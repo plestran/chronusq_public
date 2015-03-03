@@ -1,0 +1,678 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+10	src/matrix/complex/eigsrt_complex.f	/^   10   Continue$/;"	l	subroutine:EigSrt	file:
+10	src/matrix/complex/pkconv_complex.f	/^ 10     Continue$/;"	l	subroutine:PkConv	file:
+10	src/matrix/double/eigsrt_double.f	/^   10   Continue$/;"	l	subroutine:EigSrt	file:
+10	src/matrix/double/pkconv_double.f	/^ 10     Continue$/;"	l	subroutine:PkConv	file:
+20	src/matrix/complex/eigsrt_complex.f	/^   20     Continue$/;"	l	subroutine:EigSrt	file:
+20	src/matrix/complex/pkconv_complex.f	/^ 20         Continue$/;"	l	subroutine:PkConv	file:
+20	src/matrix/double/eigsrt_double.f	/^   20     Continue$/;"	l	subroutine:EigSrt	file:
+20	src/matrix/double/pkconv_double.f	/^ 20         Continue$/;"	l	subroutine:PkConv	file:
+30	src/matrix/complex/eigsrt_complex.f	/^   30         Continue$/;"	l	subroutine:EigSrt	file:
+30	src/matrix/complex/pkconv_complex.f	/^ 30         Continue$/;"	l	subroutine:PkConv	file:
+30	src/matrix/double/eigsrt_double.f	/^   30         Continue$/;"	l	subroutine:EigSrt	file:
+30	src/matrix/double/pkconv_double.f	/^ 30         Continue$/;"	l	subroutine:PkConv	file:
+ACLOCAL	src/Makefile	/^ACLOCAL = ${SHELL} \/home\/dbwy\/ChronQ_Real\/missing --run aclocal-1.11$/;"	m
+ACLOCAL_M4	src/Makefile	/^ACLOCAL_M4 = $(top_srcdir)\/aclocal.m4$/;"	m
+AMTAR	src/Makefile	/^AMTAR = ${SHELL} \/home\/dbwy\/ChronQ_Real\/missing --run tar$/;"	m
+AM_CXXFLAGS	src/Makefile	/^AM_CXXFLAGS = -I$(top_srcdir)\/include$/;"	m
+AM_RECURSIVE_TARGETS	src/Makefile	/^AM_RECURSIVE_TARGETS = $(RECURSIVE_TARGETS:-recursive=) \\$/;"	m
+AOCartesian	include/basisset.h	/^struct AOCartesian{$/;"	s
+AOIntegrals	include/aointegrals.h	/^  AOIntegrals(){;};$/;"	f	class:AOIntegrals
+AOIntegrals	include/aointegrals.h	/^class AOIntegrals{$/;"	c
+AUTOCONF	src/Makefile	/^AUTOCONF = ${SHELL} \/home\/dbwy\/ChronQ_Real\/missing --run autoconf$/;"	m
+AUTOHEADER	src/Makefile	/^AUTOHEADER = ${SHELL} \/home\/dbwy\/ChronQ_Real\/missing --run autoheader$/;"	m
+AUTOMAKE	src/Makefile	/^AUTOMAKE = ${SHELL} \/home\/dbwy\/ChronQ_Real\/missing --run automake-1.11$/;"	m
+AWK	src/Makefile	/^AWK = gawk$/;"	m
+Atoms	include/atoms.h	/^struct Atoms { $/;"	s
+BasisPair	include/basisset.h	/^struct BasisPair{$/;"	s
+BasisSet	include/basisset.h	/^class BasisSet{ $/;"	c
+CC	src/Makefile	/^CC = gcc$/;"	m
+CCDEPMODE	src/Makefile	/^CCDEPMODE = depmode=gcc3$/;"	m
+CFLAGS	src/Makefile	/^CFLAGS = -g -O2$/;"	m
+CONFIG_CLEAN_FILES	src/Makefile	/^CONFIG_CLEAN_FILES =$/;"	m
+CONFIG_CLEAN_VPATH_FILES	src/Makefile	/^CONFIG_CLEAN_VPATH_FILES =$/;"	m
+CONFIG_HEADER	src/Makefile	/^CONFIG_HEADER = $(top_builddir)\/config.h$/;"	m
+CPP	src/Makefile	/^CPP = gcc -E$/;"	m
+CPPFLAGS	src/Makefile	/^CPPFLAGS = $/;"	m
+CPY	src/matrix/double/diag.cpp	/^double *CPY,*WORK$/;"	v
+CTAGS	src/Makefile	/^CTAGS = ctags$/;"	m
+CXX	src/Makefile	/^CXX = pgcpp$/;"	m
+CXXDEPMODE	src/Makefile	/^CXXDEPMODE = depmode=none$/;"	m
+CXXFLAGS	src/Makefile	/^CXXFLAGS = -w -mp=nonuma  -tp nehalem-64 -Mreentrant -Minfo -Mneginfo -time -fast -O2 -Munroll -Mvect=assoc,recog,cachesize:20971520$/;"	m
+CYGPATH_W	src/Makefile	/^CYGPATH_W = echo$/;"	m
+Controls	include/controls.h	/^  Controls(){;};$/;"	f	class:Controls
+Controls	include/controls.h	/^class Controls {$/;"	c
+DEFS	src/Makefile	/^DEFS = -DHAVE_CONFIG_H$/;"	m
+DEPDIR	src/Makefile	/^DEPDIR = .deps$/;"	m
+DFT	include/controls.h	/^  bool  	DFT;            \/\/ use density functional theory$/;"	m	class:Controls
+DISTFILES	src/Makefile	/^DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)$/;"	m
+DIST_COMMON	src/Makefile	/^DIST_COMMON = $(srcdir)\/Makefile.am $(srcdir)\/Makefile.in$/;"	m
+DIST_SOURCES	src/Makefile	/^DIST_SOURCES =$/;"	m
+DIST_SUBDIRS	src/Makefile	/^DIST_SUBDIRS = $(SUBDIRS)$/;"	m
+Diff	include/matrix.h	/^  struct    Diff{ const Matrix *a; const Matrix *b;};  \/\/ Struct for Subtraction$/;"	s	class:Matrix
+ECHO_C	src/Makefile	/^ECHO_C = $/;"	m
+ECHO_N	src/Makefile	/^ECHO_N = -n$/;"	m
+ECHO_T	src/Makefile	/^ECHO_T = $/;"	m
+EGREP	src/Makefile	/^EGREP = \/bin\/grep -E$/;"	m
+ETAGS	src/Makefile	/^ETAGS = etags$/;"	m
+EXEEXT	src/Makefile	/^EXEEXT = $/;"	m
+EXP	include/matrix.h	/^  struct     EXP{ const Matrix *a;};                   \/\/ Struct for exp(A)$/;"	s	class:Matrix
+EigSrt	src/matrix/complex/eigsrt_complex.f	/^      Subroutine EigSrt(/;"	s
+EigSrt	src/matrix/double/eigsrt_double.f	/^      Subroutine EigSrt(/;"	s
+F77	src/Makefile	/^F77 = pgf77$/;"	m
+FFLAGS	src/Makefile	/^FFLAGS = -g$/;"	m
+Factorial	include/global.h	/^static double Factorial[8] ={$/;"	v
+FileIO	include/fileio.h	/^class FileIO {$/;"	c
+FmT	include/aointegrals.h	/^  double FmT[MAXANGULARMOMENTUM][MAXCONTRACTION][MAXCONTRACTION][MAXCONTRACTION][MAXCONTRACTION];$/;"	m	struct:QuartetConstants
+FmTTable_	include/aointegrals.h	/^  double	**FmTTable_;$/;"	m	class:AOIntegrals
+FmU	include/aointegrals.h	/^  double FmU[10][MAXCONTRACTION][MAXCONTRACTION][MAXATOMS];   \/\/ [ss]^m = FmU * vK$/;"	m	struct:PairConstants
+GREP	src/Makefile	/^GREP = \/bin\/grep$/;"	m
+GlobalMPI	include/global.h	/^struct GlobalMPI {$/;"	s
+HF	include/controls.h	/^  bool  	HF;             \/\/ use Hartree-Fock$/;"	m	class:Controls
+INCLUDED_AOINTEGRAL	include/aointegrals.h	2;"	d
+INCLUDED_ATOMS	include/atoms.h	2;"	d
+INCLUDED_BASISSET	include/basisset.h	2;"	d
+INCLUDED_CLASSTOOLS	include/classtools.h	2;"	d
+INCLUDED_CONTROLS	include/controls.h	2;"	d
+INCLUDED_FILEIO	include/fileio.h	2;"	d
+INCLUDED_GLOBAL	include/global.h	2;"	d
+INCLUDED_MATRIX	include/matrix.h	2;"	d
+INCLUDED_MEMORY	include/memory.h	2;"	d
+INCLUDED_MOINTEGRAL	include/mointegrals.h	2;"	d
+INCLUDED_MOLECULES	include/molecule.h	2;"	d
+INCLUDED_SDRESPONSE	include/sdresponse.h	2;"	d
+INCLUDED_SINGLESLATER	include/singleslater.h	2;"	d
+INCLUDED_TOOLS	include/tools.h	2;"	d
+INCLUDED_WORKERS	include/workers.h	2;"	d
+INSTALL	src/Makefile	/^INSTALL = \/usr\/bin\/install -c$/;"	m
+INSTALL_DATA	src/Makefile	/^INSTALL_DATA = ${INSTALL} -m 644$/;"	m
+INSTALL_HEADER	src/Makefile	/^INSTALL_HEADER = $(INSTALL_DATA)$/;"	m
+INSTALL_PROGRAM	src/Makefile	/^INSTALL_PROGRAM = ${INSTALL}$/;"	m
+INSTALL_SCRIPT	src/Makefile	/^INSTALL_SCRIPT = ${INSTALL}$/;"	m
+INSTALL_STRIP_PROGRAM	src/Makefile	/^INSTALL_STRIP_PROGRAM = $(install_sh) -c -s$/;"	m
+JOBVL_	include/matrix.h	/^  char      JOBVL_;            \/\/ Whether or not to compute Left Eigenvectors  (LAPACK)$/;"	m	class:Matrix
+JOBVR_	include/matrix.h	/^  char      JOBVR_;            \/\/ Whether or not to compute Right Eigenvectors (LAPACK)$/;"	m	class:Matrix
+KAB	include/basisset.h	/^  double  KAB[MAXCONTRACTION][MAXCONTRACTION];		\/\/ KAB used to compute the [ss|ss] integral$/;"	m	struct:ShellPair
+L	include/aointegrals.h	/^  int L[2];        \/\/total angular momentum of each AO$/;"	m	struct:PairConstants
+L	include/basisset.h	/^  int     L;                     \/\/ angular momentum  -  0 , 1 , 2,  3 , 4$/;"	m	struct:Shell
+L	include/basisset.h	/^  int     L[2];                 \/\/ angular momenta of the first and second shells$/;"	m	struct:BasisPair
+L	include/basisset.h	/^  int     L[2];                 \/\/ angular momenta of the first and second shells$/;"	m	struct:ShellPair
+LDFLAGS	src/Makefile	/^LDFLAGS = $/;"	m
+LIBOBJS	src/Makefile	/^LIBOBJS = $/;"	m
+LIBS	src/Makefile	/^LIBS = -llapack -lblas -lm -lc -pgf77libs -llapack -lblas$/;"	m
+LTLIBOBJS	src/Makefile	/^LTLIBOBJS = $/;"	m
+LTotal	include/basisset.h	/^  int	  LTotal;		\/\/ total angular momenta of the shell pair$/;"	m	struct:ShellPair
+LWORK	src/matrix/double/diag.cpp	/^int LWORK;$/;"	v
+MAINT	src/Makefile	/^MAINT = #$/;"	m
+MAKEINFO	src/Makefile	/^MAKEINFO = ${SHELL} \/home\/dbwy\/ChronQ_Real\/missing --run makeinfo$/;"	m
+MAXANGULARMOMENTUM	include/global.h	5;"	d
+MAXATOMS	include/global.h	7;"	d
+MAXBLOCK	include/fileio.h	3;"	d
+MAXCONTRACTION	include/global.h	6;"	d
+MAXNAMELEN	include/global.h	4;"	d
+MKDIR_P	src/Makefile	/^MKDIR_P = \/bin\/mkdir -p$/;"	m
+MOIntegrals	include/mointegrals.h	/^  MOIntegrals(){;};$/;"	f	class:MOIntegrals
+MOIntegrals	include/mointegrals.h	/^class MOIntegrals{$/;"	c
+Math	include/global.h	/^struct Math {$/;"	s
+Matrix	include/matrix.h	/^class Matrix {$/;"	c
+Matrix	src/matrix/complex/matrix_constructor_complex.cpp	/^Matrix<dcomplex>::Matrix(int rows, int cols, char *nm, char *format) {$/;"	f	class:Matrix
+Matrix	src/matrix/double/matrix_constructor_double.cpp	/^Matrix<double>::Matrix(int rows, int cols, char *nm, char *format) {$/;"	f	class:Matrix
+MaxFmTPt	include/aointegrals.h	12;"	d
+MaxTotalL	include/aointegrals.h	13;"	d
+Memory	include/memory.h	/^class Memory {$/;"	c
+MolecularConstants	include/aointegrals.h	/^struct MolecularConstants{$/;"	s
+Molecule	include/molecule.h	/^  Molecule(int nAtoms=0,FileIO *fileio=NULL){ if(nAtoms>0) iniMolecule(nAtoms,fileio);};$/;"	f	class:Molecule
+Molecule	include/molecule.h	/^class Molecule {$/;"	c
+NORMAL_INSTALL	src/Makefile	/^NORMAL_INSTALL = :$/;"	m
+NORMAL_UNINSTALL	src/Makefile	/^NORMAL_UNINSTALL = :$/;"	m
+OBJEXT	src/Makefile	/^OBJEXT = o$/;"	m
+PACKAGE	src/Makefile	/^PACKAGE = chrous-quantum-chemistry$/;"	m
+PACKAGE_BUGREPORT	src/Makefile	/^PACKAGE_BUGREPORT = xsli@uw.edu$/;"	m
+PACKAGE_NAME	src/Makefile	/^PACKAGE_NAME = Chrous Quantum Chemistry$/;"	m
+PACKAGE_STRING	src/Makefile	/^PACKAGE_STRING = Chrous Quantum Chemistry 1.0$/;"	m
+PACKAGE_TARNAME	src/Makefile	/^PACKAGE_TARNAME = chrous-quantum-chemistry$/;"	m
+PACKAGE_VERSION	src/Makefile	/^PACKAGE_VERSION = 1.0$/;"	m
+PATH_SEPARATOR	src/Makefile	/^PATH_SEPARATOR = :$/;"	m
+POST_INSTALL	src/Makefile	/^POST_INSTALL = :$/;"	m
+POST_UNINSTALL	src/Makefile	/^POST_UNINSTALL = :$/;"	m
+PRE_INSTALL	src/Makefile	/^PRE_INSTALL = :$/;"	m
+PRE_UNINSTALL	src/Makefile	/^PRE_UNINSTALL = :$/;"	m
+PWR	include/matrix.h	/^  struct     PWR{ const Matrix *a; const T *x;};  \/\/ Struct for A^x$/;"	s	class:Matrix
+PairConstants	include/aointegrals.h	/^struct PairConstants{$/;"	s
+Phys	include/global.h	/^struct Phys {$/;"	s
+PkConv	src/matrix/complex/pkconv_complex.f	/^      Subroutine PkConv(/;"	s
+PkConv	src/matrix/double/pkconv_double.f	/^      Subroutine PkConv(/;"	s
+Product	include/matrix.h	/^  struct Product{ const Matrix *a; const Matrix *b;};  \/\/ Struct for Multiplication$/;"	s	class:Matrix
+QuartetConstants	include/aointegrals.h	/^struct QuartetConstants{$/;"	s
+R2Index_	include/aointegrals.h	/^  int       **R2Index_;$/;"	m	class:AOIntegrals
+R2Index_	include/sdresponse.h	/^  int       **R2Index_;$/;"	m	class:SDResponse
+R2Index_	include/singleslater.h	/^  int    **R2Index_;$/;"	m	class:SingleSlater
+RANLIB	src/Makefile	/^RANLIB = ranlib$/;"	m
+RECURSIVE_CLEAN_TARGETS	src/Makefile	/^RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\\$/;"	m
+RECURSIVE_TARGETS	src/Makefile	/^RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \\$/;"	m
+RHF	include/singleslater.h	/^  inline int RHF()    { return this->RHF_; };$/;"	f	class:SingleSlater
+RHF_	include/singleslater.h	/^  int      RHF_;$/;"	m	class:SingleSlater
+SDResponse	include/sdresponse.h	/^  SDResponse(){;};$/;"	f	class:SDResponse
+SDResponse	include/sdresponse.h	/^class SDResponse {$/;"	c
+SET_MAKE	src/Makefile	/^SET_MAKE = $/;"	m
+SHELL	src/Makefile	/^SHELL = \/bin\/sh$/;"	m
+SOURCES	src/Makefile	/^SOURCES =$/;"	m
+SP	include/basisset.h	/^  bool	  SP;			 \/\/ is this part of an SP shell?$/;"	m	struct:Shell
+STRIP	src/Makefile	/^STRIP = $/;"	m
+SUBDIRS	src/Makefile	/^SUBDIRS = aointegrals atlas basisset cerr classtools controls fileio matrix mointegrals molecule sdresponse singleslater tools worker chronQ mattest$/;"	m
+Sa0Par	include/aointegrals.h	/^  double Sa0Par[MAXCONTRACTION][MAXCONTRACTION];$/;"	m	struct:PairConstants
+Shell	include/basisset.h	/^struct Shell{$/;"	s
+ShellPair	include/basisset.h	/^struct ShellPair{$/;"	s
+SingleSlater	include/singleslater.h	/^  SingleSlater(){;};$/;"	f	class:SingleSlater
+SingleSlater	include/singleslater.h	/^class SingleSlater {$/;"	c
+Sum	include/matrix.h	/^  struct     Sum{ const Matrix *a; const Matrix *b;};  \/\/ Struct for Addition$/;"	s	class:Matrix
+TNT	include/matrix.h	/^  struct     TNT{ const Matrix *a; const Matrix *x;};  \/\/ Struct for XA(XT) transform$/;"	s	class:Matrix
+TTN	include/matrix.h	/^  struct     TTN{ const Matrix *a; const Matrix *x;};  \/\/ Struct for (XT)AX transform$/;"	s	class:Matrix
+Ta0Par3	include/aointegrals.h	/^  double Ta0Par3[MAXCONTRACTION][MAXCONTRACTION];$/;"	m	struct:PairConstants
+TabPar1	include/aointegrals.h	/^  double TabPar1[MAXCONTRACTION][MAXCONTRACTION];$/;"	m	struct:PairConstants
+TabPar2	include/aointegrals.h	/^  double TabPar2[MAXCONTRACTION][MAXCONTRACTION];$/;"	m	struct:PairConstants
+TabPar3	include/aointegrals.h	/^  double TabPar3[MAXCONTRACTION][MAXCONTRACTION];$/;"	m	struct:PairConstants
+UAB	include/basisset.h	/^  double  UAB[MAXCONTRACTION][MAXCONTRACTION];		\/\/ KAB used to compute the [ss|ss] integral$/;"	m	struct:ShellPair
+UPLO	src/matrix/double/diag.cpp	/^char UPLO = 'L';$/;"	v
+VERSION	src/Makefile	/^VERSION = 1.0$/;"	m
+a	include/matrix.h	/^  struct     EXP{ const Matrix *a;};                   \/\/ Struct for exp(A)$/;"	m	struct:Matrix::EXP
+a	include/matrix.h	/^  struct     PWR{ const Matrix *a; const T *x;};  \/\/ Struct for A^x$/;"	m	struct:Matrix::PWR
+a	include/matrix.h	/^  struct     Sum{ const Matrix *a; const Matrix *b;};  \/\/ Struct for Addition$/;"	m	struct:Matrix::Sum
+a	include/matrix.h	/^  struct     TNT{ const Matrix *a; const Matrix *x;};  \/\/ Struct for XA(XT) transform$/;"	m	struct:Matrix::TNT
+a	include/matrix.h	/^  struct     TTN{ const Matrix *a; const Matrix *x;};  \/\/ Struct for (XT)AX transform$/;"	m	struct:Matrix::TTN
+a	include/matrix.h	/^  struct    Diff{ const Matrix *a; const Matrix *b;};  \/\/ Struct for Subtraction$/;"	m	struct:Matrix::Diff
+a	include/matrix.h	/^  struct Product{ const Matrix *a; const Matrix *b;};  \/\/ Struct for Multiplication$/;"	m	struct:Matrix::Product
+a000Par1	include/aointegrals.h	/^  double a000Par1[MAXCONTRACTION][MAXCONTRACTION];$/;"	m	struct:QuartetConstants
+a000Par2	include/aointegrals.h	/^  double a000Par2[MAXCONTRACTION][MAXCONTRACTION][MAXCONTRACTION][MAXCONTRACTION];$/;"	m	struct:QuartetConstants
+a0c0Par1	include/aointegrals.h	/^  double a0c0Par1[MAXCONTRACTION][MAXCONTRACTION];$/;"	m	struct:QuartetConstants
+a0c0Par2	include/aointegrals.h	/^  double a0c0Par2[MAXCONTRACTION][MAXCONTRACTION][MAXCONTRACTION][MAXCONTRACTION];$/;"	m	struct:QuartetConstants
+a0c0Par3	include/aointegrals.h	/^  double a0c0Par3[MAXCONTRACTION][MAXCONTRACTION][MAXCONTRACTION][MAXCONTRACTION];$/;"	m	struct:QuartetConstants
+abIndex_	include/mointegrals.h	/^  int       **abIndex_;$/;"	m	class:MOIntegrals
+abcd_	include/mointegrals.h	/^  Matrix<double>    *abcd_;$/;"	m	class:MOIntegrals
+abs_builddir	src/Makefile	/^abs_builddir = \/home\/dbwy\/ChronQ_Real\/src$/;"	m
+abs_srcdir	src/Makefile	/^abs_srcdir = \/home\/dbwy\/ChronQ_Real\/src$/;"	m
+abs_top_builddir	src/Makefile	/^abs_top_builddir = \/home\/dbwy\/ChronQ_Real$/;"	m
+abs_top_srcdir	src/Makefile	/^abs_top_srcdir = \/home\/dbwy\/ChronQ_Real$/;"	m
+ac_ct_CC	src/Makefile	/^ac_ct_CC = gcc$/;"	m
+ac_ct_CXX	src/Makefile	/^ac_ct_CXX = $/;"	m
+ac_ct_F77	src/Makefile	/^ac_ct_F77 = $/;"	m
+add	src/matrix/complex/matrix_miscmath_complex.cpp	/^template<> void Matrix<dcomplex>::add(const Matrix *a, const Matrix *b) {$/;"	f	class:Matrix
+add	src/matrix/double/matrix_miscmath_double.cpp	/^template<> void Matrix<double>::add(const Matrix *a, const Matrix *b) {$/;"	f	class:Matrix
+adjoint	include/matrix.h	/^  inline void adjoint(){$/;"	f	class:Matrix
+adjointHard	src/matrix/complex/matrix_miscmath_complex.cpp	/^void Matrix<dcomplex>::adjointHard(){$/;"	f	class:Matrix
+adjointHard	src/matrix/double/matrix_miscmath_double.cpp	/^void Matrix<double>::adjointHard(){ this->transposeHard();};$/;"	f	class:Matrix
+allocEigScr	src/matrix/complex/matrix_miscop_complex.cpp	/^template<>  dcomplex** Matrix<dcomplex>::allocEigScr(bool doGEP, int &LWORK, Matrix *B){$/;"	f	class:Matrix
+allocEigScr	src/matrix/double/matrix_miscop_double.cpp	/^template<>  double** Matrix<double>::allocEigScr(bool doGEP, int &LWORK, Matrix *B){$/;"	f	class:Matrix
+allocEigen	src/matrix/complex/matrix_miscop_complex.cpp	/^template<> void Matrix<dcomplex>::allocEigen(){$/;"	f	class:Matrix
+allocEigen	src/matrix/double/cleaneigen.cpp	/^void Matrix<double>::allocEigen(){$/;"	f	class:Matrix
+allocEigen	src/matrix/double/matrix_miscop_double.cpp	/^template<> void Matrix<double>::allocEigen(){$/;"	f	class:Matrix
+allocScratch	src/matrix/double/cleaneigen.cpp	/^double *Matrix<double>::allocScratch(){$/;"	f	class:Matrix
+am__aclocal_m4_deps	src/Makefile	/^am__aclocal_m4_deps = $(top_srcdir)\/configure.ac$/;"	m
+am__cd	src/Makefile	/^am__cd = CDPATH="$${ZSH_VERSION+.}$(PATH_SEPARATOR)" && cd$/;"	m
+am__configure_deps	src/Makefile	/^am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \\$/;"	m
+am__include	src/Makefile	/^am__include = include$/;"	m
+am__leading_dot	src/Makefile	/^am__leading_dot = .$/;"	m
+am__quote	src/Makefile	/^am__quote = $/;"	m
+am__relativize	src/Makefile	/^am__relativize = \\$/;"	m
+am__tar	src/Makefile	/^am__tar = ${AMTAR} chof - "$$tardir"$/;"	m
+am__untar	src/Makefile	/^am__untar = ${AMTAR} xf -$/;"	m
+ao	include/basisset.h	/^  AOCartesian *ao;             \/\/ array of ao's$/;"	m	class:BasisSet
+aoIndex	include/aointegrals.h	/^  int aoIndex[2];  \/\/location of PGTO in ao[]$/;"	m	struct:PairConstants
+aoIndex	include/basisset.h	/^  int     aoIndex;               \/\/ the starting index of the ao's in the shell in the ao[] array $/;"	m	struct:Shell
+aoIndex	include/basisset.h	/^  int     aoIndex[2];		\/\/ starting indeices of AOs in the first and second shells$/;"	m	struct:ShellPair
+aoIndex	include/basisset.h	/^  int     aoIndex[2];$/;"	m	struct:BasisPair
+aoPairIndex	include/basisset.h	/^  int     aoPairIndex[250][2];  \/\/ the indices of the ao pair in the ao[] array$/;"	m	struct:ShellPair
+aointegrals_	include/mointegrals.h	/^  AOIntegrals   *aointegrals_;$/;"	m	class:MOIntegrals
+aointegrals_	include/singleslater.h	/^  AOIntegrals   *aointegrals_;$/;"	m	class:SingleSlater
+atom	include/atoms.h	/^static struct Atoms atom[344] = { $/;"	v	typeref:struct:Atoms
+atomZ	include/aointegrals.h	/^  int atomZ[MAXATOMS];$/;"	m	struct:MolecularConstants
+atomicNumber	include/atoms.h	/^  int    atomicNumber; $/;"	m	struct:Atoms
+b	include/matrix.h	/^  struct     Sum{ const Matrix *a; const Matrix *b;};  \/\/ Struct for Addition$/;"	m	struct:Matrix::Sum
+b	include/matrix.h	/^  struct    Diff{ const Matrix *a; const Matrix *b;};  \/\/ Struct for Subtraction$/;"	m	struct:Matrix::Diff
+b	include/matrix.h	/^  struct Product{ const Matrix *a; const Matrix *b;};  \/\/ Struct for Multiplication$/;"	m	struct:Matrix::Product
+bannerEnd	include/global.h	/^const char bannerEnd[100]="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";$/;"	v
+bannerMid	include/global.h	/^const char bannerMid[100]="--------------------------------------------------------------------------------";$/;"	v
+bannerTop	include/global.h	/^const char bannerTop[100]="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";$/;"	v
+basisSet_	include/aointegrals.h	/^  BasisSet     	*basisSet_;$/;"	m	class:AOIntegrals
+basisSet_	include/mointegrals.h	/^  BasisSet     	*basisSet_;$/;"	m	class:MOIntegrals
+basisSet_	include/sdresponse.h	/^  BasisSet     	*basisSet_;$/;"	m	class:SDResponse
+basisset_	include/singleslater.h	/^  BasisSet     	*basisset_;$/;"	m	class:SingleSlater
+bin	include/fileio.h	/^  fstream bin;                   \/\/ file handler of the binary file$/;"	m	class:FileIO
+bindir	src/Makefile	/^bindir = ${exec_prefix}\/bin$/;"	m
+block	include/fileio.h	/^  long  block[MAXBLOCK];         \/\/ block pointers$/;"	m	class:FileIO
+blockBasisSet	include/global.h	/^enum {blockControlFlags,blockMolecule,blockBasisSet, \/\/ 1,2,3$/;"	e	enum:__anon1
+blockControlFlags	include/global.h	/^enum {blockControlFlags,blockMolecule,blockBasisSet, \/\/ 1,2,3$/;"	e	enum:__anon1
+blockIntegrals	include/global.h	/^      blockSingleSlater,blockIntegrals};  \/\/ 4,5,6$/;"	e	enum:__anon1
+blockMolecule	include/global.h	/^enum {blockControlFlags,blockMolecule,blockBasisSet, \/\/ 1,2,3$/;"	e	enum:__anon1
+blockSingleSlater	include/global.h	/^      blockSingleSlater,blockIntegrals};  \/\/ 4,5,6$/;"	e	enum:__anon1
+bohr	include/global.h	/^  double bohr;$/;"	m	struct:Phys
+build_alias	src/Makefile	/^build_alias = $/;"	m
+builddir	src/Makefile	/^builddir = .$/;"	m
+cart	include/aointegrals.h	/^  double cart[3][MAXATOMS];$/;"	m	struct:MolecularConstants
+cart	include/molecule.h	/^  inline Matrix<double> *cart() {return this->cart_;}$/;"	f	class:Molecule
+cart_	include/molecule.h	/^  Matrix<double>  *cart_;        \/\/ cartesian coordinates$/;"	m	class:Molecule
+center	include/basisset.h	/^  int     center;                \/\/ index of the atom to which the shell belongs$/;"	m	struct:Shell
+center	include/basisset.h	/^  int     center[2];		\/\/ indices of the atom where the first and second shells are centered$/;"	m	struct:ShellPair
+centerA	include/basisset.h	/^  double  centerA[3];		\/\/ x,y,z coordinate of center A$/;"	m	struct:ShellPair
+centerB	include/basisset.h	/^  double  centerB[3];		\/\/ x,y,z coordinate of center B$/;"	m	struct:ShellPair
+centerIndex	include/basisset.h	/^  int     centerIndex[2];	\/\/ indices of the atom where the first and second shells are centered$/;"	m	struct:BasisPair
+centerP	include/basisset.h	/^  double  centerP[3][MAXCONTRACTION][MAXCONTRACTION];	\/\/ x,y,z coordinate of the combined center of the shellpair (alpha*A+beta*B)\/(alpha+beta)$/;"	m	struct:ShellPair
+centerPZeta	include/basisset.h	/^  double  centerPZeta[3][MAXCONTRACTION][MAXCONTRACTION];	\/\/ centerP*(alpha+beta)$/;"	m	struct:ShellPair
+charge	include/molecule.h	/^  inline int charge() {return this->charge_;}$/;"	f	class:Molecule
+charge_	include/molecule.h	/^  int      charge_;      \/\/ total charge$/;"	m	class:Molecule
+check	include/memory.h	/^  inline void check(ostream &output=cout, string *s=NULL) {$/;"	f	class:Memory
+cleanEigen	include/matrix.h	/^  void cleanEigen(){$/;"	f	class:Matrix
+cleanEigen	src/matrix/double/cleaneigen.cpp	/^void Matrix<double>::cleanEigen(){$/;"	f	class:Matrix
+clearAll	include/matrix.h	/^  inline void clearAll(ostream &output=cout) { memset(data_,0,len_*sizeof(T));};$/;"	f	class:Matrix
+coef	include/basisset.h	/^  double  coef[MAXCONTRACTION];  \/\/ contraction coefficients$/;"	m	struct:Shell
+cols	include/matrix.h	/^  inline int   cols(){            return this->cols_;         }; \/\/ Return the number of cols being used in current treatment$/;"	f	class:Matrix
+cols_	include/matrix.h	/^  int       cols_;             \/\/ Number of columns (slowest running index) to be used by routies$/;"	m	class:Matrix
+cols_t_	include/matrix.h	/^  int       cols_t_;           \/\/ Number of columns (slowest running index) upon allocation (permanent)$/;"	m	class:Matrix
+controls_	include/aointegrals.h	/^  Controls     	*controls_;$/;"	m	class:AOIntegrals
+controls_	include/mointegrals.h	/^  Controls     	*controls_;$/;"	m	class:MOIntegrals
+controls_	include/sdresponse.h	/^  Controls     	*controls_;$/;"	m	class:SDResponse
+controls_	include/singleslater.h	/^  Controls     	*controls_;$/;"	m	class:SingleSlater
+coulombA	include/singleslater.h	/^  inline Matrix<double> *coulombA() { return this->coulombA_;};$/;"	f	class:SingleSlater
+coulombA_	include/singleslater.h	/^  Matrix<double>  *coulombA_;$/;"	m	class:SingleSlater
+coulombB	include/singleslater.h	/^  inline Matrix<double> *coulombB() { return this->coulombB_;};$/;"	f	class:SingleSlater
+coulombB_	include/singleslater.h	/^  Matrix<double>  *coulombB_;$/;"	m	class:SingleSlater
+cpyData	src/matrix/complex/matrix_setters_complex.cpp	/^template<> void Matrix<dcomplex>::cpyData<dcomplex>(dcomplex *x){ $/;"	f	class:Matrix
+cpyData	src/matrix/double/matrix_setters_double.cpp	/^template<> void Matrix<double>::cpyData<double>(double *x){ $/;"	f	class:Matrix
+dFactorial	include/global.h	/^static double dFactorial[21] = {$/;"	v
+data	include/matrix.h	/^  inline T    *data(){            return this->data_;         }; \/\/ Return the internal storage array        (template)$/;"	f	class:Matrix
+data_	include/matrix.h	/^  T         *data_;            \/\/ Internal element storage$/;"	m	class:Matrix
+datadir	src/Makefile	/^datadir = ${datarootdir}$/;"	m
+datarootdir	src/Makefile	/^datarootdir = ${prefix}\/share$/;"	m
+dcomplex	include/clapack.h	/^typedef complex<double> dcomplex;$/;"	t
+dcomplex	include/global.h	/^typedef complex<double> dcomplex;$/;"	t
+deltaAB	include/aointegrals.h	/^  double deltaAB[3];$/;"	m	struct:PairConstants
+deltaAB	include/basisset.h	/^  double  deltaAB[3];		\/\/ x,y,z distance between centers xA-xB, yA-yB, zA-zB$/;"	m	struct:ShellPair
+deltaPA	include/aointegrals.h	/^  double deltaPA[3][MAXCONTRACTION][MAXCONTRACTION];$/;"	m	struct:PairConstants
+deltaPA	include/basisset.h	/^  double  deltaPA[3][MAXCONTRACTION][MAXCONTRACTION];	\/\/ x,y,z distance P-A$/;"	m	struct:ShellPair
+deltaPApPB	include/basisset.h	/^  double  deltaPApPB[3][3][MAXCONTRACTION][MAXCONTRACTION];\/\/ PAi+PBj$/;"	m	struct:ShellPair
+deltaPAtPB	include/basisset.h	/^  double  deltaPAtPB[3][3][MAXCONTRACTION][MAXCONTRACTION];\/\/ PAi*PBj$/;"	m	struct:ShellPair
+deltaPB	include/aointegrals.h	/^  double deltaPB[3][MAXCONTRACTION][MAXCONTRACTION];$/;"	m	struct:PairConstants
+deltaPB	include/basisset.h	/^  double  deltaPB[3][MAXCONTRACTION][MAXCONTRACTION];	\/\/ x,y,z distance P-B$/;"	m	struct:ShellPair
+deltaPZ	include/aointegrals.h	/^  double deltaPZ[3][MAXCONTRACTION][MAXCONTRACTION][MAXATOMS];$/;"	m	struct:PairConstants
+deltaWP	include/aointegrals.h	/^  double deltaWP[3][MAXCONTRACTION][MAXCONTRACTION][MAXCONTRACTION][MAXCONTRACTION];$/;"	m	struct:QuartetConstants
+deltaWQ	include/aointegrals.h	/^  double deltaWQ[3][MAXCONTRACTION][MAXCONTRACTION][MAXCONTRACTION][MAXCONTRACTION];$/;"	m	struct:QuartetConstants
+densityA	include/singleslater.h	/^  inline Matrix<double> *densityA() { return this->densityA_;};$/;"	f	class:SingleSlater
+densityA_	include/singleslater.h	/^  Matrix<double>  *densityA_;$/;"	m	class:SingleSlater
+densityB	include/singleslater.h	/^  inline Matrix<double> *densityB() { return this->densityB_;};$/;"	f	class:SingleSlater
+densityB_	include/singleslater.h	/^  Matrix<double>  *densityB_;$/;"	m	class:SingleSlater
+diag	src/matrix/complex/matrix_miscmath_complex.cpp	/^template<> void Matrix<dcomplex>::diag(Matrix *B){ this->doDiag(B);};$/;"	f	class:Matrix
+diag	src/matrix/double/matrix_miscmath_double.cpp	/^template<> void Matrix<double>::diag(Matrix *B){ this->doDiag(B);};$/;"	f	class:Matrix
+directTwoE	include/controls.h	/^  bool  	directTwoE;     \/\/ if direct two-electron will performed$/;"	m	class:Controls
+divConst	include/basisset.h	/^  double  divConst;              \/\/ normalization constant = Shell.norm\/divConst$/;"	m	struct:AOCartesian
+divConst	include/basisset.h	/^  double  divConst[250];	\/\/ division constant; $/;"	m	struct:ShellPair
+doDiag	src/matrix/complex/matrix_miscmath_complex.cpp	/^template<> void Matrix<dcomplex>::doDiag(Matrix *B){$/;"	f	class:Matrix
+doDiag	src/matrix/double/matrix_miscmath_double.cpp	/^template<> void Matrix<double>::doDiag(Matrix *B){$/;"	f	class:Matrix
+doTNT	src/matrix/complex/matrix_overload_complex.cpp	/^void doTNT(Matrix<dcomplex> *res, const Matrix<dcomplex> *a, const Matrix<dcomplex> *x) {$/;"	f
+doTNT	src/matrix/double/matrix_overload_double.cpp	/^void doTNT(Matrix<double> *res, const Matrix<double> *a, const Matrix<double> *x) {$/;"	f
+doTTN	src/matrix/complex/matrix_overload_complex.cpp	/^void doTTN(Matrix<dcomplex> *res, const Matrix<dcomplex> *a, const Matrix<dcomplex> *x) {$/;"	f
+doTTN	src/matrix/double/matrix_overload_double.cpp	/^void doTTN(Matrix<double> *res, const Matrix<double> *a, const Matrix<double> *x) {$/;"	f
+docdir	src/Makefile	/^docdir = ${datarootdir}\/doc\/${PACKAGE_TARNAME}$/;"	m
+dvidir	src/Makefile	/^dvidir = ${docdir}$/;"	m
+eSort	src/matrix/double/matrix_miscop_double.cpp	/^template<> void Matrix<double>::eSort(){$/;"	f	class:Matrix
+eigLWORK	src/matrix/double/cleaneigen.cpp	/^int Matrix<double>::eigLWORK(int code, char UPLO){$/;"	f	class:Matrix
+eigenvalue	src/matrix/complex/matrix_miscop_complex.cpp	/^dcomplex* Matrix<dcomplex>::eigenvalue(){                \/\/ Return the default eigenvalue array$/;"	f	class:Matrix
+eigenvalue	src/matrix/double/matrix_miscop_double.cpp	/^double* Matrix<double>::eigenvalue(){                \/\/ Return the default eigenvalue array$/;"	f	class:Matrix
+eigenvalue_	include/matrix.h	/^  T         *eigenvalue_;      \/\/ Detault eigenvalue storage (will point to eigenvalue_re_ for double)$/;"	m	class:Matrix
+eigenvalue_im	src/matrix/complex/matrix_miscop_complex.cpp	/^double* Matrix<dcomplex>::eigenvalue_im(){$/;"	f	class:Matrix
+eigenvalue_im	src/matrix/double/matrix_miscop_double.cpp	/^double* Matrix<double>::eigenvalue_im(){$/;"	f	class:Matrix
+eigenvalue_im_	include/matrix.h	/^  double    *eigenvalue_im_;   \/\/ Imag part of the eigenvalue vector$/;"	m	class:Matrix
+eigenvalue_re	src/matrix/complex/matrix_miscop_complex.cpp	/^double* Matrix<dcomplex>::eigenvalue_re(){$/;"	f	class:Matrix
+eigenvalue_re	src/matrix/double/matrix_miscop_double.cpp	/^double* Matrix<double>::eigenvalue_re(){$/;"	f	class:Matrix
+eigenvalue_re_	include/matrix.h	/^  double    *eigenvalue_re_;   \/\/ Real part of the eigenvalue vector$/;"	m	class:Matrix
+eigenvaluez	include/matrix.h	/^  inline dcomplex* eigenvaluez(){  if(this->eigenvaluez_  !=NULL) return this->eigenvaluez_;   else throw 3106;}; \/\/ Return the eigenvalues in complex format$/;"	f	class:Matrix
+eigenvaluez_	include/matrix.h	/^  dcomplex  *eigenvaluez_;     \/\/ Complex cast of the eigenvalue vector$/;"	m	class:Matrix
+eigenvector	include/matrix.h	/^  inline T *eigenvector(){ return this->eigenvector_r();};  \/\/ Return the defualt eigenvector array$/;"	f	class:Matrix
+eigenvector_	include/matrix.h	/^  T         *eigenvector_;     \/\/ Default eigenvector storage (will point to eigenvector_r_)$/;"	m	class:Matrix
+eigenvector_l	include/matrix.h	/^  inline T *eigenvector_l(){                                \/\/ Return the left eigenvector array$/;"	f	class:Matrix
+eigenvector_l_	include/matrix.h	/^  T         *eigenvector_l_;   \/\/ Default left eigenvector storage (will point to eigenvector_r_ for 'S' and 'H')$/;"	m	class:Matrix
+eigenvector_r	include/matrix.h	/^  inline T *eigenvector_r(){                                \/\/ Return the right eigenvector array$/;"	f	class:Matrix
+eigenvector_r_	include/matrix.h	/^  T         *eigenvector_r_;   \/\/ Default right eigenvector storage$/;"	m	class:Matrix
+eight	include/global.h	/^  double zero, one, two, three, four, five, six, seven, eight, nine, ten, half, quarter;$/;"	m	struct:Math
+energyNuclei	include/molecule.h	/^  inline double energyNuclei() { return this->energyNuclei_;};$/;"	f	class:Molecule
+energyNuclei	include/singleslater.h	/^  double   energyNuclei;$/;"	m	class:SingleSlater
+energyNuclei_	include/molecule.h	/^  double   energyNuclei_;\/\/ nuclear repulsion energy$/;"	m	class:Molecule
+energyOneE	include/singleslater.h	/^  double   energyOneE;$/;"	m	class:SingleSlater
+energyOnly	include/controls.h	/^  bool  	energyOnly;     \/\/ compute energy only$/;"	m	class:Controls
+energyTwoE	include/singleslater.h	/^  double   energyTwoE;$/;"	m	class:SingleSlater
+exchangeA	include/singleslater.h	/^  inline Matrix<double> *exchangeA(){ return this->exchangeA_;};$/;"	f	class:SingleSlater
+exchangeA_	include/singleslater.h	/^  Matrix<double>  *exchangeA_;$/;"	m	class:SingleSlater
+exchangeB	include/singleslater.h	/^  inline Matrix<double> *exchangeB(){ return this->exchangeB_;};$/;"	f	class:SingleSlater
+exchangeB_	include/singleslater.h	/^  Matrix<double>  *exchangeB_;$/;"	m	class:SingleSlater
+exec_prefix	src/Makefile	/^exec_prefix = ${prefix}$/;"	m
+exp	src/matrix/complex/matrix_overload_complex.cpp	/^Matrix<dcomplex>::EXP exp(const Matrix<dcomplex>& m){$/;"	f
+exp	src/matrix/double/matrix_overload_double.cpp	/^Matrix<double>::EXP exp(const Matrix<double>& m){$/;"	f
+expo	include/basisset.h	/^  double  expo[MAXCONTRACTION];  \/\/ exponents of primitive GTOs$/;"	m	struct:Shell
+fileio_	include/aointegrals.h	/^  FileIO       	*fileio_;$/;"	m	class:AOIntegrals
+fileio_	include/mointegrals.h	/^  FileIO       	*fileio_;$/;"	m	class:MOIntegrals
+fileio_	include/sdresponse.h	/^  FileIO       	*fileio_;$/;"	m	class:SDResponse
+fileio_	include/singleslater.h	/^  FileIO       	*fileio_;$/;"	m	class:SingleSlater
+firstDer	include/controls.h	/^  bool  	firstDer;      	\/\/ compute the first derivative$/;"	m	class:Controls
+five	include/global.h	/^  double zero, one, two, three, four, five, six, seven, eight, nine, ten, half, quarter;$/;"	m	struct:Math
+fixMem	include/matrix.h	/^  inline void fixMem(){$/;"	f	class:Matrix
+fockA	include/singleslater.h	/^  inline Matrix<double> *fockA()    { return this->fockA_;};$/;"	f	class:SingleSlater
+fockA_	include/singleslater.h	/^  Matrix<double>  *fockA_;$/;"	m	class:SingleSlater
+fockB	include/singleslater.h	/^  inline Matrix<double> *fockB()    { return this->fockB_;};$/;"	f	class:SingleSlater
+fockB_	include/singleslater.h	/^  Matrix<double>  *fockB_;$/;"	m	class:SingleSlater
+format	include/matrix.h	/^  inline int format(){            return this->format_;       }; \/\/ Return the storage format$/;"	f	class:Matrix
+format_	include/matrix.h	/^  int       format_;           \/\/ Storage format                                  $/;"	m	class:Matrix
+four	include/global.h	/^  double zero, one, two, three, four, five, six, seven, eight, nine, ten, half, quarter;$/;"	m	struct:Math
+gauFChkName	include/controls.h	/^  char   	gauFChkName[MAXNAMELEN];	\/\/ Gaussian formatted checkpoint filename$/;"	m	class:Controls
+getLWORK	src/matrix/complex/matrix_miscop_complex.cpp	/^template<> int Matrix<dcomplex>::getLWORK(bool doGEP){$/;"	f	class:Matrix
+getLWORK	src/matrix/double/matrix_miscop_double.cpp	/^template<> int Matrix<double>::getLWORK(bool doGEP){$/;"	f	class:Matrix
+guess	include/controls.h	/^  int    	guess;         	\/\/ how to get the initial guess$/;"	m	class:Controls
+half	include/global.h	/^  double zero, one, two, three, four, five, six, seven, eight, nine, ten, half, quarter;$/;"	m	struct:Math
+haveAOOneE	include/aointegrals.h	/^  bool		haveAOOneE;$/;"	m	class:AOIntegrals
+haveAOTwoE	include/aointegrals.h	/^  bool		haveAOTwoE;$/;"	m	class:AOIntegrals
+haveCoulomb	include/singleslater.h	/^  bool	haveCoulomb;$/;"	m	class:SingleSlater
+haveDensity	include/singleslater.h	/^  bool	haveDensity; $/;"	m	class:SingleSlater
+haveEigen_	include/matrix.h	/^  int       haveEigen_;        \/\/ Level of eigensystem storage (compounds)$/;"	m	class:Matrix
+haveExchange	include/singleslater.h	/^  bool	haveExchange;$/;"	m	class:SingleSlater
+haveMO	include/singleslater.h	/^  bool	haveMO;$/;"	m	class:SingleSlater
+haveMOabcd	include/mointegrals.h	/^  bool      haveMOabcd;$/;"	m	class:MOIntegrals
+haveMOiabc	include/mointegrals.h	/^  bool      haveMOiabc;$/;"	m	class:MOIntegrals
+haveMOiajb	include/mointegrals.h	/^  bool      haveMOiajb;$/;"	m	class:MOIntegrals
+haveMOijab	include/mointegrals.h	/^  bool      haveMOijab;$/;"	m	class:MOIntegrals
+haveMOijka	include/mointegrals.h	/^  bool      haveMOijka;$/;"	m	class:MOIntegrals
+haveMOijkl	include/mointegrals.h	/^  bool      haveMOijkl;$/;"	m	class:MOIntegrals
+host_alias	src/Makefile	/^host_alias = $/;"	m
+htmldir	src/Makefile	/^htmldir = ${docdir}$/;"	m
+hybridDFT	include/controls.h	/^  bool  	hybridDFT; 	\/\/ DFT is a hybrid functional$/;"	m	class:Controls
+iaIndex_	include/mointegrals.h	/^  int       **iaIndex_;$/;"	m	class:MOIntegrals
+iabc_	include/mointegrals.h	/^  Matrix<double>    *iabc_;$/;"	m	class:MOIntegrals
+iajb	include/mointegrals.h	/^  inline double &iajb(int i, int a, int j, int b){$/;"	f	class:MOIntegrals
+iajb	include/mointegrals.h	/^  inline double &iajb(int ia, int jb){$/;"	f	class:MOIntegrals
+iajb_	include/mointegrals.h	/^  Matrix<double>    *iajb_;$/;"	m	class:MOIntegrals
+iden	src/matrix/complex/matrixop_complex.cpp	/^Matrix* iden(const int n, const int m){$/;"	f
+iden	src/matrix/double/matrixop_double.cpp	/^Matrix* iden(const int n, const int m){$/;"	f
+iend_	include/memory.h	/^  unsigned long long iend_,len_;$/;"	m	class:Memory
+ijIndex_	include/mointegrals.h	/^  int       **ijIndex_;$/;"	m	class:MOIntegrals
+ijab_	include/mointegrals.h	/^  Matrix<double>    *ijab_;$/;"	m	class:MOIntegrals
+ijka_	include/mointegrals.h	/^  Matrix<double>    *ijka_;$/;"	m	class:MOIntegrals
+ijkl_	include/mointegrals.h	/^  Matrix<double>    *ijkl_;$/;"	m	class:MOIntegrals
+in	include/fileio.h	/^  fstream in;                    \/\/ file handler of the input file$/;"	m	class:FileIO
+includedir	src/Makefile	/^includedir = ${prefix}\/include$/;"	m
+index	include/molecule.h	/^  inline int index(int i) { return this->index_[i];};$/;"	f	class:Molecule
+index_	include/molecule.h	/^  int     *index_;       \/\/ index of atom in the atoms[] array$/;"	m	class:Molecule
+infodir	src/Makefile	/^infodir = ${datarootdir}\/info$/;"	m
+install_sh	src/Makefile	/^install_sh = ${SHELL} \/home\/dbwy\/ChronQ_Real\/install-sh$/;"	m
+install_sh_DATA	src/Makefile	/^install_sh_DATA = $(install_sh) -c -m 644$/;"	m
+install_sh_PROGRAM	src/Makefile	/^install_sh_PROGRAM = $(install_sh) -c$/;"	m
+install_sh_SCRIPT	src/Makefile	/^install_sh_SCRIPT = $(install_sh) -c$/;"	m
+intSij	include/memory.h	/^  inline bool intSij(int op, int i, int j) {$/;"	f	class:Memory
+intSmall	include/aointegrals.h	/^  double intSmall;$/;"	m	struct:PairConstants
+inversezeta	include/basisset.h	/^  double  inversezeta[MAXCONTRACTION][MAXCONTRACTION];	\/\/ the inverse of the total of exponents 0.5\/(alpha+beta) $/;"	m	struct:ShellPair
+invzeta	include/basisset.h	/^  double  invzeta[MAXCONTRACTION][MAXCONTRACTION];	\/\/ the inverse of the total of exponents 0.5\/(alpha+beta) $/;"	m	struct:ShellPair
+ioRead	src/matrix/double/matrix_io_double.cpp	/^void Matrix<double>::ioRead(FileIO *fileio,int blockNumber,char *fileName,int charOffset) {$/;"	f	class:Matrix
+ioWrite	src/matrix/double/matrix_io_double.cpp	/^void Matrix<double>::ioWrite(FileIO *fileio,int blockNumber,char *fileName,int charOffset) {$/;"	f	class:Matrix
+isOpen	include/fileio.h	/^  inline bool isOpen(int blockNumber) {$/;"	f	class:FileIO
+kinetic_	include/aointegrals.h	/^  Matrix<double>  	*kinetic_;$/;"	m	class:AOIntegrals
+l	include/basisset.h	/^  int	  l[3];			 \/\/ x,y,z angular momentum$/;"	m	struct:AOCartesian
+len	include/matrix.h	/^  inline int    len(){            return this->len_;          }; \/\/ Return the number of elements stored for matrix$/;"	f	class:Matrix
+len_	include/matrix.h	/^  int       len_;              \/\/ Number of elements being stored in the matrix (length of data array)$/;"	m	class:Matrix
+len_	include/memory.h	/^  unsigned long long iend_,len_;$/;"	m	class:Memory
+libdir	src/Makefile	/^libdir = ${exec_prefix}\/lib$/;"	m
+libexecdir	src/Makefile	/^libexecdir = ${exec_prefix}\/libexec$/;"	m
+localedir	src/Makefile	/^localedir = ${datarootdir}\/locale$/;"	m
+localstatedir	src/Makefile	/^localstatedir = ${prefix}\/var$/;"	m
+lx	include/basisset.h	/^  int     lx;                    \/\/ x angular momentum$/;"	m	struct:AOCartesian
+ly	include/basisset.h	/^  int     ly;                    \/\/ y angular momentum$/;"	m	struct:AOCartesian
+lz	include/basisset.h	/^  int     lz;                    \/\/ z angular momentum$/;"	m	struct:AOCartesian
+mandir	src/Makefile	/^mandir = ${datarootdir}\/man$/;"	m
+mass	include/atoms.h	/^  double mass; $/;"	m	struct:Atoms
+massNumber	include/atoms.h	/^  int    massNumber; $/;"	m	struct:Atoms
+math	include/global.h	/^const Math math = {0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 0.5, 0.25,$/;"	v
+memory_	include/memory.h	/^  double *memory_;$/;"	m	class:Memory
+mkdir_p	src/Makefile	/^mkdir_p = \/bin\/mkdir -p$/;"	m
+mkinstalldirs	src/Makefile	/^mkinstalldirs = $(install_sh) -d$/;"	m
+moA	include/singleslater.h	/^  inline Matrix<double> *moA()      { return this->moA_;};$/;"	f	class:SingleSlater
+moA_	include/singleslater.h	/^  Matrix<double>  *moA_;$/;"	m	class:SingleSlater
+moB	include/singleslater.h	/^  inline Matrix<double> *moB()      { return this->moB_;};$/;"	f	class:SingleSlater
+moB_	include/singleslater.h	/^  Matrix<double>  *moB_;$/;"	m	class:SingleSlater
+mointegrals_	include/sdresponse.h	/^  MOIntegrals   *mointegrals_;$/;"	m	class:SDResponse
+molecularConstants_	include/aointegrals.h	/^  MolecularConstants	*molecularConstants_;$/;"	m	class:AOIntegrals
+molecule_	include/aointegrals.h	/^  Molecule    	*molecule_;$/;"	m	class:AOIntegrals
+molecule_	include/mointegrals.h	/^  Molecule    	*molecule_;$/;"	m	class:MOIntegrals
+molecule_	include/sdresponse.h	/^  Molecule    	*molecule_;$/;"	m	class:SDResponse
+molecule_	include/singleslater.h	/^  Molecule    	*molecule_;$/;"	m	class:SingleSlater
+myid	include/global.h	/^  int  myid;$/;"	m	struct:GlobalMPI
+nAE	include/singleslater.h	/^  inline int nAE()    { return this->nAE_;};$/;"	f	class:SingleSlater
+nAE_	include/singleslater.h	/^  int      nAE_;$/;"	m	class:SingleSlater
+nAOPair	include/basisset.h	/^  int     nAOPair;		\/\/ number of unique AO pairs$/;"	m	struct:ShellPair
+nAOs	include/basisset.h	/^  int	  nAOs;			 \/\/ number of AOs in this shell$/;"	m	struct:Shell
+nAtom	include/aointegrals.h	/^  int nAtom; \/\/number of Atoms$/;"	m	struct:MolecularConstants
+nAtoms	include/molecule.h	/^  inline int nAtoms() {return this->nAtoms_;};$/;"	f	class:Molecule
+nAtoms_	include/molecule.h	/^  int      nAtoms_;      \/\/ number of atoms in the system$/;"	m	class:Molecule
+nBE	include/singleslater.h	/^  inline int nBE()    { return this->nBE_;};$/;"	f	class:SingleSlater
+nBE_	include/singleslater.h	/^  int      nBE_;$/;"	m	class:SingleSlater
+nBasis	include/aointegrals.h	/^  int nBasis[2];   \/\/number of Basis Function$/;"	m	struct:PairConstants
+nBasis	include/basisset.h	/^  inline int     nBasis()  {return this->nBasis_;};$/;"	f	class:BasisSet
+nBasis	include/basisset.h	/^  int     nBasis[2];		\/\/ number of basis function on each shell$/;"	m	struct:ShellPair
+nBasis	include/singleslater.h	/^  inline int nBasis() { return this->nBasis_;};$/;"	f	class:SingleSlater
+nBasis_	include/aointegrals.h	/^  int       nBasis_;$/;"	m	class:AOIntegrals
+nBasis_	include/basisset.h	/^  int  nBasis_;                 \/\/ number of basis functions$/;"	m	class:BasisSet
+nBasis_	include/sdresponse.h	/^  int       nBasis_;$/;"	m	class:SDResponse
+nBasis_	include/singleslater.h	/^  int      nBasis_;$/;"	m	class:SingleSlater
+nLShell	include/basisset.h	/^  inline int nLShell(int L){return this->nLShell_[L];};$/;"	f	class:BasisSet
+nLShell_	include/basisset.h	/^  int  nLShell_[20];            \/\/ number of S,P,D,F,G... shells$/;"	m	class:BasisSet
+nOccA	include/singleslater.h	/^  inline int nOccA()  { return this->nOccA_;};$/;"	f	class:SingleSlater
+nOccA_	include/singleslater.h	/^  int      nOccA_;$/;"	m	class:SingleSlater
+nOccB	include/singleslater.h	/^  inline int nOccB()  { return this->nOccB_;}$/;"	f	class:SingleSlater
+nOccB_	include/singleslater.h	/^  int      nOccB_;$/;"	m	class:SingleSlater
+nPGTOs	include/aointegrals.h	/^  int nPGTOs[2];   \/\/number of PGTOs$/;"	m	struct:PairConstants
+nPGTOs	include/basisset.h	/^  int     nPGTOs;                \/\/ level of contraction of the shell$/;"	m	struct:Shell
+nPGTOs	include/basisset.h	/^  int     nPGTOs[2];		\/\/ number of primitive Gaussian (degree of contract) on each shell$/;"	m	struct:BasisPair
+nPGTOs	include/basisset.h	/^  int     nPGTOs[2];		\/\/ number of primitive Gaussian (degree of contract) on each shell$/;"	m	struct:ShellPair
+nPrimitive	include/basisset.h	/^  inline int nPrimitive()  {return this->nPrimitive_;};$/;"	f	class:BasisSet
+nPrimitive_	include/basisset.h	/^  int  nPrimitive_;             \/\/ number of primitive GTOs$/;"	m	class:BasisSet
+nShell	include/basisset.h	/^  inline int     nShell()  {return this->nShell_;};$/;"	f	class:BasisSet
+nShellPair	include/basisset.h	/^  inline int nShellPair()  {return this->nShellPair_;};$/;"	f	class:BasisSet
+nShellPair_	include/basisset.h	/^  int  nShellPair_;             \/\/ number of shell pairs$/;"	m	class:BasisSet
+nShell_	include/basisset.h	/^  int  nShell_;                 \/\/ number of shells$/;"	m	class:BasisSet
+nStates_	include/sdresponse.h	/^  int       nStates_;$/;"	m	class:SDResponse
+nTT_	include/aointegrals.h	/^  int       nTT_;$/;"	m	class:AOIntegrals
+nTT_	include/singleslater.h	/^  int      nTT_;$/;"	m	class:SingleSlater
+nTotalE	include/molecule.h	/^  inline int nTotalE() {return this->nTotalE_;};$/;"	f	class:Molecule
+nTotalE_	include/molecule.h	/^  int      nTotalE_;     \/\/ total number of electrons$/;"	m	class:Molecule
+nVirA	include/singleslater.h	/^  inline int nVirA()  { return this->nVirB_;};$/;"	f	class:SingleSlater
+nVirA_	include/singleslater.h	/^  int      nVirA_;$/;"	m	class:SingleSlater
+nVirB	include/singleslater.h	/^  inline int nVirB()  { return this->nVirB_;};$/;"	f	class:SingleSlater
+nVirB_	include/singleslater.h	/^  int      nVirB_;$/;"	m	class:SingleSlater
+name	include/basisset.h	/^  char    name[2];               \/\/ name of the shell - "S","P","D","F","G"$/;"	m	struct:Shell
+name_	include/matrix.h	/^  char      name_[MAXNAMELEN]; \/\/ Name of the Matrix$/;"	m	class:Matrix
+name_bin	include/fileio.h	/^  char *name_bin;                \/\/ name of the binary file$/;"	m	class:FileIO
+name_in	include/fileio.h	/^  char *name_in;                 \/\/ name of the input file$/;"	m	class:FileIO
+name_out	include/fileio.h	/^  char *name_out;                \/\/ name of the output file$/;"	m	class:FileIO
+name_scr	include/fileio.h	/^  char *name_scr;                \/\/ name of the scratch file$/;"	m	class:FileIO
+nine	include/global.h	/^  double zero, one, two, three, four, five, six, seven, eight, nine, ten, half, quarter;$/;"	m	struct:Math
+nodeNameLen	include/global.h	/^  int  nodeNameLen;$/;"	m	struct:GlobalMPI
+norm	include/basisset.h	/^  double  norm[MAXCONTRACTION];  \/\/ normalization constants of primitive GTOs (divided by AOCartesian.divConst)$/;"	m	struct:Shell
+norm	include/basisset.h	/^  double  norm[MAXCONTRACTION][MAXCONTRACTION];		\/\/ pairwise normalization constant$/;"	m	struct:ShellPair
+normQuartet	include/aointegrals.h	/^  double normQuartet[MAXCONTRACTION][MAXCONTRACTION][MAXCONTRACTION][MAXCONTRACTION];$/;"	m	struct:QuartetConstants
+norm_col	src/matrix/double/matrix_miscop_double.cpp	/^template<> void Matrix<double>::norm_col(){$/;"	f	class:Matrix
+oldincludedir	src/Makefile	/^oldincludedir = \/usr\/include$/;"	m
+one	include/global.h	/^  double zero, one, two, three, four, five, six, seven, eight, nine, ten, half, quarter;$/;"	m	struct:Math
+oneE_	include/aointegrals.h	/^  Matrix<double>    *oneE_;$/;"	m	class:AOIntegrals
+openIn	include/fileio.h	/^  inline void openIn() {$/;"	f	class:FileIO
+operator ()	include/matrix.h	/^  inline T& operator()(int row, int col){  $/;"	f	class:Matrix
+operator *	src/matrix/complex/matrix_overload_complex.cpp	/^Matrix<dcomplex>::Product Matrix<dcomplex>::operator*(const Matrix &m) const{$/;"	f	class:Matrix
+operator *	src/matrix/double/matrix_overload_double.cpp	/^Matrix<double>::Product Matrix<double>::operator*(const Matrix &m) const{$/;"	f	class:Matrix
+operator +=	src/matrix/complex/matrix_overload_complex.cpp	/^void Matrix<dcomplex>::operator+=(const Matrix *m) {$/;"	f	class:Matrix
+operator +=	src/matrix/double/matrix_overload_double.cpp	/^void Matrix<double>::operator+=(const Matrix *m) {$/;"	f	class:Matrix
+operator -	src/matrix/complex/matrix_overload_complex.cpp	/^Matrix<dcomplex>::Diff Matrix<dcomplex>::operator-(const Matrix &m) const {$/;"	f	class:Matrix
+operator -	src/matrix/double/matrix_overload_double.cpp	/^Matrix<double>::Diff Matrix<double>::operator-(const Matrix &m) const {$/;"	f	class:Matrix
+operator -=	src/matrix/complex/matrix_overload_complex.cpp	/^void Matrix<dcomplex>::operator-=(const Matrix *m) {$/;"	f	class:Matrix
+operator -=	src/matrix/double/matrix_overload_double.cpp	/^void Matrix<double>::operator-=(const Matrix *m) {$/;"	f	class:Matrix
+operator =	src/matrix/complex/matrix_overload_complex.cpp	/^template<> void Matrix<dcomplex>::operator=(const TNT& m){ doTNT(this,m.a,m.x);};$/;"	f	class:Matrix
+operator =	src/matrix/complex/matrix_overload_complex.cpp	/^template<> void Matrix<dcomplex>::operator=(const TTN& m){ doTTN(this,m.a,m.x);};$/;"	f	class:Matrix
+operator =	src/matrix/complex/matrix_overload_complex.cpp	/^void Matrix<dcomplex>::operator=(const Diff& m){$/;"	f	class:Matrix
+operator =	src/matrix/complex/matrix_overload_complex.cpp	/^void Matrix<dcomplex>::operator=(const EXP &m){$/;"	f	class:Matrix
+operator =	src/matrix/complex/matrix_overload_complex.cpp	/^void Matrix<dcomplex>::operator=(const Matrix *m) {$/;"	f	class:Matrix
+operator =	src/matrix/complex/matrix_overload_complex.cpp	/^void Matrix<dcomplex>::operator=(const PWR &m){$/;"	f	class:Matrix
+operator =	src/matrix/complex/matrix_overload_complex.cpp	/^void Matrix<dcomplex>::operator=(const Product& m){$/;"	f	class:Matrix
+operator =	src/matrix/complex/matrix_overload_complex.cpp	/^void Matrix<dcomplex>::operator=(dcomplex *m) {$/;"	f	class:Matrix
+operator =	src/matrix/double/matrix_overload_double.cpp	/^template<> void Matrix<double>::operator=(const TNT& m){ doTNT(this,m.a,m.x);};$/;"	f	class:Matrix
+operator =	src/matrix/double/matrix_overload_double.cpp	/^template<> void Matrix<double>::operator=(const TTN& m){ doTTN(this,m.a,m.x);};$/;"	f	class:Matrix
+operator =	src/matrix/double/matrix_overload_double.cpp	/^void Matrix<double>::operator=(const Diff& m){$/;"	f	class:Matrix
+operator =	src/matrix/double/matrix_overload_double.cpp	/^void Matrix<double>::operator=(const EXP &m){$/;"	f	class:Matrix
+operator =	src/matrix/double/matrix_overload_double.cpp	/^void Matrix<double>::operator=(const Matrix *m) {$/;"	f	class:Matrix
+operator =	src/matrix/double/matrix_overload_double.cpp	/^void Matrix<double>::operator=(const PWR &m){$/;"	f	class:Matrix
+operator =	src/matrix/double/matrix_overload_double.cpp	/^void Matrix<double>::operator=(const Product& m){$/;"	f	class:Matrix
+operator =	src/matrix/double/matrix_overload_double.cpp	/^void Matrix<double>::operator=(double *m) {$/;"	f	class:Matrix
+operator ^	src/matrix/complex/matrix_overload_complex.cpp	/^Matrix<dcomplex>::PWR Matrix<dcomplex>::operator^(const dcomplex &x) const{$/;"	f	class:Matrix
+operator ^	src/matrix/double/matrix_overload_double.cpp	/^Matrix<double>::PWR Matrix<double>::operator^(const double &x) const{$/;"	f	class:Matrix
+optGeometry	include/controls.h	/^  bool  	optGeometry;    \/\/ optimize geometry$/;"	m	class:Controls
+optWaveFunction	include/controls.h	/^  bool  	optWaveFunction;\/\/ optimize wave function$/;"	m	class:Controls
+out	include/fileio.h	/^  fstream out;                   \/\/ file handler of the output file$/;"	m	class:FileIO
+overlap_	include/aointegrals.h	/^  Matrix<double>  	*overlap_;$/;"	m	class:AOIntegrals
+pack	src/matrix/double/matrix_miscop_double.cpp	/^template<> void Matrix<double>::pack(){$/;"	f	class:Matrix
+pairConstants_	include/aointegrals.h	/^  PairConstants 	    *pairConstants_;$/;"	m	class:AOIntegrals
+pdfdir	src/Makefile	/^pdfdir = ${docdir}$/;"	m
+phys	include/global.h	/^const Phys phys = {0.5291772083000001};$/;"	v
+pi	include/global.h	/^  double pi,pi32,sqrt2pi54; \/\/pi, pi^{3\/2} sqrt(2)*pi^{5\/4}$/;"	m	struct:Math
+pi32	include/global.h	/^  double pi,pi32,sqrt2pi54; \/\/pi, pi^{3\/2} sqrt(2)*pi^{5\/4}$/;"	m	struct:Math
+pkgdatadir	src/Makefile	/^pkgdatadir = $(datadir)\/chrous-quantum-chemistry$/;"	m
+pkgincludedir	src/Makefile	/^pkgincludedir = $(includedir)\/chrous-quantum-chemistry$/;"	m
+pkglibdir	src/Makefile	/^pkglibdir = $(libdir)\/chrous-quantum-chemistry$/;"	m
+pkglibexecdir	src/Makefile	/^pkglibexecdir = $(libexecdir)\/chrous-quantum-chemistry$/;"	m
+potential_	include/aointegrals.h	/^  Matrix<double>  	*potential_;$/;"	m	class:AOIntegrals
+prefix	src/Makefile	/^prefix = \/usr\/local$/;"	m
+printAll	src/matrix/complex/matrix_io_complex.cpp	/^void Matrix<dcomplex>::printAll(int list, ostream &output) {$/;"	f	class:Matrix
+printAll	src/matrix/double/matrix_io_double.cpp	/^void Matrix<double>::printAll(int list, ostream &output) {$/;"	f	class:Matrix
+printDim	include/matrix.h	/^  inline void printDim(ostream &output=cout) {output<<this->name_<<" is a "<<this->rows_<<"(row)x"<<this->cols_<<"(column) matrix."<<endl;};$/;"	f	class:Matrix
+printLevel	include/controls.h	/^  int   	printLevel;	\/\/ print level$/;"	m	class:Controls
+printMem	include/matrix.h	/^  inline void printMem(){$/;"	f	class:Matrix
+program_transform_name	src/Makefile	/^program_transform_name = s,x,x,$/;"	m
+psdir	src/Makefile	/^psdir = ${docdir}$/;"	m
+quarter	include/global.h	/^  double zero, one, two, three, four, five, six, seven, eight, nine, ten, half, quarter;$/;"	m	struct:Math
+quartetConstants_	include/aointegrals.h	/^  QuartetConstants	    *quartetConstants_;$/;"	m	class:AOIntegrals
+readCharge	include/molecule.h	/^  inline void readCharge(int charge) {this->charge_=charge;};$/;"	f	class:Molecule
+readPointer	include/fileio.h	/^  long  readPointer[2*MAXBLOCK]; \/\/ read pointers$/;"	m	class:FileIO
+readSpin	include/molecule.h	/^  inline void readSpin(int spin) {this->spin_=spin;};$/;"	f	class:Molecule
+realCmplxEig_	include/matrix.h	/^  bool      realCmplxEig_;     \/\/ Complex eigenvalues of a real matrix$/;"	m	class:Matrix
+release	include/memory.h	/^  inline void release() {iend_ = 0;};$/;"	f	class:Memory
+restart	include/controls.h	/^  bool  	restart;        \/\/ restart the calculation$/;"	m	class:Controls
+rows	include/matrix.h	/^  inline int   rows(){            return this->rows_;         }; \/\/ Return the number of rows being used in current treatment$/;"	f	class:Matrix
+rows_	include/matrix.h	/^  int       rows_;             \/\/ Number of rows (leading dimension) to be used by routines$/;"	m	class:Matrix
+rows_t_	include/matrix.h	/^  int       rows_t_;           \/\/ Number of rows (leading dimension) upon allocation (permanent)$/;"	m	class:Matrix
+sbindir	src/Makefile	/^sbindir = ${exec_prefix}\/sbin$/;"	m
+scalarProd	src/matrix/complex/matrix_miscmath_complex.cpp	/^dcomplex Matrix<dcomplex>::scalarProd(Matrix *m) {$/;"	f	class:Matrix
+scalarProd	src/matrix/double/matrix_miscmath_double.cpp	/^double Matrix<double>::scalarProd(Matrix *m) {$/;"	f	class:Matrix
+scale	include/matrix.h	/^  inline void scale(T x){ for(int i=0;i<this->len_;i++) this->data_[i] = this->data_[i]*x;};$/;"	f	class:Matrix
+scaleDag	src/matrix/double/matrix_miscop_double.cpp	/^template<> void Matrix<double>::scaleDag(double x) {$/;"	f	class:Matrix
+scr	include/fileio.h	/^  fstream scr;                   \/\/ file handler of the scratch file$/;"	m	class:FileIO
+secondDer	include/controls.h	/^  bool  	secondDer; 	\/\/ compute the second derivative$/;"	m	class:Controls
+setDag	src/matrix/complex/matrix_setters_complex.cpp	/^template<> void Matrix<dcomplex>::setDag<dcomplex>(dcomplex *x){$/;"	f	class:Matrix
+setDag	src/matrix/complex/matrix_setters_complex.cpp	/^template<> void Matrix<dcomplex>::setDag<double>(double *x){$/;"	f	class:Matrix
+setDag	src/matrix/double/matrix_setters_double.cpp	/^template<> void Matrix<double>::setDag<double>(double *x){$/;"	f	class:Matrix
+setNAE	include/singleslater.h	/^  inline void setNAE(int nAE)    { this->nAE_ = nAE;};$/;"	f	class:SingleSlater
+setNBE	include/singleslater.h	/^  inline void setNBE(int nBE)    { this->nBE_ = nBE;};$/;"	f	class:SingleSlater
+setNBasis	include/singleslater.h	/^  inline void setNBasis(int nBasis) { this->nBasis_ = nBasis;};$/;"	f	class:SingleSlater
+setName	include/matrix.h	/^  inline             void setName(char *x){ strcpy(this->name_,x);     };       \/\/ Set the name of the matrix object$/;"	f	class:Matrix
+setRHF	include/singleslater.h	/^  inline void setRHF(int RHF)    { this->RHF_ = RHF;};$/;"	f	class:SingleSlater
+setSymm	include/matrix.h	/^  inline             void setSymm(char  x){ this->symm_ = x;};                   \/\/ Set the symmetry of the matrix object$/;"	f	class:Matrix
+seven	include/global.h	/^  double zero, one, two, three, four, five, six, seven, eight, nine, ten, half, quarter;$/;"	m	struct:Math
+shIndex	include/basisset.h	/^  int     shIndex;               \/\/ index of the shell in the shells[] array to which current ao belongs$/;"	m	struct:AOCartesian
+shIndex	include/basisset.h	/^  int     shIndex[2];           \/\/ indices of the first and second shell in the shells[] array to which current ao belongs$/;"	m	struct:ShellPair
+sharedstatedir	src/Makefile	/^sharedstatedir = ${prefix}\/com$/;"	m
+shellPairs	include/basisset.h	/^  ShellPair   *shellPairs;     \/\/ array of shellPairs$/;"	m	class:BasisSet
+shells	include/basisset.h	/^  Shell       *shells;         \/\/ array of shells$/;"	m	class:BasisSet
+singleSlater_	include/mointegrals.h	/^  SingleSlater  *singleSlater_;$/;"	m	class:MOIntegrals
+singleSlater_	include/sdresponse.h	/^  SingleSlater  *singleSlater_;$/;"	m	class:SDResponse
+six	include/global.h	/^  double zero, one, two, three, four, five, six, seven, eight, nine, ten, half, quarter;$/;"	m	struct:Math
+size	include/global.h	/^  int  size;$/;"	m	struct:GlobalMPI
+size	include/matrix.h	/^  inline int   size(){            return this->size_;         }; \/\/ Return the size of the matrix object     (buggy)$/;"	f	class:Matrix
+size	include/molecule.h	/^  inline int size() { return this->size_;};$/;"	f	class:Molecule
+sizeDouble	include/fileio.h	/^  int sizeDouble() { return this->sizeDouble_;};$/;"	f	class:FileIO
+sizeDouble_	include/fileio.h	/^  int   sizeDouble_;             \/\/ size of a double precision float point in terms of sizeof(char)$/;"	m	class:FileIO
+sizeFloat	include/fileio.h	/^  int sizeFloat()  { return this->sizeFloat_;};$/;"	f	class:FileIO
+sizeFloat_	include/fileio.h	/^  int   sizeFloat_;              \/\/ size of a float point in terms of sizeof(char)$/;"	m	class:FileIO
+sizeInt	include/fileio.h	/^  int sizeInt()    { return this->sizeInt_;};$/;"	f	class:FileIO
+sizeInt_	include/fileio.h	/^  int   sizeInt_;                \/\/ size of an integer in terms of sizeof(char)$/;"	m	class:FileIO
+sizeLong	include/fileio.h	/^  int sizeLong()   { return this->sizeLong_;};$/;"	f	class:FileIO
+sizeLong_	include/fileio.h	/^  int   sizeLong_;               \/\/ size of a long integer in terms of sizeof(char)$/;"	m	class:FileIO
+size_	include/matrix.h	/^  int       size_;             \/\/ Size of the matrix object (all internal storage, buggy)$/;"	m	class:Matrix
+size_	include/molecule.h	/^  int      size_;        \/\/ size of the object in terms of sizeof(char)$/;"	m	class:Molecule
+small	include/global.h	/^  double small;$/;"	m	struct:Math
+sortedShells	include/basisset.h	/^  int         *sortedShells;   \/\/ index of shells sorted from the largest angular momentum to the lowest$/;"	m	class:BasisSet
+spin	include/molecule.h	/^  inline int spin() {return this->spin_;}$/;"	f	class:Molecule
+spin	include/singleslater.h	/^  inline int spin()   { return this->spin_; };$/;"	f	class:SingleSlater
+spin_	include/molecule.h	/^  int      spin_;        \/\/ spin multiplicity$/;"	m	class:Molecule
+spin_	include/singleslater.h	/^  int      spin_;$/;"	m	class:SingleSlater
+sqrt2	include/global.h	/^  double sqrt2;$/;"	m	struct:Math
+sqrt2pi54	include/global.h	/^  double pi,pi32,sqrt2pi54; \/\/pi, pi^{3\/2} sqrt(2)*pi^{5\/4}$/;"	m	struct:Math
+srcdir	src/Makefile	/^srcdir = .$/;"	m
+ssNonzero	include/aointegrals.h	/^  bool   ssNonzero[MAXCONTRACTION][MAXCONTRACTION];$/;"	m	struct:PairConstants
+ssPair	include/aointegrals.h	/^  double ssPair[MAXCONTRACTION][MAXCONTRACTION];$/;"	m	struct:PairConstants
+ssPairTotal	include/aointegrals.h	/^  double ssPairTotal;$/;"	m	struct:PairConstants
+sub	src/matrix/complex/matrix_miscmath_complex.cpp	/^template<> void Matrix<dcomplex>::sub(const Matrix *a, const Matrix *b) {$/;"	f	class:Matrix
+sub	src/matrix/double/matrix_miscmath_double.cpp	/^template<> void Matrix<double>::sub(const Matrix *a, const Matrix *b) {$/;"	f	class:Matrix
+subdir	src/Makefile	/^subdir = src$/;"	m
+symbol	include/atoms.h	/^  char   symbol[5];$/;"	m	struct:Atoms
+symm	include/matrix.h	/^  inline char  symm(){            return this->symm_;         }; \/\/ Return the symmetry currently being used$/;"	f	class:Matrix
+symm_	include/matrix.h	/^  char      symm_;             \/\/ Symmetry of Matrix$/;"	m	class:Matrix
+sysconfdir	src/Makefile	/^sysconfdir = ${prefix}\/etc$/;"	m
+tBasis	src/matrix/complex/matrixop_complex.cpp	/^Matrix* tBasis(const Matrix *C, const Matrix *X){$/;"	f
+tBasis	src/matrix/double/matrixop_double.cpp	/^Matrix* tBasis(const Matrix *C, const Matrix *X){$/;"	f
+tagBasisSet	include/global.h	/^enum {tagMolecule,tagMatrix,tagBasisSet,tagSingleSlater,tagIntegrals,tagSDResponse};$/;"	e	enum:__anon2
+tagIntegrals	include/global.h	/^enum {tagMolecule,tagMatrix,tagBasisSet,tagSingleSlater,tagIntegrals,tagSDResponse};$/;"	e	enum:__anon2
+tagMatrix	include/global.h	/^enum {tagMolecule,tagMatrix,tagBasisSet,tagSingleSlater,tagIntegrals,tagSDResponse};$/;"	e	enum:__anon2
+tagMolecule	include/global.h	/^enum {tagMolecule,tagMatrix,tagBasisSet,tagSingleSlater,tagIntegrals,tagSDResponse};$/;"	e	enum:__anon2
+tagSDResponse	include/global.h	/^enum {tagMolecule,tagMatrix,tagBasisSet,tagSingleSlater,tagIntegrals,tagSDResponse};$/;"	e	enum:__anon2
+tagSingleSlater	include/global.h	/^enum {tagMolecule,tagMatrix,tagBasisSet,tagSingleSlater,tagIntegrals,tagSDResponse};$/;"	e	enum:__anon2
+target_alias	src/Makefile	/^target_alias = $/;"	m
+ten	include/global.h	/^  double zero, one, two, three, four, five, six, seven, eight, nine, ten, half, quarter;$/;"	m	struct:Math
+three	include/global.h	/^  double zero, one, two, three, four, five, six, seven, eight, nine, ten, half, quarter;$/;"	m	struct:Math
+thresholdAB	include/controls.h	/^  double 	thresholdAB;$/;"	m	class:Controls
+thresholdS	include/controls.h	/^  double 	thresholdS;$/;"	m	class:Controls
+thresholdSchawrtz	include/controls.h	/^  double	thresholdSchawrtz;$/;"	m	class:Controls
+top_build_prefix	src/Makefile	/^top_build_prefix = ..\/$/;"	m
+top_builddir	src/Makefile	/^top_builddir = ..$/;"	m
+top_srcdir	src/Makefile	/^top_srcdir = ..$/;"	m
+totalEnergy	include/singleslater.h	/^  double   totalEnergy;$/;"	m	class:SingleSlater
+trace	src/matrix/complex/matrix_miscmath_complex.cpp	/^dcomplex Matrix<dcomplex>::trace() {$/;"	f	class:Matrix
+trace	src/matrix/double/matrix_miscmath_double.cpp	/^double Matrix<double>::trace() {$/;"	f	class:Matrix
+transNT	src/matrix/complex/matrix_miscmath_complex.cpp	/^Matrix<dcomplex>::TNT Matrix<dcomplex>::transNT(const Matrix &X){$/;"	f	class:Matrix
+transNT	src/matrix/double/matrix_miscmath_double.cpp	/^Matrix<double>::TNT Matrix<double>::transNT(const Matrix &X){$/;"	f	class:Matrix
+transTN	src/matrix/complex/matrix_miscmath_complex.cpp	/^Matrix<dcomplex>::TTN Matrix<dcomplex>::transTN(const Matrix &X){$/;"	f	class:Matrix
+transTN	src/matrix/double/matrix_miscmath_double.cpp	/^Matrix<double>::TTN Matrix<double>::transTN(const Matrix &X){$/;"	f	class:Matrix
+trans_	include/matrix.h	/^  char      trans_;            \/\/ Transpose flag, used for LAPACK routines$/;"	m	class:Matrix
+transform	src/Makefile	/^transform = $(program_transform_name)$/;"	m
+transpose	include/matrix.h	/^  inline void transpose(){$/;"	f	class:Matrix
+transposeHard	src/matrix/complex/matrix_miscmath_complex.cpp	/^void Matrix<dcomplex>::transposeHard(){$/;"	f	class:Matrix
+transposeHard	src/matrix/double/matrix_miscmath_double.cpp	/^void Matrix<double>::transposeHard(){$/;"	f	class:Matrix
+two	include/global.h	/^  double zero, one, two, three, four, five, six, seven, eight, nine, ten, half, quarter;$/;"	m	struct:Math
+twoEC	include/aointegrals.h	/^  inline double &twoEC(int i, int j, int k, int l){$/;"	f	class:AOIntegrals
+twoEC	include/aointegrals.h	/^  inline double &twoEC(int ij, int kl){$/;"	f	class:AOIntegrals
+twoEC_	include/aointegrals.h	/^  Matrix<double>    *twoEC_;$/;"	m	class:AOIntegrals
+twoEX	include/aointegrals.h	/^  inline double &twoEX(int i, int j, int k, int l){$/;"	f	class:AOIntegrals
+twoEX	include/aointegrals.h	/^  inline double &twoEX(int ij, int kl){$/;"	f	class:AOIntegrals
+twoEX_	include/aointegrals.h	/^  Matrix<double>    *twoEX_;$/;"	m	class:AOIntegrals
+unpack	src/matrix/double/matrix_miscop_double.cpp	/^template<> void Matrix<double>::unpack(){$/;"	f	class:Matrix
+unvectorize	include/matrix.h	/^  inline void unvectorize(){$/;"	f	class:Matrix
+vectorize	include/matrix.h	/^  inline void vectorize(){$/;"	f	class:Matrix
+vectorized_	include/matrix.h	/^  bool      vectorized_;       \/\/ Boolean as to whether or not to treat the matrix as a vector$/;"	m	class:Matrix
+writePointer	include/fileio.h	/^  long  writePointer[2*MAXBLOCK];\/\/ write pointers$/;"	m	class:FileIO
+x	include/matrix.h	/^  struct     PWR{ const Matrix *a; const T *x;};  \/\/ Struct for A^x$/;"	m	struct:Matrix::PWR
+x	include/matrix.h	/^  struct     TNT{ const Matrix *a; const Matrix *x;};  \/\/ Struct for XA(XT) transform$/;"	m	struct:Matrix::TNT
+x	include/matrix.h	/^  struct     TTN{ const Matrix *a; const Matrix *x;};  \/\/ Struct for (XT)AX transform$/;"	m	struct:Matrix::TTN
+zero	include/global.h	/^  double zero, one, two, three, four, five, six, seven, eight, nine, ten, half, quarter;$/;"	m	struct:Math
+zeta	include/basisset.h	/^  double  zeta[MAXCONTRACTION][MAXCONTRACTION];		\/\/ the total of exponents (alpha+beta) $/;"	m	struct:ShellPair
+~AOIntegrals	include/aointegrals.h	/^  ~AOIntegrals(){$/;"	f	class:AOIntegrals
+~BasisSet	include/basisset.h	/^  ~BasisSet(){$/;"	f	class:BasisSet
+~Controls	include/controls.h	/^  ~Controls(){;};$/;"	f	class:Controls
+~MOIntegrals	include/mointegrals.h	/^  ~MOIntegrals(){$/;"	f	class:MOIntegrals
+~Matrix	include/matrix.h	/^  ~Matrix() {$/;"	f	class:Matrix
+~Memory	include/memory.h	/^  ~Memory() {delete[] memory_;};$/;"	f	class:Memory
+~Molecule	include/molecule.h	/^  ~Molecule(){$/;"	f	class:Molecule
+~SDResponse	include/sdresponse.h	/^  ~SDResponse() {;};$/;"	f	class:SDResponse
+~SingleSlater	include/singleslater.h	/^  ~SingleSlater() {$/;"	f	class:SingleSlater
