@@ -24,7 +24,7 @@ void complex_test(int N,int M){
   Matrix<dcomplex> *tmp = new Matrix<dcomplex>(N,N,"VTV");
 
   // Clear Contents
-  A->setSymm('H');
+//A->setSymm('H');
   A->clearAll();
   B->clearAll();
   C->clearAll();
@@ -73,7 +73,7 @@ void complex_test(int N,int M){
   try{
   (*A_Vec) =     A->eigenvector();
   cout << "Here" << endl;
-    A_Eig->setDag(A->eigenvalue_re());  
+    A_Eig->setDag(A->eigenvalue());  
   } catch (int msg){ cout << msg << endl;};
   cout << "Here" << endl;
   try{ (*AT) = A_Eig->transNT(*A_Vec);}
@@ -97,6 +97,7 @@ void complex_test(int N,int M){
   (*tmp) = (*VcT)*(*A_Vec);
   tmp->printAll();
   
+  cout << "HERE" << endl;
   delete A;
   delete B;
   delete C;
@@ -104,4 +105,5 @@ void complex_test(int N,int M){
   delete A_Eig;
   delete SqrtA;
   delete ExpA;
+  cout << "HERE" << endl;
 }

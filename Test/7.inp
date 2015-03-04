@@ -1,0 +1,11 @@
+$geom
+2
+h 0  0.0  0.0 0.309827
+h 0  0.0  0.0 -0.619653
+
+$charge 0
+$spin 1
+$basis sto3g.gbs
+$method hf
+$print 3
+

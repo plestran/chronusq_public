@@ -81,12 +81,12 @@ class AOIntegrals{
 
 public:
   // these should be protected
-  Matrix<double>    *twoEC_;
-  Matrix<double>    *twoEX_;
-  Matrix<double>    *oneE_;
-  Matrix<double>  	*overlap_;
-  Matrix<double>  	*kinetic_;
-  Matrix<double>  	*potential_;
+  Matrix<double>  *twoEC_;
+  Matrix<double>  *twoEX_;
+  Matrix<double>  *oneE_;
+  Matrix<double>  *overlap_;
+  Matrix<double>  *kinetic_;
+  Matrix<double>  *potential_;
 
   bool		haveAOTwoE;
   bool		haveAOOneE;

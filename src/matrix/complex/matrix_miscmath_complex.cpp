@@ -25,7 +25,7 @@ template<> void Matrix<dcomplex>::doDiag(Matrix *B){
   char UPLO = 'L';
   int LWORK,INFO;
   dcomplex **SCR;
-  double *RWORK;
+  double *RWORK = NULL;
 
   //  *Idiot Checks*  //
   // If Matrix is already diagonalized, early return
@@ -81,7 +81,7 @@ template<> void Matrix<dcomplex>::doDiag(Matrix *B){
   cout << " HERE65" << endl;
   for(int i = 0; i < 3; i++) delete[] SCR[i];
   cout << " HERE65" << endl;
-//delete[] SCR; 
+  delete[] SCR; 
   delete[] RWORK;
   this->haveEigen_=1;
 };
