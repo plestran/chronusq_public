@@ -38,7 +38,7 @@ int atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   else if(controls->guess==3) hartreeFock->readGuessGauFChk(controls->gauFChkName);
   hartreeFock->formFock();
   hartreeFock->computeEnergy();
-
+  hartreeFock->SCF();
   MOIntegrals *moIntegrals = new MOIntegrals();
   moIntegrals->iniMOIntegrals(molecule,basisset,fileIO,controls,aointegrals,hartreeFock);
 
