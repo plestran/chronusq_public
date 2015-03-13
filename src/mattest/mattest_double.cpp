@@ -59,10 +59,13 @@ void double_test(int N, int M){
   (*AB) = (*A)*(*B);
   (*AC) = (*A)*(*C);
   (*BD) = (*B)*(*D);
-
+  
+  
 //A->setSymm('G');
   try{ A->diag();}
   catch(int msg){ cout << msg << endl;}
+  
+  BD->printAll();
 //try{B->diag();}
 //catch(int msg) {CErr(msg);}; 
   

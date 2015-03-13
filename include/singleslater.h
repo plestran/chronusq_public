@@ -101,10 +101,10 @@ public:
   void formFock();	        // form the Fock matrix
   void formCoulomb();		// form the Coulomb matrix
   void formExchange();		// form the exchange matrix
-  void doSCF();	            // perform SCF
   void readGuessIO();       	// read the initial guess of MO's from the input stream
   void readGuessGauFChk(char*);	// read the initial guess of MO's from the Gaussian formatted checkpoint file
   void computeEnergy();         // compute the total electronic energy
+  void SCF();  
   void printEnergy(); 
   void printInfo();
 
