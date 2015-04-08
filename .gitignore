@@ -8,7 +8,6 @@ aclocal
 *.bak*
 src/mattest/mattest
 src/chronQ/chronQ
-chronQ
 *.try
 aclocal.m4
 autom4te.cache/
