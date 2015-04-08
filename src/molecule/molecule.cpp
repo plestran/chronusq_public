@@ -59,16 +59,16 @@ void Molecule::printInfo(FileIO *fileio,Controls *controls) {
   fileio->out.setf(ios::fixed,ios::floatfield);
   fileio->out<<"\nCartesian coordinates (bohr):"<<endl;
   fileio->out<<bannerTop<<endl;
-  fileio->out<<setw(24)<<" "<<setw(15)<<"X"<<setw(15)<<"Y"<<setw(15)<<"Z"<<endl;
+  fileio->out<<std::setw(24)<<" "<<std::setw(15)<<"X"<<std::setw(15)<<"Y"<<std::setw(15)<<"Z"<<endl;
   fileio->out<<bannerMid<<endl;
   for(int i=0;i<nAtoms_;i++)
-    fileio->out<<setw(8)<<i+1<<setw(8)<<atom[index_[i]].symbol<<setw(8)<<atom[index_[i]].atomicNumber
-	       <<setw(15)<<(*cart_)(0,i)<<setw(15)<<(*cart_)(1,i)<<setw(15)<<(*cart_)(2,i)<<endl;
+    fileio->out<<std::setw(8)<<i+1<<std::setw(8)<<atom[index_[i]].symbol<<std::setw(8)<<atom[index_[i]].atomicNumber
+	       <<std::setw(15)<<(*cart_)(0,i)<<std::setw(15)<<(*cart_)(1,i)<<std::setw(15)<<(*cart_)(2,i)<<endl;
   fileio->out<<bannerEnd<<endl;
   fileio->out<<"\nMolecular Information:"<<endl;
-  fileio->out<<setw(15)<<"nAtoms ="<<setw(8)<<nAtoms_<<setw(5)<<" "
-	     <<setw(20)<<"Charge ="<<setw(8)<<charge_<<endl;
-  fileio->out<<setw(15)<<"nElectrons ="<<setw(8)<<nTotalE_<<endl;
+  fileio->out<<std::setw(15)<<"nAtoms ="<<std::setw(8)<<nAtoms_<<std::setw(5)<<" "
+	     <<std::setw(20)<<"Charge ="<<std::setw(8)<<charge_<<endl;
+  fileio->out<<std::setw(15)<<"nElectrons ="<<std::setw(8)<<nTotalE_<<endl;
 };
 //--------------------------------//
 // read from binary files //

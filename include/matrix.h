@@ -115,21 +115,21 @@ public:
   inline void printMem(){
     cout << endl;
     cout << "Memory Allocation Dump for Matrix Object: " << this->name_ << endl;
-    cout << setw(15) << left << "data_" << this->data_;
+    cout << std::setw(15) << std::left << "data_" << this->data_;
     if(data_==NULL) cout << " (Not Allocated)"; cout << endl;
-    cout << setw(15) << left << "eigenvector_" << this->eigenvector_;
+    cout << std::setw(15) << std::left << "eigenvector_" << this->eigenvector_;
     if(eigenvector_==NULL) cout << " (Not Allocated)"; cout << endl;
-    cout << setw(15) << left << "eigenvalue_" << this->eigenvalue_ ;
+    cout << std::setw(15) << std::left << "eigenvalue_" << this->eigenvalue_ ;
     if(eigenvalue_==NULL) cout << " (Not Allocated)"; cout << endl;
-    cout << setw(15) << left << "eigenvector_l_" << this->eigenvector_l_ ;
+    cout << std::setw(15) << std::left << "eigenvector_l_" << this->eigenvector_l_ ;
     if(eigenvector_l_==NULL) cout << " (Not Allocated)"; cout << endl;
-    cout << setw(15) << left << "eigenvector_r_" << this->eigenvector_r_ ;
+    cout << std::setw(15) << std::left << "eigenvector_r_" << this->eigenvector_r_ ;
     if(eigenvector_r_==NULL) cout << " (Not Allocated)"; cout << endl;
-    cout << setw(15) << left << "eigenvalue_re_" << this->eigenvalue_re_ ;
+    cout << std::setw(15) << std::left << "eigenvalue_re_" << this->eigenvalue_re_ ;
     if(eigenvalue_re_==NULL) cout << " (Not Allocated)"; cout << endl;
-    cout << setw(15) << left << "eigenvalue_im_" << this->eigenvalue_im_ ;
+    cout << std::setw(15) << std::left << "eigenvalue_im_" << this->eigenvalue_im_ ;
     if(eigenvalue_im_==NULL) cout << " (Not Allocated)"; cout << endl;
-    cout << setw(15) << left << "eigenvaluez_" << this->eigenvaluez_  ;
+    cout << std::setw(15) << std::left << "eigenvaluez_" << this->eigenvaluez_  ;
     if(eigenvaluez_==NULL) cout << " (Not Allocated)"; cout << endl;
     
   }

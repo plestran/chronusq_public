@@ -19,8 +19,16 @@
 #include <cstring>
 #include <complex>
 
-using namespace std;
-typedef complex<double> dcomplex;
+//using namespace std;
+using std::cout;
+using std::endl;
+using std::cin;
+using std::fstream;
+using std::ostream;
+using std::ios;
+using std::nothrow;
+using std::ifstream;
+typedef std::complex<double> dcomplex;
 
 //----------------//
 //number constants//

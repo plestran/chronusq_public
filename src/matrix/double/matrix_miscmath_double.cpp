@@ -121,12 +121,12 @@ void Matrix<double>::diag() {
   // This generalization is for eventual implementation of DSPEV
   if(this->format_==0){
     if(this->symm_=='G'){
-//    cout << "Diagonalizing Matrix Object:"<<setw(5)<<" "<<" \""<<this->name_<<"\" at " << this << " using DGEEV" << endl;
+//    cout << "Diagonalizing Matrix Object:"<<std::setw(5)<<" "<<" \""<<this->name_<<"\" at " << this << " using DGEEV" << endl;
       dgeev_(&this->JOBVL_,&this->JOBVR_,&this->rows_,CPY,&this->rows_,this->eigenvalue_re_,
            this->eigenvalue_im_,this->eigenvector_l_,&this->rows_,this->eigenvector_r_,
            &this->rows_,WORK,&LWORK,&INFO);
     } else if(this->symm_=='S'){
-      cout << "Diagonalizing Matrix Object:"<<setw(5)<<" "<<" \""<<this->name_<<"\" at " << this << " using DSYEV" << endl;
+      cout << "Diagonalizing Matrix Object:"<<std::setw(5)<<" "<<" \""<<this->name_<<"\" at " << this << " using DSYEV" << endl;
       dsyev_(&this->JOBVR_,&UPLO,&this->rows_,this->eigenvector_,&this->rows_,this->eigenvalue_,
          WORK,&LWORK,&INFO);
       if(this->JOBVR_!='V'){ delete this->eigenvector_;};
@@ -224,7 +224,7 @@ void Matrix<double>::diag(Matrix *B){
   clock_t start,finish;
   start = clock();
   if(this->symm_=='G'){
-    cout << "Diagonalizing Matrix Object:"<<setw(5)<<" "<<" \""<<this->name_<<"\" subject to " << B->name_ << " using DGEGV" << endl;
+    cout << "Diagonalizing Matrix Object:"<<std::setw(5)<<" "<<" \""<<this->name_<<"\" subject to " << B->name_ << " using DGEGV" << endl;
     dgegv_(&JOBVL,&JOBVR,&this->rows_,CPYA,&this->rows_,CPYB,&this->rows_,ALPHAR,ALPHAI,BETA,
          this->eigenvector_l_,&this->rows_,this->eigenvector_r_, &this->rows_,WORK,&LWORK,
          &INFO);
@@ -233,7 +233,7 @@ void Matrix<double>::diag(Matrix *B){
       this->eigenvalue_im_[i] = ALPHAI[i]/BETA[i];
     };
   } else if(this->symm_=='S'){
-    cout << "Diagonalizing Matrix Object:"<<setw(5)<<" "<<" \""<<this->name_<<"\" subject to " << B->name_ << " using DSYGV" << endl;
+    cout << "Diagonalizing Matrix Object:"<<std::setw(5)<<" "<<" \""<<this->name_<<"\" subject to " << B->name_ << " using DSYGV" << endl;
     dsygv_(&ITYPE,&JOBVR,&UPLO,&this->rows_,this->eigenvector_,&this->rows_,CPYB,&this->rows_,this->eigenvalue_,
        WORK,&LWORK,&INFO);
     

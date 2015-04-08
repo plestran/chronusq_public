@@ -39,16 +39,16 @@ int main(int argc,char *argv[]) {
 //  }
 //  OOMPI_COMM_WORLD.Finalize();  
 */
-  cout << setw(25) << left << "Performing Tests for:"<< left <<setw(15) <<"N = "<< setw(4) << left << 5 <<setw(15)<<left <<" M = "<<setw(4)<<left<<7  << "  ... ";
+  cout << std::setw(25) << std::left << "Performing Tests for:"<< std::left <<std::setw(15) <<"N = "<< std::setw(4) << std::left << 5 <<std::setw(15)<<std::left <<" M = "<<std::setw(4)<<std::left<<7  << "  ... ";
   double_test(5,7);
   cout << "Done" << endl;
-  cout << setw(25) << left << "Performing Tests for:"<< left <<setw(15) <<"N = "<< setw(4) << left << 10 <<setw(15)<<left <<" M = "<<setw(4)<<left<<12  << "  ... ";
+  cout << std::setw(25) << std::left << "Performing Tests for:"<< std::left <<std::setw(15) <<"N = "<< std::setw(4) << std::left << 10 <<std::setw(15)<<std::left <<" M = "<<std::setw(4)<<std::left<<12  << "  ... ";
   double_test(10,12);
   cout << "Done" << endl;
-  cout << setw(25) << left << "Performing Tests for:"<< left <<setw(15) <<"N = "<< setw(4) << left << 50 <<setw(15)<<left <<" M = "<<setw(4)<<left<<105  << "  ... ";
+  cout << std::setw(25) << std::left << "Performing Tests for:"<< std::left <<std::setw(15) <<"N = "<< std::setw(4) << std::left << 50 <<std::setw(15)<<std::left <<" M = "<<std::setw(4)<<std::left<<105  << "  ... ";
   double_test(50,105);
   cout << "Done" << endl;
-  cout << setw(25) << left << "Performing Tests for:"<< left <<setw(15) <<"N = "<< setw(4) << left << 2 <<setw(15)<<left <<" M = "<<setw(4)<<left<<105  << "  ... ";
+  cout << std::setw(25) << std::left << "Performing Tests for:"<< std::left <<std::setw(15) <<"N = "<< std::setw(4) << std::left << 2 <<std::setw(15)<<std::left <<" M = "<<std::setw(4)<<std::left<<105  << "  ... ";
   double_test(2,105);
   cout << "Done" << endl;
   cout << "HERE IN MAIN" << endl;

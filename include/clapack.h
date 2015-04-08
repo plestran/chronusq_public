@@ -2,8 +2,8 @@
  *	C++ declaration of LAPACK drivers
  **********************************************************************************************************/
 #include <complex>
-using namespace std;
-typedef complex<double> dcomplex;
+//using namespace std;
+typedef std::complex<double> dcomplex;
 
 extern "C" {
 void dgemm_(const char*,const char*,const int*,const int*,const int*,double*,double*,const int*,double*,const int*,double*,double*,const int*);

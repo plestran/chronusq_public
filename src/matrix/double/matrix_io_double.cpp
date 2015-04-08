@@ -17,13 +17,13 @@ void Matrix<double>::printAll(int list, ostream &output) {
       for(i=0;i<cols_;i+=list) {
         output<<endl;
         end = list;
-        output<<setw(5)<<" ";
+        output<<std::setw(5)<<" ";
         if((i+list)>=cols_) end = cols_ - i;
-        for(k=i;k<i+end;k++) output<<setw(15)<<k+1;
+        for(k=i;k<i+end;k++) output<<std::setw(15)<<k+1;
         output<<endl;
         for(j=0;j<rows_;j++) {
-          output<<setw(5)<<j+1;
-          for(n=i;n<i+end;n++) output<<setw(15)<<data_[n*rows_+j]; // n in the column index (dbwy)
+          output<<std::setw(5)<<j+1;
+          for(n=i;n<i+end;n++) output<<std::setw(15)<<data_[n*rows_+j]; // n in the column index (dbwy)
           output<<endl;
         };
       };
@@ -31,13 +31,13 @@ void Matrix<double>::printAll(int list, ostream &output) {
       for(i=0;i<rows_;i+=list) {
         output<<endl;
         end = list;
-        output<<setw(5)<<" ";
+        output<<std::setw(5)<<" ";
         if((i+list)>=rows_) end = rows_ - i;
-        for(k=i;k<i+end;k++) output<<setw(15)<<k+1;
+        for(k=i;k<i+end;k++) output<<std::setw(15)<<k+1;
         output<<endl;
         for(j=0;j<cols_;j++) {
-          output<<setw(5)<<j+1;
-          for(n=i;n<i+end;n++) output<<setw(15)<<data_[n+j*rows_]; // n in the column index (dbwy)
+          output<<std::setw(5)<<j+1;
+          for(n=i;n<i+end;n++) output<<std::setw(15)<<data_[n+j*rows_]; // n in the column index (dbwy)
           output<<endl;
         };
       };
@@ -47,15 +47,15 @@ void Matrix<double>::printAll(int list, ostream &output) {
     for(i=0;i<cols_;i+=list) {
       output<<endl;
       end = i+list;
-      output<<setw(5)<<" ";
+      output<<std::setw(5)<<" ";
       if((i+list)>=cols_) end = cols_;
-      for(k=i;k<end;k++) output<<setw(15)<<k+1;
+      for(k=i;k<end;k++) output<<std::setw(15)<<k+1;
       output<<endl;
       for(j=i;j<rows_;j++) {
-	output<<setw(5)<<j+1;
+	output<<std::setw(5)<<j+1;
 	endLT = j+1;
 	if(j>=end) endLT = end;
-	for(n=i;n<endLT;n++) output<<setw(15)<<data_[n*(this->rows_)-n*(n-1)/2+j-n];
+	for(n=i;n<endLT;n++) output<<std::setw(15)<<data_[n*(this->rows_)-n*(n-1)/2+j-n];
 	output<<endl;
       };
     };

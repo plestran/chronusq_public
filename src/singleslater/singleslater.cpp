@@ -107,9 +107,9 @@ void SingleSlater::iniSingleSlater(Molecule *molecule, BasisSet *basisset, AOInt
 //-----------------------------------//
 void SingleSlater::printInfo() {
   this->fileio_->out<<"\nSingle Slater Determinent Wave Function Information:"<<endl;
-  this->fileio_->out<<setw(15)<<"nOccA ="<<setw(8)<<this->nOccA_<<setw(5)<<" "<<setw(20)<<"nVirA ="<<setw(8)<<this->nVirA_<<endl;
-  this->fileio_->out<<setw(15)<<"nOccB ="<<setw(8)<<this->nOccB_<<setw(5)<<" "<<setw(20)<<"nVirB ="<<setw(8)<<this->nVirB_<<endl;
-  this->fileio_->out<<setw(15)<<"Multiplicity ="<<setw(8)<<this->spin_<<endl;
+  this->fileio_->out<<std::setw(15)<<"nOccA ="<<std::setw(8)<<this->nOccA_<<std::setw(5)<<" "<<std::setw(20)<<"nVirA ="<<std::setw(8)<<this->nVirA_<<endl;
+  this->fileio_->out<<std::setw(15)<<"nOccB ="<<std::setw(8)<<this->nOccB_<<std::setw(5)<<" "<<std::setw(20)<<"nVirB ="<<std::setw(8)<<this->nVirB_<<endl;
+  this->fileio_->out<<std::setw(15)<<"Multiplicity ="<<std::setw(8)<<this->spin_<<endl;
 };
 //----------------------//
 // compute energies     //
@@ -125,10 +125,10 @@ void SingleSlater::computeEnergy(){
 //--------------------//
 void SingleSlater::printEnergy(){
   this->fileio_->out<<"\nEnergy Information:"<<endl;
-  this->fileio_->out<<setw(30)<<"E(one electron) = "<<setw(15)<<this->energyOneE<<setw(5)<<" a.u. "<<endl;
-  this->fileio_->out<<setw(30)<<"E(two electron) = "<<setw(15)<<this->energyTwoE<<setw(5)<<" a.u. "<<endl;
-  this->fileio_->out<<setw(30)<<"E(nuclear repulsion) = "<<setw(15)<<this->energyNuclei<<setw(5)<<" a.u. "<<endl;
-  this->fileio_->out<<setw(30)<<"E(total) = "<<setw(15)<<this->totalEnergy<<setw(5)<<" a.u. "<<endl;
+  this->fileio_->out<<std::setw(30)<<"E(one electron) = "<<std::setw(15)<<this->energyOneE<<std::setw(5)<<" a.u. "<<endl;
+  this->fileio_->out<<std::setw(30)<<"E(two electron) = "<<std::setw(15)<<this->energyTwoE<<std::setw(5)<<" a.u. "<<endl;
+  this->fileio_->out<<std::setw(30)<<"E(nuclear repulsion) = "<<std::setw(15)<<this->energyNuclei<<std::setw(5)<<" a.u. "<<endl;
+  this->fileio_->out<<std::setw(30)<<"E(total) = "<<std::setw(15)<<this->totalEnergy<<std::setw(5)<<" a.u. "<<endl;
 };
 //-------------------------//
 // form the density matrix //

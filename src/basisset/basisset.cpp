@@ -34,19 +34,19 @@ void BasisSet::printAO(ostream &output){
   output.setf(ios::fixed,ios::floatfield);
   output<<endl<<"Cartesian Basis Functions:"<<endl;
   output<<bannerTop<<endl;
-  output<<setw(16)<<"         Center"<<setw(4)<<"lx"<<setw(4)<<"ly"<<setw(4)<<"lz"
-	<<setw(18)<<"exponent"<<setw(18)<<"coefficient"<<endl;
+  output<<std::setw(16)<<"         Center"<<std::setw(4)<<"lx"<<std::setw(4)<<"ly"<<std::setw(4)<<"lz"
+	<<std::setw(18)<<"exponent"<<std::setw(18)<<"coefficient"<<endl;
   output<<bannerMid;
   for(i=0;i<this->nShell_;i++) {
     output<<endl;
-    output<<setw(5)<<i+1<<setw(4)<<shells[i].name<<setw(5)<<shells[i].center+1<<"  ";
+    output<<std::setw(5)<<i+1<<std::setw(4)<<shells[i].name<<std::setw(5)<<shells[i].center+1<<"  ";
     aoIndex = shells[i].aoIndex;
     for(k=aoIndex;k<(aoIndex+HashNAOs(shells[i].L));k++) {
-      if(k!=aoIndex) output<<setw(16)<<" ";
-      output<<setw(4)<<ao[k].lx<<setw(4)<<ao[k].ly<<setw(4)<<ao[k].lz;
+      if(k!=aoIndex) output<<std::setw(16)<<" ";
+      output<<std::setw(4)<<ao[k].lx<<std::setw(4)<<ao[k].ly<<std::setw(4)<<ao[k].lz;
       for(j=0;j<this->shells[i].nPGTOs;j++) {
-	if(j!=0) output<<setw(28)<<" ";
-	output<<setw(18)<<shells[i].expo[j]<<setw(18)<<shells[i].coef[j]<<endl;
+	if(j!=0) output<<std::setw(28)<<" ";
+	output<<std::setw(18)<<shells[i].expo[j]<<std::setw(18)<<shells[i].coef[j]<<endl;
       };
     };
   };
@@ -240,20 +240,20 @@ void BasisSet::printShell(ostream &output){
   output.setf(ios::fixed,ios::floatfield);
   output<<endl<<"Atmoic Orbital Shells:"<<endl;
   output<<bannerTop<<endl;
-  output<<setw(16)<<"         Center"<<setw(4)<<"lx"<<setw(4)<<"ly"<<setw(4)<<"lz"
-	<<setw(18)<<"exponent"<<setw(18)<<"coefficient"<<endl;
+  output<<std::setw(16)<<"         Center"<<std::setw(4)<<"lx"<<std::setw(4)<<"ly"<<std::setw(4)<<"lz"
+	<<std::setw(18)<<"exponent"<<std::setw(18)<<"coefficient"<<endl;
   output<<bannerMid;
   for(i=0;i<this->nShell_;i++) {
     output<<endl;
     shIndex = sortedShells[i];
-    output<<setw(5)<<i+1<<setw(4)<<shells[shIndex].name<<setw(5)<<shells[shIndex].center+1<<"  ";
+    output<<std::setw(5)<<i+1<<std::setw(4)<<shells[shIndex].name<<std::setw(5)<<shells[shIndex].center+1<<"  ";
     aoIndex = shells[shIndex].aoIndex;
     for(k=aoIndex;k<(aoIndex+HashNAOs(shells[shIndex].L));k++) {
-      if(k!=aoIndex) output<<setw(16)<<" ";
-      output<<setw(4)<<ao[k].lx<<setw(4)<<ao[k].ly<<setw(4)<<ao[k].lz;
+      if(k!=aoIndex) output<<std::setw(16)<<" ";
+      output<<std::setw(4)<<ao[k].lx<<std::setw(4)<<ao[k].ly<<std::setw(4)<<ao[k].lz;
       for(j=0;j<this->shells[shIndex].nPGTOs;j++) {
-	if(j!=0) output<<setw(28)<<" ";
-	output<<setw(18)<<shells[shIndex].expo[j]<<setw(18)<<shells[shIndex].coef[j]<<endl;
+	if(j!=0) output<<std::setw(28)<<" ";
+	output<<std::setw(18)<<shells[shIndex].expo[j]<<std::setw(18)<<shells[shIndex].coef[j]<<endl;
       };
     };
   };
@@ -270,14 +270,14 @@ void BasisSet::printShellPair(ostream &output){
   output.setf(ios::fixed,ios::floatfield);
   output<<endl<<"Atmoic Orbital Shell Pairs:"<<endl;
   output<<bannerTop<<endl;
-  output<<setw(8)<<"Index"
-	<<setw(12)<<"Center-1"<<setw(11)<<"Shell-1"<<setw(6)<<"L-1"<<setw(6)<<"*"
-	<<setw(10)<<"Center-2"<<setw(11)<<"Shell-2"<<setw(6)<<"L-2"<<endl;
+  output<<std::setw(8)<<"Index"
+	<<std::setw(12)<<"Center-1"<<std::setw(11)<<"Shell-1"<<std::setw(6)<<"L-1"<<std::setw(6)<<"*"
+	<<std::setw(10)<<"Center-2"<<std::setw(11)<<"Shell-2"<<std::setw(6)<<"L-2"<<endl;
   output<<bannerMid<<endl;
   for(i=0;i<this->nShellPair_;i++)
-    output<<setw(8)<<i+1
-	  <<setw(12)<<shellPairs[i].center[0]+1<<setw(11)<<shellPairs[i].shIndex[0]+1<<setw(6)<<shellPairs[i].L[0]<<setw(6)<<"*"
-	  <<setw(10)<<shellPairs[i].center[1]+1<<setw(11)<<shellPairs[i].shIndex[1]+1<<setw(6)<<shellPairs[i].L[1]<<endl;
+    output<<std::setw(8)<<i+1
+	  <<std::setw(12)<<shellPairs[i].center[0]+1<<std::setw(11)<<shellPairs[i].shIndex[0]+1<<std::setw(6)<<shellPairs[i].L[0]<<std::setw(6)<<"*"
+	  <<std::setw(10)<<shellPairs[i].center[1]+1<<std::setw(11)<<shellPairs[i].shIndex[1]+1<<std::setw(6)<<shellPairs[i].L[1]<<endl;
   output<<bannerEnd<<endl;
 };
 //---------------------------------------//
@@ -285,13 +285,13 @@ void BasisSet::printShellPair(ostream &output){
 //---------------------------------------//
 void BasisSet::printInfo(FileIO *fileio,Controls *controls) {
   fileio->out<<"\nBasis Function Information:"<<endl;
-  fileio->out<<setw(15)<<"nBasis ="<<setw(8)<<nBasis_<<setw(5)<<" "
-	     <<setw(20)<<"nPrimitive ="<<setw(8)<<nPrimitive_<<endl;
-  fileio->out<<setw(15)<<"nSShell ="<<setw(8)<<nLShell_[0]<<setw(5)<<" "
-	     <<setw(20)<<"nPShell ="<<setw(8)<<nLShell_[1]<<endl;
-  fileio->out<<setw(15)<<"nDShell ="<<setw(8)<<nLShell_[2]<<setw(5)<<" "
-	     <<setw(20)<<"nFShell ="<<setw(8)<<nLShell_[3]<<endl;
-  fileio->out<<setw(15)<<"nGShell ="<<setw(8)<<nLShell_[4]<<endl;
+  fileio->out<< std::setw(15) << "nBasis =" << std::setw(8)<< nBasis_<< std::setw(5) <<" "
+	     << std::setw(20) << "nPrimitive =" << std::setw(8)<< nPrimitive_<< endl;
+  fileio->out<< std::setw(15) << "nSShell =" << std::setw(8)<< nLShell_[0]<< std::setw(5) <<" "
+	     << std::setw(20) << "nPShell =" << std::setw(8)<< nLShell_[1]<< endl;
+  fileio->out<< std::setw(15) << "nDShell =" << std::setw(8)<< nLShell_[2]<< std::setw(5) <<" "
+	     << std::setw(20) << "nFShell =" << std::setw(8)<< nLShell_[3]<< endl;
+  fileio->out<< std::setw(15) << "nGShell =" << std::setw(8)<< nLShell_[4]<< endl;
   if(controls->printLevel>=2) printAO(fileio->out);
   if(controls->printLevel>=3) printShellPair(fileio->out);
 };
