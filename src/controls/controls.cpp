@@ -1,5 +1,5 @@
 #include "controls.h"
-
+using ChronusQ::Controls;
 /****************************/
 /* Error Messages 6000-6999 */
 /****************************/

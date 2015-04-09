@@ -2,6 +2,7 @@
 using ChronusQ::AOIntegrals;
 using ChronusQ::Molecule;
 using ChronusQ::BasisSet;
+using ChronusQ::Controls;
 //---------------------
 // initialize MOIntegrals
 //---------------------

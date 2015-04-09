@@ -6,6 +6,7 @@
 /* Error Messages 6000-6999 */
 /****************************/
 
+namespace ChronusQ {
 class Controls {
 
 public:
@@ -31,4 +32,5 @@ public:
   ~Controls(){;};
   void iniControls();
 };
+} // namespace ChronusQ
 #endif
