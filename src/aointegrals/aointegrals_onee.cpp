@@ -1,4 +1,5 @@
 #include "aointegrals.h"
+using ChronusQ::AOIntegrals;
 /************************************/
 /* overlap horizontal recursion     */
 /* (a|b) = (A-B)(a|b-1) + (a+1|b-1) */

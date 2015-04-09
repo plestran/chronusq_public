@@ -1,4 +1,5 @@
 #include "workers.h"
+using namespace ChronusQ;
 
 int atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   int i,j,k,l;

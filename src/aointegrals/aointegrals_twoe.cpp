@@ -1,4 +1,5 @@
 #include "aointegrals.h"
+using ChronusQ::AOIntegrals;
 /******************************************************/
 /* two-e horizontal recursion from (ab|cd) to (a0|cd) */
 /* (ab|cd)=(a+1,b-1|cd)+(A-B)*(a,b-1|cd)              */

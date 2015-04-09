@@ -12,6 +12,7 @@
 #define MaxFmTPt 3201
 #define MaxTotalL 18
 
+namespace ChronusQ {
 struct MolecularConstants{
   int nAtom; //number of Atoms
   int atomZ[MAXATOMS];
@@ -152,5 +153,6 @@ public:
   double twoevRRa000(ShellPair*,ShellPair*,int,int,int*,int*,int*,int*,int*);
   double twoeSSSS0(int*,ShellPair*,ShellPair*);
 };
+} // namespace ChronusQ
 
 #endif

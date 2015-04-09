@@ -1,4 +1,5 @@
 #include "aointegrals.h"
+using ChronusQ::AOIntegrals;
 static double smallT[21]={
 1.00000000000000,
 0.33333333333333,

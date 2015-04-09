@@ -23,7 +23,7 @@ class MOIntegrals{
   Molecule    	*molecule_;
   FileIO       	*fileio_;
   Controls     	*controls_;
-  AOIntegrals   *aointegrals_;
+  ChronusQ::AOIntegrals   *aointegrals_;
   SingleSlater  *singleSlater_;
 
 public:
@@ -53,7 +53,7 @@ public:
   };
   
   // initialization function
-  void iniMOIntegrals(Molecule*,BasisSet*,FileIO*,Controls*,AOIntegrals*,SingleSlater*);
+  void iniMOIntegrals(Molecule*,BasisSet*,FileIO*,Controls*,ChronusQ::AOIntegrals*,SingleSlater*);
 
   inline double &iajb(int i, int a, int j, int b){
     return (*iajb_)(this->iaIndex_[i][a],this->iaIndex_[j][b]);
