@@ -72,7 +72,7 @@ class AOIntegrals{
   double	**FmTTable_;
 
   BasisSet     	*basisSet_;
-  Molecule    	*molecule_;
+  ChronusQ::Molecule    	*molecule_;
   FileIO       	*fileio_;
   Controls     	*controls_;
 
@@ -103,7 +103,7 @@ public:
   };
   
   // initialization function
-  void iniAOIntegrals(Molecule*,BasisSet*,FileIO*,Controls*);
+  void iniAOIntegrals(ChronusQ::Molecule*,BasisSet*,FileIO*,Controls*);
 
   inline double &twoEC(int i, int j, int k, int l){
     return (*twoEC_)(this->R2Index_[i][j],this->R2Index_[k][l]);

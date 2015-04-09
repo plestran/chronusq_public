@@ -10,6 +10,7 @@
 /* Error Messages 2000-2999 */
 /****************************/
 
+namespace ChronusQ {
 class Molecule {
   int      nAtoms_;      // number of atoms in the system
   int      charge_;      // total charge
@@ -58,4 +59,5 @@ public:
   void mpiSend(int,int tag=tagMolecule);
   void mpiRecv(int,int tag=tagMolecule);
 };
+}
 #endif

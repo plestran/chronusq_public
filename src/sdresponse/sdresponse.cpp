@@ -1,4 +1,5 @@
 #include "sdresponse.h"
+using ChronusQ::Molecule;
 //------------------------------//
 // allocate memory for matrices //
 //------------------------------//

@@ -1,4 +1,5 @@
 #include "molecule.h"
+using ChronusQ::Molecule;
 //-------------//
 // initializer //
 //-------------//

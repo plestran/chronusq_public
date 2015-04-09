@@ -1,5 +1,6 @@
 #include "mointegrals.h"
 using ChronusQ::AOIntegrals;
+using ChronusQ::Molecule;
 //---------------------
 // initialize MOIntegrals
 //---------------------

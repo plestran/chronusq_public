@@ -1,4 +1,5 @@
 #include "workers.h"
+using ChronusQ::Molecule;
 
 int worker(GlobalMPI *globalMPI) {
 //  cout<<"Worker "<<globalMPI->myid<<" is on "<<globalMPI->nodeName<<endl;

@@ -3,6 +3,7 @@
 #include "global.h"
  
 /* Atomic Information*/ 
+namespace ChronusQ {
 struct Atoms { 
   int    atomicNumber; 
   char   symbol[5];
@@ -360,4 +361,5 @@ static struct Atoms atom[344] = {
   {109,Mt,268,268.13882} 
 }  
   */ 
+} // namespace ChronusQ
 #endif 

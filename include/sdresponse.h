@@ -16,7 +16,7 @@ class SDResponse {
   int       **R2Index_;
   int       nStates_;
   BasisSet     	*basisSet_;
-  Molecule    	*molecule_;
+  ChronusQ::Molecule    	*molecule_;
   FileIO       	*fileio_;
   Controls     	*controls_;
   MOIntegrals   *mointegrals_;
@@ -28,7 +28,7 @@ public:
   SDResponse(){;};
   ~SDResponse() {;};
   // pseudo-constructor
-  void iniSDResponse(Molecule*,BasisSet*,MOIntegrals*,FileIO*,Controls*,SingleSlater*);
+  void iniSDResponse(ChronusQ::Molecule*,BasisSet*,MOIntegrals*,FileIO*,Controls*,SingleSlater*);
 
   void computeExcitedStates();         // compute the total electronic energy
   void printExcitedStateEnergies(); 

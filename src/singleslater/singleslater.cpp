@@ -1,5 +1,6 @@
 #include "singleslater.h"
 using ChronusQ::AOIntegrals;
+using ChronusQ::Molecule;
 //------------------------------//
 // allocate memory for matrices //
 //------------------------------//

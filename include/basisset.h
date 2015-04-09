@@ -95,7 +95,7 @@ public:
   void iniBasisSet();
 
   // create and sort shell pairs according to the angular momenta
-  void createShellPair(Molecule*);
+  void createShellPair(ChronusQ::Molecule*);
 
   // access to private data
   inline int     nBasis()  {return this->nBasis_;};
@@ -111,7 +111,7 @@ public:
   void printShellPair(ostream &output=cout);
 
   // read from input file
-  void readBasisSet(FileIO*,Molecule*);
+  void readBasisSet(FileIO*,ChronusQ::Molecule*);
 
   /*************************/
   /* MPI Related Routines  */

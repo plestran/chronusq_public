@@ -1,4 +1,5 @@
 #include "classtools.h"
+using ChronusQ::Molecule;
 
 /************************************************/
 /* read input files and initialize everything   */

@@ -33,7 +33,7 @@ class SingleSlater {
   Matrix<double>  *moA_;
   Matrix<double>  *moB_;
   BasisSet     	*basisset_;
-  Molecule    	*molecule_;
+  ChronusQ::Molecule    	*molecule_;
   FileIO       	*fileio_;
   Controls     	*controls_;
   ChronusQ::AOIntegrals   *aointegrals_;
@@ -67,7 +67,7 @@ public:
     };
   };
   // pseudo-constructor
-  void iniSingleSlater(Molecule*,BasisSet*,ChronusQ::AOIntegrals*,FileIO*,Controls*);
+  void iniSingleSlater(ChronusQ::Molecule*,BasisSet*,ChronusQ::AOIntegrals*,FileIO*,Controls*);
 
   //set private data
   inline void setNBasis(int nBasis) { this->nBasis_ = nBasis;};

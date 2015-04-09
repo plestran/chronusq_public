@@ -11,7 +11,7 @@
 /*****************************/
 
 // read input files and initialize everything
-void readInput(FileIO*,Molecule*,BasisSet*,Controls*);
+void readInput(FileIO*,ChronusQ::Molecule*,BasisSet*,Controls*);
 
 // trace of product of two symmetric matrices
 double traceSymm(Matrix<double>*,Matrix<double>*);
