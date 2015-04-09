@@ -59,5 +59,5 @@ public:
   void mpiSend(int,int tag=tagMolecule);
   void mpiRecv(int,int tag=tagMolecule);
 };
-}
+} // namespace ChronusQ
 #endif

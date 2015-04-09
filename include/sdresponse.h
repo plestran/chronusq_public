@@ -42,5 +42,5 @@ public:
   void mpiSend(int,int tag=tagSDResponse);
   void mpiRecv(int,int tag=tagSDResponse);
 };
-}
+} // namespace ChronusQ
 #endif
