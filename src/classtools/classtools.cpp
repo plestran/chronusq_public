@@ -6,6 +6,7 @@ using ChronusQ::BasisSet;
 /* read input files and initialize everything   */
 /* memory allocations are done here too         */
 /************************************************/
+namespace ChronusQ {
 void readInput(FileIO *fileio, Molecule *mol, BasisSet *basis,Controls *controls) {
   int i, j, n, readInt;
   char readString[MAXNAMELEN];
@@ -73,3 +74,4 @@ double traceSymm(Matrix<double>* a, Matrix<double>* b) {
   };
   return tmpVal;
 };
+} // namespace ChronusQ
