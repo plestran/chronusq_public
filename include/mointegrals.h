@@ -14,6 +14,7 @@
 /****************************/
 /* Error Messages 8000-8999 */
 /****************************/
+namespace ChronusQ {
 class MOIntegrals{
   int       **iaIndex_;
   int       **ijIndex_;
@@ -69,5 +70,6 @@ public:
   void formiabc();
   void formabcd();
 };
+} // namespace ChronusQ
 
 #endif
