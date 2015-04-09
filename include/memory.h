@@ -2,6 +2,7 @@
 #define INCLUDED_MEMORY
 #include "global.h"
 
+namespace ChronusQ {
 class Memory {
   unsigned long long iend_,len_;
   double *memory_;
@@ -31,5 +32,6 @@ public:
   //print elements
   void print(long const, long const, long col=5, ostream &output=cout, char *s=NULL);
 };
+} // namespace ChronusQ
 
 #endif

@@ -1,5 +1,5 @@
 #include "memory.h"
-
+using ChronusQ::Memory;
 //constructor
 Memory::Memory(long n, char *unit, ostream output) {
   double test;
