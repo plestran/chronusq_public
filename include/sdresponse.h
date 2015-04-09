@@ -12,6 +12,7 @@
 /* Error Messages 5000-5999 */
 /****************************/
 
+namespace ChronusQ {
 class SDResponse {
   int       nBasis_;
   int       **R2Index_;
@@ -41,4 +42,5 @@ public:
   void mpiSend(int,int tag=tagSDResponse);
   void mpiRecv(int,int tag=tagSDResponse);
 };
+}
 #endif

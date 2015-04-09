@@ -4,6 +4,7 @@ using ChronusQ::BasisSet;
 using ChronusQ::Controls;
 using ChronusQ::FileIO;
 using ChronusQ::MOIntegrals;
+using ChronusQ::SDResponse;
 //------------------------------//
 // allocate memory for matrices //
 //------------------------------//

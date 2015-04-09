@@ -5,6 +5,7 @@ using ChronusQ::BasisSet;
 using ChronusQ::Controls;
 using ChronusQ::FileIO;
 using ChronusQ::Matrix;
+using ChronusQ::SingleSlater;
 //------------------------------//
 // allocate memory for matrices //
 //------------------------------//

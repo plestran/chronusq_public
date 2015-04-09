@@ -2,6 +2,7 @@
 //--------------------------------------//
 // factorial function:  t! = 1*2*3...*t //
 //--------------------------------------//
+namespace ChronusQ { 
 double factorial(int t){
   int i;
   double tmp = 1.0;
@@ -146,3 +147,4 @@ int HashIAO(int L,int *l) {
   };
 };
 
+} // namespace ChronusQ

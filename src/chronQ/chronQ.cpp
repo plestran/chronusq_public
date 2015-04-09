@@ -6,6 +6,7 @@
 #include "basisset.h"
 #include "aointegrals.h"
 #include "workers.h"
+using namespace ChronusQ;
 
 int main(int argc,char *argv[]) {
   clock_t start,finish;

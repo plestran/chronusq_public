@@ -10,6 +10,7 @@
 /* Error Messages 5000-5999 */
 /****************************/
 
+namespace ChronusQ {
 class SingleSlater {
   int      nBasis_;
   int      nTT_;
@@ -114,4 +115,5 @@ public:
   void mpiSend(int,int tag=tagSingleSlater);
   void mpiRecv(int,int tag=tagSingleSlater);
 };
+} // namespace ChronusQ
 #endif

@@ -7,6 +7,7 @@
 /*Error Messages 10000-14999 */
 /*****************************/
 
+namespace ChronusQ {
 // factorial function:  t! = 1*2*3...*t
 double  factorial (int);
 
@@ -41,4 +42,5 @@ int HashL (char*);
 // convert angular momentum to AO index in a shell
 int HashIAO(int,int*);
 
+} // namespace ChronusQ
 #endif
