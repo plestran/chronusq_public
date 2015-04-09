@@ -9,6 +9,7 @@
 /* Error Messages 4000-4999 */
 /****************************/
 
+namespace ChronusQ {
 struct Shell{
   char    name[2];               // name of the shell - "S","P","D","F","G"
   bool	  SP;			 // is this part of an SP shell?
@@ -119,5 +120,6 @@ public:
   void mpiSend(int,int tag=tagBasisSet);
   void mpiRecv(int,int tag=tagBasisSet);
 };
+} // namespace ChronusQ
 
 #endif

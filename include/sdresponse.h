@@ -6,6 +6,7 @@
 #include "controls.h"
 #include "mointegrals.h"
 #include "singleslater.h"
+#include "basisset.h"
 
 /****************************/
 /* Error Messages 5000-5999 */
@@ -15,7 +16,7 @@ class SDResponse {
   int       nBasis_;
   int       **R2Index_;
   int       nStates_;
-  BasisSet     	*basisSet_;
+  ChronusQ::BasisSet     	*basisSet_;
   ChronusQ::Molecule    	*molecule_;
   FileIO       	*fileio_;
   Controls     	*controls_;
@@ -28,7 +29,7 @@ public:
   SDResponse(){;};
   ~SDResponse() {;};
   // pseudo-constructor
-  void iniSDResponse(ChronusQ::Molecule*,BasisSet*,MOIntegrals*,FileIO*,Controls*,SingleSlater*);
+  void iniSDResponse(ChronusQ::Molecule*,ChronusQ::BasisSet*,MOIntegrals*,FileIO*,Controls*,SingleSlater*);
 
   void computeExcitedStates();         // compute the total electronic energy
   void printExcitedStateEnergies(); 

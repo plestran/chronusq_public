@@ -1,6 +1,7 @@
 #include "basisset.h"
 using ChronusQ::atom; 
 using ChronusQ::Molecule;
+using ChronusQ::BasisSet;
 //-------------//
 // constructor //
 //-------------//
