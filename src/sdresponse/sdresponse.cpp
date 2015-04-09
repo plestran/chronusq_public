@@ -2,6 +2,7 @@
 using ChronusQ::Molecule;
 using ChronusQ::BasisSet;
 using ChronusQ::Controls;
+using ChronusQ::FileIO;
 //------------------------------//
 // allocate memory for matrices //
 //------------------------------//

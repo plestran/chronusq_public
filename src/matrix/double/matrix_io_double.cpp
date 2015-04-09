@@ -1,4 +1,5 @@
 #include "matrix.h"
+using ChronusQ::FileIO;
 //-----------------------//
 // print matrix elements //
 //-----------------------//

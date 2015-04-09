@@ -3,6 +3,7 @@ using ChronusQ::AOIntegrals;
 using ChronusQ::Molecule;
 using ChronusQ::BasisSet;
 using ChronusQ::Controls;
+using ChronusQ::FileIO;
 //---------------------
 // initialize MOIntegrals
 //---------------------

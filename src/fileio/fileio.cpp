@@ -1,4 +1,5 @@
 #include "fileio.h"
+using ChronusQ::FileIO;
 //-------------//
 // constructor //
 //-------------//

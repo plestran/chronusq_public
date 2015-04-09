@@ -7,7 +7,7 @@
 /****************************/
 /* Error Messages 1000-1999 */
 /****************************/
-
+namespace ChronusQ {
 class FileIO {
 
   char *name_in;                 // name of the input file
@@ -69,4 +69,5 @@ public:
   int charOffset(int,char*);
 };
 
+} // namespace ChronusQ
 #endif
