@@ -1,4 +1,5 @@
 #include "singleslater.h"
+using ChronusQ::Matrix;
 //----------------------------------------//
 // do the SCF                             //
 // Sajan                                  //

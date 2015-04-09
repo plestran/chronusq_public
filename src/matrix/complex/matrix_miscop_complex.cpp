@@ -1,4 +1,7 @@
 #include "matrix.h"
+using ChronusQ::Matrix;
+
+namespace ChronusQ {
 /*
 template<> void Matrix<double>::pack(){
   double *tmp = new double[this->rows_*(this->rows_+1)/2];
@@ -171,3 +174,4 @@ template<>  dcomplex** Matrix<dcomplex>::allocEigScr(bool doGEP, int &LWORK, Mat
   cout << " END " << endl;
   return SCR;
 };
+} // namespace ChronusQ

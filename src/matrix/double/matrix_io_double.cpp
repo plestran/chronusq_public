@@ -1,8 +1,10 @@
 #include "matrix.h"
 using ChronusQ::FileIO;
+using ChronusQ::Matrix;
 //-----------------------//
 // print matrix elements //
 //-----------------------//
+namespace ChronusQ {
 template<>
 void Matrix<double>::printAll(int list, ostream &output) {
   int i,j,k,n,end,endLT;
@@ -156,3 +158,4 @@ void Matrix<double>::ioWrite(FileIO *fileio,int blockNumber,char *fileName,int c
     };
   };
 };
+} // namespace ChronusQ

@@ -1,5 +1,7 @@
 #include "matrix.h"
+using ChronusQ::Matrix;
 
+namespace ChronusQ {
 template<>
 template<> void Matrix<dcomplex>::cpyData<dcomplex>(dcomplex *x){ 
   for(int i = 0; i < this->len_; i++){
@@ -20,3 +22,4 @@ template<> void Matrix<dcomplex>::setDag<double>(double *x){
     for(int i=0;i<this->cols_;i++){ this->data_[this->rows_*i + i] = x[i];};
   };
 }
+} // namespace ChronusQ

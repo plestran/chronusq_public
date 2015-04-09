@@ -1,5 +1,6 @@
 #include "global.h"
 #include "matrix.h"
+using ChronusQ::Matrix;
 /*
 int dotProd(Matrix *a, Matrix *b, Matrix *c) {
   PetscMPIInt rank,size;

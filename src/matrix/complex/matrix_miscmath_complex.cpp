@@ -1,4 +1,5 @@
 #include "matrix.h"
+namespace ChronusQ {
 /**************
  *  Addition  *
  **************/
@@ -161,3 +162,4 @@ Matrix<dcomplex>::TTN Matrix<dcomplex>::transTN(const Matrix &X){
   s.x = &X;
   return s;
 }
+} // namespace ChronusQ

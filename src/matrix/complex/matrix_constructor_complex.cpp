@@ -2,6 +2,7 @@
 //-------------//
 // constructor //
 //-------------//
+namespace ChronusQ {
 template<>
 Matrix<dcomplex>::Matrix(int rows, int cols, char *nm, char *format) {
   // Initialize the Internal Pointers to NULL (to avoid problems later)
@@ -48,3 +49,4 @@ Matrix<dcomplex>::Matrix(int rows, int cols, char *nm, char *format) {
   size_ = MAXNAMELEN*sizeof(testChar) + 6*sizeof(testInt)/sizeof(testChar) + len_*sizeof(testComplex)/sizeof(testChar);
   if(haveEigen_) size_ = size_ + (rows_+1)*rows_*sizeof(testComplex)/sizeof(testChar);
 };
+} // namespace ChronusQ

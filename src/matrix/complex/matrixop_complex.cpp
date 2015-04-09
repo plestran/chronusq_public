@@ -1,5 +1,8 @@
 #include "global.h"
 #include "matrix.h"
+using Chronus::Matrix;
+
+namespace ChronusQ {
 /*
 int dotProd(Matrix *a, Matrix *b, Matrix *c) {
   PetscMPIInt rank,size;
@@ -44,3 +47,4 @@ Matrix* tBasis(const Matrix *C, const Matrix *X){
   Matrix *prod = new Matrix(X->rows_,X->cols_);
   double *scr = new double[->]
 };
+} // namespace ChronusQ

@@ -9,6 +9,7 @@
 /****************************/
 /* Error Messages 3000-3999 */
 /****************************/
+namespace ChronusQ {
 
 template <class T>
 class Matrix {
@@ -288,4 +289,5 @@ public:
 //dbwye
 };
 
+} // namespace ChronusQ
 #endif

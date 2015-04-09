@@ -1,4 +1,5 @@
 #include "matrix.h"
+using namespace ChronusQ;
 
 void double_test(int N, int M){
   // Allocate Matricies

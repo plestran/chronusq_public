@@ -1,5 +1,6 @@
 #include "matrix.h"
 using ChronusQ::FileIO;
+namespace ChronusQ {
 //-----------------------//
 // print matrix elements //
 //-----------------------//
@@ -116,3 +117,4 @@ void Matrix<dcomplex>::printAll(int list, ostream &output) {
   };
   output<<bannerEnd<<endl;
 };
+} // namespace ChronusQ

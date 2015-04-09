@@ -1,4 +1,6 @@
 #include "matrix.h"
+using ChronusQ::Matrix;
+namespace ChronusQ {
 /**********
  *  Copy  *
  **********/
@@ -274,8 +276,8 @@ void Matrix<double>::operator=(const EXP &m){
   double *tmp = new double[m.a->rows_];
   Vec->clearAll();
   Val->clearAll();
-  if(m.a->symm_=='G')      for(int i=0; i<m.a->rows_; i++) tmp[i] = (double)exp(m.a->eigenvalue_re_[i]);
-  else if(m.a->symm_=='S') for(int i=0; i<m.a->rows_; i++) tmp[i] = (double)exp(m.a->eigenvalue_[i]);
+  if(m.a->symm_=='G')      for(int i=0; i<m.a->rows_; i++) tmp[i] = (double)std::exp(m.a->eigenvalue_re_[i]);
+  else if(m.a->symm_=='S') for(int i=0; i<m.a->rows_; i++) tmp[i] = (double)std::exp(m.a->eigenvalue_[i]);
   Val->setDag(tmp);
   Val->printAll();
   if(m.a->symm_=='G')      (*Vec) = m.a->eigenvector_r_;
@@ -311,3 +313,4 @@ void Matrix<double>::operator=(const EXP& m){
   delete Vec; delete Val;
 };
 */
+} // namespace ChronusQ

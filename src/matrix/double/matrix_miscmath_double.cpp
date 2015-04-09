@@ -1,7 +1,9 @@
 #include "matrix.h"
+using ChronusQ::Matrix;
 /**************
  *  Addition  *
  **************/
+namespace ChronusQ{
 template<> void Matrix<double>::add(const Matrix *a, const Matrix *b) {
   if(a==NULL||b==NULL) throw 3000;
   else if((this->len_!=a->len_)||(this->len_!=b->len_)||(a->len_!=b->len_)) throw 3000;
@@ -309,3 +311,4 @@ Matrix<double>::TTN Matrix<double>::transTN(const Matrix &X){
   s.x = &X;
   return s;
 }
+} // namespace ChronusQ

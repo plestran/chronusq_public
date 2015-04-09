@@ -1,3 +1,5 @@
+
+using ChronusQ::Matrix;
 char UPLO = 'L';
 int LWORK;
 double *CPY,*WORK

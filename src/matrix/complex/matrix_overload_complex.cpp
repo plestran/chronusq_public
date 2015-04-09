@@ -1,4 +1,7 @@
 #include "matrix.h"
+using ChronusQ::Matrix;
+
+namespace ChronusQ {
 /**********
  *  Copy  *
  **********/
@@ -274,8 +277,8 @@ void Matrix<dcomplex>::operator=(const EXP &m){
   dcomplex *tmp = new dcomplex[m.a->rows_];
   Vec->clearAll();
   Val->clearAll();
-  if(m.a->symm_=='G')      for(int i=0; i<m.a->rows_; i++) tmp[i] = (dcomplex)exp(m.a->eigenvalue_[i]);
-  else if(m.a->symm_=='H') for(int i=0; i<m.a->rows_; i++) tmp[i] = (dcomplex)exp(m.a->eigenvalue_re_[i]);
+  if(m.a->symm_=='G')      for(int i=0; i<m.a->rows_; i++) tmp[i] = (dcomplex)std::exp(m.a->eigenvalue_[i]);
+  else if(m.a->symm_=='H') for(int i=0; i<m.a->rows_; i++) tmp[i] = (dcomplex)std::exp(m.a->eigenvalue_re_[i]);
   Val->setDag(tmp);
   Val->printAll();
   if(m.a->symm_=='G')      (*Vec) = m.a->eigenvector_r_;
@@ -311,3 +314,4 @@ void Matrix<double>::operator=(const EXP& m){
   delete Vec; delete Val;
 };
 */
+} // namespace ChronusQ

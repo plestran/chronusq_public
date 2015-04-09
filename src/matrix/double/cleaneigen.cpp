@@ -1,3 +1,4 @@
+using ChronusQ::Matrix;
 void Matrix<double>::cleanEigen(){
   delete[] this->eigenvalue_;
   delete[] this->eigenvector_;

@@ -28,12 +28,12 @@ class MOIntegrals{
 
 public:
   // these should be protected
-  Matrix<double>    *iajb_;
-  Matrix<double>    *ijab_;
-  Matrix<double>    *ijka_;
-  Matrix<double>    *ijkl_;
-  Matrix<double>    *iabc_;
-  Matrix<double>    *abcd_;
+  ChronusQ::Matrix<double>    *iajb_;
+  ChronusQ::Matrix<double>    *ijab_;
+  ChronusQ::Matrix<double>    *ijka_;
+  ChronusQ::Matrix<double>    *ijkl_;
+  ChronusQ::Matrix<double>    *iabc_;
+  ChronusQ::Matrix<double>    *abcd_;
 
   bool      haveMOiajb;
   bool      haveMOijab;
