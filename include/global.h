@@ -19,8 +19,8 @@
 #include <cstring>
 #include <complex>
 
-using namespace std;
-/*
+//using namespace std;
+
 using std::cout;
 using std::endl;
 using std::cin;
@@ -29,7 +29,7 @@ using std::ostream;
 using std::ios;
 using std::nothrow;
 using std::ifstream;
-*/
+
 typedef std::complex<double> dcomplex;
 
 //----------------//
