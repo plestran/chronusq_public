@@ -1,1 +1,7 @@
+mkdir build
+cp -r Test build
+cd build
 cmake -DCMAKE_CXX_COMPILER=g++ -DCMAKE_Fortran_COMPILER=gfortran -DCMAKE_CXX_FLAGS=-w ..
+make
+ln -s src/chronusQ/chronusQ .
+ln -s src/mattest/mattest .
