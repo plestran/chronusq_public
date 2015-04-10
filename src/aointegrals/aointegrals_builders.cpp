@@ -55,7 +55,7 @@ void AOIntegrals::computeAOTwoE(){
       j = (*ijShellPair).aoPairIndex[ij][1];
       k = (*ijShellPair).aoPairIndex[kl][0];
       l = (*ijShellPair).aoPairIndex[kl][1];
-      if(abs(this->twoEC(i,j,i,j)*this->twoEC(k,l,k,l))>this->controls_->thresholdSchawrtz) {
+      if(std::abs(this->twoEC(i,j,i,j)*this->twoEC(k,l,k,l))>this->controls_->thresholdSchawrtz) {
         nPGTOs[0] = ijShellPair->nPGTOs[0];
         nPGTOs[1] = ijShellPair->nPGTOs[1];
         nPGTOs[2] = ijShellPair->nPGTOs[0];
@@ -105,7 +105,7 @@ void AOIntegrals::computeAOTwoE(){
       j = (*ijShellPair).aoPairIndex[ij][1];
       k = (*klShellPair).aoPairIndex[kl][0];
       l = (*klShellPair).aoPairIndex[kl][1];
-      if(abs(this->twoEC(i,j,i,j)*this->twoEC(k,l,k,l))>this->controls_->thresholdSchawrtz) {
+      if(std::abs(this->twoEC(i,j,i,j)*this->twoEC(k,l,k,l))>this->controls_->thresholdSchawrtz) {
         if(totalL>=1&&iniFlag==0) {
           this->iniQuartetConstants(ijShellPair, klShellPair);
           iniFlag = 1;
@@ -169,7 +169,7 @@ void AOIntegrals::computeAOOneE(){
       j = (*ijShellPair).aoPairIndex[ij][1];
       divSTV = (*ijShellPair).divConst[ij];
       T = math.zero;
-      if(abs(this->pairConstants_->ssPairTotal)<this->pairConstants_->intSmall) {
+      if(std::abs(this->pairConstants_->ssPairTotal)<this->pairConstants_->intSmall) {
 	S = math.zero;
 	V = math.zero;
 	T = math.zero;
@@ -177,7 +177,7 @@ void AOIntegrals::computeAOOneE(){
 	if(i==j) S = math.one*divSTV;
 	else S = this->oneehRRSab((*ijShellPair).L[0],(basisSet_->ao[i]).l,(*ijShellPair).L[1],(basisSet_->ao[j]).l);
 	V = this->oneehRRVab((*ijShellPair).L[0],(basisSet_->ao[i]).l,(*ijShellPair).L[1],(basisSet_->ao[j]).l);
-	if(abs(S)>this->pairConstants_->intSmall) for(m=0;m<this->pairConstants_->nPGTOs[0];m++) for(n=0;n<this->pairConstants_->nPGTOs[1];n++) 
+	if(std::abs(S)>this->pairConstants_->intSmall) for(m=0;m<this->pairConstants_->nPGTOs[0];m++) for(n=0;n<this->pairConstants_->nPGTOs[1];n++) 
 	  if(this->pairConstants_->ssNonzero[m][n]) T += this->pairConstants_->ssPair[m][n]*this->oneevRRTab((*ijShellPair).L[0],(basisSet_->ao[i]).l,(*ijShellPair).L[1],(basisSet_->ao[j]).l,&m,&n);
 	S = S/divSTV;
 	V = V/divSTV;
@@ -201,4 +201,5 @@ void AOIntegrals::computeAOOneE(){
   };
   this->haveAOOneE = true;
 };
+
 

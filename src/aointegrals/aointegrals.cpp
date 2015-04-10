@@ -122,7 +122,7 @@ void AOIntegrals::generateFmTTable() {
   double critT = 33.0;
   double expT, factor, term, sum, twoT, Tn;
   for(i=0;i<MaxFmTPt;i++){
-    if(abs(T)<= math.small) {
+    if(std::abs(T)<= math.small) {
       for(m=0;m<=MaxTotalL;m++) this->FmTTable_[i][m]=math.one/(math.two*m+1);
     } else if(T>critT) {
       this->FmTTable_[i][0] = math.half*sqrt(math.pi/T);
@@ -199,7 +199,7 @@ void AOIntegrals::iniQuartetConstants(ShellPair *ijShellPair, ShellPair *klShell
   for(i=0;i<nPGTOs[0];i++) for(j=0;j<nPGTOs[1];j++) for(k=0;k<nPGTOs[2];k++) for(l=0;l<nPGTOs[3];l++) {
     Upq = ((*ijShellPair).UAB[i][j])*((*klShellPair).UAB[k][l]);
 //  Upq = ((*ijShellPair).KAB[i][j])*((*klShellPair).KAB[k][l]);
-    if(abs(Upq)>this->controls_->thresholdS) {
+    if(std::abs(Upq)>this->controls_->thresholdS) {
       expo1=(*ijShellPair).zeta[i][j];
       expo2=(*klShellPair).zeta[k][l];
       expoT=expo1+expo2;
@@ -287,7 +287,7 @@ void AOIntegrals::iniPairConstants(ShellPair *ijShellPair){
     this->pairConstants_->Ta0Par3[i][j] = this->pairConstants_->TabPar2[i][j]/(math.two*expo1);
     this->pairConstants_->ssPair[i][j]  = ijShellPair->norm[i][j]*sqrt((math.pi/expoT)*(math.pi/expoT)*(math.pi/expoT))*exp(-expo1*expo2*sqrAB/expoT);
     this->pairConstants_->ssPairTotal += this->pairConstants_->ssPair[i][j];
-    if(abs(this->pairConstants_->ssPair[i][j])>this->pairConstants_->intSmall) this->pairConstants_->ssNonzero[i][j] = true;
+    if(std::abs(this->pairConstants_->ssPair[i][j])>this->pairConstants_->intSmall) this->pairConstants_->ssNonzero[i][j] = true;
     else this->pairConstants_->ssNonzero[i][j] = false;
     /*******************************/
     /* compute FmU[m][i][j][iAtom] */

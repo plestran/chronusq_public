@@ -26,7 +26,7 @@ double AOIntegrals::oneehRRSab(int LA,int *lA,int LB,int *lB) {
     lAp1[iWork]++;
     lBm1[iWork]--;
     tmpVal = this->oneehRRSab(LA+1,lAp1,LB-1,lBm1);
-    if(abs(pairConstants_->deltaAB[iWork])>pairConstants_->intSmall) tmpVal+= pairConstants_->deltaAB[iWork]*this->oneehRRSab(LA,lA,LB-1,lBm1);
+    if(std::abs(pairConstants_->deltaAB[iWork])>pairConstants_->intSmall) tmpVal+= pairConstants_->deltaAB[iWork]*this->oneehRRSab(LA,lA,LB-1,lBm1);
   } else if(LB==2) {
     lBm1[iWork]--;
     int iWork2;
@@ -36,7 +36,7 @@ double AOIntegrals::oneehRRSab(int LA,int *lA,int LB,int *lB) {
 
     double primitiveVal = 0.0;
     if(iWork==iWork2) {
-      if(abs(pairConstants_->deltaAB[iWork2])>pairConstants_->intSmall) {
+      if(std::abs(pairConstants_->deltaAB[iWork2])>pairConstants_->intSmall) {
 	double sqrDeltaAB = (pairConstants_->deltaAB[iWork])*(pairConstants_->deltaAB[iWork]);
 	for(i=0;i<pairConstants_->nPGTOs[0];i++) for(j=0;j<pairConstants_->nPGTOs[1];j++)  if(pairConstants_->ssNonzero[i][j]){
 	  primitiveVal = sqrDeltaAB*this->oneevRRSa0(LA,lA,&i,&j);
@@ -52,11 +52,11 @@ double AOIntegrals::oneehRRSab(int LA,int *lA,int LB,int *lB) {
 	for(i=0;i<pairConstants_->nPGTOs[0];i++) for(j=0;j<pairConstants_->nPGTOs[1];j++) if(pairConstants_->ssNonzero[i][j]) tmpVal += pairConstants_->ssPair[i][j]*this->oneevRRSa0(LA+2,lAp1,&i,&j);
       };
     } else {
-      if(abs(pairConstants_->deltaAB[iWork2])<pairConstants_->intSmall&&abs(pairConstants_->deltaAB[iWork])<pairConstants_->intSmall) {
+      if(std::abs(pairConstants_->deltaAB[iWork2])<pairConstants_->intSmall&&std::abs(pairConstants_->deltaAB[iWork])<pairConstants_->intSmall) {
 	lAp1[iWork]++;
 	lAp1[iWork2]++;
 	for(i=0;i<pairConstants_->nPGTOs[0];i++) for(j=0;j<pairConstants_->nPGTOs[1];j++) if(pairConstants_->ssNonzero[i][j]) tmpVal += pairConstants_->ssPair[i][j]*this->oneevRRSa0(LA+2,lAp1,&i,&j);
-      } else if(abs(pairConstants_->deltaAB[iWork2])>pairConstants_->intSmall&&abs(pairConstants_->deltaAB[iWork])>pairConstants_->intSmall) {
+      } else if(std::abs(pairConstants_->deltaAB[iWork2])>pairConstants_->intSmall&&std::abs(pairConstants_->deltaAB[iWork])>pairConstants_->intSmall) {
 	double sqrDeltaAB = (pairConstants_->deltaAB[iWork])*(pairConstants_->deltaAB[iWork2]);
 	for(i=0;i<pairConstants_->nPGTOs[0];i++) for(j=0;j<pairConstants_->nPGTOs[1];j++) if(pairConstants_->ssNonzero[i][j]) {
 	  primitiveVal = sqrDeltaAB*this->oneevRRSa0(LA,lA,&i,&j);
@@ -70,7 +70,7 @@ double AOIntegrals::oneehRRSab(int LA,int *lA,int LB,int *lB) {
 	  tmpVal += primitiveVal*pairConstants_->ssPair[i][j];
 	};
       } else {
-	if(abs(pairConstants_->deltaAB[iWork2])<pairConstants_->intSmall) {
+	if(std::abs(pairConstants_->deltaAB[iWork2])<pairConstants_->intSmall) {
 	  int tmpWork = iWork;
 	  iWork = iWork2;
 	  iWork2 = tmpWork;
@@ -88,7 +88,7 @@ double AOIntegrals::oneehRRSab(int LA,int *lA,int LB,int *lB) {
     };
   } else {
     lAp1[iWork]++;
-    if(abs(pairConstants_->deltaAB[iWork])>pairConstants_->intSmall) {
+    if(std::abs(pairConstants_->deltaAB[iWork])>pairConstants_->intSmall) {
       for(i=0;i<pairConstants_->nPGTOs[0];i++) for(j=0;j<pairConstants_->nPGTOs[1];j++) if(pairConstants_->ssNonzero[i][j])
 	tmpVal += pairConstants_->ssPair[i][j]*(this->oneevRRSa0(LA+1,lAp1,&i,&j)+ pairConstants_->deltaAB[iWork]*this->oneevRRSa0(LA,lA,&i,&j));
     } else {
@@ -112,7 +112,7 @@ double AOIntegrals::oneevRRSa0(int LA,int *lA,int *i,int *j) {
   else if (lA[2]>0) iWork=2;
   if(LA>4) {
     lAm1[iWork]--;
-    if(abs(pairConstants_->deltaPA[iWork][*i][*j])>pairConstants_->intSmall) tmpVal += pairConstants_->deltaPA[iWork][*i][*j]*this->oneevRRSa0(LA-1,lAm1,i,j);
+    if(std::abs(pairConstants_->deltaPA[iWork][*i][*j])>pairConstants_->intSmall) tmpVal += pairConstants_->deltaPA[iWork][*i][*j]*this->oneevRRSa0(LA-1,lAm1,i,j);
     if(LA==2&&lA[iWork]==2) tmpVal += pairConstants_->Sa0Par[*i][*j];
     else if (lA[iWork]>=2) {
       lAm1[iWork] -=1;
@@ -120,7 +120,7 @@ double AOIntegrals::oneevRRSa0(int LA,int *lA,int *i,int *j) {
     };
   } else if (LA==4) {
     if(lA[0]==4||lA[1]==4||lA[2]==4) {
-      if(abs(pairConstants_->deltaPA[iWork][*i][*j])>pairConstants_->intSmall) {
+      if(std::abs(pairConstants_->deltaPA[iWork][*i][*j])>pairConstants_->intSmall) {
 	double sqrDeltaPA = pairConstants_->deltaPA[iWork][*i][*j]*pairConstants_->deltaPA[iWork][*i][*j];
 	tmpVal = sqrDeltaPA*sqrDeltaPA + pairConstants_->Sa0Par[*i][*j]*(math.six*sqrDeltaPA+math.three*pairConstants_->Sa0Par[*i][*j]);
       } else tmpVal = math.three*pairConstants_->Sa0Par[*i][*j]*pairConstants_->Sa0Par[*i][*j];
@@ -132,8 +132,8 @@ double AOIntegrals::oneevRRSa0(int LA,int *lA,int *i,int *j) {
       if(lA[0]==1) iWork = 0;
       else if(lA[1]==1) iWork = 1;
       else if(lA[2]==1) iWork = 2;
-      if(abs(pairConstants_->deltaPA[iWork][*i][*j])>pairConstants_->intSmall) {
-	if(abs(pairConstants_->deltaPA[iWork3][*i][*j])>pairConstants_->intSmall) {
+      if(std::abs(pairConstants_->deltaPA[iWork][*i][*j])>pairConstants_->intSmall) {
+	if(std::abs(pairConstants_->deltaPA[iWork3][*i][*j])>pairConstants_->intSmall) {
 	  tmpVal = math.three*pairConstants_->Sa0Par[*i][*j] + pairConstants_->deltaPA[iWork3][*i][*j]*pairConstants_->deltaPA[iWork3][*i][*j];
 	  tmpVal *= pairConstants_->deltaPA[iWork3][*i][*j];
 	};
@@ -143,14 +143,14 @@ double AOIntegrals::oneevRRSa0(int LA,int *lA,int *i,int *j) {
       if(lA[0]==2&&iWork!=0) iWork2 = 0;
       else if(lA[1]==2&&iWork!=1) iWork2 = 1;
       else if(lA[2]==2&&iWork!=2) iWork2 = 2;
-      if(abs(pairConstants_->deltaPA[iWork][*i][*j])>pairConstants_->intSmall&&abs(pairConstants_->deltaPA[iWork2][*i][*j])>pairConstants_->intSmall) {
+      if(std::abs(pairConstants_->deltaPA[iWork][*i][*j])>pairConstants_->intSmall&&std::abs(pairConstants_->deltaPA[iWork2][*i][*j])>pairConstants_->intSmall) {
 	double sqrDeltaPA1 = pairConstants_->deltaPA[iWork][*i][*j]*pairConstants_->deltaPA[iWork][*i][*j];
 	double sqrDeltaPA2 = pairConstants_->deltaPA[iWork2][*i][*j]*pairConstants_->deltaPA[iWork2][*i][*j];
 	tmpVal = sqrDeltaPA1*sqrDeltaPA2 + pairConstants_->Sa0Par[*i][*j]*(sqrDeltaPA1+sqrDeltaPA2+pairConstants_->Sa0Par[*i][*j]);
-      } else if(abs(pairConstants_->deltaPA[iWork][*i][*j])>pairConstants_->intSmall){
+      } else if(std::abs(pairConstants_->deltaPA[iWork][*i][*j])>pairConstants_->intSmall){
 	double sqrDeltaPA1 = pairConstants_->deltaPA[iWork][*i][*j]*pairConstants_->deltaPA[iWork][*i][*j];
 	tmpVal = pairConstants_->Sa0Par[*i][*j]*(sqrDeltaPA1+pairConstants_->Sa0Par[*i][*j]);	
-      } else if(abs(pairConstants_->deltaPA[iWork2][*i][*j])>pairConstants_->intSmall){
+      } else if(std::abs(pairConstants_->deltaPA[iWork2][*i][*j])>pairConstants_->intSmall){
 	double sqrDeltaPA2 = pairConstants_->deltaPA[iWork2][*i][*j]*pairConstants_->deltaPA[iWork2][*i][*j];
 	tmpVal = pairConstants_->Sa0Par[*i][*j]*(sqrDeltaPA2+pairConstants_->Sa0Par[*i][*j]);	
       } else tmpVal = pairConstants_->Sa0Par[*i][*j]*pairConstants_->Sa0Par[*i][*j];
@@ -162,19 +162,19 @@ double AOIntegrals::oneevRRSa0(int LA,int *lA,int *i,int *j) {
       if(lA[0]==2) iWork2 = 0;
       else if(lA[1]==2) iWork2 = 1;
       else if(lA[2]==2) iWork2 = 2;
-      if(abs(pairConstants_->deltaPA[iWork][*i][*j])>pairConstants_->intSmall&&abs(pairConstants_->deltaPA[iWork1][*i][*j])>pairConstants_->intSmall) {
+      if(std::abs(pairConstants_->deltaPA[iWork][*i][*j])>pairConstants_->intSmall&&std::abs(pairConstants_->deltaPA[iWork1][*i][*j])>pairConstants_->intSmall) {
 	double sqrDeltaPA2 = pairConstants_->deltaPA[iWork2][*i][*j]*pairConstants_->deltaPA[iWork2][*i][*j];
 	tmpVal = pairConstants_->deltaPA[iWork][*i][*j]*pairConstants_->deltaPA[iWork1][*i][*j]*(pairConstants_->Sa0Par[*i][*j]+sqrDeltaPA2);
       };
     };
   } else if (LA==3) {
     if(lA[0]==3||lA[1]==3||lA[2]==3) {
-      if(abs(pairConstants_->deltaPA[iWork][*i][*j])>pairConstants_->intSmall) {
+      if(std::abs(pairConstants_->deltaPA[iWork][*i][*j])>pairConstants_->intSmall) {
 	tmpVal = math.three*pairConstants_->Sa0Par[*i][*j] + pairConstants_->deltaPA[iWork][*i][*j]*pairConstants_->deltaPA[iWork][*i][*j];
 	tmpVal *= pairConstants_->deltaPA[iWork][*i][*j];
       };
     } else if(lA[0]==lA[1]&&lA[0]==lA[2]) {
-      if(abs(pairConstants_->deltaPA[0][*i][*j])>pairConstants_->intSmall&&abs(pairConstants_->deltaPA[1][*i][*j])>pairConstants_->intSmall&&abs(pairConstants_->deltaPA[2][*i][*j]))
+      if(std::abs(pairConstants_->deltaPA[0][*i][*j])>pairConstants_->intSmall&&std::abs(pairConstants_->deltaPA[1][*i][*j])>pairConstants_->intSmall&&std::abs(pairConstants_->deltaPA[2][*i][*j]))
 	tmpVal = pairConstants_->deltaPA[0][*i][*j]*pairConstants_->deltaPA[1][*i][*j]*pairConstants_->deltaPA[2][*i][*j];
     } else {
       int iWork2;
@@ -184,9 +184,9 @@ double AOIntegrals::oneevRRSa0(int LA,int *lA,int *i,int *j) {
       if(lA[0]==1) iWork = 0;
       else if(lA[1]==1) iWork = 1;
       else if(lA[2]==1) iWork = 2;
-      if(abs(pairConstants_->deltaPA[iWork][*i][*j])>pairConstants_->intSmall) {
+      if(std::abs(pairConstants_->deltaPA[iWork][*i][*j])>pairConstants_->intSmall) {
 	tmpVal = pairConstants_->Sa0Par[*i][*j];
-	if(abs(pairConstants_->deltaPA[iWork2][*i][*j])>pairConstants_->intSmall) tmpVal += pairConstants_->deltaPA[iWork2][*i][*j]*pairConstants_->deltaPA[iWork2][*i][*j];
+	if(std::abs(pairConstants_->deltaPA[iWork2][*i][*j])>pairConstants_->intSmall) tmpVal += pairConstants_->deltaPA[iWork2][*i][*j]*pairConstants_->deltaPA[iWork2][*i][*j];
 	tmpVal *= pairConstants_->deltaPA[iWork][*i][*j];
       };
     };
@@ -197,13 +197,13 @@ double AOIntegrals::oneevRRSa0(int LA,int *lA,int *i,int *j) {
     else if (lAm1[1]>0) iWork2=1;
     else if (lAm1[2]>0) iWork2=2;
     if(iWork!=iWork2) {
-      if(abs(pairConstants_->deltaPA[iWork][*i][*j])>pairConstants_->intSmall&&abs(pairConstants_->deltaPA[iWork2][*i][*j])>pairConstants_->intSmall) 
+      if(std::abs(pairConstants_->deltaPA[iWork][*i][*j])>pairConstants_->intSmall&&std::abs(pairConstants_->deltaPA[iWork2][*i][*j])>pairConstants_->intSmall) 
 	tmpVal = pairConstants_->deltaPA[iWork][*i][*j]*pairConstants_->deltaPA[iWork2][*i][*j];
     } else {
       tmpVal = pairConstants_->Sa0Par[*i][*j];
-      if(abs(pairConstants_->deltaPA[iWork][*i][*j])>pairConstants_->intSmall) tmpVal += pairConstants_->deltaPA[iWork][*i][*j]*pairConstants_->deltaPA[iWork][*i][*j];
+      if(std::abs(pairConstants_->deltaPA[iWork][*i][*j])>pairConstants_->intSmall) tmpVal += pairConstants_->deltaPA[iWork][*i][*j]*pairConstants_->deltaPA[iWork][*i][*j];
     };
-  } else if(abs(pairConstants_->deltaPA[iWork][*i][*j])>pairConstants_->intSmall) tmpVal = pairConstants_->deltaPA[iWork][*i][*j];
+  } else if(std::abs(pairConstants_->deltaPA[iWork][*i][*j])>pairConstants_->intSmall) tmpVal = pairConstants_->deltaPA[iWork][*i][*j];
   return tmpVal;
 };
 /************************************/
@@ -228,7 +228,7 @@ double AOIntegrals::oneehRRTSab(int LA,int *lA,int LB,int *lB,int *i, int *j) {
     lAp1[iWork]++;
     lBm1[iWork]--;
     tmpVal = this->oneehRRTSab(LA+1,lAp1,LB-1,lBm1,i,j);
-    if(abs(pairConstants_->deltaAB[iWork])>pairConstants_->intSmall) tmpVal+= pairConstants_->deltaAB[iWork]*this->oneehRRTSab(LA,lA,LB-1,lBm1,i,j);
+    if(std::abs(pairConstants_->deltaAB[iWork])>pairConstants_->intSmall) tmpVal+= pairConstants_->deltaAB[iWork]*this->oneehRRTSab(LA,lA,LB-1,lBm1,i,j);
   } else if(LB==2) {
     lBm1[iWork]--;
     int iWork2;
@@ -237,7 +237,7 @@ double AOIntegrals::oneehRRTSab(int LA,int *lA,int LB,int *lB,int *i, int *j) {
     else if (lBm1[2]>0) iWork2=2;
 
     if(iWork==iWork2) {
-      if(abs(pairConstants_->deltaAB[iWork])>pairConstants_->intSmall) {
+      if(std::abs(pairConstants_->deltaAB[iWork])>pairConstants_->intSmall) {
 	double sqrDeltaAB = (pairConstants_->deltaAB[iWork])*(pairConstants_->deltaAB[iWork]);
         tmpVal = sqrDeltaAB*this->oneevRRSa0(LA,lA,i,j);
         lAp1[iWork]++;
@@ -250,11 +250,11 @@ double AOIntegrals::oneehRRTSab(int LA,int *lA,int LB,int *lB,int *i, int *j) {
 	tmpVal += this->oneevRRSa0(LA+2,lAp1,i,j);
       };
     } else {
-      if(abs(pairConstants_->deltaAB[iWork2])<pairConstants_->intSmall&&abs(pairConstants_->deltaAB[iWork])<pairConstants_->intSmall) {
+      if(std::abs(pairConstants_->deltaAB[iWork2])<pairConstants_->intSmall&&std::abs(pairConstants_->deltaAB[iWork])<pairConstants_->intSmall) {
 	lAp1[iWork]++;
 	lAp1[iWork2]++;
 	tmpVal += this->oneevRRSa0(LA+2,lAp1,i,j);
-      } else if(abs(pairConstants_->deltaAB[iWork2])>pairConstants_->intSmall&&abs(pairConstants_->deltaAB[iWork])>pairConstants_->intSmall) {
+      } else if(std::abs(pairConstants_->deltaAB[iWork2])>pairConstants_->intSmall&&std::abs(pairConstants_->deltaAB[iWork])>pairConstants_->intSmall) {
 	double sqrDeltaAB = (pairConstants_->deltaAB[iWork])*(pairConstants_->deltaAB[iWork2]);
 	tmpVal = sqrDeltaAB*this->oneevRRSa0(LA,lA,i,j);
 	lAp1[iWork]++;
@@ -264,7 +264,7 @@ double AOIntegrals::oneehRRTSab(int LA,int *lA,int LB,int *lB,int *i, int *j) {
 	lAp1[iWork]--;
 	tmpVal += pairConstants_->deltaAB[iWork]*this->oneevRRSa0(LA+1,lAp1,i,j);
       } else {
-	if(abs(pairConstants_->deltaAB[iWork2])<pairConstants_->intSmall) {
+	if(std::abs(pairConstants_->deltaAB[iWork2])<pairConstants_->intSmall) {
 	  int tmpWork = iWork;
 	  iWork = iWork2;
 	  iWork2 = tmpWork;
@@ -278,7 +278,7 @@ double AOIntegrals::oneehRRTSab(int LA,int *lA,int LB,int *lB,int *i, int *j) {
   } else {
     lAp1[iWork]++;
     tmpVal = this->oneevRRSa0(LA+1,lAp1,i,j);
-    if(abs(pairConstants_->deltaAB[iWork])>pairConstants_->intSmall) tmpVal += pairConstants_->deltaAB[iWork]*this->oneevRRSa0(LA,lA,i,j);
+    if(std::abs(pairConstants_->deltaAB[iWork])>pairConstants_->intSmall) tmpVal += pairConstants_->deltaAB[iWork]*this->oneevRRSa0(LA,lA,i,j);
   };
   return tmpVal;
 };
@@ -301,7 +301,7 @@ double AOIntegrals::oneevRRTab(int LA,int *lA,int LB,int *lB,int *i,int *j) {
   lBm1[iWork]--;
   tmpVal = pairConstants_->TabPar2[*i][*j]*this->oneehRRTSab(LA,lA,LB,lB,i,j);
   if(LB>2) {
-    if(abs(pairConstants_->deltaPB[iWork][*i][*j])>pairConstants_->intSmall) tmpVal += pairConstants_->deltaPB[iWork][*i][*j]*this->oneevRRTab(LA,lA,LB-1,lBm1,i,j);
+    if(std::abs(pairConstants_->deltaPB[iWork][*i][*j])>pairConstants_->intSmall) tmpVal += pairConstants_->deltaPB[iWork][*i][*j]*this->oneevRRTab(LA,lA,LB-1,lBm1,i,j);
     if (lA[iWork]>0) {
       lAm1[iWork]--;
       tmpVal += (lAm1[iWork]+1)*pairConstants_->Sa0Par[*i][*j]*this->oneevRRTab(LA-1,lAm1,LB-1,lBm1,i,j);
@@ -318,9 +318,9 @@ double AOIntegrals::oneevRRTab(int LA,int *lA,int LB,int *lB,int *i,int *j) {
     else if (lBm1[1]>0) iWork2=1;
     else if (lBm1[2]>0) iWork2=2;
     double tmpVal2 = 0.0;
-    if(abs(pairConstants_->deltaPB[iWork][*i][*j])>pairConstants_->intSmall) {
+    if(std::abs(pairConstants_->deltaPB[iWork][*i][*j])>pairConstants_->intSmall) {
       tmpVal2 = pairConstants_->TabPar2[*i][*j]*this->oneehRRTSab(LA,lA,LB-1,lBm1,i,j);
-      if(abs(pairConstants_->deltaPB[iWork2][*i][*j])>pairConstants_->intSmall) tmpVal2 += pairConstants_->deltaPB[iWork2][*i][*j]*this->oneevRRTa0(LA,lA,i,j);
+      if(std::abs(pairConstants_->deltaPB[iWork2][*i][*j])>pairConstants_->intSmall) tmpVal2 += pairConstants_->deltaPB[iWork2][*i][*j]*this->oneevRRTa0(LA,lA,i,j);
       if(lA[iWork2]>0) {
 	lAm1[iWork2]--;
 	tmpVal2 += (lAm1[iWork2]+1)*pairConstants_->Sa0Par[*i][*j]*this->oneevRRTa0(LA-1,lAm1,i,j);
@@ -331,7 +331,7 @@ double AOIntegrals::oneevRRTab(int LA,int *lA,int LB,int *lB,int *i,int *j) {
     if(lA[iWork]>0) {
       lAm1[iWork]--;
       tmpVal2 = pairConstants_->TabPar2[*i][*j]*this->oneehRRTSab(LA-1,lAm1,LB-1,lBm1,i,j);
-      if(abs(pairConstants_->deltaPB[iWork2][*i][*j])>pairConstants_->intSmall) tmpVal2 += pairConstants_->deltaPB[iWork2][*i][*j]*this->oneevRRTa0(LA-1,lAm1,i,j);
+      if(std::abs(pairConstants_->deltaPB[iWork2][*i][*j])>pairConstants_->intSmall) tmpVal2 += pairConstants_->deltaPB[iWork2][*i][*j]*this->oneevRRTa0(LA-1,lAm1,i,j);
       if(lAm1[iWork2]>0) {
 	lAm1[iWork2]--;
 	if(LA>2) tmpVal2 += (lAm1[iWork2]+1)*pairConstants_->Sa0Par[*i][*j]*this->oneevRRTa0(LA-2,lAm1,i,j);
@@ -341,7 +341,7 @@ double AOIntegrals::oneevRRTab(int LA,int *lA,int LB,int *lB,int *i,int *j) {
     };
     if(iWork==iWork2) tmpVal += pairConstants_->Sa0Par[*i][*j]*this->oneevRRTa0(LA,lA,i,j) - pairConstants_->TabPar3[*i][*j]*this->oneevRRSa0(LA,lA,i,j);
   } else {
-    if(abs(pairConstants_->deltaPB[iWork][*i][*j])>pairConstants_->intSmall) tmpVal += pairConstants_->deltaPB[iWork][*i][*j]*this->oneevRRTa0(LA,lA,i,j);
+    if(std::abs(pairConstants_->deltaPB[iWork][*i][*j])>pairConstants_->intSmall) tmpVal += pairConstants_->deltaPB[iWork][*i][*j]*this->oneevRRTa0(LA,lA,i,j);
     if (lA[iWork]>0) {
       lAm1[iWork]--;
       tmpVal += (lAm1[iWork]+1)*pairConstants_->Sa0Par[*i][*j]*this->oneevRRTa0(LA-1,lAm1,i,j);
@@ -364,7 +364,7 @@ double AOIntegrals::oneevRRTa0(int LA,int *lA,int *i,int *j) {
   lAm1[iWork]--;
   tmpVal = pairConstants_->TabPar2[*i][*j]*this->oneevRRSa0(LA,lA,i,j);
   if(LA>2) {
-    if(abs(pairConstants_->deltaPA[iWork][*i][*j])>pairConstants_->intSmall) tmpVal += pairConstants_->deltaPA[iWork][*i][*j]*this->oneevRRTa0(LA-1,lAm1,i,j);
+    if(std::abs(pairConstants_->deltaPA[iWork][*i][*j])>pairConstants_->intSmall) tmpVal += pairConstants_->deltaPA[iWork][*i][*j]*this->oneevRRTa0(LA-1,lAm1,i,j);
     if(LA==2&&lA[iWork]==2) {
       tmpVal += pairConstants_->Sa0Par[*i][*j]*pairConstants_->TabPar1[*i][*j];
       tmpVal -= pairConstants_->Ta0Par3[*i][*j];
@@ -380,16 +380,16 @@ double AOIntegrals::oneevRRTa0(int LA,int *lA,int *i,int *j) {
     else if (lAm1[2]>0) iWork2=2;
     double tmpVal2 = 0.0;
     if(iWork!=iWork2) {
-      if(abs(pairConstants_->deltaPA[iWork][*i][*j])>pairConstants_->intSmall) {
-	if(abs(pairConstants_->deltaPA[iWork2][*i][*j])>pairConstants_->intSmall)
+      if(std::abs(pairConstants_->deltaPA[iWork][*i][*j])>pairConstants_->intSmall) {
+	if(std::abs(pairConstants_->deltaPA[iWork2][*i][*j])>pairConstants_->intSmall)
 	  tmpVal += pairConstants_->deltaPA[iWork][*i][*j]*(pairConstants_->TabPar2[*i][*j]*pairConstants_->deltaPA[iWork2][*i][*j] + pairConstants_->deltaPA[iWork2][*i][*j]*pairConstants_->TabPar1[*i][*j]);
       };
     } else {
       tmpVal += pairConstants_->Sa0Par[*i][*j]*pairConstants_->TabPar1[*i][*j] - pairConstants_->Ta0Par3[*i][*j];
-      if(abs(pairConstants_->deltaPA[iWork][*i][*j])>pairConstants_->intSmall) 
+      if(std::abs(pairConstants_->deltaPA[iWork][*i][*j])>pairConstants_->intSmall) 
 	tmpVal += pairConstants_->deltaPA[iWork][*i][*j]*(pairConstants_->deltaPA[iWork][*i][*j]*pairConstants_->TabPar1[*i][*j] + pairConstants_->TabPar2[*i][*j]*pairConstants_->deltaPA[iWork][*i][*j]);
     };
-  } else if(abs(pairConstants_->deltaPA[iWork][*i][*j])>pairConstants_->intSmall) tmpVal += pairConstants_->deltaPA[iWork][*i][*j]*pairConstants_->TabPar1[*i][*j];
+  } else if(std::abs(pairConstants_->deltaPA[iWork][*i][*j])>pairConstants_->intSmall) tmpVal += pairConstants_->deltaPA[iWork][*i][*j]*pairConstants_->TabPar1[*i][*j];
   return tmpVal;
 };
 /***********************************************/
@@ -930,17 +930,17 @@ double AOIntegrals::oneehRRVab(int LA,int *lA,int LB,int *lB){
       lAp1[iWork]++;
       lBm1[iWork]--;
       tmpVal = this->oneehRRVab(LA+1,lAp1,LB-1,lBm1);
-      if(abs(pairConstants_->deltaAB[iWork])>pairConstants_->intSmall) tmpVal+= pairConstants_->deltaAB[iWork]*this->oneehRRVab(LA,lA,LB-1,lBm1);
+      if(std::abs(pairConstants_->deltaAB[iWork])>pairConstants_->intSmall) tmpVal+= pairConstants_->deltaAB[iWork]*this->oneehRRVab(LA,lA,LB-1,lBm1);
     } else {
       lAp1[iWork]++;
-      if(abs(pairConstants_->deltaAB[iWork])>pairConstants_->intSmall) {
+      if(std::abs(pairConstants_->deltaAB[iWork])>pairConstants_->intSmall) {
 	for(i=0;i<pairConstants_->nPGTOs[0];i++) for(j=0;j<pairConstants_->nPGTOs[1];j++) if(pairConstants_->ssNonzero[i][j]) {
-	  for(iAtom=0;iAtom<molecularConstants_->nAtom;iAtom++) if(abs(pairConstants_->FmU[0][i][j][iAtom])>pairConstants_->intSmall)
+	  for(iAtom=0;iAtom<molecularConstants_->nAtom;iAtom++) if(std::abs(pairConstants_->FmU[0][i][j][iAtom])>pairConstants_->intSmall)
 	    tmpVal += molecularConstants_->atomZ[iAtom]*(this->oneevRRVa0(&iAtom,0,LA+1,lAp1,&i,&j)+ pairConstants_->deltaAB[iWork]*this->oneevRRVa0(&iAtom,0,LA,lA,&i,&j));
 	};
       } else {
 	for(i=0;i<pairConstants_->nPGTOs[0];i++) for(j=0;j<pairConstants_->nPGTOs[1];j++) if(pairConstants_->ssNonzero[i][j]) {
-	  for(iAtom=0;iAtom<molecularConstants_->nAtom;iAtom++) if(abs(pairConstants_->FmU[0][i][j][iAtom])>pairConstants_->intSmall)
+	  for(iAtom=0;iAtom<molecularConstants_->nAtom;iAtom++) if(std::abs(pairConstants_->FmU[0][i][j][iAtom])>pairConstants_->intSmall)
 	    tmpVal += molecularConstants_->atomZ[iAtom]*this->oneevRRVa0(&iAtom,0,LA+1,lAp1,&i,&j);
 	};
       };
@@ -962,8 +962,8 @@ double AOIntegrals::oneevRRVa0(int *iAtom,int m,int LA,int *lA, int *i, int *j){
   else if (lA[2]>0) iWork=2;
   if(LA>3){
     lAm1[iWork] -=1;
-    if(abs(pairConstants_->deltaPA[iWork][*i][*j])>pairConstants_->intSmall) tmpVal  = pairConstants_->deltaPA[iWork][*i][*j]*this->oneevRRVa0(iAtom,m,LA-1,lAm1,i,j);
-    if(abs(pairConstants_->deltaPZ[iWork][*i][*j][*iAtom])>pairConstants_->intSmall) tmpVal -= pairConstants_->deltaPZ[iWork][*i][*j][*iAtom]*this->oneevRRVa0(iAtom,m+1,LA-1,lAm1,i,j);
+    if(std::abs(pairConstants_->deltaPA[iWork][*i][*j])>pairConstants_->intSmall) tmpVal  = pairConstants_->deltaPA[iWork][*i][*j]*this->oneevRRVa0(iAtom,m,LA-1,lAm1,i,j);
+    if(std::abs(pairConstants_->deltaPZ[iWork][*i][*j][*iAtom])>pairConstants_->intSmall) tmpVal -= pairConstants_->deltaPZ[iWork][*i][*j][*iAtom]*this->oneevRRVa0(iAtom,m+1,LA-1,lAm1,i,j);
     if(LA==2&&lA[iWork]==2)
       tmpVal += pairConstants_->Sa0Par[*i][*j]*(pairConstants_->FmU[m][*i][*j][*iAtom]-pairConstants_->FmU[m+1][*i][*j][*iAtom]);
     else if (lA[iWork]>=2) {

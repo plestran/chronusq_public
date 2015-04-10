@@ -27,7 +27,6 @@ using std::cin;
 using std::fstream;
 using std::ostream;
 using std::ios;
-using std::abs;
 using std::nothrow;
 using std::ifstream;
 
