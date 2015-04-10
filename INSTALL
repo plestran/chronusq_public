@@ -8,4 +8,4 @@ to build the easy way (from source dir):
   make
 
 Currently supported COMPILER_SUITES:
-  GNU compilers
+  gcc :  GNU compilers
