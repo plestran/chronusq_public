@@ -1,3 +1,28 @@
+/* 
+ *  The Chronus Quantum (ChronusQ) software package is high-performace 
+ *  computational chemistry software with a strong emphasis on explictly 
+ *  time-dependent and post-SCF quantum mechanical methods.
+ *  
+ *  Copyright (C) 2014-2015 Li Research Group (University of Washington)
+ *  
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *  
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program; if not, write to the Free Software Foundation, Inc.,
+ *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *  
+ *  Contact the Developers:
+ *    E-Mail: xsli@uw.edu
+ *  
+ */
 #ifndef INCLUDED_BASISSET
 #define INCLUDED_BASISSET
 #include "global.h"
@@ -9,6 +34,7 @@
 /* Error Messages 4000-4999 */
 /****************************/
 
+namespace ChronusQ {
 struct Shell{
   char    name[2];               // name of the shell - "S","P","D","F","G"
   bool	  SP;			 // is this part of an SP shell?
@@ -95,7 +121,7 @@ public:
   void iniBasisSet();
 
   // create and sort shell pairs according to the angular momenta
-  void createShellPair(Molecule*);
+  void createShellPair(ChronusQ::Molecule*);
 
   // access to private data
   inline int     nBasis()  {return this->nBasis_;};
@@ -111,7 +137,7 @@ public:
   void printShellPair(ostream &output=cout);
 
   // read from input file
-  void readBasisSet(FileIO*,Molecule*);
+  void readBasisSet(FileIO*,ChronusQ::Molecule*);
 
   /*************************/
   /* MPI Related Routines  */
@@ -119,5 +145,6 @@ public:
   void mpiSend(int,int tag=tagBasisSet);
   void mpiRecv(int,int tag=tagBasisSet);
 };
+} // namespace ChronusQ
 
 #endif

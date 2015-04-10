@@ -1,3 +1,28 @@
+/* 
+ *  The Chronus Quantum (ChronusQ) software package is high-performace 
+ *  computational chemistry software with a strong emphasis on explictly 
+ *  time-dependent and post-SCF quantum mechanical methods.
+ *  
+ *  Copyright (C) 2014-2015 Li Research Group (University of Washington)
+ *  
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *  
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program; if not, write to the Free Software Foundation, Inc.,
+ *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *  
+ *  Contact the Developers:
+ *    E-Mail: xsli@uw.edu
+ *  
+ */
 #ifndef INCLUDED_MATRIX
 #define INCLUDED_MATRIX
 #include "global.h"
@@ -9,6 +34,7 @@
 /****************************/
 /* Error Messages 3000-3999 */
 /****************************/
+namespace ChronusQ {
 
 template <class T>
 class Matrix {
@@ -134,8 +160,8 @@ public:
     
   }
   // read|write scratch|binary files
-  void ioRead (FileIO*,int,char*,int charOffset=-1); // NYI Complex
-  void ioWrite(FileIO*,int,char*,int charOffset=-1); // NYI Complex
+  void ioRead (ChronusQ::FileIO*,int,char*,int charOffset=-1); // NYI Complex
+  void ioWrite(ChronusQ::FileIO*,int,char*,int charOffset=-1); // NYI Complex
 
   // Zero out the Matrix data_
   inline void clearAll(ostream &output=cout) { memset(data_,0,len_*sizeof(T));};
@@ -288,4 +314,5 @@ public:
 //dbwye
 };
 
+} // namespace ChronusQ
 #endif

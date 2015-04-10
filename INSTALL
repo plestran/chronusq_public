@@ -1,0 +1,11 @@
+Must have cmake version >= 3.0 to build this project
+
+to build the easy way (from source dir):
+
+  mkdir build
+  cp ../util/runconfig_<COMPILER_SUITE>
+  ./runconfig
+  make
+
+Currently supported COMPILER_SUITES:
+  gcc :  GNU compilers

@@ -1,4 +1,31 @@
+/* 
+ *  The Chronus Quantum (ChronusQ) software package is high-performace 
+ *  computational chemistry software with a strong emphasis on explictly 
+ *  time-dependent and post-SCF quantum mechanical methods.
+ *  
+ *  Copyright (C) 2014-2015 Li Research Group (University of Washington)
+ *  
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *  
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program; if not, write to the Free Software Foundation, Inc.,
+ *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *  
+ *  Contact the Developers:
+ *    E-Mail: xsli@uw.edu
+ *  
+ */
 #include "matrix.h"
+using ChronusQ::Matrix;
+namespace ChronusQ {
 template<> void Matrix<double>::pack(){
   double *tmp = new double[this->rows_*(this->rows_+1)/2];
   int iop = 1;
@@ -85,6 +112,10 @@ template<> void Matrix<double>::scaleDag(double x) {
     data_[i*this->rows_ +i] = x*data_[i*this->rows_ +i];
   }
 };
+
+//
+// Uses old fortran code to sort eigenvalues
+//
 template<> void Matrix<double>::eSort(){
   int iop = 1;
 
@@ -94,6 +125,35 @@ template<> void Matrix<double>::eSort(){
     eigsrt_(&iop,this->eigenvalue_,this->eigenvalue_,this->eigenvector_,this->eigenvector_,&this->rows_,&this->rows_);
   };
 };
+
+/* Attempt to generalize EigSrt to C++ (not tested, need to test)
+template<> void Matrix<double>::eSort() {
+  double tmp;
+  double *W, *VR, *VL,
+  if(this->symm_=='G') {
+    W = this->eigenvalue_re_;
+    VR = this->eigenvector_r_;
+    VL = this->eigenvector_l_;
+  } else if(this->symm_=='S') {
+    W = this->eigenvalue_;
+    VR = this->eigenvector_;
+  }
+  for(int i = 0; i < this->rows_-1; i++) {
+    for(int j = i+1; j < this->rows_; j++) {
+      if(W[i] > W[j]) {
+        tmp = W[i];
+        W[i] = W[j];
+        W[j] = tmp;
+        for(int k = 0; k < this->rows_; k++) {
+          tmp = VR[k + i*this->rows_];
+          VR[k + i*this->rows_] = VR[k + j*this->rows_];
+          VR[k + j*this->rows_] = tmp;
+        } // for k
+      } // endIf
+    } // for j
+  } // for i
+}
+*/
 
 template<> void Matrix<double>::allocEigen(){
   this->cleanEigen();
@@ -169,3 +229,4 @@ template<>  double** Matrix<double>::allocEigScr(bool doGEP, int &LWORK, Matrix 
   } 
   return SCR;
 };
+} // namespace ChronusQ

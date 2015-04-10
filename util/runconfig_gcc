@@ -1,1 +1,1 @@
-./configure F77=gfortran CXX=g++ CXXFLAGS=-w
+cmake -DCMAKE_CXX_COMPILER=g++ -DCMAKE_Fortran_COMPILER=gfortran -DCMAKE_CXX_FLAGS=-w ..
