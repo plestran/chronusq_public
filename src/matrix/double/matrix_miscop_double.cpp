@@ -87,6 +87,10 @@ template<> void Matrix<double>::scaleDag(double x) {
     data_[i*this->rows_ +i] = x*data_[i*this->rows_ +i];
   }
 };
+
+//
+// Uses old fortran code to sort eigenvalues
+//
 template<> void Matrix<double>::eSort(){
   int iop = 1;
 
@@ -96,6 +100,35 @@ template<> void Matrix<double>::eSort(){
     eigsrt_(&iop,this->eigenvalue_,this->eigenvalue_,this->eigenvector_,this->eigenvector_,&this->rows_,&this->rows_);
   };
 };
+
+/* Attempt to generalize EigSrt to C++ (not tested, need to test)
+template<> void Matrix<double>::eSort() {
+  double tmp;
+  double *W, *VR, *VL,
+  if(this->symm_=='G') {
+    W = this->eigenvalue_re_;
+    VR = this->eigenvector_r_;
+    VL = this->eigenvector_l_;
+  } else if(this->symm_=='S') {
+    W = this->eigenvalue_;
+    VR = this->eigenvector_;
+  }
+  for(int i = 0; i < this->rows_-1; i++) {
+    for(int j = i+1; j < this->rows_; j++) {
+      if(W[i] > W[j]) {
+        tmp = W[i];
+        W[i] = W[j];
+        W[j] = tmp;
+        for(int k = 0; k < this->rows_; k++) {
+          tmp = VR[k + i*this->rows_];
+          VR[k + i*this->rows_] = VR[k + j*this->rows_];
+          VR[k + j*this->rows_] = tmp;
+        } // for k
+      } // endIf
+    } // for j
+  } // for i
+}
+*/
 
 template<> void Matrix<double>::allocEigen(){
   this->cleanEigen();

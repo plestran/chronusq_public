@@ -1,1 +1,0 @@
-./configure F77=pgf77 CXX=pgcpp CXXFLAGS='-w -mp=nonuma  -tp nehalem-64 -Mreentrant -Minfo -Mneginfo -time -fast -O2 -Munroll -Mvect=assoc,recog,cachesize:20971520' LIBS='-lm -lc -pgf77libs -llapack -lblas'
