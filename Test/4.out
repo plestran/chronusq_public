@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-Job started: Fri Apr 10 10:51:38 2015
-=======
-Job started: Fri Apr 10 12:46:35 2015
->>>>>>> Libint_integration
+Job started: Fri Apr 10 16:14:21 2015
 
 
 Cartesian coordinates (bohr):
@@ -312,5 +308,5 @@ Energy Information:
        E(nuclear repulsion) =   18.7481578510 a.u. 
                    E(total) =  -74.2765542062 a.u. 
 
-Job finished: Fri Apr 10 12:46:35 2015
+Job finished: Fri Apr 10 16:14:21 2015
 
