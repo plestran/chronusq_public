@@ -1,3 +1,7 @@
 // The Configured Options and Settings for ChronusQ
 #define ChronusQ_VERSION_MAJOR @Tutorial_VERSION_MAJOR@
 #define ChronusQ_VERSION_MINOR @Tutorial_VERSION_MINOR@
+#cmakedefine LAPACK_FOUND
+#cmakedefine BLAS_FOUND
+#define _BLA_VENDOR @BLA_VENDOR@
+#cmakedefine OPENMP_FOUND
