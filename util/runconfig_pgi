@@ -1,0 +1,11 @@
+mkdir build
+cp -r Test build
+cd build
+cmake -DCMAKE_CXX_COMPILER=pgcpp \
+      -DCMAKE_Fortran_COMPILER=pgfortran \
+      -DCMAKE_CXX_FLAGS='-w -mp=nonuma  -tp nehalem-64 -Mreentrant -Minfo -Mneginfo -time -fast -O2 -Munroll -Mvect=assoc,recog,cachesize:20971520' \
+      -DCMAKE_C_COMPILER=pgcc ..
+#      -DCMAKE_Fortran_FLAGS='-w -mp=nonuma  -tp nehalem-64 -Mreentrant -Minfo -Mneginfo -time -fast -O2 -Munroll -Mvect=assoc,recog,cachesize:20971520' \
+make
+ln -s src/chronusQ/chronusQ .
+ln -s src/mattest/mattest .
