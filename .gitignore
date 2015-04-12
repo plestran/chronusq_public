@@ -21,3 +21,4 @@ stamp-h1
 test
 build
 .COPY
+*.out
