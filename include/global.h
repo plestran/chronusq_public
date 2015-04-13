@@ -31,6 +31,8 @@
 #define MAXCONTRACTION 10
 #define MAXATOMS 1000
 //#include "oompi.h"
+#include "config_chronusq.h"
+//#define USE_LIBINT
 #include <iostream>
 #include <fstream>
 #include <stdlib.h>
@@ -43,6 +45,7 @@
 //#include <new.h>
 #include <cstring>
 #include <complex>
+#include <vector>
 
 //using namespace std;
 /* Things from STD that we need always */

@@ -75,6 +75,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 
   time(&currentTime);
   fileIO->out<<"\nJob finished: "<<ctime(&currentTime)<<endl;
+
   delete  molecule;
   delete  basisset;
   delete  fileIO;

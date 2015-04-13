@@ -29,6 +29,9 @@
 #include "molecule.h"
 #include "fileio.h"
 #include "controls.h"
+#ifdef USE_LIBINT
+#include <libint2.hpp> // Libint Gaussian Integrals library
+#endif
 
 /****************************/
 /* Error Messages 4000-4999 */
@@ -121,7 +124,7 @@ public:
   void iniBasisSet();
 
   // create and sort shell pairs according to the angular momenta
-  void createShellPair(ChronusQ::Molecule*);
+  void createShellPair(Molecule*);
 
   // access to private data
   inline int     nBasis()  {return this->nBasis_;};
@@ -137,7 +140,7 @@ public:
   void printShellPair(ostream &output=cout);
 
   // read from input file
-  void readBasisSet(FileIO*,ChronusQ::Molecule*);
+  void readBasisSet(FileIO*,Molecule*);
 
   /*************************/
   /* MPI Related Routines  */
@@ -145,6 +148,10 @@ public:
   void mpiSend(int,int tag=tagBasisSet);
   void mpiRecv(int,int tag=tagBasisSet);
 };
+#ifdef USE_LIBINT
+std::vector<libint2::Shell> convShell();
+#endif
 } // namespace ChronusQ
+
 
 #endif
