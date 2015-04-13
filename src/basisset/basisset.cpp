@@ -50,10 +50,6 @@ void BasisSet::iniBasisSet(){
   if(sortedShells==NULL) throw 4002;
   shellPairs = new (nothrow) ShellPair[this->nShellPair_];
   if(shellPairs==NULL) throw 4003;
-#ifdef USE_LIBINT
-  std::vector<libint2::Shell> shells;
-  shells = ChronusQ::convShell();
-#endif
 };
 //---------------------------------//
 // print out basis set information //

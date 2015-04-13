@@ -110,6 +110,11 @@ public:
   ShellPair   *shellPairs;     // array of shellPairs
   Shell       *shells;         // array of shells
   int         *sortedShells;   // index of shells sorted from the largest angular momentum to the lowest
+  //dbwys
+#ifdef USE_LIBINT
+  std::vector<libint2::Shell> shells_libint;
+#endif
+  //dbwye
 
   // constructor & destructor
   BasisSet(int nBasis=0, int nShell=0);
@@ -142,15 +147,18 @@ public:
   // read from input file
   void readBasisSet(FileIO*,Molecule*);
 
+#ifdef USE_LIBINT
+  // If using Libint, have a routine to convert between local and libint
+  // shell format
+  void convShell(Molecule*);
+#endif
+
   /*************************/
   /* MPI Related Routines  */
   /*************************/
   void mpiSend(int,int tag=tagBasisSet);
   void mpiRecv(int,int tag=tagBasisSet);
 };
-#ifdef USE_LIBINT
-std::vector<libint2::Shell> convShell();
-#endif
 } // namespace ChronusQ
 
 
