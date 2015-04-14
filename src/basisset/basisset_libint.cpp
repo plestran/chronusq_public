@@ -8,10 +8,6 @@ typedef ChronusQ::Shell CShell;
 typedef libint2::Shell LIShell;
 
 void BasisSet::convShell(Molecule* mol) {
-  ChronusQ::Matrix<double> *cart = new Matrix<double>(3,mol->nAtoms());
-  (*cart) = (*mol->cart());
-  this->permCart = new Matrix<double>(3,mol->nAtoms());
-  (*permCart) = (*cart);
   std::vector<double> coeff;
   std::vector<double> exp;
   std::array<double,3> center;
@@ -20,9 +16,9 @@ void BasisSet::convShell(Molecule* mol) {
       coeff.push_back(this->shells[i].coef[iPrim]);
       exp.push_back(this->shells[i].expo[iPrim]);
     }
-    center = {(*cart)(0,this->shells[i].center),
-              (*cart)(1,this->shells[i].center),
-              (*cart)(2,this->shells[i].center)};
+    center = {(*mol->cart())(0,this->shells[i].center),
+              (*mol->cart())(1,this->shells[i].center),
+              (*mol->cart())(2,this->shells[i].center)};
     int L = 0;
     switch(this->shells[i].name[0]) {
       case 'S':
@@ -116,7 +112,6 @@ void BasisSet::convShell(Molecule* mol) {
     }
   }
   this->convToLI = true;
-  delete cart;
 
 }
 #endif

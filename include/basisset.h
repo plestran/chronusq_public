@@ -113,7 +113,6 @@ public:
   bool convToLI = false;
   int maxPrim;
   int maxL;
-  Matrix<double> *permCart;
 #endif
   //dbwye
 

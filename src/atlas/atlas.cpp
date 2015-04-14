@@ -57,20 +57,14 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 
   // print out molecular and basis set information
   molecule->printInfo(fileIO,controls);
-  molecule->cart()->printAll();
   basisset->printInfo(fileIO,controls);
-  molecule->cart()->printAll();
   aointegrals->iniAOIntegrals(molecule,basisset,fileIO,controls);
-  molecule->cart()->printAll();
   hartreeFock->iniSingleSlater(molecule,basisset,aointegrals,fileIO,controls);
-  molecule->cart()->printAll();
   hartreeFock->printInfo();
-  molecule->cart()->printAll();
   if(controls->guess==0) hartreeFock->formGuess();
   else if(controls->guess==1) hartreeFock->readGuessIO();
   else if(controls->guess==2) ;
   else if(controls->guess==3) hartreeFock->readGuessGauFChk(controls->gauFChkName);
-  molecule->cart()->printAll();
   hartreeFock->formFock();
   hartreeFock->computeEnergy();
   hartreeFock->SCF();
@@ -90,6 +84,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   delete  fileIO;
   delete  aointegrals;
   delete  controls;
+  libint2::cleanup();
   return  1;
 };
 

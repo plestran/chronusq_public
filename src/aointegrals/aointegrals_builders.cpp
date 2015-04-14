@@ -254,7 +254,6 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
   // Define integral Engine
   OneBodyEngine engine = OneBodyEngine(iType,this->basisSet_->maxPrim,
                                        this->basisSet_->maxL,0);
-  this->basisSet_->permCart->printAll();
   // If engine is V, define nuclear charges
   if(iType == OneBodyEngine::nuclear){
     std::vector<std::pair<double,std::array<double,3>>> q;
@@ -271,10 +270,6 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
 	  }
 	}
       );
-      cout << (*this->molecularConstants_).atomZ[i] << endl;
-      cout <<        (*this->molecule_->cart())(0,i) 
-           << " " << (*this->molecule_->cart())(1,i) 
-           << " " << (*this->molecule_->cart())(2,i) << endl;
     }
     engine.set_q(q);
   }
@@ -315,8 +310,8 @@ void AOIntegrals::computeAOOneE(){
   OneEDriver(OneBodyEngine::overlap);
   OneEDriver(OneBodyEngine::kinetic);
   OneEDriver(OneBodyEngine::nuclear);
-  libint2::cleanup();
-  exit(EXIT_FAILURE);
+  this->oneE_->add(this->kinetic_,this->potential_);
+  this->oneE_->printAll();
 }
 
 #endif
