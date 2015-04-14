@@ -3,8 +3,8 @@
  *                                                  */
 
 // Version Information
-#define ChronusQ_VERSION_MAJOR @Tutorial_VERSION_MAJOR@
-#define ChronusQ_VERSION_MINOR @Tutorial_VERSION_MINOR@
+#define ChronusQ_VERSION_MAJOR @ChronusQ_VERSION_MAJOR@
+#define ChronusQ_VERSION_MINOR @ChronusQ_VERSION_MINOR@
 
 // LAPACK/BLAS Information
 #cmakedefine LAPACK_FOUND

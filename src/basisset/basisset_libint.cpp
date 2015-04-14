@@ -43,6 +43,5 @@ void BasisSet::convShell(Molecule* mol) {
     }
   }
   this->convToLI = true;
-
 }
 #endif

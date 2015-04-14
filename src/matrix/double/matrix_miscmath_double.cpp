@@ -336,4 +336,16 @@ Matrix<double>::TTN Matrix<double>::transTN(const Matrix &X){
   s.x = &X;
   return s;
 }
+template<>
+double Matrix<double>::infNorm() {
+  double val = math.zero;
+  for(int i = 0; i < this->rows_; i++) {
+    double tmp = math.zero;
+    for(int j = 0; j < this->cols_; j++) {
+      tmp += std::abs(this->data_[j*this->rows_ + i]);
+    }
+    if(tmp > val) val = tmp;
+  }
+  return val;
+}
 } // namespace ChronusQ

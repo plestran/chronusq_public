@@ -52,6 +52,7 @@ void SingleSlater::iniSingleSlater(Molecule *molecule, BasisSet *basisset, AOInt
     fileio->out<<"Unable to allocate memory for SingleSlater::fockA_! E#:"<<msg<<endl;
     exit(1);
   };
+#ifndef USE_LIBINT
   try{
     this->coulombA_  = new Matrix<double>(nBasis,nBasis,"Alpha Coulomb Integral","LT");
   } catch (int msg) {
@@ -64,6 +65,14 @@ void SingleSlater::iniSingleSlater(Molecule *molecule, BasisSet *basisset, AOInt
     fileio->out<<"Unable to allocate memory for SingleSlater::exchangeA_! E#:"<<msg<<endl;
     exit(1);
   };
+#else // USE_LIBINT
+  try{
+    this->PTA_  = new Matrix<double>(nBasis,nBasis,"Alpha Perturbation Tensor","LT");
+  } catch (int msg) {
+    fileio->out<<"Unable to allocate memory for SingleSlater::PTA_! E#:"<<msg<<endl;
+    exit(1);
+  };
+#endif
   try{
     this->moA_       = new Matrix<double>(nBasis,nBasis,"Alpha Molecular Orbital Coefficients");
   } catch (int msg) {
@@ -84,6 +93,7 @@ void SingleSlater::iniSingleSlater(Molecule *molecule, BasisSet *basisset, AOInt
       fileio->out<<"Unable to allocate memory for SingleSlater::fockB_! E#:"<<msg<<endl;
       exit(1);
     };
+#ifndef USE_LIBINT
     try{
       this->coulombB_  = new Matrix<double>(nBasis,nBasis,"Beta Coulomb Integral","LT");
     } catch (int msg) {
@@ -96,8 +106,16 @@ void SingleSlater::iniSingleSlater(Molecule *molecule, BasisSet *basisset, AOInt
       fileio->out<<"Unable to allocate memory for SingleSlater::exchangeB_! E#:"<<msg<<endl;
       exit(1);
     };
+#else // USE_LIBINT
+  try{
+    this->PTB_  = new Matrix<double>(nBasis,nBasis,"Beta Perturbation Tensor","LT");
+  } catch (int msg) {
+    fileio->out<<"Unable to allocate memory for SingleSlater::PTB_! E#:"<<msg<<endl;
+    exit(1);
+  };
+#endif
     try{
-      this->moB_       = new Matrix<double>(nBasis,nBasis,"Alpha Molecular Orbital Coefficients","STD");
+      this->moB_       = new Matrix<double>(nBasis,nBasis,"Beta Molecular Orbital Coefficients","STD");
     } catch (int msg) {
       fileio->out<<"Unable to allocate memory for SingleSlater::moB_! E#:"<<msg<<endl;
       exit(1);
@@ -133,6 +151,9 @@ void SingleSlater::iniSingleSlater(Molecule *molecule, BasisSet *basisset, AOInt
   this->haveExchange= false;
   this->haveDensity = false;
   this->haveMO	    = false;
+#ifdef USE_LIBINT
+  this->havePT = false;
+#endif
 };
 //-----------------------------------//
 // print a wave function information //
@@ -197,19 +218,31 @@ void SingleSlater::formDensity(){
 //-------------------------//
 void SingleSlater::formFock(){
   if(!this->haveDensity) this->formDensity();
+#ifndef USE_LIBINT
   if(!this->haveCoulomb) this->formCoulomb();
   if(!this->haveExchange) this->formExchange();
+#else
+//if(!this->havePT) this->formPT();
+#endif
   if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
 
   this->fockA_->clearAll();
   *(fockA_)+=this->aointegrals_->oneE_;
+#ifndef USE_LIBINT
   *(fockA_)+=this->coulombA_;
   *(fockA_)-=this->exchangeA_;
+#else
+  *(fockA_)+=this->PTA_;
+#endif
   if(!this->RHF_){
     this->fockB_->clearAll();
     *(fockB_)+=this->aointegrals_->oneE_;
+#ifndef USE_LIBINT
     *(fockB_)+=this->coulombB_;
     *(fockB_)-=this->exchangeB_;
+#else
+    *(fockB_)+=this->PTB_;
+#endif
   };
   if(this->controls_->printLevel>=2) {
     this->fockA_->printAll(5,this->fileio_->out);

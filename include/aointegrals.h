@@ -119,9 +119,15 @@ public:
   Matrix<double>  *overlap_;
   Matrix<double>  *kinetic_;
   Matrix<double>  *potential_;
+#ifdef USE_LIBINT
+  Matrix<double>  *schwartz_;
+#endif
 
   bool		haveAOTwoE;
   bool		haveAOOneE;
+#ifdef USE_LIBINT
+  bool          haveSchwartz;
+#endif
  
   AOIntegrals(){;};
   ~AOIntegrals(){
@@ -159,6 +165,9 @@ public:
 //--------------------------------------------//
   void computeAOTwoE(); // build two-electron AO integral matrices
   void computeAOOneE(); // build one-electron AO integral matrices
+#ifdef USE_LIBINT
+  void computeSchwartz();
+#endif
 //----------------------------------------//
 // member functions in integrals_onee.cpp //
 //----------------------------------------//

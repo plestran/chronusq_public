@@ -58,6 +58,10 @@ class SingleSlater {
   ChronusQ::Matrix<double>  *exchangeB_;
   ChronusQ::Matrix<double>  *moA_;
   ChronusQ::Matrix<double>  *moB_;
+#ifdef USE_LIBINT
+  ChronusQ::Matrix<double>  *PTA_;
+  ChronusQ::Matrix<double>  *PTB_;
+#endif
   ChronusQ::BasisSet     	*basisset_;
   ChronusQ::Molecule    	*molecule_;
   ChronusQ::FileIO       	*fileio_;
@@ -70,6 +74,9 @@ public:
   bool	haveDensity; 
   bool	haveCoulomb;
   bool	haveExchange;
+#ifdef USE_LIBINT
+  bool  havePT;
+#endif
 
   double   energyOneE;
   double   energyTwoE;
@@ -127,6 +134,9 @@ public:
   void formFock();	        // form the Fock matrix
   void formCoulomb();		// form the Coulomb matrix
   void formExchange();		// form the exchange matrix
+#ifdef USE_LIBINT
+  void formPT();
+#endif
   void readGuessIO();       	// read the initial guess of MO's from the input stream
   void readGuessGauFChk(char*);	// read the initial guess of MO's from the Gaussian formatted checkpoint file
   void computeEnergy();         // compute the total electronic energy

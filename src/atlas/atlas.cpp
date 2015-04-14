@@ -61,6 +61,9 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   aointegrals->iniAOIntegrals(molecule,basisset,fileIO,controls);
   hartreeFock->iniSingleSlater(molecule,basisset,aointegrals,fileIO,controls);
   hartreeFock->printInfo();
+#ifdef USE_LIBINT
+  aointegrals->computeSchwartz();
+#endif
   if(controls->guess==0) hartreeFock->formGuess();
   else if(controls->guess==1) hartreeFock->readGuessIO();
   else if(controls->guess==2) ;

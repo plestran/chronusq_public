@@ -117,6 +117,14 @@ void AOIntegrals::iniAOIntegrals(Molecule *molecule, BasisSet *basisset, FileIO 
     fileio->out<<"Unable to allocate memory for SingleSlater::potential_! E#:"<<msg<<endl;
     exit(1);
   };
+#ifdef USE_LIBINT
+  try{
+    this->schwartz_ = new Matrix<double>(this->basisSet_->nShell(),this->basisSet_->nShell(),"Schwartz","LT");
+  } catch (int msg) {
+    fileio->out<<"Unable to allocate memory for SingleSlater::schwartz_! E#:"<<msg<<endl;
+    exit(1);
+  };
+#endif
 
   int i,j,ij;
   this->R2Index_ = new int*[this->nBasis_];
@@ -133,6 +141,9 @@ void AOIntegrals::iniAOIntegrals(Molecule *molecule, BasisSet *basisset, FileIO 
 
   this->haveAOTwoE = false;
   this->haveAOOneE = false;
+#ifdef USE_LIBINT
+  this->haveSchwartz = false;
+#endif
 
 // initialize the FmT table
 // Need to know the max L first

@@ -304,7 +304,7 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
       }
     }
   }
-  if(controls_->printLevel>=2)  mat->printAll(5,fileio_->out);
+  if(this->controls_->printLevel>=2)  mat->printAll(5,fileio_->out);
 
 }
 
@@ -333,7 +333,7 @@ void AOIntegrals::computeAOOneE(){
 
   // Get end time of one-electron integral evaluation
   auto oneEEnd = std::chrono::high_resolution_clock::now();
-  if(controls_->printLevel>=2) this->oneE_->printAll(5,fileio_->out);
+  if(this->controls_->printLevel>=2) this->oneE_->printAll(5,fileio_->out);
 
   // Compute time differenes
   std::chrono::duration<double> OneED = oneEEnd - oneEStart;
@@ -352,9 +352,59 @@ void AOIntegrals::computeAOOneE(){
                        << std::left << std::setw(15) << "---------------" << "----" << endl;
     this->fileio_->out << std::left << std::setw(60) << "Total CPU time for one-electron integral evaluation:" 
                        << std::left << std::setw(15) << OneED.count() << " sec" << endl;
+  this->haveAOOneE = true;
   }
 }
 
+using libint2::TwoBodyEngine;
+void AOIntegrals::computeSchwartz(){
+  ChronusQ::Matrix<double> *ShBlk; 
+  this->schwartz_->clearAll();
+  // Check to see if the basisset had been converted
+  if(!this->basisSet_->convToLI) this->basisSet_->convShell(this->molecule_);
+
+  // Define Integral Engine
+  TwoBodyEngine<libint2::Coulomb> engine = 
+    TwoBodyEngine<libint2::Coulomb>(this->basisSet_->maxPrim,
+                                    this->basisSet_->maxL,0);
+  engine.set_precision(0.); // Don't screen primitives during schwartz
+
+  this->fileio_->out << "Computing Schwartz Bound Tensor ... " << endl;
+
+  for(int s1=0; s1 < this->basisSet_->nShell(); s1++){
+    int n1  = this->basisSet_->shells_libint[s1].size();
+    for(int s2=0; s2 <= s1; s2++){
+      int n2  = this->basisSet_->shells_libint[s2].size();
+ 
+      const double* buff = engine.compute(
+        this->basisSet_->shells_libint[s1],
+        this->basisSet_->shells_libint[s2],
+        this->basisSet_->shells_libint[s1],
+        this->basisSet_->shells_libint[s2]
+      );
+      
+      try{
+        ShBlk = new ChronusQ::Matrix<double>(n1,n2);
+      } catch (int msg) {cout << "couldn't allocate shblk" << endl;}
+   
+      int ij = 0;
+      for(int i = 0; i < n1; i++) {
+        for(int j = 0; j < n2; j++) {
+          (*ShBlk)(i,j) = buff[ij*n1*n2 + ij];
+ 	 ij++;
+        }
+      }
+
+      (*this->schwartz_)(s1,s2) = std::sqrt(ShBlk->infNorm());
+      
+      delete ShBlk;
+    }
+  }
+
+  this->schwartz_->printAll();
+  this->haveSchwartz = true;
+  exit(EXIT_FAILURE);
+}
 
 #endif
 
