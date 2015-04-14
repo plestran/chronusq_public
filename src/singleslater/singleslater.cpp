@@ -220,8 +220,10 @@ void SingleSlater::formFock(){
 // form the Coulomb matrix    //
 //----------------------------//
 void SingleSlater::formCoulomb(){
-  clock_t start,finish;
-  start = clock();
+//clock_t start,finish;
+//start = clock();
+  std::chrono::high_resolution_clock::time_point start, finish;
+  start = std::chrono::high_resolution_clock::now();
   int i;
   
   if(!this->haveDensity) this->formDensity();
@@ -238,8 +240,9 @@ void SingleSlater::formCoulomb(){
 
   for(i=0;i<this->nBasis_;i++) (*densityA_)(i,i)*=math.two;
 
-  finish = clock();
-  this->fileio_->out<<"\nCPU time for building the Coulomb matrix:"<<(finish-start)/CLOCKS_PER_SEC<<" seconds."<<endl;
+  finish = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double> CoulD = finish - start; 
+  this->fileio_->out<<"\nCPU time for building the Coulomb matrix:  "<< CoulD.count() <<" seconds."<<endl;
 
   if(this->controls_->printLevel>=2) this->coulombA_->printAll(5,this->fileio_->out);
   this->haveCoulomb = true;
@@ -248,8 +251,10 @@ void SingleSlater::formCoulomb(){
 // form the exchange matrix    //
 //----------------------------//
 void SingleSlater::formExchange(){
-  clock_t start,finish;
-  start = clock();
+//clock_t start,finish;
+//start = clock();
+  std::chrono::high_resolution_clock::time_point start, finish;
+  start = std::chrono::high_resolution_clock::now();
   int i;
   
   if(!this->haveDensity) this->formDensity();
@@ -267,8 +272,9 @@ void SingleSlater::formExchange(){
 
   for(i=0;i<this->nBasis_;i++) (*densityA_)(i,i)*=math.two;
 
-  finish = clock();
-  this->fileio_->out<<"\nCPU time for building the Exchange matrix:"<<(finish-start)/CLOCKS_PER_SEC<<" seconds."<<endl;
+  finish = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double> ExchD = finish - start; 
+  this->fileio_->out<<"\nCPU time for building the Exchange matrix:  "<< ExchD.count() <<" seconds."<<endl;
 
   if(this->controls_->printLevel>=2) this->exchangeA_->printAll(5,this->fileio_->out);
 

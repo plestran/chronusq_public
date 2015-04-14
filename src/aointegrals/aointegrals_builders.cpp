@@ -185,8 +185,9 @@ void AOIntegrals::computeAOOneE(){
   double divSTV,S,T,V;
   int i,j,m,n,ij,ijShell,nPGTOs[2];
   ShellPair *ijShellPair;
-  clock_t start,finish;
-  if(controls_->printLevel>=1) start = clock();
+//clock_t start,finish;
+  std::chrono::high_resolution_clock::time_point start,finish;
+  if(controls_->printLevel>=1) start = std::chrono::high_resolution_clock::now();
   this->iniMolecularConstants();
   for(ijShell=0;ijShell<basisSet_->nShellPair();ijShell++) {
     ijShellPair = &(basisSet_->shellPairs[ijShell]);
@@ -223,8 +224,10 @@ void AOIntegrals::computeAOOneE(){
     this->oneE_->printAll(5,fileio_->out);
   };
   if(controls_->printLevel>=1) {
-    finish = clock();
-    this->fileio_->out<<"\nCPU time for one-electron integral:"<<(finish-start)/CLOCKS_PER_SEC<<" seconds."<<endl;
+//    finish = clock();
+    finish = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> OneED = finish - start;
+    this->fileio_->out<<"\nCPU time for one-electron integral:  "<< OneED.count() <<" seconds."<<endl;
   };
   this->haveAOOneE = true;
 };
@@ -301,7 +304,7 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
       }
     }
   }
-  mat->printAll(5,fileio_->out);
+  if(controls_->printLevel>=2)  mat->printAll(5,fileio_->out);
 
 }
 
@@ -330,7 +333,7 @@ void AOIntegrals::computeAOOneE(){
 
   // Get end time of one-electron integral evaluation
   auto oneEEnd = std::chrono::high_resolution_clock::now();
-  this->oneE_->printAll(5,fileio_->out);
+  if(controls_->printLevel>=2) this->oneE_->printAll(5,fileio_->out);
 
   // Compute time differenes
   std::chrono::duration<double> OneED = oneEEnd - oneEStart;

@@ -148,6 +148,24 @@ int HashL(char *symbol) {
   if(!strcmp(symbol,"D")) return 2; 
   if(!strcmp(symbol,"F")) return 3; 
   if(!strcmp(symbol,"G")) return 4;
+  if(!strcmp(symbol,"H")) return 5;
+  if(!strcmp(symbol,"I")) return 6;
+  if(!strcmp(symbol,"J")) return 7;
+  if(!strcmp(symbol,"K")) return 8;
+  if(!strcmp(symbol,"L")) return 9;
+  if(!strcmp(symbol,"M")) return 10;
+  if(!strcmp(symbol,"N")) return 11;
+  if(!strcmp(symbol,"O")) return 12;
+  if(!strcmp(symbol,"P")) return 13;
+  if(!strcmp(symbol,"Q")) return 14;
+  if(!strcmp(symbol,"R")) return 15;
+  if(!strcmp(symbol,"T")) return 16;
+  if(!strcmp(symbol,"U")) return 17;
+  if(!strcmp(symbol,"V")) return 18;
+  if(!strcmp(symbol,"W")) return 19;
+  if(!strcmp(symbol,"X")) return 20;
+  if(!strcmp(symbol,"Y")) return 21;
+  if(!strcmp(symbol,"Z")) return 22;
   return -1; 
 };
 //----------------------------------------------------//

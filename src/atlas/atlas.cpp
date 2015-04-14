@@ -84,7 +84,9 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   delete  fileIO;
   delete  aointegrals;
   delete  controls;
+#ifdef USE_LIBINT
   libint2::cleanup();
+#endif
   return  1;
 };
 
