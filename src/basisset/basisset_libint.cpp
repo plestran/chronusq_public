@@ -8,7 +8,10 @@ typedef ChronusQ::Shell CShell;
 typedef libint2::Shell LIShell;
 
 void BasisSet::convShell(Molecule* mol) {
-  ChronusQ::Matrix<double> cart = (*mol->cart());
+  ChronusQ::Matrix<double> *cart = new Matrix<double>(3,mol->nAtoms());
+  (*cart) = (*mol->cart());
+  this->permCart = new Matrix<double>(3,mol->nAtoms());
+  (*permCart) = (*cart);
   std::vector<double> coeff;
   std::vector<double> exp;
   std::array<double,3> center;
@@ -17,9 +20,9 @@ void BasisSet::convShell(Molecule* mol) {
       coeff.push_back(this->shells[i].coef[iPrim]);
       exp.push_back(this->shells[i].expo[iPrim]);
     }
-    center = {cart(0,this->shells[i].center),
-              cart(1,this->shells[i].center),
-              cart(2,this->shells[i].center)};
+    center = {(*cart)(0,this->shells[i].center),
+              (*cart)(1,this->shells[i].center),
+              (*cart)(2,this->shells[i].center)};
     int L = 0;
     switch(this->shells[i].name[0]) {
       case 'S':
@@ -103,9 +106,17 @@ void BasisSet::convShell(Molecule* mol) {
     );
     coeff.resize(0);
     exp.resize(0);
-//  shells_libint[i].renorm();
-    cout << shells_libint[i];
+    shells_libint[i].renorm();
+    if(i==0) {
+      this->maxPrim = this->shells[i].nPGTOs;
+      this->maxL = L;
+    } else {
+      if(this->shells[i].nPGTOs > this->maxPrim)this->maxPrim = this->shells[i].nPGTOs;
+      if(L > this->maxL) this->maxL = L;
+    }
   }
+  this->convToLI = true;
+  delete cart;
 
 }
 #endif

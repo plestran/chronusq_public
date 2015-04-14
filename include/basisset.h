@@ -29,9 +29,6 @@
 #include "molecule.h"
 #include "fileio.h"
 #include "controls.h"
-#ifdef USE_LIBINT
-#include <libint2.hpp> // Libint Gaussian Integrals library
-#endif
 
 /****************************/
 /* Error Messages 4000-4999 */
@@ -113,6 +110,10 @@ public:
   //dbwys
 #ifdef USE_LIBINT
   std::vector<libint2::Shell> shells_libint;
+  bool convToLI = false;
+  int maxPrim;
+  int maxL;
+  Matrix<double> *permCart;
 #endif
   //dbwye
 

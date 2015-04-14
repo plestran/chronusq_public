@@ -45,4 +45,7 @@ void Controls::iniControls(){
   this->thresholdSchawrtz = 1.0e-14;
   this->guess = 0;
   this->directTwoE = false;
+#ifdef USE_LIBINT
+  libint2::init();
+#endif
 };

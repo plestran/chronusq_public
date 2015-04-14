@@ -97,13 +97,19 @@ class AOIntegrals{
   double	**FmTTable_;
 
   BasisSet     	*basisSet_;
-  ChronusQ::Molecule    	*molecule_;
+  Molecule    	*molecule_;
   FileIO       	*fileio_;
   Controls     	*controls_;
 
   PairConstants 	    *pairConstants_;
   MolecularConstants	*molecularConstants_;
   QuartetConstants	    *quartetConstants_;
+
+//dbwys
+#ifdef USE_LIBINT
+  void OneEDriver(libint2::OneBodyEngine::integral_type);
+#endif
+//dbwye
 
 public:
   // these should be protected
@@ -128,7 +134,7 @@ public:
   };
   
   // initialization function
-  void iniAOIntegrals(ChronusQ::Molecule*,BasisSet*,FileIO*,Controls*);
+  void iniAOIntegrals(Molecule*,BasisSet*,FileIO*,Controls*);
 
   inline double &twoEC(int i, int j, int k, int l){
     return (*twoEC_)(this->R2Index_[i][j],this->R2Index_[k][l]);

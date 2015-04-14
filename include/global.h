@@ -46,6 +46,9 @@
 #include <cstring>
 #include <complex>
 #include <vector>
+#ifdef USE_LIBINT
+#include <libint2.hpp> // Libint Gaussian Integrals library
+#endif
 
 //using namespace std;
 /* Things from STD that we need always */

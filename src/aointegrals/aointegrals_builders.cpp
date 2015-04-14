@@ -173,6 +173,7 @@ void AOIntegrals::computeAOTwoE(){
   this->haveAOTwoE = true;
 };
 
+#ifndef USE_LIBINT // Only use Libint OneE for now
 //-----------------------------------//
 // compute one-electron integrals    //
 //   overlap matrix                  //
@@ -227,5 +228,97 @@ void AOIntegrals::computeAOOneE(){
   };
   this->haveAOOneE = true;
 };
+#else // USE_LIBINT
+using libint2::OneBodyEngine;
+
+void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
+  // Not parallelizing yet
+  //
+
+
+  Matrix<double> *mat;
+  if(iType == OneBodyEngine::overlap){
+    mat = this->overlap_;
+  } else if(iType == OneBodyEngine::kinetic) {
+    mat = this->kinetic_;
+  } else if(iType == OneBodyEngine::nuclear) {
+    mat = this->potential_;
+  } else {
+    cout << "OneBodyEngine type not recognized" << endl;
+    exit(EXIT_FAILURE);
+  }
+ 
+  // Check to see if the basisset had been converted
+  if(!this->basisSet_->convToLI) this->basisSet_->convShell(this->molecule_);
+
+  // Define integral Engine
+  OneBodyEngine engine = OneBodyEngine(iType,this->basisSet_->maxPrim,
+                                       this->basisSet_->maxL,0);
+  this->basisSet_->permCart->printAll();
+  // If engine is V, define nuclear charges
+  if(iType == OneBodyEngine::nuclear){
+    std::vector<std::pair<double,std::array<double,3>>> q;
+    for(int i = 0; i < this->molecule_->nAtoms(); i++) {
+      q.push_back(
+        {
+          static_cast<double>((*this->molecularConstants_).atomZ[i]), 
+          {
+            {
+	      (*this->molecularConstants_).cart[0][i],
+	      (*this->molecularConstants_).cart[1][i],
+	      (*this->molecularConstants_).cart[2][i]
+	    }
+	  }
+	}
+      );
+      cout << (*this->molecularConstants_).atomZ[i] << endl;
+      cout <<        (*this->molecule_->cart())(0,i) 
+           << " " << (*this->molecule_->cart())(1,i) 
+           << " " << (*this->molecule_->cart())(2,i) << endl;
+    }
+    engine.set_q(q);
+  }
+ 
+ std::vector<int> mapSh2Bf;
+ int n = 0;
+ for( auto shell: this->basisSet_->shells_libint) {
+   mapSh2Bf.push_back(n);
+   n += shell.size();
+ }
+
+  for(int s1=0; s1 < this->basisSet_->nShell(); s1++){
+    int bf1 = mapSh2Bf[s1];
+    int n1  = this->basisSet_->shells_libint[s1].size();
+    for(int s2=0; s2 <= s1; s2++){
+      int bf2 = mapSh2Bf[s2];
+      int n2  = this->basisSet_->shells_libint[s2].size();
+ 
+      const double* buff = engine.compute(
+        this->basisSet_->shells_libint[s1],
+        this->basisSet_->shells_libint[s2]
+      );
+      int ij = 0;
+      for(int i = 0; i < n1; i++) {
+        for(int j = 0; j < n2; j++) {
+          (*mat)(bf1+i,bf2+j) = buff[ij];
+ 	 ij++;
+        }
+      }
+    }
+  }
+  mat->printAll();
+
+}
+
+void AOIntegrals::computeAOOneE(){
+  this->iniMolecularConstants();
+  OneEDriver(OneBodyEngine::overlap);
+  OneEDriver(OneBodyEngine::kinetic);
+  OneEDriver(OneBodyEngine::nuclear);
+  libint2::cleanup();
+  exit(EXIT_FAILURE);
+}
+
+#endif
 
 
