@@ -49,7 +49,6 @@ void SingleSlater::SCF(){
   //overlap matrix
   this->aointegrals_->overlap_->setSymm('S');
   this->aointegrals_->overlap_->unpack();
-  this->aointegrals_->overlap_->printAll();
 
   (*this->aointegrals_->overlap_)^2; 
   

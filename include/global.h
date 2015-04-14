@@ -49,6 +49,7 @@
 #ifdef USE_LIBINT
 #include <libint2.hpp> // Libint Gaussian Integrals library
 #endif
+#include <chrono>
 
 //using namespace std;
 /* Things from STD that we need always */

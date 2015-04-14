@@ -301,18 +301,57 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
       }
     }
   }
-  mat->printAll();
+  mat->printAll(5,fileio_->out);
 
 }
 
 void AOIntegrals::computeAOOneE(){
+  // Collect Relevant data into a struct (odd, but convienient) 
   this->iniMolecularConstants();
+
+  // Start timer for one-electron integral evaluation
+  auto oneEStart = std::chrono::high_resolution_clock::now();
+
+  // Compute and time overlap integrals
+  auto OStart = std::chrono::high_resolution_clock::now();
   OneEDriver(OneBodyEngine::overlap);
+  auto OEnd = std::chrono::high_resolution_clock::now();
+
+  // Compute and time kinetic integrals
+  auto TStart = std::chrono::high_resolution_clock::now();
   OneEDriver(OneBodyEngine::kinetic);
+  auto TEnd = std::chrono::high_resolution_clock::now();
+
+  // Compute and time nuclear attraction integrals (negative sign is factored in)
+  auto VStart = std::chrono::high_resolution_clock::now();
   OneEDriver(OneBodyEngine::nuclear);
+  auto VEnd = std::chrono::high_resolution_clock::now();
   this->oneE_->add(this->kinetic_,this->potential_);
-  this->oneE_->printAll();
+
+  // Get end time of one-electron integral evaluation
+  auto oneEEnd = std::chrono::high_resolution_clock::now();
+  this->oneE_->printAll(5,fileio_->out);
+
+  // Compute time differenes
+  std::chrono::duration<double> OneED = oneEEnd - oneEStart;
+  std::chrono::duration<double> SED = OEnd - OStart;
+  std::chrono::duration<double> TED = TEnd - TStart;
+  std::chrono::duration<double> VED = VEnd - VStart;
+  if(this->controls_->printLevel >= 1) {
+    this->fileio_->out << endl;
+    this->fileio_->out << std::left << std::setw(60) << "CPU time for Overlap evaluation:" 
+                       << std::left << std::setw(15) << SED.count() << " sec" << endl;
+    this->fileio_->out << std::left << std::setw(60) << "CPU time for Kinetic evaluation:" 
+                       << std::left << std::setw(15) << TED.count() << " sec" << endl;
+    this->fileio_->out << std::left << std::setw(60) << "CPU time for Nuclear Attraction Potential evaluation:" 
+                       << std::left << std::setw(15) << VED.count() << " sec" << endl;
+    this->fileio_->out << std::left << std::setw(60) << " "
+                       << std::left << std::setw(15) << "---------------" << "----" << endl;
+    this->fileio_->out << std::left << std::setw(60) << "Total CPU time for one-electron integral evaluation:" 
+                       << std::left << std::setw(15) << OneED.count() << " sec" << endl;
+  }
 }
+
 
 #endif
 
