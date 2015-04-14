@@ -67,6 +67,11 @@ int HashL (char*);
 // convert angular momentum to AO index in a shell
 int HashIAO(int,int*);
 
+inline bool fexists(char *f){
+  ifstream ifile(f);
+  return ifile;
+}
+
 
 } // namespace ChronusQ
 #endif

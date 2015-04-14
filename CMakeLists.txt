@@ -29,6 +29,7 @@ if(USE_LIBINT)
 endif(USE_LIBINT)
 
 
+set(BASIS_PATH "${PROJECT_SOURCE_DIR}/basis")
 
 # Set up config.h with configure time settings
 configure_file(

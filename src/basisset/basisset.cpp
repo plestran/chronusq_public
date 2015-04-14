@@ -87,8 +87,13 @@ void BasisSet::readBasisSet(FileIO *fileio, Molecule *mol){
   int i,j,n,k;
   char readString[MAXNAMELEN];
   fileio->in>>readString;
-  ifstream *fileBasis = new ifstream(readString);
-  if(fileBasis==NULL) throw 4004;
+  ifstream *fileBasis;
+  if(fexists(readString)) {
+    fileBasis = new ifstream(readString);
+  } else {
+    cout << "Could not find basis set file" << endl;
+    exit(EXIT_FAILURE);
+  }
   double threePI=math.pi*math.pi*math.pi,readNorm, readExp, readCoeff1, readCoeff2;
   int    nBasis, nShell, readNPGTO, L;
   char   atomStr[MAXNAMELEN];
