@@ -44,4 +44,42 @@ void BasisSet::convShell(Molecule* mol) {
   }
   this->convToLI = true;
 }
+
+void BasisSet::makeMap(Molecule * mol) {
+  if(!this->convToLI) this->convShell(mol);
+  int n = 0;
+  for( auto shell: this->shells_libint) {
+    this->mapSh2Bf.push_back(n);
+    n += shell.size();
+  }
+  this->haveMap = true;
+}
+
+void BasisSet::computeShBlkNorm(Molecule *mol, Matrix<double> *D){
+  // This will be much easier in Eigen
+  if(!this->convToLI) this->convShell(mol);
+  if(!this->haveMap)  this->makeMap(mol);
+
+  this->shBlkNorm = new Matrix<double>(this->nShell(),this->nShell());
+  Matrix<double> *tmp;
+  for(int s1 = 0; s1 < this->nShell(); s1++) {
+    int bf1 = this->mapSh2Bf[s1];
+    int n1  = this->shells_libint[s1].size();
+    for(int s2 = 0; s2 < this->nShell(); s2++) {
+      int bf2 = this->mapSh2Bf[s2];
+      int n2  = this->shells_libint[s2].size();
+     
+      // Grab submat
+      tmp = new Matrix<double>(n1,n2);
+      tmp->clearAll();
+      for(int i = 0; i < n1; i++) {
+        for(int j = 0; j < n2; j++) {
+           (*tmp)(i,j) = (*D)(bf1+i,bf2+j);
+        } 
+      } 
+      (*this->shBlkNorm)(s1,s2) = tmp->infNorm();
+      delete tmp;
+    }
+  }
+}
 #endif

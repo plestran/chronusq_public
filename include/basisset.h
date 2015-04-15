@@ -110,7 +110,10 @@ public:
   //dbwys
 #ifdef USE_LIBINT
   std::vector<libint2::Shell> shells_libint;
+  std::vector<int> mapSh2Bf;
+  Matrix<double> *shBlkNorm;
   bool convToLI = false;
+  bool haveMap = false;
   int maxPrim;
   int maxL;
 #endif
@@ -151,6 +154,8 @@ public:
   // If using Libint, have a routine to convert between local and libint
   // shell format
   void convShell(Molecule*);
+  void makeMap(Molecule*);
+  void computeShBlkNorm(Molecule*,Matrix<double>*);
 #endif
 
   /*************************/

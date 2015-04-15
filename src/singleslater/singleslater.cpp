@@ -197,7 +197,7 @@ void SingleSlater::formDensity(){
   for(i=0;i<this->nBasis_;i++){
     for(j=i;j<this->nBasis_;j++){
       for(k=0;k<this->nOccA_;k++) (*(this->densityA_))(i,j)+=(*(this->moA_))(i,k)*(*(this->moA_))(j,k);
-      if(this->RHF_) (*(this->densityA_))(i,j) *= math.two;
+//    if(this->RHF_) (*(this->densityA_))(i,j) *= math.two;
     };
   };
 
@@ -222,7 +222,7 @@ void SingleSlater::formFock(){
   if(!this->haveCoulomb) this->formCoulomb();
   if(!this->haveExchange) this->formExchange();
 #else
-//if(!this->havePT) this->formPT();
+  if(!this->havePT) this->formPT();
 #endif
   if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
 
@@ -244,6 +244,14 @@ void SingleSlater::formFock(){
     *(fockB_)+=this->PTB_;
 #endif
   };
+
+#ifndef USE_LIBINT
+  Matrix<double> *tmp = new Matrix<double>(this->nBasis_,this->nBasis_,"NO","LT");
+  tmp->clearAll();
+  tmp->printAll();
+  (*tmp) = (*this->coulombA_) - (*this->exchangeA_);
+  tmp->printAll(5,this->fileio_->out);
+#endif
   if(this->controls_->printLevel>=2) {
     this->fockA_->printAll(5,this->fileio_->out);
     if(!this->RHF_) this->fockB_->printAll(5,this->fileio_->out);
@@ -313,6 +321,89 @@ void SingleSlater::formExchange(){
 
   this->haveExchange = true;
 };
+//dbwys
+#ifdef USE_LIBINT
+using libint2::TwoBodyEngine;
+typedef TwoBodyEngine<libint2::Coulomb> coulombEngine;
+// Form perturbation tensor (G)
+void SingleSlater::formPT() {
+  if(!this->aointegrals_->haveSchwartz) this->aointegrals_->computeSchwartz();
+  if(!this->haveDensity) this->formDensity();
+  this->PTA_->clearAll();
+  
+  coulombEngine engine = coulombEngine(this->basisset_->maxPrim,
+                                       this->basisset_->maxL,0);
+  engine.set_precision(std::numeric_limits<double>::epsilon());
+  this->fileio_->out << "Computing Two Electron Integrals with " <<
+    std::scientific << engine.precision() << " precision" << endl;
+
+  if(!this->basisset_->haveMap) this->basisset_->makeMap(this->molecule_); 
+  this->basisset_->computeShBlkNorm(this->molecule_,this->densityA_);
+  this->basisset_->shBlkNorm->printAll();
+  cout << "HERE" << endl;
+  int ijkl = 0;
+  for(int s1 = 0; s1 < this->basisset_->nShell(); s1++) {
+    int bf1_s = this->basisset_->mapSh2Bf[s1];
+    int n1    = this->basisset_->shells_libint[s1].size();
+    for(int s2 = 0; s2 <= s1; s2++) {
+      int bf2_s = this->basisset_->mapSh2Bf[s2];
+      int n2    = this->basisset_->shells_libint[s2].size();
+      for(int s3 = 0; s3 <= s1; s3++) {
+        int bf3_s = this->basisset_->mapSh2Bf[s3];
+        int n3    = this->basisset_->shells_libint[s3].size();
+        int s4_max = (s1 == s3) ? s2 : s3;
+        for(int s4 = 0; s4 <= s4_max; s4++) {
+          int bf4_s = this->basisset_->mapSh2Bf[s4];
+          int n4    = this->basisset_->shells_libint[s4].size();
+          
+          const double* buff = engine.compute(
+            this->basisset_->shells_libint[s1],
+            this->basisset_->shells_libint[s2],
+            this->basisset_->shells_libint[s3],
+            this->basisset_->shells_libint[s4]);
+          cout << "SHELL :" << s1 << " " << s2 << " " << s3 << " " <<s4<<endl; 
+          for(int i = 0; i < n1*n2*n3*n4; i++) cout << buff[i] << endl;
+    
+          double s12_deg = (s1 == s2) ? 1.0 : 2.0;
+          double s34_deg = (s3 == s4) ? 1.0 : 2.0;
+          double s12_34_deg = (s1 == s3) ? (s2 == s4 ? 1.0 : 2.0) : 2.0;
+          double s1234_deg = s12_deg * s34_deg * s12_34_deg;
+          int ijkl = 0;
+          for(int i = 0; i < n1; i++) {
+            int bf1 = bf1_s + i;
+            for(int j = 0; j < n2; j++) {
+              int bf2 = bf2_s + j;
+              for(int k = 0; k < n3; k++) {
+                int bf3 = bf3_s + k;
+                for(int l = 0; l < n4; l++) {
+                  int bf4 = bf4_s + l;
+                  double v = buff[ijkl]*s1234_deg;
+
+                  // Coulomb
+                  (*this->PTA_)(bf1,bf2) += (*this->densityA_)(bf3,bf4)*v;
+                  (*this->PTA_)(bf3,bf4) += (*this->densityA_)(bf1,bf2)*v;
+
+                  // Exchange
+                  (*this->PTA_)(bf1,bf3) -= 0.25*(*this->densityA_)(bf2,bf4)*v;
+                  (*this->PTA_)(bf2,bf4) -= 0.25*(*this->densityA_)(bf1,bf3)*v;
+                  (*this->PTA_)(bf1,bf4) -= 0.25*(*this->densityA_)(bf2,bf3)*v;
+                  (*this->PTA_)(bf2,bf3) -= 0.25*(*this->densityA_)(bf1,bf4)*v;
+                  ijkl++;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+//exit(EXIT_FAILURE);
+  cout << "HERE" << endl;
+  this->PTA_->printAll(5,this->fileio_->out);
+  
+}
+#endif
+//dbwye
 //--------------------------------//
 // form the initial guess of MO's //
 //--------------------------------//

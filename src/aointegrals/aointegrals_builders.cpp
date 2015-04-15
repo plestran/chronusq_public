@@ -276,19 +276,13 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
     }
     engine.set_q(q);
   }
- 
- std::vector<int> mapSh2Bf;
- int n = 0;
- for( auto shell: this->basisSet_->shells_libint) {
-   mapSh2Bf.push_back(n);
-   n += shell.size();
- }
+  if(!this->basisSet_->haveMap) this->basisSet_->makeMap(this->molecule_); 
 
   for(int s1=0; s1 < this->basisSet_->nShell(); s1++){
-    int bf1 = mapSh2Bf[s1];
+    int bf1 = this->basisSet_->mapSh2Bf[s1];
     int n1  = this->basisSet_->shells_libint[s1].size();
     for(int s2=0; s2 <= s1; s2++){
-      int bf2 = mapSh2Bf[s2];
+      int bf2 = this->basisSet_->mapSh2Bf[s2];
       int n2  = this->basisSet_->shells_libint[s2].size();
  
       const double* buff = engine.compute(
@@ -369,23 +363,26 @@ void AOIntegrals::computeSchwartz(){
                                     this->basisSet_->maxL,0);
   engine.set_precision(0.); // Don't screen primitives during schwartz
 
-  this->fileio_->out << "Computing Schwartz Bound Tensor ... " << endl;
+  this->fileio_->out << "Computing Schwartz Bound Tensor ... ";
+  auto start =  std::chrono::high_resolution_clock::now();
 
   for(int s1=0; s1 < this->basisSet_->nShell(); s1++){
     int n1  = this->basisSet_->shells_libint[s1].size();
     for(int s2=0; s2 <= s1; s2++){
       int n2  = this->basisSet_->shells_libint[s2].size();
  
-      const double* buff = engine.compute(
+      const auto* buff = engine.compute(
         this->basisSet_->shells_libint[s1],
         this->basisSet_->shells_libint[s2],
         this->basisSet_->shells_libint[s1],
         this->basisSet_->shells_libint[s2]
       );
+
       
       try{
         ShBlk = new ChronusQ::Matrix<double>(n1,n2);
       } catch (int msg) {cout << "couldn't allocate shblk" << endl;}
+      ShBlk->clearAll();
    
       int ij = 0;
       for(int i = 0; i < n1; i++) {
@@ -400,10 +397,12 @@ void AOIntegrals::computeSchwartz(){
       delete ShBlk;
     }
   }
+  auto finish =  std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double> elapsed = finish - start;
 
+  this->fileio_->out << "done (" << elapsed.count() << ")" << endl;
   this->schwartz_->printAll();
   this->haveSchwartz = true;
-  exit(EXIT_FAILURE);
 }
 
 #endif
