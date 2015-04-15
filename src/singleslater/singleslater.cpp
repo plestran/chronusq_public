@@ -169,7 +169,11 @@ void SingleSlater::printInfo() {
 //----------------------//
 void SingleSlater::computeEnergy(){
   this->energyOneE = (this->aointegrals_->oneE_)->scalarProd(this->densityA_);
+#ifndef USE_LIBINT
   this->energyTwoE = (this->coulombA_->scalarProd(this->densityA_) - this->exchangeA_->scalarProd(this->densityA_));
+#else
+  this->energyTwoE = (this->PTA_)->scalarProd(this->densityA_);
+#endif
   this->totalEnergy= this->energyOneE + this->energyTwoE + this->energyNuclei;
   this->printEnergy();
 };
@@ -197,7 +201,7 @@ void SingleSlater::formDensity(){
   for(i=0;i<this->nBasis_;i++){
     for(j=i;j<this->nBasis_;j++){
       for(k=0;k<this->nOccA_;k++) (*(this->densityA_))(i,j)+=(*(this->moA_))(i,k)*(*(this->moA_))(j,k);
-//    if(this->RHF_) (*(this->densityA_))(i,j) *= math.two;
+      if(this->RHF_) (*(this->densityA_))(i,j) *= math.two;
     };
   };
 
@@ -361,21 +365,21 @@ void SingleSlater::formPT() {
             this->basisset_->shells_libint[s2],
             this->basisset_->shells_libint[s3],
             this->basisset_->shells_libint[s4]);
-          cout << "SHELL :" << s1 << " " << s2 << " " << s3 << " " <<s4<<endl; 
-          for(int i = 0; i < n1*n2*n3*n4; i++) cout << buff[i] << endl;
+       // cout << "SHELL :" << s1 << " " << s2 << " " << s3 << " " <<s4<<endl; 
+       // for(int i = 0; i < n1*n2*n3*n4; i++) cout << buff[i] << endl;
     
           double s12_deg = (s1 == s2) ? 1.0 : 2.0;
           double s34_deg = (s3 == s4) ? 1.0 : 2.0;
           double s12_34_deg = (s1 == s3) ? (s2 == s4 ? 1.0 : 2.0) : 2.0;
           double s1234_deg = s12_deg * s34_deg * s12_34_deg;
           int ijkl = 0;
-          for(int i = 0; i < n1; i++) {
+          for(int i = 0; i < n1; ++i) {
             int bf1 = bf1_s + i;
-            for(int j = 0; j < n2; j++) {
+            for(int j = 0; j < n2; ++j) {
               int bf2 = bf2_s + j;
-              for(int k = 0; k < n3; k++) {
+              for(int k = 0; k < n3; ++k) {
                 int bf3 = bf3_s + k;
-                for(int l = 0; l < n4; l++) {
+                for(int l = 0; l < n4; ++l) {
                   int bf4 = bf4_s + l;
                   double v = buff[ijkl]*s1234_deg;
 
@@ -388,7 +392,7 @@ void SingleSlater::formPT() {
                   (*this->PTA_)(bf2,bf4) -= 0.25*(*this->densityA_)(bf1,bf3)*v;
                   (*this->PTA_)(bf1,bf4) -= 0.25*(*this->densityA_)(bf2,bf3)*v;
                   (*this->PTA_)(bf2,bf3) -= 0.25*(*this->densityA_)(bf1,bf4)*v;
-                  ijkl++;
+                  ++ijkl;
                 }
               }
             }
