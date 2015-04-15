@@ -403,6 +403,16 @@ void SingleSlater::formPT() {
   }
 //exit(EXIT_FAILURE);
   cout << "HERE" << endl;
+  this->PTA_->scale(0.5);
+  for(int i = 0; i < this->nBasis_; ++i){
+    for(int j = 0; j <= i ; ++j){
+      if(i==j){
+        (*this->PTA_)(i,j) = 0.5*(*this->PTA_)(i,j);
+      } else {
+        (*this->PTA_)(i,j) = 0.25*(*this->PTA_)(i,j);
+      }
+    }
+  }
   this->PTA_->printAll(5,this->fileio_->out);
   
 }
