@@ -292,9 +292,7 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
       int bf1 = this->basisSet_->mapSh2Bf[s1];
       int n1  = this->basisSet_->shells_libint[s1].size();
       for(int s2=0; s2 <= s1; s2++, s12++){
-#ifdef USE_OMP
         if(s12 % this->controls_->nthreads != thread_id) continue;
-#endif
         int bf2 = this->basisSet_->mapSh2Bf[s2];
         int n2  = this->basisSet_->shells_libint[s2].size();
   

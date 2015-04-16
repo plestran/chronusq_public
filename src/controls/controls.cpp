@@ -52,8 +52,13 @@ void Controls::iniControls(){
 #ifdef USE_OMP
   // Set up Thread Pool
   this->nthreads = omp_get_max_threads();
-  this->nthreads = 16;
   omp_set_num_threads(this->nthreads);
-  cout << omp_get_num_threads();
 #endif
 };
+
+void Controls::readSMP(int &n) {
+#ifdef USE_OMP
+  this->nthreads = n;
+  omp_set_num_threads(n);
+#endif
+}

@@ -57,6 +57,7 @@ public:
   Controls(){;};
   ~Controls(){;};
   void iniControls();
+  void readSMP(int &);
 };
 } // namespace ChronusQ
 #endif

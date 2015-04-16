@@ -26,6 +26,7 @@
 #include "classtools.h"
 using ChronusQ::Molecule;
 using ChronusQ::BasisSet;
+using ChronusQ::Controls;
 
 /************************************************/
 /* read input files and initialize everything   */
@@ -67,6 +68,11 @@ void readInput(FileIO *fileio, Molecule *mol, BasisSet *basis,Controls *controls
       }; 
     } else if(!strcmp(readString,"$BASIS")) {
       basis->readBasisSet(fileio,mol);
+//dbwys
+    } else if(!strcmp(readString,"$NSMP")) {
+      fileio->in >> readInt;
+      controls->readSMP(readInt);
+//dbwye
     } else if(!strcmp(readString,"$GUESS")) {
       fileio->in>>readString;
       strupr(readString);
