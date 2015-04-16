@@ -16,6 +16,7 @@
 
 // Parallelization Information
 #cmakedefine OPENMP_FOUND
+#cmakedefine USE_OMP
 
 // Libint Information
 #cmakedefine USE_LIBINT

@@ -52,6 +52,7 @@ public:
   double	thresholdSchawrtz;
   int    	guess;         	// how to get the initial guess
   char   	gauFChkName[MAXNAMELEN];	// Gaussian formatted checkpoint filename
+  int           nthreads;       // Number of OpenMP threads
 
   Controls(){;};
   ~Controls(){;};

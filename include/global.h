@@ -32,24 +32,24 @@
 #define MAXATOMS 1000
 //#include "oompi.h"
 #include "config_chronusq.h"
-//#define USE_LIBINT
 #include <iostream>
 #include <fstream>
 #include <stdlib.h>
 #include <cmath>
 #include <iomanip>
 #include <sys/stat.h>
-#include <pthread.h>
-//#include <error.h>
+//#include <pthread.h>
 #include <time.h>
-//#include <new.h>
 #include <cstring>
 #include <complex>
 #include <vector>
+
 #ifdef USE_LIBINT
-#include <libint2.hpp> // Libint Gaussian Integrals library
+#  include <libint2.hpp> // Libint Gaussian Integrals library
 #endif
+
 #include <chrono>
+#include <omp.h>
 
 //using namespace std;
 /* Things from STD that we need always */

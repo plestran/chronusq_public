@@ -235,9 +235,6 @@ void AOIntegrals::computeAOOneE(){
 using libint2::OneBodyEngine;
 
 void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
-  // Not parallelizing yet
-  //
-
 
   Matrix<double> *mat;
   if(iType == OneBodyEngine::overlap){
@@ -253,10 +250,10 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
  
   // Check to see if the basisset had been converted
   if(!this->basisSet_->convToLI) this->basisSet_->convShell(this->molecule_);
-
+  cout << "Threading across " << this->controls_->nthreads << " processors" << endl;
   // Define integral Engine
-  OneBodyEngine engine = OneBodyEngine(iType,this->basisSet_->maxPrim,
-                                       this->basisSet_->maxL,0);
+  std::vector<OneBodyEngine> engines(this->controls_->nthreads);
+  engines[0] = OneBodyEngine(iType,this->basisSet_->maxPrim,this->basisSet_->maxL,0);
   // If engine is V, define nuclear charges
   if(iType == OneBodyEngine::nuclear){
     std::vector<std::pair<double,std::array<double,3>>> q;
@@ -274,30 +271,46 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
 	}
       );
     }
-    engine.set_q(q);
+    engines[0].set_q(q);
   }
+  for(size_t i = 1; i < this->controls_->nthreads; i++) engines[i] = engines[0];
+
   if(!this->basisSet_->haveMap) this->basisSet_->makeMap(this->molecule_); 
 
-  for(int s1=0; s1 < this->basisSet_->nShell(); s1++){
-    int bf1 = this->basisSet_->mapSh2Bf[s1];
-    int n1  = this->basisSet_->shells_libint[s1].size();
-    for(int s2=0; s2 <= s1; s2++){
-      int bf2 = this->basisSet_->mapSh2Bf[s2];
-      int n2  = this->basisSet_->shells_libint[s2].size();
- 
-      const double* buff = engine.compute(
-        this->basisSet_->shells_libint[s1],
-        this->basisSet_->shells_libint[s2]
-      );
-      int ij = 0;
-      for(int i = 0; i < n1; i++) {
-        for(int j = 0; j < n2; j++) {
-          (*mat)(bf1+i,bf2+j) = buff[ij];
- 	 ij++;
+  cout << "Size of engines " <<engines.size() << endl;
+#ifdef USE_OMP
+  #pragma omp parallel
+#endif
+  {
+#ifdef USE_OMP
+    int thread_id = omp_get_thread_num();
+#else
+    int thread_id = 0;
+#endif
+    printf("Hello from thread %d\n",thread_id);
+    for(auto s1=0l, s12=0l; s1 < this->basisSet_->nShell(); s1++){
+      int bf1 = this->basisSet_->mapSh2Bf[s1];
+      int n1  = this->basisSet_->shells_libint[s1].size();
+      for(int s2=0; s2 <= s1; s2++, s12++){
+#ifdef USE_OMP
+        if(s12 % this->controls_->nthreads != thread_id) continue;
+#endif
+        int bf2 = this->basisSet_->mapSh2Bf[s2];
+        int n2  = this->basisSet_->shells_libint[s2].size();
+  
+        const double* buff = engines[thread_id].compute(
+          this->basisSet_->shells_libint[s1],
+          this->basisSet_->shells_libint[s2]
+        );
+        for(int i = 0, ij=0; i < n1; i++) {
+          for(int j = 0; j < n2; j++, ij++) {
+            (*mat)(bf1+i,bf2+j) = buff[ij];
+          }
         }
       }
     }
-  }
+  } // end openmp parallel
+
   if(this->controls_->printLevel>=2)  mat->printAll(5,fileio_->out);
 
 }

@@ -48,4 +48,12 @@ void Controls::iniControls(){
 #ifdef USE_LIBINT
   libint2::init();
 #endif
+  this->nthreads = 1;
+#ifdef USE_OMP
+  // Set up Thread Pool
+  this->nthreads = omp_get_max_threads();
+  this->nthreads = 16;
+  omp_set_num_threads(this->nthreads);
+  cout << omp_get_num_threads();
+#endif
 };
