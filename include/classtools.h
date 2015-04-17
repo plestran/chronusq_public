@@ -26,6 +26,7 @@
 #ifndef  INCLUDED_CLASSTOOLS
 #define  INCLUDED_CLASSTOOLS
 #include "global.h"
+#include "eiginterface.h"
 #include "fileio.h"
 #include "molecule.h"
 #include "basisset.h"
@@ -40,7 +41,7 @@ namespace ChronusQ {
 void readInput(FileIO*,ChronusQ::Molecule*,ChronusQ::BasisSet*,Controls*);
 
 // trace of product of two symmetric matrices
-double traceSymm(Matrix<double>*,Matrix<double>*);
+double traceSymm(RealMatrix*,RealMatrix*);
 } // namespace ChronusQ
 
 #endif

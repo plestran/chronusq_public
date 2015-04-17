@@ -29,7 +29,6 @@ using ChronusQ::Molecule;
 using ChronusQ::BasisSet;
 using ChronusQ::Controls;
 using ChronusQ::FileIO;
-using ChronusQ::Matrix;
 using ChronusQ::SingleSlater;
 //------------------------------//
 // allocate memory for matrices //
@@ -41,40 +40,40 @@ void SingleSlater::iniSingleSlater(Molecule *molecule, BasisSet *basisset, AOInt
   if(spin!=1) this->RHF_ = 0;
   else this->RHF_ = 1;
   try {
-    this->densityA_  = new Matrix<double>(nBasis,nBasis,"Alpha Density","LT");
+    this->densityA_  = new RealMatrix(nBasis,nBasis); // Alpha Density
   } catch (int msg) {
     fileio->out<<"Unable to allocate memory for SingleSlater::densityA_! E#:"<<msg<<endl;
     exit(1);
   };
   try{
-    this->fockA_     = new Matrix<double>(nBasis,nBasis,"Alpha Fock","LT");
+    this->fockA_     = new RealMatrix(nBasis,nBasis); // Alpha Fock
   } catch (int msg) {
     fileio->out<<"Unable to allocate memory for SingleSlater::fockA_! E#:"<<msg<<endl;
     exit(1);
   };
 #ifndef USE_LIBINT
   try{
-    this->coulombA_  = new Matrix<double>(nBasis,nBasis,"Alpha Coulomb Integral","LT");
+    this->coulombA_  = new RealMatrix(nBasis,nBasis); // Alpha Coulomb Integral
   } catch (int msg) {
     fileio->out<<"Unable to allocate memory for SingleSlater::coulombA_! E#:"<<msg<<endl;
     exit(1);
   };
   try{
-    this->exchangeA_ = new Matrix<double>(nBasis,nBasis,"Alpha Exchange Integral","LT");
+    this->exchangeA_ = new RealMatrix(nBasis,nBasis); // Alpha Exchange Integral
   } catch (int msg) {
     fileio->out<<"Unable to allocate memory for SingleSlater::exchangeA_! E#:"<<msg<<endl;
     exit(1);
   };
 #else // USE_LIBINT
   try{
-    this->PTA_  = new Matrix<double>(nBasis,nBasis,"Alpha Perturbation Tensor","LT");
+    this->PTA_  = new RealMatrix(nBasis,nBasis); // Alpha Perturbation Tensor
   } catch (int msg) {
     fileio->out<<"Unable to allocate memory for SingleSlater::PTA_! E#:"<<msg<<endl;
     exit(1);
   };
 #endif
   try{
-    this->moA_       = new Matrix<double>(nBasis,nBasis,"Alpha Molecular Orbital Coefficients");
+    this->moA_       = new RealMatrix(nBasis,nBasis); // Alpha Molecular Orbital Coefficients
   } catch (int msg) {
     fileio->out<<"Unable to allocate memory for SingleSlater::moA_! E#:"<<msg<<endl;
     exit(1);
@@ -82,40 +81,40 @@ void SingleSlater::iniSingleSlater(Molecule *molecule, BasisSet *basisset, AOInt
 
   if(!this->RHF_) {
     try{
-      this->densityB_  = new Matrix<double>(nBasis,nBasis,"Beta Density","LT");
+      this->densityB_  = new RealMatrix(nBasis,nBasis); // Beta Density
     } catch (int msg) {
       fileio->out<<"Unable to allocate memory for SingleSlater::densityB_! E#:"<<msg<<endl;
       exit(1);
     };
     try{
-      this->fockB_     = new Matrix<double>(nBasis,nBasis,"Beta Fock","LT");
+      this->fockB_     = new RealMatrix(nBasis,nBasis); // Beta Fock
     } catch (int msg) {
       fileio->out<<"Unable to allocate memory for SingleSlater::fockB_! E#:"<<msg<<endl;
       exit(1);
     };
 #ifndef USE_LIBINT
     try{
-      this->coulombB_  = new Matrix<double>(nBasis,nBasis,"Beta Coulomb Integral","LT");
+      this->coulombB_  = new RealMatrix(nBasis,nBasis); // Beta Coulomb Integral
     } catch (int msg) {
       fileio->out<<"Unable to allocate memory for SingleSlater::coulombB_! E#:"<<msg<<endl;
       exit(1);
     };
     try{
-      this->exchangeB_ = new Matrix<double>(nBasis,nBasis,"Beta Exchange Integral","LT");
+      this->exchangeB_ = new RealMatrix(nBasis,nBasis); // Beta Exchange Integral
     } catch (int msg) {
       fileio->out<<"Unable to allocate memory for SingleSlater::exchangeB_! E#:"<<msg<<endl;
       exit(1);
     };
 #else // USE_LIBINT
   try{
-    this->PTB_  = new Matrix<double>(nBasis,nBasis,"Beta Perturbation Tensor","LT");
+    this->PTB_  = new RealMatrix(nBasis,nBasis); // Beta Perturbation Tensor
   } catch (int msg) {
     fileio->out<<"Unable to allocate memory for SingleSlater::PTB_! E#:"<<msg<<endl;
     exit(1);
   };
 #endif
     try{
-      this->moB_       = new Matrix<double>(nBasis,nBasis,"Beta Molecular Orbital Coefficients","STD");
+      this->moB_       = new RealMatrix(nBasis,nBasis); // Beta Molecular Orbital Coefficients
     } catch (int msg) {
       fileio->out<<"Unable to allocate memory for SingleSlater::moB_! E#:"<<msg<<endl;
       exit(1);
@@ -168,11 +167,11 @@ void SingleSlater::printInfo() {
 // compute energies     //
 //----------------------//
 void SingleSlater::computeEnergy(){
-  this->energyOneE = (this->aointegrals_->oneE_)->scalarProd(this->densityA_);
+  this->energyOneE = (this->aointegrals_->oneE_)->cwiseProduct(*this->densityA_).sum();
 #ifndef USE_LIBINT
-  this->energyTwoE = (this->coulombA_->scalarProd(this->densityA_) - this->exchangeA_->scalarProd(this->densityA_));
+  this->energyTwoE = (this->coulombA_->cwiseProduct(*this->densityA_).sum() - this->exchangeA_->cwiseProduct(*this->densityA_).sum());
 #else
-  this->energyTwoE = (this->PTA_)->scalarProd(this->densityA_);
+  this->energyTwoE = (this->PTA_)->cwiseProduct(*this->densityA_).sum();
 #endif
   this->totalEnergy= this->energyOneE + this->energyTwoE + this->energyNuclei;
   this->printEnergy();
@@ -196,7 +195,7 @@ void SingleSlater::formDensity(){
     exit(1);
   };
 
-  this->densityA_->clearAll();
+  this->densityA_->setZero();
   int i,j,k,nE=0;
   for(i=0;i<this->nBasis_;i++){
     for(j=i;j<this->nBasis_;j++){
@@ -204,16 +203,21 @@ void SingleSlater::formDensity(){
       if(this->RHF_) (*(this->densityA_))(i,j) *= math.two;
     };
   };
+  (*this->densityA_) = this->densityA_->selfadjointView<Upper>();
 
   if(!this->RHF_) {
-    this->densityB_->clearAll();
+    this->densityB_->setZero();
     for(i=0;i<this->nBasis_;i++) for(j=i;j<this->nBasis_;j++)
       for(k=0;k<this->nOccB_;k++) (*(this->densityB_))(i,j)+=(*(this->moB_))(i,k)*(*(this->moB_))(j,k);
   };
 
   if(this->controls_->printLevel>=2) {
+/*
     this->densityA_->printAll(5,this->fileio_->out);
     if(!this->RHF_) this->densityB_->printAll(5,this->fileio_->out);
+*/
+    prettyPrint(this->fileio_->out,(*this->densityA_),"Alpha Density");
+    if(!this->RHF_) prettyPrint(this->fileio_->out,(*this->densityB_),"Beta Density");
   };
   this->haveDensity = true;
 };
@@ -230,37 +234,41 @@ void SingleSlater::formFock(){
 #endif
   if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
 
-  this->fockA_->clearAll();
-  *(fockA_)+=this->aointegrals_->oneE_;
+  this->fockA_->setZero();
+  *(fockA_)+=(*this->aointegrals_->oneE_);
 #ifndef USE_LIBINT
-  *(fockA_)+=this->coulombA_;
-  *(fockA_)-=this->exchangeA_;
+  *(fockA_)+=(*this->coulombA_);
+  *(fockA_)-=(*this->exchangeA_);
 #else
-  *(fockA_)+=this->PTA_;
+  *(fockA_)+=(*this->PTA_);
 #endif
   if(!this->RHF_){
-    this->fockB_->clearAll();
-    *(fockB_)+=this->aointegrals_->oneE_;
+    this->fockB_->setZero();
+    *(fockB_)+=(*this->aointegrals_->oneE_);
 #ifndef USE_LIBINT
-    *(fockB_)+=this->coulombB_;
-    *(fockB_)-=this->exchangeB_;
+    *(fockB_)+=(*this->coulombB_);
+    *(fockB_)-=(*this->exchangeB_);
 #else
-    *(fockB_)+=this->PTB_;
+    *(fockB_)+=(*this->PTB_);
 #endif
   };
 
 #ifndef USE_LIBINT
-  Matrix<double> *tmp = new Matrix<double>(this->nBasis_,this->nBasis_,"NO","LT");
-  tmp->clearAll();
-  tmp->printAll();
+  RealMatrix *tmp = new RealMatrix(this->nBasis_,this->nBasis_); // NO
+  tmp->setZero();
   (*tmp) = (*this->coulombA_) - (*this->exchangeA_);
-  tmp->printAll(5,this->fileio_->out);
+  prettyPrint(this->fileio_->out,(*tmp),"Coul - Exch");
 #endif
   if(this->controls_->printLevel>=2) {
+/*
     this->fockA_->printAll(5,this->fileio_->out);
     if(!this->RHF_) this->fockB_->printAll(5,this->fileio_->out);
+*/
+    prettyPrint(this->fileio_->out,(*this->fockA_),"Alpha Fock");
+    if(!this->RHF_) prettyPrint(this->fileio_->out,(*this->fockB_),"Beta Fock");
   };
 };
+#ifndef USE_LIBINT
 //----------------------------//
 // form the Coulomb matrix    //
 //----------------------------//
@@ -273,7 +281,7 @@ void SingleSlater::formCoulomb(){
   
   if(!this->haveDensity) this->formDensity();
   if(!this->aointegrals_->haveAOTwoE) this->aointegrals_->computeAOTwoE();
-  this->coulombA_->clearAll();
+  this->coulombA_->setZero();
 
   for(i=0;i<this->nBasis_;i++) (*densityA_)(i,i)*=math.half;
 
@@ -289,7 +297,8 @@ void SingleSlater::formCoulomb(){
   std::chrono::duration<double> CoulD = finish - start; 
   this->fileio_->out<<"\nCPU time for building the Coulomb matrix:  "<< CoulD.count() <<" seconds."<<endl;
 
-  if(this->controls_->printLevel>=2) this->coulombA_->printAll(5,this->fileio_->out);
+//if(this->controls_->printLevel>=2) this->coulombA_->printAll(5,this->fileio_->out);
+  if(this->controls_->printLevel>=2) prettyPrint(this->fileio_->out,(*this->coulombA_),"Alpha Coulomb");
   this->haveCoulomb = true;
 };
 //----------------------------//
@@ -304,7 +313,7 @@ void SingleSlater::formExchange(){
   
   if(!this->haveDensity) this->formDensity();
   if(!this->aointegrals_->haveAOTwoE) this->aointegrals_->computeAOTwoE();
-  this->exchangeA_->clearAll();
+  this->exchangeA_->setZero();
 
   for(i=0;i<this->nBasis_;i++) (*densityA_)(i,i)*=math.half;
 
@@ -321,10 +330,12 @@ void SingleSlater::formExchange(){
   std::chrono::duration<double> ExchD = finish - start; 
   this->fileio_->out<<"\nCPU time for building the Exchange matrix:  "<< ExchD.count() <<" seconds."<<endl;
 
-  if(this->controls_->printLevel>=2) this->exchangeA_->printAll(5,this->fileio_->out);
+//if(this->controls_->printLevel>=2) this->exchangeA_->printAll(5,this->fileio_->out);
+  if(this->controls_->printLevel>=2) prettyPrint(this->fileio_->out,(*this->exchangeA_),"Alpha Exchange");
 
   this->haveExchange = true;
 };
+#endif
 //dbwys
 #ifdef USE_LIBINT
 using libint2::TwoBodyEngine;
@@ -333,7 +344,8 @@ typedef TwoBodyEngine<libint2::Coulomb> coulombEngine;
 void SingleSlater::formPT() {
   if(!this->aointegrals_->haveSchwartz) this->aointegrals_->computeSchwartz();
   if(!this->haveDensity) this->formDensity();
-  this->PTA_->clearAll();
+  this->PTA_->setZero();
+  prettyPrint(this->fileio_->out,(*this->PTA_),"Alpha Perturbation Tensor");
   
   coulombEngine engine = coulombEngine(this->basisset_->maxPrim,
                                        this->basisset_->maxL,0);
@@ -343,7 +355,7 @@ void SingleSlater::formPT() {
 
   if(!this->basisset_->haveMap) this->basisset_->makeMap(this->molecule_); 
   this->basisset_->computeShBlkNorm(this->molecule_,this->densityA_);
-  this->basisset_->shBlkNorm->printAll();
+//this->basisset_->shBlkNorm->printAll();
   cout << "HERE" << endl;
   int ijkl = 0;
   for(int s1 = 0; s1 < this->basisset_->nShell(); s1++) {
@@ -403,7 +415,7 @@ void SingleSlater::formPT() {
   }
 //exit(EXIT_FAILURE);
   cout << "HERE" << endl;
-  this->PTA_->scale(0.5);
+  (*this->PTA_) *= 0.5;
   for(int i = 0; i < this->nBasis_; ++i){
     for(int j = 0; j <= i ; ++j){
       if(i==j){
@@ -413,7 +425,8 @@ void SingleSlater::formPT() {
       }
     }
   }
-  this->PTA_->printAll(5,this->fileio_->out);
+//this->PTA_->printAll(5,this->fileio_->out);
+  prettyPrint(this->fileio_->out,(*this->PTA_),"Alpha Perturbation Tensor");
   
 }
 #endif
@@ -423,8 +436,12 @@ void SingleSlater::formPT() {
 //--------------------------------//
 void SingleSlater::formGuess() {
   if(this->controls_->printLevel>=3) {
+/*
     this->moA_->printAll(5,this->fileio_->out);
     if(!this->RHF_) this->moB_->printAll(5,this->fileio_->out);
+*/
+    prettyPrint(this->fileio_->out,(*this->moA_),"Alpha MO Coeff");
+    if(!this->RHF_) prettyPrint(this->fileio_->out,(*this->moB_),"Beta MO Coeff");
   };
 };
 //------------------------------------------//
@@ -447,8 +464,8 @@ void SingleSlater::readGuessIO() {
   };
   this->fileio_->in.close();
   if(this->controls_->printLevel>=3) {
-    this->moA_->printAll(5,this->fileio_->out);
-    if(!this->RHF_) this->moB_->printAll(5,this->fileio_->out);
+    prettyPrint(this->fileio_->out,(*this->moA_),"Alpha MO Coeff");
+    if(!this->RHF_) prettyPrint(this->fileio_->out,(*this->moB_),"Beta MO Coeff");
   };
   this->haveMO = true;
 };
@@ -493,8 +510,8 @@ void SingleSlater::readGuessGauFChk(char *filename) {
 
   fchk->close();
   if(this->controls_->printLevel>=3) {
-    this->moA_->printAll(5,this->fileio_->out);
-    if(!this->RHF_) this->moB_->printAll(5,this->fileio_->out);
+    prettyPrint(this->fileio_->out,(*this->moA_),"Alpha MO Coeff");
+    if(!this->RHF_) prettyPrint(this->fileio_->out,(*this->moB_),"Beta MO Coeff");
   };
   this->haveMO = true;
 };
@@ -510,7 +527,7 @@ void SingleSlater::mpiSend(int toID,int tag) {
 void SingleSlater::mpiRecv(int fromID,int tag) {
   //OOMPI_COMM_WORLD[fromID].Recv(this->nAtoms_,tag);
   //this->index_=new int[this->nAtoms_];
-  //this->cart_ =new Matrix<double>(3, this->nAtoms_, "Molecule");
+  //this->cart_ =new RealMatrix(3, this->nAtoms_, "Molecule");
   //OOMPI_COMM_WORLD[fromID].Recv(this->index_,this->nAtoms_,tag);
   //this->cart_->mpiRecv(fromID,tag);
 };

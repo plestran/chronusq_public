@@ -88,21 +88,14 @@ void readInput(FileIO *fileio, Molecule *mol, BasisSet *basis,Controls *controls
 };
 /********************************/
 /* trace of producto of two     */
-/* symmetric Matrix<double>*ces           */
+/* symmetric RealMatrices       */
 /********************************/
-double traceSymm(Matrix<double>* a, Matrix<double>* b) {
-  if(a->len()!=b->len()) throw 15001;
+double traceSymm(RealMatrix* a, RealMatrix* b) {
+  if(a->size()!=b->size()) throw 15001;
   double tmpVal = 0.0;
   int i;
-  if(a->format()==0) for(i=0;i<a->len();i++) tmpVal+=a->data()[i]*b->data()[i];
-  else if (a->format()==1){
-    for(i=0;i<a->len();i++) {
-      tmpVal+=double(2.0)*a->data()[i]*b->data()[i];
-    };
-    for(i=0;i<a->rows();i++) {
-      tmpVal-=(*a)(i,i)*(*b)(i,i);
-    };
-  };
+  for(i=0;i<a->size();i++) tmpVal+=a->data()[i]*b->data()[i];
+
   return tmpVal;
 };
 } // namespace ChronusQ

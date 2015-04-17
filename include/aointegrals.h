@@ -27,8 +27,9 @@
 #define  INCLUDED_AOINTEGRAL
 //#include <gsl/gsl_sf_erf.h>
 #include "global.h"
+#include "eiginterface.h"
 #include "basisset.h"
-#include "matrix.h"
+//#include "matrix.h"
 #include "molecule.h"
 #include "fileio.h"
 #include "controls.h"
@@ -113,14 +114,14 @@ class AOIntegrals{
 
 public:
   // these should be protected
-  Matrix<double>  *twoEC_;
-  Matrix<double>  *twoEX_;
-  Matrix<double>  *oneE_;
-  Matrix<double>  *overlap_;
-  Matrix<double>  *kinetic_;
-  Matrix<double>  *potential_;
+  RealMatrix  *twoEC_;
+  RealMatrix  *twoEX_;
+  RealMatrix  *oneE_;
+  RealMatrix  *overlap_;
+  RealMatrix  *kinetic_;
+  RealMatrix  *potential_;
 #ifdef USE_LIBINT
-  Matrix<double>  *schwartz_;
+  RealMatrix  *schwartz_;
 #endif
 
   bool		haveAOTwoE;

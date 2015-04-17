@@ -26,6 +26,7 @@
 #ifndef INCLUDED_BASISSET
 #define INCLUDED_BASISSET
 #include "global.h"
+#include "eiginterface.h"
 #include "molecule.h"
 #include "fileio.h"
 #include "controls.h"
@@ -111,7 +112,7 @@ public:
 #ifdef USE_LIBINT
   std::vector<libint2::Shell> shells_libint;
   std::vector<int> mapSh2Bf;
-  Matrix<double> *shBlkNorm;
+  RealMatrix *shBlkNorm;
   bool convToLI = false;
   bool haveMap = false;
   int maxPrim;
@@ -155,7 +156,7 @@ public:
   // shell format
   void convShell(Molecule*);
   void makeMap(Molecule*);
-  void computeShBlkNorm(Molecule*,Matrix<double>*);
+  void computeShBlkNorm(Molecule*,RealMatrix*);
 #endif
 
   /*************************/

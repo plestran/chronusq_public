@@ -26,6 +26,7 @@
 #ifndef INCLUDED_CONTROLS
 #define INCLUDED_CONTROLS
 #include "global.h"
+#include "eiginterface.h"
 
 /****************************/
 /* Error Messages 6000-6999 */

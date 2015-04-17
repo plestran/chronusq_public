@@ -27,6 +27,7 @@
 #define  INCLUDED_TOOLS
 //#include <gsl/gsl_sf_erf.h>
 #include "global.h"
+#include "eiginterface.h"
 
 /*****************************/
 /*Error Messages 10000-14999 */

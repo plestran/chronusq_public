@@ -24,7 +24,6 @@
  *  
  */
 #include "singleslater.h"
-using ChronusQ::Matrix;
 using ChronusQ::SingleSlater;
 //----------------------------------------//
 // do the SCF                             //
@@ -33,6 +32,7 @@ using ChronusQ::SingleSlater;
 void SingleSlater::SCF(){
   int n=this->nBasis_; //basis of the overlap matrix
   
+  /*
   //Declaring new pointers
   double oldEnergy;
   double diffEnergy=0.1;
@@ -62,7 +62,6 @@ void SingleSlater::SCF(){
 
   
   
-  /*
   //calculate transformation matrix and its transpose
   (*transformX_)=(*diagOverlap_)^-0.5;
   transformX_->printAll();

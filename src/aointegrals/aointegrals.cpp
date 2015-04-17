@@ -85,41 +85,41 @@ void AOIntegrals::iniAOIntegrals(Molecule *molecule, BasisSet *basisset, FileIO 
   this->nTT_      = this->nBasis_*(this->nBasis_+1)/2;
 
   try {
-    this->twoEC_ = new Matrix<double>(this->nTT_,this->nTT_,"Raffenetti Two Electron Coulomb AOIntegrals","STD");
-    this->twoEX_ = new Matrix<double>(this->nTT_,this->nTT_,"Raffenetti Two Electron Exchange AOIntegrals","STD");
+    this->twoEC_ = new RealMatrix(this->nTT_,this->nTT_); // Raffenetti Two Electron Coulomb AOIntegrals
+    this->twoEX_ = new RealMatrix(this->nTT_,this->nTT_); // Raffenetti Two Electron Exchange AOIntegrals
   } catch (int msg) {
     fileio->out<<"Unable to allocate memory for twoE_ E#:"<<msg<<endl;
     exit(1);
   };
 
   try{
-    this->oneE_      = new Matrix<double>(this->nBasis_,this->nBasis_,"One Electron Integral","LT");
+    this->oneE_      = new RealMatrix(this->nBasis_,this->nBasis_); // One Electron Integral
   } catch (int msg) {
     fileio->out<<"Unable to allocate memory for oneE_! E#:"<<msg<<endl;
     exit(1);
   };
 
   try{
-    this->overlap_   = new Matrix<double>(this->nBasis_,this->nBasis_,"Overlap","LT");
+    this->overlap_   = new RealMatrix(this->nBasis_,this->nBasis_); // Overlap
   } catch (int msg) {
     fileio->out<<"Unable to allocate memory for SingleSlater::overlap_! E#:"<<msg<<endl;
     exit(1);
   };
   try{
-    this->kinetic_   = new Matrix<double>(this->nBasis_,this->nBasis_,"Kinetic","LT");
+    this->kinetic_   = new RealMatrix(this->nBasis_,this->nBasis_); // Kinetic
   } catch (int msg) {
     fileio->out<<"Unable to allocate memory for SingleSlater::kinetic_! E#:"<<msg<<endl;
     exit(1);
   };
   try{
-    this->potential_ = new Matrix<double>(this->nBasis_,this->nBasis_,"Potential","LT");
+    this->potential_ = new RealMatrix(this->nBasis_,this->nBasis_); // Potential
   } catch (int msg) {
     fileio->out<<"Unable to allocate memory for SingleSlater::potential_! E#:"<<msg<<endl;
     exit(1);
   };
 #ifdef USE_LIBINT
   try{
-    this->schwartz_ = new Matrix<double>(this->basisSet_->nShell(),this->basisSet_->nShell(),"Schwartz","LT");
+    this->schwartz_ = new RealMatrix(this->basisSet_->nShell(),this->basisSet_->nShell()); // Schwartz
   } catch (int msg) {
     fileio->out<<"Unable to allocate memory for SingleSlater::schwartz_! E#:"<<msg<<endl;
     exit(1);

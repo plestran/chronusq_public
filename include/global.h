@@ -30,26 +30,35 @@
 #define MAXANGULARMOMENTUM 6
 #define MAXCONTRACTION 10
 #define MAXATOMS 1000
-//#include "oompi.h"
+
+// CMake Compilation Configuration
 #include "config_chronusq.h"
+
+// IO
 #include <iostream>
 #include <fstream>
-#include <stdlib.h>
-#include <cmath>
 #include <iomanip>
-#include <sys/stat.h>
-//#include <pthread.h>
-#include <time.h>
-#include <cstring>
-#include <complex>
-#include <vector>
 
+// Math
+#include <cmath>
+#include <complex>
 #ifdef USE_LIBINT
 #  include <libint2.hpp> // Libint Gaussian Integrals library
 #endif
+#include <Eigen/Dense> // Eigen Linear Algebra
 
-#include <chrono>
+// Parallelization
 #include <omp.h>
+//#include "oompi.h"
+//#include <pthread.h>
+
+// Misc
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <cstring>
+#include <vector>
+#include <time.h>
+#include <chrono>
 
 //using namespace std;
 /* Things from STD that we need always */
@@ -62,7 +71,17 @@ using std::ios;
 using std::nothrow;
 using std::ifstream;
 
+/* Things from Eigen that we always need */
+using Eigen::Infinity;
+using Eigen::Dynamic;
+using Eigen::ColMajor;
+using Eigen::RowMajor;
+using Eigen::Upper;
+using Eigen::Lower;
+
+// Useful typedefs
 typedef std::complex<double> dcomplex;
+typedef Eigen::Matrix<double,Dynamic,Dynamic,RowMajor> RealMatrix; // RowMajor BC Libint
 
 //----------------//
 //number constants//

@@ -26,7 +26,8 @@
 #ifndef INCLUDED_SINGLESLATER
 #define INCLUDED_SINGLESLATER
 #include "global.h"
-#include "matrix.h"
+#include "eiginterface.h"
+//#include "matrix.h"
 #include "molecule.h"
 #include "controls.h"
 #include "aointegrals.h"
@@ -48,19 +49,19 @@ class SingleSlater {
   int      nVirB_;
   int      spin_;
   int    **R2Index_;
-  ChronusQ::Matrix<double>  *densityA_;
-  ChronusQ::Matrix<double>  *densityB_;
-  ChronusQ::Matrix<double>  *fockA_;
-  ChronusQ::Matrix<double>  *fockB_;
-  ChronusQ::Matrix<double>  *coulombA_;
-  ChronusQ::Matrix<double>  *coulombB_;
-  ChronusQ::Matrix<double>  *exchangeA_;
-  ChronusQ::Matrix<double>  *exchangeB_;
-  ChronusQ::Matrix<double>  *moA_;
-  ChronusQ::Matrix<double>  *moB_;
+  RealMatrix  *densityA_;
+  RealMatrix  *densityB_;
+  RealMatrix  *fockA_;
+  RealMatrix  *fockB_;
+  RealMatrix  *coulombA_;
+  RealMatrix  *coulombB_;
+  RealMatrix  *exchangeA_;
+  RealMatrix  *exchangeB_;
+  RealMatrix  *moA_;
+  RealMatrix  *moB_;
 #ifdef USE_LIBINT
-  ChronusQ::Matrix<double>  *PTA_;
-  ChronusQ::Matrix<double>  *PTB_;
+  RealMatrix  *PTA_;
+  RealMatrix  *PTB_;
 #endif
   ChronusQ::BasisSet     	*basisset_;
   ChronusQ::Molecule    	*molecule_;
@@ -118,16 +119,16 @@ public:
   inline int nVirB()  { return this->nVirB_;};
   inline int RHF()    { return this->RHF_; };
   inline int spin()   { return this->spin_; };
-  inline ChronusQ::Matrix<double> *densityA() { return this->densityA_;};
-  inline ChronusQ::Matrix<double> *densityB() { return this->densityB_;};
-  inline ChronusQ::Matrix<double> *fockA()    { return this->fockA_;};
-  inline ChronusQ::Matrix<double> *fockB()    { return this->fockB_;};
-  inline ChronusQ::Matrix<double> *coulombA() { return this->coulombA_;};
-  inline ChronusQ::Matrix<double> *coulombB() { return this->coulombB_;};
-  inline ChronusQ::Matrix<double> *exchangeA(){ return this->exchangeA_;};
-  inline ChronusQ::Matrix<double> *exchangeB(){ return this->exchangeB_;};
-  inline ChronusQ::Matrix<double> *moA()      { return this->moA_;};
-  inline ChronusQ::Matrix<double> *moB()      { return this->moB_;};
+  inline RealMatrix *densityA() { return this->densityA_;};
+  inline RealMatrix *densityB() { return this->densityB_;};
+  inline RealMatrix *fockA()    { return this->fockA_;};
+  inline RealMatrix *fockB()    { return this->fockB_;};
+  inline RealMatrix *coulombA() { return this->coulombA_;};
+  inline RealMatrix *coulombB() { return this->coulombB_;};
+  inline RealMatrix *exchangeA(){ return this->exchangeA_;};
+  inline RealMatrix *exchangeB(){ return this->exchangeB_;};
+  inline RealMatrix *moA()      { return this->moA_;};
+  inline RealMatrix *moB()      { return this->moB_;};
 
   void formGuess();	        // form the intial guess of MO's
   void formDensity();		// form the density matrix

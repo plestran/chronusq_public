@@ -36,7 +36,7 @@ void AOIntegrals::computeAOTwoE(){
 //  ConstQuartetNew *constQuartetNew = new ConstQuartetNew;
   nBasis = this->basisSet_->nBasis();
   ShellPair *ijShellPair, *klShellPair, *tmpShellPair;
-  this->twoEX_->clearAll();
+  this->twoEX_->setZero();
   // integration over shell quartet on same shell pairs
   for(ijShell=0;ijShell<this->basisSet_->nShellPair();ijShell++) {
     ijShellPair = &(this->basisSet_->shellPairs[ijShell]);
@@ -216,12 +216,19 @@ void AOIntegrals::computeAOOneE(){
       (*this->kinetic_)(i,j) = T;
     };
   };
-  oneE_->sub(kinetic_,potential_);
+//oneE_->sub(kinetic_,potential_);
+  (*this->oneE_) = (*this->kinetic_)-(*this->potential);
   if(controls_->printLevel>=2) {
+/*
     this->overlap_->printAll(5,fileio_->out);
     this->kinetic_->printAll(5,fileio_->out);
     this->potential_->printAll(5,fileio_->out);
     this->oneE_->printAll(5,fileio_->out);
+*/
+    prettyPrint(this->fileio_->out,(*this->overlap_),"Overlap");
+    prettyPrint(this->fileio_->out,(*this->overlap_),"Kinetic");
+    prettyPrint(this->fileio_->out,(*this->overlap_),"Potential");
+    prettyPrint(this->fileio_->out,(*this->overlap_),"Core Hamiltonian");
   };
   if(controls_->printLevel>=1) {
 //    finish = clock();
@@ -236,7 +243,7 @@ using libint2::OneBodyEngine;
 
 void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
 
-  Matrix<double> *mat;
+  RealMatrix *mat;
   if(iType == OneBodyEngine::overlap){
     mat = this->overlap_;
   } else if(iType == OneBodyEngine::kinetic) {
@@ -309,7 +316,20 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
     }
   } // end openmp parallel
 
-  if(this->controls_->printLevel>=2)  mat->printAll(5,fileio_->out);
+//if(this->controls_->printLevel>=2)  mat->printAll(5,fileio_->out);
+  if(this->controls_->printLevel>=2){
+    if(iType == OneBodyEngine::overlap){
+      prettyPrint(this->fileio_->out,(*mat),"Overlap");
+    } else if(iType == OneBodyEngine::kinetic) {
+      prettyPrint(this->fileio_->out,(*mat),"Kinetic");
+    } else if(iType == OneBodyEngine::nuclear) {
+      prettyPrint(this->fileio_->out,(*mat),"Potential");
+    } else {
+      cout << "OneBodyEngine type not recognized" << endl;
+      exit(EXIT_FAILURE);
+    }
+  }
+  
 
 }
 
@@ -334,11 +354,14 @@ void AOIntegrals::computeAOOneE(){
   auto VStart = std::chrono::high_resolution_clock::now();
   OneEDriver(OneBodyEngine::nuclear);
   auto VEnd = std::chrono::high_resolution_clock::now();
-  this->oneE_->add(this->kinetic_,this->potential_);
+//this->oneE_->add(this->kinetic_,this->potential_);
+  (*this->oneE_) = (*this->kinetic_) + (*this->potential_);
 
   // Get end time of one-electron integral evaluation
   auto oneEEnd = std::chrono::high_resolution_clock::now();
-  if(this->controls_->printLevel>=2) this->oneE_->printAll(5,fileio_->out);
+//if(this->controls_->printLevel>=2) this->oneE_->printAll(5,fileio_->out);
+  if(this->controls_->printLevel>=2) 
+    prettyPrint(this->fileio_->out,(*this->oneE_),"Core Hamiltonian");
 
   // Compute time differenes
   std::chrono::duration<double> OneED = oneEEnd - oneEStart;
@@ -363,8 +386,8 @@ void AOIntegrals::computeAOOneE(){
 
 using libint2::TwoBodyEngine;
 void AOIntegrals::computeSchwartz(){
-  ChronusQ::Matrix<double> *ShBlk; 
-  this->schwartz_->clearAll();
+  RealMatrix *ShBlk; 
+  this->schwartz_->setZero();
   // Check to see if the basisset had been converted
   if(!this->basisSet_->convToLI) this->basisSet_->convShell(this->molecule_);
 
@@ -391,9 +414,9 @@ void AOIntegrals::computeSchwartz(){
 
       
       try{
-        ShBlk = new ChronusQ::Matrix<double>(n1,n2);
+        ShBlk = new RealMatrix(n1,n2);
       } catch (int msg) {cout << "couldn't allocate shblk" << endl;}
-      ShBlk->clearAll();
+      ShBlk->setZero();
    
       int ij = 0;
       for(int i = 0; i < n1; i++) {
@@ -403,7 +426,7 @@ void AOIntegrals::computeSchwartz(){
         }
       }
 
-      (*this->schwartz_)(s1,s2) = std::sqrt(ShBlk->infNorm());
+      (*this->schwartz_)(s1,s2) = std::sqrt(ShBlk->lpNorm<Infinity>());
       
       delete ShBlk;
     }
@@ -412,7 +435,7 @@ void AOIntegrals::computeSchwartz(){
   std::chrono::duration<double> elapsed = finish - start;
 
   this->fileio_->out << "done (" << elapsed.count() << ")" << endl;
-  this->schwartz_->printAll();
+  prettyPrint(cout,(*this->schwartz_),"Schwartz Bounds");
   this->haveSchwartz = true;
 }
 
