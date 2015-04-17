@@ -307,14 +307,20 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
           this->basisSet_->shells_libint[s1],
           this->basisSet_->shells_libint[s2]
         );
+/*
         for(int i = 0, ij=0; i < n1; i++) {
           for(int j = 0; j < n2; j++, ij++) {
             (*mat)(bf1+i,bf2+j) = buff[ij];
           }
         }
+*/
+        Eigen::Map<const RealMatrix> buf_mat(buff,n1,n2);
+        mat->block(bf1,bf2,n1,n2) = buf_mat;
       }
     }
   } // end openmp parallel
+
+  (*mat) = mat->selfadjointView<Lower>();
 
 //if(this->controls_->printLevel>=2)  mat->printAll(5,fileio_->out);
   if(this->controls_->printLevel>=2){
@@ -329,7 +335,6 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
       exit(EXIT_FAILURE);
     }
   }
-  
 
 }
 
@@ -433,6 +438,7 @@ void AOIntegrals::computeSchwartz(){
   }
   auto finish =  std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> elapsed = finish - start;
+  (*this->schwartz_) = this->schwartz_->selfadjointView<Lower>();
 
   this->fileio_->out << "done (" << elapsed.count() << ")" << endl;
   prettyPrint(cout,(*this->schwartz_),"Schwartz Bounds");
