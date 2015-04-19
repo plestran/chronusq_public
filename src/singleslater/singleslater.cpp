@@ -294,8 +294,8 @@ void SingleSlater::formCoulomb(){
   for(i=0;i<this->nBasis_;i++) (*densityA_)(i,i)*=math.two;
 
   finish = std::chrono::high_resolution_clock::now();
-  std::chrono::duration<double> CoulD = finish - start; 
-  this->fileio_->out<<"\nCPU time for building the Coulomb matrix:  "<< CoulD.count() <<" seconds."<<endl;
+  this->aointegrals_->CoulD = finish - start; 
+  this->fileio_->out<<"\nCPU time for building the Coulomb matrix:  "<< this->aointegrals_->CoulD.count() <<" seconds."<<endl;
 
 //if(this->controls_->printLevel>=2) this->coulombA_->printAll(5,this->fileio_->out);
   if(this->controls_->printLevel>=2) prettyPrint(this->fileio_->out,(*this->coulombA_),"Alpha Coulomb");
@@ -327,8 +327,8 @@ void SingleSlater::formExchange(){
   for(i=0;i<this->nBasis_;i++) (*densityA_)(i,i)*=math.two;
 
   finish = std::chrono::high_resolution_clock::now();
-  std::chrono::duration<double> ExchD = finish - start; 
-  this->fileio_->out<<"\nCPU time for building the Exchange matrix:  "<< ExchD.count() <<" seconds."<<endl;
+  this->aointegrals_->ExchD = finish - start; 
+  this->fileio_->out<<"\nCPU time for building the Exchange matrix:  "<< this->aointegrals_->ExchD.count() <<" seconds."<<endl;
 
 //if(this->controls_->printLevel>=2) this->exchangeA_->printAll(5,this->fileio_->out);
   if(this->controls_->printLevel>=2) prettyPrint(this->fileio_->out,(*this->exchangeA_),"Alpha Exchange");
@@ -353,8 +353,12 @@ void SingleSlater::formPT() {
     std::scientific << engine.precision() << " precision" << endl;
 
   if(!this->basisset_->haveMap) this->basisset_->makeMap(this->molecule_); 
+  auto start = std::chrono::high_resolution_clock::now();
   this->basisset_->computeShBlkNorm(this->molecule_,this->densityA_);
+  auto finish = std::chrono::high_resolution_clock::now();
+  this->aointegrals_->DenShBlkD = finish - start;
   int ijkl = 0;
+  start = std::chrono::high_resolution_clock::now();
   for(int s1 = 0; s1 < this->basisset_->nShell(); s1++) {
     int bf1_s = this->basisset_->mapSh2Bf[s1];
     int n1    = this->basisset_->shells_libint[s1].size();
@@ -424,6 +428,8 @@ void SingleSlater::formPT() {
 //exit(EXIT_FAILURE);
   RealMatrix Tmp = 0.5*((*this->PTA_) + (*this->PTA_).transpose());
   (*this->PTA_) = 0.25*Tmp; // Can't consolidate where this comes from?
+  finish = std::chrono::high_resolution_clock::now();
+  this->aointegrals_->PTD = finish - start;
 //this->PTA_->printAll(5,this->fileio_->out);
   prettyPrint(this->fileio_->out,(*this->PTA_),"Alpha Perturbation Tensor");
   

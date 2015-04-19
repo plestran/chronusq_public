@@ -129,6 +129,18 @@ public:
 #ifdef USE_LIBINT
   bool          haveSchwartz;
 #endif
+
+
+  // Timing Stats
+  std::chrono::duration<double> OneED;
+  std::chrono::duration<double> SED;
+  std::chrono::duration<double> TED;
+  std::chrono::duration<double> VED;
+  std::chrono::duration<double> CoulD;
+  std::chrono::duration<double> ExchD;
+  std::chrono::duration<double> PTD;
+  std::chrono::duration<double> SchwartzD;
+  std::chrono::duration<double> DenShBlkD;
  
   AOIntegrals(){;};
   ~AOIntegrals(){
@@ -161,6 +173,8 @@ public:
   void iniQuartetConstants(ShellPair*,ShellPair*);
   void iniPairConstants(ShellPair*);
   void iniMolecularConstants();
+
+  void printTimings();
 //--------------------------------------------//
 // member functions in integrals_builders.cpp //
 //--------------------------------------------//

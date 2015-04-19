@@ -10,7 +10,7 @@ namespace Eigen {
   output.fill(' ');
   output.setf(std::ios::right,std::ios::scientific);
   output.setf(std::ios::fixed,std::ios::floatfield);
-  output << str + " " << std::endl;
+  output << std::endl << str + ": " << std::endl;
   output<<bannerTop;
 
   for(i=0;i<m.cols();i+=list) {

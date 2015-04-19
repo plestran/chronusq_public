@@ -69,6 +69,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   else if(controls->guess==2) ;
   else if(controls->guess==3) hartreeFock->readGuessGauFChk(controls->gauFChkName);
   hartreeFock->formFock();
+  aointegrals->printTimings();
   hartreeFock->computeEnergy();
   hartreeFock->SCF();
   MOIntegrals *moIntegrals = new MOIntegrals();

@@ -218,6 +218,8 @@ void AOIntegrals::computeAOOneE(){
   };
 //oneE_->sub(kinetic_,potential_);
   (*this->oneE_) = (*this->kinetic_)-(*this->potential);
+  finish = std::chrono::high_resolution_clock::now();
+  this->OneED = finish - start;
   if(controls_->printLevel>=2) {
 /*
     this->overlap_->printAll(5,fileio_->out);
@@ -232,9 +234,7 @@ void AOIntegrals::computeAOOneE(){
   };
   if(controls_->printLevel>=1) {
 //    finish = clock();
-    finish = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> OneED = finish - start;
-    this->fileio_->out<<"\nCPU time for one-electron integral:  "<< OneED.count() <<" seconds."<<endl;
+    this->fileio_->out<<"\nCPU time for one-electron integral:  "<< this->OneED.count() <<" seconds."<<endl;
   };
   this->haveAOOneE = true;
 };
@@ -369,24 +369,26 @@ void AOIntegrals::computeAOOneE(){
     prettyPrint(this->fileio_->out,(*this->oneE_),"Core Hamiltonian");
 
   // Compute time differenes
-  std::chrono::duration<double> OneED = oneEEnd - oneEStart;
-  std::chrono::duration<double> SED = OEnd - OStart;
-  std::chrono::duration<double> TED = TEnd - TStart;
-  std::chrono::duration<double> VED = VEnd - VStart;
+  this->OneED = oneEEnd - oneEStart;
+  this->SED = OEnd - OStart;
+  this->TED = TEnd - TStart;
+  this->VED = VEnd - VStart;
+/*
   if(this->controls_->printLevel >= 1) {
     this->fileio_->out << endl;
     this->fileio_->out << std::left << std::setw(60) << "CPU time for Overlap evaluation:" 
-                       << std::left << std::setw(15) << SED.count() << " sec" << endl;
+                       << std::left << std::setw(15) << this->SED.count() << " sec" << endl;
     this->fileio_->out << std::left << std::setw(60) << "CPU time for Kinetic evaluation:" 
-                       << std::left << std::setw(15) << TED.count() << " sec" << endl;
+                       << std::left << std::setw(15) << this->TED.count() << " sec" << endl;
     this->fileio_->out << std::left << std::setw(60) << "CPU time for Nuclear Attraction Potential evaluation:" 
-                       << std::left << std::setw(15) << VED.count() << " sec" << endl;
+                       << std::left << std::setw(15) << this->VED.count() << " sec" << endl;
     this->fileio_->out << std::left << std::setw(60) << " "
                        << std::left << std::setw(15) << "---------------" << "----" << endl;
     this->fileio_->out << std::left << std::setw(60) << "Total CPU time for one-electron integral evaluation:" 
-                       << std::left << std::setw(15) << OneED.count() << " sec" << endl;
-  this->haveAOOneE = true;
+                       << std::left << std::setw(15) << this->OneED.count() << " sec" << endl;
   }
+*/
+  this->haveAOOneE = true;
 }
 
 using libint2::TwoBodyEngine;
@@ -437,10 +439,10 @@ void AOIntegrals::computeSchwartz(){
     }
   }
   auto finish =  std::chrono::high_resolution_clock::now();
-  std::chrono::duration<double> elapsed = finish - start;
+  this->SchwartzD = finish - start;
   (*this->schwartz_) = this->schwartz_->selfadjointView<Lower>();
 
-  this->fileio_->out << "done (" << elapsed.count() << ")" << endl;
+  this->fileio_->out << "done (" << this->SchwartzD.count() << ")" << endl;
   prettyPrint(cout,(*this->schwartz_),"Schwartz Bounds");
   this->haveSchwartz = true;
 }
