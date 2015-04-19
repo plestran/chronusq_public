@@ -71,6 +71,5 @@ void BasisSet::computeShBlkNorm(Molecule *mol, RealMatrix *D){
       (*this->shBlkNorm)(s1,s2) = D->block(bf1,bf2,n1,n2).lpNorm<Infinity>();
     }
   }
-  prettyPrint(cout,(*this->shBlkNorm),"SHBLK NORM");
 }
 #endif

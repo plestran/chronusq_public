@@ -257,7 +257,6 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
  
   // Check to see if the basisset had been converted
   if(!this->basisSet_->convToLI) this->basisSet_->convShell(this->molecule_);
-  cout << "Threading across " << this->controls_->nthreads << " processors" << endl;
   // Define integral Engine
   std::vector<OneBodyEngine> engines(this->controls_->nthreads);
   engines[0] = OneBodyEngine(iType,this->basisSet_->maxPrim,this->basisSet_->maxL,0);
@@ -284,7 +283,6 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
 
   if(!this->basisSet_->haveMap) this->basisSet_->makeMap(this->molecule_); 
 
-  cout << "Size of engines " <<engines.size() << endl;
 #ifdef USE_OMP
   #pragma omp parallel
 #endif
@@ -294,7 +292,6 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
 #else
     int thread_id = 0;
 #endif
-    printf("Hello from thread %d\n",thread_id);
     for(auto s1=0l, s12=0l; s1 < this->basisSet_->nShell(); s1++){
       int bf1 = this->basisSet_->mapSh2Bf[s1];
       int n1  = this->basisSet_->shells_libint[s1].size();
@@ -443,7 +440,6 @@ void AOIntegrals::computeSchwartz(){
   (*this->schwartz_) = this->schwartz_->selfadjointView<Lower>();
 
   this->fileio_->out << "done (" << this->SchwartzD.count() << ")" << endl;
-  prettyPrint(cout,(*this->schwartz_),"Schwartz Bounds");
   this->haveSchwartz = true;
 }
 

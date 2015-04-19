@@ -181,10 +181,10 @@ void SingleSlater::computeEnergy(){
 //--------------------//
 void SingleSlater::printEnergy(){
   this->fileio_->out<<"\nEnergy Information:"<<endl;
-  this->fileio_->out<<std::setw(30)<<"E(one electron) = "<<std::setw(15)<<this->energyOneE<<std::setw(5)<<" Eh "<<endl;
-  this->fileio_->out<<std::setw(30)<<"E(two electron) = "<<std::setw(15)<<this->energyTwoE<<std::setw(5)<<" Eh "<<endl;
-  this->fileio_->out<<std::setw(30)<<"E(nuclear repulsion) = "<<std::setw(15)<<this->energyNuclei<<std::setw(5)<<" Eh "<<endl;
-  this->fileio_->out<<std::setw(30)<<"E(total) = "<<std::setw(15)<<this->totalEnergy<<std::setw(5)<<" Eh "<<endl;
+  this->fileio_->out<<std::right<<std::setw(30)<<"E(one electron) = "<<std::setw(15)<<this->energyOneE<<std::setw(5)<<" Eh "<<endl;
+  this->fileio_->out<<std::right<<std::setw(30)<<"E(two electron) = "<<std::setw(15)<<this->energyTwoE<<std::setw(5)<<" Eh "<<endl;
+  this->fileio_->out<<std::right<<std::setw(30)<<"E(nuclear repulsion) = "<<std::setw(15)<<this->energyNuclei<<std::setw(5)<<" Eh "<<endl;
+  this->fileio_->out<<std::right<<std::setw(30)<<"E(total) = "<<std::setw(15)<<this->totalEnergy<<std::setw(5)<<" Eh "<<endl;
 };
 //-------------------------//
 // form the density matrix //
@@ -345,12 +345,14 @@ void SingleSlater::formPT() {
   if(!this->aointegrals_->haveSchwartz) this->aointegrals_->computeSchwartz();
   if(!this->haveDensity) this->formDensity();
   this->PTA_->setZero();
+  std::vector<RealMatrix> 
+    G(this->controls_->nthreads,RealMatrix::Zero(this->nBasis_,this->nBasis_));
 
-  coulombEngine engine = coulombEngine(this->basisset_->maxPrim,
-                                       this->basisset_->maxL,0);
-  engine.set_precision(std::numeric_limits<double>::epsilon());
-  this->fileio_->out << "Computing Two Electron Integrals with " <<
-    std::scientific << engine.precision() << " precision" << endl;
+  std::vector<coulombEngine> engines(this->controls_->nthreads);
+  engines[0] = coulombEngine(this->basisset_->maxPrim,this->basisset_->maxL,0);
+  engines[0].set_precision(std::numeric_limits<double>::epsilon());
+
+  for(int i=1; i<this->controls_->nthreads; i++) engines[i] = engines[0];
 
   if(!this->basisset_->haveMap) this->basisset_->makeMap(this->molecule_); 
   auto start = std::chrono::high_resolution_clock::now();
@@ -359,64 +361,80 @@ void SingleSlater::formPT() {
   this->aointegrals_->DenShBlkD = finish - start;
   int ijkl = 0;
   start = std::chrono::high_resolution_clock::now();
-  for(int s1 = 0; s1 < this->basisset_->nShell(); s1++) {
-    int bf1_s = this->basisset_->mapSh2Bf[s1];
-    int n1    = this->basisset_->shells_libint[s1].size();
-    for(int s2 = 0; s2 <= s1; s2++) {
-      int bf2_s = this->basisset_->mapSh2Bf[s2];
-      int n2    = this->basisset_->shells_libint[s2].size();
-      for(int s3 = 0; s3 <= s1; s3++) {
-        int bf3_s = this->basisset_->mapSh2Bf[s3];
-        int n3    = this->basisset_->shells_libint[s3].size();
-        int s4_max = (s1 == s3) ? s2 : s3;
-        for(int s4 = 0; s4 <= s4_max; s4++) {
-          int bf4_s = this->basisset_->mapSh2Bf[s4];
-          int n4    = this->basisset_->shells_libint[s4].size();
-    
-          if( std::max((*this->basisset_->shBlkNorm)(s1,s4),
-                 std::max((*this->basisset_->shBlkNorm)(s2,s4),
-                    std::max((*this->basisset_->shBlkNorm)(s3,s4),
-                       std::max((*this->basisset_->shBlkNorm)(s1,s3),
-                          std::max((*this->basisset_->shBlkNorm)(s2,s3),
-                                   (*this->basisset_->shBlkNorm)(s1,s2))
-                          )
-                       )      
-                    )
-                 ) * (*this->aointegrals_->schwartz_)(s1,s2)
-                   * (*this->aointegrals_->schwartz_)(s3,s4)
-                 < this->controls_->thresholdSchawrtz ) continue;
 
-          const double* buff = engine.compute(
-            this->basisset_->shells_libint[s1],
-            this->basisset_->shells_libint[s2],
-            this->basisset_->shells_libint[s3],
-            this->basisset_->shells_libint[s4]);
-       // cout << "SHELL :" << s1 << " " << s2 << " " << s3 << " " <<s4<<endl; 
-       // for(int i = 0; i < n1*n2*n3*n4; i++) cout << buff[i] << endl;
-    
-          double s12_deg = (s1 == s2) ? 1.0 : 2.0;
-          double s34_deg = (s3 == s4) ? 1.0 : 2.0;
-          double s12_34_deg = (s1 == s3) ? (s2 == s4 ? 1.0 : 2.0) : 2.0;
-          double s1234_deg = s12_deg * s34_deg * s12_34_deg;
-          for(int i = 0, ijkl = 0 ; i < n1; ++i) {
-            int bf1 = bf1_s + i;
-            for(int j = 0; j < n2; ++j) {
-              int bf2 = bf2_s + j;
-              for(int k = 0; k < n3; ++k) {
-                int bf3 = bf3_s + k;
-                for(int l = 0; l < n4; ++l, ++ijkl) {
-                  int bf4 = bf4_s + l;
-                  double v = buff[ijkl]*s1234_deg;
-
-                  // Coulomb
-                  (*this->PTA_)(bf1,bf2) += (*this->densityA_)(bf3,bf4)*v;
-                  (*this->PTA_)(bf3,bf4) += (*this->densityA_)(bf1,bf2)*v;
-
-                  // Exchange
-                  (*this->PTA_)(bf1,bf3) -= 0.25*(*this->densityA_)(bf2,bf4)*v;
-                  (*this->PTA_)(bf2,bf4) -= 0.25*(*this->densityA_)(bf1,bf3)*v;
-                  (*this->PTA_)(bf1,bf4) -= 0.25*(*this->densityA_)(bf2,bf3)*v;
-                  (*this->PTA_)(bf2,bf3) -= 0.25*(*this->densityA_)(bf1,bf4)*v;
+  auto lambda = [&] (int thread_id) {
+    coulombEngine &engine = engines[thread_id];
+    RealMatrix &g = G[thread_id];
+    for(int s1 = 0, s1234=0; s1 < this->basisset_->nShell(); s1++) {
+      int bf1_s = this->basisset_->mapSh2Bf[s1];
+      int n1    = this->basisset_->shells_libint[s1].size();
+      for(int s2 = 0; s2 <= s1; s2++) {
+        int bf2_s = this->basisset_->mapSh2Bf[s2];
+        int n2    = this->basisset_->shells_libint[s2].size();
+        for(int s3 = 0; s3 <= s1; s3++) {
+          int bf3_s = this->basisset_->mapSh2Bf[s3];
+          int n3    = this->basisset_->shells_libint[s3].size();
+          int s4_max = (s1 == s3) ? s2 : s3;
+          for(int s4 = 0; s4 <= s4_max; s4++, s1234++) {
+            if(s1234 % this->controls_->nthreads != thread_id) continue;
+            int bf4_s = this->basisset_->mapSh2Bf[s4];
+            int n4    = this->basisset_->shells_libint[s4].size();
+      
+            if( std::max((*this->basisset_->shBlkNorm)(s1,s4),
+                   std::max((*this->basisset_->shBlkNorm)(s2,s4),
+                      std::max((*this->basisset_->shBlkNorm)(s3,s4),
+                         std::max((*this->basisset_->shBlkNorm)(s1,s3),
+                            std::max((*this->basisset_->shBlkNorm)(s2,s3),
+                                     (*this->basisset_->shBlkNorm)(s1,s2))
+                            )
+                         )      
+                      )
+                   ) * (*this->aointegrals_->schwartz_)(s1,s2)
+                     * (*this->aointegrals_->schwartz_)(s3,s4)
+                   < this->controls_->thresholdSchawrtz ) continue;
+ 
+            const double* buff = engine.compute(
+              this->basisset_->shells_libint[s1],
+              this->basisset_->shells_libint[s2],
+              this->basisset_->shells_libint[s3],
+              this->basisset_->shells_libint[s4]);
+         // cout << "SHELL :" << s1 << " " << s2 << " " << s3 << " " <<s4<<endl; 
+         // for(int i = 0; i < n1*n2*n3*n4; i++) cout << buff[i] << endl;
+      
+            double s12_deg = (s1 == s2) ? 1.0 : 2.0;
+            double s34_deg = (s3 == s4) ? 1.0 : 2.0;
+            double s12_34_deg = (s1 == s3) ? (s2 == s4 ? 1.0 : 2.0) : 2.0;
+            double s1234_deg = s12_deg * s34_deg * s12_34_deg;
+            for(int i = 0, ijkl = 0 ; i < n1; ++i) {
+              int bf1 = bf1_s + i;
+              for(int j = 0; j < n2; ++j) {
+                int bf2 = bf2_s + j;
+                for(int k = 0; k < n3; ++k) {
+                  int bf3 = bf3_s + k;
+                  for(int l = 0; l < n4; ++l, ++ijkl) {
+                    int bf4 = bf4_s + l;
+                    double v = buff[ijkl]*s1234_deg;
+/* 
+                    // Coulomb
+                    (*this->PTA_)(bf1,bf2) += (*this->densityA_)(bf3,bf4)*v;
+                    (*this->PTA_)(bf3,bf4) += (*this->densityA_)(bf1,bf2)*v;
+ 
+                    // Exchange
+                    (*this->PTA_)(bf1,bf3) -= 0.25*(*this->densityA_)(bf2,bf4)*v;
+                    (*this->PTA_)(bf2,bf4) -= 0.25*(*this->densityA_)(bf1,bf3)*v;
+                    (*this->PTA_)(bf1,bf4) -= 0.25*(*this->densityA_)(bf2,bf3)*v;
+                    (*this->PTA_)(bf2,bf3) -= 0.25*(*this->densityA_)(bf1,bf4)*v;
+*/
+                    // Coulomb
+                    g(bf1,bf2) += (*this->densityA_)(bf3,bf4)*v;
+                    g(bf3,bf4) += (*this->densityA_)(bf1,bf2)*v;
+ 
+                    // Exchange
+                    g(bf1,bf3) -= 0.25*(*this->densityA_)(bf2,bf4)*v;
+                    g(bf2,bf4) -= 0.25*(*this->densityA_)(bf1,bf3)*v;
+                    g(bf1,bf4) -= 0.25*(*this->densityA_)(bf2,bf3)*v;
+                    g(bf2,bf3) -= 0.25*(*this->densityA_)(bf1,bf4)*v;
+                  }
                 }
               }
             }
@@ -424,14 +442,25 @@ void SingleSlater::formPT() {
         }
       }
     }
+  };
+
+#ifdef USE_OMP
+  #pragma omp parallel
+  {
+    int thread_id = omp_get_thread_num();
+    lambda(thread_id);
   }
+#else
+  lambda(0);
+#endif
+  for(int i = 0; i < this->controls_->nthreads; i++) (*this->PTA_) += G[i];
 //exit(EXIT_FAILURE);
   RealMatrix Tmp = 0.5*((*this->PTA_) + (*this->PTA_).transpose());
   (*this->PTA_) = 0.25*Tmp; // Can't consolidate where this comes from?
   finish = std::chrono::high_resolution_clock::now();
   this->aointegrals_->PTD = finish - start;
 //this->PTA_->printAll(5,this->fileio_->out);
-  prettyPrint(this->fileio_->out,(*this->PTA_),"Alpha Perturbation Tensor");
+  if(this->controls_->printLevel >= 3) prettyPrint(this->fileio_->out,(*this->PTA_),"Alpha Perturbation Tensor");
   
 }
 #endif
