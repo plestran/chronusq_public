@@ -380,6 +380,7 @@ void SingleSlater::formPT() {
             int bf4_s = this->basisset_->mapSh2Bf[s4];
             int n4    = this->basisset_->shells_libint[s4].size();
       
+            // Schwartz and Density screening
             if( std::max((*this->basisset_->shBlkNorm)(s1,s4),
                    std::max((*this->basisset_->shBlkNorm)(s2,s4),
                       std::max((*this->basisset_->shBlkNorm)(s3,s4),
@@ -398,8 +399,6 @@ void SingleSlater::formPT() {
               this->basisset_->shells_libint[s2],
               this->basisset_->shells_libint[s3],
               this->basisset_->shells_libint[s4]);
-         // cout << "SHELL :" << s1 << " " << s2 << " " << s3 << " " <<s4<<endl; 
-         // for(int i = 0; i < n1*n2*n3*n4; i++) cout << buff[i] << endl;
       
             double s12_deg = (s1 == s2) ? 1.0 : 2.0;
             double s34_deg = (s3 == s4) ? 1.0 : 2.0;
@@ -414,7 +413,8 @@ void SingleSlater::formPT() {
                   for(int l = 0; l < n4; ++l, ++ijkl) {
                     int bf4 = bf4_s + l;
                     double v = buff[ijkl]*s1234_deg;
-/* 
+
+/*                  // This section works for serial build
                     // Coulomb
                     (*this->PTA_)(bf1,bf2) += (*this->densityA_)(bf3,bf4)*v;
                     (*this->PTA_)(bf3,bf4) += (*this->densityA_)(bf1,bf2)*v;
