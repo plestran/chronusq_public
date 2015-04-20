@@ -16,9 +16,9 @@ void BasisSet::convShell(Molecule* mol) {
       coeff.push_back(this->shells[i].coef[iPrim]);
       exp.push_back(this->shells[i].expo[iPrim]);
     }
-    center = {(*mol->cart())(0,this->shells[i].center),
+    center = {{(*mol->cart())(0,this->shells[i].center),
               (*mol->cart())(1,this->shells[i].center),
-              (*mol->cart())(2,this->shells[i].center)};
+              (*mol->cart())(2,this->shells[i].center)}};
 
     int L = ChronusQ::HashL(&this->shells[i].name[0]);
 
