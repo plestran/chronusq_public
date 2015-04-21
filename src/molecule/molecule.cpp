@@ -32,7 +32,7 @@ void Molecule::iniMolecule(int nAtoms, FileIO *fileio) {
   if(nAtoms<1) throw 2000;
   if(fileio==NULL) throw 2001;
   this->nAtoms_= nAtoms;
-  this->cart_  = new Matrix<double>(3, this->nAtoms_,"Molecular Cartesian");
+  this->cart_  = new RealMatrix(3, this->nAtoms_); // Molecular Cartesian
   this->index_ = new int[this->nAtoms_];
   this->size_  = fileio->sizeInt()*5 + fileio->sizeInt()*nAtoms_ + cart_->size();
 };
@@ -114,14 +114,15 @@ void Molecule::ioRead(FileIO *fileio) {
   size_   = storage[4];
   if(cart_!=NULL) delete[] cart_;
   if(index_!=NULL) delete[] index_;
-  cart_  = new Matrix<double>(3, nAtoms_,"Molecular Cartesian");
+  cart_  = new RealMatrix(3, nAtoms_); // Molecular Cartesian
   index_ = new int[nAtoms_];
   try { fileio->io("R",blockMolecule,"BIN",index_,nAtoms_);}
   catch (int msg) {
     fileio->out<<"Operation on file failed! E#:"<<msg<<endl;
     exit(1);    
   };
-  cart_->ioRead(fileio,blockMolecule,"BIN");
+  // FIXME Need FileIO interface to Eigen
+//cart_->ioRead(fileio,blockMolecule,"BIN");
 };
 //-----------------------//
 // write to binary files //
@@ -145,7 +146,8 @@ void Molecule::ioWrite(FileIO *fileio) {
     fileio->out<<"Operation on file failed! E#:"<<msg<<endl;
     exit(1);    
   };
-  cart_->ioWrite(fileio,blockMolecule,"BIN");
+  // FIXME Need FileIO interface to Eigen
+//cart_->ioWrite(fileio,blockMolecule,"BIN");
 };
 /*************************/
 /* MPI Related Routines  */
@@ -160,7 +162,7 @@ void Molecule::mpiSend(int toID,int tag) {
 void Molecule::mpiRecv(int fromID,int tag) {
   OOMPI_COMM_WORLD[fromID].Recv(this->nAtoms_,tag);
   this->index_=new int[this->nAtoms_];
-  this->cart_ =new Matrix<double>(3, this->nAtoms_, "Molecule");
+  this->cart_ =new RealMatrix(3, this->nAtoms_, "Molecule");
   OOMPI_COMM_WORLD[fromID].Recv(this->index_,this->nAtoms_,tag);
   this->cart_->mpiRecv(fromID,tag);
 };

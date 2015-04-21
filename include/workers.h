@@ -27,10 +27,11 @@
 #define  INCLUDED_WORKERS
 //#include "mpi.h"
 #include "global.h"
+#include "eiginterface.h"
 #include "fileio.h"
 #include "atoms.h"
 #include "molecule.h"
-#include "matrix.h"
+//#include "matrix.h"
 #include "basisset.h"
 #include "aointegrals.h"
 #include "mointegrals.h"

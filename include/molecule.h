@@ -26,9 +26,10 @@
 #ifndef INCLUDED_MOLECULES
 #define INCLUDED_MOLECULES
 #include "global.h"
+#include "eiginterface.h"
 #include "fileio.h"
 #include "atoms.h"
-#include "matrix.h"
+//#include "matrix.h"
 #include "controls.h"
 
 /****************************/
@@ -44,7 +45,7 @@ class Molecule {
   int      size_;        // size of the object in terms of sizeof(char)
   int     *index_;       // index of atom in the atoms[] array
   double   energyNuclei_;// nuclear repulsion energy
-  Matrix<double>  *cart_;        // cartesian coordinates
+  RealMatrix  *cart_;        // cartesian coordinates
 
 public:
 
@@ -62,7 +63,7 @@ public:
   // access to private data
   inline int index(int i) { return this->index_[i];};
   inline int nAtoms() {return this->nAtoms_;};
-  inline Matrix<double> *cart() {return this->cart_;}
+  inline RealMatrix *cart() {return this->cart_;}
   inline int charge() {return this->charge_;}
   inline int spin() {return this->spin_;}
   inline int nTotalE() {return this->nTotalE_;};

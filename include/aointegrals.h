@@ -27,8 +27,9 @@
 #define  INCLUDED_AOINTEGRAL
 //#include <gsl/gsl_sf_erf.h>
 #include "global.h"
+#include "eiginterface.h"
 #include "basisset.h"
-#include "matrix.h"
+//#include "matrix.h"
 #include "molecule.h"
 #include "fileio.h"
 #include "controls.h"
@@ -97,7 +98,7 @@ class AOIntegrals{
   double	**FmTTable_;
 
   BasisSet     	*basisSet_;
-  ChronusQ::Molecule    	*molecule_;
+  Molecule    	*molecule_;
   FileIO       	*fileio_;
   Controls     	*controls_;
 
@@ -105,17 +106,41 @@ class AOIntegrals{
   MolecularConstants	*molecularConstants_;
   QuartetConstants	    *quartetConstants_;
 
+//dbwys
+#ifdef USE_LIBINT
+  void OneEDriver(libint2::OneBodyEngine::integral_type);
+#endif
+//dbwye
+
 public:
   // these should be protected
-  Matrix<double>  *twoEC_;
-  Matrix<double>  *twoEX_;
-  Matrix<double>  *oneE_;
-  Matrix<double>  *overlap_;
-  Matrix<double>  *kinetic_;
-  Matrix<double>  *potential_;
+  RealMatrix  *twoEC_;
+  RealMatrix  *twoEX_;
+  RealMatrix  *oneE_;
+  RealMatrix  *overlap_;
+  RealMatrix  *kinetic_;
+  RealMatrix  *potential_;
+#ifdef USE_LIBINT
+  RealMatrix  *schwartz_;
+#endif
 
   bool		haveAOTwoE;
   bool		haveAOOneE;
+#ifdef USE_LIBINT
+  bool          haveSchwartz;
+#endif
+
+
+  // Timing Stats
+  std::chrono::duration<double> OneED;
+  std::chrono::duration<double> SED;
+  std::chrono::duration<double> TED;
+  std::chrono::duration<double> VED;
+  std::chrono::duration<double> CoulD;
+  std::chrono::duration<double> ExchD;
+  std::chrono::duration<double> PTD;
+  std::chrono::duration<double> SchwartzD;
+  std::chrono::duration<double> DenShBlkD;
  
   AOIntegrals(){;};
   ~AOIntegrals(){
@@ -128,7 +153,7 @@ public:
   };
   
   // initialization function
-  void iniAOIntegrals(ChronusQ::Molecule*,BasisSet*,FileIO*,Controls*);
+  void iniAOIntegrals(Molecule*,BasisSet*,FileIO*,Controls*);
 
   inline double &twoEC(int i, int j, int k, int l){
     return (*twoEC_)(this->R2Index_[i][j],this->R2Index_[k][l]);
@@ -148,11 +173,16 @@ public:
   void iniQuartetConstants(ShellPair*,ShellPair*);
   void iniPairConstants(ShellPair*);
   void iniMolecularConstants();
+
+  void printTimings();
 //--------------------------------------------//
 // member functions in integrals_builders.cpp //
 //--------------------------------------------//
   void computeAOTwoE(); // build two-electron AO integral matrices
   void computeAOOneE(); // build one-electron AO integral matrices
+#ifdef USE_LIBINT
+  void computeSchwartz();
+#endif
 //----------------------------------------//
 // member functions in integrals_onee.cpp //
 //----------------------------------------//

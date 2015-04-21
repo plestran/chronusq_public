@@ -19,5 +19,5 @@ install-sh
 missing
 stamp-h1
 test
-build
+build*
 .COPY

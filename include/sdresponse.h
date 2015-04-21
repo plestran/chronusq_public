@@ -26,7 +26,8 @@
 #ifndef INCLUDED_SDRESPONSE
 #define INCLUDED_SDRESPONSE
 #include "global.h"
-#include "matrix.h"
+#include "eiginterface.h"
+//#include "matrix.h"
 #include "molecule.h"
 #include "controls.h"
 #include "mointegrals.h"

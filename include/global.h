@@ -30,19 +30,36 @@
 #define MAXANGULARMOMENTUM 6
 #define MAXCONTRACTION 10
 #define MAXATOMS 1000
-//#include "oompi.h"
+
+// CMake Compilation Configuration
+#include "config_chronusq.h"
+
+// IO
 #include <iostream>
 #include <fstream>
-#include <stdlib.h>
-#include <cmath>
 #include <iomanip>
-#include <sys/stat.h>
-#include <pthread.h>
-//#include <error.h>
-#include <time.h>
-//#include <new.h>
-#include <cstring>
+
+// Math
+#include <cmath>
 #include <complex>
+#ifdef USE_LIBINT
+#  include <libint2.hpp> // Libint Gaussian Integrals library
+#endif
+#include <Eigen/Dense> // Eigen Linear Algebra
+#include <unsupported/Eigen/MatrixFunctions>
+
+// Parallelization
+#include <omp.h>
+//#include "oompi.h"
+//#include <pthread.h>
+
+// Misc
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <cstring>
+#include <vector>
+#include <time.h>
+#include <chrono>
 
 //using namespace std;
 /* Things from STD that we need always */
@@ -55,7 +72,20 @@ using std::ios;
 using std::nothrow;
 using std::ifstream;
 
+/* Things from Eigen that we always need */
+using Eigen::Infinity;
+using Eigen::Dynamic;
+using Eigen::ColMajor;
+using Eigen::RowMajor;
+using Eigen::Upper;
+using Eigen::Lower;
+
+// Useful typedefs
 typedef std::complex<double> dcomplex;
+typedef Eigen::Matrix<double,Dynamic,Dynamic,RowMajor>     RealMatrix;    // RowMajor BC Libint
+typedef Eigen::Matrix<dcomplex,Dynamic,Dynamic,RowMajor>   ComplexMatrix; // RowMajor BC Libint
+typedef Eigen::MatrixExponentialReturnValue<RealMatrix>    RealMatExp;
+typedef Eigen::MatrixExponentialReturnValue<ComplexMatrix> ComplexMatExp;
 
 //----------------//
 //number constants//
@@ -65,11 +95,12 @@ struct Math {
   double sqrt2;
   double pi,pi32,sqrt2pi54; //pi, pi^{3/2} sqrt(2)*pi^{5/4}
   double small;
+  dcomplex ii;
 };
 const Math math = {0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 0.5, 0.25,
 		   1.4142135623731,
 		   3.14159265358979,5.56832799683171,5.91496717279561,
-		   1.0e-10};
+		   1.0e-10, dcomplex(0,1.0)};
 //factorials n!
 static double Factorial[8] ={
 1,1,2, 6, 24, 120, 720, 5040 };

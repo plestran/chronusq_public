@@ -296,6 +296,7 @@ public:
   TNT transNT(const Matrix &);
   TTN transTN(const Matrix &);
   void eSort();
+  T infNorm();
 //void cleanEigen();
 //void allocEigen();
 //int  iniScratch();
