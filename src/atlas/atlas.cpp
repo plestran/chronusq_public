@@ -51,6 +51,9 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   controls->iniControls();
   readInput(fileIO,molecule,basisset,controls);
   fileIO->iniFileIO(controls->restart);
+#ifdef USE_LIBINT
+  basisset->convShell(molecule);
+#endif
 
   // print out molecular and basis set information
   molecule->printInfo(fileIO,controls);
@@ -58,11 +61,15 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   aointegrals->iniAOIntegrals(molecule,basisset,fileIO,controls);
   hartreeFock->iniSingleSlater(molecule,basisset,aointegrals,fileIO,controls);
   hartreeFock->printInfo();
+#ifdef USE_LIBINT
+  aointegrals->computeSchwartz();
+#endif
   if(controls->guess==0) hartreeFock->formGuess();
   else if(controls->guess==1) hartreeFock->readGuessIO();
   else if(controls->guess==2) ;
   else if(controls->guess==3) hartreeFock->readGuessGauFChk(controls->gauFChkName);
   hartreeFock->formFock();
+  aointegrals->printTimings();
   hartreeFock->computeEnergy();
   hartreeFock->SCF();
   MOIntegrals *moIntegrals = new MOIntegrals();
@@ -75,11 +82,15 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 
   time(&currentTime);
   fileIO->out<<"\nJob finished: "<<ctime(&currentTime)<<endl;
+
   delete  molecule;
   delete  basisset;
   delete  fileIO;
   delete  aointegrals;
   delete  controls;
+#ifdef USE_LIBINT
+  libint2::cleanup();
+#endif
   return  1;
 };
 

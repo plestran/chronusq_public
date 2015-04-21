@@ -26,6 +26,7 @@
 #ifndef INCLUDED_ATOMS
 #define INCLUDED_ATOMS 
 #include "global.h"
+#include "eiginterface.h"
  
 /* Atomic Information*/ 
 namespace ChronusQ {

@@ -1,6 +1,6 @@
-mkdir build
-cp -r Test build
-cd build
+mkdir build_pgi
+cp -r Test build_pgi
+cd build_pgi
 cmake -DCMAKE_CXX_COMPILER=pgcpp \
       -DCMAKE_Fortran_COMPILER=pgfortran \
       -DCMAKE_CXX_FLAGS='-w -mp=nonuma  -tp nehalem-64 -Mreentrant -Minfo -Mneginfo -time -fast -O2 -Munroll -Mvect=assoc,recog,cachesize:20971520' \

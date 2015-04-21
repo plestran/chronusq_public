@@ -27,6 +27,7 @@
 #define  INCLUDED_TOOLS
 //#include <gsl/gsl_sf_erf.h>
 #include "global.h"
+#include "eiginterface.h"
 
 /*****************************/
 /*Error Messages 10000-14999 */
@@ -66,6 +67,12 @@ int HashL (char*);
 
 // convert angular momentum to AO index in a shell
 int HashIAO(int,int*);
+
+inline bool fexists(char *f){
+  ifstream ifile(f);
+  return ifile;
+}
+
 
 } // namespace ChronusQ
 #endif

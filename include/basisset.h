@@ -26,6 +26,7 @@
 #ifndef INCLUDED_BASISSET
 #define INCLUDED_BASISSET
 #include "global.h"
+#include "eiginterface.h"
 #include "molecule.h"
 #include "fileio.h"
 #include "controls.h"
@@ -107,6 +108,17 @@ public:
   ShellPair   *shellPairs;     // array of shellPairs
   Shell       *shells;         // array of shells
   int         *sortedShells;   // index of shells sorted from the largest angular momentum to the lowest
+  //dbwys
+#ifdef USE_LIBINT
+  std::vector<libint2::Shell> shells_libint;
+  std::vector<int> mapSh2Bf;
+  RealMatrix *shBlkNorm;
+  bool convToLI = false;
+  bool haveMap = false;
+  int maxPrim;
+  int maxL;
+#endif
+  //dbwye
 
   // constructor & destructor
   BasisSet(int nBasis=0, int nShell=0);
@@ -121,7 +133,7 @@ public:
   void iniBasisSet();
 
   // create and sort shell pairs according to the angular momenta
-  void createShellPair(ChronusQ::Molecule*);
+  void createShellPair(Molecule*);
 
   // access to private data
   inline int     nBasis()  {return this->nBasis_;};
@@ -137,7 +149,15 @@ public:
   void printShellPair(ostream &output=cout);
 
   // read from input file
-  void readBasisSet(FileIO*,ChronusQ::Molecule*);
+  void readBasisSet(FileIO*,Molecule*);
+
+#ifdef USE_LIBINT
+  // If using Libint, have a routine to convert between local and libint
+  // shell format
+  void convShell(Molecule*);
+  void makeMap(Molecule*);
+  void computeShBlkNorm(Molecule*,RealMatrix*);
+#endif
 
   /*************************/
   /* MPI Related Routines  */
@@ -146,5 +166,6 @@ public:
   void mpiRecv(int,int tag=tagBasisSet);
 };
 } // namespace ChronusQ
+
 
 #endif

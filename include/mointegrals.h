@@ -27,8 +27,9 @@
 #define  INCLUDED_MOINTEGRAL
 //#include <gsl/gsl_sf_erf.h>
 #include "global.h"
+#include "eiginterface.h"
 #include "basisset.h"
-#include "matrix.h"
+//#include "matrix.h"
 #include "molecule.h"
 #include "fileio.h"
 #include "controls.h"
@@ -54,12 +55,12 @@ class MOIntegrals{
 
 public:
   // these should be protected
-  ChronusQ::Matrix<double>    *iajb_;
-  ChronusQ::Matrix<double>    *ijab_;
-  ChronusQ::Matrix<double>    *ijka_;
-  ChronusQ::Matrix<double>    *ijkl_;
-  ChronusQ::Matrix<double>    *iabc_;
-  ChronusQ::Matrix<double>    *abcd_;
+  RealMatrix    *iajb_;
+  RealMatrix    *ijab_;
+  RealMatrix    *ijka_;
+  RealMatrix    *ijkl_;
+  RealMatrix    *iabc_;
+  RealMatrix    *abcd_;
 
   bool      haveMOiajb;
   bool      haveMOijab;

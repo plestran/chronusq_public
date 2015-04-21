@@ -85,38 +85,46 @@ void AOIntegrals::iniAOIntegrals(Molecule *molecule, BasisSet *basisset, FileIO 
   this->nTT_      = this->nBasis_*(this->nBasis_+1)/2;
 
   try {
-    this->twoEC_ = new Matrix<double>(this->nTT_,this->nTT_,"Raffenetti Two Electron Coulomb AOIntegrals","STD");
-    this->twoEX_ = new Matrix<double>(this->nTT_,this->nTT_,"Raffenetti Two Electron Exchange AOIntegrals","STD");
+    this->twoEC_ = new RealMatrix(this->nTT_,this->nTT_); // Raffenetti Two Electron Coulomb AOIntegrals
+    this->twoEX_ = new RealMatrix(this->nTT_,this->nTT_); // Raffenetti Two Electron Exchange AOIntegrals
   } catch (int msg) {
     fileio->out<<"Unable to allocate memory for twoE_ E#:"<<msg<<endl;
     exit(1);
   };
 
   try{
-    this->oneE_      = new Matrix<double>(this->nBasis_,this->nBasis_,"One Electron Integral","LT");
+    this->oneE_      = new RealMatrix(this->nBasis_,this->nBasis_); // One Electron Integral
   } catch (int msg) {
     fileio->out<<"Unable to allocate memory for oneE_! E#:"<<msg<<endl;
     exit(1);
   };
 
   try{
-    this->overlap_   = new Matrix<double>(this->nBasis_,this->nBasis_,"Overlap","LT");
+    this->overlap_   = new RealMatrix(this->nBasis_,this->nBasis_); // Overlap
   } catch (int msg) {
     fileio->out<<"Unable to allocate memory for SingleSlater::overlap_! E#:"<<msg<<endl;
     exit(1);
   };
   try{
-    this->kinetic_   = new Matrix<double>(this->nBasis_,this->nBasis_,"Kinetic","LT");
+    this->kinetic_   = new RealMatrix(this->nBasis_,this->nBasis_); // Kinetic
   } catch (int msg) {
     fileio->out<<"Unable to allocate memory for SingleSlater::kinetic_! E#:"<<msg<<endl;
     exit(1);
   };
   try{
-    this->potential_ = new Matrix<double>(this->nBasis_,this->nBasis_,"Potential","LT");
+    this->potential_ = new RealMatrix(this->nBasis_,this->nBasis_); // Potential
   } catch (int msg) {
     fileio->out<<"Unable to allocate memory for SingleSlater::potential_! E#:"<<msg<<endl;
     exit(1);
   };
+#ifdef USE_LIBINT
+  try{
+    this->schwartz_ = new RealMatrix(this->basisSet_->nShell(),this->basisSet_->nShell()); // Schwartz
+  } catch (int msg) {
+    fileio->out<<"Unable to allocate memory for SingleSlater::schwartz_! E#:"<<msg<<endl;
+    exit(1);
+  };
+#endif
 
   int i,j,ij;
   this->R2Index_ = new int*[this->nBasis_];
@@ -133,6 +141,9 @@ void AOIntegrals::iniAOIntegrals(Molecule *molecule, BasisSet *basisset, FileIO 
 
   this->haveAOTwoE = false;
   this->haveAOOneE = false;
+#ifdef USE_LIBINT
+  this->haveSchwartz = false;
+#endif
 
 // initialize the FmT table
 // Need to know the max L first
@@ -341,3 +352,27 @@ void AOIntegrals::iniMolecularConstants(){
   };
 };
 
+void AOIntegrals::printTimings() {
+    this->fileio_->out << endl << "Timing Statistics: "<<endl << bannerTop << endl;
+    this->fileio_->out << endl << "One Electron Integral Timings" << endl << bannerMid << endl;
+    this->fileio_->out << std::left << std::setw(60) << "Wall time for Overlap evaluation:" 
+                       << std::left << std::setw(15) << this->SED.count() << " sec" << endl;
+    this->fileio_->out << std::left << std::setw(60) << "Wall time for Kinetic evaluation:" 
+                       << std::left << std::setw(15) << this->TED.count() << " sec" << endl;
+    this->fileio_->out << std::left << std::setw(60) << "Wall time for Nuclear Attraction Potential evaluation:" 
+                       << std::left << std::setw(15) << this->VED.count() << " sec" << endl;
+    this->fileio_->out << std::left << std::setw(60) << " "
+                       << std::left << std::setw(15) << "---------------" << "----" << endl;
+    this->fileio_->out << std::left << std::setw(60) << "Total wall time for one-electron integral evaluation:" 
+                       << std::left << std::setw(15) << this->OneED.count() << " sec" << endl;
+    this->fileio_->out << endl << endl;
+    this->fileio_->out << "Two Electron Integral Timings" << endl << bannerMid << endl;
+    this->fileio_->out << std::left << std::setw(60) << "Wall time for Schwartz Bound evaluation:" 
+                       << std::left << std::setw(15) << this->SchwartzD.count() << " sec" << endl;
+    this->fileio_->out << std::left << std::setw(60) << "Wall time for Density Shell Block Norm evaluation:" 
+                       << std::left << std::setw(15) << this->DenShBlkD.count() << " sec" << endl;
+    this->fileio_->out << std::left << std::setw(60) << "Wall time for Perturbation Tensor evaluation:" 
+                       << std::left << std::setw(15) << this->PTD.count() << " sec" << endl;
+      
+    this->fileio_->out << bannerEnd << endl;
+}

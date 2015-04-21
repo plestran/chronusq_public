@@ -85,10 +85,17 @@ void BasisSet::printAO(ostream &output){
 //--------------------------------------------//
 void BasisSet::readBasisSet(FileIO *fileio, Molecule *mol){
   int i,j,n,k;
+  // TODO Have this be read to a string
+  // TODO Check for basis in BASIS_PATH (should be set up though cmake)
   char readString[MAXNAMELEN];
   fileio->in>>readString;
-  ifstream *fileBasis = new ifstream(readString);
-  if(fileBasis==NULL) throw 4004;
+  ifstream *fileBasis;
+  if(fexists(readString)) {
+    fileBasis = new ifstream(readString);
+  } else {
+    cout << "Could not find basis set file" << endl;
+    exit(EXIT_FAILURE);
+  }
   double threePI=math.pi*math.pi*math.pi,readNorm, readExp, readCoeff1, readCoeff2;
   int    nBasis, nShell, readNPGTO, L;
   char   atomStr[MAXNAMELEN];
@@ -107,6 +114,8 @@ void BasisSet::readBasisSet(FileIO *fileio, Molecule *mol){
     while(strcmp(readString,"****")) { 
       *fileBasis >> readNPGTO;
       *fileBasis >> readNorm ;
+      // TODO Extend this to higher angular momentum (follow though with the rest of
+      //      the code)
       if(!strcmp(readString,"S")||!strcmp(readString,"P")||!strcmp(readString,"D")||
          !strcmp(readString,"F")||!strcmp(readString,"G")){
         //S,P,D,F,G shell
@@ -116,6 +125,7 @@ void BasisSet::readBasisSet(FileIO *fileio, Molecule *mol){
         (this->nBasis_)=(this->nBasis_)+HashNAOs(L);
         (this->nPrimitive_)=(this->nPrimitive_)+readNPGTO*HashNAOs(L);
         for(j=0;j<2*readNPGTO;j++) *fileBasis>>readString;
+      // Is this obsolete?
       } else if(!strcmp(readString,"SP")){
         //SP shell
         (this->nLShell_[0])++;
@@ -152,6 +162,8 @@ void BasisSet::readBasisSet(FileIO *fileio, Molecule *mol){
     while(strcmp(readString,"****")) { 
       *fileBasis >> readNPGTO;
       *fileBasis >> readNorm ;
+      // TODO Extend this to higher angular momentum (follow though with the rest of
+      //      the code)
       if(!strcmp(readString,"S")||!strcmp(readString,"P")||!strcmp(readString,"D")||
          !strcmp(readString,"F")||!strcmp(readString,"G")){
         //S,P,D,F,G shell

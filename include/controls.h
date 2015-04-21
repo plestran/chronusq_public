@@ -26,6 +26,7 @@
 #ifndef INCLUDED_CONTROLS
 #define INCLUDED_CONTROLS
 #include "global.h"
+#include "eiginterface.h"
 
 /****************************/
 /* Error Messages 6000-6999 */
@@ -52,10 +53,12 @@ public:
   double	thresholdSchawrtz;
   int    	guess;         	// how to get the initial guess
   char   	gauFChkName[MAXNAMELEN];	// Gaussian formatted checkpoint filename
+  int           nthreads;       // Number of OpenMP threads
 
   Controls(){;};
   ~Controls(){;};
   void iniControls();
+  void readSMP(int &);
 };
 } // namespace ChronusQ
 #endif

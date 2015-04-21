@@ -45,4 +45,20 @@ void Controls::iniControls(){
   this->thresholdSchawrtz = 1.0e-14;
   this->guess = 0;
   this->directTwoE = false;
+#ifdef USE_LIBINT
+  libint2::init();
+#endif
+  this->nthreads = 1;
+#ifdef USE_OMP
+  // Set up Thread Pool
+  this->nthreads = omp_get_max_threads();
+  omp_set_num_threads(this->nthreads);
+#endif
 };
+
+void Controls::readSMP(int &n) {
+#ifdef USE_OMP
+  this->nthreads = n;
+  omp_set_num_threads(n);
+#endif
+}

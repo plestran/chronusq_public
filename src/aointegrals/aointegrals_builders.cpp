@@ -36,7 +36,7 @@ void AOIntegrals::computeAOTwoE(){
 //  ConstQuartetNew *constQuartetNew = new ConstQuartetNew;
   nBasis = this->basisSet_->nBasis();
   ShellPair *ijShellPair, *klShellPair, *tmpShellPair;
-  this->twoEX_->clearAll();
+  this->twoEX_->setZero();
   // integration over shell quartet on same shell pairs
   for(ijShell=0;ijShell<this->basisSet_->nShellPair();ijShell++) {
     ijShellPair = &(this->basisSet_->shellPairs[ijShell]);
@@ -173,6 +173,7 @@ void AOIntegrals::computeAOTwoE(){
   this->haveAOTwoE = true;
 };
 
+#ifndef USE_LIBINT // Only use Libint OneE for now
 //-----------------------------------//
 // compute one-electron integrals    //
 //   overlap matrix                  //
@@ -184,8 +185,9 @@ void AOIntegrals::computeAOOneE(){
   double divSTV,S,T,V;
   int i,j,m,n,ij,ijShell,nPGTOs[2];
   ShellPair *ijShellPair;
-  clock_t start,finish;
-  if(controls_->printLevel>=1) start = clock();
+//clock_t start,finish;
+  std::chrono::high_resolution_clock::time_point start,finish;
+  if(controls_->printLevel>=1) start = std::chrono::high_resolution_clock::now();
   this->iniMolecularConstants();
   for(ijShell=0;ijShell<basisSet_->nShellPair();ijShell++) {
     ijShellPair = &(basisSet_->shellPairs[ijShell]);
@@ -214,18 +216,233 @@ void AOIntegrals::computeAOOneE(){
       (*this->kinetic_)(i,j) = T;
     };
   };
-  oneE_->sub(kinetic_,potential_);
+//oneE_->sub(kinetic_,potential_);
+  (*this->oneE_) = (*this->kinetic_)-(*this->potential);
+  finish = std::chrono::high_resolution_clock::now();
+  this->OneED = finish - start;
   if(controls_->printLevel>=2) {
+/*
     this->overlap_->printAll(5,fileio_->out);
     this->kinetic_->printAll(5,fileio_->out);
     this->potential_->printAll(5,fileio_->out);
     this->oneE_->printAll(5,fileio_->out);
+*/
+    prettyPrint(this->fileio_->out,(*this->overlap_),"Overlap");
+    prettyPrint(this->fileio_->out,(*this->overlap_),"Kinetic");
+    prettyPrint(this->fileio_->out,(*this->overlap_),"Potential");
+    prettyPrint(this->fileio_->out,(*this->overlap_),"Core Hamiltonian");
   };
   if(controls_->printLevel>=1) {
-    finish = clock();
-    this->fileio_->out<<"\nCPU time for one-electron integral:"<<(finish-start)/CLOCKS_PER_SEC<<" seconds."<<endl;
+//    finish = clock();
+    this->fileio_->out<<"\nCPU time for one-electron integral:  "<< this->OneED.count() <<" seconds."<<endl;
   };
   this->haveAOOneE = true;
 };
+#else // USE_LIBINT
+using libint2::OneBodyEngine;
+
+void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
+
+  RealMatrix *mat;
+  if(iType == OneBodyEngine::overlap){
+    mat = this->overlap_;
+  } else if(iType == OneBodyEngine::kinetic) {
+    mat = this->kinetic_;
+  } else if(iType == OneBodyEngine::nuclear) {
+    mat = this->potential_;
+  } else {
+    cout << "OneBodyEngine type not recognized" << endl;
+    exit(EXIT_FAILURE);
+  }
+ 
+  // Check to see if the basisset had been converted
+  if(!this->basisSet_->convToLI) this->basisSet_->convShell(this->molecule_);
+  // Define integral Engine
+  std::vector<OneBodyEngine> engines(this->controls_->nthreads);
+  engines[0] = OneBodyEngine(iType,this->basisSet_->maxPrim,this->basisSet_->maxL,0);
+  // If engine is V, define nuclear charges
+  if(iType == OneBodyEngine::nuclear){
+    std::vector<std::pair<double,std::array<double,3>>> q;
+    for(int i = 0; i < this->molecule_->nAtoms(); i++) {
+      q.push_back(
+        {
+          static_cast<double>((*this->molecularConstants_).atomZ[i]), 
+          {
+            {
+	      (*this->molecularConstants_).cart[0][i],
+	      (*this->molecularConstants_).cart[1][i],
+	      (*this->molecularConstants_).cart[2][i]
+	    }
+	  }
+	}
+      );
+    }
+    engines[0].set_q(q);
+  }
+  for(size_t i = 1; i < this->controls_->nthreads; i++) engines[i] = engines[0];
+
+  if(!this->basisSet_->haveMap) this->basisSet_->makeMap(this->molecule_); 
+
+#ifdef USE_OMP
+  #pragma omp parallel
+#endif
+  {
+#ifdef USE_OMP
+    int thread_id = omp_get_thread_num();
+#else
+    int thread_id = 0;
+#endif
+    for(auto s1=0l, s12=0l; s1 < this->basisSet_->nShell(); s1++){
+      int bf1 = this->basisSet_->mapSh2Bf[s1];
+      int n1  = this->basisSet_->shells_libint[s1].size();
+      for(int s2=0; s2 <= s1; s2++, s12++){
+        if(s12 % this->controls_->nthreads != thread_id) continue;
+        int bf2 = this->basisSet_->mapSh2Bf[s2];
+        int n2  = this->basisSet_->shells_libint[s2].size();
+  
+        const double* buff = engines[thread_id].compute(
+          this->basisSet_->shells_libint[s1],
+          this->basisSet_->shells_libint[s2]
+        );
+/*
+        for(int i = 0, ij=0; i < n1; i++) {
+          for(int j = 0; j < n2; j++, ij++) {
+            (*mat)(bf1+i,bf2+j) = buff[ij];
+          }
+        }
+*/
+        Eigen::Map<const RealMatrix> buf_mat(buff,n1,n2);
+        mat->block(bf1,bf2,n1,n2) = buf_mat;
+      }
+    }
+  } // end openmp parallel
+
+  (*mat) = mat->selfadjointView<Lower>();
+
+//if(this->controls_->printLevel>=2)  mat->printAll(5,fileio_->out);
+  if(this->controls_->printLevel>=2){
+    if(iType == OneBodyEngine::overlap){
+      prettyPrint(this->fileio_->out,(*mat),"Overlap");
+    } else if(iType == OneBodyEngine::kinetic) {
+      prettyPrint(this->fileio_->out,(*mat),"Kinetic");
+    } else if(iType == OneBodyEngine::nuclear) {
+      prettyPrint(this->fileio_->out,(*mat),"Potential");
+    } else {
+      cout << "OneBodyEngine type not recognized" << endl;
+      exit(EXIT_FAILURE);
+    }
+  }
+
+}
+
+void AOIntegrals::computeAOOneE(){
+  // Collect Relevant data into a struct (odd, but convienient) 
+  this->iniMolecularConstants();
+
+  // Start timer for one-electron integral evaluation
+  auto oneEStart = std::chrono::high_resolution_clock::now();
+
+  // Compute and time overlap integrals
+  auto OStart = std::chrono::high_resolution_clock::now();
+  OneEDriver(OneBodyEngine::overlap);
+  auto OEnd = std::chrono::high_resolution_clock::now();
+
+  // Compute and time kinetic integrals
+  auto TStart = std::chrono::high_resolution_clock::now();
+  OneEDriver(OneBodyEngine::kinetic);
+  auto TEnd = std::chrono::high_resolution_clock::now();
+
+  // Compute and time nuclear attraction integrals (negative sign is factored in)
+  auto VStart = std::chrono::high_resolution_clock::now();
+  OneEDriver(OneBodyEngine::nuclear);
+  auto VEnd = std::chrono::high_resolution_clock::now();
+//this->oneE_->add(this->kinetic_,this->potential_);
+  (*this->oneE_) = (*this->kinetic_) + (*this->potential_);
+
+  // Get end time of one-electron integral evaluation
+  auto oneEEnd = std::chrono::high_resolution_clock::now();
+//if(this->controls_->printLevel>=2) this->oneE_->printAll(5,fileio_->out);
+  if(this->controls_->printLevel>=2) 
+    prettyPrint(this->fileio_->out,(*this->oneE_),"Core Hamiltonian");
+
+  // Compute time differenes
+  this->OneED = oneEEnd - oneEStart;
+  this->SED = OEnd - OStart;
+  this->TED = TEnd - TStart;
+  this->VED = VEnd - VStart;
+/*
+  if(this->controls_->printLevel >= 1) {
+    this->fileio_->out << endl;
+    this->fileio_->out << std::left << std::setw(60) << "CPU time for Overlap evaluation:" 
+                       << std::left << std::setw(15) << this->SED.count() << " sec" << endl;
+    this->fileio_->out << std::left << std::setw(60) << "CPU time for Kinetic evaluation:" 
+                       << std::left << std::setw(15) << this->TED.count() << " sec" << endl;
+    this->fileio_->out << std::left << std::setw(60) << "CPU time for Nuclear Attraction Potential evaluation:" 
+                       << std::left << std::setw(15) << this->VED.count() << " sec" << endl;
+    this->fileio_->out << std::left << std::setw(60) << " "
+                       << std::left << std::setw(15) << "---------------" << "----" << endl;
+    this->fileio_->out << std::left << std::setw(60) << "Total CPU time for one-electron integral evaluation:" 
+                       << std::left << std::setw(15) << this->OneED.count() << " sec" << endl;
+  }
+*/
+  this->haveAOOneE = true;
+}
+
+using libint2::TwoBodyEngine;
+void AOIntegrals::computeSchwartz(){
+  RealMatrix *ShBlk; 
+  this->schwartz_->setZero();
+  // Check to see if the basisset had been converted
+  if(!this->basisSet_->convToLI) this->basisSet_->convShell(this->molecule_);
+
+  // Define Integral Engine
+  TwoBodyEngine<libint2::Coulomb> engine = 
+    TwoBodyEngine<libint2::Coulomb>(this->basisSet_->maxPrim,
+                                    this->basisSet_->maxL,0);
+  engine.set_precision(0.); // Don't screen primitives during schwartz
+
+  this->fileio_->out << "Computing Schwartz Bound Tensor ... ";
+  auto start =  std::chrono::high_resolution_clock::now();
+
+  for(int s1=0; s1 < this->basisSet_->nShell(); s1++){
+    int n1  = this->basisSet_->shells_libint[s1].size();
+    for(int s2=0; s2 <= s1; s2++){
+      int n2  = this->basisSet_->shells_libint[s2].size();
+ 
+      const auto* buff = engine.compute(
+        this->basisSet_->shells_libint[s1],
+        this->basisSet_->shells_libint[s2],
+        this->basisSet_->shells_libint[s1],
+        this->basisSet_->shells_libint[s2]
+      );
+
+      
+      try{
+        ShBlk = new RealMatrix(n1,n2);
+      } catch (int msg) {cout << "couldn't allocate shblk" << endl;}
+      ShBlk->setZero();
+   
+      int ij = 0;
+      for(int i = 0; i < n1; i++) {
+        for(int j = 0; j < n2; j++) {
+          (*ShBlk)(i,j) = buff[ij*n1*n2 + ij];
+ 	 ij++;
+        }
+      }
+
+      (*this->schwartz_)(s1,s2) = std::sqrt(ShBlk->lpNorm<Infinity>());
+      
+      delete ShBlk;
+    }
+  }
+  auto finish =  std::chrono::high_resolution_clock::now();
+  this->SchwartzD = finish - start;
+  (*this->schwartz_) = this->schwartz_->selfadjointView<Lower>();
+
+  this->fileio_->out << "done (" << this->SchwartzD.count() << ")" << endl;
+  this->haveSchwartz = true;
+}
+
+#endif
 
 
