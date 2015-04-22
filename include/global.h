@@ -25,6 +25,7 @@
  */
 #ifndef INCLUDED_GLOBAL
 #define INCLUDED_GLOBAL
+// Hello
 
 #define MAXNAMELEN 50
 #define MAXANGULARMOMENTUM 6
