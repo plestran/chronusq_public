@@ -144,6 +144,7 @@ public:
   void SCF();  
   void printEnergy(); 
   void printInfo();
+  void Hello();
 
   /*************************/
   /* MPI Related Routines  */
