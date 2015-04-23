@@ -26,7 +26,6 @@
 #ifndef INCLUDED_SINGLESLATER
 #define INCLUDED_SINGLESLATER
 #include "global.h"
-#include "eiginterface.h"
 //#include "matrix.h"
 #include "molecule.h"
 #include "controls.h"

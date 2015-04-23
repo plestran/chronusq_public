@@ -48,6 +48,7 @@
 #ifdef USE_LIBINT
 #  include <libint2.hpp> // Libint Gaussian Integrals library
 #endif
+#include "eiginterface.h"
 
 // Parallelization
 #include <omp.h>
@@ -141,12 +142,6 @@ struct Phys {
 };
 const Phys phys = {0.5291772083000001};
 
-//----------------//
-//String constants//
-//----------------//
-const char bannerTop[100]="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
-const char bannerMid[100]="--------------------------------------------------------------------------------";
-const char bannerEnd[100]="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 
 //------------------//
 // IO block numbers //

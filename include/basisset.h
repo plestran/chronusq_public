@@ -26,7 +26,6 @@
 #ifndef INCLUDED_BASISSET
 #define INCLUDED_BASISSET
 #include "global.h"
-#include "eiginterface.h"
 #include "molecule.h"
 #include "fileio.h"
 #include "controls.h"
