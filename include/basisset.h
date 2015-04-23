@@ -30,6 +30,7 @@
 #include "molecule.h"
 #include "fileio.h"
 #include "controls.h"
+#include "tools.h"
 
 /****************************/
 /* Error Messages 4000-4999 */

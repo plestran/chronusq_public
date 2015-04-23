@@ -42,11 +42,12 @@
 // Math
 #include <cmath>
 #include <complex>
+#define EIGEN_MATRIXBASE_PLUGIN "eigenplugin.h" // ChronusQ plugin for Eigen
+#include <Eigen/Core> // Eigen Linear Algebra
+#include <unsupported/Eigen/MatrixFunctions>
 #ifdef USE_LIBINT
 #  include <libint2.hpp> // Libint Gaussian Integrals library
 #endif
-#include <Eigen/Dense> // Eigen Linear Algebra
-#include <unsupported/Eigen/MatrixFunctions>
 
 // Parallelization
 #include <omp.h>
