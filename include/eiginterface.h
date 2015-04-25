@@ -1,6 +1,13 @@
-#include "global.h"
 #ifndef EIGINTER_INC
 #define EIGINTER_INC
+//----------------//
+//String constants//
+//----------------//
+const char bannerTop[100]="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+const char bannerMid[100]="--------------------------------------------------------------------------------";
+const char bannerEnd[100]="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+
+
 namespace Eigen {
   template<typename Derived>
   void prettyPrint(std::ostream & output, const Derived& m, std::string str){

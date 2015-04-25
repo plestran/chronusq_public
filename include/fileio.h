@@ -27,7 +27,6 @@
 #define INCLUDED_FILEIO
 #define MAXBLOCK 1000
 #include "global.h"
-#include "eiginterface.h"
 #include "tools.h"
 
 /****************************/

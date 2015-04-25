@@ -26,7 +26,6 @@
 #ifndef  INCLUDED_CLASSTOOLS
 #define  INCLUDED_CLASSTOOLS
 #include "global.h"
-#include "eiginterface.h"
 #include "fileio.h"
 #include "molecule.h"
 #include "basisset.h"

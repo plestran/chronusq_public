@@ -27,7 +27,6 @@
 #define  INCLUDED_AOINTEGRAL
 //#include <gsl/gsl_sf_erf.h>
 #include "global.h"
-#include "eiginterface.h"
 #include "basisset.h"
 //#include "matrix.h"
 #include "molecule.h"

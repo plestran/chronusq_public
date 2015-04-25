@@ -26,7 +26,6 @@
 #ifndef INCLUDED_MOLECULES
 #define INCLUDED_MOLECULES
 #include "global.h"
-#include "eiginterface.h"
 #include "fileio.h"
 #include "atoms.h"
 //#include "matrix.h"
