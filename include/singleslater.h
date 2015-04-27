@@ -25,12 +25,10 @@
  */
 #ifndef INCLUDED_SINGLESLATER
 #define INCLUDED_SINGLESLATER
-#include "global.h"
-#include "eiginterface.h"
-//#include "matrix.h"
-#include "molecule.h"
-#include "controls.h"
-#include "aointegrals.h"
+#include <global.h>
+#include <molecule.h>
+#include <controls.h>
+#include <aointegrals.h>
 
 /****************************/
 /* Error Messages 5000-5999 */
@@ -59,15 +57,13 @@ class SingleSlater {
   RealMatrix  *exchangeB_;
   RealMatrix  *moA_;
   RealMatrix  *moB_;
-#ifdef USE_LIBINT
   RealMatrix  *PTA_;
   RealMatrix  *PTB_;
-#endif
-  ChronusQ::BasisSet     	*basisset_;
-  ChronusQ::Molecule    	*molecule_;
-  ChronusQ::FileIO       	*fileio_;
-  ChronusQ::Controls     	*controls_;
-  ChronusQ::AOIntegrals   *aointegrals_;
+  BasisSet     	*basisset_;
+  Molecule    	*molecule_;
+  FileIO       	*fileio_;
+  Controls     	*controls_;
+  AOIntegrals   *aointegrals_;
 
 public:
  
@@ -75,9 +71,7 @@ public:
   bool	haveDensity; 
   bool	haveCoulomb;
   bool	haveExchange;
-#ifdef USE_LIBINT
   bool  havePT;
-#endif
 
   double   energyOneE;
   double   energyTwoE;
@@ -92,7 +86,9 @@ public:
     if(   coulombA_!=NULL) delete coulombA_;
     if(  exchangeA_!=NULL) delete exchangeA_;
     if(        moA_!=NULL) delete moA_;
+    if(        PTA_!=NULL) delete PTA_;
     if(!RHF_) {
+      if(      PTB_!=NULL) delete PTB_;
       if(      moB_!=NULL) delete moB_;
       if(exchangeB_!=NULL) delete exchangeB_;
       if( coulombB_!=NULL) delete coulombB_;
@@ -101,7 +97,7 @@ public:
     };
   };
   // pseudo-constructor
-  void iniSingleSlater(ChronusQ::Molecule*,ChronusQ::BasisSet*,ChronusQ::AOIntegrals*,ChronusQ::FileIO*,ChronusQ::Controls*);
+  void iniSingleSlater(Molecule*,BasisSet*,AOIntegrals*,FileIO*,Controls*);
 
   //set private data
   inline void setNBasis(int nBasis) { this->nBasis_ = nBasis;};

@@ -23,7 +23,7 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
-#include "singleslater.h"
+#include <singleslater.h>
 using ChronusQ::AOIntegrals;
 using ChronusQ::Molecule;
 using ChronusQ::BasisSet;
@@ -167,11 +167,19 @@ void SingleSlater::printInfo() {
 // compute energies     //
 //----------------------//
 void SingleSlater::computeEnergy(){
+/*
   this->energyOneE = (this->aointegrals_->oneE_)->cwiseProduct(*this->densityA_).sum();
 #ifndef USE_LIBINT
   this->energyTwoE = (this->coulombA_->cwiseProduct(*this->densityA_).sum() - this->exchangeA_->cwiseProduct(*this->densityA_).sum());
 #else
   this->energyTwoE = (this->PTA_)->cwiseProduct(*this->densityA_).sum();
+#endif
+*/
+  this->energyOneE = (*this->aointegrals_->oneE_).frobInner(*this->densityA_);
+#ifndef USE_LIBINT
+  this->energyTwoE = ((*this->coulombA_)-(*this->exchangeA_)).frobInner(*this->densityA_);
+#else
+  this->energyTwoE = (*this->PTA_).frobInner(*this->densityA_);
 #endif
   this->totalEnergy= this->energyOneE + this->energyTwoE + this->energyNuclei;
   this->printEnergy();
@@ -338,8 +346,6 @@ void SingleSlater::formExchange(){
 #endif
 //dbwys
 #ifdef USE_LIBINT
-using libint2::TwoBodyEngine;
-typedef TwoBodyEngine<libint2::Coulomb> coulombEngine;
 // Form perturbation tensor (G)
 void SingleSlater::formPT() {
   if(!this->aointegrals_->haveSchwartz) this->aointegrals_->computeSchwartz();

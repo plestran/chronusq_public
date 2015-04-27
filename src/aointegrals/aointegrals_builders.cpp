@@ -23,8 +23,9 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
-#include "aointegrals.h"
+#include <aointegrals.h>
 using ChronusQ::AOIntegrals;
+#ifndef USE_LIBINT // Libint is default integral driver
 //-----------------------------------------------//
 // compute atomic orbital two-electron integrals //
 //-----------------------------------------------//
@@ -173,7 +174,6 @@ void AOIntegrals::computeAOTwoE(){
   this->haveAOTwoE = true;
 };
 
-#ifndef USE_LIBINT // Only use Libint OneE for now
 //-----------------------------------//
 // compute one-electron integrals    //
 //   overlap matrix                  //
@@ -239,7 +239,6 @@ void AOIntegrals::computeAOOneE(){
   this->haveAOOneE = true;
 };
 #else // USE_LIBINT
-using libint2::OneBodyEngine;
 
 void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
 
@@ -441,6 +440,102 @@ void AOIntegrals::computeSchwartz(){
 
   this->fileio_->out << "done (" << this->SchwartzD.count() << ")" << endl;
   this->haveSchwartz = true;
+}
+void AOIntegrals::computeAOTwoE(){
+  if(!this->haveSchwartz) this->computeSchwartz();
+
+
+  std::vector<coulombEngine> engines(this->controls_->nthreads);
+  engines[0] = coulombEngine(this->basisSet_->maxPrim,this->basisSet_->maxL,0);
+  engines[0].set_precision(std::numeric_limits<double>::epsilon());
+
+  for(int i=1; i<this->controls_->nthreads; i++) engines[i] = engines[0];
+  if(!this->basisSet_->haveMap) this->basisSet_->makeMap(this->molecule_); 
+
+#ifdef USE_OMP
+  #pragma omp parallel
+#endif
+  {
+#ifdef USE_OMP
+    int thread_id = omp_get_thread_num();
+#else
+    int thread_id = 0;
+#endif
+  for(int s1 = 0, s1234=0; s1 < this->basisSet_->nShell(); s1++) {
+    int bf1_s = this->basisSet_->mapSh2Bf[s1];
+    int n1    = this->basisSet_->shells_libint[s1].size();
+    for(int s2 = 0; s2 <= s1; s2++) {
+      int bf2_s = this->basisSet_->mapSh2Bf[s2];
+      int n2    = this->basisSet_->shells_libint[s2].size();
+      for(int s3 = 0; s3 <= s1; s3++) {
+        int bf3_s = this->basisSet_->mapSh2Bf[s3];
+        int n3    = this->basisSet_->shells_libint[s3].size();
+        int s4_max = (s1 == s3) ? s2 : s3;
+        for(int s4 = 0; s4 <= s4_max; s4++, s1234++) {
+
+          if(s1234 % this->controls_->nthreads != thread_id) continue;
+
+          int bf4_s = this->basisSet_->mapSh2Bf[s4];
+          int n4    = this->basisSet_->shells_libint[s4].size();
+    
+          // Schwartz and Density screening
+          if((*this->schwartz_)(s1,s2) * (*this->schwartz_)(s3,s4)
+              < this->controls_->thresholdSchawrtz ) continue;
+ 
+          const double* buff = engines[thread_id].compute(
+            this->basisSet_->shells_libint[s1],
+            this->basisSet_->shells_libint[s2],
+            this->basisSet_->shells_libint[s3],
+            this->basisSet_->shells_libint[s4]);
+    
+          for(int i = 0, ijkl = 0 ; i < n1; ++i) {
+            int bf1 = bf1_s + i;
+            for(int j = 0; j < n2; ++j) {
+              int bf2 = bf2_s + j;
+              for(int k = 0; k < n3; ++k) {
+                int bf3 = bf3_s + k;
+                for(int l = 0; l < n4; ++l, ++ijkl) {
+                  int bf4 = bf4_s + l;
+		  /* Print all N^4 AO ERIs if you REALLY want to
+		  if(buff[ijkl]!=0) {
+                    cout << bf1 + 1 << " "
+		         << bf2 + 1 << " "
+		         << bf3 + 1 << " "
+		         << bf4 + 1 << " "
+			 << buff[ijkl] << endl;
+		  }
+		  */
+                  (*this->aoERI_)(bf1,bf2,bf3,bf4) = buff[ijkl];
+                  (*this->aoERI_)(bf1,bf2,bf4,bf3) = buff[ijkl];
+                  (*this->aoERI_)(bf2,bf1,bf3,bf4) = buff[ijkl];
+                  (*this->aoERI_)(bf2,bf1,bf4,bf3) = buff[ijkl];
+                  (*this->aoERI_)(bf3,bf4,bf1,bf2) = buff[ijkl];
+                  (*this->aoERI_)(bf4,bf3,bf1,bf2) = buff[ijkl];
+                  (*this->aoERI_)(bf3,bf4,bf2,bf1) = buff[ijkl];
+                  (*this->aoERI_)(bf4,bf3,bf2,bf1) = buff[ijkl];
+		}
+	      }
+	    }
+	  }
+
+	}
+      }
+    }
+  }
+  } // OMP Parallel
+
+  for(auto i = 0; i < this->nBasis_; i++)
+  for(auto j = 0; j < this->nBasis_; j++)
+  for(auto k = 0; k < this->nBasis_; k++)
+  for(auto l = 0; l < this->nBasis_; l++){
+    if((*this->aoERI_)(i,j,k,l)!=0.0)
+      cout << i + 1 << " "
+           << j + 1<< " "
+           << k + 1<< " "
+           << l + 1<< " "
+	   << (*this->aoERI_)(i,j,k,l) << endl;
+  }
+  
 }
 
 #endif

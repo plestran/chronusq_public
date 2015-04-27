@@ -25,11 +25,11 @@
  */
 #ifndef INCLUDED_MATRIX
 #define INCLUDED_MATRIX
-#include "global.h"
-#include "fileio.h"
-#include "tools.h"
-#include "clapack.h"
-#include "cerr.h"
+#include <global.h>
+#include <fileio.h>
+#include <tools.h>
+#include <clapack.h>
+#include <cerr.h>
 
 /****************************/
 /* Error Messages 3000-3999 */
@@ -160,8 +160,8 @@ public:
     
   }
   // read|write scratch|binary files
-  void ioRead (ChronusQ::FileIO*,int,char*,int charOffset=-1); // NYI Complex
-  void ioWrite(ChronusQ::FileIO*,int,char*,int charOffset=-1); // NYI Complex
+  void ioRead (FileIO*,int,char*,int charOffset=-1); // NYI Complex
+  void ioWrite(FileIO*,int,char*,int charOffset=-1); // NYI Complex
 
   // Zero out the Matrix data_
   inline void clearAll(ostream &output=cout) { memset(data_,0,len_*sizeof(T));};

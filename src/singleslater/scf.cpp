@@ -23,7 +23,7 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
-#include "singleslater.h"
+#include <singleslater.h>
 using ChronusQ::SingleSlater;
 //----------------------------------------//
 // do the SCF                             //

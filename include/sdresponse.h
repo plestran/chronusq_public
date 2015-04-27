@@ -25,14 +25,12 @@
  */
 #ifndef INCLUDED_SDRESPONSE
 #define INCLUDED_SDRESPONSE
-#include "global.h"
-#include "eiginterface.h"
-//#include "matrix.h"
-#include "molecule.h"
-#include "controls.h"
-#include "mointegrals.h"
-#include "singleslater.h"
-#include "basisset.h"
+#include <global.h>
+#include <molecule.h>
+#include <controls.h>
+#include <mointegrals.h>
+#include <singleslater.h>
+#include <basisset.h>
 
 /****************************/
 /* Error Messages 5000-5999 */
@@ -43,11 +41,11 @@ class SDResponse {
   int       nBasis_;
   int       **R2Index_;
   int       nStates_;
-  ChronusQ::BasisSet     	*basisSet_;
-  ChronusQ::Molecule    	*molecule_;
-  ChronusQ::FileIO       	*fileio_;
-  ChronusQ::Controls     	*controls_;
-  ChronusQ::MOIntegrals   *mointegrals_;
+  BasisSet     	*basisSet_;
+  Molecule    	*molecule_;
+  FileIO       	*fileio_;
+  Controls     	*controls_;
+  MOIntegrals   *mointegrals_;
   SingleSlater  *singleSlater_;
 
 public:

@@ -26,16 +26,14 @@
 #ifndef  INCLUDED_MOINTEGRAL
 #define  INCLUDED_MOINTEGRAL
 //#include <gsl/gsl_sf_erf.h>
-#include "global.h"
-#include "eiginterface.h"
-#include "basisset.h"
-//#include "matrix.h"
-#include "molecule.h"
-#include "fileio.h"
-#include "controls.h"
-#include "tools.h"
-#include "aointegrals.h"
-#include "singleslater.h"
+#include <global.h>
+#include <basisset.h>
+#include <molecule.h>
+#include <fileio.h>
+#include <controls.h>
+#include <tools.h>
+#include <aointegrals.h>
+#include <singleslater.h>
 
 /****************************/
 /* Error Messages 8000-8999 */
@@ -46,11 +44,11 @@ class MOIntegrals{
   int       **ijIndex_;
   int       **abIndex_;
 
-  ChronusQ::BasisSet     	*basisSet_;
-  ChronusQ::Molecule    	*molecule_;
-  ChronusQ::FileIO       	*fileio_;
-  ChronusQ::Controls     	*controls_;
-  ChronusQ::AOIntegrals   *aointegrals_;
+  BasisSet     	*basisSet_;
+  Molecule    	*molecule_;
+  FileIO       	*fileio_;
+  Controls     	*controls_;
+  AOIntegrals   *aointegrals_;
   SingleSlater  *singleSlater_;
 
 public:

@@ -23,14 +23,14 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
-#include "global.h"
-#include "fileio.h"
-#include "molecule.h"
-#include "atoms.h"
-#include "matrix.h"
-#include "basisset.h"
-#include "aointegrals.h"
-#include "workers.h"
+#include <global.h>
+#include <fileio.h>
+#include <molecule.h>
+#include <atoms.h>
+#include <matrix.h>
+#include <basisset.h>
+#include <aointegrals.h>
+#include <workers.h>
 using namespace ChronusQ;
 
 int main(int argc,char *argv[]) {

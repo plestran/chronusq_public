@@ -23,7 +23,7 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
-#include "controls.h"
+#include <controls.h>
 using ChronusQ::Controls;
 /****************************/
 /* Error Messages 6000-6999 */

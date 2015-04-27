@@ -26,9 +26,8 @@
 #ifndef INCLUDED_FILEIO
 #define INCLUDED_FILEIO
 #define MAXBLOCK 1000
-#include "global.h"
-#include "eiginterface.h"
-#include "tools.h"
+#include <global.h>
+#include <tools.h>
 
 /****************************/
 /* Error Messages 1000-1999 */
