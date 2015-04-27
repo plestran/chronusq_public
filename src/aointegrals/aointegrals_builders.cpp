@@ -25,6 +25,7 @@
  */
 #include <aointegrals.h>
 using ChronusQ::AOIntegrals;
+#ifndef USE_LIBINT // Libint is default integral driver
 //-----------------------------------------------//
 // compute atomic orbital two-electron integrals //
 //-----------------------------------------------//
@@ -173,7 +174,6 @@ void AOIntegrals::computeAOTwoE(){
   this->haveAOTwoE = true;
 };
 
-#ifndef USE_LIBINT // Only use Libint OneE for now
 //-----------------------------------//
 // compute one-electron integrals    //
 //   overlap matrix                  //
@@ -441,6 +441,9 @@ void AOIntegrals::computeSchwartz(){
 
   this->fileio_->out << "done (" << this->SchwartzD.count() << ")" << endl;
   this->haveSchwartz = true;
+}
+void AOIntegrals::computeAOTwoE(){
+
 }
 
 #endif

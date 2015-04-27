@@ -15,3 +15,10 @@ ChronusQ TODO
 - Better print control (consistant scheme)
 - Fix Mac compilation (weird problem with ifstream that doesn't show up on
   linux)
+- Conditional allocation of AO ERI tensor (aointegrals.cpp)
+- Try/Catch for AO ERI tensor allocation (aointegrals.cpp)
+- Use boost for high precision physical constants (global.h, etc)
+- Add initialization option (subclass?) for each main class (selectively
+  allocate matricies / tensors, etc) to set before initialization
+- Need a fully functional error handler
+- Need to rename FileIO

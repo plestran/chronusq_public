@@ -48,7 +48,8 @@
 #ifdef USE_LIBINT
 #  include <libint2.hpp> // Libint Gaussian Integrals library
 #endif
-#include <eiginterface.h>
+#include <eiginterface.h> // ChronusQ interface (TODO consolidate into plugin)
+#include <btas/btas.h> // BTAS Tensor Algebra library (header only)
 
 // Parallelization
 #include <omp.h>
@@ -81,6 +82,9 @@ using Eigen::ColMajor;
 using Eigen::RowMajor;
 using Eigen::Upper;
 using Eigen::Lower;
+
+/* Things from BTAS that we always need */
+using btas::Tensor;
 
 // Useful typedefs
 typedef std::complex<double> dcomplex;

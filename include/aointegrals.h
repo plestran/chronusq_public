@@ -114,19 +114,16 @@ public:
   // these should be protected
   RealMatrix  *twoEC_;
   RealMatrix  *twoEX_;
+  Tensor<double> *aoERI_;
   RealMatrix  *oneE_;
   RealMatrix  *overlap_;
   RealMatrix  *kinetic_;
   RealMatrix  *potential_;
-#ifdef USE_LIBINT
   RealMatrix  *schwartz_;
-#endif
 
   bool		haveAOTwoE;
   bool		haveAOOneE;
-#ifdef USE_LIBINT
   bool          haveSchwartz;
-#endif
 
 
   // Timing Stats
@@ -148,6 +145,8 @@ public:
     if(    overlap_!=NULL) delete overlap_;
     if(    kinetic_!=NULL) delete kinetic_;
     if(  potential_!=NULL) delete potential_;
+    if(   schwartz_!=NULL) delete schwartz_;
+    if(      aoERI_!=NULL) delete aoERI_;
   };
   
   // initialization function

@@ -57,10 +57,8 @@ class SingleSlater {
   RealMatrix  *exchangeB_;
   RealMatrix  *moA_;
   RealMatrix  *moB_;
-#ifdef USE_LIBINT
   RealMatrix  *PTA_;
   RealMatrix  *PTB_;
-#endif
   BasisSet     	*basisset_;
   Molecule    	*molecule_;
   FileIO       	*fileio_;
@@ -90,7 +88,9 @@ public:
     if(   coulombA_!=NULL) delete coulombA_;
     if(  exchangeA_!=NULL) delete exchangeA_;
     if(        moA_!=NULL) delete moA_;
+    if(        PTA_!=NULL) delete PTA_;
     if(!RHF_) {
+      if(      PTB_!=NULL) delete PTB_;
       if(      moB_!=NULL) delete moB_;
       if(exchangeB_!=NULL) delete exchangeB_;
       if( coulombB_!=NULL) delete coulombB_;

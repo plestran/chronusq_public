@@ -84,6 +84,7 @@ void AOIntegrals::iniAOIntegrals(Molecule *molecule, BasisSet *basisset, FileIO 
   this->nBasis_   = basisset->nBasis();
   this->nTT_      = this->nBasis_*(this->nBasis_+1)/2;
 
+#ifndef USE_LIBINT // We don't need to allocate these if we're using Libint
   try {
     this->twoEC_ = new RealMatrix(this->nTT_,this->nTT_); // Raffenetti Two Electron Coulomb AOIntegrals
     this->twoEX_ = new RealMatrix(this->nTT_,this->nTT_); // Raffenetti Two Electron Exchange AOIntegrals
@@ -91,6 +92,10 @@ void AOIntegrals::iniAOIntegrals(Molecule *molecule, BasisSet *basisset, FileIO 
     fileio->out<<"Unable to allocate memory for twoE_ E#:"<<msg<<endl;
     exit(1);
   };
+#else // Allocate space for all N^4 AO Integrals in BTAS Tensor object (TODO need to set this up to be conditional)
+  // FIXME need a try statement here
+  this->aoERI_ = new Tensor<double>(this->nBasis_,this->nBasis_,this->nBasis_,this->nBasis_);
+#endif
 
   try{
     this->oneE_      = new RealMatrix(this->nBasis_,this->nBasis_); // One Electron Integral
