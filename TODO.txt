@@ -11,6 +11,7 @@ ChronusQ TODO
 - Clean up input specification from command line (don't require .inp and .out)
 - Generalize input read to all elements
 - Write a FileIO interface for Eigen
+  - Remove dependence of FileIO on global and tools (make stand alone)
 - Better print control (consistant scheme)
 - Fix Mac compilation (weird problem with ifstream that doesn't show up on
   linux)
