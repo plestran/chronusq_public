@@ -71,9 +71,7 @@ public:
   bool	haveDensity; 
   bool	haveCoulomb;
   bool	haveExchange;
-#ifdef USE_LIBINT
   bool  havePT;
-#endif
 
   double   energyOneE;
   double   energyTwoE;

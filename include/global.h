@@ -86,12 +86,17 @@ using Eigen::Lower;
 /* Things from BTAS that we always need */
 using btas::Tensor;
 
+/* Things from Libint that we always need */
+using libint2::OneBodyEngine;
+using libint2::TwoBodyEngine;
+
 // Useful typedefs
 typedef std::complex<double> dcomplex;
 typedef Eigen::Matrix<double,Dynamic,Dynamic,RowMajor>     RealMatrix;    // RowMajor BC Libint
 typedef Eigen::Matrix<dcomplex,Dynamic,Dynamic,RowMajor>   ComplexMatrix; // RowMajor BC Libint
 typedef Eigen::MatrixExponentialReturnValue<RealMatrix>    RealMatExp;
 typedef Eigen::MatrixExponentialReturnValue<ComplexMatrix> ComplexMatExp;
+typedef TwoBodyEngine<libint2::Coulomb> coulombEngine;
 
 //----------------//
 //number constants//
