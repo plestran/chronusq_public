@@ -25,11 +25,11 @@
  */
 #ifndef  INCLUDED_CLASSTOOLS
 #define  INCLUDED_CLASSTOOLS
-#include "global.h"
-#include "fileio.h"
-#include "molecule.h"
-#include "basisset.h"
-#include "controls.h"
+#include <global.h>
+#include <fileio.h>
+#include <molecule.h>
+#include <basisset.h>
+#include <controls.h>
 
 /*****************************/
 /*Error Messages 15000-19999 */

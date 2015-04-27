@@ -25,7 +25,7 @@
  */
 #ifndef INCLUDED_MEMORY
 #define INCLUDED_MEMORY
-#include "global.h"
+#include <global.h>
 
 namespace ChronusQ {
 class Memory {

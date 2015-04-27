@@ -23,7 +23,7 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
-#include "basisset.h"
+#include <basisset.h>
 using ChronusQ::atom; 
 using ChronusQ::Molecule;
 using ChronusQ::BasisSet;

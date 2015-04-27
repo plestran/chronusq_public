@@ -23,7 +23,7 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
-#include "aointegrals.h"
+#include <aointegrals.h>
 using ChronusQ::AOIntegrals;
 static double smallT[21]={
 1.00000000000000,

@@ -25,13 +25,12 @@
  */
 #ifndef INCLUDED_SDRESPONSE
 #define INCLUDED_SDRESPONSE
-#include "global.h"
-//#include "matrix.h"
-#include "molecule.h"
-#include "controls.h"
-#include "mointegrals.h"
-#include "singleslater.h"
-#include "basisset.h"
+#include <global.h>
+#include <molecule.h>
+#include <controls.h>
+#include <mointegrals.h>
+#include <singleslater.h>
+#include <basisset.h>
 
 /****************************/
 /* Error Messages 5000-5999 */

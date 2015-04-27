@@ -23,7 +23,7 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
-#include "workers.h"
+#include <workers.h>
 using ChronusQ::Molecule;
 
 int worker(GlobalMPI *globalMPI) {

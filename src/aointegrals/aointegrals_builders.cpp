@@ -23,7 +23,7 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
-#include "aointegrals.h"
+#include <aointegrals.h>
 using ChronusQ::AOIntegrals;
 //-----------------------------------------------//
 // compute atomic orbital two-electron integrals //

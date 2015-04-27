@@ -23,7 +23,7 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
-#include "memory.h"
+#include <memory.h>
 using ChronusQ::Memory;
 //constructor
 Memory::Memory(long n, char *unit, ostream output) {

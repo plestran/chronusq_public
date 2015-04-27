@@ -23,7 +23,7 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
-#include "sdresponse.h"
+#include <sdresponse.h>
 using ChronusQ::Molecule;
 using ChronusQ::BasisSet;
 using ChronusQ::Controls;

@@ -23,7 +23,7 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
-#include "mointegrals.h"
+#include <mointegrals.h>
 using ChronusQ::AOIntegrals;
 using ChronusQ::Molecule;
 using ChronusQ::BasisSet;

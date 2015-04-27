@@ -23,7 +23,7 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
-#include "cerr.h"
+#include <cerr.h>
 
 void CErr(int msg) {
   if(msg==3000) {

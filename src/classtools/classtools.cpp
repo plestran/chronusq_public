@@ -23,7 +23,7 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
-#include "classtools.h"
+#include <classtools.h>
 using ChronusQ::Molecule;
 using ChronusQ::BasisSet;
 using ChronusQ::Controls;

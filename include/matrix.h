@@ -25,11 +25,11 @@
  */
 #ifndef INCLUDED_MATRIX
 #define INCLUDED_MATRIX
-#include "global.h"
-#include "fileio.h"
-#include "tools.h"
-#include "clapack.h"
-#include "cerr.h"
+#include <global.h>
+#include <fileio.h>
+#include <tools.h>
+#include <clapack.h>
+#include <cerr.h>
 
 /****************************/
 /* Error Messages 3000-3999 */

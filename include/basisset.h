@@ -25,11 +25,11 @@
  */
 #ifndef INCLUDED_BASISSET
 #define INCLUDED_BASISSET
-#include "global.h"
-#include "molecule.h"
-#include "fileio.h"
-#include "controls.h"
-#include "tools.h"
+#include <global.h>
+#include <molecule.h>
+#include <fileio.h>
+#include <controls.h>
+#include <tools.h>
 
 /****************************/
 /* Error Messages 4000-4999 */

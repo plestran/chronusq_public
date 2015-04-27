@@ -26,15 +26,14 @@
 #ifndef  INCLUDED_MOINTEGRAL
 #define  INCLUDED_MOINTEGRAL
 //#include <gsl/gsl_sf_erf.h>
-#include "global.h"
-#include "basisset.h"
-//#include "matrix.h"
-#include "molecule.h"
-#include "fileio.h"
-#include "controls.h"
-#include "tools.h"
-#include "aointegrals.h"
-#include "singleslater.h"
+#include <global.h>
+#include <basisset.h>
+#include <molecule.h>
+#include <fileio.h>
+#include <controls.h>
+#include <tools.h>
+#include <aointegrals.h>
+#include <singleslater.h>
 
 /****************************/
 /* Error Messages 8000-8999 */

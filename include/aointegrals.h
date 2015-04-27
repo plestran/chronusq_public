@@ -26,13 +26,12 @@
 #ifndef  INCLUDED_AOINTEGRAL
 #define  INCLUDED_AOINTEGRAL
 //#include <gsl/gsl_sf_erf.h>
-#include "global.h"
-#include "basisset.h"
-//#include "matrix.h"
-#include "molecule.h"
-#include "fileio.h"
-#include "controls.h"
-#include "tools.h"
+#include <global.h>
+#include <basisset.h>
+#include <molecule.h>
+#include <fileio.h>
+#include <controls.h>
+#include <tools.h>
 
 #define MaxFmTPt 3201
 #define MaxTotalL 18

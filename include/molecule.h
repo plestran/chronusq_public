@@ -25,11 +25,10 @@
  */
 #ifndef INCLUDED_MOLECULES
 #define INCLUDED_MOLECULES
-#include "global.h"
-#include "fileio.h"
-#include "atoms.h"
-//#include "matrix.h"
-#include "controls.h"
+#include <global.h>
+#include <fileio.h>
+#include <atoms.h>
+#include <controls.h>
 
 /****************************/
 /* Error Messages 2000-2999 */

@@ -23,7 +23,7 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
-#include "molecule.h"
+#include <molecule.h>
 using ChronusQ::Molecule;
 //-------------//
 // initializer //

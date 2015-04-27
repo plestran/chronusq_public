@@ -25,11 +25,10 @@
  */
 #ifndef INCLUDED_SINGLESLATER
 #define INCLUDED_SINGLESLATER
-#include "global.h"
-//#include "matrix.h"
-#include "molecule.h"
-#include "controls.h"
-#include "aointegrals.h"
+#include <global.h>
+#include <molecule.h>
+#include <controls.h>
+#include <aointegrals.h>
 
 /****************************/
 /* Error Messages 5000-5999 */

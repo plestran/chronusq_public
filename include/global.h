@@ -32,7 +32,7 @@
 #define MAXATOMS 1000
 
 // CMake Compilation Configuration
-#include "config_chronusq.h"
+#include <config_chronusq.h>
 
 // IO
 #include <iostream>
@@ -48,7 +48,7 @@
 #ifdef USE_LIBINT
 #  include <libint2.hpp> // Libint Gaussian Integrals library
 #endif
-#include "eiginterface.h"
+#include <eiginterface.h>
 
 // Parallelization
 #include <omp.h>
