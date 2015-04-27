@@ -63,6 +63,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   hartreeFock->printInfo();
 #ifdef USE_LIBINT
   aointegrals->computeSchwartz();
+  aointegrals->computeAOTwoE();
 #endif
   if(controls->guess==0) hartreeFock->formGuess();
   else if(controls->guess==1) hartreeFock->readGuessIO();

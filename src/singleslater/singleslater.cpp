@@ -346,8 +346,6 @@ void SingleSlater::formExchange(){
 #endif
 //dbwys
 #ifdef USE_LIBINT
-using libint2::TwoBodyEngine;
-typedef TwoBodyEngine<libint2::Coulomb> coulombEngine;
 // Form perturbation tensor (G)
 void SingleSlater::formPT() {
   if(!this->aointegrals_->haveSchwartz) this->aointegrals_->computeSchwartz();
