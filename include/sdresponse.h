@@ -41,11 +41,11 @@ class SDResponse {
   int       nBasis_;
   int       **R2Index_;
   int       nStates_;
-  ChronusQ::BasisSet     	*basisSet_;
-  ChronusQ::Molecule    	*molecule_;
-  ChronusQ::FileIO       	*fileio_;
-  ChronusQ::Controls     	*controls_;
-  ChronusQ::MOIntegrals   *mointegrals_;
+  BasisSet     	*basisSet_;
+  Molecule    	*molecule_;
+  FileIO       	*fileio_;
+  Controls     	*controls_;
+  MOIntegrals   *mointegrals_;
   SingleSlater  *singleSlater_;
 
 public:

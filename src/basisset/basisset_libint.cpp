@@ -29,6 +29,7 @@
 
 using ChronusQ::BasisSet;
 using ChronusQ::Molecule;
+using ChronusQ::HashL;
 typedef ChronusQ::Shell CShell;
 typedef libint2::Shell LIShell;
 
@@ -45,7 +46,7 @@ void BasisSet::convShell(Molecule* mol) {
               (*mol->cart())(1,this->shells[i].center),
               (*mol->cart())(2,this->shells[i].center)}};
 
-    int L = ChronusQ::HashL(&this->shells[i].name[0]);
+    int L = HashL(&this->shells[i].name[0]);
 
     this->shells_libint.push_back(
        LIShell{
