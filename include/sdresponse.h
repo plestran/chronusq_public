@@ -48,6 +48,7 @@ class SDResponse {
   MOIntegrals   *mointegrals_;
   SingleSlater  *singleSlater_;
 
+  void formRM();
 public:
  
   // constructor & destructor

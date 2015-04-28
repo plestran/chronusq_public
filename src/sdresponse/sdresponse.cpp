@@ -59,6 +59,33 @@ void SDResponse::computeExcitedStates(){
 //--------------------//
 void SDResponse::printExcitedStateEnergies(){
 };
+//--------------------//
+//    < i j | a b >   //
+//--------------------//
+void SDResponse::formRM(){
+  int i,j,a,b,mu,nu,lam,sig;
+  int nBasis = this->basisSet->nBasis();
+  // Copy this->singleslater->moA_ (Eigen) to local BTAS tensor
+  Tensor<double> this->LocMoA(nBasis,nBasis);
+  for(auto i = 0; i < this->basisSet_->nBasis(); i++)
+  for(auto j = 0; j < this->basisSet_->nBasis(); j++) {
+    //    this->LocalMoA(i,j) = oldMOA(i,j);
+    LocMoA(i,j) = this->singleslater->moA_(i,j);
+  }
+  // Create 4 Tensor<double> objects as intermetiates
+  Tensor<double> this->Inter1(nBasis,nBasis,nBasis,nBasis); // <i nu | lam sig>
+  Tensor<double> this->Inter2(nBasis,nBasis,nBasis,nBasis); // <i j  | lam sig>
+  Tensor<double> this->Inter3(nBasis,nBasis,nBasis,nBasis); // <i j  | a   sig>
+  Tensor<double> this->Inter4(nBasis,nBasis,nBasis,nBasis); // <i j  | a   b  >
+  // <i nu | lam sig>
+  contract(1.0,LocMoA(i,mu),AO,0.0,Inter1);
+  // <i j  | lam sig>
+  contract(1.0,LocMoA(j,nu),Inter1(i,nu,lam,sig),0.0,Inter2);
+  // <i j  | a   sig>
+  contract(1.0,LocMoA(lam,a),Inter2(i,j,lam,sig),0.0,Inter3);
+  // <i j  | a   b  >
+  contract(1.0,LocMoA(sig,b),Inter3(i,j,a,sig),0.0,Inter4);
+}
 
 /*************************/
 /* MPI Related Routines  */

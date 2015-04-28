@@ -523,7 +523,7 @@ void AOIntegrals::computeAOTwoE(){
     }
   }
   } // OMP Parallel
-
+/*
   for(auto i = 0; i < this->nBasis_; i++)
   for(auto j = 0; j < this->nBasis_; j++)
   for(auto k = 0; k < this->nBasis_; k++)
@@ -535,6 +535,7 @@ void AOIntegrals::computeAOTwoE(){
            << l + 1<< " "
 	   << (*this->aoERI_)(i,j,k,l) << endl;
   }
+*/
   
 }
 
