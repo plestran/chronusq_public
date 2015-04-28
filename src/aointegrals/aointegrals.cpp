@@ -98,7 +98,7 @@ void AOIntegrals::iniAOIntegrals(Molecule *molecule, BasisSet *basisset, FileIO 
 #endif
 
   try{
-    this->oneE_      = new RealMatrix(this->nBasis_,this->nBasis_); // One Electron Integral
+    this->oneE_      = std::make_shared<RealMatrix>(this->nBasis_,this->nBasis_); // One Electron Integral
   } catch (int msg) {
     fileio->out<<"Unable to allocate memory for oneE_! E#:"<<msg<<endl;
     exit(1);

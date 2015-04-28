@@ -111,11 +111,12 @@ class AOIntegrals{
 //dbwye
 
 public:
+  std::shared_ptr<RealMatrix> obj(nullptr);
   // these should be protected
   RealMatrix  *twoEC_;
   RealMatrix  *twoEX_;
   Tensor<double> *aoERI_;
-  RealMatrix  *oneE_;
+  std::shared_ptr<RealMatrix>  oneE_(nullptr);
   RealMatrix  *overlap_;
   RealMatrix  *kinetic_;
   RealMatrix  *potential_;
@@ -141,7 +142,7 @@ public:
   ~AOIntegrals(){
     if(      twoEC_!=NULL) delete twoEC_;
     if(      twoEX_!=NULL) delete twoEX_;
-    if(       oneE_!=NULL) delete oneE_;
+    oneE_.reset();
     if(    overlap_!=NULL) delete overlap_;
     if(    kinetic_!=NULL) delete kinetic_;
     if(  potential_!=NULL) delete potential_;
