@@ -29,14 +29,14 @@ using namespace ChronusQ;
 int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   int i,j,k,l;
   time_t currentTime;
-  Molecule    	*molecule     	= new Molecule();
-  BasisSet     	*basisset     	= new BasisSet();
-  Controls     	*controls     	= new Controls();
-  AOIntegrals	*aointegrals	= new AOIntegrals();
-  SingleSlater	*hartreeFock	= new SingleSlater();
-  FileIO       	*fileIO;
+  auto molecule     	= std::make_shared<Molecule>();
+  auto basisset     	= std::make_shared<BasisSet>();
+  auto controls     	= std::make_shared<Controls>();
+  auto aointegrals	= std::make_shared<AOIntegrals>();
+  auto hartreeFock	= std::make_shared<SingleSlater>();
+  std::shared_ptr<FileIO> fileIO;;
 
-  try { fileIO=new FileIO(argv[1]);}
+  try { fileIO = std::make_shared<FileIO>(argv[1]);}
   catch(int msg) {
     cout<<"Unable to open file! E#:"<<msg<<endl;
     exit(1);
@@ -73,6 +73,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   aointegrals->printTimings();
   hartreeFock->computeEnergy();
   hartreeFock->SCF();
+/*
   MOIntegrals *moIntegrals = new MOIntegrals();
   moIntegrals->iniMOIntegrals(molecule,basisset,fileIO,controls,aointegrals,hartreeFock);
 
@@ -80,15 +81,16 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   sdResponse->iniSDResponse(molecule,basisset,moIntegrals,fileIO,controls,hartreeFock);
 
   sdResponse->computeExcitedStates();
+*/
 
   time(&currentTime);
   fileIO->out<<"\nJob finished: "<<ctime(&currentTime)<<endl;
 
-  delete  molecule;
-  delete  basisset;
-  delete  fileIO;
-  delete  aointegrals;
-  delete  controls;
+  molecule.reset();
+  basisset.reset();
+  fileIO.reset();
+  aointegrals.reset();
+  controls.reset();
 #ifdef USE_LIBINT
   libint2::cleanup();
 #endif

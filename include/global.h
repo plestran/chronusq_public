@@ -33,7 +33,7 @@
 
 // CMake Compilation Configuration
 #include <config_chronusq.h>
-#include <memory>
+//#include <memory>
 
 // IO
 #include <iostream>

@@ -27,7 +27,6 @@
 #include <fileio.h>
 #include <molecule.h>
 #include <atoms.h>
-#include <matrix.h>
 #include <basisset.h>
 #include <aointegrals.h>
 #include <workers.h>

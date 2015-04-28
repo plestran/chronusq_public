@@ -83,7 +83,7 @@ void BasisSet::printAO(ostream &output){
 //--------------------------------------------//
 // Read basis set information from input file //
 //--------------------------------------------//
-void BasisSet::readBasisSet(FileIO *fileio, Molecule *mol){
+void BasisSet::readBasisSet(std::shared_ptr<FileIO> fileio, std::shared_ptr<Molecule> mol){
   int i,j,n,k;
   // TODO Have this be read to a string
   // TODO Check for basis in BASIS_PATH (should be set up though cmake)
@@ -323,7 +323,7 @@ void BasisSet::printShellPair(ostream &output){
 //---------------------------------------//
 // print a general basis set information //
 //---------------------------------------//
-void BasisSet::printInfo(FileIO *fileio,Controls *controls) {
+void BasisSet::printInfo(std::shared_ptr<FileIO> fileio,std::shared_ptr<Controls> controls) {
   fileio->out<<"\nBasis Function Information:"<<endl;
   fileio->out<< std::setw(15) << "nBasis =" << std::setw(8)<< nBasis_<< std::setw(5) <<" "
 	     << std::setw(20) << "nPrimitive =" << std::setw(8)<< nPrimitive_<< endl;
@@ -338,7 +338,7 @@ void BasisSet::printInfo(FileIO *fileio,Controls *controls) {
 //--------------------------------------------------------------//
 // create and sort shell pairs according to the angular momenta //
 //--------------------------------------------------------------//
-void BasisSet::createShellPair(Molecule *mol) {
+void BasisSet::createShellPair(std::shared_ptr<Molecule> mol) {
   int i,j,k,l,n=0;
   // sort shells according to:
   //   (1) angular momentum

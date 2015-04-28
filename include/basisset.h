@@ -112,7 +112,7 @@ public:
 #ifdef USE_LIBINT
   std::vector<libint2::Shell> shells_libint;
   std::vector<int> mapSh2Bf;
-  RealMatrix *shBlkNorm;
+  std::shared_ptr<RealMatrix> shBlkNorm;
   bool convToLI = false;
   bool haveMap = false;
   int maxPrim;
@@ -127,13 +127,14 @@ public:
     delete[] shellPairs;
     delete[] shells;
     delete[] sortedShells;
+    shBlkNorm.reset();
   };
 
   // initialize memory
   void iniBasisSet();
 
   // create and sort shell pairs according to the angular momenta
-  void createShellPair(Molecule*);
+  void createShellPair(std::shared_ptr<Molecule>);
 
   // access to private data
   inline int     nBasis()  {return this->nBasis_;};
@@ -143,20 +144,20 @@ public:
   inline int nLShell(int L){return this->nLShell_[L];};
 
   // print out basis functions
-  void printInfo(FileIO*,Controls*);
+  void printInfo(std::shared_ptr<FileIO>,std::shared_ptr<Controls>);
   void printAO(ostream &output=cout);
   void printShell(ostream &output=cout);
   void printShellPair(ostream &output=cout);
 
   // read from input file
-  void readBasisSet(FileIO*,Molecule*);
+  void readBasisSet(std::shared_ptr<FileIO>,std::shared_ptr<Molecule>);
 
 #ifdef USE_LIBINT
   // If using Libint, have a routine to convert between local and libint
   // shell format
-  void convShell(Molecule*);
-  void makeMap(Molecule*);
-  void computeShBlkNorm(Molecule*,RealMatrix*);
+  void convShell(std::shared_ptr<Molecule>);
+  void makeMap(std::shared_ptr<Molecule>);
+  void computeShBlkNorm(std::shared_ptr<Molecule>,std::shared_ptr<RealMatrix>);
 #endif
 
   /*************************/

@@ -242,7 +242,7 @@ void AOIntegrals::computeAOOneE(){
 
 void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
 
-  RealMatrix *mat;
+  std::shared_ptr<RealMatrix> mat(nullptr);
   if(iType == OneBodyEngine::overlap){
     mat = this->overlap_;
   } else if(iType == OneBodyEngine::kinetic) {
