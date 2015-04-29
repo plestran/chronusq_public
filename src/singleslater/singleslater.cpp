@@ -80,7 +80,7 @@ void SingleSlater::iniSingleSlater(std::shared_ptr<Molecule> molecule, std::shar
   this->fileio_   = fileio;
   this->controls_ = controls;
   this->aointegrals_= aointegrals;
-
+/* Leaks memory
   int i,j,ij;
   this->R2Index_ = new int*[nBasis];
   for(i=0;i<nBasis;i++) this->R2Index_[i] = new int[nBasis];
@@ -89,14 +89,13 @@ void SingleSlater::iniSingleSlater(std::shared_ptr<Molecule> molecule, std::shar
     else ij=i*(nBasis)-i*(i-1)/2+j-i;
     this->R2Index_[i][j] = ij;
   };
+*/
 
   this->haveCoulomb = false;
   this->haveExchange= false;
   this->haveDensity = false;
   this->haveMO	    = false;
-#ifdef USE_LIBINT
   this->havePT = false;
-#endif
 };
 //-----------------------------------//
 // print a wave function information //
@@ -456,16 +455,22 @@ void SingleSlater::readGuessIO() {
 //-----------------------------------------------------------------------//
 // form the initial guess of MOs from Gaussian formatted checkpoint file //
 //-----------------------------------------------------------------------//
-void SingleSlater::readGuessGauFChk(char *filename) {
+void SingleSlater::readGuessGauFChk(std::string &filename) {
   this->fileio_->out<<"reading formatted checkpoint file "<<filename<<endl;
-  char readString[MAXNAMELEN];
+  std::string readString;
   int i,j,nBasis;
   double data;
-  ifstream *fchk = new ifstream(filename);
+  std::unique_ptr<ifstream> fchk;
+  if(fexists(filename)) {
+    fchk = std::unique_ptr<ifstream>(new ifstream(filename));
+  } else {
+    cout << "Could not find "+filename << endl;
+    exit(EXIT_FAILURE);
+  }
 
   *fchk>>readString;
-  while((!(fchk->eof()))&&(strcmp(readString,"basis"))) *fchk>>readString;
-  if(!strcmp(readString,"basis")) {
+  while((!(fchk->eof()))&&(readString.compare("basis"))) *fchk>>readString;
+  if(!readString.compare("basis")) {
     *fchk>>readString;
     *fchk>>readString;
     *fchk>>nBasis;
@@ -477,8 +482,8 @@ void SingleSlater::readGuessGauFChk(char *filename) {
     this->fileio_->out<<"No basis set found in the formatted checkpoint file! "<<endl;
   };
 
-  while(!(fchk->eof())&&strcmp(readString,"MO")) *fchk>>readString;
-  if(!strcmp(readString,"MO")) {
+  while(!(fchk->eof())&&readString.compare("MO")) *fchk>>readString;
+  if(!readString.compare("MO")) {
     *fchk>>readString;
     *fchk>>readString;
     *fchk>>readString;

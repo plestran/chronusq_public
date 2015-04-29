@@ -89,9 +89,9 @@ void BasisSet::readBasisSet(std::shared_ptr<FileIO> fileio, std::shared_ptr<Mole
   // TODO Check for basis in BASIS_PATH (should be set up though cmake)
   std::string readString;
   fileio->in>>readString;
-  ifstream *fileBasis;
+  std::unique_ptr<ifstream> fileBasis;
   if(fexists(readString)) {
-    fileBasis = new ifstream(readString);
+    fileBasis = std::unique_ptr<ifstream>(new ifstream(readString));
   } else {
     cout << "Could not find basis set file" << endl;
     exit(EXIT_FAILURE);

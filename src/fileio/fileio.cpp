@@ -28,43 +28,46 @@ using ChronusQ::FileIO;
 //-------------//
 // constructor //
 //-------------//
-FileIO::FileIO(char *nm_input) {
+FileIO::FileIO(std::string &nm_input) {
   char   testChar;
   int    testInt;
   long   testLong;
   float  testFloat;
   double testDouble;
-  sizeInt_    = sizeof(testInt)   /sizeof(testChar);
-  sizeLong_   = sizeof(testLong)  /sizeof(testChar);
-  sizeFloat_  = sizeof(testFloat) /sizeof(testChar);
-  sizeDouble_ = sizeof(testDouble)/sizeof(testChar);
+  this->sizeInt_    = sizeof(testInt)   /sizeof(testChar);
+  this->sizeLong_   = sizeof(testLong)  /sizeof(testChar);
+  this->sizeFloat_  = sizeof(testFloat) /sizeof(testChar);
+  this->sizeDouble_ = sizeof(testDouble)/sizeof(testChar);
 
-  name_in   = new char[MAXNAMELEN];
-  name_out  = new char[MAXNAMELEN];
-  name_scr  = new char[MAXNAMELEN];
-  name_bin  = new char[MAXNAMELEN];
-
-  if(nm_input==NULL) {
+  if(nm_input.empty()) {
     this->out<<"Error: input filename required! "<<endl;
     throw 1001;
   } else {
-    strcpy(name_in,nm_input);
-    strcat(name_in,".inp");
-    in.open(name_in,ios::in);
-    if(in.fail()) throw 1002;
+    this->name_in = nm_input + ".inp";
+    this->in.open(name_in,ios::in);
+    if(this->in.fail()) throw 1002;
 
-    strcpy(name_out,nm_input);
-    strcat(name_out,".out");
-    out.open(name_out,ios::out);
-    if(out.fail()) throw 1003;
+    this->name_out = nm_input + ".out";
+    this->out.open(name_out,ios::out);
+    if(this->out.fail()) throw 1003;
 
     // scratch file and binary files will be initialized in iniFileIO
-    strcpy(name_scr,nm_input);
-    strcat(name_scr,".scr");
-    strcpy(name_bin,nm_input);
-    strcat(name_bin,".bin");
+    this->name_scr = nm_input + ".scr";
+    this->name_bin = nm_input + ".bin";
   };
 };
+//------------//
+// destructor //
+//------------//
+FileIO::~FileIO() {
+  if(in.is_open()) in.close();
+  if(scr.is_open()) scr.close();
+  if(bin.is_open()) bin.close();
+  if(scr.is_open()) scr.close();
+  if(bin.is_open()) bin.close();
+  if(out.is_open()) out.close();
+};
+/*
 //-------------------//
 // initialize FileIO //
 //-------------------//
@@ -125,18 +128,6 @@ void FileIO::writeBlock(){
   charStorage = (char *)block;
   bin.seekp(0,ios::beg);
   bin.write(charStorage,charLen);
-};
-//------------//
-// destructor //
-//------------//
-FileIO::~FileIO() {
-  if(in.is_open()) in.close();
-  if(scr.is_open()) scr.close();
-  if(bin.is_open()) bin.close();
-  if(scr.is_open()) scr.close();
-  if(bin.is_open()) bin.close();
-  if(remove(name_scr)!=0) out<<"Error when deleting scratch file!"<<endl;
-  if(out.is_open()) out.close();
 };
 //---------------------------------------------------------------------------------------------//
 // read & write scratch and binary files                                                       //
@@ -246,3 +237,4 @@ int FileIO::charOffset(int offset, char *offsetType) {
   out<<"Unrecognized offset type! E#:"<<1020<<endl;
   exit(1);
 };
+*/

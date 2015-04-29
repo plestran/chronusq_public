@@ -100,7 +100,16 @@ void AOIntegrals::iniAOIntegrals(std::shared_ptr<Molecule> molecule, std::shared
 #ifdef USE_LIBINT
   this->schwartz_ = std::make_shared<RealMatrix>(this->basisSet_->nShell(),this->basisSet_->nShell()); // Schwartz
 #endif
+  pairConstants_ = std::unique_ptr<PairConstants>(new PairConstants);
+  molecularConstants_ = std::unique_ptr<MolecularConstants>(new MolecularConstants);
+  quartetConstants_ = std::unique_ptr<QuartetConstants>(new QuartetConstants);
 
+  this->haveAOTwoE = false;
+  this->haveAOOneE = false;
+#ifdef USE_LIBINT
+  this->haveSchwartz = false;
+#endif
+/* This whole block leaks memory like a siv (~ 8MB leaked for test 4!)
   int i,j,ij;
   this->R2Index_ = new int*[this->nBasis_];
   for(i=0;i<this->nBasis_;i++) this->R2Index_[i] = new int[this->nBasis_];
@@ -110,21 +119,13 @@ void AOIntegrals::iniAOIntegrals(std::shared_ptr<Molecule> molecule, std::shared
     this->R2Index_[i][j] = ij;
   };
 
-  pairConstants_ = new PairConstants;
-  molecularConstants_ = new MolecularConstants;
-  quartetConstants_ = new QuartetConstants;
-
-  this->haveAOTwoE = false;
-  this->haveAOOneE = false;
-#ifdef USE_LIBINT
-  this->haveSchwartz = false;
-#endif
 
 // initialize the FmT table
 // Need to know the max L first
   this->FmTTable_ = new double*[MaxFmTPt];
   for(i=0;i<MaxFmTPt;i++) this->FmTTable_[i] = new double[MaxTotalL];
   this->generateFmTTable();
+*/
 };
 
 void AOIntegrals::generateFmTTable() {

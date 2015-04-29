@@ -96,6 +96,7 @@ void Molecule::printInfo(std::shared_ptr<FileIO> fileio,std::shared_ptr<Controls
 	     <<std::setw(20)<<"Charge ="<<std::setw(8)<<charge_<<endl;
   fileio->out<<std::setw(15)<<"nElectrons ="<<std::setw(8)<<nTotalE_<<endl;
 };
+/*
 //--------------------------------//
 // read from binary files //
 //--------------------------------//
@@ -149,6 +150,7 @@ void Molecule::ioWrite(std::shared_ptr<FileIO> fileio) {
   // FIXME Need FileIO interface to Eigen
 //cart_->ioWrite(fileio,blockMolecule,"BIN");
 };
+*/
 /*************************/
 /* MPI Related Routines  */
 /*************************/

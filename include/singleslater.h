@@ -133,7 +133,7 @@ public:
   void formExchange();		// form the exchange matrix
   void formPT();
   void readGuessIO();       	// read the initial guess of MO's from the input stream
-  void readGuessGauFChk(char*);	// read the initial guess of MO's from the Gaussian formatted checkpoint file
+  void readGuessGauFChk(std::string &);	// read the initial guess of MO's from the Gaussian formatted checkpoint file
   void computeEnergy();         // compute the total electronic energy
   void SCF();  
   void printEnergy(); 
