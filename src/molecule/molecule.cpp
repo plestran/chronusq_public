@@ -23,23 +23,23 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
-#include "molecule.h"
+#include <molecule.h>
 using ChronusQ::Molecule;
 //-------------//
 // initializer //
 //-------------//
-void Molecule::iniMolecule(int nAtoms, FileIO *fileio) {
+void Molecule::iniMolecule(int nAtoms, std::shared_ptr<FileIO> fileio) {
   if(nAtoms<1) throw 2000;
   if(fileio==NULL) throw 2001;
   this->nAtoms_= nAtoms;
-  this->cart_  = new RealMatrix(3, this->nAtoms_); // Molecular Cartesian
+  this->cart_  = std::make_shared<RealMatrix>(3, this->nAtoms_); // Molecular Cartesian
   this->index_ = new int[this->nAtoms_];
   this->size_  = fileio->sizeInt()*5 + fileio->sizeInt()*nAtoms_ + cart_->size();
 };
 //--------------------------------------------//
 // Read molecular information from input file //
 //--------------------------------------------//
-void Molecule::readMolecule(FileIO *fileio){
+void Molecule::readMolecule(std::shared_ptr<FileIO> fileio){
   int i, j, n, readInt;
   char readString[MAXNAMELEN];
   fileio->in >> readInt;
@@ -78,7 +78,7 @@ void Molecule::readMolecule(FileIO *fileio){
 //---------------------------------------------------//
 // Print out molecular carteisan coordinates in bohr //
 //---------------------------------------------------//
-void Molecule::printInfo(FileIO *fileio,Controls *controls) {
+void Molecule::printInfo(std::shared_ptr<FileIO> fileio,std::shared_ptr<Controls> controls) {
   fileio->out.precision(8);
   fileio->out.fill(' ');
   fileio->out.setf(ios::right,ios::adjustfield);
@@ -99,7 +99,7 @@ void Molecule::printInfo(FileIO *fileio,Controls *controls) {
 //--------------------------------//
 // read from binary files //
 //--------------------------------//
-void Molecule::ioRead(FileIO *fileio) {
+void Molecule::ioRead(std::shared_ptr<FileIO> fileio) {
   const int nInteger = 5;
   int storage[nInteger];
   try { fileio->io("R",blockMolecule,"BIN",storage,nInteger,0);}
@@ -112,9 +112,9 @@ void Molecule::ioRead(FileIO *fileio) {
   spin_   = storage[2];
   nTotalE_= storage[3];
   size_   = storage[4];
-  if(cart_!=NULL) delete[] cart_;
+  cart_.reset();
   if(index_!=NULL) delete[] index_;
-  cart_  = new RealMatrix(3, nAtoms_); // Molecular Cartesian
+  cart_  = std::make_shared<RealMatrix>(3, nAtoms_); // Molecular Cartesian
   index_ = new int[nAtoms_];
   try { fileio->io("R",blockMolecule,"BIN",index_,nAtoms_);}
   catch (int msg) {
@@ -127,7 +127,7 @@ void Molecule::ioRead(FileIO *fileio) {
 //-----------------------//
 // write to binary files //
 //----------------------//
-void Molecule::ioWrite(FileIO *fileio) {
+void Molecule::ioWrite(std::shared_ptr<FileIO> fileio) {
   if(!fileio->isOpen(blockMolecule)) fileio->iniBlock(blockMolecule);
   const int nInteger = 5;
   int storage[nInteger];

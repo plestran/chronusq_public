@@ -26,15 +26,14 @@
 #ifndef  INCLUDED_MOINTEGRAL
 #define  INCLUDED_MOINTEGRAL
 //#include <gsl/gsl_sf_erf.h>
-#include "global.h"
-#include "basisset.h"
-//#include "matrix.h"
-#include "molecule.h"
-#include "fileio.h"
-#include "controls.h"
-#include "tools.h"
-#include "aointegrals.h"
-#include "singleslater.h"
+#include <global.h>
+#include <basisset.h>
+#include <molecule.h>
+#include <fileio.h>
+#include <controls.h>
+#include <tools.h>
+#include <aointegrals.h>
+#include <singleslater.h>
 
 /****************************/
 /* Error Messages 8000-8999 */
@@ -45,21 +44,21 @@ class MOIntegrals{
   int       **ijIndex_;
   int       **abIndex_;
 
-  ChronusQ::BasisSet     	*basisSet_;
-  ChronusQ::Molecule    	*molecule_;
-  ChronusQ::FileIO       	*fileio_;
-  ChronusQ::Controls     	*controls_;
-  ChronusQ::AOIntegrals   *aointegrals_;
-  SingleSlater  *singleSlater_;
+  std::shared_ptr<BasisSet>      basisSet_;
+  std::shared_ptr<Molecule>      molecule_;
+  std::shared_ptr<FileIO>        fileio_;
+  std::shared_ptr<Controls>      controls_;
+  std::shared_ptr<AOIntegrals>   aointegrals_;
+  std::shared_ptr<SingleSlater>  singleSlater_;
 
 public:
   // these should be protected
-  RealMatrix    *iajb_;
-  RealMatrix    *ijab_;
-  RealMatrix    *ijka_;
-  RealMatrix    *ijkl_;
-  RealMatrix    *iabc_;
-  RealMatrix    *abcd_;
+  std::shared_ptr<RealMatrix>    iajb_;
+  std::shared_ptr<RealMatrix>    ijab_;
+  std::shared_ptr<RealMatrix>    ijka_;
+  std::shared_ptr<RealMatrix>    ijkl_;
+  std::shared_ptr<RealMatrix>    iabc_;
+  std::shared_ptr<RealMatrix>    abcd_;
 
   bool      haveMOiajb;
   bool      haveMOijab;
@@ -70,16 +69,18 @@ public:
  
   MOIntegrals(){;};
   ~MOIntegrals(){
-    if(      iajb_!=NULL) delete iajb_;
-    if(      ijab_!=NULL) delete ijab_;
-    if(      ijka_!=NULL) delete ijka_;
-    if(      ijkl_!=NULL) delete ijkl_;
-    if(      iabc_!=NULL) delete iabc_;
-    if(      abcd_!=NULL) delete abcd_;
+    iajb_.reset();
+    ijab_.reset();
+    ijka_.reset();
+    ijkl_.reset();
+    iabc_.reset();
+    abcd_.reset();
   };
   
   // initialization function
-  void iniMOIntegrals(ChronusQ::Molecule*,ChronusQ::BasisSet*,ChronusQ::FileIO*,ChronusQ::Controls*,ChronusQ::AOIntegrals*,SingleSlater*);
+  void iniMOIntegrals(std::shared_ptr<Molecule>,std::shared_ptr<BasisSet>,
+                      std::shared_ptr<FileIO>,std::shared_ptr<Controls>,
+                      std::shared_ptr<AOIntegrals>,std::shared_ptr<SingleSlater>);
 
   inline double &iajb(int i, int a, int j, int b){
     return (*iajb_)(this->iaIndex_[i][a],this->iaIndex_[j][b]);

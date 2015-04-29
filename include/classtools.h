@@ -25,11 +25,11 @@
  */
 #ifndef  INCLUDED_CLASSTOOLS
 #define  INCLUDED_CLASSTOOLS
-#include "global.h"
-#include "fileio.h"
-#include "molecule.h"
-#include "basisset.h"
-#include "controls.h"
+#include <global.h>
+#include <fileio.h>
+#include <molecule.h>
+#include <basisset.h>
+#include <controls.h>
 
 /*****************************/
 /*Error Messages 15000-19999 */
@@ -37,10 +37,11 @@
 
 namespace ChronusQ {
 // read input files and initialize everything
-void readInput(FileIO*,ChronusQ::Molecule*,ChronusQ::BasisSet*,Controls*);
+void readInput(std::shared_ptr<FileIO>,std::shared_ptr<Molecule>,
+               std::shared_ptr<BasisSet>,std::shared_ptr<Controls>);
 
 // trace of product of two symmetric matrices
-double traceSymm(RealMatrix*,RealMatrix*);
+double traceSymm(std::shared_ptr<RealMatrix>,std::shared_ptr<RealMatrix>);
 } // namespace ChronusQ
 
 #endif

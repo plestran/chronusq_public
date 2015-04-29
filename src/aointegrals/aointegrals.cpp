@@ -23,7 +23,7 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
-#include "aointegrals.h"
+#include <aointegrals.h>
 using ChronusQ::AOIntegrals;
 static double smallT[21]={
 1.00000000000000,
@@ -76,7 +76,8 @@ static double factTLarge[21] = {
 //---------------------
 // initialize AOIntegrals
 //---------------------
-void AOIntegrals::iniAOIntegrals(Molecule *molecule, BasisSet *basisset, FileIO *fileio, Controls *controls){
+void AOIntegrals::iniAOIntegrals(std::shared_ptr<Molecule> molecule, std::shared_ptr<BasisSet> basisset, 
+                                 std::shared_ptr<FileIO> fileio, std::shared_ptr<Controls> controls){
   this->molecule_ = molecule;
   this->basisSet_ = basisset;
   this->fileio_   = fileio;
@@ -84,46 +85,20 @@ void AOIntegrals::iniAOIntegrals(Molecule *molecule, BasisSet *basisset, FileIO 
   this->nBasis_   = basisset->nBasis();
   this->nTT_      = this->nBasis_*(this->nBasis_+1)/2;
 
-  try {
-    this->twoEC_ = new RealMatrix(this->nTT_,this->nTT_); // Raffenetti Two Electron Coulomb AOIntegrals
-    this->twoEX_ = new RealMatrix(this->nTT_,this->nTT_); // Raffenetti Two Electron Exchange AOIntegrals
-  } catch (int msg) {
-    fileio->out<<"Unable to allocate memory for twoE_ E#:"<<msg<<endl;
-    exit(1);
-  };
-
-  try{
-    this->oneE_      = new RealMatrix(this->nBasis_,this->nBasis_); // One Electron Integral
-  } catch (int msg) {
-    fileio->out<<"Unable to allocate memory for oneE_! E#:"<<msg<<endl;
-    exit(1);
-  };
-
-  try{
-    this->overlap_   = new RealMatrix(this->nBasis_,this->nBasis_); // Overlap
-  } catch (int msg) {
-    fileio->out<<"Unable to allocate memory for SingleSlater::overlap_! E#:"<<msg<<endl;
-    exit(1);
-  };
-  try{
-    this->kinetic_   = new RealMatrix(this->nBasis_,this->nBasis_); // Kinetic
-  } catch (int msg) {
-    fileio->out<<"Unable to allocate memory for SingleSlater::kinetic_! E#:"<<msg<<endl;
-    exit(1);
-  };
-  try{
-    this->potential_ = new RealMatrix(this->nBasis_,this->nBasis_); // Potential
-  } catch (int msg) {
-    fileio->out<<"Unable to allocate memory for SingleSlater::potential_! E#:"<<msg<<endl;
-    exit(1);
-  };
+  // FIXME need a try statement for alloc
+#ifndef USE_LIBINT // We don't need to allocate these if we're using Libint
+  this->twoEC_ = std::make_shared<RealMatrix>(this->nTT_,this->nTT_); // Raffenetti Two Electron Coulomb AOIntegrals
+  this->twoEX_ = std::make_shared<RealMatrix>(this->nTT_,this->nTT_); // Raffenetti Two Electron Exchange AOIntegrals
+#else // Allocate space for all N^4 AO Integrals in BTAS Tensor object (TODO need to set this up to be conditional)
+  if(this->controls_->buildn4eri) 
+    this->aoERI_ = std::make_shared<Tensor<double>>(this->nBasis_,this->nBasis_,this->nBasis_,this->nBasis_);
+#endif
+  this->oneE_      = std::make_shared<RealMatrix>(this->nBasis_,this->nBasis_); // One Electron Integral
+  this->overlap_   = std::make_shared<RealMatrix>(this->nBasis_,this->nBasis_); // Overlap
+  this->kinetic_   = std::make_shared<RealMatrix>(this->nBasis_,this->nBasis_); // Kinetic
+  this->potential_ = std::make_shared<RealMatrix>(this->nBasis_,this->nBasis_); // Potential
 #ifdef USE_LIBINT
-  try{
-    this->schwartz_ = new RealMatrix(this->basisSet_->nShell(),this->basisSet_->nShell()); // Schwartz
-  } catch (int msg) {
-    fileio->out<<"Unable to allocate memory for SingleSlater::schwartz_! E#:"<<msg<<endl;
-    exit(1);
-  };
+  this->schwartz_ = std::make_shared<RealMatrix>(this->basisSet_->nShell(),this->basisSet_->nShell()); // Schwartz
 #endif
 
   int i,j,ij;
