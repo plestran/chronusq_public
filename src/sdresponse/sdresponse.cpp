@@ -30,12 +30,13 @@ using ChronusQ::Controls;
 using ChronusQ::FileIO;
 using ChronusQ::MOIntegrals;
 using ChronusQ::SDResponse;
+using ChronusQ::SingleSlater;
 //------------------------------//
 // allocate memory for matrices //
 //------------------------------//
 void SDResponse::iniSDResponse( Molecule *molecule, BasisSet *basisSet, MOIntegrals *mointegrals, 
                                 FileIO *fileio, Controls *controls, SingleSlater *singleSlater) {
-  int nBasis  = basisSet->nBasis();
+  this->nBasis_  = basisSet->nBasis();
 
   this->molecule_       = molecule;
   this->basisSet_       = basisSet;
@@ -43,6 +44,8 @@ void SDResponse::iniSDResponse( Molecule *molecule, BasisSet *basisSet, MOIntegr
   this->controls_       = controls;
   this->mointegrals_    = mointegrals;
   this->singleSlater_   = singleSlater;
+
+  this->aoERI_ = singleSlater->aointegrals()->aoERI_;
 };
 //-----------------------------------//
 // print a wave function information //
@@ -60,31 +63,74 @@ void SDResponse::computeExcitedStates(){
 void SDResponse::printExcitedStateEnergies(){
 };
 //--------------------//
+//        form        //
 //    < i j | a b >   //
 //--------------------//
 void SDResponse::formRM(){
-  int i,j,a,b,mu,nu,lam,sig;
-  int nBasis = this->basisSet->nBasis();
-  // Copy this->singleslater->moA_ (Eigen) to local BTAS tensor
-  Tensor<double> this->LocMoA(nBasis,nBasis);
-  for(auto i = 0; i < this->basisSet_->nBasis(); i++)
-  for(auto j = 0; j < this->basisSet_->nBasis(); j++) {
-    //    this->LocalMoA(i,j) = oldMOA(i,j);
-    LocMoA(i,j) = this->singleslater->moA_(i,j);
+  int nOA = this->singleSlater_->nOccA();
+  int nO = nOA;
+  int nVA = this->singleSlater_->nVirA();
+  int nV  = nVA;
+
+  // Copy this->singleSlater_->moA_ (Eigen) to local BTAS tensor
+  // Split MO_O & MO_V
+  Tensor<double> LocMoAO(this->nBasis_,nO);
+  Tensor<double> LocMoAV(this->nBasis_,nV);
+  for(auto ii = 0; ii < this->nBasis_; ii++) {
+  for(auto jj = 0; jj < nO; jj++) {
+    LocMoAO(ii,jj) = (*this->singleSlater_->moA())(ii,jj);
   }
+  for(auto kk = nO; kk< this->nBasis_; kk++) {
+    LocMoAV(ii,kk-nO) = (*this->singleSlater_->moA())(ii,kk);
+  }
+  }
+
   // Create 4 Tensor<double> objects as intermetiates
-  Tensor<double> this->Inter1(nBasis,nBasis,nBasis,nBasis); // <i nu | lam sig>
-  Tensor<double> this->Inter2(nBasis,nBasis,nBasis,nBasis); // <i j  | lam sig>
-  Tensor<double> this->Inter3(nBasis,nBasis,nBasis,nBasis); // <i j  | a   sig>
-  Tensor<double> this->Inter4(nBasis,nBasis,nBasis,nBasis); // <i j  | a   b  >
+  Tensor<double> Inter1(nO,this->nBasis_,this->nBasis_,this->nBasis_); // <i nu | lam sig>
+  Tensor<double> Inter2(nO,nO,this->nBasis_,this->nBasis_); // <i j  | lam sig>
+  Tensor<double> Inter3(nO,nO,nV,this->nBasis_); // <i j  | a   sig>
+  Tensor<double> Inter4(nO,nO,nV,nV); // <i j  | a   b  >
+  Tensor<double> Inter5(nO,nO,nV,nV);
+  Tensor<double> dbbar(nO,nO,nV,nV);
+
+  enum{i,j,a,b,mu,nu,lam,sig};
   // <i nu | lam sig>
-  contract(1.0,LocMoA(i,mu),AO,0.0,Inter1);
+  contract(1.0,LocMoAO,{mu,i},(*this->aoERI_),{mu,nu,lam,sig},0.0,Inter1,{i,nu,lam,sig});
   // <i j  | lam sig>
-  contract(1.0,LocMoA(j,nu),Inter1(i,nu,lam,sig),0.0,Inter2);
+  contract(1.0,LocMoAO,{nu,j},Inter1,{i,nu,lam,sig},0.0,Inter2,{i,j,lam,sig});
   // <i j  | a   sig>
-  contract(1.0,LocMoA(lam,a),Inter2(i,j,lam,sig),0.0,Inter3);
+  contract(1.0,Inter2,{i,j,lam,sig},LocMoAV,{lam,a},0.0,Inter3,{i,j,a,sig});
   // <i j  | a   b  >
-  contract(1.0,LocMoA(sig,b),Inter3(i,j,a,sig),0.0,Inter4);
+  contract(1.0,Inter3,{i,j,a,sig},LocMoAV,{sig,b},0.0,Inter4,{i,j,a,b});
+
+    for(auto b=0;b<nV;b++) 
+    for(auto a=0;a<nV;a++) 
+    for(auto j=0;j<nO;j++) 
+    for(auto i=0;i<nO;i++) {
+      cout << "( "<< (i+1) << " " 
+           << (j+1) << " " 
+           << (a+1) << " " 
+           << (b+1) << " ) "
+           << Inter4(i,j,a,b)<<"\n"; 
+    }
+//
+//  enum{i,j,a,b,mu,nu,lam,sig};
+//  // <i nu | lam sig>
+//  contract(1.0,LocMoAO(mu,i),this->aoERI_(mu,nu,lam,sig),0.0,Inter1);
+//  // <i j  | lam sig>
+//  contract(1.0,LocMoAO(nu,j),Inter1(i,nu,lam,sig),0.0,Inter2);
+//  // <i j  | a   sig>
+//  contract(1.0,Inter2(i,j,lam,sig),LocMoAV(lam,b),0.0,Inter3);
+//  // <i j  | a   b  >
+//  contract(1.0,Inter3(i,j,a,sig),LocMoAV(sig,a),0.0,Inter5);
+//  
+//  for(auto i=0;i<nO;i++) 
+//  for(auto j=0;j<nO;j++) 
+//  for(auto a=0;a<nV;a++) 
+//  for(auto b=0;b<nV;b++) {
+//    dbbar(i,j,a,b)=Inter4(i,j,a,b)-Inter5(i,j,a,b);
+//  }
+//  
 }
 
 /*************************/

@@ -47,8 +47,10 @@ class SDResponse {
   Controls     	*controls_;
   MOIntegrals   *mointegrals_;
   SingleSlater  *singleSlater_;
+  friend class SingleSlater;
 
-  void formRM();
+  Tensor<double> *aoERI_;
+
 public:
  
   // constructor & destructor
@@ -60,6 +62,7 @@ public:
   void computeExcitedStates();         // compute the total electronic energy
   void printExcitedStateEnergies(); 
   void printInfo();
+  void formRM();
 
   /*************************/
   /* MPI Related Routines  */

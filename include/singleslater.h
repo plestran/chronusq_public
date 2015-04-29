@@ -125,6 +125,7 @@ public:
   inline RealMatrix *exchangeB(){ return this->exchangeB_;};
   inline RealMatrix *moA()      { return this->moA_;};
   inline RealMatrix *moB()      { return this->moB_;};
+  inline AOIntegrals *aointegrals(){ return this->aointegrals_;};
 
   void formGuess();	        // form the intial guess of MO's
   void formDensity();		// form the density matrix
