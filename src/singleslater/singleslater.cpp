@@ -23,7 +23,7 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
-#include "singleslater.h"
+#include <singleslater.h>
 using ChronusQ::AOIntegrals;
 using ChronusQ::Molecule;
 using ChronusQ::BasisSet;
@@ -33,92 +33,36 @@ using ChronusQ::SingleSlater;
 //------------------------------//
 // allocate memory for matrices //
 //------------------------------//
-void SingleSlater::iniSingleSlater(Molecule *molecule, BasisSet *basisset, AOIntegrals *aointegrals, FileIO *fileio, Controls *controls) {
+void SingleSlater::iniSingleSlater(std::shared_ptr<Molecule> molecule, std::shared_ptr<BasisSet> basisset, 
+                                   std::shared_ptr<AOIntegrals> aointegrals, std::shared_ptr<FileIO> fileio, 
+                                   std::shared_ptr<Controls> controls) {
   int nBasis  = basisset->nBasis();
   int nTotalE = molecule->nTotalE();
   int spin = molecule->spin();
   if(spin!=1) this->RHF_ = 0;
   else this->RHF_ = 1;
-  try {
-    this->densityA_  = new RealMatrix(nBasis,nBasis); // Alpha Density
-  } catch (int msg) {
-    fileio->out<<"Unable to allocate memory for SingleSlater::densityA_! E#:"<<msg<<endl;
-    exit(1);
-  };
-  try{
-    this->fockA_     = new RealMatrix(nBasis,nBasis); // Alpha Fock
-  } catch (int msg) {
-    fileio->out<<"Unable to allocate memory for SingleSlater::fockA_! E#:"<<msg<<endl;
-    exit(1);
-  };
+
+  // FIXME Nedd try statements for allocation
+  this->densityA_  = std::unique_ptr<RealMatrix>(new RealMatrix(nBasis,nBasis)); // Alpha Density
+  this->fockA_     = std::unique_ptr<RealMatrix>(new RealMatrix(nBasis,nBasis)); // Alpha Fock
 #ifndef USE_LIBINT
-  try{
-    this->coulombA_  = new RealMatrix(nBasis,nBasis); // Alpha Coulomb Integral
-  } catch (int msg) {
-    fileio->out<<"Unable to allocate memory for SingleSlater::coulombA_! E#:"<<msg<<endl;
-    exit(1);
-  };
-  try{
-    this->exchangeA_ = new RealMatrix(nBasis,nBasis); // Alpha Exchange Integral
-  } catch (int msg) {
-    fileio->out<<"Unable to allocate memory for SingleSlater::exchangeA_! E#:"<<msg<<endl;
-    exit(1);
-  };
+  this->coulombA_  = std::unique_ptr<RealMatrix>(new RealMatrix(nBasis,nBasis)); // Alpha Coulomb Integral
+  this->exchangeA_ = std::unique_ptr<RealMatrix>(new RealMatrix(nBasis,nBasis)); // Alpha Exchange Integral
 #else // USE_LIBINT
-  try{
-    this->PTA_  = new RealMatrix(nBasis,nBasis); // Alpha Perturbation Tensor
-  } catch (int msg) {
-    fileio->out<<"Unable to allocate memory for SingleSlater::PTA_! E#:"<<msg<<endl;
-    exit(1);
-  };
+  this->PTA_  = std::unique_ptr<RealMatrix>(new RealMatrix(nBasis,nBasis)); // Alpha Perturbation Tensor
 #endif
-  try{
-    this->moA_       = new RealMatrix(nBasis,nBasis); // Alpha Molecular Orbital Coefficients
-  } catch (int msg) {
-    fileio->out<<"Unable to allocate memory for SingleSlater::moA_! E#:"<<msg<<endl;
-    exit(1);
-  };
+  this->moA_       = std::unique_ptr<RealMatrix>(new RealMatrix(nBasis,nBasis)); // Alpha Molecular Orbital Coefficients
 
   if(!this->RHF_) {
-    try{
-      this->densityB_  = new RealMatrix(nBasis,nBasis); // Beta Density
-    } catch (int msg) {
-      fileio->out<<"Unable to allocate memory for SingleSlater::densityB_! E#:"<<msg<<endl;
-      exit(1);
-    };
-    try{
-      this->fockB_     = new RealMatrix(nBasis,nBasis); // Beta Fock
-    } catch (int msg) {
-      fileio->out<<"Unable to allocate memory for SingleSlater::fockB_! E#:"<<msg<<endl;
-      exit(1);
-    };
+    this->densityB_  = std::unique_ptr<RealMatrix>(new RealMatrix(nBasis,nBasis)); // Beta Density
+    this->fockB_     = std::unique_ptr<RealMatrix>(new RealMatrix(nBasis,nBasis)); // Beta Fock
 #ifndef USE_LIBINT
-    try{
-      this->coulombB_  = new RealMatrix(nBasis,nBasis); // Beta Coulomb Integral
-    } catch (int msg) {
-      fileio->out<<"Unable to allocate memory for SingleSlater::coulombB_! E#:"<<msg<<endl;
-      exit(1);
-    };
-    try{
-      this->exchangeB_ = new RealMatrix(nBasis,nBasis); // Beta Exchange Integral
-    } catch (int msg) {
-      fileio->out<<"Unable to allocate memory for SingleSlater::exchangeB_! E#:"<<msg<<endl;
-      exit(1);
-    };
+    this->coulombB_  = std::unique_ptr<RealMatrix>(new RealMatrix(nBasis,nBasis)); // Beta Coulomb Integral
+    this->exchangeB_ = std::unique_ptr<RealMatrix>(new RealMatrix(nBasis,nBasis)); // Beta Exchange Integral
 #else // USE_LIBINT
-  try{
-    this->PTB_  = new RealMatrix(nBasis,nBasis); // Beta Perturbation Tensor
-  } catch (int msg) {
-    fileio->out<<"Unable to allocate memory for SingleSlater::PTB_! E#:"<<msg<<endl;
-    exit(1);
-  };
+    this->PTB_  = std::unique_ptr<RealMatrix>(new RealMatrix(nBasis,nBasis)); // Beta Perturbation Tensor
 #endif
-    try{
-      this->moB_       = new RealMatrix(nBasis,nBasis); // Beta Molecular Orbital Coefficients
-    } catch (int msg) {
-      fileio->out<<"Unable to allocate memory for SingleSlater::moB_! E#:"<<msg<<endl;
-      exit(1);
-    };
+    this->moB_       = std::unique_ptr<RealMatrix>(new RealMatrix(nBasis,nBasis)); // Beta Molecular Orbital Coefficients
   };
 
   this->nBasis_= nBasis;
@@ -136,7 +80,7 @@ void SingleSlater::iniSingleSlater(Molecule *molecule, BasisSet *basisset, AOInt
   this->fileio_   = fileio;
   this->controls_ = controls;
   this->aointegrals_= aointegrals;
-
+/* Leaks memory
   int i,j,ij;
   this->R2Index_ = new int*[nBasis];
   for(i=0;i<nBasis;i++) this->R2Index_[i] = new int[nBasis];
@@ -145,14 +89,13 @@ void SingleSlater::iniSingleSlater(Molecule *molecule, BasisSet *basisset, AOInt
     else ij=i*(nBasis)-i*(i-1)/2+j-i;
     this->R2Index_[i][j] = ij;
   };
+*/
 
   this->haveCoulomb = false;
   this->haveExchange= false;
   this->haveDensity = false;
   this->haveMO	    = false;
-#ifdef USE_LIBINT
   this->havePT = false;
-#endif
 };
 //-----------------------------------//
 // print a wave function information //
@@ -167,11 +110,19 @@ void SingleSlater::printInfo() {
 // compute energies     //
 //----------------------//
 void SingleSlater::computeEnergy(){
+/*
   this->energyOneE = (this->aointegrals_->oneE_)->cwiseProduct(*this->densityA_).sum();
 #ifndef USE_LIBINT
   this->energyTwoE = (this->coulombA_->cwiseProduct(*this->densityA_).sum() - this->exchangeA_->cwiseProduct(*this->densityA_).sum());
 #else
   this->energyTwoE = (this->PTA_)->cwiseProduct(*this->densityA_).sum();
+#endif
+*/
+  this->energyOneE = (*this->aointegrals_->oneE_).frobInner(*this->densityA_);
+#ifndef USE_LIBINT
+  this->energyTwoE = ((*this->coulombA_)-(*this->exchangeA_)).frobInner(*this->densityA_);
+#else
+  this->energyTwoE = (*this->PTA_).frobInner(*this->densityA_);
 #endif
   this->totalEnergy= this->energyOneE + this->energyTwoE + this->energyNuclei;
   this->printEnergy();
@@ -338,8 +289,6 @@ void SingleSlater::formExchange(){
 #endif
 //dbwys
 #ifdef USE_LIBINT
-using libint2::TwoBodyEngine;
-typedef TwoBodyEngine<libint2::Coulomb> coulombEngine;
 // Form perturbation tensor (G)
 void SingleSlater::formPT() {
   if(!this->aointegrals_->haveSchwartz) this->aointegrals_->computeSchwartz();
@@ -356,7 +305,7 @@ void SingleSlater::formPT() {
 
   if(!this->basisset_->haveMap) this->basisset_->makeMap(this->molecule_); 
   auto start = std::chrono::high_resolution_clock::now();
-  this->basisset_->computeShBlkNorm(this->molecule_,this->densityA_);
+  this->basisset_->computeShBlkNorm(this->molecule_,this->densityA_.get());
   auto finish = std::chrono::high_resolution_clock::now();
   this->aointegrals_->DenShBlkD = finish - start;
   int ijkl = 0;
@@ -506,16 +455,22 @@ void SingleSlater::readGuessIO() {
 //-----------------------------------------------------------------------//
 // form the initial guess of MOs from Gaussian formatted checkpoint file //
 //-----------------------------------------------------------------------//
-void SingleSlater::readGuessGauFChk(char *filename) {
+void SingleSlater::readGuessGauFChk(std::string &filename) {
   this->fileio_->out<<"reading formatted checkpoint file "<<filename<<endl;
-  char readString[MAXNAMELEN];
+  std::string readString;
   int i,j,nBasis;
   double data;
-  ifstream *fchk = new ifstream(filename);
+  std::unique_ptr<ifstream> fchk;
+  if(fexists(filename)) {
+    fchk = std::unique_ptr<ifstream>(new ifstream(filename));
+  } else {
+    cout << "Could not find "+filename << endl;
+    exit(EXIT_FAILURE);
+  }
 
   *fchk>>readString;
-  while((!(fchk->eof()))&&(strcmp(readString,"basis"))) *fchk>>readString;
-  if(!strcmp(readString,"basis")) {
+  while((!(fchk->eof()))&&(readString.compare("basis"))) *fchk>>readString;
+  if(!readString.compare("basis")) {
     *fchk>>readString;
     *fchk>>readString;
     *fchk>>nBasis;
@@ -527,8 +482,8 @@ void SingleSlater::readGuessGauFChk(char *filename) {
     this->fileio_->out<<"No basis set found in the formatted checkpoint file! "<<endl;
   };
 
-  while(!(fchk->eof())&&strcmp(readString,"MO")) *fchk>>readString;
-  if(!strcmp(readString,"MO")) {
+  while(!(fchk->eof())&&readString.compare("MO")) *fchk>>readString;
+  if(!readString.compare("MO")) {
     *fchk>>readString;
     *fchk>>readString;
     *fchk>>readString;

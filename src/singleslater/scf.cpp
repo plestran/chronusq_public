@@ -23,8 +23,7 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
-#include "singleslater.h"
-#include <iomanip> 
+#include <singleslater.h>
 using ChronusQ::SingleSlater;
 //----------------------------------------//
 // do the SCF                             //
@@ -38,7 +37,7 @@ void SingleSlater::SCF(){
   double E_old;
   int maxIte    = 128; 
   int n=this->nBasis_; 
-  double Dtol = 1e-8;
+  double Dtol = 1e-10;
   double Etol = 1e-8;
 
   RealMatrix          X(n,n);

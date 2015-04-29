@@ -25,12 +25,10 @@
  */
 #ifndef INCLUDED_SINGLESLATER
 #define INCLUDED_SINGLESLATER
-#include "global.h"
-#include "eiginterface.h"
-//#include "matrix.h"
-#include "molecule.h"
-#include "controls.h"
-#include "aointegrals.h"
+#include <global.h>
+#include <molecule.h>
+#include <controls.h>
+#include <aointegrals.h>
 
 /****************************/
 /* Error Messages 5000-5999 */
@@ -49,25 +47,23 @@ class SingleSlater {
   int      nVirB_;
   int      spin_;
   int    **R2Index_;
-  RealMatrix  *densityA_;
-  RealMatrix  *densityB_;
-  RealMatrix  *fockA_;
-  RealMatrix  *fockB_;
-  RealMatrix  *coulombA_;
-  RealMatrix  *coulombB_;
-  RealMatrix  *exchangeA_;
-  RealMatrix  *exchangeB_;
-  RealMatrix  *moA_;
-  RealMatrix  *moB_;
-#ifdef USE_LIBINT
-  RealMatrix  *PTA_;
-  RealMatrix  *PTB_;
-#endif
-  ChronusQ::BasisSet     	*basisset_;
-  ChronusQ::Molecule    	*molecule_;
-  ChronusQ::FileIO       	*fileio_;
-  ChronusQ::Controls     	*controls_;
-  ChronusQ::AOIntegrals   *aointegrals_;
+  std::unique_ptr<RealMatrix>  densityA_;
+  std::unique_ptr<RealMatrix>  densityB_;
+  std::unique_ptr<RealMatrix>  fockA_;
+  std::unique_ptr<RealMatrix>  fockB_;
+  std::unique_ptr<RealMatrix>  coulombA_;
+  std::unique_ptr<RealMatrix>  coulombB_;
+  std::unique_ptr<RealMatrix>  exchangeA_;
+  std::unique_ptr<RealMatrix>  exchangeB_;
+  std::unique_ptr<RealMatrix>  moA_;
+  std::unique_ptr<RealMatrix>  moB_;
+  std::unique_ptr<RealMatrix>  PTA_;
+  std::unique_ptr<RealMatrix>  PTB_;
+  std::shared_ptr<BasisSet>    basisset_;
+  std::shared_ptr<Molecule>    molecule_;
+  std::shared_ptr<FileIO>      fileio_;
+  std::shared_ptr<Controls>    controls_;
+  std::shared_ptr<AOIntegrals> aointegrals_;
 
 public:
  
@@ -75,9 +71,7 @@ public:
   bool	haveDensity; 
   bool	haveCoulomb;
   bool	haveExchange;
-#ifdef USE_LIBINT
   bool  havePT;
-#endif
 
   double   energyOneE;
   double   energyTwoE;
@@ -87,21 +81,23 @@ public:
   // constructor & destructor
   SingleSlater(){;};
   ~SingleSlater() {
-    if(   densityA_!=NULL) delete densityA_;
-    if(      fockA_!=NULL) delete fockA_;
-    if(   coulombA_!=NULL) delete coulombA_;
-    if(  exchangeA_!=NULL) delete exchangeA_;
-    if(        moA_!=NULL) delete moA_;
-    if(!RHF_) {
-      if(      moB_!=NULL) delete moB_;
-      if(exchangeB_!=NULL) delete exchangeB_;
-      if( coulombB_!=NULL) delete coulombB_;
-      if(    fockB_!=NULL) delete fockB_;
-      if( densityB_!=NULL) delete densityB_;
-    };
+    densityA_.reset();
+    fockA_.reset();
+    coulombA_.reset();
+    exchangeA_.reset();
+    moA_.reset();
+    PTA_.reset();
+    densityB_.reset();
+    fockB_.reset();
+    coulombB_.reset();
+    exchangeB_.reset();
+    moB_.reset();
+    PTB_.reset();
   };
   // pseudo-constructor
-  void iniSingleSlater(ChronusQ::Molecule*,ChronusQ::BasisSet*,ChronusQ::AOIntegrals*,ChronusQ::FileIO*,ChronusQ::Controls*);
+  void iniSingleSlater(std::shared_ptr<Molecule>,std::shared_ptr<BasisSet>,
+                       std::shared_ptr<AOIntegrals>,std::shared_ptr<FileIO>,
+                       std::shared_ptr<Controls>);
 
   //set private data
   inline void setNBasis(int nBasis) { this->nBasis_ = nBasis;};
@@ -119,27 +115,25 @@ public:
   inline int nVirB()  { return this->nVirB_;};
   inline int RHF()    { return this->RHF_; };
   inline int spin()   { return this->spin_; };
-  inline RealMatrix *densityA() { return this->densityA_;};
-  inline RealMatrix *densityB() { return this->densityB_;};
-  inline RealMatrix *fockA()    { return this->fockA_;};
-  inline RealMatrix *fockB()    { return this->fockB_;};
-  inline RealMatrix *coulombA() { return this->coulombA_;};
-  inline RealMatrix *coulombB() { return this->coulombB_;};
-  inline RealMatrix *exchangeA(){ return this->exchangeA_;};
-  inline RealMatrix *exchangeB(){ return this->exchangeB_;};
-  inline RealMatrix *moA()      { return this->moA_;};
-  inline RealMatrix *moB()      { return this->moB_;};
+  inline RealMatrix* densityA() { return this->densityA_.get();};
+  inline RealMatrix* densityB() { return this->densityB_.get();};
+  inline RealMatrix* fockA()    { return this->fockA_.get();};
+  inline RealMatrix* fockB()    { return this->fockB_.get();};
+  inline RealMatrix* coulombA() { return this->coulombA_.get();};
+  inline RealMatrix* coulombB() { return this->coulombB_.get();};
+  inline RealMatrix* exchangeA(){ return this->exchangeA_.get();};
+  inline RealMatrix* exchangeB(){ return this->exchangeB_.get();};
+  inline RealMatrix* moA()      { return this->moA_.get();};
+  inline RealMatrix* moB()      { return this->moB_.get();};
 
   void formGuess();	        // form the intial guess of MO's
   void formDensity();		// form the density matrix
   void formFock();	        // form the Fock matrix
   void formCoulomb();		// form the Coulomb matrix
   void formExchange();		// form the exchange matrix
-#ifdef USE_LIBINT
   void formPT();
-#endif
   void readGuessIO();       	// read the initial guess of MO's from the input stream
-  void readGuessGauFChk(char*);	// read the initial guess of MO's from the Gaussian formatted checkpoint file
+  void readGuessGauFChk(std::string &);	// read the initial guess of MO's from the Gaussian formatted checkpoint file
   void computeEnergy();         // compute the total electronic energy
   void SCF();  
   void printEnergy(); 

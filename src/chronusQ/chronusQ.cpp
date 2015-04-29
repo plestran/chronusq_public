@@ -23,14 +23,13 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
-#include "global.h"
-#include "fileio.h"
-#include "molecule.h"
-#include "atoms.h"
-#include "matrix.h"
-#include "basisset.h"
-#include "aointegrals.h"
-#include "workers.h"
+#include <global.h>
+#include <fileio.h>
+#include <molecule.h>
+#include <atoms.h>
+#include <basisset.h>
+#include <aointegrals.h>
+#include <workers.h>
 using namespace ChronusQ;
 
 int main(int argc,char *argv[]) {
@@ -49,7 +48,8 @@ int main(int argc,char *argv[]) {
 
 //  if(globalMPI.myid==0) {
     start = std::chrono::high_resolution_clock::now();
-    atlas(argc, argv, &globalMPI);
+    std::string str(argv[1]);
+    atlas(argc, str, &globalMPI);
 //  } else {
 //    worker(&globalMPI);
 //  };

@@ -25,12 +25,10 @@
  */
 #ifndef INCLUDED_MOLECULES
 #define INCLUDED_MOLECULES
-#include "global.h"
-#include "eiginterface.h"
-#include "fileio.h"
-#include "atoms.h"
-//#include "matrix.h"
-#include "controls.h"
+#include <global.h>
+#include <fileio.h>
+#include <atoms.h>
+#include <controls.h>
 
 /****************************/
 /* Error Messages 2000-2999 */
@@ -38,32 +36,32 @@
 
 namespace ChronusQ {
 class Molecule {
-  int      nAtoms_;      // number of atoms in the system
-  int      charge_;      // total charge
-  int      spin_;        // spin multiplicity
-  int      nTotalE_;     // total number of electrons
-  int      size_;        // size of the object in terms of sizeof(char)
-  int     *index_;       // index of atom in the atoms[] array
-  double   energyNuclei_;// nuclear repulsion energy
-  RealMatrix  *cart_;        // cartesian coordinates
+  int                          nAtoms_;      // number of atoms in the system
+  int                          charge_;      // total charge
+  int                          spin_;        // spin multiplicity
+  int                          nTotalE_;     // total number of electrons
+  int                          size_;        // size of the object in terms of sizeof(char)
+  int                         *index_;       // index of atom in the atoms[] array
+  double                       energyNuclei_;// nuclear repulsion energy
+  std::unique_ptr<RealMatrix>  cart_;        // cartesian coordinates
 
 public:
 
   // constructor
-  Molecule(int nAtoms=0,FileIO *fileio=NULL){ if(nAtoms>0) iniMolecule(nAtoms,fileio);};
+  Molecule(int nAtoms=0,std::shared_ptr<FileIO> fileio=nullptr){ if(nAtoms>0) iniMolecule(nAtoms,fileio);};
   ~Molecule(){
     delete[] index_;
-    delete   cart_;
+    cart_.reset();
   };
-  void iniMolecule(int,FileIO*);
+  void iniMolecule(int,std::shared_ptr<FileIO>);
 
   // print
-  void printInfo(FileIO*,Controls*);
+  void printInfo(std::shared_ptr<FileIO>,std::shared_ptr<Controls>);
 
   // access to private data
   inline int index(int i) { return this->index_[i];};
   inline int nAtoms() {return this->nAtoms_;};
-  inline RealMatrix *cart() {return this->cart_;}
+  inline RealMatrix* cart() {return this->cart_.get();}
   inline int charge() {return this->charge_;}
   inline int spin() {return this->spin_;}
   inline int nTotalE() {return this->nTotalE_;};
@@ -73,11 +71,11 @@ public:
   inline double energyNuclei() { return this->energyNuclei_;};
 
   // read from input file
-  void readMolecule(FileIO*);
+  void readMolecule(std::shared_ptr<FileIO>);
 
   // read|write scratch|binary files
-  void ioRead(FileIO*);
-  void ioWrite(FileIO*);
+  void ioRead(std::shared_ptr<FileIO>);
+  void ioWrite(std::shared_ptr<FileIO>);
 
   /*************************/
   /* MPI Related Routines  */

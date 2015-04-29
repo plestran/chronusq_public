@@ -23,7 +23,7 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
-#include "aointegrals.h"
+#include <aointegrals.h>
 using ChronusQ::AOIntegrals;
 /******************************************************/
 /* two-e horizontal recursion from (ab|cd) to (a0|cd) */

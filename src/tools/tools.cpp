@@ -23,7 +23,7 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
-#include "tools.h"
+#include <tools.h>
 //--------------------------------------//
 // factorial function:  t! = 1*2*3...*t //
 //--------------------------------------//

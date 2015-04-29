@@ -23,7 +23,7 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
-#include "global.h"
+#include <global.h>
 
 namespace ChronusQ {
 void CErr(int);

@@ -32,7 +32,8 @@
 #define MAXATOMS 1000
 
 // CMake Compilation Configuration
-#include "config_chronusq.h"
+#include <config_chronusq.h>
+//#include <memory>
 
 // IO
 #include <iostream>
@@ -42,11 +43,14 @@
 // Math
 #include <cmath>
 #include <complex>
+#define EIGEN_MATRIXBASE_PLUGIN "eigenplugin.h" // ChronusQ plugin for Eigen
+#include <Eigen/Core> // Eigen Linear Algebra
+#include <unsupported/Eigen/MatrixFunctions>
 #ifdef USE_LIBINT
 #  include <libint2.hpp> // Libint Gaussian Integrals library
 #endif
-#include <Eigen/Dense> // Eigen Linear Algebra
-#include <unsupported/Eigen/MatrixFunctions>
+#include <eiginterface.h> // ChronusQ interface (TODO consolidate into plugin)
+#include <btas/btas.h> // BTAS Tensor Algebra library (header only)
 
 // Parallelization
 #include <omp.h>
@@ -55,7 +59,7 @@
 
 // Misc
 #include <stdlib.h>
-#include <sys/stat.h>
+//#include <sys/stat.h>
 #include <cstring>
 #include <vector>
 #include <time.h>
@@ -80,12 +84,20 @@ using Eigen::RowMajor;
 using Eigen::Upper;
 using Eigen::Lower;
 
+/* Things from BTAS that we always need */
+using btas::Tensor;
+
+/* Things from Libint that we always need */
+using libint2::OneBodyEngine;
+using libint2::TwoBodyEngine;
+
 // Useful typedefs
 typedef std::complex<double> dcomplex;
 typedef Eigen::Matrix<double,Dynamic,Dynamic,RowMajor>     RealMatrix;    // RowMajor BC Libint
 typedef Eigen::Matrix<dcomplex,Dynamic,Dynamic,RowMajor>   ComplexMatrix; // RowMajor BC Libint
 typedef Eigen::MatrixExponentialReturnValue<RealMatrix>    RealMatExp;
 typedef Eigen::MatrixExponentialReturnValue<ComplexMatrix> ComplexMatExp;
+typedef TwoBodyEngine<libint2::Coulomb> coulombEngine;
 
 //----------------//
 //number constants//
@@ -140,12 +152,6 @@ struct Phys {
 };
 const Phys phys = {0.5291772083000001};
 
-//----------------//
-//String constants//
-//----------------//
-const char bannerTop[100]="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
-const char bannerMid[100]="--------------------------------------------------------------------------------";
-const char bannerEnd[100]="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 
 //------------------//
 // IO block numbers //
