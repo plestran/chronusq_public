@@ -83,6 +83,10 @@ void readInput(std::shared_ptr<FileIO> fileio, std::shared_ptr<Molecule> mol,
         controls->guess = 3;
         fileio->in>>controls->gauFChkName;
       };
+    } else if(!strcmp(readString,"$DEBUG")) {
+      fileio->in>>readString;
+      strupr(readString);
+      controls->readDebug(readString);
     };
     fileio->in >> readString;
   };

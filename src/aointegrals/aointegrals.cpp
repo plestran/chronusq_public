@@ -90,7 +90,8 @@ void AOIntegrals::iniAOIntegrals(std::shared_ptr<Molecule> molecule, std::shared
   this->twoEC_ = std::make_shared<RealMatrix>(this->nTT_,this->nTT_); // Raffenetti Two Electron Coulomb AOIntegrals
   this->twoEX_ = std::make_shared<RealMatrix>(this->nTT_,this->nTT_); // Raffenetti Two Electron Exchange AOIntegrals
 #else // Allocate space for all N^4 AO Integrals in BTAS Tensor object (TODO need to set this up to be conditional)
-  this->aoERI_ = std::make_shared<Tensor<double>>(this->nBasis_,this->nBasis_,this->nBasis_,this->nBasis_);
+  if(this->controls_->buildn4eri) 
+    this->aoERI_ = std::make_shared<Tensor<double>>(this->nBasis_,this->nBasis_,this->nBasis_,this->nBasis_);
 #endif
   this->oneE_      = std::make_shared<RealMatrix>(this->nBasis_,this->nBasis_); // One Electron Integral
   this->overlap_   = std::make_shared<RealMatrix>(this->nBasis_,this->nBasis_); // Overlap

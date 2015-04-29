@@ -47,6 +47,7 @@ public:
   bool  	hybridDFT; 	// DFT is a hybrid functional
   bool  	restart;        // restart the calculation
   bool  	directTwoE;     // if direct two-electron will performed
+  bool          buildn4eri;     // Build N^4 AO ERI tensor
   double 	thresholdS;
   double 	thresholdAB;
   double	thresholdSchawrtz;
@@ -58,6 +59,7 @@ public:
   ~Controls(){;};
   void iniControls();
   void readSMP(int &);
+  void readDebug(char*);
 };
 } // namespace ChronusQ
 #endif
