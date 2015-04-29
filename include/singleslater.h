@@ -138,7 +138,7 @@ public:
   void SCF();  
   void printEnergy(); 
   void printInfo();
-
+  void printDensityinf();
   /*************************/
   /* MPI Related Routines  */
   /*************************/
