@@ -89,12 +89,29 @@ void BasisSet::readBasisSet(std::shared_ptr<FileIO> fileio, std::shared_ptr<Mole
   // TODO Check for basis in BASIS_PATH (should be set up though cmake)
   std::string readString;
   fileio->in>>readString;
+/*
   std::unique_ptr<ifstream> fileBasis;
-  if(fexists(readString)) {
+  if(fexists(BASIS_PATH+"/"+readString)) {
     fileBasis = std::unique_ptr<ifstream>(new ifstream(readString));
   } else {
     cout << "Could not find basis set file" << endl;
     exit(EXIT_FAILURE);
+  }
+*/
+  std::string basis_path = "/" + readString;
+  basis_path.insert(0,BASIS_PATH);
+  std::unique_ptr<ifstream> fileBasis(new ifstream (basis_path));
+  if(fileBasis->fail()){ // Check if file is in BASIS_PATH
+    fileBasis.reset();
+    fileBasis = std::unique_ptr<ifstream>(new ifstream(readString));
+    if(fileBasis->fail()) { // Check if file is in PWD
+      cout << "Could not find basis set file" << endl;
+      exit(EXIT_FAILURE);
+    } else {
+      fileio->out << "Reading Basis Set from:\n ./" << readString<< endl;
+    }
+  } else {
+    fileio->out << "Reading Basis Set from:" << endl << basis_path<< endl;
   }
   double threePI=math.pi*math.pi*math.pi,readNorm, readExp, readCoeff1, readCoeff2;
   int    nBasis, nShell, readNPGTO, L;
