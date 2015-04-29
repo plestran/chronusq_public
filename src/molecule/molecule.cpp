@@ -32,7 +32,7 @@ void Molecule::iniMolecule(int nAtoms, std::shared_ptr<FileIO> fileio) {
   if(nAtoms<1) throw 2000;
   if(fileio==NULL) throw 2001;
   this->nAtoms_= nAtoms;
-  this->cart_  = std::make_shared<RealMatrix>(3, this->nAtoms_); // Molecular Cartesian
+  this->cart_  = std::unique_ptr<RealMatrix>(new RealMatrix(3, this->nAtoms_)); // Molecular Cartesian
   this->index_ = new int[this->nAtoms_];
   this->size_  = fileio->sizeInt()*5 + fileio->sizeInt()*nAtoms_ + cart_->size();
 };
@@ -114,7 +114,7 @@ void Molecule::ioRead(std::shared_ptr<FileIO> fileio) {
   size_   = storage[4];
   cart_.reset();
   if(index_!=NULL) delete[] index_;
-  cart_  = std::make_shared<RealMatrix>(3, nAtoms_); // Molecular Cartesian
+  cart_  = std::unique_ptr<RealMatrix>(new RealMatrix(3, nAtoms_)); // Molecular Cartesian
   index_ = new int[nAtoms_];
   try { fileio->io("R",blockMolecule,"BIN",index_,nAtoms_);}
   catch (int msg) {

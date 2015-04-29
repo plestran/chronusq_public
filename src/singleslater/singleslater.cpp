@@ -43,26 +43,26 @@ void SingleSlater::iniSingleSlater(std::shared_ptr<Molecule> molecule, std::shar
   else this->RHF_ = 1;
 
   // FIXME Nedd try statements for allocation
-  this->densityA_  = std::make_shared<RealMatrix>(nBasis,nBasis); // Alpha Density
-  this->fockA_     = std::make_shared<RealMatrix>(nBasis,nBasis); // Alpha Fock
+  this->densityA_  = std::unique_ptr<RealMatrix>(new RealMatrix(nBasis,nBasis)); // Alpha Density
+  this->fockA_     = std::unique_ptr<RealMatrix>(new RealMatrix(nBasis,nBasis)); // Alpha Fock
 #ifndef USE_LIBINT
-  this->coulombA_  = std::make_shared<RealMatrix>(nBasis,nBasis); // Alpha Coulomb Integral
-  this->exchangeA_ = std::make_shared<RealMatrix>(nBasis,nBasis); // Alpha Exchange Integral
+  this->coulombA_  = std::unique_ptr<RealMatrix>(new RealMatrix(nBasis,nBasis)); // Alpha Coulomb Integral
+  this->exchangeA_ = std::unique_ptr<RealMatrix>(new RealMatrix(nBasis,nBasis)); // Alpha Exchange Integral
 #else // USE_LIBINT
-  this->PTA_  = std::make_shared<RealMatrix>(nBasis,nBasis); // Alpha Perturbation Tensor
+  this->PTA_  = std::unique_ptr<RealMatrix>(new RealMatrix(nBasis,nBasis)); // Alpha Perturbation Tensor
 #endif
-  this->moA_       = std::make_shared<RealMatrix>(nBasis,nBasis); // Alpha Molecular Orbital Coefficients
+  this->moA_       = std::unique_ptr<RealMatrix>(new RealMatrix(nBasis,nBasis)); // Alpha Molecular Orbital Coefficients
 
   if(!this->RHF_) {
-    this->densityB_  = std::make_shared<RealMatrix>(nBasis,nBasis); // Beta Density
-    this->fockB_     = std::make_shared<RealMatrix>(nBasis,nBasis); // Beta Fock
+    this->densityB_  = std::unique_ptr<RealMatrix>(new RealMatrix(nBasis,nBasis)); // Beta Density
+    this->fockB_     = std::unique_ptr<RealMatrix>(new RealMatrix(nBasis,nBasis)); // Beta Fock
 #ifndef USE_LIBINT
-    this->coulombB_  = std::make_shared<RealMatrix>(nBasis,nBasis); // Beta Coulomb Integral
-    this->exchangeB_ = std::make_shared<RealMatrix>(nBasis,nBasis); // Beta Exchange Integral
+    this->coulombB_  = std::unique_ptr<RealMatrix>(new RealMatrix(nBasis,nBasis)); // Beta Coulomb Integral
+    this->exchangeB_ = std::unique_ptr<RealMatrix>(new RealMatrix(nBasis,nBasis)); // Beta Exchange Integral
 #else // USE_LIBINT
-    this->PTB_  = std::make_shared<RealMatrix>(nBasis,nBasis); // Beta Perturbation Tensor
+    this->PTB_  = std::unique_ptr<RealMatrix>(new RealMatrix(nBasis,nBasis)); // Beta Perturbation Tensor
 #endif
-    this->moB_       = std::make_shared<RealMatrix>(nBasis,nBasis); // Beta Molecular Orbital Coefficients
+    this->moB_       = std::unique_ptr<RealMatrix>(new RealMatrix(nBasis,nBasis)); // Beta Molecular Orbital Coefficients
   };
 
   this->nBasis_= nBasis;
@@ -306,7 +306,7 @@ void SingleSlater::formPT() {
 
   if(!this->basisset_->haveMap) this->basisset_->makeMap(this->molecule_); 
   auto start = std::chrono::high_resolution_clock::now();
-  this->basisset_->computeShBlkNorm(this->molecule_,this->densityA_);
+  this->basisset_->computeShBlkNorm(this->molecule_,this->densityA_.get());
   auto finish = std::chrono::high_resolution_clock::now();
   this->aointegrals_->DenShBlkD = finish - start;
   int ijkl = 0;
