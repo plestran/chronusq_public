@@ -112,7 +112,7 @@ public:
 #ifdef USE_LIBINT
   std::vector<libint2::Shell> shells_libint;
   std::vector<int> mapSh2Bf;
-  std::shared_ptr<RealMatrix> shBlkNorm;
+  std::unique_ptr<RealMatrix> shBlkNorm;
   bool convToLI = false;
   bool haveMap = false;
   int maxPrim;
@@ -157,7 +157,7 @@ public:
   // shell format
   void convShell(std::shared_ptr<Molecule>);
   void makeMap(std::shared_ptr<Molecule>);
-  void computeShBlkNorm(std::shared_ptr<Molecule>,std::shared_ptr<RealMatrix>);
+  void computeShBlkNorm(std::shared_ptr<Molecule>,RealMatrix*);
 #endif
 
   /*************************/

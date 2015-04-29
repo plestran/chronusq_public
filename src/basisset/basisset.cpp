@@ -87,18 +87,18 @@ void BasisSet::readBasisSet(std::shared_ptr<FileIO> fileio, std::shared_ptr<Mole
   int i,j,n,k;
   // TODO Have this be read to a string
   // TODO Check for basis in BASIS_PATH (should be set up though cmake)
-  char readString[MAXNAMELEN];
+  std::string readString;
   fileio->in>>readString;
-  ifstream *fileBasis;
+  std::unique_ptr<ifstream> fileBasis;
   if(fexists(readString)) {
-    fileBasis = new ifstream(readString);
+    fileBasis = std::unique_ptr<ifstream>(new ifstream(readString));
   } else {
     cout << "Could not find basis set file" << endl;
     exit(EXIT_FAILURE);
   }
   double threePI=math.pi*math.pi*math.pi,readNorm, readExp, readCoeff1, readCoeff2;
   int    nBasis, nShell, readNPGTO, L;
-  char   atomStr[MAXNAMELEN];
+  std::string   atomStr;
   //----------------------------------------------------------//
   // Read cartesian basis functions                           //
   // 1. first round of reading tests the dimension of problem //
@@ -107,17 +107,17 @@ void BasisSet::readBasisSet(std::shared_ptr<FileIO> fileio, std::shared_ptr<Mole
   for(i=0; i<20; i++) this->nLShell_[i] = 0;
   this->nShell_=0;
   for(i=0; i<mol->nAtoms(); i++){
-    strcpy(atomStr,"-");
-    strcat(atomStr,atom[mol->index(i)].symbol);
-    while(strcmp(atomStr,readString)&&(!fileBasis->eof())) *fileBasis>>readString;
+    atomStr = "-";
+    atomStr = atomStr+atom[mol->index(i)].symbol;
+    while(atomStr.compare(readString)&&(!fileBasis->eof())) *fileBasis>>readString;
     *fileBasis >> readString;
-    while(strcmp(readString,"****")) { 
+    while(readString.compare("****")) { 
       *fileBasis >> readNPGTO;
       *fileBasis >> readNorm ;
       // TODO Extend this to higher angular momentum (follow though with the rest of
       //      the code)
-      if(!strcmp(readString,"S")||!strcmp(readString,"P")||!strcmp(readString,"D")||
-         !strcmp(readString,"F")||!strcmp(readString,"G")){
+      if(!(readString.compare("S"))||!(readString.compare("P"))||!(readString.compare("D"))||
+         !(readString.compare("F"))||!(readString.compare("G"))){
         //S,P,D,F,G shell
         L = HashL(readString);
         (this->nLShell_[L])++;
@@ -126,7 +126,7 @@ void BasisSet::readBasisSet(std::shared_ptr<FileIO> fileio, std::shared_ptr<Mole
         (this->nPrimitive_)=(this->nPrimitive_)+readNPGTO*HashNAOs(L);
         for(j=0;j<2*readNPGTO;j++) *fileBasis>>readString;
       // Is this obsolete?
-      } else if(!strcmp(readString,"SP")){
+      } else if(!(readString.compare("SP"))){
         //SP shell
         (this->nLShell_[0])++;
         (this->nLShell_[1])++;
@@ -155,20 +155,20 @@ void BasisSet::readBasisSet(std::shared_ptr<FileIO> fileio, std::shared_ptr<Mole
   nBasis = 0;
   nShell = 0;
   for(i=0; i<mol->nAtoms(); i++){
-    strcpy(atomStr,"-");
-    strcat(atomStr,atom[mol->index(i)].symbol);
-    while(strcmp(atomStr,readString)&&(!fileBasis->eof())) *fileBasis>>readString;
+    atomStr="-";
+    atomStr=atomStr+atom[mol->index(i)].symbol;
+    while((atomStr.compare(readString))&&(!fileBasis->eof())) *fileBasis>>readString;
     *fileBasis >> readString;
-    while(strcmp(readString,"****")) { 
+    while(readString.compare("****")) { 
       *fileBasis >> readNPGTO;
       *fileBasis >> readNorm ;
       // TODO Extend this to higher angular momentum (follow though with the rest of
       //      the code)
-      if(!strcmp(readString,"S")||!strcmp(readString,"P")||!strcmp(readString,"D")||
-         !strcmp(readString,"F")||!strcmp(readString,"G")){
+      if((!readString.compare("S"))||!(readString.compare("P"))||!(readString.compare("D"))||
+         !(readString.compare("F"))||!(readString.compare("G"))){
         //S,P,D,F,G shell
         L = HashL(readString);
-        strcpy((this->shells[nShell]).name,readString);
+	strcpy(this->shells[nShell].name,readString.c_str());
         (this->shells[nShell]).center = i;
         (this->shells[nShell]).SP     = false;
         (this->shells[nShell]).L      = L;
@@ -218,7 +218,7 @@ void BasisSet::readBasisSet(std::shared_ptr<FileIO> fileio, std::shared_ptr<Mole
         };
         nShell++;
         nBasis=nBasis+HashNAOs(L);
-      } else if(!strcmp(readString,"SP")){
+      } else if(!(readString.compare("SP"))){
         //SP Shell
         strcpy((this->shells[nShell]).name,"S");
         (this->shells[nShell]).center = i;
@@ -232,7 +232,6 @@ void BasisSet::readBasisSet(std::shared_ptr<FileIO> fileio, std::shared_ptr<Mole
 	for(k=0;k<3;k++) (this->ao[nBasis]).l[k] = 0;
         (this->ao[nBasis]).shIndex = nShell;
         (this->ao[nBasis]).divConst = 1;
-
         strcpy((this->shells[nShell+1]).name,"P");
         (this->shells[nShell+1]).center = i;
         (this->shells[nShell+1]).L      = 1;

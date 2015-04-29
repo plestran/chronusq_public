@@ -62,12 +62,12 @@ int HashNAOs (int);
 int HashNAOs (char*);
 
 // convert shell symbol to angular momentum
-int HashL (char*);
+int HashL (std::string);
 
 // convert angular momentum to AO index in a shell
 int HashIAO(int,int*);
 
-inline bool fexists(char *f){
+inline bool fexists(std::string f){
   ifstream ifile(f);
   return ifile;
 }

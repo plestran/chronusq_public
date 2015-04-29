@@ -100,9 +100,9 @@ class AOIntegrals{
   std::shared_ptr<FileIO>      	fileio_;
   std::shared_ptr<Controls>    	controls_;
 
-  PairConstants 	    *pairConstants_;
-  MolecularConstants	*molecularConstants_;
-  QuartetConstants	    *quartetConstants_;
+  std::unique_ptr<PairConstants>        pairConstants_;
+  std::unique_ptr<MolecularConstants>   molecularConstants_;
+  std::unique_ptr<QuartetConstants>     quartetConstants_;
 
 //dbwys
 #ifdef USE_LIBINT
@@ -139,14 +139,6 @@ public:
  
   AOIntegrals(){;};
   ~AOIntegrals(){
-    twoEC_.reset();
-    twoEX_.reset();
-    oneE_.reset();
-    overlap_.reset();
-    kinetic_.reset();
-    potential_.reset();
-    schwartz_.reset();
-    aoERI_.reset();
   };
   
   // initialization function

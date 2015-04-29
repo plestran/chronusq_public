@@ -47,18 +47,18 @@ class SingleSlater {
   int      nVirB_;
   int      spin_;
   int    **R2Index_;
-  std::shared_ptr<RealMatrix>  densityA_;
-  std::shared_ptr<RealMatrix>  densityB_;
-  std::shared_ptr<RealMatrix>  fockA_;
-  std::shared_ptr<RealMatrix>  fockB_;
-  std::shared_ptr<RealMatrix>  coulombA_;
-  std::shared_ptr<RealMatrix>  coulombB_;
-  std::shared_ptr<RealMatrix>  exchangeA_;
-  std::shared_ptr<RealMatrix>  exchangeB_;
-  std::shared_ptr<RealMatrix>  moA_;
-  std::shared_ptr<RealMatrix>  moB_;
-  std::shared_ptr<RealMatrix>  PTA_;
-  std::shared_ptr<RealMatrix>  PTB_;
+  std::unique_ptr<RealMatrix>  densityA_;
+  std::unique_ptr<RealMatrix>  densityB_;
+  std::unique_ptr<RealMatrix>  fockA_;
+  std::unique_ptr<RealMatrix>  fockB_;
+  std::unique_ptr<RealMatrix>  coulombA_;
+  std::unique_ptr<RealMatrix>  coulombB_;
+  std::unique_ptr<RealMatrix>  exchangeA_;
+  std::unique_ptr<RealMatrix>  exchangeB_;
+  std::unique_ptr<RealMatrix>  moA_;
+  std::unique_ptr<RealMatrix>  moB_;
+  std::unique_ptr<RealMatrix>  PTA_;
+  std::unique_ptr<RealMatrix>  PTB_;
   std::shared_ptr<BasisSet>    basisset_;
   std::shared_ptr<Molecule>    molecule_;
   std::shared_ptr<FileIO>      fileio_;
@@ -115,16 +115,16 @@ public:
   inline int nVirB()  { return this->nVirB_;};
   inline int RHF()    { return this->RHF_; };
   inline int spin()   { return this->spin_; };
-  inline std::shared_ptr<RealMatrix> densityA() { return this->densityA_;};
-  inline std::shared_ptr<RealMatrix> densityB() { return this->densityB_;};
-  inline std::shared_ptr<RealMatrix> fockA()    { return this->fockA_;};
-  inline std::shared_ptr<RealMatrix> fockB()    { return this->fockB_;};
-  inline std::shared_ptr<RealMatrix> coulombA() { return this->coulombA_;};
-  inline std::shared_ptr<RealMatrix> coulombB() { return this->coulombB_;};
-  inline std::shared_ptr<RealMatrix> exchangeA(){ return this->exchangeA_;};
-  inline std::shared_ptr<RealMatrix> exchangeB(){ return this->exchangeB_;};
-  inline std::shared_ptr<RealMatrix> moA()      { return this->moA_;};
-  inline std::shared_ptr<RealMatrix> moB()      { return this->moB_;};
+  inline RealMatrix* densityA() { return this->densityA_.get();};
+  inline RealMatrix* densityB() { return this->densityB_.get();};
+  inline RealMatrix* fockA()    { return this->fockA_.get();};
+  inline RealMatrix* fockB()    { return this->fockB_.get();};
+  inline RealMatrix* coulombA() { return this->coulombA_.get();};
+  inline RealMatrix* coulombB() { return this->coulombB_.get();};
+  inline RealMatrix* exchangeA(){ return this->exchangeA_.get();};
+  inline RealMatrix* exchangeB(){ return this->exchangeB_.get();};
+  inline RealMatrix* moA()      { return this->moA_.get();};
+  inline RealMatrix* moB()      { return this->moB_.get();};
 
   void formGuess();	        // form the intial guess of MO's
   void formDensity();		// form the density matrix
@@ -133,12 +133,12 @@ public:
   void formExchange();		// form the exchange matrix
   void formPT();
   void readGuessIO();       	// read the initial guess of MO's from the input stream
-  void readGuessGauFChk(char*);	// read the initial guess of MO's from the Gaussian formatted checkpoint file
+  void readGuessGauFChk(std::string &);	// read the initial guess of MO's from the Gaussian formatted checkpoint file
   void computeEnergy();         // compute the total electronic energy
   void SCF();  
   void printEnergy(); 
   void printInfo();
-
+  void printDensityinf();
   /*************************/
   /* MPI Related Routines  */
   /*************************/

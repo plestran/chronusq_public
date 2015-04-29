@@ -43,7 +43,7 @@ class Molecule {
   int                          size_;        // size of the object in terms of sizeof(char)
   int                         *index_;       // index of atom in the atoms[] array
   double                       energyNuclei_;// nuclear repulsion energy
-  std::shared_ptr<RealMatrix>  cart_;        // cartesian coordinates
+  std::unique_ptr<RealMatrix>  cart_;        // cartesian coordinates
 
 public:
 
@@ -61,7 +61,7 @@ public:
   // access to private data
   inline int index(int i) { return this->index_[i];};
   inline int nAtoms() {return this->nAtoms_;};
-  inline std::shared_ptr<RealMatrix> cart() {return this->cart_;}
+  inline RealMatrix* cart() {return this->cart_.get();}
   inline int charge() {return this->charge_;}
   inline int spin() {return this->spin_;}
   inline int nTotalE() {return this->nTotalE_;};

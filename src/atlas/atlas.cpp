@@ -26,7 +26,7 @@
 #include <workers.h>
 using namespace ChronusQ;
 
-int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
+int ChronusQ::atlas(int argc, std::string argv, GlobalMPI *globalMPI) {
   int i,j,k,l;
   time_t currentTime;
   auto molecule     	= std::make_shared<Molecule>();
@@ -34,9 +34,9 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   auto controls     	= std::make_shared<Controls>();
   auto aointegrals	= std::make_shared<AOIntegrals>();
   auto hartreeFock	= std::make_shared<SingleSlater>();
-  std::shared_ptr<FileIO> fileIO;;
+  std::shared_ptr<FileIO> fileIO;
 
-  try { fileIO = std::make_shared<FileIO>(argv[1]);}
+  try { fileIO = std::make_shared<FileIO>(argv);}
   catch(int msg) {
     cout<<"Unable to open file! E#:"<<msg<<endl;
     exit(1);
@@ -50,7 +50,8 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   // read input
   controls->iniControls();
   readInput(fileIO,molecule,basisset,controls);
-  fileIO->iniFileIO(controls->restart);
+//  fileIO->iniFileIO(controls->restart);
+
 #ifdef USE_LIBINT
   basisset->convShell(molecule);
 #endif
@@ -72,7 +73,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   hartreeFock->formFock();
   aointegrals->printTimings();
   hartreeFock->computeEnergy();
-  hartreeFock->SCF();
+//hartreeFock->SCF();
 /*
   MOIntegrals *moIntegrals = new MOIntegrals();
   moIntegrals->iniMOIntegrals(molecule,basisset,fileIO,controls,aointegrals,hartreeFock);
@@ -86,11 +87,6 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   time(&currentTime);
   fileIO->out<<"\nJob finished: "<<ctime(&currentTime)<<endl;
 
-  molecule.reset();
-  basisset.reset();
-  fileIO.reset();
-  aointegrals.reset();
-  controls.reset();
 #ifdef USE_LIBINT
   libint2::cleanup();
 #endif
