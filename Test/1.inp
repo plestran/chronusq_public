@@ -1007,4 +1007,5 @@ $method hf
 $basis sto3g.gbs
 $print 1
 $guess gaufchk 1.fchk
+$scf off
 

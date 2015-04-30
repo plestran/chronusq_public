@@ -42,14 +42,15 @@ BasisSet::BasisSet(int nBasis, int nShell) {
 // initialize memory //
 //-------------------//
 void BasisSet::iniBasisSet(){
+  // FIXME Need to move these over to unique_ptr
   ao = new (nothrow) AOCartesian[this->nBasis_];
-  if(ao==NULL) throw 4000;
+  if(ao==NULL) CErr("BasisSet::AOCartesian Allocation");
   shells = new (nothrow) Shell[this->nShell_];
-  if(shells==NULL) throw 4001;
+  if(shells==NULL) CErr("BasiSset::Shell Allocation");
   sortedShells = new (nothrow) int[this->nShell_];
-  if(sortedShells==NULL) throw 4002;
+  if(sortedShells==NULL) CErr("BasisSet::sortedShells");
   shellPairs = new (nothrow) ShellPair[this->nShellPair_];
-  if(shellPairs==NULL) throw 4003;
+  if(shellPairs==NULL) CErr("BasisSet::shellPairs");
 };
 //---------------------------------//
 // print out basis set information //
@@ -153,19 +154,14 @@ void BasisSet::readBasisSet(std::shared_ptr<FileIO> fileio, std::shared_ptr<Mole
         for(j=0;j<3*readNPGTO;j++) *fileBasis>>readString;
       } else {
         fileio->out<<"Error: unrecognized shell symbol!"<<endl;
-        throw 4005;
+        CErr("Unrecognized Shell symbol");
       };
       *fileBasis>>readString;
     };
     fileBasis->seekg(0);
   };
   this->nShellPair_=this->nShell_*(this->nShell_+1)/2;
-  try {
-    this->iniBasisSet();
-  } catch (int msg) {
-    fileio->out<<"Unable to allocate memory for BasisSet! E#:"<<msg<<endl;
-    exit(1);
-  };
+  this->iniBasisSet();
 
   fileBasis->seekg(0);
   nBasis = 0;
