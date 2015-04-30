@@ -34,6 +34,7 @@
 
 // CMake Compilation Configuration
 #include <config_chronusq.h>
+//#include <memory>
 
 // IO
 #include <iostream>
@@ -59,7 +60,7 @@
 
 // Misc
 #include <stdlib.h>
-#include <sys/stat.h>
+//#include <sys/stat.h>
 #include <cstring>
 #include <vector>
 #include <time.h>

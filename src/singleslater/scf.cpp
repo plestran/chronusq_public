@@ -29,67 +29,59 @@ using ChronusQ::SingleSlater;
 // do the SCF                             //
 // Sajan                                  //
 //--------------- ------------------------//
+double E_delta;
+double P_Rms;
+
 void SingleSlater::SCF(){
-  int n=this->nBasis_; //basis of the overlap matrix
-  
-  /*
-  //Declaring new pointers
-  double oldEnergy;
-  double diffEnergy=0.1;
-  double rms_Density;
-  Matrix<double> *oldDensityA_=new Matrix<double>(n,n);
-  Matrix<double> *diffDensity=new Matrix<double>(n,n);
-  Matrix<double> *diagOverlap_=new Matrix<double>(n,n);
-  Matrix<double> *transformX_=new Matrix<double>(n,n);
-  Matrix<double> *transformX_prime=new Matrix<double>(n,n);
-  Matrix<double> *transformfockA_=new Matrix<double>(n,n);
-  Matrix<double> *eig_fockA_=new Matrix<double>(n,n);
-  Matrix<double> *rms_diffDensity=new Matrix<double>(n,n);
-  
-  //overlap matrix
-  this->aointegrals_->overlap_->setSymm('S');
-  this->aointegrals_->overlap_->unpack();
+  if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
+  double E_old;
+  int maxIte    = 128; 
+  int n=this->nBasis_; 
+  double Dtol = 1e-10;
+  double Etol = 1e-8;
 
-  (*this->aointegrals_->overlap_)^2; 
-  
-
-  //(*transformX_) = (*diagOverlap_)^-0.5; 
-  //transformX_->printAll();
-
-//this->aointegrals_->overlap_->printAll();
-
-//(*transformfockA_) = this->fockA_->transTN(*transformX_);
-
+  RealMatrix          X(n,n);
+  RealMatrix  	     Fp(n,n);
+  RealMatrix  	     Cp(n,n);
+  RealMatrix      P_old(n,n);
   
   
-  //calculate transformation matrix and its transpose
-  (*transformX_)=(*diagOverlap_)^-0.5;
-  transformX_->printAll();
-  (*transformX_prime)=(*transformX_);
-  transformX_prime->transpose(); 
-  transformX_prime->printAll();
-  
-  for(int i=0;i<10;i++){
-    fockA_->unpack();
-    (*oldDensityA_) = (*this->densityA_);  	 	    //copy the old density to new one
-    oldEnergy= this->totalEnergy;
-    (*transformfockA_)=(*transformX_prime)*(*fockA_)
-    (*transformfockA_)=(*transformfockA_)*(*transformX_);
-    (*eig_fockA_)=transformfockA_->eigenvector();
-    (*moA_)=(transformX_)*(*eig_fockA);		            //new MO coefficient matrix
-    fockA_->pack();
-    formDensity(fileio, controls);                          //form a new density matrix
-    intTwoE(molecule,basis,this,fileio,controls);
-    formFock(fileio, controls);                             //forming a new fock matrix
-    computeEnergy(fileio, controls);                        //calcualte the new total energy with new density
-    cout << this->totalEnergy << endl; 
-    diffEnergy=((this->totalEnergy - oldEnergy)/oldEnergy)*100;
-    (*diffDensity)=(*this->densityA_) - (*oldDensityA_);
-    (*rms_diffDensity)=(*diffDensity)*(*diffDensity);
-    //rms_Density=*(rms_diffDensity->sumAllelem());
-    rms_Density=(double)sqrt(rms_Density);
+  int i;
+  X=(*this->aointegrals_->overlap_).pow(-0.5);
+  for (i=0; i<maxIte;i++){
+    this->fileio_->out << endl << endl << bannerTop <<endl;  
+    this->fileio_->out << "SCF iteration:"<< i+1 <<endl;  
+    this->fileio_->out << bannerEnd <<endl;  
+    
+    P_old = (*this->densityA_);
+    E_old = this->totalEnergy;
+    Fp    = X.transpose()*(*this->fockA_)*X;
+    Eigen::SelfAdjointEigenSolver<RealMatrix> sys(Fp);
+    Cp    = sys.eigenvectors();
+    
+    //(*this->epsA_)= sys.eigenvalues();
+    (*this->moA_) = X*Cp;
+    this->formDensity();
+    this->formFock();
+    this->computeEnergy();
+     
+    P_Rms=((*this->densityA_)-P_old).norm();
+    E_delta= this->totalEnergy-E_old;
+    this->printDensityinf();     
+
+    if(((*this->densityA_)-P_old).norm()<Dtol && pow((this->totalEnergy-E_old),2)<Etol){break;};
   };
+  
+  this->fileio_->out <<"\n"<<endl; 
+  this->fileio_->out << bannerEnd <<endl;
+  this->fileio_->out << "\nRequested convergence on RMS density matrix = " <<std::setw(5)<<Dtol <<"  within  " <<maxIte <<"  cycles."<<endl;
+  this->fileio_->out << "Requested convergence on             energy = " <<Etol << endl;
+  this->fileio_->out << "\nSCF Done: E(RHF) = "<< this->totalEnergy << "  Eh  after  "<< i+1 << "  cycles" <<endl;
+  this->fileio_->out << bannerEnd <<endl;
+}; 
 
-  */
-};     
-
+void SingleSlater::printDensityinf(){
+  this->fileio_->out<<"\nSCF Information:"<<endl;
+  this->fileio_->out<<std::right<<std::setw(30)<<"    Delta-E = "<<std::setw(15)<<E_delta<<std::setw(5)<<" Eh "<<endl;
+  this->fileio_->out<<std::right<<std::setw(30)<<"RMS Density = "<<std::setw(15)<<P_Rms<<endl;
+};

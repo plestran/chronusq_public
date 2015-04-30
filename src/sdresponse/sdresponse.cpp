@@ -34,8 +34,8 @@ using ChronusQ::SingleSlater;
 //------------------------------//
 // allocate memory for matrices //
 //------------------------------//
-void SDResponse::iniSDResponse( Molecule *molecule, BasisSet *basisSet, MOIntegrals *mointegrals, 
-                                FileIO *fileio, Controls *controls, SingleSlater *singleSlater) {
+void SDResponse::iniSDResponse( std::shared_ptr<Molecule> molecule, std::shared_ptr<BasisSet> basisSet, std::shared_ptr<MOIntegrals> mointegrals, 
+                                std::shared_ptr<FileIO> fileio, std::shared_ptr<Controls> controls, std::shared_ptr<SingleSlater> singleSlater) {
   this->nBasis_  = basisSet->nBasis();
 
   this->molecule_       = molecule;

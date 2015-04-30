@@ -37,10 +37,11 @@
 
 namespace ChronusQ {
 // read input files and initialize everything
-void readInput(FileIO*,Molecule*,BasisSet*,Controls*);
+void readInput(std::shared_ptr<FileIO>,std::shared_ptr<Molecule>,
+               std::shared_ptr<BasisSet>,std::shared_ptr<Controls>);
 
 // trace of product of two symmetric matrices
-double traceSymm(RealMatrix*,RealMatrix*);
+double traceSymm(std::shared_ptr<RealMatrix>,std::shared_ptr<RealMatrix>);
 } // namespace ChronusQ
 
 #endif

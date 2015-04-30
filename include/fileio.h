@@ -35,10 +35,10 @@
 namespace ChronusQ {
 class FileIO {
 
-  char *name_in;                 // name of the input file
-  char *name_out;                // name of the output file
-  char *name_scr;                // name of the scratch file
-  char *name_bin;                // name of the binary file
+  std::string  name_in;                 // name of the input file
+  std::string  name_out;                // name of the output file
+  std::string  name_scr;                // name of the scratch file
+  std::string  name_bin;                // name of the binary file
   int   sizeInt_;                // size of an integer in terms of sizeof(char)
   int   sizeLong_;               // size of a long integer in terms of sizeof(char)
   int   sizeFloat_;              // size of a float point in terms of sizeof(char)
@@ -55,7 +55,7 @@ public:
   fstream bin;                   // file handler of the binary file
 
   // constructor and destructor
-  FileIO(char *);
+  FileIO(std::string &);
   void iniFileIO(bool);
   ~FileIO();
 
@@ -85,13 +85,15 @@ public:
   void writeBlock();
 
   // read||write scratch and binary files
-  void io(char*, int, char*, char*, int, int offset=-1,char*offsetType=NULL);
-  void io(char*, int, char*, int*, int, int offset=-1,char*offsetType=NULL);
-  void io(char*, int, char*, long*, int, int offset=-1,char*offsetType=NULL);
-  void io(char*, int, char*, float*, int, int offset=-1,char*offsetType=NULL);
-  void io(char*, int, char*, double*, int, int offset=-1,char*offsetType=NULL);
-  void rw(char*, int, char*, char*, int, int offset=-1);
+  /*
+  void io(std::string &, int, std::string &, std::string &, int, int offset=-1,std::string offsetType="");
+  void io(std::string &, int, std::string &, int*, int, int offset=-1,std::string offsetType="");
+  void io(std::string &, int, std::string &, long*, int, int offset=-1,std::string offsetType="");
+  void io(std::string &, int, std::string &, float*, int, int offset=-1,std::string offsetType="");
+  void io(std::string &, int, std::string &, double*, int, int offset=-1,std::string offsetType="");
+  void rw(std::string &, int, std::string &, std::string &, int, int offset=-1);
   int charOffset(int,char*);
+  */
 };
 
 } // namespace ChronusQ

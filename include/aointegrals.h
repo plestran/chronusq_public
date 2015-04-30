@@ -95,14 +95,14 @@ class AOIntegrals{
   int       **R2Index_;
   double	**FmTTable_;
 
-  BasisSet     	*basisSet_;
-  Molecule    	*molecule_;
-  FileIO       	*fileio_;
-  Controls     	*controls_;
+  std::shared_ptr<BasisSet>    	basisSet_;
+  std::shared_ptr<Molecule>   	molecule_;
+  std::shared_ptr<FileIO>      	fileio_;
+  std::shared_ptr<Controls>    	controls_;
 
-  PairConstants 	    *pairConstants_;
-  MolecularConstants	*molecularConstants_;
-  QuartetConstants	    *quartetConstants_;
+  std::unique_ptr<PairConstants>        pairConstants_;
+  std::unique_ptr<MolecularConstants>   molecularConstants_;
+  std::unique_ptr<QuartetConstants>     quartetConstants_;
 
 //dbwys
 #ifdef USE_LIBINT
@@ -112,14 +112,14 @@ class AOIntegrals{
 
 public:
   // these should be protected
-  RealMatrix  *twoEC_;
-  RealMatrix  *twoEX_;
-  Tensor<double> *aoERI_;
-  RealMatrix  *oneE_;
-  RealMatrix  *overlap_;
-  RealMatrix  *kinetic_;
-  RealMatrix  *potential_;
-  RealMatrix  *schwartz_;
+  std::shared_ptr<RealMatrix>     twoEC_;
+  std::shared_ptr<RealMatrix>     twoEX_;
+  std::shared_ptr<RealMatrix>     oneE_;
+  std::shared_ptr<RealMatrix>     overlap_;
+  std::shared_ptr<RealMatrix>     kinetic_;
+  std::shared_ptr<RealMatrix>     potential_;
+  std::shared_ptr<RealMatrix>     schwartz_;
+  std::shared_ptr<Tensor<double>> aoERI_;
 
   bool		haveAOTwoE;
   bool		haveAOOneE;
@@ -139,18 +139,11 @@ public:
  
   AOIntegrals(){;};
   ~AOIntegrals(){
-    if(      twoEC_!=NULL) delete twoEC_;
-    if(      twoEX_!=NULL) delete twoEX_;
-    if(       oneE_!=NULL) delete oneE_;
-    if(    overlap_!=NULL) delete overlap_;
-    if(    kinetic_!=NULL) delete kinetic_;
-    if(  potential_!=NULL) delete potential_;
-    if(   schwartz_!=NULL) delete schwartz_;
-    if(      aoERI_!=NULL) delete aoERI_;
   };
   
   // initialization function
-  void iniAOIntegrals(Molecule*,BasisSet*,FileIO*,Controls*);
+  void iniAOIntegrals(std::shared_ptr<Molecule>,std::shared_ptr<BasisSet>,
+                      std::shared_ptr<FileIO>,std::shared_ptr<Controls>);
 
   inline double &twoEC(int i, int j, int k, int l){
     return (*twoEC_)(this->R2Index_[i][j],this->R2Index_[k][l]);

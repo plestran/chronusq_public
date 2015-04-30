@@ -33,7 +33,7 @@ using ChronusQ::HashL;
 typedef ChronusQ::Shell CShell;
 typedef libint2::Shell LIShell;
 
-void BasisSet::convShell(Molecule* mol) {
+void BasisSet::convShell(std::shared_ptr<Molecule> mol) {
   std::vector<double> coeff;
   std::vector<double> exp;
   std::array<double,3> center;
@@ -71,7 +71,7 @@ void BasisSet::convShell(Molecule* mol) {
   this->convToLI = true;
 }
 
-void BasisSet::makeMap(Molecule * mol) {
+void BasisSet::makeMap(std::shared_ptr<Molecule>  mol) {
   if(!this->convToLI) this->convShell(mol);
   int n = 0;
   for( auto shell: this->shells_libint) {
@@ -81,12 +81,12 @@ void BasisSet::makeMap(Molecule * mol) {
   this->haveMap = true;
 }
 
-void BasisSet::computeShBlkNorm(Molecule *mol, RealMatrix *D){
+void BasisSet::computeShBlkNorm(std::shared_ptr<Molecule> mol, RealMatrix *D){
   // This will be much easier in Eigen
   if(!this->convToLI) this->convShell(mol);
   if(!this->haveMap)  this->makeMap(mol);
 
-  this->shBlkNorm = new RealMatrix(this->nShell(),this->nShell());
+  this->shBlkNorm = std::unique_ptr<RealMatrix>(new RealMatrix(this->nShell_,this->nShell_));
   for(int s1 = 0; s1 < this->nShell(); s1++) {
     int bf1 = this->mapSh2Bf[s1];
     int n1  = this->shells_libint[s1].size();

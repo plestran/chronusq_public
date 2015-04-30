@@ -44,7 +44,8 @@ void Controls::iniControls(){
   this->thresholdAB = 1.0e-6;
   this->thresholdSchawrtz = 1.0e-14;
   this->guess = 0;
-  this->directTwoE = false;
+  this->directTwoE = true;
+  this->buildn4eri = false;
 #ifdef USE_LIBINT
   libint2::init();
 #endif
@@ -61,4 +62,13 @@ void Controls::readSMP(int &n) {
   this->nthreads = n;
   omp_set_num_threads(n);
 #endif
+}
+
+void Controls::readDebug(char* str){
+  if(!strcmp(str,"AOERI")){
+    this->directTwoE = false;
+    this->buildn4eri = true;
+  } else {
+    cout << "Debug option \"" << str << "\" not recognized\n";
+  }
 }
