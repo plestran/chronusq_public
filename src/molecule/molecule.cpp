@@ -29,8 +29,8 @@ using ChronusQ::Molecule;
 // initializer //
 //-------------//
 void Molecule::iniMolecule(int nAtoms, std::shared_ptr<FileIO> fileio) {
-  if(nAtoms<1) throw 2000;
-  if(fileio==NULL) throw 2001;
+  if(!fileio) CErr("No FileIO given to Molecule");
+  if(nAtoms<1) CErr("No Atoms given to build Molecule",fileio->out);
   this->nAtoms_= nAtoms;
   this->cart_  = std::unique_ptr<RealMatrix>(new RealMatrix(3, this->nAtoms_)); // Molecular Cartesian
   this->index_ = new int[this->nAtoms_];
@@ -43,19 +43,14 @@ void Molecule::readMolecule(std::shared_ptr<FileIO> fileio){
   int i, j, n, readInt;
   std::string readString;
   fileio->in >> readInt;
-  try{ iniMolecule(readInt,fileio);}
-  catch(int msg) {
-    fileio->out<<"Molecule initialization failed! E#: "<<msg<<endl;
-    exit(1);
-  };
+  iniMolecule(readInt,fileio);
   nTotalE_ = 0;
   for(i=0;i<nAtoms_;i++) {
     fileio->in >> readString;
     fileio->in >> readInt;
     if((n=HashAtom(readString,readInt))!=-1) index_[i] = n;
     else {
-      fileio->out <<"Error: invalid atomic symbol or mass number!"<<endl;
-      throw 2002;
+      CErr("Error: invalid atomic symbol or mass number!",fileio->out);
     };
     nTotalE_ += atom[n].atomicNumber;
     fileio->in >> (*cart_)(0,i);

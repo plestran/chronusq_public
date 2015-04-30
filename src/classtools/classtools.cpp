@@ -62,11 +62,7 @@ void readInput(std::shared_ptr<FileIO> fileio, std::shared_ptr<Molecule> mol,
 	controls->DFT=true;
       };
     } else if(!strcmp(readString,"$GEOM")) {
-      try{mol->readMolecule(fileio);}
-      catch(int msg) {
-	fileio->out<<"Reading molecular information failed! E#: "<<msg<<endl;
-	exit(1);
-      }; 
+      mol->readMolecule(fileio);
     } else if(!strcmp(readString,"$BASIS")) {
       basis->readBasisSet(fileio,mol);
 //dbwys
@@ -83,6 +79,13 @@ void readInput(std::shared_ptr<FileIO> fileio, std::shared_ptr<Molecule> mol,
         controls->guess = 3;
         fileio->in>>controls->gauFChkName;
       };
+    } else if(!strcmp(readString,"$SCF")) {
+      fileio->in>>readString;
+      strupr(readString);
+      if(!strcmp(readString,"OFF"))
+        controls->optWaveFunction = false;
+      else if(!strcmp(readString,"ON"))
+        controls->optWaveFunction = true;
     } else if(!strcmp(readString,"$DEBUG")) {
       fileio->in>>readString;
       strupr(readString);
@@ -96,7 +99,7 @@ void readInput(std::shared_ptr<FileIO> fileio, std::shared_ptr<Molecule> mol,
 /* symmetric RealMatrices       */
 /********************************/
 double traceSymm(RealMatrix* a, RealMatrix* b) {
-  if(a->size()!=b->size()) throw 15001;
+  if(a->size()!=b->size()) CErr("Only able to trace matricies of the same size"); // FIXME this is depreciated
   double tmpVal = 0.0;
   int i;
   for(i=0;i<a->size();i++) tmpVal+=a->data()[i]*b->data()[i];

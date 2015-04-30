@@ -32,7 +32,7 @@ namespace ChronusQ {
 double factorial(int t){
   int i;
   double tmp = 1.0;
-  if (t<0 ) throw 10000;
+  if (t<0 ) CErr("Factorial (t!) only defined on domain t in [0,inf)");
   if (t==0) return 1.0;
   else {
     for(i=1;i<=t;i++) tmp *= i;
@@ -45,7 +45,7 @@ double factorial(int t){
 double doubleFact(int t){
   int i;
   double tmp = 1.0;
-  if (t<0) throw 10001;
+  if (t<0 ) CErr("Double factorial (t!!) only defined on domain t in [0,inf)");
   if (t==0) return 1.0;
   else  {
     for(i=1;i<=t;i++) tmp *= (2*i-1);
@@ -70,13 +70,13 @@ double powerInt(double base, int order){
 //---------------------------------------------------------//
 double polyCoeff(int l, int i){
   if (l>= i) return factorial(l)/( factorial(i)*factorial(l-i) );
-  else throw 10002;
+  else throw 10002; // FIXME need a CErr for this, don't understand the error
 };
 //-----------------------------------------------//
 // (x+pA)^a*(x+pB)^b = sum[coeff * x^k]; k<=a+b  //
 //-----------------------------------------------//
 double kCoeff(int k, int a, int b, double pA, double pB){
-  if(a<0||b<0||k>a+b) throw 10003;
+  if(a<0||b<0||k>a+b) throw 10003; // FIXME need a CErr for this, don't understand the error
   int from, to;
   int it,i,j;
   double tmp=0;
@@ -134,7 +134,6 @@ int HashAtom(std::string element, int massNumber) {
     };
     
     if (!element.compare(currentAtom)&&!atom[i].stable.compare("Y")){
-      cout << currentAtom << endl;
       return i;
       break;
     };

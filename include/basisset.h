@@ -26,6 +26,7 @@
 #ifndef INCLUDED_BASISSET
 #define INCLUDED_BASISSET
 #include <global.h>
+#include <cerr.h>
 #include <molecule.h>
 #include <fileio.h>
 #include <controls.h>
@@ -103,7 +104,7 @@ class BasisSet{
   friend class FileIO;
 
 public:
-
+  // FIXME need to move these over to unique_ptr
   AOCartesian *ao;             // array of ao's
   ShellPair   *shellPairs;     // array of shellPairs
   Shell       *shells;         // array of shells
@@ -122,12 +123,11 @@ public:
 
   // constructor & destructor
   BasisSet(int nBasis=0, int nShell=0);
-  ~BasisSet(){
+  ~BasisSet(){ // FIXME need to move these over to unique_ptr
     delete[] ao;
     delete[] shellPairs;
     delete[] shells;
     delete[] sortedShells;
-    shBlkNorm.reset();
   };
 
   // initialize memory
