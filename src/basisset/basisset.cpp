@@ -105,8 +105,7 @@ void BasisSet::readBasisSet(std::shared_ptr<FileIO> fileio, std::shared_ptr<Mole
     fileBasis.reset();
     fileBasis = std::unique_ptr<ifstream>(new ifstream(readString));
     if(fileBasis->fail()) { // Check if file is in PWD
-      cout << "Could not find basis set file" << endl;
-      exit(EXIT_FAILURE);
+      CErr("Could not find basis set file",fileio->out);
     } else {
       fileio->out << "Reading Basis Set from:\n ./" << readString<< endl;
     }

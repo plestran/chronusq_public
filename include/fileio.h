@@ -27,6 +27,7 @@
 #define INCLUDED_FILEIO
 #define MAXBLOCK 1000
 #include <global.h>
+#include <cerr.h>
 #include <tools.h>
 
 /****************************/

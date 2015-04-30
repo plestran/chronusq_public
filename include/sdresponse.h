@@ -26,6 +26,7 @@
 #ifndef INCLUDED_SDRESPONSE
 #define INCLUDED_SDRESPONSE
 #include <global.h>
+#include <cerr.h>
 #include <molecule.h>
 #include <controls.h>
 #include <mointegrals.h>
