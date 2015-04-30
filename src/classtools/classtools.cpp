@@ -79,6 +79,13 @@ void readInput(std::shared_ptr<FileIO> fileio, std::shared_ptr<Molecule> mol,
         controls->guess = 3;
         fileio->in>>controls->gauFChkName;
       };
+    } else if(!strcmp(readString,"$SCF")) {
+      fileio->in>>readString;
+      strupr(readString);
+      if(!strcmp(readString,"OFF"))
+        controls->optWaveFunction = false;
+      else if(!strcmp(readString,"ON"))
+        controls->optWaveFunction = true;
     } else if(!strcmp(readString,"$DEBUG")) {
       fileio->in>>readString;
       strupr(readString);
