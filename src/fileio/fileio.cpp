@@ -45,11 +45,11 @@ FileIO::FileIO(std::string &nm_input) {
   } else {
     this->name_in = nm_input + ".inp";
     this->in.open(name_in,ios::in);
-    if(this->in.fail()) throw 1002;
+    if(this->in.fail()) CErr("Unable to open "+this->name_in);
 
     this->name_out = nm_input + ".out";
     this->out.open(name_out,ios::out);
-    if(this->out.fail()) throw 1003;
+    if(this->out.fail()) CErr("Unable to open "+this->name_out);
 
     // scratch file and binary files will be initialized in iniFileIO
     this->name_scr = nm_input + ".scr";
