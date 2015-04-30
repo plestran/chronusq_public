@@ -87,18 +87,31 @@ void AOIntegrals::iniAOIntegrals(std::shared_ptr<Molecule> molecule, std::shared
 
   // FIXME need a try statement for alloc
 #ifndef USE_LIBINT // We don't need to allocate these if we're using Libint
-  this->twoEC_ = std::make_shared<RealMatrix>(this->nTT_,this->nTT_); // Raffenetti Two Electron Coulomb AOIntegrals
-  this->twoEX_ = std::make_shared<RealMatrix>(this->nTT_,this->nTT_); // Raffenetti Two Electron Exchange AOIntegrals
+  try {
+    this->twoEC_ = std::make_shared<RealMatrix>(this->nTT_,this->nTT_); // Raffenetti Two Electron Coulomb AOIntegrals
+    this->twoEX_ = std::make_shared<RealMatrix>(this->nTT_,this->nTT_); // Raffenetti Two Electron Exchange AOIntegrals
+  } catch (...) {
+    CErr(std::current_exception(),"Coulomb and Exchange Tensor(R4) Allocation");
+  }
 #else // Allocate space for all N^4 AO Integrals in BTAS Tensor object (TODO need to set this up to be conditional)
-  if(this->controls_->buildn4eri) 
-    this->aoERI_ = std::make_shared<Tensor<double>>(this->nBasis_,this->nBasis_,this->nBasis_,this->nBasis_);
+  try {
+    if(this->controls_->buildn4eri) 
+      this->aoERI_ = std::make_shared<Tensor<double>>(this->nBasis_,this->nBasis_,this->nBasis_,this->nBasis_);
+  } catch (...) {
+    CErr(std::current_exception(),"N^4 ERI Tensor Allocation");
+  }
 #endif
-  this->oneE_      = std::make_shared<RealMatrix>(this->nBasis_,this->nBasis_); // One Electron Integral
-  this->overlap_   = std::make_shared<RealMatrix>(this->nBasis_,this->nBasis_); // Overlap
-  this->kinetic_   = std::make_shared<RealMatrix>(this->nBasis_,this->nBasis_); // Kinetic
-  this->potential_ = std::make_shared<RealMatrix>(this->nBasis_,this->nBasis_); // Potential
+  try {
+    this->oneE_      = std::make_shared<RealMatrix>(this->nBasis_,this->nBasis_); // One Electron Integral
+    this->overlap_   = std::make_shared<RealMatrix>(this->nBasis_,this->nBasis_); // Overlap
+    this->kinetic_   = std::make_shared<RealMatrix>(this->nBasis_,this->nBasis_); // Kinetic
+    this->potential_ = std::make_shared<RealMatrix>(this->nBasis_,this->nBasis_); // Potential
+  } catch (...) {
+    CErr(std::current_exception(),"One Electron Integral Tensor Alloation (All)");
+  }
 #ifdef USE_LIBINT
-  this->schwartz_ = std::make_shared<RealMatrix>(this->basisSet_->nShell(),this->basisSet_->nShell()); // Schwartz
+  try { this->schwartz_ = std::make_shared<RealMatrix>(this->basisSet_->nShell(),this->basisSet_->nShell()); }// Schwartz  
+  catch (...) { CErr(std::current_exception(),"Schwartz Bound Tensor Allocation"); }
 #endif
   pairConstants_ = std::unique_ptr<PairConstants>(new PairConstants);
   molecularConstants_ = std::unique_ptr<MolecularConstants>(new MolecularConstants);

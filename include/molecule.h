@@ -26,6 +26,7 @@
 #ifndef INCLUDED_MOLECULES
 #define INCLUDED_MOLECULES
 #include <global.h>
+#include <cerr.h>
 #include <fileio.h>
 #include <atoms.h>
 #include <controls.h>

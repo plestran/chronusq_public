@@ -33,7 +33,6 @@
 
 // CMake Compilation Configuration
 #include <config_chronusq.h>
-//#include <memory>
 
 // IO
 #include <iostream>
@@ -64,6 +63,9 @@
 #include <vector>
 #include <time.h>
 #include <chrono>
+#include <memory>
+#include <exception>
+#include <stdexcept>
 
 //using namespace std;
 /* Things from STD that we need always */

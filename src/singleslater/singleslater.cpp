@@ -36,44 +36,55 @@ using ChronusQ::SingleSlater;
 void SingleSlater::iniSingleSlater(std::shared_ptr<Molecule> molecule, std::shared_ptr<BasisSet> basisset, 
                                    std::shared_ptr<AOIntegrals> aointegrals, std::shared_ptr<FileIO> fileio, 
                                    std::shared_ptr<Controls> controls) {
-  int nBasis  = basisset->nBasis();
   int nTotalE = molecule->nTotalE();
-  int spin = molecule->spin();
-  if(spin!=1) this->RHF_ = 0;
-  else this->RHF_ = 1;
-
-  // FIXME Nedd try statements for allocation
-  this->densityA_  = std::unique_ptr<RealMatrix>(new RealMatrix(nBasis,nBasis)); // Alpha Density
-  this->fockA_     = std::unique_ptr<RealMatrix>(new RealMatrix(nBasis,nBasis)); // Alpha Fock
-#ifndef USE_LIBINT
-  this->coulombA_  = std::unique_ptr<RealMatrix>(new RealMatrix(nBasis,nBasis)); // Alpha Coulomb Integral
-  this->exchangeA_ = std::unique_ptr<RealMatrix>(new RealMatrix(nBasis,nBasis)); // Alpha Exchange Integral
-#else // USE_LIBINT
-  this->PTA_  = std::unique_ptr<RealMatrix>(new RealMatrix(nBasis,nBasis)); // Alpha Perturbation Tensor
-#endif
-  this->moA_       = std::unique_ptr<RealMatrix>(new RealMatrix(nBasis,nBasis)); // Alpha Molecular Orbital Coefficients
-
-  if(!this->RHF_) {
-    this->densityB_  = std::unique_ptr<RealMatrix>(new RealMatrix(nBasis,nBasis)); // Beta Density
-    this->fockB_     = std::unique_ptr<RealMatrix>(new RealMatrix(nBasis,nBasis)); // Beta Fock
-#ifndef USE_LIBINT
-    this->coulombB_  = std::unique_ptr<RealMatrix>(new RealMatrix(nBasis,nBasis)); // Beta Coulomb Integral
-    this->exchangeB_ = std::unique_ptr<RealMatrix>(new RealMatrix(nBasis,nBasis)); // Beta Exchange Integral
-#else // USE_LIBINT
-    this->PTB_  = std::unique_ptr<RealMatrix>(new RealMatrix(nBasis,nBasis)); // Beta Perturbation Tensor
-#endif
-    this->moB_       = std::unique_ptr<RealMatrix>(new RealMatrix(nBasis,nBasis)); // Beta Molecular Orbital Coefficients
-  };
-
-  this->nBasis_= nBasis;
+  this->nBasis_  = basisset->nBasis();
   this->nTT_   = this->nBasis_*(this->nBasis_+1)/2;
-  this->spin_  = spin;
-  int nSingleE = spin - 1;
+  this->spin_  = molecule->spin();
+  int nSingleE = this->spin_ - 1;
   this->nOccB_ = (nTotalE - nSingleE)/2;
   this->nVirB_ = this->nBasis_ - this->nOccB_;
   this->nOccA_ = this->nOccB_ + nSingleE;
   this->nVirA_ = this->nBasis_ - this->nOccA_;
   this->energyNuclei = molecule->energyNuclei();
+  if(this->spin_!=1) this->RHF_ = 0;
+  else this->RHF_ = 1;
+
+  // FIXME Nedd try statements for allocation
+  try { this->densityA_  = std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nBasis_)); } // Alpha Density
+  catch (...) { CErr(std::current_exception(),"Alpha Density Matrix Allocation"); }
+  try { this->fockA_     = std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nBasis_)); } // Alpha Fock
+  catch (...) { CErr(std::current_exception(),"Alpha Fock Matrix Allocation"); }
+#ifndef USE_LIBINT
+  try { this->coulombA_  = std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nBasis_)); } // Alpha Coulomb Integral
+  catch (...) { CErr(std::current_exception(),"Alpha Coulomb Tensor (R2) Allocation"); }
+  try { this->exchangeA_ = std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nBasis_)); }// Alpha Exchange Integral
+  catch (...) { CErr(std::current_exception(),"Alpha Exchange Tensor (R2) Allocation"); }
+#else // USE_LIBINT
+  try { this->PTA_  = std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nBasis_)); } // Alpha Perturbation Tensor
+  catch (...) { CErr(std::current_exception(),"Alpha Perturbation Tensor (G[P]) Allocation"); }
+#endif
+  try { this->moA_       = std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nBasis_)); } // Alpha Molecular Orbital Coefficients
+  catch (...) { CErr(std::current_exception(),"Alpha MO Coefficients Allocation"); }
+  
+
+  if(!this->RHF_) {
+    try { this->densityB_  = std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nBasis_)); } // Beta Density
+    catch (...) { CErr(std::current_exception(),"Beta Density Matrix Allocation"); }
+    try { this->fockB_     = std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nBasis_)); } // Beta Fock
+    catch (...) { CErr(std::current_exception(),"Beta Fock Matrix Allocation"); }
+#ifndef USE_LIBINT
+    try { this->coulombB_  = std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nBasis_)); } // Beta Coulomb Integral
+    catch (...) { CErr(std::current_exception(),"Beta Coulomb Tensor (R2) Allocation"); }
+    try { this->exchangeB_ = std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nBasis_)); } // Beta Exchange Integral
+    catch (...) { CErr(std::current_exception(),"Beta Exchange Tensor (R2) Allocation"); }
+#else // USE_LIBINT
+    try { this->PTB_  = std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nBasis_)); } // Beta Perturbation Tensor
+    catch (...) { CErr(std::current_exception(),"Beta Perturbation Tensor (G[P]) Allocation"); }
+#endif
+    try { this->moB_       = std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nBasis_)); } // Beta Molecular Orbital Coefficients
+    catch (...) { CErr(std::current_exception(),"Beta MO Coefficients Allocation"); }
+  };
+
 
   this->molecule_ = molecule;
   this->basisset_ = basisset;

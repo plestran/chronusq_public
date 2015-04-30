@@ -26,6 +26,7 @@
 #ifndef INCLUDED_SINGLESLATER
 #define INCLUDED_SINGLESLATER
 #include <global.h>
+#include <cerr.h>
 #include <molecule.h>
 #include <controls.h>
 #include <aointegrals.h>

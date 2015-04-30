@@ -27,6 +27,7 @@
 #define  INCLUDED_WORKERS
 //#include "mpi.h"
 #include <global.h>
+#include <cerr.h>
 #include <fileio.h>
 #include <atoms.h>
 #include <molecule.h>

@@ -1,6 +1,7 @@
 add_subdirectory(aointegrals)
 add_subdirectory(atlas)
 add_subdirectory(basisset)
+add_subdirectory(cerr)
 add_subdirectory(classtools)
 add_subdirectory(controls)
 add_subdirectory(fileio)
