@@ -40,7 +40,7 @@
 #include <classtools.h>
 
 namespace ChronusQ {
-int atlas(int, std::string, GlobalMPI*);
+int atlas(int, char**, GlobalMPI*);
 int worker(GlobalMPI*);
 } // namespace ChronusQ
 

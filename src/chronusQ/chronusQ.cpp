@@ -48,8 +48,7 @@ int main(int argc,char *argv[]) {
 
 //  if(globalMPI.myid==0) {
     start = std::chrono::high_resolution_clock::now();
-    std::string str(argv[1]);
-    atlas(argc, str, &globalMPI);
+    atlas(argc, argv, &globalMPI);
 //  } else {
 //    worker(&globalMPI);
 //  };
