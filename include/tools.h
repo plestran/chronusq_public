@@ -55,8 +55,11 @@ void strupr (char*);
 // make a lowercase copy of s:
 void strlwr (char*);
 
+// make a lowercase of the string:
+std::string stringlower(std::string);
+
 // convert atomic symbol and mass to an index in the table of atom in atoms.h
-int HashAtom (char*, int);
+int HashAtom (std::string, int);
 
 // convert shell symbol or angular momentum to number of AOs in the shell
 int HashNAOs (int);
