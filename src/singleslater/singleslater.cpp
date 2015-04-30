@@ -471,13 +471,9 @@ void SingleSlater::readGuessGauFChk(std::string &filename) {
   std::string readString;
   int i,j,nBasis;
   double data;
-  std::unique_ptr<ifstream> fchk;
-  if(fexists(filename)) {
-    fchk = std::unique_ptr<ifstream>(new ifstream(filename));
-  } else {
-    cout << "Could not find "+filename << endl;
-    exit(EXIT_FAILURE);
-  }
+  std::unique_ptr<ifstream> fchk(new ifstream(filename));
+  if(fchk->fail()) 
+    CErr("Could not find "+filename,this->fileio_->out);
 
   *fchk>>readString;
   while((!(fchk->eof()))&&(readString.compare("basis"))) *fchk>>readString;
