@@ -116,6 +116,17 @@ std::string stringlower(std::string str){
   }; 
   return str;
 };
+
+//-----------------------------//
+// return uppercase of the str //
+// ----------------------------//
+std::string stringupper(std::string str){
+  std::string ucStr(str);
+  for (auto i=0;i<str.size();i++){
+    ucStr[i]=toupper(str[i]);
+  }
+  return ucStr;
+}
 //-----------------------------------------------------------------------------//
 // convert atomic symbol and mass to an index in the table of atom in atoms.h  //
 //-----------------------------------------------------------------------------//

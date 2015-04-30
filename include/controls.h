@@ -60,7 +60,7 @@ public:
   ~Controls(){;};
   void iniControls();
   void readSMP(int &);
-  void readDebug(char*);
+  void readDebug(std::string);
 };
 } // namespace ChronusQ
 #endif
