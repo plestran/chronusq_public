@@ -72,7 +72,7 @@ public:
   inline double energyNuclei() { return this->energyNuclei_;};
 
   // read from input file
-  void readMolecule(std::shared_ptr<FileIO>);
+  void readMolecule(std::shared_ptr<FileIO>, std::istream &);
 
   // read|write scratch|binary files
   void ioRead(std::shared_ptr<FileIO>);

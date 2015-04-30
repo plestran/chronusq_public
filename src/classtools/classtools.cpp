@@ -62,14 +62,30 @@ void readInput(std::shared_ptr<FileIO> fileio, std::shared_ptr<Molecule> mol,
 	controls->DFT=true;
       };
     } else if(!strcmp(readString,"$GEOM")) {
-      mol->readMolecule(fileio);
+      fileio->in >> readString;
+      strupr(readString);
+      fstream *geomRead;
+      if(!strcmp(readString,"READ")) {
+        geomRead = &fileio->in;
+      } else if(!strcmp(readString,"FILE")) {
+        fileio->in >> readString;
+        geomRead = new fstream(readString,ios::in);
+        if(geomRead->fail()) CErr("Unable to open "+std::string(readString),fileio->out); 
+        else fileio->out << "Reading geometry from " << readString << endl;
+      } else {
+        CErr("Unrecognized GEOM option: " + std::string(readString),fileio->out);
+      }
+      mol->readMolecule(fileio,*geomRead);
+      if(!(geomRead==&fileio->in)){
+//      fileio->out << "Closing " << readString << endl;
+        geomRead->close();
+        delete geomRead;
+      }
     } else if(!strcmp(readString,"$BASIS")) {
       basis->readBasisSet(fileio,mol);
-//dbwys
     } else if(!strcmp(readString,"$NSMP")) {
       fileio->in >> readInt;
       controls->readSMP(readInt);
-//dbwye
     } else if(!strcmp(readString,"$GUESS")) {
       fileio->in>>readString;
       strupr(readString);

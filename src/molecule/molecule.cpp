@@ -39,25 +39,25 @@ void Molecule::iniMolecule(int nAtoms, std::shared_ptr<FileIO> fileio) {
 //--------------------------------------------//
 // Read molecular information from input file //
 //--------------------------------------------//
-void Molecule::readMolecule(std::shared_ptr<FileIO> fileio){
+void Molecule::readMolecule(std::shared_ptr<FileIO> fileio, std::istream &geomRead){
   int i, j, n, readInt;
   std::string readString;
-  fileio->in >> readInt;
+  geomRead >> readInt;
   iniMolecule(readInt,fileio);
   nTotalE_ = 0;
   for(i=0;i<nAtoms_;i++) {
-    fileio->in >> readString;
-    fileio->in >> readInt;
+    geomRead >> readString;
+    geomRead >> readInt;
     if((n=HashAtom(readString,readInt))!=-1) index_[i] = n;
     else {
       CErr("Error: invalid atomic symbol or mass number!",fileio->out);
     };
     nTotalE_ += atom[n].atomicNumber;
-    fileio->in >> (*cart_)(0,i);
+    geomRead >> (*cart_)(0,i);
     (*cart_)(0,i) = (*cart_)(0,i)/phys.bohr;
-    fileio->in >> (*cart_)(1,i);
+    geomRead >> (*cart_)(1,i);
     (*cart_)(1,i) = (*cart_)(1,i)/phys.bohr;
-    fileio->in >> (*cart_)(2,i);
+    geomRead >> (*cart_)(2,i);
     (*cart_)(2,i) = (*cart_)(2,i)/phys.bohr;
   };
   double sqrAB;
