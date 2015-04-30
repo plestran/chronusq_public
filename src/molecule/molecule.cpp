@@ -41,7 +41,7 @@ void Molecule::iniMolecule(int nAtoms, std::shared_ptr<FileIO> fileio) {
 //--------------------------------------------//
 void Molecule::readMolecule(std::shared_ptr<FileIO> fileio){
   int i, j, n, readInt;
-  char readString[MAXNAMELEN];
+  std::string readString;
   fileio->in >> readInt;
   try{ iniMolecule(readInt,fileio);}
   catch(int msg) {

@@ -24,6 +24,7 @@
  *  
  */
 #include <tools.h>
+#include <atoms.h>
 //--------------------------------------//
 // factorial function:  t! = 1*2*3...*t //
 //--------------------------------------//
@@ -106,19 +107,38 @@ void strlwr(char *a) {
     ++a;
   }
 };
+//-----------------------------//
+//  make give string to lower  //
+//  ---------------------------//
+std::string stringlower(std::string str){
+  for (int i =0;i<str.size();i++){
+    str[i]=tolower(str[i]);
+  }; 
+  return str;
+};
 //-----------------------------------------------------------------------------//
 // convert atomic symbol and mass to an index in the table of atom in atoms.h  //
 //-----------------------------------------------------------------------------//
-int HashAtom(char *symbol, int massNumber) { 
-  strlwr(symbol);
-  if(!strcmp(symbol,"h")&&(massNumber==0||massNumber==1)) return 0; 
-  if(!strcmp(symbol,"d")||(!strcmp(symbol,"h")&&massNumber==2)) return 1; 
-  if(!strcmp(symbol,"t")||(!strcmp(symbol,"h")&&massNumber==3)) return 2; 
-  if(!strcmp(symbol,"he")&&(massNumber==0||massNumber==3)) return 3; 
-  if(!strcmp(symbol,"he")&&massNumber==4) return 4; 
-  if(!strcmp(symbol,"li")&&(massNumber==0||massNumber==6)) return 5; 
-  if(!strcmp(symbol,"li")&&massNumber==7) return 6; 
-  if(!strcmp(symbol,"c")) return 11;
+int HashAtom(std::string element, int massNumber) { 
+  element = stringlower(element);
+  std::string currentAtom;
+  
+  for (auto i=0;i<atom.size();i++){
+    currentAtom=atom[i].symbol;
+    currentAtom=stringlower(currentAtom);
+    if (massNumber>0){
+      if (!element.compare(currentAtom)&&massNumber==atom[i].massNumber){
+        return i;
+        break;
+      };
+    };
+    
+    if (!element.compare(currentAtom)&&!atom[i].stable.compare("Y")){
+      cout << currentAtom << endl;
+      return i;
+      break;
+    };
+  };
   return -1; 
 }; 
 //-------------------------------------------------------------------------//
