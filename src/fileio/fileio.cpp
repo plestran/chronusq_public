@@ -28,7 +28,7 @@ using ChronusQ::FileIO;
 //-------------//
 // constructor //
 //-------------//
-FileIO::FileIO(std::string &nm_input) {
+FileIO::FileIO(std::string nm_input) {
   char   testChar;
   int    testInt;
   long   testLong;
@@ -40,8 +40,7 @@ FileIO::FileIO(std::string &nm_input) {
   this->sizeDouble_ = sizeof(testDouble)/sizeof(testChar);
 
   if(nm_input.empty()) {
-    this->out<<"Error: input filename required! "<<endl;
-    throw 1001;
+    CErr("Fatal: Input File Required");
   } else {
     this->name_in = nm_input + ".inp";
     this->in.open(name_in,ios::in);
@@ -55,6 +54,52 @@ FileIO::FileIO(std::string &nm_input) {
     this->name_scr = nm_input + ".scr";
     this->name_bin = nm_input + ".bin";
   };
+};
+FileIO::FileIO(std::vector<std::string> nm_input) {
+  char   testChar;
+  int    testInt;
+  long   testLong;
+  float  testFloat;
+  double testDouble;
+  this->sizeInt_    = sizeof(testInt)   /sizeof(testChar);
+  this->sizeLong_   = sizeof(testLong)  /sizeof(testChar);
+  this->sizeFloat_  = sizeof(testFloat) /sizeof(testChar);
+  this->sizeDouble_ = sizeof(testDouble)/sizeof(testChar);
+
+  if(nm_input.size()==0) CErr("Fatal: Input File Required");
+  cout << "HERE" << endl;
+
+  std::string inputTag = "--inp=";
+  std::string outputTag = "--out=";
+  std::string scrTag = "--scr=";
+  std::string binTag = "--bin=";
+  for(auto i = 0; i < nm_input.size(); ++i) {
+    if(!nm_input[i].compare(0,inputTag.length(),inputTag)){
+      nm_input[i].erase(0,inputTag.length());
+      this->name_in = nm_input[i];
+    } else if(!nm_input[i].compare(0,outputTag.length(),outputTag)){
+      nm_input[i].erase(0,outputTag.length());
+      this->name_out = nm_input[i];
+    } else if(!nm_input[i].compare(0,scrTag.length(),scrTag)){
+      nm_input[i].erase(0,scrTag.length());
+      this->name_scr = nm_input[i];
+    } else if(!nm_input[i].compare(0,binTag.length(),binTag)){
+      nm_input[i].erase(0,binTag.length());
+      this->name_bin = nm_input[i];
+    } else CErr("Input \""+nm_input[i]+"\" not recognized");
+  }
+  cout << "HERE" << endl;
+
+  if(this->name_in.empty()) CErr("Fatal: Must specify an input file");
+  if(this->name_out.empty()) this->name_out = this->name_in + ".out";
+  if(this->name_scr.empty()) this->name_scr = this->name_in + ".scr";
+  if(this->name_bin.empty()) this->name_bin = this->name_in + ".bin";
+
+  this->in.open(name_in,ios::in);
+  this->out.open(name_out,ios::out);
+
+  if(this->in.fail()) CErr("Unable to open "+this->name_in);
+  if(this->out.fail()) CErr("Unable to open "+this->name_out);
 };
 //------------//
 // destructor //
