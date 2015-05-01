@@ -125,6 +125,7 @@ public:
   inline RealMatrix* exchangeB(){ return this->exchangeB_.get();};
   inline RealMatrix* moA()      { return this->moA_.get();};
   inline RealMatrix* moB()      { return this->moB_.get();};
+  inline AOIntegrals* aointegrals() {return this->aointegrals_.get();};
 
   void formGuess();	        // form the intial guess of MO's
   void formDensity();		// form the density matrix

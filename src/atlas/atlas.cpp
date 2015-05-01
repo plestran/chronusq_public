@@ -74,7 +74,8 @@ int ChronusQ::atlas(int argc, std::string argv, GlobalMPI *globalMPI) {
   aointegrals->printTimings();
   hartreeFock->computeEnergy();
 //hartreeFock->SCF();
-  MOIntegrals *moIntegrals = new MOIntegrals();
+//MOIntegrals *moIntegrals = new MOIntegrals();
+  std::shared_ptr<MOIntegrals> moIntegrals = std::make_shared<MOIntegrals>();
   moIntegrals->iniMOIntegrals(molecule,basisset,fileIO,controls,aointegrals,hartreeFock);
 
   SDResponse *sdResponse = new SDResponse();
