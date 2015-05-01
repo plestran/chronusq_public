@@ -139,8 +139,7 @@ public:
   std::chrono::duration<double> DenShBlkD;
  
   AOIntegrals(){;};
-  ~AOIntegrals(){
-  };
+  ~AOIntegrals(){;};
   
   // initialization function
   void iniAOIntegrals(std::shared_ptr<Molecule>,std::shared_ptr<BasisSet>,
