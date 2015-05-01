@@ -79,12 +79,9 @@ void SDResponse::formRM(){
   for(auto ii = 0; ii < this->nBasis_; ii++) {
   for(auto jj = 0; jj < nO; jj++) {
     LocMoAO(ii,jj) = (*this->singleSlater_->moA())(ii,jj);
-    cout << "The MO_NO: "<< ii<<jj<< " " <<LocMoAO(ii,jj) << "\n";
   }
   for(auto kk = nO; kk< this->nBasis_; kk++) {
     LocMoAV(ii,kk-nO) = (*this->singleSlater_->moA())(ii,kk);
-    cout << "The MO_NV: "<< ii<<(kk-nO)<< LocMoAO(ii,kk-nO) << "\n";
-
   }
   }
   // Create the A matrix <aj||ib>
@@ -112,7 +109,7 @@ void SDResponse::formRM(){
   // <i j  | a   b  >
   contract(1.0,InterA3,{a,j,i,sig},LocMoAV,{sig,b},0.0,InterA4,{a,j,i,b});
   cout <<"finish 4\n";
-
+  cout << "This is <aj|ib>\n";
   for(auto b=0;b<nV;b++) 
   for(auto i=0;i<nO;i++) 
   for(auto j=0;j<nO;j++) 
@@ -133,6 +130,17 @@ void SDResponse::formRM(){
   contract(1.0,InterA2,{a,j,lam,sig},LocMoAV,{lam,b},0.0,InterA5,{a,j,b,sig});
   // <a j  | b   i  >
   contract(1.0,InterA5,{a,j,b,sig},LocMoAO,{sig,i},0.0,InterA6,{a,j,b,i});
+  cout << "This is <aj|bi>\n";
+  for(auto i=0;i<nO;i++) 
+  for(auto b=0;b<nV;b++) 
+  for(auto j=0;j<nO;j++) 
+  for(auto a=0;a<nV;a++) {
+    cout << "( "<< (a+1) << " " 
+         << (j+1) << " " 
+         << (b+1) << " " 
+         << (i+1) << " ) "
+         << InterA6(a,j,b,i)<<"\n"; 
+  }
 
   for(auto a=0;a<nV;a++) 
   for(auto j=0;j<nO;j++) 
@@ -175,17 +183,17 @@ void SDResponse::formRM(){
   // <i j  | a   b  >
   contract(1.0,InterB3,{i,j,a,sig},LocMoAV,{sig,b},0.0,InterB4,{i,j,a,b});
   cout << "finish 4\n";
-
-//  for(auto b=0;b<nV;b++) 
-//  for(auto a=0;a<nV;a++) 
-//  for(auto j=0;j<nO;j++) 
-//  for(auto i=0;i<nO;i++) {
-//    cout << "( "<< (i+1) << " " 
-//         << (j+1) << " " 
-//         << (a+1) << " " 
-//         << (b+1) << " ) "
-//         << Inter4(i,j,a,b)<<"\n"; 
-//  }
+  cout << "This is <ij|ab>\n";
+  for(auto b=0;b<nV;b++) 
+  for(auto a=0;a<nV;a++) 
+  for(auto j=0;j<nO;j++) 
+  for(auto i=0;i<nO;i++) {
+    cout << "( "<< (i+1) << " " 
+         << (j+1) << " " 
+         << (a+1) << " " 
+         << (b+1) << " ) "
+         << InterB4(i,j,a,b)<<"\n"; 
+  }
   
   // <ij|ba>
   // <i nu | lam sig>
@@ -195,7 +203,18 @@ void SDResponse::formRM(){
   // <i j  | b   sig>
   contract(1.0,InterB2,{i,j,lam,sig},LocMoAV,{lam,b},0.0,InterB3,{i,j,b,sig});
   // <i j  | b   a  >
-  contract(1.0,InterB3,{i,j,b,sig},LocMoAV,{sig,a},0.0,InterB4,{i,j,b,a});
+  contract(1.0,InterB3,{i,j,b,sig},LocMoAV,{sig,a},0.0,InterB5,{i,j,b,a});
+  cout << "This is <ij|ba>\n";
+  for(auto a=0;a<nV;a++) 
+  for(auto b=0;b<nV;b++) 
+  for(auto j=0;j<nO;j++) 
+  for(auto i=0;i<nO;i++) {
+    cout << "( "<< (i+1) << " " 
+         << (j+1) << " " 
+         << (b+1) << " " 
+         << (a+1) << " ) "
+         << InterB5(i,j,b,a)<<"\n"; 
+  }
 
   for(auto i=0;i<nO;i++) 
   for(auto j=0;j<nO;j++) 
