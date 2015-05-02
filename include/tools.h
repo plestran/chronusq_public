@@ -58,6 +58,8 @@ void strlwr (char*);
 // make a lowercase of the string:
 std::string stringlower(std::string);
 
+//make a uppercaser of the string:
+std::string stringupper(std::string);
 // convert atomic symbol and mass to an index in the table of atom in atoms.h
 int HashAtom (std::string, int);
 

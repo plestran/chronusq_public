@@ -36,38 +36,39 @@ namespace ChronusQ {
 void readInput(std::shared_ptr<FileIO> fileio, std::shared_ptr<Molecule> mol, 
                std::shared_ptr<BasisSet> basis,std::shared_ptr<Controls> controls) {
   int i, j, n, readInt;
-  char readString[MAXNAMELEN];
+  std::string readString;
   fileio->in >> readString;
   while(!(fileio->in.eof())) {
-    strupr(readString);
-    if(!strcmp(readString,"/*")) while(strcmp(readString,"*/")) fileio->in >> readString;
-    else if(!strcmp(readString,"$CHARGE")) {
+    readString=stringupper(readString);
+    if(!readString.compare("/*")) while(readString.compare("*/")) fileio->in >> readString;
+    else if(!readString.compare("$CHARGE")) {
       fileio->in >> readInt;
       mol->readCharge(readInt);
-    } else if(!strcmp(readString,"$SPIN")) {
+    } else if(!readString.compare("$SPIN")) {
       fileio->in >> readInt;
       mol->readSpin(readInt);
-    } else if(!strcmp(readString,"$EXTRA")) {
+    } else if(!readString.compare("$EXTRA")) {
       fileio->in>>readString;
-      strupr(readString);
-      if(!strcmp(readString,"RESTART")) controls->restart=true;
-    } else if(!strcmp(readString,"$PRINT")) {
+      readString=stringupper(readString);
+      if(!readString.compare("RESTART")) controls->restart=true;
+    } else if(!readString.compare("$PRINT")) {
       fileio->in >> (controls->printLevel);
-    } else if(!strcmp(readString,"$METHOD")) {
+    } else if(!readString.compare("$METHOD")) {
       fileio->in >> readString;
-      strupr(readString);
-      if(!strcmp(readString,"HF")) controls->HF=true;
+      readString=stringupper(readString);
+      if(!readString.compare("HF")) controls->HF=true;
       else {
 	controls->HF=false;
 	controls->DFT=true;
       };
-    } else if(!strcmp(readString,"$GEOM")) {
+<<<<<<< HEAD
+    } else if(!readString.compare("$GEOM")) {
       fileio->in >> readString;
-      strupr(readString);
+      readString=stringupper(readString);  
       fstream *geomRead;
-      if(!strcmp(readString,"READ")) {
+      if(!readString.compare("READ")) {
         geomRead = &fileio->in;
-      } else if(!strcmp(readString,"FILE")) {
+      } else if(!readString.compare("FILE")) {
         fileio->in >> readString;
         geomRead = new fstream(readString,ios::in);
         if(geomRead->fail()) CErr("Unable to open "+std::string(readString),fileio->out); 
@@ -81,30 +82,30 @@ void readInput(std::shared_ptr<FileIO> fileio, std::shared_ptr<Molecule> mol,
         geomRead->close();
         delete geomRead;
       }
-    } else if(!strcmp(readString,"$BASIS")) {
+    } else if(!readString.compare("$BASIS")) {
       basis->readBasisSet(fileio,mol);
-    } else if(!strcmp(readString,"$NSMP")) {
+    } else if(!readString.compare("$NSMP")) {
       fileio->in >> readInt;
       controls->readSMP(readInt);
-    } else if(!strcmp(readString,"$GUESS")) {
+    } else if(!readString.compare("$GUESS")) {
       fileio->in>>readString;
-      strupr(readString);
-      if(!strcmp(readString,"INPUT")) {
+      readString=stringupper(readString);  
+      if(!readString.compare("INPUT")) {
         controls->guess = 1;
-      } else if(!strcmp(readString,"GAUFCHK")) {
+      } else if(!readString.compare("GAUFCHK")) {
         controls->guess = 3;
         fileio->in>>controls->gauFChkName;
       };
-    } else if(!strcmp(readString,"$SCF")) {
+    } else if(!readString.compare("$SCF")) {
       fileio->in>>readString;
-      strupr(readString);
-      if(!strcmp(readString,"OFF"))
+      readString=stringupper(readString);
+      if(!readString.compare("OFF"))
         controls->optWaveFunction = false;
-      else if(!strcmp(readString,"ON"))
+      else if(!readString.compare("ON"))
         controls->optWaveFunction = true;
-    } else if(!strcmp(readString,"$DEBUG")) {
+    } else if(!readString.compare("$DEBUG")) {
       fileio->in>>readString;
-      strupr(readString);
+      readString=stringupper(readString);
       controls->readDebug(readString);
     };
     fileio->in >> readString;

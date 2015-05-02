@@ -64,8 +64,8 @@ void Controls::readSMP(int &n) {
 #endif
 }
 
-void Controls::readDebug(char* str){
-  if(!strcmp(str,"AOERI")){
+void Controls::readDebug(std::string str){
+  if(!str.compare("AOERI")){
     this->directTwoE = false;
     this->buildn4eri = true;
   } else {

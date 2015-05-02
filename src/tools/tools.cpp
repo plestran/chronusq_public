@@ -116,6 +116,17 @@ std::string stringlower(std::string str){
   }; 
   return str;
 };
+
+//-----------------------------//
+// return uppercase of the str //
+// ----------------------------//
+std::string stringupper(std::string str){
+  std::string ucStr(str);
+  for (auto i=0;i<str.size();i++){
+    ucStr[i]=toupper(str[i]);
+  }
+  return ucStr;
+}
 //-----------------------------------------------------------------------------//
 // convert atomic symbol and mass to an index in the table of atom in atoms.h  //
 //-----------------------------------------------------------------------------//
@@ -147,14 +158,14 @@ int HashNAOs(int L) {
   return (L+1)*(L+2)/2;
 };
 
-int HashNAOs(char *symbol) { 
-  strupr(symbol);
-  if(!strcmp(symbol,"S")) return 1; 
-  if(!strcmp(symbol,"P")) return 3; 
-  if(!strcmp(symbol,"D")) return 6; 
-  if(!strcmp(symbol,"F")) return 10; 
-  if(!strcmp(symbol,"G")) return 15;
-  if(!strcmp(symbol,"H")) return 21;
+int HashNAOs(std::string symbol) { 
+  symbol = stringupper(symbol);
+  if(!symbol.compare("S")) return 1; 
+  if(!symbol.compare("P")) return 3; 
+  if(!symbol.compare("D")) return 6; 
+  if(!symbol.compare("F")) return 10; 
+  if(!symbol.compare("G")) return 15;
+  if(!symbol.compare("H")) return 21;
   return -1; 
 }; 
 //-------------------------------------------//

@@ -444,13 +444,13 @@ void SingleSlater::formGuess() {
 void SingleSlater::readGuessIO() {
   int i,j;
   this->fileio_->in.clear();
-  char readString[MAXNAMELEN];
+  std::string readString;
   this->fileio_->in.seekg(0,ios::beg);
   this->fileio_->in>>readString;
-  strupr(readString);
-  while(!this->fileio_->in.eof()&&strcmp(readString,"$GUESS")) {
+  readString=stringupper(readString);
+  while(!this->fileio_->in.eof()&&readString.compare("$GUESS")) {
     this->fileio_->in>>readString;
-    strupr(readString);
+    readString=stringupper(readString);
   };
   this->fileio_->in >> readString;
   for(i=0;i<this->nBasis_;i++) for(j=0;j<this->nBasis_;j++){
