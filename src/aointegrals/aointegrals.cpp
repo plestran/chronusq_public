@@ -77,7 +77,7 @@ static double factTLarge[21] = {
 // initialize AOIntegrals
 //---------------------
 void AOIntegrals::iniAOIntegrals(std::shared_ptr<Molecule> molecule, std::shared_ptr<BasisSet> basisset, 
-                                 std::shared_ptr<FileIO> fileio, std::shared_ptr<Controls> controls){
+                                 std::shared_ptr<FileIO> fileio, std::shared_ptr<Controls> controls,std::shared_ptr<BasisSet> DFbasisSet = nullptr){
   this->molecule_ = molecule;
   this->basisSet_ = basisset;
   this->fileio_   = fileio;
@@ -96,7 +96,7 @@ void AOIntegrals::iniAOIntegrals(std::shared_ptr<Molecule> molecule, std::shared
 #else // Allocate space for all N^4 AO Integrals in BTAS Tensor object (TODO need to set this up to be conditional)
   try {
     if(this->controls_->buildn4eri) 
-      this->aoERI_ = std::make_shared<Tensor<double>>(this->nBasis_,this->nBasis_,this->nBasis_,this->nBasis_);
+      this->aoERI_ = std::make_shared<RealTensor4d>(this->nBasis_,this->nBasis_,this->nBasis_,this->nBasis_);
   } catch (...) {
     CErr(std::current_exception(),"N^4 ERI Tensor Allocation");
   }
@@ -112,6 +112,12 @@ void AOIntegrals::iniAOIntegrals(std::shared_ptr<Molecule> molecule, std::shared
 #ifdef USE_LIBINT
   try { this->schwartz_ = std::make_shared<RealMatrix>(this->basisSet_->nShell(),this->basisSet_->nShell()); }// Schwartz  
   catch (...) { CErr(std::current_exception(),"Schwartz Bound Tensor Allocation"); }
+  if(this->controls_->doDF) {
+    try { 
+      this->aoRII_ = std::make_shared<RealTensor3d>(this->basisSet_->nShell(),this->basisSet_->nShell(),this->DFbasisSet_->nShell()); 
+      this->aoRIS_ = std::make_shared<RealTensor2d>(this->DFbasisSet->nShell(),this->DFbasisSet_->nShell());
+    } catch (...) { CErr(std::current_exception(),"Density Fitting Tensor Allocation");}
+  }
 #endif
   pairConstants_ = std::unique_ptr<PairConstants>(new PairConstants);
   molecularConstants_ = std::unique_ptr<MolecularConstants>(new MolecularConstants);

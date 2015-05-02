@@ -97,6 +97,7 @@ class AOIntegrals{
   double	**FmTTable_;
 
   std::shared_ptr<BasisSet>    	basisSet_;
+  std::shared_ptr<BasisSet>     DFbasisSet_;
   std::shared_ptr<Molecule>   	molecule_;
   std::shared_ptr<FileIO>      	fileio_;
   std::shared_ptr<Controls>    	controls_;
@@ -120,11 +121,16 @@ public:
   std::shared_ptr<RealMatrix>     kinetic_;
   std::shared_ptr<RealMatrix>     potential_;
   std::shared_ptr<RealMatrix>     schwartz_;
-  std::shared_ptr<Tensor<double>> aoERI_;
+//std::shared_ptr<Tensor<double>> aoERI_;
+  std::shared_ptr<RealTensor4d>   aoERI_;
+  std::shared_ptr<RealTensor3d>   aoRII_;
+  std::shared_ptr<RealTensor2d>   aoRIS_;
 
   bool		haveAOTwoE;
   bool		haveAOOneE;
   bool          haveSchwartz;
+  bool          haveRIS;
+  bool          haveRII;
 
 
   // Timing Stats
@@ -172,13 +178,15 @@ public:
   void computeAOOneE(); // build one-electron AO integral matrices
 #ifdef USE_LIBINT
   void computeSchwartz();
+  void computeAORII();
+  void computeAORIS();
 #endif
 //----------------------------------------//
 // member functions in integrals_onee.cpp //
 //----------------------------------------//
-  void computeOverlapS();
-  void computeKineticT();
-  void computePotentialV();
+  void computeOverlapS(); // Depreciated
+  void computeKineticT(); // Depreciated
+  void computePotentialV(); // Depreciated
   double oneehRRTSab(int,int*,int,int*,int*,int*);
   double oneehRRSab(int,int*,int,int*);
   double oneehRRVab(int,int*,int,int*);

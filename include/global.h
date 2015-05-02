@@ -102,6 +102,12 @@ typedef Eigen::Matrix<dcomplex,Dynamic,Dynamic,RowMajor>   ComplexMatrix; // Row
 typedef Eigen::MatrixExponentialReturnValue<RealMatrix>    RealMatExp;
 typedef Eigen::MatrixExponentialReturnValue<ComplexMatrix> ComplexMatExp;
 typedef TwoBodyEngine<libint2::Coulomb> coulombEngine;
+typedef btas::RangeNd<CblasRowMajor,std::array<long,4>> Range4d;
+typedef btas::RangeNd<CblasRowMajor,std::array<long,3>> Range3d;
+typedef btas::RangeNd<CblasRowMajor,std::array<long,2>> Range2d;
+typedef Tensor<double,Range4d> RealTensor4d;
+typedef Tensor<double,Range3d> RealTensor3d;
+typedef Tensor<double,Range2d> RealTensor2d;
 
 //----------------//
 //number constants//
