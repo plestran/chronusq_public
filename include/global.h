@@ -43,6 +43,7 @@
 #include <cmath>
 #include <complex>
 #define EIGEN_MATRIXBASE_PLUGIN "eigenplugin.h" // ChronusQ plugin for Eigen
+#define EIGEN_INITIALIZE_MATRICES_BY_ZERO // Eröffne die Matrizen als Null.
 #include <Eigen/Core> // Eigen Linear Algebra
 #include <unsupported/Eigen/MatrixFunctions>
 #ifdef USE_LIBINT
@@ -99,6 +100,10 @@ using libint2::TwoBodyEngine;
 typedef std::complex<double> dcomplex;
 typedef Eigen::Matrix<double,Dynamic,Dynamic,RowMajor>     RealMatrix;    // RowMajor BC Libint
 typedef Eigen::Matrix<dcomplex,Dynamic,Dynamic,RowMajor>   ComplexMatrix; // RowMajor BC Libint
+typedef Eigen::Map<RealMatrix> RealMap;
+typedef Eigen::Map<const RealMatrix> ConstRealMap;
+typedef Eigen::Map<ComplexMatrix> ComplexMap;
+typedef Eigen::Map<const ComplexMatrix> ConstComplexMap;
 typedef Eigen::MatrixExponentialReturnValue<RealMatrix>    RealMatExp;
 typedef Eigen::MatrixExponentialReturnValue<ComplexMatrix> ComplexMatExp;
 typedef TwoBodyEngine<libint2::Coulomb> coulombEngine;

@@ -310,7 +310,7 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
           }
         }
 */
-        Eigen::Map<const RealMatrix> buf_mat(buff,n1,n2);
+        ConstRealMap buf_mat(buff,n1,n2);
         mat->block(bf1,bf2,n1,n2) = buf_mat;
       }
     }
@@ -416,9 +416,7 @@ void AOIntegrals::computeSchwartz(){
       );
 
       
-      try{
-        ShBlk = new RealMatrix(n1,n2);
-      } catch (int msg) {cout << "couldn't allocate shblk" << endl;}
+      ShBlk = new RealMatrix(n1,n2);
       ShBlk->setZero();
    
       int ij = 0;
@@ -590,12 +588,13 @@ void AOIntegrals::computeAORII(){
 
   std::vector<coulombEngine> engines(this->controls_->nthreads);
   engines[0] = coulombEngine(
-    this->basisSet_->maxPrim,this->DFbasisSet_->maxPrim,
-    this->basisSet_->maxL,this->DFbasisSet_->maxL,0);
+    std::max(this->basisSet_->maxPrim,this->DFbasisSet_->maxPrim),
+    std::max(this->basisSet_->maxL,this->DFbasisSet_->maxL),0);
   engines[0].set_precision(std::numeric_limits<double>::epsilon());
 
   for(int i=1; i<this->controls_->nthreads; i++) engines[i] = engines[0];
   if(!this->basisSet_->haveMap) this->basisSet_->makeMap(this->molecule_); 
+  if(!this->DFbasisSet_->haveMap) this->DFbasisSet_->makeMap(this->molecule_); 
 
 #ifdef USE_OMP
   #pragma omp parallel
@@ -612,7 +611,7 @@ void AOIntegrals::computeAORII(){
     for(int s2 = 0; s2 < this->basisSet_->nShell(); s2++) {
       int bf2_s = this->basisSet_->mapSh2Bf[s2];
       int n2    = this->basisSet_->shells_libint[s2].size();
-      for(int dfs = 0; dfs < this->DFbasisSet_->nShell; dfs++,s123++) {
+      for(int dfs = 0; dfs < this->DFbasisSet_->nShell(); dfs++,s123++) {
         if(s123 % this->controls_->nthreads != thread_id) continue;
         int dfbf3_s = this->DFbasisSet_->mapSh2Bf[dfs];
         int dfn3    = this->DFbasisSet_->shells_libint[dfs].size();
@@ -624,12 +623,66 @@ void AOIntegrals::computeAORII(){
         const double* buff = engines[thread_id].compute(
           this->basisSet_->shells_libint[s1],
           this->basisSet_->shells_libint[s2],
-          this->DFbasisSet_->shells_libint[dfs]);
+          this->DFbasisSet_->shells_libint[dfs],
+          libint2::Shell::unit());
 
-         // Still need to finish this TODO
-
+        auto lower = {bf1_s,bf2_s,dfbf3_s};
+        auto upper = {bf1_s+n1,bf2_s+n2,dfbf3_s+dfn3};
+        auto view  = btas::make_view(
+          this->aoRII_->range().slice(lower,upper),
+          this->aoRII_->storage());
+        std::copy(buff,buff+n1*n2*dfn3,view.begin());
+      }
+    }
+  }
+  } // omp parallel scope
 }
 
+void AOIntegrals::computeAORIS(){
+  this->haveRIS= true;
+  std::vector<coulombEngine> engines(this->controls_->nthreads);
+  engines[0] = coulombEngine( this->DFbasisSet_->maxPrim, 
+                              this->DFbasisSet_->maxL,0);
+  engines[0].set_precision(std::numeric_limits<double>::epsilon());
+
+  for(int i=1; i<this->controls_->nthreads; i++) engines[i] = engines[0];
+  if(!this->DFbasisSet_->haveMap) this->DFbasisSet_->makeMap(this->molecule_); 
+
+  RealMap aoRISMap(&this->aoRIS_->storage()[0],
+    this->DFbasisSet_->nBasis(),this->DFbasisSet_->nBasis());
+
+#ifdef USE_OMP
+  #pragma omp parallel
+#endif
+  {
+#ifdef USE_OMP
+    int thread_id = omp_get_thread_num();
+#else
+    int thread_id = 0;
+#endif
+  for(int s1 = 0, s12=0; s1 < this->DFbasisSet_->nShell(); s1++) {
+    int bf1_s = this->DFbasisSet_->mapSh2Bf[s1];
+    int n1    = this->DFbasisSet_->shells_libint[s1].size();
+    for(int s2 = 0; s2 < this->DFbasisSet_->nShell(); s2++,s12++) {
+      int bf2_s = this->DFbasisSet_->mapSh2Bf[s2];
+      int n2    = this->DFbasisSet_->shells_libint[s2].size();
+ 
+      if(s12 % this->controls_->nthreads != thread_id) continue;
+
+      const double* buff = engines[thread_id].compute(
+        this->DFbasisSet_->shells_libint[s1],
+        libint2::Shell::unit(),
+        this->DFbasisSet_->shells_libint[s2],
+        libint2::Shell::unit());
+
+      ConstRealMap buffMat(buff,n1,n2);
+      aoRISMap.block(bf1_s,bf2_s,n1,n2) = buffMat; 
+    }
+  }
+  } // omp parallel scope
+
+  aoRISMap = aoRISMap.selfadjointView<Lower>(); // Symmetrize
+}
 #endif
 
 

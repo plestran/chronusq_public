@@ -77,9 +77,10 @@ static double factTLarge[21] = {
 // initialize AOIntegrals
 //---------------------
 void AOIntegrals::iniAOIntegrals(std::shared_ptr<Molecule> molecule, std::shared_ptr<BasisSet> basisset, 
-                                 std::shared_ptr<FileIO> fileio, std::shared_ptr<Controls> controls,std::shared_ptr<BasisSet> DFbasisSet = nullptr){
+                                 std::shared_ptr<FileIO> fileio, std::shared_ptr<Controls> controls,std::shared_ptr<BasisSet> DFbasisSet){
   this->molecule_ = molecule;
   this->basisSet_ = basisset;
+  this->DFbasisSet_ = DFbasisSet;
   this->fileio_   = fileio;
   this->controls_ = controls;
   this->nBasis_   = basisset->nBasis();
@@ -93,7 +94,7 @@ void AOIntegrals::iniAOIntegrals(std::shared_ptr<Molecule> molecule, std::shared
   } catch (...) {
     CErr(std::current_exception(),"Coulomb and Exchange Tensor(R4) Allocation");
   }
-#else // Allocate space for all N^4 AO Integrals in BTAS Tensor object (TODO need to set this up to be conditional)
+#else 
   try {
     if(this->controls_->buildn4eri) 
       this->aoERI_ = std::make_shared<RealTensor4d>(this->nBasis_,this->nBasis_,this->nBasis_,this->nBasis_);
@@ -114,8 +115,8 @@ void AOIntegrals::iniAOIntegrals(std::shared_ptr<Molecule> molecule, std::shared
   catch (...) { CErr(std::current_exception(),"Schwartz Bound Tensor Allocation"); }
   if(this->controls_->doDF) {
     try { 
-      this->aoRII_ = std::make_shared<RealTensor3d>(this->basisSet_->nShell(),this->basisSet_->nShell(),this->DFbasisSet_->nShell()); 
-      this->aoRIS_ = std::make_shared<RealTensor2d>(this->DFbasisSet->nShell(),this->DFbasisSet_->nShell());
+      this->aoRII_ = std::make_shared<RealTensor3d>(this->basisSet_->nBasis(),this->basisSet_->nBasis(),this->DFbasisSet_->nBasis()); 
+      this->aoRIS_ = std::make_shared<RealTensor2d>(this->DFbasisSet_->nBasis(),this->DFbasisSet_->nBasis());
     } catch (...) { CErr(std::current_exception(),"Density Fitting Tensor Allocation");}
   }
 #endif

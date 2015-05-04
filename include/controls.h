@@ -49,6 +49,7 @@ public:
   bool  	restart;        // restart the calculation
   bool  	directTwoE;     // if direct two-electron will performed
   bool          buildn4eri;     // Build N^4 AO ERI tensor
+  bool          doDF;           // Density fitting (RI) flag
   double 	thresholdS;
   double 	thresholdAB;
   double	thresholdSchawrtz;

@@ -6,19 +6,10 @@ ChronusQ TODO
 - Move documentation over to DOxygen
 - Add full support for Intel compiler (installed on Urania)
 - Add full support for PGI compiler
-- Add an option for SCF upon input
-- Have an option to read from an xyz for geometry specificiation
-- Clean up input specification from command line (don't require .inp and .out)
-- Generalize input read to all elements
 - Write a FileIO interface for Eigen
   - Remove dependence of FileIO on global and tools (make stand alone)
 - Better print control (consistant scheme)
-- Fix Mac compilation (weird problem with ifstream that doesn't show up on
-  linux)
-- Conditional allocation of AO ERI tensor (aointegrals.cpp)
-- Try/Catch for AO ERI tensor allocation (aointegrals.cpp)
 - Use boost for high precision physical constants (global.h, etc)
 - Add initialization option (subclass?) for each main class (selectively
   allocate matricies / tensors, etc) to set before initialization
-- Need a fully functional error handler
 - Need to rename FileIO

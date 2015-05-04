@@ -149,7 +149,8 @@ public:
   
   // initialization function
   void iniAOIntegrals(std::shared_ptr<Molecule>,std::shared_ptr<BasisSet>,
-                      std::shared_ptr<FileIO>,std::shared_ptr<Controls>);
+                      std::shared_ptr<FileIO>,std::shared_ptr<Controls>,
+                      std::shared_ptr<BasisSet> DFbasisSet=nullptr);
 
   inline double &twoEC(int i, int j, int k, int l){
     return (*twoEC_)(this->R2Index_[i][j],this->R2Index_[k][l]);

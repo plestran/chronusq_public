@@ -61,7 +61,6 @@ void readInput(std::shared_ptr<FileIO> fileio, std::shared_ptr<Molecule> mol,
 	controls->HF=false;
 	controls->DFT=true;
       };
-<<<<<<< HEAD
     } else if(!readString.compare("$GEOM")) {
       fileio->in >> readString;
       readString=stringupper(readString);  

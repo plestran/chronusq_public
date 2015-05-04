@@ -467,7 +467,7 @@ void SingleSlater::readGuessIO() {
 // form the initial guess of MOs from Gaussian formatted checkpoint file //
 //-----------------------------------------------------------------------//
 void SingleSlater::readGuessGauFChk(std::string &filename) {
-  this->fileio_->out<<"reading formatted checkpoint file "<<filename<<endl;
+  this->fileio_->out<<"Reading formatted checkpoint file "<<filename<<endl;
   std::string readString;
   int i,j,nBasis;
   double data;

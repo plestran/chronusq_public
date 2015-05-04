@@ -46,6 +46,7 @@ void Controls::iniControls(){
   this->guess = 0;
   this->directTwoE = true;
   this->buildn4eri = false;
+  this->doDF = false;
 #ifdef USE_LIBINT
   libint2::init();
 #endif
