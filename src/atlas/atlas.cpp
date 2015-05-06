@@ -75,9 +75,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   hartreeFock->computeEnergy();
   if(controls->optWaveFunction) hartreeFock->SCF();
   else fileIO->out << "**Skipping SCF Optimization**" << endl;
-/*
   MOIntegrals *moIntegrals = new MOIntegrals();
->>>>>>> 135e336f44c0190b6e0da27e9638377982168265
   moIntegrals->iniMOIntegrals(molecule,basisset,fileIO,controls,aointegrals,hartreeFock);
 
   SDResponse *sdResponse = new SDResponse();
