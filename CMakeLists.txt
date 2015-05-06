@@ -23,9 +23,9 @@ option(USE_LIBINT "Use LibInt Integral Driver" OFF) # Default use in-house integ
 option(USE_BOOST_TIMER "Use Boost High Performace Timer" OFF) # Default use built in timer
 
 if(USE_LIBINT)
-  find_library(LIBINT_LIB int2 /usr/local/libint/2.1.0-beta/lib)
-  include_directories("/usr/local/libint/2.1.0-beta/include")
-  include_directories("/usr/local/libint/2.1.0-beta/include/libint2")
+  find_library(LIBINT_LIB int2 ${PROJECT_SOURCE_DIR}/deps/lib)
+  include_directories("${PROJECT_SOURCE_DIR}/deps/include")
+  include_directories("${PROJECT_SOURCE_DIR}/deps/include/libint2")
   include_directories("/usr/include/eigen3")
 endif(USE_LIBINT)
 
