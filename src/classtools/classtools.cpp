@@ -62,18 +62,30 @@ void readInput(std::shared_ptr<FileIO> fileio, std::shared_ptr<Molecule> mol,
 	controls->DFT=true;
       };
     } else if(!strcmp(readString,"$GEOM")) {
-      try{mol->readMolecule(fileio);}
-      catch(int msg) {
-	fileio->out<<"Reading molecular information failed! E#: "<<msg<<endl;
-	exit(1);
-      }; 
+      fileio->in >> readString;
+      strupr(readString);
+      fstream *geomRead;
+      if(!strcmp(readString,"READ")) {
+        geomRead = &fileio->in;
+      } else if(!strcmp(readString,"FILE")) {
+        fileio->in >> readString;
+        geomRead = new fstream(readString,ios::in);
+        if(geomRead->fail()) CErr("Unable to open "+std::string(readString),fileio->out); 
+        else fileio->out << "Reading geometry from " << readString << endl;
+      } else {
+        CErr("Unrecognized GEOM option: " + std::string(readString),fileio->out);
+      }
+      mol->readMolecule(fileio,*geomRead);
+      if(!(geomRead==&fileio->in)){
+//      fileio->out << "Closing " << readString << endl;
+        geomRead->close();
+        delete geomRead;
+      }
     } else if(!strcmp(readString,"$BASIS")) {
       basis->readBasisSet(fileio,mol);
-//dbwys
     } else if(!strcmp(readString,"$NSMP")) {
       fileio->in >> readInt;
       controls->readSMP(readInt);
-//dbwye
     } else if(!strcmp(readString,"$GUESS")) {
       fileio->in>>readString;
       strupr(readString);
@@ -83,6 +95,13 @@ void readInput(std::shared_ptr<FileIO> fileio, std::shared_ptr<Molecule> mol,
         controls->guess = 3;
         fileio->in>>controls->gauFChkName;
       };
+    } else if(!strcmp(readString,"$SCF")) {
+      fileio->in>>readString;
+      strupr(readString);
+      if(!strcmp(readString,"OFF"))
+        controls->optWaveFunction = false;
+      else if(!strcmp(readString,"ON"))
+        controls->optWaveFunction = true;
     } else if(!strcmp(readString,"$DEBUG")) {
       fileio->in>>readString;
       strupr(readString);
@@ -96,7 +115,7 @@ void readInput(std::shared_ptr<FileIO> fileio, std::shared_ptr<Molecule> mol,
 /* symmetric RealMatrices       */
 /********************************/
 double traceSymm(RealMatrix* a, RealMatrix* b) {
-  if(a->size()!=b->size()) throw 15001;
+  if(a->size()!=b->size()) CErr("Only able to trace matricies of the same size"); // FIXME this is depreciated
   double tmpVal = 0.0;
   int i;
   for(i=0;i<a->size();i++) tmpVal+=a->data()[i]*b->data()[i];

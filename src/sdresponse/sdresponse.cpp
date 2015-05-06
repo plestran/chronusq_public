@@ -130,7 +130,7 @@ void SDResponse::formRM(){
   contract(1.0,InterA2,{a,j,lam,sig},LocMoAV,{lam,b},0.0,InterA5,{a,j,b,sig});
   // <a j  | b   i  >
   contract(1.0,InterA5,{a,j,b,sig},LocMoAO,{sig,i},0.0,InterA6,{a,j,b,i});
-  cout << "This is <aj|bi>\n";
+  cout << "This is <aj|bi>" << endl;
   for(auto i=0;i<nO;i++) 
   for(auto b=0;b<nV;b++) 
   for(auto j=0;j<nO;j++) 
@@ -148,6 +148,11 @@ void SDResponse::formRM(){
   for(auto b=0;b<nV;b++) {
     dbbarA(a,j,i,b)=InterA4(a,j,i,b)-InterA6(a,j,b,i);
   }
+
+//cout << "<AJ|IB>" << endl;
+//for(auto x : InterA4) cout << x << endl;
+//cout << "<AJ|BI>" << endl;
+//for(auto x : InterA6) cout << x << endl;
   //Print A matrix
   cout << "Here is Matrix A: <aj||ib>\n";
   for(auto b=0;b<nV;b++) 
@@ -235,8 +240,20 @@ void SDResponse::formRM(){
          << dbbarB(i,j,a,b)<<"\n"; 
   }
  
-}
 
+  cout << "Dump out AO ERIs" << endl;
+//  for (auto y : (*this->aoERI_)) cout << y << endl;
+  for (auto sig=0;sig<this->nBasis_;sig++)
+  for (auto lam=0;lam<this->nBasis_;lam++)
+  for (auto nu =0;nu <this->nBasis_;nu++)
+  for (auto mu =0;mu <this->nBasis_;mu++){
+    cout << "< "<< mu+1 <<" "
+         <<  nu+1 << " "
+         <<  lam+1 << " "
+         <<  sig+1 <<  ">      "
+         << (*this->aoERI_)(mu,nu,lam,sig) << "\n";
+  }
+}
 /*************************/
 /* MPI Related Routines  */
 /*************************/

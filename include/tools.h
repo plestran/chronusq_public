@@ -27,6 +27,7 @@
 #define  INCLUDED_TOOLS
 //#include <gsl/gsl_sf_erf.h>
 #include <global.h>
+#include <cerr.h>
 
 /*****************************/
 /*Error Messages 10000-14999 */
@@ -54,8 +55,11 @@ void strupr (char*);
 // make a lowercase copy of s:
 void strlwr (char*);
 
+// make a lowercase of the string:
+std::string stringlower(std::string);
+
 // convert atomic symbol and mass to an index in the table of atom in atoms.h
-int HashAtom (char*, int);
+int HashAtom (std::string, int);
 
 // convert shell symbol or angular momentum to number of AOs in the shell
 int HashNAOs (int);
@@ -66,11 +70,6 @@ int HashL (std::string);
 
 // convert angular momentum to AO index in a shell
 int HashIAO(int,int*);
-
-inline bool fexists(std::string f){
-  ifstream ifile(f);
-  return ifile;
-}
 
 
 } // namespace ChronusQ

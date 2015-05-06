@@ -1,8 +1,10 @@
 Must have cmake version >= 2.8 to build this project
 
-to build the easy way (from source dir):
+to build the easy way (from top chronusq dir):
   util/runconfig_<COMPILER_SUITE>
 
 Currently supported COMPILER_SUITE variables:
   gcc :  GNU compilers
-  pgi :  Portland Group compilers
+
+Scripts for pgi and intel are also included, but they aren't functional unless
+libint has been compiled with the respective compiler

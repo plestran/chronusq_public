@@ -27,6 +27,7 @@
 #define  INCLUDED_WORKERS
 //#include "mpi.h"
 #include <global.h>
+#include <cerr.h>
 #include <fileio.h>
 #include <atoms.h>
 #include <molecule.h>
@@ -39,7 +40,7 @@
 #include <classtools.h>
 
 namespace ChronusQ {
-int atlas(int, std::string, GlobalMPI*);
+int atlas(int, char**, GlobalMPI*);
 int worker(GlobalMPI*);
 } // namespace ChronusQ
 
