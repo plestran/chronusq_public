@@ -31,6 +31,8 @@ using ChronusQ::FileIO;
 using ChronusQ::MOIntegrals;
 using ChronusQ::SDResponse;
 using ChronusQ::SingleSlater;
+using std::cout;
+using std::setw;
 //------------------------------//
 // allocate memory for matrices //
 //------------------------------//
@@ -44,8 +46,7 @@ void SDResponse::iniSDResponse( std::shared_ptr<Molecule> molecule, std::shared_
   this->controls_       = controls;
   this->mointegrals_    = mointegrals;
   this->singleSlater_   = singleSlater;
-
-  this->aoERI_ = singleSlater->aointegrals()->aoERI_;
+  this->aoERI_          = singleSlater->aointegrals()->aoERI_;
 };
 //-----------------------------------//
 // print a wave function information //
@@ -84,174 +85,115 @@ void SDResponse::formRM(){
     LocMoAV(ii,kk-nO) = (*this->singleSlater_->moA())(ii,kk);
   }
   }
-  // Create the A matrix <aj||ib>
-  // Create 4 Tensor<double> objects as intermetiates
-  Tensor<double> InterA1(nV,this->nBasis_,this->nBasis_,this->nBasis_); // <a nu | lam sig>
-  Tensor<double> InterA2(nV,nO,this->nBasis_,this->nBasis_); // <a j  | lam sig>
-  Tensor<double> InterA3(nV,nO,nO,this->nBasis_); // <a j  | i   sig>
-  Tensor<double> InterA4(nV,nO,nO,nV); // < a j | i b >
-  Tensor<double> InterA5(nV,nO,nV,this->nBasis_); // < a j | b sig >
-  Tensor<double> InterA6(nV,nO,nV,nO); //< a j | b i >
-  Tensor<double> dbbarA(nV,nO,nO,nV); // <aj||ib>
+  // Create the A matrix
+  // Ixxxx for intermediate Sxxxx for Mulliken Notation single bar
+  // Dxxxx for Dirac Notation double bar, dxxxx for Dirac Notation single bar
+  Tensor<double> Ianls(nV,this->nBasis_,this->nBasis_,this->nBasis_); // (a nu | lam sig)
+  Tensor<double> Iails(nV,nO,this->nBasis_,this->nBasis_); // (a j  | lam sig)
+  Tensor<double> Iaijs(nV,nO,nO,this->nBasis_); // (a j  | i   sig)
+  Tensor<double> Saijb(nV,nO,nO,nV); // ( a j | i b )
+  Tensor<double> Iabls(nV,nV,this->nBasis_,this->nBasis_); // ( a j | b sig )
+  Tensor<double> Iabjs(nV,nV,nO,this->nBasis_); // ( a j | b i )
+  Tensor<double> Sabji(nV,nV,nO,nO); // ( a b | j i )
+  Tensor<double> Dajib(nV,nO,nO,nV); // <aj||ib>
+  Tensor<double> dajib(nV,nO,nO,nV); // <aj|ib>
 
   enum{a,j,i,b,mu,nu,lam,sig};
 
-  // <aj|ib>
-  // <a nu | lam sig>
-  contract(1.0,LocMoAV,{mu,a},(*this->aoERI_),{mu,nu,lam,sig},0.0,InterA1,{a,nu,lam,sig});
-  cout <<"finish 1\n";
-  // <a j  | lam sig>
-  contract(1.0,LocMoAO,{nu,j},InterA1,{a,nu,lam,sig},0.0,InterA2,{a,j,lam,sig});
-  cout <<"finish 2\n";
-  // <i j  | a   sig>
-  contract(1.0,InterA2,{a,j,lam,sig},LocMoAO,{lam,i},0.0,InterA3,{a,j,i,sig});
-  cout <<"finish 3\n";
-  // <i j  | a   b  >
-  contract(1.0,InterA3,{a,j,i,sig},LocMoAV,{sig,b},0.0,InterA4,{a,j,i,b});
-  cout <<"finish 4\n";
+  // (ai|jb)
+  // (a nu | lam sig)
+  contract(1.0,LocMoAV,{mu,a},(*this->aoERI_),{mu,nu,lam,sig},0.0,Ianls,{a,nu,lam,sig});
+  // (a i  | lam sig)
+  contract(1.0,LocMoAO,{nu,i},Ianls,{a,nu,lam,sig},0.0,Iails,{a,i,lam,sig});
+  // (a i  | j   sig)
+  contract(1.0,Iails,{a,i,lam,sig},LocMoAO,{lam,j},0.0,Iaijs,{a,i,j,sig});
+  // (a i  | j   b  )
+  contract(1.0,Iaijs,{a,i,j,sig},LocMoAV,{sig,b},0.0,Saijb,{a,i,j,b});
+
+  // (ab|ji)
+  // (a nu | lam sig)
+  contract(1.0,LocMoAV,{mu,a},(*this->aoERI_),{mu,nu,lam,sig},0.0,Ianls,{a,nu,lam,sig});
+  // (a b  | lam sig)
+  contract(1.0,LocMoAV,{nu,b},Ianls,{a,nu,lam,sig},0.0,Iabls,{a,b,lam,sig});
+  // (a b  | j   sig)
+  contract(1.0,Iabls,{a,b,lam,sig},LocMoAO,{lam,j},0.0,Iabjs,{a,b,j,sig});
+  // (a b  | j   i  )
+  contract(1.0,Iabjs,{a,b,j,sig},LocMoAO,{sig,i},0.0,Sabji,{a,b,j,i});
+
+  // Build <aj|ib>
   cout << "This is <aj|ib>\n";
-  for(auto b=0;b<nV;b++) 
-  for(auto i=0;i<nO;i++) 
-  for(auto j=0;j<nO;j++) 
-  for(auto a=0;a<nV;a++) {
-    cout << "( "<< (a+1) << " " 
-         << (j+1) << " " 
-         << (i+1) << " " 
-         << (b+1) << " ) "
-         << InterA4(a,j,i,b)<<"\n"; 
-  }
-
-  // <aj|bi>
-  // <a nu | lam sig>
-  contract(1.0,LocMoAV,{mu,a},(*this->aoERI_),{mu,nu,lam,sig},0.0,InterA1,{a,nu,lam,sig});
-  // <a j  | lam sig>
-  contract(1.0,LocMoAO,{nu,j},InterA1,{a,nu,lam,sig},0.0,InterA2,{a,j,lam,sig});
-  // <a j  | b   sig>
-  contract(1.0,InterA2,{a,j,lam,sig},LocMoAV,{lam,b},0.0,InterA5,{a,j,b,sig});
-  // <a j  | b   i  >
-  contract(1.0,InterA5,{a,j,b,sig},LocMoAO,{sig,i},0.0,InterA6,{a,j,b,i});
-  cout << "This is <aj|bi>" << endl;
-  for(auto i=0;i<nO;i++) 
-  for(auto b=0;b<nV;b++) 
-  for(auto j=0;j<nO;j++) 
-  for(auto a=0;a<nV;a++) {
-    cout << "( "<< (a+1) << " " 
-         << (j+1) << " " 
-         << (b+1) << " " 
-         << (i+1) << " ) "
-         << InterA6(a,j,b,i)<<"\n"; 
-  }
-
   for(auto a=0;a<nV;a++) 
   for(auto j=0;j<nO;j++) 
   for(auto i=0;i<nO;i++) 
   for(auto b=0;b<nV;b++) {
-    dbbarA(a,j,i,b)=InterA4(a,j,i,b)-InterA6(a,j,b,i);
+    Dajib(a,j,i,b) = Saijb(a,i,j,b)-Sabji(a,b,j,i);
+    dajib(a,j,i,b) = Saijb(a,i,j,b);
   }
 
-//cout << "<AJ|IB>" << endl;
-//for(auto x : InterA4) cout << x << endl;
-//cout << "<AJ|BI>" << endl;
-//for(auto x : InterA6) cout << x << endl;
-  //Print A matrix
-  cout << "Here is Matrix A: <aj||ib>\n";
-  for(auto b=0;b<nV;b++) 
-  for(auto i=0;i<nO;i++) 
-  for(auto j=0;j<nO;j++) 
-  for(auto a=0;a<nV;a++) {
-    cout << "( "<< (a+1) << " " 
-         << (j+1) << " " 
-         << (i+1) << " " 
-         << (b+1) << " ) "
-         << dbbarA(a,j,i,b)<<"\n"; 
+  // Build A matrix
+  int nOV = nO*nV;
+  int ia,jb;
+  RealMatrix A(2*nOV,2*nOV);
+  RealMatrix Ad(nOV,nOV);
+  RealMatrix Aod(nOV,nOV);
+  RealMatrix EigO(nO,1);
+  RealMatrix EigV(nV,1);
+
+  for (auto i=0;i<nO;i++){
+    EigO(i,0) = (*this->singleSlater_->epsA())(i,0);
+    cout << "The " << (i+1) << " eigenvalue is: " << EigO(i,0) << endl;
+  }
+  for (auto j=0;j<nV;j++){
+    EigV(j,0) = (*this->singleSlater_->epsA())((j+nO),0);
+    cout << "The " << (j+1) << " eigenvalue is: " << EigV(j,0) << endl;
   }
 
-  // Create the B matrix <ij||ab>
-  // Create 4 Tensor<double> objects as intermetiates
-  Tensor<double> InterB1(nO,this->nBasis_,this->nBasis_,this->nBasis_); // <i nu | lam sig>
-  Tensor<double> InterB2(nO,nO,this->nBasis_,this->nBasis_); // <i j  | lam sig>
-  Tensor<double> InterB3(nO,nO,nV,this->nBasis_); // <i j  | a   sig>
-  Tensor<double> InterB4(nO,nO,nV,nV); // < i j | a b >
-  Tensor<double> InterB5(nO,nO,nV,nV); // < i j | b a >
-  Tensor<double> dbbarB(nO,nO,nV,nV); // <ij||ab>
-  
-  // <ij|ab>
-  // <i nu | lam sig>
-  contract(1.0,LocMoAO,{mu,i},(*this->aoERI_),{mu,nu,lam,sig},0.0,InterB1,{i,nu,lam,sig});
-  cout << "finish 1\n";
-  // <i j  | lam sig>
-  contract(1.0,LocMoAO,{nu,j},InterB1,{i,nu,lam,sig},0.0,InterB2,{i,j,lam,sig});
-  cout << "finish 2\n";
-  // <i j  | a   sig>
-  contract(1.0,InterB2,{i,j,lam,sig},LocMoAV,{lam,a},0.0,InterB3,{i,j,a,sig});
-  cout << "finish 3\n";
-  // <i j  | a   b  >
-  contract(1.0,InterB3,{i,j,a,sig},LocMoAV,{sig,b},0.0,InterB4,{i,j,a,b});
-  cout << "finish 4\n";
-  cout << "This is <ij|ab>\n";
-  for(auto b=0;b<nV;b++) 
-  for(auto a=0;a<nV;a++) 
-  for(auto j=0;j<nO;j++) 
-  for(auto i=0;i<nO;i++) {
-    cout << "( "<< (i+1) << " " 
-         << (j+1) << " " 
-         << (a+1) << " " 
-         << (b+1) << " ) "
-         << InterB4(i,j,a,b)<<"\n"; 
+  ia = 0;
+  for (auto i=0;i<nO;i++)
+  for (auto a=0;a<nV;a++){
+    jb =0;
+    for (auto j=0;j<nO;j++)
+    for (auto b=0;b<nV;b++){
+      Ad(ia,jb) = 0.0;
+      if ((a==b)&&(i==j)){
+	Ad(ia,jb) = EigV(a,0)-EigO(i,0);
+      }
+      Ad(ia,jb) = Ad(ia,jb) + Dajib(a,j,i,b);
+      Aod(ia,jb) = dajib(a,j,i,b);
+      cout << "Ad(" <<ia<<","<<jb<<") = " << Ad(ia,jb) << endl; 
+      cout << "Aod(" <<ia<<","<<jb<<") = " << Aod(ia,jb) << endl;
+      jb = jb+1;
+    }
+    ia = ia+1;
   }
   
-  // <ij|ba>
-  // <i nu | lam sig>
-  contract(1.0,LocMoAO,{mu,i},(*this->aoERI_),{mu,nu,lam,sig},0.0,InterB1,{i,nu,lam,sig});
-  // <i j  | lam sig>
-  contract(1.0,LocMoAO,{nu,j},InterB1,{i,nu,lam,sig},0.0,InterB2,{i,j,lam,sig});
-  // <i j  | b   sig>
-  contract(1.0,InterB2,{i,j,lam,sig},LocMoAV,{lam,b},0.0,InterB3,{i,j,b,sig});
-  // <i j  | b   a  >
-  contract(1.0,InterB3,{i,j,b,sig},LocMoAV,{sig,a},0.0,InterB5,{i,j,b,a});
-  cout << "This is <ij|ba>\n";
-  for(auto a=0;a<nV;a++) 
-  for(auto b=0;b<nV;b++) 
-  for(auto j=0;j<nO;j++) 
-  for(auto i=0;i<nO;i++) {
-    cout << "( "<< (i+1) << " " 
-         << (j+1) << " " 
-         << (b+1) << " " 
-         << (a+1) << " ) "
-         << InterB5(i,j,b,a)<<"\n"; 
+  for (auto i=0;i<nOV;i++)
+  for (auto j=0;j<nOV;j++){
+    A(i,j) = Ad(i,j);
+    A(i+nOV,j+nOV) = Ad(i,j);
+    A(i,j+nOV) = Aod(i,j);
+    A(i+nOV,j) = Aod(i,j);
+  } 
+
+  // Print the A matrix
+  cout << "Print the A matrix" << endl;
+  for (auto i=0;i<2*nOV;i++)
+  for (auto j=0;j<2*nOV;j++){
+    cout << "(" << (i+1) << ", "
+	 << (j+1) << ")" << "  "
+	 << A(i,j) << endl;
   }
 
-  for(auto i=0;i<nO;i++) 
-  for(auto j=0;j<nO;j++) 
-  for(auto a=0;a<nV;a++) 
-  for(auto b=0;b<nV;b++) {
-    dbbarB(i,j,a,b)=InterB4(i,j,a,b)-InterB5(i,j,b,a);
-  }
-  //Print B matrix
-  cout << "Here is Matrix B: <ij||ab>\n";
-  for(auto b=0;b<nV;b++) 
-  for(auto a=0;a<nV;a++) 
-  for(auto j=0;j<nO;j++) 
-  for(auto i=0;i<nO;i++) {
-    cout << "( "<< (i+1) << " " 
-         << (j+1) << " " 
-         << (a+1) << " " 
-         << (b+1) << " ) "
-         << dbbarB(i,j,a,b)<<"\n"; 
-  }
- 
-
-  cout << "Dump out AO ERIs" << endl;
-//  for (auto y : (*this->aoERI_)) cout << y << endl;
-  for (auto sig=0;sig<this->nBasis_;sig++)
-  for (auto lam=0;lam<this->nBasis_;lam++)
-  for (auto nu =0;nu <this->nBasis_;nu++)
-  for (auto mu =0;mu <this->nBasis_;mu++){
-    cout << "< "<< mu+1 <<" "
-         <<  nu+1 << " "
-         <<  lam+1 << " "
-         <<  sig+1 <<  ">      "
-         << (*this->aoERI_)(mu,nu,lam,sig) << "\n";
+  // Diagonalize the A matrix
+  Eigen::SelfAdjointEigenSolver<RealMatrix> ES;
+  ES.compute(A);
+  ES.eigenvalues();
+  //ES.eigenvectors();
+  
+  // Print the CIS Excitation Energies
+  for (auto i=0;i<2*nOV;i++){
+    cout << "The " << (i+1) << " Exicitation Energy is: "
+         << (ES.eigenvalues())(i) << endl;
   }
 }
 /*************************/

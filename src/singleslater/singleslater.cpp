@@ -65,6 +65,8 @@ void SingleSlater::iniSingleSlater(std::shared_ptr<Molecule> molecule, std::shar
 #endif
   try { this->moA_       = std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nBasis_)); } // Alpha Molecular Orbital Coefficients
   catch (...) { CErr(std::current_exception(),"Alpha MO Coefficients Allocation"); }
+  try { this->epsA_       = std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nBasis_)); } // Alpha Orbital Eigenvalues
+  catch (...) { CErr(std::current_exception(),"Alpha Orbital Eigenvalues"); }
   
 
   if(!this->RHF_) {
@@ -83,6 +85,8 @@ void SingleSlater::iniSingleSlater(std::shared_ptr<Molecule> molecule, std::shar
 #endif
     try { this->moB_       = std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nBasis_)); } // Beta Molecular Orbital Coefficients
     catch (...) { CErr(std::current_exception(),"Beta MO Coefficients Allocation"); }
+    try { this->epsB_       = std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nBasis_)); } // Beta Orbital Eigenvalues
+    catch (...) { CErr(std::current_exception(),"Beta Orbital Eigenvalues"); }
   };
 
 

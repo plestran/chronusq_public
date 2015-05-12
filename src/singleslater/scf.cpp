@@ -59,7 +59,7 @@ void SingleSlater::SCF(){
     Eigen::SelfAdjointEigenSolver<RealMatrix> sys(Fp);
     Cp    = sys.eigenvectors();
     
-    //(*this->epsA_)= sys.eigenvalues();
+    (*this->epsA_)= sys.eigenvalues();
     (*this->moA_) = X*Cp;
     this->formDensity();
     this->formFock();

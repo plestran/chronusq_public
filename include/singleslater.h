@@ -60,6 +60,8 @@ class SingleSlater {
   std::unique_ptr<RealMatrix>  moB_;
   std::unique_ptr<RealMatrix>  PTA_;
   std::unique_ptr<RealMatrix>  PTB_;
+  std::unique_ptr<RealMatrix>  epsA_;
+  std::unique_ptr<RealMatrix>  epsB_;
   std::shared_ptr<BasisSet>    basisset_;
   std::shared_ptr<Molecule>    molecule_;
   std::shared_ptr<FileIO>      fileio_;
@@ -126,6 +128,7 @@ public:
   inline RealMatrix* exchangeB(){ return this->exchangeB_.get();};
   inline RealMatrix* moA()      { return this->moA_.get();};
   inline RealMatrix* moB()      { return this->moB_.get();};
+  inline RealMatrix* epsA()     { return this->epsA_.get();};
   inline AOIntegrals* aointegrals() {return this->aointegrals_.get();};
 
   void formGuess();	        // form the intial guess of MO's
