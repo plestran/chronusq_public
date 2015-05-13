@@ -56,7 +56,8 @@ public:
   fstream bin;                   // file handler of the binary file
 
   // constructor and destructor
-  FileIO(std::string &);
+  FileIO(std::string );
+  FileIO(std::vector<std::string> );
   void iniFileIO(bool);
   ~FileIO();
 

@@ -310,7 +310,7 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
           }
         }
 */
-        Eigen::Map<const RealMatrix> buf_mat(buff,n1,n2);
+        ConstRealMap buf_mat(buff,n1,n2);
         mat->block(bf1,bf2,n1,n2) = buf_mat;
       }
     }
@@ -416,9 +416,7 @@ void AOIntegrals::computeSchwartz(){
       );
 
       
-      try{
-        ShBlk = new RealMatrix(n1,n2);
-      } catch (int msg) {cout << "couldn't allocate shblk" << endl;}
+      ShBlk = new RealMatrix(n1,n2);
       ShBlk->setZero();
    
       int ij = 0;
@@ -487,7 +485,59 @@ void AOIntegrals::computeAOTwoE(){
             this->basisSet_->shells_libint[s2],
             this->basisSet_->shells_libint[s3],
             this->basisSet_->shells_libint[s4]);
-    
+
+
+          std::vector<std::array<int,4>> lower;
+          std::vector<std::array<int,4>> upper;
+/*
+          auto lower_p1 = {bf1,bf2,bf3,bf4};
+          auto lower_p2 = {bf1,bf2,bf4,bf3};
+          auto lower_p3 = {bf2,bf1,bf3,bf4};
+          auto lower_p4 = {bf2,bf1,bf4,bf3};
+          auto lower_p5 = {bf3,bf4,bf1,bf2};
+          auto lower_p6 = {bf4,bf3,bf1,bf2};
+          auto lower_p7 = {bf3,bf4,bf2,bf1};
+          auto lower_p8 = {bf4,bf3,bf2,bf1};
+
+
+          auto upper_p1 = {bf1+n1,bf2+n2,bf3+n3,bf4+n4};
+          auto upper_p2 = {bf1+n1,bf2+n2,bf4+n4,bf3+n3};
+          auto upper_p3 = {bf2+n2,bf1+n1,bf3+n3,bf4+n4};
+          auto upper_p4 = {bf2+n2,bf1+n1,bf4+n4,bf3+n3};
+          auto upper_p5 = {bf3+n3,bf4+n4,bf1+n1,bf2+n2};
+          auto upper_p6 = {bf4+n4,bf3+n3,bf1+n1,bf2+n2};
+          auto upper_p7 = {bf3+n3,bf4+n4,bf2+n2,bf1+n1};
+          auto upper_p8 = {bf4+n4,bf3+n3,bf2+n2,bf1+n1};
+*/
+/*        TODO Why doesn't this work?
+          lower.push_back({{bf1_s,bf2_s,bf3_s,bf4_s}});
+          lower.push_back({{bf1_s,bf2_s,bf4_s,bf3_s}});
+          lower.push_back({{bf2_s,bf1_s,bf3_s,bf4_s}});
+          lower.push_back({{bf2_s,bf1_s,bf4_s,bf3_s}});
+          lower.push_back({{bf3_s,bf4_s,bf1_s,bf2_s}});
+          lower.push_back({{bf4_s,bf3_s,bf1_s,bf2_s}});
+          lower.push_back({{bf3_s,bf4_s,bf2_s,bf1_s}});
+          lower.push_back({{bf4_s,bf3_s,bf2_s,bf1_s}});
+
+
+          upper.push_back({{bf1_s+n1,bf2_s+n2,bf3_s+n3,bf4_s+n4}});
+          upper.push_back({{bf1_s+n1,bf2_s+n2,bf4_s+n4,bf3_s+n3}});
+          upper.push_back({{bf2_s+n2,bf1_s+n1,bf3_s+n3,bf4_s+n4}});
+          upper.push_back({{bf2_s+n2,bf1_s+n1,bf4_s+n4,bf3_s+n3}});
+          upper.push_back({{bf3_s+n3,bf4_s+n4,bf1_s+n1,bf2_s+n2}});
+          upper.push_back({{bf4_s+n4,bf3_s+n3,bf1_s+n1,bf2_s+n2}});
+          upper.push_back({{bf3_s+n3,bf4_s+n4,bf2_s+n2,bf1_s+n1}});
+          upper.push_back({{bf4_s+n4,bf3_s+n3,bf2_s+n2,bf1_s+n1}});
+
+          for(auto p = 0; p < lower.size(); ++p) {
+            auto view = btas::make_view(
+              this->aoERI_->range().slice(lower[p],upper[p]),
+              this->aoERI_->storage());
+            std::copy(buff,buff+n1*n2*n3*n4,view.begin());
+          }
+*/
+//        lower.clear();
+//        upper.clear();
           for(int i = 0, ijkl = 0 ; i < n1; ++i) {
             int bf1 = bf1_s + i;
             for(int j = 0; j < n2; ++j) {
@@ -496,15 +546,6 @@ void AOIntegrals::computeAOTwoE(){
                 int bf3 = bf3_s + k;
                 for(int l = 0; l < n4; ++l, ++ijkl) {
                   int bf4 = bf4_s + l;
-		  /* Print all N^4 AO ERIs if you REALLY want to
-		  if(buff[ijkl]!=0) {
-                    cout << bf1 + 1 << " "
-		         << bf2 + 1 << " "
-		         << bf3 + 1 << " "
-		         << bf4 + 1 << " "
-			 << buff[ijkl] << endl;
-		  }
-		  */
                   (*this->aoERI_)(bf1,bf2,bf3,bf4) = buff[ijkl];
                   (*this->aoERI_)(bf1,bf2,bf4,bf3) = buff[ijkl];
                   (*this->aoERI_)(bf2,bf1,bf3,bf4) = buff[ijkl];
@@ -524,20 +565,124 @@ void AOIntegrals::computeAOTwoE(){
   }
   } // OMP Parallel
 
-  for(auto i = 0; i < this->nBasis_; i++)
-  for(auto j = 0; j < this->nBasis_; j++)
-  for(auto k = 0; k < this->nBasis_; k++)
-  for(auto l = 0; l < this->nBasis_; l++){
-    if((*this->aoERI_)(i,j,k,l)!=0.0)
-      cout << i + 1 << " "
-           << j + 1<< " "
-           << k + 1<< " "
-           << l + 1<< " "
-	   << (*this->aoERI_)(i,j,k,l) << endl;
+  if(this->controls_->printLevel > 4) {
+    for(auto i = 0; i < this->nBasis_; i++)
+    for(auto j = 0; j < this->nBasis_; j++)
+    for(auto k = 0; k < this->nBasis_; k++)
+    for(auto l = 0; l < this->nBasis_; l++){
+      if(std::abs((*this->aoERI_)(i,j,k,l))>1e-6)
+        cout << "( " <<i + 1 << " "
+             << j + 1<< " "
+             << k + 1<< " "
+             << l + 1<< " ) "
+             << (*this->aoERI_)(i,j,k,l) << endl;
+    }
   }
   
 }
 
+void AOIntegrals::computeAORII(){
+  if(!this->haveSchwartz) this->computeSchwartz();
+  if(!this->haveRIS)      this->computeAORIS(); 
+
+
+  std::vector<coulombEngine> engines(this->controls_->nthreads);
+  engines[0] = coulombEngine(
+    std::max(this->basisSet_->maxPrim,this->DFbasisSet_->maxPrim),
+    std::max(this->basisSet_->maxL,this->DFbasisSet_->maxL),0);
+  engines[0].set_precision(std::numeric_limits<double>::epsilon());
+
+  for(int i=1; i<this->controls_->nthreads; i++) engines[i] = engines[0];
+  if(!this->basisSet_->haveMap) this->basisSet_->makeMap(this->molecule_); 
+  if(!this->DFbasisSet_->haveMap) this->DFbasisSet_->makeMap(this->molecule_); 
+
+#ifdef USE_OMP
+  #pragma omp parallel
+#endif
+  {
+#ifdef USE_OMP
+    int thread_id = omp_get_thread_num();
+#else
+    int thread_id = 0;
+#endif
+  for(int s1 = 0, s123=0; s1 < this->basisSet_->nShell(); s1++) {
+    int bf1_s = this->basisSet_->mapSh2Bf[s1];
+    int n1    = this->basisSet_->shells_libint[s1].size();
+    for(int s2 = 0; s2 < this->basisSet_->nShell(); s2++) {
+      int bf2_s = this->basisSet_->mapSh2Bf[s2];
+      int n2    = this->basisSet_->shells_libint[s2].size();
+      for(int dfs = 0; dfs < this->DFbasisSet_->nShell(); dfs++,s123++) {
+        if(s123 % this->controls_->nthreads != thread_id) continue;
+        int dfbf3_s = this->DFbasisSet_->mapSh2Bf[dfs];
+        int dfn3    = this->DFbasisSet_->shells_libint[dfs].size();
+
+        // Schwartz and Density screening
+        if((*this->schwartz_)(s1,s2) * (*this->aoRIS_)(dfs,dfs)
+            < this->controls_->thresholdSchawrtz ) continue;
+ 
+        const double* buff = engines[thread_id].compute(
+          this->basisSet_->shells_libint[s1],
+          this->basisSet_->shells_libint[s2],
+          this->DFbasisSet_->shells_libint[dfs],
+          libint2::Shell::unit());
+
+        auto lower = {bf1_s,bf2_s,dfbf3_s};
+        auto upper = {bf1_s+n1,bf2_s+n2,dfbf3_s+dfn3};
+        auto view  = btas::make_view(
+          this->aoRII_->range().slice(lower,upper),
+          this->aoRII_->storage());
+        std::copy(buff,buff+n1*n2*dfn3,view.begin());
+      }
+    }
+  }
+  } // omp parallel scope
+}
+
+void AOIntegrals::computeAORIS(){
+  this->haveRIS= true;
+  std::vector<coulombEngine> engines(this->controls_->nthreads);
+  engines[0] = coulombEngine( this->DFbasisSet_->maxPrim, 
+                              this->DFbasisSet_->maxL,0);
+  engines[0].set_precision(std::numeric_limits<double>::epsilon());
+
+  for(int i=1; i<this->controls_->nthreads; i++) engines[i] = engines[0];
+  if(!this->DFbasisSet_->haveMap) this->DFbasisSet_->makeMap(this->molecule_); 
+
+  RealMap aoRISMap(&this->aoRIS_->storage()[0],
+    this->DFbasisSet_->nBasis(),this->DFbasisSet_->nBasis());
+
+#ifdef USE_OMP
+  #pragma omp parallel
+#endif
+  {
+#ifdef USE_OMP
+    int thread_id = omp_get_thread_num();
+#else
+    int thread_id = 0;
+#endif
+  for(int s1 = 0, s12=0; s1 < this->DFbasisSet_->nShell(); s1++) {
+    int bf1_s = this->DFbasisSet_->mapSh2Bf[s1];
+    int n1    = this->DFbasisSet_->shells_libint[s1].size();
+    for(int s2 = 0; s2 < this->DFbasisSet_->nShell(); s2++,s12++) {
+      int bf2_s = this->DFbasisSet_->mapSh2Bf[s2];
+      int n2    = this->DFbasisSet_->shells_libint[s2].size();
+ 
+      if(s12 % this->controls_->nthreads != thread_id) continue;
+
+      const double* buff = engines[thread_id].compute(
+        this->DFbasisSet_->shells_libint[s1],
+        libint2::Shell::unit(),
+        this->DFbasisSet_->shells_libint[s2],
+        libint2::Shell::unit());
+
+      ConstRealMap buffMat(buff,n1,n2);
+      aoRISMap.block(bf1_s,bf2_s,n1,n2) = buffMat; 
+    }
+  }
+  } // omp parallel scope
+
+  aoRISMap = aoRISMap.selfadjointView<Lower>(); // Symmetrize
+}
 #endif
 
 

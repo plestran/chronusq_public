@@ -24,9 +24,10 @@
  *  
  */
 #include <workers.h>
+#include <davidson.h>
 using namespace ChronusQ;
 
-int ChronusQ::atlas(int argc, std::string argv, GlobalMPI *globalMPI) {
+int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   int i,j,k,l;
   time_t currentTime;
   auto molecule     	= std::make_shared<Molecule>();
@@ -36,11 +37,11 @@ int ChronusQ::atlas(int argc, std::string argv, GlobalMPI *globalMPI) {
   auto hartreeFock	= std::make_shared<SingleSlater>();
   std::shared_ptr<FileIO> fileIO;
 
-  try { fileIO = std::make_shared<FileIO>(argv);}
-  catch(int msg) {
-    cout<<"Unable to open file! E#:"<<msg<<endl;
-    exit(1);
-  };
+  std::vector<std::string> argv_string;
+  for(auto i = 1; i < argc; ++i) if(argv[i][0]=='-') argv_string.push_back(argv[i]);
+  if(argv_string.size()==0) fileIO = std::make_shared<FileIO>(argv[1]);
+  else fileIO = std::make_shared<FileIO>(argv_string);
+
 
   // print out the starting time of the job
   time(&currentTime);
@@ -71,6 +72,7 @@ int ChronusQ::atlas(int argc, std::string argv, GlobalMPI *globalMPI) {
   hartreeFock->computeEnergy();
   if(controls->optWaveFunction) hartreeFock->SCF();
   else fileIO->out << "**Skipping SCF Optimization**" << endl; 
+
 /*
   MOIntegrals *moIntegrals = new MOIntegrals();
   moIntegrals->iniMOIntegrals(molecule,basisset,fileIO,controls,aointegrals,hartreeFock);
@@ -83,6 +85,19 @@ int ChronusQ::atlas(int argc, std::string argv, GlobalMPI *globalMPI) {
 
   time(&currentTime);
   fileIO->out<<"\nJob finished: "<<ctime(&currentTime)<<endl;
+  int N = 900;
+  int NSek = 15;
+  std::shared_ptr<RealMatrix> A = std::make_shared<RealMatrix>(N,N);
+  for(auto i = 0; i < N; i++) (*A)(i,i) = i+1;
+  (*A) = (*A) + RealMatrix::Random(N,N);
+  (*A) = A->selfadjointView<Eigen::Lower>();
+  for(int i = 0; i < N; i++)
+  for(int j = 0; j < N; j++) {
+    (*A)(i,j) = std::abs((*A)(i,j));
+  }
+  Davidson<RealMatrix> dav(A,NSek);
+  dav.run(fileIO->out);
+  
 
 #ifdef USE_LIBINT
   libint2::cleanup();

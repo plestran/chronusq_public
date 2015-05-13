@@ -62,7 +62,25 @@ void readInput(std::shared_ptr<FileIO> fileio, std::shared_ptr<Molecule> mol,
 	controls->DFT=true;
       };
     } else if(!readString.compare("$GEOM")) {
-      mol->readMolecule(fileio);
+      fileio->in >> readString;
+      readString=stringupper(readString);  
+      fstream *geomRead;
+      if(!readString.compare("READ")) {
+        geomRead = &fileio->in;
+      } else if(!readString.compare("FILE")) {
+        fileio->in >> readString;
+        geomRead = new fstream(readString,ios::in);
+        if(geomRead->fail()) CErr("Unable to open "+std::string(readString),fileio->out); 
+        else fileio->out << "Reading geometry from " << readString << endl;
+      } else {
+        CErr("Unrecognized GEOM option: " + std::string(readString),fileio->out);
+      }
+      mol->readMolecule(fileio,*geomRead);
+      if(!(geomRead==&fileio->in)){
+//      fileio->out << "Closing " << readString << endl;
+        geomRead->close();
+        delete geomRead;
+      }
     } else if(!readString.compare("$BASIS")) {
       //basis->readBasisSet(fileio,mol);
 #ifdef USE_LIBINT
@@ -72,7 +90,6 @@ void readInput(std::shared_ptr<FileIO> fileio, std::shared_ptr<Molecule> mol,
     } else if(!readString.compare("$NSMP")) {
       fileio->in >> readInt;
       controls->readSMP(readInt);
-//dbwye
     } else if(!readString.compare("$GUESS")) {
       fileio->in>>readString;
       readString=stringupper(readString);  

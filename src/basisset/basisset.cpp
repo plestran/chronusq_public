@@ -109,10 +109,10 @@ void BasisSet::readBasisSet(std::shared_ptr<FileIO> fileio, std::shared_ptr<Mole
     if(fileBasis->fail()) { // Check if file is in PWD
       CErr("Could not find basis set file",fileio->out);
     } else {
-      fileio->out << "Reading Basis Set from:\n ./" << readString<< endl;
+      fileio->out << "Reading Basis Set from: ./" << readString<< endl;
     }
   } else {
-    fileio->out << "Reading Basis Set from:" << endl << basis_path<< endl;
+    fileio->out << "Reading Basis Set from: " << basis_path<< endl;
   }
   double threePI=math.pi*math.pi*math.pi,readNorm, readExp, readCoeff1, readCoeff2;
   int    nBasis, nShell, readNPGTO, L;
