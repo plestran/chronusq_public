@@ -46,6 +46,7 @@ void Controls::iniControls(){
   this->guess = 0;
   this->directTwoE = true;
   this->buildn4eri = false;
+  this->doDF = false;
 #ifdef USE_LIBINT
   libint2::init();
 #endif
@@ -64,8 +65,8 @@ void Controls::readSMP(int &n) {
 #endif
 }
 
-void Controls::readDebug(char* str){
-  if(!strcmp(str,"AOERI")){
+void Controls::readDebug(std::string str){
+  if(!str.compare("AOERI")){
     this->directTwoE = false;
     this->buildn4eri = true;
   } else {

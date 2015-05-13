@@ -34,3 +34,10 @@ template<typename OtherDerived>
 inline Scalar frobInner(const MatrixBase<OtherDerived>& other) const {
   return (derived().cwiseProduct(other.derived())).sum();
 }
+
+inline void normCol() const {
+  for(auto j = 0; j < cols(); j++) {
+    Scalar colNorm = derived().col(j).norm();
+    derived().col(j) = derived().col(j)/colNorm;
+  }
+}
