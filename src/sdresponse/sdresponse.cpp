@@ -175,8 +175,6 @@ void SDResponse::formRM(){
       Bd(ia,jb) = Dabij(a,b,i,j);
       Aod(ia,jb) = dajib(a,j,i,b);
       Bod(ia,jb) = dabij(a,b,i,j);
-      //cout << "Ad(" <<ia<<","<<jb<<") = " << Ad(ia,jb) << endl; 
-      //cout << "Aod(" <<ia<<","<<jb<<") = " << Aod(ia,jb) << endl;
       jb = jb+1;
     }
     ia = ia+1;
@@ -190,17 +188,6 @@ void SDResponse::formRM(){
   B.block(0,nOV,nOV,nOV) = Aod;
   B.block(nOV,0,nOV,nOV) = Aod;
 
-//  for (auto i=0;i<nOV;i++)
-//  for (auto j=0;j<nOV;j++){
-//    A(i,j) = Ad(i,j);
-//    B(i,j) = Bd(i,j);
-//    A(i+nOV,j+nOV) = Ad(i,j);
-//    B(i+nOV,j+nOV) = Bd(i,j);
-//    A(i,j+nOV) = Aod(i,j);
-//    B(i,j+nOV) = Bod(i,j);
-//    A(i+nOV,j) = Aod(i,j);
-//    B(i+nOV,j) = Bod(i,j);
-//  } 
   for (auto i=0;i<2*nOV;i++)
   for (auto j=0;j<2*nOV;j++){
     cout << "A symmetry " << A(i,j)-A(j,i) <<endl;
@@ -213,13 +200,6 @@ void SDResponse::formRM(){
   ABBA.block(2*nOV,2*nOV,2*nOV,2*nOV) = -A;
   ABBA.block(0,2*nOV,2*nOV,2*nOV) = B;
   ABBA.block(2*nOV,0,2*nOV,2*nOV) = -B;
-//  for (auto i=0;i<2*nOV;i++)
-//  for (auto j=0;j<2*nOV;j++){
-//    ABBA(i,j) = A(i,j);
-//    ABBA(i+2*nOV,j+2*nOV) = -A(i,j);
-//    ABBA(i,j+nOV) = B(i,j);
-//    ABBA(i+nOV,j) = -B(i,j);
-//  }
 
   // Print the A & B matrix
   cout << "Print the A matrix" << endl;
