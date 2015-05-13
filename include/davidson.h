@@ -1,6 +1,37 @@
+/* 
+ *  The Chronus Quantum (ChronusQ) software package is high-performace 
+ *  computational chemistry software with a strong emphasis on explicitly 
+ *  time-dependent and post-SCF quantum mechanical methods.
+ *  
+ *  Copyright (C) 2014-2015 Li Research Group (University of Washington)
+ *  
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *  
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program; if not, write to the Free Software Foundation, Inc.,
+ *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *  
+ *  Contact the Developers:
+ *    E-Mail: xsli@uw.edu
+ *  
+ */
 #include <global.h>
-
+#include <cerr.h>
+#ifndef INCLUDED_DAVIDSON
+#define INCLUDED_DAVIDSON
 namespace ChronusQ {
+/**
+ *  A class to run Davidson Diagonalization written by David Williams-Young
+ *
+ */
   template <typename TMat>
   class Davidson {
     int     n_;          // Dimension of the problem (LDA)
@@ -15,8 +46,8 @@ namespace ChronusQ {
     int     maxSubSpace_; // Maximum iterative subspace
     int     maxIter_;     // Maximum number of iterations (micro)
     int     MaxIter_;     // Maximum number of iterations (macro) 
-    int          nSek_;        // Number of desired roots
-    int          nGuess_;      // Number of given (or created) guesses
+    int     nSek_;        // Number of desired roots
+    int     nGuess_;      // Number of given (or created) guesses
 
     void runMicro(ostream &output=cout);
     bool converged_;
@@ -36,6 +67,7 @@ namespace ChronusQ {
       finish = std::chrono::high_resolution_clock::now();
       elapsed = finish-start;
       time(&currentTime);
+      if(!this->converged_) CErr("Davidson Didn't Converge!",output);
       output << "Davidson Diagonalization Finished: " << ctime(&currentTime);
       output << "Time Elapsed: " << elapsed.count() << " sec" << endl;
       output << bannerEnd << endl << endl;;
@@ -109,3 +141,4 @@ namespace ChronusQ {
     
   }; // class Davidson
 } // namespace ChronusQ
+#endif

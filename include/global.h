@@ -195,5 +195,6 @@ struct GlobalMPI {
 //---------//
 enum {tagMolecule,tagMatrix,tagBasisSet,tagSingleSlater,tagIntegrals,tagSDResponse};
 
+#include <clapack.h> // Extern "C" defs for LAPACK routines (require "_" extension)
 
 #endif
