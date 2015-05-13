@@ -14,7 +14,11 @@ void Davidson<RealMatrix>::runMicro(ostream &output ) {
   int NTrial = this->nGuess_;
   TrialVec = (*this->guess_);
   for(auto iter = 0; iter < this->maxIter_; iter++){
-   
+    std::chrono::high_resolution_clock::time_point start,finish;
+    std::chrono::duration<double> elapsed;
+    output << "Starting Davidson Mirco Iteration " << iter + 1 << endl;
+    start = std::chrono::high_resolution_clock::now();
+
     // Matrix Product (AX). Keep around for reuse in computing
     // the residual vector
     AX = (*this->mat_) * TrialVec;  
@@ -42,22 +46,32 @@ void Davidson<RealMatrix>::runMicro(ostream &output ) {
 
     // Loop over NSek residual vectors. Decide from which residuals
     // will be made perturbed guess vectors
+    output << "Checking Residual Norms:" << endl;
     for(auto k = 0; k < this->nSek_; k++) {
       if(Res.col(k).norm() < 1e-6) resConv.push_back(true);
       else {
         resConv.push_back(false); NNotConv++;
       }
-      output << "Norm of Residual " << k+1 << " = " << Res.col(k).norm() 
-           << " " << resConv[k] <<endl;
+      if(resConv[k]) {
+        output << "Norm of Residual " << k+1 << " = " << Res.col(k).norm() 
+           << " \t Root has converged" <<endl;
+      } else {
+        output << "Norm of Residual " << k+1 << " = " << Res.col(k).norm() 
+           << " \t Root has not converved" <<endl;
+      }
     }
 
-    output << *this->eigenvalues_ << endl << endl;
+//  output << *this->eigenvalues_ << endl << endl;
 
     // If NSek (lowest) residuals are converged, exit, else, create
     // perturbed guess vectors for next iteration
     this->converged_ = (NNotConv == 0);
-    if(this->converged_) break;
-
+    if(this->converged_) {
+      finish = std::chrono::high_resolution_clock::now();
+      elapsed = finish - start;
+      output << "Davidson Micro Iteration took " << elapsed.count() << " secs" << endl << endl;
+      break;
+    }
 
     // Resize the trial vector dimension to contain the new perturbed
     // guess vectors
@@ -87,6 +101,9 @@ void Davidson<RealMatrix>::runMicro(ostream &output ) {
     TrialVec = QR.matrixQ().block(0,0,this->n_,NTrial+NNotConv);
     
     NTrial += NNotConv;
+    finish = std::chrono::high_resolution_clock::now();
+    elapsed = finish - start;
+    output << "Davidson Micro Iteration took " << elapsed.count() << " secs" << endl << endl;
   } 
 }
 } // namespace ChronusQ

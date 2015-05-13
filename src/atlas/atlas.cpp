@@ -89,10 +89,10 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   time(&currentTime);
   fileIO->out<<"\nJob finished: "<<ctime(&currentTime)<<endl;
   int N = 900;
-  int NSek = 4;
+  int NSek = 15;
   std::shared_ptr<RealMatrix> A = std::make_shared<RealMatrix>(N,N);
   for(auto i = 0; i < N; i++) (*A)(i,i) = i+1;
-  (*A) = (*A) + 0.1*RealMatrix::Random(N,N);
+  (*A) = (*A) + RealMatrix::Random(N,N);
   (*A) = A->selfadjointView<Eigen::Lower>();
   for(int i = 0; i < N; i++)
   for(int j = 0; j < N; j++) {
