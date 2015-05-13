@@ -44,7 +44,7 @@ class SDResponse {
   int       nStates_;
   friend class SingleSlater;
 
-  std::shared_ptr<Tensor<double>> aoERI_;
+  std::shared_ptr<RealTensor4d> aoERI_;
   std::shared_ptr<BasisSet>      basisSet_;
   std::shared_ptr<Molecule>      molecule_;
   std::shared_ptr<FileIO>        fileio_;

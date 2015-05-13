@@ -24,6 +24,7 @@
  *  
  */
 #include <workers.h>
+#include <davidson.h>
 using namespace ChronusQ;
 
 int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
@@ -75,9 +76,9 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   hartreeFock->computeEnergy();
   std::shared_ptr<MOIntegrals> moIntegrals = std::make_shared<MOIntegrals>();
   if(controls->optWaveFunction) hartreeFock->SCF();
-  else fileIO->out << "**Skipping SCF Optimization**" << endl;
-//  MOIntegrals *moIntegrals = new MOIntegrals();
-  moIntegrals->iniMOIntegrals(molecule,basisset,fileIO,controls,aointegrals,hartreeFock);
+  else fileIO->out << endl << "**Skipping SCF Optimization**" << endl;
+  //MOIntegrals *moIntegrals = new MOIntegrals();
+  //moIntegrals->iniMOIntegrals(molecule,basisset,fileIO,controls,aointegrals,hartreeFock);
 
   SDResponse *sdResponse = new SDResponse();
   sdResponse->iniSDResponse(molecule,basisset,moIntegrals,fileIO,controls,hartreeFock);
@@ -87,6 +88,19 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 
   time(&currentTime);
   fileIO->out<<"\nJob finished: "<<ctime(&currentTime)<<endl;
+  int N = 900;
+  int NSek = 15;
+  std::shared_ptr<RealMatrix> A = std::make_shared<RealMatrix>(N,N);
+  for(auto i = 0; i < N; i++) (*A)(i,i) = i+1;
+  (*A) = (*A) + RealMatrix::Random(N,N);
+  (*A) = A->selfadjointView<Eigen::Lower>();
+  for(int i = 0; i < N; i++)
+  for(int j = 0; j < N; j++) {
+    (*A)(i,j) = std::abs((*A)(i,j));
+  }
+  Davidson<RealMatrix> dav(A,NSek);
+  dav.run(fileIO->out);
+  
 
 #ifdef USE_LIBINT
   libint2::cleanup();

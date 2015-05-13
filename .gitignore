@@ -21,3 +21,7 @@ stamp-h1
 test
 build*
 .COPY
+deps/include/
+deps/lib/
+deps/libint-2.1.0-beta/
+deps/share/

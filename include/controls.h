@@ -49,6 +49,7 @@ public:
   bool  	restart;        // restart the calculation
   bool  	directTwoE;     // if direct two-electron will performed
   bool          buildn4eri;     // Build N^4 AO ERI tensor
+  bool          doDF;           // Density fitting (RI) flag
   double 	thresholdS;
   double 	thresholdAB;
   double	thresholdSchawrtz;
@@ -60,7 +61,7 @@ public:
   ~Controls(){;};
   void iniControls();
   void readSMP(int &);
-  void readDebug(char*);
+  void readDebug(std::string);
 };
 } // namespace ChronusQ
 #endif

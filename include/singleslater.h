@@ -83,20 +83,7 @@ public:
 
   // constructor & destructor
   SingleSlater(){;};
-  ~SingleSlater() {
-    densityA_.reset();
-    fockA_.reset();
-    coulombA_.reset();
-    exchangeA_.reset();
-    moA_.reset();
-    PTA_.reset();
-    densityB_.reset();
-    fockB_.reset();
-    coulombB_.reset();
-    exchangeB_.reset();
-    moB_.reset();
-    PTB_.reset();
-  };
+  ~SingleSlater() {;};
   // pseudo-constructor
   void iniSingleSlater(std::shared_ptr<Molecule>,std::shared_ptr<BasisSet>,
                        std::shared_ptr<AOIntegrals>,std::shared_ptr<FileIO>,

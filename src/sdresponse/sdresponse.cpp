@@ -221,15 +221,24 @@ void SDResponse::formRM(){
   Eigen::SelfAdjointEigenSolver<RealMatrix> CIS;
   CIS.compute(A);
   CIS.eigenvalues();
-  //CIS.eigenvectors();
+  CIS.eigenvectors();
   
   // Print the CIS Excitation Energies
   for (auto i=0;i<2*nOV;i++){
     cout << "The " << (i+1) << " CIS Exicitation Energy is: "
          << (CIS.eigenvalues())(i) << endl;
   }
+  
+  RealMatrix AXs(4*nOV,4*nOV);
+  AXs = A * CIS.eigenvectors();
+  // Print the AX matrix
+  for (auto i=0;i<4*nOV;i++)
+  for (auto j=0;j<4*nOV;j++){
+    cout << "( "<< i+1 << ", "<< j+1 << " )      "
+         << AXs(i,j)<<endl;
+  }
 
-  // LR RDHF routine
+  // LR TDHF routine
   Eigen::EigenSolver<RealMatrix> TD;
   TD.compute(ABBA);
   TD.eigenvalues();
@@ -242,6 +251,17 @@ void SDResponse::formRM(){
   }
 
 }
+
+RealMatrix SDResponse::formRM2(int NTrial){
+
+  // Convert X from MO to AO X(AO) = C(occ) * X(MO) * C(vir)^T
+  // Contract X(AO) with (mu nu || lambda sigma)  IX_{ij} = (ij||kl) X(AO)_{kl}
+  // Transform IX from AO to MO  IX(MO) = C(occ)^T * IX(AO) * C(vir)
+  // Contract IX(MO) with eigenvalue differences
+  //   AX_{ia} = IX(ia) / (e(a) - e(i))
+
+}
+
 /*************************/
 /* MPI Related Routines  */
 /*************************/
