@@ -97,6 +97,8 @@ void SDResponse::formRM(){
   Tensor<double> Sabji(nV,nV,nO,nO); // ( a b | j i )
   Tensor<double> Dajib(nV,nO,nO,nV); // <aj||ib>
   Tensor<double> dajib(nV,nO,nO,nV); // <aj|ib>
+  Tensor<double> Dabij(nV,nV,nO,nO); // <ab||ij>
+  Tensor<double> dabij(nV,nV,nO,nO); // <ab|ij>
 
   enum{a,j,i,b,mu,nu,lam,sig};
 
@@ -120,8 +122,7 @@ void SDResponse::formRM(){
   // (a b  | j   i  )
   contract(1.0,Iabjs,{a,b,j,sig},LocMoAO,{sig,i},0.0,Sabji,{a,b,j,i});
 
-  // Build <aj|ib>
-  cout << "This is <aj|ib>\n";
+  // Build <aj||ib>
   for(auto a=0;a<nV;a++) 
   for(auto j=0;j<nO;j++) 
   for(auto i=0;i<nO;i++) 
@@ -129,23 +130,35 @@ void SDResponse::formRM(){
     Dajib(a,j,i,b) = Saijb(a,i,j,b)-Sabji(a,b,j,i);
     dajib(a,j,i,b) = Saijb(a,i,j,b);
   }
+  //Build <ab||ij>
+  for (auto a=0;a<nV;a++)
+  for (auto b=0;b<nV;b++)
+  for (auto i=0;i<nO;i++)
+  for (auto j=0;j<nO;j++){
+    Dabij(a,b,i,j) = Saijb(a,i,j,b) - Saijb(a,j,i,b);
+    dabij(a,b,i,j) = Saijb(a,i,j,b);
+  }
 
-  // Build A matrix
+  // Build A & B matrix
   int nOV = nO*nV;
   int ia,jb;
+  RealMatrix ABBA(4*nOV,4*nOV);
   RealMatrix A(2*nOV,2*nOV);
+  RealMatrix B(2*nOV,2*nOV);
   RealMatrix Ad(nOV,nOV);
+  RealMatrix Bd(nOV,nOV);
   RealMatrix Aod(nOV,nOV);
+  RealMatrix Bod(nOV,nOV);
   RealMatrix EigO(nO,1);
   RealMatrix EigV(nV,1);
 
   for (auto i=0;i<nO;i++){
     EigO(i,0) = (*this->singleSlater_->epsA())(i,0);
-    cout << "The " << (i+1) << " eigenvalue is: " << EigO(i,0) << endl;
+    cout << "The " << (i+1) << " eigenvalue in Occupied is: " << EigO(i,0) << endl;
   }
   for (auto j=0;j<nV;j++){
     EigV(j,0) = (*this->singleSlater_->epsA())((j+nO),0);
-    cout << "The " << (j+1) << " eigenvalue is: " << EigV(j,0) << endl;
+    cout << "The " << (j+1) << " eigenvalue in Virtual is: " << EigV(j,0) << endl;
   }
 
   ia = 0;
@@ -159,23 +172,56 @@ void SDResponse::formRM(){
 	Ad(ia,jb) = EigV(a,0)-EigO(i,0);
       }
       Ad(ia,jb) = Ad(ia,jb) + Dajib(a,j,i,b);
+      Bd(ia,jb) = Dabij(a,b,i,j);
       Aod(ia,jb) = dajib(a,j,i,b);
-      cout << "Ad(" <<ia<<","<<jb<<") = " << Ad(ia,jb) << endl; 
-      cout << "Aod(" <<ia<<","<<jb<<") = " << Aod(ia,jb) << endl;
+      Bod(ia,jb) = dabij(a,b,i,j);
+      //cout << "Ad(" <<ia<<","<<jb<<") = " << Ad(ia,jb) << endl; 
+      //cout << "Aod(" <<ia<<","<<jb<<") = " << Aod(ia,jb) << endl;
       jb = jb+1;
     }
     ia = ia+1;
   }
-  
-  for (auto i=0;i<nOV;i++)
-  for (auto j=0;j<nOV;j++){
-    A(i,j) = Ad(i,j);
-    A(i+nOV,j+nOV) = Ad(i,j);
-    A(i,j+nOV) = Aod(i,j);
-    A(i+nOV,j) = Aod(i,j);
-  } 
+  A.block(0,0,nOV,nOV) = Ad;
+  A.block(nOV,nOV,nOV,nOV) = Ad;
+  A.block(0,nOV,nOV,nOV) = Aod;
+  A.block(nOV,0,nOV,nOV) = Aod;
+  B.block(0,0,nOV,nOV) = Bd;
+  B.block(nOV,nOV,nOV,nOV) = Bd;
+  B.block(0,nOV,nOV,nOV) = Aod;
+  B.block(nOV,0,nOV,nOV) = Aod;
 
-  // Print the A matrix
+//  for (auto i=0;i<nOV;i++)
+//  for (auto j=0;j<nOV;j++){
+//    A(i,j) = Ad(i,j);
+//    B(i,j) = Bd(i,j);
+//    A(i+nOV,j+nOV) = Ad(i,j);
+//    B(i+nOV,j+nOV) = Bd(i,j);
+//    A(i,j+nOV) = Aod(i,j);
+//    B(i,j+nOV) = Bod(i,j);
+//    A(i+nOV,j) = Aod(i,j);
+//    B(i+nOV,j) = Bod(i,j);
+//  } 
+  for (auto i=0;i<2*nOV;i++)
+  for (auto j=0;j<2*nOV;j++){
+    cout << "A symmetry " << A(i,j)-A(j,i) <<endl;
+    cout << "B symmetry " << B(i,j)-B(j,i) <<endl;
+  }
+
+  // Build the ABBA matrix
+
+  ABBA.block(0,0,2*nOV,2*nOV) = A;
+  ABBA.block(2*nOV,2*nOV,2*nOV,2*nOV) = -A;
+  ABBA.block(0,2*nOV,2*nOV,2*nOV) = B;
+  ABBA.block(2*nOV,0,2*nOV,2*nOV) = -B;
+//  for (auto i=0;i<2*nOV;i++)
+//  for (auto j=0;j<2*nOV;j++){
+//    ABBA(i,j) = A(i,j);
+//    ABBA(i+2*nOV,j+2*nOV) = -A(i,j);
+//    ABBA(i,j+nOV) = B(i,j);
+//    ABBA(i+nOV,j) = -B(i,j);
+//  }
+
+  // Print the A & B matrix
   cout << "Print the A matrix" << endl;
   for (auto i=0;i<2*nOV;i++)
   for (auto j=0;j<2*nOV;j++){
@@ -183,18 +229,38 @@ void SDResponse::formRM(){
 	 << (j+1) << ")" << "  "
 	 << A(i,j) << endl;
   }
-
+  cout << "Print the B matrix" << endl;
+  for (auto i=0;i<2*nOV;i++)
+  for (auto j=0;j<2*nOV;j++){
+    cout << "(" << (i+1) << ", "
+	 << (j+1) << ")" << "  "
+	 << B(i,j) << endl;
+  }
+  // CIS routine
   // Diagonalize the A matrix
-  Eigen::SelfAdjointEigenSolver<RealMatrix> ES;
-  ES.compute(A);
-  ES.eigenvalues();
-  //ES.eigenvectors();
+  Eigen::SelfAdjointEigenSolver<RealMatrix> CIS;
+  CIS.compute(A);
+  CIS.eigenvalues();
+  //CIS.eigenvectors();
   
   // Print the CIS Excitation Energies
   for (auto i=0;i<2*nOV;i++){
-    cout << "The " << (i+1) << " Exicitation Energy is: "
-         << (ES.eigenvalues())(i) << endl;
+    cout << "The " << (i+1) << " CIS Exicitation Energy is: "
+         << (CIS.eigenvalues())(i) << endl;
   }
+
+  // LR RDHF routine
+  Eigen::EigenSolver<RealMatrix> TD;
+  TD.compute(ABBA);
+  TD.eigenvalues();
+  //TD.eigenvectors();
+
+  // Print the LR-TDHF Excitation Energies
+  for (auto i=0;i<4*nOV;i++){
+    cout << "The " << (i+1) << " LR-TDHF Exicitation Energy is: "
+         << (TD.eigenvalues())(i) << endl;
+  }
+
 }
 /*************************/
 /* MPI Related Routines  */
