@@ -51,6 +51,7 @@ namespace ChronusQ {
 
     void runMicro(ostream &output=cout);
     bool converged_;
+    bool useLAPACK_;
 
 
   public:
@@ -85,6 +86,7 @@ namespace ChronusQ {
       this->n_           = 0;
       this->converged_   = false;
       this->hermetian_   = false;
+      this->useLAPACK_   = true;
     }
 
     Davidson(std::shared_ptr<TMat> A, int nSek) {
@@ -92,6 +94,7 @@ namespace ChronusQ {
       this->maxIter_     = 128;
       this->MaxIter_     = 20;
       this->converged_   = false;
+      this->useLAPACK_   = true; // Use LAPACK by default
       this->mat_    = A;
       this->nSek_   = nSek;
       this->nGuess_ = 2*nSek;
@@ -133,6 +136,10 @@ namespace ChronusQ {
            << this->MaxIter_ << endl;
       output << std::setw(50) << std::left << "  Using an Hermetian algorithm?:";
       if(this->hermetian_) output << "Yes";
+      else output << "No";
+      output << endl;
+      output << std::setw(50) << std::left << "  Using LAPACK to diagonalize subspace?:";
+      if(this->useLAPACK_) output << "Yes";
       else output << "No";
       output << endl;
  

@@ -28,7 +28,6 @@
 namespace ChronusQ {
 template<>
 void Davidson<RealMatrix>::runMicro(ostream &output ) {
-  bool useLAPACK = true;
   RealMatrix AX(this->n_,this->nGuess_);
   RealMatrix XTAX(this->nGuess_,this->nGuess_);
   RealMatrix U(this->n_,this->nGuess_);
@@ -40,7 +39,7 @@ void Davidson<RealMatrix>::runMicro(ostream &output ) {
   Eigen::Map<Eigen::VectorXd> ER(LAPACK_SCR,0);
 
   Eigen::SelfAdjointEigenSolver<RealMatrix> subDiag_;
-  if(useLAPACK) {
+  if(this->useLAPACK_) {
     LWORK = 6*this->n_;
     LEN_LAPACK_SCR = 0;
     LEN_LAPACK_SCR += this->maxSubSpace_; // Subspace eigenvalues (real)
@@ -65,25 +64,26 @@ void Davidson<RealMatrix>::runMicro(ostream &output ) {
     XTAX = TrialVec.transpose()*AX; 
 
     // Diagonalize the subspace
-    if(!useLAPACK) subDiag_.compute(XTAX);
+    if(!this->useLAPACK_) subDiag_.compute(XTAX);
     else {
       new (&ER) Eigen::Map<Eigen::VectorXd>(LAPACK_SCR,NTrial);
 //    RealMap VR(LAPACK_SCR+NTrial,NTrial*NTrial); // DSYEV will overwrite XTAX
       char JOBZ = 'V';
       char UPLO = 'L';
       int INFO;
-      dsyev_(&JOBZ,&UPLO,&NTrial,XTAX.data(),&NTrial,ER.data(),LAPACK_SCR+NTrial,&LWORK,&INFO); 
-      cout << INFO << endl;
-      XTAX.transposeInPlace();
+      dsyev_(&JOBZ,&UPLO,&NTrial,XTAX.data(),&NTrial,ER.data(),
+             LAPACK_SCR+NTrial,&LWORK,&INFO); 
+      if(INFO!=0) CErr("DSYEV failed to converge in Davison Iterations",output);
+      XTAX.transposeInPlace(); // Convert to RowMajor...
     }
    
     
     // Reconstruct approximate eigenvectors
-    if(!useLAPACK) U = TrialVec * subDiag_.eigenvectors();
+    if(!this->useLAPACK_) U = TrialVec * subDiag_.eigenvectors();
     else U = TrialVec * XTAX;
 
     // Stash away current approximation of eigenvalues and eigenvectors (NSek)
-    if(!useLAPACK) {
+    if(!this->useLAPACK_) {
       (*this->eigenvalues_) = subDiag_.eigenvalues().block(0,0,this->nSek_,1);
     } else {
       (*this->eigenvalues_) = ER.block(0,0,this->nSek_,1);
@@ -92,8 +92,9 @@ void Davidson<RealMatrix>::runMicro(ostream &output ) {
     
     // Construct the residual vector 
     // R = A*U - U*E = (AX)*c - U*E
-    if(!useLAPACK) Res = AX*subDiag_.eigenvectors() - U*subDiag_.eigenvalues().asDiagonal();
-    else Res = AX*XTAX - U*ER.asDiagonal();
+    if(!this->useLAPACK_) {
+      Res = AX*subDiag_.eigenvectors() - U*subDiag_.eigenvalues().asDiagonal();
+    } else Res = AX*XTAX - U*ER.asDiagonal();
 
     // Vector to store convergence info
     std::vector<bool> resConv;
@@ -103,7 +104,7 @@ void Davidson<RealMatrix>::runMicro(ostream &output ) {
     // will be made perturbed guess vectors
     output << "  Checking Residual Norms:" << endl;
     for(auto k = 0; k < this->nSek_; k++) {
-      if(Res.col(k).norm() < 1e-6) resConv.push_back(true);
+      if(Res.col(k).norm() < 5e-6) resConv.push_back(true);
       else {
         resConv.push_back(false); NNotConv++;
       }
@@ -143,7 +144,7 @@ void Davidson<RealMatrix>::runMicro(ostream &output ) {
       //             if this criteria is not met.
       if(!resConv[k]) {
         for(auto i = 0; i < this->n_; i++) {
-          if(!useLAPACK) {
+          if(!this->useLAPACK_) {
             T(i,0) = - Res.col(k)(i) / ((*this->mat_)(i,i) - subDiag_.eigenvalues()(k));
           } else {
             T(i,0) = - Res.col(k)(i) / ((*this->mat_)(i,i) - ER(k));
