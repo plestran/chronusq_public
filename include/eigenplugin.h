@@ -41,3 +41,8 @@ inline void normCol() const {
     derived().col(j) = derived().col(j)/colNorm;
   }
 }
+
+template<typename OtherDerived>
+inline OtherDerived AX(const MatrixBase<OtherDerived> &other) const {
+  return derived*other.derived();
+}

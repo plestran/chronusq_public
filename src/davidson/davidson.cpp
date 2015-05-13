@@ -160,12 +160,15 @@ void Davidson<RealMatrix>::runMicro(ostream &output ) {
     // existing set using QR factorization (piviting a problem??)
     Eigen::FullPivHouseholderQR<RealMatrix> QR(TrialVec);
     TrialVec = QR.matrixQ().block(0,0,this->n_,NTrial+NNotConv);
+    TrialVec = TrialVec*QR.colsPermutation().transpose(); // permute the vectors back
     
     NTrial += NNotConv;
     finish = std::chrono::high_resolution_clock::now();
     elapsed = finish - start;
     output << "Davidson Micro Iteration took " << std::fixed 
            << elapsed.count() << " secs" << endl << endl;
+//  output << QR.colsPermutation().toDenseMatrix() << endl;
+//  output << endl << TrialVec << endl;
   } 
   delete [] LAPACK_SCR; // Cleanup scratch space
 }
