@@ -63,8 +63,7 @@ void BasisSet::basisSetRead(std::shared_ptr<FileIO> fileio, std::shared_ptr<Mole
   auto temp=0;
   double readNorm,expval,coefval,coefvalp;
   for (auto i=0; i<mol->nAtoms();i++){
-    atomStr="-";
-    atomStr=atomStr+atom[mol->index(i)].symbol;
+    atomStr=atom[mol->index(i)].symbol;
     while(atomStr.compare(readString)&&(!fileBasis->eof())){ 
       *fileBasis>>readString;
     }
@@ -102,6 +101,7 @@ void BasisSet::basisSetRead(std::shared_ptr<FileIO> fileio, std::shared_ptr<Mole
 	}
       };
       if (readString.size()==1){
+        if (this->nLShell_.size()==L) this->nLShell_.push_back(0);
         temp=(this->nLShell_)[L];
         (this->nLShell_)[L]=temp+1;
 	this->atomNum.push_back(i);
@@ -140,7 +140,8 @@ void BasisSet::basisSetRead(std::shared_ptr<FileIO> fileio, std::shared_ptr<Mole
 	   center
            }
          );
-        temp=(this->nLShell_)[Ls];
+        if (this->nLShell_.size()==Ls) this->nLShell_.push_back(0);
+	temp=(this->nLShell_)[Ls];
         (this->nLShell_)[Ls]=temp+1;
 
 	this->nBasis_=(this->nBasis_)+HashNAOs(Ls);
@@ -155,7 +156,7 @@ void BasisSet::basisSetRead(std::shared_ptr<FileIO> fileio, std::shared_ptr<Mole
 	   center
            }
          );  
-            
+        if (this->nLShell_.size()==Lp) this->nLShell_.push_back(0);    
        temp=(this->nLShell_)[Lp];
        (this->nLShell_)[Lp]=temp+1;
        this->nBasis_=(this->nBasis_)+HashNAOs(Lp);
@@ -218,6 +219,19 @@ void BasisSet::computeShBlkNorm(std::shared_ptr<Molecule> mol, RealMatrix *D){
   
 }
 
+//---------------------------------------//
+// print a general basis set information //
+//---------------------------------------//
+void BasisSet::printInfo_libint(std::shared_ptr<FileIO> fileio,std::shared_ptr<Controls> controls) {
+  fileio->out<<"\nBasis Function Information:"<<endl;
+  for(auto i=0;i<this->nLShell_.size();i=i+2){
+    fileio->out <<std::setw(15) << "n" <<HashS(i)<<"Shell =" << std::setw(8) << this->nLShell_[i] << std::setw(5) << " "
+             << std::setw(20) << "n" <<HashS(i+1)<<"Shell =" << std::setw(8) << this->nLShell_[i+1] << endl;
+  }
+  if(controls->printLevel>=2) printAtomO(fileio->out);
+  //if(controls->printLevel>=3) printShellPair(fileio->out);
+  
+};
 void BasisSet::printAtomO(ostream &output){
     
   output.precision(6);
