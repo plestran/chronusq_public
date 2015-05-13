@@ -185,17 +185,45 @@ int HashL(std::string symbol) {
   if(!symbol.compare("M")) return 10; 
   if(!symbol.compare("N")) return 11; 
   if(!symbol.compare("O")) return 12; 
-  if(!symbol.compare("P")) return 13; 
-  if(!symbol.compare("Q")) return 14; 
-  if(!symbol.compare("R")) return 15; 
-  if(!symbol.compare("T")) return 16; 
-  if(!symbol.compare("U")) return 17; 
-  if(!symbol.compare("V")) return 18; 
-  if(!symbol.compare("W")) return 19; 
-  if(!symbol.compare("X")) return 20; 
-  if(!symbol.compare("Y")) return 21; 
-  if(!symbol.compare("Z")) return 22; 
+  if(!symbol.compare("Q")) return 13; 
+  if(!symbol.compare("R")) return 14; 
+  if(!symbol.compare("T")) return 15; 
+  if(!symbol.compare("U")) return 16; 
+  if(!symbol.compare("V")) return 17; 
+  if(!symbol.compare("W")) return 18; 
+  if(!symbol.compare("X")) return 19; 
+  if(!symbol.compare("Y")) return 20; 
+  if(!symbol.compare("Z")) return 21; 
   return -1; 
+};
+//-------------------------------------------//
+// convert angular momentum  to shell        //
+//-------------------------------------------//
+std::string HashS(int L) {
+  std::string sym;
+  if(L==0) sym="S"; 
+  if(L==1) sym="P"; 
+  if(L==2) sym="D"; 
+  if(L==3) sym="F"; 
+  if(L==4) sym="G"; 
+  if(L==5) sym="H"; 
+  if(L==6) sym="I"; 
+  if(L==7) sym="J"; 
+  if(L==8) sym="K"; 
+  if(L==9) sym="L"; 
+  if(L==10) sym="M"; 
+  if(L==11) sym="N"; 
+  if(L==12) sym="O"; 
+  if(L==13) sym="Q"; 
+  if(L==14) sym="R"; 
+  if(L==15) sym="T"; 
+  if(L==16) sym="U"; 
+  if(L==17) sym="V"; 
+  if(L==18) sym="W"; 
+  if(L==19) sym="X"; 
+  if(L==20) sym="Y"; 
+  if(L==21) sym="Z"; 
+  return sym; 
 };
 //----------------------------------------------------//
 // convert angular momentum to AO index in a shell    //

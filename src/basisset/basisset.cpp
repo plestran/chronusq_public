@@ -90,6 +90,7 @@ void BasisSet::readBasisSet(std::shared_ptr<FileIO> fileio, std::shared_ptr<Mole
   // TODO Check for basis in BASIS_PATH (should be set up though cmake)
   std::string readString;
   fileio->in>>readString;
+  cout << readString <<endl;
 /*
   std::unique_ptr<ifstream> fileBasis;
   if(fexists(BASIS_PATH+"/"+readString)) {
@@ -142,6 +143,7 @@ void BasisSet::readBasisSet(std::shared_ptr<FileIO> fileio, std::shared_ptr<Mole
         (this->nBasis_)=(this->nBasis_)+HashNAOs(L);
         (this->nPrimitive_)=(this->nPrimitive_)+readNPGTO*HashNAOs(L);
         for(j=0;j<2*readNPGTO;j++) *fileBasis>>readString;
+      // q
       // Is this obsolete?
       } else if(!(readString.compare("SP"))){
         //SP shell
@@ -343,8 +345,8 @@ void BasisSet::printInfo(std::shared_ptr<FileIO> fileio,std::shared_ptr<Controls
   fileio->out<< std::setw(15) << "nDShell =" << std::setw(8)<< nLShell_[2]<< std::setw(5) <<" "
 	     << std::setw(20) << "nFShell =" << std::setw(8)<< nLShell_[3]<< endl;
   fileio->out<< std::setw(15) << "nGShell =" << std::setw(8)<< nLShell_[4]<< endl;
-  if(controls->printLevel>=2) printAO(fileio->out);
-  if(controls->printLevel>=3) printShellPair(fileio->out);
+  if(controls->printLevel>=2) printAtomO(fileio->out);
+  //if(controls->printLevel>=3) printShellPair(fileio->out);
 };
 //--------------------------------------------------------------//
 // create and sort shell pairs according to the angular momenta //
