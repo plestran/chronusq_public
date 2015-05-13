@@ -99,7 +99,7 @@ class BasisSet{
   int  nBasis_;                 // number of basis functions
   int  nPrimitive_;             // number of primitive GTOs
   int  nShell_;                 // number of shells
-  int  nLShell_[20];            // number of S,P,D,F,G... shells
+  std::vector<int>  nLShell_;   // number of S,P,D,F,G... shells
   int  nShellPair_;             // number of shell pairs
   friend class FileIO;
 
@@ -146,6 +146,7 @@ public:
 
   // print out basis functions
   void printInfo(std::shared_ptr<FileIO>,std::shared_ptr<Controls>);
+  void printInfo_libint(std::shared_ptr<FileIO>,std::shared_ptr<Controls>);
   void printAO(ostream &output=cout);
   void printAtomO(ostream &output=cout);
   void printShell(ostream &output=cout);
