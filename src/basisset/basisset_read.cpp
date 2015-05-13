@@ -63,8 +63,7 @@ void BasisSet::basisSetRead(std::shared_ptr<FileIO> fileio, std::shared_ptr<Mole
   auto temp=0;
   double readNorm,expval,coefval,coefvalp;
   for (auto i=0; i<mol->nAtoms();i++){
-    atomStr="-";
-    atomStr=atomStr+atom[mol->index(i)].symbol;
+    atomStr=atom[mol->index(i)].symbol;
     while(atomStr.compare(readString)&&(!fileBasis->eof())){ 
       *fileBasis>>readString;
     }
@@ -241,3 +240,4 @@ void BasisSet::printAtomO(ostream &output){
   output << bannerEnd <<endl;
 }
 #endif
+
