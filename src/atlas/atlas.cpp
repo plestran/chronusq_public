@@ -54,7 +54,7 @@ int ChronusQ::atlas(int argc, std::string argv, GlobalMPI *globalMPI) {
 
   // print out molecular and basis set information
   molecule->printInfo(fileIO,controls);
-  basisset->printInfo(fileIO,controls);
+  basisset->printInfo_libint(fileIO,controls);
   aointegrals->iniAOIntegrals(molecule,basisset,fileIO,controls);
   hartreeFock->iniSingleSlater(molecule,basisset,aointegrals,fileIO,controls);
   hartreeFock->printInfo();
