@@ -31,8 +31,9 @@ using ChronusQ::BasisSet;
 using ChronusQ::Molecule;
 using ChronusQ::HashL;
 using ChronusQ::HashNAOs;
-typedef ChronusQ::Shell CShell;
+typedef libint2::Shell CShell;
 typedef libint2::Shell LIShell;
+std::vector<libint2::Shell> shells_libint_unnormal;
 
 void BasisSet::basisSetRead(std::shared_ptr<FileIO> fileio, std::shared_ptr<Molecule> mol){
   std::vector<double> coeff;
@@ -61,27 +62,39 @@ void BasisSet::basisSetRead(std::shared_ptr<FileIO> fileio, std::shared_ptr<Mole
   int readNPGTO,L,Ls,Lp;
   auto count=0;
   auto temp=0;
-  double readNorm,expval,coefval,coefvalp;
-  for (auto i=0; i<mol->nAtoms();i++){
-    atomStr=atom[mol->index(i)].symbol;
-    while(atomStr.compare(readString)&&(!fileBasis->eof())){ 
+  double readNorm,expval,coeffD,coeffDp;
+  std::string coefval, coefvalp;
+  std::string nameOfAtom;
+  struct basisSet_libint{
+    std::string atomName;
+    std::vector<libint2::Shell> refShell;
+  };
+  std::vector <basisSet_libint> allBasis;
+  std::vector <libint2::Shell> refShell;
+  center={{0,0,0}};
+  while (!(fileBasis->eof())){
+    while (readString.compare("****")){
       *fileBasis>>readString;
-    }
-    
-    center = {{(*mol->cart())(0,i),
-              (*mol->cart())(1,i),
-              (*mol->cart())(2,i)}};
+    };
+    *fileBasis >> readString;
+    nameOfAtom =readString;
+    *fileBasis >> readString; 
     *fileBasis >> readString;
     while(readString.compare("****")){
       *fileBasis >> readNPGTO;   
-      *fileBasis >> readNorm;
-      for (auto j=0;j<readNPGTO;j++){
+      *fileBasis >> readNorm; 
+      for (auto j=0;j<readNPGTO;++j){
         if (readString.size()==1){
           L=HashL(readString);
 	  *fileBasis >> expval;
 	  *fileBasis >> coefval;
 	  exp.push_back(expval);
-	  coeff.push_back(coefval);  	
+
+	  auto e(coefval.find_first_of("Dd"));
+	  if (e!=std::string::npos)
+	    coefval[e]='E';
+          coeffD=std::stod(coefval);
+	  coeff.push_back(coeffD);  	
         }
         else if(readString.size()==2){
           Ls=HashL(readString.substr(0,1));
@@ -91,102 +104,101 @@ void BasisSet::basisSetRead(std::shared_ptr<FileIO> fileio, std::shared_ptr<Mole
 	  *fileBasis >> coefvalp;
 	  exp.push_back (expval);
 	  expP.push_back(expval);
-	  coeff.push_back (coefval);
-	  coeffP.push_back(coefvalp);
-        }
-	else{
-          fileio->out<<"Error: unrecognized shell symbol!"<<endl;
-          CErr("Unrecognized Shell symbol");
 	  
-	}
-      };
+	  auto e(coefval.find_first_of("Dd"));
+	  if (e!=std::string::npos)
+	    coefval[e]='E';
+          coeffD=std::stod(coefval);
+	  
+	  auto f(coefvalp.find_first_of("Dd"));
+	  if (f!=std::string::npos)
+	    coefvalp[f]='E';
+          coeffDp=std::stod(coefvalp);
+	  
+	  coeff.push_back (coeffD);
+	  coeffP.push_back(coeffDp);
+      }
+     }
       if (readString.size()==1){
-        if (this->nLShell_.size()==L) this->nLShell_.push_back(0);
-        temp=(this->nLShell_)[L];
-        (this->nLShell_)[L]=temp+1;
-	this->atomNum.push_back(i);
-	this->shells_libint.push_back(
-          LIShell{
-            exp,
-	    {
-              {L, false, coeff}
-	    },
+        refShell.push_back(
+        LIShell{
+          exp,
+	  {
+            {L, false, coeff}
+	  },
 	    center
           }
         );
         coeff.resize(0);
         exp.resize(0);
-        shells_libint[count].renorm();
-	count++;
-	this->nBasis_=(this->nBasis_)+HashNAOs(L);
-        (this->nPrimitive_)=(this->nPrimitive_)+readNPGTO*HashNAOs(L);
-        if(count==1) {
-           this->maxPrim = readNPGTO;
-           this->maxL = L;
-        }   
-	else {
-           if(readNPGTO > this->maxPrim)this->maxPrim = readNPGTO;
-           if(L > this->maxL) this->maxL = L;
-        }
       }
       else if(readString.size()==2){
-         this->atomNum.push_back(i);
-	 this->shells_libint.push_back(
-           LIShell{
-           exp,
-	   {
-             {Ls, false, coeff}
-	   },
-	   center
-           }
-         );
-        if (this->nLShell_.size()==Ls) this->nLShell_.push_back(0);
-	temp=(this->nLShell_)[Ls];
-        (this->nLShell_)[Ls]=temp+1;
-
-	this->nBasis_=(this->nBasis_)+HashNAOs(Ls);
-        (this->nPrimitive_)=(this->nPrimitive_)+readNPGTO*HashNAOs(Ls);
-        this->atomNum.push_back(i);
-	this->shells_libint.push_back(
-           LIShell{
-           expP,
-	   {
-             {Lp, false, coeffP}
-	   },
-	   center
-           }
-         );  
-        if (this->nLShell_.size()==Lp) this->nLShell_.push_back(0);    
-       temp=(this->nLShell_)[Lp];
-       (this->nLShell_)[Lp]=temp+1;
-       this->nBasis_=(this->nBasis_)+HashNAOs(Lp);
-       (this->nPrimitive_)=(this->nPrimitive_)+readNPGTO*HashNAOs(Lp);
-       coeff.resize(0);
-       exp.resize(0);
-       expP.resize(0);
-       coeffP.resize(0);
-       shells_libint[count].renorm();
-       count++;
-       shells_libint[count].renorm();
-       count++;
-       if (count==2){
-         this->maxPrim= readNPGTO;
-	 this->maxL=Lp;
-       }
-       else{
-         if(readNPGTO > this->maxPrim)this->maxPrim = readNPGTO;
-         if(Lp > this->maxL) this->maxL = Lp;
-       }
-     }
-     else{
-         fileio->out<<"Error: unrecognized shell symbol!"<<endl;
-         CErr("Unrecognized Shell symbol"); 
-       }
-      *fileBasis >> readString;
+        refShell.push_back(
+        LIShell{
+          exp,
+	  {
+            {Ls, false, coeff}
+	  },
+	  center
+          }
+        );
+        refShell.push_back(
+        LIShell{
+          expP,
+	  {
+            {Lp, false, coeffP}
+	  },
+	  center
+          }
+        ); 
+        coeff.resize(0);
+        exp.resize(0);
+        expP.resize(0);
+        coeffP.resize(0);
+      };
+     *fileBasis >> readString;
     }
-    fileBasis->seekg(0);
+    allBasis.push_back({nameOfAtom,refShell});
+    refShell.resize(0);
   }
-  this->convToLI = true;
+  count=0;
+  for (auto i=0; i<mol->nAtoms();++i){
+   atomStr=atom[mol->index(i)].symbol;
+   center = {{(*mol->cart())(0,i),
+              (*mol->cart())(1,i),
+              (*mol->cart())(2,i)}};
+   for(auto k=0; k<allBasis.size();++k){
+     if (atomStr.compare(allBasis[k].atomName)==0){
+       for (auto j=0;j<allBasis[k].refShell.size();++j){
+         this->shells_libint.push_back(LIShell{allBasis[k].refShell[j].alpha,{allBasis[k].refShell[j].contr[0]},center});
+         shells_libint_unnormal.push_back(LIShell{allBasis[k].refShell[j].alpha,{allBasis[k].refShell[j].contr[0]},center});
+	 int L=allBasis[k].refShell[j].contr[0].l;
+	 if (this->nLShell_.size()==L) this->nLShell_.push_back(0);
+         temp=(this->nLShell_)[L];
+         (this->nLShell_)[L]=temp+1;
+	 this->shells_libint[count].renorm();
+	 count++;
+	 readNPGTO=allBasis[k].refShell[j].alpha.size();
+	 this->nBasis_=(this->nBasis_)+HashNAOs(L);
+	 this->atomNum.push_back(i);
+         (this->nPrimitive_)=(this->nPrimitive_)+readNPGTO*HashNAOs(L);
+         if(count==1) {
+           this->maxPrim = readNPGTO;
+           this->maxL = L;
+         }   
+	 else {
+           if(readNPGTO > this->maxPrim)this->maxPrim = readNPGTO;
+           if(L > this->maxL) this->maxL = L;
+         }
+       }
+       break;
+     }
+     if (k==allBasis.size()-1){
+       fileio->out<<"Error: unrecognized shell symbol!"<<endl;
+       CErr("Unrecognized Shell symbol");
+     }
+   }
+  }
   fileBasis->close();
 }
 
@@ -248,7 +260,7 @@ void BasisSet::printAtomO(ostream &output){
     output<<std::setw(8)<<this->shells_libint[i].contr[0].l;
       for(auto j=0;j<this->shells_libint[i].alpha.size();j++) {
 	if(j!=0) output<<std::setw(36)<<" ";
-	output<<std::setw(26)<<this->shells_libint[i].alpha[j]<<std::setw(18)<<this->shells_libint[i].contr[0].coeff[j]<<endl;
+	output<<std::setw(26)<<this->shells_libint[i].alpha[j]<<std::setw(18)<<shells_libint_unnormal[i].contr[0].coeff[j]<<endl;
       };
       output << endl;
   } 
