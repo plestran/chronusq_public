@@ -162,11 +162,13 @@ void SDResponse::formRM(){
   }
 
   ia = 0;
+  for (auto a=0;a<nV;a++)
   for (auto i=0;i<nO;i++)
-  for (auto a=0;a<nV;a++){
+  {
     jb =0;
+    for (auto b=0;b<nV;b++)
     for (auto j=0;j<nO;j++)
-    for (auto b=0;b<nV;b++){
+    {
       Ad(ia,jb) = 0.0;
       if ((a==b)&&(i==j)){
 	Ad(ia,jb) = EigV(a,0)-EigO(i,0);
@@ -229,14 +231,26 @@ void SDResponse::formRM(){
          << (CIS.eigenvalues())(i) << endl;
   }
   
-  RealMatrix AXs(4*nOV,4*nOV);
-  AXs = A * CIS.eigenvectors();
-  // Print the AX matrix
-  for (auto i=0;i<4*nOV;i++)
-  for (auto j=0;j<4*nOV;j++){
-    cout << "( "<< i+1 << ", "<< j+1 << " )      "
-         << AXs(i,j)<<endl;
-  }
+//  ia= 0;
+//  for (auto i=0;i<nO;i++)
+//  for (auto a=0;a<nV;a++)
+//  {
+//    cout << "Eigenvectors Alpha" <<"a = " << a << ", " <<" i = " << i << "  " << CIS.eigenvectors()(ia,0) << endl;
+//    ia = ia+1;
+//  } 
+//  ia= 0;
+//  for (auto i=0;i<nO;i++)
+//  for (auto a=0;a<nV;a++)
+//  {
+//    cout << "Eigenvectors Beta" <<"a = " << a << ", " <<" i = " << i << "  " << CIS.eigenvectors()(nOV+ia,0) << endl;
+//    ia = ia+1;
+//  } 
+  cout << "Show the first eigenvector\n" <<endl;
+  cout << CIS.eigenvectors().col(1)<< endl;
+  cout << "Alpha part"<< endl;
+  cout << CIS.eigenvectors().col(1).head(nOV)<< endl;
+  cout << "Beta part"<< endl;
+  cout << CIS.eigenvectors().col(1).tail(nOV)<< endl;
 
   // LR TDHF routine
   Eigen::EigenSolver<RealMatrix> TD;
@@ -252,7 +266,7 @@ void SDResponse::formRM(){
 
 }
 
-RealMatrix SDResponse::formRM2(int NTrial){
+//RealMatrix SDResponse::formRM2(int NTrial){
 
   // Convert X from MO to AO X(AO) = C(occ) * X(MO) * C(vir)^T
   // Contract X(AO) with (mu nu || lambda sigma)  IX_{ij} = (ij||kl) X(AO)_{kl}
@@ -260,7 +274,7 @@ RealMatrix SDResponse::formRM2(int NTrial){
   // Contract IX(MO) with eigenvalue differences
   //   AX_{ia} = IX(ia) / (e(a) - e(i))
 
-}
+//}
 
 /*************************/
 /* MPI Related Routines  */
