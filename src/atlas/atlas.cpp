@@ -93,17 +93,18 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 
   time(&currentTime);
   fileIO->out<<"\nJob finished: "<<ctime(&currentTime)<<endl;
-  int N = 5;
-  int NSek = 3;
+  int N = 500;
+  int NSek = 15;
   std::shared_ptr<RealMatrix> A = std::make_shared<RealMatrix>(N,N);
   for(auto i = 0; i < N; i++) (*A)(i,i) = i+1;
   (*A) = (*A) + RealMatrix::Random(N,N);
-//(*A) = A->selfadjointView<Eigen::Lower>();
+  (*A) = A->selfadjointView<Eigen::Lower>();
   Eigen::EigenSolver<RealMatrix> ES;
   for(int i = 0; i < N; i++)
   for(int j = 0; j < N; j++) {
     (*A)(i,j) = std::abs((*A)(i,j));
   }
+/*
   ES.compute(*A);
   Eigen::VectorXd E = ES.eigenvalues().real();
   RealMatrix VR = ES.eigenvectors().real();
@@ -111,10 +112,9 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   ES.compute(A->transpose());
   RealMatrix VL = ES.eigenvectors().real();
   cout << endl << ES.eigenvectors() << endl;
-  VR.normCol();
-  VL.normCol();
+//VR.normCol();
+//VL.normCol();
 
-/*
   Eigen::FullPivLU<RealMatrix> lu(VL.transpose()*VR);
   cout << endl << ES.eigenvectors() << endl;
 
@@ -135,16 +135,14 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   for(auto i = 0; i < N; i++){
     cout << endl << (*A)*VR.col(i) - E(i)*VR.col(i) << endl;
   }
-*/
 
   cout << endl << VL.transpose()*VR << endl;
   biOrth(VL,VR);
   cout << endl << VL.transpose()*VR << endl;
 //cout << *A << endl;
-/*
+*/
   Davidson<double> dav(&AX,A,NSek,N);
   dav.run(fileIO->out);
-*/
   
 
 #ifdef USE_LIBINT
