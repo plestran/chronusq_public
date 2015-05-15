@@ -70,6 +70,9 @@ int HashNAOs (char*);
 // convert shell symbol to angular momentum
 int HashL (std::string);
 
+// convert angular momentum to shell symbol
+std::string HashS(int);
+
 // convert angular momentum to AO index in a shell
 int HashIAO(int,int*);
 
