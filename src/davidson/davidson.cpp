@@ -27,29 +27,44 @@
 
 namespace ChronusQ {
 template<>
-void Davidson<RealMatrix>::runMicro(ostream &output ) {
-  RealMatrix AX(this->n_,this->nGuess_);
+void Davidson<double>::runMicro(ostream &output ) {
+  RealMatrix AXR(this->n_,this->nGuess_);
   RealMatrix XTAX(this->nGuess_,this->nGuess_);
-  RealMatrix U(this->n_,this->nGuess_);
-  RealMatrix Res(this->n_,this->nGuess_);
-  RealMatrix TrialVec(this->n_,this->nGuess_);
+  RealMatrix UR(this->n_,this->nGuess_);
+  RealMatrix ResR(this->n_,this->nGuess_);
+  RealMatrix TrialVecR(this->n_,this->nGuess_);
   RealMatrix T(this->n_,1);
   double *LAPACK_SCR;
   int LEN_LAPACK_SCR,LWORK;
   Eigen::Map<Eigen::VectorXd> ER(LAPACK_SCR,0);
+/*
+  Eigen::Map<Eigen::VectorXd> EI(LAPACK_SCR,0);
+  RealMap VR(LAPACK_SCR,0,0);
+  RealMap VL(LAPACK_SCR,0,0);
+*/
 
-  Eigen::SelfAdjointEigenSolver<RealMatrix> subDiag_;
+  Eigen::SelfAdjointEigenSolver<RealMatrix> subDiagH_;
   if(this->useLAPACK_) {
     LWORK = 6*this->n_;
     LEN_LAPACK_SCR = 0;
-    LEN_LAPACK_SCR += this->maxSubSpace_; // Subspace eigenvalues (real)
-//  LEN_LAPACK_SCR += this->maxSubSpace_*this->maxSubSpace_; // Subspace eigenvectors (right) (not needed for SY)
+    // Subspace eigenvalues (real)
+    LEN_LAPACK_SCR += this->maxSubSpace_;
+/*
+    if(!this->hermetian_) {
+      // Subspace eigenvalues (imag)
+      LEN_LAPACK_SCR += this->maxSubSpace_; 
+      // Subspace eigenvectors (right) (not needed for SY)
+      LEN_LAPACK_SCR += this->maxSubSpace_*this->maxSubSpace_; 
+      // Subspace eigenvectors (left) (not needed for SY)
+      LEN_LAPACK_SCR += this->maxSubSpace_*this->maxSubSpace_;
+    }
+*/
     LEN_LAPACK_SCR += LWORK; // LAPACK workspace
     LAPACK_SCR = new double[LEN_LAPACK_SCR];
   }
 
   int NTrial = this->nGuess_;
-  TrialVec = (*this->guess_);
+  TrialVecR = (*this->guess_);
   for(auto iter = 0; iter < this->maxIter_; iter++){
     std::chrono::high_resolution_clock::time_point start,finish;
     std::chrono::duration<double> elapsed;
@@ -58,43 +73,84 @@ void Davidson<RealMatrix>::runMicro(ostream &output ) {
 
     // Matrix Product (AX). Keep around for reuse in computing
     // the residual vector
-    AX = (*this->mat_) * TrialVec;  
+    if(this->AX_==NULL) AXR = (*this->mat_) * TrialVecR;  
+    else AXR = this->AX_(*this->mat_,TrialVecR);
    
     // Full projection of A onto subspace
-    XTAX = TrialVec.transpose()*AX; 
+    XTAX = TrialVecR.transpose()*AXR; 
 
     // Diagonalize the subspace
-    if(!this->useLAPACK_) subDiag_.compute(XTAX);
+    if(!this->useLAPACK_) subDiagH_.compute(XTAX);
     else {
       new (&ER) Eigen::Map<Eigen::VectorXd>(LAPACK_SCR,NTrial);
-//    RealMap VR(LAPACK_SCR+NTrial,NTrial*NTrial); // DSYEV will overwrite XTAX
-      char JOBZ = 'V';
+      int IOff = NTrial;
+/*
+      if(!this->hermetian_) {
+        new (&EI) Eigen::Map<Eigen::VectorXd>(LAPACK_SCR+IOff,NTrial);
+        IOff += NTrial;
+        new (&VR) RealMap(LAPACK_SCR+IOff,NTrial,NTrial);
+        IOff += NTrial*NTrial;
+      }
+*/
+      char JOBVR = 'V';
+      char JOBVL = 'N';
       char UPLO = 'L';
       int INFO;
-      dsyev_(&JOBZ,&UPLO,&NTrial,XTAX.data(),&NTrial,ER.data(),
-             LAPACK_SCR+NTrial,&LWORK,&INFO); 
-      if(INFO!=0) CErr("DSYEV failed to converge in Davison Iterations",output);
-      XTAX.transposeInPlace(); // Convert to RowMajor...
+      if(this->hermetian_) {
+        dsyev_(&JOBVR,&UPLO,&NTrial,XTAX.data(),&NTrial,ER.data(),
+               LAPACK_SCR+IOff,&LWORK,&INFO); 
+        if(INFO!=0) CErr("DSYEV failed to converge in Davison Iterations",output);
+        XTAX.transposeInPlace(); // Convert to RowMajor...
+      } 
+/*
+      else {
+        dgeev_(&JOBVL,&JOBVR,&NTrial,XTAX.data(),&NTrial,ER.data(),
+               EI.data(),VL.data(),&NTrial,VR.data(),&NTrial,
+               LAPACK_SCR+IOff,&LWORK,&INFO);
+        if(INFO!=0) CErr("DGEEV failed to converge in Davison Iterations",output);
+        VR.transposeInPlace(); // Convert ro RowMajor...
+//      eigSort(false,ER,VR,VL);
+      }
+*/
     }
    
     
     // Reconstruct approximate eigenvectors
-    if(!this->useLAPACK_) U = TrialVec * subDiag_.eigenvectors();
-    else U = TrialVec * XTAX;
+    if(!this->useLAPACK_) UR = TrialVecR * subDiagH_.eigenvectors();
+    else {
+      if(this->hermetian_) UR = TrialVecR * XTAX;
+//    else                 UR = TrialVecR * VR;
+    }
 
     // Stash away current approximation of eigenvalues and eigenvectors (NSek)
     if(!this->useLAPACK_) {
-      (*this->eigenvalues_) = subDiag_.eigenvalues().block(0,0,this->nSek_,1);
+      (*this->eigenvalues_) = subDiagH_.eigenvalues().block(0,0,this->nSek_,1);
     } else {
       (*this->eigenvalues_) = ER.block(0,0,this->nSek_,1);
     }
-    (*this->eigenvector_) = U.block(0,0,this->n_,this->nSek_);
+    (*this->eigenvector_) = UR.block(0,0,this->n_,this->nSek_);
     
     // Construct the residual vector 
     // R = A*U - U*E = (AX)*c - U*E
     if(!this->useLAPACK_) {
-      Res = AX*subDiag_.eigenvectors() - U*subDiag_.eigenvalues().asDiagonal();
-    } else Res = AX*XTAX - U*ER.asDiagonal();
+      ResR = AXR*subDiagH_.eigenvectors() - UR*subDiagH_.eigenvalues().asDiagonal();
+    } else {
+      if(this->hermetian_) ResR = AXR*XTAX - UR*ER.asDiagonal();
+/*
+      else {
+        int NImag = 0;
+        for(auto k = 0; k < NTrial; k++) if(std::abs(EI(k))<1e-10) NImag++;
+        ResR.resize(this->n_,NTrial+NImag);
+        for(auto k = 0; k < NTrial+NImag; k++) {
+          ResR.col(k) = AXR*VR.col(k) - ER(k)*UR.col(k);
+          if(std::abs(EI(k))<1e-10) {
+            ResR.col(k+1) = AXR*VR.col(k) - EI(k)*UR.col(k);
+            k++;
+          }
+        }
+      }
+*/
+    }
 
     // Vector to store convergence info
     std::vector<bool> resConv;
@@ -104,16 +160,16 @@ void Davidson<RealMatrix>::runMicro(ostream &output ) {
     // will be made perturbed guess vectors
     output << "  Checking Residual Norms:" << endl;
     for(auto k = 0; k < this->nSek_; k++) {
-      if(Res.col(k).norm() < 5e-6) resConv.push_back(true);
+      if(ResR.col(k).norm() < 5e-6) resConv.push_back(true);
       else {
         resConv.push_back(false); NNotConv++;
       }
       if(resConv[k]) {
         output << "    Norm of Residual " << k+1 << " = " << std::scientific 
-               << Res.col(k).norm() << " \t \t Root has converged" <<endl;
+               << ResR.col(k).norm() << " \t \t Root has converged" <<endl;
       } else {
         output << "    Norm of Residual " << k+1 << " = " << std::scientific 
-               << Res.col(k).norm() << " \t \t Root has not converged" <<endl;
+               << ResR.col(k).norm() << " \t \t Root has not converged" <<endl;
       }
     }
 
@@ -132,7 +188,7 @@ void Davidson<RealMatrix>::runMicro(ostream &output ) {
 
     // Resize the trial vector dimension to contain the new perturbed
     // guess vectors
-    TrialVec.conservativeResize(this->n_,NTrial+NNotConv);
+    TrialVecR.conservativeResize(this->n_,NTrial+NNotConv);
     int INDX = 0;
     for(auto k = 0; k < this->nSek_; k++) {
       // If the residual for root "k" is not converged, construct
@@ -145,22 +201,22 @@ void Davidson<RealMatrix>::runMicro(ostream &output ) {
       if(!resConv[k]) {
         for(auto i = 0; i < this->n_; i++) {
           if(!this->useLAPACK_) {
-            T(i,0) = - Res.col(k)(i) / ((*this->mat_)(i,i) - subDiag_.eigenvalues()(k));
+            T(i,0) = - ResR.col(k)(i) / ((*this->mat_)(i,i) - subDiagH_.eigenvalues()(k));
           } else {
-            T(i,0) = - Res.col(k)(i) / ((*this->mat_)(i,i) - ER(k));
+            T(i,0) = - ResR.col(k)(i) / ((*this->mat_)(i,i) - ER(k));
           }
         }
 //      output << TrialVec.rows() <<" " <<TrialVec.cols() << endl;
 //      output << T.rows() <<" " <<T.cols() << endl;
-        TrialVec.block(0,NTrial + INDX,this->n_,1) = T;
+        TrialVecR.block(0,NTrial + INDX,this->n_,1) = T;
         INDX++;
       }
     }
     // Normalize and orthogonalize the new guess vectors to the
-    // existing set using QR factorization (piviting a problem??)
-    Eigen::FullPivHouseholderQR<RealMatrix> QR(TrialVec);
-    TrialVec = QR.matrixQ().block(0,0,this->n_,NTrial+NNotConv);
-    TrialVec = TrialVec*QR.colsPermutation().transpose(); // permute the vectors back
+    // existing set using QR factorization
+    Eigen::FullPivHouseholderQR<RealMatrix> QR(TrialVecR);
+    TrialVecR = QR.matrixQ().block(0,0,this->n_,NTrial+NNotConv);
+    TrialVecR = TrialVecR*QR.colsPermutation().transpose(); // permute the vectors back
     
     NTrial += NNotConv;
     finish = std::chrono::high_resolution_clock::now();

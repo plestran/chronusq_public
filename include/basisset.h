@@ -157,7 +157,7 @@ public:
   // shell format
   void convShell(std::shared_ptr<Molecule>);
   void makeMap(std::shared_ptr<Molecule>);
-  void computeShBlkNorm(std::shared_ptr<Molecule>,RealMatrix*);
+  void computeShBlkNorm(std::shared_ptr<Molecule>,const RealMatrix*);
 #endif
 
   /*************************/

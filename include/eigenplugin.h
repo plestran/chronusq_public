@@ -37,12 +37,8 @@ inline Scalar frobInner(const MatrixBase<OtherDerived>& other) const {
 
 inline void normCol() const {
   for(auto j = 0; j < cols(); j++) {
-    Scalar colNorm = derived().col(j).norm();
-    derived().col(j) = derived().col(j)/colNorm;
+    double colNorm = derived().col(j).norm();
+    this.col(j) = this.col(j)/colNorm;
   }
 }
 
-template<typename OtherDerived>
-inline OtherDerived AX(const MatrixBase<OtherDerived> &other) const {
-  return derived*other.derived();
-}

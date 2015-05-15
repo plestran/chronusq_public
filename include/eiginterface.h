@@ -60,5 +60,30 @@ namespace Eigen {
   };
   output<<bannerEnd<<std::endl;
   }
+
+  template<typename Derived>
+  void eigSort(bool doL, Derived &E, Derived &VR, Derived &VL){
+    for(auto i = 0  ; i < VR.rows()-1; i++)
+    for(auto j = i+1; j < VR.rows()  ; j++) {
+      if(E(i) > E(j)) {
+        E(i).swap(E(j));
+        VR.col(i).swap(VR.col(j));
+        if(doL) VL.col(i).swap(VL.col(j));
+      }
+    }
+  }
+
+  template<typename Derived>
+  void biOrth(Derived &L, Derived &R){
+    for(auto i = 0; i < R.cols(); i++){
+      double inner = std::abs(L.col(i).dot(R.col(i)));
+      std::cout << inner << std::endl;
+      L.col(i) = L.col(i) / std::sqrt(inner);
+      R.col(i) = R.col(i) / std::sqrt(inner);
+      for(auto j = i+1; j < R.cols(); j++){
+        R.col(j) = R.col(j) - R.col(j).dot(L.col(i))*L.col(i);
+      }
+    }
+  }
 }
 #endif

@@ -27,6 +27,11 @@
 #include <davidson.h>
 using namespace ChronusQ;
 
+RealMatrix AX(const RealMatrix &A, const RealMatrix &B) {return A*B;};
+
+
+
+
 int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   int i,j,k,l;
   time_t currentTime;
@@ -88,18 +93,58 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 
   time(&currentTime);
   fileIO->out<<"\nJob finished: "<<ctime(&currentTime)<<endl;
-  int N = 300;
+  int N = 5;
   int NSek = 3;
   std::shared_ptr<RealMatrix> A = std::make_shared<RealMatrix>(N,N);
   for(auto i = 0; i < N; i++) (*A)(i,i) = i+1;
   (*A) = (*A) + RealMatrix::Random(N,N);
-  (*A) = A->selfadjointView<Eigen::Lower>();
+//(*A) = A->selfadjointView<Eigen::Lower>();
+  Eigen::EigenSolver<RealMatrix> ES;
   for(int i = 0; i < N; i++)
   for(int j = 0; j < N; j++) {
     (*A)(i,j) = std::abs((*A)(i,j));
   }
-  Davidson<RealMatrix> dav(A,NSek);
+  ES.compute(*A);
+  Eigen::VectorXd E = ES.eigenvalues().real();
+  RealMatrix VR = ES.eigenvectors().real();
+  cout << endl << ES.eigenvectors() << endl;
+  ES.compute(A->transpose());
+  RealMatrix VL = ES.eigenvectors().real();
+  cout << endl << ES.eigenvectors() << endl;
+  VR.normCol();
+  VL.normCol();
+
+/*
+  Eigen::FullPivLU<RealMatrix> lu(VL.transpose()*VR);
+  cout << endl << ES.eigenvectors() << endl;
+
+  RealMatrix L = RealMatrix::Identity(N,N);
+  L.triangularView<Eigen::StrictlyLower>() = lu.matrixLU();
+  RealMatrix U = lu.matrixLU().triangularView<Eigen::Upper>();
+  for(auto i = 0; i < N; i++){
+    cout << endl << (*A)*VR.col(i) - E(i)*VR.col(i) << endl;
+  }
+
+  cout << endl << endl << L.inverse()*lu.permutationP()*VL.transpose()*VR*lu.permutationQ()*U.inverse() << endl;
+
+  VR = VR*lu.permutationQ()*U.inverse();
+  VL = VL*lu.permutationP().transpose()*L.inverse().transpose();
+  cout << endl << VL.transpose()*VR << endl;
+
+
+  for(auto i = 0; i < N; i++){
+    cout << endl << (*A)*VR.col(i) - E(i)*VR.col(i) << endl;
+  }
+*/
+
+  cout << endl << VL.transpose()*VR << endl;
+  biOrth(VL,VR);
+  cout << endl << VL.transpose()*VR << endl;
+//cout << *A << endl;
+/*
+  Davidson<double> dav(&AX,A,NSek,N);
   dav.run(fileIO->out);
+*/
   
 
 #ifdef USE_LIBINT
