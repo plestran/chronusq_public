@@ -99,7 +99,7 @@ class BasisSet{
   int  nBasis_;                 // number of basis functions
   int  nPrimitive_;             // number of primitive GTOs
   int  nShell_;                 // number of shells
-  int  nLShell_[20];            // number of S,P,D,F,G... shells
+  std::vector<int>  nLShell_;   // number of S,P,D,F,G... shells
   int  nShellPair_;             // number of shell pairs
   friend class FileIO;
 
@@ -118,6 +118,7 @@ public:
   bool haveMap = false;
   int maxPrim;
   int maxL;
+  std::vector<int> atomNum;
 #endif
   //dbwye
 
@@ -139,22 +140,25 @@ public:
   // access to private data
   inline int     nBasis()  {return this->nBasis_;};
   inline int nPrimitive()  {return this->nPrimitive_;};
-  inline int     nShell()  {return this->nShell_;};
+  inline int     nShell()  {return this->shells_libint.size();};
   inline int nShellPair()  {return this->nShellPair_;};
   inline int nLShell(int L){return this->nLShell_[L];};
 
   // print out basis functions
   void printInfo(std::shared_ptr<FileIO>,std::shared_ptr<Controls>);
+  void printInfo_libint(std::shared_ptr<FileIO>,std::shared_ptr<Controls>);
   void printAO(ostream &output=cout);
+  void printAtomO(ostream &output=cout);
   void printShell(ostream &output=cout);
   void printShellPair(ostream &output=cout);
 
   // read from input file
   void readBasisSet(std::shared_ptr<FileIO>,std::shared_ptr<Molecule>);
-
+  
 #ifdef USE_LIBINT
   // If using Libint, have a routine to convert between local and libint
   // shell format
+  void basisSetRead(std::shared_ptr<FileIO>,std::shared_ptr<Molecule>); 
   void convShell(std::shared_ptr<Molecule>);
   void makeMap(std::shared_ptr<Molecule>);
   void computeShBlkNorm(std::shared_ptr<Molecule>,const RealMatrix*);

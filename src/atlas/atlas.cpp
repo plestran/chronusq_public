@@ -58,13 +58,9 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   readInput(fileIO,molecule,basisset,controls);
 //  fileIO->iniFileIO(controls->restart);
 
-#ifdef USE_LIBINT
-  basisset->convShell(molecule);
-#endif
-
   // print out molecular and basis set information
   molecule->printInfo(fileIO,controls);
-  basisset->printInfo(fileIO,controls);
+  basisset->printInfo_libint(fileIO,controls);
   aointegrals->iniAOIntegrals(molecule,basisset,fileIO,controls);
   hartreeFock->iniSingleSlater(molecule,basisset,aointegrals,fileIO,controls);
   hartreeFock->printInfo();
@@ -80,7 +76,8 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   aointegrals->printTimings();
   hartreeFock->computeEnergy();
   if(controls->optWaveFunction) hartreeFock->SCF();
-  else fileIO->out << endl << "**Skipping SCF Optimization**" << endl;
+  else fileIO->out << "**Skipping SCF Optimization**" << endl; 
+
 /*
   MOIntegrals *moIntegrals = new MOIntegrals();
   moIntegrals->iniMOIntegrals(molecule,basisset,fileIO,controls,aointegrals,hartreeFock);
@@ -148,7 +145,9 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 #ifdef USE_LIBINT
   libint2::cleanup();
 #endif
-  return  1;
+
+
+return  1;
 };
 
 

@@ -402,7 +402,6 @@ void AOIntegrals::computeSchwartz(){
 
   this->fileio_->out << "Computing Schwartz Bound Tensor ... ";
   auto start =  std::chrono::high_resolution_clock::now();
-
   for(int s1=0; s1 < this->basisSet_->nShell(); s1++){
     int n1  = this->basisSet_->shells_libint[s1].size();
     for(int s2=0; s2 <= s1; s2++){

@@ -70,7 +70,7 @@ void BasisSet::convShell(std::shared_ptr<Molecule> mol) {
   }
   this->convToLI = true;
 }
-
+/*
 void BasisSet::makeMap(std::shared_ptr<Molecule>  mol) {
   if(!this->convToLI) this->convShell(mol);
   int n = 0;
@@ -98,4 +98,5 @@ void BasisSet::computeShBlkNorm(std::shared_ptr<Molecule> mol, const RealMatrix 
     }
   }
 }
+*/
 #endif
