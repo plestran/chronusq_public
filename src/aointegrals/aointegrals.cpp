@@ -107,9 +107,9 @@ void AOIntegrals::iniAOIntegrals(std::shared_ptr<Molecule> molecule, std::shared
     this->overlap_      = std::make_shared<RealMatrix>(this->nBasis_,this->nBasis_); // Overlap
     this->kinetic_      = std::make_shared<RealMatrix>(this->nBasis_,this->nBasis_); // Kinetic
     this->potential_    = std::make_shared<RealMatrix>(this->nBasis_,this->nBasis_); // Potential
-    if(this->controls_->doDipole || this->controls_->doQuadpole){
+//  if(this->controls_->doDipole || this->controls_->doQuadpole){
       this->elecDipole_   = std::make_shared<RealTensor3d>(3,this->nBasis_,this->nBasis_); // Electic Dipole
-    }
+//  }
     if(this->controls_->doQuadpole) {
       this->elecQuadpole_ = std::make_shared<RealTensor3d>(6,this->nBasis_,this->nBasis_); // Electic Quadrupole
     }

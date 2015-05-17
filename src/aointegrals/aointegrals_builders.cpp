@@ -245,6 +245,7 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
   std::vector<RealMap> mat;
   int NB = this->nBasis_;
   int NBSq = NB*NB;
+  cout << "HERE" << endl;
   if(iType == OneBodyEngine::overlap){
     mat.push_back(RealMap(this->overlap_->data(),NB,NB));
   } else if(iType == OneBodyEngine::kinetic) {
@@ -252,10 +253,15 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
   } else if(iType == OneBodyEngine::nuclear) {
     mat.push_back(RealMap(this->potential_->data(),NB,NB));
   } else if(iType == OneBodyEngine::emultipole1) {
+  cout << "HERE" << this->elecDipole_->size()<<endl;
     mat.push_back(RealMap(this->overlap_->data(),NB,NB));
+  cout << "HERE" << endl;
     mat.push_back(RealMap(&this->elecDipole_->storage()[0],NB,NB));
+  cout << "HERE" << endl;
     mat.push_back(RealMap(&this->elecDipole_->storage()[NBSq],NB,NB));
+  cout << "HERE" << endl;
     mat.push_back(RealMap(&this->elecDipole_->storage()[2*NBSq],NB,NB));
+  cout << "HERE" << endl;
   } else if(iType == OneBodyEngine::emultipole2) {
     mat.push_back(RealMap(this->overlap_->data(),NB,NB));
     mat.push_back(RealMap(&this->elecDipole_->storage()[0],NB,NB));
@@ -271,6 +277,7 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
     cout << "OneBodyEngine type not recognized" << endl;
     exit(EXIT_FAILURE);
   }
+  cout << "HERE" << endl;
  
   // Check to see if the basisset had been converted
   if(!this->basisSet_->convToLI) this->basisSet_->convShell(this->molecule_);
@@ -299,7 +306,7 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
   for(size_t i = 1; i < this->controls_->nthreads; i++) engines[i] = engines[0];
 
   if(!this->basisSet_->haveMap) this->basisSet_->makeMap(this->molecule_); 
-
+  cout << "HERE" << endl;
 #ifdef USE_OMP
   #pragma omp parallel
 #endif
@@ -382,7 +389,7 @@ void AOIntegrals::computeAOOneE(){
 
   // Compute and time overlap integrals
   auto OStart = std::chrono::high_resolution_clock::now();
-  OneEDriver(OneBodyEngine::overlap);
+  OneEDriver(OneBodyEngine::emultipole1);
   auto OEnd = std::chrono::high_resolution_clock::now();
 
   // Compute and time kinetic integrals
