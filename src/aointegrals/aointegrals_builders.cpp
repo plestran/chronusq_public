@@ -564,20 +564,6 @@ void AOIntegrals::computeAOTwoE(){
   }
   } // OMP Parallel
 
-  if(this->controls_->printLevel > 4) {
-    for(auto i = 0; i < this->nBasis_; i++)
-    for(auto j = 0; j < this->nBasis_; j++)
-    for(auto k = 0; k < this->nBasis_; k++)
-    for(auto l = 0; l < this->nBasis_; l++){
-      if(std::abs((*this->aoERI_)(i,j,k,l))>1e-6)
-        cout << "( " <<i + 1 << " "
-             << j + 1<< " "
-             << k + 1<< " "
-             << l + 1<< " ) "
-             << (*this->aoERI_)(i,j,k,l) << endl;
-    }
-  }
-  
 }
 
 void AOIntegrals::computeAORII(){

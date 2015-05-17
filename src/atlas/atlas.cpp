@@ -29,9 +29,6 @@ using namespace ChronusQ;
 
 RealMatrix AX(const RealMatrix &A, const RealMatrix &B) {return A*B;};
 
-
-
-
 int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   int i,j,k,l;
   time_t currentTime;
