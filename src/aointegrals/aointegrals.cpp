@@ -103,10 +103,16 @@ void AOIntegrals::iniAOIntegrals(std::shared_ptr<Molecule> molecule, std::shared
   }
 #endif
   try {
-    this->oneE_      = std::make_shared<RealMatrix>(this->nBasis_,this->nBasis_); // One Electron Integral
-    this->overlap_   = std::make_shared<RealMatrix>(this->nBasis_,this->nBasis_); // Overlap
-    this->kinetic_   = std::make_shared<RealMatrix>(this->nBasis_,this->nBasis_); // Kinetic
-    this->potential_ = std::make_shared<RealMatrix>(this->nBasis_,this->nBasis_); // Potential
+    this->oneE_         = std::make_shared<RealMatrix>(this->nBasis_,this->nBasis_); // One Electron Integral
+    this->overlap_      = std::make_shared<RealMatrix>(this->nBasis_,this->nBasis_); // Overlap
+    this->kinetic_      = std::make_shared<RealMatrix>(this->nBasis_,this->nBasis_); // Kinetic
+    this->potential_    = std::make_shared<RealMatrix>(this->nBasis_,this->nBasis_); // Potential
+    if(this->controls_->doDipole || this->controls_->doQuadpole){
+      this->elecDipole_   = std::make_shared<RealTensor3d>(3,this->nBasis_,this->nBasis_); // Electic Dipole
+    }
+    if(this->controls_->doQuadpole) {
+      this->elecQuadpole_ = std::make_shared<RealTensor3d>(6,this->nBasis_,this->nBasis_); // Electic Quadrupole
+    }
   } catch (...) {
     CErr(std::current_exception(),"One Electron Integral Tensor Alloation (All)");
   }
