@@ -190,11 +190,6 @@ void SDResponse::formRM(){
   B.block(0,nOV,nOV,nOV) = Aod;
   B.block(nOV,0,nOV,nOV) = Aod;
 
-  for (auto i=0;i<2*nOV;i++)
-  for (auto j=0;j<2*nOV;j++){
-    cout << "A symmetry " << A(i,j)-A(j,i) <<endl;
-    cout << "B symmetry " << B(i,j)-B(j,i) <<endl;
-  }
 
   // Build the ABBA matrix
 
@@ -205,19 +200,9 @@ void SDResponse::formRM(){
 
   // Print the A & B matrix
   cout << "Print the A matrix" << endl;
-  for (auto i=0;i<2*nOV;i++)
-  for (auto j=0;j<2*nOV;j++){
-    cout << "(" << (i+1) << ", "
-	 << (j+1) << ")" << "  "
-	 << A(i,j) << endl;
-  }
+  cout << A  << endl;
   cout << "Print the B matrix" << endl;
-  for (auto i=0;i<2*nOV;i++)
-  for (auto j=0;j<2*nOV;j++){
-    cout << "(" << (i+1) << ", "
-	 << (j+1) << ")" << "  "
-	 << B(i,j) << endl;
-  }
+  cout << B  << endl;
   // CIS routine
   // Diagonalize the A matrix
   Eigen::SelfAdjointEigenSolver<RealMatrix> CIS;
@@ -232,30 +217,32 @@ void SDResponse::formRM(){
   }
   // Print AX(1)
   RealMatrix X =  CIS.eigenvectors().col(1);
+  cout << "Print X "<< endl;
+  cout << X <<endl;
   cout << "Print AX"<<endl;
   cout << A*X << endl;
   // Get XA_AO and XB_AO
   RealMap XA(X.data(),nV,nO);
-  cout << "Print the XA" <<endl;
-  cout << XA << endl;
+//  cout << "Print the XA" <<endl;
+//  cout << XA << endl;
   RealMap XB(X.data()+nOV,nV,nO);
-  cout << "Print the XB" <<endl;
-  cout << XB << endl;
-  RealMatrix XAAO = this->singleSlater_->moA()->block(0,nV,this->nBasis_,nV)*XA*this->singleSlater_->moA()->block(0,0,this->nBasis_,nO).transpose();
-  RealMatrix XBAO = this->singleSlater_->moA()->block(0,nV,this->nBasis_,nV)*XA*this->singleSlater_->moA()->block(0,0,this->nBasis_,nO).transpose();
-  cout << "Print XAAO" << endl;
-  cout << XAAO << endl;
-  cout << "Print XBAO" << endl;
-  cout << XBAO << endl;
+//  cout << "Print the XB" <<endl;
+//  cout << XB << endl;
+  RealMatrix XAAO = this->singleSlater_->moA()->block(0,nO,this->nBasis_,nV)*XA*this->singleSlater_->moA()->block(0,0,this->nBasis_,nO).transpose();
+  RealMatrix XBAO = this->singleSlater_->moA()->block(0,nO,this->nBasis_,nV)*XB*this->singleSlater_->moA()->block(0,0,this->nBasis_,nO).transpose();
+//  cout << "Print XAAO" << endl;
+//  cout << XAAO << endl;
+//  cout << "Print XBAO" << endl;
+//  cout << XBAO << endl;
   // Back transform to verify
-  cout << "Print Overlap" <<endl;
-  RealMatrix Overlap = (*this->singleSlater_->aointegrals()->overlap_);
-  RealMatrix XAT = this->singleSlater_->moA()->block(0,nV,this->nBasis_,nV).transpose()*Overlap*XAAO*Overlap*this->singleSlater_->moA()->block(0,0,this->nBasis_,nO);
-  RealMatrix XBT = this->singleSlater_->moA()->block(0,nV,this->nBasis_,nV).transpose()*Overlap*XBAO*Overlap*this->singleSlater_->moA()->block(0,0,this->nBasis_,nO);
-  cout << "Print the back transformed XA"<< endl;
-  cout << XAT<< endl;
-  cout << "Print the back transformed XB"<< endl;
-  cout << XBT<< endl;
+//  cout << "Print Overlap" <<endl;
+//  RealMatrix Overlap = (*this->singleSlater_->aointegrals()->overlap_);
+//  RealMatrix XAT = this->singleSlater_->moA()->block(0,nV,this->nBasis_,nV).transpose()*Overlap*XAAO*Overlap*this->singleSlater_->moA()->block(0,0,this->nBasis_,nO);
+//  RealMatrix XBT = this->singleSlater_->moA()->block(0,nV,this->nBasis_,nV).transpose()*Overlap*XBAO*Overlap*this->singleSlater_->moA()->block(0,0,this->nBasis_,nO);
+//  cout << "Print the back transformed XA"<< endl;
+//  cout << XAT<< endl;
+//  cout << "Print the back transformed XB"<< endl;
+//  cout << XBT<< endl;
  
   // Store XAAO and XBAO in tensor form
   Tensor<double> XAAOTsr(this->nBasis_,this->nBasis_);
@@ -266,6 +253,12 @@ void SDResponse::formRM(){
     XAAOTsr(i,j) = XAAO(i,j);
     XBAOTsr(i,j) = XBAO(i,j);
   }
+  RealMatrix IXMO1(nV,nO);
+  RealMatrix IXMO2(nV,nO);
+  RealMatrix IXMO3(nV,nO);
+  RealMatrix IXMO4(nV,nO);
+  RealMatrix IXMOA(nV,nO);
+  RealMatrix IXMOB(nV,nO);
 
   // Build <mn||ls> and <mn|ls>
   Tensor<double> Dmnls(this->nBasis_,this->nBasis_,this->nBasis_,this->nBasis_);
@@ -274,8 +267,8 @@ void SDResponse::formRM(){
   for (auto n=0;n<this->nBasis_;n++)
   for (auto l=0;l<this->nBasis_;l++)
   for (auto s=0;s<this->nBasis_;s++){
-    Dmnls = (*this->aoERI_)(m,l,n,s)-(*this->aoERI_)(m,s,n,l);
-    dmnls = (*this->aoERI_)(m,n,l,s);
+    Dmnls(m,n,l,s) = (*this->aoERI_)(m,l,n,s)-(*this->aoERI_)(m,s,n,l);
+    dmnls(m,n,l,s) = (*this->aoERI_)(m,l,n,s);
   }
   // Contract A_AAAA( <mn||ls> ) with XA
   Tensor<double> IXAO1(this->nBasis_,this->nBasis_);
@@ -288,9 +281,9 @@ void SDResponse::formRM(){
   for (auto i=0;i<nO;i++)
   {
     IXMO1(a,i)=IXMOTsr1(a,i);
-    IXMO1(a,i)= IXMO1(a,i) + XA(a,i)*(EigV(a)-EigO(i));
+    IXMO1(a,i)= IXMO1(a,i) + XA(a,i)*(EigV(a,0)-EigO(i,0));
+   // cout << XA(a,i)*(EigV(a,0)-EigO(i,0)) << endl;
   }
-
   // Contract A_AABB( <mn|ls> ) with XB
   Tensor<double> IXAO2(this->nBasis_,this->nBasis_);
   Tensor<double> IIXMO2(nV,this->nBasis_);
@@ -330,13 +323,24 @@ void SDResponse::formRM(){
   for (auto i=0;i<nO;i++)
   {
     IXMO4(a,i) = IXMOTsr4(a,i);
-    IXMO4(a,i) = IXMO4(a,i) + XA(a,i)*(EigV(a)-EigO(i));
+    IXMO4(a,i) = IXMO4(a,i) + XB(a,i)*(EigV(a,0)-EigO(i,0));
+   // cout << XB(a,i)*(EigV(a,0)-EigO(i,0)) << endl;
   }
+  
 
   // Get the Final AX matrix
   IXMOA = IXMO1+IXMO2;
   IXMOB = IXMO3+IXMO4;
-  
+
+  cout << "Print IXMO" << endl;
+  cout << IXMO1 << endl;
+  cout << "---" << endl;  
+  cout << IXMO2 << endl;
+  cout << "---" << endl;  
+  cout << IXMO3 << endl;
+  cout << "---" << endl;  
+  cout << IXMO4 << endl;
+
   // Print AX(a,i)
   cout << "Print AX(a,i)" <<endl;
   cout << IXMOA <<endl;
