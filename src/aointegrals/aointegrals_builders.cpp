@@ -327,11 +327,11 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
           }
         }
 */
-        double * matPtr = buff;
+        int IOff = 0;
         for(auto nMat = 0; nMat < mat.size(); nMat++) {
-          ConstRealMap bufMat(matPtr,n1,n2); // Read only map
+          ConstRealMap bufMat(&buff[IOff],n1,n2); // Read only map
           mat[nMat].block(bf1,bf2,n1,n2) = bufMat;
-          matPtr += n1*n2;
+          IOff += n1*n2;
         }
       }
     }

@@ -137,7 +137,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 //cout << *A << endl;
 */
   Davidson<double> dav(&AX,A,NSek,N);
-  dav.run(fileIO->out);
+//dav.run(fileIO->out);
   
 
 #ifdef USE_LIBINT
