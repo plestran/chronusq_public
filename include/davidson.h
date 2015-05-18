@@ -32,14 +32,16 @@ namespace ChronusQ {
  *  A class to run Davidson Diagonalization written by David Williams-Young
  *
  */
-  template <typename TMat>
+  template <typename T>
   class Davidson {
+    typedef Eigen::Matrix<T,Dynamic,Dynamic,RowMajor> TMat;
+    typedef Eigen::Matrix<T,Dynamic,1> TVec;
     int     n_;          // Dimension of the problem (LDA)
     std::shared_ptr<TMat> mat_;        // The full matrix to be diagonalized (?)
     bool                  hermetian_;  // Whether or not the problem is hemetian
 
     std::shared_ptr<TMat> guess_;      // Guess vectors
-    std::shared_ptr<TMat> eigenvalues_;
+    std::shared_ptr<TVec> eigenvalues_;
     std::shared_ptr<TMat> eigenvector_;
 
 
@@ -52,6 +54,7 @@ namespace ChronusQ {
     void runMicro(ostream &output=cout);
     bool converged_;
     bool useLAPACK_;
+    TMat (*AX_)(const TMat &, const TMat &) ;      // Function to form AX
 
 
   public:
@@ -75,6 +78,7 @@ namespace ChronusQ {
     };
     Davidson() {
       this->mat_         = nullptr;
+      this->AX_          = NULL;
       this->guess_       = nullptr;
       this->eigenvalues_ = nullptr;
       this->eigenvector_ = nullptr;
@@ -94,8 +98,9 @@ namespace ChronusQ {
       this->maxIter_     = 128;
       this->MaxIter_     = 20;
       this->converged_   = false;
-      this->useLAPACK_   = true; // Use LAPACK by default
+      this->useLAPACK_   = false; // Use LAPACK by default
       this->mat_    = A;
+      this->AX_     = NULL;
       this->nSek_   = nSek;
       this->nGuess_ = 2*nSek;
       this->n_      = A->cols();
@@ -110,7 +115,36 @@ namespace ChronusQ {
       this->guess_  = 
         std::make_shared<TMat>(this->n_,this->nGuess_);
       this->eigenvalues_ = 
-        std::make_shared<TMat>(this->nSek_,1);
+        std::make_shared<TVec>(this->nSek_);
+      this->eigenvector_ = 
+        std::make_shared<TMat>(this->n_,this->nSek_);
+      this->hermetian_ = true; // Only supports Hermetian for time being
+
+      (*this->guess_) = TMat::Identity(this->n_,this->nGuess_); // Identity guess (primitive)
+    }
+    Davidson(TMat (*AX)(const TMat&, const TMat&), std::shared_ptr<TMat> A, int nSek, int N) {
+      this->maxSubSpace_ = 250;
+      this->maxIter_     = 128;
+      this->MaxIter_     = 20;
+      this->converged_   = false;
+      this->useLAPACK_   = false; // Use LAPACK by default
+      this->mat_    = A;
+      this->AX_     = AX;
+      this->nSek_   = nSek;
+      this->nGuess_ = 2*nSek;
+      this->n_      = N;
+/*
+      this->guess_  = 
+        std::unique_ptr<TMat>(new TMat(this->n_,this->nGuess_));
+      this->eigenvalues_ = 
+        std::unique_ptr<TMat>(new TMat(this->nSek_,1));
+      this->eigenvector_ = 
+        std::unique_ptr<TMat>(new TMat(this->n_,this->nSek_));
+*/
+      this->guess_  = 
+        std::make_shared<TMat>(this->n_,this->nGuess_);
+      this->eigenvalues_ = 
+        std::make_shared<TVec>(this->nSek_);
       this->eigenvector_ = 
         std::make_shared<TMat>(this->n_,this->nSek_);
       this->hermetian_ = true; // Only supports Hermetian for time being
@@ -140,6 +174,10 @@ namespace ChronusQ {
       output << endl;
       output << std::setw(50) << std::left << "  Using LAPACK to diagonalize subspace?:";
       if(this->useLAPACK_) output << "Yes";
+      else output << "No";
+      output << endl;
+      output << std::setw(50) << std::left << "  Full Matrix Passed to for AX:";
+      if(this->AX_==NULL) output << "Yes";
       else output << "No";
       output << endl;
  

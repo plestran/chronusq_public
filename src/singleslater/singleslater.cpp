@@ -302,6 +302,12 @@ void SingleSlater::formExchange(){
 #ifdef USE_LIBINT
 // Form perturbation tensor (G)
 void SingleSlater::formPT() {
+  if(!this->haveDensity) this->formDensity();
+  this->aointegrals_->twoEContract(true,*this->densityA_,*this->PTA_);
+  if(this->controls_->printLevel >= 3) prettyPrint(this->fileio_->out,(*this->PTA_),"Alpha Perturbation Tensor");
+}
+/*
+void SingleSlater::formPT() {
   if(!this->aointegrals_->haveSchwartz) this->aointegrals_->computeSchwartz();
   if(!this->haveDensity) this->formDensity();
   this->PTA_->setZero();
@@ -374,17 +380,6 @@ void SingleSlater::formPT() {
                     int bf4 = bf4_s + l;
                     double v = buff[ijkl]*s1234_deg;
 
-/*                  // This section works for serial build
-                    // Coulomb
-                    (*this->PTA_)(bf1,bf2) += (*this->densityA_)(bf3,bf4)*v;
-                    (*this->PTA_)(bf3,bf4) += (*this->densityA_)(bf1,bf2)*v;
- 
-                    // Exchange
-                    (*this->PTA_)(bf1,bf3) -= 0.25*(*this->densityA_)(bf2,bf4)*v;
-                    (*this->PTA_)(bf2,bf4) -= 0.25*(*this->densityA_)(bf1,bf3)*v;
-                    (*this->PTA_)(bf1,bf4) -= 0.25*(*this->densityA_)(bf2,bf3)*v;
-                    (*this->PTA_)(bf2,bf3) -= 0.25*(*this->densityA_)(bf1,bf4)*v;
-*/
                     // Coulomb
                     g(bf1,bf2) += (*this->densityA_)(bf3,bf4)*v;
                     g(bf3,bf4) += (*this->densityA_)(bf1,bf2)*v;
@@ -423,6 +418,7 @@ void SingleSlater::formPT() {
   if(this->controls_->printLevel >= 3) prettyPrint(this->fileio_->out,(*this->PTA_),"Alpha Perturbation Tensor");
   
 }
+*/
 #endif
 //dbwye
 //--------------------------------//
