@@ -85,7 +85,11 @@ void SingleSlater::iniSingleSlater(std::shared_ptr<Molecule> molecule, std::shar
     catch (...) { CErr(std::current_exception(),"Beta MO Coefficients Allocation"); }
   };
 
-
+  cout << " HERE" << endl;
+  this->dipole_ = std::unique_ptr<RealMatrix>(new RealMatrix(3,1));
+  cout << " HERE" << endl;
+  this->quadpole_ = std::unique_ptr<RealMatrix>(new RealMatrix(3,3));
+  cout << " HERE" << endl;
   this->molecule_ = molecule;
   this->basisset_ = basisset;
   this->fileio_   = fileio;
@@ -508,6 +512,27 @@ void SingleSlater::readGuessGauFChk(std::string &filename) {
   this->haveMO = true;
 };
 
+void SingleSlater::computeMultipole(){
+  cout << " HERE" << endl;
+  if(!this->haveDensity) this->formDensity();
+  cout << " HERE" << endl;
+  if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
+  cout << " HERE" << endl;
+  if(!this->controls_->doDipole && !this->controls_->doQuadpole) return;
+
+  int NB = this->nBasis_;
+  int NBSq = NB*NB;
+  int iBuf = 0;
+  cout << " HERE" << endl;
+  for(auto ixyz = 0; ixyz < 3; ixyz++){
+    ConstRealMap mu(&this->aointegrals_->elecDipole_->storage()[iBuf],NB,NB);
+    (*dipole_)(ixyz,0) = this->densityA_->frobInner(mu);
+    iBuf += NBSq;
+    cout << mu << endl << endl;
+  }
+  cout << *dipole_ << endl;
+
+}
 /*************************/
 /* MPI Related Routines  */
 /*************************/

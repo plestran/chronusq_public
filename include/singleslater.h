@@ -60,6 +60,8 @@ class SingleSlater {
   std::unique_ptr<RealMatrix>  moB_;
   std::unique_ptr<RealMatrix>  PTA_;
   std::unique_ptr<RealMatrix>  PTB_;
+  std::unique_ptr<RealMatrix>  dipole_;
+  std::unique_ptr<RealMatrix>  quadpole_;
   std::shared_ptr<BasisSet>    basisset_;
   std::shared_ptr<Molecule>    molecule_;
   std::shared_ptr<FileIO>      fileio_;
@@ -123,8 +125,10 @@ public:
   void readGuessIO();       	// read the initial guess of MO's from the input stream
   void readGuessGauFChk(std::string &);	// read the initial guess of MO's from the Gaussian formatted checkpoint file
   void computeEnergy();         // compute the total electronic energy
+  void computeMultipole();      // compute multipole properties
   void SCF();  
   void printEnergy(); 
+  void printMultipole();
   void printInfo();
   void printDensityinf();
   /*************************/
