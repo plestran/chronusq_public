@@ -525,7 +525,7 @@ void SingleSlater::computeMultipole(){
   for(int iA = 0; iA < this->molecule_->nAtoms(); iA++)
     *this->dipole_ -= elements[this->molecule_->index(iA)].atomicNumber *
           this->molecule_->cart()->col(iA);
-  cout << *this->quadpole_ << endl;
+  *this->dipole_ = -(*this->dipole_);
   if(this->controls_->doQuadpole){
     iBuf = 0;
     for(auto jxyz = 0; jxyz < 3; jxyz++)
@@ -541,8 +541,22 @@ void SingleSlater::computeMultipole(){
 //          this->molecule_->cart()->col(iA) * 
 //          this->molecule_->cart()->col(iA).transpose();
   }
-  cout << *this->quadpole_ << endl;
+  this->printMultipole();
 
+}
+void SingleSlater::printMultipole(){
+  this->fileio_->out << bannerTop << endl;
+  this->fileio_->out << "Dipole:" << endl;
+  this->fileio_->out << std::left << std::setw(5) <<"X=" 
+                     << std::fixed << std::right << std::setw(20) 
+                     << (*this->dipole_)(0,0) << endl;
+  this->fileio_->out << std::left << std::setw(5) <<"Y=" 
+                     << std::fixed << std::right << std::setw(20) 
+                     << (*this->dipole_)(1,0) << endl;
+  this->fileio_->out << std::left << std::setw(5) <<"Z=" 
+                     << std::fixed << std::right << std::setw(20) 
+                     << (*this->dipole_)(2,0) << endl;
+  this->fileio_->out << bannerEnd << endl;
 }
 /*************************/
 /* MPI Related Routines  */
