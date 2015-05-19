@@ -50,12 +50,16 @@ public:
   bool  	directTwoE;     // if direct two-electron will performed
   bool          buildn4eri;     // Build N^4 AO ERI tensor
   bool          doDF;           // Density fitting (RI) flag
+  bool          doDipole;       // Use Libint dipole integrals?
+  bool          doQuadpole;     // Use Libint quadrapole integrals?
+//bool          doOctapole;     // Usr Libint octapole integrals?
   double 	thresholdS;
   double 	thresholdAB;
   double	thresholdSchawrtz;
   int    	guess;         	// how to get the initial guess
   int           nthreads;       // Number of OpenMP threads
   std::string   gauFChkName;	// Gaussian formatted checkpoint filename
+  std::string   gauMalElName;   // Gaussian raw matrix element file
 
   Controls(){;};
   ~Controls(){;};

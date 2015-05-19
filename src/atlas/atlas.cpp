@@ -29,9 +29,6 @@ using namespace ChronusQ;
 
 RealMatrix AX(const RealMatrix &A, const RealMatrix &B) {return A*B;};
 
-
-
-
 int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   int i,j,k,l;
   time_t currentTime;
@@ -77,6 +74,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   hartreeFock->computeEnergy();
   if(controls->optWaveFunction) hartreeFock->SCF();
   else fileIO->out << "**Skipping SCF Optimization**" << endl; 
+  hartreeFock->computeMultipole();
 
 /*
   MOIntegrals *moIntegrals = new MOIntegrals();
@@ -139,7 +137,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 //cout << *A << endl;
 */
   Davidson<double> dav(&AX,A,NSek,N);
-  dav.run(fileIO->out);
+//dav.run(fileIO->out);
   
 
 #ifdef USE_LIBINT
