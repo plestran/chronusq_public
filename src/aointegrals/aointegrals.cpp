@@ -107,9 +107,9 @@ void AOIntegrals::iniAOIntegrals(std::shared_ptr<Molecule> molecule, std::shared
     this->overlap_      = std::make_shared<RealMatrix>(this->nBasis_,this->nBasis_); // Overlap
     this->kinetic_      = std::make_shared<RealMatrix>(this->nBasis_,this->nBasis_); // Kinetic
     this->potential_    = std::make_shared<RealMatrix>(this->nBasis_,this->nBasis_); // Potential
-//  if(this->controls_->doDipole || this->controls_->doQuadpole){
+    if(this->controls_->doDipole || this->controls_->doQuadpole){
       this->elecDipole_   = std::make_shared<RealTensor3d>(3,this->nBasis_,this->nBasis_); // Electic Dipole
-//  }
+    }
     if(this->controls_->doQuadpole) {
       this->elecQuadpole_ = std::make_shared<RealTensor3d>(6,this->nBasis_,this->nBasis_); // Electic Quadrupole
     }
@@ -357,8 +357,14 @@ void AOIntegrals::iniMolecularConstants(){
 void AOIntegrals::printTimings() {
     this->fileio_->out << endl << "Timing Statistics: "<<endl << bannerTop << endl;
     this->fileio_->out << endl << "One Electron Integral Timings" << endl << bannerMid << endl;
-    this->fileio_->out << std::left << std::setw(60) << "Wall time for Overlap evaluation:" 
-                       << std::left << std::setw(15) << this->SED.count() << " sec" << endl;
+    if(this->controls_->doQuadpole) {
+      this->fileio_->out << std::left << std::setw(60) << "Wall time for Overlap + Dipole + Quadrupole evaluation:"; 
+    } else if(this->controls_->doDipole) {
+      this->fileio_->out << std::left << std::setw(60) << "Wall time for Overlap + Dipole evaluation:"; 
+    } else {
+      this->fileio_->out << std::left << std::setw(60) << "Wall time for Overlap evaluation:"; 
+    }
+    this->fileio_->out << std::left << std::setw(15) << this->SED.count() << " sec" << endl;
     this->fileio_->out << std::left << std::setw(60) << "Wall time for Kinetic evaluation:" 
                        << std::left << std::setw(15) << this->TED.count() << " sec" << endl;
     this->fileio_->out << std::left << std::setw(60) << "Wall time for Nuclear Attraction Potential evaluation:" 

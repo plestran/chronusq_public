@@ -47,8 +47,8 @@ void Controls::iniControls(){
   this->directTwoE =        true;
   this->buildn4eri =        false;
   this->doDF =              false;
-  this->doDipole =          false;
-  this->doQuadpole =        false;
+  this->doDipole =          true;
+  this->doQuadpole =        true;
 #ifdef USE_LIBINT
   // Bootstrap Libint env
   libint2::init(); 

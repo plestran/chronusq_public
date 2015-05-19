@@ -1028,14 +1028,14 @@ void AOIntegrals::twoEContract(bool doRHFFock, const RealMatrix &X, RealMatrix &
                     // Exchange
                     if(doRHFFock) {
                       g(bf1,bf3) -= 0.25*X(bf2,bf4)*v;
-                      g(bf2,bf4) -= 0.25*X(bf1,bf3)*v;
+                      g(bf4,bf2) -= 0.25*X(bf1,bf3)*v;
                       g(bf1,bf4) -= 0.25*X(bf2,bf3)*v;
-                      g(bf2,bf3) -= 0.25*X(bf1,bf4)*v;
+                      g(bf3,bf2) -= 0.25*X(bf1,bf4)*v;
                     } else {
                       g(bf1,bf3) -= 0.5*X(bf2,bf4)*v;
-                      g(bf2,bf4) -= 0.5*X(bf1,bf3)*v;
+                      g(bf4,bf2) -= 0.5*X(bf1,bf3)*v;
                       g(bf1,bf4) -= 0.5*X(bf2,bf3)*v;
-                      g(bf2,bf3) -= 0.5*X(bf1,bf4)*v;
+                      g(bf3,bf2) -= 0.5*X(bf1,bf4)*v;
                     }
                   }
                 }
@@ -1057,8 +1057,10 @@ void AOIntegrals::twoEContract(bool doRHFFock, const RealMatrix &X, RealMatrix &
   lambda(0);
 #endif
   for(int i = 0; i < this->controls_->nthreads; i++) AX += G[i];
-  RealMatrix Tmp = 0.5*(AX + AX.transpose());
-  AX = 0.25*Tmp; // Can't consolidate where this comes from?
+//RealMatrix Tmp = 0.5*(AX + AX.transpose()); // RAFF MAKES NOT SENSE!
+//AX = 0.25*Tmp; // Can't consolidate where this comes from?
+  cout << "HEHR" << endl;
+  if(doRHFFock) AX = 0.25*AX; // Can't consolidate where this comes from?
   finish = std::chrono::high_resolution_clock::now();
   if(doRHFFock) this->PTD = finish - start;
    
