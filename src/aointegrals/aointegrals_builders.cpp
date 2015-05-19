@@ -336,8 +336,7 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
       }
     }
   } // end openmp parallel
-
-  for(auto nMat = 0; nMat < mat.size(); nMat++)
+  for(auto nMat = 0; nMat < mat.size(); nMat++) 
     mat[nMat] = mat[nMat].selfadjointView<Lower>();
 
 //if(this->controls_->printLevel>=2)  mat->printAll(5,fileio_->out);

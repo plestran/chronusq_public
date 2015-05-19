@@ -85,11 +85,8 @@ void SingleSlater::iniSingleSlater(std::shared_ptr<Molecule> molecule, std::shar
     catch (...) { CErr(std::current_exception(),"Beta MO Coefficients Allocation"); }
   };
 
-  cout << " HERE" << endl;
   this->dipole_ = std::unique_ptr<RealMatrix>(new RealMatrix(3,1));
-  cout << " HERE" << endl;
   this->quadpole_ = std::unique_ptr<RealMatrix>(new RealMatrix(3,3));
-  cout << " HERE" << endl;
   this->molecule_ = molecule;
   this->basisset_ = basisset;
   this->fileio_   = fileio;
@@ -513,24 +510,38 @@ void SingleSlater::readGuessGauFChk(std::string &filename) {
 };
 
 void SingleSlater::computeMultipole(){
-  cout << " HERE" << endl;
   if(!this->haveDensity) this->formDensity();
-  cout << " HERE" << endl;
   if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
-  cout << " HERE" << endl;
   if(!this->controls_->doDipole && !this->controls_->doQuadpole) return;
 
   int NB = this->nBasis_;
   int NBSq = NB*NB;
   int iBuf = 0;
-  cout << " HERE" << endl;
   for(auto ixyz = 0; ixyz < 3; ixyz++){
     ConstRealMap mu(&this->aointegrals_->elecDipole_->storage()[iBuf],NB,NB);
     (*dipole_)(ixyz,0) = this->densityA_->frobInner(mu);
     iBuf += NBSq;
-    cout << mu << endl << endl;
   }
-  cout << *dipole_ << endl;
+  for(int iA = 0; iA < this->molecule_->nAtoms(); iA++)
+    *this->dipole_ -= elements[this->molecule_->index(iA)].atomicNumber *
+          this->molecule_->cart()->col(iA);
+  cout << *this->quadpole_ << endl;
+  if(this->controls_->doQuadpole){
+    iBuf = 0;
+    for(auto jxyz = 0; jxyz < 3; jxyz++)
+    for(auto ixyz = jxyz; ixyz < 3; ixyz++){
+      ConstRealMap 
+        mu(&this->aointegrals_->elecQuadpole_->storage()[iBuf],NB,NB);
+      (*quadpole_)(ixyz,jxyz) = this->densityA_->frobInner(mu);
+      iBuf += NBSq;
+    }
+    *this->quadpole_ = this->quadpole_->selfadjointView<Lower>();
+//  for(int iA = 0; iA < this->molecule_->nAtoms(); iA++)
+//    *this->quadpole_ -= elements[this->molecule_->index(iA)].atomicNumber *
+//          this->molecule_->cart()->col(iA) * 
+//          this->molecule_->cart()->col(iA).transpose();
+  }
+  cout << *this->quadpole_ << endl;
 
 }
 /*************************/
