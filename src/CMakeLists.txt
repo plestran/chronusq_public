@@ -1,4 +1,5 @@
 add_subdirectory(aointegrals)
+add_subdirectory(gauinterface)
 add_subdirectory(atlas)
 add_subdirectory(basisset)
 add_subdirectory(cerr)
