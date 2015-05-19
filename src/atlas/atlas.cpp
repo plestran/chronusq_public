@@ -37,6 +37,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   auto controls     	= std::make_shared<Controls>();
   auto aointegrals	= std::make_shared<AOIntegrals>();
   auto hartreeFock	= std::make_shared<SingleSlater>();
+  RealMatrix XMO;
   std::shared_ptr<FileIO> fileIO;
 
   std::vector<std::string> argv_string;
@@ -86,6 +87,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 
   sdResponse->computeExcitedStates();
   sdResponse->formRM();
+  sdResponse->formRM2(XMO);
 
   time(&currentTime);
   fileIO->out<<"\nJob finished: "<<ctime(&currentTime)<<endl;

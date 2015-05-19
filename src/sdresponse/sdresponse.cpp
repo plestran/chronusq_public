@@ -209,167 +209,304 @@ void SDResponse::formRM(){
   CIS.compute(A);
   CIS.eigenvalues();
   CIS.eigenvectors();
-  
+  cout << "Print Eigenvectors " << endl;
+  cout << CIS.eigenvectors() << endl;
   // Print the CIS Excitation Energies
   for (auto i=0;i<2*nOV;i++){
     cout << "The " << (i+1) << " CIS Exicitation Energy is: "
          << (CIS.eigenvalues())(i) << endl;
   }
-  // Print AX(1)
-  RealMatrix X =  CIS.eigenvectors().col(1);
-  cout << "Print X "<< endl;
-  cout << X <<endl;
-  cout << "Print AX (A,x already known)" <<endl;
-  cout << A*X << endl;
-  // Get XA_AO and XB_AO
-  RealMap XA(X.data(),nV,nO);
-//  cout << "Print the XA" <<endl;
-//  cout << XA << endl;
-  RealMap XB(X.data()+nOV,nV,nO);
-//  cout << "Print the XB" <<endl;
-//  cout << XB << endl;
-  RealMatrix XAAO = this->singleSlater_->moA()->block(0,nO,this->nBasis_,nV)*XA*this->singleSlater_->moA()->block(0,0,this->nBasis_,nO).transpose();
-  RealMatrix XBAO = this->singleSlater_->moA()->block(0,nO,this->nBasis_,nV)*XB*this->singleSlater_->moA()->block(0,0,this->nBasis_,nO).transpose();
-//  cout << "Print XAAO" << endl;
-//  cout << XAAO << endl;
-//  cout << "Print XBAO" << endl;
-//  cout << XBAO << endl;
-  // Back transform to verify
-//  cout << "Print Overlap" <<endl;
-//  RealMatrix Overlap = (*this->singleSlater_->aointegrals()->overlap_);
-//  RealMatrix XAT = this->singleSlater_->moA()->block(0,nV,this->nBasis_,nV).transpose()*Overlap*XAAO*Overlap*this->singleSlater_->moA()->block(0,0,this->nBasis_,nO);
-//  RealMatrix XBT = this->singleSlater_->moA()->block(0,nV,this->nBasis_,nV).transpose()*Overlap*XBAO*Overlap*this->singleSlater_->moA()->block(0,0,this->nBasis_,nO);
-//  cout << "Print the back transformed XA"<< endl;
-//  cout << XAT<< endl;
-//  cout << "Print the back transformed XB"<< endl;
-//  cout << XBT<< endl;
- 
-  // Store XAAO and XBAO in tensor form
+  RealMatrix XMO(nOV,1);
+  XMO = CIS.eigenvectors().block(0,0,2*nOV,3);
+  formRM2(XMO);
+
+//  // Print AX(1)
+//  RealMatrix X =  CIS.eigenvectors().col(1);
+//  cout << "Print X "<< endl;
+//  cout << X <<endl;
+//  cout << "Print AX (A,x already known)" <<endl;
+//  cout << A*X << endl;
+//  // Get XA_AO and XB_AO
+//  RealMap XA(X.data(),nV,nO);
+//  RealMap XB(X.data()+nOV,nV,nO);
+//  RealMatrix XAAO = this->singleSlater_->moA()->block(0,nO,this->nBasis_,nV)*XA*this->singleSlater_->moA()->block(0,0,this->nBasis_,nO).transpose();
+//  RealMatrix XBAO = this->singleSlater_->moA()->block(0,nO,this->nBasis_,nV)*XB*this->singleSlater_->moA()->block(0,0,this->nBasis_,nO).transpose();
+//
+//  // Store XAAO and XBAO in tensor form
+//  Tensor<double> XAAOTsr(this->nBasis_,this->nBasis_);
+//  Tensor<double> XBAOTsr(this->nBasis_,this->nBasis_);
+//  for (auto i=0;i<this->nBasis_;i++)
+//  for (auto j=0;j<this->nBasis_;j++)
+//  {
+//    XAAOTsr(i,j) = XAAO(i,j);
+//    XBAOTsr(i,j) = XBAO(i,j);
+//  }
+//  RealMatrix IXMO1(nV,nO);
+//  RealMatrix IXMO2(nV,nO);
+//  RealMatrix IXMO3(nV,nO);
+//  RealMatrix IXMO4(nV,nO);
+//  RealMatrix IXMOA(nV,nO);
+//  RealMatrix IXMOB(nV,nO);
+//
+//  // Build <mn||ls> and <mn|ls>
+//  Tensor<double> Dmnls(this->nBasis_,this->nBasis_,this->nBasis_,this->nBasis_);
+//  Tensor<double> dmnls(this->nBasis_,this->nBasis_,this->nBasis_,this->nBasis_);
+//  for (auto m=0;m<this->nBasis_;m++)
+//  for (auto n=0;n<this->nBasis_;n++)
+//  for (auto l=0;l<this->nBasis_;l++)
+//  for (auto s=0;s<this->nBasis_;s++){
+//    Dmnls(m,n,l,s) = (*this->aoERI_)(m,l,n,s)-(*this->aoERI_)(m,s,n,l);
+//    dmnls(m,n,l,s) = (*this->aoERI_)(m,l,n,s);
+//  }
+//
+//  //Test twoEContract
+//  RealMatrix IXAO1t(nV,nO);
+//  RealMatrix TestA(this->nBasis_,this->nBasis_);
+//  RealMatrix TestM(nV,nO);
+//  RealMatrix IXMO1t(nV,nO);
+//  this->singleSlater_->aointegrals()->twoEContract(false,XAAO,IXAO1t);
+//  IXMO1t = this->singleSlater_->moA()->block(0,nO,this->nBasis_,nV).transpose()*IXAO1t*this->singleSlater_->moA()->block(0,0,this->nBasis_,nO);
+//  cout << "Test twoEContract" << endl;
+//  cout << IXAO1t << endl;
+//  cout << IXMO1t << endl;
+//  // Contract A_AAAA( <mn||ls> ) with XA
+//  Tensor<double> IXAO1(this->nBasis_,this->nBasis_);
+//  Tensor<double> IIXMO1(nV,this->nBasis_);
+//  Tensor<double> IXMOTsr1(nV,nO);
+//  contract(1.0,XAAOTsr,{sig,nu},Dmnls,{mu,nu,lam,sig},0.0,IXAO1,{mu,lam});
+//  for (auto i=0;i<this->nBasis_;i++)
+//  for (auto j=0;j<this->nBasis_;j++)
+//  {
+//    TestA(i,j) = IXAO1(i,j);
+//  }
+//  contract(1.0,LocMoAV,{mu,a},IXAO1,{mu,lam},0.0,IIXMO1,{a,lam});
+//  contract(1.0,LocMoAO,{lam,i},IIXMO1,{a,lam},0.0,IXMOTsr1,{a,i});
+//  for (auto a=0;a<nV;a++)
+//  for (auto i=0;i<nO;i++)
+//  {
+//    IXMO1(a,i)=IXMOTsr1(a,i);
+//    TestM(a,i)=IXMOTsr1(a,i);
+//    IXMO1(a,i)= IXMO1(a,i) + XA(a,i)*(EigV(a,0)-EigO(i,0));
+//   // cout << XA(a,i)*(EigV(a,0)-EigO(i,0)) << endl;
+//  }
+//  cout << "Print tensor contraction " << endl;
+//  cout << TestA << endl;
+//  cout << TestM << endl;
+//  // Contract A_AABB( <mn|ls> ) with XB
+//  Tensor<double> IXAO2(this->nBasis_,this->nBasis_);
+//  Tensor<double> IIXMO2(nV,this->nBasis_);
+//  Tensor<double> IXMOTsr2(nV,nO);
+//  contract(1.0,XBAOTsr,{sig,nu},dmnls,{mu,nu,lam,sig},0.0,IXAO2,{mu,lam});
+//  contract(1.0,LocMoAV,{mu,a},IXAO2,{mu,lam},0.0,IIXMO2,{a,lam});
+//  contract(1.0,LocMoAO,{lam,i},IIXMO2,{a,lam},0.0,IXMOTsr2,{a,i});
+//  for (auto a=0;a<nV;a++)
+//  for (auto i=0;i<nO;i++)
+//  {
+//    IXMO2(a,i)=IXMOTsr2(a,i);
+//  }
+//
+//
+//  // Contract A_BBAA( <mn|ls> ) with XA
+//  Tensor<double> IXAO3(this->nBasis_,this->nBasis_);
+//  Tensor<double> IIXMO3(nV,this->nBasis_);
+//  Tensor<double> IXMOTsr3(nV,nO);
+//  contract(1.0,XAAOTsr,{sig,nu},dmnls,{mu,nu,lam,sig},0.0,IXAO3,{mu,lam});
+//  contract(1.0,LocMoAV,{mu,a},IXAO3,{mu,lam},0.0,IIXMO3,{a,lam});
+//  contract(1.0,LocMoAO,{lam,i},IIXMO3,{a,lam},0.0,IXMOTsr3,{a,i});
+//  for (auto a=0;a<nV;a++)
+//  for (auto i=0;i<nO;i++)
+//  {
+//    IXMO3(a,i)=IXMOTsr3(a,i);
+//  }
+//
+// 
+//  // Contract A_BBBB( <mn||ls> ) with XB
+//  Tensor<double> IXAO4(this->nBasis_,this->nBasis_);
+//  Tensor<double> IIXMO4(nV,this->nBasis_);
+//  Tensor<double> IXMOTsr4(nV,nO);
+//  contract(1.0,XBAOTsr,{sig,nu},Dmnls,{mu,nu,lam,sig},0.0,IXAO4,{mu,lam});
+//  contract(1.0,LocMoAV,{mu,a},IXAO4,{mu,lam},0.0,IIXMO4,{a,lam});
+//  contract(1.0,LocMoAO,{lam,i},IIXMO4,{a,lam},0.0,IXMOTsr4,{a,i});
+//  for (auto a=0;a<nV;a++)
+//  for (auto i=0;i<nO;i++)
+//  {
+//    IXMO4(a,i) = IXMOTsr4(a,i);
+//    IXMO4(a,i) = IXMO4(a,i) + XB(a,i)*(EigV(a,0)-EigO(i,0));
+//   // cout << XB(a,i)*(EigV(a,0)-EigO(i,0)) << endl;
+//  }
+//  
+//
+//  // Get the Final AX matrix
+//  IXMOA = IXMO1+IXMO2;
+//  IXMOB = IXMO3+IXMO4;
+//
+//  // Print AX(a,i)
+//  cout << "Print AX (direct build)" <<endl;
+//  cout << IXMOA <<endl;
+//  cout << IXMOB << endl;
+
+
+  // LR TDHF routine
+//  Eigen::EigenSolver<RealMatrix> TD;
+//  TD.compute(ABBA);
+//  TD.eigenvalues();
+//  //TD.eigenvectors();
+//
+//  // Print the LR-TDHF Excitation Energies
+//  for (auto i=0;i<4*nOV;i++){
+//    cout << "The " << (i+1) << " LR-TDHF Exicitation Energy is: "
+//         << (TD.eigenvalues())(i) << endl;
+//  }
+
+}
+
+RealMatrix SDResponse::formRM2(RealMatrix &XMO){
+  int nOA = this->singleSlater_->nOccA();
+  int nO = nOA;
+  int nVA = this->singleSlater_->nVirA();
+  int nV  = nVA;
+  cout << "Number of Occupied: " << nO << ", Number of Virtual " << nV << " Number of Basis: "<<this->nBasis_<< ".\n";
+  Tensor<double> LocMoAO(this->nBasis_,nO);
+  Tensor<double> LocMoAV(this->nBasis_,nV);
+  for(auto ii = 0; ii < this->nBasis_; ii++) {
+    for(auto jj = 0; jj < nO; jj++) {
+      LocMoAO(ii,jj) = (*this->singleSlater_->moA())(ii,jj);
+    }
+    for(auto kk = nO; kk< this->nBasis_; kk++) {
+      LocMoAV(ii,kk-nO) = (*this->singleSlater_->moA())(ii,kk);
+    }
+  }
+  int nOV = nO*nV;
+  RealMatrix EigO(nO,1);
+  RealMatrix EigV(nV,1);
+  for (auto i=0;i<nO;i++){
+    EigO(i,0) = (*this->singleSlater_->epsA())(i,0);
+    cout << "The " << (i+1) << " eigenvalue in Occupied is: " << EigO(i,0) << endl;
+  }
+  for (auto j=0;j<nV;j++){
+    EigV(j,0) = (*this->singleSlater_->epsA())((j+nO),0);
+    cout << "The " << (j+1) << " eigenvalue in Virtual is: " << EigV(j,0) << endl;
+  }
+  enum{a,j,i,b,mu,nu,lam,sig};
+
+  int nCol = XMO.cols();
+  cout << "Print the number of Columns: " << nCol << endl;
+  RealMatrix AX(2*nOV,nCol);
   Tensor<double> XAAOTsr(this->nBasis_,this->nBasis_);
   Tensor<double> XBAOTsr(this->nBasis_,this->nBasis_);
-  for (auto i=0;i<this->nBasis_;i++)
-  for (auto j=0;j<this->nBasis_;j++)
-  {
-    XAAOTsr(i,j) = XAAO(i,j);
-    XBAOTsr(i,j) = XBAO(i,j);
-  }
+  RealMatrix X(nOV,1);
+  RealMatrix XAAO(this->nBasis_,this->nBasis_);
+  RealMatrix XBAO(this->nBasis_,this->nBasis_);
+  Tensor<double> IXAO1(this->nBasis_,this->nBasis_);
+  Tensor<double> IIXMO1(nV,this->nBasis_);
+  Tensor<double> IXMOTsr1(nV,nO);
+  Tensor<double> IXAO2(this->nBasis_,this->nBasis_);
+  Tensor<double> IIXMO2(nV,this->nBasis_);
+  Tensor<double> IXMOTsr2(nV,nO);
+  Tensor<double> IXAO3(this->nBasis_,this->nBasis_);
+  Tensor<double> IIXMO3(nV,this->nBasis_);
+  Tensor<double> IXMOTsr3(nV,nO);
+  Tensor<double> IXAO4(this->nBasis_,this->nBasis_);
+  Tensor<double> IIXMO4(nV,this->nBasis_);
+  Tensor<double> IXMOTsr4(nV,nO);
   RealMatrix IXMO1(nV,nO);
   RealMatrix IXMO2(nV,nO);
   RealMatrix IXMO3(nV,nO);
   RealMatrix IXMO4(nV,nO);
   RealMatrix IXMOA(nV,nO);
   RealMatrix IXMOB(nV,nO);
-
   // Build <mn||ls> and <mn|ls>
   Tensor<double> Dmnls(this->nBasis_,this->nBasis_,this->nBasis_,this->nBasis_);
   Tensor<double> dmnls(this->nBasis_,this->nBasis_,this->nBasis_,this->nBasis_);
   for (auto m=0;m<this->nBasis_;m++)
   for (auto n=0;n<this->nBasis_;n++)
   for (auto l=0;l<this->nBasis_;l++)
-  for (auto s=0;s<this->nBasis_;s++){
+  for (auto s=0;s<this->nBasis_;s++)
+  {
     Dmnls(m,n,l,s) = (*this->aoERI_)(m,l,n,s)-(*this->aoERI_)(m,s,n,l);
     dmnls(m,n,l,s) = (*this->aoERI_)(m,l,n,s);
   }
-  // Contract A_AAAA( <mn||ls> ) with XA
-  Tensor<double> IXAO1(this->nBasis_,this->nBasis_);
-  Tensor<double> IIXMO1(nV,this->nBasis_);
-  Tensor<double> IXMOTsr1(nV,nO);
-  contract(1.0,XAAOTsr,{sig,nu},Dmnls,{mu,nu,lam,sig},0.0,IXAO1,{mu,lam});
-  contract(1.0,LocMoAV,{mu,a},IXAO1,{mu,lam},0.0,IIXMO1,{a,lam});
-  contract(1.0,LocMoAO,{lam,i},IIXMO1,{a,lam},0.0,IXMOTsr1,{a,i});
-  for (auto a=0;a<nV;a++)
-  for (auto i=0;i<nO;i++)
-  {
-    IXMO1(a,i)=IXMOTsr1(a,i);
-    IXMO1(a,i)= IXMO1(a,i) + XA(a,i)*(EigV(a,0)-EigO(i,0));
-   // cout << XA(a,i)*(EigV(a,0)-EigO(i,0)) << endl;
-  }
-  // Contract A_AABB( <mn|ls> ) with XB
-  Tensor<double> IXAO2(this->nBasis_,this->nBasis_);
-  Tensor<double> IIXMO2(nV,this->nBasis_);
-  Tensor<double> IXMOTsr2(nV,nO);
-  contract(1.0,XBAOTsr,{sig,nu},dmnls,{mu,nu,lam,sig},0.0,IXAO2,{mu,lam});
-  contract(1.0,LocMoAV,{mu,a},IXAO2,{mu,lam},0.0,IIXMO2,{a,lam});
-  contract(1.0,LocMoAO,{lam,i},IIXMO2,{a,lam},0.0,IXMOTsr2,{a,i});
-  for (auto a=0;a<nV;a++)
-  for (auto i=0;i<nO;i++)
-  {
-    IXMO2(a,i)=IXMOTsr2(a,i);
-  }
+  cout << "Print X" << endl;
+  cout << XMO << endl;
 
-
-  // Contract A_BBAA( <mn|ls> ) with XA
-  Tensor<double> IXAO3(this->nBasis_,this->nBasis_);
-  Tensor<double> IIXMO3(nV,this->nBasis_);
-  Tensor<double> IXMOTsr3(nV,nO);
-  contract(1.0,XAAOTsr,{sig,nu},dmnls,{mu,nu,lam,sig},0.0,IXAO3,{mu,lam});
-  contract(1.0,LocMoAV,{mu,a},IXAO3,{mu,lam},0.0,IIXMO3,{a,lam});
-  contract(1.0,LocMoAO,{lam,i},IIXMO3,{a,lam},0.0,IXMOTsr3,{a,i});
-  for (auto a=0;a<nV;a++)
-  for (auto i=0;i<nO;i++)
-  {
-    IXMO3(a,i)=IXMOTsr3(a,i);
-  }
-
- 
-  // Contract A_BBBB( <mn||ls> ) with XB
-  Tensor<double> IXAO4(this->nBasis_,this->nBasis_);
-  Tensor<double> IIXMO4(nV,this->nBasis_);
-  Tensor<double> IXMOTsr4(nV,nO);
-  contract(1.0,XBAOTsr,{sig,nu},Dmnls,{mu,nu,lam,sig},0.0,IXAO4,{mu,lam});
-  contract(1.0,LocMoAV,{mu,a},IXAO4,{mu,lam},0.0,IIXMO4,{a,lam});
-  contract(1.0,LocMoAO,{lam,i},IIXMO4,{a,lam},0.0,IXMOTsr4,{a,i});
-  for (auto a=0;a<nV;a++)
-  for (auto i=0;i<nO;i++)
-  {
-    IXMO4(a,i) = IXMOTsr4(a,i);
-    IXMO4(a,i) = IXMO4(a,i) + XB(a,i)*(EigV(a,0)-EigO(i,0));
-   // cout << XB(a,i)*(EigV(a,0)-EigO(i,0)) << endl;
-  }
+  for (auto idx=0;idx<nCol;idx++)
+  { 
+    X = XMO.col(idx);
+    cout << "Print the " << idx << " column vector" <<endl;
+    cout << X << endl;
+    RealMap XA(X.data(),nV,nO);
+    cout << "Print the XA" <<endl;
+    cout << XA << endl;
+    RealMap XB(X.data()+nOV,nV,nO);
+    cout << "Print the XB" <<endl;
+    cout << XB << endl;
+    XAAO = this->singleSlater_->moA()->block(0,nO,this->nBasis_,nV)*XA*this->singleSlater_->moA()->block(0,0,this->nBasis_,nO).transpose();
+    XBAO = this->singleSlater_->moA()->block(0,nO,this->nBasis_,nV)*XB*this->singleSlater_->moA()->block(0,0,this->nBasis_,nO).transpose();
+    // XAAO,XBAO in tensor form
+    for (auto i=0;i<this->nBasis_;i++)
+    for (auto j=0;j<this->nBasis_;j++)
+    {
+      XAAOTsr(i,j) = XAAO(i,j);
+      XBAOTsr(i,j) = XBAO(i,j);
+    }
+    // Contract A_AAAA( <mn||ls> ) with XA
+    contract(1.0,XAAOTsr,{sig,nu},Dmnls,{mu,nu,lam,sig},0.0,IXAO1,{mu,lam});
+    contract(1.0,LocMoAV,{mu,a},IXAO1,{mu,lam},0.0,IIXMO1,{a,lam});
+    contract(1.0,LocMoAO,{lam,i},IIXMO1,{a,lam},0.0,IXMOTsr1,{a,i});
+    for (auto a=0;a<nV;a++)
+    for (auto i=0;i<nO;i++)
+    {
+      IXMO1(a,i)=IXMOTsr1(a,i);
+      IXMO1(a,i)= IXMO1(a,i) + XA(a,i)*(EigV(a,0)-EigO(i,0));
+    }
+    // Contract A_AABB( <mn|ls> ) with XB
+    contract(1.0,XBAOTsr,{sig,nu},dmnls,{mu,nu,lam,sig},0.0,IXAO2,{mu,lam});
+    contract(1.0,LocMoAV,{mu,a},IXAO2,{mu,lam},0.0,IIXMO2,{a,lam});
+    contract(1.0,LocMoAO,{lam,i},IIXMO2,{a,lam},0.0,IXMOTsr2,{a,i});
+    for (auto a=0;a<nV;a++)
+    for (auto i=0;i<nO;i++)
+    {
+      IXMO2(a,i)=IXMOTsr2(a,i);
+    }
+    // Contract A_BBAA( <mn|ls> ) with XA
+    contract(1.0,XAAOTsr,{sig,nu},dmnls,{mu,nu,lam,sig},0.0,IXAO3,{mu,lam});
+    contract(1.0,LocMoAV,{mu,a},IXAO3,{mu,lam},0.0,IIXMO3,{a,lam});
+    contract(1.0,LocMoAO,{lam,i},IIXMO3,{a,lam},0.0,IXMOTsr3,{a,i});
+    for (auto a=0;a<nV;a++)
+    for (auto i=0;i<nO;i++)
+    {
+      IXMO3(a,i)=IXMOTsr3(a,i);
+    }
+    // Contract A_BBBB( <mn||ls> ) with XB
+    contract(1.0,XBAOTsr,{sig,nu},Dmnls,{mu,nu,lam,sig},0.0,IXAO4,{mu,lam});
+    contract(1.0,LocMoAV,{mu,a},IXAO4,{mu,lam},0.0,IIXMO4,{a,lam});
+    contract(1.0,LocMoAO,{lam,i},IIXMO4,{a,lam},0.0,IXMOTsr4,{a,i});
+    for (auto a=0;a<nV;a++)
+    for (auto i=0;i<nO;i++)
+    {
+      IXMO4(a,i) = IXMOTsr4(a,i);
+      IXMO4(a,i) = IXMO4(a,i) + XB(a,i)*(EigV(a,0)-EigO(i,0));
+    }
+    
   
-
-  // Get the Final AX matrix
-  IXMOA = IXMO1+IXMO2;
-  IXMOB = IXMO3+IXMO4;
-
-//  cout << "Print IXMO" << endl;
-//  cout << IXMO1 << endl;
-//  cout << "---" << endl;  
-//  cout << IXMO2 << endl;
-//  cout << "---" << endl;  
-//  cout << IXMO3 << endl;
-//  cout << "---" << endl;  
-//  cout << IXMO4 << endl;
-
-  // Print AX(a,i)
-  cout << "Print AX (direct build)" <<endl;
-  cout << IXMOA <<endl;
-  cout << IXMOB << endl;
-
-
-  // LR TDHF routine
-  Eigen::EigenSolver<RealMatrix> TD;
-  TD.compute(ABBA);
-  TD.eigenvalues();
-  //TD.eigenvectors();
-
-  // Print the LR-TDHF Excitation Energies
-  for (auto i=0;i<4*nOV;i++){
-    cout << "The " << (i+1) << " LR-TDHF Exicitation Energy is: "
-         << (TD.eigenvalues())(i) << endl;
+    // Get the Final AX matrix
+    IXMOA = IXMO1+IXMO2;
+    IXMOB = IXMO3+IXMO4;
+ 
+    // Print AX(i)
+    cout << "Print AX(i) (direct build)" <<endl;
+    cout << IXMOA <<endl;
+    cout << IXMOB << endl;
+    RealMap IXMOAV(IXMOA.data(),nOV,1);
+    RealMap IXMOBV(IXMOB.data(),nOV,1);
+    AX.block(0,idx,nOV,1) = IXMOAV;
+    AX.block(nOV,idx,nOV,1) = IXMOBV; 
   }
+  cout << "Print AX" << endl;
+  cout << AX << endl;
 
+  return AX;
 }
-
-//RealMatrix SDResponse::formRM2(int NTrial){
-
-  // Convert X from MO to AO X(AO) = C(occ) * X(MO) * C(vir)^T
-  // Contract X(AO) with (mu nu || lambda sigma)  IX_{ij} = (ij||kl) X(AO)_{kl}
-  // Transform IX from AO to MO  IX(MO) = C(occ)^T * IX(AO) * C(vir)
-  // Contract IX(MO) with eigenvalue differences
-  //   AX_{ia} = IX(ia) / (e(a) - e(i))
-
-//}
 
 /*************************/
 /* MPI Related Routines  */

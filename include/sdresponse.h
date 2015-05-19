@@ -51,6 +51,7 @@ class SDResponse {
   std::shared_ptr<Controls>      controls_;
   std::shared_ptr<MOIntegrals>   mointegrals_;
   std::shared_ptr<SingleSlater>  singleSlater_;
+  RealMatrix                     XMO;
 
 public:
  
@@ -66,6 +67,7 @@ public:
   void printExcitedStateEnergies(); 
   void printInfo();
   void formRM();
+  RealMatrix formRM2(RealMatrix &XMO);
 
   /*************************/
   /* MPI Related Routines  */

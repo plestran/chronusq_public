@@ -1058,7 +1058,7 @@ void AOIntegrals::twoEContract(bool doRHFFock, const RealMatrix &X, RealMatrix &
 #endif
   for(int i = 0; i < this->controls_->nthreads; i++) AX += G[i];
   RealMatrix Tmp = 0.5*(AX + AX.transpose());
-  AX = 0.25*Tmp; // Can't consolidate where this comes from?
+  if(doRHFFock) AX = 0.25*Tmp; // Can't consolidate where this comes from?
   finish = std::chrono::high_resolution_clock::now();
   if(doRHFFock) this->PTD = finish - start;
    
