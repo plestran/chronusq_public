@@ -90,6 +90,7 @@ void BasisSet::basisSetRead(std::shared_ptr<FileIO> fileio, std::shared_ptr<Mole
 	  *fileBasis >> coefval;
 	  exp.push_back(expval);
 
+	  
 	  auto e(coefval.find_first_of("Dd"));
 	  if (e!=std::string::npos)
 	    coefval[e]='E';
@@ -167,6 +168,7 @@ void BasisSet::basisSetRead(std::shared_ptr<FileIO> fileio, std::shared_ptr<Mole
    center = {{(*mol->cart())(0,i),
               (*mol->cart())(1,i),
               (*mol->cart())(2,i)}};
+   cout << center[1] << endl;
    for(auto k=0; k<allBasis.size();++k){
      if (atomStr.compare(allBasis[k].atomName)==0){
        for (auto j=0;j<allBasis[k].refShell.size();++j){
@@ -199,6 +201,7 @@ void BasisSet::basisSetRead(std::shared_ptr<FileIO> fileio, std::shared_ptr<Mole
      }
    }
   }
+  this->convToLI=true;
   fileBasis->close();
 }
 
