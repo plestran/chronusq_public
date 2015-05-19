@@ -219,7 +219,7 @@ void SDResponse::formRM(){
   RealMatrix X =  CIS.eigenvectors().col(1);
   cout << "Print X "<< endl;
   cout << X <<endl;
-  cout << "Print AX"<<endl;
+  cout << "Print AX (A,x already known)" <<endl;
   cout << A*X << endl;
   // Get XA_AO and XB_AO
   RealMap XA(X.data(),nV,nO);
@@ -332,17 +332,17 @@ void SDResponse::formRM(){
   IXMOA = IXMO1+IXMO2;
   IXMOB = IXMO3+IXMO4;
 
-  cout << "Print IXMO" << endl;
-  cout << IXMO1 << endl;
-  cout << "---" << endl;  
-  cout << IXMO2 << endl;
-  cout << "---" << endl;  
-  cout << IXMO3 << endl;
-  cout << "---" << endl;  
-  cout << IXMO4 << endl;
+//  cout << "Print IXMO" << endl;
+//  cout << IXMO1 << endl;
+//  cout << "---" << endl;  
+//  cout << IXMO2 << endl;
+//  cout << "---" << endl;  
+//  cout << IXMO3 << endl;
+//  cout << "---" << endl;  
+//  cout << IXMO4 << endl;
 
   // Print AX(a,i)
-  cout << "Print AX(a,i)" <<endl;
+  cout << "Print AX (direct build)" <<endl;
   cout << IXMOA <<endl;
   cout << IXMOB << endl;
 

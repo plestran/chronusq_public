@@ -70,7 +70,7 @@ void BasisSet::convShell(std::shared_ptr<Molecule> mol) {
   }
   this->convToLI = true;
 }
-
+/*
 void BasisSet::makeMap(std::shared_ptr<Molecule>  mol) {
   if(!this->convToLI) this->convShell(mol);
   int n = 0;
@@ -81,7 +81,7 @@ void BasisSet::makeMap(std::shared_ptr<Molecule>  mol) {
   this->haveMap = true;
 }
 
-void BasisSet::computeShBlkNorm(std::shared_ptr<Molecule> mol, RealMatrix *D){
+void BasisSet::computeShBlkNorm(std::shared_ptr<Molecule> mol, const RealMatrix *D){
   // This will be much easier in Eigen
   if(!this->convToLI) this->convShell(mol);
   if(!this->haveMap)  this->makeMap(mol);
@@ -98,4 +98,5 @@ void BasisSet::computeShBlkNorm(std::shared_ptr<Molecule> mol, RealMatrix *D){
     }
   }
 }
+*/
 #endif

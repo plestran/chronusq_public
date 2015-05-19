@@ -82,7 +82,11 @@ void readInput(std::shared_ptr<FileIO> fileio, std::shared_ptr<Molecule> mol,
         delete geomRead;
       }
     } else if(!readString.compare("$BASIS")) {
-      basis->readBasisSet(fileio,mol);
+      //basis->readBasisSet(fileio,mol);
+#ifdef USE_LIBINT
+      basis->basisSetRead(fileio,mol);
+#endif 
+//dbwys
     } else if(!readString.compare("$NSMP")) {
       fileio->in >> readInt;
       controls->readSMP(readInt);
@@ -121,5 +125,6 @@ double traceSymm(RealMatrix* a, RealMatrix* b) {
   for(i=0;i<a->size();i++) tmpVal+=a->data()[i]*b->data()[i];
 
   return tmpVal;
-};
-} // namespace ChronusQ
+ };
+}
+// namespace ChronusQ
