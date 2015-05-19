@@ -25,47 +25,60 @@
  */
 #ifndef INCLUDED_GAUINTERFACE
 #define INCLUDED_GAUINTERFACE
+#include <string>
+#include <iostream>
+#include <fstream>
+#include <iomanip>
+
 const int LEN_GAU_STR = 64*sizeof(char);
 class GauMatEl{
-  bool         doPrint_;
+  bool          doPrint_;
 
-  ifstream     infile_;
+  std::ifstream infile_;
 
-  std::string  fname_;
-  std::string  labFil_;
-  std::string  gVers_;
-  std::string  jobTitle_;
+  std::string   fname_;
+  std::string   labFil_;   // Matrix element file type
+  std::string   gVers_;    // Gaussian version which generated the file
+  std::string   jobTitle_; // Title card of Gaussian job
   
-  int          *iAn_;
-  int          *iAtTyp_;
-  int          *iBfAtm_;
-  int          *iBfTyp_;
-  int          iVers_;
-  int          nLab_;
-  int          nAtoms_;
-  int          nBasis_; 
-  int          nBsUse_;
-  int          iCharge_;
-  int          multip_;
-  int          nE_;
-  int          len12L_;
-  int          len4L_;
-  int          iOpCl_;
-  int          iCGU_;  
-  int          nFC_;
-  int          nFV_;
-  int          iTran_;
-  int          iDum_;
-  int          nInitRem_;
-  int          nShellAO_;
-  int          nPrimAO_;
-  int          nShellDB_; 
-  int          nPrimDB_;
-  int          nBTot_;
+  /*
+   * ICGU = KLM
+   *
+   * K = 1/2 for spin aligned vs GHF
+   * L = 1/2 for real vs complex
+   * M = 1/2 for RHF/GHF vs UHF (1 vs 2 spin blocks)
+   *
+   */
+  int           *iAn_;     // Atomic numbers
+  int           *iAtTyp_;
+  int           *iBfAtm_;
+  int           *iBfTyp_;
+  int           iVers_;    // Version number of file format
+  int           nLab_;     // Number on general data records (??)
+  int           nAtoms_;   // Number of atoms
+  int           nBasis_;   // Number of basis functions
+  int           nBsUse_;   // Number of linerly independant basis functions
+  int           iCharge_;  // Molecular charge
+  int           multip_;   // Spin multiplicity
+  int           nE_;       // Number of electrons
+  int           len12L_;   // Number of bytes for integer labels for 1d/2d
+  int           len4L_;    // Number of bytes for integer labels for 4d
+  int           iOpCl_;    // Open/Closed shell flag
+  int           iCGU_;     // Complex and / or GHF flag
+  int           nFC_;
+  int           nFV_;
+  int           iTran_;
+  int           iDum_;
+  int           nInitRem_;
+  int           nShellAO_;
+  int           nPrimAO_;
+  int           nShellDB_; 
+  int           nPrimDB_;
+  int           nBTot_;
 
-  double       *atmChg_;
-  double       *cart_;
-  double       *atmWgt_;
+  double        *atmChg_;
+  double        *cart_;
+  double        *atmWgt_;
 
   void readGauRec1_();
   void readGauRec2_();
@@ -79,10 +92,12 @@ class GauMatEl{
   void readGauRec10_();
   void readGauRec11_();
 
-  void init_();
+  void init_(std::string &);
 
 public:
-  GauMatEl(){this->init_();};
+  GauMatEl(std::string name=""){
+    this->init_(name);
+  }
   ~GauMatEl(){
     delete[] iAn_;
     delete[] iAtTyp_;
@@ -91,9 +106,10 @@ public:
     delete[] atmChg_;
     delete[] cart_;
     delete[] atmWgt_;
+    infile_.close();
   };
   
   void readInitRecs(); 
-}
+};
 
 #endif
