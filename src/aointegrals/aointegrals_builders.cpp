@@ -228,9 +228,9 @@ void AOIntegrals::computeAOOneE(){
     this->oneE_->printAll(5,fileio_->out);
 */
     prettyPrint(this->fileio_->out,(*this->overlap_),"Overlap");
-    prettyPrint(this->fileio_->out,(*this->overlap_),"Kinetic");
-    prettyPrint(this->fileio_->out,(*this->overlap_),"Potential");
-    prettyPrint(this->fileio_->out,(*this->overlap_),"Core Hamiltonian");
+    prettyPrint(this->fileio_->out,(*this->kinetic_),"Kinetic");
+    prettyPrint(this->fileio_->out,(*this->potential_),"Potential");
+    prettyPrint(this->fileio_->out,(*this->oneE_),"Core Hamiltonian");
   };
   if(controls_->printLevel>=1) {
 //    finish = clock();
@@ -242,13 +242,31 @@ void AOIntegrals::computeAOOneE(){
 
 void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
 
-  std::shared_ptr<RealMatrix> mat(nullptr);
+  std::vector<RealMap> mat;
+  int NB = this->nBasis_;
+  int NBSq = NB*NB;
   if(iType == OneBodyEngine::overlap){
-    mat = this->overlap_;
+    mat.push_back(RealMap(this->overlap_->data(),NB,NB));
   } else if(iType == OneBodyEngine::kinetic) {
-    mat = this->kinetic_;
+    mat.push_back(RealMap(this->kinetic_->data(),NB,NB));
   } else if(iType == OneBodyEngine::nuclear) {
-    mat = this->potential_;
+    mat.push_back(RealMap(this->potential_->data(),NB,NB));
+  } else if(iType == OneBodyEngine::emultipole1) {
+    mat.push_back(RealMap(this->overlap_->data(),NB,NB));
+    mat.push_back(RealMap(&this->elecDipole_->storage()[0],NB,NB));
+    mat.push_back(RealMap(&this->elecDipole_->storage()[NBSq],NB,NB));
+    mat.push_back(RealMap(&this->elecDipole_->storage()[2*NBSq],NB,NB));
+  } else if(iType == OneBodyEngine::emultipole2) {
+    mat.push_back(RealMap(this->overlap_->data(),NB,NB));
+    mat.push_back(RealMap(&this->elecDipole_->storage()[0],NB,NB));
+    mat.push_back(RealMap(&this->elecDipole_->storage()[NBSq],NB,NB));
+    mat.push_back(RealMap(&this->elecDipole_->storage()[2*NBSq],NB,NB));
+    mat.push_back(RealMap(&this->elecQuadpole_->storage()[0],NB,NB));
+    mat.push_back(RealMap(&this->elecQuadpole_->storage()[NBSq],NB,NB));
+    mat.push_back(RealMap(&this->elecQuadpole_->storage()[2*NBSq],NB,NB));
+    mat.push_back(RealMap(&this->elecQuadpole_->storage()[3*NBSq],NB,NB));
+    mat.push_back(RealMap(&this->elecQuadpole_->storage()[4*NBSq],NB,NB));
+    mat.push_back(RealMap(&this->elecQuadpole_->storage()[5*NBSq],NB,NB));
   } else {
     cout << "OneBodyEngine type not recognized" << endl;
     exit(EXIT_FAILURE);
@@ -281,7 +299,6 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
   for(size_t i = 1; i < this->controls_->nthreads; i++) engines[i] = engines[0];
 
   if(!this->basisSet_->haveMap) this->basisSet_->makeMap(this->molecule_); 
-
 #ifdef USE_OMP
   #pragma omp parallel
 #endif
@@ -310,22 +327,42 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
           }
         }
 */
-        ConstRealMap buf_mat(buff,n1,n2);
-        mat->block(bf1,bf2,n1,n2) = buf_mat;
+        int IOff = 0;
+        for(auto nMat = 0; nMat < mat.size(); nMat++) {
+          ConstRealMap bufMat(&buff[IOff],n1,n2); // Read only map
+          mat[nMat].block(bf1,bf2,n1,n2) = bufMat;
+          IOff += n1*n2;
+        }
       }
     }
   } // end openmp parallel
-
-  (*mat) = mat->selfadjointView<Lower>();
+  for(auto nMat = 0; nMat < mat.size(); nMat++) 
+    mat[nMat] = mat[nMat].selfadjointView<Lower>();
 
 //if(this->controls_->printLevel>=2)  mat->printAll(5,fileio_->out);
   if(this->controls_->printLevel>=2){
     if(iType == OneBodyEngine::overlap){
-      prettyPrint(this->fileio_->out,(*mat),"Overlap");
+      prettyPrint(this->fileio_->out,(mat[0]),"Overlap");
     } else if(iType == OneBodyEngine::kinetic) {
-      prettyPrint(this->fileio_->out,(*mat),"Kinetic");
+      prettyPrint(this->fileio_->out,(mat[0]),"Kinetic");
     } else if(iType == OneBodyEngine::nuclear) {
-      prettyPrint(this->fileio_->out,(*mat),"Potential");
+      prettyPrint(this->fileio_->out,(mat[0]),"Potential");
+    } else if(iType == OneBodyEngine::emultipole1) {
+      prettyPrint(this->fileio_->out,(mat[0]),"Overlap");
+      prettyPrint(this->fileio_->out,(mat[1]),"Electric Dipole (x)");
+      prettyPrint(this->fileio_->out,(mat[2]),"Electric Dipole (y)");
+      prettyPrint(this->fileio_->out,(mat[3]),"Electric Dipole (z)");
+    } else if(iType == OneBodyEngine::emultipole2) {
+      prettyPrint(this->fileio_->out,(mat[0]),"Overlap");
+      prettyPrint(this->fileio_->out,(mat[1]),"Electric Dipole (x)");
+      prettyPrint(this->fileio_->out,(mat[2]),"Electric Dipole (y)");
+      prettyPrint(this->fileio_->out,(mat[3]),"Electric Dipole (z)");
+      prettyPrint(this->fileio_->out,(mat[4]),"Electric Quadrupole (xx)");
+      prettyPrint(this->fileio_->out,(mat[5]),"Electric Quadrupole (xy)");
+      prettyPrint(this->fileio_->out,(mat[6]),"Electric Quadrupole (xz)");
+      prettyPrint(this->fileio_->out,(mat[7]),"Electric Quadrupole (yy)");
+      prettyPrint(this->fileio_->out,(mat[8]),"Electric Quadrupole (yz)");
+      prettyPrint(this->fileio_->out,(mat[9]),"Electric Quadrupole (zz)");
     } else {
       cout << "OneBodyEngine type not recognized" << endl;
       exit(EXIT_FAILURE);
@@ -343,7 +380,9 @@ void AOIntegrals::computeAOOneE(){
 
   // Compute and time overlap integrals
   auto OStart = std::chrono::high_resolution_clock::now();
-  OneEDriver(OneBodyEngine::overlap);
+  if(this->controls_->doQuadpole) OneEDriver(OneBodyEngine::emultipole2);
+  else if(this->controls_->doDipole) OneEDriver(OneBodyEngine::emultipole1);
+  else OneEDriver(OneBodyEngine::overlap);
   auto OEnd = std::chrono::high_resolution_clock::now();
 
   // Compute and time kinetic integrals
@@ -564,20 +603,6 @@ void AOIntegrals::computeAOTwoE(){
   }
   } // OMP Parallel
 
-  if(this->controls_->printLevel > 4) {
-    for(auto i = 0; i < this->nBasis_; i++)
-    for(auto j = 0; j < this->nBasis_; j++)
-    for(auto k = 0; k < this->nBasis_; k++)
-    for(auto l = 0; l < this->nBasis_; l++){
-      if(std::abs((*this->aoERI_)(i,j,k,l))>1e-6)
-        cout << "( " <<i + 1 << " "
-             << j + 1<< " "
-             << k + 1<< " "
-             << l + 1<< " ) "
-             << (*this->aoERI_)(i,j,k,l) << endl;
-    }
-  }
-  
 }
 
 void AOIntegrals::computeAORII(){

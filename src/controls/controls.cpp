@@ -30,25 +30,28 @@ using ChronusQ::Controls;
 /****************************/
 //constructor and initialization
 void Controls::iniControls(){
-  this->printLevel = 0;
-  this->energyOnly = false;
-  this->optWaveFunction = true;
-  this->optGeometry = false;
-  this->firstDer = false;
-  this->secondDer = false;
-  this->HF = true;
-  this->DFT = false;
-  this->hybridDFT = false;
-  this->restart = false;
-  this->thresholdS = 1.0e-10;
-  this->thresholdAB = 1.0e-6;
+  this->printLevel =        0;
+  this->energyOnly =        false;
+  this->optWaveFunction =   true;
+  this->optGeometry =       false;
+  this->firstDer =          false;
+  this->secondDer =         false;
+  this->HF =                true;
+  this->DFT =               false;
+  this->hybridDFT =         false;
+  this->restart =           false;
+  this->thresholdS =        1.0e-10;
+  this->thresholdAB =       1.0e-6;
   this->thresholdSchawrtz = 1.0e-14;
-  this->guess = 0;
-  this->directTwoE = true;
-  this->buildn4eri = false;
-  this->doDF = false;
+  this->guess =             0;
+  this->directTwoE =        true;
+  this->buildn4eri =        false;
+  this->doDF =              false;
+  this->doDipole =          true;
+  this->doQuadpole =        true;
 #ifdef USE_LIBINT
-  libint2::init();
+  // Bootstrap Libint env
+  libint2::init(); 
 #endif
   this->nthreads = 1;
 #ifdef USE_OMP

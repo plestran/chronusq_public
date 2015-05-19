@@ -85,7 +85,8 @@ void SingleSlater::iniSingleSlater(std::shared_ptr<Molecule> molecule, std::shar
     catch (...) { CErr(std::current_exception(),"Beta MO Coefficients Allocation"); }
   };
 
-
+  this->dipole_ = std::unique_ptr<RealMatrix>(new RealMatrix(3,1));
+  this->quadpole_ = std::unique_ptr<RealMatrix>(new RealMatrix(3,3));
   this->molecule_ = molecule;
   this->basisset_ = basisset;
   this->fileio_   = fileio;
@@ -302,6 +303,12 @@ void SingleSlater::formExchange(){
 #ifdef USE_LIBINT
 // Form perturbation tensor (G)
 void SingleSlater::formPT() {
+  if(!this->haveDensity) this->formDensity();
+  this->aointegrals_->twoEContract(true,*this->densityA_,*this->PTA_);
+  if(this->controls_->printLevel >= 3) prettyPrint(this->fileio_->out,(*this->PTA_),"Alpha Perturbation Tensor");
+}
+/*
+void SingleSlater::formPT() {
   if(!this->aointegrals_->haveSchwartz) this->aointegrals_->computeSchwartz();
   if(!this->haveDensity) this->formDensity();
   this->PTA_->setZero();
@@ -374,17 +381,6 @@ void SingleSlater::formPT() {
                     int bf4 = bf4_s + l;
                     double v = buff[ijkl]*s1234_deg;
 
-/*                  // This section works for serial build
-                    // Coulomb
-                    (*this->PTA_)(bf1,bf2) += (*this->densityA_)(bf3,bf4)*v;
-                    (*this->PTA_)(bf3,bf4) += (*this->densityA_)(bf1,bf2)*v;
- 
-                    // Exchange
-                    (*this->PTA_)(bf1,bf3) -= 0.25*(*this->densityA_)(bf2,bf4)*v;
-                    (*this->PTA_)(bf2,bf4) -= 0.25*(*this->densityA_)(bf1,bf3)*v;
-                    (*this->PTA_)(bf1,bf4) -= 0.25*(*this->densityA_)(bf2,bf3)*v;
-                    (*this->PTA_)(bf2,bf3) -= 0.25*(*this->densityA_)(bf1,bf4)*v;
-*/
                     // Coulomb
                     g(bf1,bf2) += (*this->densityA_)(bf3,bf4)*v;
                     g(bf3,bf4) += (*this->densityA_)(bf1,bf2)*v;
@@ -423,6 +419,7 @@ void SingleSlater::formPT() {
   if(this->controls_->printLevel >= 3) prettyPrint(this->fileio_->out,(*this->PTA_),"Alpha Perturbation Tensor");
   
 }
+*/
 #endif
 //dbwye
 //--------------------------------//
@@ -512,6 +509,55 @@ void SingleSlater::readGuessGauFChk(std::string &filename) {
   this->haveMO = true;
 };
 
+void SingleSlater::computeMultipole(){
+  if(!this->haveDensity) this->formDensity();
+  if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
+  if(!this->controls_->doDipole && !this->controls_->doQuadpole) return;
+
+  int NB = this->nBasis_;
+  int NBSq = NB*NB;
+  int iBuf = 0;
+  for(auto ixyz = 0; ixyz < 3; ixyz++){
+    ConstRealMap mu(&this->aointegrals_->elecDipole_->storage()[iBuf],NB,NB);
+    (*dipole_)(ixyz,0) = this->densityA_->frobInner(mu);
+    iBuf += NBSq;
+  }
+  for(int iA = 0; iA < this->molecule_->nAtoms(); iA++)
+    *this->dipole_ -= elements[this->molecule_->index(iA)].atomicNumber *
+          this->molecule_->cart()->col(iA);
+  *this->dipole_ = -(*this->dipole_);
+  if(this->controls_->doQuadpole){
+    iBuf = 0;
+    for(auto jxyz = 0; jxyz < 3; jxyz++)
+    for(auto ixyz = jxyz; ixyz < 3; ixyz++){
+      ConstRealMap 
+        mu(&this->aointegrals_->elecQuadpole_->storage()[iBuf],NB,NB);
+      (*quadpole_)(ixyz,jxyz) = this->densityA_->frobInner(mu);
+      iBuf += NBSq;
+    }
+    *this->quadpole_ = this->quadpole_->selfadjointView<Lower>();
+//  for(int iA = 0; iA < this->molecule_->nAtoms(); iA++)
+//    *this->quadpole_ -= elements[this->molecule_->index(iA)].atomicNumber *
+//          this->molecule_->cart()->col(iA) * 
+//          this->molecule_->cart()->col(iA).transpose();
+  }
+  this->printMultipole();
+
+}
+void SingleSlater::printMultipole(){
+  this->fileio_->out << bannerTop << endl;
+  this->fileio_->out << "Dipole:" << endl;
+  this->fileio_->out << std::left << std::setw(5) <<"X=" 
+                     << std::fixed << std::right << std::setw(20) 
+                     << (*this->dipole_)(0,0) << endl;
+  this->fileio_->out << std::left << std::setw(5) <<"Y=" 
+                     << std::fixed << std::right << std::setw(20) 
+                     << (*this->dipole_)(1,0) << endl;
+  this->fileio_->out << std::left << std::setw(5) <<"Z=" 
+                     << std::fixed << std::right << std::setw(20) 
+                     << (*this->dipole_)(2,0) << endl;
+  this->fileio_->out << bannerEnd << endl;
+}
 /*************************/
 /* MPI Related Routines  */
 /*************************/
