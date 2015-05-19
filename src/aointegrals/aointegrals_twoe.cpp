@@ -1024,6 +1024,8 @@ void AOIntegrals::twoEContract(bool doRHFFock, const RealMatrix &X, RealMatrix &
                     // Coulomb
                     g(bf1,bf2) += X(bf3,bf4)*v;
                     g(bf3,bf4) += X(bf1,bf2)*v;
+                    g(bf2,bf1) += X(bf4,bf3)*v;
+                    g(bf4,bf3) += X(bf2,bf1)*v;
  
                     // Exchange
                     if(doRHFFock) {
@@ -1031,11 +1033,21 @@ void AOIntegrals::twoEContract(bool doRHFFock, const RealMatrix &X, RealMatrix &
                       g(bf4,bf2) -= 0.25*X(bf1,bf3)*v;
                       g(bf1,bf4) -= 0.25*X(bf2,bf3)*v;
                       g(bf3,bf2) -= 0.25*X(bf1,bf4)*v;
+
+                      g(bf3,bf1) -= 0.25*X(bf4,bf2)*v;
+                      g(bf2,bf4) -= 0.25*X(bf3,bf1)*v;
+                      g(bf4,bf1) -= 0.25*X(bf3,bf2)*v;
+                      g(bf2,bf3) -= 0.25*X(bf4,bf1)*v;
                     } else {
                       g(bf1,bf3) -= 0.5*X(bf2,bf4)*v;
                       g(bf4,bf2) -= 0.5*X(bf1,bf3)*v;
                       g(bf1,bf4) -= 0.5*X(bf2,bf3)*v;
                       g(bf3,bf2) -= 0.5*X(bf1,bf4)*v;
+
+                      g(bf3,bf1) -= 0.5*X(bf4,bf2)*v;
+                      g(bf2,bf4) -= 0.5*X(bf3,bf1)*v;
+                      g(bf4,bf1) -= 0.5*X(bf3,bf2)*v;
+                      g(bf2,bf3) -= 0.5*X(bf4,bf1)*v;
                     }
                   }
                 }
@@ -1057,10 +1069,13 @@ void AOIntegrals::twoEContract(bool doRHFFock, const RealMatrix &X, RealMatrix &
   lambda(0);
 #endif
   for(int i = 0; i < this->controls_->nthreads; i++) AX += G[i];
-//RealMatrix Tmp = 0.5*(AX + AX.transpose()); // RAFF MAKES NOT SENSE!
+//RealMatrix Tmp = 0.5*(AX + AX.transpose());
 //AX = 0.25*Tmp; // Can't consolidate where this comes from?
   cout << "HEHR" << endl;
-  if(doRHFFock) AX = 0.25*AX; // Can't consolidate where this comes from?
+//if(doRHFFock) AX = 0.25*AX; // Can't consolidate where this comes from?
+  AX = AX*0.5; // Gaussian nonsense
+  AX = AX*0.5; // werid factor that comes from A + AT
+  if(doRHFFock) AX = AX*0.5; // E ~ 0.5*G
   finish = std::chrono::high_resolution_clock::now();
   if(doRHFFock) this->PTD = finish - start;
    
