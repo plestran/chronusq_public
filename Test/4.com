@@ -1,5 +1,5 @@
 %chk=4.chk
-#p hf/sto-3g GFInput nosymm scf=incore 6d scf=tight iop(3/33=10,5/33=10)
+#p hf/sto-3g GFInput nosymm scf=incore 6d scf=tight iop(3/33=10,5/33=10) output=RawMatrixElement
 
 d
 
@@ -7,6 +7,7 @@ d
 c  0.0  0.1 0.0
 c  1.0  0.0 0.15
 
+file.out
 
 C 0
 S    3 1.00

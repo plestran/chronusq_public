@@ -45,7 +45,9 @@ class Molecule {
   int                         *index_;       // index of atom in the atoms[] array
   double                       energyNuclei_;// nuclear repulsion energy
   std::unique_ptr<RealMatrix>  cart_;        // cartesian coordinates
-
+//APS
+  std::unique_ptr<RealMatrix>  COM_;         // center of mass coordinate or center of nuclear charges 
+//APE
 public:
 
   // constructor
@@ -55,7 +57,9 @@ public:
     cart_.reset();
   };
   void iniMolecule(int,std::shared_ptr<FileIO>);
-
+//APS Compute center of mass (or center of nuclear charges) of a molecule
+  void toCOM(int Iop0);    
+//APE
   // print
   void printInfo(std::shared_ptr<FileIO>,std::shared_ptr<Controls>);
 
