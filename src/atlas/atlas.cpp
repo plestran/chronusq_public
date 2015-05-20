@@ -86,7 +86,12 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 
   sdResponse->computeExcitedStates();
 */
-
+//APS
+ int Iop=0;
+ molecule->toCOM(Iop);  // call object molecule pointing to function toCOM-Iop=0 Center of Mass
+ Iop=1;
+ molecule->toCOM(Iop);  // call object molecule pointing to function toCOM-Iop=1 Center of Nuclear Charges
+//APE
   time(&currentTime);
   fileIO->out<<"\nJob finished: "<<ctime(&currentTime)<<endl;
   int N = 500;
