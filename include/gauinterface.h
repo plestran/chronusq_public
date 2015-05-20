@@ -29,10 +29,13 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
+#include <vector>
 
 const int LEN_GAU_STR = 64*sizeof(char);
 class GauMatEl{
   bool          doPrint_;
+  bool          haveHeader_;
+  bool          readInit_;
 
   std::ifstream infile_;
 
@@ -92,9 +95,45 @@ class GauMatEl{
   void readGauRec10_();
   void readGauRec11_();
 
+  int lenRec1_;
+  int lenRec2_;
+  int lenRec3_;
+  int lenRec4_;
+  int lenRec5_;
+  int lenRec6_;
+  int lenRec7_;
+  int lenRec8_;
+  int lenRec9_;
+  int lenRec10_;
+  int lenRec11_;
+  int lenInit_;
+
   void init_(std::string &);
 
+  std::vector<std::string> GauHeader;
+  void initHeader_();
+
 public:
+  enum {
+    dipole,
+    quadrupole,
+    octupole,
+    overlap,
+    corehama,
+    corehamb,
+    kinetic,
+    orthbasis,
+    epsa,
+    epsb,
+    moa,
+    mob,
+    dena,
+    denb,
+    scfdena,
+    scfdenb,
+    focka,
+    fockb
+  };
   GauMatEl(std::string name=""){
     this->init_(name);
   }
@@ -110,6 +149,42 @@ public:
   };
   
   void readInitRecs(); 
+  inline std::string   fname(){   return this->fname_;};
+  inline std::string   labFil(){  return this->labFil_;};   
+  inline std::string   gVers(){   return this->gVers_;};    
+  inline std::string   jobTitle(){return this->jobTitle_;}; 
+  inline int *         iAn(){     return this->iAn_;};     
+  inline int *         iAtTyp(){  return this->iAtTyp_;};
+  inline int *         iBfAtm(){  return this->iBfAtm_;};
+  inline int *         iBfTyp(){  return this->iBfTyp_;};
+  inline int           iVers(){   return this->iVers_;};    
+  inline int           nLab(){    return this->nLab_;};     
+  inline int           nAtoms(){  return this->nAtoms_;};   
+  inline int           nBasis(){  return this->nBasis_;};   
+  inline int           nBsUse(){  return this->nBsUse_;};   
+  inline int           iCharge(){ return this->iCharge_;};  
+  inline int           multip(){  return this->multip_;};   
+  inline int           nE(){return this->nE_;};       
+  inline int           len12L(){return this->len12L_;};   
+  inline int           len4L(){return this->len4L_;};    
+  inline int           iOpCl(){return this->iOpCl_;};    
+  inline int           iCGU(){return this->iCGU_;};     
+  inline int           nFC(){return this->nFC_;};
+  inline int           nFV(){return this->nFV_;};
+  inline int           iTran(){return this->iTran_;};
+  inline int           iDum(){return this->iDum_;};
+  inline int           nInitRem(){return this->nInitRem_;};
+  inline int           nShellAO(){return this->nShellAO_;};
+  inline int           nPrimAO(){return this->nPrimAO_;};
+  inline int           nShellDB(){return this->nShellDB_;}; 
+  inline int           nPrimDB(){return this->nPrimDB_;};
+  inline int           nBTot(){return this->nBTot_;};
+
+  inline double *      atmChg(){return this->atmChg_;};
+  inline double *      cart(){return this->cart_;};
+  inline double *      atmWgt(){return this->atmWgt_;};
+
+  void readRec(int,double*&);
 };
 
 #endif

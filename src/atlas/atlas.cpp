@@ -144,7 +144,14 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 */
   Davidson<double> dav(&AX,A,NSek,N);
 //dav.run(fileIO->out);
-  GauMatEl gau("file.out");
+//GauMatEl gau("file.out");
+//double * x = NULL;
+//gau.readRec(GauMatEl::overlap,x);
+//cout << "OUTSIDE" << endl;
+//cout << x[23] << endl << endl;
+//gau.readRec(GauMatEl::dipole,x);
+//cout << "OUTSIDE" << endl;
+//cout << x[23] << endl << endl;
   
 
 #ifdef USE_LIBINT

@@ -27,11 +27,8 @@
 
 void GauMatEl::init_(std::string& name){
   this->fname_ = name;
-  std::cout << "HERE" << std::endl;
 //if(name.compare("")) return;
 
-  std::cout << "HERE" << std::endl;
-  
   infile_.open(name, std::ios::binary | std::ios::in);
 
   labFil_   = '\0';
@@ -50,8 +47,9 @@ void GauMatEl::init_(std::string& name){
   this->cart_   = NULL;
   this->atmWgt_ = NULL;
 
-  this->doPrint_ = true;
+  this->doPrint_ = false;
   this->readInitRecs();
+  this->initHeader_();
 }
 
 void GauMatEl::readGauRec1_(){
@@ -72,6 +70,7 @@ void GauMatEl::readGauRec1_(){
                  this->gVers_  << std::endl;
   } 
   else std::cout << "Record 1 Sucessfully Read" << std::endl;
+  this->lenRec1_ = 2*LEN_GAU_STR + 2*sizeof(int);
 
 }
 void GauMatEl::readGauRec2_(){
@@ -121,6 +120,7 @@ void GauMatEl::readGauRec2_(){
                  this->iCGU_   << std::endl; 
   }
   else std::cout << "Record 2 Sucessfully Read" << std::endl;
+  this->lenRec2_ = LEN_GAU_STR + 10*sizeof(int);
 
 }
 void GauMatEl::readGauRec3_(){
@@ -136,6 +136,7 @@ void GauMatEl::readGauRec3_(){
                    *(this->iAn_+i) << std::endl;
   }
   else std::cout << "Record 3 Sucessfully Read" << std::endl;
+  this->lenRec3_ = (this->nAtoms_+this->nAtoms_%2)*sizeof(int);
 }
 void GauMatEl::readGauRec4_(){
   this->iAtTyp_ = new int[this->nAtoms_+this->nAtoms_%2];
@@ -149,6 +150,7 @@ void GauMatEl::readGauRec4_(){
       std::cout << std::setw(15) << std::left << " " << 
                    *(this->iAtTyp_+i) << std::endl;
   } else std::cout << "Record 4 Sucessfully Read" << std::endl;
+  this->lenRec4_ = (this->nAtoms_+this->nAtoms_%2)*sizeof(int);
 }
 void GauMatEl::readGauRec5_(){
   this->atmChg_ = new double[this->nAtoms_];
@@ -160,6 +162,7 @@ void GauMatEl::readGauRec5_(){
     for(auto i = 0; i < this->nAtoms_; i++) 
       std::cout << std::setw(15) << std::fixed << std::left << " " << *(this->atmChg_+i) << std::endl;
   } else std::cout << "Record 5 Sucessfully Read" << std::endl;
+  this->lenRec5_ = (this->nAtoms_)*sizeof(double);
 }
 void GauMatEl::readGauRec6_(){
   this->cart_ = new double[3*this->nAtoms_];
@@ -175,6 +178,7 @@ void GauMatEl::readGauRec6_(){
       std::cout << std::endl;
     }
   } else std::cout << "Record 6 Sucessfully Read" << std::endl;
+  this->lenRec6_ = (3*this->nAtoms_)*sizeof(double);
 }
 void GauMatEl::readGauRec7_(){
   this->iBfAtm_ = new int[this->nBasis_];
@@ -191,6 +195,7 @@ void GauMatEl::readGauRec7_(){
     for(auto i = 0; i < this->nBasis_; i++) 
       std::cout << std::setw(15) << std::left << " " << *(this->iBfTyp_+i) << std::endl;
   } else std::cout << "Record 7 Sucessfully Read" << std::endl;
+  this->lenRec7_ = (2*this->nBasis_)*sizeof(int);
 }
 void GauMatEl::readGauRec8_(){
   this->atmWgt_ = new double[this->nAtoms_];
@@ -202,6 +207,7 @@ void GauMatEl::readGauRec8_(){
     for(auto i = 0; i < this->nAtoms_; i++) 
       std::cout << std::setw(15) << std::fixed << std::left << " " << *(this->atmWgt_+i) <<std::endl;
   } else std::cout << "Record 8 Sucessfully Read" << std::endl;
+  this->lenRec8_ = (this->nAtoms_)*sizeof(double);
 }
 void GauMatEl::readGauRec9_(){
   infile_.read((char*)&this->nFC_,  sizeof(int) );
@@ -216,6 +222,7 @@ void GauMatEl::readGauRec9_(){
     std::cout << std::setw(15) << std::left << "  ITran: "   << this->iTran_   << std::endl;
     std::cout << std::setw(15) << std::left << "  IDum: "   << this->iDum_   << std::endl;
   } else std::cout << "Record 9 Sucessfully Read" << std::endl;
+  this->lenRec9_ = 4*sizeof(int);
 }
 void GauMatEl::readGauRec10_(){
   int IX;
@@ -227,6 +234,7 @@ void GauMatEl::readGauRec10_(){
     std::cout << std::setw(15) << std::left << "Record 10:" << std::endl;
     std::cout << std::setw(15) << std::left << "  Number of Remaining Recs: "   << this->nInitRem_   << std::endl;
   } else std::cout << "Record 10 Sucessfully Read" << std::endl;
+  this->lenRec10_ = 2*sizeof(int);
 }
 void GauMatEl::readGauRec11_(){
   int NRecs = 5;
@@ -251,13 +259,11 @@ void GauMatEl::readGauRec11_(){
     std::cout << std::setw(15) << std::left << "  NPrimDB: "   << this->nPrimDB_   << std::endl;
     std::cout << std::setw(15) << std::left << "  NBTot: "   << this->nBTot_   << std::endl;
   } else std::cout << "Record 11 Sucessfully Read" << std::endl;
-
+  this->lenRec11_ = this->nInitRem_*sizeof(int);
 }
 void GauMatEl::readInitRecs(){
-  std::cout << "HERE" << std::endl;
   readGauRec1_();
   readGauRec2_();
-  std::cout << "HERE" << std::endl;
   readGauRec3_();
   readGauRec4_();
   readGauRec5_();
@@ -267,4 +273,90 @@ void GauMatEl::readInitRecs(){
   readGauRec9_();
   readGauRec10_();
   readGauRec11_();
+  this->readInit_=true;
+  this->lenInit_ = 
+        this->lenRec1_ +  this->lenRec2_ + this->lenRec3_ +
+        this->lenRec4_ +  this->lenRec5_ + this->lenRec6_ +
+        this->lenRec7_ +  this->lenRec8_ + this->lenRec9_ +
+        this->lenRec10_ + this->lenRec11_;
+}
+void GauMatEl::initHeader_(){
+  GauHeader = {
+    "DIPOLE INTEGRALS",
+    "QUADRUPOLE INTEGRALS",
+    "OCTUPOLE INTEGRALS",
+    "OVERLAP",
+    "CORE HAMILTONIAN ALPHA",
+    "CORE HAMILTONIAN BETA",
+    "KINETIC",
+    "ORTHOGONAL BASIS",
+    "ALPHA ORBITAL ENERGIES",
+    "BETA ORBITAL ENERGIES",
+    "ALPHA MO COEFFICIENTS",
+    "BETA MO COEFFICIENTS",
+    "ALPHA DENSITY MATRIX",
+    "BETA DENSITY MATRIX",
+    "ALPHA SCF DENSITY MATRIX",
+    "BETA SCF DENSITY MATRIX",
+    "ALPHA FOCK MATRIX",
+    "BETA FOCK MATRIX" 
+  };
+
+  for(auto i = 0; i < GauHeader.size(); i++)
+    GauHeader[i].resize(LEN_GAU_STR,' ');
+}
+void GauMatEl::readRec(int rec, double*& data){
+  bool found = false;
+
+  std::string FileTerm = "END";
+  FileTerm.resize(LEN_GAU_STR,' ');
+  infile_.seekg(this->lenInit_,infile_.beg);
+
+  while(!infile_.eof()){
+    int      *ID = NULL;
+    double   *DX = NULL;
+    std::string Label(LEN_GAU_STR,'\0');
+    int NI, NR, NTot, NPerRec, N1, N2, N3, N4, N5, ISym;
+
+    infile_.read(&Label[0],      LEN_GAU_STR );
+    if(!Label.compare(FileTerm)) break;
+
+    infile_.read((char*)&NI,     sizeof(int) );
+    infile_.read((char*)&NR,     sizeof(int) );
+    infile_.read((char*)&NTot,   sizeof(int) );
+    infile_.read((char*)&NPerRec,sizeof(int) );
+    infile_.read((char*)&N1,     sizeof(int) );
+    infile_.read((char*)&N2,     sizeof(int) );
+    infile_.read((char*)&N3,     sizeof(int) );
+    infile_.read((char*)&N4,     sizeof(int) );
+    infile_.read((char*)&N5,     sizeof(int) );
+    infile_.read((char*)&ISym,   sizeof(int) );
+    int NRec = (NTot+NPerRec-1)/NPerRec;
+    ID = new int[NRec*NI*NPerRec];
+    DX = new double[NRec*NR*NPerRec];
+    for(auto iRec = 0; iRec < NRec; iRec++){
+      if(NI != 0) {
+        infile_.read((char*)(ID+iRec*NI*NPerRec),NI*NPerRec*sizeof(int));
+      }
+      if(NR >  0) {
+        infile_.read((char*)(DX+iRec*NR*NPerRec),NR*NPerRec*sizeof(double));
+      }
+    }
+    if(!Label.compare(GauHeader[rec])){
+      delete [] data;
+      data = new double[NTot];
+      for(auto i = 0; i < NTot; i++){
+        std::cout << DX[i] << std::endl;
+        data[i] = DX[i];
+      }
+     
+      found = true;
+      break; 
+    }
+    
+    delete [] ID;
+    delete [] DX;
+  }
+  if(found) std::cout << "FOUND " << GauHeader[rec] << std::endl;
+
 }

@@ -557,6 +557,7 @@ void SingleSlater::printMultipole(){
                      << std::fixed << std::right << std::setw(20) 
                      << (*this->dipole_)(2,0) << endl;
   this->fileio_->out << bannerEnd << endl;
+  this->fileio_->out << *this->quadpole_ << endl << endl;
 }
 /*************************/
 /* MPI Related Routines  */
