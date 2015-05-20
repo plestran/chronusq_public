@@ -58,6 +58,7 @@ namespace ChronusQ {
 
 
   public:
+    inline TVec* eigenvalues(){return this->eigenvalues_.get();};
     inline void run(ostream &output=cout) {
       time_t currentTime;
       std::chrono::high_resolution_clock::time_point start,finish;
