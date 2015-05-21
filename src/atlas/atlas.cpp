@@ -52,14 +52,14 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 
   // read input
   controls->iniControls();
-  readInput(fileIO,molecule,basisset,controls);
+  readInput(fileIO.get(),molecule.get(),basisset.get(),controls.get());
 //  fileIO->iniFileIO(controls->restart);
 
   // print out molecular and basis set information
-  molecule->printInfo(fileIO,controls);
-  basisset->printInfo_libint(fileIO,controls);
-  aointegrals->iniAOIntegrals(molecule,basisset,fileIO,controls);
-  hartreeFock->iniSingleSlater(molecule,basisset,aointegrals,fileIO,controls);
+  molecule->printInfo(fileIO.get(),controls.get());
+  basisset->printInfo_libint(fileIO.get(),controls.get());
+  aointegrals->iniAOIntegrals(molecule.get(),basisset.get(),fileIO.get(),controls.get());
+  hartreeFock->iniSingleSlater(molecule.get(),basisset.get(),aointegrals.get(),fileIO.get(),controls.get());
   hartreeFock->printInfo();
 #ifdef USE_LIBINT
   aointegrals->computeSchwartz();
@@ -144,7 +144,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   cout << endl << VL.transpose()*VR << endl;
 //cout << *A << endl;
 */
-  Davidson<double> dav(&AX,A,NSek,N);
+//Davidson<double> dav(&AX,A,NSek,N);
 //dav.run(fileIO->out);
 //GauMatEl gau("file.out");
 //double * x = NULL;

@@ -33,9 +33,9 @@ using ChronusQ::SingleSlater;
 //------------------------------//
 // allocate memory for matrices //
 //------------------------------//
-void SingleSlater::iniSingleSlater(std::shared_ptr<Molecule> molecule, std::shared_ptr<BasisSet> basisset, 
-                                   std::shared_ptr<AOIntegrals> aointegrals, std::shared_ptr<FileIO> fileio, 
-                                   std::shared_ptr<Controls> controls) {
+void SingleSlater::iniSingleSlater(Molecule * molecule, BasisSet * basisset, 
+                                   AOIntegrals * aointegrals, FileIO * fileio, 
+                                   Controls * controls) {
   int nTotalE = molecule->nTotalE();
   this->nBasis_  = basisset->nBasis();
   this->nTT_   = this->nBasis_*(this->nBasis_+1)/2;

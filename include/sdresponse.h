@@ -42,12 +42,12 @@ class SDResponse {
   int       nBasis_;
   int       **R2Index_;
   int       nStates_;
-  std::shared_ptr<BasisSet>      basisSet_;
-  std::shared_ptr<Molecule>      molecule_;
-  std::shared_ptr<FileIO>        fileio_;
-  std::shared_ptr<Controls>      controls_;
-  std::shared_ptr<MOIntegrals>   mointegrals_;
-  std::shared_ptr<SingleSlater>  singleSlater_;
+  BasisSet *      basisSet_;
+  Molecule *      molecule_;
+  FileIO *        fileio_;
+  Controls *      controls_;
+  MOIntegrals *   mointegrals_;
+  SingleSlater *  singleSlater_;
 
 public:
  
@@ -55,9 +55,9 @@ public:
   SDResponse(){;};
   ~SDResponse() {;};
   // pseudo-constructor
-  void iniSDResponse(std::shared_ptr<Molecule>,std::shared_ptr<BasisSet>,
-                     std::shared_ptr<MOIntegrals>,std::shared_ptr<FileIO>,
-                     std::shared_ptr<Controls>,std::shared_ptr<SingleSlater>);
+  void iniSDResponse(Molecule *,BasisSet *,
+                     MOIntegrals *,FileIO *,
+                     Controls *,SingleSlater *);
 
   void computeExcitedStates();         // compute the total electronic energy
   void printExcitedStateEnergies(); 

@@ -35,7 +35,7 @@ typedef libint2::Shell CShell;
 typedef libint2::Shell LIShell;
 std::vector<libint2::Shell> shells_libint_unnormal;
 
-void BasisSet::basisSetRead(std::shared_ptr<FileIO> fileio, std::shared_ptr<Molecule> mol){
+void BasisSet::basisSetRead(FileIO * fileio, Molecule * mol){
   std::vector<double> coeff;
   std::vector<double> coeffP;
   std::vector<double> exp;
@@ -202,7 +202,7 @@ void BasisSet::basisSetRead(std::shared_ptr<FileIO> fileio, std::shared_ptr<Mole
   fileBasis->close();
 }
 
-void BasisSet::makeMap(std::shared_ptr<Molecule>  mol) {
+void BasisSet::makeMap(Molecule *  mol) {
   if(!this->convToLI) this->convShell(mol);
   int n = 0;
   for( auto shell: this->shells_libint) {
@@ -212,7 +212,7 @@ void BasisSet::makeMap(std::shared_ptr<Molecule>  mol) {
   this->haveMap = true;
 }
 
-void BasisSet::computeShBlkNorm(std::shared_ptr<Molecule> mol, const RealMatrix *D){
+void BasisSet::computeShBlkNorm(Molecule * mol, const RealMatrix *D){
   // This will be much easier in Eigen
   //if(!this->convToLI) this->convShell(mol);
   if(!this->haveMap)  this->makeMap(mol);
@@ -234,7 +234,7 @@ void BasisSet::computeShBlkNorm(std::shared_ptr<Molecule> mol, const RealMatrix 
 //---------------------------------------//
 // print a general basis set information //
 //---------------------------------------//
-void BasisSet::printInfo_libint(std::shared_ptr<FileIO> fileio,std::shared_ptr<Controls> controls) {
+void BasisSet::printInfo_libint(FileIO * fileio,Controls * controls) {
   fileio->out<<"\nBasis Function Information:"<<endl;
   for(auto i=0;i<this->nLShell_.size();i=i+2){
     fileio->out <<std::setw(15) << "n" <<HashS(i)<<"Shell =" << std::setw(8) << this->nLShell_[i] << std::setw(5) << " "

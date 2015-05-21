@@ -62,11 +62,11 @@ class SingleSlater {
   std::unique_ptr<RealMatrix>  PTB_;
   std::unique_ptr<RealMatrix>  dipole_;
   std::unique_ptr<RealMatrix>  quadpole_;
-  std::shared_ptr<BasisSet>    basisset_;
-  std::shared_ptr<Molecule>    molecule_;
-  std::shared_ptr<FileIO>      fileio_;
-  std::shared_ptr<Controls>    controls_;
-  std::shared_ptr<AOIntegrals> aointegrals_;
+  BasisSet *    basisset_;
+  Molecule *    molecule_;
+  FileIO *      fileio_;
+  Controls *    controls_;
+  AOIntegrals * aointegrals_;
 
 public:
  
@@ -85,9 +85,9 @@ public:
   SingleSlater(){;};
   ~SingleSlater() {;};
   // pseudo-constructor
-  void iniSingleSlater(std::shared_ptr<Molecule>,std::shared_ptr<BasisSet>,
-                       std::shared_ptr<AOIntegrals>,std::shared_ptr<FileIO>,
-                       std::shared_ptr<Controls>);
+  void iniSingleSlater(Molecule *,BasisSet *,
+                       AOIntegrals *,FileIO *,
+                       Controls *);
 
   //set private data
   inline void setNBasis(int nBasis) { this->nBasis_ = nBasis;};

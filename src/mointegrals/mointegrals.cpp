@@ -33,8 +33,8 @@ using ChronusQ::MOIntegrals;
 //---------------------
 // initialize MOIntegrals
 //---------------------
-void MOIntegrals::iniMOIntegrals(   std::shared_ptr<Molecule> molecule, std::shared_ptr<BasisSet> basisSet, std::shared_ptr<FileIO> fileio, 
-                                    std::shared_ptr<Controls> controls, std::shared_ptr<AOIntegrals> aointegrals, std::shared_ptr<SingleSlater> singleSlater){
+void MOIntegrals::iniMOIntegrals(   Molecule * molecule, BasisSet * basisSet, FileIO * fileio, 
+                                    Controls * controls, AOIntegrals * aointegrals, SingleSlater * singleSlater){
   this->molecule_ = molecule;
   this->basisSet_ = basisSet;
   this->fileio_   = fileio;
