@@ -475,6 +475,7 @@ void SingleSlater::readGuessGauMatEl(GauMatEl& matEl){
     prettyPrint(this->fileio_->out,(*this->moA_),"Alpha MO Coeff");
     if(!this->RHF_) prettyPrint(this->fileio_->out,(*this->moB_),"Beta MO Coeff");
   };
+  delete [] scr;
   this->haveMO = true;
 }
 //-----------------------------------------------------------------------//
