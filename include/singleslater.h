@@ -123,6 +123,7 @@ public:
   void formExchange();		// form the exchange matrix
   void formPT();
   void readGuessIO();       	// read the initial guess of MO's from the input stream
+  void readGuessGauMatEl(GauMatEl&); // read the intial guess of MO's from Gaussian raw matrix element file
   void readGuessGauFChk(std::string &);	// read the initial guess of MO's from the Gaussian formatted checkpoint file
   void computeEnergy();         // compute the total electronic energy
   void computeMultipole();      // compute multipole properties

@@ -25,7 +25,6 @@
  */
 #include <workers.h>
 #include <davidson.h>
-#include <gauinterface.h>
 using namespace ChronusQ;
 
 RealMatrix AX(const RealMatrix &A, const RealMatrix &B) {return A*B;};
@@ -68,7 +67,10 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 #endif
   if(controls->guess==0) hartreeFock->formGuess();
   else if(controls->guess==1) hartreeFock->readGuessIO();
-  else if(controls->guess==2) ;
+  else if(controls->guess==2) {
+    GauMatEl matEl(controls->gauMatElName);
+    hartreeFock->readGuessGauMatEl(matEl);
+  }
   else if(controls->guess==3) hartreeFock->readGuessGauFChk(controls->gauFChkName);
   hartreeFock->formFock();
   aointegrals->printTimings();

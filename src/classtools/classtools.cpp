@@ -95,6 +95,9 @@ void readInput(std::shared_ptr<FileIO> fileio, std::shared_ptr<Molecule> mol,
       readString=stringupper(readString);  
       if(!readString.compare("INPUT")) {
         controls->guess = 1;
+      } else if(!readString.compare("GAUMATEL")) {
+        controls->guess = 2;
+        fileio->in>>controls->gauMatElName;
       } else if(!readString.compare("GAUFCHK")) {
         controls->guess = 3;
         fileio->in>>controls->gauFChkName;

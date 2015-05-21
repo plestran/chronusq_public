@@ -69,6 +69,7 @@
 #include <memory>
 #include <exception>
 #include <stdexcept>
+#include <gauinterface.h>
 
 //using namespace std;
 /* Things from STD that we need always */
