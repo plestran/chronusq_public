@@ -32,17 +32,17 @@ RealMatrix AX(const RealMatrix &A, const RealMatrix &B) {return A*B;};
 int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   int i,j,k,l;
   time_t currentTime;
-  auto molecule     	= std::make_shared<Molecule>();
-  auto basisset     	= std::make_shared<BasisSet>();
-  auto controls     	= std::make_shared<Controls>();
-  auto aointegrals	= std::make_shared<AOIntegrals>();
-  auto hartreeFock	= std::make_shared<SingleSlater>();
-  std::shared_ptr<FileIO> fileIO;
+  auto molecule     	= std::unique_ptr<Molecule>(new Molecule());
+  auto basisset     	= std::unique_ptr<BasisSet>(new BasisSet());
+  auto controls     	= std::unique_ptr<Controls>(new Controls());
+  auto aointegrals	= std::unique_ptr<AOIntegrals>(new AOIntegrals());
+  auto hartreeFock	= std::unique_ptr<SingleSlater>(new SingleSlater());
+  std::unique_ptr<FileIO> fileIO;
 
   std::vector<std::string> argv_string;
   for(auto i = 1; i < argc; ++i) if(argv[i][0]=='-') argv_string.push_back(argv[i]);
-  if(argv_string.size()==0) fileIO = std::make_shared<FileIO>(argv[1]);
-  else fileIO = std::make_shared<FileIO>(argv_string);
+  if(argv_string.size()==0) fileIO = std::unique_ptr<FileIO>(new FileIO(argv[1]));
+  else fileIO = std::unique_ptr<FileIO>(new FileIO(argv_string));
 
 
   // print out the starting time of the job
