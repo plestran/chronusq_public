@@ -192,11 +192,17 @@ void SDResponse::formRM(){
   B.block(0,nOV,nOV,nOV) = Aod;
   B.block(nOV,0,nOV,nOV) = Aod;
   
+  cout << "Return Permutation" <<endl;
+  RealMatrix Permt(2*nOV,1);
+  Permt = ReturnDiag();
+  cout << Permt << endl;
+  
   // Davison(A)
   std::shared_ptr<RealMatrix> Aptr = std::make_shared<RealMatrix>(2*nOV,2*nOV);
   *Aptr = A;
 
-  Davidson<double> davA(Aptr,4);
+  //Davidson<double> davA(Aptr,4);
+  Davidson<double> davA(this,Davidson<double>::CIS,3);
   davA.run(this->fileio_->out);
   cout << "The lowest 4 eigenvalue solved by Davidson Algorithm:" <<endl;
   cout << *davA.eigenvalues() << endl;
@@ -386,6 +392,73 @@ RealMatrix SDResponse::formRM2(RealMatrix &XMO){
 
   return AX;
 }
+
+RealMatrix SDResponse::ReturnDiag(){
+  int nO = this->singleSlater_->nOccA();
+  int nV = this->singleSlater_->nVirA();
+  int nOV = nO*nV;
+  RealMatrix EigO(nO,1);
+  RealMatrix EigV(nV,1);
+  for (auto i=0;i<nO;i++){
+    EigO(i,0) = (*this->singleSlater_->epsA())(i,0);
+    cout << "The " << (i+1) << " eigenvalue in Occupied is: " << EigO(i,0) << endl;
+  }
+  for (auto j=0;j<nV;j++){
+    EigV(j,0) = (*this->singleSlater_->epsA())((j+nO),0);
+    cout << "The " << (j+1) << " eigenvalue in Virtual is: " << EigV(j,0) << endl;
+  }
+
+  RealMatrix PDiag(2*nOV,1);
+  for (auto a=0;a<nV;a++)
+  for (auto i=0;i<nO;i++)
+  {
+    PDiag(a*nO+i,0) = EigV(a,0)-EigO(i,0);
+    PDiag(a*nO+i+nOV,0) = EigV(a,0)-EigO(i,0);
+  }
+  cout << "Pseudo Diagonal" << endl;
+  cout << PDiag << endl;
+
+  double temp1;
+  double temp2;
+  bool isSorted;
+  RealMatrix Permt(2*nOV,1);
+  for (auto i=0;i<2*nOV;i++)
+  {
+    Permt(i,0) = i;
+  }
+  cout << "Print inital index" <<endl;
+  cout << Permt << endl;
+  for (auto i=0;i<2*nOV-1;i++)
+  {
+    isSorted = true;
+    for (auto j=0;j<2*nOV-1;j++)
+    {
+      if (PDiag(j,0)>PDiag(j+1,0))
+      {
+        isSorted=false;
+        temp1=PDiag(j,0);
+        temp2=Permt(j,0);
+        PDiag(j,0)=PDiag(j+1,0);
+        Permt(j,0)=Permt(j+1,0);
+        PDiag(j+1,0)=temp1;
+        Permt(j+1,0)=temp2;
+      }
+    }
+  }
+  cout << "After sort" <<endl;
+  cout << Permt << endl;
+  
+  RealMatrix GVec(2*nOV,2*nOV);
+  GVec.Zero(2*nOV,2*nOV);
+  for (auto i=0;i<2*nOV;i++)
+  {
+    GVec(Permt(i,0),i) = 1.0;
+  }
+  cout << "Print out the new Guess Vector" << endl;
+  cout << GVec << endl;
+  return Permt;
+}
+
 
 /*************************/
 /* MPI Related Routines  */

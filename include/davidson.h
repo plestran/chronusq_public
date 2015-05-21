@@ -35,11 +35,6 @@ namespace ChronusQ {
  */
   template <typename T>
   class Davidson {
-    enum{
-      CIS,
-      RPA,
-      CCSD
-    };
     typedef Eigen::Matrix<T,Dynamic,Dynamic,RowMajor> TMat;
     typedef Eigen::Matrix<T,Dynamic,1> TVec;
     int     n_;          // Dimension of the problem (LDA)
@@ -63,10 +58,16 @@ namespace ChronusQ {
     TMat (*AX_)(const TMat &, const TMat &) ;      // Function to form AX
 
     int method_;
-    std::shared_ptr<SDResponse> sdr_;
+    SDResponse *  sdr_;
 
 
   public:
+    enum{
+      __invalid,
+      CIS,
+      RPA,
+      CCSD
+    };
     inline TVec* eigenvalues(){return this->eigenvalues_.get();};
     // Run the Davidson
     inline void run(ostream &output=cout) {
@@ -174,7 +175,7 @@ namespace ChronusQ {
       (*this->guess_) = TMat::Identity(this->n_,this->nGuess_); // Identity guess (primitive)
     }
 
-    Davidson(std::shared_ptr<ChronusQ::SDResponse> SDR, int meth, int nSek){
+    Davidson(SDResponse* SDR, int meth, int nSek){
       this->maxSubSpace_ = 250;
       this->maxIter_     = 128;
       this->MaxIter_     = 20;
@@ -183,8 +184,8 @@ namespace ChronusQ {
       this->mat_    = nullptr;
       this->AX_     = NULL;
       this->nSek_   = nSek;
-      this->nGuess_ = 2*nSek;
-//    this->n_      = N;
+      this->nGuess_ = nSek;
+      this->n_      = SDR->nOV();
       this->method_ = meth;
       this->sdr_    = SDR;
 /*

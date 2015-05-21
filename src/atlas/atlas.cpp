@@ -90,6 +90,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   sdResponse->computeExcitedStates();
   sdResponse->formRM();
   sdResponse->formRM2(XMO);
+  sdResponse->ReturnDiag();
 
 //APS
  int Iop=0;

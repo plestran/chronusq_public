@@ -63,11 +63,13 @@ public:
                      std::shared_ptr<MOIntegrals>,std::shared_ptr<FileIO>,
                      std::shared_ptr<Controls>,std::shared_ptr<SingleSlater>);
 
+  inline int nOV(){return this->singleSlater_->nOV();};
   void computeExcitedStates();         // compute the total electronic energy
   void printExcitedStateEnergies(); 
   void printInfo();
   void formRM();
   RealMatrix formRM2(RealMatrix &XMO);
+  RealMatrix ReturnDiag();
 
   /*************************/
   /* MPI Related Routines  */

@@ -103,10 +103,11 @@ public:
   inline int nBE()    { return this->nBE_;};
   inline int nOccA()  { return this->nOccA_;};
   inline int nOccB()  { return this->nOccB_;}
-  inline int nVirA()  { return this->nVirB_;};
+  inline int nVirA()  { return this->nVirA_;};
   inline int nVirB()  { return this->nVirB_;};
   inline int RHF()    { return this->RHF_; };
   inline int spin()   { return this->spin_; };
+  inline int nOV()    { return 2*nOccA_*nVirA_;};
   inline RealMatrix* densityA() { return this->densityA_.get();};
   inline RealMatrix* densityB() { return this->densityB_.get();};
   inline RealMatrix* fockA()    { return this->fockA_.get();};
