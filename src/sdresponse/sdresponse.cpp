@@ -33,7 +33,6 @@ using ChronusQ::MOIntegrals;
 using ChronusQ::SDResponse;
 using ChronusQ::SingleSlater;
 using ChronusQ::Davidson; 
-using ChronusQ::AOIntegrals;
 using std::cout;
 using std::setw;
 //------------------------------//
@@ -211,7 +210,7 @@ void SDResponse::formRM(){
          << (CIS.eigenvalues())(i) << endl;
   }
   
-  RealMatrix XMO = CIS.eigenvectors().col(1);
+  RealMatrix XMO = CIS.eigenvectors().col(0);
   formRM2(XMO);
 
   // LR TDHF routine
@@ -330,7 +329,7 @@ RealMatrix SDResponse::formRM2(RealMatrix &XMO){
     }
     RealMatrix IXAO1t(this->nBasis_,this->nBasis_);
     // Contract A_AAAA( <mn||ls> ) with XA
-    AOIntegrals::twoEContract(false,XAAO,IXAO1t);
+    this->singleSlater_->aointegrals()->twoEContract(false,XAAO,IXAO1t);
     cout << "Direct Contraction" << endl;
     cout << IXAO1t << endl;
     contract(1.0,XAAOTsr,{sig,nu},Dmnls,{mu,nu,lam,sig},0.0,IXAO1,{mu,lam});
