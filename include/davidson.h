@@ -25,6 +25,7 @@
  */
 #include <global.h>
 #include <cerr.h>
+#include <sdresponse.h>
 #ifndef INCLUDED_DAVIDSON
 #define INCLUDED_DAVIDSON
 namespace ChronusQ {
@@ -34,15 +35,20 @@ namespace ChronusQ {
  */
   template <typename T>
   class Davidson {
+    enum{
+      CIS,
+      RPA,
+      CCSD
+    };
     typedef Eigen::Matrix<T,Dynamic,Dynamic,RowMajor> TMat;
     typedef Eigen::Matrix<T,Dynamic,1> TVec;
     int     n_;          // Dimension of the problem (LDA)
-    std::shared_ptr<TMat> mat_;        // The full matrix to be diagonalized (?)
-    bool                  hermetian_;  // Whether or not the problem is hemetian
+    TMat*   mat_;        // The full matrix to be diagonalized (?)
+    bool    hermetian_;  // Whether or not the problem is hemetian
 
-    std::shared_ptr<TMat> guess_;      // Guess vectors
-    std::shared_ptr<TVec> eigenvalues_;
-    std::shared_ptr<TMat> eigenvector_;
+    std::unique_ptr<TMat> guess_;      // Guess vectors
+    std::unique_ptr<TVec> eigenvalues_;
+    std::unique_ptr<TMat> eigenvector_;
 
 
     int     maxSubSpace_; // Maximum iterative subspace
@@ -56,8 +62,12 @@ namespace ChronusQ {
     bool useLAPACK_;
     TMat (*AX_)(const TMat &, const TMat &) ;      // Function to form AX
 
+    int method_;
+    SDResponse * sdr_;
+
 
   public:
+    // Run the Davidson
     inline void run(ostream &output=cout) {
       time_t currentTime;
       std::chrono::high_resolution_clock::time_point start,finish;
@@ -76,6 +86,8 @@ namespace ChronusQ {
       output << "Time Elapsed: " << elapsed.count() << " sec" << endl;
       output << bannerEnd << endl << endl;;
     };
+
+    // Default contructor (nothing interesting...)
     Davidson() {
       this->mat_         = nullptr;
       this->AX_          = NULL;
@@ -91,9 +103,12 @@ namespace ChronusQ {
       this->converged_   = false;
       this->hermetian_   = false;
       this->useLAPACK_   = true;
+      this->method_      = -1;
+      this->sdr_    = nullptr;
     }
 
-    Davidson(std::shared_ptr<TMat> A, int nSek) {
+    // Pass a ptr to a matrix to be diagonalized
+    Davidson(TMat* A, int nSek) {
       this->maxSubSpace_ = 250;
       this->maxIter_     = 128;
       this->MaxIter_     = 20;
@@ -104,25 +119,29 @@ namespace ChronusQ {
       this->nSek_   = nSek;
       this->nGuess_ = 2*nSek;
       this->n_      = A->cols();
-/*
+      this->method_      = -1;
+      this->sdr_    = nullptr;
       this->guess_  = 
         std::unique_ptr<TMat>(new TMat(this->n_,this->nGuess_));
       this->eigenvalues_ = 
         std::unique_ptr<TMat>(new TMat(this->nSek_,1));
       this->eigenvector_ = 
         std::unique_ptr<TMat>(new TMat(this->n_,this->nSek_));
-*/
+/*
       this->guess_  = 
         std::make_shared<TMat>(this->n_,this->nGuess_);
       this->eigenvalues_ = 
         std::make_shared<TVec>(this->nSek_);
       this->eigenvector_ = 
         std::make_shared<TMat>(this->n_,this->nSek_);
+*/
       this->hermetian_ = true; // Only supports Hermetian for time being
 
       (*this->guess_) = TMat::Identity(this->n_,this->nGuess_); // Identity guess (primitive)
     }
-    Davidson(TMat (*AX)(const TMat&, const TMat&), std::shared_ptr<TMat> A, int nSek, int N) {
+
+    // Pass a function to compute AX (dummy routine to test function passing
+    Davidson(TMat (*AX)(const TMat&, const TMat&), TMat * A, int nSek, int N) {
       this->maxSubSpace_ = 250;
       this->maxIter_     = 128;
       this->MaxIter_     = 20;
@@ -133,23 +152,58 @@ namespace ChronusQ {
       this->nSek_   = nSek;
       this->nGuess_ = 2*nSek;
       this->n_      = N;
-/*
+      this->method_      = -1;
+      this->sdr_    = nullptr;
       this->guess_  = 
         std::unique_ptr<TMat>(new TMat(this->n_,this->nGuess_));
       this->eigenvalues_ = 
         std::unique_ptr<TMat>(new TMat(this->nSek_,1));
       this->eigenvector_ = 
         std::unique_ptr<TMat>(new TMat(this->n_,this->nSek_));
-*/
+/*
       this->guess_  = 
         std::make_shared<TMat>(this->n_,this->nGuess_);
       this->eigenvalues_ = 
         std::make_shared<TVec>(this->nSek_);
       this->eigenvector_ = 
         std::make_shared<TMat>(this->n_,this->nSek_);
+*/
       this->hermetian_ = true; // Only supports Hermetian for time being
 
       (*this->guess_) = TMat::Identity(this->n_,this->nGuess_); // Identity guess (primitive)
+    }
+
+    Davidson(SDResponse * SDR, int meth, int nSek){
+      this->maxSubSpace_ = 250;
+      this->maxIter_     = 128;
+      this->MaxIter_     = 20;
+      this->converged_   = false;
+      this->useLAPACK_   = false; // Use LAPACK by default
+      this->mat_    = nullptr;
+      this->AX_     = NULL;
+      this->nSek_   = nSek;
+      this->nGuess_ = 2*nSek;
+//    this->n_      = N;
+      this->method_ = meth;
+      this->sdr_    = SDR;
+      this->guess_  = 
+        std::unique_ptr<TMat>(new TMat(this->n_,this->nGuess_));
+      this->eigenvalues_ = 
+        std::unique_ptr<TMat>(new TMat(this->nSek_,1));
+      this->eigenvector_ = 
+        std::unique_ptr<TMat>(new TMat(this->n_,this->nSek_));
+/*
+      this->guess_  = 
+        std::make_shared<TMat>(this->n_,this->nGuess_);
+      this->eigenvalues_ = 
+        std::make_shared<TVec>(this->nSek_);
+      this->eigenvector_ = 
+        std::make_shared<TMat>(this->n_,this->nSek_);
+*/
+      this->hermetian_ = true; // Only supports Hermetian for time being
+
+      (*this->guess_) = TMat::Identity(this->n_,this->nGuess_); // Identity guess (primitive)
+
     }
     ~Davidson(){;};
     

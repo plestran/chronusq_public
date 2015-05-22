@@ -33,8 +33,8 @@ using ChronusQ::Controls;
 /* memory allocations are done here too         */
 /************************************************/
 namespace ChronusQ {
-void readInput(std::shared_ptr<FileIO> fileio, std::shared_ptr<Molecule> mol, 
-               std::shared_ptr<BasisSet> basis,std::shared_ptr<Controls> controls) {
+void readInput(FileIO * fileio, Molecule * mol, 
+               BasisSet * basis,Controls * controls) {
   int i, j, n, readInt;
   std::string readString;
   fileio->in >> readString;
@@ -95,6 +95,9 @@ void readInput(std::shared_ptr<FileIO> fileio, std::shared_ptr<Molecule> mol,
       readString=stringupper(readString);  
       if(!readString.compare("INPUT")) {
         controls->guess = 1;
+      } else if(!readString.compare("GAUMATEL")) {
+        controls->guess = 2;
+        fileio->in>>controls->gauMatElName;
       } else if(!readString.compare("GAUFCHK")) {
         controls->guess = 3;
         fileio->in>>controls->gauFChkName;

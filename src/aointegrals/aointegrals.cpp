@@ -76,8 +76,8 @@ static double factTLarge[21] = {
 //---------------------
 // initialize AOIntegrals
 //---------------------
-void AOIntegrals::iniAOIntegrals(std::shared_ptr<Molecule> molecule, std::shared_ptr<BasisSet> basisset, 
-                                 std::shared_ptr<FileIO> fileio, std::shared_ptr<Controls> controls,std::shared_ptr<BasisSet> DFbasisSet){
+void AOIntegrals::iniAOIntegrals(Molecule * molecule, BasisSet * basisset, 
+                                 FileIO * fileio, Controls * controls,BasisSet * DFbasisSet){
   this->molecule_ = molecule;
   this->basisSet_ = basisset;
   this->DFbasisSet_ = DFbasisSet;
@@ -89,40 +89,43 @@ void AOIntegrals::iniAOIntegrals(std::shared_ptr<Molecule> molecule, std::shared
   // FIXME need a try statement for alloc
 #ifndef USE_LIBINT // We don't need to allocate these if we're using Libint
   try {
-    this->twoEC_ = std::make_shared<RealMatrix>(this->nTT_,this->nTT_); // Raffenetti Two Electron Coulomb AOIntegrals
-    this->twoEX_ = std::make_shared<RealMatrix>(this->nTT_,this->nTT_); // Raffenetti Two Electron Exchange AOIntegrals
+    this->twoEC_ = std::unique_ptr<RealMatrix>(new RealMatrix(this->nTT_,this->nTT_)); // Raffenetti Two Electron Coulomb AOIntegrals
+    this->twoEX_ = std::unique_ptr<RealMatrix>(new RealMatrix(this->nTT_,this->nTT_)); // Raffenetti Two Electron Exchange AOIntegrals
   } catch (...) {
     CErr(std::current_exception(),"Coulomb and Exchange Tensor(R4) Allocation");
   }
 #else 
   try {
     if(this->controls_->buildn4eri) 
-      this->aoERI_ = std::make_shared<RealTensor4d>(this->nBasis_,this->nBasis_,this->nBasis_,this->nBasis_);
+      this->aoERI_ = std::unique_ptr<RealTensor4d>(new RealTensor4d(this->nBasis_,this->nBasis_,this->nBasis_,this->nBasis_));
   } catch (...) {
     CErr(std::current_exception(),"N^4 ERI Tensor Allocation");
   }
 #endif
   try {
-    this->oneE_         = std::make_shared<RealMatrix>(this->nBasis_,this->nBasis_); // One Electron Integral
-    this->overlap_      = std::make_shared<RealMatrix>(this->nBasis_,this->nBasis_); // Overlap
-    this->kinetic_      = std::make_shared<RealMatrix>(this->nBasis_,this->nBasis_); // Kinetic
-    this->potential_    = std::make_shared<RealMatrix>(this->nBasis_,this->nBasis_); // Potential
-    if(this->controls_->doDipole || this->controls_->doQuadpole){
-      this->elecDipole_   = std::make_shared<RealTensor3d>(3,this->nBasis_,this->nBasis_); // Electic Dipole
+    this->oneE_         = std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nBasis_)); // One Electron Integral
+    this->overlap_      = std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nBasis_)); // Overlap
+    this->kinetic_      = std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nBasis_)); // Kinetic
+    this->potential_    = std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nBasis_)); // Potential
+    if(this->controls_->doDipole || this->controls_->doQuadpole || this->controls_->doOctpole){
+      this->elecDipole_   = std::unique_ptr<RealTensor3d>(new RealTensor3d(3,this->nBasis_,this->nBasis_)); // Electic Dipole
     }
-    if(this->controls_->doQuadpole) {
-      this->elecQuadpole_ = std::make_shared<RealTensor3d>(6,this->nBasis_,this->nBasis_); // Electic Quadrupole
+    if(this->controls_->doQuadpole || this->controls_->doOctpole) {
+      this->elecQuadpole_ = std::unique_ptr<RealTensor3d>(new RealTensor3d(6,this->nBasis_,this->nBasis_)); // Electic Quadrupole
+    }
+    if(this->controls_->doOctpole){
+      this->elecOctpole_ = std::unique_ptr<RealTensor3d>(new RealTensor3d(10,this->nBasis_,this->nBasis_)); // Electic Octupole
     }
   } catch (...) {
     CErr(std::current_exception(),"One Electron Integral Tensor Alloation (All)");
   }
 #ifdef USE_LIBINT
-  try { this->schwartz_ = std::make_shared<RealMatrix>(this->basisSet_->nShell(),this->basisSet_->nShell()); }// Schwartz  
+  try { this->schwartz_ = std::unique_ptr<RealMatrix>(new RealMatrix(this->basisSet_->nShell(),this->basisSet_->nShell())); }// Schwartz  
   catch (...) { CErr(std::current_exception(),"Schwartz Bound Tensor Allocation"); }
   if(this->controls_->doDF) {
     try { 
-      this->aoRII_ = std::make_shared<RealTensor3d>(this->basisSet_->nBasis(),this->basisSet_->nBasis(),this->DFbasisSet_->nBasis()); 
-      this->aoRIS_ = std::make_shared<RealTensor2d>(this->DFbasisSet_->nBasis(),this->DFbasisSet_->nBasis());
+      this->aoRII_ = std::unique_ptr<RealTensor3d>(new RealTensor3d(this->basisSet_->nBasis(),this->basisSet_->nBasis(),this->DFbasisSet_->nBasis())); 
+      this->aoRIS_ = std::unique_ptr<RealTensor2d>(new RealTensor2d(this->DFbasisSet_->nBasis(),this->DFbasisSet_->nBasis()));
     } catch (...) { CErr(std::current_exception(),"Density Fitting Tensor Allocation");}
   }
 #endif
@@ -357,7 +360,9 @@ void AOIntegrals::iniMolecularConstants(){
 void AOIntegrals::printTimings() {
     this->fileio_->out << endl << "Timing Statistics: "<<endl << bannerTop << endl;
     this->fileio_->out << endl << "One Electron Integral Timings" << endl << bannerMid << endl;
-    if(this->controls_->doQuadpole) {
+    if(this->controls_->doOctpole) {
+      this->fileio_->out << std::left << std::setw(60) << "Wall time for Overlap + Dipole + Quadrupole + Octupole"; 
+    } else if(this->controls_->doQuadpole) {
       this->fileio_->out << std::left << std::setw(60) << "Wall time for Overlap + Dipole + Quadrupole evaluation:"; 
     } else if(this->controls_->doDipole) {
       this->fileio_->out << std::left << std::setw(60) << "Wall time for Overlap + Dipole evaluation:"; 
@@ -365,6 +370,8 @@ void AOIntegrals::printTimings() {
       this->fileio_->out << std::left << std::setw(60) << "Wall time for Overlap evaluation:"; 
     }
     this->fileio_->out << std::left << std::setw(15) << this->SED.count() << " sec" << endl;
+    if(this->controls_->doOctpole)
+      this->fileio_->out << std::left << "evaluation:" << endl;
     this->fileio_->out << std::left << std::setw(60) << "Wall time for Kinetic evaluation:" 
                        << std::left << std::setw(15) << this->TED.count() << " sec" << endl;
     this->fileio_->out << std::left << std::setw(60) << "Wall time for Nuclear Attraction Potential evaluation:" 

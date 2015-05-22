@@ -33,7 +33,7 @@ using ChronusQ::HashL;
 typedef ChronusQ::Shell CShell;
 typedef libint2::Shell LIShell;
 
-void BasisSet::convShell(std::shared_ptr<Molecule> mol) {
+void BasisSet::convShell(Molecule * mol) {
   std::vector<double> coeff;
   std::vector<double> exp;
   std::array<double,3> center;
@@ -71,7 +71,7 @@ void BasisSet::convShell(std::shared_ptr<Molecule> mol) {
   this->convToLI = true;
 }
 /*
-void BasisSet::makeMap(std::shared_ptr<Molecule>  mol) {
+void BasisSet::makeMap(Molecule *  mol) {
   if(!this->convToLI) this->convShell(mol);
   int n = 0;
   for( auto shell: this->shells_libint) {
@@ -81,7 +81,7 @@ void BasisSet::makeMap(std::shared_ptr<Molecule>  mol) {
   this->haveMap = true;
 }
 
-void BasisSet::computeShBlkNorm(std::shared_ptr<Molecule> mol, const RealMatrix *D){
+void BasisSet::computeShBlkNorm(Molecule * mol, const RealMatrix *D){
   // This will be much easier in Eigen
   if(!this->convToLI) this->convShell(mol);
   if(!this->haveMap)  this->makeMap(mol);
