@@ -48,6 +48,7 @@ void SingleSlater::SCF(){
   
   int i;
   X=(*this->aointegrals_->overlap_).pow(-0.5);
+//this->fileio_->out << X << endl << endl;
   for (i=0; i<maxIte;i++){
     this->fileio_->out << endl << endl << bannerTop <<endl;  
     this->fileio_->out << "SCF iteration:"<< i+1 <<endl;  
@@ -56,8 +57,10 @@ void SingleSlater::SCF(){
     P_old = (*this->densityA_);
     E_old = this->totalEnergy;
     Fp    = X.transpose()*(*this->fockA_)*X;
+//  this->fileio_->out << Fp << endl << endl;
     Eigen::SelfAdjointEigenSolver<RealMatrix> sys(Fp);
     Cp    = sys.eigenvectors();
+//  this->fileio_->out << Cp << endl << endl;
     
     //(*this->epsA_)= sys.eigenvalues();
     (*this->moA_) = X*Cp;
