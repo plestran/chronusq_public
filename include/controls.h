@@ -59,7 +59,7 @@ public:
   int    	guess;         	// how to get the initial guess
   int           nthreads;       // Number of OpenMP threads
   std::string   gauFChkName;	// Gaussian formatted checkpoint filename
-  std::string   gauMalElName;   // Gaussian raw matrix element file
+  std::string   gauMatElName;   // Gaussian raw matrix element file
 
   Controls(){;};
   ~Controls(){;};

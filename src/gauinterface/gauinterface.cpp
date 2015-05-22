@@ -69,7 +69,7 @@ void GauMatEl::readGauRec1_(){
     std::cout << std::setw(15) << std::left << "  GVers:  " << 
                  this->gVers_  << std::endl;
   } 
-  else std::cout << "Record 1 Sucessfully Read" << std::endl;
+//else std::cout << "Record 1 Sucessfully Read" << std::endl;
   this->lenRec1_ = 2*LEN_GAU_STR + 2*sizeof(int);
 
 }
@@ -119,7 +119,7 @@ void GauMatEl::readGauRec2_(){
     std::cout << std::setw(15) << std::left << "  ICGU:    " << 
                  this->iCGU_   << std::endl; 
   }
-  else std::cout << "Record 2 Sucessfully Read" << std::endl;
+//else std::cout << "Record 2 Sucessfully Read" << std::endl;
   this->lenRec2_ = LEN_GAU_STR + 10*sizeof(int);
 
 }
@@ -135,7 +135,7 @@ void GauMatEl::readGauRec3_(){
       std::cout << std::setw(15) << std::left << " " << 
                    *(this->iAn_+i) << std::endl;
   }
-  else std::cout << "Record 3 Sucessfully Read" << std::endl;
+//else std::cout << "Record 3 Sucessfully Read" << std::endl;
   this->lenRec3_ = (this->nAtoms_+this->nAtoms_%2)*sizeof(int);
 }
 void GauMatEl::readGauRec4_(){
@@ -149,7 +149,8 @@ void GauMatEl::readGauRec4_(){
     for(auto i = 0; i < this->nAtoms_+this->nAtoms_%2; i++) 
       std::cout << std::setw(15) << std::left << " " << 
                    *(this->iAtTyp_+i) << std::endl;
-  } else std::cout << "Record 4 Sucessfully Read" << std::endl;
+  } 
+//else std::cout << "Record 4 Sucessfully Read" << std::endl;
   this->lenRec4_ = (this->nAtoms_+this->nAtoms_%2)*sizeof(int);
 }
 void GauMatEl::readGauRec5_(){
@@ -161,7 +162,8 @@ void GauMatEl::readGauRec5_(){
     std::cout << std::setw(15) << std::left << "  AtmChg_: " << std::endl;
     for(auto i = 0; i < this->nAtoms_; i++) 
       std::cout << std::setw(15) << std::fixed << std::left << " " << *(this->atmChg_+i) << std::endl;
-  } else std::cout << "Record 5 Sucessfully Read" << std::endl;
+  } 
+//else std::cout << "Record 5 Sucessfully Read" << std::endl;
   this->lenRec5_ = (this->nAtoms_)*sizeof(double);
 }
 void GauMatEl::readGauRec6_(){
@@ -177,7 +179,8 @@ void GauMatEl::readGauRec6_(){
       }
       std::cout << std::endl;
     }
-  } else std::cout << "Record 6 Sucessfully Read" << std::endl;
+  } 
+//else std::cout << "Record 6 Sucessfully Read" << std::endl;
   this->lenRec6_ = (3*this->nAtoms_)*sizeof(double);
 }
 void GauMatEl::readGauRec7_(){
@@ -194,7 +197,8 @@ void GauMatEl::readGauRec7_(){
     std::cout << std::setw(15) << std::left << "  IBfTyp_: " << std::endl;
     for(auto i = 0; i < this->nBasis_; i++) 
       std::cout << std::setw(15) << std::left << " " << *(this->iBfTyp_+i) << std::endl;
-  } else std::cout << "Record 7 Sucessfully Read" << std::endl;
+  }
+//else std::cout << "Record 7 Sucessfully Read" << std::endl;
   this->lenRec7_ = (2*this->nBasis_)*sizeof(int);
 }
 void GauMatEl::readGauRec8_(){
@@ -206,7 +210,8 @@ void GauMatEl::readGauRec8_(){
     std::cout << std::setw(15) << std::left << "  AtmWgt_: " << std::endl;
     for(auto i = 0; i < this->nAtoms_; i++) 
       std::cout << std::setw(15) << std::fixed << std::left << " " << *(this->atmWgt_+i) <<std::endl;
-  } else std::cout << "Record 8 Sucessfully Read" << std::endl;
+  }
+//else std::cout << "Record 8 Sucessfully Read" << std::endl;
   this->lenRec8_ = (this->nAtoms_)*sizeof(double);
 }
 void GauMatEl::readGauRec9_(){
@@ -221,7 +226,8 @@ void GauMatEl::readGauRec9_(){
     std::cout << std::setw(15) << std::left << "  NFV: "   << this->nFV_   << std::endl;
     std::cout << std::setw(15) << std::left << "  ITran: "   << this->iTran_   << std::endl;
     std::cout << std::setw(15) << std::left << "  IDum: "   << this->iDum_   << std::endl;
-  } else std::cout << "Record 9 Sucessfully Read" << std::endl;
+  } 
+//else std::cout << "Record 9 Sucessfully Read" << std::endl;
   this->lenRec9_ = 4*sizeof(int);
 }
 void GauMatEl::readGauRec10_(){
@@ -233,7 +239,8 @@ void GauMatEl::readGauRec10_(){
     std::cout << std::setw(15) << std::left << std::endl;
     std::cout << std::setw(15) << std::left << "Record 10:" << std::endl;
     std::cout << std::setw(15) << std::left << "  Number of Remaining Recs: "   << this->nInitRem_   << std::endl;
-  } else std::cout << "Record 10 Sucessfully Read" << std::endl;
+  } 
+//else std::cout << "Record 10 Sucessfully Read" << std::endl;
   this->lenRec10_ = 2*sizeof(int);
 }
 void GauMatEl::readGauRec11_(){
@@ -258,7 +265,8 @@ void GauMatEl::readGauRec11_(){
     std::cout << std::setw(15) << std::left << "  NShellDB: "   << this->nShellDB_   << std::endl;
     std::cout << std::setw(15) << std::left << "  NPrimDB: "   << this->nPrimDB_   << std::endl;
     std::cout << std::setw(15) << std::left << "  NBTot: "   << this->nBTot_   << std::endl;
-  } else std::cout << "Record 11 Sucessfully Read" << std::endl;
+  }
+//else std::cout << "Record 11 Sucessfully Read" << std::endl;
   this->lenRec11_ = this->nInitRem_*sizeof(int);
 }
 void GauMatEl::readInitRecs(){
@@ -305,7 +313,7 @@ void GauMatEl::initHeader_(){
   for(auto i = 0; i < GauHeader.size(); i++)
     GauHeader[i].resize(LEN_GAU_STR,' ');
 }
-void GauMatEl::readRec(int rec, double*& data){
+void GauMatEl::readRec(int rec, double*& data, bool alloc){
   bool found = false;
 
   std::string FileTerm = "END";
@@ -343,10 +351,11 @@ void GauMatEl::readRec(int rec, double*& data){
       }
     }
     if(!Label.compare(GauHeader[rec])){
-      delete [] data;
-      data = new double[NTot];
+      if(alloc){
+        delete [] data;
+        data = new double[NTot];
+      }
       for(auto i = 0; i < NTot; i++){
-        std::cout << DX[i] << std::endl;
         data[i] = DX[i];
       }
      
@@ -357,6 +366,6 @@ void GauMatEl::readRec(int rec, double*& data){
     delete [] ID;
     delete [] DX;
   }
-  if(found) std::cout << "FOUND " << GauHeader[rec] << std::endl;
+//if(found) std::cout << "FOUND " << GauHeader[rec] << std::endl;
 
 }

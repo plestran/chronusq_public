@@ -38,17 +38,16 @@ using std::setw;
 //------------------------------//
 // allocate memory for matrices //
 //------------------------------//
-void SDResponse::iniSDResponse( std::shared_ptr<Molecule> molecule, std::shared_ptr<BasisSet> basisSet, std::shared_ptr<MOIntegrals> mointegrals, 
-                                std::shared_ptr<FileIO> fileio, std::shared_ptr<Controls> controls, std::shared_ptr<SingleSlater> singleSlater) {
+void SDResponse::iniSDResponse( Molecule * molecule, BasisSet * basisSet, MOIntegrals * mointegrals, 
+                                FileIO * fileio, Controls * controls, SingleSlater * singleSlater) {
   this->nBasis_  = basisSet->nBasis();
-
   this->molecule_       = molecule;
   this->basisSet_       = basisSet;
   this->fileio_         = fileio;
   this->controls_       = controls;
   this->mointegrals_    = mointegrals;
   this->singleSlater_   = singleSlater;
-  this->aoERI_          = singleSlater->aointegrals()->aoERI_;
+  this->aoERI_          = singleSlater->aointegrals()->aoERI_.get();
 };
 //-----------------------------------//
 // print a wave function information //
@@ -192,20 +191,16 @@ void SDResponse::formRM(){
   B.block(0,nOV,nOV,nOV) = Aod;
   B.block(nOV,0,nOV,nOV) = Aod;
   
-  cout << "Return Permutation" <<endl;
-  RealMatrix Permt(2*nOV,1);
-  Permt = ReturnDiag();
-  cout << Permt << endl;
-  
-  // Davison(A)
-  std::shared_ptr<RealMatrix> Aptr = std::make_shared<RealMatrix>(2*nOV,2*nOV);
-  *Aptr = A;
-
-  //Davidson<double> davA(Aptr,4);
-  Davidson<double> davA(this,Davidson<double>::CIS,3);
-  davA.run(this->fileio_->out);
-  cout << "The lowest 4 eigenvalue solved by Davidson Algorithm:" <<endl;
-  cout << *davA.eigenvalues() << endl;
+//  RealMatrix PDiag(2*nOV,1);
+//  PDiag = ReturnDiag();
+//  RealMatrix GVec(2*nOV,2*nOV);
+//  GVec = Guess(PDiag);
+//
+//  //Davidson<double> davA(Aptr,4);
+//  Davidson<double> davA(this,Davidson<double>::CIS,3,&GVec,3,&PDiag);
+//  davA.run(this->fileio_->out);
+//  cout << "The lowest 3 eigenvalue solved by Davidson Algorithm:" <<endl;
+//  cout << *davA.eigenvalues() << endl;
 
 
   // Build the ABBA matrix
@@ -226,9 +221,8 @@ void SDResponse::formRM(){
     cout << "The " << (i+1) << " CIS Exicitation Energy is: "
          << (CIS.eigenvalues())(i) << endl;
   }
-  RealMatrix XMO = CIS.eigenvectors().block(0,0,2*nOV,3);
-  formRM2(XMO);
-
+  
+  DavidsonCIS();
 
   // LR TDHF routine
   Eigen::EigenSolver<RealMatrix> TD;
@@ -244,12 +238,27 @@ void SDResponse::formRM(){
 
 }
 
+void SDResponse::DavidsonCIS(){
+  int nOV = this->nOV()/2;
+  cout << nOV << endl;
+  RealMatrix PDiag(2*nOV,1);
+  PDiag = ReturnDiag();
+  RealMatrix GVec(2*nOV,2*nOV);
+  GVec = Guess(PDiag);
+  RealMatrix Gpass = GVec.block(0,0,2*nOV,3);
+  cout << Gpass << endl;
+  Davidson<double> davA(this,Davidson<double>::CIS,3,&Gpass,3,&PDiag);
+  davA.run(this->fileio_->out);
+  cout << "The lowest 3 eigenvalue solved by Davidson Algorithm:" <<endl;
+  cout << *davA.eigenvalues() << endl;
+
+}
+
 RealMatrix SDResponse::formRM2(RealMatrix &XMO){
   int nOA = this->singleSlater_->nOccA();
   int nO = nOA;
   int nVA = this->singleSlater_->nVirA();
   int nV  = nVA;
-  cout << "Number of Occupied: " << nO << ", Number of Virtual " << nV << " Number of Basis: "<<this->nBasis_<< ".\n";
   Tensor<double> LocMoAO(this->nBasis_,nO);
   Tensor<double> LocMoAV(this->nBasis_,nV);
   for(auto ii = 0; ii < this->nBasis_; ii++) {
@@ -310,8 +319,6 @@ RealMatrix SDResponse::formRM2(RealMatrix &XMO){
     Dmnls(m,n,l,s) = (*this->aoERI_)(m,l,n,s)-(*this->aoERI_)(m,s,n,l);
     dmnls(m,n,l,s) = (*this->aoERI_)(m,l,n,s);
   }
-  cout << "Print XMO: " << endl;
-  cout << XMO << endl;
 
   for (auto idx=0;idx<nCol;idx++)
   {
@@ -387,8 +394,6 @@ RealMatrix SDResponse::formRM2(RealMatrix &XMO){
     AX.block(0,idx,nOV,1) = IXMOAV;
     AX.block(nOV,idx,nOV,1) = IXMOBV; 
   }
-  cout << "Print AX:" << endl;
-  cout << AX << endl;
 
   return AX;
 }
@@ -401,11 +406,9 @@ RealMatrix SDResponse::ReturnDiag(){
   RealMatrix EigV(nV,1);
   for (auto i=0;i<nO;i++){
     EigO(i,0) = (*this->singleSlater_->epsA())(i,0);
-    cout << "The " << (i+1) << " eigenvalue in Occupied is: " << EigO(i,0) << endl;
   }
   for (auto j=0;j<nV;j++){
     EigV(j,0) = (*this->singleSlater_->epsA())((j+nO),0);
-    cout << "The " << (j+1) << " eigenvalue in Virtual is: " << EigV(j,0) << endl;
   }
 
   RealMatrix PDiag(2*nOV,1);
@@ -415,48 +418,46 @@ RealMatrix SDResponse::ReturnDiag(){
     PDiag(a*nO+i,0) = EigV(a,0)-EigO(i,0);
     PDiag(a*nO+i+nOV,0) = EigV(a,0)-EigO(i,0);
   }
-  cout << "Pseudo Diagonal" << endl;
-  cout << PDiag << endl;
 
+  return PDiag;
+}
+
+RealMatrix SDResponse::Guess(RealMatrix &PDiag){
+  int nO = this->singleSlater_->nOccA();
+  int nV = this->singleSlater_->nVirA();
+  int nOV = nO*nV;
   double temp1;
-  double temp2;
+  double temp2;                                                                                                    
   bool isSorted;
-  RealMatrix Permt(2*nOV,1);
-  for (auto i=0;i<2*nOV;i++)
-  {
+  RealMatrix Permt(2*nOV,1);                                                                                       
+  for (auto i=0;i<2*nOV;i++)                                                                                       
+  { 
     Permt(i,0) = i;
-  }
-  cout << "Print inital index" <<endl;
-  cout << Permt << endl;
+  }   
   for (auto i=0;i<2*nOV-1;i++)
-  {
+  {   
     isSorted = true;
-    for (auto j=0;j<2*nOV-1;j++)
-    {
-      if (PDiag(j,0)>PDiag(j+1,0))
+    for (auto j=0;j<2*nOV-1;j++)                                                                                   
+    { 
+      if (PDiag(j,0)>PDiag(j+1,0))                                                                                 
       {
         isSorted=false;
         temp1=PDiag(j,0);
-        temp2=Permt(j,0);
+        temp2=Permt(j,0);                                                                                          
         PDiag(j,0)=PDiag(j+1,0);
-        Permt(j,0)=Permt(j+1,0);
+        Permt(j,0)=Permt(j+1,0);                                                                                   
         PDiag(j+1,0)=temp1;
-        Permt(j+1,0)=temp2;
-      }
-    }
+        Permt(j+1,0)=temp2;                                                                                        
+      } 
+    }                                                                                                              
   }
-  cout << "After sort" <<endl;
-  cout << Permt << endl;
-  
-  RealMatrix GVec(2*nOV,2*nOV);
+  RealMatrix GVec(2*nOV,2*nOV);                                                                                    
   GVec.Zero(2*nOV,2*nOV);
-  for (auto i=0;i<2*nOV;i++)
-  {
-    GVec(Permt(i,0),i) = 1.0;
-  }
-  cout << "Print out the new Guess Vector" << endl;
-  cout << GVec << endl;
-  return Permt;
+  for (auto i=0;i<2*nOV;i++)                                                                                       
+  {   
+    GVec(Permt(i,0),i) = 1.0;                                                                                      
+  }   
+  return GVec;
 }
 
 

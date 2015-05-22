@@ -51,17 +51,17 @@ class Molecule {
 public:
 
   // constructor
-  Molecule(int nAtoms=0,std::shared_ptr<FileIO> fileio=nullptr){ if(nAtoms>0) iniMolecule(nAtoms,fileio);};
+  Molecule(int nAtoms=0,FileIO * fileio=NULL){ if(nAtoms>0) iniMolecule(nAtoms,fileio);};
   ~Molecule(){
     delete[] index_;
     cart_.reset();
   };
-  void iniMolecule(int,std::shared_ptr<FileIO>);
+  void iniMolecule(int,FileIO *);
 //APS Compute center of mass (or center of nuclear charges) of a molecule
   void toCOM(int Iop0);    
 //APE
   // print
-  void printInfo(std::shared_ptr<FileIO>,std::shared_ptr<Controls>);
+  void printInfo(FileIO *,Controls *);
 
   // access to private data
   inline int index(int i) { return this->index_[i];};
@@ -76,11 +76,11 @@ public:
   inline double energyNuclei() { return this->energyNuclei_;};
 
   // read from input file
-  void readMolecule(std::shared_ptr<FileIO>, std::istream &);
+  void readMolecule(FileIO *, std::istream &);
 
   // read|write scratch|binary files
-  void ioRead(std::shared_ptr<FileIO>);
-  void ioWrite(std::shared_ptr<FileIO>);
+  void ioRead(FileIO *);
+  void ioWrite(FileIO *);
 
   /*************************/
   /* MPI Related Routines  */

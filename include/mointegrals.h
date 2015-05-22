@@ -45,21 +45,21 @@ class MOIntegrals{
   int       **ijIndex_;
   int       **abIndex_;
 
-  std::shared_ptr<BasisSet>      basisSet_;
-  std::shared_ptr<Molecule>      molecule_;
-  std::shared_ptr<FileIO>        fileio_;
-  std::shared_ptr<Controls>      controls_;
-  std::shared_ptr<AOIntegrals>   aointegrals_;
-  std::shared_ptr<SingleSlater>  singleSlater_;
+  BasisSet *      basisSet_;
+  Molecule *      molecule_;
+  FileIO *        fileio_;
+  Controls *      controls_;
+  AOIntegrals *   aointegrals_;
+  SingleSlater *  singleSlater_;
 
 public:
   // these should be protected
-  std::shared_ptr<RealMatrix>    iajb_;
-  std::shared_ptr<RealMatrix>    ijab_;
-  std::shared_ptr<RealMatrix>    ijka_;
-  std::shared_ptr<RealMatrix>    ijkl_;
-  std::shared_ptr<RealMatrix>    iabc_;
-  std::shared_ptr<RealMatrix>    abcd_;
+  std::unique_ptr<RealMatrix>    iajb_;
+  std::unique_ptr<RealMatrix>    ijab_;
+  std::unique_ptr<RealMatrix>    ijka_;
+  std::unique_ptr<RealMatrix>    ijkl_;
+  std::unique_ptr<RealMatrix>    iabc_;
+  std::unique_ptr<RealMatrix>    abcd_;
 
   bool      haveMOiajb;
   bool      haveMOijab;
@@ -69,19 +69,12 @@ public:
   bool      haveMOabcd;
  
   MOIntegrals(){;};
-  ~MOIntegrals(){
-    iajb_.reset();
-    ijab_.reset();
-    ijka_.reset();
-    ijkl_.reset();
-    iabc_.reset();
-    abcd_.reset();
-  };
+  ~MOIntegrals(){;};
   
   // initialization function
-  void iniMOIntegrals(std::shared_ptr<Molecule>,std::shared_ptr<BasisSet>,
-                      std::shared_ptr<FileIO>,std::shared_ptr<Controls>,
-                      std::shared_ptr<AOIntegrals>,std::shared_ptr<SingleSlater>);
+  void iniMOIntegrals(Molecule *,BasisSet *,
+                      FileIO *,Controls *,
+                      AOIntegrals *,SingleSlater *);
 
   inline double &iajb(int i, int a, int j, int b){
     return (*iajb_)(this->iaIndex_[i][a],this->iaIndex_[j][b]);

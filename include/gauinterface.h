@@ -184,7 +184,7 @@ public:
   inline double *      cart(){return this->cart_;};
   inline double *      atmWgt(){return this->atmWgt_;};
 
-  void readRec(int,double*&);
+  void readRec(int,double*&,bool);
 };
 
 #endif

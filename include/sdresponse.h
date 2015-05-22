@@ -44,14 +44,15 @@ class SDResponse {
   int       nStates_;
   friend class SingleSlater;
 
-  std::shared_ptr<RealTensor4d> aoERI_;
-  std::shared_ptr<BasisSet>      basisSet_;
-  std::shared_ptr<Molecule>      molecule_;
-  std::shared_ptr<FileIO>        fileio_;
-  std::shared_ptr<Controls>      controls_;
-  std::shared_ptr<MOIntegrals>   mointegrals_;
-  std::shared_ptr<SingleSlater>  singleSlater_;
-  RealMatrix                     XMO;
+  RealMatrix      XMO;
+  RealMatrix      PDiag;
+  BasisSet *      basisSet_;
+  Molecule *      molecule_;
+  FileIO *        fileio_;
+  Controls *      controls_;
+  MOIntegrals *   mointegrals_;
+  SingleSlater *  singleSlater_;
+  RealTensor4d *  aoERI_;
 
 public:
  
@@ -59,17 +60,19 @@ public:
   SDResponse(){;};
   ~SDResponse() {;};
   // pseudo-constructor
-  void iniSDResponse(std::shared_ptr<Molecule>,std::shared_ptr<BasisSet>,
-                     std::shared_ptr<MOIntegrals>,std::shared_ptr<FileIO>,
-                     std::shared_ptr<Controls>,std::shared_ptr<SingleSlater>);
+  void iniSDResponse(Molecule *,BasisSet *,
+                     MOIntegrals *,FileIO *,
+                     Controls *,SingleSlater *);
 
   inline int nOV(){return this->singleSlater_->nOV();};
   void computeExcitedStates();         // compute the total electronic energy
   void printExcitedStateEnergies(); 
   void printInfo();
   void formRM();
+  void DavidsonCIS();
   RealMatrix formRM2(RealMatrix &XMO);
   RealMatrix ReturnDiag();
+  RealMatrix Guess(RealMatrix &PDiag);
 
   /*************************/
   /* MPI Related Routines  */

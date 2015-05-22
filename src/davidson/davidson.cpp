@@ -42,9 +42,9 @@ void Davidson<double>::runMicro(ostream &output ) {
   RealMap VR(LAPACK_SCR,0,0);
   RealMap VL(LAPACK_SCR,0,0);
 */
-  std::unique_ptr<RealMatrix> diagonal;
-  if(this->method_!=0) diagonal = std::unique_ptr<RealMatrix>(new RealMatrix(this->n_,1));
-  if(this->method_==1) *diagonal = this->sdr_->ReturnDiag();
+  if(this->method_!=1&&this->diagonal_==NULL) CErr("Need to pass davison a diagonal");
+  if(this->method_!=1) diagonal_ = new RealMatrix(this->n_,1);
+  if(this->method_==1) *diagonal_ = this->sdr_->ReturnDiag();
 
   Eigen::SelfAdjointEigenSolver<RealMatrix> subDiagH_;
   if(this->useLAPACK_) {
@@ -80,12 +80,10 @@ void Davidson<double>::runMicro(ostream &output ) {
     if(this->method_==1) AXR = this->sdr_->formRM2(TrialVecR);
     else if(this->AX_==NULL) AXR = (*this->mat_) * TrialVecR;  
     else AXR = this->AX_(*this->mat_,TrialVecR);
-    cout << "HERE" << endl;
     cout << AXR << endl << endl;
    
     // Full projection of A onto subspace
     XTAX = TrialVecR.transpose()*AXR; 
-    cout << "HERE 1" << endl;
 
     // Diagonalize the subspace
     if(!this->useLAPACK_) subDiagH_.compute(XTAX);
@@ -121,7 +119,6 @@ void Davidson<double>::runMicro(ostream &output ) {
       }
 */
     }
-    cout << "HERE 2" << endl;
    
     
     // Reconstruct approximate eigenvectors
@@ -130,7 +127,6 @@ void Davidson<double>::runMicro(ostream &output ) {
       if(this->hermetian_) UR = TrialVecR * XTAX;
 //    else                 UR = TrialVecR * VR;
     }
-    cout << "HERE 3" << endl;
 
     // Stash away current approximation of eigenvalues and eigenvectors (NSek)
     if(!this->useLAPACK_) {
@@ -140,7 +136,6 @@ void Davidson<double>::runMicro(ostream &output ) {
     }
     (*this->eigenvector_) = UR.block(0,0,this->n_,this->nSek_);
 
-    cout << "HERE 4" << endl;
     
     // Construct the residual vector 
     // R = A*U - U*E = (AX)*c - U*E
@@ -163,7 +158,6 @@ void Davidson<double>::runMicro(ostream &output ) {
       }
 */
     }
-    cout << "HERE 5" << endl;
 
     // Vector to store convergence info
     std::vector<bool> resConv;
@@ -185,7 +179,6 @@ void Davidson<double>::runMicro(ostream &output ) {
                << ResR.col(k).norm() << " \t \t Root has not converged" <<endl;
       }
     }
-    cout << "HERE 5" << endl;
 
 //  output << *this->eigenvalues_ << endl << endl;
 
@@ -199,12 +192,10 @@ void Davidson<double>::runMicro(ostream &output ) {
              << elapsed.count() << " secs" << endl << endl;
       break;
     }
-    cout << "HERE 8" <<this->n_<< endl;
 
     // Resize the trial vector dimension to contain the new perturbed
     // guess vectors
     TrialVecR.conservativeResize(this->n_,NTrial+NNotConv);
-    cout << "HERE 8" <<this->n_<< endl;
     int INDX = 0;
     for(auto k = 0; k < this->nSek_; k++) {
       // If the residual for root "k" is not converged, construct
@@ -216,8 +207,8 @@ void Davidson<double>::runMicro(ostream &output ) {
       //             if this criteria is not met.
       if(!resConv[k]) {
         for(auto i = 0; i < this->n_; i++) {
-          if(this->method_!=0) {
-            T(i,0) = - ResR.col(k)(i) / ((*diagonal)(i,0) - subDiagH_.eigenvalues()(k));
+          if(this->method_==1) {
+            T(i,0) = - ResR.col(k)(i) / ((*diagonal_)(i,0) - subDiagH_.eigenvalues()(k));
           }else if(!this->useLAPACK_) {
             T(i,0) = - ResR.col(k)(i) / ((*this->mat_)(i,i) - subDiagH_.eigenvalues()(k));
           } else {
@@ -230,7 +221,6 @@ void Davidson<double>::runMicro(ostream &output ) {
         INDX++;
       }
     }
-    cout << "HERE 7" << endl;
     // Normalize and orthogonalize the new guess vectors to the
     // existing set using QR factorization
     Eigen::FullPivHouseholderQR<RealMatrix> QR(TrialVecR);
@@ -244,7 +234,6 @@ void Davidson<double>::runMicro(ostream &output ) {
            << elapsed.count() << " secs" << endl << endl;
 //  output << QR.colsPermutation().toDenseMatrix() << endl;
 //  output << endl << TrialVec << endl;
-    cout << "HERE 6" << endl;
   } 
   delete [] LAPACK_SCR; // Cleanup scratch space
 }

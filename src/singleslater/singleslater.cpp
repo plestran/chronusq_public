@@ -33,9 +33,9 @@ using ChronusQ::SingleSlater;
 //------------------------------//
 // allocate memory for matrices //
 //------------------------------//
-void SingleSlater::iniSingleSlater(std::shared_ptr<Molecule> molecule, std::shared_ptr<BasisSet> basisset, 
-                                   std::shared_ptr<AOIntegrals> aointegrals, std::shared_ptr<FileIO> fileio, 
-                                   std::shared_ptr<Controls> controls) {
+void SingleSlater::iniSingleSlater(Molecule * molecule, BasisSet * basisset, 
+                                   AOIntegrals * aointegrals, FileIO * fileio, 
+                                   Controls * controls) {
   int nTotalE = molecule->nTotalE();
   this->nBasis_  = basisset->nBasis();
   this->nTT_   = this->nBasis_*(this->nBasis_+1)/2;
@@ -464,6 +464,24 @@ void SingleSlater::readGuessIO() {
   };
   this->haveMO = true;
 };
+//-----------------------------------------------------------------------//
+// form the initial guess of MOs from Gaussian raw matrix element file   //
+//-----------------------------------------------------------------------//
+void SingleSlater::readGuessGauMatEl(GauMatEl& matEl){
+  this->fileio_->out << "Reading MO coefficients from " <<matEl.fname()<< endl;
+  if(matEl.nBasis()!=this->nBasis_) CErr("Basis Set mismatch",this->fileio_->out);
+  double *scr = NULL;
+  matEl.readRec(GauMatEl::moa,scr,true); 
+  for(auto i = 0; i < this->nBasis_*this->nBasis_; i++)
+    this->moA_->data()[i] = scr[i];
+  this->moA_->transposeInPlace();
+  if(this->controls_->printLevel>=3) {
+    prettyPrint(this->fileio_->out,(*this->moA_),"Alpha MO Coeff");
+    if(!this->RHF_) prettyPrint(this->fileio_->out,(*this->moB_),"Beta MO Coeff");
+  };
+  delete [] scr;
+  this->haveMO = true;
+}
 //-----------------------------------------------------------------------//
 // form the initial guess of MOs from Gaussian formatted checkpoint file //
 //-----------------------------------------------------------------------//

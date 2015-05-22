@@ -64,11 +64,11 @@ class SingleSlater {
   std::unique_ptr<RealMatrix>  epsB_;
   std::unique_ptr<RealMatrix>  dipole_;
   std::unique_ptr<RealMatrix>  quadpole_;
-  std::shared_ptr<BasisSet>    basisset_;
-  std::shared_ptr<Molecule>    molecule_;
-  std::shared_ptr<FileIO>      fileio_;
-  std::shared_ptr<Controls>    controls_;
-  std::shared_ptr<AOIntegrals> aointegrals_;
+  BasisSet *    basisset_;
+  Molecule *    molecule_;
+  FileIO *      fileio_;
+  Controls *    controls_;
+  AOIntegrals * aointegrals_;
 
 public:
  
@@ -87,9 +87,9 @@ public:
   SingleSlater(){;};
   ~SingleSlater() {;};
   // pseudo-constructor
-  void iniSingleSlater(std::shared_ptr<Molecule>,std::shared_ptr<BasisSet>,
-                       std::shared_ptr<AOIntegrals>,std::shared_ptr<FileIO>,
-                       std::shared_ptr<Controls>);
+  void iniSingleSlater(Molecule *,BasisSet *,
+                       AOIntegrals *,FileIO *,
+                       Controls *);
 
   //set private data
   inline void setNBasis(int nBasis) { this->nBasis_ = nBasis;};
@@ -119,7 +119,7 @@ public:
   inline RealMatrix* moA()      { return this->moA_.get();};
   inline RealMatrix* moB()      { return this->moB_.get();};
   inline RealMatrix* epsA()     { return this->epsA_.get();};
-  inline AOIntegrals* aointegrals() {return this->aointegrals_.get();};
+  inline AOIntegrals* aointegrals() {return this->aointegrals_;};
 
   void formGuess();	        // form the intial guess of MO's
   void formDensity();		// form the density matrix
@@ -128,6 +128,7 @@ public:
   void formExchange();		// form the exchange matrix
   void formPT();
   void readGuessIO();       	// read the initial guess of MO's from the input stream
+  void readGuessGauMatEl(GauMatEl&); // read the intial guess of MO's from Gaussian raw matrix element file
   void readGuessGauFChk(std::string &);	// read the initial guess of MO's from the Gaussian formatted checkpoint file
   void computeEnergy();         // compute the total electronic energy
   void computeMultipole();      // compute multipole properties
