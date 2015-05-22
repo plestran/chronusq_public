@@ -52,7 +52,7 @@ public:
   bool          doDF;           // Density fitting (RI) flag
   bool          doDipole;       // Use Libint dipole integrals?
   bool          doQuadpole;     // Use Libint quadrapole integrals?
-//bool          doOctapole;     // Usr Libint octapole integrals?
+  bool          doOctpole;     // Usr Libint octapole integrals?
   double 	thresholdS;
   double 	thresholdAB;
   double	thresholdSchawrtz;
