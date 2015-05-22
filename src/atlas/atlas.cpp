@@ -32,8 +32,6 @@ RealMatrix AX(const RealMatrix &A, const RealMatrix &B) {return A*B;};
 int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   int i,j,k,l;
   time_t currentTime;
-  RealMatrix XMO;
-  RealMatrix PDiag;
   auto molecule     	= std::unique_ptr<Molecule>(new Molecule());
   auto basisset     	= std::unique_ptr<BasisSet>(new BasisSet());
   auto controls     	= std::unique_ptr<Controls>(new Controls());
@@ -92,6 +90,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 
   sdResponse->computeExcitedStates();
   sdResponse->formRM();
+  sdResponse->DavidsonCIS();
   //sdResponse->formRM2(XMO);
   //sdResponse->ReturnDiag();
   //sdResponse->Guess(PDiag);

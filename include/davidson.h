@@ -190,7 +190,7 @@ namespace ChronusQ {
       this->nSek_   = nSek;
       if(nGuess==0) this->nGuess_ = 2*nSek;
       else this->nGuess_=nGuess;
-      this->n_      = SDR->nOV();
+      this->n_      = 2*SDR->nOV();
       this->method_ = meth;
       this->sdr_    = SDR;
       this->diagonal_ = diagonal;

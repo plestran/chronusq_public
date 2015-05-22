@@ -191,18 +191,6 @@ void SDResponse::formRM(){
   B.block(0,nOV,nOV,nOV) = Aod;
   B.block(nOV,0,nOV,nOV) = Aod;
   
-//  RealMatrix PDiag(2*nOV,1);
-//  PDiag = ReturnDiag();
-//  RealMatrix GVec(2*nOV,2*nOV);
-//  GVec = Guess(PDiag);
-//
-//  //Davidson<double> davA(Aptr,4);
-//  Davidson<double> davA(this,Davidson<double>::CIS,3,&GVec,3,&PDiag);
-//  davA.run(this->fileio_->out);
-//  cout << "The lowest 3 eigenvalue solved by Davidson Algorithm:" <<endl;
-//  cout << *davA.eigenvalues() << endl;
-
-
   // Build the ABBA matrix
 
   ABBA.block(0,0,2*nOV,2*nOV) = A;
@@ -222,8 +210,6 @@ void SDResponse::formRM(){
          << (CIS.eigenvalues())(i) << endl;
   }
   
-  DavidsonCIS();
-
   // LR TDHF routine
   Eigen::EigenSolver<RealMatrix> TD;
   TD.compute(ABBA);
@@ -239,8 +225,7 @@ void SDResponse::formRM(){
 }
 
 void SDResponse::DavidsonCIS(){
-  int nOV = this->nOV()/2;
-  cout << nOV << endl;
+  int nOV = this->nOV();
   RealMatrix PDiag(2*nOV,1);
   PDiag = ReturnDiag();
   RealMatrix GVec(2*nOV,2*nOV);
@@ -255,10 +240,8 @@ void SDResponse::DavidsonCIS(){
 }
 
 RealMatrix SDResponse::formRM2(RealMatrix &XMO){
-  int nOA = this->singleSlater_->nOccA();
-  int nO = nOA;
-  int nVA = this->singleSlater_->nVirA();
-  int nV  = nVA;
+  int nO = this->singleSlater_->nOccA();
+  int nV = this->singleSlater_->nVirA();
   Tensor<double> LocMoAO(this->nBasis_,nO);
   Tensor<double> LocMoAV(this->nBasis_,nV);
   for(auto ii = 0; ii < this->nBasis_; ii++) {
@@ -269,7 +252,7 @@ RealMatrix SDResponse::formRM2(RealMatrix &XMO){
       LocMoAV(ii,kk-nO) = (*this->singleSlater_->moA())(ii,kk);
     }
   }
-  int nOV = nO*nV;
+  int nOV = this->nOV();
   RealMatrix EigO(nO,1);
   RealMatrix EigV(nV,1);
   for (auto i=0;i<nO;i++){
@@ -401,7 +384,7 @@ RealMatrix SDResponse::formRM2(RealMatrix &XMO){
 RealMatrix SDResponse::ReturnDiag(){
   int nO = this->singleSlater_->nOccA();
   int nV = this->singleSlater_->nVirA();
-  int nOV = nO*nV;
+  int nOV = this->nOV();
   RealMatrix EigO(nO,1);
   RealMatrix EigV(nV,1);
   for (auto i=0;i<nO;i++){
@@ -425,7 +408,7 @@ RealMatrix SDResponse::ReturnDiag(){
 RealMatrix SDResponse::Guess(RealMatrix &PDiag){
   int nO = this->singleSlater_->nOccA();
   int nV = this->singleSlater_->nVirA();
-  int nOV = nO*nV;
+  int nOV = this->nOV();
   double temp1;
   double temp2;                                                                                                    
   bool isSorted;
