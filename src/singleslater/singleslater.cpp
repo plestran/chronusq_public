@@ -544,6 +544,7 @@ void SingleSlater::computeMultipole(){
     *this->dipole_ -= elements[this->molecule_->index(iA)].atomicNumber *
           this->molecule_->cart()->col(iA);
   *this->dipole_ = -(*this->dipole_);
+  
   if(this->controls_->doQuadpole){
     iBuf = 0;
     for(auto jxyz = 0; jxyz < 3; jxyz++)
@@ -554,28 +555,58 @@ void SingleSlater::computeMultipole(){
       iBuf += NBSq;
     }
     *this->quadpole_ = this->quadpole_->selfadjointView<Lower>();
-//  for(int iA = 0; iA < this->molecule_->nAtoms(); iA++)
-//    *this->quadpole_ -= elements[this->molecule_->index(iA)].atomicNumber *
-//          this->molecule_->cart()->col(iA) * 
-//          this->molecule_->cart()->col(iA).transpose();
+    *this->quadpole_ = -(*this->quadpole_);
+//  this->quadpole_->setZero();
+    for(int iA = 0; iA < this->molecule_->nAtoms(); iA++)
+      *this->quadpole_ += elements[this->molecule_->index(iA)].atomicNumber *
+            this->molecule_->cart()->col(iA) * 
+            this->molecule_->cart()->col(iA).transpose();
   }
   this->printMultipole();
 
 }
 void SingleSlater::printMultipole(){
   this->fileio_->out << bannerTop << endl;
-  this->fileio_->out << "Dipole:" << endl;
+  this->fileio_->out << "Dipole (Debye):" << endl;
   this->fileio_->out << std::left << std::setw(5) <<"X=" 
                      << std::fixed << std::right << std::setw(20) 
-                     << (*this->dipole_)(0,0) << endl;
+                     << (*this->dipole_)(0,0)/phys.debye << endl;
   this->fileio_->out << std::left << std::setw(5) <<"Y=" 
                      << std::fixed << std::right << std::setw(20) 
-                     << (*this->dipole_)(1,0) << endl;
+                     << (*this->dipole_)(1,0)/phys.debye << endl;
   this->fileio_->out << std::left << std::setw(5) <<"Z=" 
                      << std::fixed << std::right << std::setw(20) 
-                     << (*this->dipole_)(2,0) << endl;
-  this->fileio_->out << bannerEnd << endl;
-  this->fileio_->out << *this->quadpole_ << endl << endl;
+                     << (*this->dipole_)(2,0)/phys.debye << endl;
+  this->fileio_->out << bannerMid << endl;
+  this->fileio_->out << "Quadrupole (Debye-Ang):" << endl;
+  this->fileio_->out << std::left << std::setw(5) <<"XX=" 
+                     << std::fixed << std::right << std::setw(20) 
+                     << (*this->quadpole_)(0,0)*phys.bohr/phys.debye;
+  this->fileio_->out << std::left << std::setw(5) <<" XY=" 
+                     << std::fixed << std::right << std::setw(20) 
+                     << (*this->quadpole_)(0,1)*phys.bohr/phys.debye;
+  this->fileio_->out << std::left << std::setw(5) <<" XZ=" 
+                     << std::fixed << std::right << std::setw(20) 
+                     << (*this->quadpole_)(0,2)*phys.bohr/phys.debye << endl;
+  this->fileio_->out << std::left << std::setw(5) <<"YX=" 
+                     << std::fixed << std::right << std::setw(20) 
+                     << (*this->quadpole_)(1,0)*phys.bohr/phys.debye;
+  this->fileio_->out << std::left << std::setw(5) <<" YY=" 
+                     << std::fixed << std::right << std::setw(20) 
+                     << (*this->quadpole_)(1,1)*phys.bohr/phys.debye;
+  this->fileio_->out << std::left << std::setw(5) <<" YZ=" 
+                     << std::fixed << std::right << std::setw(20) 
+                     << (*this->quadpole_)(1,2)*phys.bohr/phys.debye << endl;
+  this->fileio_->out << std::left << std::setw(5) <<"ZX=" 
+                     << std::fixed << std::right << std::setw(20) 
+                     << (*this->quadpole_)(2,0)*phys.bohr/phys.debye;
+  this->fileio_->out << std::left << std::setw(5) <<" ZY=" 
+                     << std::fixed << std::right << std::setw(20) 
+                     << (*this->quadpole_)(2,1)*phys.bohr/phys.debye;
+  this->fileio_->out << std::left << std::setw(5) <<" ZZ=" 
+                     << std::fixed << std::right << std::setw(20) 
+                     << (*this->quadpole_)(2,2)*phys.bohr/phys.debye << endl;
+  this->fileio_->out << endl << bannerEnd << endl;
 }
 /*************************/
 /* MPI Related Routines  */
