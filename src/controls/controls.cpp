@@ -49,6 +49,7 @@ void Controls::iniControls(){
   this->doDF =              false;
   this->doDipole =          true;
   this->doQuadpole =        true;
+  this->doOctpole =         true;
 #ifdef USE_LIBINT
   // Bootstrap Libint env
   libint2::init(); 
