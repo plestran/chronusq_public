@@ -62,6 +62,7 @@ class SingleSlater {
   std::unique_ptr<RealMatrix>  PTB_;
   std::unique_ptr<RealMatrix>  dipole_;
   std::unique_ptr<RealMatrix>  quadpole_;
+  std::unique_ptr<RealTensor3d>  octpole_;
   BasisSet *    basisset_;
   Molecule *    molecule_;
   FileIO *      fileio_;

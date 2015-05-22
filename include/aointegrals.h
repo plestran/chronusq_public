@@ -149,7 +149,8 @@ public:
   std::unique_ptr<RealTensor3d>  aoRII_; ///< Rank-3 DFI tensor over density-fitting basis functions \f$ ( \mu\nu \vert X ) \f$
   std::unique_ptr<RealTensor2d>  aoRIS_; ///< Rank-2 Metric overlap tensor over density-fitting basis functions \f$\left( X \vert r_{12}^{-1} \vert Y \right)\f$
   std::unique_ptr<RealTensor3d>  elecDipole_; ///< Electric dipole matrix \f$\vec{\mu}_{\nu\sigma}=\langle\nu\vert\vec{r}\vert\sigma\rangle\f$
-  std::unique_ptr<RealTensor3d>  elecQuadpole_;///< Electric quadrupole matrix \f$Q_{\mu\nu}^{ij}=\langle\nu\vert 3r_i r_j - \delta_{ij}\vert r \vert^2\vert\sigma\rangle\f$
+  std::unique_ptr<RealTensor3d>  elecQuadpole_;///< Electric quadrupole matrix \f$Q_{\mu\nu}^{ij}=\langle\mu\vert r_i r_j \vert\nu\rangle\f$
+  std::unique_ptr<RealTensor3d>  elecOctpole_;///< Electric octupole matrix \f$O_{\mu\nu}^{ijk}=\langle\mu\vert r_i r_j r_k \vert\nu\rangle\f$
 
   bool		haveAOTwoE; ///< Whether or not the two-bodied molecular integrals have been evaluated (for in-core integrals)
   bool		haveAOOneE; ///< Whether or not the one-body molecular integrals have been evaluated

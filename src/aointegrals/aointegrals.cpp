@@ -107,11 +107,14 @@ void AOIntegrals::iniAOIntegrals(Molecule * molecule, BasisSet * basisset,
     this->overlap_      = std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nBasis_)); // Overlap
     this->kinetic_      = std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nBasis_)); // Kinetic
     this->potential_    = std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nBasis_)); // Potential
-    if(this->controls_->doDipole || this->controls_->doQuadpole){
+    if(this->controls_->doDipole || this->controls_->doQuadpole || this->controls_->doOctpole){
       this->elecDipole_   = std::unique_ptr<RealTensor3d>(new RealTensor3d(3,this->nBasis_,this->nBasis_)); // Electic Dipole
     }
-    if(this->controls_->doQuadpole) {
+    if(this->controls_->doQuadpole || this->controls_->doOctpole) {
       this->elecQuadpole_ = std::unique_ptr<RealTensor3d>(new RealTensor3d(6,this->nBasis_,this->nBasis_)); // Electic Quadrupole
+    }
+    if(this->controls_->doOctpole){
+      this->elecOctpole_ = std::unique_ptr<RealTensor3d>(new RealTensor3d(10,this->nBasis_,this->nBasis_)); // Electic Octupole
     }
   } catch (...) {
     CErr(std::current_exception(),"One Electron Integral Tensor Alloation (All)");
@@ -357,7 +360,9 @@ void AOIntegrals::iniMolecularConstants(){
 void AOIntegrals::printTimings() {
     this->fileio_->out << endl << "Timing Statistics: "<<endl << bannerTop << endl;
     this->fileio_->out << endl << "One Electron Integral Timings" << endl << bannerMid << endl;
-    if(this->controls_->doQuadpole) {
+    if(this->controls_->doOctpole) {
+      this->fileio_->out << std::left << std::setw(60) << "Wall time for Overlap + Dipole + Quadrupole + Octupole evaluation:"; 
+    } else if(this->controls_->doQuadpole) {
       this->fileio_->out << std::left << std::setw(60) << "Wall time for Overlap + Dipole + Quadrupole evaluation:"; 
     } else if(this->controls_->doDipole) {
       this->fileio_->out << std::left << std::setw(60) << "Wall time for Overlap + Dipole evaluation:"; 
