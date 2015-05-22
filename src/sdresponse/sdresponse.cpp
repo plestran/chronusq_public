@@ -33,6 +33,7 @@ using ChronusQ::MOIntegrals;
 using ChronusQ::SDResponse;
 using ChronusQ::SingleSlater;
 using ChronusQ::Davidson; 
+using ChronusQ::AOIntegrals;
 using std::cout;
 using std::setw;
 //------------------------------//
@@ -210,6 +211,9 @@ void SDResponse::formRM(){
          << (CIS.eigenvalues())(i) << endl;
   }
   
+  RealMatrix XMO = CIS.eigenvectors().col(1);
+  formRM2(XMO);
+
   // LR TDHF routine
   Eigen::EigenSolver<RealMatrix> TD;
   TD.compute(ABBA);
@@ -324,8 +328,20 @@ RealMatrix SDResponse::formRM2(RealMatrix &XMO){
       XAAOTsr(i,j) = XAAO(i,j);
       XBAOTsr(i,j) = XBAO(i,j);
     }
+    RealMatrix IXAO1t(this->nBasis_,this->nBasis_);
     // Contract A_AAAA( <mn||ls> ) with XA
+    AOIntegrals::twoEContract(false,XAAO,IXAO1t);
+    cout << "Direct Contraction" << endl;
+    cout << IXAO1t << endl;
     contract(1.0,XAAOTsr,{sig,nu},Dmnls,{mu,nu,lam,sig},0.0,IXAO1,{mu,lam});
+    RealMatrix IXAO1m(this->nBasis_,this->nBasis_);
+    for (auto i=0;i<this->nBasis_;i++)
+    for (auto j=0;j<this->nBasis_;j++)
+    {
+      IXAO1m(i,j) = IXAO1(i,j);
+    }
+    cout << "Tensor Contraction" << endl;
+    cout << IXAO1m << endl;
     contract(1.0,LocMoAV,{mu,a},IXAO1,{mu,lam},0.0,IIXMO1,{a,lam});
     contract(1.0,LocMoAO,{lam,i},IIXMO1,{a,lam},0.0,IXMOTsr1,{a,i});
     for (auto a=0;a<nV;a++)
