@@ -1071,7 +1071,6 @@ void AOIntegrals::twoEContract(bool doRHFFock, const RealMatrix &X, RealMatrix &
   for(int i = 0; i < this->controls_->nthreads; i++) AX += G[i];
 //RealMatrix Tmp = 0.5*(AX + AX.transpose());
 //AX = 0.25*Tmp; // Can't consolidate where this comes from?
-  cout << "HEHR" << endl;
 //if(doRHFFock) AX = 0.25*AX; // Can't consolidate where this comes from?
   AX = AX*0.5; // Gaussian nonsense
   AX = AX*0.5; // werid factor that comes from A + AT

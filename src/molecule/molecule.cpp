@@ -28,7 +28,7 @@ using ChronusQ::Molecule;
 //-------------//
 // initializer //
 //-------------//
-void Molecule::iniMolecule(int nAtoms, std::shared_ptr<FileIO> fileio) {
+void Molecule::iniMolecule(int nAtoms, FileIO * fileio) {
   if(!fileio) CErr("No FileIO given to Molecule");
   if(nAtoms<1) CErr("No Atoms given to build Molecule",fileio->out);
   this->nAtoms_= nAtoms;
@@ -39,7 +39,7 @@ void Molecule::iniMolecule(int nAtoms, std::shared_ptr<FileIO> fileio) {
 //--------------------------------------------//
 // Read molecular information from input file //
 //--------------------------------------------//
-void Molecule::readMolecule(std::shared_ptr<FileIO> fileio, std::istream &geomRead){
+void Molecule::readMolecule(FileIO * fileio, std::istream &geomRead){
   int i, j, n, readInt;
   std::string readString;
   geomRead >> readInt;
@@ -73,7 +73,7 @@ void Molecule::readMolecule(std::shared_ptr<FileIO> fileio, std::istream &geomRe
 //---------------------------------------------------//
 // Print out molecular carteisan coordinates in bohr //
 //---------------------------------------------------//
-void Molecule::printInfo(std::shared_ptr<FileIO> fileio,std::shared_ptr<Controls> controls) {
+void Molecule::printInfo(FileIO * fileio,Controls * controls) {
   fileio->out.precision(8);
   fileio->out.fill(' ');
   fileio->out.setf(ios::right,ios::adjustfield);
@@ -95,7 +95,7 @@ void Molecule::printInfo(std::shared_ptr<FileIO> fileio,std::shared_ptr<Controls
 //--------------------------------//
 // read from binary files //
 //--------------------------------//
-void Molecule::ioRead(std::shared_ptr<FileIO> fileio) {
+void Molecule::ioRead(FileIO * fileio) {
   const int nInteger = 5;
   int storage[nInteger];
   try { fileio->io("R",blockMolecule,"BIN",storage,nInteger,0);}
@@ -123,7 +123,7 @@ void Molecule::ioRead(std::shared_ptr<FileIO> fileio) {
 //-----------------------//
 // write to binary files //
 //----------------------//
-void Molecule::ioWrite(std::shared_ptr<FileIO> fileio) {
+void Molecule::ioWrite(FileIO * fileio) {
   if(!fileio->isOpen(blockMolecule)) fileio->iniBlock(blockMolecule);
   const int nInteger = 5;
   int storage[nInteger];
