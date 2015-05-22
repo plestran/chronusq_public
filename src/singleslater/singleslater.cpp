@@ -87,6 +87,7 @@ void SingleSlater::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
 
   this->dipole_ = std::unique_ptr<RealMatrix>(new RealMatrix(3,1));
   this->quadpole_ = std::unique_ptr<RealMatrix>(new RealMatrix(3,3));
+  this->tracelessQuadpole_ = std::unique_ptr<RealMatrix>(new RealMatrix(3,3));
   this->octpole_  = std::unique_ptr<RealTensor3d>(new RealTensor3d(3,3,3));
   this->molecule_ = molecule;
   this->basisset_ = basisset;
@@ -538,13 +539,12 @@ void SingleSlater::computeMultipole(){
   int iBuf = 0;
   for(auto ixyz = 0; ixyz < 3; ixyz++){
     ConstRealMap mu(&this->aointegrals_->elecDipole_->storage()[iBuf],NB,NB);
-    (*dipole_)(ixyz,0) = this->densityA_->frobInner(mu);
+    (*dipole_)(ixyz,0) = -this->densityA_->frobInner(mu);
     iBuf += NBSq;
   }
   for(int iA = 0; iA < this->molecule_->nAtoms(); iA++)
-    *this->dipole_ -= elements[this->molecule_->index(iA)].atomicNumber *
+    *this->dipole_ += elements[this->molecule_->index(iA)].atomicNumber *
           this->molecule_->cart()->col(iA);
-  *this->dipole_ = -(*this->dipole_);
   
   if(this->controls_->doQuadpole){
     iBuf = 0;
@@ -552,16 +552,17 @@ void SingleSlater::computeMultipole(){
     for(auto ixyz = jxyz; ixyz < 3; ixyz++){
       ConstRealMap 
         mu(&this->aointegrals_->elecQuadpole_->storage()[iBuf],NB,NB);
-      (*quadpole_)(jxyz,ixyz) = this->densityA_->frobInner(mu);
+      (*quadpole_)(jxyz,ixyz) = -this->densityA_->frobInner(mu);
       iBuf += NBSq;
     }
     *this->quadpole_ = this->quadpole_->selfadjointView<Upper>();
-    *this->quadpole_ = -(*this->quadpole_);
 //  this->quadpole_->setZero();
     for(int iA = 0; iA < this->molecule_->nAtoms(); iA++)
       *this->quadpole_ += elements[this->molecule_->index(iA)].atomicNumber *
             this->molecule_->cart()->col(iA) * 
             this->molecule_->cart()->col(iA).transpose();
+
+    (*this->tracelessQuadpole_) = (*this->quadpole_) - RealMatrix::Identity(3,3)*this->quadpole_->trace()/3;
   }
 
   if(this->controls_->doOctpole){
@@ -599,7 +600,8 @@ void SingleSlater::computeMultipole(){
 }
 void SingleSlater::printMultipole(){
   this->fileio_->out << bannerTop << endl;
-  this->fileio_->out << "Dipole (Debye):" << endl;
+  this->fileio_->out << std::setw(50) << std::left <<"Electric Dipole Moment"
+                        << "(Debye)" << endl;
   this->fileio_->out << std::left << std::setw(5) <<"X=" 
                      << std::fixed << std::right << std::setw(20) 
                      << (*this->dipole_)(0,0)/phys.debye << endl;
@@ -611,7 +613,8 @@ void SingleSlater::printMultipole(){
                      << (*this->dipole_)(2,0)/phys.debye << endl;
   if(this->controls_->doQuadpole) {
     this->fileio_->out << bannerMid << endl;
-    this->fileio_->out << "Quadrupole (Debye-Ang):" << endl;
+    this->fileio_->out << std::setw(50) << std::left << "Electric Quadrupole Moment" 
+                       <<  "(Debye-\u212B)" << endl;
     this->fileio_->out << std::left << std::setw(5) <<"XX=" 
                        << std::fixed << std::right << std::setw(20) 
                        << (*this->quadpole_)(0,0)*phys.bohr/phys.debye;
@@ -639,10 +642,41 @@ void SingleSlater::printMultipole(){
     this->fileio_->out << std::left << std::setw(5) <<" ZZ=" 
                        << std::fixed << std::right << std::setw(20) 
                        << (*this->quadpole_)(2,2)*phys.bohr/phys.debye << endl;
+    this->fileio_->out << bannerMid << endl;
+    this->fileio_->out << std::setw(50) << std::left << "Electric Quadrupole Moment (Traceless)" 
+                       <<  "(Debye-\u212B)" << endl;
+    this->fileio_->out << std::left << std::setw(5) <<"XX=" 
+                       << std::fixed << std::right << std::setw(20) 
+                       << (*this->tracelessQuadpole_)(0,0)*phys.bohr/phys.debye;
+    this->fileio_->out << std::left << std::setw(5) <<" XY=" 
+                       << std::fixed << std::right << std::setw(20) 
+                       << (*this->tracelessQuadpole_)(0,1)*phys.bohr/phys.debye;
+    this->fileio_->out << std::left << std::setw(5) <<" XZ=" 
+                       << std::fixed << std::right << std::setw(20) 
+                       << (*this->tracelessQuadpole_)(0,2)*phys.bohr/phys.debye << endl;
+    this->fileio_->out << std::left << std::setw(5) <<"YX=" 
+                       << std::fixed << std::right << std::setw(20) 
+                       << (*this->tracelessQuadpole_)(1,0)*phys.bohr/phys.debye;
+    this->fileio_->out << std::left << std::setw(5) <<" YY=" 
+                       << std::fixed << std::right << std::setw(20) 
+                       << (*this->tracelessQuadpole_)(1,1)*phys.bohr/phys.debye;
+    this->fileio_->out << std::left << std::setw(5) <<" YZ=" 
+                       << std::fixed << std::right << std::setw(20) 
+                       << (*this->tracelessQuadpole_)(1,2)*phys.bohr/phys.debye << endl;
+    this->fileio_->out << std::left << std::setw(5) <<"ZX=" 
+                       << std::fixed << std::right << std::setw(20) 
+                       << (*this->tracelessQuadpole_)(2,0)*phys.bohr/phys.debye;
+    this->fileio_->out << std::left << std::setw(5) <<" ZY=" 
+                       << std::fixed << std::right << std::setw(20) 
+                       << (*this->tracelessQuadpole_)(2,1)*phys.bohr/phys.debye;
+    this->fileio_->out << std::left << std::setw(5) <<" ZZ=" 
+                       << std::fixed << std::right << std::setw(20) 
+                       << (*this->tracelessQuadpole_)(2,2)*phys.bohr/phys.debye << endl;
   }
   if(this->controls_->doOctpole) {
     this->fileio_->out << bannerMid << endl;
-    this->fileio_->out << "Octupole (Debye-Ang^2):" << endl;
+    this->fileio_->out << std::setw(50) << std::left << "Electric Octupole Moment" 
+                       << "(Debye-\u212B\u00B2)" << endl;
     this->fileio_->out << std::left << std::setw(5) <<"XXX=" 
                        << std::fixed << std::right << std::setw(20) 
                        << (*this->octpole_)(0,0,0)*phys.bohr*phys.bohr/phys.debye;

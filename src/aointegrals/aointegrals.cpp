@@ -361,7 +361,7 @@ void AOIntegrals::printTimings() {
     this->fileio_->out << endl << "Timing Statistics: "<<endl << bannerTop << endl;
     this->fileio_->out << endl << "One Electron Integral Timings" << endl << bannerMid << endl;
     if(this->controls_->doOctpole) {
-      this->fileio_->out << std::left << std::setw(60) << "Wall time for Overlap + Dipole + Quadrupole + Octupole evaluation:"; 
+      this->fileio_->out << std::left << std::setw(60) << "Wall time for Overlap + Dipole + Quadrupole + Octupole"; 
     } else if(this->controls_->doQuadpole) {
       this->fileio_->out << std::left << std::setw(60) << "Wall time for Overlap + Dipole + Quadrupole evaluation:"; 
     } else if(this->controls_->doDipole) {
@@ -370,6 +370,8 @@ void AOIntegrals::printTimings() {
       this->fileio_->out << std::left << std::setw(60) << "Wall time for Overlap evaluation:"; 
     }
     this->fileio_->out << std::left << std::setw(15) << this->SED.count() << " sec" << endl;
+    if(this->controls_->doOctpole)
+      this->fileio_->out << std::left << "evaluation:" << endl;
     this->fileio_->out << std::left << std::setw(60) << "Wall time for Kinetic evaluation:" 
                        << std::left << std::setw(15) << this->TED.count() << " sec" << endl;
     this->fileio_->out << std::left << std::setw(60) << "Wall time for Nuclear Attraction Potential evaluation:" 
