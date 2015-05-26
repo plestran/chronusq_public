@@ -468,8 +468,7 @@ void SingleSlater::readGuessIO() {
 void SingleSlater::readGuessGauMatEl(GauMatEl& matEl){
   this->fileio_->out << "Reading MO coefficients from " <<matEl.fname()<< endl;
   if(matEl.nBasis()!=this->nBasis_) CErr("Basis Set mismatch",this->fileio_->out);
-  double *scr = NULL;
-  matEl.readRec(GauMatEl::moa,scr,true); 
+  double *scr = matEl.readRec(GauMatEl::moa); 
   for(auto i = 0; i < this->nBasis_*this->nBasis_; i++)
     this->moA_->data()[i] = scr[i];
   this->moA_->transposeInPlace();
