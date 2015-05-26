@@ -313,7 +313,7 @@ void GauMatEl::initHeader_(){
   for(auto i = 0; i < GauHeader.size(); i++)
     GauHeader[i].resize(LEN_GAU_STR,' ');
 }
-void GauMatEl::readRec(int rec, double*& data, bool alloc){
+double * GauMatEl::readRec(int rec){
   bool found = false;
 
   std::string FileTerm = "END";
@@ -351,15 +351,15 @@ void GauMatEl::readRec(int rec, double*& data, bool alloc){
       }
     }
     if(!Label.compare(GauHeader[rec])){
-      if(alloc){
-        delete [] data;
-        data = new double[NTot];
-      }
+      double *data = new double[NTot];
       for(auto i = 0; i < NTot; i++){
         data[i] = DX[i];
       }
      
       found = true;
+      delete [] ID;
+      delete [] DX;
+      return data;
       break; 
     }
     
