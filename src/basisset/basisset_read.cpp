@@ -33,7 +33,7 @@ using ChronusQ::HashL;
 using ChronusQ::HashNAOs;
 typedef libint2::Shell CShell;
 typedef libint2::Shell LIShell;
-std::vector<libint2::Shell> shells_libint_unnormal;
+
 
 void BasisSet::basisSetRead(FileIO * fileio, Molecule * mol){
   std::vector<double> coeff;
@@ -90,6 +90,7 @@ void BasisSet::basisSetRead(FileIO * fileio, Molecule * mol){
 	  *fileBasis >> coefval;
 	  exp.push_back(expval);
 
+	  
 	  auto e(coefval.find_first_of("Dd"));
 	  if (e!=std::string::npos)
 	    coefval[e]='E';
@@ -167,6 +168,7 @@ void BasisSet::basisSetRead(FileIO * fileio, Molecule * mol){
    center = {{(*mol->cart())(0,i),
               (*mol->cart())(1,i),
               (*mol->cart())(2,i)}};
+   cout << center[1] << endl;
    for(auto k=0; k<allBasis.size();++k){
      if (atomStr.compare(allBasis[k].atomName)==0){
        for (auto j=0;j<allBasis[k].refShell.size();++j){
@@ -199,6 +201,7 @@ void BasisSet::basisSetRead(FileIO * fileio, Molecule * mol){
      }
    }
   }
+  this->convToLI=true;
   fileBasis->close();
 }
 
