@@ -34,10 +34,12 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   time_t currentTime;
   auto molecule     	= std::unique_ptr<Molecule>(new Molecule());
   auto basisset     	= std::unique_ptr<BasisSet>(new BasisSet());
+  auto dfBasisset     	= std::unique_ptr<BasisSet>(new BasisSet());
   auto controls     	= std::unique_ptr<Controls>(new Controls());
   auto aointegrals	= std::unique_ptr<AOIntegrals>(new AOIntegrals());
   auto hartreeFock	= std::unique_ptr<SingleSlater>(new SingleSlater());
   std::unique_ptr<FileIO> fileIO;
+  cout << dfBasisset.get() << endl;
 
   std::vector<std::string> argv_string;
   for(auto i = 1; i < argc; ++i) if(argv[i][0]=='-') argv_string.push_back(argv[i]);
@@ -52,12 +54,13 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 
   // read input
   controls->iniControls();
-  readInput(fileIO.get(),molecule.get(),basisset.get(),controls.get());
+  readInput(fileIO.get(),molecule.get(),basisset.get(),controls.get(),dfBasisset.get());
 //  fileIO->iniFileIO(controls->restart);
 
   // print out molecular and basis set information
   molecule->printInfo(fileIO.get(),controls.get());
   basisset->printInfo_libint(fileIO.get(),controls.get());
+  dfBasisset->printInfo_libint(fileIO.get(),controls.get());
   aointegrals->iniAOIntegrals(molecule.get(),basisset.get(),fileIO.get(),controls.get());
   hartreeFock->iniSingleSlater(molecule.get(),basisset.get(),aointegrals.get(),fileIO.get(),controls.get());
   hartreeFock->printInfo();

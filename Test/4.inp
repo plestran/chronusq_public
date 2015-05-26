@@ -5,7 +5,8 @@ c 0 1.0  0.0 0.15
 
 $charge 0
 $spin 1
-$basis sto3g.gbs
+$basis cc-pVDZ.gbs
+$dfbasis ON cc-pVDZ_RI.gbs
 $nsmp 8
 $method hf
 $print 3
