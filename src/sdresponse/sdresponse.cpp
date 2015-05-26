@@ -41,6 +41,9 @@ using std::setw;
 void SDResponse::iniSDResponse( Molecule * molecule, BasisSet * basisSet, MOIntegrals * mointegrals, 
                                 FileIO * fileio, Controls * controls, SingleSlater * singleSlater) {
   this->nBasis_  = basisSet->nBasis();
+  this->nO       = singleSlater_->nOccA();
+  this->nV       = singleSlater_->nVirA();
+  this->nOV      = singleSlater_->nOV(); 
   this->molecule_       = molecule;
   this->basisSet_       = basisSet;
   this->fileio_         = fileio;
@@ -48,6 +51,7 @@ void SDResponse::iniSDResponse( Molecule * molecule, BasisSet * basisSet, MOInte
   this->mointegrals_    = mointegrals;
   this->singleSlater_   = singleSlater;
   this->aoERI_          = singleSlater->aointegrals()->aoERI_.get();
+  this->elecDipole_     = singleSlater->aointegrals()->elecDipole_.get();
 };
 //-----------------------------------//
 // print a wave function information //
@@ -458,6 +462,33 @@ RealMatrix SDResponse::Guess(RealMatrix &PDiag){
   return GVec;
 }
 
+RealMatrix SDResponse::TransDipole(RealMatrix &TransDen){
+  int NBSq = this->nBasis_*this->nBasis_;
+  int nSub = TransDen.rows()/nOV;
+  RealMatrix TransDipole(1,3);
+  for (auto i=0,IOff=0;i<3;i++,IOff+=NBSq)
+  { 
+    dI = 0.0;
+    RealMap Dipole(*this->elecDipole_->storage()[IOff],this->nBasis_,this->nBasis_);
+    for (auto j=0, Shift=0;j<nSub;j++,Shift+=nOV)
+    {
+      RealMap TDenMO(TransDen.data()+Shift,nV,nO);
+      RealMatrix TDenAO = this->singleSlater_->moA()->block(0,nO,this->nBasis_,nV)*TDenMO*this->singleSlater_->moA()->block(0,0,this->nBasis_,nO).transpose();
+      RealMatrix TransDipole = TDenAO.transpose()*Dipole;
+      TransDipole(1,i) += TransDipole.trace()
+    }
+  }
+  return TransDipole;
+}
+
+double SDResponse::OscStrength(RealMatrix &TransDipole, double &Omega){
+  double Oscstr = 0.0;
+  for (auto i=0;i<3;i++)
+  {
+    Oscstr += (2.0/3.0)*Omega*pow(TransDipole(1,i),2);
+  }
+  return Oscstr;
+}
 
 /*************************/
 /* MPI Related Routines  */

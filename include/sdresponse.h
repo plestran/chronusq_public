@@ -42,6 +42,9 @@ class SDResponse {
   int       nBasis_;
   int       **R2Index_;
   int       nStates_;
+  int       nO;
+  int       nV;
+  int       nOV;
   friend class SingleSlater;
 
   RealMatrix      XMO;
@@ -53,6 +56,7 @@ class SDResponse {
   MOIntegrals *   mointegrals_;
   SingleSlater *  singleSlater_;
   RealTensor4d *  aoERI_;
+  RealTensor3d *  elecDipole_;
 
 public:
  
@@ -73,6 +77,8 @@ public:
   RealMatrix formRM2(RealMatrix &XMO);
   RealMatrix ReturnDiag();
   RealMatrix Guess(RealMatrix &PDiag);
+  RealMatrix TransDipole(RealMatrix &TransDen);
+  double OscStrength(RealMatrix &TransDipole,double &Omega)
 
   /*************************/
   /* MPI Related Routines  */
