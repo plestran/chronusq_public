@@ -1149,10 +1149,10 @@ void AOIntegrals::twoEContract(bool doRHFFock, const RealMatrix &X, RealMatrix &
   #pragma omp parallel
   {
     int thread_id = omp_get_thread_num();
-    simple_twoe(thread_id);
+    efficient_twoe(thread_id);
   }
 #else
-  simple_twoe(0);
+  efficient_twoe(0);
 #endif
   for(int i = 0; i < this->controls_->nthreads; i++) AX += G[i];
 //RealMatrix Tmp = 0.5*(AX + AX.transpose());
