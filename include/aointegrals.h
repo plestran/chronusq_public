@@ -120,11 +120,11 @@ class AOIntegrals{
   int       **R2Index_;
   double	**FmTTable_;
 
-  std::shared_ptr<BasisSet>    	basisSet_; ///< Smart pointer to primary basis set
-  std::shared_ptr<BasisSet>     DFbasisSet_; ///< Smart pointer to density fitting basis set
-  std::shared_ptr<Molecule>   	molecule_; ///< Smart pointer to molecule specification
-  std::shared_ptr<FileIO>      	fileio_; ///< Smart pointer to FileIO
-  std::shared_ptr<Controls>    	controls_; ///< Smart pointer to job control
+  BasisSet *    	basisSet_; ///< Smart pointer to primary basis set
+  BasisSet *     DFbasisSet_; ///< Smart pointer to density fitting basis set
+  Molecule *   	molecule_; ///< Smart pointer to molecule specification
+  FileIO *      	fileio_; ///< Smart pointer to FileIO
+  Controls *    	controls_; ///< Smart pointer to job control
 
   std::unique_ptr<PairConstants>        pairConstants_; ///< Smart pointer to struct containing shell-pair meta-data
   std::unique_ptr<MolecularConstants>   molecularConstants_; ///< Smart pointer to struct containing molecular struture meta-data
@@ -138,18 +138,19 @@ class AOIntegrals{
 
 public:
   // these should be protected
-  std::shared_ptr<RealMatrix>    twoEC_; ///< Two-body Coulomb integrals 
-  std::shared_ptr<RealMatrix>    twoEX_; ///< Two-body Exchange integrals
-  std::shared_ptr<RealMatrix>    oneE_; ///< Core Hamiltonian \f$ h = T + V \f$
-  std::shared_ptr<RealMatrix>    overlap_; ///< Overlap matrix \f$ S_{\mu\nu} = \langle \mu \vert \nu \rangle \f$
-  std::shared_ptr<RealMatrix>    kinetic_; ///< Kinetic energy tensor \f$ T_{\mu\nu} = \langle \mu \vert \Delta \vert \nu \rangle \f$
-  std::shared_ptr<RealMatrix>    potential_; ///< Potential (nuclear attraction) energy tensor \f$ V_{\mu\nu} = \sum_A \left\langle \mu \vert r_{1A}^{-1}\vert \nu\right\rangle\f$
-  std::shared_ptr<RealMatrix>    schwartz_; ///< Schwartz bounds for ERI screening
-  std::shared_ptr<RealTensor4d>  aoERI_; ///< Rank-4 ERI tensor over primary basis functions \f$ (\mu \nu \vert \lambda\delta )\f$
-  std::shared_ptr<RealTensor3d>  aoRII_; ///< Rank-3 DFI tensor over density-fitting basis functions \f$ ( \mu\nu \vert X ) \f$
-  std::shared_ptr<RealTensor2d>  aoRIS_; ///< Rank-2 Metric overlap tensor over density-fitting basis functions \f$\left( X \vert r_{12}^{-1} \vert Y \right)\f$
-  std::shared_ptr<RealTensor3d>  elecDipole_; ///< Electric dipole matrix \f$\vec{\mu}_{\nu\sigma}=\langle\nu\vert\vec{r}\vert\sigma\rangle\f$
-  std::shared_ptr<RealTensor3d>  elecQuadpole_;///< Electric quadrupole matrix \f$Q_{\mu\nu}^{ij}=\langle\nu\vert 3r_i r_j - \delta_{ij}\vert r \vert^2\vert\sigma\rangle\f$
+  std::unique_ptr<RealMatrix>    twoEC_; ///< Two-body Coulomb integrals 
+  std::unique_ptr<RealMatrix>    twoEX_; ///< Two-body Exchange integrals
+  std::unique_ptr<RealMatrix>    oneE_; ///< Core Hamiltonian \f$ h = T + V \f$
+  std::unique_ptr<RealMatrix>    overlap_; ///< Overlap matrix \f$ S_{\mu\nu} = \langle \mu \vert \nu \rangle \f$
+  std::unique_ptr<RealMatrix>    kinetic_; ///< Kinetic energy tensor \f$ T_{\mu\nu} = \langle \mu \vert \Delta \vert \nu \rangle \f$
+  std::unique_ptr<RealMatrix>    potential_; ///< Potential (nuclear attraction) energy tensor \f$ V_{\mu\nu} = \sum_A \left\langle \mu \vert r_{1A}^{-1}\vert \nu\right\rangle\f$
+  std::unique_ptr<RealMatrix>    schwartz_; ///< Schwartz bounds for ERI screening
+  std::unique_ptr<RealTensor4d>  aoERI_; ///< Rank-4 ERI tensor over primary basis functions \f$ (\mu \nu \vert \lambda\delta )\f$
+  std::unique_ptr<RealTensor3d>  aoRII_; ///< Rank-3 DFI tensor over density-fitting basis functions \f$ ( \mu\nu \vert X ) \f$
+  std::unique_ptr<RealTensor2d>  aoRIS_; ///< Rank-2 Metric overlap tensor over density-fitting basis functions \f$\left( X \vert r_{12}^{-1} \vert Y \right)\f$
+  std::unique_ptr<RealTensor3d>  elecDipole_; ///< Electric dipole matrix \f$\vec{\mu}_{\nu\sigma}=\langle\nu\vert\vec{r}\vert\sigma\rangle\f$
+  std::unique_ptr<RealTensor3d>  elecQuadpole_;///< Electric quadrupole matrix \f$Q_{\mu\nu}^{ij}=\langle\mu\vert r_i r_j \vert\nu\rangle\f$
+  std::unique_ptr<RealTensor3d>  elecOctpole_;///< Electric octupole matrix \f$O_{\mu\nu}^{ijk}=\langle\mu\vert r_i r_j r_k \vert\nu\rangle\f$
 
   bool		haveAOTwoE; ///< Whether or not the two-bodied molecular integrals have been evaluated (for in-core integrals)
   bool		haveAOOneE; ///< Whether or not the one-body molecular integrals have been evaluated
@@ -172,9 +173,9 @@ public:
   AOIntegrals(){;};
   ~AOIntegrals(){;};
   
-  void iniAOIntegrals(std::shared_ptr<Molecule>,std::shared_ptr<BasisSet>,
-                      std::shared_ptr<FileIO>,std::shared_ptr<Controls>,
-                      std::shared_ptr<BasisSet> DFbasisSet=nullptr); ///< Initialization function
+  void iniAOIntegrals(Molecule *,BasisSet *,
+                      FileIO *,Controls *,
+                      BasisSet * DFbasisSet=NULL); ///< Initialization function
 
   inline double &twoEC(int i, int j, int k, int l){
     return (*twoEC_)(this->R2Index_[i][j],this->R2Index_[k][l]);

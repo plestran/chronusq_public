@@ -112,7 +112,7 @@ FileIO::~FileIO() {
   if(bin.is_open()) bin.close();
   if(out.is_open()) out.close();
 };
-/*
+
 //-------------------//
 // initialize FileIO //
 //-------------------//
@@ -144,6 +144,8 @@ void FileIO::iniFileIO(bool restart) {
     writePointer[i+MAXBLOCK] = 0;
   };
 };
+
+
 //-------------------------------------------------//
 // initialize blocks                               //
 //   only assign block pointer                     //
@@ -174,12 +176,15 @@ void FileIO::writeBlock(){
   bin.seekp(0,ios::beg);
   bin.write(charStorage,charLen);
 };
+
+
 //---------------------------------------------------------------------------------------------//
 // read & write scratch and binary files                                                       //
 //  io() is a wrapper to convert different types of variables to character storage requirement //
 //  rw() is operates read|write on scratch and binary files                                    //
 //---------------------------------------------------------------------------------------------//
-void FileIO::io(char *op, int blockNumber, char *file, char *storage, int len, int offset, char *offsetType) {
+/*
+void FileIO::io(std::string op, int blockNumber, std:string file, std::string storage, int len, int offset, std::string offsetType) {
   int cOffset = offset;
   if(offset>0&&offsetType!=NULL) cOffset = charOffset(offset,offsetType);
   try {this->rw(op, blockNumber, file, storage, len, cOffset);}
@@ -272,7 +277,7 @@ void FileIO::rw(char *op, int blockNumber, char *file, char *charStorage, int ch
 //----------------------------------------//
 // return offset in terms of sizeof(char) //
 //----------------------------------------//
-int FileIO::charOffset(int offset, char *offsetType) {
+int FileIO::charOffset(int offset, std::string offsetType) {
   strupr(offsetType);
   if(!strcmp(offsetType,"CHAR")) return offset;
   else if(!strcmp(offsetType,"INT")) return offset*sizeInt_;

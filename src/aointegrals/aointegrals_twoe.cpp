@@ -969,7 +969,7 @@ void AOIntegrals::twoEContract(bool doRHFFock, const RealMatrix &X, RealMatrix &
   int ijkl = 0;
   start = std::chrono::high_resolution_clock::now();
 
-  auto lambda = [&] (int thread_id) {
+  auto efficient_twoe = [&] (int thread_id) {
     coulombEngine &engine = engines[thread_id];
     RealMatrix &g = G[thread_id];
     for(int s1 = 0, s1234=0; s1 < this->basisSet_->nShell(); s1++) {
@@ -1024,6 +1024,8 @@ void AOIntegrals::twoEContract(bool doRHFFock, const RealMatrix &X, RealMatrix &
                     // Coulomb
                     g(bf1,bf2) += X(bf3,bf4)*v;
                     g(bf3,bf4) += X(bf1,bf2)*v;
+                    g(bf2,bf1) += X(bf4,bf3)*v;
+                    g(bf4,bf3) += X(bf2,bf1)*v;
  
                     // Exchange
                     if(doRHFFock) {
@@ -1031,11 +1033,21 @@ void AOIntegrals::twoEContract(bool doRHFFock, const RealMatrix &X, RealMatrix &
                       g(bf4,bf2) -= 0.25*X(bf1,bf3)*v;
                       g(bf1,bf4) -= 0.25*X(bf2,bf3)*v;
                       g(bf3,bf2) -= 0.25*X(bf1,bf4)*v;
+
+                      g(bf3,bf1) -= 0.25*X(bf4,bf2)*v;
+                      g(bf2,bf4) -= 0.25*X(bf3,bf1)*v;
+                      g(bf4,bf1) -= 0.25*X(bf3,bf2)*v;
+                      g(bf2,bf3) -= 0.25*X(bf4,bf1)*v;
                     } else {
                       g(bf1,bf3) -= 0.5*X(bf2,bf4)*v;
                       g(bf4,bf2) -= 0.5*X(bf1,bf3)*v;
                       g(bf1,bf4) -= 0.5*X(bf2,bf3)*v;
                       g(bf3,bf2) -= 0.5*X(bf1,bf4)*v;
+
+                      g(bf3,bf1) -= 0.5*X(bf4,bf2)*v;
+                      g(bf2,bf4) -= 0.5*X(bf3,bf1)*v;
+                      g(bf4,bf1) -= 0.5*X(bf3,bf2)*v;
+                      g(bf2,bf3) -= 0.5*X(bf4,bf1)*v;
                     }
                   }
                 }
@@ -1047,20 +1059,108 @@ void AOIntegrals::twoEContract(bool doRHFFock, const RealMatrix &X, RealMatrix &
     }
   };
 
+  auto simple_twoe = [&] (int thread_id){
+    coulombEngine &engine = engines[thread_id];
+    RealMatrix &g = G[thread_id];
+    for(int s1 = 0, s1234=0; s1 < this->basisSet_->nShell(); s1++) {
+      int bf1_s = this->basisSet_->mapSh2Bf[s1];
+      int n1    = this->basisSet_->shells_libint[s1].size();
+      for(int s2 = 0; s2 < this->basisSet_->nShell(); s2++) {
+        int bf2_s = this->basisSet_->mapSh2Bf[s2];
+        int n2    = this->basisSet_->shells_libint[s2].size();
+        for(int s3 = 0; s3 < this->basisSet_->nShell(); s3++) {
+          int bf3_s = this->basisSet_->mapSh2Bf[s3];
+          int n3    = this->basisSet_->shells_libint[s3].size();
+          for(int s4 = 0; s4 < this->basisSet_->nShell(); s4++, s1234++) {
+            if(s1234 % this->controls_->nthreads != thread_id) continue;
+            int bf4_s = this->basisSet_->mapSh2Bf[s4];
+            int n4    = this->basisSet_->shells_libint[s4].size();
+      
+            // Schwartz and Density screening
+            if( std::max((*this->basisSet_->shBlkNorm)(s1,s4),
+                   std::max((*this->basisSet_->shBlkNorm)(s2,s4),
+                      std::max((*this->basisSet_->shBlkNorm)(s3,s4),
+                         std::max((*this->basisSet_->shBlkNorm)(s1,s3),
+                            std::max((*this->basisSet_->shBlkNorm)(s2,s3),
+                                     (*this->basisSet_->shBlkNorm)(s1,s2))
+                            )
+                         )      
+                      )
+                   ) * (*this->schwartz_)(s1,s2)
+                     * (*this->schwartz_)(s3,s4)
+                   < this->controls_->thresholdSchawrtz ) continue;
+ 
+            const double* buff = engine.compute(
+              this->basisSet_->shells_libint[s1],
+              this->basisSet_->shells_libint[s2],
+              this->basisSet_->shells_libint[s3],
+              this->basisSet_->shells_libint[s4]);
+            for(int i = 0, ijkl = 0 ; i < n1; ++i) {
+              int bf1 = bf1_s + i;
+              for(int j = 0; j < n2; ++j) {
+                int bf2 = bf2_s + j;
+                for(int k = 0; k < n3; ++k) {
+                  int bf3 = bf3_s + k;
+                  for(int l = 0; l < n4; ++l, ++ijkl) {
+                    int bf4 = bf4_s + l;
+                    double v = buff[ijkl];
+
+                    // Coulomb
+                    g(bf1,bf2) += X(bf3,bf4)*v;
+                    g(bf3,bf4) += X(bf1,bf2)*v;
+                    g(bf2,bf1) += X(bf4,bf3)*v;
+                    g(bf4,bf3) += X(bf2,bf1)*v;
+ 
+                    // Exchange
+                    if(doRHFFock) {
+                      g(bf1,bf3) -= 0.25*X(bf2,bf4)*v;
+                      g(bf4,bf2) -= 0.25*X(bf1,bf3)*v;
+                      g(bf1,bf4) -= 0.25*X(bf2,bf3)*v;
+                      g(bf3,bf2) -= 0.25*X(bf1,bf4)*v;
+
+                      g(bf3,bf1) -= 0.25*X(bf4,bf2)*v;
+                      g(bf2,bf4) -= 0.25*X(bf3,bf1)*v;
+                      g(bf4,bf1) -= 0.25*X(bf3,bf2)*v;
+                      g(bf2,bf3) -= 0.25*X(bf4,bf1)*v;
+                    } else {
+                      g(bf1,bf3) -= 0.5*X(bf2,bf4)*v;
+                      g(bf4,bf2) -= 0.5*X(bf1,bf3)*v;
+                      g(bf1,bf4) -= 0.5*X(bf2,bf3)*v;
+                      g(bf3,bf2) -= 0.5*X(bf1,bf4)*v;
+
+                      g(bf3,bf1) -= 0.5*X(bf4,bf2)*v;
+                      g(bf2,bf4) -= 0.5*X(bf3,bf1)*v;
+                      g(bf4,bf1) -= 0.5*X(bf3,bf2)*v;
+                      g(bf2,bf3) -= 0.5*X(bf4,bf1)*v;
+                    }
+                    
+                  }
+                }
+              }
+            }
+
+          }
+        }
+      }
+    }
+  };
+
 #ifdef USE_OMP
   #pragma omp parallel
   {
     int thread_id = omp_get_thread_num();
-    lambda(thread_id);
+    efficient_twoe(thread_id);
   }
 #else
-  lambda(0);
+  efficient_twoe(0);
 #endif
   for(int i = 0; i < this->controls_->nthreads; i++) AX += G[i];
-//RealMatrix Tmp = 0.5*(AX + AX.transpose()); // RAFF MAKES NOT SENSE!
+//RealMatrix Tmp = 0.5*(AX + AX.transpose());
 //AX = 0.25*Tmp; // Can't consolidate where this comes from?
-  cout << "HEHR" << endl;
-  if(doRHFFock) AX = 0.25*AX; // Can't consolidate where this comes from?
+//if(doRHFFock) AX = 0.25*AX; // Can't consolidate where this comes from?
+  AX = AX*0.5; // Gaussian nonsense
+  AX = AX*0.5; // werid factor that comes from A + AT
+  if(doRHFFock) AX = AX*0.5; // E ~ 0.5*G
   finish = std::chrono::high_resolution_clock::now();
   if(doRHFFock) this->PTD = finish - start;
    

@@ -253,20 +253,22 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
     mat.push_back(RealMap(this->potential_->data(),NB,NB));
   } else if(iType == OneBodyEngine::emultipole1) {
     mat.push_back(RealMap(this->overlap_->data(),NB,NB));
-    mat.push_back(RealMap(&this->elecDipole_->storage()[0],NB,NB));
-    mat.push_back(RealMap(&this->elecDipole_->storage()[NBSq],NB,NB));
-    mat.push_back(RealMap(&this->elecDipole_->storage()[2*NBSq],NB,NB));
+    for(auto i = 0, IOff=0; i < 3; i++,IOff+=NBSq)
+      mat.push_back(RealMap(&this->elecDipole_->storage()[IOff],NB,NB));
   } else if(iType == OneBodyEngine::emultipole2) {
     mat.push_back(RealMap(this->overlap_->data(),NB,NB));
-    mat.push_back(RealMap(&this->elecDipole_->storage()[0],NB,NB));
-    mat.push_back(RealMap(&this->elecDipole_->storage()[NBSq],NB,NB));
-    mat.push_back(RealMap(&this->elecDipole_->storage()[2*NBSq],NB,NB));
-    mat.push_back(RealMap(&this->elecQuadpole_->storage()[0],NB,NB));
-    mat.push_back(RealMap(&this->elecQuadpole_->storage()[NBSq],NB,NB));
-    mat.push_back(RealMap(&this->elecQuadpole_->storage()[2*NBSq],NB,NB));
-    mat.push_back(RealMap(&this->elecQuadpole_->storage()[3*NBSq],NB,NB));
-    mat.push_back(RealMap(&this->elecQuadpole_->storage()[4*NBSq],NB,NB));
-    mat.push_back(RealMap(&this->elecQuadpole_->storage()[5*NBSq],NB,NB));
+    for(auto i = 0, IOff=0; i < 3; i++,IOff+=NBSq)
+      mat.push_back(RealMap(&this->elecDipole_->storage()[IOff],NB,NB));
+    for(auto i = 0, IOff=0; i < 6; i++,IOff+=NBSq)
+      mat.push_back(RealMap(&this->elecQuadpole_->storage()[IOff],NB,NB));
+  } else if(iType == OneBodyEngine::emultipole3) {
+    mat.push_back(RealMap(this->overlap_->data(),NB,NB));
+    for(auto i = 0, IOff=0; i < 3; i++,IOff+=NBSq)
+      mat.push_back(RealMap(&this->elecDipole_->storage()[IOff],NB,NB));
+    for(auto i = 0, IOff=0; i < 6; i++,IOff+=NBSq)
+      mat.push_back(RealMap(&this->elecQuadpole_->storage()[IOff],NB,NB));
+    for(auto i = 0, IOff=0; i < 10; i++,IOff+=NBSq)
+      mat.push_back(RealMap(&this->elecOctpole_->storage()[IOff],NB,NB));
   } else {
     cout << "OneBodyEngine type not recognized" << endl;
     exit(EXIT_FAILURE);
@@ -363,6 +365,28 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
       prettyPrint(this->fileio_->out,(mat[7]),"Electric Quadrupole (yy)");
       prettyPrint(this->fileio_->out,(mat[8]),"Electric Quadrupole (yz)");
       prettyPrint(this->fileio_->out,(mat[9]),"Electric Quadrupole (zz)");
+    } else if(iType == OneBodyEngine::emultipole3) {
+      prettyPrint(this->fileio_->out,(mat[0]),"Overlap");
+      prettyPrint(this->fileio_->out,(mat[1]),"Electric Dipole (x)");
+      prettyPrint(this->fileio_->out,(mat[2]),"Electric Dipole (y)");
+      prettyPrint(this->fileio_->out,(mat[3]),"Electric Dipole (z)");
+      prettyPrint(this->fileio_->out,(mat[4]),"Electric Quadrupole (xx)");
+      prettyPrint(this->fileio_->out,(mat[5]),"Electric Quadrupole (xy)");
+      prettyPrint(this->fileio_->out,(mat[6]),"Electric Quadrupole (xz)");
+      prettyPrint(this->fileio_->out,(mat[7]),"Electric Quadrupole (yy)");
+      prettyPrint(this->fileio_->out,(mat[8]),"Electric Quadrupole (yz)");
+      prettyPrint(this->fileio_->out,(mat[9]),"Electric Quadrupole (zz)");
+      prettyPrint(this->fileio_->out,(mat[10]),"Electric Octupole (xxx)");
+      prettyPrint(this->fileio_->out,(mat[11]),"Electric Octupole (xxy)");
+      prettyPrint(this->fileio_->out,(mat[12]),"Electric Octupole (xxz)");
+      prettyPrint(this->fileio_->out,(mat[13]),"Electric Octupole (xyy)");
+      prettyPrint(this->fileio_->out,(mat[14]),"Electric Octupole (xyz)");
+      prettyPrint(this->fileio_->out,(mat[15]),"Electric Octupole (xzz)");
+      prettyPrint(this->fileio_->out,(mat[16]),"Electric Octupole (yyy)");
+      prettyPrint(this->fileio_->out,(mat[17]),"Electric Octupole (yyz)");
+      prettyPrint(this->fileio_->out,(mat[18]),"Electric Octupole (yzz)");
+      prettyPrint(this->fileio_->out,(mat[19]),"Electric Octupole (zzz)");
+
     } else {
       cout << "OneBodyEngine type not recognized" << endl;
       exit(EXIT_FAILURE);
@@ -380,7 +404,8 @@ void AOIntegrals::computeAOOneE(){
 
   // Compute and time overlap integrals
   auto OStart = std::chrono::high_resolution_clock::now();
-  if(this->controls_->doQuadpole) OneEDriver(OneBodyEngine::emultipole2);
+  if(this->controls_->doOctpole) OneEDriver(OneBodyEngine::emultipole3);
+  else if(this->controls_->doQuadpole) OneEDriver(OneBodyEngine::emultipole2);
   else if(this->controls_->doDipole) OneEDriver(OneBodyEngine::emultipole1);
   else OneEDriver(OneBodyEngine::overlap);
   auto OEnd = std::chrono::high_resolution_clock::now();

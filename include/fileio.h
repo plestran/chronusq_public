@@ -95,8 +95,7 @@ public:
   void io(std::string &, int, std::string &, double*, int, int offset=-1,std::string offsetType="");
   void rw(std::string &, int, std::string &, std::string &, int, int offset=-1);
   int charOffset(int,char*);
-  */
+*/
 };
-
 } // namespace ChronusQ
 #endif

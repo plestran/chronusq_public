@@ -33,9 +33,9 @@ using ChronusQ::HashL;
 using ChronusQ::HashNAOs;
 typedef libint2::Shell CShell;
 typedef libint2::Shell LIShell;
-std::vector<libint2::Shell> shells_libint_unnormal;
 
-void BasisSet::basisSetRead(std::shared_ptr<FileIO> fileio, std::shared_ptr<Molecule> mol){
+
+void BasisSet::basisSetRead(FileIO * fileio, Molecule * mol){
   std::vector<double> coeff;
   std::vector<double> coeffP;
   std::vector<double> exp;
@@ -90,6 +90,7 @@ void BasisSet::basisSetRead(std::shared_ptr<FileIO> fileio, std::shared_ptr<Mole
 	  *fileBasis >> coefval;
 	  exp.push_back(expval);
 
+	  
 	  auto e(coefval.find_first_of("Dd"));
 	  if (e!=std::string::npos)
 	    coefval[e]='E';
@@ -167,6 +168,7 @@ void BasisSet::basisSetRead(std::shared_ptr<FileIO> fileio, std::shared_ptr<Mole
    center = {{(*mol->cart())(0,i),
               (*mol->cart())(1,i),
               (*mol->cart())(2,i)}};
+   cout << center[1] << endl;
    for(auto k=0; k<allBasis.size();++k){
      if (atomStr.compare(allBasis[k].atomName)==0){
        for (auto j=0;j<allBasis[k].refShell.size();++j){
@@ -199,10 +201,11 @@ void BasisSet::basisSetRead(std::shared_ptr<FileIO> fileio, std::shared_ptr<Mole
      }
    }
   }
+  this->convToLI=true;
   fileBasis->close();
 }
 
-void BasisSet::makeMap(std::shared_ptr<Molecule>  mol) {
+void BasisSet::makeMap(Molecule *  mol) {
   if(!this->convToLI) this->convShell(mol);
   int n = 0;
   for( auto shell: this->shells_libint) {
@@ -212,7 +215,7 @@ void BasisSet::makeMap(std::shared_ptr<Molecule>  mol) {
   this->haveMap = true;
 }
 
-void BasisSet::computeShBlkNorm(std::shared_ptr<Molecule> mol, const RealMatrix *D){
+void BasisSet::computeShBlkNorm(Molecule * mol, const RealMatrix *D){
   // This will be much easier in Eigen
   //if(!this->convToLI) this->convShell(mol);
   if(!this->haveMap)  this->makeMap(mol);
@@ -234,7 +237,7 @@ void BasisSet::computeShBlkNorm(std::shared_ptr<Molecule> mol, const RealMatrix 
 //---------------------------------------//
 // print a general basis set information //
 //---------------------------------------//
-void BasisSet::printInfo_libint(std::shared_ptr<FileIO> fileio,std::shared_ptr<Controls> controls) {
+void BasisSet::printInfo_libint(FileIO * fileio,Controls * controls) {
   fileio->out<<"\nBasis Function Information:"<<endl;
   for(auto i=0;i<this->nLShell_.size();i=i+2){
     fileio->out <<std::setw(15) << "n" <<HashS(i)<<"Shell =" << std::setw(8) << this->nLShell_[i] << std::setw(5) << " "

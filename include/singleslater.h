@@ -62,11 +62,13 @@ class SingleSlater {
   std::unique_ptr<RealMatrix>  PTB_;
   std::unique_ptr<RealMatrix>  dipole_;
   std::unique_ptr<RealMatrix>  quadpole_;
-  std::shared_ptr<BasisSet>    basisset_;
-  std::shared_ptr<Molecule>    molecule_;
-  std::shared_ptr<FileIO>      fileio_;
-  std::shared_ptr<Controls>    controls_;
-  std::shared_ptr<AOIntegrals> aointegrals_;
+  std::unique_ptr<RealMatrix>  tracelessQuadpole_;
+  std::unique_ptr<RealTensor3d>  octpole_;
+  BasisSet *    basisset_;
+  Molecule *    molecule_;
+  FileIO *      fileio_;
+  Controls *    controls_;
+  AOIntegrals * aointegrals_;
 
 public:
  
@@ -85,9 +87,9 @@ public:
   SingleSlater(){;};
   ~SingleSlater() {;};
   // pseudo-constructor
-  void iniSingleSlater(std::shared_ptr<Molecule>,std::shared_ptr<BasisSet>,
-                       std::shared_ptr<AOIntegrals>,std::shared_ptr<FileIO>,
-                       std::shared_ptr<Controls>);
+  void iniSingleSlater(Molecule *,BasisSet *,
+                       AOIntegrals *,FileIO *,
+                       Controls *);
 
   //set private data
   inline void setNBasis(int nBasis) { this->nBasis_ = nBasis;};
@@ -123,6 +125,7 @@ public:
   void formExchange();		// form the exchange matrix
   void formPT();
   void readGuessIO();       	// read the initial guess of MO's from the input stream
+  void readGuessGauMatEl(GauMatEl&); // read the intial guess of MO's from Gaussian raw matrix element file
   void readGuessGauFChk(std::string &);	// read the initial guess of MO's from the Gaussian formatted checkpoint file
   void computeEnergy();         // compute the total electronic energy
   void computeMultipole();      // compute multipole properties
@@ -131,8 +134,46 @@ public:
   void printMultipole();
   void printInfo();
   void printDensityinf();
+
+  inline void operator=(SingleSlater &other){
+    this->nBasis_ = other.nBasis_;
+    this->nTT_    = other.nTT_;
+    this->nAE_    = other.nAE_;
+    this->nBE_    = other.nBE_; 
+    this->RHF_    = other.RHF_;
+    this->nOccA_  = other.nOccA_;
+    this->nOccB_  = other.nOccB_;
+    this->nVirA_  = other.nVirA_;
+    this->nVirB_  = other.nVirB_;
+    this->spin_   = other.spin_;
+    // Hardcoded for Libint route
+    this->densityA_           = std::unique_ptr<RealMatrix>(new RealMatrix(*other.densityA_));
+    this->fockA_              = std::unique_ptr<RealMatrix>(new RealMatrix(*other.fockA_));
+//  this->coulombA_           = std::unique_ptr<RealMatrix>(new RealMatrix(*other.coulombA_));
+//  this->exchangeA_          = std::unique_ptr<RealMatrix>(new RealMatrix(*other.exchangeA_));
+    this->moA_                = std::unique_ptr<RealMatrix>(new RealMatrix(*other.moA_));
+    this->PTA_                = std::unique_ptr<RealMatrix>(new RealMatrix(*other.PTA_));
+    if(!this->RHF_){
+      this->densityB_           = std::unique_ptr<RealMatrix>(new RealMatrix(*other.densityB_));
+      this->fockB_              = std::unique_ptr<RealMatrix>(new RealMatrix(*other.fockB_));
+//    this->coulombB_           = std::unique_ptr<RealMatrix>(new RealMatrix(*other.coulombB_));
+//    this->exchangeB_          = std::unique_ptr<RealMatrix>(new RealMatrix(*other.exchangeB_));
+      this->moB_                = std::unique_ptr<RealMatrix>(new RealMatrix(*other.moB_));
+      this->PTB_                = std::unique_ptr<RealMatrix>(new RealMatrix(*other.PTB_));
+    }
+    this->dipole_             = std::unique_ptr<RealMatrix>(new RealMatrix(*other.dipole_));
+    this->quadpole_           = std::unique_ptr<RealMatrix>(new RealMatrix(*other.quadpole_));
+    this->tracelessQuadpole_  = std::unique_ptr<RealMatrix>(new RealMatrix(*other.tracelessQuadpole_));
+    this->octpole_            = std::unique_ptr<RealTensor3d>(new RealTensor3d(*other.octpole_));
+    this->basisset_    = other.basisset_;    
+    this->molecule_    = other.molecule_;
+    this->fileio_      = other.fileio_;
+    this->controls_    = other.controls_;
+    this->aointegrals_ = other.aointegrals_;
+  }
   /*************************/
   /* MPI Related Routines  */
+
   /*************************/
   void mpiSend(int,int tag=tagSingleSlater);
   void mpiRecv(int,int tag=tagSingleSlater);

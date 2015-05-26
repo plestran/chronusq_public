@@ -25,7 +25,6 @@
  */
 #include <workers.h>
 #include <davidson.h>
-#include <gauinterface.h>
 using namespace ChronusQ;
 
 RealMatrix AX(const RealMatrix &A, const RealMatrix &B) {return A*B;};
@@ -33,17 +32,19 @@ RealMatrix AX(const RealMatrix &A, const RealMatrix &B) {return A*B;};
 int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   int i,j,k,l;
   time_t currentTime;
-  auto molecule     	= std::make_shared<Molecule>();
-  auto basisset     	= std::make_shared<BasisSet>();
-  auto controls     	= std::make_shared<Controls>();
-  auto aointegrals	= std::make_shared<AOIntegrals>();
-  auto hartreeFock	= std::make_shared<SingleSlater>();
-  std::shared_ptr<FileIO> fileIO;
+  auto molecule     	= std::unique_ptr<Molecule>(new Molecule());
+  auto basisset     	= std::unique_ptr<BasisSet>(new BasisSet());
+  auto dfBasisset     	= std::unique_ptr<BasisSet>(new BasisSet());
+  auto controls     	= std::unique_ptr<Controls>(new Controls());
+  auto aointegrals	= std::unique_ptr<AOIntegrals>(new AOIntegrals());
+  auto hartreeFock	= std::unique_ptr<SingleSlater>(new SingleSlater());
+  std::unique_ptr<FileIO> fileIO;
+  cout << dfBasisset.get() << endl;
 
   std::vector<std::string> argv_string;
   for(auto i = 1; i < argc; ++i) if(argv[i][0]=='-') argv_string.push_back(argv[i]);
-  if(argv_string.size()==0) fileIO = std::make_shared<FileIO>(argv[1]);
-  else fileIO = std::make_shared<FileIO>(argv_string);
+  if(argv_string.size()==0) fileIO = std::unique_ptr<FileIO>(new FileIO(argv[1]));
+  else fileIO = std::unique_ptr<FileIO>(new FileIO(argv_string));
 
 
   // print out the starting time of the job
@@ -53,14 +54,15 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 
   // read input
   controls->iniControls();
-  readInput(fileIO,molecule,basisset,controls);
+  readInput(fileIO.get(),molecule.get(),basisset.get(),controls.get(),dfBasisset.get());
 //  fileIO->iniFileIO(controls->restart);
 
   // print out molecular and basis set information
-  molecule->printInfo(fileIO,controls);
-  basisset->printInfo_libint(fileIO,controls);
-  aointegrals->iniAOIntegrals(molecule,basisset,fileIO,controls);
-  hartreeFock->iniSingleSlater(molecule,basisset,aointegrals,fileIO,controls);
+  molecule->printInfo(fileIO.get(),controls.get());
+  basisset->printInfo_libint(fileIO.get(),controls.get());
+  dfBasisset->printInfo_libint(fileIO.get(),controls.get());
+  aointegrals->iniAOIntegrals(molecule.get(),basisset.get(),fileIO.get(),controls.get());
+  hartreeFock->iniSingleSlater(molecule.get(),basisset.get(),aointegrals.get(),fileIO.get(),controls.get());
   hartreeFock->printInfo();
 #ifdef USE_LIBINT
   aointegrals->computeSchwartz();
@@ -68,7 +70,10 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 #endif
   if(controls->guess==0) hartreeFock->formGuess();
   else if(controls->guess==1) hartreeFock->readGuessIO();
-  else if(controls->guess==2) ;
+  else if(controls->guess==2) {
+    GauMatEl matEl(controls->gauMatElName);
+    hartreeFock->readGuessGauMatEl(matEl);
+  }
   else if(controls->guess==3) hartreeFock->readGuessGauFChk(controls->gauFChkName);
   hartreeFock->formFock();
   aointegrals->printTimings();
@@ -142,9 +147,16 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   cout << endl << VL.transpose()*VR << endl;
 //cout << *A << endl;
 */
-  Davidson<double> dav(&AX,A,NSek,N);
+//Davidson<double> dav(&AX,A,NSek,N);
 //dav.run(fileIO->out);
-  GauMatEl gau("file.out");
+//GauMatEl gau("file.out");
+//double * x = NULL;
+//gau.readRec(GauMatEl::overlap,x);
+//cout << "OUTSIDE" << endl;
+//cout << x[23] << endl << endl;
+//gau.readRec(GauMatEl::dipole,x);
+//cout << "OUTSIDE" << endl;
+//cout << x[23] << endl << endl;
   
 
 #ifdef USE_LIBINT

@@ -112,6 +112,7 @@ public:
   //dbwys
 #ifdef USE_LIBINT
   std::vector<libint2::Shell> shells_libint;
+  std::vector<libint2::Shell> shells_libint_unnormal;
   std::vector<int> mapSh2Bf;
   std::unique_ptr<RealMatrix> shBlkNorm;
   bool convToLI = false;
@@ -135,7 +136,7 @@ public:
   void iniBasisSet();
 
   // create and sort shell pairs according to the angular momenta
-  void createShellPair(std::shared_ptr<Molecule>);
+  void createShellPair(Molecule *);
 
   // access to private data
   inline int     nBasis()  {return this->nBasis_;};
@@ -145,23 +146,23 @@ public:
   inline int nLShell(int L){return this->nLShell_[L];};
 
   // print out basis functions
-  void printInfo(std::shared_ptr<FileIO>,std::shared_ptr<Controls>);
-  void printInfo_libint(std::shared_ptr<FileIO>,std::shared_ptr<Controls>);
+  void printInfo(FileIO *,Controls *);
+  void printInfo_libint(FileIO *,Controls *);
   void printAO(ostream &output=cout);
   void printAtomO(ostream &output=cout);
   void printShell(ostream &output=cout);
   void printShellPair(ostream &output=cout);
 
   // read from input file
-  void readBasisSet(std::shared_ptr<FileIO>,std::shared_ptr<Molecule>);
+  void readBasisSet(FileIO *,Molecule *);
   
 #ifdef USE_LIBINT
   // If using Libint, have a routine to convert between local and libint
   // shell format
-  void basisSetRead(std::shared_ptr<FileIO>,std::shared_ptr<Molecule>); 
-  void convShell(std::shared_ptr<Molecule>);
-  void makeMap(std::shared_ptr<Molecule>);
-  void computeShBlkNorm(std::shared_ptr<Molecule>,const RealMatrix*);
+  void basisSetRead(FileIO *,Molecule *); 
+  void convShell(Molecule *);
+  void makeMap(Molecule *);
+  void computeShBlkNorm(Molecule *,const RealMatrix*);
 #endif
 
   /*************************/
