@@ -134,8 +134,45 @@ public:
   void printMultipole();
   void printInfo();
   void printDensityinf();
+
+  inline void operator=(SingleSlater &other){
+/*
+    this->nBasis_ = other.nBasis_;
+    this->nTT_    = other.nTT_;
+    this->nAE_    = other.nAE_;
+    this->nBE_    = other.nBE_; 
+    this->RHF_    = other.RHF_;
+    this->nOccA_  = other.nOccA_;
+    this->nOccB_  = other.nOccB_;
+    this->nVirA_  = other.nVirA_;
+    this->nVirB_  = other.nVirB_;
+    this->spin_   = other.spin_;
+    this->densityA_           = std::unique_ptr<RealMatrix>(new RealMatrix(*other.densityA_));
+    this->densityB_           = std::unique_ptr<RealMatrix>(new RealMatrix(*other.densityB_));
+    this->fockA_              = std::unique_ptr<RealMatrix>(new RealMatrix(*other.fockA_));
+    this->fockB_              = std::unique_ptr<RealMatrix>(new RealMatrix(*other.fockB_));
+    this->coulombA_           = std::unique_ptr<RealMatrix>(new RealMatrix(*other.coulombA_));
+    this->coulombB_           = std::unique_ptr<RealMatrix>(new RealMatrix(*other.coulombB_));
+    this->exchangeA_          = std::unique_ptr<RealMatrix>(new RealMatrix(*other.exchangeA_));
+    this->exchangeB_          = std::unique_ptr<RealMatrix>(new RealMatrix(*other.exchangeB_));
+    this->moA_                = std::unique_ptr<RealMatrix>(new RealMatrix(*other.moA_));
+    this->moB_                = std::unique_ptr<RealMatrix>(new RealMatrix(*other.moB_));
+    this->PTA_                = std::unique_ptr<RealMatrix>(new RealMatrix(*other.PTA_));
+    this->PTB_                = std::unique_ptr<RealMatrix>(new RealMatrix(*other.PTB_));
+    this->dipole_             = std::unique_ptr<RealMatrix>(new RealMatrix(*other.dipole_));
+    this->quadpole_           = std::unique_ptr<RealMatrix>(new RealMatrix(*other.quadpole_));
+    this->tracelessQuadpole_  = std::unique_ptr<RealMatrix>(new RealMatrix(*other.tracelessQuadpole_));
+    this->octpole_            = std::unique_ptr<RealTensor3d>(new RealTensor3d(*other.octpole_));
+    this->basisset_    = other.basisset_;    
+    this->molecule_    = other.molecule_;
+    this->fileio_      = other.fileio_;
+    this->controls_    = other.controls_;
+    this->aointegrals_ = other.aointegrals_;
+*/
+  }
   /*************************/
   /* MPI Related Routines  */
+
   /*************************/
   void mpiSend(int,int tag=tagSingleSlater);
   void mpiRecv(int,int tag=tagSingleSlater);

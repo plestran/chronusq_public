@@ -38,8 +38,7 @@
 
 namespace ChronusQ {
 // read input files and initialize everything
-void readInput(FileIO *,Molecule *,
-               BasisSet *,Controls *);
+void readInput(FileIO *,Molecule *, BasisSet *, Controls *, BasisSet * dfBasis=NULL);
 
 // trace of product of two symmetric matrices
 double traceSymm(RealMatrix *,RealMatrix *);

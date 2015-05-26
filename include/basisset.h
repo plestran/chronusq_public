@@ -112,6 +112,7 @@ public:
   //dbwys
 #ifdef USE_LIBINT
   std::vector<libint2::Shell> shells_libint;
+  std::vector<libint2::Shell> shells_libint_unnormal;
   std::vector<int> mapSh2Bf;
   std::unique_ptr<RealMatrix> shBlkNorm;
   bool convToLI = false;
