@@ -36,7 +36,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   auto dfBasisset     	= std::unique_ptr<BasisSet>(new BasisSet());
   auto controls     	= std::unique_ptr<Controls>(new Controls());
   auto aointegrals	= std::unique_ptr<AOIntegrals>(new AOIntegrals());
-  auto hartreeFock	= std::unique_ptr<SingleSlater>(new SingleSlater());
+  auto hartreeFock	= std::unique_ptr<SingleSlater<double>>(new SingleSlater<double>());
   std::unique_ptr<FileIO> fileIO;
 
   // Initialize the FileIO object
