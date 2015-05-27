@@ -40,10 +40,8 @@ using std::setw;
 //------------------------------//
 void SDResponse::iniSDResponse( Molecule * molecule, BasisSet * basisSet, MOIntegrals * mointegrals, 
                                 FileIO * fileio, Controls * controls, SingleSlater * singleSlater) {
+  cout << "start initialization" << endl;
   this->nBasis_  = basisSet->nBasis();
-  this->nO       = singleSlater_->nOccA();
-  this->nV       = singleSlater_->nVirA();
-  this->nOV      = singleSlater_->nOV(); 
   this->molecule_       = molecule;
   this->basisSet_       = basisSet;
   this->fileio_         = fileio;
@@ -52,6 +50,12 @@ void SDResponse::iniSDResponse( Molecule * molecule, BasisSet * basisSet, MOInte
   this->singleSlater_   = singleSlater;
   this->aoERI_          = singleSlater->aointegrals()->aoERI_.get();
   this->elecDipole_     = singleSlater->aointegrals()->elecDipole_.get();
+  cout << "Allocate Memory for CISEnergy_ and CISTransDen_" << endl;
+  int nOV = singleSlater->nOV();
+  this->CISEnergy_ = std::unique_ptr<RealMatrix>(new RealMatrix(2*nOV,1));
+  this->CISTransDen_ = std::unique_ptr<RealMatrix>(new RealMatrix(2*nOV,2*nOV));
+  this->TransDipole_ = std::unique_ptr<RealMatrix>(new RealMatrix(1,3));
+  cout << "finish initialization" << endl;
 };
 //-----------------------------------//
 // print a wave function information //
@@ -145,7 +149,7 @@ void SDResponse::formRM(){
   }
 
   // Build A & B matrix
-  int nOV = nO*nV;
+  int nOV = this->singleSlater_->nOV();
   int ia,jb;
   RealMatrix ABBA(4*nOV,4*nOV);
   RealMatrix A(2*nOV,2*nOV);
@@ -209,13 +213,21 @@ void SDResponse::formRM(){
   CIS.eigenvalues();
   CIS.eigenvectors();
   // Print the CIS Excitation Energies
-  for (auto i=0;i<2*nOV;i++){
-    cout << "The " << (i+1) << " CIS Exicitation Energy is: "
-         << (CIS.eigenvalues())(i) << endl;
-  }
-  
-  RealMatrix XMO = CIS.eigenvectors().col(0);
-  formRM2(XMO);
+//  for (auto i=0;i<2*nOV;i++){
+//    cout << "The " << (i+1) << " CIS Exicitation Energy is: "
+//         << (CIS.eigenvalues())(i) << endl;
+//  }
+  cout << "Here " << endl;
+  cout << "Output Energy" << endl;
+  *this->CISEnergy_   = CIS.eigenvalues();
+  cout << *this->CISEnergy_ << endl;
+  cout << "Output Transition Density" << endl;
+  *this->CISTransDen_ = CIS.eigenvectors();
+  cout << *this->CISTransDen_ << endl;
+  cout << "Here " << endl;
+  TransDipole();
+  double Oscstr = OscStrength();
+  cout << "f = " << Oscstr << endl;
 
   // LR TDHF routine
   Eigen::EigenSolver<RealMatrix> TD;
@@ -232,7 +244,7 @@ void SDResponse::formRM(){
 }
 
 void SDResponse::DavidsonCIS(){
-  int nOV = this->nOV();
+  int nOV = this->singleSlater_->nOV();
   RealMatrix PDiag(2*nOV,1);
   PDiag = ReturnDiag();
   RealMatrix GVec(2*nOV,2*nOV);
@@ -259,7 +271,7 @@ RealMatrix SDResponse::formRM2(RealMatrix &XMO){
       LocMoAV(ii,kk-nO) = (*this->singleSlater_->moA())(ii,kk);
     }
   }
-  int nOV = this->nOV();
+  int nOV = this->singleSlater_->nOV();
   RealMatrix EigO(nO,1);
   RealMatrix EigV(nV,1);
   for (auto i=0;i<nO;i++){
@@ -403,7 +415,7 @@ RealMatrix SDResponse::formRM2(RealMatrix &XMO){
 RealMatrix SDResponse::ReturnDiag(){
   int nO = this->singleSlater_->nOccA();
   int nV = this->singleSlater_->nVirA();
-  int nOV = this->nOV();
+  int nOV = this->singleSlater_->nOV();
   RealMatrix EigO(nO,1);
   RealMatrix EigV(nV,1);
   for (auto i=0;i<nO;i++){
@@ -427,7 +439,7 @@ RealMatrix SDResponse::ReturnDiag(){
 RealMatrix SDResponse::Guess(RealMatrix &PDiag){
   int nO = this->singleSlater_->nOccA();
   int nV = this->singleSlater_->nVirA();
-  int nOV = this->nOV();
+  int nOV = this->singleSlater_->nOV();
   double temp1;
   double temp2;                                                                                                    
   bool isSorted;
@@ -462,30 +474,41 @@ RealMatrix SDResponse::Guess(RealMatrix &PDiag){
   return GVec;
 }
 
-RealMatrix SDResponse::TransDipole(RealMatrix &TransDen){
+void SDResponse::TransDipole(){
+  int nO   = this->singleSlater_->nOccA();
+  int nV   = this->singleSlater_->nVirA();
+  int nOV  = this->singleSlater_->nOV();
   int NBSq = this->nBasis_*this->nBasis_;
+  double transdipole;
+  (*this->CISTransDen_).transposeInPlace();
+  RealMap TransDen(this->CISTransDen_->data()+10*nOV,2*nOV,1);
+  cout << "The transition density matrix we use: " << endl;
+  cout << TransDen << endl;
   int nSub = TransDen.rows()/nOV;
-  RealMatrix TransDipole(1,3);
   for (auto i=0,IOff=0;i<3;i++,IOff+=NBSq)
   { 
-    dI = 0.0;
-    RealMap Dipole(*this->elecDipole_->storage()[IOff],this->nBasis_,this->nBasis_);
+    transdipole = 0.0;
+    RealMap Dipole(&this->elecDipole_->storage()[IOff],this->nBasis_,this->nBasis_);
+    cout << "Display dipole" << endl;
+    cout << Dipole << endl;
     for (auto j=0, Shift=0;j<nSub;j++,Shift+=nOV)
     {
       RealMap TDenMO(TransDen.data()+Shift,nV,nO);
       RealMatrix TDenAO = this->singleSlater_->moA()->block(0,nO,this->nBasis_,nV)*TDenMO*this->singleSlater_->moA()->block(0,0,this->nBasis_,nO).transpose();
-      RealMatrix TransDipole = TDenAO.transpose()*Dipole;
-      TransDipole(1,i) += TransDipole.trace()
+      TDenAO = TDenAO.transpose()*Dipole;
+      transdipole += TDenAO.trace();
     }
+    (*this->TransDipole_)(0,i) = transdipole;
   }
-  return TransDipole;
+  
 }
 
-double SDResponse::OscStrength(RealMatrix &TransDipole, double &Omega){
+double SDResponse::OscStrength(){
   double Oscstr = 0.0;
+  double Omega  = (*this->CISEnergy_)(5);
   for (auto i=0;i<3;i++)
   {
-    Oscstr += (2.0/3.0)*Omega*pow(TransDipole(1,i),2);
+    Oscstr += (2.0/3.0)*Omega*pow((*this->TransDipole_)(0,i),2);
   }
   return Oscstr;
 }

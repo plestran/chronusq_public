@@ -42,13 +42,13 @@ class SDResponse {
   int       nBasis_;
   int       **R2Index_;
   int       nStates_;
-  int       nO;
-  int       nV;
-  int       nOV;
   friend class SingleSlater;
 
   RealMatrix      XMO;
   RealMatrix      PDiag;
+  std::unique_ptr<RealMatrix>    CISTransDen_;
+  std::unique_ptr<RealMatrix>    CISEnergy_;
+  std::unique_ptr<RealMatrix>    TransDipole_;
   BasisSet *      basisSet_;
   Molecule *      molecule_;
   FileIO *        fileio_;
@@ -77,8 +77,8 @@ public:
   RealMatrix formRM2(RealMatrix &XMO);
   RealMatrix ReturnDiag();
   RealMatrix Guess(RealMatrix &PDiag);
-  RealMatrix TransDipole(RealMatrix &TransDen);
-  double OscStrength(RealMatrix &TransDipole,double &Omega)
+  void TransDipole();
+  double OscStrength();
 
   /*************************/
   /* MPI Related Routines  */
