@@ -428,6 +428,8 @@ void SingleSlater::formPT() {
 // form the initial guess of MO's //
 //--------------------------------//
 void SingleSlater::formGuess() {
+  this->moA_->setZero();
+  this->haveMO = true;
   if(this->controls_->printLevel>=3) {
 /*
     this->moA_->printAll(5,this->fileio_->out);
