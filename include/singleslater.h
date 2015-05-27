@@ -62,9 +62,9 @@ class SingleSlater {
   std::unique_ptr<TMatrix>  moB_;
   std::unique_ptr<TMatrix>  PTA_;
   std::unique_ptr<TMatrix>  PTB_;
-  std::unique_ptr<TMatrix>  dipole_;
-  std::unique_ptr<TMatrix>  quadpole_;
-  std::unique_ptr<TMatrix>  tracelessQuadpole_;
+  std::unique_ptr<RealMatrix>  dipole_;
+  std::unique_ptr<RealMatrix>  quadpole_;
+  std::unique_ptr<RealMatrix>  tracelessQuadpole_;
   std::unique_ptr<RealTensor3d>  octpole_;
   BasisSet *    basisset_;
   Molecule *    molecule_;
@@ -161,9 +161,9 @@ public:
       this->moB_                = std::unique_ptr<TMatrix>(new TMatrix(*other.moB_));
       this->PTB_                = std::unique_ptr<TMatrix>(new TMatrix(*other.PTB_));
     }
-    this->dipole_             = std::unique_ptr<TMatrix>(new TMatrix(*other.dipole_));
-    this->quadpole_           = std::unique_ptr<TMatrix>(new TMatrix(*other.quadpole_));
-    this->tracelessQuadpole_  = std::unique_ptr<TMatrix>(new TMatrix(*other.tracelessQuadpole_));
+    this->dipole_             = std::unique_ptr<RealMatrix>(new RealMatrix(*other.dipole_));
+    this->quadpole_           = std::unique_ptr<RealMatrix>(new RealMatrix(*other.quadpole_));
+    this->tracelessQuadpole_  = std::unique_ptr<RealMatrix>(new RealMatrix(*other.tracelessQuadpole_));
     this->octpole_            = std::unique_ptr<RealTensor3d>(new RealTensor3d(*other.octpole_));
     this->basisset_    = other.basisset_;    
     this->molecule_    = other.molecule_;

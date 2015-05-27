@@ -23,6 +23,9 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
+/*********************
+ * Allocate Matricies *
+ **********************/
 template<typename T>
 void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset, 
                                    AOIntegrals * aointegrals, FileIO * fileio, 
@@ -76,9 +79,9 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
     catch (...) { CErr(std::current_exception(),"Beta MO Coefficients Allocation"); }
   };
 
-  this->dipole_ = std::unique_ptr<TMatrix>(new TMatrix(3,1));
-  this->quadpole_ = std::unique_ptr<TMatrix>(new TMatrix(3,3));
-  this->tracelessQuadpole_ = std::unique_ptr<TMatrix>(new TMatrix(3,3));
+  this->dipole_ = std::unique_ptr<RealMatrix>(new RealMatrix(3,1));
+  this->quadpole_ = std::unique_ptr<RealMatrix>(new RealMatrix(3,3));
+  this->tracelessQuadpole_ = std::unique_ptr<RealMatrix>(new RealMatrix(3,3));
   this->octpole_  = std::unique_ptr<RealTensor3d>(new RealTensor3d(3,3,3));
   this->molecule_ = molecule;
   this->basisset_ = basisset;
