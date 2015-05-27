@@ -627,7 +627,7 @@ void AOIntegrals::computeAOTwoE(){
     }
   }
   } // OMP Parallel
-
+  this->haveAOTwoE = true;
 }
 
 void AOIntegrals::computeAORII(){

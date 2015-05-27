@@ -948,7 +948,8 @@ double AOIntegrals::twoeSSSS0(int *nPGTOs, ShellPair *ijShellPair, ShellPair *kl
 };
 
 #ifdef USE_LIBINT
-void AOIntegrals::twoEContract(bool doRHFFock, const RealMatrix &X, RealMatrix &AX) {
+void AOIntegrals::twoEContractDirect(bool doRHFFock, const RealMatrix &X, RealMatrix &AX) {
+  this->fileio_->out << "Contracting Directly with two-electron integrals" << endl;
 
   if(!this->haveSchwartz) this->computeSchwartz();
   if(!this->basisSet_->haveMap) this->basisSet_->makeMap(this->molecule_); 
@@ -1164,5 +1165,25 @@ void AOIntegrals::twoEContract(bool doRHFFock, const RealMatrix &X, RealMatrix &
   finish = std::chrono::high_resolution_clock::now();
   if(doRHFFock) this->PTD = finish - start;
    
+}
+void AOIntegrals::twoEContractN4(bool doRHFFock, const RealMatrix &X, RealMatrix &AX) {
+  this->fileio_->out << "Contracting with in-core two-electron integrals" << endl;
+  if(!this->haveAOTwoE) this->computeAOTwoE();
+  RealTensor2d XTensor(X.rows(),X.cols());
+  RealTensor2d AXTensor(AX.rows(),AX.cols());
+  for(auto i = 0; i < X.size(); i++) XTensor.storage()[i] = X.data()[i];
+  AXTensor.fill(0.0);
+
+  double fact = -1.0;
+  if(doRHFFock) fact = -0.5;
+
+  enum{i,j,k,l}; 
+  contract(1.0,*this->aoERI_,{i,j,k,l},XTensor,{l,k},0.0,AXTensor,{i,j});
+  contract(fact,*this->aoERI_,{i,l,k,j},XTensor,{l,k},1.0,AXTensor,{i,j});
+
+  for(auto i = 0; i < AX.size(); i++) AX.data()[i] = AXTensor.storage()[i];
+//AX = AX*0.5; // Gaussian nonsense
+//AX = AX*0.5; // werid factor that comes from A + AT
+  if(doRHFFock) AX = AX*0.5; // E ~ 0.5*G
 }
 #endif

@@ -135,9 +135,9 @@ void AOIntegrals::iniAOIntegrals(Molecule * molecule, BasisSet * basisset,
 
   this->haveAOTwoE = false;
   this->haveAOOneE = false;
-#ifdef USE_LIBINT
   this->haveSchwartz = false;
-#endif
+  this->haveRIS = false;
+  this->haveRII = false;
 /* This whole block leaks memory like a siv (~ 8MB leaked for test 4!)
   int i,j,ij;
   this->R2Index_ = new int*[this->nBasis_];

@@ -306,7 +306,10 @@ void SingleSlater::formExchange(){
 // Form perturbation tensor (G)
 void SingleSlater::formPT() {
   if(!this->haveDensity) this->formDensity();
-  this->aointegrals_->twoEContract(true,*this->densityA_,*this->PTA_);
+  if(this->controls_->directTwoE)
+    this->aointegrals_->twoEContractDirect(true,*this->densityA_,*this->PTA_);
+  else
+    this->aointegrals_->twoEContractN4(true,*this->densityA_,*this->PTA_);
   if(this->controls_->printLevel >= 3) prettyPrint(this->fileio_->out,(*this->PTA_),"Alpha Perturbation Tensor");
 }
 /*

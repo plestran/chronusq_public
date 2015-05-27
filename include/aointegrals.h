@@ -206,7 +206,8 @@ public:
   void computeSchwartz();
   void computeAORII();
   void computeAORIS();
-  void twoEContract(bool,const RealMatrix &, RealMatrix &);
+  void twoEContractDirect(bool,const RealMatrix &, RealMatrix &);
+  void twoEContractN4(bool,const RealMatrix &, RealMatrix &);
 #endif
 //----------------------------------------//
 // member functions in integrals_onee.cpp //
