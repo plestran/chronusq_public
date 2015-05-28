@@ -236,10 +236,6 @@ void AOIntegrals::twoEContractDirect(bool RHF, bool doFock, const RealMatrix &XA
   efficient_twoe(0);
 #endif
   for(int i = 0; i < this->controls_->nthreads; i++) AXAlpha += G[i];
-//RealMatrix Tmp = 0.5*(AX + AX.transpose());
-//AX = 0.25*Tmp; // Can't consolidate where this comes from?
-//if(RHF && doFock) AX = 0.25*AX; // Can't consolidate where this comes from?
-  AXAlpha = AXAlpha*0.5; // Gaussian nonsense
   AXAlpha = AXAlpha*0.5; // werid factor that comes from A + AT
   if(RHF && doFock) AXAlpha = AXAlpha*0.5; // E ~ 0.5*G
   finish = std::chrono::high_resolution_clock::now();
@@ -266,7 +262,6 @@ void AOIntegrals::twoEContractN4(bool RHF, bool doFock, const RealMatrix &XAlpha
   for(auto i = 0; i < AXAlpha.size(); i++) AXAlpha.data()[i] = AXAlphaTensor.storage()[i];
 //AXAlpha = AXAlpha*0.5; // Gaussian nonsense
 //AXAlpha = AXAlpha*0.5; // werid factor that comes from A + AT
-  if(RHF && doFock) AXAlpha = AXAlpha*0.5; // E ~ 0.5*G
 }
 
 template<>

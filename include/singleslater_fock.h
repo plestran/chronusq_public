@@ -61,17 +61,17 @@ void SingleSlater<T>::formFock(){
   this->fockA_->setZero();
   *(fockA_)+=(*this->aointegrals_->oneE_);
 #ifndef USE_LIBINT
-  *(fockA_)+=2*(*this->coulombA_);
-  *(fockA_)-=2*(*this->exchangeA_);
+  *(fockA_)+=(*this->coulombA_);
+  *(fockA_)-=(*this->exchangeA_);
 #else
-  *(fockA_)+=2*(*this->PTA_);
+  *(fockA_)+=(*this->PTA_);
 #endif
   if(!this->RHF_){
     this->fockB_->setZero();
     *(fockB_)+=(*this->aointegrals_->oneE_);
 #ifndef USE_LIBINT
-    *(fockB_)+=2*(*this->coulombB_);
-    *(fockB_)-=2*(*this->exchangeB_);
+    *(fockB_)+=(*this->coulombB_);
+    *(fockB_)-=(*this->exchangeB_);
 #else
     *(fockB_)+=(*this->PTB_);
 #endif

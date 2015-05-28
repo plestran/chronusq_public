@@ -53,7 +53,7 @@ void SingleSlater<T>::computeEnergy(){
 #ifndef USE_LIBINT
   this->energyTwoE = ((*this->coulombA_)-(*this->exchangeA_)).frobInner(this->densityA->conjugate());
 #else
-  this->energyTwoE = (*this->PTA_).frobInner(this->densityA_->conjugate());
+  this->energyTwoE = 0.5*(*this->PTA_).frobInner(this->densityA_->conjugate());
 #endif
   this->totalEnergy= this->energyOneE + this->energyTwoE + this->energyNuclei;
   this->printEnergy();
