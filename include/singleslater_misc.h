@@ -50,11 +50,11 @@ void SingleSlater<T>::formDensity(){
 template<typename T>
 void SingleSlater<T>::computeEnergy(){
   this->energyOneE = (*this->aointegrals_->oneE_).frobInner(this->densityA_->conjugate());
-#ifndef USE_LIBINT
-  this->energyTwoE = ((*this->coulombA_)-(*this->exchangeA_)).frobInner(this->densityA->conjugate());
-#else
   this->energyTwoE = 0.5*(*this->PTA_).frobInner(this->densityA_->conjugate());
-#endif
+  if(!this->RHF_){
+    this->energyOneE += (*this->aointegrals_->oneE_).frobInner(this->densityB_->conjugate());
+    this->energyTwoE += 0.5*(*this->PTB_).frobInner(this->densityB_->conjugate());
+  }
   this->totalEnergy= this->energyOneE + this->energyTwoE + this->energyNuclei;
   this->printEnergy();
 };

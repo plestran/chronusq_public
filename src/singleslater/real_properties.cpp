@@ -40,6 +40,7 @@ void SingleSlater<double>::computeMultipole(){
   for(auto ixyz = 0; ixyz < 3; ixyz++){
     ConstRealMap mu(&this->aointegrals_->elecDipole_->storage()[iBuf],NB,NB);
     (*dipole_)(ixyz,0) = -this->densityA_->frobInner(mu);
+    if(!this->RHF_) (*dipole_)(ixyz,0) += -this->densityB_->frobInner(mu);
     iBuf += NBSq;
   }
   for(int iA = 0; iA < this->molecule_->nAtoms(); iA++)
@@ -53,6 +54,7 @@ void SingleSlater<double>::computeMultipole(){
       ConstRealMap 
         mu(&this->aointegrals_->elecQuadpole_->storage()[iBuf],NB,NB);
       (*quadpole_)(jxyz,ixyz) = -this->densityA_->frobInner(mu);
+      if(!this->RHF_) (*quadpole_)(jxyz,ixyz) += -this->densityB_->frobInner(mu);
       iBuf += NBSq;
     }
     *this->quadpole_ = this->quadpole_->selfadjointView<Upper>();
@@ -72,6 +74,7 @@ void SingleSlater<double>::computeMultipole(){
       ConstRealMap 
         mu(&this->aointegrals_->elecOctpole_->storage()[iBuf],NB,NB);
       (*octpole_)(kxyz,jxyz,ixyz) = -this->densityA_->frobInner(mu);
+      if(!this->RHF_)( *octpole_)(kxyz,jxyz,ixyz) += -this->densityB_->frobInner(mu);
       iBuf += NBSq;
     }
     for(auto kxyz = 0;    kxyz < 3; kxyz++)
