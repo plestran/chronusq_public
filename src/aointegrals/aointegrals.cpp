@@ -96,8 +96,10 @@ void AOIntegrals::iniAOIntegrals(Molecule * molecule, BasisSet * basisset,
   }
 #else 
   try {
-    if(this->controls_->buildn4eri) 
+    if(this->controls_->buildn4eri && !this->controls_->doDF) {
+      this->fileio_->out << "Allocating N4 ERI" << endl;
       this->aoERI_ = std::unique_ptr<RealTensor4d>(new RealTensor4d(this->nBasis_,this->nBasis_,this->nBasis_,this->nBasis_));
+    } 
   } catch (...) {
     CErr(std::current_exception(),"N^4 ERI Tensor Allocation");
   }
