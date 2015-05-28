@@ -480,17 +480,29 @@ void SDResponse::TransDipole(){
   int nOV  = this->singleSlater_->nOV();
   int NBSq = this->nBasis_*this->nBasis_;
   double transdipole;
+  double Tmax=0.0;
+  int order=0;
   (*this->CISTransDen_).transposeInPlace();
-  RealMap TransDen(this->CISTransDen_->data()+10*nOV,2*nOV,1);
+  RealMap TransDen(this->CISTransDen_->data()+12*nOV,2*nOV,1);
   cout << "The transition density matrix we use: " << endl;
   cout << TransDen << endl;
+  Tmax = TransDen(0,0);
+  cout << "Tmax = " << Tmax << endl;
+  for (auto i=0;i<nOV-1;i++)
+  {
+    if (abs(TransDen(i+1,0))>abs(Tmax))
+    {
+      Tmax = TransDen(i+1,0);
+      cout << "Tmax = " << Tmax << endl;
+      order = i+1;
+    }
+  }
+  cout << "Maximum contribution is " << Tmax << " from " << order%nO+1 << " -> " << order/nO+nO+1 << endl;
   int nSub = TransDen.rows()/nOV;
   for (auto i=0,IOff=0;i<3;i++,IOff+=NBSq)
   { 
     transdipole = 0.0;
     RealMap Dipole(&this->elecDipole_->storage()[IOff],this->nBasis_,this->nBasis_);
-    cout << "Display dipole" << endl;
-    cout << Dipole << endl;
     for (auto j=0, Shift=0;j<nSub;j++,Shift+=nOV)
     {
       RealMap TDenMO(TransDen.data()+Shift,nV,nO);
@@ -505,7 +517,7 @@ void SDResponse::TransDipole(){
 
 double SDResponse::OscStrength(){
   double Oscstr = 0.0;
-  double Omega  = (*this->CISEnergy_)(5);
+  double Omega  = (*this->CISEnergy_)(6);
   for (auto i=0;i<3;i++)
   {
     Oscstr += (2.0/3.0)*Omega*pow((*this->TransDipole_)(0,i),2);
