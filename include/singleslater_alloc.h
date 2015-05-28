@@ -30,6 +30,11 @@ template<typename T>
 void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset, 
                                    AOIntegrals * aointegrals, FileIO * fileio, 
                                    Controls * controls) {
+  this->molecule_ = molecule;
+  this->basisset_ = basisset;
+  this->fileio_   = fileio;
+  this->controls_ = controls;
+  this->aointegrals_= aointegrals;
   int nTotalE = molecule->nTotalE();
   this->nBasis_  = basisset->nBasis();
   this->nTT_   = this->nBasis_*(this->nBasis_+1)/2;
@@ -83,11 +88,6 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
   this->quadpole_ = std::unique_ptr<RealMatrix>(new RealMatrix(3,3));
   this->tracelessQuadpole_ = std::unique_ptr<RealMatrix>(new RealMatrix(3,3));
   this->octpole_  = std::unique_ptr<RealTensor3d>(new RealTensor3d(3,3,3));
-  this->molecule_ = molecule;
-  this->basisset_ = basisset;
-  this->fileio_   = fileio;
-  this->controls_ = controls;
-  this->aointegrals_= aointegrals;
 /* Leaks memory
   int i,j,ij;
   this->R2Index_ = new int*[nBasis];
@@ -103,6 +103,6 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
   this->haveExchange= false;
   this->haveDensity = false;
   this->haveMO	    = false;
-  this->havePT = false;
+  this->havePT      = false;
 };
 

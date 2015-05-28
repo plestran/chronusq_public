@@ -31,8 +31,6 @@ void SingleSlater<T>::formDensity(){
   if(!this->haveMO)
     CErr("No MO coefficients available to form one-particle density matrix!",
          this->fileio_->out);
-
-  this->densityA_->setZero();
   *this->densityA_ = this->moA_->block(0,0,this->nBasis_,this->nOccA_)*
                    this->moA_->block(0,0,this->nBasis_,this->nOccA_).adjoint();
   if(this->RHF_) *this->densityA_ *= math.two;

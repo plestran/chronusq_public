@@ -208,9 +208,9 @@ public:
   void computeAORII();
   void computeAORIS();
   void transformAORII();
-  template<typename T> void twoEContractDirect(bool,const T &, T &);
-  template<typename T> void twoEContractN4(bool,const T &, T &);
-  template<typename T> void twoEContractDF(bool,const T &, T &);
+  template<typename T> void twoEContractDirect(bool,bool,const T &,T &,const T &, T &);
+  template<typename T> void twoEContractN4(bool,bool,const T &,T &,const T &, T &);
+  template<typename T> void twoEContractDF(bool,bool,const T &,T &,const T &, T &);
   void compareRI();
 #endif
 //----------------------------------------//

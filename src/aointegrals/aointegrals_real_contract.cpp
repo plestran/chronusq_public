@@ -27,12 +27,13 @@
 namespace ChronusQ{
 #ifdef USE_LIBINT
 template<>
-void AOIntegrals::twoEContractDirect(bool doRHFFock, const RealMatrix &X, RealMatrix &AX) {
+void AOIntegrals::twoEContractDirect(bool RHF, bool doFock, const RealMatrix &XAlpha, RealMatrix &AXAlpha,
+                                     const RealMatrix &XBeta, RealMatrix &AXBeta) {
   this->fileio_->out << "Contracting Directly with two-electron integrals" << endl;
 
   if(!this->haveSchwartz) this->computeSchwartz();
   if(!this->basisSet_->haveMap) this->basisSet_->makeMap(this->molecule_); 
-  AX.setZero();
+  AXAlpha.setZero();
   std::vector<RealMatrix> 
     G(this->controls_->nthreads,RealMatrix::Zero(this->nBasis_,this->nBasis_));
 
@@ -43,9 +44,9 @@ void AOIntegrals::twoEContractDirect(bool doRHFFock, const RealMatrix &X, RealMa
   for(int i=1; i<this->controls_->nthreads; i++) engines[i] = engines[0];
 
   auto start = std::chrono::high_resolution_clock::now();
-  this->basisSet_->computeShBlkNorm(this->molecule_,&X);
+  this->basisSet_->computeShBlkNorm(this->molecule_,&XAlpha);
   auto finish = std::chrono::high_resolution_clock::now();
-  if(doRHFFock) this->DenShBlkD = finish - start;
+  if(RHF && doFock) this->DenShBlkD = finish - start;
   int ijkl = 0;
   start = std::chrono::high_resolution_clock::now();
 
@@ -102,32 +103,32 @@ void AOIntegrals::twoEContractDirect(bool doRHFFock, const RealMatrix &X, RealMa
                     double v = buff[ijkl]*s1234_deg;
 
                     // Coulomb
-                    g(bf1,bf2) += X(bf3,bf4)*v;
-                    g(bf3,bf4) += X(bf1,bf2)*v;
-                    g(bf2,bf1) += X(bf4,bf3)*v;
-                    g(bf4,bf3) += X(bf2,bf1)*v;
+                    g(bf1,bf2) += XAlpha(bf3,bf4)*v;
+                    g(bf3,bf4) += XAlpha(bf1,bf2)*v;
+                    g(bf2,bf1) += XAlpha(bf4,bf3)*v;
+                    g(bf4,bf3) += XAlpha(bf2,bf1)*v;
  
                     // Exchange
-                    if(doRHFFock) {
-                      g(bf1,bf3) -= 0.25*X(bf2,bf4)*v;
-                      g(bf4,bf2) -= 0.25*X(bf1,bf3)*v;
-                      g(bf1,bf4) -= 0.25*X(bf2,bf3)*v;
-                      g(bf3,bf2) -= 0.25*X(bf1,bf4)*v;
+                    if(RHF && doFock) {
+                      g(bf1,bf3) -= 0.25*XAlpha(bf2,bf4)*v;
+                      g(bf4,bf2) -= 0.25*XAlpha(bf1,bf3)*v;
+                      g(bf1,bf4) -= 0.25*XAlpha(bf2,bf3)*v;
+                      g(bf3,bf2) -= 0.25*XAlpha(bf1,bf4)*v;
 
-                      g(bf3,bf1) -= 0.25*X(bf4,bf2)*v;
-                      g(bf2,bf4) -= 0.25*X(bf3,bf1)*v;
-                      g(bf4,bf1) -= 0.25*X(bf3,bf2)*v;
-                      g(bf2,bf3) -= 0.25*X(bf4,bf1)*v;
+                      g(bf3,bf1) -= 0.25*XAlpha(bf4,bf2)*v;
+                      g(bf2,bf4) -= 0.25*XAlpha(bf3,bf1)*v;
+                      g(bf4,bf1) -= 0.25*XAlpha(bf3,bf2)*v;
+                      g(bf2,bf3) -= 0.25*XAlpha(bf4,bf1)*v;
                     } else {
-                      g(bf1,bf3) -= 0.5*X(bf2,bf4)*v;
-                      g(bf4,bf2) -= 0.5*X(bf1,bf3)*v;
-                      g(bf1,bf4) -= 0.5*X(bf2,bf3)*v;
-                      g(bf3,bf2) -= 0.5*X(bf1,bf4)*v;
+                      g(bf1,bf3) -= 0.5*XAlpha(bf2,bf4)*v;
+                      g(bf4,bf2) -= 0.5*XAlpha(bf1,bf3)*v;
+                      g(bf1,bf4) -= 0.5*XAlpha(bf2,bf3)*v;
+                      g(bf3,bf2) -= 0.5*XAlpha(bf1,bf4)*v;
 
-                      g(bf3,bf1) -= 0.5*X(bf4,bf2)*v;
-                      g(bf2,bf4) -= 0.5*X(bf3,bf1)*v;
-                      g(bf4,bf1) -= 0.5*X(bf3,bf2)*v;
-                      g(bf2,bf3) -= 0.5*X(bf4,bf1)*v;
+                      g(bf3,bf1) -= 0.5*XAlpha(bf4,bf2)*v;
+                      g(bf2,bf4) -= 0.5*XAlpha(bf3,bf1)*v;
+                      g(bf4,bf1) -= 0.5*XAlpha(bf3,bf2)*v;
+                      g(bf2,bf3) -= 0.5*XAlpha(bf4,bf1)*v;
                     }
                   }
                 }
@@ -186,32 +187,32 @@ void AOIntegrals::twoEContractDirect(bool doRHFFock, const RealMatrix &X, RealMa
                     double v = buff[ijkl];
 
                     // Coulomb
-                    g(bf1,bf2) += X(bf3,bf4)*v;
-                    g(bf3,bf4) += X(bf1,bf2)*v;
-                    g(bf2,bf1) += X(bf4,bf3)*v;
-                    g(bf4,bf3) += X(bf2,bf1)*v;
+                    g(bf1,bf2) += XAlpha(bf3,bf4)*v;
+                    g(bf3,bf4) += XAlpha(bf1,bf2)*v;
+                    g(bf2,bf1) += XAlpha(bf4,bf3)*v;
+                    g(bf4,bf3) += XAlpha(bf2,bf1)*v;
  
                     // Exchange
-                    if(doRHFFock) {
-                      g(bf1,bf3) -= 0.25*X(bf2,bf4)*v;
-                      g(bf4,bf2) -= 0.25*X(bf1,bf3)*v;
-                      g(bf1,bf4) -= 0.25*X(bf2,bf3)*v;
-                      g(bf3,bf2) -= 0.25*X(bf1,bf4)*v;
+                    if(RHF && doFock) {
+                      g(bf1,bf3) -= 0.25*XAlpha(bf2,bf4)*v;
+                      g(bf4,bf2) -= 0.25*XAlpha(bf1,bf3)*v;
+                      g(bf1,bf4) -= 0.25*XAlpha(bf2,bf3)*v;
+                      g(bf3,bf2) -= 0.25*XAlpha(bf1,bf4)*v;
 
-                      g(bf3,bf1) -= 0.25*X(bf4,bf2)*v;
-                      g(bf2,bf4) -= 0.25*X(bf3,bf1)*v;
-                      g(bf4,bf1) -= 0.25*X(bf3,bf2)*v;
-                      g(bf2,bf3) -= 0.25*X(bf4,bf1)*v;
+                      g(bf3,bf1) -= 0.25*XAlpha(bf4,bf2)*v;
+                      g(bf2,bf4) -= 0.25*XAlpha(bf3,bf1)*v;
+                      g(bf4,bf1) -= 0.25*XAlpha(bf3,bf2)*v;
+                      g(bf2,bf3) -= 0.25*XAlpha(bf4,bf1)*v;
                     } else {
-                      g(bf1,bf3) -= 0.5*X(bf2,bf4)*v;
-                      g(bf4,bf2) -= 0.5*X(bf1,bf3)*v;
-                      g(bf1,bf4) -= 0.5*X(bf2,bf3)*v;
-                      g(bf3,bf2) -= 0.5*X(bf1,bf4)*v;
+                      g(bf1,bf3) -= 0.5*XAlpha(bf2,bf4)*v;
+                      g(bf4,bf2) -= 0.5*XAlpha(bf1,bf3)*v;
+                      g(bf1,bf4) -= 0.5*XAlpha(bf2,bf3)*v;
+                      g(bf3,bf2) -= 0.5*XAlpha(bf1,bf4)*v;
 
-                      g(bf3,bf1) -= 0.5*X(bf4,bf2)*v;
-                      g(bf2,bf4) -= 0.5*X(bf3,bf1)*v;
-                      g(bf4,bf1) -= 0.5*X(bf3,bf2)*v;
-                      g(bf2,bf3) -= 0.5*X(bf4,bf1)*v;
+                      g(bf3,bf1) -= 0.5*XAlpha(bf4,bf2)*v;
+                      g(bf2,bf4) -= 0.5*XAlpha(bf3,bf1)*v;
+                      g(bf4,bf1) -= 0.5*XAlpha(bf3,bf2)*v;
+                      g(bf2,bf3) -= 0.5*XAlpha(bf4,bf1)*v;
                     }
                     
                   }
@@ -234,68 +235,70 @@ void AOIntegrals::twoEContractDirect(bool doRHFFock, const RealMatrix &X, RealMa
 #else
   efficient_twoe(0);
 #endif
-  for(int i = 0; i < this->controls_->nthreads; i++) AX += G[i];
+  for(int i = 0; i < this->controls_->nthreads; i++) AXAlpha += G[i];
 //RealMatrix Tmp = 0.5*(AX + AX.transpose());
 //AX = 0.25*Tmp; // Can't consolidate where this comes from?
-//if(doRHFFock) AX = 0.25*AX; // Can't consolidate where this comes from?
-  AX = AX*0.5; // Gaussian nonsense
-  AX = AX*0.5; // werid factor that comes from A + AT
-  if(doRHFFock) AX = AX*0.5; // E ~ 0.5*G
+//if(RHF && doFock) AX = 0.25*AX; // Can't consolidate where this comes from?
+  AXAlpha = AXAlpha*0.5; // Gaussian nonsense
+  AXAlpha = AXAlpha*0.5; // werid factor that comes from A + AT
+  if(RHF && doFock) AXAlpha = AXAlpha*0.5; // E ~ 0.5*G
   finish = std::chrono::high_resolution_clock::now();
-  if(doRHFFock) this->PTD = finish - start;
+  if(RHF && doFock) this->PTD = finish - start;
    
 }
 template<>
-void AOIntegrals::twoEContractN4(bool doRHFFock, const RealMatrix &X, RealMatrix &AX) {
+void AOIntegrals::twoEContractN4(bool RHF, bool doFock, const RealMatrix &XAlpha, RealMatrix &AXAlpha,
+                                 const RealMatrix &XBeta, RealMatrix &AXBeta) {
   this->fileio_->out << "Contracting with in-core two-electron integrals" << endl;
   if(!this->haveAOTwoE) this->computeAOTwoE();
-  RealTensor2d XTensor(X.rows(),X.cols());
-  RealTensor2d AXTensor(AX.rows(),AX.cols());
-  for(auto i = 0; i < X.size(); i++) XTensor.storage()[i] = X.data()[i];
-  AXTensor.fill(0.0);
+  RealTensor2d XAlphaTensor(XAlpha.rows(),XAlpha.cols());
+  RealTensor2d AXAlphaTensor(AXAlpha.rows(),AXAlpha.cols());
+  for(auto i = 0; i < XAlpha.size(); i++) XAlphaTensor.storage()[i] = XAlpha.data()[i];
+  AXAlphaTensor.fill(0.0);
 
   double fact = -1.0;
-  if(doRHFFock) fact = -0.5;
+  if(RHF && doFock) fact = -0.5;
 
   enum{i,j,k,l}; 
-  contract(1.0,*this->aoERI_,{i,j,k,l},XTensor,{l,k},0.0,AXTensor,{i,j});
-  contract(fact,*this->aoERI_,{i,l,k,j},XTensor,{l,k},1.0,AXTensor,{i,j});
+  contract(1.0,*this->aoERI_,{i,j,k,l},XAlphaTensor,{l,k},0.0,AXAlphaTensor,{i,j});
+  contract(fact,*this->aoERI_,{i,l,k,j},XAlphaTensor,{l,k},1.0,AXAlphaTensor,{i,j});
 
-  for(auto i = 0; i < AX.size(); i++) AX.data()[i] = AXTensor.storage()[i];
-//AX = AX*0.5; // Gaussian nonsense
-//AX = AX*0.5; // werid factor that comes from A + AT
-  if(doRHFFock) AX = AX*0.5; // E ~ 0.5*G
+  for(auto i = 0; i < AXAlpha.size(); i++) AXAlpha.data()[i] = AXAlphaTensor.storage()[i];
+//AXAlpha = AXAlpha*0.5; // Gaussian nonsense
+//AXAlpha = AXAlpha*0.5; // werid factor that comes from A + AT
+  if(RHF && doFock) AXAlpha = AXAlpha*0.5; // E ~ 0.5*G
 }
 
 template<>
-void AOIntegrals::twoEContractDF(bool doRHFFock, const RealMatrix &X, RealMatrix &AX) {
+void AOIntegrals::twoEContractDF(bool RHF, bool doFock, const RealMatrix &XAlpha, RealMatrix &AXAlpha,
+                                 const RealMatrix &XBeta, RealMatrix &AXBeta) {
   this->fileio_->out << "Contracting with in-core density fitting integrals" << endl;
   if(!this->haveRIS)  this->computeAORIS();
   if(!this->haveRII)  this->computeAORII();
   if(!this->haveTRII) this->transformAORII();
 
-  RealTensor2d XTensor(X.rows(),X.cols());
-  RealTensor2d AXTensor(AX.rows(),AX.cols());
+  RealTensor2d XAlphaTensor(XAlpha.rows(),XAlpha.cols());
+  RealTensor2d AXAlphaTensor(AXAlpha.rows(),AXAlpha.cols());
 
-  for(auto i = 0; i < X.size(); i++) XTensor.storage()[i] = X.data()[i];
-  AXTensor.fill(0.0);
+  for(auto i = 0; i < XAlpha.size(); i++) XAlphaTensor.storage()[i] = XAlpha.data()[i];
+  AXAlphaTensor.fill(0.0);
 
   RealTensor1d A(this->DFbasisSet_->nBasis());
   RealTensor3d B(this->nBasis_,this->nBasis_,this->DFbasisSet_->nBasis());
 
   double fact = -1.0;
-  if(doRHFFock) fact = -0.5;
+  if(RHF && doFock) fact = -0.5;
 
   enum{i,j,k,l,XX,YY}; 
-  contract(1.0,*this->aoRII_,{i,j,XX},XTensor,{i,j},0.0,A,{XX});
-  contract(1.0,*this->aoRII_,{k,i,XX},XTensor,{k,j},0.0,B,{i,j,XX});
-  contract(1.0,*this->aoRII_,{i,j,XX},A,{XX},0.0,AXTensor,{i,j});
-  contract(-0.5,*this->aoRII_,{i,k,XX},B,{j,k,XX},1.0,AXTensor,{i,j});
+  contract(1.0,*this->aoRII_,{i,j,XX},XAlphaTensor,{i,j},0.0,A,{XX});
+  contract(1.0,*this->aoRII_,{k,i,XX},XAlphaTensor,{k,j},0.0,B,{i,j,XX});
+  contract(1.0,*this->aoRII_,{i,j,XX},A,{XX},0.0,AXAlphaTensor,{i,j});
+  contract(-0.5,*this->aoRII_,{i,k,XX},B,{j,k,XX},1.0,AXAlphaTensor,{i,j});
 
-  for(auto i = 0; i < AX.size(); i++) AX.data()[i] = AXTensor.storage()[i];
-//AX = AX*0.5; // Gaussian nonsense
-//AX = AX*0.5; // werid factor that comes from A + AT
-  if(doRHFFock) AX = AX*0.5; // E ~ 0.5*G
+  for(auto i = 0; i < AXAlpha.size(); i++) AXAlpha.data()[i] = AXAlphaTensor.storage()[i];
+//AXAlpha = AXAlpha*0.5; // Gaussian nonsense
+//AXAlpha = AXAlpha*0.5; // werid factor that comes from A + AT
+  if(RHF && doFock) AXAlpha = AXAlpha*0.5; // E ~ 0.5*G
 }
 #endif
 

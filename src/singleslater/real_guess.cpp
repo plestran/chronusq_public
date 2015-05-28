@@ -31,12 +31,9 @@ namespace ChronusQ {
 template<>
 void SingleSlater<double>::formGuess() {
   this->moA_->setZero();
+  if(!this->RHF_) this->moB_->setZero();
   this->haveMO = true;
   if(this->controls_->printLevel>=3) {
-/*
-    this->moA_->printAll(5,this->fileio_->out);
-    if(!this->RHF_) this->moB_->printAll(5,this->fileio_->out);
-*/
     prettyPrint(this->fileio_->out,(*this->moA_),"Alpha MO Coeff");
     if(!this->RHF_) prettyPrint(this->fileio_->out,(*this->moB_),"Beta MO Coeff");
   };
@@ -77,12 +74,19 @@ void SingleSlater<double>::readGuessGauMatEl(GauMatEl& matEl){
   double *scr = matEl.readRec(GauMatEl::moa); 
   for(auto i = 0; i < this->nBasis_*this->nBasis_; i++)
     this->moA_->data()[i] = scr[i];
-  this->moA_->transposeInPlace();
+  this->moA_->transposeInPlace(); // Row Major
+  delete [] scr;
+  if(!this->RHF_) {
+    scr = matEl.readRec(GauMatEl::mob); 
+    for(auto i = 0; i < this->nBasis_*this->nBasis_; i++)
+      this->moB_->data()[i] = scr[i];
+    this->moB_->transposeInPlace(); // Row Major
+    delete [] scr;
+  }
   if(this->controls_->printLevel>=3) {
     prettyPrint(this->fileio_->out,(*this->moA_),"Alpha MO Coeff");
     if(!this->RHF_) prettyPrint(this->fileio_->out,(*this->moB_),"Beta MO Coeff");
   };
-  delete [] scr;
   this->haveMO = true;
 }
 //-----------------------------------------------------------------------//
