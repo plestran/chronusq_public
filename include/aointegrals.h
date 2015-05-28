@@ -157,6 +157,7 @@ public:
   bool          haveSchwartz; ///< Whether or not the Schwartz bound tensor has been evaluated for the primary basis set
   bool          haveRIS; ///< Whether or not the DFI tensor has been evaluated for the density-fiting basis set
   bool          haveRII; ///< Whether or not the Metric overlap tensor has been evaluated for the density-fitting basis set
+  bool          haveTRII;
 
 
   // Timing Stats
@@ -206,8 +207,11 @@ public:
   void computeSchwartz();
   void computeAORII();
   void computeAORIS();
+  void transformAORII();
   template<typename T> void twoEContractDirect(bool,const T &, T &);
   template<typename T> void twoEContractN4(bool,const T &, T &);
+  template<typename T> void twoEContractDF(bool,const T &, T &);
+  void compareRI();
 #endif
 //----------------------------------------//
 // member functions in integrals_onee.cpp //

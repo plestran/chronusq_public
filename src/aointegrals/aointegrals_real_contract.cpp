@@ -266,6 +266,37 @@ void AOIntegrals::twoEContractN4(bool doRHFFock, const RealMatrix &X, RealMatrix
 //AX = AX*0.5; // werid factor that comes from A + AT
   if(doRHFFock) AX = AX*0.5; // E ~ 0.5*G
 }
+
+template<>
+void AOIntegrals::twoEContractDF(bool doRHFFock, const RealMatrix &X, RealMatrix &AX) {
+  this->fileio_->out << "Contracting with in-core density fitting integrals" << endl;
+  if(!this->haveRIS)  this->computeAORIS();
+  if(!this->haveRII)  this->computeAORII();
+  if(!this->haveTRII) this->transformAORII();
+
+  RealTensor2d XTensor(X.rows(),X.cols());
+  RealTensor2d AXTensor(AX.rows(),AX.cols());
+
+  for(auto i = 0; i < X.size(); i++) XTensor.storage()[i] = X.data()[i];
+  AXTensor.fill(0.0);
+
+  RealTensor1d A(this->DFbasisSet_->nBasis());
+  RealTensor3d B(this->nBasis_,this->nBasis_,this->DFbasisSet_->nBasis());
+
+  double fact = -1.0;
+  if(doRHFFock) fact = -0.5;
+
+  enum{i,j,k,l,XX,YY}; 
+  contract(1.0,*this->aoRII_,{i,j,XX},XTensor,{i,j},0.0,A,{XX});
+  contract(1.0,*this->aoRII_,{k,i,XX},XTensor,{k,j},0.0,B,{i,j,XX});
+  contract(1.0,*this->aoRII_,{i,j,XX},A,{XX},0.0,AXTensor,{i,j});
+  contract(-0.5,*this->aoRII_,{i,k,XX},B,{j,k,XX},1.0,AXTensor,{i,j});
+
+  for(auto i = 0; i < AX.size(); i++) AX.data()[i] = AXTensor.storage()[i];
+//AX = AX*0.5; // Gaussian nonsense
+//AX = AX*0.5; // werid factor that comes from A + AT
+  if(doRHFFock) AX = AX*0.5; // E ~ 0.5*G
+}
 #endif
 
 }

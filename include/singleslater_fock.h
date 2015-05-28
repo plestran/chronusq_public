@@ -34,6 +34,8 @@ void SingleSlater<T>::formPT(){
   if(!this->haveDensity) this->formDensity();
   if(this->controls_->directTwoE)
     this->aointegrals_->twoEContractDirect(true,*this->densityA_,*this->PTA_);
+  else if(this->controls_->doDF)
+    this->aointegrals_->twoEContractDF(true,*this->densityA_,*this->PTA_);
   else
     this->aointegrals_->twoEContractN4(true,*this->densityA_,*this->PTA_);
   if(this->controls_->printLevel >= 3) prettyPrint(this->fileio_->out,(*this->PTA_),"Alpha Perturbation Tensor");
