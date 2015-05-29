@@ -488,13 +488,13 @@ void SDResponse::TransDipole(){
   cout << TransDen << endl;
   Tmax = TransDen(0,0);
   cout << "Tmax = " << Tmax << endl;
-  for (auto i=0;i<nOV-1;i++)
+  for (auto i=0;i<nOV;i++)
   {
-    if (abs(TransDen(i+1,0))>abs(Tmax))
+    if (fabs(TransDen(i,0))>fabs(Tmax))
     {
-      Tmax = TransDen(i+1,0);
+      Tmax = TransDen(i,0);
       cout << "Tmax = " << Tmax << endl;
-      order = i+1;
+      order = i;
     }
   }
   cout << "Maximum contribution is " << Tmax << " from " << order%nO+1 << " -> " << order/nO+nO+1 << endl;
