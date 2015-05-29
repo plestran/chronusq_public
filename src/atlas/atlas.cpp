@@ -39,7 +39,6 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   auto aointegrals	= std::unique_ptr<AOIntegrals>(new AOIntegrals());
   auto hartreeFock	= std::unique_ptr<SingleSlater>(new SingleSlater());
   std::unique_ptr<FileIO> fileIO;
-  cout << dfBasisset.get() << endl;
 
   std::vector<std::string> argv_string;
   for(auto i = 1; i < argc; ++i) if(argv[i][0]=='-') argv_string.push_back(argv[i]);

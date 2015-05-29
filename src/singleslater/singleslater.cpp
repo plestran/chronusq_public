@@ -195,7 +195,7 @@ void SingleSlater::formFock(){
   if(!this->haveCoulomb) this->formCoulomb();
   if(!this->haveExchange) this->formExchange();
 #else
-  if(!this->havePT) this->formPT();
+  this->formPT();
 #endif
   if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
 
