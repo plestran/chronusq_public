@@ -114,6 +114,12 @@ void readInput(FileIO * fileio, Molecule * mol, BasisSet * basis, Controls * con
         controls->optWaveFunction = false;
       else if(!readString.compare("ON"))
         controls->optWaveFunction = true;
+      else if(!readString.compare("DIRECT"))
+        controls->directTwoE = true;
+      else if(!readString.compare("INCORE")){
+        controls->directTwoE = false;
+        controls->buildn4eri = true;
+      }
     } else if(!readString.compare("$DEBUG")) {
       fileio->in>>readString;
       readString=stringupper(readString);

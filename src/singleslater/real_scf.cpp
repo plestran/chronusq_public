@@ -24,7 +24,6 @@
  *  
  */
 #include <singleslater.h>
-using ChronusQ::SingleSlater;
 //----------------------------------------//
 // do the SCF                             //
 // Sajan                                  //
@@ -32,7 +31,15 @@ using ChronusQ::SingleSlater;
 double E_delta;
 double P_Rms;
 
-void SingleSlater::SCF(){
+namespace ChronusQ {
+template<>
+void SingleSlater<double>::printDensityinf(){
+  this->fileio_->out<<"\nSCF Information:"<<endl;
+  this->fileio_->out<<std::right<<std::setw(30)<<"    Delta-E = "<<std::setw(15)<<E_delta<<std::setw(5)<<" Eh "<<endl;
+  this->fileio_->out<<std::right<<std::setw(30)<<"RMS Density = "<<std::setw(15)<<P_Rms<<endl;
+};
+template<>
+void SingleSlater<double>::SCF(){
   if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
   double E_old;
   int maxIte    = 128; 
@@ -83,8 +90,4 @@ void SingleSlater::SCF(){
   this->fileio_->out << bannerEnd <<endl;
 }; 
 
-void SingleSlater::printDensityinf(){
-  this->fileio_->out<<"\nSCF Information:"<<endl;
-  this->fileio_->out<<std::right<<std::setw(30)<<"    Delta-E = "<<std::setw(15)<<E_delta<<std::setw(5)<<" Eh "<<endl;
-  this->fileio_->out<<std::right<<std::setw(30)<<"RMS Density = "<<std::setw(15)<<P_Rms<<endl;
-};
+} // namespace ChronusQ

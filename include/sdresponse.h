@@ -47,7 +47,7 @@ class SDResponse {
   FileIO *        fileio_;
   Controls *      controls_;
   MOIntegrals *   mointegrals_;
-  SingleSlater *  singleSlater_;
+  SingleSlater<double> *  singleSlater_;
 
 public:
  
@@ -57,7 +57,7 @@ public:
   // pseudo-constructor
   void iniSDResponse(Molecule *,BasisSet *,
                      MOIntegrals *,FileIO *,
-                     Controls *,SingleSlater *);
+                     Controls *,SingleSlater<double> *);
 
   void computeExcitedStates();         // compute the total electronic energy
   void printExcitedStateEnergies(); 
