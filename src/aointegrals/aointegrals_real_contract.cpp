@@ -308,9 +308,6 @@ void AOIntegrals::twoEContractDF(bool RHF, bool doFock, const RealMatrix &XAlpha
   contract(-0.5,*this->aoRII_,{i,k,XX},B,{j,k,XX},1.0,AXAlphaTensor,{i,j});
 
   for(auto i = 0; i < AXAlpha.size(); i++) AXAlpha.data()[i] = AXAlphaTensor.storage()[i];
-//AXAlpha = AXAlpha*0.5; // Gaussian nonsense
-//AXAlpha = AXAlpha*0.5; // werid factor that comes from A + AT
-  if(RHF && doFock) AXAlpha = AXAlpha*0.5; // E ~ 0.5*G
 }
 #endif
 

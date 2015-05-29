@@ -26,7 +26,6 @@
 /********************************
  * Form Perturbation Tensor (G) *
  ********************************/
-// Only works for RHF FIXME
 // Only available for Libint Integrals
 #ifdef USE_LIBINT
 template<typename T>
@@ -48,8 +47,6 @@ void SingleSlater<T>::formPT(){
 /********************
  * Form Fock Matrix *
  ********************/
-// Only reliable for RHF (b/c factors of 2) FIXME
-// In-house integrals are broken for Fock   FIXME
 template<typename T>
 void SingleSlater<T>::formFock(){
   if(!this->haveDensity) this->formDensity();
