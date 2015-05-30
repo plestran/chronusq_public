@@ -28,8 +28,6 @@ using ChronusQ::Controls;
 using ChronusQ::FileIO;
 using ChronusQ::SingleSlater;
 
-extern "C" void dgesv_(int *n, int *nrhs, double *A, int *lda , int *ipiv, double *b, int *ldb, int *info);
-extern "C" void dsyev_(char *Jobz, char *Uplo, int *n, double *A, int *lda, double *W, double *work, int *lwork, int *info);
 //----------------------------------------//
 // do the SCF                             //
 // Sajan                                  //
@@ -48,13 +46,13 @@ template<>
 void SingleSlater<double>::SCF(){
   if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
   double E_old;
-  int maxIte    = 128; 
-  int n=this->nBasis_; 
+  int maxIter    = 128; 
+  int n = this->nBasis_; 
   double Dtol = 1e-10;
   double Etol = 1e-8;
   std::vector<RealMatrix> Error;
   std::vector<RealMatrix> fock;
-  int i; 
+  int iter; 
   
   //RealMatrix memory allocation
   int lenX = n*n; // X
@@ -95,9 +93,9 @@ void SingleSlater<double>::SCF(){
    
   
   X=(*this->aointegrals_->overlap_).pow(-0.5);
-  for (i=0; i<maxIte;i++){
+  for (iter=0; iter<maxIter; iter++){
     this->fileio_->out << endl << endl << bannerTop <<endl;  
-    this->fileio_->out << "SCF iteration:"<< i+1 <<endl;  
+    this->fileio_->out << "SCF iteration:"<< iter+1 <<endl;  
     this->fileio_->out << bannerEnd <<endl;  
     
     P_old = (*this->densityA_);
@@ -113,33 +111,39 @@ void SingleSlater<double>::SCF(){
     
     
     //Implimenting DIIS
-    if(i % 6 ==0){
-      Error.push_back((*this->fockA_)*(*this->densityA_)*(*this->aointegrals_->overlap_)-(*this->aointegrals_->overlap_)*(*this->densityA_)*(*this->fockA_));
+    if(iter % 6 ==0){
+      Error.push_back((*this->fockA_) * (*this->densityA_) * (*this->aointegrals_->overlap_) -
+                      (*this->aointegrals_->overlap_) * (*this->densityA_) * (*this->fockA_));
       fock.push_back(*this->fockA_);
     }
-    if(i % 6 ==1){
-      Error.push_back((*this->fockA_)*(*this->densityA_)*(*this->aointegrals_->overlap_)-(*this->aointegrals_->overlap_)*(*this->densityA_)*(*this->fockA_));
+    if(iter % 6 ==1){
+      Error.push_back((*this->fockA_) * (*this->densityA_) * (*this->aointegrals_->overlap_) -
+                      (*this->aointegrals_->overlap_) * (*this->densityA_) * (*this->fockA_));
       fock.push_back(*this->fockA_);
     }
-    if(i % 6 ==2){
-      Error.push_back((*this->fockA_)*(*this->densityA_)*(*this->aointegrals_->overlap_)-(*this->aointegrals_->overlap_)*(*this->densityA_)*(*this->fockA_));
+    if(iter % 6 ==2){
+      Error.push_back((*this->fockA_) * (*this->densityA_) * (*this->aointegrals_->overlap_) - 
+                      (*this->aointegrals_->overlap_) * (*this->densityA_) * (*this->fockA_));
       fock.push_back(*this->fockA_);
     }
-    if(i % 6 ==3){
-      Error.push_back((*this->fockA_)*(*this->densityA_)*(*this->aointegrals_->overlap_)-(*this->aointegrals_->overlap_)*(*this->densityA_)*(*this->fockA_));
+    if(iter % 6 ==3){
+      Error.push_back((*this->fockA_) * (*this->densityA_) * (*this->aointegrals_->overlap_) - 
+                      (*this->aointegrals_->overlap_) * (*this->densityA_) * (*this->fockA_));
       fock.push_back(*this->fockA_);
     }
-    if(i % 6 ==4){
-      Error.push_back((*this->fockA_)*(*this->densityA_)*(*this->aointegrals_->overlap_)-(*this->aointegrals_->overlap_)*(*this->densityA_)*(*this->fockA_));
+    if(iter % 6 ==4){
+      Error.push_back((*this->fockA_) * (*this->densityA_) * (*this->aointegrals_->overlap_) - 
+                      (*this->aointegrals_->overlap_) * (*this->densityA_) * (*this->fockA_));
       fock.push_back(*this->fockA_);
     }
-    if(i % 6 ==5){
-      Error.push_back((*this->fockA_)*(*this->densityA_)*(*this->aointegrals_->overlap_)-(*this->aointegrals_->overlap_)*(*this->densityA_)*(*this->fockA_));
+    if(iter % 6 ==5){
+      Error.push_back((*this->fockA_) * (*this->densityA_) * (*this->aointegrals_->overlap_) - 
+                      (*this->aointegrals_->overlap_) * (*this->densityA_) * (*this->fockA_));
       fock.push_back(*this->fockA_);
     }
     
     
-    if(i % 6==0 && i!=0){
+    if(iter % 6==0 && iter!=0){
       
       for (auto j=0;j<Error.size();j++){
         for (auto k=0; k<=j;k++){
@@ -174,21 +178,14 @@ void SingleSlater<double>::SCF(){
   };
   
   //freeing the memory
-  /*
-  delete[] coef;
-  delete[] ipiv;
-  delete[] X_m;
-  delete[] P_old_m;
-  delete[] Fp_m;
-  delete[] work;
-  delete[] B_m;
-  delete[] eig_values;
-  */
+  delete [] SCR;
+  delete [] ipiv;
+
   this->fileio_->out <<"\n"<<endl; 
   this->fileio_->out << bannerEnd <<endl;
-  this->fileio_->out << "\nRequested convergence on RMS density matrix = " <<std::setw(5)<<Dtol <<"  within  " <<maxIte <<"  cycles."<<endl;
+  this->fileio_->out << "\nRequested convergence on RMS density matrix = " <<std::setw(5)<<Dtol <<"  within  " <<maxIter <<"  cycles."<<endl;
   this->fileio_->out << "Requested convergence on             energy = " <<Etol << endl;
-  this->fileio_->out << "\nSCF Done: E(RHF) = "<< this->totalEnergy << "  Eh  after  "<< i+1 << "  cycles" <<endl;
+  this->fileio_->out << "\nSCF Done: E(RHF) = "<< this->totalEnergy << "  Eh  after  "<< iter+1 << "  cycles" <<endl;
   this->fileio_->out << bannerEnd <<endl;
 }; 
 } // namespace ChronusQ
