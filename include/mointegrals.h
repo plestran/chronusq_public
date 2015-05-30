@@ -50,7 +50,7 @@ class MOIntegrals{
   FileIO *        fileio_;
   Controls *      controls_;
   AOIntegrals *   aointegrals_;
-  SingleSlater *  singleSlater_;
+  SingleSlater<double> *  singleSlater_;
 
 public:
   // these should be protected
@@ -74,7 +74,7 @@ public:
   // initialization function
   void iniMOIntegrals(Molecule *,BasisSet *,
                       FileIO *,Controls *,
-                      AOIntegrals *,SingleSlater *);
+                      AOIntegrals *,SingleSlater<double> *);
 
   inline double &iajb(int i, int a, int j, int b){
     return (*iajb_)(this->iaIndex_[i][a],this->iaIndex_[j][b]);

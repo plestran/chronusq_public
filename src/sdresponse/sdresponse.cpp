@@ -34,7 +34,7 @@ using ChronusQ::SDResponse;
 // allocate memory for matrices //
 //------------------------------//
 void SDResponse::iniSDResponse( Molecule * molecule, BasisSet * basisSet, MOIntegrals * mointegrals, 
-                                FileIO * fileio, Controls * controls, SingleSlater * singleSlater) {
+                                FileIO * fileio, Controls * controls, SingleSlater<double> * singleSlater) {
   int nBasis  = basisSet->nBasis();
 
   this->molecule_       = molecule;

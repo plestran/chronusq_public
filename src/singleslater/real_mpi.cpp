@@ -23,30 +23,24 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
-#include <mointegrals.h>
-using ChronusQ::AOIntegrals;
-using ChronusQ::Molecule;
-using ChronusQ::BasisSet;
-using ChronusQ::Controls;
-using ChronusQ::FileIO;
-using ChronusQ::MOIntegrals;
-//---------------------
-// initialize MOIntegrals
-//---------------------
-void MOIntegrals::iniMOIntegrals(   Molecule * molecule, BasisSet * basisSet, FileIO * fileio, 
-                                    Controls * controls, AOIntegrals * aointegrals, SingleSlater<double> * singleSlater){
-  this->molecule_ = molecule;
-  this->basisSet_ = basisSet;
-  this->fileio_   = fileio;
-  this->controls_ = controls;
-  this->aointegrals_ = aointegrals;
-  this->singleSlater_ = singleSlater;
-
-  this->haveMOiajb = false;
-  this->haveMOijab = false;
-  this->haveMOijka = false;
-  this->haveMOijkl = false;
-  this->haveMOiabc = false;
-  this->haveMOabcd = false;
+#include <singleslater.h>
+namespace ChronusQ {
+/*************************/
+/* MPI Related Routines  */
+/*************************/
+template<>
+void SingleSlater<double>::mpiSend(int toID,int tag) {
+  //OOMPI_COMM_WORLD[toID].Send(this->nAtoms_,tag);
+  //OOMPI_COMM_WORLD[toID].Send(this->index_,this->nAtoms_,tag);
+  //this->cart_->mpiSend(toID,tag);
 };
+template<>
+void SingleSlater<double>::mpiRecv(int fromID,int tag) {
+  //OOMPI_COMM_WORLD[fromID].Recv(this->nAtoms_,tag);
+  //this->index_=new int[this->nAtoms_];
+  //this->cart_ =new RealMatrix(3, this->nAtoms_, "Molecule");
+  //OOMPI_COMM_WORLD[fromID].Recv(this->index_,this->nAtoms_,tag);
+  //this->cart_->mpiRecv(fromID,tag);
+};
+} // namespace ChronusQ
 

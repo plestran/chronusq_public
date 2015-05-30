@@ -24,7 +24,6 @@
  *  
  */
 #include <singleslater.h>
-#include <eiginterface.h>
 using ChronusQ::Controls;
 using ChronusQ::FileIO;
 using ChronusQ::SingleSlater;
@@ -38,23 +37,25 @@ extern "C" void dsyev_(char *Jobz, char *Uplo, int *n, double *A, int *lda, doub
 double E_delta;
 double P_Rms;
 
-void SingleSlater::SCF(){
+namespace ChronusQ {
+template<>
+void SingleSlater<double>::printDensityinf(){
+  this->fileio_->out<<"\nSCF Information:"<<endl;
+  this->fileio_->out<<std::right<<std::setw(30)<<"    Delta-E = "<<std::setw(15)<<E_delta<<std::setw(5)<<" Eh "<<endl;
+  this->fileio_->out<<std::right<<std::setw(30)<<"RMS Density = "<<std::setw(15)<<P_Rms<<endl;
+};
+template<>
+void SingleSlater<double>::SCF(){
   if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
   double E_old;
   int maxIte    = 128; 
   int n=this->nBasis_; 
   double Dtol = 1e-10;
   double Etol = 1e-8;
-  /*
-  RealMatrix          X(n,n);
-  RealMatrix  	     Fp(n,n);
-  RealMatrix  	     Cp(n,n);
-  RealMatrix      P_old(n,n);
-  RealMatrix          B(7,7); 
-  */
   std::vector<RealMatrix> Error;
   std::vector<RealMatrix> fock;
   int i; 
+  
   //RealMatrix memory allocation
   int lenX = n*n; // X
   int lenFp = n*n; // Fp
@@ -190,10 +191,4 @@ void SingleSlater::SCF(){
   this->fileio_->out << "\nSCF Done: E(RHF) = "<< this->totalEnergy << "  Eh  after  "<< i+1 << "  cycles" <<endl;
   this->fileio_->out << bannerEnd <<endl;
 }; 
-
-void SingleSlater::printDensityinf(){
-  this->fileio_->out<<"\nSCF Information:"<<endl;
-  this->fileio_->out<<std::right<<std::setw(30)<<"    Delta-E = "<<std::setw(15)<<E_delta<<std::setw(5)<<" Eh "<<endl;
-  this->fileio_->out<<std::right<<std::setw(30)<<"RMS Density = "<<std::setw(15)<<P_Rms<<endl;
-};
-
+} // namespace ChronusQ
