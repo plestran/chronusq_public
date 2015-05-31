@@ -46,7 +46,7 @@ template<>
 void SingleSlater<double>::SCF(){
   if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
   double E_old;
-  int maxIter    = 128; 
+  int maxIter    = 250; 
   int n = this->nBasis_; 
   double Dtol = 1e-10;
   double Etol = 1e-8;
