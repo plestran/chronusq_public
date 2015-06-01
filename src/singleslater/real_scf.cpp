@@ -45,8 +45,8 @@ void SingleSlater<double>::printDensityinf(){
 template<>
 void SingleSlater<double>::SCF(){
   if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
-  double EOld;
-  int maxIter    = 250; 
+  double E_old;
+  int maxIter    = 128; 
   int n = this->nBasis_; 
   double Dtol = 1e-10;
   double Etol = 1e-8;
