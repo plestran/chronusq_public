@@ -60,8 +60,6 @@ class SingleSlater {
   std::unique_ptr<TMatrix>  exchangeB_;
   std::unique_ptr<TMatrix>  moA_;
   std::unique_ptr<TMatrix>  moB_;
-  std::unique_ptr<TMatrix>  epsA_;
-  std::unique_ptr<TMatrix>  epsB_;
   std::unique_ptr<TMatrix>  PTA_;
   std::unique_ptr<TMatrix>  PTB_;
   std::unique_ptr<RealMatrix>  dipole_;
