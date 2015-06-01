@@ -64,6 +64,8 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
 #endif
   try { this->moA_       = std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_)); } // Alpha Molecular Orbital Coefficients
   catch (...) { CErr(std::current_exception(),"Alpha MO Coefficients Allocation"); }
+  try { this->epsA_       = std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,1)); } // Alpha Orbital Energies
+  catch (...) { CErr(std::current_exception(),"Alpha Orbital Energies"); }
   
 
   if(!this->RHF_) {
@@ -82,6 +84,8 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
 #endif
     try { this->moB_       = std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_)); } // Beta Molecular Orbital Coefficients
     catch (...) { CErr(std::current_exception(),"Beta MO Coefficients Allocation"); }
+  try { this->epsB_       = std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,1)); } // Beta Orbital Energies
+  catch (...) { CErr(std::current_exception(),"Beta Orbital Energies"); }
   };
 
   this->dipole_ = std::unique_ptr<RealMatrix>(new RealMatrix(3,1));
