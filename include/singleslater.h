@@ -60,6 +60,8 @@ class SingleSlater {
   std::unique_ptr<TMatrix>  exchangeB_;
   std::unique_ptr<TMatrix>  moA_;
   std::unique_ptr<TMatrix>  moB_;
+  std::unique_ptr<TMatrix>  epsA_;
+  std::unique_ptr<TMatrix>  epsB_;
   std::unique_ptr<TMatrix>  PTA_;
   std::unique_ptr<TMatrix>  PTB_;
   std::unique_ptr<RealMatrix>  dipole_;
@@ -88,6 +90,9 @@ public:
   // constructor & destructor
   SingleSlater(){;};
   ~SingleSlater() {;};
+
+  template<typename U>
+  SingleSlater(SingleSlater<U> *);
   // pseudo-constructor
   void iniSingleSlater(Molecule *,BasisSet *,AOIntegrals *,FileIO *,Controls *);
 
@@ -99,6 +104,7 @@ public:
 
   // access to private data
   inline int nBasis() { return this->nBasis_;};
+  inline int nTT()     { return this->nTT_;};
   inline int nAE()    { return this->nAE_;};
   inline int nBE()    { return this->nBE_;};
   inline int nOccA()  { return this->nOccA_;};
@@ -117,6 +123,17 @@ public:
   inline TMatrix* exchangeB(){ return this->exchangeB_.get();};
   inline TMatrix* moA()      { return this->moA_.get();};
   inline TMatrix* moB()      { return this->moB_.get();};
+  inline TMatrix* PTA()      { return this->PTA_.get();};
+  inline TMatrix* PTB()      { return this->PTB_.get();};
+  inline RealMatrix* dipole(){ return this->dipole_.get();};
+  inline RealMatrix* quadpole(){ return this->quadpole_.get();};
+  inline RealMatrix* tracelessQuadpole(){ return this->tracelessQuadpole_.get();};
+  inline RealTensor3d* octpole(){ return this->octpole_.get();};
+  inline BasisSet *    basisset(){return this->basisset_;};
+  inline Molecule *    molecule(){return this->molecule_;};
+  inline FileIO *      fileio(){return this->fileio_;};
+  inline Controls *    controls(){return this->controls_;};
+  inline AOIntegrals * aointegrals(){return this->aointegrals_;};
 
   void formGuess();	        // form the intial guess of MO's
   void formDensity();		// form the density matrix
@@ -135,42 +152,6 @@ public:
   void printInfo();
   void printDensityinf();
 
-  inline void operator=(SingleSlater<T> &other){
-    this->nBasis_ = other.nBasis_;
-    this->nTT_    = other.nTT_;
-    this->nAE_    = other.nAE_;
-    this->nBE_    = other.nBE_; 
-    this->RHF_    = other.RHF_;
-    this->nOccA_  = other.nOccA_;
-    this->nOccB_  = other.nOccB_;
-    this->nVirA_  = other.nVirA_;
-    this->nVirB_  = other.nVirB_;
-    this->spin_   = other.spin_;
-    // Hardcoded for Libint route
-    this->densityA_           = std::unique_ptr<TMatrix>(new TMatrix(*other.densityA_));
-    this->fockA_              = std::unique_ptr<TMatrix>(new TMatrix(*other.fockA_));
-//  this->coulombA_           = std::unique_ptr<TMatrix>(new TMatrix(*other.coulombA_));
-//  this->exchangeA_          = std::unique_ptr<TMatrix>(new TMatrix(*other.exchangeA_));
-    this->moA_                = std::unique_ptr<TMatrix>(new TMatrix(*other.moA_));
-    this->PTA_                = std::unique_ptr<TMatrix>(new TMatrix(*other.PTA_));
-    if(!this->RHF_){
-      this->densityB_           = std::unique_ptr<TMatrix>(new TMatrix(*other.densityB_));
-      this->fockB_              = std::unique_ptr<TMatrix>(new TMatrix(*other.fockB_));
-//    this->coulombB_           = std::unique_ptr<TMatrix>(new TMatrix(*other.coulombB_));
-//    this->exchangeB_          = std::unique_ptr<TMatrix>(new TMatrix(*other.exchangeB_));
-      this->moB_                = std::unique_ptr<TMatrix>(new TMatrix(*other.moB_));
-      this->PTB_                = std::unique_ptr<TMatrix>(new TMatrix(*other.PTB_));
-    }
-    this->dipole_             = std::unique_ptr<RealMatrix>(new RealMatrix(*other.dipole_));
-    this->quadpole_           = std::unique_ptr<RealMatrix>(new RealMatrix(*other.quadpole_));
-    this->tracelessQuadpole_  = std::unique_ptr<RealMatrix>(new RealMatrix(*other.tracelessQuadpole_));
-    this->octpole_            = std::unique_ptr<RealTensor3d>(new RealTensor3d(*other.octpole_));
-    this->basisset_    = other.basisset_;    
-    this->molecule_    = other.molecule_;
-    this->fileio_      = other.fileio_;
-    this->controls_    = other.controls_;
-    this->aointegrals_ = other.aointegrals_;
-  }
   /*************************/
   /* MPI Related Routines  */
   /*************************/

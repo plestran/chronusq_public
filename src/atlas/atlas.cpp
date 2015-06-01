@@ -95,6 +95,9 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 */
   time(&currentTime);
   fileIO->out<<"\nJob finished: "<<ctime(&currentTime)<<endl;
+  SingleSlater<dcomplex> newSS(hartreeFock.get());
+  newSS.printInfo();
+  prettyPrint(cout,*newSS.densityA(),"New D");
 #ifdef USE_LIBINT
   libint2::cleanup();
 #endif

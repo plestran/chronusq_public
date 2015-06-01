@@ -59,3 +59,4 @@ void SingleSlater<T>::computeEnergy(){
   this->printEnergy();
 };
 
+
