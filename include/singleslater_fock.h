@@ -59,19 +59,19 @@ void SingleSlater<T>::formFock(){
   if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
 
   this->fockA_->setZero();
-  *(fockA_)+=(*this->aointegrals_->oneE_);
+  fockA_->real()+=(*this->aointegrals_->oneE_);
 #ifndef USE_LIBINT
-  *(fockA_)+=(*this->coulombA_);
-  *(fockA_)-=(*this->exchangeA_);
+  fockA_->real()+=(*this->coulombA_);
+  fockA_->real()-=(*this->exchangeA_);
 #else
   *(fockA_)+=(*this->PTA_);
 #endif
   if(!this->RHF_){
     this->fockB_->setZero();
-    *(fockB_)+=(*this->aointegrals_->oneE_);
+    fockB_->real()+=(*this->aointegrals_->oneE_);
 #ifndef USE_LIBINT
-    *(fockB_)+=(*this->coulombB_);
-    *(fockB_)-=(*this->exchangeB_);
+    fockB_->real()+=(*this->coulombB_);
+    fockB_->real()-=(*this->exchangeB_);
 #else
     *(fockB_)+=(*this->PTB_);
 #endif

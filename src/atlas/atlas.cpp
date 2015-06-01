@@ -98,6 +98,8 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   SingleSlater<dcomplex> newSS(hartreeFock.get());
   newSS.printInfo();
   prettyPrint(cout,*newSS.densityA(),"New D");
+  newSS.formFock();
+  prettyPrint(cout,*newSS.fockA(),"New F");
 #ifdef USE_LIBINT
   libint2::cleanup();
 #endif
