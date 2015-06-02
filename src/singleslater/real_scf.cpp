@@ -32,34 +32,32 @@ using ChronusQ::SingleSlater;
 // do the SCF                             //
 // Sajan                                  //
 //----------------------------------------//
-double EDelta;
-double PAlphaRMS;
-double PBetaRMS;
-
 namespace ChronusQ {
 template<>
-void SingleSlater<double>::printDensityinf(){
+void SingleSlater<double>::printDensityInfo(double PAlphaRMS,double EDelta){
   this->fileio_->out<<"\nSCF Information:"<<endl;
   this->fileio_->out<<std::right<<std::setw(30)<<"    Delta-E = "<<std::setw(15)<<EDelta<<std::setw(5)<<" Eh "<<endl;
-  if(this->RHF_)
-    this->fileio_->out<<std::right<<std::setw(30)<<"RMS Density = "<<std::setw(15)<<PAlphaRMS<<endl;
-  else {
-    this->fileio_->out<<std::right<<std::setw(30)<<"RMS Alpha Density = "<<std::setw(15)<<PAlphaRMS<<endl;
-    this->fileio_->out<<std::right<<std::setw(30)<<"RMS Beta Density = "<<std::setw(15)<<PBetaRMS<<endl;
-  }
+  this->fileio_->out<<std::right<<std::setw(30)<<"RMS Density = "<<std::setw(15)<<PAlphaRMS<<endl;
+};
+template<>
+void SingleSlater<double>::printDensityInfo(double PAlphaRMS, double PBetaRMS, double EDelta){
+  this->fileio_->out<<"\nSCF Information:"<<endl;
+  this->fileio_->out<<std::right<<std::setw(30)<<"    Delta-E = "<<std::setw(15)<<EDelta<<std::setw(5)<<" Eh "<<endl;
+  this->fileio_->out<<std::right<<std::setw(30)<<"RMS Alpha Density = "<<std::setw(15)<<PAlphaRMS<<endl;
+  this->fileio_->out<<std::right<<std::setw(30)<<"RMS Beta Density = "<<std::setw(15)<<PBetaRMS<<endl;
 };
 template<>
 void SingleSlater<double>::SCF(){
   if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
   double EOld;
+  double EDelta;
+  double PAlphaRMS;
+  double PBetaRMS;
+
   int maxIter    = 128; 
   int n = this->nBasis_; 
   double Dtol = 1e-10;
   double Etol = 1e-8;
-  std::vector<RealMatrix> ErrorAlpha;
-  std::vector<RealMatrix> fockAlpha;
-  std::vector<RealMatrix> ErrorBeta;
-  std::vector<RealMatrix> fockBeta;
   int iter; 
   
   //RealMatrix memory allocation
@@ -69,18 +67,22 @@ void SingleSlater<double>::SCF(){
   int lenB = 49;  // B
   int lenCoeff = 7;   // Coeff
   int lwork = 4*n; // LAPACK Workspace
-  int LenScr = lenX + lenF + lenP + lenB + lenCoeff + lwork;
-  if(!this->RHF_) LenScr += lenF + lenP;
+  int LenScr = lenX + lenF + lenP + lenB + lenCoeff + lwork + 2*lenF*(lenCoeff-1);
+  if(!this->RHF_) LenScr += lenF + lenP + 2*lenF*(lenCoeff-1);
 
-  double *SCR          = NULL;
-  double *XMem         = NULL;
-  double *FpAlphaMem   = NULL;
-  double *POldAlphaMem = NULL;
-  double *FpBetaMem    = NULL;
-  double *POldBetaMem  = NULL;
-  double *BMem         = NULL;
-  double *coef         = NULL;
-  double *work         = NULL;
+  double *SCR            = NULL;
+  double *XMem           = NULL;
+  double *FpAlphaMem     = NULL;
+  double *POldAlphaMem   = NULL;
+  double *FpBetaMem      = NULL;
+  double *POldBetaMem    = NULL;
+  double *BMem           = NULL;
+  double *coef           = NULL;
+  double *ErrorAlphaMem  = NULL;  
+  double *ErrorBetaMem   = NULL;
+  double *FADIIS         = NULL;
+  double *FBDIIS         = NULL;
+  double *work           = NULL;
 
   SCR = new double [LenScr];
   XMem    = SCR;
@@ -101,13 +103,22 @@ void SingleSlater<double>::SCF(){
   RealMap POldAlpha(POldAlphaMem,n,n);
   RealMap FpBeta(FpBetaMem,n,n);
   RealMap POldBeta(POldBetaMem,n,n);
-  RealMap B(BMem,7,7);
+  RealMap B(BMem,lenCoeff,lenCoeff);
   
 
   //lapack variables for DIIS
-  coef = BMem + lenB;
-  int *iPiv = new int[7];
-  int row=7;
+  ErrorAlphaMem = BMem + lenB;
+  if(!this->RHF_) {
+    ErrorBetaMem = ErrorAlphaMem + lenF*(lenCoeff-1);
+    FADIIS = ErrorBetaMem + lenF*(lenCoeff-1);
+    FBDIIS = FADIIS + lenF*(lenCoeff-1);
+    coef = FBDIIS + lenF*(lenCoeff-1);
+  } else {
+    FADIIS = ErrorAlphaMem + lenF*(lenCoeff-1);
+    coef = FADIIS + lenF*(lenCoeff-1);
+  }
+  int *iPiv = new int[lenCoeff];
+  int row=lenCoeff;
   int nrhs=1;
   int info=-1;
 
@@ -144,105 +155,56 @@ void SingleSlater<double>::SCF(){
     
     
     // DIIS 
-    if(iter % 6 ==0){
-      ErrorAlpha.push_back((*this->fockA_) * (*this->densityA_) * (*this->aointegrals_->overlap_) -
-                      (*this->aointegrals_->overlap_) * (*this->densityA_) * (*this->fockA_));
-      fockAlpha.push_back(*this->fockA_);
-      if(!this->RHF_){
-        ErrorBeta.push_back((*this->fockB_) * (*this->densityB_) * (*this->aointegrals_->overlap_) -
-                        (*this->aointegrals_->overlap_) * (*this->densityB_) * (*this->fockB_));
-        fockBeta.push_back(*this->fockB_);
-      }
-    }
-    if(iter % 6 ==1){
-      ErrorAlpha.push_back((*this->fockA_) * (*this->densityA_) * (*this->aointegrals_->overlap_) -
-                      (*this->aointegrals_->overlap_) * (*this->densityA_) * (*this->fockA_));
-      fockAlpha.push_back(*this->fockA_);
-      if(!this->RHF_){
-        ErrorBeta.push_back((*this->fockB_) * (*this->densityB_) * (*this->aointegrals_->overlap_) -
-                        (*this->aointegrals_->overlap_) * (*this->densityB_) * (*this->fockB_));
-        fockBeta.push_back(*this->fockB_);
-      }
-    }
-    if(iter % 6 ==2){
-      ErrorAlpha.push_back((*this->fockA_) * (*this->densityA_) * (*this->aointegrals_->overlap_) - 
-                      (*this->aointegrals_->overlap_) * (*this->densityA_) * (*this->fockA_));
-      fockAlpha.push_back(*this->fockA_);
-      if(!this->RHF_){
-        ErrorBeta.push_back((*this->fockB_) * (*this->densityB_) * (*this->aointegrals_->overlap_) -
-                        (*this->aointegrals_->overlap_) * (*this->densityB_) * (*this->fockB_));
-        fockBeta.push_back(*this->fockB_);
-      }
-    }
-    if(iter % 6 ==3){
-      ErrorAlpha.push_back((*this->fockA_) * (*this->densityA_) * (*this->aointegrals_->overlap_) - 
-                      (*this->aointegrals_->overlap_) * (*this->densityA_) * (*this->fockA_));
-      fockAlpha.push_back(*this->fockA_);
-      if(!this->RHF_){
-        ErrorBeta.push_back((*this->fockB_) * (*this->densityB_) * (*this->aointegrals_->overlap_) -
-                        (*this->aointegrals_->overlap_) * (*this->densityB_) * (*this->fockB_));
-        fockBeta.push_back(*this->fockB_);
-      }
-    }
-    if(iter % 6 ==4){
-      ErrorAlpha.push_back((*this->fockA_) * (*this->densityA_) * (*this->aointegrals_->overlap_) - 
-                      (*this->aointegrals_->overlap_) * (*this->densityA_) * (*this->fockA_));
-      fockAlpha.push_back(*this->fockA_);
-      if(!this->RHF_){
-        ErrorBeta.push_back((*this->fockB_) * (*this->densityB_) * (*this->aointegrals_->overlap_) -
-                        (*this->aointegrals_->overlap_) * (*this->densityB_) * (*this->fockB_));
-        fockBeta.push_back(*this->fockB_);
-      }
-    }
-    if(iter % 6 ==5){
-      ErrorAlpha.push_back((*this->fockA_) * (*this->densityA_) * (*this->aointegrals_->overlap_) - 
-                      (*this->aointegrals_->overlap_) * (*this->densityA_) * (*this->fockA_));
-      fockAlpha.push_back(*this->fockA_);
-      if(!this->RHF_){
-        ErrorBeta.push_back((*this->fockB_) * (*this->densityB_) * (*this->aointegrals_->overlap_) -
-                        (*this->aointegrals_->overlap_) * (*this->densityB_) * (*this->fockB_));
-        fockBeta.push_back(*this->fockB_);
-      }
+    RealMap ErrA(ErrorAlphaMem + (iter%(lenCoeff-1))*lenF,n,n);
+    ErrA = (*this->fockA_) * (*this->densityA_) * (*this->aointegrals_->overlap_);
+    ErrA -= (*this->aointegrals_->overlap_) * (*this->densityA_) * (*this->fockA_);
+    memcpy(FADIIS+(iter%(lenCoeff-1))*lenF,this->fockA_->data(),lenF*sizeof(double));
+    if(!this->RHF_){
+      RealMap ErrB(ErrorBetaMem + (iter%(lenCoeff-1))*lenF,n,n);
+      ErrB = (*this->fockB_) * (*this->densityB_) * (*this->aointegrals_->overlap_);
+      ErrB -= (*this->aointegrals_->overlap_) * (*this->densityB_) * (*this->fockB_);
+      memcpy(FBDIIS+(iter%(lenCoeff-1))*lenF,this->fockB_->data(),lenF*sizeof(double));
     }
     
     
-    if(iter % 6==0 && iter!=0){
-      
-      for (auto j=0;j<ErrorAlpha.size();j++){
-        for (auto k=0; k<=j;k++){
-          B(j,k)=(ErrorAlpha[j]*(ErrorAlpha[k].transpose())).trace();
-          if(!this->RHF_) B(j,k) += (ErrorBeta[j]*(ErrorBeta[k].transpose())).trace();
-	  B(k,j)=B(j,k);
+    if(iter % (lenCoeff-1) == 0 && iter != 0){
+      for(auto j = 0; j < (lenCoeff-1); j++)
+      for(auto k = 0; k <= j          ; k++){
+        RealMap EJA(ErrorAlphaMem + (j%(lenCoeff-1))*lenF,n,n);
+        RealMap EKA(ErrorAlphaMem + (k%(lenCoeff-1))*lenF,n,n);
+        B(j,k) = -EJA.frobInner(EKA);
+        if(!this->RHF_){
+          RealMap EJB(ErrorBetaMem + (j%(lenCoeff-1))*lenF,n,n);
+          RealMap EKB(ErrorBetaMem + (k%(lenCoeff-1))*lenF,n,n);
+          B(j,k) = -EJB.frobInner(EKB);
         }
+        B(k,j) = B(j,k);
       }
-      for (auto l=0;l<6;l++){
-         B(6,l)=-1.0;
-	 B(l,6)=-1.0;
+      for (auto l=0;l<lenCoeff-1;l++){
+         B(lenCoeff-1,l)=-1.0;
+	 B(l,lenCoeff-1)=-1.0;
       }
-      B(6,6)=0;
-      for (auto k =0;k<6;k++){
-        coef[k]=0.0;
-      }
-      coef[6]=-1.0;
+      B(lenCoeff-1,lenCoeff-1)=0;
+      memset(coef,0.0,lenCoeff-1*sizeof(double)); // Zero out DIIS coef
+      coef[lenCoeff-1]=-1.0;
       dgesv_(&row,&nrhs,B.data(),&row, iPiv, coef,&row, &info);
       this->fockA_->setZero();
       if(!this->RHF_) this->fockB_->setZero();
-      for(auto j = 0; j < 6; j++) {
-        *this->fockA_ += coef[j]*fockAlpha[j];
-        if(!this->RHF_) *this->fockB_ += coef[j]*fockBeta[j];
-      }
-      ErrorAlpha.clear();
-      fockAlpha.clear();
-      if(!this->RHF_){
-        ErrorBeta.clear();
-        fockBeta.clear();
+      for(auto j = 0; j < lenCoeff-1; j++) {
+        RealMap FA(FADIIS + (j%(lenCoeff-1))*lenF,n,n);
+        *this->fockA_ += coef[j]*FA;
+        if(!this->RHF_) {
+          RealMap FB(FBDIIS + (j%(lenCoeff-1))*lenF,n,n);
+          *this->fockB_ += coef[j]*FB;
+        }
       }
     }
 
     PAlphaRMS=((*this->densityA_)-POldAlpha).norm();
     if(!this->RHF_) PBetaRMS = ((*this->densityB_) - POldBeta).norm();
     EDelta= this->totalEnergy-EOld;
-    this->printDensityinf();     
+    if(this->RHF_) this->printDensityInfo(PAlphaRMS,EDelta);     
+    else this->printDensityInfo(PAlphaRMS,PBetaRMS,EDelta);     
     
     if(this->RHF_){
       if(PAlphaRMS < Dtol && pow((this->totalEnergy-EOld),2)<Etol) break;
@@ -254,12 +216,17 @@ void SingleSlater<double>::SCF(){
   //freeing the memory
   delete [] SCR;
   delete [] iPiv;
-
+  
+  if(iter >= maxIter)
+    this->fileio_->out << "SCF Failed to converge within maximum number of iterations" << endl << endl;
   this->fileio_->out <<"\n"<<endl; 
   this->fileio_->out << bannerEnd <<endl;
   this->fileio_->out << "\nRequested convergence on RMS density matrix = " <<std::setw(5)<<Dtol <<"  within  " <<maxIter <<"  cycles."<<endl;
   this->fileio_->out << "Requested convergence on             energy = " <<Etol << endl;
-  this->fileio_->out << "\nSCF Done: E(RHF) = "<< this->totalEnergy << "  Eh  after  "<< iter+1 << "  cycles" <<endl;
+  if(maxIter > iter){
+    if(this->RHF_) this->fileio_->out << "\nSCF Done: E(RHF) = "<< this->totalEnergy << "  Eh  after  "<< iter+1 << "  cycles" <<endl;
+    else this->fileio_->out << "\nSCF Done: E(UHF) = "<< this->totalEnergy << "  Eh  after  "<< iter+1 << "  cycles" <<endl;
+  }
   this->fileio_->out << bannerEnd <<endl;
 }; 
 } // namespace ChronusQ
