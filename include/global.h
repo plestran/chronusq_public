@@ -112,12 +112,15 @@ typedef TwoBodyEngine<libint2::Coulomb> coulombEngine; ///< Two-body ERI engine 
 typedef btas::RangeNd<CblasRowMajor,std::array<long,4>> Range4d; ///< BTAS range specification for rank-4 tensors
 typedef btas::RangeNd<CblasRowMajor,std::array<long,3>> Range3d; ///< BTAS range specification for rank-3 tensors
 typedef btas::RangeNd<CblasRowMajor,std::array<long,2>> Range2d; ///< BTAS range specification for rank-2 tensors (isomorphic with matrix)
+typedef btas::RangeNd<CblasRowMajor,std::array<long,1>> Range1d; ///< BTAS range specification for rank-1 tensors (isomorphic with vector)
 typedef Tensor<double,Range4d> RealTensor4d; ///< Support for real-valued rank-4 tensors using BTAS
 typedef Tensor<double,Range3d> RealTensor3d; ///< Support for real-valued rank-3 tensors using BTAS
 typedef Tensor<double,Range2d> RealTensor2d; ///< Support for real-values rank-2 tensors (aka Matricies) using BTAS
+typedef Tensor<double,Range1d> RealTensor1d; ///< Support for real-values rank-1 tensors (aka Vectors) using BTAS
 typedef Tensor<dcomplex,Range4d> ComplexTensor4d; ///< Support for complex-valued rank-4 tensors using BTAS
 typedef Tensor<dcomplex,Range3d> ComplexTensor3d; ///< Support for complex-valued rank-3 tensors using BTAS
 typedef Tensor<dcomplex,Range2d> ComplexTensor2d; ///< Support for complex-values rank-2 tensors (aka Matricies) using BTAS
+typedef Tensor<dcomplex,Range1d> ComplexTensor1d; ///< Support for complex-values rank-1 tensors (aka Vectors) using BTAS
 
 //----------------//
 //number constants//

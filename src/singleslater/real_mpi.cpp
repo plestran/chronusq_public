@@ -23,25 +23,24 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
-#ifndef  INCLUDED_CLASSTOOLS
-#define  INCLUDED_CLASSTOOLS
-#include <global.h>
-#include <cerr.h>
-#include <fileio.h>
-#include <molecule.h>
-#include <basisset.h>
-#include <controls.h>
-
-/*****************************/
-/*Error Messages 15000-19999 */
-/*****************************/
-
+#include <singleslater.h>
 namespace ChronusQ {
-// read input files and initialize everything
-void readInput(FileIO *,Molecule *, BasisSet *, Controls *, BasisSet * dfBasis=NULL);
-
-// trace of product of two symmetric matrices
-double traceSymm(RealMatrix *,RealMatrix *);
+/*************************/
+/* MPI Related Routines  */
+/*************************/
+template<>
+void SingleSlater<double>::mpiSend(int toID,int tag) {
+  //OOMPI_COMM_WORLD[toID].Send(this->nAtoms_,tag);
+  //OOMPI_COMM_WORLD[toID].Send(this->index_,this->nAtoms_,tag);
+  //this->cart_->mpiSend(toID,tag);
+};
+template<>
+void SingleSlater<double>::mpiRecv(int fromID,int tag) {
+  //OOMPI_COMM_WORLD[fromID].Recv(this->nAtoms_,tag);
+  //this->index_=new int[this->nAtoms_];
+  //this->cart_ =new RealMatrix(3, this->nAtoms_, "Molecule");
+  //OOMPI_COMM_WORLD[fromID].Recv(this->index_,this->nAtoms_,tag);
+  //this->cart_->mpiRecv(fromID,tag);
+};
 } // namespace ChronusQ
 
-#endif

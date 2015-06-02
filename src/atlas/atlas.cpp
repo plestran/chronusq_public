@@ -27,18 +27,19 @@
 #include <davidson.h>
 using namespace ChronusQ;
 
-RealMatrix AX(const RealMatrix &A, const RealMatrix &B) {return A*B;};
-
 int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
-  int i,j,k,l;
   time_t currentTime;
+
+  // Pointers for important storage 
   auto molecule     	= std::unique_ptr<Molecule>(new Molecule());
   auto basisset     	= std::unique_ptr<BasisSet>(new BasisSet());
+  auto dfBasisset     	= std::unique_ptr<BasisSet>(new BasisSet());
   auto controls     	= std::unique_ptr<Controls>(new Controls());
   auto aointegrals	= std::unique_ptr<AOIntegrals>(new AOIntegrals());
-  auto hartreeFock	= std::unique_ptr<SingleSlater>(new SingleSlater());
+  auto hartreeFock	= std::unique_ptr<SingleSlater<double>>(new SingleSlater<double>());
   std::unique_ptr<FileIO> fileIO;
 
+  // Initialize the FileIO object
   std::vector<std::string> argv_string;
   for(auto i = 1; i < argc; ++i) if(argv[i][0]=='-') argv_string.push_back(argv[i]);
   if(argv_string.size()==0) fileIO = std::unique_ptr<FileIO>(new FileIO(argv[1]));
@@ -50,21 +51,23 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   fileIO->out<<"Job started: "<<ctime(&currentTime)<<endl;
   //fileIO->out<<"Central control process is on "<<globalMPI->nodeName<<endl;
 
-  // read input
+  // Initialize default settings and read input
   controls->iniControls();
-  readInput(fileIO.get(),molecule.get(),basisset.get(),controls.get());
+  readInput(fileIO.get(),molecule.get(),basisset.get(),controls.get(),dfBasisset.get());
 //  fileIO->iniFileIO(controls->restart);
 
   // print out molecular and basis set information
   molecule->printInfo(fileIO.get(),controls.get());
   basisset->printInfo_libint(fileIO.get(),controls.get());
-  aointegrals->iniAOIntegrals(molecule.get(),basisset.get(),fileIO.get(),controls.get());
+
+  dfBasisset->printInfo_libint(fileIO.get(),controls.get());
+
+  aointegrals->iniAOIntegrals(molecule.get(),basisset.get(),fileIO.get(),controls.get(),dfBasisset.get());
+  cout << "HERE" << endl;
   hartreeFock->iniSingleSlater(molecule.get(),basisset.get(),aointegrals.get(),fileIO.get(),controls.get());
+  cout << "HERE" << endl;
   hartreeFock->printInfo();
-#ifdef USE_LIBINT
-  aointegrals->computeSchwartz();
-  if(controls->buildn4eri) aointegrals->computeAOTwoE();
-#endif
+  cout << "HERE" << endl;
   if(controls->guess==0) hartreeFock->formGuess();
   else if(controls->guess==1) hartreeFock->readGuessIO();
   else if(controls->guess==2) {
@@ -72,6 +75,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
     hartreeFock->readGuessGauMatEl(matEl);
   }
   else if(controls->guess==3) hartreeFock->readGuessGauFChk(controls->gauFChkName);
+  cout << "HERE" << endl;
   hartreeFock->formFock();
   aointegrals->printTimings();
   hartreeFock->computeEnergy();
@@ -82,18 +86,22 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   else fileIO->out << "**Skipping SCF Optimization**" << endl; 
   hartreeFock->computeMultipole();
 
-  //MOIntegrals *moIntegrals = new MOIntegrals();
-  //moIntegrals->iniMOIntegrals(molecule,basisset,fileIO,controls,aointegrals,hartreeFock);
-
   SDResponse *sdResponse = new SDResponse();
   sdResponse->iniSDResponse(molecule.get(),basisset.get(),moIntegrals.get(),fileIO.get(),controls.get(),hartreeFock.get());
 
   sdResponse->computeExcitedStates();
+
   sdResponse->formRM();
-  //sdResponse->DavidsonCIS();
+  sdResponse->DavidsonCIS();
   //sdResponse->formRM2(XMO);
   //sdResponse->ReturnDiag();
   //sdResponse->Guess(PDiag);
+
+//if(controls->doDF) aointegrals->compareRI();
+/*
+  MOIntegrals *moIntegrals = new MOIntegrals();
+  moIntegrals->iniMOIntegrals(molecule,basisset,fileIO,controls,aointegrals,hartreeFock);
+
 
 //APS
  int Iop=0;
@@ -101,68 +109,12 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
  Iop=1;
  molecule->toCOM(Iop);  // call object molecule pointing to function toCOM-Iop=1 Center of Nuclear Charges
 //APE
+*/
   time(&currentTime);
   fileIO->out<<"\nJob finished: "<<ctime(&currentTime)<<endl;
-  int N = 500;
-  int NSek = 15;
-  std::shared_ptr<RealMatrix> A = std::make_shared<RealMatrix>(N,N);
-  for(auto i = 0; i < N; i++) (*A)(i,i) = i+1;
-  (*A) = (*A) + RealMatrix::Random(N,N);
-  (*A) = A->selfadjointView<Eigen::Lower>();
-  Eigen::EigenSolver<RealMatrix> ES;
-  for(int i = 0; i < N; i++)
-  for(int j = 0; j < N; j++) {
-    (*A)(i,j) = std::abs((*A)(i,j));
-  }
-/*
-  ES.compute(*A);
-  Eigen::VectorXd E = ES.eigenvalues().real();
-  RealMatrix VR = ES.eigenvectors().real();
-  cout << endl << ES.eigenvectors() << endl;
-  ES.compute(A->transpose());
-  RealMatrix VL = ES.eigenvectors().real();
-  cout << endl << ES.eigenvectors() << endl;
-//VR.normCol();
-//VL.normCol();
-
-  Eigen::FullPivLU<RealMatrix> lu(VL.transpose()*VR);
-  cout << endl << ES.eigenvectors() << endl;
-
-  RealMatrix L = RealMatrix::Identity(N,N);
-  L.triangularView<Eigen::StrictlyLower>() = lu.matrixLU();
-  RealMatrix U = lu.matrixLU().triangularView<Eigen::Upper>();
-  for(auto i = 0; i < N; i++){
-    cout << endl << (*A)*VR.col(i) - E(i)*VR.col(i) << endl;
-  }
-
-  cout << endl << endl << L.inverse()*lu.permutationP()*VL.transpose()*VR*lu.permutationQ()*U.inverse() << endl;
-
-  VR = VR*lu.permutationQ()*U.inverse();
-  VL = VL*lu.permutationP().transpose()*L.inverse().transpose();
-  cout << endl << VL.transpose()*VR << endl;
-
-
-  for(auto i = 0; i < N; i++){
-    cout << endl << (*A)*VR.col(i) - E(i)*VR.col(i) << endl;
-  }
-
-  cout << endl << VL.transpose()*VR << endl;
-  biOrth(VL,VR);
-  cout << endl << VL.transpose()*VR << endl;
-//cout << *A << endl;
-*/
-//Davidson<double> dav(&AX,A,NSek,N);
-//dav.run(fileIO->out);
-//GauMatEl gau("file.out");
-//double * x = NULL;
-//gau.readRec(GauMatEl::overlap,x);
-//cout << "OUTSIDE" << endl;
-//cout << x[23] << endl << endl;
-//gau.readRec(GauMatEl::dipole,x);
-//cout << "OUTSIDE" << endl;
-//cout << x[23] << endl << endl;
-  
-
+  SingleSlater<dcomplex> newSS(hartreeFock.get());
+  newSS.printInfo();
+  prettyPrint(cout,*newSS.densityA(),"New D");
 #ifdef USE_LIBINT
   libint2::cleanup();
 #endif

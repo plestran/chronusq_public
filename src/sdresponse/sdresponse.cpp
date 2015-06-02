@@ -39,9 +39,9 @@ using std::setw;
 // allocate memory for matrices //
 //------------------------------//
 void SDResponse::iniSDResponse( Molecule * molecule, BasisSet * basisSet, MOIntegrals * mointegrals, 
-                                FileIO * fileio, Controls * controls, SingleSlater * singleSlater) {
-  cout << "start initialization" << endl;
+                                FileIO * fileio, Controls * controls, SingleSlater<double> * singleSlater) {
   this->nBasis_  = basisSet->nBasis();
+
   this->molecule_       = molecule;
   this->basisSet_       = basisSet;
   this->fileio_         = fileio;
@@ -162,12 +162,12 @@ void SDResponse::formRM(){
   RealMatrix EigV(nV,1);
 
   for (auto i=0;i<nO;i++){
-    EigO(i,0) = (*this->singleSlater_->epsA())(i,0);
-    cout << "The " << (i+1) << " eigenvalue in Occupied is: " << EigO(i,0) << endl;
+    EigO(i) = (*this->singleSlater_->epsA())(i);
+    cout << "The " << (i+1) << " eigenvalue in Occupied is: " << EigO(i) << endl;
   }
   for (auto j=0;j<nV;j++){
-    EigV(j,0) = (*this->singleSlater_->epsA())((j+nO),0);
-    cout << "The " << (j+1) << " eigenvalue in Virtual is: " << EigV(j,0) << endl;
+    EigV(j) = (*this->singleSlater_->epsA())((j+nO));
+    cout << "The " << (j+1) << " eigenvalue in Virtual is: " << EigV(j) << endl;
   }
 
   ia = 0;
@@ -180,7 +180,7 @@ void SDResponse::formRM(){
     {
       Ad(ia,jb) = 0.0;
       if ((a==b)&&(i==j)){
-	Ad(ia,jb) = EigV(a,0)-EigO(i,0);
+	Ad(ia,jb) = EigV(a)-EigO(i);
       }
       Ad(ia,jb) = Ad(ia,jb) + Dajib(a,j,i,b);
       Bd(ia,jb) = Dabij(a,b,i,j);
@@ -275,12 +275,12 @@ RealMatrix SDResponse::formRM2(RealMatrix &XMO){
   RealMatrix EigO(nO,1);
   RealMatrix EigV(nV,1);
   for (auto i=0;i<nO;i++){
-    EigO(i,0) = (*this->singleSlater_->epsA())(i,0);
-    //cout << "The " << (i+1) << " eigenvalue in Occupied is: " << EigO(i,0) << endl;
+    EigO(i) = (*this->singleSlater_->epsA())(i);
+    //cout << "The " << (i+1) << " eigenvalue in Occupied is: " << EigO(i) << endl;
   }
   for (auto j=0;j<nV;j++){
-    EigV(j,0) = (*this->singleSlater_->epsA())((j+nO),0);
-    //cout << "The " << (j+1) << " eigenvalue in Virtual is: " << EigV(j,0) << endl;
+    EigV(j) = (*this->singleSlater_->epsA())((j+nO));
+    //cout << "The " << (j+1) << " eigenvalue in Virtual is: " << EigV(j) << endl;
   }
   enum{a,j,i,b,mu,nu,lam,sig};
 
@@ -345,25 +345,14 @@ RealMatrix SDResponse::formRM2(RealMatrix &XMO){
     }
     RealMatrix IXAO1t(this->nBasis_,this->nBasis_);
     // Contract A_AAAA( <mn||ls> ) with XA
-    this->singleSlater_->aointegrals()->twoEContract(false,XAAO,IXAO1t);
-    cout << "Direct Contraction" << endl;
-    cout << IXAO1t << endl;
     contract(1.0,XAAOTsr,{sig,nu},Dmnls,{mu,nu,lam,sig},0.0,IXAO1,{mu,lam});
-    RealMatrix IXAO1m(this->nBasis_,this->nBasis_);
-    for (auto i=0;i<this->nBasis_;i++)
-    for (auto j=0;j<this->nBasis_;j++)
-    {
-      IXAO1m(i,j) = IXAO1(i,j);
-    }
-    cout << "Tensor Contraction" << endl;
-    cout << IXAO1m << endl;
     contract(1.0,LocMoAV,{mu,a},IXAO1,{mu,lam},0.0,IIXMO1,{a,lam});
     contract(1.0,LocMoAO,{lam,i},IIXMO1,{a,lam},0.0,IXMOTsr1,{a,i});
     for (auto a=0;a<nV;a++)
     for (auto i=0;i<nO;i++)
     {
       IXMO1(a,i)=IXMOTsr1(a,i);
-      IXMO1(a,i)= IXMO1(a,i) + XA(a,i)*(EigV(a,0)-EigO(i,0));
+      IXMO1(a,i)= IXMO1(a,i) + XA(a,i)*(EigV(a)-EigO(i));
     }
     // Contract A_AABB( <mn|ls> ) with XB
     contract(1.0,XBAOTsr,{sig,nu},dmnls,{mu,nu,lam,sig},0.0,IXAO2,{mu,lam});
@@ -391,7 +380,7 @@ RealMatrix SDResponse::formRM2(RealMatrix &XMO){
     for (auto i=0;i<nO;i++)
     {
       IXMO4(a,i) = IXMOTsr4(a,i);
-      IXMO4(a,i) = IXMO4(a,i) + XB(a,i)*(EigV(a,0)-EigO(i,0));
+      IXMO4(a,i) = IXMO4(a,i) + XB(a,i)*(EigV(a)-EigO(i));
     }
     
   
@@ -419,18 +408,18 @@ RealMatrix SDResponse::ReturnDiag(){
   RealMatrix EigO(nO,1);
   RealMatrix EigV(nV,1);
   for (auto i=0;i<nO;i++){
-    EigO(i,0) = (*this->singleSlater_->epsA())(i,0);
+    EigO(i) = (*this->singleSlater_->epsA())(i);
   }
   for (auto j=0;j<nV;j++){
-    EigV(j,0) = (*this->singleSlater_->epsA())((j+nO),0);
+    EigV(j) = (*this->singleSlater_->epsA())((j+nO));
   }
 
   RealMatrix PDiag(2*nOV,1);
   for (auto a=0;a<nV;a++)
   for (auto i=0;i<nO;i++)
   {
-    PDiag(a*nO+i,0) = EigV(a,0)-EigO(i,0);
-    PDiag(a*nO+i+nOV,0) = EigV(a,0)-EigO(i,0);
+    PDiag(a*nO+i,0) = EigV(a)-EigO(i);
+    PDiag(a*nO+i+nOV,0) = EigV(a)-EigO(i);
   }
 
   return PDiag;
@@ -483,7 +472,7 @@ void SDResponse::TransDipole(){
   double Tmax=0.0;
   int order=0;
   (*this->CISTransDen_).transposeInPlace();
-  RealMap TransDen(this->CISTransDen_->data()+12*nOV,2*nOV,1);
+  RealMap TransDen(this->CISTransDen_->data()+2*nOV,2*nOV,1);
   cout << "The transition density matrix we use: " << endl;
   cout << TransDen << endl;
   Tmax = TransDen(0,0);

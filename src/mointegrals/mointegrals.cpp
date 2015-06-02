@@ -34,7 +34,7 @@ using ChronusQ::MOIntegrals;
 // initialize MOIntegrals
 //---------------------
 void MOIntegrals::iniMOIntegrals(   Molecule * molecule, BasisSet * basisSet, FileIO * fileio, 
-                                    Controls * controls, AOIntegrals * aointegrals, SingleSlater * singleSlater){
+                                    Controls * controls, AOIntegrals * aointegrals, SingleSlater<double> * singleSlater){
   this->molecule_ = molecule;
   this->basisSet_ = basisSet;
   this->fileio_   = fileio;

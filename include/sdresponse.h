@@ -42,7 +42,7 @@ class SDResponse {
   int       nBasis_;
   int       **R2Index_;
   int       nStates_;
-  friend class SingleSlater;
+  friend class SingleSlater<double>;
 
   RealMatrix      XMO;
   RealMatrix      PDiag;
@@ -54,7 +54,7 @@ class SDResponse {
   FileIO *        fileio_;
   Controls *      controls_;
   MOIntegrals *   mointegrals_;
-  SingleSlater *  singleSlater_;
+  SingleSlater<double> *  singleSlater_;
   RealTensor4d *  aoERI_;
   RealTensor3d *  elecDipole_;
 
@@ -66,7 +66,7 @@ public:
   // pseudo-constructor
   void iniSDResponse(Molecule *,BasisSet *,
                      MOIntegrals *,FileIO *,
-                     Controls *,SingleSlater *);
+                     Controls *,SingleSlater<double> *);
 
   inline int nOV(){return this->singleSlater_->nOV();};
   void computeExcitedStates();         // compute the total electronic energy

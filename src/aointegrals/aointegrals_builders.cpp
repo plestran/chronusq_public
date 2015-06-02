@@ -627,6 +627,7 @@ void AOIntegrals::computeAOTwoE(){
     }
   }
   } // OMP Parallel
+  this->haveAOTwoE = true;
 }
 
 void AOIntegrals::computeAORII(){
@@ -684,6 +685,7 @@ void AOIntegrals::computeAORII(){
     }
   }
   } // omp parallel scope
+  this->haveRII = true;
 }
 
 void AOIntegrals::computeAORIS(){
@@ -730,7 +732,43 @@ void AOIntegrals::computeAORIS(){
   } // omp parallel scope
 
   aoRISMap = aoRISMap.selfadjointView<Lower>(); // Symmetrize
+  this->haveRIS = true;
 }
+
+void AOIntegrals::transformAORII(){
+  if(!this->haveRIS) this->computeAORIS();
+  if(!this->haveRII) this->computeAORII();
+
+  RealMap S(&this->aoRIS_->storage()[0],this->DFbasisSet_->nBasis(),this->DFbasisSet_->nBasis());
+  RealMatrix ShalfMat = S.pow(-0.5);
+  RealTensor2d Shalf(this->DFbasisSet_->nBasis(),this->DFbasisSet_->nBasis());
+  for(auto i = 0; i < Shalf.size(); i++)
+    Shalf.storage()[i] = ShalfMat.data()[i];
+  RealTensor3d A0(this->nBasis_,this->nBasis_,this->DFbasisSet_->nBasis());
+  enum{i,j,k,l,X,Y};
+  contract(1.0,*this->aoRII_,{i,j,X},Shalf,{X,Y},0.0,A0,{i,j,Y});
+  *this->aoRII_ = A0;
+  this->haveTRII = true;
+}
+
+void AOIntegrals::compareRI(){
+  if(!this->haveRIS)  this->computeAORIS();
+  if(!this->haveRII)  this->computeAORII();
+  if(!this->haveTRII) this->transformAORII();
+
+
+  RealTensor4d fakeERI(this->nBasis_,this->nBasis_,this->nBasis_,this->nBasis_);
+  RealTensor4d diff(this->nBasis_,this->nBasis_,this->nBasis_,this->nBasis_);
+
+  enum{i,j,k,l,X,Y};
+  contract(1.0,*this->aoRII_,{i,j,X},*this->aoRII_,{k,l,X},0.0,fakeERI,{i,j,k,l});
+
+  diff = fakeERI - (*this->aoERI_);
+  auto sum = 0.0;
+  for(auto x : diff) sum += std::abs(x);
+  cout << std::scientific << sum / diff.size() << endl;
+}
+
 #endif
 
 

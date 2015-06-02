@@ -36,7 +36,9 @@
 /****************************/
 
 namespace ChronusQ {
+template<typename T>
 class SingleSlater {
+  typedef Eigen::Matrix<T,Dynamic,Dynamic,RowMajor> TMatrix;
   int      nBasis_;
   int      nTT_;
   int      nAE_;
@@ -48,20 +50,20 @@ class SingleSlater {
   int      nVirB_;
   int      spin_;
   int    **R2Index_;
-  std::unique_ptr<RealMatrix>  densityA_;
-  std::unique_ptr<RealMatrix>  densityB_;
-  std::unique_ptr<RealMatrix>  fockA_;
-  std::unique_ptr<RealMatrix>  fockB_;
-  std::unique_ptr<RealMatrix>  coulombA_;
-  std::unique_ptr<RealMatrix>  coulombB_;
-  std::unique_ptr<RealMatrix>  exchangeA_;
-  std::unique_ptr<RealMatrix>  exchangeB_;
-  std::unique_ptr<RealMatrix>  moA_;
-  std::unique_ptr<RealMatrix>  moB_;
-  std::unique_ptr<RealMatrix>  PTA_;
-  std::unique_ptr<RealMatrix>  PTB_;
-  std::unique_ptr<RealMatrix>  epsA_;
-  std::unique_ptr<RealMatrix>  epsB_;
+  std::unique_ptr<TMatrix>  densityA_;
+  std::unique_ptr<TMatrix>  densityB_;
+  std::unique_ptr<TMatrix>  fockA_;
+  std::unique_ptr<TMatrix>  fockB_;
+  std::unique_ptr<TMatrix>  coulombA_;
+  std::unique_ptr<TMatrix>  coulombB_;
+  std::unique_ptr<TMatrix>  exchangeA_;
+  std::unique_ptr<TMatrix>  exchangeB_;
+  std::unique_ptr<TMatrix>  moA_;
+  std::unique_ptr<TMatrix>  moB_;
+  std::unique_ptr<TMatrix>  epsA_;
+  std::unique_ptr<TMatrix>  epsB_;
+  std::unique_ptr<TMatrix>  PTA_;
+  std::unique_ptr<TMatrix>  PTB_;
   std::unique_ptr<RealMatrix>  dipole_;
   std::unique_ptr<RealMatrix>  quadpole_;
   std::unique_ptr<RealMatrix>  tracelessQuadpole_;
@@ -88,10 +90,11 @@ public:
   // constructor & destructor
   SingleSlater(){;};
   ~SingleSlater() {;};
+
+  template<typename U>
+  SingleSlater(SingleSlater<U> *);
   // pseudo-constructor
-  void iniSingleSlater(Molecule *,BasisSet *,
-                       AOIntegrals *,FileIO *,
-                       Controls *);
+  void iniSingleSlater(Molecule *,BasisSet *,AOIntegrals *,FileIO *,Controls *);
 
   //set private data
   inline void setNBasis(int nBasis) { this->nBasis_ = nBasis;};
@@ -101,6 +104,7 @@ public:
 
   // access to private data
   inline int nBasis() { return this->nBasis_;};
+  inline int nTT()     { return this->nTT_;};
   inline int nAE()    { return this->nAE_;};
   inline int nBE()    { return this->nBE_;};
   inline int nOccA()  { return this->nOccA_;};
@@ -110,18 +114,29 @@ public:
   inline int RHF()    { return this->RHF_; };
   inline int spin()   { return this->spin_; };
   inline int nOV()    { return nOccA_*nVirA_;};
-  inline RealMatrix* densityA() { return this->densityA_.get();};
-  inline RealMatrix* densityB() { return this->densityB_.get();};
-  inline RealMatrix* fockA()    { return this->fockA_.get();};
-  inline RealMatrix* fockB()    { return this->fockB_.get();};
-  inline RealMatrix* coulombA() { return this->coulombA_.get();};
-  inline RealMatrix* coulombB() { return this->coulombB_.get();};
-  inline RealMatrix* exchangeA(){ return this->exchangeA_.get();};
-  inline RealMatrix* exchangeB(){ return this->exchangeB_.get();};
-  inline RealMatrix* moA()      { return this->moA_.get();};
-  inline RealMatrix* moB()      { return this->moB_.get();};
-  inline RealMatrix* epsA()     { return this->epsA_.get();};
-  inline AOIntegrals* aointegrals() {return this->aointegrals_;};
+  inline TMatrix* densityA() { return this->densityA_.get();};
+  inline TMatrix* densityB() { return this->densityB_.get();};
+  inline TMatrix* fockA()    { return this->fockA_.get();};
+  inline TMatrix* fockB()    { return this->fockB_.get();};
+  inline TMatrix* coulombA() { return this->coulombA_.get();};
+  inline TMatrix* coulombB() { return this->coulombB_.get();};
+  inline TMatrix* exchangeA(){ return this->exchangeA_.get();};
+  inline TMatrix* exchangeB(){ return this->exchangeB_.get();};
+  inline TMatrix* moA()      { return this->moA_.get();};
+  inline TMatrix* moB()      { return this->moB_.get();};
+  inline TMatrix* epsA()     { return this->epsA_.get();};
+  inline TMatrix* epsB()     { return this->epsB_.get();};
+  inline TMatrix* PTA()      { return this->PTA_.get();};
+  inline TMatrix* PTB()      { return this->PTB_.get();};
+  inline RealMatrix* dipole(){ return this->dipole_.get();};
+  inline RealMatrix* quadpole(){ return this->quadpole_.get();};
+  inline RealMatrix* tracelessQuadpole(){ return this->tracelessQuadpole_.get();};
+  inline RealTensor3d* octpole(){ return this->octpole_.get();};
+  inline BasisSet *    basisset(){return this->basisset_;};
+  inline Molecule *    molecule(){return this->molecule_;};
+  inline FileIO *      fileio(){return this->fileio_;};
+  inline Controls *    controls(){return this->controls_;};
+  inline AOIntegrals * aointegrals(){return this->aointegrals_;};
 
   void formGuess();	        // form the intial guess of MO's
   void formDensity();		// form the density matrix
@@ -140,11 +155,19 @@ public:
   void printInfo();
   void Hello();
   void printDensityinf();
+
   /*************************/
   /* MPI Related Routines  */
   /*************************/
   void mpiSend(int,int tag=tagSingleSlater);
   void mpiRecv(int,int tag=tagSingleSlater);
 };
+
+#include <singleslater_alloc.h>
+#include <singleslater_print.h>
+#include <singleslater_fock.h>
+#include <singleslater_misc.h>
+
+
 } // namespace ChronusQ
 #endif
