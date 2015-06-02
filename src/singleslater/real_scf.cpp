@@ -167,10 +167,11 @@ void SingleSlater<double>::SCF(){
     }
     
     
-    if(iter % (lenCoeff-1) == 0 && iter != 0){
+    if(iter % (lenCoeff-1) == 5 && iter != 0){
       for(auto j = 0; j < (lenCoeff-1); j++)
       for(auto k = 0; k <= j          ; k++){
         RealMap EJA(ErrorAlphaMem + (j%(lenCoeff-1))*lenF,n,n);
+        if(k==0) prettyPrint(this->fileio_->out,EJA,"Error "+std::to_string(j));
         RealMap EKA(ErrorAlphaMem + (k%(lenCoeff-1))*lenF,n,n);
         B(j,k) = -EJA.frobInner(EKA);
         if(!this->RHF_){
@@ -185,19 +186,27 @@ void SingleSlater<double>::SCF(){
 	 B(l,lenCoeff-1)=-1.0;
       }
       B(lenCoeff-1,lenCoeff-1)=0;
-      memset(coef,0.0,lenCoeff-1*sizeof(double)); // Zero out DIIS coef
+      prettyPrint(this->fileio_->out,B,"B");
+//    memset(coef,0.0,lenCoeff-1*sizeof(double)); // Zero out DIIS coef
+      for(auto k = 0; k < lenCoeff;k++) coef[k] = 0.0; 
       coef[lenCoeff-1]=-1.0;
+      this->fileio_->out << "COEFF Before" << endl;
+      for(auto k = 0; k < lenCoeff; k++) this->fileio_->out << coef[k] << endl;
       dgesv_(&row,&nrhs,B.data(),&row, iPiv, coef,&row, &info);
+      this->fileio_->out << "COEFF" << endl;
+      for(auto k = 0; k < lenCoeff; k++) this->fileio_->out << coef[k] << endl;
       this->fockA_->setZero();
       if(!this->RHF_) this->fockB_->setZero();
       for(auto j = 0; j < lenCoeff-1; j++) {
         RealMap FA(FADIIS + (j%(lenCoeff-1))*lenF,n,n);
         *this->fockA_ += coef[j]*FA;
+        prettyPrint(this->fileio_->out,FA,"Fock "+std::to_string(j));
         if(!this->RHF_) {
           RealMap FB(FBDIIS + (j%(lenCoeff-1))*lenF,n,n);
           *this->fockB_ += coef[j]*FB;
         }
       }
+      prettyPrint(this->fileio_->out,*this->fockA_,"Total Fock");
     }
 
     PAlphaRMS=((*this->densityA_)-POldAlpha).norm();
