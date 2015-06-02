@@ -113,7 +113,8 @@ public:
   inline int nVirB()  { return this->nVirB_;};
   inline int RHF()    { return this->RHF_; };
   inline int spin()   { return this->spin_; };
-  inline int nOV()    { return nOccA_*nVirA_;};
+  inline int nOVA()    { return nOccA_*nVirA_;};
+  inline int nOVB()    { return nOccB_*nVirB_;};
   inline TMatrix* densityA() { return this->densityA_.get();};
   inline TMatrix* densityB() { return this->densityB_.get();};
   inline TMatrix* fockA()    { return this->fockA_.get();};

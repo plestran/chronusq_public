@@ -51,11 +51,11 @@ void SDResponse::iniSDResponse( Molecule * molecule, BasisSet * basisSet, MOInte
   this->aoERI_          = singleSlater->aointegrals()->aoERI_.get();
   this->elecDipole_     = singleSlater->aointegrals()->elecDipole_.get();
   cout << "Allocate Memory for CISEnergy_ and CISTransDen_" << endl;
-  int nOV = singleSlater->nOV();
-  this->CISEnergy_ = std::unique_ptr<RealMatrix>(new RealMatrix(2*nOV,1));
-  this->CISTransDen_ = std::unique_ptr<RealMatrix>(new RealMatrix(2*nOV,2*nOV));
+  int nOVA = singleSlater->nOVA();
+  int nOVB = singleSlater->nOVB();
+  this->CISEnergy_ = std::unique_ptr<RealMatrix>(new RealMatrix(nOVA+nOVB,1));
+  this->CISTransDen_ = std::unique_ptr<RealMatrix>(new RealMatrix(nOVA+nOVB,nOVA+nOVB));
   this->TransDipole_ = std::unique_ptr<RealMatrix>(new RealMatrix(1,3));
-  cout << "finish initialization" << endl;
 };
 //-----------------------------------//
 // print a wave function information //
@@ -79,132 +79,323 @@ void SDResponse::printExcitedStateEnergies(){
 void SDResponse::formRM(){
   // Get info from SCF and make Local copy of MO
   int nOA = this->singleSlater_->nOccA();
-  int nO = nOA;
+  int nOB = this->singleSlater_->nOccB();
   int nVA = this->singleSlater_->nVirA();
-  int nV  = nVA;
-  cout << "Number of Occupied: " << nO << ", Number of Virtual " << nV << " Number of Basis: "<<this->nBasis_<< ".\n";
-  Tensor<double> LocMoAO(this->nBasis_,nO);
-  Tensor<double> LocMoAV(this->nBasis_,nV);
+  int nVB = this->singleSlater_->nVirB();
+  int nOVA = this->singleSlater->nOVA();
+  int nOVB = this->singleSlater->nOVB();
+  cout << "Number of Occupied Alpha: " << nOA << ", Number of Virtual Alpha" << nVA << " Number of Basis: "<<this->nBasis_<< ".\n";
+  cout << "Number of Occupied Beta: " << nOB << ", Number of Virtual Beta" << nVB << " Number of Basis: "<<this->nBasis_<< ".\n";
+  Tensor<double> LocMoAO(this->nBasis_,nOA);
+  Tensor<double> LocMoAV(this->nBasis_,nVA);
+  Tensor<double> LocMoBO(this->nBasis_,nOB);
+  Tensor<double> LocMoBV(this->nBasis_,nVB);
+
   for(auto ii = 0; ii < this->nBasis_; ii++) {
-  for(auto jj = 0; jj < nO; jj++) {
+  for(auto jj = 0; jj < nOA; jj++) {
     LocMoAO(ii,jj) = (*this->singleSlater_->moA())(ii,jj);
   }
-  for(auto kk = nO; kk< this->nBasis_; kk++) {
-    LocMoAV(ii,kk-nO) = (*this->singleSlater_->moA())(ii,kk);
+  for(auto kk = nOA; kk< this->nBasis_; kk++) {
+    LocMoAV(ii,kk-nOA) = (*this->singleSlater_->moA())(ii,kk);
   }
   }
+
+  for(auto ii = 0; ii < this->nBasis_; ii++) {
+  for(auto jj = 0; jj < nOB; jj++) {
+    LocMoBO(ii,jj) = (*this->singleSlater_->moB())(ii,jj);
+  }
+  for(auto kk = nOB; kk< this->nBasis_; kk++) {
+    LocMoBV(ii,kk-nOB) = (*this->singleSlater_->moB())(ii,kk);
+  }
+  }
+
 
   // Prepare the 2e integrals
   // Ixxxx for intermediate Sxxxx for Mulliken Notation single bar
   // Dxxxx for Dirac Notation double bar, dxxxx for Dirac Notation single bar
-  Tensor<double> Ianls(nV,this->nBasis_,this->nBasis_,this->nBasis_); // (a nu | lam sig)
-  Tensor<double> Iails(nV,nO,this->nBasis_,this->nBasis_); // (a j  | lam sig)
-  Tensor<double> Iaijs(nV,nO,nO,this->nBasis_); // (a j  | i   sig)
-  Tensor<double> Saijb(nV,nO,nO,nV); // ( a j | i b )
-  Tensor<double> Iabls(nV,nV,this->nBasis_,this->nBasis_); // ( a j | b sig )
-  Tensor<double> Iabjs(nV,nV,nO,this->nBasis_); // ( a j | b i )
-  Tensor<double> Sabji(nV,nV,nO,nO); // ( a b | j i )
-  Tensor<double> Dajib(nV,nO,nO,nV); // <aj||ib>
-  Tensor<double> dajib(nV,nO,nO,nV); // <aj|ib>
-  Tensor<double> Dabij(nV,nV,nO,nO); // <ab||ij>
-  Tensor<double> dabij(nV,nV,nO,nO); // <ab|ij>
+  Tensor<double> IanlsA(nVA,this->nBasis_,this->nBasis_,this->nBasis_); // (a nu | lam sig)
+  Tensor<double> IanlsB(nVB,this->nBasis_,this->nBasis_,this->nBasis_);
+  Tensor<double> IailsA(nVA,nOA,this->nBasis_,this->nBasis_); // (a j  | lam sig)
+  Tensor<double> IailsB(nVB,nOB,this->nBasis_,this->nBasis_);
+  Tensor<double> IaijsAA(nVA,nOA,nOA,this->nBasis_); // (a j  | i   sig)
+  Tensor<double> IaijsAB(nVA,nOA,nOB,this->nBasis_);
+  Tensor<double> IaijsBA(nVB,nOB,nOA,this->nBasis_);
+  Tensor<double> IaijsBB(nVB,nOB,nOB,this->nBasis_);
+  Tensor<double> SaijbAA(nVA,nOA,nOA,nVA); // ( a j | i b )
+  Tensor<double> SaijbAB(nVA,nOA,nOB,nVB);
+  Tensor<double> SaijbBA(nVB,nOB,nOA,nVA);
+  Tensor<double> SaijbBB(nVB,nOB,nOB,nVB);
+  Tensor<double> IablsA(nVA,nVA,this->nBasis_,this->nBasis_); // ( a j | b sig )
+  Tensor<double> IablsB(nVB,nVB,this->nBasis_,this->nBasis_);
+  Tensor<double> IabjsA(nVA,nVA,nOA,this->nBasis_); // ( a j | b i )
+  Tensor<double> IabjsB(nVB,nVB,nOB,this->nBasis_);
+  Tensor<double> SabjiAA(nVA,nVA,nOA,nOA); // ( a b | j i )
+  Tensor<double> SabjiBB(nVB,nVB,nOB,nOB);
+  Tensor<double> DajibAA(nVA,nOA,nOA,nVA); // <aj||ib>
+  Tensor<double> DajibBB(nVB,nOB,nOB,nVB);
+  Tensor<double> dajibAB(nVA,nOB,nOA,nVB); // <aj|ib>
+  Tensor<double> dajibBA(nVB,nOA,nOB,nVA);
+  Tensor<double> DabijAA(nVA,nVA,nOA,nOA); // <ab||ij>
+  Tensor<double> DabijBB(nVB,nVB,nOB,nOB);
+  Tensor<double> dabijAB(nVA,nVB,nOA,nOB); // <ab|ij>
+  Tensor<double> dabijBA(nVB,nVA,nOB,nOA);
 
   enum{a,j,i,b,mu,nu,lam,sig};
 
-  // (ai|jb)
+  // (ai|jb)AAAA
   // (a nu | lam sig)
-  contract(1.0,LocMoAV,{mu,a},(*this->aoERI_),{mu,nu,lam,sig},0.0,Ianls,{a,nu,lam,sig});
+  contract(1.0,LocMoAV,{mu,a},(*this->aoERI_),{mu,nu,lam,sig},0.0,IanlsA,{a,nu,lam,sig});
   // (a i  | lam sig)
-  contract(1.0,LocMoAO,{nu,i},Ianls,{a,nu,lam,sig},0.0,Iails,{a,i,lam,sig});
+  contract(1.0,LocMoAO,{nu,i},IanlsA,{a,nu,lam,sig},0.0,IailsA,{a,i,lam,sig});
   // (a i  | j   sig)
-  contract(1.0,Iails,{a,i,lam,sig},LocMoAO,{lam,j},0.0,Iaijs,{a,i,j,sig});
+  contract(1.0,IailsA,{a,i,lam,sig},LocMoAO,{lam,j},0.0,IaijsAA,{a,i,j,sig});
   // (a i  | j   b  )
-  contract(1.0,Iaijs,{a,i,j,sig},LocMoAV,{sig,b},0.0,Saijb,{a,i,j,b});
+  contract(1.0,IaijsAA,{a,i,j,sig},LocMoAV,{sig,b},0.0,SaijbAA,{a,i,j,b});
 
-  // (ab|ji)
+  // (ai|jb)AABB
   // (a nu | lam sig)
-  contract(1.0,LocMoAV,{mu,a},(*this->aoERI_),{mu,nu,lam,sig},0.0,Ianls,{a,nu,lam,sig});
+  contract(1.0,LocMoAV,{mu,a},(*this->aoERI_),{mu,nu,lam,sig},0.0,IanlsA,{a,nu,lam,sig});
+  // (a i  | lam sig)
+  contract(1.0,LocMoAO,{nu,i},IanlsA,{a,nu,lam,sig},0.0,IailsA,{a,i,lam,sig});
+  // (a i  | j   sig)
+  contract(1.0,IailsA,{a,i,lam,sig},LocMoBO,{lam,j},0.0,IaijsAB,{a,i,j,sig});
+  // (a i  | j   b  )
+  contract(1.0,IaijsAB,{a,i,j,sig},LocMoBV,{sig,b},0.0,SaijbAB,{a,i,j,b});
+ 
+  // (ai|jb)BBAA
+  // (a nu | lam sig)
+  contract(1.0,LocMoBV,{mu,a},(*this->aoERI_),{mu,nu,lam,sig},0.0,IanlsB,{a,nu,lam,sig});
+  // (a i  | lam sig)
+  contract(1.0,LocMoBO,{nu,i},IanlsB,{a,nu,lam,sig},0.0,IailsB,{a,i,lam,sig});
+  // (a i  | j   sig)
+  contract(1.0,IailsB,{a,i,lam,sig},LocMoAO,{lam,j},0.0,IaijsBA,{a,i,j,sig});
+  // (a i  | j   b  )
+  contract(1.0,IaijsBA,{a,i,j,sig},LocMoAV,{sig,b},0.0,SaijbBA,{a,i,j,b});
+ 
+  // (ai|jb)BBBB
+  // (a nu | lam sig)
+  contract(1.0,LocMoBV,{mu,a},(*this->aoERI_),{mu,nu,lam,sig},0.0,IanlsB,{a,nu,lam,sig});
+  // (a i  | lam sig)
+  contract(1.0,LocMoBO,{nu,i},IanlsB,{a,nu,lam,sig},0.0,IailsB,{a,i,lam,sig});
+  // (a i  | j   sig)
+  contract(1.0,IailsB,{a,i,lam,sig},LocMoBO,{lam,j},0.0,IaijsBB,{a,i,j,sig});
+  // (a i  | j   b  )
+  contract(1.0,IaijsB,{a,i,j,sig},LocMoBV,{sig,b},0.0,SaijbBB,{a,i,j,b});
+
+  // (ab|ji)AAAA
+  // (a nu | lam sig)
+  contract(1.0,LocMoAV,{mu,a},(*this->aoERI_),{mu,nu,lam,sig},0.0,IanlsA,{a,nu,lam,sig});
   // (a b  | lam sig)
-  contract(1.0,LocMoAV,{nu,b},Ianls,{a,nu,lam,sig},0.0,Iabls,{a,b,lam,sig});
+  contract(1.0,LocMoAV,{nu,b},IanlsA,{a,nu,lam,sig},0.0,IablsA,{a,b,lam,sig});
   // (a b  | j   sig)
-  contract(1.0,Iabls,{a,b,lam,sig},LocMoAO,{lam,j},0.0,Iabjs,{a,b,j,sig});
+  contract(1.0,IablsA,{a,b,lam,sig},LocMoAO,{lam,j},0.0,IabjsA,{a,b,j,sig});
   // (a b  | j   i  )
-  contract(1.0,Iabjs,{a,b,j,sig},LocMoAO,{sig,i},0.0,Sabji,{a,b,j,i});
+  contract(1.0,IabjsA,{a,b,j,sig},LocMoAO,{sig,i},0.0,SabjiAA,{a,b,j,i});
 
-  // Build <aj||ib>
-  for(auto a=0;a<nV;a++) 
-  for(auto j=0;j<nO;j++) 
-  for(auto i=0;i<nO;i++) 
-  for(auto b=0;b<nV;b++) {
-    Dajib(a,j,i,b) = Saijb(a,i,j,b)-Sabji(a,b,j,i);
-    dajib(a,j,i,b) = Saijb(a,i,j,b);
-  }
-  //Build <ab||ij>
-  for (auto a=0;a<nV;a++)
-  for (auto b=0;b<nV;b++)
-  for (auto i=0;i<nO;i++)
-  for (auto j=0;j<nO;j++){
-    Dabij(a,b,i,j) = Saijb(a,i,j,b) - Saijb(a,j,i,b);
-    dabij(a,b,i,j) = Saijb(a,i,j,b);
+  // (ab|ji)BBBB
+  // (a nu | lam sig)
+  contract(1.0,LocMoAV,{mu,a},(*this->aoERI_),{mu,nu,lam,sig},0.0,IanlsB,{a,nu,lam,sig});
+  // (a b  | lam sig)
+  contract(1.0,LocMoAV,{nu,b},IanlsB,{a,nu,lam,sig},0.0,IablsB,{a,b,lam,sig});
+  // (a b  | j   sig)
+  contract(1.0,IablsB,{a,b,lam,sig},LocMoAO,{lam,j},0.0,IabjsB,{a,b,j,sig});
+  // (a b  | j   i  )
+  contract(1.0,IabjsB,{a,b,j,sig},LocMoAO,{sig,i},0.0,SabjiBB,{a,b,j,i});
+
+
+  // Build <aj||ib>AAAA
+  for(auto a=0;a<nVA;a++) 
+  for(auto j=0;j<nOA;j++) 
+  for(auto i=0;i<nOA;i++) 
+  for(auto b=0;b<nVA;b++) {
+    DajibAA(a,j,i,b) = SaijbAA(a,i,j,b)-SabjiAA(a,b,j,i);
+    dajibAA(a,j,i,b) = SaijbAA(a,i,j,b);
   }
 
+  // Build <aj||ib>ABAB
+  for(auto a=0;a<nVA;a++) 
+  for(auto j=0;j<nOB;j++) 
+  for(auto i=0;i<nOA;i++) 
+  for(auto b=0;b<nVB;b++) {
+    dajibAB(a,j,i,b) = SaijbAB(a,i,j,b);
+  }
+
+  // Build <aj||ib>BABA
+  for(auto a=0;a<nVB;a++)
+  for(auto j=0;j<nOA;j++)
+  for(auto i=0;i<nOB;i++)
+  for(auto b=0;b<nVA;b++) {
+    dajibBA(a,j,i,b) = SaijbBA(a,i,j,b);
+  }
+
+  // Build <aj||ib>BBBB
+  for(auto a=0;a<nVB;a++)
+  for(auto j=0;j<nOB;j++)
+  for(auto i=0;i<nOB;i++)
+  for(auto b=0;b<nVB;b++) {
+    DajibBB(a,j,i,b) = SaijbBB(a,i,j,b)-SabjiBB(a,b,j,i);
+  }
+
+  //Build <ab||ij>AAAA
+  for (auto a=0;a<nVA;a++)
+  for (auto b=0;b<nVA;b++)
+  for (auto i=0;i<nOA;i++)
+  for (auto j=0;j<nOA;j++){
+    DabijAA(a,b,i,j) = SaijbAA(a,i,j,b) - SaijbAA(a,j,i,b);
+  }
+
+  //Build <ab||ij> ABAB
+  for (auto a=0;a<nVA;a++)
+  for (auto b=0;b<nVB;b++)
+  for (auto i=0;i<nOA;i++)
+  for (auto j=0;j<nOB;j++){
+    dabijAB(a,b,i,j) = SaijbAB(a,i,j,b);
+  }
+
+  //Build <ab||ij> BABA
+  for (auto a=0;a<nVB;a++)
+  for (auto b=0;b<nVA;b++)
+  for (auto i=0;i<nOB;i++)
+  for (auto j=0;j<nOA;j++){
+    dabijBA(a,b,i,j) = SaijbBA(a,i,j,b);
+  }
+
+  //Build <ab||ij> BBBB
+  for (auto a=0;a<nVB;a++)
+  for (auto b=0;b<nVB;b++)
+  for (auto i=0;i<nOB;i++)
+  for (auto j=0;j<nOB;j++){
+    DabijBB(a,b,i,j) = SaijbBB(a,i,j,b) - SaijbBB(a,j,i,b);
+  }
+ 
   // Build A & B matrix
-  int nOV = this->singleSlater_->nOV();
   int ia,jb;
-  RealMatrix ABBA(4*nOV,4*nOV);
-  RealMatrix A(2*nOV,2*nOV);
-  RealMatrix B(2*nOV,2*nOV);
-  RealMatrix Ad(nOV,nOV);
-  RealMatrix Bd(nOV,nOV);
-  RealMatrix Aod(nOV,nOV);
-  RealMatrix Bod(nOV,nOV);
-  RealMatrix EigO(nO,1);
-  RealMatrix EigV(nV,1);
+  RealMatrix ABBA(2*(nOVA+nOVB),2*(nOVA+nOVB));
+  RealMatrix A(nOVA+nOVB,nOVA+nOVB);
+  RealMatrix B(nOVA+nOVB,nOVA+nOVB);
+  RealMatrix Aud(nOVA,nOVA);
+  RealMatrix Add(nOVB,nOVB);
+  RealMatrix Bud(nOVA,nOVA);
+  RealMatrix Bdd(nOVB,nOVB);
+  RealMatrix Auod(nOVA,nOVB);
+  RealMatrix Adod(nOVB,nOVA);
+  RealMatrix Buod(nOVA,nOVB);
+  RealMatrix Bdod(nOVB,nOVA);
+  RealMatrix EigAO(nOA,1);
+  RealMatrix EigAV(nVA,1);
+  RealMatrix EigBO(nOB,1);
+  RealMatrix EigBV(nVB,1);
 
-  for (auto i=0;i<nO;i++){
-    EigO(i) = (*this->singleSlater_->epsA())(i);
-    cout << "The " << (i+1) << " eigenvalue in Occupied is: " << EigO(i) << endl;
+  for (auto i=0;i<nOA;i++){
+    EigAO(i) = (*this->singleSlater_->epsA())(i);
+    cout << "The " << (i+1) << " eigenvalue in Occupied Alpha is: " << EigAO(i) << endl;
   }
-  for (auto j=0;j<nV;j++){
-    EigV(j) = (*this->singleSlater_->epsA())((j+nO));
-    cout << "The " << (j+1) << " eigenvalue in Virtual is: " << EigV(j) << endl;
+  for (auto j=0;j<nVA;j++){
+    EigAV(j) = (*this->singleSlater_->epsA())((j+nOA));
+    cout << "The " << (j+1) << " eigenvalue in Virtual Alpha is: " << EigAV(j) << endl;
   }
+  for (auto i=0;i<nOB;i++){
+    EigBO(i) = (*this->singleSlater_->epsB())(i);
+    cout << "The " << (i+1) << " eigenvalue in Occupied Beta is: " << EigBO(i) << endl;
+  }
+  for (auto j=0;j<nVB;j++){
+    EigBV(j) = (*this->singleSlater_->epsB())((j+nOB));
+    cout << "The " << (j+1) << " eigenvalue in Virtual Beta is: " << EigBV(j) << endl;
+  }
+
 
   ia = 0;
-  for (auto a=0;a<nV;a++)
-  for (auto i=0;i<nO;i++)
+  for (auto a=0;a<nVA;a++)
+  for (auto i=0;i<nOA;i++)
   {
     jb =0;
-    for (auto b=0;b<nV;b++)
-    for (auto j=0;j<nO;j++)
+    for (auto b=0;b<nVA;b++)
+    for (auto j=0;j<nOA;j++)
     {
-      Ad(ia,jb) = 0.0;
+      Aud(ia,jb) = 0.0;
       if ((a==b)&&(i==j)){
-	Ad(ia,jb) = EigV(a)-EigO(i);
+	Aud(ia,jb) = EigAV(a)-EigAO(i);
       }
-      Ad(ia,jb) = Ad(ia,jb) + Dajib(a,j,i,b);
-      Bd(ia,jb) = Dabij(a,b,i,j);
-      Aod(ia,jb) = dajib(a,j,i,b);
-      Bod(ia,jb) = dabij(a,b,i,j);
+      Aud(ia,jb) = Aud(ia,jb) + DajibAA(a,j,i,b);
+      Bud(ia,jb) = DabijAA(a,b,i,j);
+      //Aod(ia,jb) = dajib(a,j,i,b);
+      //Bod(ia,jb) = dabij(a,b,i,j);
       jb = jb+1;
     }
     ia = ia+1;
   }
-  A.block(0,0,nOV,nOV) = Ad;
-  A.block(nOV,nOV,nOV,nOV) = Ad;
-  A.block(0,nOV,nOV,nOV) = Aod;
-  A.block(nOV,0,nOV,nOV) = Aod;
-  B.block(0,0,nOV,nOV) = Bd;
-  B.block(nOV,nOV,nOV,nOV) = Bd;
-  B.block(0,nOV,nOV,nOV) = Aod;
-  B.block(nOV,0,nOV,nOV) = Aod;
+
+  ia = 0;
+  for (auto a=0;a<nVB;a++)
+  for (auto i=0;i<nOB;i++)
+  {
+    jb =0;
+    for (auto b=0;b<nVB;b++)
+    for (auto j=0;j<nOB;j++)
+    {
+      Add(ia,jb) = 0.0;
+      if ((a==b)&&(i==j)){
+	Add(ia,jb) = EigBV(a)-EigBO(i);
+      }
+      Add(ia,jb) = Add(ia,jb) + DajibBB(a,j,i,b);
+      Bdd(ia,jb) = DabijBB(a,b,i,j);
+      //Aod(ia,jb) = dajib(a,j,i,b);
+      //Bod(ia,jb) = dabij(a,b,i,j);
+      jb = jb+1;
+    }
+    ia = ia+1;
+  }
+
+  ia = 0;
+  for (auto a=0;a<nVA;a++)
+  for (auto i=0;i<nOA;i++)
+  {
+    jb =0;
+    for (auto b=0;b<nVB;b++)
+    for (auto j=0;j<nOB;j++)
+    {
+      Auod(ia,jb) = dajibAB(a,j,i,b);
+      Buod(ia,jb) = dabijAB(a,b,i,j);
+      //Aod(ia,jb) = dajib(a,j,i,b);
+      //Bod(ia,jb) = dabij(a,b,i,j);
+      jb = jb+1;
+    }
+    ia = ia+1;
+  }
+
+  ia = 0;
+  for (auto a=0;a<nVB;a++)
+  for (auto i=0;i<nOB;i++)
+  {
+    jb =0;
+    for (auto b=0;b<nVA;b++)
+    for (auto j=0;j<nOA;j++)
+    {
+      Adod(ia,jb) = dajibBA(a,j,i,b);
+      Bdod(ia,jb) = dabijBA(a,b,i,j);
+      //Aod(ia,jb) = dajib(a,j,i,b);
+      //Bod(ia,jb) = dabij(a,b,i,j);
+      jb = jb+1;
+    }
+    ia = ia+1;
+  }
+
+
+  A.block(0,0,nOVA,nOVA) = Aud;
+  A.block(nOVA,nOVA,nOVB,nOVB) = Add;
+  A.block(0,nOVA,nOVA,nOVB) = Auod;
+  A.block(nOVA,0,nOVB,nOVA) = Adod;
+  B.block(0,0,nOVA,nOVA) = Bud;
+  B.block(nOVA,nOVA,nOVB,nOVB) = Bdd;
+  B.block(0,nOVA,nOVA,nOVB) = Auod;
+  B.block(nOVA,0,nOVB,nOVA) = Adod;
   
   // Build the ABBA matrix
 
-  ABBA.block(0,0,2*nOV,2*nOV) = A;
-  ABBA.block(2*nOV,2*nOV,2*nOV,2*nOV) = -A;
-  ABBA.block(0,2*nOV,2*nOV,2*nOV) = B;
-  ABBA.block(2*nOV,0,2*nOV,2*nOV) = -B;
+  ABBA.block(0,0,nOVA+nOVB,nOVA+nOVB) = A;
+  ABBA.block(nOVA+nOVB,nOVA+nOVB,nOVA+nOVB,nOVA+nOVB) = -A;
+  ABBA.block(0,nOVA+nOVB,nOVA+nOVB,nOVA+nOVB) = B;
+  ABBA.block(nOVA+nOVB,0,nOVA+nOVB,nOVA+nOVB) = -B;
 
   // CIS routine
   // Diagonalize the A matrix
@@ -230,10 +421,10 @@ void SDResponse::formRM(){
   cout << "f = " << Oscstr << endl;
 
   // LR TDHF routine
-  Eigen::EigenSolver<RealMatrix> TD;
-  TD.compute(ABBA);
-  TD.eigenvalues();
-  TD.eigenvectors();
+  //Eigen::EigenSolver<RealMatrix> TD;
+  //TD.compute(ABBA);
+  //TD.eigenvalues();
+  //TD.eigenvectors();
 
   // Print the LR-TDHF Excitation Energies
   //for (auto i=0;i<4*nOV;i++){
@@ -244,14 +435,14 @@ void SDResponse::formRM(){
 }
 
 void SDResponse::DavidsonCIS(){
-  int nOV = this->singleSlater_->nOV();
-  RealMatrix PDiag(2*nOV,1);
+  int nOVA = this->singleSlater_->nOVA();
+  RealMatrix PDiag(nOVA+nOVB,1);
   PDiag = ReturnDiag();
-  RealMatrix GVec(2*nOV,2*nOV);
+  RealMatrix GVec(nOVA+nOVB,nOVA+nOVB);
   GVec = Guess(PDiag);
-  RealMatrix Gpass = GVec.block(0,0,2*nOV,3);
+  RealMatrix Gpass = GVec.block(0,0,nOVA+nOVB,1);
   cout << Gpass << endl;
-  Davidson<double> davA(this,Davidson<double>::CIS,3,&Gpass,3,&PDiag);
+  Davidson<double> davA(this,Davidson<double>::CIS,1,&Gpass,1,&PDiag);
   davA.run(this->fileio_->out);
   cout << "The lowest 3 eigenvalue solved by Davidson Algorithm:" <<endl;
   cout << *davA.eigenvalues() << endl;
@@ -259,57 +450,87 @@ void SDResponse::DavidsonCIS(){
 }
 
 RealMatrix SDResponse::formRM2(RealMatrix &XMO){
-  int nO = this->singleSlater_->nOccA();
-  int nV = this->singleSlater_->nVirA();
-  Tensor<double> LocMoAO(this->nBasis_,nO);
-  Tensor<double> LocMoAV(this->nBasis_,nV);
+  int nOA = this->singleSlater_->nOccA();
+  int nVA = this->singleSlater_->nVirA();
+  int nOB = this->singleSlater_->nOccB();
+  int nVB = this->singleSlater_->nVirB();
+
+  Tensor<double> LocMoAO(this->nBasis_,nOA);
+  Tensor<double> LocMoAV(this->nBasis_,nVA);
+  Tensor<double> LocMoBO(this->nBasis_,nOB);
+  Tensor<double> LocMoBV(this->nBasis_,nVB);
+
   for(auto ii = 0; ii < this->nBasis_; ii++) {
-    for(auto jj = 0; jj < nO; jj++) {
+    for(auto jj = 0; jj < nOA; jj++) {
       LocMoAO(ii,jj) = (*this->singleSlater_->moA())(ii,jj);
     }
-    for(auto kk = nO; kk< this->nBasis_; kk++) {
-      LocMoAV(ii,kk-nO) = (*this->singleSlater_->moA())(ii,kk);
+    for(auto kk = nOA; kk< this->nBasis_; kk++) {
+      LocMoAV(ii,kk-nOA) = (*this->singleSlater_->moA())(ii,kk);
     }
   }
-  int nOV = this->singleSlater_->nOV();
-  RealMatrix EigO(nO,1);
-  RealMatrix EigV(nV,1);
-  for (auto i=0;i<nO;i++){
-    EigO(i) = (*this->singleSlater_->epsA())(i);
+
+  for(auto ii = 0; ii < this->nBasis_; ii++) {
+    for(auto jj = 0; jj < nOB; jj++) {
+      LocMoBO(ii,jj) = (*this->singleSlater_->moB())(ii,jj);
+    }
+    for(auto kk = nOB; kk< this->nBasis_; kk++) {
+      LocMoBV(ii,kk-nOB) = (*this->singleSlater_->moB())(ii,kk);
+    }
+  }
+
+  int nOVA = this->singleSlater_->nOVA();
+  int nOVB = this->singleSlater_->nOVB();
+  RealMatrix EigAO(nOA,1);
+  RealMatrix EigAV(nVA,1);
+  RealMatrix EigBO(nOB,1);
+  RealMatrix EigBV(nVB,1);
+
+  for (auto i=0;i<nOA;i++){
+    EigAO(i) = (*this->singleSlater_->epsA())(i);
     //cout << "The " << (i+1) << " eigenvalue in Occupied is: " << EigO(i) << endl;
   }
-  for (auto j=0;j<nV;j++){
-    EigV(j) = (*this->singleSlater_->epsA())((j+nO));
+  for (auto j=0;j<nVA;j++){
+    EigAV(j) = (*this->singleSlater_->epsA())((j+nOA));
     //cout << "The " << (j+1) << " eigenvalue in Virtual is: " << EigV(j) << endl;
   }
+
+  for (auto i=0;i<nOB;i++){
+    EigBO(i) = (*this->singleSlater_->epsB())(i);
+    //cout << "The " << (i+1) << " eigenvalue in Occupied is: " << EigO(i) << endl;
+  }
+  for (auto j=0;j<nVB;j++){
+    EigBV(j) = (*this->singleSlater_->epsB())((j+nOB));
+    //cout << "The " << (j+1) << " eigenvalue in Virtual is: " << EigV(j) << endl;
+  }
+
   enum{a,j,i,b,mu,nu,lam,sig};
 
   int nCol = XMO.cols();
-  cout << "The dimension of input Matrix XMO:  " << 2*nOV << " * "<< nCol << endl;
-  RealMatrix AX(2*nOV,nCol);
+  cout << "The dimension of input Matrix XMO:  " << (nOVA+nOVB) << " * "<< nCol << endl;
+  RealMatrix AX(nOVA+nOVB,nCol);
   Tensor<double> XAAOTsr(this->nBasis_,this->nBasis_);
   Tensor<double> XBAOTsr(this->nBasis_,this->nBasis_);
-  RealMatrix X(nOV,1);
+  RealMatrix X(nOVA+nOVB,1);
   RealMatrix XAAO(this->nBasis_,this->nBasis_);
   RealMatrix XBAO(this->nBasis_,this->nBasis_);
   Tensor<double> IXAO1(this->nBasis_,this->nBasis_);
-  Tensor<double> IIXMO1(nV,this->nBasis_);
-  Tensor<double> IXMOTsr1(nV,nO);
+  Tensor<double> IIXMO1(nVA,this->nBasis_);
+  Tensor<double> IXMOTsr1(nVA,nOA);
   Tensor<double> IXAO2(this->nBasis_,this->nBasis_);
-  Tensor<double> IIXMO2(nV,this->nBasis_);
-  Tensor<double> IXMOTsr2(nV,nO);
+  Tensor<double> IIXMO2(nVA,this->nBasis_);
+  Tensor<double> IXMOTsr2(nVA,nOA);
   Tensor<double> IXAO3(this->nBasis_,this->nBasis_);
-  Tensor<double> IIXMO3(nV,this->nBasis_);
-  Tensor<double> IXMOTsr3(nV,nO);
+  Tensor<double> IIXMO3(nVB,this->nBasis_);
+  Tensor<double> IXMOTsr3(nVB,nOB);
   Tensor<double> IXAO4(this->nBasis_,this->nBasis_);
-  Tensor<double> IIXMO4(nV,this->nBasis_);
-  Tensor<double> IXMOTsr4(nV,nO);
-  RealMatrix IXMO1(nV,nO);
-  RealMatrix IXMO2(nV,nO);
-  RealMatrix IXMO3(nV,nO);
-  RealMatrix IXMO4(nV,nO);
-  RealMatrix IXMOA(nV,nO);
-  RealMatrix IXMOB(nV,nO);
+  Tensor<double> IIXMO4(nVB,this->nBasis_);
+  Tensor<double> IXMOTsr4(nVB,nOB);
+  RealMatrix IXMO1(nVA,nOA);
+  RealMatrix IXMO2(nVA,nOA);
+  RealMatrix IXMO3(nVB,nOB);
+  RealMatrix IXMO4(nVB,nOB);
+  RealMatrix IXMOA(nVA,nOA);
+  RealMatrix IXMOB(nVB,nOB);
   // Build <mn||ls> and <mn|ls>
   Tensor<double> Dmnls(this->nBasis_,this->nBasis_,this->nBasis_,this->nBasis_);
   Tensor<double> dmnls(this->nBasis_,this->nBasis_,this->nBasis_,this->nBasis_);
@@ -328,14 +549,14 @@ RealMatrix SDResponse::formRM2(RealMatrix &XMO){
     X = XMO.col(idx);
     //cout << "Contract the " << idx+1 << " column vector" <<endl;
     //cout << X << endl;
-    RealMap XA(X.data(),nV,nO);
+    RealMap XA(X.data(),nVA,nOA);
     //cout << "Print the XA" <<endl;
     //cout << XA << endl;
-    RealMap XB(X.data()+nOV,nV,nO);
+    RealMap XB(X.data()+nOVA,nVB,nOB);
     //cout << "Print the XB" <<endl;
     //cout << XB << endl;
-    XAAO = this->singleSlater_->moA()->block(0,nO,this->nBasis_,nV)*XA*this->singleSlater_->moA()->block(0,0,this->nBasis_,nO).transpose();
-    XBAO = this->singleSlater_->moA()->block(0,nO,this->nBasis_,nV)*XB*this->singleSlater_->moA()->block(0,0,this->nBasis_,nO).transpose();
+    XAAO = this->singleSlater_->moA()->block(0,nOA,this->nBasis_,nVA)*XA*this->singleSlater_->moA()->block(0,0,this->nBasis_,nOA).transpose();
+    XBAO = this->singleSlater_->moA()->block(0,nOB,this->nBasis_,nVB)*XB*this->singleSlater_->moA()->block(0,0,this->nBasis_,nOB).transpose();
     // XAAO,XBAO in tensor form
     for (auto i=0;i<this->nBasis_;i++)
     for (auto j=0;j<this->nBasis_;j++)
@@ -348,39 +569,39 @@ RealMatrix SDResponse::formRM2(RealMatrix &XMO){
     contract(1.0,XAAOTsr,{sig,nu},Dmnls,{mu,nu,lam,sig},0.0,IXAO1,{mu,lam});
     contract(1.0,LocMoAV,{mu,a},IXAO1,{mu,lam},0.0,IIXMO1,{a,lam});
     contract(1.0,LocMoAO,{lam,i},IIXMO1,{a,lam},0.0,IXMOTsr1,{a,i});
-    for (auto a=0;a<nV;a++)
-    for (auto i=0;i<nO;i++)
+    for (auto a=0;a<nVA;a++)
+    for (auto i=0;i<nOA;i++)
     {
       IXMO1(a,i)=IXMOTsr1(a,i);
-      IXMO1(a,i)= IXMO1(a,i) + XA(a,i)*(EigV(a)-EigO(i));
+      IXMO1(a,i)= IXMO1(a,i) + XA(a,i)*(EigAV(a)-EigAO(i));
     }
     // Contract A_AABB( <mn|ls> ) with XB
     contract(1.0,XBAOTsr,{sig,nu},dmnls,{mu,nu,lam,sig},0.0,IXAO2,{mu,lam});
     contract(1.0,LocMoAV,{mu,a},IXAO2,{mu,lam},0.0,IIXMO2,{a,lam});
     contract(1.0,LocMoAO,{lam,i},IIXMO2,{a,lam},0.0,IXMOTsr2,{a,i});
-    for (auto a=0;a<nV;a++)
-    for (auto i=0;i<nO;i++)
+    for (auto a=0;a<nVA;a++)
+    for (auto i=0;i<nOA;i++)
     {
       IXMO2(a,i)=IXMOTsr2(a,i);
     }
     // Contract A_BBAA( <mn|ls> ) with XA
     contract(1.0,XAAOTsr,{sig,nu},dmnls,{mu,nu,lam,sig},0.0,IXAO3,{mu,lam});
-    contract(1.0,LocMoAV,{mu,a},IXAO3,{mu,lam},0.0,IIXMO3,{a,lam});
-    contract(1.0,LocMoAO,{lam,i},IIXMO3,{a,lam},0.0,IXMOTsr3,{a,i});
-    for (auto a=0;a<nV;a++)
-    for (auto i=0;i<nO;i++)
+    contract(1.0,LocMoBV,{mu,a},IXAO3,{mu,lam},0.0,IIXMO3,{a,lam});
+    contract(1.0,LocMoBO,{lam,i},IIXMO3,{a,lam},0.0,IXMOTsr3,{a,i});
+    for (auto a=0;a<nVB;a++)
+    for (auto i=0;i<nOB;i++)
     {
       IXMO3(a,i)=IXMOTsr3(a,i);
     }
     // Contract A_BBBB( <mn||ls> ) with XB
     contract(1.0,XBAOTsr,{sig,nu},Dmnls,{mu,nu,lam,sig},0.0,IXAO4,{mu,lam});
-    contract(1.0,LocMoAV,{mu,a},IXAO4,{mu,lam},0.0,IIXMO4,{a,lam});
-    contract(1.0,LocMoAO,{lam,i},IIXMO4,{a,lam},0.0,IXMOTsr4,{a,i});
-    for (auto a=0;a<nV;a++)
-    for (auto i=0;i<nO;i++)
+    contract(1.0,LocMoBV,{mu,a},IXAO4,{mu,lam},0.0,IIXMO4,{a,lam});
+    contract(1.0,LocMoBO,{lam,i},IIXMO4,{a,lam},0.0,IXMOTsr4,{a,i});
+    for (auto a=0;a<nVB;a++)
+    for (auto i=0;i<nOB;i++)
     {
       IXMO4(a,i) = IXMOTsr4(a,i);
-      IXMO4(a,i) = IXMO4(a,i) + XB(a,i)*(EigV(a)-EigO(i));
+      IXMO4(a,i) = IXMO4(a,i) + XB(a,i)*(EigBV(a)-EigBO(i));
     }
     
   
@@ -392,36 +613,51 @@ RealMatrix SDResponse::formRM2(RealMatrix &XMO){
     //cout << "Print AX(i) (direct build)" <<endl;
     //cout << IXMOA <<endl;
     //cout << IXMOB << endl;
-    RealMap IXMOAV(IXMOA.data(),nOV,1);
-    RealMap IXMOBV(IXMOB.data(),nOV,1);
-    AX.block(0,idx,nOV,1) = IXMOAV;
-    AX.block(nOV,idx,nOV,1) = IXMOBV; 
+    RealMap IXMOAV(IXMOA.data(),nOVA,1);
+    RealMap IXMOBV(IXMOB.data(),nOVB,1);
+    AX.block(0,idx,nOVA,1) = IXMOAV;
+    AX.block(nOVA,idx,nOVB,1) = IXMOBV; 
   }
 
   return AX;
 }
 
 RealMatrix SDResponse::ReturnDiag(){
-  int nO = this->singleSlater_->nOccA();
-  int nV = this->singleSlater_->nVirA();
-  int nOV = this->singleSlater_->nOV();
-  RealMatrix EigO(nO,1);
-  RealMatrix EigV(nV,1);
-  for (auto i=0;i<nO;i++){
-    EigO(i) = (*this->singleSlater_->epsA())(i);
+  int nOA = this->singleSlater_->nOccA();
+  int nVA = this->singleSlater_->nVirA();
+  int nOB = this->singleSlater_->nOccB();
+  int nVB = this->singleSlater_->nVirB();
+  int nOVA = this->singleSlater_->nOVA();
+  int nOVB = this->singleSlater_->nOVB();
+  RealMatrix EigAO(nOA,1);
+  RealMatrix EigAV(nVA,1);
+  RealMatrix EigBO(nOB,1);
+  RealMatrix EigBV(nVB,1);
+  for (auto i=0;i<nOA;i++){
+    EigAO(i) = (*this->singleSlater_->epsA())(i);
+  }
+  for (auto j=0;j<nVA;j++){
+    EigAV(j) = (*this->singleSlater_->epsA())((j+nOA));
+  }
+  for (auto i=0;i<nOB;i++){
+    EigBO(i) = (*this->singleSlater_->epsB())(i);
   }
   for (auto j=0;j<nV;j++){
-    EigV(j) = (*this->singleSlater_->epsA())((j+nO));
+    EigBV(j) = (*this->singleSlater_->epsB())((j+nOB));
   }
 
-  RealMatrix PDiag(2*nOV,1);
-  for (auto a=0;a<nV;a++)
-  for (auto i=0;i<nO;i++)
+  RealMatrix PDiag(nOVA+nOVB,1);
+  for (auto a=0;a<nVA;a++)
+  for (auto i=0;i<nOA;i++)
   {
-    PDiag(a*nO+i,0) = EigV(a)-EigO(i);
-    PDiag(a*nO+i+nOV,0) = EigV(a)-EigO(i);
+    PDiag(a*nOA+i,0) = EigV(a)-EigO(i);
   }
 
+  for (auto a=0;a<nVB;a++)
+  for (auto i=0;i<nOB;i++)
+  {
+    PDiag(a*nOB+i+nOVA,0) = EigV(a)-EigO(i);
+  }
   return PDiag;
 }
 
