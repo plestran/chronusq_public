@@ -187,8 +187,11 @@ void SingleSlater<double>::SCF(){
       }
       B(lenCoeff-1,lenCoeff-1)=0;
       prettyPrint(this->fileio_->out,B,"B");
-      memset(coef,0.0,lenCoeff-1*sizeof(double)); // Zero out DIIS coef
+//    memset(coef,0.0,lenCoeff-1*sizeof(double)); // Zero out DIIS coef
+      for(auto k = 0; k < lenCoeff;k++) coef[k] = 0.0; 
       coef[lenCoeff-1]=-1.0;
+      this->fileio_->out << "COEFF Before" << endl;
+      for(auto k = 0; k < lenCoeff; k++) this->fileio_->out << coef[k] << endl;
       dgesv_(&row,&nrhs,B.data(),&row, iPiv, coef,&row, &info);
       this->fileio_->out << "COEFF" << endl;
       for(auto k = 0; k < lenCoeff; k++) this->fileio_->out << coef[k] << endl;
