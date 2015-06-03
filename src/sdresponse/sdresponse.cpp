@@ -591,7 +591,7 @@ RealMatrix SDResponse::formRM2(RealMatrix &XMO){
     {
       MYAXA(a,i)=IXAO1(a,i);
     }
-    cout << "Show my AXA" << endl;
+    cout << "Show my AXAA" << endl;
     cout << MYAXA << endl;
     contract(1.0,LocMoAV,{mu,a},IXAO1,{mu,lam},0.0,IIXMO1,{a,lam});
     contract(1.0,LocMoAO,{lam,i},IIXMO1,{a,lam},0.0,IXMOTsr1,{a,i});
@@ -602,8 +602,16 @@ RealMatrix SDResponse::formRM2(RealMatrix &XMO){
       cout << IXMO1(a,i) << endl;
       IXMO1(a,i)= IXMO1(a,i) + XA(a,i)*(EigAV(a)-EigAO(i));
     }
+    RealMatrix MYAXAB(this->nBasis_,this->nBasis_);
     // Contract A_AABB( <mn|ls> ) with XB
     contract(1.0,XBAOTsr,{sig,nu},dmnls,{mu,nu,lam,sig},0.0,IXAO2,{mu,lam});
+    for (auto a=0;a<this->nBasis_;a++)
+    for (auto i=0;i<this->nBasis_;i++)
+    {
+      MYAXAB(a,i) = IXAO2(a,i);
+    }
+    cout << "Show my AXAB" << endl;
+    cout << MYAXAB << endl;
     contract(1.0,LocMoAV,{mu,a},IXAO2,{mu,lam},0.0,IIXMO2,{a,lam});
     contract(1.0,LocMoAO,{lam,i},IIXMO2,{a,lam},0.0,IXMOTsr2,{a,i});
     for (auto a=0;a<nVA;a++)
@@ -611,8 +619,16 @@ RealMatrix SDResponse::formRM2(RealMatrix &XMO){
     {
       IXMO2(a,i)=IXMOTsr2(a,i);
     }
+    RealMatrix MYAXBA(this->nBasis_,this->nBasis_);
     // Contract A_BBAA( <mn|ls> ) with XA
     contract(1.0,XAAOTsr,{sig,nu},dmnls,{mu,nu,lam,sig},0.0,IXAO3,{mu,lam});
+    for (auto a=0;a<this->nBasis_;a++)
+    for (auto i=0;i<this->nBasis_;i++)
+    {
+      MYAXBA(a,i) = IXAO3(a,i);
+    }
+    cout << "Show my AXBA" << endl;
+    cout << MYAXBA << endl;
     contract(1.0,LocMoBV,{mu,a},IXAO3,{mu,lam},0.0,IIXMO3,{a,lam});
     contract(1.0,LocMoBO,{lam,i},IIXMO3,{a,lam},0.0,IXMOTsr3,{a,i});
     for (auto a=0;a<nVB;a++)
@@ -627,7 +643,7 @@ RealMatrix SDResponse::formRM2(RealMatrix &XMO){
     {
       MYAXB(a,i)=IXAO4(a,i);
     }
-    cout << "Show my AXB" << endl;
+    cout << "Show my AXBB" << endl;
     cout << MYAXB << endl;
     contract(1.0,LocMoBV,{mu,a},IXAO4,{mu,lam},0.0,IIXMO4,{a,lam});
     contract(1.0,LocMoBO,{lam,i},IIXMO4,{a,lam},0.0,IXMOTsr4,{a,i});
@@ -638,7 +654,10 @@ RealMatrix SDResponse::formRM2(RealMatrix &XMO){
       cout << IXMO4(a,i) << endl;
       IXMO4(a,i) = IXMO4(a,i) + XB(a,i)*(EigBV(a)-EigBO(i));
     }
-    
+    cout << "MyAXA" << endl;
+    cout << MYAXA+MYAXAB << endl;
+    cout << "MyAXB" << endl;
+    cout << MYAXB+MYAXBA << endl;
   
     // Get the Final AX matrix
     IXMOA = IXMO1+IXMO2;
