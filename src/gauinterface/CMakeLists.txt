@@ -1,1 +1,1 @@
-add_library(gauinterface gauinterface.cpp)
+add_library(gauinterface gaumatel.cpp gaujob.cpp)

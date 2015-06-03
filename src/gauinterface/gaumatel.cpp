@@ -31,6 +31,12 @@ void GauMatEl::init_(std::string& name){
 
   infile_.open(name, std::ios::binary | std::ios::in);
 
+/*  if(!infile_){
+    std::cout << "Fatal Error: Could not open MatEl file" << std::endl;
+    exit(1);
+  }
+*/
+
   labFil_   = '\0';
   gVers_    = '\0';
   jobTitle_ = '\0';

@@ -30,6 +30,7 @@
 #include <fstream>
 #include <iomanip>
 #include <vector>
+#include <memory>
 
 const int LEN_GAU_STR = 64*sizeof(char);
 class GauMatEl{
@@ -185,6 +186,40 @@ public:
   inline double *      atmWgt(){return this->atmWgt_;};
 
   double * readRec(int);
+};
+
+class GauJob{
+  std::ofstream gauInput_;
+  std::string   gauFName_;
+  std::string   basisName_;
+  bool          doOpt_;
+  double*       cart_;
+  int           charge_;
+  int           multip_;
+  std::vector<int> atoms_;
+  std::unique_ptr<GauMatEl>     matEl_;
+
+  void genInput();
+  
+
+public:
+  GauJob(bool doOpt, std::string basis, double* cart, std::vector<int> &atoms, int charge, int multip, std::string name="TEMP"){
+
+    this->doOpt_      = doOpt;
+    this->gauFName_   = name;
+    this->basisName_  = basis;
+    this->cart_ = cart;
+    this->charge_ = charge;
+    this->multip_ = multip;
+    this->atoms_ = atoms;
+
+    this->genInput();
+  };
+
+  ~GauJob(){this->gauInput_.close();};
+
+   void run();
+   
 };
 
 #endif
