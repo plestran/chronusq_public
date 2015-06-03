@@ -68,7 +68,8 @@ public:
                      MOIntegrals *,FileIO *,
                      Controls *,SingleSlater<double> *);
 
-  inline int nOV(){return this->singleSlater_->nOV();};
+  inline int nOVA(){return this->singleSlater_->nOVA();};
+  inline int nOVB(){return this->singleSlater_->nOVB();};
   void computeExcitedStates();         // compute the total electronic energy
   void printExcitedStateEnergies(); 
   void printInfo();

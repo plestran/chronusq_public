@@ -51,8 +51,8 @@ void SDResponse::iniSDResponse( Molecule * molecule, BasisSet * basisSet, MOInte
   this->aoERI_          = singleSlater->aointegrals()->aoERI_.get();
   this->elecDipole_     = singleSlater->aointegrals()->elecDipole_.get();
   cout << "Allocate Memory for CISEnergy_ and CISTransDen_" << endl;
-  int nOVA = singleSlater->nOVA();
-  int nOVB = singleSlater->nOVB();
+  int nOVA = singleSlater_->nOVA();
+  int nOVB = singleSlater_->nOVB();
   this->CISEnergy_ = std::unique_ptr<RealMatrix>(new RealMatrix(nOVA+nOVB,1));
   this->CISTransDen_ = std::unique_ptr<RealMatrix>(new RealMatrix(nOVA+nOVB,nOVA+nOVB));
   this->TransDipole_ = std::unique_ptr<RealMatrix>(new RealMatrix(1,3));
@@ -82,8 +82,8 @@ void SDResponse::formRM(){
   int nOB = this->singleSlater_->nOccB();
   int nVA = this->singleSlater_->nVirA();
   int nVB = this->singleSlater_->nVirB();
-  int nOVA = this->singleSlater->nOVA();
-  int nOVB = this->singleSlater->nOVB();
+  int nOVA = this->singleSlater_->nOVA();
+  int nOVB = this->singleSlater_->nOVB();
   cout << "Number of Occupied Alpha: " << nOA << ", Number of Virtual Alpha" << nVA << " Number of Basis: "<<this->nBasis_<< ".\n";
   cout << "Number of Occupied Beta: " << nOB << ", Number of Virtual Beta" << nVB << " Number of Basis: "<<this->nBasis_<< ".\n";
   Tensor<double> LocMoAO(this->nBasis_,nOA);
@@ -99,6 +99,10 @@ void SDResponse::formRM(){
     LocMoAV(ii,kk-nOA) = (*this->singleSlater_->moA())(ii,kk);
   }
   }
+  cout << "MoA" << endl;
+  cout << (*this->singleSlater_->moA())<<endl;
+  cout << "MoB" << endl;
+  cout << (*this->singleSlater_->moB())<<endl;
 
   for(auto ii = 0; ii < this->nBasis_; ii++) {
   for(auto jj = 0; jj < nOB; jj++) {
@@ -108,7 +112,7 @@ void SDResponse::formRM(){
     LocMoBV(ii,kk-nOB) = (*this->singleSlater_->moB())(ii,kk);
   }
   }
-
+  cout << "Storge local copy of MO" << endl;
 
   // Prepare the 2e integrals
   // Ixxxx for intermediate Sxxxx for Mulliken Notation single bar
@@ -151,7 +155,7 @@ void SDResponse::formRM(){
   contract(1.0,IailsA,{a,i,lam,sig},LocMoAO,{lam,j},0.0,IaijsAA,{a,i,j,sig});
   // (a i  | j   b  )
   contract(1.0,IaijsAA,{a,i,j,sig},LocMoAV,{sig,b},0.0,SaijbAA,{a,i,j,b});
-
+  cout << "1"<<endl;
   // (ai|jb)AABB
   // (a nu | lam sig)
   contract(1.0,LocMoAV,{mu,a},(*this->aoERI_),{mu,nu,lam,sig},0.0,IanlsA,{a,nu,lam,sig});
@@ -161,7 +165,7 @@ void SDResponse::formRM(){
   contract(1.0,IailsA,{a,i,lam,sig},LocMoBO,{lam,j},0.0,IaijsAB,{a,i,j,sig});
   // (a i  | j   b  )
   contract(1.0,IaijsAB,{a,i,j,sig},LocMoBV,{sig,b},0.0,SaijbAB,{a,i,j,b});
- 
+  cout << "2" <<endl;
   // (ai|jb)BBAA
   // (a nu | lam sig)
   contract(1.0,LocMoBV,{mu,a},(*this->aoERI_),{mu,nu,lam,sig},0.0,IanlsB,{a,nu,lam,sig});
@@ -171,7 +175,7 @@ void SDResponse::formRM(){
   contract(1.0,IailsB,{a,i,lam,sig},LocMoAO,{lam,j},0.0,IaijsBA,{a,i,j,sig});
   // (a i  | j   b  )
   contract(1.0,IaijsBA,{a,i,j,sig},LocMoAV,{sig,b},0.0,SaijbBA,{a,i,j,b});
- 
+  cout << "3" << endl;
   // (ai|jb)BBBB
   // (a nu | lam sig)
   contract(1.0,LocMoBV,{mu,a},(*this->aoERI_),{mu,nu,lam,sig},0.0,IanlsB,{a,nu,lam,sig});
@@ -180,8 +184,8 @@ void SDResponse::formRM(){
   // (a i  | j   sig)
   contract(1.0,IailsB,{a,i,lam,sig},LocMoBO,{lam,j},0.0,IaijsBB,{a,i,j,sig});
   // (a i  | j   b  )
-  contract(1.0,IaijsB,{a,i,j,sig},LocMoBV,{sig,b},0.0,SaijbBB,{a,i,j,b});
-
+  contract(1.0,IaijsBB,{a,i,j,sig},LocMoBV,{sig,b},0.0,SaijbBB,{a,i,j,b});
+  cout << "4" <<endl;
   // (ab|ji)AAAA
   // (a nu | lam sig)
   contract(1.0,LocMoAV,{mu,a},(*this->aoERI_),{mu,nu,lam,sig},0.0,IanlsA,{a,nu,lam,sig});
@@ -191,17 +195,17 @@ void SDResponse::formRM(){
   contract(1.0,IablsA,{a,b,lam,sig},LocMoAO,{lam,j},0.0,IabjsA,{a,b,j,sig});
   // (a b  | j   i  )
   contract(1.0,IabjsA,{a,b,j,sig},LocMoAO,{sig,i},0.0,SabjiAA,{a,b,j,i});
-
+  cout << "5" << endl;
   // (ab|ji)BBBB
   // (a nu | lam sig)
-  contract(1.0,LocMoAV,{mu,a},(*this->aoERI_),{mu,nu,lam,sig},0.0,IanlsB,{a,nu,lam,sig});
+  contract(1.0,LocMoBV,{mu,a},(*this->aoERI_),{mu,nu,lam,sig},0.0,IanlsB,{a,nu,lam,sig});
   // (a b  | lam sig)
-  contract(1.0,LocMoAV,{nu,b},IanlsB,{a,nu,lam,sig},0.0,IablsB,{a,b,lam,sig});
+  contract(1.0,LocMoBV,{nu,b},IanlsB,{a,nu,lam,sig},0.0,IablsB,{a,b,lam,sig});
   // (a b  | j   sig)
-  contract(1.0,IablsB,{a,b,lam,sig},LocMoAO,{lam,j},0.0,IabjsB,{a,b,j,sig});
+  contract(1.0,IablsB,{a,b,lam,sig},LocMoBO,{lam,j},0.0,IabjsB,{a,b,j,sig});
   // (a b  | j   i  )
-  contract(1.0,IabjsB,{a,b,j,sig},LocMoAO,{sig,i},0.0,SabjiBB,{a,b,j,i});
-
+  contract(1.0,IabjsB,{a,b,j,sig},LocMoBO,{sig,i},0.0,SabjiBB,{a,b,j,i});
+  cout << "6" << endl;
 
   // Build <aj||ib>AAAA
   for(auto a=0;a<nVA;a++) 
@@ -209,9 +213,8 @@ void SDResponse::formRM(){
   for(auto i=0;i<nOA;i++) 
   for(auto b=0;b<nVA;b++) {
     DajibAA(a,j,i,b) = SaijbAA(a,i,j,b)-SabjiAA(a,b,j,i);
-    dajibAA(a,j,i,b) = SaijbAA(a,i,j,b);
   }
-
+  cout << "7" << endl;
   // Build <aj||ib>ABAB
   for(auto a=0;a<nVA;a++) 
   for(auto j=0;j<nOB;j++) 
@@ -219,7 +222,7 @@ void SDResponse::formRM(){
   for(auto b=0;b<nVB;b++) {
     dajibAB(a,j,i,b) = SaijbAB(a,i,j,b);
   }
-
+  cout << "8" << endl;
   // Build <aj||ib>BABA
   for(auto a=0;a<nVB;a++)
   for(auto j=0;j<nOA;j++)
@@ -227,7 +230,7 @@ void SDResponse::formRM(){
   for(auto b=0;b<nVA;b++) {
     dajibBA(a,j,i,b) = SaijbBA(a,i,j,b);
   }
-
+  cout << "9" << endl;
   // Build <aj||ib>BBBB
   for(auto a=0;a<nVB;a++)
   for(auto j=0;j<nOB;j++)
@@ -235,7 +238,7 @@ void SDResponse::formRM(){
   for(auto b=0;b<nVB;b++) {
     DajibBB(a,j,i,b) = SaijbBB(a,i,j,b)-SabjiBB(a,b,j,i);
   }
-
+  cout << "10" << endl;
   //Build <ab||ij>AAAA
   for (auto a=0;a<nVA;a++)
   for (auto b=0;b<nVA;b++)
@@ -243,7 +246,7 @@ void SDResponse::formRM(){
   for (auto j=0;j<nOA;j++){
     DabijAA(a,b,i,j) = SaijbAA(a,i,j,b) - SaijbAA(a,j,i,b);
   }
-
+  cout << "11" << endl;
   //Build <ab||ij> ABAB
   for (auto a=0;a<nVA;a++)
   for (auto b=0;b<nVB;b++)
@@ -251,7 +254,7 @@ void SDResponse::formRM(){
   for (auto j=0;j<nOB;j++){
     dabijAB(a,b,i,j) = SaijbAB(a,i,j,b);
   }
-
+  cout << "12" << endl;
   //Build <ab||ij> BABA
   for (auto a=0;a<nVB;a++)
   for (auto b=0;b<nVA;b++)
@@ -259,7 +262,7 @@ void SDResponse::formRM(){
   for (auto j=0;j<nOA;j++){
     dabijBA(a,b,i,j) = SaijbBA(a,i,j,b);
   }
-
+  cout << "13"<< endl;
   //Build <ab||ij> BBBB
   for (auto a=0;a<nVB;a++)
   for (auto b=0;b<nVB;b++)
@@ -267,7 +270,7 @@ void SDResponse::formRM(){
   for (auto j=0;j<nOB;j++){
     DabijBB(a,b,i,j) = SaijbBB(a,i,j,b) - SaijbBB(a,j,i,b);
   }
- 
+  cout << "14" << endl;
   // Build A & B matrix
   int ia,jb;
   RealMatrix ABBA(2*(nOVA+nOVB),2*(nOVA+nOVB));
@@ -436,6 +439,7 @@ void SDResponse::formRM(){
 
 void SDResponse::DavidsonCIS(){
   int nOVA = this->singleSlater_->nOVA();
+  int nOVB = this->singleSlater_->nOVB();
   RealMatrix PDiag(nOVA+nOVB,1);
   PDiag = ReturnDiag();
   RealMatrix GVec(nOVA+nOVB,nOVA+nOVB);
@@ -642,7 +646,7 @@ RealMatrix SDResponse::ReturnDiag(){
   for (auto i=0;i<nOB;i++){
     EigBO(i) = (*this->singleSlater_->epsB())(i);
   }
-  for (auto j=0;j<nV;j++){
+  for (auto j=0;j<nVB;j++){
     EigBV(j) = (*this->singleSlater_->epsB())((j+nOB));
   }
 
@@ -650,33 +654,36 @@ RealMatrix SDResponse::ReturnDiag(){
   for (auto a=0;a<nVA;a++)
   for (auto i=0;i<nOA;i++)
   {
-    PDiag(a*nOA+i,0) = EigV(a)-EigO(i);
+    PDiag(a*nOA+i,0) = EigAV(a)-EigAO(i);
   }
 
   for (auto a=0;a<nVB;a++)
   for (auto i=0;i<nOB;i++)
   {
-    PDiag(a*nOB+i+nOVA,0) = EigV(a)-EigO(i);
+    PDiag(a*nOB+i+nOVA,0) = EigBV(a)-EigBO(i);
   }
   return PDiag;
 }
 
 RealMatrix SDResponse::Guess(RealMatrix &PDiag){
-  int nO = this->singleSlater_->nOccA();
-  int nV = this->singleSlater_->nVirA();
-  int nOV = this->singleSlater_->nOV();
+  int nOA = this->singleSlater_->nOccA();
+  int nOB = this->singleSlater_->nOccB();
+  int nVA = this->singleSlater_->nVirA();
+  int nVB = this->singleSlater_->nVirB();
+  int nOVA = this->singleSlater_->nOVA();
+  int nOVB = this->singleSlater_->nOVB();
   double temp1;
   double temp2;                                                                                                    
   bool isSorted;
-  RealMatrix Permt(2*nOV,1);                                                                                       
-  for (auto i=0;i<2*nOV;i++)                                                                                       
+  RealMatrix Permt(nOVA+nOVB,1);                                                                                       
+  for (auto i=0;i<(nOVA+nOVB);i++)                                                                                       
   { 
     Permt(i,0) = i;
   }   
-  for (auto i=0;i<2*nOV-1;i++)
+  for (auto i=0;i<(nOVA+nOVB-1);i++)
   {   
     isSorted = true;
-    for (auto j=0;j<2*nOV-1;j++)                                                                                   
+    for (auto j=0;j<(nOVA+nOVB-1);j++)                                                                                   
     { 
       if (PDiag(j,0)>PDiag(j+1,0))                                                                                 
       {
@@ -690,9 +697,9 @@ RealMatrix SDResponse::Guess(RealMatrix &PDiag){
       } 
     }                                                                                                              
   }
-  RealMatrix GVec(2*nOV,2*nOV);                                                                                    
-  GVec.Zero(2*nOV,2*nOV);
-  for (auto i=0;i<2*nOV;i++)                                                                                       
+  RealMatrix GVec(nOVA+nOVB,nOVA+nOVB);                                                                                    
+  GVec.Zero(nOVA+nOVB,nOVA+nOVB);
+  for (auto i=0;i<(nOVA+nOVB);i++)                                                                                       
   {   
     GVec(Permt(i,0),i) = 1.0;                                                                                      
   }   
@@ -700,41 +707,44 @@ RealMatrix SDResponse::Guess(RealMatrix &PDiag){
 }
 
 void SDResponse::TransDipole(){
-  int nO   = this->singleSlater_->nOccA();
-  int nV   = this->singleSlater_->nVirA();
-  int nOV  = this->singleSlater_->nOV();
+  int nOA   = this->singleSlater_->nOccA();
+  int nVA   = this->singleSlater_->nVirA();
+  int nOVA  = this->singleSlater_->nOVA();
+  int nOB   = this->singleSlater_->nOccB();
+  int nVB   = this->singleSlater_->nVirB();
+  int nOVB  = this->singleSlater_->nOVB();
+
   int NBSq = this->nBasis_*this->nBasis_;
   double transdipole;
   double Tmax=0.0;
   int order=0;
   (*this->CISTransDen_).transposeInPlace();
-  RealMap TransDen(this->CISTransDen_->data()+2*nOV,2*nOV,1);
+  RealMap TransDen(this->CISTransDen_->data()+nOVA+nOVB,(nOVA+nOVB),1);
   cout << "The transition density matrix we use: " << endl;
   cout << TransDen << endl;
   Tmax = TransDen(0,0);
   cout << "Tmax = " << Tmax << endl;
-  for (auto i=0;i<nOV;i++)
+  for (auto i=0;i<(nOVA+nOVB);i++)
   {
     if (fabs(TransDen(i,0))>fabs(Tmax))
     {
       Tmax = TransDen(i,0);
-      cout << "Tmax = " << Tmax << endl;
       order = i;
     }
   }
-  cout << "Maximum contribution is " << Tmax << " from " << order%nO+1 << " -> " << order/nO+nO+1 << endl;
-  int nSub = TransDen.rows()/nOV;
+  cout << "Maximum contribution is " <<endl;
   for (auto i=0,IOff=0;i<3;i++,IOff+=NBSq)
   { 
     transdipole = 0.0;
     RealMap Dipole(&this->elecDipole_->storage()[IOff],this->nBasis_,this->nBasis_);
-    for (auto j=0, Shift=0;j<nSub;j++,Shift+=nOV)
-    {
-      RealMap TDenMO(TransDen.data()+Shift,nV,nO);
-      RealMatrix TDenAO = this->singleSlater_->moA()->block(0,nO,this->nBasis_,nV)*TDenMO*this->singleSlater_->moA()->block(0,0,this->nBasis_,nO).transpose();
-      TDenAO = TDenAO.transpose()*Dipole;
-      transdipole += TDenAO.trace();
-    }
+    RealMap TDenMO1(TransDen.data(),nVA,nOA);
+    RealMatrix TDenAO = this->singleSlater_->moA()->block(0,nOA,this->nBasis_,nVA)*TDenMO1*this->singleSlater_->moA()->block(0,0,this->nBasis_,nOA).transpose();
+    TDenAO = TDenAO.transpose()*Dipole;
+    transdipole += TDenAO.trace();
+    RealMap TDenMO2(TransDen.data()+nOVA,nVB,nOB);
+    TDenAO = this->singleSlater_->moB()->block(0,nOB,this->nBasis_,nVB)*TDenMO2*this->singleSlater_->moB()->block(0,0,this->nBasis_,nOB).transpose();
+    TDenAO = TDenAO.transpose()*Dipole;
+    transdipole += TDenAO.trace();
     (*this->TransDipole_)(0,i) = transdipole;
   }
   
