@@ -76,26 +76,39 @@ void SingleSlater<double>::SCF(){
   double *POldAlphaMem   = NULL;
   double *FpBetaMem      = NULL;
   double *POldBetaMem    = NULL;
-  double *BMem           = NULL;
-  double *coef           = NULL;
+//double *BMem           = NULL;
+//double *coef           = NULL;
   double *ErrorAlphaMem  = NULL;  
   double *ErrorBetaMem   = NULL;
   double *FADIIS         = NULL;
   double *FBDIIS         = NULL;
   double *work           = NULL;
+  int info;
 
   SCR = new double [LenScr];
   XMem    = SCR;
   if(this->RHF_) {
     FpAlphaMem   = XMem + lenX;
     POldAlphaMem = FpAlphaMem + lenF;
-    BMem    = POldAlphaMem + lenP;
+//  BMem    = POldAlphaMem + lenP;
+    ErrorAlphaMem = POldAlphaMem + lenP;
+    FADIIS = ErrorAlphaMem + lenF*(lenCoeff-1);
+//  coef = FADIIS + lenF*(lenCoeff-1);
+//  work = coef + lenCoeff;
+    work = FADIIS + lenF*(lenCoeff-1);
   } else {
     FpAlphaMem   = XMem + lenX;
     FpBetaMem    = FpAlphaMem + lenF;
     POldAlphaMem = FpBetaMem  + lenF;
     POldBetaMem  = POldAlphaMem + lenP;
-    BMem    = POldBetaMem + lenP;
+//  BMem    = POldBetaMem + lenP;
+    ErrorAlphaMem = POldBetaMem + lenP;
+    ErrorBetaMem = ErrorAlphaMem + lenF*(lenCoeff-1);
+    FADIIS = ErrorBetaMem + lenF*(lenCoeff-1);
+    FBDIIS = FADIIS + lenF*(lenCoeff-1);
+//  coef = FBDIIS + lenF*(lenCoeff-1);
+//  work = coef + lenCoeff;
+    work = FBDIIS + lenF*(lenCoeff-1);
   }
 
   RealMap X(XMem,n,n);
@@ -103,11 +116,12 @@ void SingleSlater<double>::SCF(){
   RealMap POldAlpha(POldAlphaMem,n,n);
   RealMap FpBeta(FpBetaMem,n,n);
   RealMap POldBeta(POldBetaMem,n,n);
-  RealMap B(BMem,lenCoeff,lenCoeff);
+//RealMap B(BMem,lenCoeff,lenCoeff);
   
 
   //lapack variables for DIIS
-  ErrorAlphaMem = BMem + lenB;
+//ErrorAlphaMem = BMem + lenB;
+/*
   if(!this->RHF_) {
     ErrorBetaMem = ErrorAlphaMem + lenF*(lenCoeff-1);
     FADIIS = ErrorBetaMem + lenF*(lenCoeff-1);
@@ -117,15 +131,18 @@ void SingleSlater<double>::SCF(){
     FADIIS = ErrorAlphaMem + lenF*(lenCoeff-1);
     coef = FADIIS + lenF*(lenCoeff-1);
   }
+*/
+/*
   int *iPiv = new int[lenCoeff];
   int row=lenCoeff;
   int nrhs=1;
   int info=-1;
+*/
 
   //lapack variables for F'C=CE
   char j='V';
   char u='U';
-  work = coef + lenCoeff;
+//work = coef + lenCoeff;
    
   
   X=(*this->aointegrals_->overlap_).pow(-0.5);
@@ -166,8 +183,10 @@ void SingleSlater<double>::SCF(){
       memcpy(FBDIIS+(iter%(lenCoeff-1))*lenF,this->fockB_->data(),lenF*sizeof(double));
     }
     
-    
-    if(iter % (lenCoeff-1) == 5 && iter != 0){
+    if(iter % (lenCoeff-1) == (lenCoeff-2) && iter != 0) 
+      this->CDIIS(lenCoeff,ErrorAlphaMem,FADIIS,ErrorBetaMem,FBDIIS);
+/*
+    if(iter % (lenCoeff-1) == (lenCoeff-2) && iter != 0){
       for(auto j = 0; j < (lenCoeff-1); j++)
       for(auto k = 0; k <= j          ; k++){
         RealMap EJA(ErrorAlphaMem + (j%(lenCoeff-1))*lenF,n,n);
@@ -187,7 +206,6 @@ void SingleSlater<double>::SCF(){
       }
       B(lenCoeff-1,lenCoeff-1)=0;
       prettyPrint(this->fileio_->out,B,"B");
-//    memset(coef,0.0,lenCoeff-1*sizeof(double)); // Zero out DIIS coef
       for(auto k = 0; k < lenCoeff;k++) coef[k] = 0.0; 
       coef[lenCoeff-1]=-1.0;
       this->fileio_->out << "COEFF Before" << endl;
@@ -208,6 +226,7 @@ void SingleSlater<double>::SCF(){
       }
       prettyPrint(this->fileio_->out,*this->fockA_,"Total Fock");
     }
+*/
 
     PAlphaRMS=((*this->densityA_)-POldAlpha).norm();
     if(!this->RHF_) PBetaRMS = ((*this->densityB_) - POldBeta).norm();
@@ -224,7 +243,7 @@ void SingleSlater<double>::SCF(){
   
   //freeing the memory
   delete [] SCR;
-  delete [] iPiv;
+//delete [] iPiv;
   
   if(iter >= maxIter)
     this->fileio_->out << "SCF Failed to converge within maximum number of iterations" << endl << endl;

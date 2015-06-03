@@ -147,6 +147,7 @@ public:
   void computeEnergy();         // compute the total electronic energy
   void computeMultipole();      // compute multipole properties
   void SCF();  
+  void CDIIS(int,T*,T*,T*,T*);
   void printEnergy(); 
   void printMultipole();
   void printInfo();

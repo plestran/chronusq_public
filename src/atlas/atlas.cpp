@@ -91,7 +91,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 */
   time(&currentTime);
   fileIO->out<<"\nJob finished: "<<ctime(&currentTime)<<endl;
-/* Example of how to copy a real single slater to a complex one
+/*
   SingleSlater<dcomplex> newSS(hartreeFock.get());
   newSS.printInfo();
   prettyPrint(cout,*newSS.densityA(),"New D");
