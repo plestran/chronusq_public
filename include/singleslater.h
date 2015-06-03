@@ -154,8 +154,8 @@ public:
   void printEnergy(); 
   void printMultipole();
   void printInfo();
-  void Hello();
-  void printDensityinf();
+  void printDensityInfo(double,double,double);
+  void printDensityInfo(double,double);
 
   /*************************/
   /* MPI Related Routines  */
