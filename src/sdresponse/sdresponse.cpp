@@ -575,13 +575,31 @@ RealMatrix SDResponse::formRM2(RealMatrix &XMO){
     }
     RealMatrix IXAO1t(this->nBasis_,this->nBasis_);
     // Contract A_AAAA( <mn||ls> ) with XA
+    cout << "****Test twoEContractN4" << endl;
+    RealMatrix AXA(this->nBasis_,this->nBasis_);
+    RealMatrix AXB(this->nBasis_,this->nBasis_);
+    RealMatrix MYAXA(this->nBasis_,this->nBasis_);
+    RealMatrix MYAXB(this->nBasis_,this->nBasis_);
+    this->singleSlater_->aointegrals()->twoEContractN4(false, true, XAAO,AXA,XBAO,AXB);
+    cout << "AXA" << endl;
+    cout << AXA << endl;
+    cout << "AXB" << endl;
+    cout << AXB   << endl;
     contract(1.0,XAAOTsr,{sig,nu},Dmnls,{mu,nu,lam,sig},0.0,IXAO1,{mu,lam});
+    for (auto a=0;a<this->nBasis_;a++)
+    for (auto i=0;i<this->nBasis_;i++)
+    {
+      MYAXA(a,i)=IXAO1(a,i);
+    }
+    cout << "Show my AXA" << endl;
+    cout << MYAXA << endl;
     contract(1.0,LocMoAV,{mu,a},IXAO1,{mu,lam},0.0,IIXMO1,{a,lam});
     contract(1.0,LocMoAO,{lam,i},IIXMO1,{a,lam},0.0,IXMOTsr1,{a,i});
     for (auto a=0;a<nVA;a++)
     for (auto i=0;i<nOA;i++)
     {
       IXMO1(a,i)=IXMOTsr1(a,i);
+      cout << IXMO1(a,i) << endl;
       IXMO1(a,i)= IXMO1(a,i) + XA(a,i)*(EigAV(a)-EigAO(i));
     }
     // Contract A_AABB( <mn|ls> ) with XB
@@ -604,12 +622,20 @@ RealMatrix SDResponse::formRM2(RealMatrix &XMO){
     }
     // Contract A_BBBB( <mn||ls> ) with XB
     contract(1.0,XBAOTsr,{sig,nu},Dmnls,{mu,nu,lam,sig},0.0,IXAO4,{mu,lam});
+    for (auto a=0;a<this->nBasis_;a++)
+    for (auto i=0;i<this->nBasis_;i++)
+    {
+      MYAXB(a,i)=IXAO4(a,i);
+    }
+    cout << "Show my AXB" << endl;
+    cout << MYAXB << endl;
     contract(1.0,LocMoBV,{mu,a},IXAO4,{mu,lam},0.0,IIXMO4,{a,lam});
     contract(1.0,LocMoBO,{lam,i},IIXMO4,{a,lam},0.0,IXMOTsr4,{a,i});
     for (auto a=0;a<nVB;a++)
     for (auto i=0;i<nOB;i++)
     {
       IXMO4(a,i) = IXMOTsr4(a,i);
+      cout << IXMO4(a,i) << endl;
       IXMO4(a,i) = IXMO4(a,i) + XB(a,i)*(EigBV(a)-EigBO(i));
     }
     
