@@ -51,7 +51,6 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   time(&currentTime);
   fileIO->out<<"Job started: "<<ctime(&currentTime)<<endl;
   //fileIO->out<<"Central control process is on "<<globalMPI->nodeName<<endl;
-
   // read input
   controls->iniControls();
   readInput(fileIO.get(),molecule.get(),basisset.get(),controls.get(),dfBasisset.get());
@@ -75,6 +74,10 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
     hartreeFock->readGuessGauMatEl(matEl);
   }
   else if(controls->guess==3) hartreeFock->readGuessGauFChk(controls->gauFChkName);
+//APS I have MO
+  fileIO->out<<"APS Print 0"<<endl;
+  hartreeFock->matchord();
+//APE
   hartreeFock->formFock();
   aointegrals->printTimings();
   hartreeFock->computeEnergy();
@@ -92,10 +95,10 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   sdResponse->computeExcitedStates();
 */
 //APS
- int Iop=0;
- molecule->toCOM(Iop);  // call object molecule pointing to function toCOM-Iop=0 Center of Mass
- Iop=1;
- molecule->toCOM(Iop);  // call object molecule pointing to function toCOM-Iop=1 Center of Nuclear Charges
+  int Iop=0;
+  molecule->toCOM(Iop);  // call object molecule pointing to function toCOM-Iop=0 Center of Mass
+  Iop=1;
+  molecule->toCOM(Iop);  // call object molecule pointing to function toCOM-Iop=1 Center of Nuclear Charges
 //APE
   time(&currentTime);
   fileIO->out<<"\nJob finished: "<<ctime(&currentTime)<<endl;

@@ -39,6 +39,9 @@ void SingleSlater::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
   int nTotalE = molecule->nTotalE();
   this->nBasis_  = basisset->nBasis();
   this->nTT_   = this->nBasis_*(this->nBasis_+1)/2;
+//APS 
+  this->nShell_  = basisset->nShell();
+//APE
   this->spin_  = molecule->spin();
   int nSingleE = this->spin_ - 1;
   this->nOccB_ = (nTotalE - nSingleE)/2;
@@ -776,3 +779,71 @@ void SingleSlater::mpiRecv(int fromID,int tag) {
   //this->cart_->mpiRecv(fromID,tag);
 };
 
+//APS
+//  Function to read and match the Gaussian Guess from previous calculation
+//  Note: It works as long you use the cartisian basis in both softwares
+void SingleSlater::matchord(){
+     unsigned int ibase=0;
+     unsigned int irow;
+     for(auto i=0;i<this->nShell_;i++) {
+           int L=basisset_->shells_libint[i].contr[0].l;
+//         s functions order matchs
+           if (L==0){ibase += 1;}
+//         p functions order matchs
+           else if (L==1){ibase+=3;} 
+//           d functions in cartesian --> swap
+           else if (L==2){
+             irow = ibase-1;
+             (*this->moA_).row((irow+2)).swap((*this->moA_).row(irow+4));
+             (*this->moA_).row((irow+3)).swap((*this->moA_).row(irow+5));
+             (*this->moA_).row((irow+5)).swap((*this->moA_).row(irow+6));
+             ibase+=6;
+             }
+//           f functions in cartesian --> swap
+           else if (L==3){
+             irow = ibase-1;
+             (*this->moA_).row((irow+2)).swap((*this->moA_).row(irow+5));
+             (*this->moA_).row((irow+3)).swap((*this->moA_).row(irow+6));
+             (*this->moA_).row((irow+5)).swap((*this->moA_).row(irow+10));
+             (*this->moA_).row((irow+6)).swap((*this->moA_).row(irow+7));
+             (*this->moA_).row((irow+7)).swap((*this->moA_).row(irow+10));
+             (*this->moA_).row((irow+8)).swap((*this->moA_).row(irow+9));
+             ibase+=10;
+             }
+//           g functions in cartesian --> swap
+           else if (L==4){
+             irow = ibase-1;
+             for(auto ishift=0;ishift<7;ishift++) {
+               (*this->moA_).row((irow+(15-ishift))).swap((*this->moA_).row(irow+(1+ishift)));
+               }
+             ibase+=15;
+             }
+//           h function in cartesian --> swap
+           else if (L==5){
+             irow = ibase-1;
+             for(auto ishift=0;ishift<10;ishift++) {
+               (*this->moA_).row((irow+(21-ishift))).swap((*this->moA_).row(irow+(1+ishift)));
+               }
+             ibase+=21;
+             }
+//           I function in cartesian --> swap
+           else if (L==6){
+             irow = ibase-1;
+             for(auto ishift=0;ishift<14;ishift++) {
+               (*this->moA_).row((irow+(28-ishift))).swap((*this->moA_).row(irow+(1+ishift)));
+               }
+             ibase+=28;
+             }
+//           K function in cartesian --> swap
+           else if (L==7){
+             irow = ibase-1;
+             for(auto ishift=0;ishift<18;ishift++) {
+               (*this->moA_).row((irow+(36-ishift))).swap((*this->moA_).row(irow+(1+ishift)));
+               }
+             ibase+=36;
+             }
+           else {this->fileio_->out<<"L>7? Really? not yet implemented"<<endl;};
+       };
+     prettyPrint(this->fileio_->out,(*this->moA_),"APS PRINT GUESS SWAP");
+};
+//APE

@@ -38,6 +38,9 @@
 namespace ChronusQ {
 class SingleSlater {
   int      nBasis_;
+//APS
+  int      nShell_;
+//APE
   int      nTT_;
   int      nAE_;
   int      nBE_;
@@ -90,7 +93,9 @@ public:
   void iniSingleSlater(Molecule *,BasisSet *,
                        AOIntegrals *,FileIO *,
                        Controls *);
-
+  // APS Set Function to match Guassian order of guess
+  void matchord();
+  // APE
   //set private data
   inline void setNBasis(int nBasis) { this->nBasis_ = nBasis;};
   inline void setNAE(int nAE)    { this->nAE_ = nAE;};
@@ -99,6 +104,9 @@ public:
 
   // access to private data
   inline int nBasis() { return this->nBasis_;};
+//APS
+  inline int nShell() { return this->nShell_;};
+//APE
   inline int nAE()    { return this->nAE_;};
   inline int nBE()    { return this->nBE_;};
   inline int nOccA()  { return this->nOccA_;};
