@@ -411,6 +411,11 @@ void SDResponse::formRM(){
 //    cout << "The " << (i+1) << " CIS Exicitation Energy is: "
 //         << (CIS.eigenvalues())(i) << endl;
 //  }
+  RealMatrix XMO = CIS.eigenvectors().col(1);
+  formRM2(XMO);
+  cout << "True AX" << endl;
+  cout << A*CIS.eigenvectors() << endl;
+  cout << "***********" << endl;
   cout << "Here " << endl;
   cout << "Output Energy" << endl;
   *this->CISEnergy_   = CIS.eigenvalues();
@@ -444,9 +449,9 @@ void SDResponse::DavidsonCIS(){
   PDiag = ReturnDiag();
   RealMatrix GVec(nOVA+nOVB,nOVA+nOVB);
   GVec = Guess(PDiag);
-  RealMatrix Gpass = GVec.block(0,0,nOVA+nOVB,1);
+  RealMatrix Gpass = GVec.block(0,0,(nOVA+nOVB),3);
   cout << Gpass << endl;
-  Davidson<double> davA(this,Davidson<double>::CIS,1,&Gpass,1,&PDiag);
+  Davidson<double> davA(this,Davidson<double>::CIS,3,&Gpass,3,&PDiag);
   davA.run(this->fileio_->out);
   cout << "The lowest 3 eigenvalue solved by Davidson Algorithm:" <<endl;
   cout << *davA.eigenvalues() << endl;
@@ -491,20 +496,20 @@ RealMatrix SDResponse::formRM2(RealMatrix &XMO){
 
   for (auto i=0;i<nOA;i++){
     EigAO(i) = (*this->singleSlater_->epsA())(i);
-    //cout << "The " << (i+1) << " eigenvalue in Occupied is: " << EigO(i) << endl;
+    cout << "The " << (i+1) << " eigenvalue in Occupied is: " << EigAO(i) << endl;
   }
   for (auto j=0;j<nVA;j++){
     EigAV(j) = (*this->singleSlater_->epsA())((j+nOA));
-    //cout << "The " << (j+1) << " eigenvalue in Virtual is: " << EigV(j) << endl;
+    cout << "The " << (j+1) << " eigenvalue in Virtual is: " << EigAV(j) << endl;
   }
 
   for (auto i=0;i<nOB;i++){
     EigBO(i) = (*this->singleSlater_->epsB())(i);
-    //cout << "The " << (i+1) << " eigenvalue in Occupied is: " << EigO(i) << endl;
+    cout << "The " << (i+1) << " eigenvalue in Occupied is: " << EigBO(i) << endl;
   }
   for (auto j=0;j<nVB;j++){
     EigBV(j) = (*this->singleSlater_->epsB())((j+nOB));
-    //cout << "The " << (j+1) << " eigenvalue in Virtual is: " << EigV(j) << endl;
+    cout << "The " << (j+1) << " eigenvalue in Virtual is: " << EigBV(j) << endl;
   }
 
   enum{a,j,i,b,mu,nu,lam,sig};
@@ -560,7 +565,7 @@ RealMatrix SDResponse::formRM2(RealMatrix &XMO){
     //cout << "Print the XB" <<endl;
     //cout << XB << endl;
     XAAO = this->singleSlater_->moA()->block(0,nOA,this->nBasis_,nVA)*XA*this->singleSlater_->moA()->block(0,0,this->nBasis_,nOA).transpose();
-    XBAO = this->singleSlater_->moA()->block(0,nOB,this->nBasis_,nVB)*XB*this->singleSlater_->moA()->block(0,0,this->nBasis_,nOB).transpose();
+    XBAO = this->singleSlater_->moB()->block(0,nOB,this->nBasis_,nVB)*XB*this->singleSlater_->moB()->block(0,0,this->nBasis_,nOB).transpose();
     // XAAO,XBAO in tensor form
     for (auto i=0;i<this->nBasis_;i++)
     for (auto j=0;j<this->nBasis_;j++)
@@ -622,7 +627,8 @@ RealMatrix SDResponse::formRM2(RealMatrix &XMO){
     AX.block(0,idx,nOVA,1) = IXMOAV;
     AX.block(nOVA,idx,nOVB,1) = IXMOBV; 
   }
-
+  cout << "AX"  <<endl;
+  cout << AX    <<endl;
   return AX;
 }
 
