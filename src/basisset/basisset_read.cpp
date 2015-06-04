@@ -214,12 +214,12 @@ void BasisSet::makeMap(Molecule *  mol) {
   this->haveMap = true;
 }
 
-void BasisSet::computeShBlkNorm(Molecule * mol, const RealMatrix *D){
-  // This will be much easier in Eigen
-  //if(!this->convToLI) this->convShell(mol);
+void BasisSet::computeShBlkNorm(bool RHF, Molecule * mol, const RealMatrix *DAlpha,
+                                const RealMatrix *DBeta){
   if(!this->haveMap)  this->makeMap(mol);
   int nOfShell=this->shells_libint.size();
-  this->shBlkNorm = std::unique_ptr<RealMatrix>(new RealMatrix(nOfShell,nOfShell));
+  this->shBlkNormAlpha = std::unique_ptr<RealMatrix>(new RealMatrix(nOfShell,nOfShell));
+  if(!RHF) this->shBlkNormBeta = std::unique_ptr<RealMatrix>(new RealMatrix(nOfShell,nOfShell));
   for(int s1 = 0; s1 < nOfShell; s1++) {
     int bf1 = this->mapSh2Bf[s1];
     int n1  = this->shells_libint[s1].size();
@@ -227,7 +227,9 @@ void BasisSet::computeShBlkNorm(Molecule * mol, const RealMatrix *D){
       int bf2 = this->mapSh2Bf[s2];
       int n2  = this->shells_libint[s2].size();
      
-      (*this->shBlkNorm)(s1,s2) = D->block(bf1,bf2,n1,n2).lpNorm<Infinity>();
+      (*this->shBlkNormAlpha)(s1,s2) = DAlpha->block(bf1,bf2,n1,n2).lpNorm<Infinity>();
+      if(!RHF)
+        (*this->shBlkNormBeta)(s1,s2) = DBeta->block(bf1,bf2,n1,n2).lpNorm<Infinity>();
     }
   }
   
