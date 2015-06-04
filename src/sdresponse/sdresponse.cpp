@@ -573,45 +573,44 @@ RealMatrix SDResponse::formRM2(RealMatrix &XMO){
       XAAOTsr(i,j) = XAAO(i,j);
       XBAOTsr(i,j) = XBAO(i,j);
     }
-    RealMatrix IXAO1t(this->nBasis_,this->nBasis_);
     // Contract A_AAAA( <mn||ls> ) with XA
+
     cout << "****Test twoEContractN4" << endl;
-    RealMatrix AXA(this->nBasis_,this->nBasis_);
-    RealMatrix AXB(this->nBasis_,this->nBasis_);
+    RealMatrix AXA(nVA,nOA);
+    RealMatrix AXB(nVB,nOB);
+    RealMatrix IXA(this->nBasis_,this->nBasis_);
+    RealMatrix IXB(this->nBasis_,this->nBasis_);
     RealMatrix MYAXA(this->nBasis_,this->nBasis_);
     RealMatrix MYAXB(this->nBasis_,this->nBasis_);
-    this->singleSlater_->aointegrals()->twoEContractN4(false, true, XAAO,AXA,XBAO,AXB);
-    cout << "AXA" << endl;
-    cout << AXA << endl;
-    cout << "AXB" << endl;
-    cout << AXB   << endl;
-    contract(1.0,XAAOTsr,{sig,nu},Dmnls,{mu,nu,lam,sig},0.0,IXAO1,{mu,lam});
-    for (auto a=0;a<this->nBasis_;a++)
-    for (auto i=0;i<this->nBasis_;i++)
+    this->singleSlater_->aointegrals()->twoEContractN4(false, true, XAAO,IXA,XBAO,IXB);
+    AXA = this->singleSlater_->moA()->block(0,nOA,this->nBasis_,nVA).transpose()*IXA*this->singleSlater_->moA()->block(0,0,this->nBasis_,nOA);
+    AXB = this->singleSlater_->moB()->block(0,nOB,this->nBasis_,nVB).transpose()*IXB*this->singleSlater_->moB()->block(0,0,this->nBasis_,nOB);
+    for (auto a=0;a<nVA;a++)
+    for (auto i=0;i<nOA;i++)
     {
-      MYAXA(a,i)=IXAO1(a,i);
+      AXA(a,i)= AXA(a,i) + XA(a,i)*(EigAV(a)-EigAO(i));
     }
-    cout << "Show my AXAA" << endl;
-    cout << MYAXA << endl;
+    for (auto a=0;a<nVB;a++)
+    for (auto i=0;i<nOB;i++)
+    {
+      AXB(a,i)= AXB(a,i) + XB(a,i)*(EigBV(a)-EigBO(i));
+    }
+    cout << "N4" << endl;
+    cout << AXA << endl;
+    cout << "****" << endl;
+    cout << AXB << endl;
+
+    contract(1.0,XAAOTsr,{sig,nu},Dmnls,{mu,nu,lam,sig},0.0,IXAO1,{mu,lam});
     contract(1.0,LocMoAV,{mu,a},IXAO1,{mu,lam},0.0,IIXMO1,{a,lam});
     contract(1.0,LocMoAO,{lam,i},IIXMO1,{a,lam},0.0,IXMOTsr1,{a,i});
     for (auto a=0;a<nVA;a++)
     for (auto i=0;i<nOA;i++)
     {
       IXMO1(a,i)=IXMOTsr1(a,i);
-      cout << IXMO1(a,i) << endl;
       IXMO1(a,i)= IXMO1(a,i) + XA(a,i)*(EigAV(a)-EigAO(i));
     }
-    RealMatrix MYAXAB(this->nBasis_,this->nBasis_);
     // Contract A_AABB( <mn|ls> ) with XB
     contract(1.0,XBAOTsr,{sig,nu},dmnls,{mu,nu,lam,sig},0.0,IXAO2,{mu,lam});
-    for (auto a=0;a<this->nBasis_;a++)
-    for (auto i=0;i<this->nBasis_;i++)
-    {
-      MYAXAB(a,i) = IXAO2(a,i);
-    }
-    cout << "Show my AXAB" << endl;
-    cout << MYAXAB << endl;
     contract(1.0,LocMoAV,{mu,a},IXAO2,{mu,lam},0.0,IIXMO2,{a,lam});
     contract(1.0,LocMoAO,{lam,i},IIXMO2,{a,lam},0.0,IXMOTsr2,{a,i});
     for (auto a=0;a<nVA;a++)
@@ -619,16 +618,8 @@ RealMatrix SDResponse::formRM2(RealMatrix &XMO){
     {
       IXMO2(a,i)=IXMOTsr2(a,i);
     }
-    RealMatrix MYAXBA(this->nBasis_,this->nBasis_);
     // Contract A_BBAA( <mn|ls> ) with XA
     contract(1.0,XAAOTsr,{sig,nu},dmnls,{mu,nu,lam,sig},0.0,IXAO3,{mu,lam});
-    for (auto a=0;a<this->nBasis_;a++)
-    for (auto i=0;i<this->nBasis_;i++)
-    {
-      MYAXBA(a,i) = IXAO3(a,i);
-    }
-    cout << "Show my AXBA" << endl;
-    cout << MYAXBA << endl;
     contract(1.0,LocMoBV,{mu,a},IXAO3,{mu,lam},0.0,IIXMO3,{a,lam});
     contract(1.0,LocMoBO,{lam,i},IIXMO3,{a,lam},0.0,IXMOTsr3,{a,i});
     for (auto a=0;a<nVB;a++)
@@ -638,30 +629,22 @@ RealMatrix SDResponse::formRM2(RealMatrix &XMO){
     }
     // Contract A_BBBB( <mn||ls> ) with XB
     contract(1.0,XBAOTsr,{sig,nu},Dmnls,{mu,nu,lam,sig},0.0,IXAO4,{mu,lam});
-    for (auto a=0;a<this->nBasis_;a++)
-    for (auto i=0;i<this->nBasis_;i++)
-    {
-      MYAXB(a,i)=IXAO4(a,i);
-    }
-    cout << "Show my AXBB" << endl;
-    cout << MYAXB << endl;
     contract(1.0,LocMoBV,{mu,a},IXAO4,{mu,lam},0.0,IIXMO4,{a,lam});
     contract(1.0,LocMoBO,{lam,i},IIXMO4,{a,lam},0.0,IXMOTsr4,{a,i});
     for (auto a=0;a<nVB;a++)
     for (auto i=0;i<nOB;i++)
     {
       IXMO4(a,i) = IXMOTsr4(a,i);
-      cout << IXMO4(a,i) << endl;
       IXMO4(a,i) = IXMO4(a,i) + XB(a,i)*(EigBV(a)-EigBO(i));
     }
-    cout << "MyAXA" << endl;
-    cout << MYAXA+MYAXAB << endl;
-    cout << "MyAXB" << endl;
-    cout << MYAXB+MYAXBA << endl;
-  
+ 
     // Get the Final AX matrix
     IXMOA = IXMO1+IXMO2;
     IXMOB = IXMO3+IXMO4;
+    cout << "Old" << endl;
+    cout << IXMOA << endl;
+    cout << "****" << endl;
+    cout << IXMOB << endl;
  
     // Print AX(i)
     //cout << "Print AX(i) (direct build)" <<endl;
