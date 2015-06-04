@@ -96,8 +96,10 @@ void AOIntegrals::iniAOIntegrals(Molecule * molecule, BasisSet * basisset,
   }
 #else 
   try {
-    if(this->controls_->buildn4eri) 
+    if(this->controls_->buildn4eri && !this->controls_->doDF) {
+      this->fileio_->out << "Allocating N4 ERI" << endl;
       this->aoERI_ = std::unique_ptr<RealTensor4d>(new RealTensor4d(this->nBasis_,this->nBasis_,this->nBasis_,this->nBasis_));
+    } 
   } catch (...) {
     CErr(std::current_exception(),"N^4 ERI Tensor Allocation");
   }
@@ -135,9 +137,9 @@ void AOIntegrals::iniAOIntegrals(Molecule * molecule, BasisSet * basisset,
 
   this->haveAOTwoE = false;
   this->haveAOOneE = false;
-#ifdef USE_LIBINT
   this->haveSchwartz = false;
-#endif
+  this->haveRIS = false;
+  this->haveRII = false;
 /* This whole block leaks memory like a siv (~ 8MB leaked for test 4!)
   int i,j,ij;
   this->R2Index_ = new int*[this->nBasis_];

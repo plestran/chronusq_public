@@ -168,7 +168,6 @@ void BasisSet::basisSetRead(FileIO * fileio, Molecule * mol){
    center = {{(*mol->cart())(0,i),
               (*mol->cart())(1,i),
               (*mol->cart())(2,i)}};
-   cout << center[1] << endl;
    for(auto k=0; k<allBasis.size();++k){
      if (atomStr.compare(allBasis[k].atomName)==0){
        for (auto j=0;j<allBasis[k].refShell.size();++j){

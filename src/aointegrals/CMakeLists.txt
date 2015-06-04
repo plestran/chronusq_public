@@ -1,1 +1,1 @@
-add_library(aointegrals aointegrals.cpp aointegrals_builders.cpp aointegrals_onee.cpp aointegrals_twoe.cpp)
+add_library(aointegrals aointegrals.cpp aointegrals_builders.cpp aointegrals_onee.cpp aointegrals_twoe.cpp aointegrals_real_contract.cpp aointegrals_complex_contract.cpp)

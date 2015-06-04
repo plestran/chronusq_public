@@ -1,0 +1,58 @@
+Job started: Fri Aug 25 08:24:26 2006
+
+Central control process is on Bohr
+
+Cartesian coordinates (bohr):
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                                      X              Y              Z
+----------------------------------------------------------------------
+       1       C       6     0.00000000     0.00000000     0.00000000
+       2       C       6     2.83458920     0.00000000     0.00000000
+       3       C       6     5.66917840     0.00000000     0.00000000
+       4       C       6     8.50376760     0.00000000     0.00000000
+       5       C       6    11.33835680     0.00000000     0.00000000
+       6       C       6    14.17294600     0.00000000     0.00000000
+       7       C       6    17.00753521     0.00000000     0.00000000
+       8       C       6    19.84212441     0.00000000     0.00000000
+       9       C       6    22.67671361     0.00000000     0.00000000
+      10       C       6    25.51130281     0.00000000     0.00000000
+      11       C       6     0.00000000     2.83458920     0.00000000
+      12       C       6     0.00000000     5.66917840     0.00000000
+      13       C       6     0.00000000     8.50376760     0.00000000
+      14       C       6     0.00000000    11.33835680     0.00000000
+      15       C       6     0.00000000    14.17294600     0.00000000
+      16       C       6     0.00000000    17.00753521     0.00000000
+      17       C       6     0.00000000    19.84212441     0.00000000
+      18       C       6     0.00000000    22.67671361     0.00000000
+      19       C       6     0.00000000    25.51130281     0.00000000
+      20       C       6     2.83458920     2.83458920     0.00000000
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+Molecular Information:
+       nAtoms =      20                 Charge =       0
+   nElectrons =     120
+
+Basis Function Information:
+       nBasis =     100             nPrimitive =     300
+      nSShell =      40                nPShell =      20
+      nDShell =       0                nFShell =       0
+      nGShell =       0
+
+Wave Function Information:
+          nAE =       0                    nBE =       0
+        nOccA =      60                  nVirA =      40
+        nOccB =      60                  nVirB =      40
+ Multiplicity =       1
+
+CPU time for one-electron integral:0 seconds.
+
+CPU time for two-electron integral:0 seconds.
+
+Energy Information:
+            E(one electron) =      0.00000000 a.u. 
+            E(two electron) =      0.00000000 a.u. 
+       E(nuclear repulsion) =    748.20800797 a.u. 
+                   E(total) =    748.20800797 a.u. 
+
+Job finished: Fri Aug 25 08:24:27 2006
+

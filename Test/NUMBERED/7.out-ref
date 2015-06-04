@@ -1,0 +1,131 @@
+Job started: Thu Jan 15 09:20:15 2015
+
+
+Cartesian coordinates (bohr):
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                                      X              Y              Z
+----------------------------------------------------------------------
+       1       H       1     0.00000000     0.00000000     0.58548818
+       2       H       1     0.00000000     0.00000000    -1.17097447
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+Molecular Information:
+       nAtoms =       2                 Charge =       0
+   nElectrons =       2
+
+Basis Function Information:
+       nBasis =       2             nPrimitive =       6
+      nSShell =       2                nPShell =       0
+      nDShell =       0                nFShell =       0
+      nGShell =       0
+
+Cartesian Basis Functions:
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+          Center  lx  ly  lz          exponent       coefficient
+----------------------------------------------------------------------
+    1   S    1     0   0   0          3.425251          0.154329
+                                      0.623914          0.535328
+                                      0.168855          0.444635
+
+    2   S    2     0   0   0          3.425251          0.154329
+                                      0.623914          0.535328
+                                      0.168855          0.444635
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+Atmoic Orbital Shell Pairs:
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+   Index    Center-1    Shell-1   L-1     *  Center-2    Shell-2   L-2
+----------------------------------------------------------------------
+       1           1          1     0     *         1          1     0
+       2           1          1     0     *         2          2     0
+       3           2          2     0     *         2          2     0
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+Wave Function Information:
+        nOccA =       1                  nVirA =       1
+        nOccB =       1                  nVirB =       1
+ Multiplicity =       1
+
+Alpha Molecular Orbital Coefficients :
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                   1              2
+    1   0.0000000000   0.0000000000
+    2   0.0000000000   0.0000000000
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+Alpha Density :
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                   1              2
+    1   0.0000000000
+    2   0.0000000000   0.0000000000
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+Overlap :
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                   1              2
+    1   1.0000000000
+    2   0.5389422214   1.0000000000
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+Kinetic :
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                   1              2
+    1   0.7600318800
+    2   0.1395896375   0.7600318800
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+Potential :
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                   1              2
+    1   1.7728625927
+    2   0.8913848126   1.7728625927
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+One Electron Integral :
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                   1              2
+    1  -1.0128307127
+    2  -0.7517951751  -1.0128307127
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+CPU time for one-electron integral:0 seconds.
+
+CPU time for initializing in-core two-electron integral:0 seconds.
+
+CPU time for Coulomb integral:0 seconds.
+
+CPU time for Exchange integral:0 seconds.
+
+CPU time for building the G(P) matrix:0 seconds.
+
+Alpha Coulomb Integral :
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                   1              2
+    1   0.0000000000
+    2   0.0000000000   0.0000000000
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+Alpha Exchange Integral :
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                   1              2
+    1   0.0000000000
+    2   0.0000000000   0.0000000000
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+CPU time for two-electron integral:0 seconds.
+
+Alpha Fock :
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                   1              2
+    1  -1.0128307127
+    2  -0.7517951751  -1.0128307127
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+Energy Information:
+            E(one electron) =    0.0000000000 a.u. 
+            E(two electron) =    0.0000000000 a.u. 
+       E(nuclear repulsion) =    0.5693260837 a.u. 
+                   E(total) =    0.5693260837 a.u. 
+
+Job finished: Thu Jan 15 09:20:15 2015
+
