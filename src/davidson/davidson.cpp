@@ -42,6 +42,9 @@ void Davidson<double>::runMicro(ostream &output ) {
   RealMap VR(LAPACK_SCR,0,0);
   RealMap VL(LAPACK_SCR,0,0);
 */
+  if(this->method_!=1&&this->diagonal_==NULL) CErr("Need to pass davison a diagonal");
+  if(this->method_!=1) diagonal_ = new RealMatrix(this->n_,1);
+  if(this->method_==1) *diagonal_ = this->sdr_->ReturnDiag();
 
   Eigen::SelfAdjointEigenSolver<RealMatrix> subDiagH_;
   if(this->useLAPACK_) {
@@ -66,6 +69,7 @@ void Davidson<double>::runMicro(ostream &output ) {
   int NTrial = this->nGuess_;
   TrialVecR = (*this->guess_);
   for(auto iter = 0; iter < this->maxIter_; iter++){
+    cout << "ITER" << iter << endl;
     std::chrono::high_resolution_clock::time_point start,finish;
     std::chrono::duration<double> elapsed;
     output << "Starting Davidson Micro Iteration " << iter + 1 << endl;
@@ -73,8 +77,10 @@ void Davidson<double>::runMicro(ostream &output ) {
 
     // Matrix Product (AX). Keep around for reuse in computing
     // the residual vector
-    if(this->AX_==NULL) AXR = (*this->mat_) * TrialVecR;  
+    if(this->method_==1) AXR = this->sdr_->formRM2(TrialVecR);
+    else if(this->AX_==NULL) AXR = (*this->mat_) * TrialVecR;  
     else AXR = this->AX_(*this->mat_,TrialVecR);
+    cout << AXR << endl << endl;
    
     // Full projection of A onto subspace
     XTAX = TrialVecR.transpose()*AXR; 
@@ -129,6 +135,7 @@ void Davidson<double>::runMicro(ostream &output ) {
       (*this->eigenvalues_) = ER.block(0,0,this->nSek_,1);
     }
     (*this->eigenvector_) = UR.block(0,0,this->n_,this->nSek_);
+
     
     // Construct the residual vector 
     // R = A*U - U*E = (AX)*c - U*E
@@ -200,7 +207,9 @@ void Davidson<double>::runMicro(ostream &output ) {
       //             if this criteria is not met.
       if(!resConv[k]) {
         for(auto i = 0; i < this->n_; i++) {
-          if(!this->useLAPACK_) {
+          if(this->method_==1) {
+            T(i,0) = - ResR.col(k)(i) / ((*diagonal_)(i,0) - subDiagH_.eigenvalues()(k));
+          }else if(!this->useLAPACK_) {
             T(i,0) = - ResR.col(k)(i) / ((*this->mat_)(i,i) - subDiagH_.eigenvalues()(k));
           } else {
             T(i,0) = - ResR.col(k)(i) / ((*this->mat_)(i,i) - ER(k));

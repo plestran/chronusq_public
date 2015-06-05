@@ -76,19 +76,36 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   hartreeFock->formFock();
   aointegrals->printTimings();
   hartreeFock->computeEnergy();
+  std::shared_ptr<MOIntegrals> moIntegrals = std::make_shared<MOIntegrals>();
   if(controls->optWaveFunction) hartreeFock->SCF();
+  //MOIntegrals *moIntegrals = new MOIntegrals();
+  //moIntegrals->iniMOIntegrals(molecule,basisset,fileIO,controls,aointegrals,hartreeFock);
   else fileIO->out << "**Skipping SCF Optimization**" << endl; 
   hartreeFock->computeMultipole();
+
+  SDResponse *sdResponse = new SDResponse();
+  sdResponse->iniSDResponse(molecule.get(),basisset.get(),moIntegrals.get(),fileIO.get(),controls.get(),hartreeFock.get());
+
+  sdResponse->computeExcitedStates();
+
+  sdResponse->formRM();
+  sdResponse->DavidsonCIS();
+  //sdResponse->formRM2(XMO);
+  //sdResponse->ReturnDiag();
+  //sdResponse->Guess(PDiag);
 
 //if(controls->doDF) aointegrals->compareRI();
 /*
   MOIntegrals *moIntegrals = new MOIntegrals();
   moIntegrals->iniMOIntegrals(molecule,basisset,fileIO,controls,aointegrals,hartreeFock);
 
-  SDResponse *sdResponse = new SDResponse();
-  sdResponse->iniSDResponse(molecule,basisset,moIntegrals,fileIO,controls,hartreeFock);
 
-  sdResponse->computeExcitedStates();
+//APS
+ int Iop=0;
+ molecule->toCOM(Iop);  // call object molecule pointing to function toCOM-Iop=0 Center of Mass
+ Iop=1;
+ molecule->toCOM(Iop);  // call object molecule pointing to function toCOM-Iop=1 Center of Nuclear Charges
+//APE
 */
   time(&currentTime);
   fileIO->out<<"\nJob finished: "<<ctime(&currentTime)<<endl;
