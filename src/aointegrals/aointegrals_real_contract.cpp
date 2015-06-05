@@ -34,7 +34,7 @@ void AOIntegrals::twoEContractDirect(bool RHF, bool doFock, const RealMatrix &XA
   if(!this->haveSchwartz) this->computeSchwartz();
   if(!this->basisSet_->haveMap) this->basisSet_->makeMap(this->molecule_); 
   AXAlpha.setZero();
-  AXBeta.setZero();
+  if(!RHF) AXBeta.setZero();
   int nRHF;
   if(RHF) nRHF = 1;
   else    nRHF = 2;

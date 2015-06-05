@@ -41,21 +41,24 @@ void BasisSet::basisSetRead(FileIO * fileio, Molecule * mol){
   std::vector<double> exp;
   std::vector<double> expP;
   std::array<double,3> center;
+
+  // Open Basis File
   std::string readString;
   fileio->in>>readString;
-  std::string basis_path = "/" + readString;
-  basis_path.insert(0,BASIS_PATH);
-  std::unique_ptr<ifstream> fileBasis(new ifstream (basis_path));
+  this->basis_path = "/" + readString;
+  this->basis_path.insert(0,BASIS_PATH);
+  std::unique_ptr<ifstream> fileBasis(new ifstream (this->basis_path));
   if(fileBasis->fail()){ // Check if file is in BASIS_PATH
     fileBasis.reset();
     fileBasis = std::unique_ptr<ifstream>(new ifstream(readString));
     if(fileBasis->fail()) { // Check if file is in PWD
       CErr("Could not find basis set file",fileio->out);
     } else {
-      fileio->out << "Reading Basis Set from:\n ./" << readString<< endl;
+      this->basis_path = readString;
+      fileio->out << "Reading Basis Set from: ./" << readString<< endl;
     }
   } else {
-    fileio->out << "Reading Basis Set from:" << endl << basis_path<< endl;
+    fileio->out << "Reading Basis Set from:" << endl << this->basis_path<< endl;
   }
 
   std::string atomStr;

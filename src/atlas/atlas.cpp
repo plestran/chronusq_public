@@ -109,6 +109,17 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   GauJob job(false,"sto-3g",tmp,atm,0,1);
   job.run();
 */
+/*
+  Eigen::SelfAdjointEigenSolver<RealMatrix> ES;
+  ES.compute((*hartreeFock->densityA())+(*hartreeFock->densityB())/2);
+  cout << ES.eigenvalues() << endl;
+  cout << endl <<ES.eigenvectors()*(*hartreeFock->densityA())*ES.eigenvectors().transpose() << endl;
+  cout << endl << (hartreeFock->moB()->transpose())*(*aointegrals->overlap_)*(*hartreeFock->densityB())*(*aointegrals->overlap_)*(*hartreeFock->moB()) << endl;
+  RealMatrix X = aointegrals->overlap_->pow(-0.5);
+  ES.compute(X*((*hartreeFock->densityA())+(*hartreeFock->densityB()))*X.transpose()/2);
+  cout << endl << ES.eigenvalues() << endl;
+  cout << endl << ES.eigenvectors().transpose()*(*hartreeFock->densityA())*ES.eigenvectors() << endl;
+*/
 #ifdef USE_LIBINT
   libint2::cleanup();
 #endif

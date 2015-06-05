@@ -122,6 +122,7 @@ public:
   int maxL;
   std::vector<int> atomNum;
 #endif
+  std::string basis_path;
   //dbwye
 
   // constructor & destructor
