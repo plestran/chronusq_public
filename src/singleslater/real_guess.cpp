@@ -32,6 +32,29 @@ template<>
 void SingleSlater<double>::formGuess() {
   this->moA_->setZero();
   if(!this->RHF_) this->moB_->setZero();
+
+  // Determining unique atoms
+  std::vector<Atoms> uniqueElement;
+  for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
+    if(iAtm == 0) uniqueElement.push_back(
+                    elements[this->molecule_->index(iAtm)]);
+    int uSize = uniqueElement.size();
+    bool uniq = true;
+    for(auto iUn = 0; iUn < uSize; iUn++){
+      if(uniqueElement[iUn].atomicNumber == 
+         elements[this->molecule_->index(iAtm)].atomicNumber){
+        uniq = false;
+        break;
+      }
+    }
+    if(uniq) uniqueElement.push_back(elements[this->molecule_->index(iAtm)]);
+  }
+
+  this->fileio_->out << "Found " << uniqueElement.size() << 
+                        " unique atoms in molecule" << endl;
+  for(auto iUn = 0; iUn < uniqueElement.size(); iUn++){
+    Molecule uniqueAtom(uniqueElement[iUn],this->fileio_);
+  }
   this->haveMO = true;
   if(this->controls_->printLevel>=3) {
     prettyPrint(this->fileio_->out,(*this->moA_),"Alpha MO Coeff");

@@ -34,8 +34,12 @@ void AOIntegrals::twoEContractDirect(bool RHF, bool doFock, const RealMatrix &XA
   if(!this->haveSchwartz) this->computeSchwartz();
   if(!this->basisSet_->haveMap) this->basisSet_->makeMap(this->molecule_); 
   AXAlpha.setZero();
-  std::vector<RealMatrix> 
-    G(this->controls_->nthreads,RealMatrix::Zero(this->nBasis_,this->nBasis_));
+  if(!RHF) AXBeta.setZero();
+  int nRHF;
+  if(RHF) nRHF = 1;
+  else    nRHF = 2;
+  std::vector<std::vector<RealMatrix>> G(nRHF,std::vector<RealMatrix>
+    (this->controls_->nthreads,RealMatrix::Zero(this->nBasis_,this->nBasis_)));
 
   std::vector<coulombEngine> engines(this->controls_->nthreads);
   engines[0] = coulombEngine(this->basisSet_->maxPrim,this->basisSet_->maxL,0);
@@ -44,15 +48,14 @@ void AOIntegrals::twoEContractDirect(bool RHF, bool doFock, const RealMatrix &XA
   for(int i=1; i<this->controls_->nthreads; i++) engines[i] = engines[0];
 
   auto start = std::chrono::high_resolution_clock::now();
-  this->basisSet_->computeShBlkNorm(this->molecule_,&XAlpha);
+  this->basisSet_->computeShBlkNorm(RHF,this->molecule_,&XAlpha,&XBeta);
   auto finish = std::chrono::high_resolution_clock::now();
-  if(RHF && doFock) this->DenShBlkD = finish - start;
+  if(doFock) this->DenShBlkD = finish - start;
   int ijkl = 0;
   start = std::chrono::high_resolution_clock::now();
 
   auto efficient_twoe = [&] (int thread_id) {
     coulombEngine &engine = engines[thread_id];
-    RealMatrix &g = G[thread_id];
     for(int s1 = 0, s1234=0; s1 < this->basisSet_->nShell(); s1++) {
       int bf1_s = this->basisSet_->mapSh2Bf[s1];
       int n1    = this->basisSet_->shells_libint[s1].size();
@@ -69,18 +72,32 @@ void AOIntegrals::twoEContractDirect(bool RHF, bool doFock, const RealMatrix &XA
             int n4    = this->basisSet_->shells_libint[s4].size();
       
             // Schwartz and Density screening
-            if( std::max((*this->basisSet_->shBlkNorm)(s1,s4),
-                   std::max((*this->basisSet_->shBlkNorm)(s2,s4),
-                      std::max((*this->basisSet_->shBlkNorm)(s3,s4),
-                         std::max((*this->basisSet_->shBlkNorm)(s1,s3),
-                            std::max((*this->basisSet_->shBlkNorm)(s2,s3),
-                                     (*this->basisSet_->shBlkNorm)(s1,s2))
-                            )
-                         )      
-                      )
-                   ) * (*this->schwartz_)(s1,s2)
-                     * (*this->schwartz_)(s3,s4)
-                   < this->controls_->thresholdSchawrtz ) continue;
+            double shMax;
+            if(RHF){
+              shMax = std::max((*this->basisSet_->shBlkNormAlpha)(s1,s4),
+                      std::max((*this->basisSet_->shBlkNormAlpha)(s2,s4),
+                      std::max((*this->basisSet_->shBlkNormAlpha)(s3,s4),
+                      std::max((*this->basisSet_->shBlkNormAlpha)(s1,s3),
+                      std::max((*this->basisSet_->shBlkNormAlpha)(s2,s3),
+                               (*this->basisSet_->shBlkNormAlpha)(s1,s2)))))) * 
+                      (*this->schwartz_)(s1,s2) * (*this->schwartz_)(s3,s4);
+            } else {
+              shMax = std::max((*this->basisSet_->shBlkNormAlpha)(s1,s4),
+                      std::max((*this->basisSet_->shBlkNormAlpha)(s2,s4),
+                      std::max((*this->basisSet_->shBlkNormAlpha)(s3,s4),
+                      std::max((*this->basisSet_->shBlkNormAlpha)(s1,s3),
+                      std::max((*this->basisSet_->shBlkNormAlpha)(s2,s3),
+                      std::max((*this->basisSet_->shBlkNormAlpha)(s1,s2), 
+                      std::max((*this->basisSet_->shBlkNormBeta)(s1,s4),
+                      std::max((*this->basisSet_->shBlkNormBeta)(s2,s4),
+                      std::max((*this->basisSet_->shBlkNormBeta)(s3,s4),
+                      std::max((*this->basisSet_->shBlkNormBeta)(s1,s3),
+                      std::max((*this->basisSet_->shBlkNormBeta)(s2,s3),
+                               (*this->basisSet_->shBlkNormBeta)(s1,s2)))))))))))) * 
+                      (*this->schwartz_)(s1,s2) * (*this->schwartz_)(s3,s4);
+            }
+
+            if(shMax < this->controls_->thresholdSchawrtz ) continue;
  
             const double* buff = engine.compute(
               this->basisSet_->shells_libint[s1],
@@ -103,32 +120,91 @@ void AOIntegrals::twoEContractDirect(bool RHF, bool doFock, const RealMatrix &XA
                     double v = buff[ijkl]*s1234_deg;
 
                     // Coulomb
-                    g(bf1,bf2) += XAlpha(bf3,bf4)*v;
-                    g(bf3,bf4) += XAlpha(bf1,bf2)*v;
-                    g(bf2,bf1) += XAlpha(bf4,bf3)*v;
-                    g(bf4,bf3) += XAlpha(bf2,bf1)*v;
+                    if(RHF && doFock) {
+                      G[0][thread_id](bf1,bf2) += XAlpha(bf3,bf4)*v;
+                      G[0][thread_id](bf3,bf4) += XAlpha(bf1,bf2)*v;
+                      G[0][thread_id](bf2,bf1) += XAlpha(bf4,bf3)*v;
+                      G[0][thread_id](bf4,bf3) += XAlpha(bf2,bf1)*v;
+                    } else if(doFock) {
+                      G[0][thread_id](bf1,bf2) += (XAlpha(bf3,bf4)+XBeta(bf3,bf4))*v;
+                      G[0][thread_id](bf3,bf4) += (XAlpha(bf1,bf2)+XBeta(bf1,bf2))*v;
+                      G[0][thread_id](bf2,bf1) += (XAlpha(bf4,bf3)+XBeta(bf4,bf3))*v;
+                      G[0][thread_id](bf4,bf3) += (XAlpha(bf2,bf1)+XBeta(bf2,bf1))*v;
+                      G[1][thread_id](bf1,bf2) += (XAlpha(bf3,bf4)+XBeta(bf3,bf4))*v;
+                      G[1][thread_id](bf3,bf4) += (XAlpha(bf1,bf2)+XBeta(bf1,bf2))*v;
+                      G[1][thread_id](bf2,bf1) += (XAlpha(bf4,bf3)+XBeta(bf4,bf3))*v;
+                      G[1][thread_id](bf4,bf3) += (XAlpha(bf2,bf1)+XBeta(bf2,bf1))*v;
+                    } else {
+                      G[0][thread_id](bf1,bf2) += (XAlpha(bf3,bf4)+XBeta(bf3,bf4))*v;
+                      G[0][thread_id](bf3,bf4) += (XAlpha(bf1,bf2)+XBeta(bf1,bf2))*v;
+                      G[0][thread_id](bf2,bf1) += (XAlpha(bf4,bf3)+XBeta(bf4,bf3))*v;
+                      G[0][thread_id](bf4,bf3) += (XAlpha(bf2,bf1)+XBeta(bf2,bf1))*v;
+                      G[1][thread_id](bf1,bf2) += (XAlpha(bf3,bf4)+XBeta(bf3,bf4))*v;
+                      G[1][thread_id](bf3,bf4) += (XAlpha(bf1,bf2)+XBeta(bf1,bf2))*v;
+                      G[1][thread_id](bf2,bf1) += (XAlpha(bf4,bf3)+XBeta(bf4,bf3))*v;
+                      G[1][thread_id](bf4,bf3) += (XAlpha(bf2,bf1)+XBeta(bf2,bf1))*v;
+
+                      G[0][thread_id](bf1,bf2) += (XAlpha(bf4,bf3)+XBeta(bf4,bf3))*v;
+                      G[0][thread_id](bf3,bf4) += (XAlpha(bf2,bf1)+XBeta(bf2,bf1))*v;
+                      G[0][thread_id](bf2,bf1) += (XAlpha(bf3,bf4)+XBeta(bf3,bf4))*v;
+                      G[0][thread_id](bf4,bf3) += (XAlpha(bf1,bf2)+XBeta(bf1,bf2))*v;
+                      G[1][thread_id](bf1,bf2) += (XAlpha(bf4,bf3)+XBeta(bf4,bf3))*v;
+                      G[1][thread_id](bf3,bf4) += (XAlpha(bf2,bf1)+XBeta(bf2,bf1))*v;
+                      G[1][thread_id](bf2,bf1) += (XAlpha(bf3,bf4)+XBeta(bf3,bf4))*v;
+                      G[1][thread_id](bf4,bf3) += (XAlpha(bf1,bf2)+XBeta(bf1,bf2))*v;
+                    }
  
                     // Exchange
                     if(RHF && doFock) {
-                      g(bf1,bf3) -= 0.25*XAlpha(bf2,bf4)*v;
-                      g(bf4,bf2) -= 0.25*XAlpha(bf1,bf3)*v;
-                      g(bf1,bf4) -= 0.25*XAlpha(bf2,bf3)*v;
-                      g(bf3,bf2) -= 0.25*XAlpha(bf1,bf4)*v;
+                      G[0][thread_id](bf1,bf3) -= 0.25*XAlpha(bf2,bf4)*v;
+                      G[0][thread_id](bf4,bf2) -= 0.25*XAlpha(bf1,bf3)*v;
+                      G[0][thread_id](bf1,bf4) -= 0.25*XAlpha(bf2,bf3)*v;
+                      G[0][thread_id](bf3,bf2) -= 0.25*XAlpha(bf1,bf4)*v;
 
-                      g(bf3,bf1) -= 0.25*XAlpha(bf4,bf2)*v;
-                      g(bf2,bf4) -= 0.25*XAlpha(bf3,bf1)*v;
-                      g(bf4,bf1) -= 0.25*XAlpha(bf3,bf2)*v;
-                      g(bf2,bf3) -= 0.25*XAlpha(bf4,bf1)*v;
+                      G[0][thread_id](bf3,bf1) -= 0.25*XAlpha(bf4,bf2)*v;
+                      G[0][thread_id](bf2,bf4) -= 0.25*XAlpha(bf3,bf1)*v;
+                      G[0][thread_id](bf4,bf1) -= 0.25*XAlpha(bf3,bf2)*v;
+                      G[0][thread_id](bf2,bf3) -= 0.25*XAlpha(bf4,bf1)*v;
+                    } else if(doFock) {
+                      G[0][thread_id](bf1,bf3) -= 0.5*XAlpha(bf2,bf4)*v;
+                      G[0][thread_id](bf4,bf2) -= 0.5*XAlpha(bf1,bf3)*v;
+                      G[0][thread_id](bf1,bf4) -= 0.5*XAlpha(bf2,bf3)*v;
+                      G[0][thread_id](bf3,bf2) -= 0.5*XAlpha(bf1,bf4)*v;
+
+                      G[0][thread_id](bf3,bf1) -= 0.5*XAlpha(bf4,bf2)*v;
+                      G[0][thread_id](bf2,bf4) -= 0.5*XAlpha(bf3,bf1)*v;
+                      G[0][thread_id](bf4,bf1) -= 0.5*XAlpha(bf3,bf2)*v;
+                      G[0][thread_id](bf2,bf3) -= 0.5*XAlpha(bf4,bf1)*v;
+
+                      G[1][thread_id](bf1,bf3) -= 0.5*XBeta(bf2,bf4)*v;
+                      G[1][thread_id](bf4,bf2) -= 0.5*XBeta(bf1,bf3)*v;
+                      G[1][thread_id](bf1,bf4) -= 0.5*XBeta(bf2,bf3)*v;
+                      G[1][thread_id](bf3,bf2) -= 0.5*XBeta(bf1,bf4)*v;
+
+                      G[1][thread_id](bf3,bf1) -= 0.5*XBeta(bf4,bf2)*v;
+                      G[1][thread_id](bf2,bf4) -= 0.5*XBeta(bf3,bf1)*v;
+                      G[1][thread_id](bf4,bf1) -= 0.5*XBeta(bf3,bf2)*v;
+                      G[1][thread_id](bf2,bf3) -= 0.5*XBeta(bf4,bf1)*v;
                     } else {
-                      g(bf1,bf3) -= 0.5*XAlpha(bf2,bf4)*v;
-                      g(bf4,bf2) -= 0.5*XAlpha(bf1,bf3)*v;
-                      g(bf1,bf4) -= 0.5*XAlpha(bf2,bf3)*v;
-                      g(bf3,bf2) -= 0.5*XAlpha(bf1,bf4)*v;
+                      G[0][thread_id](bf1,bf3) -= XAlpha(bf2,bf4)*v;
+                      G[0][thread_id](bf4,bf2) -= XAlpha(bf1,bf3)*v;
+                      G[0][thread_id](bf1,bf4) -= XAlpha(bf2,bf3)*v;
+                      G[0][thread_id](bf3,bf2) -= XAlpha(bf1,bf4)*v;
 
-                      g(bf3,bf1) -= 0.5*XAlpha(bf4,bf2)*v;
-                      g(bf2,bf4) -= 0.5*XAlpha(bf3,bf1)*v;
-                      g(bf4,bf1) -= 0.5*XAlpha(bf3,bf2)*v;
-                      g(bf2,bf3) -= 0.5*XAlpha(bf4,bf1)*v;
+                      G[0][thread_id](bf3,bf1) -= XAlpha(bf4,bf2)*v;
+                      G[0][thread_id](bf2,bf4) -= XAlpha(bf3,bf1)*v;
+                      G[0][thread_id](bf4,bf1) -= XAlpha(bf3,bf2)*v;
+                      G[0][thread_id](bf2,bf3) -= XAlpha(bf4,bf1)*v;
+
+                      G[1][thread_id](bf1,bf3) -= XBeta(bf2,bf4)*v;
+                      G[1][thread_id](bf4,bf2) -= XBeta(bf1,bf3)*v;
+                      G[1][thread_id](bf1,bf4) -= XBeta(bf2,bf3)*v;
+                      G[1][thread_id](bf3,bf2) -= XBeta(bf1,bf4)*v;
+
+                      G[1][thread_id](bf3,bf1) -= XBeta(bf4,bf2)*v;
+                      G[1][thread_id](bf2,bf4) -= XBeta(bf3,bf1)*v;
+                      G[1][thread_id](bf4,bf1) -= XBeta(bf3,bf2)*v;
+                      G[1][thread_id](bf2,bf3) -= XBeta(bf4,bf1)*v;
                     }
                   }
                 }
@@ -140,91 +216,6 @@ void AOIntegrals::twoEContractDirect(bool RHF, bool doFock, const RealMatrix &XA
     }
   };
 
-  auto simple_twoe = [&] (int thread_id){
-    coulombEngine &engine = engines[thread_id];
-    RealMatrix &g = G[thread_id];
-    for(int s1 = 0, s1234=0; s1 < this->basisSet_->nShell(); s1++) {
-      int bf1_s = this->basisSet_->mapSh2Bf[s1];
-      int n1    = this->basisSet_->shells_libint[s1].size();
-      for(int s2 = 0; s2 < this->basisSet_->nShell(); s2++) {
-        int bf2_s = this->basisSet_->mapSh2Bf[s2];
-        int n2    = this->basisSet_->shells_libint[s2].size();
-        for(int s3 = 0; s3 < this->basisSet_->nShell(); s3++) {
-          int bf3_s = this->basisSet_->mapSh2Bf[s3];
-          int n3    = this->basisSet_->shells_libint[s3].size();
-          for(int s4 = 0; s4 < this->basisSet_->nShell(); s4++, s1234++) {
-            if(s1234 % this->controls_->nthreads != thread_id) continue;
-            int bf4_s = this->basisSet_->mapSh2Bf[s4];
-            int n4    = this->basisSet_->shells_libint[s4].size();
-      
-            // Schwartz and Density screening
-            if( std::max((*this->basisSet_->shBlkNorm)(s1,s4),
-                   std::max((*this->basisSet_->shBlkNorm)(s2,s4),
-                      std::max((*this->basisSet_->shBlkNorm)(s3,s4),
-                         std::max((*this->basisSet_->shBlkNorm)(s1,s3),
-                            std::max((*this->basisSet_->shBlkNorm)(s2,s3),
-                                     (*this->basisSet_->shBlkNorm)(s1,s2))
-                            )
-                         )      
-                      )
-                   ) * (*this->schwartz_)(s1,s2)
-                     * (*this->schwartz_)(s3,s4)
-                   < this->controls_->thresholdSchawrtz ) continue;
- 
-            const double* buff = engine.compute(
-              this->basisSet_->shells_libint[s1],
-              this->basisSet_->shells_libint[s2],
-              this->basisSet_->shells_libint[s3],
-              this->basisSet_->shells_libint[s4]);
-            for(int i = 0, ijkl = 0 ; i < n1; ++i) {
-              int bf1 = bf1_s + i;
-              for(int j = 0; j < n2; ++j) {
-                int bf2 = bf2_s + j;
-                for(int k = 0; k < n3; ++k) {
-                  int bf3 = bf3_s + k;
-                  for(int l = 0; l < n4; ++l, ++ijkl) {
-                    int bf4 = bf4_s + l;
-                    double v = buff[ijkl];
-
-                    // Coulomb
-                    g(bf1,bf2) += XAlpha(bf3,bf4)*v;
-                    g(bf3,bf4) += XAlpha(bf1,bf2)*v;
-                    g(bf2,bf1) += XAlpha(bf4,bf3)*v;
-                    g(bf4,bf3) += XAlpha(bf2,bf1)*v;
- 
-                    // Exchange
-                    if(RHF && doFock) {
-                      g(bf1,bf3) -= 0.25*XAlpha(bf2,bf4)*v;
-                      g(bf4,bf2) -= 0.25*XAlpha(bf1,bf3)*v;
-                      g(bf1,bf4) -= 0.25*XAlpha(bf2,bf3)*v;
-                      g(bf3,bf2) -= 0.25*XAlpha(bf1,bf4)*v;
-
-                      g(bf3,bf1) -= 0.25*XAlpha(bf4,bf2)*v;
-                      g(bf2,bf4) -= 0.25*XAlpha(bf3,bf1)*v;
-                      g(bf4,bf1) -= 0.25*XAlpha(bf3,bf2)*v;
-                      g(bf2,bf3) -= 0.25*XAlpha(bf4,bf1)*v;
-                    } else {
-                      g(bf1,bf3) -= 0.5*XAlpha(bf2,bf4)*v;
-                      g(bf4,bf2) -= 0.5*XAlpha(bf1,bf3)*v;
-                      g(bf1,bf4) -= 0.5*XAlpha(bf2,bf3)*v;
-                      g(bf3,bf2) -= 0.5*XAlpha(bf1,bf4)*v;
-
-                      g(bf3,bf1) -= 0.5*XAlpha(bf4,bf2)*v;
-                      g(bf2,bf4) -= 0.5*XAlpha(bf3,bf1)*v;
-                      g(bf4,bf1) -= 0.5*XAlpha(bf3,bf2)*v;
-                      g(bf2,bf3) -= 0.5*XAlpha(bf4,bf1)*v;
-                    }
-                    
-                  }
-                }
-              }
-            }
-
-          }
-        }
-      }
-    }
-  };
 
 #ifdef USE_OMP
   #pragma omp parallel
@@ -235,11 +226,16 @@ void AOIntegrals::twoEContractDirect(bool RHF, bool doFock, const RealMatrix &XA
 #else
   efficient_twoe(0);
 #endif
-  for(int i = 0; i < this->controls_->nthreads; i++) AXAlpha += G[i];
+  for(int i = 0; i < this->controls_->nthreads; i++) AXAlpha += G[0][i];
+  if(!RHF) for(int i = 0; i < this->controls_->nthreads; i++) AXBeta += G[1][i];
   AXAlpha = AXAlpha*0.5; // werid factor that comes from A + AT
-  if(RHF && doFock) AXAlpha = AXAlpha*0.5; // E ~ 0.5*G
+  AXAlpha = AXAlpha*0.5;
+  if(!RHF){
+    AXBeta = AXBeta*0.5; // werid factor that comes from A + AT
+    AXBeta = AXBeta*0.5;
+  }
   finish = std::chrono::high_resolution_clock::now();
-  if(RHF && doFock) this->PTD = finish - start;
+  if(doFock) this->PTD = finish - start;
    
 }
 template<>

@@ -35,11 +35,6 @@ namespace ChronusQ {
  */
   template <typename T>
   class Davidson {
-    enum{
-      CIS,
-      RPA,
-      CCSD
-    };
     typedef Eigen::Matrix<T,Dynamic,Dynamic,RowMajor> TMat;
     typedef Eigen::Matrix<T,Dynamic,1> TVec;
     int     n_;          // Dimension of the problem (LDA)
@@ -49,6 +44,7 @@ namespace ChronusQ {
     std::unique_ptr<TMat> guess_;      // Guess vectors
     std::unique_ptr<TVec> eigenvalues_;
     std::unique_ptr<TMat> eigenvector_;
+    TMat* diagonal_;
 
 
     int     maxSubSpace_; // Maximum iterative subspace
@@ -67,6 +63,14 @@ namespace ChronusQ {
 
 
   public:
+    enum{
+      __invalid,
+      CIS,
+      RPA,
+      CCSD
+    };
+    inline TVec* eigenvalues(){return this->eigenvalues_.get();};
+    inline TMat* eigenvector(){return this->eigenvector_.get();};
     // Run the Davidson
     inline void run(ostream &output=cout) {
       time_t currentTime;
@@ -105,6 +109,7 @@ namespace ChronusQ {
       this->useLAPACK_   = true;
       this->method_      = -1;
       this->sdr_    = nullptr;
+      this->diagonal_ = NULL;
     }
 
     // Pass a ptr to a matrix to be diagonalized
@@ -121,6 +126,7 @@ namespace ChronusQ {
       this->n_      = A->cols();
       this->method_      = -1;
       this->sdr_    = nullptr;
+      this->diagonal_ = NULL;
       this->guess_  = 
         std::unique_ptr<TMat>(new TMat(this->n_,this->nGuess_));
       this->eigenvalues_ = 
@@ -154,6 +160,7 @@ namespace ChronusQ {
       this->n_      = N;
       this->method_      = -1;
       this->sdr_    = nullptr;
+      this->diagonal_ = NULL;
       this->guess_  = 
         std::unique_ptr<TMat>(new TMat(this->n_,this->nGuess_));
       this->eigenvalues_ = 
@@ -173,7 +180,7 @@ namespace ChronusQ {
       (*this->guess_) = TMat::Identity(this->n_,this->nGuess_); // Identity guess (primitive)
     }
 
-    Davidson(SDResponse * SDR, int meth, int nSek){
+    Davidson(SDResponse * SDR, int meth, int nSek, RealMatrix *Guess=NULL,int nGuess=0,RealMatrix* diagonal=NULL){
       this->maxSubSpace_ = 250;
       this->maxIter_     = 128;
       this->MaxIter_     = 20;
@@ -182,14 +189,16 @@ namespace ChronusQ {
       this->mat_    = nullptr;
       this->AX_     = NULL;
       this->nSek_   = nSek;
-      this->nGuess_ = 2*nSek;
-//    this->n_      = N;
+      if(nGuess==0) this->nGuess_ = 2*nSek;
+      else this->nGuess_=nGuess;
+      this->n_      = SDR->nOVA()+SDR->nOVB();
       this->method_ = meth;
       this->sdr_    = SDR;
+      this->diagonal_ = diagonal;
       this->guess_  = 
         std::unique_ptr<TMat>(new TMat(this->n_,this->nGuess_));
       this->eigenvalues_ = 
-        std::unique_ptr<TMat>(new TMat(this->nSek_,1));
+        std::unique_ptr<TVec>(new TVec(this->nSek_,1));
       this->eigenvector_ = 
         std::unique_ptr<TMat>(new TMat(this->n_,this->nSek_));
 /*
@@ -202,7 +211,8 @@ namespace ChronusQ {
 */
       this->hermetian_ = true; // Only supports Hermetian for time being
 
-      (*this->guess_) = TMat::Identity(this->n_,this->nGuess_); // Identity guess (primitive)
+      if(Guess==NULL) (*this->guess_) = TMat::Identity(this->n_,this->nGuess_); // Identity guess (primitive)
+      else (*this->guess_) = *Guess;
 
     }
     ~Davidson(){;};

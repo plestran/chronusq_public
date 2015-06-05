@@ -48,18 +48,36 @@ class Molecule {
 //APS
   std::unique_ptr<RealMatrix>  COM_;         // center of mass coordinate or center of nuclear charges 
 //APE
+  std::unique_ptr<RealMatrix>  momentOfInertia_; // Moment of inertia
+  std::unique_ptr<RealMatrix>  rIJ_;             // Interatomic distance matrix
 public:
 
   // constructor
   Molecule(int nAtoms=0,FileIO * fileio=NULL){ if(nAtoms>0) iniMolecule(nAtoms,fileio);};
+  Molecule(Atoms atm, FileIO *fileio=NULL){
+    this->iniMolecule(1,fileio);
+    auto n = HashAtom(atm.symbol,atm.massNumber);
+    if(n!=-1) index_[0] = n;
+    else
+      CErr("Error: invalid atomic symbol or mass number!",fileio->out);
+    nTotalE_ = atm.atomicNumber;
+    (*cart_)(0,0) = 0.0;
+    (*cart_)(1,0) = 0.0;
+    (*cart_)(2,0) = 0.0;
+    energyNuclei_ = 0.0;
+    this->computeRij();
+    this->toCOM(0);
+    this->computeI();
+  }
   ~Molecule(){
     delete[] index_;
-    cart_.reset();
   };
   void iniMolecule(int,FileIO *);
 //APS Compute center of mass (or center of nuclear charges) of a molecule
   void toCOM(int Iop0);    
 //APE
+  void computeI();
+  void computeRij();
   // print
   void printInfo(FileIO *,Controls *);
 

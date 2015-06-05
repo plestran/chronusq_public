@@ -25,6 +25,7 @@
  */
 #ifndef INCLUDED_GLOBAL
 #define INCLUDED_GLOBAL
+// Hello
 
 #define MAXNAMELEN 50 ///< Define maximum length for char arrays
 #define MAXANGULARMOMENTUM 6 ///< Define maximum allowed total angular momentum for basis functions

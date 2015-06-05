@@ -42,12 +42,22 @@ class SDResponse {
   int       nBasis_;
   int       **R2Index_;
   int       nStates_;
+  int       RHF_;
+  friend class SingleSlater<double>;
+
+  RealMatrix      XMO;
+  RealMatrix      PDiag;
+  std::unique_ptr<RealMatrix>    CISTransDen_;
+  std::unique_ptr<RealMatrix>    CISEnergy_;
+  std::unique_ptr<RealMatrix>    TransDipole_;
   BasisSet *      basisSet_;
   Molecule *      molecule_;
   FileIO *        fileio_;
   Controls *      controls_;
   MOIntegrals *   mointegrals_;
   SingleSlater<double> *  singleSlater_;
+  RealTensor4d *  aoERI_;
+  RealTensor3d *  elecDipole_;
 
 public:
  
@@ -59,9 +69,18 @@ public:
                      MOIntegrals *,FileIO *,
                      Controls *,SingleSlater<double> *);
 
+  inline int nOVA(){return this->singleSlater_->nOVA();};
+  inline int nOVB(){return this->singleSlater_->nOVB();};
   void computeExcitedStates();         // compute the total electronic energy
   void printExcitedStateEnergies(); 
   void printInfo();
+  void formRM();
+  void DavidsonCIS();
+  RealMatrix formRM2(RealMatrix &XMO);
+  RealMatrix ReturnDiag();
+  RealMatrix Guess(RealMatrix &PDiag);
+  void TransDipole(int st_rank,RealMatrix TransDen);
+  double OscStrength(int st_rank,double Omega);
 
   /*************************/
   /* MPI Related Routines  */

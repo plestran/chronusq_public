@@ -114,10 +114,12 @@ public:
   inline int nBE()    { return this->nBE_;};
   inline int nOccA()  { return this->nOccA_;};
   inline int nOccB()  { return this->nOccB_;}
-  inline int nVirA()  { return this->nVirB_;};
+  inline int nVirA()  { return this->nVirA_;};
   inline int nVirB()  { return this->nVirB_;};
   inline int RHF()    { return this->RHF_; };
   inline int spin()   { return this->spin_; };
+  inline int nOVA()    { return nOccA_*nVirA_;};
+  inline int nOVB()    { return nOccB_*nVirB_;};
   inline TMatrix* densityA() { return this->densityA_.get();};
   inline TMatrix* densityB() { return this->densityB_.get();};
   inline TMatrix* fockA()    { return this->fockA_.get();};
@@ -128,6 +130,8 @@ public:
   inline TMatrix* exchangeB(){ return this->exchangeB_.get();};
   inline TMatrix* moA()      { return this->moA_.get();};
   inline TMatrix* moB()      { return this->moB_.get();};
+  inline TMatrix* epsA()     { return this->epsA_.get();};
+  inline TMatrix* epsB()     { return this->epsB_.get();};
   inline TMatrix* PTA()      { return this->PTA_.get();};
   inline TMatrix* PTB()      { return this->PTB_.get();};
   inline RealMatrix* dipole(){ return this->dipole_.get();};
@@ -155,6 +159,7 @@ public:
   void computeEnergy();         // compute the total electronic energy
   void computeMultipole();      // compute multipole properties
   void SCF();  
+  void CDIIS(int,T*,T*,T*,T*);
   void printEnergy(); 
   void printMultipole();
   void printInfo();

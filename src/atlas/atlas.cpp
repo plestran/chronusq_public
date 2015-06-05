@@ -38,6 +38,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   auto aointegrals	= std::unique_ptr<AOIntegrals>(new AOIntegrals());
   auto hartreeFock	= std::unique_ptr<SingleSlater<double>>(new SingleSlater<double>());
   std::unique_ptr<FileIO> fileIO;
+  std::unique_ptr<GauJob> gauJob;
 
   // Initialize the FileIO object
   std::vector<std::string> argv_string;
@@ -78,28 +79,66 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   hartreeFock->formFock();
   aointegrals->printTimings();
   hartreeFock->computeEnergy();
+  std::shared_ptr<MOIntegrals> moIntegrals = std::make_shared<MOIntegrals>();
   if(controls->optWaveFunction) hartreeFock->SCF();
+  //MOIntegrals *moIntegrals = new MOIntegrals();
+  //moIntegrals->iniMOIntegrals(molecule,basisset,fileIO,controls,aointegrals,hartreeFock);
   else fileIO->out << "**Skipping SCF Optimization**" << endl; 
   hartreeFock->computeMultipole();
+
+  SDResponse *sdResponse = new SDResponse();
+  sdResponse->iniSDResponse(molecule.get(),basisset.get(),moIntegrals.get(),fileIO.get(),controls.get(),hartreeFock.get());
+
+  sdResponse->computeExcitedStates();
+
+  sdResponse->formRM();
+  sdResponse->DavidsonCIS();
+  //sdResponse->formRM2(XMO);
+  //sdResponse->ReturnDiag();
+  //sdResponse->Guess(PDiag);
 
 //if(controls->doDF) aointegrals->compareRI();
 /*
   MOIntegrals *moIntegrals = new MOIntegrals();
   moIntegrals->iniMOIntegrals(molecule,basisset,fileIO,controls,aointegrals,hartreeFock);
 
-  SDResponse *sdResponse = new SDResponse();
-  sdResponse->iniSDResponse(molecule,basisset,moIntegrals,fileIO,controls,hartreeFock);
 
-  sdResponse->computeExcitedStates();
+//APS
+ int Iop=0;
+ molecule->toCOM(Iop);  // call object molecule pointing to function toCOM-Iop=0 Center of Mass
+ Iop=1;
+ molecule->toCOM(Iop);  // call object molecule pointing to function toCOM-Iop=1 Center of Nuclear Charges
+//APE
 */
   time(&currentTime);
   fileIO->out<<"\nJob finished: "<<ctime(&currentTime)<<endl;
-/* Example of how to copy a real single slater to a complex one
+/*
   SingleSlater<dcomplex> newSS(hartreeFock.get());
   newSS.printInfo();
   prettyPrint(cout,*newSS.densityA(),"New D");
   newSS.formFock();
   prettyPrint(cout,*newSS.fockA(),"New F");
+*/
+/*
+  double *tmp = new double[3*2];
+  for(auto i =0; i < 6; i++) tmp[i] = 0.0;
+  tmp[0] = 0.9;
+  std::vector<int> atm;
+  atm.push_back(1);
+  atm.push_back(1);
+  GauJob job(false,"sto-3g",tmp,atm,0,1);
+  job.run();
+*/
+/*
+  Eigen::SelfAdjointEigenSolver<RealMatrix> ES;
+  ES.compute((*hartreeFock->densityA())+(*hartreeFock->densityB())/2);
+  cout << ES.eigenvalues() << endl;
+  cout << endl <<ES.eigenvectors()*(*hartreeFock->densityA())*ES.eigenvectors().transpose() << endl;
+  cout << endl << (hartreeFock->moB()->transpose())*(*aointegrals->overlap_)*(*hartreeFock->densityB())*(*aointegrals->overlap_)*(*hartreeFock->moB()) << endl;
+  RealMatrix X = aointegrals->overlap_->pow(-0.5);
+  ES.compute(X*((*hartreeFock->densityA())+(*hartreeFock->densityB()))*X.transpose()/2);
+  cout << endl << ES.eigenvalues() << endl;
+  cout << endl << ES.eigenvectors().transpose()*(*hartreeFock->densityA())*ES.eigenvectors() << endl;
 */
 #ifdef USE_LIBINT
   libint2::cleanup();

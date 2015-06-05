@@ -68,6 +68,9 @@ void Molecule::readMolecule(FileIO * fileio, std::istream &geomRead){
       for(n=0;n<3;n++) sqrAB += ((*cart_)(n,i)-(*cart_)(n,j))*((*cart_)(n,i)-(*cart_)(n,j));
       energyNuclei_ += atom[index_[i]].atomicNumber*atom[index_[j]].atomicNumber/sqrt(sqrAB);
   };
+  this->computeRij();
+  this->toCOM(0);
+  this->computeI();
 
 };
 //---------------------------------------------------//
@@ -85,7 +88,9 @@ void Molecule::printInfo(FileIO * fileio,Controls * controls) {
   for(int i=0;i<nAtoms_;i++)
     fileio->out<<std::setw(8)<<i+1<<std::setw(8)<<atom[index_[i]].symbol<<std::setw(8)<<atom[index_[i]].atomicNumber
 	       <<std::setw(15)<<(*cart_)(0,i)<<std::setw(15)<<(*cart_)(1,i)<<std::setw(15)<<(*cart_)(2,i)<<endl;
-  fileio->out<<bannerEnd<<endl;
+  fileio->out<<bannerMid<<endl;
+  prettyPrint(fileio->out,*this->momentOfInertia_,"Moment of Inertia Tensor (AMU-bohr\u00B2)");
+  prettyPrint(fileio->out,*this->rIJ_,"Interatomic Distance Matrix (bohr)");
   fileio->out<<"\nMolecular Information:"<<endl;
   fileio->out<<std::setw(15)<<"nAtoms ="<<std::setw(8)<<nAtoms_<<std::setw(5)<<" "
 	     <<std::setw(20)<<"Charge ="<<std::setw(8)<<charge_<<endl;
@@ -191,4 +196,22 @@ void Molecule::toCOM(int Iop){
 //   cout << *COM_/TotW <<endl;
 }
 //APE
+void Molecule::computeI(){
+  this->momentOfInertia_ = std::unique_ptr<RealMatrix>(new RealMatrix(3,3));
+  RealMatrix E = RealMatrix::Identity(3,3); // Assuming X,Y,Z unit vectors as intertial frame
 
+  for(auto iAtm = 0; iAtm < this->nAtoms_; iAtm++){
+    *this->momentOfInertia_ += elements[this->index_[iAtm]].mass*(
+                                this->cart_->col(iAtm).dot(this->cart_->col(iAtm))*E -
+                                this->cart_->col(iAtm)*this->cart_->col(iAtm).transpose());
+  }
+  
+}
+void Molecule::computeRij(){
+  this->rIJ_ = std::unique_ptr<RealMatrix>(new RealMatrix(this->nAtoms_,this->nAtoms_));
+  for(auto iAtm = 0; iAtm < this->nAtoms_; iAtm++)
+  for(auto jAtm = 0; jAtm < iAtm;          jAtm++){
+    (*this->rIJ_)(iAtm,jAtm) = (cart_->col(iAtm) - cart_->col(jAtm)).norm();
+  }
+  (*this->rIJ_) = this->rIJ_->selfadjointView<Lower>();
+}

@@ -114,13 +114,15 @@ public:
   std::vector<libint2::Shell> shells_libint;
   std::vector<libint2::Shell> shells_libint_unnormal;
   std::vector<int> mapSh2Bf;
-  std::unique_ptr<RealMatrix> shBlkNorm;
+  std::unique_ptr<RealMatrix> shBlkNormAlpha;
+  std::unique_ptr<RealMatrix> shBlkNormBeta;
   bool convToLI = false;
   bool haveMap = false;
   int maxPrim;
   int maxL;
   std::vector<int> atomNum;
 #endif
+  std::string basis_path;
   //dbwye
 
   // constructor & destructor
@@ -162,7 +164,7 @@ public:
   void basisSetRead(FileIO *,Molecule *); 
   void convShell(Molecule *);
   void makeMap(Molecule *);
-  void computeShBlkNorm(Molecule *,const RealMatrix*);
+  void computeShBlkNorm(bool,Molecule *,const RealMatrix*,const RealMatrix*);
 #endif
 
   /*************************/
