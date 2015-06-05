@@ -42,6 +42,7 @@ class SDResponse {
   int       nBasis_;
   int       **R2Index_;
   int       nStates_;
+  int       RHF_;
   friend class SingleSlater<double>;
 
   RealMatrix      XMO;
