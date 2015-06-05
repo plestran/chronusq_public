@@ -48,6 +48,8 @@ class Molecule {
 //APS
   std::unique_ptr<RealMatrix>  COM_;         // center of mass coordinate or center of nuclear charges 
 //APE
+  std::unique_ptr<RealMatrix>  momentOfInertia_; // Moment of inertia
+  std::unique_ptr<RealMatrix>  rIJ_;             // Interatomic distance matrix
 public:
 
   // constructor
@@ -60,6 +62,8 @@ public:
 //APS Compute center of mass (or center of nuclear charges) of a molecule
   void toCOM(int Iop0);    
 //APE
+  void computeI();
+  void computeRij();
   // print
   void printInfo(FileIO *,Controls *);
 

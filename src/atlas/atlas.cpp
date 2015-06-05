@@ -38,6 +38,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   auto aointegrals	= std::unique_ptr<AOIntegrals>(new AOIntegrals());
   auto hartreeFock	= std::unique_ptr<SingleSlater<double>>(new SingleSlater<double>());
   std::unique_ptr<FileIO> fileIO;
+  std::unique_ptr<GauJob> gauJob;
 
   // Initialize the FileIO object
   std::vector<std::string> argv_string;
@@ -108,12 +109,22 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 */
   time(&currentTime);
   fileIO->out<<"\nJob finished: "<<ctime(&currentTime)<<endl;
-/* Example of how to copy a real single slater to a complex one
+/*
   SingleSlater<dcomplex> newSS(hartreeFock.get());
   newSS.printInfo();
   prettyPrint(cout,*newSS.densityA(),"New D");
   newSS.formFock();
   prettyPrint(cout,*newSS.fockA(),"New F");
+*/
+/*
+  double *tmp = new double[3*2];
+  for(auto i =0; i < 6; i++) tmp[i] = 0.0;
+  tmp[0] = 0.9;
+  std::vector<int> atm;
+  atm.push_back(1);
+  atm.push_back(1);
+  GauJob job(false,"sto-3g",tmp,atm,0,1);
+  job.run();
 */
 #ifdef USE_LIBINT
   libint2::cleanup();
