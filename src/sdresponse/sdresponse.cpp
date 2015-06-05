@@ -588,10 +588,24 @@ RealMatrix SDResponse::formRM2(RealMatrix &XMO){
     // Contract A_AAAA( <mn||ls> ) with XA
     RealMatrix AXA(nVA,nOA);
     RealMatrix AXB(nVB,nOB);
+    RealMatrix AXAD(nVA,nOA);
+    RealMatrix AXBD(nVB,nOB);
+    RealMatrix IXAD(this->nBasis_,this->nBasis_);
+    RealMatrix IXBD(this->nBasis_,this->nBasis_);
     RealMatrix IXA(this->nBasis_,this->nBasis_);
     RealMatrix IXB(this->nBasis_,this->nBasis_);
-
+    // Try twoEContractDirect
+    this->singleSlater_->aointegrals()->twoEContractDirect(false, true, XAAO,IXAD,XBAO,IXBD);
     this->singleSlater_->aointegrals()->twoEContractN4(false, true, XAAO,IXA,XBAO,IXB);
+    cout << "compare" << endl;
+    cout << "IXAD" <<endl;
+    cout << IXAD  << endl;
+    cout << "IXA" <<endl;
+    cout << IXA  << endl;
+    cout << "IXBD" <<endl;
+    cout << IXBD  << endl;
+    cout << "IXB" << endl;
+    cout << IXB << endl;
     AXA = this->singleSlater_->moA()->block(0,nOA,this->nBasis_,nVA).transpose()*IXA*this->singleSlater_->moA()->block(0,0,this->nBasis_,nOA);
     if (this->RHF_)
     {
