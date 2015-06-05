@@ -70,6 +70,7 @@ namespace ChronusQ {
       CCSD
     };
     inline TVec* eigenvalues(){return this->eigenvalues_.get();};
+    inline TMat* eigenvector(){return this->eigenvector_.get();};
     // Run the Davidson
     inline void run(ostream &output=cout) {
       time_t currentTime;

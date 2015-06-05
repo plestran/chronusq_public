@@ -89,7 +89,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   sdResponse->computeExcitedStates();
 
   sdResponse->formRM();
-  //sdResponse->DavidsonCIS();
+  sdResponse->DavidsonCIS();
   //sdResponse->formRM2(XMO);
   //sdResponse->ReturnDiag();
   //sdResponse->Guess(PDiag);

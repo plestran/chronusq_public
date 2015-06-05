@@ -79,8 +79,8 @@ public:
   RealMatrix formRM2(RealMatrix &XMO);
   RealMatrix ReturnDiag();
   RealMatrix Guess(RealMatrix &PDiag);
-  void TransDipole();
-  double OscStrength();
+  void TransDipole(int st_rank,RealMatrix TransDen);
+  double OscStrength(int st_rank,double Omega);
 
   /*************************/
   /* MPI Related Routines  */
