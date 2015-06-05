@@ -72,6 +72,9 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
     hartreeFock->readGuessGauMatEl(matEl);
   }
   else if(controls->guess==3) hartreeFock->readGuessGauFChk(controls->gauFChkName);
+//APS I have MO Please check in which controls call the following function
+  hartreeFock->matchord();
+//APE
   hartreeFock->formFock();
   aointegrals->printTimings();
   hartreeFock->computeEnergy();

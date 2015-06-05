@@ -40,6 +40,9 @@ template<typename T>
 class SingleSlater {
   typedef Eigen::Matrix<T,Dynamic,Dynamic,RowMajor> TMatrix;
   int      nBasis_;
+//APS
+  int      nShell_;
+//APE
   int      nTT_;
   int      nAE_;
   int      nBE_;
@@ -95,7 +98,6 @@ public:
   SingleSlater(SingleSlater<U> *);
   // pseudo-constructor
   void iniSingleSlater(Molecule *,BasisSet *,AOIntegrals *,FileIO *,Controls *);
-
   //set private data
   inline void setNBasis(int nBasis) { this->nBasis_ = nBasis;};
   inline void setNAE(int nAE)    { this->nAE_ = nAE;};
@@ -105,6 +107,9 @@ public:
   // access to private data
   inline int nBasis() { return this->nBasis_;};
   inline int nTT()     { return this->nTT_;};
+//APS
+  inline int nShell() { return this->nShell_;};
+//APE
   inline int nAE()    { return this->nAE_;};
   inline int nBE()    { return this->nBE_;};
   inline int nOccA()  { return this->nOccA_;};
@@ -141,6 +146,9 @@ public:
   void formCoulomb();		// form the Coulomb matrix
   void formExchange();		// form the exchange matrix
   void formPT();
+  // APS           
+  void matchord();              // match Guassian order of guess
+  // APE
   void readGuessIO();       	// read the initial guess of MO's from the input stream
   void readGuessGauMatEl(GauMatEl&); // read the intial guess of MO's from Gaussian raw matrix element file
   void readGuessGauFChk(std::string &);	// read the initial guess of MO's from the Gaussian formatted checkpoint file
