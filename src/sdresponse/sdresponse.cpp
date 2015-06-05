@@ -162,7 +162,6 @@ void SDResponse::formRM(){
   contract(1.0,IablsA,{a,b,lam,sig},LocMoAO,{lam,j},0.0,IabjsA,{a,b,j,sig});
   // (a b  | j   i  )
   contract(1.0,IabjsA,{a,b,j,sig},LocMoAO,{sig,i},0.0,SabjiAA,{a,b,j,i});
-  cout << "5" << endl;
 
   // Build <aj||ib>AAAA
   for(auto a=0;a<nVA;a++) 
@@ -177,7 +176,7 @@ void SDResponse::formRM(){
   for(auto j=0;j<nOB;j++) 
   for(auto i=0;i<nOA;i++) 
   for(auto b=0;b<nVB;b++) {
-    dajibAB(a,j,i,b) = SaijbAA(a,j,i,b);
+    dajibAB(a,j,i,b) = SaijbAA(a,i,j,b);
   }
    
   //Build <ab||ij>AAAA
@@ -187,7 +186,6 @@ void SDResponse::formRM(){
   for (auto j=0;j<nOA;j++){
     DabijAA(a,b,i,j) = SaijbAA(a,i,j,b) - SaijbAA(a,j,i,b);
   }
-  cout << "11" << endl;
   //Build <ab||ij> ABAB
   for (auto a=0;a<nVA;a++)
   for (auto b=0;b<nVB;b++)
@@ -195,7 +193,6 @@ void SDResponse::formRM(){
   for (auto j=0;j<nOB;j++){
     dabijAB(a,b,i,j) = SaijbAA(a,i,j,b);
   }
-  cout << "12" << endl;
 
   // Build A & B matrix
   int ia,jb;
@@ -256,7 +253,6 @@ void SDResponse::formRM(){
     }
     ia = ia+1;
   }
-  cout << "After building A" << endl;
   if (this->RHF_)
   {
     A.block(0,0,nOVA,nOVA) = Aud;
@@ -268,11 +264,9 @@ void SDResponse::formRM(){
     B.block(0,nOVA,nOVA,nOVB) = Buod;
     B.block(nOVA,0,nOVB,nOVA) = Buod;
   }
-  cout << "Before UHF "<< endl;
+
   if (!this->RHF_)
   {
-  
-  
     for(auto ii = 0; ii < this->nBasis_; ii++) {
       for(auto jj = 0; jj < nOB; jj++) {
         LocMoBO(ii,jj) = (*this->singleSlater_->moB())(ii,jj);
@@ -290,8 +284,6 @@ void SDResponse::formRM(){
     contract(1.0,IailsA,{a,i,lam,sig},LocMoBO,{lam,j},0.0,IaijsAB,{a,i,j,sig});
     // (a i  | j   b  )
     contract(1.0,IaijsAB,{a,i,j,sig},LocMoBV,{sig,b},0.0,SaijbAB,{a,i,j,b});
-    cout << "2" <<endl;
-    
     // (ai|jb)BBAA
     // (a nu | lam sig)
     contract(1.0,LocMoBV,{mu,a},(*this->aoERI_),{mu,nu,lam,sig},0.0,IanlsB,{a,nu,lam,sig});
@@ -301,7 +293,6 @@ void SDResponse::formRM(){
     contract(1.0,IailsB,{a,i,lam,sig},LocMoAO,{lam,j},0.0,IaijsBA,{a,i,j,sig});
     // (a i  | j   b  )
     contract(1.0,IaijsBA,{a,i,j,sig},LocMoAV,{sig,b},0.0,SaijbBA,{a,i,j,b});
-    cout << "3" << endl;
     // (ai|jb)BBBB
     // (a nu | lam sig)
     contract(1.0,LocMoBV,{mu,a},(*this->aoERI_),{mu,nu,lam,sig},0.0,IanlsB,{a,nu,lam,sig});
@@ -311,7 +302,6 @@ void SDResponse::formRM(){
     contract(1.0,IailsB,{a,i,lam,sig},LocMoBO,{lam,j},0.0,IaijsBB,{a,i,j,sig});
     // (a i  | j   b  )
     contract(1.0,IaijsBB,{a,i,j,sig},LocMoBV,{sig,b},0.0,SaijbBB,{a,i,j,b});
-    cout << "4" <<endl;
     // (ab|ji)BBBB
     // (a nu | lam sig)
     contract(1.0,LocMoBV,{mu,a},(*this->aoERI_),{mu,nu,lam,sig},0.0,IanlsB,{a,nu,lam,sig});
@@ -336,7 +326,6 @@ void SDResponse::formRM(){
     for(auto b=0;b<nVA;b++) {
       dajibBA(a,j,i,b) = SaijbBA(a,i,j,b);
     }
-    cout << "9" << endl;
     // Build <aj||ib>BBBB
     for(auto a=0;a<nVB;a++)
     for(auto j=0;j<nOB;j++)
@@ -360,7 +349,6 @@ void SDResponse::formRM(){
     for (auto j=0;j<nOA;j++){
       dabijBA(a,b,i,j) = SaijbBA(a,i,j,b);
     }
-    cout << "13"<< endl;
     //Build <ab||ij> BBBB
     for (auto a=0;a<nVB;a++)
     for (auto b=0;b<nVB;b++)
@@ -456,10 +444,6 @@ void SDResponse::formRM(){
     B.block(nOVA,0,nOVB,nOVA) = Adod;
   }
 
-  cout << "Aud" << endl;
-  cout << Aud << endl;
-  cout << "Auod" << endl;
-  cout << Auod << endl;
   // Build the ABBA matrix
   cout << "ABBA for LR-TDHF" << endl;
   ABBA.block(0,0,nOVA+nOVB,nOVA+nOVB) = A;
@@ -473,11 +457,7 @@ void SDResponse::formRM(){
   CIS.compute(A);
   CIS.eigenvalues();
   CIS.eigenvectors();
-  // Print the CIS Excitation Energies
-//  for (auto i=0;i<2*nOV;i++){
-//    cout << "The " << (i+1) << " CIS Exicitation Energy is: "
-//         << (CIS.eigenvalues())(i) << endl;
-//  }
+
   RealMatrix XMO = CIS.eigenvectors().col(7);
   cout << "Enter formRM2" << endl;
   formRM2(XMO);
@@ -497,17 +477,14 @@ void SDResponse::formRM(){
   cout << "f = " << Oscstr << endl;
 
   // LR TDHF routine
-  //Eigen::EigenSolver<RealMatrix> TD;
-  //TD.compute(ABBA);
-  //TD.eigenvalues();
-  //TD.eigenvectors();
+  Eigen::EigenSolver<RealMatrix> TD;
+  TD.compute(ABBA);
+  TD.eigenvalues();
+  TD.eigenvectors();
 
   // Print the LR-TDHF Excitation Energies
-  //for (auto i=0;i<4*nOV;i++){
-  //  cout << "The " << (i+1) << " LR-TDHF Exicitation Energy is: "
-  //       << (TD.eigenvalues())(i) << endl;
-  //}
-
+  cout << "Linear response energy" << endl;
+  cout << TD.eigenvalues() << endl;
 }
 
 void SDResponse::DavidsonCIS(){
@@ -519,7 +496,7 @@ void SDResponse::DavidsonCIS(){
   GVec = Guess(PDiag);
   RealMatrix Gpass = GVec.block(0,0,(nOVA+nOVB),3);
   cout << Gpass << endl;
-  Davidson<double> davA(this,Davidson<double>::CIS,2,&Gpass,3,&PDiag);
+  Davidson<double> davA(this,Davidson<double>::CIS,3,&Gpass,3,&PDiag);
   davA.run(this->fileio_->out);
   cout << "The lowest 3 eigenvalue solved by Davidson Algorithm:" <<endl;
   cout << *davA.eigenvalues() << endl;
@@ -581,7 +558,7 @@ RealMatrix SDResponse::formRM2(RealMatrix &XMO){
   enum{a,j,i,b,mu,nu,lam,sig};
 
   int nCol = XMO.cols();
-  cout << "The dimension of input Matrix XMO:  " << (nOVA+nOVB) << " * "<< nCol << endl;
+  cout << "The dimension of input trial vector:  " << (nOVA+nOVB) << " * "<< nCol << endl;
   RealMatrix AX(nOVA+nOVB,nCol);
   RealMatrix X(nOVA+nOVB,1);
   RealMatrix XAAO(this->nBasis_,this->nBasis_);
@@ -652,8 +629,6 @@ RealMatrix SDResponse::formRM2(RealMatrix &XMO){
     AX.block(0,idx,nOVA,1) = AXu;
     AX.block(nOVA,idx,nOVB,1) = AXd; 
   }
-//  cout << "AX"  <<endl;
-//  cout << AX    <<endl;
   return AX;
 }
 
