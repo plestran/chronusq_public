@@ -135,25 +135,25 @@ void AOIntegrals::twoEContractDirect(bool RHF, bool doFock, const RealMatrix &XA
                       G[1][thread_id](bf2,bf1) += (XAlpha(bf3,bf4)+XBeta(bf3,bf4))*v;
                       G[1][thread_id](bf4,bf3) += (XAlpha(bf1,bf2)+XBeta(bf1,bf2))*v;
                     } else {
-                      G[0][thread_id](bf1,bf2) += (XAlpha(bf4,bf3)+XBeta(bf4,bf3))*v;
-                      G[0][thread_id](bf3,bf4) += (XAlpha(bf2,bf1)+XBeta(bf2,bf1))*v;
-                      G[0][thread_id](bf2,bf1) += (XAlpha(bf3,bf4)+XBeta(bf3,bf4))*v;
-                      G[0][thread_id](bf4,bf3) += (XAlpha(bf1,bf2)+XBeta(bf1,bf2))*v;
-                      G[1][thread_id](bf1,bf2) += (XAlpha(bf4,bf3)+XBeta(bf4,bf3))*v;
-                      G[1][thread_id](bf3,bf4) += (XAlpha(bf2,bf1)+XBeta(bf2,bf1))*v;
-                      G[1][thread_id](bf2,bf1) += (XAlpha(bf3,bf4)+XBeta(bf3,bf4))*v;
-                      G[1][thread_id](bf4,bf3) += (XAlpha(bf1,bf2)+XBeta(bf1,bf2))*v;
+                      G[0][thread_id](bf1,bf2) += 0.5*(XAlpha(bf4,bf3)+XBeta(bf4,bf3))*v;
+                      G[0][thread_id](bf3,bf4) += 0.5*(XAlpha(bf2,bf1)+XBeta(bf2,bf1))*v;
+                      G[0][thread_id](bf2,bf1) += 0.5*(XAlpha(bf3,bf4)+XBeta(bf3,bf4))*v;
+                      G[0][thread_id](bf4,bf3) += 0.5*(XAlpha(bf1,bf2)+XBeta(bf1,bf2))*v;
+                      G[1][thread_id](bf1,bf2) += 0.5*(XAlpha(bf4,bf3)+XBeta(bf4,bf3))*v;
+                      G[1][thread_id](bf3,bf4) += 0.5*(XAlpha(bf2,bf1)+XBeta(bf2,bf1))*v;
+                      G[1][thread_id](bf2,bf1) += 0.5*(XAlpha(bf3,bf4)+XBeta(bf3,bf4))*v;
+                      G[1][thread_id](bf4,bf3) += 0.5*(XAlpha(bf1,bf2)+XBeta(bf1,bf2))*v;
 
-                      G[0][thread_id](bf1,bf2) += (XAlpha(bf3,bf4)+XBeta(bf3,bf4))*v;
-                      G[0][thread_id](bf3,bf4) += (XAlpha(bf1,bf2)+XBeta(bf1,bf2))*v;
-                      G[0][thread_id](bf2,bf1) += (XAlpha(bf4,bf3)+XBeta(bf4,bf3))*v;
-                      G[0][thread_id](bf4,bf3) += (XAlpha(bf2,bf1)+XBeta(bf2,bf1))*v;
-                      G[1][thread_id](bf1,bf2) += (XAlpha(bf3,bf4)+XBeta(bf3,bf4))*v;
-                      G[1][thread_id](bf3,bf4) += (XAlpha(bf1,bf2)+XBeta(bf1,bf2))*v;
-                      G[1][thread_id](bf2,bf1) += (XAlpha(bf4,bf3)+XBeta(bf4,bf3))*v;
-                      G[1][thread_id](bf4,bf3) += (XAlpha(bf2,bf1)+XBeta(bf2,bf1))*v;
+                      G[0][thread_id](bf1,bf2) += 0.5*(XAlpha(bf3,bf4)+XBeta(bf3,bf4))*v;
+                      G[0][thread_id](bf3,bf4) += 0.5*(XAlpha(bf1,bf2)+XBeta(bf1,bf2))*v;
+                      G[0][thread_id](bf2,bf1) += 0.5*(XAlpha(bf4,bf3)+XBeta(bf4,bf3))*v;
+                      G[0][thread_id](bf4,bf3) += 0.5*(XAlpha(bf2,bf1)+XBeta(bf2,bf1))*v;
+                      G[1][thread_id](bf1,bf2) += 0.5*(XAlpha(bf3,bf4)+XBeta(bf3,bf4))*v;
+                      G[1][thread_id](bf3,bf4) += 0.5*(XAlpha(bf1,bf2)+XBeta(bf1,bf2))*v;
+                      G[1][thread_id](bf2,bf1) += 0.5*(XAlpha(bf4,bf3)+XBeta(bf4,bf3))*v;
+                      G[1][thread_id](bf4,bf3) += 0.5*(XAlpha(bf2,bf1)+XBeta(bf2,bf1))*v;
                     }
- 
+
                     // Exchange
                     if(RHF && doFock) {
                       G[0][thread_id](bf1,bf3) -= 0.25*XAlpha(bf2,bf4)*v;
@@ -186,25 +186,25 @@ void AOIntegrals::twoEContractDirect(bool RHF, bool doFock, const RealMatrix &XA
                       G[1][thread_id](bf4,bf1) -= 0.5*XBeta(bf3,bf2)*v;
                       G[1][thread_id](bf3,bf2) -= 0.5*XBeta(bf4,bf1)*v;
                     } else {
-                      G[0][thread_id](bf1,bf3) -= XAlpha(bf2,bf4)*v;
-                      G[0][thread_id](bf2,bf4) -= XAlpha(bf1,bf3)*v;
-                      G[0][thread_id](bf1,bf4) -= XAlpha(bf2,bf3)*v;
-                      G[0][thread_id](bf2,bf3) -= XAlpha(bf1,bf4)*v;
+                      G[0][thread_id](bf1,bf3) -= 0.5*XAlpha(bf2,bf4)*v;
+                      G[0][thread_id](bf2,bf4) -= 0.5*XAlpha(bf1,bf3)*v;
+                      G[0][thread_id](bf1,bf4) -= 0.5*XAlpha(bf2,bf3)*v;
+                      G[0][thread_id](bf2,bf3) -= 0.5*XAlpha(bf1,bf4)*v;
 
-                      G[0][thread_id](bf3,bf1) -= XAlpha(bf4,bf2)*v;
-                      G[0][thread_id](bf4,bf2) -= XAlpha(bf3,bf1)*v;
-                      G[0][thread_id](bf4,bf1) -= XAlpha(bf3,bf2)*v;
-                      G[0][thread_id](bf3,bf2) -= XAlpha(bf4,bf1)*v;
+                      G[0][thread_id](bf3,bf1) -= 0.5*XAlpha(bf4,bf2)*v;
+                      G[0][thread_id](bf4,bf2) -= 0.5*XAlpha(bf3,bf1)*v;
+                      G[0][thread_id](bf4,bf1) -= 0.5*XAlpha(bf3,bf2)*v;
+                      G[0][thread_id](bf3,bf2) -= 0.5*XAlpha(bf4,bf1)*v;
 
-                      G[1][thread_id](bf1,bf3) -= XBeta(bf2,bf4)*v;
-                      G[1][thread_id](bf2,bf4) -= XBeta(bf1,bf3)*v;
-                      G[1][thread_id](bf1,bf4) -= XBeta(bf2,bf3)*v;
-                      G[1][thread_id](bf2,bf3) -= XBeta(bf1,bf4)*v;
+                      G[1][thread_id](bf1,bf3) -= 0.5*XBeta(bf2,bf4)*v;
+                      G[1][thread_id](bf2,bf4) -= 0.5*XBeta(bf1,bf3)*v;
+                      G[1][thread_id](bf1,bf4) -= 0.5*XBeta(bf2,bf3)*v;
+                      G[1][thread_id](bf2,bf3) -= 0.5*XBeta(bf1,bf4)*v;
 
-                      G[1][thread_id](bf3,bf1) -= XBeta(bf4,bf2)*v;
-                      G[1][thread_id](bf4,bf2) -= XBeta(bf3,bf1)*v;
-                      G[1][thread_id](bf4,bf1) -= XBeta(bf3,bf2)*v;
-                      G[1][thread_id](bf3,bf2) -= XBeta(bf4,bf1)*v;
+                      G[1][thread_id](bf3,bf1) -= 0.5*XBeta(bf4,bf2)*v;
+                      G[1][thread_id](bf4,bf2) -= 0.5*XBeta(bf3,bf1)*v;
+                      G[1][thread_id](bf4,bf1) -= 0.5*XBeta(bf3,bf2)*v;
+                      G[1][thread_id](bf3,bf2) -= 0.5*XBeta(bf4,bf1)*v;
                     }
                   }
                 }

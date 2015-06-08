@@ -82,7 +82,6 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   //moIntegrals->iniMOIntegrals(molecule,basisset,fileIO,controls,aointegrals,hartreeFock);
   else fileIO->out << "**Skipping SCF Optimization**" << endl; 
   hartreeFock->computeMultipole();
-/*
   SDResponse *sdResponse = new SDResponse();
   sdResponse->iniSDResponse(molecule.get(),basisset.get(),moIntegrals.get(),fileIO.get(),controls.get(),hartreeFock.get());
 
@@ -91,7 +90,6 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   sdResponse->formRM();
 
   sdResponse->DavidsonCIS();
-*/
   //sdResponse->formRM2(XMO);
   //sdResponse->ReturnDiag();
   //sdResponse->Guess(PDiag);
@@ -111,17 +109,10 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 */
   time(&currentTime);
   fileIO->out<<"\nJob finished: "<<ctime(&currentTime)<<endl;
+/*
   SingleSlater<dcomplex> newSS(hartreeFock.get());
-  newSS.printInfo();
-  for(auto i = 0; i < hartreeFock->nBasis(); i++)
-  for(auto j = 0; j <= i;                    j++){
-    if(i != j) (*newSS.densityA())(i,j) = dcomplex(i+1,j-1);
-    else       (*newSS.densityA())(i,j) = dcomplex(i+1);
-  }
-  *newSS.densityA() = newSS.densityA()->selfadjointView<Lower>();
-  prettyPrint(cout,(*newSS.densityA()),"new D");
   newSS.formFock();
-  prettyPrint(cout,(*newSS.fockA()),"new F");
+*/
 /*
   double *tmp = new double[3*2];
   for(auto i =0; i < 6; i++) tmp[i] = 0.0;

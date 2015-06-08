@@ -136,25 +136,24 @@ void AOIntegrals::twoEContractDirect(bool RHF, bool doFock, const ComplexMatrix 
                       G[1][thread_id](bf2,bf1) += (XAlpha(bf3,bf4)+XBeta(bf3,bf4)).real()*v;
                       G[1][thread_id](bf4,bf3) += (XAlpha(bf1,bf2)+XBeta(bf1,bf2)).real()*v;
                     } else {
-                      G[0][thread_id](bf1,bf2) += (XAlpha(bf4,bf3)+XBeta(bf4,bf3))*v;
-                      G[0][thread_id](bf3,bf4) += (XAlpha(bf2,bf1)+XBeta(bf2,bf1))*v;
-                      G[0][thread_id](bf2,bf1) += (XAlpha(bf3,bf4)+XBeta(bf3,bf4))*v;
-                      G[0][thread_id](bf4,bf3) += (XAlpha(bf1,bf2)+XBeta(bf1,bf2))*v;
-                      G[1][thread_id](bf1,bf2) += (XAlpha(bf4,bf3)+XBeta(bf4,bf3))*v;
-                      G[1][thread_id](bf3,bf4) += (XAlpha(bf2,bf1)+XBeta(bf2,bf1))*v;
-                      G[1][thread_id](bf2,bf1) += (XAlpha(bf3,bf4)+XBeta(bf3,bf4))*v;
-                      G[1][thread_id](bf4,bf3) += (XAlpha(bf1,bf2)+XBeta(bf1,bf2))*v;
+                      G[0][thread_id](bf1,bf2) += 0.5*(XAlpha(bf4,bf3)+XBeta(bf4,bf3))*v;
+                      G[0][thread_id](bf3,bf4) += 0.5*(XAlpha(bf2,bf1)+XBeta(bf2,bf1))*v;
+                      G[0][thread_id](bf2,bf1) += 0.5*(XAlpha(bf3,bf4)+XBeta(bf3,bf4))*v;
+                      G[0][thread_id](bf4,bf3) += 0.5*(XAlpha(bf1,bf2)+XBeta(bf1,bf2))*v;
+                      G[1][thread_id](bf1,bf2) += 0.5*(XAlpha(bf4,bf3)+XBeta(bf4,bf3))*v;
+                      G[1][thread_id](bf3,bf4) += 0.5*(XAlpha(bf2,bf1)+XBeta(bf2,bf1))*v;
+                      G[1][thread_id](bf2,bf1) += 0.5*(XAlpha(bf3,bf4)+XBeta(bf3,bf4))*v;
+                      G[1][thread_id](bf4,bf3) += 0.5*(XAlpha(bf1,bf2)+XBeta(bf1,bf2))*v;
 
-                      G[0][thread_id](bf1,bf2) += (XAlpha(bf3,bf4)+XBeta(bf3,bf4))*v;
-                      G[0][thread_id](bf3,bf4) += (XAlpha(bf1,bf2)+XBeta(bf1,bf2))*v;
-                      G[0][thread_id](bf2,bf1) += (XAlpha(bf4,bf3)+XBeta(bf4,bf3))*v;
-                      G[0][thread_id](bf4,bf3) += (XAlpha(bf2,bf1)+XBeta(bf2,bf1))*v;
-                      G[1][thread_id](bf1,bf2) += (XAlpha(bf3,bf4)+XBeta(bf3,bf4))*v;
-                      G[1][thread_id](bf3,bf4) += (XAlpha(bf1,bf2)+XBeta(bf1,bf2))*v;
-                      G[1][thread_id](bf2,bf1) += (XAlpha(bf4,bf3)+XBeta(bf4,bf3))*v;
-                      G[1][thread_id](bf4,bf3) += (XAlpha(bf2,bf1)+XBeta(bf2,bf1))*v;
+                      G[0][thread_id](bf1,bf2) += 0.5*(XAlpha(bf3,bf4)+XBeta(bf3,bf4))*v;
+                      G[0][thread_id](bf3,bf4) += 0.5*(XAlpha(bf1,bf2)+XBeta(bf1,bf2))*v;
+                      G[0][thread_id](bf2,bf1) += 0.5*(XAlpha(bf4,bf3)+XBeta(bf4,bf3))*v;
+                      G[0][thread_id](bf4,bf3) += 0.5*(XAlpha(bf2,bf1)+XBeta(bf2,bf1))*v;
+                      G[1][thread_id](bf1,bf2) += 0.5*(XAlpha(bf3,bf4)+XBeta(bf3,bf4))*v;
+                      G[1][thread_id](bf3,bf4) += 0.5*(XAlpha(bf1,bf2)+XBeta(bf1,bf2))*v;
+                      G[1][thread_id](bf2,bf1) += 0.5*(XAlpha(bf4,bf3)+XBeta(bf4,bf3))*v;
+                      G[1][thread_id](bf4,bf3) += 0.5*(XAlpha(bf2,bf1)+XBeta(bf2,bf1))*v;
                     }
- 
                     // Exchange
                     if(RHF && doFock) {
                       G[0][thread_id](bf1,bf3) -= 0.25*XAlpha(bf2,bf4)*v;
@@ -187,25 +186,25 @@ void AOIntegrals::twoEContractDirect(bool RHF, bool doFock, const ComplexMatrix 
                       G[1][thread_id](bf4,bf1) -= 0.5*XBeta(bf3,bf2)*v;
                       G[1][thread_id](bf3,bf2) -= 0.5*XBeta(bf4,bf1)*v;
                     } else {
-                      G[0][thread_id](bf1,bf3) -= XAlpha(bf2,bf4)*v;
-                      G[0][thread_id](bf2,bf4) -= XAlpha(bf1,bf3)*v;
-                      G[0][thread_id](bf1,bf4) -= XAlpha(bf2,bf3)*v;
-                      G[0][thread_id](bf2,bf3) -= XAlpha(bf1,bf4)*v;
+                      G[0][thread_id](bf1,bf3) -= 0.5*XAlpha(bf2,bf4)*v;
+                      G[0][thread_id](bf2,bf4) -= 0.5*XAlpha(bf1,bf3)*v;
+                      G[0][thread_id](bf1,bf4) -= 0.5*XAlpha(bf2,bf3)*v;
+                      G[0][thread_id](bf2,bf3) -= 0.5*XAlpha(bf1,bf4)*v;
 
-                      G[0][thread_id](bf3,bf1) -= XAlpha(bf4,bf2)*v;
-                      G[0][thread_id](bf4,bf2) -= XAlpha(bf3,bf1)*v;
-                      G[0][thread_id](bf4,bf1) -= XAlpha(bf3,bf2)*v;
-                      G[0][thread_id](bf3,bf2) -= XAlpha(bf4,bf1)*v;
+                      G[0][thread_id](bf3,bf1) -= 0.5*XAlpha(bf4,bf2)*v;
+                      G[0][thread_id](bf4,bf2) -= 0.5*XAlpha(bf3,bf1)*v;
+                      G[0][thread_id](bf4,bf1) -= 0.5*XAlpha(bf3,bf2)*v;
+                      G[0][thread_id](bf3,bf2) -= 0.5*XAlpha(bf4,bf1)*v;
 
-                      G[1][thread_id](bf1,bf3) -= XBeta(bf2,bf4)*v;
-                      G[1][thread_id](bf2,bf4) -= XBeta(bf1,bf3)*v;
-                      G[1][thread_id](bf1,bf4) -= XBeta(bf2,bf3)*v;
-                      G[1][thread_id](bf2,bf3) -= XBeta(bf1,bf4)*v;
+                      G[1][thread_id](bf1,bf3) -= 0.5*XBeta(bf2,bf4)*v;
+                      G[1][thread_id](bf2,bf4) -= 0.5*XBeta(bf1,bf3)*v;
+                      G[1][thread_id](bf1,bf4) -= 0.5*XBeta(bf2,bf3)*v;
+                      G[1][thread_id](bf2,bf3) -= 0.5*XBeta(bf1,bf4)*v;
 
-                      G[1][thread_id](bf3,bf1) -= XBeta(bf4,bf2)*v;
-                      G[1][thread_id](bf4,bf2) -= XBeta(bf3,bf1)*v;
-                      G[1][thread_id](bf4,bf1) -= XBeta(bf3,bf2)*v;
-                      G[1][thread_id](bf3,bf2) -= XBeta(bf4,bf1)*v;
+                      G[1][thread_id](bf3,bf1) -= 0.5*XBeta(bf4,bf2)*v;
+                      G[1][thread_id](bf4,bf2) -= 0.5*XBeta(bf3,bf1)*v;
+                      G[1][thread_id](bf4,bf1) -= 0.5*XBeta(bf3,bf2)*v;
+                      G[1][thread_id](bf3,bf2) -= 0.5*XBeta(bf4,bf1)*v;
                     }
                   }
                 }
@@ -243,16 +242,25 @@ void AOIntegrals::twoEContractN4(bool RHF, bool doFock, const ComplexMatrix &XAl
                                  const ComplexMatrix &XBeta, ComplexMatrix &AXBeta) {
   this->fileio_->out << "Contracting with in-core two-electron integrals" << endl;
   if(!this->haveAOTwoE) this->computeAOTwoE();
+/*
   RealTensor2d ReXAlphaTensor(XAlpha.rows(),XAlpha.cols());
   RealTensor2d ImXAlphaTensor(XAlpha.rows(),XAlpha.cols());
   RealTensor2d ReAXAlphaTensor(AXAlpha.rows(),AXAlpha.cols());
   RealTensor2d ImAXAlphaTensor(AXAlpha.rows(),AXAlpha.cols());
+  RealTensor2d ReXBetaTensor(XBeta.rows(),XBeta.cols());
+  RealTensor2d ImXBetaTensor(XBeta.rows(),XBeta.cols());
+  RealTensor2d ReAXBetaTensor(AXBeta.rows(),AXBeta.cols());
+  RealTensor2d ImAXBetaTensor(AXBeta.rows(),AXBeta.cols());
   for(auto i = 0; i < XAlpha.size(); i++) {
     ReXAlphaTensor.storage()[i] = XAlpha.data()[i].real();
     ImXAlphaTensor.storage()[i] = XAlpha.data()[i].imag();
+    ReXBetaTensor.storage()[i] = XBeta.data()[i].real();
+    ImXBetaTensor.storage()[i] = XBeta.data()[i].imag();
   }
   ReAXAlphaTensor.fill(0.0);
   ImAXAlphaTensor.fill(0.0);
+  ReAXBetaTensor.fill(0.0);
+  ImAXBetaTensor.fill(0.0);
 
   double fact = -1.0;
   if(RHF && doFock) fact = -0.5;
@@ -266,6 +274,63 @@ void AOIntegrals::twoEContractN4(bool RHF, bool doFock, const ComplexMatrix &XAl
   for(auto i = 0; i < AXAlpha.size(); i++) {
     AXAlpha.data()[i] = 
       dcomplex(ReAXAlphaTensor.storage()[i],ImAXAlphaTensor.storage()[i]);
+  }
+*/
+  RealTensor2d ReXAlphaTensor, ReXBetaTensor;
+  RealTensor2d ReAXAlphaTensor,ReAXBetaTensor;
+  RealTensor2d ImXAlphaTensor, ImXBetaTensor;
+  RealTensor2d ImAXAlphaTensor,ImAXBetaTensor;
+  enum{i,j,k,l}; 
+
+  if(doFock)  {
+    ReXAlphaTensor  = RealTensor2d(XAlpha.rows(),XAlpha.cols());
+    ReAXAlphaTensor = RealTensor2d(AXAlpha.rows(),AXAlpha.cols());
+    ImXAlphaTensor  = RealTensor2d(XAlpha.rows(),XAlpha.cols());
+    ImAXAlphaTensor = RealTensor2d(AXAlpha.rows(),AXAlpha.cols());
+    for(auto i = 0; i < XAlpha.size(); i++) {
+      ReXAlphaTensor.storage()[i] = XAlpha.data()[i].real();
+      ImXAlphaTensor.storage()[i] = XAlpha.data()[i].imag();
+    }
+    ReAXAlphaTensor.fill(0.0);
+    ImAXAlphaTensor.fill(0.0);
+    if(RHF){
+      contract(1.0,*this->aoERI_,{i,j,k,l},ReXAlphaTensor,{l,k},0.0,ReAXAlphaTensor,{i,j});
+      contract(1.0,*this->aoERI_,{i,j,k,l},ImXAlphaTensor,{l,k},0.0,ImAXAlphaTensor,{i,j});
+      contract(-0.5,*this->aoERI_,{i,l,k,j},ReXAlphaTensor,{l,k},1.0,ReAXAlphaTensor,{i,j});
+      contract(-0.5,*this->aoERI_,{i,l,k,j},ImXAlphaTensor,{l,k},1.0,ImAXAlphaTensor,{i,j});
+     
+    } else {
+      ReXBetaTensor  = RealTensor2d(XBeta.rows(),XBeta.cols());
+      ReAXBetaTensor = RealTensor2d(AXBeta.rows(),AXBeta.cols());
+      ImXBetaTensor  = RealTensor2d(XBeta.rows(),XBeta.cols());
+      ImAXBetaTensor = RealTensor2d(AXBeta.rows(),AXBeta.cols());
+      for(auto i = 0; i < XBeta.size(); i++) {
+        ReXBetaTensor.storage()[i] = XBeta.data()[i].real();
+        ImXBetaTensor.storage()[i] = XBeta.data()[i].imag();
+      }
+      ReAXBetaTensor.fill(0.0);
+      ImAXBetaTensor.fill(0.0);
+      RealTensor2d ReXTotalTensor(XAlpha.rows(),XBeta.cols());
+      RealTensor2d ImXTotalTensor(XAlpha.rows(),XBeta.cols());
+
+      ReXTotalTensor = ReXAlphaTensor + ReXBetaTensor;
+      ImXTotalTensor = ImXAlphaTensor + ImXBetaTensor;
+
+      contract(1.0,*this->aoERI_,{i,j,k,l},ReXTotalTensor,{l,k},0.0,ReAXAlphaTensor,{i,j});
+      contract(1.0,*this->aoERI_,{i,j,k,l},ImXTotalTensor,{l,k},0.0,ImAXAlphaTensor,{i,j});
+      ReAXBetaTensor = ReAXAlphaTensor;
+      ImAXBetaTensor = ImAXAlphaTensor;
+      contract(-1.0,*this->aoERI_,{i,l,k,j},ReXAlphaTensor,{l,k},1.0,ReAXAlphaTensor,{i,j});
+      contract(-1.0,*this->aoERI_,{i,l,k,j},ImXAlphaTensor,{l,k},1.0,ImAXAlphaTensor,{i,j});
+      contract(-1.0,*this->aoERI_,{i,l,k,j},ReXBetaTensor,{l,k},1.0,ReAXBetaTensor,{i,j});
+      contract(-1.0,*this->aoERI_,{i,l,k,j},ImXBetaTensor,{l,k},1.0,ImAXBetaTensor,{i,j});
+    } 
+  } else CErr("General Contraction NYI for in-core integrals");
+  for(auto i = 0; i < AXAlpha.size(); i++) {
+    AXAlpha.data()[i] = 
+      dcomplex(ReAXAlphaTensor.storage()[i],ImAXAlphaTensor.storage()[i]);
+    if(!RHF) AXBeta.data()[i] = 
+      dcomplex(ReAXBetaTensor.storage()[i],ImAXBetaTensor.storage()[i]);
   }
 }
 template<>

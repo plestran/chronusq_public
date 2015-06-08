@@ -590,8 +590,8 @@ RealMatrix SDResponse::formRM2(RealMatrix &XMO){
     RealMatrix IXA(this->nBasis_,this->nBasis_);
     RealMatrix IXB(this->nBasis_,this->nBasis_);
     // Try twoEContractDirect
-    //this->singleSlater_->aointegrals()->twoEContractDirect(false, true, XAAO,IXAD,XBAO,IXBD);
-    this->singleSlater_->aointegrals()->twoEContractN4(false, true, XAAO,IXA,XBAO,IXB);
+    this->singleSlater_->aointegrals()->twoEContractDirect(false, false, XAAO,IXA,XBAO,IXB);
+    //this->singleSlater_->aointegrals()->twoEContractN4(false, true, XAAO,IXA,XBAO,IXB);
     //cout << "compare" << endl;
     //cout << "IXAD" <<endl;
     //cout << IXAD  << endl;
