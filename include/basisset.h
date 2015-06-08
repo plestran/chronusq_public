@@ -165,6 +165,7 @@ public:
   void convShell(Molecule *);
   void makeMap(Molecule *);
   void computeShBlkNorm(bool,Molecule *,const RealMatrix*,const RealMatrix*);
+  void computeShBlkNorm(bool,Molecule *,const ComplexMatrix*,const ComplexMatrix*);
 #endif
 
   /*************************/
