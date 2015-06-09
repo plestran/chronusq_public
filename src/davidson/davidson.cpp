@@ -165,19 +165,21 @@ void Davidson<double>::runMicro(ostream &output ) {
 
     // Loop over NSek residual vectors. Decide from which residuals
     // will be made perturbed guess vectors
-    output << "  Checking Residual Norms:" << endl;
     for(auto k = 0; k < this->nSek_; k++) {
       if(ResR.col(k).norm() < 5e-6) resConv.push_back(true);
       else {
         resConv.push_back(false); NNotConv++;
       }
-      if(resConv[k]) {
-        output << "    Norm of Residual " << k+1 << " = " << std::scientific 
-               << ResR.col(k).norm() << " \t \t Root has converged" <<endl;
-      } else {
-        output << "    Norm of Residual " << k+1 << " = " << std::scientific 
-               << ResR.col(k).norm() << " \t \t Root has not converged" <<endl;
-      }
+    }
+    output << "  Checking Davidson Convergence:" << endl;
+    output << "    " << std::setw(8)  << " " << std::setw(32) << std::left << "    Roots at Current Iteration:";
+    output << std::setw(32) << std::left << "    Norm of Residual:" << endl;
+    for(auto k = 0 ; k < this->nSek_; k++){
+      output << "    " << std::setw(12) << "State " + std::to_string(k+1) + ":";
+      output << std::setw(32) << std::left << std::fixed << (*this->eigenvalues_)(k,0);
+      output << std::setw(15) << std::left << std::scientific << ResR.col(k).norm();
+      if(resConv[k]) output << "     Root has converged" << endl;
+      else output << "     Root has not converged" << endl;
     }
 
 //  output << *this->eigenvalues_ << endl << endl;
