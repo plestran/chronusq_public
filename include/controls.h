@@ -52,12 +52,14 @@ public:
   bool          doDF;           // Density fitting (RI) flag
   bool          doDipole;       // Use Libint dipole integrals?
   bool          doQuadpole;     // Use Libint quadrapole integrals?
-  bool          doOctpole;     // Usr Libint octapole integrals?
+  bool          doOctpole;      // Use Libint octapole integrals?
+  bool          doSDR;
   double 	thresholdS;
   double 	thresholdAB;
   double	thresholdSchawrtz;
   int    	guess;         	// how to get the initial guess
   int           nthreads;       // Number of OpenMP threads
+  int           SDMethod;
   std::string   gauFChkName;	// Gaussian formatted checkpoint filename
   std::string   gauMatElName;   // Gaussian raw matrix element file
 
