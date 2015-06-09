@@ -43,6 +43,20 @@ class SDResponse {
   int       **R2Index_;
   int       nStates_;
   int       RHF_;
+//dbwys
+  int       nSek_;
+  int       iMeth_;
+  bool      haveDag_;
+  int       nOA_;
+  int       nVA_;
+  int       nOB_;
+  int       nVB_;
+  int       nOAVA_;
+  int       nOBVB_;
+  int       nOAVB_;
+  int       nOBVA_;
+  int       nSingleDim_;
+//dbwye
   friend class SingleSlater<double>;
 
   RealMatrix      XMO;
@@ -58,6 +72,11 @@ class SDResponse {
   SingleSlater<double> *  singleSlater_;
   RealTensor4d *  aoERI_;
   RealTensor3d *  elecDipole_;
+
+//dbwys
+  std::unique_ptr<RealMatrix> tMO_;
+  std::unique_ptr<RealMatrix> rmDiag_;
+//dbwye
 
 public:
  
@@ -76,6 +95,13 @@ public:
   void printInfo();
   void formRM();
   void DavidsonCIS();
+//dbwys
+  void setNSek(int n){ this->nSek_  = n;};
+  void setMeth(int n){ this->iMeth_ = n;};
+  void formGuess();
+  void checkValid();
+  void getDiag();
+//dbwye
   RealMatrix formRM2(RealMatrix &XMO);
   RealMatrix ReturnDiag();
   RealMatrix Guess(RealMatrix &PDiag);

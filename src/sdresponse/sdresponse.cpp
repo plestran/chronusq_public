@@ -64,6 +64,19 @@ void SDResponse::iniSDResponse( Molecule * molecule, BasisSet * basisSet, MOInte
   this->CISEnergy_ = std::unique_ptr<RealMatrix>(new RealMatrix(nOVA+nOVB,1));
   this->CISTransDen_ = std::unique_ptr<RealMatrix>(new RealMatrix(nOVA+nOVB,nOVA+nOVB));
   this->TransDipole_ = std::unique_ptr<RealMatrix>(new RealMatrix(1,3));
+//dbwys
+  this->nSek_    = 0;
+  this->iMeth_   = 0;
+  this->haveDag_ = false;
+  this->nOA_ = this->singleSlater_->nOccA();
+  this->nOB_ = this->singleSlater_->nOccB();
+  this->nVA_ = this->singleSlater_->nVirA();
+  this->nVB_ = this->singleSlater_->nVirB();
+  this->nOAVA_ = this->nOA_*this->nVA_;
+  this->nOBVB_ = this->nOB_*this->nVB_;
+  this->nOAVB_ = this->nOA_*this->nVB_;
+  this->nOBVA_ = this->nOB_*this->nVA_;
+//dbwye
 };
 //-----------------------------------//
 // print a wave function information //
@@ -503,7 +516,7 @@ void SDResponse::DavidsonCIS(){
     TransDipole(st_rank,TransDen);
     double Omega = DavEvalues(st_rank);
     double Oscstr = OscStrength(st_rank,Omega);
-    cout << "Excitation energy is: " << " " << Omega << " f = "<< Oscstr << endl << endl;
+    cout << "Excitation energy is: " << " " << Omega*phys.hartreePerEV << " f = "<< Oscstr << endl << endl;
   }
 
 }
@@ -806,3 +819,45 @@ void SDResponse::mpiRecv(int fromID,int tag) {
   //this->cart_->mpiRecv(fromID,tag);
 };
 
+
+//dbwys
+void SDResponse::formGuess(){
+  this->checkValid();
+  if(!this->haveDag_) this->getDiag();
+}
+
+void SDResponse::checkValid(){
+  if(this->nSek_ == 0)
+    CErr("Specification of zero desired roots is not acceptable",
+         this->fileio_->out);
+  if(this->iMeth_ == 0)
+    CErr("Invalid Method: SDResponse::iMeth_ = " + std::to_string(this->iMeth_),
+         this->fileio_->out);
+  if(this->nSingleDim_ == 0)
+    CErr("Leading Dimenstion not defined for SDResponse::iMeth_ = " +
+         std::to_string(this->iMeth_),this->fileio_->out);
+}
+void SDResponse::getDiag(){
+  this->rmDiag_ = std::unique_ptr<RealMatrix>(new RealMatrix(nSingleDim_,1)); 
+
+  for(auto iAlpha = 0; iAlpha < this->nOA_; iAlpha++)
+  for(auto aAlpha = 0; aAlpha < this->nVA_; aAlpha++){
+    auto iaAlpha = aAlpha*this->nOA_ + iAlpha; 
+    auto eiAlpha = (*this->singleSlater_->epsA())(iAlpha);
+    auto eaAlpha = (*this->singleSlater_->epsA())(aAlpha+this->nOA_);
+    (*this->rmDiag_)(iaAlpha,0) = eiAlpha - eaAlpha;
+    if(this->RHF_) 
+      (*this->rmDiag_)(iaAlpha+this->nOAVA_,0) = eiAlpha - eaAlpha;
+  }
+  if(!this->RHF_){
+    for(auto iBeta = 0; iBeta < this->nOB_; iBeta++)
+    for(auto aBeta = 0; aBeta < this->nVA_; aBeta++){
+      auto iaBeta = aBeta*this->nOB_ + iBeta + this->nOAVA_; 
+      auto eiBeta = (*this->singleSlater_->epsB())(iBeta);
+      auto eaBeta = (*this->singleSlater_->epsB())(aBeta+this->nOB_);
+      (*this->rmDiag_)(iaBeta,0) = eiBeta - eaBeta;
+    }
+  }
+  this->haveDag_ = true;
+}
+//dbwye
