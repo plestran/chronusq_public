@@ -73,7 +73,7 @@ void Davidson<double>::runMicro(ostream &output ) {
 
     // Matrix Product (AX). Keep around for reuse in computing
     // the residual vector
-    if(this->method_ == SDResponse::CIS) AXR = this->sdr_->formRM2(TrialVecR);
+    if(this->method_ == SDResponse::CIS) AXR = this->sdr_->formRM3(TrialVecR);
     else if(this->AX_==NULL) AXR = (*this->mat_) * TrialVecR;  
     else AXR = this->AX_(*this->mat_,TrialVecR);
 //  cout << AXR << endl << endl;

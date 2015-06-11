@@ -116,7 +116,9 @@ public:
   inline int  nGuess(){return this->nGuess_;};
   inline int  nSek(){return this->nSek_;};
   inline int iMeth(){return this->iMeth_;};
+  inline int nSingleDim(){return this->nSingleDim_;};
   void formGuess();
+  RealMatrix formRM3(RealMatrix &);
   void checkValid();
   void getDiag();
   inline RealMatrix * rmDiag(){return this->rmDiag_.get();};

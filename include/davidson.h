@@ -187,7 +187,7 @@ namespace ChronusQ {
       this->nSek_   = SDR->nSek();
       this->nGuess_ = SDR->nGuess();
       if(this->nGuess_ == 0) this->nGuess_ = 2*this->nSek_;
-      this->n_      = SDR->nSingleDim_;
+      this->n_      = SDR->nSingleDim();
       this->method_ = SDR->iMeth();
       this->sdr_    = SDR;
       this->guess_  = std::unique_ptr<TMat>(new TMat(this->n_,this->nGuess_));

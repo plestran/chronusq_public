@@ -645,6 +645,120 @@ RealMatrix SDResponse::formRM2(RealMatrix &XMO){
   }
   return AX;
 }
+//dbwys
+RealMatrix SDResponse::formRM3(RealMatrix &XMO){
+  RealMatrix AX(this->nSingleDim_,XMO.cols());
+  RealMatrix X(this->nSingleDim_,1);
+  std::vector<RealMatrix> XAAO(XMO.cols(),RealMatrix::Zero(this->nBasis_,this->nBasis_));
+  std::vector<RealMatrix> XBAO(XMO.cols(),RealMatrix::Zero(this->nBasis_,this->nBasis_));
+  std::vector<RealMatrix>  IXA(XMO.cols(),RealMatrix::Zero(this->nBasis_,this->nBasis_));
+  std::vector<RealMatrix>  IXB(XMO.cols(),RealMatrix::Zero(this->nBasis_,this->nBasis_));
+  std::vector<RealMatrix>  AXA(XMO.cols(),RealMatrix::Zero(this->nVA_,this->nOA_));
+  std::vector<RealMatrix>  AXB(XMO.cols(),RealMatrix::Zero(this->nVB_,this->nOB_));
+
+  // Build AX by column 
+  for (auto idx = 0; idx < XMO.cols(); idx++)
+  {
+
+    X = XMO.col(idx);
+    RealMap XA(X.data(),this->nVA_,this->nOA_);
+    RealMap XB(X.data()+this->nOAVA_,this->nVB_,this->nOB_);
+    /*
+     *  XAO(s) = Cv(s) * XMO(s) * Co(s)**H
+     *
+     *  XAO(s) - s-spin block of X in the AO basis
+     *  XMO(s) - s-spin block of X in the MO basis
+     *  Cv(s)  - s-spin block of the virtual block of the MO coefficients
+     *  Co(s)  - s-spin block of the occupied block of the MO coefficients
+     *  H      - Adjoint
+     */ 
+    XAAO[idx] = 
+      this->singleSlater_->moA()->block(0,this->nOA_,this->nBasis_,this->nVA_)*
+      XA*
+      this->singleSlater_->moA()->block(0,0,this->nBasis_,this->nOA_).adjoint();
+    if (this->RHF_)
+    {
+      XBAO[idx] = 
+        this->singleSlater_->moA()->block(0,this->nOB_,this->nBasis_,this->nVB_)*
+        XB*
+        this->singleSlater_->moA()->block(0,0,this->nBasis_,this->nOB_).adjoint();
+    }
+    else
+    {
+      XBAO[idx] = 
+        this->singleSlater_->moB()->block(0,this->nOB_,this->nBasis_,this->nVB_)*
+        XB*
+        this->singleSlater_->moB()->block(0,0,this->nBasis_,this->nOB_).adjoint();
+    }
+  }
+
+    /*
+     *  IXAO(s)_{i,j} = [ (ij,s|kl,s') + delta_{s,s'}*(il,s|kj,s) ] * XAO(s')_{l,k}
+     */ 
+    this->singleSlater_->aointegrals()->multTwoEContractDirect(XMO.cols(),false, false, XAAO,IXA,XBAO,IXB);
+    
+
+  for(auto idx = 0; idx < XMO.cols(); idx++){
+    X = XMO.col(idx);
+    RealMap XA(X.data(),this->nVA_,this->nOA_);
+    RealMap XB(X.data()+this->nOAVA_,this->nVB_,this->nOB_);
+    /*
+     *  AX(s)   += IXMO(s)
+     *  IXMO(s) =  Cv(s)**H * IXAO(s) * Co(s)
+     */  
+    AXA[idx] = 
+      this->singleSlater_->moA()->block(0,this->nOA_,this->nBasis_,this->nVA_).adjoint()*
+      IXA[idx]*
+      this->singleSlater_->moA()->block(0,0,this->nBasis_,this->nOA_);
+    if (this->RHF_)
+    {
+      AXB[idx] = 
+        this->singleSlater_->moA()->block(0,this->nOB_,this->nBasis_,this->nVB_).adjoint()*
+        IXB[idx]*
+        this->singleSlater_->moA()->block(0,0,this->nBasis_,this->nOB_);
+    }
+    else
+    {
+      AXB[idx] = 
+        this->singleSlater_->moB()->block(0,this->nOB_,this->nBasis_,this->nVB_).adjoint()*
+        IXB[idx]*
+        this->singleSlater_->moB()->block(0,0,this->nBasis_,this->nOB_);
+    }
+
+/*  Old inefficient way of adding in the eigenenergie differences...
+ *  Keep around just in case
+    for (auto a = 0, ia = 0; a < this->nVA_; a++)
+    for (auto i = 0; i  < this->nOA_;  i++, ia++)
+    {
+      AXA(a,i) += XA(a,i) * (*this->rmDiag_)(ia,0);
+    }
+    for (auto a = 0, ia = this->nOAVA_; a < this->nVB_; a++)
+    for (auto i = 0; i  < this->nOB_;   i++,           ia++)
+    {
+      AXB(a,i) += XB(a,i) * (*this->rmDiag_)(ia,0);
+    }
+*/
+    
+    RealMap AXu(AXA[idx].data(),this->nOAVA_,1);
+    RealMap AXd(AXB[idx].data(),this->nOBVB_,1);
+    RealMap  Xu(XA.data(),this->nOAVA_,1);
+    RealMap  Xd(XB.data(),this->nOBVB_,1);
+
+   
+    /*
+     *  AX(s)_{a,i} += [Eps(s)_{a} - Eps(s)_{i}] * XMO(s)_{a,i}
+     *
+     *  Eps(s)_{a/i} - s-spin virtual / occupied eigenenergies (cannonical)
+     */ 
+    AXu += Xu.cwiseProduct(this->rmDiag_->block(0,0,this->nOAVA_,1));
+    AXd += Xd.cwiseProduct(this->rmDiag_->block(this->nOAVA_,0,this->nOBVB_,1));
+    
+    AX.block(0,idx,this->nOAVA_,1) = AXu;
+    AX.block(this->nOAVA_,idx,this->nOBVB_,1) = AXd; 
+  }
+  return AX;
+}
+//dbwye
 
 RealMatrix SDResponse::ReturnDiag(){
   int nOA = this->singleSlater_->nOccA();
