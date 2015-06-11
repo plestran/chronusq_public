@@ -65,7 +65,7 @@ void Davidson<double>::runMicro(ostream &output ) {
   int NTrial = this->nGuess_;
   TrialVecR = (*this->guess_);
   for(auto iter = 0; iter < this->maxIter_; iter++){
-    cout << "ITER" << iter << endl;
+//  cout << "ITER" << iter << endl;
     std::chrono::high_resolution_clock::time_point start,finish;
     std::chrono::duration<double> elapsed;
     output << "Starting Davidson Micro Iteration " << iter + 1 << endl;
@@ -76,7 +76,7 @@ void Davidson<double>::runMicro(ostream &output ) {
     if(this->method_==1) AXR = this->sdr_->formRM2(TrialVecR);
     else if(this->AX_==NULL) AXR = (*this->mat_) * TrialVecR;  
     else AXR = this->AX_(*this->mat_,TrialVecR);
-    cout << AXR << endl << endl;
+//  cout << AXR << endl << endl;
    
     // Full projection of A onto subspace
     XTAX = TrialVecR.transpose()*AXR; 

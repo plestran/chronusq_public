@@ -50,6 +50,7 @@ void SDResponse::iniSDResponse( Molecule * molecule, BasisSet * basisSet, MOInte
   this->aoERI_          = singleSlater->aointegrals()->aoERI_.get();
   this->elecDipole_     = singleSlater->aointegrals()->elecDipole_.get();
   this->RHF_            = singleSlater->RHF();
+/*
   if (this->RHF_)
   {
     cout << "The calculation is based on RHF" << endl;
@@ -59,6 +60,7 @@ void SDResponse::iniSDResponse( Molecule * molecule, BasisSet * basisSet, MOInte
     cout << "The calculation is based on UHF" << endl;
   }
   cout << "Allocate Memory for CISEnergy_ and CISTransDen_" << endl;
+*/
   int nOVA = singleSlater_->nOVA();
   int nOVB = singleSlater_->nOVB();
   this->CISEnergy_ = std::unique_ptr<RealMatrix>(new RealMatrix(nOVA+nOVB,1));
@@ -495,30 +497,34 @@ void SDResponse::formRM(){
 }
 
 void SDResponse::DavidsonCIS(){
+/*
   int nOVA = this->singleSlater_->nOVA();
   int nOVB = this->singleSlater_->nOVB();
+*/
   int nstate =3;
+/*
   RealMatrix PDiag(nOVA+nOVB,1);
   PDiag = ReturnDiag();
   RealMatrix GVec(nOVA+nOVB,nOVA+nOVB);
   GVec = Guess(PDiag);
-  this->formGuess();
   RealMatrix Gpass = GVec.block(0,0,(nOVA+nOVB),3);
   cout << Gpass << endl;
 //CErr();
+*/
+  this->formGuess();
   Davidson<double> davA(this);
   davA.run(this->fileio_->out);
-  cout << "The lowest " << nstate << " eigenstates solved by Davidson Algorithm:" <<endl;
+  this->fileio_->out << "The lowest " << nstate << " eigenstates solved by Davidson Algorithm:" <<endl;
   RealMatrix DavEvalues = *davA.eigenvalues();
   RealMatrix DavEvector = *davA.eigenvector();
   DavEvector.transposeInPlace();/*Change the matrix to Column major, do this before call the TransDipole*/
   for (auto st_rank=0;st_rank<nstate;st_rank++)
   {
-    RealMap TransDen(DavEvector.data()+st_rank*(nOVA+nOVB),(nOVA+nOVB),1);
+    RealMap TransDen(DavEvector.data()+st_rank*(this->nSingleDim_),(this->nSingleDim_),1);
     TransDipole(st_rank,TransDen);
     double Omega = DavEvalues(st_rank);
     double Oscstr = OscStrength(st_rank,Omega);
-    cout << "Excitation energy is: " << " " << Omega*phys.hartreePerEV << " f = "<< Oscstr << endl << endl;
+    this->fileio_->out << "Excitation energy is: " << " " << Omega*phys.hartreePerEV << " eV   f = "<< Oscstr << endl << endl;
   }
 
 }
@@ -574,7 +580,7 @@ RealMatrix SDResponse::formRM2(RealMatrix &XMO){
   enum{a,j,i,b,mu,nu,lam,sig};
 
   int nCol = XMO.cols();
-  cout << "The dimension of input trial vector:  " << (nOVA+nOVB) << " * "<< nCol << endl;
+//cout << "The dimension of input trial vector:  " << (nOVA+nOVB) << " * "<< nCol << endl;
   RealMatrix AX(nOVA+nOVB,nCol);
   RealMatrix X(nOVA+nOVB,1);
   RealMatrix XAAO(this->nBasis_,this->nBasis_);
@@ -753,12 +759,12 @@ void SDResponse::TransDipole(int st_rank,RealMatrix TransDen){
 
   int NBSq = this->nBasis_*this->nBasis_;
   double transdipole;
-  cout << "For the " << (st_rank+1) << " excited state transition, the contribution of MO are:"<< endl;
+  this->fileio_->out << "For the " << (st_rank+1) << " excited state transition, the contribution of MO are:"<< endl;
   for (auto i=0;i<nOVA;i++)
   {
     if (fabs(TransDen(i,0))>0.1)
     {
-      cout <<(i%nOA+1) <<  "A -> " << (i/nOA+1+nOA) << "A" << "    " << TransDen(i,0) << endl;
+      this->fileio_->out <<(i%nOA+1) <<  "A -> " << (i/nOA+1+nOA) << "A" << "    " << TransDen(i,0) << endl;
     }
   }
   if (!this->RHF_)
@@ -767,7 +773,7 @@ void SDResponse::TransDipole(int st_rank,RealMatrix TransDen){
     {
       if (fabs(TransDen(i+nOVA,0))>0.1)
       {
-        cout <<(i%nOB+1) <<  "B -> " << (i/nOB+1+nOB) << "B" << "    " << TransDen(i+nOVA,0) << endl;
+        this->fileio_->out <<(i%nOB+1) <<  "B -> " << (i/nOB+1+nOB) << "B" << "    " << TransDen(i+nOVA,0) << endl;
       }
     }
   }
@@ -848,7 +854,7 @@ void SDResponse::formGuess(){
     }
     (*this->davGuess_)(indx,i) = 1.0;
   }
-  cout << *this->davGuess_ << endl;
+//cout << *this->davGuess_ << endl;
 }
 
 void SDResponse::checkValid(){
