@@ -45,6 +45,7 @@ class SDResponse {
   int       RHF_;
 //dbwys
   int       nSek_;
+  int       nGuess_;
   int       iMeth_;
   bool      haveDag_;
   int       nOA_;
@@ -76,9 +77,22 @@ class SDResponse {
 //dbwys
   std::unique_ptr<RealMatrix> tMO_;
   std::unique_ptr<RealMatrix> rmDiag_;
+  std::unique_ptr<RealMatrix>  davGuess_;
+//dbwye
+//
+//dbwys
+  void initMeth();
 //dbwye
 
 public:
+//dbwys
+  enum{
+    __invalid,
+    CIS,
+    RPA,
+    CCSD
+  };
+//dbwye
  
   // constructor & destructor
   SDResponse(){;};
@@ -96,8 +110,9 @@ public:
   void formRM();
   void DavidsonCIS();
 //dbwys
-  void setNSek(int n){ this->nSek_  = n;};
-  void setMeth(int n){ this->iMeth_ = n;};
+  void setNSek(int n){ this->nSek_  = n; this->nGuess_ = 2*n;};
+  void setMeth(int n){ this->iMeth_ = n; this->initMeth();};
+  void setNGuess(int n){this->nGuess_ = n;};
   void formGuess();
   void checkValid();
   void getDiag();

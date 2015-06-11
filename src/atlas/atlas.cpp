@@ -86,6 +86,8 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   if(controls->doSDR) {
     sdResponse->iniSDResponse(molecule.get(),basisset.get(),moIntegrals.get(),fileIO.get(),
                               controls.get(),hartreeFock.get());
+    sdResponse->setNSek(3);
+    sdResponse->setMeth(SDResponse::CIS);
 //  sdResponse->computeExcitedStates();
 //  sdResponse->formRM();
     if(controls->SDMethod == 1) sdResponse->DavidsonCIS();

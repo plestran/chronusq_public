@@ -502,8 +502,10 @@ void SDResponse::DavidsonCIS(){
   PDiag = ReturnDiag();
   RealMatrix GVec(nOVA+nOVB,nOVA+nOVB);
   GVec = Guess(PDiag);
+  this->formGuess();
   RealMatrix Gpass = GVec.block(0,0,(nOVA+nOVB),3);
   cout << Gpass << endl;
+  CErr();
   Davidson<double> davA(this,Davidson<double>::CIS,nstate,&Gpass,3,&PDiag);
   davA.run(this->fileio_->out);
   cout << "The lowest " << nstate << " eigenstates solved by Davidson Algorithm:" <<endl;
@@ -824,6 +826,29 @@ void SDResponse::mpiRecv(int fromID,int tag) {
 void SDResponse::formGuess(){
   this->checkValid();
   if(!this->haveDag_) this->getDiag();
+  this->davGuess_ = 
+    std::unique_ptr<RealMatrix>(
+      new RealMatrix(this->nSingleDim_,this->nGuess_)
+    ); 
+  int nRHF = 1;
+  if(this->RHF_) nRHF = 2;
+  RealMatrix dagCpy(this->nSingleDim_/nRHF,1);
+  std::memcpy(dagCpy.data(),this->rmDiag_->data(),dagCpy.size()*sizeof(double));
+  std::sort(dagCpy.data(),dagCpy.data()+dagCpy.size(),
+            [](double a, double b)->bool{ return a>b;});
+//std::sort(dagCpy.data(),dagCpy.data()+dagCpy.size()/2);
+  
+  for(auto i = 0; i < this->nGuess_; i++){
+    int indx;
+    for(auto k = 0; k < dagCpy.size(); k++){
+      if(dagCpy(i,0) == (*this->rmDiag_)(k,0)){
+        indx = k;
+        break;
+      }
+    }
+    (*this->davGuess_)(indx,i) = 1.0;
+  }
+  cout << *this->davGuess_ << endl;
 }
 
 void SDResponse::checkValid(){
@@ -859,5 +884,14 @@ void SDResponse::getDiag(){
     }
   }
   this->haveDag_ = true;
+}
+void SDResponse::initMeth(){
+  if(this->nSek_ == 0) 
+    CErr("Must set NSek before initializing a PSCF method",this->fileio_->out);
+  if(this->iMeth_ == CIS){
+    this->nSingleDim_ = this->nOAVA_ + this->nOBVB_;
+  } else {
+    CErr("PSCF Method " + std::to_string(this->iMeth_) + " NYI",this->fileio_->out);
+  }
 }
 //dbwye
