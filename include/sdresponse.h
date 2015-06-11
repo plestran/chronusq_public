@@ -110,12 +110,13 @@ public:
   void formRM();
   void DavidsonCIS();
 //dbwys
-  void setNSek(int n){ this->nSek_  = n; this->nGuess_ = 2*n;};
-  void setMeth(int n){ this->iMeth_ = n; this->initMeth();};
-  void setNGuess(int n){this->nGuess_ = n;};
+  inline void setNSek(int n){ this->nSek_  = n; this->nGuess_ = 2*n;};
+  inline void setMeth(int n){ this->iMeth_ = n; this->initMeth();};
+  inline void setNGuess(int n){this->nGuess_ = n;};
   void formGuess();
   void checkValid();
   void getDiag();
+  inline RealMatrix * rmDiag(){return this->rmDiag_.get();};
 //dbwye
   RealMatrix formRM2(RealMatrix &XMO);
   RealMatrix ReturnDiag();

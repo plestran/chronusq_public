@@ -505,8 +505,8 @@ void SDResponse::DavidsonCIS(){
   this->formGuess();
   RealMatrix Gpass = GVec.block(0,0,(nOVA+nOVB),3);
   cout << Gpass << endl;
-  CErr();
-  Davidson<double> davA(this,Davidson<double>::CIS,nstate,&Gpass,3,&PDiag);
+//CErr();
+  Davidson<double> davA(this,Davidson<double>::CIS,nstate,&Gpass,3);
   davA.run(this->fileio_->out);
   cout << "The lowest " << nstate << " eigenstates solved by Davidson Algorithm:" <<endl;
   RealMatrix DavEvalues = *davA.eigenvalues();

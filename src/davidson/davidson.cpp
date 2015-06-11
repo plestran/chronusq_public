@@ -42,10 +42,6 @@ void Davidson<double>::runMicro(ostream &output ) {
   RealMap VR(LAPACK_SCR,0,0);
   RealMap VL(LAPACK_SCR,0,0);
 */
-  if(this->method_!=1&&this->diagonal_==NULL) CErr("Need to pass davison a diagonal");
-  if(this->method_!=1) diagonal_ = new RealMatrix(this->n_,1);
-  if(this->method_==1) *diagonal_ = this->sdr_->ReturnDiag();
-
   Eigen::SelfAdjointEigenSolver<RealMatrix> subDiagH_;
   if(this->useLAPACK_) {
     LWORK = 6*this->n_;
@@ -210,7 +206,7 @@ void Davidson<double>::runMicro(ostream &output ) {
       if(!resConv[k]) {
         for(auto i = 0; i < this->n_; i++) {
           if(this->method_==1) {
-            T(i,0) = - ResR.col(k)(i) / ((*diagonal_)(i,0) - subDiagH_.eigenvalues()(k));
+            T(i,0) = - ResR.col(k)(i) / ((*this->sdr_->rmDiag())(i,0) - subDiagH_.eigenvalues()(k));
           }else if(!this->useLAPACK_) {
             T(i,0) = - ResR.col(k)(i) / ((*this->mat_)(i,i) - subDiagH_.eigenvalues()(k));
           } else {
