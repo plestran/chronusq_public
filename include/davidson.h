@@ -176,7 +176,7 @@ namespace ChronusQ {
       (*this->guess_) = TMat::Identity(this->n_,this->nGuess_); // Identity guess (primitive)
     }
 
-    Davidson(SDResponse * SDR, int meth, int nSek, RealMatrix *Guess=NULL,int nGuess=0){
+    Davidson(SDResponse * SDR){
       this->maxSubSpace_ = 250;
       this->maxIter_     = 128;
       this->MaxIter_     = 20;
@@ -184,11 +184,11 @@ namespace ChronusQ {
       this->useLAPACK_   = false; // Use LAPACK by default
       this->mat_    = nullptr;
       this->AX_     = NULL;
-      this->nSek_   = nSek;
-      if(nGuess==0) this->nGuess_ = 2*nSek;
-      else this->nGuess_=nGuess;
+      this->nSek_   = SDR->nSek();
+      this->nGuess_ = SDR->nGuess();
+      if(this->nGuess_ == 0) this->nGuess_ = 2*this->nSek_;
       this->n_      = SDR->nOVA()+SDR->nOVB();
-      this->method_ = meth;
+      this->method_ = SDR->iMeth();
       this->sdr_    = SDR;
       this->guess_  = 
         std::unique_ptr<TMat>(new TMat(this->n_,this->nGuess_));
@@ -206,8 +206,7 @@ namespace ChronusQ {
 */
       this->hermetian_ = true; // Only supports Hermetian for time being
 
-      if(Guess==NULL) (*this->guess_) = TMat::Identity(this->n_,this->nGuess_); // Identity guess (primitive)
-      else (*this->guess_) = *Guess;
+      *this->guess_ = *SDR->davGuess(); // Copy the guess over? FIXME
 
     }
     ~Davidson(){;};

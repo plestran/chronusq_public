@@ -113,10 +113,14 @@ public:
   inline void setNSek(int n){ this->nSek_  = n; this->nGuess_ = 2*n;};
   inline void setMeth(int n){ this->iMeth_ = n; this->initMeth();};
   inline void setNGuess(int n){this->nGuess_ = n;};
+  inline int  nGuess(){return this->nGuess_;};
+  inline int  nSek(){return this->nSek_;};
+  inline int iMeth(){return this->iMeth_;};
   void formGuess();
   void checkValid();
   void getDiag();
   inline RealMatrix * rmDiag(){return this->rmDiag_.get();};
+  inline RealMatrix * davGuess(){return this->davGuess_.get();};
 //dbwye
   RealMatrix formRM2(RealMatrix &XMO);
   RealMatrix ReturnDiag();
