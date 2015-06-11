@@ -73,7 +73,7 @@ void Davidson<double>::runMicro(ostream &output ) {
 
     // Matrix Product (AX). Keep around for reuse in computing
     // the residual vector
-    if(this->method_==1) AXR = this->sdr_->formRM2(TrialVecR);
+    if(this->method_ == SDResponse::CIS) AXR = this->sdr_->formRM2(TrialVecR);
     else if(this->AX_==NULL) AXR = (*this->mat_) * TrialVecR;  
     else AXR = this->AX_(*this->mat_,TrialVecR);
 //  cout << AXR << endl << endl;
@@ -205,12 +205,27 @@ void Davidson<double>::runMicro(ostream &output ) {
       //             if this criteria is not met.
       if(!resConv[k]) {
         for(auto i = 0; i < this->n_; i++) {
+/*
           if(this->method_==1) {
             T(i,0) = - ResR.col(k)(i) / ((*this->sdr_->rmDiag())(i,0) - subDiagH_.eigenvalues()(k));
           }else if(!this->useLAPACK_) {
             T(i,0) = - ResR.col(k)(i) / ((*this->mat_)(i,i) - subDiagH_.eigenvalues()(k));
           } else {
             T(i,0) = - ResR.col(k)(i) / ((*this->mat_)(i,i) - ER(k));
+          }
+*/
+          if(!this->useLAPACK_) {
+            if(this->method_ == SDResponse::CIS) {
+              T(i,0) = - ResR.col(k)(i) / ((*this->sdr_->rmDiag())(i,0) - subDiagH_.eigenvalues()(k));
+            } else {
+              T(i,0) = - ResR.col(k)(i) / ((*this->mat_)(i,i) - subDiagH_.eigenvalues()(k));
+            }
+          } else {
+            if(this->method_ == SDResponse::CIS) {
+              T(i,0) = - ResR.col(k)(i) / ((*this->sdr_->rmDiag())(i,0) - ER(k));
+            } else {
+              T(i,0) = - ResR.col(k)(i) / ((*this->mat_)(i,i) - ER(k));
+            }
           }
         }
 //      output << TrialVec.rows() <<" " <<TrialVec.cols() << endl;

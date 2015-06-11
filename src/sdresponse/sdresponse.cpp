@@ -530,130 +530,118 @@ void SDResponse::DavidsonCIS(){
 }
 
 RealMatrix SDResponse::formRM2(RealMatrix &XMO){
-  int nOA = this->singleSlater_->nOccA();
-  int nVA = this->singleSlater_->nVirA();
-  int nOVA = this->singleSlater_->nOVA();
-  int nOB = this->singleSlater_->nOccB();
-  int nVB = this->singleSlater_->nVirB();
-  int nOVB = this->singleSlater_->nOVB();
-  Tensor<double> LocMoAO(this->nBasis_,nOA);
-  Tensor<double> LocMoAV(this->nBasis_,nVA);
-  Tensor<double> LocMoBO(this->nBasis_,nOB);
-  Tensor<double> LocMoBV(this->nBasis_,nVB);
-  RealMatrix EigAO(nOA,1);
-  RealMatrix EigAV(nVA,1);
-  RealMatrix EigBO(nOB,1);
-  RealMatrix EigBV(nVB,1);
-
-  for(auto ii = 0; ii < this->nBasis_; ii++) {
-    for(auto jj = 0; jj < nOA; jj++) {
-      LocMoAO(ii,jj) = (*this->singleSlater_->moA())(ii,jj);
-    }
-    for(auto kk = nOA; kk< this->nBasis_; kk++) {
-      LocMoAV(ii,kk-nOA) = (*this->singleSlater_->moA())(ii,kk);
-    }
-  }
-  for (auto i=0;i<nOA;i++){
-    EigAO(i) = (*this->singleSlater_->epsA())(i);
-  }
-  for (auto j=0;j<nVA;j++){
-    EigAV(j) = (*this->singleSlater_->epsA())((j+nOA));
-  }
-
-  if (!this->RHF_)
-  {
-    for(auto ii = 0; ii < this->nBasis_; ii++) {
-      for(auto jj = 0; jj < nOB; jj++) {
-        LocMoBO(ii,jj) = (*this->singleSlater_->moB())(ii,jj);
-      }
-      for(auto kk = nOB; kk< this->nBasis_; kk++) {
-        LocMoBV(ii,kk-nOB) = (*this->singleSlater_->moB())(ii,kk);
-      }
-    }
-    for (auto i=0;i<nOB;i++){
-      EigBO(i) = (*this->singleSlater_->epsB())(i);
-    }
-    for (auto j=0;j<nVB;j++){
-      EigBV(j) = (*this->singleSlater_->epsB())((j+nOB));
-    }
-  }
-  enum{a,j,i,b,mu,nu,lam,sig};
-
-  int nCol = XMO.cols();
-//cout << "The dimension of input trial vector:  " << (nOVA+nOVB) << " * "<< nCol << endl;
-  RealMatrix AX(nOVA+nOVB,nCol);
-  RealMatrix X(nOVA+nOVB,1);
+  RealMatrix AX(this->nSingleDim_,XMO.cols());
+  RealMatrix X(this->nSingleDim_,1);
   RealMatrix XAAO(this->nBasis_,this->nBasis_);
   RealMatrix XBAO(this->nBasis_,this->nBasis_);
+  RealMatrix AXA(this->nVA_,this->nOA_);
+  RealMatrix AXB(this->nVB_,this->nOB_);
+  RealMatrix IXA(this->nBasis_,this->nBasis_);
+  RealMatrix IXB(this->nBasis_,this->nBasis_);
 
-  for (auto idx=0;idx<nCol;idx++)
+  // Build AX by column 
+  for (auto idx = 0; idx < XMO.cols(); idx++)
   {
-    // Build AX by column 
+
     X = XMO.col(idx);
-    RealMap XA(X.data(),nVA,nOA);
-    RealMap XB(X.data()+nOVA,nVB,nOB);
-    XAAO = this->singleSlater_->moA()->block(0,nOA,this->nBasis_,nVA)*XA*this->singleSlater_->moA()->block(0,0,this->nBasis_,nOA).transpose();
+    RealMap XA(X.data(),this->nVA_,this->nOA_);
+    RealMap XB(X.data()+this->nOAVA_,this->nVB_,this->nOB_);
+    /*
+     *  XAO(s) = Cv(s) * XMO(s) * Co(s)**H
+     *
+     *  XAO(s) - s-spin block of X in the AO basis
+     *  XMO(s) - s-spin block of X in the MO basis
+     *  Cv(s)  - s-spin block of the virtual block of the MO coefficients
+     *  Co(s)  - s-spin block of the occupied block of the MO coefficients
+     *  H      - Adjoint
+     */ 
+    XAAO = 
+      this->singleSlater_->moA()->block(0,this->nOA_,this->nBasis_,this->nVA_)*
+      XA*
+      this->singleSlater_->moA()->block(0,0,this->nBasis_,this->nOA_).adjoint();
     if (this->RHF_)
     {
-      XBAO = this->singleSlater_->moA()->block(0,nOB,this->nBasis_,nVB)*XB*this->singleSlater_->moA()->block(0,0,this->nBasis_,nOB).transpose();
+      XBAO = 
+        this->singleSlater_->moA()->block(0,this->nOB_,this->nBasis_,this->nVB_)*
+        XB*
+        this->singleSlater_->moA()->block(0,0,this->nBasis_,this->nOB_).adjoint();
     }
     else
     {
-      XBAO = this->singleSlater_->moB()->block(0,nOB,this->nBasis_,nVB)*XB*this->singleSlater_->moB()->block(0,0,this->nBasis_,nOB).transpose();
-    }
-    // Contract A_AAAA( <mn||ls> ) with XA
-    RealMatrix AXA(nVA,nOA);
-    RealMatrix AXB(nVB,nOB);
-    RealMatrix AXAD(nVA,nOA);
-    RealMatrix AXBD(nVB,nOB);
-    RealMatrix IXAD(this->nBasis_,this->nBasis_);
-    RealMatrix IXBD(this->nBasis_,this->nBasis_);
-    RealMatrix IXA(this->nBasis_,this->nBasis_);
-    RealMatrix IXB(this->nBasis_,this->nBasis_);
-    // Try twoEContractDirect
-    this->singleSlater_->aointegrals()->twoEContractDirect(false, false, XAAO,IXA,XBAO,IXB);
-    //this->singleSlater_->aointegrals()->twoEContractN4(false, true, XAAO,IXA,XBAO,IXB);
-    //cout << "compare" << endl;
-    //cout << "IXAD" <<endl;
-    //cout << IXAD  << endl;
-    //cout << "IXA" <<endl;
-    //cout << IXA  << endl;
-    //cout << "IXBD" <<endl;
-    //cout << IXBD  << endl;
-    //cout << "IXB" << endl;
-    //cout << IXB << endl;
-    AXA = this->singleSlater_->moA()->block(0,nOA,this->nBasis_,nVA).transpose()*IXA*this->singleSlater_->moA()->block(0,0,this->nBasis_,nOA);
-    if (this->RHF_)
-    {
-      AXB = this->singleSlater_->moA()->block(0,nOB,this->nBasis_,nVB).transpose()*IXB*this->singleSlater_->moA()->block(0,0,this->nBasis_,nOB);
-    }
-    else
-    {
-      AXB = this->singleSlater_->moB()->block(0,nOB,this->nBasis_,nVB).transpose()*IXB*this->singleSlater_->moB()->block(0,0,this->nBasis_,nOB);
+      XBAO = 
+        this->singleSlater_->moB()->block(0,this->nOB_,this->nBasis_,this->nVB_)*
+        XB*
+        this->singleSlater_->moB()->block(0,0,this->nBasis_,this->nOB_).adjoint();
     }
 
-    for (auto a=0;a<nVA;a++)
-    for (auto i=0;i<nOA;i++)
-    {
-      AXA(a,i)= AXA(a,i) + XA(a,i)*(EigAV(a)-EigAO(i));
-    }
-    for (auto a=0;a<nVB;a++)
-    for (auto i=0;i<nOB;i++)
-    {
-      if (this->RHF_)
-      {
-        AXB(a,i)= AXB(a,i) + XB(a,i)*(EigAV(a)-EigAO(i));
-      }
-      else
-      {
-        AXB(a,i)= AXB(a,i) + XB(a,i)*(EigBV(a)-EigBO(i));
-      }
-    }
+
+    AXA.setZero();  
+    AXB.setZero();
+    IXA.setZero();
+    IXB.setZero();
+
+    /*
+     *  IXAO(s)_{i,j} = [ (ij,s|kl,s') + delta_{s,s'}*(il,s|kj,s) ] * XAO(s')_{l,k}
+     */ 
+    if(this->controls_->directTwoE && !this->controls_->doDF)
+      this->singleSlater_->aointegrals()->twoEContractDirect(false, false, XAAO,IXA,XBAO,IXB);
+    else
+      this->singleSlater_->aointegrals()->twoEContractN4(false, true, XAAO,IXA,XBAO,IXB);
     
-    RealMap AXu(AXA.data(),nOVA,1);
-    RealMap AXd(AXB.data(),nOVB,1);
-    AX.block(0,idx,nOVA,1) = AXu;
-    AX.block(nOVA,idx,nOVB,1) = AXd; 
+
+    /*
+     *  AX(s)   += IXMO(s)
+     *  IXMO(s) =  Cv(s)**H * IXAO(s) * Co(s)
+     */  
+    AXA = 
+      this->singleSlater_->moA()->block(0,this->nOA_,this->nBasis_,this->nVA_).adjoint()*
+      IXA*
+      this->singleSlater_->moA()->block(0,0,this->nBasis_,this->nOA_);
+    if (this->RHF_)
+    {
+      AXB = 
+        this->singleSlater_->moA()->block(0,this->nOB_,this->nBasis_,this->nVB_).adjoint()*
+        IXB*
+        this->singleSlater_->moA()->block(0,0,this->nBasis_,this->nOB_);
+    }
+    else
+    {
+      AXB = 
+        this->singleSlater_->moB()->block(0,this->nOB_,this->nBasis_,this->nVB_).adjoint()*
+        IXB*
+        this->singleSlater_->moB()->block(0,0,this->nBasis_,this->nOB_);
+    }
+
+/*  Old inefficient way of adding in the eigenenergie differences...
+ *  Keep around just in case
+    for (auto a = 0, ia = 0; a < this->nVA_; a++)
+    for (auto i = 0; i  < this->nOA_;  i++, ia++)
+    {
+      AXA(a,i) += XA(a,i) * (*this->rmDiag_)(ia,0);
+    }
+    for (auto a = 0, ia = this->nOAVA_; a < this->nVB_; a++)
+    for (auto i = 0; i  < this->nOB_;   i++,           ia++)
+    {
+      AXB(a,i) += XB(a,i) * (*this->rmDiag_)(ia,0);
+    }
+*/
+    
+    RealMap AXu(AXA.data(),this->nOAVA_,1);
+    RealMap AXd(AXB.data(),this->nOBVB_,1);
+    RealMap  Xu(XA.data(),this->nOAVA_,1);
+    RealMap  Xd(XB.data(),this->nOBVB_,1);
+
+   
+    /*
+     *  AX(s)_{a,i} += [Eps(s)_{a} - Eps(s)_{i}] * XMO(s)_{a,i}
+     *
+     *  Eps(s)_{a/i} - s-spin virtual / occupied eigenenergies (cannonical)
+     */ 
+    AXu += Xu.cwiseProduct(this->rmDiag_->block(0,0,this->nOAVA_,1));
+    AXd += Xd.cwiseProduct(this->rmDiag_->block(this->nOAVA_,0,this->nOBVB_,1));
+    
+    AX.block(0,idx,this->nOAVA_,1) = AXu;
+    AX.block(this->nOAVA_,idx,this->nOBVB_,1) = AXd; 
   }
   return AX;
 }
@@ -840,8 +828,9 @@ void SDResponse::formGuess(){
   if(this->RHF_) nRHF = 2;
   RealMatrix dagCpy(this->nSingleDim_/nRHF,1);
   std::memcpy(dagCpy.data(),this->rmDiag_->data(),dagCpy.size()*sizeof(double));
-  std::sort(dagCpy.data(),dagCpy.data()+dagCpy.size(),
-            [](double a, double b)->bool{ return a>b;});
+//std::sort(dagCpy.data(),dagCpy.data()+dagCpy.size(),
+//          [](double a, double b)->bool{ return a>b;});
+  std::sort(dagCpy.data(),dagCpy.data()+dagCpy.size());
 //std::sort(dagCpy.data(),dagCpy.data()+dagCpy.size()/2);
   
   for(auto i = 0; i < this->nGuess_; i++){
@@ -871,22 +860,22 @@ void SDResponse::checkValid(){
 void SDResponse::getDiag(){
   this->rmDiag_ = std::unique_ptr<RealMatrix>(new RealMatrix(nSingleDim_,1)); 
 
-  for(auto iAlpha = 0; iAlpha < this->nOA_; iAlpha++)
-  for(auto aAlpha = 0; aAlpha < this->nVA_; aAlpha++){
+  for(auto aAlpha = 0; aAlpha < this->nVA_; aAlpha++)
+  for(auto iAlpha = 0; iAlpha < this->nOA_; iAlpha++){
     auto iaAlpha = aAlpha*this->nOA_ + iAlpha; 
     auto eiAlpha = (*this->singleSlater_->epsA())(iAlpha);
     auto eaAlpha = (*this->singleSlater_->epsA())(aAlpha+this->nOA_);
-    (*this->rmDiag_)(iaAlpha,0) = eiAlpha - eaAlpha;
+    (*this->rmDiag_)(iaAlpha,0) = eaAlpha - eiAlpha;
     if(this->RHF_) 
-      (*this->rmDiag_)(iaAlpha+this->nOAVA_,0) = eiAlpha - eaAlpha;
+      (*this->rmDiag_)(iaAlpha+this->nOAVA_,0) = eaAlpha - eiAlpha;
   }
   if(!this->RHF_){
-    for(auto iBeta = 0; iBeta < this->nOB_; iBeta++)
-    for(auto aBeta = 0; aBeta < this->nVA_; aBeta++){
+    for(auto aBeta = 0; aBeta < this->nVA_; aBeta++)
+    for(auto iBeta = 0; iBeta < this->nOB_; iBeta++){
       auto iaBeta = aBeta*this->nOB_ + iBeta + this->nOAVA_; 
       auto eiBeta = (*this->singleSlater_->epsB())(iBeta);
       auto eaBeta = (*this->singleSlater_->epsB())(aBeta+this->nOB_);
-      (*this->rmDiag_)(iaBeta,0) = eiBeta - eaBeta;
+      (*this->rmDiag_)(iaBeta,0) = eaBeta - eiBeta;
     }
   }
   this->haveDag_ = true;

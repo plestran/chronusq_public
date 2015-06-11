@@ -181,32 +181,20 @@ namespace ChronusQ {
       this->maxIter_     = 128;
       this->MaxIter_     = 20;
       this->converged_   = false;
-      this->useLAPACK_   = false; // Use LAPACK by default
+      this->useLAPACK_   = true; // Use LAPACK by default
       this->mat_    = nullptr;
       this->AX_     = NULL;
       this->nSek_   = SDR->nSek();
       this->nGuess_ = SDR->nGuess();
       if(this->nGuess_ == 0) this->nGuess_ = 2*this->nSek_;
-      this->n_      = SDR->nOVA()+SDR->nOVB();
+      this->n_      = SDR->nSingleDim_;
       this->method_ = SDR->iMeth();
       this->sdr_    = SDR;
-      this->guess_  = 
-        std::unique_ptr<TMat>(new TMat(this->n_,this->nGuess_));
-      this->eigenvalues_ = 
-        std::unique_ptr<TVec>(new TVec(this->nSek_,1));
-      this->eigenvector_ = 
-        std::unique_ptr<TMat>(new TMat(this->n_,this->nSek_));
-/*
-      this->guess_  = 
-        std::make_shared<TMat>(this->n_,this->nGuess_);
-      this->eigenvalues_ = 
-        std::make_shared<TVec>(this->nSek_);
-      this->eigenvector_ = 
-        std::make_shared<TMat>(this->n_,this->nSek_);
-*/
+      this->guess_  = std::unique_ptr<TMat>(new TMat(this->n_,this->nGuess_));
+      *this->guess_ = *SDR->davGuess(); // This forms an unnesecary copy of the guess FIXME
+      this->eigenvalues_ = std::unique_ptr<TVec>(new TVec(this->nSek_,1));
+      this->eigenvector_ = std::unique_ptr<TMat>(new TMat(this->n_,this->nSek_));
       this->hermetian_ = true; // Only supports Hermetian for time being
-
-      *this->guess_ = *SDR->davGuess(); // Copy the guess over? FIXME
 
     }
     ~Davidson(){;};
@@ -235,7 +223,7 @@ namespace ChronusQ {
       else output << "No";
       output << endl;
       output << std::setw(50) << std::left << "  Full Matrix Passed to for AX:";
-      if(this->AX_==NULL) output << "Yes";
+      if(this->mat_ != nullptr) output << "Yes";
       else output << "No";
       output << endl;
  
