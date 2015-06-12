@@ -236,9 +236,20 @@ void Davidson<double>::runMicro(ostream &output ) {
     }
     // Normalize and orthogonalize the new guess vectors to the
     // existing set using QR factorization
+    /*
     Eigen::FullPivHouseholderQR<RealMatrix> QR(TrialVecR);
     TrialVecR = QR.matrixQ().block(0,0,this->n_,NTrial+NNotConv);
     TrialVecR = TrialVecR*QR.colsPermutation().transpose(); // permute the vectors back
+    */
+    TrialVecR.transposeInPlace(); // to ColMajor
+    // cols <-> rows
+    int INFO;
+    int M = TrialVecR.cols();
+    int N = TrialVecR.rows();
+    dgeqrf_(&M,&N,TrialVecR.data(),&M,LAPACK_SCR,LAPACK_SCR+N,&LWORK,&INFO);
+    dorgqr_(&M,&N,&N,TrialVecR.data(),&M,LAPACK_SCR,LAPACK_SCR+N,&LWORK,&INFO);
+    TrialVecR.transposeInPlace(); // to RowMajor
+    
     
     NTrial += NNotConv;
     finish = std::chrono::high_resolution_clock::now();
