@@ -492,8 +492,107 @@ void SDResponse::formRM(){
   TD.eigenvectors();
 
   // Print the LR-TDHF Excitation Energies
-  //cout << "Linear response energy" << endl;
-  //cout << TD.eigenvalues() << endl;
+    cout << "Linear response energy" << endl;
+    cout << TD.eigenvalues() << endl;
+    RealMatrix ReE(ABBA.rows(),1);
+    ReE = TD.eigenvalues().real();
+    std::sort(ReE.data(),ReE.data()+ReE.size());
+    cout << ReE*phys.eVPerHartree << endl;
+    cout << TD.eigenvectors().col(0) << endl;
+    RealMatrix EVec = TD.eigenvectors().real();
+
+    RealMatrix T(4*this->nOAVA_,1);
+    T = EVec.col(0);
+    cout << T << endl << endl;
+    RealMatrix xMO = T.block(0,0,2*this->nOAVA_,1);
+    RealMatrix xMOA = xMO.block(0,0,this->nOAVA_,1);
+    RealMatrix xMOB = xMO.block(this->nOAVA_,0,this->nOAVA_,1);
+    RealMatrix yMO = T.block(2*this->nOAVA_,0,2*this->nOAVA_,1);
+    RealMatrix yMOA = yMO.block(0,0,this->nOAVA_,1);
+    RealMatrix yMOB = yMO.block(this->nOAVA_,0,this->nOAVA_,1);
+    RealMatrix TMOA(this->nBasis_,this->nBasis_);
+    RealMatrix TMOB(this->nBasis_,this->nBasis_);
+//  for(auto i = 0, ia = 0; i < this->nOA_; i++)
+//  for(auto a = 0; a < this->nVA_; a++, ia++){
+    for(auto a = 0, ia = 0; a < this->nVA_; a++)
+    for(auto i = 0; i < this->nOA_; i++, ia++){
+      cout << ia << endl;
+      TMOA(a+this->nOA_,i) = xMOA(ia,0);
+      TMOA(i,a+this->nOA_) = -yMOA(ia,0);
+/*
+      TMOA(a+this->nOA_,i) = -yMOA(ia,0);
+      TMOA(i,a+this->nOA_) = xMOA(ia,0);
+*/
+    }
+//  for(auto i = 0, ia = 0; i < this->nOB_; i++)
+//  for(auto a = 0; a < this->nVB_; a++, ia++){
+    for(auto a = 0, ia = 0; a < this->nVB_; a++)
+    for(auto i = 0; i < this->nOB_; i++, ia++){
+      TMOB(a+this->nOB_,i) = xMOB(ia,0);
+      TMOB(i,a+this->nOB_) = -yMOB(ia,0);
+/*
+      TMOB(a+this->nOB_,i) = -yMOB(ia,0);
+      TMOB(i,a+this->nOB_) = xMOB(ia,0);
+*/
+    }
+
+    cout << endl << TMOA << endl;
+    cout << endl << TMOB << endl;
+
+    RealMatrix TAOA = (*this->singleSlater_->moA())*TMOA*this->singleSlater_->moA()->adjoint();
+//  RealMatrix TAOB = (*this->singleSlater_->moB())*TMOB*this->singleSlater_->moB()->adjoint();
+    RealMatrix TAOB = (*this->singleSlater_->moA())*TMOB*this->singleSlater_->moA()->adjoint();
+    cout << endl << TAOA << endl;
+    cout << endl << TAOB << endl;
+
+    RealMatrix commA = TAOA*(*this->singleSlater_->aointegrals()->overlap_)*(*this->singleSlater_->densityA())/2 - (*this->singleSlater_->densityA())/2*(*this->singleSlater_->aointegrals()->overlap_)*TAOA;
+    RealMatrix commB = TAOB*(*this->singleSlater_->aointegrals()->overlap_)*(*this->singleSlater_->densityA())/2 - (*this->singleSlater_->densityA())/2*(*this->singleSlater_->aointegrals()->overlap_)*TAOB;
+
+    RealMatrix gCommA(this->nBasis_,this->nBasis_);
+    RealMatrix gCommB(this->nBasis_,this->nBasis_);
+    cout << endl << "COMMA" << commA << endl;
+    cout << endl << "COMMB" << commB << endl;
+
+    this->singleSlater_->aointegrals()->twoEContractDirect(false,false,commA,gCommA,commB,gCommB);
+
+    RealMatrix sigAOA = (*this->singleSlater_->fockA())*commA*(*this->singleSlater_->aointegrals()->overlap_) - (*this->singleSlater_->aointegrals()->overlap_)*commA*(*this->singleSlater_->fockA());
+    sigAOA += gCommA*(*this->singleSlater_->densityA())/2*(*this->singleSlater_->aointegrals()->overlap_) - (*this->singleSlater_->aointegrals()->overlap_)*(*this->singleSlater_->densityA())/2*gCommA;
+ 
+    RealMatrix sigMOA = this->singleSlater_->moA()->adjoint()*sigAOA*(*this->singleSlater_->moA());
+/*
+    RealMatrix ITAOA(this->nBasis_,this->nBasis_);
+    RealMatrix ITAOB(this->nBasis_,this->nBasis_);
+
+    this->singleSlater_->aointegrals()->twoEContractN4(false,true,TAOA,ITAOA,TAOB,ITAOB);
+
+    RealMatrix ITMOA = this->singleSlater_->moA()->adjoint()*ITAOA*(*this->singleSlater_->moA());
+    RealMatrix ITMOB = this->singleSlater_->moA()->adjoint()*ITAOB*(*this->singleSlater_->moA());
+*/
+
+/*
+  if(!this->haveDag_) this->getDiag();
+    for (auto a = 0, ia = 0; a < this->nVA_; a++)
+    for (auto i = 0; i  < this->nOA_;  i++, ia++)
+    {
+      ITMOA(a,i) += TMOA(a,i) * (*this->rmDiag_)(ia,0);
+    }
+    for (auto a = 0, ia = this->nOAVA_; a < this->nVB_; a++)
+    for (auto i = 0; i  < this->nOB_;   i++,           ia++)
+    {
+      ITMOB(a,i) += TMOB(a,i) * (*this->rmDiag_)(ia,0);
+    }
+*/
+    
+  ABBA.block(nOVA+nOVB,nOVA+nOVB,nOVA+nOVB,nOVA+nOVB) = A;
+  ABBA.block(nOVA+nOVB,0,nOVA+nOVB,nOVA+nOVB) = B;
+    cout << "SIG" << endl;
+    cout << endl << sigMOA << endl; 
+    cout << endl << ABBA*T << endl;
+    cout << endl << endl << T << endl << endl <<
+       -this->singleSlater_->moA()->adjoint()*(*this->singleSlater_->aointegrals()->overlap_)*commA*(*this->singleSlater_->aointegrals()->overlap_)*(*this->singleSlater_->moA());
+
+    
+
 }
 
 void SDResponse::DavidsonCIS(){
@@ -501,7 +600,7 @@ void SDResponse::DavidsonCIS(){
   int nOVA = this->singleSlater_->nOVA();
   int nOVB = this->singleSlater_->nOVB();
 */
-  int nstate =3;
+//int nstate =3;
 /*
   RealMatrix PDiag(nOVA+nOVB,1);
   PDiag = ReturnDiag();
@@ -514,17 +613,23 @@ void SDResponse::DavidsonCIS(){
   this->formGuess();
   Davidson<double> davA(this);
   davA.run(this->fileio_->out);
-  this->fileio_->out << "The lowest " << nstate << " eigenstates solved by Davidson Algorithm:" <<endl;
+//this->fileio_->out << "The lowest " << this->nSek_ << " eigenstates solved by Davidson Algorithm:" <<endl;
+  this->fileio_->out << bannerTop << endl << "CIS Diagonalization for lowest " << this->nSek_ << " eigenstates" << endl;
+  this->fileio_->out << bannerMid << endl;
   RealMatrix DavEvalues = *davA.eigenvalues();
   RealMatrix DavEvector = *davA.eigenvector();
   DavEvector.transposeInPlace();/*Change the matrix to Column major, do this before call the TransDipole*/
-  for (auto st_rank=0;st_rank<nstate;st_rank++)
+  for (auto st_rank = 0;st_rank < this->nSek_; st_rank++)
   {
+    double Omega = DavEvalues(st_rank);
+    this->fileio_->out << "Excited State " << st_rank+1 << ":";
+    this->fileio_->out << endl << "  \u03C9 = " << std::setw(15) << std::setprecision(7) << std::fixed << Omega                   << " Eh";
+    this->fileio_->out << endl << "  \u03C9 = " << std::setw(15) << std::setprecision(7) << std::fixed << Omega*phys.eVPerHartree << " eV";
+    this->fileio_->out << endl << "  \u03C9 = " << std::setw(15) << std::setprecision(7) << std::fixed << Omega*phys.nmPerHartree << " nm" << endl;
     RealMap TransDen(DavEvector.data()+st_rank*(this->nSingleDim_),(this->nSingleDim_),1);
     TransDipole(st_rank,TransDen);
-    double Omega = DavEvalues(st_rank);
     double Oscstr = OscStrength(st_rank,Omega);
-    this->fileio_->out << "Excitation energy is: " << " " << Omega*phys.hartreePerEV << " eV   f = "<< Oscstr << endl << endl;
+    this->fileio_->out << "Excitation energy is: " << " " << Omega*phys.eVPerHartree << " eV   f = "<< Oscstr << endl << endl;
   }
 
 }
@@ -657,8 +762,7 @@ RealMatrix SDResponse::formRM3(RealMatrix &XMO){
   std::vector<RealMatrix>  AXB(XMO.cols(),RealMatrix::Zero(this->nVB_,this->nOB_));
 
   // Build AX by column 
-  for (auto idx = 0; idx < XMO.cols(); idx++)
-  {
+  for (auto idx = 0; idx < XMO.cols(); idx++){
 
     X = XMO.col(idx);
     RealMap XA(X.data(),this->nVA_,this->nOA_);
@@ -676,15 +780,12 @@ RealMatrix SDResponse::formRM3(RealMatrix &XMO){
       this->singleSlater_->moA()->block(0,this->nOA_,this->nBasis_,this->nVA_)*
       XA*
       this->singleSlater_->moA()->block(0,0,this->nBasis_,this->nOA_).adjoint();
-    if (this->RHF_)
-    {
+    if (this->RHF_){
       XBAO[idx] = 
         this->singleSlater_->moA()->block(0,this->nOB_,this->nBasis_,this->nVB_)*
         XB*
         this->singleSlater_->moA()->block(0,0,this->nBasis_,this->nOB_).adjoint();
-    }
-    else
-    {
+    } else {
       XBAO[idx] = 
         this->singleSlater_->moB()->block(0,this->nOB_,this->nBasis_,this->nVB_)*
         XB*
@@ -866,7 +967,7 @@ void SDResponse::TransDipole(int st_rank,RealMatrix TransDen){
   {
     if (fabs(TransDen(i,0))>0.1)
     {
-      this->fileio_->out <<(i%nOA+1) <<  "A -> " << (i/nOA+1+nOA) << "A" << "    " << TransDen(i,0) << endl;
+      this->fileio_->out <<(i%nOA+1) <<  "A -> " << (i/nOA+1+nOA) << "A" << "    " << std::fixed << TransDen(i,0) << endl;
     }
   }
   if (!this->RHF_)
@@ -875,7 +976,7 @@ void SDResponse::TransDipole(int st_rank,RealMatrix TransDen){
     {
       if (fabs(TransDen(i+nOVA,0))>0.1)
       {
-        this->fileio_->out <<(i%nOB+1) <<  "B -> " << (i/nOB+1+nOB) << "B" << "    " << TransDen(i+nOVA,0) << endl;
+        this->fileio_->out <<(i%nOB+1) <<  "B -> " << (i/nOB+1+nOB) << "B" << "    " << std::fixed << TransDen(i+nOVA,0) << endl;
       }
     }
   }

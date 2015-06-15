@@ -89,7 +89,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
     sdResponse->setNSek(3);
     sdResponse->setMeth(SDResponse::CIS);
 //  sdResponse->computeExcitedStates();
-//  sdResponse->formRM();
+    sdResponse->formRM();
     if(controls->SDMethod == 1) sdResponse->DavidsonCIS();
     //sdResponse->formRM2(XMO);
     //sdResponse->ReturnDiag();

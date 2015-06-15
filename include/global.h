@@ -176,10 +176,11 @@ static double dFactorial[21] = {
 struct Phys {
   double bohr; ///< Bohr radii per Angstrom
   double debye; ///< e*bohr in 1 Debye
-  double hartreePerEV;
+  double eVPerHartree;
+  double nmPerHartree;
   //number of cartesian AO's in a shell
 };
-const Phys phys = {0.5291772083000001,0.393430307,27.211396132};
+const Phys phys = {0.5291772083000001,0.393430307,27.211396132,45.56335};
 
 
 //------------------//

@@ -228,19 +228,12 @@ void Davidson<double>::runMicro(ostream &output ) {
             }
           }
         }
-//      output << TrialVec.rows() <<" " <<TrialVec.cols() << endl;
-//      output << T.rows() <<" " <<T.cols() << endl;
         TrialVecR.block(0,NTrial + INDX,this->n_,1) = T;
         INDX++;
       }
     }
     // Normalize and orthogonalize the new guess vectors to the
     // existing set using QR factorization
-    /*
-    Eigen::FullPivHouseholderQR<RealMatrix> QR(TrialVecR);
-    TrialVecR = QR.matrixQ().block(0,0,this->n_,NTrial+NNotConv);
-    TrialVecR = TrialVecR*QR.colsPermutation().transpose(); // permute the vectors back
-    */
     TrialVecR.transposeInPlace(); // to ColMajor
     // cols <-> rows
     int INFO;
@@ -256,8 +249,6 @@ void Davidson<double>::runMicro(ostream &output ) {
     elapsed = finish - start;
     output << "Davidson Micro Iteration took " << std::fixed 
            << elapsed.count() << " secs" << endl << endl;
-//  output << QR.colsPermutation().toDenseMatrix() << endl;
-//  output << endl << TrialVec << endl;
   } 
   delete [] LAPACK_SCR; // Cleanup scratch space
 }
