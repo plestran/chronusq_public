@@ -118,7 +118,8 @@ public:
   inline int iMeth(){return this->iMeth_;};
   inline int nSingleDim(){return this->nSingleDim_;};
   void formGuess();
-  RealMatrix formRM3(RealMatrix &);
+//RealMatrix formRM3(RealMatrix &);
+  RealMatrix formRM3(RealCMMap &);
   void checkValid();
   void getDiag();
   inline RealMatrix * rmDiag(){return this->rmDiag_.get();};

@@ -751,7 +751,7 @@ RealMatrix SDResponse::formRM2(RealMatrix &XMO){
   return AX;
 }
 //dbwys
-RealMatrix SDResponse::formRM3(RealMatrix &XMO){
+RealMatrix SDResponse::formRM3(RealCMMap &XMO){
   RealMatrix AX(this->nSingleDim_,XMO.cols());
   RealMatrix X(this->nSingleDim_,1);
   std::vector<RealMatrix> XAAO(XMO.cols(),RealMatrix::Zero(this->nBasis_,this->nBasis_));
