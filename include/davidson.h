@@ -40,6 +40,7 @@ namespace ChronusQ {
     int     n_;          // Dimension of the problem (LDA)
     TMat*   mat_;        // The full matrix to be diagonalized (?)
     bool    hermetian_;  // Whether or not the problem is hemetian
+    bool    symmetrized_;
 
     std::unique_ptr<TMat> guess_;      // Guess vectors
     std::unique_ptr<TVec> eigenvalues_;
@@ -105,6 +106,7 @@ namespace ChronusQ {
       this->n_           = 0;
       this->converged_   = false;
       this->hermetian_   = false;
+      this->symmetrized_      = false;
       this->useLAPACK_   = true;
       this->method_      = -1;
       this->sdr_    = nullptr;
@@ -139,6 +141,7 @@ namespace ChronusQ {
         std::make_shared<TMat>(this->n_,this->nSek_);
 */
       this->hermetian_ = true; // Only supports Hermetian for time being
+      this->symmetrized_    = false;
 
       (*this->guess_) = TMat::Identity(this->n_,this->nGuess_); // Identity guess (primitive)
     }
@@ -172,6 +175,7 @@ namespace ChronusQ {
         std::make_shared<TMat>(this->n_,this->nSek_);
 */
       this->hermetian_ = true; // Only supports Hermetian for time being
+      this->symmetrized_    = false;
 
       (*this->guess_) = TMat::Identity(this->n_,this->nGuess_); // Identity guess (primitive)
     }
@@ -195,6 +199,7 @@ namespace ChronusQ {
       this->eigenvalues_ = std::unique_ptr<TVec>(new TVec(this->nSek_,1));
       this->eigenvector_ = std::unique_ptr<TMat>(new TMat(this->n_,this->nSek_));
       this->hermetian_ = true; // Only supports Hermetian for time being
+      this->symmetrized_    = false;
 
     }
     ~Davidson(){;};

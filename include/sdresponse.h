@@ -119,7 +119,8 @@ public:
   inline int nSingleDim(){return this->nSingleDim_;};
   void formGuess();
 //RealMatrix formRM3(RealMatrix &);
-  RealMatrix formRM3(RealCMMap &);
+//RealMatrix formRM3(RealCMMap &);
+  void formRM3(RealCMMap &, RealCMMap &);
   void checkValid();
   void getDiag();
   inline RealMatrix * rmDiag(){return this->rmDiag_.get();};
