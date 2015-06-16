@@ -120,7 +120,7 @@ public:
   void formGuess();
 //RealMatrix formRM3(RealMatrix &);
 //RealMatrix formRM3(RealCMMap &);
-  void formRM3(RealCMMap &, RealCMMap &);
+  void formRM3(RealCMMap &, RealCMMap &, RealCMMap &Rho);
   void checkValid();
   void getDiag();
   inline RealMatrix * rmDiag(){return this->rmDiag_.get();};

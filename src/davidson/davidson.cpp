@@ -121,19 +121,23 @@ void Davidson<double>::runMicro(ostream &output ) {
 
   RealCMMap SigmaR(   SigmaRMem,  0,0);
   RealCMMap NewSR(    SigmaRMem,  0,0);
-  RealCMMap XTSigmaR(  XTSigmaRMem,0,0);
-  RealCMMap UR(    URMem,   0,0);
-  RealCMMap ResR(  ResRMem, 0,0);
-  RealCMMap TrialVecR(TVecRMem,0,0);
-  RealCMMap NewVecR(TVecRMem,0,0);
+  RealCMMap XTSigmaR( XTSigmaRMem,0,0);
+  RealCMMap RhoR(     RhoRMem,    0,0);
+  RealCMMap NewRhoR(  RhoRMem,    0,0);
+  RealCMMap UR(       URMem,      0,0);
+  RealCMMap ResR(     ResRMem,    0,0);
+  RealCMMap TrialVecR(TVecRMem,   0,0);
+  RealCMMap NewVecR(  TVecRMem,   0,0);
 
   RealCMMap SigmaL(   SigmaLMem,  0,0);
   RealCMMap NewSL(    SigmaLMem,  0,0);
-  RealCMMap XTSigmaL(  XTSigmaLMem,0,0);
-  RealCMMap UL(    ULMem,   0,0);
-  RealCMMap ResL(  ResLMem, 0,0);
-  RealCMMap TrialVecL(TVecLMem,0,0);
-  RealCMMap NewVecL(TVecLMem,0,0);
+  RealCMMap XTSigmaL( XTSigmaLMem,0,0);
+  RealCMMap RhoL(     RhoLMem,    0,0);
+  RealCMMap NewRhoL(  RhoLMem,    0,0);
+  RealCMMap UL(       ULMem,      0,0);
+  RealCMMap ResL(     ResLMem,    0,0);
+  RealCMMap TrialVecL(TVecLMem,   0,0);
+  RealCMMap NewVecL(  TVecLMem,   0,0);
 
   RealCMMap T(TMem,this->n_,  1);
 
@@ -170,6 +174,7 @@ void Davidson<double>::runMicro(ostream &output ) {
     output << "Starting Davidson Micro Iteration " << iter + 1 << endl;
     start = std::chrono::high_resolution_clock::now();
 
+    // Resize the Eigen Maps to fit new vectors
     new (&SigmaR)   RealCMMap(SigmaRMem,  this->n_,NTrial);
     new (&XTSigmaR) RealCMMap(XTSigmaRMem,NTrial,  NTrial);
     new (&UR)       RealCMMap(URMem,      this->n_,NTrial);
@@ -180,15 +185,7 @@ void Davidson<double>::runMicro(ostream &output ) {
     // Matrix Product (Sigma / AX). Keep around for reuse in computing
     // the residual vector
     if(this->method_ == SDResponse::CIS) 
-      this->sdr_->formRM3(NewVecR,NewSR);
-/*
-    else if(this->method_ == SDResponse::RPA) {
-      SigmaR = this->sdr_->formRM3(TrialVecR);
-      SigmaL = this->sdr_->formRM3(TrialVecL);
-      RhoR   = this->sdr_->formRM4(TrialVecR);
-      RhoL   = this->sdr_->formRM4(TrialVecL);
-    }
-*/
+      this->sdr_->formRM3(NewVecR,NewSR,NewRhoR);
     else if(this->AX_==NULL) NewSR = (*this->mat_) * NewVecR;  
     else NewSR = this->AX_(*this->mat_,NewVecR);
 //  cout << SigmaR << endl << endl;

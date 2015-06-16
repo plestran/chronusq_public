@@ -751,51 +751,52 @@ RealMatrix SDResponse::formRM2(RealMatrix &XMO){
   return AX;
 }
 //dbwys
-void SDResponse::formRM3(RealCMMap &XMO, RealCMMap &AX){
+void SDResponse::formRM3(RealCMMap &XMO, RealCMMap &Sigma, RealCMMap &Rho){
   RealMatrix X(this->nSingleDim_,1);
   std::vector<RealMatrix> XAAO(XMO.cols(),RealMatrix::Zero(this->nBasis_,this->nBasis_));
   std::vector<RealMatrix> XBAO(XMO.cols(),RealMatrix::Zero(this->nBasis_,this->nBasis_));
-  std::vector<RealMatrix>  IXA(XMO.cols(),RealMatrix::Zero(this->nBasis_,this->nBasis_));
-  std::vector<RealMatrix>  IXB(XMO.cols(),RealMatrix::Zero(this->nBasis_,this->nBasis_));
-  std::vector<RealMatrix>  AXA(XMO.cols(),RealMatrix::Zero(this->nVA_,this->nOA_));
-  std::vector<RealMatrix>  AXB(XMO.cols(),RealMatrix::Zero(this->nVB_,this->nOB_));
+  std::vector<RealMatrix> IXAOA(XMO.cols(),RealMatrix::Zero(this->nBasis_,this->nBasis_));
+  std::vector<RealMatrix> IXAOB(XMO.cols(),RealMatrix::Zero(this->nBasis_,this->nBasis_));
+  std::vector<RealMatrix>  SigmaA(XMO.cols(),RealMatrix::Zero(this->nVA_,this->nOA_));
+  std::vector<RealMatrix>  SigmaB(XMO.cols(),RealMatrix::Zero(this->nVB_,this->nOB_));
 
-  // Build AX by column 
+  RealMatrix XMOA(this->nBasis_,this->nBasis_);
+  RealMatrix XMOB(this->nBasis_,this->nBasis_);
+  RealMatrix IXMOA(this->nBasis_,this->nBasis_);
+  RealMatrix IXMOB(this->nBasis_,this->nBasis_);
+
+  // Build Sigma by column 
   for (auto idx = 0; idx < XMO.cols(); idx++){
-
-    X = XMO.col(idx);
-    RealMap XA(X.data(),this->nVA_,this->nOA_);
-    RealMap XB(X.data()+this->nOAVA_,this->nVB_,this->nOB_);
     /*
-     *  XAO(s) = Cv(s) * XMO(s) * Co(s)**H
+     *  XAO(s) = C(s) * XMO(s) * C(s)**H
      *
      *  XAO(s) - s-spin block of X in the AO basis
      *  XMO(s) - s-spin block of X in the MO basis
-     *  Cv(s)  - s-spin block of the virtual block of the MO coefficients
-     *  Co(s)  - s-spin block of the occupied block of the MO coefficients
+     *  C(s)   - s-spin block of the MO coefficients
      *  H      - Adjoint
      */ 
-    XAAO[idx] = 
-      this->singleSlater_->moA()->block(0,this->nOA_,this->nBasis_,this->nVA_)*
-      XA*
-      this->singleSlater_->moA()->block(0,0,this->nBasis_,this->nOA_).adjoint();
-    if (this->RHF_){
-      XBAO[idx] = 
-        this->singleSlater_->moA()->block(0,this->nOB_,this->nBasis_,this->nVB_)*
-        XB*
-        this->singleSlater_->moA()->block(0,0,this->nBasis_,this->nOB_).adjoint();
-    } else {
-      XBAO[idx] = 
-        this->singleSlater_->moB()->block(0,this->nOB_,this->nBasis_,this->nVB_)*
-        XB*
-        this->singleSlater_->moB()->block(0,0,this->nBasis_,this->nOB_).adjoint();
+    X = XMO.col(idx);
+    for(auto a = this->nOA_, ia = 0; a < this->nBasis_; a++)
+    for(auto i = 0         ; i < this->nOA_; i++, ia++){
+      XMOA(a,i) = X(ia);
     }
+    for(auto a = this->nOB_, ia = this->nOAVA_; a < this->nBasis_; a++)
+    for(auto i = 0         ; i < this->nOB_; i++, ia++){
+      XMOB(a,i) = X(ia);
+    }
+
+    XAAO[idx] = (*this->singleSlater_->moA()) * XMOA * this->singleSlater_->moA()->adjoint();
+    if(this->RHF_)
+      XBAO[idx] = (*this->singleSlater_->moA()) * XMOB * this->singleSlater_->moA()->adjoint();
+    else
+      XBAO[idx] = (*this->singleSlater_->moB()) * XMOB * this->singleSlater_->moB()->adjoint();
+    
   }
 
     /*
      *  IXAO(s)_{i,j} = [ (ij,s|kl,s') + delta_{s,s'}*(il,s|kj,s) ] * XAO(s')_{l,k}
      */ 
-    this->singleSlater_->aointegrals()->multTwoEContractDirect(XMO.cols(),false, false, XAAO,IXA,XBAO,IXB);
+    this->singleSlater_->aointegrals()->multTwoEContractDirect(XMO.cols(),false, false, XAAO,IXAOA,XBAO,IXAOB);
     
 
   for(auto idx = 0; idx < XMO.cols(); idx++){
@@ -803,58 +804,65 @@ void SDResponse::formRM3(RealCMMap &XMO, RealCMMap &AX){
     RealMap XA(X.data(),this->nVA_,this->nOA_);
     RealMap XB(X.data()+this->nOAVA_,this->nVB_,this->nOB_);
     /*
-     *  AX(s)   += IXMO(s)
+     *  Sigma(s)   += IXMO(s)
      *  IXMO(s) =  Cv(s)**H * IXAO(s) * Co(s)
      */  
-    AXA[idx] = 
+    SigmaA[idx] = 
       this->singleSlater_->moA()->block(0,this->nOA_,this->nBasis_,this->nVA_).adjoint()*
-      IXA[idx]*
+      IXAOA[idx]*
       this->singleSlater_->moA()->block(0,0,this->nBasis_,this->nOA_);
     if (this->RHF_)
     {
-      AXB[idx] = 
+      SigmaB[idx] = 
         this->singleSlater_->moA()->block(0,this->nOB_,this->nBasis_,this->nVB_).adjoint()*
-        IXB[idx]*
+        IXAOB[idx]*
         this->singleSlater_->moA()->block(0,0,this->nBasis_,this->nOB_);
     }
     else
     {
-      AXB[idx] = 
+      SigmaB[idx] = 
         this->singleSlater_->moB()->block(0,this->nOB_,this->nBasis_,this->nVB_).adjoint()*
-        IXB[idx]*
+        IXAOB[idx]*
         this->singleSlater_->moB()->block(0,0,this->nBasis_,this->nOB_);
     }
+/*
+    IXMOA = this->singleSlater_->moA()->adjoint() * IXAOA * (*this->singleSlater_->moA());
+    if(this->RHF_)
+      IXMOB = this->singleSlater_->moA()->adjoint() * IXAOB * (*this->singleSlater_->moA());
+    else
+      IXMOB = this->singleSlater_->moB()->adjoint() * IXAOB * (*this->singleSlater_->moB());
+*/
 
 /*  Old inefficient way of adding in the eigenenergie differences...
  *  Keep around just in case
     for (auto a = 0, ia = 0; a < this->nVA_; a++)
     for (auto i = 0; i  < this->nOA_;  i++, ia++)
     {
-      AXA(a,i) += XA(a,i) * (*this->rmDiag_)(ia,0);
+      SigmaA(a,i) += XA(a,i) * (*this->rmDiag_)(ia,0);
     }
     for (auto a = 0, ia = this->nOAVA_; a < this->nVB_; a++)
     for (auto i = 0; i  < this->nOB_;   i++,           ia++)
     {
-      AXB(a,i) += XB(a,i) * (*this->rmDiag_)(ia,0);
+      SigmaB(a,i) += XB(a,i) * (*this->rmDiag_)(ia,0);
     }
 */
     
-    RealMap AXu(AXA[idx].data(),this->nOAVA_,1);
-    RealMap AXd(AXB[idx].data(),this->nOBVB_,1);
+    RealMap Sigmau(SigmaA[idx].data(),this->nOAVA_,1);
+    RealMap Sigmad(SigmaB[idx].data(),this->nOBVB_,1);
     RealMap  Xu(XA.data(),this->nOAVA_,1);
     RealMap  Xd(XB.data(),this->nOBVB_,1);
 
    
     /*
-     *  AX(s)_{a,i} += [Eps(s)_{a} - Eps(s)_{i}] * XMO(s)_{a,i}
+     *  Sigma(s)_{a,i} += [Eps(s)_{a} - Eps(s)_{i}] * XMO(s)_{a,i}
      *
      *  Eps(s)_{a/i} - s-spin virtual / occupied eigenenergies (cannonical)
      */ 
-    AXu += Xu.cwiseProduct(this->rmDiag_->block(0,0,this->nOAVA_,1));
-    AXd += Xd.cwiseProduct(this->rmDiag_->block(this->nOAVA_,0,this->nOBVB_,1));
+    Sigmau += Xu.cwiseProduct(this->rmDiag_->block(0,0,this->nOAVA_,1));
+    Sigmad += Xd.cwiseProduct(this->rmDiag_->block(this->nOAVA_,0,this->nOBVB_,1));
     
-    AX.block(0,idx,this->nOAVA_,1) = AXu;
-    AX.block(this->nOAVA_,idx,this->nOBVB_,1) = AXd; 
+    Sigma.block(0,idx,this->nOAVA_,1) = Sigmau;
+    Sigma.block(this->nOAVA_,idx,this->nOBVB_,1) = Sigmad; 
   }
 }
 //dbwye
