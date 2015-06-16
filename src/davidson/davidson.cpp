@@ -33,7 +33,10 @@ void Davidson<double>::runMicro(ostream &output ) {
 
   int LenScr  = 0;
   int LenSigma   = this->n_ * this->maxSubSpace_;
+  int LenRho     = this->n_ * this->maxSubSpace_;
   int LenXTSigma = this->maxSubSpace_ * this->maxSubSpace_;
+  int LenXTRho   = this->maxSubSpace_ * this->maxSubSpace_;
+  int LenSuper   = 4 * this->maxSubSpace_ * this->maxSubSpace_;
   int LenU    = this->n_ * this->maxSubSpace_;
   int LenRes  = this->n_ * this->maxSubSpace_;
   int LenTVec = this->n_ * this->maxSubSpace_;
@@ -59,11 +62,33 @@ void Davidson<double>::runMicro(ostream &output ) {
    *
    * (6) Temp storage for a single precondictioned eigenvector 
    *
-   * (12) Local copy of the real part of the eigenvalues (reused for Tau storage for QR)
+   * (7) Linear transform of the metric S onto the right / gerade trial vectors
    *
-   * (13) Length of LAPACK workspace (used in all LAPACK Calls)
+   * (8) Reduced dimension of S into the right / gerade trial vector subspace
    *
-   * (14) Total double precision words required for LAPACK
+   * (9) Linear transform of A onto left / ungerade trial vectors 
+   *
+   * (10) Linear transform of the metric S onto the left /un gerade trial vectors
+   *
+   * (11) Reduced dimension of A onto the left / ungerade trial vector subspace
+   *
+   * (12) Reduced dimension of S into the left / ungerade trial vector subspace
+   *
+   * (13) Approximate left / ungerade eigenvectors 
+   *
+   * (14) Residuals of the left / ungerade eigenvectors 
+   *
+   * (15) Left / ungerade trial vectors 
+   *
+   * (16) Supermatrix of reduced dimension A onto the two subspaces
+   *
+   * (17) Supermatrix of reduced dimension S onto the two subspaces
+   *
+   * (18) Local copy of the real part of the eigenvalues (reused for Tau storage for QR)
+   *
+   * (19) Length of LAPACK workspace (used in all LAPACK Calls)
+   *
+   * (21) Total double precision words required for LAPACK
    */
 
   LenScr += LenSigma;   // 1
@@ -75,17 +100,25 @@ void Davidson<double>::runMicro(ostream &output ) {
 
 
   if(!this->hermetian_ || this->symmetrized_){
-    LenScr += LenSigma;   // 7
-    LenScr += LenXTSigma; // 8
-    LenScr += LenU;       // 9
-    LenScr += LenRes;     // 10
-    LenScr += LenTVec;    // 11
+    LenScr += LenRho;     // 7
+    LenScr += LenXTRho;   // 8 
+    LenScr += LenSigma;   // 9
+    LenScr += LenRho;     // 10
+    LenScr += LenXTSigma; // 11
+    LenScr += LenXTRho;   // 12
+    LenScr += LenU;       // 13
+    LenScr += LenRes;     // 14
+    LenScr += LenTVec;    // 15
+    LenScr += LenSuper;   // 16
+    LenScr += LenSuper;   // 17
   }
 
   LWORK = 6*this->n_;
-  LEN_LAPACK_SCR += this->maxSubSpace_; // 12
-  LEN_LAPACK_SCR += LWORK;              // 13
-  LenScr += LEN_LAPACK_SCR;             // 14
+  LEN_LAPACK_SCR += this->maxSubSpace_; // 18
+  LEN_LAPACK_SCR += LWORK;              // 19
+  if(!this->hermetian_ || this->symmetrized_)
+    LEN_LAPACK_SCR += this->maxSubSpace_; // 20
+  LenScr += LEN_LAPACK_SCR;             // 21
 
   double * SCR         = NULL; 
   double * SigmaRMem   = NULL; 
@@ -96,6 +129,8 @@ void Davidson<double>::runMicro(ostream &output ) {
   double * RhoLMem     = NULL; 
   double * XTRhoRMem   = NULL; 
   double * XTRhoLMem   = NULL; 
+  double * ASuperMem   = NULL;
+  double * SSuperMem   = NULL;
   double * URMem       = NULL; 
   double * ULMem       = NULL; 
   double * ResRMem     = NULL; 
@@ -116,6 +151,19 @@ void Davidson<double>::runMicro(ostream &output ) {
   TVecRMem      = ResRMem     + LenRes;
   TMem          = TVecRMem    + LenTVec;
   LAPACK_SCR    = TMem        + LenT;
+  if(!this->hermetian_ || this->symmetrized_){
+    RhoRMem       = LAPACK_SCR  + LEN_LAPACK_SCR;
+    XTRhoRMem     = RhoRMem     + LenRho;
+    SigmaLMem     = XTRhoRMem   + LenXTRho;
+    XTSigmaLMem   = SigmaLMem   + LenSigma;
+    RhoLMem       = XTSigmaLMem + LenXTSigma;
+    XTRhoLMem     = RhoLMem     + LenRho;
+    ULMem         = XTRhoLMem   + LenXTRho;
+    ResLMem       = ULMem       + LenU;
+    TVecLMem      = ResLMem     + LenRes;
+    ASuperMem     = TVecLMem    + LenTVec;
+    SSuperMem     = ASuperMem   + LenSuper;
+  }
 
 //RealMatrix TrialVecR(this->n_,this->nGuess_);
 
@@ -124,6 +172,7 @@ void Davidson<double>::runMicro(ostream &output ) {
   RealCMMap XTSigmaR( XTSigmaRMem,0,0);
   RealCMMap RhoR(     RhoRMem,    0,0);
   RealCMMap NewRhoR(  RhoRMem,    0,0);
+  RealCMMap XTRhoR(   XTRhoRMem,  0,0);
   RealCMMap UR(       URMem,      0,0);
   RealCMMap ResR(     ResRMem,    0,0);
   RealCMMap TrialVecR(TVecRMem,   0,0);
@@ -134,10 +183,14 @@ void Davidson<double>::runMicro(ostream &output ) {
   RealCMMap XTSigmaL( XTSigmaLMem,0,0);
   RealCMMap RhoL(     RhoLMem,    0,0);
   RealCMMap NewRhoL(  RhoLMem,    0,0);
+  RealCMMap XTRhoL(   XTRhoLMem,  0,0);
   RealCMMap UL(       ULMem,      0,0);
   RealCMMap ResL(     ResLMem,    0,0);
   RealCMMap TrialVecL(TVecLMem,   0,0);
   RealCMMap NewVecL(  TVecLMem,   0,0);
+
+  RealCMMap ASuper(ASuperMem,0,0);
+  RealCMMap SSuper(SSuperMem,0,0);
 
   RealCMMap T(TMem,this->n_,  1);
 
@@ -164,11 +217,16 @@ void Davidson<double>::runMicro(ostream &output ) {
   int NTrial = this->nGuess_;
   int NOld   = 0;
   int NNew   = this->nGuess_;
-  new (&TrialVecR) RealCMMap(TVecRMem,this->n_,NTrial);
 
+  new (&TrialVecR) RealCMMap(TVecRMem,this->n_,NTrial);
   TrialVecR = (*this->guess_);
+  if(!this->hermetian_ || this->symmetrized_){
+    new (&TrialVecL) RealCMMap(TVecLMem,this->n_,NTrial);
+    TrialVecL = (*this->guess_);
+  }
 
   for(auto iter = 0; iter < this->maxIter_; iter++){
+    cout << endl << "ITER" << iter << endl;
     std::chrono::high_resolution_clock::time_point start,finish;
     std::chrono::duration<double> elapsed;
     output << "Starting Davidson Micro Iteration " << iter + 1 << endl;
@@ -180,22 +238,58 @@ void Davidson<double>::runMicro(ostream &output ) {
     new (&UR)       RealCMMap(URMem,      this->n_,NTrial);
     new (&ResR)     RealCMMap(ResRMem,    this->n_,NTrial);
     new (&NewSR)    RealCMMap(SigmaRMem+NOld*this->n_,this->n_,NNew);
-    new (&NewVecR)  RealCMMap(TVecRMem+NOld*this->n_,this->n_,NNew);
+    new (&NewVecR)  RealCMMap(TVecRMem+ NOld*this->n_,this->n_,NNew);
+    if(!this->hermetian_ || this->symmetrized_){
+      new (&RhoR)     RealCMMap(RhoRMem,    this->n_,NTrial);
+      new (&XTRhoR)   RealCMMap(XTRhoRMem,  NTrial,  NTrial);
+      new (&SigmaL)   RealCMMap(SigmaLMem,  this->n_,NTrial);
+      new (&XTSigmaL) RealCMMap(XTSigmaLMem,NTrial,  NTrial);
+      new (&RhoL)     RealCMMap(RhoLMem,    this->n_,NTrial);
+      new (&XTRhoL)   RealCMMap(XTRhoLMem,  NTrial,  NTrial);
+      new (&UL)       RealCMMap(ULMem,      this->n_,NTrial);
+      new (&ResL)     RealCMMap(ResLMem,    this->n_,NTrial);
+      new (&ASuper)   RealCMMap(ASuperMem, 2*NTrial,2*NTrial);
+      new (&SSuper)   RealCMMap(SSuperMem, 2*NTrial,2*NTrial);
+
+      new (&NewRhoR)  RealCMMap(RhoRMem + NOld*this->n_,this->n_,NNew);
+      new (&NewRhoL)  RealCMMap(RhoLMem + NOld*this->n_,this->n_,NNew);
+      new (&NewSL)    RealCMMap(SigmaLMem+NOld*this->n_,this->n_,NNew);
+      new (&NewVecL)  RealCMMap(TVecLMem+ NOld*this->n_,this->n_,NNew);
+    }
 
     // Matrix Product (Sigma / AX). Keep around for reuse in computing
     // the residual vector
-    if(this->method_ == SDResponse::CIS) 
-      this->sdr_->formRM3(NewVecR,NewSR,NewRhoR);
+    if(this->method_ == SDResponse::CIS || 
+       this->method_ == SDResponse::RPA){ 
+
+      this->sdr_->formRM3(NewVecR,NewSR,NewRhoL);
+      if(this->method_ == SDResponse::RPA)
+        this->sdr_->formRM3(NewVecL,NewSL,NewRhoR);
+
+    }
     else if(this->AX_==NULL) NewSR = (*this->mat_) * NewVecR;  
     else NewSR = this->AX_(*this->mat_,NewVecR);
-//  cout << SigmaR << endl << endl;
+    cout << SigmaR << endl << endl;
    
-    // Full projection of A onto subspace
+    // Full projection of A (and S) onto subspace
     XTSigmaR = TrialVecR.transpose()*SigmaR; 
+    if(!this->hermetian_ || this->symmetrized_){
+      XTRhoR   = TrialVecR.transpose()*RhoR;
+      XTSigmaL = TrialVecL.transpose()*SigmaL;
+      XTRhoL   = TrialVecL.transpose()*RhoL;
+
+      ASuper.block(0,     0,     NTrial,NTrial) = XTSigmaR;
+      ASuper.block(NTrial,NTrial,NTrial,NTrial) = XTSigmaL;
+      SSuper.block(0,     NTrial,NTrial,NTrial) = XTRhoR;
+      SSuper.block(NTrial,0,     NTrial,NTrial) = XTRhoL;
+    }
 
     // Diagonalize the subspace
-    new (&ER) RealVecMap(LAPACK_SCR,NTrial);
     int IOff = NTrial;
+    if(!this->hermetian_ || this->symmetrized_){
+      IOff += NTrial;
+      new (&ER) RealVecMap(LAPACK_SCR,2*NTrial);
+    } else{ new (&ER) RealVecMap(LAPACK_SCR,NTrial);}
 /*
     if(!this->hermetian_) {
       new (&EI) Eigen::Map<Eigen::VectorXd>(LAPACK_SCR+IOff,NTrial);
@@ -205,10 +299,21 @@ void Davidson<double>::runMicro(ostream &output ) {
     }
 */
     if(this->hermetian_) {
-      dsyev_(&JOBVR,&UPLO,&NTrial,XTSigmaR.data(),&NTrial,ER.data(),
-             LAPACK_SCR+IOff,&LWORK,&INFO); 
-      if(INFO!=0) CErr("DSYEV failed to converge in Davison Iterations",output);
+      if(!this->symmetrized_){
+        dsyev_(&JOBVR,&UPLO,&NTrial,XTSigmaR.data(),&NTrial,ER.data(),
+               LAPACK_SCR+IOff,&LWORK,&INFO); 
+        if(INFO!=0) CErr("DSYEV failed to converge in Davison Iterations",output);
+      } else {
+        int iType = 1;
+        int TwoNTrial = 2*NTrial;
+        dsygv_(&iType,&JOBVR,&UPLO,&TwoNTrial,SSuper.data(),&TwoNTrial,
+               ASuper.data(),&TwoNTrial,ER.data(),LAPACK_SCR+IOff,&LWORK,
+               &INFO);
+        if(INFO!=0) CErr("DSYGV failed to converge in Davison Iterations",output);
+      }
     } 
+//  cout << ER << endl << endl;
+//  CErr();
 /*
     else {
       dgeev_(&JOBVL,&JOBVR,&NTrial,XTSigmaR.data(),&NTrial,ER.data(),

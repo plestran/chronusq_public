@@ -131,6 +131,7 @@ void readInput(FileIO * fileio, Molecule * mol, BasisSet * basis, Controls * con
       readString = stringupper(readString);
       controls->doSDR = true;
       if(!readString.compare("CIS")) controls->SDMethod = 1;
+      else if(!readString.compare("RPA")) controls->SDMethod = 2;
       else CErr("Input PSCF Option Not Recgnized",fileio->out);
     }
     fileio->in >> readString;

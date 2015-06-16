@@ -492,106 +492,36 @@ void SDResponse::formRM(){
   TD.eigenvectors();
 
   // Print the LR-TDHF Excitation Energies
-    cout << "Linear response energy" << endl;
-    cout << TD.eigenvalues() << endl;
-    RealMatrix ReE(ABBA.rows(),1);
-    ReE = TD.eigenvalues().real();
-    std::sort(ReE.data(),ReE.data()+ReE.size());
-    cout << ReE*phys.eVPerHartree << endl;
-    cout << TD.eigenvectors().col(0) << endl;
-    RealMatrix EVec = TD.eigenvectors().real();
+  cout << "Linear response energy" << endl;
+  cout << TD.eigenvalues() << endl;
+  RealMatrix ReE(ABBA.rows(),1);
+  ReE = TD.eigenvalues().real();
+  std::sort(ReE.data(),ReE.data()+ReE.size());
+  cout << ReE*phys.eVPerHartree << endl;
+  cout << TD.eigenvectors().col(0) << endl;
+  RealMatrix EVec = TD.eigenvectors().real();
 
-    RealMatrix T(4*this->nOAVA_,1);
-    T = EVec.col(0);
-    cout << T << endl << endl;
-    RealMatrix xMO = T.block(0,0,2*this->nOAVA_,1);
-    RealMatrix xMOA = xMO.block(0,0,this->nOAVA_,1);
-    RealMatrix xMOB = xMO.block(this->nOAVA_,0,this->nOAVA_,1);
-    RealMatrix yMO = T.block(2*this->nOAVA_,0,2*this->nOAVA_,1);
-    RealMatrix yMOA = yMO.block(0,0,this->nOAVA_,1);
-    RealMatrix yMOB = yMO.block(this->nOAVA_,0,this->nOAVA_,1);
-    RealMatrix TMOA(this->nBasis_,this->nBasis_);
-    RealMatrix TMOB(this->nBasis_,this->nBasis_);
-//  for(auto i = 0, ia = 0; i < this->nOA_; i++)
-//  for(auto a = 0; a < this->nVA_; a++, ia++){
-    for(auto a = 0, ia = 0; a < this->nVA_; a++)
-    for(auto i = 0; i < this->nOA_; i++, ia++){
-      cout << ia << endl;
-      TMOA(a+this->nOA_,i) = xMOA(ia,0);
-      TMOA(i,a+this->nOA_) = -yMOA(ia,0);
-/*
-      TMOA(a+this->nOA_,i) = -yMOA(ia,0);
-      TMOA(i,a+this->nOA_) = xMOA(ia,0);
-*/
-    }
-//  for(auto i = 0, ia = 0; i < this->nOB_; i++)
-//  for(auto a = 0; a < this->nVB_; a++, ia++){
-    for(auto a = 0, ia = 0; a < this->nVB_; a++)
-    for(auto i = 0; i < this->nOB_; i++, ia++){
-      TMOB(a+this->nOB_,i) = xMOB(ia,0);
-      TMOB(i,a+this->nOB_) = -yMOB(ia,0);
-/*
-      TMOB(a+this->nOB_,i) = -yMOB(ia,0);
-      TMOB(i,a+this->nOB_) = xMOB(ia,0);
-*/
-    }
-
-    cout << endl << TMOA << endl;
-    cout << endl << TMOB << endl;
-
-    RealMatrix TAOA = (*this->singleSlater_->moA())*TMOA*this->singleSlater_->moA()->adjoint();
-//  RealMatrix TAOB = (*this->singleSlater_->moB())*TMOB*this->singleSlater_->moB()->adjoint();
-    RealMatrix TAOB = (*this->singleSlater_->moA())*TMOB*this->singleSlater_->moA()->adjoint();
-    cout << endl << TAOA << endl;
-    cout << endl << TAOB << endl;
-
-    RealMatrix commA = TAOA*(*this->singleSlater_->aointegrals()->overlap_)*(*this->singleSlater_->densityA())/2 - (*this->singleSlater_->densityA())/2*(*this->singleSlater_->aointegrals()->overlap_)*TAOA;
-    RealMatrix commB = TAOB*(*this->singleSlater_->aointegrals()->overlap_)*(*this->singleSlater_->densityA())/2 - (*this->singleSlater_->densityA())/2*(*this->singleSlater_->aointegrals()->overlap_)*TAOB;
-
-    RealMatrix gCommA(this->nBasis_,this->nBasis_);
-    RealMatrix gCommB(this->nBasis_,this->nBasis_);
-    cout << endl << "COMMA" << commA << endl;
-    cout << endl << "COMMB" << commB << endl;
-
-    this->singleSlater_->aointegrals()->twoEContractDirect(false,false,commA,gCommA,commB,gCommB);
-
-    RealMatrix sigAOA = (*this->singleSlater_->fockA())*commA*(*this->singleSlater_->aointegrals()->overlap_) - (*this->singleSlater_->aointegrals()->overlap_)*commA*(*this->singleSlater_->fockA());
-    sigAOA += gCommA*(*this->singleSlater_->densityA())/2*(*this->singleSlater_->aointegrals()->overlap_) - (*this->singleSlater_->aointegrals()->overlap_)*(*this->singleSlater_->densityA())/2*gCommA;
- 
-    RealMatrix sigMOA = this->singleSlater_->moA()->adjoint()*sigAOA*(*this->singleSlater_->moA());
-/*
-    RealMatrix ITAOA(this->nBasis_,this->nBasis_);
-    RealMatrix ITAOB(this->nBasis_,this->nBasis_);
-
-    this->singleSlater_->aointegrals()->twoEContractN4(false,true,TAOA,ITAOA,TAOB,ITAOB);
-
-    RealMatrix ITMOA = this->singleSlater_->moA()->adjoint()*ITAOA*(*this->singleSlater_->moA());
-    RealMatrix ITMOB = this->singleSlater_->moA()->adjoint()*ITAOB*(*this->singleSlater_->moA());
-*/
-
-/*
-  if(!this->haveDag_) this->getDiag();
-    for (auto a = 0, ia = 0; a < this->nVA_; a++)
-    for (auto i = 0; i  < this->nOA_;  i++, ia++)
-    {
-      ITMOA(a,i) += TMOA(a,i) * (*this->rmDiag_)(ia,0);
-    }
-    for (auto a = 0, ia = this->nOAVA_; a < this->nVB_; a++)
-    for (auto i = 0; i  < this->nOB_;   i++,           ia++)
-    {
-      ITMOB(a,i) += TMOB(a,i) * (*this->rmDiag_)(ia,0);
-    }
-*/
-    
+  RealMatrix T(4*this->nOAVA_,1);
+  RealMatrix sigMOA(T);
+  RealMatrix rhoMOA(T);
+  sigMOA.setZero();
+  rhoMOA.setZero();
+  T = EVec.col(0);
   ABBA.block(nOVA+nOVB,nOVA+nOVB,nOVA+nOVB,nOVA+nOVB) = A;
   ABBA.block(nOVA+nOVB,0,nOVA+nOVB,nOVA+nOVB) = B;
-    cout << "SIG" << endl;
-    cout << endl << sigMOA << endl; 
-    cout << endl << ABBA*T << endl;
-    cout << endl << endl << T << endl << endl <<
-       -this->singleSlater_->moA()->adjoint()*(*this->singleSlater_->aointegrals()->overlap_)*commA*(*this->singleSlater_->aointegrals()->overlap_)*(*this->singleSlater_->moA());
-
-    
+  cout << "SIG" << endl;
+  RealCMMap sMap(sigMOA.data(),4*this->nOAVA_,1);
+  RealCMMap tMap(T.data(),4*this->nOAVA_,1);
+  RealCMMap rMap(rhoMOA.data(),4*this->nOAVA_,1);
+  this->iMeth_ = this->RPA;
+  this->nSingleDim_ = 4*this->nOAVA_;
+  formRM3(tMap,sMap,rMap);
+  this->iMeth_ = this->CIS;
+  this->nSingleDim_ = 2*this->nOAVA_;
+  cout << endl << sigMOA << endl; 
+  cout << endl << ABBA*T << endl;
+  cout << endl << T << endl << endl;
+  cout << endl << rhoMOA << endl << endl;
 
 }
 
@@ -752,18 +682,38 @@ RealMatrix SDResponse::formRM2(RealMatrix &XMO){
 }
 //dbwys
 void SDResponse::formRM3(RealCMMap &XMO, RealCMMap &Sigma, RealCMMap &Rho){
-  RealMatrix X(this->nSingleDim_,1);
-  std::vector<RealMatrix> XAAO(XMO.cols(),RealMatrix::Zero(this->nBasis_,this->nBasis_));
-  std::vector<RealMatrix> XBAO(XMO.cols(),RealMatrix::Zero(this->nBasis_,this->nBasis_));
-  std::vector<RealMatrix> IXAOA(XMO.cols(),RealMatrix::Zero(this->nBasis_,this->nBasis_));
-  std::vector<RealMatrix> IXAOB(XMO.cols(),RealMatrix::Zero(this->nBasis_,this->nBasis_));
-  std::vector<RealMatrix>  SigmaA(XMO.cols(),RealMatrix::Zero(this->nVA_,this->nOA_));
-  std::vector<RealMatrix>  SigmaB(XMO.cols(),RealMatrix::Zero(this->nVB_,this->nOB_));
-
+/*
+ *  Forms sigma (and possibly rho) for the linear transfomation of E^(2)
+ *  (and possibly S^(2) ) onto trial vectors (or any vector in general)
+ *
+ *  Adapted from Helgaker, et al. JCP 113, 8908 (2000)
+ *
+ *  DBWY (2015)
+ */
+  std::vector<RealMatrix> CommA(XMO.cols(),RealMatrix::Zero(this->nBasis_,this->nBasis_));
+  std::vector<RealMatrix> CommB(XMO.cols(),RealMatrix::Zero(this->nBasis_,this->nBasis_));
+  std::vector<RealMatrix> GCommA(XMO.cols(),RealMatrix::Zero(this->nBasis_,this->nBasis_));
+  std::vector<RealMatrix> GCommB(XMO.cols(),RealMatrix::Zero(this->nBasis_,this->nBasis_));
   RealMatrix XMOA(this->nBasis_,this->nBasis_);
   RealMatrix XMOB(this->nBasis_,this->nBasis_);
-  RealMatrix IXMOA(this->nBasis_,this->nBasis_);
-  RealMatrix IXMOB(this->nBasis_,this->nBasis_);
+  RealMatrix XAAO(this->nBasis_,this->nBasis_);
+  RealMatrix XBAO(this->nBasis_,this->nBasis_);
+  RealMatrix SigAOA(this->nBasis_,this->nBasis_);
+  RealMatrix SigAOB(this->nBasis_,this->nBasis_);
+  RealMatrix SigMOA(this->nBasis_,this->nBasis_);
+  RealMatrix SigMOB(this->nBasis_,this->nBasis_);
+  RealMatrix RhoAOA, RhoAOB;
+  RealMatrix RhoMOA, RhoMOB;
+  if(this->iMeth_ == RPA){
+    RhoAOA = RealMatrix::Zero(this->nBasis_,this->nBasis_);
+    RhoAOB = RealMatrix::Zero(this->nBasis_,this->nBasis_);
+    RhoMOA = RealMatrix::Zero(this->nBasis_,this->nBasis_);
+    RhoMOB = RealMatrix::Zero(this->nBasis_,this->nBasis_);
+  }
+
+  double fact = 1.0;
+  if(this->RHF_) fact = 0.5;
+  int iOff = this->nOAVA_ + this->nOBVB_;
 
   // Build Sigma by column 
   for (auto idx = 0; idx < XMO.cols(); idx++){
@@ -775,94 +725,90 @@ void SDResponse::formRM3(RealCMMap &XMO, RealCMMap &Sigma, RealCMMap &Rho){
      *  C(s)   - s-spin block of the MO coefficients
      *  H      - Adjoint
      */ 
-    X = XMO.col(idx);
+    RealVecMap X(XMO.data()+idx*this->nSingleDim_,this->nSingleDim_);
     for(auto a = this->nOA_, ia = 0; a < this->nBasis_; a++)
     for(auto i = 0         ; i < this->nOA_; i++, ia++){
       XMOA(a,i) = X(ia);
+      if(this->iMeth_ == RPA) XMOA(i,a) = X(ia+iOff);
     }
     for(auto a = this->nOB_, ia = this->nOAVA_; a < this->nBasis_; a++)
     for(auto i = 0         ; i < this->nOB_; i++, ia++){
       XMOB(a,i) = X(ia);
+      if(this->iMeth_ == RPA) XMOB(i,a) = X(ia+iOff);
     }
 
-    XAAO[idx] = (*this->singleSlater_->moA()) * XMOA * this->singleSlater_->moA()->adjoint();
+    XAAO = (*this->singleSlater_->moA()) * XMOA * this->singleSlater_->moA()->adjoint();
     if(this->RHF_)
-      XBAO[idx] = (*this->singleSlater_->moA()) * XMOB * this->singleSlater_->moA()->adjoint();
+      XBAO = (*this->singleSlater_->moA()) * XMOB * this->singleSlater_->moA()->adjoint();
     else
-      XBAO[idx] = (*this->singleSlater_->moB()) * XMOB * this->singleSlater_->moB()->adjoint();
-    
+      XBAO = (*this->singleSlater_->moB()) * XMOB * this->singleSlater_->moB()->adjoint();
+
+    CommA[idx] =  fact * XAAO * (*this->singleSlater_->aointegrals()->overlap_) * (*this->singleSlater_->densityA());
+    CommA[idx] += fact * (*this->singleSlater_->densityA()) * (*this->singleSlater_->aointegrals()->overlap_) * XAAO;
+    if(this->RHF_){ 
+      CommB[idx] =  fact * XBAO * (*this->singleSlater_->aointegrals()->overlap_) * (*this->singleSlater_->densityA());
+      CommB[idx] += fact * (*this->singleSlater_->densityA()) * (*this->singleSlater_->aointegrals()->overlap_) * XBAO;
+    } else {
+      CommB[idx] =  fact * XBAO * (*this->singleSlater_->aointegrals()->overlap_) * (*this->singleSlater_->densityB());
+      CommB[idx] += fact * (*this->singleSlater_->densityB()) * (*this->singleSlater_->aointegrals()->overlap_) * XBAO;
+    }
   }
 
-    /*
-     *  IXAO(s)_{i,j} = [ (ij,s|kl,s') + delta_{s,s'}*(il,s|kj,s) ] * XAO(s')_{l,k}
-     */ 
-    this->singleSlater_->aointegrals()->multTwoEContractDirect(XMO.cols(),false, false, XAAO,IXAOA,XBAO,IXAOB);
-    
+  this->singleSlater_->aointegrals()->multTwoEContractDirect(XMO.cols(),false, false, CommA,GCommA,CommB,GCommB);
 
   for(auto idx = 0; idx < XMO.cols(); idx++){
-    X = XMO.col(idx);
-    RealMap XA(X.data(),this->nVA_,this->nOA_);
-    RealMap XB(X.data()+this->nOAVA_,this->nVB_,this->nOB_);
-    /*
-     *  Sigma(s)   += IXMO(s)
-     *  IXMO(s) =  Cv(s)**H * IXAO(s) * Co(s)
-     */  
-    SigmaA[idx] = 
-      this->singleSlater_->moA()->block(0,this->nOA_,this->nBasis_,this->nVA_).adjoint()*
-      IXAOA[idx]*
-      this->singleSlater_->moA()->block(0,0,this->nBasis_,this->nOA_);
-    if (this->RHF_)
-    {
-      SigmaB[idx] = 
-        this->singleSlater_->moA()->block(0,this->nOB_,this->nBasis_,this->nVB_).adjoint()*
-        IXAOB[idx]*
-        this->singleSlater_->moA()->block(0,0,this->nBasis_,this->nOB_);
+    SigAOA =  (*this->singleSlater_->fockA()) * CommA[idx] * (*this->singleSlater_->aointegrals()->overlap_);
+    SigAOA -= (*this->singleSlater_->aointegrals()->overlap_) * CommA[idx] * (*this->singleSlater_->fockA());
+    SigAOA += fact * GCommA[idx] * (*this->singleSlater_->densityA()) * (*this->singleSlater_->aointegrals()->overlap_);
+    SigAOA -= fact * (*this->singleSlater_->aointegrals()->overlap_) * (*this->singleSlater_->densityA()) * GCommA[idx];
+
+    if(this->RHF_) {
+      SigAOB =  (*this->singleSlater_->fockA()) * CommB[idx] * (*this->singleSlater_->aointegrals()->overlap_);
+      SigAOB -= (*this->singleSlater_->aointegrals()->overlap_) * CommB[idx] * (*this->singleSlater_->fockA());
+      SigAOB += fact * GCommB[idx] * (*this->singleSlater_->densityA()) * (*this->singleSlater_->aointegrals()->overlap_);
+      SigAOB -= fact * (*this->singleSlater_->aointegrals()->overlap_) * (*this->singleSlater_->densityA()) * GCommB[idx];
+    } else {
+      SigAOB =  (*this->singleSlater_->fockB()) * CommB[idx] * (*this->singleSlater_->aointegrals()->overlap_);
+      SigAOB -= (*this->singleSlater_->aointegrals()->overlap_) * CommB[idx] * (*this->singleSlater_->fockB());
+      SigAOB += fact * GCommB[idx] * (*this->singleSlater_->densityB()) * (*this->singleSlater_->aointegrals()->overlap_);
+      SigAOB -= fact * (*this->singleSlater_->aointegrals()->overlap_) * (*this->singleSlater_->densityB()) * GCommB[idx];
     }
-    else
-    {
-      SigmaB[idx] = 
-        this->singleSlater_->moB()->block(0,this->nOB_,this->nBasis_,this->nVB_).adjoint()*
-        IXAOB[idx]*
-        this->singleSlater_->moB()->block(0,0,this->nBasis_,this->nOB_);
-    }
-/*
-    IXMOA = this->singleSlater_->moA()->adjoint() * IXAOA * (*this->singleSlater_->moA());
+
+    SigMOA = this->singleSlater_->moA()->adjoint() * SigAOA * (*this->singleSlater_->moA());
     if(this->RHF_)
-      IXMOB = this->singleSlater_->moA()->adjoint() * IXAOB * (*this->singleSlater_->moA());
-    else
-      IXMOB = this->singleSlater_->moB()->adjoint() * IXAOB * (*this->singleSlater_->moB());
-*/
+      SigMOB = this->singleSlater_->moA()->adjoint() * SigAOB * (*this->singleSlater_->moA());
+    else 
+      SigMOB = this->singleSlater_->moB()->adjoint() * SigAOB * (*this->singleSlater_->moB());
 
-/*  Old inefficient way of adding in the eigenenergie differences...
- *  Keep around just in case
-    for (auto a = 0, ia = 0; a < this->nVA_; a++)
-    for (auto i = 0; i  < this->nOA_;  i++, ia++)
-    {
-      SigmaA(a,i) += XA(a,i) * (*this->rmDiag_)(ia,0);
-    }
-    for (auto a = 0, ia = this->nOAVA_; a < this->nVB_; a++)
-    for (auto i = 0; i  < this->nOB_;   i++,           ia++)
-    {
-      SigmaB(a,i) += XB(a,i) * (*this->rmDiag_)(ia,0);
-    }
-*/
-    
-    RealMap Sigmau(SigmaA[idx].data(),this->nOAVA_,1);
-    RealMap Sigmad(SigmaB[idx].data(),this->nOBVB_,1);
-    RealMap  Xu(XA.data(),this->nOAVA_,1);
-    RealMap  Xd(XB.data(),this->nOBVB_,1);
+    if(this->iMeth_){
+      RhoAOA =  (*this->singleSlater_->aointegrals()->overlap_) * CommA[idx] * (*this->singleSlater_->aointegrals()->overlap_);
+      RhoAOB =  (*this->singleSlater_->aointegrals()->overlap_) * CommB[idx] * (*this->singleSlater_->aointegrals()->overlap_);
 
-   
-    /*
-     *  Sigma(s)_{a,i} += [Eps(s)_{a} - Eps(s)_{i}] * XMO(s)_{a,i}
-     *
-     *  Eps(s)_{a/i} - s-spin virtual / occupied eigenenergies (cannonical)
-     */ 
-    Sigmau += Xu.cwiseProduct(this->rmDiag_->block(0,0,this->nOAVA_,1));
-    Sigmad += Xd.cwiseProduct(this->rmDiag_->block(this->nOAVA_,0,this->nOBVB_,1));
-    
-    Sigma.block(0,idx,this->nOAVA_,1) = Sigmau;
-    Sigma.block(this->nOAVA_,idx,this->nOBVB_,1) = Sigmad; 
+      RhoMOA = this->singleSlater_->moA()->adjoint() * RhoAOA * (*this->singleSlater_->moA());
+      if(this->RHF_)
+        RhoMOB = this->singleSlater_->moA()->adjoint() * RhoAOB * (*this->singleSlater_->moA());
+      else 
+        RhoMOB = this->singleSlater_->moB()->adjoint() * RhoAOB * (*this->singleSlater_->moB());
+    }
+
+    for(auto a = this->nOA_, ia = 0; a < this->nBasis_; a++)
+    for(auto i = 0         ; i < this->nOA_; i++, ia++){
+      Sigma(ia,idx)  = SigMOA(a,i);
+      if(this->iMeth_ == RPA) {
+        Sigma(ia+iOff,idx) = -SigMOA(i,a);
+        Rho(  ia     ,idx) =  RhoMOA(a,i);
+        Rho(  ia+iOff,idx) = -RhoMOA(i,a);
+      }
+    }
+    for(auto a = this->nOB_, ia = this->nOAVA_; a < this->nBasis_; a++)
+    for(auto i = 0         ; i < this->nOB_; i++, ia++){
+      Sigma(ia,idx) = SigMOB(a,i);
+      if(this->iMeth_ == RPA) {
+        Sigma(ia+iOff,idx) = -SigMOB(i,a);
+        Rho(  ia     ,idx) =  RhoMOB(a,i);
+        Rho(  ia+iOff,idx) = -RhoMOB(i,a);
+      }
+    }
   }
 }
 //dbwye
