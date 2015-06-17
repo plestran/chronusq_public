@@ -40,7 +40,6 @@ void Davidson<double>::runMicro(ostream &output ) {
   int LenU    = this->n_ * this->maxSubSpace_;
   int LenRes  = this->n_ * this->maxSubSpace_;
   int LenTVec = this->n_ * this->maxSubSpace_;
-  int LenT    = this->n_;
   int LEN_LAPACK_SCR = 0;
   int LWORK = 0;
 
@@ -96,7 +95,6 @@ void Davidson<double>::runMicro(ostream &output ) {
   LenScr += LenU;       // 3
   LenScr += LenRes;     // 4 
   LenScr += LenTVec;    // 5
-  LenScr += LenT;       // 6
 
 
   if(!this->hermetian_ || this->symmetrized_){
@@ -137,7 +135,6 @@ void Davidson<double>::runMicro(ostream &output ) {
   double * ResLMem     = NULL; 
   double * TVecRMem    = NULL;         
   double * TVecLMem    = NULL;         
-  double * TMem        = NULL;        
   double * LAPACK_SCR  = NULL;
 
   // Allocate Scratch Space
@@ -149,8 +146,7 @@ void Davidson<double>::runMicro(ostream &output ) {
   URMem         = XTSigmaRMem + LenXTSigma;
   ResRMem       = URMem       + LenU; 
   TVecRMem      = ResRMem     + LenRes;
-  TMem          = TVecRMem    + LenTVec;
-  LAPACK_SCR    = TMem        + LenT;
+  LAPACK_SCR    = TVecRMem    + LenTVec;
   if(!this->hermetian_ || this->symmetrized_){
     RhoRMem       = LAPACK_SCR  + LEN_LAPACK_SCR;
     XTRhoRMem     = RhoRMem     + LenRho;
@@ -192,7 +188,6 @@ void Davidson<double>::runMicro(ostream &output ) {
   RealCMMap ASuper(ASuperMem,0,0);
   RealCMMap SSuper(SSuperMem,0,0);
 
-  RealCMMap T(TMem,this->n_,  1);
 
 
   RealVecMap ER(LAPACK_SCR,0);
@@ -452,7 +447,7 @@ void Davidson<double>::runMicro(ostream &output ) {
       if(!resConv[k]) {
         for(auto i = 0; i < this->n_; i++) {
           if(this->method_ == SDResponse::CIS) {
-            T(i,0) = - ResR.col(k)(i) / ((*this->sdr_->rmDiag())(i,0) - ER(k));
+            TrialVecR(i,NTrial+INDX) = - ResR.col(k)(i) / ((*this->sdr_->rmDiag())(i,0) - ER(k));
           } 
 /*
           else if(this->method_ == SDResponse::RPA) {
@@ -460,10 +455,9 @@ void Davidson<double>::runMicro(ostream &output ) {
           } 
 */
           else {
-            T(i,0) = - ResR.col(k)(i) / ((*this->mat_)(i,i) - ER(k));
+            TrialVecR(i,NTrial+INDX) = - ResR.col(k)(i) / ((*this->mat_)(i,i) - ER(k));
           }
         }
-        TrialVecR.block(0,NTrial + INDX,this->n_,1) = T;
         INDX++;
       }
     }
