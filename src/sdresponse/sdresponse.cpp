@@ -509,6 +509,7 @@ void SDResponse::formRM(){
   T = EVec.col(0);
   ABBA.block(nOVA+nOVB,nOVA+nOVB,nOVA+nOVB,nOVA+nOVB) = A;
   ABBA.block(nOVA+nOVB,0,nOVA+nOVB,nOVA+nOVB) = B;
+/*
   cout << "SIG" << endl;
   RealCMMap sMap(sigMOA.data(),4*this->nOAVA_,1);
   RealCMMap tMap(T.data(),4*this->nOAVA_,1);
@@ -522,6 +523,7 @@ void SDResponse::formRM(){
   cout << endl << ABBA*T << endl;
   cout << endl << T << endl << endl;
   cout << endl << rhoMOA << endl << endl;
+*/
 
 }
 
@@ -756,6 +758,7 @@ void SDResponse::formRM3(RealCMMap &XMO, RealCMMap &Sigma, RealCMMap &Rho){
 
   this->singleSlater_->aointegrals()->multTwoEContractDirect(XMO.cols(),false, false, CommA,GCommA,CommB,GCommB);
 
+
   for(auto idx = 0; idx < XMO.cols(); idx++){
     SigAOA =  (*this->singleSlater_->fockA()) * CommA[idx] * (*this->singleSlater_->aointegrals()->overlap_);
     SigAOA -= (*this->singleSlater_->aointegrals()->overlap_) * CommA[idx] * (*this->singleSlater_->fockA());
@@ -793,6 +796,7 @@ void SDResponse::formRM3(RealCMMap &XMO, RealCMMap &Sigma, RealCMMap &Rho){
 
     for(auto a = this->nOA_, ia = 0; a < this->nBasis_; a++)
     for(auto i = 0         ; i < this->nOA_; i++, ia++){
+      cout << ia << endl;
       Sigma(ia,idx)  = SigMOA(a,i);
       if(this->iMeth_ == RPA) {
         Sigma(ia+iOff,idx) = -SigMOA(i,a);
@@ -991,8 +995,10 @@ void SDResponse::formGuess(){
     std::unique_ptr<RealMatrix>(
       new RealMatrix(this->nSingleDim_,this->nGuess_)
     ); 
+  cout << *this->rmDiag_ << endl << endl;
   int nRHF = 1;
   if(this->RHF_) nRHF = 2;
+  if(this->iMeth_==RPA) nRHF *= 2;
   RealMatrix dagCpy(this->nSingleDim_/nRHF,1);
   std::memcpy(dagCpy.data(),this->rmDiag_->data(),dagCpy.size()*sizeof(double));
 //std::sort(dagCpy.data(),dagCpy.data()+dagCpy.size(),
@@ -1045,6 +1051,9 @@ void SDResponse::getDiag(){
       (*this->rmDiag_)(iaBeta,0) = eaBeta - eiBeta;
     }
   }
+  if(this->iMeth_ == RPA)
+    this->rmDiag_->block(nSingleDim_/2,0,nSingleDim_/2,1)
+      = this->rmDiag_->block(0,0,nSingleDim_/2,1);
   this->haveDag_ = true;
 }
 void SDResponse::initMeth(){
@@ -1052,6 +1061,8 @@ void SDResponse::initMeth(){
     CErr("Must set NSek before initializing a PSCF method",this->fileio_->out);
   if(this->iMeth_ == CIS){
     this->nSingleDim_ = this->nOAVA_ + this->nOBVB_;
+  } else if(this->iMeth_ == RPA){
+    this->nSingleDim_ = 2*(this->nOAVA_ + this->nOBVB_);
   } else {
     CErr("PSCF Method " + std::to_string(this->iMeth_) + " NYI",this->fileio_->out);
   }

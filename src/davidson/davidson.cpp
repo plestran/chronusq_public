@@ -219,10 +219,21 @@ void Davidson<double>::runMicro(ostream &output ) {
   int NNew   = this->nGuess_;
 
   new (&TrialVecR) RealCMMap(TVecRMem,this->n_,NTrial);
-  TrialVecR = (*this->guess_);
   if(!this->hermetian_ || this->symmetrized_){
     new (&TrialVecL) RealCMMap(TVecLMem,this->n_,NTrial);
+  }
+
+  if(this->symmetrized_){
+    TrialVecR = (*this->guess_);
+    TrialVecR.block(this->n_/2,0,this->n_/2,this->nGuess_)
+      = TrialVecR.block(0,0,this->n_/2,this->nGuess_);
     TrialVecL = (*this->guess_);
+    TrialVecL.block(this->n_/2,0,this->n_/2,this->nGuess_)
+      = -TrialVecL.block(0,0,this->n_/2,this->nGuess_);
+    TrialVecR *= std::sqrt(0.5);
+    TrialVecL *= std::sqrt(0.5);
+  } else {
+    TrialVecR = (*this->guess_);
   }
 
   for(auto iter = 0; iter < this->maxIter_; iter++){
@@ -310,10 +321,28 @@ void Davidson<double>::runMicro(ostream &output ) {
                ASuper.data(),&TwoNTrial,ER.data(),LAPACK_SCR+IOff,&LWORK,
                &INFO);
         if(INFO!=0) CErr("DSYGV failed to converge in Davison Iterations",output);
+        cout << ER << endl << endl;
+        cout << SSuper << endl << endl;
+/*
+        new (&ER)     RealVecMap(LAPACK_SCR+NTrial,NTrial);
+        new (&SSuper) RealCMMap (SSuperMem+2*NTrial*NTrial,2*NTrial,NTrial);
+        for(auto i = 0 ; i < NTrial; i++) ER(i) = 1/ER(i);
+        for(auto i = 0 ; i < NTrial/2; i++){
+          SSuper.col(i).swap(SSuper.col(NTrial - i - 1));
+          double tmp = ER(i);
+          ER(i) = ER(NTrial - i - 1);
+          ER(NTrial - i - 1) = tmp;
+        }
+*/
+        new (&ER)     RealVecMap(LAPACK_SCR,NTrial);
+        new (&SSuper) RealCMMap (SSuperMem,2*NTrial,NTrial);
+        for(auto i = 0 ; i < NTrial; i++) ER(i) = -1.0/ER(i);
+        cout << ER << endl << endl;
+        cout << SSuper << endl << endl;
+        XTSigmaR = SSuper.block(0,     0,NTrial,NTrial);
+        XTSigmaL = SSuper.block(NTrial,0,NTrial,NTrial);
       }
     } 
-//  cout << ER << endl << endl;
-//  CErr();
 /*
     else {
       dgeev_(&JOBVL,&JOBVR,&NTrial,XTSigmaR.data(),&NTrial,ER.data(),
@@ -328,17 +357,24 @@ void Davidson<double>::runMicro(ostream &output ) {
    
     
     // Reconstruct approximate eigenvectors
-    if(this->hermetian_) UR = TrialVecR * XTSigmaR;
+    if(this->hermetian_)   UR = TrialVecR * XTSigmaR;
+    if(this->symmetrized_) UL = TrialVecL * XTSigmaL;
 //  else                 UR = TrialVecR * VR;
 
     // Stash away current approximation of eigenvalues and eigenvectors (NSek)
     (*this->eigenvalues_) = ER.block(0,0,this->nSek_,1);
-    (*this->eigenvector_) = UR.block(0,0,this->n_,this->nSek_);
-
+    (*this->eigenvector_) = UR.block(0,0,this->n_,this->nSek_); // This is wrong for symmetrized.... FIXME
     
     // Construct the residual vector 
     // R = A*U - U*E = (AX)*c - U*E
-    if(this->hermetian_) ResR = SigmaR*XTSigmaR - UR*ER.asDiagonal();
+    if(this->hermetian_ && !this->symmetrized_) ResR = SigmaR*XTSigmaR - UR*ER.asDiagonal();
+    if(this->symmetrized_) {
+      ResR = SigmaR*XTSigmaR - RhoR*XTSigmaL*ER.asDiagonal();
+      ResL = SigmaL*XTSigmaL - RhoL*XTSigmaR*ER.asDiagonal();
+      cout << ResR << endl << endl;
+      cout << ResL << endl << endl;
+   }
+   
 /*
     else {
       int NImag = 0;
@@ -362,21 +398,29 @@ void Davidson<double>::runMicro(ostream &output ) {
     // Loop over NSek residual vectors. Decide from which residuals
     // will be made perturbed guess vectors
     for(auto k = 0; k < this->nSek_; k++) {
-      if(ResR.col(k).norm() < 5e-6) resConv.push_back(true);
+      double NORM = ResR.col(k).norm();
+      if(!this->hermetian_ || this->symmetrized_) 
+        NORM = std::max(NORM,ResL.col(k).norm());
+      if(NORM < 5e-6) resConv.push_back(true);
       else {
         resConv.push_back(false); NNotConv++;
       }
     }
     output << "  Checking Davidson Convergence:" << endl;
     output << "    " << std::setw(8)  << " " << std::setw(32) << std::left << "    Roots at Current Iteration:";
-    output << std::setw(32) << std::left << "    Norm of Residual:" << endl;
+    output << std::setw(32) << std::left << "    (Max) Norm of Residual(s):" << endl;
     for(auto k = 0 ; k < this->nSek_; k++){
+      double NORM = ResR.col(k).norm();
+      if(!this->hermetian_ || this->symmetrized_) 
+        NORM = std::max(NORM,ResL.col(k).norm());
+
       output << "    " << std::setw(12) << "State " + std::to_string(k+1) + ":";
       output << std::setw(32) << std::left << std::fixed << (*this->eigenvalues_)(k,0);
-      output << std::setw(15) << std::left << std::scientific << ResR.col(k).norm();
+      output << std::setw(32) << std::left << std::scientific << NORM;
       if(resConv[k]) output << "     Root has converged" << endl;
       else output << "     Root has not converged" << endl;
     }
+    if(this->symmetrized_) CErr();
 
 //  output << *this->eigenvalues_ << endl << endl;
 
@@ -394,6 +438,8 @@ void Davidson<double>::runMicro(ostream &output ) {
     // Resize the trial vector dimension to contain the new perturbed
     // guess vectors
     new (&TrialVecR) RealCMMap(TVecRMem,this->n_,NTrial+NNotConv);
+    if(this->symmetrized_ || !this->hermetian_)
+      new (&TrialVecL) RealCMMap(TVecLMem,this->n_,NTrial+NNotConv);
     int INDX = 0;
     for(auto k = 0; k < this->nSek_; k++) {
       // If the residual for root "k" is not converged, construct
@@ -407,7 +453,13 @@ void Davidson<double>::runMicro(ostream &output ) {
         for(auto i = 0; i < this->n_; i++) {
           if(this->method_ == SDResponse::CIS) {
             T(i,0) = - ResR.col(k)(i) / ((*this->sdr_->rmDiag())(i,0) - ER(k));
-          } else {
+          } 
+/*
+          else if(this->method_ == SDResponse::RPA) {
+            TrialVecR(i,NTrial+INDX) = -ResR.col(k)(i) 
+          } 
+*/
+          else {
             T(i,0) = - ResR.col(k)(i) / ((*this->mat_)(i,i) - ER(k));
           }
         }

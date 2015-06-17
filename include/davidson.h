@@ -199,7 +199,7 @@ namespace ChronusQ {
       this->eigenvalues_ = std::unique_ptr<TVec>(new TVec(this->nSek_,1));
       this->eigenvector_ = std::unique_ptr<TMat>(new TMat(this->n_,this->nSek_));
       this->hermetian_ = true; // Only supports Hermetian for time being
-      this->symmetrized_    = false;
+      this->symmetrized_    = (this->method_ == SDResponse::RPA);
 
     }
     ~Davidson(){;};
