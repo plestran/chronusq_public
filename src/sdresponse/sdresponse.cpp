@@ -497,7 +497,7 @@ void SDResponse::formRM(){
   RealMatrix ReE(ABBA.rows(),1);
   ReE = TD.eigenvalues().real();
   std::sort(ReE.data(),ReE.data()+ReE.size());
-  cout << ReE*phys.eVPerHartree << endl;
+  cout << ReE << endl;
   cout << TD.eigenvectors().col(0) << endl;
   RealMatrix EVec = TD.eigenvectors().real();
 
@@ -509,7 +509,6 @@ void SDResponse::formRM(){
   T = EVec.col(0);
   ABBA.block(nOVA+nOVB,nOVA+nOVB,nOVA+nOVB,nOVA+nOVB) = A;
   ABBA.block(nOVA+nOVB,0,nOVA+nOVB,nOVA+nOVB) = B;
-/*
   cout << "SIG" << endl;
   RealCMMap sMap(sigMOA.data(),4*this->nOAVA_,1);
   RealCMMap tMap(T.data(),4*this->nOAVA_,1);
@@ -517,14 +516,15 @@ void SDResponse::formRM(){
   this->iMeth_ = this->RPA;
   this->nSingleDim_ = 4*this->nOAVA_;
   formRM3(tMap,sMap,rMap);
-  this->iMeth_ = this->CIS;
-  this->nSingleDim_ = 2*this->nOAVA_;
-  cout << endl << sigMOA << endl; 
-  cout << endl << ABBA*T << endl;
-  cout << endl << T << endl << endl;
-  cout << endl << rhoMOA << endl << endl;
-*/
+//this->iMeth_ = this->CIS;
+//this->nSingleDim_ = 2*this->nOAVA_;
+  cout << endl << ABBA*T-sigMOA << endl;
+  T.block(2*this->nOAVA_,0,2*this->nOAVA_,1) = -T.block(2*this->nOAVA_,0,2*this->nOAVA_,1);
+  cout << "RHO" << endl;
+  cout << endl << T-rhoMOA << endl << endl;
+  T.block(2*this->nOAVA_,0,2*this->nOAVA_,1) = -T.block(2*this->nOAVA_,0,2*this->nOAVA_,1);
 
+  cout << sigMOA -  TD.eigenvalues()(0).real()*rhoMOA<< endl;
 }
 
 void SDResponse::DavidsonCIS(){
@@ -796,7 +796,6 @@ void SDResponse::formRM3(RealCMMap &XMO, RealCMMap &Sigma, RealCMMap &Rho){
 
     for(auto a = this->nOA_, ia = 0; a < this->nBasis_; a++)
     for(auto i = 0         ; i < this->nOA_; i++, ia++){
-      cout << ia << endl;
       Sigma(ia,idx)  = SigMOA(a,i);
       if(this->iMeth_ == RPA) {
         Sigma(ia+iOff,idx) = -SigMOA(i,a);
@@ -995,16 +994,12 @@ void SDResponse::formGuess(){
     std::unique_ptr<RealMatrix>(
       new RealMatrix(this->nSingleDim_,this->nGuess_)
     ); 
-  cout << *this->rmDiag_ << endl << endl;
   int nRHF = 1;
   if(this->RHF_) nRHF = 2;
   if(this->iMeth_==RPA) nRHF *= 2;
   RealMatrix dagCpy(this->nSingleDim_/nRHF,1);
   std::memcpy(dagCpy.data(),this->rmDiag_->data(),dagCpy.size()*sizeof(double));
-//std::sort(dagCpy.data(),dagCpy.data()+dagCpy.size(),
-//          [](double a, double b)->bool{ return a>b;});
   std::sort(dagCpy.data(),dagCpy.data()+dagCpy.size());
-//std::sort(dagCpy.data(),dagCpy.data()+dagCpy.size()/2);
   
   for(auto i = 0; i < this->nGuess_; i++){
     int indx;
@@ -1016,7 +1011,31 @@ void SDResponse::formGuess(){
     }
     (*this->davGuess_)(indx,i) = 1.0;
   }
-//cout << *this->davGuess_ << endl;
+}
+
+void SDResponse::formPerturbedGuess(double Omega, const RealCMMap & ResR, RealCMMap & QR, const RealCMMap & ResL, 
+                        RealCMMap & QL){
+  if(this->iMeth_ == CIS){
+    for(auto i = 0; i < this->nSingleDim_; i++)
+      QR(i) = -ResR(i) / ((*this->rmDiag())(i,0) - Omega);
+  } else if(this->iMeth_ == RPA) {
+    for(auto i = 0; i < this->nSingleDim_; i++){
+      QR(i) = ResR(i) * (*this->rmDiag())(i,0);
+      QL(i) = ResL(i) * (*this->rmDiag())(i,0);
+    }
+    for(auto i = 0; i < this->nSingleDim_/2; i++){
+      QR(i) += Omega*ResL(i);
+      QR(this->nSingleDim_/2 + i) -= Omega*ResL(this->nSingleDim_/2 + i);
+      QL(i) += Omega*ResR(i);
+      QL(this->nSingleDim_/2 + i) -= Omega*ResR(this->nSingleDim_/2 + i);
+    }
+    for(auto i = 0; i < this->nSingleDim_; i++){
+      QR(i) = QR(i) / (std::pow((*this->rmDiag())(i,0),2.0) - std::pow(Omega,2.0));
+      QL(i) = QL(i) / (std::pow((*this->rmDiag())(i,0),2.0) - std::pow(Omega,2.0));
+    }
+  } else {
+    CErr("Perturbed guess vectors NYI for SDResponse::iMeth_ = " + std::to_string(this->iMeth_),this->fileio_->out);
+  }
 }
 
 void SDResponse::checkValid(){

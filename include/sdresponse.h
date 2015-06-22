@@ -118,6 +118,7 @@ public:
   inline int iMeth(){return this->iMeth_;};
   inline int nSingleDim(){return this->nSingleDim_;};
   void formGuess();
+  void formPerturbedGuess(double,const RealCMMap &, RealCMMap &,const RealCMMap &, RealCMMap &);
 //RealMatrix formRM3(RealMatrix &);
 //RealMatrix formRM3(RealCMMap &);
   void formRM3(RealCMMap &, RealCMMap &, RealCMMap &Rho);
