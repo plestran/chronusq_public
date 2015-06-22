@@ -78,6 +78,10 @@ void SDResponse::iniSDResponse( Molecule * molecule, BasisSet * basisSet, MOInte
   this->nOBVB_ = this->nOB_*this->nVB_;
   this->nOAVB_ = this->nOA_*this->nVB_;
   this->nOBVA_ = this->nOB_*this->nVA_;
+  cout << "NOAVA in INI " << nOAVA_ << endl; 
+  cout << "NOBVB in INI " << nOBVB_ << endl; 
+  cout << "NOAVB in INI " << nOAVB_ << endl; 
+  cout << "NOBVA in INI " << nOBVA_ << endl; 
 //dbwye
 };
 //-----------------------------------//
@@ -490,6 +494,7 @@ void SDResponse::formRM(){
   TD.compute(ABBA);
   TD.eigenvalues();
   TD.eigenvectors();
+  cout <<"ABBA" << ABBA << endl;
 
   // Print the LR-TDHF Excitation Energies
   cout << "Linear response energy" << endl;
@@ -497,11 +502,10 @@ void SDResponse::formRM(){
   RealMatrix ReE(ABBA.rows(),1);
   ReE = TD.eigenvalues().real();
   std::sort(ReE.data(),ReE.data()+ReE.size());
-  cout << ReE << endl;
+  cout << ReE*phys.eVPerHartree << endl;
   cout << TD.eigenvectors().col(0) << endl;
   RealMatrix EVec = TD.eigenvectors().real();
-
-  RealMatrix T(4*this->nOAVA_,1);
+  RealMatrix T(this->nSingleDim_,1);
   RealMatrix sigMOA(T);
   RealMatrix rhoMOA(T);
   sigMOA.setZero();
@@ -510,19 +514,15 @@ void SDResponse::formRM(){
   ABBA.block(nOVA+nOVB,nOVA+nOVB,nOVA+nOVB,nOVA+nOVB) = A;
   ABBA.block(nOVA+nOVB,0,nOVA+nOVB,nOVA+nOVB) = B;
   cout << "SIG" << endl;
-  RealCMMap sMap(sigMOA.data(),4*this->nOAVA_,1);
-  RealCMMap tMap(T.data(),4*this->nOAVA_,1);
-  RealCMMap rMap(rhoMOA.data(),4*this->nOAVA_,1);
-  this->iMeth_ = this->RPA;
-  this->nSingleDim_ = 4*this->nOAVA_;
+  RealCMMap sMap(sigMOA.data(),this->nSingleDim_,1);
+  RealCMMap tMap(T.data(),this->nSingleDim_,1);
+  RealCMMap rMap(rhoMOA.data(),this->nSingleDim_,1);
   formRM3(tMap,sMap,rMap);
-//this->iMeth_ = this->CIS;
-//this->nSingleDim_ = 2*this->nOAVA_;
   cout << endl << ABBA*T-sigMOA << endl;
-  T.block(2*this->nOAVA_,0,2*this->nOAVA_,1) = -T.block(2*this->nOAVA_,0,2*this->nOAVA_,1);
+  T.block(this->nSingleDim_/2,0,this->nSingleDim_/2,1) = -T.block(this->nSingleDim_/2,0,this->nSingleDim_/2,1);
   cout << "RHO" << endl;
   cout << endl << T-rhoMOA << endl << endl;
-  T.block(2*this->nOAVA_,0,2*this->nOAVA_,1) = -T.block(2*this->nOAVA_,0,2*this->nOAVA_,1);
+  T.block(this->nSingleDim_/2,0,this->nSingleDim_/2,1) = -T.block(this->nSingleDim_/2,0,this->nSingleDim_/2,1);
 
   cout << sigMOA -  TD.eigenvalues()(0).real()*rhoMOA<< endl;
 }
@@ -1000,6 +1000,7 @@ void SDResponse::formGuess(){
   RealMatrix dagCpy(this->nSingleDim_/nRHF,1);
   std::memcpy(dagCpy.data(),this->rmDiag_->data(),dagCpy.size()*sizeof(double));
   std::sort(dagCpy.data(),dagCpy.data()+dagCpy.size());
+  cout << *rmDiag_<<endl;
   
   for(auto i = 0; i < this->nGuess_; i++){
     int indx;
@@ -1011,6 +1012,7 @@ void SDResponse::formGuess(){
     }
     (*this->davGuess_)(indx,i) = 1.0;
   }
+  cout << *this->davGuess_ << endl;
 }
 
 void SDResponse::formPerturbedGuess(double Omega, const RealCMMap & ResR, RealCMMap & QR, const RealCMMap & ResL, 
@@ -1062,7 +1064,7 @@ void SDResponse::getDiag(){
       (*this->rmDiag_)(iaAlpha+this->nOAVA_,0) = eaAlpha - eiAlpha;
   }
   if(!this->RHF_){
-    for(auto aBeta = 0; aBeta < this->nVA_; aBeta++)
+    for(auto aBeta = 0; aBeta < this->nVB_; aBeta++)
     for(auto iBeta = 0; iBeta < this->nOB_; iBeta++){
       auto iaBeta = aBeta*this->nOB_ + iBeta + this->nOAVA_; 
       auto eiBeta = (*this->singleSlater_->epsB())(iBeta);
@@ -1085,5 +1087,6 @@ void SDResponse::initMeth(){
   } else {
     CErr("PSCF Method " + std::to_string(this->iMeth_) + " NYI",this->fileio_->out);
   }
+  cout << "NSing in initMeth " << nSingleDim_ << endl;
 }
 //dbwye

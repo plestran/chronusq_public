@@ -282,6 +282,8 @@ void Davidson<double>::runMicro(ostream &output ) {
       ASuper.block(NTrial,NTrial,NTrial,NTrial) = XTSigmaL;
       SSuper.block(0,     NTrial,NTrial,NTrial) = XTRhoR;
       SSuper.block(NTrial,0,     NTrial,NTrial) = XTRhoL;
+      cout << ASuper << endl << endl;
+      cout << SSuper << endl << endl;
     }
 
 
@@ -311,6 +313,7 @@ void Davidson<double>::runMicro(ostream &output ) {
         dsygv_(&iType,&JOBVR,&UPLO,&TwoNTrial,SSuper.data(),&TwoNTrial,
                ASuper.data(),&TwoNTrial,ER.data(),LAPACK_SCR+IOff,&LWORK,
                &INFO);
+        cout << INFO << endl;
         if(INFO!=0) CErr("DSYGV failed to converge in Davison Iterations",output);
 
         new (&ER)     RealVecMap(LAPACK_SCR+NTrial,NTrial);
