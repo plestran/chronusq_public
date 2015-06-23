@@ -203,7 +203,7 @@ namespace ChronusQ {
       this->eigenvector_ = this->sdr_->transDen();
       this->hermetian_ = true; // Only supports Hermetian for time being
       this->symmetrized_    = (this->method_ == SDResponse::RPA);
-      this->debug_ = true;
+      this->debug_ = false;
       this->cleanup_ = false;
 
     }

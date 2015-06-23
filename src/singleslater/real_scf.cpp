@@ -36,15 +36,15 @@ namespace ChronusQ {
 template<>
 void SingleSlater<double>::printDensityInfo(double PAlphaRMS,double EDelta){
   this->fileio_->out<<"\nSCF Information:"<<endl;
-  this->fileio_->out<<std::right<<std::setw(30)<<"    Delta-E = "<<std::setw(15)<<EDelta<<std::setw(5)<<" Eh "<<endl;
-  this->fileio_->out<<std::right<<std::setw(30)<<"RMS Density = "<<std::setw(15)<<PAlphaRMS<<endl;
+  this->fileio_->out<<std::right<<std::setw(30)<<"    Delta-E = "<<std::setw(15)<<std::scientific<<EDelta<<std::setw(5)<<" Eh "<<endl;
+  this->fileio_->out<<std::right<<std::setw(30)<<"RMS Density = "<<std::setw(15)<<std::scientific<<PAlphaRMS<<endl;
 };
 template<>
 void SingleSlater<double>::printDensityInfo(double PAlphaRMS, double PBetaRMS, double EDelta){
   this->fileio_->out<<"\nSCF Information:"<<endl;
-  this->fileio_->out<<std::right<<std::setw(30)<<"    Delta-E = "<<std::setw(15)<<EDelta<<std::setw(5)<<" Eh "<<endl;
-  this->fileio_->out<<std::right<<std::setw(30)<<"RMS Alpha Density = "<<std::setw(15)<<PAlphaRMS<<endl;
-  this->fileio_->out<<std::right<<std::setw(30)<<"RMS Beta Density = "<<std::setw(15)<<PBetaRMS<<endl;
+  this->fileio_->out<<std::right<<std::setw(30)<<"    Delta-E = "<<std::setw(15)<<std::scientific<<EDelta<<std::setw(5)<<" Eh "<<endl;
+  this->fileio_->out<<std::right<<std::setw(30)<<"RMS Alpha Density = "<<std::setw(15)<<std::scientific<<PAlphaRMS<<endl;
+  this->fileio_->out<<std::right<<std::setw(30)<<"RMS Beta Density = "<<std::setw(15)<<std::scientific<<PBetaRMS<<endl;
 };
 template<>
 void SingleSlater<double>::SCF(){
@@ -185,48 +185,6 @@ void SingleSlater<double>::SCF(){
     
     if(iter % (lenCoeff-1) == (lenCoeff-2) && iter != 0) 
       this->CDIIS(lenCoeff,ErrorAlphaMem,FADIIS,ErrorBetaMem,FBDIIS);
-/*
-    if(iter % (lenCoeff-1) == (lenCoeff-2) && iter != 0){
-      for(auto j = 0; j < (lenCoeff-1); j++)
-      for(auto k = 0; k <= j          ; k++){
-        RealMap EJA(ErrorAlphaMem + (j%(lenCoeff-1))*lenF,n,n);
-        if(k==0) prettyPrint(this->fileio_->out,EJA,"Error "+std::to_string(j));
-        RealMap EKA(ErrorAlphaMem + (k%(lenCoeff-1))*lenF,n,n);
-        B(j,k) = -EJA.frobInner(EKA);
-        if(!this->RHF_){
-          RealMap EJB(ErrorBetaMem + (j%(lenCoeff-1))*lenF,n,n);
-          RealMap EKB(ErrorBetaMem + (k%(lenCoeff-1))*lenF,n,n);
-          B(j,k) = -EJB.frobInner(EKB);
-        }
-        B(k,j) = B(j,k);
-      }
-      for (auto l=0;l<lenCoeff-1;l++){
-         B(lenCoeff-1,l)=-1.0;
-	 B(l,lenCoeff-1)=-1.0;
-      }
-      B(lenCoeff-1,lenCoeff-1)=0;
-      prettyPrint(this->fileio_->out,B,"B");
-      for(auto k = 0; k < lenCoeff;k++) coef[k] = 0.0; 
-      coef[lenCoeff-1]=-1.0;
-      this->fileio_->out << "COEFF Before" << endl;
-      for(auto k = 0; k < lenCoeff; k++) this->fileio_->out << coef[k] << endl;
-      dgesv_(&row,&nrhs,B.data(),&row, iPiv, coef,&row, &info);
-      this->fileio_->out << "COEFF" << endl;
-      for(auto k = 0; k < lenCoeff; k++) this->fileio_->out << coef[k] << endl;
-      this->fockA_->setZero();
-      if(!this->RHF_) this->fockB_->setZero();
-      for(auto j = 0; j < lenCoeff-1; j++) {
-        RealMap FA(FADIIS + (j%(lenCoeff-1))*lenF,n,n);
-        *this->fockA_ += coef[j]*FA;
-        prettyPrint(this->fileio_->out,FA,"Fock "+std::to_string(j));
-        if(!this->RHF_) {
-          RealMap FB(FBDIIS + (j%(lenCoeff-1))*lenF,n,n);
-          *this->fockB_ += coef[j]*FB;
-        }
-      }
-      prettyPrint(this->fileio_->out,*this->fockA_,"Total Fock");
-    }
-*/
 
     PAlphaRMS=((*this->densityA_)-POldAlpha).norm();
     if(!this->RHF_) PBetaRMS = ((*this->densityB_) - POldBeta).norm();
@@ -243,12 +201,11 @@ void SingleSlater<double>::SCF(){
   
   //freeing the memory
   delete [] SCR;
-//delete [] iPiv;
   
   if(iter >= maxIter)
     this->fileio_->out << "SCF Failed to converge within maximum number of iterations" << endl << endl;
   this->fileio_->out <<"\n"<<endl; 
-  this->fileio_->out << bannerEnd <<endl;
+  this->fileio_->out << bannerEnd <<endl<<std::fixed;
   this->fileio_->out << "\nRequested convergence on RMS density matrix = " <<std::setw(5)<<Dtol <<"  within  " <<maxIter <<"  cycles."<<endl;
   this->fileio_->out << "Requested convergence on             energy = " <<Etol << endl;
   if(maxIter > iter){

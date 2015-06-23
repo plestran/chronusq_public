@@ -130,8 +130,8 @@ void SDResponse::formRM(){
   int nOB = this->singleSlater_->nOccB();
   int nVB = this->singleSlater_->nVirB();
   int nOVB = this->singleSlater_->nOVB();
-  cout << "Number of Occupied Alpha: " << nOA << ", Number of Virtual Alpha" << nVA << " Number of Basis: "<<this->nBasis_<< ".\n";
-  cout << "Number of Occupied Beta: " << nOB << ", Number of Virtual Beta" << nVB << " Number of Basis: "<<this->nBasis_<< ".\n";
+//cout << "Number of Occupied Alpha: " << nOA << ", Number of Virtual Alpha" << nVA << " Number of Basis: "<<this->nBasis_<< ".\n";
+//cout << "Number of Occupied Beta: " << nOB << ", Number of Virtual Beta" << nVB << " Number of Basis: "<<this->nBasis_<< ".\n";
   Tensor<double> LocMoAO(this->nBasis_,nOA);
   Tensor<double> LocMoAV(this->nBasis_,nVA);
   Tensor<double> LocMoBO(this->nBasis_,nOB);
@@ -188,7 +188,6 @@ void SDResponse::formRM(){
   contract(1.0,IailsA,{a,i,lam,sig},LocMoAO,{lam,j},0.0,IaijsAA,{a,i,j,sig});
   // (a i  | j   b  )
   contract(1.0,IaijsAA,{a,i,j,sig},LocMoAV,{sig,b},0.0,SaijbAA,{a,i,j,b});
-  cout << "1"<<endl;
 
 
   // (ab|ji)AAAA
@@ -249,7 +248,7 @@ void SDResponse::formRM(){
   RealMatrix Bdod(nOVB,nOVA);
   RealMatrix EigBO(nOB,1);
   RealMatrix EigBV(nVB,1);
-
+/*
   for (auto i=0;i<nOA;i++){
     EigAO(i) = (*this->singleSlater_->epsA())(i);
     cout << "The " << (i+1) << " eigenvalue in Occupied Alpha is: " << EigAO(i) << endl;
@@ -258,6 +257,7 @@ void SDResponse::formRM(){
     EigAV(j) = (*this->singleSlater_->epsA())((j+nOA));
     cout << "The " << (j+1) << " eigenvalue in Virtual Alpha is: " << EigAV(j) << endl;
   }
+*/
 
   ia = 0;
   for (auto a=0;a<nVA;a++)
@@ -394,6 +394,7 @@ void SDResponse::formRM(){
     for (auto j=0;j<nOB;j++){
       DabijBB(a,b,i,j) = SaijbBB(a,i,j,b) - SaijbBB(a,j,i,b);
     }
+/*
     for (auto i=0;i<nOB;i++){
       EigBO(i) = (*this->singleSlater_->epsB())(i);
       cout << "The " << (i+1) << " eigenvalue in Occupied Beta is: " << EigBO(i) << endl;
@@ -402,6 +403,7 @@ void SDResponse::formRM(){
       EigBV(j) = (*this->singleSlater_->epsB())((j+nOB));
       cout << "The " << (j+1) << " eigenvalue in Virtual Beta is: " << EigBV(j) << endl;
     }
+*/
     ia = 0;
     for (auto a=0;a<nVA;a++)
     for (auto i=0;i<nOA;i++)
@@ -977,13 +979,11 @@ void SDResponse::formGuess(){
   RealMatrix dagCpy(this->nSingleDim_/nRHF,1);
   std::memcpy(dagCpy.data(),this->rmDiag_->data(),dagCpy.size()*sizeof(double));
   std::sort(dagCpy.data(),dagCpy.data()+dagCpy.size());
-  cout << *rmDiag_<<endl;
   std::vector<int> alreadyAdded; 
   for(auto i = 0; i < this->nGuess_; i++){
     int indx;
     for(auto k = 0; k < dagCpy.size(); k++){
       auto it = std::find(alreadyAdded.begin(),alreadyAdded.end(),k);
-      if(it != alreadyAdded.end()) cout << k << endl;
       if((dagCpy(i,0) == (*this->rmDiag_)(k,0)) && it == alreadyAdded.end()){
         indx = k;
         alreadyAdded.push_back(indx);
@@ -992,7 +992,6 @@ void SDResponse::formGuess(){
     }
     (*this->davGuess_)(indx,i) = 1.0;
   }
-  cout << *this->davGuess_ << endl;
 }
 
 void SDResponse::formPerturbedGuess(double Omega, const RealCMMap & ResR, RealCMMap & QR, const RealCMMap & ResL, 
@@ -1067,7 +1066,6 @@ void SDResponse::initMeth(){
   } else {
     CErr("PSCF Method " + std::to_string(this->iMeth_) + " NYI",this->fileio_->out);
   }
-  cout << "NSing in initMeth " << nSingleDim_ << endl;
 }
 
 void SDResponse::formAOTDen(const RealVecMap &TMOV, RealMatrix &TAOA, RealMatrix &TAOB){
@@ -1144,14 +1142,14 @@ void SDResponse::printPrinciple(int iSt){
       this->fileio_->out << "    "
                        << (ia % this->nOA_) + 1              << "A -> "
                        << (ia / this->nOA_) + this->nOA_ + 1 << "A    "
-                       << std::fixed << (*this->transDen_)(xIA,iSt)
+                       << std::fixed << std::setw(10) << std::right << (*this->transDen_)(xIA,iSt)
                        << endl;
     if(this->iMeth_ == RPA)
       if(std::abs((*this->transDen_)(yIA,iSt)) > 0.1)
         this->fileio_->out << "    "
                          << (ia % this->nOA_) + 1              << "A <- "
                          << (ia / this->nOA_) + this->nOA_ + 1 << "A    "
-                         << std::fixed << (*this->transDen_)(yIA,iSt)
+                         << std::fixed << std::setw(10) << std::right << (*this->transDen_)(yIA,iSt)
                          << endl;
   }
   if(!this->RHF_){
@@ -1162,14 +1160,14 @@ void SDResponse::printPrinciple(int iSt){
         this->fileio_->out << "    "
                          << (ia % this->nOA_) + 1              << "B -> "
                          << (ia / this->nOA_) + this->nOA_ + 1 << "B    "
-                         << std::fixed << (*this->transDen_)(xIA,iSt)
+                         << std::fixed << std::setw(10) << std::right << (*this->transDen_)(xIA,iSt)
                          << endl;
       if(this->iMeth_ == RPA)
         if(std::abs((*this->transDen_)(yIA,iSt)) > 0.1)
           this->fileio_->out << "    "
                            << (ia % this->nOA_) + 1              << "B <- "
                            << (ia / this->nOA_) + this->nOA_ + 1 << "B    "
-                           << std::fixed << (*this->transDen_)(yIA,iSt)
+                           << std::fixed << std::setw(10) << std::right << (*this->transDen_)(yIA,iSt)
                            << endl;
     }
   }
