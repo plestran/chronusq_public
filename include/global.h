@@ -91,6 +91,7 @@ using Eigen::ColMajor;
 using Eigen::RowMajor;
 using Eigen::Upper;
 using Eigen::Lower;
+using Eigen::VectorXd;
 
 /* Things from BTAS that we always need */
 using btas::Tensor;
@@ -105,7 +106,7 @@ typedef Eigen::Matrix<double,Dynamic,Dynamic,RowMajor>     RealMatrix;    ///< D
 typedef Eigen::Matrix<dcomplex,Dynamic,Dynamic,RowMajor>   ComplexMatrix; ///< Dynamically allocated Complex (dcomplex) matrix. Row major for integration with Libint
 typedef Eigen::Matrix<double,Dynamic,Dynamic,ColMajor>     RealCMMatrix;    ///< Dynamically allocated Real (double) matrix. Row major for integration with Libint
 typedef Eigen::Matrix<dcomplex,Dynamic,Dynamic,ColMajor>   ComplexCMMatrix; ///< Dynamically allocated Complex (dcomplex) matrix. Row major for integration with Libint
-typedef Eigen::Map<Eigen::VectorXd> RealVecMap;
+typedef Eigen::Map<VectorXd> RealVecMap;
 typedef Eigen::Map<RealMatrix> RealMap; ///< Map double precision real array onto RealMatrix object
 typedef Eigen::Map<RealCMMatrix> RealCMMap; ///< Map double precision real array onto RealMatrix object
 typedef Eigen::Map<const RealMatrix> ConstRealMap; ///< Map double precision real array onto const RealMatrix object

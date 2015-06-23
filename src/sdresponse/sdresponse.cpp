@@ -63,9 +63,11 @@ void SDResponse::iniSDResponse( Molecule * molecule, BasisSet * basisSet, MOInte
 */
   int nOVA = singleSlater_->nOVA();
   int nOVB = singleSlater_->nOVB();
+/*
   this->CISEnergy_ = std::unique_ptr<RealMatrix>(new RealMatrix(nOVA+nOVB,1));
   this->CISTransDen_ = std::unique_ptr<RealMatrix>(new RealMatrix(nOVA+nOVB,nOVA+nOVB));
   this->TransDipole_ = std::unique_ptr<RealMatrix>(new RealMatrix(1,3));
+*/
 //dbwys
   this->haveDag_ = false;
   this->nOA_ = this->singleSlater_->nOccA();
@@ -78,6 +80,9 @@ void SDResponse::iniSDResponse( Molecule * molecule, BasisSet * basisSet, MOInte
   this->nOBVA_ = this->nOB_*this->nVA_;
   this->setNSek(this->controls_->SDNSek);
   this->setMeth(this->controls_->SDMethod);
+  this->omega_ = std::unique_ptr<VectorXd>(new VectorXd(this->nSek_));
+  this->transDen_ = std::unique_ptr<RealCMMatrix>(new RealCMMatrix(this->nSingleDim_,this->nSek_));
+  this->oscStrength_ = std::unique_ptr<RealMatrix>(new RealMatrix(this->nSek_+1,this->nSek_+1));
 //dbwye
 };
 //-----------------------------------//
@@ -471,9 +476,10 @@ void SDResponse::formRM(){
   CIS.compute(A);
   CIS.eigenvalues();
   CIS.eigenvectors();
+/*
   *this->CISEnergy_   = CIS.eigenvalues();
   *this->CISTransDen_ = CIS.eigenvectors(); 
-  (*this->CISTransDen_).transposeInPlace(); /*Change the matrix to Column major, do this before call the TransDipole*/
+  (*this->CISTransDen_).transposeInPlace(); 
   int nstate =5;
   cout << "Output the lowest "<< nstate << " states" << endl;
   for (auto st_rank=0;st_rank<nstate;st_rank++)
@@ -484,6 +490,7 @@ void SDResponse::formRM(){
     double Oscstr = OscStrength(st_rank,Omega);
     cout << "Excitation energy is: " << " " << CIS.eigenvalues().row(st_rank) << " f = "<< Oscstr << endl << endl;
   }
+*/
 
   // LR TDHF routine
   Eigen::EigenSolver<RealMatrix> TD;
@@ -544,20 +551,20 @@ void SDResponse::DavidsonCIS(){
 //this->fileio_->out << "The lowest " << this->nSek_ << " eigenstates solved by Davidson Algorithm:" <<endl;
   this->fileio_->out << bannerTop << endl << "CIS Diagonalization for lowest " << this->nSek_ << " eigenstates" << endl;
   this->fileio_->out << bannerMid << endl;
-  RealMatrix DavEvalues = *davA.eigenvalues();
-  RealMatrix DavEvector = *davA.eigenvector();
-  DavEvector.transposeInPlace();/*Change the matrix to Column major, do this before call the TransDipole*/
+
   for (auto st_rank = 0;st_rank < this->nSek_; st_rank++)
   {
-    double Omega = DavEvalues(st_rank);
+    double Omega = (*this->omega_)(st_rank);
     this->fileio_->out << "Excited State " << st_rank+1 << ":";
     this->fileio_->out << endl << "  \u03C9 = " << std::setw(15) << std::setprecision(7) << std::fixed << Omega                   << " Eh";
     this->fileio_->out << endl << "  \u03C9 = " << std::setw(15) << std::setprecision(7) << std::fixed << Omega*phys.eVPerHartree << " eV";
     this->fileio_->out << endl << "  \u03C9 = " << std::setw(15) << std::setprecision(7) << std::fixed << Omega*phys.nmPerHartree << " nm" << endl;
+/*
     RealMap TransDen(DavEvector.data()+st_rank*(this->nSingleDim_),(this->nSingleDim_),1);
     TransDipole(st_rank,TransDen);
     double Oscstr = OscStrength(st_rank,Omega);
     this->fileio_->out << "Excitation energy is: " << " " << Omega*phys.eVPerHartree << " eV   f = "<< Oscstr << endl << endl;
+*/
   }
 
 }
@@ -692,21 +699,14 @@ void SDResponse::formRM3(RealCMMap &XMO, RealCMMap &Sigma, RealCMMap &Rho){
   std::vector<RealMatrix> CommB(XMO.cols(),RealMatrix::Zero(this->nBasis_,this->nBasis_));
   std::vector<RealMatrix> GCommA(XMO.cols(),RealMatrix::Zero(this->nBasis_,this->nBasis_));
   std::vector<RealMatrix> GCommB(XMO.cols(),RealMatrix::Zero(this->nBasis_,this->nBasis_));
-  RealMatrix XMOA(this->nBasis_,this->nBasis_);
-  RealMatrix XMOB(this->nBasis_,this->nBasis_);
   RealMatrix XAAO(this->nBasis_,this->nBasis_);
   RealMatrix XBAO(this->nBasis_,this->nBasis_);
   RealMatrix SigAOA(this->nBasis_,this->nBasis_);
   RealMatrix SigAOB(this->nBasis_,this->nBasis_);
-  RealMatrix SigMOA(this->nBasis_,this->nBasis_);
-  RealMatrix SigMOB(this->nBasis_,this->nBasis_);
   RealMatrix RhoAOA, RhoAOB;
-  RealMatrix RhoMOA, RhoMOB;
   if(this->iMeth_ == RPA){
     RhoAOA = RealMatrix::Zero(this->nBasis_,this->nBasis_);
     RhoAOB = RealMatrix::Zero(this->nBasis_,this->nBasis_);
-    RhoMOA = RealMatrix::Zero(this->nBasis_,this->nBasis_);
-    RhoMOB = RealMatrix::Zero(this->nBasis_,this->nBasis_);
   }
 
   double fact = 1.0;
@@ -724,22 +724,7 @@ void SDResponse::formRM3(RealCMMap &XMO, RealCMMap &Sigma, RealCMMap &Rho){
      *  H      - Adjoint
      */ 
     RealVecMap X(XMO.data()+idx*this->nSingleDim_,this->nSingleDim_);
-    for(auto a = this->nOA_, ia = 0; a < this->nBasis_; a++)
-    for(auto i = 0         ; i < this->nOA_; i++, ia++){
-      XMOA(a,i) = X(ia);
-      if(this->iMeth_ == RPA) XMOA(i,a) = X(ia+iOff);
-    }
-    for(auto a = this->nOB_, ia = this->nOAVA_; a < this->nBasis_; a++)
-    for(auto i = 0         ; i < this->nOB_; i++, ia++){
-      XMOB(a,i) = X(ia);
-      if(this->iMeth_ == RPA) XMOB(i,a) = X(ia+iOff);
-    }
-
-    XAAO = (*this->singleSlater_->moA()) * XMOA * this->singleSlater_->moA()->adjoint();
-    if(this->RHF_)
-      XBAO = (*this->singleSlater_->moA()) * XMOB * this->singleSlater_->moA()->adjoint();
-    else
-      XBAO = (*this->singleSlater_->moB()) * XMOB * this->singleSlater_->moB()->adjoint();
+    this->formAOTDen(X,XAAO,XBAO);
 
     CommA[idx] =  fact * XAAO * (*this->singleSlater_->aointegrals()->overlap_) * (*this->singleSlater_->densityA());
     CommA[idx] += fact * (*this->singleSlater_->densityA()) * (*this->singleSlater_->aointegrals()->overlap_) * XAAO;
@@ -773,40 +758,14 @@ void SDResponse::formRM3(RealCMMap &XMO, RealCMMap &Sigma, RealCMMap &Rho){
       SigAOB -= fact * (*this->singleSlater_->aointegrals()->overlap_) * (*this->singleSlater_->densityB()) * GCommB[idx];
     }
 
-    SigMOA = this->singleSlater_->moA()->adjoint() * SigAOA * (*this->singleSlater_->moA());
-    if(this->RHF_)
-      SigMOB = this->singleSlater_->moA()->adjoint() * SigAOB * (*this->singleSlater_->moA());
-    else 
-      SigMOB = this->singleSlater_->moB()->adjoint() * SigAOB * (*this->singleSlater_->moB());
+    RealVecMap SVec(Sigma.data()+idx*this->nSingleDim_,this->nSingleDim_);
+    this->formMOTDen(SVec,SigAOA,SigAOB);
 
-    if(this->iMeth_){
+    if(this->iMeth_ == RPA){
       RhoAOA =  (*this->singleSlater_->aointegrals()->overlap_) * CommA[idx] * (*this->singleSlater_->aointegrals()->overlap_);
       RhoAOB =  (*this->singleSlater_->aointegrals()->overlap_) * CommB[idx] * (*this->singleSlater_->aointegrals()->overlap_);
-
-      RhoMOA = this->singleSlater_->moA()->adjoint() * RhoAOA * (*this->singleSlater_->moA());
-      if(this->RHF_)
-        RhoMOB = this->singleSlater_->moA()->adjoint() * RhoAOB * (*this->singleSlater_->moA());
-      else 
-        RhoMOB = this->singleSlater_->moB()->adjoint() * RhoAOB * (*this->singleSlater_->moB());
-    }
-
-    for(auto a = this->nOA_, ia = 0; a < this->nBasis_; a++)
-    for(auto i = 0         ; i < this->nOA_; i++, ia++){
-      Sigma(ia,idx)  = SigMOA(a,i);
-      if(this->iMeth_ == RPA) {
-        Sigma(ia+iOff,idx) = -SigMOA(i,a);
-        Rho(  ia     ,idx) =  RhoMOA(a,i);
-        Rho(  ia+iOff,idx) = -RhoMOA(i,a);
-      }
-    }
-    for(auto a = this->nOB_, ia = this->nOAVA_; a < this->nBasis_; a++)
-    for(auto i = 0         ; i < this->nOB_; i++, ia++){
-      Sigma(ia,idx) = SigMOB(a,i);
-      if(this->iMeth_ == RPA) {
-        Sigma(ia+iOff,idx) = -SigMOB(i,a);
-        Rho(  ia     ,idx) =  RhoMOB(a,i);
-        Rho(  ia+iOff,idx) = -RhoMOB(i,a);
-      }
+      RealVecMap RVec(Sigma.data()+idx*this->nSingleDim_,this->nSingleDim_);
+      this->formMOTDen(RVec,RhoAOA,RhoAOB);
     }
   }
 }
@@ -951,7 +910,7 @@ void SDResponse::TransDipole(int st_rank,RealMatrix TransDen){
     }
     TDenAO = TDenAO.transpose()*Dipole;
     transdipole += TDenAO.trace();
-    (*this->TransDipole_)(0,i) = transdipole;
+//  (*this->TransDipole_)(0,i) = transdipole;
   }
   
 }
@@ -960,7 +919,7 @@ double SDResponse::OscStrength(int st_rank,double Omega){
   double Oscstr = 0.0;
   for (auto i=0;i<3;i++)
   {
-    Oscstr += (2.0/3.0)*Omega*pow((*this->TransDipole_)(0,i),2);
+//  Oscstr += (2.0/3.0)*Omega*pow((*this->TransDipole_)(0,i),2);
   }
   return Oscstr;
 }
@@ -1087,5 +1046,48 @@ void SDResponse::initMeth(){
     CErr("PSCF Method " + std::to_string(this->iMeth_) + " NYI",this->fileio_->out);
   }
   cout << "NSing in initMeth " << nSingleDim_ << endl;
+}
+
+void SDResponse::formAOTDen(const RealVecMap &TMOV, RealMatrix &TAOA, RealMatrix &TAOB){
+  RealMatrix TMOA(this->nBasis_,this->nBasis_);
+  RealMatrix TMOB(this->nBasis_,this->nBasis_);
+  int iOff = this->nOAVA_ + this->nOBVB_;
+  for(auto a = this->nOA_, ia = 0; a < this->nBasis_; a++)
+  for(auto i = 0         ; i < this->nOA_; i++, ia++){
+    TMOA(a,i) = TMOV(ia);
+    if(this->iMeth_ == RPA) TMOA(i,a) = TMOV(ia+iOff);
+  }
+  for(auto a = this->nOB_, ia = this->nOAVA_; a < this->nBasis_; a++)
+  for(auto i = 0         ; i < this->nOB_; i++, ia++){
+    TMOB(a,i) = TMOV(ia);
+    if(this->iMeth_ == RPA) TMOB(i,a) = TMOV(ia+iOff);
+  }
+  TAOA = (*this->singleSlater_->moA()) * TMOA * this->singleSlater_->moA()->adjoint();
+  if(this->RHF_)
+    TAOB = (*this->singleSlater_->moA()) * TMOB * this->singleSlater_->moA()->adjoint();
+  else
+    TAOB = (*this->singleSlater_->moB()) * TMOB * this->singleSlater_->moB()->adjoint();
+}
+
+void SDResponse::formMOTDen(RealVecMap &TMOV, const RealMatrix &TAOA, const RealMatrix &TAOB){
+  RealMatrix TMOA(this->nBasis_,this->nBasis_);
+  RealMatrix TMOB(this->nBasis_,this->nBasis_);
+  TMOA = this->singleSlater_->moA()->adjoint() * TAOA * (*this->singleSlater_->moA());
+  if(this->RHF_)
+    TMOB = this->singleSlater_->moA()->adjoint() * TAOB * (*this->singleSlater_->moA());
+  else 
+    TMOB = this->singleSlater_->moB()->adjoint() * TAOB * (*this->singleSlater_->moB());
+  int iOff = this->nOAVA_ + this->nOBVB_;
+  for(auto a = this->nOA_, ia = 0; a < this->nBasis_; a++)
+  for(auto i = 0         ; i < this->nOA_; i++, ia++){
+    TMOV(ia) = TMOA(a,i);
+    if(this->iMeth_ == RPA) TMOV(ia+iOff) = -TMOA(i,a);
+  }
+  for(auto a = this->nOB_, ia = this->nOAVA_; a < this->nBasis_; a++)
+  for(auto i = 0         ; i < this->nOB_; i++, ia++){
+    TMOV(ia) = TMOB(a,i);
+    if(this->iMeth_ == RPA) TMOV(ia+iOff) = -TMOB(i,a);
+  }
+
 }
 //dbwye

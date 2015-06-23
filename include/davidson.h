@@ -35,17 +35,18 @@ namespace ChronusQ {
  */
   template <typename T>
   class Davidson {
-    typedef Eigen::Matrix<T,Dynamic,Dynamic,RowMajor> TMat;
+    typedef Eigen::Matrix<T,Dynamic,Dynamic,ColMajor> TMat;
     typedef Eigen::Matrix<T,Dynamic,1> TVec;
     int     n_;          // Dimension of the problem (LDA)
     TMat*   mat_;        // The full matrix to be diagonalized (?)
     bool    hermetian_;  // Whether or not the problem is hemetian
     bool    symmetrized_;
     bool    debug_;
+    bool    cleanup_;
 
     std::unique_ptr<TMat> guess_;      // Guess vectors
-    std::unique_ptr<TVec> eigenvalues_;
-    std::unique_ptr<TMat> eigenvector_;
+    TVec* eigenvalues_;
+    TMat* eigenvector_;
 
 
     int     maxSubSpace_; // Maximum iterative subspace
@@ -70,8 +71,8 @@ namespace ChronusQ {
       RPA,
       CCSD
     };
-    inline TVec* eigenvalues(){return this->eigenvalues_.get();};
-    inline TMat* eigenvector(){return this->eigenvector_.get();};
+    inline TVec* eigenvalues(){return this->eigenvalues_;};
+    inline TMat* eigenvector(){return this->eigenvector_;};
     // Run the Davidson
     inline void run(ostream &output=cout) {
       time_t currentTime;
@@ -97,8 +98,8 @@ namespace ChronusQ {
       this->mat_         = nullptr;
       this->AX_          = NULL;
       this->guess_       = nullptr;
-      this->eigenvalues_ = nullptr;
-      this->eigenvector_ = nullptr;
+      this->eigenvalues_ = NULL;
+      this->eigenvector_ = NULL;
       this->maxSubSpace_ = 250;
       this->maxIter_     = 20;
       this->MaxIter_     = 20;
@@ -109,6 +110,7 @@ namespace ChronusQ {
       this->hermetian_   = false;
       this->symmetrized_      = false;
       this->debug_ = false;
+      this->cleanup_ = true;
       this->useLAPACK_   = true;
       this->method_      = -1;
       this->sdr_    = nullptr;
@@ -128,12 +130,9 @@ namespace ChronusQ {
       this->n_      = A->cols();
       this->method_      = -1;
       this->sdr_    = nullptr;
-      this->guess_  = 
-        std::unique_ptr<TMat>(new TMat(this->n_,this->nGuess_));
-      this->eigenvalues_ = 
-        std::unique_ptr<TMat>(new TMat(this->nSek_,1));
-      this->eigenvector_ = 
-        std::unique_ptr<TMat>(new TMat(this->n_,this->nSek_));
+      this->guess_  = std::unique_ptr<TMat>(new TMat(this->n_,this->nGuess_));
+      this->eigenvalues_ = new TMat(this->nSek_,1);
+      this->eigenvector_ = new TMat(this->n_,this->nSek_);
 /*
       this->guess_  = 
         std::make_shared<TMat>(this->n_,this->nGuess_);
@@ -145,6 +144,7 @@ namespace ChronusQ {
       this->hermetian_ = true; // Only supports Hermetian for time being
       this->symmetrized_    = false;
       this->debug_ = false;
+      this->cleanup_ = true;
 
       (*this->guess_) = TMat::Identity(this->n_,this->nGuess_); // Identity guess (primitive)
     }
@@ -165,10 +165,8 @@ namespace ChronusQ {
       this->sdr_    = nullptr;
       this->guess_  = 
         std::unique_ptr<TMat>(new TMat(this->n_,this->nGuess_));
-      this->eigenvalues_ = 
-        std::unique_ptr<TMat>(new TMat(this->nSek_,1));
-      this->eigenvector_ = 
-        std::unique_ptr<TMat>(new TMat(this->n_,this->nSek_));
+      this->eigenvalues_ = new TMat(this->nSek_,1);
+      this->eigenvector_ = new TMat(this->n_,this->nSek_);
 /*
       this->guess_  = 
         std::make_shared<TMat>(this->n_,this->nGuess_);
@@ -180,6 +178,7 @@ namespace ChronusQ {
       this->hermetian_ = true; // Only supports Hermetian for time being
       this->symmetrized_    = false;
       this->debug_ = false;
+      this->cleanup_ = true;
 
       (*this->guess_) = TMat::Identity(this->n_,this->nGuess_); // Identity guess (primitive)
     }
@@ -200,14 +199,20 @@ namespace ChronusQ {
       this->sdr_    = SDR;
       this->guess_  = std::unique_ptr<TMat>(new TMat(this->n_,this->nGuess_));
       *this->guess_ = *SDR->davGuess(); // This forms an unnesecary copy of the guess FIXME
-      this->eigenvalues_ = std::unique_ptr<TVec>(new TVec(this->nSek_,1));
-      this->eigenvector_ = std::unique_ptr<TMat>(new TMat(this->n_,this->nSek_));
+      this->eigenvalues_ = this->sdr_->omega();
+      this->eigenvector_ = this->sdr_->transDen();
       this->hermetian_ = true; // Only supports Hermetian for time being
       this->symmetrized_    = (this->method_ == SDResponse::RPA);
       this->debug_ = true;
+      this->cleanup_ = false;
 
     }
-    ~Davidson(){;};
+    ~Davidson(){
+       if(this->cleanup_){
+         delete this->eigenvector_;
+         delete this->eigenvalues_;
+       }
+     };
     
     inline void printInfo(ostream &output=cout) {
       output << bannerTop << endl;

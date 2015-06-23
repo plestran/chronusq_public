@@ -62,9 +62,9 @@ class SDResponse {
 
   RealMatrix      XMO;
   RealMatrix      PDiag;
-  std::unique_ptr<RealMatrix>    CISTransDen_;
-  std::unique_ptr<RealMatrix>    CISEnergy_;
-  std::unique_ptr<RealMatrix>    TransDipole_;
+  std::unique_ptr<RealCMMatrix>    transDen_;
+  std::unique_ptr<RealMatrix>      oscStrength_;
+  std::unique_ptr<VectorXd>        omega_;
   BasisSet *      basisSet_;
   Molecule *      molecule_;
   FileIO *        fileio_;
@@ -117,6 +117,8 @@ public:
   inline int  nSek(){return this->nSek_;};
   inline int iMeth(){return this->iMeth_;};
   inline int nSingleDim(){return this->nSingleDim_;};
+  inline VectorXd* omega(){return this->omega_.get();};
+  inline RealCMMatrix* transDen(){return this->transDen_.get();};
   void formGuess();
   void formPerturbedGuess(double,const RealCMMap &, RealCMMap &,const RealCMMap &, RealCMMap &);
   void formRM3(RealCMMap &, RealCMMap &, RealCMMap &Rho);
@@ -124,6 +126,8 @@ public:
   void getDiag();
   inline RealMatrix * rmDiag(){return this->rmDiag_.get();};
   inline RealMatrix * davGuess(){return this->davGuess_.get();};
+  void formAOTDen(const RealVecMap &, RealMatrix &, RealMatrix &);
+  void formMOTDen(RealVecMap &, const RealMatrix &, const RealMatrix &);
 //dbwye
   RealMatrix formRM2(RealMatrix &XMO);
   RealMatrix ReturnDiag();
