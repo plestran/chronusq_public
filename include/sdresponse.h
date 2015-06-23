@@ -65,6 +65,7 @@ class SDResponse {
   std::unique_ptr<RealCMMatrix>    transDen_;
   std::unique_ptr<RealMatrix>      oscStrength_;
   std::unique_ptr<VectorXd>        omega_;
+  std::unique_ptr<RealTensor3d>    transDipole_;
   BasisSet *      basisSet_;
   Molecule *      molecule_;
   FileIO *        fileio_;
@@ -128,6 +129,9 @@ public:
   inline RealMatrix * davGuess(){return this->davGuess_.get();};
   void formAOTDen(const RealVecMap &, RealMatrix &, RealMatrix &);
   void formMOTDen(RealVecMap &, const RealMatrix &, const RealMatrix &);
+  void formTransDipole();
+  void formOscStrength();
+  void printPrinciple(int );
 //dbwye
   RealMatrix formRM2(RealMatrix &XMO);
   RealMatrix ReturnDiag();

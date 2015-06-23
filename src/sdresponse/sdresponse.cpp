@@ -83,6 +83,7 @@ void SDResponse::iniSDResponse( Molecule * molecule, BasisSet * basisSet, MOInte
   this->omega_ = std::unique_ptr<VectorXd>(new VectorXd(this->nSek_));
   this->transDen_ = std::unique_ptr<RealCMMatrix>(new RealCMMatrix(this->nSingleDim_,this->nSek_));
   this->oscStrength_ = std::unique_ptr<RealMatrix>(new RealMatrix(this->nSek_+1,this->nSek_+1));
+  this->transDipole_ = std::unique_ptr<RealTensor3d>(new RealTensor3d(this->nSek_+1,this->nSek_+1,3));
 //dbwye
 };
 //-----------------------------------//
@@ -99,6 +100,23 @@ void SDResponse::computeExcitedStates(){
 // print energies     //
 //--------------------//
 void SDResponse::printExcitedStateEnergies(){
+  this->fileio_->out << bannerTop << endl;
+  if(this->iMeth_ == CIS)
+    this->fileio_->out << "CIS";
+  else if(this->iMeth_ == RPA)
+    this->fileio_->out << "RPA";
+  this->fileio_->out << " Diagonalization for lowest " << this->nSek_ << " eigenstates" << endl;
+  this->fileio_->out << bannerMid << endl << endl;
+  
+  for(auto iSt = 0; iSt < this->nSek_; iSt++){
+    double Omega = (*this->omega_)(iSt);
+    this->fileio_->out << "Excited State " << iSt+1 << ":" << endl;
+    this->fileio_->out << "  \u03C9 = " << std::setw(10) << std::setprecision(7) << std::fixed << Omega                   << " Eh   ";
+    this->fileio_->out << "  \u03C9 = " << std::setw(10) << std::setprecision(7) << std::fixed << Omega*phys.eVPerHartree << " eV   ";
+    this->fileio_->out << "  \u03C9 = " << std::setw(10) << std::setprecision(7) << std::fixed << Omega*phys.nmPerHartree << " nm   " << endl;
+    this->fileio_->out << "  f(" << 0 << "," << iSt+1 << ") = " << (*this->oscStrength_)(0,iSt+1) << endl;
+    this->printPrinciple(iSt);
+  }
 };
 //--------------------//
 //        form        //
@@ -549,9 +567,11 @@ void SDResponse::DavidsonCIS(){
   Davidson<double> davA(this);
   davA.run(this->fileio_->out);
 //this->fileio_->out << "The lowest " << this->nSek_ << " eigenstates solved by Davidson Algorithm:" <<endl;
+  this->formTransDipole();
+  this->formOscStrength();
+/*
   this->fileio_->out << bannerTop << endl << "CIS Diagonalization for lowest " << this->nSek_ << " eigenstates" << endl;
   this->fileio_->out << bannerMid << endl;
-
   for (auto st_rank = 0;st_rank < this->nSek_; st_rank++)
   {
     double Omega = (*this->omega_)(st_rank);
@@ -559,13 +579,15 @@ void SDResponse::DavidsonCIS(){
     this->fileio_->out << endl << "  \u03C9 = " << std::setw(15) << std::setprecision(7) << std::fixed << Omega                   << " Eh";
     this->fileio_->out << endl << "  \u03C9 = " << std::setw(15) << std::setprecision(7) << std::fixed << Omega*phys.eVPerHartree << " eV";
     this->fileio_->out << endl << "  \u03C9 = " << std::setw(15) << std::setprecision(7) << std::fixed << Omega*phys.nmPerHartree << " nm" << endl;
+*/
 /*
     RealMap TransDen(DavEvector.data()+st_rank*(this->nSingleDim_),(this->nSingleDim_),1);
     TransDipole(st_rank,TransDen);
     double Oscstr = OscStrength(st_rank,Omega);
     this->fileio_->out << "Excitation energy is: " << " " << Omega*phys.eVPerHartree << " eV   f = "<< Oscstr << endl << endl;
 */
-  }
+//}
+  this->printExcitedStateEnergies();
 
 }
 
@@ -764,7 +786,7 @@ void SDResponse::formRM3(RealCMMap &XMO, RealCMMap &Sigma, RealCMMap &Rho){
     if(this->iMeth_ == RPA){
       RhoAOA =  (*this->singleSlater_->aointegrals()->overlap_) * CommA[idx] * (*this->singleSlater_->aointegrals()->overlap_);
       RhoAOB =  (*this->singleSlater_->aointegrals()->overlap_) * CommB[idx] * (*this->singleSlater_->aointegrals()->overlap_);
-      RealVecMap RVec(Sigma.data()+idx*this->nSingleDim_,this->nSingleDim_);
+      RealVecMap RVec(Rho.data()+idx*this->nSingleDim_,this->nSingleDim_);
       this->formMOTDen(RVec,RhoAOA,RhoAOB);
     }
   }
@@ -1088,6 +1110,69 @@ void SDResponse::formMOTDen(RealVecMap &TMOV, const RealMatrix &TAOA, const Real
     TMOV(ia) = TMOB(a,i);
     if(this->iMeth_ == RPA) TMOV(ia+iOff) = -TMOB(i,a);
   }
+}
 
+void SDResponse::formTransDipole(){
+   RealMatrix TAOA(this->nBasis_,this->nBasis_);
+   RealMatrix TAOB(this->nBasis_,this->nBasis_);
+   auto NBSq = this->nBasis_*this->nBasis_;
+   for(auto iSt = 0; iSt < this->nSek_; iSt++){
+     RealVecMap TMOV(this->transDen_->data()+iSt*this->nSingleDim_,this->nSingleDim_);
+     this->formAOTDen(TMOV,TAOA,TAOB);
+     for(auto iXYZ = 0, iOff = 0; iXYZ < 3; iXYZ++, iOff += NBSq){
+       RealMap dipole(&this->elecDipole_->storage()[iOff],this->nBasis_,this->nBasis_);
+       (*this->transDipole_)(0,iSt+1,iXYZ) = (TAOA+TAOB).frobInner(dipole);
+     }
+   }
+}
+
+void SDResponse::formOscStrength(){
+  this->oscStrength_->setZero();
+  for(auto iSt  = 0; iSt  < this->nSek_; iSt++ )
+  for(auto iXYZ = 0; iXYZ < 3;           iXYZ++){
+    (*this->oscStrength_)(0,iSt+1) +=
+      (2.0/3.0)*(*this->omega_)(iSt)*
+      std::pow((*this->transDipole_)(0,iSt+1,iXYZ),2.0);
+  }
+}
+
+void SDResponse::printPrinciple(int iSt){
+  this->fileio_->out << "  Principle Transitions   ( tol = 0.1 )" << endl;
+  for(auto ia = 0; ia < this->nOAVA_; ia++){
+    auto xIA = ia; auto yIA = ia + this->nSingleDim_/2;
+    if(std::abs((*this->transDen_)(xIA,iSt)) > 0.1)
+      this->fileio_->out << "    "
+                       << (ia % this->nOA_) + 1              << "A -> "
+                       << (ia / this->nOA_) + this->nOA_ + 1 << "A    "
+                       << std::fixed << (*this->transDen_)(xIA,iSt)
+                       << endl;
+    if(this->iMeth_ == RPA)
+      if(std::abs((*this->transDen_)(yIA,iSt)) > 0.1)
+        this->fileio_->out << "    "
+                         << (ia % this->nOA_) + 1              << "A <- "
+                         << (ia / this->nOA_) + this->nOA_ + 1 << "A    "
+                         << std::fixed << (*this->transDen_)(yIA,iSt)
+                         << endl;
+  }
+  if(!this->RHF_){
+    for(auto ia = this->nOAVA_; ia < this->nOAVA_ + this->nOBVB_; ia++){
+      auto xIA = ia; auto yIA = ia + this->nSingleDim_/2;
+ 
+      if(std::abs((*this->transDen_)(xIA,iSt)) > 0.1)
+        this->fileio_->out << "    "
+                         << (ia % this->nOA_) + 1              << "B -> "
+                         << (ia / this->nOA_) + this->nOA_ + 1 << "B    "
+                         << std::fixed << (*this->transDen_)(xIA,iSt)
+                         << endl;
+      if(this->iMeth_ == RPA)
+        if(std::abs((*this->transDen_)(yIA,iSt)) > 0.1)
+          this->fileio_->out << "    "
+                           << (ia % this->nOA_) + 1              << "B <- "
+                           << (ia / this->nOA_) + this->nOA_ + 1 << "B    "
+                           << std::fixed << (*this->transDen_)(yIA,iSt)
+                           << endl;
+    }
+  }
+  this->fileio_->out << bannerMid << endl << endl;
 }
 //dbwye
