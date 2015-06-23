@@ -119,12 +119,16 @@ void readInput(FileIO * fileio, Molecule * mol, BasisSet * basis, Controls * con
       else if(!readString.compare("INCORE")){
         controls->directTwoE = false;
         controls->buildn4eri = true;
+      } else {
+        CErr("Input SCF Option Not Recognized",fileio->out);
       }
     } else if(!readString.compare("$DEBUG")) {
       fileio->in>>readString;
       readString=stringupper(readString);
       controls->readDebug(readString);
-    };
+    } else if(!readString.compare("$PSCF")) {
+      controls->readPSCF(fileio->in,fileio->out);
+    }
     fileio->in >> readString;
   };
 };

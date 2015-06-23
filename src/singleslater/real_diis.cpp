@@ -39,7 +39,8 @@ void SingleSlater<double>::CDIIS(int N, double *EA, double *FADIIS, double *EB, 
   for(auto j = 0; j < (N-1); j++)
   for(auto k = 0; k <= j          ; k++){
     RealMap EJA(EA + (j%(N-1))*NBSq,this->nBasis_,this->nBasis_);
-    if(k==0) prettyPrint(this->fileio_->out,EJA,"Error "+std::to_string(j));
+    if((k==0) && this->controls_->printLevel > 4) 
+      prettyPrint(this->fileio_->out,EJA,"Error "+std::to_string(j));
     RealMap EKA(EA + (k%(N-1))*NBSq,this->nBasis_,this->nBasis_);
     B(j,k) = -EJA.frobInner(EKA);
     if(!this->RHF_){
@@ -67,7 +68,7 @@ void SingleSlater<double>::CDIIS(int N, double *EA, double *FADIIS, double *EB, 
       *this->fockB_ += coef[j]*FB;
     }
   }
-  prettyPrint(this->fileio_->out,*this->fockA_,"Total Fock");
+  if(this->controls_->printLevel > 4) prettyPrint(this->fileio_->out,*this->fockA_,"Total Fock");
   delete [] coef;
   delete [] iPiv;
 

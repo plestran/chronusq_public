@@ -43,13 +43,29 @@ class SDResponse {
   int       **R2Index_;
   int       nStates_;
   int       RHF_;
+//dbwys
+  int       nSek_;
+  int       nGuess_;
+  int       iMeth_;
+  bool      haveDag_;
+  int       nOA_;
+  int       nVA_;
+  int       nOB_;
+  int       nVB_;
+  int       nOAVA_;
+  int       nOBVB_;
+  int       nOAVB_;
+  int       nOBVA_;
+  int       nSingleDim_;
+//dbwye
   friend class SingleSlater<double>;
 
   RealMatrix      XMO;
   RealMatrix      PDiag;
-  std::unique_ptr<RealMatrix>    CISTransDen_;
-  std::unique_ptr<RealMatrix>    CISEnergy_;
-  std::unique_ptr<RealMatrix>    TransDipole_;
+  std::unique_ptr<RealCMMatrix>    transDen_;
+  std::unique_ptr<RealMatrix>      oscStrength_;
+  std::unique_ptr<VectorXd>        omega_;
+  std::unique_ptr<RealTensor3d>    transDipole_;
   BasisSet *      basisSet_;
   Molecule *      molecule_;
   FileIO *        fileio_;
@@ -59,7 +75,25 @@ class SDResponse {
   RealTensor4d *  aoERI_;
   RealTensor3d *  elecDipole_;
 
+//dbwys
+  std::unique_ptr<RealMatrix> tMO_;
+  std::unique_ptr<RealMatrix> rmDiag_;
+  std::unique_ptr<RealMatrix>  davGuess_;
+//dbwye
+//
+//dbwys
+  void initMeth();
+//dbwye
+
 public:
+//dbwys
+  enum{
+    __invalid,
+    CIS,
+    RPA,
+    CCSD
+  };
+//dbwye
  
   // constructor & destructor
   SDResponse(){;};
@@ -76,6 +110,29 @@ public:
   void printInfo();
   void formRM();
   void DavidsonCIS();
+//dbwys
+  inline void setNSek(int n){ this->nSek_  = n; this->nGuess_ = 2*n;};
+  inline void setMeth(int n){ this->iMeth_ = n; this->initMeth();};
+  inline void setNGuess(int n){this->nGuess_ = n;};
+  inline int  nGuess(){return this->nGuess_;};
+  inline int  nSek(){return this->nSek_;};
+  inline int iMeth(){return this->iMeth_;};
+  inline int nSingleDim(){return this->nSingleDim_;};
+  inline VectorXd* omega(){return this->omega_.get();};
+  inline RealCMMatrix* transDen(){return this->transDen_.get();};
+  void formGuess();
+  void formPerturbedGuess(double,const RealCMMap &, RealCMMap &,const RealCMMap &, RealCMMap &);
+  void formRM3(RealCMMap &, RealCMMap &, RealCMMap &Rho);
+  void checkValid();
+  void getDiag();
+  inline RealMatrix * rmDiag(){return this->rmDiag_.get();};
+  inline RealMatrix * davGuess(){return this->davGuess_.get();};
+  void formAOTDen(const RealVecMap &, RealMatrix &, RealMatrix &);
+  void formMOTDen(RealVecMap &, const RealMatrix &, const RealMatrix &);
+  void formTransDipole();
+  void formOscStrength();
+  void printPrinciple(int );
+//dbwye
   RealMatrix formRM2(RealMatrix &XMO);
   RealMatrix ReturnDiag();
   RealMatrix Guess(RealMatrix &PDiag);

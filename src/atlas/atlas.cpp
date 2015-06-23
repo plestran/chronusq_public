@@ -37,6 +37,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   auto controls     	= std::unique_ptr<Controls>(new Controls());
   auto aointegrals	= std::unique_ptr<AOIntegrals>(new AOIntegrals());
   auto hartreeFock	= std::unique_ptr<SingleSlater<double>>(new SingleSlater<double>());
+  auto sdResponse       = std::unique_ptr<SDResponse>(new SDResponse());
   std::unique_ptr<FileIO> fileIO;
   std::unique_ptr<GauJob> gauJob;
 
@@ -85,17 +86,11 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   //moIntegrals->iniMOIntegrals(molecule,basisset,fileIO,controls,aointegrals,hartreeFock);
   else fileIO->out << "**Skipping SCF Optimization**" << endl; 
   hartreeFock->computeMultipole();
-
-  SDResponse *sdResponse = new SDResponse();
-  sdResponse->iniSDResponse(molecule.get(),basisset.get(),moIntegrals.get(),fileIO.get(),controls.get(),hartreeFock.get());
-
-  sdResponse->computeExcitedStates();
-
-  sdResponse->formRM();
-  sdResponse->DavidsonCIS();
-  //sdResponse->formRM2(XMO);
-  //sdResponse->ReturnDiag();
-  //sdResponse->Guess(PDiag);
+  if(controls->doSDR) {
+    sdResponse->iniSDResponse(molecule.get(),basisset.get(),moIntegrals.get(),fileIO.get(),
+                              controls.get(),hartreeFock.get());
+    sdResponse->DavidsonCIS();
+  }
 
 //if(controls->doDF) aointegrals->compareRI();
 /*
@@ -114,10 +109,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   fileIO->out<<"\nJob finished: "<<ctime(&currentTime)<<endl;
 /*
   SingleSlater<dcomplex> newSS(hartreeFock.get());
-  newSS.printInfo();
-  prettyPrint(cout,*newSS.densityA(),"New D");
   newSS.formFock();
-  prettyPrint(cout,*newSS.fockA(),"New F");
 */
 /*
   double *tmp = new double[3*2];

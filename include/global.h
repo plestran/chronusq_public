@@ -70,6 +70,7 @@
 #include <memory>
 #include <exception>
 #include <stdexcept>
+#include <algorithm>
 #include <gauinterface.h>
 
 //using namespace std;
@@ -90,6 +91,7 @@ using Eigen::ColMajor;
 using Eigen::RowMajor;
 using Eigen::Upper;
 using Eigen::Lower;
+using Eigen::VectorXd;
 
 /* Things from BTAS that we always need */
 using btas::Tensor;
@@ -102,7 +104,11 @@ using libint2::TwoBodyEngine;
 typedef std::complex<double> dcomplex; ///< Support for complex numbers (double precision)
 typedef Eigen::Matrix<double,Dynamic,Dynamic,RowMajor>     RealMatrix;    ///< Dynamically allocated Real (double) matrix. Row major for integration with Libint
 typedef Eigen::Matrix<dcomplex,Dynamic,Dynamic,RowMajor>   ComplexMatrix; ///< Dynamically allocated Complex (dcomplex) matrix. Row major for integration with Libint
+typedef Eigen::Matrix<double,Dynamic,Dynamic,ColMajor>     RealCMMatrix;    ///< Dynamically allocated Real (double) matrix. Row major for integration with Libint
+typedef Eigen::Matrix<dcomplex,Dynamic,Dynamic,ColMajor>   ComplexCMMatrix; ///< Dynamically allocated Complex (dcomplex) matrix. Row major for integration with Libint
+typedef Eigen::Map<VectorXd> RealVecMap;
 typedef Eigen::Map<RealMatrix> RealMap; ///< Map double precision real array onto RealMatrix object
+typedef Eigen::Map<RealCMMatrix> RealCMMap; ///< Map double precision real array onto RealMatrix object
 typedef Eigen::Map<const RealMatrix> ConstRealMap; ///< Map double precision real array onto const RealMatrix object
 typedef Eigen::Map<ComplexMatrix> ComplexMap; ///< Map double precision complex array onto ComplexMatrix object
 typedef Eigen::Map<const ComplexMatrix> ConstComplexMap; ///< Map double precision complex array onto const ComplexMatrix object
@@ -176,9 +182,11 @@ static double dFactorial[21] = {
 struct Phys {
   double bohr; ///< Bohr radii per Angstrom
   double debye; ///< e*bohr in 1 Debye
+  double eVPerHartree;
+  double nmPerHartree;
   //number of cartesian AO's in a shell
 };
-const Phys phys = {0.5291772083000001,0.393430307};
+const Phys phys = {0.5291772083000001,0.393430307,27.211396132,45.56335};
 
 
 //------------------//

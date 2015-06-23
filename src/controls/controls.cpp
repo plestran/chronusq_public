@@ -50,6 +50,8 @@ void Controls::iniControls(){
   this->doDipole =          true;
   this->doQuadpole =        true;
   this->doOctpole =         true;
+  this->doSDR     =         false;
+  this->SDMethod  =         0;
 #ifdef USE_LIBINT
   // Bootstrap Libint env
   libint2::init(); 
@@ -67,6 +69,18 @@ void Controls::readSMP(int &n) {
   this->nthreads = n;
   omp_set_num_threads(n);
 #endif
+}
+
+void Controls::readPSCF(std::fstream &in, std::fstream &out){
+  this->doSDR = true;
+  std::string readString;
+  in >> readString;
+  readString = stringupper(readString);
+  if(!readString.compare("CIS"))      this->SDMethod = 1;
+  else if(!readString.compare("RPA")) this->SDMethod = 2;
+  else CErr("Input PSCF Option Not Recgnized",out);
+
+  in >> this->SDNSek;
 }
 
 void Controls::readDebug(std::string str){

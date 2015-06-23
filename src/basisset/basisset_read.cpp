@@ -237,6 +237,26 @@ void BasisSet::computeShBlkNorm(bool RHF, Molecule * mol, const RealMatrix *DAlp
   }
   
 }
+void BasisSet::computeShBlkNorm(bool RHF, Molecule * mol, const ComplexMatrix *DAlpha,
+                                const ComplexMatrix *DBeta){
+  if(!this->haveMap)  this->makeMap(mol);
+  int nOfShell=this->shells_libint.size();
+  this->shBlkNormAlpha = std::unique_ptr<RealMatrix>(new RealMatrix(nOfShell,nOfShell));
+  if(!RHF) this->shBlkNormBeta = std::unique_ptr<RealMatrix>(new RealMatrix(nOfShell,nOfShell));
+  for(int s1 = 0; s1 < nOfShell; s1++) {
+    int bf1 = this->mapSh2Bf[s1];
+    int n1  = this->shells_libint[s1].size();
+    for(int s2 = 0; s2 < nOfShell; s2++) {
+      int bf2 = this->mapSh2Bf[s2];
+      int n2  = this->shells_libint[s2].size();
+     
+      (*this->shBlkNormAlpha)(s1,s2) = DAlpha->block(bf1,bf2,n1,n2).lpNorm<Infinity>();
+      if(!RHF)
+        (*this->shBlkNormBeta)(s1,s2) = DBeta->block(bf1,bf2,n1,n2).lpNorm<Infinity>();
+    }
+  }
+  
+}
 
 //---------------------------------------//
 // print a general basis set information //
