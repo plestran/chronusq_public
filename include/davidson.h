@@ -41,6 +41,7 @@ namespace ChronusQ {
     TMat*   mat_;        // The full matrix to be diagonalized (?)
     bool    hermetian_;  // Whether or not the problem is hemetian
     bool    symmetrized_;
+    bool    debug_;
 
     std::unique_ptr<TMat> guess_;      // Guess vectors
     std::unique_ptr<TVec> eigenvalues_;
@@ -107,6 +108,7 @@ namespace ChronusQ {
       this->converged_   = false;
       this->hermetian_   = false;
       this->symmetrized_      = false;
+      this->debug_ = false;
       this->useLAPACK_   = true;
       this->method_      = -1;
       this->sdr_    = nullptr;
@@ -142,6 +144,7 @@ namespace ChronusQ {
 */
       this->hermetian_ = true; // Only supports Hermetian for time being
       this->symmetrized_    = false;
+      this->debug_ = false;
 
       (*this->guess_) = TMat::Identity(this->n_,this->nGuess_); // Identity guess (primitive)
     }
@@ -176,6 +179,7 @@ namespace ChronusQ {
 */
       this->hermetian_ = true; // Only supports Hermetian for time being
       this->symmetrized_    = false;
+      this->debug_ = false;
 
       (*this->guess_) = TMat::Identity(this->n_,this->nGuess_); // Identity guess (primitive)
     }
@@ -200,6 +204,7 @@ namespace ChronusQ {
       this->eigenvector_ = std::unique_ptr<TMat>(new TMat(this->n_,this->nSek_));
       this->hermetian_ = true; // Only supports Hermetian for time being
       this->symmetrized_    = (this->method_ == SDResponse::RPA);
+      this->debug_ = true;
 
     }
     ~Davidson(){;};

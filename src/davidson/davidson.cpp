@@ -85,7 +85,9 @@ void Davidson<double>::runMicro(ostream &output ) {
    *
    * (18) Local copy of the real part of the eigenvalues (reused for Tau storage for QR)
    *
-   * (19) Length of LAPACK workspace (used in all LAPACK Calls)
+   * (19) Space for the paired / imaginary part of the eigenvalues
+   *
+   * (20) Length of LAPACK workspace (used in all LAPACK Calls)
    *
    * (21) Total double precision words required for LAPACK
    */
@@ -113,9 +115,9 @@ void Davidson<double>::runMicro(ostream &output ) {
 
   LWORK = 6*this->n_;
   LEN_LAPACK_SCR += this->maxSubSpace_; // 18
-  LEN_LAPACK_SCR += LWORK;              // 19
   if(!this->hermetian_ || this->symmetrized_)
-    LEN_LAPACK_SCR += this->maxSubSpace_; // 20
+    LEN_LAPACK_SCR += this->maxSubSpace_; // 19
+  LEN_LAPACK_SCR += LWORK;              // 20
   LenScr += LEN_LAPACK_SCR;             // 21
 
   double * SCR         = NULL; 
@@ -256,41 +258,86 @@ void Davidson<double>::runMicro(ostream &output ) {
       new (&NewVecL)  RealCMMap(TVecLMem+ NOld*this->n_,this->n_,NNew);
     }
 
-    // Matrix Product (Sigma / AX). Keep around for reuse in computing
-    // the residual vector
-    if(this->method_ == SDResponse::CIS || 
-       this->method_ == SDResponse::RPA){ 
-
-      this->sdr_->formRM3(NewVecR,NewSR,NewRhoL);
+    /*
+     *  Compute the linear transformation of the matrix (σ) [and possibly the 
+     *  metric (ρ)] onto the basis vectors (b)
+     *
+     *  For Hermetian matricies in general (viz. Davidson J. Comput. Phys. 17 (1975))
+     *
+     *  σ = E| b >
+     *
+     *  For RPA (viz. Kauczor et al. JCTC 7 (2010) p. 1610  (Eq 74,75)):
+     *
+     *  σ_g = E| b_g >   σ_u = E| b_u >
+     *  ρ_g = E| b_u >   ρ_u = E| b_g >
+     *
+     *  ** ρ not referenced for CIS although it is passed **
+     *
+     */
+    if(this->method_ == SDResponse::CIS || this->method_ == SDResponse::RPA){ 
+      this->sdr_->formRM3(NewVecR,NewSR,NewRhoL); // Linear transforms onto right / gerade
       if(this->method_ == SDResponse::RPA)
-        this->sdr_->formRM3(NewVecL,NewSL,NewRhoR);
-
+        this->sdr_->formRM3(NewVecL,NewSL,NewRhoR); // Linear transforms onto left / ungerade
+      if(this->debug_){
+        prettyPrint(output,SigmaR,"Sigma (g)   ITER: "+std::to_string(iter));
+        prettyPrint(output,SigmaL,"Sigma (u)   ITER: "+std::to_string(iter));
+        prettyPrint(output,RhoR,"Rho (g)   ITER: "+std::to_string(iter));
+        prettyPrint(output,RhoL,"Rho (u)   ITER: "+std::to_string(iter));
+      }
     }
     else if(this->AX_==NULL) NewSR = (*this->mat_) * NewVecR;  
     else NewSR = this->AX_(*this->mat_,NewVecR);
    
-    // Full projection of A (and S) onto subspace
-    XTSigmaR = TrialVecR.transpose()*SigmaR; 
+    /*
+     *  Full projection of the matrix (and the metric) onto the reduced subspace
+     *
+     *  For Hermetian matricies in general (viz. Davidson J. Comput. Phys. 17 (1975))
+     *
+     *  E(R) = < b | σ >
+     *
+     *  For RPA (viz. Kauczor et al. JCTC 7 (2010) p. 1610  (Eq 89)):
+     *
+     *  E(R)_gg = < b_g | σ_g >
+     *  E(R)_uu = < b_u | σ_u >
+     *  S(R)_gu = < b_g | ρ_g >
+     *  S(R)_uu = < b_u | ρ_u >
+     *
+     */ 
+    XTSigmaR = TrialVecR.transpose()*SigmaR; // E(R) or E(R)_gg
+    if(this->debug_)
+      prettyPrint(output,XTSigmaR,"E(R) (gg)   ITER: "+std::to_string(iter));
     if(!this->hermetian_ || this->symmetrized_){
-      XTRhoR   = TrialVecR.transpose()*RhoR;
-      XTSigmaL = TrialVecL.transpose()*SigmaL;
-      XTRhoL   = TrialVecL.transpose()*RhoL;
+      XTRhoR   = TrialVecR.transpose()*RhoR;   // S(R)_gu
+      XTSigmaL = TrialVecL.transpose()*SigmaL; // E(R)_uu
+      XTRhoL   = TrialVecL.transpose()*RhoL;   // S(R)_ug
+      if(this->debug_){
+        prettyPrint(output,XTRhoR,  "S(R) (gu)   ITER: "+std::to_string(iter));
+        prettyPrint(output,XTSigmaL,"E(R) (uu)   ITER: "+std::to_string(iter));
+        prettyPrint(output,XTRhoL  ,"S(R) (ug)   ITER: "+std::to_string(iter));
+      }
+
+      /*
+       * Set up the reduced dimensional supermatricies
+       * viz. Kauczor et al. JCTC p. 1610  (Eq 88)
+       *
+       * E(R) = [ E(R)_gg   0  ]    S(R) = [   0  S(R)_gu ]
+       *        [   0  E(R)_uu ]           [ S(R)_ug   0  ]
+       *
+       */  
+
       ASuper.setZero();
       SSuper.setZero();
-
       ASuper.block(0,     0,     NTrial,NTrial) = XTSigmaR;
       ASuper.block(NTrial,NTrial,NTrial,NTrial) = XTSigmaL;
       SSuper.block(0,     NTrial,NTrial,NTrial) = XTRhoR;
       SSuper.block(NTrial,0,     NTrial,NTrial) = XTRhoL;
-      cout << ASuper << endl << endl;
-      cout << SSuper << endl << endl;
     }
 
 
-    // Diagonalize the subspace
-    int IOff = NTrial;
+    /* Diagonalize the subspace */
+    int IOff = NTrial; // Space for eigenvalues
     if(!this->hermetian_ || this->symmetrized_){
-      IOff += NTrial;
+      IOff += NTrial; // Space for paired eigenvalues
       new (&ER) RealVecMap(LAPACK_SCR,2*NTrial);
     } else{ new (&ER) RealVecMap(LAPACK_SCR,NTrial);}
 /*
@@ -303,21 +350,36 @@ void Davidson<double>::runMicro(ostream &output ) {
 */
     if(this->hermetian_) {
       if(!this->symmetrized_){
+        // Solve E(R)| X(R) > = | X(R) > ω
         dsyev_(&JOBVR,&UPLO,&NTrial,XTSigmaR.data(),&NTrial,ER.data(),
                LAPACK_SCR+IOff,&LWORK,&INFO); 
         if(INFO!=0) CErr("DSYEV failed to converge in Davison Iterations",output);
       } else {
-        int iType = 1;
-        int TwoNTrial = 2*NTrial;
-        RealCMMatrix SCPY(SSuper);
+        int iType = 1; // Flag for the type of GEP being solved
+        int TwoNTrial = 2*NTrial; // Dimension of the supermatricies
+        RealCMMatrix SCPY(SSuper); // Copy of original matrix to use for re-orthogonalization
+        /*
+         * Solve S(R)| X(R) > = E(R)| X(R) > (1/ω)
+         *
+         * | X(R) > = | X(R)_g >
+         *            | X(R)_u >
+         *
+         * The opposite (1/ω vs ω) is solved because the metric is not positive definite
+         * and can therefore not be solved using DSYGV because of the involved Cholesky
+         * decomposition.
+         *
+         * This must be revisited for Spinor orbital hessians! FIXME
+         */ 
         dsygv_(&iType,&JOBVR,&UPLO,&TwoNTrial,SSuper.data(),&TwoNTrial,
                ASuper.data(),&TwoNTrial,ER.data(),LAPACK_SCR+IOff,&LWORK,
                &INFO);
-        cout << INFO << endl;
         if(INFO!=0) CErr("DSYGV failed to converge in Davison Iterations",output);
 
+        // Grab the "positive paired" roots (throw away other element of the pair)
         new (&ER)     RealVecMap(LAPACK_SCR+NTrial,NTrial);
         new (&SSuper) RealCMMap (SSuperMem+2*NTrial*NTrial,2*NTrial,NTrial);
+
+        // Swap the ordering because we solve for (1/ω)
         for(auto i = 0 ; i < NTrial; i++) ER(i) = 1.0/ER(i);
         for(auto i = 0 ; i < NTrial/2; i++){
           SSuper.col(i).swap(SSuper.col(NTrial - i - 1));
@@ -326,6 +388,11 @@ void Davidson<double>::runMicro(ostream &output ) {
           ER(NTrial - i - 1) = tmp;
         }
 
+        // Re-orthogonalize the eigenvectors with respect to the metric S(R)
+        // because DSYGV orthogonalzies the vectors with respect to E(R)
+        // because we solve the opposite problem.
+        //
+        // Gramm-Schmidt
         for(auto i = 0; i < NTrial; i++){
           double inner = SSuper.col(i).dot(SCPY*SSuper.col(i));
           int sgn = inner / std::abs(inner);
@@ -338,6 +405,10 @@ void Davidson<double>::runMicro(ostream &output ) {
 
         XTSigmaR = SSuper.block(0,     0,NTrial,NTrial);
         XTSigmaL = SSuper.block(NTrial,0,NTrial,NTrial);
+        if(this->debug_){
+          prettyPrint(output,XTSigmaR,"X(R) (g)   ITER: "+std::to_string(iter));
+          prettyPrint(output,XTSigmaL,"X(R) (u)   ITER: "+std::to_string(iter));
+        }
       }
     } 
 /*
@@ -353,22 +424,54 @@ void Davidson<double>::runMicro(ostream &output ) {
     
    
     
-    // Reconstruct approximate eigenvectors
+    /*
+     *  Reconstruct the approximate eigenvectors
+     *
+     *  For Hermetian matricies in general (viz. Davidson J. Comput. Phys. 17 (1975))
+     *
+     *  | X > = | b_i > X(R)_i
+     *
+     *  For RPA (viz. Kauczor et al. JCTC 7 (2010) p. 1610  (Eq 90,91)):
+     *
+     *  | X_g > = | {b_g}_i > {X(R)_g}_i
+     *  | X_u > = | {b_u}_i > {X(R)_u}_i
+     */ 
     if(this->hermetian_)   UR = TrialVecR * XTSigmaR;
     if(this->symmetrized_) UL = TrialVecL * XTSigmaL;
+    if(this->symmetrized_ && this->debug_){
+      prettyPrint(output,UR,"X (g)   ITER: "+std::to_string(iter));
+      prettyPrint(output,UL,"X (u)   ITER: "+std::to_string(iter));
+    }
 //  else                 UR = TrialVecR * VR;
 
     // Stash away current approximation of eigenvalues and eigenvectors (NSek)
     (*this->eigenvalues_) = ER.block(0,0,this->nSek_,1);
-    (*this->eigenvector_) = UR.block(0,0,this->n_,this->nSek_); // This is wrong for symmetrized.... FIXME
-    if(this->symmetrized_)(*this->eigenvector_) += UL.block(0,0,this->n_,this->nSek_); // This is wrong for symmetrized.... FIXME
+    (*this->eigenvector_) = UR.block(0,0,this->n_,this->nSek_); 
+    // | X > = | X_g > + | X_u > (viz. Kauczor et al. JCTC 7 (2010) p. 1610  (Eq 80))
+    if(this->symmetrized_)(*this->eigenvector_) += UL.block(0,0,this->n_,this->nSek_); 
     
     // Construct the residual vector 
     // R = A*U - S*U*E = (AX)*c - (SX)*c*E
+    /*
+     * Construct the residual vector
+     *
+     *  For Hermetian matricies in general (viz. Davidson J. Comput. Phys. 17 (1975))
+     *
+     *  R = A| X > - | X > * ω = | σ_i > * X(R)_i - | X > ω
+     *
+     *  For RPA (viz. Kauczor et al. JCTC 7 (2010) p. 1610  (Eq 92,93)):
+     *
+     *  R_g = | {σ_g}_i > * {X(R)_g}_i - | {ρ_g}_i > * {X(R)_u}_i * ω
+     *  R_u = | {σ_u}_i > * {X(R)_g}_i - | {ρ_u}_i > * {X(R)_g}_i * ω
+     */ 
     if(this->hermetian_ && !this->symmetrized_) ResR = SigmaR*XTSigmaR - UR*ER.asDiagonal();
     if(this->symmetrized_) {
       ResR = SigmaR*XTSigmaR - RhoR*XTSigmaL*ER.asDiagonal();
       ResL = SigmaL*XTSigmaL - RhoL*XTSigmaR*ER.asDiagonal();
+      if(this->debug_){
+        prettyPrint(output,ResR,"Res (g)   ITER: " + std::to_string(iter));
+        prettyPrint(output,ResL,"Res (u)   ITER: " + std::to_string(iter));
+      }
    }
 
 /*
