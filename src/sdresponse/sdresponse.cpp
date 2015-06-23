@@ -67,8 +67,6 @@ void SDResponse::iniSDResponse( Molecule * molecule, BasisSet * basisSet, MOInte
   this->CISTransDen_ = std::unique_ptr<RealMatrix>(new RealMatrix(nOVA+nOVB,nOVA+nOVB));
   this->TransDipole_ = std::unique_ptr<RealMatrix>(new RealMatrix(1,3));
 //dbwys
-  this->nSek_    = 0;
-  this->iMeth_   = 0;
   this->haveDag_ = false;
   this->nOA_ = this->singleSlater_->nOccA();
   this->nOB_ = this->singleSlater_->nOccB();
@@ -78,10 +76,8 @@ void SDResponse::iniSDResponse( Molecule * molecule, BasisSet * basisSet, MOInte
   this->nOBVB_ = this->nOB_*this->nVB_;
   this->nOAVB_ = this->nOA_*this->nVB_;
   this->nOBVA_ = this->nOB_*this->nVA_;
-  cout << "NOAVA in INI " << nOAVA_ << endl; 
-  cout << "NOBVB in INI " << nOBVB_ << endl; 
-  cout << "NOAVB in INI " << nOAVB_ << endl; 
-  cout << "NOBVA in INI " << nOBVA_ << endl; 
+  this->setNSek(this->controls_->SDNSek);
+  this->setMeth(this->controls_->SDMethod);
 //dbwye
 };
 //-----------------------------------//

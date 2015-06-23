@@ -71,6 +71,18 @@ void Controls::readSMP(int &n) {
 #endif
 }
 
+void Controls::readPSCF(std::fstream &in, std::fstream &out){
+  this->doSDR = true;
+  std::string readString;
+  in >> readString;
+  readString = stringupper(readString);
+  if(!readString.compare("CIS"))      this->SDMethod = 1;
+  else if(!readString.compare("RPA")) this->SDMethod = 2;
+  else CErr("Input PSCF Option Not Recgnized",out);
+
+  in >> this->SDNSek;
+}
+
 void Controls::readDebug(std::string str){
   if(!str.compare("AOERI")){
     this->directTwoE = false;
