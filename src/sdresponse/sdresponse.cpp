@@ -1001,12 +1001,15 @@ void SDResponse::formGuess(){
   std::memcpy(dagCpy.data(),this->rmDiag_->data(),dagCpy.size()*sizeof(double));
   std::sort(dagCpy.data(),dagCpy.data()+dagCpy.size());
   cout << *rmDiag_<<endl;
-  
+  std::vector<int> alreadyAdded; 
   for(auto i = 0; i < this->nGuess_; i++){
     int indx;
     for(auto k = 0; k < dagCpy.size(); k++){
-      if(dagCpy(i,0) == (*this->rmDiag_)(k,0)){
+      auto it = std::find(alreadyAdded.begin(),alreadyAdded.end(),k);
+      if(it != alreadyAdded.end()) cout << k << endl;
+      if((dagCpy(i,0) == (*this->rmDiag_)(k,0)) && it == alreadyAdded.end()){
         indx = k;
+        alreadyAdded.push_back(indx);
         break;
       }
     }

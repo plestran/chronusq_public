@@ -70,6 +70,7 @@
 #include <memory>
 #include <exception>
 #include <stdexcept>
+#include <algorithm>
 #include <gauinterface.h>
 
 //using namespace std;
