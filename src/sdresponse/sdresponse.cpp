@@ -732,6 +732,9 @@ void SDResponse::formRM3(RealCMMap &XMO, RealCMMap &Sigma, RealCMMap &Rho){
     RhoAOA = RealMatrix::Zero(this->nBasis_,this->nBasis_);
     RhoAOB = RealMatrix::Zero(this->nBasis_,this->nBasis_);
   }
+  RealMatrix SDA,SDB;
+  SDA = (*this->singleSlater_->aointegrals()->overlap_) * (*this->singleSlater_->densityA());
+  if(!this->RHF_) SDB = (*this->singleSlater_->aointegrals()->overlap_) * (*this->singleSlater_->densityB());
 
   double fact = 1.0;
   if(this->RHF_) fact = 0.5;
@@ -750,14 +753,14 @@ void SDResponse::formRM3(RealCMMap &XMO, RealCMMap &Sigma, RealCMMap &Rho){
     RealVecMap X(XMO.data()+idx*this->nSingleDim_,this->nSingleDim_);
     this->formAOTDen(X,XAAO,XBAO);
 
-    CommA[idx] =  fact * XAAO * (*this->singleSlater_->aointegrals()->overlap_) * (*this->singleSlater_->densityA());
-    CommA[idx] += fact * (*this->singleSlater_->densityA()) * (*this->singleSlater_->aointegrals()->overlap_) * XAAO;
+    CommA[idx] =  fact * XAAO * SDA; 
+    CommA[idx] += fact * SDA.adjoint() * XAAO;
     if(this->RHF_){ 
-      CommB[idx] =  fact * XBAO * (*this->singleSlater_->aointegrals()->overlap_) * (*this->singleSlater_->densityA());
-      CommB[idx] += fact * (*this->singleSlater_->densityA()) * (*this->singleSlater_->aointegrals()->overlap_) * XBAO;
+      CommB[idx] =  fact * XBAO * SDA;
+      CommB[idx] += fact * SDA.adjoint() * XBAO;
     } else {
-      CommB[idx] =  fact * XBAO * (*this->singleSlater_->aointegrals()->overlap_) * (*this->singleSlater_->densityB());
-      CommB[idx] += fact * (*this->singleSlater_->densityB()) * (*this->singleSlater_->aointegrals()->overlap_) * XBAO;
+      CommB[idx] =  fact * XBAO * SDB;
+      CommB[idx] += fact * SDB.adjoint() * XBAO;
     }
   }
 
@@ -767,19 +770,19 @@ void SDResponse::formRM3(RealCMMap &XMO, RealCMMap &Sigma, RealCMMap &Rho){
   for(auto idx = 0; idx < XMO.cols(); idx++){
     SigAOA =  (*this->singleSlater_->fockA()) * CommA[idx] * (*this->singleSlater_->aointegrals()->overlap_);
     SigAOA -= (*this->singleSlater_->aointegrals()->overlap_) * CommA[idx] * (*this->singleSlater_->fockA());
-    SigAOA += fact * GCommA[idx] * (*this->singleSlater_->densityA()) * (*this->singleSlater_->aointegrals()->overlap_);
-    SigAOA -= fact * (*this->singleSlater_->aointegrals()->overlap_) * (*this->singleSlater_->densityA()) * GCommA[idx];
+    SigAOA += fact * GCommA[idx] * SDA.adjoint();
+    SigAOA -= fact * SDA * GCommA[idx];
 
     if(this->RHF_) {
       SigAOB =  (*this->singleSlater_->fockA()) * CommB[idx] * (*this->singleSlater_->aointegrals()->overlap_);
       SigAOB -= (*this->singleSlater_->aointegrals()->overlap_) * CommB[idx] * (*this->singleSlater_->fockA());
-      SigAOB += fact * GCommB[idx] * (*this->singleSlater_->densityA()) * (*this->singleSlater_->aointegrals()->overlap_);
-      SigAOB -= fact * (*this->singleSlater_->aointegrals()->overlap_) * (*this->singleSlater_->densityA()) * GCommB[idx];
+      SigAOB += fact * GCommB[idx] * SDA.adjoint();
+      SigAOB -= fact * SDA * GCommB[idx];
     } else {
       SigAOB =  (*this->singleSlater_->fockB()) * CommB[idx] * (*this->singleSlater_->aointegrals()->overlap_);
       SigAOB -= (*this->singleSlater_->aointegrals()->overlap_) * CommB[idx] * (*this->singleSlater_->fockB());
-      SigAOB += fact * GCommB[idx] * (*this->singleSlater_->densityB()) * (*this->singleSlater_->aointegrals()->overlap_);
-      SigAOB -= fact * (*this->singleSlater_->aointegrals()->overlap_) * (*this->singleSlater_->densityB()) * GCommB[idx];
+      SigAOB += fact * GCommB[idx] * SDB.adjoint();
+      SigAOB -= fact * SDB * GCommB[idx];
     }
 
     RealVecMap SVec(Sigma.data()+idx*this->nSingleDim_,this->nSingleDim_);

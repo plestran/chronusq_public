@@ -71,6 +71,7 @@ public:
   void readSMP(int &);
   void readPSCF(std::fstream &,std::fstream &);
   void readDebug(std::string);
+  void printSettings(std::fstream &);
 };
 } // namespace ChronusQ
 #endif
