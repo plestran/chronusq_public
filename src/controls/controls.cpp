@@ -91,3 +91,39 @@ void Controls::readDebug(std::string str){
     cout << "Debug option \"" << str << "\" not recognized\n";
   }
 }
+
+void Controls::printSettings(fstream &out){
+//out << bannerTop << endl;
+  out << endl << "ChronusQ Control Settings:" << endl << bannerMid << endl;
+
+  out << std::setw(35) << std::left << "  Print Level:" << this->printLevel << endl;
+  out << std::setw(35) << std::left << "  Shared Memory Threads (OpenMP)" << this->nthreads << endl;
+  out << std::setw(35) << std::left << "  Performing SCF:";
+  if(this->optWaveFunction) {
+    out << "YES" << endl;
+    out << std::setw(35) << std::left << "    Schwartz Bound Threshold:" << std::scientific << this->thresholdSchawrtz << endl;
+    out << std::setw(35) << std::left << "    Direct:";
+    if(this->directTwoE) out << "YES" << endl;
+    else out << "NO" <<endl;
+  } else out << "NO" << endl;
+
+  out << std::setw(35) << std::left << "  Building Full ERIs:";
+  if(this->buildn4eri) out << "YES" << endl;
+  else out << "NO" << endl;
+
+  out << std::setw(35) << std::left << "  Density Fitting:";
+  if(this->doDF) out << "ON" << endl;
+  else out << "OFF" << endl;
+
+  out << std::setw(35) << std::left << "  Compute Dipole Moment:";
+  if(this->doDipole) out << "YES" << endl;
+  else out << "NO" << endl;
+  out << std::setw(35) << std::left << "  Compute Quadrupole Moment:";
+  if(this->doDipole) out << "YES" << endl;
+  else out << "NO" << endl;
+  out << std::setw(35) << std::left << "  Compute Octupole Moment:";
+  if(this->doDipole) out << "YES" << endl;
+  else out << "NO" << endl;
+  out << std::fixed;
+//out << bannerEnd << endl;
+}
