@@ -27,13 +27,84 @@
 
 namespace ChronusQ {
 template<>
-void QuasiNewton<double>::runMicro(){
+void QuasiNewton<double>::redDiag(int NTrial,ostream &output){
   // LAPACK Variables
-  char JOBVR = 'V';
-  char JOBVL = 'N';
-  char UPLO = 'L';
-  int INFO;
+  char JOBVR = 'V'; // Get Right eigenvectors
+  char JOBVL = 'N'; // Get Left eigenvectors
+  char UPLO = 'L';  // Lower triagnle is used for symmetrix matricies
+  int INFO;         // Success / failure flag
+  int iType = 1;    // Flag for the type of GEP being solved
+  int TwoNTrial = 2*NTrial; // Dimension of the supermatricies
 
+  int IOff = NTrial; // Space for eigenvalues
+  if(!this->isHermetian_ || this->symmetrizedTrial_){
+    IOff += NTrial; // Space for paired eigenvalues or imaginary part
+    new (&this->ER) RealVecMap(this->LAPACK_SCR,2*NTrial);
+  } else{ new (&this->ER) RealVecMap(this->LAPACK_SCR,NTrial);}
+  double * WORK = this->LAPACK_SCR + IOff;
+
+  if(this->isHermetian_) {
+    if(!this->symmetrizedTrial_){
+      // Solve E(R)| X(R) > = | X(R) > ω
+      dsyev_(&JOBVR,&UPLO,&NTrial,this->XTSigmaR.data(),&NTrial,
+             this->ER.data(),WORK,&this->LWORK,&INFO); 
+      if(INFO!=0) CErr("DSYEV failed to converge in Davison Iterations",output);
+    } else {
+      RealCMMatrix SCPY(SSuper); // Copy of original matrix to use for re-orthogonalization
+      /*
+       * Solve S(R)| X(R) > = E(R)| X(R) > (1/ω)
+       *
+       * | X(R) > = | X(R)_g >
+       *            | X(R)_u >
+       *
+       * The opposite (1/ω vs ω) is solved because the metric is not positive definite
+       * and can therefore not be solved using DSYGV because of the involved Cholesky
+       * decomposition.
+       *
+       * This must be revisited for Spinor orbital hessians! FIXME
+       */ 
+      dsygv_(&iType,&JOBVR,&UPLO,&TwoNTrial,this->SSuper.data(),&TwoNTrial,
+             this->ASuper.data(),&TwoNTrial,this->ER.data(),WORK,&this->LWORK,
+             &INFO);
+      if(INFO!=0) CErr("DSYGV failed to converge in Davison Iterations",output);
+
+      // Grab the "positive paired" roots (throw away other element of the pair)
+      new (&this->ER)     RealVecMap(this->LAPACK_SCR+NTrial,NTrial);
+      new (&this->SSuper) RealCMMap (this->SSuperMem+2*NTrial*NTrial,2*NTrial,NTrial);
+
+      // Swap the ordering because we solve for (1/ω)
+      for(auto i = 0 ; i < NTrial; i++) ER(i) = 1.0/this->ER(i);
+      for(auto i = 0 ; i < NTrial/2; i++){
+        this->SSuper.col(i).swap(this->SSuper.col(NTrial - i - 1));
+        double tmp = this->ER(i);
+        this->ER(i) = this->ER(NTrial - i - 1);
+        this->ER(NTrial - i - 1) = tmp;
+      }
+
+      // Re-orthogonalize the eigenvectors with respect to the metric S(R)
+      // because DSYGV orthogonalzies the vectors with respect to E(R)
+      // because we solve the opposite problem.
+      //
+      // Gramm-Schmidt
+      for(auto i = 0; i < NTrial; i++){
+        double inner = this->SSuper.col(i).dot(SCPY*this->SSuper.col(i));
+        int sgn = inner / std::abs(inner);
+        inner = sgn*std::sqrt(sgn*inner);
+        this->SSuper.col(i) /= inner;
+        for(auto j = i+1; j < NTrial; j++){
+          this->SSuper.col(j) -= 
+            this->SSuper.col(i)*
+            (this->SSuper.col(i).dot(SCPY*this->SSuper.col(j)));
+        }
+      }
+
+      this->XTSigmaR = this->SSuper.block(0,     0,NTrial,NTrial);
+      this->XTSigmaL = this->SSuper.block(NTrial,0,NTrial,NTrial);
+    }
+  } 
+} // redDiag
+template<>
+void QuasiNewton<double>::runMicro(ostream &output){
   // Inital Values
   int NTrial = this->nGuess_;
   int NOld   = 0;
@@ -69,8 +140,19 @@ void QuasiNewton<double>::runMicro(){
 
     // Resize the Eigen Mapes to fit new vectors
     this->resizeMaps(NTrial,NOld,NNew);
+    // Perform the Linear Transformation
+    this->linearTrans();
+    // Perform full projection
+    this->fullProjection();
+    // Build Supermatricies if symmetrized vectors are used
+    if(this->symmetrizedTrial_) this->buildSuperMat(NTrial);
+    // Diagonalize the subspace
+    if(this->doDiag_) this->redDiag(NTrial);
+    // Reconstruct the solution vectors
+    this->reconstructSolution(); 
 
   } // for iter in [0, maxIter)
   
 } // runMicro
+
 } // namespace ChronusQ

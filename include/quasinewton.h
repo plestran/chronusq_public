@@ -47,7 +47,7 @@ template <typename T>
     bool doDiag_;          // Quasi-Newton Diagonalization (Davidson)
     bool doGEP_;           // Generalized Eigenproblem
     bool doLin_;           // Quasi-Newton Linear Equation Solve
-    bool symmtrizedTrial_; // Symmetrized Trial Vectors (Kauczor et al. JCTC 7 (2010))
+    bool symmetrizedTrial_; // Symmetrized Trial Vectors (Kauczor et al. JCTC 7 (2010))
     bool debug_;           // Enables various debug options
     bool cleanupMem_;      // True if memory cleanup is required (if memory was allocated locally)
     bool isConverged_;     // True if the iterative calculation converged
@@ -73,10 +73,15 @@ template <typename T>
     void loadDefaults();                   // Initialize the control parameters to defualt values
     #include <quasinewtonscratch.h>
     void resizeMaps(const int,const int,const int);
+    void linearTrans();
+    void fullProjection();
+    void buildSuperMat(const int);
+    void redDiag(int,ostream &output=cout);
+    void reconstructSolution();
 
     // Allocate space for local copy of the guess vectors
     inline void allocGuess(){ 
-      this->guess_ = std:unique_ptr<TMat>(new TMat(this->n_,this->nGuess_));
+      this->guess_ = std::unique_ptr<TMat>(new TMat(this->n_,this->nGuess_));
       if(this->genGuess_) this->identGuess();
     };
 
@@ -189,11 +194,11 @@ template <typename T>
    inline TMat* eigenVector(){return this->solutionVector_;};
    inline void run(ostream &output=cout){
      time_t currentTime;
-     std::chrono::high_resolution_clock::time_pint start,finish;
+     std::chrono::high_resolution_clock::time_point start,finish;
      std::chrono::duration<double> elapsed;
      output << bannerTop << endl << endl;
      time(&currentTime);
-     outout << "Quasi-Newton Calculation Started: " << ctime(&currentTime) << endl;
+     output << "Quasi-Newton Calculation Started: " << ctime(&currentTime) << endl;
      this->printInfo(output);
      start = std::chrono::high_resolution_clock::now();
      this->runMicro(output);
@@ -206,7 +211,7 @@ template <typename T>
      output << bannerEnd << endl << endl;
    }
   
-  } // class QuasiNewton
+  }; // class QuasiNewton
   template<typename T>
   void QuasiNewton<T>::loadDefaults(){
     this->isHermetian_      = true;  // Default to Hermetian Scheme
@@ -241,7 +246,7 @@ template <typename T>
   void QuasiNewton<T>::checkValid(ostream &output){
     if(this->A_ != NULL){
       if(this->A_->rows() != this->A_->cols())
-        CErr("Quasi-Newton only supported for square problems!")
+        CErr("Quasi-Newton only supported for square problems!");
     }
     if(this->nGuess_ >= this->maxSubSpace_)
       CErr("Number of initial guess vectors exceeds maximum dimension of iterative subspace");
@@ -274,4 +279,102 @@ template <typename T>
       new (&this->NewVecL)  TCMMap(this->TVecLMem+ NOld*this->N_,this->N_,NNew);
     }
   }
+
+  /*
+   *  Compute the linear transformation of the matrix (σ) [and possibly the 
+   *  metric (ρ)] onto the basis vectors (b)
+   *
+   *  For Hermetian matricies in general (viz. Davidson J. Comput. Phys. 17 (1975))
+   *
+   *  σ = E| b >
+   *
+   *  For RPA (viz. Kauczor et al. JCTC 7 (2010) p. 1610  (Eq 74,75)):
+   *
+   *  σ_g = E| b_g >   σ_u = E| b_u >
+   *  ρ_g = E| b_u >   ρ_u = E| b_g >
+   *
+   *  ** ρ not referenced for CIS although it is passed **
+   *
+   */
+  template<typename T>
+  void QuasiNewton<T>::linearTrans(){
+    if(this->sdr_ != NULL){
+      if(this->sdr_->iMeth() == SDResponse::CIS || this->sdr_->iMeth() == SDResponse::RPA){
+        // Linear transformation onto right / gerade
+        this->sdr_->formRM3(this->NewVecR,this->NewSR,this->NewRhoL); 
+        if(this->sdr_->iMeth() == SDResponse::RPA)   
+          // Linear trasnformation onto left / ungerade
+          this->sdr_->formRM3(this->NewVecL,this->NewSL,this->NewRhoR);
+      }
+    } else this->NewSR = (*this->A_) * this->NewVecR;
+  }
+
+
+  /*
+   *  Full projection of the matrix (and the metric) onto the reduced subspace
+   *
+   *  For Hermetian matricies in general (viz. Davidson J. Comput. Phys. 17 (1975))
+   *
+   *  E(R) = < b | σ >
+   *
+   *  For RPA (viz. Kauczor et al. JCTC 7 (2010) p. 1610  (Eq 89)):
+   *
+   *  E(R)_gg = < b_g | σ_g >
+   *  E(R)_uu = < b_u | σ_u >
+   *  S(R)_gu = < b_g | ρ_g >
+   *  S(R)_uu = < b_u | ρ_u >
+   *
+   */ 
+  template<typename T>
+  void QuasiNewton<T>::fullProjection(){
+    this->XTSigmaR = this->TrialVecR.transpose()*this->SigmaR; // E(R) or E(R)_gg
+    if(!this->isHermetian_ || this->symmetrizedTrial_){
+      this->XTRhoR   = this->TrialVecR.transpose()*this->RhoR;   // S(R)_gu
+      this->XTSigmaL = this->TrialVecL.transpose()*this->SigmaL; // E(R)_uu
+      this->XTRhoL   = this->TrialVecL.transpose()*this->RhoL;   // S(R)_ug
+    }
+  }
+
+  /*
+   * Set up the reduced dimensional supermatricies
+   * viz. Kauczor et al. JCTC p. 1610  (Eq 88)
+   *
+   * E(R) = [ E(R)_gg   0  ]    S(R) = [   0  S(R)_gu ]
+   *        [   0  E(R)_uu ]           [ S(R)_ug   0  ]
+   *
+   */  
+  template<typename T>
+  void QuasiNewton<T>::buildSuperMat(const int NTrial){
+    ASuper.setZero();
+    SSuper.setZero();
+    ASuper.block(0,     0,     NTrial,NTrial) = XTSigmaR;
+    ASuper.block(NTrial,NTrial,NTrial,NTrial) = XTSigmaL;
+    SSuper.block(0,     NTrial,NTrial,NTrial) = XTRhoR;
+    SSuper.block(NTrial,0,     NTrial,NTrial) = XTRhoL;
+  }
+
+  /*
+   *  Reconstruct the approximate eigenvectors
+   *
+   *  For Hermetian matricies in general (viz. Davidson J. Comput. Phys. 17 (1975))
+   *
+   *  | X > = | b_i > X(R)_i
+   *
+   *  For RPA (viz. Kauczor et al. JCTC 7 (2010) p. 1610  (Eq 90,91)):
+   *
+   *  | X_g > = | {b_g}_i > {X(R)_g}_i
+   *  | X_u > = | {b_u}_i > {X(R)_u}_i
+   */ 
+  template<typename T>
+  void QuasiNewton<T>::reconstructSolution(){
+    this->UR = this->TrialVecR * this->XTSigmaR;
+    if(this->symmetrizedTrial_) this->UL = this->TrialVecL * this->XTSigmaL;
+    // Stash away current approximation of eigenvalues and eigenvectors (NSek)
+    (*this->solutionValues_) = this->ER.block(0,0,this->nSek_,1);
+    (*this->solutionVector_) = this->UR.block(0,0,this->N_,this->nSek_); 
+    // | X > = | X_g > + | X_u > (viz. Kauczor et al. JCTC 7 (2010) p. 1610  (Eq 80))
+    if(this->symmetrizedTrial_)(*this->solutionVector_) += this->UL.block(0,0,this->N_,this->nSek_); 
+  }
+
 } // namespace ChronusQ
+#endif
