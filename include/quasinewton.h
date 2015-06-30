@@ -40,6 +40,8 @@ template <typename T>
     // Useful typedefs for Eigen templates
     typedef Eigen::Matrix<T,Dynamic,Dynamic,ColMajor> TMat;
     typedef Eigen::Matrix<T,Dynamic,1> TVec;
+    typedef Eigen::Map<TMat> TCMMap;
+    typedef Eigen::Map<TVec> TVecMap;
 
     bool isHermetian_;     // Hermetian Scheme
     bool doDiag_;          // Quasi-Newton Diagonalization (Davidson)
@@ -66,25 +68,38 @@ template <typename T>
 
     SDResponse * sdr_;     // Pointer to SDResponse object
 
-    void runMicro(ostream &output=cout);
-    void checkValid(ostream &output=cout);
-    void loadDefaults();
+    void runMicro(ostream &output=cout);   // Run a set of micro iterations
+    void checkValid(ostream &output=cout); // Check if varibles make sense (idiot check)
+    void loadDefaults();                   // Initialize the control parameters to defualt values
+    void allocScr();                       // Allocate scratch space
+    #include <quasinewtonscratch.h>
 
+    // Allocate space for local copy of the guess vectors
     inline void allocGuess(){ 
       this->guess_ = std:unique_ptr<TMat>(new TMat(this->n_,this->nGuess_));
       if(this->genGuess_) this->identGuess();
     };
+
+    // Allocate space for solution
     inline void allocSolution(){
       this->solutionVector_ = new TMat(this->nSek_,1);
       this->solutionValues_ = new TMat(this->n_,this->nSek_);
       this->cleanupMem_ = true;
     };
+
+    // Generate the identity (standard) guess
     inline void identGuess(){
       (*this->guess_) = TMat::Identity(this->n_,this->nGuess_);
     };
+
+    // Standard value for the maximum dimension of the
+    // iterative subspace min(6*NSek,N/2)
     inline int stdSubSpace(){
       return std::min(6*this->nSek_,this->N_/2);
     };
+
+    // Standard value for the number of inital guess
+    // vectors that are to be generated 2*NSek
     inline int stdNGuess(){
       return 2*this->nSek_;
     }
@@ -135,6 +150,7 @@ template <typename T>
       this->checkValid();
       this->allocGuess();
       this->allocSolution();
+      this->allocScr();
     };
 
     /**
@@ -165,8 +181,8 @@ template <typename T>
       if(this->genGuess_) this->nGuess_ = this->stdNGuess();
       this->checkValid();
       this->allocGuess();
-      this->allocSolution();
       if(!this->genGuess_) *this->guess_ = *SDR->davGuess();
+      this->allocScr();
     };
 
    inline TVec* eigenValues(){return this->solutionValues_;};
