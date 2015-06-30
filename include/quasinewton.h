@@ -47,7 +47,7 @@ template <typename T>
     bool doDiag_;          // Quasi-Newton Diagonalization (Davidson)
     bool doGEP_;           // Generalized Eigenproblem
     bool doLin_;           // Quasi-Newton Linear Equation Solve
-    bool symmtrizedTrial_; // Symmetrized Trial Vectors (Kauczor et al. JCTC 7 (2010) p. 1610)
+    bool symmtrizedTrial_; // Symmetrized Trial Vectors (Kauczor et al. JCTC 7 (2010))
     bool debug_;           // Enables various debug options
     bool cleanupMem_;      // True if memory cleanup is required (if memory was allocated locally)
     bool isConverged_;     // True if the iterative calculation converged
@@ -71,8 +71,8 @@ template <typename T>
     void runMicro(ostream &output=cout);   // Run a set of micro iterations
     void checkValid(ostream &output=cout); // Check if varibles make sense (idiot check)
     void loadDefaults();                   // Initialize the control parameters to defualt values
-    void allocScr();                       // Allocate scratch space
     #include <quasinewtonscratch.h>
+    void resizeMaps(const int,const int,const int);
 
     // Allocate space for local copy of the guess vectors
     inline void allocGuess(){ 
@@ -207,8 +207,8 @@ template <typename T>
    }
   
   } // class QuasiNewton
-
-  void QuasiNewton::loadDefaults(){
+  template<typename T>
+  void QuasiNewton<T>::loadDefaults(){
     this->isHermetian_      = true;  // Default to Hermetian Scheme
     this->doDiag_           = true;  // Defualt to diagonalization
     this->doGEP_            = false; // Default standard eigenproblem if doing a diagonalization
@@ -237,12 +237,41 @@ template <typename T>
     this->sdr_              = NULL;
   }
 
-  void QuasiNewton::checkValid(ostream &output){
+  template<typename T>
+  void QuasiNewton<T>::checkValid(ostream &output){
     if(this->A_ != NULL){
       if(this->A_->rows() != this->A_->cols())
         CErr("Quasi-Newton only supported for square problems!")
     }
     if(this->nGuess_ >= this->maxSubSpace_)
       CErr("Number of initial guess vectors exceeds maximum dimension of iterative subspace");
+  }
+ 
+  // Resize the Eigen Maps to fit new vectors
+  template<typename T>
+  void QuasiNewton<T>::resizeMaps(const int NTrial, const int NOld, const int NNew){
+    new (&this->SigmaR)   TCMMap(this->SigmaRMem,  this->N_,NTrial);
+    new (&this->XTSigmaR) TCMMap(this->XTSigmaRMem,NTrial,  NTrial);
+    new (&this->UR)       TCMMap(this->URMem,      this->N_,NTrial);
+    new (&this->ResR)     TCMMap(this->ResRMem,    this->N_,NTrial);
+    new (&this->NewSR)    TCMMap(this->SigmaRMem+NOld*this->N_,this->N_,NNew);
+    new (&this->NewVecR)  TCMMap(this->TVecRMem+ NOld*this->N_,this->N_,NNew);
+    if(!this->isHermetian_ || this->symmetrizedTrial_){
+      new (&this->RhoR)     TCMMap(this->RhoRMem,    this->N_,NTrial);
+      new (&this->XTRhoR)   TCMMap(this->XTRhoRMem,  NTrial,  NTrial);
+      new (&this->SigmaL)   TCMMap(this->SigmaLMem,  this->N_,NTrial);
+      new (&this->XTSigmaL) TCMMap(this->XTSigmaLMem,NTrial,  NTrial);
+      new (&this->RhoL)     TCMMap(this->RhoLMem,    this->N_,NTrial);
+      new (&this->XTRhoL)   TCMMap(this->XTRhoLMem,  NTrial,  NTrial);
+      new (&this->UL)       TCMMap(this->ULMem,      this->N_,NTrial);
+      new (&this->ResL)     TCMMap(this->ResLMem,    this->N_,NTrial);
+      new (&this->ASuper)   TCMMap(this->ASuperMem, 2*NTrial,2*NTrial);
+      new (&this->SSuper)   TCMMap(this->SSuperMem, 2*NTrial,2*NTrial);
+
+      new (&this->NewRhoR)  TCMMap(this->RhoRMem + NOld*this->N_,this->N_,NNew);
+      new (&this->NewRhoL)  TCMMap(this->RhoLMem + NOld*this->N_,this->N_,NNew);
+      new (&this->NewSL)    TCMMap(this->SigmaLMem+NOld*this->N_,this->N_,NNew);
+      new (&this->NewVecL)  TCMMap(this->TVecLMem+ NOld*this->N_,this->N_,NNew);
+    }
   }
 } // namespace ChronusQ
