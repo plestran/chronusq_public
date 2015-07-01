@@ -176,8 +176,8 @@ inline void initScrPtr(){
 }
 inline void allocScr(){
   // Initialize various parameters
-  this->initScrLen();
-  this->initScrPtr();
+//this->initScrLen();
+//this->initScrPtr();
 
   // Allocate scratch space
   this->SCR = new double [this->LenScr]; 
@@ -239,4 +239,7 @@ inline void allocScr(){
   new (&EI) TVecMap(LAPACK_SCR,0);
   new (&VR) TCMMap( LAPACK_SCR,0,0);
   new (&VL) TCMMap( LAPACK_SCR,0,0);
+}
+void cleanupScr(){
+  delete [] this->SCR;
 }

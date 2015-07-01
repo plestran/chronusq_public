@@ -23,11 +23,11 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
+#ifndef INCLUDED_QUASINEWTON
+#define INCLUDED_QUATINEWTON
 #include <global.h>
 #include <cerr.h>
 #include <sdresponse.h>
-#ifndef INCLUDED_DAVIDSON
-#define INCLUDED_DAVIDSON
 namespace ChronusQ {
 /**
  * A class to setup and run various iterative Quasi-Newton type 
@@ -47,7 +47,8 @@ template <typename T>
     bool doDiag_;          // Quasi-Newton Diagonalization (Davidson)
     bool doGEP_;           // Generalized Eigenproblem
     bool doLin_;           // Quasi-Newton Linear Equation Solve
-    bool symmetrizedTrial_; // Symmetrized Trial Vectors (Kauczor et al. JCTC 7 (2010))
+    bool doResGuess_;      // Generate new vectors from residual
+    bool symmetrizedTrial_;// Symmetrized Trial Vectors (Kauczor et al. JCTC 7 (2010))
     bool debug_;           // Enables various debug options
     bool cleanupMem_;      // True if memory cleanup is required (if memory was allocated locally)
     bool isConverged_;     // True if the iterative calculation converged
@@ -60,6 +61,8 @@ template <typename T>
     int nSek_;             // Number of desired roots in the case of diagonalization (Davidson)
     int nGuess_;           // Numer of given (or to be generated) guess vectors
 //  int method_;           // Post-SCF method being performed
+
+    double resTol_;        // Residual norm tolerence for convergence
 
     TMat * A_;                // Pointer to full matrix to be diagonalized
     TMat * solutionVector_;   // Solution vectors at current iteration (could be local or non-local)
@@ -78,6 +81,10 @@ template <typename T>
     void buildSuperMat(const int);
     void redDiag(int,ostream &output=cout);
     void reconstructSolution();
+    void genRes();
+    void genResGuess();
+    std::vector<bool> checkConv(int &,ostream &output=cout);
+    void formNewGuess(std::vector<bool> &,int,int,int,int);
 
     // Allocate space for local copy of the guess vectors
     inline void allocGuess(){ 
@@ -210,14 +217,47 @@ template <typename T>
      output << "Time Elapsed: " << elapsed.count() << " sec" << endl;
      output << bannerEnd << endl << endl;
    }
+    inline void printInfo(ostream &output=cout) {
+      output << bannerTop << endl;
+      output << "Davidson Diagonalization Settings:" << endl << endl;
+ 
+      output << std::setw(50) << std::left << "  Dimension of the Matrix:" << this->N_ << endl;
+      output << std::setw(50) << std::left << "  Number of Desired Roots:" << this->nSek_ << endl;
+      output << std::setw(50) << std::left << "  Number of Initial Guess Vectors:" << this->nGuess_;
+      if(this->nGuess_ == 2*this->nSek_) output << "    (default 2*NSek)";
+      output << endl;
+      output << std::setw(50) << std::left << "  Maximum Dimension of Iterative Subspace:"
+           << this->maxSubSpace_ << endl;
+      output << std::setw(50) << std::left << "  Maximum Number of Micro Iterations:"
+           << this->maxIter_ << endl;
+      output << std::setw(50) << std::left << "  Maximum Number of Macro Iterations:"
+           << this->MaxIter_ << endl;
+      output << std::setw(50) << std::left << "  Using an Hermetian algorithm?:";
+      if(this->hermetian_) output << "Yes";
+      else output << "No";
+      output << endl;
+      output << std::setw(50) << std::left << "  Using LAPACK to diagonalize subspace?:";
+      if(this->useLAPACK_) output << "Yes";
+      else output << "No";
+      output << endl;
+      output << std::setw(50) << std::left << "  Full Matrix Passed to for AX:";
+      if(this->mat_ != nullptr) output << "Yes";
+      else output << "No";
+      output << endl;
+ 
+      output << endl << bannerEnd << endl;
+    }
   
   }; // class QuasiNewton
   template<typename T>
   void QuasiNewton<T>::loadDefaults(){
+    this->initScrLen();
+    this->initScrPtr();
     this->isHermetian_      = true;  // Default to Hermetian Scheme
     this->doDiag_           = true;  // Defualt to diagonalization
     this->doGEP_            = false; // Default standard eigenproblem if doing a diagonalization
     this->doLin_            = false; // Mildly redundent, as it will currently always be the opposite of doDiag
+    this->doResGuess_       = true;  // Default to residual based guess
     this->symmetrizedTrial_ = false; // Default to unmodified trial vectors
     this->debug_            = false; // Default to terse output
     this->cleanupMem_       = false; // Assume that the space for results was allocated elsewhere
@@ -240,7 +280,9 @@ template <typename T>
     this->solutionValues_   = NULL;
     this->guess_            = nullptr;
     this->sdr_              = NULL;
-  }
+
+    this->resTol_           = 5.0e-6;
+  } // loadDefaults
 
   template<typename T>
   void QuasiNewton<T>::checkValid(ostream &output){
@@ -250,7 +292,7 @@ template <typename T>
     }
     if(this->nGuess_ >= this->maxSubSpace_)
       CErr("Number of initial guess vectors exceeds maximum dimension of iterative subspace");
-  }
+  } // checkValid
  
   // Resize the Eigen Maps to fit new vectors
   template<typename T>
@@ -278,7 +320,7 @@ template <typename T>
       new (&this->NewSL)    TCMMap(this->SigmaLMem+NOld*this->N_,this->N_,NNew);
       new (&this->NewVecL)  TCMMap(this->TVecLMem+ NOld*this->N_,this->N_,NNew);
     }
-  }
+  } // resizeMaps
 
   /*
    *  Compute the linear transformation of the matrix (σ) [and possibly the 
@@ -307,7 +349,7 @@ template <typename T>
           this->sdr_->formRM3(this->NewVecL,this->NewSL,this->NewRhoR);
       }
     } else this->NewSR = (*this->A_) * this->NewVecR;
-  }
+  } // linearTrans
 
 
   /*
@@ -333,7 +375,7 @@ template <typename T>
       this->XTSigmaL = this->TrialVecL.transpose()*this->SigmaL; // E(R)_uu
       this->XTRhoL   = this->TrialVecL.transpose()*this->RhoL;   // S(R)_ug
     }
-  }
+  } // fullProjection
 
   /*
    * Set up the reduced dimensional supermatricies
@@ -351,7 +393,7 @@ template <typename T>
     ASuper.block(NTrial,NTrial,NTrial,NTrial) = XTSigmaL;
     SSuper.block(0,     NTrial,NTrial,NTrial) = XTRhoR;
     SSuper.block(NTrial,0,     NTrial,NTrial) = XTRhoL;
-  }
+  } // buildSuperMat
 
   /*
    *  Reconstruct the approximate eigenvectors
@@ -374,7 +416,69 @@ template <typename T>
     (*this->solutionVector_) = this->UR.block(0,0,this->N_,this->nSek_); 
     // | X > = | X_g > + | X_u > (viz. Kauczor et al. JCTC 7 (2010) p. 1610  (Eq 80))
     if(this->symmetrizedTrial_)(*this->solutionVector_) += this->UL.block(0,0,this->N_,this->nSek_); 
-  }
+  } // reconstructSolution
+
+  /*
+   * Construct the residual vector
+   *
+   *  For Hermetian matricies in general (viz. Davidson J. Comput. Phys. 17 (1975))
+   *
+   *  R = A| X > - | X > * ω = | σ_i > * X(R)_i - | X > ω
+   *
+   *  For RPA (viz. Kauczor et al. JCTC 7 (2010) p. 1610  (Eq 92,93)):
+   *
+   *  R_g = | {σ_g}_i > * {X(R)_g}_i - | {ρ_g}_i > * {X(R)_u}_i * ω
+   *  R_u = | {σ_u}_i > * {X(R)_g}_i - | {ρ_u}_i > * {X(R)_g}_i * ω
+   */ 
+  template<typename T>
+  void QuasiNewton<T>::genRes(){
+    if(this->isHermetian_ && !this->symmetrizedTrial_) 
+      this->ResR = this->SigmaR*this->XTSigmaR - this->UR*this->ER.asDiagonal();
+    if(this->symmetrizedTrial_) {
+      this->ResR = this->SigmaR*this->XTSigmaR - 
+                   this->RhoR*this->XTSigmaL*this->ER.asDiagonal();
+      this->ResL = this->SigmaL*this->XTSigmaL - 
+                   this->RhoL*this->XTSigmaR*this->ER.asDiagonal();
+    }
+  } //genRes
+
+  /**
+   * Check for convergence
+   */ 
+  template<typename T>
+  std::vector<bool> QuasiNewton<T>::checkConv(int & NNotConv,ostream &output) {
+    // Vector to store convergence info
+    std::vector<bool> resConv;
+    NNotConv = 0;
+
+    // Loop over NSek residual vectors. Decide from which residuals
+    // will be made perturbed guess vectors
+    for(auto k = 0; k < this->nSek_; k++) {
+      double NORM = this->ResR.col(k).norm();
+      if(!this->isHermetian_ || this->symmetrizedTrial_) 
+        NORM = std::max(NORM,this->ResL.col(k).norm());
+      if(NORM < this->resTol_) resConv.push_back(true);
+      else {
+        resConv.push_back(false); NNotConv++;
+      }
+    }
+    output << "  Checking Quasi-Newton Convergence:" << endl;
+    output << "    " << std::setw(8)  << " " << std::setw(32) << std::left << "    Roots at Current Iteration:";
+    output << std::setw(32) << std::left << "    (Max) Norm of Residual(s):" << endl;
+    for(auto k = 0 ; k < this->nSek_; k++){
+      double NORM = this->ResR.col(k).norm();
+      if(!this->isHermetian_ || this->symmetrizedTrial_) 
+        NORM = std::max(NORM,this->ResL.col(k).norm());
+
+      output << "    " << std::setw(12) << "State " + std::to_string(k+1) + ":";
+      output << std::setw(32) << std::left << std::fixed << (*this->solutionValues_)(k,0);
+      output << std::setw(32) << std::left << std::scientific << NORM;
+      if(resConv[k]) output << "     Root has converged" << endl;
+      else output << "     Root has not converged" << endl;
+    }
+    return resConv;
+  } // checkConv
+
 
 } // namespace ChronusQ
 #endif

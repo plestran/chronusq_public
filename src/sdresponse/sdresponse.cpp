@@ -25,6 +25,7 @@
  */
 #include <sdresponse.h>
 #include <davidson.h>
+#include <quasinewton.h>
 using ChronusQ::Molecule;
 using ChronusQ::BasisSet;
 using ChronusQ::Controls;
@@ -33,6 +34,7 @@ using ChronusQ::MOIntegrals;
 using ChronusQ::SDResponse;
 using ChronusQ::SingleSlater;
 using ChronusQ::Davidson; 
+using ChronusQ::QuasiNewton; 
 using std::cout;
 using std::setw;
 //------------------------------//
@@ -566,7 +568,11 @@ void SDResponse::DavidsonCIS(){
 //CErr();
 */
   this->formGuess();
+/*
   Davidson<double> davA(this);
+  davA.run(this->fileio_->out);
+*/
+  QuasiNewton<double> davA(this);
   davA.run(this->fileio_->out);
 //this->fileio_->out << "The lowest " << this->nSek_ << " eigenstates solved by Davidson Algorithm:" <<endl;
   this->formTransDipole();
