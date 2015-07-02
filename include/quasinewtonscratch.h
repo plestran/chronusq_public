@@ -1,3 +1,4 @@
+// Integer Length Parameters
 int LenScr        ; 
 int LenSigma      ; 
 int LenRho        ;
@@ -9,7 +10,7 @@ int LenRes        ;
 int LenTVec       ;
 int LEN_LAPACK_SCR; 
 int LWORK         ;
-
+// Templated pointers for scratch
 T * SCR        ; 
 T * SigmaRMem  ; 
 T * SigmaLMem  ; 
@@ -28,7 +29,7 @@ T * ResLMem    ;
 T * TVecRMem   ;         
 T * TVecLMem   ;         
 T * LAPACK_SCR ;
-
+/* Old member definitions of Eigen::Maps (not used)
 TCMMap SigmaR   ;
 TCMMap NewSR    ;
 TCMMap XTSigmaR ;
@@ -63,7 +64,8 @@ TVecMap ER;
 TVecMap EI;
 TCMMap  VR;
 TCMMap  VL;
-/**
+*/
+/**DETERMINE LENGTH OF SCRATCH SPACE
  * DETERMINE LENGTH OF SCRATCH SPACE
  *
  * (1) Linear transform of A onto right / gerade trial vectors 
@@ -203,6 +205,7 @@ inline void allocScr(){
     this->SSuperMem     = this->ASuperMem   + this->LenSuper;
   }
 
+/*
   // Initialize Eigen Maps (not sure if this is nessacary...)
   new (&SigmaR)    TCMMap(SigmaRMem,  0,0);
   new (&NewSR)     TCMMap(SigmaRMem,  0,0);
@@ -239,6 +242,7 @@ inline void allocScr(){
   new (&EI) TVecMap(LAPACK_SCR,0);
   new (&VR) TCMMap( LAPACK_SCR,0,0);
   new (&VL) TCMMap( LAPACK_SCR,0,0);
+*/
 }
 void cleanupScr(){
   delete [] this->SCR;

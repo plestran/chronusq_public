@@ -132,6 +132,7 @@ public:
   void formTransDipole();
   void formOscStrength();
   void printPrinciple(int );
+  FileIO * fileio(){return this->fileio_;};
 //dbwye
   RealMatrix formRM2(RealMatrix &XMO);
   RealMatrix ReturnDiag();

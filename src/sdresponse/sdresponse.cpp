@@ -568,12 +568,11 @@ void SDResponse::DavidsonCIS(){
 //CErr();
 */
   this->formGuess();
-/*
   Davidson<double> davA(this);
   davA.run(this->fileio_->out);
-*/
-  QuasiNewton<double> davA(this);
-  davA.run(this->fileio_->out);
+  QuasiNewton<double> davB(this);
+  davB.run(this->fileio_->out);
+//davA.run(this->fileio_->out);
 //this->fileio_->out << "The lowest " << this->nSek_ << " eigenstates solved by Davidson Algorithm:" <<endl;
   this->formTransDipole();
   this->formOscStrength();
