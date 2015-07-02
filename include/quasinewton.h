@@ -290,6 +290,7 @@ template <typename T>
   inline void allocScr(){
     // Allocate scratch space
     this->SCR = new double [this->LenScr]; 
+    std::memset((void*)this->SCR,0.0,this->LenScr*sizeof(double));
   
     // Partition scratch space
     this->SigmaRMem     = this->SCR;
@@ -320,7 +321,7 @@ template <typename T>
       if(this->A_->rows() != this->A_->cols())
         CErr("Quasi-Newton only supported for square problems!");
     }
-    if(this->nGuess_ >= this->maxSubSpace_)
+    if(this->nGuess_ > this->maxSubSpace_)
       CErr("Number of initial guess vectors exceeds maximum dimension of iterative subspace");
   } // checkValid
     inline void allocSolution(){

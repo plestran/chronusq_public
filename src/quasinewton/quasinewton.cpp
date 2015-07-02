@@ -108,8 +108,8 @@ namespace ChronusQ {
 
     } 
   } // redDiag
-/** Form New Perturbed Guess **/
-template<>
+  /** Form New Perturbed Guess **/
+  template<>
   void QuasiNewton<double>::formNewGuess(std::vector<bool> &resConv,int &NTrial, 
                                     int NNotConv, int &NOld, int &NNew){
   
@@ -174,7 +174,7 @@ template<>
     NOld = NTrial;
     NNew = NNotConv;
     NTrial += NNew;
-  
+    if(NTrial > this->maxSubSpace_) CErr(); 
   }
   /** Run Micro Iteration **/
   template<>
@@ -206,7 +206,6 @@ template<>
     } else {
       TrialVecR = (*this->guess_);
     }
-
     for(auto iter = 0; iter < this->maxIter_; iter++){
       std::chrono::high_resolution_clock::time_point start,finish;
       std::chrono::duration<double> elapsed;

@@ -568,8 +568,8 @@ void SDResponse::DavidsonCIS(){
 //CErr();
 */
   this->formGuess();
-  Davidson<double> davA(this);
-  davA.run(this->fileio_->out);
+//Davidson<double> davA(this);
+//davA.run(this->fileio_->out);
   QuasiNewton<double> davB(this);
   davB.run(this->fileio_->out);
 //davA.run(this->fileio_->out);
@@ -982,7 +982,7 @@ void SDResponse::formGuess(){
       new RealMatrix(this->nSingleDim_,this->nGuess_)
     ); 
   int nRHF = 1;
-  if(this->RHF_) nRHF = 2;
+//if(this->RHF_) nRHF = 2;
   if(this->iMeth_==RPA) nRHF *= 2;
   RealMatrix dagCpy(this->nSingleDim_/nRHF,1);
   std::memcpy(dagCpy.data(),this->rmDiag_->data(),dagCpy.size()*sizeof(double));
@@ -992,7 +992,8 @@ void SDResponse::formGuess(){
     int indx;
     for(auto k = 0; k < dagCpy.size(); k++){
       auto it = std::find(alreadyAdded.begin(),alreadyAdded.end(),k);
-      if((dagCpy(i,0) == (*this->rmDiag_)(k,0)) && it == alreadyAdded.end()){
+      if((dagCpy(i % (this->nSingleDim_/nRHF),0) == (*this->rmDiag_)(k,0)) && 
+          it == alreadyAdded.end()){
         indx = k;
         alreadyAdded.push_back(indx);
         break;
