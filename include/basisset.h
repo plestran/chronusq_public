@@ -1,5 +1,5 @@
-/* 
- *  The Chronus Quantum (ChronusQ) software package is high-performace 
+/*
+ *  Chronus Quantum (ChronusQ) software package is high-performace 
  *  computational chemistry software with a strong emphasis on explicitly 
  *  time-dependent and post-SCF quantum mechanical methods.
  *  
@@ -111,6 +111,11 @@ public:
   int         *sortedShells;   // index of shells sorted from the largest angular momentum to the lowest
   //dbwys
 #ifdef USE_LIBINT
+  struct basis_libint {
+    std::string atomName;
+    std::vector<libint2::Shell> refShell;
+  };
+  std::vector<basis_libint> allBasis;
   std::vector<libint2::Shell> shells_libint;
   std::vector<libint2::Shell> shells_libint_unnormal;
   std::vector<int> mapSh2Bf;
@@ -139,7 +144,9 @@ public:
 
   // create and sort shell pairs according to the angular momenta
   void createShellPair(Molecule *);
-
+  // set private data
+  inline void setnBasis(int i){this->nBasis_=i;};
+  inline void setnPrimitive(int i){this->nPrimitive_=i;};
   // access to private data
   inline int     nBasis()  {return this->nBasis_;};
   inline int nPrimitive()  {return this->nPrimitive_;};
@@ -167,7 +174,6 @@ public:
   void computeShBlkNorm(bool,Molecule *,const RealMatrix*,const RealMatrix*);
   void computeShBlkNorm(bool,Molecule *,const ComplexMatrix*,const ComplexMatrix*);
 #endif
-
   /*************************/
   /* MPI Related Routines  */
   /*************************/
