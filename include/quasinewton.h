@@ -55,6 +55,7 @@ template <typename T>
     bool cleanupMem_;      // True if memory cleanup is required
     bool isConverged_;     // True if the iterative calculation converged
     bool genGuess_;        // Generate Standard (identity) Guess
+    bool doRestart_;
 
     // Integer size related member variables
     int N_;                // Dimension of the problem
@@ -71,6 +72,7 @@ template <typename T>
 
     // Templated pointers to Eigen storage
     TMat * A_;                // Pointer to full matrix to be diagonalized
+    TMat * diag_;             // Pointer to diagonal storage
     TMat * solutionVector_;   // Solution vectors at current iteration 
     TVec * solutionValues_;   // Solution values (eigen) at current iteration 
     std::unique_ptr<TMat> guess_;   // Guess vectors (always local copy)
@@ -137,6 +139,7 @@ template <typename T>
       this->cleanupMem_       = false; // Assume that the space for results was allocated elsewhere
       this->isConverged_      = false; // Obviously the calculation doesn't begin converged...
       this->genGuess_         = true;  // Defualt generate identity guess
+      this->doRestart_        = false; // class global variable to determine if a restart is needed
     }
     inline void initSize(){
       // Zero out all of the size dependent quantities
@@ -148,6 +151,7 @@ template <typename T>
     inline void initPtr(){
       // Initialize all pointers to some varient of NULL
       this->A_                = NULL;
+      this->diag_             = NULL;
       this->solutionVector_   = NULL;
       this->solutionValues_   = NULL;
       this->guess_            = nullptr;
@@ -341,6 +345,7 @@ template <typename T>
     void genResGuess();
     std::vector<bool> checkConv(const int, int &,ostream &output=cout);
     void formNewGuess(std::vector<bool> &,int&,int,int&,int&);
+    void formResidualGuess(double,const RealCMMap &, RealCMMap &, const RealCMMap &, RealCMMap &);
   public:
     /** Destructor
      *  
@@ -381,6 +386,7 @@ template <typename T>
       this->nGuess_           = SDR->nGuess();
       this->solutionValues_   = SDR->omega();
       this->solutionVector_   = SDR->transDen();
+      this->diag_             = SDR->rmDiag();
       this->symmetrizedTrial_ = (SDR->iMeth() == SDResponse::RPA);
       this->doGEP_            = (SDR->iMeth() == SDResponse::RPA);
       this->genGuess_         = (this->nGuess_ == 0);

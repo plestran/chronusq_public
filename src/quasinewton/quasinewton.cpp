@@ -108,21 +108,54 @@ namespace ChronusQ {
 
     } 
   } // redDiag
-  /** Form New Perturbed Guess **/
+  /** Form Residual Based Guess **/
+  template<>
+  void QuasiNewton<double>::formResidualGuess(double Omega, 
+                                     const RealCMMap & ResR, RealCMMap & QR, 
+                                     const RealCMMap & ResL, RealCMMap & QL){
+    if(this->symmetrizedTrial_) {
+      for(auto i = 0; i < this->N_; i++){
+        QR(i) = ResR(i) * (*this->diag_)(i,0);
+        QL(i) = ResL(i) * (*this->diag_)(i,0);
+      }
+      for(auto i = 0; i < this->N_/2; i++){
+        QR(i) += Omega*ResL(i);
+        QR(this->N_/2 + i) -= Omega*ResL(this->N_/2 + i);
+        QL(i) += Omega*ResR(i);
+        QL(this->N_/2 + i) -= Omega*ResR(this->N_/2 + i);
+      }
+      for(auto i = 0; i < this->N_; i++){
+        QR(i) = QR(i) / (std::pow((*this->diag_)(i,0),2.0)-std::pow(Omega,2.0));
+        QL(i) = QL(i) / (std::pow((*this->diag_)(i,0),2.0)-std::pow(Omega,2.0));
+      }
+    } else {
+      for(auto i = 0; i < this->N_; i++)
+        QR(i) = -ResR(i) / ((*this->diag_)(i,0) - Omega);
+    }
+  }
+    /** Form New Perturbed Guess **/
   template<>
   void QuasiNewton<double>::formNewGuess(std::vector<bool> &resConv,int &NTrial, 
                                     int NNotConv, int &NOld, int &NNew){
-  
-    RealCMMap TrialVecR(this->TVecRMem,this->N_,NTrial+NNotConv);
-    RealCMMap ResR     (this->ResRMem, this->N_,NTrial         );
+    int ILen = this->nGuess_ - NNotConv;
 
-    // Initialze so they stay in scope
+    RealCMMap TrialVecR(this->TVecRMem,0,0);
     RealCMMap TrialVecL(this->TVecLMem,0,0);
-    RealCMMap ResL     (this->ResLMem,0,0);
-    if(this->symmetrizedTrial_ || !this->isHermetian_){
+    RealCMMap ResR     (this->ResRMem, 0,0);
+    RealCMMap ResL     (this->ResLMem, 0,0);
+    RealCMMap QR       (this->TVecRMem,0,0);
+    RealCMMap RR       (this->ResRMem ,0,0);
+    RealCMMap QL       (this->TVecLMem,0,0);
+    RealCMMap RL       (this->ResLMem ,0,0);
+
+    new (&ResR) RealCMMap(this->ResRMem,this->N_,NTrial);
+    if(this->symmetrizedTrial_ || !this->isHermetian_)
+      new (&ResL) RealCMMap(this->ResLMem,this->N_,NTrial);
+
+    new (&TrialVecR) RealCMMap(this->TVecRMem,this->N_,NTrial+NNotConv);
+    if(this->symmetrizedTrial_ || !this->isHermetian_)
       new (&TrialVecL) RealCMMap(this->TVecLMem,this->N_,NTrial+NNotConv);
-      new (&ResL     ) RealCMMap(this->ResLMem, this->N_,NTrial         );
-    }
+
     RealVecMap ER(this->ERMem,NTrial);
     int INDX = 0;
     for(auto k = 0; k < this->nSek_; k++) {
@@ -134,24 +167,13 @@ namespace ChronusQ {
       //             matricies. Convergence will be slow (maybe infinitely)
       //             if this criteria is not met.
       if(!resConv[k]) {
-        if(this->sdr_ != NULL) {
-          if(this->sdr_->iMeth() == SDResponse::CIS || 
-             this->sdr_->iMeth() == SDResponse::RPA){
-            RealCMMap QR(this->TVecRMem+(NTrial+INDX)*this->N_,this->N_,1);
-            RealCMMap RR(this->ResRMem + k*this->N_,           this->N_,1);
-            RealCMMap QL(this->TVecLMem                       ,0,0       );
-            RealCMMap RL(this->ResLMem                        ,0,0       );
-            if(this->sdr_->iMeth() == SDResponse::RPA){
-              new (&QL) RealCMMap(this->TVecLMem+(NTrial+INDX)*this->N_,this->N_,1);
-              new (&RL) RealCMMap(this->ResLMem + k*this->N_,this->N_,1);
-            }
-            this->sdr_->formPerturbedGuess(ER(k),RR,QR,RL,QL);
-          }
-        } else {
-          for(auto i = 0; i < this->N_; i++) {
-            TrialVecR(i,NTrial+INDX) = -ResR.col(k)(i)/((*this->A_)(i,i)-ER(k));
-          }
+        new (&QR) RealCMMap(this->TVecRMem+(NTrial+INDX)*this->N_,this->N_,1);
+        new (&RR) RealCMMap(this->ResRMem + k*this->N_,           this->N_,1);
+        if(this->symmetrizedTrial_){
+          new (&QL) RealCMMap(this->TVecLMem+(NTrial+INDX)*this->N_,this->N_,1);
+          new (&RL) RealCMMap(this->ResLMem + k*this->N_,this->N_,1);
         }
+        this->formResidualGuess(ER(k),RR,QR,RL,QL);
         INDX++;
       }
     }
@@ -174,7 +196,6 @@ namespace ChronusQ {
     NOld = NTrial;
     NNew = NNotConv;
     NTrial += NNew;
-    if(NTrial > this->maxSubSpace_) CErr(); 
   }
   /** Run Micro Iteration **/
   template<>
@@ -230,6 +251,7 @@ namespace ChronusQ {
       // If NSek (lowest) residuals are converged, exit, else, create
       // perturbed guess vectors for next iteration
       this->isConverged_ = (NNotConv == 0);
+      this->doRestart_   = (NTrial+NNotConv > this->maxSubSpace_);
       if(this->isConverged_) {
         finish = std::chrono::high_resolution_clock::now();
         elapsed = finish - start;
@@ -237,7 +259,10 @@ namespace ChronusQ {
                << elapsed.count() << " secs" << endl << endl;
         break;
       }
+      if(this->doRestart_) CErr("QuasiNewton tried to extend the subspace");
       this->formNewGuess(resConv,NTrial,NNotConv,NOld,NNew);
+      if(this->doRestart_) break;
+
       finish = std::chrono::high_resolution_clock::now();
       elapsed = finish - start;
       output << "Quasi-Newton Micro Iteration took " << std::fixed 

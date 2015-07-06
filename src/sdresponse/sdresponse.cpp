@@ -1040,7 +1040,7 @@ void SDResponse::checkValid(){
          std::to_string(this->iMeth_),this->fileio_->out);
 }
 void SDResponse::getDiag(){
-  this->rmDiag_ = std::unique_ptr<RealMatrix>(new RealMatrix(nSingleDim_,1)); 
+  this->rmDiag_ = std::unique_ptr<RealCMMatrix>(new RealCMMatrix(nSingleDim_,1)); 
 
   for(auto aAlpha = 0; aAlpha < this->nVA_; aAlpha++)
   for(auto iAlpha = 0; iAlpha < this->nOA_; iAlpha++){

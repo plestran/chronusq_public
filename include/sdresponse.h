@@ -77,7 +77,7 @@ class SDResponse {
 
 //dbwys
   std::unique_ptr<RealMatrix> tMO_;
-  std::unique_ptr<RealMatrix> rmDiag_;
+  std::unique_ptr<RealCMMatrix> rmDiag_;
   std::unique_ptr<RealMatrix>  davGuess_;
 //dbwye
 //
@@ -125,7 +125,7 @@ public:
   void formRM3(RealCMMap &, RealCMMap &, RealCMMap &Rho);
   void checkValid();
   void getDiag();
-  inline RealMatrix * rmDiag(){return this->rmDiag_.get();};
+  inline RealCMMatrix * rmDiag(){return this->rmDiag_.get();};
   inline RealMatrix * davGuess(){return this->davGuess_.get();};
   void formAOTDen(const RealVecMap &, RealMatrix &, RealMatrix &);
   void formMOTDen(RealVecMap &, const RealMatrix &, const RealMatrix &);
