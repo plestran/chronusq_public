@@ -84,6 +84,7 @@ public:
   bool	haveCoulomb;
   bool	haveExchange;
   bool  havePT;
+  bool  doCUHF;
 
   double   energyOneE;
   double   energyTwoE;
