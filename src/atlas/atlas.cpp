@@ -81,7 +81,10 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   aointegrals->printTimings();
   hartreeFock->computeEnergy();
   std::shared_ptr<MOIntegrals> moIntegrals = std::make_shared<MOIntegrals>();
-  if(controls->optWaveFunction) hartreeFock->SCF();
+  if(controls->optWaveFunction) {
+    hartreeFock->doCUHF = true;
+    hartreeFock->SCF();
+  }
   //MOIntegrals *moIntegrals = new MOIntegrals();
   //moIntegrals->iniMOIntegrals(molecule,basisset,fileIO,controls,aointegrals,hartreeFock);
   else fileIO->out << "**Skipping SCF Optimization**" << endl; 
