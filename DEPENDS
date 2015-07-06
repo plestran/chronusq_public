@@ -1,0 +1,27 @@
+This file contains information pertaining to the dependencies
+of ChronusQ on other open-source software.
+
+
+C++11 is required for all of the dependencies. The developers
+have tested with the following compilers:
+
+ GCC 4.8+
+
+
+
+
+Below are the current dependencies of ChronusQ:
+
+
+Molecular integrals over Gaussians:     Libint [1]
+Threaded and Vectorized Linear Algebra: Eigen  [2]
+Multi-Linear Algebra:                   BTAS   [3]
+
+[1] Edward F. Valeev; Libint: machine-generated library for efficient evaluation
+      of molecular integrals over Gaussians, version 2.1.0;
+      https://github.com/evaleev/libint/; 2015.
+
+[2] Gaël Guenebaud and Benoît Jacob and others; Eigen v3;
+      http://eigen.tuxfamily.org; 2010.
+
+[3] http://itensor.org/btas
