@@ -137,7 +137,9 @@ namespace ChronusQ {
   template<>
   void QuasiNewton<double>::formNewGuess(std::vector<bool> &resConv,int &NTrial, 
                                     int NNotConv, int &NOld, int &NNew){
-    int ILen = this->nGuess_ - NNotConv;
+    int ILen;
+    if(this->doRestart_) ILen = this->nGuess_ - NNotConv;
+    else                 ILen = NTrial;
 
     RealCMMap TrialVecR(this->TVecRMem,0,0);
     RealCMMap TrialVecL(this->TVecLMem,0,0);
@@ -152,9 +154,24 @@ namespace ChronusQ {
     if(this->symmetrizedTrial_ || !this->isHermetian_)
       new (&ResL) RealCMMap(this->ResLMem,this->N_,NTrial);
 
-    new (&TrialVecR) RealCMMap(this->TVecRMem,this->N_,NTrial+NNotConv);
-    if(this->symmetrizedTrial_ || !this->isHermetian_)
-      new (&TrialVecL) RealCMMap(this->TVecLMem,this->N_,NTrial+NNotConv);
+    if(this->doRestart_){ 
+      new (&TrialVecR) RealCMMap(this->TVecRMem,this->N_,NTrial);
+      if(this->symmetrizedTrial_ || !this->isHermetian_)
+        new (&TrialVecL) RealCMMap(this->TVecLMem,this->N_,NTrial);
+    } else {
+      new (&TrialVecR) RealCMMap(this->TVecRMem,this->N_,NTrial+NNotConv);
+      if(this->symmetrizedTrial_ || !this->isHermetian_)
+        new (&TrialVecL) RealCMMap(this->TVecLMem,this->N_,NTrial+NNotConv);
+    }
+
+    if(this->doRestart_){
+      this->allocGuess();
+      this->guessR_->block(0,0,this->N_,ILen) = 
+        TrialVecR.block(0,NTrial-ILen-1,this->N_,ILen);
+      if(this->symmetrizedTrial_ || !this->isHermetian_)
+        this->guessL_->block(0,0,this->N_,ILen) = 
+          TrialVecL.block(0,NTrial-ILen-1,this->N_,ILen);
+    }
 
     RealVecMap ER(this->ERMem,NTrial);
     int INDX = 0;
@@ -167,35 +184,57 @@ namespace ChronusQ {
       //             matricies. Convergence will be slow (maybe infinitely)
       //             if this criteria is not met.
       if(!resConv[k]) {
-        new (&QR) RealCMMap(this->TVecRMem+(NTrial+INDX)*this->N_,this->N_,1);
-        new (&RR) RealCMMap(this->ResRMem + k*this->N_,           this->N_,1);
-        if(this->symmetrizedTrial_){
-          new (&QL) RealCMMap(this->TVecLMem+(NTrial+INDX)*this->N_,this->N_,1);
+        new (&RR) RealCMMap(this->ResRMem + k*this->N_,this->N_,1);
+        if(this->symmetrizedTrial_)
           new (&RL) RealCMMap(this->ResLMem + k*this->N_,this->N_,1);
+         
+        if(this->doRestart_){
+          new (&QR) RealCMMap(this->guessR_->data()+(ILen+INDX)*this->N_,this->N_,1);
+          if(this->symmetrizedTrial_)
+            new (&QL) RealCMMap(this->guessL_->data()+(ILen+INDX)*this->N_,this->N_,1);
+        } else {
+          new (&QR) RealCMMap(this->TVecRMem+(ILen+INDX)*this->N_,this->N_,1);
+          if(this->symmetrizedTrial_)
+            new (&QL) RealCMMap(this->TVecLMem+(ILen+INDX)*this->N_,this->N_,1);
         }
+        
         this->formResidualGuess(ER(k),RR,QR,RL,QL);
         INDX++;
       }
     }
     // Normalize and orthogonalize the new guess vectors to the
     // existing set using QR factorization
-    int N = TrialVecR.cols();
-    int M = TrialVecR.rows();
-    int LDA = TrialVecR.rows();
-    int INFO;
+    int N,M,LDA,INFO;
+    double * AMATR, * AMATL;
+    if(this->doRestart_){
+      N = this->guessR_->cols();
+      M = this->guessR_->rows();
+      LDA = this->guessR_->rows();
+      AMATR = this->guessR_->data();
+      if(this->symmetrizedTrial_ || !this->isHermetian_) AMATL = this->guessL_->data();
+      
+    } else {
+      N = TrialVecR.cols();
+      M = TrialVecR.rows();
+      LDA = TrialVecR.rows();
+      AMATR = TrialVecR.data();
+      if(this->symmetrizedTrial_ || !this->isHermetian_) AMATL = TrialVecL.data();
+    }
     double *TAU = this->LAPACK_SCR;
     this->WORK = TAU + N;
   
-    dgeqrf_(&M,&N,TrialVecR.data(),&LDA,TAU,this->WORK,&this->LWORK,&INFO);
-    dorgqr_(&M,&N,&N,TrialVecR.data(),&LDA,TAU,this->WORK,&this->LWORK,&INFO);
+    dgeqrf_(&M,&N,AMATR,&LDA,TAU,this->WORK,&this->LWORK,&INFO);
+    dorgqr_(&M,&N,&N,AMATR,&LDA,TAU,this->WORK,&this->LWORK,&INFO);
     if(this->symmetrizedTrial_ || !this->isHermetian_){
-      dgeqrf_(&M,&N,TrialVecL.data(),&LDA,TAU,this->WORK,&this->LWORK,&INFO);
-      dorgqr_(&M,&N,&N,TrialVecL.data(),&LDA,TAU,this->WORK,&this->LWORK,&INFO);
+      dgeqrf_(&M,&N,AMATL,&LDA,TAU,this->WORK,&this->LWORK,&INFO);
+      dorgqr_(&M,&N,&N,AMATL,&LDA,TAU,this->WORK,&this->LWORK,&INFO);
     }
     // Update number of vectors
-    NOld = NTrial;
-    NNew = NNotConv;
-    NTrial += NNew;
+    if(!this->doRestart_){
+      NOld = NTrial;
+      NNew = NNotConv;
+      NTrial += NNew;
+    }
   }
   /** Run Micro Iteration **/
   template<>
@@ -213,9 +252,10 @@ namespace ChronusQ {
     }
 
     // Symmetrize the trial vectors viz Kauczor et al. JCTC 7 (2010)
+    TrialVecR = (*this->guessR_);
     if(this->symmetrizedTrial_){
-      TrialVecR = (*this->guess_);
-      TrialVecL = (*this->guess_);
+      if(this->doRestart_) TrialVecL = (*this->guessL_);
+      else                 TrialVecL = (*this->guessR_);
       TrialVecR.block(this->N_/2,0,this->N_/2,this->nGuess_)
         = TrialVecR.block(0,0,this->N_/2,this->nGuess_);
       TrialVecL.block(this->N_/2,0,this->N_/2,this->nGuess_)
@@ -223,10 +263,10 @@ namespace ChronusQ {
       // Normalize
       TrialVecR *= std::sqrt(0.5);
       TrialVecL *= std::sqrt(0.5);
-  
-    } else {
-      TrialVecR = (*this->guess_);
     }
+    this->guessR_.reset();
+    if(this->doRestart_) this->guessL_.reset();
+
     for(auto iter = 0; iter < this->maxIter_; iter++){
       std::chrono::high_resolution_clock::time_point start,finish;
       std::chrono::duration<double> elapsed;
@@ -259,7 +299,7 @@ namespace ChronusQ {
                << elapsed.count() << " secs" << endl << endl;
         break;
       }
-      if(this->doRestart_) CErr("QuasiNewton tried to extend the subspace");
+//    if(this->doRestart_) CErr("QuasiNewton tried to extend the subspace");
       this->formNewGuess(resConv,NTrial,NNotConv,NOld,NNew);
       if(this->doRestart_) break;
 

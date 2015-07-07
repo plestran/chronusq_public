@@ -75,7 +75,8 @@ template <typename T>
     TMat * diag_;             // Pointer to diagonal storage
     TMat * solutionVector_;   // Solution vectors at current iteration 
     TVec * solutionValues_;   // Solution values (eigen) at current iteration 
-    std::unique_ptr<TMat> guess_;   // Guess vectors (always local copy)
+    std::unique_ptr<TMat> guessR_;   // Guess vectors (always local copy)
+    std::unique_ptr<TMat> guessL_;   // Guess vectors (always local copy)
 
     SDResponse * sdr_; // Pointer to SDResponse object
     /** Scratch Variables **/
@@ -154,7 +155,8 @@ template <typename T>
       this->diag_             = NULL;
       this->solutionVector_   = NULL;
       this->solutionValues_   = NULL;
-      this->guess_            = nullptr;
+      this->guessR_           = nullptr;
+      this->guessL_           = nullptr;
       this->sdr_              = NULL;
      
       this->SCR         = NULL; 
@@ -284,12 +286,15 @@ template <typename T>
     }
     inline void allocGuess(){ 
       // Allocate space for local copy of the guess vectors
-      this->guess_ = std::unique_ptr<TMat>(new TMat(this->N_,this->nGuess_));
+      this->guessR_ = std::unique_ptr<TMat>(new TMat(this->N_,this->nGuess_));
+      if(this->doRestart_)
+        this->guessL_ = std::unique_ptr<TMat>(new TMat(this->N_,this->nGuess_));
       if(this->genGuess_) this->identGuess();
     };
     inline void identGuess(){
       // Generate the identity (standard) guess
-      (*this->guess_) = TMat::Identity(this->N_,this->nGuess_);
+      (*this->guessR_) = TMat::Identity(this->N_,this->nGuess_);
+      this->genGuess_ = false; // So we dont generate the guess on restart
     };
   inline void allocScr(){
     // Allocate scratch space
@@ -396,7 +401,7 @@ template <typename T>
       if(this->genGuess_) this->nGuess_ = this->stdNGuess();
       this->checkValid(SDR->fileio()->out);
       this->allocGuess();
-      if(!this->genGuess_) *this->guess_ = *SDR->davGuess();
+      if(!this->genGuess_) *this->guessR_ = *SDR->davGuess();
       this->allocScr();
     };
     /** Public inline functions **/
@@ -442,7 +447,10 @@ template <typename T>
     output << "Quasi-Newton Calculation Started: " << ctime(&currentTime) << endl;
     this->printInfo(output);
     start = std::chrono::high_resolution_clock::now();
-    this->runMicro(output);
+    for(auto iter = 0; iter < this->MaxIter_; iter++){
+      this->runMicro(output);
+      if(this->isConverged_) break;
+    }
     finish = std::chrono::high_resolution_clock::now();
     elapsed = finish - start;
     time(&currentTime);
