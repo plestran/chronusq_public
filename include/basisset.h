@@ -1,5 +1,5 @@
-/*
- *  Chronus Quantum (ChronusQ) software package is high-performace 
+/* 
+ *  The Chronus Quantum (ChronusQ) software package is high-performace 
  *  computational chemistry software with a strong emphasis on explicitly 
  *  time-dependent and post-SCF quantum mechanical methods.
  *  
