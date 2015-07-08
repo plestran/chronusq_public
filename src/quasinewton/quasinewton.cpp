@@ -256,13 +256,15 @@ namespace ChronusQ {
     if(this->symmetrizedTrial_){
       if(this->doRestart_) TrialVecL = (*this->guessL_);
       else                 TrialVecL = (*this->guessR_);
-      TrialVecR.block(this->N_/2,0,this->N_/2,this->nGuess_)
-        = TrialVecR.block(0,0,this->N_/2,this->nGuess_);
-      TrialVecL.block(this->N_/2,0,this->N_/2,this->nGuess_)
-        = -TrialVecL.block(0,0,this->N_/2,this->nGuess_);
-      // Normalize
-      TrialVecR *= std::sqrt(0.5);
-      TrialVecL *= std::sqrt(0.5);
+      if(!this->doRestart_){
+        TrialVecR.block(this->N_/2,0,this->N_/2,this->nGuess_)
+          = TrialVecR.block(0,0,this->N_/2,this->nGuess_);
+        TrialVecL.block(this->N_/2,0,this->N_/2,this->nGuess_)
+          = -TrialVecL.block(0,0,this->N_/2,this->nGuess_);
+        // Normalize
+        TrialVecR *= std::sqrt(0.5);
+        TrialVecL *= std::sqrt(0.5);
+      }
     }
     this->guessR_.reset();
     if(this->doRestart_) this->guessL_.reset();
@@ -300,8 +302,38 @@ namespace ChronusQ {
         break;
       }
 //    if(this->doRestart_) CErr("QuasiNewton tried to extend the subspace");
+      if(this->doRestart_) {
+        this->allocGuess();
+        RealCMMap UR(this->URMem,this->N_,this->nGuess_);
+        (*this->guessR_) = UR;
+        if(this->symmetrizedTrial_){
+          RealCMMap UL(this->ULMem,this->N_,this->nGuess_);
+          (*this->guessL_) = UL;
+        } 
+        std::memset(this->SCR,0.0,this->LenScr*sizeof(double));
+        cout << (this->guessR_->adjoint())*(*this->guessR_)<< endl;
+        int N = this->guessR_->cols();
+        int M = this->guessR_->rows();
+        int LDA = this->guessR_->rows();
+        int INFO;
+        double *AMATR = this->guessR_->data();
+        double *AMATL;
+        if(this->symmetrizedTrial_ || !this->isHermetian_) AMATL = this->guessL_->data();
+        double *TAU = this->LAPACK_SCR;
+        this->WORK = TAU + N;
+    
+        dgeqrf_(&M,&N,AMATR,&LDA,TAU,this->WORK,&this->LWORK,&INFO);
+        dorgqr_(&M,&N,&N,AMATR,&LDA,TAU,this->WORK,&this->LWORK,&INFO);
+        if(this->symmetrizedTrial_ || !this->isHermetian_){
+          dgeqrf_(&M,&N,AMATL,&LDA,TAU,this->WORK,&this->LWORK,&INFO);
+          dorgqr_(&M,&N,&N,AMATL,&LDA,TAU,this->WORK,&this->LWORK,&INFO);
+        }
+        cout << (this->guessR_->adjoint())*(*this->guessR_)<< endl;
+//      CErr();
+//      this->doRestart_ = false;
+        break;
+      }
       this->formNewGuess(resConv,NTrial,NNotConv,NOld,NNew);
-      if(this->doRestart_) break;
 
       finish = std::chrono::high_resolution_clock::now();
       elapsed = finish - start;
