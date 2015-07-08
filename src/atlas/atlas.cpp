@@ -82,7 +82,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   hartreeFock->computeEnergy();
   std::shared_ptr<MOIntegrals> moIntegrals = std::make_shared<MOIntegrals>();
   if(controls->optWaveFunction) {
-    hartreeFock->doCUHF = true;
+    hartreeFock->doCUHF = false;
     hartreeFock->SCF();
   }
   //MOIntegrals *moIntegrals = new MOIntegrals();
