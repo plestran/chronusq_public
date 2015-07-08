@@ -199,6 +199,39 @@ namespace ChronusQ {
     NNew = NNotConv;
     NTrial += NNew;
   }
+  template<>
+  void QuasiNewton<double>::setupRestart(){
+    this->allocGuess();
+    RealCMMap UR(this->URMem,this->N_,this->nGuess_);
+    (*this->guessR_) = UR;
+    if(this->symmetrizedTrial_){
+      RealCMMap UL(this->ULMem,this->N_,this->nGuess_);
+      (*this->guessL_) = UL;
+    } 
+    // Zero out scratch space
+    std::memset(this->SCR,0.0,this->LenScr*sizeof(double));
+
+    // Ensure that the the new guess vectors are orthonormal
+    int N = this->guessR_->cols();
+    int M = this->guessR_->rows();
+    int LDA = this->guessR_->rows();
+    int INFO;
+    double *AMATR = this->guessR_->data();
+    double *AMATL;
+    if(this->symmetrizedTrial_ || !this->isHermetian_) AMATL = this->guessL_->data();
+    double *TAU = this->LAPACK_SCR;
+    this->WORK = TAU + N;
+    
+    dgeqrf_(&M,&N,AMATR,&LDA,TAU,this->WORK,&this->LWORK,&INFO);
+    dorgqr_(&M,&N,&N,AMATR,&LDA,TAU,this->WORK,&this->LWORK,&INFO);
+    if(this->symmetrizedTrial_ || !this->isHermetian_){
+      dgeqrf_(&M,&N,AMATL,&LDA,TAU,this->WORK,&this->LWORK,&INFO);
+      dorgqr_(&M,&N,&N,AMATL,&LDA,TAU,this->WORK,&this->LWORK,&INFO);
+    }
+
+    /** DO NOT RESET doRestart_ here! next iteration needs to know that we
+        restarted **/
+  } // setupRestart
   /** Run Micro Iteration **/
   template<>
   void QuasiNewton<double>::runMicro(ostream &output){
@@ -264,34 +297,8 @@ namespace ChronusQ {
                << elapsed.count() << " secs" << endl << endl;
         break;
       }
-//    if(this->doRestart_) CErr("QuasiNewton tried to extend the subspace");
       if(this->doRestart_) {
-        this->allocGuess();
-        RealCMMap UR(this->URMem,this->N_,this->nGuess_);
-        (*this->guessR_) = UR;
-        if(this->symmetrizedTrial_){
-          RealCMMap UL(this->ULMem,this->N_,this->nGuess_);
-          (*this->guessL_) = UL;
-        } 
-        std::memset(this->SCR,0.0,this->LenScr*sizeof(double));
-        int N = this->guessR_->cols();
-        int M = this->guessR_->rows();
-        int LDA = this->guessR_->rows();
-        int INFO;
-        double *AMATR = this->guessR_->data();
-        double *AMATL;
-        if(this->symmetrizedTrial_ || !this->isHermetian_) AMATL = this->guessL_->data();
-        double *TAU = this->LAPACK_SCR;
-        this->WORK = TAU + N;
-    
-        dgeqrf_(&M,&N,AMATR,&LDA,TAU,this->WORK,&this->LWORK,&INFO);
-        dorgqr_(&M,&N,&N,AMATR,&LDA,TAU,this->WORK,&this->LWORK,&INFO);
-        if(this->symmetrizedTrial_ || !this->isHermetian_){
-          dgeqrf_(&M,&N,AMATL,&LDA,TAU,this->WORK,&this->LWORK,&INFO);
-          dorgqr_(&M,&N,&N,AMATL,&LDA,TAU,this->WORK,&this->LWORK,&INFO);
-        }
-//      CErr();
-//      this->doRestart_ = false;
+        this->setupRestart();
         break;
       }
       this->formNewGuess(resConv,NTrial,NNotConv,NOld,NNew);

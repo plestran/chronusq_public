@@ -351,6 +351,7 @@ template <typename T>
     std::vector<bool> checkConv(const int, int &,ostream &output=cout);
     void formNewGuess(std::vector<bool> &,int&,int,int&,int&);
     void formResidualGuess(double,const RealCMMap &, RealCMMap &, const RealCMMap &, RealCMMap &);
+    void setupRestart();
   public:
     /** Destructor
      *  
