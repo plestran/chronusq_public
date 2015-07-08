@@ -24,7 +24,7 @@
  *  
  */
 #include <sdresponse.h>
-#include <davidson.h>
+#include <quasinewton.h>
 using ChronusQ::Molecule;
 using ChronusQ::BasisSet;
 using ChronusQ::Controls;
@@ -32,7 +32,7 @@ using ChronusQ::FileIO;
 using ChronusQ::MOIntegrals;
 using ChronusQ::SDResponse;
 using ChronusQ::SingleSlater;
-using ChronusQ::Davidson; 
+using ChronusQ::QuasiNewton; 
 using std::cout;
 using std::setw;
 //------------------------------//
@@ -550,7 +550,7 @@ void SDResponse::formRM(){
   cout << sigMOA -  TD.eigenvalues()(0).real()*rhoMOA<< endl;
 }
 
-void SDResponse::DavidsonCIS(){
+void SDResponse::IterativeRPA(){
 /*
   int nOVA = this->singleSlater_->nOVA();
   int nOVB = this->singleSlater_->nOVB();
@@ -566,8 +566,9 @@ void SDResponse::DavidsonCIS(){
 //CErr();
 */
   this->formGuess();
-  Davidson<double> davA(this);
+  QuasiNewton<double> davA(this);
   davA.run(this->fileio_->out);
+//davA.run(this->fileio_->out);
 //this->fileio_->out << "The lowest " << this->nSek_ << " eigenstates solved by Davidson Algorithm:" <<endl;
   this->formTransDipole();
   this->formOscStrength();
@@ -977,7 +978,7 @@ void SDResponse::formGuess(){
       new RealMatrix(this->nSingleDim_,this->nGuess_)
     ); 
   int nRHF = 1;
-  if(this->RHF_) nRHF = 2;
+//if(this->RHF_) nRHF = 2;
   if(this->iMeth_==RPA) nRHF *= 2;
   RealMatrix dagCpy(this->nSingleDim_/nRHF,1);
   std::memcpy(dagCpy.data(),this->rmDiag_->data(),dagCpy.size()*sizeof(double));
@@ -987,7 +988,8 @@ void SDResponse::formGuess(){
     int indx;
     for(auto k = 0; k < dagCpy.size(); k++){
       auto it = std::find(alreadyAdded.begin(),alreadyAdded.end(),k);
-      if((dagCpy(i,0) == (*this->rmDiag_)(k,0)) && it == alreadyAdded.end()){
+      if((dagCpy(i % (this->nSingleDim_/nRHF),0) == (*this->rmDiag_)(k,0)) && 
+          it == alreadyAdded.end()){
         indx = k;
         alreadyAdded.push_back(indx);
         break;
@@ -1034,7 +1036,7 @@ void SDResponse::checkValid(){
          std::to_string(this->iMeth_),this->fileio_->out);
 }
 void SDResponse::getDiag(){
-  this->rmDiag_ = std::unique_ptr<RealMatrix>(new RealMatrix(nSingleDim_,1)); 
+  this->rmDiag_ = std::unique_ptr<RealCMMatrix>(new RealCMMatrix(nSingleDim_,1)); 
 
   for(auto aAlpha = 0; aAlpha < this->nVA_; aAlpha++)
   for(auto iAlpha = 0; iAlpha < this->nOA_; iAlpha++){
@@ -1139,6 +1141,7 @@ void SDResponse::formOscStrength(){
 
 void SDResponse::printPrinciple(int iSt){
   this->fileio_->out << "  Principle Transitions   ( tol = 0.1 )" << endl;
+/*
   for(auto ia = 0; ia < this->nOAVA_; ia++){
     auto xIA = ia; auto yIA = ia + this->nSingleDim_/2;
     if(std::abs((*this->transDen_)(xIA,iSt)) > 0.1)
@@ -1172,6 +1175,58 @@ void SDResponse::printPrinciple(int iSt){
                            << (ia / this->nOA_) + this->nOA_ + 1 << "B    "
                            << std::fixed << std::setw(10) << std::right << (*this->transDen_)(yIA,iSt)
                            << endl;
+    }
+  }
+*/
+  double printTol = 0.1;
+  for(auto ia = 0; ia < this->nOAVA_; ia++){
+    auto xIA_Alpha = ia; auto yIA_Alpha = ia + this->nSingleDim_/2;
+
+    auto alphaOccOrb = (xIA_Alpha % this->nOA_) + 1;
+    auto alphaVirOrb = (xIA_Alpha / this->nOA_) + this->nOA_ + 1;
+
+    double absXIA_Alpha, absYIA_Alpha;
+
+    absXIA_Alpha = std::abs((*this->transDen_)(xIA_Alpha,iSt));
+    if(this->iMeth_ == RPA)
+      absYIA_Alpha = std::abs((*this->transDen_)(yIA_Alpha,iSt));
+
+    if(absXIA_Alpha > printTol)
+        this->fileio_->out << "    "
+                           << alphaOccOrb << "A -> " << alphaVirOrb << "A   "
+                           << std::fixed << std::setw(10) << std::right <<
+                           (*this->transDen_)(xIA_Alpha,iSt) << endl;
+    if(this->iMeth_ == RPA){
+      if(absYIA_Alpha > printTol)
+          this->fileio_->out << "    "
+                             << alphaOccOrb << "A <- " << alphaVirOrb << "A   "
+                             << std::fixed << std::setw(10) << std::right <<
+                             (*this->transDen_)(yIA_Alpha,iSt) << endl;
+    }
+  }
+  for(auto ia = this->nOAVA_; ia < this->nOAVA_ + this->nOBVB_; ia++){
+    auto xIA_Beta = ia; auto yIA_Beta = ia + this->nSingleDim_/2;
+
+    auto betaOccOrb = ((xIA_Beta - this->nOAVA_) % this->nOB_) + 1;
+    auto betaVirOrb = ((xIA_Beta - this->nOAVA_) / this->nOB_) + this->nOB_ + 1;
+
+    double absXIA_Beta, absYIA_Beta;
+
+    absXIA_Beta = std::abs((*this->transDen_)(xIA_Beta,iSt));
+    if(this->iMeth_ == RPA)
+      absYIA_Beta = std::abs((*this->transDen_)(yIA_Beta,iSt));
+
+    if(absXIA_Beta > printTol)
+        this->fileio_->out << "    "
+                           << betaOccOrb << "B -> " << betaVirOrb << "B   "
+                           << std::fixed << std::setw(10) << std::right <<
+                           (*this->transDen_)(xIA_Beta,iSt) << endl;
+    if(this->iMeth_ == RPA){
+      if(absYIA_Beta > printTol)
+          this->fileio_->out << "    "
+                             << betaOccOrb << "B <- " << betaVirOrb << "B   "
+                             << std::fixed << std::setw(10) << std::right <<
+                             (*this->transDen_)(yIA_Beta,iSt) << endl;
     }
   }
   this->fileio_->out << bannerMid << endl << endl;

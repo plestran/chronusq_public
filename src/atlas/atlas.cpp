@@ -24,7 +24,6 @@
  *  
  */
 #include <workers.h>
-#include <davidson.h>
 using namespace ChronusQ;
 
 int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
@@ -87,7 +86,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   if(controls->doSDR) {
     sdResponse->iniSDResponse(molecule.get(),basisset.get(),moIntegrals.get(),fileIO.get(),
                               controls.get(),hartreeFock.get());
-    sdResponse->DavidsonCIS();
+    sdResponse->IterativeRPA();
   }
 
 //if(controls->doDF) aointegrals->compareRI();

@@ -24,4 +24,6 @@ void dsygv_(int*,char*,char*,int*,double*,int*,double*,int*,double*,double*,int*
 void dgeqrf_(int *, int *, double *, int *, double *, double *, int *, int *);
 void dorgqr_(int *, int *, int *, double *, int *, double *, double *, int *, int *);
 void dgesvd_(char*,char*,int*,int*,double*,int*,double*,double*,int*,double*,int*,double*,int*,int*);
+void dgetrf_(int*,int*,double*,int*,int*,int*);
+void dgetri_(int*,double*,int*,int*,double*,int*,int*);
 }
