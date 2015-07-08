@@ -81,6 +81,10 @@ void Molecule::printInfo(FileIO * fileio,Controls * controls) {
   fileio->out.fill(' ');
   fileio->out.setf(ios::right,ios::adjustfield);
   fileio->out.setf(ios::fixed,ios::floatfield);
+  fileio->out<<"\nMolecular Information:"<<endl;
+  fileio->out<<std::setw(15)<<"nAtoms ="<<std::setw(8)<<nAtoms_<<std::setw(5)<<" "
+	     <<std::setw(20)<<"Charge ="<<std::setw(8)<<charge_<<endl;
+  fileio->out<<std::setw(15)<<"nElectrons ="<<std::setw(8)<<nTotalE_<<endl;
   fileio->out<<"\nCartesian coordinates (bohr):"<<endl;
   fileio->out<<bannerTop<<endl;
   fileio->out<<std::setw(24)<<" "<<std::setw(15)<<"X"<<std::setw(15)<<"Y"<<std::setw(15)<<"Z"<<endl;
@@ -91,10 +95,6 @@ void Molecule::printInfo(FileIO * fileio,Controls * controls) {
   fileio->out<<bannerMid<<endl;
   prettyPrint(fileio->out,*this->momentOfInertia_,"Moment of Inertia Tensor (AMU-bohr\u00B2)");
   prettyPrint(fileio->out,*this->rIJ_,"Interatomic Distance Matrix (bohr)");
-  fileio->out<<"\nMolecular Information:"<<endl;
-  fileio->out<<std::setw(15)<<"nAtoms ="<<std::setw(8)<<nAtoms_<<std::setw(5)<<" "
-	     <<std::setw(20)<<"Charge ="<<std::setw(8)<<charge_<<endl;
-  fileio->out<<std::setw(15)<<"nElectrons ="<<std::setw(8)<<nTotalE_<<endl;
 };
 /*
 //--------------------------------//

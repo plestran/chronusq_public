@@ -77,7 +77,7 @@ class SDResponse {
 
 //dbwys
   std::unique_ptr<RealMatrix> tMO_;
-  std::unique_ptr<RealMatrix> rmDiag_;
+  std::unique_ptr<RealCMMatrix> rmDiag_;
   std::unique_ptr<RealMatrix>  davGuess_;
 //dbwye
 //
@@ -109,7 +109,7 @@ public:
   void printExcitedStateEnergies(); 
   void printInfo();
   void formRM();
-  void DavidsonCIS();
+  void IterativeRPA();
 //dbwys
   inline void setNSek(int n){ this->nSek_  = n; this->nGuess_ = 2*n;};
   inline void setMeth(int n){ this->iMeth_ = n; this->initMeth();};
@@ -125,13 +125,14 @@ public:
   void formRM3(RealCMMap &, RealCMMap &, RealCMMap &Rho);
   void checkValid();
   void getDiag();
-  inline RealMatrix * rmDiag(){return this->rmDiag_.get();};
+  inline RealCMMatrix * rmDiag(){return this->rmDiag_.get();};
   inline RealMatrix * davGuess(){return this->davGuess_.get();};
   void formAOTDen(const RealVecMap &, RealMatrix &, RealMatrix &);
   void formMOTDen(RealVecMap &, const RealMatrix &, const RealMatrix &);
   void formTransDipole();
   void formOscStrength();
   void printPrinciple(int );
+  FileIO * fileio(){return this->fileio_;};
 //dbwye
   RealMatrix formRM2(RealMatrix &XMO);
   RealMatrix ReturnDiag();
