@@ -24,7 +24,6 @@
  *  
  */
 #include <workers.h>
-#include <davidson.h>
 using namespace ChronusQ;
 
 int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
