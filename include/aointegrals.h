@@ -217,6 +217,8 @@ public:
                                                          const std::vector<T> &,std::vector<T> &);
   template<typename T> void multTwoEContractDF(int, bool,bool,const std::vector<T> &,std::vector<T> &,
                                                          const std::vector<T> &,std::vector<T> &);
+  template<typename TMat,typename T> void RHFFockContract(TMat&, const TMat &, int,int,int,int,
+                                                  int,int,int,int,T*,T);
   void compareRI();
 #endif
 //----------------------------------------//

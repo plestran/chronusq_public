@@ -525,6 +525,40 @@ std::vector<std::vector<std::vector<RealMatrix>>> G(nRHF,std::vector<std::vector
   if(doFock) this->PTD = finish - start;
    
 }
+template<>
+void AOIntegrals::RHFFockContract(RealMatrix &G, const RealMatrix &X, int n1, int n2, int n3, int n4, 
+                     int bf1_s, int bf2_s, int bf3_s, int bf4_s, double* buff, double deg){
+  for(int i = 0, ijkl = 0 ; i < n1; ++i) {
+    int bf1 = bf1_s + i;
+    for(int j = 0; j < n2; ++j) {
+      int bf2 = bf2_s + j;
+      for(int k = 0; k < n3; ++k) {
+        int bf3 = bf3_s + k;
+        for(int l = 0; l < n4; ++l, ++ijkl) {
+          int bf4 = bf4_s + l;
+          double v = buff[ijkl]*deg;
+
+          // Coulomb
+          G(bf1,bf2) += X(bf4,bf3)*v;
+          G(bf3,bf4) += X(bf2,bf1)*v;
+          G(bf2,bf1) += X(bf3,bf4)*v;
+          G(bf4,bf3) += X(bf1,bf2)*v;
+
+          // Exchange
+          G(bf1,bf3) -= 0.25*X(bf2,bf4)*v;
+          G(bf2,bf4) -= 0.25*X(bf1,bf3)*v;
+          G(bf1,bf4) -= 0.25*X(bf2,bf3)*v;
+          G(bf2,bf3) -= 0.25*X(bf1,bf4)*v;
+
+          G(bf3,bf1) -= 0.25*X(bf4,bf2)*v;
+          G(bf4,bf2) -= 0.25*X(bf3,bf1)*v;
+          G(bf4,bf1) -= 0.25*X(bf3,bf2)*v;
+          G(bf3,bf2) -= 0.25*X(bf4,bf1)*v;
+        }
+      }
+    }
+  }
+}
 #endif
 
 }
