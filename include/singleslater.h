@@ -25,19 +25,24 @@
  */
 #ifndef INCLUDED_SINGLESLATER
 #define INCLUDED_SINGLESLATER
-#include "global.h"
-#include "matrix.h"
-#include "molecule.h"
-#include "controls.h"
-#include "aointegrals.h"
+#include <global.h>
+#include <cerr.h>
+#include <molecule.h>
+#include <controls.h>
+#include <aointegrals.h>
 
 /****************************/
 /* Error Messages 5000-5999 */
 /****************************/
 
 namespace ChronusQ {
+template<typename T>
 class SingleSlater {
+  typedef Eigen::Matrix<T,Dynamic,Dynamic,RowMajor> TMatrix;
   int      nBasis_;
+//APS
+  int      nShell_;
+//APE
   int      nTT_;
   int      nAE_;
   int      nBE_;
@@ -48,21 +53,29 @@ class SingleSlater {
   int      nVirB_;
   int      spin_;
   int    **R2Index_;
-  ChronusQ::Matrix<double>  *densityA_;
-  ChronusQ::Matrix<double>  *densityB_;
-  ChronusQ::Matrix<double>  *fockA_;
-  ChronusQ::Matrix<double>  *fockB_;
-  ChronusQ::Matrix<double>  *coulombA_;
-  ChronusQ::Matrix<double>  *coulombB_;
-  ChronusQ::Matrix<double>  *exchangeA_;
-  ChronusQ::Matrix<double>  *exchangeB_;
-  ChronusQ::Matrix<double>  *moA_;
-  ChronusQ::Matrix<double>  *moB_;
-  ChronusQ::BasisSet     	*basisset_;
-  ChronusQ::Molecule    	*molecule_;
-  ChronusQ::FileIO       	*fileio_;
-  ChronusQ::Controls     	*controls_;
-  ChronusQ::AOIntegrals   *aointegrals_;
+  std::unique_ptr<TMatrix>  densityA_;
+  std::unique_ptr<TMatrix>  densityB_;
+  std::unique_ptr<TMatrix>  fockA_;
+  std::unique_ptr<TMatrix>  fockB_;
+  std::unique_ptr<TMatrix>  coulombA_;
+  std::unique_ptr<TMatrix>  coulombB_;
+  std::unique_ptr<TMatrix>  exchangeA_;
+  std::unique_ptr<TMatrix>  exchangeB_;
+  std::unique_ptr<TMatrix>  moA_;
+  std::unique_ptr<TMatrix>  moB_;
+  std::unique_ptr<TMatrix>  epsA_;
+  std::unique_ptr<TMatrix>  epsB_;
+  std::unique_ptr<TMatrix>  PTA_;
+  std::unique_ptr<TMatrix>  PTB_;
+  std::unique_ptr<RealMatrix>  dipole_;
+  std::unique_ptr<RealMatrix>  quadpole_;
+  std::unique_ptr<RealMatrix>  tracelessQuadpole_;
+  std::unique_ptr<RealTensor3d>  octpole_;
+  BasisSet *    basisset_;
+  Molecule *    molecule_;
+  FileIO *      fileio_;
+  Controls *    controls_;
+  AOIntegrals * aointegrals_;
 
 public:
  
@@ -70,6 +83,8 @@ public:
   bool	haveDensity; 
   bool	haveCoulomb;
   bool	haveExchange;
+  bool  havePT;
+  bool  doCUHF;
 
   double   energyOneE;
   double   energyTwoE;
@@ -78,23 +93,12 @@ public:
 
   // constructor & destructor
   SingleSlater(){;};
-  ~SingleSlater() {
-    if(   densityA_!=NULL) delete densityA_;
-    if(      fockA_!=NULL) delete fockA_;
-    if(   coulombA_!=NULL) delete coulombA_;
-    if(  exchangeA_!=NULL) delete exchangeA_;
-    if(        moA_!=NULL) delete moA_;
-    if(!RHF_) {
-      if(      moB_!=NULL) delete moB_;
-      if(exchangeB_!=NULL) delete exchangeB_;
-      if( coulombB_!=NULL) delete coulombB_;
-      if(    fockB_!=NULL) delete fockB_;
-      if( densityB_!=NULL) delete densityB_;
-    };
-  };
-  // pseudo-constructor
-  void iniSingleSlater(ChronusQ::Molecule*,ChronusQ::BasisSet*,ChronusQ::AOIntegrals*,ChronusQ::FileIO*,ChronusQ::Controls*);
+  ~SingleSlater() {;};
 
+  template<typename U>
+  SingleSlater(SingleSlater<U> *);
+  // pseudo-constructor
+  void iniSingleSlater(Molecule *,BasisSet *,AOIntegrals *,FileIO *,Controls *);
   //set private data
   inline void setNBasis(int nBasis) { this->nBasis_ = nBasis;};
   inline void setNAE(int nAE)    { this->nAE_ = nAE;};
@@ -103,36 +107,65 @@ public:
 
   // access to private data
   inline int nBasis() { return this->nBasis_;};
+  inline int nTT()     { return this->nTT_;};
+//APS
+  inline int nShell() { return this->nShell_;};
+//APE
   inline int nAE()    { return this->nAE_;};
   inline int nBE()    { return this->nBE_;};
   inline int nOccA()  { return this->nOccA_;};
   inline int nOccB()  { return this->nOccB_;}
-  inline int nVirA()  { return this->nVirB_;};
+  inline int nVirA()  { return this->nVirA_;};
   inline int nVirB()  { return this->nVirB_;};
   inline int RHF()    { return this->RHF_; };
   inline int spin()   { return this->spin_; };
-  inline ChronusQ::Matrix<double> *densityA() { return this->densityA_;};
-  inline ChronusQ::Matrix<double> *densityB() { return this->densityB_;};
-  inline ChronusQ::Matrix<double> *fockA()    { return this->fockA_;};
-  inline ChronusQ::Matrix<double> *fockB()    { return this->fockB_;};
-  inline ChronusQ::Matrix<double> *coulombA() { return this->coulombA_;};
-  inline ChronusQ::Matrix<double> *coulombB() { return this->coulombB_;};
-  inline ChronusQ::Matrix<double> *exchangeA(){ return this->exchangeA_;};
-  inline ChronusQ::Matrix<double> *exchangeB(){ return this->exchangeB_;};
-  inline ChronusQ::Matrix<double> *moA()      { return this->moA_;};
-  inline ChronusQ::Matrix<double> *moB()      { return this->moB_;};
+  inline int nOVA()    { return nOccA_*nVirA_;};
+  inline int nOVB()    { return nOccB_*nVirB_;};
+  inline TMatrix* densityA() { return this->densityA_.get();};
+  inline TMatrix* densityB() { return this->densityB_.get();};
+  inline TMatrix* fockA()    { return this->fockA_.get();};
+  inline TMatrix* fockB()    { return this->fockB_.get();};
+  inline TMatrix* coulombA() { return this->coulombA_.get();};
+  inline TMatrix* coulombB() { return this->coulombB_.get();};
+  inline TMatrix* exchangeA(){ return this->exchangeA_.get();};
+  inline TMatrix* exchangeB(){ return this->exchangeB_.get();};
+  inline TMatrix* moA()      { return this->moA_.get();};
+  inline TMatrix* moB()      { return this->moB_.get();};
+  inline TMatrix* epsA()     { return this->epsA_.get();};
+  inline TMatrix* epsB()     { return this->epsB_.get();};
+  inline TMatrix* PTA()      { return this->PTA_.get();};
+  inline TMatrix* PTB()      { return this->PTB_.get();};
+  inline RealMatrix* dipole(){ return this->dipole_.get();};
+  inline RealMatrix* quadpole(){ return this->quadpole_.get();};
+  inline RealMatrix* tracelessQuadpole(){ return this->tracelessQuadpole_.get();};
+  inline RealTensor3d* octpole(){ return this->octpole_.get();};
+  inline BasisSet *    basisset(){return this->basisset_;};
+  inline Molecule *    molecule(){return this->molecule_;};
+  inline FileIO *      fileio(){return this->fileio_;};
+  inline Controls *    controls(){return this->controls_;};
+  inline AOIntegrals * aointegrals(){return this->aointegrals_;};
 
   void formGuess();	        // form the intial guess of MO's
   void formDensity();		// form the density matrix
   void formFock();	        // form the Fock matrix
   void formCoulomb();		// form the Coulomb matrix
   void formExchange();		// form the exchange matrix
+  void formPT();
+  // APS           
+  void matchord();              // match Guassian order of guess
+  // APE
   void readGuessIO();       	// read the initial guess of MO's from the input stream
-  void readGuessGauFChk(char*);	// read the initial guess of MO's from the Gaussian formatted checkpoint file
+  void readGuessGauMatEl(GauMatEl&); // read the intial guess of MO's from Gaussian raw matrix element file
+  void readGuessGauFChk(std::string &);	// read the initial guess of MO's from the Gaussian formatted checkpoint file
   void computeEnergy();         // compute the total electronic energy
+  void computeMultipole();      // compute multipole properties
   void SCF();  
+  void CDIIS(int,T*,T*,T*,T*);
   void printEnergy(); 
+  void printMultipole();
   void printInfo();
+  void printDensityInfo(double,double,double);
+  void printDensityInfo(double,double);
 
   /*************************/
   /* MPI Related Routines  */
@@ -140,5 +173,12 @@ public:
   void mpiSend(int,int tag=tagSingleSlater);
   void mpiRecv(int,int tag=tagSingleSlater);
 };
+
+#include <singleslater_alloc.h>
+#include <singleslater_print.h>
+#include <singleslater_fock.h>
+#include <singleslater_misc.h>
+
+
 } // namespace ChronusQ
 #endif

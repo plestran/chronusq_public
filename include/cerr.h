@@ -23,8 +23,13 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
-#include "global.h"
-
+#ifndef INCLUDED_CERR
+#define INCLUDED_CERR
+#include <global.h>
 namespace ChronusQ {
-void CErr(int);
+void CErr(std::ostream & out=std::cout);
+void CErr(std::string,std::ostream & out=std::cout );
+void CErr(std::exception_ptr,std::ostream & out=std::cout);
+void CErr(std::exception_ptr,std::string,std::ostream & out=std::cout);
 } // namespace ChronusQ
+#endif

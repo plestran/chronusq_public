@@ -23,46 +23,41 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
-#include "molecule.h"
+#include <molecule.h>
 using ChronusQ::Molecule;
 //-------------//
 // initializer //
 //-------------//
-void Molecule::iniMolecule(int nAtoms, FileIO *fileio) {
-  if(nAtoms<1) throw 2000;
-  if(fileio==NULL) throw 2001;
+void Molecule::iniMolecule(int nAtoms, FileIO * fileio) {
+  if(!fileio) CErr("No FileIO given to Molecule");
+  if(nAtoms<1) CErr("No Atoms given to build Molecule",fileio->out);
   this->nAtoms_= nAtoms;
-  this->cart_  = new Matrix<double>(3, this->nAtoms_,"Molecular Cartesian");
+  this->cart_  = std::unique_ptr<RealMatrix>(new RealMatrix(3, this->nAtoms_)); // Molecular Cartesian
   this->index_ = new int[this->nAtoms_];
   this->size_  = fileio->sizeInt()*5 + fileio->sizeInt()*nAtoms_ + cart_->size();
 };
 //--------------------------------------------//
 // Read molecular information from input file //
 //--------------------------------------------//
-void Molecule::readMolecule(FileIO *fileio){
+void Molecule::readMolecule(FileIO * fileio, std::istream &geomRead){
   int i, j, n, readInt;
-  char readString[MAXNAMELEN];
-  fileio->in >> readInt;
-  try{ iniMolecule(readInt,fileio);}
-  catch(int msg) {
-    fileio->out<<"Molecule initialization failed! E#: "<<msg<<endl;
-    exit(1);
-  };
+  std::string readString;
+  geomRead >> readInt;
+  iniMolecule(readInt,fileio);
   nTotalE_ = 0;
   for(i=0;i<nAtoms_;i++) {
-    fileio->in >> readString;
-    fileio->in >> readInt;
+    geomRead >> readString;
+    geomRead >> readInt;
     if((n=HashAtom(readString,readInt))!=-1) index_[i] = n;
     else {
-      fileio->out <<"Error: invalid atomic symbol or mass number!"<<endl;
-      throw 2002;
+      CErr("Error: invalid atomic symbol or mass number!",fileio->out);
     };
     nTotalE_ += atom[n].atomicNumber;
-    fileio->in >> (*cart_)(0,i);
+    geomRead >> (*cart_)(0,i);
     (*cart_)(0,i) = (*cart_)(0,i)/phys.bohr;
-    fileio->in >> (*cart_)(1,i);
+    geomRead >> (*cart_)(1,i);
     (*cart_)(1,i) = (*cart_)(1,i)/phys.bohr;
-    fileio->in >> (*cart_)(2,i);
+    geomRead >> (*cart_)(2,i);
     (*cart_)(2,i) = (*cart_)(2,i)/phys.bohr;
   };
   double sqrAB;
@@ -73,16 +68,23 @@ void Molecule::readMolecule(FileIO *fileio){
       for(n=0;n<3;n++) sqrAB += ((*cart_)(n,i)-(*cart_)(n,j))*((*cart_)(n,i)-(*cart_)(n,j));
       energyNuclei_ += atom[index_[i]].atomicNumber*atom[index_[j]].atomicNumber/sqrt(sqrAB);
   };
+  this->computeRij();
+  this->toCOM(0);
+  this->computeI();
 
 };
 //---------------------------------------------------//
 // Print out molecular carteisan coordinates in bohr //
 //---------------------------------------------------//
-void Molecule::printInfo(FileIO *fileio,Controls *controls) {
+void Molecule::printInfo(FileIO * fileio,Controls * controls) {
   fileio->out.precision(8);
   fileio->out.fill(' ');
   fileio->out.setf(ios::right,ios::adjustfield);
   fileio->out.setf(ios::fixed,ios::floatfield);
+  fileio->out<<"\nMolecular Information:"<<endl;
+  fileio->out<<std::setw(15)<<"nAtoms ="<<std::setw(8)<<nAtoms_<<std::setw(5)<<" "
+	     <<std::setw(20)<<"Charge ="<<std::setw(8)<<charge_<<endl;
+  fileio->out<<std::setw(15)<<"nElectrons ="<<std::setw(8)<<nTotalE_<<endl;
   fileio->out<<"\nCartesian coordinates (bohr):"<<endl;
   fileio->out<<bannerTop<<endl;
   fileio->out<<std::setw(24)<<" "<<std::setw(15)<<"X"<<std::setw(15)<<"Y"<<std::setw(15)<<"Z"<<endl;
@@ -90,16 +92,15 @@ void Molecule::printInfo(FileIO *fileio,Controls *controls) {
   for(int i=0;i<nAtoms_;i++)
     fileio->out<<std::setw(8)<<i+1<<std::setw(8)<<atom[index_[i]].symbol<<std::setw(8)<<atom[index_[i]].atomicNumber
 	       <<std::setw(15)<<(*cart_)(0,i)<<std::setw(15)<<(*cart_)(1,i)<<std::setw(15)<<(*cart_)(2,i)<<endl;
-  fileio->out<<bannerEnd<<endl;
-  fileio->out<<"\nMolecular Information:"<<endl;
-  fileio->out<<std::setw(15)<<"nAtoms ="<<std::setw(8)<<nAtoms_<<std::setw(5)<<" "
-	     <<std::setw(20)<<"Charge ="<<std::setw(8)<<charge_<<endl;
-  fileio->out<<std::setw(15)<<"nElectrons ="<<std::setw(8)<<nTotalE_<<endl;
+  fileio->out<<bannerMid<<endl;
+  prettyPrint(fileio->out,*this->momentOfInertia_,"Moment of Inertia Tensor (AMU-bohr\u00B2)");
+  prettyPrint(fileio->out,*this->rIJ_,"Interatomic Distance Matrix (bohr)");
 };
+/*
 //--------------------------------//
 // read from binary files //
 //--------------------------------//
-void Molecule::ioRead(FileIO *fileio) {
+void Molecule::ioRead(FileIO * fileio) {
   const int nInteger = 5;
   int storage[nInteger];
   try { fileio->io("R",blockMolecule,"BIN",storage,nInteger,0);}
@@ -112,21 +113,22 @@ void Molecule::ioRead(FileIO *fileio) {
   spin_   = storage[2];
   nTotalE_= storage[3];
   size_   = storage[4];
-  if(cart_!=NULL) delete[] cart_;
+  cart_.reset();
   if(index_!=NULL) delete[] index_;
-  cart_  = new Matrix<double>(3, nAtoms_,"Molecular Cartesian");
+  cart_  = std::unique_ptr<RealMatrix>(new RealMatrix(3, nAtoms_)); // Molecular Cartesian
   index_ = new int[nAtoms_];
   try { fileio->io("R",blockMolecule,"BIN",index_,nAtoms_);}
   catch (int msg) {
     fileio->out<<"Operation on file failed! E#:"<<msg<<endl;
     exit(1);    
   };
-  cart_->ioRead(fileio,blockMolecule,"BIN");
+  // FIXME Need FileIO interface to Eigen
+//cart_->ioRead(fileio,blockMolecule,"BIN");
 };
 //-----------------------//
 // write to binary files //
 //----------------------//
-void Molecule::ioWrite(FileIO *fileio) {
+void Molecule::ioWrite(FileIO * fileio) {
   if(!fileio->isOpen(blockMolecule)) fileio->iniBlock(blockMolecule);
   const int nInteger = 5;
   int storage[nInteger];
@@ -145,8 +147,10 @@ void Molecule::ioWrite(FileIO *fileio) {
     fileio->out<<"Operation on file failed! E#:"<<msg<<endl;
     exit(1);    
   };
-  cart_->ioWrite(fileio,blockMolecule,"BIN");
+  // FIXME Need FileIO interface to Eigen
+//cart_->ioWrite(fileio,blockMolecule,"BIN");
 };
+*/
 /*************************/
 /* MPI Related Routines  */
 /*************************/
@@ -160,8 +164,54 @@ void Molecule::mpiSend(int toID,int tag) {
 void Molecule::mpiRecv(int fromID,int tag) {
   OOMPI_COMM_WORLD[fromID].Recv(this->nAtoms_,tag);
   this->index_=new int[this->nAtoms_];
-  this->cart_ =new Matrix<double>(3, this->nAtoms_, "Molecule");
+  this->cart_ =new RealMatrix(3, this->nAtoms_, "Molecule");
   OOMPI_COMM_WORLD[fromID].Recv(this->index_,this->nAtoms_,tag);
   this->cart_->mpiRecv(fromID,tag);
 };
 */
+//APS  compute center of Mass (Iop=0) or center of nuclear charges (Iop=1)
+void Molecule::toCOM(int Iop){
+     int iA, nAtoms;
+     this->COM_=std::unique_ptr<RealMatrix>(new RealMatrix(3,1)); 
+     double TotW=0.;
+//   cout << "Check APE" <<endl;
+//     cout << "nAtoms = " <<nAtoms_ <<endl;
+     if(Iop ==0){
+       for(iA=0;iA<nAtoms_;iA++){
+          TotW+=elements[index_[iA]].mass;
+          (COM_->col(0))+=(cart_->col(iA))*elements[index_[iA]].mass;
+       }
+//     cout <<"Total Mass(amu)= " <<TotW <<endl;
+//     cout <<"Center of Mass "<<endl;
+     }
+     else if(Iop ==1){
+       for(iA=0;iA<nAtoms_;iA++){
+          TotW+=elements[index_[iA]].atomicNumber;
+          (COM_->col(0))+=(cart_->col(iA))*elements[index_[iA]].atomicNumber;
+        }
+//      cout <<"Total Nuclear Charge= " <<TotW <<endl;
+//      cout <<"Center of Nuclear Charges "<<endl;
+     }
+//   cout << "Cartesian coordinates (Bohr):"<<endl;   
+//   cout << *COM_/TotW <<endl;
+}
+//APE
+void Molecule::computeI(){
+  this->momentOfInertia_ = std::unique_ptr<RealMatrix>(new RealMatrix(3,3));
+  RealMatrix E = RealMatrix::Identity(3,3); // Assuming X,Y,Z unit vectors as intertial frame
+
+  for(auto iAtm = 0; iAtm < this->nAtoms_; iAtm++){
+    *this->momentOfInertia_ += elements[this->index_[iAtm]].mass*(
+                                this->cart_->col(iAtm).dot(this->cart_->col(iAtm))*E -
+                                this->cart_->col(iAtm)*this->cart_->col(iAtm).transpose());
+  }
+  
+}
+void Molecule::computeRij(){
+  this->rIJ_ = std::unique_ptr<RealMatrix>(new RealMatrix(this->nAtoms_,this->nAtoms_));
+  for(auto iAtm = 0; iAtm < this->nAtoms_; iAtm++)
+  for(auto jAtm = 0; jAtm < iAtm;          jAtm++){
+    (*this->rIJ_)(iAtm,jAtm) = (cart_->col(iAtm) - cart_->col(jAtm)).norm();
+  }
+  (*this->rIJ_) = this->rIJ_->selfadjointView<Lower>();
+}

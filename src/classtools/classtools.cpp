@@ -23,80 +23,126 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
-#include "classtools.h"
+#include <classtools.h>
 using ChronusQ::Molecule;
 using ChronusQ::BasisSet;
+using ChronusQ::Controls;
 
 /************************************************/
 /* read input files and initialize everything   */
 /* memory allocations are done here too         */
 /************************************************/
 namespace ChronusQ {
-void readInput(FileIO *fileio, Molecule *mol, BasisSet *basis,Controls *controls) {
+void readInput(FileIO * fileio, Molecule * mol, BasisSet * basis, Controls * controls,
+               BasisSet * dfBasis) {
   int i, j, n, readInt;
-  char readString[MAXNAMELEN];
+  std::string readString;
   fileio->in >> readString;
   while(!(fileio->in.eof())) {
-    strupr(readString);
-    if(!strcmp(readString,"/*")) while(strcmp(readString,"*/")) fileio->in >> readString;
-    else if(!strcmp(readString,"$CHARGE")) {
+    readString=stringupper(readString);
+    if(!readString.compare("/*")) while(readString.compare("*/")) fileio->in >> readString;
+    else if(!readString.compare("$CHARGE")) {
       fileio->in >> readInt;
       mol->readCharge(readInt);
-    } else if(!strcmp(readString,"$SPIN")) {
+    } else if(!readString.compare("$SPIN")) {
       fileio->in >> readInt;
       mol->readSpin(readInt);
-    } else if(!strcmp(readString,"$EXTRA")) {
+    } else if(!readString.compare("$EXTRA")) {
       fileio->in>>readString;
-      strupr(readString);
-      if(!strcmp(readString,"RESTART")) controls->restart=true;
-    } else if(!strcmp(readString,"$PRINT")) {
+      readString=stringupper(readString);
+      if(!readString.compare("RESTART")) controls->restart=true;
+    } else if(!readString.compare("$PRINT")) {
       fileio->in >> (controls->printLevel);
-    } else if(!strcmp(readString,"$METHOD")) {
+    } else if(!readString.compare("$METHOD")) {
       fileio->in >> readString;
-      strupr(readString);
-      if(!strcmp(readString,"HF")) controls->HF=true;
+      readString=stringupper(readString);
+      if(!readString.compare("HF")) controls->HF=true;
       else {
 	controls->HF=false;
 	controls->DFT=true;
       };
-    } else if(!strcmp(readString,"$GEOM")) {
-      try{mol->readMolecule(fileio);}
-      catch(int msg) {
-	fileio->out<<"Reading molecular information failed! E#: "<<msg<<endl;
-	exit(1);
-      }; 
-    } else if(!strcmp(readString,"$BASIS")) {
-      basis->readBasisSet(fileio,mol);
-    } else if(!strcmp(readString,"$GUESS")) {
+    } else if(!readString.compare("$GEOM")) {
+      fileio->in >> readString;
+      readString=stringupper(readString);  
+      fstream *geomRead;
+      if(!readString.compare("READ")) {
+        geomRead = &fileio->in;
+      } else if(!readString.compare("FILE")) {
+        fileio->in >> readString;
+        geomRead = new fstream(readString,ios::in);
+        if(geomRead->fail()) CErr("Unable to open "+std::string(readString),fileio->out); 
+        else fileio->out << "Reading geometry from " << readString << endl;
+      } else {
+        CErr("Unrecognized GEOM option: " + std::string(readString),fileio->out);
+      }
+      mol->readMolecule(fileio,*geomRead);
+      if(!(geomRead==&fileio->in)){
+//      fileio->out << "Closing " << readString << endl;
+        geomRead->close();
+        delete geomRead;
+      }
+    } else if(!readString.compare("$BASIS")) {
+      //basis->readBasisSet(fileio,mol);
+      basis->basisSetRead(fileio,mol);
+    } else if(!readString.compare("$DFBASIS")) {
+      fileio->in >> readString;
+      if(!readString.compare("ON")) controls->doDF = true;
+      if(controls->doDF) {
+        //basis->readBasisSet(fileio,mol);
+        dfBasis->basisSetRead(fileio,mol);
+      }
+//dbwys
+    } else if(!readString.compare("$NSMP")) {
+      fileio->in >> readInt;
+      controls->readSMP(readInt);
+    } else if(!readString.compare("$GUESS")) {
       fileio->in>>readString;
-      strupr(readString);
-      if(!strcmp(readString,"INPUT")) {
+      readString=stringupper(readString);  
+      if(!readString.compare("INPUT")) {
         controls->guess = 1;
-      } else if(!strcmp(readString,"GAUFCHK")) {
+      } else if(!readString.compare("GAUMATEL")) {
+        controls->guess = 2;
+        fileio->in>>controls->gauMatElName;
+      } else if(!readString.compare("GAUFCHK")) {
         controls->guess = 3;
         fileio->in>>controls->gauFChkName;
       };
-    };
+    } else if(!readString.compare("$SCF")) {
+      fileio->in>>readString;
+      readString=stringupper(readString);
+      if(!readString.compare("OFF"))
+        controls->optWaveFunction = false;
+      else if(!readString.compare("ON"))
+        controls->optWaveFunction = true;
+      else if(!readString.compare("DIRECT"))
+        controls->directTwoE = true;
+      else if(!readString.compare("INCORE")){
+        controls->directTwoE = false;
+        controls->buildn4eri = true;
+      } else {
+        CErr("Input SCF Option Not Recognized",fileio->out);
+      }
+    } else if(!readString.compare("$DEBUG")) {
+      fileio->in>>readString;
+      readString=stringupper(readString);
+      controls->readDebug(readString);
+    } else if(!readString.compare("$PSCF")) {
+      controls->readPSCF(fileio->in,fileio->out);
+    }
     fileio->in >> readString;
   };
 };
 /********************************/
 /* trace of producto of two     */
-/* symmetric Matrix<double>*ces           */
+/* symmetric RealMatrices       */
 /********************************/
-double traceSymm(Matrix<double>* a, Matrix<double>* b) {
-  if(a->len()!=b->len()) throw 15001;
+double traceSymm(RealMatrix* a, RealMatrix* b) {
+  if(a->size()!=b->size()) CErr("Only able to trace matricies of the same size"); // FIXME this is depreciated
   double tmpVal = 0.0;
   int i;
-  if(a->format()==0) for(i=0;i<a->len();i++) tmpVal+=a->data()[i]*b->data()[i];
-  else if (a->format()==1){
-    for(i=0;i<a->len();i++) {
-      tmpVal+=double(2.0)*a->data()[i]*b->data()[i];
-    };
-    for(i=0;i<a->rows();i++) {
-      tmpVal-=(*a)(i,i)*(*b)(i,i);
-    };
-  };
+  for(i=0;i<a->size();i++) tmpVal+=a->data()[i]*b->data()[i];
+
   return tmpVal;
-};
-} // namespace ChronusQ
+ };
+}
+// namespace ChronusQ

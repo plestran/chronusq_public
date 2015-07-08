@@ -25,24 +25,53 @@
  */
 #ifndef INCLUDED_GLOBAL
 #define INCLUDED_GLOBAL
+// Hello
 
-#define MAXNAMELEN 50
-#define MAXANGULARMOMENTUM 6
-#define MAXCONTRACTION 10
-#define MAXATOMS 1000
-//#include "oompi.h"
+#define MAXNAMELEN 50 ///< Define maximum length for char arrays
+#define MAXANGULARMOMENTUM 6 ///< Define maximum allowed total angular momentum for basis functions
+#define MAXCONTRACTION 10 ///< Define maximum contraction depth for gaussian basis functions
+#define MAXATOMS 1000 ///< Define maximum number of allowed nuclei
+
+// CMake Compilation Configuration
+#include <config_chronusq.h>
+
+// IO
 #include <iostream>
 #include <fstream>
-#include <stdlib.h>
-#include <cmath>
 #include <iomanip>
-#include <sys/stat.h>
-#include <pthread.h>
-//#include <error.h>
-#include <time.h>
-//#include <new.h>
-#include <cstring>
+
+// Math
+#include <cmath>
 #include <complex>
+#define EIGEN_MATRIXBASE_PLUGIN "eigenplugin.h" ///< ChronusQ plugin for Eigen
+#define EIGEN_INITIALIZE_MATRICES_BY_ZERO // Eröffne die Matrizen als Null.
+#include <Eigen/Core> // Eigen Linear Algebra
+#include <unsupported/Eigen/MatrixFunctions>
+#ifdef USE_LIBINT
+#  include <libint2.hpp> // Libint Gaussian Integrals library
+#endif
+#include <eiginterface.h> // ChronusQ interface (TODO consolidate into plugin)
+#include <btas/btas.h> // BTAS Tensor Algebra library (header only)
+
+// Parallelization
+#ifdef USE_OMP
+#include <omp.h>
+#endif
+//#include "oompi.h"
+//#include <pthread.h>
+
+// Misc
+#include <stdlib.h>
+//#include <sys/stat.h>
+#include <cstring>
+#include <vector>
+#include <time.h>
+#include <chrono>
+#include <memory>
+#include <exception>
+#include <stdexcept>
+#include <algorithm>
+#include <gauinterface.h>
 
 //using namespace std;
 /* Things from STD that we need always */
@@ -55,21 +84,69 @@ using std::ios;
 using std::nothrow;
 using std::ifstream;
 
-typedef std::complex<double> dcomplex;
+/* Things from Eigen that we always need */
+using Eigen::Infinity;
+using Eigen::Dynamic;
+using Eigen::ColMajor;
+using Eigen::RowMajor;
+using Eigen::Upper;
+using Eigen::Lower;
+using Eigen::VectorXd;
+
+/* Things from BTAS that we always need */
+using btas::Tensor;
+
+/* Things from Libint that we always need */
+using libint2::OneBodyEngine;
+using libint2::TwoBodyEngine;
+
+// Useful typedefs
+typedef std::complex<double> dcomplex; ///< Support for complex numbers (double precision)
+typedef Eigen::Matrix<double,Dynamic,Dynamic,RowMajor>     RealMatrix;    ///< Dynamically allocated Real (double) matrix. Row major for integration with Libint
+typedef Eigen::Matrix<dcomplex,Dynamic,Dynamic,RowMajor>   ComplexMatrix; ///< Dynamically allocated Complex (dcomplex) matrix. Row major for integration with Libint
+typedef Eigen::Matrix<double,Dynamic,Dynamic,ColMajor>     RealCMMatrix;    ///< Dynamically allocated Real (double) matrix. Row major for integration with Libint
+typedef Eigen::Matrix<dcomplex,Dynamic,Dynamic,ColMajor>   ComplexCMMatrix; ///< Dynamically allocated Complex (dcomplex) matrix. Row major for integration with Libint
+typedef Eigen::Map<VectorXd> RealVecMap;
+typedef Eigen::Map<RealMatrix> RealMap; ///< Map double precision real array onto RealMatrix object
+typedef Eigen::Map<RealCMMatrix> RealCMMap; ///< Map double precision real array onto RealMatrix object
+typedef Eigen::Map<const RealMatrix> ConstRealMap; ///< Map double precision real array onto const RealMatrix object
+typedef Eigen::Map<ComplexMatrix> ComplexMap; ///< Map double precision complex array onto ComplexMatrix object
+typedef Eigen::Map<const ComplexMatrix> ConstComplexMap; ///< Map double precision complex array onto const ComplexMatrix object
+typedef Eigen::MatrixExponentialReturnValue<RealMatrix>    RealMatExp; ///< Driver for matrix exponentaial (RealMatrix)
+typedef Eigen::MatrixExponentialReturnValue<ComplexMatrix> ComplexMatExp; ///< Driver for matrix exponential (ComplexMatrix)
+typedef TwoBodyEngine<libint2::Coulomb> coulombEngine; ///< Two-body ERI engine for Libint
+typedef btas::RangeNd<CblasRowMajor,std::array<long,4>> Range4d; ///< BTAS range specification for rank-4 tensors
+typedef btas::RangeNd<CblasRowMajor,std::array<long,3>> Range3d; ///< BTAS range specification for rank-3 tensors
+typedef btas::RangeNd<CblasRowMajor,std::array<long,2>> Range2d; ///< BTAS range specification for rank-2 tensors (isomorphic with matrix)
+typedef btas::RangeNd<CblasRowMajor,std::array<long,1>> Range1d; ///< BTAS range specification for rank-1 tensors (isomorphic with vector)
+typedef Tensor<double,Range4d> RealTensor4d; ///< Support for real-valued rank-4 tensors using BTAS
+typedef Tensor<double,Range3d> RealTensor3d; ///< Support for real-valued rank-3 tensors using BTAS
+typedef Tensor<double,Range2d> RealTensor2d; ///< Support for real-values rank-2 tensors (aka Matricies) using BTAS
+typedef Tensor<double,Range1d> RealTensor1d; ///< Support for real-values rank-1 tensors (aka Vectors) using BTAS
+typedef Tensor<dcomplex,Range4d> ComplexTensor4d; ///< Support for complex-valued rank-4 tensors using BTAS
+typedef Tensor<dcomplex,Range3d> ComplexTensor3d; ///< Support for complex-valued rank-3 tensors using BTAS
+typedef Tensor<dcomplex,Range2d> ComplexTensor2d; ///< Support for complex-values rank-2 tensors (aka Matricies) using BTAS
+typedef Tensor<dcomplex,Range1d> ComplexTensor1d; ///< Support for complex-values rank-1 tensors (aka Vectors) using BTAS
 
 //----------------//
 //number constants//
 //----------------//
+/**
+ * Various numerical constants.
+ */
 struct Math {
   double zero, one, two, three, four, five, six, seven, eight, nine, ten, half, quarter;
   double sqrt2;
-  double pi,pi32,sqrt2pi54; //pi, pi^{3/2} sqrt(2)*pi^{5/4}
+  double pi; ///< Mathematical constant \f$\pi\f$
+  double pi32; ///< Mathematical constant \f$\pi^{3/2}\f$
+  double sqrt2pi54; ///< Mathematical constant \f$\sqrt{2}\pi^{5/4}\f$
   double small;
+  dcomplex ii; ///< Imaginary unit (0 + 1i)
 };
 const Math math = {0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 0.5, 0.25,
 		   1.4142135623731,
 		   3.14159265358979,5.56832799683171,5.91496717279561,
-		   1.0e-10};
+		   1.0e-10, dcomplex(0,1.0)};
 //factorials n!
 static double Factorial[8] ={
 1,1,2, 6, 24, 120, 720, 5040 };
@@ -99,22 +176,18 @@ static double dFactorial[21] = {
   319830986772877752139776.00000000,
 };
 
-//------------------//
-//Physical constants//
-//------------------//
+/**
+ *  Physical constants (considering phasing out to use Boost phyiscal constants)
+ */
 struct Phys {
-  //Bohr radius per Angstrom
-  double bohr;
+  double bohr; ///< Bohr radii per Angstrom
+  double debye; ///< e*bohr in 1 Debye
+  double eVPerHartree;
+  double nmPerHartree;
   //number of cartesian AO's in a shell
 };
-const Phys phys = {0.5291772083000001};
+const Phys phys = {0.5291772083000001,0.393430307,27.211396132,45.56335};
 
-//----------------//
-//String constants//
-//----------------//
-const char bannerTop[100]="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
-const char bannerMid[100]="--------------------------------------------------------------------------------";
-const char bannerEnd[100]="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 
 //------------------//
 // IO block numbers //
@@ -122,20 +195,20 @@ const char bannerEnd[100]="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 enum {blockControlFlags,blockMolecule,blockBasisSet, // 1,2,3
       blockSingleSlater,blockIntegrals};  // 4,5,6
 
-//----------//
-//MPI global//
-//----------//
-
+/**
+ *  Information pertaining to MPI realated states
+ */
 struct GlobalMPI {
-  int  myid;
-  int  size;
+  int  myid; ///< Global rank of current process
+  int  size; ///< Total number of processes
 //  char nodeName[MPI_MAX_PROCESSOR_NAME];;
-  int  nodeNameLen;
+  int  nodeNameLen; ///< Length of process name
 };
 //---------//
 //MPI Tags //
 //---------//
 enum {tagMolecule,tagMatrix,tagBasisSet,tagSingleSlater,tagIntegrals,tagSDResponse};
 
+#include <clapack.h> // Extern "C" defs for LAPACK routines (require "_" extension)
 
 #endif

@@ -1,8 +1,29 @@
 Must have cmake version >= 2.8 to build this project
 
-to build the easy way (from source dir):
-  util/runconfig_<COMPILER_SUITE>
+The first thing that must be compiled is the Libint library
+(see DEPENDS). The easy way to to this (from the chronusq
+dir) is to run the script:
+
+  util/buildlibint NPROC
+
+where NPROC is the number of processors you wish to compile
+with. This will place files in the nesecary place for use
+with ChronusQ. If Libint is already installed elsewhere,
+you must passify the CMakeLists.txt in the chronusQ directory
+by changing the location of the Libint library (this will
+be done automatically eventually, but development has not reached
+that point yet)
+
+
+To build the easy way (from top chronusq dir):
+  util/runconfig_<COMPILER_SUITE>[_OPTION1[_OPTION2[...]]]
 
 Currently supported COMPILER_SUITE variables:
   gcc :  GNU compilers
-  pgi :  Portland Group compilers
+
+Currently suppored OPTION variables:
+  openmp : enable OpenMP threads (currently only threading available)
+  libint : enable libint integrals (must be enabled!)
+
+Scripts for pgi and intel are also included, but they aren't functional unless
+libint has been compiled with the respective compiler

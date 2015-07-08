@@ -6,7 +6,6 @@ aclocal
 *.a
 .*.swp
 *.bak*
-src/mattest/mattest
 src/chronQ/chronQ
 *.try
 aclocal.m4
@@ -19,6 +18,9 @@ install-sh
 missing
 stamp-h1
 test
-build
+build*
 .COPY
-*.out
+deps/include/
+deps/lib/
+deps/src/libint-2.1.0-beta2/
+deps/share/

@@ -23,64 +23,124 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
-#include "workers.h"
+#include <workers.h>
 using namespace ChronusQ;
 
 int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
-  int i,j,k,l;
   time_t currentTime;
-  Molecule    	*molecule     	= new Molecule();
-  BasisSet     	*basisset     	= new BasisSet();
-  Controls     	*controls     	= new Controls();
-  AOIntegrals	*aointegrals	= new AOIntegrals();
-  SingleSlater	*hartreeFock	= new SingleSlater();
-  FileIO       	*fileIO;
 
-  try { fileIO=new FileIO(argv[1]);}
-  catch(int msg) {
-    cout<<"Unable to open file! E#:"<<msg<<endl;
-    exit(1);
-  };
+  // Pointers for important storage 
+  auto molecule     	= std::unique_ptr<Molecule>(new Molecule());
+  auto basisset     	= std::unique_ptr<BasisSet>(new BasisSet());
+  auto dfBasisset     	= std::unique_ptr<BasisSet>(new BasisSet());
+  auto controls     	= std::unique_ptr<Controls>(new Controls());
+  auto aointegrals	= std::unique_ptr<AOIntegrals>(new AOIntegrals());
+  auto hartreeFock	= std::unique_ptr<SingleSlater<double>>(new SingleSlater<double>());
+  auto sdResponse       = std::unique_ptr<SDResponse>(new SDResponse());
+  std::unique_ptr<FileIO> fileIO;
+  std::unique_ptr<GauJob> gauJob;
+
+  // Initialize the FileIO object
+  std::vector<std::string> argv_string;
+  for(auto i = 1; i < argc; ++i) if(argv[i][0]=='-') argv_string.push_back(argv[i]);
+  if(argv_string.size()==0) fileIO = std::unique_ptr<FileIO>(new FileIO(argv[1]));
+  else fileIO = std::unique_ptr<FileIO>(new FileIO(argv_string));
+
 
   // print out the starting time of the job
   time(&currentTime);
   fileIO->out<<"Job started: "<<ctime(&currentTime)<<endl;
   //fileIO->out<<"Central control process is on "<<globalMPI->nodeName<<endl;
 
-  // read input
+  // Initialize default settings and read input
   controls->iniControls();
-  readInput(fileIO,molecule,basisset,controls);
-  fileIO->iniFileIO(controls->restart);
+  readInput(fileIO.get(),molecule.get(),basisset.get(),controls.get(),dfBasisset.get());
+//  fileIO->iniFileIO(controls->restart);
 
   // print out molecular and basis set information
-  molecule->printInfo(fileIO,controls);
-  basisset->printInfo(fileIO,controls);
-  aointegrals->iniAOIntegrals(molecule,basisset,fileIO,controls);
-  hartreeFock->iniSingleSlater(molecule,basisset,aointegrals,fileIO,controls);
+  controls->printSettings(fileIO->out);
+  molecule->printInfo(fileIO.get(),controls.get());
+  basisset->printInfo_libint(fileIO.get(),controls.get());
+
+  dfBasisset->printInfo_libint(fileIO.get(),controls.get());
+
+  aointegrals->iniAOIntegrals(molecule.get(),basisset.get(),fileIO.get(),controls.get(),dfBasisset.get());
+  hartreeFock->iniSingleSlater(molecule.get(),basisset.get(),aointegrals.get(),fileIO.get(),controls.get());
   hartreeFock->printInfo();
   if(controls->guess==0) hartreeFock->formGuess();
   else if(controls->guess==1) hartreeFock->readGuessIO();
-  else if(controls->guess==2) ;
+  else if(controls->guess==2) {
+    GauMatEl matEl(controls->gauMatElName);
+    hartreeFock->readGuessGauMatEl(matEl);
+  }
   else if(controls->guess==3) hartreeFock->readGuessGauFChk(controls->gauFChkName);
+//APS I have MO Please check in which controls call the following function
+//hartreeFock->matchord();
+//APE
   hartreeFock->formFock();
+  aointegrals->printTimings();
   hartreeFock->computeEnergy();
-  hartreeFock->SCF();
+  std::shared_ptr<MOIntegrals> moIntegrals = std::make_shared<MOIntegrals>();
+  if(controls->optWaveFunction) {
+    hartreeFock->doCUHF = false;
+    hartreeFock->SCF();
+  }
+  //MOIntegrals *moIntegrals = new MOIntegrals();
+  //moIntegrals->iniMOIntegrals(molecule,basisset,fileIO,controls,aointegrals,hartreeFock);
+  else fileIO->out << "**Skipping SCF Optimization**" << endl; 
+  hartreeFock->computeMultipole();
+  if(controls->doSDR) {
+    sdResponse->iniSDResponse(molecule.get(),basisset.get(),moIntegrals.get(),fileIO.get(),
+                              controls.get(),hartreeFock.get());
+    sdResponse->IterativeRPA();
+  }
+
+//if(controls->doDF) aointegrals->compareRI();
+/*
   MOIntegrals *moIntegrals = new MOIntegrals();
   moIntegrals->iniMOIntegrals(molecule,basisset,fileIO,controls,aointegrals,hartreeFock);
 
-  SDResponse *sdResponse = new SDResponse();
-  sdResponse->iniSDResponse(molecule,basisset,moIntegrals,fileIO,controls,hartreeFock);
 
-  sdResponse->computeExcitedStates();
-
+//APS
+ int Iop=0;
+ molecule->toCOM(Iop);  // call object molecule pointing to function toCOM-Iop=0 Center of Mass
+ Iop=1;
+ molecule->toCOM(Iop);  // call object molecule pointing to function toCOM-Iop=1 Center of Nuclear Charges
+//APE
+*/
   time(&currentTime);
   fileIO->out<<"\nJob finished: "<<ctime(&currentTime)<<endl;
-  delete  molecule;
-  delete  basisset;
-  delete  fileIO;
-  delete  aointegrals;
-  delete  controls;
-  return  1;
+/*
+  SingleSlater<dcomplex> newSS(hartreeFock.get());
+  newSS.formFock();
+*/
+/*
+  double *tmp = new double[3*2];
+  for(auto i =0; i < 6; i++) tmp[i] = 0.0;
+  tmp[0] = 0.9;
+  std::vector<int> atm;
+  atm.push_back(1);
+  atm.push_back(1);
+  GauJob job(false,"sto-3g",tmp,atm,0,1);
+  job.run();
+*/
+/*
+  Eigen::SelfAdjointEigenSolver<RealMatrix> ES;
+  ES.compute((*hartreeFock->densityA())+(*hartreeFock->densityB())/2);
+  cout << ES.eigenvalues() << endl;
+  cout << endl <<ES.eigenvectors()*(*hartreeFock->densityA())*ES.eigenvectors().transpose() << endl;
+  cout << endl << (hartreeFock->moB()->transpose())*(*aointegrals->overlap_)*(*hartreeFock->densityB())*(*aointegrals->overlap_)*(*hartreeFock->moB()) << endl;
+  RealMatrix X = aointegrals->overlap_->pow(-0.5);
+  ES.compute(X*((*hartreeFock->densityA())+(*hartreeFock->densityB()))*X.transpose()/2);
+  cout << endl << ES.eigenvalues() << endl;
+  cout << endl << ES.eigenvectors().transpose()*(*hartreeFock->densityA())*ES.eigenvectors() << endl;
+*/
+#ifdef USE_LIBINT
+  libint2::cleanup();
+#endif
+
+
+return  1;
 };
 
 

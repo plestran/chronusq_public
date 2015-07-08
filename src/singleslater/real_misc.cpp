@@ -1,0 +1,141 @@
+/* 
+ *  The Chronus Quantum (ChronusQ) software package is high-performace 
+ *  computational chemistry software with a strong emphasis on explicitly 
+ *  time-dependent and post-SCF quantum mechanical methods.
+ *  
+ *  Copyright (C) 2014-2015 Li Research Group (University of Washington)
+ *  
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *  
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program; if not, write to the Free Software Foundation, Inc.,
+ *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *  
+ *  Contact the Developers:
+ *    E-Mail: xsli@uw.edu
+ *  
+ */
+#include <singleslater.h>
+namespace ChronusQ {
+template<>
+template<>
+SingleSlater<double>::SingleSlater(SingleSlater<double> * other){
+    this->nBasis_ = other->nBasis_;
+    this->nTT_    = other->nTT_;
+//APS 
+    this->nShell_ = other->nShell_;
+//APE
+    this->nAE_    = other->nAE_;
+    this->nBE_    = other->nBE_; 
+    this->RHF_    = other->RHF_;
+    this->nOccA_  = other->nOccA_;
+    this->nOccB_  = other->nOccB_;
+    this->nVirA_  = other->nVirA_;
+    this->nVirB_  = other->nVirB_;
+    this->spin_   = other->spin_;
+    this->energyNuclei = other->energyNuclei;
+    this->RHF_ = other->RHF_;
+    this->haveDensity = true;
+    this->haveMO	    = true;
+    this->havePT      = true;
+    // Hardcoded for Libint route
+    this->densityA_           = std::unique_ptr<RealMatrix>(new RealMatrix(*other->densityA_));
+    this->fockA_              = std::unique_ptr<RealMatrix>(new RealMatrix(*other->fockA_));
+    this->moA_                = std::unique_ptr<RealMatrix>(new RealMatrix(*other->moA_));
+    this->PTA_                = std::unique_ptr<RealMatrix>(new RealMatrix(*other->PTA_));
+    if(!this->RHF_){
+      this->densityB_           = std::unique_ptr<RealMatrix>(new RealMatrix(*other->densityB_));
+      this->fockB_              = std::unique_ptr<RealMatrix>(new RealMatrix(*other->fockB_));
+      this->moB_                = std::unique_ptr<RealMatrix>(new RealMatrix(*other->moB_));
+      this->PTB_                = std::unique_ptr<RealMatrix>(new RealMatrix(*other->PTB_));
+    }
+    this->dipole_             = std::unique_ptr<RealMatrix>(new RealMatrix(*other->dipole_));
+    this->quadpole_           = std::unique_ptr<RealMatrix>(new RealMatrix(*other->quadpole_));
+    this->tracelessQuadpole_  = std::unique_ptr<RealMatrix>(new RealMatrix(*other->tracelessQuadpole_));
+    this->octpole_            = std::unique_ptr<RealTensor3d>(new RealTensor3d(*other->octpole_));
+    this->basisset_    = other->basisset_;    
+    this->molecule_    = other->molecule_;
+    this->fileio_      = other->fileio_;
+    this->controls_    = other->controls_;
+    this->aointegrals_ = other->aointegrals_;
+}
+
+//APS
+//  Function to read and match the Gaussian Guess from previous calculation
+//  Note: It works as long you use the cartisian basis in both softwares
+  template<>
+  void SingleSlater<double>::matchord(){
+    unsigned int ibase=0;
+    unsigned int irow;
+    for(auto i=0;i<this->nShell_;i++){
+          int L=basisset_->shells_libint[i].contr[0].l;
+//         s functions order matchs
+           if (L==0){ibase += 1;}
+//         p functions order matchs
+           else if (L==1){ibase+=3;} 
+//           d functions in cartesian --> swap
+           else if (L==2){
+             irow = ibase-1;
+             (*this->moA_).row((irow+2)).swap((*this->moA_).row(irow+4));
+             (*this->moA_).row((irow+3)).swap((*this->moA_).row(irow+5));
+             (*this->moA_).row((irow+5)).swap((*this->moA_).row(irow+6));
+             ibase+=6;
+             }
+//           f functions in cartesian --> swap
+           else if (L==3){
+             irow = ibase-1;
+             (*this->moA_).row((irow+2)).swap((*this->moA_).row(irow+5));
+             (*this->moA_).row((irow+3)).swap((*this->moA_).row(irow+6));
+             (*this->moA_).row((irow+5)).swap((*this->moA_).row(irow+10));
+             (*this->moA_).row((irow+6)).swap((*this->moA_).row(irow+7));
+             (*this->moA_).row((irow+7)).swap((*this->moA_).row(irow+10));
+             (*this->moA_).row((irow+8)).swap((*this->moA_).row(irow+9));
+             ibase+=10;
+             }
+//           g functions in cartesian --> swap
+           else if (L==4){
+             irow = ibase-1;
+             for(auto ishift=0;ishift<7;ishift++) {
+               (*this->moA_).row((irow+(15-ishift))).swap((*this->moA_).row(irow+(1+ishift)));
+               }
+             ibase+=15;
+             }
+//           h function in cartesian --> swap
+           else if (L==5){
+             irow = ibase-1;
+             for(auto ishift=0;ishift<10;ishift++) {
+               (*this->moA_).row((irow+(21-ishift))).swap((*this->moA_).row(irow+(1+ishift)));
+               }
+             ibase+=21;
+             }
+//           I function in cartesian --> swap
+           else if (L==6){
+             irow = ibase-1;
+             for(auto ishift=0;ishift<14;ishift++) {
+               (*this->moA_).row((irow+(28-ishift))).swap((*this->moA_).row(irow+(1+ishift)));
+               }
+             ibase+=28;
+             }
+//           K function in cartesian --> swap
+           else if (L==7){
+             irow = ibase-1;
+             for(auto ishift=0;ishift<18;ishift++) {
+               (*this->moA_).row((irow+(36-ishift))).swap((*this->moA_).row(irow+(1+ishift)));
+               }
+             ibase+=36;
+             }
+           else {this->fileio_->out<<"L>7? Really? not yet implemented"<<endl;};
+       };
+     prettyPrint(this->fileio_->out,(*this->moA_),"APS PRINT GUESS SWAP");
+   };
+////APE
+//
+} // Namespace ChronusQ

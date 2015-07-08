@@ -23,48 +23,96 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
-#include "fileio.h"
+#include <fileio.h>
 using ChronusQ::FileIO;
 //-------------//
 // constructor //
 //-------------//
-FileIO::FileIO(char *nm_input) {
+FileIO::FileIO(std::string nm_input) {
   char   testChar;
   int    testInt;
   long   testLong;
   float  testFloat;
   double testDouble;
-  sizeInt_    = sizeof(testInt)   /sizeof(testChar);
-  sizeLong_   = sizeof(testLong)  /sizeof(testChar);
-  sizeFloat_  = sizeof(testFloat) /sizeof(testChar);
-  sizeDouble_ = sizeof(testDouble)/sizeof(testChar);
+  this->sizeInt_    = sizeof(testInt)   /sizeof(testChar);
+  this->sizeLong_   = sizeof(testLong)  /sizeof(testChar);
+  this->sizeFloat_  = sizeof(testFloat) /sizeof(testChar);
+  this->sizeDouble_ = sizeof(testDouble)/sizeof(testChar);
 
-  name_in   = new char[MAXNAMELEN];
-  name_out  = new char[MAXNAMELEN];
-  name_scr  = new char[MAXNAMELEN];
-  name_bin  = new char[MAXNAMELEN];
-
-  if(nm_input==NULL) {
-    this->out<<"Error: input filename required! "<<endl;
-    throw 1001;
+  if(nm_input.empty()) {
+    CErr("Fatal: Input File Required");
   } else {
-    strcpy(name_in,nm_input);
-    strcat(name_in,".inp");
-    in.open(name_in,ios::in);
-    if(in.fail()) throw 1002;
+    this->name_in = nm_input + ".inp";
+    this->in.open(name_in,ios::in);
+    if(this->in.fail()) CErr("Unable to open "+this->name_in);
 
-    strcpy(name_out,nm_input);
-    strcat(name_out,".out");
-    out.open(name_out,ios::out);
-    if(out.fail()) throw 1003;
+    this->name_out = nm_input + ".out";
+    this->out.open(name_out,ios::out);
+    if(this->out.fail()) CErr("Unable to open "+this->name_out);
 
     // scratch file and binary files will be initialized in iniFileIO
-    strcpy(name_scr,nm_input);
-    strcat(name_scr,".scr");
-    strcpy(name_bin,nm_input);
-    strcat(name_bin,".bin");
+    this->name_scr = nm_input + ".scr";
+    this->name_bin = nm_input + ".bin";
   };
 };
+FileIO::FileIO(std::vector<std::string> nm_input) {
+  char   testChar;
+  int    testInt;
+  long   testLong;
+  float  testFloat;
+  double testDouble;
+  this->sizeInt_    = sizeof(testInt)   /sizeof(testChar);
+  this->sizeLong_   = sizeof(testLong)  /sizeof(testChar);
+  this->sizeFloat_  = sizeof(testFloat) /sizeof(testChar);
+  this->sizeDouble_ = sizeof(testDouble)/sizeof(testChar);
+
+  if(nm_input.size()==0) CErr("Fatal: Input File Required");
+  cout << "HERE" << endl;
+
+  std::string inputTag = "--inp=";
+  std::string outputTag = "--out=";
+  std::string scrTag = "--scr=";
+  std::string binTag = "--bin=";
+  for(auto i = 0; i < nm_input.size(); ++i) {
+    if(!nm_input[i].compare(0,inputTag.length(),inputTag)){
+      nm_input[i].erase(0,inputTag.length());
+      this->name_in = nm_input[i];
+    } else if(!nm_input[i].compare(0,outputTag.length(),outputTag)){
+      nm_input[i].erase(0,outputTag.length());
+      this->name_out = nm_input[i];
+    } else if(!nm_input[i].compare(0,scrTag.length(),scrTag)){
+      nm_input[i].erase(0,scrTag.length());
+      this->name_scr = nm_input[i];
+    } else if(!nm_input[i].compare(0,binTag.length(),binTag)){
+      nm_input[i].erase(0,binTag.length());
+      this->name_bin = nm_input[i];
+    } else CErr("Input \""+nm_input[i]+"\" not recognized");
+  }
+  cout << "HERE" << endl;
+
+  if(this->name_in.empty()) CErr("Fatal: Must specify an input file");
+  if(this->name_out.empty()) this->name_out = this->name_in + ".out";
+  if(this->name_scr.empty()) this->name_scr = this->name_in + ".scr";
+  if(this->name_bin.empty()) this->name_bin = this->name_in + ".bin";
+
+  this->in.open(name_in,ios::in);
+  this->out.open(name_out,ios::out);
+
+  if(this->in.fail()) CErr("Unable to open "+this->name_in);
+  if(this->out.fail()) CErr("Unable to open "+this->name_out);
+};
+//------------//
+// destructor //
+//------------//
+FileIO::~FileIO() {
+  if(in.is_open()) in.close();
+  if(scr.is_open()) scr.close();
+  if(bin.is_open()) bin.close();
+  if(scr.is_open()) scr.close();
+  if(bin.is_open()) bin.close();
+  if(out.is_open()) out.close();
+};
+
 //-------------------//
 // initialize FileIO //
 //-------------------//
@@ -96,6 +144,8 @@ void FileIO::iniFileIO(bool restart) {
     writePointer[i+MAXBLOCK] = 0;
   };
 };
+
+
 //-------------------------------------------------//
 // initialize blocks                               //
 //   only assign block pointer                     //
@@ -126,24 +176,15 @@ void FileIO::writeBlock(){
   bin.seekp(0,ios::beg);
   bin.write(charStorage,charLen);
 };
-//------------//
-// destructor //
-//------------//
-FileIO::~FileIO() {
-  if(in.is_open()) in.close();
-  if(scr.is_open()) scr.close();
-  if(bin.is_open()) bin.close();
-  if(scr.is_open()) scr.close();
-  if(bin.is_open()) bin.close();
-  if(remove(name_scr)!=0) out<<"Error when deleting scratch file!"<<endl;
-  if(out.is_open()) out.close();
-};
+
+
 //---------------------------------------------------------------------------------------------//
 // read & write scratch and binary files                                                       //
 //  io() is a wrapper to convert different types of variables to character storage requirement //
 //  rw() is operates read|write on scratch and binary files                                    //
 //---------------------------------------------------------------------------------------------//
-void FileIO::io(char *op, int blockNumber, char *file, char *storage, int len, int offset, char *offsetType) {
+/*
+void FileIO::io(std::string op, int blockNumber, std:string file, std::string storage, int len, int offset, std::string offsetType) {
   int cOffset = offset;
   if(offset>0&&offsetType!=NULL) cOffset = charOffset(offset,offsetType);
   try {this->rw(op, blockNumber, file, storage, len, cOffset);}
@@ -236,7 +277,7 @@ void FileIO::rw(char *op, int blockNumber, char *file, char *charStorage, int ch
 //----------------------------------------//
 // return offset in terms of sizeof(char) //
 //----------------------------------------//
-int FileIO::charOffset(int offset, char *offsetType) {
+int FileIO::charOffset(int offset, std::string offsetType) {
   strupr(offsetType);
   if(!strcmp(offsetType,"CHAR")) return offset;
   else if(!strcmp(offsetType,"INT")) return offset*sizeInt_;
@@ -246,3 +287,4 @@ int FileIO::charOffset(int offset, char *offsetType) {
   out<<"Unrecognized offset type! E#:"<<1020<<endl;
   exit(1);
 };
+*/

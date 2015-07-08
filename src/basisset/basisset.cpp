@@ -23,7 +23,7 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
-#include "basisset.h"
+#include <basisset.h>
 using ChronusQ::atom; 
 using ChronusQ::Molecule;
 using ChronusQ::BasisSet;
@@ -42,14 +42,15 @@ BasisSet::BasisSet(int nBasis, int nShell) {
 // initialize memory //
 //-------------------//
 void BasisSet::iniBasisSet(){
+  // FIXME Need to move these over to unique_ptr
   ao = new (nothrow) AOCartesian[this->nBasis_];
-  if(ao==NULL) throw 4000;
+  if(ao==NULL) CErr("BasisSet::AOCartesian Allocation");
   shells = new (nothrow) Shell[this->nShell_];
-  if(shells==NULL) throw 4001;
+  if(shells==NULL) CErr("BasiSset::Shell Allocation");
   sortedShells = new (nothrow) int[this->nShell_];
-  if(sortedShells==NULL) throw 4002;
+  if(sortedShells==NULL) CErr("BasisSet::sortedShells");
   shellPairs = new (nothrow) ShellPair[this->nShellPair_];
-  if(shellPairs==NULL) throw 4003;
+  if(shellPairs==NULL) CErr("BasisSet::shellPairs");
 };
 //---------------------------------//
 // print out basis set information //
@@ -83,15 +84,39 @@ void BasisSet::printAO(ostream &output){
 //--------------------------------------------//
 // Read basis set information from input file //
 //--------------------------------------------//
-void BasisSet::readBasisSet(FileIO *fileio, Molecule *mol){
+void BasisSet::readBasisSet(FileIO * fileio, Molecule * mol){
   int i,j,n,k;
-  char readString[MAXNAMELEN];
+  // TODO Have this be read to a string
+  // TODO Check for basis in BASIS_PATH (should be set up though cmake)
+  std::string readString;
   fileio->in>>readString;
-  ifstream *fileBasis = new ifstream(readString);
-  if(fileBasis==NULL) throw 4004;
+  cout << readString <<endl;
+/*
+  std::unique_ptr<ifstream> fileBasis;
+  if(fexists(BASIS_PATH+"/"+readString)) {
+    fileBasis = std::unique_ptr<ifstream>(new ifstream(readString));
+  } else {
+    cout << "Could not find basis set file" << endl;
+    exit(EXIT_FAILURE);
+  }
+*/
+  std::string basis_path = "/" + readString;
+  basis_path.insert(0,BASIS_PATH);
+  std::unique_ptr<ifstream> fileBasis(new ifstream (basis_path));
+  if(fileBasis->fail()){ // Check if file is in BASIS_PATH
+    fileBasis.reset();
+    fileBasis = std::unique_ptr<ifstream>(new ifstream(readString));
+    if(fileBasis->fail()) { // Check if file is in PWD
+      CErr("Could not find basis set file",fileio->out);
+    } else {
+      fileio->out << "Reading Basis Set from: ./" << readString<< endl;
+    }
+  } else {
+    fileio->out << "Reading Basis Set from: " << basis_path<< endl;
+  }
   double threePI=math.pi*math.pi*math.pi,readNorm, readExp, readCoeff1, readCoeff2;
   int    nBasis, nShell, readNPGTO, L;
-  char   atomStr[MAXNAMELEN];
+  std::string   atomStr;
   //----------------------------------------------------------//
   // Read cartesian basis functions                           //
   // 1. first round of reading tests the dimension of problem //
@@ -100,15 +125,17 @@ void BasisSet::readBasisSet(FileIO *fileio, Molecule *mol){
   for(i=0; i<20; i++) this->nLShell_[i] = 0;
   this->nShell_=0;
   for(i=0; i<mol->nAtoms(); i++){
-    strcpy(atomStr,"-");
-    strcat(atomStr,atom[mol->index(i)].symbol);
-    while(strcmp(atomStr,readString)&&(!fileBasis->eof())) *fileBasis>>readString;
+    atomStr = "-";
+    atomStr = atomStr+atom[mol->index(i)].symbol;
+    while(atomStr.compare(readString)&&(!fileBasis->eof())) *fileBasis>>readString;
     *fileBasis >> readString;
-    while(strcmp(readString,"****")) { 
+    while(readString.compare("****")) { 
       *fileBasis >> readNPGTO;
       *fileBasis >> readNorm ;
-      if(!strcmp(readString,"S")||!strcmp(readString,"P")||!strcmp(readString,"D")||
-         !strcmp(readString,"F")||!strcmp(readString,"G")){
+      // TODO Extend this to higher angular momentum (follow though with the rest of
+      //      the code)
+      if(!(readString.compare("S"))||!(readString.compare("P"))||!(readString.compare("D"))||
+         !(readString.compare("F"))||!(readString.compare("G"))){
         //S,P,D,F,G shell
         L = HashL(readString);
         (this->nLShell_[L])++;
@@ -116,7 +143,9 @@ void BasisSet::readBasisSet(FileIO *fileio, Molecule *mol){
         (this->nBasis_)=(this->nBasis_)+HashNAOs(L);
         (this->nPrimitive_)=(this->nPrimitive_)+readNPGTO*HashNAOs(L);
         for(j=0;j<2*readNPGTO;j++) *fileBasis>>readString;
-      } else if(!strcmp(readString,"SP")){
+      // q
+      // Is this obsolete?
+      } else if(!(readString.compare("SP"))){
         //SP shell
         (this->nLShell_[0])++;
         (this->nLShell_[1])++;
@@ -127,36 +156,33 @@ void BasisSet::readBasisSet(FileIO *fileio, Molecule *mol){
         for(j=0;j<3*readNPGTO;j++) *fileBasis>>readString;
       } else {
         fileio->out<<"Error: unrecognized shell symbol!"<<endl;
-        throw 4005;
+        CErr("Unrecognized Shell symbol");
       };
       *fileBasis>>readString;
     };
     fileBasis->seekg(0);
   };
   this->nShellPair_=this->nShell_*(this->nShell_+1)/2;
-  try {
-    this->iniBasisSet();
-  } catch (int msg) {
-    fileio->out<<"Unable to allocate memory for BasisSet! E#:"<<msg<<endl;
-    exit(1);
-  };
+  this->iniBasisSet();
 
   fileBasis->seekg(0);
   nBasis = 0;
   nShell = 0;
   for(i=0; i<mol->nAtoms(); i++){
-    strcpy(atomStr,"-");
-    strcat(atomStr,atom[mol->index(i)].symbol);
-    while(strcmp(atomStr,readString)&&(!fileBasis->eof())) *fileBasis>>readString;
+    atomStr="-";
+    atomStr=atomStr+atom[mol->index(i)].symbol;
+    while((atomStr.compare(readString))&&(!fileBasis->eof())) *fileBasis>>readString;
     *fileBasis >> readString;
-    while(strcmp(readString,"****")) { 
+    while(readString.compare("****")) { 
       *fileBasis >> readNPGTO;
       *fileBasis >> readNorm ;
-      if(!strcmp(readString,"S")||!strcmp(readString,"P")||!strcmp(readString,"D")||
-         !strcmp(readString,"F")||!strcmp(readString,"G")){
+      // TODO Extend this to higher angular momentum (follow though with the rest of
+      //      the code)
+      if((!readString.compare("S"))||!(readString.compare("P"))||!(readString.compare("D"))||
+         !(readString.compare("F"))||!(readString.compare("G"))){
         //S,P,D,F,G shell
         L = HashL(readString);
-        strcpy((this->shells[nShell]).name,readString);
+	strcpy(this->shells[nShell].name,readString.c_str());
         (this->shells[nShell]).center = i;
         (this->shells[nShell]).SP     = false;
         (this->shells[nShell]).L      = L;
@@ -206,7 +232,7 @@ void BasisSet::readBasisSet(FileIO *fileio, Molecule *mol){
         };
         nShell++;
         nBasis=nBasis+HashNAOs(L);
-      } else if(!strcmp(readString,"SP")){
+      } else if(!(readString.compare("SP"))){
         //SP Shell
         strcpy((this->shells[nShell]).name,"S");
         (this->shells[nShell]).center = i;
@@ -220,7 +246,6 @@ void BasisSet::readBasisSet(FileIO *fileio, Molecule *mol){
 	for(k=0;k<3;k++) (this->ao[nBasis]).l[k] = 0;
         (this->ao[nBasis]).shIndex = nShell;
         (this->ao[nBasis]).divConst = 1;
-
         strcpy((this->shells[nShell+1]).name,"P");
         (this->shells[nShell+1]).center = i;
         (this->shells[nShell+1]).L      = 1;
@@ -311,7 +336,7 @@ void BasisSet::printShellPair(ostream &output){
 //---------------------------------------//
 // print a general basis set information //
 //---------------------------------------//
-void BasisSet::printInfo(FileIO *fileio,Controls *controls) {
+void BasisSet::printInfo(FileIO * fileio,Controls * controls) {
   fileio->out<<"\nBasis Function Information:"<<endl;
   fileio->out<< std::setw(15) << "nBasis =" << std::setw(8)<< nBasis_<< std::setw(5) <<" "
 	     << std::setw(20) << "nPrimitive =" << std::setw(8)<< nPrimitive_<< endl;
@@ -320,13 +345,13 @@ void BasisSet::printInfo(FileIO *fileio,Controls *controls) {
   fileio->out<< std::setw(15) << "nDShell =" << std::setw(8)<< nLShell_[2]<< std::setw(5) <<" "
 	     << std::setw(20) << "nFShell =" << std::setw(8)<< nLShell_[3]<< endl;
   fileio->out<< std::setw(15) << "nGShell =" << std::setw(8)<< nLShell_[4]<< endl;
-  if(controls->printLevel>=2) printAO(fileio->out);
-  if(controls->printLevel>=3) printShellPair(fileio->out);
+  if(controls->printLevel>=2) printAtomO(fileio->out);
+  //if(controls->printLevel>=3) printShellPair(fileio->out);
 };
 //--------------------------------------------------------------//
 // create and sort shell pairs according to the angular momenta //
 //--------------------------------------------------------------//
-void BasisSet::createShellPair(Molecule *mol) {
+void BasisSet::createShellPair(Molecule * mol) {
   int i,j,k,l,n=0;
   // sort shells according to:
   //   (1) angular momentum

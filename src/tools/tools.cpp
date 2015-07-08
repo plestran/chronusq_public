@@ -23,7 +23,8 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
-#include "tools.h"
+#include <tools.h>
+#include <atoms.h>
 //--------------------------------------//
 // factorial function:  t! = 1*2*3...*t //
 //--------------------------------------//
@@ -31,7 +32,7 @@ namespace ChronusQ {
 double factorial(int t){
   int i;
   double tmp = 1.0;
-  if (t<0 ) throw 10000;
+  if (t<0 ) CErr("Factorial (t!) only defined on domain t in [0,inf)");
   if (t==0) return 1.0;
   else {
     for(i=1;i<=t;i++) tmp *= i;
@@ -44,7 +45,7 @@ double factorial(int t){
 double doubleFact(int t){
   int i;
   double tmp = 1.0;
-  if (t<0) throw 10001;
+  if (t<0 ) CErr("Double factorial (t!!) only defined on domain t in [0,inf)");
   if (t==0) return 1.0;
   else  {
     for(i=1;i<=t;i++) tmp *= (2*i-1);
@@ -69,13 +70,13 @@ double powerInt(double base, int order){
 //---------------------------------------------------------//
 double polyCoeff(int l, int i){
   if (l>= i) return factorial(l)/( factorial(i)*factorial(l-i) );
-  else throw 10002;
+  else throw 10002; // FIXME need a CErr for this, don't understand the error
 };
 //-----------------------------------------------//
 // (x+pA)^a*(x+pB)^b = sum[coeff * x^k]; k<=a+b  //
 //-----------------------------------------------//
 double kCoeff(int k, int a, int b, double pA, double pB){
-  if(a<0||b<0||k>a+b) throw 10003;
+  if(a<0||b<0||k>a+b) throw 10003; // FIXME need a CErr for this, don't understand the error
   int from, to;
   int it,i,j;
   double tmp=0;
@@ -106,19 +107,48 @@ void strlwr(char *a) {
     ++a;
   }
 };
+//-----------------------------//
+//  make give string to lower  //
+//  ---------------------------//
+std::string stringlower(std::string str){
+  for (int i =0;i<str.size();i++){
+    str[i]=tolower(str[i]);
+  }; 
+  return str;
+};
+
+//-----------------------------//
+// return uppercase of the str //
+// ----------------------------//
+std::string stringupper(std::string str){
+  std::string ucStr(str);
+  for (auto i=0;i<str.size();i++){
+    ucStr[i]=toupper(str[i]);
+  }
+  return ucStr;
+}
 //-----------------------------------------------------------------------------//
 // convert atomic symbol and mass to an index in the table of atom in atoms.h  //
 //-----------------------------------------------------------------------------//
-int HashAtom(char *symbol, int massNumber) { 
-  strlwr(symbol);
-  if(!strcmp(symbol,"h")&&(massNumber==0||massNumber==1)) return 0; 
-  if(!strcmp(symbol,"d")||(!strcmp(symbol,"h")&&massNumber==2)) return 1; 
-  if(!strcmp(symbol,"t")||(!strcmp(symbol,"h")&&massNumber==3)) return 2; 
-  if(!strcmp(symbol,"he")&&(massNumber==0||massNumber==3)) return 3; 
-  if(!strcmp(symbol,"he")&&massNumber==4) return 4; 
-  if(!strcmp(symbol,"li")&&(massNumber==0||massNumber==6)) return 5; 
-  if(!strcmp(symbol,"li")&&massNumber==7) return 6; 
-  if(!strcmp(symbol,"c")) return 11;
+int HashAtom(std::string element, int massNumber) { 
+  element = stringlower(element);
+  std::string currentAtom;
+  
+  for (auto i=0;i<atom.size();i++){
+    currentAtom=atom[i].symbol;
+    currentAtom=stringlower(currentAtom);
+    if (massNumber>0){
+      if (!element.compare(currentAtom)&&massNumber==atom[i].massNumber){
+        return i;
+        break;
+      };
+    };
+    
+    if (!element.compare(currentAtom)&&!atom[i].stable.compare("Y")){
+      return i;
+      break;
+    };
+  };
   return -1; 
 }; 
 //-------------------------------------------------------------------------//
@@ -128,27 +158,72 @@ int HashNAOs(int L) {
   return (L+1)*(L+2)/2;
 };
 
-int HashNAOs(char *symbol) { 
-  strupr(symbol);
-  if(!strcmp(symbol,"S")) return 1; 
-  if(!strcmp(symbol,"P")) return 3; 
-  if(!strcmp(symbol,"D")) return 6; 
-  if(!strcmp(symbol,"F")) return 10; 
-  if(!strcmp(symbol,"G")) return 15;
-  if(!strcmp(symbol,"H")) return 21;
+int HashNAOs(std::string symbol) { 
+  symbol = stringupper(symbol);
+  if(!symbol.compare("S")) return 1; 
+  if(!symbol.compare("P")) return 3; 
+  if(!symbol.compare("D")) return 6; 
+  if(!symbol.compare("F")) return 10; 
+  if(!symbol.compare("G")) return 15;
+  if(!symbol.compare("H")) return 21;
   return -1; 
 }; 
 //-------------------------------------------//
 // convert shell symbol to angular momentum  //
 //-------------------------------------------//
-int HashL(char *symbol) {
-  strupr(symbol);
-  if(!strcmp(symbol,"S")) return 0; 
-  if(!strcmp(symbol,"P")) return 1; 
-  if(!strcmp(symbol,"D")) return 2; 
-  if(!strcmp(symbol,"F")) return 3; 
-  if(!strcmp(symbol,"G")) return 4;
+int HashL(std::string symbol) {
+  if(!symbol.compare("S")) return 0; 
+  if(!symbol.compare("P")) return 1; 
+  if(!symbol.compare("D")) return 2; 
+  if(!symbol.compare("F")) return 3; 
+  if(!symbol.compare("G")) return 4; 
+  if(!symbol.compare("H")) return 5; 
+  if(!symbol.compare("I")) return 6; 
+  if(!symbol.compare("J")) return 7; 
+  if(!symbol.compare("K")) return 8; 
+  if(!symbol.compare("L")) return 9; 
+  if(!symbol.compare("M")) return 10; 
+  if(!symbol.compare("N")) return 11; 
+  if(!symbol.compare("O")) return 12; 
+  if(!symbol.compare("Q")) return 13; 
+  if(!symbol.compare("R")) return 14; 
+  if(!symbol.compare("T")) return 15; 
+  if(!symbol.compare("U")) return 16; 
+  if(!symbol.compare("V")) return 17; 
+  if(!symbol.compare("W")) return 18; 
+  if(!symbol.compare("X")) return 19; 
+  if(!symbol.compare("Y")) return 20; 
+  if(!symbol.compare("Z")) return 21; 
   return -1; 
+};
+//-------------------------------------------//
+// convert angular momentum  to shell        //
+//-------------------------------------------//
+std::string HashS(int L) {
+  std::string sym;
+  if(L==0) sym="S"; 
+  if(L==1) sym="P"; 
+  if(L==2) sym="D"; 
+  if(L==3) sym="F"; 
+  if(L==4) sym="G"; 
+  if(L==5) sym="H"; 
+  if(L==6) sym="I"; 
+  if(L==7) sym="J"; 
+  if(L==8) sym="K"; 
+  if(L==9) sym="L"; 
+  if(L==10) sym="M"; 
+  if(L==11) sym="N"; 
+  if(L==12) sym="O"; 
+  if(L==13) sym="Q"; 
+  if(L==14) sym="R"; 
+  if(L==15) sym="T"; 
+  if(L==16) sym="U"; 
+  if(L==17) sym="V"; 
+  if(L==18) sym="W"; 
+  if(L==19) sym="X"; 
+  if(L==20) sym="Y"; 
+  if(L==21) sym="Z"; 
+  return sym; 
 };
 //----------------------------------------------------//
 // convert angular momentum to AO index in a shell    //

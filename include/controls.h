@@ -25,7 +25,9 @@
  */
 #ifndef INCLUDED_CONTROLS
 #define INCLUDED_CONTROLS
-#include "global.h"
+#include <global.h>
+#include <cerr.h>
+#include <tools.h>
 
 /****************************/
 /* Error Messages 6000-6999 */
@@ -47,15 +49,29 @@ public:
   bool  	hybridDFT; 	// DFT is a hybrid functional
   bool  	restart;        // restart the calculation
   bool  	directTwoE;     // if direct two-electron will performed
+  bool          buildn4eri;     // Build N^4 AO ERI tensor
+  bool          doDF;           // Density fitting (RI) flag
+  bool          doDipole;       // Use Libint dipole integrals?
+  bool          doQuadpole;     // Use Libint quadrapole integrals?
+  bool          doOctpole;      // Use Libint octapole integrals?
+  bool          doSDR;
   double 	thresholdS;
   double 	thresholdAB;
   double	thresholdSchawrtz;
   int    	guess;         	// how to get the initial guess
-  char   	gauFChkName[MAXNAMELEN];	// Gaussian formatted checkpoint filename
+  int           nthreads;       // Number of OpenMP threads
+  int           SDMethod;
+  int           SDNSek;
+  std::string   gauFChkName;	// Gaussian formatted checkpoint filename
+  std::string   gauMatElName;   // Gaussian raw matrix element file
 
   Controls(){;};
   ~Controls(){;};
   void iniControls();
+  void readSMP(int &);
+  void readPSCF(std::fstream &,std::fstream &);
+  void readDebug(std::string);
+  void printSettings(std::fstream &);
 };
 } // namespace ChronusQ
 #endif

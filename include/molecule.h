@@ -25,11 +25,11 @@
  */
 #ifndef INCLUDED_MOLECULES
 #define INCLUDED_MOLECULES
-#include "global.h"
-#include "fileio.h"
-#include "atoms.h"
-#include "matrix.h"
-#include "controls.h"
+#include <global.h>
+#include <cerr.h>
+#include <fileio.h>
+#include <atoms.h>
+#include <controls.h>
 
 /****************************/
 /* Error Messages 2000-2999 */
@@ -37,32 +37,54 @@
 
 namespace ChronusQ {
 class Molecule {
-  int      nAtoms_;      // number of atoms in the system
-  int      charge_;      // total charge
-  int      spin_;        // spin multiplicity
-  int      nTotalE_;     // total number of electrons
-  int      size_;        // size of the object in terms of sizeof(char)
-  int     *index_;       // index of atom in the atoms[] array
-  double   energyNuclei_;// nuclear repulsion energy
-  Matrix<double>  *cart_;        // cartesian coordinates
-
+  int                          nAtoms_;      // number of atoms in the system
+  int                          charge_;      // total charge
+  int                          spin_;        // spin multiplicity
+  int                          nTotalE_;     // total number of electrons
+  int                          size_;        // size of the object in terms of sizeof(char)
+  int                         *index_;       // index of atom in the atoms[] array
+  double                       energyNuclei_;// nuclear repulsion energy
+  std::unique_ptr<RealMatrix>  cart_;        // cartesian coordinates
+//APS
+  std::unique_ptr<RealMatrix>  COM_;         // center of mass coordinate or center of nuclear charges 
+//APE
+  std::unique_ptr<RealMatrix>  momentOfInertia_; // Moment of inertia
+  std::unique_ptr<RealMatrix>  rIJ_;             // Interatomic distance matrix
 public:
 
   // constructor
-  Molecule(int nAtoms=0,FileIO *fileio=NULL){ if(nAtoms>0) iniMolecule(nAtoms,fileio);};
+  Molecule(int nAtoms=0,FileIO * fileio=NULL){ if(nAtoms>0) iniMolecule(nAtoms,fileio);};
+  Molecule(Atoms atm, FileIO *fileio=NULL){
+    this->iniMolecule(1,fileio);
+    auto n = HashAtom(atm.symbol,atm.massNumber);
+    if(n!=-1) index_[0] = n;
+    else
+      CErr("Error: invalid atomic symbol or mass number!",fileio->out);
+    nTotalE_ = atm.atomicNumber;
+    (*cart_)(0,0) = 0.0;
+    (*cart_)(1,0) = 0.0;
+    (*cart_)(2,0) = 0.0;
+    energyNuclei_ = 0.0;
+    this->computeRij();
+    this->toCOM(0);
+    this->computeI();
+  }
   ~Molecule(){
     delete[] index_;
-    delete   cart_;
   };
-  void iniMolecule(int,FileIO*);
-
+  void iniMolecule(int,FileIO *);
+//APS Compute center of mass (or center of nuclear charges) of a molecule
+  void toCOM(int Iop0);    
+//APE
+  void computeI();
+  void computeRij();
   // print
-  void printInfo(FileIO*,Controls*);
+  void printInfo(FileIO *,Controls *);
 
   // access to private data
   inline int index(int i) { return this->index_[i];};
   inline int nAtoms() {return this->nAtoms_;};
-  inline Matrix<double> *cart() {return this->cart_;}
+  inline RealMatrix* cart() {return this->cart_.get();}
   inline int charge() {return this->charge_;}
   inline int spin() {return this->spin_;}
   inline int nTotalE() {return this->nTotalE_;};
@@ -72,11 +94,11 @@ public:
   inline double energyNuclei() { return this->energyNuclei_;};
 
   // read from input file
-  void readMolecule(FileIO*);
+  void readMolecule(FileIO *, std::istream &);
 
   // read|write scratch|binary files
-  void ioRead(FileIO*);
-  void ioWrite(FileIO*);
+  void ioRead(FileIO *);
+  void ioWrite(FileIO *);
 
   /*************************/
   /* MPI Related Routines  */

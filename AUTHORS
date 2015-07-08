@@ -1,0 +1,13 @@
+Name                   Institution                      Major Contributions
+---------------------------------------------------------------------------
+Xiaosong Li            University of Washington         Principal Developer
+
+David Williams-Young   University of Washington         General infrastructure, Parallelism, Density Fitting
+                                                        Post-SCF methods, Real-Time Quantum Dynamics,
+                                                        Response Theory
+
+Sajan Silwal           University of Washington         General infrastructure, SCF
+
+Feizhi Ding            University of Washington         Real-Time Quantum Dynamics
+
+Hongbin Liu            University of Washington         General infrastructure, Post-SCF methods
