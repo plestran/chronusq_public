@@ -1,6 +1,5 @@
-
-/* 
- *  The Chronus Quantum (ChronusQ) software package is high-performace 
+/*
+ * Chronus Quantum (ChronusQ) software package is high-performace 
  *  computational chemistry software with a strong emphasis on explicitly 
  *  time-dependent and post-SCF quantum mechanical methods.
  *  
@@ -68,11 +67,6 @@ void BasisSet::basisSetRead(FileIO * fileio, Molecule * mol){
   double readNorm,expval,coeffD,coeffDp;
   std::string coefval, coefvalp;
   std::string nameOfAtom;
-  struct basisSet_libint{
-    std::string atomName;
-    std::vector<libint2::Shell> refShell;
-  };
-  std::vector <basisSet_libint> allBasis;
   std::vector <libint2::Shell> refShell;
   center={{0,0,0}};
   while (!(fileBasis->eof())){
@@ -162,7 +156,7 @@ void BasisSet::basisSetRead(FileIO * fileio, Molecule * mol){
       };
      *fileBasis >> readString;
     }
-    allBasis.push_back({nameOfAtom,refShell});
+    this->allBasis.push_back({nameOfAtom,refShell});
     refShell.resize(0);
   }
   count=0;
@@ -171,18 +165,18 @@ void BasisSet::basisSetRead(FileIO * fileio, Molecule * mol){
    center = {{(*mol->cart())(0,i),
               (*mol->cart())(1,i),
               (*mol->cart())(2,i)}};
-   for(auto k=0; k<allBasis.size();++k){
-     if (atomStr.compare(allBasis[k].atomName)==0){
-       for (auto j=0;j<allBasis[k].refShell.size();++j){
-         this->shells_libint.push_back(LIShell{allBasis[k].refShell[j].alpha,{allBasis[k].refShell[j].contr[0]},center});
-         shells_libint_unnormal.push_back(LIShell{allBasis[k].refShell[j].alpha,{allBasis[k].refShell[j].contr[0]},center});
-	 int L=allBasis[k].refShell[j].contr[0].l;
+   for(auto k=0; k<this->allBasis.size();++k){
+     if (atomStr.compare(this->allBasis[k].atomName)==0){
+       for (auto j=0;j<this->allBasis[k].refShell.size();++j){
+         this->shells_libint.push_back(LIShell{this->allBasis[k].refShell[j].alpha,{this->allBasis[k].refShell[j].contr[0]},center});
+         shells_libint_unnormal.push_back(LIShell{this->allBasis[k].refShell[j].alpha,{this->allBasis[k].refShell[j].contr[0]},center});
+	 int L=this->allBasis[k].refShell[j].contr[0].l;
 	 if (this->nLShell_.size()==L) this->nLShell_.push_back(0);
          temp=(this->nLShell_)[L];
          (this->nLShell_)[L]=temp+1;
 	 this->shells_libint[count].renorm();
 	 count++;
-	 readNPGTO=allBasis[k].refShell[j].alpha.size();
+	 readNPGTO=this->allBasis[k].refShell[j].alpha.size();
 	 this->nBasis_=(this->nBasis_)+HashNAOs(L);
 	 this->atomNum.push_back(i);
          (this->nPrimitive_)=(this->nPrimitive_)+readNPGTO*HashNAOs(L);
@@ -197,7 +191,7 @@ void BasisSet::basisSetRead(FileIO * fileio, Molecule * mol){
        }
        break;
      }
-     if (k==allBasis.size()-1){
+     if (k==this->allBasis.size()-1){
        fileio->out<<"Error: unrecognized shell symbol!"<<endl;
        CErr("Unrecognized Shell symbol");
      }
@@ -207,15 +201,6 @@ void BasisSet::basisSetRead(FileIO * fileio, Molecule * mol){
   fileBasis->close();
 }
 
-void BasisSet::makeMap(Molecule *  mol) {
-  if(!this->convToLI) this->convShell(mol);
-  int n = 0;
-  for( auto shell: this->shells_libint) {
-    this->mapSh2Bf.push_back(n);
-    n += shell.size();
-  }
-  this->haveMap = true;
-}
 
 void BasisSet::computeShBlkNorm(bool RHF, Molecule * mol, const RealMatrix *DAlpha,
                                 const RealMatrix *DBeta){
@@ -293,5 +278,14 @@ void BasisSet::printAtomO(ostream &output){
   } 
   output << bannerEnd <<endl;
 }
-#endif
 
+void BasisSet::makeMap(Molecule *  mol) {
+  if(!this->convToLI) this->convShell(mol);
+  int n = 0;
+  for( auto shell: this->shells_libint) {
+    this->mapSh2Bf.push_back(n);
+    n += shell.size();
+  }
+  this->haveMap = true;
+}
+#endif
