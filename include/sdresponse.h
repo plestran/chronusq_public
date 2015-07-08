@@ -109,7 +109,7 @@ public:
   void printExcitedStateEnergies(); 
   void printInfo();
   void formRM();
-  void DavidsonCIS();
+  void IterativeRPA();
 //dbwys
   inline void setNSek(int n){ this->nSek_  = n; this->nGuess_ = 2*n;};
   inline void setMeth(int n){ this->iMeth_ = n; this->initMeth();};

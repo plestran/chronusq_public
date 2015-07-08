@@ -550,7 +550,7 @@ void SDResponse::formRM(){
   cout << sigMOA -  TD.eigenvalues()(0).real()*rhoMOA<< endl;
 }
 
-void SDResponse::DavidsonCIS(){
+void SDResponse::IterativeRPA(){
 /*
   int nOVA = this->singleSlater_->nOVA();
   int nOVB = this->singleSlater_->nOVB();
