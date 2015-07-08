@@ -137,9 +137,6 @@ namespace ChronusQ {
   template<>
   void QuasiNewton<double>::formNewGuess(std::vector<bool> &resConv,int &NTrial, 
                                     int NNotConv, int &NOld, int &NNew){
-    int ILen;
-    if(this->doRestart_) ILen = this->nGuess_ - NNotConv;
-    else                 ILen = NTrial;
 
     RealCMMap TrialVecR(this->TVecRMem,0,0);
     RealCMMap TrialVecL(this->TVecLMem,0,0);
@@ -150,27 +147,11 @@ namespace ChronusQ {
     RealCMMap QL       (this->TVecLMem,0,0);
     RealCMMap RL       (this->ResLMem ,0,0);
 
+    new (&TrialVecR) RealCMMap(this->TVecRMem,this->N_,NTrial+NNotConv);
     new (&ResR) RealCMMap(this->ResRMem,this->N_,NTrial);
-    if(this->symmetrizedTrial_ || !this->isHermetian_)
+    if(this->symmetrizedTrial_ || !this->isHermetian_){
+      new (&TrialVecL) RealCMMap(this->TVecLMem,this->N_,NTrial+NNotConv);
       new (&ResL) RealCMMap(this->ResLMem,this->N_,NTrial);
-
-    if(this->doRestart_){ 
-      new (&TrialVecR) RealCMMap(this->TVecRMem,this->N_,NTrial);
-      if(this->symmetrizedTrial_ || !this->isHermetian_)
-        new (&TrialVecL) RealCMMap(this->TVecLMem,this->N_,NTrial);
-    } else {
-      new (&TrialVecR) RealCMMap(this->TVecRMem,this->N_,NTrial+NNotConv);
-      if(this->symmetrizedTrial_ || !this->isHermetian_)
-        new (&TrialVecL) RealCMMap(this->TVecLMem,this->N_,NTrial+NNotConv);
-    }
-
-    if(this->doRestart_){
-      this->allocGuess();
-      this->guessR_->block(0,0,this->N_,ILen) = 
-        TrialVecR.block(0,NTrial-ILen-1,this->N_,ILen);
-      if(this->symmetrizedTrial_ || !this->isHermetian_)
-        this->guessL_->block(0,0,this->N_,ILen) = 
-          TrialVecL.block(0,NTrial-ILen-1,this->N_,ILen);
     }
 
     RealVecMap ER(this->ERMem,NTrial);
@@ -185,19 +166,12 @@ namespace ChronusQ {
       //             if this criteria is not met.
       if(!resConv[k]) {
         new (&RR) RealCMMap(this->ResRMem + k*this->N_,this->N_,1);
-        if(this->symmetrizedTrial_)
+        new (&QR) RealCMMap(this->TVecRMem+(NTrial+INDX)*this->N_,this->N_,1);
+        if(this->symmetrizedTrial_ || !this->isHermetian_){
           new (&RL) RealCMMap(this->ResLMem + k*this->N_,this->N_,1);
-         
-        if(this->doRestart_){
-          new (&QR) RealCMMap(this->guessR_->data()+(ILen+INDX)*this->N_,this->N_,1);
-          if(this->symmetrizedTrial_)
-            new (&QL) RealCMMap(this->guessL_->data()+(ILen+INDX)*this->N_,this->N_,1);
-        } else {
-          new (&QR) RealCMMap(this->TVecRMem+(ILen+INDX)*this->N_,this->N_,1);
-          if(this->symmetrizedTrial_)
-            new (&QL) RealCMMap(this->TVecLMem+(ILen+INDX)*this->N_,this->N_,1);
+          new (&QL) RealCMMap(this->TVecLMem+(NTrial+INDX)*this->N_,this->N_,1);
         }
-        
+         
         this->formResidualGuess(ER(k),RR,QR,RL,QL);
         INDX++;
       }
@@ -206,20 +180,11 @@ namespace ChronusQ {
     // existing set using QR factorization
     int N,M,LDA,INFO;
     double * AMATR, * AMATL;
-    if(this->doRestart_){
-      N = this->guessR_->cols();
-      M = this->guessR_->rows();
-      LDA = this->guessR_->rows();
-      AMATR = this->guessR_->data();
-      if(this->symmetrizedTrial_ || !this->isHermetian_) AMATL = this->guessL_->data();
-      
-    } else {
-      N = TrialVecR.cols();
-      M = TrialVecR.rows();
-      LDA = TrialVecR.rows();
-      AMATR = TrialVecR.data();
-      if(this->symmetrizedTrial_ || !this->isHermetian_) AMATL = TrialVecL.data();
-    }
+    N = TrialVecR.cols();
+    M = TrialVecR.rows();
+    LDA = TrialVecR.rows();
+    AMATR = TrialVecR.data();
+    if(this->symmetrizedTrial_ || !this->isHermetian_) AMATL = TrialVecL.data();
     double *TAU = this->LAPACK_SCR;
     this->WORK = TAU + N;
   
@@ -230,11 +195,9 @@ namespace ChronusQ {
       dorgqr_(&M,&N,&N,AMATL,&LDA,TAU,this->WORK,&this->LWORK,&INFO);
     }
     // Update number of vectors
-    if(!this->doRestart_){
-      NOld = NTrial;
-      NNew = NNotConv;
-      NTrial += NNew;
-    }
+    NOld = NTrial;
+    NNew = NNotConv;
+    NTrial += NNew;
   }
   /** Run Micro Iteration **/
   template<>
@@ -311,7 +274,6 @@ namespace ChronusQ {
           (*this->guessL_) = UL;
         } 
         std::memset(this->SCR,0.0,this->LenScr*sizeof(double));
-        cout << (this->guessR_->adjoint())*(*this->guessR_)<< endl;
         int N = this->guessR_->cols();
         int M = this->guessR_->rows();
         int LDA = this->guessR_->rows();
@@ -328,7 +290,6 @@ namespace ChronusQ {
           dgeqrf_(&M,&N,AMATL,&LDA,TAU,this->WORK,&this->LWORK,&INFO);
           dorgqr_(&M,&N,&N,AMATL,&LDA,TAU,this->WORK,&this->LWORK,&INFO);
         }
-        cout << (this->guessR_->adjoint())*(*this->guessR_)<< endl;
 //      CErr();
 //      this->doRestart_ = false;
         break;
