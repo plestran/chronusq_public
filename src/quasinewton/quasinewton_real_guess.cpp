@@ -105,22 +105,8 @@ namespace ChronusQ {
     }
     // Normalize and orthogonalize the new guess vectors to the
     // existing set using QR factorization
-    int N,M,LDA,INFO;
-    double * AMATR, * AMATL;
-    N = TrialVecR.cols();
-    M = TrialVecR.rows();
-    LDA = TrialVecR.rows();
-    AMATR = TrialVecR.data();
-    if(this->symmetrizedTrial_ || !this->isHermetian_) AMATL = TrialVecL.data();
-    double *TAU = this->LAPACK_SCR;
-    this->WORK = TAU + N;
-  
-    dgeqrf_(&M,&N,AMATR,&LDA,TAU,this->WORK,&this->LWORK,&INFO);
-    dorgqr_(&M,&N,&N,AMATR,&LDA,TAU,this->WORK,&this->LWORK,&INFO);
-    if(this->symmetrizedTrial_ || !this->isHermetian_){
-      dgeqrf_(&M,&N,AMATL,&LDA,TAU,this->WORK,&this->LWORK,&INFO);
-      dorgqr_(&M,&N,&N,AMATL,&LDA,TAU,this->WORK,&this->LWORK,&INFO);
-    }
+    this->Orth(TrialVecR);
+    if(this->symmetrizedTrial_) this->Orth(TrialVecL);
     // Update number of vectors
     NOld = NTrial;
     NNew = NNotConv;

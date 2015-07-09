@@ -40,4 +40,19 @@ namespace ChronusQ {
     dorgqr_(&M,&N,&N,AMAT,&LDA,TAU,this->WORK,&this->LWORK,&INFO);
     
   }
+
+  template<>
+  void QuasiNewton<double>::Orth(RealCMMatrix &A){
+    int N   = A.cols();
+    int M   = A.rows();
+    int LDA = M;
+    int INFO;
+    double * AMAT = A.data();
+    double * TAU = this->LAPACK_SCR;
+    this->WORK = TAU + N;
+
+    dgeqrf_(&M,&N,AMAT,&LDA,TAU,this->WORK,&this->LWORK,&INFO);
+    dorgqr_(&M,&N,&N,AMAT,&LDA,TAU,this->WORK,&this->LWORK,&INFO);
+    
+  }
 }; // namespace ChronusQ
