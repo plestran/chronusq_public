@@ -120,7 +120,7 @@ namespace ChronusQ {
     this->diagMem(NTrial); 
     if(this->isHermetian_) {
       if(!this->symmetrizedTrial_) this->stdHerDiag(NTrial,output);
-      else this->symmHerDiag(NTrial,output);
+      else                         this->symmHerDiag(NTrial,output);
     } else {
     
     } 

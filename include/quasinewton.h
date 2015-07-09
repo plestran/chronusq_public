@@ -351,10 +351,11 @@ template <typename T>
     void symmNonHerDiag(int, ostream &output=cout);
     void reconstructSolution(const int);
     void genRes(const int);
-    void genResGuess();
     std::vector<bool> checkConv(const int, int &,ostream &output=cout);
     void formNewGuess(std::vector<bool> &,int&,int,int&,int&);
     void formResidualGuess(double,const RealCMMap &, RealCMMap &, const RealCMMap &, RealCMMap &);
+    void genStdResGuess(double, const RealCMMap &, RealCMMap &);
+    void genSymmResGuess(double,const RealCMMap &, RealCMMap &, const RealCMMap &, RealCMMap &);
     void setupRestart();
   public:
     /** Destructor

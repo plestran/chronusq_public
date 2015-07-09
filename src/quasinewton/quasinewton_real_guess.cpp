@@ -26,6 +26,32 @@
 #include <quasinewton.h>
 
 namespace ChronusQ {
+  template<>
+  void QuasiNewton<double>::genStdResGuess(double Omega, const RealCMMap &Res, RealCMMap &Q){
+    for(auto i = 0; i < this->N_; i++)
+      Q(i) = -Res(i) / ((*this->diag_)(i,0) - Omega);
+  }
+
+  template<>
+  void QuasiNewton<double>::genSymmResGuess(double Omega, 
+                                     const RealCMMap & ResR, RealCMMap & QR, 
+                                     const RealCMMap & ResL, RealCMMap & QL){
+    for(auto i = 0; i < this->N_; i++){
+      QR(i) = ResR(i) * (*this->diag_)(i,0);
+      QL(i) = ResL(i) * (*this->diag_)(i,0);
+    }
+    for(auto i = 0; i < this->N_/2; i++){
+      QR(i) += Omega*ResL(i);
+      QR(this->N_/2 + i) -= Omega*ResL(this->N_/2 + i);
+      QL(i) += Omega*ResR(i);
+      QL(this->N_/2 + i) -= Omega*ResR(this->N_/2 + i);
+    }
+    for(auto i = 0; i < this->N_; i++){
+      QR(i) = QR(i) / (std::pow((*this->diag_)(i,0),2.0)-std::pow(Omega,2.0));
+      QL(i) = QL(i) / (std::pow((*this->diag_)(i,0),2.0)-std::pow(Omega,2.0));
+    }
+  }
+
   /** Form Residual Based Guess **/
   template<>
   void QuasiNewton<double>::formResidualGuess(double Omega, 
