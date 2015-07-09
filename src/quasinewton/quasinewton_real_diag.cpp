@@ -86,6 +86,7 @@ namespace ChronusQ {
      *
      * Gramm-Schmidt
      */
+/*
     for(auto i = 0; i < NTrial; i++){
       double inner = SSuper.col(i).dot(SCPY*SSuper.col(i));
       int sgn = inner / std::abs(inner);
@@ -96,6 +97,8 @@ namespace ChronusQ {
           SSuper.col(i)*(SSuper.col(i).dot(SCPY*SSuper.col(j)));
       }
     }
+*/
+    this->metBiOrth(SSuper,SCPY);
 
     // Separate the eigenvectors into gerade and ungerade parts
     RealCMMap XTSigmaR(this->XTSigmaRMem,NTrial,NTrial);

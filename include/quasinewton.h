@@ -359,6 +359,7 @@ template <typename T>
     void setupRestart();
     void Orth(RealCMMap &);
     void Orth(RealCMMatrix &);
+    void metBiOrth(RealCMMap &, const RealCMMatrix &);
   public:
     /** Destructor
      *  

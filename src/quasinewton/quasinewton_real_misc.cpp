@@ -55,4 +55,19 @@ namespace ChronusQ {
     dorgqr_(&M,&N,&N,AMAT,&LDA,TAU,this->WORK,&this->LWORK,&INFO);
     
   }
+
+  template<>
+  void QuasiNewton<double>::metBiOrth(RealCMMap &A, const RealCMMatrix &Met){
+    int N = A.cols();
+    RealCMMatrix AX = Met*A;
+    for(auto i = 0; i < N; i++){
+      double inner = A.col(i).dot(AX.col(i));
+      int sgn = inner / std::abs(inner);
+      inner = sgn*std::sqrt(sgn*inner);
+      A.col(i) /= inner;
+      for(auto j = i + 1; j < N; j++){
+        A.col(j) -= A.col(i) * A.col(i).dot(AX.col(j));
+      } 
+    }
+  }
 }; // namespace ChronusQ
