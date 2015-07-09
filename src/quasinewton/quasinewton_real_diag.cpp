@@ -112,6 +112,7 @@ namespace ChronusQ {
 
     SCPY = SSuper; // Copy of original matrix to use for re-orthogonalization
 
+    // Invert the metric (maybe not needed?)
     dgetrf_(&TwoNTrial,&TwoNTrial,this->SSuperMem,&TwoNTrial,IPIV,&INFO);
     dgetri_(&TwoNTrial,this->SSuperMem,&TwoNTrial,IPIV,this->WORK,&this->LWORK,&INFO);
     delete [] IPIV;

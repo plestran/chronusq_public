@@ -41,23 +41,28 @@ namespace ChronusQ {
       new (&TrialVecL) RealCMMap(this->TVecLMem,this->N_,NTrial);
     }
 
-    // Symmetrize the trial vectors viz Kauczor et al. JCTC 7 (2010)
+    // Copy guess into Trial Vec
     TrialVecR = (*this->guessR_);
-    if(this->symmetrizedTrial_){
+    if(this->symmetrizedTrial_ || !this->isHermetian_){
       if(this->doRestart_) TrialVecL = (*this->guessL_);
       else                 TrialVecL = (*this->guessR_);
-      if(!this->doRestart_){
-        TrialVecR.block(this->N_/2,0,this->N_/2,this->nGuess_)
-          = TrialVecR.block(0,0,this->N_/2,this->nGuess_);
-        TrialVecL.block(this->N_/2,0,this->N_/2,this->nGuess_)
-          = -TrialVecL.block(0,0,this->N_/2,this->nGuess_);
-        // Normalize
-        TrialVecR *= std::sqrt(0.5);
-        TrialVecL *= std::sqrt(0.5);
-      }
     }
+
+    // Deallocate extraneous Guess storage
     this->guessR_.reset();
-    if(this->doRestart_) this->guessL_.reset();
+    if(this->doRestart_ && (this->symmetrizedTrial_ || !this->isHermetian_)) 
+      this->guessL_.reset();
+
+    // Symmetrize the trial vectors viz Kauczor et al. JCTC 7 (2010)
+    if(!this->doRestart_ && this->symmetrizedTrial_){
+      TrialVecR.block(this->N_/2,0,this->N_/2,this->nGuess_)
+        = TrialVecR.block(0,0,this->N_/2,this->nGuess_);
+      TrialVecL.block(this->N_/2,0,this->N_/2,this->nGuess_)
+        = -TrialVecL.block(0,0,this->N_/2,this->nGuess_);
+      // Normalize
+      TrialVecR *= std::sqrt(0.5);
+      TrialVecL *= std::sqrt(0.5);
+    }
 
     for(auto iter = 0; iter < this->maxIter_; iter++){
       std::chrono::high_resolution_clock::time_point start,finish;
