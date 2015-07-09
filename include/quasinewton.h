@@ -113,6 +113,7 @@ template <typename T>
     T * TVecLMem   ;         
     T * LAPACK_SCR ;
     T * ERMem      ;
+    T * EIMem      ;
     T * WORK       ;
     /** Inline Functions **/
     inline void loadDefaults(){
@@ -178,6 +179,7 @@ template <typename T>
       this->TVecLMem    = NULL;         
       this->LAPACK_SCR  = NULL;
       this->ERMem       = NULL;
+      this->EIMem       = NULL;
       this->WORK        = NULL;
     };
   inline void initScrLen(){
@@ -228,6 +230,8 @@ template <typename T>
  * (20) Length of LAPACK workspace (used in all LAPACK Calls)
  *
  * (21) Total double precision words required for LAPACK
+ *
+ * (22) Space for imaginary parts of paired eigenvalues
  */
     // Lenth of memory partitions
     this->LenSigma   = this->N_ * this->maxSubSpace_;
@@ -270,6 +274,8 @@ template <typename T>
     this->LEN_LAPACK_SCR += this->maxSubSpace_;   // 18
     if(!this->isHermetian_ || this->symmetrizedTrial_)
       this->LEN_LAPACK_SCR += this->maxSubSpace_; // 19
+    if(!this->isHermetian_ && this->symmetrizedTrial_)
+      this->LEN_LAPACK_SCR += 2*this->maxSubSpace_; // 22
     this->LEN_LAPACK_SCR += this->LWORK;          // 20
     this->LenScr += this->LEN_LAPACK_SCR;         // 21
   }
@@ -360,6 +366,7 @@ template <typename T>
     void Orth(RealCMMap &);
     void Orth(RealCMMatrix &);
     void metBiOrth(RealCMMap &, const RealCMMatrix &);
+    void eigSrt(RealCMMap &, RealVecMap &);
   public:
     /** Destructor
      *  
@@ -405,6 +412,7 @@ template <typename T>
       this->doGEP_            = (SDR->iMeth() == SDResponse::RPA);
       this->genGuess_         = (this->nGuess_ == 0);
       this->maxSubSpace_      = this->stdSubSpace();
+      this->isHermetian_      = false;
       this->initScrLen();
 
       if(this->genGuess_) this->nGuess_ = this->stdNGuess();

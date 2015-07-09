@@ -70,4 +70,22 @@ namespace ChronusQ {
       } 
     }
   }
+
+  template<>
+  void QuasiNewton<double>::eigSrt(RealCMMap &V, RealVecMap &E){
+    auto N = V.cols();
+    while( N != 0){
+      auto newn = 0;
+      for(auto i = 1; i < N; i++){
+        if( E(i-1) > E(i) ){
+          auto tmp = E(i);
+          E(i) = E(i-1);
+          E(i-1) = tmp;
+          V.col(i).swap(V.col(i-1));
+          newn = i;
+        }
+      }
+      N = newn;
+    }
+  }
 }; // namespace ChronusQ

@@ -86,18 +86,6 @@ namespace ChronusQ {
      *
      * Gramm-Schmidt
      */
-/*
-    for(auto i = 0; i < NTrial; i++){
-      double inner = SSuper.col(i).dot(SCPY*SSuper.col(i));
-      int sgn = inner / std::abs(inner);
-      inner = sgn*std::sqrt(sgn*inner);
-      SSuper.col(i) /= inner;
-      for(auto j = i+1; j < NTrial; j++){
-        SSuper.col(j) -= 
-          SSuper.col(i)*(SSuper.col(i).dot(SCPY*SSuper.col(j)));
-      }
-    }
-*/
     this->metBiOrth(SSuper,SCPY);
 
     // Separate the eigenvectors into gerade and ungerade parts
@@ -108,12 +96,75 @@ namespace ChronusQ {
   } // symmHerDiag
 
   template<>
+  void QuasiNewton<double>::symmNonHerDiag(int NTrial, ostream &output){
+    char JOBVL = 'N';
+    char JOBVR = 'V';
+    int TwoNTrial = 2*NTrial;
+    int *IPIV = new int[TwoNTrial];
+    int INFO;
+
+    RealCMMap SSuper(this->SSuperMem, TwoNTrial,TwoNTrial);
+    RealCMMap ASuper(this->ASuperMem, TwoNTrial,TwoNTrial);
+    RealCMMatrix SCPY(SSuper); // Copy of original matrix to use for re-orthogonalization
+
+    dgetrf_(&TwoNTrial,&TwoNTrial,this->SSuperMem,&TwoNTrial,IPIV,&INFO);
+    dgetri_(&TwoNTrial,this->SSuperMem,&TwoNTrial,IPIV,this->WORK,&this->LWORK,&INFO);
+
+//  cout << SCPY * SSuper << endl;
+//  cout << endl << SCPY << endl;
+//  cout << endl << SSuper << endl;
+
+    RealCMMatrix NHrProd = SSuper*ASuper;
+
+    dgeev_(&JOBVL,&JOBVR,&TwoNTrial,NHrProd.data(),&TwoNTrial,this->ERMem,this->EIMem,
+           this->SSuperMem,&TwoNTrial,this->SSuperMem,&TwoNTrial,this->WORK,&this->LWORK,
+           &INFO);
+
+    RealVecMap ER(this->ERMem,TwoNTrial);
+    RealVecMap EI(this->EIMem,TwoNTrial);
+    RealCMMap  VR(this->SSuperMem,TwoNTrial,TwoNTrial);
+//  cout << endl << EI;
+//  cout << endl << endl << VR;
+    this->eigSrt(VR,ER);
+//  cout << endl << endl << ER << endl << endl;
+//  cout << endl << endl << VR << endl << endl;
+  
+    // Grab the "positive paired" roots (throw away other element of the pair)
+    this->ERMem += NTrial;
+    new (&ER    ) RealVecMap(this->ERMem,NTrial);
+    new (&SSuper) RealCMMap(this->SSuperMem+2*NTrial*NTrial,2*NTrial,NTrial);
+
+    /*
+     * Re-orthogonalize the eigenvectors with respect to the metric S(R)
+     * because DSYGV orthogonalzies the vectors with respect to E(R)
+     * because we solve the opposite problem.
+     *
+     * Gramm-Schmidt
+     */
+    this->metBiOrth(SSuper,SCPY);
+
+    // Separate the eigenvectors into gerade and ungerade parts
+    RealCMMap XTSigmaR(this->XTSigmaRMem,NTrial,NTrial);
+    RealCMMap XTSigmaL(this->XTSigmaLMem,NTrial,NTrial);
+    XTSigmaR = SSuper.block(0,     0,NTrial,NTrial);
+    XTSigmaL = SSuper.block(NTrial,0,NTrial,NTrial);
+//  CErr();
+  }
+
+  template<>
   void QuasiNewton<double>::diagMem(int NTrial){
     int IOff = NTrial;
     if(!this->isHermetian_ || this->symmetrizedTrial_){
       IOff += NTrial; // Space for paired eigenvalues or imaginary part
     }
+    if(!this->isHermetian_ && this->symmetrizedTrial_){
+      IOff += 2*NTrial; // Space for paired eigenvalues or imaginary part
+    }
     this->ERMem = LAPACK_SCR;
+    if(!this->isHermetian_){
+      if(this->symmetrizedTrial_) this->EIMem = this->ERMem + 2*NTrial;
+      else                        this->EIMem = this->ERMem +   NTrial;
+    }
     this->WORK  = this->ERMem + IOff;
   } // diagMem
 
@@ -125,7 +176,7 @@ namespace ChronusQ {
       if(!this->symmetrizedTrial_) this->stdHerDiag(NTrial,output);
       else                         this->symmHerDiag(NTrial,output);
     } else {
-    
+      if(this->symmetrizedTrial_) this->symmNonHerDiag(NTrial,output);
     } 
   } // redDiag
 
