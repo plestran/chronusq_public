@@ -105,6 +105,9 @@ template <typename T>
     T * XTRhoLMem  ; 
     T * ASuperMem  ;
     T * SSuperMem  ;
+    T * SCPYMem    ;
+    T * NHrProdMem ;
+    T * BiOrthMem  ;
     T * URMem      ; 
     T * ULMem      ; 
     T * ResRMem    ; 
@@ -171,6 +174,9 @@ template <typename T>
       this->XTRhoLMem   = NULL; 
       this->ASuperMem   = NULL;
       this->SSuperMem   = NULL;
+      this->SCPYMem     = NULL;
+      this->NHrProdMem  = NULL;
+      this->BiOrthMem   = NULL;
       this->URMem       = NULL; 
       this->ULMem       = NULL; 
       this->ResRMem     = NULL; 
@@ -232,6 +238,12 @@ template <typename T>
  * (21) Total double precision words required for LAPACK
  *
  * (22) Space for imaginary parts of paired eigenvalues
+ *
+ * (23) Space for a copy of the S supermatrix to use for re-orthogonalization
+ *
+ * (24) Space for the non-hermetian product of S^-1 * A in the reduced dimention
+ *
+ * (25) Space for SX product for BiOrth wrt the metric
  */
     // Lenth of memory partitions
     this->LenSigma   = this->N_ * this->maxSubSpace_;
@@ -267,6 +279,12 @@ template <typename T>
       this->LenScr += this->LenTVec;    // 15
       this->LenScr += this->LenSuper;   // 16
       this->LenScr += this->LenSuper;   // 17
+      this->LenScr += this->LenSuper;   // 23
+      this->LenScr += this->LenSuper;   // 25
+    }
+
+    if(!this->isHermetian_ && this->symmetrizedTrial_){
+      this->LenScr += this->LenSuper; // 24
     }
   
     // LAPACK Storage Space Length
@@ -326,6 +344,11 @@ template <typename T>
       this->TVecLMem      = this->ResLMem     + this->LenRes;
       this->ASuperMem     = this->TVecLMem    + this->LenTVec;
       this->SSuperMem     = this->ASuperMem   + this->LenSuper;
+      this->SCPYMem       = this->SSuperMem   + this->LenSuper;
+      this->BiOrthMem     = this->SCPYMem     + this->LenSuper;
+    }
+    if(!this->isHermetian_ && this->symmetrizedTrial_){
+      this->NHrProdMem    = this->BiOrthMem   + this->LenSuper;
     }
   }
   inline void cleanupScr(){

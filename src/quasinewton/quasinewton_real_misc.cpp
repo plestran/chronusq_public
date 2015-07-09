@@ -59,7 +59,9 @@ namespace ChronusQ {
   template<>
   void QuasiNewton<double>::metBiOrth(RealCMMap &A, const RealCMMatrix &Met){
     int N = A.cols();
-    RealCMMatrix AX = Met*A;
+//  RealCMMatrix AX = Met*A;
+    RealCMMap AX(this->BiOrthMem,Met.rows(),N);
+    AX = Met*A;
     for(auto i = 0; i < N; i++){
       double inner = A.col(i).dot(AX.col(i));
       int sgn = inner / std::abs(inner);

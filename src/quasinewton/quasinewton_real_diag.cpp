@@ -57,7 +57,9 @@ namespace ChronusQ {
     int INFO;
 
     RealCMMap SSuper(this->SSuperMem, 2*NTrial,2*NTrial);
-    RealCMMatrix SCPY(SSuper); // Copy of original matrix to use for re-orthogonalization
+    RealCMMap    SCPY(this->SCPYMem,   TwoNTrial,TwoNTrial);
+
+    SCPY = SSuper; // Copy of original matrix to use for re-orthogonalization
 
     // Perform diagonalization of reduced subspace using DSYGV
     dsygv_(&iType,&JOBV,&UPLO,&TwoNTrial,this->SSuperMem,&TwoNTrial,
@@ -103,31 +105,27 @@ namespace ChronusQ {
     int *IPIV = new int[TwoNTrial];
     int INFO;
 
-    RealCMMap SSuper(this->SSuperMem, TwoNTrial,TwoNTrial);
-    RealCMMap ASuper(this->ASuperMem, TwoNTrial,TwoNTrial);
-    RealCMMatrix SCPY(SSuper); // Copy of original matrix to use for re-orthogonalization
+    RealCMMap  SSuper(this->SSuperMem, TwoNTrial,TwoNTrial);
+    RealCMMap  ASuper(this->ASuperMem, TwoNTrial,TwoNTrial);
+    RealCMMap    SCPY(this->SCPYMem,   TwoNTrial,TwoNTrial);
+    RealCMMap NHrProd(this->NHrProdMem,TwoNTrial,TwoNTrial);
+
+    SCPY = SSuper; // Copy of original matrix to use for re-orthogonalization
 
     dgetrf_(&TwoNTrial,&TwoNTrial,this->SSuperMem,&TwoNTrial,IPIV,&INFO);
     dgetri_(&TwoNTrial,this->SSuperMem,&TwoNTrial,IPIV,this->WORK,&this->LWORK,&INFO);
+    delete [] IPIV;
 
-//  cout << SCPY * SSuper << endl;
-//  cout << endl << SCPY << endl;
-//  cout << endl << SSuper << endl;
-
-    RealCMMatrix NHrProd = SSuper*ASuper;
+    NHrProd = SSuper * ASuper;
 
     dgeev_(&JOBVL,&JOBVR,&TwoNTrial,NHrProd.data(),&TwoNTrial,this->ERMem,this->EIMem,
            this->SSuperMem,&TwoNTrial,this->SSuperMem,&TwoNTrial,this->WORK,&this->LWORK,
            &INFO);
-
+    // Sort eigensystem using Bubble Sort
     RealVecMap ER(this->ERMem,TwoNTrial);
     RealVecMap EI(this->EIMem,TwoNTrial);
     RealCMMap  VR(this->SSuperMem,TwoNTrial,TwoNTrial);
-//  cout << endl << EI;
-//  cout << endl << endl << VR;
     this->eigSrt(VR,ER);
-//  cout << endl << endl << ER << endl << endl;
-//  cout << endl << endl << VR << endl << endl;
   
     // Grab the "positive paired" roots (throw away other element of the pair)
     this->ERMem += NTrial;
