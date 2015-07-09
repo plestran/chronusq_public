@@ -345,6 +345,10 @@ template <typename T>
     void fullProjection(const int);
     void buildSuperMat(const int);
     void redDiag(int,ostream &output=cout);
+    void diagMem(int);
+    void stdHerDiag(int, ostream &output=cout);
+    void symmHerDiag(int, ostream &output=cout);
+    void symmNonHerDiag(int, ostream &output=cout);
     void reconstructSolution(const int);
     void genRes(const int);
     void genResGuess();

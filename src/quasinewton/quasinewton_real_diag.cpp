@@ -26,6 +26,84 @@
 #include <quasinewton.h>
 
 namespace ChronusQ {
+  template<>
+  void QuasiNewton<double>::stdHerDiag(int NTrial, ostream &output){
+    // Solve E(R)| X(R) > = | X(R) > ω
+    char JOBV = 'V';
+    char UPLO = 'L';
+    int INFO;
+    dsyev_(&JOBV,&UPLO,&NTrial,this->XTSigmaRMem,&NTrial,
+           this->ERMem,this->WORK,&this->LWORK,&INFO); 
+    if(INFO!=0) CErr("DSYEV failed to converge in Davison Iterations",output);
+  } // stdHerDiag
+
+  template<>
+  void QuasiNewton<double>::symmHerDiag(int NTrial, ostream &output){
+    /*
+     * Solve S(R)| X(R) > = E(R)| X(R) > (1/ω)
+     *
+     * | X(R) > = | X(R)_g >
+     *            | X(R)_u >
+     *
+     * The opposite (1/ω vs ω) is solved because the metric is not positive definite
+     * and can therefore not be solved using DSYGV because of the involved Cholesky
+     * decomposition.
+     *
+     */ 
+    char JOBV = 'V';
+    char UPLO = 'L';
+    int iType = 1;
+    int TwoNTrial = 2*NTrial;
+    int INFO;
+
+    RealCMMap SSuper(this->SSuperMem, 2*NTrial,2*NTrial);
+    RealCMMatrix SCPY(SSuper); // Copy of original matrix to use for re-orthogonalization
+
+    // Perform diagonalization of reduced subspace using DSYGV
+    dsygv_(&iType,&JOBV,&UPLO,&TwoNTrial,this->SSuperMem,&TwoNTrial,
+           this->ASuperMem,&TwoNTrial,this->ERMem,this->WORK,&this->LWORK,
+           &INFO);
+    if(INFO!=0) CErr("DSYGV failed to converge in Davison Iterations",output);
+    
+    // Grab the "positive paired" roots (throw away other element of the pair)
+    this->ERMem += NTrial;
+    RealVecMap ER    (this->ERMem,NTrial);
+    new (&SSuper) RealCMMap(this->SSuperMem+2*NTrial*NTrial,2*NTrial,NTrial);
+
+    // Swap the ordering because we solve for (1/ω)
+    for(auto i = 0 ; i < NTrial; i++) ER(i) = 1.0/ER(i);
+    for(auto i = 0 ; i < NTrial/2; i++){
+      SSuper.col(i).swap(SSuper.col(NTrial - i - 1));
+      double tmp = ER(i);
+      ER(i) = ER(NTrial - i - 1);
+      ER(NTrial - i - 1) = tmp;
+    }
+
+    /*
+     * Re-orthogonalize the eigenvectors with respect to the metric S(R)
+     * because DSYGV orthogonalzies the vectors with respect to E(R)
+     * because we solve the opposite problem.
+     *
+     * Gramm-Schmidt
+     */
+    for(auto i = 0; i < NTrial; i++){
+      double inner = SSuper.col(i).dot(SCPY*SSuper.col(i));
+      int sgn = inner / std::abs(inner);
+      inner = sgn*std::sqrt(sgn*inner);
+      SSuper.col(i) /= inner;
+      for(auto j = i+1; j < NTrial; j++){
+        SSuper.col(j) -= 
+          SSuper.col(i)*(SSuper.col(i).dot(SCPY*SSuper.col(j)));
+      }
+    }
+
+    // Separate the eigenvectors into gerade and ungerade parts
+    RealCMMap XTSigmaR(this->XTSigmaRMem,NTrial,NTrial);
+    RealCMMap XTSigmaL(this->XTSigmaLMem,NTrial,NTrial);
+    XTSigmaR = SSuper.block(0,     0,NTrial,NTrial);
+    XTSigmaL = SSuper.block(NTrial,0,NTrial,NTrial);
+  } // symmHerDiag
+
   /** Diagoanlize Reduced Problem **/
   template<>
   void QuasiNewton<double>::redDiag(int NTrial,ostream &output){
@@ -108,4 +186,5 @@ namespace ChronusQ {
 
     } 
   } // redDiag
+
 }; // namespace ChronusQ
