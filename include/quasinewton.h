@@ -357,6 +357,7 @@ template <typename T>
     void genStdHerResGuess(double, const RealCMMap &, RealCMMap &);
     void genSymmResGuess(double,const RealCMMap &, RealCMMap &, const RealCMMap &, RealCMMap &);
     void setupRestart();
+    void Orth(RealCMMap &);
   public:
     /** Destructor
      *  
