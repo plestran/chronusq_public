@@ -26,6 +26,153 @@
 #include <aointegrals.h>
 namespace ChronusQ{
 #ifdef USE_LIBINT
+/**
+ *  Given a shell quartet block of ERIs (row-major), the following contraction is performed
+ *
+ *  G(μ,v) = (μ v | λ σ) X(σ,λ) - 0.5 (μ σ | λ v) X(σ,λ)
+ *
+ *  This assumes that G is actually an arbitrary spin block of G and that X is actually
+ *  X-Total, i.e. X = X-Alpha + X-Beta (hence the 0.5 on the exchange part)
+ */
+template<>
+void AOIntegrals::Restricted34HerContract(RealMatrix &G, const RealMatrix &X, int n1, int n2, int n3, int n4, 
+                     int bf1_s, int bf2_s, int bf3_s, int bf4_s, const double* buff, double deg){
+  for(int i = 0, ijkl = 0 ; i < n1; ++i) {
+    int bf1 = bf1_s + i;
+    for(int j = 0; j < n2; ++j) {
+      int bf2 = bf2_s + j;
+      for(int k = 0; k < n3; ++k) {
+        int bf3 = bf3_s + k;
+        for(int l = 0; l < n4; ++l, ++ijkl) {
+          int bf4 = bf4_s + l;
+          double v = buff[ijkl]*deg;
+
+          // Coulomb
+          G(bf1,bf2) += X(bf4,bf3)*v;
+          G(bf3,bf4) += X(bf2,bf1)*v;
+          G(bf2,bf1) += X(bf3,bf4)*v;
+          G(bf4,bf3) += X(bf1,bf2)*v;
+
+          // Exchange
+          G(bf1,bf3) -= 0.25*X(bf2,bf4)*v;
+          G(bf2,bf4) -= 0.25*X(bf1,bf3)*v;
+          G(bf1,bf4) -= 0.25*X(bf2,bf3)*v;
+          G(bf2,bf3) -= 0.25*X(bf1,bf4)*v;
+
+          G(bf3,bf1) -= 0.25*X(bf4,bf2)*v;
+          G(bf4,bf2) -= 0.25*X(bf3,bf1)*v;
+          G(bf4,bf1) -= 0.25*X(bf3,bf2)*v;
+          G(bf3,bf2) -= 0.25*X(bf4,bf1)*v;
+        }
+      }
+    }
+  }
+} // Restricted34HerContract 
+template<>
+void AOIntegrals::UnRestricted34HerContract(RealMatrix &GAlpha, const RealMatrix &XAlpha, RealMatrix &GBeta, const RealMatrix &XBeta, int n1, int n2, int n3, int n4, 
+                     int bf1_s, int bf2_s, int bf3_s, int bf4_s, const double* buff, double deg){
+  for(int i = 0, ijkl = 0 ; i < n1; ++i) {
+    int bf1 = bf1_s + i;
+    for(int j = 0; j < n2; ++j) {
+      int bf2 = bf2_s + j;
+      for(int k = 0; k < n3; ++k) {
+        int bf3 = bf3_s + k;
+        for(int l = 0; l < n4; ++l, ++ijkl) {
+          int bf4 = bf4_s + l;
+          double v = buff[ijkl]*deg;
+
+          // Coulomb
+          GAlpha(bf1,bf2) += (XAlpha(bf4,bf3)+XBeta(bf4,bf3))*v;
+          GAlpha(bf3,bf4) += (XAlpha(bf2,bf1)+XBeta(bf2,bf1))*v;
+          GAlpha(bf2,bf1) += (XAlpha(bf3,bf4)+XBeta(bf3,bf4))*v;
+          GAlpha(bf4,bf3) += (XAlpha(bf1,bf2)+XBeta(bf1,bf2))*v;
+          GBeta(bf1,bf2)  += (XAlpha(bf4,bf3)+XBeta(bf4,bf3))*v;
+          GBeta(bf3,bf4)  += (XAlpha(bf2,bf1)+XBeta(bf2,bf1))*v;
+          GBeta(bf2,bf1)  += (XAlpha(bf3,bf4)+XBeta(bf3,bf4))*v;
+          GBeta(bf4,bf3)  += (XAlpha(bf1,bf2)+XBeta(bf1,bf2))*v;
+
+          // Exchange
+          GAlpha(bf1,bf3) -= 0.5*XAlpha(bf2,bf4)*v;
+          GAlpha(bf2,bf4) -= 0.5*XAlpha(bf1,bf3)*v;
+          GAlpha(bf1,bf4) -= 0.5*XAlpha(bf2,bf3)*v;
+          GAlpha(bf2,bf3) -= 0.5*XAlpha(bf1,bf4)*v;
+
+          GAlpha(bf3,bf1) -= 0.5*XAlpha(bf4,bf2)*v;
+          GAlpha(bf4,bf2) -= 0.5*XAlpha(bf3,bf1)*v;
+          GAlpha(bf4,bf1) -= 0.5*XAlpha(bf3,bf2)*v;
+          GAlpha(bf3,bf2) -= 0.5*XAlpha(bf4,bf1)*v;
+
+          GBeta(bf1,bf3)  -= 0.5*XBeta(bf2,bf4)*v;
+          GBeta(bf2,bf4)  -= 0.5*XBeta(bf1,bf3)*v;
+          GBeta(bf1,bf4)  -= 0.5*XBeta(bf2,bf3)*v;
+          GBeta(bf2,bf3)  -= 0.5*XBeta(bf1,bf4)*v;
+
+          GBeta(bf3,bf1)  -= 0.5*XBeta(bf4,bf2)*v;
+          GBeta(bf4,bf2)  -= 0.5*XBeta(bf3,bf1)*v;
+          GBeta(bf4,bf1)  -= 0.5*XBeta(bf3,bf2)*v;
+          GBeta(bf3,bf2)  -= 0.5*XBeta(bf4,bf1)*v;
+        }
+      }
+    }
+  }
+} // UnRestricted34HerContract
+template<>
+void AOIntegrals::General34NonHerContract(RealMatrix &GAlpha, const RealMatrix &XAlpha, RealMatrix &GBeta, const RealMatrix &XBeta, int n1, int n2, int n3, int n4, 
+                     int bf1_s, int bf2_s, int bf3_s, int bf4_s, const double* buff, double deg){
+  for(int i = 0, ijkl = 0 ; i < n1; ++i) {
+    int bf1 = bf1_s + i;
+    for(int j = 0; j < n2; ++j) {
+      int bf2 = bf2_s + j;
+      for(int k = 0; k < n3; ++k) {
+        int bf3 = bf3_s + k;
+        for(int l = 0; l < n4; ++l, ++ijkl) {
+          int bf4 = bf4_s + l;
+          double v = buff[ijkl]*deg;
+
+          // Coulomb
+          GAlpha(bf1,bf2) += 0.5*(XAlpha(bf4,bf3)+XBeta(bf4,bf3))*v;
+          GAlpha(bf3,bf4) += 0.5*(XAlpha(bf2,bf1)+XBeta(bf2,bf1))*v;
+          GAlpha(bf2,bf1) += 0.5*(XAlpha(bf3,bf4)+XBeta(bf3,bf4))*v;
+          GAlpha(bf4,bf3) += 0.5*(XAlpha(bf1,bf2)+XBeta(bf1,bf2))*v;
+          GBeta(bf1,bf2)  += 0.5*(XAlpha(bf4,bf3)+XBeta(bf4,bf3))*v;
+          GBeta(bf3,bf4)  += 0.5*(XAlpha(bf2,bf1)+XBeta(bf2,bf1))*v;
+          GBeta(bf2,bf1)  += 0.5*(XAlpha(bf3,bf4)+XBeta(bf3,bf4))*v;
+          GBeta(bf4,bf3)  += 0.5*(XAlpha(bf1,bf2)+XBeta(bf1,bf2))*v;
+
+          GAlpha(bf1,bf2) += 0.5*(XAlpha(bf3,bf4)+XBeta(bf3,bf4))*v;
+          GAlpha(bf3,bf4) += 0.5*(XAlpha(bf1,bf2)+XBeta(bf1,bf2))*v;
+          GAlpha(bf2,bf1) += 0.5*(XAlpha(bf4,bf3)+XBeta(bf4,bf3))*v;
+          GAlpha(bf4,bf3) += 0.5*(XAlpha(bf2,bf1)+XBeta(bf2,bf1))*v;
+          GBeta(bf1,bf2)  += 0.5*(XAlpha(bf3,bf4)+XBeta(bf3,bf4))*v;
+          GBeta(bf3,bf4)  += 0.5*(XAlpha(bf1,bf2)+XBeta(bf1,bf2))*v;
+          GBeta(bf2,bf1)  += 0.5*(XAlpha(bf4,bf3)+XBeta(bf4,bf3))*v;
+          GBeta(bf4,bf3)  += 0.5*(XAlpha(bf2,bf1)+XBeta(bf2,bf1))*v;
+
+          // Exchange
+          GAlpha(bf1,bf3) -= 0.5*XAlpha(bf2,bf4)*v;
+          GAlpha(bf2,bf4) -= 0.5*XAlpha(bf1,bf3)*v;
+          GAlpha(bf1,bf4) -= 0.5*XAlpha(bf2,bf3)*v;
+          GAlpha(bf2,bf3) -= 0.5*XAlpha(bf1,bf4)*v;
+
+          GAlpha(bf3,bf1) -= 0.5*XAlpha(bf4,bf2)*v;
+          GAlpha(bf4,bf2) -= 0.5*XAlpha(bf3,bf1)*v;
+          GAlpha(bf4,bf1) -= 0.5*XAlpha(bf3,bf2)*v;
+          GAlpha(bf3,bf2) -= 0.5*XAlpha(bf4,bf1)*v;
+
+          GBeta(bf1,bf3)  -= 0.5*XBeta(bf2,bf4)*v;
+          GBeta(bf2,bf4)  -= 0.5*XBeta(bf1,bf3)*v;
+          GBeta(bf1,bf4)  -= 0.5*XBeta(bf2,bf3)*v;
+          GBeta(bf2,bf3)  -= 0.5*XBeta(bf1,bf4)*v;
+
+          GBeta(bf3,bf1)  -= 0.5*XBeta(bf4,bf2)*v;
+          GBeta(bf4,bf2)  -= 0.5*XBeta(bf3,bf1)*v;
+          GBeta(bf4,bf1)  -= 0.5*XBeta(bf3,bf2)*v;
+          GBeta(bf3,bf2)  -= 0.5*XBeta(bf4,bf1)*v;
+        }
+      }
+    }
+  }
+}
 template<>
 void AOIntegrals::twoEContractDirect(bool RHF, bool doFock, const RealMatrix &XAlpha, RealMatrix &AXAlpha,
                                      const RealMatrix &XBeta, RealMatrix &AXBeta) {
@@ -109,6 +256,17 @@ void AOIntegrals::twoEContractDirect(bool RHF, bool doFock, const RealMatrix &XA
             double s34_deg = (s3 == s4) ? 1.0 : 2.0;
             double s12_34_deg = (s1 == s3) ? (s2 == s4 ? 1.0 : 2.0) : 2.0;
             double s1234_deg = s12_deg * s34_deg * s12_34_deg;
+
+            if(RHF && doFock) 
+              this->Restricted34HerContract(G[0][thread_id],XAlpha,n1,n2,n3,n4,
+                bf1_s,bf2_s,bf3_s,bf4_s,buff,s1234_deg);
+            else if(doFock)
+              this->UnRestricted34HerContract(G[0][thread_id],XAlpha,G[1][thread_id],
+                XBeta,n1,n2,n3,n4,bf1_s,bf2_s,bf3_s,bf4_s,buff,s1234_deg);
+            else
+              this->General34NonHerContract(G[0][thread_id],XAlpha,G[1][thread_id],
+                XBeta,n1,n2,n3,n4,bf1_s,bf2_s,bf3_s,bf4_s,buff,s1234_deg);
+  /*           
             for(int i = 0, ijkl = 0 ; i < n1; ++i) {
               int bf1 = bf1_s + i;
               for(int j = 0; j < n2; ++j) {
@@ -210,6 +368,7 @@ void AOIntegrals::twoEContractDirect(bool RHF, bool doFock, const RealMatrix &XA
                 }
               }
             }
+*/
           }
         }
       }
@@ -524,40 +683,6 @@ std::vector<std::vector<std::vector<RealMatrix>>> G(nRHF,std::vector<std::vector
   finish = std::chrono::high_resolution_clock::now();
   if(doFock) this->PTD = finish - start;
    
-}
-template<>
-void AOIntegrals::RHFFockContract(RealMatrix &G, const RealMatrix &X, int n1, int n2, int n3, int n4, 
-                     int bf1_s, int bf2_s, int bf3_s, int bf4_s, double* buff, double deg){
-  for(int i = 0, ijkl = 0 ; i < n1; ++i) {
-    int bf1 = bf1_s + i;
-    for(int j = 0; j < n2; ++j) {
-      int bf2 = bf2_s + j;
-      for(int k = 0; k < n3; ++k) {
-        int bf3 = bf3_s + k;
-        for(int l = 0; l < n4; ++l, ++ijkl) {
-          int bf4 = bf4_s + l;
-          double v = buff[ijkl]*deg;
-
-          // Coulomb
-          G(bf1,bf2) += X(bf4,bf3)*v;
-          G(bf3,bf4) += X(bf2,bf1)*v;
-          G(bf2,bf1) += X(bf3,bf4)*v;
-          G(bf4,bf3) += X(bf1,bf2)*v;
-
-          // Exchange
-          G(bf1,bf3) -= 0.25*X(bf2,bf4)*v;
-          G(bf2,bf4) -= 0.25*X(bf1,bf3)*v;
-          G(bf1,bf4) -= 0.25*X(bf2,bf3)*v;
-          G(bf2,bf3) -= 0.25*X(bf1,bf4)*v;
-
-          G(bf3,bf1) -= 0.25*X(bf4,bf2)*v;
-          G(bf4,bf2) -= 0.25*X(bf3,bf1)*v;
-          G(bf4,bf1) -= 0.25*X(bf3,bf2)*v;
-          G(bf3,bf2) -= 0.25*X(bf4,bf1)*v;
-        }
-      }
-    }
-  }
 }
 #endif
 
