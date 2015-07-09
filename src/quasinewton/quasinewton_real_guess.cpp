@@ -27,7 +27,7 @@
 
 namespace ChronusQ {
   template<>
-  void QuasiNewton<double>::genStdResGuess(double Omega, const RealCMMap &Res, RealCMMap &Q){
+  void QuasiNewton<double>::genStdHerResGuess(double Omega, const RealCMMap &Res, RealCMMap &Q){
     for(auto i = 0; i < this->N_; i++)
       Q(i) = -Res(i) / ((*this->diag_)(i,0) - Omega);
   }
@@ -57,25 +57,8 @@ namespace ChronusQ {
   void QuasiNewton<double>::formResidualGuess(double Omega, 
                                      const RealCMMap & ResR, RealCMMap & QR, 
                                      const RealCMMap & ResL, RealCMMap & QL){
-    if(this->symmetrizedTrial_) {
-      for(auto i = 0; i < this->N_; i++){
-        QR(i) = ResR(i) * (*this->diag_)(i,0);
-        QL(i) = ResL(i) * (*this->diag_)(i,0);
-      }
-      for(auto i = 0; i < this->N_/2; i++){
-        QR(i) += Omega*ResL(i);
-        QR(this->N_/2 + i) -= Omega*ResL(this->N_/2 + i);
-        QL(i) += Omega*ResR(i);
-        QL(this->N_/2 + i) -= Omega*ResR(this->N_/2 + i);
-      }
-      for(auto i = 0; i < this->N_; i++){
-        QR(i) = QR(i) / (std::pow((*this->diag_)(i,0),2.0)-std::pow(Omega,2.0));
-        QL(i) = QL(i) / (std::pow((*this->diag_)(i,0),2.0)-std::pow(Omega,2.0));
-      }
-    } else {
-      for(auto i = 0; i < this->N_; i++)
-        QR(i) = -ResR(i) / ((*this->diag_)(i,0) - Omega);
-    }
+    if(this->symmetrizedTrial_) this->genSymmResGuess(  Omega,ResR,QR,ResL,QL);
+    else                        this->genStdHerResGuess(Omega,ResR,QR        );
   }
     /** Form New Perturbed Guess **/
   template<>
