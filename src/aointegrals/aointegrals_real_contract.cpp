@@ -266,109 +266,6 @@ void AOIntegrals::twoEContractDirect(bool RHF, bool doFock, const RealMatrix &XA
             else
               this->General34NonHerContract(G[0][thread_id],XAlpha,G[1][thread_id],
                 XBeta,n1,n2,n3,n4,bf1_s,bf2_s,bf3_s,bf4_s,buff,s1234_deg);
-  /*           
-            for(int i = 0, ijkl = 0 ; i < n1; ++i) {
-              int bf1 = bf1_s + i;
-              for(int j = 0; j < n2; ++j) {
-                int bf2 = bf2_s + j;
-                for(int k = 0; k < n3; ++k) {
-                  int bf3 = bf3_s + k;
-                  for(int l = 0; l < n4; ++l, ++ijkl) {
-                    int bf4 = bf4_s + l;
-                    double v = buff[ijkl]*s1234_deg;
-
-                    // Coulomb
-                    if(RHF && doFock) {
-                      G[0][thread_id](bf1,bf2) += XAlpha(bf4,bf3)*v;
-                      G[0][thread_id](bf3,bf4) += XAlpha(bf2,bf1)*v;
-                      G[0][thread_id](bf2,bf1) += XAlpha(bf3,bf4)*v;
-                      G[0][thread_id](bf4,bf3) += XAlpha(bf1,bf2)*v;
-                    } else if(doFock) {
-                      G[0][thread_id](bf1,bf2) += (XAlpha(bf4,bf3)+XBeta(bf4,bf3))*v;
-                      G[0][thread_id](bf3,bf4) += (XAlpha(bf2,bf1)+XBeta(bf2,bf1))*v;
-                      G[0][thread_id](bf2,bf1) += (XAlpha(bf3,bf4)+XBeta(bf3,bf4))*v;
-                      G[0][thread_id](bf4,bf3) += (XAlpha(bf1,bf2)+XBeta(bf1,bf2))*v;
-                      G[1][thread_id](bf1,bf2) += (XAlpha(bf4,bf3)+XBeta(bf4,bf3))*v;
-                      G[1][thread_id](bf3,bf4) += (XAlpha(bf2,bf1)+XBeta(bf2,bf1))*v;
-                      G[1][thread_id](bf2,bf1) += (XAlpha(bf3,bf4)+XBeta(bf3,bf4))*v;
-                      G[1][thread_id](bf4,bf3) += (XAlpha(bf1,bf2)+XBeta(bf1,bf2))*v;
-                    } else {
-                      G[0][thread_id](bf1,bf2) += 0.5*(XAlpha(bf4,bf3)+XBeta(bf4,bf3))*v;
-                      G[0][thread_id](bf3,bf4) += 0.5*(XAlpha(bf2,bf1)+XBeta(bf2,bf1))*v;
-                      G[0][thread_id](bf2,bf1) += 0.5*(XAlpha(bf3,bf4)+XBeta(bf3,bf4))*v;
-                      G[0][thread_id](bf4,bf3) += 0.5*(XAlpha(bf1,bf2)+XBeta(bf1,bf2))*v;
-                      G[1][thread_id](bf1,bf2) += 0.5*(XAlpha(bf4,bf3)+XBeta(bf4,bf3))*v;
-                      G[1][thread_id](bf3,bf4) += 0.5*(XAlpha(bf2,bf1)+XBeta(bf2,bf1))*v;
-                      G[1][thread_id](bf2,bf1) += 0.5*(XAlpha(bf3,bf4)+XBeta(bf3,bf4))*v;
-                      G[1][thread_id](bf4,bf3) += 0.5*(XAlpha(bf1,bf2)+XBeta(bf1,bf2))*v;
-
-                      G[0][thread_id](bf1,bf2) += 0.5*(XAlpha(bf3,bf4)+XBeta(bf3,bf4))*v;
-                      G[0][thread_id](bf3,bf4) += 0.5*(XAlpha(bf1,bf2)+XBeta(bf1,bf2))*v;
-                      G[0][thread_id](bf2,bf1) += 0.5*(XAlpha(bf4,bf3)+XBeta(bf4,bf3))*v;
-                      G[0][thread_id](bf4,bf3) += 0.5*(XAlpha(bf2,bf1)+XBeta(bf2,bf1))*v;
-                      G[1][thread_id](bf1,bf2) += 0.5*(XAlpha(bf3,bf4)+XBeta(bf3,bf4))*v;
-                      G[1][thread_id](bf3,bf4) += 0.5*(XAlpha(bf1,bf2)+XBeta(bf1,bf2))*v;
-                      G[1][thread_id](bf2,bf1) += 0.5*(XAlpha(bf4,bf3)+XBeta(bf4,bf3))*v;
-                      G[1][thread_id](bf4,bf3) += 0.5*(XAlpha(bf2,bf1)+XBeta(bf2,bf1))*v;
-                    }
-
-                    // Exchange
-                    if(RHF && doFock) {
-                      G[0][thread_id](bf1,bf3) -= 0.25*XAlpha(bf2,bf4)*v;
-                      G[0][thread_id](bf2,bf4) -= 0.25*XAlpha(bf1,bf3)*v;
-                      G[0][thread_id](bf1,bf4) -= 0.25*XAlpha(bf2,bf3)*v;
-                      G[0][thread_id](bf2,bf3) -= 0.25*XAlpha(bf1,bf4)*v;
-
-                      G[0][thread_id](bf3,bf1) -= 0.25*XAlpha(bf4,bf2)*v;
-                      G[0][thread_id](bf4,bf2) -= 0.25*XAlpha(bf3,bf1)*v;
-                      G[0][thread_id](bf4,bf1) -= 0.25*XAlpha(bf3,bf2)*v;
-                      G[0][thread_id](bf3,bf2) -= 0.25*XAlpha(bf4,bf1)*v;
-                    } else if(doFock) {
-                      G[0][thread_id](bf1,bf3) -= 0.5*XAlpha(bf2,bf4)*v;
-                      G[0][thread_id](bf2,bf4) -= 0.5*XAlpha(bf1,bf3)*v;
-                      G[0][thread_id](bf1,bf4) -= 0.5*XAlpha(bf2,bf3)*v;
-                      G[0][thread_id](bf2,bf3) -= 0.5*XAlpha(bf1,bf4)*v;
-
-                      G[0][thread_id](bf3,bf1) -= 0.5*XAlpha(bf4,bf2)*v;
-                      G[0][thread_id](bf4,bf2) -= 0.5*XAlpha(bf3,bf1)*v;
-                      G[0][thread_id](bf4,bf1) -= 0.5*XAlpha(bf3,bf2)*v;
-                      G[0][thread_id](bf3,bf2) -= 0.5*XAlpha(bf4,bf1)*v;
-
-                      G[1][thread_id](bf1,bf3) -= 0.5*XBeta(bf2,bf4)*v;
-                      G[1][thread_id](bf2,bf4) -= 0.5*XBeta(bf1,bf3)*v;
-                      G[1][thread_id](bf1,bf4) -= 0.5*XBeta(bf2,bf3)*v;
-                      G[1][thread_id](bf2,bf3) -= 0.5*XBeta(bf1,bf4)*v;
-
-                      G[1][thread_id](bf3,bf1) -= 0.5*XBeta(bf4,bf2)*v;
-                      G[1][thread_id](bf4,bf2) -= 0.5*XBeta(bf3,bf1)*v;
-                      G[1][thread_id](bf4,bf1) -= 0.5*XBeta(bf3,bf2)*v;
-                      G[1][thread_id](bf3,bf2) -= 0.5*XBeta(bf4,bf1)*v;
-                    } else {
-                      G[0][thread_id](bf1,bf3) -= 0.5*XAlpha(bf2,bf4)*v;
-                      G[0][thread_id](bf2,bf4) -= 0.5*XAlpha(bf1,bf3)*v;
-                      G[0][thread_id](bf1,bf4) -= 0.5*XAlpha(bf2,bf3)*v;
-                      G[0][thread_id](bf2,bf3) -= 0.5*XAlpha(bf1,bf4)*v;
-
-                      G[0][thread_id](bf3,bf1) -= 0.5*XAlpha(bf4,bf2)*v;
-                      G[0][thread_id](bf4,bf2) -= 0.5*XAlpha(bf3,bf1)*v;
-                      G[0][thread_id](bf4,bf1) -= 0.5*XAlpha(bf3,bf2)*v;
-                      G[0][thread_id](bf3,bf2) -= 0.5*XAlpha(bf4,bf1)*v;
-
-                      G[1][thread_id](bf1,bf3) -= 0.5*XBeta(bf2,bf4)*v;
-                      G[1][thread_id](bf2,bf4) -= 0.5*XBeta(bf1,bf3)*v;
-                      G[1][thread_id](bf1,bf4) -= 0.5*XBeta(bf2,bf3)*v;
-                      G[1][thread_id](bf2,bf3) -= 0.5*XBeta(bf1,bf4)*v;
-
-                      G[1][thread_id](bf3,bf1) -= 0.5*XBeta(bf4,bf2)*v;
-                      G[1][thread_id](bf4,bf2) -= 0.5*XBeta(bf3,bf1)*v;
-                      G[1][thread_id](bf4,bf1) -= 0.5*XBeta(bf3,bf2)*v;
-                      G[1][thread_id](bf3,bf2) -= 0.5*XBeta(bf4,bf1)*v;
-                    }
-                  }
-                }
-              }
-            }
-*/
           }
         }
       }
@@ -551,114 +448,25 @@ std::vector<std::vector<std::vector<RealMatrix>>> G(nRHF,std::vector<std::vector
             double s34_deg = (s3 == s4) ? 1.0 : 2.0;
             double s12_34_deg = (s1 == s3) ? (s2 == s4 ? 1.0 : 2.0) : 2.0;
             double s1234_deg = s12_deg * s34_deg * s12_34_deg;
-            for(int i = 0, ijkl = 0 ; i < n1; ++i) {
-              int bf1 = bf1_s + i;
-              for(int j = 0; j < n2; ++j) {
-                int bf2 = bf2_s + j;
-                for(int k = 0; k < n3; ++k) {
-                  int bf3 = bf3_s + k;
-                  for(int l = 0; l < n4; ++l, ++ijkl) {
-                    int bf4 = bf4_s + l;
-                    double v = buff[ijkl]*s1234_deg;
 
-                    for(auto iX = 0; iX < nVec; iX++){
-                      // Coulomb
-                      if(RHF && doFock) {
-                        G[0][iX][thread_id](bf1,bf2) += XAlpha[iX](bf4,bf3)*v;
-                        G[0][iX][thread_id](bf3,bf4) += XAlpha[iX](bf2,bf1)*v;
-                        G[0][iX][thread_id](bf2,bf1) += XAlpha[iX](bf3,bf4)*v;
-                        G[0][iX][thread_id](bf4,bf3) += XAlpha[iX](bf1,bf2)*v;
-                      } else if(doFock) {
-                        G[0][iX][thread_id](bf1,bf2) += (XAlpha[iX](bf4,bf3)+XBeta[iX](bf4,bf3))*v;
-                        G[0][iX][thread_id](bf3,bf4) += (XAlpha[iX](bf2,bf1)+XBeta[iX](bf2,bf1))*v;
-                        G[0][iX][thread_id](bf2,bf1) += (XAlpha[iX](bf3,bf4)+XBeta[iX](bf3,bf4))*v;
-                        G[0][iX][thread_id](bf4,bf3) += (XAlpha[iX](bf1,bf2)+XBeta[iX](bf1,bf2))*v;
-                        G[1][iX][thread_id](bf1,bf2) += (XAlpha[iX](bf4,bf3)+XBeta[iX](bf4,bf3))*v;
-                        G[1][iX][thread_id](bf3,bf4) += (XAlpha[iX](bf2,bf1)+XBeta[iX](bf2,bf1))*v;
-                        G[1][iX][thread_id](bf2,bf1) += (XAlpha[iX](bf3,bf4)+XBeta[iX](bf3,bf4))*v;
-                        G[1][iX][thread_id](bf4,bf3) += (XAlpha[iX](bf1,bf2)+XBeta[iX](bf1,bf2))*v;
-                      } else {
-                        G[0][iX][thread_id](bf1,bf2) += 0.5*(XAlpha[iX](bf4,bf3)+XBeta[iX](bf4,bf3))*v;
-                        G[0][iX][thread_id](bf3,bf4) += 0.5*(XAlpha[iX](bf2,bf1)+XBeta[iX](bf2,bf1))*v;
-                        G[0][iX][thread_id](bf2,bf1) += 0.5*(XAlpha[iX](bf3,bf4)+XBeta[iX](bf3,bf4))*v;
-                        G[0][iX][thread_id](bf4,bf3) += 0.5*(XAlpha[iX](bf1,bf2)+XBeta[iX](bf1,bf2))*v;
-                        G[1][iX][thread_id](bf1,bf2) += 0.5*(XAlpha[iX](bf4,bf3)+XBeta[iX](bf4,bf3))*v;
-                        G[1][iX][thread_id](bf3,bf4) += 0.5*(XAlpha[iX](bf2,bf1)+XBeta[iX](bf2,bf1))*v;
-                        G[1][iX][thread_id](bf2,bf1) += 0.5*(XAlpha[iX](bf3,bf4)+XBeta[iX](bf3,bf4))*v;
-                        G[1][iX][thread_id](bf4,bf3) += 0.5*(XAlpha[iX](bf1,bf2)+XBeta[iX](bf1,bf2))*v;
-                     
-                        G[0][iX][thread_id](bf1,bf2) += 0.5*(XAlpha[iX](bf3,bf4)+XBeta[iX](bf3,bf4))*v;
-                        G[0][iX][thread_id](bf3,bf4) += 0.5*(XAlpha[iX](bf1,bf2)+XBeta[iX](bf1,bf2))*v;
-                        G[0][iX][thread_id](bf2,bf1) += 0.5*(XAlpha[iX](bf4,bf3)+XBeta[iX](bf4,bf3))*v;
-                        G[0][iX][thread_id](bf4,bf3) += 0.5*(XAlpha[iX](bf2,bf1)+XBeta[iX](bf2,bf1))*v;
-                        G[1][iX][thread_id](bf1,bf2) += 0.5*(XAlpha[iX](bf3,bf4)+XBeta[iX](bf3,bf4))*v;
-                        G[1][iX][thread_id](bf3,bf4) += 0.5*(XAlpha[iX](bf1,bf2)+XBeta[iX](bf1,bf2))*v;
-                        G[1][iX][thread_id](bf2,bf1) += 0.5*(XAlpha[iX](bf4,bf3)+XBeta[iX](bf4,bf3))*v;
-                        G[1][iX][thread_id](bf4,bf3) += 0.5*(XAlpha[iX](bf2,bf1)+XBeta[iX](bf2,bf1))*v;
-                      } // Coulomb
-                     
-                      // Exchange
-                      if(RHF && doFock) {
-                        G[0][iX][thread_id](bf1,bf3) -= 0.25*XAlpha[iX](bf2,bf4)*v;
-                        G[0][iX][thread_id](bf2,bf4) -= 0.25*XAlpha[iX](bf1,bf3)*v;
-                        G[0][iX][thread_id](bf1,bf4) -= 0.25*XAlpha[iX](bf2,bf3)*v;
-                        G[0][iX][thread_id](bf2,bf3) -= 0.25*XAlpha[iX](bf1,bf4)*v;
-                     
-                        G[0][iX][thread_id](bf3,bf1) -= 0.25*XAlpha[iX](bf4,bf2)*v;
-                        G[0][iX][thread_id](bf4,bf2) -= 0.25*XAlpha[iX](bf3,bf1)*v;
-                        G[0][iX][thread_id](bf4,bf1) -= 0.25*XAlpha[iX](bf3,bf2)*v;
-                        G[0][iX][thread_id](bf3,bf2) -= 0.25*XAlpha[iX](bf4,bf1)*v;
-                      } else if(doFock) {
-                        G[0][iX][thread_id](bf1,bf3) -= 0.5*XAlpha[iX](bf2,bf4)*v;
-                        G[0][iX][thread_id](bf2,bf4) -= 0.5*XAlpha[iX](bf1,bf3)*v;
-                        G[0][iX][thread_id](bf1,bf4) -= 0.5*XAlpha[iX](bf2,bf3)*v;
-                        G[0][iX][thread_id](bf2,bf3) -= 0.5*XAlpha[iX](bf1,bf4)*v;
-                     
-                        G[0][iX][thread_id](bf3,bf1) -= 0.5*XAlpha[iX](bf4,bf2)*v;
-                        G[0][iX][thread_id](bf4,bf2) -= 0.5*XAlpha[iX](bf3,bf1)*v;
-                        G[0][iX][thread_id](bf4,bf1) -= 0.5*XAlpha[iX](bf3,bf2)*v;
-                        G[0][iX][thread_id](bf3,bf2) -= 0.5*XAlpha[iX](bf4,bf1)*v;
-                     
-                        G[1][iX][thread_id](bf1,bf3) -= 0.5*XBeta[iX](bf2,bf4)*v;
-                        G[1][iX][thread_id](bf2,bf4) -= 0.5*XBeta[iX](bf1,bf3)*v;
-                        G[1][iX][thread_id](bf1,bf4) -= 0.5*XBeta[iX](bf2,bf3)*v;
-                        G[1][iX][thread_id](bf2,bf3) -= 0.5*XBeta[iX](bf1,bf4)*v;
-                     
-                        G[1][iX][thread_id](bf3,bf1) -= 0.5*XBeta[iX](bf4,bf2)*v;
-                        G[1][iX][thread_id](bf4,bf2) -= 0.5*XBeta[iX](bf3,bf1)*v;
-                        G[1][iX][thread_id](bf4,bf1) -= 0.5*XBeta[iX](bf3,bf2)*v;
-                        G[1][iX][thread_id](bf3,bf2) -= 0.5*XBeta[iX](bf4,bf1)*v;
-                      } else {
-                        G[0][iX][thread_id](bf1,bf3) -= 0.5*XAlpha[iX](bf2,bf4)*v;
-                        G[0][iX][thread_id](bf2,bf4) -= 0.5*XAlpha[iX](bf1,bf3)*v;
-                        G[0][iX][thread_id](bf1,bf4) -= 0.5*XAlpha[iX](bf2,bf3)*v;
-                        G[0][iX][thread_id](bf2,bf3) -= 0.5*XAlpha[iX](bf1,bf4)*v;
-                     
-                        G[0][iX][thread_id](bf3,bf1) -= 0.5*XAlpha[iX](bf4,bf2)*v;
-                        G[0][iX][thread_id](bf4,bf2) -= 0.5*XAlpha[iX](bf3,bf1)*v;
-                        G[0][iX][thread_id](bf4,bf1) -= 0.5*XAlpha[iX](bf3,bf2)*v;
-                        G[0][iX][thread_id](bf3,bf2) -= 0.5*XAlpha[iX](bf4,bf1)*v;
-                     
-                        G[1][iX][thread_id](bf1,bf3) -= 0.5*XBeta[iX](bf2,bf4)*v;
-                        G[1][iX][thread_id](bf2,bf4) -= 0.5*XBeta[iX](bf1,bf3)*v;
-                        G[1][iX][thread_id](bf1,bf4) -= 0.5*XBeta[iX](bf2,bf3)*v;
-                        G[1][iX][thread_id](bf2,bf3) -= 0.5*XBeta[iX](bf1,bf4)*v;
-                     
-                        G[1][iX][thread_id](bf3,bf1) -= 0.5*XBeta[iX](bf4,bf2)*v;
-                        G[1][iX][thread_id](bf4,bf2) -= 0.5*XBeta[iX](bf3,bf1)*v;
-                        G[1][iX][thread_id](bf4,bf1) -= 0.5*XBeta[iX](bf3,bf2)*v;
-                        G[1][iX][thread_id](bf3,bf2) -= 0.5*XBeta[iX](bf4,bf1)*v;
-                      } // Exchange
-                    } // Loop over X
-                  } // Loop l
-                } // Loop k
-              } // Loop j
-            } // Loop i
+            for(auto iX = 0; iX < nVec; iX++){
+              if(RHF && doFock) 
+                this->Restricted34HerContract(G[0][iX][thread_id],XAlpha[iX],n1,n2,n3,n4,
+                  bf1_s,bf2_s,bf3_s,bf4_s,buff,s1234_deg);
+              else if(doFock)
+                this->UnRestricted34HerContract(G[0][iX][thread_id],XAlpha[iX],
+                  G[1][iX][thread_id],XBeta[iX],n1,n2,n3,n4,bf1_s,bf2_s,bf3_s,bf4_s,buff,
+                  s1234_deg);
+              else
+                this->General34NonHerContract(G[0][iX][thread_id],XAlpha[iX],
+                  G[1][iX][thread_id],XBeta[iX],n1,n2,n3,n4,bf1_s,bf2_s,bf3_s,bf4_s,buff,
+                  s1234_deg);
+            } // Loop iX
           } // Loop s4
         } // Loop s3
       } // Loop s2
     } // Loop s1
-  };// efficiens_twoe 
+  };// efficient_twoe 
 
 
 #ifdef USE_OMP
