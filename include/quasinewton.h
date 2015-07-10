@@ -532,7 +532,8 @@ template <typename T>
       new (&NewVecL) TCMMap(this->TVecLMem+ NOld*this->N_,this->N_,NNew);
     }
     if(this->sdr_ != NULL){
-      if(this->sdr_->iMeth() == SDResponse::CIS || this->sdr_->iMeth() == SDResponse::RPA){
+      if(this->sdr_->iMeth() == SDResponse::CIS || this->sdr_->iMeth() == SDResponse::RPA ||
+         this->sdr_->iMeth() == SDResponse::STAB){
         // Linear transformation onto right / gerade
         this->sdr_->formRM3(NewVecR,NewSR,NewRhoL); 
         if(this->sdr_->iMeth() == SDResponse::RPA)   
