@@ -76,11 +76,13 @@ void Controls::readPSCF(std::fstream &in, std::fstream &out){
   std::string readString;
   in >> readString;
   readString = stringupper(readString);
-  if(!readString.compare("CIS"))      this->SDMethod = 1;
-  else if(!readString.compare("RPA")) this->SDMethod = 4;
+  if(!readString.compare("CIS"))       this->SDMethod = 1;
+  else if(!readString.compare("RPA"))  this->SDMethod = 2;
+  else if(!readString.compare("STAB")) this->SDMethod = 4;
   else CErr("Input PSCF Option Not Recgnized",out);
 
-  in >> this->SDNSek;
+  if(this->SDMethod != 4) in >> this->SDNSek;
+  else                    this->SDNSek = 3;
 }
 
 void Controls::readDebug(std::string str){
