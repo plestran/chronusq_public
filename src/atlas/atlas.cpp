@@ -84,6 +84,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   if(controls->optWaveFunction) {
     hartreeFock->doCUHF = false;
     hartreeFock->SCF();
+    cout << *hartreeFock->epsA() << endl << endl;
   }
   //MOIntegrals *moIntegrals = new MOIntegrals();
   //moIntegrals->iniMOIntegrals(molecule,basisset,fileIO,controls,aointegrals,hartreeFock);
@@ -93,6 +94,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
     sdResponse->iniSDResponse(molecule.get(),basisset.get(),moIntegrals.get(),fileIO.get(),
                               controls.get(),hartreeFock.get());
     sdResponse->IterativeRPA();
+    sdResponse->incorePPRPA();
   }
 
 //if(controls->doDF) aointegrals->compareRI();

@@ -32,6 +32,9 @@ namespace ChronusQ {
     char JOBV = 'V';
     char UPLO = 'L';
     int INFO;
+    RealCMMap A(this->XTSigmaRMem,NTrial,NTrial);
+  //cout << "HERE" << endl;
+  //cout << endl << A << endl;
     dsyev_(&JOBV,&UPLO,&NTrial,this->XTSigmaRMem,&NTrial,
            this->ERMem,this->WORK,&this->LWORK,&INFO); 
     if(INFO!=0) CErr("DSYEV failed to converge in Davison Iterations",output);
@@ -118,6 +121,7 @@ namespace ChronusQ {
     delete [] IPIV;
 
     NHrProd = SSuper * ASuper;
+//  cout << "PROD" << endl << NHrProd << endl;
 
     dgeev_(&JOBVL,&JOBVR,&TwoNTrial,NHrProd.data(),&TwoNTrial,this->ERMem,this->EIMem,
            this->SSuperMem,&TwoNTrial,this->SSuperMem,&TwoNTrial,this->WORK,&this->LWORK,
@@ -126,7 +130,9 @@ namespace ChronusQ {
     RealVecMap ER(this->ERMem,TwoNTrial);
     RealVecMap EI(this->EIMem,TwoNTrial);
     RealCMMap  VR(this->SSuperMem,TwoNTrial,TwoNTrial);
+//  cout << endl << ER << endl;
     this->eigSrt(VR,ER);
+//  cout << endl << ER << endl;
   
     // Grab the "positive paired" roots (throw away other element of the pair)
     this->ERMem += NTrial;
@@ -171,6 +177,7 @@ namespace ChronusQ {
   template<>
   void QuasiNewton<double>::redDiag(int NTrial,ostream &output){
     this->diagMem(NTrial); 
+  //cout << "HERE" << endl;
     if(this->isHermetian_) {
       if(!this->symmetrizedTrial_) this->stdHerDiag(NTrial,output);
       else                         this->symmHerDiag(NTrial,output);

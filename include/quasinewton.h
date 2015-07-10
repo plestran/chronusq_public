@@ -435,7 +435,7 @@ template <typename T>
       this->doGEP_            = (SDR->iMeth() == SDResponse::RPA);
       this->genGuess_         = (this->nGuess_ == 0);
       this->maxSubSpace_      = this->stdSubSpace();
-      this->isHermetian_      = false;
+      this->isHermetian_      = !(SDR->iMeth() == SDResponse::RPA);
       this->initScrLen();
 
       if(this->genGuess_) this->nGuess_ = this->stdNGuess();

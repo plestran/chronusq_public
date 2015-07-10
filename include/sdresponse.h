@@ -91,6 +91,7 @@ public:
     __invalid,
     CIS,
     RPA,
+    PPRPA,
     CCSD
   };
 //dbwye
@@ -132,6 +133,7 @@ public:
   void formTransDipole();
   void formOscStrength();
   void printPrinciple(int );
+  void incorePPRPA();
   FileIO * fileio(){return this->fileio_;};
 //dbwye
   RealMatrix formRM2(RealMatrix &XMO);

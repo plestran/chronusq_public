@@ -1231,4 +1231,130 @@ void SDResponse::printPrinciple(int iSt){
   }
   this->fileio_->out << bannerMid << endl << endl;
 }
+
+void SDResponse::incorePPRPA(){
+  enum{a,b,c,d,i,j,k,l,mu,nu,lam,sig};
+  Tensor<double> LocMoAO(this->nBasis_,this->nOA_);
+  Tensor<double> LocMoAV(this->nBasis_,this->nVA_);
+  Tensor<double> LocMoBO(this->nBasis_,this->nOB_);
+  Tensor<double> LocMoBV(this->nBasis_,this->nVB_);  
+
+
+  for(auto ii = 0; ii < this->nBasis_; ii++) {
+    for(auto jj = 0; jj < this->nOA_; jj++) {
+      LocMoAO(ii,jj) = (*this->singleSlater_->moA())(ii,jj);
+    }
+    for(auto kk = this->nOA_; kk < this->nBasis_; kk++) {
+      LocMoAV(ii,kk-this->nOA_) = (*this->singleSlater_->moA())(ii,kk);
+    }
+  }
+
+  Tensor<double> IanlsA(this->nVA_,this->nBasis_,this->nBasis_,this->nBasis_); // ( a(A) nu   |  lam   sig  )
+  Tensor<double> IablsA(this->nVA_,this->nVA_   ,this->nBasis_,this->nBasis_); // ( a(A) b(A) |  lam   sig  )
+  Tensor<double> IabcsA(this->nVA_,this->nVA_   ,this->nVA_   ,this->nBasis_); // ( a(A) b(A) |  c(A)  sig  )
+  Tensor<double> SabcdA(this->nVA_,this->nVA_   ,this->nVA_   ,this->nVA_   ); // ( a(A) b(A) |  c(A)  d(A) )
+  Tensor<double> dabcdA(this->nVA_,this->nVA_   ,this->nVA_   ,this->nVA_   ); // < a(A) b(A) |  c(A)  d(A) >
+  Tensor<double> DabcdA(this->nVA_,this->nVA_   ,this->nVA_   ,this->nVA_   ); // < a(A) b(A) || c(A)  d(A) >
+
+  Tensor<double> IinlsA(this->nOA_,this->nBasis_,this->nBasis_,this->nBasis_); // ( i(A) nu   |  lam   sig  )
+  Tensor<double> IijlsA(this->nOA_,this->nOA_   ,this->nBasis_,this->nBasis_); // ( i(A) j(A) |  lam   sig  )
+  Tensor<double> IijksA(this->nOA_,this->nOA_   ,this->nOA_   ,this->nBasis_); // ( i(A) j(A) |  k(A)  sig  )
+  Tensor<double> SijklA(this->nOA_,this->nOA_   ,this->nOA_   ,this->nOA_   ); // ( i(A) j(A) |  k(A)  l(A) )
+  Tensor<double> dijklA(this->nOA_,this->nOA_   ,this->nOA_   ,this->nOA_   ); // < i(A) j(A) |  k(A)  l(A) >
+  Tensor<double> DijklA(this->nOA_,this->nOA_   ,this->nOA_   ,this->nOA_   ); // < i(A) j(A) || k(A)  l(A) >
+
+  // Form <AB||CD>
+  
+  // (ab | cd) AAAA
+  contract(1.0,LocMoAV,{mu ,a},(*this->aoERI_),{mu,nu,lam,sig},0.0,IanlsA,{a,nu,lam,sig});
+  contract(1.0,LocMoAV,{nu ,b},IanlsA         ,{a ,nu,lam,sig},0.0,IablsA,{a,b ,lam,sig});
+  contract(1.0,LocMoAV,{lam,c},IablsA         ,{a ,b ,lam,sig},0.0,IabcsA,{a,b ,c  ,sig});
+  contract(1.0,LocMoAV,{sig,d},IabcsA         ,{a ,b ,c  ,sig},0.0,SabcdA,{a,b ,c  ,d  });
+
+  // <ab | cd> = (ac | bd)
+  for(auto a = 0; a < this->nVA_; a++)
+  for(auto b = 0; b < this->nVA_; b++)
+  for(auto c = 0; c < this->nVA_; c++)
+  for(auto d = 0; d < this->nVA_; d++){
+    dabcdA(a,b,c,d) = SabcdA(a,c,b,d);
+  }
+
+  // <ab || cd> = <ab | cd> - <ab | dc>
+  for(auto a = 0; a < this->nVA_; a++)
+  for(auto b = 0; b < this->nVA_; b++)
+  for(auto c = 0; c < this->nVA_; c++)
+  for(auto d = 0; d < this->nVA_; d++){
+    DabcdA(a,b,c,d) = dabcdA(a,b,c,d) - dabcdA(a,b,d,c);
+  }
+
+
+  // Form <IJ||KL>
+  
+  // (ij | kl) AAAA
+  cout << "HERE" << endl;
+  contract(1.0,LocMoAO,{mu ,i},(*this->aoERI_),{mu,nu,lam,sig},0.0,IinlsA,{i,nu,lam,sig});
+  cout << "HERE" << endl;
+  contract(1.0,LocMoAO,{nu ,j},IinlsA         ,{i ,nu,lam,sig},0.0,IijlsA,{i,j ,lam,sig});
+  cout << "HERE" << endl;
+  contract(1.0,LocMoAO,{lam,k},IijlsA         ,{i ,j ,lam,sig},0.0,IijksA,{i,j ,k  ,sig});
+  cout << "HERE" << endl;
+  contract(1.0,LocMoAO,{sig,l},IijksA         ,{i ,j ,k  ,sig},0.0,SijklA,{i,j ,k  ,l  });
+  cout << "HERE" << endl;
+  cout << "HERE" << endl;
+
+  // <ij | kl> = (ik | jl)
+  for(auto i = 0; i < this->nOA_; i++)
+  for(auto j = 0; j < this->nOA_; j++)
+  for(auto k = 0; k < this->nOA_; k++)
+  for(auto l = 0; l < this->nOA_; l++){
+    dijklA(i,j,k,l) = SijklA(i,k,j,l);
+  }
+  cout << "HERE" << endl;
+
+  // <ij || kl> = <ij | kl> - <ij | lk>
+  for(auto i = 0; i < this->nOA_; i++)
+  for(auto j = 0; j < this->nOA_; j++)
+  for(auto k = 0; k < this->nOA_; k++)
+  for(auto l = 0; l < this->nOA_; l++){
+    DijklA(i,j,k,l) = dijklA(i,j,k,l) - dijklA(i,j,l,k);
+  }
+  cout << "HERE" << endl;
+
+  double Rmu = (*this->singleSlater_->epsA())(this->nOA_-1) + (*this->singleSlater_->epsA())(this->nOA_);
+  Rmu /= 2;
+
+  RealMatrix A(this->nVA_*(this->nVA_-1)/2,this->nVA_*(this->nVA_-1)/2);
+  RealMatrix C(this->nOA_*(this->nOA_-1)/2,this->nOA_*(this->nOA_-1)/2);
+
+  for(auto a = 0, ab = 0; a < this->nVA_; a++      )
+  for(auto b = 0        ; b < a         ; b++, ab++){
+    for(auto c = 0, cd = 0; c < this->nVA_; c++      )
+    for(auto d = 0        ; d < c         ; d++, cd++){
+      A(ab,cd) = DabcdA(a,b,c,d);
+      if(ab == cd) 
+        A(ab,cd) += (*this->singleSlater_->epsA())(a+this->nOA_) + 
+                    (*this->singleSlater_->epsA())(b+this->nOA_) - 2*Rmu;
+    }
+  }
+
+  for(auto i = 0, ij = 0; i < this->nOA_; i++      )
+  for(auto j = 0        ; j < i         ; j++, ij++){
+    for(auto k = 0, kl = 0; k < this->nOA_; k++      )
+    for(auto l = 0        ; l < k         ; l++, kl++){
+      C(ij,kl) = DijklA(i,j,k,l);
+      if(ij == kl) 
+        C(ij,kl) -= (*this->singleSlater_->epsA())(i) + 
+                    (*this->singleSlater_->epsA())(j) - 2*Rmu;
+    }
+  }
+
+//cout << A - A.adjoint() << endl << endl;
+
+  Eigen::SelfAdjointEigenSolver<RealMatrix> ES;
+  ES.compute(A);
+  cout << ES.eigenvalues() << endl << endl;
+  ES.compute(C);
+  cout << ES.eigenvalues() << endl << endl;
+
+}
 //dbwye

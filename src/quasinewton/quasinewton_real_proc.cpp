@@ -43,6 +43,7 @@ namespace ChronusQ {
 
     // Copy guess into Trial Vec
     TrialVecR = (*this->guessR_);
+  //cout << TrialVecR << endl << endl;
     if(this->symmetrizedTrial_ || !this->isHermetian_){
       if(this->doRestart_) TrialVecL = (*this->guessL_);
       else                 TrialVecL = (*this->guessR_);
