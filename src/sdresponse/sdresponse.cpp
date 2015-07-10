@@ -1269,6 +1269,17 @@ void SDResponse::incorePPRPA(){
   Tensor<double> dabijA(this->nVA_,this->nVA_   ,this->nOA_   ,this->nOA_   ); // < a(A) b(A) |  i(A)  j(A) >
   Tensor<double> DabijA(this->nVA_,this->nVA_   ,this->nOA_   ,this->nOA_   ); // < a(A) b(A) || i(A)  j(A) >
 
+  Tensor<double> IabcsAB(this->nVA_,this->nVA_   ,this->nVB_   ,this->nBasis_); // ( a(A) b(A) |  c(B)  sig  )
+  Tensor<double> SabcdAB(this->nVA_,this->nVA_   ,this->nVB_   ,this->nVB_   ); // ( a(A) b(A) |  c(B)  d(B) )
+  Tensor<double> dabcdAB(this->nVA_,this->nVB_   ,this->nVA_   ,this->nVB_   ); // < a(A) b(B) |  c(A)  d(B) >
+
+  Tensor<double> IijksAB(this->nOA_,this->nOA_   ,this->nOB_   ,this->nBasis_); // ( i(A) j(A) |  k(B)  sig  )
+  Tensor<double> SijklAB(this->nOA_,this->nOA_   ,this->nOB_   ,this->nOB_   ); // ( i(A) j(A) |  k(B)  l(B) )
+  Tensor<double> dijklAB(this->nOA_,this->nOB_   ,this->nOA_   ,this->nOB_   ); // < i(A) j(B) |  k(A)  l(B) >
+
+  Tensor<double> IaibsAB(this->nVA_,this->nOA_   ,this->nVB_   ,this->nBasis_); // ( a(A) i(A) |  b(B)  sig  )
+  Tensor<double> SaibjAB(this->nVA_,this->nOA_   ,this->nVB_   ,this->nOB_   ); // ( a(A) i(A) |  b(B)  j(B) )
+  Tensor<double> dabijAB(this->nVA_,this->nVB_   ,this->nOA_   ,this->nOB_   ); // < a(A) b(B) |  i(A)  j(B) >
 
   // Form <AB||CD>
   
@@ -1278,12 +1289,17 @@ void SDResponse::incorePPRPA(){
   contract(1.0,LocMoAV,{lam,c},IablsA         ,{a ,b ,lam,sig},0.0,IabcsA,{a,b ,c  ,sig});
   contract(1.0,LocMoAV,{sig,d},IabcsA         ,{a ,b ,c  ,sig},0.0,SabcdA,{a,b ,c  ,d  });
 
+  // (ab | cd) AABB
+  contract(1.0,LocMoAV,{lam,c},IablsA ,{a,b,lam,sig},0.0,IabcsAB,{a,b,c,sig});
+  contract(1.0,LocMoAV,{sig,d},IabcsAB,{a,b,c  ,sig},0.0,SabcdAB,{a,b,c,d  });
+
   // <ab | cd> = (ac | bd)
   for(auto a = 0; a < this->nVA_; a++)
   for(auto b = 0; b < this->nVA_; b++)
   for(auto c = 0; c < this->nVA_; c++)
   for(auto d = 0; d < this->nVA_; d++){
     dabcdA(a,b,c,d) = SabcdA(a,c,b,d);
+    dabcdAB(a,b,c,d) = SabcdAB(a,c,b,d);
   }
 
   // <ab || cd> = <ab | cd> - <ab | dc>
@@ -1303,12 +1319,17 @@ void SDResponse::incorePPRPA(){
   contract(1.0,LocMoAO,{lam,k},IijlsA         ,{i ,j ,lam,sig},0.0,IijksA,{i,j ,k  ,sig});
   contract(1.0,LocMoAO,{sig,l},IijksA         ,{i ,j ,k  ,sig},0.0,SijklA,{i,j ,k  ,l  });
 
+  // (ij | kl) AABB
+  contract(1.0,LocMoAO,{lam,k},IijlsA ,{i,j,lam,sig},0.0,IijksAB,{i,j,k,sig});
+  contract(1.0,LocMoAO,{sig,l},IijksAB,{i,j,k  ,sig},0.0,SijklAB,{i,j,k,l  });
+
   // <ij | kl> = (ik | jl)
   for(auto i = 0; i < this->nOA_; i++)
   for(auto j = 0; j < this->nOA_; j++)
   for(auto k = 0; k < this->nOA_; k++)
   for(auto l = 0; l < this->nOA_; l++){
     dijklA(i,j,k,l) = SijklA(i,k,j,l);
+    dijklAB(i,j,k,l) = SijklAB(i,k,j,l);
   }
 
   // <ij || kl> = <ij | kl> - <ij | lk>
@@ -1321,10 +1342,14 @@ void SDResponse::incorePPRPA(){
 
   // Form <AB||IJ>
 
-  // (ai | bj)
+  // (ai | bj) AAAA
   contract(1.0,LocMoAO,{nu ,i},IanlsA,{a,nu,lam,sig},0.0,IailsA,{a,i,lam,sig});
   contract(1.0,LocMoAV,{lam,b},IailsA,{a,i ,lam,sig},0.0,IaibsA,{a,i,b  ,sig});
   contract(1.0,LocMoAO,{sig,j},IaibsA,{a,i ,b  ,sig},0.0,SaibjA,{a,i,b  ,j  });
+
+  // (ai | bj) AABB
+  contract(1.0,LocMoAV,{lam,b},IailsA ,{a,i,lam,sig},0.0,IaibsAB,{a,i,b,sig});
+  contract(1.0,LocMoAO,{sig,j},IaibsAB,{a,i,b,  sig},0.0,SaibjAB,{a,i,b,j  });
 
   // <ab | ij> = (ai | bj)
   for(auto a = 0; a < this->nVA_; a++)
@@ -1332,6 +1357,7 @@ void SDResponse::incorePPRPA(){
   for(auto i = 0; i < this->nOA_; i++)
   for(auto j = 0; j < this->nOA_; j++){
     dabijA(a,b,i,j) = SaibjA(a,i,b,j);
+    dabijAB(a,b,i,j) = SaibjAB(a,i,b,j);
   }
 
   // <ab || ij> = <ab | ij> - <ab | ji>
@@ -1346,17 +1372,20 @@ void SDResponse::incorePPRPA(){
   double Rmu = (*this->singleSlater_->epsA())(this->nOA_-1) + (*this->singleSlater_->epsA())(this->nOA_);
   Rmu /= 2;
 
-  RealMatrix A(this->nVA_*(this->nVA_-1)/2,this->nVA_*(this->nVA_-1)/2);
-  RealMatrix B(this->nVA_*(this->nVA_-1)/2,this->nOA_*(this->nOA_-1)/2);
-  RealMatrix C(this->nOA_*(this->nOA_-1)/2,this->nOA_*(this->nOA_-1)/2);
+  RealMatrix AAA(this->nVA_*(this->nVA_-1)/2,this->nVA_*(this->nVA_-1)/2);
+  RealMatrix BAA(this->nVA_*(this->nVA_-1)/2,this->nOA_*(this->nOA_-1)/2);
+  RealMatrix CAA(this->nOA_*(this->nOA_-1)/2,this->nOA_*(this->nOA_-1)/2);
+  RealMatrix AAB(this->nVA_*this->nVA_,this->nVA_*this->nVA_);
+  RealMatrix BAB(this->nVA_*this->nVA_,this->nOA_*this->nOA_);
+  RealMatrix CAB(this->nOA_*this->nOA_,this->nOA_*this->nOA_);
 
   for(auto a = 0, ab = 0; a < this->nVA_; a++      )
   for(auto b = 0        ; b < a         ; b++, ab++){
     for(auto c = 0, cd = 0; c < this->nVA_; c++      )
     for(auto d = 0        ; d < c         ; d++, cd++){
-      A(ab,cd) = DabcdA(a,b,c,d);
+      AAA(ab,cd) = DabcdA(a,b,c,d);
       if(ab == cd) 
-        A(ab,cd) += (*this->singleSlater_->epsA())(a+this->nOA_) + 
+        AAA(ab,cd) += (*this->singleSlater_->epsA())(a+this->nOA_) + 
                     (*this->singleSlater_->epsA())(b+this->nOA_) - 2*Rmu;
     }
   }
@@ -1365,9 +1394,9 @@ void SDResponse::incorePPRPA(){
   for(auto j = 0        ; j < i         ; j++, ij++){
     for(auto k = 0, kl = 0; k < this->nOA_; k++      )
     for(auto l = 0        ; l < k         ; l++, kl++){
-      C(ij,kl) = DijklA(i,j,k,l);
+      CAA(ij,kl) = DijklA(i,j,k,l);
       if(ij == kl) 
-        C(ij,kl) -= (*this->singleSlater_->epsA())(i) + 
+        CAA(ij,kl) -= (*this->singleSlater_->epsA())(i) + 
                     (*this->singleSlater_->epsA())(j) - 2*Rmu;
     }
   }
@@ -1376,7 +1405,37 @@ void SDResponse::incorePPRPA(){
   for(auto b = 0        ; b < a         ; b++, ab++){
     for(auto i = 0, ij = 0; i < this->nOA_; i++      )
     for(auto j = 0        ; j < i         ; j++, ij++){
-      B(ab,ij) = DabijA(a,b,i,j);
+      BAA(ab,ij) = DabijA(a,b,i,j);
+    }
+  }
+
+  for(auto a = 0, ab = 0; a < this->nVA_; a++      )
+  for(auto b = 0        ; b < this->nVA_; b++, ab++){
+    for(auto c = 0, cd = 0; c < this->nVA_; c++      )
+    for(auto d = 0        ; d < this->nVA_; d++, cd++){
+      AAB(ab,cd) = dabcdAB(a,b,c,d);
+      if(ab == cd) 
+        AAB(ab,cd) += (*this->singleSlater_->epsA())(a+this->nOA_) + 
+                    (*this->singleSlater_->epsA())(b+this->nOA_) - 2*Rmu;
+    }
+  }
+
+  for(auto i = 0, ij = 0; i < this->nOA_; i++      )
+  for(auto j = 0        ; j < this->nOA_; j++, ij++){
+    for(auto k = 0, kl = 0; k < this->nOA_; k++      )
+    for(auto l = 0        ; l < this->nOA_; l++, kl++){
+      CAB(ij,kl) = dijklAB(i,j,k,l);
+      if(ij == kl) 
+        CAB(ij,kl) -= (*this->singleSlater_->epsA())(i) + 
+                    (*this->singleSlater_->epsA())(j) - 2*Rmu;
+    }
+  }
+
+  for(auto a = 0, ab = 0; a < this->nVA_; a++      )
+  for(auto b = 0        ; b < this->nVA_; b++, ab++){
+    for(auto i = 0, ij = 0; i < this->nOA_; i++      )
+    for(auto j = 0        ; j < this->nOA_; j++, ij++){
+      BAB(ab,ij) = dabijAB(a,b,i,j);
     }
   }
   
@@ -1384,30 +1443,45 @@ void SDResponse::incorePPRPA(){
 //cout << A - A.adjoint() << endl << endl;
 
   Eigen::SelfAdjointEigenSolver<RealMatrix> ES;
-  ES.compute(A);
+  ES.compute(AAA);
   cout << ES.eigenvalues() << endl << endl;
-  auto AEig = ES.eigenvalues();
-  ES.compute(C);
+  ES.compute(CAA);
   cout << ES.eigenvalues() << endl << endl;
-  auto CEig = ES.eigenvalues();
-
-  cout << "COMPARE" << endl;
-  cout << AEig << endl << endl << CEig << endl << endl;
-
   
-  RealMatrix Full(this->nVA_*(this->nVA_-1)/2+this->nOA_*(this->nOA_-1)/2,this->nVA_*(this->nVA_-1)/2+this->nOA_*(this->nOA_-1)/2);
+  RealMatrix FullAA(this->nVA_*(this->nVA_-1)/2+this->nOA_*(this->nOA_-1)/2,this->nVA_*(this->nVA_-1)/2+this->nOA_*(this->nOA_-1)/2);
 
-  Full.block(0,0,this->nVA_*(this->nVA_-1)/2,this->nVA_*(this->nVA_-1)/2) = A;
-  Full.block(0,this->nVA_*(this->nVA_-1)/2,this->nVA_*(this->nVA_-1)/2,this->nOA_*(this->nOA_-1)/2) = B;
-  Full.block(this->nVA_*(this->nVA_-1)/2,0,this->nOA_*(this->nOA_-1)/2,this->nVA_*(this->nVA_-1)/2) = -B.transpose();
-  Full.block(this->nVA_*(this->nVA_-1)/2,this->nVA_*(this->nVA_-1)/2,this->nOA_*(this->nOA_-1)/2,this->nOA_*(this->nOA_-1)/2) = -C;
+  FullAA.block(0,0,this->nVA_*(this->nVA_-1)/2,this->nVA_*(this->nVA_-1)/2) = AAA;
+  FullAA.block(0,this->nVA_*(this->nVA_-1)/2,this->nVA_*(this->nVA_-1)/2,this->nOA_*(this->nOA_-1)/2) = BAA;
+  FullAA.block(this->nVA_*(this->nVA_-1)/2,0,this->nOA_*(this->nOA_-1)/2,this->nVA_*(this->nVA_-1)/2) = -BAA.transpose();
+  FullAA.block(this->nVA_*(this->nVA_-1)/2,this->nVA_*(this->nVA_-1)/2,this->nOA_*(this->nOA_-1)/2,this->nOA_*(this->nOA_-1)/2) = -CAA;
 
   Eigen::EigenSolver<RealMatrix> EA;
-  EA.compute(Full);
-  Eigen::VectorXd ER = EA.eigenvalues().real();
+  EA.compute(FullAA);
+  Eigen::VectorXd ER = -EA.eigenvalues().real();
   std::sort(ER.data(),ER.data()+ER.size());
+  ER = -ER;
   cout << ER << endl << endl;
 
+  cout << "PPRPA" << endl;
+  ES.compute(AAB);
+  cout << ES.eigenvalues() << endl << endl;
+  ES.compute(CAB);
+  cout << ES.eigenvalues() << endl << endl;
+  
+  RealMatrix FullAB(this->nVA_*this->nVA_+this->nOA_*this->nOA_,this->nVA_*this->nVA_+this->nOA_*this->nOA_);
+
+  FullAB.block(0,0,this->nVA_*this->nVA_,  this->nVA_*this->nVA_) = AAB;
+  FullAB.block(0,  this->nVA_*this->nVA_,  this->nVA_*this->nVA_,this->nOA_*this->nOA_) = BAB;
+  FullAB.block(    this->nVA_*this->nVA_,0,this->nOA_*this->nOA_,this->nVA_*this->nVA_) = -BAB.transpose();
+  FullAB.block(    this->nVA_*this->nVA_,  this->nVA_*this->nVA_,this->nOA_*this->nOA_,this->nOA_*this->nOA_) = -CAB;
+
+  EA.compute(FullAB);
+  Eigen::VectorXd ERAB = -EA.eigenvalues().real();
+  std::sort(ERAB.data(),ERAB.data()+ERAB.size());
+  ERAB = -ERAB;
+  cout << ERAB << endl << endl;
+
+  RealMatrix TAA = EA.eigenvectors().col(0).real();
 
 }
 //dbwye
