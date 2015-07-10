@@ -92,6 +92,7 @@ public:
     CIS,
     RPA,
     PPRPA,
+    STAB,
     CCSD
   };
 //dbwye

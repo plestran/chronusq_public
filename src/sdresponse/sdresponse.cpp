@@ -105,6 +105,8 @@ void SDResponse::printExcitedStateEnergies(){
     this->fileio_->out << "CIS";
   else if(this->iMeth_ == RPA)
     this->fileio_->out << "RPA";
+  else if(this->iMeth_ == STAB)
+    this->fileio_->out << "Stability";
   this->fileio_->out << " Diagonalization for lowest " << this->nSek_ << " eigenstates" << endl;
   this->fileio_->out << bannerMid << endl << endl;
   
@@ -979,7 +981,7 @@ void SDResponse::formGuess(){
     ); 
   int nRHF = 1;
 //if(this->RHF_) nRHF = 2;
-  if(this->iMeth_==RPA) nRHF *= 2;
+  if(this->iMeth_== RPA || this->iMeth_ == STAB) nRHF *= 2;
   RealMatrix dagCpy(this->nSingleDim_/nRHF,1);
   std::memcpy(dagCpy.data(),this->rmDiag_->data(),dagCpy.size()*sizeof(double));
   std::sort(dagCpy.data(),dagCpy.data()+dagCpy.size());
@@ -1056,7 +1058,7 @@ void SDResponse::getDiag(){
       (*this->rmDiag_)(iaBeta,0) = eaBeta - eiBeta;
     }
   }
-  if(this->iMeth_ == RPA)
+  if(this->iMeth_ == RPA || this->iMeth_ == STAB)
     this->rmDiag_->block(nSingleDim_/2,0,nSingleDim_/2,1)
       = this->rmDiag_->block(0,0,nSingleDim_/2,1);
   this->haveDag_ = true;
@@ -1066,7 +1068,7 @@ void SDResponse::initMeth(){
     CErr("Must set NSek before initializing a PSCF method",this->fileio_->out);
   if(this->iMeth_ == CIS){
     this->nSingleDim_ = this->nOAVA_ + this->nOBVB_;
-  } else if(this->iMeth_ == RPA){
+  } else if(this->iMeth_ == RPA || this->iMeth_ == STAB){
     this->nSingleDim_ = 2*(this->nOAVA_ + this->nOBVB_);
   } else {
     CErr("PSCF Method " + std::to_string(this->iMeth_) + " NYI",this->fileio_->out);
@@ -1080,12 +1082,12 @@ void SDResponse::formAOTDen(const RealVecMap &TMOV, RealMatrix &TAOA, RealMatrix
   for(auto a = this->nOA_, ia = 0; a < this->nBasis_; a++)
   for(auto i = 0         ; i < this->nOA_; i++, ia++){
     TMOA(a,i) = TMOV(ia);
-    if(this->iMeth_ == RPA) TMOA(i,a) = TMOV(ia+iOff);
+    if(this->iMeth_ == RPA || this->iMeth_ == STAB) TMOA(i,a) = TMOV(ia+iOff);
   }
   for(auto a = this->nOB_, ia = this->nOAVA_; a < this->nBasis_; a++)
   for(auto i = 0         ; i < this->nOB_; i++, ia++){
     TMOB(a,i) = TMOV(ia);
-    if(this->iMeth_ == RPA) TMOB(i,a) = TMOV(ia+iOff);
+    if(this->iMeth_ == RPA || this->iMeth_ == STAB) TMOB(i,a) = TMOV(ia+iOff);
   }
   TAOA = (*this->singleSlater_->moA()) * TMOA * this->singleSlater_->moA()->adjoint();
   if(this->RHF_)
@@ -1106,12 +1108,12 @@ void SDResponse::formMOTDen(RealVecMap &TMOV, const RealMatrix &TAOA, const Real
   for(auto a = this->nOA_, ia = 0; a < this->nBasis_; a++)
   for(auto i = 0         ; i < this->nOA_; i++, ia++){
     TMOV(ia) = TMOA(a,i);
-    if(this->iMeth_ == RPA) TMOV(ia+iOff) = -TMOA(i,a);
+    if(this->iMeth_ == RPA || this->iMeth_ == STAB) TMOV(ia+iOff) = -TMOA(i,a);
   }
   for(auto a = this->nOB_, ia = this->nOAVA_; a < this->nBasis_; a++)
   for(auto i = 0         ; i < this->nOB_; i++, ia++){
     TMOV(ia) = TMOB(a,i);
-    if(this->iMeth_ == RPA) TMOV(ia+iOff) = -TMOB(i,a);
+    if(this->iMeth_ == RPA || this->iMeth_ == STAB) TMOV(ia+iOff) = -TMOB(i,a);
   }
 }
 
@@ -1188,7 +1190,7 @@ void SDResponse::printPrinciple(int iSt){
     double absXIA_Alpha, absYIA_Alpha;
 
     absXIA_Alpha = std::abs((*this->transDen_)(xIA_Alpha,iSt));
-    if(this->iMeth_ == RPA)
+    if(this->iMeth_ == RPA || this->iMeth_ == STAB)
       absYIA_Alpha = std::abs((*this->transDen_)(yIA_Alpha,iSt));
 
     if(absXIA_Alpha > printTol)
@@ -1196,7 +1198,7 @@ void SDResponse::printPrinciple(int iSt){
                            << alphaOccOrb << "A -> " << alphaVirOrb << "A   "
                            << std::fixed << std::setw(10) << std::right <<
                            (*this->transDen_)(xIA_Alpha,iSt) << endl;
-    if(this->iMeth_ == RPA){
+    if(this->iMeth_ == RPA || this->iMeth_ == STAB){
       if(absYIA_Alpha > printTol)
           this->fileio_->out << "    "
                              << alphaOccOrb << "A <- " << alphaVirOrb << "A   "
@@ -1213,7 +1215,7 @@ void SDResponse::printPrinciple(int iSt){
     double absXIA_Beta, absYIA_Beta;
 
     absXIA_Beta = std::abs((*this->transDen_)(xIA_Beta,iSt));
-    if(this->iMeth_ == RPA)
+    if(this->iMeth_ == RPA || this->iMeth_ == STAB)
       absYIA_Beta = std::abs((*this->transDen_)(yIA_Beta,iSt));
 
     if(absXIA_Beta > printTol)
@@ -1221,7 +1223,7 @@ void SDResponse::printPrinciple(int iSt){
                            << betaOccOrb << "B -> " << betaVirOrb << "B   "
                            << std::fixed << std::setw(10) << std::right <<
                            (*this->transDen_)(xIA_Beta,iSt) << endl;
-    if(this->iMeth_ == RPA){
+    if(this->iMeth_ == RPA || this->iMeth_ == STAB){
       if(absYIA_Beta > printTol)
           this->fileio_->out << "    "
                              << betaOccOrb << "B <- " << betaVirOrb << "B   "
