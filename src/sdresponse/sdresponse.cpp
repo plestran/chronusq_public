@@ -1445,8 +1445,41 @@ void SDResponse::incorePPRPA(){
   Eigen::SelfAdjointEigenSolver<RealMatrix> ES;
   ES.compute(AAA);
   cout << ES.eigenvalues() << endl << endl;
+
+  Eigen::VectorXd TDAMOV = ES.eigenvectors().col(0);
+  RealMatrix TDAMO(this->nBasis_,this->nBasis_);
+  RealMatrix TDAAO(this->nBasis_,this->nBasis_);
+  Tensor<double> TDAAOTen(this->nBasis_,this->nBasis_);
+  Tensor<double> IXAOTDATen(this->nBasis_,this->nBasis_);
+  RealMatrix IXAOTDA(this->nBasis_,this->nBasis_);
+  RealMatrix IXMO(this->nBasis_,this->nBasis_);
+
+  for(auto a = 0, ab = 0; a < this->nVA_; a++)
+  for(auto b = 0; b < a ; b++, ab++){
+    TDAMO(this->nOA_+a,this->nOA_+b) = TDAMOV(ab);
+    TDAMO(this->nOA_+b,this->nOA_+a) = -TDAMOV(ab);
+  }
+  cout << bannerMid << endl;
+  cout << TDAMO << endl;
+  cout << bannerMid << endl;
+
+  TDAAO = (*this->singleSlater_->moA()) * TDAMO * this->singleSlater_->moA()->adjoint();
+  std::memcpy(&TDAAOTen.storage()[0],TDAAO.data(),TDAAO.size()*sizeof(double));
+  contract(1.0,TDAAOTen,{lam,sig},*this->aoERI_,{mu,lam,nu,sig},0.0,IXAOTDATen,{mu,nu});
+  std::memcpy(IXAOTDA.data(),&IXAOTDATen.storage()[0],IXAOTDA.size()*sizeof(double));
+  IXMO = this->singleSlater_->moA()->adjoint() * IXAOTDA * (*this->singleSlater_->moA());
+  for(auto a = 0, ab = 0; a < this->nVA_; a++)
+  for(auto b = 0; b < a ; b++, ab++){
+    cout << IXMO(this->nOA_+a,this->nOA_+b) + TDAMOV(ab)*((*this->singleSlater_->epsA())(a+this->nOA_) + (*this->singleSlater_->epsA())(b+this->nOA_) - 2*Rmu) << endl;
+  }
+  cout << endl;
+  cout << AAA*TDAMOV << endl << endl;
+
+
+
   ES.compute(CAA);
   cout << ES.eigenvalues() << endl << endl;
+  
   
   RealMatrix FullAA(this->nVA_*(this->nVA_-1)/2+this->nOA_*(this->nOA_-1)/2,this->nVA_*(this->nVA_-1)/2+this->nOA_*(this->nOA_-1)/2);
 
@@ -1461,10 +1494,33 @@ void SDResponse::incorePPRPA(){
   std::sort(ER.data(),ER.data()+ER.size());
   ER = -ER;
   cout << ER << endl << endl;
+  RealMatrix TAA = EA.eigenvectors().col(0).real();
 
   cout << "PPRPA" << endl;
   ES.compute(AAB);
   cout << ES.eigenvalues() << endl << endl;
+
+  TDAMOV = ES.eigenvectors().col(0);
+  TDAMO.setZero();
+
+  for(auto a = 0, ab = 0; a < this->nVA_; a++)
+  for(auto b = 0; b  < this->nVA_ ; b++, ab++){
+    TDAMO(this->nOA_+a,this->nOA_+b) = TDAMOV(ab);
+  }
+
+  TDAAO =  (*this->singleSlater_->moA()) * TDAMO * this->singleSlater_->moA()->adjoint();
+//TDAAO -= (*this->singleSlater_->moA()) * TDAMO.adjoint() * this->singleSlater_->moA()->adjoint();
+  std::memcpy(&TDAAOTen.storage()[0],TDAAO.data(),TDAAO.size()*sizeof(double));
+  contract(1.0,TDAAOTen,{lam,sig},*this->aoERI_,{mu,lam,nu,sig},0.0,IXAOTDATen,{mu,nu});
+  std::memcpy(IXAOTDA.data(),&IXAOTDATen.storage()[0],IXAOTDA.size()*sizeof(double));
+  IXMO = this->singleSlater_->moA()->adjoint() * IXAOTDA * (*this->singleSlater_->moA());
+  for(auto a = 0, ab = 0; a < this->nVA_; a++)
+  for(auto b = 0; b  < this->nVA_ ; b++, ab++){
+    cout << IXMO(this->nOA_+a,this->nOA_+b) + TDAMOV(ab)*((*this->singleSlater_->epsA())(a+this->nOA_) + (*this->singleSlater_->epsA())(b+this->nOA_) - 2*Rmu) << endl;
+  }
+  cout << endl;
+  cout << AAB*TDAMOV << endl << endl;
+
   ES.compute(CAB);
   cout << ES.eigenvalues() << endl << endl;
   
@@ -1480,8 +1536,81 @@ void SDResponse::incorePPRPA(){
   std::sort(ERAB.data(),ERAB.data()+ERAB.size());
   ERAB = -ERAB;
   cout << ERAB << endl << endl;
+  RealMatrix TAB = EA.eigenvectors().col(0).real();
 
-  RealMatrix TAA = EA.eigenvectors().col(0).real();
+  Eigen::VectorXd TAAX = TAA.block(0,0,this->nVA_*(this->nVA_-1)/2,1);
+  Eigen::VectorXd TAAY = TAA.block(this->nVA_*(this->nVA_-1)/2,0,this->nOA_*(this->nOA_-1)/2,1);
+  Eigen::VectorXd TABX = TAB.block(0,0,this->nVA_*this->nVA_,1);
+  Eigen::VectorXd TABY = TAB.block(0,0,this->nOA_*this->nOA_,1);
+  
+
+  RealMatrix TMOAA(this->nOA_+this->nVA_,this->nOA_+this->nVA_);
+  RealMatrix TMOAB(this->nOA_+this->nVA_,this->nOB_+this->nVB_);
+  RealMatrix TMO(2*this->nBasis_,2*this->nBasis_);
+
+  cout << "HERE" << endl;
+  for(auto a = 0, ab = 0; a < this->nVA_; a++)
+  for(auto b = 0; b < a ; b++, ab++){
+    TMOAA(this->nOA_+a,this->nOA_+b) = TAAX(ab); 
+    TMOAA(this->nOA_+b,this->nOA_+a) = -TAAX(ab); 
+  }
+  for(auto i = 0, ij = 0; i < this->nOA_; i++)
+  for(auto j = 0; j < i ; j++, ij++){
+    TMOAA(i,j) = TAAY(ij); 
+    TMOAA(j,i) = -TAAY(ij); 
+  }
+
+  for(auto a = 0, ab = 0; a < this->nVA_; a++      )
+  for(auto b = 0        ; b < this->nVA_; b++, ab++){
+    TMOAB(this->nOA_+a,this->nOA_+b) = TABX(ab); 
+  }
+  for(auto i = 0, ij = 0; i < this->nOA_; i++      )
+  for(auto j = 0        ; j < this->nOA_; j++, ij++){
+    TMOAB(i,j) = TABY(ij); 
+  }
+
+/*
+  cout << "HERE" << endl;
+  cout << this->nBasis_ << " " << this->nOA_+this->nVA_ << endl;
+  TMO.block(0,0,this->nOA_+this->nVA_,this->nOA_+this->nVA_) = TMOAA;
+  TMO.block(this->nOA_+this->nVA_,this->nOA_+this->nVA_,this->nOA_+this->nVA_,this->nOA_+this->nVA_) = TMOAA;
+  TMO.block(this->nOA_+this->nVA_,0,this->nOA_+this->nVA_,this->nOA_+this->nVA_) = TMOAB;
+
+  TMO = TMO - TMO.transpose();
+  cout << TMO << endl;
+*/
+
+  RealMatrix TAO = (*this->singleSlater_->moA()) * TMOAA * this->singleSlater_->moA()->adjoint(); 
+
+  Tensor<double> TAOTen(this->nBasis_,this->nBasis_);
+  Tensor<double> IXAOTen(this->nBasis_,this->nBasis_);
+  RealMatrix IXAO(this->nBasis_,this->nBasis_);
+  RealMatrix IXMOFullAA(this->nBasis_,this->nBasis_);
+  Eigen::VectorXd IXMOXAA(this->nVA_*(this->nVA_-1)/2);
+  Eigen::VectorXd IXMOYAA(this->nVA_*(this->nVA_-1)/2);
+
+  std::memcpy(&TAOTen.storage()[0],TAO.data(),TAO.size()*sizeof(double));
+  contract(1.0,TAOTen,{nu,sig},*this->aoERI_,{mu,nu,lam,sig},0.0,IXAOTen,{mu,lam});
+  std::memcpy(IXAO.data(),&IXAOTen.storage()[0],IXAOTen.size()*sizeof(double));
+
+  IXMOFullAA = this->singleSlater_->moA()->adjoint() * IXAO * (*this->singleSlater_->moA());
+  cout << endl << FullAA * TAA << endl;
+
+  for(auto a = 0, ab = 0; a < this->nVA_; a++)
+  for(auto b = 0; b < a ; b++, ab++){
+    IXMOXAA(ab)= IXMOFullAA(this->nOA_+a,this->nOA_+b) + TAAX(ab) * ((*this->singleSlater_->epsA())(a+this->nOA_) + 
+                    (*this->singleSlater_->epsA())(b+this->nOA_) - 2*Rmu);
+  }
+  for(auto i = 0, ij = 0; i < this->nOA_; i++)
+  for(auto j = 0; j < i ; j++, ij++){
+    IXMOYAA(ij)= IXMOFullAA(this->nOA_+a,this->nOA_+b); 
+  }
+
+  cout << endl << IXMOXAA << endl;
+
+  
+
+
 
 }
 //dbwye
