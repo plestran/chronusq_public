@@ -1612,6 +1612,7 @@ void SDResponse::incorePPRPA(){
   RealMatrix ASing(this->nVA_*(this->nVA_+1)/2,this->nVA_*(this->nVA_+1)/2);
   RealMatrix BSing(this->nVA_*(this->nVA_+1)/2,this->nOA_*(this->nOA_+1)/2);
   RealMatrix CSing(this->nOA_*(this->nOA_+1)/2,this->nOA_*(this->nOA_+1)/2);
+  RealMatrix FullSing(this->nVA_*(this->nVA_+1)/2+this->nOA_*(this->nOA_+1)/2,this->nVA_*(this->nVA_+1)/2+this->nOA_*(this->nOA_+1)/2);
 
   for(auto a = 0, ab = 0; a < this->nVA_; a++       )
   for(auto b = 0        ; b <= a        ; b++, ab++){
@@ -1656,6 +1657,20 @@ void SDResponse::incorePPRPA(){
 
   ES.compute(ASing);
   cout << endl << "SA A:" << endl << ES.eigenvalues() << endl;
+  ES.compute(CSing);
+  cout << endl << "SA C:" << endl << ES.eigenvalues() << endl;
+
+  FullSing.block(0,0,this->nVA_*(this->nVA_+1)/2,this->nVA_*(this->nVA_+1)/2) = ASing;
+  FullSing.block(0,this->nVA_*(this->nVA_+1)/2,this->nVA_*(this->nVA_+1)/2,this->nOA_*(this->nOA_+1)/2) = BSing;
+  FullSing.block(this->nVA_*(this->nVA_+1)/2,0,this->nOA_*(this->nOA_+1)/2,this->nVA_*(this->nVA_+1)/2) = -BSing.transpose();
+  FullSing.block(this->nVA_*(this->nVA_+1)/2,this->nVA_*(this->nVA_+1)/2,this->nOA_*(this->nOA_+1)/2,this->nOA_*(this->nOA_+1)/2) = -CSing;
+
+  EA.compute(FullSing);
+  Eigen::VectorXd ERSing = -EA.eigenvalues().real();
+  std::sort(ERSing.data(),ERSing.data()+ERSing.size());
+  ERSing = -ERSing;
+  cout << ERSing << endl << endl;
+  RealMatrix TSing = EA.eigenvectors().col(0).real();
   
 
 }
