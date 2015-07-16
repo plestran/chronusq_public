@@ -1372,6 +1372,7 @@ void SDResponse::incorePPRPA(){
   double Rmu = (*this->singleSlater_->epsA())(this->nOA_-1) + (*this->singleSlater_->epsA())(this->nOA_);
   Rmu /= 2;
 
+/*
   RealMatrix AAA(this->nVA_*(this->nVA_-1)/2,this->nVA_*(this->nVA_-1)/2);
   RealMatrix BAA(this->nVA_*(this->nVA_-1)/2,this->nOA_*(this->nOA_-1)/2);
   RealMatrix CAA(this->nOA_*(this->nOA_-1)/2,this->nOA_*(this->nOA_-1)/2);
@@ -1569,16 +1570,6 @@ void SDResponse::incorePPRPA(){
     TMOAB(i,j) = TABY(ij); 
   }
 
-/*
-  cout << "HERE" << endl;
-  cout << this->nBasis_ << " " << this->nOA_+this->nVA_ << endl;
-  TMO.block(0,0,this->nOA_+this->nVA_,this->nOA_+this->nVA_) = TMOAA;
-  TMO.block(this->nOA_+this->nVA_,this->nOA_+this->nVA_,this->nOA_+this->nVA_,this->nOA_+this->nVA_) = TMOAA;
-  TMO.block(this->nOA_+this->nVA_,0,this->nOA_+this->nVA_,this->nOA_+this->nVA_) = TMOAB;
-
-  TMO = TMO - TMO.transpose();
-  cout << TMO << endl;
-*/
 
   RealMatrix TAO = (*this->singleSlater_->moA()) * TMOAA * this->singleSlater_->moA()->adjoint(); 
 
@@ -1671,7 +1662,276 @@ void SDResponse::incorePPRPA(){
   ERSing = -ERSing;
   cout << ERSing << endl << endl;
   RealMatrix TSing = EA.eigenvectors().col(0).real();
+*/
   
+
+  int VirSqAASLT   = this->nVA_*(this->nVA_-1)/2;
+  int OccSqAASLT   = this->nOA_*(this->nOA_-1)/2;
+  int VirSqAALT    = this->nVA_*(this->nVA_+1)/2;
+  int OccSqAALT    = this->nOA_*(this->nOA_+1)/2;
+  int VirSqBBSLT   = this->nVB_*(this->nVB_-1)/2;
+  int OccSqBBSLT   = this->nOB_*(this->nOB_-1)/2;
+  int VirSqBBLT    = this->nVB_*(this->nVB_+1)/2;
+  int OccSqBBLT    = this->nOB_*(this->nOB_+1)/2;
+  int VirSqAA      = this->nVA_*this->nVA_;
+  int OccSqAA      = this->nOA_*this->nOA_;
+  int VirSqAB      = this->nVA_*this->nVB_;
+  int OccSqAB      = this->nOA_*this->nOB_;
+  int FullAADim    = VirSqAASLT + OccSqAASLT;
+  int FullABDim    = VirSqAB    + OccSqAB   ;
+  int FullBBDim    = VirSqBBSLT + OccSqBBSLT;
+  int FullSingDim  = VirSqAALT  + OccSqAALT;
+  
+
+  // Pure Spin (triplet)
+  RealMatrix AAA(VirSqAASLT,VirSqAASLT);
+  RealMatrix BAA(VirSqAASLT,OccSqAASLT);
+  RealMatrix CAA(OccSqAASLT,OccSqAASLT);
+  RealMatrix FullAA(FullAADim,FullAADim);
+
+  RealMatrix ABB(VirSqBBSLT,VirSqBBSLT);
+  RealMatrix BBB(VirSqBBSLT,OccSqBBSLT);
+  RealMatrix CBB(OccSqBBSLT,OccSqBBSLT);
+  RealMatrix FullBB(FullBBDim,FullBBDim);
+
+  // Mixed Spin (singlet + triplet)
+  RealMatrix AAB(VirSqAB,VirSqAB);
+  RealMatrix BAB(VirSqAB,OccSqAB);
+  RealMatrix CAB(OccSqAB,OccSqAB);
+  RealMatrix FullAB(FullABDim,FullABDim);
+
+  // Spin-Adapted Singlet
+  RealMatrix ASing(VirSqAALT,VirSqAALT);
+  RealMatrix BSing(VirSqAALT,OccSqAALT);
+  RealMatrix CSing(OccSqAALT,OccSqAALT);
+  RealMatrix FullSing(FullSingDim,FullSingDim);
+
+  // Eigensolvers
+  Eigen::SelfAdjointEigenSolver<RealMatrix> ES;
+  Eigen::EigenSolver<RealMatrix> EA;
+
+  // Eigensolution (Full) storage
+  // Eigen values
+  Eigen::VectorXd ATDAEAA;
+  Eigen::VectorXd ATDAEAB;
+  Eigen::VectorXd ATDAEBB;
+  Eigen::VectorXd ATDAESing;
+  Eigen::VectorXd CTDAEAA;
+  Eigen::VectorXd CTDAEAB;
+  Eigen::VectorXd CTDAEBB;
+  Eigen::VectorXd CTDAESing;
+  Eigen::VectorXd RPAEAA;
+  Eigen::VectorXd RPAEAB;
+  Eigen::VectorXd RPAEBB;
+  Eigen::VectorXd RPAESing;
+  // Eigen Vectors
+  Eigen::VectorXd ATDATAA;
+  Eigen::VectorXd ATDATAB;
+  Eigen::VectorXd ATDATBB;
+  Eigen::VectorXd ATDATSing;
+  Eigen::VectorXd CTDATAA;
+  Eigen::VectorXd CTDATAB;
+  Eigen::VectorXd CTDATBB;
+  Eigen::VectorXd CTDATSing;
+  Eigen::VectorXd RPATAA;
+  Eigen::VectorXd RPATAB;
+  Eigen::VectorXd RPATBB;
+  Eigen::VectorXd RPATSing;
+
+  // Build Pure-Spin Matricies
+  // A
+  for(auto a = 0, ab = 0; a < this->nVA_; a++      )
+  for(auto b = 0        ; b < a         ; b++, ab++){
+    for(auto c = 0, cd = 0; c < this->nVA_; c++      )
+    for(auto d = 0        ; d < c         ; d++, cd++){
+      AAA(ab,cd) = DabcdA(a,b,c,d);
+      if(ab == cd) 
+        AAA(ab,cd) += (*this->singleSlater_->epsA())(a+this->nOA_) + 
+                    (*this->singleSlater_->epsA())(b+this->nOA_) - 2*Rmu;
+    }
+  }
+
+  // C
+  for(auto i = 0, ij = 0; i < this->nOA_; i++      )
+  for(auto j = 0        ; j < i         ; j++, ij++){
+    for(auto k = 0, kl = 0; k < this->nOA_; k++      )
+    for(auto l = 0        ; l < k         ; l++, kl++){
+      CAA(ij,kl) = DijklA(i,j,k,l);
+      if(ij == kl) 
+        CAA(ij,kl) -= (*this->singleSlater_->epsA())(i) + 
+                    (*this->singleSlater_->epsA())(j) - 2*Rmu;
+    }
+  }
+
+  // B
+  for(auto a = 0, ab = 0; a < this->nVA_; a++      )
+  for(auto b = 0        ; b < a         ; b++, ab++){
+    for(auto i = 0, ij = 0; i < this->nOA_; i++      )
+    for(auto j = 0        ; j < i         ; j++, ij++){
+      BAA(ab,ij) = DabijA(a,b,i,j);
+    }
+  }
+
+  FullAA.block(0,0,VirSqAASLT,VirSqAASLT)                   =  AAA;
+  FullAA.block(0,VirSqAASLT,VirSqAASLT,OccSqAASLT)          =  BAA; 
+  FullAA.block(VirSqAASLT,0,OccSqAASLT,VirSqAASLT)          = -BAA.adjoint();
+  FullAA.block(VirSqAASLT,VirSqAASLT,OccSqAASLT,OccSqAASLT) = -CAA;
+
+  // Build Mixed-Spin Matricies
+  // A
+  for(auto a = 0, ab = 0; a < this->nVA_; a++      )
+  for(auto b = 0        ; b < this->nVA_; b++, ab++){
+    for(auto c = 0, cd = 0; c < this->nVA_; c++      )
+    for(auto d = 0        ; d < this->nVA_; d++, cd++){
+      AAB(ab,cd) = dabcdAB(a,b,c,d);
+      if(ab == cd) 
+        AAB(ab,cd) += (*this->singleSlater_->epsA())(a+this->nOA_) + 
+                    (*this->singleSlater_->epsA())(b+this->nOA_) - 2*Rmu;
+    }
+  }
+
+  // C
+  for(auto i = 0, ij = 0; i < this->nOA_; i++      )
+  for(auto j = 0        ; j < this->nOA_; j++, ij++){
+    for(auto k = 0, kl = 0; k < this->nOA_; k++      )
+    for(auto l = 0        ; l < this->nOA_; l++, kl++){
+      CAB(ij,kl) = dijklAB(i,j,k,l);
+      if(ij == kl) 
+        CAB(ij,kl) -= (*this->singleSlater_->epsA())(i) + 
+                    (*this->singleSlater_->epsA())(j) - 2*Rmu;
+    }
+  }
+
+  // B
+  for(auto a = 0, ab = 0; a < this->nVA_; a++      )
+  for(auto b = 0        ; b < this->nVA_; b++, ab++){
+    for(auto i = 0, ij = 0; i < this->nOA_; i++      )
+    for(auto j = 0        ; j < this->nOA_; j++, ij++){
+      BAB(ab,ij) = dabijAB(a,b,i,j);
+    }
+  }
+
+  FullAB.block(0,0,VirSqAB,VirSqAB)             =  AAB;
+  FullAB.block(0,VirSqAB,VirSqAB,OccSqAB)       =  BAB; 
+  FullAB.block(VirSqAB,0,OccSqAB,VirSqAB)       = -BAB.adjoint();
+  FullAB.block(VirSqAB,VirSqAB,OccSqAB,OccSqAB) = -CAB;
+
+  // Spin-Adapted Singlet Matricies
+  // A
+  for(auto a = 0, ab = 0; a < this->nVA_; a++       )
+  for(auto b = 0        ; b <= a        ; b++, ab++){
+    for(auto c = 0, cd = 0; c < this->nVA_; c++       )
+    for(auto d = 0        ; d <= c        ; d++, cd++){
+      double fact = 1.0;
+      if(a==b) fact *= std::sqrt(0.5);
+      if(c==d) fact *= std::sqrt(0.5);
+      ASing(ab,cd) = fact*(dabcdA(a,b,c,d) + dabcdA(a,b,d,c));
+      if(ab == cd) 
+        ASing(ab,cd) += (*this->singleSlater_->epsA())(a+this->nOA_) + 
+                    (*this->singleSlater_->epsA())(b+this->nOA_) - 2*Rmu;
+    }
+  }
+   
+  // C
+  for(auto i = 0, ij = 0; i < this->nOA_; i++      )
+  for(auto j = 0        ; j <= i        ; j++, ij++){
+    for(auto k = 0, kl = 0; k < this->nOA_; k++      )
+    for(auto l = 0        ; l <= k        ; l++, kl++){
+      double fact = 1.0;
+      if(i==j) fact *= std::sqrt(0.5);
+      if(k==l) fact *= std::sqrt(0.5);
+
+      CSing(ij,kl) = fact*(dijklA(i,j,k,l) + dijklA(i,j,l,k));
+      if(ij == kl) 
+        CSing(ij,kl) -= (*this->singleSlater_->epsA())(i) + 
+                    (*this->singleSlater_->epsA())(j) - 2*Rmu;
+    }
+  }
+
+  // B
+  for(auto a = 0, ab = 0; a < this->nVA_; a++      )
+  for(auto b = 0        ; b <= a        ; b++, ab++){
+    for(auto i = 0, ij = 0; i < this->nOA_; i++      )
+    for(auto j = 0        ; j <= i        ; j++, ij++){
+      double fact = 1.0;
+      if(i==j) fact *= std::sqrt(0.5);
+      if(a==b) fact *= std::sqrt(0.5);
+
+      BSing(ab,ij) = fact*(dabijA(a,b,i,j)+dabijA(a,b,j,i));
+    }
+  }
+
+  FullSing.block(0,0,VirSqAALT,VirSqAALT)                 =  ASing;
+  FullSing.block(0,VirSqAALT,VirSqAALT,OccSqAALT)         =  BSing; 
+  FullSing.block(VirSqAALT,0,OccSqAALT,VirSqAALT)         = -BSing.adjoint();
+  FullSing.block(VirSqAALT,VirSqAALT,OccSqAALT,OccSqAALT) = -CSing;
+
+  // Full Diagonalization
+  // Pure Spin
+  ES.compute(AAA);
+    ATDAEAA = -ES.eigenvalues();
+    std::sort(ATDAEAA.data(),ATDAEAA.data()+ATDAEAA.size());
+    ATDAEAA = -ATDAEAA;
+    ATDATAA = ES.eigenvectors().col(0);
+  ES.compute(-CAA);
+    CTDAEAA = -ES.eigenvalues();
+    std::sort(CTDAEAA.data(),CTDAEAA.data()+CTDAEAA.size());
+    CTDAEAA = -CTDAEAA;
+    CTDATAA = ES.eigenvectors().col(0);
+  EA.compute(FullAA);
+    RPAEAA = -EA.eigenvalues().real();
+    std::sort(RPAEAA.data(),RPAEAA.data()+RPAEAA.size());
+    RPAEAA = -RPAEAA;
+    RPATAA = EA.eigenvectors().col(0).real();
+    
+  // Mixed Spin
+  ES.compute(AAB);
+    ATDAEAB = -ES.eigenvalues();
+    std::sort(ATDAEAB.data(),ATDAEAB.data()+ATDAEAB.size());
+    ATDAEAB = -ATDAEAB;
+    ATDATAB = ES.eigenvectors().col(0);
+  ES.compute(-CAB);
+    CTDAEAB = -ES.eigenvalues();
+    std::sort(CTDAEAB.data(),CTDAEAB.data()+CTDAEAB.size());
+    CTDAEAB = -CTDAEAB;
+    CTDATAB = ES.eigenvectors().col(0);
+  EA.compute(FullAB);
+    RPAEAB = -EA.eigenvalues().real();
+    std::sort(RPAEAB.data(),RPAEAB.data()+RPAEAB.size());
+    RPAEAB = -RPAEAB;
+    RPATAB = EA.eigenvectors().col(0).real();
+
+  // Spin-Adapted Singlet
+  ES.compute(ASing);
+    ATDAESing = -ES.eigenvalues();
+    std::sort(ATDAESing.data(),ATDAESing.data()+ATDAESing.size());
+    ATDAESing = -ATDAESing;
+    ATDATSing = ES.eigenvectors().col(0);
+  ES.compute(-CSing);
+    CTDAESing = -ES.eigenvalues();
+    std::sort(CTDAESing.data(),CTDAESing.data()+CTDAESing.size());
+    CTDAESing = -CTDAESing;
+    CTDATSing = ES.eigenvectors().col(0);
+  EA.compute(FullSing);
+    RPAESing = -EA.eigenvalues().real();
+    std::sort(RPAESing.data(),RPAESing.data()+RPAESing.size());
+    RPAESing = -RPAESing;
+    RPATSing = EA.eigenvectors().col(0).real();
+
+  Eigen::IOFormat HeavyFmt(8);
+
+  cout << "A TDA (AA) Eigenvalues:" << endl;
+  cout << ATDAEAA.format(HeavyFmt) << endl << endl;
+  cout << "A TDA (AB) Eigenvalues:" << endl;
+  cout << ATDAEAB.format(HeavyFmt) << endl << endl;
+  cout << "C TDA (AA) Eigenvalues:" << endl;
+  cout << CTDAEAA.format(HeavyFmt) << endl << endl;
+  cout << "C TDA (AB) Eigenvalues:" << endl;
+  cout << CTDAEAB.format(HeavyFmt) << endl << endl;
+  cout << "RPA (AA) Eigenvalues:" << endl;
+  cout << RPAEAA.format(HeavyFmt)  << endl << endl;
+  cout << "RPA (AB) Eigenvalues:" << endl;
+  cout << RPAEAB.format(HeavyFmt)  << endl << endl;
 
 }
 //dbwye
