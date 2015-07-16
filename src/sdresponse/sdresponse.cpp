@@ -1738,6 +1738,33 @@ void SDResponse::incorePPRPA(){
   Eigen::VectorXd RPATBB;
   Eigen::VectorXd RPATSing;
 
+  // AX Contract Storage
+  RealMatrix ATDAMOAA(this->nBasis_,this->nBasis_);
+  RealMatrix ATDAMOAB(this->nBasis_,this->nBasis_);
+  RealMatrix CTDAMOAA(this->nBasis_,this->nBasis_);
+  RealMatrix CTDAMOAB(this->nBasis_,this->nBasis_);
+  RealMatrix RPAMOAA(this->nBasis_,this->nBasis_);
+  RealMatrix RPAMOAB(this->nBasis_,this->nBasis_);
+  RealMatrix ATDAAOAA(this->nBasis_,this->nBasis_);
+  RealMatrix ATDAAOAB(this->nBasis_,this->nBasis_);
+  RealMatrix CTDAAOAA(this->nBasis_,this->nBasis_);
+  RealMatrix CTDAAOAB(this->nBasis_,this->nBasis_);
+  RealMatrix RPAAOAA(this->nBasis_,this->nBasis_);
+  RealMatrix RPAAOAB(this->nBasis_,this->nBasis_);
+
+  RealMatrix ATDAIXMOAA(this->nBasis_,this->nBasis_);
+  RealMatrix ATDAIXMOAB(this->nBasis_,this->nBasis_);
+  RealMatrix CTDAIXMOAA(this->nBasis_,this->nBasis_);
+  RealMatrix CTDAIXMOAB(this->nBasis_,this->nBasis_);
+  RealMatrix RPAIXMOAA(this->nBasis_,this->nBasis_);
+  RealMatrix RPAIXMOAB(this->nBasis_,this->nBasis_);
+  RealMatrix ATDAIXAOAA(this->nBasis_,this->nBasis_);
+  RealMatrix ATDAIXAOAB(this->nBasis_,this->nBasis_);
+  RealMatrix CTDAIXAOAA(this->nBasis_,this->nBasis_);
+  RealMatrix CTDAIXAOAB(this->nBasis_,this->nBasis_);
+  RealMatrix RPAIXAOAA(this->nBasis_,this->nBasis_);
+  RealMatrix RPAIXAOAB(this->nBasis_,this->nBasis_);
+
   // Build Pure-Spin Matricies
   // A
   for(auto a = 0, ab = 0; a < this->nVA_; a++      )
@@ -1932,6 +1959,31 @@ void SDResponse::incorePPRPA(){
   cout << RPAEAA.format(HeavyFmt)  << endl << endl;
   cout << "RPA (AB) Eigenvalues:" << endl;
   cout << RPAEAB.format(HeavyFmt)  << endl << endl;
+
+
+  for(auto a = 0, ab = 0; a < this->nVA_; a++      )
+  for(auto b = 0        ; b < a         ; b++, ab++){
+    ATDAMOAA(this->nOA_+a,this->nOA_+b) = ATDATAA(ab); 
+    ATDAMOAA(this->nOA_+b,this->nOA_+a) = -ATDATAA(ab); 
+  }
+  for(auto i = 0, ij = 0; i < this->nOA_; i++      )
+  for(auto j = 0        ; j < i         ; j++, ij++){
+    CTDAMOAA(i,j) = CTDATAA(ij); 
+    CTDAMOAA(j,i) = -CTDATAA(ij); 
+  }
+
+  for(auto a = 0, ab = 0; a < this->nVA_; a++      )
+  for(auto b = 0        ; b < a         ; b++, ab++){
+    RPAMOAA(this->nOA_+a,this->nOA_+b) =  RPATAA(ab); 
+    RPAMOAA(this->nOA_+b,this->nOA_+a) = -RPATAA(ab); 
+  }
+  for(auto i = 0, ij = VirSqAASLT; i < this->nOA_; i++      )
+  for(auto j = 0        ; j < i         ; j++, ij++){
+    RPAMOAA(i,j) =  RPATAA(ij); 
+    RPAMOAA(j,i) = -RPATAA(ij); 
+  }
+
+   
 
 }
 //dbwye
