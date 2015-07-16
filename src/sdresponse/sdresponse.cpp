@@ -1609,8 +1609,54 @@ void SDResponse::incorePPRPA(){
   cout << endl << IXMOXAA << endl;
 
   
+  RealMatrix ASing(this->nVA_*(this->nVA_+1)/2,this->nVA_*(this->nVA_+1)/2);
+  RealMatrix BSing(this->nVA_*(this->nVA_+1)/2,this->nOA_*(this->nOA_+1)/2);
+  RealMatrix CSing(this->nOA_*(this->nOA_+1)/2,this->nOA_*(this->nOA_+1)/2);
 
+  for(auto a = 0, ab = 0; a < this->nVA_; a++       )
+  for(auto b = 0        ; b <= a        ; b++, ab++){
+    for(auto c = 0, cd = 0; c < this->nVA_; c++       )
+    for(auto d = 0        ; d <= c        ; d++, cd++){
+      double fact = 1.0;
+      if(a==b) fact *= std::sqrt(0.5);
+      if(c==d) fact *= std::sqrt(0.5);
+      ASing(ab,cd) = fact*(dabcdA(a,b,c,d) + dabcdA(a,b,d,c));
+      if(ab == cd) 
+        ASing(ab,cd) += (*this->singleSlater_->epsA())(a+this->nOA_) + 
+                    (*this->singleSlater_->epsA())(b+this->nOA_) - 2*Rmu;
+    }
+  }
+   
+  for(auto i = 0, ij = 0; i < this->nOA_; i++      )
+  for(auto j = 0        ; j <= i        ; j++, ij++){
+    for(auto k = 0, kl = 0; k < this->nOA_; k++      )
+    for(auto l = 0        ; l <= k        ; l++, kl++){
+      double fact = 1.0;
+      if(i==j) fact *= std::sqrt(0.5);
+      if(k==l) fact *= std::sqrt(0.5);
 
+      CSing(ij,kl) = fact*(dijklA(i,j,k,l) + dijklA(i,j,l,k));
+      if(ij == kl) 
+        CSing(ij,kl) -= (*this->singleSlater_->epsA())(i) + 
+                    (*this->singleSlater_->epsA())(j) - 2*Rmu;
+    }
+  }
+
+  for(auto a = 0, ab = 0; a < this->nVA_; a++      )
+  for(auto b = 0        ; b <= a        ; b++, ab++){
+    for(auto i = 0, ij = 0; i < this->nOA_; i++      )
+    for(auto j = 0        ; j <= i        ; j++, ij++){
+      double fact = 1.0;
+      if(i==j) fact *= std::sqrt(0.5);
+      if(a==b) fact *= std::sqrt(0.5);
+
+      BSing(ab,ij) = fact*(dabijA(a,b,i,j)+dabijA(a,b,j,i));
+    }
+  }
+
+  ES.compute(ASing);
+  cout << endl << "SA A:" << endl << ES.eigenvalues() << endl;
+  
 
 }
 //dbwye
