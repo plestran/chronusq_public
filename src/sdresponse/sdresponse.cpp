@@ -1741,30 +1741,70 @@ void SDResponse::incorePPRPA(){
   // AX Contract Storage
   RealMatrix ATDAMOAA(this->nBasis_,this->nBasis_);
   RealMatrix ATDAMOAB(this->nBasis_,this->nBasis_);
+  RealMatrix ATDAMOSing(this->nBasis_,this->nBasis_);
   RealMatrix CTDAMOAA(this->nBasis_,this->nBasis_);
   RealMatrix CTDAMOAB(this->nBasis_,this->nBasis_);
+  RealMatrix CTDAMOSing(this->nBasis_,this->nBasis_);
   RealMatrix RPAMOAA(this->nBasis_,this->nBasis_);
   RealMatrix RPAMOAB(this->nBasis_,this->nBasis_);
+  RealMatrix RPAMOSing(this->nBasis_,this->nBasis_);
   RealMatrix ATDAAOAA(this->nBasis_,this->nBasis_);
   RealMatrix ATDAAOAB(this->nBasis_,this->nBasis_);
+  RealMatrix ATDAAOSing(this->nBasis_,this->nBasis_);
   RealMatrix CTDAAOAA(this->nBasis_,this->nBasis_);
   RealMatrix CTDAAOAB(this->nBasis_,this->nBasis_);
+  RealMatrix CTDAAOSing(this->nBasis_,this->nBasis_);
   RealMatrix RPAAOAA(this->nBasis_,this->nBasis_);
   RealMatrix RPAAOAB(this->nBasis_,this->nBasis_);
+  RealMatrix RPAAOSing(this->nBasis_,this->nBasis_);
 
   RealMatrix ATDAIXMOAA(this->nBasis_,this->nBasis_);
   RealMatrix ATDAIXMOAB(this->nBasis_,this->nBasis_);
+  RealMatrix ATDAIXMOSing(this->nBasis_,this->nBasis_);
   RealMatrix CTDAIXMOAA(this->nBasis_,this->nBasis_);
   RealMatrix CTDAIXMOAB(this->nBasis_,this->nBasis_);
+  RealMatrix CTDAIXMOSing(this->nBasis_,this->nBasis_);
   RealMatrix RPAIXMOAA(this->nBasis_,this->nBasis_);
   RealMatrix RPAIXMOAB(this->nBasis_,this->nBasis_);
+  RealMatrix RPAIXMOSing(this->nBasis_,this->nBasis_);
   RealMatrix ATDAIXAOAA(this->nBasis_,this->nBasis_);
   RealMatrix ATDAIXAOAB(this->nBasis_,this->nBasis_);
+  RealMatrix ATDAIXAOSing(this->nBasis_,this->nBasis_);
   RealMatrix CTDAIXAOAA(this->nBasis_,this->nBasis_);
   RealMatrix CTDAIXAOAB(this->nBasis_,this->nBasis_);
+  RealMatrix CTDAIXAOSing(this->nBasis_,this->nBasis_);
   RealMatrix RPAIXAOAA(this->nBasis_,this->nBasis_);
   RealMatrix RPAIXAOAB(this->nBasis_,this->nBasis_);
+  RealMatrix RPAIXAOSing(this->nBasis_,this->nBasis_);
 
+  Eigen::VectorXd ATDAAXMOAA(VirSqAASLT);
+  Eigen::VectorXd ATDAAXMOAB(VirSqAB);
+  Eigen::VectorXd ATDAAXMOSing(VirSqAALT);
+  Eigen::VectorXd CTDAAXMOAA(OccSqAASLT);
+  Eigen::VectorXd CTDAAXMOAB(OccSqAB);
+  Eigen::VectorXd CTDAAXMOSing(OccSqAALT);
+  Eigen::VectorXd RPAAXMOAA(VirSqAASLT + OccSqAASLT);
+  Eigen::VectorXd RPAAXMOAB(VirSqAB + OccSqAB);
+  Eigen::VectorXd RPAAXMOSing(VirSqAALT + OccSqAALT);
+
+  Tensor<double> ATDAAOTenAA(this->nBasis_,this->nBasis_);
+  Tensor<double> ATDAAOTenAB(this->nBasis_,this->nBasis_);
+  Tensor<double> ATDAAOTenSing(this->nBasis_,this->nBasis_);
+  Tensor<double> CTDAAOTenAA(this->nBasis_,this->nBasis_);
+  Tensor<double> CTDAAOTenAB(this->nBasis_,this->nBasis_);
+  Tensor<double> CTDAAOTenSing(this->nBasis_,this->nBasis_);
+  Tensor<double> RPAAOTenAA(this->nBasis_,this->nBasis_);
+  Tensor<double> RPAAOTenAB(this->nBasis_,this->nBasis_);
+  Tensor<double> RPAAOTenSing(this->nBasis_,this->nBasis_);
+  Tensor<double> ATDAIXAOTenAA(this->nBasis_,this->nBasis_);
+  Tensor<double> ATDAIXAOTenAB(this->nBasis_,this->nBasis_);
+  Tensor<double> ATDAIXAOTenSing(this->nBasis_,this->nBasis_);
+  Tensor<double> CTDAIXAOTenAA(this->nBasis_,this->nBasis_);
+  Tensor<double> CTDAIXAOTenAB(this->nBasis_,this->nBasis_);
+  Tensor<double> CTDAIXAOTenSing(this->nBasis_,this->nBasis_);
+  Tensor<double> RPAIXAOTenAA(this->nBasis_,this->nBasis_);
+  Tensor<double> RPAIXAOTenAB(this->nBasis_,this->nBasis_);
+  Tensor<double> RPAIXAOTenSing(this->nBasis_,this->nBasis_);
   // Build Pure-Spin Matricies
   // A
   for(auto a = 0, ab = 0; a < this->nVA_; a++      )
@@ -1951,14 +1991,22 @@ void SDResponse::incorePPRPA(){
   cout << ATDAEAA.format(HeavyFmt) << endl << endl;
   cout << "A TDA (AB) Eigenvalues:" << endl;
   cout << ATDAEAB.format(HeavyFmt) << endl << endl;
+  cout << "A TDA (SAS) Eigenvalues:" << endl;
+  cout << ATDAESing.format(HeavyFmt) << endl << endl;
   cout << "C TDA (AA) Eigenvalues:" << endl;
   cout << CTDAEAA.format(HeavyFmt) << endl << endl;
   cout << "C TDA (AB) Eigenvalues:" << endl;
   cout << CTDAEAB.format(HeavyFmt) << endl << endl;
+  cout << "C TDA (SAS) Eigenvalues:" << endl;
+  cout << CTDAESing.format(HeavyFmt) << endl << endl;
   cout << "RPA (AA) Eigenvalues:" << endl;
   cout << RPAEAA.format(HeavyFmt)  << endl << endl;
   cout << "RPA (AB) Eigenvalues:" << endl;
   cout << RPAEAB.format(HeavyFmt)  << endl << endl;
+  cout << "RPA (AB) Eigenvalues:" << endl;
+  cout << RPAEAB.format(HeavyFmt)  << endl << endl;
+  cout << "RPA (SAS) Eigenvalues:" << endl;
+  cout << RPAESing.format(HeavyFmt)  << endl << endl;
 
 
   for(auto a = 0, ab = 0; a < this->nVA_; a++      )
@@ -1983,7 +2031,166 @@ void SDResponse::incorePPRPA(){
     RPAMOAA(j,i) = -RPATAA(ij); 
   }
 
-   
+  for(auto a = 0, ab = 0; a < this->nVA_; a++      )
+  for(auto b = 0        ; b < this->nVB_; b++, ab++){
+    ATDAMOAB(this->nOA_+a,this->nOB_+b) = ATDATAB(ab); 
+  }
+  for(auto i = 0, ij = 0; i < this->nOA_; i++      )
+  for(auto j = 0        ; j < this->nOA_; j++, ij++){
+    CTDAMOAB(i,j) = CTDATAB(ij); 
+  }
 
+  for(auto a = 0, ab = 0; a < this->nVA_; a++      )
+  for(auto b = 0        ; b < this->nVA_; b++, ab++){
+    RPAMOAB(this->nOA_+a,this->nOA_+b) =  RPATAB(ab); 
+  }
+  for(auto i = 0, ij = VirSqAB; i < this->nOA_; i++      )
+  for(auto j = 0        ; j < this->nOA_; j++, ij++){
+    RPAMOAB(i,j) =  RPATAB(ij); 
+  }
+
+  for(auto a = 0, ab = 0; a < this->nVA_; a++ )
+  for(auto b = 0; b <= a; b++           , ab++){
+    double fact = 1.0;
+    if(a==b) fact = std::sqrt(0.5);
+    ATDAMOSing(this->nOA_+a,this->nOA_+b) = fact*ATDATSing(ab);
+    if(a > b)
+      ATDAMOSing(this->nOA_+b,this->nOA_+a) = -ATDATSing(ab);
+  }
+
+  for(auto i = 0, ij = 0; i < this->nOA_; i++ )
+  for(auto j = 0; j <= i; j++           , ij++){
+    double fact = 1.0;
+    if(i==j) fact = std::sqrt(0.5);
+    CTDAMOSing(i,j) = fact*CTDATSing(ij);
+    if(a > b)
+      CTDAMOSing(j,i) = -CTDATSing(ij);
+  }
+   
+  for(auto a = 0, ab = 0; a < this->nVA_; a++ )
+  for(auto b = 0; b <= a; b++           , ab++){
+    double fact = 1.0;
+    if(a==b) fact = std::sqrt(0.5);
+    RPAMOSing(this->nOA_+a,this->nOA_+b) = fact*RPATSing(ab);
+    if(a > b)
+      RPAMOSing(this->nOA_+b,this->nOA_+a) = -RPATSing(ab);
+  }
+
+  for(auto i = 0, ij = VirSqAALT; i < this->nOA_; i++ )
+  for(auto j = 0; j <= i; j++           , ij++){
+    double fact = 1.0;
+    if(i==j) fact = std::sqrt(0.5);
+    RPAMOSing(i,j) = fact*RPATSing(ij);
+    if(a > b)
+      RPAMOSing(j,i) = -RPATSing(ij);
+  }
+
+
+  ATDAAOAA = (*this->singleSlater_->moA())*ATDAMOAA*this->singleSlater_->moA()->adjoint();  
+  CTDAAOAA = (*this->singleSlater_->moA())*CTDAMOAA*this->singleSlater_->moA()->adjoint();  
+  RPAAOAA =  (*this->singleSlater_->moA())*RPAMOAA*this->singleSlater_->moA()->adjoint();  
+  ATDAAOAB = (*this->singleSlater_->moA())*ATDAMOAB*this->singleSlater_->moA()->adjoint();  
+  CTDAAOAB = (*this->singleSlater_->moA())*CTDAMOAB*this->singleSlater_->moA()->adjoint();  
+  RPAAOAB =  (*this->singleSlater_->moA())*RPAMOAB*this->singleSlater_->moA()->adjoint();  
+  ATDAAOSing=(*this->singleSlater_->moA())*ATDAMOSing*this->singleSlater_->moA()->adjoint();
+  CTDAAOSing=(*this->singleSlater_->moA())*CTDAMOSing*this->singleSlater_->moA()->adjoint();
+  RPAAOSing=(*this->singleSlater_->moA())*RPAMOSing*this->singleSlater_->moA()->adjoint();  
+
+  std::memcpy(&ATDAAOTenAA.storage()[0],ATDAAOAA.data(),ATDAAOAA.size()*sizeof(double));
+  std::memcpy(&CTDAAOTenAA.storage()[0],CTDAAOAA.data(),CTDAAOAA.size()*sizeof(double));
+  std::memcpy(&RPAAOTenAA.storage()[0],RPAAOAA.data(),RPAAOAA.size()*sizeof(double));
+  std::memcpy(&ATDAAOTenAB.storage()[0],ATDAAOAB.data(),ATDAAOAB.size()*sizeof(double));
+  std::memcpy(&CTDAAOTenAB.storage()[0],CTDAAOAB.data(),CTDAAOAB.size()*sizeof(double));
+  std::memcpy(&RPAAOTenAB.storage()[0],RPAAOAB.data(),RPAAOAB.size()*sizeof(double));
+  std::memcpy(&ATDAAOTenSing.storage()[0],ATDAAOSing.data(),ATDAAOSing.size()*sizeof(double));
+  std::memcpy(&CTDAAOTenSing.storage()[0],CTDAAOSing.data(),CTDAAOSing.size()*sizeof(double));
+  std::memcpy(&RPAAOTenSing.storage()[0],RPAAOSing.data(),RPAAOSing.size()*sizeof(double));
+
+  contract(1.0,ATDAAOTenAA,{lam,sig},*this->aoERI_,{mu,lam,nu,sig},0.0,ATDAIXAOTenAA,{mu,nu});
+  contract(1.0,CTDAAOTenAA,{lam,sig},*this->aoERI_,{mu,lam,nu,sig},0.0,CTDAIXAOTenAA,{mu,nu});
+  contract(1.0,RPAAOTenAA,{lam,sig},*this->aoERI_,{mu,lam,nu,sig},0.0,RPAIXAOTenAA,{mu,nu});
+  contract(1.0,ATDAAOTenAB,{lam,sig},*this->aoERI_,{mu,lam,nu,sig},0.0,ATDAIXAOTenAB,{mu,nu});
+  contract(1.0,CTDAAOTenAB,{lam,sig},*this->aoERI_,{mu,lam,nu,sig},0.0,CTDAIXAOTenAB,{mu,nu});
+  contract(1.0,RPAAOTenAB,{lam,sig},*this->aoERI_,{mu,lam,nu,sig},0.0,RPAIXAOTenAB,{mu,nu});
+  contract(1.0,ATDAAOTenSing,{lam,sig},*this->aoERI_,{mu,lam,nu,sig},0.0,ATDAIXAOTenSing,{mu,nu});
+  contract(1.0,CTDAAOTenSing,{lam,sig},*this->aoERI_,{mu,lam,nu,sig},0.0,CTDAIXAOTenSing,{mu,nu});
+  contract(1.0,RPAAOTenSing,{lam,sig},*this->aoERI_,{mu,lam,nu,sig},0.0,RPAIXAOTenSing,{mu,nu});
+
+  std::memcpy(ATDAIXAOAA.data(),&ATDAIXAOTenAA.storage()[0],ATDAIXAOTenAA.size()*sizeof(double));
+  std::memcpy(CTDAIXAOAA.data(),&CTDAIXAOTenAA.storage()[0],CTDAIXAOTenAA.size()*sizeof(double));
+  std::memcpy(RPAIXAOAA.data(),&RPAIXAOTenAA.storage()[0],RPAIXAOTenAA.size()*sizeof(double));
+  std::memcpy(ATDAIXAOAB.data(),&ATDAIXAOTenAB.storage()[0],ATDAIXAOTenAB.size()*sizeof(double));
+  std::memcpy(CTDAIXAOAB.data(),&CTDAIXAOTenAB.storage()[0],CTDAIXAOTenAB.size()*sizeof(double));
+  std::memcpy(RPAIXAOAB.data(),&RPAIXAOTenAB.storage()[0],RPAIXAOTenAB.size()*sizeof(double));
+  std::memcpy(ATDAIXAOSing.data(),&ATDAIXAOTenSing.storage()[0],ATDAIXAOTenSing.size()*sizeof(double));
+  std::memcpy(CTDAIXAOSing.data(),&CTDAIXAOTenSing.storage()[0],CTDAIXAOTenSing.size()*sizeof(double));
+  std::memcpy(RPAIXAOSing.data(),&RPAIXAOTenSing.storage()[0],RPAIXAOTenSing.size()*sizeof(double));
+
+  ATDAIXMOAA = this->singleSlater_->moA()->adjoint() * ATDAIXAOAA * (*this->singleSlater_->moA()); 
+  CTDAIXMOAA = this->singleSlater_->moA()->adjoint() * CTDAIXAOAA * (*this->singleSlater_->moA()); 
+  RPAIXMOAA = this->singleSlater_->moA()->adjoint() * RPAIXAOAA * (*this->singleSlater_->moA()); 
+  ATDAIXMOAB = this->singleSlater_->moA()->adjoint() * ATDAIXAOAB * (*this->singleSlater_->moA()); 
+  CTDAIXMOAB = this->singleSlater_->moA()->adjoint() * CTDAIXAOAB * (*this->singleSlater_->moA()); 
+  RPAIXMOAB = this->singleSlater_->moA()->adjoint() * RPAIXAOAB * (*this->singleSlater_->moA()); 
+  ATDAIXMOSing = this->singleSlater_->moA()->adjoint() * ATDAIXAOSing * (*this->singleSlater_->moA()); 
+  CTDAIXMOSing = this->singleSlater_->moA()->adjoint() * CTDAIXAOSing * (*this->singleSlater_->moA()); 
+  RPAIXMOSing = this->singleSlater_->moA()->adjoint() * RPAIXAOSing * (*this->singleSlater_->moA()); 
+
+  for(auto a = 0, ab = 0; a < this->nVA_; a++      )
+  for(auto b = 0        ; b < a         ; b++, ab++){
+    ATDAAXMOAA(ab) = ATDAIXMOAA(this->nOA_+a,this->nOA_+b) + ATDATAA(ab) *
+                     ( (*this->singleSlater_->epsA())(a+this->nOA_) +
+                       (*this->singleSlater_->epsA())(b+this->nOA_) - 
+                       2*Rmu );
+  }
+  for(auto i = 0, ij = 0; i < this->nOA_; i++      )
+  for(auto j = 0        ; j < i         ; j++, ij++){
+    CTDAAXMOAA(ij) = CTDAIXMOAA(i,j) - CTDATAA(ij) *
+                     ( (*this->singleSlater_->epsA())(i) +
+                       (*this->singleSlater_->epsA())(j) - 
+                       2*Rmu );
+  }
+
+  for(auto a = 0, ab = 0; a < this->nVA_; a++      )
+  for(auto b = 0        ; b < this->nVA_; b++, ab++){
+    ATDAAXMOAB(ab) = ATDAIXMOAB(this->nOA_+a,this->nOA_+b) + ATDATAB(ab) *
+                     ( (*this->singleSlater_->epsA())(a+this->nOA_) +
+                       (*this->singleSlater_->epsA())(b+this->nOA_) - 
+                       2*Rmu );
+  }
+  for(auto i = 0, ij = 0; i < this->nOA_; i++      )
+  for(auto j = 0        ; j < this->nOA_; j++, ij++){
+    CTDAAXMOAB(ij) = CTDAIXMOAB(i,j) - CTDATAB(ij) *
+                     ( (*this->singleSlater_->epsA())(i) +
+                       (*this->singleSlater_->epsA())(j) - 
+                       2*Rmu );
+  }
+
+  for(auto a = 0, ab = 0; a < this->nVA_; a++      )
+  for(auto b = 0        ; b <=a         ; b++, ab++){
+    double fact = 1.0;
+    if(a==b) fact = std::sqrt(0.5);
+    ATDAAXMOSing(ab) = fact*ATDAIXMOSing(this->nOA_+a,this->nOA_+b) + ATDATSing(ab) *
+                     ( (*this->singleSlater_->epsA())(a+this->nOA_) +
+                       (*this->singleSlater_->epsA())(b+this->nOA_) - 
+                       2*Rmu );
+  }
+  for(auto i = 0, ij = 0; i < this->nOA_; i++      )
+  for(auto j = 0        ; j <=i         ; j++, ij++){
+    double fact = 1.0;
+    if(i==j) fact = std::sqrt(0.5);
+    CTDAAXMOSing(ij) = fact*CTDAIXMOSing(i,j) - CTDATSing(ij) *
+                     ( (*this->singleSlater_->epsA())(i) +
+                       (*this->singleSlater_->epsA())(j) - 
+                       2*Rmu );
+  }
+  cout << "Checking A TDA (AA) AX... |AX| = " << ATDAAXMOAA.norm() << " |R| = " << (ATDAAXMOAA - AAA*ATDATAA).norm() << endl;
+  cout << "Checking C TDA (AA) AX... |AX| = " << CTDAAXMOAA.norm() << " |R| = " << (CTDAAXMOAA - CAA*CTDATAA).norm() << endl;
+  cout << "Checking A TDA (AB) AX... |AX| = " << ATDAAXMOAB.norm() << " |R| = " << (ATDAAXMOAB - AAB*ATDATAB).norm() << endl;
+  cout << "Checking C TDA (AB) AX... |AX| = " << CTDAAXMOAB.norm() << " |R| = " << (CTDAAXMOAB - CAB*CTDATAB).norm() << endl;
+  cout << "Checking A TDA (SA) AX... |AX| = " << ATDAAXMOSing.norm() << " |R| = " << (ATDAAXMOSing - ASing*ATDATSing).norm() << endl;
+  cout << "Checking C TDA (SA) AX... |AX| = " << CTDAAXMOSing.norm() << " |R| = " << (CTDAAXMOSing - CSing*CTDATSing).norm() << endl;
+  
 }
+
 //dbwye

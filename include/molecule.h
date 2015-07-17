@@ -53,7 +53,10 @@ class Molecule {
 public:
 
   // constructor
-  Molecule(int nAtoms=0,FileIO * fileio=NULL){ if(nAtoms>0) iniMolecule(nAtoms,fileio);};
+  Molecule(int nAtoms=0,FileIO * fileio=NULL){ 
+    this->nTotalE_ = 0;
+    if(nAtoms>0) iniMolecule(nAtoms,fileio);
+  };
   Molecule(Atoms atm, FileIO *fileio=NULL){
     this->iniMolecule(1,fileio);
     auto n = HashAtom(atm.symbol,atm.massNumber);
@@ -88,7 +91,7 @@ public:
   inline int charge() {return this->charge_;}
   inline int spin() {return this->spin_;}
   inline int nTotalE() {return this->nTotalE_;};
-  inline void readCharge(int charge) {this->charge_=charge;};
+  inline void readCharge(int charge) {this->charge_=charge; this->nTotalE_ -= charge;};
   inline void readSpin(int spin) {this->spin_=spin;};
   inline int size() { return this->size_;};
   inline double energyNuclei() { return this->energyNuclei_;};
