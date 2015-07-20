@@ -2169,6 +2169,20 @@ void SDResponse::incorePPRPA(){
                        (*this->singleSlater_->epsA())(j) - 
                        2*Rmu );
   }
+  for(auto a = 0, ab = 0; a < this->nVA_; a++      )
+  for(auto b = 0        ; b < a         ; b++, ab++){
+    RPAAXMOAA(ab) = RPAIXMOAA(this->nOA_+a,this->nOA_+b) + RPATAA(ab) *
+                     ( (*this->singleSlater_->epsA())(a+this->nOA_) +
+                       (*this->singleSlater_->epsA())(b+this->nOA_) - 
+                       2*Rmu );
+  }
+  for(auto i = 0, ij = VirSqAASLT; i < this->nOA_; i++      )
+  for(auto j = 0        ; j < i         ; j++, ij++){
+    RPAAXMOAA(ij) = -RPAIXMOAA(i,j) + RPATAA(ij) *
+                     ( (*this->singleSlater_->epsA())(i) +
+                       (*this->singleSlater_->epsA())(j) - 
+                       2*Rmu );
+  }
 
   for(auto a = 0, ab = 0; a < this->nVA_; a++      )
   for(auto b = 0        ; b < this->nVA_; b++, ab++){
@@ -2180,6 +2194,20 @@ void SDResponse::incorePPRPA(){
   for(auto i = 0, ij = 0; i < this->nOA_; i++      )
   for(auto j = 0        ; j < this->nOA_; j++, ij++){
     CTDAAXMOAB(ij) = CTDAIXMOAB(i,j) - CTDATAB(ij) *
+                     ( (*this->singleSlater_->epsA())(i) +
+                       (*this->singleSlater_->epsA())(j) - 
+                       2*Rmu );
+  }
+  for(auto a = 0, ab = 0; a < this->nVA_; a++      )
+  for(auto b = 0        ; b < this->nVA_; b++, ab++){
+    RPAAXMOAB(ab) = RPAIXMOAB(this->nOA_+a,this->nOA_+b) + RPATAB(ab) *
+                     ( (*this->singleSlater_->epsA())(a+this->nOA_) +
+                       (*this->singleSlater_->epsA())(b+this->nOA_) - 
+                       2*Rmu );
+  }
+  for(auto i = 0, ij = VirSqAB; i < this->nOA_; i++      )
+  for(auto j = 0        ; j < this->nOA_; j++, ij++){
+    RPAAXMOAB(ij) = -RPAIXMOAB(i,j) + RPATAB(ij) *
                      ( (*this->singleSlater_->epsA())(i) +
                        (*this->singleSlater_->epsA())(j) - 
                        2*Rmu );
@@ -2203,32 +2231,34 @@ void SDResponse::incorePPRPA(){
                        (*this->singleSlater_->epsA())(j) - 
                        2*Rmu );
   }
-  cout << "HERE"<<endl;
   for(auto a = 0, ab = 0; a < this->nVA_; a++      )
-  for(auto b = 0        ; b < a         ; b++, ab++){
-    RPAAXMOAA(ab) = RPAIXMOAA(this->nOA_+a,this->nOA_+b) + RPATAA(ab) *
+  for(auto b = 0        ; b <=a         ; b++, ab++){
+    double fact = 1.0;
+    if(a==b) fact = std::sqrt(0.5);
+    RPAAXMOSing(ab) = fact*RPAIXMOSing(this->nOA_+a,this->nOA_+b) + RPATSing(ab) *
                      ( (*this->singleSlater_->epsA())(a+this->nOA_) +
                        (*this->singleSlater_->epsA())(b+this->nOA_) - 
                        2*Rmu );
   }
-  cout << "HERE"<<endl;
-  for(auto i = 0, ij = VirSqAASLT; i < this->nOA_; i++      )
-  for(auto j = 0        ; j < i         ; j++, ij++){
-    RPAAXMOAA(ij) = -RPAIXMOAA(i,j) + RPATAA(ij) *
+  for(auto i = 0, ij = VirSqAALT; i < this->nOA_; i++      )
+  for(auto j = 0        ; j <=i         ; j++, ij++){
+    double fact = 1.0;
+    if(i==j) fact = std::sqrt(0.5);
+    RPAAXMOSing(ij) = -fact*RPAIXMOSing(i,j) + RPATSing(ij) *
                      ( (*this->singleSlater_->epsA())(i) +
                        (*this->singleSlater_->epsA())(j) - 
                        2*Rmu );
   }
-  cout << "HERE"<<endl;
   cout << "Checking A TDA (AA) AX... |AX| = " << ATDAAXMOAA.norm() << " |R| = " << (ATDAAXMOAA - AAA*ATDATAA).norm() << endl;
   cout << "Checking C TDA (AA) AX... |AX| = " << CTDAAXMOAA.norm() << " |R| = " << (CTDAAXMOAA - CAA*CTDATAA).norm() << endl;
   cout << "Checking RPA   (AA) AX... |AX| = " << RPAAXMOAA.norm() << " |R| = " << (RPAAXMOAA - FullAA*RPATAA).norm() << endl;
   cout << "Checking A TDA (AB) AX... |AX| = " << ATDAAXMOAB.norm() << " |R| = " << (ATDAAXMOAB - AAB*ATDATAB).norm() << endl;
   cout << "Checking C TDA (AB) AX... |AX| = " << CTDAAXMOAB.norm() << " |R| = " << (CTDAAXMOAB - CAB*CTDATAB).norm() << endl;
+  cout << "Checking RPA   (AB) AX... |AX| = " << RPAAXMOAB.norm() << " |R| = " << (RPAAXMOAB - FullAB*RPATAB).norm() << endl;
   cout << "Checking A TDA (SA) AX... |AX| = " << ATDAAXMOSing.norm() << " |R| = " << (ATDAAXMOSing - ASing*ATDATSing).norm() << endl;
   cout << "Checking C TDA (SA) AX... |AX| = " << CTDAAXMOSing.norm() << " |R| = " << (CTDAAXMOSing - CSing*CTDATSing).norm() << endl;
-  for(auto i = 0; i < RPAAXMOAA.size(); i++)
-    cout << RPAAXMOAA(i) << " " << (FullAA*RPATAA)(i) << endl;
+  cout << "Checking RPA   (SA) AX... |AX| = " << RPAAXMOSing.norm() << " |R| = " << (RPAAXMOSing - FullSing*RPATSing).norm() << endl;
+//for(auto i = 0 ; i < RPAAXMOAB.size() ; i++) cout << RPAAXMOAB(i) << " " << (FullAB*RPATAB)(i) << endl;
 }
 
 //dbwye
