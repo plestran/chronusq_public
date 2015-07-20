@@ -208,7 +208,7 @@ public:
   void computeAORII();
   void computeAORIS();
   void transformAORII();
-  template<typename T> void twoEContractDirect(bool,bool,const T &,T &,const T &, T &);
+  template<typename T> void twoEContractDirect(bool,bool,bool,const T &,T &,const T &, T &);
   template<typename T> void twoEContractN4(bool,bool,const T &,T &,const T &, T &);
   template<typename T> void twoEContractDF(bool,bool,const T &,T &,const T &, T &);
   template<typename T> void multTwoEContractDirect(int, bool,bool,const std::vector<T> &,std::vector<T> &,
@@ -222,6 +222,8 @@ public:
   template<typename TMat,typename T> void UnRestricted34HerContract(TMat&, const TMat &, TMat&, const TMat &, int,int,int,int,
                                                   int,int,int,int,const T*,T);
   template<typename TMat,typename T> void General34NonHerContract(TMat&, const TMat &, TMat&, const TMat &, int,int,int,int,
+                                                  int,int,int,int,const T*,T);
+  template<typename TMat,typename T> void General24CouContract(TMat&, const TMat &, int,int,int,int,
                                                   int,int,int,int,const T*,T);
   void compareRI();
 #endif

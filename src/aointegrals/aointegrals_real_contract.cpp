@@ -174,7 +174,35 @@ void AOIntegrals::General34NonHerContract(RealMatrix &GAlpha, const RealMatrix &
   }
 }
 template<>
-void AOIntegrals::twoEContractDirect(bool RHF, bool doFock, const RealMatrix &XAlpha, RealMatrix &AXAlpha,
+void AOIntegrals::General24CouContract(RealMatrix &G, const RealMatrix &X, int n1, int n2, int n3, int n4,
+                     int bf1_s, int bf2_s, int bf3_s, int bf4_s, const double * buff, double deg){
+  for(int i = 0, ijkl = 0 ; i < n1; ++i) {
+    int bf1 = bf1_s + i;
+    for(int j = 0; j < n2; ++j) {
+      int bf2 = bf2_s + j;
+      for(int k = 0; k < n3; ++k) {
+        int bf3 = bf3_s + k;
+        for(int l = 0; l < n4; ++l, ++ijkl) {
+          int bf4 = bf4_s + l;
+          double v = buff[ijkl]*deg;
+
+          G(bf1,bf3) += X(bf2,bf4)*v;
+          G(bf2,bf3) += X(bf1,bf4)*v;
+          G(bf1,bf4) += X(bf2,bf3)*v;
+          G(bf2,bf4) += X(bf1,bf3)*v;
+
+          G(bf3,bf1) += X(bf4,bf2)*v; 
+          G(bf4,bf1) += X(bf3,bf2)*v;
+          G(bf3,bf2) += X(bf4,bf1)*v;
+          G(bf4,bf2) += X(bf3,bf1)*v;
+        }
+      }
+    }
+  }
+
+}
+template<>
+void AOIntegrals::twoEContractDirect(bool RHF, bool doFock, bool do24, const RealMatrix &XAlpha, RealMatrix &AXAlpha,
                                      const RealMatrix &XBeta, RealMatrix &AXBeta) {
   this->fileio_->out << "Contracting Directly with two-electron integrals" << endl;
 
@@ -263,9 +291,12 @@ void AOIntegrals::twoEContractDirect(bool RHF, bool doFock, const RealMatrix &XA
             else if(doFock)
               this->UnRestricted34HerContract(G[0][thread_id],XAlpha,G[1][thread_id],
                 XBeta,n1,n2,n3,n4,bf1_s,bf2_s,bf3_s,bf4_s,buff,s1234_deg);
-            else
+            else if(!do24)
               this->General34NonHerContract(G[0][thread_id],XAlpha,G[1][thread_id],
                 XBeta,n1,n2,n3,n4,bf1_s,bf2_s,bf3_s,bf4_s,buff,s1234_deg);
+            else
+              this->General24CouContract(G[0][thread_id],XAlpha,n1,n2,n3,n4,
+                bf1_s,bf2_s,bf3_s,bf4_s,buff,s1234_deg);
           }
         }
       }
@@ -286,9 +317,11 @@ void AOIntegrals::twoEContractDirect(bool RHF, bool doFock, const RealMatrix &XA
   if(!RHF) for(int i = 0; i < this->controls_->nthreads; i++) AXBeta += G[1][i];
   AXAlpha = AXAlpha*0.5; // werid factor that comes from A + AT
   AXAlpha = AXAlpha*0.5;
+  if(do24) AXAlpha *= 0.5;
   if(!RHF){
     AXBeta = AXBeta*0.5; // werid factor that comes from A + AT
     AXBeta = AXBeta*0.5;
+    if(do24) AXBeta *= 0.5;
   }
   finish = std::chrono::high_resolution_clock::now();
   if(doFock) this->PTD = finish - start;

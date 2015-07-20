@@ -32,7 +32,7 @@ template<typename T>
 void SingleSlater<T>::formPT(){
   if(!this->haveDensity) this->formDensity();
   if(this->controls_->directTwoE && !this->controls_->doDF)
-    this->aointegrals_->twoEContractDirect(this->RHF_,true,*this->densityA_,*this->PTA_,*this->densityB_,*this->PTB_);
+    this->aointegrals_->twoEContractDirect(this->RHF_,true,false,*this->densityA_,*this->PTA_,*this->densityB_,*this->PTB_);
   else if(this->controls_->doDF)
     this->aointegrals_->twoEContractDF(this->RHF_,true,*this->densityA_,*this->PTA_,*this->densityB_,*this->PTB_);
   else

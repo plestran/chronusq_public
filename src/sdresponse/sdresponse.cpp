@@ -649,7 +649,7 @@ RealMatrix SDResponse::formRM2(RealMatrix &XMO){
      *  IXAO(s)_{i,j} = [ (ij,s|kl,s') + delta_{s,s'}*(il,s|kj,s) ] * XAO(s')_{l,k}
      */ 
     if(this->controls_->directTwoE && !this->controls_->doDF)
-      this->singleSlater_->aointegrals()->twoEContractDirect(false, false, XAAO,IXA,XBAO,IXB);
+      this->singleSlater_->aointegrals()->twoEContractDirect(false,false,false,XAAO,IXA,XBAO,IXB);
     else
       this->singleSlater_->aointegrals()->twoEContractN4(false, true, XAAO,IXA,XBAO,IXB);
     
@@ -2055,7 +2055,7 @@ void SDResponse::incorePPRPA(){
     if(a==b) fact = std::sqrt(0.5);
     ATDAMOSing(this->nOA_+a,this->nOA_+b) = fact*ATDATSing(ab);
     if(a > b)
-      ATDAMOSing(this->nOA_+b,this->nOA_+a) = -ATDATSing(ab);
+      ATDAMOSing(this->nOA_+b,this->nOA_+a) = ATDATSing(ab);
   }
 
   for(auto i = 0, ij = 0; i < this->nOA_; i++ )
@@ -2096,6 +2096,7 @@ void SDResponse::incorePPRPA(){
   CTDAAOSing=(*this->singleSlater_->moA())*CTDAMOSing*this->singleSlater_->moA()->adjoint();
   RPAAOSing=(*this->singleSlater_->moA())*RPAMOSing*this->singleSlater_->moA()->adjoint();  
 
+/*
   std::memcpy(&ATDAAOTenAA.storage()[0],ATDAAOAA.data(),ATDAAOAA.size()*sizeof(double));
   std::memcpy(&CTDAAOTenAA.storage()[0],CTDAAOAA.data(),CTDAAOAA.size()*sizeof(double));
   std::memcpy(&RPAAOTenAA.storage()[0],RPAAOAA.data(),RPAAOAA.size()*sizeof(double));
@@ -2116,6 +2117,13 @@ void SDResponse::incorePPRPA(){
   contract(1.0,CTDAAOTenSing,{lam,sig},*this->aoERI_,{mu,lam,nu,sig},0.0,CTDAIXAOTenSing,{mu,nu});
   contract(1.0,RPAAOTenSing,{lam,sig},*this->aoERI_,{mu,lam,nu,sig},0.0,RPAIXAOTenSing,{mu,nu});
 
+//for(auto i = 0; i < this->nBasis_; i++)
+//for(auto j = 0; j < this->nBasis_; j++)
+//  cout << ATDAIXAOAA(i,j) << " " <<ATDAIXAOTenAA(i,j) << "\t" <<
+//  ATDAIXAOAA(i,j) /ATDAIXAOTenAA(i,j) << endl;
+
+//CErr();
+
   std::memcpy(ATDAIXAOAA.data(),&ATDAIXAOTenAA.storage()[0],ATDAIXAOTenAA.size()*sizeof(double));
   std::memcpy(CTDAIXAOAA.data(),&CTDAIXAOTenAA.storage()[0],CTDAIXAOTenAA.size()*sizeof(double));
   std::memcpy(RPAIXAOAA.data(),&RPAIXAOTenAA.storage()[0],RPAIXAOTenAA.size()*sizeof(double));
@@ -2125,6 +2133,17 @@ void SDResponse::incorePPRPA(){
   std::memcpy(ATDAIXAOSing.data(),&ATDAIXAOTenSing.storage()[0],ATDAIXAOTenSing.size()*sizeof(double));
   std::memcpy(CTDAIXAOSing.data(),&CTDAIXAOTenSing.storage()[0],CTDAIXAOTenSing.size()*sizeof(double));
   std::memcpy(RPAIXAOSing.data(),&RPAIXAOTenSing.storage()[0],RPAIXAOTenSing.size()*sizeof(double));
+*/
+
+  this->singleSlater_->aointegrals()->twoEContractDirect(true,false,true,ATDAAOAA,ATDAIXAOAA,ATDAAOAA,ATDAIXAOAA);
+  this->singleSlater_->aointegrals()->twoEContractDirect(true,false,true,CTDAAOAA,CTDAIXAOAA,CTDAAOAA,CTDAIXAOAA);
+  this->singleSlater_->aointegrals()->twoEContractDirect(true,false,true,RPAAOAA,RPAIXAOAA,RPAAOAA,RPAIXAOAA);
+  this->singleSlater_->aointegrals()->twoEContractDirect(true,false,true,ATDAAOAB,ATDAIXAOAB,ATDAAOAB,ATDAIXAOAA);
+  this->singleSlater_->aointegrals()->twoEContractDirect(true,false,true,CTDAAOAB,CTDAIXAOAB,CTDAAOAB,CTDAIXAOAA);
+  this->singleSlater_->aointegrals()->twoEContractDirect(true,false,true,RPAAOAB,RPAIXAOAB,RPAAOAB,RPAIXAOAA);
+  this->singleSlater_->aointegrals()->twoEContractDirect(true,false,true,ATDAAOSing,ATDAIXAOSing,ATDAAOSing,ATDAIXAOAA);
+  this->singleSlater_->aointegrals()->twoEContractDirect(true,false,true,CTDAAOSing,CTDAIXAOSing,CTDAAOSing,CTDAIXAOAA);
+  this->singleSlater_->aointegrals()->twoEContractDirect(true,false,true,RPAAOSing,RPAIXAOSing,RPAAOSing,RPAIXAOAA);
 
   ATDAIXMOAA = this->singleSlater_->moA()->adjoint() * ATDAIXAOAA * (*this->singleSlater_->moA()); 
   CTDAIXMOAA = this->singleSlater_->moA()->adjoint() * CTDAIXAOAA * (*this->singleSlater_->moA()); 

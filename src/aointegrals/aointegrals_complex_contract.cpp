@@ -27,7 +27,7 @@
 namespace ChronusQ{
 #ifdef USE_LIBINT
 template<>
-void AOIntegrals::twoEContractDirect(bool RHF, bool doFock, const ComplexMatrix &XAlpha, ComplexMatrix &AXAlpha,
+void AOIntegrals::twoEContractDirect(bool RHF, bool doFock, bool do24, const ComplexMatrix &XAlpha, ComplexMatrix &AXAlpha,
                                  const ComplexMatrix &XBeta, ComplexMatrix &AXBeta) {
 //CErr("No Direct Contraction for Complex Matricies Implemented");
   this->fileio_->out << "Contracting Directly with two-electron integrals" << endl;
