@@ -47,6 +47,7 @@ class SDResponse {
   int       nSek_;
   int       nGuess_;
   int       iMeth_;
+  int       iPPRPA_;
   bool      haveDag_;
   int       nOA_;
   int       nVA_;
@@ -57,6 +58,7 @@ class SDResponse {
   int       nOAVB_;
   int       nOBVA_;
   int       nSingleDim_;
+  double    rMu_;
 //dbwye
   friend class SingleSlater<double>;
 
@@ -92,6 +94,8 @@ public:
     CIS,
     RPA,
     PPRPA,
+    PPATDA,
+    PPCTDA,
     CCSD
   };
 //dbwye
@@ -124,6 +128,7 @@ public:
   void formGuess();
   void formPerturbedGuess(double,const RealCMMap &, RealCMMap &,const RealCMMap &, RealCMMap &);
   void formRM3(RealCMMap &, RealCMMap &, RealCMMap &Rho);
+  void formRM4(RealCMMap &, RealCMMap &, RealCMMap &Rho);
   void checkValid();
   void getDiag();
   inline RealCMMatrix * rmDiag(){return this->rmDiag_.get();};

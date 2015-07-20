@@ -395,7 +395,7 @@ void AOIntegrals::twoEContractDF(bool RHF, bool doFock, const RealMatrix &XAlpha
   for(auto i = 0; i < AXAlpha.size(); i++) AXAlpha.data()[i] = AXAlphaTensor.storage()[i];
 }
 template<>
-void AOIntegrals::multTwoEContractDirect(int nVec, bool RHF, bool doFock, const std::vector<RealMatrix> &XAlpha, std::vector<RealMatrix> &AXAlpha,
+void AOIntegrals::multTwoEContractDirect(int nVec, bool RHF, bool doFock, bool do24,const std::vector<RealMatrix> &XAlpha, std::vector<RealMatrix> &AXAlpha,
                                      const std::vector<RealMatrix> &XBeta, std::vector<RealMatrix> &AXBeta) {
   this->fileio_->out << "Contracting Directly with two-electron integrals" << endl;
 
@@ -490,10 +490,13 @@ std::vector<std::vector<std::vector<RealMatrix>>> G(nRHF,std::vector<std::vector
                 this->UnRestricted34HerContract(G[0][iX][thread_id],XAlpha[iX],
                   G[1][iX][thread_id],XBeta[iX],n1,n2,n3,n4,bf1_s,bf2_s,bf3_s,bf4_s,buff,
                   s1234_deg);
-              else
+              else if(!do24)
                 this->General34NonHerContract(G[0][iX][thread_id],XAlpha[iX],
                   G[1][iX][thread_id],XBeta[iX],n1,n2,n3,n4,bf1_s,bf2_s,bf3_s,bf4_s,buff,
                   s1234_deg);
+              else
+                this->General24CouContract(G[0][iX][thread_id],XAlpha[iX],n1,n2,n3,n4,
+                  bf1_s,bf2_s,bf3_s,bf4_s,buff,s1234_deg);
             } // Loop iX
           } // Loop s4
         } // Loop s3
@@ -519,8 +522,10 @@ std::vector<std::vector<std::vector<RealMatrix>>> G(nRHF,std::vector<std::vector
     for(int i = 0; i < this->controls_->nthreads; i++) 
       AXBeta[k] += G[1][k][i];
 
-  for(auto k = 0; k < nVec; k++) AXAlpha[k] *= 0.25;
-  if(!RHF) for(auto k = 0; k < nVec; k++) AXBeta[k] *= 0.25;
+  double fact = 0.25;
+  if(do24) fact += 0.5;
+  for(auto k = 0; k < nVec; k++) AXAlpha[k] *= fact;
+  if(!RHF) for(auto k = 0; k < nVec; k++) AXBeta[k] *= fact;
   finish = std::chrono::high_resolution_clock::now();
   if(doFock) this->PTD = finish - start;
    
