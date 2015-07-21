@@ -47,24 +47,22 @@ void SDResponse::formAOTDen(const RealVecMap &TMOV, RealMatrix &TAOA, RealMatrix
 } //formAOTDen
 
 void SDResponse::formMOTDen(RealVecMap &TMOV, const RealMatrix &TAOA, const RealMatrix &TAOB){
-  RealMatrix TMOA(this->nBasis_,this->nBasis_);
-  RealMatrix TMOB(this->nBasis_,this->nBasis_);
+  bool doVOOV = (this->iMeth_ == CIS || this->iMeth_ == RPA); 
+  bool doVVOO = (this->iMeth_ == PPRPA || this->iMeth_ == PPATDA || this->iMeth_ == PPCTDA);
+  RealMatrix TMOA,TMOB;
+  TMOA = RealMatrix::Zero(this->nBasis_,this->nBasis_);
+  if(!doVVOO) TMOB = RealMatrix::Zero(this->nBasis_,this->nBasis_);
+
   TMOA = this->singleSlater_->moA()->adjoint() * TAOA * (*this->singleSlater_->moA());
-  if(this->RHF_)
-    TMOB = this->singleSlater_->moA()->adjoint() * TAOB * (*this->singleSlater_->moA());
-  else 
-    TMOB = this->singleSlater_->moB()->adjoint() * TAOB * (*this->singleSlater_->moB());
-  int iOff = this->nOAVA_ + this->nOBVB_;
-  for(auto a = this->nOA_, ia = 0; a < this->nBasis_; a++)
-  for(auto i = 0         ; i < this->nOA_; i++, ia++){
-    TMOV(ia) = TMOA(a,i);
-    if(this->iMeth_ == RPA) TMOV(ia+iOff) = -TMOA(i,a);
+  if(!doVVOO) {
+    if(this->RHF_)
+      TMOB = this->singleSlater_->moA()->adjoint() * TAOB * (*this->singleSlater_->moA());
+    else 
+      TMOB = this->singleSlater_->moB()->adjoint() * TAOB * (*this->singleSlater_->moB());
   }
-  for(auto a = this->nOB_, ia = this->nOAVA_; a < this->nBasis_; a++)
-  for(auto i = 0         ; i < this->nOB_; i++, ia++){
-    TMOV(ia) = TMOB(a,i);
-    if(this->iMeth_ == RPA) TMOV(ia+iOff) = -TMOB(i,a);
-  }
+  if(doVOOV) this->retrvVOOV(TMOV,TMOA,TMOB);
+  else if(doVVOO) this->retrvVVOO(TMOV,TMOA);
+  
 }// formMOTDen
 
 void SDResponse::placeVOOV(const RealVecMap &TMOV, RealMatrix &TMOA, RealMatrix &TMOB){
@@ -132,6 +130,205 @@ void SDResponse::placeVVOO(const RealVecMap &TMOV, RealMatrix &TMO){
     }
   } // doY
 } // placeVVOO
+
+void SDResponse::retrvVOOV(RealVecMap &TMOV, const RealMatrix &TMOA, const RealMatrix &TMOB){
+  int iOff = this->nOAVA_ + this->nOBVB_;
+  for(auto a = this->nOA_, ia = 0; a < this->nBasis_; a++)
+  for(auto i = 0         ; i < this->nOA_; i++, ia++){
+    TMOV(ia) = TMOA(a,i);
+    if(this->iMeth_ == RPA) TMOV(ia+iOff) = -TMOA(i,a);
+  }
+  for(auto a = this->nOB_, ia = this->nOAVA_; a < this->nBasis_; a++)
+  for(auto i = 0         ; i < this->nOB_; i++, ia++){
+    TMOV(ia) = TMOB(a,i);
+    if(this->iMeth_ == RPA) TMOV(ia+iOff) = -TMOB(i,a);
+  }
+} // retrvVOOV
+
+void SDResponse::retrvVVOO(RealVecMap &TMOV, const RealMatrix &TMO){
+  bool doX = ( (this->iMeth_ == PPATDA) || (this->iMeth_ == PPRPA) );
+  bool doY = ( (this->iMeth_ == PPCTDA) || (this->iMeth_ == PPRPA) );
+
+  if(doX){
+    if(this->iPPRPA_ == 0){ // AA block
+      for(auto a = 0, ab = 0; a < this->nVA_; a++)
+      for(auto b = 0; b  < a;           b++, ab++){
+        TMOV(ab) = TMO(this->nOA_+a,this->nOA_+b);
+      } // loop AB A < B (A-Alpha B-Alpha)
+    } else if(this->iPPRPA_ == 1) { // AB block
+      for(auto a = 0, ab = 0; a < this->nVA_; a++)
+      for(auto b = 0;  b < this->nVB_;  b++, ab++){
+        TMOV(ab) = TMO(this->nOA_+a,this->nOB_+b);
+      } // loop AB (A-Alpha B-Beta)
+    } else if(this->iPPRPA_ == 2) { // BB block
+      for(auto a = 0, ab = 0; a < this->nVB_; a++)
+      for(auto b = 0; b  < a;           b++, ab++){
+        TMOV(ab) = TMO(this->nOA_+a,this->nOB_+b);
+      } // loop AB A < B (A-Alpha B-Alpha)
+    }
+  } // doX
+  if(doY){
+    int iOff = 0;
+    // Offset in the eigenvector for PPRPA Y amplitudes
+    if((this->iMeth_ == PPRPA) && (this->iPPRPA_ == 0)) iOff = this->nVA_*(this->nVA_-1)/2;
+    if((this->iMeth_ == PPRPA) && (this->iPPRPA_ == 1)) iOff = this->nVA_*this->nVB_;
+    if((this->iMeth_ == PPRPA) && (this->iPPRPA_ == 2)) iOff = this->nVB_*(this->nVB_-1)/2;
+    double fact = 1.0;
+    if(this->iMeth_ == PPRPA) fact *= -1.0;
+
+    if(this->iPPRPA_ == 0) { // AA Block
+      for(auto i = 0, ij = iOff; i < this->nOA_; i++)
+      for(auto j = 0; j  < i   ;           j++, ij++){
+        TMOV(ij) = fact*TMO(i,j);
+      } // loop IJ I < J (I-Alpha J-Alpha)
+    } else if(this->iPPRPA_ == 1) { // AB Block
+      for(auto i = 0, ij = iOff; i < this->nOA_; i++)
+      for(auto j = 0;  j < this->nOB_;     j++, ij++){
+        TMOV(ij) =  fact*TMO(i,j);
+      } // loop IJ (I-Alpha J-Beta)
+    } else if(this->iPPRPA_ == 2) { // BB Block
+      for(auto i = 0, ij = iOff; i < this->nOB_; i++)
+      for(auto j = 0; j  < i   ;           j++, ij++){
+        TMOV(ij) = fact*TMO(i,j);
+      } // loop IJ I < J (I-Beta J-Beta)
+    }
+  } // doY
+} //retrvVVOO
+
+void SDResponse::scaleDagPPRPA(bool inplace, RealVecMap &T, RealVecMap &IX, RealVecMap *AX){
+  // inplace triggers whether or not AX is populated (or touched for that matter)
+  bool doX = ( (this->iMeth_ == PPATDA) || (this->iMeth_ == PPRPA) );
+  bool doY = ( (this->iMeth_ == PPCTDA) || (this->iMeth_ == PPRPA) );
+
+  int iOff = 0;
+  // Offset in the eigenvector for PPRPA Y amplitudes
+  if((this->iMeth_ == PPRPA) && (this->iPPRPA_ == 0)) iOff = this->nVA_*(this->nVA_-1)/2;
+  if((this->iMeth_ == PPRPA) && (this->iPPRPA_ == 1)) iOff = this->nVA_*this->nVB_;
+  if((this->iMeth_ == PPRPA) && (this->iPPRPA_ == 2)) iOff = this->nVB_*(this->nVB_-1)/2;
+  double fact = -1.0;
+  if(this->iMeth_ == PPRPA) fact *= -1.0;
+ 
+
+  if(inplace){
+    if(doX){
+      if(this->iPPRPA_ == 0){ // AA block
+        for(auto a = 0, ab = 0; a < this->nVA_; a++)
+        for(auto b = 0; b  < a;           b++, ab++){
+          IX(ab) = IX(ab) + T(ab) * 
+            ( (*this->singleSlater_->epsA())(a+this->nOA_) +
+              (*this->singleSlater_->epsA())(b+this->nOA_) - 2*this->rMu_);
+        } // loop AB A < B (A-Alpha B-Alpha)
+      } else if(this->iPPRPA_ == 1) { // AB block
+        for(auto a = 0, ab = 0; a < this->nVA_; a++)
+        for(auto b = 0;  b < this->nVB_;  b++, ab++){
+          if(this->RHF_)
+            IX(ab) = IX(ab) + T(ab) * 
+              ( (*this->singleSlater_->epsA())(a+this->nOA_) +
+                (*this->singleSlater_->epsA())(b+this->nOA_) - 2*this->rMu_);
+          else
+            IX(ab) = IX(ab) + T(ab) * 
+              ( (*this->singleSlater_->epsA())(a+this->nOA_) +
+                (*this->singleSlater_->epsB())(b+this->nOB_) - 2*this->rMu_);
+        } // loop AB (A-Alpha B-Beta)
+      } else if(this->iPPRPA_ == 2) { // BB block
+        for(auto a = 0, ab = 0; a < this->nVB_; a++)
+        for(auto b = 0; b  < a;           b++, ab++){
+          IX(ab) = IX(ab) + T(ab) * 
+            ( (*this->singleSlater_->epsB())(a+this->nOB_) +
+              (*this->singleSlater_->epsB())(b+this->nOB_) - 2*this->rMu_);
+        } // loop AB A < B (A-Alpha B-Alpha)
+      }
+    } // doX
+    if(doY){
+      if(this->iPPRPA_ == 0) { // AA Block
+        for(auto i = 0, ij = iOff; i < this->nOA_; i++)
+        for(auto j = 0; j  < i   ;           j++, ij++){
+          IX(ij) = IX(ij) + T(ij) * fact * 
+            ( (*this->singleSlater_->epsA())(i) +
+              (*this->singleSlater_->epsA())(j) - 2*this->rMu_);
+        } // loop IJ I < J (I-Alpha J-Alpha)
+      } else if(this->iPPRPA_ == 1) { // AB Block
+        for(auto i = 0, ij = iOff; i < this->nOA_; i++)
+        for(auto j = 0;  j < this->nOB_;     j++, ij++){
+          if(this->RHF_)
+            IX(ij) = IX(ij) + T(ij) * fact * 
+              ( (*this->singleSlater_->epsA())(i) +
+                (*this->singleSlater_->epsA())(j) - 2*this->rMu_);
+          else
+            IX(ij) = IX(ij) + T(ij) * fact * 
+              ( (*this->singleSlater_->epsA())(i) +
+                (*this->singleSlater_->epsB())(j) - 2*this->rMu_);
+        } // loop IJ (I-Alpha J-Beta)
+      } else if(this->iPPRPA_ == 2) { // BB Block
+        for(auto i = 0, ij = iOff; i < this->nOB_; i++)
+        for(auto j = 0; j  < i   ;           j++, ij++){
+          IX(ij) = IX(ij) + T(ij) * fact * 
+            ( (*this->singleSlater_->epsB())(i) +
+              (*this->singleSlater_->epsB())(j) - 2*this->rMu_);
+        } // loop IJ I < J (I-Beta J-Beta)
+      }
+    } // doY
+  } else { // inplace if-block end
+    if(doX){
+      if(this->iPPRPA_ == 0){ // AA block
+        for(auto a = 0, ab = 0; a < this->nVA_; a++)
+        for(auto b = 0; b  < a;           b++, ab++){
+          (*AX)(ab) = IX(ab) + T(ab) * 
+            ( (*this->singleSlater_->epsA())(a+this->nOA_) +
+              (*this->singleSlater_->epsA())(b+this->nOA_) - 2*this->rMu_);
+        } // loop AB A < B (A-Alpha B-Alpha)
+      } else if(this->iPPRPA_ == 1) { // AB block
+        for(auto a = 0, ab = 0; a < this->nVA_; a++)
+        for(auto b = 0;  b < this->nVB_;  b++, ab++){
+          if(this->RHF_)
+            (*AX)(ab) = IX(ab) + T(ab) * 
+              ( (*this->singleSlater_->epsA())(a+this->nOA_) +
+                (*this->singleSlater_->epsA())(b+this->nOA_) - 2*this->rMu_);
+          else
+            (*AX)(ab) = IX(ab) + T(ab) * 
+              ( (*this->singleSlater_->epsA())(a+this->nOA_) +
+                (*this->singleSlater_->epsB())(b+this->nOB_) - 2*this->rMu_);
+        } // loop AB (A-Alpha B-Beta)
+      } else if(this->iPPRPA_ == 2) { // BB block
+        for(auto a = 0, ab = 0; a < this->nVB_; a++)
+        for(auto b = 0; b  < a;           b++, ab++){
+          (*AX)(ab) = IX(ab) + T(ab) * 
+            ( (*this->singleSlater_->epsB())(a+this->nOB_) +
+              (*this->singleSlater_->epsB())(b+this->nOB_) - 2*this->rMu_);
+        } // loop AB A < B (A-Alpha B-Alpha)
+      }
+    } // doX
+    if(doY){
+      if(this->iPPRPA_ == 0) { // AA Block
+        for(auto i = 0, ij = iOff; i < this->nOA_; i++)
+        for(auto j = 0; j  < i   ;           j++, ij++){
+          (*AX)(ij) = IX(ij) + T(ij) * fact * 
+            ( (*this->singleSlater_->epsA())(i) +
+              (*this->singleSlater_->epsA())(j) - 2*this->rMu_);
+        } // loop IJ I < J (I-Alpha J-Alpha)
+      } else if(this->iPPRPA_ == 1) { // AB Block
+        for(auto i = 0, ij = iOff; i < this->nOA_; i++)
+        for(auto j = 0;  j < this->nOB_;     j++, ij++){
+          if(this->RHF_)
+            (*AX)(ij) = IX(ij) + T(ij) * fact * 
+              ( (*this->singleSlater_->epsA())(i) +
+                (*this->singleSlater_->epsA())(j) - 2*this->rMu_);
+          else
+            (*AX)(ij) = IX(ij) + T(ij) * fact * 
+              ( (*this->singleSlater_->epsA())(i) +
+                (*this->singleSlater_->epsB())(j) - 2*this->rMu_);
+        } // loop IJ (I-Alpha J-Beta)
+      } else if(this->iPPRPA_ == 2) { // BB Block
+        for(auto i = 0, ij = iOff; i < this->nOB_; i++)
+        for(auto j = 0; j  < i   ;           j++, ij++){
+          (*AX)(ij) = IX(ij) + T(ij) * fact * 
+            ( (*this->singleSlater_->epsB())(i) +
+              (*this->singleSlater_->epsB())(j) - 2*this->rMu_);
+        } // loop IJ I < J (I-Beta J-Beta)
+      }
+    } // doY
+  } // inplace else-block end
+}
 
 void SDResponse::initMeth(){
   if(this->nSek_ == 0) 
@@ -310,6 +507,7 @@ void SDResponse::incorePPRPA(){
 
   double Rmu = (*this->singleSlater_->epsA())(this->nOA_-1) + (*this->singleSlater_->epsA())(this->nOA_);
   Rmu /= 2;
+  this->rMu_ = Rmu;
 
   int VirSqAASLT   = this->nVA_*(this->nVA_-1)/2;
   int OccSqAASLT   = this->nOA_*(this->nOA_-1)/2;
@@ -777,7 +975,6 @@ void SDResponse::incorePPRPA(){
   cout << "Checking AO Trans function A TDA (AB)... |T| = " << ATDAAOABTmp.norm() << " |R| = " << (ATDAAOABTmp - ATDAAOAB).norm() << endl;
   cout << "Checking AO Trans function C TDA (AB)... |T| = " << CTDAAOABTmp.norm() << " |R| = " << (CTDAAOABTmp - CTDAAOAB).norm() << endl;
   cout << "Checking AO Trans function RPA   (AB)... |T| = " << RPAAOABTmp.norm() << " |R| = " << (RPAAOABTmp - RPAAOAB).norm() << endl;
-  CErr();
 
 /*
   std::memcpy(&ATDAAOTenAA.storage()[0],ATDAAOAA.data(),ATDAAOAA.size()*sizeof(double));
@@ -840,7 +1037,8 @@ void SDResponse::incorePPRPA(){
 
   for(auto a = 0, ab = 0; a < this->nVA_; a++      )
   for(auto b = 0        ; b < a         ; b++, ab++){
-    ATDAAXMOAA(ab) = ATDAIXMOAA(this->nOA_+a,this->nOA_+b) + ATDATAA(ab) *
+    ATDAAXMOAA(ab) = ATDAIXMOAA(this->nOA_+a,this->nOA_+b)
+                     + ATDATAA(ab) *
                      ( (*this->singleSlater_->epsA())(a+this->nOA_) +
                        (*this->singleSlater_->epsA())(b+this->nOA_) - 
                        2*Rmu );
@@ -942,6 +1140,51 @@ void SDResponse::incorePPRPA(){
   cout << "Checking C TDA (SA) AX... |AX| = " << CTDAAXMOSing.norm() << " |R| = " << (CTDAAXMOSing - CSing*CTDATSing).norm() << endl;
   cout << "Checking RPA   (SA) AX... |AX| = " << RPAAXMOSing.norm() << " |R| = " << (RPAAXMOSing - FullSing*RPATSing).norm() << endl;
 //for(auto i = 0 ; i < RPAAXMOAB.size() ; i++) cout << RPAAXMOAB(i) << " " << (FullAB*RPATAB)(i) << endl;
+//
+
+
+  Eigen::VectorXd ATDAAXAAMOTmp(VirSqAASLT); 
+  Eigen::VectorXd CTDAAXAAMOTmp(OccSqAASLT); 
+  Eigen::VectorXd RPAAXAAMOTmp(VirSqAASLT + OccSqAASLT); 
+  Eigen::VectorXd ATDAAXABMOTmp(VirSqAB); 
+  Eigen::VectorXd CTDAAXABMOTmp(OccSqAB); 
+  Eigen::VectorXd RPAAXABMOTmp(VirSqAB + OccSqAB); 
+
+  RealVecMap ATDAAXAAMOTmpMap(ATDAAXAAMOTmp.data(),VirSqAASLT); 
+  RealVecMap CTDAAXAAMOTmpMap(CTDAAXAAMOTmp.data(),OccSqAASLT); 
+  RealVecMap RPAAXAAMOTmpMap(RPAAXAAMOTmp.data(),VirSqAASLT + OccSqAASLT); 
+  RealVecMap ATDAAXABMOTmpMap(ATDAAXABMOTmp.data(),VirSqAB); 
+  RealVecMap CTDAAXABMOTmpMap(CTDAAXABMOTmp.data(),OccSqAB); 
+  RealVecMap RPAAXABMOTmpMap(RPAAXABMOTmp.data(),VirSqAB + OccSqAB); 
+
+  this->iPPRPA_ = 0;
+  this->iMeth_  = PPATDA;
+  this->formMOTDen(ATDAAXAAMOTmpMap,ATDAIXAOAA,ATDAIXAOAA);
+  this->scaleDagPPRPA(true,ATDATAAMap,ATDAAXAAMOTmpMap);
+  this->iMeth_  = PPCTDA;
+  this->formMOTDen(CTDAAXAAMOTmpMap,CTDAIXAOAA,CTDAIXAOAA);
+  this->scaleDagPPRPA(true,CTDATAAMap,CTDAAXAAMOTmpMap);
+  this->iMeth_  = PPRPA;
+  this->formMOTDen(RPAAXAAMOTmpMap,RPAIXAOAA,RPAIXAOAA);
+  this->scaleDagPPRPA(true,RPATAAMap,RPAAXAAMOTmpMap);
+
+  this->iPPRPA_ = 1;
+  this->iMeth_  = PPATDA;
+  this->formMOTDen(ATDAAXABMOTmpMap,ATDAIXAOAB,ATDAIXAOAB);
+  this->scaleDagPPRPA(true,ATDATABMap,ATDAAXABMOTmpMap);
+  this->iMeth_  = PPCTDA;
+  this->formMOTDen(CTDAAXABMOTmpMap,CTDAIXAOAB,CTDAIXAOAB);
+  this->scaleDagPPRPA(true,CTDATABMap,CTDAAXABMOTmpMap);
+  this->iMeth_  = PPRPA;
+  this->formMOTDen(RPAAXABMOTmpMap,RPAIXAOAB,RPAIXAOAB);
+  this->scaleDagPPRPA(true,RPATABMap,RPAAXABMOTmpMap);
+
+  cout << "Checking MO Trans function A TDA (AA)... |AX| = " << ATDAAXAAMOTmp.norm() << " |R| = " << (ATDAAXMOAA - ATDAAXAAMOTmp).norm() << endl;
+  cout << "Checking MO Trans function C TDA (AA)... |AX| = " << CTDAAXAAMOTmp.norm() << " |R| = " << (CTDAAXMOAA - CTDAAXAAMOTmp).norm() << endl;
+  cout << "Checking MO Trans function RPA   (AA)... |AX| = " << RPAAXAAMOTmp.norm() << " |R| = " << (RPAAXMOAA - RPAAXAAMOTmp).norm() << endl;
+  cout << "Checking MO Trans function A TDA (AB)... |AX| = " << ATDAAXABMOTmp.norm() << " |R| = " << (ATDAAXMOAB - ATDAAXABMOTmp).norm() << endl;
+  cout << "Checking MO Trans function C TDA (AB)... |AX| = " << CTDAAXABMOTmp.norm() << " |R| = " << (CTDAAXMOAB - CTDAAXABMOTmp).norm() << endl;
+  cout << "Checking MO Trans function RPA   (AB)... |AX| = " << RPAAXABMOTmp.norm() << " |R| = " << (RPAAXMOAB - RPAAXABMOTmp).norm() << endl;
 } //incorePPRPA
 
 void SDResponse::formRM(){
