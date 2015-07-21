@@ -27,24 +27,23 @@
 using ChronusQ::SDResponse;
 
 void SDResponse::formAOTDen(const RealVecMap &TMOV, RealMatrix &TAOA, RealMatrix &TAOB){
-  RealMatrix TMOA(this->nBasis_,this->nBasis_);
-  RealMatrix TMOB(this->nBasis_,this->nBasis_);
-  int iOff = this->nOAVA_ + this->nOBVB_;
-  for(auto a = this->nOA_, ia = 0; a < this->nBasis_; a++)
-  for(auto i = 0         ; i < this->nOA_; i++, ia++){
-    TMOA(a,i) = TMOV(ia);
-    if(this->iMeth_ == RPA) TMOA(i,a) = TMOV(ia+iOff);
-  }
-  for(auto a = this->nOB_, ia = this->nOAVA_; a < this->nBasis_; a++)
-  for(auto i = 0         ; i < this->nOB_; i++, ia++){
-    TMOB(a,i) = TMOV(ia);
-    if(this->iMeth_ == RPA) TMOB(i,a) = TMOV(ia+iOff);
-  }
+  bool doVOOV = (this->iMeth_ == CIS || this->iMeth_ == RPA); 
+  bool doVVOO = (this->iMeth_ == PPRPA || this->iMeth_ == PPATDA || this->iMeth_ == PPCTDA);
+
+  RealMatrix TMOA,TMOB;
+  TMOA = RealMatrix::Zero(this->nBasis_,this->nBasis_);
+  if(!doVVOO) TMOB = RealMatrix::Zero(this->nBasis_,this->nBasis_);
+
+  if(doVOOV) this->placeVOOV(TMOV,TMOA,TMOB);
+  else if(doVVOO) this->placeVVOO(TMOV,TMOA);
+
   TAOA = (*this->singleSlater_->moA()) * TMOA * this->singleSlater_->moA()->adjoint();
-  if(this->RHF_)
-    TAOB = (*this->singleSlater_->moA()) * TMOB * this->singleSlater_->moA()->adjoint();
-  else
-    TAOB = (*this->singleSlater_->moB()) * TMOB * this->singleSlater_->moB()->adjoint();
+  if(!doVVOO){
+    if(this->RHF_)
+      TAOB = (*this->singleSlater_->moA()) * TMOB * this->singleSlater_->moA()->adjoint();
+    else
+      TAOB = (*this->singleSlater_->moB()) * TMOB * this->singleSlater_->moB()->adjoint();
+  }
 } //formAOTDen
 
 void SDResponse::formMOTDen(RealVecMap &TMOV, const RealMatrix &TAOA, const RealMatrix &TAOB){
@@ -67,6 +66,72 @@ void SDResponse::formMOTDen(RealVecMap &TMOV, const RealMatrix &TAOA, const Real
     if(this->iMeth_ == RPA) TMOV(ia+iOff) = -TMOB(i,a);
   }
 }// formMOTDen
+
+void SDResponse::placeVOOV(const RealVecMap &TMOV, RealMatrix &TMOA, RealMatrix &TMOB){
+  int iOff = this->nOAVA_ + this->nOBVB_;
+  for(auto a = this->nOA_, ia = 0; a < this->nBasis_; a++)
+  for(auto i = 0         ; i < this->nOA_; i++, ia++){
+    TMOA(a,i) = TMOV(ia);
+    if(this->iMeth_ == RPA) TMOA(i,a) = TMOV(ia+iOff);
+  }
+  for(auto a = this->nOB_, ia = this->nOAVA_; a < this->nBasis_; a++)
+  for(auto i = 0         ; i < this->nOB_; i++, ia++){
+    TMOB(a,i) = TMOV(ia);
+    if(this->iMeth_ == RPA) TMOB(i,a) = TMOV(ia+iOff);
+  }
+} //placeVOOV
+
+void SDResponse::placeVVOO(const RealVecMap &TMOV, RealMatrix &TMO){
+  bool doX = ( (this->iMeth_ == PPATDA) || (this->iMeth_ == PPRPA) );
+  bool doY = ( (this->iMeth_ == PPCTDA) || (this->iMeth_ == PPRPA) );
+
+  if(doX){
+    if(this->iPPRPA_ == 0){ // AA block
+      for(auto a = 0, ab = 0; a < this->nVA_; a++)
+      for(auto b = 0; b  < a;           b++, ab++){
+        TMO(this->nOA_+a,this->nOA_+b) =  TMOV(ab); 
+        TMO(this->nOA_+b,this->nOA_+a) = -TMOV(ab); 
+      } // loop AB A < B (A-Alpha B-Alpha)
+    } else if(this->iPPRPA_ == 1) { // AB block
+      for(auto a = 0, ab = 0; a < this->nVA_; a++)
+      for(auto b = 0;  b < this->nVB_;  b++, ab++){
+        TMO(this->nOA_+a,this->nOB_+b) = TMOV(ab); 
+      } // loop AB (A-Alpha B-Beta)
+    } else if(this->iPPRPA_ == 2) { // BB block
+      for(auto a = 0, ab = 0; a < this->nVB_; a++)
+      for(auto b = 0; b  < a;           b++, ab++){
+        TMO(this->nOB_+a,this->nOB_+b) =  TMOV(ab); 
+        TMO(this->nOB_+b,this->nOB_+a) = -TMOV(ab); 
+      } // loop AB A < B (A-Alpha B-Alpha)
+    }
+  } // doX
+  if(doY){
+    int iOff = 0;
+    // Offset in the eigenvector for PPRPA Y amplitudes
+    if((this->iMeth_ == PPRPA) && (this->iPPRPA_ == 0)) iOff = this->nVA_*(this->nVA_-1)/2;
+    if((this->iMeth_ == PPRPA) && (this->iPPRPA_ == 1)) iOff = this->nVA_*this->nVB_;
+    if((this->iMeth_ == PPRPA) && (this->iPPRPA_ == 2)) iOff = this->nVB_*(this->nVB_-1)/2;
+
+    if(this->iPPRPA_ == 0) { // AA Block
+      for(auto i = 0, ij = iOff; i < this->nOA_; i++)
+      for(auto j = 0; j  < i   ;           j++, ij++){
+        TMO(i,j) =  TMOV(ij);
+        TMO(j,i) = -TMOV(ij);
+      } // loop IJ I < J (I-Alpha J-Alpha)
+    } else if(this->iPPRPA_ == 1) { // AB Block
+      for(auto i = 0, ij = iOff; i < this->nOA_; i++)
+      for(auto j = 0;  j < this->nOB_;     j++, ij++){
+        TMO(i,j) =  TMOV(ij);
+      } // loop IJ (I-Alpha J-Beta)
+    } else if(this->iPPRPA_ == 2) { // BB Block
+      for(auto i = 0, ij = iOff; i < this->nOB_; i++)
+      for(auto j = 0; j  < i   ;           j++, ij++){
+        TMO(i,j) =  TMOV(ij);
+        TMO(j,i) = -TMOV(ij);
+      } // loop IJ I < J (I-Beta J-Beta)
+    }
+  } // doY
+} // placeVVOO
 
 void SDResponse::initMeth(){
   if(this->nSek_ == 0) 
@@ -676,6 +741,43 @@ void SDResponse::incorePPRPA(){
   ATDAAOSing=(*this->singleSlater_->moA())*ATDAMOSing*this->singleSlater_->moA()->adjoint();
   CTDAAOSing=(*this->singleSlater_->moA())*CTDAMOSing*this->singleSlater_->moA()->adjoint();
   RPAAOSing=(*this->singleSlater_->moA())*RPAMOSing*this->singleSlater_->moA()->adjoint();  
+
+  RealVecMap ATDATAAMap(ATDATAA.data(),VirSqAASLT);
+  RealVecMap CTDATAAMap(CTDATAA.data(),OccSqAASLT);
+  RealVecMap RPATAAMap(RPATAA.data(),VirSqAASLT + OccSqAASLT);
+  RealVecMap ATDATABMap(ATDATAB.data(),VirSqAB);
+  RealVecMap CTDATABMap(CTDATAB.data(),OccSqAB);
+  RealVecMap RPATABMap(RPATAB.data(),VirSqAB + OccSqAB);
+  RealMatrix ATDAAOAATmp(this->nBasis_,this->nBasis_);
+  RealMatrix CTDAAOAATmp(this->nBasis_,this->nBasis_);
+  RealMatrix RPAAOAATmp(this->nBasis_,this->nBasis_);
+  RealMatrix ATDAAOABTmp(this->nBasis_,this->nBasis_);
+  RealMatrix CTDAAOABTmp(this->nBasis_,this->nBasis_);
+  RealMatrix RPAAOABTmp(this->nBasis_,this->nBasis_);
+
+  this->iPPRPA_ = 0;
+  this->iMeth_  = PPATDA;
+  this->formAOTDen(ATDATAAMap,ATDAAOAATmp,ATDAAOAATmp);
+  this->iMeth_  = PPCTDA;
+  this->formAOTDen(CTDATAAMap,CTDAAOAATmp,CTDAAOAATmp);
+  this->iMeth_  = PPRPA;
+  this->formAOTDen(RPATAAMap,RPAAOAATmp,RPAAOAATmp);
+
+  this->iPPRPA_ = 1;
+  this->iMeth_  = PPATDA;
+  this->formAOTDen(ATDATABMap,ATDAAOABTmp,ATDAAOABTmp);
+  this->iMeth_  = PPCTDA;
+  this->formAOTDen(CTDATABMap,CTDAAOABTmp,CTDAAOABTmp);
+  this->iMeth_  = PPRPA;
+  this->formAOTDen(RPATABMap,RPAAOABTmp,RPAAOABTmp);
+
+  cout << "Checking AO Trans function A TDA (AA)... |T| = " << ATDAAOAATmp.norm() << " |R| = " << (ATDAAOAATmp - ATDAAOAA).norm() << endl;
+  cout << "Checking AO Trans function C TDA (AA)... |T| = " << CTDAAOAATmp.norm() << " |R| = " << (CTDAAOAATmp - CTDAAOAA).norm() << endl;
+  cout << "Checking AO Trans function RPA   (AA)... |T| = " << RPAAOAATmp.norm() << " |R| = " << (RPAAOAATmp - RPAAOAA).norm() << endl;
+  cout << "Checking AO Trans function A TDA (AB)... |T| = " << ATDAAOABTmp.norm() << " |R| = " << (ATDAAOABTmp - ATDAAOAB).norm() << endl;
+  cout << "Checking AO Trans function C TDA (AB)... |T| = " << CTDAAOABTmp.norm() << " |R| = " << (CTDAAOABTmp - CTDAAOAB).norm() << endl;
+  cout << "Checking AO Trans function RPA   (AB)... |T| = " << RPAAOABTmp.norm() << " |R| = " << (RPAAOABTmp - RPAAOAB).norm() << endl;
+  CErr();
 
 /*
   std::memcpy(&ATDAAOTenAA.storage()[0],ATDAAOAA.data(),ATDAAOAA.size()*sizeof(double));

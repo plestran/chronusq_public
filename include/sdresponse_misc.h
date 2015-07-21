@@ -27,6 +27,8 @@
 
   void formAOTDen(const RealVecMap &, RealMatrix &, RealMatrix &);
   void formMOTDen(RealVecMap &, const RealMatrix &, const RealMatrix &);
+  void placeVOOV(const RealVecMap &,RealMatrix &, RealMatrix&);
+  void placeVVOO(const RealVecMap &,RealMatrix &);
   void initMeth();
   void checkValid();
 
