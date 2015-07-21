@@ -36,3 +36,7 @@
   void mpiSend(int,int tag=tagSDResponse);
   void mpiRecv(int,int tag=tagSDResponse);
 
+  // Proof of concept routines
+  void incorePPRPA();
+  void formRM();
+  RealMatrix formRM2(RealMatrix &XMO);

@@ -40,7 +40,6 @@
 namespace ChronusQ {
 class SDResponse {
   int       nBasis_;
-  int       nStates_;
   int       RHF_;
   int       nSek_;
   int       nGuess_;
@@ -71,7 +70,6 @@ class SDResponse {
   RealTensor4d *  aoERI_;
   RealTensor3d *  elecDipole_;
 
-  std::unique_ptr<RealMatrix> tMO_;
   std::unique_ptr<RealCMMatrix> rmDiag_;
   std::unique_ptr<RealMatrix>  davGuess_;
 
@@ -93,9 +91,6 @@ public:
   void iniSDResponse(Molecule *,BasisSet *,MOIntegrals *,FileIO *,Controls *,
                      SingleSlater<double> *);
 
-  void computeExcitedStates();         // compute the total electronic energy
-  void formRM();
-  RealMatrix formRM2(RealMatrix &XMO);
   #include <sdresponse_getset.h>
   #include <sdresponse_qnrelated.h>
   #include <sdresponse_io.h>
