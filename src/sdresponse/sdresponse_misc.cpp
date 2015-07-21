@@ -830,7 +830,7 @@ void SDResponse::incorePPRPA(){
     RPATSing = EA.eigenvectors().col(0).real();
 
   Eigen::IOFormat HeavyFmt(8);
-
+/*
   cout << "A TDA (AA) Eigenvalues:" << endl;
   cout << ATDAEAA.format(HeavyFmt) << endl << endl;
   cout << "A TDA (AB) Eigenvalues:" << endl;
@@ -851,6 +851,7 @@ void SDResponse::incorePPRPA(){
   cout << RPAEAB.format(HeavyFmt)  << endl << endl;
   cout << "RPA (SAS) Eigenvalues:" << endl;
   cout << RPAESing.format(HeavyFmt)  << endl << endl;
+*/
 
 
   for(auto a = 0, ab = 0; a < this->nVA_; a++      )
@@ -1025,6 +1026,7 @@ void SDResponse::incorePPRPA(){
   this->singleSlater_->aointegrals()->twoEContractDirect(true,false,true,CTDAAOSing,CTDAIXAOSing,CTDAAOSing,CTDAIXAOAA);
   this->singleSlater_->aointegrals()->twoEContractDirect(true,false,true,RPAAOSing,RPAIXAOSing,RPAAOSing,RPAIXAOAA);
 
+
   ATDAIXMOAA = this->singleSlater_->moA()->adjoint() * ATDAIXAOAA * (*this->singleSlater_->moA()); 
   CTDAIXMOAA = this->singleSlater_->moA()->adjoint() * CTDAIXAOAA * (*this->singleSlater_->moA()); 
   RPAIXMOAA = this->singleSlater_->moA()->adjoint() * RPAIXAOAA * (*this->singleSlater_->moA()); 
@@ -1136,9 +1138,9 @@ void SDResponse::incorePPRPA(){
   cout << "Checking A TDA (AB) AX... |AX| = " << ATDAAXMOAB.norm() << " |R| = " << (ATDAAXMOAB - AAB*ATDATAB).norm() << endl;
   cout << "Checking C TDA (AB) AX... |AX| = " << CTDAAXMOAB.norm() << " |R| = " << (CTDAAXMOAB - CAB*CTDATAB).norm() << endl;
   cout << "Checking RPA   (AB) AX... |AX| = " << RPAAXMOAB.norm() << " |R| = " << (RPAAXMOAB - FullAB*RPATAB).norm() << endl;
-  cout << "Checking A TDA (SA) AX... |AX| = " << ATDAAXMOSing.norm() << " |R| = " << (ATDAAXMOSing - ASing*ATDATSing).norm() << endl;
-  cout << "Checking C TDA (SA) AX... |AX| = " << CTDAAXMOSing.norm() << " |R| = " << (CTDAAXMOSing - CSing*CTDATSing).norm() << endl;
-  cout << "Checking RPA   (SA) AX... |AX| = " << RPAAXMOSing.norm() << " |R| = " << (RPAAXMOSing - FullSing*RPATSing).norm() << endl;
+//cout << "Checking A TDA (SA) AX... |AX| = " << ATDAAXMOSing.norm() << " |R| = " << (ATDAAXMOSing - ASing*ATDATSing).norm() << endl;
+//cout << "Checking C TDA (SA) AX... |AX| = " << CTDAAXMOSing.norm() << " |R| = " << (CTDAAXMOSing - CSing*CTDATSing).norm() << endl;
+//cout << "Checking RPA   (SA) AX... |AX| = " << RPAAXMOSing.norm() << " |R| = " << (RPAAXMOSing - FullSing*RPATSing).norm() << endl;
 //for(auto i = 0 ; i < RPAAXMOAB.size() ; i++) cout << RPAAXMOAB(i) << " " << (FullAB*RPATAB)(i) << endl;
 //
 
@@ -1185,6 +1187,55 @@ void SDResponse::incorePPRPA(){
   cout << "Checking MO Trans function A TDA (AB)... |AX| = " << ATDAAXABMOTmp.norm() << " |R| = " << (ATDAAXMOAB - ATDAAXABMOTmp).norm() << endl;
   cout << "Checking MO Trans function C TDA (AB)... |AX| = " << CTDAAXABMOTmp.norm() << " |R| = " << (CTDAAXMOAB - CTDAAXABMOTmp).norm() << endl;
   cout << "Checking MO Trans function RPA   (AB)... |AX| = " << RPAAXABMOTmp.norm() << " |R| = " << (RPAAXMOAB - RPAAXABMOTmp).norm() << endl;
+
+  Eigen::VectorXd ATDAAXAAMOTmp2(VirSqAASLT); 
+  Eigen::VectorXd CTDAAXAAMOTmp2(OccSqAASLT); 
+  Eigen::VectorXd RPAAXAAMOTmp2(VirSqAASLT + OccSqAASLT); 
+  Eigen::VectorXd ATDAAXABMOTmp2(VirSqAB); 
+  Eigen::VectorXd CTDAAXABMOTmp2(OccSqAB); 
+  Eigen::VectorXd RPAAXABMOTmp2(VirSqAB + OccSqAB); 
+
+  RealCMMap ATDAAXAAMOTmp2Map(ATDAAXAAMOTmp2.data(),VirSqAASLT,1); 
+  RealCMMap CTDAAXAAMOTmp2Map(CTDAAXAAMOTmp2.data(),OccSqAASLT,1); 
+  RealCMMap RPAAXAAMOTmp2Map(RPAAXAAMOTmp2.data(),VirSqAASLT + OccSqAASLT,1); 
+  RealCMMap ATDAAXABMOTmp2Map(ATDAAXABMOTmp2.data(),VirSqAB,1); 
+  RealCMMap CTDAAXABMOTmp2Map(CTDAAXABMOTmp2.data(),OccSqAB,1); 
+  RealCMMap RPAAXABMOTmp2Map(RPAAXABMOTmp2.data(),VirSqAB + OccSqAB,1); 
+  RealCMMap ATDATAAMap2(ATDATAA.data(),VirSqAASLT,1);
+  RealCMMap CTDATAAMap2(CTDATAA.data(),OccSqAASLT,1);
+  RealCMMap RPATAAMap2(RPATAA.data(),VirSqAASLT + OccSqAASLT,1);
+  RealCMMap ATDATABMap2(ATDATAB.data(),VirSqAB,1);
+  RealCMMap CTDATABMap2(CTDATAB.data(),OccSqAB,1);
+  RealCMMap RPATABMap2(RPATAB.data(),VirSqAB + OccSqAB,1);
+
+  this->iPPRPA_ = 0;
+  this->iMeth_  = PPATDA;
+  this->nSingleDim_ = VirSqAASLT;
+  this->formRM4(ATDATAAMap2,ATDAAXAAMOTmp2Map,ATDAAXAAMOTmp2Map);
+  this->iMeth_  = PPCTDA;
+  this->nSingleDim_ = OccSqAASLT;
+  this->formRM4(CTDATAAMap2,CTDAAXAAMOTmp2Map,CTDAAXAAMOTmp2Map);
+  this->iMeth_  = PPRPA;
+  this->nSingleDim_ = VirSqAASLT + OccSqAASLT;
+  this->formRM4(RPATAAMap2,RPAAXAAMOTmp2Map,RPAAXAAMOTmp2Map);
+
+  this->iPPRPA_ = 1;
+  this->iMeth_  = PPATDA;
+  this->nSingleDim_ = VirSqAB;
+  this->formRM4(ATDATABMap2,ATDAAXABMOTmp2Map,ATDAAXABMOTmp2Map);
+  this->iMeth_  = PPCTDA;
+  this->nSingleDim_ = OccSqAB;
+  this->formRM4(CTDATABMap2,CTDAAXABMOTmp2Map,CTDAAXABMOTmp2Map);
+  this->iMeth_  = PPRPA;
+  this->nSingleDim_ = VirSqAB + OccSqAB;
+  this->formRM4(RPATABMap2,RPAAXABMOTmp2Map,RPAAXABMOTmp2Map);
+
+  cout << "Checking Full AX function A TDA (AA)... |AX| = " << ATDAAXAAMOTmp2.norm() << " |R| = " << (ATDAAXMOAA - ATDAAXAAMOTmp2).norm() << endl;
+  cout << "Checking Full AX function A TDA (AA)... |AX| = " << CTDAAXAAMOTmp2.norm() << " |R| = " << (CTDAAXMOAA - CTDAAXAAMOTmp2).norm() << endl;
+  cout << "Checking Full AX function A TDA (AA)... |AX| = " << RPAAXAAMOTmp2.norm() << " |R| = " << (RPAAXMOAA - RPAAXAAMOTmp2).norm() << endl;
+  cout << "Checking Full AX function A TDA (AB)... |AX| = " << ATDAAXABMOTmp2.norm() << " |R| = " << (ATDAAXMOAB - ATDAAXABMOTmp2).norm() << endl;
+  cout << "Checking Full AX function A TDA (AB)... |AX| = " << CTDAAXABMOTmp2.norm() << " |R| = " << (CTDAAXMOAB - CTDAAXABMOTmp2).norm() << endl;
+  cout << "Checking Full AX function A TDA (AB)... |AX| = " << RPAAXABMOTmp2.norm() << " |R| = " << (RPAAXMOAB - RPAAXABMOTmp2).norm() << endl;
 } //incorePPRPA
 
 void SDResponse::formRM(){

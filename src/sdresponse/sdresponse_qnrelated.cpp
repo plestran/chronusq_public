@@ -207,111 +207,13 @@ void SDResponse::formRM4(RealCMMap& XMO, RealCMMap &Sigma, RealCMMap &Rho){
 
   this->singleSlater_->aointegrals()->multTwoEContractDirect(XMO.cols(),true,false,true,XAO,IXAO,XAO,IXAO);
 
+
   for(auto idx = 0; idx < XMO.cols(); idx++){
-    if(this->iPPRPA_ == 0){
-      IXMO = this->singleSlater_->moA()->adjoint() * IXAO[idx] * (*this->singleSlater_->moA());
-    } else if(this->iPPRPA_ == 1){
-      if(this->RHF_)
-        IXMO = this->singleSlater_->moA()->adjoint() * IXAO[idx] * (*this->singleSlater_->moA());
-      else
-        IXMO = this->singleSlater_->moA()->adjoint() * IXAO[idx] * (*this->singleSlater_->moB());
-    } else if(this->iPPRPA_ == 2){
-      IXMO = this->singleSlater_->moB()->adjoint() * IXAO[idx] * (*this->singleSlater_->moB());
-    } else CErr("iPPRPA not recognized in FormRM4");
-
-    if(doA){
-      if(this->iPPRPA_ == 0){
-        for(auto a = 0, ab = 0; a < this->nVA_; a++      )
-        for(auto b = 0        ; b < a         ; b++, ab++){
-          Sigma.col(idx)(ab) = IXMO(this->nOA_+a,this->nOB_+b) + XMO.col(idx)(ab) *
-            ( (*this->singleSlater_->epsA())(a+this->nOA_) +
-              (*this->singleSlater_->epsA())(b+this->nOA_) - 2*this->rMu_ );
-        }
-      } else if(this->iPPRPA_ == 1){
-        for(auto a = 0, ab = 0; a < this->nVA_; a++      )
-        for(auto b = 0        ; b < this->nVB_; b++, ab++){
-          if(this->RHF_){
-            Sigma.col(idx)(ab) = IXMO(this->nOA_+a,this->nOA_+b) + XMO.col(idx)(ab) *
-              ( (*this->singleSlater_->epsA())(a+this->nOA_) +
-                (*this->singleSlater_->epsA())(b+this->nOA_) - 2*this->rMu_ );
-          } else {
-            Sigma.col(idx)(ab) = IXMO(this->nOA_+a,this->nOB_+b) + XMO.col(idx)(ab) *
-              ( (*this->singleSlater_->epsA())(a+this->nOA_) +
-                (*this->singleSlater_->epsB())(b+this->nOB_) - 2*this->rMu_ );
-          }
-        }
-      } else if(this->iPPRPA_ == 2){
-        for(auto a = 0, ab = 0; a < this->nVB_; a++      )
-        for(auto b = 0        ; b < a         ; b++, ab++){
-          Sigma.col(idx)(ab) = IXMO(this->nOB_+a,this->nOB_+b) + XMO.col(idx)(ab) *
-            ( (*this->singleSlater_->epsB())(a+this->nOB_) +
-              (*this->singleSlater_->epsB())(b+this->nOB_) - 2*this->rMu_ );
-        }
-      } else CErr("iPPRPA not recognized in FormRM4");
-    } // doA
-
-    if(doC){
-      if(this->iMeth_ == PPCTDA) {
-        if(this->iPPRPA_ == 0) {
-          for(auto i = 0, ij = 0; i < this->nOA_; i++      )
-          for(auto j = 0        ; j < i         ; j++, ij++){
-            Sigma.col(idx)(ij) = IXMO(i,j) - XMO(ij) * 
-            ( (*this->singleSlater_->epsA())(i) +
-              (*this->singleSlater_->epsA())(j) - 2*this->rMu_ );
-          }
-        } else if(this->iPPRPA_ == 1) {
-          for(auto i = 0, ij = 0; i < this->nOA_; i++      )
-          for(auto j = 0        ; j < this->nOB_; j++, ij++){
-            if(this->RHF_) {
-              Sigma.col(idx)(ij) = IXMO(i,j) - XMO(ij) * 
-              ( (*this->singleSlater_->epsA())(i) +
-                (*this->singleSlater_->epsA())(j) - 2*this->rMu_ );
-            } else {
-              Sigma.col(idx)(ij) = IXMO(i,j) - XMO(ij) * 
-              ( (*this->singleSlater_->epsA())(i) +
-                (*this->singleSlater_->epsB())(j) - 2*this->rMu_ );
-            }
-          }
-        } else if(this->iPPRPA_ == 2) {
-          for(auto i = 0, ij = 0; i < this->nOB_; i++      )
-          for(auto j = 0        ; j < i         ; j++, ij++){
-            Sigma.col(idx)(ij) = IXMO(i,j) - XMO(ij) * 
-            ( (*this->singleSlater_->epsB())(i) +
-              (*this->singleSlater_->epsB())(j) - 2*this->rMu_ );
-          }
-        } else CErr("iPPRPA not recognized in FormRM4");
-      } // CTDA
-      else {
-        if(this->iPPRPA_ == 0) {
-          for(auto i = 0, ij = VirSqAASLT; i < this->nOA_; i++      )
-          for(auto j = 0        ; j < i         ; j++, ij++){
-            Sigma.col(idx)(ij) = -IXMO(i,j) + XMO(ij) * 
-            ( (*this->singleSlater_->epsA())(i) +
-              (*this->singleSlater_->epsA())(j) - 2*this->rMu_ );
-          }
-        } else if(this->iPPRPA_ == 1) {
-          for(auto i = 0, ij = VirSqAB; i < this->nOA_; i++      )
-          for(auto j = 0        ; j < this->nOB_; j++, ij++){
-            if(this->RHF_) {
-              Sigma.col(idx)(ij) = -IXMO(i,j) + XMO(ij) * 
-              ( (*this->singleSlater_->epsA())(i) +
-                (*this->singleSlater_->epsA())(j) - 2*this->rMu_ );
-            } else {
-              Sigma.col(idx)(ij) = -IXMO(i,j) + XMO(ij) * 
-              ( (*this->singleSlater_->epsA())(i) +
-                (*this->singleSlater_->epsB())(j) - 2*this->rMu_ );
-            }
-          }
-        } else if(this->iPPRPA_ == 2) {
-          for(auto i = 0, ij = VirSqBBSLT; i < this->nOB_; i++      )
-          for(auto j = 0        ; j < i         ; j++, ij++){
-            Sigma.col(idx)(ij) = -IXMO(i,j) + XMO(ij) * 
-            ( (*this->singleSlater_->epsB())(i) +
-              (*this->singleSlater_->epsB())(j) - 2*this->rMu_ );
-          }
-        } else CErr("iPPRPA not recognized in FormRM4");
-      } // PPRPA C contribution
-    } // doC
+    RealVecMap X(XMO.data()+idx*this->nSingleDim_,this->nSingleDim_);
+    RealVecMap SVec(Sigma.data()+idx*this->nSingleDim_,this->nSingleDim_);
+    this->formMOTDen(SVec,IXAO[idx],IXAO[idx]);
+    this->scaleDagPPRPA(true,X,SVec);
   }
+
 } // formRM4
 

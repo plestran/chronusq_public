@@ -523,7 +523,7 @@ std::vector<std::vector<std::vector<RealMatrix>>> G(nRHF,std::vector<std::vector
       AXBeta[k] += G[1][k][i];
 
   double fact = 0.25;
-  if(do24) fact += 0.5;
+  if(do24) fact *= 0.5;
   for(auto k = 0; k < nVec; k++) AXAlpha[k] *= fact;
   if(!RHF) for(auto k = 0; k < nVec; k++) AXBeta[k] *= fact;
   finish = std::chrono::high_resolution_clock::now();

@@ -84,7 +84,6 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   if(controls->optWaveFunction) {
     hartreeFock->doCUHF = false;
     hartreeFock->SCF();
-    cout << *hartreeFock->epsA() << endl << endl;
   }
   //MOIntegrals *moIntegrals = new MOIntegrals();
   //moIntegrals->iniMOIntegrals(molecule,basisset,fileIO,controls,aointegrals,hartreeFock);
