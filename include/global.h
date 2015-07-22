@@ -60,6 +60,10 @@
 //#include "oompi.h"
 //#include <pthread.h>
 
+// Boost Headers
+#include <boost/geometry/geometry.hpp>
+#include <boost/math/constants/constants.hpp>
+
 // Misc
 #include <stdlib.h>
 //#include <sys/stat.h>
@@ -100,6 +104,9 @@ using btas::Tensor;
 using libint2::OneBodyEngine;
 using libint2::TwoBodyEngine;
 
+// Alias for Boost::Geometry
+namespace bg = boost::geometry;
+
 // Useful typedefs
 typedef std::complex<double> dcomplex; ///< Support for complex numbers (double precision)
 typedef Eigen::Matrix<double,Dynamic,Dynamic,RowMajor>     RealMatrix;    ///< Dynamically allocated Real (double) matrix. Row major for integration with Libint
@@ -127,6 +134,11 @@ typedef Tensor<dcomplex,Range4d> ComplexTensor4d; ///< Support for complex-value
 typedef Tensor<dcomplex,Range3d> ComplexTensor3d; ///< Support for complex-valued rank-3 tensors using BTAS
 typedef Tensor<dcomplex,Range2d> ComplexTensor2d; ///< Support for complex-values rank-2 tensors (aka Matricies) using BTAS
 typedef Tensor<dcomplex,Range1d> ComplexTensor1d; ///< Support for complex-values rank-1 tensors (aka Vectors) using BTAS
+
+
+typedef bg::model::point< double, 3, bg::cs::spherical<bg::radian> > sph3GP; ///< 3 Coordinate Spherical (w varying radius) (phi,theta,radius)
+typedef bg::model::point< double, 2, bg::cs::spherical<bg::radian> > sph2GP; ///< 2 Coordinate Spherical (unit sphere)      (phi,theta)
+typedef bg::model::point< double, 3, bg::cs::cartesian > cartGP;             ///< 3 Coordinate Carteaisn                    (x,y,z)
 
 //----------------//
 //number constants//
