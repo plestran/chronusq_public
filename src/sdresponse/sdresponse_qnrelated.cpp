@@ -68,27 +68,104 @@ void SDResponse::formGuess(){
 void SDResponse::getDiag(){
   this->rmDiag_ = std::unique_ptr<RealCMMatrix>(new RealCMMatrix(nSingleDim_,1)); 
 
-  for(auto aAlpha = 0; aAlpha < this->nVA_; aAlpha++)
-  for(auto iAlpha = 0; iAlpha < this->nOA_; iAlpha++){
-    auto iaAlpha = aAlpha*this->nOA_ + iAlpha; 
-    auto eiAlpha = (*this->singleSlater_->epsA())(iAlpha);
-    auto eaAlpha = (*this->singleSlater_->epsA())(aAlpha+this->nOA_);
-    (*this->rmDiag_)(iaAlpha,0) = eaAlpha - eiAlpha;
-    if(this->RHF_) 
-      (*this->rmDiag_)(iaAlpha+this->nOAVA_,0) = eaAlpha - eiAlpha;
-  }
-  if(!this->RHF_){
-    for(auto aBeta = 0; aBeta < this->nVB_; aBeta++)
-    for(auto iBeta = 0; iBeta < this->nOB_; iBeta++){
-      auto iaBeta = aBeta*this->nOB_ + iBeta + this->nOAVA_; 
-      auto eiBeta = (*this->singleSlater_->epsB())(iBeta);
-      auto eaBeta = (*this->singleSlater_->epsB())(aBeta+this->nOB_);
-      (*this->rmDiag_)(iaBeta,0) = eaBeta - eiBeta;
+  if(this->iMeth_ == RPA || this->iMeth_ == CIS){
+    for(auto aAlpha = 0; aAlpha < this->nVA_; aAlpha++)
+    for(auto iAlpha = 0; iAlpha < this->nOA_; iAlpha++){
+      auto iaAlpha = aAlpha*this->nOA_ + iAlpha; 
+      auto eiAlpha = (*this->singleSlater_->epsA())(iAlpha);
+      auto eaAlpha = (*this->singleSlater_->epsA())(aAlpha+this->nOA_);
+      (*this->rmDiag_)(iaAlpha,0) = eaAlpha - eiAlpha;
+      if(this->RHF_) 
+        (*this->rmDiag_)(iaAlpha+this->nOAVA_,0) = eaAlpha - eiAlpha;
     }
+    if(!this->RHF_){
+      for(auto aBeta = 0; aBeta < this->nVB_; aBeta++)
+      for(auto iBeta = 0; iBeta < this->nOB_; iBeta++){
+        auto iaBeta = aBeta*this->nOB_ + iBeta + this->nOAVA_; 
+        auto eiBeta = (*this->singleSlater_->epsB())(iBeta);
+        auto eaBeta = (*this->singleSlater_->epsB())(aBeta+this->nOB_);
+        (*this->rmDiag_)(iaBeta,0) = eaBeta - eiBeta;
+      }
+    }
+    if(this->iMeth_ == RPA)
+      this->rmDiag_->block(nSingleDim_/2,0,nSingleDim_/2,1)
+        = this->rmDiag_->block(0,0,nSingleDim_/2,1);
+  } else if(this->iMeth_ == PPRPA || this->iMeth_ == PPATDA || this->iMeth_ == PPCTDA){
+    bool doA = ( (this->iMeth_ == PPATDA) || (this->iMeth_ == PPRPA) );
+    bool doC = ( (this->iMeth_ == PPCTDA) || (this->iMeth_ == PPRPA) );
+
+    if(doA){
+      if(this->iPPRPA_ == 0){
+        for(auto aAlpha = 0, abAA = 0; aAlpha < this->nVA_; aAlpha++)
+        for(auto bAlpha = 0; bAlpha <  aAlpha ; bAlpha++, abAA++    ){
+          double eaAlpha = (*this->singleSlater_->epsA())(aAlpha + this->nOA_);
+          double ebAlpha = (*this->singleSlater_->epsA())(bAlpha + this->nOA_);
+          (*this->rmDiag_)(abAA) = eaAlpha + ebAlpha - 2*this->rMu_; 
+        }
+      } else if(this->iPPRPA_ == 1) {
+        for(auto aAlpha = 0, abAB = 0; aAlpha < this->nVA_; aAlpha++)
+        for(auto bBeta  = 0; bBeta < this->nVB_ ; bBeta++, abAB++    ){
+          double eaAlpha, ebBeta;
+          if(this->RHF_){
+            eaAlpha = (*this->singleSlater_->epsA())(aAlpha + this->nOA_);
+            ebBeta  = (*this->singleSlater_->epsA())(bBeta  + this->nOA_);
+          } else {
+            eaAlpha = (*this->singleSlater_->epsA())(aAlpha + this->nOA_);
+            ebBeta  = (*this->singleSlater_->epsB())(bBeta  + this->nOB_);
+          }
+          (*this->rmDiag_)(abAB) = eaAlpha + ebBeta - 2*this->rMu_; 
+        } 
+      } else if(this->iPPRPA_ == 2) {
+        for(auto aBeta = 0, abBB = 0; aBeta < this->nVB_; aBeta++)
+        for(auto bBeta = 0; bBeta <  aBeta ; bBeta++, abBB++    ){
+          double eaBeta = (*this->singleSlater_->epsA())(aBeta + this->nOB_);
+          double ebBeta = (*this->singleSlater_->epsA())(bBeta + this->nOB_);
+          (*this->rmDiag_)(abBB) = eaBeta + ebBeta - 2*this->rMu_; 
+        }
+      }
+    }
+    if(doC){
+      int iOff = 0;
+      // Offset in the eigenvector for PPRPA Y amplitudes
+      if((this->iMeth_ == PPRPA) && (this->iPPRPA_ == 0)) iOff = this->nVA_*(this->nVA_-1)/2;
+      if((this->iMeth_ == PPRPA) && (this->iPPRPA_ == 1)) iOff = this->nVA_*this->nVB_;
+      if((this->iMeth_ == PPRPA) && (this->iPPRPA_ == 2)) iOff = this->nVB_*(this->nVB_-1)/2;
+      double fact = -1.0;
+      if(this->iMeth_ == PPRPA) fact *= -1.0;
+      
+      if(this->iPPRPA_ == 0){
+        for(auto iAlpha = 0, ijAA = iOff; iAlpha < this->nOA_; iAlpha++)
+        for(auto jAlpha = 0; jAlpha <  iAlpha ;    jAlpha++, ijAA++    ){
+          double eiAlpha = (*this->singleSlater_->epsA())(iAlpha);
+          double ejAlpha = (*this->singleSlater_->epsA())(jAlpha);
+          (*this->rmDiag_)(ijAA) = fact * (eiAlpha + ejAlpha - 2*this->rMu_); 
+        } // loop I < J (I-Alpha J-Alpha)
+      } else if(this->iPPRPA_ == 1) {
+        for(auto iAlpha = 0, ijAB = iOff; iAlpha < this->nOA_; iAlpha++)
+        for(auto jBeta  = 0; jBeta < this->nOB_ ;  jBeta++, ijAB++     ){
+          double eiAlpha, ejBeta;
+          if(this->RHF_){
+            eiAlpha = (*this->singleSlater_->epsA())(iAlpha);
+            ejBeta  = (*this->singleSlater_->epsA())(jBeta );
+          } else {
+            eiAlpha = (*this->singleSlater_->epsA())(iAlpha);
+            ejBeta  = (*this->singleSlater_->epsB())(jBeta );
+          }
+          (*this->rmDiag_)(ijAB) = fact * (eiAlpha + ejBeta - 2*this->rMu_); 
+        } // loop IJ (I-Alpha J-Beta)
+      } else if(this->iPPRPA_ == 2) {
+        for(auto iBeta = 0, ijBB = iOff; iBeta < this->nOB_; iBeta++)
+        for(auto jBeta = 0; jBeta <  iBeta ;    jBeta++, ijBB++    ){
+          double eiBeta = (*this->singleSlater_->epsA())(iBeta);
+          double ejBeta = (*this->singleSlater_->epsA())(jBeta);
+          (*this->rmDiag_)(ijBB) = fact * (eiBeta + ejBeta - 2*this->rMu_); 
+        } // loop I < J (I-Beta J-Beta)
+      }
+    } // doC
+    
+  } else {
+    CErr("Diagonal elements for given iMeth not defined");
   }
-  if(this->iMeth_ == RPA)
-    this->rmDiag_->block(nSingleDim_/2,0,nSingleDim_/2,1)
-      = this->rmDiag_->block(0,0,nSingleDim_/2,1);
   this->haveDag_ = true;
 } // getDiag
 

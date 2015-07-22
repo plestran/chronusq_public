@@ -31,6 +31,7 @@
   void placeVVOO(const RealVecMap &,RealMatrix &);
   void retrvVOOV(RealVecMap &,const RealMatrix &,const RealMatrix&);
   void retrvVVOO(RealVecMap &,const RealMatrix &);
+  void initRMu();
   void scaleDagPPRPA(bool,RealVecMap &,RealVecMap &,RealVecMap *AX=NULL); 
   void initMeth();
   void checkValid();

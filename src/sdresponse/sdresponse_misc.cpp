@@ -195,8 +195,21 @@ void SDResponse::retrvVVOO(RealVecMap &TMOV, const RealMatrix &TMO){
   } // doY
 } //retrvVVOO
 
+void SDResponse::initRMu(){
+  // RMu = [ e(HOMO) + e(LUMO) ] / 2
+  if(this->RHF_)
+    this->rMu_ = ( (*this->singleSlater_->epsA())(this->nOA_-1) + 
+                   (*this->singleSlater_->epsA())(this->nOA_)    ) / 2.0;
+  else
+    this->rMu_ = ( std::max( (*this->singleSlater_->epsA())(this->nOA_-1), 
+                             (*this->singleSlater_->epsB())(this->nOB_-1) ) +
+                   std::max( (*this->singleSlater_->epsA())(this->nOA_  ), 
+                             (*this->singleSlater_->epsB())(this->nOB_  ) ) ) / 2.0;
+} // initRMu
+
 void SDResponse::scaleDagPPRPA(bool inplace, RealVecMap &T, RealVecMap &IX, RealVecMap *AX){
   // inplace triggers whether or not AX is populated (or touched for that matter)
+/*
   bool doX = ( (this->iMeth_ == PPATDA) || (this->iMeth_ == PPRPA) );
   bool doY = ( (this->iMeth_ == PPCTDA) || (this->iMeth_ == PPRPA) );
 
@@ -328,15 +341,50 @@ void SDResponse::scaleDagPPRPA(bool inplace, RealVecMap &T, RealVecMap &IX, Real
       }
     } // doY
   } // inplace else-block end
-}
+*/
+  if(!this->haveDag_) this->getDiag();
+  if(inplace) IX    = IX + T.cwiseProduct(*this->rmDiag_);
+  else        (*AX) = IX + T.cwiseProduct(*this->rmDiag_);
+} // scaleDagPPRPA
 
 void SDResponse::initMeth(){
   if(this->nSek_ == 0) 
     CErr("Must set NSek before initializing a PSCF method",this->fileio_->out);
+  if((this->iMeth_ == PPRPA || this->iMeth_ == PPATDA || this->iMeth_ == PPCTDA)
+      && !(this->iPPRPA_ >= 0 && this->iPPRPA_ <= 2))
+    CErr("Invalid iPPRPA_ in SDResponse::initMeth()",this->fileio_->out);
+
   if(this->iMeth_ == CIS){
+    /******************/
+    /* CIS Single Dim */
     this->nSingleDim_ = this->nOAVA_ + this->nOBVB_;
+    /******************/
   } else if(this->iMeth_ == RPA){
+    /******************/
+    /* RPA Single Dim */
     this->nSingleDim_ = 2*(this->nOAVA_ + this->nOBVB_);
+    /******************/
+  } else if(this->iMeth_ == PPRPA){
+    /*********************/
+    /* pp-RPA Single Dim */
+    if(this->iPPRPA_ == 0)      this->nSingleDim_ = this->nVAVA_SLT_ + this->nOAOA_SLT_;
+    else if(this->iPPRPA_ == 1) this->nSingleDim_ = this->nVAVB_     + this->nOAOB_;
+    else if(this->iPPRPA_ == 2) this->nSingleDim_ = this->nVBVB_SLT_ + this->nOBOB_SLT_;
+    /*********************/
+  } else if(this->iMeth_ == PPATDA){
+    /*************************/
+    /* pp-TDA (A) Single Dim */
+    if(this->iPPRPA_ == 0)      this->nSingleDim_ = this->nVAVA_SLT_;
+    else if(this->iPPRPA_ == 1) this->nSingleDim_ = this->nVAVB_    ; 
+    else if(this->iPPRPA_ == 2) this->nSingleDim_ = this->nVBVB_SLT_;
+    /*************************/
+  } else if(this->iMeth_ == PPCTDA){
+    /*************************/
+    /* pp-TDA (C) Single Dim */
+    if(this->iPPRPA_ == 0)      this->nSingleDim_ = this->nOAOA_SLT_;
+    else if(this->iPPRPA_ == 1) this->nSingleDim_ = this->nOAOB_;
+    else if(this->iPPRPA_ == 2) this->nSingleDim_ = this->nOBOB_SLT_;
+    /*************************/
   } else {
     CErr("PSCF Method " + std::to_string(this->iMeth_) + " NYI",this->fileio_->out);
   }
@@ -346,12 +394,29 @@ void SDResponse::checkValid(){
   if(this->nSek_ == 0)
     CErr("Specification of zero desired roots is not acceptable",
          this->fileio_->out);
+  if(this->nGuess_ == 0)
+    CErr("Specification of guess vectors is not acceptable",
+         this->fileio_->out);
   if(this->iMeth_ == 0)
     CErr("Invalid Method: SDResponse::iMeth_ = " + std::to_string(this->iMeth_),
          this->fileio_->out);
   if(this->nSingleDim_ == 0)
     CErr("Leading Dimenstion not defined for SDResponse::iMeth_ = " +
          std::to_string(this->iMeth_),this->fileio_->out);
+  bool gtNSD   = this->nSingleDim_     < this->nGuess_;
+  bool gtNSDd2 = (this->nSingleDim_/2) < this->nGuess_;
+  bool gtADim;
+  if(this->iPPRPA_ == 0) gtADim = nVAVA_SLT_ < this->nGuess_;
+  if(this->iPPRPA_ == 1) gtADim = nVAVB_     < this->nGuess_;
+  if(this->iPPRPA_ == 2) gtADim = nVBVB_SLT_ < this->nGuess_;
+
+  if(this->nGuess_ < this->nSek_)
+    CErr("Must specify more guess vectors than desired roots",this->fileio_->out);
+
+  if((this->iMeth_ == PPRPA && gtADim ) ||
+     (this->iMeth_ == RPA   && gtNSDd2) ||
+     gtNSD)
+    CErr("Number of guess roots exceeds number of number of possible roots");
 } //checkValid
 
 
@@ -505,9 +570,13 @@ void SDResponse::incorePPRPA(){
   }
 
 
+/*
   double Rmu = (*this->singleSlater_->epsA())(this->nOA_-1) + (*this->singleSlater_->epsA())(this->nOA_);
   Rmu /= 2;
   this->rMu_ = Rmu;
+*/
+  this->initRMu();
+  double Rmu = this->rMu_;
 
   int VirSqAASLT   = this->nVA_*(this->nVA_-1)/2;
   int OccSqAASLT   = this->nOA_*(this->nOA_-1)/2;
@@ -1158,7 +1227,7 @@ void SDResponse::incorePPRPA(){
   RealVecMap ATDAAXABMOTmpMap(ATDAAXABMOTmp.data(),VirSqAB); 
   RealVecMap CTDAAXABMOTmpMap(CTDAAXABMOTmp.data(),OccSqAB); 
   RealVecMap RPAAXABMOTmpMap(RPAAXABMOTmp.data(),VirSqAB + OccSqAB); 
-
+/*
   this->iPPRPA_ = 0;
   this->iMeth_  = PPATDA;
   this->formMOTDen(ATDAAXAAMOTmpMap,ATDAIXAOAA,ATDAIXAOAA);
@@ -1187,6 +1256,7 @@ void SDResponse::incorePPRPA(){
   cout << "Checking MO Trans function A TDA (AB)... |AX| = " << ATDAAXABMOTmp.norm() << " |R| = " << (ATDAAXMOAB - ATDAAXABMOTmp).norm() << endl;
   cout << "Checking MO Trans function C TDA (AB)... |AX| = " << CTDAAXABMOTmp.norm() << " |R| = " << (CTDAAXMOAB - CTDAAXABMOTmp).norm() << endl;
   cout << "Checking MO Trans function RPA   (AB)... |AX| = " << RPAAXABMOTmp.norm() << " |R| = " << (RPAAXMOAB - RPAAXABMOTmp).norm() << endl;
+*/
 
   Eigen::VectorXd ATDAAXAAMOTmp2(VirSqAASLT); 
   Eigen::VectorXd CTDAAXAAMOTmp2(OccSqAASLT); 
@@ -1211,23 +1281,29 @@ void SDResponse::incorePPRPA(){
   this->iPPRPA_ = 0;
   this->iMeth_  = PPATDA;
   this->nSingleDim_ = VirSqAASLT;
+  this->haveDag_ = false;
   this->formRM4(ATDATAAMap2,ATDAAXAAMOTmp2Map,ATDAAXAAMOTmp2Map);
   this->iMeth_  = PPCTDA;
   this->nSingleDim_ = OccSqAASLT;
+  this->haveDag_ = false;
   this->formRM4(CTDATAAMap2,CTDAAXAAMOTmp2Map,CTDAAXAAMOTmp2Map);
   this->iMeth_  = PPRPA;
   this->nSingleDim_ = VirSqAASLT + OccSqAASLT;
+  this->haveDag_ = false;
   this->formRM4(RPATAAMap2,RPAAXAAMOTmp2Map,RPAAXAAMOTmp2Map);
 
   this->iPPRPA_ = 1;
   this->iMeth_  = PPATDA;
   this->nSingleDim_ = VirSqAB;
+  this->haveDag_ = false;
   this->formRM4(ATDATABMap2,ATDAAXABMOTmp2Map,ATDAAXABMOTmp2Map);
   this->iMeth_  = PPCTDA;
   this->nSingleDim_ = OccSqAB;
+  this->haveDag_ = false;
   this->formRM4(CTDATABMap2,CTDAAXABMOTmp2Map,CTDAAXABMOTmp2Map);
   this->iMeth_  = PPRPA;
   this->nSingleDim_ = VirSqAB + OccSqAB;
+  this->haveDag_ = false;
   this->formRM4(RPATABMap2,RPAAXABMOTmp2Map,RPAAXABMOTmp2Map);
 
   cout << "Checking Full AX function A TDA (AA)... |AX| = " << ATDAAXAAMOTmp2.norm() << " |R| = " << (ATDAAXMOAA - ATDAAXAAMOTmp2).norm() << endl;

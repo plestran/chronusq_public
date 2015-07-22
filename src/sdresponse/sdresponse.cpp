@@ -57,6 +57,18 @@ void SDResponse::iniSDResponse( Molecule * molecule, BasisSet * basisSet, MOInte
   this->nOBVB_ = this->nOB_*this->nVB_;
   this->nOAVB_ = this->nOA_*this->nVB_;
   this->nOBVA_ = this->nOB_*this->nVA_;
+  this->nVAVA_SLT_ =      this->nVA_*(this->nVA_-1)/2;
+  this->nVBVB_SLT_ =      this->nVB_*(this->nVB_-1)/2;
+  this->nVAVA_LT_  =      this->nVA_*(this->nVA_+1)/2;
+  this->nVAVA_     =      this->nVA_*this->nVA_;
+  this->nVBVB_     =      this->nVB_*this->nVB_;
+  this->nOAOA_SLT_ =      this->nOA_*(this->nOA_-1)/2;
+  this->nOBOB_SLT_ =      this->nOB_*(this->nOB_-1)/2;
+  this->nOAOA_LT_  =      this->nOA_*(this->nOA_+1)/2;
+  this->nOAOA_     =      this->nOA_*this->nOA_;
+  this->nOBOB_     =      this->nOB_*this->nOB_;
+  this->nVAVB_     =      this->nVA_*this->nVB_;
+  this->nOAOB_     =      this->nOA_*this->nOB_;
   this->setNSek(this->controls_->SDNSek);
   this->setMeth(this->controls_->SDMethod);
   this->omega_ = std::unique_ptr<VectorXd>(new VectorXd(this->nSek_));

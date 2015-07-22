@@ -50,11 +50,24 @@ class SDResponse {
   int       nVA_;
   int       nOB_;
   int       nVB_;
-  int       nOAVA_;
-  int       nOBVB_;
-  int       nOAVB_;
-  int       nOBVA_;
-  int       nSingleDim_;
+  int       nOAVA_;      // NOA * NVA
+  int       nOBVB_;      // NOB * NVB
+  int       nOAVB_;      // NOA * NVB
+  int       nOBVA_;      // NOB * NVA
+  int       nVAVA_SLT_;  // NVA * (NVA - 1) / 2
+  int       nVBVB_SLT_;  // NVB * (NVB - 1) / 2
+  int       nVAVA_LT_;   // NVA * (NVA + 1) / 2
+  int       nVAVA_;      // NVA * NVA
+  int       nVBVB_;      // NVB * NVB
+  int       nOAOA_SLT_;  // NOA * (NOA - 1) / 2
+  int       nOBOB_SLT_;  // NOB * (NOB - 1) / 2
+  int       nOAOA_LT_;   // NOA * (NOA + 1) / 2
+  int       nOAOA_;      // NOA * NOA
+  int       nOBOB_;      // NOB * NOB
+  int       nVAVB_;      // NVA * NVB
+  int       nOAOB_;      // NOA * NOB
+
+  int       nSingleDim_; // Single dimension of response matrix
   double    rMu_;
 
   std::unique_ptr<RealCMMatrix>    transDen_;
