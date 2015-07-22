@@ -538,6 +538,13 @@ template <typename T>
         if(this->sdr_->iMeth() == SDResponse::RPA)   
           // Linear trasnformation onto left / ungerade
           this->sdr_->formRM3(NewVecL,NewSL,NewRhoR);
+      } else if(this->sdr_->iMeth() == SDResponse::PPRPA  || 
+                this->sdr_->iMeth() == SDResponse::PPATDA ||
+                this->sdr_->iMeth() == SDResponse::PPCTDA) {
+        this->sdr_->formRM4(NewVecR,NewSR,NewRhoL); 
+        if(this->sdr_->iMeth() == SDResponse::PPRPA)   
+          // Linear trasnformation onto left / ungerade
+          this->sdr_->formRM4(NewVecL,NewSL,NewRhoR);
       }
     } else NewSR = (*this->A_) * NewVecR;
   } // linearTrans

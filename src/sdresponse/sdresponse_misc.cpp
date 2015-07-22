@@ -1282,6 +1282,7 @@ void SDResponse::incorePPRPA(){
   this->iMeth_  = PPATDA;
   this->nSingleDim_ = VirSqAASLT;
   this->haveDag_ = false;
+  this->formGuess();
   this->formRM4(ATDATAAMap2,ATDAAXAAMOTmp2Map,ATDAAXAAMOTmp2Map);
   this->iMeth_  = PPCTDA;
   this->nSingleDim_ = OccSqAASLT;

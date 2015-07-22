@@ -28,6 +28,7 @@
   inline void setNSek(int n){   this->nSek_  = n; this->nGuess_ = 2*n; };
   inline void setMeth(int n){   this->iMeth_ = n; this->initMeth();    };
   inline void setNGuess(int n){ this->nGuess_ = n;                     };
+  inline void setPPRPA(int n){ this->iPPRPA_ = n;                      };
 
   // Getters
   inline int           nGuess(){     return this->nGuess_;               };

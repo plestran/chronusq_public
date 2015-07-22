@@ -29,12 +29,16 @@ using ChronusQ::SDResponse;
 using ChronusQ::QuasiNewton;
 
 void SDResponse::IterativeRPA(){
+  bool hasProp = (this->iMeth_==CIS || this->iMeth_==RPA);
   this->formGuess();
+//if(this->iMeth_ == PPATDA) CErr();
   QuasiNewton<double> davA(this);
   davA.run(this->fileio_->out);
-  this->formTransDipole();
-  this->formOscStrength();
-  this->printExcitedStateEnergies();
+  if(hasProp){
+    this->formTransDipole();
+    this->formOscStrength();
+    this->printExcitedStateEnergies();
+  }
 } // IterativeRPA
 
 void SDResponse::formGuess(){
@@ -44,9 +48,21 @@ void SDResponse::formGuess(){
     std::unique_ptr<RealMatrix>(
       new RealMatrix(this->nSingleDim_,this->nGuess_)
     ); 
-  int nRHF = 1;
-  if(this->iMeth_==RPA) nRHF *= 2;
-  RealMatrix dagCpy(this->nSingleDim_/nRHF,1);
+  int nRPA = 1;
+  if(this->iMeth_==RPA) nRPA *= 2;
+  int nCPY;
+  if(this->iMeth_ == CIS || this->iMeth_ == RPA) nCPY = this->nSingleDim_ / nRPA;
+  else if(this->iMeth_ == PPRPA){
+    if(this->iPPRPA_ == 0)
+      nCPY = this->nVAVA_SLT_;
+    else if(this->iPPRPA_ = 1)
+      nCPY = this->nVAVB_;
+    else if(this->iPPRPA_ = 2)
+      nCPY = this->nVBVB_SLT_;
+  } else {
+    nCPY = this->nSingleDim_;
+  }
+  RealMatrix dagCpy(nCPY,1);
   std::memcpy(dagCpy.data(),this->rmDiag_->data(),dagCpy.size()*sizeof(double));
   std::sort(dagCpy.data(),dagCpy.data()+dagCpy.size());
   std::vector<int> alreadyAdded; 
@@ -54,7 +70,7 @@ void SDResponse::formGuess(){
     int indx;
     for(auto k = 0; k < dagCpy.size(); k++){
       auto it = std::find(alreadyAdded.begin(),alreadyAdded.end(),k);
-      if((dagCpy(i % (this->nSingleDim_/nRHF),0) == (*this->rmDiag_)(k,0)) && 
+      if((dagCpy(i % nCPY,0) == (*this->rmDiag_)(k,0)) && 
           it == alreadyAdded.end()){
         indx = k;
         alreadyAdded.push_back(indx);
@@ -93,6 +109,7 @@ void SDResponse::getDiag(){
   } else if(this->iMeth_ == PPRPA || this->iMeth_ == PPATDA || this->iMeth_ == PPCTDA){
     bool doA = ( (this->iMeth_ == PPATDA) || (this->iMeth_ == PPRPA) );
     bool doC = ( (this->iMeth_ == PPCTDA) || (this->iMeth_ == PPRPA) );
+    this->initRMu();
 
     if(doA){
       if(this->iPPRPA_ == 0){

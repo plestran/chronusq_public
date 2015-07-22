@@ -90,8 +90,10 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   else fileIO->out << "**Skipping SCF Optimization**" << endl; 
   hartreeFock->computeMultipole();
   if(controls->doSDR) {
+    sdResponse->setPPRPA(1);
     sdResponse->iniSDResponse(molecule.get(),basisset.get(),moIntegrals.get(),fileIO.get(),
                               controls.get(),hartreeFock.get());
+    
     sdResponse->IterativeRPA();
     sdResponse->incorePPRPA();
   }
