@@ -47,6 +47,7 @@ public:
   bool  	HF;             // use Hartree-Fock
   bool  	DFT;            // use density functional theory
   bool  	hybridDFT; 	// DFT is a hybrid functional
+  bool          doTCS;          // Use Two-Component Spinor Basis
   bool  	restart;        // restart the calculation
   bool  	directTwoE;     // if direct two-electron will performed
   bool          buildn4eri;     // Build N^4 AO ERI tensor
@@ -54,7 +55,7 @@ public:
   bool          doDipole;       // Use Libint dipole integrals?
   bool          doQuadpole;     // Use Libint quadrapole integrals?
   bool          doOctpole;      // Use Libint octapole integrals?
-  bool          doSDR;
+  bool          doSDR;          // Perform Response calculation
   double 	thresholdS;
   double 	thresholdAB;
   double	thresholdSchawrtz;

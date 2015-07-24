@@ -40,9 +40,7 @@ template<typename T>
 class SingleSlater {
   typedef Eigen::Matrix<T,Dynamic,Dynamic,RowMajor> TMatrix;
   int      nBasis_;
-//APS
   int      nShell_;
-//APE
   int      nTT_;
   int      nAE_;
   int      nBE_;
@@ -53,6 +51,8 @@ class SingleSlater {
   int      nVirB_;
   int      spin_;
   int    **R2Index_;
+
+  int      nTCS_;
   std::unique_ptr<TMatrix>  densityA_;
   std::unique_ptr<TMatrix>  densityB_;
   std::unique_ptr<TMatrix>  fockA_;
@@ -85,6 +85,7 @@ public:
   bool	haveExchange;
   bool  havePT;
   bool  doCUHF;
+  bool  TCS;
 
   double   energyOneE;
   double   energyTwoE;

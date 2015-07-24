@@ -49,24 +49,87 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
   if(this->spin_!=1) this->RHF_ = 0;
   else this->RHF_ = 1;
 
-  // FIXME Nedd try statements for allocation
-  try { this->densityA_  = std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_)); } // Alpha Density
-  catch (...) { CErr(std::current_exception(),"Alpha Density Matrix Allocation"); }
-  try { this->fockA_     = std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_)); } // Alpha Fock
-  catch (...) { CErr(std::current_exception(),"Alpha Fock Matrix Allocation"); }
+  this->TCS = controls->doTCS;
+  this->nTCS_ = 1;
+  if(this->TCS) this->nTCS_ = 2;
+
+  // Alpha / TCS Density
+  try { 
+    this->densityA_  = 
+      std::unique_ptr<TMatrix>( new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
+  } catch (...) { 
+    if(this->TCS)
+      CErr(std::current_exception(),"TCS Density Matrix Allocation"); 
+    else
+      CErr(std::current_exception(),"Alpha Density Matrix Allocation"); 
+  }
+
+  // Alpha / TCS Fock
+  try { 
+    this->fockA_ = 
+      std::unique_ptr<TMatrix>(new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
+  } catch (...) { 
+    if(this->TCS)
+      CErr(std::current_exception(),"TCS Fock Matrix Allocation"); 
+    else
+      CErr(std::current_exception(),"Alpha Fock Matrix Allocation"); 
+  }
+
 #ifndef USE_LIBINT
-  try { this->coulombA_  = std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_)); } // Alpha Coulomb Integral
-  catch (...) { CErr(std::current_exception(),"Alpha Coulomb Tensor (R2) Allocation"); }
-  try { this->exchangeA_ = std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_)); }// Alpha Exchange Integral
-  catch (...) { CErr(std::current_exception(),"Alpha Exchange Tensor (R2) Allocation"); }
+  // Alpha / TCS Coulomb Matrix
+  try { 
+    this->coulombA_  = 
+      std::unique_ptr<TMatrix>(new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_)); 
+  } catch (...) { 
+    if(this->TCS)
+      CErr(std::current_exception(),"TCS Coulomb Tensor (R2) Allocation"); 
+    else
+      CErr(std::current_exception(),"Alpha Coulomb Tensor (R2) Allocation"); 
+  }
+
+  // Alpha / TCS Exchange Matrix
+  try { 
+    this->exchangeA_ = 
+      std::unique_ptr<TMatrix>(new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
+  } catch (...) { 
+    if(this->TCS)
+      CErr(std::current_exception(),"TCS Exchange Tensor (R2) Allocation"); 
+    else
+      CErr(std::current_exception(),"Alpha Exchange Tensor (R2) Allocation"); 
+  }
 #else // USE_LIBINT
-  try { this->PTA_  = std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_)); } // Alpha Perturbation Tensor
-  catch (...) { CErr(std::current_exception(),"Alpha Perturbation Tensor (G[P]) Allocation"); }
+  // Alpha / TCS Perturbation Tensor
+  try { 
+    this->PTA_  = 
+      std::unique_ptr<TMatrix>(new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
+  } catch (...) { 
+    if(this->TCS)
+      CErr(std::current_exception(),"TCS Perturbation Tensor (G[P]) Allocation"); 
+    else
+      CErr(std::current_exception(),"Alpha Perturbation Tensor (G[P]) Allocation"); 
+  }
 #endif
-  try { this->moA_       = std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_)); } // Alpha Molecular Orbital Coefficients
-  catch (...) { CErr(std::current_exception(),"Alpha MO Coefficients Allocation"); }
-    try { this->epsA_       = std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_)); } // Alpha Eigenorbital Energies
-    catch (...) { CErr(std::current_exception(),"Alpha Eigenorbital Energies"); }
+  // Alpha / TCS Molecular Orbital Coefficients
+  try { 
+    this->moA_ = 
+      std::unique_ptr<TMatrix>(new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_)); 
+  } catch (...) { 
+    if(this->TCS)
+      CErr(std::current_exception(),"TCS MO Coefficients Allocation");
+    else
+      CErr(std::current_exception(),"Alpha MO Coefficients Allocation"); 
+  }
+
+  // Alpha / TCS Eigenorbital Energies
+  try { 
+    this->epsA_ = 
+      std::unique_ptr<TMatrix>(new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_)); 
+  } catch (...) { 
+    if(this->TCS)
+      CErr(std::current_exception(),"TCS Eigenorbital Energies"); 
+    else
+      CErr(std::current_exception(),"Alpha Eigenorbital Energies"); 
+  }
   
 
   if(!this->RHF_) {

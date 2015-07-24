@@ -39,6 +39,7 @@ void Controls::iniControls(){
   this->HF =                true;
   this->DFT =               false;
   this->hybridDFT =         false;
+  this->doTCS =             false;
   this->restart =           false;
   this->thresholdS =        1.0e-10;
   this->thresholdAB =       1.0e-6;
