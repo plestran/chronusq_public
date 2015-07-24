@@ -300,7 +300,8 @@ template <typename T>
     inline int stdSubSpace(){
       // Standard value for the maximum dimension of the
       // iterative subspace min(6*NSek,N/2)
-      return std::min(6*this->nSek_,this->N_/2);
+      //return std::min(20*this->nSek_,this->N_/2);
+      return std::min(250,this->N_/2);
     };
 
     inline int stdNGuess(){
