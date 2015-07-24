@@ -205,7 +205,6 @@ template<>
 void AOIntegrals::twoEContractDirect(bool RHF, bool doFock, bool do24, const RealMatrix &XAlpha, RealMatrix &AXAlpha,
                                      const RealMatrix &XBeta, RealMatrix &AXBeta) {
   this->fileio_->out << "Contracting Directly with two-electron integrals" << endl;
-
   if(!this->haveSchwartz) this->computeSchwartz();
   if(!this->basisSet_->haveMap) this->basisSet_->makeMap(this->molecule_); 
   AXAlpha.setZero();

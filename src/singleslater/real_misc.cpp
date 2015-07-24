@@ -77,6 +77,7 @@ SingleSlater<double>::SingleSlater(SingleSlater<double> * other){
     unsigned int irow;
     for(auto i=0;i<this->nShell_;i++){
           int L=basisset_->shells_libint[i].contr[0].l;
+          cout << L << endl;
 //         s functions order matchs
            if (L==0){ibase += 1;}
 //         p functions order matchs
@@ -87,6 +88,11 @@ SingleSlater<double>::SingleSlater(SingleSlater<double> * other){
              (*this->moA_).row((irow+2)).swap((*this->moA_).row(irow+4));
              (*this->moA_).row((irow+3)).swap((*this->moA_).row(irow+5));
              (*this->moA_).row((irow+5)).swap((*this->moA_).row(irow+6));
+             if(!this->RHF_){
+               (*this->moB_).row((irow+2)).swap((*this->moB_).row(irow+4));
+               (*this->moB_).row((irow+3)).swap((*this->moB_).row(irow+5));
+               (*this->moB_).row((irow+5)).swap((*this->moB_).row(irow+6));
+             }
              ibase+=6;
              }
 //           f functions in cartesian --> swap
@@ -98,6 +104,14 @@ SingleSlater<double>::SingleSlater(SingleSlater<double> * other){
              (*this->moA_).row((irow+6)).swap((*this->moA_).row(irow+7));
              (*this->moA_).row((irow+7)).swap((*this->moA_).row(irow+10));
              (*this->moA_).row((irow+8)).swap((*this->moA_).row(irow+9));
+             if(!this->RHF_) {
+               (*this->moB_).row((irow+2)).swap((*this->moB_).row(irow+5));
+               (*this->moB_).row((irow+3)).swap((*this->moB_).row(irow+6));
+               (*this->moB_).row((irow+5)).swap((*this->moB_).row(irow+10));
+               (*this->moB_).row((irow+6)).swap((*this->moB_).row(irow+7));
+               (*this->moB_).row((irow+7)).swap((*this->moB_).row(irow+10));
+               (*this->moB_).row((irow+8)).swap((*this->moB_).row(irow+9));
+             }
              ibase+=10;
              }
 //           g functions in cartesian --> swap
@@ -105,6 +119,7 @@ SingleSlater<double>::SingleSlater(SingleSlater<double> * other){
              irow = ibase-1;
              for(auto ishift=0;ishift<7;ishift++) {
                (*this->moA_).row((irow+(15-ishift))).swap((*this->moA_).row(irow+(1+ishift)));
+               if(!this->RHF_) (*this->moB_).row((irow+(15-ishift))).swap((*this->moB_).row(irow+(1+ishift)));
                }
              ibase+=15;
              }
@@ -113,6 +128,7 @@ SingleSlater<double>::SingleSlater(SingleSlater<double> * other){
              irow = ibase-1;
              for(auto ishift=0;ishift<10;ishift++) {
                (*this->moA_).row((irow+(21-ishift))).swap((*this->moA_).row(irow+(1+ishift)));
+               if(!this->RHF_) (*this->moB_).row((irow+(21-ishift))).swap((*this->moB_).row(irow+(1+ishift)));
                }
              ibase+=21;
              }
@@ -121,6 +137,7 @@ SingleSlater<double>::SingleSlater(SingleSlater<double> * other){
              irow = ibase-1;
              for(auto ishift=0;ishift<14;ishift++) {
                (*this->moA_).row((irow+(28-ishift))).swap((*this->moA_).row(irow+(1+ishift)));
+               if(!this->RHF_) (*this->moB_).row((irow+(28-ishift))).swap((*this->moB_).row(irow+(1+ishift)));
                }
              ibase+=28;
              }
@@ -129,6 +146,7 @@ SingleSlater<double>::SingleSlater(SingleSlater<double> * other){
              irow = ibase-1;
              for(auto ishift=0;ishift<18;ishift++) {
                (*this->moA_).row((irow+(36-ishift))).swap((*this->moA_).row(irow+(1+ishift)));
+               if(!this->RHF_) (*this->moB_).row((irow+(36-ishift))).swap((*this->moB_).row(irow+(1+ishift)));
                }
              ibase+=36;
              }

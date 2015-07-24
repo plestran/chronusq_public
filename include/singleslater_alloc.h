@@ -39,6 +39,7 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
   this->nBasis_  = basisset->nBasis();
   this->nTT_   = this->nBasis_*(this->nBasis_+1)/2;
   this->spin_  = molecule->spin();
+  this->nShell_ = basisset->nShell();
   int nSingleE = this->spin_ - 1;
   this->nOccB_ = (nTotalE - nSingleE)/2;
   this->nVirB_ = this->nBasis_ - this->nOccB_;

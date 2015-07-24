@@ -95,7 +95,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
                               controls.get(),hartreeFock.get());
     
     sdResponse->IterativeRPA();
-    sdResponse->incorePPRPA();
+  //sdResponse->incorePPRPA();
   }
 
 //if(controls->doDF) aointegrals->compareRI();

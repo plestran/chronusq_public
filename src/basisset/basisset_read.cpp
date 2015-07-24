@@ -214,7 +214,6 @@ void BasisSet::computeShBlkNorm(bool RHF, Molecule * mol, const RealMatrix *DAlp
     for(int s2 = 0; s2 < nOfShell; s2++) {
       int bf2 = this->mapSh2Bf[s2];
       int n2  = this->shells_libint[s2].size();
-     
       (*this->shBlkNormAlpha)(s1,s2) = DAlpha->block(bf1,bf2,n1,n2).lpNorm<Infinity>();
       if(!RHF)
         (*this->shBlkNormBeta)(s1,s2) = DBeta->block(bf1,bf2,n1,n2).lpNorm<Infinity>();

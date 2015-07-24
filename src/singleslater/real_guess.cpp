@@ -38,11 +38,6 @@ namespace ChronusQ {
 //--------------------------------//
 template<>
 void SingleSlater<double>::formGuess() {
-  auto aointegralsAtom  = new AOIntegrals;
-  auto hartreeFockAtom  = new SingleSlater<double>;
-  auto controlAtom      = new Controls;
-  auto basisSetAtom     = new BasisSet;
-  auto dfBasissetAtom   = new BasisSet;
   
   std::vector<RealMatrix> atomMO;
   std::vector<RealMatrix> atomMOB;
@@ -84,6 +79,11 @@ void SingleSlater<double>::formGuess() {
   
   this->fileio_->out << endl << "Atomic SCF Starting............." << endl << endl;
   for(auto iUn = 0; iUn < uniqueElement.size(); iUn++){
+    auto aointegralsAtom  = new AOIntegrals;
+    auto hartreeFockAtom  = new SingleSlater<double>;
+    auto controlAtom      = new Controls;
+    auto basisSetAtom     = new BasisSet;
+    auto dfBasissetAtom   = new BasisSet;
     std::vector<libint2::Shell> atomShell;
     Molecule uniqueAtom(uniqueElement[iUn],this->fileio_);
     uniqueAtom.readCharge(0);
@@ -260,6 +260,7 @@ void SingleSlater<double>::readGuessGauMatEl(GauMatEl& matEl){
     this->moB_->transposeInPlace(); // Row Major
     delete [] scr;
   }
+  this->matchord();
   if(this->controls_->printLevel>=3) {
     prettyPrint(this->fileio_->out,(*this->moA_),"Alpha MO Coeff");
     if(!this->RHF_) prettyPrint(this->fileio_->out,(*this->moB_),"Beta MO Coeff");
