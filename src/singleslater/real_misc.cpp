@@ -40,12 +40,13 @@ SingleSlater<double>::SingleSlater(SingleSlater<double> * other){
     this->nOccB_  = other->nOccB_;
     this->nVirA_  = other->nVirA_;
     this->nVirB_  = other->nVirB_;
-    this->spin_   = other->spin_;
+    this->multip_   = other->multip_;
     this->energyNuclei = other->energyNuclei;
     this->RHF_ = other->RHF_;
     this->haveDensity = true;
     this->haveMO	    = true;
     this->havePT      = true;
+    this->TCS = other->TCS;
     // Hardcoded for Libint route
     this->densityA_           = std::unique_ptr<RealMatrix>(new RealMatrix(*other->densityA_));
     this->fockA_              = std::unique_ptr<RealMatrix>(new RealMatrix(*other->fockA_));

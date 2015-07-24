@@ -146,7 +146,7 @@ void SingleSlater<double>::SCF(){
   if (doCUHF){
     Xp= (*this->aointegrals_->overlap_).pow(0.5);
     numE     = this->molecule_->nTotalE();
-    actSpace = this->molecule_->spin() - 1;
+    actSpace = this->molecule_->multip() - 1;
     coreSpace= (numE - actSpace)/2;
     virSpace = n - coreSpace - actSpace;
   }

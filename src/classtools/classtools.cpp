@@ -46,7 +46,7 @@ void readInput(FileIO * fileio, Molecule * mol, BasisSet * basis, Controls * con
       mol->readCharge(readInt);
     } else if(!readString.compare("$SPIN")) {
       fileio->in >> readInt;
-      mol->readSpin(readInt);
+      mol->readMultip(readInt);
     } else if(!readString.compare("$EXTRA")) {
       fileio->in>>readString;
       readString=stringupper(readString);

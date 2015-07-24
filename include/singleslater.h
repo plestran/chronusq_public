@@ -49,7 +49,7 @@ class SingleSlater {
   int      nOccB_;
   int      nVirA_;
   int      nVirB_;
-  int      spin_;
+  int      multip_;
   int    **R2Index_;
 
   int      nTCS_;
@@ -119,7 +119,7 @@ public:
   inline int nVirA()  { return this->nVirA_;};
   inline int nVirB()  { return this->nVirB_;};
   inline int RHF()    { return this->RHF_; };
-  inline int spin()   { return this->spin_; };
+  inline int multip()  { return this->multip_;};
   inline int nOVA()    { return nOccA_*nVirA_;};
   inline int nOVB()    { return nOccB_*nVirB_;};
   inline TMatrix* densityA() { return this->densityA_.get();};

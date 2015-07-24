@@ -87,7 +87,7 @@ void SingleSlater<double>::formGuess() {
     std::vector<libint2::Shell> atomShell;
     Molecule uniqueAtom(uniqueElement[iUn],this->fileio_);
     uniqueAtom.readCharge(0);
-    uniqueAtom.readSpin(uniqueElement[iUn].defaultMult);
+    uniqueAtom.readMultip(uniqueElement[iUn].defaultMult);
     for (auto i = 0; i< this->basisset_->allBasis.size();i++){
       if (this->basisset_->allBasis[i].atomName.compare(uniqueElement[iUn].symbol)==0){
 	basisSetAtom->shells_libint= this->basisset_->allBasis[i].refShell;
@@ -184,7 +184,7 @@ void SingleSlater<double>::formGuess() {
   
   if(!this->RHF_){
     int numE = this->molecule_->nTotalE();
-    int betaE  = (numE-this->molecule_->spin()-1)/2;
+    int betaE  = (numE-this->molecule_->multip()-1)/2;
     int alphaE = (numE - betaE);
     (*this->densityA_) =2* (double)alphaE/(double)numE * (*this->densityA_);
     (*this->densityB_) =2* (double)betaE/(double)numE * (*this->densityB_);
