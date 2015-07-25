@@ -40,7 +40,7 @@
 namespace ChronusQ {
 class SDResponse {
   int       nBasis_;
-  int       RHF_;
+  int       Ref_;
   int       nSek_;
   int       nGuess_;
   int       iMeth_;

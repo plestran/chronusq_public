@@ -43,7 +43,7 @@ void SingleSlater<double>::CDIIS(int N, double *EA, double *FADIIS, double *EB, 
       prettyPrint(this->fileio_->out,EJA,"Error "+std::to_string(j));
     RealMap EKA(EA + (k%(N-1))*NBSq,this->nBasis_,this->nBasis_);
     B(j,k) = -EJA.frobInner(EKA);
-    if(!this->RHF_){
+    if(this->Ref_ != RHF){
       RealMap EJB(EB + (j%(N-1))*NBSq,this->nBasis_,this->nBasis_);
       RealMap EKB(EB + (k%(N-1))*NBSq,this->nBasis_,this->nBasis_);
       B(j,k) = -EJB.frobInner(EKB);
@@ -59,11 +59,11 @@ void SingleSlater<double>::CDIIS(int N, double *EA, double *FADIIS, double *EB, 
   coef[N-1]=-1.0;
   dgesv_(&N,&NRHS,B.data(),&N,iPiv,coef,&N,&INFO);
   this->fockA_->setZero();
-  if(!this->RHF_) this->fockB_->setZero();
+  if(this->Ref_ != RHF) this->fockB_->setZero();
   for(auto j = 0; j < N-1; j++) {
     RealMap FA(FADIIS + (j%(N-1))*NBSq,this->nBasis_,this->nBasis_);
     *this->fockA_ += coef[j]*FA;
-    if(!this->RHF_) {
+    if(this->Ref_ != RHF) {
       RealMap FB(FBDIIS + (j%(N-1))*NBSq,this->nBasis_,this->nBasis_);
       *this->fockB_ += coef[j]*FB;
     }

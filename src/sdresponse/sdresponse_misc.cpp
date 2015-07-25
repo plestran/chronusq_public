@@ -39,7 +39,7 @@ void SDResponse::formAOTDen(const RealVecMap &TMOV, RealMatrix &TAOA, RealMatrix
 
   TAOA = (*this->singleSlater_->moA()) * TMOA * this->singleSlater_->moA()->adjoint();
   if(!doVVOO){
-    if(this->RHF_)
+    if(this->Ref_ == SingleSlater<double>::RHF)
       TAOB = (*this->singleSlater_->moA()) * TMOB * this->singleSlater_->moA()->adjoint();
     else
       TAOB = (*this->singleSlater_->moB()) * TMOB * this->singleSlater_->moB()->adjoint();
@@ -55,7 +55,7 @@ void SDResponse::formMOTDen(RealVecMap &TMOV, const RealMatrix &TAOA, const Real
 
   TMOA = this->singleSlater_->moA()->adjoint() * TAOA * (*this->singleSlater_->moA());
   if(!doVVOO) {
-    if(this->RHF_)
+    if(this->Ref_ == SingleSlater<double>::RHF)
       TMOB = this->singleSlater_->moA()->adjoint() * TAOB * (*this->singleSlater_->moA());
     else 
       TMOB = this->singleSlater_->moB()->adjoint() * TAOB * (*this->singleSlater_->moB());
@@ -197,7 +197,7 @@ void SDResponse::retrvVVOO(RealVecMap &TMOV, const RealMatrix &TMO){
 
 void SDResponse::initRMu(){
   // RMu = [ e(HOMO) + e(LUMO) ] / 2
-  if(this->RHF_)
+  if(this->Ref_ == SingleSlater<double>::RHF)
     this->rMu_ = ( (*this->singleSlater_->epsA())(this->nOA_-1) + 
                    (*this->singleSlater_->epsA())(this->nOA_)    ) / 2.0;
   else
@@ -234,7 +234,7 @@ void SDResponse::scaleDagPPRPA(bool inplace, RealVecMap &T, RealVecMap &IX, Real
       } else if(this->iPPRPA_ == 1) { // AB block
         for(auto a = 0, ab = 0; a < this->nVA_; a++)
         for(auto b = 0;  b < this->nVB_;  b++, ab++){
-          if(this->RHF_)
+          if(this->Ref_ == SingleSlater<double>::RHF)
             IX(ab) = IX(ab) + T(ab) * 
               ( (*this->singleSlater_->epsA())(a+this->nOA_) +
                 (*this->singleSlater_->epsA())(b+this->nOA_) - 2*this->rMu_);
@@ -263,7 +263,7 @@ void SDResponse::scaleDagPPRPA(bool inplace, RealVecMap &T, RealVecMap &IX, Real
       } else if(this->iPPRPA_ == 1) { // AB Block
         for(auto i = 0, ij = iOff; i < this->nOA_; i++)
         for(auto j = 0;  j < this->nOB_;     j++, ij++){
-          if(this->RHF_)
+          if(this->Ref_ == SingleSlater<double>::RHF)
             IX(ij) = IX(ij) + T(ij) * fact * 
               ( (*this->singleSlater_->epsA())(i) +
                 (*this->singleSlater_->epsA())(j) - 2*this->rMu_);
@@ -293,7 +293,7 @@ void SDResponse::scaleDagPPRPA(bool inplace, RealVecMap &T, RealVecMap &IX, Real
       } else if(this->iPPRPA_ == 1) { // AB block
         for(auto a = 0, ab = 0; a < this->nVA_; a++)
         for(auto b = 0;  b < this->nVB_;  b++, ab++){
-          if(this->RHF_)
+          if(this->Ref_ == SingleSlater<double>::RHF)
             (*AX)(ab) = IX(ab) + T(ab) * 
               ( (*this->singleSlater_->epsA())(a+this->nOA_) +
                 (*this->singleSlater_->epsA())(b+this->nOA_) - 2*this->rMu_);
@@ -322,7 +322,7 @@ void SDResponse::scaleDagPPRPA(bool inplace, RealVecMap &T, RealVecMap &IX, Real
       } else if(this->iPPRPA_ == 1) { // AB Block
         for(auto i = 0, ij = iOff; i < this->nOA_; i++)
         for(auto j = 0;  j < this->nOB_;     j++, ij++){
-          if(this->RHF_)
+          if(this->Ref_ == SingleSlater<double>::RHF)
             (*AX)(ij) = IX(ij) + T(ij) * fact * 
               ( (*this->singleSlater_->epsA())(i) +
                 (*this->singleSlater_->epsA())(j) - 2*this->rMu_);
@@ -1484,7 +1484,7 @@ void SDResponse::formRM(){
     }
     ia = ia+1;
   }
-  if (this->RHF_)
+  if (this->Ref_ == SingleSlater<double>::RHF)
   {
     A.block(0,0,nOVA,nOVA) = Aud;
     A.block(nOVA,nOVA,nOVB,nOVB) = Aud;
@@ -1496,7 +1496,7 @@ void SDResponse::formRM(){
     B.block(nOVA,0,nOVB,nOVA) = Buod;
   }
 
-  if (!this->RHF_)
+  if (this->Ref_ != SingleSlater<double>::RHF)
   {
     for(auto ii = 0; ii < this->nBasis_; ii++) {
       for(auto jj = 0; jj < nOB; jj++) {
@@ -1773,7 +1773,7 @@ RealMatrix SDResponse::formRM2(RealMatrix &XMO){
       this->singleSlater_->moA()->block(0,this->nOA_,this->nBasis_,this->nVA_)*
       XA*
       this->singleSlater_->moA()->block(0,0,this->nBasis_,this->nOA_).adjoint();
-    if (this->RHF_)
+    if (this->Ref_ == SingleSlater<double>::RHF)
     {
       XBAO = 
         this->singleSlater_->moA()->block(0,this->nOB_,this->nBasis_,this->nVB_)*
@@ -1811,7 +1811,7 @@ RealMatrix SDResponse::formRM2(RealMatrix &XMO){
       this->singleSlater_->moA()->block(0,this->nOA_,this->nBasis_,this->nVA_).adjoint()*
       IXA*
       this->singleSlater_->moA()->block(0,0,this->nBasis_,this->nOA_);
-    if (this->RHF_)
+    if (this->Ref_ == SingleSlater<double>::RHF)
     {
       AXB = 
         this->singleSlater_->moA()->block(0,this->nOB_,this->nBasis_,this->nVB_).adjoint()*

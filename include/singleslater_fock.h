@@ -30,16 +30,17 @@
 #ifdef USE_LIBINT
 template<typename T>
 void SingleSlater<T>::formPT(){
+  bool doRHF = (this->Ref_ == RHF);
   if(!this->haveDensity) this->formDensity();
   if(this->controls_->directTwoE && !this->controls_->doDF)
-    this->aointegrals_->twoEContractDirect(this->RHF_,true,false,*this->densityA_,*this->PTA_,*this->densityB_,*this->PTB_);
+    this->aointegrals_->twoEContractDirect(doRHF,true,false,*this->densityA_,*this->PTA_,*this->densityB_,*this->PTB_);
   else if(this->controls_->doDF)
-    this->aointegrals_->twoEContractDF(this->RHF_,true,*this->densityA_,*this->PTA_,*this->densityB_,*this->PTB_);
+    this->aointegrals_->twoEContractDF(doRHF,true,*this->densityA_,*this->PTA_,*this->densityB_,*this->PTB_);
   else
-    this->aointegrals_->twoEContractN4(this->RHF_,true,*this->densityA_,*this->PTA_,*this->densityB_,*this->PTB_);
+    this->aointegrals_->twoEContractN4(doRHF,true,*this->densityA_,*this->PTA_,*this->densityB_,*this->PTB_);
   if(this->controls_->printLevel >= 3) {
     prettyPrint(this->fileio_->out,(*this->PTA_),"Alpha Perturbation Tensor");
-    if(!this->RHF_) prettyPrint(this->fileio_->out,(*this->PTB_),"Beta Perturbation Tensor");
+    if(this->Ref_ != RHF) prettyPrint(this->fileio_->out,(*this->PTB_),"Beta Perturbation Tensor");
   }
 }
 #endif
@@ -66,7 +67,7 @@ void SingleSlater<T>::formFock(){
 #else
   *(fockA_)+=(*this->PTA_);
 #endif
-  if(!this->RHF_){
+  if(this->Ref_ != RHF){
     this->fockB_->setZero();
     fockB_->real()+=(*this->aointegrals_->oneE_);
 #ifndef USE_LIBINT
@@ -78,7 +79,7 @@ void SingleSlater<T>::formFock(){
   };
   if(this->controls_->printLevel>=2) {
     prettyPrint(this->fileio_->out,(*this->fockA_),"Alpha Fock");
-    if(!this->RHF_) prettyPrint(this->fileio_->out,(*this->fockB_),"Beta Fock");
+    if(this->Ref_ != RHF) prettyPrint(this->fileio_->out,(*this->fockB_),"Beta Fock");
   };
 };
 

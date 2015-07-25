@@ -73,7 +73,7 @@ void SingleSlater<double>::SCF(){
   int lenDelF   = n*n; //CUHF DelF 
   int lenOccNum = n;   //CUHF occupation number
   int LenScr = lenX + lenF + lenP + lenB + lenCoeff + lwork + 2*lenF*(lenCoeff-1);
-  if(!this->RHF_) LenScr += lenF + lenP + 2*lenF*(lenCoeff-1);
+  if(this->Ref_ != RHF) LenScr += lenF + lenP + 2*lenF*(lenCoeff-1);
   if(doCUHF) LenScr += lenXp + lenOccNum + lenPsort + lenLambda + lenDelF + lenP;
 
   double *SCR            = NULL;
@@ -99,7 +99,7 @@ void SingleSlater<double>::SCF(){
 
   SCR = new double [LenScr];
   XMem    = SCR;
-  if(this->RHF_) {
+  if(this->Ref_ == RHF) {
     FpAlphaMem   = XMem + lenX;
     POldAlphaMem = FpAlphaMem + lenF;
     ErrorAlphaMem = POldAlphaMem + lenP;
@@ -155,7 +155,7 @@ void SingleSlater<double>::SCF(){
     this->fileio_->out << "SCF iteration:"<< iter+1 <<endl;  
     this->fileio_->out << bannerEnd <<endl;  
     if (doCUHF){
-      if (!this->RHF_){
+      if (this->Ref_ != RHF){
         P = (*this->densityA_ + *this->densityB_)/2 ;
       }
       else{
@@ -170,7 +170,7 @@ void SingleSlater<double>::SCF(){
       } 
       P = Psort;
     
-      if (!this->RHF_){
+      if (this->Ref_ != RHF){
         DelF = (*this->fockA_ - *this->fockB_) / 2; 
       }
       else{
@@ -189,7 +189,7 @@ void SingleSlater<double>::SCF(){
       lambda = Xp *  lambda * Xp;
    
       *this->fockA_ = *this->fockA_ + lambda;
-      if (!this->RHF_){
+      if (this->Ref_ != RHF){
         *this->fockB_ = *this->fockB_ - lambda;
         POldBeta   = (*this->densityB_);
 	FpBeta = X.transpose() * (*this->fockB_) * X;
@@ -207,7 +207,7 @@ void SingleSlater<double>::SCF(){
     else{
       POldAlpha = (*this->densityA_);
       FpAlpha   = X.transpose()*(*this->fockA_)*X;
-      if(!this->RHF_) {
+      if(this->Ref_ != RHF) {
         POldBeta   = (*this->densityB_);
         FpBeta     = X.transpose()*(*this->fockB_)*X;
       }
@@ -215,7 +215,7 @@ void SingleSlater<double>::SCF(){
       dsyev_(&j,&u,&n, FpAlpha.data(), &n, this->epsA_->data(), work, &lwork, &info);
       FpAlpha.transposeInPlace(); // bc Row Major
       (*this->moA_) = X*FpAlpha;
-      if(!this->RHF_) {
+      if(this->Ref_ != RHF) {
         dsyev_(&j,&u,&n, FpBeta.data(), &n, this->epsB_->data(), work, &lwork, &info);
         FpBeta.transposeInPlace(); // bc Row Major
         (*this->moB_) = X*FpBeta;
@@ -233,7 +233,7 @@ void SingleSlater<double>::SCF(){
       ErrA = (*this->fockA_) * (*this->densityA_) * (*this->aointegrals_->overlap_);
       ErrA -= (*this->aointegrals_->overlap_) * (*this->densityA_) * (*this->fockA_);
       memcpy(FADIIS+(iter%(lenCoeff-1))*lenF,this->fockA_->data(),lenF*sizeof(double));
-      if(!this->RHF_){
+      if(this->Ref_ != RHF){
         RealMap ErrB(ErrorBetaMem + (iter%(lenCoeff-1))*lenF,n,n);
         ErrB = (*this->fockB_) * (*this->densityB_) * (*this->aointegrals_->overlap_);
         ErrB -= (*this->aointegrals_->overlap_) * (*this->densityB_) * (*this->fockB_);
@@ -244,20 +244,20 @@ void SingleSlater<double>::SCF(){
         this->CDIIS(lenCoeff,ErrorAlphaMem,FADIIS,ErrorBetaMem,FBDIIS);
     }
     PAlphaRMS=((*this->densityA_)-POldAlpha).norm();
-    if(!this->RHF_) PBetaRMS = ((*this->densityB_) - POldBeta).norm();
+    if(this->Ref_ != RHF) PBetaRMS = ((*this->densityB_) - POldBeta).norm();
     EDelta= this->totalEnergy-EOld;
-    if(this->RHF_) this->printDensityInfo(PAlphaRMS,EDelta);     
+    if(this->Ref_ == RHF) this->printDensityInfo(PAlphaRMS,EDelta);     
     else this->printDensityInfo(PAlphaRMS,PBetaRMS,EDelta);     
     
     if (doCUHF){
-      if(this->RHF_){
+      if(this->Ref_ == RHF){
         if(PAlphaRMS < Dtol && pow((this->totalEnergy-EOld),2)<Etol) break;
       } else {
         if((PAlphaRMS < Dtol || PBetaRMS < Dtol) && pow((this->totalEnergy-EOld),2)<Etol) break;
       } 
     }
     else{
-      if(this->RHF_){
+      if(this->Ref_ == RHF){
         if(PAlphaRMS < Dtol && pow((this->totalEnergy-EOld),2)<Etol) break;
       } else {
         if(PAlphaRMS < Dtol && PBetaRMS < Dtol && pow((this->totalEnergy-EOld),2)<Etol) break;
@@ -277,7 +277,7 @@ void SingleSlater<double>::SCF(){
   if(maxIter > iter){
     if(doCUHF) this->fileio_->out << "\nSCF Done: E(CUHF) = "<< this->totalEnergy << "  Eh  after  "<< iter+1 << "  cycles" <<endl;
     else{
-      if(this->RHF_) this->fileio_->out << "\nSCF Done: E(RHF) = "<< this->totalEnergy << "  Eh  after  "<< iter+1 << "  cycles" <<endl;
+      if(this->Ref_ == RHF) this->fileio_->out << "\nSCF Done: E(RHF) = "<< this->totalEnergy << "  Eh  after  "<< iter+1 << "  cycles" <<endl;
       else this->fileio_->out << "\nSCF Done: E(UHF) = "<< this->totalEnergy << "  Eh  after  "<< iter+1 << "  cycles" <<endl;
   }
   }

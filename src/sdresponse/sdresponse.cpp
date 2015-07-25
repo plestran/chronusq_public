@@ -47,7 +47,7 @@ void SDResponse::iniSDResponse( Molecule * molecule, BasisSet * basisSet, MOInte
   this->singleSlater_   = singleSlater;
   this->aoERI_          = singleSlater->aointegrals()->aoERI_.get();
   this->elecDipole_     = singleSlater->aointegrals()->elecDipole_.get();
-  this->RHF_            = singleSlater->RHF();
+  this->Ref_            = singleSlater->Ref();
   this->haveDag_ = false;
   this->nOA_ = this->singleSlater_->nOccA();
   this->nOB_ = this->singleSlater_->nOccB();

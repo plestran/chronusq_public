@@ -32,24 +32,22 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<dcomplex> * other){
     this->nTT_    = other->nTT_;
     this->nAE_    = other->nAE_;
     this->nBE_    = other->nBE_; 
-    this->RHF_    = other->RHF_;
+    this->Ref_    = other->Ref();
     this->nOccA_  = other->nOccA_;
     this->nOccB_  = other->nOccB_;
     this->nVirA_  = other->nVirA_;
     this->nVirB_  = other->nVirB_;
     this->multip_   = other->multip_;
     this->energyNuclei = other->energyNuclei;
-    this->RHF_ = other->RHF();
     this->haveDensity = true;
     this->haveMO	    = true;
     this->havePT      = true;
-    this->TCS = other->TCS;
     // Hardcoded for Libint route
     this->densityA_           = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(*other->densityA_));
     this->fockA_              = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(*other->fockA_));
     this->moA_                = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(*other->moA_));
     this->PTA_                = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(*other->PTA_));
-    if(!this->RHF_){
+    if(this->Ref_ != RHF){
       this->densityB_           = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(*other->densityB_));
       this->fockB_              = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(*other->fockB_));
       this->moB_                = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(*other->moB_));
@@ -72,18 +70,16 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other){
     this->nTT_    = other->nTT();
     this->nAE_    = other->nAE();
     this->nBE_    = other->nBE(); 
-    this->RHF_    = other->RHF();
     this->nOccA_  = other->nOccA();
     this->nOccB_  = other->nOccB();
     this->nVirA_  = other->nVirA();
     this->nVirB_  = other->nVirB();
     this->multip_   = other->multip();
     this->energyNuclei = other->energyNuclei;
-    this->RHF_ = other->RHF();
+    this->Ref_    = other->Ref();
     this->haveDensity = true;
     this->haveMO	    = true;
     this->havePT      = true;
-    this->TCS = other->TCS;
     // Hardcoded for Libint route
     this->densityA_           = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
     this->fockA_              = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
@@ -93,7 +89,7 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other){
     this->fockA_->real()       = *other->fockA();
     this->moA_->real()         = *other->moA();
     this->PTA_->real()         = *other->PTA();
-    if(!this->RHF_){
+    if(this->Ref_ != RHF){
       this->densityB_           = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
       this->fockB_              = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
       this->moB_                = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));

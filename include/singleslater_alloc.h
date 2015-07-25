@@ -46,19 +46,24 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
   this->nOccA_ = this->nOccB_ + nSingleE;
   this->nVirA_ = this->nBasis_ - this->nOccA_;
   this->energyNuclei = molecule->energyNuclei();
-  if(this->multip_!=1) this->RHF_ = 0;
-  else this->RHF_ = 1;
+  this->doCUHF = false;
 
-  this->TCS = controls->doTCS;
+  if(this->multip_ == 1)                     this->Ref_ = RHF ; // RHF
+  else if(!this->doCUHF && !controls->doTCS) this->Ref_ = UHF ; // UHF
+  else if(this->doCUHF)                      this->Ref_ = CUHF; // CUHF / ROHF
+  else if(controls->doTCS)                   this->Ref_ = TCS ; // TCS
+
+
   this->nTCS_ = 1;
-  if(this->TCS) this->nTCS_ = 2;
+  if(this->Ref_ == TCS) this->nTCS_ = 2;
+  
 
   // Alpha / TCS Density
   try { 
     this->densityA_  = 
       std::unique_ptr<TMatrix>( new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
   } catch (...) { 
-    if(this->TCS)
+    if(this->Ref_ == TCS)
       CErr(std::current_exception(),"TCS Density Matrix Allocation"); 
     else
       CErr(std::current_exception(),"Alpha Density Matrix Allocation"); 
@@ -69,7 +74,7 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
     this->fockA_ = 
       std::unique_ptr<TMatrix>(new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
   } catch (...) { 
-    if(this->TCS)
+    if(this->Ref_ == TCS)
       CErr(std::current_exception(),"TCS Fock Matrix Allocation"); 
     else
       CErr(std::current_exception(),"Alpha Fock Matrix Allocation"); 
@@ -81,7 +86,7 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
     this->coulombA_  = 
       std::unique_ptr<TMatrix>(new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_)); 
   } catch (...) { 
-    if(this->TCS)
+    if(this->Ref_ == TCS)
       CErr(std::current_exception(),"TCS Coulomb Tensor (R2) Allocation"); 
     else
       CErr(std::current_exception(),"Alpha Coulomb Tensor (R2) Allocation"); 
@@ -92,7 +97,7 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
     this->exchangeA_ = 
       std::unique_ptr<TMatrix>(new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
   } catch (...) { 
-    if(this->TCS)
+    if(this->Ref_ == TCS)
       CErr(std::current_exception(),"TCS Exchange Tensor (R2) Allocation"); 
     else
       CErr(std::current_exception(),"Alpha Exchange Tensor (R2) Allocation"); 
@@ -103,7 +108,7 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
     this->PTA_  = 
       std::unique_ptr<TMatrix>(new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
   } catch (...) { 
-    if(this->TCS)
+    if(this->Ref_ == TCS)
       CErr(std::current_exception(),"TCS Perturbation Tensor (G[P]) Allocation"); 
     else
       CErr(std::current_exception(),"Alpha Perturbation Tensor (G[P]) Allocation"); 
@@ -114,7 +119,7 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
     this->moA_ = 
       std::unique_ptr<TMatrix>(new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_)); 
   } catch (...) { 
-    if(this->TCS)
+    if(this->Ref_ == TCS)
       CErr(std::current_exception(),"TCS MO Coefficients Allocation");
     else
       CErr(std::current_exception(),"Alpha MO Coefficients Allocation"); 
@@ -125,14 +130,14 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
     this->epsA_ = 
       std::unique_ptr<TMatrix>(new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_)); 
   } catch (...) { 
-    if(this->TCS)
+    if(this->Ref_ == TCS)
       CErr(std::current_exception(),"TCS Eigenorbital Energies"); 
     else
       CErr(std::current_exception(),"Alpha Eigenorbital Energies"); 
   }
   
 
-  if(!this->RHF_) {
+  if(this->Ref_ != RHF && this->Ref_ != TCS  && !this->doCUHF) {
     try { this->densityB_  = std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_)); } // Beta Density
     catch (...) { CErr(std::current_exception(),"Beta Density Matrix Allocation"); }
     try { this->fockB_     = std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_)); } // Beta Fock

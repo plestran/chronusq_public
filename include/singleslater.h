@@ -44,7 +44,7 @@ class SingleSlater {
   int      nTT_;
   int      nAE_;
   int      nBE_;
-  int      RHF_;
+  int      Ref_;
   int      nOccA_;
   int      nOccB_;
   int      nVirA_;
@@ -79,13 +79,18 @@ class SingleSlater {
 
 public:
  
+  enum{
+    RHF,
+    UHF,
+    CUHF,
+    TCS
+  };
   bool	haveMO;
   bool	haveDensity; 
   bool	haveCoulomb;
   bool	haveExchange;
   bool  havePT;
   bool  doCUHF;
-  bool  TCS;
 
   double   energyOneE;
   double   energyTwoE;
@@ -104,7 +109,7 @@ public:
   inline void setNBasis(int nBasis) { this->nBasis_ = nBasis;};
   inline void setNAE(int nAE)    { this->nAE_ = nAE;};
   inline void setNBE(int nBE)    { this->nBE_ = nBE;};
-  inline void setRHF(int RHF)    { this->RHF_ = RHF;};
+  inline void setRef(int Ref)    { this->Ref_ = Ref;};
 
   // access to private data
   inline int nBasis() { return this->nBasis_;};
@@ -118,7 +123,7 @@ public:
   inline int nOccB()  { return this->nOccB_;}
   inline int nVirA()  { return this->nVirA_;};
   inline int nVirB()  { return this->nVirB_;};
-  inline int RHF()    { return this->RHF_; };
+  inline int Ref()    { return this->Ref_; };
   inline int multip()  { return this->multip_;};
   inline int nOVA()    { return nOccA_*nVirA_;};
   inline int nOVB()    { return nOccB_*nVirB_;};

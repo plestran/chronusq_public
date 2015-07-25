@@ -33,14 +33,14 @@ void SingleSlater<T>::formDensity(){
          this->fileio_->out);
   *this->densityA_ = this->moA_->block(0,0,this->nBasis_,this->nOccA_)*
                    this->moA_->block(0,0,this->nBasis_,this->nOccA_).adjoint();
-  if(this->RHF_) *this->densityA_ *= math.two;
+  if(this->Ref_ == RHF) *this->densityA_ *= math.two;
   else {
     *this->densityB_ = this->moB_->block(0,0,this->nBasis_,this->nOccB_)*
                    this->moB_->block(0,0,this->nBasis_,this->nOccB_).adjoint();
   }
   if(this->controls_->printLevel>=2) {
     prettyPrint(this->fileio_->out,(*this->densityA_),"Alpha Density");
-    if(!this->RHF_) prettyPrint(this->fileio_->out,(*this->densityB_),"Beta Density");
+    if(this->Ref_ != RHF) prettyPrint(this->fileio_->out,(*this->densityB_),"Beta Density");
   };
   this->haveDensity = true;
 }
@@ -51,7 +51,7 @@ template<typename T>
 void SingleSlater<T>::computeEnergy(){
   this->energyOneE = (*this->aointegrals_->oneE_).frobInner(this->densityA_->conjugate());
   this->energyTwoE = 0.5*(*this->PTA_).frobInner(this->densityA_->conjugate());
-  if(!this->RHF_){
+  if(this->Ref_ != RHF){
     this->energyOneE += (*this->aointegrals_->oneE_).frobInner(this->densityB_->conjugate());
     this->energyTwoE += 0.5*(*this->PTB_).frobInner(this->densityB_->conjugate());
   }

@@ -43,7 +43,7 @@ void SingleSlater<double>::formGuess() {
   std::vector<RealMatrix> atomMOB;
   int readNPGTO,L, nsize;
   this->moA_->setZero();
-  if(!this->RHF_) this->moB_->setZero();
+  if(this->Ref_ != RHF) this->moB_->setZero();
 
   // Determining unique atoms
   std::vector<Atoms> uniqueElement;
@@ -122,13 +122,13 @@ void SingleSlater<double>::formGuess() {
     aointegralsAtom->iniAOIntegrals (&uniqueAtom, basisSetAtom, this->fileio_, controlAtom, dfBasissetAtom);
     hartreeFockAtom->iniSingleSlater(&uniqueAtom, basisSetAtom, aointegralsAtom, this->fileio_, controlAtom);
     hartreeFockAtom->moA_->setZero();
-    if (!hartreeFockAtom->RHF_) hartreeFockAtom->moB_->setZero();
+    if (!hartreeFockAtom->Ref_) hartreeFockAtom->moB_->setZero();
     hartreeFockAtom->haveMO = true;
     hartreeFockAtom->formFock();
     hartreeFockAtom->computeEnergy();
     hartreeFockAtom->doCUHF = true;
     hartreeFockAtom->SCF();
-    if (!hartreeFockAtom->RHF_){
+    if (!hartreeFockAtom->Ref_){
       denMOB = (*hartreeFockAtom->densityB_);
       denMOA = (*hartreeFockAtom->densityA_);
     }
@@ -172,7 +172,7 @@ void SingleSlater<double>::formGuess() {
     for (auto i=nIndex; i<atomMO[repeatedAtoms[k]].rows()+nIndex;i++){
       for (auto j=nIndex; j<atomMO[repeatedAtoms[k]].cols()+nIndex;j++){
 	(*this->densityA_)(i,j)=((atomMO[repeatedAtoms[k]])(i-nIndex,j-nIndex)+(atomMOB[repeatedAtoms[k]])(i-nIndex,j-nIndex))/2;         
-        if (!this->RHF_){
+        if (this->Ref_ != RHF){
 	  (*this->densityB_)(i,j)=((atomMO[repeatedAtoms[k]])(i-nIndex,j-nIndex)+(atomMOB[repeatedAtoms[k]])(i-nIndex,j-nIndex))/2;         
 	}
       }
@@ -182,7 +182,7 @@ void SingleSlater<double>::formGuess() {
   atomMO.resize(0);
   atomMOB.resize(0);
   
-  if(!this->RHF_){
+  if(this->Ref_ != RHF){
     int numE = this->molecule_->nTotalE();
     int betaE  = (numE-this->molecule_->multip()-1)/2;
     int alphaE = (numE - betaE);
@@ -195,14 +195,14 @@ void SingleSlater<double>::formGuess() {
   this->haveDensity = true;
   this->formFock();
   FpAlpha   = X.transpose()*(*this->fockA_)*X;
-  if(!this->RHF_) {
+  if(this->Ref_ != RHF) {
     FpBeta     = X.transpose()*(*this->fockB_)*X;
   }
   dsyev_(&j,&u,&n, FpAlpha.data(), &n, this->epsA_->data(), work, &lwork, &info);
   FpAlpha.transposeInPlace(); // bc Row Major
   (*this->moA_) = X*FpAlpha;
   
-  if(!this->RHF_) {
+  if(this->Ref_ != RHF) {
     dsyev_(&j,&u,&n, FpBeta.data(), &n, this->epsB_->data(), work, &lwork, &info);
     FpBeta.transposeInPlace(); // bc Row Major
     (*this->moB_) = X*FpBeta;
@@ -211,7 +211,7 @@ void SingleSlater<double>::formGuess() {
   this->haveDensity = false;
   if(this->controls_->printLevel>=3) {
     prettyPrint(this->fileio_->out,(*this->moA_),"Alpha MO Coeff");
-    if(!this->RHF_) prettyPrint(this->fileio_->out,(*this->moB_),"Beta MO Coeff");
+    if(this->Ref_ != RHF) prettyPrint(this->fileio_->out,(*this->moB_),"Beta MO Coeff");
   };
   delete [] SCR;
 };
@@ -237,7 +237,7 @@ void SingleSlater<double>::readGuessIO() {
   this->fileio_->in.close();
   if(this->controls_->printLevel>=3) {
     prettyPrint(this->fileio_->out,(*this->moA_),"Alpha MO Coeff");
-    if(!this->RHF_) prettyPrint(this->fileio_->out,(*this->moB_),"Beta MO Coeff");
+    if(this->Ref_ != RHF) prettyPrint(this->fileio_->out,(*this->moB_),"Beta MO Coeff");
   };
   this->haveMO = true;
 };
@@ -253,7 +253,7 @@ void SingleSlater<double>::readGuessGauMatEl(GauMatEl& matEl){
     this->moA_->data()[i] = scr[i];
   this->moA_->transposeInPlace(); // Row Major
   delete [] scr;
-  if(!this->RHF_) {
+  if(this->Ref_ != RHF) {
     scr = matEl.readRec(GauMatEl::mob); 
     for(auto i = 0; i < this->nBasis_*this->nBasis_; i++)
       this->moB_->data()[i] = scr[i];
@@ -263,7 +263,7 @@ void SingleSlater<double>::readGuessGauMatEl(GauMatEl& matEl){
   this->matchord();
   if(this->controls_->printLevel>=3) {
     prettyPrint(this->fileio_->out,(*this->moA_),"Alpha MO Coeff");
-    if(!this->RHF_) prettyPrint(this->fileio_->out,(*this->moB_),"Beta MO Coeff");
+    if(this->Ref_ != RHF) prettyPrint(this->fileio_->out,(*this->moB_),"Beta MO Coeff");
   };
   this->haveMO = true;
 }
@@ -312,7 +312,7 @@ void SingleSlater<double>::readGuessGauFChk(std::string &filename) {
   fchk->close();
   if(this->controls_->printLevel>=3) {
     prettyPrint(this->fileio_->out,(*this->moA_),"Alpha MO Coeff");
-    if(!this->RHF_) prettyPrint(this->fileio_->out,(*this->moB_),"Beta MO Coeff");
+    if(this->Ref_ != RHF) prettyPrint(this->fileio_->out,(*this->moB_),"Beta MO Coeff");
   };
   this->haveMO = true;
 };

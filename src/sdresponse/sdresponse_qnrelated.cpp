@@ -91,10 +91,10 @@ void SDResponse::getDiag(){
       auto eiAlpha = (*this->singleSlater_->epsA())(iAlpha);
       auto eaAlpha = (*this->singleSlater_->epsA())(aAlpha+this->nOA_);
       (*this->rmDiag_)(iaAlpha,0) = eaAlpha - eiAlpha;
-      if(this->RHF_) 
+      if(this->Ref_ == SingleSlater<double>::RHF) 
         (*this->rmDiag_)(iaAlpha+this->nOAVA_,0) = eaAlpha - eiAlpha;
     }
-    if(!this->RHF_){
+    if(this->Ref_ != SingleSlater<double>::RHF){
       for(auto aBeta = 0; aBeta < this->nVB_; aBeta++)
       for(auto iBeta = 0; iBeta < this->nOB_; iBeta++){
         auto iaBeta = aBeta*this->nOB_ + iBeta + this->nOAVA_; 
@@ -123,7 +123,7 @@ void SDResponse::getDiag(){
         for(auto aAlpha = 0, abAB = 0; aAlpha < this->nVA_; aAlpha++)
         for(auto bBeta  = 0; bBeta < this->nVB_ ; bBeta++, abAB++    ){
           double eaAlpha, ebBeta;
-          if(this->RHF_){
+          if(this->Ref_ == SingleSlater<double>::RHF){
             eaAlpha = (*this->singleSlater_->epsA())(aAlpha + this->nOA_);
             ebBeta  = (*this->singleSlater_->epsA())(bBeta  + this->nOA_);
           } else {
@@ -161,7 +161,7 @@ void SDResponse::getDiag(){
         for(auto iAlpha = 0, ijAB = iOff; iAlpha < this->nOA_; iAlpha++)
         for(auto jBeta  = 0; jBeta < this->nOB_ ;  jBeta++, ijAB++     ){
           double eiAlpha, ejBeta;
-          if(this->RHF_){
+          if(this->Ref_ == SingleSlater<double>::RHF){
             eiAlpha = (*this->singleSlater_->epsA())(iAlpha);
             ejBeta  = (*this->singleSlater_->epsA())(jBeta );
           } else {
@@ -210,10 +210,10 @@ void SDResponse::formRM3(RealCMMap &XMO, RealCMMap &Sigma, RealCMMap &Rho){
   }
   RealMatrix SDA,SDB;
   SDA = (*this->singleSlater_->aointegrals()->overlap_) * (*this->singleSlater_->densityA());
-  if(!this->RHF_) SDB = (*this->singleSlater_->aointegrals()->overlap_) * (*this->singleSlater_->densityB());
+  if(this->Ref_ != SingleSlater<double>::RHF) SDB = (*this->singleSlater_->aointegrals()->overlap_) * (*this->singleSlater_->densityB());
 
   double fact = 1.0;
-  if(this->RHF_) fact = 0.5;
+  if(this->Ref_ == SingleSlater<double>::RHF) fact = 0.5;
   int iOff = this->nOAVA_ + this->nOBVB_;
 
   // Build Sigma by column 
@@ -231,7 +231,7 @@ void SDResponse::formRM3(RealCMMap &XMO, RealCMMap &Sigma, RealCMMap &Rho){
 
     CommA[idx] =  fact * XAAO * SDA; 
     CommA[idx] += fact * SDA.adjoint() * XAAO;
-    if(this->RHF_){ 
+    if(this->Ref_ == SingleSlater<double>::RHF){ 
       CommB[idx] =  fact * XBAO * SDA;
       CommB[idx] += fact * SDA.adjoint() * XBAO;
     } else {
@@ -249,7 +249,7 @@ void SDResponse::formRM3(RealCMMap &XMO, RealCMMap &Sigma, RealCMMap &Rho){
     SigAOA += fact * GCommA[idx] * SDA.adjoint();
     SigAOA -= fact * SDA * GCommA[idx];
 
-    if(this->RHF_) {
+    if(this->Ref_ == SingleSlater<double>::RHF) {
       SigAOB =  (*this->singleSlater_->fockA()) * CommB[idx] * (*this->singleSlater_->aointegrals()->overlap_);
       SigAOB -= (*this->singleSlater_->aointegrals()->overlap_) * CommB[idx] * (*this->singleSlater_->fockA());
       SigAOB += fact * GCommB[idx] * SDA.adjoint();

@@ -35,24 +35,22 @@ SingleSlater<double>::SingleSlater(SingleSlater<double> * other){
 //APE
     this->nAE_    = other->nAE_;
     this->nBE_    = other->nBE_; 
-    this->RHF_    = other->RHF_;
+    this->Ref_    = other->Ref();
     this->nOccA_  = other->nOccA_;
     this->nOccB_  = other->nOccB_;
     this->nVirA_  = other->nVirA_;
     this->nVirB_  = other->nVirB_;
     this->multip_   = other->multip_;
     this->energyNuclei = other->energyNuclei;
-    this->RHF_ = other->RHF_;
     this->haveDensity = true;
     this->haveMO	    = true;
     this->havePT      = true;
-    this->TCS = other->TCS;
     // Hardcoded for Libint route
     this->densityA_           = std::unique_ptr<RealMatrix>(new RealMatrix(*other->densityA_));
     this->fockA_              = std::unique_ptr<RealMatrix>(new RealMatrix(*other->fockA_));
     this->moA_                = std::unique_ptr<RealMatrix>(new RealMatrix(*other->moA_));
     this->PTA_                = std::unique_ptr<RealMatrix>(new RealMatrix(*other->PTA_));
-    if(!this->RHF_){
+    if(this->Ref_ != RHF){
       this->densityB_           = std::unique_ptr<RealMatrix>(new RealMatrix(*other->densityB_));
       this->fockB_              = std::unique_ptr<RealMatrix>(new RealMatrix(*other->fockB_));
       this->moB_                = std::unique_ptr<RealMatrix>(new RealMatrix(*other->moB_));
@@ -89,7 +87,7 @@ SingleSlater<double>::SingleSlater(SingleSlater<double> * other){
              (*this->moA_).row((irow+2)).swap((*this->moA_).row(irow+4));
              (*this->moA_).row((irow+3)).swap((*this->moA_).row(irow+5));
              (*this->moA_).row((irow+5)).swap((*this->moA_).row(irow+6));
-             if(!this->RHF_){
+             if(this->Ref_ != RHF){
                (*this->moB_).row((irow+2)).swap((*this->moB_).row(irow+4));
                (*this->moB_).row((irow+3)).swap((*this->moB_).row(irow+5));
                (*this->moB_).row((irow+5)).swap((*this->moB_).row(irow+6));
@@ -105,7 +103,7 @@ SingleSlater<double>::SingleSlater(SingleSlater<double> * other){
              (*this->moA_).row((irow+6)).swap((*this->moA_).row(irow+7));
              (*this->moA_).row((irow+7)).swap((*this->moA_).row(irow+10));
              (*this->moA_).row((irow+8)).swap((*this->moA_).row(irow+9));
-             if(!this->RHF_) {
+             if(this->Ref_ != RHF) {
                (*this->moB_).row((irow+2)).swap((*this->moB_).row(irow+5));
                (*this->moB_).row((irow+3)).swap((*this->moB_).row(irow+6));
                (*this->moB_).row((irow+5)).swap((*this->moB_).row(irow+10));
@@ -120,7 +118,7 @@ SingleSlater<double>::SingleSlater(SingleSlater<double> * other){
              irow = ibase-1;
              for(auto ishift=0;ishift<7;ishift++) {
                (*this->moA_).row((irow+(15-ishift))).swap((*this->moA_).row(irow+(1+ishift)));
-               if(!this->RHF_) (*this->moB_).row((irow+(15-ishift))).swap((*this->moB_).row(irow+(1+ishift)));
+               if(this->Ref_ != RHF) (*this->moB_).row((irow+(15-ishift))).swap((*this->moB_).row(irow+(1+ishift)));
                }
              ibase+=15;
              }
@@ -129,7 +127,7 @@ SingleSlater<double>::SingleSlater(SingleSlater<double> * other){
              irow = ibase-1;
              for(auto ishift=0;ishift<10;ishift++) {
                (*this->moA_).row((irow+(21-ishift))).swap((*this->moA_).row(irow+(1+ishift)));
-               if(!this->RHF_) (*this->moB_).row((irow+(21-ishift))).swap((*this->moB_).row(irow+(1+ishift)));
+               if(this->Ref_ != RHF) (*this->moB_).row((irow+(21-ishift))).swap((*this->moB_).row(irow+(1+ishift)));
                }
              ibase+=21;
              }
@@ -138,7 +136,7 @@ SingleSlater<double>::SingleSlater(SingleSlater<double> * other){
              irow = ibase-1;
              for(auto ishift=0;ishift<14;ishift++) {
                (*this->moA_).row((irow+(28-ishift))).swap((*this->moA_).row(irow+(1+ishift)));
-               if(!this->RHF_) (*this->moB_).row((irow+(28-ishift))).swap((*this->moB_).row(irow+(1+ishift)));
+               if(this->Ref_ != RHF) (*this->moB_).row((irow+(28-ishift))).swap((*this->moB_).row(irow+(1+ishift)));
                }
              ibase+=28;
              }
@@ -147,7 +145,7 @@ SingleSlater<double>::SingleSlater(SingleSlater<double> * other){
              irow = ibase-1;
              for(auto ishift=0;ishift<18;ishift++) {
                (*this->moA_).row((irow+(36-ishift))).swap((*this->moA_).row(irow+(1+ishift)));
-               if(!this->RHF_) (*this->moB_).row((irow+(36-ishift))).swap((*this->moB_).row(irow+(1+ishift)));
+               if(this->Ref_ != RHF) (*this->moB_).row((irow+(36-ishift))).swap((*this->moB_).row(irow+(1+ishift)));
                }
              ibase+=36;
              }
