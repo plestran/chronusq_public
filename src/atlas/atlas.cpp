@@ -24,7 +24,16 @@
  *  
  */
 #include <workers.h>
+#include <grid.h>
 using namespace ChronusQ;
+
+void func(Grid *g){
+  double ref = 0.18947234582049224;
+     (*g).genGrid();
+   cout << "Gauss-Chebyshev 1st kind grid generated" << endl;
+   cout << "Test Integral value= "<< (*g).integrate() << endl;
+   cout << "Test Integral err  = "<< std::scientific <<std::abs((*g).integrate() - ref)/ref << endl;
+}
 
 int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   time_t currentTime;
@@ -108,6 +117,28 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
  molecule->toCOM(Iop);  // call object molecule pointing to function toCOM-Iop=1 Center of Nuclear Charges
 //APE
 */
+//APS
+//Test one dimensional grid
+  fileIO->out << "**AP One dimensional grid test**" << endl;
+  int Ngridr =   500;
+  int Ngridr2 = 5000;
+  double ref = 0.18947234582049224;
+  double radius = 1.0;
+   GaussChebyshev1stGrid Rad(Ngridr,0.0,radius);
+   Rad.genGrid();
+   fileIO->out <<  Ngridr <<" grid points" << endl;
+   fileIO->out << "Gauss-Chebyshev 1st kind grid generated" << endl;
+   fileIO->out << "Test Integral value= "<< Rad.integrate() << endl;
+   fileIO->out << "Test Integral err  = "<< std::scientific<< std::abs(Rad.integrate() - ref)/ref << endl;
+   GaussChebyshev1stGrid Rad2(Ngridr2,0.0,radius);
+   Rad2.genGrid();
+   fileIO->out <<  Ngridr2 <<" grid points" << endl;
+   fileIO->out << "Gauss-Chebyshev 1st kind grid generated" << endl;
+   fileIO->out << "Test Integral value= "<< Rad2.integrate() << endl;
+   fileIO->out << "Test Integral err  = "<< std::scientific <<std::abs(Rad2.integrate() - ref)/ref << endl;
+   
+   func(&Rad);
+//APE
   time(&currentTime);
   fileIO->out<<"\nJob finished: "<<ctime(&currentTime)<<endl;
 /*

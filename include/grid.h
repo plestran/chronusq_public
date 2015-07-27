@@ -35,12 +35,14 @@ class Grid {
       };
       virtual void                   genGrid() = 0; ///< virtual function to generate the grid points
       virtual void                   transformPts() = 0; ///< virtual function to transform the integral interval
+      virtual double                 integrate()    = 0; ///< virtual function to integrate
   }; // class Grid
 
 class OneDGrid : public Grid {
    protected:
       double * gridPts_;
       double * weights_;
+      double   f_val(double);
       double   norm_;
       std::array<double,2> range_;
    public:
@@ -54,10 +56,28 @@ class OneDGrid : public Grid {
       ~OneDGrid(){
          delete [] this->gridPts_;
          delete [] this->weights_;
+       cout << "Deliting" <<endl;
        };
 // access to protected data
        inline double * gridPts(){ return this->gridPts_;};
        inline double * weights(){ return this->weights_;};
        inline double norm(){ return this->norm_;};
+       double integrate();
 }; // Class OneGrid (one dimensional grid)
+
+  class GaussChebyshev1stGrid : public OneDGrid {
+    public:
+      GaussChebyshev1stGrid(
+        int npts = 0, double beg = 0.0, double end = 0.0):
+        OneDGrid(npts,beg,end){
+          this->gridPts_ = new double[this->nPts_];        ///< Grid Points
+          this->weights_ = new double[this->nPts_];        ///< Weights
+        };
+  // Class Functions
+    void genGrid();                                      
+    void transformPts();
+//    double integrate();
+//    double f_val( double rad);
+  }; // class GaussChebyshev1stGrid
+
 }; // namespace ChronusQ
