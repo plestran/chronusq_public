@@ -122,13 +122,13 @@ void SingleSlater<double>::formGuess() {
     aointegralsAtom->iniAOIntegrals (&uniqueAtom, basisSetAtom, this->fileio_, controlAtom, dfBasissetAtom);
     hartreeFockAtom->iniSingleSlater(&uniqueAtom, basisSetAtom, aointegralsAtom, this->fileio_, controlAtom);
     hartreeFockAtom->moA_->setZero();
-    if (!hartreeFockAtom->Ref_) hartreeFockAtom->moB_->setZero();
+    if (hartreeFockAtom->Ref_ != RHF) hartreeFockAtom->moB_->setZero();
     hartreeFockAtom->haveMO = true;
     hartreeFockAtom->formFock();
     hartreeFockAtom->computeEnergy();
     hartreeFockAtom->doCUHF = true;
     hartreeFockAtom->SCF();
-    if (!hartreeFockAtom->Ref_){
+    if (hartreeFockAtom->Ref_ != RHF){
       denMOB = (*hartreeFockAtom->densityB_);
       denMOA = (*hartreeFockAtom->densityA_);
     }

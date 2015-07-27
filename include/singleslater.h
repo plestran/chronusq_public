@@ -52,30 +52,32 @@ class SingleSlater {
   int      multip_;
   int    **R2Index_;
 
-  int      nTCS_;
-  std::unique_ptr<TMatrix>  densityA_;
-  std::unique_ptr<TMatrix>  densityB_;
-  std::unique_ptr<TMatrix>  fockA_;
-  std::unique_ptr<TMatrix>  fockB_;
-  std::unique_ptr<TMatrix>  coulombA_;
-  std::unique_ptr<TMatrix>  coulombB_;
-  std::unique_ptr<TMatrix>  exchangeA_;
-  std::unique_ptr<TMatrix>  exchangeB_;
-  std::unique_ptr<TMatrix>  moA_;
-  std::unique_ptr<TMatrix>  moB_;
-  std::unique_ptr<TMatrix>  epsA_;
-  std::unique_ptr<TMatrix>  epsB_;
-  std::unique_ptr<TMatrix>  PTA_;
-  std::unique_ptr<TMatrix>  PTB_;
-  std::unique_ptr<RealMatrix>  dipole_;
-  std::unique_ptr<RealMatrix>  quadpole_;
-  std::unique_ptr<RealMatrix>  tracelessQuadpole_;
-  std::unique_ptr<RealTensor3d>  octpole_;
-  BasisSet *    basisset_;
-  Molecule *    molecule_;
-  FileIO *      fileio_;
-  Controls *    controls_;
-  AOIntegrals * aointegrals_;
+  int      nTCS_; ///< Integer to scale the dimension of matricies for TCS's
+
+  // Internal Storage
+  std::unique_ptr<TMatrix>  densityA_;   ///< Alpha or Full (TCS) Density Matrix
+  std::unique_ptr<TMatrix>  densityB_;   ///< Beta Density Matrix
+  std::unique_ptr<TMatrix>  fockA_;      ///< Alpha or Full (TCS) Fock Matrix
+  std::unique_ptr<TMatrix>  fockB_;      ///< Beta Fock Matrix
+  std::unique_ptr<TMatrix>  coulombA_;   ///< Alpha or Full (TCS) Coulomb Matrix
+  std::unique_ptr<TMatrix>  coulombB_;   ///< Beta Coulomb Matrix
+  std::unique_ptr<TMatrix>  exchangeA_;  ///< Alpha or Full (TCS) Exchange Matrix
+  std::unique_ptr<TMatrix>  exchangeB_;  ///< Beta Exchange Matrix
+  std::unique_ptr<TMatrix>  moA_;        ///< Alpha or Full (TCS) MO Coefficient Matrix
+  std::unique_ptr<TMatrix>  moB_;        ///< Beta MO Coefficient Matrix
+  std::unique_ptr<TMatrix>  epsA_;       ///< Alpha or Full (TCS) Fock Eigenenergies
+  std::unique_ptr<TMatrix>  epsB_;       ///< Beta Fock Eigenenergie
+  std::unique_ptr<TMatrix>  PTA_;        ///< Alpha or Full (TCS) Perturbation Tensor
+  std::unique_ptr<TMatrix>  PTB_;        ///< Beta Perturbation Tensor
+  std::unique_ptr<RealMatrix>  dipole_;  ///< Electric Dipole Moment
+  std::unique_ptr<RealMatrix>  quadpole_; ///< Electric Quadrupole Moment
+  std::unique_ptr<RealMatrix>  tracelessQuadpole_; ///< Traceless Electric Quadrupole Moment
+  std::unique_ptr<RealTensor3d>  octpole_; ///< Electric Octupole Moment
+  BasisSet *    basisset_;               ///< Basis Set
+  Molecule *    molecule_;               ///< Molecular specificiations
+  FileIO *      fileio_;                 ///< Access to output file
+  Controls *    controls_;               ///< General ChronusQ flow parameters
+  AOIntegrals * aointegrals_;            ///< Molecular Integrals over GTOs (AO basis)
 
 public:
  
@@ -84,25 +86,25 @@ public:
     UHF,
     CUHF,
     TCS
-  };
-  bool	haveMO;
-  bool	haveDensity; 
-  bool	haveCoulomb;
-  bool	haveExchange;
-  bool  havePT;
-  bool  doCUHF;
+  }; ///< Supported references
+  bool	haveMO;      ///< Have MO coefficients?
+  bool	haveDensity; ///< Computed Density? (Not sure if this is used anymore)
+  bool	haveCoulomb; ///< Computed Coulomb Matrix?
+  bool	haveExchange;///< Computed Exchange Matrix?
+  bool  havePT;      ///< Computed Perturbation Tensor?
+  bool  doCUHF;      ///< Redundent with enum for References?
 
-  double   energyOneE;
-  double   energyTwoE;
-  double   energyNuclei;
-  double   totalEnergy;
+  double   energyOneE; ///< One-bodied operator tensors traced with Density
+  double   energyTwoE; ///< Two-bodied operator tensors traced with Density
+  double   energyNuclei; ///< N-N Repulsion Energy
+  double   totalEnergy; ///< Sum of all energetic contributions
 
   // constructor & destructor
   SingleSlater(){;};
   ~SingleSlater() {;};
 
   template<typename U>
-  SingleSlater(SingleSlater<U> *);
+  SingleSlater(SingleSlater<U> *); ///< Copy Constructor
   // pseudo-constructor
   void iniSingleSlater(Molecule *,BasisSet *,AOIntegrals *,FileIO *,Controls *);
   //set private data
@@ -114,9 +116,7 @@ public:
   // access to private data
   inline int nBasis() { return this->nBasis_;};
   inline int nTT()     { return this->nTT_;};
-//APS
   inline int nShell() { return this->nShell_;};
-//APE
   inline int nAE()    { return this->nAE_;};
   inline int nBE()    { return this->nBE_;};
   inline int nOccA()  { return this->nOccA_;};
@@ -157,9 +157,7 @@ public:
   void formCoulomb();		// form the Coulomb matrix
   void formExchange();		// form the exchange matrix
   void formPT();
-  // APS           
   void matchord();              // match Guassian order of guess
-  // APE
   void readGuessIO();       	// read the initial guess of MO's from the input stream
   void readGuessGauMatEl(GauMatEl&); // read the intial guess of MO's from Gaussian raw matrix element file
   void readGuessGauFChk(std::string &);	// read the initial guess of MO's from the Gaussian formatted checkpoint file
