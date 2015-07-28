@@ -142,7 +142,7 @@ public:
   // constructor & destructor
   SingleSlater(){;};
   ~SingleSlater() {
-    if(this->SCF_SCR != NULL) delete [] this->SCF_SCR;
+  //if(this->SCF_SCR != NULL) delete [] this->SCF_SCR;
   };
 
   template<typename U>
