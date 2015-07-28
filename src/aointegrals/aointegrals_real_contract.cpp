@@ -45,7 +45,7 @@ void AOIntegrals::Gen34Contract(RealMatrix &G, const RealMatrix &X, int bf1, int
  * Forms the unique contributions for a 23 contraction
  * given the permutational symmetry of real ERIs
  *
- * G[X](μ,v) += 2*fact*(μ σ | λ v) X(σ,λ)
+ * G[X](μ,v) -= 2*fact*(μ σ | λ v) X(σ,λ)
  *
  */
 template<> 
@@ -92,7 +92,7 @@ void AOIntegrals::Restricted34HerContract(RealMatrix &G, const RealMatrix &X, in
   }
 } // Restricted34HerContract 
 template<>
-void AOIntegrals::UnRestricted34HerContract(RealMatrix &GAlpha, const RealMatrix &XAlpha, RealMatrix &GBeta, const RealMatrix &XBeta, int n1, int n2, int n3, int n4, 
+void AOIntegrals::UnRestricted34HerContract(RealMatrix &GAlpha, const RealMatrix &XAlpha, RealMatrix &GBeta, const RealMatrix &XBeta, const RealMatrix &XTotal, int n1, int n2, int n3, int n4, 
                      int bf1_s, int bf2_s, int bf3_s, int bf4_s, const double* buff, double deg){
   for(int i = 0, ijkl = 0 ; i < n1; ++i) {
     int bf1 = bf1_s + i;
@@ -105,6 +105,7 @@ void AOIntegrals::UnRestricted34HerContract(RealMatrix &GAlpha, const RealMatrix
           double v = buff[ijkl]*deg;
 
           // Coulomb
+/*
           GAlpha(bf1,bf2) += (XAlpha(bf4,bf3)+XBeta(bf4,bf3))*v;
           GAlpha(bf3,bf4) += (XAlpha(bf2,bf1)+XBeta(bf2,bf1))*v;
           GAlpha(bf2,bf1) += (XAlpha(bf3,bf4)+XBeta(bf3,bf4))*v;
@@ -113,8 +114,12 @@ void AOIntegrals::UnRestricted34HerContract(RealMatrix &GAlpha, const RealMatrix
           GBeta(bf3,bf4)  += (XAlpha(bf2,bf1)+XBeta(bf2,bf1))*v;
           GBeta(bf2,bf1)  += (XAlpha(bf3,bf4)+XBeta(bf3,bf4))*v;
           GBeta(bf4,bf3)  += (XAlpha(bf1,bf2)+XBeta(bf1,bf2))*v;
+*/
+          this->Gen34Contract(GAlpha,XTotal,bf1,bf2,bf3,bf4,v);
+          this->Gen34Contract(GBeta, XTotal,bf1,bf2,bf3,bf4,v);
 
           // Exchange
+/*
           GAlpha(bf1,bf3) -= 0.5*XAlpha(bf2,bf4)*v;
           GAlpha(bf2,bf4) -= 0.5*XAlpha(bf1,bf3)*v;
           GAlpha(bf1,bf4) -= 0.5*XAlpha(bf2,bf3)*v;
@@ -134,13 +139,16 @@ void AOIntegrals::UnRestricted34HerContract(RealMatrix &GAlpha, const RealMatrix
           GBeta(bf4,bf2)  -= 0.5*XBeta(bf3,bf1)*v;
           GBeta(bf4,bf1)  -= 0.5*XBeta(bf3,bf2)*v;
           GBeta(bf3,bf2)  -= 0.5*XBeta(bf4,bf1)*v;
+*/
+          this->Gen23Contract(GAlpha,XAlpha,bf1,bf2,bf3,bf4,v,0.5);
+          this->Gen23Contract(GBeta, XBeta, bf1,bf2,bf3,bf4,v,0.5);
         }
       }
     }
   }
 } // UnRestricted34HerContract
 template<>
-void AOIntegrals::General34NonHerContract(RealMatrix &GAlpha, const RealMatrix &XAlpha, RealMatrix &GBeta, const RealMatrix &XBeta, int n1, int n2, int n3, int n4, 
+void AOIntegrals::General34NonHerContract(RealMatrix &GAlpha, const RealMatrix &XAlpha, RealMatrix &GBeta, const RealMatrix &XBeta, const RealMatrix &XTotal, int n1, int n2, int n3, int n4, 
                      int bf1_s, int bf2_s, int bf3_s, int bf4_s, const double* buff, double deg){
   for(int i = 0, ijkl = 0 ; i < n1; ++i) {
     int bf1 = bf1_s + i;
@@ -153,6 +161,7 @@ void AOIntegrals::General34NonHerContract(RealMatrix &GAlpha, const RealMatrix &
           double v = buff[ijkl]*deg;
 
           // Coulomb
+/*
           GAlpha(bf1,bf2) += 0.5*(XAlpha(bf4,bf3)+XBeta(bf4,bf3))*v;
           GAlpha(bf3,bf4) += 0.5*(XAlpha(bf2,bf1)+XBeta(bf2,bf1))*v;
           GAlpha(bf2,bf1) += 0.5*(XAlpha(bf3,bf4)+XBeta(bf3,bf4))*v;
@@ -170,8 +179,13 @@ void AOIntegrals::General34NonHerContract(RealMatrix &GAlpha, const RealMatrix &
           GBeta(bf3,bf4)  += 0.5*(XAlpha(bf1,bf2)+XBeta(bf1,bf2))*v;
           GBeta(bf2,bf1)  += 0.5*(XAlpha(bf4,bf3)+XBeta(bf4,bf3))*v;
           GBeta(bf4,bf3)  += 0.5*(XAlpha(bf2,bf1)+XBeta(bf2,bf1))*v;
+*/
+          this->Gen34Contract(GAlpha,XTotal,bf1,bf2,bf3,bf4,v);
+          this->Gen34Contract(GBeta, XTotal,bf1,bf2,bf3,bf4,v);
+         
 
           // Exchange
+/*
           GAlpha(bf1,bf3) -= 0.5*XAlpha(bf2,bf4)*v;
           GAlpha(bf2,bf4) -= 0.5*XAlpha(bf1,bf3)*v;
           GAlpha(bf1,bf4) -= 0.5*XAlpha(bf2,bf3)*v;
@@ -191,6 +205,9 @@ void AOIntegrals::General34NonHerContract(RealMatrix &GAlpha, const RealMatrix &
           GBeta(bf4,bf2)  -= 0.5*XBeta(bf3,bf1)*v;
           GBeta(bf4,bf1)  -= 0.5*XBeta(bf3,bf2)*v;
           GBeta(bf3,bf2)  -= 0.5*XBeta(bf4,bf1)*v;
+*/
+          this->Gen23Contract(GAlpha,XAlpha,bf1,bf2,bf3,bf4,v,0.5);
+          this->Gen23Contract(GBeta, XBeta, bf1,bf2,bf3,bf4,v,0.5);
         }
       }
     }
@@ -318,10 +335,10 @@ void AOIntegrals::twoEContractDirect(bool RHF, bool doFock, bool do24, const Rea
                 bf1_s,bf2_s,bf3_s,bf4_s,buff,s1234_deg);
             else if(doFock)
               this->UnRestricted34HerContract(G[0][thread_id],XAlpha,G[1][thread_id],
-                XBeta,n1,n2,n3,n4,bf1_s,bf2_s,bf3_s,bf4_s,buff,s1234_deg);
+                XBeta,XTotal,n1,n2,n3,n4,bf1_s,bf2_s,bf3_s,bf4_s,buff,s1234_deg);
             else if(!do24)
               this->General34NonHerContract(G[0][thread_id],XAlpha,G[1][thread_id],
-                XBeta,n1,n2,n3,n4,bf1_s,bf2_s,bf3_s,bf4_s,buff,s1234_deg);
+                XBeta,XTotal,n1,n2,n3,n4,bf1_s,bf2_s,bf3_s,bf4_s,buff,s1234_deg);
             else
               this->General24CouContract(G[0][thread_id],XAlpha,n1,n2,n3,n4,
                 bf1_s,bf2_s,bf3_s,bf4_s,buff,s1234_deg);
@@ -439,6 +456,15 @@ std::vector<std::vector<std::vector<RealMatrix>>> G(nRHF,std::vector<std::vector
   std::vector<RealMatrix>(this->controls_->nthreads,
   RealMatrix::Zero(this->nBasis_,this->nBasis_))));
 
+  std::vector<RealMatrix> XTotal;
+  if(!RHF){
+    for(auto iX = 0; iX < nVec; iX++){
+      XTotal.push_back(XAlpha[iX] + XBeta[iX]);
+      if(!doFock)
+        XTotal[iX] = 0.5*XTotal[iX] + 0.5*(XAlpha[iX].adjoint() + XBeta[iX].adjoint());
+    }
+  }
+
   std::vector<coulombEngine> engines(this->controls_->nthreads);
   engines[0] = coulombEngine(this->basisSet_->maxPrim,this->basisSet_->maxL,0);
   engines[0].set_precision(std::numeric_limits<double>::epsilon());
@@ -516,12 +542,12 @@ std::vector<std::vector<std::vector<RealMatrix>>> G(nRHF,std::vector<std::vector
                   bf1_s,bf2_s,bf3_s,bf4_s,buff,s1234_deg);
               else if(doFock)
                 this->UnRestricted34HerContract(G[0][iX][thread_id],XAlpha[iX],
-                  G[1][iX][thread_id],XBeta[iX],n1,n2,n3,n4,bf1_s,bf2_s,bf3_s,bf4_s,buff,
-                  s1234_deg);
+                  G[1][iX][thread_id],XBeta[iX],XTotal[iX],n1,n2,n3,n4,bf1_s,bf2_s,bf3_s,
+                  bf4_s,buff,s1234_deg);
               else if(!do24)
                 this->General34NonHerContract(G[0][iX][thread_id],XAlpha[iX],
-                  G[1][iX][thread_id],XBeta[iX],n1,n2,n3,n4,bf1_s,bf2_s,bf3_s,bf4_s,buff,
-                  s1234_deg);
+                  G[1][iX][thread_id],XBeta[iX],XTotal[iX],n1,n2,n3,n4,bf1_s,bf2_s,bf3_s,
+                  bf4_s,buff, s1234_deg);
               else
                 this->General24CouContract(G[0][iX][thread_id],XAlpha[iX],n1,n2,n3,n4,
                   bf1_s,bf2_s,bf3_s,bf4_s,buff,s1234_deg);
