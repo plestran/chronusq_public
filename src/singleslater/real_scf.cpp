@@ -175,49 +175,4 @@ void SingleSlater<double>::evalConver(){
     this->isConverged = this->isConverged && (PBetaRMS < this->denTol_);
 }
 
-template<>
-void SingleSlater<double>::SCF(){
-  if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
-  int iter; 
-
-  this->initSCFMem();
-  this->formX();
-  for (iter = 0; iter < this->maxSCFIter_; iter++){
-    this->fileio_->out << endl << endl << bannerTop <<endl;  
-    this->fileio_->out << "SCF iteration:"<< iter+1 <<endl;  
-    this->fileio_->out << bannerEnd <<endl;  
-
-    if(this->Ref_ == CUHF) this->formNO();
-    this->diagFock();
-    this->formDensity();
-    this->formFock();
-  //this->computeEnergy();
-
-    if(this->Ref_ != CUHF){ // DIIS NYI for CUHF
-      this->GenDComm(iter);
-      this->CpyFock(iter);   
-      if(iter % (this->lenCoeff_-1) == (this->lenCoeff_-2) && iter != 0) this->CDIIS();
-    }
-    this->evalConver();
-    if(this->isConverged) break;
-
-  }; // SCF Loop
-  delete [] this->SCF_SCR;
-
-  if(!this->isConverged)
-    CErr("SCF Failed to converge within maximum number of iterations",this->fileio_->out);
-  this->fileio_->out <<"\n"<<endl; 
-  this->fileio_->out << bannerEnd <<endl<<std::fixed;
-  this->fileio_->out << "\nRequested convergence on RMS density matrix = " <<std::setw(5)<<this->denTol_ <<"  within  " << this->maxSCFIter_ <<"  cycles."<<endl;
-  this->fileio_->out << "Requested convergence on             energy = " <<this->eneTol_ << endl;
-  if(this->isConverged){
-    this->fileio_->out << endl << "SCF Completed: E(";
-    if(this->Ref_ == RHF)  this->fileio_->out << "RHF";
-    if(this->Ref_ == UHF)  this->fileio_->out << "UHF";
-    if(this->Ref_ == CUHF) this->fileio_->out << "CUHF";
-    this->fileio_->out << ") = ";
-    this->fileio_->out << this->totalEnergy << "  Eh after  " << iter + 1 << "  SCF Iterations" << endl;
-  }
-  this->fileio_->out << bannerEnd <<endl;
-}
 } // namespace ChronusQ

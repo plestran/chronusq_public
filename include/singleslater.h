@@ -229,6 +229,7 @@ public:
 #include <singleslater_print.h>
 #include <singleslater_fock.h>
 #include <singleslater_misc.h>
+#include <singleslater_scf.h>
 
 
 } // namespace ChronusQ
