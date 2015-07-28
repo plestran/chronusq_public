@@ -30,7 +30,8 @@ using ChronusQ::SingleSlater;
 
 namespace ChronusQ{
 template<>
-void SingleSlater<double>::CDIIS(int N, double *EA, double *FADIIS, double *EB, double *FBDIIS){
+void SingleSlater<double>::CDIIS(){
+  int N = this->lenCoeff_;
   RealMatrix B(N,N);
   double *coef = new double[N];
   int    *iPiv = new int[N];
@@ -38,15 +39,13 @@ void SingleSlater<double>::CDIIS(int N, double *EA, double *FADIIS, double *EB, 
   int NBSq = this->nBasis_*this->nBasis_;
   for(auto j = 0; j < (N-1); j++)
   for(auto k = 0; k <= j          ; k++){
-    RealMap EJA(EA + (j%(N-1))*NBSq,this->nBasis_,this->nBasis_);
-    if((k==0) && this->controls_->printLevel > 4) 
-      prettyPrint(this->fileio_->out,EJA,"Error "+std::to_string(j));
-    RealMap EKA(EA + (k%(N-1))*NBSq,this->nBasis_,this->nBasis_);
+    RealMap EJA(this->ErrorAlphaMem_ + (j%(N-1))*NBSq,this->nBasis_,this->nBasis_);
+    RealMap EKA(this->ErrorAlphaMem_ + (k%(N-1))*NBSq,this->nBasis_,this->nBasis_);
     B(j,k) = -EJA.frobInner(EKA);
-    if(this->Ref_ != RHF){
-      RealMap EJB(EB + (j%(N-1))*NBSq,this->nBasis_,this->nBasis_);
-      RealMap EKB(EB + (k%(N-1))*NBSq,this->nBasis_,this->nBasis_);
-      B(j,k) = -EJB.frobInner(EKB);
+    if(!this->isClosedShell){
+      RealMap EJB(this->ErrorBetaMem_ + (j%(N-1))*NBSq,this->nBasis_,this->nBasis_);
+      RealMap EKB(this->ErrorBetaMem_ + (k%(N-1))*NBSq,this->nBasis_,this->nBasis_);
+      B(j,k) += -EJB.frobInner(EKB);
     }
     B(k,j) = B(j,k);
   }
@@ -59,18 +58,43 @@ void SingleSlater<double>::CDIIS(int N, double *EA, double *FADIIS, double *EB, 
   coef[N-1]=-1.0;
   dgesv_(&N,&NRHS,B.data(),&N,iPiv,coef,&N,&INFO);
   this->fockA_->setZero();
-  if(this->Ref_ != RHF) this->fockB_->setZero();
+  if(!this->isClosedShell) this->fockB_->setZero();
   for(auto j = 0; j < N-1; j++) {
-    RealMap FA(FADIIS + (j%(N-1))*NBSq,this->nBasis_,this->nBasis_);
+    RealMap FA(this->FADIIS_ + (j%(N-1))*NBSq,this->nBasis_,this->nBasis_);
     *this->fockA_ += coef[j]*FA;
-    if(this->Ref_ != RHF) {
-      RealMap FB(FBDIIS + (j%(N-1))*NBSq,this->nBasis_,this->nBasis_);
+    if(!this->isClosedShell) {
+      RealMap FB(this->FBDIIS_ + (j%(N-1))*NBSq,this->nBasis_,this->nBasis_);
       *this->fockB_ += coef[j]*FB;
     }
   }
-  if(this->controls_->printLevel > 4) prettyPrint(this->fileio_->out,*this->fockA_,"Total Fock");
   delete [] coef;
   delete [] iPiv;
 
-}
+} // CDIIS
+
+template<>
+void SingleSlater<double>::CpyFock(int iter){
+  std::memcpy(this->FADIIS_+(iter % (this->lenCoeff_-1)) * this->lenF_,this->fockA_->data(),
+              this->lenF_ * sizeof(double));
+  if(!this->isClosedShell)
+    std::memcpy(this->FBDIIS_ + (iter % (this->lenCoeff_-1)) * this->lenF_,
+                this->fockB_->data(),this->lenF_ * sizeof(double));
+} // CpyFock
+
+template<>
+void SingleSlater<double>::GenDComm(int iter){
+  RealMap ErrA(this->ErrorAlphaMem_ + (iter % (this->lenCoeff_-1)) * this->lenF_,
+               this->nBasis_,this->nBasis_);
+
+  ErrA = (*this->fockA_) * (*this->densityA_) * (*this->aointegrals_->overlap_);
+  ErrA -= (*this->aointegrals_->overlap_) * (*this->densityA_) * (*this->fockA_);
+  if(!this->isClosedShell){
+    RealMap ErrB(this->ErrorBetaMem_ + (iter % (this->lenCoeff_-1)) * this->lenF_,
+                 this->nBasis_,this->nBasis_);
+
+    ErrB = (*this->fockB_) * (*this->densityB_) * (*this->aointegrals_->overlap_);
+    ErrB -= (*this->aointegrals_->overlap_) * (*this->densityB_) * (*this->fockB_);
+  }
+} // GenDComm
+
 }// Namespace ChronusQ

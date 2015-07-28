@@ -200,30 +200,10 @@ void SingleSlater<double>::SCF(){
     this->formFock();
   //this->computeEnergy();
 
-    if (this->Ref_ != CUHF){ // DIIS NYI for CUHF
-      RealMap ErrA(this->ErrorAlphaMem_ + (iter % (this->lenCoeff_-1)) * this->lenF_,
-                   this->nBasis_,this->nBasis_);
-
-      ErrA = (*this->fockA_) * (*this->densityA_) * (*this->aointegrals_->overlap_);
-      ErrA -= (*this->aointegrals_->overlap_) * (*this->densityA_) * (*this->fockA_);
-
-      std::memcpy(this->FADIIS_+(iter % (this->lenCoeff_-1)) * this->lenF_,
-                  this->fockA_->data(),this->lenF_ * sizeof(double));
-
-      if(!this->isClosedShell){
-        RealMap ErrB(this->ErrorBetaMem_ + (iter % (this->lenCoeff_-1)) * this->lenF_,
-                     this->nBasis_,this->nBasis_);
-
-        ErrB = (*this->fockB_) * (*this->densityB_) * (*this->aointegrals_->overlap_);
-        ErrB -= (*this->aointegrals_->overlap_) * (*this->densityB_) * (*this->fockB_);
-
-        std::memcpy(this->FBDIIS_ + (iter % (this->lenCoeff_-1)) * this->lenF_,
-                    this->fockB_->data(),this->lenF_ * sizeof(double));
-      }
-    
-      if(iter % (this->lenCoeff_-1) == (this->lenCoeff_-2) && iter != 0) 
-        this->CDIIS(this->lenCoeff_,this->ErrorAlphaMem_,this->FADIIS_,this->ErrorBetaMem_,
-                    this->FBDIIS_);
+    if(this->Ref_ != CUHF){ // DIIS NYI for CUHF
+      this->GenDComm(iter);
+      this->CpyFock(iter);   
+      if(iter % (this->lenCoeff_-1) == (this->lenCoeff_-2) && iter != 0) this->CDIIS();
     }
     this->evalConver();
     if(this->isConverged) break;
