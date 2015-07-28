@@ -147,72 +147,7 @@ void AOIntegrals::UnRestricted34HerContract(RealMatrix &GAlpha, const RealMatrix
     }
   }
 } // UnRestricted34HerContract
-template<>
-void AOIntegrals::General34NonHerContract(RealMatrix &GAlpha, const RealMatrix &XAlpha, RealMatrix &GBeta, const RealMatrix &XBeta, const RealMatrix &XTotal, int n1, int n2, int n3, int n4, 
-                     int bf1_s, int bf2_s, int bf3_s, int bf4_s, const double* buff, double deg){
-  for(int i = 0, ijkl = 0 ; i < n1; ++i) {
-    int bf1 = bf1_s + i;
-    for(int j = 0; j < n2; ++j) {
-      int bf2 = bf2_s + j;
-      for(int k = 0; k < n3; ++k) {
-        int bf3 = bf3_s + k;
-        for(int l = 0; l < n4; ++l, ++ijkl) {
-          int bf4 = bf4_s + l;
-          double v = buff[ijkl]*deg;
 
-          // Coulomb
-/*
-          GAlpha(bf1,bf2) += 0.5*(XAlpha(bf4,bf3)+XBeta(bf4,bf3))*v;
-          GAlpha(bf3,bf4) += 0.5*(XAlpha(bf2,bf1)+XBeta(bf2,bf1))*v;
-          GAlpha(bf2,bf1) += 0.5*(XAlpha(bf3,bf4)+XBeta(bf3,bf4))*v;
-          GAlpha(bf4,bf3) += 0.5*(XAlpha(bf1,bf2)+XBeta(bf1,bf2))*v;
-          GBeta(bf1,bf2)  += 0.5*(XAlpha(bf4,bf3)+XBeta(bf4,bf3))*v;
-          GBeta(bf3,bf4)  += 0.5*(XAlpha(bf2,bf1)+XBeta(bf2,bf1))*v;
-          GBeta(bf2,bf1)  += 0.5*(XAlpha(bf3,bf4)+XBeta(bf3,bf4))*v;
-          GBeta(bf4,bf3)  += 0.5*(XAlpha(bf1,bf2)+XBeta(bf1,bf2))*v;
-
-          GAlpha(bf1,bf2) += 0.5*(XAlpha(bf3,bf4)+XBeta(bf3,bf4))*v;
-          GAlpha(bf3,bf4) += 0.5*(XAlpha(bf1,bf2)+XBeta(bf1,bf2))*v;
-          GAlpha(bf2,bf1) += 0.5*(XAlpha(bf4,bf3)+XBeta(bf4,bf3))*v;
-          GAlpha(bf4,bf3) += 0.5*(XAlpha(bf2,bf1)+XBeta(bf2,bf1))*v;
-          GBeta(bf1,bf2)  += 0.5*(XAlpha(bf3,bf4)+XBeta(bf3,bf4))*v;
-          GBeta(bf3,bf4)  += 0.5*(XAlpha(bf1,bf2)+XBeta(bf1,bf2))*v;
-          GBeta(bf2,bf1)  += 0.5*(XAlpha(bf4,bf3)+XBeta(bf4,bf3))*v;
-          GBeta(bf4,bf3)  += 0.5*(XAlpha(bf2,bf1)+XBeta(bf2,bf1))*v;
-*/
-          this->Gen34Contract(GAlpha,XTotal,bf1,bf2,bf3,bf4,v);
-          this->Gen34Contract(GBeta, XTotal,bf1,bf2,bf3,bf4,v);
-         
-
-          // Exchange
-/*
-          GAlpha(bf1,bf3) -= 0.5*XAlpha(bf2,bf4)*v;
-          GAlpha(bf2,bf4) -= 0.5*XAlpha(bf1,bf3)*v;
-          GAlpha(bf1,bf4) -= 0.5*XAlpha(bf2,bf3)*v;
-          GAlpha(bf2,bf3) -= 0.5*XAlpha(bf1,bf4)*v;
-
-          GAlpha(bf3,bf1) -= 0.5*XAlpha(bf4,bf2)*v;
-          GAlpha(bf4,bf2) -= 0.5*XAlpha(bf3,bf1)*v;
-          GAlpha(bf4,bf1) -= 0.5*XAlpha(bf3,bf2)*v;
-          GAlpha(bf3,bf2) -= 0.5*XAlpha(bf4,bf1)*v;
-
-          GBeta(bf1,bf3)  -= 0.5*XBeta(bf2,bf4)*v;
-          GBeta(bf2,bf4)  -= 0.5*XBeta(bf1,bf3)*v;
-          GBeta(bf1,bf4)  -= 0.5*XBeta(bf2,bf3)*v;
-          GBeta(bf2,bf3)  -= 0.5*XBeta(bf1,bf4)*v;
-
-          GBeta(bf3,bf1)  -= 0.5*XBeta(bf4,bf2)*v;
-          GBeta(bf4,bf2)  -= 0.5*XBeta(bf3,bf1)*v;
-          GBeta(bf4,bf1)  -= 0.5*XBeta(bf3,bf2)*v;
-          GBeta(bf3,bf2)  -= 0.5*XBeta(bf4,bf1)*v;
-*/
-          this->Gen23Contract(GAlpha,XAlpha,bf1,bf2,bf3,bf4,v,0.5);
-          this->Gen23Contract(GBeta, XBeta, bf1,bf2,bf3,bf4,v,0.5);
-        }
-      }
-    }
-  }
-}
 template<>
 void AOIntegrals::General24CouContract(RealMatrix &G, const RealMatrix &X, int n1, int n2, int n3, int n4,
                      int bf1_s, int bf2_s, int bf3_s, int bf4_s, const double * buff, double deg){
@@ -333,11 +268,8 @@ void AOIntegrals::twoEContractDirect(bool RHF, bool doFock, bool do24, const Rea
             if(RHF && doFock) 
               this->Restricted34HerContract(G[0][thread_id],XAlpha,n1,n2,n3,n4,
                 bf1_s,bf2_s,bf3_s,bf4_s,buff,s1234_deg);
-            else if(doFock)
-              this->UnRestricted34HerContract(G[0][thread_id],XAlpha,G[1][thread_id],
-                XBeta,XTotal,n1,n2,n3,n4,bf1_s,bf2_s,bf3_s,bf4_s,buff,s1234_deg);
             else if(!do24)
-              this->General34NonHerContract(G[0][thread_id],XAlpha,G[1][thread_id],
+              this->UnRestricted34HerContract(G[0][thread_id],XAlpha,G[1][thread_id],
                 XBeta,XTotal,n1,n2,n3,n4,bf1_s,bf2_s,bf3_s,bf4_s,buff,s1234_deg);
             else
               this->General24CouContract(G[0][thread_id],XAlpha,n1,n2,n3,n4,
@@ -540,14 +472,10 @@ std::vector<std::vector<std::vector<RealMatrix>>> G(nRHF,std::vector<std::vector
               if(RHF && doFock) 
                 this->Restricted34HerContract(G[0][iX][thread_id],XAlpha[iX],n1,n2,n3,n4,
                   bf1_s,bf2_s,bf3_s,bf4_s,buff,s1234_deg);
-              else if(doFock)
+              else if(!do24)
                 this->UnRestricted34HerContract(G[0][iX][thread_id],XAlpha[iX],
                   G[1][iX][thread_id],XBeta[iX],XTotal[iX],n1,n2,n3,n4,bf1_s,bf2_s,bf3_s,
                   bf4_s,buff,s1234_deg);
-              else if(!do24)
-                this->General34NonHerContract(G[0][iX][thread_id],XAlpha[iX],
-                  G[1][iX][thread_id],XBeta[iX],XTotal[iX],n1,n2,n3,n4,bf1_s,bf2_s,bf3_s,
-                  bf4_s,buff, s1234_deg);
               else
                 this->General24CouContract(G[0][iX][thread_id],XAlpha[iX],n1,n2,n3,n4,
                   bf1_s,bf2_s,bf3_s,bf4_s,buff,s1234_deg);
