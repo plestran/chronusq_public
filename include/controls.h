@@ -56,10 +56,13 @@ public:
   bool          doQuadpole;     // Use Libint quadrapole integrals?
   bool          doOctpole;      // Use Libint octapole integrals?
   bool          doSDR;          // Perform Response calculation
-  bool          doCUHF;
+  bool          doCUHF;         // To CUHF (Eigenfunction of S x S)
   double 	thresholdS;
   double 	thresholdAB;
   double	thresholdSchawrtz;
+  double        SCFdenTol_;
+  double        SCFeneTol_;
+  int           SCFmaxIter_;
   int    	guess;         	// how to get the initial guess
   int           nthreads;       // Number of OpenMP threads
   int           SDMethod;

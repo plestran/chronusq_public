@@ -117,6 +117,10 @@ class SingleSlater {
   void diagFock();
   void evalConver();
 
+  double denTol_;
+  double eneTol_;
+  int maxSCFIter_;
+
 public:
  
   enum{

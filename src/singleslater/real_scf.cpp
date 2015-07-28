@@ -153,8 +153,6 @@ void SingleSlater<double>::evalConver(){
   double EDelta;
   double PAlphaRMS;
   double PBetaRMS;
-  double Dtol = 1e-10;
-  double Etol = 1e-8;
 
   RealMap POldAlpha(this->POldAlphaMem_,this->nBasis_,this->nBasis_);
   RealMap POldBeta(this->POldBetaMem_,0,0);
@@ -172,24 +170,19 @@ void SingleSlater<double>::evalConver(){
   if(this->isClosedShell) this->printDensityInfo(PAlphaRMS,EDelta);
   else                    this->printDensityInfo(PAlphaRMS,PBetaRMS,EDelta);
 
-  this->isConverged = (PAlphaRMS < Dtol) && (std::pow(EDelta,2) < Etol);
+  this->isConverged = (PAlphaRMS < this->denTol_) && (std::pow(EDelta,2) < this->eneTol_);
   if(!this->isClosedShell)
-    this->isConverged = this->isConverged && (PBetaRMS < Dtol);
+    this->isConverged = this->isConverged && (PBetaRMS < this->denTol_);
 }
 
 template<>
 void SingleSlater<double>::SCF(){
   if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
-
-  int maxIter    = 128; 
-  double Dtol = 1e-10;
-  double Etol = 1e-8;
-  int n = this->nBasis_; 
   int iter; 
 
   this->initSCFMem();
   this->formX();
-  for (iter=0; iter<maxIter; iter++){
+  for (iter = 0; iter < this->maxSCFIter_; iter++){
     this->fileio_->out << endl << endl << bannerTop <<endl;  
     this->fileio_->out << "SCF iteration:"<< iter+1 <<endl;  
     this->fileio_->out << bannerEnd <<endl;  
@@ -215,8 +208,8 @@ void SingleSlater<double>::SCF(){
     CErr("SCF Failed to converge within maximum number of iterations",this->fileio_->out);
   this->fileio_->out <<"\n"<<endl; 
   this->fileio_->out << bannerEnd <<endl<<std::fixed;
-  this->fileio_->out << "\nRequested convergence on RMS density matrix = " <<std::setw(5)<<Dtol <<"  within  " <<maxIter <<"  cycles."<<endl;
-  this->fileio_->out << "Requested convergence on             energy = " <<Etol << endl;
+  this->fileio_->out << "\nRequested convergence on RMS density matrix = " <<std::setw(5)<<this->denTol_ <<"  within  " << this->maxSCFIter_ <<"  cycles."<<endl;
+  this->fileio_->out << "Requested convergence on             energy = " <<this->eneTol_ << endl;
   if(this->isConverged){
     this->fileio_->out << endl << "SCF Completed: E(";
     if(this->Ref_ == RHF)  this->fileio_->out << "RHF";
