@@ -110,4 +110,4 @@ namespace ChronusQ{
     }
   } // General24CouContract
 
-}
+} // namespace ChronusQ
