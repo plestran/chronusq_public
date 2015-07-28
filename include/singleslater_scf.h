@@ -136,7 +136,6 @@ void SingleSlater<T>::SCF(){
     this->diagFock();
     this->formDensity();
     this->formFock();
-  //this->computeEnergy();
 
     if(this->Ref_ != CUHF){ // DIIS NYI for CUHF
       this->GenDComm(iter);
