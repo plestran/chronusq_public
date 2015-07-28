@@ -27,40 +27,6 @@
 namespace ChronusQ{
 #ifdef USE_LIBINT
 /**
- * Forms the unique contributions for a 34 contraction
- * given the permutational symmetry of real ERIs
- *
- * G[X](μ,v) += (μ v | λ σ) X(σ,λ)
- *
- */
-template<>
-void AOIntegrals::Gen34Contract(RealMatrix &G, const RealMatrix &X, int bf1, int bf2, int bf3, int bf4, double v){
-  G(bf1,bf2) += X(bf4,bf3)*v;
-  G(bf3,bf4) += X(bf2,bf1)*v;
-  G(bf2,bf1) += X(bf3,bf4)*v;
-  G(bf4,bf3) += X(bf1,bf2)*v;
-} // Restricted34HerContract
-
-/**
- * Forms the unique contributions for a 23 contraction
- * given the permutational symmetry of real ERIs
- *
- * G[X](μ,v) -= 2*fact*(μ σ | λ v) X(σ,λ)
- *
- */
-template<> 
-void AOIntegrals::Gen23Contract(RealMatrix &G, const RealMatrix &X, int bf1, int bf2, int bf3, int bf4, double v, double fact){
-  G(bf1,bf3) -= fact*X(bf2,bf4)*v;
-  G(bf2,bf4) -= fact*X(bf1,bf3)*v;
-  G(bf1,bf4) -= fact*X(bf2,bf3)*v;
-  G(bf2,bf3) -= fact*X(bf1,bf4)*v;
-
-  G(bf3,bf1) -= fact*X(bf4,bf2)*v;
-  G(bf4,bf2) -= fact*X(bf3,bf1)*v;
-  G(bf4,bf1) -= fact*X(bf3,bf2)*v;
-  G(bf3,bf2) -= fact*X(bf4,bf1)*v;
-}
-/**
  *  Given a shell quartet block of ERIs (row-major), the following contraction is performed
  *
  *  G(μ,v) = (μ v | λ σ) X(σ,λ) - 0.5 (μ σ | λ v) X(σ,λ)
@@ -105,41 +71,10 @@ void AOIntegrals::UnRestricted34HerContract(RealMatrix &GAlpha, const RealMatrix
           double v = buff[ijkl]*deg;
 
           // Coulomb
-/*
-          GAlpha(bf1,bf2) += (XAlpha(bf4,bf3)+XBeta(bf4,bf3))*v;
-          GAlpha(bf3,bf4) += (XAlpha(bf2,bf1)+XBeta(bf2,bf1))*v;
-          GAlpha(bf2,bf1) += (XAlpha(bf3,bf4)+XBeta(bf3,bf4))*v;
-          GAlpha(bf4,bf3) += (XAlpha(bf1,bf2)+XBeta(bf1,bf2))*v;
-          GBeta(bf1,bf2)  += (XAlpha(bf4,bf3)+XBeta(bf4,bf3))*v;
-          GBeta(bf3,bf4)  += (XAlpha(bf2,bf1)+XBeta(bf2,bf1))*v;
-          GBeta(bf2,bf1)  += (XAlpha(bf3,bf4)+XBeta(bf3,bf4))*v;
-          GBeta(bf4,bf3)  += (XAlpha(bf1,bf2)+XBeta(bf1,bf2))*v;
-*/
           this->Gen34Contract(GAlpha,XTotal,bf1,bf2,bf3,bf4,v);
           this->Gen34Contract(GBeta, XTotal,bf1,bf2,bf3,bf4,v);
 
           // Exchange
-/*
-          GAlpha(bf1,bf3) -= 0.5*XAlpha(bf2,bf4)*v;
-          GAlpha(bf2,bf4) -= 0.5*XAlpha(bf1,bf3)*v;
-          GAlpha(bf1,bf4) -= 0.5*XAlpha(bf2,bf3)*v;
-          GAlpha(bf2,bf3) -= 0.5*XAlpha(bf1,bf4)*v;
-
-          GAlpha(bf3,bf1) -= 0.5*XAlpha(bf4,bf2)*v;
-          GAlpha(bf4,bf2) -= 0.5*XAlpha(bf3,bf1)*v;
-          GAlpha(bf4,bf1) -= 0.5*XAlpha(bf3,bf2)*v;
-          GAlpha(bf3,bf2) -= 0.5*XAlpha(bf4,bf1)*v;
-
-          GBeta(bf1,bf3)  -= 0.5*XBeta(bf2,bf4)*v;
-          GBeta(bf2,bf4)  -= 0.5*XBeta(bf1,bf3)*v;
-          GBeta(bf1,bf4)  -= 0.5*XBeta(bf2,bf3)*v;
-          GBeta(bf2,bf3)  -= 0.5*XBeta(bf1,bf4)*v;
-
-          GBeta(bf3,bf1)  -= 0.5*XBeta(bf4,bf2)*v;
-          GBeta(bf4,bf2)  -= 0.5*XBeta(bf3,bf1)*v;
-          GBeta(bf4,bf1)  -= 0.5*XBeta(bf3,bf2)*v;
-          GBeta(bf3,bf2)  -= 0.5*XBeta(bf4,bf1)*v;
-*/
           this->Gen23Contract(GAlpha,XAlpha,bf1,bf2,bf3,bf4,v,0.5);
           this->Gen23Contract(GBeta, XBeta, bf1,bf2,bf3,bf4,v,0.5);
         }
@@ -160,22 +95,13 @@ void AOIntegrals::General24CouContract(RealMatrix &G, const RealMatrix &X, int n
         for(int l = 0; l < n4; ++l, ++ijkl) {
           int bf4 = bf4_s + l;
           double v = buff[ijkl]*deg;
-
-          G(bf1,bf3) += X(bf2,bf4)*v;
-          G(bf2,bf3) += X(bf1,bf4)*v;
-          G(bf1,bf4) += X(bf2,bf3)*v;
-          G(bf2,bf4) += X(bf1,bf3)*v;
-
-          G(bf3,bf1) += X(bf4,bf2)*v; 
-          G(bf4,bf1) += X(bf3,bf2)*v;
-          G(bf3,bf2) += X(bf4,bf1)*v;
-          G(bf4,bf2) += X(bf3,bf1)*v;
+          this->Gen24Contract(G,X,bf1,bf2,bf3,bf4,v);
         }
       }
     }
   }
 
-}
+} // General24CouContract
 template<>
 void AOIntegrals::twoEContractDirect(bool RHF, bool doFock, bool do24, const RealMatrix &XAlpha, RealMatrix &AXAlpha,
                                      const RealMatrix &XBeta, RealMatrix &AXBeta) {
