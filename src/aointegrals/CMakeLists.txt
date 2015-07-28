@@ -1,4 +1,5 @@
 add_library(aointegrals aointegrals.cpp aointegrals_builders.cpp
 aointegrals_onee.cpp aointegrals_twoe.cpp aointegrals_real_contract.cpp
 aointegrals_complex_contract.cpp aointegrals_real_contract_uniquegen.cpp
-aointegrals_real_contract_percontract.cpp aointegrals_real_contract_direct.cpp)
+aointegrals_real_contract_percontract.cpp aointegrals_real_contract_direct.cpp
+aointegrals_real_contract_N4.cpp aointegrals_real_contract_DF.cpp)
