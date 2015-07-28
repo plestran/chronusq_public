@@ -27,6 +27,40 @@
 namespace ChronusQ{
 #ifdef USE_LIBINT
 /**
+ * Forms the unique contributions for a 34 contraction
+ * given the permutational symmetry of real ERIs
+ *
+ * G[X](μ,v) += (μ v | λ σ) X(σ,λ)
+ *
+ */
+template<>
+void AOIntegrals::Gen34Contract(RealMatrix &G, const RealMatrix &X, int bf1, int bf2, int bf3, int bf4, double v){
+  G(bf1,bf2) += X(bf4,bf3)*v;
+  G(bf3,bf4) += X(bf2,bf1)*v;
+  G(bf2,bf1) += X(bf3,bf4)*v;
+  G(bf4,bf3) += X(bf1,bf2)*v;
+} // Restricted34HerContract
+
+/**
+ * Forms the unique contributions for a 23 contraction
+ * given the permutational symmetry of real ERIs
+ *
+ * G[X](μ,v) += 2*fact*(μ σ | λ v) X(σ,λ)
+ *
+ */
+template<> 
+void AOIntegrals::Gen23Contract(RealMatrix &G, const RealMatrix &X, int bf1, int bf2, int bf3, int bf4, double v, double fact){
+  G(bf1,bf3) -= fact*X(bf2,bf4)*v;
+  G(bf2,bf4) -= fact*X(bf1,bf3)*v;
+  G(bf1,bf4) -= fact*X(bf2,bf3)*v;
+  G(bf2,bf3) -= fact*X(bf1,bf4)*v;
+
+  G(bf3,bf1) -= fact*X(bf4,bf2)*v;
+  G(bf4,bf2) -= fact*X(bf3,bf1)*v;
+  G(bf4,bf1) -= fact*X(bf3,bf2)*v;
+  G(bf3,bf2) -= fact*X(bf4,bf1)*v;
+}
+/**
  *  Given a shell quartet block of ERIs (row-major), the following contraction is performed
  *
  *  G(μ,v) = (μ v | λ σ) X(σ,λ) - 0.5 (μ σ | λ v) X(σ,λ)
@@ -48,21 +82,10 @@ void AOIntegrals::Restricted34HerContract(RealMatrix &G, const RealMatrix &X, in
           double v = buff[ijkl]*deg;
 
           // Coulomb
-          G(bf1,bf2) += X(bf4,bf3)*v;
-          G(bf3,bf4) += X(bf2,bf1)*v;
-          G(bf2,bf1) += X(bf3,bf4)*v;
-          G(bf4,bf3) += X(bf1,bf2)*v;
+          this->Gen34Contract(G,X,bf1,bf2,bf3,bf4,v);
 
           // Exchange
-          G(bf1,bf3) -= 0.25*X(bf2,bf4)*v;
-          G(bf2,bf4) -= 0.25*X(bf1,bf3)*v;
-          G(bf1,bf4) -= 0.25*X(bf2,bf3)*v;
-          G(bf2,bf3) -= 0.25*X(bf1,bf4)*v;
-
-          G(bf3,bf1) -= 0.25*X(bf4,bf2)*v;
-          G(bf4,bf2) -= 0.25*X(bf3,bf1)*v;
-          G(bf4,bf1) -= 0.25*X(bf3,bf2)*v;
-          G(bf3,bf2) -= 0.25*X(bf4,bf1)*v;
+          this->Gen23Contract(G,X,bf1,bf2,bf3,bf4,v,0.25);
         }
       }
     }
@@ -214,6 +237,12 @@ void AOIntegrals::twoEContractDirect(bool RHF, bool doFock, bool do24, const Rea
   else    nRHF = 2;
   std::vector<std::vector<RealMatrix>> G(nRHF,std::vector<RealMatrix>
     (this->controls_->nthreads,RealMatrix::Zero(this->nBasis_,this->nBasis_)));
+
+  RealMatrix XTotal;
+  if(!RHF) {
+    XTotal = XAlpha + XBeta;
+    if(!doFock) XTotal = 0.5*XTotal + 0.5*(XAlpha.adjoint() + XBeta.adjoint());
+  }
 
   std::vector<coulombEngine> engines(this->controls_->nthreads);
   engines[0] = coulombEngine(this->basisSet_->maxPrim,this->basisSet_->maxL,0);
