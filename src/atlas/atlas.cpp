@@ -27,12 +27,23 @@
 #include <grid.h>
 using namespace ChronusQ;
 
+  //  Test Function for One-dimensional grid
 void func(Grid *g){
+  // Reference numeric integration computed with Mathematica
   double ref = 0.18947234582049224;
-     (*g).genGrid();
-   cout << "Gauss-Chebyshev 1st kind grid generated" << endl;
+   (*g).genGrid();
    cout << "Test Integral value= "<< (*g).integrate() << endl;
-   cout << "Test Integral err  = "<< std::scientific <<std::abs((*g).integrate() - ref)/ref << endl;
+//   cout << "Test Integral err  = "<< std::scientific <<std::abs((*g).integrate() - ref)/ref << endl;
+   cout << "Test Integral err  = "<<std::abs((*g).integrate() - ref)/ref << endl;
+}
+
+void func2D(twoDGrid *g){
+  // Reference numeric integration computed with Mathematica
+//  double ref = 0.18947234582049224;
+   (*g).genGrid();
+   (*g).transformPts(); 
+//   cout << "Test Integral value= "<< (*g).integrate() << endl;
+//   cout << "Test Integral err  = "<< std::scientific <<std::abs((*g).integrate() - ref)/ref << endl;
 }
 
 int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
@@ -110,35 +121,25 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   moIntegrals->iniMOIntegrals(molecule,basisset,fileIO,controls,aointegrals,hartreeFock);
 
 
-//APS
  int Iop=0;
  molecule->toCOM(Iop);  // call object molecule pointing to function toCOM-Iop=0 Center of Mass
  Iop=1;
  molecule->toCOM(Iop);  // call object molecule pointing to function toCOM-Iop=1 Center of Nuclear Charges
-//APE
 */
-//APS
 //Test one dimensional grid
   fileIO->out << "**AP One dimensional grid test**" << endl;
   int Ngridr =   500;
   int Ngridr2 = 5000;
-  double ref = 0.18947234582049224;
+  int NLeb    = 18;
   double radius = 1.0;
    GaussChebyshev1stGrid Rad(Ngridr,0.0,radius);
-   Rad.genGrid();
-   fileIO->out <<  Ngridr <<" grid points" << endl;
-   fileIO->out << "Gauss-Chebyshev 1st kind grid generated" << endl;
-   fileIO->out << "Test Integral value= "<< Rad.integrate() << endl;
-   fileIO->out << "Test Integral err  = "<< std::scientific<< std::abs(Rad.integrate() - ref)/ref << endl;
    GaussChebyshev1stGrid Rad2(Ngridr2,0.0,radius);
-   Rad2.genGrid();
-   fileIO->out <<  Ngridr2 <<" grid points" << endl;
-   fileIO->out << "Gauss-Chebyshev 1st kind grid generated" << endl;
-   fileIO->out << "Test Integral value= "<< Rad2.integrate() << endl;
-   fileIO->out << "Test Integral err  = "<< std::scientific <<std::abs(Rad2.integrate() - ref)/ref << endl;
+   LebedevGrid GridLeb(NLeb);
    
    func(&Rad);
-//APE
+   func(&Rad2);
+   func2D(&GridLeb);
+//
   time(&currentTime);
   fileIO->out<<"\nJob finished: "<<ctime(&currentTime)<<endl;
 /*
