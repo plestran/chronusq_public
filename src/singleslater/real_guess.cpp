@@ -127,8 +127,7 @@ void SingleSlater<double>::formGuess() {
     hartreeFockAtom->haveMO = true;
     hartreeFockAtom->formFock();
     hartreeFockAtom->computeEnergy();
-//  hartreeFockAtom->doCUHF = true;
-    hartreeFockAtom->SCF2();
+    hartreeFockAtom->SCF();
     if (hartreeFockAtom->Ref_ != RHF){
       denMOB = (*hartreeFockAtom->densityB_);
       denMOA = (*hartreeFockAtom->densityA_);

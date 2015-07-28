@@ -47,7 +47,6 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
   this->nVirA_ = this->nBasis_ - this->nOccA_;
   this->energyNuclei = molecule->energyNuclei();
   this->isConverged = false;
-  this->doCUHF = controls->doCUHF;
 
   this->isClosedShell = (this->multip_ == 1);
   if(this->isClosedShell && !controls->doCUHF)   this->Ref_ = RHF ; // RHF
