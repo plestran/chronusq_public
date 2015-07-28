@@ -46,6 +46,7 @@ void SingleSlater<double>::printDensityInfo(double PAlphaRMS, double PBetaRMS, d
   this->fileio_->out<<std::right<<std::setw(30)<<"RMS Alpha Density = "<<std::setw(15)<<std::scientific<<PAlphaRMS<<endl;
   this->fileio_->out<<std::right<<std::setw(30)<<"RMS Beta Density = "<<std::setw(15)<<std::scientific<<PBetaRMS<<endl;
 };
+
 template<>
 void SingleSlater<double>::SCF(){
   if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
@@ -232,12 +233,12 @@ void SingleSlater<double>::SCF(){
       RealMap ErrA(ErrorAlphaMem + (iter%(lenCoeff-1))*lenF,n,n);
       ErrA = (*this->fockA_) * (*this->densityA_) * (*this->aointegrals_->overlap_);
       ErrA -= (*this->aointegrals_->overlap_) * (*this->densityA_) * (*this->fockA_);
-      memcpy(FADIIS+(iter%(lenCoeff-1))*lenF,this->fockA_->data(),lenF*sizeof(double));
+      std::memcpy(FADIIS+(iter%(lenCoeff-1))*lenF,this->fockA_->data(),lenF*sizeof(double));
       if(this->Ref_ != RHF){
         RealMap ErrB(ErrorBetaMem + (iter%(lenCoeff-1))*lenF,n,n);
         ErrB = (*this->fockB_) * (*this->densityB_) * (*this->aointegrals_->overlap_);
         ErrB -= (*this->aointegrals_->overlap_) * (*this->densityB_) * (*this->fockB_);
-        memcpy(FBDIIS+(iter%(lenCoeff-1))*lenF,this->fockB_->data(),lenF*sizeof(double));
+        std::memcpy(FBDIIS+(iter%(lenCoeff-1))*lenF,this->fockB_->data(),lenF*sizeof(double));
       }
     
       if(iter % (lenCoeff-1) == (lenCoeff-2) && iter != 0) 
@@ -283,4 +284,205 @@ void SingleSlater<double>::SCF(){
   }
   this->fileio_->out << bannerEnd <<endl;
 }; 
+
+template<>
+void SingleSlater<double>::formX(){
+  RealMap X(this->XMem_,this->nBasis_,this->nBasis_);
+  X = (*this->aointegrals_->overlap_).pow(-0.5); // Make this more efficient... FIXME
+
+  if(this->Ref_ == CUHF){
+    RealMap Xp(this->XpMem_,this->nBasis_,this->nBasis_);
+    Xp = (*this->aointegrals_->overlap_).pow(0.5); // Make this more efficient... FIXME
+  }
+}
+
+template<>
+void SingleSlater<double>::formNO(){
+  int INFO;
+  char JOBZ = 'V';
+  char UPLO = 'L';
+
+  RealMap P(this->PNOMem_,this->nBasis_,this->nBasis_);
+  RealMap Xp(this->XpMem_,this->nBasis_,this->nBasis_);
+
+  P = 0.5 * Xp * (*this->densityA_) * Xp;
+  if(!this->isClosedShell)
+    P += 0.5 * Xp * (*this->densityB_) * Xp;
+
+  dsyev_(&JOBZ,&UPLO,&this->nBasis_,this->PNOMem_,&this->nBasis_,this->occNumMem_,
+         this->WORK_,&this->LWORK_,&INFO);
+  if(INFO != 0) CErr("DSYEV Failed in FormNO",this->fileio_->out);
+  P.transposeInPlace();
+
+  // Swap Ordering
+  for(auto i = 0; i < this->nBasis_/2; i++) P.col(i).swap(P.col(this->nBasis_ - i- 1));
+
+}
+
+template<>
+void SingleSlater<double>::diagFock(){
+  int INFO;
+  char JOBZ = 'V';
+  char UPLO = 'U';
+
+  RealMap X(this->XMem_,this->nBasis_,this->nBasis_);
+  RealMap POldAlpha(this->POldAlphaMem_,this->nBasis_,this->nBasis_);
+  RealMap FpAlpha(this->FpAlphaMem_,this->nBasis_,this->nBasis_);
+  RealMap POldBeta(this->POldBetaMem_,0,0);
+  RealMap FpBeta(this->FpBetaMem_,0,0);
+  if(!this->isClosedShell){
+    new (&POldBeta)  RealMap(this->POldBetaMem_, this->nBasis_,this->nBasis_);
+    new (&FpBeta) RealMap(this->FpBetaMem_,this->nBasis_,this->nBasis_);
+  }
+
+
+  if(this->Ref_ == CUHF){
+    RealMap P(this->PNOMem_,this->nBasis_,this->nBasis_);
+    RealMap Xp(this->XpMem_,this->nBasis_,this->nBasis_);
+    RealMap DelF(this->delFMem_,this->nBasis_,this->nBasis_);
+    RealMap Lambda(this->lambdaMem_,this->nBasis_,this->nBasis_);
+
+    int activeSpace  = this->molecule_->multip() - 1;
+    int coreSpace    = (this->molecule_->nTotalE() - activeSpace) / 2;
+    int virtualSpace = this->nBasis_ - coreSpace - activeSpace;
+
+    DelF = 0.5 * X * (*this->fockA_) * X;
+    if(!this->isClosedShell)
+      DelF -= 0.5 * X * (*this->fockB_) * X;
+ 
+    DelF = P.transpose() * DelF * P;
+ 
+    Lambda.setZero();
+    for(auto i = activeSpace + coreSpace; i < this->nBasis_; i++)
+    for(auto j = 0                      ; j < coreSpace    ; j++){
+      Lambda(i,j) = -DelF(i,j);
+      Lambda(j,i) = -DelF(j,i);
+    }
+    Lambda = P  * Lambda * P.transpose();
+    Lambda = Xp * Lambda * Xp;  
+ 
+    (*this->fockA_) += Lambda;
+    if(!this->isClosedShell) (*this->fockB_) -= Lambda;
+  }
+
+  POldAlpha = (*this->densityA_);
+  if(!this->isClosedShell) POldBeta = (*this->densityB_);
+  FpAlpha = X.transpose() * (*this->fockA_) * X;
+  dsyev_(&JOBZ,&UPLO,&this->nBasis_,this->FpAlphaMem_,&this->nBasis_,this->epsA_->data(),
+         this->WORK_,&this->LWORK_,&INFO);
+  if(INFO != 0) CErr("DSYEV Failed Fock Alpha",this->fileio_->out);
+  FpAlpha.transposeInPlace(); // bc row major
+  (*this->moA_) = X * FpAlpha;
+
+  if(!this->isClosedShell){
+    FpBeta = X.transpose() * (*this->fockB_) * X;
+    dsyev_(&JOBZ,&UPLO,&this->nBasis_,this->FpBetaMem_,&this->nBasis_,this->epsB_->data(),
+           this->WORK_,&this->LWORK_,&INFO);
+    if(INFO != 0) CErr("DSYEV Failed Fock Beta",this->fileio_->out);
+    FpBeta.transposeInPlace(); // bc row major
+    (*this->moB_) = X * FpBeta;
+  }
+
+}
+
+template<>
+void SingleSlater<double>::evalConver(){
+  double EOld;
+  double EDelta;
+  double PAlphaRMS;
+  double PBetaRMS;
+  double Dtol = 1e-10;
+  double Etol = 1e-8;
+
+  RealMap POldAlpha(this->POldAlphaMem_,this->nBasis_,this->nBasis_);
+  RealMap POldBeta(this->POldBetaMem_,0,0);
+  if(!this->isClosedShell){
+    new (&POldBeta)  RealMap(this->POldBetaMem_, this->nBasis_,this->nBasis_);
+  }
+
+  EOld = this->totalEnergy;
+  this->computeEnergy();
+  EDelta = this->totalEnergy - EOld;
+
+  PAlphaRMS = ((*this->densityA_) - POldAlpha).norm();
+  if(!this->isClosedShell) PBetaRMS = ((*this->densityB_) - POldBeta).norm();
+
+  if(this->isClosedShell) this->printDensityInfo(PAlphaRMS,EDelta);
+  else                    this->printDensityInfo(PAlphaRMS,PBetaRMS,EDelta);
+
+  this->isConverged = (PAlphaRMS < Dtol) && (std::pow(EDelta,2) < Etol);
+  if(!this->isClosedShell)
+    this->isConverged = this->isConverged && (PBetaRMS < Dtol);
+}
+
+template<>
+void SingleSlater<double>::SCF2(){
+  if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
+
+  int maxIter    = 128; 
+  double Dtol = 1e-10;
+  double Etol = 1e-8;
+  int n = this->nBasis_; 
+  int iter; 
+
+  this->initSCFMem();
+  this->formX();
+  for (iter=0; iter<maxIter; iter++){
+    this->fileio_->out << endl << endl << bannerTop <<endl;  
+    this->fileio_->out << "SCF iteration:"<< iter+1 <<endl;  
+    this->fileio_->out << bannerEnd <<endl;  
+
+    if(this->Ref_ == CUHF) this->formNO();
+    this->diagFock();
+    this->formDensity();
+    this->formFock();
+  //this->computeEnergy();
+
+    if (this->Ref_ != CUHF){ // DIIS NYI for CUHF
+      RealMap ErrA(this->ErrorAlphaMem_ + (iter % (this->lenCoeff_-1)) * this->lenF_,
+                   this->nBasis_,this->nBasis_);
+
+      ErrA = (*this->fockA_) * (*this->densityA_) * (*this->aointegrals_->overlap_);
+      ErrA -= (*this->aointegrals_->overlap_) * (*this->densityA_) * (*this->fockA_);
+
+      std::memcpy(this->FADIIS_+(iter % (this->lenCoeff_-1)) * this->lenF_,
+                  this->fockA_->data(),this->lenF_ * sizeof(double));
+
+      if(!this->isClosedShell){
+        RealMap ErrB(this->ErrorBetaMem_ + (iter % (this->lenCoeff_-1)) * this->lenF_,
+                     this->nBasis_,this->nBasis_);
+
+        ErrB = (*this->fockB_) * (*this->densityB_) * (*this->aointegrals_->overlap_);
+        ErrB -= (*this->aointegrals_->overlap_) * (*this->densityB_) * (*this->fockB_);
+
+        std::memcpy(this->FBDIIS_ + (iter % (this->lenCoeff_-1)) * this->lenF_,
+                    this->fockB_->data(),this->lenF_ * sizeof(double));
+      }
+    
+      if(iter % (this->lenCoeff_-1) == (this->lenCoeff_-2) && iter != 0) 
+        this->CDIIS(this->lenCoeff_,this->ErrorAlphaMem_,this->FADIIS_,this->ErrorBetaMem_,
+                    this->FBDIIS_);
+    }
+    this->evalConver();
+    if(this->isConverged) break;
+
+  }; // SCF Loop
+  delete [] this->SCF_SCR;
+
+  if(!this->isConverged)
+    CErr("SCF Failed to converge within maximum number of iterations",this->fileio_->out);
+  this->fileio_->out <<"\n"<<endl; 
+  this->fileio_->out << bannerEnd <<endl<<std::fixed;
+  this->fileio_->out << "\nRequested convergence on RMS density matrix = " <<std::setw(5)<<Dtol <<"  within  " <<maxIter <<"  cycles."<<endl;
+  this->fileio_->out << "Requested convergence on             energy = " <<Etol << endl;
+  if(this->isConverged){
+    this->fileio_->out << endl << "SCF Completed: E(";
+    if(this->Ref_ == RHF)  this->fileio_->out << "RHF";
+    if(this->Ref_ == UHF)  this->fileio_->out << "UHF";
+    if(this->Ref_ == CUHF) this->fileio_->out << "CUHF";
+    this->fileio_->out << ") = ";
+    this->fileio_->out << this->totalEnergy << "  Eh after  " << iter + 1 << "  SCF Iterations" << endl;
+  }
+  this->fileio_->out << bannerEnd <<endl;
+}
 } // namespace ChronusQ

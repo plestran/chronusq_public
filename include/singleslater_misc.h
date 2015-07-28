@@ -31,12 +31,24 @@ void SingleSlater<T>::formDensity(){
   if(!this->haveMO)
     CErr("No MO coefficients available to form one-particle density matrix!",
          this->fileio_->out);
-  *this->densityA_ = this->moA_->block(0,0,this->nBasis_,this->nOccA_)*
-                   this->moA_->block(0,0,this->nBasis_,this->nOccA_).adjoint();
-  if(this->Ref_ == RHF) *this->densityA_ *= math.two;
-  else {
-    *this->densityB_ = this->moB_->block(0,0,this->nBasis_,this->nOccB_)*
-                   this->moB_->block(0,0,this->nBasis_,this->nOccB_).adjoint();
+
+  if(this->Ref_ == TCS){
+    auto nOcc = this->nOccA_ + this->nOccB_;
+
+    (*this->densityA_)= 
+      this->moA_->block(0,0,this->nTCS_*this->nBasis_,nOcc)*
+      this->moA_->block(0,0,this->nTCS_*this->nBasis_,nOcc).adjoint();
+
+  } else {
+    (*this->densityA_) = 
+      this->moA_->block(0,0,this->nBasis_,this->nOccA_)*
+      this->moA_->block(0,0,this->nBasis_,this->nOccA_).adjoint();
+    if(this->Ref_ == RHF) (*this->densityA_) *= math.two;// D(a) is actually total D for RHF
+    else {
+      (*this->densityB_) = 
+        this->moB_->block(0,0,this->nBasis_,this->nOccB_)*
+        this->moB_->block(0,0,this->nBasis_,this->nOccB_).adjoint();
+    }
   }
   if(this->controls_->printLevel>=2) {
     prettyPrint(this->fileio_->out,(*this->densityA_),"Alpha Density");

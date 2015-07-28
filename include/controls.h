@@ -56,6 +56,7 @@ public:
   bool          doQuadpole;     // Use Libint quadrapole integrals?
   bool          doOctpole;      // Use Libint octapole integrals?
   bool          doSDR;          // Perform Response calculation
+  bool          doCUHF;
   double 	thresholdS;
   double 	thresholdAB;
   double	thresholdSchawrtz;

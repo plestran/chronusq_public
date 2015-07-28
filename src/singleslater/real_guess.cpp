@@ -119,6 +119,7 @@ void SingleSlater<double>::formGuess() {
     RealMatrix denMOB(nsize, nsize);
     basisSetAtom->convToLI=true;
     controlAtom->iniControls();
+    controlAtom->doCUHF = true;
     aointegralsAtom->iniAOIntegrals (&uniqueAtom, basisSetAtom, this->fileio_, controlAtom, dfBasissetAtom);
     hartreeFockAtom->iniSingleSlater(&uniqueAtom, basisSetAtom, aointegralsAtom, this->fileio_, controlAtom);
     hartreeFockAtom->moA_->setZero();
@@ -126,8 +127,8 @@ void SingleSlater<double>::formGuess() {
     hartreeFockAtom->haveMO = true;
     hartreeFockAtom->formFock();
     hartreeFockAtom->computeEnergy();
-    hartreeFockAtom->doCUHF = true;
-    hartreeFockAtom->SCF();
+//  hartreeFockAtom->doCUHF = true;
+    hartreeFockAtom->SCF2();
     if (hartreeFockAtom->Ref_ != RHF){
       denMOB = (*hartreeFockAtom->densityB_);
       denMOA = (*hartreeFockAtom->densityA_);

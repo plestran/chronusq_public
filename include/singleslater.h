@@ -79,6 +79,44 @@ class SingleSlater {
   Controls *    controls_;               ///< General ChronusQ flow parameters
   AOIntegrals * aointegrals_;            ///< Molecular Integrals over GTOs (AO basis)
 
+  int lenX_;
+  int lenXp_;
+  int lenF_;
+  int lenP_;
+  int lenB_;
+  int lenCoeff_;
+  int LWORK_;
+  int lenLambda_;
+  int lenDelF_;
+  int lenOccNum_;
+  int lenScr_;
+
+  T *SCF_SCR;
+  T *XMem_;
+  T *FpAlphaMem_;
+  T *FpBetaMem_;
+  T *POldAlphaMem_;
+  T *POldBetaMem_;
+  T *ErrorAlphaMem_;
+  T *ErrorBetaMem_;
+  T *FADIIS_;
+  T *FBDIIS_;
+  T *WORK_;
+  T *XpMem_;
+  T *lambdaMem_;
+  T *delFMem_;
+  T *PNOMem_;
+  T *occNumMem_;
+  
+
+  void initSCFMem();
+  void initMemLen();
+  void initSCFPtr();
+  void formX();
+  void formNO();
+  void diagFock();
+  void evalConver();
+
 public:
  
   enum{
@@ -92,7 +130,9 @@ public:
   bool	haveCoulomb; ///< Computed Coulomb Matrix?
   bool	haveExchange;///< Computed Exchange Matrix?
   bool  havePT;      ///< Computed Perturbation Tensor?
-  bool  doCUHF;      ///< Redundent with enum for References?
+  bool  isClosedShell;
+  bool  isConverged;
+  bool doCUHF;
 
   double   energyOneE; ///< One-bodied operator tensors traced with Density
   double   energyTwoE; ///< Two-bodied operator tensors traced with Density
@@ -101,7 +141,9 @@ public:
 
   // constructor & destructor
   SingleSlater(){;};
-  ~SingleSlater() {;};
+  ~SingleSlater() {
+    if(this->SCF_SCR != NULL) delete [] this->SCF_SCR;
+  };
 
   template<typename U>
   SingleSlater(SingleSlater<U> *); ///< Copy Constructor
@@ -164,6 +206,7 @@ public:
   void computeEnergy();         // compute the total electronic energy
   void computeMultipole();      // compute multipole properties
   void SCF();  
+  void SCF2();
   void CDIIS(int,T*,T*,T*,T*);
   void printEnergy(); 
   void printMultipole();

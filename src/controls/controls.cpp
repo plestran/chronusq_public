@@ -52,6 +52,7 @@ void Controls::iniControls(){
   this->doQuadpole =        true;
   this->doOctpole =         true;
   this->doSDR     =         false;
+  this->doCUHF    =         false;
   this->SDMethod  =         0;
 #ifdef USE_LIBINT
   // Bootstrap Libint env
