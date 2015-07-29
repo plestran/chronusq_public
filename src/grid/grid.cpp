@@ -34,16 +34,39 @@ namespace ChronusQ{
          return (std::pow(rad,2.0))*(std::exp(-((std::pow(rad,2.0)))));
          } 
 
+  double OneDGrid::f2_val(double elevation,double azimut){
+  // Test Function to be integrated by One-dimensional grid over a solid angle
+         return (15.0)*(std::pow(sin(elevation),4.0))/(32.0*math.pi);
+         } 
+
   double OneDGrid::integrate(){
   // Integrate a test function for a one dimensional grid radial part
    double sum = 0.0;
      std::cout << "Number of One-grid points= "<< this->nPts_  <<std::endl;
      for(int i = 0; i < this->nPts_; i++){
-       sum += (this->f_val(this->gridPts_[i]))*(this->weights_[i]);
+       if(this->intas2GPt_){
+         sum += (this->f2_val(bg::get<0>(this->grid2GPts_[i]),bg::get<1>(this->grid2GPts_[i])))*(this->weights_[i]);
+         }else{
+         sum += (this->f_val(this->gridPts_[i]))*(this->weights_[i]);
+       }
+      }
+     if(this->intas2GPt_){
+       return 4.0*math.pi*sum;
+       }else{
+       return sum*this->norm_;
      }
-   return sum*this->norm_;
-
   }
+void OneDGrid::printGrid(){
+    for(int i = 0; i < this->nPts_; i++){
+//  Printing for mathematica
+    if(this->intas2GPt_){
+      cout << "{ 1.0, "<<bg::get<1>(this->grid2GPts_[i])<<", " <<bg::get<0>(this->grid2GPts_[i]) <<"}, "<< endl;
+      }else{
+      cout << this->gridPts_[i] << endl;
+      }    
+}
+
+};
 
   // Class Functions Declaration
 
@@ -84,17 +107,8 @@ namespace ChronusQ{
       }
   };
 
-void twoDGrid::transformPts(){
-    for(int i = 0; i < this->nPts_; i++){
-//  Printing for mathematica
-    cout << "{ 1.0, "<<bg::get<1>(this->grid2GPts_[i])<<", " <<bg::get<0>(this->grid2GPts_[i]) <<"}, "<< endl;
-    }
 
-};
-
-double twoDGrid::integrate(){
-       double val = 0.0;
-       return val;
+    void LebedevGrid::transformPts(){
 };
 
 void LebedevGrid::gen6_A1(int num, long double a, long double v){

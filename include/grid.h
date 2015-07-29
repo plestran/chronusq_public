@@ -37,6 +37,7 @@ class Grid {
         this->nPts_ = npts;
       };
       virtual void                   genGrid() = 0; ///< virtual function to generate the grid points
+      virtual void                   printGrid() = 0; ///< virtual function to print the grid points
       virtual void                   transformPts() = 0; ///< virtual function to transform the integral interval
       virtual double                 integrate()    = 0; ///< virtual function to integrate
   }; // class Grid
@@ -44,10 +45,13 @@ class Grid {
 class OneDGrid : public Grid {
    protected:
       double * gridPts_;
+      sph2GP * grid2GPts_;
       double * weights_;
       double   f_val(double);
+      double   f2_val(double, double);
       double   norm_;
       std::array<double,2> range_;
+      bool intas2GPt_ = false;
    public:
       OneDGrid(
         int npts = 0, double beg = 0.0, double end = 0.0):
@@ -57,33 +61,38 @@ class OneDGrid : public Grid {
       };
 // deconstructor
       ~OneDGrid(){
+         if(intas2GPt_){
+         delete [] this->grid2GPts_;
+         }else{
          delete [] this->gridPts_;
+         }
          delete [] this->weights_;
-       cout << "Deliting" <<endl;
+       cout << "Deleting" <<endl;
        };
 // access to protected data
        inline double * gridPts(){ return this->gridPts_;};
        inline double * weights(){ return this->weights_;};
        inline double norm(){ return this->norm_;};
        double integrate();
+       void printGrid();
 }; // Class OneGrid (one dimensional grid)
 
-class twoDGrid : public Grid {
-   protected:
-      sph2GP * grid2GPts_;
-      double * weights_;
-   public:
-      twoDGrid(
-       int npts = 0):
-        Grid(npts){
-        };
+//class twoDGrid : public Grid {
+//   protected:
+//      sph2GP * grid2GPts_;
+//      double * weights_;
+//   public:
+//      twoDGrid(
+//       int npts = 0):
+//        Grid(npts){
+//        };
 // deconstructor
-      ~twoDGrid(){
-         delete [] this->grid2GPts_;
+//      ~twoDGrid(){
+//         delete [] this->grid2GPts_;
 //         boost::geometry::clear(this->grid2GPts_);
-         delete [] this->weights_;
-       cout << "Deliting" <<endl;
-       };
+//         delete [] this->weights_;
+//       cout << "Deliting" <<endl;
+//       };
 // access to protected data
 //       inline double * get_grid2GPts_elev(){ 
 //     elevation from [0,2PI]
@@ -99,69 +108,22 @@ class twoDGrid : public Grid {
 //       void * set_grid2GPPts_azim(double * val){
 //        bg::set<1>((this->grid2GPts_), (* val));}; 
 //   2D integration
-       double integrate();
-       void   transformPts();
-}; // Class twoD Grid
 
 
-class LebedevGrid : public twoDGrid {
+class LebedevGrid : public OneDGrid {
     public:
       LebedevGrid(
-        int npts = 0):
-        twoDGrid(npts){
+        int npts = 0, double beg = 0.0, double end = 0.0):
+        OneDGrid(npts,beg,end){
           this->grid2GPts_ = new sph2GP[this->nPts_];  //< Lebedev polar coordinates [
           this->weights_   = new double[this->nPts_];
+          this->intas2GPt_ = true;
         };
+      void transformPts();
       void genGrid();
       void gen6_A1(int num, long double a, long double v);
       void gen12_A2(int num, long double a, long double v);
   }; // class LebedevGrid
-
-/*
-class threeDGrid : public Grid {
-   protected:
-      bg::model::point< double, 3,bg::cs::cartesian> * gridPts_;
-//      double * Pcart_;
-      double * weights_;
-      double   f_val(double);
-      double   norm_;
-      std::array<double,2> range_;
-//   public:
-      threeDGrid(
-       int npts = 0, double beg = 0.0, double end = 0.0):
-        Grid(npts){
-          this->range_ = {beg, end};
-          this->norm_ = (end-beg)/2.0;
-      };
-// deconstructor
-      ~threeDGrid(){
-         delete [] this->gridPts_;
-         delete [] this->weights_;
-       cout << "Deliting" <<endl;
-       };
-// access to protected data
-       inline double * get_gridPts_X(){ 
-       double xval = bg::get<0>(this->gridPts_);
-       return &xval;};
-       inline double * get_gridPts_Y(){ 
-       double yval = bg::get<1>(this->gridPts_);
-       return &yval;};
-       inline double * get_gridPts_Z(){ 
-       double zval = bg::get<2>(this->gridPts_);
-       return &zval;};
-       inline double * weights(){ return this->weights_;};
-       inline double norm(){ return this->norm_;};
-// Functions to inizialize data
-       void * setX_gridPts(double * val){
-        bg::set<0>((this->gridPts_), (* val));}; 
-       void * setY_gridPts(double * val){
-        bg::set<1>((this->gridPts_), (* val));}; 
-       void * setZ_gridPts(double * val){
-        bg::set<2>((this->gridPts_), (* val));}; 
-//   3D integration
-       double integrate();
-}; // Class 3DGrid (three dimensional grid)
-*/
 
   class GaussChebyshev1stGrid : public OneDGrid {
     public:
@@ -174,8 +136,6 @@ class threeDGrid : public Grid {
   // Class Functions
     void genGrid();                                      
     void transformPts();
-//    double integrate();
-//    double f_val( double rad);
   }; // class GaussChebyshev1stGrid
 
 }; // namespace ChronusQ

@@ -32,18 +32,16 @@ void func(Grid *g){
   // Reference numeric integration computed with Mathematica
   double ref = 0.18947234582049224;
    (*g).genGrid();
+//   (*g).printGrid(); 
    cout << "Test Integral value= "<< (*g).integrate() << endl;
 //   cout << "Test Integral err  = "<< std::scientific <<std::abs((*g).integrate() - ref)/ref << endl;
    cout << "Test Integral err  = "<<std::abs((*g).integrate() - ref)/ref << endl;
 }
 
-void func2D(twoDGrid *g){
-  // Reference numeric integration computed with Mathematica
-//  double ref = 0.18947234582049224;
+void func2D(OneDGrid *g){
    (*g).genGrid();
-   (*g).transformPts(); 
-//   cout << "Test Integral value= "<< (*g).integrate() << endl;
-//   cout << "Test Integral err  = "<< std::scientific <<std::abs((*g).integrate() - ref)/ref << endl;
+   (*g).printGrid(); 
+   cout << "Test Integral value= "<< (*g).integrate() << endl;
 }
 
 int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
@@ -134,7 +132,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   double radius = 1.0;
    GaussChebyshev1stGrid Rad(Ngridr,0.0,radius);
    GaussChebyshev1stGrid Rad2(Ngridr2,0.0,radius);
-   LebedevGrid GridLeb(NLeb);
+   LebedevGrid GridLeb(NLeb,0.0,0.0);
    
    func(&Rad);
    func(&Rad2);
