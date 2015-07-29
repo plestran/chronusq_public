@@ -24,10 +24,8 @@
  *  
  */
 #include <classtools.h>
-#include <basisset_new.h>
 using ChronusQ::Molecule;
 using ChronusQ::BasisSet;
-using ChronusQ::BasisSetNew;
 using ChronusQ::Controls;
 
 /************************************************/
@@ -88,9 +86,6 @@ void readInput(FileIO * fileio, Molecule * mol, BasisSet * basis, Controls * con
       }
     } else if(!readString.compare("$BASIS")) {
       //basis->readBasisSet(fileio,mol);
-      BasisSetNew nb;
-      nb.basisSetRead(fileio,mol);
-      CErr();
       basis->basisSetRead(fileio,mol);
     } else if(!readString.compare("$DFBASIS")) {
       fileio->in >> readString;

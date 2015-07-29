@@ -301,7 +301,7 @@ void AOIntegrals::iniPairConstants(ShellPair *ijShellPair){
   for(j=0;j<2;j++) {
     for(k=0;k<3;k++) center[k][j]=(*(molecule_->cart()))(k,((*ijShellPair).center[j]));
     for(i=0;i<this->pairConstants_->nPGTOs[j];i++){
-      expo[i][j]=(basisSet_->shells[(*ijShellPair).shIndex[j]]).expo[i];
+      expo[i][j]=(basisSet_->shells_old[(*ijShellPair).shIndex[j]]).expo[i];
     };
   };
   /*-------------------------*/

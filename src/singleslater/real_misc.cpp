@@ -75,8 +75,8 @@ SingleSlater<double>::SingleSlater(SingleSlater<double> * other){
     unsigned int ibase=0;
     unsigned int irow;
     for(auto i=0;i<this->nShell_;i++){
-          int L=basisset_->shells_libint[i].contr[0].l;
-          cout << L << endl;
+          int L=basisset_->shells(i).contr[0].l;
+//        cout << L << endl;
 //         s functions order matchs
            if (L==0){ibase += 1;}
 //         p functions order matchs

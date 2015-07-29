@@ -23,8 +23,8 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
-#ifndef INCLUDED_BASISSETNEW
-#define INCLUDED_BASISSETNEW
+#ifndef INCLUDED_BASISSET
+#define INCLUDED_BASISSET
 #include <global.h>
 #include <cerr.h>
 #include <molecule.h>
@@ -36,9 +36,7 @@
 /* Error Messages 4000-4999 */
 /****************************/
 
-
-namespace ChronusQ{
-/*
+namespace ChronusQ {
 struct Shell{
   char    name[2];               // name of the shell - "S","P","D","F","G"
   bool	  SP;			 // is this part of an SP shell?
@@ -96,86 +94,93 @@ struct ShellPair{
   double  UAB[MAXCONTRACTION][MAXCONTRACTION];		// KAB used to compute the [ss|ss] integral
   double  norm[MAXCONTRACTION][MAXCONTRACTION];		// pairwise normalization constant
 };
-*/
 
-class BasisSetNew{
-  struct ReferenceShell{
-    int atomicNumber;
-    int index;
-    std::vector<libint2::Shell> shells;
-  }; 
-  int  nBasis_           = 0    ;
-  int  nPrimitive_       = 0    ;
-  int  nShell_           = 0    ;
-  int  nShellPair_       = 0    ;
-  int  maxPrim_          = 0    ;
-  int  maxL_             = 0    ;
-  bool haveMapSh2Bf_     = false;
-  bool haveMapSh2Cen_    = false;
-  bool doSph_            = false;
-
-  std::vector<int>            nLShell_;
-  std::vector<int>            mapSh2Bf_;
-  std::vector<int>            mapSh2Cen_;
-  std::vector<libint2::Shell> shells_;
-  std::vector<ReferenceShell> refShells_;
-
-  std::string basisPath_;
-
-  std::unique_ptr<ifstream> basisFile_;
-
-
-  FileIO *fileio_;
-
+class BasisSet{ 
+  int  nBasis_;                 // number of basis functions
+  int  nPrimitive_;             // number of primitive GTOs
+  int  nShell_;                 // number of shells
+  std::vector<int>  nLShell_;   // number of S,P,D,F,G... shells
+  int  nShellPair_;             // number of shell pairs
+  friend class FileIO;
 
 public:
-/*
-  AOCartesian *ao;
-  ShellPair   *shellPairs;
-  Shell       *shells;
-  int         *sortedShells;
-*/
+  // FIXME need to move these over to unique_ptr
+  AOCartesian *ao;             // array of ao's
+  ShellPair   *shellPairs;     // array of shellPairs
+  Shell       *shells;         // array of shells
+  int         *sortedShells;   // index of shells sorted from the largest angular momentum to the lowest
+  //dbwys
+#ifdef USE_LIBINT
+  struct basis_libint {
+    std::string atomName;
+    std::vector<libint2::Shell> refShell;
+  };
+  std::vector<basis_libint> allBasis;
+  std::vector<libint2::Shell> shells_libint;
+  std::vector<libint2::Shell> shells_libint_unnormal;
+  std::vector<int> mapSh2Bf;
+  std::unique_ptr<RealMatrix> shBlkNormAlpha;
+  std::unique_ptr<RealMatrix> shBlkNormBeta;
+  bool convToLI = false;
+  bool haveMap = false;
+  int maxPrim;
+  int maxL;
+  std::vector<int> atomNum;
+#endif
+  std::string basis_path;
+  //dbwye
 
-  std::unique_ptr<RealMatrix> shBlkNormAlpha; 
-  std::unique_ptr<RealMatrix> shBlkNormBeta; 
-
-  BasisSetNew(int nBasis=0, int nShell=0){;};
-  ~BasisSetNew(){ // FIXME need to move these over to unique_ptr
-/*
+  // constructor & destructor
+  BasisSet(int nBasis=0, int nShell=0);
+  ~BasisSet(){ // FIXME need to move these over to unique_ptr
     delete[] ao;
     delete[] shellPairs;
     delete[] shells;
     delete[] sortedShells;
-*/
-    this->basisFile_->close();
   };
 
+  // initialize memory
+  void iniBasisSet();
+
+  // create and sort shell pairs according to the angular momenta
+  void createShellPair(Molecule *);
+  // set private data
+  inline void setnBasis(int i){this->nBasis_=i;};
+  inline void setnPrimitive(int i){this->nPrimitive_=i;};
+  // access to private data
   inline int     nBasis()  {return this->nBasis_;};
   inline int nPrimitive()  {return this->nPrimitive_;};
-  inline int     nShell()  {return this->shells_.size();};
+  inline int     nShell()  {return this->shells_libint.size();};
   inline int nShellPair()  {return this->nShellPair_;};
   inline int nLShell(int L){return this->nLShell_[L];};
 
-  inline void setBasisPath(std::string str){ this->basisPath_ = str;};
+  // print out basis functions
+  void printInfo(FileIO *,Controls *);
+  void printInfo_libint(FileIO *,Controls *);
+  void printAO(ostream &output=cout);
+  void printAtomO(ostream &output=cout);
+  void printShell(ostream &output=cout);
+  void printShellPair(ostream &output=cout);
+
+  // read from input file
+  void readBasisSet(FileIO *,Molecule *);
+  
+#ifdef USE_LIBINT
+  // If using Libint, have a routine to convert between local and libint
+  // shell format
+  void basisSetRead(FileIO *,Molecule *); 
+  void convShell(Molecule *);
+  void makeMap(Molecule *);
+  void computeShBlkNorm(bool,Molecule *,const RealMatrix*,const RealMatrix*);
+  void computeShBlkNorm(bool,Molecule *,const ComplexMatrix*,const ComplexMatrix*);
+#endif
+  /*************************/
+  /* MPI Related Routines  */
+  /*************************/
+  void mpiSend(int,int tag=tagBasisSet);
+  void mpiRecv(int,int tag=tagBasisSet);
+};
+} // namespace ChronusQ
 
 
-  void printInfo();
-  void printMeta();
-  void printHeader();
-  void printBasis();
-
-  void basisSetRead(FileIO *, Molecule *);
-  void findBasisFile(std::string);
-  void parseGlobal();
-  void constructLocal(Molecule *);
-  void computeMeta();
-  void makeMapSh2Bf();
-  void makeMapSh2Cen(Molecule *);
-  template<typename TMat> void computeShBlkNorm(bool, const TMat*, const TMat*);
-
-  BasisSetNew constructExtrn(Molecule *);
-
-
-}; // class BasisSet
-}; // namespace ChronusQ
 #endif

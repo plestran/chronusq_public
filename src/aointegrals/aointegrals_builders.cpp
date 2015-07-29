@@ -275,10 +275,9 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
   }
  
   // Check to see if the basisset had been converted
-  if(!this->basisSet_->convToLI) this->basisSet_->convShell(this->molecule_);
   // Define integral Engine
   std::vector<OneBodyEngine> engines(this->controls_->nthreads);
-  engines[0] = OneBodyEngine(iType,this->basisSet_->maxPrim,this->basisSet_->maxL,0);
+  engines[0] = OneBodyEngine(iType,this->basisSet_->maxPrim(),this->basisSet_->maxL(),0);
   // If engine is V, define nuclear charges
   if(iType == OneBodyEngine::nuclear){
     std::vector<std::pair<double,std::array<double,3>>> q;
@@ -300,7 +299,7 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
   }
   for(size_t i = 1; i < this->controls_->nthreads; i++) engines[i] = engines[0];
 
-  if(!this->basisSet_->haveMap) this->basisSet_->makeMap(this->molecule_); 
+  if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(); 
 #ifdef USE_OMP
   #pragma omp parallel
 #endif
@@ -311,16 +310,16 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
     int thread_id = 0;
 #endif
     for(auto s1=0l, s12=0l; s1 < this->basisSet_->nShell(); s1++){
-      int bf1 = this->basisSet_->mapSh2Bf[s1];
-      int n1  = this->basisSet_->shells_libint[s1].size();
+      int bf1 = this->basisSet_->mapSh2Bf(s1);
+      int n1  = this->basisSet_->shells(s1).size();
       for(int s2=0; s2 <= s1; s2++, s12++){
         if(s12 % this->controls_->nthreads != thread_id) continue;
-        int bf2 = this->basisSet_->mapSh2Bf[s2];
-        int n2  = this->basisSet_->shells_libint[s2].size();
+        int bf2 = this->basisSet_->mapSh2Bf(s2);
+        int n2  = this->basisSet_->shells(s2).size();
   
         const double* buff = engines[thread_id].compute(
-          this->basisSet_->shells_libint[s1],
-          this->basisSet_->shells_libint[s2]
+          this->basisSet_->shells(s1),
+          this->basisSet_->shells(s2)
         );
 /*
         for(int i = 0, ij=0; i < n1; i++) {
@@ -454,29 +453,39 @@ void AOIntegrals::computeAOOneE(){
 using libint2::TwoBodyEngine;
 void AOIntegrals::computeSchwartz(){
   RealMatrix *ShBlk; 
+  cout << "HERE 3" << endl;
   this->schwartz_->setZero();
   // Check to see if the basisset had been converted
-  if(!this->basisSet_->convToLI) this->basisSet_->convShell(this->molecule_);
 
+  cout << this->basisSet_->maxPrim() << endl;
+  cout << this->basisSet_->maxL() << endl;
   // Define Integral Engine
   TwoBodyEngine<libint2::Coulomb> engine = 
-    TwoBodyEngine<libint2::Coulomb>(this->basisSet_->maxPrim,
-                                    this->basisSet_->maxL,0);
+    TwoBodyEngine<libint2::Coulomb>(this->basisSet_->maxPrim(),
+                                    this->basisSet_->maxL(),0);
   engine.set_precision(0.); // Don't screen primitives during schwartz
+  cout << "HERE 3" << endl;
 
   this->fileio_->out << "Computing Schwartz Bound Tensor ... ";
+  cout << "HERE 3" << endl;
   auto start =  std::chrono::high_resolution_clock::now();
   for(int s1=0; s1 < this->basisSet_->nShell(); s1++){
-    int n1  = this->basisSet_->shells_libint[s1].size();
+    int n1  = this->basisSet_->shells(s1).size();
     for(int s2=0; s2 <= s1; s2++){
-      int n2  = this->basisSet_->shells_libint[s2].size();
+      int n2  = this->basisSet_->shells(s2).size();
+      cout << n1 << " " << n2 << endl;
+      cout << "HERE 3"<<endl;
  
+      cout << this << endl << this->basisSet_ << endl;
+      cout << this->basisSet_->shells_[s1] << endl;
+      cout << this->basisSet_->shells_[s2] << endl;
       const auto* buff = engine.compute(
-        this->basisSet_->shells_libint[s1],
-        this->basisSet_->shells_libint[s2],
-        this->basisSet_->shells_libint[s1],
-        this->basisSet_->shells_libint[s2]
+        this->basisSet_->shells_[s1],
+        this->basisSet_->shells_[s2],
+        this->basisSet_->shells_[s1],
+        this->basisSet_->shells_[s2]
       );
+      cout << "HERE 3"<<endl;
 
       
       ShBlk = new RealMatrix(n1,n2);
@@ -495,6 +504,7 @@ void AOIntegrals::computeSchwartz(){
       delete ShBlk;
     }
   }
+  cout << "HERE 3" << endl;
   auto finish =  std::chrono::high_resolution_clock::now();
   this->SchwartzD = finish - start;
   (*this->schwartz_) = this->schwartz_->selfadjointView<Lower>();
@@ -507,11 +517,11 @@ void AOIntegrals::computeAOTwoE(){
 
 
   std::vector<coulombEngine> engines(this->controls_->nthreads);
-  engines[0] = coulombEngine(this->basisSet_->maxPrim,this->basisSet_->maxL,0);
+  engines[0] = coulombEngine(this->basisSet_->maxPrim(),this->basisSet_->maxL(),0);
   engines[0].set_precision(std::numeric_limits<double>::epsilon());
 
   for(int i=1; i<this->controls_->nthreads; i++) engines[i] = engines[0];
-  if(!this->basisSet_->haveMap) this->basisSet_->makeMap(this->molecule_); 
+  if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(); 
 
 #ifdef USE_OMP
   #pragma omp parallel
@@ -523,31 +533,31 @@ void AOIntegrals::computeAOTwoE(){
     int thread_id = 0;
 #endif
   for(int s1 = 0, s1234=0; s1 < this->basisSet_->nShell(); s1++) {
-    int bf1_s = this->basisSet_->mapSh2Bf[s1];
-    int n1    = this->basisSet_->shells_libint[s1].size();
+    int bf1_s = this->basisSet_->mapSh2Bf(s1);
+    int n1    = this->basisSet_->shells(s1).size();
     for(int s2 = 0; s2 <= s1; s2++) {
-      int bf2_s = this->basisSet_->mapSh2Bf[s2];
-      int n2    = this->basisSet_->shells_libint[s2].size();
+      int bf2_s = this->basisSet_->mapSh2Bf(s2);
+      int n2    = this->basisSet_->shells(s2).size();
       for(int s3 = 0; s3 <= s1; s3++) {
-        int bf3_s = this->basisSet_->mapSh2Bf[s3];
-        int n3    = this->basisSet_->shells_libint[s3].size();
+        int bf3_s = this->basisSet_->mapSh2Bf(s3);
+        int n3    = this->basisSet_->shells(s3).size();
         int s4_max = (s1 == s3) ? s2 : s3;
         for(int s4 = 0; s4 <= s4_max; s4++, s1234++) {
 
           if(s1234 % this->controls_->nthreads != thread_id) continue;
 
-          int bf4_s = this->basisSet_->mapSh2Bf[s4];
-          int n4    = this->basisSet_->shells_libint[s4].size();
+          int bf4_s = this->basisSet_->mapSh2Bf(s4);
+          int n4    = this->basisSet_->shells(s4).size();
     
           // Schwartz and Density screening
           if((*this->schwartz_)(s1,s2) * (*this->schwartz_)(s3,s4)
               < this->controls_->thresholdSchawrtz ) continue;
  
           const double* buff = engines[thread_id].compute(
-            this->basisSet_->shells_libint[s1],
-            this->basisSet_->shells_libint[s2],
-            this->basisSet_->shells_libint[s3],
-            this->basisSet_->shells_libint[s4]);
+            this->basisSet_->shells(s1),
+            this->basisSet_->shells(s2),
+            this->basisSet_->shells(s3),
+            this->basisSet_->shells(s4));
 
 
           std::vector<std::array<int,4>> lower;
@@ -637,13 +647,13 @@ void AOIntegrals::computeAORII(){
 
   std::vector<coulombEngine> engines(this->controls_->nthreads);
   engines[0] = coulombEngine(
-    std::max(this->basisSet_->maxPrim,this->DFbasisSet_->maxPrim),
-    std::max(this->basisSet_->maxL,this->DFbasisSet_->maxL),0);
+    std::max(this->basisSet_->maxPrim(),this->DFbasisSet_->maxPrim()),
+    std::max(this->basisSet_->maxL(),this->DFbasisSet_->maxL()),0);
   engines[0].set_precision(std::numeric_limits<double>::epsilon());
 
   for(int i=1; i<this->controls_->nthreads; i++) engines[i] = engines[0];
-  if(!this->basisSet_->haveMap) this->basisSet_->makeMap(this->molecule_); 
-  if(!this->DFbasisSet_->haveMap) this->DFbasisSet_->makeMap(this->molecule_); 
+  if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(); 
+  if(!this->DFbasisSet_->haveMapSh2Bf) this->DFbasisSet_->makeMapSh2Bf(); 
 
 #ifdef USE_OMP
   #pragma omp parallel
@@ -655,24 +665,24 @@ void AOIntegrals::computeAORII(){
     int thread_id = 0;
 #endif
   for(int s1 = 0, s123=0; s1 < this->basisSet_->nShell(); s1++) {
-    int bf1_s = this->basisSet_->mapSh2Bf[s1];
-    int n1    = this->basisSet_->shells_libint[s1].size();
+    int bf1_s = this->basisSet_->mapSh2Bf(s1);
+    int n1    = this->basisSet_->shells(s1).size();
     for(int s2 = 0; s2 < this->basisSet_->nShell(); s2++) {
-      int bf2_s = this->basisSet_->mapSh2Bf[s2];
-      int n2    = this->basisSet_->shells_libint[s2].size();
+      int bf2_s = this->basisSet_->mapSh2Bf(s2);
+      int n2    = this->basisSet_->shells(s2).size();
       for(int dfs = 0; dfs < this->DFbasisSet_->nShell(); dfs++,s123++) {
         if(s123 % this->controls_->nthreads != thread_id) continue;
-        int dfbf3_s = this->DFbasisSet_->mapSh2Bf[dfs];
-        int dfn3    = this->DFbasisSet_->shells_libint[dfs].size();
+        int dfbf3_s = this->DFbasisSet_->mapSh2Bf(dfs);
+        int dfn3    = this->DFbasisSet_->shells(dfs).size();
 
         // Schwartz and Density screening
         if((*this->schwartz_)(s1,s2) * (*this->aoRIS_)(dfs,dfs)
             < this->controls_->thresholdSchawrtz ) continue;
  
         const double* buff = engines[thread_id].compute(
-          this->basisSet_->shells_libint[s1],
-          this->basisSet_->shells_libint[s2],
-          this->DFbasisSet_->shells_libint[dfs],
+          this->basisSet_->shells(s1),
+          this->basisSet_->shells(s2),
+          this->DFbasisSet_->shells(dfs),
           libint2::Shell::unit());
 
         auto lower = {bf1_s,bf2_s,dfbf3_s};
@@ -691,12 +701,12 @@ void AOIntegrals::computeAORII(){
 void AOIntegrals::computeAORIS(){
   this->haveRIS= true;
   std::vector<coulombEngine> engines(this->controls_->nthreads);
-  engines[0] = coulombEngine( this->DFbasisSet_->maxPrim, 
-                              this->DFbasisSet_->maxL,0);
+  engines[0] = coulombEngine( this->DFbasisSet_->maxPrim(), 
+                              this->DFbasisSet_->maxL(),0);
   engines[0].set_precision(std::numeric_limits<double>::epsilon());
 
   for(int i=1; i<this->controls_->nthreads; i++) engines[i] = engines[0];
-  if(!this->DFbasisSet_->haveMap) this->DFbasisSet_->makeMap(this->molecule_); 
+  if(!this->DFbasisSet_->haveMapSh2Bf) this->DFbasisSet_->makeMapSh2Bf(); 
 
   RealMap aoRISMap(&this->aoRIS_->storage()[0],
     this->DFbasisSet_->nBasis(),this->DFbasisSet_->nBasis());
@@ -711,18 +721,18 @@ void AOIntegrals::computeAORIS(){
     int thread_id = 0;
 #endif
   for(int s1 = 0, s12=0; s1 < this->DFbasisSet_->nShell(); s1++) {
-    int bf1_s = this->DFbasisSet_->mapSh2Bf[s1];
-    int n1    = this->DFbasisSet_->shells_libint[s1].size();
+    int bf1_s = this->DFbasisSet_->mapSh2Bf(s1);
+    int n1    = this->DFbasisSet_->shells(s1).size();
     for(int s2 = 0; s2 < this->DFbasisSet_->nShell(); s2++,s12++) {
-      int bf2_s = this->DFbasisSet_->mapSh2Bf[s2];
-      int n2    = this->DFbasisSet_->shells_libint[s2].size();
+      int bf2_s = this->DFbasisSet_->mapSh2Bf(s2);
+      int n2    = this->DFbasisSet_->shells(s2).size();
  
       if(s12 % this->controls_->nthreads != thread_id) continue;
 
       const double* buff = engines[thread_id].compute(
-        this->DFbasisSet_->shells_libint[s1],
+        this->DFbasisSet_->shells(s1),
         libint2::Shell::unit(),
-        this->DFbasisSet_->shells_libint[s2],
+        this->DFbasisSet_->shells(s2),
         libint2::Shell::unit());
 
       ConstRealMap buffMat(buff,n1,n2);

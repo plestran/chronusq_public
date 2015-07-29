@@ -1,12 +1,12 @@
-#include <basisset_new.h>
+#include <basisset.h>
 
 namespace ChronusQ{
 
-  void BasisSetNew::printHeader(){
+  void BasisSet::printHeader(){
     this->fileio_->out << endl << "Basis Function Information:" << endl << endl;;
   }
 
-  void BasisSetNew::printMeta(){
+  void BasisSet::printMeta(){
     
     this->fileio_->out << "  nBasis      =  " <<  this->nBasis_     << endl; 
     this->fileio_->out << "  nPrimitive  =  " <<  this->nPrimitive_ << endl; 
@@ -21,7 +21,7 @@ namespace ChronusQ{
     this->fileio_->out << "  nShellPair  =  " <<  this->nShellPair_ << endl; 
   }
 
-  void BasisSetNew::printBasis(){
+  void BasisSet::printBasis(){
     this->fileio_->out.precision(6);
     this->fileio_->out.fill(' ');
     this->fileio_->out.setf(ios::right,ios::adjustfield);
@@ -53,7 +53,7 @@ namespace ChronusQ{
     }
   }
 
-  void BasisSetNew::printInfo(){
+  void BasisSet::printInfo(){
     this->printHeader();
     this->printMeta();
     this->printBasis();

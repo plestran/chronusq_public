@@ -44,7 +44,8 @@ void SingleSlater<double>::formGuess() {
   int readNPGTO,L, nsize;
   this->moA_->setZero();
   if(this->Ref_ != RHF) this->moB_->setZero();
-
+  this->haveMO = true;
+/*
   // Determining unique atoms
   std::vector<Atoms> uniqueElement;
   std::vector<int>   repeatedAtoms;
@@ -88,36 +89,14 @@ void SingleSlater<double>::formGuess() {
     Molecule uniqueAtom(uniqueElement[iUn],this->fileio_);
     uniqueAtom.readCharge(0);
     uniqueAtom.readMultip(uniqueElement[iUn].defaultMult);
-    for (auto i = 0; i< this->basisset_->allBasis.size();i++){
-      if (this->basisset_->allBasis[i].atomName.compare(uniqueElement[iUn].symbol)==0){
-	basisSetAtom->shells_libint= this->basisset_->allBasis[i].refShell;
-	basisSetAtom->setnBasis(0);
-	for (auto k =0;k<basisSetAtom->shells_libint.size();k++){
-	  readNPGTO= basisSetAtom->shells_libint[k].alpha.size();
-	  L = basisSetAtom->shells_libint[k].contr[0].l;
-	  basisSetAtom->setnBasis(basisSetAtom->nBasis()+HashNAOs(L));
-	  basisSetAtom->setnPrimitive(basisSetAtom->nPrimitive() + readNPGTO * HashNAOs(L));
-	  if (k==0){
-	    basisSetAtom->maxPrim = readNPGTO;
-	    basisSetAtom->maxL    = L;
-	  }
-	  if (basisSetAtom->maxPrim < readNPGTO){
-	    basisSetAtom->maxPrim = readNPGTO; 
-	  }
-	  if (basisSetAtom->maxL < L){
-	    basisSetAtom->maxL = L; 
-	  }
-	}
-	break;
-      }
-    }
-    for (auto i=0;i<basisSetAtom->shells_libint.size();i++){
-      basisSetAtom->shells_libint[i].renorm();
-    }
-    nsize = basisSetAtom->nBasis();
+
+    basisSetAtom = this->basisset_->constructExtrn(&uniqueAtom); 
+    basisSetAtom->makeMapSh2Bf();
+    basisSetAtom->makeMapSh2Cen(&uniqueAtom);
+    auto nsize = basisSetAtom->nBasis();
+
     RealMatrix denMOA(nsize, nsize);
     RealMatrix denMOB(nsize, nsize);
-    basisSetAtom->convToLI=true;
     controlAtom->iniControls();
     controlAtom->doCUHF = true;
     aointegralsAtom->iniAOIntegrals (&uniqueAtom, basisSetAtom, this->fileio_, controlAtom, dfBasissetAtom);
@@ -125,9 +104,14 @@ void SingleSlater<double>::formGuess() {
     hartreeFockAtom->moA_->setZero();
     if (hartreeFockAtom->Ref_ != RHF) hartreeFockAtom->moB_->setZero();
     hartreeFockAtom->haveMO = true;
+    cout << this << endl << hartreeFockAtom << endl << basisSetAtom << endl;
+    cout << "HERE" << endl;
     hartreeFockAtom->formFock();
+    cout << "HERE" << endl;
     hartreeFockAtom->computeEnergy();
+    cout << "HERE" << endl;
     hartreeFockAtom->SCF();
+    cout << "HERE" << endl;
     if (hartreeFockAtom->Ref_ != RHF){
       denMOB = (*hartreeFockAtom->densityB_);
       denMOA = (*hartreeFockAtom->densityA_);
@@ -138,8 +122,8 @@ void SingleSlater<double>::formGuess() {
     }
     atomMO.push_back(denMOA);
     atomMOB.push_back(denMOB);
-    basisSetAtom->setnBasis(0);
-    basisSetAtom->setnPrimitive(0);
+  //basisSetAtom->setnBasis(0);
+  //basisSetAtom->setnPrimitive(0);
   }
   this->fileio_->out << endl << "Atomic SCF Completed............." << endl << endl;
   int n = (*this->moA_).rows();
@@ -214,6 +198,7 @@ void SingleSlater<double>::formGuess() {
     if(this->Ref_ != RHF) prettyPrint(this->fileio_->out,(*this->moB_),"Beta MO Coeff");
   };
   delete [] SCR;
+*/
 };
 //------------------------------------------//
 // form the initial guess of MOs from input //

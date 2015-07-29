@@ -31,7 +31,9 @@
 template<typename T>
 void SingleSlater<T>::formPT(){
   bool doRHF = (this->Ref_ == RHF);
+  cout << "HERE 1" << endl;
   if(!this->haveDensity) this->formDensity();
+  cout << "HERE 1" << endl;
   if(this->controls_->directTwoE && !this->controls_->doDF)
     this->aointegrals_->twoEContractDirect(doRHF,true,false,*this->densityA_,*this->PTA_,*this->densityB_,*this->PTB_);
   else if(this->controls_->doDF)
@@ -50,13 +52,17 @@ void SingleSlater<T>::formPT(){
  ********************/
 template<typename T>
 void SingleSlater<T>::formFock(){
+  
+    cout << "HERE" << endl;
   if(!this->haveDensity) this->formDensity();
+    cout << "HERE" << endl;
 #ifndef USE_LIBINT
   if(!this->haveCoulomb) this->formCoulomb();
   if(!this->haveExchange) this->formExchange();
 #else
   this->formPT();
 #endif
+    cout << "HERE" << endl;
   if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
 
   this->fockA_->setZero();
