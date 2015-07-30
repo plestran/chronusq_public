@@ -456,8 +456,6 @@ void AOIntegrals::computeSchwartz(){
   this->schwartz_->setZero();
   // Check to see if the basisset had been converted
 
-  cout << this->basisSet_->maxPrim() << endl;
-  cout << this->basisSet_->maxL() << endl;
   // Define Integral Engine
   TwoBodyEngine<libint2::Coulomb> engine = 
     TwoBodyEngine<libint2::Coulomb>(this->basisSet_->maxPrim(),

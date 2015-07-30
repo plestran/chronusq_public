@@ -85,14 +85,6 @@ void SingleSlater<double>::formGuess() {
       }
     }
   }
-  cout << "INDEX" << endl;
-  for(auto i = 0; i < uniqueElement.size(); i++){
-  for(auto j : atomIndex[i] ){
-    cout << j << '\t';
-  }
-  cout << endl;
-  }
-  cout << endl << endl;
 
   this->fileio_->out << "Found " << uniqueElement.size() << 
                         " unique atoms in molecule" << endl;
@@ -134,7 +126,6 @@ void SingleSlater<double>::formGuess() {
     hartreeFockAtom.formFock();
     hartreeFockAtom.computeEnergy();
     hartreeFockAtom.SCF();
-    cout << "IUn " << iUn << endl << endl << (*hartreeFockAtom.densityA_) << endl << endl;
   
     for(auto iAtm : atomIndex[iUn]){
       auto iBfSt = this->basisset_->mapCen2Bf(iAtm)[0];
@@ -156,11 +147,7 @@ void SingleSlater<double>::formGuess() {
     }
 
   }
-    cout << "NAE" << this->nAE_ << endl << "NBE" << this->nBE_ << endl;
     if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
-    cout << "TOTAL" << endl << endl << (*this->densityA_) << endl << endl;
-    cout << ((*this->densityA_)*(*this->aointegrals_->overlap_)).trace() << endl << endl;
-    if(!this->isClosedShell) cout << ((*this->densityB_)*(*this->aointegrals_->overlap_)).trace() << endl << endl;
     this->haveMO = true;
     this->haveDensity = true;
 //  CErr();

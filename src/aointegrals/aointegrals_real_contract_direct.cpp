@@ -29,13 +29,10 @@ namespace ChronusQ{
   void AOIntegrals::twoEContractDirect(bool RHF, bool doFock, bool do24, 
     const RealMatrix &XAlpha, RealMatrix &AXAlpha, const RealMatrix &XBeta, 
     RealMatrix &AXBeta) {
-    cout << "HERE 2" << endl;
 
     this->fileio_->out << "Contracting Directly with two-electron integrals" << endl;
     if(!this->haveSchwartz) this->computeSchwartz();
-    cout << "HERE 2" << endl;
     if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(); 
-    cout << "HERE 2" << endl;
     AXAlpha.setZero();
     if(!RHF) AXBeta.setZero();
     int nRHF;
@@ -56,11 +53,9 @@ namespace ChronusQ{
   
     for(int i=1; i<this->controls_->nthreads; i++) engines[i] = engines[0];
   
-    cout << "HERE 2" << endl;
     auto start = std::chrono::high_resolution_clock::now();
     this->basisSet_->computeShBlkNorm(!RHF,&XAlpha,&XBeta);
     auto finish = std::chrono::high_resolution_clock::now();
-    cout << "HERE 2" << endl;
     if(doFock) this->DenShBlkD = finish - start;
     int ijkl = 0;
     start = std::chrono::high_resolution_clock::now();

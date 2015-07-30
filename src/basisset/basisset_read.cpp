@@ -79,13 +79,9 @@ void BasisSet::parseGlobal(){
         std::istream_iterator<std::string>{});
       if(newRec){
         if(!firstRec) {
-//        cout << " " << nShell_tmp << endl;
           this->refShells_.push_back(ReferenceShell{atomicNumber,indx,tmpShell});
         }
-//      for(auto it = tokens.begin(); it != tokens.end(); it++) cout << *it << " ";
-//      cout << tokens[0] << " ";
         indx = HashAtom(tokens[0],0);
-//      cout << " " << elements[indx].atomicNumber;
         atomicNumber = elements[indx].atomicNumber;
         newRec = false;
         firstRec = false;
@@ -129,22 +125,10 @@ void BasisSet::parseGlobal(){
     }
   }
   this->refShells_.push_back(ReferenceShell{atomicNumber,indx,tmpShell}); // Append the last Rec
-//cout << endl;
-//cout << nEmpty << endl;
-//cout << nComm << endl;
-//cout << nRec << endl;
  
-  for(auto it = this->refShells_.begin(); it != this->refShells_.end(); ++it){
-    cout << (*it).atomicNumber << '\t' << (*it).index << endl;
-    for(auto jt = (*it).shells.begin(); jt != (*it).shells.end(); ++jt)
-      cout << *jt << endl;
-    cout << endl;
-  }
-
 };
 
 void BasisSet::constructLocal(Molecule * mol){
-  cout << mol->nAtoms() << endl << this->refShells_.size() << endl;
   for(auto iAtom = 0; iAtom < mol->nAtoms(); iAtom++){
     bool found = false;
     for(auto iRef = this->refShells_.begin(); iRef != this->refShells_.end(); ++iRef){
@@ -168,10 +152,6 @@ void BasisSet::constructLocal(Molecule * mol){
              " not found in current Basis Set",
            this->fileio_->out);
   }
-  cout << "Local Shells" << endl;
-  for(auto iShell = this->shells_.begin(); iShell != this->shells_.end(); ++iShell)
-    cout << *iShell << endl;
-
   this->computeMeta();
 }
 
@@ -181,7 +161,6 @@ void BasisSet::computeMeta(){
   
   for(auto iShell = this->shells_.begin(); iShell != this->shells_.end(); ++iShell){
     this->nBasis_ += (*iShell).size();
-    cout << this->nBasis_ << endl;
     auto L = (*iShell).contr[0].l;
     auto shPrim = (*iShell).alpha.size();  
     if( L      > this->maxL_   ) this->maxL_    = L     ;
@@ -194,13 +173,6 @@ void BasisSet::computeMeta(){
     this->nLShell_[shell.contr[0].l]++;
   }
 
-  cout << "nBasis       " <<  this->nBasis_     << endl; 
-  cout << "nPrimitive   " <<  this->nPrimitive_ << endl; 
-  cout << "maxPrim      " <<  this->maxPrim_    << endl; 
-  cout << "maxL         " <<  this->maxL_       << endl; 
-  cout << "nShell       " <<  this->nShell_     << endl; 
-  cout << "nShellPair   " <<  this->nShellPair_ << endl; 
-  for(auto sh : this->nLShell_) cout << sh << endl;
 }
 
 void BasisSet::makeMapSh2Bf(){
@@ -240,7 +212,6 @@ void BasisSet::makeMapCen2Bf(Molecule *mol){
     }
   }
 */
-  cout << "HERE" << endl;
   for(auto iAtm = 0; iAtm < mol->nAtoms(); iAtm++){
     auto nSize = 0;
     for(auto iShell = 0; iShell < this->nShell_; iShell++){
@@ -248,7 +219,6 @@ void BasisSet::makeMapCen2Bf(Molecule *mol){
     }
     auto iSt = -1;
     for(auto iShell = 0; iShell < this->nShell_; iShell++){
-      cout << this->mapSh2Cen_[iShell] << endl;
       if((iAtm+1) == this->mapSh2Cen_[iShell]){
        iSt = this->mapSh2Bf_[iShell];
        break;
@@ -258,10 +228,6 @@ void BasisSet::makeMapCen2Bf(Molecule *mol){
     this->mapCen2Bf_.push_back({{iSt,nSize}});
   }
 
-  cout << "MC2B" << endl;
-  for(auto i : this->mapCen2Bf_)
-    cout << i[0] << '\t' << i[1] << endl;
-  cout << endl << endl;
 
   this->haveMapCen2Bf = true;
   
