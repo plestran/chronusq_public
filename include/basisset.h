@@ -102,18 +102,20 @@ class BasisSet{
     int index;
     std::vector<libint2::Shell> shells;
   }; 
-  int  nBasis_           = 0    ;
-  int  nPrimitive_       = 0    ;
-  int  nShell_           = 0    ;
-  int  nShellPair_       = 0    ;
-  int  maxPrim_          = 0    ;
-  int  maxL_             = 0    ;
-  bool doSph_            = false;
+  int  nBasis_      ;
+  int  nPrimitive_  ;
+  int  nShell_      ;
+  int  nShellPair_  ;
+  int  maxPrim_     ;
+  int  maxL_        ;
+  bool doSph_       ;
 
-  std::vector<int>            nLShell_;
-  std::vector<int>            mapSh2Bf_;
-  std::vector<int>            mapSh2Cen_;
-  std::vector<ReferenceShell> refShells_;
+  std::vector<int>               nLShell_;
+  std::vector<int>               mapSh2Bf_;
+  std::vector<int>               mapSh2Cen_;
+  std::vector<std::array<int,2>> mapCen2Bf_;
+  std::vector<ReferenceShell>    refShells_;
+  std::vector<libint2::Shell>    shells_;
 
   std::string basisPath_;
 
@@ -131,14 +133,42 @@ public:
 
 
 
-  bool haveMapSh2Bf     = false;
-  bool haveMapSh2Cen    = false;
+  bool haveMapSh2Bf  ;
+  bool haveMapSh2Cen ;
+  bool haveMapCen2Bf ;
 
   std::unique_ptr<RealMatrix> shBlkNormAlpha; 
   std::unique_ptr<RealMatrix> shBlkNormBeta; 
-  std::vector<libint2::Shell> shells_;
 
-  BasisSet(int nBasis=0, int nShell=0){;};
+  BasisSet(){
+    this->nBasis_          = 0      ;
+    this->nPrimitive_      = 0      ;
+    this->nShell_          = 0      ;
+    this->nShellPair_      = 0      ;
+    this->maxPrim_         = 0      ;
+    this->maxL_            = 0      ;
+    this->doSph_           = false  ;
+    this->haveMapSh2Bf     = false  ;
+    this->haveMapSh2Cen    = false  ;
+    this->basisFile_       = nullptr;
+    this->fileio_          = NULL   ;
+  };
+
+  BasisSet(const BasisSet &basis){
+    this->nBasis_          = 0      ;
+    this->nPrimitive_      = 0      ;
+    this->nShell_          = 0      ;
+    this->nShellPair_      = 0      ;
+    this->maxPrim_         = 0      ;
+    this->maxL_            = 0      ;
+    this->doSph_           = basis.doSph_       ; 
+//  this->haveMapSh2Bf     = basis.haveMapSh2Bf ; 
+//  this->haveMapSh2Cen    = basis.haveMapSh2Cen;
+//  this->basisFile_       = basis.basisFile_   ; 
+    this->fileio_          = basis.fileio_      ; 
+    this->basisPath_       = basis.basisPath_   ;
+    this->refShells_       = basis.refShells_   ;
+  }
   ~BasisSet(){ // FIXME need to move these over to unique_ptr
 /*
     delete[] ao;
@@ -156,9 +186,11 @@ public:
   inline int       maxL() {return this->maxL_;         };
   inline int    maxPrim() {return this->maxPrim_;      };
   
-  inline libint2::Shell   shells(int i) {return this->shells_[i];  };
-  inline int             nLShell(int L) {return this->nLShell_[L]; };
-  inline int            mapSh2Bf(int i) {return this->mapSh2Bf_[i];};
+  inline libint2::Shell      shells(int i) {return this->shells_[i];    };
+  inline int                nLShell(int L) {return this->nLShell_[L];   };
+  inline int               mapSh2Bf(int i) {return this->mapSh2Bf_[i];  };
+  inline int               mapSh2Cen(int i) {return this->mapSh2Cen_[i];};
+  inline std::array<int,2> mapCen2Bf(int i) {return this->mapCen2Bf_[i];};
   
 
   inline void setBasisPath(std::string str){ this->basisPath_ = str;};
@@ -176,10 +208,12 @@ public:
   void computeMeta();
   void makeMapSh2Bf();
   void makeMapSh2Cen(Molecule *);
+  void makeMapCen2Bf(Molecule *);
+  void renormShells();
   template<typename TMat> void computeShBlkNorm(bool, const TMat*, const TMat*);
 
-  BasisSet* constructExtrn(Molecule *);
-
+//BasisSet* constructExtrn(Molecule *);
+  void constructExtrn(Molecule *, BasisSet *);
 
 }; // class BasisSet
 }; // namespace ChronusQ

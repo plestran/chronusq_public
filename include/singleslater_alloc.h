@@ -45,6 +45,8 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
   this->nVirB_ = this->nBasis_ - this->nOccB_;
   this->nOccA_ = this->nOccB_ + nSingleE;
   this->nVirA_ = this->nBasis_ - this->nOccA_;
+  this->nAE_   = this->nOccA_;
+  this->nBE_   = this->nOccB_;
   this->energyNuclei = molecule->energyNuclei();
   this->isConverged = false;
   this->denTol_ = controls->SCFdenTol_;

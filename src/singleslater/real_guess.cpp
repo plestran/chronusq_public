@@ -43,56 +43,144 @@ void SingleSlater<double>::formGuess() {
   std::vector<RealMatrix> atomMOB;
   int readNPGTO,L, nsize;
   this->moA_->setZero();
-  if(this->Ref_ != RHF) this->moB_->setZero();
-  this->haveMO = true;
-/*
+  if(!this->isClosedShell) this->moB_->setZero();
+//this->haveMO = true;
+
   // Determining unique atoms
   std::vector<Atoms> uniqueElement;
-  std::vector<int>   repeatedAtoms;
+//std::vector<int>   repeatedAtoms;
   for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
     if(iAtm == 0){ 
       uniqueElement.push_back(elements[this->molecule_->index(iAtm)]);
-      repeatedAtoms.push_back(iAtm);
+//    repeatedAtoms.push_back(iAtm);
     }
-    int uSize = uniqueElement.size();
+//  int uSize = uniqueElement.size();
     bool uniq = true;
-    int count;
-    for(auto iUn = 0; iUn < uSize; iUn++){
+//  int count;
+    for(auto iUn = 0; iUn < uniqueElement.size(); iUn++){
       if(uniqueElement[iUn].atomicNumber == 
         elements[this->molecule_->index(iAtm)].atomicNumber){
         uniq = false;
-	count=iUn;
+//	count=iUn;
         break;
       }
     }
     if(uniq) {
       uniqueElement.push_back(elements[this->molecule_->index(iAtm)]);
-      repeatedAtoms.push_back(uniqueElement.size()-1);
+//    repeatedAtoms.push_back(uniqueElement.size()-1);
     }
-    else {
-      if (iAtm!=0)
-        repeatedAtoms.push_back(count); 
+//  else {
+//    if (iAtm!=0)
+//      repeatedAtoms.push_back(count); 
+//  }
+  }
+
+  std::vector<std::vector<int>> atomIndex(uniqueElement.size());
+  for(auto iUn = 0; iUn < uniqueElement.size(); iUn++){
+    for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
+      if(uniqueElement[iUn].atomicNumber == 
+        elements[this->molecule_->index(iAtm)].atomicNumber){
+        
+        atomIndex[iUn].push_back(iAtm);
+      }
     }
   }
+  cout << "INDEX" << endl;
+  for(auto i = 0; i < uniqueElement.size(); i++){
+  for(auto j : atomIndex[i] ){
+    cout << j << '\t';
+  }
+  cout << endl;
+  }
+  cout << endl << endl;
 
   this->fileio_->out << "Found " << uniqueElement.size() << 
                         " unique atoms in molecule" << endl;
   
   this->fileio_->out << endl << "Atomic SCF Starting............." << endl << endl;
+
   for(auto iUn = 0; iUn < uniqueElement.size(); iUn++){
-    auto aointegralsAtom  = new AOIntegrals;
-    auto hartreeFockAtom  = new SingleSlater<double>;
-    auto controlAtom      = new Controls;
-    auto basisSetAtom     = new BasisSet;
-    auto dfBasissetAtom   = new BasisSet;
+    AOIntegrals aointegralsAtom;
+    SingleSlater<double> hartreeFockAtom;
+    Controls controlAtom;
+    BasisSet basisSetAtom;
+    BasisSet dfBasisSetAtom;
+    Molecule uniqueAtom(uniqueElement[iUn],this->fileio_);
+
+    uniqueAtom.readCharge(0);
+    uniqueAtom.readMultip(uniqueElement[iUn].defaultMult);
+  //uniqueAtom.printInfo(this->fileio_,this->controls_);
+
+//  basisSetAtom.constructLocal(&uniqueAtom);
+    this->basisset_->constructExtrn(&uniqueAtom,&basisSetAtom);
+    basisSetAtom.makeMapSh2Bf();
+    basisSetAtom.makeMapSh2Cen(&uniqueAtom);
+  //basisSetAtom.printInfo();
+    basisSetAtom.renormShells();
+
+    controlAtom.iniControls();
+    controlAtom.doCUHF = true;
+
+
+    aointegralsAtom.iniAOIntegrals(&uniqueAtom,&basisSetAtom,this->fileio_,&controlAtom,
+      &dfBasisSetAtom);
+    hartreeFockAtom.iniSingleSlater(&uniqueAtom,&basisSetAtom,&aointegralsAtom,
+      this->fileio_,&controlAtom);
+
+    hartreeFockAtom.moA_->setZero();
+    if(!hartreeFockAtom.isClosedShell) hartreeFockAtom.moB_->setZero();
+    hartreeFockAtom.haveMO = true;
+
+    hartreeFockAtom.formFock();
+    hartreeFockAtom.computeEnergy();
+    hartreeFockAtom.SCF();
+    cout << "IUn " << iUn << endl << endl << (*hartreeFockAtom.densityA_) << endl << endl;
+  
+    for(auto iAtm : atomIndex[iUn]){
+      auto iBfSt = this->basisset_->mapCen2Bf(iAtm)[0];
+      auto iSize = this->basisset_->mapCen2Bf(iAtm)[1]; 
+      this->densityA_->block(iBfSt,iBfSt,iSize,iSize)= (*hartreeFockAtom.densityA_);
+      if(!this->isClosedShell){
+//      this->densityA_->block(iBfSt,iBfSt,iSize,iSize) *= (double)nAE_/(double)(nAE_+nBE_);
+        if(hartreeFockAtom.isClosedShell)
+          this->densityB_->block(iBfSt,iBfSt,iSize,iSize)= (*hartreeFockAtom.densityA_);
+        else
+          this->densityB_->block(iBfSt,iBfSt,iSize,iSize)= (*hartreeFockAtom.densityB_);
+//      this->densityB_->block(iBfSt,iBfSt,iSize,iSize) *= (double)nBE_/(double)(nAE_+nBE_);
+      } else {
+        if(!hartreeFockAtom.isClosedShell){
+          this->densityA_->block(iBfSt,iBfSt,iSize,iSize) += (*hartreeFockAtom.densityB_);
+//        this->densityA_->block(iBfSt,iBfSt,iSize,iSize) *= 0.5;
+        }
+      }
+    }
+
+  }
+    cout << "NAE" << this->nAE_ << endl << "NBE" << this->nBE_ << endl;
+    if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
+    cout << "TOTAL" << endl << endl << (*this->densityA_) << endl << endl;
+    cout << ((*this->densityA_)*(*this->aointegrals_->overlap_)).trace() << endl << endl;
+    if(!this->isClosedShell) cout << ((*this->densityB_)*(*this->aointegrals_->overlap_)).trace() << endl << endl;
+    this->haveMO = true;
+    this->haveDensity = true;
+//  CErr();
+/*
+  for(auto iUn = 0; iUn < uniqueElement.size(); iUn++){
+    auto aointegralsAtom  = new AOIntegrals();
+    auto hartreeFockAtom  = new SingleSlater<double>();
+    auto controlAtom      = new Controls();
+    auto basisSetAtom     = new BasisSet(*this->basisset_);
+    auto dfBasissetAtom   = new BasisSet();
     std::vector<libint2::Shell> atomShell;
     Molecule uniqueAtom(uniqueElement[iUn],this->fileio_);
     uniqueAtom.readCharge(0);
     uniqueAtom.readMultip(uniqueElement[iUn].defaultMult);
 
-    basisSetAtom = this->basisset_->constructExtrn(&uniqueAtom); 
+//  this->basisset_->constructExtrn(&uniqueAtom,basisSetAtom); 
+    basisSetAtom->constructLocal(&uniqueAtom);
     basisSetAtom->makeMapSh2Bf();
     basisSetAtom->makeMapSh2Cen(&uniqueAtom);
+    basisSetAtom->printInfo();
     auto nsize = basisSetAtom->nBasis();
 
     RealMatrix denMOA(nsize, nsize);
@@ -104,8 +192,10 @@ void SingleSlater<double>::formGuess() {
     hartreeFockAtom->moA_->setZero();
     if (hartreeFockAtom->Ref_ != RHF) hartreeFockAtom->moB_->setZero();
     hartreeFockAtom->haveMO = true;
-    cout << this << endl << hartreeFockAtom << endl << basisSetAtom << endl;
+    cout << this << endl << aointegralsAtom << endl << hartreeFockAtom << endl << basisSetAtom << endl;
     cout << "HERE" << endl;
+    aointegralsAtom->computeSchwartz();
+    CErr();
     hartreeFockAtom->formFock();
     cout << "HERE" << endl;
     hartreeFockAtom->computeEnergy();

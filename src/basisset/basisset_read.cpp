@@ -12,9 +12,9 @@ void BasisSet::basisSetRead(FileIO * fileio, Molecule * mol){
   this->constructLocal(mol);
   this->makeMapSh2Bf();
   this->makeMapSh2Cen(mol);
+  this->makeMapCen2Bf(mol);
   this->printInfo();
-  for(auto iShell = this->shells_.begin(); iShell != this->shells_.end(); ++iShell)
-    iShell->renorm();
+  this->renormShells();
 
 }; // basisSetRead
 
@@ -144,6 +144,7 @@ void BasisSet::parseGlobal(){
 };
 
 void BasisSet::constructLocal(Molecule * mol){
+  cout << mol->nAtoms() << endl << this->refShells_.size() << endl;
   for(auto iAtom = 0; iAtom < mol->nAtoms(); iAtom++){
     bool found = false;
     for(auto iRef = this->refShells_.begin(); iRef != this->refShells_.end(); ++iRef){
@@ -176,9 +177,11 @@ void BasisSet::constructLocal(Molecule * mol){
 
 void BasisSet::computeMeta(){
   this->nShell_     = this->shells_.size();
+  this->nShellPair_ = this->nShell_ * (this->nShell_ + 1) / 2;
   
   for(auto iShell = this->shells_.begin(); iShell != this->shells_.end(); ++iShell){
     this->nBasis_ += (*iShell).size();
+    cout << this->nBasis_ << endl;
     auto L = (*iShell).contr[0].l;
     auto shPrim = (*iShell).alpha.size();  
     if( L      > this->maxL_   ) this->maxL_    = L     ;
@@ -222,6 +225,46 @@ void BasisSet::makeMapSh2Cen(Molecule *mol){
     } 
   }
   this->haveMapSh2Cen = true;
+}
+
+void BasisSet::makeMapCen2Bf(Molecule *mol){
+  if(!this->haveMapSh2Bf ) this->makeMapSh2Bf();
+  if(!this->haveMapSh2Cen) this->makeMapSh2Cen(mol);
+
+/*
+  for(auto iAtm = 0; iAtm < mol->nAtoms(); iAtm++){
+    for(auto iShell = 0; iShell < this->nShell_; iShell++){
+      if(iAtm == this->mapSh2Cen_[iShell]){
+        this->mapCen2Bf_.push_back({{ this->mapSh2Bf_[iShell], this->shells_[iShell].size() }});
+      }
+    }
+  }
+*/
+  cout << "HERE" << endl;
+  for(auto iAtm = 0; iAtm < mol->nAtoms(); iAtm++){
+    auto nSize = 0;
+    for(auto iShell = 0; iShell < this->nShell_; iShell++){
+      if((iAtm+1) == this->mapSh2Cen_[iShell]) nSize += this->shells_[iShell].size();
+    }
+    auto iSt = -1;
+    for(auto iShell = 0; iShell < this->nShell_; iShell++){
+      cout << this->mapSh2Cen_[iShell] << endl;
+      if((iAtm+1) == this->mapSh2Cen_[iShell]){
+       iSt = this->mapSh2Bf_[iShell];
+       break;
+      }
+    }
+    if(iSt == -1) CErr("Could not find Center in Basis definition",this->fileio_->out);
+    this->mapCen2Bf_.push_back({{iSt,nSize}});
+  }
+
+  cout << "MC2B" << endl;
+  for(auto i : this->mapCen2Bf_)
+    cout << i[0] << '\t' << i[1] << endl;
+  cout << endl << endl;
+
+  this->haveMapCen2Bf = true;
+  
 }
 
 template<>
@@ -278,8 +321,8 @@ void BasisSet::computeShBlkNorm(bool doBeta, const ComplexMatrix *DAlpha,
   }
 } // computeShBlkNorm (TMat = ComplexMatrix)
 
-BasisSet* BasisSet::constructExtrn(Molecule * mol){
-  BasisSet* genBasis = new BasisSet();
+void BasisSet::constructExtrn(Molecule * mol, BasisSet *genBasis){
+  genBasis->fileio_ = this->fileio_;
   for(auto iAtom = 0; iAtom < mol->nAtoms(); iAtom++){
     bool found = false;
     for(auto iRef = this->refShells_.begin(); iRef != this->refShells_.end(); ++iRef){
@@ -304,8 +347,12 @@ BasisSet* BasisSet::constructExtrn(Molecule * mol){
            this->fileio_->out);
   }
   genBasis->computeMeta();
-  return genBasis;
 
+}
+
+void BasisSet::renormShells(){
+  for(auto iShell = this->shells_.begin(); iShell != this->shells_.end(); ++iShell)
+    iShell->renorm();
 }
 
 } // namespace ChronusQ
