@@ -101,28 +101,27 @@ class BasisSet{
     int atomicNumber;
     int index;
     std::vector<libint2::Shell> shells;
-  }; 
-  int  nBasis_      ;
-  int  nPrimitive_  ;
-  int  nShell_      ;
-  int  nShellPair_  ;
-  int  maxPrim_     ;
-  int  maxL_        ;
-  bool doSph_       ;
+  }; ///< struct to hold information about the basis reference
+  int  nBasis_      ; ///< Number of (Gaußian) contracted basis functions
+  int  nPrimitive_  ; ///< Number of uncontracted Gaußian primitives
+  int  nShell_      ; ///< Number of basis shells
+  int  nShellPair_  ; ///< Number of unique basis shell pairs
+  int  maxPrim_     ; ///< Maximum number of Gaußian primitives for a single basis function
+  int  maxL_        ; ///< Maximum angular momentum for a single basis function
+  bool doSph_       ; ///< Whether or not to make the cartesian -> spherical transformation
 
-  std::vector<int>               nLShell_;
-  std::vector<int>               mapSh2Bf_;
-  std::vector<int>               mapSh2Cen_;
-  std::vector<std::array<int,2>> mapCen2Bf_;
-  std::vector<ReferenceShell>    refShells_;
-  std::vector<libint2::Shell>    shells_;
+  std::vector<int>               nLShell_  ; ///< Maps L value to # of shells of that L
+  std::vector<int>               mapSh2Bf_ ; ///< Maps shell number to first basis funtion
+  std::vector<int>               mapSh2Cen_; ///< Maps shell number to atomic center
+  std::vector<std::array<int,2>> mapCen2Bf_; ///< Maps atomic center to first basis function
+  std::vector<ReferenceShell>    refShells_; ///< Set of reference shells for given basis
+  std::vector<libint2::Shell>    shells_   ; ///< Local basis storage (in shells)
 
-  std::string basisPath_;
+  std::string basisPath_; ///< Path to the basis file
 
-  std::unique_ptr<ifstream> basisFile_;
+  std::unique_ptr<ifstream> basisFile_; ///< The file containing the basis defintion (G94)
 
-
-  FileIO *fileio_;
+  FileIO *fileio_; ///< FileIO Object for output file
 
 
 public:
@@ -133,13 +132,16 @@ public:
 
 
 
-  bool haveMapSh2Bf  ;
-  bool haveMapSh2Cen ;
-  bool haveMapCen2Bf ;
+  bool haveMapSh2Bf  ; ///< (?) The map from shells to basis functions has been made
+  bool haveMapSh2Cen ; ///< (?) The map from shells to atomic centers has been made
+  bool haveMapCen2Bf ; ///< (?) The map from atomic centers to basis functions has been made
 
-  std::unique_ptr<RealMatrix> shBlkNormAlpha; 
-  std::unique_ptr<RealMatrix> shBlkNormBeta; 
+  std::unique_ptr<RealMatrix> shBlkNormAlpha; ///< Shell Block (Inf) norm for Alpha matrix
+  std::unique_ptr<RealMatrix> shBlkNormBeta;  ///< Shell Block (Inf) norm for Beta  matrix
 
+  /**
+   *  Default Constructor
+   */ 
   BasisSet(){
     this->nBasis_          = 0      ;
     this->nPrimitive_      = 0      ;
@@ -154,6 +156,9 @@ public:
     this->fileio_          = NULL   ;
   };
 
+  /**
+   *  Copy Constructor
+   */ 
   BasisSet(const BasisSet &basis){
     this->nBasis_          = 0      ;
     this->nPrimitive_      = 0      ;
@@ -162,13 +167,13 @@ public:
     this->maxPrim_         = 0      ;
     this->maxL_            = 0      ;
     this->doSph_           = basis.doSph_       ; 
-//  this->haveMapSh2Bf     = basis.haveMapSh2Bf ; 
-//  this->haveMapSh2Cen    = basis.haveMapSh2Cen;
-//  this->basisFile_       = basis.basisFile_   ; 
     this->fileio_          = basis.fileio_      ; 
     this->basisPath_       = basis.basisPath_   ;
     this->refShells_       = basis.refShells_   ;
   }
+  /**
+   *  Destructor
+   */ 
   ~BasisSet(){ // FIXME need to move these over to unique_ptr
 /*
     delete[] ao;
@@ -176,15 +181,15 @@ public:
     delete[] shells_old;
     delete[] sortedShells;
 */
-//  this->basisFile_->close();
   };
 
-  inline int     nBasis() {return this->nBasis_;       };
-  inline int nPrimitive() {return this->nPrimitive_;   };
-  inline int     nShell() {return this->shells_.size();};
-  inline int nShellPair() {return this->nShellPair_;   };
-  inline int       maxL() {return this->maxL_;         };
-  inline int    maxPrim() {return this->maxPrim_;      };
+  // Getters
+  inline int     nBasis() {return this->nBasis_;       }; ///< Return # of basis functions
+  inline int nPrimitive() {return this->nPrimitive_;   }; ///< Return # of primitive GTOs
+  inline int     nShell() {return this->shells_.size();}; ///< Return # of basis shells
+  inline int nShellPair() {return this->nShellPair_;   }; ///< Return # of unique shell pairs
+  inline int       maxL() {return this->maxL_;         }; ///< Return max angular momentum
+  inline int    maxPrim() {return this->maxPrim_;      }; ///< Return max # primitive GTOs
   
   inline libint2::Shell      shells(int i) {return this->shells_[i];    };
   inline int                nLShell(int L) {return this->nLShell_[L];   };
@@ -196,24 +201,23 @@ public:
   inline void setBasisPath(std::string str){ this->basisPath_ = str;};
 
 
-  void printInfo();
-  void printMeta();
-  void printHeader();
-  void printBasis();
+  void printInfo();   ///< Print all info
+  void printMeta();   ///< Print Meta data (nBasis, etc)
+  void printHeader(); ///< Print header
+  void printBasis();  ///< Print basis definition
 
-  void basisSetRead(FileIO *, Molecule *);
-  void findBasisFile(std::string);
-  void parseGlobal();
-  void constructLocal(Molecule *);
-  void computeMeta();
-  void makeMapSh2Bf();
-  void makeMapSh2Cen(Molecule *);
-  void makeMapCen2Bf(Molecule *);
-  void renormShells();
+  void basisSetRead(FileIO *, Molecule *); ///< Parse and construct basis from file
+  void findBasisFile(std::string);         ///< Attempt to find basis set file
+  void parseGlobal();                      ///< Parse basis set file, generate reference
+  void constructLocal(Molecule *);         ///< Construct local basis defintion
+  void computeMeta();                      ///< Compute meta data (nBasis, etc)
+  void makeMapSh2Bf();                     ///< generate mapSh2Bf
+  void makeMapSh2Cen(Molecule *);          ///< generate mapSh2Cen
+  void makeMapCen2Bf(Molecule *);          ///< generate mapCen2Bf
+  void renormShells();                     ///< Renormalize Libint2::Shell set
   template<typename TMat> void computeShBlkNorm(bool, const TMat*, const TMat*);
 
-//BasisSet* constructExtrn(Molecule *);
-  void constructExtrn(Molecule *, BasisSet *);
+  void constructExtrn(Molecule *, BasisSet *); ///< Generate new basis from refernce shells
 
 }; // class BasisSet
 }; // namespace ChronusQ
