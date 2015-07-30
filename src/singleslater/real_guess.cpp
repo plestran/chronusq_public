@@ -44,37 +44,27 @@ void SingleSlater<double>::formGuess() {
   int readNPGTO,L, nsize;
   this->moA_->setZero();
   if(!this->isClosedShell) this->moB_->setZero();
-//this->haveMO = true;
 
   // Determining unique atoms
   std::vector<Atoms> uniqueElement;
-//std::vector<int>   repeatedAtoms;
   for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
     if(iAtm == 0){ 
       uniqueElement.push_back(elements[this->molecule_->index(iAtm)]);
-//    repeatedAtoms.push_back(iAtm);
     }
-//  int uSize = uniqueElement.size();
     bool uniq = true;
-//  int count;
     for(auto iUn = 0; iUn < uniqueElement.size(); iUn++){
       if(uniqueElement[iUn].atomicNumber == 
         elements[this->molecule_->index(iAtm)].atomicNumber){
         uniq = false;
-//	count=iUn;
         break;
       }
     }
     if(uniq) {
       uniqueElement.push_back(elements[this->molecule_->index(iAtm)]);
-//    repeatedAtoms.push_back(uniqueElement.size()-1);
     }
-//  else {
-//    if (iAtm!=0)
-//      repeatedAtoms.push_back(count); 
-//  }
   }
 
+  // Generate a map of unique atoms to centers
   std::vector<std::vector<int>> atomIndex(uniqueElement.size());
   for(auto iUn = 0; iUn < uniqueElement.size(); iUn++){
     for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
@@ -91,7 +81,9 @@ void SingleSlater<double>::formGuess() {
   
   this->fileio_->out << endl << "Atomic SCF Starting............." << endl << endl;
 
+  // Loop and perform CUHF on each atomic center
   for(auto iUn = 0; iUn < uniqueElement.size(); iUn++){
+    // Local objects to be constructed and destructed at every loop
     AOIntegrals aointegralsAtom;
     SingleSlater<double> hartreeFockAtom;
     Controls controlAtom;
@@ -99,31 +91,38 @@ void SingleSlater<double>::formGuess() {
     BasisSet dfBasisSetAtom;
     Molecule uniqueAtom(uniqueElement[iUn],this->fileio_);
 
+    // FIXME: This only makes sense for neutral molecules
     uniqueAtom.readCharge(0);
     uniqueAtom.readMultip(uniqueElement[iUn].defaultMult);
 
+    // Construct atomic basis set from the reference
     this->basisset_->constructExtrn(&uniqueAtom,&basisSetAtom);
+    // Generate basis maps
     basisSetAtom.makeMapSh2Bf();
     basisSetAtom.makeMapSh2Cen(&uniqueAtom);
-    basisSetAtom.renormShells();
+    basisSetAtom.renormShells(); // Libint throws a hissy fit without this
 
     controlAtom.iniControls();
-    controlAtom.doCUHF = true;
+    controlAtom.doCUHF = true; // Can set to false too if UHF guess is desired
 
-
+    // Initialize the local integral and SS classes
     aointegralsAtom.iniAOIntegrals(&uniqueAtom,&basisSetAtom,this->fileio_,&controlAtom,
       &dfBasisSetAtom);
     hartreeFockAtom.iniSingleSlater(&uniqueAtom,&basisSetAtom,&aointegralsAtom,
       this->fileio_,&controlAtom);
 
+    // Zero out the MO coeff for local SS object
     hartreeFockAtom.moA_->setZero();
     if(!hartreeFockAtom.isClosedShell) hartreeFockAtom.moB_->setZero();
     hartreeFockAtom.haveMO = true;
 
+    // Prime and perform the atomic SCF
     hartreeFockAtom.formFock();
     hartreeFockAtom.computeEnergy();
     hartreeFockAtom.SCF();
   
+    // Place atomic SCF densities in the right place of the total density
+    // ** Note: ALWAYS spin average, even for UHF **
     for(auto iAtm : atomIndex[iUn]){
       auto iBfSt = this->basisset_->mapCen2Bf(iAtm)[0];
       auto iSize = this->basisset_->mapCen2Bf(iAtm)[1]; 
@@ -139,14 +138,18 @@ void SingleSlater<double>::formGuess() {
           this->densityA_->block(iBfSt,iBfSt,iSize,iSize) += (*hartreeFockAtom.densityB_);
         }
       }
-    }
+    } // loop iAtm
 
-  }
+  } // Loop iUn
+
+  // Scale UHF densities according to desired multiplicity
   if(!this->isClosedShell){
     int nE = this->molecule_->nTotalE();
     (*this->densityA_) *= (double)this->nAE_/(double)nE ;
     (*this->densityB_) *= (double)this->nBE_/(double)nE ;
   }
+
+  // Set flags to use in the rest of code
   this->haveMO = true;
   this->haveDensity = true;
 };
