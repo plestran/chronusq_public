@@ -146,7 +146,7 @@ public:
     delete[] shells_old;
     delete[] sortedShells;
 */
-    this->basisFile_->close();
+//  this->basisFile_->close();
   };
 
   inline int     nBasis() {return this->nBasis_;       };
