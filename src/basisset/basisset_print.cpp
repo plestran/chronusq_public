@@ -2,10 +2,22 @@
 
 namespace ChronusQ{
 
+  /**
+   *  Print the header for BasisSet::printInfo
+   */ 
   void BasisSet::printHeader(){
     this->fileio_->out << endl << "Basis Function Information:" << endl << endl;;
   }
 
+  /**
+   *  Print BasisSet metadata:
+   *    nBasis
+   *    nPrimitive
+   *    maxPrim
+   *    nShell
+   *    nLShell
+   *    nShellPair
+   */ 
   void BasisSet::printMeta(){
     
     this->fileio_->out << "  nBasis      =  " <<  this->nBasis_     << endl; 
@@ -21,6 +33,10 @@ namespace ChronusQ{
     this->fileio_->out << "  nShellPair  =  " <<  this->nShellPair_ << endl; 
   }
 
+
+  /**
+   *  Print Basis Set definition
+   */ 
   void BasisSet::printBasis(){
     this->fileio_->out.precision(6);
     this->fileio_->out.fill(' ');
@@ -53,6 +69,9 @@ namespace ChronusQ{
     }
   }
 
+  /**
+   *  Print important information about a BasisSet object
+   */ 
   void BasisSet::printInfo(){
     this->printHeader();
     this->printMeta();

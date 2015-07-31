@@ -45,11 +45,7 @@ void BasisSet::parseGlobal(){
   std::string readString;
   std::string nameOfAtom;
   std::string shSymb;
-  double      scaleFactor;
-  double      dummyDouble;
-  int         dummyInt;
   int         contDepth;
-  int         nShell_tmp = 0;
   int atomicNumber;
   int indx;
   std::vector<libint2::Shell> tmpShell;
@@ -85,7 +81,6 @@ void BasisSet::parseGlobal(){
         atomicNumber = elements[indx].atomicNumber;
         newRec = false;
         firstRec = false;
-        nShell_tmp = 0;
         tmpShell.clear();
       } else {
         contDepth = std::stoi(tokens[1]);
@@ -118,208 +113,12 @@ void BasisSet::parseGlobal(){
             libint2::Shell{ exp, {{HashL(shSymb),this->doSph_,contPrimary}}, {{0,0,0}} }
           );
         }
-
-        if(!shSymb.compare("SP")) nShell_tmp += 2;
-        else                      nShell_tmp++;
       }
     }
   }
-  this->refShells_.push_back(ReferenceShell{atomicNumber,indx,tmpShell}); // Append the last Rec
+  // Append the last Rec
+  this->refShells_.push_back(ReferenceShell{atomicNumber,indx,tmpShell}); 
  
 };
-
-void BasisSet::constructLocal(Molecule * mol){
-  for(auto iAtom = 0; iAtom < mol->nAtoms(); iAtom++){
-    bool found = false;
-    for(auto iRef = this->refShells_.begin(); iRef != this->refShells_.end(); ++iRef){
-      if(mol->index(iAtom) == (*iRef).index){
-        for(auto iShell = (*iRef).shells.begin(); iShell != (*iRef).shells.end(); ++iShell)
-          this->shells_.push_back(
-            libint2::Shell{ 
-              iShell->alpha, 
-              {iShell->contr[0]}, 
-              {{ (*mol->cart())(0,iAtom),
-                 (*mol->cart())(1,iAtom),
-                 (*mol->cart())(2,iAtom)}}
-            }
-          );
-        found = true;
-      }
-    }
-    if(!found)  
-      CErr("Atomic Number " + 
-             std::to_string(elements[mol->index(iAtom)].atomicNumber) +
-             " not found in current Basis Set",
-           this->fileio_->out);
-  }
-  this->computeMeta();
-}
-
-void BasisSet::computeMeta(){
-  this->nShell_     = this->shells_.size();
-  this->nShellPair_ = this->nShell_ * (this->nShell_ + 1) / 2;
-  
-  for(auto iShell = this->shells_.begin(); iShell != this->shells_.end(); ++iShell){
-    this->nBasis_ += (*iShell).size();
-    auto L = (*iShell).contr[0].l;
-    auto shPrim = (*iShell).alpha.size();  
-    if( L      > this->maxL_   ) this->maxL_    = L     ;
-    if( shPrim > this->maxPrim_) this->maxPrim_ = shPrim;
-    this->nPrimitive_ += shPrim * (*iShell).size();
-  }
-
-  this->nLShell_ = std::vector<int>(this->maxL_+1,0);
-  for(auto shell : this->shells_){
-    this->nLShell_[shell.contr[0].l]++;
-  }
-
-}
-
-void BasisSet::makeMapSh2Bf(){
-  auto n = 0;
-  for(auto shell : this->shells_){
-     this->mapSh2Bf_.push_back(n);
-     n += shell.size();
-  }
-  this->haveMapSh2Bf = true;
-}
-
-void BasisSet::makeMapSh2Cen(Molecule *mol){
-  for(auto shell : this->shells_){
-    for(auto iAtom = 0; iAtom < mol->nAtoms(); iAtom++){
-      std::array<double,3> center = {{ (*mol->cart())(0,iAtom),
-                                       (*mol->cart())(1,iAtom),
-                                       (*mol->cart())(2,iAtom) }};
-      if(shell.O == center){
-        this->mapSh2Cen_.push_back(iAtom+1);
-        break;
-      }
-    } 
-  }
-  this->haveMapSh2Cen = true;
-}
-
-void BasisSet::makeMapCen2Bf(Molecule *mol){
-  if(!this->haveMapSh2Bf ) this->makeMapSh2Bf();
-  if(!this->haveMapSh2Cen) this->makeMapSh2Cen(mol);
-
-/*
-  for(auto iAtm = 0; iAtm < mol->nAtoms(); iAtm++){
-    for(auto iShell = 0; iShell < this->nShell_; iShell++){
-      if(iAtm == this->mapSh2Cen_[iShell]){
-        this->mapCen2Bf_.push_back({{ this->mapSh2Bf_[iShell], this->shells_[iShell].size() }});
-      }
-    }
-  }
-*/
-  for(auto iAtm = 0; iAtm < mol->nAtoms(); iAtm++){
-    auto nSize = 0;
-    for(auto iShell = 0; iShell < this->nShell_; iShell++){
-      if((iAtm+1) == this->mapSh2Cen_[iShell]) nSize += this->shells_[iShell].size();
-    }
-    auto iSt = -1;
-    for(auto iShell = 0; iShell < this->nShell_; iShell++){
-      if((iAtm+1) == this->mapSh2Cen_[iShell]){
-       iSt = this->mapSh2Bf_[iShell];
-       break;
-      }
-    }
-    if(iSt == -1) CErr("Could not find Center in Basis definition",this->fileio_->out);
-    this->mapCen2Bf_.push_back({{iSt,nSize}});
-  }
-
-
-  this->haveMapCen2Bf = true;
-  
-}
-
-template<>
-void BasisSet::computeShBlkNorm(bool doBeta, const RealMatrix *DAlpha, 
-                                   const RealMatrix *DBeta){
-  // If map doesnt exist, make it
-  if(!this->haveMapSh2Bf) this->makeMapSh2Bf();
-
-  // Allocate Matricies
-  this->shBlkNormAlpha = 
-    std::unique_ptr<RealMatrix>(new RealMatrix(this->nShell_,this->nShell_));
-  if(doBeta)
-    this->shBlkNormBeta = 
-      std::unique_ptr<RealMatrix>(new RealMatrix(this->nShell_,this->nShell_));
-
-  for(int s1 = 0; s1 < this->nShell_; s1++) {
-    int bf1 = this->mapSh2Bf_[s1];
-    int n1  = this->shells_[s1].size();
-    for(int s2 = 0; s2 < this->nShell_; s2++) {
-      int bf2 = this->mapSh2Bf_[s2];
-      int n2  = this->shells_[s2].size();
-     
-      (*this->shBlkNormAlpha)(s1,s2) = DAlpha->block(bf1,bf2,n1,n2).lpNorm<Infinity>();
-      if(doBeta)
-        (*this->shBlkNormBeta)(s1,s2) = DBeta->block(bf1,bf2,n1,n2).lpNorm<Infinity>();
-    }
-  }
-} // computeShBlkNorm (TMat = RealMatrix)
-
-template<>
-void BasisSet::computeShBlkNorm(bool doBeta, const ComplexMatrix *DAlpha, 
-                                   const ComplexMatrix *DBeta){
-  // If map doesnt exist, make it
-  if(!this->haveMapSh2Bf) this->makeMapSh2Bf();
-
-  // Allocate Matricies
-  this->shBlkNormAlpha = 
-    std::unique_ptr<RealMatrix>(new RealMatrix(this->nShell_,this->nShell_));
-  if(doBeta)
-    this->shBlkNormBeta = 
-      std::unique_ptr<RealMatrix>(new RealMatrix(this->nShell_,this->nShell_));
-
-  for(int s1 = 0; s1 < this->nShell_; s1++) {
-    int bf1 = this->mapSh2Bf_[s1];
-    int n1  = this->shells_[s1].size();
-    for(int s2 = 0; s2 < this->nShell_; s2++) {
-      int bf2 = this->mapSh2Bf_[s2];
-      int n2  = this->shells_[s2].size();
-     
-      (*this->shBlkNormAlpha)(s1,s2) = DAlpha->block(bf1,bf2,n1,n2).lpNorm<Infinity>();
-      if(doBeta)
-        (*this->shBlkNormBeta)(s1,s2) = DBeta->block(bf1,bf2,n1,n2).lpNorm<Infinity>();
-    }
-  }
-} // computeShBlkNorm (TMat = ComplexMatrix)
-
-void BasisSet::constructExtrn(Molecule * mol, BasisSet *genBasis){
-  genBasis->fileio_ = this->fileio_;
-  for(auto iAtom = 0; iAtom < mol->nAtoms(); iAtom++){
-    bool found = false;
-    for(auto iRef = this->refShells_.begin(); iRef != this->refShells_.end(); ++iRef){
-      if(mol->index(iAtom) == (*iRef).index){
-        for(auto iShell = (*iRef).shells.begin(); iShell != (*iRef).shells.end(); ++iShell)
-          genBasis->shells_.push_back(
-            libint2::Shell{ 
-              iShell->alpha, 
-              {iShell->contr[0]}, 
-              {{ (*mol->cart())(0,iAtom),
-                 (*mol->cart())(1,iAtom),
-                 (*mol->cart())(2,iAtom)}}
-            }
-          );
-        found = true;
-      }
-    }
-    if(!found)  
-      CErr("Atomic Number " + 
-             std::to_string(elements[mol->index(iAtom)].atomicNumber) +
-             " not found in current Basis Set",
-           this->fileio_->out);
-  }
-  genBasis->computeMeta();
-
-}
-
-void BasisSet::renormShells(){
-  for(auto iShell = this->shells_.begin(); iShell != this->shells_.end(); ++iShell)
-    iShell->renorm();
-}
-
 } // namespace ChronusQ
 

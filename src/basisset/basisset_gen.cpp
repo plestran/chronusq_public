@@ -1,0 +1,81 @@
+#include <basisset.h>
+namespace ChronusQ{
+void BasisSet::constructLocal(Molecule * mol){
+  for(auto iAtom = 0; iAtom < mol->nAtoms(); iAtom++){
+    bool found = false;
+    for(auto iRef = this->refShells_.begin(); iRef != this->refShells_.end(); ++iRef){
+      if(mol->index(iAtom) == (*iRef).index){
+        for(auto iShell = (*iRef).shells.begin(); iShell != (*iRef).shells.end(); ++iShell)
+          this->shells_.push_back(
+            libint2::Shell{ 
+              iShell->alpha, 
+              {iShell->contr[0]}, 
+              {{ (*mol->cart())(0,iAtom),
+                 (*mol->cart())(1,iAtom),
+                 (*mol->cart())(2,iAtom)}}
+            }
+          );
+        found = true;
+      }
+    }
+    if(!found)  
+      CErr("Atomic Number " + 
+             std::to_string(elements[mol->index(iAtom)].atomicNumber) +
+             " not found in current Basis Set",
+           this->fileio_->out);
+  }
+  this->computeMeta();
+}
+
+void BasisSet::constructExtrn(Molecule * mol, BasisSet *genBasis){
+  genBasis->fileio_ = this->fileio_;
+  for(auto iAtom = 0; iAtom < mol->nAtoms(); iAtom++){
+    bool found = false;
+    for(auto iRef = this->refShells_.begin(); iRef != this->refShells_.end(); ++iRef){
+      if(mol->index(iAtom) == (*iRef).index){
+        for(auto iShell = (*iRef).shells.begin(); iShell != (*iRef).shells.end(); ++iShell)
+          genBasis->shells_.push_back(
+            libint2::Shell{ 
+              iShell->alpha, 
+              {iShell->contr[0]}, 
+              {{ (*mol->cart())(0,iAtom),
+                 (*mol->cart())(1,iAtom),
+                 (*mol->cart())(2,iAtom)}}
+            }
+          );
+        found = true;
+      }
+    }
+    if(!found)  
+      CErr("Atomic Number " + 
+             std::to_string(elements[mol->index(iAtom)].atomicNumber) +
+             " not found in current Basis Set",
+           this->fileio_->out);
+  }
+  genBasis->computeMeta();
+
+}
+
+void BasisSet::computeMeta(){
+  this->nShell_     = this->shells_.size();
+  this->nShellPair_ = this->nShell_ * (this->nShell_ + 1) / 2;
+  
+  for(auto iShell = this->shells_.begin(); iShell != this->shells_.end(); ++iShell){
+    this->nBasis_ += (*iShell).size();
+    auto L = (*iShell).contr[0].l;
+    auto shPrim = (*iShell).alpha.size();  
+    if( L      > this->maxL_   ) this->maxL_    = L     ;
+    if( shPrim > this->maxPrim_) this->maxPrim_ = shPrim;
+    this->nPrimitive_ += shPrim * (*iShell).size();
+  }
+
+  this->nLShell_ = std::vector<int>(this->maxL_+1,0);
+  for(auto shell : this->shells_){
+    this->nLShell_[shell.contr[0].l]++;
+  }
+
+}
+
+
+}; // namespace ChronusQ
+
