@@ -35,7 +35,7 @@ namespace ChronusQ{
    *  X-Total, i.e. X = X-Alpha + X-Beta (hence the 0.5 on the exchange part)
    */
   template<>
-  void AOIntegrals::Restricted34HerContract(RealMatrix &G, const RealMatrix &X, int n1, 
+  void AOIntegrals::Restricted34Contract(RealMatrix &G, const RealMatrix &X, int n1, 
     int n2, int n3, int n4, int bf1_s, int bf2_s, int bf3_s, int bf4_s, const double* buff, 
     double deg){
 
@@ -54,10 +54,10 @@ namespace ChronusQ{
         }
       }
     }
-  } // Restricted34HerContract 
+  } // Restricted34Contract 
 
   template<>
-  void AOIntegrals::UnRestricted34HerContract(RealMatrix &GAlpha, const RealMatrix &XAlpha, 
+  void AOIntegrals::UnRestricted34Contract(RealMatrix &GAlpha, const RealMatrix &XAlpha, 
     RealMatrix &GBeta, const RealMatrix &XBeta, const RealMatrix &XTotal, int n1, int n2, 
     int n3, int n4, int bf1_s, int bf2_s, int bf3_s, int bf4_s, const double* buff, 
     double deg){
@@ -79,7 +79,7 @@ namespace ChronusQ{
         }
       }
     }
-  } // UnRestricted34HerContract
+  } // UnRestricted34Contract
   
   template<>
   void AOIntegrals::General24CouContract(RealMatrix &G, const RealMatrix &X, int n1, int n2, 

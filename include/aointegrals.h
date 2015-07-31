@@ -221,10 +221,10 @@ public:
     void multTwoEContractDF(int, bool,bool,const std::vector<T> &,std::vector<T> &,
                             const std::vector<T> &,std::vector<T> &);
   template<typename TMat,typename T> 
-    void Restricted34HerContract(TMat&, const TMat &, int,int,int,int,int,int,int,int,
+    void Restricted34Contract(TMat&, const TMat &, int,int,int,int,int,int,int,int,
                                  const T*,T);
   template<typename TMat,typename T> 
-    void UnRestricted34HerContract(TMat&, const TMat &, TMat&, const TMat &, const TMat &, 
+    void UnRestricted34Contract(TMat&, const TMat &, TMat&, const TMat &, const TMat &, 
                                    int,int,int,int,int,int,int,int,const T*,T);
   template<typename TMat,typename T> 
     void General24CouContract(TMat&, const TMat &, int,int,int,int,int,int,int,int,
