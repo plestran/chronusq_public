@@ -196,7 +196,9 @@ public:
   inline Controls *    controls(){return this->controls_;};
   inline AOIntegrals * aointegrals(){return this->aointegrals_;};
 
-  void formGuess();	        // form the intial guess of MO's
+  void formGuess();	        // form the intial guess of MO's (Density)
+  void placeAtmDen(std::vector<int>, SingleSlater<T> &);           // Place the atomic densities into total densities for guess
+  void scaleDen();              // Scale the unrestricted densities for correct # electrons
   void formDensity();		// form the density matrix
   void formFock();	        // form the Fock matrix
   void formCoulomb();		// form the Coulomb matrix

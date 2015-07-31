@@ -33,6 +33,36 @@ using ChronusQ::Controls;
 using ChronusQ::Molecule;
 using ChronusQ::HashNAOs;
 namespace ChronusQ {
+template<>
+void SingleSlater<double>::placeAtmDen(std::vector<int> atomIndex, SingleSlater<double> &hfA){
+  // Place atomic SCF densities in the right place of the total density
+  // ** Note: ALWAYS spin average, even for UHF **
+  for(auto iAtm : atomIndex){
+    auto iBfSt = this->basisset_->mapCen2Bf(iAtm)[0];
+    auto iSize = this->basisset_->mapCen2Bf(iAtm)[1]; 
+    this->densityA_->block(iBfSt,iBfSt,iSize,iSize)= (*hfA.densityA_);
+    if(!this->isClosedShell){
+      if(hfA.isClosedShell)
+        this->densityB_->block(iBfSt,iBfSt,iSize,iSize)= 2*(*hfA.densityA_);
+      else
+        this->densityB_->block(iBfSt,iBfSt,iSize,iSize)= 
+          (*hfA.densityB_) + (*hfA.densityA_);
+    } else {
+      if(!hfA.isClosedShell){
+        this->densityA_->block(iBfSt,iBfSt,iSize,iSize) += (*hfA.densityB_);
+      }
+    }
+  } // loop iAtm
+}
+template<>
+void SingleSlater<double>::scaleDen(){
+  // Scale UHF densities according to desired multiplicity
+  if(!this->isClosedShell){
+    int nE = this->molecule_->nTotalE();
+    (*this->densityA_) *= (double)this->nAE_/(double)nE ;
+    (*this->densityB_) *= (double)this->nBE_/(double)nE ;
+  }
+}; // SingleSlater::scaleDen [T=double]
 //--------------------------------//
 // form the initial guess of MO's //
 //--------------------------------//
@@ -120,34 +150,13 @@ void SingleSlater<double>::formGuess() {
     hartreeFockAtom.formFock();
     hartreeFockAtom.computeEnergy();
     hartreeFockAtom.SCF();
-  
-    // Place atomic SCF densities in the right place of the total density
-    // ** Note: ALWAYS spin average, even for UHF **
-    for(auto iAtm : atomIndex[iUn]){
-      auto iBfSt = this->basisset_->mapCen2Bf(iAtm)[0];
-      auto iSize = this->basisset_->mapCen2Bf(iAtm)[1]; 
-      this->densityA_->block(iBfSt,iBfSt,iSize,iSize)= (*hartreeFockAtom.densityA_);
-      if(!this->isClosedShell){
-        if(hartreeFockAtom.isClosedShell)
-          this->densityB_->block(iBfSt,iBfSt,iSize,iSize)= 2*(*hartreeFockAtom.densityA_);
-        else
-          this->densityB_->block(iBfSt,iBfSt,iSize,iSize)= 
-            (*hartreeFockAtom.densityB_) + (*hartreeFockAtom.densityA_);
-      } else {
-        if(!hartreeFockAtom.isClosedShell){
-          this->densityA_->block(iBfSt,iBfSt,iSize,iSize) += (*hartreeFockAtom.densityB_);
-        }
-      }
-    } // loop iAtm
+
+    // Place Atomic Densities into Total Densities
+    this->placeAtmDen(atomIndex[iUn],hartreeFockAtom);
 
   } // Loop iUn
 
-  // Scale UHF densities according to desired multiplicity
-  if(!this->isClosedShell){
-    int nE = this->molecule_->nTotalE();
-    (*this->densityA_) *= (double)this->nAE_/(double)nE ;
-    (*this->densityB_) *= (double)this->nBE_/(double)nE ;
-  }
+  this->scaleDen();
 
   // Set flags to use in the rest of code
   this->haveMO = true;
