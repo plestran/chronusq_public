@@ -135,15 +135,12 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 //Test one dimensional grid
   fileIO->out << "**AP One dimensional grid test**" << endl;
   int Ngridr =   500;
-  int Ngridr2 = 5;
-  int NLeb    = 26;
+  int NLeb    = 38;
   double radius = 1.0;
    GaussChebyshev1stGrid Rad(Ngridr,0.0,radius);
-   GaussChebyshev1stGrid Rad2(Ngridr2,0.0,radius);
    LebedevGrid GridLeb(NLeb);
    
 //   func(&Rad);
-//   func(&Rad2);
 //   func2D(&GridLeb);
 //
    Rad.genGrid();

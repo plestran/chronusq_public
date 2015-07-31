@@ -135,6 +135,8 @@ void OneDGrid::printGrid(){
      double A1;
      double A2;
      double A3;
+     double C1;
+     double q1;
 // We are using the values in Lebedev75 Zh. vychisl Mat mat Fiz 15, 1, 48-54, 1975
 // For nPts == 38
      if(this->nPts_ == 6){
@@ -152,6 +154,15 @@ void OneDGrid::printGrid(){
        gen6_A1(0,one,A1);
        gen12_A2(6,overradtwo,A2);
        gen8_A3(18,overradthree,A3); 
+    }else if(this->nPts_ == 38){
+// Lebedev N=38; eta 0.877 Lebedev 1973 ZVMMF_15_48 table 9.1;
+      A1 = double(1)/double(105);
+      A3 = double(9)/double(280);
+      q1 = 0.4597008433809831;
+      C1 = double(1)/double(35);
+      gen6_A1(0,one,A1);
+      gen8_A3(6,overradthree,A3);
+      gen24_Cn(14,q1,C1);
       }else{
       CErr("Number of points not available in Lebedev quadrature");
       }
@@ -161,7 +172,7 @@ void OneDGrid::printGrid(){
     void LebedevGrid::transformPts(){
 };
 
-void LebedevGrid::gen6_A1(int num, long double a, long double v){
+void LebedevGrid::gen6_A1(int num, double a, double v){
 //  v is A1 in Lebedev Tables. 
     cartGP tmpCart;
     tmpCart.set<0>(a);
@@ -201,7 +212,7 @@ void LebedevGrid::gen6_A1(int num, long double a, long double v){
     bg::transform(tmpCart,(this->grid2GPts_[num+5]));
 }
 
-void LebedevGrid::gen12_A2(int num, long double a, long double v){
+void LebedevGrid::gen12_A2(int num, double a, double v){
 //  v is A2 in Lebedev Tables. 
     
     cartGP tmpCart;
@@ -280,7 +291,7 @@ void LebedevGrid::gen12_A2(int num, long double a, long double v){
 
 }
 
-void LebedevGrid::gen8_A3(int num, long double a, long double v){
+void LebedevGrid::gen8_A3(int num, double a, double v){
 //  v is A3 in Lebedev Tables. 
     
     cartGP tmpCart;
@@ -333,132 +344,154 @@ void LebedevGrid::gen8_A3(int num, long double a, long double v){
     bg::transform(tmpCart,(this->grid2GPts_[num+7]));
 }
 
-void LebedevGrid::gen24_Cn(int num, long double a, long double v){
-//  a is p in Lebedev
-//  b is q in Lebedev
-    long double b;
+void LebedevGrid::gen24_Cn(int num, double q, double v){
+//  v is Cn in Lebedev
+    double p= std::sqrt(1.0 - q * q);
     cartGP tmpCart;
-    b = sqrt ( 1.0 -  a * a ); 
 
-    tmpCart.set<0>(a);
-    tmpCart.set<1>(b);
+    tmpCart.set<0>(q);
+    tmpCart.set<1>(p);
     tmpCart.set<2>(0.0);
     this->weights_[num+0] = v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+0]));
 
-    tmpCart.set<0>(-a);
-    tmpCart.set<1>(b);
+    tmpCart.set<0>(-q);
+    tmpCart.set<1>(p);
     tmpCart.set<2>(0.0);
     this->weights_[num+1] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+1]));
     
-    tmpCart.set<0>(a);
-    tmpCart.set<1>(-b);
+    tmpCart.set<0>(q);
+    tmpCart.set<1>(-p);
     tmpCart.set<2>(0.0);
     this->weights_[num+2] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+2]));
 
-    tmpCart.set<0>(-a);
-    tmpCart.set<1>(-b);
+    tmpCart.set<0>(-q);
+    tmpCart.set<1>(-p);
     tmpCart.set<2>(0.0);
     this->weights_[num+3] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+3]));
  
-    tmpCart.set<0>(b);
-    tmpCart.set<1>(a);
+    tmpCart.set<0>(p);
+    tmpCart.set<1>(q);
     tmpCart.set<2>(0.0);
     this->weights_[num+4] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+4]));
 
-    tmpCart.set<0>(-b);
-    tmpCart.set<1>(a);
+    tmpCart.set<0>(-p);
+    tmpCart.set<1>(q);
     tmpCart.set<2>(0.0);
     this->weights_[num+5] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+5]));
 
-    tmpCart.set<0>(b);
-    tmpCart.set<1>(-a);
+    tmpCart.set<0>(p);
+    tmpCart.set<1>(-q);
     tmpCart.set<2>(0.0);
     this->weights_[num+6] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+6]));
 
-    tmpCart.set<0>(-b);
-    tmpCart.set<1>(-a);
+    tmpCart.set<0>(-p);
+    tmpCart.set<1>(-q);
     tmpCart.set<2>(0.0);
     this->weights_[num+7] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+7]));
 
-    tmpCart.set<0>(a);
+    tmpCart.set<0>(q);
     tmpCart.set<1>(0.0);
-    tmpCart.set<2>(b);
+    tmpCart.set<2>(p);
     this->weights_[num+8] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+8]));
 
-    tmpCart.set<0>(-a);
+    tmpCart.set<0>(-q);
     tmpCart.set<1>(0.0);
-    tmpCart.set<2>(b);
+    tmpCart.set<2>(p);
     this->weights_[num+9] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+9]));
 //x[10]
-    tmpCart.set<0>(a);
+    tmpCart.set<0>(q);
     tmpCart.set<1>(0.0);
-    tmpCart.set<2>(-b);
+    tmpCart.set<2>(-p);
     this->weights_[num+10] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+10]));
 
-    tmpCart.set<0>(-a);
+    tmpCart.set<0>(-q);
     tmpCart.set<1>(0.0);
-    tmpCart.set<2>(-b);
+    tmpCart.set<2>(-p);
     this->weights_[num+11] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+11]));
 //check
-    tmpCart.set<0>(b);
+    tmpCart.set<0>(p);
     tmpCart.set<1>(0);
-    tmpCart.set<2>(a);
+    tmpCart.set<2>(q);
     this->weights_[num+12] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+12]));
 
-    tmpCart.set<0>(-b);
+    tmpCart.set<0>(-p);
     tmpCart.set<1>(0.0);
-    tmpCart.set<2>(a);
+    tmpCart.set<2>(q);
     this->weights_[num+13] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+13]));
 
-    tmpCart.set<0>(b);
+    tmpCart.set<0>(p);
     tmpCart.set<1>(0.0);
-    tmpCart.set<2>(-a);
+    tmpCart.set<2>(-q);
     this->weights_[num+14] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+14]));
 
-    tmpCart.set<0>(-b);
+    tmpCart.set<0>(-p);
     tmpCart.set<1>(0.0);
-    tmpCart.set<2>(-a);
+    tmpCart.set<2>(-q);
     this->weights_[num+15] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+15]));
 
     tmpCart.set<0>(0.0);
-    tmpCart.set<1>(a);
-    tmpCart.set<2>(b);
+    tmpCart.set<1>(q);
+    tmpCart.set<2>(p);
     this->weights_[num+16] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+16]));
 
     tmpCart.set<0>(0.0);
-    tmpCart.set<1>(-a);
-    tmpCart.set<2>(b);
+    tmpCart.set<1>(-q);
+    tmpCart.set<2>(p);
     this->weights_[num+17] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+17]));
 
     tmpCart.set<0>(0.0);
-    tmpCart.set<1>(a);
-    tmpCart.set<2>(-b);
+    tmpCart.set<1>(q);
+    tmpCart.set<2>(-p);
     this->weights_[num+18] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+18]));
 
     tmpCart.set<0>(0.0);
-    tmpCart.set<1>(-a);
-    tmpCart.set<2>(-b);
+    tmpCart.set<1>(-q);
+    tmpCart.set<2>(-p);
     this->weights_[num+19] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+19]));
 //20
     tmpCart.set<0>(0.0);
-    tmpCart.set<1>(b);
-    tmpCart.set<2>(a);
+    tmpCart.set<1>(p);
+    tmpCart.set<2>(q);
     this->weights_[num+20] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+20]));
 
     tmpCart.set<0>(0.0);
-    tmpCart.set<1>(-b);
-    tmpCart.set<2>(a);
+    tmpCart.set<1>(-p);
+    tmpCart.set<2>(q);
     this->weights_[num+21] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+21]));
 
     tmpCart.set<0>(0.0);
-    tmpCart.set<1>(b);
-    tmpCart.set<2>(-a);
+    tmpCart.set<1>(p);
+    tmpCart.set<2>(-q);
     this->weights_[num+22] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+22]));
 
     tmpCart.set<0>(0.0);
-    tmpCart.set<1>(-b);
-    tmpCart.set<2>(-a);
+    tmpCart.set<1>(-p);
+    tmpCart.set<2>(-q);
     this->weights_[num+23] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+23]));
 
 }
 

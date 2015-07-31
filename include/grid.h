@@ -108,10 +108,10 @@ class LebedevGrid : public OneDGrid {
         };
       void transformPts();
       void genGrid();
-      void gen6_A1(int num, long double a, long double v);
-      void gen12_A2(int num, long double a, long double v);
-      void gen8_A3(int num, long double a, long double v);
-      void gen24_Cn(int num, long double a, long double v);
+      void gen6_A1(int num, double a, double v);
+      void gen12_A2(int num, double a, double v);
+      void gen8_A3(int num, double a, double v);
+      void gen24_Cn(int num, double a, double v);
   }; // class LebedevGrid
 
   class GaussChebyshev1stGrid : public OneDGrid {
