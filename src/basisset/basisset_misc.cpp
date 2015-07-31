@@ -25,6 +25,12 @@
  */
 #include <basisset.h>
 namespace ChronusQ{
+/**
+ *  Compute the shell block norm matrix for some AO quantity to
+ *  be contracted to AO ERIs w/ screening
+ *
+ *  Each element is the infinity norm of the shell pair block
+ */
 template<>
 void BasisSet::computeShBlkNorm(bool doBeta, const RealMatrix *DAlpha, 
                                    const RealMatrix *DBeta){
@@ -50,8 +56,14 @@ void BasisSet::computeShBlkNorm(bool doBeta, const RealMatrix *DAlpha,
         (*this->shBlkNormBeta)(s1,s2) = DBeta->block(bf1,bf2,n1,n2).lpNorm<Infinity>();
     }
   }
-} // computeShBlkNorm (TMat = RealMatrix)
+} // BasisSet::computeShBlkNorm (TMat = RealMatrix)
 
+/**
+ *  Compute the shell block norm matrix for some AO quantity to
+ *  be contracted to AO ERIs w/ screening
+ *
+ *  Each element is the infinity norm of the shell pair block
+ */
 template<>
 void BasisSet::computeShBlkNorm(bool doBeta, const ComplexMatrix *DAlpha, 
                                    const ComplexMatrix *DBeta){
@@ -77,12 +89,15 @@ void BasisSet::computeShBlkNorm(bool doBeta, const ComplexMatrix *DAlpha,
         (*this->shBlkNormBeta)(s1,s2) = DBeta->block(bf1,bf2,n1,n2).lpNorm<Infinity>();
     }
   }
-} // computeShBlkNorm (TMat = ComplexMatrix)
+} // BasisSet::computeShBlkNorm (TMat = ComplexMatrix)
 
+/**
+ *  Renormalize the libint2::Shell vector (this is important)
+ */
 void BasisSet::renormShells(){
   for(auto iShell = this->shells_.begin(); iShell != this->shells_.end(); ++iShell)
     iShell->renorm();
-}
+} // BasisSet::renormShells
 
 
 }; //namespace ChronusQ

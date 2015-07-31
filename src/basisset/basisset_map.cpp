@@ -25,15 +25,21 @@
  */
 #include <basisset.h>
 namespace ChronusQ{
+/**
+ *  Generate shell index -> starting basis function map
+ */
 void BasisSet::makeMapSh2Bf(){
   auto n = 0;
   for(auto shell : this->shells_){
      this->mapSh2Bf_.push_back(n);
      n += shell.size();
-  }
+  } // loop shell
   this->haveMapSh2Bf = true;
-}
+} // BasisSet::makeMapSh2Bf
 
+/**
+ *  Generate shell index -> atomic center map
+ */
 void BasisSet::makeMapSh2Cen(Molecule *mol){
   for(auto shell : this->shells_){
     for(auto iAtom = 0; iAtom < mol->nAtoms(); iAtom++){
@@ -44,43 +50,34 @@ void BasisSet::makeMapSh2Cen(Molecule *mol){
         this->mapSh2Cen_.push_back(iAtom+1);
         break;
       }
-    } 
-  }
+    } // loop iAtom 
+  } // loop shell
   this->haveMapSh2Cen = true;
-}
+} // BasisSet::makeMapSh2Cen
 
+/**
+ *  Generate atomic center index -> starting basis function map
+ */
 void BasisSet::makeMapCen2Bf(Molecule *mol){
   if(!this->haveMapSh2Bf ) this->makeMapSh2Bf();
   if(!this->haveMapSh2Cen) this->makeMapSh2Cen(mol);
 
-/*
-  for(auto iAtm = 0; iAtm < mol->nAtoms(); iAtm++){
-    for(auto iShell = 0; iShell < this->nShell_; iShell++){
-      if(iAtm == this->mapSh2Cen_[iShell]){
-        this->mapCen2Bf_.push_back({{ this->mapSh2Bf_[iShell], this->shells_[iShell].size() }});
-      }
-    }
-  }
-*/
   for(auto iAtm = 0; iAtm < mol->nAtoms(); iAtm++){
     auto nSize = 0;
     for(auto iShell = 0; iShell < this->nShell_; iShell++){
       if((iAtm+1) == this->mapSh2Cen_[iShell]) nSize += this->shells_[iShell].size();
-    }
+    } // loop iShell
     auto iSt = -1;
     for(auto iShell = 0; iShell < this->nShell_; iShell++){
       if((iAtm+1) == this->mapSh2Cen_[iShell]){
        iSt = this->mapSh2Bf_[iShell];
        break;
       }
-    }
+    } // loop iShell
     if(iSt == -1) CErr("Could not find Center in Basis definition",this->fileio_->out);
     this->mapCen2Bf_.push_back({{iSt,nSize}});
-  }
-
-
+  } // loop iAtm
   this->haveMapCen2Bf = true;
-  
-}
+} // BasisSet::makeMapCen2Bf
 
 }; // namespace ChronusQ

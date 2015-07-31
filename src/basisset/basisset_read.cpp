@@ -25,6 +25,9 @@
  */
 #include <basisset.h>
 namespace ChronusQ{
+/**
+ *  Parse a basis file and construct reference and local basis set defintion  
+ */
 void BasisSet::basisSetRead(FileIO * fileio, Molecule * mol){
 
   std::string readString;
@@ -41,8 +44,11 @@ void BasisSet::basisSetRead(FileIO * fileio, Molecule * mol){
   this->printInfo();
   this->renormShells();
 
-}; // basisSetRead
+}; // BasisSet::basisSetRead
 
+/**
+ * Attempt to find the file containing the basis set definition
+ */
 void BasisSet::findBasisFile(std::string fName){
   std::string tmpStr;
 
@@ -63,8 +69,12 @@ void BasisSet::findBasisFile(std::string fName){
       this->fileio_->out << "Reading Basis Set from: ./" << this->basisPath_ << endl;
     } else CErr("Could not find basis set file \"" + fName + "\"");
   }
-};
+}; // BasisSet::findBasisFile
 
+/**
+ *  Parse the basis set file and generate a set of reference shells
+ *  from which local and external basis set objects are constructed
+ */
 void BasisSet::parseGlobal(){
 
   std::string readString;
@@ -144,6 +154,6 @@ void BasisSet::parseGlobal(){
   // Append the last Rec
   this->refShells_.push_back(ReferenceShell{atomicNumber,indx,tmpShell}); 
  
-};
+}; // BasisSet::parseGlobal
 } // namespace ChronusQ
 

@@ -25,6 +25,10 @@
  */
 #include <basisset.h>
 namespace ChronusQ{
+/**
+ *  Construct a local basis defintion using libint2::Shell struct
+ *  from the reference shells
+ */
 void BasisSet::constructLocal(Molecule * mol){
   for(auto iAtom = 0; iAtom < mol->nAtoms(); iAtom++){
     bool found = false;
@@ -42,16 +46,19 @@ void BasisSet::constructLocal(Molecule * mol){
           );
         found = true;
       }
-    }
+    } // loop iRef
     if(!found)  
       CErr("Atomic Number " + 
              std::to_string(elements[mol->index(iAtom)].atomicNumber) +
              " not found in current Basis Set",
            this->fileio_->out);
-  }
+  } // loop iAtom
   this->computeMeta();
-}
+} // BasisSet::constructLocal
 
+/**
+ *  Construct an external basis defintion using the local reference shells
+ */
 void BasisSet::constructExtrn(Molecule * mol, BasisSet *genBasis){
   genBasis->fileio_ = this->fileio_;
   for(auto iAtom = 0; iAtom < mol->nAtoms(); iAtom++){
@@ -70,17 +77,20 @@ void BasisSet::constructExtrn(Molecule * mol, BasisSet *genBasis){
           );
         found = true;
       }
-    }
+    } // Loop iRef
     if(!found)  
       CErr("Atomic Number " + 
              std::to_string(elements[mol->index(iAtom)].atomicNumber) +
              " not found in current Basis Set",
            this->fileio_->out);
-  }
+  } // loop IAtom
   genBasis->computeMeta();
 
-}
+} // BasisSet::constructExtrn
 
+/**
+ *  Compute BasisSet metadata
+ */
 void BasisSet::computeMeta(){
   this->nShell_     = this->shells_.size();
   this->nShellPair_ = this->nShell_ * (this->nShell_ + 1) / 2;
@@ -92,15 +102,13 @@ void BasisSet::computeMeta(){
     if( L      > this->maxL_   ) this->maxL_    = L     ;
     if( shPrim > this->maxPrim_) this->maxPrim_ = shPrim;
     this->nPrimitive_ += shPrim * (*iShell).size();
-  }
+  } // loop iShell
 
   this->nLShell_ = std::vector<int>(this->maxL_+1,0);
   for(auto shell : this->shells_){
     this->nLShell_[shell.contr[0].l]++;
-  }
+  } // loop shell
 
-}
-
-
+} // BasisSet::computeMeta
 }; // namespace ChronusQ
 
