@@ -299,7 +299,7 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
   }
   for(size_t i = 1; i < this->controls_->nthreads; i++) engines[i] = engines[0];
 
-  if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(); 
+  if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(1); 
 #ifdef USE_OMP
   #pragma omp parallel
 #endif
@@ -509,7 +509,7 @@ void AOIntegrals::computeAOTwoE(){
   engines[0].set_precision(std::numeric_limits<double>::epsilon());
 
   for(int i=1; i<this->controls_->nthreads; i++) engines[i] = engines[0];
-  if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(); 
+  if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(1); 
 
 #ifdef USE_OMP
   #pragma omp parallel
@@ -640,8 +640,8 @@ void AOIntegrals::computeAORII(){
   engines[0].set_precision(std::numeric_limits<double>::epsilon());
 
   for(int i=1; i<this->controls_->nthreads; i++) engines[i] = engines[0];
-  if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(); 
-  if(!this->DFbasisSet_->haveMapSh2Bf) this->DFbasisSet_->makeMapSh2Bf(); 
+  if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(1); 
+  if(!this->DFbasisSet_->haveMapSh2Bf) this->DFbasisSet_->makeMapSh2Bf(1); 
 
 #ifdef USE_OMP
   #pragma omp parallel
@@ -694,7 +694,7 @@ void AOIntegrals::computeAORIS(){
   engines[0].set_precision(std::numeric_limits<double>::epsilon());
 
   for(int i=1; i<this->controls_->nthreads; i++) engines[i] = engines[0];
-  if(!this->DFbasisSet_->haveMapSh2Bf) this->DFbasisSet_->makeMapSh2Bf(); 
+  if(!this->DFbasisSet_->haveMapSh2Bf) this->DFbasisSet_->makeMapSh2Bf(1); 
 
   RealMap aoRISMap(&this->aoRIS_->storage()[0],
     this->DFbasisSet_->nBasis(),this->DFbasisSet_->nBasis());

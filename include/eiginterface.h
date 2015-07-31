@@ -63,6 +63,50 @@ namespace Eigen {
   }
 
   template<typename Derived>
+  void prettyPrintTCS(std::ostream & output, const Derived& m, std::string str){
+  int list = 5;
+  int i,j,k,n,end,endLT;
+  output.precision(10);
+  output.fill(' ');
+  output.setf(std::ios::right,std::ios::scientific);
+  output.setf(std::ios::fixed,std::ios::floatfield);
+  output << std::endl << "Alpha [" << str <<  "]: " << std::endl;
+  output << bannerTop;
+
+  for(i=0;i<(m.cols()/2);i+=list) {
+    output << std::endl;
+    end = list;
+    output << std::setw(5) << " ";
+    if((i + list) >= (m.cols()/2)) end = (m.cols()/2) - i;
+    for(k = i; k < i+end; k++) output << std::setw(15) << k+1;
+    output << std::endl;
+    for(j = 0;j < (m.rows()/2); j++) {
+      output << std::setw(5) << std::left << j+1;
+      for(n = i; n < i+end; n++) output << std::setw(15) << std::right << m(2*j,2*n); // n in the column index (dbwy)
+      output << std::endl;
+    };
+  };
+  output << bannerEnd << std::endl;
+  output << std::endl << "Beta [" << str <<  "]: " << std::endl;
+  output << bannerTop;
+
+  for(i=0;i<(m.cols()/2);i+=list) {
+    output << std::endl;
+    end = list;
+    output << std::setw(5) << " ";
+    if((i + list) >= (m.cols()/2)) end = (m.cols()/2) - i;
+    for(k = i; k < i+end; k++) output << std::setw(15) << k+1;
+    output << std::endl;
+    for(j = 0;j < (m.rows()/2); j++) {
+      output << std::setw(5) << std::left << j+1;
+      for(n = i; n < i+end; n++) output << std::setw(15) << std::right << m(2*j+1,2*n+1); // n in the column index (dbwy)
+      output << std::endl;
+    };
+  };
+  output << bannerEnd << std::endl;
+  }
+
+  template<typename Derived>
   void eigSort(bool doL, Derived &E, Derived &VR, Derived &VL){
     for(auto i = 0  ; i < VR.rows()-1; i++)
     for(auto j = i+1; j < VR.rows()  ; j++) {

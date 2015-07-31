@@ -206,14 +206,14 @@ public:
   void printHeader(); ///< Print header
   void printBasis();  ///< Print basis definition
 
-  void basisSetRead(FileIO *, Molecule *); ///< Parse and construct basis from file
+  void basisSetRead(FileIO *,Molecule *,Controls *); ///< Parse and construct basis from file
   void findBasisFile(std::string);         ///< Attempt to find basis set file
   void parseGlobal();                      ///< Parse basis set file, generate reference
   void constructLocal(Molecule *);         ///< Construct local basis defintion
   void computeMeta();                      ///< Compute meta data (nBasis, etc)
-  void makeMapSh2Bf();                     ///< generate mapSh2Bf
+  void makeMapSh2Bf(int);                  ///< generate mapSh2Bf
   void makeMapSh2Cen(Molecule *);          ///< generate mapSh2Cen
-  void makeMapCen2Bf(Molecule *);          ///< generate mapCen2Bf
+  void makeMapCen2Bf(int,Molecule *);          ///< generate mapCen2Bf
   void renormShells();                     ///< Renormalize Libint2::Shell set
   template<typename TMat> void computeShBlkNorm(bool, const TMat*, const TMat*);
 

@@ -33,7 +33,7 @@ void AOIntegrals::twoEContractDirect(bool RHF, bool doFock, bool do24, const Com
   this->fileio_->out << "Contracting Directly with two-electron integrals" << endl;
 
   if(!this->haveSchwartz) this->computeSchwartz();
-  if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(); 
+  if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(1); 
   AXAlpha.setZero();
   if(!RHF) AXBeta.setZero();
   int nRHF;

@@ -86,13 +86,13 @@ void readInput(FileIO * fileio, Molecule * mol, BasisSet * basis, Controls * con
       }
     } else if(!readString.compare("$BASIS")) {
       //basis->readBasisSet(fileio,mol);
-      basis->basisSetRead(fileio,mol);
+      basis->basisSetRead(fileio,mol,controls);
     } else if(!readString.compare("$DFBASIS")) {
       fileio->in >> readString;
       if(!readString.compare("ON")) controls->doDF = true;
       if(controls->doDF) {
         //basis->readBasisSet(fileio,mol);
-        dfBasis->basisSetRead(fileio,mol);
+        dfBasis->basisSetRead(fileio,mol,controls);
       }
 //dbwys
     } else if(!readString.compare("$NSMP")) {

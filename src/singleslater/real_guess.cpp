@@ -40,16 +40,44 @@ void SingleSlater<double>::placeAtmDen(std::vector<int> atomIndex, SingleSlater<
   for(auto iAtm : atomIndex){
     auto iBfSt = this->basisset_->mapCen2Bf(iAtm)[0];
     auto iSize = this->basisset_->mapCen2Bf(iAtm)[1]; 
-    this->densityA_->block(iBfSt,iBfSt,iSize,iSize)= (*hfA.densityA_);
-    if(!this->isClosedShell){
-      if(hfA.isClosedShell)
-        this->densityB_->block(iBfSt,iBfSt,iSize,iSize)= 2*(*hfA.densityA_);
-      else
-        this->densityB_->block(iBfSt,iBfSt,iSize,iSize)= 
-          (*hfA.densityB_) + (*hfA.densityA_);
+    cout << "LITTE DENSITY A" << endl << (*hfA.densityA_) << endl << endl;
+    cout << "LITTE DENSITY B" << endl << (*hfA.densityB_) << endl << endl;
+    if(this->Ref_ != TCS){
+/*
+      this->densityA_->block(iBfSt,iBfSt,iSize,iSize)= (*hfA.densityA_);
+      if(!this->isClosedShell){
+        if(hfA.isClosedShell)
+          this->densityB_->block(iBfSt,iBfSt,iSize,iSize)= 2*(*hfA.densityA_);
+        else
+          this->densityB_->block(iBfSt,iBfSt,iSize,iSize)= 
+            (*hfA.densityB_) + (*hfA.densityA_);
+      } else {
+        if(!hfA.isClosedShell){
+          this->densityA_->block(iBfSt,iBfSt,iSize,iSize) += (*hfA.densityB_);
+        }
+      }
+*/
+      this->densityA_->block(iBfSt,iBfSt,iSize,iSize)= (*hfA.densityA_);
+      if(this->isClosedShell){
+        if(hfA.isClosedShell) 
+          this->densityA_->block(iBfSt,iBfSt,iSize,iSize) += (*hfA.densityA_);
+        else
+          this->densityA_->block(iBfSt,iBfSt,iSize,iSize) += (*hfA.densityB_);
+      } else {
+        this->densityB_->block(iBfSt,iBfSt,iSize,iSize)= (*hfA.densityA_);
+        if(hfA.isClosedShell){
+          this->densityA_->block(iBfSt,iBfSt,iSize,iSize) += (*hfA.densityA_);
+          this->densityB_->block(iBfSt,iBfSt,iSize,iSize) += (*hfA.densityA_);
+        } else {
+          this->densityA_->block(iBfSt,iBfSt,iSize,iSize) += (*hfA.densityB_);
+          this->densityB_->block(iBfSt,iBfSt,iSize,iSize) += (*hfA.densityB_);
+        }
+      }
     } else {
-      if(!hfA.isClosedShell){
-        this->densityA_->block(iBfSt,iBfSt,iSize,iSize) += (*hfA.densityB_);
+      for(auto I = iBfSt, i = 0; I < (iBfSt +iSize); I += 2, i++)
+      for(auto J = iBfSt, j = 0; J < (iBfSt +iSize); J += 2, j++){
+        (*this->densityA_)(I,J)     = (*hfA.densityA_)(i,j) + (*hfA.densityB_)(i,j);
+        (*this->densityA_)(I+1,J+1) = (*hfA.densityA_)(i,j) + (*hfA.densityB_)(i,j);
       }
     }
   } // loop iAtm
@@ -57,11 +85,22 @@ void SingleSlater<double>::placeAtmDen(std::vector<int> atomIndex, SingleSlater<
 template<>
 void SingleSlater<double>::scaleDen(){
   // Scale UHF densities according to desired multiplicity
-  if(!this->isClosedShell){
+  if(!this->isClosedShell && this->Ref_ != TCS){
     int nE = this->molecule_->nTotalE();
     (*this->densityA_) *= (double)this->nAE_/(double)nE ;
     (*this->densityB_) *= (double)this->nBE_/(double)nE ;
+    prettyPrint(cout,(*this->densityA_),"DENSITY A");
+    prettyPrint(cout,(*this->densityB_),"DENSITY B");
+  } else if(this->Ref_ == TCS) {
+    int nE = this->molecule_->nTotalE();
+    for(auto i = 0; i < this->nTCS_*this->nBasis_; i += 2)
+    for(auto j = 0; j < this->nTCS_*this->nBasis_; j += 2){
+      (*this->densityA_)(i,j)      *= (double)this->nAE_/(double)nE ;
+      (*this->densityA_)(i+1,j+1)  *= (double)this->nBE_/(double)nE ;
+    }
+    prettyPrintTCS(cout,(*this->densityA_),"DENSITY");
   }
+  CErr();
 }; // SingleSlater::scaleDen [T=double]
 //--------------------------------//
 // form the initial guess of MO's //
@@ -73,7 +112,7 @@ void SingleSlater<double>::formGuess() {
   std::vector<RealMatrix> atomMOB;
   int readNPGTO,L, nsize;
   this->moA_->setZero();
-  if(!this->isClosedShell) this->moB_->setZero();
+  if(!this->isClosedShell && this->Ref_ != TCS) this->moB_->setZero();
 
   // Determining unique atoms
   std::vector<Atoms> uniqueElement;
@@ -128,7 +167,7 @@ void SingleSlater<double>::formGuess() {
     // Construct atomic basis set from the reference
     this->basisset_->constructExtrn(&uniqueAtom,&basisSetAtom);
     // Generate basis maps
-    basisSetAtom.makeMapSh2Bf();
+    basisSetAtom.makeMapSh2Bf(1);
     basisSetAtom.makeMapSh2Cen(&uniqueAtom);
     basisSetAtom.renormShells(); // Libint throws a hissy fit without this
 

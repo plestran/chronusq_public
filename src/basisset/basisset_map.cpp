@@ -28,11 +28,11 @@ namespace ChronusQ{
 /**
  *  Generate shell index -> starting basis function map
  */
-void BasisSet::makeMapSh2Bf(){
+void BasisSet::makeMapSh2Bf(int nTCS){
   auto n = 0;
   for(auto shell : this->shells_){
      this->mapSh2Bf_.push_back(n);
-     n += shell.size();
+     n += nTCS*shell.size();
   } // loop shell
   this->haveMapSh2Bf = true;
 } // BasisSet::makeMapSh2Bf
@@ -58,14 +58,14 @@ void BasisSet::makeMapSh2Cen(Molecule *mol){
 /**
  *  Generate atomic center index -> starting basis function map
  */
-void BasisSet::makeMapCen2Bf(Molecule *mol){
-  if(!this->haveMapSh2Bf ) this->makeMapSh2Bf();
+void BasisSet::makeMapCen2Bf(int nTCS, Molecule *mol){
+  if(!this->haveMapSh2Bf ) this->makeMapSh2Bf(nTCS);
   if(!this->haveMapSh2Cen) this->makeMapSh2Cen(mol);
 
   for(auto iAtm = 0; iAtm < mol->nAtoms(); iAtm++){
     auto nSize = 0;
     for(auto iShell = 0; iShell < this->nShell_; iShell++){
-      if((iAtm+1) == this->mapSh2Cen_[iShell]) nSize += this->shells_[iShell].size();
+      if((iAtm+1) == this->mapSh2Cen_[iShell]) nSize += nTCS*this->shells_[iShell].size();
     } // loop iShell
     auto iSt = -1;
     for(auto iShell = 0; iShell < this->nShell_; iShell++){

@@ -32,7 +32,7 @@ namespace ChronusQ{
 
     this->fileio_->out << "Contracting Directly with two-electron integrals" << endl;
     if(!this->haveSchwartz) this->computeSchwartz();
-    if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(); 
+    if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(1); 
     AXAlpha.setZero();
     if(!RHF) AXBeta.setZero();
     int nRHF;
@@ -163,7 +163,7 @@ namespace ChronusQ{
     this->fileio_->out << "Contracting Directly with two-electron integrals" << endl;
   
     if(!this->haveSchwartz) this->computeSchwartz();
-    if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(); 
+    if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(1); 
     for(auto i = 0; i < nVec; i++) AXAlpha[i].setZero();
     if(!RHF)
       for(auto i = 0; i < nVec; i++) AXBeta[i].setZero();
