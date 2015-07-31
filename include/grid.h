@@ -40,6 +40,7 @@ class Grid {
       virtual void                   printGrid() = 0; ///< virtual function to print the grid points
       virtual void                   transformPts() = 0; ///< virtual function to transform the integral interval
       virtual double                 integrate()    = 0; ///< virtual function to integrate
+      int npts(){return this->nPts_;};
   }; // class Grid
 
 class OneDGrid : public Grid {
@@ -72,49 +73,35 @@ class OneDGrid : public Grid {
 // access to protected data
        inline double * gridPts(){ return this->gridPts_;};
        inline double * weights(){ return this->weights_;};
+       inline sph2GP * grid2GPts(){return this->grid2GPts_;};
        inline double norm(){ return this->norm_;};
        double integrate();
        void printGrid();
 }; // Class OneGrid (one dimensional grid)
 
-//class twoDGrid : public Grid {
-//   protected:
-//      sph2GP * grid2GPts_;
-//      double * weights_;
-//   public:
-//      twoDGrid(
-//       int npts = 0):
-//        Grid(npts){
-//        };
-// deconstructor
-//      ~twoDGrid(){
-//         delete [] this->grid2GPts_;
-//         boost::geometry::clear(this->grid2GPts_);
-//         delete [] this->weights_;
-//       cout << "Deliting" <<endl;
-//       };
-// access to protected data
-//       inline double * get_grid2GPts_elev(){ 
-//     elevation from [0,2PI]
-//       double elev = bg::get<0>(this->grid2GPts_);
-//       return &elev;};
-//       inline double * get_grid2GPts_azim(){ 
-//     azimuthal from [0,PI]
-//       double azim = bg::get<1>(this->grid2GPts_);
-//       return &azim;};
-// Functions to inizialize data
-//       void * set_grid2GPPts_elev(double * val){
-//        bg::set<0>((this->grid2GPts_), (* val));}; 
-//       void * set_grid2GPPts_azim(double * val){
-//        bg::set<1>((this->grid2GPts_), (* val));}; 
-//   2D integration
+class TwoDGrid : public Grid {
+      protected:
+            OneDGrid * Gr_;
+            OneDGrid * Gs_;
+      double   fsphe(double,double,double);
+//            int * Gsnpts_;
+      public:
+        TwoDGrid(OneDGrid *Gr, OneDGrid *Gs){
+        this->Gr_ =  Gr;
+        this->Gs_ =  Gs;
+          };
+      double integrate();
+      void printGrid();
+      void genGrid();
+      void transformPts();
+  }; //   Class TwoDGrid
 
 
 class LebedevGrid : public OneDGrid {
     public:
       LebedevGrid(
-        int npts = 0, double beg = 0.0, double end = 0.0):
-        OneDGrid(npts,beg,end){
+        int npts = 0):
+        OneDGrid(npts,0.0,0.0){
           this->grid2GPts_ = new sph2GP[this->nPts_];  //< Lebedev polar coordinates [
           this->weights_   = new double[this->nPts_];
           this->intas2GPt_ = true;
@@ -123,6 +110,8 @@ class LebedevGrid : public OneDGrid {
       void genGrid();
       void gen6_A1(int num, long double a, long double v);
       void gen12_A2(int num, long double a, long double v);
+      void gen8_A3(int num, long double a, long double v);
+      void gen24_Cn(int num, long double a, long double v);
   }; // class LebedevGrid
 
   class GaussChebyshev1stGrid : public OneDGrid {

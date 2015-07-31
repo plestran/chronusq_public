@@ -44,6 +44,14 @@ void func2D(OneDGrid *g){
    cout << "Test Integral value= "<< (*g).integrate() << endl;
 }
 
+//void func2D_plus(OneDGrid *gr, OneDGrid *gs){
+//   (*gr).genGrid();
+//   (*gs).genGrid();
+//     TwoDGrid(*gr, *gs) grs2;
+//   TwoDGrid *G3(*gr,*gs);
+//   cout << "Test Integral value= "<< (g2d).integrate() << endl;
+//}
+
 int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   time_t currentTime;
 
@@ -127,17 +135,23 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 //Test one dimensional grid
   fileIO->out << "**AP One dimensional grid test**" << endl;
   int Ngridr =   500;
-  int Ngridr2 = 5000;
-  int NLeb    = 18;
+  int Ngridr2 = 5;
+  int NLeb    = 26;
   double radius = 1.0;
    GaussChebyshev1stGrid Rad(Ngridr,0.0,radius);
    GaussChebyshev1stGrid Rad2(Ngridr2,0.0,radius);
-   LebedevGrid GridLeb(NLeb,0.0,0.0);
+   LebedevGrid GridLeb(NLeb);
    
-   func(&Rad);
-   func(&Rad2);
-   func2D(&GridLeb);
+//   func(&Rad);
+//   func(&Rad2);
+//   func2D(&GridLeb);
 //
+   Rad.genGrid();
+   GridLeb.genGrid();
+   TwoDGrid G3(&Rad,&GridLeb);
+   cout << "Sphere Int = " << G3.integrate() <<endl;
+   cout << "Sphere Err = " << std::abs(G3.integrate()-(4.0*radius*radius*radius*math.pi/3.0)) <<endl;
+//   G3.printGrid();
   time(&currentTime);
   fileIO->out<<"\nJob finished: "<<ctime(&currentTime)<<endl;
 /*

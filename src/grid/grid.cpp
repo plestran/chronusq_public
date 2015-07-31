@@ -68,6 +68,38 @@ void OneDGrid::printGrid(){
 
 };
 
+  double TwoDGrid::fsphe(double r, double elevation, double azimut){
+  // Test Function to be integrated by Two-dimensional grid
+     return r*r;
+   } 
+ 
+  double TwoDGrid::integrate(){
+  // Integrate a test function for a one dimensional grid radial part
+   double sum = 0.0;
+     std::cout << "Number of Radial-grid points= "<< Gr_->npts()  <<std::endl;
+     std::cout << "Number of Solid Angle-grid points= "<< Gs_->npts()  <<std::endl;
+     for(int i = 0; i < Gr_->npts(); i++){
+      for(int j = 0; j < Gs_->npts(); j++){
+         sum += (this->fsphe(Gr_->gridPts()[i],bg::get<1>(Gs_->grid2GPts()[j]),bg::get<0>(Gs_->grid2GPts()[j])))*(Gs_->weights()[j])*(Gr_->weights()[i]);
+        }
+      }
+        return 4.0*(math.pi)*sum*(Gr_->norm());
+  }
+
+
+    void TwoDGrid::transformPts(){
+};
+
+    void TwoDGrid::printGrid(){
+     for(int i = 0; i < Gr_->npts(); i++){
+      for(int j = 0; j < Gs_->npts(); j++){
+      cout << "{" << Gr_->gridPts()[i] << ", "<<bg::get<1>(Gs_->grid2GPts()[j])<<", " <<bg::get<0>(Gs_->grid2GPts()[j]) <<"}, "<< endl;
+        
+        }
+      }
+};
+    void TwoDGrid::genGrid(){
+};
   // Class Functions Declaration
 
   // Function Gauss-Chebyshev 1st kind 
@@ -97,11 +129,29 @@ void OneDGrid::printGrid(){
 
 // Function definition for Lebedev
    void LebedevGrid::genGrid(){
+     double one = 1.0;
+     double overradtwo = std::sqrt(0.5);
+     double overradthree = std::sqrt(1.0/3.0);
+     double A1;
+     double A2;
+     double A3;
+// We are using the values in Lebedev75 Zh. vychisl Mat mat Fiz 15, 1, 48-54, 1975
+// For nPts == 38
      if(this->nPts_ == 6){
-       gen6_A1(0,1.0,(1.0/6.0));
-      }else if(this->nPts_== 18){
-       gen6_A1(0,1.0,0.6666666666666667e-1);
-       gen12_A2(6,(1.0/std::sqrt(2.0)),0.7500000000000000e-1);
+       A1 = 1.0/6.0;
+       gen6_A1(0,one,A1);
+      }else if(this->nPts_== 14){
+       A1= 0.6666666666666667e-1;
+       A3= 0.7500000000000000e-1;
+       gen6_A1(0,one,A1);
+       gen8_A3(6,overradtwo,A3);
+    }else if(this->nPts_ == 26){
+       A1 = 0.4761904761904762e-1;
+       A2 = 0.3809523809523810e-1;
+       A3 = 0.3214285714285714e-1; 
+       gen6_A1(0,one,A1);
+       gen12_A2(6,overradtwo,A2);
+       gen8_A3(18,overradthree,A3); 
       }else{
       CErr("Number of points not available in Lebedev quadrature");
       }
@@ -112,7 +162,7 @@ void OneDGrid::printGrid(){
 };
 
 void LebedevGrid::gen6_A1(int num, long double a, long double v){
-    
+//  v is A1 in Lebedev Tables. 
     cartGP tmpCart;
     tmpCart.set<0>(a);
     tmpCart.set<1>(0.0);
@@ -152,6 +202,7 @@ void LebedevGrid::gen6_A1(int num, long double a, long double v){
 }
 
 void LebedevGrid::gen12_A2(int num, long double a, long double v){
+//  v is A2 in Lebedev Tables. 
     
     cartGP tmpCart;
 
@@ -226,6 +277,188 @@ void LebedevGrid::gen12_A2(int num, long double a, long double v){
     tmpCart.set<2>(0.0);
     this->weights_[num+11] = v;
     bg::transform(tmpCart,(this->grid2GPts_[num+11]));
+
+}
+
+void LebedevGrid::gen8_A3(int num, long double a, long double v){
+//  v is A3 in Lebedev Tables. 
+    
+    cartGP tmpCart;
+    tmpCart.set<0>(a);
+    tmpCart.set<1>(a);
+    tmpCart.set<2>(a);
+    this->weights_[num+0] = v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+0]));
+
+    tmpCart.set<0>(-a);
+    tmpCart.set<1>(a);
+    tmpCart.set<2>(a);
+    this->weights_[num+1] = v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+1]));
+
+    tmpCart.set<0>(a);
+    tmpCart.set<1>(-a);
+    tmpCart.set<2>(a);
+    this->weights_[num+2] = v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+2]));
+
+    tmpCart.set<0>(-a);
+    tmpCart.set<1>(-a);
+    tmpCart.set<2>(a);
+    this->weights_[num+3] = v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+3]));
+
+    tmpCart.set<0>(a);
+    tmpCart.set<1>(a);
+    tmpCart.set<2>(-a);
+    this->weights_[num+4] = v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+4]));
+
+    tmpCart.set<0>(-a);
+    tmpCart.set<1>(a);
+    tmpCart.set<2>(-a);
+    this->weights_[num+5] = v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+5]));
+
+    tmpCart.set<0>(a);
+    tmpCart.set<1>(-a);
+    tmpCart.set<2>(-a);
+    this->weights_[num+6] = v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+6]));
+
+    tmpCart.set<0>(-a);
+    tmpCart.set<1>(-a);
+    tmpCart.set<2>(-a);
+    this->weights_[num+7] = v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+7]));
+}
+
+void LebedevGrid::gen24_Cn(int num, long double a, long double v){
+//  a is p in Lebedev
+//  b is q in Lebedev
+    long double b;
+    cartGP tmpCart;
+    b = sqrt ( 1.0 -  a * a ); 
+
+    tmpCart.set<0>(a);
+    tmpCart.set<1>(b);
+    tmpCart.set<2>(0.0);
+    this->weights_[num+0] = v;
+
+    tmpCart.set<0>(-a);
+    tmpCart.set<1>(b);
+    tmpCart.set<2>(0.0);
+    this->weights_[num+1] =  v;
+    
+    tmpCart.set<0>(a);
+    tmpCart.set<1>(-b);
+    tmpCart.set<2>(0.0);
+    this->weights_[num+2] =  v;
+
+    tmpCart.set<0>(-a);
+    tmpCart.set<1>(-b);
+    tmpCart.set<2>(0.0);
+    this->weights_[num+3] =  v;
+ 
+    tmpCart.set<0>(b);
+    tmpCart.set<1>(a);
+    tmpCart.set<2>(0.0);
+    this->weights_[num+4] =  v;
+
+    tmpCart.set<0>(-b);
+    tmpCart.set<1>(a);
+    tmpCart.set<2>(0.0);
+    this->weights_[num+5] =  v;
+
+    tmpCart.set<0>(b);
+    tmpCart.set<1>(-a);
+    tmpCart.set<2>(0.0);
+    this->weights_[num+6] =  v;
+
+    tmpCart.set<0>(-b);
+    tmpCart.set<1>(-a);
+    tmpCart.set<2>(0.0);
+    this->weights_[num+7] =  v;
+
+    tmpCart.set<0>(a);
+    tmpCart.set<1>(0.0);
+    tmpCart.set<2>(b);
+    this->weights_[num+8] =  v;
+
+    tmpCart.set<0>(-a);
+    tmpCart.set<1>(0.0);
+    tmpCart.set<2>(b);
+    this->weights_[num+9] =  v;
+//x[10]
+    tmpCart.set<0>(a);
+    tmpCart.set<1>(0.0);
+    tmpCart.set<2>(-b);
+    this->weights_[num+10] =  v;
+
+    tmpCart.set<0>(-a);
+    tmpCart.set<1>(0.0);
+    tmpCart.set<2>(-b);
+    this->weights_[num+11] =  v;
+//check
+    tmpCart.set<0>(b);
+    tmpCart.set<1>(0);
+    tmpCart.set<2>(a);
+    this->weights_[num+12] =  v;
+
+    tmpCart.set<0>(-b);
+    tmpCart.set<1>(0.0);
+    tmpCart.set<2>(a);
+    this->weights_[num+13] =  v;
+
+    tmpCart.set<0>(b);
+    tmpCart.set<1>(0.0);
+    tmpCart.set<2>(-a);
+    this->weights_[num+14] =  v;
+
+    tmpCart.set<0>(-b);
+    tmpCart.set<1>(0.0);
+    tmpCart.set<2>(-a);
+    this->weights_[num+15] =  v;
+
+    tmpCart.set<0>(0.0);
+    tmpCart.set<1>(a);
+    tmpCart.set<2>(b);
+    this->weights_[num+16] =  v;
+
+    tmpCart.set<0>(0.0);
+    tmpCart.set<1>(-a);
+    tmpCart.set<2>(b);
+    this->weights_[num+17] =  v;
+
+    tmpCart.set<0>(0.0);
+    tmpCart.set<1>(a);
+    tmpCart.set<2>(-b);
+    this->weights_[num+18] =  v;
+
+    tmpCart.set<0>(0.0);
+    tmpCart.set<1>(-a);
+    tmpCart.set<2>(-b);
+    this->weights_[num+19] =  v;
+//20
+    tmpCart.set<0>(0.0);
+    tmpCart.set<1>(b);
+    tmpCart.set<2>(a);
+    this->weights_[num+20] =  v;
+
+    tmpCart.set<0>(0.0);
+    tmpCart.set<1>(-b);
+    tmpCart.set<2>(a);
+    this->weights_[num+21] =  v;
+
+    tmpCart.set<0>(0.0);
+    tmpCart.set<1>(b);
+    tmpCart.set<2>(-a);
+    this->weights_[num+22] =  v;
+
+    tmpCart.set<0>(0.0);
+    tmpCart.set<1>(-b);
+    tmpCart.set<2>(-a);
+    this->weights_[num+23] =  v;
 
 }
 
