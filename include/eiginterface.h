@@ -70,7 +70,7 @@ namespace Eigen {
   output.fill(' ');
   output.setf(std::ios::right,std::ios::scientific);
   output.setf(std::ios::fixed,std::ios::floatfield);
-  output << std::endl << "Alpha [" << str <<  "]: " << std::endl;
+  output << std::endl << "Alpha-Alpha [" << str <<  "]: " << std::endl;
   output << bannerTop;
 
   for(i=0;i<(m.cols()/2);i+=list) {
@@ -87,7 +87,7 @@ namespace Eigen {
     };
   };
   output << bannerEnd << std::endl;
-  output << std::endl << "Beta [" << str <<  "]: " << std::endl;
+  output << std::endl << "Beta-Beta [" << str <<  "]: " << std::endl;
   output << bannerTop;
 
   for(i=0;i<(m.cols()/2);i+=list) {
@@ -100,6 +100,40 @@ namespace Eigen {
     for(j = 0;j < (m.rows()/2); j++) {
       output << std::setw(5) << std::left << j+1;
       for(n = i; n < i+end; n++) output << std::setw(15) << std::right << m(2*j+1,2*n+1); // n in the column index (dbwy)
+      output << std::endl;
+    };
+  };
+  output << bannerEnd << std::endl;
+  output << std::endl << "Alpha-Beta [" << str <<  "]: " << std::endl;
+  output << bannerTop;
+
+  for(i=0;i<(m.cols()/2);i+=list) {
+    output << std::endl;
+    end = list;
+    output << std::setw(5) << " ";
+    if((i + list) >= (m.cols()/2)) end = (m.cols()/2) - i;
+    for(k = i; k < i+end; k++) output << std::setw(15) << k+1;
+    output << std::endl;
+    for(j = 0;j < (m.rows()/2); j++) {
+      output << std::setw(5) << std::left << j+1;
+      for(n = i; n < i+end; n++) output << std::setw(15) << std::right << m(2*j,2*n+1); // n in the column index (dbwy)
+      output << std::endl;
+    };
+  };
+  output << bannerEnd << std::endl;
+  output << std::endl << "Beta-Alpha [" << str <<  "]: " << std::endl;
+  output << bannerTop;
+
+  for(i=0;i<(m.cols()/2);i+=list) {
+    output << std::endl;
+    end = list;
+    output << std::setw(5) << " ";
+    if((i + list) >= (m.cols()/2)) end = (m.cols()/2) - i;
+    for(k = i; k < i+end; k++) output << std::setw(15) << k+1;
+    output << std::endl;
+    for(j = 0;j < (m.rows()/2); j++) {
+      output << std::setw(5) << std::left << j+1;
+      for(n = i; n < i+end; n++) output << std::setw(15) << std::right << m(2*j+1,2*n); // n in the column index (dbwy)
       output << std::endl;
     };
   };

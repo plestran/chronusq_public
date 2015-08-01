@@ -33,12 +33,38 @@ namespace ChronusQ{
    *
    */
   template<>
-  void AOIntegrals::Gen34Contract(RealMatrix &G, const RealMatrix &X, int bf1, int bf2, int bf3, int bf4, double v){
+  void AOIntegrals::Gen34Contract(RealMatrix &G, const RealMatrix &X, int bf1, int bf2, 
+    int bf3, int bf4, double v){
+
     G(bf1,bf2) += X(bf4,bf3)*v;
     G(bf3,bf4) += X(bf2,bf1)*v;
     G(bf2,bf1) += X(bf3,bf4)*v;
     G(bf4,bf3) += X(bf1,bf2)*v;
   } // Gen34Contract
+
+  template<>
+  void AOIntegrals::GenCouContractSpinor(RealMatrix &G, const RealMatrix &X, int bf1, 
+    int bf2, int bf3, int bf4, double v){
+
+    // Alpha-Alpha
+    G(bf1,bf2)     += X(bf4,bf3)*v;
+    G(bf3,bf4)     += X(bf2,bf1)*v;
+    G(bf2,bf1)     += X(bf3,bf4)*v;
+    G(bf4,bf3)     += X(bf1,bf2)*v;
+    G(bf1+1,bf2+1) += X(bf4,bf3)*v;
+    G(bf3+1,bf4+1) += X(bf2,bf1)*v;
+    G(bf2+1,bf1+1) += X(bf3,bf4)*v;
+    G(bf4+1,bf3+1) += X(bf1,bf2)*v;
+    // Beta-Beta
+    G(bf1,bf2)     += X(bf4+1,bf3+1)*v;
+    G(bf3,bf4)     += X(bf2+1,bf1+1)*v;
+    G(bf2,bf1)     += X(bf3+1,bf4+1)*v;
+    G(bf4,bf3)     += X(bf1+1,bf2+1)*v;
+    G(bf1+1,bf2+1) += X(bf4+1,bf3+1)*v;
+    G(bf3+1,bf4+1) += X(bf2+1,bf1+1)*v;
+    G(bf2+1,bf1+1) += X(bf3+1,bf4+1)*v;
+    G(bf4+1,bf3+1) += X(bf1+1,bf2+1)*v;
+  } // GenCouContractSpinor
   
   /**
    * Forms the unique contributions for a 23 contraction
@@ -48,7 +74,9 @@ namespace ChronusQ{
    *
    */
   template<> 
-  void AOIntegrals::Gen23Contract(RealMatrix &G, const RealMatrix &X, int bf1, int bf2, int bf3, int bf4, double v, double fact){
+  void AOIntegrals::Gen23Contract(RealMatrix &G, const RealMatrix &X, int bf1, int bf2, 
+    int bf3, int bf4, double v, double fact){
+
     G(bf1,bf3) -= fact*X(bf2,bf4)*v;
     G(bf2,bf4) -= fact*X(bf1,bf3)*v;
     G(bf1,bf4) -= fact*X(bf2,bf3)*v;
@@ -58,7 +86,56 @@ namespace ChronusQ{
     G(bf4,bf2) -= fact*X(bf3,bf1)*v;
     G(bf4,bf1) -= fact*X(bf3,bf2)*v;
     G(bf3,bf2) -= fact*X(bf4,bf1)*v;
-  } // Gen23 Contract
+  } // Gen23Contract
+
+  template<> 
+  void AOIntegrals::GenExchContractSpinor(RealMatrix &G, const RealMatrix &X, int bf1, 
+    int bf2, int bf3, int bf4, double v, double fact){
+
+    // Alpha-Alpha
+    G(bf1,bf3) -= fact*X(bf2,bf4)*v;
+    G(bf2,bf4) -= fact*X(bf1,bf3)*v;
+    G(bf1,bf4) -= fact*X(bf2,bf3)*v;
+    G(bf2,bf3) -= fact*X(bf1,bf4)*v;
+  
+    G(bf3,bf1) -= fact*X(bf4,bf2)*v;
+    G(bf4,bf2) -= fact*X(bf3,bf1)*v;
+    G(bf4,bf1) -= fact*X(bf3,bf2)*v;
+    G(bf3,bf2) -= fact*X(bf4,bf1)*v;
+
+    // Beta-Beta
+    G(bf1+1,bf3+1) -= fact*X(bf2+1,bf4+1)*v;
+    G(bf2+1,bf4+1) -= fact*X(bf1+1,bf3+1)*v;
+    G(bf1+1,bf4+1) -= fact*X(bf2+1,bf3+1)*v;
+    G(bf2+1,bf3+1) -= fact*X(bf1+1,bf4+1)*v;
+  
+    G(bf3+1,bf1+1) -= fact*X(bf4+1,bf2+1)*v;
+    G(bf4+1,bf2+1) -= fact*X(bf3+1,bf1+1)*v;
+    G(bf4+1,bf1+1) -= fact*X(bf3+1,bf2+1)*v;
+    G(bf3+1,bf2+1) -= fact*X(bf4+1,bf1+1)*v;
+
+    // Alpha-Beta
+    G(bf1,bf3+1) -= fact*X(bf2,bf4+1)*v;
+    G(bf2,bf4+1) -= fact*X(bf1,bf3+1)*v;
+    G(bf1,bf4+1) -= fact*X(bf2,bf3+1)*v;
+    G(bf2,bf3+1) -= fact*X(bf1,bf4+1)*v;
+  
+    G(bf3,bf1+1) -= fact*X(bf4,bf2+1)*v;
+    G(bf4,bf2+1) -= fact*X(bf3,bf1+1)*v;
+    G(bf4,bf1+1) -= fact*X(bf3,bf2+1)*v;
+    G(bf3,bf2+1) -= fact*X(bf4,bf1+1)*v;
+
+    // Beta-Alpha
+    G(bf1+1,bf3) -= fact*X(bf2+1,bf4)*v;
+    G(bf2+1,bf4) -= fact*X(bf1+1,bf3)*v;
+    G(bf1+1,bf4) -= fact*X(bf2+1,bf3)*v;
+    G(bf2+1,bf3) -= fact*X(bf1+1,bf4)*v;
+  
+    G(bf3+1,bf1) -= fact*X(bf4+1,bf2)*v;
+    G(bf4+1,bf2) -= fact*X(bf3+1,bf1)*v;
+    G(bf4+1,bf1) -= fact*X(bf3+1,bf2)*v;
+    G(bf3+1,bf2) -= fact*X(bf4+1,bf1)*v;
+  } // Gen23Contract
   
   /**
    * Forms the unique contributions for a 24 contraction

@@ -80,6 +80,36 @@ namespace ChronusQ{
       }
     }
   } // UnRestricted34Contract
+
+  template<>
+  void AOIntegrals::Spinor34Contract(RealMatrix &G, const RealMatrix &X, int n1, int n2, 
+    int n3, int n4, int bf1_s, int bf2_s, int bf3_s, int bf4_s, const double* buff, 
+    double deg){
+
+    for(int i = 0, bf1 = bf1_s, ijkl = 0 ; i < n1; ++i, bf1 += 2) {
+      for(int j = 0, bf2 = bf2_s; j < n2; ++j, bf2 += 2) {
+        for(int k = 0, bf3 = bf3_s; k < n3; ++k, bf3 += 2) {
+          for(int l = 0, bf4 = bf4_s; l < n4; ++l, bf4 += 2, ++ijkl) {
+            double v = buff[ijkl]*deg;
+  
+            // Coulomb
+          //this->Gen34Contract(G,X,bf1,bf2,bf3,bf4,v);
+          //this->Gen34Contract(G,X,bf1+1,bf2+1,bf3+1,bf4+1,v);
+            this->GenCouContractSpinor(G,X,bf1,bf2,bf3,bf4,v); 
+
+            // Exchange
+/*
+            this->Gen23Contract(G,X,bf1,bf2,bf3,bf4,v,0.5);
+            this->Gen23Contract(G,X,bf1+1,bf2+1,bf3+1,bf4+1,v,0.5);
+//          this->Gen23Contract(G,X,bf1+1,bf2,bf3+1,bf4,v,0.5);
+//          this->Gen23Contract(G,X,bf1,bf2+1,bf3,bf4+1,v,0.5);
+*/
+            this->GenExchContractSpinor(G,X,bf1,bf2,bf3,bf4,v,0.5);
+          }
+        }
+      }
+    }
+  } // Spinor34Contract 
   
   template<>
   void AOIntegrals::General24CouContract(RealMatrix &G, const RealMatrix &X, int n1, int n2, 

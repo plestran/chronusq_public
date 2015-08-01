@@ -31,17 +31,24 @@
 template<typename T>
 void SingleSlater<T>::formPT(){
   bool doRHF = (this->Ref_ == RHF);
+  bool doTCS = (this->Ref_ == TCS);
   if(!this->haveDensity) this->formDensity();
+  cout << "HEREB" << endl;
   if(this->controls_->directTwoE && !this->controls_->doDF)
-    this->aointegrals_->twoEContractDirect(doRHF,true,false,*this->densityA_,*this->PTA_,*this->densityB_,*this->PTB_);
+    this->aointegrals_->twoEContractDirect(doRHF,true,false,doTCS,*this->densityA_,*this->PTA_,*this->densityB_,*this->PTB_);
   else if(this->controls_->doDF)
     this->aointegrals_->twoEContractDF(doRHF,true,*this->densityA_,*this->PTA_,*this->densityB_,*this->PTB_);
   else
     this->aointegrals_->twoEContractN4(doRHF,true,*this->densityA_,*this->PTA_,*this->densityB_,*this->PTB_);
   if(this->controls_->printLevel >= 3) {
-    prettyPrint(this->fileio_->out,(*this->PTA_),"Alpha Perturbation Tensor");
-    if(this->Ref_ != RHF) prettyPrint(this->fileio_->out,(*this->PTB_),"Beta Perturbation Tensor");
+    if(!doTCS){
+      prettyPrint(cout,(*this->PTA_),"Alpha Perturbation Tensor");
+      if(this->Ref_ != RHF) prettyPrint(cout,(*this->PTB_),"Beta Perturbation Tensor");
+    } else {
+      prettyPrintTCS(cout,(*this->PTA_),"Perturbation Tensor");
+    }
   }
+if(doTCS)CErr();
 }
 #endif
 

@@ -208,7 +208,7 @@ public:
   void computeAORII();
   void computeAORIS();
   void transformAORII();
-  template<typename T> void twoEContractDirect(bool,bool,bool,const T &,T &,const T &, T &);
+  template<typename T> void twoEContractDirect(bool,bool,bool,bool,const T&,T&,const T&,T&);
   template<typename T> void twoEContractN4(bool,bool,const T &,T &,const T &, T &);
   template<typename T> void twoEContractDF(bool,bool,const T &,T &,const T &, T &);
   template<typename T>
@@ -226,6 +226,8 @@ public:
   template<typename TMat,typename T> 
     void UnRestricted34Contract(TMat&, const TMat &, TMat&, const TMat &, const TMat &, 
                                    int,int,int,int,int,int,int,int,const T*,T);
+  template<typename TMat,typename T>
+    void Spinor34Contract(TMat&,const TMat&,int,int,int,int,int,int,int,int,const T*,T);
   template<typename TMat,typename T> 
     void General24CouContract(TMat&, const TMat &, int,int,int,int,int,int,int,int,
                               const T*,T);
@@ -233,6 +235,10 @@ public:
   template<typename TMat,typename T> void Gen23Contract(TMat&,const TMat&,int,int,int,int,T,
                                                         double);
   template<typename TMat,typename T> void Gen24Contract(TMat&,const TMat&,int,int,int,int,T);
+  template<typename TMat,typename T> void GenCouContractSpinor(TMat&,const TMat&,int,int,int,
+                                                               int,T);
+  template<typename TMat,typename T> void GenExchContractSpinor(TMat&,const TMat&,int,int,
+                                                                int,int,T,double);
 
   void compareRI();
 #endif

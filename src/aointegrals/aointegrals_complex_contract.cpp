@@ -27,9 +27,10 @@
 namespace ChronusQ{
 #ifdef USE_LIBINT
 template<>
-void AOIntegrals::twoEContractDirect(bool RHF, bool doFock, bool do24, const ComplexMatrix &XAlpha, ComplexMatrix &AXAlpha,
+void AOIntegrals::twoEContractDirect(bool RHF, bool doFock, bool do24, bool doTCS, const ComplexMatrix &XAlpha, ComplexMatrix &AXAlpha,
                                  const ComplexMatrix &XBeta, ComplexMatrix &AXBeta) {
 //CErr("No Direct Contraction for Complex Matricies Implemented");
+  if(doTCS) CErr("TCS Complex contraction NYI");
   this->fileio_->out << "Contracting Directly with two-electron integrals" << endl;
 
   if(!this->haveSchwartz) this->computeSchwartz();
@@ -49,7 +50,7 @@ void AOIntegrals::twoEContractDirect(bool RHF, bool doFock, bool do24, const Com
   for(int i=1; i<this->controls_->nthreads; i++) engines[i] = engines[0];
 
   auto start = std::chrono::high_resolution_clock::now();
-  this->basisSet_->computeShBlkNorm(!RHF,&XAlpha,&XBeta);
+  this->basisSet_->computeShBlkNorm(!RHF,1,&XAlpha,&XBeta);
   auto finish = std::chrono::high_resolution_clock::now();
   if(doFock) this->DenShBlkD = finish - start;
   int ijkl = 0;

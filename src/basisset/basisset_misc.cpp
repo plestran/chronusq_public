@@ -32,10 +32,10 @@ namespace ChronusQ{
  *  Each element is the infinity norm of the shell pair block
  */
 template<>
-void BasisSet::computeShBlkNorm(bool doBeta, const RealMatrix *DAlpha, 
+void BasisSet::computeShBlkNorm(bool doBeta, int nTCS, const RealMatrix *DAlpha, 
                                    const RealMatrix *DBeta){
   // If map doesnt exist, make it
-  if(!this->haveMapSh2Bf) this->makeMapSh2Bf(1);
+  if(!this->haveMapSh2Bf) this->makeMapSh2Bf(nTCS);
 
   // Allocate Matricies
   this->shBlkNormAlpha = 
@@ -65,10 +65,10 @@ void BasisSet::computeShBlkNorm(bool doBeta, const RealMatrix *DAlpha,
  *  Each element is the infinity norm of the shell pair block
  */
 template<>
-void BasisSet::computeShBlkNorm(bool doBeta, const ComplexMatrix *DAlpha, 
+void BasisSet::computeShBlkNorm(bool doBeta,int nTCS,const ComplexMatrix *DAlpha, 
                                    const ComplexMatrix *DBeta){
   // If map doesnt exist, make it
-  if(!this->haveMapSh2Bf) this->makeMapSh2Bf(1);
+  if(!this->haveMapSh2Bf) this->makeMapSh2Bf(nTCS);
 
   // Allocate Matricies
   this->shBlkNormAlpha = 

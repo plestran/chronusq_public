@@ -100,7 +100,7 @@ void SingleSlater<double>::scaleDen(){
     }
     prettyPrintTCS(cout,(*this->densityA_),"DENSITY");
   }
-  CErr();
+//CErr();
 }; // SingleSlater::scaleDen [T=double]
 //--------------------------------//
 // form the initial guess of MO's //

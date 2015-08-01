@@ -1085,15 +1085,15 @@ void SDResponse::incorePPRPA(){
   std::memcpy(RPAIXAOSing.data(),&RPAIXAOTenSing.storage()[0],RPAIXAOTenSing.size()*sizeof(double));
 */
 
-  this->singleSlater_->aointegrals()->twoEContractDirect(true,false,true,ATDAAOAA,ATDAIXAOAA,ATDAAOAA,ATDAIXAOAA);
-  this->singleSlater_->aointegrals()->twoEContractDirect(true,false,true,CTDAAOAA,CTDAIXAOAA,CTDAAOAA,CTDAIXAOAA);
-  this->singleSlater_->aointegrals()->twoEContractDirect(true,false,true,RPAAOAA,RPAIXAOAA,RPAAOAA,RPAIXAOAA);
-  this->singleSlater_->aointegrals()->twoEContractDirect(true,false,true,ATDAAOAB,ATDAIXAOAB,ATDAAOAB,ATDAIXAOAA);
-  this->singleSlater_->aointegrals()->twoEContractDirect(true,false,true,CTDAAOAB,CTDAIXAOAB,CTDAAOAB,CTDAIXAOAA);
-  this->singleSlater_->aointegrals()->twoEContractDirect(true,false,true,RPAAOAB,RPAIXAOAB,RPAAOAB,RPAIXAOAA);
-  this->singleSlater_->aointegrals()->twoEContractDirect(true,false,true,ATDAAOSing,ATDAIXAOSing,ATDAAOSing,ATDAIXAOAA);
-  this->singleSlater_->aointegrals()->twoEContractDirect(true,false,true,CTDAAOSing,CTDAIXAOSing,CTDAAOSing,CTDAIXAOAA);
-  this->singleSlater_->aointegrals()->twoEContractDirect(true,false,true,RPAAOSing,RPAIXAOSing,RPAAOSing,RPAIXAOAA);
+  this->singleSlater_->aointegrals()->twoEContractDirect(true,false,true,false,ATDAAOAA,ATDAIXAOAA,ATDAAOAA,ATDAIXAOAA);
+  this->singleSlater_->aointegrals()->twoEContractDirect(true,false,true,false,CTDAAOAA,CTDAIXAOAA,CTDAAOAA,CTDAIXAOAA);
+  this->singleSlater_->aointegrals()->twoEContractDirect(true,false,true,false,RPAAOAA,RPAIXAOAA,RPAAOAA,RPAIXAOAA);
+  this->singleSlater_->aointegrals()->twoEContractDirect(true,false,true,false,ATDAAOAB,ATDAIXAOAB,ATDAAOAB,ATDAIXAOAA);
+  this->singleSlater_->aointegrals()->twoEContractDirect(true,false,true,false,CTDAAOAB,CTDAIXAOAB,CTDAAOAB,CTDAIXAOAA);
+  this->singleSlater_->aointegrals()->twoEContractDirect(true,false,true,false,RPAAOAB,RPAIXAOAB,RPAAOAB,RPAIXAOAA);
+  this->singleSlater_->aointegrals()->twoEContractDirect(true,false,true,false,ATDAAOSing,ATDAIXAOSing,ATDAAOSing,ATDAIXAOAA);
+  this->singleSlater_->aointegrals()->twoEContractDirect(true,false,true,false,CTDAAOSing,CTDAIXAOSing,CTDAAOSing,CTDAIXAOAA);
+  this->singleSlater_->aointegrals()->twoEContractDirect(true,false,true,false,RPAAOSing,RPAIXAOSing,RPAAOSing,RPAIXAOAA);
 
 
   ATDAIXMOAA = this->singleSlater_->moA()->adjoint() * ATDAIXAOAA * (*this->singleSlater_->moA()); 
@@ -1798,7 +1798,7 @@ RealMatrix SDResponse::formRM2(RealMatrix &XMO){
      *  IXAO(s)_{i,j} = [ (ij,s|kl,s') + delta_{s,s'}*(il,s|kj,s) ] * XAO(s')_{l,k}
      */ 
     if(this->controls_->directTwoE && !this->controls_->doDF)
-      this->singleSlater_->aointegrals()->twoEContractDirect(false,false,false,XAAO,IXA,XBAO,IXB);
+      this->singleSlater_->aointegrals()->twoEContractDirect(false,false,false,false,XAAO,IXA,XBAO,IXB);
     else
       this->singleSlater_->aointegrals()->twoEContractN4(false, true, XAAO,IXA,XBAO,IXB);
     

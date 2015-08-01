@@ -215,7 +215,7 @@ public:
   void makeMapSh2Cen(Molecule *);          ///< generate mapSh2Cen
   void makeMapCen2Bf(int,Molecule *);          ///< generate mapCen2Bf
   void renormShells();                     ///< Renormalize Libint2::Shell set
-  template<typename TMat> void computeShBlkNorm(bool, const TMat*, const TMat*);
+  template<typename TMat> void computeShBlkNorm(bool,int,const TMat*, const TMat*);
 
   void constructExtrn(Molecule *, BasisSet *); ///< Generate new basis from refernce shells
 

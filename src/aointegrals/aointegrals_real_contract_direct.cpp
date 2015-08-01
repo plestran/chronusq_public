@@ -26,39 +26,51 @@
 #include <aointegrals.h>
 namespace ChronusQ{
   template<>
-  void AOIntegrals::twoEContractDirect(bool RHF, bool doFock, bool do24, 
+  void AOIntegrals::twoEContractDirect(bool RHF, bool doFock, bool do24, bool doTCS, 
     const RealMatrix &XAlpha, RealMatrix &AXAlpha, const RealMatrix &XBeta, 
     RealMatrix &AXBeta) {
 
+    if(doTCS) cout << "HERE 1" << endl;
+    int nTCS = 1;
+    if(doTCS) nTCS = 2;
     this->fileio_->out << "Contracting Directly with two-electron integrals" << endl;
     if(!this->haveSchwartz) this->computeSchwartz();
-    if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(1); 
+    if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(nTCS); 
+    cout << "MAPMAPMAPMAPMAPMAPMAPMAPMAPMAP" << endl;
+    for(auto i = 0; i < this->basisSet_->nShell(); i++) cout << this->basisSet_->mapSh2Bf(i) << endl;
     AXAlpha.setZero();
-    if(!RHF) AXBeta.setZero();
+    if(!RHF && !doTCS) AXBeta.setZero();
+    cout << "HERE 3" << endl;
     int nRHF;
-    if(RHF) nRHF = 1;
+    if(RHF || doTCS) nRHF = 1;
     else    nRHF = 2;
     std::vector<std::vector<RealMatrix>> G(nRHF,std::vector<RealMatrix>
-      (this->controls_->nthreads,RealMatrix::Zero(this->nBasis_,this->nBasis_)));
+      (this->controls_->nthreads,RealMatrix::Zero(nTCS*this->nBasis_,nTCS*this->nBasis_)));
   
+    cout << "HERE 4" << endl;
     RealMatrix XTotal;
-    if(!RHF) {
+    if(!RHF && !doTCS) {
       XTotal = XAlpha + XBeta;
       if(!doFock) XTotal = 0.5*XTotal + 0.5*(XAlpha.adjoint() + XBeta.adjoint());
     }
+    cout << "HERE 5" << endl;
   
     std::vector<coulombEngine> engines(this->controls_->nthreads);
     engines[0] = coulombEngine(this->basisSet_->maxPrim(),this->basisSet_->maxL(),0);
     engines[0].set_precision(std::numeric_limits<double>::epsilon());
+    cout << "HERE 6" << endl;
   
     for(int i=1; i<this->controls_->nthreads; i++) engines[i] = engines[0];
+    cout << "HERE 7" << endl;
   
+    cout << "HERE 8" << endl;
     auto start = std::chrono::high_resolution_clock::now();
-    this->basisSet_->computeShBlkNorm(!RHF,&XAlpha,&XBeta);
+    this->basisSet_->computeShBlkNorm(!RHF && !doTCS,nTCS,&XAlpha,&XBeta);
     auto finish = std::chrono::high_resolution_clock::now();
     if(doFock) this->DenShBlkD = finish - start;
     int ijkl = 0;
     start = std::chrono::high_resolution_clock::now();
+    cout << "HERE 9" << endl;
   
     auto efficient_twoe = [&] (int thread_id) {
       coulombEngine &engine = engines[thread_id];
@@ -78,8 +90,9 @@ namespace ChronusQ{
               int n4    = this->basisSet_->shells(s4).size();
         
               // Schwartz and Density screening
+/*
               double shMax;
-              if(RHF){
+              if(RHF || doTCS){
                 shMax = std::max((*this->basisSet_->shBlkNormAlpha)(s1,s4),
                         std::max((*this->basisSet_->shBlkNormAlpha)(s2,s4),
                         std::max((*this->basisSet_->shBlkNormAlpha)(s3,s4),
@@ -104,6 +117,7 @@ namespace ChronusQ{
               }
   
               if(shMax < this->controls_->thresholdSchawrtz ) continue;
+*/
    
               const double* buff = engine.compute(
                 this->basisSet_->shells(s1),
@@ -119,9 +133,12 @@ namespace ChronusQ{
               if(RHF && doFock) 
                 this->Restricted34Contract(G[0][thread_id],XAlpha,n1,n2,n3,n4,
                   bf1_s,bf2_s,bf3_s,bf4_s,buff,s1234_deg);
-              else if(!do24)
+              else if(!do24 && !doTCS)
                 this->UnRestricted34Contract(G[0][thread_id],XAlpha,G[1][thread_id],
                   XBeta,XTotal,n1,n2,n3,n4,bf1_s,bf2_s,bf3_s,bf4_s,buff,s1234_deg);
+              else if(!do24)
+                this->Spinor34Contract(G[0][thread_id],XAlpha,n1,n2,n3,n4,
+                  bf1_s,bf2_s,bf3_s,bf4_s,buff,s1234_deg);
               else
                 this->General24CouContract(G[0][thread_id],XAlpha,n1,n2,n3,n4,
                   bf1_s,bf2_s,bf3_s,bf4_s,buff,s1234_deg);
@@ -141,16 +158,21 @@ namespace ChronusQ{
   #else
     efficient_twoe(0);
   #endif
+    cout << "HERE 10" << endl;
     for(int i = 0; i < this->controls_->nthreads; i++) AXAlpha += G[0][i];
-    if(!RHF) for(int i = 0; i < this->controls_->nthreads; i++) AXBeta += G[1][i];
+    cout << "HERE 11" << endl;
+    if(!RHF && !doTCS) for(int i = 0; i < this->controls_->nthreads; i++) AXBeta += G[1][i];
+    cout << "HERE 12" << endl;
     AXAlpha = AXAlpha*0.5; // werid factor that comes from A + AT
     AXAlpha = AXAlpha*0.5;
     if(do24) AXAlpha *= 0.5;
-    if(!RHF){
+    cout << "HERE 13" << endl;
+    if(!RHF && !doTCS){
       AXBeta = AXBeta*0.5; // werid factor that comes from A + AT
       AXBeta = AXBeta*0.5;
       if(do24) AXBeta *= 0.5;
     }
+    cout << "HERE 14" << endl;
     finish = std::chrono::high_resolution_clock::now();
     if(doFock) this->PTD = finish - start;
      
@@ -194,7 +216,7 @@ namespace ChronusQ{
     std::vector<RealMatrix> betaShBlk;
     auto start = std::chrono::high_resolution_clock::now();
     for(auto i = 0; i < nVec; i++){
-      this->basisSet_->computeShBlkNorm(!RHF,&XAlpha[i],&XBeta[i]);
+      this->basisSet_->computeShBlkNorm(!RHF,1,&XAlpha[i],&XBeta[i]);
       alphaShBlk.push_back(*this->basisSet_->shBlkNormAlpha);
       if(!RHF)
         betaShBlk.push_back(*this->basisSet_->shBlkNormBeta);

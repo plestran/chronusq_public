@@ -75,17 +75,19 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
     hartreeFock->readGuessGauMatEl(matEl);
   }
   else if(controls->guess==3) hartreeFock->readGuessGauFChk(controls->gauFChkName);
+  cout << "HEREA" << endl;
 //APS I have MO Please check in which controls call the following function
 //hartreeFock->matchord();
 //APE
   hartreeFock->formFock();
+  CErr();
   aointegrals->printTimings();
   hartreeFock->computeEnergy();
-  std::shared_ptr<MOIntegrals> moIntegrals = std::make_shared<MOIntegrals>();
   if(controls->optWaveFunction)  hartreeFock->SCF();
   //MOIntegrals *moIntegrals = new MOIntegrals();
   //moIntegrals->iniMOIntegrals(molecule,basisset,fileIO,controls,aointegrals,hartreeFock);
   else fileIO->out << "**Skipping SCF Optimization**" << endl; 
+  std::shared_ptr<MOIntegrals> moIntegrals = std::make_shared<MOIntegrals>();
   hartreeFock->computeMultipole();
   if(controls->doSDR) {
     sdResponse->setPPRPA(1);
