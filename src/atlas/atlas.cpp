@@ -54,7 +54,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 
   // Initialize default settings and read input
   controls->iniControls();
-  controls->doTCS = true;
+//controls->doTCS = true;
   readInput(fileIO.get(),molecule.get(),basisset.get(),controls.get(),dfBasisset.get());
 //  fileIO->iniFileIO(controls->restart);
 
@@ -80,9 +80,9 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 //hartreeFock->matchord();
 //APE
   hartreeFock->formFock();
-  CErr();
   aointegrals->printTimings();
   hartreeFock->computeEnergy();
+  CErr();
   if(controls->optWaveFunction)  hartreeFock->SCF();
   //MOIntegrals *moIntegrals = new MOIntegrals();
   //moIntegrals->iniMOIntegrals(molecule,basisset,fileIO,controls,aointegrals,hartreeFock);
