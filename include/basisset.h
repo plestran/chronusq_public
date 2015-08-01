@@ -196,6 +196,10 @@ public:
   inline int               mapSh2Bf(int i) {return this->mapSh2Bf_[i];  };
   inline int               mapSh2Cen(int i) {return this->mapSh2Cen_[i];};
   inline std::array<int,2> mapCen2Bf(int i) {return this->mapCen2Bf_[i];};
+
+  inline void resetMapSh2Bf() {this->mapSh2Bf_.clear(); this->haveMapSh2Bf  = false;};
+  inline void resetMapSh2Cen(){this->mapSh2Cen_.clear();this->haveMapSh2Cen = false;};
+  inline void resetMapCen2Bf(){this->mapCen2Bf_.clear();this->haveMapCen2Bf = false;};
   
 
   inline void setBasisPath(std::string str){ this->basisPath_ = str;};

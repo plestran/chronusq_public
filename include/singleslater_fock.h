@@ -42,13 +42,14 @@ void SingleSlater<T>::formPT(){
     this->aointegrals_->twoEContractN4(doRHF,true,*this->densityA_,*this->PTA_,*this->densityB_,*this->PTB_);
   if(this->controls_->printLevel >= 3) {
     if(!doTCS){
-      prettyPrint(cout,(*this->PTA_),"Alpha Perturbation Tensor");
-      if(this->Ref_ != RHF) prettyPrint(cout,(*this->PTB_),"Beta Perturbation Tensor");
+      prettyPrint(this->fileio_->out,(*this->PTA_),"Alpha Perturbation Tensor");
+      if(this->Ref_ != RHF) prettyPrint(this->fileio_->out,(*this->PTB_),"Beta Perturbation Tensor");
     } else {
-      prettyPrintTCS(cout,(*this->PTA_),"Perturbation Tensor");
+      prettyPrintTCS(this->fileio_->out,(*this->PTA_),"Perturbation Tensor");
     }
   }
-if(doTCS)CErr();
+  cout << "HERE TCS" << endl;
+//if(doTCS)CErr();
 }
 #endif
 
@@ -65,17 +66,31 @@ void SingleSlater<T>::formFock(){
 #else
   this->formPT();
 #endif
+  cout << "HERE TCS" << endl;
+  if(this->Ref_ == TCS) this->basisset_->resetMapSh2Bf();
   if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
+  if(this->Ref_ == TCS) {
+    this->basisset_->resetMapSh2Bf(); 
+    this->basisset_->makeMapSh2Bf(this->nTCS_);
+  }
 
+  cout << "HERE TCS" << endl;
   this->fockA_->setZero();
-  fockA_->real()+=(*this->aointegrals_->oneE_);
+  if(this->Ref_ != TCS) fockA_->real()+=(*this->aointegrals_->oneE_);
+  else {
+    for(auto I = 0, i = 0; i < this->nBasis_; I += 2, i++)
+    for(auto J = 0, j = 0; j < this->nBasis_; J += 2, j++){
+      this->fockA_->real()(I,J)     += (*this->aointegrals_->oneE_)(i,j);
+      this->fockA_->real()(I+1,J+1) += (*this->aointegrals_->oneE_)(i,j);
+    }
+  }
 #ifndef USE_LIBINT
   fockA_->real()+=(*this->coulombA_);
   fockA_->real()-=(*this->exchangeA_);
 #else
   *(fockA_)+=(*this->PTA_);
 #endif
-  if(this->Ref_ != RHF){
+  if(!this->isClosedShell && this->Ref_ != TCS){
     this->fockB_->setZero();
     fockB_->real()+=(*this->aointegrals_->oneE_);
 #ifndef USE_LIBINT
@@ -86,8 +101,12 @@ void SingleSlater<T>::formFock(){
 #endif
   };
   if(this->controls_->printLevel>=2) {
-    prettyPrint(this->fileio_->out,(*this->fockA_),"Alpha Fock");
-    if(this->Ref_ != RHF) prettyPrint(this->fileio_->out,(*this->fockB_),"Beta Fock");
+    if(this->Ref_ != TCS){
+      prettyPrint(this->fileio_->out,(*this->fockA_),"Alpha Fock");
+      if(this->Ref_ != RHF) prettyPrint(this->fileio_->out,(*this->fockB_),"Beta Fock");
+    } else {
+      prettyPrintTCS(this->fileio_->out,(*this->fockA_),"Fock");
+    }
   };
 };
 

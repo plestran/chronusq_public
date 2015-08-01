@@ -242,6 +242,7 @@ void AOIntegrals::computeAOOneE(){
 
 void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
 
+  cout << "HERE TCS 2" << endl;
   std::vector<RealMap> mat;
   int NB = this->nBasis_;
   int NBSq = NB*NB;
@@ -273,6 +274,7 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
     cout << "OneBodyEngine type not recognized" << endl;
     exit(EXIT_FAILURE);
   }
+  cout << "HERE TCS 2" << endl;
  
   // Check to see if the basisset had been converted
   // Define integral Engine
@@ -309,6 +311,7 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
 #else
     int thread_id = 0;
 #endif
+  cout << "HERE TCS 2" << endl;
     for(auto s1=0l, s12=0l; s1 < this->basisSet_->nShell(); s1++){
       int bf1 = this->basisSet_->mapSh2Bf(s1);
       int n1  = this->basisSet_->shells(s1).size();
@@ -391,6 +394,7 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
       exit(EXIT_FAILURE);
     }
   }
+  cout << "HERE TCS 2" << endl;
 
 }
 
@@ -401,6 +405,7 @@ void AOIntegrals::computeAOOneE(){
   // Start timer for one-electron integral evaluation
   auto oneEStart = std::chrono::high_resolution_clock::now();
 
+  cout << "HERE TCS 1" << endl;
   // Compute and time overlap integrals
   auto OStart = std::chrono::high_resolution_clock::now();
   if(this->controls_->doOctpole) OneEDriver(OneBodyEngine::emultipole3);
@@ -408,11 +413,13 @@ void AOIntegrals::computeAOOneE(){
   else if(this->controls_->doDipole) OneEDriver(OneBodyEngine::emultipole1);
   else OneEDriver(OneBodyEngine::overlap);
   auto OEnd = std::chrono::high_resolution_clock::now();
+  cout << "HERE TCS 1" << endl;
 
   // Compute and time kinetic integrals
   auto TStart = std::chrono::high_resolution_clock::now();
   OneEDriver(OneBodyEngine::kinetic);
   auto TEnd = std::chrono::high_resolution_clock::now();
+  cout << "HERE TCS 1" << endl;
 
   // Compute and time nuclear attraction integrals (negative sign is factored in)
   auto VStart = std::chrono::high_resolution_clock::now();
@@ -420,12 +427,14 @@ void AOIntegrals::computeAOOneE(){
   auto VEnd = std::chrono::high_resolution_clock::now();
 //this->oneE_->add(this->kinetic_,this->potential_);
   (*this->oneE_) = (*this->kinetic_) + (*this->potential_);
+  cout << "HERE TCS 1" << endl;
 
   // Get end time of one-electron integral evaluation
   auto oneEEnd = std::chrono::high_resolution_clock::now();
 //if(this->controls_->printLevel>=2) this->oneE_->printAll(5,fileio_->out);
   if(this->controls_->printLevel>=2) 
     prettyPrint(this->fileio_->out,(*this->oneE_),"Core Hamiltonian");
+  cout << "HERE TCS 1" << endl;
 
   // Compute time differenes
   this->OneED = oneEEnd - oneEStart;
