@@ -33,6 +33,7 @@ using ChronusQ::HashNAOs;
 typedef libint2::Shell CShell;
 typedef libint2::Shell LIShell;
 
+namespace ChronusQ{
 
 void BasisSet::basisSetRead(FileIO * fileio, Molecule * mol){
   std::vector<double> coeff;
@@ -287,5 +288,197 @@ void BasisSet::makeMap(Molecule *  mol) {
     n += shell.size();
   }
   this->haveMap = true;
+}
+
+template<>
+double * BasisSet::basisEval(int iShell, std::array<double,3> center, cartGP *pt){
+  auto shSize = this->shells_libint[iShell].size(); 
+  auto contDepth = this->shells_libint[iShell].alpha.size(); 
+  double * fEVal = new double[shSize];
+  
+  std::vector<std::array<int,3>> L;
+  if(this->shells_libint[iShell].contr[0].l == 0){
+    L.push_back({{0,0,0}});
+  } else if(this->shells_libint[iShell].contr[0].l == 1){
+    L.push_back({{1,0,0}});
+    L.push_back({{0,1,0}});
+    L.push_back({{0,0,1}});
+  } else if(this->shells_libint[iShell].contr[0].l == 2){
+    L.push_back({{2,0,0}});
+    L.push_back({{1,1,0}});
+    L.push_back({{1,0,1}});
+    L.push_back({{0,2,0}});
+    L.push_back({{0,1,1}});
+    L.push_back({{0,0,2}});
+  } else CErr("L > 2 NYI");
+
+  std::memset(fEVal,0,shSize*sizeof(double));
+
+  double x = bg::get<0>(*pt) - center[0];
+  double y = bg::get<1>(*pt) - center[1];
+  double z = bg::get<2>(*pt) - center[2];
+  double rSq = x*x + y*y + z*z;
+  for(auto i = 0; i < shSize; i++){
+    cout << endl << fEVal[i] << endl;
+    for(auto k = 0; k < contDepth; k++){
+      fEVal[i] += 
+        this->shells_libint[iShell].contr[0].coeff[k] *
+        std::exp(-this->shells_libint[iShell].alpha[k]*rSq);
+    }
+    auto l = L[i][0];
+    auto m = L[i][1];
+    auto n = L[i][2];
+
+    fEVal[i] *= std::pow(x,l);
+    fEVal[i] *= std::pow(y,m);
+    fEVal[i] *= std::pow(z,n);
+  }
+
+  return fEVal;
+}
+template<>
+double * BasisSet::basisEval(int iShell, std::array<double,3> center,sph3GP *ptSph){
+  cartGP pt;
+  bg::transform(*ptSph,pt);
+  auto shSize = this->shells_libint[iShell].size(); 
+  auto contDepth = this->shells_libint[iShell].alpha.size(); 
+  double * fEVal = new double[shSize];
+  
+  std::vector<std::array<int,3>> L;
+  if(this->shells_libint[iShell].contr[0].l == 0){
+    L.push_back({{0,0,0}});
+  } else if(this->shells_libint[iShell].contr[0].l == 1){
+    L.push_back({{1,0,0}});
+    L.push_back({{0,1,0}});
+    L.push_back({{0,0,1}});
+  } else if(this->shells_libint[iShell].contr[0].l == 2){
+    L.push_back({{2,0,0}});
+    L.push_back({{1,1,0}});
+    L.push_back({{1,0,1}});
+    L.push_back({{0,2,0}});
+    L.push_back({{0,1,1}});
+    L.push_back({{0,0,2}});
+  } else CErr("L > 2 NYI");
+
+  std::memset(fEVal,0,shSize*sizeof(double));
+
+  double x = bg::get<0>(pt) - center[0];
+  double y = bg::get<1>(pt) - center[1];
+  double z = bg::get<2>(pt) - center[2];
+  double rSq = x*x + y*y + z*z;
+  for(auto i = 0; i < shSize; i++){
+    cout << endl << fEVal[i] << endl;
+    for(auto k = 0; k < contDepth; k++){
+      fEVal[i] += 
+        this->shells_libint[iShell].contr[0].coeff[k] *
+        std::exp(-this->shells_libint[iShell].alpha[k]*rSq);
+    }
+    auto l = L[i][0];
+    auto m = L[i][1];
+    auto n = L[i][2];
+
+    fEVal[i] *= std::pow(x,l);
+    fEVal[i] *= std::pow(y,m);
+    fEVal[i] *= std::pow(z,n);
+  }
+
+  return fEVal;
+}
+template<>
+double * BasisSet::basisEval(libint2::Shell &liShell, cartGP *pt){
+  auto shSize = liShell.size(); 
+  auto contDepth = liShell.alpha.size(); 
+  auto center = liShell.O;
+  double * fEVal = new double[shSize];
+  
+  std::vector<std::array<int,3>> L;
+  if(liShell.contr[0].l == 0){
+    L.push_back({{0,0,0}});
+  } else if(liShell.contr[0].l == 1){
+    L.push_back({{1,0,0}});
+    L.push_back({{0,1,0}});
+    L.push_back({{0,0,1}});
+  } else if(liShell.contr[0].l == 2){
+    L.push_back({{2,0,0}});
+    L.push_back({{1,1,0}});
+    L.push_back({{1,0,1}});
+    L.push_back({{0,2,0}});
+    L.push_back({{0,1,1}});
+    L.push_back({{0,0,2}});
+  } else CErr("L > 2 NYI");
+
+  std::memset(fEVal,0,shSize*sizeof(double));
+
+  double x = bg::get<0>(*pt) - center[0];
+  double y = bg::get<1>(*pt) - center[1];
+  double z = bg::get<2>(*pt) - center[2];
+  double rSq = x*x + y*y + z*z;
+  for(auto i = 0; i < shSize; i++){
+    cout << endl << fEVal[i] << endl;
+    for(auto k = 0; k < contDepth; k++){
+      fEVal[i] += 
+        liShell.contr[0].coeff[k] *
+        std::exp(-liShell.alpha[k]*rSq);
+    }
+    auto l = L[i][0];
+    auto m = L[i][1];
+    auto n = L[i][2];
+
+    fEVal[i] *= std::pow(x,l);
+    fEVal[i] *= std::pow(y,m);
+    fEVal[i] *= std::pow(z,n);
+  }
+
+  return fEVal;
+}
+template<>
+double * BasisSet::basisEval(libint2::Shell &liShell, sph3GP *ptSph){
+  cartGP pt;
+  bg::transform(*ptSph,pt);
+  auto shSize = liShell.size(); 
+  auto contDepth = liShell.alpha.size(); 
+  auto center = liShell.O;
+  double * fEVal = new double[shSize];
+  
+  std::vector<std::array<int,3>> L;
+  if(liShell.contr[0].l == 0){
+    L.push_back({{0,0,0}});
+  } else if(liShell.contr[0].l == 1){
+    L.push_back({{1,0,0}});
+    L.push_back({{0,1,0}});
+    L.push_back({{0,0,1}});
+  } else if(liShell.contr[0].l == 2){
+    L.push_back({{2,0,0}});
+    L.push_back({{1,1,0}});
+    L.push_back({{1,0,1}});
+    L.push_back({{0,2,0}});
+    L.push_back({{0,1,1}});
+    L.push_back({{0,0,2}});
+  } else CErr("L > 2 NYI");
+
+  std::memset(fEVal,0,shSize*sizeof(double));
+
+  double x = bg::get<0>(pt) - center[0];
+  double y = bg::get<1>(pt) - center[1];
+  double z = bg::get<2>(pt) - center[2];
+  double rSq = x*x + y*y + z*z;
+  for(auto i = 0; i < shSize; i++){
+    cout << endl << fEVal[i] << endl;
+    for(auto k = 0; k < contDepth; k++){
+      fEVal[i] += 
+        liShell.contr[0].coeff[k] *
+        std::exp(-liShell.alpha[k]*rSq);
+    }
+    auto l = L[i][0];
+    auto m = L[i][1];
+    auto n = L[i][2];
+
+    fEVal[i] *= std::pow(x,l);
+    fEVal[i] *= std::pow(y,m);
+    fEVal[i] *= std::pow(z,n);
+  }
+
+  return fEVal;
+}
 }
 #endif

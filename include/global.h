@@ -137,7 +137,7 @@ typedef Tensor<dcomplex,Range1d> ComplexTensor1d; ///< Support for complex-value
 
 
 typedef bg::model::point< double, 3, bg::cs::spherical<bg::radian> > sph3GP; ///< 3 Coordinate Spherical (w varying radius) (phi,theta,radius)
-typedef bg::model::point< double, 2, bg::cs::spherical<bg::radian> > sph2GP; ///< 2 Coordinate Spherical (unit sphere)      (phi,theta)
+typedef bg::model::point< double, 2, bg::cs::spherical<bg::radian> > sph2GP; ///< 2 Coordinate Spherical (unit sphere)      (phi,theta) (Azimut[0,2pi],Elevation[0,pi]
 typedef bg::model::point< double, 3, bg::cs::cartesian > cartGP;             ///< 3 Coordinate Carteaisn                    (x,y,z)
 
 //----------------//

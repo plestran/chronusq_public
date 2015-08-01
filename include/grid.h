@@ -84,6 +84,7 @@ class TwoDGrid : public Grid {
             OneDGrid * Gr_;
             OneDGrid * Gs_;
       double   fsphe(double,double,double);
+      double   ftest(double,double,double);
 //            int * Gsnpts_;
       public:
         TwoDGrid(OneDGrid *Gr, OneDGrid *Gs){
@@ -112,6 +113,7 @@ class LebedevGrid : public OneDGrid {
       void gen12_A2(int num, double a, double v);
       void gen8_A3(int num, double a, double v);
       void gen24_Cn(int num, double a, double v);
+      void gen24_Bn(int num, double a, double v);
   }; // class LebedevGrid
 
   class GaussChebyshev1stGrid : public OneDGrid {

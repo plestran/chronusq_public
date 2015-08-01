@@ -133,21 +133,44 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
  molecule->toCOM(Iop);  // call object molecule pointing to function toCOM-Iop=1 Center of Nuclear Charges
 */
 //Test one dimensional grid
+//
+  cartGP pt(0.01,0.02,0.03);
+  sph3GP ptSPH;
+  bg::transform(pt,ptSPH);
+  double *f = basisset->basisEval(2,basisset->shells_libint[2].O,&ptSPH);
+  double *g = basisset->basisEval(basisset->shells_libint[2],&ptSPH);
+  cout << basisset->shells_libint[2] << endl;
+  for(auto i = 0; i < 3; i++)
+  cout << "FEVAL " << *(f+i) << " " << *(g+i) <<endl;
   fileIO->out << "**AP One dimensional grid test**" << endl;
-  int Ngridr =   500;
-  int NLeb    = 38;
+  int Ngridr =   700;
+  int NLeb1    = 14;
+  int NLeb2    = 26;
+  int NLeb3    = 38;
   double radius = 1.0;
-   GaussChebyshev1stGrid Rad(Ngridr,0.0,radius);
-   LebedevGrid GridLeb(NLeb);
+  double reftest = 0.6345191418561634;  
+  GaussChebyshev1stGrid Rad(Ngridr,0.0,radius);
+   LebedevGrid GridLeb1(NLeb1);
+   LebedevGrid GridLeb2(NLeb2);
+   LebedevGrid GridLeb3(NLeb3);
    
 //   func(&Rad);
 //   func2D(&GridLeb);
 //
    Rad.genGrid();
-   GridLeb.genGrid();
-   TwoDGrid G3(&Rad,&GridLeb);
-   cout << "Sphere Int = " << G3.integrate() <<endl;
-   cout << "Sphere Err = " << std::abs(G3.integrate()-(4.0*radius*radius*radius*math.pi/3.0)) <<endl;
+   GridLeb1.genGrid();
+   GridLeb2.genGrid();
+   GridLeb3.genGrid();
+   TwoDGrid G1(&Rad,&GridLeb1);
+   TwoDGrid G2(&Rad,&GridLeb2);
+   TwoDGrid G3(&Rad,&GridLeb3);
+   cout << "Test Int = " << G1.integrate() <<endl;
+   cout << "Test Err = " << std::abs(G1.integrate()-reftest) <<endl;
+   cout << "Test Int = " << G2.integrate() <<endl;
+   cout << "Test Err = " << std::abs(G2.integrate()-reftest) <<endl;
+   cout << "Test Int = " << G3.integrate() <<endl;
+//   cout << "Sphere Err = " << std::abs(G3.integrate()-(4.0*radius*radius*radius*math.pi/3.0)) <<endl;
+   cout << "Test Err = " << std::abs(G3.integrate()-reftest) <<endl;
 //   G3.printGrid();
   time(&currentTime);
   fileIO->out<<"\nJob finished: "<<ctime(&currentTime)<<endl;

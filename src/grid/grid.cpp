@@ -72,6 +72,11 @@ void OneDGrid::printGrid(){
   // Test Function to be integrated by Two-dimensional grid
      return r*r;
    } 
+
+  double TwoDGrid::ftest(double rad, double elevation, double azimut) {
+//  return std::sin(elevation)*(std::pow(rad,2.0))*(std::exp( -std::pow(rad,2.0)-std::pow((elevation-azimut),2.0)) );
+  return (std::pow(rad,2.0))*(std::exp( -std::pow(rad,2.0)-std::pow((elevation-azimut),2.0)) );
+}
  
   double TwoDGrid::integrate(){
   // Integrate a test function for a one dimensional grid radial part
@@ -80,7 +85,7 @@ void OneDGrid::printGrid(){
      std::cout << "Number of Solid Angle-grid points= "<< Gs_->npts()  <<std::endl;
      for(int i = 0; i < Gr_->npts(); i++){
       for(int j = 0; j < Gs_->npts(); j++){
-         sum += (this->fsphe(Gr_->gridPts()[i],bg::get<1>(Gs_->grid2GPts()[j]),bg::get<0>(Gs_->grid2GPts()[j])))*(Gs_->weights()[j])*(Gr_->weights()[i]);
+         sum += (this->ftest(Gr_->gridPts()[i],bg::get<1>(Gs_->grid2GPts()[j]),bg::get<0>(Gs_->grid2GPts()[j])))*(Gs_->weights()[j])*(Gr_->weights()[i]);
         }
       }
         return 4.0*(math.pi)*sum*(Gr_->norm());
@@ -490,6 +495,157 @@ void LebedevGrid::gen24_Cn(int num, double q, double v){
     tmpCart.set<0>(0.0);
     tmpCart.set<1>(-p);
     tmpCart.set<2>(-q);
+    this->weights_[num+23] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+23]));
+
+}
+
+void LebedevGrid::gen24_Bn(int num, double l, double v){
+    double m;
+    cartGP tmpCart;
+
+    m = std::sqrt ( 1.0 - 2.0 * l * l ); 
+    tmpCart.set<0>(l);
+    tmpCart.set<1>(l);
+    tmpCart.set<2>(m);
+    this->weights_[num+0] = v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+0]));
+
+    tmpCart.set<0>(-l);
+    tmpCart.set<1>( l);
+    tmpCart.set<2>( m);
+    this->weights_[num+1] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+1]));
+    
+    tmpCart.set<0>(l);
+    tmpCart.set<1>(-l);
+    tmpCart.set<2>( m);
+    this->weights_[num+2] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+2]));
+
+    tmpCart.set<0>(-l);
+    tmpCart.set<1>(-l);
+    tmpCart.set<2>(m);
+    this->weights_[num+3] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+3]));
+ 
+    tmpCart.set<0>(l);
+    tmpCart.set<1>(l);
+    tmpCart.set<2>(-m);
+    this->weights_[num+4] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+4]));
+
+    tmpCart.set<0>(-l);
+    tmpCart.set<1>( l);
+    tmpCart.set<2>(-m);
+    this->weights_[num+5] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+5]));
+
+    tmpCart.set<0>(l);
+    tmpCart.set<1>(-l);
+    tmpCart.set<2>(-m);
+    this->weights_[num+6] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+6]));
+
+    tmpCart.set<0>(-l);
+    tmpCart.set<1>(-l);
+    tmpCart.set<2>(-m);
+    this->weights_[num+7] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+7]));
+
+    tmpCart.set<0>(l);
+    tmpCart.set<1>(m);
+    tmpCart.set<2>(l);
+    this->weights_[num+8] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+8]));
+
+    tmpCart.set<0>(-l);
+    tmpCart.set<1>( m);
+    tmpCart.set<2>( l);
+    this->weights_[num+9] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+9]));
+//x[10]
+    tmpCart.set<0>( l);
+    tmpCart.set<1>(-m);
+    tmpCart.set<2>( l);
+    this->weights_[num+10] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+10]));
+
+    tmpCart.set<0>(-l);
+    tmpCart.set<1>(-m);
+    tmpCart.set<2>( l);
+    this->weights_[num+11] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+11]));
+//check
+    tmpCart.set<0>(l);
+    tmpCart.set<1>(m);
+    tmpCart.set<2>(-l);
+    this->weights_[num+12] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+12]));
+
+    tmpCart.set<0>(-l);
+    tmpCart.set<1>(m);
+    tmpCart.set<2>(-l);
+    this->weights_[num+13] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+13]));
+
+    tmpCart.set<0>(l);
+    tmpCart.set<1>(-m);
+    tmpCart.set<2>(-l);
+    this->weights_[num+14] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+14]));
+
+    tmpCart.set<0>(-l);
+    tmpCart.set<1>(-m);
+    tmpCart.set<2>(-l);
+    this->weights_[num+15] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+15]));
+
+    tmpCart.set<0>(m);
+    tmpCart.set<1>(l);
+    tmpCart.set<2>(l);
+    this->weights_[num+16] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+16]));
+
+    tmpCart.set<0>(-m);
+    tmpCart.set<1>( l);
+    tmpCart.set<2>( l);
+    this->weights_[num+17] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+17]));
+
+    tmpCart.set<0>( m);
+    tmpCart.set<1>(-l);
+    tmpCart.set<2>( l);
+    this->weights_[num+18] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+18]));
+
+    tmpCart.set<0>(-m);
+    tmpCart.set<1>(-l);
+    tmpCart.set<2>(l);
+    this->weights_[num+19] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+19]));
+//20
+    tmpCart.set<0>(m);
+    tmpCart.set<1>(l);
+    tmpCart.set<2>(-l);
+    this->weights_[num+20] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+20]));
+
+    tmpCart.set<0>(-m);
+    tmpCart.set<1>( l);
+    tmpCart.set<2>(-l);
+    this->weights_[num+21] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+21]));
+
+    tmpCart.set<0>(m);
+    tmpCart.set<1>(-l);
+    tmpCart.set<2>(-l);
+    this->weights_[num+22] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+22]));
+
+    tmpCart.set<0>(-m);
+    tmpCart.set<1>(-l);
+    tmpCart.set<2>(-l);
     this->weights_[num+23] =  v;
     bg::transform(tmpCart,(this->grid2GPts_[num+23]));
 

@@ -173,6 +173,8 @@ public:
   void makeMap(Molecule *);
   void computeShBlkNorm(bool,Molecule *,const RealMatrix*,const RealMatrix*);
   void computeShBlkNorm(bool,Molecule *,const ComplexMatrix*,const ComplexMatrix*);
+  template <typename T> double * basisEval(int,std::array<double,3>,T*);
+  template <typename T> double * basisEval(libint2::Shell&,T*);
 #endif
   /*************************/
   /* MPI Related Routines  */
