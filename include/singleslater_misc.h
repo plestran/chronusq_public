@@ -34,7 +34,6 @@ void SingleSlater<T>::formDensity(){
 
   if(this->Ref_ == TCS){
     auto nOcc = this->nOccA_ + this->nOccB_;
-    cout << "nOCC in FD" << nOcc << endl;
 /*
     (*this->densityA_)= 
       this->moA_->block(0,0,this->nTCS_*this->nBasis_,nOcc)*
@@ -49,8 +48,8 @@ void SingleSlater<T>::formDensity(){
       for(auto k = 0; k < nOcc; k++){
         (*this->densityA_)(i,j)     += (*this->moA_)(i,k)   * (*this->moA_)(j,k);
         (*this->densityA_)(i+1,j+1) += (*this->moA_)(i+1,k) * (*this->moA_)(j+1,k);
-      //(*this->densityA_)(i+1,j)   += (*this->moA_)(i+1,k) * (*this->moA_)(j,k);
-      //(*this->densityA_)(i,j+1)   += (*this->moA_)(i,k)   * (*this->moA_)(j+1,k);
+        (*this->densityA_)(i+1,j)   += (*this->moA_)(i+1,k) * (*this->moA_)(j,k);
+        (*this->densityA_)(i,j+1)   += (*this->moA_)(i,k)   * (*this->moA_)(j+1,k);
       }
     }
   } else {

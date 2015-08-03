@@ -30,47 +30,37 @@ namespace ChronusQ{
     const RealMatrix &XAlpha, RealMatrix &AXAlpha, const RealMatrix &XBeta, 
     RealMatrix &AXBeta) {
 
-    if(doTCS) cout << "HERE 1" << endl;
     int nTCS = 1;
     if(doTCS) nTCS = 2;
     this->fileio_->out << "Contracting Directly with two-electron integrals" << endl;
     if(!this->haveSchwartz) this->computeSchwartz();
     if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(nTCS); 
-    cout << "MAPMAPMAPMAPMAPMAPMAPMAPMAPMAP" << endl;
-    for(auto i = 0; i < this->basisSet_->nShell(); i++) cout << this->basisSet_->mapSh2Bf(i) << endl;
     AXAlpha.setZero();
     if(!RHF && !doTCS) AXBeta.setZero();
-    cout << "HERE 3" << endl;
     int nRHF;
     if(RHF || doTCS) nRHF = 1;
     else    nRHF = 2;
     std::vector<std::vector<RealMatrix>> G(nRHF,std::vector<RealMatrix>
       (this->controls_->nthreads,RealMatrix::Zero(nTCS*this->nBasis_,nTCS*this->nBasis_)));
   
-    cout << "HERE 4" << endl;
     RealMatrix XTotal;
     if(!RHF && !doTCS) {
       XTotal = XAlpha + XBeta;
       if(!doFock) XTotal = 0.5*XTotal + 0.5*(XAlpha.adjoint() + XBeta.adjoint());
     }
-    cout << "HERE 5" << endl;
   
     std::vector<coulombEngine> engines(this->controls_->nthreads);
     engines[0] = coulombEngine(this->basisSet_->maxPrim(),this->basisSet_->maxL(),0);
     engines[0].set_precision(std::numeric_limits<double>::epsilon());
-    cout << "HERE 6" << endl;
   
     for(int i=1; i<this->controls_->nthreads; i++) engines[i] = engines[0];
-    cout << "HERE 7" << endl;
   
-    cout << "HERE 8" << endl;
     auto start = std::chrono::high_resolution_clock::now();
     this->basisSet_->computeShBlkNorm(!RHF && !doTCS,nTCS,&XAlpha,&XBeta);
     auto finish = std::chrono::high_resolution_clock::now();
     if(doFock) this->DenShBlkD = finish - start;
     int ijkl = 0;
     start = std::chrono::high_resolution_clock::now();
-    cout << "HERE 9" << endl;
   
     auto efficient_twoe = [&] (int thread_id) {
       coulombEngine &engine = engines[thread_id];
@@ -158,21 +148,16 @@ namespace ChronusQ{
   #else
     efficient_twoe(0);
   #endif
-    cout << "HERE 10" << endl;
     for(int i = 0; i < this->controls_->nthreads; i++) AXAlpha += G[0][i];
-    cout << "HERE 11" << endl;
     if(!RHF && !doTCS) for(int i = 0; i < this->controls_->nthreads; i++) AXBeta += G[1][i];
-    cout << "HERE 12" << endl;
     AXAlpha = AXAlpha*0.5; // werid factor that comes from A + AT
     AXAlpha = AXAlpha*0.5;
     if(do24) AXAlpha *= 0.5;
-    cout << "HERE 13" << endl;
     if(!RHF && !doTCS){
       AXBeta = AXBeta*0.5; // werid factor that comes from A + AT
       AXBeta = AXBeta*0.5;
       if(do24) AXBeta *= 0.5;
     }
-    cout << "HERE 14" << endl;
     finish = std::chrono::high_resolution_clock::now();
     if(doFock) this->PTD = finish - start;
      

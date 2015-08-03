@@ -33,7 +33,6 @@ void SingleSlater<T>::formPT(){
   bool doRHF = (this->Ref_ == RHF);
   bool doTCS = (this->Ref_ == TCS);
   if(!this->haveDensity) this->formDensity();
-  cout << "HEREB" << endl;
   if(this->controls_->directTwoE && !this->controls_->doDF)
     this->aointegrals_->twoEContractDirect(doRHF,true,false,doTCS,*this->densityA_,*this->PTA_,*this->densityB_,*this->PTB_);
   else if(this->controls_->doDF)
@@ -48,7 +47,6 @@ void SingleSlater<T>::formPT(){
       prettyPrintTCS(this->fileio_->out,(*this->PTA_),"Perturbation Tensor");
     }
   }
-  cout << "HERE TCS" << endl;
 //if(doTCS)CErr();
 }
 #endif
@@ -66,7 +64,6 @@ void SingleSlater<T>::formFock(){
 #else
   this->formPT();
 #endif
-  cout << "HERE TCS" << endl;
   if(this->Ref_ == TCS) this->basisset_->resetMapSh2Bf();
   if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
   if(this->Ref_ == TCS) {
@@ -74,7 +71,6 @@ void SingleSlater<T>::formFock(){
     this->basisset_->makeMapSh2Bf(this->nTCS_);
   }
 
-  cout << "HERE TCS" << endl;
   this->fockA_->setZero();
   if(this->Ref_ != TCS) fockA_->real()+=(*this->aointegrals_->oneE_);
   else {

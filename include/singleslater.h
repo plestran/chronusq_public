@@ -116,6 +116,7 @@ class SingleSlater {
   void formX();
   void formNO();
   void diagFock();
+  void mixOrbitalsSCF();
   void evalConver();
 
   double denTol_;

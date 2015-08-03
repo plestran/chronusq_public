@@ -102,7 +102,6 @@ void SingleSlater<double>::diagFock(){
   char UPLO = 'U';
   auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
 
-  cout << "HERE SCF 1" << endl;
   RealMap X(this->XMem_,NTCSxNBASIS,NTCSxNBASIS);
   RealMap POldAlpha(this->POldAlphaMem_,NTCSxNBASIS,NTCSxNBASIS);
   RealMap FpAlpha(this->FpAlphaMem_,NTCSxNBASIS,NTCSxNBASIS);
@@ -112,7 +111,6 @@ void SingleSlater<double>::diagFock(){
     new (&POldBeta)  RealMap(this->POldBetaMem_, NTCSxNBASIS,NTCSxNBASIS);
     new (&FpBeta)    RealMap(this->FpBetaMem_,NTCSxNBASIS,NTCSxNBASIS);
   }
-  cout << "HERE SCF 1" << endl;
 
 
   if(this->Ref_ == CUHF){
@@ -144,10 +142,8 @@ void SingleSlater<double>::diagFock(){
     if(!this->isClosedShell) (*this->fockB_) -= Lambda;
   }
 
-  cout << "HERE SCF 1" << endl;
   POldAlpha = (*this->densityA_);
   if(!this->isClosedShell && this->Ref_ != TCS) POldBeta = (*this->densityB_);
-  cout << "HERE SCF 1" << endl;
 
   FpAlpha = X.transpose() * (*this->fockA_) * X;
   dsyev_(&JOBZ,&UPLO,&NTCSxNBASIS,this->FpAlphaMem_,&NTCSxNBASIS,this->epsA_->data(),
@@ -155,12 +151,6 @@ void SingleSlater<double>::diagFock(){
   if(INFO != 0) CErr("DSYEV Failed Fock Alpha",this->fileio_->out);
   FpAlpha.transposeInPlace(); // bc row major
   (*this->moA_) = X * FpAlpha;
-  cout << "HERE SCF 1" << endl;
-  if(this->Ref_ == TCS){
-//  RealMap GenOverlap(this->SMem_,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
-//  prettyPrint(cout,this->moA_->adjoint() * GenOverlap * (*this->moA_),"Meteric Overlap");
-//  CErr();
-  }
 
   if(!this->isClosedShell && this->Ref_ != TCS){
     FpBeta = X.transpose() * (*this->fockB_) * X;
@@ -169,17 +159,6 @@ void SingleSlater<double>::diagFock(){
     if(INFO != 0) CErr("DSYEV Failed Fock Beta",this->fileio_->out);
     FpBeta.transposeInPlace(); // bc row major
     (*this->moB_) = X * FpBeta;
-  }
-  if(this->Ref_ != TCS && this->Ref_ != CUHF){
-    prettyPrint(cout,*this->epsA_,"Alpha Epsilon");
-    prettyPrint(cout,*this->moA_,"Alpha MO");
-    if(!this->isClosedShell){
-      prettyPrint(cout,*this->epsB_,"Beta Epsilon");
-      prettyPrint(cout,*this->moB_,"Beta MO");
-    }
-  } else if(this->Ref_ == TCS) {
-    prettyPrint(cout,*this->epsA_,"Epsilon");
-    prettyPrintTCSOD(cout,*this->moA_,"MO");
   }
 
   
@@ -212,6 +191,18 @@ void SingleSlater<double>::evalConver(){
   this->isConverged = (PAlphaRMS < this->denTol_) && (std::pow(EDelta,2) < this->eneTol_);
   if(!this->isClosedShell)
     this->isConverged = this->isConverged && (PBetaRMS < this->denTol_);
+}
+
+template<>
+void SingleSlater<double>::mixOrbitalsSCF(){
+  if(this->Ref_ == TCS){
+    Eigen::VectorXd HOMO = this->moA_->col(this->nAE_+this->nBE_-1);
+    Eigen::VectorXd LUMO = this->moA_->col(this->nTCS_*this->nBasis_-1);
+    cout << HOMO << endl << endl << LUMO << endl << endl;
+    this->moA_->col(this->nAE_+this->nBE_-1) = std::sqrt(0.5) * (HOMO + LUMO);
+//  this->moA_->col(this->nAE_+this->nBE_) =   std::sqrt(0.5) * (HOMO - LUMO);
+    this->moA_->col(this->nTCS_*this->nBasis_-1) = std::sqrt(0.5) * (HOMO - LUMO);
+  }
 }
 
 } // namespace ChronusQ

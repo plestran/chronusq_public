@@ -40,8 +40,6 @@ void SingleSlater<double>::placeAtmDen(std::vector<int> atomIndex, SingleSlater<
   for(auto iAtm : atomIndex){
     auto iBfSt = this->basisset_->mapCen2Bf(iAtm)[0];
     auto iSize = this->basisset_->mapCen2Bf(iAtm)[1]; 
-    cout << "LITTE DENSITY A" << endl << (*hfA.densityA_) << endl << endl;
-    cout << "LITTE DENSITY B" << endl << (*hfA.densityB_) << endl << endl;
     if(this->Ref_ != TCS){
 /*
       this->densityA_->block(iBfSt,iBfSt,iSize,iSize)= (*hfA.densityA_);
@@ -89,8 +87,6 @@ void SingleSlater<double>::scaleDen(){
     int nE = this->molecule_->nTotalE();
     (*this->densityA_) *= (double)this->nAE_/(double)nE ;
     (*this->densityB_) *= (double)this->nBE_/(double)nE ;
-    prettyPrint(cout,(*this->densityA_),"DENSITY A");
-    prettyPrint(cout,(*this->densityB_),"DENSITY B");
   } else if(this->Ref_ == TCS) {
     int nE = this->molecule_->nTotalE();
     for(auto i = 0; i < this->nTCS_*this->nBasis_; i += 2)
@@ -98,8 +94,23 @@ void SingleSlater<double>::scaleDen(){
       (*this->densityA_)(i,j)      *= (double)this->nAE_/(double)nE ;
       (*this->densityA_)(i+1,j+1)  *= (double)this->nBE_/(double)nE ;
     }
+/*
+    double theta = math.pi / 8.0;
+    double c = std::cos(theta);
+    double s = std::sin(theta);
+    for(auto i = 0; i < this->nTCS_*this->nBasis_; i += 2)
+    for(auto j = 0; j < this->nTCS_*this->nBasis_; j += 2){
+      double Paa = (*this->densityA_)(i,j);
+      double Pbb = (*this->densityA_)(i+1,j+1);
+      (*this->densityA_)(i,j)     = c*c*Paa + s*s*Pbb;
+      (*this->densityA_)(i+1,j+1) = c*c*Pbb + s*s*Paa;
+      (*this->densityA_)(i+1,j)   = c*s*(Paa - Pbb);
+      (*this->densityA_)(i,j+1)   = c*s*(Paa - Pbb);
+     
+    }
+*/
+    
 //  (*this->densityA_) *= (double)(this->nAE_+this->nBE_)/(double)nE ;
-    prettyPrintTCS(cout,(*this->densityA_),"DENSITY");
   }
 //CErr();
 }; // SingleSlater::scaleDen [T=double]

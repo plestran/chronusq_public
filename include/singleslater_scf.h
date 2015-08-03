@@ -133,36 +133,24 @@ void SingleSlater<T>::SCF(){
   if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
   int iter; 
 
-  cout << "HERE SCF" << endl;
   this->initSCFMem();
-  cout << "HERE SCF" << endl;
   this->formX();
-  cout << "HERE SCF" << endl;
   for (iter = 0; iter < this->maxSCFIter_; iter++){
     this->fileio_->out << endl << endl << bannerTop <<endl;  
     this->fileio_->out << "SCF iteration:"<< iter+1 <<endl;  
     this->fileio_->out << bannerEnd <<endl;  
 
     if(this->Ref_ == CUHF) this->formNO();
-  cout << "HERE SCF Before DF" << endl;
     this->diagFock();
-  cout << "HERE SCF Before FD" << endl;
+    if(iter == 0) this->mixOrbitalsSCF();
     this->formDensity();
- // if(this->Ref_==UHF || this->Ref_==TCS)CErr();
-  cout << "HERE SCF Before FF" << endl;
     this->formFock();
-  cout << "HERE SCF Before GDC" << endl;
- // this->computeEnergy();
- // if(this->Ref_==UHF || this->Ref_==TCS)CErr();
 
     if(this->Ref_ != CUHF){ // DIIS NYI for CUHF
       this->GenDComm(iter);
-      cout << "HERE BEFORE CPY FOCK" << endl;
       this->CpyFock(iter);   
-  cout << "HERE SCF Before DIIS" << endl;
       if(iter % (this->lenCoeff_-1) == (this->lenCoeff_-2) && iter != 0) this->CDIIS();
     }
-    cout << "HERE SCF Before EC" << endl;
     this->evalConver();
     if(this->isConverged) break;
 
@@ -185,6 +173,5 @@ void SingleSlater<T>::SCF(){
     this->fileio_->out << this->totalEnergy << "  Eh after  " << iter + 1 << "  SCF Iterations" << endl;
   }
   this->fileio_->out << bannerEnd <<endl;
-  if(this->Ref_==UHF || this->Ref_==TCS)CErr();
 }
 
