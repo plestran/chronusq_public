@@ -36,13 +36,13 @@ void SingleSlater<double>::CDIIS(){
   double *coef = new double[N];
   int    *iPiv = new int[N];
   int    NRHS = 1, INFO = -1;
-  int NBSq = this->nBasis_*this->nBasis_;
+  int NBSq = this->nBasis_*this->nBasis_*this->nTCS_*this->nTCS_;
   for(auto j = 0; j < (N-1); j++)
   for(auto k = 0; k <= j          ; k++){
-    RealMap EJA(this->ErrorAlphaMem_ + (j%(N-1))*NBSq,this->nBasis_,this->nBasis_);
-    RealMap EKA(this->ErrorAlphaMem_ + (k%(N-1))*NBSq,this->nBasis_,this->nBasis_);
+    RealMap EJA(this->ErrorAlphaMem_ + (j%(N-1))*NBSq,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
+    RealMap EKA(this->ErrorAlphaMem_ + (k%(N-1))*NBSq,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
     B(j,k) = -EJA.frobInner(EKA);
-    if(!this->isClosedShell){
+    if(!this->isClosedShell && this->Ref_ != TCS){
       RealMap EJB(this->ErrorBetaMem_ + (j%(N-1))*NBSq,this->nBasis_,this->nBasis_);
       RealMap EKB(this->ErrorBetaMem_ + (k%(N-1))*NBSq,this->nBasis_,this->nBasis_);
       B(j,k) += -EJB.frobInner(EKB);
@@ -58,11 +58,11 @@ void SingleSlater<double>::CDIIS(){
   coef[N-1]=-1.0;
   dgesv_(&N,&NRHS,B.data(),&N,iPiv,coef,&N,&INFO);
   this->fockA_->setZero();
-  if(!this->isClosedShell) this->fockB_->setZero();
+  if(!this->isClosedShell && this->Ref_ != TCS) this->fockB_->setZero();
   for(auto j = 0; j < N-1; j++) {
-    RealMap FA(this->FADIIS_ + (j%(N-1))*NBSq,this->nBasis_,this->nBasis_);
+    RealMap FA(this->FADIIS_ + (j%(N-1))*NBSq,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
     *this->fockA_ += coef[j]*FA;
-    if(!this->isClosedShell) {
+    if(!this->isClosedShell && this->Ref_ != TCS) {
       RealMap FB(this->FBDIIS_ + (j%(N-1))*NBSq,this->nBasis_,this->nBasis_);
       *this->fockB_ += coef[j]*FB;
     }
@@ -76,7 +76,7 @@ template<>
 void SingleSlater<double>::CpyFock(int iter){
   std::memcpy(this->FADIIS_+(iter % (this->lenCoeff_-1)) * this->lenF_,this->fockA_->data(),
               this->lenF_ * sizeof(double));
-  if(!this->isClosedShell)
+  if(!this->isClosedShell && this->Ref_ != TCS)
     std::memcpy(this->FBDIIS_ + (iter % (this->lenCoeff_-1)) * this->lenF_,
                 this->fockB_->data(),this->lenF_ * sizeof(double));
 } // CpyFock
@@ -84,11 +84,17 @@ void SingleSlater<double>::CpyFock(int iter){
 template<>
 void SingleSlater<double>::GenDComm(int iter){
   RealMap ErrA(this->ErrorAlphaMem_ + (iter % (this->lenCoeff_-1)) * this->lenF_,
-               this->nBasis_,this->nBasis_);
+               this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
 
-  ErrA = (*this->fockA_) * (*this->densityA_) * (*this->aointegrals_->overlap_);
-  ErrA -= (*this->aointegrals_->overlap_) * (*this->densityA_) * (*this->fockA_);
-  if(!this->isClosedShell){
+  if(this->Ref_ == TCS){
+    RealMap GenOverlap(this->SMem_,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
+    ErrA = (*this->fockA_) * (*this->densityA_) * (GenOverlap);
+    ErrA -= (GenOverlap) * (*this->densityA_) * (*this->fockA_);
+  } else {
+    ErrA = (*this->fockA_) * (*this->densityA_) * (*this->aointegrals_->overlap_);
+    ErrA -= (*this->aointegrals_->overlap_) * (*this->densityA_) * (*this->fockA_);
+  }
+  if(!this->isClosedShell && this->Ref_ != TCS){
     RealMap ErrB(this->ErrorBetaMem_ + (iter % (this->lenCoeff_-1)) * this->lenF_,
                  this->nBasis_,this->nBasis_);
 

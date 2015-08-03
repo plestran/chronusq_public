@@ -34,11 +34,25 @@ void SingleSlater<T>::formDensity(){
 
   if(this->Ref_ == TCS){
     auto nOcc = this->nOccA_ + this->nOccB_;
-
+    cout << "nOCC in FD" << nOcc << endl;
+/*
     (*this->densityA_)= 
       this->moA_->block(0,0,this->nTCS_*this->nBasis_,nOcc)*
       this->moA_->block(0,0,this->nTCS_*this->nBasis_,nOcc).adjoint();
-
+*/
+    for(auto i = 0; i < this->nTCS_*this->nBasis_; i+=2)
+    for(auto j = 0; j < this->nTCS_*this->nBasis_; j+=2){
+      (*this->densityA_)(i,j)     = 0.0;
+      (*this->densityA_)(i+1,j+1) = 0.0;
+      (*this->densityA_)(i+1,j)   = 0.0;
+      (*this->densityA_)(i,j+1)   = 0.0;
+      for(auto k = 0; k < nOcc; k++){
+        (*this->densityA_)(i,j)     += (*this->moA_)(i,k)   * (*this->moA_)(j,k);
+        (*this->densityA_)(i+1,j+1) += (*this->moA_)(i+1,k) * (*this->moA_)(j+1,k);
+      //(*this->densityA_)(i+1,j)   += (*this->moA_)(i+1,k) * (*this->moA_)(j,k);
+      //(*this->densityA_)(i,j+1)   += (*this->moA_)(i,k)   * (*this->moA_)(j+1,k);
+      }
+    }
   } else {
     (*this->densityA_) = 
       this->moA_->block(0,0,this->nBasis_,this->nOccA_)*
@@ -51,8 +65,11 @@ void SingleSlater<T>::formDensity(){
     }
   }
   if(this->controls_->printLevel>=2) {
-    prettyPrint(this->fileio_->out,(*this->densityA_),"Alpha Density");
-    if(this->Ref_ != RHF) prettyPrint(this->fileio_->out,(*this->densityB_),"Beta Density");
+    if(this->Ref_ != TCS) {
+      prettyPrint(this->fileio_->out,(*this->densityA_),"Alpha Density");
+      if(this->Ref_ != RHF) prettyPrint(this->fileio_->out,(*this->densityB_),"Beta Density");
+    } else
+      prettyPrintTCS(this->fileio_->out,(*this->densityA_),"Density");
   };
   this->haveDensity = true;
 }

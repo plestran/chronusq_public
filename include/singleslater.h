@@ -92,6 +92,7 @@ class SingleSlater {
   int lenScr_;
 
   T *SCF_SCR;
+  T *SMem_;
   T *XMem_;
   T *FpAlphaMem_;
   T *FpBetaMem_;

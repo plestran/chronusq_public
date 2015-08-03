@@ -98,6 +98,7 @@ void SingleSlater<double>::scaleDen(){
       (*this->densityA_)(i,j)      *= (double)this->nAE_/(double)nE ;
       (*this->densityA_)(i+1,j+1)  *= (double)this->nBE_/(double)nE ;
     }
+//  (*this->densityA_) *= (double)(this->nAE_+this->nBE_)/(double)nE ;
     prettyPrintTCS(cout,(*this->densityA_),"DENSITY");
   }
 //CErr();

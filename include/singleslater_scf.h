@@ -44,10 +44,12 @@ void SingleSlater<T>::initMemLen(){
   this->lenScr_ += this->lenCoeff_; // Storage for CDIIS Coefficients
   this->lenScr_ += this->lenB_;     // Storage for CDIIS Metric
   this->lenScr_ += 2*(this->lenCoeff_ - 1) * this->lenF_; // CDIIS Commutator (A) array
-  if(!this->isClosedShell) {
+  if(!this->isClosedShell && this->Ref_ != TCS) {
     this->lenScr_ += this->lenF_;     // Storage for Beta Fock
     this->lenScr_ += this->lenP_;     // Storage for Beta Density
     this->lenScr_ += 2*(this->lenCoeff_ - 1) * this->lenF_; // CDIIS Commutator (B) array
+  } else if(this->Ref_ == TCS) {
+    this->lenScr_ += this->lenX_; // Storage for General Overlap
   }
   if(this->Ref_ == CUHF) {
     this->lenScr_ += this->lenXp_; // Storage for X^(0.5)
@@ -65,6 +67,7 @@ template <typename T>
 void SingleSlater<T>::initSCFPtr(){
   this->SCF_SCR        = NULL;
   this->XMem_          = NULL;
+  this->SMem_          = NULL;
   this->FpAlphaMem_    = NULL;
   this->FpBetaMem_     = NULL;
   this->POldAlphaMem_  = NULL;
@@ -92,14 +95,19 @@ void SingleSlater<T>::initSCFMem(){
   this->SCF_SCR = new double[this->lenScr_];
   std::memset(this->SCF_SCR,0.0,this->lenScr_*sizeof(double));
 
-  this->XMem_          = this->SCF_SCR;
+  if(this->Ref_ == TCS){
+    this->SMem_        = this->SCF_SCR;
+    this->XMem_        = this->SMem_ + this->lenX_;
+  } else {
+    this->XMem_        = this->SCF_SCR;
+  }
   this->FpAlphaMem_    = this->XMem_          + this->lenX_;
   this->POldAlphaMem_  = this->FpAlphaMem_    + this->lenF_;
   this->ErrorAlphaMem_ = this->POldAlphaMem_  + this->lenP_;
   this->FADIIS_        = this->ErrorAlphaMem_ + this->lenF_*(this->lenCoeff_ -1);
   LAST_FOR_SECTION     = this->FADIIS_;
   LEN_LAST_FOR_SECTION = this->lenF_*(this->lenCoeff_ -1);
-  if(!this->isClosedShell){
+  if(!this->isClosedShell && this->Ref_ != TCS){
     this->FpBetaMem_     = LAST_FOR_SECTION + LEN_LAST_FOR_SECTION;
     this->POldBetaMem_   = this->FpBetaMem_    + this->lenF_;
     this->ErrorBetaMem_  = this->POldBetaMem_  + this->lenP_;
@@ -125,23 +133,36 @@ void SingleSlater<T>::SCF(){
   if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
   int iter; 
 
+  cout << "HERE SCF" << endl;
   this->initSCFMem();
+  cout << "HERE SCF" << endl;
   this->formX();
+  cout << "HERE SCF" << endl;
   for (iter = 0; iter < this->maxSCFIter_; iter++){
     this->fileio_->out << endl << endl << bannerTop <<endl;  
     this->fileio_->out << "SCF iteration:"<< iter+1 <<endl;  
     this->fileio_->out << bannerEnd <<endl;  
 
     if(this->Ref_ == CUHF) this->formNO();
+  cout << "HERE SCF Before DF" << endl;
     this->diagFock();
+  cout << "HERE SCF Before FD" << endl;
     this->formDensity();
+ // if(this->Ref_==UHF || this->Ref_==TCS)CErr();
+  cout << "HERE SCF Before FF" << endl;
     this->formFock();
+  cout << "HERE SCF Before GDC" << endl;
+ // this->computeEnergy();
+ // if(this->Ref_==UHF || this->Ref_==TCS)CErr();
 
     if(this->Ref_ != CUHF){ // DIIS NYI for CUHF
       this->GenDComm(iter);
+      cout << "HERE BEFORE CPY FOCK" << endl;
       this->CpyFock(iter);   
+  cout << "HERE SCF Before DIIS" << endl;
       if(iter % (this->lenCoeff_-1) == (this->lenCoeff_-2) && iter != 0) this->CDIIS();
     }
+    cout << "HERE SCF Before EC" << endl;
     this->evalConver();
     if(this->isConverged) break;
 
@@ -159,9 +180,11 @@ void SingleSlater<T>::SCF(){
     if(this->Ref_ == RHF)  this->fileio_->out << "RHF";
     if(this->Ref_ == UHF)  this->fileio_->out << "UHF";
     if(this->Ref_ == CUHF) this->fileio_->out << "CUHF";
+    if(this->Ref_ == TCS)  this->fileio_->out << "TCS";
     this->fileio_->out << ") = ";
     this->fileio_->out << this->totalEnergy << "  Eh after  " << iter + 1 << "  SCF Iterations" << endl;
   }
   this->fileio_->out << bannerEnd <<endl;
+  if(this->Ref_==UHF || this->Ref_==TCS)CErr();
 }
 
