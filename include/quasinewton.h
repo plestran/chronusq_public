@@ -416,8 +416,9 @@ template <typename T>
      *  All of the parameters are set based on the SDResponse object
      *  that is passed in. Currently, QuasiNewton knows about the
      *  following from SDResponse:
-     *   -  Configuration Interaction Singles (CIS)
-     *   -  Random Phase Approximation        (RPA)
+     *   -  Configuration Interaction Singles            (CIS)
+     *   -  Random Phase Approximation                   (RPA)
+     *   -  Particle-Particle Random Phase Approximation (pp-RPA)
      *   
      *  Currently, the following developments are under-way and
      *  QuasiNewton will know how to handle them soon enough

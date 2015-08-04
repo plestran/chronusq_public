@@ -162,6 +162,7 @@ public:
 
   // access to private data
   inline int nBasis() { return this->nBasis_;};
+  inline int nTCS()   { return this->nTCS_;};
   inline int nTT()     { return this->nTT_;};
   inline int nShell() { return this->nShell_;};
   inline int nAE()    { return this->nAE_;};

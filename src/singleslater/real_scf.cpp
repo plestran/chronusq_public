@@ -198,7 +198,6 @@ void SingleSlater<double>::mixOrbitalsSCF(){
   if(this->Ref_ == TCS){
     Eigen::VectorXd HOMO = this->moA_->col(this->nAE_+this->nBE_-1);
     Eigen::VectorXd LUMO = this->moA_->col(this->nTCS_*this->nBasis_-1);
-    cout << HOMO << endl << endl << LUMO << endl << endl;
     this->moA_->col(this->nAE_+this->nBE_-1) = std::sqrt(0.5) * (HOMO + LUMO);
 //  this->moA_->col(this->nAE_+this->nBE_) =   std::sqrt(0.5) * (HOMO - LUMO);
     this->moA_->col(this->nTCS_*this->nBasis_-1) = std::sqrt(0.5) * (HOMO - LUMO);

@@ -80,7 +80,6 @@ namespace ChronusQ{
               int n4    = this->basisSet_->shells(s4).size();
         
               // Schwartz and Density screening
-/*
               double shMax;
               if(RHF || doTCS){
                 shMax = std::max((*this->basisSet_->shBlkNormAlpha)(s1,s4),
@@ -107,7 +106,6 @@ namespace ChronusQ{
               }
   
               if(shMax < this->controls_->thresholdSchawrtz ) continue;
-*/
    
               const double* buff = engine.compute(
                 this->basisSet_->shells(s1),
@@ -163,27 +161,29 @@ namespace ChronusQ{
      
   }
   template<>
-  void AOIntegrals::multTwoEContractDirect(int nVec, bool RHF, bool doFock, bool do24,
-    const std::vector<RealMatrix> &XAlpha, std::vector<RealMatrix> &AXAlpha, 
+  void AOIntegrals::multTwoEContractDirect(int nVec, bool RHF, bool doFock, bool do24, 
+    bool doTCS, const std::vector<RealMatrix> &XAlpha, std::vector<RealMatrix> &AXAlpha, 
     const std::vector<RealMatrix> &XBeta, std::vector<RealMatrix> &AXBeta) {
 
     this->fileio_->out << "Contracting Directly with two-electron integrals" << endl;
   
+    int nTCS = 1;
+    if(doTCS) nTCS = 2;
     if(!this->haveSchwartz) this->computeSchwartz();
-    if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(1); 
+    if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(nTCS); 
     for(auto i = 0; i < nVec; i++) AXAlpha[i].setZero();
-    if(!RHF)
+    if(!RHF && !doTCS)
       for(auto i = 0; i < nVec; i++) AXBeta[i].setZero();
     int nRHF;
-    if(RHF) nRHF = 1;
+    if(RHF || doTCS) nRHF = 1;
     else    nRHF = 2;
   std::vector<std::vector<std::vector<RealMatrix>>> G(nRHF,
     std::vector<std::vector<RealMatrix>>(nVec,
       std::vector<RealMatrix>(this->controls_->nthreads,
-        RealMatrix::Zero(this->nBasis_,this->nBasis_))));
+        RealMatrix::Zero(nTCS*this->nBasis_,nTCS*this->nBasis_))));
   
     std::vector<RealMatrix> XTotal;
-    if(!RHF){
+    if(!RHF && !doTCS){
       for(auto iX = 0; iX < nVec; iX++){
         XTotal.push_back(XAlpha[iX] + XBeta[iX]);
         if(!doFock)
@@ -201,9 +201,9 @@ namespace ChronusQ{
     std::vector<RealMatrix> betaShBlk;
     auto start = std::chrono::high_resolution_clock::now();
     for(auto i = 0; i < nVec; i++){
-      this->basisSet_->computeShBlkNorm(!RHF,1,&XAlpha[i],&XBeta[i]);
+      this->basisSet_->computeShBlkNorm(!RHF && !doTCS,nTCS,&XAlpha[i],&XBeta[i]);
       alphaShBlk.push_back(*this->basisSet_->shBlkNormAlpha);
-      if(!RHF)
+      if(!RHF && !doTCS)
         betaShBlk.push_back(*this->basisSet_->shBlkNormBeta);
     }
     auto finish = std::chrono::high_resolution_clock::now();
@@ -232,7 +232,7 @@ namespace ChronusQ{
               double shMax;
               for(auto k = 0; k < nVec; k++){
                 double tmpMax = 0;
-                if(RHF){
+                if(RHF || doTCS){
                   tmpMax = std::max(alphaShBlk[k](s1,s4), std::max(alphaShBlk[k](s2,s4),
                            std::max(alphaShBlk[k](s3,s4), std::max(alphaShBlk[k](s1,s3),
                            std::max(alphaShBlk[k](s2,s3), alphaShBlk[k](s1,s2)))))) * 
@@ -266,10 +266,13 @@ namespace ChronusQ{
                 if(RHF && doFock) 
                   this->Restricted34Contract(G[0][iX][thread_id],XAlpha[iX],n1,n2,n3,n4,
                     bf1_s,bf2_s,bf3_s,bf4_s,buff,s1234_deg);
-                else if(!do24)
+                else if(!do24 && !doTCS)
                   this->UnRestricted34Contract(G[0][iX][thread_id],XAlpha[iX],
                     G[1][iX][thread_id],XBeta[iX],XTotal[iX],n1,n2,n3,n4,bf1_s,bf2_s,bf3_s,
                     bf4_s,buff,s1234_deg);
+                else if(!do24)
+                  this->Spinor34Contract(G[0][iX][thread_id],XAlpha[iX],n1,n2,n3,n4,
+                    bf1_s,bf2_s,bf3_s,bf4_s,buff,s1234_deg);
                 else
                   this->General24CouContract(G[0][iX][thread_id],XAlpha[iX],n1,n2,n3,n4,
                     bf1_s,bf2_s,bf3_s,bf4_s,buff,s1234_deg);
@@ -293,7 +296,7 @@ namespace ChronusQ{
     for(int k = 0; k < nVec; k++)
     for(int i = 0; i < this->controls_->nthreads; i++) 
       AXAlpha[k] += G[0][k][i];
-    if(!RHF)
+    if(!RHF && !doTCS)
       for(int k = 0; k < nVec; k++)
       for(int i = 0; i < this->controls_->nthreads; i++) 
         AXBeta[k] += G[1][k][i];
@@ -301,7 +304,7 @@ namespace ChronusQ{
     double fact = 0.25;
     if(do24) fact *= 0.5;
     for(auto k = 0; k < nVec; k++) AXAlpha[k] *= fact;
-    if(!RHF) for(auto k = 0; k < nVec; k++) AXBeta[k] *= fact;
+    if(!RHF && !doTCS) for(auto k = 0; k < nVec; k++) AXBeta[k] *= fact;
     finish = std::chrono::high_resolution_clock::now();
     if(doFock) this->PTD = finish - start;
      

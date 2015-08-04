@@ -85,7 +85,6 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   //MOIntegrals *moIntegrals = new MOIntegrals();
   //moIntegrals->iniMOIntegrals(molecule,basisset,fileIO,controls,aointegrals,hartreeFock);
   else fileIO->out << "**Skipping SCF Optimization**" << endl; 
-  cout << *hartreeFock->moA() << endl;
   std::shared_ptr<MOIntegrals> moIntegrals = std::make_shared<MOIntegrals>();
   hartreeFock->computeMultipole();
   if(controls->doSDR) {

@@ -212,7 +212,7 @@ public:
   template<typename T> void twoEContractN4(bool,bool,const T &,T &,const T &, T &);
   template<typename T> void twoEContractDF(bool,bool,const T &,T &,const T &, T &);
   template<typename T>
-    void multTwoEContractDirect(int, bool,bool,bool,const std::vector<T> &,std::vector<T> &,
+    void multTwoEContractDirect(int, bool,bool,bool,bool,const std::vector<T> &,std::vector<T> &,
                                 const std::vector<T> &,std::vector<T> &);
   template<typename T> 
     void multTwoEContractN4(int, bool,bool,const std::vector<T> &,std::vector<T> &,

@@ -53,7 +53,6 @@ namespace ChronusQ {
     this->guessR_.reset();
     if(this->doRestart_ && (this->symmetrizedTrial_ || !this->isHermetian_)) 
       this->guessL_.reset();
-
     // Symmetrize the trial vectors viz Kauczor et al. JCTC 7 (2010)
     if(!this->doRestart_ && this->symmetrizedTrial_){
       TrialVecR.block(this->N_/2,0,this->N_/2,this->nGuess_)
@@ -73,6 +72,7 @@ namespace ChronusQ {
  
       // Perform the Linear Transformation
       this->linearTrans(NOld,NNew);
+
       // Perform full projection
       this->fullProjection(NTrial);
       // Build Supermatricies if symmetrized vectors are used

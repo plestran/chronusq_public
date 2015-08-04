@@ -40,6 +40,7 @@
 namespace ChronusQ {
 class SDResponse {
   int       nBasis_;
+  int       nTCS_;
   int       Ref_;
   int       nSek_;
   int       nGuess_;
@@ -66,6 +67,15 @@ class SDResponse {
   int       nOBOB_;      // NOB * NOB
   int       nVAVB_;      // NVA * NVB
   int       nOAOB_;      // NOA * NOB
+  int       nO_;         // NOA + NOB
+  int       nV_;         // NVA + NVB
+  int       nOV_;        // NO * NV
+  int       nVV_SLT_;    // NV * (NV - 1) / 2
+  int       nVV_LT_;     // NV * (NV + 1) / 2
+  int       nVV_;        // NV * NV
+  int       nOO_SLT_;    // NO * (NO - 1) / 2
+  int       nOO_LT_;     // NO * (NO + 1) / 2
+  int       nOO_;        // NO * NO
 
   int       nSingleDim_; // Single dimension of response matrix
   double    rMu_;
