@@ -107,6 +107,5 @@ void SingleSlater<T>::formFock(){
       prettyPrintTCS(this->fileio_->out,(*this->fockA_),"Fock");
     }
   };
-  if(this->nTCS_==2) CErr();
 };
 

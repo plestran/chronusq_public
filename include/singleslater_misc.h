@@ -34,11 +34,10 @@ void SingleSlater<T>::formDensity(){
 
   if(this->Ref_ == TCS){
     auto nOcc = this->nOccA_ + this->nOccB_;
-/*
     (*this->densityA_)= 
       this->moA_->block(0,0,this->nTCS_*this->nBasis_,nOcc)*
       this->moA_->block(0,0,this->nTCS_*this->nBasis_,nOcc).adjoint();
-*/
+/*
     for(auto i = 0; i < this->nTCS_*this->nBasis_; i+=2)
     for(auto j = 0; j < this->nTCS_*this->nBasis_; j+=2){
       (*this->densityA_)(i,j)     = 0.0;
@@ -52,6 +51,7 @@ void SingleSlater<T>::formDensity(){
         (*this->densityA_)(i,j+1)   += (*this->moA_)(i,k)   * (*this->moA_)(j+1,k);
       }
     }
+*/
   } else {
     (*this->densityA_) = 
       this->moA_->block(0,0,this->nBasis_,this->nOccA_)*
@@ -77,6 +77,7 @@ void SingleSlater<T>::formDensity(){
  ************************/
 template<typename T>
 void SingleSlater<T>::computeEnergy(){
+/*
   if(this->Ref_ != TCS)
     this->energyOneE = (*this->aointegrals_->oneE_).frobInner(this->densityA_->conjugate());
   else {
@@ -88,6 +89,8 @@ void SingleSlater<T>::computeEnergy(){
         this->densityA_->conjugate()(I+1,J+1)*(*this->aointegrals_->oneE_)(i,j);
     } 
   }
+*/
+  this->energyOneE = (*this->aointegrals_->oneE_).frobInner(this->densityA_->conjugate());
   this->energyTwoE = 0.5*(*this->PTA_).frobInner(this->densityA_->conjugate());
   if(!this->isClosedShell && this->Ref_ != TCS){
     this->energyOneE += (*this->aointegrals_->oneE_).frobInner(this->densityB_->conjugate());

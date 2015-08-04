@@ -48,9 +48,7 @@ void SingleSlater<T>::initMemLen(){
     this->lenScr_ += this->lenF_;     // Storage for Beta Fock
     this->lenScr_ += this->lenP_;     // Storage for Beta Density
     this->lenScr_ += 2*(this->lenCoeff_ - 1) * this->lenF_; // CDIIS Commutator (B) array
-  } else if(this->Ref_ == TCS) {
-    this->lenScr_ += this->lenX_; // Storage for General Overlap
-  }
+  } 
   if(this->Ref_ == CUHF) {
     this->lenScr_ += this->lenXp_; // Storage for X^(0.5)
     this->lenScr_ += this->lenOccNum_; // Storage for Occupation Numbers (NOs)
@@ -67,7 +65,6 @@ template <typename T>
 void SingleSlater<T>::initSCFPtr(){
   this->SCF_SCR        = NULL;
   this->XMem_          = NULL;
-  this->SMem_          = NULL;
   this->FpAlphaMem_    = NULL;
   this->FpBetaMem_     = NULL;
   this->POldAlphaMem_  = NULL;
@@ -95,12 +92,7 @@ void SingleSlater<T>::initSCFMem(){
   this->SCF_SCR = new double[this->lenScr_];
   std::memset(this->SCF_SCR,0.0,this->lenScr_*sizeof(double));
 
-  if(this->Ref_ == TCS){
-    this->SMem_        = this->SCF_SCR;
-    this->XMem_        = this->SMem_ + this->lenX_;
-  } else {
-    this->XMem_        = this->SCF_SCR;
-  }
+  this->XMem_          = this->SCF_SCR;
   this->FpAlphaMem_    = this->XMem_          + this->lenX_;
   this->POldAlphaMem_  = this->FpAlphaMem_    + this->lenF_;
   this->ErrorAlphaMem_ = this->POldAlphaMem_  + this->lenP_;

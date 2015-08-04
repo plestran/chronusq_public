@@ -50,6 +50,7 @@ void SingleSlater<double>::printDensityInfo(double PAlphaRMS, double PBetaRMS, d
 template<>
 void SingleSlater<double>::formX(){
   RealMap X(this->XMem_,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
+/*
   if(this->Ref_ != TCS)
     X = (*this->aointegrals_->overlap_).pow(-0.5); // Make this more efficient... FIXME
   else {
@@ -65,6 +66,8 @@ void SingleSlater<double>::formX(){
   //X = OTmp.pow(-0.5);
     X = GenOverlap.pow(-0.5);
   }
+*/
+  X = (*this->aointegrals_->overlap_).pow(-0.5); // Make this more efficient... FIXME
 
   if(this->Ref_ == CUHF){
     RealMap Xp(this->XpMem_,this->nBasis_,this->nBasis_);
