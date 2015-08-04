@@ -104,6 +104,7 @@ public:
     PPRPA,
     PPATDA,
     PPCTDA,
+    STAB,
     CCSD
   };
  

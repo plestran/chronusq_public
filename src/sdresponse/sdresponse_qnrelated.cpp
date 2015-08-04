@@ -49,9 +49,9 @@ void SDResponse::formGuess(){
       new RealMatrix(this->nSingleDim_,this->nGuess_)
     ); 
   int nRPA = 1;
-  if(this->iMeth_==RPA) nRPA *= 2;
+  if(this->iMeth_==RPA || this->iMeth_ == STAB) nRPA *= 2;
   int nCPY;
-  if(this->iMeth_ == CIS || this->iMeth_ == RPA) nCPY = this->nSingleDim_ / nRPA;
+  if(this->iMeth_ == CIS || this->iMeth_ == RPA || this->iMeth_ == STAB) nCPY = this->nSingleDim_ / nRPA;
   else if(this->iMeth_ == PPRPA){
     if(this->iPPRPA_ == 0)
       nCPY = this->nVAVA_SLT_;
@@ -85,7 +85,7 @@ void SDResponse::getDiag(){
   this->rmDiag_ = std::unique_ptr<RealCMMatrix>(new RealCMMatrix(nSingleDim_,1)); 
 
   if(this->Ref_ == SingleSlater<double>::TCS) {
-    if(this->iMeth_ == RPA || this->iMeth_ == CIS){
+    if(this->iMeth_ == RPA || this->iMeth_ == CIS || this->iMeth_ == STAB){
       for(auto a = 0; a < this->nV_; a++)
       for(auto i = 0; i < this->nO_; i++){
         auto ia = a*this->nO_ + i;
@@ -93,12 +93,12 @@ void SDResponse::getDiag(){
         auto ea = (*this->singleSlater_->epsA())(a+this->nO_);
         (*this->rmDiag_)(ia,0) = ea - ei;
       }
-      if(this->iMeth_ == RPA)
+      if(this->iMeth_ == RPA || this->iMeth_ == STAB)
         this->rmDiag_->block(nSingleDim_/2,0,nSingleDim_/2,1)
           = this->rmDiag_->block(0,0,nSingleDim_/2,1);
     }
   } else {
-    if(this->iMeth_ == RPA || this->iMeth_ == CIS){
+    if(this->iMeth_ == RPA || this->iMeth_ == CIS || this->iMeth_ == STAB){
       for(auto aAlpha = 0; aAlpha < this->nVA_; aAlpha++)
       for(auto iAlpha = 0; iAlpha < this->nOA_; iAlpha++){
         auto iaAlpha = aAlpha*this->nOA_ + iAlpha; 
@@ -117,7 +117,7 @@ void SDResponse::getDiag(){
           (*this->rmDiag_)(iaBeta,0) = eaBeta - eiBeta;
         }
       }
-      if(this->iMeth_ == RPA)
+      if(this->iMeth_ == RPA || this->iMeth_ == STAB)
         this->rmDiag_->block(nSingleDim_/2,0,nSingleDim_/2,1)
           = this->rmDiag_->block(0,0,nSingleDim_/2,1);
     } else if(this->iMeth_ == PPRPA || this->iMeth_ == PPATDA || this->iMeth_ == PPCTDA){

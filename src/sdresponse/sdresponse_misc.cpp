@@ -27,7 +27,7 @@
 using ChronusQ::SDResponse;
 
 void SDResponse::formAOTDen(const RealVecMap &TMOV, RealMatrix &TAOA, RealMatrix &TAOB){
-  bool doVOOV = (this->iMeth_ == CIS || this->iMeth_ == RPA); 
+  bool doVOOV = (this->iMeth_ == CIS || this->iMeth_ == RPA || this->iMeth_ == STAB); 
   bool doVVOO = (this->iMeth_ == PPRPA || this->iMeth_ == PPATDA || this->iMeth_ == PPCTDA);
 
   auto NTCSxNBASIS = this->nTCS_ * this->nBasis_;
@@ -49,7 +49,7 @@ void SDResponse::formAOTDen(const RealVecMap &TMOV, RealMatrix &TAOA, RealMatrix
 } //formAOTDen
 
 void SDResponse::formMOTDen(RealVecMap &TMOV, const RealMatrix &TAOA, const RealMatrix &TAOB){
-  bool doVOOV = (this->iMeth_ == CIS || this->iMeth_ == RPA); 
+  bool doVOOV = (this->iMeth_ == CIS || this->iMeth_ == RPA || this->iMeth_ == STAB); 
   bool doVVOO = (this->iMeth_ == PPRPA || this->iMeth_ == PPATDA || this->iMeth_ == PPCTDA);
   auto NTCSxNBASIS = this->nTCS_ * this->nBasis_;
 
@@ -78,18 +78,18 @@ void SDResponse::placeVOOV(const RealVecMap &TMOV, RealMatrix &TMOA, RealMatrix 
     for(auto a = this->nO_, ia = 0; a < this->nTCS_*this->nBasis_; a++)
     for(auto i = 0         ; i < this->nO_; i++, ia++){
       TMOA(a,i) = TMOV(ia);
-      if(this->iMeth_ == RPA) TMOA(i,a) = TMOV(ia+iOff);
+      if(this->iMeth_ == RPA || this->iMeth_ == STAB) TMOA(i,a) = TMOV(ia+iOff);
     }
   } else {
     for(auto a = this->nOA_, ia = 0; a < this->nBasis_; a++)
     for(auto i = 0         ; i < this->nOA_; i++, ia++){
       TMOA(a,i) = TMOV(ia);
-      if(this->iMeth_ == RPA) TMOA(i,a) = TMOV(ia+iOff);
+      if(this->iMeth_ == RPA || this->iMeth_ == STAB) TMOA(i,a) = TMOV(ia+iOff);
     }
     for(auto a = this->nOB_, ia = this->nOAVA_; a < this->nBasis_; a++)
     for(auto i = 0         ; i < this->nOB_; i++, ia++){
       TMOB(a,i) = TMOV(ia);
-      if(this->iMeth_ == RPA) TMOB(i,a) = TMOV(ia+iOff);
+      if(this->iMeth_ == RPA || this->iMeth_ == STAB) TMOB(i,a) = TMOV(ia+iOff);
     }
   }
 } //placeVOOV
@@ -154,18 +154,18 @@ void SDResponse::retrvVOOV(RealVecMap &TMOV, const RealMatrix &TMOA, const RealM
     for(auto a = this->nO_, ia = 0; a < this->nTCS_*this->nBasis_; a++)
     for(auto i = 0         ; i < this->nO_; i++, ia++){
       TMOV(ia) = TMOA(a,i);
-      if(this->iMeth_ == RPA) TMOV(ia+iOff) = -TMOA(i,a);
+      if(this->iMeth_ == RPA || this->iMeth_ == STAB) TMOV(ia+iOff) = -TMOA(i,a);
     }
   } else {
     for(auto a = this->nOA_, ia = 0; a < this->nBasis_; a++)
     for(auto i = 0         ; i < this->nOA_; i++, ia++){
       TMOV(ia) = TMOA(a,i);
-      if(this->iMeth_ == RPA) TMOV(ia+iOff) = -TMOA(i,a);
+      if(this->iMeth_ == RPA || this->iMeth_ == STAB) TMOV(ia+iOff) = -TMOA(i,a);
     }
     for(auto a = this->nOB_, ia = this->nOAVA_; a < this->nBasis_; a++)
     for(auto i = 0         ; i < this->nOB_; i++, ia++){
       TMOV(ia) = TMOB(a,i);
-      if(this->iMeth_ == RPA) TMOV(ia+iOff) = -TMOB(i,a);
+      if(this->iMeth_ == RPA || this->iMeth_ == STAB) TMOV(ia+iOff) = -TMOB(i,a);
     }
   }
 } // retrvVOOV
@@ -390,7 +390,7 @@ void SDResponse::initMeth(){
     else 
       this->nSingleDim_ = this->nOAVA_ + this->nOBVB_;
     /******************/
-  } else if(this->iMeth_ == RPA){
+  } else if(this->iMeth_ == RPA || this->iMeth_ == STAB){
     /******************/
     /* RPA Single Dim */
     if(this->Ref_ == SingleSlater<double>::TCS)

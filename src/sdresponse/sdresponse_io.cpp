@@ -92,6 +92,8 @@ void SDResponse::printExcitedStateEnergies(){
     this->fileio_->out << "CIS";
   else if(this->iMeth_ == RPA)
     this->fileio_->out << "RPA";
+  else if(this->iMeth_ == STAB)
+    this->fileio_->out << "Stability";
   this->fileio_->out << " Diagonalization for lowest " << this->nSek_ << " eigenstates" << endl;
   this->fileio_->out << bannerMid << endl << endl;
   

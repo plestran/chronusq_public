@@ -86,3 +86,4 @@ void SDResponse::iniSDResponse( Molecule * molecule, BasisSet * basisSet, MOInte
   this->oscStrength_ = std::unique_ptr<RealMatrix>(new RealMatrix(this->nSek_+1,this->nSek_+1));
   this->transDipole_ = std::unique_ptr<RealTensor3d>(new RealTensor3d(this->nSek_+1,this->nSek_+1,3));
 };
+//dbwye
