@@ -72,6 +72,7 @@ void SingleSlater<T>::formFock(){
 //}
 
   this->fockA_->setZero();
+/*
   if(this->Ref_ != TCS) fockA_->real()+=(*this->aointegrals_->oneE_);
   else {
     for(auto I = 0, i = 0; i < this->nBasis_; I += 2, i++)
@@ -80,6 +81,8 @@ void SingleSlater<T>::formFock(){
       this->fockA_->real()(I+1,J+1) += (*this->aointegrals_->oneE_)(i,j);
     }
   }
+*/
+  fockA_->real()+=(*this->aointegrals_->oneE_);
 #ifndef USE_LIBINT
   fockA_->real()+=(*this->coulombA_);
   fockA_->real()-=(*this->exchangeA_);
@@ -104,5 +107,6 @@ void SingleSlater<T>::formFock(){
       prettyPrintTCS(this->fileio_->out,(*this->fockA_),"Fock");
     }
   };
+  if(this->nTCS_==2) CErr();
 };
 

@@ -444,7 +444,6 @@ void AOIntegrals::computeAOOneE(){
 //if(this->controls_->printLevel>=2) this->oneE_->printAll(5,fileio_->out);
   if(this->controls_->printLevel>=2) 
     prettyPrintTCS(this->fileio_->out,(*this->oneE_),"Core Hamiltonian");
-  if(this->nTCS_==2) CErr();
 
   // Compute time differenes
   this->OneED = oneEEnd - oneEStart;
