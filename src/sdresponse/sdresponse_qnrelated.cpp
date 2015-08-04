@@ -231,7 +231,8 @@ void SDResponse::formRM3(RealCMMap &XMO, RealCMMap &Sigma, RealCMMap &Rho){
       RhoAOB = RealMatrix::Zero(NTCSxNBASIS,NTCSxNBASIS);
   }
 
-  RealMatrix SDA,SDB, GS;
+  RealMatrix SDA,SDB;
+/*
   if(this->Ref_ == SingleSlater<double>::TCS){
     SDA = RealMatrix::Zero(NTCSxNBASIS,NTCSxNBASIS);
     GS  = RealMatrix::Zero(NTCSxNBASIS,NTCSxNBASIS);
@@ -249,6 +250,12 @@ void SDResponse::formRM3(RealCMMap &XMO, RealCMMap &Sigma, RealCMMap &Rho){
       SDB = 
         (*this->singleSlater_->aointegrals()->overlap_) * (*this->singleSlater_->densityB());
   }
+*/
+  SDA = (*this->singleSlater_->aointegrals()->overlap_) * (*this->singleSlater_->densityA());
+  if(!this->singleSlater_->isClosedShell && this->Ref_ != SingleSlater<double>::TCS)
+    SDB = 
+      (*this->singleSlater_->aointegrals()->overlap_) * (*this->singleSlater_->densityB());
+  
 
   double fact = 1.0;
   if(this->Ref_ == SingleSlater<double>::RHF) fact = 0.5;
@@ -284,6 +291,7 @@ void SDResponse::formRM3(RealCMMap &XMO, RealCMMap &Sigma, RealCMMap &Rho){
 
 
   for(auto idx = 0; idx < XMO.cols(); idx++){
+/*
     if(this->Ref_ == SingleSlater<double>::TCS){
       SigAOA =  (*this->singleSlater_->fockA()) * CommA[idx] * GS;
       SigAOA -= GS * CommA[idx] * (*this->singleSlater_->fockA());
@@ -295,6 +303,13 @@ void SDResponse::formRM3(RealCMMap &XMO, RealCMMap &Sigma, RealCMMap &Rho){
         (*this->singleSlater_->aointegrals()->overlap_) * CommA[idx] * 
         (*this->singleSlater_->fockA());
     }
+*/
+    SigAOA =  
+      (*this->singleSlater_->fockA()) * CommA[idx] * 
+      (*this->singleSlater_->aointegrals()->overlap_);
+    SigAOA -= 
+      (*this->singleSlater_->aointegrals()->overlap_) * CommA[idx] * 
+      (*this->singleSlater_->fockA());
     SigAOA += fact * GCommA[idx] * SDA.adjoint();
     SigAOA -= fact * SDA * GCommA[idx];
 
@@ -322,6 +337,7 @@ void SDResponse::formRM3(RealCMMap &XMO, RealCMMap &Sigma, RealCMMap &Rho){
     this->formMOTDen(SVec,SigAOA,SigAOB);
 
     if(this->iMeth_ == RPA){
+/*
       if(this->Ref_ == SingleSlater<double>::TCS)
         RhoAOA =  GS * CommA[idx] * GS;
       else {
@@ -332,6 +348,13 @@ void SDResponse::formRM3(RealCMMap &XMO, RealCMMap &Sigma, RealCMMap &Rho){
           (*this->singleSlater_->aointegrals()->overlap_) * CommB[idx] * 
           (*this->singleSlater_->aointegrals()->overlap_);
       }
+*/
+      RhoAOA =  
+        (*this->singleSlater_->aointegrals()->overlap_) * CommA[idx] * 
+        (*this->singleSlater_->aointegrals()->overlap_);
+      RhoAOB =  
+        (*this->singleSlater_->aointegrals()->overlap_) * CommB[idx] * 
+        (*this->singleSlater_->aointegrals()->overlap_);
       RealVecMap RVec(Rho.data()+idx*this->nSingleDim_,this->nSingleDim_);
       this->formMOTDen(RVec,RhoAOA,RhoAOB);
     }
