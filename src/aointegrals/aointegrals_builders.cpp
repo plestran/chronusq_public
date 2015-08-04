@@ -241,9 +241,8 @@ void AOIntegrals::computeAOOneE(){
 #else // USE_LIBINT
 
 void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
-
   std::vector<RealMap> mat;
-  int NB = this->nBasis_;
+  int NB = this->nTCS_*this->nBasis_;
   int NBSq = NB*NB;
   if(iType == OneBodyEngine::overlap){
     mat.push_back(RealMap(this->overlap_->data(),NB,NB));
@@ -299,7 +298,7 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
   }
   for(size_t i = 1; i < this->controls_->nthreads; i++) engines[i] = engines[0];
 
-  if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(1); 
+  if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(this->nTCS_); 
 #ifdef USE_OMP
   #pragma omp parallel
 #endif
@@ -310,11 +309,11 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
     int thread_id = 0;
 #endif
     for(auto s1=0l, s12=0l; s1 < this->basisSet_->nShell(); s1++){
-      int bf1 = this->basisSet_->mapSh2Bf(s1);
+      int bf1_s = this->basisSet_->mapSh2Bf(s1);
       int n1  = this->basisSet_->shells(s1).size();
       for(int s2=0; s2 <= s1; s2++, s12++){
         if(s12 % this->controls_->nthreads != thread_id) continue;
-        int bf2 = this->basisSet_->mapSh2Bf(s2);
+        int bf2_s = this->basisSet_->mapSh2Bf(s2);
         int n2  = this->basisSet_->shells(s2).size();
   
         const double* buff = engines[thread_id].compute(
@@ -322,16 +321,32 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
           this->basisSet_->shells(s2)
         );
 /*
-        for(int i = 0, ij=0; i < n1; i++) {
-          for(int j = 0; j < n2; j++, ij++) {
-            (*mat)(bf1+i,bf2+j) = buff[ij];
+        if(this->nTCS_ == 1){
+          for(int i = 0, ij=0; i < n1; i++) {
+            for(int j = 0; j < n2; j++, ij++) {
+              (*mat)(bf1+i,bf2+j) = buff[ij];
+            }
+          }
+        } else {
+          for(int i = 0, ij=0; i < n1; i+=2) {
+            for(int j = 0; j < n2; j+=2, ij++) {
+              (*mat)(bf1+i,bf2+j)     = buff[ij];
+              (*mat)(bf1+i+1,bf2+j+1) = buff[ij];
+            }
           }
         }
 */
         int IOff = 0;
         for(auto nMat = 0; nMat < mat.size(); nMat++) {
-          ConstRealMap bufMat(&buff[IOff],n1,n2); // Read only map
-          mat[nMat].block(bf1,bf2,n1,n2) = bufMat;
+//        ConstRealMap bufMat(&buff[IOff],n1/this->nTCS_,n2/this->nTCS_); // Read only map
+//        mat[nMat].block(bf1,bf2,n1,n2) = bufMat;
+//        for(auto i = 0, ij = 0; i < n1; i += this->nTCS_)
+//        for(auto j = 0; j < n2; j += this->nTCS_, ij++  ){
+          for(auto i = 0, bf1 = bf1_s, ij = 0; i < n1; i++, bf1 += this->nTCS_)            
+          for(auto j = 0, bf2 = bf2_s; j < n2; j++, bf2 += this->nTCS_){            
+            mat[nMat](bf1,bf2) = buff[IOff + ij];
+            if(this->nTCS_ == 2) mat[nMat](bf1+1,bf2+1) = buff[IOff + ij];
+          }
           IOff += n1*n2;
         }
       }
@@ -343,48 +358,48 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
 //if(this->controls_->printLevel>=2)  mat->printAll(5,fileio_->out);
   if(this->controls_->printLevel>=2){
     if(iType == OneBodyEngine::overlap){
-      prettyPrint(this->fileio_->out,(mat[0]),"Overlap");
+      prettyPrintTCS(this->fileio_->out,(mat[0]),"Overlap");
     } else if(iType == OneBodyEngine::kinetic) {
-      prettyPrint(this->fileio_->out,(mat[0]),"Kinetic");
+      prettyPrintTCS(this->fileio_->out,(mat[0]),"Kinetic");
     } else if(iType == OneBodyEngine::nuclear) {
-      prettyPrint(this->fileio_->out,(mat[0]),"Potential");
+      prettyPrintTCS(this->fileio_->out,(mat[0]),"Potential");
     } else if(iType == OneBodyEngine::emultipole1) {
-      prettyPrint(this->fileio_->out,(mat[0]),"Overlap");
-      prettyPrint(this->fileio_->out,(mat[1]),"Electric Dipole (x)");
-      prettyPrint(this->fileio_->out,(mat[2]),"Electric Dipole (y)");
-      prettyPrint(this->fileio_->out,(mat[3]),"Electric Dipole (z)");
+      prettyPrintTCS(this->fileio_->out,(mat[0]),"Overlap");
+      prettyPrintTCS(this->fileio_->out,(mat[1]),"Electric Dipole (x)");
+      prettyPrintTCS(this->fileio_->out,(mat[2]),"Electric Dipole (y)");
+      prettyPrintTCS(this->fileio_->out,(mat[3]),"Electric Dipole (z)");
     } else if(iType == OneBodyEngine::emultipole2) {
-      prettyPrint(this->fileio_->out,(mat[0]),"Overlap");
-      prettyPrint(this->fileio_->out,(mat[1]),"Electric Dipole (x)");
-      prettyPrint(this->fileio_->out,(mat[2]),"Electric Dipole (y)");
-      prettyPrint(this->fileio_->out,(mat[3]),"Electric Dipole (z)");
-      prettyPrint(this->fileio_->out,(mat[4]),"Electric Quadrupole (xx)");
-      prettyPrint(this->fileio_->out,(mat[5]),"Electric Quadrupole (xy)");
-      prettyPrint(this->fileio_->out,(mat[6]),"Electric Quadrupole (xz)");
-      prettyPrint(this->fileio_->out,(mat[7]),"Electric Quadrupole (yy)");
-      prettyPrint(this->fileio_->out,(mat[8]),"Electric Quadrupole (yz)");
-      prettyPrint(this->fileio_->out,(mat[9]),"Electric Quadrupole (zz)");
+      prettyPrintTCS(this->fileio_->out,(mat[0]),"Overlap");
+      prettyPrintTCS(this->fileio_->out,(mat[1]),"Electric Dipole (x)");
+      prettyPrintTCS(this->fileio_->out,(mat[2]),"Electric Dipole (y)");
+      prettyPrintTCS(this->fileio_->out,(mat[3]),"Electric Dipole (z)");
+      prettyPrintTCS(this->fileio_->out,(mat[4]),"Electric Quadrupole (xx)");
+      prettyPrintTCS(this->fileio_->out,(mat[5]),"Electric Quadrupole (xy)");
+      prettyPrintTCS(this->fileio_->out,(mat[6]),"Electric Quadrupole (xz)");
+      prettyPrintTCS(this->fileio_->out,(mat[7]),"Electric Quadrupole (yy)");
+      prettyPrintTCS(this->fileio_->out,(mat[8]),"Electric Quadrupole (yz)");
+      prettyPrintTCS(this->fileio_->out,(mat[9]),"Electric Quadrupole (zz)");
     } else if(iType == OneBodyEngine::emultipole3) {
-      prettyPrint(this->fileio_->out,(mat[0]),"Overlap");
-      prettyPrint(this->fileio_->out,(mat[1]),"Electric Dipole (x)");
-      prettyPrint(this->fileio_->out,(mat[2]),"Electric Dipole (y)");
-      prettyPrint(this->fileio_->out,(mat[3]),"Electric Dipole (z)");
-      prettyPrint(this->fileio_->out,(mat[4]),"Electric Quadrupole (xx)");
-      prettyPrint(this->fileio_->out,(mat[5]),"Electric Quadrupole (xy)");
-      prettyPrint(this->fileio_->out,(mat[6]),"Electric Quadrupole (xz)");
-      prettyPrint(this->fileio_->out,(mat[7]),"Electric Quadrupole (yy)");
-      prettyPrint(this->fileio_->out,(mat[8]),"Electric Quadrupole (yz)");
-      prettyPrint(this->fileio_->out,(mat[9]),"Electric Quadrupole (zz)");
-      prettyPrint(this->fileio_->out,(mat[10]),"Electric Octupole (xxx)");
-      prettyPrint(this->fileio_->out,(mat[11]),"Electric Octupole (xxy)");
-      prettyPrint(this->fileio_->out,(mat[12]),"Electric Octupole (xxz)");
-      prettyPrint(this->fileio_->out,(mat[13]),"Electric Octupole (xyy)");
-      prettyPrint(this->fileio_->out,(mat[14]),"Electric Octupole (xyz)");
-      prettyPrint(this->fileio_->out,(mat[15]),"Electric Octupole (xzz)");
-      prettyPrint(this->fileio_->out,(mat[16]),"Electric Octupole (yyy)");
-      prettyPrint(this->fileio_->out,(mat[17]),"Electric Octupole (yyz)");
-      prettyPrint(this->fileio_->out,(mat[18]),"Electric Octupole (yzz)");
-      prettyPrint(this->fileio_->out,(mat[19]),"Electric Octupole (zzz)");
+      prettyPrintTCS(this->fileio_->out,(mat[0]),"Overlap");
+      prettyPrintTCS(this->fileio_->out,(mat[1]),"Electric Dipole (x)");
+      prettyPrintTCS(this->fileio_->out,(mat[2]),"Electric Dipole (y)");
+      prettyPrintTCS(this->fileio_->out,(mat[3]),"Electric Dipole (z)");
+      prettyPrintTCS(this->fileio_->out,(mat[4]),"Electric Quadrupole (xx)");
+      prettyPrintTCS(this->fileio_->out,(mat[5]),"Electric Quadrupole (xy)");
+      prettyPrintTCS(this->fileio_->out,(mat[6]),"Electric Quadrupole (xz)");
+      prettyPrintTCS(this->fileio_->out,(mat[7]),"Electric Quadrupole (yy)");
+      prettyPrintTCS(this->fileio_->out,(mat[8]),"Electric Quadrupole (yz)");
+      prettyPrintTCS(this->fileio_->out,(mat[9]),"Electric Quadrupole (zz)");
+      prettyPrintTCS(this->fileio_->out,(mat[10]),"Electric Octupole (xxx)");
+      prettyPrintTCS(this->fileio_->out,(mat[11]),"Electric Octupole (xxy)");
+      prettyPrintTCS(this->fileio_->out,(mat[12]),"Electric Octupole (xxz)");
+      prettyPrintTCS(this->fileio_->out,(mat[13]),"Electric Octupole (xyy)");
+      prettyPrintTCS(this->fileio_->out,(mat[14]),"Electric Octupole (xyz)");
+      prettyPrintTCS(this->fileio_->out,(mat[15]),"Electric Octupole (xzz)");
+      prettyPrintTCS(this->fileio_->out,(mat[16]),"Electric Octupole (yyy)");
+      prettyPrintTCS(this->fileio_->out,(mat[17]),"Electric Octupole (yyz)");
+      prettyPrintTCS(this->fileio_->out,(mat[18]),"Electric Octupole (yzz)");
+      prettyPrintTCS(this->fileio_->out,(mat[19]),"Electric Octupole (zzz)");
 
     } else {
       cout << "OneBodyEngine type not recognized" << endl;
@@ -408,16 +423,19 @@ void AOIntegrals::computeAOOneE(){
   else if(this->controls_->doDipole) OneEDriver(OneBodyEngine::emultipole1);
   else OneEDriver(OneBodyEngine::overlap);
   auto OEnd = std::chrono::high_resolution_clock::now();
+  if(this->nTCS_ == 2) cout << "After OVERLAP" << endl;
 
   // Compute and time kinetic integrals
   auto TStart = std::chrono::high_resolution_clock::now();
   OneEDriver(OneBodyEngine::kinetic);
   auto TEnd = std::chrono::high_resolution_clock::now();
+  if(this->nTCS_ == 2) cout << "After Kin" << endl;
 
   // Compute and time nuclear attraction integrals (negative sign is factored in)
   auto VStart = std::chrono::high_resolution_clock::now();
   OneEDriver(OneBodyEngine::nuclear);
   auto VEnd = std::chrono::high_resolution_clock::now();
+  if(this->nTCS_ == 2) cout << "After Pot" << endl;
 //this->oneE_->add(this->kinetic_,this->potential_);
   (*this->oneE_) = (*this->kinetic_) + (*this->potential_);
 
@@ -425,7 +443,8 @@ void AOIntegrals::computeAOOneE(){
   auto oneEEnd = std::chrono::high_resolution_clock::now();
 //if(this->controls_->printLevel>=2) this->oneE_->printAll(5,fileio_->out);
   if(this->controls_->printLevel>=2) 
-    prettyPrint(this->fileio_->out,(*this->oneE_),"Core Hamiltonian");
+    prettyPrintTCS(this->fileio_->out,(*this->oneE_),"Core Hamiltonian");
+  if(this->nTCS_==2) CErr();
 
   // Compute time differenes
   this->OneED = oneEEnd - oneEStart;

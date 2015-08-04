@@ -84,7 +84,9 @@ void AOIntegrals::iniAOIntegrals(Molecule * molecule, BasisSet * basisset,
   this->fileio_   = fileio;
   this->controls_ = controls;
   this->nBasis_   = basisset->nBasis();
-  this->nTT_      = this->nBasis_*(this->nBasis_+1)/2;
+  this->nTCS_     = 1;
+  if(controls->doTCS) this->nTCS_ = 2;
+  this->nTT_      = this->nTCS_*this->nBasis_*(this->nTCS_*this->nBasis_+1)/2;
 
   // FIXME need a try statement for alloc
 #ifndef USE_LIBINT // We don't need to allocate these if we're using Libint
@@ -98,25 +100,25 @@ void AOIntegrals::iniAOIntegrals(Molecule * molecule, BasisSet * basisset,
   try {
     if(this->controls_->buildn4eri && !this->controls_->doDF) {
       this->fileio_->out << "Allocating N4 ERI" << endl;
-      this->aoERI_ = std::unique_ptr<RealTensor4d>(new RealTensor4d(this->nBasis_,this->nBasis_,this->nBasis_,this->nBasis_));
+      this->aoERI_ = std::unique_ptr<RealTensor4d>(new RealTensor4d(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
     } 
   } catch (...) {
     CErr(std::current_exception(),"N^4 ERI Tensor Allocation");
   }
 #endif
   try {
-    this->oneE_         = std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nBasis_)); // One Electron Integral
-    this->overlap_      = std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nBasis_)); // Overlap
-    this->kinetic_      = std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nBasis_)); // Kinetic
-    this->potential_    = std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nBasis_)); // Potential
+    this->oneE_         = std::unique_ptr<RealMatrix>(new RealMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_)); // One Electron Integral
+    this->overlap_      = std::unique_ptr<RealMatrix>(new RealMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_)); // Overlap
+    this->kinetic_      = std::unique_ptr<RealMatrix>(new RealMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_)); // Kinetic
+    this->potential_    = std::unique_ptr<RealMatrix>(new RealMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_)); // Potential
     if(this->controls_->doDipole || this->controls_->doQuadpole || this->controls_->doOctpole){
-      this->elecDipole_   = std::unique_ptr<RealTensor3d>(new RealTensor3d(3,this->nBasis_,this->nBasis_)); // Electic Dipole
+      this->elecDipole_   = std::unique_ptr<RealTensor3d>(new RealTensor3d(3,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_)); // Electic Dipole
     }
     if(this->controls_->doQuadpole || this->controls_->doOctpole) {
-      this->elecQuadpole_ = std::unique_ptr<RealTensor3d>(new RealTensor3d(6,this->nBasis_,this->nBasis_)); // Electic Quadrupole
+      this->elecQuadpole_ = std::unique_ptr<RealTensor3d>(new RealTensor3d(6,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_)); // Electic Quadrupole
     }
     if(this->controls_->doOctpole){
-      this->elecOctpole_ = std::unique_ptr<RealTensor3d>(new RealTensor3d(10,this->nBasis_,this->nBasis_)); // Electic Octupole
+      this->elecOctpole_ = std::unique_ptr<RealTensor3d>(new RealTensor3d(10,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_)); // Electic Octupole
     }
   } catch (...) {
     CErr(std::current_exception(),"One Electron Integral Tensor Alloation (All)");

@@ -64,12 +64,12 @@ void SingleSlater<T>::formFock(){
 #else
   this->formPT();
 #endif
-  if(this->Ref_ == TCS) this->basisset_->resetMapSh2Bf();
+//if(this->Ref_ == TCS) this->basisset_->resetMapSh2Bf();
   if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
-  if(this->Ref_ == TCS) {
-    this->basisset_->resetMapSh2Bf(); 
-    this->basisset_->makeMapSh2Bf(this->nTCS_);
-  }
+//if(this->Ref_ == TCS) {
+//  this->basisset_->resetMapSh2Bf(); 
+//  this->basisset_->makeMapSh2Bf(this->nTCS_);
+//}
 
   this->fockA_->setZero();
   if(this->Ref_ != TCS) fockA_->real()+=(*this->aointegrals_->oneE_);

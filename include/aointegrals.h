@@ -116,6 +116,7 @@ struct QuartetConstants{
  */
 class AOIntegrals{
   int       nBasis_; ///< Number of basis functions \f$N_{b}\f$
+  int       nTCS_;
   int       nTT_; ///< Reduced number of basis functions (lower triangle) \f$ N_b (N_b+1) / 2\f$
   int       **R2Index_;
   double	**FmTTable_;
