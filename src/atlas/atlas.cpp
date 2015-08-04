@@ -83,11 +83,11 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   hartreeFock->computeEnergy();
   if(controls->optWaveFunction)  hartreeFock->SCF();
   else fileIO->out << "**Skipping SCF Optimization**" << endl; 
-  CErr();
   //MOIntegrals *moIntegrals = new MOIntegrals();
   //moIntegrals->iniMOIntegrals(molecule,basisset,fileIO,controls,aointegrals,hartreeFock);
   std::shared_ptr<MOIntegrals> moIntegrals = std::make_shared<MOIntegrals>();
   hartreeFock->computeMultipole();
+  CErr();
   if(controls->doSDR) {
     sdResponse->setPPRPA(1);
     sdResponse->iniSDResponse(molecule.get(),basisset.get(),moIntegrals.get(),fileIO.get(),
