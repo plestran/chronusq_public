@@ -527,7 +527,9 @@ void AOIntegrals::computeAOTwoE(){
   engines[0].set_precision(std::numeric_limits<double>::epsilon());
 
   for(int i=1; i<this->controls_->nthreads; i++) engines[i] = engines[0];
-  if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(1); 
+  if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(this->nTCS_); 
+
+  this->aoERI_->fill(0.0);
 
 #ifdef USE_OMP
   #pragma omp parallel
@@ -617,25 +619,46 @@ void AOIntegrals::computeAOTwoE(){
 */
 //        lower.clear();
 //        upper.clear();
-          for(int i = 0, ijkl = 0 ; i < n1; ++i) {
-            int bf1 = bf1_s + i;
-            for(int j = 0; j < n2; ++j) {
-              int bf2 = bf2_s + j;
-              for(int k = 0; k < n3; ++k) {
-                int bf3 = bf3_s + k;
-                for(int l = 0; l < n4; ++l, ++ijkl) {
-                  int bf4 = bf4_s + l;
-                  (*this->aoERI_)(bf1,bf2,bf3,bf4) = buff[ijkl];
-                  (*this->aoERI_)(bf1,bf2,bf4,bf3) = buff[ijkl];
-                  (*this->aoERI_)(bf2,bf1,bf3,bf4) = buff[ijkl];
-                  (*this->aoERI_)(bf2,bf1,bf4,bf3) = buff[ijkl];
-                  (*this->aoERI_)(bf3,bf4,bf1,bf2) = buff[ijkl];
-                  (*this->aoERI_)(bf4,bf3,bf1,bf2) = buff[ijkl];
-                  (*this->aoERI_)(bf3,bf4,bf2,bf1) = buff[ijkl];
-                  (*this->aoERI_)(bf4,bf3,bf2,bf1) = buff[ijkl];
-		}
-	      }
-	    }
+          for(int i = 0, bf1 = bf1_s, ijkl = 0 ; i < n1; ++i, bf1 += this->nTCS_) 
+          for(int j = 0, bf2 = bf2_s           ; j < n2; ++j, bf2 += this->nTCS_) 
+          for(int k = 0, bf3 = bf3_s           ; k < n3; ++k, bf3 += this->nTCS_) 
+          for(int l = 0, bf4 = bf4_s           ; l < n4; ++l, bf4 += this->nTCS_, ++ijkl) {
+            (*this->aoERI_)(bf1,bf2,bf3,bf4) = buff[ijkl];
+            (*this->aoERI_)(bf1,bf2,bf4,bf3) = buff[ijkl];
+            (*this->aoERI_)(bf2,bf1,bf3,bf4) = buff[ijkl];
+            (*this->aoERI_)(bf2,bf1,bf4,bf3) = buff[ijkl];
+            (*this->aoERI_)(bf3,bf4,bf1,bf2) = buff[ijkl];
+            (*this->aoERI_)(bf4,bf3,bf1,bf2) = buff[ijkl];
+            (*this->aoERI_)(bf3,bf4,bf2,bf1) = buff[ijkl];
+            (*this->aoERI_)(bf4,bf3,bf2,bf1) = buff[ijkl];
+            if(this->nTCS_ == 2){
+              (*this->aoERI_)(bf1+1,bf2+1,bf3+1,bf4+1) = buff[ijkl];
+              (*this->aoERI_)(bf1+1,bf2+1,bf4+1,bf3+1) = buff[ijkl];
+              (*this->aoERI_)(bf2+1,bf1+1,bf3+1,bf4+1) = buff[ijkl];
+              (*this->aoERI_)(bf2+1,bf1+1,bf4+1,bf3+1) = buff[ijkl];
+              (*this->aoERI_)(bf3+1,bf4+1,bf1+1,bf2+1) = buff[ijkl];
+              (*this->aoERI_)(bf4+1,bf3+1,bf1+1,bf2+1) = buff[ijkl];
+              (*this->aoERI_)(bf3+1,bf4+1,bf2+1,bf1+1) = buff[ijkl];
+              (*this->aoERI_)(bf4+1,bf3+1,bf2+1,bf1+1) = buff[ijkl];
+
+              (*this->aoERI_)(bf1+1,bf2+1,bf3,bf4)     = buff[ijkl];
+              (*this->aoERI_)(bf1+1,bf2+1,bf4,bf3)     = buff[ijkl];
+              (*this->aoERI_)(bf2+1,bf1+1,bf3,bf4)     = buff[ijkl];
+              (*this->aoERI_)(bf2+1,bf1+1,bf4,bf3)     = buff[ijkl];
+              (*this->aoERI_)(bf3+1,bf4+1,bf1,bf2)     = buff[ijkl];
+              (*this->aoERI_)(bf4+1,bf3+1,bf1,bf2)     = buff[ijkl];
+              (*this->aoERI_)(bf3+1,bf4+1,bf2,bf1)     = buff[ijkl];
+              (*this->aoERI_)(bf4+1,bf3+1,bf2,bf1)     = buff[ijkl];
+
+              (*this->aoERI_)(bf1,bf2,bf3+1,bf4+1)     = buff[ijkl];
+              (*this->aoERI_)(bf1,bf2,bf4+1,bf3+1)     = buff[ijkl];
+              (*this->aoERI_)(bf2,bf1,bf3+1,bf4+1)     = buff[ijkl];
+              (*this->aoERI_)(bf2,bf1,bf4+1,bf3+1)     = buff[ijkl];
+              (*this->aoERI_)(bf3,bf4,bf1+1,bf2+1)     = buff[ijkl];
+              (*this->aoERI_)(bf4,bf3,bf1+1,bf2+1)     = buff[ijkl];
+              (*this->aoERI_)(bf3,bf4,bf2+1,bf1+1)     = buff[ijkl];
+              (*this->aoERI_)(bf4,bf3,bf2+1,bf1+1)     = buff[ijkl];
+            }
 	  }
 
 	}

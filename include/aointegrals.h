@@ -210,7 +210,7 @@ public:
   void computeAORIS();
   void transformAORII();
   template<typename T> void twoEContractDirect(bool,bool,bool,bool,const T&,T&,const T&,T&);
-  template<typename T> void twoEContractN4(bool,bool,const T &,T &,const T &, T &);
+  template<typename T> void twoEContractN4(bool,bool,bool,const T &,T &,const T &, T &);
   template<typename T> void twoEContractDF(bool,bool,const T &,T &,const T &, T &);
   template<typename T>
     void multTwoEContractDirect(int, bool,bool,bool,bool,const std::vector<T> &,std::vector<T> &,

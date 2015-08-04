@@ -26,8 +26,9 @@
 #include <aointegrals.h>
 namespace ChronusQ{
   template<>
-  void AOIntegrals::twoEContractN4(bool RHF, bool doFock, const RealMatrix &XAlpha, 
-    RealMatrix &AXAlpha, const RealMatrix &XBeta, RealMatrix &AXBeta) {
+  void AOIntegrals::twoEContractN4(bool RHF, bool doFock, bool doTCS,
+    const RealMatrix &XAlpha, RealMatrix &AXAlpha, const RealMatrix &XBeta, 
+    RealMatrix &AXBeta) {
 
     this->fileio_->out << "Contracting with in-core two-electron integrals" << endl;
     if(!this->haveAOTwoE) this->computeAOTwoE();
@@ -44,7 +45,7 @@ namespace ChronusQ{
       if(RHF){
         contract(1.0,*this->aoERI_,{i,j,k,l},XAlphaTensor,{l,k},0.0,AXAlphaTensor,{i,j});
         contract(-0.5,*this->aoERI_,{i,l,k,j},XAlphaTensor,{l,k},1.0,AXAlphaTensor,{i,j});
-      } else {
+      } else if(!doTCS) {
         XBetaTensor  = RealTensor2d(XBeta.rows(),XBeta.cols());
         AXBetaTensor = RealTensor2d(AXBeta.rows(),AXBeta.cols());
         for(auto i = 0; i < XBeta.size(); i++) XBetaTensor.storage()[i] = XBeta.data()[i];
@@ -57,10 +58,13 @@ namespace ChronusQ{
         AXBetaTensor = AXAlphaTensor;
         contract(-1.0,*this->aoERI_,{i,l,k,j},XAlphaTensor,{l,k},1.0,AXAlphaTensor,{i,j});
         contract(-1.0,*this->aoERI_,{i,l,k,j},XBetaTensor,{l,k},1.0,AXBetaTensor,{i,j});
-      } 
+      } else if(doTCS) {
+        contract(1.0 ,*this->aoERI_,{i,j,k,l},XAlphaTensor,{l,k},0.0,AXAlphaTensor,{i,j});
+        contract(-1.0,*this->aoERI_,{i,l,k,j},XAlphaTensor,{l,k},1.0,AXAlphaTensor,{i,j});
+      }
     } else CErr("General Contraction NYI for in-core integrals");
      for(auto i = 0; i < AXAlpha.size(); i++) AXAlpha.data()[i] = AXAlphaTensor.storage()[i];
-     if(!RHF)
+     if(!RHF && !doTCS)
        for(auto i = 0; i < AXBeta.size(); i++) AXBeta.data()[i] = AXBetaTensor.storage()[i];
   }  // twoEContractN4
 }; // namespace ChronusQ

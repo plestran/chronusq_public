@@ -1834,7 +1834,7 @@ RealMatrix SDResponse::formRM2(RealMatrix &XMO){
     if(this->controls_->directTwoE && !this->controls_->doDF)
       this->singleSlater_->aointegrals()->twoEContractDirect(false,false,false,false,XAAO,IXA,XBAO,IXB);
     else
-      this->singleSlater_->aointegrals()->twoEContractN4(false, true, XAAO,IXA,XBAO,IXB);
+      this->singleSlater_->aointegrals()->twoEContractN4(false, true,false,XAAO,IXA,XBAO,IXB);
     
 
     /*
