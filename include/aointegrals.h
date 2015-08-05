@@ -204,6 +204,7 @@ public:
 //--------------------------------------------//
   void computeAOTwoE(); // build two-electron AO integral matrices
   void computeAOOneE(); // build one-electron AO integral matrices
+  void printOneE();
 #ifdef USE_LIBINT
   void computeSchwartz();
   void computeAORII();

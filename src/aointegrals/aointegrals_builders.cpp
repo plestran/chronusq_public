@@ -356,56 +356,56 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
     mat[nMat] = mat[nMat].selfadjointView<Lower>();
 
 //if(this->controls_->printLevel>=2)  mat->printAll(5,fileio_->out);
-  if(this->controls_->printLevel>=2){
-    if(iType == OneBodyEngine::overlap){
-      prettyPrintTCS(this->fileio_->out,(mat[0]),"Overlap");
-    } else if(iType == OneBodyEngine::kinetic) {
-      prettyPrintTCS(this->fileio_->out,(mat[0]),"Kinetic");
-    } else if(iType == OneBodyEngine::nuclear) {
-      prettyPrintTCS(this->fileio_->out,(mat[0]),"Potential");
-    } else if(iType == OneBodyEngine::emultipole1) {
-      prettyPrintTCS(this->fileio_->out,(mat[0]),"Overlap");
-      prettyPrintTCS(this->fileio_->out,(mat[1]),"Electric Dipole (x)");
-      prettyPrintTCS(this->fileio_->out,(mat[2]),"Electric Dipole (y)");
-      prettyPrintTCS(this->fileio_->out,(mat[3]),"Electric Dipole (z)");
-    } else if(iType == OneBodyEngine::emultipole2) {
-      prettyPrintTCS(this->fileio_->out,(mat[0]),"Overlap");
-      prettyPrintTCS(this->fileio_->out,(mat[1]),"Electric Dipole (x)");
-      prettyPrintTCS(this->fileio_->out,(mat[2]),"Electric Dipole (y)");
-      prettyPrintTCS(this->fileio_->out,(mat[3]),"Electric Dipole (z)");
-      prettyPrintTCS(this->fileio_->out,(mat[4]),"Electric Quadrupole (xx)");
-      prettyPrintTCS(this->fileio_->out,(mat[5]),"Electric Quadrupole (xy)");
-      prettyPrintTCS(this->fileio_->out,(mat[6]),"Electric Quadrupole (xz)");
-      prettyPrintTCS(this->fileio_->out,(mat[7]),"Electric Quadrupole (yy)");
-      prettyPrintTCS(this->fileio_->out,(mat[8]),"Electric Quadrupole (yz)");
-      prettyPrintTCS(this->fileio_->out,(mat[9]),"Electric Quadrupole (zz)");
-    } else if(iType == OneBodyEngine::emultipole3) {
-      prettyPrintTCS(this->fileio_->out,(mat[0]),"Overlap");
-      prettyPrintTCS(this->fileio_->out,(mat[1]),"Electric Dipole (x)");
-      prettyPrintTCS(this->fileio_->out,(mat[2]),"Electric Dipole (y)");
-      prettyPrintTCS(this->fileio_->out,(mat[3]),"Electric Dipole (z)");
-      prettyPrintTCS(this->fileio_->out,(mat[4]),"Electric Quadrupole (xx)");
-      prettyPrintTCS(this->fileio_->out,(mat[5]),"Electric Quadrupole (xy)");
-      prettyPrintTCS(this->fileio_->out,(mat[6]),"Electric Quadrupole (xz)");
-      prettyPrintTCS(this->fileio_->out,(mat[7]),"Electric Quadrupole (yy)");
-      prettyPrintTCS(this->fileio_->out,(mat[8]),"Electric Quadrupole (yz)");
-      prettyPrintTCS(this->fileio_->out,(mat[9]),"Electric Quadrupole (zz)");
-      prettyPrintTCS(this->fileio_->out,(mat[10]),"Electric Octupole (xxx)");
-      prettyPrintTCS(this->fileio_->out,(mat[11]),"Electric Octupole (xxy)");
-      prettyPrintTCS(this->fileio_->out,(mat[12]),"Electric Octupole (xxz)");
-      prettyPrintTCS(this->fileio_->out,(mat[13]),"Electric Octupole (xyy)");
-      prettyPrintTCS(this->fileio_->out,(mat[14]),"Electric Octupole (xyz)");
-      prettyPrintTCS(this->fileio_->out,(mat[15]),"Electric Octupole (xzz)");
-      prettyPrintTCS(this->fileio_->out,(mat[16]),"Electric Octupole (yyy)");
-      prettyPrintTCS(this->fileio_->out,(mat[17]),"Electric Octupole (yyz)");
-      prettyPrintTCS(this->fileio_->out,(mat[18]),"Electric Octupole (yzz)");
-      prettyPrintTCS(this->fileio_->out,(mat[19]),"Electric Octupole (zzz)");
+//if(this->controls_->printLevel>=2){
+//  if(iType == OneBodyEngine::overlap){
+//    prettyPrintTCS(this->fileio_->out,(mat[0]),"Overlap");
+//  } else if(iType == OneBodyEngine::kinetic) {
+//    prettyPrintTCS(this->fileio_->out,(mat[0]),"Kinetic");
+//  } else if(iType == OneBodyEngine::nuclear) {
+//    prettyPrintTCS(this->fileio_->out,(mat[0]),"Potential");
+//  } else if(iType == OneBodyEngine::emultipole1) {
+//    prettyPrintTCS(this->fileio_->out,(mat[0]),"Overlap");
+//    prettyPrintTCS(this->fileio_->out,(mat[1]),"Electric Dipole (x)");
+//    prettyPrintTCS(this->fileio_->out,(mat[2]),"Electric Dipole (y)");
+//    prettyPrintTCS(this->fileio_->out,(mat[3]),"Electric Dipole (z)");
+//  } else if(iType == OneBodyEngine::emultipole2) {
+//    prettyPrintTCS(this->fileio_->out,(mat[0]),"Overlap");
+//    prettyPrintTCS(this->fileio_->out,(mat[1]),"Electric Dipole (x)");
+//    prettyPrintTCS(this->fileio_->out,(mat[2]),"Electric Dipole (y)");
+//    prettyPrintTCS(this->fileio_->out,(mat[3]),"Electric Dipole (z)");
+//    prettyPrintTCS(this->fileio_->out,(mat[4]),"Electric Quadrupole (xx)");
+//    prettyPrintTCS(this->fileio_->out,(mat[5]),"Electric Quadrupole (xy)");
+//    prettyPrintTCS(this->fileio_->out,(mat[6]),"Electric Quadrupole (xz)");
+//    prettyPrintTCS(this->fileio_->out,(mat[7]),"Electric Quadrupole (yy)");
+//    prettyPrintTCS(this->fileio_->out,(mat[8]),"Electric Quadrupole (yz)");
+//    prettyPrintTCS(this->fileio_->out,(mat[9]),"Electric Quadrupole (zz)");
+//  } else if(iType == OneBodyEngine::emultipole3) {
+//    prettyPrintTCS(this->fileio_->out,(mat[0]),"Overlap");
+//    prettyPrintTCS(this->fileio_->out,(mat[1]),"Electric Dipole (x)");
+//    prettyPrintTCS(this->fileio_->out,(mat[2]),"Electric Dipole (y)");
+//    prettyPrintTCS(this->fileio_->out,(mat[3]),"Electric Dipole (z)");
+//    prettyPrintTCS(this->fileio_->out,(mat[4]),"Electric Quadrupole (xx)");
+//    prettyPrintTCS(this->fileio_->out,(mat[5]),"Electric Quadrupole (xy)");
+//    prettyPrintTCS(this->fileio_->out,(mat[6]),"Electric Quadrupole (xz)");
+//    prettyPrintTCS(this->fileio_->out,(mat[7]),"Electric Quadrupole (yy)");
+//    prettyPrintTCS(this->fileio_->out,(mat[8]),"Electric Quadrupole (yz)");
+//    prettyPrintTCS(this->fileio_->out,(mat[9]),"Electric Quadrupole (zz)");
+//    prettyPrintTCS(this->fileio_->out,(mat[10]),"Electric Octupole (xxx)");
+//    prettyPrintTCS(this->fileio_->out,(mat[11]),"Electric Octupole (xxy)");
+//    prettyPrintTCS(this->fileio_->out,(mat[12]),"Electric Octupole (xxz)");
+//    prettyPrintTCS(this->fileio_->out,(mat[13]),"Electric Octupole (xyy)");
+//    prettyPrintTCS(this->fileio_->out,(mat[14]),"Electric Octupole (xyz)");
+//    prettyPrintTCS(this->fileio_->out,(mat[15]),"Electric Octupole (xzz)");
+//    prettyPrintTCS(this->fileio_->out,(mat[16]),"Electric Octupole (yyy)");
+//    prettyPrintTCS(this->fileio_->out,(mat[17]),"Electric Octupole (yyz)");
+//    prettyPrintTCS(this->fileio_->out,(mat[18]),"Electric Octupole (yzz)");
+//    prettyPrintTCS(this->fileio_->out,(mat[19]),"Electric Octupole (zzz)");
 
-    } else {
-      cout << "OneBodyEngine type not recognized" << endl;
-      exit(EXIT_FAILURE);
-    }
-  }
+//  } else {
+//    cout << "OneBodyEngine type not recognized" << endl;
+//    exit(EXIT_FAILURE);
+//  }
+//}
 
 }
 
@@ -442,8 +442,9 @@ void AOIntegrals::computeAOOneE(){
   // Get end time of one-electron integral evaluation
   auto oneEEnd = std::chrono::high_resolution_clock::now();
 //if(this->controls_->printLevel>=2) this->oneE_->printAll(5,fileio_->out);
-  if(this->controls_->printLevel>=2) 
-    prettyPrintTCS(this->fileio_->out,(*this->oneE_),"Core Hamiltonian");
+//if(this->controls_->printLevel>=2) 
+//  prettyPrintTCS(this->fileio_->out,(*this->oneE_),"Core Hamiltonian");
+  if(this->controls_->printLevel>=2) this->printOneE();
 
   // Compute time differenes
   this->OneED = oneEEnd - oneEStart;

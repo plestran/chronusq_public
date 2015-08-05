@@ -395,3 +395,86 @@ void AOIntegrals::printTimings() {
       
     this->fileio_->out << bannerEnd << endl;
 }
+
+void AOIntegrals::printOneE(){
+  std::vector<RealMap> mat;
+  int NB = this->nTCS_*this->nBasis_;
+  int NBSq = NB*NB;
+
+  mat.push_back(RealMap(this->overlap_->data(),NB,NB));
+  mat.push_back(RealMap(this->kinetic_->data(),NB,NB));
+  mat.push_back(RealMap(this->potential_->data(),NB,NB));
+  mat.push_back(RealMap(this->oneE_->data(),NB,NB));
+  if(this->controls_->doOctpole||this->controls_->doQuadpole||this->controls_->doDipole)
+    for(auto i = 0, IOff=0; i < 3; i++,IOff+=NBSq)
+      mat.push_back(RealMap(&this->elecDipole_->storage()[IOff],NB,NB));
+  if(this->controls_->doOctpole||this->controls_->doQuadpole)
+    for(auto i = 0, IOff=0; i < 6; i++,IOff+=NBSq)
+      mat.push_back(RealMap(&this->elecQuadpole_->storage()[IOff],NB,NB));
+  if(this->controls_->doOctpole)
+    for(auto i = 0, IOff=0; i < 10; i++,IOff+=NBSq)
+      mat.push_back(RealMap(&this->elecOctpole_->storage()[IOff],NB,NB));
+  
+  
+  if(this->nTCS_ == 2){
+    prettyPrintTCS(this->fileio_->out,(mat[0]),"Overlap");
+    if(this->controls_->doOctpole||this->controls_->doQuadpole||this->controls_->doDipole){
+      prettyPrintTCS(this->fileio_->out,(mat[4]),"Electric Dipole (x)");
+      prettyPrintTCS(this->fileio_->out,(mat[5]),"Electric Dipole (y)");
+      prettyPrintTCS(this->fileio_->out,(mat[6]),"Electric Dipole (z)");
+    }
+    if(this->controls_->doOctpole||this->controls_->doQuadpole){
+      prettyPrintTCS(this->fileio_->out,(mat[7]), "Electric Quadrupole (xx)");
+      prettyPrintTCS(this->fileio_->out,(mat[8]), "Electric Quadrupole (xy)");
+      prettyPrintTCS(this->fileio_->out,(mat[9]), "Electric Quadrupole (xz)");
+      prettyPrintTCS(this->fileio_->out,(mat[10]),"Electric Quadrupole (yy)");
+      prettyPrintTCS(this->fileio_->out,(mat[11]),"Electric Quadrupole (yz)");
+      prettyPrintTCS(this->fileio_->out,(mat[12]),"Electric Quadrupole (zz)");
+    }
+    if(this->controls_->doOctpole){
+      prettyPrintTCS(this->fileio_->out,(mat[13]),"Electric Octupole (xxx)");
+      prettyPrintTCS(this->fileio_->out,(mat[14]),"Electric Octupole (xxy)");
+      prettyPrintTCS(this->fileio_->out,(mat[15]),"Electric Octupole (xxz)");
+      prettyPrintTCS(this->fileio_->out,(mat[16]),"Electric Octupole (xyy)");
+      prettyPrintTCS(this->fileio_->out,(mat[17]),"Electric Octupole (xyz)");
+      prettyPrintTCS(this->fileio_->out,(mat[18]),"Electric Octupole (xzz)");
+      prettyPrintTCS(this->fileio_->out,(mat[19]),"Electric Octupole (yyy)");
+      prettyPrintTCS(this->fileio_->out,(mat[20]),"Electric Octupole (yyz)");
+      prettyPrintTCS(this->fileio_->out,(mat[21]),"Electric Octupole (yzz)");
+      prettyPrintTCS(this->fileio_->out,(mat[22]),"Electric Octupole (zzz)");
+    }
+    prettyPrintTCS(this->fileio_->out,(mat[1]),"Kinetic");
+    prettyPrintTCS(this->fileio_->out,(mat[2]),"Potential");
+    prettyPrintTCS(this->fileio_->out,(mat[3]),"Core Hamiltonian");
+  } else {
+    prettyPrint(this->fileio_->out,(mat[0]),"Overlap");
+    if(this->controls_->doOctpole||this->controls_->doQuadpole||this->controls_->doDipole){
+      prettyPrint(this->fileio_->out,(mat[4]),"Electric Dipole (x)");
+      prettyPrint(this->fileio_->out,(mat[5]),"Electric Dipole (y)");
+      prettyPrint(this->fileio_->out,(mat[6]),"Electric Dipole (z)");
+    }
+    if(this->controls_->doOctpole||this->controls_->doQuadpole){
+      prettyPrint(this->fileio_->out,(mat[7]), "Electric Quadrupole (xx)");
+      prettyPrint(this->fileio_->out,(mat[8]), "Electric Quadrupole (xy)");
+      prettyPrint(this->fileio_->out,(mat[9]), "Electric Quadrupole (xz)");
+      prettyPrint(this->fileio_->out,(mat[10]),"Electric Quadrupole (yy)");
+      prettyPrint(this->fileio_->out,(mat[11]),"Electric Quadrupole (yz)");
+      prettyPrint(this->fileio_->out,(mat[12]),"Electric Quadrupole (zz)");
+    }
+    if(this->controls_->doOctpole){
+      prettyPrint(this->fileio_->out,(mat[13]),"Electric Octupole (xxx)");
+      prettyPrint(this->fileio_->out,(mat[14]),"Electric Octupole (xxy)");
+      prettyPrint(this->fileio_->out,(mat[15]),"Electric Octupole (xxz)");
+      prettyPrint(this->fileio_->out,(mat[16]),"Electric Octupole (xyy)");
+      prettyPrint(this->fileio_->out,(mat[17]),"Electric Octupole (xyz)");
+      prettyPrint(this->fileio_->out,(mat[18]),"Electric Octupole (xzz)");
+      prettyPrint(this->fileio_->out,(mat[19]),"Electric Octupole (yyy)");
+      prettyPrint(this->fileio_->out,(mat[20]),"Electric Octupole (yyz)");
+      prettyPrint(this->fileio_->out,(mat[21]),"Electric Octupole (yzz)");
+      prettyPrint(this->fileio_->out,(mat[22]),"Electric Octupole (zzz)");
+    }
+    prettyPrint(this->fileio_->out,(mat[1]),"Kinetic");
+    prettyPrint(this->fileio_->out,(mat[2]),"Potential");
+    prettyPrint(this->fileio_->out,(mat[3]),"Core Hamiltonian");
+  }
+}
