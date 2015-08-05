@@ -35,6 +35,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   auto dfBasisset     	= std::unique_ptr<BasisSet>(new BasisSet());
   auto controls     	= std::unique_ptr<Controls>(new Controls());
   auto aointegrals	= std::unique_ptr<AOIntegrals>(new AOIntegrals());
+  auto mointegrals	= std::unique_ptr<MOIntegrals>(new MOIntegrals());
   auto hartreeFock	= std::unique_ptr<SingleSlater<double>>(new SingleSlater<double>());
   auto sdResponse       = std::unique_ptr<SDResponse>(new SDResponse());
   std::unique_ptr<FileIO> fileIO;
@@ -54,7 +55,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 
   // Initialize default settings and read input
   controls->iniControls();
-  controls->doTCS = true;
+//controls->doTCS = true;
   readInput(fileIO.get(),molecule.get(),basisset.get(),controls.get(),dfBasisset.get());
 //  fileIO->iniFileIO(controls->restart);
 
@@ -83,17 +84,16 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   hartreeFock->computeEnergy();
   if(controls->optWaveFunction)  hartreeFock->SCF();
   else fileIO->out << "**Skipping SCF Optimization**" << endl; 
-  //MOIntegrals *moIntegrals = new MOIntegrals();
-  //moIntegrals->iniMOIntegrals(molecule,basisset,fileIO,controls,aointegrals,hartreeFock);
-  std::shared_ptr<MOIntegrals> moIntegrals = std::make_shared<MOIntegrals>();
   hartreeFock->computeMultipole();
+  mointegrals->iniMOIntegrals(molecule.get(),basisset.get(),fileIO.get(),controls.get(),aointegrals.get(),hartreeFock.get());
   if(controls->doSDR) {
     sdResponse->setPPRPA(1);
-    sdResponse->iniSDResponse(molecule.get(),basisset.get(),moIntegrals.get(),fileIO.get(),
+    sdResponse->iniSDResponse(molecule.get(),basisset.get(),mointegrals.get(),fileIO.get(),
                               controls.get(),hartreeFock.get());
     
     sdResponse->IterativeRPA();
   //sdResponse->incorePPRPA();
+  sdResponse->incoreCIS();
   }
 
 //if(controls->doDF) aointegrals->compareRI();

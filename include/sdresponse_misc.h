@@ -44,5 +44,6 @@
 
   // Proof of concept routines
   void incorePPRPA();
+  void incoreCIS();
   void formRM();
   RealMatrix formRM2(RealMatrix &XMO);

@@ -1893,3 +1893,25 @@ RealMatrix SDResponse::formRM2(RealMatrix &XMO){
   }
   return AX;
 } //formRM2
+
+void SDResponse::incoreCIS(){
+  cout << "HERE" << endl;
+  RealMatrix A(this->nOV_,this->nOV_);
+  this->mointegrals_->formIAJB(true); 
+  cout << "HERE " << this->nOV_ <<endl;
+
+  for(auto i = 0, ia = 0; i < this->nO_; i++      )
+  for(auto a = 0        ; a < this->nV_; a++, ia++)
+  for(auto j = 0, jb = 0; j < this->nO_; j++      )
+  for(auto b = 0        ; b < this->nV_; b++, jb++){
+    cout << i << " " << a << " " << ia << "::";
+    cout << j << " " << b << " " << jb << endl;
+    A(ia,jb) = this->mointegrals_->IAJB(i,a,j,b);
+    if(ia == jb) A(ia,jb) += (*this->singleSlater_->epsA())(a+this->nO_)
+                          -(*this->singleSlater_->epsA())(i);
+  }
+
+  Eigen::SelfAdjointEigenSolver<RealMatrix> ES(A);
+  cout << A.eigenvalues()*phys.eVPerHartree << endl;
+
+}

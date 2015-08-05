@@ -41,25 +41,74 @@
 /****************************/
 namespace ChronusQ {
 class MOIntegrals{
-  int       **iaIndex_;
-  int       **ijIndex_;
-  int       **abIndex_;
-
   BasisSet *      basisSet_;
   Molecule *      molecule_;
   FileIO *        fileio_;
   Controls *      controls_;
   AOIntegrals *   aointegrals_;
   SingleSlater<double> *  singleSlater_;
-
-public:
-  // these should be protected
+/*
   std::unique_ptr<RealMatrix>    iajb_;
   std::unique_ptr<RealMatrix>    ijab_;
   std::unique_ptr<RealMatrix>    ijka_;
   std::unique_ptr<RealMatrix>    ijkl_;
   std::unique_ptr<RealMatrix>    iabc_;
   std::unique_ptr<RealMatrix>    abcd_;
+*/
+  std::unique_ptr<RealTensor4d>    iajb_;
+  std::unique_ptr<RealTensor4d>    ijab_;
+  std::unique_ptr<RealTensor4d>    ijka_;
+  std::unique_ptr<RealTensor4d>    ijkl_;
+  std::unique_ptr<RealTensor4d>    iabc_;
+  std::unique_ptr<RealTensor4d>    abcd_;
+  std::unique_ptr<RealTensor4d>    iajbAAAA_;
+  std::unique_ptr<RealTensor4d>    ijabAAAA_;
+  std::unique_ptr<RealTensor4d>    ijkaAAAA_;
+  std::unique_ptr<RealTensor4d>    ijklAAAA_;
+  std::unique_ptr<RealTensor4d>    iabcAAAA_;
+  std::unique_ptr<RealTensor4d>    abcdAAAA_;
+  std::unique_ptr<RealTensor4d>    iajbAABB_;
+  std::unique_ptr<RealTensor4d>    ijabAABB_;
+  std::unique_ptr<RealTensor4d>    ijkaAABB_;
+  std::unique_ptr<RealTensor4d>    ijklAABB_;
+  std::unique_ptr<RealTensor4d>    iabcAABB_;
+  std::unique_ptr<RealTensor4d>    abcdAABB_;
+  std::unique_ptr<RealTensor4d>    iajbBBBB_;
+  std::unique_ptr<RealTensor4d>    ijabBBBB_;
+  std::unique_ptr<RealTensor4d>    ijkaBBBB_;
+  std::unique_ptr<RealTensor4d>    ijklBBBB_;
+  std::unique_ptr<RealTensor4d>    iabcBBBB_;
+  std::unique_ptr<RealTensor4d>    abcdBBBB_;
+
+  std::unique_ptr<RealTensor2d>    locMOOcc_;
+  std::unique_ptr<RealTensor2d>    locMOVir_;
+  std::unique_ptr<RealTensor2d>    locMOAOcc_;
+  std::unique_ptr<RealTensor2d>    locMOAVir_;
+  std::unique_ptr<RealTensor2d>    locMOBOcc_;
+  std::unique_ptr<RealTensor2d>    locMOBVir_;
+
+  int nBasis_;
+  int Ref_;
+  int nTCS_;
+  int nOA_;
+  int nOB_;
+  int nVA_;
+  int nVB_;
+  int nO_;
+  int nV_;
+
+  bool iajbIsDBar;
+  bool ijabIsDBar;
+  bool ijkaIsDBar;
+  bool ijklIsDBar;
+  bool iabcIsDBar;
+  bool abcdIsDBar;
+
+  bool haveLocMO;
+
+  void getLocMO();
+
+public:
 
   bool      haveMOiajb;
   bool      haveMOijab;
@@ -76,19 +125,34 @@ public:
                       FileIO *,Controls *,
                       AOIntegrals *,SingleSlater<double> *);
 
-  inline double &iajb(int i, int a, int j, int b){
-    return (*iajb_)(this->iaIndex_[i][a],this->iaIndex_[j][b]);
-  };
-  inline double &iajb(int ia, int jb){
-    return (*iajb_)(ia,jb);
-  };
+  void formIAJB(bool);
+  void formIJAB(bool);
+  void formIJKA(bool);
+  void formIJKL(bool);
+  void formIABC(bool);
+  void formABCD(bool);
 
-  void formiajb();
-  void formijab();
-  void formijka();
-  void formijkl();
-  void formiabc();
-  void formabcd();
+  inline double IAJB(int i,int a,int j,int b,std::string spn="AAAA"){
+    if(this->Ref_ == SingleSlater<double>::TCS){
+      return (*this->iajb_)(i,a,j,b);
+    } else {
+      if(this->singleSlater_->isClosedShell){
+        if(!spn.compare("AAAA") || !spn.compare("BBBB"))
+          return (*this->iajbAAAA_)(i,a,j,b);
+        else if(!spn.compare("AABB"))
+          return (*this->iajbAABB_)(i,a,j,b);
+        else CErr(spn+" is not a recognized spin order for IAJB",this->fileio_->out);
+      } else {
+        if(!spn.compare("AAAA"))
+          return (*this->iajbAAAA_)(i,a,j,b);
+        else if(!spn.compare("AABB"))
+          return (*this->iajbAABB_)(i,a,j,b);
+        else if(!spn.compare("BBBB"))
+          return (*this->iajbBBBB_)(i,a,j,b);
+        else CErr(spn+" is not a regocnized spin order for IAJB",this->fileio_->out);
+      }
+    }
+  } 
 };
 } // namespace ChronusQ
 
