@@ -55,7 +55,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 
   // Initialize default settings and read input
   controls->iniControls();
-  controls->doTCS = true;
+//controls->doTCS = true;
   readInput(fileIO.get(),molecule.get(),basisset.get(),controls.get(),dfBasisset.get());
 //  fileIO->iniFileIO(controls->restart);
 
