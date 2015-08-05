@@ -39,6 +39,7 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
+#include <sstream>
 
 // Math
 #include <cmath>
@@ -76,6 +77,7 @@
 #include <stdexcept>
 #include <algorithm>
 #include <gauinterface.h>
+#include <iterator>
 
 //using namespace std;
 /* Things from STD that we need always */

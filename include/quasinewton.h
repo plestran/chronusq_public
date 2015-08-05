@@ -105,6 +105,9 @@ template <typename T>
     T * XTRhoLMem  ; 
     T * ASuperMem  ;
     T * SSuperMem  ;
+    T * SCPYMem    ;
+    T * NHrProdMem ;
+    T * BiOrthMem  ;
     T * URMem      ; 
     T * ULMem      ; 
     T * ResRMem    ; 
@@ -113,6 +116,7 @@ template <typename T>
     T * TVecLMem   ;         
     T * LAPACK_SCR ;
     T * ERMem      ;
+    T * EIMem      ;
     T * WORK       ;
     /** Inline Functions **/
     inline void loadDefaults(){
@@ -170,6 +174,9 @@ template <typename T>
       this->XTRhoLMem   = NULL; 
       this->ASuperMem   = NULL;
       this->SSuperMem   = NULL;
+      this->SCPYMem     = NULL;
+      this->NHrProdMem  = NULL;
+      this->BiOrthMem   = NULL;
       this->URMem       = NULL; 
       this->ULMem       = NULL; 
       this->ResRMem     = NULL; 
@@ -178,6 +185,7 @@ template <typename T>
       this->TVecLMem    = NULL;         
       this->LAPACK_SCR  = NULL;
       this->ERMem       = NULL;
+      this->EIMem       = NULL;
       this->WORK        = NULL;
     };
   inline void initScrLen(){
@@ -228,6 +236,14 @@ template <typename T>
  * (20) Length of LAPACK workspace (used in all LAPACK Calls)
  *
  * (21) Total double precision words required for LAPACK
+ *
+ * (22) Space for imaginary parts of paired eigenvalues
+ *
+ * (23) Space for a copy of the S supermatrix to use for re-orthogonalization
+ *
+ * (24) Space for the non-hermetian product of S^-1 * A in the reduced dimention
+ *
+ * (25) Space for SX product for BiOrth wrt the metric
  */
     // Lenth of memory partitions
     this->LenSigma   = this->N_ * this->maxSubSpace_;
@@ -263,6 +279,12 @@ template <typename T>
       this->LenScr += this->LenTVec;    // 15
       this->LenScr += this->LenSuper;   // 16
       this->LenScr += this->LenSuper;   // 17
+      this->LenScr += this->LenSuper;   // 23
+      this->LenScr += this->LenSuper;   // 25
+    }
+
+    if(!this->isHermetian_ && this->symmetrizedTrial_){
+      this->LenScr += this->LenSuper; // 24
     }
   
     // LAPACK Storage Space Length
@@ -270,13 +292,16 @@ template <typename T>
     this->LEN_LAPACK_SCR += this->maxSubSpace_;   // 18
     if(!this->isHermetian_ || this->symmetrizedTrial_)
       this->LEN_LAPACK_SCR += this->maxSubSpace_; // 19
+    if(!this->isHermetian_ && this->symmetrizedTrial_)
+      this->LEN_LAPACK_SCR += 2*this->maxSubSpace_; // 22
     this->LEN_LAPACK_SCR += this->LWORK;          // 20
     this->LenScr += this->LEN_LAPACK_SCR;         // 21
   }
     inline int stdSubSpace(){
       // Standard value for the maximum dimension of the
       // iterative subspace min(6*NSek,N/2)
-      return std::min(6*this->nSek_,this->N_/2);
+      //return std::min(20*this->nSek_,this->N_/2);
+      return std::min(250,this->N_/2);
     };
 
     inline int stdNGuess(){
@@ -320,6 +345,11 @@ template <typename T>
       this->TVecLMem      = this->ResLMem     + this->LenRes;
       this->ASuperMem     = this->TVecLMem    + this->LenTVec;
       this->SSuperMem     = this->ASuperMem   + this->LenSuper;
+      this->SCPYMem       = this->SSuperMem   + this->LenSuper;
+      this->BiOrthMem     = this->SCPYMem     + this->LenSuper;
+    }
+    if(!this->isHermetian_ && this->symmetrizedTrial_){
+      this->NHrProdMem    = this->BiOrthMem   + this->LenSuper;
     }
   }
   inline void cleanupScr(){
@@ -345,13 +375,22 @@ template <typename T>
     void fullProjection(const int);
     void buildSuperMat(const int);
     void redDiag(int,ostream &output=cout);
+    void diagMem(int);
+    void stdHerDiag(int, ostream &output=cout);
+    void symmHerDiag(int, ostream &output=cout);
+    void symmNonHerDiag(int, ostream &output=cout);
     void reconstructSolution(const int);
     void genRes(const int);
-    void genResGuess();
     std::vector<bool> checkConv(const int, int &,ostream &output=cout);
     void formNewGuess(std::vector<bool> &,int&,int,int&,int&);
     void formResidualGuess(double,const RealCMMap &, RealCMMap &, const RealCMMap &, RealCMMap &);
+    void genStdHerResGuess(double, const RealCMMap &, RealCMMap &);
+    void genSymmResGuess(double,const RealCMMap &, RealCMMap &, const RealCMMap &, RealCMMap &);
     void setupRestart();
+    void Orth(RealCMMap &);
+    void Orth(RealCMMatrix &);
+    void metBiOrth(RealCMMap &, const RealCMMatrix &);
+    void eigSrt(RealCMMap &, RealVecMap &);
   public:
     /** Destructor
      *  
@@ -377,8 +416,9 @@ template <typename T>
      *  All of the parameters are set based on the SDResponse object
      *  that is passed in. Currently, QuasiNewton knows about the
      *  following from SDResponse:
-     *   -  Configuration Interaction Singles (CIS)
-     *   -  Random Phase Approximation        (RPA)
+     *   -  Configuration Interaction Singles            (CIS)
+     *   -  Random Phase Approximation                   (RPA)
+     *   -  Particle-Particle Random Phase Approximation (pp-RPA)
      *   
      *  Currently, the following developments are under-way and
      *  QuasiNewton will know how to handle them soon enough
@@ -397,6 +437,7 @@ template <typename T>
       this->doGEP_            = (SDR->iMeth() == SDResponse::RPA);
       this->genGuess_         = (this->nGuess_ == 0);
       this->maxSubSpace_      = this->stdSubSpace();
+      this->isHermetian_      = !(SDR->iMeth() == SDResponse::RPA);
       this->initScrLen();
 
       if(this->genGuess_) this->nGuess_ = this->stdNGuess();
@@ -493,12 +534,20 @@ template <typename T>
       new (&NewVecL) TCMMap(this->TVecLMem+ NOld*this->N_,this->N_,NNew);
     }
     if(this->sdr_ != NULL){
-      if(this->sdr_->iMeth() == SDResponse::CIS || this->sdr_->iMeth() == SDResponse::RPA){
+      if(this->sdr_->iMeth() == SDResponse::CIS || this->sdr_->iMeth() == SDResponse::RPA ||
+         this->sdr_->iMeth() == SDResponse::STAB){
         // Linear transformation onto right / gerade
         this->sdr_->formRM3(NewVecR,NewSR,NewRhoL); 
         if(this->sdr_->iMeth() == SDResponse::RPA)   
           // Linear trasnformation onto left / ungerade
           this->sdr_->formRM3(NewVecL,NewSL,NewRhoR);
+      } else if(this->sdr_->iMeth() == SDResponse::PPRPA  || 
+                this->sdr_->iMeth() == SDResponse::PPATDA ||
+                this->sdr_->iMeth() == SDResponse::PPCTDA) {
+        this->sdr_->formRM4(NewVecR,NewSR,NewRhoL); 
+        if(this->sdr_->iMeth() == SDResponse::PPRPA)   
+          // Linear trasnformation onto left / ungerade
+          this->sdr_->formRM4(NewVecL,NewSL,NewRhoR);
       }
     } else NewSR = (*this->A_) * NewVecR;
   } // linearTrans

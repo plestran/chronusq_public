@@ -39,6 +39,7 @@ void Controls::iniControls(){
   this->HF =                true;
   this->DFT =               false;
   this->hybridDFT =         false;
+  this->doTCS =             false;
   this->restart =           false;
   this->thresholdS =        1.0e-10;
   this->thresholdAB =       1.0e-6;
@@ -51,7 +52,11 @@ void Controls::iniControls(){
   this->doQuadpole =        true;
   this->doOctpole =         true;
   this->doSDR     =         false;
+  this->doCUHF    =         false;
   this->SDMethod  =         0;
+  this->SCFdenTol_ = 1e-10;
+  this->SCFeneTol_ = 1e-12;
+  this->SCFmaxIter_ = 128;
 #ifdef USE_LIBINT
   // Bootstrap Libint env
   libint2::init(); 
@@ -76,11 +81,16 @@ void Controls::readPSCF(std::fstream &in, std::fstream &out){
   std::string readString;
   in >> readString;
   readString = stringupper(readString);
-  if(!readString.compare("CIS"))      this->SDMethod = 1;
-  else if(!readString.compare("RPA")) this->SDMethod = 2;
+  if(!readString.compare("CIS"))        this->SDMethod = 1;
+  else if(!readString.compare("RPA"))   this->SDMethod = 2;
+  else if(!readString.compare("PPRPA")) this->SDMethod = 3;
+  else if(!readString.compare("PPATDA")) this->SDMethod = 4;
+  else if(!readString.compare("PPCTDA")) this->SDMethod = 5;
+  else if(!readString.compare("STAB")) this->SDMethod = 6;
   else CErr("Input PSCF Option Not Recgnized",out);
 
-  in >> this->SDNSek;
+  if(this->SDMethod != 6) in >> this->SDNSek;
+  else                    this->SDNSek = 3;
 }
 
 void Controls::readDebug(std::string str){

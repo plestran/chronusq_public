@@ -110,7 +110,7 @@ void Molecule::ioRead(FileIO * fileio) {
   };
   nAtoms_ = storage[0];
   charge_ = storage[1];
-  spin_   = storage[2];
+  multip_   = storage[2];
   nTotalE_= storage[3];
   size_   = storage[4];
   cart_.reset();
@@ -134,7 +134,7 @@ void Molecule::ioWrite(FileIO * fileio) {
   int storage[nInteger];
   storage[0] = nAtoms_;
   storage[1] = charge_;
-  storage[2] = spin_;
+  storage[2] = multip_;
   storage[3] = nTotalE_;
   storage[4] = size_;
   try { fileio->io("W",blockMolecule,"BIN",storage,nInteger,0);}

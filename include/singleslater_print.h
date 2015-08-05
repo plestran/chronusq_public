@@ -43,7 +43,7 @@ void SingleSlater<T>::printInfo() {
   this->fileio_->out<<"\nSingle Slater Determinent Wave Function Information:"<<endl;
   this->fileio_->out<<std::setw(15)<<"nOccA ="<<std::setw(8)<<this->nOccA_<<std::setw(5)<<" "<<std::setw(20)<<"nVirA ="<<std::setw(8)<<this->nVirA_<<endl;
   this->fileio_->out<<std::setw(15)<<"nOccB ="<<std::setw(8)<<this->nOccB_<<std::setw(5)<<" "<<std::setw(20)<<"nVirB ="<<std::setw(8)<<this->nVirB_<<endl;
-  this->fileio_->out<<std::setw(15)<<"Multiplicity ="<<std::setw(8)<<this->spin_<<endl;
+  this->fileio_->out<<std::setw(15)<<"Multiplicity ="<<std::setw(8)<<this->multip_<<endl;
 };
 /***********************************************
  * Print the Multipole Moments (Electric Only) *

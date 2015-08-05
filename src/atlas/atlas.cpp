@@ -80,15 +80,16 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 
   // Initialize default settings and read input
   controls->iniControls();
+//controls->doTCS = true;
   readInput(fileIO.get(),molecule.get(),basisset.get(),controls.get(),dfBasisset.get());
 //  fileIO->iniFileIO(controls->restart);
 
   // print out molecular and basis set information
   controls->printSettings(fileIO->out);
   molecule->printInfo(fileIO.get(),controls.get());
-  basisset->printInfo_libint(fileIO.get(),controls.get());
+  basisset->printInfo();
 
-  dfBasisset->printInfo_libint(fileIO.get(),controls.get());
+//dfBasisset->printInfo();
 
   aointegrals->iniAOIntegrals(molecule.get(),basisset.get(),fileIO.get(),controls.get(),dfBasisset.get());
   hartreeFock->iniSingleSlater(molecule.get(),basisset.get(),aointegrals.get(),fileIO.get(),controls.get());
@@ -106,19 +107,19 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   hartreeFock->formFock();
   aointegrals->printTimings();
   hartreeFock->computeEnergy();
-  std::shared_ptr<MOIntegrals> moIntegrals = std::make_shared<MOIntegrals>();
-  if(controls->optWaveFunction) {
-    hartreeFock->doCUHF = false;
-    hartreeFock->SCF();
-  }
+  if(controls->optWaveFunction)  hartreeFock->SCF();
   //MOIntegrals *moIntegrals = new MOIntegrals();
   //moIntegrals->iniMOIntegrals(molecule,basisset,fileIO,controls,aointegrals,hartreeFock);
   else fileIO->out << "**Skipping SCF Optimization**" << endl; 
+  std::shared_ptr<MOIntegrals> moIntegrals = std::make_shared<MOIntegrals>();
   hartreeFock->computeMultipole();
   if(controls->doSDR) {
+    sdResponse->setPPRPA(1);
     sdResponse->iniSDResponse(molecule.get(),basisset.get(),moIntegrals.get(),fileIO.get(),
                               controls.get(),hartreeFock.get());
+    
     sdResponse->IterativeRPA();
+  //sdResponse->incorePPRPA();
   }
 
 //if(controls->doDF) aointegrals->compareRI();
@@ -137,11 +138,12 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   cartGP pt(0.01,0.02,0.03);
   sph3GP ptSPH;
   bg::transform(pt,ptSPH);
-  double *f = basisset->basisEval(2,basisset->shells_libint[2].O,&ptSPH);
-  double *g = basisset->basisEval(basisset->shells_libint[2],&ptSPH);
-  cout << basisset->shells_libint[2] << endl;
+  double *f = basisset->basisEval(2,basisset->shells(2).O,&ptSPH);
+//double *g = basisset->basisEval(basisset->shells(2),&ptSPH);
+  cout << basisset->shells(2) << endl;
   for(auto i = 0; i < 3; i++)
-  cout << "FEVAL " << *(f+i) << " " << *(g+i) <<endl;
+  cout << "FEVAL " << *(f+i) <<endl;
+//cout << "FEVAL " << *(f+i) << " " << *(g+i) <<endl;
   fileIO->out << "**AP One dimensional grid test**" << endl;
   int Ngridr =   700;
   int NLeb1    = 14;

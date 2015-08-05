@@ -208,21 +208,38 @@ public:
   void computeAORII();
   void computeAORIS();
   void transformAORII();
-  template<typename T> void twoEContractDirect(bool,bool,const T &,T &,const T &, T &);
+  template<typename T> void twoEContractDirect(bool,bool,bool,bool,const T&,T&,const T&,T&);
   template<typename T> void twoEContractN4(bool,bool,const T &,T &,const T &, T &);
   template<typename T> void twoEContractDF(bool,bool,const T &,T &,const T &, T &);
-  template<typename T> void multTwoEContractDirect(int, bool,bool,const std::vector<T> &,std::vector<T> &,
-                                                             const std::vector<T> &,std::vector<T> &);
-  template<typename T> void multTwoEContractN4(int, bool,bool,const std::vector<T> &,std::vector<T> &,
-                                                         const std::vector<T> &,std::vector<T> &);
-  template<typename T> void multTwoEContractDF(int, bool,bool,const std::vector<T> &,std::vector<T> &,
-                                                         const std::vector<T> &,std::vector<T> &);
-  template<typename TMat,typename T> void Restricted34HerContract(TMat&, const TMat &, int,int,int,int,
-                                                  int,int,int,int,const T*,T);
-  template<typename TMat,typename T> void UnRestricted34HerContract(TMat&, const TMat &, TMat&, const TMat &, int,int,int,int,
-                                                  int,int,int,int,const T*,T);
-  template<typename TMat,typename T> void General34NonHerContract(TMat&, const TMat &, TMat&, const TMat &, int,int,int,int,
-                                                  int,int,int,int,const T*,T);
+  template<typename T>
+    void multTwoEContractDirect(int, bool,bool,bool,bool,const std::vector<T> &,std::vector<T> &,
+                                const std::vector<T> &,std::vector<T> &);
+  template<typename T> 
+    void multTwoEContractN4(int, bool,bool,const std::vector<T> &,std::vector<T> &,
+                            const std::vector<T> &,std::vector<T> &);
+  template<typename T> 
+    void multTwoEContractDF(int, bool,bool,const std::vector<T> &,std::vector<T> &,
+                            const std::vector<T> &,std::vector<T> &);
+  template<typename TMat,typename T> 
+    void Restricted34Contract(TMat&, const TMat &, int,int,int,int,int,int,int,int,
+                                 const T*,T);
+  template<typename TMat,typename T> 
+    void UnRestricted34Contract(TMat&, const TMat &, TMat&, const TMat &, const TMat &, 
+                                   int,int,int,int,int,int,int,int,const T*,T);
+  template<typename TMat,typename T>
+    void Spinor34Contract(TMat&,const TMat&,int,int,int,int,int,int,int,int,const T*,T);
+  template<typename TMat,typename T> 
+    void General24CouContract(TMat&, const TMat &, int,int,int,int,int,int,int,int,
+                              const T*,T);
+  template<typename TMat,typename T> void Gen34Contract(TMat&,const TMat&,int,int,int,int,T);
+  template<typename TMat,typename T> void Gen23Contract(TMat&,const TMat&,int,int,int,int,T,
+                                                        double);
+  template<typename TMat,typename T> void Gen24Contract(TMat&,const TMat&,int,int,int,int,T);
+  template<typename TMat,typename T> void GenCouContractSpinor(TMat&,const TMat&,int,int,int,
+                                                               int,T);
+  template<typename TMat,typename T> void GenExchContractSpinor(TMat&,const TMat&,int,int,
+                                                                int,int,T,double);
+
   void compareRI();
 #endif
 //----------------------------------------//

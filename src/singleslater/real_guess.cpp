@@ -33,49 +33,127 @@ using ChronusQ::Controls;
 using ChronusQ::Molecule;
 using ChronusQ::HashNAOs;
 namespace ChronusQ {
+template<>
+void SingleSlater<double>::placeAtmDen(std::vector<int> atomIndex, SingleSlater<double> &hfA){
+  // Place atomic SCF densities in the right place of the total density
+  // ** Note: ALWAYS spin average, even for UHF **
+  for(auto iAtm : atomIndex){
+    auto iBfSt = this->basisset_->mapCen2Bf(iAtm)[0];
+    auto iSize = this->basisset_->mapCen2Bf(iAtm)[1]; 
+    if(this->Ref_ != TCS){
+/*
+      this->densityA_->block(iBfSt,iBfSt,iSize,iSize)= (*hfA.densityA_);
+      if(!this->isClosedShell){
+        if(hfA.isClosedShell)
+          this->densityB_->block(iBfSt,iBfSt,iSize,iSize)= 2*(*hfA.densityA_);
+        else
+          this->densityB_->block(iBfSt,iBfSt,iSize,iSize)= 
+            (*hfA.densityB_) + (*hfA.densityA_);
+      } else {
+        if(!hfA.isClosedShell){
+          this->densityA_->block(iBfSt,iBfSt,iSize,iSize) += (*hfA.densityB_);
+        }
+      }
+*/
+      this->densityA_->block(iBfSt,iBfSt,iSize,iSize)= (*hfA.densityA_);
+      if(this->isClosedShell){
+        if(hfA.isClosedShell) 
+          this->densityA_->block(iBfSt,iBfSt,iSize,iSize) += (*hfA.densityA_);
+        else
+          this->densityA_->block(iBfSt,iBfSt,iSize,iSize) += (*hfA.densityB_);
+      } else {
+        this->densityB_->block(iBfSt,iBfSt,iSize,iSize)= (*hfA.densityA_);
+        if(hfA.isClosedShell){
+          this->densityA_->block(iBfSt,iBfSt,iSize,iSize) += (*hfA.densityA_);
+          this->densityB_->block(iBfSt,iBfSt,iSize,iSize) += (*hfA.densityA_);
+        } else {
+          this->densityA_->block(iBfSt,iBfSt,iSize,iSize) += (*hfA.densityB_);
+          this->densityB_->block(iBfSt,iBfSt,iSize,iSize) += (*hfA.densityB_);
+        }
+      }
+    } else {
+      for(auto I = iBfSt, i = 0; I < (iBfSt +iSize); I += 2, i++)
+      for(auto J = iBfSt, j = 0; J < (iBfSt +iSize); J += 2, j++){
+        (*this->densityA_)(I,J)     = (*hfA.densityA_)(i,j) + (*hfA.densityB_)(i,j);
+        (*this->densityA_)(I+1,J+1) = (*hfA.densityA_)(i,j) + (*hfA.densityB_)(i,j);
+      }
+    }
+  } // loop iAtm
+}
+template<>
+void SingleSlater<double>::scaleDen(){
+  // Scale UHF densities according to desired multiplicity
+  if(!this->isClosedShell && this->Ref_ != TCS){
+    int nE = this->molecule_->nTotalE();
+    (*this->densityA_) *= (double)this->nAE_/(double)nE ;
+    (*this->densityB_) *= (double)this->nBE_/(double)nE ;
+  } else if(this->Ref_ == TCS) {
+    int nE = this->molecule_->nTotalE();
+    for(auto i = 0; i < this->nTCS_*this->nBasis_; i += 2)
+    for(auto j = 0; j < this->nTCS_*this->nBasis_; j += 2){
+      (*this->densityA_)(i,j)      *= (double)this->nAE_/(double)nE ;
+      (*this->densityA_)(i+1,j+1)  *= (double)this->nBE_/(double)nE ;
+    }
+/*
+    double theta = math.pi / 8.0;
+    double c = std::cos(theta);
+    double s = std::sin(theta);
+    for(auto i = 0; i < this->nTCS_*this->nBasis_; i += 2)
+    for(auto j = 0; j < this->nTCS_*this->nBasis_; j += 2){
+      double Paa = (*this->densityA_)(i,j);
+      double Pbb = (*this->densityA_)(i+1,j+1);
+      (*this->densityA_)(i,j)     = c*c*Paa + s*s*Pbb;
+      (*this->densityA_)(i+1,j+1) = c*c*Pbb + s*s*Paa;
+      (*this->densityA_)(i+1,j)   = c*s*(Paa - Pbb);
+      (*this->densityA_)(i,j+1)   = c*s*(Paa - Pbb);
+     
+    }
+*/
+    
+//  (*this->densityA_) *= (double)(this->nAE_+this->nBE_)/(double)nE ;
+  }
+//CErr();
+}; // SingleSlater::scaleDen [T=double]
 //--------------------------------//
 // form the initial guess of MO's //
 //--------------------------------//
 template<>
 void SingleSlater<double>::formGuess() {
-  auto aointegralsAtom  = new AOIntegrals;
-  auto hartreeFockAtom  = new SingleSlater<double>;
-  auto controlAtom      = new Controls;
-  auto basisSetAtom     = new BasisSet;
-  auto dfBasissetAtom   = new BasisSet;
   
   std::vector<RealMatrix> atomMO;
   std::vector<RealMatrix> atomMOB;
   int readNPGTO,L, nsize;
   this->moA_->setZero();
-  if(!this->RHF_) this->moB_->setZero();
+  if(!this->isClosedShell && this->Ref_ != TCS) this->moB_->setZero();
 
   // Determining unique atoms
   std::vector<Atoms> uniqueElement;
-  std::vector<int>   repeatedAtoms;
   for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
     if(iAtm == 0){ 
       uniqueElement.push_back(elements[this->molecule_->index(iAtm)]);
-      repeatedAtoms.push_back(iAtm);
     }
-    int uSize = uniqueElement.size();
     bool uniq = true;
-    int count;
-    for(auto iUn = 0; iUn < uSize; iUn++){
+    for(auto iUn = 0; iUn < uniqueElement.size(); iUn++){
       if(uniqueElement[iUn].atomicNumber == 
         elements[this->molecule_->index(iAtm)].atomicNumber){
         uniq = false;
-	count=iUn;
         break;
       }
     }
     if(uniq) {
       uniqueElement.push_back(elements[this->molecule_->index(iAtm)]);
-      repeatedAtoms.push_back(uniqueElement.size()-1);
     }
-    else {
-      if (iAtm!=0)
-        repeatedAtoms.push_back(count); 
+  }
+
+  // Generate a map of unique atoms to centers
+  std::vector<std::vector<int>> atomIndex(uniqueElement.size());
+  for(auto iUn = 0; iUn < uniqueElement.size(); iUn++){
+    for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
+      if(uniqueElement[iUn].atomicNumber == 
+        elements[this->molecule_->index(iAtm)].atomicNumber){
+        
+        atomIndex[iUn].push_back(iAtm);
+      }
     }
   }
 
@@ -83,137 +161,57 @@ void SingleSlater<double>::formGuess() {
                         " unique atoms in molecule" << endl;
   
   this->fileio_->out << endl << "Atomic SCF Starting............." << endl << endl;
-  for(auto iUn = 0; iUn < uniqueElement.size(); iUn++){
-    std::vector<libint2::Shell> atomShell;
-    Molecule uniqueAtom(uniqueElement[iUn],this->fileio_);
-    uniqueAtom.readCharge(0);
-    uniqueAtom.readSpin(uniqueElement[iUn].defaultMult);
-    for (auto i = 0; i< this->basisset_->allBasis.size();i++){
-      if (this->basisset_->allBasis[i].atomName.compare(uniqueElement[iUn].symbol)==0){
-	basisSetAtom->shells_libint= this->basisset_->allBasis[i].refShell;
-	basisSetAtom->setnBasis(0);
-	for (auto k =0;k<basisSetAtom->shells_libint.size();k++){
-	  readNPGTO= basisSetAtom->shells_libint[k].alpha.size();
-	  L = basisSetAtom->shells_libint[k].contr[0].l;
-	  basisSetAtom->setnBasis(basisSetAtom->nBasis()+HashNAOs(L));
-	  basisSetAtom->setnPrimitive(basisSetAtom->nPrimitive() + readNPGTO * HashNAOs(L));
-	  if (k==0){
-	    basisSetAtom->maxPrim = readNPGTO;
-	    basisSetAtom->maxL    = L;
-	  }
-	  if (basisSetAtom->maxPrim < readNPGTO){
-	    basisSetAtom->maxPrim = readNPGTO; 
-	  }
-	  if (basisSetAtom->maxL < L){
-	    basisSetAtom->maxL = L; 
-	  }
-	}
-	break;
-      }
-    }
-    for (auto i=0;i<basisSetAtom->shells_libint.size();i++){
-      basisSetAtom->shells_libint[i].renorm();
-    }
-    nsize = basisSetAtom->nBasis();
-    RealMatrix denMOA(nsize, nsize);
-    RealMatrix denMOB(nsize, nsize);
-    basisSetAtom->convToLI=true;
-    controlAtom->iniControls();
-    aointegralsAtom->iniAOIntegrals (&uniqueAtom, basisSetAtom, this->fileio_, controlAtom, dfBasissetAtom);
-    hartreeFockAtom->iniSingleSlater(&uniqueAtom, basisSetAtom, aointegralsAtom, this->fileio_, controlAtom);
-    hartreeFockAtom->moA_->setZero();
-    if (!hartreeFockAtom->RHF_) hartreeFockAtom->moB_->setZero();
-    hartreeFockAtom->haveMO = true;
-    hartreeFockAtom->formFock();
-    hartreeFockAtom->computeEnergy();
-    hartreeFockAtom->doCUHF = true;
-    hartreeFockAtom->SCF();
-    if (!hartreeFockAtom->RHF_){
-      denMOB = (*hartreeFockAtom->densityB_);
-      denMOA = (*hartreeFockAtom->densityA_);
-    }
-    else{
-      denMOA = (*hartreeFockAtom->densityA_);
-      denMOB = (*hartreeFockAtom->densityA_);
-    }
-    atomMO.push_back(denMOA);
-    atomMOB.push_back(denMOB);
-    basisSetAtom->setnBasis(0);
-    basisSetAtom->setnPrimitive(0);
-  }
-  this->fileio_->out << endl << "Atomic SCF Completed............." << endl << endl;
-  int n = (*this->moA_).rows();
-  int lenX  = n * n;
-  int lenFp = n * n;
-  int lenFb = n * n;
-  int lwork = 4 *n;
-  int lenoccNum = n;
-  int lenScr    = lenX + lenFp + lenFb + lwork + lenoccNum;
-  double *SCR, *Xmem, *Fpmem, *Fbmem, *work, *occNum;
-  
-  SCR   = new double[lenScr];
-  Xmem  = SCR;
-  Fpmem = Xmem  + lenX;
-  Fbmem = Fpmem + lenFp;
-  work  = Fbmem + lenFb;
-  occNum= work  + lwork;
- 
-  RealMap X(Xmem, n, n);
-  RealMap FpAlpha(Fpmem, n, n);
-  RealMap FpBeta (Fbmem, n, n);
-  for(auto iUn = 0; iUn < uniqueElement.size(); iUn++){
-    Molecule uniqueAtom(uniqueElement[iUn],this->fileio_);
-  }
-  this->haveMO = true;
-  if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
-  X=(*this->aointegrals_->overlap_).pow(-0.5);
-  int nIndex=0;
-  for (auto k=0; k<repeatedAtoms.size();k++){
-    for (auto i=nIndex; i<atomMO[repeatedAtoms[k]].rows()+nIndex;i++){
-      for (auto j=nIndex; j<atomMO[repeatedAtoms[k]].cols()+nIndex;j++){
-	(*this->densityA_)(i,j)=((atomMO[repeatedAtoms[k]])(i-nIndex,j-nIndex)+(atomMOB[repeatedAtoms[k]])(i-nIndex,j-nIndex))/2;         
-        if (!this->RHF_){
-	  (*this->densityB_)(i,j)=((atomMO[repeatedAtoms[k]])(i-nIndex,j-nIndex)+(atomMOB[repeatedAtoms[k]])(i-nIndex,j-nIndex))/2;         
-	}
-      }
-    }
-    nIndex = nIndex+atomMO[repeatedAtoms[k]].rows();
-  }
-  atomMO.resize(0);
-  atomMOB.resize(0);
-  
-  if(!this->RHF_){
-    int numE = this->molecule_->nTotalE();
-    int betaE  = (numE-this->molecule_->spin()-1)/2;
-    int alphaE = (numE - betaE);
-    (*this->densityA_) =2* (double)alphaE/(double)numE * (*this->densityA_);
-    (*this->densityB_) =2* (double)betaE/(double)numE * (*this->densityB_);
-  }
-  int info  = -1;
-  char j = 'V';
-  char u = 'U';
-  this->haveDensity = true;
-  this->formFock();
-  FpAlpha   = X.transpose()*(*this->fockA_)*X;
-  if(!this->RHF_) {
-    FpBeta     = X.transpose()*(*this->fockB_)*X;
-  }
-  dsyev_(&j,&u,&n, FpAlpha.data(), &n, this->epsA_->data(), work, &lwork, &info);
-  FpAlpha.transposeInPlace(); // bc Row Major
-  (*this->moA_) = X*FpAlpha;
-  
-  if(!this->RHF_) {
-    dsyev_(&j,&u,&n, FpBeta.data(), &n, this->epsB_->data(), work, &lwork, &info);
-    FpBeta.transposeInPlace(); // bc Row Major
-    (*this->moB_) = X*FpBeta;
-  }
 
-  this->haveDensity = false;
-  if(this->controls_->printLevel>=3) {
-    prettyPrint(this->fileio_->out,(*this->moA_),"Alpha MO Coeff");
-    if(!this->RHF_) prettyPrint(this->fileio_->out,(*this->moB_),"Beta MO Coeff");
-  };
-  delete [] SCR;
+  // Loop and perform CUHF on each atomic center
+  for(auto iUn = 0; iUn < uniqueElement.size(); iUn++){
+    // Local objects to be constructed and destructed at every loop
+    AOIntegrals aointegralsAtom;
+    SingleSlater<double> hartreeFockAtom;
+    Controls controlAtom;
+    BasisSet basisSetAtom;
+    BasisSet dfBasisSetAtom;
+    Molecule uniqueAtom(uniqueElement[iUn],this->fileio_);
+
+    // FIXME: This only makes sense for neutral molecules
+    uniqueAtom.readCharge(0);
+    uniqueAtom.readMultip(uniqueElement[iUn].defaultMult);
+
+    // Construct atomic basis set from the reference
+    this->basisset_->constructExtrn(&uniqueAtom,&basisSetAtom);
+    // Generate basis maps
+    basisSetAtom.makeMapSh2Bf(1);
+    basisSetAtom.makeMapSh2Cen(&uniqueAtom);
+    basisSetAtom.renormShells(); // Libint throws a hissy fit without this
+
+    controlAtom.iniControls();
+    controlAtom.doCUHF = true; // Can set to false too if UHF guess is desired
+
+    // Initialize the local integral and SS classes
+    aointegralsAtom.iniAOIntegrals(&uniqueAtom,&basisSetAtom,this->fileio_,&controlAtom,
+      &dfBasisSetAtom);
+    hartreeFockAtom.iniSingleSlater(&uniqueAtom,&basisSetAtom,&aointegralsAtom,
+      this->fileio_,&controlAtom);
+
+    // Zero out the MO coeff for local SS object
+    hartreeFockAtom.moA_->setZero();
+    if(!hartreeFockAtom.isClosedShell) hartreeFockAtom.moB_->setZero();
+    hartreeFockAtom.haveMO = true;
+
+    // Prime and perform the atomic SCF
+    hartreeFockAtom.formFock();
+    hartreeFockAtom.computeEnergy();
+    hartreeFockAtom.SCF();
+
+    // Place Atomic Densities into Total Densities
+    this->placeAtmDen(atomIndex[iUn],hartreeFockAtom);
+
+  } // Loop iUn
+
+  this->scaleDen();
+
+  // Set flags to use in the rest of code
+  this->haveMO = true;
+  this->haveDensity = true;
 };
 //------------------------------------------//
 // form the initial guess of MOs from input //
@@ -237,7 +235,7 @@ void SingleSlater<double>::readGuessIO() {
   this->fileio_->in.close();
   if(this->controls_->printLevel>=3) {
     prettyPrint(this->fileio_->out,(*this->moA_),"Alpha MO Coeff");
-    if(!this->RHF_) prettyPrint(this->fileio_->out,(*this->moB_),"Beta MO Coeff");
+    if(this->Ref_ != RHF) prettyPrint(this->fileio_->out,(*this->moB_),"Beta MO Coeff");
   };
   this->haveMO = true;
 };
@@ -253,16 +251,17 @@ void SingleSlater<double>::readGuessGauMatEl(GauMatEl& matEl){
     this->moA_->data()[i] = scr[i];
   this->moA_->transposeInPlace(); // Row Major
   delete [] scr;
-  if(!this->RHF_) {
+  if(this->Ref_ != RHF) {
     scr = matEl.readRec(GauMatEl::mob); 
     for(auto i = 0; i < this->nBasis_*this->nBasis_; i++)
       this->moB_->data()[i] = scr[i];
     this->moB_->transposeInPlace(); // Row Major
     delete [] scr;
   }
+  this->matchord();
   if(this->controls_->printLevel>=3) {
     prettyPrint(this->fileio_->out,(*this->moA_),"Alpha MO Coeff");
-    if(!this->RHF_) prettyPrint(this->fileio_->out,(*this->moB_),"Beta MO Coeff");
+    if(this->Ref_ != RHF) prettyPrint(this->fileio_->out,(*this->moB_),"Beta MO Coeff");
   };
   this->haveMO = true;
 }
@@ -311,7 +310,7 @@ void SingleSlater<double>::readGuessGauFChk(std::string &filename) {
   fchk->close();
   if(this->controls_->printLevel>=3) {
     prettyPrint(this->fileio_->out,(*this->moA_),"Alpha MO Coeff");
-    if(!this->RHF_) prettyPrint(this->fileio_->out,(*this->moB_),"Beta MO Coeff");
+    if(this->Ref_ != RHF) prettyPrint(this->fileio_->out,(*this->moB_),"Beta MO Coeff");
   };
   this->haveMO = true;
 };
