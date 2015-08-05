@@ -338,14 +338,14 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
 */
         int IOff = 0;
         for(auto nMat = 0; nMat < mat.size(); nMat++) {
-//        ConstRealMap bufMat(&buff[IOff],n1/this->nTCS_,n2/this->nTCS_); // Read only map
+          ConstRealMap bufMat(&buff[IOff],n1,n2); // Read only map
 //        mat[nMat].block(bf1,bf2,n1,n2) = bufMat;
 //        for(auto i = 0, ij = 0; i < n1; i += this->nTCS_)
 //        for(auto j = 0; j < n2; j += this->nTCS_, ij++  ){
-          for(auto i = 0, bf1 = bf1_s, ij = 0; i < n1; i++, bf1 += this->nTCS_)            
+          for(auto i = 0, bf1 = bf1_s; i < n1; i++, bf1 += this->nTCS_)            
           for(auto j = 0, bf2 = bf2_s; j < n2; j++, bf2 += this->nTCS_){            
-            mat[nMat](bf1,bf2) = buff[IOff + ij];
-            if(this->nTCS_ == 2) mat[nMat](bf1+1,bf2+1) = buff[IOff + ij];
+            mat[nMat](bf1,bf2) = bufMat(i,j);
+            if(this->nTCS_ == 2) mat[nMat](bf1+1,bf2+1) = bufMat(i,j);
           }
           IOff += n1*n2;
         }
