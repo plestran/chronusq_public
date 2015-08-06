@@ -109,6 +109,7 @@ class MOIntegrals{
   void getLocMO();
 
 public:
+  void testLocMO();
 
   bool      haveMOiajb;
   bool      haveMOijab;
@@ -137,6 +138,7 @@ public:
       return (*this->iajb_)(i,a,j,b);
     } else {
       if(this->singleSlater_->isClosedShell){
+//cout << "(" << i << " " << a + this->nOA_ << " | " << j << " " << this->nOA_+b << ") " <<(*this->iajbAABB_)(i,a,j,b) << endl;
         if(!spn.compare("AAAA") || !spn.compare("BBBB"))
           return (*this->iajbAAAA_)(i,a,j,b);
         else if(!spn.compare("AABB"))
@@ -150,6 +152,71 @@ public:
         else if(!spn.compare("BBBB"))
           return (*this->iajbBBBB_)(i,a,j,b);
         else CErr(spn+" is not a regocnized spin order for IAJB",this->fileio_->out);
+      }
+    }
+  } 
+  inline double IABJ(int i,int a,int b,int j,std::string spn="AAAA"){
+    if(this->Ref_ == SingleSlater<double>::TCS){
+      return (*this->iajb_)(i,a,j,b);
+    } else {
+      if(this->singleSlater_->isClosedShell){
+        if(!spn.compare("AAAA") || !spn.compare("BBBB"))
+          return (*this->iajbAAAA_)(i,a,j,b);
+        else if(!spn.compare("AABB"))
+          return (*this->iajbAABB_)(i,a,j,b);
+        else CErr(spn+" is not a recognized spin order for IAJB",this->fileio_->out);
+      } else {
+        if(!spn.compare("AAAA"))
+          return (*this->iajbAAAA_)(i,a,j,b);
+        else if(!spn.compare("AABB"))
+          return (*this->iajbAABB_)(i,a,j,b);
+        else if(!spn.compare("BBBB"))
+          return (*this->iajbBBBB_)(i,a,j,b);
+        else CErr(spn+" is not a regocnized spin order for IAJB",this->fileio_->out);
+      }
+    }
+  } 
+  inline double ABCD(int a,int b,int c,int d,std::string spn="AAAA"){
+    if(this->Ref_ == SingleSlater<double>::TCS){
+      return (*this->abcd_)(a,b,c,d);
+    } else {
+      if(this->singleSlater_->isClosedShell){
+//cout << "(" << a + this->nOA_ << " " << b + this->nOA_ << " | " << c + this->nOA_ << " " << this->nOA_+d << ") " <<(*this->abcdAABB_)(a,b,c,d) << endl;
+        if(!spn.compare("AAAA") || !spn.compare("BBBB"))
+          return (*this->abcdAAAA_)(a,b,c,d);
+        else if(!spn.compare("AABB"))
+          return (*this->abcdAABB_)(a,b,c,d);
+        else CErr(spn+" is not a recognized spin order for abcd",this->fileio_->out);
+      } else {
+        if(!spn.compare("AAAA"))
+          return (*this->abcdAAAA_)(a,b,c,d);
+        else if(!spn.compare("AABB"))
+          return (*this->abcdAABB_)(a,b,c,d);
+        else if(!spn.compare("BBBB"))
+          return (*this->abcdBBBB_)(a,b,c,d);
+        else CErr(spn+" is not a regocnized spin order for abcd",this->fileio_->out);
+      }
+    }
+  } 
+  inline double IJKL(int i,int j,int k,int l,std::string spn="AAAA"){
+    if(this->Ref_ == SingleSlater<double>::TCS){
+      return (*this->ijkl_)(i,j,k,l);
+    } else {
+      if(this->singleSlater_->isClosedShell){
+//cout << "(" << i << " " << j << " | " << k << " " << l << ") " <<(*this->ijklAABB_)(i,j,k,l) << endl;
+        if(!spn.compare("AAAA") || !spn.compare("BBBB"))
+          return (*this->ijklAAAA_)(i,j,k,l);
+        else if(!spn.compare("AABB"))
+          return (*this->ijklAABB_)(i,j,k,l);
+        else CErr(spn+" is not a recognized spin order for ijkl",this->fileio_->out);
+      } else {
+        if(!spn.compare("AAAA"))
+          return (*this->ijklAAAA_)(i,j,k,l);
+        else if(!spn.compare("AABB"))
+          return (*this->ijklAABB_)(i,j,k,l);
+        else if(!spn.compare("BBBB"))
+          return (*this->ijklBBBB_)(i,j,k,l);
+        else CErr(spn+" is not a regocnized spin order for ijkl",this->fileio_->out);
       }
     }
   } 

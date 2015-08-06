@@ -54,7 +54,8 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
   this->maxSCFIter_ = controls->SCFmaxIter_;
 
   this->isClosedShell = (this->multip_ == 1);
-  if(this->isClosedShell && !controls->doCUHF)   this->Ref_ = RHF ; // RHF
+  if(this->isClosedShell && !controls->doCUHF
+     && !controls->doTCS)                        this->Ref_ = RHF ; // RHF
   else if(!controls->doCUHF && !controls->doTCS) this->Ref_ = UHF ; // UHF
   else if(controls->doCUHF)                      this->Ref_ = CUHF; // CUHF
   else if(controls->doTCS)                       this->Ref_ = TCS ; // TCS

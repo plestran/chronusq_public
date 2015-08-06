@@ -66,6 +66,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 
 //dfBasisset->printInfo();
 
+  cout << "HERE" << endl;
   aointegrals->iniAOIntegrals(molecule.get(),basisset.get(),fileIO.get(),controls.get(),dfBasisset.get());
   hartreeFock->iniSingleSlater(molecule.get(),basisset.get(),aointegrals.get(),fileIO.get(),controls.get());
   hartreeFock->printInfo();
@@ -76,12 +77,17 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
     hartreeFock->readGuessGauMatEl(matEl);
   }
   else if(controls->guess==3) hartreeFock->readGuessGauFChk(controls->gauFChkName);
+  cout << "HERE" << endl;
 //APS I have MO Please check in which controls call the following function
 //hartreeFock->matchord();
 //APE
+  cout << "HERE" << endl;
   hartreeFock->formFock();
+  cout << "HERE" << endl;
   aointegrals->printTimings();
+  cout << "HERE" << endl;
   hartreeFock->computeEnergy();
+  cout << "HERE" << endl;
   if(controls->optWaveFunction)  hartreeFock->SCF();
   else fileIO->out << "**Skipping SCF Optimization**" << endl; 
   hartreeFock->computeMultipole();
@@ -91,10 +97,12 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
     sdResponse->iniSDResponse(molecule.get(),basisset.get(),mointegrals.get(),fileIO.get(),
                               controls.get(),hartreeFock.get());
     
-    sdResponse->IterativeRPA();
+//  sdResponse->IterativeRPA();
   //sdResponse->incorePPRPA();
 //sdResponse->incoreCIS();
+  sdResponse->incorePPRPAnew();
   }
+//mointegrals->testLocMO();
 
 //if(controls->doDF) aointegrals->compareRI();
 /*
