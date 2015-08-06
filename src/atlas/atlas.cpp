@@ -24,6 +24,7 @@
  *  
  */
 #include <workers.h>
+#include <mollerplesset.h>
 using namespace ChronusQ;
 
 int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
@@ -102,6 +103,10 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 //sdResponse->incoreCIS();
   sdResponse->incorePPRPAnew();
   }
+  auto mp       = std::unique_ptr<MollerPlesset>(new MollerPlesset());
+    mp->iniMollerPlesset(molecule.get(),basisset.get(),mointegrals.get(),fileIO.get(),
+                              controls.get(),hartreeFock.get());
+    mp->MP2();
 //mointegrals->testLocMO();
 
 //if(controls->doDF) aointegrals->compareRI();

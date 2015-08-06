@@ -303,6 +303,7 @@ void MOIntegrals::testLocMO(){
 }
 
 void MOIntegrals::formIAJB(bool doDBar){
+  cout << "HERE" << endl;
   if(this->haveMOiajb && (this->iajbIsDBar == doDBar)) return;
   else if(this->iajbIsDBar != doDBar) {
     if(this->Ref_ == SingleSlater<double>::TCS)
@@ -315,7 +316,9 @@ void MOIntegrals::formIAJB(bool doDBar){
     }
   }
 
+  cout << "HERE" << endl;
   this->getLocMO();
+  cout << "HERE" << endl;
 
 
   if(this->Ref_ == SingleSlater<double>::TCS){
@@ -416,15 +419,18 @@ void MOIntegrals::formIAJB(bool doDBar){
      * storage with the single bar MO integrals
      */ 
  
-    if(this->Ref_ != SingleSlater<double>::TCS){
+  cout << "HERE" << endl;
+    if(this->Ref_ == SingleSlater<double>::TCS){
       // Last Quarter Transformation (i a | j b) 
       contract(1.0,(*this->locMOVir_),{sg,b},Iiajs,{i,a,j,sg},
                0.0,(*this->iajb_),{i,a,j,b});
     } else {
+  cout << "HERE" << endl;
 
       // Last Quarter Transformation Alpha-Alpha-Alpha-Alpha (i a | j b) [AA|AA]
       contract(1.0,(*this->locMOAVir_),{sg,b},IiajsAAA,{i,a,j,sg},
                0.0,(*this->iajbAAAA_),{i,a,j,b});
+  cout << "HERE" << endl;
      
       /******************************/
       /* ONLY BUILD IF CLOSED SHELL */
@@ -640,7 +646,7 @@ void MOIntegrals::formABCD(bool doDBar){
      * storage with the single bar MO integrals
      */ 
  
-    if(this->Ref_ != SingleSlater<double>::TCS){
+    if(this->Ref_ == SingleSlater<double>::TCS){
       // Last Quarter Transformation (a b | c d) 
       contract(1.0,(*this->locMOVir_),{sg,d},Iabcs,{a,b,c,sg},
                0.0,(*this->abcd_),{a,b,c,d});
@@ -869,7 +875,7 @@ void MOIntegrals::formIJKL(bool doDBar){
      * storage with the single bar MO integrals
      */ 
  
-    if(this->Ref_ != SingleSlater<double>::TCS){
+    if(this->Ref_ == SingleSlater<double>::TCS){
       // Last Quarter Transformation (i j | k l) 
       contract(1.0,(*this->locMOOcc_),{sg,l},Iijks,{i,j,k,sg},
                0.0,(*this->ijkl_),{i,j,k,l});
