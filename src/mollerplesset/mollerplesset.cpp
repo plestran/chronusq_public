@@ -55,28 +55,53 @@ void MollerPlesset::iniMollerPlesset( Molecule * molecule, BasisSet * basisSet, 
 double MollerPlesset::MP2(){
   this->mointegrals_->formIAJB(false);
   double EMP2 = 0.0;
+  double fact = 1.0;
+  if(!this->singleSlater_->isClosedShell) fact = 0.5;
+
   for(auto i = 0; i < this->nOA_; i++)
   for(auto j = 0; j < this->nOA_; j++)
   for(auto a = 0; a < this->nVA_; a++)
   for(auto b = 0; b < this->nVA_; b++){
-    EMP2 += this->mointegrals_->IAJB(i,a,j,b,"AAAA")*
-            (this->mointegrals_->IAJB(i,a,j,b,"AAAA") - 
-             this->mointegrals_->IAJB(i,b,j,a,"AAAA")) /
+    EMP2 += fact*this->mointegrals_->IAJB(i,a,j,b,"AAAA")*
+                (this->mointegrals_->IAJB(i,a,j,b,"AAAA") - 
+                 this->mointegrals_->IAJB(i,b,j,a,"AAAA")) /
             ( (*this->singleSlater_->epsA())(i) + (*this->singleSlater_->epsA())(j)
             - (*this->singleSlater_->epsA())(a + this->nOA_)
             - (*this->singleSlater_->epsA())(b + this->nOA_));
   }
+
+  if(!this->singleSlater_->isClosedShell) {
+    for(auto i = 0; i < this->nOB_; i++)
+    for(auto j = 0; j < this->nOB_; j++)
+    for(auto a = 0; a < this->nVB_; a++)
+    for(auto b = 0; b < this->nVB_; b++){
+      EMP2 += 0.5*this->mointegrals_->IAJB(i,a,j,b,"BBBB")*
+              (this->mointegrals_->IAJB(i,a,j,b,"BBBB") - 
+               this->mointegrals_->IAJB(i,b,j,a,"BBBB")) /
+              ( (*this->singleSlater_->epsB())(i) + (*this->singleSlater_->epsB())(j)
+              - (*this->singleSlater_->epsB())(a + this->nOB_)
+              - (*this->singleSlater_->epsB())(b + this->nOB_));
+    }
+  }
+
   for(auto i = 0; i < this->nOA_; i++)
-  for(auto j = 0; j < this->nOA_; j++)
+  for(auto j = 0; j < this->nOB_; j++)
   for(auto a = 0; a < this->nVA_; a++)
-  for(auto b = 0; b < this->nVA_; b++){
-    EMP2 += this->mointegrals_->IAJB(i,a,j,b,"AABB")*
-            this->mointegrals_->IAJB(i,a,j,b,"AABB")/
-            ( (*this->singleSlater_->epsA())(i) + (*this->singleSlater_->epsA())(j)
-            - (*this->singleSlater_->epsA())(a + this->nOA_)
-            - (*this->singleSlater_->epsA())(b + this->nOA_));
+  for(auto b = 0; b < this->nVB_; b++){
+    if(this->singleSlater_->isClosedShell)
+      EMP2 += this->mointegrals_->IAJB(i,a,j,b,"AABB")*
+              this->mointegrals_->IAJB(i,a,j,b,"AABB")/
+              ( (*this->singleSlater_->epsA())(i) + (*this->singleSlater_->epsA())(j)
+              - (*this->singleSlater_->epsA())(a + this->nOA_)
+              - (*this->singleSlater_->epsA())(b + this->nOA_));
+    else
+      EMP2 += this->mointegrals_->IAJB(i,a,j,b,"AABB")*
+              this->mointegrals_->IAJB(i,a,j,b,"AABB")/
+              ( (*this->singleSlater_->epsA())(i) + (*this->singleSlater_->epsB())(j)
+              - (*this->singleSlater_->epsA())(a + this->nOA_)
+              - (*this->singleSlater_->epsB())(b + this->nOB_));
   }
   cout << "EMP2 " << EMP2 +this->singleSlater_->totalEnergy<< endl;
   cout << "EMP2 " << EMP2 << endl;
-  return EMP2*0.25;
+  return EMP2;
 }
