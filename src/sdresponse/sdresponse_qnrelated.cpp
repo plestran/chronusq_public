@@ -261,7 +261,6 @@ void SDResponse::formRM3(RealCMMap &XMO, RealCMMap &Sigma, RealCMMap &Rho){
   if(this->Ref_ == SingleSlater<double>::RHF) fact = 0.5;
   int iOff = this->nOAVA_ + this->nOBVB_;
   if(this->Ref_ == SingleSlater<double>::TCS) iOff = this->nOV_;
-  cout << "NSingleDim "<< this->nSingleDim_  << endl;
 
   // Build Sigma by column 
   for (auto idx = 0; idx < XMO.cols(); idx++){

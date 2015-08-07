@@ -1894,79 +1894,7 @@ RealMatrix SDResponse::formRM2(RealMatrix &XMO){
   }
   return AX;
 } //formRM2
-/*
-void SDResponse::incoreCIS(){
-  cout << "HERE" << endl;
-  RealMatrix A;
-  if(this->Ref_ == SingleSlater<double>::TCS) A = RealMatrix(this->nOV_,this->nOV_);
-  else A = RealMatrix(this->nOAVA_ + this->nOBVB_, this->nOAVA_ + this->nOBVB_);
-  this->mointegrals_->formIAJB(true); 
-  this->mointegrals_->formABCD(true); 
-  this->mointegrals_->formIJKL(true); 
-  cout << endl << "DIM" << endl<<  this->nOAVA_ + this->nOBVB_ << endl;
-//this->formRM();
-//cout << "HERE " << this->nOV_ <<endl;
 
-  cout << " First Element" << endl << (*this->singleSlater_->epsA())(this->nOA_) - (*this->singleSlater_->epsA())(0) + this->mointegrals_->IAJB(0,0,0,0,"AAAA") << endl; 
-  for(auto i = 0, ia = 0; i < this->nOA_; i++)
-  for(auto a = 0        ; a < this->nVA_; a++, ia++)
-  for(auto j = 0, jb = 0; j < this->nOA_; j++)
-  for(auto b = 0        ; b < this->nVA_; b++, jb++){
-    A(ia,jb) = this->mointegrals_->IAJB(i,a,j,b,"AAAA");
-    if(ia == jb) A(ia,jb) += (*this->singleSlater_->epsA())(a+this->nOA_)
-                            -(*this->singleSlater_->epsA())(i);
-    else A(jb,ia) = A(ia,jb);
-  }
-  for(auto i = 0, ia = 0           ; i < this->nOA_; i++)
-  for(auto a = 0                   ; a < this->nVA_; a++, ia++)
-  for(auto j = 0, jb = this->nOAVA_; j < this->nOA_; j++)
-  for(auto b = 0                   ; b < this->nVA_; b++, jb++){
-    A(ia,jb) = this->mointegrals_->IAJB(i,a,j,b,"AABB");
-    A(jb,ia) = this->mointegrals_->IAJB(i,a,j,b,"AABB");
-  }
-  for(auto i = 0, ia = this->nOAVA_; i < this->nOA_; i++)
-  for(auto a = 0                   ; a < this->nVA_; a++, ia++)
-  for(auto j = 0, jb = this->nOAVA_; j < this->nOA_; j++)
-  for(auto b = 0                   ; b < this->nVA_; b++, jb++){
-    A(ia,jb) = this->mointegrals_->IAJB(i,a,j,b,"AAAA");
-    if(ia == jb) A(ia,jb) += (*this->singleSlater_->epsA())(a+this->nOA_)
-                            -(*this->singleSlater_->epsA())(i);
-    else A(jb,ia) = A(ia,jb);
-  }
-
-  cout << "IJKL MO Integrals" << endl; 
-  for(auto i = 0; i < this->nOA_; i++)
-  for(auto j = 0; j < this->nOA_; j++)
-  for(auto k = 0; k < this->nOA_; k++)
-  for(auto l = 0; l < this->nOA_; l++)
-  cout << "(" << i << " " << j << " | " << k << " " << l << ") " << 
-          this->mointegrals_->IJKL(i,j,k,l,"AABB") << endl;
-
-  cout << "ABCD MO Integrals" << endl; 
-  for(auto a = 0; a < this->nVA_; a++)
-  for(auto b = 0; b < this->nVA_; b++)
-  for(auto c = 0; c < this->nVA_; c++)
-  for(auto d = 0; d < this->nVA_; d++)
-  cout << "(" << a+this->nOA_ << " " << b+this->nOA_ << " | " 
-              << c+this->nOA_ << " " << d+this->nOA_ << ") " << 
-          this->mointegrals_->ABCD(a,b,c,d,"AABB") << endl;
-
-  cout << "IAJB MO Integrals" << endl; 
-  for(auto i = 0; i < this->nOA_; i++)
-  for(auto a = 0; a < this->nVA_; a++)
-  for(auto j = 0; j < this->nOA_; j++)
-  for(auto b = 0; b < this->nVA_; b++)
-  cout << "(" << i << " " << a+this->nOA_ << " | " << j << " " 
-              << b+this->nOA_ << ") " << 
-          this->mointegrals_->IAJB(i,a,j,b,"AABB") << endl;
-  
-
-  cout << A << endl << endl;;
-  Eigen::SelfAdjointEigenSolver<RealMatrix> ES(A);
-  cout << A.eigenvalues() << endl;
-
-}
-*/
 void SDResponse::incoreCIS(){
   RealMatrix A;
   if(this->Ref_ == SingleSlater<double>::TCS) A = RealMatrix(this->nOV_,this->nOV_);
@@ -1988,17 +1916,17 @@ void SDResponse::incoreCIS(){
  
   Eigen::SelfAdjointEigenSolver<RealMatrix> ES(A);
   cout << ES.eigenvalues()<< endl;
-  RealMatrix Vec = ES.eigenvectors().col(0);
-  RealMatrix AX(this->nOV_,1);
-  RealCMMap VMap(Vec.data(),this->nOV_,1);
-  RealCMMap AXMap(AX.data(),this->nOV_,1);
-  cout << "AX Before" << endl << AX << endl;
-  this->formRM3(VMap,AXMap,AXMap);
-  cout << "NOV " << this->nOV_ << endl;
-  cout << "VEC" << endl << Vec << endl;
-  cout << "VEC An" << endl << A*Vec << endl;
-  cout << "VEC An" << endl << A*VMap << endl;
-  cout << "AX Gen" << endl << AX << endl;
+//RealMatrix Vec = ES.eigenvectors().col(0);
+//RealMatrix AX(this->nOV_,1);
+//RealCMMap VMap(Vec.data(),this->nOV_,1);
+//RealCMMap AXMap(AX.data(),this->nOV_,1);
+//cout << "AX Before" << endl << AX << endl;
+//this->formRM3(VMap,AXMap,AXMap);
+//cout << "NOV " << this->nOV_ << endl;
+//cout << "VEC" << endl << Vec << endl;
+//cout << "VEC An" << endl << A*Vec << endl;
+//cout << "VEC An" << endl << A*VMap << endl;
+//cout << "AX Gen" << endl << AX << endl;
 /*
   RealVecMap VcMap(Vec.data(),this->nOV_);
   RealMatrix TAO(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);

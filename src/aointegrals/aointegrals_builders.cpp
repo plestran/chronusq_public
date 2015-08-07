@@ -423,19 +423,16 @@ void AOIntegrals::computeAOOneE(){
   else if(this->controls_->doDipole) OneEDriver(OneBodyEngine::emultipole1);
   else OneEDriver(OneBodyEngine::overlap);
   auto OEnd = std::chrono::high_resolution_clock::now();
-  if(this->nTCS_ == 2) cout << "After OVERLAP" << endl;
 
   // Compute and time kinetic integrals
   auto TStart = std::chrono::high_resolution_clock::now();
   OneEDriver(OneBodyEngine::kinetic);
   auto TEnd = std::chrono::high_resolution_clock::now();
-  if(this->nTCS_ == 2) cout << "After Kin" << endl;
 
   // Compute and time nuclear attraction integrals (negative sign is factored in)
   auto VStart = std::chrono::high_resolution_clock::now();
   OneEDriver(OneBodyEngine::nuclear);
   auto VEnd = std::chrono::high_resolution_clock::now();
-  if(this->nTCS_ == 2) cout << "After Pot" << endl;
 //this->oneE_->add(this->kinetic_,this->potential_);
   (*this->oneE_) = (*this->kinetic_) + (*this->potential_);
 

@@ -38,12 +38,9 @@ void SingleSlater<double>::placeAtmDen(std::vector<int> atomIndex, SingleSlater<
   // Place atomic SCF densities in the right place of the total density
   // ** Note: ALWAYS spin average, even for UHF **
   for(auto iAtm : atomIndex){
-      cout << "HERE" << endl;
     auto iBfSt = this->basisset_->mapCen2Bf(iAtm)[0];
     auto iSize = this->basisset_->mapCen2Bf(iAtm)[1]; 
-      cout << "HERE" << endl;
     if(this->Ref_ != TCS){
-      cout << "HERE 1" << endl;
 /*
       this->densityA_->block(iBfSt,iBfSt,iSize,iSize)= (*hfA.densityA_);
       if(!this->isClosedShell){
@@ -75,13 +72,11 @@ void SingleSlater<double>::placeAtmDen(std::vector<int> atomIndex, SingleSlater<
         }
       }
     } else {
-      cout << "HERE" << endl;
       for(auto I = iBfSt, i = 0; I < (iBfSt +iSize); I += 2, i++)
       for(auto J = iBfSt, j = 0; J < (iBfSt +iSize); J += 2, j++){
         (*this->densityA_)(I,J)     = (*hfA.densityA_)(i,j) + (*hfA.densityB_)(i,j);
         (*this->densityA_)(I+1,J+1) = (*hfA.densityA_)(i,j) + (*hfA.densityB_)(i,j);
       }
-      cout << "HERE" << endl;
     }
   } // loop iAtm
 }
@@ -207,7 +202,6 @@ void SingleSlater<double>::formGuess() {
     hartreeFockAtom.computeEnergy();
     hartreeFockAtom.SCF();
     
-      cout << "HERE" << endl;
     // Place Atomic Densities into Total Densities
     this->placeAtmDen(atomIndex[iUn],hartreeFockAtom);
 
