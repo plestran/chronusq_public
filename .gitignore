@@ -18,7 +18,7 @@ install-sh
 missing
 stamp-h1
 test
-build*
+build_*
 .COPY
 deps/include/
 deps/lib/

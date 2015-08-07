@@ -302,6 +302,7 @@ template <typename T>
       // iterative subspace min(6*NSek,N/2)
       //return std::min(20*this->nSek_,this->N_/2);
       return std::min(250,this->N_/2);
+//    return this->N_;
     };
 
     inline int stdNGuess(){
