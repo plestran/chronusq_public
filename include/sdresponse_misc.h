@@ -46,5 +46,6 @@
   void incorePPRPA();
   void incorePPRPAnew();
   void incoreCIS();
+  void incoreRPA();
   void formRM();
   RealMatrix formRM2(RealMatrix &XMO);

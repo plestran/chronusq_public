@@ -352,9 +352,10 @@ void SDResponse::formRM3(RealCMMap &XMO, RealCMMap &Sigma, RealCMMap &Rho){
       RhoAOA =  
         (*this->singleSlater_->aointegrals()->overlap_) * CommA[idx] * 
         (*this->singleSlater_->aointegrals()->overlap_);
-      RhoAOB =  
-        (*this->singleSlater_->aointegrals()->overlap_) * CommB[idx] * 
-        (*this->singleSlater_->aointegrals()->overlap_);
+      if(this->Ref_ != SingleSlater<double>::TCS)
+        RhoAOB =  
+          (*this->singleSlater_->aointegrals()->overlap_) * CommB[idx] * 
+          (*this->singleSlater_->aointegrals()->overlap_);
       RealVecMap RVec(Rho.data()+idx*this->nSingleDim_,this->nSingleDim_);
       this->formMOTDen(RVec,RhoAOA,RhoAOB);
     }

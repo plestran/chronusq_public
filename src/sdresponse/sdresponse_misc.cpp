@@ -1943,6 +1943,73 @@ void SDResponse::incoreCIS(){
 */
 
 }
+void SDResponse::incoreRPA(){
+  RealMatrix A,B,ABBA;
+  if(this->Ref_ == SingleSlater<double>::TCS) {
+    A = RealMatrix(this->nOV_,this->nOV_);
+    B = RealMatrix(this->nOV_,this->nOV_);
+    ABBA = RealMatrix(2*this->nOV_,2*this->nOV_);
+  } else {
+    A = RealMatrix(this->nOAVA_ + this->nOBVB_, this->nOAVA_ + this->nOBVB_);
+    B = RealMatrix(this->nOAVA_ + this->nOBVB_, this->nOAVA_ + this->nOBVB_);
+    ABBA = RealMatrix(2*(this->nOAVA_ + this->nOBVB_), 2*(this->nOAVA_ + this->nOBVB_));
+  }
+  this->mointegrals_->formIAJB(false); 
+  this->mointegrals_->formIJAB(false); 
+
+
+  if(this->Ref_ == SingleSlater<double>::TCS){
+    for(auto a = 0, ia = 0        ; a < this->nV_; a++)
+    for(auto i = 0; i < this->nO_; i++, ia++      )
+    for(auto b = 0, jb = 0        ; b < this->nV_; b++)
+    for(auto j = 0; j < this->nO_; j++, jb++      ){
+      A(ia,jb) = this->mointegrals_->IAJB(i,a,j,b) - this->mointegrals_->IJAB(i,j,a,b);
+      if(ia==jb) A(ia,jb) += (*this->singleSlater_->epsA())(a+this->nO_) -
+                             (*this->singleSlater_->epsA())(i);
+      B(ia,jb) = this->mointegrals_->IAJB(i,a,j,b) - this->mointegrals_->IAJB(i,b,j,a);
+    }
+  }
+  ABBA.block(0,0,this->nOV_,this->nOV_) = A;
+  ABBA.block(this->nOV_,0,this->nOV_,this->nOV_) = B;
+  ABBA.block(0,this->nOV_,this->nOV_,this->nOV_) = B;
+  ABBA.block(this->nOV_,this->nOV_,this->nOV_,this->nOV_) = A;
+ 
+  Eigen::SelfAdjointEigenSolver<RealMatrix> ES(ABBA);
+  cout << ES.eigenvalues()<< endl;
+
+  ABBA.block(0,0,this->nOV_,this->nOV_) = A;
+  ABBA.block(this->nOV_,0,this->nOV_,this->nOV_) = -B;
+  ABBA.block(0,this->nOV_,this->nOV_,this->nOV_) = B;
+  ABBA.block(this->nOV_,this->nOV_,this->nOV_,this->nOV_) = -A;
+  Eigen::EigenSolver<RealMatrix> EA(ABBA);
+  cout << endl << EA.eigenvalues() << endl;
+//RealMatrix Vec = ES.eigenvectors().col(0);
+//RealMatrix AX(this->nOV_,1);
+//RealCMMap VMap(Vec.data(),this->nOV_,1);
+//RealCMMap AXMap(AX.data(),this->nOV_,1);
+//cout << "AX Before" << endl << AX << endl;
+//this->formRM3(VMap,AXMap,AXMap);
+//cout << "NOV " << this->nOV_ << endl;
+//cout << "VEC" << endl << Vec << endl;
+//cout << "VEC An" << endl << A*Vec << endl;
+//cout << "VEC An" << endl << A*VMap << endl;
+//cout << "AX Gen" << endl << AX << endl;
+/*
+  RealVecMap VcMap(Vec.data(),this->nOV_);
+  RealMatrix TAO(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
+  RealMatrix SDA = (*this->singleSlater_->aointegrals()->overlap_) * (*this->singleSlater_->densityA());
+  this->formAOTDen(VcMap,TAO,TAO);
+  RealMatrix Comm = TAO*SDA + SDA.adjoint() * TAO;
+  RealMatrix GComm(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
+  this->singleSlater_->aointegrals()->multTwoEContractDirect(1,false,false,false,true,Comm,
+    GComm,Comm,GComm);
+  RealMatrix AXAO = (*this->singleSlater_->fockA()) * Comm * (*this->singleSlater_->aointegrals()->overlap_) - (*this->singleSlater_->aointegrals()->overlap_) * Comm * (*this->singleSlater_->fockA()) + GComm * SDA - SDA * GComm;
+  RealVecMap AXMap(AX.data(),this->nOV_);
+  this->formMOTDen(AXMap,AXAO,AXAO);
+  cout << "AX Gen 2" << endl << AXMap << endl;
+*/
+
+}
 
 void SDResponse::incorePPRPAnew(){
   cout << "BEFORE ABCD" << endl;

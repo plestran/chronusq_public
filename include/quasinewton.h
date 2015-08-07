@@ -301,8 +301,8 @@ template <typename T>
       // Standard value for the maximum dimension of the
       // iterative subspace min(6*NSek,N/2)
       //return std::min(20*this->nSek_,this->N_/2);
-      return std::min(250,this->N_/2);
-//    return this->N_;
+//    return std::min(250,this->N_/2);
+      return this->N_;
     };
 
     inline int stdNGuess(){
@@ -539,9 +539,14 @@ template <typename T>
          this->sdr_->iMeth() == SDResponse::STAB){
         // Linear transformation onto right / gerade
         this->sdr_->formRM3(NewVecR,NewSR,NewRhoL); 
-        if(this->sdr_->iMeth() == SDResponse::RPA)   
+        if(this->sdr_->iMeth() == SDResponse::RPA){
           // Linear trasnformation onto left / ungerade
           this->sdr_->formRM3(NewVecL,NewSL,NewRhoR);
+          cout << "VecR" << endl << NewVecR << endl;
+          cout << "RhoR" << endl << NewRhoR << endl;
+          cout << "VecL" << endl << NewVecL << endl;
+          cout << "RhoL" << endl << NewRhoL << endl;
+        }
       } else if(this->sdr_->iMeth() == SDResponse::PPRPA  || 
                 this->sdr_->iMeth() == SDResponse::PPATDA ||
                 this->sdr_->iMeth() == SDResponse::PPCTDA) {

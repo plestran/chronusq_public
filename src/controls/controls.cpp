@@ -90,7 +90,7 @@ void Controls::readPSCF(std::fstream &in, std::fstream &out){
   else CErr("Input PSCF Option Not Recgnized",out);
 
   if(this->SDMethod != 6) in >> this->SDNSek;
-  else                    this->SDNSek = 3;
+  else                    this->SDNSek = 4;
 }
 
 void Controls::readDebug(std::string str){
