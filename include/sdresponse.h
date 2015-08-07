@@ -40,28 +40,46 @@
 namespace ChronusQ {
 class SDResponse {
   int       nBasis_;
-  int       **R2Index_;
-  int       nStates_;
-  int       RHF_;
-//dbwys
+  int       nTCS_;
+  int       Ref_;
   int       nSek_;
   int       nGuess_;
   int       iMeth_;
+  int       iPPRPA_;
   bool      haveDag_;
   int       nOA_;
   int       nVA_;
   int       nOB_;
   int       nVB_;
-  int       nOAVA_;
-  int       nOBVB_;
-  int       nOAVB_;
-  int       nOBVA_;
-  int       nSingleDim_;
-//dbwye
-  friend class SingleSlater<double>;
+  int       nOAVA_;      // NOA * NVA
+  int       nOBVB_;      // NOB * NVB
+  int       nOAVB_;      // NOA * NVB
+  int       nOBVA_;      // NOB * NVA
+  int       nVAVA_SLT_;  // NVA * (NVA - 1) / 2
+  int       nVBVB_SLT_;  // NVB * (NVB - 1) / 2
+  int       nVAVA_LT_;   // NVA * (NVA + 1) / 2
+  int       nVAVA_;      // NVA * NVA
+  int       nVBVB_;      // NVB * NVB
+  int       nOAOA_SLT_;  // NOA * (NOA - 1) / 2
+  int       nOBOB_SLT_;  // NOB * (NOB - 1) / 2
+  int       nOAOA_LT_;   // NOA * (NOA + 1) / 2
+  int       nOAOA_;      // NOA * NOA
+  int       nOBOB_;      // NOB * NOB
+  int       nVAVB_;      // NVA * NVB
+  int       nOAOB_;      // NOA * NOB
+  int       nO_;         // NOA + NOB
+  int       nV_;         // NVA + NVB
+  int       nOV_;        // NO * NV
+  int       nVV_SLT_;    // NV * (NV - 1) / 2
+  int       nVV_LT_;     // NV * (NV + 1) / 2
+  int       nVV_;        // NV * NV
+  int       nOO_SLT_;    // NO * (NO - 1) / 2
+  int       nOO_LT_;     // NO * (NO + 1) / 2
+  int       nOO_;        // NO * NO
 
-  RealMatrix      XMO;
-  RealMatrix      PDiag;
+  int       nSingleDim_; // Single dimension of response matrix
+  double    rMu_;
+
   std::unique_ptr<RealCMMatrix>    transDen_;
   std::unique_ptr<RealMatrix>      oscStrength_;
   std::unique_ptr<VectorXd>        omega_;
@@ -75,76 +93,34 @@ class SDResponse {
   RealTensor4d *  aoERI_;
   RealTensor3d *  elecDipole_;
 
-//dbwys
-  std::unique_ptr<RealMatrix> tMO_;
   std::unique_ptr<RealCMMatrix> rmDiag_;
   std::unique_ptr<RealMatrix>  davGuess_;
-//dbwye
-//
-//dbwys
-  void initMeth();
-//dbwye
 
 public:
-//dbwys
   enum{
     __invalid,
     CIS,
     RPA,
+    PPRPA,
+    PPATDA,
+    PPCTDA,
+    STAB,
     CCSD
   };
-//dbwye
  
   // constructor & destructor
   SDResponse(){;};
   ~SDResponse() {;};
   // pseudo-constructor
-  void iniSDResponse(Molecule *,BasisSet *,
-                     MOIntegrals *,FileIO *,
-                     Controls *,SingleSlater<double> *);
+  void iniSDResponse(Molecule *,BasisSet *,MOIntegrals *,FileIO *,Controls *,
+                     SingleSlater<double> *);
 
-  inline int nOVA(){return this->singleSlater_->nOVA();};
-  inline int nOVB(){return this->singleSlater_->nOVB();};
-  void computeExcitedStates();         // compute the total electronic energy
-  void printExcitedStateEnergies(); 
-  void printInfo();
-  void formRM();
-  void IterativeRPA();
-//dbwys
-  inline void setNSek(int n){ this->nSek_  = n; this->nGuess_ = 2*n;};
-  inline void setMeth(int n){ this->iMeth_ = n; this->initMeth();};
-  inline void setNGuess(int n){this->nGuess_ = n;};
-  inline int  nGuess(){return this->nGuess_;};
-  inline int  nSek(){return this->nSek_;};
-  inline int iMeth(){return this->iMeth_;};
-  inline int nSingleDim(){return this->nSingleDim_;};
-  inline VectorXd* omega(){return this->omega_.get();};
-  inline RealCMMatrix* transDen(){return this->transDen_.get();};
-  void formGuess();
-  void formPerturbedGuess(double,const RealCMMap &, RealCMMap &,const RealCMMap &, RealCMMap &);
-  void formRM3(RealCMMap &, RealCMMap &, RealCMMap &Rho);
-  void checkValid();
-  void getDiag();
-  inline RealCMMatrix * rmDiag(){return this->rmDiag_.get();};
-  inline RealMatrix * davGuess(){return this->davGuess_.get();};
-  void formAOTDen(const RealVecMap &, RealMatrix &, RealMatrix &);
-  void formMOTDen(RealVecMap &, const RealMatrix &, const RealMatrix &);
-  void formTransDipole();
-  void formOscStrength();
-  void printPrinciple(int );
-  FileIO * fileio(){return this->fileio_;};
-//dbwye
-  RealMatrix formRM2(RealMatrix &XMO);
-  RealMatrix ReturnDiag();
-  RealMatrix Guess(RealMatrix &PDiag);
-  void TransDipole(int st_rank,RealMatrix TransDen);
-  double OscStrength(int st_rank,double Omega);
+  #include <sdresponse_getset.h>
+  #include <sdresponse_qnrelated.h>
+  #include <sdresponse_io.h>
+  #include <sdresponse_misc.h>
+  #include <sdresponse_prop.h>
 
-  /*************************/
-  /* MPI Related Routines  */
-  /*************************/
-  void mpiSend(int,int tag=tagSDResponse);
-  void mpiRecv(int,int tag=tagSDResponse);
 };
 } // namespace ChronusQ
 #endif

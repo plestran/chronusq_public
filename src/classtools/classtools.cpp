@@ -46,7 +46,7 @@ void readInput(FileIO * fileio, Molecule * mol, BasisSet * basis, Controls * con
       mol->readCharge(readInt);
     } else if(!readString.compare("$SPIN")) {
       fileio->in >> readInt;
-      mol->readSpin(readInt);
+      mol->readMultip(readInt);
     } else if(!readString.compare("$EXTRA")) {
       fileio->in>>readString;
       readString=stringupper(readString);
@@ -57,7 +57,13 @@ void readInput(FileIO * fileio, Molecule * mol, BasisSet * basis, Controls * con
       fileio->in >> readString;
       readString=stringupper(readString);
       if(!readString.compare("HF")) controls->HF=true;
-      else {
+      else if(!readString.compare("ROHF")){
+        controls->HF     = true;
+        controls->doCUHF = true;
+      } else if(!readString.compare("GHF")){
+        controls->HF = true;
+        controls->doTCS = true;
+      } else {
 	controls->HF=false;
 	controls->DFT=true;
       };
@@ -83,13 +89,13 @@ void readInput(FileIO * fileio, Molecule * mol, BasisSet * basis, Controls * con
       }
     } else if(!readString.compare("$BASIS")) {
       //basis->readBasisSet(fileio,mol);
-      basis->basisSetRead(fileio,mol);
+      basis->basisSetRead(fileio,mol,controls);
     } else if(!readString.compare("$DFBASIS")) {
       fileio->in >> readString;
       if(!readString.compare("ON")) controls->doDF = true;
       if(controls->doDF) {
         //basis->readBasisSet(fileio,mol);
-        dfBasis->basisSetRead(fileio,mol);
+        dfBasis->basisSetRead(fileio,mol,controls);
       }
 //dbwys
     } else if(!readString.compare("$NSMP")) {

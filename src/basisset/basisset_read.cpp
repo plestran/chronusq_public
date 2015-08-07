@@ -1,5 +1,5 @@
-/*
- * The Chronus Quantum (ChronusQ) software package is high-performace 
+/* 
+ *  The Chronus Quantum (ChronusQ) software package is high-performace 
  *  computational chemistry software with a strong emphasis on explicitly 
  *  time-dependent and post-SCF quantum mechanical methods.
  *  
@@ -24,268 +24,138 @@
  *  
  */
 #include <basisset.h>
+namespace ChronusQ{
+/**
+ *  Parse a basis file and construct reference and local basis set defintion  
+ */
+void BasisSet::basisSetRead(FileIO * fileio, Molecule * mol, Controls *controls){
 
-#ifdef USE_LIBINT
-using ChronusQ::BasisSet;
-using ChronusQ::Molecule;
-using ChronusQ::HashL;
-using ChronusQ::HashNAOs;
-typedef libint2::Shell CShell;
-typedef libint2::Shell LIShell;
-
-
-void BasisSet::basisSetRead(FileIO * fileio, Molecule * mol){
-  std::vector<double> coeff;
-  std::vector<double> coeffP;
-  std::vector<double> exp;
-  std::vector<double> expP;
-  std::array<double,3> center;
-
-  // Open Basis File
   std::string readString;
-  fileio->in>>readString;
-  this->basis_path = "/" + readString;
-  this->basis_path.insert(0,BASIS_PATH);
-  std::unique_ptr<ifstream> fileBasis(new ifstream (this->basis_path));
-  if(fileBasis->fail()){ // Check if file is in BASIS_PATH
-    fileBasis.reset();
-    fileBasis = std::unique_ptr<ifstream>(new ifstream(readString));
-    if(fileBasis->fail()) { // Check if file is in PWD
-      CErr("Could not find basis set file",fileio->out);
-    } else {
-      this->basis_path = readString;
-      fileio->out << "Reading Basis Set from: ./" << readString<< endl;
-    }
+  int nTCS = 1;
+  if(controls->doTCS) nTCS = 2;
+  
+  this->fileio_ = fileio;
+ 
+  this->fileio_->in >> readString; // read the name of the basis set file
+  this->findBasisFile(readString); // Try to find the basis set file
+  this->parseGlobal();
+  this->constructLocal(mol);
+  this->makeMapSh2Bf(nTCS);
+  this->makeMapSh2Cen(mol);
+  this->makeMapCen2Bf(nTCS,mol);
+  this->printInfo();
+  this->renormShells();
+
+}; // BasisSet::basisSetRead
+
+/**
+ * Attempt to find the file containing the basis set definition
+ */
+void BasisSet::findBasisFile(std::string fName){
+  std::string tmpStr;
+
+  tmpStr = "/" + fName;
+  tmpStr.insert(0,BASIS_PATH);
+  this->setBasisPath(tmpStr);
+
+  this->basisFile_ = std::unique_ptr<ifstream>(new ifstream(this->basisPath_));
+
+  
+  if(!this->basisFile_->fail()){ // Check if file is in BASIS_PATH
+    this->fileio_->out << "Reading Basis Set from: " << this->basisPath_ << endl;
   } else {
-    fileio->out << "Reading Basis Set from:" << endl << this->basis_path<< endl;
+    this->basisFile_.reset();
+    this->setBasisPath(fName);
+    this->basisFile_ = std::unique_ptr<ifstream>(new ifstream(this->basisPath_));
+    if(!this->basisFile_->fail()){ // Check if file is in PWD
+      this->fileio_->out << "Reading Basis Set from: ./" << this->basisPath_ << endl;
+    } else CErr("Could not find basis set file \"" + fName + "\"");
   }
+}; // BasisSet::findBasisFile
 
-  std::string atomStr;
-  int readNPGTO,L,Ls,Lp;
-  auto count=0;
-  auto temp=0;
-  double readNorm,expval,coeffD,coeffDp;
-  std::string coefval, coefvalp;
+/**
+ *  Parse the basis set file and generate a set of reference shells
+ *  from which local and external basis set objects are constructed
+ */
+void BasisSet::parseGlobal(){
+
+  std::string readString;
   std::string nameOfAtom;
-  std::vector <libint2::Shell> refShell;
-  center={{0,0,0}};
-  while (!(fileBasis->eof())){
-    while (readString.compare("****")){
-      *fileBasis>>readString;
-    };
-    *fileBasis >> readString;
-    nameOfAtom =readString;
-    *fileBasis >> readString; 
-    *fileBasis >> readString;
-    while(readString.compare("****")){
-      *fileBasis >> readNPGTO;   
-      *fileBasis >> readNorm; 
-      for (auto j=0;j<readNPGTO;++j){
-        if (readString.size()==1){
-          L=HashL(readString);
-	  *fileBasis >> expval;
-	  *fileBasis >> coefval;
-	  exp.push_back(expval);
+  std::string shSymb;
+  int         contDepth;
+  int atomicNumber;
+  int indx;
+  std::vector<libint2::Shell> tmpShell;
 
-	  
-	  auto e(coefval.find_first_of("Dd"));
-	  if (e!=std::string::npos)
-	    coefval[e]='E';
-          coeffD=std::stod(coefval);
-	  coeff.push_back(coeffD);  	
+  bool readRec = false;
+  bool newRec  = false;
+  bool firstRec = true;
+  int nEmpty = 0;
+  int nComm  = 0;
+  int nRec   = 0;
+
+  while(!this->basisFile_->eof()){
+    std::getline(*this->basisFile_,readString);
+    if(readString.size() == 0)    nEmpty++;
+    else if(readString[0] == '!') nComm++;
+    else if(!readString.compare("****")){
+      std::getline(*this->basisFile_,readString);
+      if(readString.size() == 0) { nEmpty++; readRec = false; continue;}
+      nRec++;
+      readRec = true;
+      newRec  = true;
+    }
+
+    if(readRec){
+      std::istringstream iss(readString);
+      std::vector<std::string> tokens(std::istream_iterator<std::string>{iss},
+        std::istream_iterator<std::string>{});
+      if(newRec){
+        if(!firstRec) {
+          this->refShells_.push_back(ReferenceShell{atomicNumber,indx,tmpShell});
         }
-        else if(readString.size()==2){
-          Ls=HashL(readString.substr(0,1));
-          Lp=HashL(readString.substr(1,1));
-	  *fileBasis >> expval;
-	  *fileBasis >> coefval;
-	  *fileBasis >> coefvalp;
-	  exp.push_back (expval);
-	  expP.push_back(expval);
-	  
-	  auto e(coefval.find_first_of("Dd"));
-	  if (e!=std::string::npos)
-	    coefval[e]='E';
-          coeffD=std::stod(coefval);
-	  
-	  auto f(coefvalp.find_first_of("Dd"));
-	  if (f!=std::string::npos)
-	    coefvalp[f]='E';
-          coeffDp=std::stod(coefvalp);
-	  
-	  coeff.push_back (coeffD);
-	  coeffP.push_back(coeffDp);
+        indx = HashAtom(tokens[0],0);
+        atomicNumber = elements[indx].atomicNumber;
+        newRec = false;
+        firstRec = false;
+        tmpShell.clear();
+      } else {
+        contDepth = std::stoi(tokens[1]);
+        shSymb    = tokens[0];
+        std::vector<double> exp;
+        std::vector<double> contPrimary;
+        std::vector<double> contSecondary;
+
+        for(auto i = 0; i < contDepth; i++) {
+          std::getline(*this->basisFile_,readString);
+          std::istringstream iss2(readString);
+          std::vector<std::string> tokens2(std::istream_iterator<std::string>{iss2},
+            std::istream_iterator<std::string>{});
+
+          exp.push_back(std::stod(tokens2[0]));
+          contPrimary.push_back(std::stod(tokens2[1]));
+          if(!shSymb.compare("SP"))
+            contSecondary.push_back(std::stod(tokens2[2]));
+        }
+
+        if(!shSymb.compare("SP")) {
+          tmpShell.push_back(
+            libint2::Shell{ exp, {{0,this->doSph_,contPrimary}}, {{0,0,0}} }
+          );
+          tmpShell.push_back(
+            libint2::Shell{ exp, {{1,this->doSph_,contSecondary}}, {{0,0,0}} }
+          );
+        } else {
+          tmpShell.push_back(
+            libint2::Shell{ exp, {{HashL(shSymb),this->doSph_,contPrimary}}, {{0,0,0}} }
+          );
+        }
       }
-     }
-      if (readString.size()==1){
-        refShell.push_back(
-        LIShell{
-          exp,
-	  {
-            {L, false, coeff}
-	  },
-	    center
-          }
-        );
-        coeff.resize(0);
-        exp.resize(0);
-      }
-      else if(readString.size()==2){
-        refShell.push_back(
-        LIShell{
-          exp,
-	  {
-            {Ls, false, coeff}
-	  },
-	  center
-          }
-        );
-        refShell.push_back(
-        LIShell{
-          expP,
-	  {
-            {Lp, false, coeffP}
-	  },
-	  center
-          }
-        ); 
-        coeff.resize(0);
-        exp.resize(0);
-        expP.resize(0);
-        coeffP.resize(0);
-      };
-     *fileBasis >> readString;
-    }
-    this->allBasis.push_back({nameOfAtom,refShell});
-    refShell.resize(0);
-  }
-  count=0;
-  for (auto i=0; i<mol->nAtoms();++i){
-   atomStr=atom[mol->index(i)].symbol;
-   center = {{(*mol->cart())(0,i),
-              (*mol->cart())(1,i),
-              (*mol->cart())(2,i)}};
-   for(auto k=0; k<this->allBasis.size();++k){
-     if (atomStr.compare(this->allBasis[k].atomName)==0){
-       for (auto j=0;j<this->allBasis[k].refShell.size();++j){
-         this->shells_libint.push_back(LIShell{this->allBasis[k].refShell[j].alpha,{this->allBasis[k].refShell[j].contr[0]},center});
-         shells_libint_unnormal.push_back(LIShell{this->allBasis[k].refShell[j].alpha,{this->allBasis[k].refShell[j].contr[0]},center});
-	 int L=this->allBasis[k].refShell[j].contr[0].l;
-	 if (this->nLShell_.size()==L) this->nLShell_.push_back(0);
-         temp=(this->nLShell_)[L];
-         (this->nLShell_)[L]=temp+1;
-	 this->shells_libint[count].renorm();
-	 count++;
-	 readNPGTO=this->allBasis[k].refShell[j].alpha.size();
-	 this->nBasis_=(this->nBasis_)+HashNAOs(L);
-	 this->atomNum.push_back(i);
-         (this->nPrimitive_)=(this->nPrimitive_)+readNPGTO*HashNAOs(L);
-         if(count==1) {
-           this->maxPrim = readNPGTO;
-           this->maxL = L;
-         }   
-	 else {
-           if(readNPGTO > this->maxPrim)this->maxPrim = readNPGTO;
-           if(L > this->maxL) this->maxL = L;
-         }
-       }
-       break;
-     }
-     if (k==this->allBasis.size()-1){
-       fileio->out<<"Error: unrecognized shell symbol!"<<endl;
-       CErr("Unrecognized Shell symbol");
-     }
-   }
-  }
-  this->convToLI=true;
-  fileBasis->close();
-}
-
-
-void BasisSet::computeShBlkNorm(bool RHF, Molecule * mol, const RealMatrix *DAlpha,
-                                const RealMatrix *DBeta){
-  if(!this->haveMap)  this->makeMap(mol);
-  int nOfShell=this->shells_libint.size();
-  this->shBlkNormAlpha = std::unique_ptr<RealMatrix>(new RealMatrix(nOfShell,nOfShell));
-  if(!RHF) this->shBlkNormBeta = std::unique_ptr<RealMatrix>(new RealMatrix(nOfShell,nOfShell));
-  for(int s1 = 0; s1 < nOfShell; s1++) {
-    int bf1 = this->mapSh2Bf[s1];
-    int n1  = this->shells_libint[s1].size();
-    for(int s2 = 0; s2 < nOfShell; s2++) {
-      int bf2 = this->mapSh2Bf[s2];
-      int n2  = this->shells_libint[s2].size();
-     
-      (*this->shBlkNormAlpha)(s1,s2) = DAlpha->block(bf1,bf2,n1,n2).lpNorm<Infinity>();
-      if(!RHF)
-        (*this->shBlkNormBeta)(s1,s2) = DBeta->block(bf1,bf2,n1,n2).lpNorm<Infinity>();
     }
   }
-  
-}
-void BasisSet::computeShBlkNorm(bool RHF, Molecule * mol, const ComplexMatrix *DAlpha,
-                                const ComplexMatrix *DBeta){
-  if(!this->haveMap)  this->makeMap(mol);
-  int nOfShell=this->shells_libint.size();
-  this->shBlkNormAlpha = std::unique_ptr<RealMatrix>(new RealMatrix(nOfShell,nOfShell));
-  if(!RHF) this->shBlkNormBeta = std::unique_ptr<RealMatrix>(new RealMatrix(nOfShell,nOfShell));
-  for(int s1 = 0; s1 < nOfShell; s1++) {
-    int bf1 = this->mapSh2Bf[s1];
-    int n1  = this->shells_libint[s1].size();
-    for(int s2 = 0; s2 < nOfShell; s2++) {
-      int bf2 = this->mapSh2Bf[s2];
-      int n2  = this->shells_libint[s2].size();
-     
-      (*this->shBlkNormAlpha)(s1,s2) = DAlpha->block(bf1,bf2,n1,n2).lpNorm<Infinity>();
-      if(!RHF)
-        (*this->shBlkNormBeta)(s1,s2) = DBeta->block(bf1,bf2,n1,n2).lpNorm<Infinity>();
-    }
-  }
-  
-}
+  // Append the last Rec
+  this->refShells_.push_back(ReferenceShell{atomicNumber,indx,tmpShell}); 
+ 
+}; // BasisSet::parseGlobal
+} // namespace ChronusQ
 
-//---------------------------------------//
-// print a general basis set information //
-//---------------------------------------//
-void BasisSet::printInfo_libint(FileIO * fileio,Controls * controls) {
-  fileio->out<<"\nBasis Function Information:"<<endl;
-  for(auto i=0;i<this->nLShell_.size();i=i+2){
-    fileio->out <<std::setw(15) << "n" <<HashS(i)<<"Shell =" << std::setw(8) << this->nLShell_[i] << std::setw(5) << " "
-             << std::setw(20) << "n" <<HashS(i+1)<<"Shell =" << std::setw(8) << this->nLShell_[i+1] << endl;
-  }
-  if(controls->printLevel>=2) printAtomO(fileio->out);
-  //if(controls->printLevel>=3) printShellPair(fileio->out);
-  
-};
-void BasisSet::printAtomO(ostream &output){
-    
-  output.precision(6);
-  output.fill(' ');
-  output.setf(ios::right,ios::adjustfield);
-  output.setf(ios::fixed,ios::floatfield);
-  output<<endl<<"Cartesian Basis Functions:"<<endl;
-  output<<bannerTop<<endl;
-  output<<std::setw(16)<<"        Shell Type"<<"    Center"<<std::setw(8)<<"L"<<std::setw(26)<<"exponent"<<std::setw(18)<<"coefficient"<<endl;
-  output<<bannerMid << endl;
-  for (auto i=0;i<this->shells_libint.size();i++){
-    
-    output<<std::setw(5)<<i+1<<std::setw(8)<<HashS(this->shells_libint[i].contr[0].l)<<std::setw(13)<<this->atomNum[i]+1<<"  ";
-    output<<std::setw(8)<<this->shells_libint[i].contr[0].l;
-      for(auto j=0;j<this->shells_libint[i].alpha.size();j++) {
-	if(j!=0) output<<std::setw(36)<<" ";
-	output<<std::setw(26)<<this->shells_libint[i].alpha[j]<<std::setw(18)<<shells_libint_unnormal[i].contr[0].coeff[j]<<endl;
-      };
-      output << endl;
-  } 
-  output << bannerEnd <<endl;
-}
-
-void BasisSet::makeMap(Molecule *  mol) {
-  if(!this->convToLI) this->convShell(mol);
-  int n = 0;
-  for( auto shell: this->shells_libint) {
-    this->mapSh2Bf.push_back(n);
-    n += shell.size();
-  }
-  this->haveMap = true;
-}
-#endif

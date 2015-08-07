@@ -27,13 +27,14 @@
 namespace ChronusQ{
 #ifdef USE_LIBINT
 template<>
-void AOIntegrals::twoEContractDirect(bool RHF, bool doFock, const ComplexMatrix &XAlpha, ComplexMatrix &AXAlpha,
+void AOIntegrals::twoEContractDirect(bool RHF, bool doFock, bool do24, bool doTCS, const ComplexMatrix &XAlpha, ComplexMatrix &AXAlpha,
                                  const ComplexMatrix &XBeta, ComplexMatrix &AXBeta) {
 //CErr("No Direct Contraction for Complex Matricies Implemented");
+  if(doTCS) CErr("TCS Complex contraction NYI");
   this->fileio_->out << "Contracting Directly with two-electron integrals" << endl;
 
   if(!this->haveSchwartz) this->computeSchwartz();
-  if(!this->basisSet_->haveMap) this->basisSet_->makeMap(this->molecule_); 
+  if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(1); 
   AXAlpha.setZero();
   if(!RHF) AXBeta.setZero();
   int nRHF;
@@ -43,13 +44,13 @@ void AOIntegrals::twoEContractDirect(bool RHF, bool doFock, const ComplexMatrix 
     (this->controls_->nthreads,ComplexMatrix::Zero(this->nBasis_,this->nBasis_)));
 
   std::vector<coulombEngine> engines(this->controls_->nthreads);
-  engines[0] = coulombEngine(this->basisSet_->maxPrim,this->basisSet_->maxL,0);
+  engines[0] = coulombEngine(this->basisSet_->maxPrim(),this->basisSet_->maxL(),0);
   engines[0].set_precision(std::numeric_limits<double>::epsilon());
 
   for(int i=1; i<this->controls_->nthreads; i++) engines[i] = engines[0];
 
   auto start = std::chrono::high_resolution_clock::now();
-  this->basisSet_->computeShBlkNorm(RHF,this->molecule_,&XAlpha,&XBeta);
+  this->basisSet_->computeShBlkNorm(!RHF,1,&XAlpha,&XBeta);
   auto finish = std::chrono::high_resolution_clock::now();
   if(doFock) this->DenShBlkD = finish - start;
   int ijkl = 0;
@@ -58,19 +59,19 @@ void AOIntegrals::twoEContractDirect(bool RHF, bool doFock, const ComplexMatrix 
   auto efficient_twoe = [&] (int thread_id) {
     coulombEngine &engine = engines[thread_id];
     for(int s1 = 0, s1234=0; s1 < this->basisSet_->nShell(); s1++) {
-      int bf1_s = this->basisSet_->mapSh2Bf[s1];
-      int n1    = this->basisSet_->shells_libint[s1].size();
+      int bf1_s = this->basisSet_->mapSh2Bf(s1);
+      int n1    = this->basisSet_->shells(s1).size();
       for(int s2 = 0; s2 <= s1; s2++) {
-        int bf2_s = this->basisSet_->mapSh2Bf[s2];
-        int n2    = this->basisSet_->shells_libint[s2].size();
+        int bf2_s = this->basisSet_->mapSh2Bf(s2);
+        int n2    = this->basisSet_->shells(s2).size();
         for(int s3 = 0; s3 <= s1; s3++) {
-          int bf3_s = this->basisSet_->mapSh2Bf[s3];
-          int n3    = this->basisSet_->shells_libint[s3].size();
+          int bf3_s = this->basisSet_->mapSh2Bf(s3);
+          int n3    = this->basisSet_->shells(s3).size();
           int s4_max = (s1 == s3) ? s2 : s3;
           for(int s4 = 0; s4 <= s4_max; s4++, s1234++) {
             if(s1234 % this->controls_->nthreads != thread_id) continue;
-            int bf4_s = this->basisSet_->mapSh2Bf[s4];
-            int n4    = this->basisSet_->shells_libint[s4].size();
+            int bf4_s = this->basisSet_->mapSh2Bf(s4);
+            int n4    = this->basisSet_->shells(s4).size();
       
             // Schwartz and Density screening
             double shMax;
@@ -101,10 +102,10 @@ void AOIntegrals::twoEContractDirect(bool RHF, bool doFock, const ComplexMatrix 
             if(shMax < this->controls_->thresholdSchawrtz ) continue;
  
             const double* buff = engine.compute(
-              this->basisSet_->shells_libint[s1],
-              this->basisSet_->shells_libint[s2],
-              this->basisSet_->shells_libint[s3],
-              this->basisSet_->shells_libint[s4]);
+              this->basisSet_->shells(s1),
+              this->basisSet_->shells(s2),
+              this->basisSet_->shells(s3),
+              this->basisSet_->shells(s4));
       
             double s12_deg = (s1 == s2) ? 1.0 : 2.0;
             double s34_deg = (s3 == s4) ? 1.0 : 2.0;
@@ -238,7 +239,7 @@ void AOIntegrals::twoEContractDirect(bool RHF, bool doFock, const ComplexMatrix 
   if(doFock) this->PTD = finish - start;
 }
 template<>
-void AOIntegrals::twoEContractN4(bool RHF, bool doFock, const ComplexMatrix &XAlpha, ComplexMatrix &AXAlpha,
+void AOIntegrals::twoEContractN4(bool RHF, bool doFock, bool doTCS, const ComplexMatrix &XAlpha, ComplexMatrix &AXAlpha,
                                  const ComplexMatrix &XBeta, ComplexMatrix &AXBeta) {
   this->fileio_->out << "Contracting with in-core two-electron integrals" << endl;
   if(!this->haveAOTwoE) this->computeAOTwoE();

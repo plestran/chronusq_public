@@ -24,6 +24,7 @@
  *  
  */
 #include <workers.h>
+#include <mollerplesset.h>
 using namespace ChronusQ;
 
 int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
@@ -35,6 +36,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   auto dfBasisset     	= std::unique_ptr<BasisSet>(new BasisSet());
   auto controls     	= std::unique_ptr<Controls>(new Controls());
   auto aointegrals	= std::unique_ptr<AOIntegrals>(new AOIntegrals());
+  auto mointegrals	= std::unique_ptr<MOIntegrals>(new MOIntegrals());
   auto hartreeFock	= std::unique_ptr<SingleSlater<double>>(new SingleSlater<double>());
   auto sdResponse       = std::unique_ptr<SDResponse>(new SDResponse());
   std::unique_ptr<FileIO> fileIO;
@@ -54,15 +56,16 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 
   // Initialize default settings and read input
   controls->iniControls();
+//controls->doTCS = true;
   readInput(fileIO.get(),molecule.get(),basisset.get(),controls.get(),dfBasisset.get());
 //  fileIO->iniFileIO(controls->restart);
 
   // print out molecular and basis set information
   controls->printSettings(fileIO->out);
   molecule->printInfo(fileIO.get(),controls.get());
-  basisset->printInfo_libint(fileIO.get(),controls.get());
+  basisset->printInfo();
 
-  dfBasisset->printInfo_libint(fileIO.get(),controls.get());
+//dfBasisset->printInfo();
 
   aointegrals->iniAOIntegrals(molecule.get(),basisset.get(),fileIO.get(),controls.get(),dfBasisset.get());
   hartreeFock->iniSingleSlater(molecule.get(),basisset.get(),aointegrals.get(),fileIO.get(),controls.get());
@@ -80,20 +83,25 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   hartreeFock->formFock();
   aointegrals->printTimings();
   hartreeFock->computeEnergy();
-  std::shared_ptr<MOIntegrals> moIntegrals = std::make_shared<MOIntegrals>();
-  if(controls->optWaveFunction) {
-    hartreeFock->doCUHF = false;
-    hartreeFock->SCF();
-  }
-  //MOIntegrals *moIntegrals = new MOIntegrals();
-  //moIntegrals->iniMOIntegrals(molecule,basisset,fileIO,controls,aointegrals,hartreeFock);
+  if(controls->optWaveFunction)  hartreeFock->SCF();
   else fileIO->out << "**Skipping SCF Optimization**" << endl; 
   hartreeFock->computeMultipole();
+  mointegrals->iniMOIntegrals(molecule.get(),basisset.get(),fileIO.get(),controls.get(),aointegrals.get(),hartreeFock.get());
   if(controls->doSDR) {
-    sdResponse->iniSDResponse(molecule.get(),basisset.get(),moIntegrals.get(),fileIO.get(),
+    sdResponse->setPPRPA(1);
+    sdResponse->iniSDResponse(molecule.get(),basisset.get(),mointegrals.get(),fileIO.get(),
                               controls.get(),hartreeFock.get());
+    
     sdResponse->IterativeRPA();
+  //sdResponse->incorePPRPA();
+//sdResponse->incoreCIS();
+//sdResponse->incorePPRPAnew();
   }
+  auto mp       = std::unique_ptr<MollerPlesset>(new MollerPlesset());
+    mp->iniMollerPlesset(molecule.get(),basisset.get(),mointegrals.get(),fileIO.get(),
+                              controls.get(),hartreeFock.get());
+  //mp->MP2();
+//mointegrals->testLocMO();
 
 //if(controls->doDF) aointegrals->compareRI();
 /*

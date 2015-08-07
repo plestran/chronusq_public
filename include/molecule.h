@@ -39,7 +39,7 @@ namespace ChronusQ {
 class Molecule {
   int                          nAtoms_;      // number of atoms in the system
   int                          charge_;      // total charge
-  int                          spin_;        // spin multiplicity
+  int                          multip_;      // spin multiplicity
   int                          nTotalE_;     // total number of electrons
   int                          size_;        // size of the object in terms of sizeof(char)
   int                         *index_;       // index of atom in the atoms[] array
@@ -53,7 +53,10 @@ class Molecule {
 public:
 
   // constructor
-  Molecule(int nAtoms=0,FileIO * fileio=NULL){ if(nAtoms>0) iniMolecule(nAtoms,fileio);};
+  Molecule(int nAtoms=0,FileIO * fileio=NULL){ 
+    this->nTotalE_ = 0;
+    if(nAtoms>0) iniMolecule(nAtoms,fileio);
+  };
   Molecule(Atoms atm, FileIO *fileio=NULL){
     this->iniMolecule(1,fileio);
     auto n = HashAtom(atm.symbol,atm.massNumber);
@@ -86,10 +89,10 @@ public:
   inline int nAtoms() {return this->nAtoms_;};
   inline RealMatrix* cart() {return this->cart_.get();}
   inline int charge() {return this->charge_;}
-  inline int spin() {return this->spin_;}
+  inline int multip() {return this->multip_;}
   inline int nTotalE() {return this->nTotalE_;};
-  inline void readCharge(int charge) {this->charge_=charge;};
-  inline void readSpin(int spin) {this->spin_=spin;};
+  inline void readCharge(int charge) {this->charge_=charge; this->nTotalE_ -= charge;};
+  inline void readMultip(int multip) {this->multip_=multip;};
   inline int size() { return this->size_;};
   inline double energyNuclei() { return this->energyNuclei_;};
 

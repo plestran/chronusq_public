@@ -7,30 +7,35 @@
 AOCartesian	include/basisset.h	/^struct AOCartesian{$/;"	s	namespace:ChronusQ
 AOIntegrals	include/aointegrals.h	/^  AOIntegrals(){;};$/;"	f	class:ChronusQ::AOIntegrals
 AOIntegrals	include/aointegrals.h	/^class AOIntegrals{$/;"	c	namespace:ChronusQ
-AX_	include/davidson.h	/^    TMat (*AX_)(const TMat &, const TMat &) ;      \/\/ Function to form AX$/;"	m	class:ChronusQ::Davidson
+ASuperMem	include/quasinewton.h	/^    T * ASuperMem  ;$/;"	m	class:ChronusQ::QuasiNewton
+ASuperMem	include/quasinewtonscratch.h	/^T * ASuperMem  ;$/;"	v
+A_	include/quasinewton.h	/^    TMat * A_;                \/\/ Pointer to full matrix to be diagonalized$/;"	m	class:ChronusQ::QuasiNewton
 Atoms	include/atoms.h	/^struct Atoms { $/;"	s	namespace:ChronusQ
 BasisPair	include/basisset.h	/^struct BasisPair{$/;"	s	namespace:ChronusQ
 BasisSet	include/basisset.h	/^class BasisSet{ $/;"	c	namespace:ChronusQ
 BasisSet	src/basisset/basisset.cpp	/^BasisSet::BasisSet(int nBasis, int nShell) {$/;"	f	class:BasisSet
-CCSD	include/davidson.h	/^      CCSD$/;"	e	enum:ChronusQ::Davidson::__anon1
+BiOrthMem	include/quasinewton.h	/^    T * BiOrthMem  ;$/;"	m	class:ChronusQ::QuasiNewton
+CCSD	include/sdresponse.h	/^    CCSD$/;"	e	enum:ChronusQ::SDResponse::__anon4
+CDIIS	src/singleslater/real_diis.cpp	/^void SingleSlater<double>::CDIIS(int N, double *EA, double *FADIIS, double *EB, double *FBDIIS){$/;"	f	class:ChronusQ::SingleSlater
 CErr	src/cerr/cerr.cpp	/^void ChronusQ::CErr(std::exception_ptr eptr,std::ostream & out) {$/;"	f	class:ChronusQ
 CErr	src/cerr/cerr.cpp	/^void ChronusQ::CErr(std::exception_ptr eptr,std::string msg,std::ostream & out) {$/;"	f	class:ChronusQ
 CErr	src/cerr/cerr.cpp	/^void ChronusQ::CErr(std::ostream & out){$/;"	f	class:ChronusQ
 CErr	src/cerr/cerr.cpp	/^void ChronusQ::CErr(std::string msg,std::ostream & out){$/;"	f	class:ChronusQ
-CIS	include/davidson.h	/^      CIS,$/;"	e	enum:ChronusQ::Davidson::__anon1
+CIS	include/sdresponse.h	/^    CIS,$/;"	e	enum:ChronusQ::SDResponse::__anon4
 COM_	include/molecule.h	/^  std::unique_ptr<RealMatrix>  COM_;         \/\/ center of mass coordinate or center of nuclear charges $/;"	m	class:ChronusQ::Molecule
 CShell	src/basisset/basisset_libint.cpp	/^typedef ChronusQ::Shell CShell;$/;"	t	file:
 CShell	src/basisset/basisset_read.cpp	/^typedef libint2::Shell CShell;$/;"	t	file:
+CUHF	include/singleslater.h	/^    CUHF,$/;"	e	enum:ChronusQ::SingleSlater::__anon5
 ChronusQ	include/aointegrals.h	/^namespace ChronusQ {$/;"	n
 ChronusQ	include/atoms.h	/^namespace ChronusQ {$/;"	n
 ChronusQ	include/basisset.h	/^namespace ChronusQ {$/;"	n
 ChronusQ	include/cerr.h	/^namespace ChronusQ {$/;"	n
 ChronusQ	include/classtools.h	/^namespace ChronusQ {$/;"	n
 ChronusQ	include/controls.h	/^namespace ChronusQ {$/;"	n
-ChronusQ	include/davidson.h	/^namespace ChronusQ {$/;"	n
 ChronusQ	include/fileio.h	/^namespace ChronusQ {$/;"	n
 ChronusQ	include/mointegrals.h	/^namespace ChronusQ {$/;"	n
 ChronusQ	include/molecule.h	/^namespace ChronusQ {$/;"	n
+ChronusQ	include/quasinewton.h	/^namespace ChronusQ {$/;"	n
 ChronusQ	include/sdresponse.h	/^namespace ChronusQ {$/;"	n
 ChronusQ	include/singleslater.h	/^namespace ChronusQ {$/;"	n
 ChronusQ	include/tools.h	/^namespace ChronusQ {$/;"	n
@@ -38,16 +43,25 @@ ChronusQ	include/workers.h	/^namespace ChronusQ {$/;"	n
 ChronusQ	src/aointegrals/aointegrals_complex_contract.cpp	/^namespace ChronusQ{$/;"	n	file:
 ChronusQ	src/aointegrals/aointegrals_real_contract.cpp	/^namespace ChronusQ{$/;"	n	file:
 ChronusQ	src/classtools/classtools.cpp	/^namespace ChronusQ {$/;"	n	file:
-ChronusQ	src/davidson/davidson.cpp	/^namespace ChronusQ {$/;"	n	file:
+ChronusQ	src/quasinewton/quasinewton_real_diag.cpp	/^namespace ChronusQ {$/;"	n	file:
+ChronusQ	src/quasinewton/quasinewton_real_guess.cpp	/^namespace ChronusQ {$/;"	n	file:
+ChronusQ	src/quasinewton/quasinewton_real_misc.cpp	/^namespace ChronusQ {$/;"	n	file:
+ChronusQ	src/quasinewton/quasinewton_real_proc.cpp	/^namespace ChronusQ {$/;"	n	file:
+ChronusQ	src/quasinewton/quasinewton_real_restart.cpp	/^namespace ChronusQ {$/;"	n	file:
+ChronusQ	src/singleslater/complex_misc.cpp	/^namespace ChronusQ {$/;"	n	file:
+ChronusQ	src/singleslater/real_diis.cpp	/^namespace ChronusQ{$/;"	n	file:
 ChronusQ	src/singleslater/real_fock.cpp	/^namespace ChronusQ {$/;"	n	file:
 ChronusQ	src/singleslater/real_guess.cpp	/^namespace ChronusQ {$/;"	n	file:
+ChronusQ	src/singleslater/real_misc.cpp	/^namespace ChronusQ {$/;"	n	file:
 ChronusQ	src/singleslater/real_mpi.cpp	/^namespace ChronusQ {$/;"	n	file:
 ChronusQ	src/singleslater/real_properties.cpp	/^namespace ChronusQ {$/;"	n	file:
 ChronusQ	src/singleslater/real_scf.cpp	/^namespace ChronusQ {$/;"	n	file:
 ChronusQ	src/tools/tools.cpp	/^namespace ChronusQ { $/;"	n	file:
+ComplexCMMatrix	include/global.h	/^typedef Eigen::Matrix<dcomplex,Dynamic,Dynamic,ColMajor>   ComplexCMMatrix; \/\/\/< Dynamically allocated Complex (dcomplex) matrix. Row major for integration with Libint$/;"	t
 ComplexMap	include/global.h	/^typedef Eigen::Map<ComplexMatrix> ComplexMap; \/\/\/< Map double precision complex array onto ComplexMatrix object$/;"	t
 ComplexMatExp	include/global.h	/^typedef Eigen::MatrixExponentialReturnValue<ComplexMatrix> ComplexMatExp; \/\/\/< Driver for matrix exponential (ComplexMatrix)$/;"	t
 ComplexMatrix	include/global.h	/^typedef Eigen::Matrix<dcomplex,Dynamic,Dynamic,RowMajor>   ComplexMatrix; \/\/\/< Dynamically allocated Complex (dcomplex) matrix. Row major for integration with Libint$/;"	t
+ComplexTensor1d	include/global.h	/^typedef Tensor<dcomplex,Range1d> ComplexTensor1d; \/\/\/< Support for complex-values rank-1 tensors (aka Vectors) using BTAS$/;"	t
 ComplexTensor2d	include/global.h	/^typedef Tensor<dcomplex,Range2d> ComplexTensor2d; \/\/\/< Support for complex-values rank-2 tensors (aka Matricies) using BTAS$/;"	t
 ComplexTensor3d	include/global.h	/^typedef Tensor<dcomplex,Range3d> ComplexTensor3d; \/\/\/< Support for complex-valued rank-3 tensors using BTAS$/;"	t
 ComplexTensor4d	include/global.h	/^typedef Tensor<dcomplex,Range4d> ComplexTensor4d; \/\/\/< Support for complex-valued rank-4 tensors using BTAS$/;"	t
@@ -58,16 +72,13 @@ Controls	include/controls.h	/^class Controls {$/;"	c	namespace:ChronusQ
 CoulD	include/aointegrals.h	/^  std::chrono::duration<double> CoulD; \/\/\/< High-precision timing for Coulomb tensor evaluation$/;"	m	class:ChronusQ::AOIntegrals
 DFT	include/controls.h	/^  bool  	DFT;            \/\/ use density functional theory$/;"	m	class:ChronusQ::Controls
 DFbasisSet_	include/aointegrals.h	/^  BasisSet *     DFbasisSet_; \/\/\/< Smart pointer to density fitting basis set$/;"	m	class:ChronusQ::AOIntegrals
-Davidson	include/davidson.h	/^    Davidson() {$/;"	f	class:ChronusQ::Davidson
-Davidson	include/davidson.h	/^    Davidson(SDResponse * SDR, int meth, int nSek){$/;"	f	class:ChronusQ::Davidson
-Davidson	include/davidson.h	/^    Davidson(TMat (*AX)(const TMat&, const TMat&), TMat * A, int nSek, int N) {$/;"	f	class:ChronusQ::Davidson
-Davidson	include/davidson.h	/^    Davidson(TMat* A, int nSek) {$/;"	f	class:ChronusQ::Davidson
-Davidson	include/davidson.h	/^  class Davidson {$/;"	c	namespace:ChronusQ
 DenShBlkD	include/aointegrals.h	/^  std::chrono::duration<double> DenShBlkD; \/\/\/< High-precision timing for Density shell-block norm evaluation$/;"	m	class:ChronusQ::AOIntegrals
-EIGEN_INITIALIZE_MATRICES_BY_ZERO	include/global.h	46;"	d
-EIGEN_MATRIXBASE_PLUGIN	include/global.h	45;"	d
+EIGEN_INITIALIZE_MATRICES_BY_ZERO	include/global.h	47;"	d
+EIGEN_MATRIXBASE_PLUGIN	include/global.h	46;"	d
 EIGINTER_INC	include/eiginterface.h	27;"	d
-E_delta	src/singleslater/real_scf.cpp	/^double E_delta;$/;"	v
+EIMem	include/quasinewton.h	/^    T * EIMem      ;$/;"	m	class:ChronusQ::QuasiNewton
+ERMem	include/quasinewton.h	/^    T * ERMem      ;$/;"	m	class:ChronusQ::QuasiNewton
+E_delta	src/singleslater/scf.cpp	/^double E_delta;$/;"	v
 Eigen	include/eiginterface.h	/^namespace Eigen {$/;"	n
 ExchD	include/aointegrals.h	/^  std::chrono::duration<double> ExchD; \/\/\/< High-precision timing for Exchange tensor evaluation$/;"	m	class:ChronusQ::AOIntegrals
 Factorial	include/global.h	/^static double Factorial[8] ={$/;"	v
@@ -78,8 +89,12 @@ FmT	include/aointegrals.h	/^  double FmT[MAXANGULARMOMENTUM][MAXCONTRACTION][MAX
 FmTTable_	include/aointegrals.h	/^  double	**FmTTable_;$/;"	m	class:ChronusQ::AOIntegrals
 FmU	include/aointegrals.h	/^  double FmU[10][MAXCONTRACTION][MAXCONTRACTION][MAXATOMS];   \/\/ [ss]^m = FmU * vK$/;"	m	struct:ChronusQ::PairConstants
 GauHeader	include/gauinterface.h	/^  std::vector<std::string> GauHeader;$/;"	m	class:GauMatEl
+GauJob	include/gauinterface.h	/^  GauJob(bool doOpt, std::string basis, double* cart, std::vector<int> &atoms, int charge, int multip, std::string name="TEMP"){$/;"	f	class:GauJob
+GauJob	include/gauinterface.h	/^class GauJob{$/;"	c
 GauMatEl	include/gauinterface.h	/^  GauMatEl(std::string name=""){$/;"	f	class:GauMatEl
 GauMatEl	include/gauinterface.h	/^class GauMatEl{$/;"	c
+General24CouContract	src/aointegrals/aointegrals_real_contract.cpp	/^void AOIntegrals::General24CouContract(RealMatrix &G, const RealMatrix &X, int n1, int n2, int n3, int n4,$/;"	f	class:ChronusQ::AOIntegrals
+General34NonHerContract	src/aointegrals/aointegrals_real_contract.cpp	/^void AOIntegrals::General34NonHerContract(RealMatrix &GAlpha, const RealMatrix &XAlpha, RealMatrix &GBeta, const RealMatrix &XBeta, int n1, int n2, int n3, int n4, $/;"	f	class:ChronusQ::AOIntegrals
 GlobalMPI	include/global.h	/^struct GlobalMPI {$/;"	s
 HF	include/controls.h	/^  bool  	HF;             \/\/ use Hartree-Fock$/;"	m	class:ChronusQ::Controls
 HashAtom	src/tools/tools.cpp	/^int HashAtom(std::string element, int massNumber) { $/;"	f	namespace:ChronusQ
@@ -94,84 +109,175 @@ INCLUDED_BASISSET	include/basisset.h	27;"	d
 INCLUDED_CERR	include/cerr.h	27;"	d
 INCLUDED_CLASSTOOLS	include/classtools.h	27;"	d
 INCLUDED_CONTROLS	include/controls.h	27;"	d
-INCLUDED_DAVIDSON	include/davidson.h	30;"	d
 INCLUDED_FILEIO	include/fileio.h	27;"	d
 INCLUDED_GAUINTERFACE	include/gauinterface.h	27;"	d
 INCLUDED_GLOBAL	include/global.h	27;"	d
 INCLUDED_MOINTEGRAL	include/mointegrals.h	27;"	d
 INCLUDED_MOLECULES	include/molecule.h	27;"	d
+INCLUDED_QUATINEWTON	include/quasinewton.h	27;"	d
 INCLUDED_SDRESPONSE	include/sdresponse.h	27;"	d
 INCLUDED_SINGLESLATER	include/singleslater.h	27;"	d
 INCLUDED_TOOLS	include/tools.h	27;"	d
 INCLUDED_WORKERS	include/workers.h	27;"	d
+IterativeRPA	src/sdresponse/sdresponse_qnrelated.cpp	/^void SDResponse::IterativeRPA(){$/;"	f	class:SDResponse
 KAB	include/basisset.h	/^  double  KAB[MAXCONTRACTION][MAXCONTRACTION];		\/\/ KAB used to compute the [ss|ss] integral$/;"	m	struct:ChronusQ::ShellPair
 L	include/aointegrals.h	/^  int L[2];        \/\/\/< total angular momentum of each AO$/;"	m	struct:ChronusQ::PairConstants
 L	include/basisset.h	/^  int     L;                     \/\/ angular momentum  -  0 , 1 , 2,  3 , 4$/;"	m	struct:ChronusQ::Shell
 L	include/basisset.h	/^  int     L[2];                 \/\/ angular momenta of the first and second shells$/;"	m	struct:ChronusQ::BasisPair
 L	include/basisset.h	/^  int     L[2];                 \/\/ angular momenta of the first and second shells$/;"	m	struct:ChronusQ::ShellPair
+LAPACK_SCR	include/quasinewton.h	/^    T * LAPACK_SCR ;$/;"	m	class:ChronusQ::QuasiNewton
+LAPACK_SCR	include/quasinewtonscratch.h	/^T * LAPACK_SCR ;$/;"	v
 LEN_GAU_STR	include/gauinterface.h	/^const int LEN_GAU_STR = 64*sizeof(char);$/;"	v
+LEN_LAPACK_SCR	include/quasinewton.h	/^    int LEN_LAPACK_SCR; $/;"	m	class:ChronusQ::QuasiNewton
+LEN_LAPACK_SCR	include/quasinewtonscratch.h	/^int LEN_LAPACK_SCR; $/;"	v
 LIShell	src/basisset/basisset_libint.cpp	/^typedef libint2::Shell LIShell;$/;"	t	file:
 LIShell	src/basisset/basisset_read.cpp	/^typedef libint2::Shell LIShell;$/;"	t	file:
 LTotal	include/basisset.h	/^  int	  LTotal;		\/\/ total angular momenta of the shell pair$/;"	m	struct:ChronusQ::ShellPair
-MAXANGULARMOMENTUM	include/global.h	30;"	d
-MAXATOMS	include/global.h	32;"	d
+LWORK	include/quasinewton.h	/^    int LWORK         ;$/;"	m	class:ChronusQ::QuasiNewton
+LWORK	include/quasinewtonscratch.h	/^int LWORK         ;$/;"	v
+LenRes	include/quasinewton.h	/^    int LenRes        ;$/;"	m	class:ChronusQ::QuasiNewton
+LenRes	include/quasinewtonscratch.h	/^int LenRes        ;$/;"	v
+LenRho	include/quasinewton.h	/^    int LenRho        ;$/;"	m	class:ChronusQ::QuasiNewton
+LenRho	include/quasinewtonscratch.h	/^int LenRho        ;$/;"	v
+LenScr	include/quasinewton.h	/^    int LenScr        ; $/;"	m	class:ChronusQ::QuasiNewton
+LenScr	include/quasinewtonscratch.h	/^int LenScr        ; $/;"	v
+LenSigma	include/quasinewton.h	/^    int LenSigma      ; $/;"	m	class:ChronusQ::QuasiNewton
+LenSigma	include/quasinewtonscratch.h	/^int LenSigma      ; $/;"	v
+LenSuper	include/quasinewton.h	/^    int LenSuper      ;$/;"	m	class:ChronusQ::QuasiNewton
+LenSuper	include/quasinewtonscratch.h	/^int LenSuper      ;$/;"	v
+LenTVec	include/quasinewton.h	/^    int LenTVec       ;$/;"	m	class:ChronusQ::QuasiNewton
+LenTVec	include/quasinewtonscratch.h	/^int LenTVec       ;$/;"	v
+LenU	include/quasinewton.h	/^    int LenU          ;$/;"	m	class:ChronusQ::QuasiNewton
+LenU	include/quasinewtonscratch.h	/^int LenU          ;$/;"	v
+LenXTRho	include/quasinewton.h	/^    int LenXTRho      ;$/;"	m	class:ChronusQ::QuasiNewton
+LenXTRho	include/quasinewtonscratch.h	/^int LenXTRho      ;$/;"	v
+LenXTSigma	include/quasinewton.h	/^    int LenXTSigma    ;$/;"	m	class:ChronusQ::QuasiNewton
+LenXTSigma	include/quasinewtonscratch.h	/^int LenXTSigma    ;$/;"	v
+MAXANGULARMOMENTUM	include/global.h	31;"	d
+MAXATOMS	include/global.h	33;"	d
 MAXBLOCK	include/fileio.h	28;"	d
-MAXCONTRACTION	include/global.h	31;"	d
-MAXNAMELEN	include/global.h	29;"	d
+MAXCONTRACTION	include/global.h	32;"	d
+MAXNAMELEN	include/global.h	30;"	d
 MOIntegrals	include/mointegrals.h	/^  MOIntegrals(){;};$/;"	f	class:ChronusQ::MOIntegrals
 MOIntegrals	include/mointegrals.h	/^class MOIntegrals{$/;"	c	namespace:ChronusQ
 Math	include/global.h	/^struct Math {$/;"	s
 MaxFmTPt	include/aointegrals.h	37;"	d
-MaxIter_	include/davidson.h	/^    int     MaxIter_;     \/\/ Maximum number of iterations (macro) $/;"	m	class:ChronusQ::Davidson
+MaxIter_	include/quasinewton.h	/^    int MaxIter_;          \/\/ Maximum number of macro iterations$/;"	m	class:ChronusQ::QuasiNewton
 MaxTotalL	include/aointegrals.h	38;"	d
 Memory	src/memory/memory.cpp	/^Memory::Memory(long n, std::string unit, ostream output) {$/;"	f	class:Memory
 MolecularConstants	include/aointegrals.h	/^struct MolecularConstants{$/;"	s	namespace:ChronusQ
-Molecule	include/molecule.h	/^  Molecule(int nAtoms=0,FileIO * fileio=NULL){ if(nAtoms>0) iniMolecule(nAtoms,fileio);};$/;"	f	class:ChronusQ::Molecule
+Molecule	include/molecule.h	/^  Molecule(Atoms atm, FileIO *fileio=NULL){$/;"	f	class:ChronusQ::Molecule
+Molecule	include/molecule.h	/^  Molecule(int nAtoms=0,FileIO * fileio=NULL){ $/;"	f	class:ChronusQ::Molecule
 Molecule	include/molecule.h	/^class Molecule {$/;"	c	namespace:ChronusQ
+NHrProdMem	include/quasinewton.h	/^    T * NHrProdMem ;$/;"	m	class:ChronusQ::QuasiNewton
+N_	include/quasinewton.h	/^    int N_;                \/\/ Dimension of the problem$/;"	m	class:ChronusQ::QuasiNewton
 OneED	include/aointegrals.h	/^  std::chrono::duration<double> OneED; \/\/\/< High-precision timing for core Hamiltonian assembly$/;"	m	class:ChronusQ::AOIntegrals
-PTA_	include/singleslater.h	/^  std::unique_ptr<TMatrix>  PTA_;$/;"	m	class:ChronusQ::SingleSlater
-PTB_	include/singleslater.h	/^  std::unique_ptr<TMatrix>  PTB_;$/;"	m	class:ChronusQ::SingleSlater
+Orth	src/quasinewton/quasinewton_real_misc.cpp	/^  void QuasiNewton<double>::Orth(RealCMMap &A){$/;"	f	class:ChronusQ::QuasiNewton
+Orth	src/quasinewton/quasinewton_real_misc.cpp	/^  void QuasiNewton<double>::Orth(RealCMMatrix &A){$/;"	f	class:ChronusQ::QuasiNewton
+PPATDA	include/sdresponse.h	/^    PPATDA,$/;"	e	enum:ChronusQ::SDResponse::__anon4
+PPCTDA	include/sdresponse.h	/^    PPCTDA,$/;"	e	enum:ChronusQ::SDResponse::__anon4
+PPRPA	include/sdresponse.h	/^    PPRPA,$/;"	e	enum:ChronusQ::SDResponse::__anon4
+PTA	include/singleslater.h	/^  inline TMatrix* PTA()      { return this->PTA_.get();};$/;"	f	class:ChronusQ::SingleSlater
+PTA_	include/singleslater.h	/^  std::unique_ptr<TMatrix>  PTA_;        \/\/\/< Alpha or Full (TCS) Perturbation Tensor$/;"	m	class:ChronusQ::SingleSlater
+PTB	include/singleslater.h	/^  inline TMatrix* PTB()      { return this->PTB_.get();};$/;"	f	class:ChronusQ::SingleSlater
+PTB_	include/singleslater.h	/^  std::unique_ptr<TMatrix>  PTB_;        \/\/\/< Beta Perturbation Tensor$/;"	m	class:ChronusQ::SingleSlater
 PTD	include/aointegrals.h	/^  std::chrono::duration<double> PTD; \/\/\/< High-precision timing for Perturbation tensor evaluation, \\f$G[P]\\f\$$/;"	m	class:ChronusQ::AOIntegrals
-P_Rms	src/singleslater/real_scf.cpp	/^double P_Rms;$/;"	v
+P_Rms	src/singleslater/scf.cpp	/^double P_Rms;$/;"	v
 PairConstants	include/aointegrals.h	/^struct PairConstants{$/;"	s	namespace:ChronusQ
 Phys	include/global.h	/^struct Phys {$/;"	s
 QuartetConstants	include/aointegrals.h	/^struct QuartetConstants{$/;"	s	namespace:ChronusQ
+QuasiNewton	include/quasinewton.h	/^    QuasiNewton(){ this->loadDefaults();};$/;"	f	class:ChronusQ::QuasiNewton
+QuasiNewton	include/quasinewton.h	/^    QuasiNewton(SDResponse * SDR) : QuasiNewton(){$/;"	f	class:ChronusQ::QuasiNewton
+QuasiNewton	include/quasinewton.h	/^  class QuasiNewton{$/;"	c	namespace:ChronusQ
 R2Index_	include/aointegrals.h	/^  int       **R2Index_;$/;"	m	class:ChronusQ::AOIntegrals
-R2Index_	include/sdresponse.h	/^  int       **R2Index_;$/;"	m	class:ChronusQ::SDResponse
 R2Index_	include/singleslater.h	/^  int    **R2Index_;$/;"	m	class:ChronusQ::SingleSlater
-RHF	include/singleslater.h	/^  inline int RHF()    { return this->RHF_; };$/;"	f	class:ChronusQ::SingleSlater
-RHF_	include/singleslater.h	/^  int      RHF_;$/;"	m	class:ChronusQ::SingleSlater
-RPA	include/davidson.h	/^      RPA,$/;"	e	enum:ChronusQ::Davidson::__anon1
+RHF	include/singleslater.h	/^    RHF,$/;"	e	enum:ChronusQ::SingleSlater::__anon5
+RPA	include/sdresponse.h	/^    RPA,$/;"	e	enum:ChronusQ::SDResponse::__anon4
+Range1d	include/global.h	/^typedef btas::RangeNd<CblasRowMajor,std::array<long,1>> Range1d; \/\/\/< BTAS range specification for rank-1 tensors (isomorphic with vector)$/;"	t
 Range2d	include/global.h	/^typedef btas::RangeNd<CblasRowMajor,std::array<long,2>> Range2d; \/\/\/< BTAS range specification for rank-2 tensors (isomorphic with matrix)$/;"	t
 Range3d	include/global.h	/^typedef btas::RangeNd<CblasRowMajor,std::array<long,3>> Range3d; \/\/\/< BTAS range specification for rank-3 tensors$/;"	t
 Range4d	include/global.h	/^typedef btas::RangeNd<CblasRowMajor,std::array<long,4>> Range4d; \/\/\/< BTAS range specification for rank-4 tensors$/;"	t
+RealCMMap	include/global.h	/^typedef Eigen::Map<RealCMMatrix> RealCMMap; \/\/\/< Map double precision real array onto RealMatrix object$/;"	t
+RealCMMatrix	include/global.h	/^typedef Eigen::Matrix<double,Dynamic,Dynamic,ColMajor>     RealCMMatrix;    \/\/\/< Dynamically allocated Real (double) matrix. Row major for integration with Libint$/;"	t
 RealMap	include/global.h	/^typedef Eigen::Map<RealMatrix> RealMap; \/\/\/< Map double precision real array onto RealMatrix object$/;"	t
 RealMatExp	include/global.h	/^typedef Eigen::MatrixExponentialReturnValue<RealMatrix>    RealMatExp; \/\/\/< Driver for matrix exponentaial (RealMatrix)$/;"	t
 RealMatrix	include/global.h	/^typedef Eigen::Matrix<double,Dynamic,Dynamic,RowMajor>     RealMatrix;    \/\/\/< Dynamically allocated Real (double) matrix. Row major for integration with Libint$/;"	t
+RealTensor1d	include/global.h	/^typedef Tensor<double,Range1d> RealTensor1d; \/\/\/< Support for real-values rank-1 tensors (aka Vectors) using BTAS$/;"	t
 RealTensor2d	include/global.h	/^typedef Tensor<double,Range2d> RealTensor2d; \/\/\/< Support for real-values rank-2 tensors (aka Matricies) using BTAS$/;"	t
 RealTensor3d	include/global.h	/^typedef Tensor<double,Range3d> RealTensor3d; \/\/\/< Support for real-valued rank-3 tensors using BTAS$/;"	t
 RealTensor4d	include/global.h	/^typedef Tensor<double,Range4d> RealTensor4d; \/\/\/< Support for real-valued rank-4 tensors using BTAS$/;"	t
+RealVecMap	include/global.h	/^typedef Eigen::Map<VectorXd> RealVecMap;$/;"	t
+Ref	include/singleslater.h	/^  inline int Ref()    { return this->Ref_; };$/;"	f	class:ChronusQ::SingleSlater
+Ref_	include/sdresponse.h	/^  int       Ref_;$/;"	m	class:ChronusQ::SDResponse
+Ref_	include/singleslater.h	/^  int      Ref_;$/;"	m	class:ChronusQ::SingleSlater
+ResLMem	include/quasinewton.h	/^    T * ResLMem    ; $/;"	m	class:ChronusQ::QuasiNewton
+ResLMem	include/quasinewtonscratch.h	/^T * ResLMem    ; $/;"	v
+ResRMem	include/quasinewton.h	/^    T * ResRMem    ; $/;"	m	class:ChronusQ::QuasiNewton
+ResRMem	include/quasinewtonscratch.h	/^T * ResRMem    ; $/;"	v
+Restricted34HerContract	src/aointegrals/aointegrals_real_contract.cpp	/^void AOIntegrals::Restricted34HerContract(RealMatrix &G, const RealMatrix &X, int n1, int n2, int n3, int n4, $/;"	f	class:ChronusQ::AOIntegrals
+RhoLMem	include/quasinewton.h	/^    T * RhoLMem    ; $/;"	m	class:ChronusQ::QuasiNewton
+RhoLMem	include/quasinewtonscratch.h	/^T * RhoLMem    ; $/;"	v
+RhoRMem	include/quasinewton.h	/^    T * RhoRMem    ; $/;"	m	class:ChronusQ::QuasiNewton
+RhoRMem	include/quasinewtonscratch.h	/^T * RhoRMem    ; $/;"	v
 SCF	src/singleslater/real_scf.cpp	/^void SingleSlater<double>::SCF(){$/;"	f	class:ChronusQ::SingleSlater
+SCF	src/singleslater/scf.cpp	/^void SingleSlater::SCF(){$/;"	f	class:SingleSlater
+SCPYMem	include/quasinewton.h	/^    T * SCPYMem    ;$/;"	m	class:ChronusQ::QuasiNewton
+SCR	include/quasinewton.h	/^    T * SCR        ; $/;"	m	class:ChronusQ::QuasiNewton
+SCR	include/quasinewtonscratch.h	/^T * SCR        ; $/;"	v
+SDMethod	include/controls.h	/^  int           SDMethod;$/;"	m	class:ChronusQ::Controls
+SDNSek	include/controls.h	/^  int           SDNSek;$/;"	m	class:ChronusQ::Controls
 SDResponse	include/sdresponse.h	/^  SDResponse(){;};$/;"	f	class:ChronusQ::SDResponse
 SDResponse	include/sdresponse.h	/^class SDResponse {$/;"	c	namespace:ChronusQ
 SED	include/aointegrals.h	/^  std::chrono::duration<double> SED; \/\/\/< High-precision timing for overlap matrix evaluation$/;"	m	class:ChronusQ::AOIntegrals
 SP	include/basisset.h	/^  bool	  SP;			 \/\/ is this part of an SP shell?$/;"	m	struct:ChronusQ::Shell
+SSuperMem	include/quasinewton.h	/^    T * SSuperMem  ;$/;"	m	class:ChronusQ::QuasiNewton
+SSuperMem	include/quasinewtonscratch.h	/^T * SSuperMem  ;$/;"	v
 Sa0Par	include/aointegrals.h	/^  double Sa0Par[MAXCONTRACTION][MAXCONTRACTION];$/;"	m	struct:ChronusQ::PairConstants
 SchwartzD	include/aointegrals.h	/^  std::chrono::duration<double> SchwartzD; \/\/\/< High-precision timing for Schwartz bound evaluation$/;"	m	class:ChronusQ::AOIntegrals
 Shell	include/basisset.h	/^struct Shell{$/;"	s	namespace:ChronusQ
 ShellPair	include/basisset.h	/^struct ShellPair{$/;"	s	namespace:ChronusQ
+SigmaLMem	include/quasinewton.h	/^    T * SigmaLMem  ; $/;"	m	class:ChronusQ::QuasiNewton
+SigmaLMem	include/quasinewtonscratch.h	/^T * SigmaLMem  ; $/;"	v
+SigmaRMem	include/quasinewton.h	/^    T * SigmaRMem  ; $/;"	m	class:ChronusQ::QuasiNewton
+SigmaRMem	include/quasinewtonscratch.h	/^T * SigmaRMem  ; $/;"	v
 SingleSlater	include/singleslater.h	/^  SingleSlater(){;};$/;"	f	class:ChronusQ::SingleSlater
 SingleSlater	include/singleslater.h	/^class SingleSlater {$/;"	c	namespace:ChronusQ
+SingleSlater	src/singleslater/complex_misc.cpp	/^SingleSlater<dcomplex>::SingleSlater(SingleSlater<dcomplex> * other){$/;"	f	class:ChronusQ::SingleSlater
+SingleSlater	src/singleslater/complex_misc.cpp	/^SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other){$/;"	f	class:ChronusQ::SingleSlater
+SingleSlater	src/singleslater/real_misc.cpp	/^SingleSlater<double>::SingleSlater(SingleSlater<double> * other){$/;"	f	class:ChronusQ::SingleSlater
+TCMMap	include/quasinewton.h	/^    typedef Eigen::Map<TMat> TCMMap;$/;"	t	class:ChronusQ::QuasiNewton
+TCS	include/singleslater.h	/^    TCS$/;"	e	enum:ChronusQ::SingleSlater::__anon5
 TED	include/aointegrals.h	/^  std::chrono::duration<double> TED; \/\/\/< High-precision timing for kinetic energy tensor evaluation$/;"	m	class:ChronusQ::AOIntegrals
-TMat	include/davidson.h	/^    typedef Eigen::Matrix<T,Dynamic,Dynamic,RowMajor> TMat;$/;"	t	class:ChronusQ::Davidson
+TMat	include/quasinewton.h	/^    typedef Eigen::Matrix<T,Dynamic,Dynamic,ColMajor> TMat;$/;"	t	class:ChronusQ::QuasiNewton
 TMatrix	include/singleslater.h	/^  typedef Eigen::Matrix<T,Dynamic,Dynamic,RowMajor> TMatrix;$/;"	t	class:ChronusQ::SingleSlater
-TVec	include/davidson.h	/^    typedef Eigen::Matrix<T,Dynamic,1> TVec;$/;"	t	class:ChronusQ::Davidson
+TVec	include/quasinewton.h	/^    typedef Eigen::Matrix<T,Dynamic,1> TVec;$/;"	t	class:ChronusQ::QuasiNewton
+TVecLMem	include/quasinewton.h	/^    T * TVecLMem   ;         $/;"	m	class:ChronusQ::QuasiNewton
+TVecLMem	include/quasinewtonscratch.h	/^T * TVecLMem   ;         $/;"	v
+TVecMap	include/quasinewton.h	/^    typedef Eigen::Map<TVec> TVecMap;$/;"	t	class:ChronusQ::QuasiNewton
+TVecRMem	include/quasinewton.h	/^    T * TVecRMem   ;         $/;"	m	class:ChronusQ::QuasiNewton
+TVecRMem	include/quasinewtonscratch.h	/^T * TVecRMem   ;         $/;"	v
 Ta0Par3	include/aointegrals.h	/^  double Ta0Par3[MAXCONTRACTION][MAXCONTRACTION];$/;"	m	struct:ChronusQ::PairConstants
 TabPar1	include/aointegrals.h	/^  double TabPar1[MAXCONTRACTION][MAXCONTRACTION];$/;"	m	struct:ChronusQ::PairConstants
 TabPar2	include/aointegrals.h	/^  double TabPar2[MAXCONTRACTION][MAXCONTRACTION];$/;"	m	struct:ChronusQ::PairConstants
 TabPar3	include/aointegrals.h	/^  double TabPar3[MAXCONTRACTION][MAXCONTRACTION];$/;"	m	struct:ChronusQ::PairConstants
 UAB	include/basisset.h	/^  double  UAB[MAXCONTRACTION][MAXCONTRACTION];		\/\/ KAB used to compute the [ss|ss] integral$/;"	m	struct:ChronusQ::ShellPair
+UHF	include/singleslater.h	/^    UHF,$/;"	e	enum:ChronusQ::SingleSlater::__anon5
+ULMem	include/quasinewton.h	/^    T * ULMem      ; $/;"	m	class:ChronusQ::QuasiNewton
+ULMem	include/quasinewtonscratch.h	/^T * ULMem      ; $/;"	v
+URMem	include/quasinewton.h	/^    T * URMem      ; $/;"	m	class:ChronusQ::QuasiNewton
+URMem	include/quasinewtonscratch.h	/^T * URMem      ; $/;"	v
+UnRestricted34HerContract	src/aointegrals/aointegrals_real_contract.cpp	/^void AOIntegrals::UnRestricted34HerContract(RealMatrix &GAlpha, const RealMatrix &XAlpha, RealMatrix &GBeta, const RealMatrix &XBeta, int n1, int n2, int n3, int n4, $/;"	f	class:ChronusQ::AOIntegrals
 VED	include/aointegrals.h	/^  std::chrono::duration<double> VED; \/\/\/< High-precision timing for potential energy tensor evaluation$/;"	m	class:ChronusQ::AOIntegrals
+WORK	include/quasinewton.h	/^    T * WORK       ;$/;"	m	class:ChronusQ::QuasiNewton
+XTRhoLMem	include/quasinewton.h	/^    T * XTRhoLMem  ; $/;"	m	class:ChronusQ::QuasiNewton
+XTRhoLMem	include/quasinewtonscratch.h	/^T * XTRhoLMem  ; $/;"	v
+XTRhoRMem	include/quasinewton.h	/^    T * XTRhoRMem  ; $/;"	m	class:ChronusQ::QuasiNewton
+XTRhoRMem	include/quasinewtonscratch.h	/^T * XTRhoRMem  ; $/;"	v
+XTSigmaLMem	include/quasinewton.h	/^    T * XTSigmaLMem; $/;"	m	class:ChronusQ::QuasiNewton
+XTSigmaLMem	include/quasinewtonscratch.h	/^T * XTSigmaLMem; $/;"	v
+XTSigmaRMem	include/quasinewton.h	/^    T * XTSigmaRMem; $/;"	m	class:ChronusQ::QuasiNewton
+XTSigmaRMem	include/quasinewtonscratch.h	/^T * XTSigmaRMem; $/;"	v
+__invalid	include/sdresponse.h	/^    __invalid,$/;"	e	enum:ChronusQ::SDResponse::__anon4
 a000Par1	include/aointegrals.h	/^  double a000Par1[MAXCONTRACTION][MAXCONTRACTION];$/;"	m	struct:ChronusQ::QuartetConstants
 a000Par2	include/aointegrals.h	/^  double a000Par2[MAXCONTRACTION][MAXCONTRACTION][MAXCONTRACTION][MAXCONTRACTION];$/;"	m	struct:ChronusQ::QuartetConstants
 a0c0Par1	include/aointegrals.h	/^  double a0c0Par1[MAXCONTRACTION][MAXCONTRACTION];$/;"	m	struct:ChronusQ::QuartetConstants
@@ -179,8 +285,14 @@ a0c0Par2	include/aointegrals.h	/^  double a0c0Par2[MAXCONTRACTION][MAXCONTRACTIO
 a0c0Par3	include/aointegrals.h	/^  double a0c0Par3[MAXCONTRACTION][MAXCONTRACTION][MAXCONTRACTION][MAXCONTRACTION];$/;"	m	struct:ChronusQ::QuartetConstants
 abIndex_	include/mointegrals.h	/^  int       **abIndex_;$/;"	m	class:ChronusQ::MOIntegrals
 abcd_	include/mointegrals.h	/^  std::unique_ptr<RealMatrix>    abcd_;$/;"	m	class:ChronusQ::MOIntegrals
+allBasis	include/basisset.h	/^  std::vector<basis_libint> allBasis;$/;"	m	class:ChronusQ::BasisSet
+allocGuess	include/quasinewton.h	/^    inline void allocGuess(){ $/;"	f	class:ChronusQ::QuasiNewton
+allocScr	include/quasinewton.h	/^  inline void allocScr(){$/;"	f	class:ChronusQ::QuasiNewton
+allocScr	include/quasinewtonscratch.h	/^inline void allocScr(){$/;"	f
+allocSolution	include/quasinewton.h	/^    inline void allocSolution(){$/;"	f	class:ChronusQ::QuasiNewton
 ao	include/basisset.h	/^  AOCartesian *ao;             \/\/ array of ao's$/;"	m	class:ChronusQ::BasisSet
 aoERI_	include/aointegrals.h	/^  std::unique_ptr<RealTensor4d>  aoERI_; \/\/\/< Rank-4 ERI tensor over primary basis functions \\f$ (\\mu \\nu \\vert \\lambda\\delta )\\f\$$/;"	m	class:ChronusQ::AOIntegrals
+aoERI_	include/sdresponse.h	/^  RealTensor4d *  aoERI_;$/;"	m	class:ChronusQ::SDResponse
 aoIndex	include/aointegrals.h	/^  int aoIndex[2];  \/\/\/< location of PGTO in ao[]$/;"	m	struct:ChronusQ::PairConstants
 aoIndex	include/basisset.h	/^  int     aoIndex;               \/\/ the starting index of the ao's in the shell in the ao[] array $/;"	m	struct:ChronusQ::Shell
 aoIndex	include/basisset.h	/^  int     aoIndex[2];		\/\/ starting indeices of AOs in the first and second shells$/;"	m	struct:ChronusQ::ShellPair
@@ -188,38 +300,47 @@ aoIndex	include/basisset.h	/^  int     aoIndex[2];$/;"	m	struct:ChronusQ::BasisP
 aoPairIndex	include/basisset.h	/^  int     aoPairIndex[250][2];  \/\/ the indices of the ao pair in the ao[] array$/;"	m	struct:ChronusQ::ShellPair
 aoRII_	include/aointegrals.h	/^  std::unique_ptr<RealTensor3d>  aoRII_; \/\/\/< Rank-3 DFI tensor over density-fitting basis functions \\f$ ( \\mu\\nu \\vert X ) \\f\$$/;"	m	class:ChronusQ::AOIntegrals
 aoRIS_	include/aointegrals.h	/^  std::unique_ptr<RealTensor2d>  aoRIS_; \/\/\/< Rank-2 Metric overlap tensor over density-fitting basis functions \\f$\\left( X \\vert r_{12}^{-1} \\vert Y \\right)\\f\$$/;"	m	class:ChronusQ::AOIntegrals
+aointegrals	include/singleslater.h	/^  inline AOIntegrals * aointegrals(){return this->aointegrals_;};$/;"	f	class:ChronusQ::SingleSlater
 aointegrals_	include/mointegrals.h	/^  AOIntegrals *   aointegrals_;$/;"	m	class:ChronusQ::MOIntegrals
-aointegrals_	include/singleslater.h	/^  AOIntegrals * aointegrals_;$/;"	m	class:ChronusQ::SingleSlater
+aointegrals_	include/singleslater.h	/^  AOIntegrals * aointegrals_;            \/\/\/< Molecular Integrals over GTOs (AO basis)$/;"	m	class:ChronusQ::SingleSlater
 atlas	src/atlas/atlas.cpp	/^int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {$/;"	f	class:ChronusQ
 atmChg	include/gauinterface.h	/^  inline double *      atmChg(){return this->atmChg_;};$/;"	f	class:GauMatEl
 atmChg_	include/gauinterface.h	/^  double        *atmChg_;$/;"	m	class:GauMatEl
 atmWgt	include/gauinterface.h	/^  inline double *      atmWgt(){return this->atmWgt_;};$/;"	f	class:GauMatEl
 atmWgt_	include/gauinterface.h	/^  double        *atmWgt_;$/;"	m	class:GauMatEl
+atomName	include/basisset.h	/^    std::string atomName;$/;"	m	struct:ChronusQ::BasisSet::basis_libint
 atomNum	include/basisset.h	/^  std::vector<int> atomNum;$/;"	m	class:ChronusQ::BasisSet
 atomZ	include/aointegrals.h	/^  int atomZ[MAXATOMS]; \/\/\/< Classical charges of nuclei$/;"	m	struct:ChronusQ::MolecularConstants
 atomicNumber	include/atoms.h	/^  int    atomicNumber;$/;"	m	struct:ChronusQ::Atoms
+atoms_	include/gauinterface.h	/^  std::vector<int> atoms_;$/;"	m	class:GauJob
 bannerEnd	include/eiginterface.h	/^const std::string bannerEnd="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";$/;"	v
 bannerMid	include/eiginterface.h	/^const std::string bannerMid="--------------------------------------------------------------------------------";$/;"	v
 bannerTop	include/eiginterface.h	/^const std::string bannerTop="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";$/;"	v
+basisName_	include/gauinterface.h	/^  std::string   basisName_;$/;"	m	class:GauJob
 basisSetRead	src/basisset/basisset_read.cpp	/^void BasisSet::basisSetRead(FileIO * fileio, Molecule * mol){$/;"	f	class:BasisSet
 basisSet_	include/aointegrals.h	/^  BasisSet *    	basisSet_; \/\/\/< Smart pointer to primary basis set$/;"	m	class:ChronusQ::AOIntegrals
 basisSet_	include/mointegrals.h	/^  BasisSet *      basisSet_;$/;"	m	class:ChronusQ::MOIntegrals
 basisSet_	include/sdresponse.h	/^  BasisSet *      basisSet_;$/;"	m	class:ChronusQ::SDResponse
-basisset_	include/singleslater.h	/^  BasisSet *    basisset_;$/;"	m	class:ChronusQ::SingleSlater
+basis_libint	include/basisset.h	/^  struct basis_libint {$/;"	s	class:ChronusQ::BasisSet
+basis_path	include/basisset.h	/^  std::string basis_path;$/;"	m	class:ChronusQ::BasisSet
+basisset	include/singleslater.h	/^  inline BasisSet *    basisset(){return this->basisset_;};$/;"	f	class:ChronusQ::SingleSlater
+basisset_	include/singleslater.h	/^  BasisSet *    basisset_;               \/\/\/< Basis Set$/;"	m	class:ChronusQ::SingleSlater
 biOrth	include/eiginterface.h	/^  void biOrth(Derived &L, Derived &R){$/;"	f	namespace:Eigen
 bin	include/fileio.h	/^  fstream bin;                   \/\/ file handler of the binary file$/;"	m	class:ChronusQ::FileIO
 block	include/fileio.h	/^  long  block[MAXBLOCK];         \/\/ block pointers$/;"	m	class:ChronusQ::FileIO
-blockBasisSet	include/global.h	/^enum {blockControlFlags,blockMolecule,blockBasisSet, \/\/ 1,2,3$/;"	e	enum:__anon3
-blockControlFlags	include/global.h	/^enum {blockControlFlags,blockMolecule,blockBasisSet, \/\/ 1,2,3$/;"	e	enum:__anon3
-blockIntegrals	include/global.h	/^      blockSingleSlater,blockIntegrals};  \/\/ 4,5,6$/;"	e	enum:__anon3
-blockMolecule	include/global.h	/^enum {blockControlFlags,blockMolecule,blockBasisSet, \/\/ 1,2,3$/;"	e	enum:__anon3
-blockSingleSlater	include/global.h	/^      blockSingleSlater,blockIntegrals};  \/\/ 4,5,6$/;"	e	enum:__anon3
+blockBasisSet	include/global.h	/^enum {blockControlFlags,blockMolecule,blockBasisSet, \/\/ 1,2,3$/;"	e	enum:__anon2
+blockControlFlags	include/global.h	/^enum {blockControlFlags,blockMolecule,blockBasisSet, \/\/ 1,2,3$/;"	e	enum:__anon2
+blockIntegrals	include/global.h	/^      blockSingleSlater,blockIntegrals};  \/\/ 4,5,6$/;"	e	enum:__anon2
+blockMolecule	include/global.h	/^enum {blockControlFlags,blockMolecule,blockBasisSet, \/\/ 1,2,3$/;"	e	enum:__anon2
+blockSingleSlater	include/global.h	/^      blockSingleSlater,blockIntegrals};  \/\/ 4,5,6$/;"	e	enum:__anon2
 bohr	include/global.h	/^  double bohr; \/\/\/< Bohr radii per Angstrom$/;"	m	struct:Phys
+buildSuperMat	include/quasinewton.h	/^  void QuasiNewton<T>::buildSuperMat(const int NTrial){$/;"	f	class:ChronusQ::QuasiNewton
 buildn4eri	include/controls.h	/^  bool          buildn4eri;     \/\/ Build N^4 AO ERI tensor$/;"	m	class:ChronusQ::Controls
 cart	include/aointegrals.h	/^  double cart[3][MAXATOMS]; \/\/\/< Cartesian co-ordinates for classical nuclei$/;"	m	struct:ChronusQ::MolecularConstants
 cart	include/gauinterface.h	/^  inline double *      cart(){return this->cart_;};$/;"	f	class:GauMatEl
 cart	include/molecule.h	/^  inline RealMatrix* cart() {return this->cart_.get();}$/;"	f	class:ChronusQ::Molecule
 cart_	include/gauinterface.h	/^  double        *cart_;$/;"	m	class:GauMatEl
+cart_	include/gauinterface.h	/^  double*       cart_;$/;"	m	class:GauJob
 cart_	include/molecule.h	/^  std::unique_ptr<RealMatrix>  cart_;        \/\/ cartesian coordinates$/;"	m	class:ChronusQ::Molecule
 center	include/basisset.h	/^  int     center;                \/\/ index of the atom to which the shell belongs$/;"	m	struct:ChronusQ::Shell
 center	include/basisset.h	/^  int     center[2];		\/\/ indices of the atom where the first and second shells are centered$/;"	m	struct:ChronusQ::ShellPair
@@ -229,33 +350,46 @@ centerIndex	include/basisset.h	/^  int     centerIndex[2];	\/\/ indices of the a
 centerP	include/basisset.h	/^  double  centerP[3][MAXCONTRACTION][MAXCONTRACTION];	\/\/ x,y,z coordinate of the combined center of the shellpair (alpha*A+beta*B)\/(alpha+beta)$/;"	m	struct:ChronusQ::ShellPair
 centerPZeta	include/basisset.h	/^  double  centerPZeta[3][MAXCONTRACTION][MAXCONTRACTION];	\/\/ centerP*(alpha+beta)$/;"	m	struct:ChronusQ::ShellPair
 charge	include/molecule.h	/^  inline int charge() {return this->charge_;}$/;"	f	class:ChronusQ::Molecule
+charge_	include/gauinterface.h	/^  int           charge_;$/;"	m	class:GauJob
 charge_	include/molecule.h	/^  int                          charge_;      \/\/ total charge$/;"	m	class:ChronusQ::Molecule
+checkConv	include/quasinewton.h	/^  std::vector<bool> QuasiNewton<T>::checkConv(const int NTrial, int & NNotConv,ostream &output) {$/;"	f	class:ChronusQ::QuasiNewton
+checkValid	include/quasinewton.h	/^  inline void checkValid(ostream &output=cout){$/;"	f	class:ChronusQ::QuasiNewton
+checkValid	src/sdresponse/sdresponse_misc.cpp	/^void SDResponse::checkValid(){$/;"	f	class:SDResponse
+cleanupMem_	include/quasinewton.h	/^    bool cleanupMem_;      \/\/ True if memory cleanup is required$/;"	m	class:ChronusQ::QuasiNewton
+cleanupScr	include/quasinewton.h	/^  inline void cleanupScr(){$/;"	f	class:ChronusQ::QuasiNewton
+cleanupScr	include/quasinewtonscratch.h	/^void cleanupScr(){$/;"	f
 coef	include/basisset.h	/^  double  coef[MAXCONTRACTION];  \/\/ contraction coefficients$/;"	m	struct:ChronusQ::Shell
 computeAOOneE	src/aointegrals/aointegrals_builders.cpp	/^void AOIntegrals::computeAOOneE(){$/;"	f	class:AOIntegrals
 computeAOTwoE	src/aointegrals/aointegrals_builders.cpp	/^void AOIntegrals::computeAOTwoE(){$/;"	f	class:AOIntegrals
 computeEnergy	include/singleslater_misc.h	/^void SingleSlater<T>::computeEnergy(){$/;"	f	class:SingleSlater
-computeExcitedStates	src/sdresponse/sdresponse.cpp	/^void SDResponse::computeExcitedStates(){$/;"	f	class:SDResponse
 computeFmTTaylor	src/aointegrals/aointegrals.cpp	/^void AOIntegrals::computeFmTTaylor(double *FmT, double T, int maxM, int minM){$/;"	f	class:AOIntegrals
+computeI	src/molecule/molecule.cpp	/^void Molecule::computeI(){$/;"	f	class:Molecule
 computeMultipole	src/singleslater/real_properties.cpp	/^void SingleSlater<double>::computeMultipole(){$/;"	f	class:ChronusQ::SingleSlater
-computeShBlkNorm	src/basisset/basisset_read.cpp	/^void BasisSet::computeShBlkNorm(Molecule * mol, const RealMatrix *D){$/;"	f	class:BasisSet
+computeRij	src/molecule/molecule.cpp	/^void Molecule::computeRij(){$/;"	f	class:Molecule
+computeShBlkNorm	src/basisset/basisset_read.cpp	/^void BasisSet::computeShBlkNorm(bool RHF, Molecule * mol, const ComplexMatrix *DAlpha,$/;"	f	class:BasisSet
+computeShBlkNorm	src/basisset/basisset_read.cpp	/^void BasisSet::computeShBlkNorm(bool RHF, Molecule * mol, const RealMatrix *DAlpha,$/;"	f	class:BasisSet
+controls	include/singleslater.h	/^  inline Controls *    controls(){return this->controls_;};$/;"	f	class:ChronusQ::SingleSlater
 controls_	include/aointegrals.h	/^  Controls *    	controls_; \/\/\/< Smart pointer to job control$/;"	m	class:ChronusQ::AOIntegrals
 controls_	include/mointegrals.h	/^  Controls *      controls_;$/;"	m	class:ChronusQ::MOIntegrals
 controls_	include/sdresponse.h	/^  Controls *      controls_;$/;"	m	class:ChronusQ::SDResponse
-controls_	include/singleslater.h	/^  Controls *    controls_;$/;"	m	class:ChronusQ::SingleSlater
+controls_	include/singleslater.h	/^  Controls *    controls_;               \/\/\/< General ChronusQ flow parameters$/;"	m	class:ChronusQ::SingleSlater
 convShell	src/basisset/basisset_libint.cpp	/^void BasisSet::convShell(Molecule * mol) {$/;"	f	class:BasisSet
 convToLI	include/basisset.h	/^  bool convToLI = false;$/;"	m	class:ChronusQ::BasisSet
-converged_	include/davidson.h	/^    bool converged_;$/;"	m	class:ChronusQ::Davidson
-corehama	include/gauinterface.h	/^    corehama,$/;"	e	enum:GauMatEl::__anon2
-corehamb	include/gauinterface.h	/^    corehamb,$/;"	e	enum:GauMatEl::__anon2
+corehama	include/gauinterface.h	/^    corehama,$/;"	e	enum:GauMatEl::__anon1
+corehamb	include/gauinterface.h	/^    corehamb,$/;"	e	enum:GauMatEl::__anon1
 coulombA	include/singleslater.h	/^  inline TMatrix* coulombA() { return this->coulombA_.get();};$/;"	f	class:ChronusQ::SingleSlater
-coulombA_	include/singleslater.h	/^  std::unique_ptr<TMatrix>  coulombA_;$/;"	m	class:ChronusQ::SingleSlater
+coulombA_	include/singleslater.h	/^  std::unique_ptr<TMatrix>  coulombA_;   \/\/\/< Alpha or Full (TCS) Coulomb Matrix$/;"	m	class:ChronusQ::SingleSlater
 coulombB	include/singleslater.h	/^  inline TMatrix* coulombB() { return this->coulombB_.get();};$/;"	f	class:ChronusQ::SingleSlater
-coulombB_	include/singleslater.h	/^  std::unique_ptr<TMatrix>  coulombB_;$/;"	m	class:ChronusQ::SingleSlater
+coulombB_	include/singleslater.h	/^  std::unique_ptr<TMatrix>  coulombB_;   \/\/\/< Beta Coulomb Matrix$/;"	m	class:ChronusQ::SingleSlater
 coulombEngine	include/global.h	/^typedef TwoBodyEngine<libint2::Coulomb> coulombEngine; \/\/\/< Two-body ERI engine for Libint$/;"	t
 createShellPair	src/basisset/basisset.cpp	/^void BasisSet::createShellPair(Molecule * mol) {$/;"	f	class:BasisSet
 dFactorial	include/global.h	/^static double dFactorial[21] = {$/;"	v
+davGuess	include/sdresponse_getset.h	/^  inline RealMatrix*   davGuess(){   return this->davGuess_.get();       };$/;"	f
+davGuess_	include/sdresponse.h	/^  std::unique_ptr<RealMatrix>  davGuess_;$/;"	m	class:ChronusQ::SDResponse
 dcomplex	include/global.h	/^typedef std::complex<double> dcomplex; \/\/\/< Support for complex numbers (double precision)$/;"	t
+debug_	include/quasinewton.h	/^    bool debug_;           \/\/ Enables various debug options$/;"	m	class:ChronusQ::QuasiNewton
 debye	include/global.h	/^  double debye; \/\/\/< e*bohr in 1 Debye$/;"	m	struct:Phys
+defaultMult	include/atoms.h	/^  int defaultMult;$/;"	m	struct:ChronusQ::Atoms
 deltaAB	include/aointegrals.h	/^  double deltaAB[3];$/;"	m	struct:ChronusQ::PairConstants
 deltaAB	include/basisset.h	/^  double  deltaAB[3];		\/\/ x,y,z distance between centers xA-xB, yA-yB, zA-zB$/;"	m	struct:ChronusQ::ShellPair
 deltaPA	include/aointegrals.h	/^  double deltaPA[3][MAXCONTRACTION][MAXCONTRACTION];$/;"	m	struct:ChronusQ::PairConstants
@@ -267,83 +401,126 @@ deltaPB	include/basisset.h	/^  double  deltaPB[3][MAXCONTRACTION][MAXCONTRACTION
 deltaPZ	include/aointegrals.h	/^  double deltaPZ[3][MAXCONTRACTION][MAXCONTRACTION][MAXATOMS];$/;"	m	struct:ChronusQ::PairConstants
 deltaWP	include/aointegrals.h	/^  double deltaWP[3][MAXCONTRACTION][MAXCONTRACTION][MAXCONTRACTION][MAXCONTRACTION];$/;"	m	struct:ChronusQ::QuartetConstants
 deltaWQ	include/aointegrals.h	/^  double deltaWQ[3][MAXCONTRACTION][MAXCONTRACTION][MAXCONTRACTION][MAXCONTRACTION];$/;"	m	struct:ChronusQ::QuartetConstants
-dena	include/gauinterface.h	/^    dena,$/;"	e	enum:GauMatEl::__anon2
-denb	include/gauinterface.h	/^    denb,$/;"	e	enum:GauMatEl::__anon2
+dena	include/gauinterface.h	/^    dena,$/;"	e	enum:GauMatEl::__anon1
+denb	include/gauinterface.h	/^    denb,$/;"	e	enum:GauMatEl::__anon1
 densityA	include/singleslater.h	/^  inline TMatrix* densityA() { return this->densityA_.get();};$/;"	f	class:ChronusQ::SingleSlater
-densityA_	include/singleslater.h	/^  std::unique_ptr<TMatrix>  densityA_;$/;"	m	class:ChronusQ::SingleSlater
+densityA_	include/singleslater.h	/^  std::unique_ptr<TMatrix>  densityA_;   \/\/\/< Alpha or Full (TCS) Density Matrix$/;"	m	class:ChronusQ::SingleSlater
 densityB	include/singleslater.h	/^  inline TMatrix* densityB() { return this->densityB_.get();};$/;"	f	class:ChronusQ::SingleSlater
-densityB_	include/singleslater.h	/^  std::unique_ptr<TMatrix>  densityB_;$/;"	m	class:ChronusQ::SingleSlater
-dipole	include/gauinterface.h	/^    dipole,$/;"	e	enum:GauMatEl::__anon2
-dipole_	include/singleslater.h	/^  std::unique_ptr<RealMatrix>  dipole_;$/;"	m	class:ChronusQ::SingleSlater
+densityB_	include/singleslater.h	/^  std::unique_ptr<TMatrix>  densityB_;   \/\/\/< Beta Density Matrix$/;"	m	class:ChronusQ::SingleSlater
+diagMem	src/quasinewton/quasinewton_real_diag.cpp	/^  void QuasiNewton<double>::diagMem(int NTrial){$/;"	f	class:ChronusQ::QuasiNewton
+diag_	include/quasinewton.h	/^    TMat * diag_;             \/\/ Pointer to diagonal storage$/;"	m	class:ChronusQ::QuasiNewton
+dipole	include/gauinterface.h	/^    dipole,$/;"	e	enum:GauMatEl::__anon1
+dipole	include/singleslater.h	/^  inline RealMatrix* dipole(){ return this->dipole_.get();};$/;"	f	class:ChronusQ::SingleSlater
+dipole_	include/singleslater.h	/^  std::unique_ptr<RealMatrix>  dipole_;  \/\/\/< Electric Dipole Moment$/;"	m	class:ChronusQ::SingleSlater
 directTwoE	include/controls.h	/^  bool  	directTwoE;     \/\/ if direct two-electron will performed$/;"	m	class:ChronusQ::Controls
 divConst	include/basisset.h	/^  double  divConst;              \/\/ normalization constant = Shell.norm\/divConst$/;"	m	struct:ChronusQ::AOCartesian
 divConst	include/basisset.h	/^  double  divConst[250];	\/\/ division constant; $/;"	m	struct:ChronusQ::ShellPair
+doCUHF	include/controls.h	/^  bool          doCUHF;$/;"	m	class:ChronusQ::Controls
 doDF	include/controls.h	/^  bool          doDF;           \/\/ Density fitting (RI) flag$/;"	m	class:ChronusQ::Controls
+doDiag_	include/quasinewton.h	/^    bool doDiag_;          \/\/ Quasi-Newton Diagonalization (Davidson)$/;"	m	class:ChronusQ::QuasiNewton
 doDipole	include/controls.h	/^  bool          doDipole;       \/\/ Use Libint dipole integrals?$/;"	m	class:ChronusQ::Controls
-doOctpole	include/controls.h	/^  bool          doOctpole;     \/\/ Usr Libint octapole integrals?$/;"	m	class:ChronusQ::Controls
+doGEP_	include/quasinewton.h	/^    bool doGEP_;           \/\/ Generalized Eigenproblem$/;"	m	class:ChronusQ::QuasiNewton
+doLin_	include/quasinewton.h	/^    bool doLin_;           \/\/ Quasi-Newton Linear Equation Solve$/;"	m	class:ChronusQ::QuasiNewton
+doOctpole	include/controls.h	/^  bool          doOctpole;      \/\/ Use Libint octapole integrals?$/;"	m	class:ChronusQ::Controls
+doOpt_	include/gauinterface.h	/^  bool          doOpt_;$/;"	m	class:GauJob
 doPrint_	include/gauinterface.h	/^  bool          doPrint_;$/;"	m	class:GauMatEl
 doQuadpole	include/controls.h	/^  bool          doQuadpole;     \/\/ Use Libint quadrapole integrals?$/;"	m	class:ChronusQ::Controls
+doResGuess_	include/quasinewton.h	/^    bool doResGuess_;      \/\/ Generate new vectors from residual$/;"	m	class:ChronusQ::QuasiNewton
+doRestart_	include/quasinewton.h	/^    bool doRestart_;$/;"	m	class:ChronusQ::QuasiNewton
+doSDR	include/controls.h	/^  bool          doSDR;          \/\/ Perform Response calculation$/;"	m	class:ChronusQ::Controls
+doTCS	include/controls.h	/^  bool          doTCS;          \/\/ Use Two-Component Spinor Basis$/;"	m	class:ChronusQ::Controls
 doubleFact	src/tools/tools.cpp	/^double doubleFact(int t){$/;"	f	namespace:ChronusQ
+eVPerHartree	include/global.h	/^  double eVPerHartree;$/;"	m	struct:Phys
 eigSort	include/eiginterface.h	/^  void eigSort(bool doL, Derived &E, Derived &VR, Derived &VL){$/;"	f	namespace:Eigen
-eigenvalues_	include/davidson.h	/^    std::unique_ptr<TVec> eigenvalues_;$/;"	m	class:ChronusQ::Davidson
-eigenvector_	include/davidson.h	/^    std::unique_ptr<TMat> eigenvector_;$/;"	m	class:ChronusQ::Davidson
+eigSrt	src/quasinewton/quasinewton_real_misc.cpp	/^  void QuasiNewton<double>::eigSrt(RealCMMap &V, RealVecMap &E){$/;"	f	class:ChronusQ::QuasiNewton
+eigenValues	include/quasinewton.h	/^    inline TVec* eigenValues(){return this->solutionValues_;};$/;"	f	class:ChronusQ::QuasiNewton
+eigenVector	include/quasinewton.h	/^    inline TMat* eigenVector(){return this->solutionVector_;};$/;"	f	class:ChronusQ::QuasiNewton
 eight	include/global.h	/^  double zero, one, two, three, four, five, six, seven, eight, nine, ten, half, quarter;$/;"	m	struct:Math
 elecDipole_	include/aointegrals.h	/^  std::unique_ptr<RealTensor3d>  elecDipole_; \/\/\/< Electric dipole matrix \\f$\\vec{\\mu}_{\\nu\\sigma}=\\langle\\nu\\vert\\vec{r}\\vert\\sigma\\rangle\\f\$$/;"	m	class:ChronusQ::AOIntegrals
+elecDipole_	include/sdresponse.h	/^  RealTensor3d *  elecDipole_;$/;"	m	class:ChronusQ::SDResponse
 elecOctpole_	include/aointegrals.h	/^  std::unique_ptr<RealTensor3d>  elecOctpole_;\/\/\/< Electric octupole matrix \\f$O_{\\mu\\nu}^{ijk}=\\langle\\mu\\vert r_i r_j r_k \\vert\\nu\\rangle\\f\$$/;"	m	class:ChronusQ::AOIntegrals
 elecQuadpole_	include/aointegrals.h	/^  std::unique_ptr<RealTensor3d>  elecQuadpole_;\/\/\/< Electric quadrupole matrix \\f$Q_{\\mu\\nu}^{ij}=\\langle\\mu\\vert r_i r_j \\vert\\nu\\rangle\\f\$$/;"	m	class:ChronusQ::AOIntegrals
 elements	include/atoms.h	/^static const Atoms elements[] = { $/;"	m	namespace:ChronusQ
 energyNuclei	include/molecule.h	/^  inline double energyNuclei() { return this->energyNuclei_;};$/;"	f	class:ChronusQ::Molecule
-energyNuclei	include/singleslater.h	/^  double   energyNuclei;$/;"	m	class:ChronusQ::SingleSlater
+energyNuclei	include/singleslater.h	/^  double   energyNuclei; \/\/\/< N-N Repulsion Energy$/;"	m	class:ChronusQ::SingleSlater
 energyNuclei_	include/molecule.h	/^  double                       energyNuclei_;\/\/ nuclear repulsion energy$/;"	m	class:ChronusQ::Molecule
-energyOneE	include/singleslater.h	/^  double   energyOneE;$/;"	m	class:ChronusQ::SingleSlater
+energyOneE	include/singleslater.h	/^  double   energyOneE; \/\/\/< One-bodied operator tensors traced with Density$/;"	m	class:ChronusQ::SingleSlater
 energyOnly	include/controls.h	/^  bool  	energyOnly;     \/\/ compute energy only$/;"	m	class:ChronusQ::Controls
-energyTwoE	include/singleslater.h	/^  double   energyTwoE;$/;"	m	class:ChronusQ::SingleSlater
-epsa	include/gauinterface.h	/^    epsa,$/;"	e	enum:GauMatEl::__anon2
-epsb	include/gauinterface.h	/^    epsb,$/;"	e	enum:GauMatEl::__anon2
+energyTwoE	include/singleslater.h	/^  double   energyTwoE; \/\/\/< Two-bodied operator tensors traced with Density$/;"	m	class:ChronusQ::SingleSlater
+epsA	include/singleslater.h	/^  inline TMatrix* epsA()     { return this->epsA_.get();};$/;"	f	class:ChronusQ::SingleSlater
+epsA_	include/singleslater.h	/^  std::unique_ptr<TMatrix>  epsA_;       \/\/\/< Alpha or Full (TCS) Fock Eigenenergies$/;"	m	class:ChronusQ::SingleSlater
+epsB	include/singleslater.h	/^  inline TMatrix* epsB()     { return this->epsB_.get();};$/;"	f	class:ChronusQ::SingleSlater
+epsB_	include/singleslater.h	/^  std::unique_ptr<TMatrix>  epsB_;       \/\/\/< Beta Fock Eigenenergie$/;"	m	class:ChronusQ::SingleSlater
+epsa	include/gauinterface.h	/^    epsa,$/;"	e	enum:GauMatEl::__anon1
+epsb	include/gauinterface.h	/^    epsb,$/;"	e	enum:GauMatEl::__anon1
 exchangeA	include/singleslater.h	/^  inline TMatrix* exchangeA(){ return this->exchangeA_.get();};$/;"	f	class:ChronusQ::SingleSlater
-exchangeA_	include/singleslater.h	/^  std::unique_ptr<TMatrix>  exchangeA_;$/;"	m	class:ChronusQ::SingleSlater
+exchangeA_	include/singleslater.h	/^  std::unique_ptr<TMatrix>  exchangeA_;  \/\/\/< Alpha or Full (TCS) Exchange Matrix$/;"	m	class:ChronusQ::SingleSlater
 exchangeB	include/singleslater.h	/^  inline TMatrix* exchangeB(){ return this->exchangeB_.get();};$/;"	f	class:ChronusQ::SingleSlater
-exchangeB_	include/singleslater.h	/^  std::unique_ptr<TMatrix>  exchangeB_;$/;"	m	class:ChronusQ::SingleSlater
+exchangeB_	include/singleslater.h	/^  std::unique_ptr<TMatrix>  exchangeB_;  \/\/\/< Beta Exchange Matrix$/;"	m	class:ChronusQ::SingleSlater
 expo	include/basisset.h	/^  double  expo[MAXCONTRACTION];  \/\/ exponents of primitive GTOs$/;"	m	struct:ChronusQ::Shell
 factTLarge	src/aointegrals/aointegrals.cpp	/^static double factTLarge[21] = {$/;"	v	file:
 factorial	src/tools/tools.cpp	/^double factorial(int t){$/;"	f	namespace:ChronusQ
+fileio	include/sdresponse_getset.h	/^  inline FileIO*       fileio(){     return this->fileio_;               };$/;"	f
+fileio	include/singleslater.h	/^  inline FileIO *      fileio(){return this->fileio_;};$/;"	f	class:ChronusQ::SingleSlater
 fileio_	include/aointegrals.h	/^  FileIO *      	fileio_; \/\/\/< Smart pointer to FileIO$/;"	m	class:ChronusQ::AOIntegrals
 fileio_	include/mointegrals.h	/^  FileIO *        fileio_;$/;"	m	class:ChronusQ::MOIntegrals
 fileio_	include/sdresponse.h	/^  FileIO *        fileio_;$/;"	m	class:ChronusQ::SDResponse
-fileio_	include/singleslater.h	/^  FileIO *      fileio_;$/;"	m	class:ChronusQ::SingleSlater
+fileio_	include/singleslater.h	/^  FileIO *      fileio_;                 \/\/\/< Access to output file$/;"	m	class:ChronusQ::SingleSlater
 firstDer	include/controls.h	/^  bool  	firstDer;      	\/\/ compute the first derivative$/;"	m	class:ChronusQ::Controls
 five	include/global.h	/^  double zero, one, two, three, four, five, six, seven, eight, nine, ten, half, quarter;$/;"	m	struct:Math
 fname	include/gauinterface.h	/^  inline std::string   fname(){   return this->fname_;};$/;"	f	class:GauMatEl
 fname_	include/gauinterface.h	/^  std::string   fname_;$/;"	m	class:GauMatEl
 fockA	include/singleslater.h	/^  inline TMatrix* fockA()    { return this->fockA_.get();};$/;"	f	class:ChronusQ::SingleSlater
-fockA_	include/singleslater.h	/^  std::unique_ptr<TMatrix>  fockA_;$/;"	m	class:ChronusQ::SingleSlater
+fockA_	include/singleslater.h	/^  std::unique_ptr<TMatrix>  fockA_;      \/\/\/< Alpha or Full (TCS) Fock Matrix$/;"	m	class:ChronusQ::SingleSlater
 fockB	include/singleslater.h	/^  inline TMatrix* fockB()    { return this->fockB_.get();};$/;"	f	class:ChronusQ::SingleSlater
-fockB_	include/singleslater.h	/^  std::unique_ptr<TMatrix>  fockB_;$/;"	m	class:ChronusQ::SingleSlater
-focka	include/gauinterface.h	/^    focka,$/;"	e	enum:GauMatEl::__anon2
-fockb	include/gauinterface.h	/^    fockb$/;"	e	enum:GauMatEl::__anon2
+fockB_	include/singleslater.h	/^  std::unique_ptr<TMatrix>  fockB_;      \/\/\/< Beta Fock Matrix$/;"	m	class:ChronusQ::SingleSlater
+focka	include/gauinterface.h	/^    focka,$/;"	e	enum:GauMatEl::__anon1
+fockb	include/gauinterface.h	/^    fockb$/;"	e	enum:GauMatEl::__anon1
+formAOTDen	src/sdresponse/sdresponse_misc.cpp	/^void SDResponse::formAOTDen(const RealVecMap &TMOV, RealMatrix &TAOA, RealMatrix &TAOB){$/;"	f	class:SDResponse
 formCoulomb	src/singleslater/real_fock.cpp	/^void SingleSlater<double>::formCoulomb(){$/;"	f	class:ChronusQ::SingleSlater
 formDensity	include/singleslater_misc.h	/^void SingleSlater<T>::formDensity(){$/;"	f	class:SingleSlater
 formExchange	src/singleslater/real_fock.cpp	/^void SingleSlater<double>::formExchange(){$/;"	f	class:ChronusQ::SingleSlater
 formFock	include/singleslater_fock.h	/^void SingleSlater<T>::formFock(){$/;"	f	class:SingleSlater
+formGuess	src/sdresponse/sdresponse_qnrelated.cpp	/^void SDResponse::formGuess(){$/;"	f	class:SDResponse
 formGuess	src/singleslater/real_guess.cpp	/^void SingleSlater<double>::formGuess() {$/;"	f	class:ChronusQ::SingleSlater
+formMOTDen	src/sdresponse/sdresponse_misc.cpp	/^void SDResponse::formMOTDen(RealVecMap &TMOV, const RealMatrix &TAOA, const RealMatrix &TAOB){$/;"	f	class:SDResponse
+formNewGuess	src/quasinewton/quasinewton_real_guess.cpp	/^  void QuasiNewton<double>::formNewGuess(std::vector<bool> &resConv,int &NTrial, $/;"	f	class:ChronusQ::QuasiNewton
+formOscStrength	src/sdresponse/sdresponse_prop.cpp	/^void SDResponse::formOscStrength(){$/;"	f	class:SDResponse
 formPT	include/singleslater_fock.h	/^void SingleSlater<T>::formPT(){$/;"	f	class:SingleSlater
+formRM	src/sdresponse/sdresponse_misc.cpp	/^void SDResponse::formRM(){$/;"	f	class:SDResponse
+formRM2	src/sdresponse/sdresponse_misc.cpp	/^RealMatrix SDResponse::formRM2(RealMatrix &XMO){$/;"	f	class:SDResponse
+formRM3	src/sdresponse/sdresponse_qnrelated.cpp	/^void SDResponse::formRM3(RealCMMap &XMO, RealCMMap &Sigma, RealCMMap &Rho){$/;"	f	class:SDResponse
+formRM4	src/sdresponse/sdresponse_qnrelated.cpp	/^void SDResponse::formRM4(RealCMMap& XMO, RealCMMap &Sigma, RealCMMap &Rho){$/;"	f	class:SDResponse
+formResidualGuess	src/quasinewton/quasinewton_real_guess.cpp	/^  void QuasiNewton<double>::formResidualGuess(double Omega, $/;"	f	class:ChronusQ::QuasiNewton
+formTransDipole	src/sdresponse/sdresponse_prop.cpp	/^void SDResponse::formTransDipole(){$/;"	f	class:SDResponse
 four	include/global.h	/^  double zero, one, two, three, four, five, six, seven, eight, nine, ten, half, quarter;$/;"	m	struct:Math
 frobInner	include/eigenplugin.h	/^inline Scalar frobInner(const MatrixBase<OtherDerived>& other) const {$/;"	f
+fullProjection	include/quasinewton.h	/^  void QuasiNewton<T>::fullProjection(const int NTrial){$/;"	f	class:ChronusQ::QuasiNewton
 gVers	include/gauinterface.h	/^  inline std::string   gVers(){   return this->gVers_;};    $/;"	f	class:GauMatEl
 gVers_	include/gauinterface.h	/^  std::string   gVers_;    \/\/ Gaussian version which generated the file$/;"	m	class:GauMatEl
 gauFChkName	include/controls.h	/^  std::string   gauFChkName;	\/\/ Gaussian formatted checkpoint filename$/;"	m	class:ChronusQ::Controls
+gauFName_	include/gauinterface.h	/^  std::string   gauFName_;$/;"	m	class:GauJob
+gauInput_	include/gauinterface.h	/^  std::ofstream gauInput_;$/;"	m	class:GauJob
 gauMatElName	include/controls.h	/^  std::string   gauMatElName;   \/\/ Gaussian raw matrix element file$/;"	m	class:ChronusQ::Controls
+genGuess_	include/quasinewton.h	/^    bool genGuess_;        \/\/ Generate Standard (identity) Guess$/;"	m	class:ChronusQ::QuasiNewton
+genInput	src/gauinterface/gaujob.cpp	/^void GauJob::genInput(){$/;"	f	class:GauJob
+genRes	include/quasinewton.h	/^  void QuasiNewton<T>::genRes(const int NTrial){$/;"	f	class:ChronusQ::QuasiNewton
+genStdHerResGuess	src/quasinewton/quasinewton_real_guess.cpp	/^  void QuasiNewton<double>::genStdHerResGuess(double Omega, const RealCMMap &Res, RealCMMap &Q){$/;"	f	class:ChronusQ::QuasiNewton
+genSymmResGuess	src/quasinewton/quasinewton_real_guess.cpp	/^  void QuasiNewton<double>::genSymmResGuess(double Omega, $/;"	f	class:ChronusQ::QuasiNewton
 generateFmTTable	src/aointegrals/aointegrals.cpp	/^void AOIntegrals::generateFmTTable() {$/;"	f	class:AOIntegrals
+getDiag	src/sdresponse/sdresponse_qnrelated.cpp	/^void SDResponse::getDiag(){$/;"	f	class:SDResponse
 guess	include/controls.h	/^  int    	guess;         	\/\/ how to get the initial guess$/;"	m	class:ChronusQ::Controls
-guess_	include/davidson.h	/^    std::unique_ptr<TMat> guess_;      \/\/ Guess vectors$/;"	m	class:ChronusQ::Davidson
+guessL_	include/quasinewton.h	/^    std::unique_ptr<TMat> guessL_;   \/\/ Guess vectors (always local copy)$/;"	m	class:ChronusQ::QuasiNewton
+guessR_	include/quasinewton.h	/^    std::unique_ptr<TMat> guessR_;   \/\/ Guess vectors (always local copy)$/;"	m	class:ChronusQ::QuasiNewton
 half	include/global.h	/^  double zero, one, two, three, four, five, six, seven, eight, nine, ten, half, quarter;$/;"	m	struct:Math
 haveAOOneE	include/aointegrals.h	/^  bool		haveAOOneE; \/\/\/< Whether or not the one-body molecular integrals have been evaluated$/;"	m	class:ChronusQ::AOIntegrals
 haveAOTwoE	include/aointegrals.h	/^  bool		haveAOTwoE; \/\/\/< Whether or not the two-bodied molecular integrals have been evaluated (for in-core integrals)$/;"	m	class:ChronusQ::AOIntegrals
-haveCoulomb	include/singleslater.h	/^  bool	haveCoulomb;$/;"	m	class:ChronusQ::SingleSlater
-haveDensity	include/singleslater.h	/^  bool	haveDensity; $/;"	m	class:ChronusQ::SingleSlater
-haveExchange	include/singleslater.h	/^  bool	haveExchange;$/;"	m	class:ChronusQ::SingleSlater
+haveCoulomb	include/singleslater.h	/^  bool	haveCoulomb; \/\/\/< Computed Coulomb Matrix?$/;"	m	class:ChronusQ::SingleSlater
+haveDag_	include/sdresponse.h	/^  bool      haveDag_;$/;"	m	class:ChronusQ::SDResponse
+haveDensity	include/singleslater.h	/^  bool	haveDensity; \/\/\/< Computed Density? (Not sure if this is used anymore)$/;"	m	class:ChronusQ::SingleSlater
+haveExchange	include/singleslater.h	/^  bool	haveExchange;\/\/\/< Computed Exchange Matrix?$/;"	m	class:ChronusQ::SingleSlater
 haveHeader_	include/gauinterface.h	/^  bool          haveHeader_;$/;"	m	class:GauMatEl
-haveMO	include/singleslater.h	/^  bool	haveMO;$/;"	m	class:ChronusQ::SingleSlater
+haveMO	include/singleslater.h	/^  bool	haveMO;      \/\/\/< Have MO coefficients?$/;"	m	class:ChronusQ::SingleSlater
 haveMOabcd	include/mointegrals.h	/^  bool      haveMOabcd;$/;"	m	class:ChronusQ::MOIntegrals
 haveMOiabc	include/mointegrals.h	/^  bool      haveMOiabc;$/;"	m	class:ChronusQ::MOIntegrals
 haveMOiajb	include/mointegrals.h	/^  bool      haveMOiajb;$/;"	m	class:ChronusQ::MOIntegrals
@@ -351,11 +528,11 @@ haveMOijab	include/mointegrals.h	/^  bool      haveMOijab;$/;"	m	class:ChronusQ:
 haveMOijka	include/mointegrals.h	/^  bool      haveMOijka;$/;"	m	class:ChronusQ::MOIntegrals
 haveMOijkl	include/mointegrals.h	/^  bool      haveMOijkl;$/;"	m	class:ChronusQ::MOIntegrals
 haveMap	include/basisset.h	/^  bool haveMap = false;$/;"	m	class:ChronusQ::BasisSet
-havePT	include/singleslater.h	/^  bool  havePT;$/;"	m	class:ChronusQ::SingleSlater
+havePT	include/singleslater.h	/^  bool  havePT;      \/\/\/< Computed Perturbation Tensor?$/;"	m	class:ChronusQ::SingleSlater
 haveRII	include/aointegrals.h	/^  bool          haveRII; \/\/\/< Whether or not the Metric overlap tensor has been evaluated for the density-fitting basis set$/;"	m	class:ChronusQ::AOIntegrals
 haveRIS	include/aointegrals.h	/^  bool          haveRIS; \/\/\/< Whether or not the DFI tensor has been evaluated for the density-fiting basis set$/;"	m	class:ChronusQ::AOIntegrals
 haveSchwartz	include/aointegrals.h	/^  bool          haveSchwartz; \/\/\/< Whether or not the Schwartz bound tensor has been evaluated for the primary basis set$/;"	m	class:ChronusQ::AOIntegrals
-hermetian_	include/davidson.h	/^    bool    hermetian_;  \/\/ Whether or not the problem is hemetian$/;"	m	class:ChronusQ::Davidson
+haveTRII	include/aointegrals.h	/^  bool          haveTRII;$/;"	m	class:ChronusQ::AOIntegrals
 hybridDFT	include/controls.h	/^  bool  	hybridDFT; 	\/\/ DFT is a hybrid functional$/;"	m	class:ChronusQ::Controls
 iAn	include/gauinterface.h	/^  inline int *         iAn(){     return this->iAn_;};     $/;"	f	class:GauMatEl
 iAn_	include/gauinterface.h	/^  int           *iAn_;     \/\/ Atomic numbers$/;"	m	class:GauMatEl
@@ -371,8 +548,11 @@ iCharge	include/gauinterface.h	/^  inline int           iCharge(){ return this->
 iCharge_	include/gauinterface.h	/^  int           iCharge_;  \/\/ Molecular charge$/;"	m	class:GauMatEl
 iDum	include/gauinterface.h	/^  inline int           iDum(){return this->iDum_;};$/;"	f	class:GauMatEl
 iDum_	include/gauinterface.h	/^  int           iDum_;$/;"	m	class:GauMatEl
+iMeth	include/sdresponse_getset.h	/^  inline int           iMeth(){      return this->iMeth_;                };$/;"	f
+iMeth_	include/sdresponse.h	/^  int       iMeth_;$/;"	m	class:ChronusQ::SDResponse
 iOpCl	include/gauinterface.h	/^  inline int           iOpCl(){return this->iOpCl_;};    $/;"	f	class:GauMatEl
 iOpCl_	include/gauinterface.h	/^  int           iOpCl_;    \/\/ Open\/Closed shell flag$/;"	m	class:GauMatEl
+iPPRPA_	include/sdresponse.h	/^  int       iPPRPA_;$/;"	m	class:ChronusQ::SDResponse
 iTran	include/gauinterface.h	/^  inline int           iTran(){return this->iTran_;};$/;"	f	class:GauMatEl
 iTran_	include/gauinterface.h	/^  int           iTran_;$/;"	m	class:GauMatEl
 iVers	include/gauinterface.h	/^  inline int           iVers(){   return this->iVers_;};    $/;"	f	class:GauMatEl
@@ -382,12 +562,14 @@ iabc_	include/mointegrals.h	/^  std::unique_ptr<RealMatrix>    iabc_;$/;"	m	clas
 iajb	include/mointegrals.h	/^  inline double &iajb(int i, int a, int j, int b){$/;"	f	class:ChronusQ::MOIntegrals
 iajb	include/mointegrals.h	/^  inline double &iajb(int ia, int jb){$/;"	f	class:ChronusQ::MOIntegrals
 iajb_	include/mointegrals.h	/^  std::unique_ptr<RealMatrix>    iajb_;$/;"	m	class:ChronusQ::MOIntegrals
+identGuess	include/quasinewton.h	/^    inline void identGuess(){$/;"	f	class:ChronusQ::QuasiNewton
 ii	include/global.h	/^  dcomplex ii; \/\/\/< Imaginary unit (0 + 1i)$/;"	m	struct:Math
 ijIndex_	include/mointegrals.h	/^  int       **ijIndex_;$/;"	m	class:ChronusQ::MOIntegrals
 ijab_	include/mointegrals.h	/^  std::unique_ptr<RealMatrix>    ijab_;$/;"	m	class:ChronusQ::MOIntegrals
 ijka_	include/mointegrals.h	/^  std::unique_ptr<RealMatrix>    ijka_;$/;"	m	class:ChronusQ::MOIntegrals
 ijkl_	include/mointegrals.h	/^  std::unique_ptr<RealMatrix>    ijkl_;$/;"	m	class:ChronusQ::MOIntegrals
 in	include/fileio.h	/^  fstream in;                    \/\/ file handler of the input file$/;"	m	class:ChronusQ::FileIO
+incorePPRPA	src/sdresponse/sdresponse_misc.cpp	/^void SDResponse::incorePPRPA(){$/;"	f	class:SDResponse
 index	include/molecule.h	/^  inline int index(int i) { return this->index_[i];};$/;"	f	class:ChronusQ::Molecule
 index_	include/molecule.h	/^  int                         *index_;       \/\/ index of atom in the atoms[] array$/;"	m	class:ChronusQ::Molecule
 infile_	include/gauinterface.h	/^  std::ifstream infile_;$/;"	m	class:GauMatEl
@@ -403,16 +585,26 @@ iniPairConstants	src/aointegrals/aointegrals.cpp	/^void AOIntegrals::iniPairCons
 iniQuartetConstants	src/aointegrals/aointegrals.cpp	/^void AOIntegrals::iniQuartetConstants(ShellPair *ijShellPair, ShellPair *klShellPair){$/;"	f	class:AOIntegrals
 iniSDResponse	src/sdresponse/sdresponse.cpp	/^void SDResponse::iniSDResponse( Molecule * molecule, BasisSet * basisSet, MOIntegrals * mointegrals, $/;"	f	class:SDResponse
 iniSingleSlater	include/singleslater_alloc.h	/^void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset, $/;"	f	class:SingleSlater
-initHeader_	src/gauinterface/gauinterface.cpp	/^void GauMatEl::initHeader_(){$/;"	f	class:GauMatEl
-init_	src/gauinterface/gauinterface.cpp	/^void GauMatEl::init_(std::string& name){$/;"	f	class:GauMatEl
+initBoolean	include/quasinewton.h	/^    inline void initBoolean(){$/;"	f	class:ChronusQ::QuasiNewton
+initHeader_	src/gauinterface/gaumatel.cpp	/^void GauMatEl::initHeader_(){$/;"	f	class:GauMatEl
+initMeth	src/sdresponse/sdresponse_misc.cpp	/^void SDResponse::initMeth(){$/;"	f	class:SDResponse
+initPtr	include/quasinewton.h	/^    inline void initPtr(){$/;"	f	class:ChronusQ::QuasiNewton
+initRMu	src/sdresponse/sdresponse_misc.cpp	/^void SDResponse::initRMu(){$/;"	f	class:SDResponse
+initScrLen	include/quasinewton.h	/^  inline void initScrLen(){$/;"	f	class:ChronusQ::QuasiNewton
+initScrLen	include/quasinewtonscratch.h	/^inline void initScrLen(){$/;"	f
+initScrPtr	include/quasinewtonscratch.h	/^inline void initScrPtr(){$/;"	f
+initSize	include/quasinewton.h	/^    inline void initSize(){$/;"	f	class:ChronusQ::QuasiNewton
+init_	src/gauinterface/gaumatel.cpp	/^void GauMatEl::init_(std::string& name){$/;"	f	class:GauMatEl
 intSmall	include/aointegrals.h	/^  double intSmall;$/;"	m	struct:ChronusQ::PairConstants
 inversezeta	include/basisset.h	/^  double  inversezeta[MAXCONTRACTION][MAXCONTRACTION];	\/\/ the inverse of the total of exponents 0.5\/(alpha+beta) $/;"	m	struct:ChronusQ::ShellPair
 invzeta	include/basisset.h	/^  double  invzeta[MAXCONTRACTION][MAXCONTRACTION];	\/\/ the inverse of the total of exponents 0.5\/(alpha+beta) $/;"	m	struct:ChronusQ::ShellPair
+isConverged_	include/quasinewton.h	/^    bool isConverged_;     \/\/ True if the iterative calculation converged$/;"	m	class:ChronusQ::QuasiNewton
+isHermetian_	include/quasinewton.h	/^    bool isHermetian_;     \/\/ Hermetian Scheme$/;"	m	class:ChronusQ::QuasiNewton
 isOpen	include/fileio.h	/^  inline bool isOpen(int blockNumber) {$/;"	f	class:ChronusQ::FileIO
 jobTitle	include/gauinterface.h	/^  inline std::string   jobTitle(){return this->jobTitle_;}; $/;"	f	class:GauMatEl
 jobTitle_	include/gauinterface.h	/^  std::string   jobTitle_; \/\/ Title card of Gaussian job$/;"	m	class:GauMatEl
 kCoeff	src/tools/tools.cpp	/^double kCoeff(int k, int a, int b, double pA, double pB){$/;"	f	namespace:ChronusQ
-kinetic	include/gauinterface.h	/^    kinetic,$/;"	e	enum:GauMatEl::__anon2
+kinetic	include/gauinterface.h	/^    kinetic,$/;"	e	enum:GauMatEl::__anon1
 kinetic_	include/aointegrals.h	/^  std::unique_ptr<RealMatrix>    kinetic_; \/\/\/< Kinetic energy tensor \\f$ T_{\\mu\\nu} = \\langle \\mu \\vert \\Delta \\vert \\nu \\rangle \\f\$$/;"	m	class:ChronusQ::AOIntegrals
 l	include/basisset.h	/^  int	  l[3];			 \/\/ x,y,z angular momentum$/;"	m	struct:ChronusQ::AOCartesian
 labFil	include/gauinterface.h	/^  inline std::string   labFil(){  return this->labFil_;};   $/;"	f	class:GauMatEl
@@ -433,6 +625,8 @@ lenRec6_	include/gauinterface.h	/^  int lenRec6_;$/;"	m	class:GauMatEl
 lenRec7_	include/gauinterface.h	/^  int lenRec7_;$/;"	m	class:GauMatEl
 lenRec8_	include/gauinterface.h	/^  int lenRec8_;$/;"	m	class:GauMatEl
 lenRec9_	include/gauinterface.h	/^  int lenRec9_;$/;"	m	class:GauMatEl
+linearTrans	include/quasinewton.h	/^  void QuasiNewton<T>::linearTrans(const int NOld,const int NNew){$/;"	f	class:ChronusQ::QuasiNewton
+loadDefaults	include/quasinewton.h	/^    inline void loadDefaults(){$/;"	f	class:ChronusQ::QuasiNewton
 lx	include/basisset.h	/^  int     lx;                    \/\/ x angular momentum$/;"	m	struct:ChronusQ::AOCartesian
 ly	include/basisset.h	/^  int     ly;                    \/\/ y angular momentum$/;"	m	struct:ChronusQ::AOCartesian
 lz	include/basisset.h	/^  int     lz;                    \/\/ z angular momentum$/;"	m	struct:ChronusQ::AOCartesian
@@ -441,31 +635,40 @@ makeMap	src/basisset/basisset_read.cpp	/^void BasisSet::makeMap(Molecule *  mol)
 mapSh2Bf	include/basisset.h	/^  std::vector<int> mapSh2Bf;$/;"	m	class:ChronusQ::BasisSet
 mass	include/atoms.h	/^  double mass; $/;"	m	struct:ChronusQ::Atoms
 massNumber	include/atoms.h	/^  int    massNumber; $/;"	m	struct:ChronusQ::Atoms
-mat_	include/davidson.h	/^    TMat*   mat_;        \/\/ The full matrix to be diagonalized (?)$/;"	m	class:ChronusQ::Davidson
+matEl_	include/gauinterface.h	/^  std::unique_ptr<GauMatEl>     matEl_;$/;"	m	class:GauJob
+matchord	src/singleslater/real_misc.cpp	/^  void SingleSlater<double>::matchord(){$/;"	f	class:ChronusQ::SingleSlater
 math	include/global.h	/^const Math math = {0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 0.5, 0.25,$/;"	v
-maxIter_	include/davidson.h	/^    int     maxIter_;     \/\/ Maximum number of iterations (micro)$/;"	m	class:ChronusQ::Davidson
+maxIter_	include/quasinewton.h	/^    int maxIter_;          \/\/ Maximum number of miro iterations$/;"	m	class:ChronusQ::QuasiNewton
 maxL	include/basisset.h	/^  int maxL;$/;"	m	class:ChronusQ::BasisSet
 maxPrim	include/basisset.h	/^  int maxPrim;$/;"	m	class:ChronusQ::BasisSet
-maxSubSpace_	include/davidson.h	/^    int     maxSubSpace_; \/\/ Maximum iterative subspace$/;"	m	class:ChronusQ::Davidson
-method_	include/davidson.h	/^    int method_;$/;"	m	class:ChronusQ::Davidson
+maxSubSpace_	include/quasinewton.h	/^    int maxSubSpace_;      \/\/ Maximum dimension of the iterative subspace$/;"	m	class:ChronusQ::QuasiNewton
+metBiOrth	src/quasinewton/quasinewton_real_misc.cpp	/^  void QuasiNewton<double>::metBiOrth(RealCMMap &A, const RealCMMatrix &Met){$/;"	f	class:ChronusQ::QuasiNewton
 moA	include/singleslater.h	/^  inline TMatrix* moA()      { return this->moA_.get();};$/;"	f	class:ChronusQ::SingleSlater
-moA_	include/singleslater.h	/^  std::unique_ptr<TMatrix>  moA_;$/;"	m	class:ChronusQ::SingleSlater
+moA_	include/singleslater.h	/^  std::unique_ptr<TMatrix>  moA_;        \/\/\/< Alpha or Full (TCS) MO Coefficient Matrix$/;"	m	class:ChronusQ::SingleSlater
 moB	include/singleslater.h	/^  inline TMatrix* moB()      { return this->moB_.get();};$/;"	f	class:ChronusQ::SingleSlater
-moB_	include/singleslater.h	/^  std::unique_ptr<TMatrix>  moB_;$/;"	m	class:ChronusQ::SingleSlater
-moa	include/gauinterface.h	/^    moa,$/;"	e	enum:GauMatEl::__anon2
-mob	include/gauinterface.h	/^    mob,$/;"	e	enum:GauMatEl::__anon2
+moB_	include/singleslater.h	/^  std::unique_ptr<TMatrix>  moB_;        \/\/\/< Beta MO Coefficient Matrix$/;"	m	class:ChronusQ::SingleSlater
+moa	include/gauinterface.h	/^    moa,$/;"	e	enum:GauMatEl::__anon1
+mob	include/gauinterface.h	/^    mob,$/;"	e	enum:GauMatEl::__anon1
 mointegrals_	include/sdresponse.h	/^  MOIntegrals *   mointegrals_;$/;"	m	class:ChronusQ::SDResponse
 molecularConstants_	include/aointegrals.h	/^  std::unique_ptr<MolecularConstants>   molecularConstants_; \/\/\/< Smart pointer to struct containing molecular struture meta-data$/;"	m	class:ChronusQ::AOIntegrals
+molecule	include/singleslater.h	/^  inline Molecule *    molecule(){return this->molecule_;};$/;"	f	class:ChronusQ::SingleSlater
 molecule_	include/aointegrals.h	/^  Molecule *   	molecule_; \/\/\/< Smart pointer to molecule specification$/;"	m	class:ChronusQ::AOIntegrals
 molecule_	include/mointegrals.h	/^  Molecule *      molecule_;$/;"	m	class:ChronusQ::MOIntegrals
 molecule_	include/sdresponse.h	/^  Molecule *      molecule_;$/;"	m	class:ChronusQ::SDResponse
-molecule_	include/singleslater.h	/^  Molecule *    molecule_;$/;"	m	class:ChronusQ::SingleSlater
-mpiRecv	src/sdresponse/sdresponse.cpp	/^void SDResponse::mpiRecv(int fromID,int tag) {$/;"	f	class:SDResponse
+molecule_	include/singleslater.h	/^  Molecule *    molecule_;               \/\/\/< Molecular specificiations$/;"	m	class:ChronusQ::SingleSlater
+momentOfInertia_	include/molecule.h	/^  std::unique_ptr<RealMatrix>  momentOfInertia_; \/\/ Moment of inertia$/;"	m	class:ChronusQ::Molecule
+mpiRecv	src/sdresponse/sdresponse_misc.cpp	/^void SDResponse::mpiRecv(int fromID,int tag) {$/;"	f	class:SDResponse
 mpiRecv	src/singleslater/real_mpi.cpp	/^void SingleSlater<double>::mpiRecv(int fromID,int tag) {$/;"	f	class:ChronusQ::SingleSlater
-mpiSend	src/sdresponse/sdresponse.cpp	/^void SDResponse::mpiSend(int toID,int tag) {$/;"	f	class:SDResponse
+mpiSend	src/sdresponse/sdresponse_misc.cpp	/^void SDResponse::mpiSend(int toID,int tag) {$/;"	f	class:SDResponse
 mpiSend	src/singleslater/real_mpi.cpp	/^void SingleSlater<double>::mpiSend(int toID,int tag) {$/;"	f	class:ChronusQ::SingleSlater
+multTwoEContractDirect	src/aointegrals/aointegrals_real_contract.cpp	/^void AOIntegrals::multTwoEContractDirect(int nVec, bool RHF, bool doFock, bool do24,const std::vector<RealMatrix> &XAlpha, std::vector<RealMatrix> &AXAlpha,$/;"	f	class:ChronusQ::AOIntegrals
 multip	include/gauinterface.h	/^  inline int           multip(){  return this->multip_;};   $/;"	f	class:GauMatEl
+multip	include/molecule.h	/^  inline int multip() {return this->multip_;}$/;"	f	class:ChronusQ::Molecule
+multip	include/singleslater.h	/^  inline int multip()  { return this->multip_;};$/;"	f	class:ChronusQ::SingleSlater
 multip_	include/gauinterface.h	/^  int           multip_;   \/\/ Spin multiplicity$/;"	m	class:GauMatEl
+multip_	include/gauinterface.h	/^  int           multip_;$/;"	m	class:GauJob
+multip_	include/molecule.h	/^  int                          multip_;      \/\/ spin multiplicity$/;"	m	class:ChronusQ::Molecule
+multip_	include/singleslater.h	/^  int      multip_;$/;"	m	class:ChronusQ::SingleSlater
 myid	include/global.h	/^  int  myid; \/\/\/< Global rank of current process$/;"	m	struct:GlobalMPI
 nAE	include/singleslater.h	/^  inline int nAE()    { return this->nAE_;};$/;"	f	class:ChronusQ::SingleSlater
 nAE_	include/singleslater.h	/^  int      nAE_;$/;"	m	class:ChronusQ::SingleSlater
@@ -498,13 +701,31 @@ nFC	include/gauinterface.h	/^  inline int           nFC(){return this->nFC_;};$/
 nFC_	include/gauinterface.h	/^  int           nFC_;$/;"	m	class:GauMatEl
 nFV	include/gauinterface.h	/^  inline int           nFV(){return this->nFV_;};$/;"	f	class:GauMatEl
 nFV_	include/gauinterface.h	/^  int           nFV_;$/;"	m	class:GauMatEl
-nGuess_	include/davidson.h	/^    int     nGuess_;      \/\/ Number of given (or created) guesses$/;"	m	class:ChronusQ::Davidson
+nGuess	include/sdresponse_getset.h	/^  inline int           nGuess(){     return this->nGuess_;               };$/;"	f
+nGuess_	include/quasinewton.h	/^    int nGuess_;           \/\/ Numer of given (or to be generated) guess vectors$/;"	m	class:ChronusQ::QuasiNewton
+nGuess_	include/sdresponse.h	/^  int       nGuess_;$/;"	m	class:ChronusQ::SDResponse
 nInitRem	include/gauinterface.h	/^  inline int           nInitRem(){return this->nInitRem_;};$/;"	f	class:GauMatEl
 nInitRem_	include/gauinterface.h	/^  int           nInitRem_;$/;"	m	class:GauMatEl
 nLShell	include/basisset.h	/^  inline int nLShell(int L){return this->nLShell_[L];};$/;"	f	class:ChronusQ::BasisSet
 nLShell_	include/basisset.h	/^  std::vector<int>  nLShell_;   \/\/ number of S,P,D,F,G... shells$/;"	m	class:ChronusQ::BasisSet
 nLab	include/gauinterface.h	/^  inline int           nLab(){    return this->nLab_;};     $/;"	f	class:GauMatEl
 nLab_	include/gauinterface.h	/^  int           nLab_;     \/\/ Number on general data records (??)$/;"	m	class:GauMatEl
+nOAOA_	include/sdresponse.h	/^  int       nOAOA_;      \/\/ NOA * NOA$/;"	m	class:ChronusQ::SDResponse
+nOAOA_LT_	include/sdresponse.h	/^  int       nOAOA_LT_;   \/\/ NOA * (NOA + 1) \/ 2$/;"	m	class:ChronusQ::SDResponse
+nOAOA_SLT_	include/sdresponse.h	/^  int       nOAOA_SLT_;  \/\/ NOA * (NOA - 1) \/ 2$/;"	m	class:ChronusQ::SDResponse
+nOAOB_	include/sdresponse.h	/^  int       nOAOB_;      \/\/ NOA * NOB$/;"	m	class:ChronusQ::SDResponse
+nOAVA_	include/sdresponse.h	/^  int       nOAVA_;      \/\/ NOA * NVA$/;"	m	class:ChronusQ::SDResponse
+nOAVB_	include/sdresponse.h	/^  int       nOAVB_;      \/\/ NOA * NVB$/;"	m	class:ChronusQ::SDResponse
+nOA_	include/sdresponse.h	/^  int       nOA_;$/;"	m	class:ChronusQ::SDResponse
+nOBOB_	include/sdresponse.h	/^  int       nOBOB_;      \/\/ NOB * NOB$/;"	m	class:ChronusQ::SDResponse
+nOBOB_SLT_	include/sdresponse.h	/^  int       nOBOB_SLT_;  \/\/ NOB * (NOB - 1) \/ 2$/;"	m	class:ChronusQ::SDResponse
+nOBVA_	include/sdresponse.h	/^  int       nOBVA_;      \/\/ NOB * NVA$/;"	m	class:ChronusQ::SDResponse
+nOBVB_	include/sdresponse.h	/^  int       nOBVB_;      \/\/ NOB * NVB$/;"	m	class:ChronusQ::SDResponse
+nOB_	include/sdresponse.h	/^  int       nOB_;$/;"	m	class:ChronusQ::SDResponse
+nOVA	include/sdresponse_getset.h	/^  inline int           nOVA(){       return this->singleSlater_->nOVA(); };$/;"	f
+nOVA	include/singleslater.h	/^  inline int nOVA()    { return nOccA_*nVirA_;};$/;"	f	class:ChronusQ::SingleSlater
+nOVB	include/sdresponse_getset.h	/^  inline int           nOVB(){       return this->singleSlater_->nOVB(); };$/;"	f
+nOVB	include/singleslater.h	/^  inline int nOVB()    { return nOccB_*nVirB_;};$/;"	f	class:ChronusQ::SingleSlater
 nOccA	include/singleslater.h	/^  inline int nOccA()  { return this->nOccA_;};$/;"	f	class:ChronusQ::SingleSlater
 nOccA_	include/singleslater.h	/^  int      nOccA_;$/;"	m	class:ChronusQ::SingleSlater
 nOccB	include/singleslater.h	/^  inline int nOccB()  { return this->nOccB_;}$/;"	f	class:ChronusQ::SingleSlater
@@ -519,8 +740,11 @@ nPrimDB	include/gauinterface.h	/^  inline int           nPrimDB(){return this->n
 nPrimDB_	include/gauinterface.h	/^  int           nPrimDB_;$/;"	m	class:GauMatEl
 nPrimitive	include/basisset.h	/^  inline int nPrimitive()  {return this->nPrimitive_;};$/;"	f	class:ChronusQ::BasisSet
 nPrimitive_	include/basisset.h	/^  int  nPrimitive_;             \/\/ number of primitive GTOs$/;"	m	class:ChronusQ::BasisSet
-nSek_	include/davidson.h	/^    int     nSek_;        \/\/ Number of desired roots$/;"	m	class:ChronusQ::Davidson
+nSek	include/sdresponse_getset.h	/^  inline int           nSek(){       return this->nSek_;                 };$/;"	f
+nSek_	include/quasinewton.h	/^    int nSek_;             \/\/ Number of desired roots for diagonalization$/;"	m	class:ChronusQ::QuasiNewton
+nSek_	include/sdresponse.h	/^  int       nSek_;$/;"	m	class:ChronusQ::SDResponse
 nShell	include/basisset.h	/^  inline int     nShell()  {return this->shells_libint.size();};$/;"	f	class:ChronusQ::BasisSet
+nShell	include/singleslater.h	/^  inline int nShell() { return this->nShell_;};$/;"	f	class:ChronusQ::SingleSlater
 nShellAO	include/gauinterface.h	/^  inline int           nShellAO(){return this->nShellAO_;};$/;"	f	class:GauMatEl
 nShellAO_	include/gauinterface.h	/^  int           nShellAO_;$/;"	m	class:GauMatEl
 nShellDB	include/gauinterface.h	/^  inline int           nShellDB(){return this->nShellDB_;}; $/;"	f	class:GauMatEl
@@ -528,29 +752,44 @@ nShellDB_	include/gauinterface.h	/^  int           nShellDB_; $/;"	m	class:GauMa
 nShellPair	include/basisset.h	/^  inline int nShellPair()  {return this->nShellPair_;};$/;"	f	class:ChronusQ::BasisSet
 nShellPair_	include/basisset.h	/^  int  nShellPair_;             \/\/ number of shell pairs$/;"	m	class:ChronusQ::BasisSet
 nShell_	include/basisset.h	/^  int  nShell_;                 \/\/ number of shells$/;"	m	class:ChronusQ::BasisSet
-nStates_	include/sdresponse.h	/^  int       nStates_;$/;"	m	class:ChronusQ::SDResponse
+nShell_	include/singleslater.h	/^  int      nShell_;$/;"	m	class:ChronusQ::SingleSlater
+nSingleDim	include/sdresponse_getset.h	/^  inline int           nSingleDim(){ return this->nSingleDim_;           };$/;"	f
+nSingleDim_	include/sdresponse.h	/^  int       nSingleDim_; \/\/ Single dimension of response matrix$/;"	m	class:ChronusQ::SDResponse
+nTCS_	include/singleslater.h	/^  int      nTCS_; \/\/\/< Integer to scale the dimension of matricies for TCS's$/;"	m	class:ChronusQ::SingleSlater
+nTT	include/singleslater.h	/^  inline int nTT()     { return this->nTT_;};$/;"	f	class:ChronusQ::SingleSlater
 nTT_	include/aointegrals.h	/^  int       nTT_; \/\/\/< Reduced number of basis functions (lower triangle) \\f$ N_b (N_b+1) \/ 2\\f\$$/;"	m	class:ChronusQ::AOIntegrals
 nTT_	include/singleslater.h	/^  int      nTT_;$/;"	m	class:ChronusQ::SingleSlater
 nTotalE	include/molecule.h	/^  inline int nTotalE() {return this->nTotalE_;};$/;"	f	class:ChronusQ::Molecule
 nTotalE_	include/molecule.h	/^  int                          nTotalE_;     \/\/ total number of electrons$/;"	m	class:ChronusQ::Molecule
-nVirA	include/singleslater.h	/^  inline int nVirA()  { return this->nVirB_;};$/;"	f	class:ChronusQ::SingleSlater
+nVAVA_	include/sdresponse.h	/^  int       nVAVA_;      \/\/ NVA * NVA$/;"	m	class:ChronusQ::SDResponse
+nVAVA_LT_	include/sdresponse.h	/^  int       nVAVA_LT_;   \/\/ NVA * (NVA + 1) \/ 2$/;"	m	class:ChronusQ::SDResponse
+nVAVA_SLT_	include/sdresponse.h	/^  int       nVAVA_SLT_;  \/\/ NVA * (NVA - 1) \/ 2$/;"	m	class:ChronusQ::SDResponse
+nVAVB_	include/sdresponse.h	/^  int       nVAVB_;      \/\/ NVA * NVB$/;"	m	class:ChronusQ::SDResponse
+nVA_	include/sdresponse.h	/^  int       nVA_;$/;"	m	class:ChronusQ::SDResponse
+nVBVB_	include/sdresponse.h	/^  int       nVBVB_;      \/\/ NVB * NVB$/;"	m	class:ChronusQ::SDResponse
+nVBVB_SLT_	include/sdresponse.h	/^  int       nVBVB_SLT_;  \/\/ NVB * (NVB - 1) \/ 2$/;"	m	class:ChronusQ::SDResponse
+nVB_	include/sdresponse.h	/^  int       nVB_;$/;"	m	class:ChronusQ::SDResponse
+nVirA	include/singleslater.h	/^  inline int nVirA()  { return this->nVirA_;};$/;"	f	class:ChronusQ::SingleSlater
 nVirA_	include/singleslater.h	/^  int      nVirA_;$/;"	m	class:ChronusQ::SingleSlater
 nVirB	include/singleslater.h	/^  inline int nVirB()  { return this->nVirB_;};$/;"	f	class:ChronusQ::SingleSlater
 nVirB_	include/singleslater.h	/^  int      nVirB_;$/;"	m	class:ChronusQ::SingleSlater
-n_	include/davidson.h	/^    int     n_;          \/\/ Dimension of the problem (LDA)$/;"	m	class:ChronusQ::Davidson
 name	include/basisset.h	/^  char    name[2];               \/\/ name of the shell - "S","P","D","F","G"$/;"	m	struct:ChronusQ::Shell
 name_bin	include/fileio.h	/^  std::string  name_bin;                \/\/ name of the binary file$/;"	m	class:ChronusQ::FileIO
 name_in	include/fileio.h	/^  std::string  name_in;                 \/\/ name of the input file$/;"	m	class:ChronusQ::FileIO
 name_out	include/fileio.h	/^  std::string  name_out;                \/\/ name of the output file$/;"	m	class:ChronusQ::FileIO
 name_scr	include/fileio.h	/^  std::string  name_scr;                \/\/ name of the scratch file$/;"	m	class:ChronusQ::FileIO
 nine	include/global.h	/^  double zero, one, two, three, four, five, six, seven, eight, nine, ten, half, quarter;$/;"	m	struct:Math
+nmPerHartree	include/global.h	/^  double nmPerHartree;$/;"	m	struct:Phys
 nodeNameLen	include/global.h	/^  int  nodeNameLen; \/\/\/< Length of process name$/;"	m	struct:GlobalMPI
 norm	include/basisset.h	/^  double  norm[MAXCONTRACTION];  \/\/ normalization constants of primitive GTOs (divided by AOCartesian.divConst)$/;"	m	struct:ChronusQ::Shell
 norm	include/basisset.h	/^  double  norm[MAXCONTRACTION][MAXCONTRACTION];		\/\/ pairwise normalization constant$/;"	m	struct:ChronusQ::ShellPair
 normQuartet	include/aointegrals.h	/^  double normQuartet[MAXCONTRACTION][MAXCONTRACTION][MAXCONTRACTION][MAXCONTRACTION];$/;"	m	struct:ChronusQ::QuartetConstants
 nthreads	include/controls.h	/^  int           nthreads;       \/\/ Number of OpenMP threads$/;"	m	class:ChronusQ::Controls
-octpole_	include/singleslater.h	/^  std::unique_ptr<RealTensor3d>  octpole_;$/;"	m	class:ChronusQ::SingleSlater
-octupole	include/gauinterface.h	/^    octupole,$/;"	e	enum:GauMatEl::__anon2
+octpole	include/singleslater.h	/^  inline RealTensor3d* octpole(){ return this->octpole_.get();};$/;"	f	class:ChronusQ::SingleSlater
+octpole_	include/singleslater.h	/^  std::unique_ptr<RealTensor3d>  octpole_; \/\/\/< Electric Octupole Moment$/;"	m	class:ChronusQ::SingleSlater
+octupole	include/gauinterface.h	/^    octupole,$/;"	e	enum:GauMatEl::__anon1
+omega	include/sdresponse_getset.h	/^  inline VectorXd*     omega(){      return this->omega_.get();          };$/;"	f
+omega_	include/sdresponse.h	/^  std::unique_ptr<VectorXd>        omega_;$/;"	m	class:ChronusQ::SDResponse
 one	include/global.h	/^  double zero, one, two, three, four, five, six, seven, eight, nine, ten, half, quarter;$/;"	m	struct:Math
 oneE_	include/aointegrals.h	/^  std::unique_ptr<RealMatrix>    oneE_; \/\/\/< Core Hamiltonian \\f$ h = T + V \\f\$$/;"	m	class:ChronusQ::AOIntegrals
 oneehRRSab	src/aointegrals/aointegrals_onee.cpp	/^double AOIntegrals::oneehRRSab(int LA,int *lA,int LB,int *lB) {$/;"	f	class:AOIntegrals
@@ -561,17 +800,19 @@ oneevRRTa0	src/aointegrals/aointegrals_onee.cpp	/^double AOIntegrals::oneevRRTa0
 oneevRRTab	src/aointegrals/aointegrals_onee.cpp	/^double AOIntegrals::oneevRRTab(int LA,int *lA,int LB,int *lB,int *i,int *j) {$/;"	f	class:AOIntegrals
 oneevRRVa0	src/aointegrals/aointegrals_onee.cpp	/^double AOIntegrals::oneevRRVa0(int *iAtom,int m,int LA,int *lA, int *i, int *j){$/;"	f	class:AOIntegrals
 openIn	include/fileio.h	/^  inline void openIn() {$/;"	f	class:ChronusQ::FileIO
-operator =	include/singleslater.h	/^  inline void operator=(SingleSlater<T> &other){$/;"	f	class:ChronusQ::SingleSlater
 optGeometry	include/controls.h	/^  bool  	optGeometry;    \/\/ optimize geometry$/;"	m	class:ChronusQ::Controls
 optWaveFunction	include/controls.h	/^  bool  	optWaveFunction;\/\/ optimize wave function$/;"	m	class:ChronusQ::Controls
-orthbasis	include/gauinterface.h	/^    orthbasis,$/;"	e	enum:GauMatEl::__anon2
+orthbasis	include/gauinterface.h	/^    orthbasis,$/;"	e	enum:GauMatEl::__anon1
+oscStrength_	include/sdresponse.h	/^  std::unique_ptr<RealMatrix>      oscStrength_;$/;"	m	class:ChronusQ::SDResponse
 out	include/fileio.h	/^  fstream out;                   \/\/ file handler of the output file$/;"	m	class:ChronusQ::FileIO
-overlap	include/gauinterface.h	/^    overlap,$/;"	e	enum:GauMatEl::__anon2
+overlap	include/gauinterface.h	/^    overlap,$/;"	e	enum:GauMatEl::__anon1
 overlap_	include/aointegrals.h	/^  std::unique_ptr<RealMatrix>    overlap_; \/\/\/< Overlap matrix \\f$ S_{\\mu\\nu} = \\langle \\mu \\vert \\nu \\rangle \\f\$$/;"	m	class:ChronusQ::AOIntegrals
 pairConstants_	include/aointegrals.h	/^  std::unique_ptr<PairConstants>        pairConstants_; \/\/\/< Smart pointer to struct containing shell-pair meta-data$/;"	m	class:ChronusQ::AOIntegrals
-phys	include/global.h	/^const Phys phys = {0.5291772083000001,0.393430307};$/;"	v
+phys	include/global.h	/^const Phys phys = {0.5291772083000001,0.393430307,27.211396132,45.56335};$/;"	v
 pi	include/global.h	/^  double pi; \/\/\/< Mathematical constant \\f$\\pi\\f\$$/;"	m	struct:Math
 pi32	include/global.h	/^  double pi32; \/\/\/< Mathematical constant \\f$\\pi^{3\/2}\\f\$$/;"	m	struct:Math
+placeVOOV	src/sdresponse/sdresponse_misc.cpp	/^void SDResponse::placeVOOV(const RealVecMap &TMOV, RealMatrix &TMOA, RealMatrix &TMOB){$/;"	f	class:SDResponse
+placeVVOO	src/sdresponse/sdresponse_misc.cpp	/^void SDResponse::placeVVOO(const RealVecMap &TMOV, RealMatrix &TMO){$/;"	f	class:SDResponse
 polyCoeff	src/tools/tools.cpp	/^double polyCoeff(int l, int i){$/;"	f	namespace:ChronusQ
 potential_	include/aointegrals.h	/^  std::unique_ptr<RealMatrix>    potential_; \/\/\/< Potential (nuclear attraction) energy tensor \\f$ V_{\\mu\\nu} = \\sum_A \\left\\langle \\mu \\vert r_{1A}^{-1}\\vert \\nu\\right\\rangle\\f\$$/;"	m	class:ChronusQ::AOIntegrals
 powerInt	src/tools/tools.cpp	/^double powerInt(double base, int order){$/;"	f	namespace:ChronusQ
@@ -579,65 +820,91 @@ prettyPrint	include/eiginterface.h	/^  void prettyPrint(std::ostream & output, c
 print	src/memory/memory.cpp	/^void Memory::print(long const start, long const final, long col, ostream &output, std:string s) {$/;"	f	class:Memory
 printAO	src/basisset/basisset.cpp	/^void BasisSet::printAO(ostream &output){$/;"	f	class:BasisSet
 printAtomO	src/basisset/basisset_read.cpp	/^void BasisSet::printAtomO(ostream &output){$/;"	f	class:BasisSet
-printDensityinf	src/singleslater/real_scf.cpp	/^void SingleSlater<double>::printDensityinf(){$/;"	f	class:ChronusQ::SingleSlater
+printDensityInfo	src/singleslater/real_scf.cpp	/^void SingleSlater<double>::printDensityInfo(double PAlphaRMS, double PBetaRMS, double EDelta){$/;"	f	class:ChronusQ::SingleSlater
+printDensityInfo	src/singleslater/real_scf.cpp	/^void SingleSlater<double>::printDensityInfo(double PAlphaRMS,double EDelta){$/;"	f	class:ChronusQ::SingleSlater
+printDensityinf	src/singleslater/scf.cpp	/^void SingleSlater::printDensityinf(){$/;"	f	class:SingleSlater
 printEnergy	include/singleslater_print.h	/^void SingleSlater<T>::printEnergy(){$/;"	f	class:SingleSlater
-printExcitedStateEnergies	src/sdresponse/sdresponse.cpp	/^void SDResponse::printExcitedStateEnergies(){$/;"	f	class:SDResponse
-printInfo	include/davidson.h	/^    inline void printInfo(ostream &output=cout) {$/;"	f	class:ChronusQ::Davidson
+printExcitedStateEnergies	src/sdresponse/sdresponse_io.cpp	/^void SDResponse::printExcitedStateEnergies(){$/;"	f	class:SDResponse
+printInfo	include/quasinewton.h	/^    inline void printInfo(ostream &output=cout) {$/;"	f	class:ChronusQ::QuasiNewton
 printInfo	include/singleslater_print.h	/^void SingleSlater<T>::printInfo() {$/;"	f	class:SingleSlater
 printInfo	src/basisset/basisset.cpp	/^void BasisSet::printInfo(FileIO * fileio,Controls * controls) {$/;"	f	class:BasisSet
 printInfo	src/molecule/molecule.cpp	/^void Molecule::printInfo(FileIO * fileio,Controls * controls) {$/;"	f	class:Molecule
-printInfo	src/sdresponse/sdresponse.cpp	/^void SDResponse::printInfo() {$/;"	f	class:SDResponse
+printInfo	src/sdresponse/sdresponse_io.cpp	/^void SDResponse::printInfo() {$/;"	f	class:SDResponse
 printInfo_libint	src/basisset/basisset_read.cpp	/^void BasisSet::printInfo_libint(FileIO * fileio,Controls * controls) {$/;"	f	class:BasisSet
 printLevel	include/controls.h	/^  int   	printLevel;	\/\/ print level$/;"	m	class:ChronusQ::Controls
 printMultipole	include/singleslater_print.h	/^void SingleSlater<T>::printMultipole(){$/;"	f	class:SingleSlater
+printPrinciple	src/sdresponse/sdresponse_io.cpp	/^void SDResponse::printPrinciple(int iSt){$/;"	f	class:SDResponse
+printSettings	src/controls/controls.cpp	/^void Controls::printSettings(fstream &out){$/;"	f	class:Controls
 printShell	src/basisset/basisset.cpp	/^void BasisSet::printShell(ostream &output){$/;"	f	class:BasisSet
 printShellPair	src/basisset/basisset.cpp	/^void BasisSet::printShellPair(ostream &output){$/;"	f	class:BasisSet
 printTimings	src/aointegrals/aointegrals.cpp	/^void AOIntegrals::printTimings() {$/;"	f	class:AOIntegrals
-quadpole_	include/singleslater.h	/^  std::unique_ptr<RealMatrix>  quadpole_;$/;"	m	class:ChronusQ::SingleSlater
-quadrupole	include/gauinterface.h	/^    quadrupole,$/;"	e	enum:GauMatEl::__anon2
+quadpole	include/singleslater.h	/^  inline RealMatrix* quadpole(){ return this->quadpole_.get();};$/;"	f	class:ChronusQ::SingleSlater
+quadpole_	include/singleslater.h	/^  std::unique_ptr<RealMatrix>  quadpole_; \/\/\/< Electric Quadrupole Moment$/;"	m	class:ChronusQ::SingleSlater
+quadrupole	include/gauinterface.h	/^    quadrupole,$/;"	e	enum:GauMatEl::__anon1
 quarter	include/global.h	/^  double zero, one, two, three, four, five, six, seven, eight, nine, ten, half, quarter;$/;"	m	struct:Math
 quartetConstants_	include/aointegrals.h	/^  std::unique_ptr<QuartetConstants>     quartetConstants_; \/\/\/< Smart pointer to struct containing shell-quartet meta-data$/;"	m	class:ChronusQ::AOIntegrals
+rIJ_	include/molecule.h	/^  std::unique_ptr<RealMatrix>  rIJ_;             \/\/ Interatomic distance matrix$/;"	m	class:ChronusQ::Molecule
+rMu_	include/sdresponse.h	/^  double    rMu_;$/;"	m	class:ChronusQ::SDResponse
 readBasisSet	src/basisset/basisset.cpp	/^void BasisSet::readBasisSet(FileIO * fileio, Molecule * mol){$/;"	f	class:BasisSet
 readBlock	src/fileio/fileio.cpp	/^void FileIO::readBlock(){$/;"	f	class:FileIO
-readCharge	include/molecule.h	/^  inline void readCharge(int charge) {this->charge_=charge;};$/;"	f	class:ChronusQ::Molecule
+readCharge	include/molecule.h	/^  inline void readCharge(int charge) {this->charge_=charge; this->nTotalE_ -= charge;};$/;"	f	class:ChronusQ::Molecule
 readDebug	src/controls/controls.cpp	/^void Controls::readDebug(std::string str){$/;"	f	class:Controls
-readGauRec10_	src/gauinterface/gauinterface.cpp	/^void GauMatEl::readGauRec10_(){$/;"	f	class:GauMatEl
-readGauRec11_	src/gauinterface/gauinterface.cpp	/^void GauMatEl::readGauRec11_(){$/;"	f	class:GauMatEl
-readGauRec1_	src/gauinterface/gauinterface.cpp	/^void GauMatEl::readGauRec1_(){$/;"	f	class:GauMatEl
-readGauRec2_	src/gauinterface/gauinterface.cpp	/^void GauMatEl::readGauRec2_(){$/;"	f	class:GauMatEl
-readGauRec3_	src/gauinterface/gauinterface.cpp	/^void GauMatEl::readGauRec3_(){$/;"	f	class:GauMatEl
-readGauRec4_	src/gauinterface/gauinterface.cpp	/^void GauMatEl::readGauRec4_(){$/;"	f	class:GauMatEl
-readGauRec5_	src/gauinterface/gauinterface.cpp	/^void GauMatEl::readGauRec5_(){$/;"	f	class:GauMatEl
-readGauRec6_	src/gauinterface/gauinterface.cpp	/^void GauMatEl::readGauRec6_(){$/;"	f	class:GauMatEl
-readGauRec7_	src/gauinterface/gauinterface.cpp	/^void GauMatEl::readGauRec7_(){$/;"	f	class:GauMatEl
-readGauRec8_	src/gauinterface/gauinterface.cpp	/^void GauMatEl::readGauRec8_(){$/;"	f	class:GauMatEl
-readGauRec9_	src/gauinterface/gauinterface.cpp	/^void GauMatEl::readGauRec9_(){$/;"	f	class:GauMatEl
+readGauRec10_	src/gauinterface/gaumatel.cpp	/^void GauMatEl::readGauRec10_(){$/;"	f	class:GauMatEl
+readGauRec11_	src/gauinterface/gaumatel.cpp	/^void GauMatEl::readGauRec11_(){$/;"	f	class:GauMatEl
+readGauRec1_	src/gauinterface/gaumatel.cpp	/^void GauMatEl::readGauRec1_(){$/;"	f	class:GauMatEl
+readGauRec2_	src/gauinterface/gaumatel.cpp	/^void GauMatEl::readGauRec2_(){$/;"	f	class:GauMatEl
+readGauRec3_	src/gauinterface/gaumatel.cpp	/^void GauMatEl::readGauRec3_(){$/;"	f	class:GauMatEl
+readGauRec4_	src/gauinterface/gaumatel.cpp	/^void GauMatEl::readGauRec4_(){$/;"	f	class:GauMatEl
+readGauRec5_	src/gauinterface/gaumatel.cpp	/^void GauMatEl::readGauRec5_(){$/;"	f	class:GauMatEl
+readGauRec6_	src/gauinterface/gaumatel.cpp	/^void GauMatEl::readGauRec6_(){$/;"	f	class:GauMatEl
+readGauRec7_	src/gauinterface/gaumatel.cpp	/^void GauMatEl::readGauRec7_(){$/;"	f	class:GauMatEl
+readGauRec8_	src/gauinterface/gaumatel.cpp	/^void GauMatEl::readGauRec8_(){$/;"	f	class:GauMatEl
+readGauRec9_	src/gauinterface/gaumatel.cpp	/^void GauMatEl::readGauRec9_(){$/;"	f	class:GauMatEl
 readGuessGauFChk	src/singleslater/real_guess.cpp	/^void SingleSlater<double>::readGuessGauFChk(std::string &filename) {$/;"	f	class:ChronusQ::SingleSlater
 readGuessGauMatEl	src/singleslater/real_guess.cpp	/^void SingleSlater<double>::readGuessGauMatEl(GauMatEl& matEl){$/;"	f	class:ChronusQ::SingleSlater
 readGuessIO	src/singleslater/real_guess.cpp	/^void SingleSlater<double>::readGuessIO() {$/;"	f	class:ChronusQ::SingleSlater
-readInitRecs	src/gauinterface/gauinterface.cpp	/^void GauMatEl::readInitRecs(){$/;"	f	class:GauMatEl
+readInitRecs	src/gauinterface/gaumatel.cpp	/^void GauMatEl::readInitRecs(){$/;"	f	class:GauMatEl
 readInit_	include/gauinterface.h	/^  bool          readInit_;$/;"	m	class:GauMatEl
 readInput	src/classtools/classtools.cpp	/^void readInput(FileIO * fileio, Molecule * mol, BasisSet * basis, Controls * controls,$/;"	f	namespace:ChronusQ
 readMolecule	src/molecule/molecule.cpp	/^void Molecule::readMolecule(FileIO * fileio, std::istream &geomRead){$/;"	f	class:Molecule
+readMultip	include/molecule.h	/^  inline void readMultip(int multip) {this->multip_=multip;};$/;"	f	class:ChronusQ::Molecule
+readPSCF	src/controls/controls.cpp	/^void Controls::readPSCF(std::fstream &in, std::fstream &out){$/;"	f	class:Controls
 readPointer	include/fileio.h	/^  long  readPointer[2*MAXBLOCK]; \/\/ read pointers$/;"	m	class:ChronusQ::FileIO
-readRec	src/gauinterface/gauinterface.cpp	/^double * GauMatEl::readRec(int rec){$/;"	f	class:GauMatEl
+readRec	src/gauinterface/gaumatel.cpp	/^double * GauMatEl::readRec(int rec){$/;"	f	class:GauMatEl
 readSMP	src/controls/controls.cpp	/^void Controls::readSMP(int &n) {$/;"	f	class:Controls
-readSpin	include/molecule.h	/^  inline void readSpin(int spin) {this->spin_=spin;};$/;"	f	class:ChronusQ::Molecule
+reconstructSolution	include/quasinewton.h	/^  void QuasiNewton<T>::reconstructSolution(const int NTrial){$/;"	f	class:ChronusQ::QuasiNewton
+redDiag	src/quasinewton/quasinewton_real_diag.cpp	/^  void QuasiNewton<double>::redDiag(int NTrial,ostream &output){$/;"	f	class:ChronusQ::QuasiNewton
+refShell	include/basisset.h	/^    std::vector<libint2::Shell> refShell;$/;"	m	struct:ChronusQ::BasisSet::basis_libint
+resTol_	include/quasinewton.h	/^    double resTol_;        \/\/ Residual norm tolerence for convergence$/;"	m	class:ChronusQ::QuasiNewton
 restart	include/controls.h	/^  bool  	restart;        \/\/ restart the calculation$/;"	m	class:ChronusQ::Controls
-run	include/davidson.h	/^    inline void run(ostream &output=cout) {$/;"	f	class:ChronusQ::Davidson
-runMicro	src/davidson/davidson.cpp	/^void Davidson<double>::runMicro(ostream &output ) {$/;"	f	class:ChronusQ::Davidson
-scfdena	include/gauinterface.h	/^    scfdena,$/;"	e	enum:GauMatEl::__anon2
-scfdenb	include/gauinterface.h	/^    scfdenb,$/;"	e	enum:GauMatEl::__anon2
+retrvVOOV	src/sdresponse/sdresponse_misc.cpp	/^void SDResponse::retrvVOOV(RealVecMap &TMOV, const RealMatrix &TMOA, const RealMatrix &TMOB){$/;"	f	class:SDResponse
+retrvVVOO	src/sdresponse/sdresponse_misc.cpp	/^void SDResponse::retrvVVOO(RealVecMap &TMOV, const RealMatrix &TMO){$/;"	f	class:SDResponse
+rmDiag	include/sdresponse_getset.h	/^  inline RealCMMatrix* rmDiag(){     return this->rmDiag_.get();         };$/;"	f
+rmDiag_	include/sdresponse.h	/^  std::unique_ptr<RealCMMatrix> rmDiag_;$/;"	m	class:ChronusQ::SDResponse
+run	include/quasinewton.h	/^  void QuasiNewton<T>::run(ostream &output){$/;"	f	class:ChronusQ::QuasiNewton
+run	src/gauinterface/gaujob.cpp	/^void GauJob::run(){$/;"	f	class:GauJob
+runMicro	src/quasinewton/quasinewton_real_proc.cpp	/^  void QuasiNewton<double>::runMicro(ostream &output){$/;"	f	class:ChronusQ::QuasiNewton
+scaleDagPPRPA	src/sdresponse/sdresponse_misc.cpp	/^void SDResponse::scaleDagPPRPA(bool inplace, RealVecMap &T, RealVecMap &IX, RealVecMap *AX){$/;"	f	class:SDResponse
+scfdena	include/gauinterface.h	/^    scfdena,$/;"	e	enum:GauMatEl::__anon1
+scfdenb	include/gauinterface.h	/^    scfdenb,$/;"	e	enum:GauMatEl::__anon1
 schwartz_	include/aointegrals.h	/^  std::unique_ptr<RealMatrix>    schwartz_; \/\/\/< Schwartz bounds for ERI screening$/;"	m	class:ChronusQ::AOIntegrals
 scr	include/fileio.h	/^  fstream scr;                   \/\/ file handler of the scratch file$/;"	m	class:ChronusQ::FileIO
-sdr_	include/davidson.h	/^    SDResponse * sdr_;$/;"	m	class:ChronusQ::Davidson
+sdr_	include/quasinewton.h	/^    SDResponse * sdr_; \/\/ Pointer to SDResponse object$/;"	m	class:ChronusQ::QuasiNewton
 secondDer	include/controls.h	/^  bool  	secondDer; 	\/\/ compute the second derivative$/;"	m	class:ChronusQ::Controls
+setMeth	include/sdresponse_getset.h	/^  inline void setMeth(int n){   this->iMeth_ = n; this->initMeth();    };$/;"	f
 setNAE	include/singleslater.h	/^  inline void setNAE(int nAE)    { this->nAE_ = nAE;};$/;"	f	class:ChronusQ::SingleSlater
 setNBE	include/singleslater.h	/^  inline void setNBE(int nBE)    { this->nBE_ = nBE;};$/;"	f	class:ChronusQ::SingleSlater
 setNBasis	include/singleslater.h	/^  inline void setNBasis(int nBasis) { this->nBasis_ = nBasis;};$/;"	f	class:ChronusQ::SingleSlater
-setRHF	include/singleslater.h	/^  inline void setRHF(int RHF)    { this->RHF_ = RHF;};$/;"	f	class:ChronusQ::SingleSlater
+setNGuess	include/sdresponse_getset.h	/^  inline void setNGuess(int n){ this->nGuess_ = n;                     };$/;"	f
+setNSek	include/sdresponse_getset.h	/^  inline void setNSek(int n){   this->nSek_  = n; this->nGuess_ = 2*n; };$/;"	f
+setPPRPA	include/sdresponse_getset.h	/^  inline void setPPRPA(int n){ this->iPPRPA_ = n;                      };$/;"	f
+setRef	include/singleslater.h	/^  inline void setRef(int Ref)    { this->Ref_ = Ref;};$/;"	f	class:ChronusQ::SingleSlater
+setnBasis	include/basisset.h	/^  inline void setnBasis(int i){this->nBasis_=i;};$/;"	f	class:ChronusQ::BasisSet
+setnPrimitive	include/basisset.h	/^  inline void setnPrimitive(int i){this->nPrimitive_=i;};$/;"	f	class:ChronusQ::BasisSet
+setupRestart	src/quasinewton/quasinewton_real_restart.cpp	/^  void QuasiNewton<double>::setupRestart(){$/;"	f	class:ChronusQ::QuasiNewton
 seven	include/global.h	/^  double zero, one, two, three, four, five, six, seven, eight, nine, ten, half, quarter;$/;"	m	struct:Math
-shBlkNorm	include/basisset.h	/^  std::unique_ptr<RealMatrix> shBlkNorm;$/;"	m	class:ChronusQ::BasisSet
+shBlkNormAlpha	include/basisset.h	/^  std::unique_ptr<RealMatrix> shBlkNormAlpha;$/;"	m	class:ChronusQ::BasisSet
+shBlkNormBeta	include/basisset.h	/^  std::unique_ptr<RealMatrix> shBlkNormBeta;$/;"	m	class:ChronusQ::BasisSet
 shIndex	include/basisset.h	/^  int     shIndex;               \/\/ index of the shell in the shells[] array to which current ao belongs$/;"	m	struct:ChronusQ::AOCartesian
 shIndex	include/basisset.h	/^  int     shIndex[2];           \/\/ indices of the first and second shell in the shells[] array to which current ao belongs$/;"	m	struct:ChronusQ::ShellPair
 shellPairs	include/basisset.h	/^  ShellPair   *shellPairs;     \/\/ array of shellPairs$/;"	m	class:ChronusQ::BasisSet
@@ -660,45 +927,55 @@ sizeLong_	include/fileio.h	/^  int   sizeLong_;               \/\/ size of a lon
 size_	include/molecule.h	/^  int                          size_;        \/\/ size of the object in terms of sizeof(char)$/;"	m	class:ChronusQ::Molecule
 small	include/global.h	/^  double small;$/;"	m	struct:Math
 smallT	src/aointegrals/aointegrals.cpp	/^static double smallT[21]={$/;"	v	file:
+solutionValues_	include/quasinewton.h	/^    TVec * solutionValues_;   \/\/ Solution values (eigen) at current iteration $/;"	m	class:ChronusQ::QuasiNewton
+solutionVector_	include/quasinewton.h	/^    TMat * solutionVector_;   \/\/ Solution vectors at current iteration $/;"	m	class:ChronusQ::QuasiNewton
 sortedShells	include/basisset.h	/^  int         *sortedShells;   \/\/ index of shells sorted from the largest angular momentum to the lowest$/;"	m	class:ChronusQ::BasisSet
-spin	include/molecule.h	/^  inline int spin() {return this->spin_;}$/;"	f	class:ChronusQ::Molecule
-spin	include/singleslater.h	/^  inline int spin()   { return this->spin_; };$/;"	f	class:ChronusQ::SingleSlater
-spin_	include/molecule.h	/^  int                          spin_;        \/\/ spin multiplicity$/;"	m	class:ChronusQ::Molecule
-spin_	include/singleslater.h	/^  int      spin_;$/;"	m	class:ChronusQ::SingleSlater
 sqrt2	include/global.h	/^  double sqrt2;$/;"	m	struct:Math
 sqrt2pi54	include/global.h	/^  double sqrt2pi54; \/\/\/< Mathematical constant \\f$\\sqrt{2}\\pi^{5\/4}\\f\$$/;"	m	struct:Math
 ssNonzero	include/aointegrals.h	/^  bool   ssNonzero[MAXCONTRACTION][MAXCONTRACTION];$/;"	m	struct:ChronusQ::PairConstants
 ssPair	include/aointegrals.h	/^  double ssPair[MAXCONTRACTION][MAXCONTRACTION];$/;"	m	struct:ChronusQ::PairConstants
 ssPairTotal	include/aointegrals.h	/^  double ssPairTotal;$/;"	m	struct:ChronusQ::PairConstants
 stable	include/atoms.h	/^  std::string stable;$/;"	m	struct:ChronusQ::Atoms
+stdHerDiag	src/quasinewton/quasinewton_real_diag.cpp	/^  void QuasiNewton<double>::stdHerDiag(int NTrial, ostream &output){$/;"	f	class:ChronusQ::QuasiNewton
+stdNGuess	include/quasinewton.h	/^    inline int stdNGuess(){$/;"	f	class:ChronusQ::QuasiNewton
+stdSubSpace	include/quasinewton.h	/^    inline int stdSubSpace(){$/;"	f	class:ChronusQ::QuasiNewton
 stringlower	src/tools/tools.cpp	/^std::string stringlower(std::string str){$/;"	f	namespace:ChronusQ
 stringupper	src/tools/tools.cpp	/^std::string stringupper(std::string str){$/;"	f	namespace:ChronusQ
 strlwr	src/tools/tools.cpp	/^void strlwr(char *a) {$/;"	f	namespace:ChronusQ
 strupr	src/tools/tools.cpp	/^void strupr(char *a) {$/;"	f	namespace:ChronusQ
 symbol	include/atoms.h	/^  std::string symbol;$/;"	m	struct:ChronusQ::Atoms
-tagBasisSet	include/global.h	/^enum {tagMolecule,tagMatrix,tagBasisSet,tagSingleSlater,tagIntegrals,tagSDResponse};$/;"	e	enum:__anon4
-tagIntegrals	include/global.h	/^enum {tagMolecule,tagMatrix,tagBasisSet,tagSingleSlater,tagIntegrals,tagSDResponse};$/;"	e	enum:__anon4
-tagMatrix	include/global.h	/^enum {tagMolecule,tagMatrix,tagBasisSet,tagSingleSlater,tagIntegrals,tagSDResponse};$/;"	e	enum:__anon4
-tagMolecule	include/global.h	/^enum {tagMolecule,tagMatrix,tagBasisSet,tagSingleSlater,tagIntegrals,tagSDResponse};$/;"	e	enum:__anon4
-tagSDResponse	include/global.h	/^enum {tagMolecule,tagMatrix,tagBasisSet,tagSingleSlater,tagIntegrals,tagSDResponse};$/;"	e	enum:__anon4
-tagSingleSlater	include/global.h	/^enum {tagMolecule,tagMatrix,tagBasisSet,tagSingleSlater,tagIntegrals,tagSDResponse};$/;"	e	enum:__anon4
+symmHerDiag	src/quasinewton/quasinewton_real_diag.cpp	/^  void QuasiNewton<double>::symmHerDiag(int NTrial, ostream &output){$/;"	f	class:ChronusQ::QuasiNewton
+symmNonHerDiag	src/quasinewton/quasinewton_real_diag.cpp	/^  void QuasiNewton<double>::symmNonHerDiag(int NTrial, ostream &output){$/;"	f	class:ChronusQ::QuasiNewton
+symmetrizedTrial_	include/quasinewton.h	/^    bool symmetrizedTrial_;\/\/ Symmetrized Trial Vectors (Kauczor et al.)$/;"	m	class:ChronusQ::QuasiNewton
+tagBasisSet	include/global.h	/^enum {tagMolecule,tagMatrix,tagBasisSet,tagSingleSlater,tagIntegrals,tagSDResponse};$/;"	e	enum:__anon3
+tagIntegrals	include/global.h	/^enum {tagMolecule,tagMatrix,tagBasisSet,tagSingleSlater,tagIntegrals,tagSDResponse};$/;"	e	enum:__anon3
+tagMatrix	include/global.h	/^enum {tagMolecule,tagMatrix,tagBasisSet,tagSingleSlater,tagIntegrals,tagSDResponse};$/;"	e	enum:__anon3
+tagMolecule	include/global.h	/^enum {tagMolecule,tagMatrix,tagBasisSet,tagSingleSlater,tagIntegrals,tagSDResponse};$/;"	e	enum:__anon3
+tagSDResponse	include/global.h	/^enum {tagMolecule,tagMatrix,tagBasisSet,tagSingleSlater,tagIntegrals,tagSDResponse};$/;"	e	enum:__anon3
+tagSingleSlater	include/global.h	/^enum {tagMolecule,tagMatrix,tagBasisSet,tagSingleSlater,tagIntegrals,tagSDResponse};$/;"	e	enum:__anon3
 ten	include/global.h	/^  double zero, one, two, three, four, five, six, seven, eight, nine, ten, half, quarter;$/;"	m	struct:Math
 three	include/global.h	/^  double zero, one, two, three, four, five, six, seven, eight, nine, ten, half, quarter;$/;"	m	struct:Math
 thresholdAB	include/controls.h	/^  double 	thresholdAB;$/;"	m	class:ChronusQ::Controls
 thresholdS	include/controls.h	/^  double 	thresholdS;$/;"	m	class:ChronusQ::Controls
 thresholdSchawrtz	include/controls.h	/^  double	thresholdSchawrtz;$/;"	m	class:ChronusQ::Controls
 toCOM	src/molecule/molecule.cpp	/^void Molecule::toCOM(int Iop){$/;"	f	class:Molecule
-totalEnergy	include/singleslater.h	/^  double   totalEnergy;$/;"	m	class:ChronusQ::SingleSlater
+totalEnergy	include/singleslater.h	/^  double   totalEnergy; \/\/\/< Sum of all energetic contributions$/;"	m	class:ChronusQ::SingleSlater
 traceSymm	src/classtools/classtools.cpp	/^double traceSymm(RealMatrix* a, RealMatrix* b) {$/;"	f	namespace:ChronusQ
-tracelessQuadpole_	include/singleslater.h	/^  std::unique_ptr<RealMatrix>  tracelessQuadpole_;$/;"	m	class:ChronusQ::SingleSlater
+tracelessQuadpole	include/singleslater.h	/^  inline RealMatrix* tracelessQuadpole(){ return this->tracelessQuadpole_.get();};$/;"	f	class:ChronusQ::SingleSlater
+tracelessQuadpole_	include/singleslater.h	/^  std::unique_ptr<RealMatrix>  tracelessQuadpole_; \/\/\/< Traceless Electric Quadrupole Moment$/;"	m	class:ChronusQ::SingleSlater
+transDen	include/sdresponse_getset.h	/^  inline RealCMMatrix* transDen(){   return this->transDen_.get();       };$/;"	f
+transDen_	include/sdresponse.h	/^  std::unique_ptr<RealCMMatrix>    transDen_;$/;"	m	class:ChronusQ::SDResponse
+transDipole_	include/sdresponse.h	/^  std::unique_ptr<RealTensor3d>    transDipole_;$/;"	m	class:ChronusQ::SDResponse
 two	include/global.h	/^  double zero, one, two, three, four, five, six, seven, eight, nine, ten, half, quarter;$/;"	m	struct:Math
 twoEC	include/aointegrals.h	/^  inline double &twoEC(int i, int j, int k, int l){$/;"	f	class:ChronusQ::AOIntegrals
 twoEC	include/aointegrals.h	/^  inline double &twoEC(int ij, int kl){$/;"	f	class:ChronusQ::AOIntegrals
 twoEC_	include/aointegrals.h	/^  std::unique_ptr<RealMatrix>    twoEC_; \/\/\/< Two-body Coulomb integrals $/;"	m	class:ChronusQ::AOIntegrals
-twoEContractDirect	src/aointegrals/aointegrals_complex_contract.cpp	/^void AOIntegrals::twoEContractDirect(bool doRHFFock, const ComplexMatrix &X, ComplexMatrix &AX) {$/;"	f	class:ChronusQ::AOIntegrals
-twoEContractDirect	src/aointegrals/aointegrals_real_contract.cpp	/^void AOIntegrals::twoEContractDirect(bool doRHFFock, const RealMatrix &X, RealMatrix &AX) {$/;"	f	class:ChronusQ::AOIntegrals
-twoEContractN4	src/aointegrals/aointegrals_complex_contract.cpp	/^void AOIntegrals::twoEContractN4(bool doRHFFock, const ComplexMatrix &X, ComplexMatrix &AX) {$/;"	f	class:ChronusQ::AOIntegrals
-twoEContractN4	src/aointegrals/aointegrals_real_contract.cpp	/^void AOIntegrals::twoEContractN4(bool doRHFFock, const RealMatrix &X, RealMatrix &AX) {$/;"	f	class:ChronusQ::AOIntegrals
+twoEContractDF	src/aointegrals/aointegrals_complex_contract.cpp	/^void AOIntegrals::twoEContractDF(bool RHF, bool doFock, const ComplexMatrix &XAlpha, ComplexMatrix &AXAlpha,$/;"	f	class:ChronusQ::AOIntegrals
+twoEContractDF	src/aointegrals/aointegrals_real_contract.cpp	/^void AOIntegrals::twoEContractDF(bool RHF, bool doFock, const RealMatrix &XAlpha, RealMatrix &AXAlpha,$/;"	f	class:ChronusQ::AOIntegrals
+twoEContractDirect	src/aointegrals/aointegrals_complex_contract.cpp	/^void AOIntegrals::twoEContractDirect(bool RHF, bool doFock, bool do24, const ComplexMatrix &XAlpha, ComplexMatrix &AXAlpha,$/;"	f	class:ChronusQ::AOIntegrals
+twoEContractDirect	src/aointegrals/aointegrals_real_contract.cpp	/^void AOIntegrals::twoEContractDirect(bool RHF, bool doFock, bool do24, const RealMatrix &XAlpha, RealMatrix &AXAlpha,$/;"	f	class:ChronusQ::AOIntegrals
+twoEContractN4	src/aointegrals/aointegrals_complex_contract.cpp	/^void AOIntegrals::twoEContractN4(bool RHF, bool doFock, const ComplexMatrix &XAlpha, ComplexMatrix &AXAlpha,$/;"	f	class:ChronusQ::AOIntegrals
+twoEContractN4	src/aointegrals/aointegrals_real_contract.cpp	/^void AOIntegrals::twoEContractN4(bool RHF, bool doFock, const RealMatrix &XAlpha, RealMatrix &AXAlpha,$/;"	f	class:ChronusQ::AOIntegrals
 twoEX	include/aointegrals.h	/^  inline double &twoEX(int i, int j, int k, int l){$/;"	f	class:ChronusQ::AOIntegrals
 twoEX	include/aointegrals.h	/^  inline double &twoEX(int ij, int kl){$/;"	f	class:ChronusQ::AOIntegrals
 twoEX_	include/aointegrals.h	/^  std::unique_ptr<RealMatrix>    twoEX_; \/\/\/< Two-body Exchange integrals$/;"	m	class:ChronusQ::AOIntegrals
@@ -710,7 +987,6 @@ twoeppp0	src/aointegrals/aointegrals_twoe.cpp	/^double AOIntegrals::twoeppp0( in
 twoepppp	src/aointegrals/aointegrals_twoe.cpp	/^double AOIntegrals::twoepppp(int *nPGTOs,ShellPair *ijShellPair,ShellPair *klShellPair,int LA,int *lA,int LB,int *lB,int LC,int *lC,int LD,int *lD) {$/;"	f	class:AOIntegrals
 twoevRRa000	src/aointegrals/aointegrals_twoe.cpp	/^double AOIntegrals::twoevRRa000(ShellPair *ijShellPair,ShellPair *klShellPair,int m,int LA,int *lA,int *i,int *j,int *k,int *l) {$/;"	f	class:AOIntegrals
 twoevRRa0c0	src/aointegrals/aointegrals_twoe.cpp	/^double AOIntegrals::twoevRRa0c0(  ShellPair *ijShellPair, ShellPair *klShellPair,$/;"	f	class:AOIntegrals
-useLAPACK_	include/davidson.h	/^    bool useLAPACK_;$/;"	m	class:ChronusQ::Davidson
 worker	src/worker/worker.cpp	/^int worker(GlobalMPI *globalMPI) {$/;"	f
 writeBlock	src/fileio/fileio.cpp	/^void FileIO::writeBlock(){$/;"	f	class:FileIO
 writePointer	include/fileio.h	/^  long  writePointer[2*MAXBLOCK];\/\/ write pointers$/;"	m	class:ChronusQ::FileIO
@@ -719,10 +995,11 @@ zeta	include/basisset.h	/^  double  zeta[MAXCONTRACTION][MAXCONTRACTION];		\/\/ 
 ~AOIntegrals	include/aointegrals.h	/^  ~AOIntegrals(){;};$/;"	f	class:ChronusQ::AOIntegrals
 ~BasisSet	include/basisset.h	/^  ~BasisSet(){ \/\/ FIXME need to move these over to unique_ptr$/;"	f	class:ChronusQ::BasisSet
 ~Controls	include/controls.h	/^  ~Controls(){;};$/;"	f	class:ChronusQ::Controls
-~Davidson	include/davidson.h	/^    ~Davidson(){;};$/;"	f	class:ChronusQ::Davidson
 ~FileIO	src/fileio/fileio.cpp	/^FileIO::~FileIO() {$/;"	f	class:FileIO
+~GauJob	include/gauinterface.h	/^  ~GauJob(){this->gauInput_.close();};$/;"	f	class:GauJob
 ~GauMatEl	include/gauinterface.h	/^  ~GauMatEl(){$/;"	f	class:GauMatEl
 ~MOIntegrals	include/mointegrals.h	/^  ~MOIntegrals(){;};$/;"	f	class:ChronusQ::MOIntegrals
 ~Molecule	include/molecule.h	/^  ~Molecule(){$/;"	f	class:ChronusQ::Molecule
+~QuasiNewton	include/quasinewton.h	/^    ~QuasiNewton(){$/;"	f	class:ChronusQ::QuasiNewton
 ~SDResponse	include/sdresponse.h	/^  ~SDResponse() {;};$/;"	f	class:ChronusQ::SDResponse
 ~SingleSlater	include/singleslater.h	/^  ~SingleSlater() {;};$/;"	f	class:ChronusQ::SingleSlater

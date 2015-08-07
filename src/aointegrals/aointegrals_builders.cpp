@@ -241,9 +241,8 @@ void AOIntegrals::computeAOOneE(){
 #else // USE_LIBINT
 
 void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
-
   std::vector<RealMap> mat;
-  int NB = this->nBasis_;
+  int NB = this->nTCS_*this->nBasis_;
   int NBSq = NB*NB;
   if(iType == OneBodyEngine::overlap){
     mat.push_back(RealMap(this->overlap_->data(),NB,NB));
@@ -275,10 +274,9 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
   }
  
   // Check to see if the basisset had been converted
-  if(!this->basisSet_->convToLI) this->basisSet_->convShell(this->molecule_);
   // Define integral Engine
   std::vector<OneBodyEngine> engines(this->controls_->nthreads);
-  engines[0] = OneBodyEngine(iType,this->basisSet_->maxPrim,this->basisSet_->maxL,0);
+  engines[0] = OneBodyEngine(iType,this->basisSet_->maxPrim(),this->basisSet_->maxL(),0);
   // If engine is V, define nuclear charges
   if(iType == OneBodyEngine::nuclear){
     std::vector<std::pair<double,std::array<double,3>>> q;
@@ -300,7 +298,7 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
   }
   for(size_t i = 1; i < this->controls_->nthreads; i++) engines[i] = engines[0];
 
-  if(!this->basisSet_->haveMap) this->basisSet_->makeMap(this->molecule_); 
+  if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(this->nTCS_); 
 #ifdef USE_OMP
   #pragma omp parallel
 #endif
@@ -311,28 +309,44 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
     int thread_id = 0;
 #endif
     for(auto s1=0l, s12=0l; s1 < this->basisSet_->nShell(); s1++){
-      int bf1 = this->basisSet_->mapSh2Bf[s1];
-      int n1  = this->basisSet_->shells_libint[s1].size();
+      int bf1_s = this->basisSet_->mapSh2Bf(s1);
+      int n1  = this->basisSet_->shells(s1).size();
       for(int s2=0; s2 <= s1; s2++, s12++){
         if(s12 % this->controls_->nthreads != thread_id) continue;
-        int bf2 = this->basisSet_->mapSh2Bf[s2];
-        int n2  = this->basisSet_->shells_libint[s2].size();
+        int bf2_s = this->basisSet_->mapSh2Bf(s2);
+        int n2  = this->basisSet_->shells(s2).size();
   
         const double* buff = engines[thread_id].compute(
-          this->basisSet_->shells_libint[s1],
-          this->basisSet_->shells_libint[s2]
+          this->basisSet_->shells(s1),
+          this->basisSet_->shells(s2)
         );
 /*
-        for(int i = 0, ij=0; i < n1; i++) {
-          for(int j = 0; j < n2; j++, ij++) {
-            (*mat)(bf1+i,bf2+j) = buff[ij];
+        if(this->nTCS_ == 1){
+          for(int i = 0, ij=0; i < n1; i++) {
+            for(int j = 0; j < n2; j++, ij++) {
+              (*mat)(bf1+i,bf2+j) = buff[ij];
+            }
+          }
+        } else {
+          for(int i = 0, ij=0; i < n1; i+=2) {
+            for(int j = 0; j < n2; j+=2, ij++) {
+              (*mat)(bf1+i,bf2+j)     = buff[ij];
+              (*mat)(bf1+i+1,bf2+j+1) = buff[ij];
+            }
           }
         }
 */
         int IOff = 0;
         for(auto nMat = 0; nMat < mat.size(); nMat++) {
           ConstRealMap bufMat(&buff[IOff],n1,n2); // Read only map
-          mat[nMat].block(bf1,bf2,n1,n2) = bufMat;
+//        mat[nMat].block(bf1,bf2,n1,n2) = bufMat;
+//        for(auto i = 0, ij = 0; i < n1; i += this->nTCS_)
+//        for(auto j = 0; j < n2; j += this->nTCS_, ij++  ){
+          for(auto i = 0, bf1 = bf1_s; i < n1; i++, bf1 += this->nTCS_)            
+          for(auto j = 0, bf2 = bf2_s; j < n2; j++, bf2 += this->nTCS_){            
+            mat[nMat](bf1,bf2) = bufMat(i,j);
+            if(this->nTCS_ == 2) mat[nMat](bf1+1,bf2+1) = bufMat(i,j);
+          }
           IOff += n1*n2;
         }
       }
@@ -342,56 +356,56 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
     mat[nMat] = mat[nMat].selfadjointView<Lower>();
 
 //if(this->controls_->printLevel>=2)  mat->printAll(5,fileio_->out);
-  if(this->controls_->printLevel>=2){
-    if(iType == OneBodyEngine::overlap){
-      prettyPrint(this->fileio_->out,(mat[0]),"Overlap");
-    } else if(iType == OneBodyEngine::kinetic) {
-      prettyPrint(this->fileio_->out,(mat[0]),"Kinetic");
-    } else if(iType == OneBodyEngine::nuclear) {
-      prettyPrint(this->fileio_->out,(mat[0]),"Potential");
-    } else if(iType == OneBodyEngine::emultipole1) {
-      prettyPrint(this->fileio_->out,(mat[0]),"Overlap");
-      prettyPrint(this->fileio_->out,(mat[1]),"Electric Dipole (x)");
-      prettyPrint(this->fileio_->out,(mat[2]),"Electric Dipole (y)");
-      prettyPrint(this->fileio_->out,(mat[3]),"Electric Dipole (z)");
-    } else if(iType == OneBodyEngine::emultipole2) {
-      prettyPrint(this->fileio_->out,(mat[0]),"Overlap");
-      prettyPrint(this->fileio_->out,(mat[1]),"Electric Dipole (x)");
-      prettyPrint(this->fileio_->out,(mat[2]),"Electric Dipole (y)");
-      prettyPrint(this->fileio_->out,(mat[3]),"Electric Dipole (z)");
-      prettyPrint(this->fileio_->out,(mat[4]),"Electric Quadrupole (xx)");
-      prettyPrint(this->fileio_->out,(mat[5]),"Electric Quadrupole (xy)");
-      prettyPrint(this->fileio_->out,(mat[6]),"Electric Quadrupole (xz)");
-      prettyPrint(this->fileio_->out,(mat[7]),"Electric Quadrupole (yy)");
-      prettyPrint(this->fileio_->out,(mat[8]),"Electric Quadrupole (yz)");
-      prettyPrint(this->fileio_->out,(mat[9]),"Electric Quadrupole (zz)");
-    } else if(iType == OneBodyEngine::emultipole3) {
-      prettyPrint(this->fileio_->out,(mat[0]),"Overlap");
-      prettyPrint(this->fileio_->out,(mat[1]),"Electric Dipole (x)");
-      prettyPrint(this->fileio_->out,(mat[2]),"Electric Dipole (y)");
-      prettyPrint(this->fileio_->out,(mat[3]),"Electric Dipole (z)");
-      prettyPrint(this->fileio_->out,(mat[4]),"Electric Quadrupole (xx)");
-      prettyPrint(this->fileio_->out,(mat[5]),"Electric Quadrupole (xy)");
-      prettyPrint(this->fileio_->out,(mat[6]),"Electric Quadrupole (xz)");
-      prettyPrint(this->fileio_->out,(mat[7]),"Electric Quadrupole (yy)");
-      prettyPrint(this->fileio_->out,(mat[8]),"Electric Quadrupole (yz)");
-      prettyPrint(this->fileio_->out,(mat[9]),"Electric Quadrupole (zz)");
-      prettyPrint(this->fileio_->out,(mat[10]),"Electric Octupole (xxx)");
-      prettyPrint(this->fileio_->out,(mat[11]),"Electric Octupole (xxy)");
-      prettyPrint(this->fileio_->out,(mat[12]),"Electric Octupole (xxz)");
-      prettyPrint(this->fileio_->out,(mat[13]),"Electric Octupole (xyy)");
-      prettyPrint(this->fileio_->out,(mat[14]),"Electric Octupole (xyz)");
-      prettyPrint(this->fileio_->out,(mat[15]),"Electric Octupole (xzz)");
-      prettyPrint(this->fileio_->out,(mat[16]),"Electric Octupole (yyy)");
-      prettyPrint(this->fileio_->out,(mat[17]),"Electric Octupole (yyz)");
-      prettyPrint(this->fileio_->out,(mat[18]),"Electric Octupole (yzz)");
-      prettyPrint(this->fileio_->out,(mat[19]),"Electric Octupole (zzz)");
+//if(this->controls_->printLevel>=2){
+//  if(iType == OneBodyEngine::overlap){
+//    prettyPrintTCS(this->fileio_->out,(mat[0]),"Overlap");
+//  } else if(iType == OneBodyEngine::kinetic) {
+//    prettyPrintTCS(this->fileio_->out,(mat[0]),"Kinetic");
+//  } else if(iType == OneBodyEngine::nuclear) {
+//    prettyPrintTCS(this->fileio_->out,(mat[0]),"Potential");
+//  } else if(iType == OneBodyEngine::emultipole1) {
+//    prettyPrintTCS(this->fileio_->out,(mat[0]),"Overlap");
+//    prettyPrintTCS(this->fileio_->out,(mat[1]),"Electric Dipole (x)");
+//    prettyPrintTCS(this->fileio_->out,(mat[2]),"Electric Dipole (y)");
+//    prettyPrintTCS(this->fileio_->out,(mat[3]),"Electric Dipole (z)");
+//  } else if(iType == OneBodyEngine::emultipole2) {
+//    prettyPrintTCS(this->fileio_->out,(mat[0]),"Overlap");
+//    prettyPrintTCS(this->fileio_->out,(mat[1]),"Electric Dipole (x)");
+//    prettyPrintTCS(this->fileio_->out,(mat[2]),"Electric Dipole (y)");
+//    prettyPrintTCS(this->fileio_->out,(mat[3]),"Electric Dipole (z)");
+//    prettyPrintTCS(this->fileio_->out,(mat[4]),"Electric Quadrupole (xx)");
+//    prettyPrintTCS(this->fileio_->out,(mat[5]),"Electric Quadrupole (xy)");
+//    prettyPrintTCS(this->fileio_->out,(mat[6]),"Electric Quadrupole (xz)");
+//    prettyPrintTCS(this->fileio_->out,(mat[7]),"Electric Quadrupole (yy)");
+//    prettyPrintTCS(this->fileio_->out,(mat[8]),"Electric Quadrupole (yz)");
+//    prettyPrintTCS(this->fileio_->out,(mat[9]),"Electric Quadrupole (zz)");
+//  } else if(iType == OneBodyEngine::emultipole3) {
+//    prettyPrintTCS(this->fileio_->out,(mat[0]),"Overlap");
+//    prettyPrintTCS(this->fileio_->out,(mat[1]),"Electric Dipole (x)");
+//    prettyPrintTCS(this->fileio_->out,(mat[2]),"Electric Dipole (y)");
+//    prettyPrintTCS(this->fileio_->out,(mat[3]),"Electric Dipole (z)");
+//    prettyPrintTCS(this->fileio_->out,(mat[4]),"Electric Quadrupole (xx)");
+//    prettyPrintTCS(this->fileio_->out,(mat[5]),"Electric Quadrupole (xy)");
+//    prettyPrintTCS(this->fileio_->out,(mat[6]),"Electric Quadrupole (xz)");
+//    prettyPrintTCS(this->fileio_->out,(mat[7]),"Electric Quadrupole (yy)");
+//    prettyPrintTCS(this->fileio_->out,(mat[8]),"Electric Quadrupole (yz)");
+//    prettyPrintTCS(this->fileio_->out,(mat[9]),"Electric Quadrupole (zz)");
+//    prettyPrintTCS(this->fileio_->out,(mat[10]),"Electric Octupole (xxx)");
+//    prettyPrintTCS(this->fileio_->out,(mat[11]),"Electric Octupole (xxy)");
+//    prettyPrintTCS(this->fileio_->out,(mat[12]),"Electric Octupole (xxz)");
+//    prettyPrintTCS(this->fileio_->out,(mat[13]),"Electric Octupole (xyy)");
+//    prettyPrintTCS(this->fileio_->out,(mat[14]),"Electric Octupole (xyz)");
+//    prettyPrintTCS(this->fileio_->out,(mat[15]),"Electric Octupole (xzz)");
+//    prettyPrintTCS(this->fileio_->out,(mat[16]),"Electric Octupole (yyy)");
+//    prettyPrintTCS(this->fileio_->out,(mat[17]),"Electric Octupole (yyz)");
+//    prettyPrintTCS(this->fileio_->out,(mat[18]),"Electric Octupole (yzz)");
+//    prettyPrintTCS(this->fileio_->out,(mat[19]),"Electric Octupole (zzz)");
 
-    } else {
-      cout << "OneBodyEngine type not recognized" << endl;
-      exit(EXIT_FAILURE);
-    }
-  }
+//  } else {
+//    cout << "OneBodyEngine type not recognized" << endl;
+//    exit(EXIT_FAILURE);
+//  }
+//}
 
 }
 
@@ -425,8 +439,9 @@ void AOIntegrals::computeAOOneE(){
   // Get end time of one-electron integral evaluation
   auto oneEEnd = std::chrono::high_resolution_clock::now();
 //if(this->controls_->printLevel>=2) this->oneE_->printAll(5,fileio_->out);
-  if(this->controls_->printLevel>=2) 
-    prettyPrint(this->fileio_->out,(*this->oneE_),"Core Hamiltonian");
+//if(this->controls_->printLevel>=2) 
+//  prettyPrintTCS(this->fileio_->out,(*this->oneE_),"Core Hamiltonian");
+  if(this->controls_->printLevel>=2) this->printOneE();
 
   // Compute time differenes
   this->OneED = oneEEnd - oneEStart;
@@ -456,26 +471,25 @@ void AOIntegrals::computeSchwartz(){
   RealMatrix *ShBlk; 
   this->schwartz_->setZero();
   // Check to see if the basisset had been converted
-  if(!this->basisSet_->convToLI) this->basisSet_->convShell(this->molecule_);
 
   // Define Integral Engine
   TwoBodyEngine<libint2::Coulomb> engine = 
-    TwoBodyEngine<libint2::Coulomb>(this->basisSet_->maxPrim,
-                                    this->basisSet_->maxL,0);
+    TwoBodyEngine<libint2::Coulomb>(this->basisSet_->maxPrim(),
+                                    this->basisSet_->maxL(),0);
   engine.set_precision(0.); // Don't screen primitives during schwartz
 
   this->fileio_->out << "Computing Schwartz Bound Tensor ... ";
   auto start =  std::chrono::high_resolution_clock::now();
   for(int s1=0; s1 < this->basisSet_->nShell(); s1++){
-    int n1  = this->basisSet_->shells_libint[s1].size();
+    int n1  = this->basisSet_->shells(s1).size();
     for(int s2=0; s2 <= s1; s2++){
-      int n2  = this->basisSet_->shells_libint[s2].size();
- 
+      int n2  = this->basisSet_->shells(s2).size();
+
       const auto* buff = engine.compute(
-        this->basisSet_->shells_libint[s1],
-        this->basisSet_->shells_libint[s2],
-        this->basisSet_->shells_libint[s1],
-        this->basisSet_->shells_libint[s2]
+        this->basisSet_->shells(s1),
+        this->basisSet_->shells(s2),
+        this->basisSet_->shells(s1),
+        this->basisSet_->shells(s2)
       );
 
       
@@ -507,11 +521,13 @@ void AOIntegrals::computeAOTwoE(){
 
 
   std::vector<coulombEngine> engines(this->controls_->nthreads);
-  engines[0] = coulombEngine(this->basisSet_->maxPrim,this->basisSet_->maxL,0);
+  engines[0] = coulombEngine(this->basisSet_->maxPrim(),this->basisSet_->maxL(),0);
   engines[0].set_precision(std::numeric_limits<double>::epsilon());
 
   for(int i=1; i<this->controls_->nthreads; i++) engines[i] = engines[0];
-  if(!this->basisSet_->haveMap) this->basisSet_->makeMap(this->molecule_); 
+  if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(this->nTCS_); 
+
+  this->aoERI_->fill(0.0);
 
 #ifdef USE_OMP
   #pragma omp parallel
@@ -523,31 +539,31 @@ void AOIntegrals::computeAOTwoE(){
     int thread_id = 0;
 #endif
   for(int s1 = 0, s1234=0; s1 < this->basisSet_->nShell(); s1++) {
-    int bf1_s = this->basisSet_->mapSh2Bf[s1];
-    int n1    = this->basisSet_->shells_libint[s1].size();
+    int bf1_s = this->basisSet_->mapSh2Bf(s1);
+    int n1    = this->basisSet_->shells(s1).size();
     for(int s2 = 0; s2 <= s1; s2++) {
-      int bf2_s = this->basisSet_->mapSh2Bf[s2];
-      int n2    = this->basisSet_->shells_libint[s2].size();
+      int bf2_s = this->basisSet_->mapSh2Bf(s2);
+      int n2    = this->basisSet_->shells(s2).size();
       for(int s3 = 0; s3 <= s1; s3++) {
-        int bf3_s = this->basisSet_->mapSh2Bf[s3];
-        int n3    = this->basisSet_->shells_libint[s3].size();
+        int bf3_s = this->basisSet_->mapSh2Bf(s3);
+        int n3    = this->basisSet_->shells(s3).size();
         int s4_max = (s1 == s3) ? s2 : s3;
         for(int s4 = 0; s4 <= s4_max; s4++, s1234++) {
 
           if(s1234 % this->controls_->nthreads != thread_id) continue;
 
-          int bf4_s = this->basisSet_->mapSh2Bf[s4];
-          int n4    = this->basisSet_->shells_libint[s4].size();
+          int bf4_s = this->basisSet_->mapSh2Bf(s4);
+          int n4    = this->basisSet_->shells(s4).size();
     
           // Schwartz and Density screening
           if((*this->schwartz_)(s1,s2) * (*this->schwartz_)(s3,s4)
               < this->controls_->thresholdSchawrtz ) continue;
  
           const double* buff = engines[thread_id].compute(
-            this->basisSet_->shells_libint[s1],
-            this->basisSet_->shells_libint[s2],
-            this->basisSet_->shells_libint[s3],
-            this->basisSet_->shells_libint[s4]);
+            this->basisSet_->shells(s1),
+            this->basisSet_->shells(s2),
+            this->basisSet_->shells(s3),
+            this->basisSet_->shells(s4));
 
 
           std::vector<std::array<int,4>> lower;
@@ -601,25 +617,46 @@ void AOIntegrals::computeAOTwoE(){
 */
 //        lower.clear();
 //        upper.clear();
-          for(int i = 0, ijkl = 0 ; i < n1; ++i) {
-            int bf1 = bf1_s + i;
-            for(int j = 0; j < n2; ++j) {
-              int bf2 = bf2_s + j;
-              for(int k = 0; k < n3; ++k) {
-                int bf3 = bf3_s + k;
-                for(int l = 0; l < n4; ++l, ++ijkl) {
-                  int bf4 = bf4_s + l;
-                  (*this->aoERI_)(bf1,bf2,bf3,bf4) = buff[ijkl];
-                  (*this->aoERI_)(bf1,bf2,bf4,bf3) = buff[ijkl];
-                  (*this->aoERI_)(bf2,bf1,bf3,bf4) = buff[ijkl];
-                  (*this->aoERI_)(bf2,bf1,bf4,bf3) = buff[ijkl];
-                  (*this->aoERI_)(bf3,bf4,bf1,bf2) = buff[ijkl];
-                  (*this->aoERI_)(bf4,bf3,bf1,bf2) = buff[ijkl];
-                  (*this->aoERI_)(bf3,bf4,bf2,bf1) = buff[ijkl];
-                  (*this->aoERI_)(bf4,bf3,bf2,bf1) = buff[ijkl];
-		}
-	      }
-	    }
+          for(int i = 0, bf1 = bf1_s, ijkl = 0 ; i < n1; ++i, bf1 += this->nTCS_) 
+          for(int j = 0, bf2 = bf2_s           ; j < n2; ++j, bf2 += this->nTCS_) 
+          for(int k = 0, bf3 = bf3_s           ; k < n3; ++k, bf3 += this->nTCS_) 
+          for(int l = 0, bf4 = bf4_s           ; l < n4; ++l, bf4 += this->nTCS_, ++ijkl) {
+            (*this->aoERI_)(bf1,bf2,bf3,bf4) = buff[ijkl];
+            (*this->aoERI_)(bf1,bf2,bf4,bf3) = buff[ijkl];
+            (*this->aoERI_)(bf2,bf1,bf3,bf4) = buff[ijkl];
+            (*this->aoERI_)(bf2,bf1,bf4,bf3) = buff[ijkl];
+            (*this->aoERI_)(bf3,bf4,bf1,bf2) = buff[ijkl];
+            (*this->aoERI_)(bf4,bf3,bf1,bf2) = buff[ijkl];
+            (*this->aoERI_)(bf3,bf4,bf2,bf1) = buff[ijkl];
+            (*this->aoERI_)(bf4,bf3,bf2,bf1) = buff[ijkl];
+            if(this->nTCS_ == 2){
+              (*this->aoERI_)(bf1+1,bf2+1,bf3+1,bf4+1) = buff[ijkl];
+              (*this->aoERI_)(bf1+1,bf2+1,bf4+1,bf3+1) = buff[ijkl];
+              (*this->aoERI_)(bf2+1,bf1+1,bf3+1,bf4+1) = buff[ijkl];
+              (*this->aoERI_)(bf2+1,bf1+1,bf4+1,bf3+1) = buff[ijkl];
+              (*this->aoERI_)(bf3+1,bf4+1,bf1+1,bf2+1) = buff[ijkl];
+              (*this->aoERI_)(bf4+1,bf3+1,bf1+1,bf2+1) = buff[ijkl];
+              (*this->aoERI_)(bf3+1,bf4+1,bf2+1,bf1+1) = buff[ijkl];
+              (*this->aoERI_)(bf4+1,bf3+1,bf2+1,bf1+1) = buff[ijkl];
+
+              (*this->aoERI_)(bf1+1,bf2+1,bf3,bf4)     = buff[ijkl];
+              (*this->aoERI_)(bf1+1,bf2+1,bf4,bf3)     = buff[ijkl];
+              (*this->aoERI_)(bf2+1,bf1+1,bf3,bf4)     = buff[ijkl];
+              (*this->aoERI_)(bf2+1,bf1+1,bf4,bf3)     = buff[ijkl];
+              (*this->aoERI_)(bf3+1,bf4+1,bf1,bf2)     = buff[ijkl];
+              (*this->aoERI_)(bf4+1,bf3+1,bf1,bf2)     = buff[ijkl];
+              (*this->aoERI_)(bf3+1,bf4+1,bf2,bf1)     = buff[ijkl];
+              (*this->aoERI_)(bf4+1,bf3+1,bf2,bf1)     = buff[ijkl];
+
+              (*this->aoERI_)(bf1,bf2,bf3+1,bf4+1)     = buff[ijkl];
+              (*this->aoERI_)(bf1,bf2,bf4+1,bf3+1)     = buff[ijkl];
+              (*this->aoERI_)(bf2,bf1,bf3+1,bf4+1)     = buff[ijkl];
+              (*this->aoERI_)(bf2,bf1,bf4+1,bf3+1)     = buff[ijkl];
+              (*this->aoERI_)(bf3,bf4,bf1+1,bf2+1)     = buff[ijkl];
+              (*this->aoERI_)(bf4,bf3,bf1+1,bf2+1)     = buff[ijkl];
+              (*this->aoERI_)(bf3,bf4,bf2+1,bf1+1)     = buff[ijkl];
+              (*this->aoERI_)(bf4,bf3,bf2+1,bf1+1)     = buff[ijkl];
+            }
 	  }
 
 	}
@@ -637,13 +674,13 @@ void AOIntegrals::computeAORII(){
 
   std::vector<coulombEngine> engines(this->controls_->nthreads);
   engines[0] = coulombEngine(
-    std::max(this->basisSet_->maxPrim,this->DFbasisSet_->maxPrim),
-    std::max(this->basisSet_->maxL,this->DFbasisSet_->maxL),0);
+    std::max(this->basisSet_->maxPrim(),this->DFbasisSet_->maxPrim()),
+    std::max(this->basisSet_->maxL(),this->DFbasisSet_->maxL()),0);
   engines[0].set_precision(std::numeric_limits<double>::epsilon());
 
   for(int i=1; i<this->controls_->nthreads; i++) engines[i] = engines[0];
-  if(!this->basisSet_->haveMap) this->basisSet_->makeMap(this->molecule_); 
-  if(!this->DFbasisSet_->haveMap) this->DFbasisSet_->makeMap(this->molecule_); 
+  if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(1); 
+  if(!this->DFbasisSet_->haveMapSh2Bf) this->DFbasisSet_->makeMapSh2Bf(1); 
 
 #ifdef USE_OMP
   #pragma omp parallel
@@ -655,24 +692,24 @@ void AOIntegrals::computeAORII(){
     int thread_id = 0;
 #endif
   for(int s1 = 0, s123=0; s1 < this->basisSet_->nShell(); s1++) {
-    int bf1_s = this->basisSet_->mapSh2Bf[s1];
-    int n1    = this->basisSet_->shells_libint[s1].size();
+    int bf1_s = this->basisSet_->mapSh2Bf(s1);
+    int n1    = this->basisSet_->shells(s1).size();
     for(int s2 = 0; s2 < this->basisSet_->nShell(); s2++) {
-      int bf2_s = this->basisSet_->mapSh2Bf[s2];
-      int n2    = this->basisSet_->shells_libint[s2].size();
+      int bf2_s = this->basisSet_->mapSh2Bf(s2);
+      int n2    = this->basisSet_->shells(s2).size();
       for(int dfs = 0; dfs < this->DFbasisSet_->nShell(); dfs++,s123++) {
         if(s123 % this->controls_->nthreads != thread_id) continue;
-        int dfbf3_s = this->DFbasisSet_->mapSh2Bf[dfs];
-        int dfn3    = this->DFbasisSet_->shells_libint[dfs].size();
+        int dfbf3_s = this->DFbasisSet_->mapSh2Bf(dfs);
+        int dfn3    = this->DFbasisSet_->shells(dfs).size();
 
         // Schwartz and Density screening
         if((*this->schwartz_)(s1,s2) * (*this->aoRIS_)(dfs,dfs)
             < this->controls_->thresholdSchawrtz ) continue;
  
         const double* buff = engines[thread_id].compute(
-          this->basisSet_->shells_libint[s1],
-          this->basisSet_->shells_libint[s2],
-          this->DFbasisSet_->shells_libint[dfs],
+          this->basisSet_->shells(s1),
+          this->basisSet_->shells(s2),
+          this->DFbasisSet_->shells(dfs),
           libint2::Shell::unit());
 
         auto lower = {bf1_s,bf2_s,dfbf3_s};
@@ -691,12 +728,12 @@ void AOIntegrals::computeAORII(){
 void AOIntegrals::computeAORIS(){
   this->haveRIS= true;
   std::vector<coulombEngine> engines(this->controls_->nthreads);
-  engines[0] = coulombEngine( this->DFbasisSet_->maxPrim, 
-                              this->DFbasisSet_->maxL,0);
+  engines[0] = coulombEngine( this->DFbasisSet_->maxPrim(), 
+                              this->DFbasisSet_->maxL(),0);
   engines[0].set_precision(std::numeric_limits<double>::epsilon());
 
   for(int i=1; i<this->controls_->nthreads; i++) engines[i] = engines[0];
-  if(!this->DFbasisSet_->haveMap) this->DFbasisSet_->makeMap(this->molecule_); 
+  if(!this->DFbasisSet_->haveMapSh2Bf) this->DFbasisSet_->makeMapSh2Bf(1); 
 
   RealMap aoRISMap(&this->aoRIS_->storage()[0],
     this->DFbasisSet_->nBasis(),this->DFbasisSet_->nBasis());
@@ -711,18 +748,18 @@ void AOIntegrals::computeAORIS(){
     int thread_id = 0;
 #endif
   for(int s1 = 0, s12=0; s1 < this->DFbasisSet_->nShell(); s1++) {
-    int bf1_s = this->DFbasisSet_->mapSh2Bf[s1];
-    int n1    = this->DFbasisSet_->shells_libint[s1].size();
+    int bf1_s = this->DFbasisSet_->mapSh2Bf(s1);
+    int n1    = this->DFbasisSet_->shells(s1).size();
     for(int s2 = 0; s2 < this->DFbasisSet_->nShell(); s2++,s12++) {
-      int bf2_s = this->DFbasisSet_->mapSh2Bf[s2];
-      int n2    = this->DFbasisSet_->shells_libint[s2].size();
+      int bf2_s = this->DFbasisSet_->mapSh2Bf(s2);
+      int n2    = this->DFbasisSet_->shells(s2).size();
  
       if(s12 % this->controls_->nthreads != thread_id) continue;
 
       const double* buff = engines[thread_id].compute(
-        this->DFbasisSet_->shells_libint[s1],
+        this->DFbasisSet_->shells(s1),
         libint2::Shell::unit(),
-        this->DFbasisSet_->shells_libint[s2],
+        this->DFbasisSet_->shells(s2),
         libint2::Shell::unit());
 
       ConstRealMap buffMat(buff,n1,n2);
