@@ -118,11 +118,11 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
     sdResponse->iniSDResponse(molecule.get(),basisset.get(),mointegrals.get(),fileIO.get(),
                               controls.get(),hartreeFock.get());
     
-    sdResponse->IterativeRPA();
+  //sdResponse->IterativeRPA();
   //sdResponse->incorePPRPA();
 //sdResponse->incoreCIS();
-  sdResponse->incoreRPA();
-//sdResponse->incorePPRPAnew();
+//sdResponse->incoreRPA();
+  sdResponse->incorePPRPAnew();
   }
   auto mp       = std::unique_ptr<MollerPlesset>(new MollerPlesset());
     mp->iniMollerPlesset(molecule.get(),basisset.get(),mointegrals.get(),fileIO.get(),
@@ -143,6 +143,8 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 */
 //Test one dimensional grid
 //
+//
+/*
   cartGP pt(0.01,0.02,0.03);
   sph3GP ptSPH;
   bg::transform(pt,ptSPH);
@@ -182,6 +184,8 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 //   cout << "Sphere Err = " << std::abs(G3.integrate()-(4.0*radius*radius*radius*math.pi/3.0)) <<endl;
    cout << "Test Err = " << std::abs(G3.integrate()-reftest) <<endl;
 //   G3.printGrid();
+//   
+   */
   time(&currentTime);
   fileIO->out<<"\nJob finished: "<<ctime(&currentTime)<<endl;
 /*

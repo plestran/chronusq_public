@@ -200,6 +200,7 @@ public:
   } 
   inline double ABCD(int a,int b,int c,int d,std::string spn="AAAA"){
     if(this->Ref_ == SingleSlater<double>::TCS){
+//    cout << "DjM " << this->abcd_->size() << endl;
       return (*this->abcd_)(a,b,c,d);
     } else {
       if(this->singleSlater_->isClosedShell){

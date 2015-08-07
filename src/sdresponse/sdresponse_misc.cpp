@@ -222,14 +222,19 @@ void SDResponse::retrvVVOO(RealVecMap &TMOV, const RealMatrix &TMO){
 
 void SDResponse::initRMu(){
   // RMu = [ e(HOMO) + e(LUMO) ] / 2
-  if(this->Ref_ == SingleSlater<double>::RHF || this->nOB_ == 0)
-    this->rMu_ = ( (*this->singleSlater_->epsA())(this->nOA_-1) + 
-                   (*this->singleSlater_->epsA())(this->nOA_)    ) / 2.0;
-  else if(this->nOB_ > 0)
-    this->rMu_ = ( std::max( (*this->singleSlater_->epsA())(this->nOA_-1), 
-                             (*this->singleSlater_->epsB())(this->nOB_-1) ) +
-                   std::max( (*this->singleSlater_->epsA())(this->nOA_  ), 
-                             (*this->singleSlater_->epsB())(this->nOB_  ) ) ) / 2.0;
+  if(this->Ref_ == SingleSlater<double>::TCS){
+    this->rMu_ = ( (*this->singleSlater_->epsA())(this->nO_-1) + 
+                   (*this->singleSlater_->epsA())(this->nO_)    ) / 2.0;
+  } else {
+    if(this->Ref_ == SingleSlater<double>::RHF || this->nOB_ == 0)
+      this->rMu_ = ( (*this->singleSlater_->epsA())(this->nOA_-1) + 
+                     (*this->singleSlater_->epsA())(this->nOA_)    ) / 2.0;
+    else if(this->nOB_ > 0)
+      this->rMu_ = ( std::max( (*this->singleSlater_->epsA())(this->nOA_-1), 
+                               (*this->singleSlater_->epsB())(this->nOB_-1) ) +
+                     std::max( (*this->singleSlater_->epsA())(this->nOA_  ), 
+                               (*this->singleSlater_->epsB())(this->nOB_  ) ) ) / 2.0;
+  }
 } // initRMu
 
 void SDResponse::scaleDagPPRPA(bool inplace, RealVecMap &T, RealVecMap &IX, RealVecMap *AX){
@@ -1983,6 +1988,7 @@ void SDResponse::incoreRPA(){
   ABBA.block(this->nOV_,this->nOV_,this->nOV_,this->nOV_) = -A;
   Eigen::EigenSolver<RealMatrix> EA(ABBA);
   cout << endl << EA.eigenvalues() << endl;
+
 //RealMatrix Vec = ES.eigenvectors().col(0);
 //RealMatrix AX(this->nOV_,1);
 //RealCMMap VMap(Vec.data(),this->nOV_,1);
@@ -2011,155 +2017,181 @@ void SDResponse::incoreRPA(){
 
 }
 
+//void SDResponse::incorePPRPAnew(){
+//  cout << "BEFORE ABCD" << endl;
+//  this->mointegrals_->formABCD(false); 
+////cout << "BEFORE IJKL" << endl;
+////this->mointegrals_->formIJKL(true); 
+//  RealMatrix A  ,B  ,C;
+//  RealMatrix AAA,AAB,ABB;
+//  RealMatrix CAA,CAB,CBB;
+//  RealMatrix BAA,BAB,BBB;
+//  // Eigensolvers
+//  Eigen::SelfAdjointEigenSolver<RealMatrix> ES;
+//  Eigen::EigenSolver<RealMatrix> EA;
+//  // Eigen values
+//  Eigen::VectorXd ATDAEAA;
+//  Eigen::VectorXd ATDAEAB;
+//  Eigen::VectorXd ATDAEBB;
+//  Eigen::VectorXd ATDAESing;
+//  Eigen::VectorXd CTDAEAA;
+//  Eigen::VectorXd CTDAEAB;
+//  Eigen::VectorXd CTDAEBB;
+//  Eigen::VectorXd CTDAESing;
+//  Eigen::VectorXd RPAEAA;
+//  Eigen::VectorXd RPAEAB;
+//  Eigen::VectorXd RPAEBB;
+//  Eigen::VectorXd RPAESing;
+//  // Eigen Vectors
+//  Eigen::VectorXd ATDATAA;
+//  Eigen::VectorXd ATDATAB;
+//  Eigen::VectorXd ATDATBB;
+//  Eigen::VectorXd ATDATSing;
+//  Eigen::VectorXd CTDATAA;
+//  Eigen::VectorXd CTDATAB;
+//  Eigen::VectorXd CTDATBB;
+//  Eigen::VectorXd CTDATSing;
+//  Eigen::VectorXd RPATAA;
+//  Eigen::VectorXd RPATAB;
+//  Eigen::VectorXd RPATBB;
+//  Eigen::VectorXd RPATSing;
+//
+//  AAA = RealMatrix(this->nVAVA_SLT_,this->nVAVA_SLT_);
+//  AAB = RealMatrix(this->nVAVB_,this->nVAVB_);
+////CAA = RealMatrix(this->nOAOA_SLT_,this->nOAOA_SLT_);
+////CAB = RealMatrix(this->nOAOB_,this->nOAOB_);
+// 
+//
+//  this->initRMu();
+//  double Rmu = 0.0;
+//
+//  if(this->Ref_ != SingleSlater<double>::TCS) {
+////  for(auto a = 0, ab = 0; a < this->nV_; a++      )
+////  for(auto b = 0        ; b < a        ; b++, ab++){
+////    for(auto c = 0, cd = 0; c < this->nV_; c++      )
+////    for(auto d = 0        ; d < c        ; d++, cd++){
+////      A(ab,cd) = this->mointegrals_->ABCD(a,c,b,d) -
+////                   this->mointegrals_->ABCD(a,d,b,c);
+////      if(ab == cd) 
+////        A(ab,cd) += (*this->singleSlater_->epsA())(a+this->nO_) + 
+////                      (*this->singleSlater_->epsA())(b+this->nO_) - 
+////                      2*Rmu;
+////    }
+////  }
+//
+//  } else {
+//    for(auto a = 0, ab = 0; a < this->nVA_; a++      )
+//    for(auto b = 0        ; b < a         ; b++, ab++){
+//      for(auto c = 0, cd = 0; c < this->nVA_; c++      )
+//      for(auto d = 0        ; d < c         ; d++, cd++){
+//        AAA(ab,cd) = this->mointegrals_->ABCD(a,c,b,d,"AAAA") -
+//                     this->mointegrals_->ABCD(a,d,b,c,"AAAA");
+//        if(ab == cd) 
+//          AAA(ab,cd) += (*this->singleSlater_->epsA())(a+this->nOA_) + 
+//                        (*this->singleSlater_->epsA())(b+this->nOA_) - 
+//                        2*Rmu;
+//      }
+//    }
+//    for(auto a = 0, ab = 0; a < this->nVA_; a++      )
+//    for(auto b = 0        ; b < this->nVB_; b++, ab++){
+//      for(auto c = 0, cd = 0; c < this->nVA_; c++      )
+//      for(auto d = 0        ; d < this->nVB_; d++, cd++){
+//        AAB(ab,cd) = this->mointegrals_->ABCD(a,c,b,d,"AABB") -
+//                     this->mointegrals_->ABCD(a,d,b,c,"AABB");
+//        if(ab == cd) 
+//          AAB(ab,cd) += (*this->singleSlater_->epsA())(a+this->nOA_) + 
+//                        (*this->singleSlater_->epsA())(b+this->nOA_) - 
+//                        2*Rmu;
+//      }
+//    }
+//    // Full Diagonalization
+//    // Pure Spin
+//    ES.compute(AAA);
+//      ATDAEAA = -ES.eigenvalues();
+//      std::sort(ATDAEAA.data(),ATDAEAA.data()+ATDAEAA.size());
+//      ATDAEAA = -ATDAEAA;
+//      ATDATAA = ES.eigenvectors().col(0);
+//  /*
+//    ES.compute(-CAA);
+//      CTDAEAA = -ES.eigenvalues();
+//      std::sort(CTDAEAA.data(),CTDAEAA.data()+CTDAEAA.size());
+//      CTDAEAA = -CTDAEAA;
+//      CTDATAA = ES.eigenvectors().col(0);
+//    EA.compute(FullAA);
+//      RPAEAA = -EA.eigenvalues().real();
+//      std::sort(RPAEAA.data(),RPAEAA.data()+RPAEAA.size());
+//      RPAEAA = -RPAEAA;
+//      RPATAA = EA.eigenvectors().col(0).real();
+//  */
+//      
+//    // Mixed Spin
+//    ES.compute(AAB);
+//      ATDAEAB = -ES.eigenvalues();
+//      std::sort(ATDAEAB.data(),ATDAEAB.data()+ATDAEAB.size());
+//      ATDAEAB = -ATDAEAB;
+//      ATDATAB = ES.eigenvectors().col(0);
+//      cout << ATDATAB << endl;
+//  /*
+//    ES.compute(-CAB);
+//      CTDAEAB = -ES.eigenvalues();
+//      std::sort(CTDAEAB.data(),CTDAEAB.data()+CTDAEAB.size());
+//      CTDAEAB = -CTDAEAB;
+//      CTDATAB = ES.eigenvectors().col(0);
+//    EA.compute(FullAB);
+//      RPAEAB = -EA.eigenvalues().real();
+//      std::sort(RPAEAB.data(),RPAEAB.data()+RPAEAB.size());
+//      RPAEAB = -RPAEAB;
+//      RPATAB = EA.eigenvectors().col(0).real();
+//  */
+//    Eigen::IOFormat HeavyFmt(8);
+//    cout << "A TDA (AA) Eigenvalues:" << endl;
+//    cout << (ATDAEAA*phys.eVPerHartree).format(HeavyFmt) << endl << endl;
+//    cout << "A TDA (AB) Eigenvalues:" << endl;
+//    cout << (ATDAEAB).format(HeavyFmt) << endl << endl;
+//  /*
+//    cout << "A TDA (SAS) Eigenvalues:" << endl;
+//    cout << ATDAESing.format(HeavyFmt) << endl << endl;
+//    cout << "C TDA (AA) Eigenvalues:" << endl;
+//    cout << CTDAEAA.format(HeavyFmt) << endl << endl;
+//    cout << "C TDA (AB) Eigenvalues:" << endl;
+//    cout << CTDAEAB.format(HeavyFmt) << endl << endl;
+//    cout << "C TDA (SAS) Eigenvalues:" << endl;
+//    cout << CTDAESing.format(HeavyFmt) << endl << endl;
+//    cout << "RPA (AA) Eigenvalues:" << endl;
+//    cout << RPAEAA.format(HeavyFmt)  << endl << endl;
+//    cout << "RPA (AB) Eigenvalues:" << endl;
+//    cout << RPAEAB.format(HeavyFmt)  << endl << endl;
+//    cout << "RPA (AB) Eigenvalues:" << endl;
+//    cout << RPAEAB.format(HeavyFmt)  << endl << endl;
+//    cout << "RPA (SAS) Eigenvalues:" << endl;
+//    cout << RPAESing.format(HeavyFmt)  << endl << endl;
+//  */
+//  }
+//  
+//}
 void SDResponse::incorePPRPAnew(){
-  cout << "BEFORE ABCD" << endl;
-  this->mointegrals_->formABCD(false); 
-//cout << "BEFORE IJKL" << endl;
-//this->mointegrals_->formIJKL(true); 
-  RealMatrix A  ,B  ,C;
-  RealMatrix AAA,AAB,ABB;
-  RealMatrix CAA,CAB,CBB;
-  RealMatrix BAA,BAB,BBB;
-  // Eigensolvers
-  Eigen::SelfAdjointEigenSolver<RealMatrix> ES;
-  Eigen::EigenSolver<RealMatrix> EA;
-  // Eigen values
-  Eigen::VectorXd ATDAEAA;
-  Eigen::VectorXd ATDAEAB;
-  Eigen::VectorXd ATDAEBB;
-  Eigen::VectorXd ATDAESing;
-  Eigen::VectorXd CTDAEAA;
-  Eigen::VectorXd CTDAEAB;
-  Eigen::VectorXd CTDAEBB;
-  Eigen::VectorXd CTDAESing;
-  Eigen::VectorXd RPAEAA;
-  Eigen::VectorXd RPAEAB;
-  Eigen::VectorXd RPAEBB;
-  Eigen::VectorXd RPAESing;
-  // Eigen Vectors
-  Eigen::VectorXd ATDATAA;
-  Eigen::VectorXd ATDATAB;
-  Eigen::VectorXd ATDATBB;
-  Eigen::VectorXd ATDATSing;
-  Eigen::VectorXd CTDATAA;
-  Eigen::VectorXd CTDATAB;
-  Eigen::VectorXd CTDATBB;
-  Eigen::VectorXd CTDATSing;
-  Eigen::VectorXd RPATAA;
-  Eigen::VectorXd RPATAB;
-  Eigen::VectorXd RPATBB;
-  Eigen::VectorXd RPATSing;
+  RealMatrix A;
 
-  AAA = RealMatrix(this->nVAVA_SLT_,this->nVAVA_SLT_);
-  AAB = RealMatrix(this->nVAVB_,this->nVAVB_);
-//CAA = RealMatrix(this->nOAOA_SLT_,this->nOAOA_SLT_);
-//CAB = RealMatrix(this->nOAOB_,this->nOAOB_);
- 
+  A = RealMatrix(this->nVV_SLT_,this->nVV_SLT_);
+  cout << "HERE" << endl;
+  cout << "NV4" << this->nV_*this->nV_*this->nV_*this->nV_ << endl;
+  this->mointegrals_->formABCD(false);
+  cout << "HERE" << endl;
 
   this->initRMu();
-  double Rmu = 0.0;
+  double Rmu = this->rMu_;
 
-  if(this->Ref_ != SingleSlater<double>::TCS) {
-//  for(auto a = 0, ab = 0; a < this->nV_; a++      )
-//  for(auto b = 0        ; b < a        ; b++, ab++){
-//    for(auto c = 0, cd = 0; c < this->nV_; c++      )
-//    for(auto d = 0        ; d < c        ; d++, cd++){
-//      A(ab,cd) = this->mointegrals_->ABCD(a,c,b,d) -
-//                   this->mointegrals_->ABCD(a,d,b,c);
-//      if(ab == cd) 
-//        A(ab,cd) += (*this->singleSlater_->epsA())(a+this->nO_) + 
-//                      (*this->singleSlater_->epsA())(b+this->nO_) - 
-//                      2*Rmu;
-//    }
-//  }
-
-  } else {
-    for(auto a = 0, ab = 0; a < this->nVA_; a++      )
-    for(auto b = 0        ; b < a         ; b++, ab++){
-      for(auto c = 0, cd = 0; c < this->nVA_; c++      )
-      for(auto d = 0        ; d < c         ; d++, cd++){
-        AAA(ab,cd) = this->mointegrals_->ABCD(a,c,b,d,"AAAA") -
-                     this->mointegrals_->ABCD(a,d,b,c,"AAAA");
-        if(ab == cd) 
-          AAA(ab,cd) += (*this->singleSlater_->epsA())(a+this->nOA_) + 
-                        (*this->singleSlater_->epsA())(b+this->nOA_) - 
-                        2*Rmu;
-      }
-    }
-    for(auto a = 0, ab = 0; a < this->nVA_; a++      )
-    for(auto b = 0        ; b < this->nVB_; b++, ab++){
-      for(auto c = 0, cd = 0; c < this->nVA_; c++      )
-      for(auto d = 0        ; d < this->nVB_; d++, cd++){
-        AAB(ab,cd) = this->mointegrals_->ABCD(a,c,b,d,"AABB") -
-                     this->mointegrals_->ABCD(a,d,b,c,"AABB");
-        if(ab == cd) 
-          AAB(ab,cd) += (*this->singleSlater_->epsA())(a+this->nOA_) + 
-                        (*this->singleSlater_->epsA())(b+this->nOA_) - 
-                        2*Rmu;
-      }
-    }
-    // Full Diagonalization
-    // Pure Spin
-    ES.compute(AAA);
-      ATDAEAA = -ES.eigenvalues();
-      std::sort(ATDAEAA.data(),ATDAEAA.data()+ATDAEAA.size());
-      ATDAEAA = -ATDAEAA;
-      ATDATAA = ES.eigenvectors().col(0);
-  /*
-    ES.compute(-CAA);
-      CTDAEAA = -ES.eigenvalues();
-      std::sort(CTDAEAA.data(),CTDAEAA.data()+CTDAEAA.size());
-      CTDAEAA = -CTDAEAA;
-      CTDATAA = ES.eigenvectors().col(0);
-    EA.compute(FullAA);
-      RPAEAA = -EA.eigenvalues().real();
-      std::sort(RPAEAA.data(),RPAEAA.data()+RPAEAA.size());
-      RPAEAA = -RPAEAA;
-      RPATAA = EA.eigenvectors().col(0).real();
-  */
-      
-    // Mixed Spin
-    ES.compute(AAB);
-      ATDAEAB = -ES.eigenvalues();
-      std::sort(ATDAEAB.data(),ATDAEAB.data()+ATDAEAB.size());
-      ATDAEAB = -ATDAEAB;
-      ATDATAB = ES.eigenvectors().col(0);
-      cout << ATDATAB << endl;
-  /*
-    ES.compute(-CAB);
-      CTDAEAB = -ES.eigenvalues();
-      std::sort(CTDAEAB.data(),CTDAEAB.data()+CTDAEAB.size());
-      CTDAEAB = -CTDAEAB;
-      CTDATAB = ES.eigenvectors().col(0);
-    EA.compute(FullAB);
-      RPAEAB = -EA.eigenvalues().real();
-      std::sort(RPAEAB.data(),RPAEAB.data()+RPAEAB.size());
-      RPAEAB = -RPAEAB;
-      RPATAB = EA.eigenvectors().col(0).real();
-  */
-    Eigen::IOFormat HeavyFmt(8);
-    cout << "A TDA (AA) Eigenvalues:" << endl;
-    cout << (ATDAEAA*phys.eVPerHartree).format(HeavyFmt) << endl << endl;
-    cout << "A TDA (AB) Eigenvalues:" << endl;
-    cout << (ATDAEAB).format(HeavyFmt) << endl << endl;
-  /*
-    cout << "A TDA (SAS) Eigenvalues:" << endl;
-    cout << ATDAESing.format(HeavyFmt) << endl << endl;
-    cout << "C TDA (AA) Eigenvalues:" << endl;
-    cout << CTDAEAA.format(HeavyFmt) << endl << endl;
-    cout << "C TDA (AB) Eigenvalues:" << endl;
-    cout << CTDAEAB.format(HeavyFmt) << endl << endl;
-    cout << "C TDA (SAS) Eigenvalues:" << endl;
-    cout << CTDAESing.format(HeavyFmt) << endl << endl;
-    cout << "RPA (AA) Eigenvalues:" << endl;
-    cout << RPAEAA.format(HeavyFmt)  << endl << endl;
-    cout << "RPA (AB) Eigenvalues:" << endl;
-    cout << RPAEAB.format(HeavyFmt)  << endl << endl;
-    cout << "RPA (AB) Eigenvalues:" << endl;
-    cout << RPAEAB.format(HeavyFmt)  << endl << endl;
-    cout << "RPA (SAS) Eigenvalues:" << endl;
-    cout << RPAESing.format(HeavyFmt)  << endl << endl;
-  */
+  for(auto a = 0, ab = 0; a < this->nV_; a++      )
+  for(auto b = 0        ; b < a        ; b++, ab++)
+  for(auto c = 0, cd = 0; c < this->nV_; c++      )
+  for(auto d = 0        ; d < c        ; d++, cd++){
+    A(ab,cd) = this->mointegrals_->ABCD(a,c,b,d) - this->mointegrals_->ABCD(a,d,b,c);
+    if(ab == cd) A(ab,cd) +=
+      (*this->singleSlater_->epsA())(a+this->nOA_) + 
+      (*this->singleSlater_->epsA())(b+this->nOA_) - 2*Rmu; 
   }
-  
+  cout << A - A.adjoint() << endl;
+
+  Eigen::SelfAdjointEigenSolver<RealMatrix> ES(A);
+  cout << A.eigenvalues() << endl;
 }
