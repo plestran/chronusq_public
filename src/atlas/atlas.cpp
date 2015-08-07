@@ -98,15 +98,15 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
     sdResponse->iniSDResponse(molecule.get(),basisset.get(),mointegrals.get(),fileIO.get(),
                               controls.get(),hartreeFock.get());
     
-//  sdResponse->IterativeRPA();
+    sdResponse->IterativeRPA();
   //sdResponse->incorePPRPA();
-//sdResponse->incoreCIS();
-  sdResponse->incorePPRPAnew();
+  sdResponse->incoreCIS();
+//sdResponse->incorePPRPAnew();
   }
   auto mp       = std::unique_ptr<MollerPlesset>(new MollerPlesset());
     mp->iniMollerPlesset(molecule.get(),basisset.get(),mointegrals.get(),fileIO.get(),
                               controls.get(),hartreeFock.get());
-    mp->MP2();
+  //mp->MP2();
 //mointegrals->testLocMO();
 
 //if(controls->doDF) aointegrals->compareRI();

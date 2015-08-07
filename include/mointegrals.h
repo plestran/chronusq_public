@@ -155,6 +155,28 @@ public:
       }
     }
   } 
+  inline double IJAB(int i,int j,int a,int b,std::string spn="AAAA"){
+    if(this->Ref_ == SingleSlater<double>::TCS){
+      return (*this->ijab_)(i,j,a,b);
+    } else {
+      if(this->singleSlater_->isClosedShell){
+//cout << "(" << i << " " << a + this->nOA_ << " | " << j << " " << this->nOA_+b << ") " <<(*this->ijabAABB_)(i,j,a,b) << endl;
+        if(!spn.compare("AAAA") || !spn.compare("BBBB"))
+          return (*this->ijabAAAA_)(i,j,a,b);
+        else if(!spn.compare("AABB"))
+          return (*this->ijabAABB_)(i,j,a,b);
+        else CErr(spn+" is not a recognized spin order for ijab",this->fileio_->out);
+      } else {
+        if(!spn.compare("AAAA"))
+          return (*this->ijabAAAA_)(i,j,a,b);
+        else if(!spn.compare("AABB"))
+          return (*this->ijabAABB_)(i,j,a,b);
+        else if(!spn.compare("BBBB"))
+          return (*this->ijabBBBB_)(i,j,a,b);
+        else CErr(spn+" is not a regocnized spin order for ijab",this->fileio_->out);
+      }
+    }
+  } 
   inline double IABJ(int i,int a,int b,int j,std::string spn="AAAA"){
     if(this->Ref_ == SingleSlater<double>::TCS){
       return (*this->iajb_)(i,a,j,b);
