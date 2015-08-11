@@ -934,7 +934,7 @@ void MOIntegrals::formIJKL(bool doDBar){
          */ 
         if(this->singleSlater_->isClosedShell)
           (*this->ijklAAAA_)(i,j,k,l) =
-            (*this->ijklAABB_)(i,j,k,l)-(*this->ijklAABB_)(a,d,c,b);
+            (*this->ijklAABB_)(i,j,k,l)-(*this->ijklAABB_)(i,l,k,j);
         else {
           (*this->ijklAAAA_)(i,j,k,l) = SijklAAAA(i,j,k,l) - SijklAAAA(i,l,k,j);
           (*this->ijklBBBB_)(i,j,k,l) = SijklBBBB(i,j,k,l) - SijklBBBB(i,l,k,j);

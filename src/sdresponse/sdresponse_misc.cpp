@@ -2179,11 +2179,14 @@ void SDResponse::incorePPRPAnew(){
   RealMatrix AAA,BAA,CAA;
   RealMatrix AAB,BAB,CAB;
   RealMatrix ABB,BBB,CBB;
+  RealMatrix Full;
+  RealMatrix FullAA, FullAB, FullBB;
 
   if(this->Ref_ == SingleSlater<double>::TCS){
     A = RealMatrix(this->nVV_SLT_,this->nVV_SLT_);
     B = RealMatrix(this->nVV_SLT_,this->nOO_SLT_);
     C = RealMatrix(this->nOO_SLT_,this->nOO_SLT_);
+    Full = RealMatrix(this->nVV_SLT_+this->nOO_SLT_,this->nVV_SLT_+this->nOO_SLT_);
   } else {
     AAA = RealMatrix(this->nVAVA_SLT_,this->nVAVA_SLT_);
     BAA = RealMatrix(this->nVAVA_SLT_,this->nOAOA_SLT_);
@@ -2191,10 +2194,14 @@ void SDResponse::incorePPRPAnew(){
     AAB = RealMatrix(this->nVAVB_,this->nVAVB_);
     BAB = RealMatrix(this->nVAVB_,this->nOAOB_);
     CAB = RealMatrix(this->nOAOB_,this->nOAOB_);
+    FullAA =RealMatrix(this->nVAVA_SLT_+this->nOAOA_SLT_,this->nVAVA_SLT_+this->nOAOA_SLT_);
+    FullAB = RealMatrix(this->nVAVB_+this->nOAOB_,this->nVAVB_+this->nOAOB_);
     if(!this->singleSlater_->isClosedShell){
       ABB = RealMatrix(this->nVBVB_SLT_,this->nVBVB_SLT_);
       BBB = RealMatrix(this->nVBVB_SLT_,this->nOBOB_SLT_);
       CBB = RealMatrix(this->nOBOB_SLT_,this->nOBOB_SLT_);
+      FullBB =
+        RealMatrix(this->nVBVB_SLT_+this->nOBOB_SLT_,this->nVBVB_SLT_+this->nOBOB_SLT_);
     }
   }
   this->mointegrals_->formABCD(false);
@@ -2247,6 +2254,19 @@ void SDResponse::incorePPRPAnew(){
     std::sort(ECTDA.data(),ECTDA.data()+ECTDA.size());
     ECTDA = -ECTDA;
     cout << ECTDA << endl;
+
+    Full.block(0,0,this->nVV_SLT_,this->nVV_SLT_) = A;
+    Full.block(this->nVV_SLT_,this->nVV_SLT_,this->nOO_SLT_,this->nOO_SLT_) = -C;
+    Full.block(0,this->nVV_SLT_,this->nVV_SLT_,this->nOO_SLT_) = B;
+    Full.block(this->nVV_SLT_,0,this->nOO_SLT_,this->nVV_SLT_) = -B.adjoint();
+    Eigen::EigenSolver<RealMatrix> EA;
+    EA.compute(Full);
+    Eigen::VectorXd ERPA = EA.eigenvalues().real();
+    ERPA = -ERPA;
+    std::sort(ERPA.data(),ERPA.data()+ERPA.size());
+    ERPA = -ERPA;
+    cout << endl << endl << ERPA << endl;
+    
   } else {
     for(auto a = 0, ab = 0; a < this->nVA_; a++      )
     for(auto b = 0        ; b < a        ; b++, ab++)
