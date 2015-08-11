@@ -223,10 +223,11 @@ public:
   } 
   inline double IJKL(int i,int j,int k,int l,std::string spn="AAAA"){
     if(this->Ref_ == SingleSlater<double>::TCS){
+//    cout << "DjM " << this->ijkl_->size() << endl;
       return (*this->ijkl_)(i,j,k,l);
     } else {
       if(this->singleSlater_->isClosedShell){
-//cout << "(" << i << " " << j << " | " << k << " " << l << ") " <<(*this->ijklAABB_)(i,j,k,l) << endl;
+//cout << "(" << a + this->nOA_ << " " << b + this->nOA_ << " | " << c + this->nOA_ << " " << this->nOA_+d << ") " <<(*this->ijklAABB_)(i,j,k,l) << endl;
         if(!spn.compare("AAAA") || !spn.compare("BBBB"))
           return (*this->ijklAAAA_)(i,j,k,l);
         else if(!spn.compare("AABB"))

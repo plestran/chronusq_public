@@ -801,26 +801,26 @@ void MOIntegrals::formIJKL(bool doDBar){
 
   if(this->Ref_ == SingleSlater<double>::TCS){
 
-    // First Quarter Transformation  (i ν | λ κ)
+    // First Quarter Transformation  (a ν | λ κ)
     contract(1.0,(*this->locMOOcc_),{mu,i},(*this->aointegrals_->aoERI_),{mu,nu,lm,sg},
              0.0,Iinls,{i,nu,lm,sg});
  
-    // First Half Transformation     (i j | λ κ)
+    // First Half Transformation     (a b | λ κ)
     contract(1.0,(*this->locMOOcc_),{nu,j},Iinls,{i,nu,lm,sg},0.0,Iijls,{i,j,lm,sg});
  
-    // Third Quarter Transformation  (i j | k κ)
+    // Third Quarter Transformation  (a b | c κ)
     contract(1.0,(*this->locMOOcc_),{lm,k},Iijls,{i,j,lm,sg},0.0,Iijks,{i,j,k,sg});
 
   } else {
 
-    // First Quarter Transformation Alpha             (i ν | λ κ) [A]
+    // First Quarter Transformation Alpha             (a ν | λ κ) [A]
     contract(1.0,(*this->locMOAOcc_),{mu,i},(*this->aointegrals_->aoERI_),{mu,nu,lm,sg},
              0.0,IinlsA,{i,nu,lm,sg});
  
-    // First Half Transformation Alpha-Alpha          (i j | λ κ) [AA]
+    // First Half Transformation Alpha-Alpha          (a b | λ κ) [AA]
     contract(1.0,(*this->locMOAOcc_),{nu,j},IinlsA,{i,nu,lm,sg},0.0,IijlsAA,{i,j,lm,sg});
  
-    // Third Quarter Transformation Alpha-Alpha-Alpha (i j | k κ) [AA|A]
+    // Third Quarter Transformation Alpha-Alpha-Alpha (a b | c κ) [AA|A]
     contract(1.0,(*this->locMOAOcc_),{lm,k},IijlsAA,{i,j,lm,sg},0.0,IijksAAA,{i,j,k,sg});
  
     /******************************/
@@ -828,17 +828,17 @@ void MOIntegrals::formIJKL(bool doDBar){
     /******************************/
     if(!this->singleSlater_->isClosedShell){
  
-      // First Quarter Transformation Beta            (i ν | λ κ) [B]
+      // First Quarter Transformation Beta            (a ν | λ κ) [B]
       contract(1.0,(*this->locMOBOcc_),{mu,i},(*this->aointegrals_->aoERI_),{mu,nu,lm,sg},
                0.0,IinlsB,{i,nu,lm,sg});
  
-      // First Half Transformation Beta-Beta          (i j | λ κ) [BB]
+      // First Half Transformation Beta-Beta          (a b | λ κ) [BB]
       contract(1.0,(*this->locMOBOcc_),{nu,j},IinlsB,{i,nu,lm,sg},0.0,IijlsBB,{i,j,lm,sg});
  
-      // Third Quarter Transformation Beta-Beta-Beta    (i j | k κ) [BB|B]
+      // Third Quarter Transformation Beta-Beta-Beta    (a b | c κ) [BB|B]
       contract(1.0,(*this->locMOBOcc_),{lm,k},IijlsBB,{i,j,lm,sg},0.0,IijksBBB,{i,j,k,sg});
  
-      // Third Quarter Transformation Alpha-Alpha-Beta  (i j | k κ) [AA|B]
+      // Third Quarter Transformation Alpha-Alpha-Beta  (a b | c κ) [AA|B]
       contract(1.0,(*this->locMOBOcc_),{lm,k},IijlsAA,{i,j,lm,sg},0.0,IijksAAB,{i,j,k,sg});
  
     }
@@ -854,26 +854,26 @@ void MOIntegrals::formIJKL(bool doDBar){
      */ 
  
     if(this->Ref_ == SingleSlater<double>::TCS){
-      // Last Quarter Transformation (i j | k l) 
+      // Last Quarter Transformation (a b | c d) 
       contract(1.0,(*this->locMOOcc_),{sg,l},Iijks,{i,j,k,sg},
                0.0,(*this->ijkl_),{i,j,k,l});
     } else {
 
-      // Last Quarter Transformation Alpha-Alpha-Alpha-Alpha (i j | k l) [AA|AA]
+      // Last Quarter Transformation Alpha-Alpha-Alpha-Alpha (a b | c d) [AA|AA]
       contract(1.0,(*this->locMOAOcc_),{sg,l},IijksAAA,{i,j,k,sg},
                0.0,(*this->ijklAAAA_),{i,j,k,l});
      
       /******************************/
       /* ONLY BUILD IF CLOSED SHELL */
       /******************************/
-      // Last Quarter Transformation Beta-Beta-Beta-Beta (i j | k l) [BB|BB]
+      // Last Quarter Transformation Beta-Beta-Beta-Beta (a b | c d) [BB|BB]
       if(!this->singleSlater_->isClosedShell)
         contract(1.0,(*this->locMOBOcc_),{sg,l},IijksBBB,{i,j,k,sg},
                  0.0,(*this->ijklBBBB_),{i,j,k,l});
     }
 
   /****************************************/
-  /*  IF DOING DOUBLE BAR AND OPEN-SHELL  */
+  /*  IF DOING DOUBLE AND OPEN-SHELL BAR  */
   /****************************************/
   } else if(!this->singleSlater_->isClosedShell || this->Ref_ == SingleSlater<double>::TCS) {
     /*
@@ -882,12 +882,12 @@ void MOIntegrals::formIJKL(bool doDBar){
      */ 
 
     if(this->Ref_ == SingleSlater<double>::TCS)
-      // Last Quarter Transformation (i j | k l)
+      // Last Quarter Transformation (a b | c d)
       contract(1.0,(*this->locMOOcc_),{sg,l},Iijks,{i,j,k,sg},0.0,Sijkl,{i,j,k,l});
     else {
-      // Last Quarter Transformation Alpha-Alpha-Alpha-Alpha (i j | k l) [AA|AA]
+      // Last Quarter Transformation Alpha-Alpha-Alpha-Alpha (a b | c d) [AA|AA]
       contract(1.0,(*this->locMOAOcc_),{sg,l},IijksAAA,{i,j,k,sg},0.0,SijklAAAA,{i,j,k,l});
-      // Last Quarter Transformation Beta-Beta-Beta-Beta (i j | k l) [BB|BB]
+      // Last Quarter Transformation Beta-Beta-Beta-Beta (a b | c d) [BB|BB]
       contract(1.0,(*this->locMOBOcc_),{sg,l},IijksBBB,{i,j,k,sg},0.0,SijklBBBB,{i,j,k,l});
     }
   }
@@ -899,11 +899,11 @@ void MOIntegrals::formIJKL(bool doDBar){
      * integration removes the exchange term)
      */ 
     if(!this->singleSlater_->isClosedShell){
-      // (UHF) Last Quarter Transformation Alpha-Alpha-Beta-Beta (i j | k l) [AA|BB]
+      // (UHF) Last Quarter Transformation Alpha-Alpha-Beta-Beta (a b | c d) [AA|BB]
       contract(1.0,(*this->locMOBOcc_),{sg,l},IijksAAB,{i,j,k,sg},
                0.0,(*this->ijklAABB_),{i,j,k,l});
     } else {
-      // (RHF) Last Quarter Transformation Alpha-Alpha-Beta-Beta (i j | k l) [AA|BB]
+      // (RHF) Last Quarter Transformation Alpha-Alpha-Beta-Beta (a b | c d) [AA|BB]
       contract(1.0,(*this->locMOAOcc_),{sg,l},IijksAAA,{i,j,k,sg},
                0.0,(*this->ijklAABB_),{i,j,k,l});
     }
@@ -912,7 +912,7 @@ void MOIntegrals::formIJKL(bool doDBar){
   /*
    * Build double-bar integrals from single-bar integrals is requested
    *
-   * (i j || k l) = (i j | k l) - (i l | k j)
+   * (a b || c d) = (a b | c d) - (a d | c b)
    *
    */
   if(doDBar){
@@ -934,7 +934,7 @@ void MOIntegrals::formIJKL(bool doDBar){
          */ 
         if(this->singleSlater_->isClosedShell)
           (*this->ijklAAAA_)(i,j,k,l) =
-            (*this->ijklAABB_)(i,j,k,l)-(*this->ijklAABB_)(i,l,k,j);
+            (*this->ijklAABB_)(i,j,k,l)-(*this->ijklAABB_)(a,d,c,b);
         else {
           (*this->ijklAAAA_)(i,j,k,l) = SijklAAAA(i,j,k,l) - SijklAAAA(i,l,k,j);
           (*this->ijklBBBB_)(i,j,k,l) = SijklBBBB(i,j,k,l) - SijklBBBB(i,l,k,j);
@@ -948,15 +948,6 @@ void MOIntegrals::formIJKL(bool doDBar){
           (*this->ijklBBBB_)(i,j,k,l) = SijklBBBB(i,j,k,l) - SijklBBBB(i,l,k,j);
     }
   }
-    
-/*
-    for(auto i = 0; i < this->nOA_; i++)
-    for(auto a = 0; a < this->nVA_; a++)
-    for(auto j = 0; j < this->nOB_; j++)
-    for(auto b = 0; b < this->nVB_; b++){
-  cout << "(" << i << " " << a + this->nOA_ << " | " << j << " " << this->nOA_+b << ") " <<(*this->iajbAABB_)(i,a,j,b) << endl;
-    }
-*/
 }
 
 void MOIntegrals::formIJAB(bool doDBar){

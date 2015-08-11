@@ -771,10 +771,16 @@ void SDResponse::incorePPRPA(){
   }
 
   // C
+  cout << "CORRECT" << endl;
   for(auto i = 0, ij = 0; i < this->nOA_; i++      )
   for(auto j = 0        ; j < i         ; j++, ij++){
     for(auto k = 0, kl = 0; k < this->nOA_; k++      )
     for(auto l = 0        ; l < k         ; l++, kl++){
+      cout << "Single " << dijklA(i,j,k,l) << endl; 
+      cout << "Double " << DijklA(i,j,k,l) << endl; 
+      if(ij==kl) {
+        cout << "EPS " << (*this->singleSlater_->epsA())(i) + (*this->singleSlater_->epsA())(j) - 2*Rmu << endl;;
+      }
       CAA(ij,kl) = DijklA(i,j,k,l);
       if(ij == kl) 
         CAA(ij,kl) -= (*this->singleSlater_->epsA())(i) + 
@@ -893,6 +899,7 @@ void SDResponse::incorePPRPA(){
     ATDAEAA = -ATDAEAA;
     ATDATAA = ES.eigenvectors().col(0);
   ES.compute(-CAA);
+    cout << CAA << endl << endl;
     CTDAEAA = -ES.eigenvalues();
     std::sort(CTDAEAA.data(),CTDAEAA.data()+CTDAEAA.size());
     CTDAEAA = -CTDAEAA;
@@ -938,7 +945,6 @@ void SDResponse::incorePPRPA(){
     RPATSing = EA.eigenvectors().col(0).real();
 
   Eigen::IOFormat HeavyFmt(8);
-/*
   cout << "A TDA (AA) Eigenvalues:" << endl;
   cout << ATDAEAA.format(HeavyFmt) << endl << endl;
   cout << "A TDA (AB) Eigenvalues:" << endl;
@@ -959,7 +965,6 @@ void SDResponse::incorePPRPA(){
   cout << RPAEAB.format(HeavyFmt)  << endl << endl;
   cout << "RPA (SAS) Eigenvalues:" << endl;
   cout << RPAESing.format(HeavyFmt)  << endl << endl;
-*/
 
 
   for(auto a = 0, ab = 0; a < this->nVA_; a++      )
@@ -2170,28 +2175,119 @@ void SDResponse::incoreRPA(){
 //  
 //}
 void SDResponse::incorePPRPAnew(){
-  RealMatrix A;
+  RealMatrix A,B,C;
+  RealMatrix AAA,BAA,CAA;
+  RealMatrix AAB,BAB,CAB;
+  RealMatrix ABB,BBB,CBB;
 
-  A = RealMatrix(this->nVV_SLT_,this->nVV_SLT_);
-  cout << "HERE" << endl;
-  cout << "NV4" << this->nV_*this->nV_*this->nV_*this->nV_ << endl;
+  if(this->Ref_ == SingleSlater<double>::TCS){
+    A = RealMatrix(this->nVV_SLT_,this->nVV_SLT_);
+    B = RealMatrix(this->nVV_SLT_,this->nOO_SLT_);
+    C = RealMatrix(this->nOO_SLT_,this->nOO_SLT_);
+  } else {
+    AAA = RealMatrix(this->nVAVA_SLT_,this->nVAVA_SLT_);
+    BAA = RealMatrix(this->nVAVA_SLT_,this->nOAOA_SLT_);
+    CAA = RealMatrix(this->nOAOA_SLT_,this->nOAOA_SLT_);
+    AAB = RealMatrix(this->nVAVB_,this->nVAVB_);
+    BAB = RealMatrix(this->nVAVB_,this->nOAOB_);
+    CAB = RealMatrix(this->nOAOB_,this->nOAOB_);
+    if(!this->singleSlater_->isClosedShell){
+      ABB = RealMatrix(this->nVBVB_SLT_,this->nVBVB_SLT_);
+      BBB = RealMatrix(this->nVBVB_SLT_,this->nOBOB_SLT_);
+      CBB = RealMatrix(this->nOBOB_SLT_,this->nOBOB_SLT_);
+    }
+  }
   this->mointegrals_->formABCD(false);
-  cout << "HERE" << endl;
+  this->mointegrals_->formIAJB(false);
+  this->mointegrals_->formIJKL(false);
 
   this->initRMu();
   double Rmu = this->rMu_;
 
-  for(auto a = 0, ab = 0; a < this->nV_; a++      )
-  for(auto b = 0        ; b < a        ; b++, ab++)
-  for(auto c = 0, cd = 0; c < this->nV_; c++      )
-  for(auto d = 0        ; d < c        ; d++, cd++){
-    A(ab,cd) = this->mointegrals_->ABCD(a,c,b,d) - this->mointegrals_->ABCD(a,d,b,c);
-    if(ab == cd) A(ab,cd) +=
-      (*this->singleSlater_->epsA())(a+this->nOA_) + 
-      (*this->singleSlater_->epsA())(b+this->nOA_) - 2*Rmu; 
-  }
-  cout << A - A.adjoint() << endl;
+  if(this->Ref_ == SingleSlater<double>::TCS) {
+    for(auto a = 0, ab = 0; a < this->nV_; a++      )
+    for(auto b = 0        ; b < a        ; b++, ab++)
+    for(auto c = 0, cd = 0; c < this->nV_; c++      )
+    for(auto d = 0        ; d < c        ; d++, cd++){
+      A(ab,cd) = this->mointegrals_->ABCD(a,c,b,d) - this->mointegrals_->ABCD(a,d,b,c);
+      if(ab == cd) A(ab,cd) +=
+        (*this->singleSlater_->epsA())(a+this->nO_) + 
+        (*this->singleSlater_->epsA())(b+this->nO_) - 2*Rmu; 
+    }
 
-  Eigen::SelfAdjointEigenSolver<RealMatrix> ES(A);
-  cout << A.eigenvalues() << endl;
+    for(auto i = 0, ij = 0; i < this->nO_; i++      )
+    for(auto j = 0        ; j < i        ; j++, ij++)
+    for(auto k = 0, kl = 0; k < this->nO_; k++      )
+    for(auto l = 0        ; l < k        ; l++, kl++){
+      C(ij,kl) = this->mointegrals_->IJKL(i,k,j,l) - this->mointegrals_->IJKL(i,l,j,k);
+      if(ij == kl) C(ij,kl) -=
+        (*this->singleSlater_->epsA())(i) + 
+        (*this->singleSlater_->epsA())(j) - 2*Rmu; 
+    }
+
+    for(auto a = 0, ab = 0; a < this->nV_; a++      )
+    for(auto b = 0        ; b < a        ; b++, ab++)
+    for(auto i = 0, ij = 0; i < this->nO_; i++      )
+    for(auto j = 0        ; j < i        ; j++, ij++){
+      B(ab,ij) = this->mointegrals_->IAJB(i,a,j,b) - this->mointegrals_->IAJB(i,b,j,a);
+    }
+ 
+    Eigen::SelfAdjointEigenSolver<RealMatrix> ES;
+    ES.compute(A);
+    Eigen::VectorXd EATDA = ES.eigenvalues().real();
+    EATDA = -EATDA;
+    std::sort(EATDA.data(),EATDA.data()+EATDA.size());
+    EATDA = -EATDA; 
+    cout << EATDA << endl;
+ 
+    cout << endl << endl;
+    ES.compute(-C);
+    Eigen::VectorXd ECTDA = ES.eigenvalues().real();
+    ECTDA = -ECTDA;
+    std::sort(ECTDA.data(),ECTDA.data()+ECTDA.size());
+    ECTDA = -ECTDA;
+    cout << ECTDA << endl;
+  } else {
+    for(auto a = 0, ab = 0; a < this->nVA_; a++      )
+    for(auto b = 0        ; b < a        ; b++, ab++)
+    for(auto c = 0, cd = 0; c < this->nVA_; c++      )
+    for(auto d = 0        ; d < c        ; d++, cd++){
+      AAA(ab,cd) = this->mointegrals_->ABCD(a,c,b,d,"AAAA") - this->mointegrals_->ABCD(a,d,b,c,"AAAA");
+      if(ab == cd) AAA(ab,cd) +=
+        (*this->singleSlater_->epsA())(a+this->nOA_) + 
+        (*this->singleSlater_->epsA())(b+this->nOA_) - 2*Rmu; 
+    }
+    for(auto i = 0, ij = 0; i < this->nOA_; i++      )
+    for(auto j = 0        ; j < i        ; j++, ij++)
+    for(auto k = 0, kl = 0; k < this->nOA_; k++      )
+    for(auto l = 0        ; l < k        ; l++, kl++){
+      CAA(ij,kl) = this->mointegrals_->IJKL(i,k,j,l,"AAAA") - this->mointegrals_->IJKL(i,l,j,k,"AAAA") ;;
+      if(ij == kl) CAA(ij,kl) -=
+        (*this->singleSlater_->epsA())(i) + 
+        (*this->singleSlater_->epsA())(j) - 2*Rmu; 
+    }
+    for(auto a = 0, ab = 0; a < this->nVA_; a++      )
+    for(auto b = 0        ; b < a        ; b++, ab++)
+    for(auto i = 0, ij = 0; i < this->nOA_; i++      )
+    for(auto j = 0        ; j < i        ; j++, ij++){
+      BAA(ab,ij) = this->mointegrals_->IAJB(i,a,j,b,"AAAA") - this->mointegrals_->IAJB(i,b,j,a,"AAAA");
+    }
+ 
+    Eigen::SelfAdjointEigenSolver<RealMatrix> ES;
+    ES.compute(AAA);
+    Eigen::VectorXd EATDA = ES.eigenvalues().real();
+    EATDA = -EATDA;
+    std::sort(EATDA.data(),EATDA.data()+EATDA.size());
+    EATDA = -EATDA; 
+    cout << EATDA << endl;
+ 
+    cout << endl << endl;
+    ES.compute(-CAA);
+    Eigen::VectorXd ECTDA = ES.eigenvalues().real();
+    ECTDA = -ECTDA;
+    std::sort(ECTDA.data(),ECTDA.data()+ECTDA.size());
+    ECTDA = -ECTDA;
+    cout << ECTDA << endl;
+  }
+  
 }
