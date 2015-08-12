@@ -411,8 +411,10 @@ void SDResponse::formRM4(RealCMMap& XMO, RealCMMap &Sigma, RealCMMap &Rho){
     this->formAOTDen(X,XAO[idx],XAO[idx]);
   }
 
-  this->singleSlater_->aointegrals()->multTwoEContractDirect(XMO.cols(),true,false,true,
-    false,XAO,IXAO,XAO,IXAO);
+  bool RHF   = this->Ref_ != SingleSlater<double>::TCS;
+  bool doTCS = this->Ref_ == SingleSlater<double>::TCS;
+  this->singleSlater_->aointegrals()->multTwoEContractDirect(XMO.cols(),RHF,false,true,
+    doTCS,XAO,IXAO,XAO,IXAO);
 
 
   for(auto idx = 0; idx < XMO.cols(); idx++){

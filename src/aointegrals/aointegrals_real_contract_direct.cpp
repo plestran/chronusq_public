@@ -273,12 +273,14 @@ namespace ChronusQ{
                   this->UnRestricted34Contract(G[0][iX][thread_id],XAlpha[iX],
                     G[1][iX][thread_id],XBeta[iX],XTotal[iX],n1,n2,n3,n4,bf1_s,bf2_s,bf3_s,
                     bf4_s,buff,s1234_deg);
-                else if(!do24){
+                else if(doTCS && !do24)
                   this->Spinor34Contract(G[0][iX][thread_id],XAlpha[iX],n1,n2,n3,n4,
                     bf1_s,bf2_s,bf3_s,bf4_s,buff,s1234_deg);
-                }
-                else
+                else if(!doTCS && do24)
                   this->General24CouContract(G[0][iX][thread_id],XAlpha[iX],n1,n2,n3,n4,
+                    bf1_s,bf2_s,bf3_s,bf4_s,buff,s1234_deg);
+                else if(doTCS && do24)
+                  this->Spinor24CouContract(G[0][iX][thread_id],XAlpha[iX],n1,n2,n3,n4,
                     bf1_s,bf2_s,bf3_s,bf4_s,buff,s1234_deg);
               } // Loop iX
             } // Loop s4
