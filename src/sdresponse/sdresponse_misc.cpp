@@ -24,7 +24,9 @@
  *  
  */
 #include <sdresponse.h>
+#include <quasinewton.h>
 using ChronusQ::SDResponse;
+using ChronusQ::QuasiNewton;
 
 void SDResponse::formAOTDen(const RealVecMap &TMOV, RealMatrix &TAOA, RealMatrix &TAOB){
   bool doVOOV = (this->iMeth_ == CIS || this->iMeth_ == RPA || this->iMeth_ == STAB); 
@@ -2296,28 +2298,25 @@ void SDResponse::incorePPRPAnew(){
     Eigen::SelfAdjointEigenSolver<RealMatrix> ES;
     ES.compute(A);
     Eigen::VectorXd EATDA = ES.eigenvalues().real();
-    Eigen::VectorXd TATDA = ES.eigenvectors().col(0).real();
-    RealVecMap TATDAMap(TATDA.data(),TATDA.size());
-    RealMatrix TAAO(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
-    RealMatrix ITAAO(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
-    RealMatrix ATAAO(this->nVV_SLT_,1);
-    RealVecMap ATAAOMap(ATAAO.data(),ATAAO.size());
-    cout << "HERE" << endl;
-    this->formAOTDen(TATDAMap,TAAO,TAAO);
-    cout << "HERE" << endl;
-    this->singleSlater_->aointegrals()->twoEContractDirect(false,false,true,true,TAAO,
-      ITAAO,TAAO,ITAAO);
-    cout << "HERE" << endl;
-    this->formMOTDen(ATAAOMap,ITAAO,ITAAO);
-    cout << "HERE" << endl;
-    this->scaleDagPPRPA(true,TATDAMap,ATAAOMap);
     EATDA = -EATDA;
     std::sort(EATDA.data(),EATDA.data()+EATDA.size());
-    EATDA = -EATDA; 
+    EATDA = -EATDA;
+    cout << std::fixed << std::setprecision(12);
     cout << EATDA << endl;
-    cout << endl << "TRUE" << endl << A*TATDA << endl;
-    cout << endl << "Computed" << endl << ATAAOMap << endl;
- 
+//  RealCMMatrix TATDA = ES.eigenvectors().real();
+//  RealCMMap TATDAMap(TATDA.data(),this->nVV_SLT_,this->nVV_SLT_);
+//  RealCMMatrix ATATDA(this->nVV_SLT_,this->nVV_SLT_);
+//  RealCMMap ATATDAMap(ATATDA.data(),this->nVV_SLT_,this->nVV_SLT_);
+// 
+//  this->formRM4(TATDAMap,ATATDAMap,ATATDAMap);
+//  prettyPrint(cout,A*TATDA - ATATDAMap,"DIFF");
+    if(!this->haveDag_) this->getDiag();
+    RealCMMatrix Vec(this->nVV_SLT_,8);
+    VectorXd Eig(8,1);
+    RealCMMatrix ACM = A;
+    QuasiNewton<double> davA(8,&ACM,this->rmDiag_.get(),&Vec,&Eig);
+    davA.run(cout);
+    
     cout << endl << endl;
     ES.compute(-C);
     Eigen::VectorXd ECTDA = ES.eigenvalues().real();

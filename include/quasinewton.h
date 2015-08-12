@@ -447,6 +447,28 @@ template <typename T>
       if(!this->genGuess_) *this->guessR_ = *SDR->davGuess();
       this->allocScr();
     };
+
+    QuasiNewton(int n, TMat *A,TMat* diag,TMat *Vc, TVec *Eig) : QuasiNewton() {
+      this->N_ = A->rows();
+      this->A_ = A;
+      this->nSek_ = n;
+      this->solutionValues_ = Eig;
+      this->solutionVector_ = Vc;
+      this->diag_           = diag;
+      this->symmetrizedTrial_ = false;
+      this->doGEP_            = false;
+      this->genGuess_         = true;
+      this->maxSubSpace_      = this->stdSubSpace();
+      this->isHermetian_      = true;
+      this->initScrLen();
+
+      if(this->genGuess_) this->nGuess_ = this->stdNGuess();
+      this->checkValid(cout);
+      this->allocGuess();
+      this->allocScr();
+    
+
+    }
     /** Public inline functions **/
     inline TVec* eigenValues(){return this->solutionValues_;};
     inline TMat* eigenVector(){return this->solutionVector_;};
@@ -735,6 +757,7 @@ template <typename T>
         resConv.push_back(false); NNotConv++;
       }
     }
+    output << std::fixed << std::setprecision(12);
     output << "  Checking Quasi-Newton Convergence:" << endl;
     output << "    " << std::setw(8)  << " " << std::setw(32) << std::left << "    Roots at Current Iteration:";
     output << std::setw(32) << std::left << "    (Max) Norm of Residual(s):" << endl;
