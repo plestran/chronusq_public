@@ -233,10 +233,15 @@ public:
   template<typename TMat,typename T> 
     void General24CouContract(TMat&, const TMat &, int,int,int,int,int,int,int,int,
                               const T*,T);
+  template<typename TMat,typename T> 
+    void Spinor24CouContract(TMat&, const TMat &, int,int,int,int,int,int,int,int,
+                              const T*,T);
   template<typename TMat,typename T> void Gen34Contract(TMat&,const TMat&,int,int,int,int,T);
   template<typename TMat,typename T> void Gen23Contract(TMat&,const TMat&,int,int,int,int,T,
                                                         double);
   template<typename TMat,typename T> void Gen24Contract(TMat&,const TMat&,int,int,int,int,T);
+  template<typename TMat,typename T> 
+    void Spinor24Contract(TMat&,const TMat&,int,int,int,int,T);
   template<typename TMat,typename T> void GenCouContractSpinor(TMat&,const TMat&,int,int,int,
                                                                int,T);
   template<typename TMat,typename T> void GenExchContractSpinor(TMat&,const TMat&,int,int,

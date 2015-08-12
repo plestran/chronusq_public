@@ -178,4 +178,47 @@ namespace ChronusQ{
     G(bf3,bf2) += X(bf4,bf1)*v;
     G(bf4,bf2) += X(bf3,bf1)*v;
   } // Gen24Contract
+
+  template<>
+  void AOIntegrals::Spinor24Contract(RealMatrix &G, const RealMatrix &X, int bf1, int bf2, int bf3, int bf4, double v){
+    G(bf1,bf3) += X(bf2,bf4)*v;
+    G(bf2,bf3) += X(bf1,bf4)*v;
+    G(bf1,bf4) += X(bf2,bf3)*v;
+    G(bf2,bf4) += X(bf1,bf3)*v;
+  
+    G(bf3,bf1) += X(bf4,bf2)*v; 
+    G(bf4,bf1) += X(bf3,bf2)*v;
+    G(bf3,bf2) += X(bf4,bf1)*v;
+    G(bf4,bf2) += X(bf3,bf1)*v;
+
+    G(bf1+1,bf3+1) += X(bf2+1,bf4+1)*v;
+    G(bf2+1,bf3+1) += X(bf1+1,bf4+1)*v;
+    G(bf1+1,bf4+1) += X(bf2+1,bf3+1)*v;
+    G(bf2+1,bf4+1) += X(bf1+1,bf3+1)*v;
+  
+    G(bf3+1,bf1+1) += X(bf4+1,bf2+1)*v; 
+    G(bf4+1,bf1+1) += X(bf3+1,bf2+1)*v;
+    G(bf3+1,bf2+1) += X(bf4+1,bf1+1)*v;
+    G(bf4+1,bf2+1) += X(bf3+1,bf1+1)*v;
+
+    G(bf1,bf3+1) += X(bf2,bf4+1)*v;
+    G(bf2,bf3+1) += X(bf1,bf4+1)*v;
+    G(bf1,bf4+1) += X(bf2,bf3+1)*v;
+    G(bf2,bf4+1) += X(bf1,bf3+1)*v;
+  
+    G(bf3,bf1+1) += X(bf4,bf2+1)*v; 
+    G(bf4,bf1+1) += X(bf3,bf2+1)*v;
+    G(bf3,bf2+1) += X(bf4,bf1+1)*v;
+    G(bf4,bf2+1) += X(bf3,bf1+1)*v;
+
+    G(bf1+1,bf3) += X(bf2+1,bf4)*v;
+    G(bf2+1,bf3) += X(bf1+1,bf4)*v;
+    G(bf1+1,bf4) += X(bf2+1,bf3)*v;
+    G(bf2+1,bf4) += X(bf1+1,bf3)*v;
+  
+    G(bf3+1,bf1) += X(bf4+1,bf2)*v; 
+    G(bf4+1,bf1) += X(bf3+1,bf2)*v;
+    G(bf3+1,bf2) += X(bf4+1,bf1)*v;
+    G(bf4+1,bf2) += X(bf3+1,bf1)*v;
+  } // Spinor24Contract
 }; // namespace ChronusQ

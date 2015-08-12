@@ -98,52 +98,70 @@ void SDResponse::placeVVOO(const RealVecMap &TMOV, RealMatrix &TMO){
   bool doX = ( (this->iMeth_ == PPATDA) || (this->iMeth_ == PPRPA) );
   bool doY = ( (this->iMeth_ == PPCTDA) || (this->iMeth_ == PPRPA) );
 
-  if(doX){
-    if(this->iPPRPA_ == 0){ // AA block
-      for(auto a = 0, ab = 0; a < this->nVA_; a++)
+  if(this->Ref_ == SingleSlater<double>::TCS){
+    if(doX){
+      for(auto a = 0, ab = 0; a < this->nV_; a++)
       for(auto b = 0; b  < a;           b++, ab++){
-        TMO(this->nOA_+a,this->nOA_+b) =  TMOV(ab); 
-        TMO(this->nOA_+b,this->nOA_+a) = -TMOV(ab); 
+        TMO(this->nO_+a,this->nO_+b) =  TMOV(ab); 
+        TMO(this->nO_+b,this->nO_+a) = -TMOV(ab); 
       } // loop AB A < B (A-Alpha B-Alpha)
-    } else if(this->iPPRPA_ == 1) { // AB block
-      for(auto a = 0, ab = 0; a < this->nVA_; a++)
-      for(auto b = 0;  b < this->nVB_;  b++, ab++){
-        TMO(this->nOA_+a,this->nOB_+b) = TMOV(ab); 
-      } // loop AB (A-Alpha B-Beta)
-    } else if(this->iPPRPA_ == 2) { // BB block
-      for(auto a = 0, ab = 0; a < this->nVB_; a++)
-      for(auto b = 0; b  < a;           b++, ab++){
-        TMO(this->nOB_+a,this->nOB_+b) =  TMOV(ab); 
-        TMO(this->nOB_+b,this->nOB_+a) = -TMOV(ab); 
-      } // loop AB A < B (A-Alpha B-Alpha)
-    }
-  } // doX
-  if(doY){
-    int iOff = 0;
-    // Offset in the eigenvector for PPRPA Y amplitudes
-    if((this->iMeth_ == PPRPA) && (this->iPPRPA_ == 0)) iOff = this->nVA_*(this->nVA_-1)/2;
-    if((this->iMeth_ == PPRPA) && (this->iPPRPA_ == 1)) iOff = this->nVA_*this->nVB_;
-    if((this->iMeth_ == PPRPA) && (this->iPPRPA_ == 2)) iOff = this->nVB_*(this->nVB_-1)/2;
-
-    if(this->iPPRPA_ == 0) { // AA Block
-      for(auto i = 0, ij = iOff; i < this->nOA_; i++)
+    } // doX
+    if(doY){
+      int iOff = this->nVV_SLT_;
+      for(auto i = 0, ij = iOff; i < this->nO_; i++)
       for(auto j = 0; j  < i   ;           j++, ij++){
         TMO(i,j) =  TMOV(ij);
         TMO(j,i) = -TMOV(ij);
       } // loop IJ I < J (I-Alpha J-Alpha)
-    } else if(this->iPPRPA_ == 1) { // AB Block
-      for(auto i = 0, ij = iOff; i < this->nOA_; i++)
-      for(auto j = 0;  j < this->nOB_;     j++, ij++){
-        TMO(i,j) =  TMOV(ij);
-      } // loop IJ (I-Alpha J-Beta)
-    } else if(this->iPPRPA_ == 2) { // BB Block
-      for(auto i = 0, ij = iOff; i < this->nOB_; i++)
-      for(auto j = 0; j  < i   ;           j++, ij++){
-        TMO(i,j) =  TMOV(ij);
-        TMO(j,i) = -TMOV(ij);
-      } // loop IJ I < J (I-Beta J-Beta)
-    }
-  } // doY
+    } // doY
+  } else {
+    if(doX){
+      if(this->iPPRPA_ == 0){ // AA block
+        for(auto a = 0, ab = 0; a < this->nVA_; a++)
+        for(auto b = 0; b  < a;           b++, ab++){
+          TMO(this->nOA_+a,this->nOA_+b) =  TMOV(ab); 
+          TMO(this->nOA_+b,this->nOA_+a) = -TMOV(ab); 
+        } // loop AB A < B (A-Alpha B-Alpha)
+      } else if(this->iPPRPA_ == 1) { // AB block
+        for(auto a = 0, ab = 0; a < this->nVA_; a++)
+        for(auto b = 0;  b < this->nVB_;  b++, ab++){
+          TMO(this->nOA_+a,this->nOB_+b) = TMOV(ab); 
+        } // loop AB (A-Alpha B-Beta)
+      } else if(this->iPPRPA_ == 2) { // BB block
+        for(auto a = 0, ab = 0; a < this->nVB_; a++)
+        for(auto b = 0; b  < a;           b++, ab++){
+          TMO(this->nOB_+a,this->nOB_+b) =  TMOV(ab); 
+          TMO(this->nOB_+b,this->nOB_+a) = -TMOV(ab); 
+        } // loop AB A < B (A-Alpha B-Alpha)
+      }
+    } // doX
+    if(doY){
+      int iOff = 0;
+      // Offset in the eigenvector for PPRPA Y amplitudes
+      if((this->iMeth_ == PPRPA) && (this->iPPRPA_ == 0)) iOff = this->nVAVA_SLT_;
+      if((this->iMeth_ == PPRPA) && (this->iPPRPA_ == 1)) iOff = this->nVAVB_;
+      if((this->iMeth_ == PPRPA) && (this->iPPRPA_ == 2)) iOff = this->nVBVB_SLT_;
+ 
+      if(this->iPPRPA_ == 0) { // AA Block
+        for(auto i = 0, ij = iOff; i < this->nOA_; i++)
+        for(auto j = 0; j  < i   ;           j++, ij++){
+          TMO(i,j) =  TMOV(ij);
+          TMO(j,i) = -TMOV(ij);
+        } // loop IJ I < J (I-Alpha J-Alpha)
+      } else if(this->iPPRPA_ == 1) { // AB Block
+        for(auto i = 0, ij = iOff; i < this->nOA_; i++)
+        for(auto j = 0;  j < this->nOB_;     j++, ij++){
+          TMO(i,j) =  TMOV(ij);
+        } // loop IJ (I-Alpha J-Beta)
+      } else if(this->iPPRPA_ == 2) { // BB Block
+        for(auto i = 0, ij = iOff; i < this->nOB_; i++)
+        for(auto j = 0; j  < i   ;           j++, ij++){
+          TMO(i,j) =  TMOV(ij);
+          TMO(j,i) = -TMOV(ij);
+        } // loop IJ I < J (I-Beta J-Beta)
+      }
+    } // doY
+  }
 } // placeVVOO
 
 void SDResponse::retrvVOOV(RealVecMap &TMOV, const RealMatrix &TMOA, const RealMatrix &TMOB){
@@ -174,50 +192,68 @@ void SDResponse::retrvVVOO(RealVecMap &TMOV, const RealMatrix &TMO){
   bool doX = ( (this->iMeth_ == PPATDA) || (this->iMeth_ == PPRPA) );
   bool doY = ( (this->iMeth_ == PPCTDA) || (this->iMeth_ == PPRPA) );
 
-  if(doX){
-    if(this->iPPRPA_ == 0){ // AA block
-      for(auto a = 0, ab = 0; a < this->nVA_; a++)
+  if(this->Ref_ == SingleSlater<double>::TCS){
+    if(doX){
+      for(auto a = 0, ab = 0; a < this->nV_; a++)
       for(auto b = 0; b  < a;           b++, ab++){
-        TMOV(ab) = TMO(this->nOA_+a,this->nOA_+b);
-      } // loop AB A < B (A-Alpha B-Alpha)
-    } else if(this->iPPRPA_ == 1) { // AB block
-      for(auto a = 0, ab = 0; a < this->nVA_; a++)
-      for(auto b = 0;  b < this->nVB_;  b++, ab++){
-        TMOV(ab) = TMO(this->nOA_+a,this->nOB_+b);
-      } // loop AB (A-Alpha B-Beta)
-    } else if(this->iPPRPA_ == 2) { // BB block
-      for(auto a = 0, ab = 0; a < this->nVB_; a++)
-      for(auto b = 0; b  < a;           b++, ab++){
-        TMOV(ab) = TMO(this->nOA_+a,this->nOB_+b);
+        TMOV(ab) = TMO(this->nO_+a,this->nO_+b);
       } // loop AB A < B (A-Alpha B-Alpha)
     }
-  } // doX
-  if(doY){
-    int iOff = 0;
-    // Offset in the eigenvector for PPRPA Y amplitudes
-    if((this->iMeth_ == PPRPA) && (this->iPPRPA_ == 0)) iOff = this->nVA_*(this->nVA_-1)/2;
-    if((this->iMeth_ == PPRPA) && (this->iPPRPA_ == 1)) iOff = this->nVA_*this->nVB_;
-    if((this->iMeth_ == PPRPA) && (this->iPPRPA_ == 2)) iOff = this->nVB_*(this->nVB_-1)/2;
-    double fact = 1.0;
-    if(this->iMeth_ == PPRPA) fact *= -1.0;
-
-    if(this->iPPRPA_ == 0) { // AA Block
-      for(auto i = 0, ij = iOff; i < this->nOA_; i++)
+    if(doY){
+      auto iOff = this->nVV_SLT_;
+      double fact = 1.0;
+      if(this->iMeth_ == PPRPA) fact *= -1.0;
+      for(auto i = 0, ij = iOff; i < this->nO_; i++)
       for(auto j = 0; j  < i   ;           j++, ij++){
         TMOV(ij) = fact*TMO(i,j);
       } // loop IJ I < J (I-Alpha J-Alpha)
-    } else if(this->iPPRPA_ == 1) { // AB Block
-      for(auto i = 0, ij = iOff; i < this->nOA_; i++)
-      for(auto j = 0;  j < this->nOB_;     j++, ij++){
-        TMOV(ij) =  fact*TMO(i,j);
-      } // loop IJ (I-Alpha J-Beta)
-    } else if(this->iPPRPA_ == 2) { // BB Block
-      for(auto i = 0, ij = iOff; i < this->nOB_; i++)
-      for(auto j = 0; j  < i   ;           j++, ij++){
-        TMOV(ij) = fact*TMO(i,j);
-      } // loop IJ I < J (I-Beta J-Beta)
     }
-  } // doY
+  } else {
+    if(doX){
+      if(this->iPPRPA_ == 0){ // AA block
+        for(auto a = 0, ab = 0; a < this->nVA_; a++)
+        for(auto b = 0; b  < a;           b++, ab++){
+          TMOV(ab) = TMO(this->nOA_+a,this->nOA_+b);
+        } // loop AB A < B (A-Alpha B-Alpha)
+      } else if(this->iPPRPA_ == 1) { // AB block
+        for(auto a = 0, ab = 0; a < this->nVA_; a++)
+        for(auto b = 0;  b < this->nVB_;  b++, ab++){
+          TMOV(ab) = TMO(this->nOA_+a,this->nOB_+b);
+        } // loop AB (A-Alpha B-Beta)
+      } else if(this->iPPRPA_ == 2) { // BB block
+        for(auto a = 0, ab = 0; a < this->nVB_; a++)
+        for(auto b = 0; b  < a;           b++, ab++){
+          TMOV(ab) = TMO(this->nOA_+a,this->nOB_+b);
+        } // loop AB A < B (A-Alpha B-Alpha)
+      }
+    } // doX
+    if(doY){
+      int iOff = 0;
+      // Offset in the eigenvector for PPRPA Y amplitudes
+      if((this->iMeth_ == PPRPA) && (this->iPPRPA_ == 0)) iOff = this->nVAVA_SLT_;
+      if((this->iMeth_ == PPRPA) && (this->iPPRPA_ == 1)) iOff = this->nVAVB_;
+      if((this->iMeth_ == PPRPA) && (this->iPPRPA_ == 2)) iOff = this->nVBVB_SLT_;
+      double fact = 1.0;
+      if(this->iMeth_ == PPRPA) fact *= -1.0;
+ 
+      if(this->iPPRPA_ == 0) { // AA Block
+        for(auto i = 0, ij = iOff; i < this->nOA_; i++)
+        for(auto j = 0; j  < i   ;           j++, ij++){
+          TMOV(ij) = fact*TMO(i,j);
+        } // loop IJ I < J (I-Alpha J-Alpha)
+      } else if(this->iPPRPA_ == 1) { // AB Block
+        for(auto i = 0, ij = iOff; i < this->nOA_; i++)
+        for(auto j = 0;  j < this->nOB_;     j++, ij++){
+          TMOV(ij) =  fact*TMO(i,j);
+        } // loop IJ (I-Alpha J-Beta)
+      } else if(this->iPPRPA_ == 2) { // BB Block
+        for(auto i = 0, ij = iOff; i < this->nOB_; i++)
+        for(auto j = 0; j  < i   ;           j++, ij++){
+          TMOV(ij) = fact*TMO(i,j);
+        } // loop IJ I < J (I-Beta J-Beta)
+      }
+    } // doY
+  }
 } //retrvVVOO
 
 void SDResponse::initRMu(){
@@ -383,9 +419,11 @@ void SDResponse::initMeth(){
   if((this->iMeth_ == PPRPA || this->iMeth_ == PPATDA || this->iMeth_ == PPCTDA)
       && !(this->iPPRPA_ >= 0 && this->iPPRPA_ <= 2))
     CErr("Invalid iPPRPA_ in SDResponse::initMeth()",this->fileio_->out);
+/*
   if((this->iMeth_ == PPRPA || this->iMeth_ == PPATDA || this->iMeth_ == PPCTDA)
       && this->Ref_ == SingleSlater<double>::TCS)
     CErr("PPRPA/PPTDA NYI for Spinor Reference");
+*/
 
   if(this->iMeth_ == CIS){
     /******************/
@@ -406,23 +444,35 @@ void SDResponse::initMeth(){
   } else if(this->iMeth_ == PPRPA){
     /*********************/
     /* pp-RPA Single Dim */
-    if(this->iPPRPA_ == 0)      this->nSingleDim_ = this->nVAVA_SLT_ + this->nOAOA_SLT_;
-    else if(this->iPPRPA_ == 1) this->nSingleDim_ = this->nVAVB_     + this->nOAOB_;
-    else if(this->iPPRPA_ == 2) this->nSingleDim_ = this->nVBVB_SLT_ + this->nOBOB_SLT_;
+    if(this->Ref_ == SingleSlater<double>::TCS)
+      this->nSingleDim_ = this->nVV_SLT_ + this->nOO_SLT_;
+    else {
+      if(this->iPPRPA_ == 0)      this->nSingleDim_ = this->nVAVA_SLT_ + this->nOAOA_SLT_;
+      else if(this->iPPRPA_ == 1) this->nSingleDim_ = this->nVAVB_     + this->nOAOB_;
+      else if(this->iPPRPA_ == 2) this->nSingleDim_ = this->nVBVB_SLT_ + this->nOBOB_SLT_;
+    }
     /*********************/
   } else if(this->iMeth_ == PPATDA){
     /*************************/
     /* pp-TDA (A) Single Dim */
-    if(this->iPPRPA_ == 0)      this->nSingleDim_ = this->nVAVA_SLT_;
-    else if(this->iPPRPA_ == 1) this->nSingleDim_ = this->nVAVB_    ; 
-    else if(this->iPPRPA_ == 2) this->nSingleDim_ = this->nVBVB_SLT_;
+    if(this->Ref_ == SingleSlater<double>::TCS)
+      this->nSingleDim_ = this->nVV_SLT_;
+    else {
+      if(this->iPPRPA_ == 0)      this->nSingleDim_ = this->nVAVA_SLT_;
+      else if(this->iPPRPA_ == 1) this->nSingleDim_ = this->nVAVB_    ; 
+      else if(this->iPPRPA_ == 2) this->nSingleDim_ = this->nVBVB_SLT_;
+    }
     /*************************/
   } else if(this->iMeth_ == PPCTDA){
     /*************************/
     /* pp-TDA (C) Single Dim */
-    if(this->iPPRPA_ == 0)      this->nSingleDim_ = this->nOAOA_SLT_;
-    else if(this->iPPRPA_ == 1) this->nSingleDim_ = this->nOAOB_;
-    else if(this->iPPRPA_ == 2) this->nSingleDim_ = this->nOBOB_SLT_;
+    if(this->Ref_ == SingleSlater<double>::TCS)
+      this->nSingleDim_ = this->nOO_SLT_;
+    else {
+      if(this->iPPRPA_ == 0)      this->nSingleDim_ = this->nOAOA_SLT_;
+      else if(this->iPPRPA_ == 1) this->nSingleDim_ = this->nOAOB_;
+      else if(this->iPPRPA_ == 2) this->nSingleDim_ = this->nOBOB_SLT_;
+    }
     /*************************/
   } else {
     CErr("PSCF Method " + std::to_string(this->iMeth_) + " NYI",this->fileio_->out);
@@ -445,9 +495,13 @@ void SDResponse::checkValid(){
   bool gtNSD   = this->nSingleDim_     < this->nGuess_;
   bool gtNSDd2 = (this->nSingleDim_/2) < this->nGuess_;
   bool gtADim;
-  if(this->iPPRPA_ == 0) gtADim = nVAVA_SLT_ < this->nGuess_;
-  if(this->iPPRPA_ == 1) gtADim = nVAVB_     < this->nGuess_;
-  if(this->iPPRPA_ == 2) gtADim = nVBVB_SLT_ < this->nGuess_;
+  if(this->Ref_ == SingleSlater<double>::TCS)
+    gtADim = this->nVV_SLT_ < this->nGuess_;
+  else {
+    if(this->iPPRPA_ == 0) gtADim = nVAVA_SLT_ < this->nGuess_;
+    if(this->iPPRPA_ == 1) gtADim = nVAVB_     < this->nGuess_;
+    if(this->iPPRPA_ == 2) gtADim = nVBVB_SLT_ < this->nGuess_;
+  }
 
   if(this->nGuess_ < this->nSek_)
     CErr("Must specify more guess vectors than desired roots",this->fileio_->out);
@@ -2242,10 +2296,27 @@ void SDResponse::incorePPRPAnew(){
     Eigen::SelfAdjointEigenSolver<RealMatrix> ES;
     ES.compute(A);
     Eigen::VectorXd EATDA = ES.eigenvalues().real();
+    Eigen::VectorXd TATDA = ES.eigenvectors().col(0).real();
+    RealVecMap TATDAMap(TATDA.data(),TATDA.size());
+    RealMatrix TAAO(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
+    RealMatrix ITAAO(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
+    RealMatrix ATAAO(this->nVV_SLT_,1);
+    RealVecMap ATAAOMap(ATAAO.data(),ATAAO.size());
+    cout << "HERE" << endl;
+    this->formAOTDen(TATDAMap,TAAO,TAAO);
+    cout << "HERE" << endl;
+    this->singleSlater_->aointegrals()->twoEContractDirect(false,false,true,true,TAAO,
+      ITAAO,TAAO,ITAAO);
+    cout << "HERE" << endl;
+    this->formMOTDen(ATAAOMap,ITAAO,ITAAO);
+    cout << "HERE" << endl;
+    this->scaleDagPPRPA(true,TATDAMap,ATAAOMap);
     EATDA = -EATDA;
     std::sort(EATDA.data(),EATDA.data()+EATDA.size());
     EATDA = -EATDA; 
     cout << EATDA << endl;
+    cout << endl << "TRUE" << endl << A*TATDA << endl;
+    cout << endl << "Computed" << endl << ATAAOMap << endl;
  
     cout << endl << endl;
     ES.compute(-C);

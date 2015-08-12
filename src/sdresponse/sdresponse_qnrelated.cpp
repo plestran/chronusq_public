@@ -51,14 +51,19 @@ void SDResponse::formGuess(){
   int nRPA = 1;
   if(this->iMeth_==RPA || this->iMeth_ == STAB) nRPA *= 2;
   int nCPY;
-  if(this->iMeth_ == CIS || this->iMeth_ == RPA || this->iMeth_ == STAB) nCPY = this->nSingleDim_ / nRPA;
+  if(this->iMeth_ == CIS || this->iMeth_ == RPA || this->iMeth_ == STAB) 
+    nCPY = this->nSingleDim_ / nRPA;
   else if(this->iMeth_ == PPRPA){
-    if(this->iPPRPA_ == 0)
-      nCPY = this->nVAVA_SLT_;
-    else if(this->iPPRPA_ = 1)
-      nCPY = this->nVAVB_;
-    else if(this->iPPRPA_ = 2)
-      nCPY = this->nVBVB_SLT_;
+    if(this->Ref_ == SingleSlater<double>::TCS)
+      nCPY = this->nVV_SLT_;
+    else {
+      if(this->iPPRPA_ == 0)
+        nCPY = this->nVAVA_SLT_;
+      else if(this->iPPRPA_ = 1)
+        nCPY = this->nVAVB_;
+      else if(this->iPPRPA_ = 2)
+        nCPY = this->nVBVB_SLT_;
+    }
   } else {
     nCPY = this->nSingleDim_;
   }
@@ -96,6 +101,34 @@ void SDResponse::getDiag(){
       if(this->iMeth_ == RPA || this->iMeth_ == STAB)
         this->rmDiag_->block(nSingleDim_/2,0,nSingleDim_/2,1)
           = this->rmDiag_->block(0,0,nSingleDim_/2,1);
+    } else if(this->iMeth_ == PPRPA || this->iMeth_ == PPATDA || this->iMeth_ == PPCTDA){
+      bool doA = ( (this->iMeth_ == PPATDA) || (this->iMeth_ == PPRPA) );
+      bool doC = ( (this->iMeth_ == PPCTDA) || (this->iMeth_ == PPRPA) );
+      this->initRMu();
+ 
+      if(doA){
+          for(auto a = 0, ab = 0; a < this->nV_; a++)
+          for(auto b = 0; b <  a ; b++, ab++    ){
+            double ea = (*this->singleSlater_->epsA())(a + this->nO_);
+            double eb = (*this->singleSlater_->epsA())(b + this->nO_);
+            (*this->rmDiag_)(ab) = ea + eb - 2*this->rMu_; 
+          }
+      } //doA
+      if(doC){
+        int iOff = this->nVV_SLT_;
+        double fact = -1.0;
+        if(this->iMeth_ == PPRPA) fact *= -1.0;
+        
+          for(auto i = 0, ij = iOff; i < this->nO_; i++)
+          for(auto j = 0; j <  i ;    j++, ij++    ){
+            double ei = (*this->singleSlater_->epsA())(i);
+            double ej = (*this->singleSlater_->epsA())(j);
+            (*this->rmDiag_)(ij) = fact * (ei + ej - 2*this->rMu_); 
+          } // loop I < J (I- J-)
+      } // doC
+      
+    } else {
+      CErr("Diagonal elements for given iMeth not defined");
     }
   } else {
     if(this->iMeth_ == RPA || this->iMeth_ == CIS || this->iMeth_ == STAB){
@@ -363,25 +396,15 @@ void SDResponse::formRM3(RealCMMap &XMO, RealCMMap &Sigma, RealCMMap &Rho){
 } // formRM3
 
 void SDResponse::formRM4(RealCMMap& XMO, RealCMMap &Sigma, RealCMMap &Rho){
-  int VirSqAASLT   = this->nVA_*(this->nVA_-1)/2;
-  int OccSqAASLT   = this->nOA_*(this->nOA_-1)/2;
-  int VirSqAALT    = this->nVA_*(this->nVA_+1)/2;
-  int OccSqAALT    = this->nOA_*(this->nOA_+1)/2;
-  int VirSqBBSLT   = this->nVB_*(this->nVB_-1)/2;
-  int OccSqBBSLT   = this->nOB_*(this->nOB_-1)/2;
-  int VirSqBBLT    = this->nVB_*(this->nVB_+1)/2;
-  int OccSqBBLT    = this->nOB_*(this->nOB_+1)/2;
-  int VirSqAA      = this->nVA_*this->nVA_;
-  int OccSqAA      = this->nOA_*this->nOA_;
-  int VirSqAB      = this->nVA_*this->nVB_;
-  int OccSqAB      = this->nOA_*this->nOB_;
 
   bool doA = ( (this->iMeth_ == PPATDA) || (this->iMeth_ == PPRPA) );
   bool doC = ( (this->iMeth_ == PPCTDA) || (this->iMeth_ == PPRPA) );
 
-  std::vector<RealMatrix> XAO(XMO.cols(),RealMatrix::Zero(this->nBasis_,this->nBasis_)); 
-  std::vector<RealMatrix> IXAO(XMO.cols(),RealMatrix::Zero(this->nBasis_,this->nBasis_)); 
-  RealMatrix IXMO(this->nBasis_,this->nBasis_);
+  std::vector<RealMatrix> 
+    XAO(XMO.cols(),RealMatrix::Zero(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_)); 
+  std::vector<RealMatrix> 
+    IXAO(XMO.cols(),RealMatrix::Zero(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_)); 
+  RealMatrix IXMO(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
 
   for(auto idx = 0; idx < XMO.cols(); idx++){
     RealVecMap X(XMO.data()+idx*this->nSingleDim_,this->nSingleDim_);

@@ -124,11 +124,14 @@ namespace ChronusQ{
               else if(!do24 && !doTCS)
                 this->UnRestricted34Contract(G[0][thread_id],XAlpha,G[1][thread_id],
                   XBeta,XTotal,n1,n2,n3,n4,bf1_s,bf2_s,bf3_s,bf4_s,buff,s1234_deg);
-              else if(!do24)
+              else if(doTCS && !do24)
                 this->Spinor34Contract(G[0][thread_id],XAlpha,n1,n2,n3,n4,
                   bf1_s,bf2_s,bf3_s,bf4_s,buff,s1234_deg);
-              else
+              else if(!doTCS && do24)
                 this->General24CouContract(G[0][thread_id],XAlpha,n1,n2,n3,n4,
+                  bf1_s,bf2_s,bf3_s,bf4_s,buff,s1234_deg);
+              else if(doTCS && do24)
+                this->Spinor24CouContract(G[0][thread_id],XAlpha,n1,n2,n3,n4,
                   bf1_s,bf2_s,bf3_s,bf4_s,buff,s1234_deg);
             }
           }
