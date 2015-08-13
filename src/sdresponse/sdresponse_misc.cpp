@@ -2041,7 +2041,17 @@ void SDResponse::incoreRPA(){
   ABBA.block(this->nOV_,this->nOV_,this->nOV_,this->nOV_) = A;
  
   Eigen::SelfAdjointEigenSolver<RealMatrix> ES(ABBA);
+  cout << std::fixed << std::setprecision(12);
   cout << ES.eigenvalues()<< endl;
+
+  RealCMMatrix TStab = ES.eigenvectors().real();
+  RealCMMap TStabMap(TStab.data(),2*this->nOV_,2*this->nOV_);
+  RealCMMatrix ATStab(2*this->nOV_,2*this->nOV_);
+  RealCMMap ATStabMap(ATStab.data(),2*this->nOV_,2*this->nOV_);
+
+  this->formRM3(TStabMap,ATStabMap,ATStabMap);
+  prettyPrint(cout,ABBA*TStab - ATStabMap,"DIFF");
+  
 
   ABBA.block(0,0,this->nOV_,this->nOV_) = A;
   ABBA.block(this->nOV_,0,this->nOV_,this->nOV_) = -B;
