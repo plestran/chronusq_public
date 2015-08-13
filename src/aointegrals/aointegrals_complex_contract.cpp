@@ -239,7 +239,7 @@ void AOIntegrals::twoEContractDirect(bool RHF, bool doFock, bool do24, bool doTC
   if(doFock) this->PTD = finish - start;
 }
 template<>
-void AOIntegrals::twoEContractN4(bool RHF, bool doFock, bool doTCS, const ComplexMatrix &XAlpha, ComplexMatrix &AXAlpha,
+void AOIntegrals::twoEContractN4(bool RHF, bool doFock, bool do24, bool doTCS, const ComplexMatrix &XAlpha, ComplexMatrix &AXAlpha,
                                  const ComplexMatrix &XBeta, ComplexMatrix &AXBeta) {
   this->fileio_->out << "Contracting with in-core two-electron integrals" << endl;
   if(!this->haveAOTwoE) this->computeAOTwoE();

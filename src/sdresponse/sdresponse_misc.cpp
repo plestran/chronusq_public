@@ -1901,7 +1901,7 @@ RealMatrix SDResponse::formRM2(RealMatrix &XMO){
     if(this->controls_->directTwoE && !this->controls_->doDF)
       this->singleSlater_->aointegrals()->twoEContractDirect(false,false,false,false,XAAO,IXA,XBAO,IXB);
     else
-      this->singleSlater_->aointegrals()->twoEContractN4(false, true,false,XAAO,IXA,XBAO,IXB);
+      this->singleSlater_->aointegrals()->twoEContractN4(false,true,false,false,XAAO,IXA,XBAO,IXB);
     
 
     /*
@@ -2303,19 +2303,37 @@ void SDResponse::incorePPRPAnew(){
     EATDA = -EATDA;
     cout << std::fixed << std::setprecision(12);
     cout << EATDA << endl;
-//  RealCMMatrix TATDA = ES.eigenvectors().real();
-//  RealCMMap TATDAMap(TATDA.data(),this->nVV_SLT_,this->nVV_SLT_);
-//  RealCMMatrix ATATDA(this->nVV_SLT_,this->nVV_SLT_);
-//  RealCMMap ATATDAMap(ATATDA.data(),this->nVV_SLT_,this->nVV_SLT_);
-// 
-//  this->formRM4(TATDAMap,ATATDAMap,ATATDAMap);
-//  prettyPrint(cout,A*TATDA - ATATDAMap,"DIFF");
+
+    if(!this->haveDag_) this->getDiag();
+    RealCMMatrix TATDA = ES.eigenvectors().real();
+    RealCMMap TATDAMap(TATDA.data(),this->nVV_SLT_,this->nVV_SLT_);
+    RealCMMatrix ATATDA(this->nVV_SLT_,this->nVV_SLT_);
+    RealCMMap ATATDAMap(ATATDA.data(),this->nVV_SLT_,this->nVV_SLT_);
+/*
+    for(auto iSt = 0; iSt < this->nVV_SLT_;iSt++)
+    for(auto a = 0, ab = 0; a < this->nV_; a++      )
+    for(auto b = 0        ; b < a        ; b++, ab++)
+    for(auto c = 0, cd = 0; c < this->nV_; c++      )
+    for(auto d = 0        ; d < c        ; d++, cd++){
+      ATATDA(ab,iSt) += 
+        (this->mointegrals_->ABCD(a,c,b,d) - this->mointegrals_->ABCD(a,d,b,c))*
+        TATDA(cd,iSt);
+      if(ab==cd)
+        ATATDA(ab,iSt) += (*this->rmDiag_)(ab)*TATDA(ab,iSt);
+    }
+*/
+   
+    this->formRM4(TATDAMap,ATATDAMap,ATATDAMap);
+    prettyPrint(cout,A*TATDA - ATATDAMap,"DIFF");
+/*
     if(!this->haveDag_) this->getDiag();
     RealCMMatrix Vec(this->nVV_SLT_,8);
     VectorXd Eig(8,1);
     RealCMMatrix ACM = A;
     QuasiNewton<double> davA(8,&ACM,this->rmDiag_.get(),&Vec,&Eig);
     davA.run(cout);
+*/
+    
     
     cout << endl << endl;
     ES.compute(-C);

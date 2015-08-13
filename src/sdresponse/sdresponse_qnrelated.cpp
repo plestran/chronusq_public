@@ -413,9 +413,13 @@ void SDResponse::formRM4(RealCMMap& XMO, RealCMMap &Sigma, RealCMMap &Rho){
 
   bool RHF   = this->Ref_ != SingleSlater<double>::TCS;
   bool doTCS = this->Ref_ == SingleSlater<double>::TCS;
-  this->singleSlater_->aointegrals()->multTwoEContractDirect(XMO.cols(),RHF,false,true,
-    doTCS,XAO,IXAO,XAO,IXAO);
-
+//this->singleSlater_->aointegrals()->multTwoEContractDirect(XMO.cols(),RHF,false,true,
+//  doTCS,XAO,IXAO,XAO,IXAO);
+//cout << "HERE" << endl;
+  for(auto idx = 0; idx < XMO.cols(); idx++)
+    this->singleSlater_->aointegrals()->twoEContractN4(false,false,true,doTCS,XAO[idx],
+      IXAO[idx],XAO[idx],IXAO[idx]);
+//cout << "HERE" << endl;
 
   for(auto idx = 0; idx < XMO.cols(); idx++){
     RealVecMap X(XMO.data()+idx*this->nSingleDim_,this->nSingleDim_);
