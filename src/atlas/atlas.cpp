@@ -209,6 +209,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 
   SingleSlater<dcomplex> newSS(hartreeFockReal.get());
   newSS.formFock();
+  cout << "DIFF" << endl << (*newSS.fockA()).real() - (*hartreeFockReal->fockA()) << endl;
 /*
   double *tmp = new double[3*2];
   for(auto i =0; i < 6; i++) tmp[i] = 0.0;
