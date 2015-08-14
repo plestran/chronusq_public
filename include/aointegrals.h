@@ -273,7 +273,9 @@ public:
   double twoevRRa0c0(ShellPair*,ShellPair*,int,int,int*,int,int*,int*,int*,int*,int*);
   double twoevRRa000(ShellPair*,ShellPair*,int,int,int*,int*,int*,int*,int*);
   double twoeSSSS0(int*,ShellPair*,ShellPair*);
-};
+}; // class AOIntegrals
+
+#include <aointegrals_uniquegen.h>
 } // namespace ChronusQ
 
 #endif
