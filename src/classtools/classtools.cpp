@@ -125,6 +125,8 @@ void readInput(FileIO * fileio, Molecule * mol, BasisSet * basis, Controls * con
       else if(!readString.compare("INCORE")){
         controls->directTwoE = false;
         controls->buildn4eri = true;
+      } else if(!readString.compare("COMPLEX")){
+        controls->doComplex = true;
       } else {
         CErr("Input SCF Option Not Recognized",fileio->out);
       }

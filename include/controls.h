@@ -57,6 +57,7 @@ public:
   bool          doOctpole;      // Use Libint octapole integrals?
   bool          doSDR;          // Perform Response calculation
   bool          doCUHF;         // To CUHF (Eigenfunction of S x S)
+  bool          doComplex;      // Find complex solution
   double 	thresholdS;
   double 	thresholdAB;
   double	thresholdSchawrtz;
