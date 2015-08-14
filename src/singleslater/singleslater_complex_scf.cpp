@@ -34,16 +34,17 @@ using ChronusQ::SingleSlater;
 //----------------------------------------//
 namespace ChronusQ {
 template<>
-void SingleSlater<double>::complexMem(){;};
-
+void SingleSlater<dcomplex>::complexMem(){
+  this->lenRealScr_ += this->LRWORK_; // Extra space for RWORK for complex
+};
 template<>
-void SingleSlater<double>::printDensityInfo(double PAlphaRMS,double EDelta){
+void SingleSlater<dcomplex>::printDensityInfo(double PAlphaRMS,double EDelta){
   this->fileio_->out<<"\nSCF Information:"<<endl;
   this->fileio_->out<<std::right<<std::setw(30)<<"    Delta-E = "<<std::setw(15)<<std::scientific<<EDelta<<std::setw(5)<<" Eh "<<endl;
   this->fileio_->out<<std::right<<std::setw(30)<<"RMS Density = "<<std::setw(15)<<std::scientific<<PAlphaRMS<<endl;
 };
 template<>
-void SingleSlater<double>::printDensityInfo(double PAlphaRMS, double PBetaRMS, double EDelta){
+void SingleSlater<dcomplex>::printDensityInfo(double PAlphaRMS, double PBetaRMS, double EDelta){
   this->fileio_->out<<"\nSCF Information:"<<endl;
   this->fileio_->out<<std::right<<std::setw(30)<<"    Delta-E = "<<std::setw(15)<<std::scientific<<EDelta<<std::setw(5)<<" Eh "<<endl;
   this->fileio_->out<<std::right<<std::setw(30)<<"RMS Alpha Density = "<<std::setw(15)<<std::scientific<<PAlphaRMS<<endl;
@@ -51,32 +52,32 @@ void SingleSlater<double>::printDensityInfo(double PAlphaRMS, double PBetaRMS, d
 };
 
 template<>
-void SingleSlater<double>::formX(){
-  RealMap X(this->XMem_,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
-  X = (*this->aointegrals_->overlap_).pow(-0.5); // Make this more efficient... FIXME
+void SingleSlater<dcomplex>::formX(){
+  ComplexMap X(this->XMem_,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
+  X.real() = (*this->aointegrals_->overlap_).pow(-0.5); // Make this more efficient... FIXME
 
   if(this->Ref_ == CUHF){
-    RealMap Xp(this->XpMem_,this->nBasis_,this->nBasis_);
-    Xp = (*this->aointegrals_->overlap_).pow(0.5); // Make this more efficient... FIXME
+    ComplexMap Xp(this->XpMem_,this->nBasis_,this->nBasis_);
+    Xp.real() = (*this->aointegrals_->overlap_).pow(0.5); // Make this more efficient... FIXME
   }
 }
 
 template<>
-void SingleSlater<double>::formNO(){
+void SingleSlater<dcomplex>::formNO(){
   int INFO;
   char JOBZ = 'V';
   char UPLO = 'L';
 
-  RealMap P(this->PNOMem_,this->nBasis_,this->nBasis_);
-  RealMap Xp(this->XpMem_,this->nBasis_,this->nBasis_);
+  ComplexMap P(this->PNOMem_,this->nBasis_,this->nBasis_);
+  ComplexMap Xp(this->XpMem_,this->nBasis_,this->nBasis_);
 
   P = 0.5 * Xp * (*this->densityA_) * Xp;
   if(!this->isClosedShell)
     P += 0.5 * Xp * (*this->densityB_) * Xp;
 
-  dsyev_(&JOBZ,&UPLO,&this->nBasis_,this->PNOMem_,&this->nBasis_,this->occNumMem_,
-         this->WORK_,&this->LWORK_,&INFO);
-  if(INFO != 0) CErr("DSYEV Failed in FormNO",this->fileio_->out);
+  zheev_(&JOBZ,&UPLO,&this->nBasis_,this->PNOMem_,&this->nBasis_,this->occNumMem_,
+         this->WORK_,&this->LWORK_,this->RWORK_,&INFO);
+  if(INFO != 0) CErr("ZHEEV Failed in FormNO",this->fileio_->out);
   P.transposeInPlace();
 
   // Swap Ordering
@@ -85,28 +86,28 @@ void SingleSlater<double>::formNO(){
 }
 
 template<>
-void SingleSlater<double>::diagFock(){
+void SingleSlater<dcomplex>::diagFock(){
   int INFO;
   char JOBZ = 'V';
   char UPLO = 'U';
   auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
 
-  RealMap X(this->XMem_,NTCSxNBASIS,NTCSxNBASIS);
-  RealMap POldAlpha(this->POldAlphaMem_,NTCSxNBASIS,NTCSxNBASIS);
-  RealMap FpAlpha(this->FpAlphaMem_,NTCSxNBASIS,NTCSxNBASIS);
-  RealMap POldBeta(this->POldBetaMem_,0,0);
-  RealMap FpBeta(this->FpBetaMem_,0,0);
+  ComplexMap X(this->XMem_,NTCSxNBASIS,NTCSxNBASIS);
+  ComplexMap POldAlpha(this->POldAlphaMem_,NTCSxNBASIS,NTCSxNBASIS);
+  ComplexMap FpAlpha(this->FpAlphaMem_,NTCSxNBASIS,NTCSxNBASIS);
+  ComplexMap POldBeta(this->POldBetaMem_,0,0);
+  ComplexMap FpBeta(this->FpBetaMem_,0,0);
   if(!this->isClosedShell && this->Ref_ != TCS){
-    new (&POldBeta)  RealMap(this->POldBetaMem_, NTCSxNBASIS,NTCSxNBASIS);
-    new (&FpBeta)    RealMap(this->FpBetaMem_,NTCSxNBASIS,NTCSxNBASIS);
+    new (&POldBeta)  ComplexMap(this->POldBetaMem_, NTCSxNBASIS,NTCSxNBASIS);
+    new (&FpBeta)    ComplexMap(this->FpBetaMem_,NTCSxNBASIS,NTCSxNBASIS);
   }
 
 
   if(this->Ref_ == CUHF){
-    RealMap P(this->PNOMem_,this->nBasis_,this->nBasis_);
-    RealMap Xp(this->XpMem_,this->nBasis_,this->nBasis_);
-    RealMap DelF(this->delFMem_,this->nBasis_,this->nBasis_);
-    RealMap Lambda(this->lambdaMem_,this->nBasis_,this->nBasis_);
+    ComplexMap P(this->PNOMem_,this->nBasis_,this->nBasis_);
+    ComplexMap Xp(this->XpMem_,this->nBasis_,this->nBasis_);
+    ComplexMap DelF(this->delFMem_,this->nBasis_,this->nBasis_);
+    ComplexMap Lambda(this->lambdaMem_,this->nBasis_,this->nBasis_);
 
     int activeSpace  = this->molecule_->multip() - 1;
     int coreSpace    = (this->molecule_->nTotalE() - activeSpace) / 2;
@@ -135,17 +136,17 @@ void SingleSlater<double>::diagFock(){
   if(!this->isClosedShell && this->Ref_ != TCS) POldBeta = (*this->densityB_);
 
   FpAlpha = X.transpose() * (*this->fockA_) * X;
-  dsyev_(&JOBZ,&UPLO,&NTCSxNBASIS,this->FpAlphaMem_,&NTCSxNBASIS,this->epsA_->data(),
-         this->WORK_,&this->LWORK_,&INFO);
-  if(INFO != 0) CErr("DSYEV Failed Fock Alpha",this->fileio_->out);
+  zheev_(&JOBZ,&UPLO,&NTCSxNBASIS,this->FpAlphaMem_,&NTCSxNBASIS,this->epsA_->data(),
+         this->WORK_,&this->LWORK_,this->RWORK_,&INFO);
+  if(INFO != 0) CErr("ZHEEV Failed Fock Alpha",this->fileio_->out);
   FpAlpha.transposeInPlace(); // bc row major
   (*this->moA_) = X * FpAlpha;
 
   if(!this->isClosedShell && this->Ref_ != TCS){
     FpBeta = X.transpose() * (*this->fockB_) * X;
-    dsyev_(&JOBZ,&UPLO,&this->nBasis_,this->FpBetaMem_,&this->nBasis_,this->epsB_->data(),
-           this->WORK_,&this->LWORK_,&INFO);
-    if(INFO != 0) CErr("DSYEV Failed Fock Beta",this->fileio_->out);
+    zheev_(&JOBZ,&UPLO,&this->nBasis_,this->FpBetaMem_,&this->nBasis_,this->epsB_->data(),
+           this->WORK_,&this->LWORK_,this->RWORK_,&INFO);
+    if(INFO != 0) CErr("ZHEEV Failed Fock Beta",this->fileio_->out);
     FpBeta.transposeInPlace(); // bc row major
     (*this->moB_) = X * FpBeta;
   }
@@ -155,16 +156,16 @@ void SingleSlater<double>::diagFock(){
 }
 
 template<>
-void SingleSlater<double>::evalConver(){
+void SingleSlater<dcomplex>::evalConver(){
   double EOld;
   double EDelta;
   double PAlphaRMS;
   double PBetaRMS;
 
-  RealMap POldAlpha(this->POldAlphaMem_,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
-  RealMap POldBeta(this->POldBetaMem_,0,0);
+  ComplexMap POldAlpha(this->POldAlphaMem_,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
+  ComplexMap POldBeta(this->POldBetaMem_,0,0);
   if(!this->isClosedShell && this->Ref_ != TCS){
-    new (&POldBeta)  RealMap(this->POldBetaMem_, this->nBasis_,this->nBasis_);
+    new (&POldBeta)  ComplexMap(this->POldBetaMem_, this->nBasis_,this->nBasis_);
   }
 
   EOld = this->totalEnergy;
@@ -183,11 +184,11 @@ void SingleSlater<double>::evalConver(){
 }
 
 template<>
-void SingleSlater<double>::mixOrbitalsSCF(){
+void SingleSlater<dcomplex>::mixOrbitalsSCF(){
   if(this->Ref_ == TCS){
   //CErr();
   auto nO = this->nAE_ + this->nBE_;
-  VectorXd HOMOA,LUMOB;
+  Eigen::VectorXcd HOMOA,LUMOB;
   int indxHOMOA = -1, indxLUMOB = -1;
 /*
   for(auto i = nO-1; i >= 0; i--){
@@ -216,7 +217,7 @@ void SingleSlater<double>::mixOrbitalsSCF(){
     for(auto j = 0; j < this->nTCS_*this->nBasis_; j+=2){
       auto aComp = (*this->moA_)(j,i);
       auto bComp = (*this->moA_)(j+1,i);
-      if(std::abs(aComp) > 1e-10 && std::abs(bComp) < 1e-10) nNonZeroAlpha++;
+      if(std::norm(aComp) > 1e-10 && std::norm(bComp) < 1e-10) nNonZeroAlpha++;
     }
     double percentNonZeroAlpha = (double)nNonZeroAlpha/(double)nOrb;
     if(percentNonZeroAlpha > maxPercentNonZeroAlpha){
@@ -230,7 +231,7 @@ void SingleSlater<double>::mixOrbitalsSCF(){
     for(auto j = 1; j < this->nTCS_*this->nBasis_; j+=2){
       auto aComp = (*this->moA_)(j-1,i);
       auto bComp = (*this->moA_)(j,i);
-      if(std::abs(bComp) > 1e-6 && std::abs(aComp) < 1e-6) nNonZeroBeta++;
+      if(std::norm(bComp) > 1e-6 && std::norm(aComp) < 1e-6) nNonZeroBeta++;
     }
     double percentNonZeroBeta = (double)nNonZeroBeta/(double)nOrb;
     if(percentNonZeroBeta > maxPercentNonZeroBeta){

@@ -86,11 +86,16 @@ class SingleSlater {
   int lenB_;
   int lenCoeff_;
   int LWORK_;
+  int LRWORK_;
   int lenLambda_;
   int lenDelF_;
   int lenOccNum_;
   int lenScr_;
+  int lenRealScr_;
 
+  double *REAL_SCF_SCR;
+  double *occNumMem_;
+  double *RWORK_;
   T *SCF_SCR;
   T *XMem_;
   T *FpAlphaMem_;
@@ -106,10 +111,10 @@ class SingleSlater {
   T *lambdaMem_;
   T *delFMem_;
   T *PNOMem_;
-  T *occNumMem_;
   
 
   void initSCFMem();
+  void complexMem();
   void initMemLen();
   void initSCFPtr();
   void formX();

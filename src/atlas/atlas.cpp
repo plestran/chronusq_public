@@ -129,6 +129,12 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
     if(controls->optWaveFunction)  hartreeFockReal->SCF();
     else fileIO->out << "**Skipping SCF Optimization**" << endl; 
     hartreeFockReal->computeMultipole();
+  } else {
+    hartreeFockComplex->formFock();
+    aointegrals->printTimings();
+    hartreeFockComplex->computeEnergy();
+    if(controls->optWaveFunction)  hartreeFockComplex->SCF();
+    else fileIO->out << "**Skipping SCF Optimization**" << endl; 
   }
   mointegrals->iniMOIntegrals(molecule.get(),basisset.get(),fileIO.get(),controls.get(),aointegrals.get(),hartreeFockReal.get());
   if(controls->doSDR) {
