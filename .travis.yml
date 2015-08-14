@@ -6,7 +6,7 @@ compiler:
 env:
   - GCC_VERSION=4.9
 install:
-  - ./util/buildlibint
+  - ./util/buildlibint 4
   - cd deps
   - git clone https://github.com/wavefunction91/eigen.git
   - git clone https://github.com/wavefunction91/BTAS.git
