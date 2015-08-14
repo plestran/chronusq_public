@@ -5,3 +5,4 @@ tar xvf libint-2.1.0-beta2.tgz
 cd libint-2.1.0-beta2
 ./configure --prefix=$PWD/../.. --with-cxx=g++
 make install -j$1
+cd ../../..
