@@ -254,8 +254,8 @@ void SingleSlater<double>::mixOrbitalsSCF(){
   }
 
   if(indxHOMOA == -1 || indxLUMOB == -1)
-    CErr("TCS orbital swap failed to find suitable Alpha-Beta pair",this->fileio_->out);
-
+  //  CErr("TCS orbital swap failed to find suitable Alpha-Beta pair",this->fileio_->out);
+    return;
   
 //CErr();
   HOMOA = this->moA_->col(indxHOMOA) ;

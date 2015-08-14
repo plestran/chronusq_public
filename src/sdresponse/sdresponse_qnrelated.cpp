@@ -39,6 +39,7 @@ void SDResponse::IterativeRPA(){
     this->formOscStrength();
     this->printExcitedStateEnergies();
   }
+  if(this->iMeth_ == STAB) this->reoptWF();
 } // IterativeRPA
 
 void SDResponse::formGuess(){
@@ -429,4 +430,94 @@ void SDResponse::formRM4(RealCMMap& XMO, RealCMMap &Sigma, RealCMMap &Rho){
   }
 
 } // formRM4
+
+void SDResponse::reoptWF(){
+  int maxStabIter = 4;
+  double small = 1e-9;
+  bool stable = false;
+  int NTCSxNBASIS = this->nTCS_*this->nBasis_;
+
+  int lenRealScr    = 0;
+  int lenComplexScr = 0;
+  int lenMat = NTCSxNBASIS*NTCSxNBASIS;
+  int lenEig = NTCSxNBASIS;
+  int lWork  = 4*NTCSxNBASIS;
+  int INFO;
+  char UPLO = 'L', JOBZ = 'V';
+
+  lenRealScr += lenMat; // Stability step in MO basis
+  lenRealScr += lenMat; // Matrix exponential
+  lenRealScr += lenEig; // Eigenvalues
+  lenRealScr += std::max(1,3*NTCSxNBASIS-1); // RWORK LAPACK Workspace
+
+
+  lenComplexScr += lenMat; // Stability step in MO basis
+  lenComplexScr += lenMat; // Matrix exponential
+  lenComplexScr += lenMat; // BSCR
+  lenComplexScr += lWork;  // LAPACK workspace (WORK)
+
+
+
+  double * REAL_SCR = new double[lenRealScr];
+
+  double * realStab    = REAL_SCR;
+  double * realExpStab = realStab    + lenMat;
+  double * W           = realExpStab + lenMat;
+  double * RWORK       = W           + lenEig;
+
+  dcomplex * COMPLEX_SCR = new dcomplex[lenComplexScr];
+
+  dcomplex * complexStab    = COMPLEX_SCR;
+  dcomplex * complexExpStab = complexStab    + lenMat;
+  dcomplex * BSCR           = complexExpStab + lenMat;
+  dcomplex * WORK           = BSCR           + lenMat;
+
+  RealCMMap    AReal(realStab   ,NTCSxNBASIS,NTCSxNBASIS);
+  RealCMMap ExpAReal(realExpStab,NTCSxNBASIS,NTCSxNBASIS);
+
+  ComplexCMMap    AComplex(complexStab   ,NTCSxNBASIS,NTCSxNBASIS);
+  ComplexCMMap    BComplex(BSCR          ,NTCSxNBASIS,NTCSxNBASIS);
+  ComplexCMMap ExpAComplex(complexExpStab,NTCSxNBASIS,NTCSxNBASIS);
+
+
+  for(auto iter = 0; iter < maxStabIter; iter++){
+    AReal.setZero();
+    ExpAReal.setZero();
+    AComplex.setZero();
+    BComplex.setZero();
+    ExpAComplex.setZero();
+
+    bool isPositive = (*this->omega_)(0) > 0.0;
+    bool isSmall    = std::abs((*this->omega_)(0)) < small;
+    if(isPositive || isSmall) {
+      stable = true;
+      break;
+    }
+    for(auto a = this->nO_, ia = 0; a < NTCSxNBASIS; a++)
+    for(auto i = 0         ; i < this->nO_; i++, ia++){
+      AComplex(a,i) = dcomplex(0.0, 0.9*(*this->transDen_)(ia,0));
+      AComplex(i,a) = dcomplex(0.0,-0.9*(*this->transDen_)(ia,0));
+    }
+// cout << AComplex.imag() << endl;
+
+    zheev_(&JOBZ,&UPLO,&NTCSxNBASIS,complexStab,&NTCSxNBASIS,W,WORK,&lWork,RWORK,&INFO);
+    std::memcpy(BSCR,complexStab,lenMat*sizeof(dcomplex));
+    for(auto i = 0; i < NTCSxNBASIS; i++){
+      dcomplex scal = std::exp(dcomplex(0.0,-W[i]));
+      BComplex.col(i) *= scal;
+    }
+   ExpAComplex = BComplex * AComplex.adjoint();
+   ExpAReal = ExpAComplex.real();
+// prettyPrint(cout,ExpAReal,"Exp(J)");
+// prettyPrint(cout,ExpAReal*ExpAReal.adjoint(),"Exp(J)");
+
+   (*this->singleSlater_->moA()) *= ExpAReal;
+   this->singleSlater_->formDensity();
+   this->singleSlater_->formFock();
+   this->singleSlater_->SCF();
+   QuasiNewton<double> dav(this);
+   dav.run(this->fileio_->out);
+   CErr();
+  } // loop iter
+} // reoptWF
 
