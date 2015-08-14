@@ -84,6 +84,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   // Initialize default settings and read input
   controls->iniControls();
 //controls->doTCS = true;
+  controls->doComplex = true;
   readInput(fileIO.get(),molecule.get(),basisset.get(),controls.get(),dfBasisset.get());
 //  fileIO->iniFileIO(controls->restart);
 
@@ -126,6 +127,8 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
     hartreeFockReal->formFock();
     aointegrals->printTimings();
     hartreeFockReal->computeEnergy();
+    prettyPrint(cout,*(hartreeFockReal->densityA()),"DA");
+    prettyPrint(cout,*(hartreeFockReal->fockA()),"FA");
     if(controls->optWaveFunction)  hartreeFockReal->SCF();
     else fileIO->out << "**Skipping SCF Optimization**" << endl; 
     hartreeFockReal->computeMultipole();
@@ -133,6 +136,8 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
     hartreeFockComplex->formFock();
     aointegrals->printTimings();
     hartreeFockComplex->computeEnergy();
+    prettyPrintComplex(cout,*(hartreeFockComplex->densityA()),"DA");
+    prettyPrintComplex(cout,*(hartreeFockComplex->fockA()),"FA");
     if(controls->optWaveFunction)  hartreeFockComplex->SCF();
     else fileIO->out << "**Skipping SCF Optimization**" << endl; 
   }
@@ -213,10 +218,10 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   time(&currentTime);
   fileIO->out<<"\nJob finished: "<<ctime(&currentTime)<<endl;
 
-  SingleSlater<dcomplex> newSS(hartreeFockReal.get());
-  newSS.formFock();
-  newSS.computeEnergy();
-  cout << "DIFF" << endl << (*newSS.fockA()).real() - (*hartreeFockReal->fockA()) << endl;
+//SingleSlater<dcomplex> newSS(hartreeFockReal.get());
+//newSS.formFock();
+//newSS.computeEnergy();
+//cout << "DIFF" << endl << (*newSS.fockA()).real() - (*hartreeFockReal->fockA()) << endl;
 /*
   double *tmp = new double[3*2];
   for(auto i =0; i < 6; i++) tmp[i] = 0.0;

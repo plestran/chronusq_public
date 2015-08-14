@@ -246,6 +246,9 @@ void SingleSlater<double>::mixOrbitalsSCF(){
 //CErr();
   HOMOA = this->moA_->col(indxHOMOA) ;
   LUMOB = this->moA_->col(indxLUMOB) ;
+  cout << HOMOA << endl << endl;
+  cout << LUMOB << endl << endl;
+  prettyPrint(cout,*this->moA_,"MO");
   this->moA_->col(indxHOMOA) = std::sqrt(0.5) * (HOMOA + LUMOB);
   this->moA_->col(indxLUMOB) = std::sqrt(0.5) * (HOMOA - LUMOB);
 /*

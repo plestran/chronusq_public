@@ -185,9 +185,9 @@ void SingleSlater<dcomplex>::evalConver(){
 
 template<>
 void SingleSlater<dcomplex>::mixOrbitalsSCF(){
+  auto nO = this->nAE_ + this->nBE_;
   if(this->Ref_ == TCS){
   //CErr();
-  auto nO = this->nAE_ + this->nBE_;
   Eigen::VectorXcd HOMOA,LUMOB;
   int indxHOMOA = -1, indxLUMOB = -1;
 /*
@@ -217,7 +217,7 @@ void SingleSlater<dcomplex>::mixOrbitalsSCF(){
     for(auto j = 0; j < this->nTCS_*this->nBasis_; j+=2){
       auto aComp = (*this->moA_)(j,i);
       auto bComp = (*this->moA_)(j+1,i);
-      if(std::norm(aComp) > 1e-10 && std::norm(bComp) < 1e-10) nNonZeroAlpha++;
+      if(std::norm(aComp) > 1e-12 && std::norm(bComp) < 1e-12) nNonZeroAlpha++;
     }
     double percentNonZeroAlpha = (double)nNonZeroAlpha/(double)nOrb;
     if(percentNonZeroAlpha > maxPercentNonZeroAlpha){
@@ -231,7 +231,7 @@ void SingleSlater<dcomplex>::mixOrbitalsSCF(){
     for(auto j = 1; j < this->nTCS_*this->nBasis_; j+=2){
       auto aComp = (*this->moA_)(j-1,i);
       auto bComp = (*this->moA_)(j,i);
-      if(std::norm(bComp) > 1e-6 && std::norm(aComp) < 1e-6) nNonZeroBeta++;
+      if(std::norm(bComp) > 1e-12 && std::norm(aComp) < 1e-12) nNonZeroBeta++;
     }
     double percentNonZeroBeta = (double)nNonZeroBeta/(double)nOrb;
     if(percentNonZeroBeta > maxPercentNonZeroBeta){
@@ -240,13 +240,20 @@ void SingleSlater<dcomplex>::mixOrbitalsSCF(){
     }
   }
 
-  if(indxHOMOA == -1 || indxLUMOB == -1)
-  //  CErr("TCS orbital swap failed to find suitable Alpha-Beta pair",this->fileio_->out);
+  if(indxHOMOA == -1 || indxLUMOB == -1){
+    cout << "HERE 1" << endl;
+   this->fileio_->out << "TCS orbital swap failed to find suitable Alpha-Beta pair" << endl;
     return;
+  }
   
 //CErr();
+//indxHOMOA = 2;
+//indxLUMOB = 5;
   HOMOA = this->moA_->col(indxHOMOA) ;
   LUMOB = this->moA_->col(indxLUMOB) ;
+  cout << HOMOA << endl << endl;
+  cout << LUMOB << endl << endl;
+  prettyPrintComplex(cout,*this->moA_,"MO");
   this->moA_->col(indxHOMOA) = std::sqrt(0.5) * (HOMOA + LUMOB);
   this->moA_->col(indxLUMOB) = std::sqrt(0.5) * (HOMOA - LUMOB);
 /*
@@ -262,6 +269,10 @@ void SingleSlater<dcomplex>::mixOrbitalsSCF(){
    cout << endl << endl <<  this->moA_->col(this->nTCS_*this->nBasis_-1) << endl;
 */
   }
+//auto HOMO = this->moA_->col(nO-1);
+//auto LUMO = this->moA_->col(nO);
+//this->moA_->col(nO-1) = std::sqrt(0.5) * (HOMO + math.ii*LUMO);
+//this->moA_->col(nO)   = std::sqrt(0.5) * (HOMO - math.ii*LUMO);
 }
 
 } // namespace ChronusQ
