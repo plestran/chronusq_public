@@ -65,8 +65,8 @@ class SingleSlater {
   std::unique_ptr<TMatrix>  exchangeB_;  ///< Beta Exchange Matrix
   std::unique_ptr<TMatrix>  moA_;        ///< Alpha or Full (TCS) MO Coefficient Matrix
   std::unique_ptr<TMatrix>  moB_;        ///< Beta MO Coefficient Matrix
-  std::unique_ptr<TMatrix>  epsA_;       ///< Alpha or Full (TCS) Fock Eigenenergies
-  std::unique_ptr<TMatrix>  epsB_;       ///< Beta Fock Eigenenergie
+  std::unique_ptr<RealMatrix>  epsA_;       ///< Alpha or Full (TCS) Fock Eigenenergies
+  std::unique_ptr<RealMatrix>  epsB_;       ///< Beta Fock Eigenenergie
   std::unique_ptr<TMatrix>  PTA_;        ///< Alpha or Full (TCS) Perturbation Tensor
   std::unique_ptr<TMatrix>  PTB_;        ///< Beta Perturbation Tensor
   std::unique_ptr<RealMatrix>  dipole_;  ///< Electric Dipole Moment
@@ -184,8 +184,8 @@ public:
   inline TMatrix* exchangeB(){ return this->exchangeB_.get();};
   inline TMatrix* moA()      { return this->moA_.get();};
   inline TMatrix* moB()      { return this->moB_.get();};
-  inline TMatrix* epsA()     { return this->epsA_.get();};
-  inline TMatrix* epsB()     { return this->epsB_.get();};
+  inline RealMatrix* epsA()     { return this->epsA_.get();};
+  inline RealMatrix* epsB()     { return this->epsB_.get();};
   inline TMatrix* PTA()      { return this->PTA_.get();};
   inline TMatrix* PTB()      { return this->PTB_.get();};
   inline RealMatrix* dipole(){ return this->dipole_.get();};
@@ -199,7 +199,7 @@ public:
   inline AOIntegrals * aointegrals(){return this->aointegrals_;};
 
   void formGuess();	        // form the intial guess of MO's (Density)
-  void placeAtmDen(std::vector<int>, SingleSlater<T> &);           // Place the atomic densities into total densities for guess
+  void placeAtmDen(std::vector<int>, SingleSlater<double> &);           // Place the atomic densities into total densities for guess
   void scaleDen();              // Scale the unrestricted densities for correct # electrons
   void formDensity();		// form the density matrix
   void formFock();	        // form the Fock matrix

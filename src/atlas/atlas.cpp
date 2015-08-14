@@ -106,22 +106,30 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
     hartreeFockComplex->printInfo();
   }
 
-  if(controls->guess==0) hartreeFockReal->formGuess();
-  else if(controls->guess==1) hartreeFockReal->readGuessIO();
-  else if(controls->guess==2) {
-    GauMatEl matEl(controls->gauMatElName);
-    hartreeFockReal->readGuessGauMatEl(matEl);
+  if(!controls->doComplex){
+    if(controls->guess==0) hartreeFockReal->formGuess();
+    else if(controls->guess==1) hartreeFockReal->readGuessIO();
+    else if(controls->guess==2) {
+      GauMatEl matEl(controls->gauMatElName);
+      hartreeFockReal->readGuessGauMatEl(matEl);
+    }
+    else if(controls->guess==3) hartreeFockReal->readGuessGauFChk(controls->gauFChkName);
+  } else {
+    if(controls->guess==0) hartreeFockComplex->formGuess();
+    else CErr("Cannot Read Guess for Complex Wavefunctions (NYI)",fileIO->out);
   }
-  else if(controls->guess==3) hartreeFockReal->readGuessGauFChk(controls->gauFChkName);
 //APS I have MO Please check in which controls call the following function
 //hartreeFockReal->matchord();
 //APE
-  hartreeFockReal->formFock();
-  aointegrals->printTimings();
-  hartreeFockReal->computeEnergy();
-  if(controls->optWaveFunction)  hartreeFockReal->SCF();
-  else fileIO->out << "**Skipping SCF Optimization**" << endl; 
-  hartreeFockReal->computeMultipole();
+
+  if(!controls->doComplex){
+    hartreeFockReal->formFock();
+    aointegrals->printTimings();
+    hartreeFockReal->computeEnergy();
+    if(controls->optWaveFunction)  hartreeFockReal->SCF();
+    else fileIO->out << "**Skipping SCF Optimization**" << endl; 
+    hartreeFockReal->computeMultipole();
+  }
   mointegrals->iniMOIntegrals(molecule.get(),basisset.get(),fileIO.get(),controls.get(),aointegrals.get(),hartreeFockReal.get());
   if(controls->doSDR) {
     sdResponse->setPPRPA(1);
@@ -198,10 +206,9 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
    */
   time(&currentTime);
   fileIO->out<<"\nJob finished: "<<ctime(&currentTime)<<endl;
-/*
+
   SingleSlater<dcomplex> newSS(hartreeFockReal.get());
   newSS.formFock();
-*/
 /*
   double *tmp = new double[3*2];
   for(auto i =0; i < 6; i++) tmp[i] = 0.0;
