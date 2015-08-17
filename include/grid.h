@@ -85,6 +85,7 @@ class TwoDGrid : public Grid {
             OneDGrid * Gs_;
       double   fsphe(double,double,double);
       double   ftest(double,double,double);
+      double   gtest(sph3GP);
 //            int * Gsnpts_;
       public:
         TwoDGrid(OneDGrid *Gr, OneDGrid *Gs){
@@ -128,5 +129,18 @@ class LebedevGrid : public OneDGrid {
     void genGrid();                                      
     void transformPts();
   }; // class GaussChebyshev1stGrid
+
+  class GaussChebyshev1stGridInf : public OneDGrid {
+    public:
+      GaussChebyshev1stGridInf(
+        int npts = 0, double beg = 0.0, double end = 0.0):
+        OneDGrid(npts,beg,end){
+          this->gridPts_ = new double[this->nPts_];        ///< Grid Points
+          this->weights_ = new double[this->nPts_];        ///< Weights
+        };
+  // Class Functions
+    void genGrid();                                      
+    void transformPts();
+  }; // class GaussChebyshev1stGridInf
 
 }; // namespace ChronusQ

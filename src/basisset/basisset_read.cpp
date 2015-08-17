@@ -229,22 +229,29 @@ double * BasisSet::basisEval(int iShell, std::array<double,3> center,sph3GP *ptS
   } else CErr("L > 2 NYI");
 
   std::memset(fEVal,0,shSize*sizeof(double));
-
+  cout << "Point Cart " << bg::get<0>(pt) << " " << bg::get<1>(pt) << " " << bg::get<2>(pt) <<endl;
+  cout << "Center     " << center[0] << " " << center[1] << " " << center[2] <<endl;
   double x = bg::get<0>(pt) - center[0];
   double y = bg::get<1>(pt) - center[1];
   double z = bg::get<2>(pt) - center[2];
+  cout << "Point Scaled" << x << " " << y << " " << z << endl;
   double rSq = x*x + y*y + z*z;
+  cout << " rSq " << rSq << endl;
+  cout << "shSize " << shSize << endl;
+  cout << "contDepth " << contDepth << endl;
   for(auto i = 0; i < shSize; i++){
-    cout << endl << fEVal[i] << endl;
+//    cout << endl << fEVal[i] << endl;
     for(auto k = 0; k < contDepth; k++){
       fEVal[i] += 
         this->shells(iShell).contr[0].coeff[k] *
         std::exp(-this->shells(iShell).alpha[k]*rSq);
+//        cout << "AP " << this->shells(iShell).contr[0].coeff[k] << endl;
+//        cout <<  this->shells(iShell).alpha[k] << endl;
     }
     auto l = L[i][0];
     auto m = L[i][1];
     auto n = L[i][2];
-
+    cout << "l= " << l << "m= " << m << "n= " << n << endl;
     fEVal[i] *= std::pow(x,l);
     fEVal[i] *= std::pow(y,m);
     fEVal[i] *= std::pow(z,n);
