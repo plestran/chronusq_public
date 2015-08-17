@@ -29,7 +29,7 @@
  ************************************/
 namespace ChronusQ {
 template<>
-void SingleSlater<double>::computeMultipole(){
+void SingleSlater<dcomplex>::computeMultipole(){
   if(!this->haveDensity) this->formDensity();
   if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
   if(!this->controls_->doDipole && !this->controls_->doQuadpole) return;
@@ -39,9 +39,9 @@ void SingleSlater<double>::computeMultipole(){
   int iBuf = 0;
   for(auto ixyz = 0; ixyz < 3; ixyz++){
     ConstRealMap mu(&this->aointegrals_->elecDipole_->storage()[iBuf],NB,NB);
-    (*dipole_)(ixyz,0) = -this->densityA_->frobInner(mu);
+    (*dipole_)(ixyz,0) = -this->densityA_->real().frobInner(mu);
     if(!this->isClosedShell && this->Ref_ != TCS) 
-      (*dipole_)(ixyz,0) += -this->densityB_->frobInner(mu);
+      (*dipole_)(ixyz,0) += -this->densityB_->real().frobInner(mu);
     iBuf += NBSq;
   }
   for(int iA = 0; iA < this->molecule_->nAtoms(); iA++)
@@ -53,9 +53,9 @@ void SingleSlater<double>::computeMultipole(){
     for(auto jxyz = 0; jxyz < 3; jxyz++)
     for(auto ixyz = jxyz; ixyz < 3; ixyz++){
       ConstRealMap mu(&this->aointegrals_->elecQuadpole_->storage()[iBuf],NB,NB);
-        (*quadpole_)(jxyz,ixyz) = -this->densityA_->frobInner(mu);
+        (*quadpole_)(jxyz,ixyz) = -this->densityA_->real().frobInner(mu);
         if(!this->isClosedShell && this->Ref_ != TCS) 
-          (*quadpole_)(jxyz,ixyz) += -this->densityB_->frobInner(mu);
+          (*quadpole_)(jxyz,ixyz) += -this->densityB_->real().frobInner(mu);
       iBuf += NBSq;
     }
     *this->quadpole_ = this->quadpole_->selfadjointView<Upper>();
@@ -73,9 +73,9 @@ void SingleSlater<double>::computeMultipole(){
     for(auto jxyz = kxyz; jxyz < 3; jxyz++)
     for(auto ixyz = jxyz; ixyz < 3; ixyz++){
       ConstRealMap mu(&this->aointegrals_->elecOctpole_->storage()[iBuf],NB,NB);
-      (*octpole_)(kxyz,jxyz,ixyz) = -this->densityA_->frobInner(mu);
+      (*octpole_)(kxyz,jxyz,ixyz) = -this->densityA_->real().frobInner(mu);
       if(!this->isClosedShell && this->Ref_ != TCS) 
-        (*octpole_)(kxyz,jxyz,ixyz) += -this->densityB_->frobInner(mu);
+        (*octpole_)(kxyz,jxyz,ixyz) += -this->densityB_->real().frobInner(mu);
       iBuf += NBSq;
     }
     for(auto kxyz = 0;    kxyz < 3; kxyz++)
