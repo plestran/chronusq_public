@@ -60,6 +60,9 @@ void readInput(FileIO * fileio, Molecule * mol, BasisSet * basis, Controls * con
       else if(!readString.compare("ROHF")){
         controls->HF     = true;
         controls->doCUHF = true;
+      } else if(!readString.compare("GHF")){
+        controls->HF = true;
+        controls->doTCS = true;
       } else {
 	controls->HF=false;
 	controls->DFT=true;

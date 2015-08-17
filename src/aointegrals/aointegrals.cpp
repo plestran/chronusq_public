@@ -84,7 +84,9 @@ void AOIntegrals::iniAOIntegrals(Molecule * molecule, BasisSet * basisset,
   this->fileio_   = fileio;
   this->controls_ = controls;
   this->nBasis_   = basisset->nBasis();
-  this->nTT_      = this->nBasis_*(this->nBasis_+1)/2;
+  this->nTCS_     = 1;
+  if(controls->doTCS) this->nTCS_ = 2;
+  this->nTT_      = this->nTCS_*this->nBasis_*(this->nTCS_*this->nBasis_+1)/2;
 
   // FIXME need a try statement for alloc
 #ifndef USE_LIBINT // We don't need to allocate these if we're using Libint
@@ -98,25 +100,25 @@ void AOIntegrals::iniAOIntegrals(Molecule * molecule, BasisSet * basisset,
   try {
     if(this->controls_->buildn4eri && !this->controls_->doDF) {
       this->fileio_->out << "Allocating N4 ERI" << endl;
-      this->aoERI_ = std::unique_ptr<RealTensor4d>(new RealTensor4d(this->nBasis_,this->nBasis_,this->nBasis_,this->nBasis_));
+      this->aoERI_ = std::unique_ptr<RealTensor4d>(new RealTensor4d(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
     } 
   } catch (...) {
     CErr(std::current_exception(),"N^4 ERI Tensor Allocation");
   }
 #endif
   try {
-    this->oneE_         = std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nBasis_)); // One Electron Integral
-    this->overlap_      = std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nBasis_)); // Overlap
-    this->kinetic_      = std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nBasis_)); // Kinetic
-    this->potential_    = std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nBasis_)); // Potential
+    this->oneE_         = std::unique_ptr<RealMatrix>(new RealMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_)); // One Electron Integral
+    this->overlap_      = std::unique_ptr<RealMatrix>(new RealMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_)); // Overlap
+    this->kinetic_      = std::unique_ptr<RealMatrix>(new RealMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_)); // Kinetic
+    this->potential_    = std::unique_ptr<RealMatrix>(new RealMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_)); // Potential
     if(this->controls_->doDipole || this->controls_->doQuadpole || this->controls_->doOctpole){
-      this->elecDipole_   = std::unique_ptr<RealTensor3d>(new RealTensor3d(3,this->nBasis_,this->nBasis_)); // Electic Dipole
+      this->elecDipole_   = std::unique_ptr<RealTensor3d>(new RealTensor3d(3,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_)); // Electic Dipole
     }
     if(this->controls_->doQuadpole || this->controls_->doOctpole) {
-      this->elecQuadpole_ = std::unique_ptr<RealTensor3d>(new RealTensor3d(6,this->nBasis_,this->nBasis_)); // Electic Quadrupole
+      this->elecQuadpole_ = std::unique_ptr<RealTensor3d>(new RealTensor3d(6,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_)); // Electic Quadrupole
     }
     if(this->controls_->doOctpole){
-      this->elecOctpole_ = std::unique_ptr<RealTensor3d>(new RealTensor3d(10,this->nBasis_,this->nBasis_)); // Electic Octupole
+      this->elecOctpole_ = std::unique_ptr<RealTensor3d>(new RealTensor3d(10,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_)); // Electic Octupole
     }
   } catch (...) {
     CErr(std::current_exception(),"One Electron Integral Tensor Alloation (All)");
@@ -392,4 +394,87 @@ void AOIntegrals::printTimings() {
                        << std::left << std::setw(15) << this->PTD.count() << " sec" << endl;
       
     this->fileio_->out << bannerEnd << endl;
+}
+
+void AOIntegrals::printOneE(){
+  std::vector<RealMap> mat;
+  int NB = this->nTCS_*this->nBasis_;
+  int NBSq = NB*NB;
+
+  mat.push_back(RealMap(this->overlap_->data(),NB,NB));
+  mat.push_back(RealMap(this->kinetic_->data(),NB,NB));
+  mat.push_back(RealMap(this->potential_->data(),NB,NB));
+  mat.push_back(RealMap(this->oneE_->data(),NB,NB));
+  if(this->controls_->doOctpole||this->controls_->doQuadpole||this->controls_->doDipole)
+    for(auto i = 0, IOff=0; i < 3; i++,IOff+=NBSq)
+      mat.push_back(RealMap(&this->elecDipole_->storage()[IOff],NB,NB));
+  if(this->controls_->doOctpole||this->controls_->doQuadpole)
+    for(auto i = 0, IOff=0; i < 6; i++,IOff+=NBSq)
+      mat.push_back(RealMap(&this->elecQuadpole_->storage()[IOff],NB,NB));
+  if(this->controls_->doOctpole)
+    for(auto i = 0, IOff=0; i < 10; i++,IOff+=NBSq)
+      mat.push_back(RealMap(&this->elecOctpole_->storage()[IOff],NB,NB));
+  
+  
+  if(this->nTCS_ == 2){
+    prettyPrintTCS(this->fileio_->out,(mat[0]),"Overlap");
+    if(this->controls_->doOctpole||this->controls_->doQuadpole||this->controls_->doDipole){
+      prettyPrintTCS(this->fileio_->out,(mat[4]),"Electric Dipole (x)");
+      prettyPrintTCS(this->fileio_->out,(mat[5]),"Electric Dipole (y)");
+      prettyPrintTCS(this->fileio_->out,(mat[6]),"Electric Dipole (z)");
+    }
+    if(this->controls_->doOctpole||this->controls_->doQuadpole){
+      prettyPrintTCS(this->fileio_->out,(mat[7]), "Electric Quadrupole (xx)");
+      prettyPrintTCS(this->fileio_->out,(mat[8]), "Electric Quadrupole (xy)");
+      prettyPrintTCS(this->fileio_->out,(mat[9]), "Electric Quadrupole (xz)");
+      prettyPrintTCS(this->fileio_->out,(mat[10]),"Electric Quadrupole (yy)");
+      prettyPrintTCS(this->fileio_->out,(mat[11]),"Electric Quadrupole (yz)");
+      prettyPrintTCS(this->fileio_->out,(mat[12]),"Electric Quadrupole (zz)");
+    }
+    if(this->controls_->doOctpole){
+      prettyPrintTCS(this->fileio_->out,(mat[13]),"Electric Octupole (xxx)");
+      prettyPrintTCS(this->fileio_->out,(mat[14]),"Electric Octupole (xxy)");
+      prettyPrintTCS(this->fileio_->out,(mat[15]),"Electric Octupole (xxz)");
+      prettyPrintTCS(this->fileio_->out,(mat[16]),"Electric Octupole (xyy)");
+      prettyPrintTCS(this->fileio_->out,(mat[17]),"Electric Octupole (xyz)");
+      prettyPrintTCS(this->fileio_->out,(mat[18]),"Electric Octupole (xzz)");
+      prettyPrintTCS(this->fileio_->out,(mat[19]),"Electric Octupole (yyy)");
+      prettyPrintTCS(this->fileio_->out,(mat[20]),"Electric Octupole (yyz)");
+      prettyPrintTCS(this->fileio_->out,(mat[21]),"Electric Octupole (yzz)");
+      prettyPrintTCS(this->fileio_->out,(mat[22]),"Electric Octupole (zzz)");
+    }
+    prettyPrintTCS(this->fileio_->out,(mat[1]),"Kinetic");
+    prettyPrintTCS(this->fileio_->out,(mat[2]),"Potential");
+    prettyPrintTCS(this->fileio_->out,(mat[3]),"Core Hamiltonian");
+  } else {
+    prettyPrint(this->fileio_->out,(mat[0]),"Overlap");
+    if(this->controls_->doOctpole||this->controls_->doQuadpole||this->controls_->doDipole){
+      prettyPrint(this->fileio_->out,(mat[4]),"Electric Dipole (x)");
+      prettyPrint(this->fileio_->out,(mat[5]),"Electric Dipole (y)");
+      prettyPrint(this->fileio_->out,(mat[6]),"Electric Dipole (z)");
+    }
+    if(this->controls_->doOctpole||this->controls_->doQuadpole){
+      prettyPrint(this->fileio_->out,(mat[7]), "Electric Quadrupole (xx)");
+      prettyPrint(this->fileio_->out,(mat[8]), "Electric Quadrupole (xy)");
+      prettyPrint(this->fileio_->out,(mat[9]), "Electric Quadrupole (xz)");
+      prettyPrint(this->fileio_->out,(mat[10]),"Electric Quadrupole (yy)");
+      prettyPrint(this->fileio_->out,(mat[11]),"Electric Quadrupole (yz)");
+      prettyPrint(this->fileio_->out,(mat[12]),"Electric Quadrupole (zz)");
+    }
+    if(this->controls_->doOctpole){
+      prettyPrint(this->fileio_->out,(mat[13]),"Electric Octupole (xxx)");
+      prettyPrint(this->fileio_->out,(mat[14]),"Electric Octupole (xxy)");
+      prettyPrint(this->fileio_->out,(mat[15]),"Electric Octupole (xxz)");
+      prettyPrint(this->fileio_->out,(mat[16]),"Electric Octupole (xyy)");
+      prettyPrint(this->fileio_->out,(mat[17]),"Electric Octupole (xyz)");
+      prettyPrint(this->fileio_->out,(mat[18]),"Electric Octupole (xzz)");
+      prettyPrint(this->fileio_->out,(mat[19]),"Electric Octupole (yyy)");
+      prettyPrint(this->fileio_->out,(mat[20]),"Electric Octupole (yyz)");
+      prettyPrint(this->fileio_->out,(mat[21]),"Electric Octupole (yzz)");
+      prettyPrint(this->fileio_->out,(mat[22]),"Electric Octupole (zzz)");
+    }
+    prettyPrint(this->fileio_->out,(mat[1]),"Kinetic");
+    prettyPrint(this->fileio_->out,(mat[2]),"Potential");
+    prettyPrint(this->fileio_->out,(mat[3]),"Core Hamiltonian");
+  }
 }

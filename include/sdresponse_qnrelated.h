@@ -30,3 +30,4 @@
   void formPerturbedGuess(double,const RealCMMap&, RealCMMap&,const RealCMMap&, RealCMMap&);
   void formRM3(RealCMMap&, RealCMMap&, RealCMMap&);
   void formRM4(RealCMMap&, RealCMMap&, RealCMMap&);
+  void reoptWF();

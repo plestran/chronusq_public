@@ -116,6 +116,7 @@ struct QuartetConstants{
  */
 class AOIntegrals{
   int       nBasis_; ///< Number of basis functions \f$N_{b}\f$
+  int       nTCS_;
   int       nTT_; ///< Reduced number of basis functions (lower triangle) \f$ N_b (N_b+1) / 2\f$
   int       **R2Index_;
   double	**FmTTable_;
@@ -203,13 +204,14 @@ public:
 //--------------------------------------------//
   void computeAOTwoE(); // build two-electron AO integral matrices
   void computeAOOneE(); // build one-electron AO integral matrices
+  void printOneE();
 #ifdef USE_LIBINT
   void computeSchwartz();
   void computeAORII();
   void computeAORIS();
   void transformAORII();
   template<typename T> void twoEContractDirect(bool,bool,bool,bool,const T&,T&,const T&,T&);
-  template<typename T> void twoEContractN4(bool,bool,const T &,T &,const T &, T &);
+  template<typename T> void twoEContractN4(bool,bool,bool,bool,const T &,T &,const T &, T &);
   template<typename T> void twoEContractDF(bool,bool,const T &,T &,const T &, T &);
   template<typename T>
     void multTwoEContractDirect(int, bool,bool,bool,bool,const std::vector<T> &,std::vector<T> &,
@@ -231,10 +233,15 @@ public:
   template<typename TMat,typename T> 
     void General24CouContract(TMat&, const TMat &, int,int,int,int,int,int,int,int,
                               const T*,T);
+  template<typename TMat,typename T> 
+    void Spinor24CouContract(TMat&, const TMat &, int,int,int,int,int,int,int,int,
+                              const T*,T);
   template<typename TMat,typename T> void Gen34Contract(TMat&,const TMat&,int,int,int,int,T);
   template<typename TMat,typename T> void Gen23Contract(TMat&,const TMat&,int,int,int,int,T,
                                                         double);
   template<typename TMat,typename T> void Gen24Contract(TMat&,const TMat&,int,int,int,int,T);
+  template<typename TMat,typename T> 
+    void Spinor24Contract(TMat&,const TMat&,int,int,int,int,T);
   template<typename TMat,typename T> void GenCouContractSpinor(TMat&,const TMat&,int,int,int,
                                                                int,T);
   template<typename TMat,typename T> void GenExchContractSpinor(TMat&,const TMat&,int,int,

@@ -24,6 +24,7 @@
  *  
  */
 #include <workers.h>
+#include <mollerplesset.h>
 #include <grid.h>
 using namespace ChronusQ;
 
@@ -61,6 +62,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   auto dfBasisset     	= std::unique_ptr<BasisSet>(new BasisSet());
   auto controls     	= std::unique_ptr<Controls>(new Controls());
   auto aointegrals	= std::unique_ptr<AOIntegrals>(new AOIntegrals());
+  auto mointegrals	= std::unique_ptr<MOIntegrals>(new MOIntegrals());
   auto hartreeFock	= std::unique_ptr<SingleSlater<double>>(new SingleSlater<double>());
   auto sdResponse       = std::unique_ptr<SDResponse>(new SDResponse());
   std::unique_ptr<FileIO> fileIO;
@@ -108,19 +110,25 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   aointegrals->printTimings();
   hartreeFock->computeEnergy();
   if(controls->optWaveFunction)  hartreeFock->SCF();
-  //MOIntegrals *moIntegrals = new MOIntegrals();
-  //moIntegrals->iniMOIntegrals(molecule,basisset,fileIO,controls,aointegrals,hartreeFock);
   else fileIO->out << "**Skipping SCF Optimization**" << endl; 
-  std::shared_ptr<MOIntegrals> moIntegrals = std::make_shared<MOIntegrals>();
   hartreeFock->computeMultipole();
+  mointegrals->iniMOIntegrals(molecule.get(),basisset.get(),fileIO.get(),controls.get(),aointegrals.get(),hartreeFock.get());
   if(controls->doSDR) {
     sdResponse->setPPRPA(1);
-    sdResponse->iniSDResponse(molecule.get(),basisset.get(),moIntegrals.get(),fileIO.get(),
+    sdResponse->iniSDResponse(molecule.get(),basisset.get(),mointegrals.get(),fileIO.get(),
                               controls.get(),hartreeFock.get());
     
     sdResponse->IterativeRPA();
   //sdResponse->incorePPRPA();
+//sdResponse->incoreCIS();
+//sdResponse->incoreRPA();
+//sdResponse->incorePPRPAnew();
   }
+  auto mp       = std::unique_ptr<MollerPlesset>(new MollerPlesset());
+    mp->iniMollerPlesset(molecule.get(),basisset.get(),mointegrals.get(),fileIO.get(),
+                              controls.get(),hartreeFock.get());
+  //mp->MP2();
+//mointegrals->testLocMO();
 
 //if(controls->doDF) aointegrals->compareRI();
 /*
@@ -135,6 +143,8 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 */
 //Test one dimensional grid
 //
+//
+/*
   cartGP pt(0.01,0.02,0.03);
   sph3GP ptSPH;
   bg::transform(pt,ptSPH);
@@ -178,6 +188,8 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 //   cout << "Sphere Err = " << std::abs(G3.integrate()-(4.0*radius*radius*radius*math.pi/3.0)) <<endl;
 ////   cout << "Test Err = " << std::abs(G3.integrate()-reftest) <<endl;
 //   G3.printGrid();
+//   
+   */
   time(&currentTime);
   fileIO->out<<"\nJob finished: "<<ctime(&currentTime)<<endl;
 /*

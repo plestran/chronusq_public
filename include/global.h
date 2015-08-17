@@ -120,6 +120,7 @@ typedef Eigen::Map<RealMatrix> RealMap; ///< Map double precision real array ont
 typedef Eigen::Map<RealCMMatrix> RealCMMap; ///< Map double precision real array onto RealMatrix object
 typedef Eigen::Map<const RealMatrix> ConstRealMap; ///< Map double precision real array onto const RealMatrix object
 typedef Eigen::Map<ComplexMatrix> ComplexMap; ///< Map double precision complex array onto ComplexMatrix object
+typedef Eigen::Map<ComplexCMMatrix> ComplexCMMap; ///< Map double precision complex array onto ComplexMatrix object
 typedef Eigen::Map<const ComplexMatrix> ConstComplexMap; ///< Map double precision complex array onto const ComplexMatrix object
 typedef Eigen::MatrixExponentialReturnValue<RealMatrix>    RealMatExp; ///< Driver for matrix exponentaial (RealMatrix)
 typedef Eigen::MatrixExponentialReturnValue<ComplexMatrix> ComplexMatExp; ///< Driver for matrix exponential (ComplexMatrix)

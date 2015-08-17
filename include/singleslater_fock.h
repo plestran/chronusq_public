@@ -38,7 +38,7 @@ void SingleSlater<T>::formPT(){
   else if(this->controls_->doDF)
     this->aointegrals_->twoEContractDF(doRHF,true,*this->densityA_,*this->PTA_,*this->densityB_,*this->PTB_);
   else
-    this->aointegrals_->twoEContractN4(doRHF,true,*this->densityA_,*this->PTA_,*this->densityB_,*this->PTB_);
+    this->aointegrals_->twoEContractN4(doRHF,true,false,doTCS,*this->densityA_,*this->PTA_,*this->densityB_,*this->PTB_);
   if(this->controls_->printLevel >= 3) {
     if(!doTCS){
       prettyPrint(this->fileio_->out,(*this->PTA_),"Alpha Perturbation Tensor");
@@ -64,14 +64,15 @@ void SingleSlater<T>::formFock(){
 #else
   this->formPT();
 #endif
-  if(this->Ref_ == TCS) this->basisset_->resetMapSh2Bf();
+//if(this->Ref_ == TCS) this->basisset_->resetMapSh2Bf();
   if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
-  if(this->Ref_ == TCS) {
-    this->basisset_->resetMapSh2Bf(); 
-    this->basisset_->makeMapSh2Bf(this->nTCS_);
-  }
+//if(this->Ref_ == TCS) {
+//  this->basisset_->resetMapSh2Bf(); 
+//  this->basisset_->makeMapSh2Bf(this->nTCS_);
+//}
 
   this->fockA_->setZero();
+/*
   if(this->Ref_ != TCS) fockA_->real()+=(*this->aointegrals_->oneE_);
   else {
     for(auto I = 0, i = 0; i < this->nBasis_; I += 2, i++)
@@ -80,6 +81,8 @@ void SingleSlater<T>::formFock(){
       this->fockA_->real()(I+1,J+1) += (*this->aointegrals_->oneE_)(i,j);
     }
   }
+*/
+  fockA_->real()+=(*this->aointegrals_->oneE_);
 #ifndef USE_LIBINT
   fockA_->real()+=(*this->coulombA_);
   fockA_->real()-=(*this->exchangeA_);

@@ -126,92 +126,94 @@ void SingleSlater<double>::formGuess() {
   this->moA_->setZero();
   if(!this->isClosedShell && this->Ref_ != TCS) this->moB_->setZero();
 
-  // Determining unique atoms
-  std::vector<Atoms> uniqueElement;
-  for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
-    if(iAtm == 0){ 
-      uniqueElement.push_back(elements[this->molecule_->index(iAtm)]);
-    }
-    bool uniq = true;
-    for(auto iUn = 0; iUn < uniqueElement.size(); iUn++){
-      if(uniqueElement[iUn].atomicNumber == 
-        elements[this->molecule_->index(iAtm)].atomicNumber){
-        uniq = false;
-        break;
-      }
-    }
-    if(uniq) {
-      uniqueElement.push_back(elements[this->molecule_->index(iAtm)]);
-    }
-  }
-
-  // Generate a map of unique atoms to centers
-  std::vector<std::vector<int>> atomIndex(uniqueElement.size());
-  for(auto iUn = 0; iUn < uniqueElement.size(); iUn++){
+  if(this->molecule_->nAtoms() > 1) {
+    // Determining unique atoms
+    std::vector<Atoms> uniqueElement;
     for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
-      if(uniqueElement[iUn].atomicNumber == 
-        elements[this->molecule_->index(iAtm)].atomicNumber){
-        
-        atomIndex[iUn].push_back(iAtm);
+      if(iAtm == 0){ 
+        uniqueElement.push_back(elements[this->molecule_->index(iAtm)]);
+      }
+      bool uniq = true;
+      for(auto iUn = 0; iUn < uniqueElement.size(); iUn++){
+        if(uniqueElement[iUn].atomicNumber == 
+          elements[this->molecule_->index(iAtm)].atomicNumber){
+          uniq = false;
+          break;
+        }
+      }
+      if(uniq) {
+        uniqueElement.push_back(elements[this->molecule_->index(iAtm)]);
       }
     }
+ 
+    // Generate a map of unique atoms to centers
+    std::vector<std::vector<int>> atomIndex(uniqueElement.size());
+    for(auto iUn = 0; iUn < uniqueElement.size(); iUn++){
+      for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
+        if(uniqueElement[iUn].atomicNumber == 
+          elements[this->molecule_->index(iAtm)].atomicNumber){
+          
+          atomIndex[iUn].push_back(iAtm);
+        }
+      }
+    }
+ 
+    this->fileio_->out << "Found " << uniqueElement.size() << 
+                          " unique atoms in molecule" << endl;
+    
+    this->fileio_->out << endl << "Atomic SCF Starting............." << endl << endl;
+ 
+    // Loop and perform CUHF on each atomic center
+    for(auto iUn = 0; iUn < uniqueElement.size(); iUn++){
+      // Local objects to be constructed and destructed at every loop
+      AOIntegrals aointegralsAtom;
+      SingleSlater<double> hartreeFockAtom;
+      Controls controlAtom;
+      BasisSet basisSetAtom;
+      BasisSet dfBasisSetAtom;
+      Molecule uniqueAtom(uniqueElement[iUn],this->fileio_);
+ 
+      // FIXME: This only makes sense for neutral molecules
+      uniqueAtom.readCharge(0);
+      uniqueAtom.readMultip(uniqueElement[iUn].defaultMult);
+ 
+      // Construct atomic basis set from the reference
+      this->basisset_->constructExtrn(&uniqueAtom,&basisSetAtom);
+      // Generate basis maps
+      basisSetAtom.makeMapSh2Bf(1);
+      basisSetAtom.makeMapSh2Cen(&uniqueAtom);
+      basisSetAtom.renormShells(); // Libint throws a hissy fit without this
+ 
+      controlAtom.iniControls();
+      controlAtom.doCUHF = true; // Can set to false too if UHF guess is desired
+ 
+      // Initialize the local integral and SS classes
+      aointegralsAtom.iniAOIntegrals(&uniqueAtom,&basisSetAtom,this->fileio_,&controlAtom,
+        &dfBasisSetAtom);
+      hartreeFockAtom.iniSingleSlater(&uniqueAtom,&basisSetAtom,&aointegralsAtom,
+        this->fileio_,&controlAtom);
+ 
+      // Zero out the MO coeff for local SS object
+      hartreeFockAtom.moA_->setZero();
+      if(!hartreeFockAtom.isClosedShell) hartreeFockAtom.moB_->setZero();
+      hartreeFockAtom.haveMO = true;
+ 
+      // Prime and perform the atomic SCF
+      hartreeFockAtom.formFock();
+      hartreeFockAtom.computeEnergy();
+      hartreeFockAtom.SCF();
+      
+      // Place Atomic Densities into Total Densities
+      this->placeAtmDen(atomIndex[iUn],hartreeFockAtom);
+ 
+    } // Loop iUn
+ 
+    this->scaleDen();
   }
-
-  this->fileio_->out << "Found " << uniqueElement.size() << 
-                        " unique atoms in molecule" << endl;
-  
-  this->fileio_->out << endl << "Atomic SCF Starting............." << endl << endl;
-
-  // Loop and perform CUHF on each atomic center
-  for(auto iUn = 0; iUn < uniqueElement.size(); iUn++){
-    // Local objects to be constructed and destructed at every loop
-    AOIntegrals aointegralsAtom;
-    SingleSlater<double> hartreeFockAtom;
-    Controls controlAtom;
-    BasisSet basisSetAtom;
-    BasisSet dfBasisSetAtom;
-    Molecule uniqueAtom(uniqueElement[iUn],this->fileio_);
-
-    // FIXME: This only makes sense for neutral molecules
-    uniqueAtom.readCharge(0);
-    uniqueAtom.readMultip(uniqueElement[iUn].defaultMult);
-
-    // Construct atomic basis set from the reference
-    this->basisset_->constructExtrn(&uniqueAtom,&basisSetAtom);
-    // Generate basis maps
-    basisSetAtom.makeMapSh2Bf(1);
-    basisSetAtom.makeMapSh2Cen(&uniqueAtom);
-    basisSetAtom.renormShells(); // Libint throws a hissy fit without this
-
-    controlAtom.iniControls();
-    controlAtom.doCUHF = true; // Can set to false too if UHF guess is desired
-
-    // Initialize the local integral and SS classes
-    aointegralsAtom.iniAOIntegrals(&uniqueAtom,&basisSetAtom,this->fileio_,&controlAtom,
-      &dfBasisSetAtom);
-    hartreeFockAtom.iniSingleSlater(&uniqueAtom,&basisSetAtom,&aointegralsAtom,
-      this->fileio_,&controlAtom);
-
-    // Zero out the MO coeff for local SS object
-    hartreeFockAtom.moA_->setZero();
-    if(!hartreeFockAtom.isClosedShell) hartreeFockAtom.moB_->setZero();
-    hartreeFockAtom.haveMO = true;
-
-    // Prime and perform the atomic SCF
-    hartreeFockAtom.formFock();
-    hartreeFockAtom.computeEnergy();
-    hartreeFockAtom.SCF();
-
-    // Place Atomic Densities into Total Densities
-    this->placeAtmDen(atomIndex[iUn],hartreeFockAtom);
-
-  } // Loop iUn
-
-  this->scaleDen();
 
   // Set flags to use in the rest of code
   this->haveMO = true;
-  this->haveDensity = true;
+  if(this->molecule_->nAtoms() > 1) this->haveDensity = true;
 };
 //------------------------------------------//
 // form the initial guess of MOs from input //

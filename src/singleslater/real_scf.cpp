@@ -50,6 +50,7 @@ void SingleSlater<double>::printDensityInfo(double PAlphaRMS, double PBetaRMS, d
 template<>
 void SingleSlater<double>::formX(){
   RealMap X(this->XMem_,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
+/*
   if(this->Ref_ != TCS)
     X = (*this->aointegrals_->overlap_).pow(-0.5); // Make this more efficient... FIXME
   else {
@@ -65,6 +66,8 @@ void SingleSlater<double>::formX(){
   //X = OTmp.pow(-0.5);
     X = GenOverlap.pow(-0.5);
   }
+*/
+  X = (*this->aointegrals_->overlap_).pow(-0.5); // Make this more efficient... FIXME
 
   if(this->Ref_ == CUHF){
     RealMap Xp(this->XpMem_,this->nBasis_,this->nBasis_);
@@ -196,11 +199,81 @@ void SingleSlater<double>::evalConver(){
 template<>
 void SingleSlater<double>::mixOrbitalsSCF(){
   if(this->Ref_ == TCS){
+  //CErr();
+  auto nO = this->nAE_ + this->nBE_;
+  VectorXd HOMOA,LUMOB;
+  int indxHOMOA = -1, indxLUMOB = -1;
+/*
+  for(auto i = nO-1; i >= 0; i--){
+    auto aComp = this->moA_->col(i)(0);
+    auto bComp = this->moA_->col(i)(1);
+    if(std::abs(aComp) > 1e-10 && std::abs(bComp) < 1e-10){
+      HOMOA = this->moA_->col(i);
+      indxHOMOA = i;
+      break;
+    }
+  }
+  for(auto i = nO; i < this->nTCS_*this->nBasis_; i++){
+    auto aComp = this->moA_->col(i)(0);
+    auto bComp = this->moA_->col(i)(1);
+    if(std::abs(bComp) > 1e-10 && std::abs(aComp) < 1e-10){
+      LUMOB = this->moA_->col(i);
+      indxLUMOB = i;
+      break;
+    }
+  }
+*/
+  auto nOrb = this->nBasis_;
+  double maxPercentNonZeroAlpha = 0;
+  for(auto i = nO-1; i >= 0; i--){
+    auto nNonZeroAlpha = 0;
+    for(auto j = 0; j < this->nTCS_*this->nBasis_; j+=2){
+      auto aComp = (*this->moA_)(j,i);
+      auto bComp = (*this->moA_)(j+1,i);
+      if(std::abs(aComp) > 1e-10 && std::abs(bComp) < 1e-10) nNonZeroAlpha++;
+    }
+    double percentNonZeroAlpha = (double)nNonZeroAlpha/(double)nOrb;
+    if(percentNonZeroAlpha > maxPercentNonZeroAlpha){
+      maxPercentNonZeroAlpha = percentNonZeroAlpha;
+      indxHOMOA = i;
+    }
+  }
+  double maxPercentNonZeroBeta = 0;
+  for(auto i = nO; i < this->nTCS_*this->nBasis_; i++){
+    auto nNonZeroBeta = 0;
+    for(auto j = 1; j < this->nTCS_*this->nBasis_; j+=2){
+      auto aComp = (*this->moA_)(j-1,i);
+      auto bComp = (*this->moA_)(j,i);
+      if(std::abs(bComp) > 1e-6 && std::abs(aComp) < 1e-6) nNonZeroBeta++;
+    }
+    double percentNonZeroBeta = (double)nNonZeroBeta/(double)nOrb;
+    if(percentNonZeroBeta > maxPercentNonZeroBeta){
+      maxPercentNonZeroBeta = percentNonZeroBeta;
+      indxLUMOB = i;
+    }
+  }
+
+  if(indxHOMOA == -1 || indxLUMOB == -1)
+  //  CErr("TCS orbital swap failed to find suitable Alpha-Beta pair",this->fileio_->out);
+    return;
+  
+//CErr();
+  HOMOA = this->moA_->col(indxHOMOA) ;
+  LUMOB = this->moA_->col(indxLUMOB) ;
+  this->moA_->col(indxHOMOA) = std::sqrt(0.5) * (HOMOA + LUMOB);
+  this->moA_->col(indxLUMOB) = std::sqrt(0.5) * (HOMOA - LUMOB);
+/*
     Eigen::VectorXd HOMO = this->moA_->col(this->nAE_+this->nBE_-1);
     Eigen::VectorXd LUMO = this->moA_->col(this->nTCS_*this->nBasis_-1);
+   cout << endl << endl <<  this->moA_->col(this->nAE_+this->nBE_-1) << endl; 
+   cout << endl << endl <<  this->moA_->col(this->nTCS_*this->nBasis_-1) << endl;
     this->moA_->col(this->nAE_+this->nBE_-1) = std::sqrt(0.5) * (HOMO + LUMO);
 //  this->moA_->col(this->nAE_+this->nBE_) =   std::sqrt(0.5) * (HOMO - LUMO);
     this->moA_->col(this->nTCS_*this->nBasis_-1) = std::sqrt(0.5) * (HOMO - LUMO);
+
+   cout << endl << endl <<  this->moA_->col(this->nAE_+this->nBE_-1) << endl; 
+   cout << endl << endl <<  this->moA_->col(this->nTCS_*this->nBasis_-1) << endl;
+*/
   }
 }
 

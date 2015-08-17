@@ -23,29 +23,43 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
+#ifndef INCLUDED_MOLLERPLESSET
+#define INCLUDED_MOLLERPLESSET
+#include <global.h>
+#include <cerr.h>
+#include <molecule.h>
+#include <controls.h>
+#include <mointegrals.h>
+#include <singleslater.h>
+#include <basisset.h>
 
 
-  void formAOTDen(const RealVecMap &, RealMatrix &, RealMatrix &);
-  void formMOTDen(RealVecMap &, const RealMatrix &, const RealMatrix &);
-  void placeVOOV(const RealVecMap &,RealMatrix &, RealMatrix&);
-  void placeVVOO(const RealVecMap &,RealMatrix &);
-  void retrvVOOV(RealVecMap &,const RealMatrix &,const RealMatrix&);
-  void retrvVVOO(RealVecMap &,const RealMatrix &);
-  void initRMu();
-  void scaleDagPPRPA(bool,RealVecMap &,RealVecMap &,RealVecMap *AX=NULL); 
-  void initMeth();
-  void checkValid();
+namespace ChronusQ {
+  class MollerPlesset {
+    int nBasis_;
+    int nTCS_;
+    int Ref_;
+    int order_;
+    int nOA_;
+    int nVA_;
+    int nOB_;
+    int nVB_;
+    int nO_;         // NOA + NOB
+    int nV_;         // NVA + NVB
+    BasisSet *      basisSet_;
+    Molecule *      molecule_;
+    FileIO *        fileio_;
+    Controls *      controls_;
+    MOIntegrals *   mointegrals_;
+    SingleSlater<double> *  singleSlater_;
+  public:
+    MollerPlesset(){;};
+    ~MollerPlesset(){;};
+    void iniMollerPlesset(Molecule *,BasisSet *,MOIntegrals *,FileIO *,Controls *,
+                          SingleSlater<double> *);
+    double MP2();
+    double MP3();
+  };
+}
 
-  /*************************/
-  /* MPI Related Routines  */
-  /*************************/
-  void mpiSend(int,int tag=tagSDResponse);
-  void mpiRecv(int,int tag=tagSDResponse);
-
-  // Proof of concept routines
-  void incorePPRPA();
-  void incorePPRPAnew();
-  void incoreCIS();
-  void incoreRPA();
-  void formRM();
-  RealMatrix formRM2(RealMatrix &XMO);
+#endif
