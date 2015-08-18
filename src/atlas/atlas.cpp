@@ -62,7 +62,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   auto dfBasisset         = std::unique_ptr<BasisSet>(new BasisSet());
   auto controls           = std::unique_ptr<Controls>(new Controls());
   auto aointegrals        = std::unique_ptr<AOIntegrals>(new AOIntegrals());
-  auto mointegrals        = std::unique_ptr<MOIntegrals>(new MOIntegrals());
+  auto mointegrals        = std::unique_ptr<MOIntegrals<double>>(new MOIntegrals<double>());
   auto hartreeFockReal	  = std::unique_ptr<SingleSlater<double>>(  new SingleSlater<double>()  );
   auto hartreeFockComplex = std::unique_ptr<SingleSlater<dcomplex>>(new SingleSlater<dcomplex>());
   auto sdResponse         = std::unique_ptr<SDResponse>(new SDResponse());

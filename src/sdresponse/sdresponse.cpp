@@ -36,7 +36,7 @@ using std::setw;
 //------------------------------//
 // allocate memory for matrices //
 //------------------------------//
-void SDResponse::iniSDResponse( Molecule * molecule, BasisSet * basisSet, MOIntegrals * mointegrals, 
+void SDResponse::iniSDResponse( Molecule * molecule, BasisSet * basisSet, MOIntegrals<double> * mointegrals, 
                                 FileIO * fileio, Controls * controls, SingleSlater<double> * singleSlater) {
   this->nBasis_         = basisSet->nBasis();
   this->nTCS_           = singleSlater->nTCS();
