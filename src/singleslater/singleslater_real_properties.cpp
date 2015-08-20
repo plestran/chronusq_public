@@ -39,19 +39,6 @@ void SingleSlater<double>::computeMultipole(){
   int iBuf = 0;
   for(auto ixyz = 0; ixyz < 3; ixyz++){
     ConstRealMap mu(&this->aointegrals_->elecDipole_->storage()[iBuf],NB,NB);
-/*
-    if(this->Ref_ == TCS) {
-      (*dipole_)(ixyz,0) = 0.0;
-      for(auto I = 0, i = 0; i < this->nBasis_; I += 2, i++)    
-      for(auto J = 0, j = 0; j < this->nBasis_; J += 2, j++){
-        (*dipole_)(ixyz,0) -= (*this->densityA_)(I,J)     * mu(i,j) 
-                            - (*this->densityA_)(I+1,J+1) * mu(i,j);
-      }
-    } else {
-      (*dipole_)(ixyz,0) = -this->densityA_->frobInner(mu);
-      if(this->Ref_ != RHF) (*dipole_)(ixyz,0) += -this->densityB_->frobInner(mu);
-    }
-*/
     (*dipole_)(ixyz,0) = -this->densityA_->frobInner(mu);
     if(!this->isClosedShell && this->Ref_ != TCS) 
       (*dipole_)(ixyz,0) += -this->densityB_->frobInner(mu);
@@ -66,19 +53,6 @@ void SingleSlater<double>::computeMultipole(){
     for(auto jxyz = 0; jxyz < 3; jxyz++)
     for(auto ixyz = jxyz; ixyz < 3; ixyz++){
       ConstRealMap mu(&this->aointegrals_->elecQuadpole_->storage()[iBuf],NB,NB);
-/*
-      if(this->Ref_ == TCS){
-        (*quadpole_)(ixyz,jxyz) = 0.0;
-        for(auto I = 0, i = 0; i < this->nBasis_; I += 2, i++)    
-        for(auto J = 0, j = 0; j < this->nBasis_; J += 2, j++){
-          (*quadpole_)(ixyz,jxyz) -= (*this->densityA_)(I,J)     * mu(i,j) 
-                                   - (*this->densityA_)(I+1,J+1) * mu(i,j); 
-        }
-      } else {
-        (*quadpole_)(jxyz,ixyz) = -this->densityA_->frobInner(mu);
-        if(this->Ref_ != RHF) (*quadpole_)(jxyz,ixyz) += -this->densityB_->frobInner(mu);
-      }
-*/
         (*quadpole_)(jxyz,ixyz) = -this->densityA_->frobInner(mu);
         if(!this->isClosedShell && this->Ref_ != TCS) 
           (*quadpole_)(jxyz,ixyz) += -this->densityB_->frobInner(mu);
@@ -99,19 +73,6 @@ void SingleSlater<double>::computeMultipole(){
     for(auto jxyz = kxyz; jxyz < 3; jxyz++)
     for(auto ixyz = jxyz; ixyz < 3; ixyz++){
       ConstRealMap mu(&this->aointegrals_->elecOctpole_->storage()[iBuf],NB,NB);
-/*
-      if(this->Ref_ == TCS){
-        (*octpole_)(ixyz,jxyz,kxyz) = 0.0;
-        for(auto I = 0, i = 0; i < this->nBasis_; I += 2, i++)    
-        for(auto J = 0, j = 0; j < this->nBasis_; J += 2, j++){
-          (*octpole_)(ixyz,jxyz,kxyz) -= (*this->densityA_)(I,J)     * mu(i,j) 
-                                       - (*this->densityA_)(I+1,J+1) * mu(i,j); 
-        }
-      } else {
-        (*octpole_)(kxyz,jxyz,ixyz) = -this->densityA_->frobInner(mu);
-        if(this->Ref_ != RHF)( *octpole_)(kxyz,jxyz,ixyz) += -this->densityB_->frobInner(mu);
-      }
-*/
       (*octpole_)(kxyz,jxyz,ixyz) = -this->densityA_->frobInner(mu);
       if(!this->isClosedShell && this->Ref_ != TCS) 
         (*octpole_)(kxyz,jxyz,ixyz) += -this->densityB_->frobInner(mu);

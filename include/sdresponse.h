@@ -88,7 +88,7 @@ class SDResponse {
   Molecule *      molecule_;
   FileIO *        fileio_;
   Controls *      controls_;
-  MOIntegrals *   mointegrals_;
+  MOIntegrals<double> *   mointegrals_;
   SingleSlater<double> *  singleSlater_;
   RealTensor4d *  aoERI_;
   RealTensor3d *  elecDipole_;
@@ -112,8 +112,8 @@ public:
   SDResponse(){;};
   ~SDResponse() {;};
   // pseudo-constructor
-  void iniSDResponse(Molecule *,BasisSet *,MOIntegrals *,FileIO *,Controls *,
-                     SingleSlater<double> *);
+  void iniSDResponse(Molecule *,BasisSet *,MOIntegrals<double> *,FileIO *,
+                     Controls *, SingleSlater<double> *);
 
   #include <sdresponse_getset.h>
   #include <sdresponse_qnrelated.h>

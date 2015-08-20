@@ -34,6 +34,9 @@ using ChronusQ::SingleSlater;
 //----------------------------------------//
 namespace ChronusQ {
 template<>
+void SingleSlater<double>::complexMem(){;};
+
+template<>
 void SingleSlater<double>::printDensityInfo(double PAlphaRMS,double EDelta){
   this->fileio_->out<<"\nSCF Information:"<<endl;
   this->fileio_->out<<std::right<<std::setw(30)<<"    Delta-E = "<<std::setw(15)<<std::scientific<<EDelta<<std::setw(5)<<" Eh "<<endl;
@@ -50,23 +53,6 @@ void SingleSlater<double>::printDensityInfo(double PAlphaRMS, double PBetaRMS, d
 template<>
 void SingleSlater<double>::formX(){
   RealMap X(this->XMem_,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
-/*
-  if(this->Ref_ != TCS)
-    X = (*this->aointegrals_->overlap_).pow(-0.5); // Make this more efficient... FIXME
-  else {
-    RealMap GenOverlap(this->SMem_,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
-//  RealMatrix OTmp(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
-    for(auto I = 0, i = 0; i < this->nBasis_; i++, I +=2)
-    for(auto J = 0, j = 0; j < this->nBasis_; j++, J +=2){
-    //OTmp(I,J)    = (*this->aointegrals_->overlap_)(i,j);
-    //OTmp(I+1,J+1) = (*this->aointegrals_->overlap_)(i,j);
-      GenOverlap(I,J)    = (*this->aointegrals_->overlap_)(i,j);
-      GenOverlap(I+1,J+1) = (*this->aointegrals_->overlap_)(i,j);
-    }
-  //X = OTmp.pow(-0.5);
-    X = GenOverlap.pow(-0.5);
-  }
-*/
   X = (*this->aointegrals_->overlap_).pow(-0.5); // Make this more efficient... FIXME
 
   if(this->Ref_ == CUHF){
@@ -260,6 +246,9 @@ void SingleSlater<double>::mixOrbitalsSCF(){
 //CErr();
   HOMOA = this->moA_->col(indxHOMOA) ;
   LUMOB = this->moA_->col(indxLUMOB) ;
+  cout << HOMOA << endl << endl;
+  cout << LUMOB << endl << endl;
+  prettyPrint(cout,*this->moA_,"MO");
   this->moA_->col(indxHOMOA) = std::sqrt(0.5) * (HOMOA + LUMOB);
   this->moA_->col(indxLUMOB) = std::sqrt(0.5) * (HOMOA - LUMOB);
 /*

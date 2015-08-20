@@ -72,32 +72,5 @@ void SingleSlater<T>::formDensity(){
   };
   this->haveDensity = true;
 }
-/************************
- * Compute Total Energy *
- ************************/
-template<typename T>
-void SingleSlater<T>::computeEnergy(){
-/*
-  if(this->Ref_ != TCS)
-    this->energyOneE = (*this->aointegrals_->oneE_).frobInner(this->densityA_->conjugate());
-  else {
-    this->energyOneE = 0.0;
-    for(auto I = 0, i = 0; i < this->nBasis_; I += 2, i++)    
-    for(auto J = 0, j = 0; j < this->nBasis_; J += 2, j++){
-      this->energyOneE += 
-        this->densityA_->conjugate()(I,J)*(*this->aointegrals_->oneE_)(i,j) + 
-        this->densityA_->conjugate()(I+1,J+1)*(*this->aointegrals_->oneE_)(i,j);
-    } 
-  }
-*/
-  this->energyOneE = (*this->aointegrals_->oneE_).frobInner(this->densityA_->conjugate());
-  this->energyTwoE = 0.5*(*this->PTA_).frobInner(this->densityA_->conjugate());
-  if(!this->isClosedShell && this->Ref_ != TCS){
-    this->energyOneE += (*this->aointegrals_->oneE_).frobInner(this->densityB_->conjugate());
-    this->energyTwoE += 0.5*(*this->PTB_).frobInner(this->densityB_->conjugate());
-  }
-  this->totalEnergy= this->energyOneE + this->energyTwoE + this->energyNuclei;
-  this->printEnergy();
-};
 
 

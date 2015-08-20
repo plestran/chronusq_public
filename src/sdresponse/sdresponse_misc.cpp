@@ -2049,8 +2049,8 @@ void SDResponse::incoreRPA(){
   RealCMMatrix ATStab(2*this->nOV_,2*this->nOV_);
   RealCMMap ATStabMap(ATStab.data(),2*this->nOV_,2*this->nOV_);
 
-  this->formRM3(TStabMap,ATStabMap,ATStabMap);
-  prettyPrint(cout,ABBA*TStab - ATStabMap,"DIFF");
+//this->formRM3(TStabMap,ATStabMap,ATStabMap);
+//prettyPrint(cout,ABBA*TStab - ATStabMap,"DIFF");
   
 
   ABBA.block(0,0,this->nOV_,this->nOV_) = A;
@@ -2059,6 +2059,14 @@ void SDResponse::incoreRPA(){
   ABBA.block(this->nOV_,this->nOV_,this->nOV_,this->nOV_) = -A;
   Eigen::EigenSolver<RealMatrix> EA(ABBA);
   cout << endl << EA.eigenvalues() << endl;
+  RealMatrix AmB = A-B;
+  RealMatrix ApB = A+B;
+
+  EA.compute(ApB);
+  cout << endl << EA.eigenvalues() << endl;
+  EA.compute(AmB);
+  cout << endl << EA.eigenvalues() << endl;
+  CErr();
 
 //RealMatrix Vec = ES.eigenvectors().col(0);
 //RealMatrix AX(this->nOV_,1);

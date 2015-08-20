@@ -123,8 +123,7 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
 
   // Alpha / TCS Eigenorbital Energies
   try { 
-    this->epsA_ = std::unique_ptr<TMatrix>(
-      new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_)); 
+    this->epsA_ = std::unique_ptr<RealMatrix>(new RealMatrix(this->nTCS_*this->nBasis_,1)); 
   } catch (...) { 
     if(this->Ref_ == TCS) CErr(std::current_exception(),"TCS Eigenorbital Energies"); 
     else                  CErr(std::current_exception(),"Alpha Eigenorbital Energies"); 
@@ -147,7 +146,7 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
 #endif
     try { this->moB_       = std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_)); } // Beta Molecular Orbital Coefficients
     catch (...) { CErr(std::current_exception(),"Beta MO Coefficients Allocation"); }
-    try { this->epsB_       = std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_)); } // Beta Eigenorbital Energies
+    try { this->epsB_       = std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,1)); } // Beta Eigenorbital Energies
     catch (...) { CErr(std::current_exception(),"Beta Eigenorbital Energies"); }
   };
 

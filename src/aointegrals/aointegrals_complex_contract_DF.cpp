@@ -23,43 +23,12 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
-#ifndef INCLUDED_MOLLERPLESSET
-#define INCLUDED_MOLLERPLESSET
-#include <global.h>
-#include <cerr.h>
-#include <molecule.h>
-#include <controls.h>
-#include <mointegrals.h>
-#include <singleslater.h>
-#include <basisset.h>
+#include <aointegrals.h>
+namespace ChronusQ{
+  template<>
+  void AOIntegrals::twoEContractDF(bool RHF, bool doFock, const ComplexMatrix &XAlpha, ComplexMatrix &AXAlpha,
+                                   const ComplexMatrix &XBeta, ComplexMatrix &AXBeta) {
+    CErr("No Density Fitting Contraction for Complex Matricies Implemented");
+  }
+} // namespace ChronusQ
 
-
-namespace ChronusQ {
-  class MollerPlesset {
-    int nBasis_;
-    int nTCS_;
-    int Ref_;
-    int order_;
-    int nOA_;
-    int nVA_;
-    int nOB_;
-    int nVB_;
-    int nO_;         // NOA + NOB
-    int nV_;         // NVA + NVB
-    BasisSet *      basisSet_;
-    Molecule *      molecule_;
-    FileIO *        fileio_;
-    Controls *      controls_;
-    MOIntegrals<double> *   mointegrals_;
-    SingleSlater<double> *  singleSlater_;
-  public:
-    MollerPlesset(){;};
-    ~MollerPlesset(){;};
-    void iniMollerPlesset(Molecule *,BasisSet *,MOIntegrals<double> *,FileIO *,Controls *,
-                          SingleSlater<double> *);
-    double MP2();
-    double MP3();
-  };
-}
-
-#endif
