@@ -433,7 +433,7 @@ void SDResponse::formRM4(RealCMMap& XMO, RealCMMap &Sigma, RealCMMap &Rho){
 
 void SDResponse::reoptWF(){
   int maxStabIter = 4;
-  double small = 1e-9;
+  double small = 1e-10;
   bool stable = false;
   int NTCSxNBASIS = this->nTCS_*this->nBasis_;
 
@@ -522,6 +522,8 @@ void SDResponse::reoptWF(){
   if(stable){
     this->singleSlater_->computeEnergy();
     this->singleSlater_->computeMultipole();
+  } else {
+    CErr("Stability failed to Re-Optimize Wavefunction",this->fileio_->out);
   }
 } // reoptWF
 

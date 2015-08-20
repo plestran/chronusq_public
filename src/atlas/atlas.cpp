@@ -127,8 +127,8 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
     hartreeFockReal->formFock();
     aointegrals->printTimings();
     hartreeFockReal->computeEnergy();
-    prettyPrint(cout,*(hartreeFockReal->densityA()),"DA");
-    prettyPrint(cout,*(hartreeFockReal->fockA()),"FA");
+//  prettyPrint(cout,*(hartreeFockReal->densityA()),"DA");
+//  prettyPrint(cout,*(hartreeFockReal->fockA()),"FA");
     if(controls->optWaveFunction)  hartreeFockReal->SCF();
     else fileIO->out << "**Skipping SCF Optimization**" << endl; 
     hartreeFockReal->computeMultipole();
@@ -136,8 +136,8 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
     hartreeFockComplex->formFock();
     aointegrals->printTimings();
     hartreeFockComplex->computeEnergy();
-    prettyPrintComplex(cout,*(hartreeFockComplex->densityA()),"DA");
-    prettyPrintComplex(cout,*(hartreeFockComplex->fockA()),"FA");
+//  prettyPrintComplex(cout,*(hartreeFockComplex->densityA()),"DA");
+//  prettyPrintComplex(cout,*(hartreeFockComplex->fockA()),"FA");
     if(controls->optWaveFunction)  hartreeFockComplex->SCF();
     else fileIO->out << "**Skipping SCF Optimization**" << endl; 
     hartreeFockComplex->computeMultipole();
