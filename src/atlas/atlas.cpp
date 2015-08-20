@@ -84,7 +84,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   // Initialize default settings and read input
   controls->iniControls();
 //controls->doTCS = true;
-  controls->doComplex = true;
+//controls->doComplex = true;
   readInput(fileIO.get(),molecule.get(),basisset.get(),controls.get(),dfBasisset.get());
 //  fileIO->iniFileIO(controls->restart);
 
@@ -148,10 +148,10 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
     sdResponse->iniSDResponse(molecule.get(),basisset.get(),mointegrals.get(),fileIO.get(),
                               controls.get(),hartreeFockReal.get());
     
-  //sdResponse->IterativeRPA();
+    sdResponse->IterativeRPA();
   //sdResponse->incorePPRPA();
 //sdResponse->incoreCIS();
-  sdResponse->incoreRPA();
+//sdResponse->incoreRPA();
 //sdResponse->incorePPRPAnew();
   }
   auto mp       = std::unique_ptr<MollerPlesset>(new MollerPlesset());

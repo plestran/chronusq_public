@@ -503,7 +503,7 @@ void SDResponse::reoptWF(){
     zheev_(&JOBZ,&UPLO,&NTCSxNBASIS,complexStab,&NTCSxNBASIS,W,WORK,&lWork,RWORK,&INFO);
     std::memcpy(BSCR,complexStab,lenMat*sizeof(dcomplex));
     for(auto i = 0; i < NTCSxNBASIS; i++){
-      dcomplex scal = std::exp(dcomplex(0.0,-W[i]));
+      dcomplex scal = std::exp(dcomplex(0.0,-2.0*W[i]));
       BComplex.col(i) *= scal;
     }
    ExpAComplex = BComplex * AComplex.adjoint();
@@ -517,7 +517,11 @@ void SDResponse::reoptWF(){
    this->singleSlater_->SCF();
    QuasiNewton<double> dav(this);
    dav.run(this->fileio_->out);
-   CErr();
+ //CErr();
   } // loop iter
+  if(stable){
+    this->singleSlater_->computeEnergy();
+    this->singleSlater_->computeMultipole();
+  }
 } // reoptWF
 
