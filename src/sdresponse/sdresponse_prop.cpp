@@ -26,7 +26,9 @@
 #include <sdresponse.h>
 using ChronusQ::SDResponse;
 
-void SDResponse::formTransDipole(){
+namespace ChronusQ {
+template<>
+void SDResponse<double>::formTransDipole(){
    RealMatrix TAOA(this->nBasis_,this->nBasis_);
    RealMatrix TAOB(this->nBasis_,this->nBasis_);
    auto NBSq = this->nBasis_*this->nBasis_;
@@ -40,7 +42,8 @@ void SDResponse::formTransDipole(){
    }
 } //formTransDipole
 
-void SDResponse::formOscStrength(){
+template<>
+void SDResponse<double>::formOscStrength(){
   this->oscStrength_->setZero();
   for(auto iSt  = 0; iSt  < this->nSek_; iSt++ )
   for(auto iXYZ = 0; iXYZ < 3;           iXYZ++){
@@ -49,4 +52,4 @@ void SDResponse::formOscStrength(){
       std::pow((*this->transDipole_)(0,iSt+1,iXYZ),2.0);
   }
 } //formOscStrength
-
+} // namespace ChronusQ

@@ -65,7 +65,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   auto mointegrals        = std::unique_ptr<MOIntegrals<double>>(new MOIntegrals<double>());
   auto hartreeFockReal	  = std::unique_ptr<SingleSlater<double>>(  new SingleSlater<double>()  );
   auto hartreeFockComplex = std::unique_ptr<SingleSlater<dcomplex>>(new SingleSlater<dcomplex>());
-  auto sdResponse         = std::unique_ptr<SDResponse>(new SDResponse());
+  auto sdResponse         = std::unique_ptr<SDResponse<double>>(new SDResponse<double>());
   std::unique_ptr<FileIO> fileIO;
   std::unique_ptr<GauJob> gauJob;
 

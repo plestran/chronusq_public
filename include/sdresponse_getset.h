@@ -38,7 +38,7 @@
   inline int           nOVA(){       return this->singleSlater_->nOVA(); };
   inline int           nOVB(){       return this->singleSlater_->nOVB(); };
   inline VectorXd*     omega(){      return this->omega_.get();          };
-  inline RealCMMatrix* transDen(){   return this->transDen_.get();       };
+  inline TCMMatrix*    transDen(){   return this->transDen_.get();       };
   inline RealCMMatrix* rmDiag(){     return this->rmDiag_.get();         };
-  inline RealMatrix*   davGuess(){   return this->davGuess_.get();       };
+  inline TMatrix*      davGuess(){   return this->davGuess_.get();       };
   inline FileIO*       fileio(){     return this->fileio_;               };

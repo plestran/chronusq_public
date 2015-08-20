@@ -78,7 +78,7 @@ template <typename T>
     std::unique_ptr<TMat> guessR_;   // Guess vectors (always local copy)
     std::unique_ptr<TMat> guessL_;   // Guess vectors (always local copy)
 
-    SDResponse * sdr_; // Pointer to SDResponse object
+    SDResponse<T> * sdr_; // Pointer to SDResponse object
     /** Scratch Variables **/
     // Length of memory partitions
     int LenScr        ; 
@@ -426,7 +426,7 @@ template <typename T>
      *   -  Standard Frequency Dependent Linear Response (SFDLR)
      *   -  Damped Frequency Dependent Linear Response   (DFDLR)
      */ 
-    QuasiNewton(SDResponse * SDR) : QuasiNewton(){
+    QuasiNewton(SDResponse<T> * SDR) : QuasiNewton(){
       this->sdr_              = SDR; 
       this->N_                = SDR->nSingleDim();
       this->nSek_             = SDR->nSek();
@@ -434,11 +434,11 @@ template <typename T>
       this->solutionValues_   = SDR->omega();
       this->solutionVector_   = SDR->transDen();
       this->diag_             = SDR->rmDiag();
-      this->symmetrizedTrial_ = (SDR->iMeth() == SDResponse::RPA);
-      this->doGEP_            = (SDR->iMeth() == SDResponse::RPA);
+      this->symmetrizedTrial_ = (SDR->iMeth() == SDResponse<T>::RPA);
+      this->doGEP_            = (SDR->iMeth() == SDResponse<T>::RPA);
       this->genGuess_         = (this->nGuess_ == 0);
       this->maxSubSpace_      = this->stdSubSpace();
-      this->isHermetian_      = !(SDR->iMeth() == SDResponse::RPA);
+      this->isHermetian_      = !(SDR->iMeth() == SDResponse<T>::RPA);
       this->initScrLen();
 
       if(this->genGuess_) this->nGuess_ = this->stdNGuess();
@@ -557,11 +557,11 @@ template <typename T>
       new (&NewVecL) TCMMap(this->TVecLMem+ NOld*this->N_,this->N_,NNew);
     }
     if(this->sdr_ != NULL){
-      if(this->sdr_->iMeth() == SDResponse::CIS || this->sdr_->iMeth() == SDResponse::RPA ||
-         this->sdr_->iMeth() == SDResponse::STAB){
+      if(this->sdr_->iMeth() == SDResponse<T>::CIS || this->sdr_->iMeth() == SDResponse<T>::RPA ||
+         this->sdr_->iMeth() == SDResponse<T>::STAB){
         // Linear transformation onto right / gerade
         this->sdr_->formRM3(NewVecR,NewSR,NewRhoL); 
-        if(this->sdr_->iMeth() == SDResponse::RPA){
+        if(this->sdr_->iMeth() == SDResponse<T>::RPA){
           // Linear trasnformation onto left / ungerade
           this->sdr_->formRM3(NewVecL,NewSL,NewRhoR);
           cout << "VecR" << endl << NewVecR << endl;
@@ -569,11 +569,11 @@ template <typename T>
           cout << "VecL" << endl << NewVecL << endl;
           cout << "RhoL" << endl << NewRhoL << endl;
         }
-      } else if(this->sdr_->iMeth() == SDResponse::PPRPA  || 
-                this->sdr_->iMeth() == SDResponse::PPATDA ||
-                this->sdr_->iMeth() == SDResponse::PPCTDA) {
+      } else if(this->sdr_->iMeth() == SDResponse<T>::PPRPA  || 
+                this->sdr_->iMeth() == SDResponse<T>::PPATDA ||
+                this->sdr_->iMeth() == SDResponse<T>::PPCTDA) {
         this->sdr_->formRM4(NewVecR,NewSR,NewRhoL); 
-        if(this->sdr_->iMeth() == SDResponse::PPRPA)   
+        if(this->sdr_->iMeth() == SDResponse<T>::PPRPA)   
           // Linear trasnformation onto left / ungerade
           this->sdr_->formRM4(NewVecL,NewSL,NewRhoR);
       }

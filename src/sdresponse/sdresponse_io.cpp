@@ -26,7 +26,9 @@
 #include <sdresponse.h>
 using ChronusQ::SDResponse;
 
-void SDResponse::printPrinciple(int iSt){
+namespace ChronusQ {
+template<>
+void SDResponse<double>::printPrinciple(int iSt){
   double printTol = 0.1;
 
   this->fileio_->out << "  Principle Transitions   ( tol = 0.1 )" << endl;
@@ -83,10 +85,12 @@ void SDResponse::printPrinciple(int iSt){
   this->fileio_->out << bannerMid << endl << endl;
 }
 
-void SDResponse::printInfo() {
+template<>
+void SDResponse<double>::printInfo() {
 };//printInfo
 
-void SDResponse::printExcitedStateEnergies(){
+template<>
+void SDResponse<double>::printExcitedStateEnergies(){
   this->fileio_->out << bannerTop << endl;
   if(this->iMeth_ == CIS)
     this->fileio_->out << "CIS";
@@ -107,3 +111,4 @@ void SDResponse::printExcitedStateEnergies(){
     this->printPrinciple(iSt);
   }
 } //printExcitedStateEnergies()
+} // namespace ChronusQ

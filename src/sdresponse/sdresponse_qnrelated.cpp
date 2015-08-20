@@ -28,66 +28,9 @@
 using ChronusQ::SDResponse;
 using ChronusQ::QuasiNewton;
 
-void SDResponse::IterativeRPA(){
-  bool hasProp = ((this->iMeth_==CIS || this->iMeth_==RPA) && this->Ref_ != SingleSlater<double>::TCS);
-  this->formGuess();
-//if(this->iMeth_ == PPATDA) CErr();
-  QuasiNewton<double> davA(this);
-  davA.run(this->fileio_->out);
-  if(hasProp){
-    this->formTransDipole();
-    this->formOscStrength();
-    this->printExcitedStateEnergies();
-  }
-  if(this->iMeth_ == STAB) this->reoptWF();
-} // IterativeRPA
-
-void SDResponse::formGuess(){
-  this->checkValid();
-  if(!this->haveDag_) this->getDiag();
-  this->davGuess_ = 
-    std::unique_ptr<RealMatrix>(
-      new RealMatrix(this->nSingleDim_,this->nGuess_)
-    ); 
-  int nRPA = 1;
-  if(this->iMeth_==RPA || this->iMeth_ == STAB) nRPA *= 2;
-  int nCPY;
-  if(this->iMeth_ == CIS || this->iMeth_ == RPA || this->iMeth_ == STAB) 
-    nCPY = this->nSingleDim_ / nRPA;
-  else if(this->iMeth_ == PPRPA){
-    if(this->Ref_ == SingleSlater<double>::TCS)
-      nCPY = this->nVV_SLT_;
-    else {
-      if(this->iPPRPA_ == 0)
-        nCPY = this->nVAVA_SLT_;
-      else if(this->iPPRPA_ = 1)
-        nCPY = this->nVAVB_;
-      else if(this->iPPRPA_ = 2)
-        nCPY = this->nVBVB_SLT_;
-    }
-  } else {
-    nCPY = this->nSingleDim_;
-  }
-  RealMatrix dagCpy(nCPY,1);
-  std::memcpy(dagCpy.data(),this->rmDiag_->data(),dagCpy.size()*sizeof(double));
-  std::sort(dagCpy.data(),dagCpy.data()+dagCpy.size());
-  std::vector<int> alreadyAdded; 
-  for(auto i = 0; i < this->nGuess_; i++){
-    int indx;
-    for(auto k = 0; k < dagCpy.size(); k++){
-      auto it = std::find(alreadyAdded.begin(),alreadyAdded.end(),k);
-      if((dagCpy(i % nCPY,0) == (*this->rmDiag_)(k,0)) && 
-          it == alreadyAdded.end()){
-        indx = k;
-        alreadyAdded.push_back(indx);
-        break;
-      }
-    }
-    (*this->davGuess_)(indx,i) = 1.0;
-  }
-} // formGuess
-
-void SDResponse::getDiag(){
+namespace ChronusQ {
+template<>
+void SDResponse<double>::getDiag(){
   this->rmDiag_ = std::unique_ptr<RealCMMatrix>(new RealCMMatrix(nSingleDim_,1)); 
 
   if(this->Ref_ == SingleSlater<double>::TCS) {
@@ -235,7 +178,167 @@ void SDResponse::getDiag(){
   this->haveDag_ = true;
 } // getDiag
 
-void SDResponse::formRM3(RealCMMap &XMO, RealCMMap &Sigma, RealCMMap &Rho){
+template<>
+void SDResponse<double>::reoptWF(){
+  int maxStabIter = 4;
+  double small = 1e-10;
+  bool stable = false;
+  int NTCSxNBASIS = this->nTCS_*this->nBasis_;
+
+  int lenRealScr    = 0;
+  int lenComplexScr = 0;
+  int lenMat = NTCSxNBASIS*NTCSxNBASIS;
+  int lenEig = NTCSxNBASIS;
+  int lWork  = 4*NTCSxNBASIS;
+  int INFO;
+  char UPLO = 'L', JOBZ = 'V';
+
+  lenRealScr += lenMat; // Stability step in MO basis
+  lenRealScr += lenMat; // Matrix exponential
+  lenRealScr += lenEig; // Eigenvalues
+  lenRealScr += std::max(1,3*NTCSxNBASIS-1); // RWORK LAPACK Workspace
+
+
+  lenComplexScr += lenMat; // Stability step in MO basis
+  lenComplexScr += lenMat; // Matrix exponential
+  lenComplexScr += lenMat; // BSCR
+  lenComplexScr += lWork;  // LAPACK workspace (WORK)
+
+
+
+  double * REAL_SCR = new double[lenRealScr];
+
+  double * realStab    = REAL_SCR;
+  double * realExpStab = realStab    + lenMat;
+  double * W           = realExpStab + lenMat;
+  double * RWORK       = W           + lenEig;
+
+  dcomplex * COMPLEX_SCR = new dcomplex[lenComplexScr];
+
+  dcomplex * complexStab    = COMPLEX_SCR;
+  dcomplex * complexExpStab = complexStab    + lenMat;
+  dcomplex * BSCR           = complexExpStab + lenMat;
+  dcomplex * WORK           = BSCR           + lenMat;
+
+  RealCMMap    AReal(realStab   ,NTCSxNBASIS,NTCSxNBASIS);
+  RealCMMap ExpAReal(realExpStab,NTCSxNBASIS,NTCSxNBASIS);
+
+  ComplexCMMap    AComplex(complexStab   ,NTCSxNBASIS,NTCSxNBASIS);
+  ComplexCMMap    BComplex(BSCR          ,NTCSxNBASIS,NTCSxNBASIS);
+  ComplexCMMap ExpAComplex(complexExpStab,NTCSxNBASIS,NTCSxNBASIS);
+
+
+  for(auto iter = 0; iter < maxStabIter; iter++){
+    AReal.setZero();
+    ExpAReal.setZero();
+    AComplex.setZero();
+    BComplex.setZero();
+    ExpAComplex.setZero();
+
+    bool isPositive = (*this->omega_)(0) > 0.0;
+    bool isSmall    = std::abs((*this->omega_)(0)) < small;
+    if(isPositive || isSmall) {
+      stable = true;
+      break;
+    }
+    for(auto a = this->nO_, ia = 0; a < NTCSxNBASIS; a++)
+    for(auto i = 0         ; i < this->nO_; i++, ia++){
+      AComplex(a,i) = dcomplex(0.0, 0.9*(*this->transDen_)(ia,0));
+      AComplex(i,a) = dcomplex(0.0,-0.9*(*this->transDen_)(ia,0));
+    }
+// cout << AComplex.imag() << endl;
+
+    zheev_(&JOBZ,&UPLO,&NTCSxNBASIS,complexStab,&NTCSxNBASIS,W,WORK,&lWork,RWORK,&INFO);
+    std::memcpy(BSCR,complexStab,lenMat*sizeof(dcomplex));
+    for(auto i = 0; i < NTCSxNBASIS; i++){
+      dcomplex scal = std::exp(dcomplex(0.0,-2.0*W[i]));
+      BComplex.col(i) *= scal;
+    }
+   ExpAComplex = BComplex * AComplex.adjoint();
+   ExpAReal = ExpAComplex.real();
+// prettyPrint(cout,ExpAReal,"Exp(J)");
+// prettyPrint(cout,ExpAReal*ExpAReal.adjoint(),"Exp(J)");
+
+   (*this->singleSlater_->moA()) *= ExpAReal;
+   this->singleSlater_->formDensity();
+   this->singleSlater_->formFock();
+   this->singleSlater_->SCF();
+   QuasiNewton<double> dav(this);
+   dav.run(this->fileio_->out);
+ //CErr();
+  } // loop iter
+  if(stable){
+    this->singleSlater_->computeEnergy();
+    this->singleSlater_->computeMultipole();
+  } else {
+    CErr("Stability failed to Re-Optimize Wavefunction",this->fileio_->out);
+  }
+} // reoptWF
+
+template<>
+void SDResponse<double>::formGuess(){
+  this->checkValid();
+  if(!this->haveDag_) this->getDiag();
+  this->davGuess_ = 
+    std::unique_ptr<RealMatrix>(
+      new RealMatrix(this->nSingleDim_,this->nGuess_)
+    ); 
+  int nRPA = 1;
+  if(this->iMeth_==RPA || this->iMeth_ == STAB) nRPA *= 2;
+  int nCPY;
+  if(this->iMeth_ == CIS || this->iMeth_ == RPA || this->iMeth_ == STAB) 
+    nCPY = this->nSingleDim_ / nRPA;
+  else if(this->iMeth_ == PPRPA){
+    if(this->Ref_ == SingleSlater<double>::TCS)
+      nCPY = this->nVV_SLT_;
+    else {
+      if(this->iPPRPA_ == 0)
+        nCPY = this->nVAVA_SLT_;
+      else if(this->iPPRPA_ = 1)
+        nCPY = this->nVAVB_;
+      else if(this->iPPRPA_ = 2)
+        nCPY = this->nVBVB_SLT_;
+    }
+  } else {
+    nCPY = this->nSingleDim_;
+  }
+  RealMatrix dagCpy(nCPY,1);
+  std::memcpy(dagCpy.data(),this->rmDiag_->data(),dagCpy.size()*sizeof(double));
+  std::sort(dagCpy.data(),dagCpy.data()+dagCpy.size());
+  std::vector<int> alreadyAdded; 
+  for(auto i = 0; i < this->nGuess_; i++){
+    int indx;
+    for(auto k = 0; k < dagCpy.size(); k++){
+      auto it = std::find(alreadyAdded.begin(),alreadyAdded.end(),k);
+      if((dagCpy(i % nCPY,0) == (*this->rmDiag_)(k,0)) && 
+          it == alreadyAdded.end()){
+        indx = k;
+        alreadyAdded.push_back(indx);
+        break;
+      }
+    }
+    (*this->davGuess_)(indx,i) = 1.0;
+  }
+} // formGuess
+
+
+template<>
+void SDResponse<double>::IterativeRPA(){
+  bool hasProp = ((this->iMeth_==CIS || this->iMeth_==RPA) && this->Ref_ != SingleSlater<double>::TCS);
+  this->formGuess();
+//if(this->iMeth_ == PPATDA) CErr();
+  QuasiNewton<double> davA(this);
+  davA.run(this->fileio_->out);
+  if(hasProp){
+    this->formTransDipole();
+    this->formOscStrength();
+    this->printExcitedStateEnergies();
+  }
+  if(this->iMeth_ == STAB) this->reoptWF();
+} // IterativeRPA
+
+template<>
+void SDResponse<double>::formRM3(RealCMMap &XMO, RealCMMap &Sigma, RealCMMap &Rho){
 /*
  *  Forms sigma (and possibly rho) for the linear transfomation of E^(2)
  *  (and possibly S^(2) ) onto trial vectors (or any vector in general)
@@ -396,7 +499,8 @@ void SDResponse::formRM3(RealCMMap &XMO, RealCMMap &Sigma, RealCMMap &Rho){
   }
 } // formRM3
 
-void SDResponse::formRM4(RealCMMap& XMO, RealCMMap &Sigma, RealCMMap &Rho){
+template<>
+void SDResponse<double>::formRM4(RealCMMap& XMO, RealCMMap &Sigma, RealCMMap &Rho){
 
   bool doA = ( (this->iMeth_ == PPATDA) || (this->iMeth_ == PPRPA) );
   bool doC = ( (this->iMeth_ == PPCTDA) || (this->iMeth_ == PPRPA) );
@@ -431,99 +535,4 @@ void SDResponse::formRM4(RealCMMap& XMO, RealCMMap &Sigma, RealCMMap &Rho){
 
 } // formRM4
 
-void SDResponse::reoptWF(){
-  int maxStabIter = 4;
-  double small = 1e-10;
-  bool stable = false;
-  int NTCSxNBASIS = this->nTCS_*this->nBasis_;
-
-  int lenRealScr    = 0;
-  int lenComplexScr = 0;
-  int lenMat = NTCSxNBASIS*NTCSxNBASIS;
-  int lenEig = NTCSxNBASIS;
-  int lWork  = 4*NTCSxNBASIS;
-  int INFO;
-  char UPLO = 'L', JOBZ = 'V';
-
-  lenRealScr += lenMat; // Stability step in MO basis
-  lenRealScr += lenMat; // Matrix exponential
-  lenRealScr += lenEig; // Eigenvalues
-  lenRealScr += std::max(1,3*NTCSxNBASIS-1); // RWORK LAPACK Workspace
-
-
-  lenComplexScr += lenMat; // Stability step in MO basis
-  lenComplexScr += lenMat; // Matrix exponential
-  lenComplexScr += lenMat; // BSCR
-  lenComplexScr += lWork;  // LAPACK workspace (WORK)
-
-
-
-  double * REAL_SCR = new double[lenRealScr];
-
-  double * realStab    = REAL_SCR;
-  double * realExpStab = realStab    + lenMat;
-  double * W           = realExpStab + lenMat;
-  double * RWORK       = W           + lenEig;
-
-  dcomplex * COMPLEX_SCR = new dcomplex[lenComplexScr];
-
-  dcomplex * complexStab    = COMPLEX_SCR;
-  dcomplex * complexExpStab = complexStab    + lenMat;
-  dcomplex * BSCR           = complexExpStab + lenMat;
-  dcomplex * WORK           = BSCR           + lenMat;
-
-  RealCMMap    AReal(realStab   ,NTCSxNBASIS,NTCSxNBASIS);
-  RealCMMap ExpAReal(realExpStab,NTCSxNBASIS,NTCSxNBASIS);
-
-  ComplexCMMap    AComplex(complexStab   ,NTCSxNBASIS,NTCSxNBASIS);
-  ComplexCMMap    BComplex(BSCR          ,NTCSxNBASIS,NTCSxNBASIS);
-  ComplexCMMap ExpAComplex(complexExpStab,NTCSxNBASIS,NTCSxNBASIS);
-
-
-  for(auto iter = 0; iter < maxStabIter; iter++){
-    AReal.setZero();
-    ExpAReal.setZero();
-    AComplex.setZero();
-    BComplex.setZero();
-    ExpAComplex.setZero();
-
-    bool isPositive = (*this->omega_)(0) > 0.0;
-    bool isSmall    = std::abs((*this->omega_)(0)) < small;
-    if(isPositive || isSmall) {
-      stable = true;
-      break;
-    }
-    for(auto a = this->nO_, ia = 0; a < NTCSxNBASIS; a++)
-    for(auto i = 0         ; i < this->nO_; i++, ia++){
-      AComplex(a,i) = dcomplex(0.0, 0.9*(*this->transDen_)(ia,0));
-      AComplex(i,a) = dcomplex(0.0,-0.9*(*this->transDen_)(ia,0));
-    }
-// cout << AComplex.imag() << endl;
-
-    zheev_(&JOBZ,&UPLO,&NTCSxNBASIS,complexStab,&NTCSxNBASIS,W,WORK,&lWork,RWORK,&INFO);
-    std::memcpy(BSCR,complexStab,lenMat*sizeof(dcomplex));
-    for(auto i = 0; i < NTCSxNBASIS; i++){
-      dcomplex scal = std::exp(dcomplex(0.0,-2.0*W[i]));
-      BComplex.col(i) *= scal;
-    }
-   ExpAComplex = BComplex * AComplex.adjoint();
-   ExpAReal = ExpAComplex.real();
-// prettyPrint(cout,ExpAReal,"Exp(J)");
-// prettyPrint(cout,ExpAReal*ExpAReal.adjoint(),"Exp(J)");
-
-   (*this->singleSlater_->moA()) *= ExpAReal;
-   this->singleSlater_->formDensity();
-   this->singleSlater_->formFock();
-   this->singleSlater_->SCF();
-   QuasiNewton<double> dav(this);
-   dav.run(this->fileio_->out);
- //CErr();
-  } // loop iter
-  if(stable){
-    this->singleSlater_->computeEnergy();
-    this->singleSlater_->computeMultipole();
-  } else {
-    CErr("Stability failed to Re-Optimize Wavefunction",this->fileio_->out);
-  }
-} // reoptWF
-
+} // namespace ChronusQ
