@@ -177,11 +177,12 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 
 
   fileIO->out << "**AP One dimensional grid test**" << endl;
-  int Ngridr =   1000;
+  int Ngridr =   30;
 //  int NLeb1    = 14;
 //  int NLeb2    = 26;
-    int NLeb3    = 50;
-//    int NLeb3    = 110;
+//    int NLeb3 = 38;
+//    int NLeb3    = 50;
+    int NLeb3    = 110;
   double radius = 5.0;
 //   GaussChebyshev1stGrid Rad(Ngridr,0.0,radius);
    GaussChebyshev1stGridInf Rad(Ngridr,0.0,radius);
@@ -191,18 +192,12 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
    Rad.genGrid();
    GridLeb2.genGrid();
    TwoDGrid G2(&Rad,&GridLeb2);
-//   G2.printGrid();
 
    sph3GP ptSPH;
    cartGP ptCar;
-//   cartGP ptCarT(0.1,0.2,0.3);
    auto center = basisset->shells(0).O;
-//   cartGP ptCarO(0.0,0.0,1.150061);
-//   cartGP ptCarO(0.377945,-0.566918,1.150061);
-//   cout << "Test func " << *(basisset->basisProdEval(basisset->shells(0),basisset->shells(0),&ptCarT)) << endl;
-//   cout << "Test oxy  " << foxy(ptCarT,ptCarO,130.709320,23.808861,6.443608,4.251943,4.112294,1.281623,0.0,0.0,0.0) <<endl;
    double value;
-   cout << basisset->shells(0) << endl;
+//   cout << basisset->shells(0) << endl;
    for(int i = 0; i < Ngridr; i++){
       for(int j = 0; j < NLeb3; j++){
     ptSPH = G2.gridPt(i,j);
@@ -210,12 +205,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
     ptCar.set<0>(bg::get<0>(ptCar) + center[0]);
     ptCar.set<1>(bg::get<1>(ptCar) + center[1]);
     ptCar.set<2>(bg::get<2>(ptCar) + center[2]);
-
-//   cout << "ptSPH " << bg::get<0>(ptSPH) << " " <<bg::get<1>(ptSPH) << " "<< bg::get<2>(ptSPH) <<endl; 
-//   cout << "ptCar Out" << bg::get<0>(ptCar) <<" "<< bg::get<1>(ptCar) << " " <<bg::get<2>(ptCar) <<endl; 
-     value = *(basisset->basisProdEval(basisset->shells(0),basisset->shells(0),&ptCar));
-//     value = foxy(ptCar,ptCarO,130.709320,23.808861,6.443608,4.251943,4.112294,1.281623,0.0,0.0,0.0) ;
-//   value = G2.ftestVal(&ptCar);
+    value = *(basisset->basisProdEval(basisset->shells(0),basisset->shells(0),&ptCar));
    G2.setFEval(value,i,j,NLeb3);
      }
     }

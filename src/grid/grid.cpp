@@ -134,31 +134,14 @@ void OneDGrid::printGrid(){
    double sum = 0.0;
      std::cout << "Number of Radial-grid points= "<< Gr_->npts()  <<std::endl;
      std::cout << "Number of Solid Angle-grid points= "<< Gs_->npts()  <<std::endl;
-//     cartGP ptCarO(0.0,0.0,1.150061);
-//     sph3GP ptSPH;
-//     cartGP ptCar;
-//  for(auto i = 0, ij = 0; i < Gr_->npts(); i++)
-//  for(auto j = 0; j < Gs_->npts(); j++, ij++){
      for(int i = 0; i < Gr_->npts(); i++){
       for(int j = 0; j < Gs_->npts(); j++){
-//          ptSPH.set<0>(bg::get<0>(Gs_->grid2GPts()[j])); 
-//          ptSPH.set<1>(bg::get<1>(Gs_->grid2GPts()[j])); 
-//          ptSPH.set<2>(Gr_->gridPts()[i]); 
-//          bg::transform(ptSPH,ptCar);
-//          sum += this->foxy(ptCar,ptCarO,130.709320,23.808861,6.443608,4.251943,4.112294,1.281623,0.0,0.0,0.0)*(Gs_->weights()[j])*(Gr_->weights()[i]);
-
-
-
-//           cout << "Print rad " << Gr_->gridPts()[i] <<"  " <<(std::pow(Gr_->gridPts()[i],2.0)) <<endl;
-//         sum += (this->ftest(Gr_->gridPts()[i],bg::get<1>(Gs_->grid2GPts()[j]),bg::get<0>(Gs_->grid2GPts()[j])))*(Gs_->weights()[j])*(Gr_->weights()[i]);
-//           sum += this->fEVal[i*Gs_->npts() + j]*(Gs_->weights()[j])*(Gr_->weights()[i]);
            sum += this->fEVal[i*Gs_->npts() + j]*(Gs_->weights()[j])*(Gr_->weights()[i])*(std::pow(Gr_->gridPts()[i],2.0));
         }
       }
            cout << "before norm "<< sum <<endl;
 //        return 4.0*(math.pi)*sum*(Gr_->norm());
         return 4.0*math.pi*sum;
-//        return sum;
   }
 
 /*
@@ -254,16 +237,14 @@ void OneDGrid::printGrid(){
       double val;
       double dmu;
       double den;
-      double rOri =1.150061;
-    cout << " Transformed Becke " << endl;
-    for(int i = 0; i < this->nPts_; i++){
-       
-      dmu = (std::pow((1-this->gridPts_[i]),2.0)) / (2.0*toau*rOxy);
-      val = toau * rOxy *  (1+this->gridPts_[i]) / (1-this->gridPts_[i]);
-      den = std::sqrt(1.0-(std::pow(this->gridPts_[i],2.0)));
-      this->weights_[i] = this->weights_[i]*den/dmu;
-      this->gridPts_[i] = val;
-      }
+      for(int i = 0; i < this->nPts_; i++){
+        dmu = (std::pow((1-this->gridPts_[i]),2.0)) / (2.0*toau*rOxy);
+        val = toau * rOxy *  (1+this->gridPts_[i]) / (1-this->gridPts_[i]);
+        den = std::sqrt(1.0-(std::pow(this->gridPts_[i],2.0)));
+        this->weights_[i] = this->weights_[i]*den/dmu;
+        this->gridPts_[i] = val;
+        }
+      cout << " Transformed Becke " << endl;
   }
 
  
@@ -319,19 +300,23 @@ void OneDGrid::printGrid(){
     }else if(this->nPts_ == 110){
 // Lebedev N=110; eta 0.982 Lebedev 1976 ZVMMF_15_48 table 11.1;
       A1 = 0.00382827049494;
-      A3 = 0.00988550016044;
-      B1 = 0.00844068048232;
+//      A3 = 0.00988550016044;
+      A3 = 0.009793737512487512;
+//      B1 = 0.00844068048232;
+      B1 = 0.008211737283191111;
       l1 = 0.185115635345;
       gen6_A1(0,one,A1); 
       gen8_A3(6,overradthree,A3); 
       gen24_Bn(14,l1,B1);
       double B2 = 0.00959547133607;
-      double l2 = 0.383386152638; 
+//      double l2 = 0.383386152638; 
+      double l2 = 0.3956894730559419; 
       gen24_Bn(38,l2,B2);
       double B3 = 0.00994281489118;
       double l3 = 0.690421048382;
-      gen24_Bn(62,l2,B2);
-      C1 = 4.0 * (std::pow(17.0,3.0)) / 2027025.0;
+      gen24_Bn(62,l3,B3);
+//      C1 = 4.0 * (std::pow(17.0,3.0)) / 2027025.0;
+      C1 = 0.00969499636166;
       q1 = 0.478369028812;
       gen24_Cn(86,q1,C1);
       }else{
