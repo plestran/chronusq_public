@@ -1,2 +1,2 @@
-add_library(sdresponse sdresponse.cpp sdresponse_io.cpp sdresponse_misc.cpp
-sdresponse_prop.cpp sdresponse_qnrelated.cpp)
+add_library(sdresponse sdresponse_double.cpp sdresponse_double_io.cpp sdresponse_double_misc.cpp
+sdresponse_double_prop.cpp sdresponse_double_qnrelated.cpp)
