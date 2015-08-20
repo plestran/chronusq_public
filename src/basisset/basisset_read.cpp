@@ -289,7 +289,7 @@ double * BasisSet::basisEval(libint2::Shell &liShell, cartGP *pt){
   double z = bg::get<2>(*pt) - center[2];
   double rSq = x*x + y*y + z*z;
   for(auto i = 0; i < shSize; i++){
-    cout << endl << fEVal[i] << endl;
+//    cout << endl << fEVal[i] << endl;
     for(auto k = 0; k < contDepth; k++){
       fEVal[i] += 
         liShell.contr[0].coeff[k] *
@@ -338,7 +338,7 @@ double * BasisSet::basisEval(libint2::Shell &liShell, sph3GP *ptSph){
   double z = bg::get<2>(pt) - center[2];
   double rSq = x*x + y*y + z*z;
   for(auto i = 0; i < shSize; i++){
-    cout << endl << fEVal[i] << endl;
+//    cout << endl << fEVal[i] << endl;
     for(auto k = 0; k < contDepth; k++){
       fEVal[i] += 
         liShell.contr[0].coeff[k] *
@@ -351,13 +351,14 @@ double * BasisSet::basisEval(libint2::Shell &liShell, sph3GP *ptSph){
     fEVal[i] *= std::pow(x,l);
     fEVal[i] *= std::pow(y,m);
     fEVal[i] *= std::pow(z,n);
+//    cout << "inside " << i << "  " << fEVal[i] << endl;
   }
 
   return fEVal;
 }
 
 template<>
-double * BasisSet::basisProdEval(libint2::Shell &s1, libint2::Shell &s2, cartGP *pt){
+double * BasisSet::basisProdEval(libint2::Shell s1, libint2::Shell s2, cartGP *pt){
   double *fEVal = new double[s1.size()*s2.size()];
   double *s1Eval = basisEval(s1,pt);
   double *s2Eval = basisEval(s2,pt);
@@ -365,12 +366,32 @@ double * BasisSet::basisProdEval(libint2::Shell &s1, libint2::Shell &s2, cartGP 
   for(auto i = 0, ij = 0; i < s1.size(); i++)
   for(auto j = 0; j < s2.size(); j++, ij++){
     fEVal[ij] = s1Eval[i]*s2Eval[j];
+//    cout << "Print Inside =" << fEVal[ij] <<endl;
   }
   delete [] s1Eval;
   delete [] s2Eval;
-
+  
   return fEVal;
   
 }
+
+template<>
+double * BasisSet::basisProdEval(libint2::Shell s1, libint2::Shell s2, sph3GP *pt){
+  double *fEVal = new double[s1.size()*s2.size()];
+  double *s1Eval = basisEval(s1,pt);
+  double *s2Eval = basisEval(s2,pt);
+
+  for(auto i = 0, ij = 0; i < s1.size(); i++)
+  for(auto j = 0; j < s2.size(); j++, ij++){
+    fEVal[ij] = s1Eval[i]*s2Eval[j];
+//    cout << "Print Inside =" << fEVal[ij] <<endl;
+}
+  delete [] s1Eval;
+  delete [] s2Eval;
+  
+  return fEVal;
+  
+}
+
 } // namespace ChronusQ
 

@@ -39,11 +39,29 @@ void func(Grid *g){
    cout << "Test Integral err  = "<<std::abs((*g).integrate() - ref)/ref << endl;
 }
 
+
 void func2D(OneDGrid *g){
    (*g).genGrid();
    (*g).printGrid(); 
    cout << "Test Integral value= "<< (*g).integrate() << endl;
 }
+
+  double foxy(cartGP pt, cartGP O,double a1, double a2, double a3, double d1, double d2, double d3, double lx, double ly, double lz) {
+     double x = bg::get<0>(pt)-bg::get<0>(O);
+     double y = bg::get<1>(pt)-bg::get<1>(O);
+     double z = bg::get<2>(pt)-bg::get<2>(O);
+//     cout << "x "<<x <<" y "<< y << " z " << z <<endl;
+     double fun = 0.0;
+     double rSq;
+     rSq = (x*x + y*y + z*z);
+      fun  += d1*std::exp(-a1*rSq);
+      fun  += d2*std::exp(-a2*rSq);
+      fun  += d3*std::exp(-a3*rSq);
+      fun *= std::pow(x,lx);
+      fun *= std::pow(y,ly);
+      fun *= std::pow(z,lz);
+     return fun*fun;
+  }
 
 //void func2D_plus(OneDGrid *gr, OneDGrid *gs){
 //   (*gr).genGrid();
@@ -144,52 +162,66 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 //Test one dimensional grid
 //
 //
-/*
-  cartGP pt(0.01,0.02,0.03);
-  sph3GP ptSPH;
-  bg::transform(pt,ptSPH);
+
+//  cartGP pt(0.01,0.02,0.03);
+  
+
+
 //  double *f = basisset->basisEval(2,basisset->shells(2).O,&ptSPH);
-  double *f = basisset->basisEval(2,basisset->shells(2).O,&ptSPH);
+//  double *f = basisset->basisEval(2,basisset->shells(2).O,&ptSPH);
 //double *g = basisset->basisEval(basisset->shells(2),&ptSPH);
-  cout << basisset->shells(2) << endl;
-  for(auto i = 0; i < 3; i++)
-  cout << "FEVAL " << *(f+i) <<endl;
+//  cout << basisset->shells(2) << endl;
+//  for(auto i = 0; i < 3; i++)
+//  cout << "FEVAL " << *(f+i) <<endl;
 //cout << "FEVAL " << *(f+i) << " " << *(g+i) <<endl;
+
+
   fileIO->out << "**AP One dimensional grid test**" << endl;
-  int Ngridr =   10;
-  int NLeb1    = 14;
-  int NLeb2    = 26;
-  int NLeb3    = 38;
-  double radius = 1.0;
-  double reftest = 0.6345191418561634;  
-  GaussChebyshev1stGrid Rad(Ngridr,0.0,radius);
-  GaussChebyshev1stGridInf RadInf(Ngridr,0.0,radius);
-   LebedevGrid GridLeb1(NLeb1);
-   LebedevGrid GridLeb2(NLeb2);
-   LebedevGrid GridLeb3(NLeb3);
+  int Ngridr =   1000;
+//  int NLeb1    = 14;
+//  int NLeb2    = 26;
+    int NLeb3    = 50;
+//    int NLeb3    = 110;
+  double radius = 5.0;
+//   GaussChebyshev1stGrid Rad(Ngridr,0.0,radius);
+   GaussChebyshev1stGridInf Rad(Ngridr,0.0,radius);
+   LebedevGrid GridLeb2(NLeb3);
    
-//   func(&Rad);
-//   func2D(&GridLeb);
 //
    Rad.genGrid();
-   RadInf.genGrid();
-   GridLeb1.genGrid();
    GridLeb2.genGrid();
-   GridLeb3.genGrid();
-   TwoDGrid G1(&Rad,&GridLeb1);   
-   TwoDGrid G2(&RadInf,&GridLeb2);
-   G2.printGrid();
-//   TwoDGrid G3(&Rad,&GridLeb3);
-   cout << "Test Int = " << G1.integrate() <<endl;
-   cout << "Test Err = " << std::abs(G1.integrate()-reftest) <<endl;
-////   cout << "Test Int = " << G2.integrate() <<endl;
-////   cout << "Test Err = " << std::abs(G2.integrate()-reftest) <<endl;
-///   cout << "Test Int = " << G3.integrate() <<endl;
-//   cout << "Sphere Err = " << std::abs(G3.integrate()-(4.0*radius*radius*radius*math.pi/3.0)) <<endl;
-////   cout << "Test Err = " << std::abs(G3.integrate()-reftest) <<endl;
-//   G3.printGrid();
+   TwoDGrid G2(&Rad,&GridLeb2);
+//   G2.printGrid();
+
+   sph3GP ptSPH;
+   cartGP ptCar;
+//   cartGP ptCarT(0.1,0.2,0.3);
+   auto center = basisset->shells(0).O;
+//   cartGP ptCarO(0.0,0.0,1.150061);
+//   cartGP ptCarO(0.377945,-0.566918,1.150061);
+//   cout << "Test func " << *(basisset->basisProdEval(basisset->shells(0),basisset->shells(0),&ptCarT)) << endl;
+//   cout << "Test oxy  " << foxy(ptCarT,ptCarO,130.709320,23.808861,6.443608,4.251943,4.112294,1.281623,0.0,0.0,0.0) <<endl;
+   double value;
+   cout << basisset->shells(0) << endl;
+   for(int i = 0; i < Ngridr; i++){
+      for(int j = 0; j < NLeb3; j++){
+    ptSPH = G2.gridPt(i,j);
+    bg::transform(ptSPH,ptCar);
+    ptCar.set<0>(bg::get<0>(ptCar) + center[0]);
+    ptCar.set<1>(bg::get<1>(ptCar) + center[1]);
+    ptCar.set<2>(bg::get<2>(ptCar) + center[2]);
+
+//   cout << "ptSPH " << bg::get<0>(ptSPH) << " " <<bg::get<1>(ptSPH) << " "<< bg::get<2>(ptSPH) <<endl; 
+//   cout << "ptCar Out" << bg::get<0>(ptCar) <<" "<< bg::get<1>(ptCar) << " " <<bg::get<2>(ptCar) <<endl; 
+     value = *(basisset->basisProdEval(basisset->shells(0),basisset->shells(0),&ptCar));
+//     value = foxy(ptCar,ptCarO,130.709320,23.808861,6.443608,4.251943,4.112294,1.281623,0.0,0.0,0.0) ;
+//   value = G2.ftestVal(&ptCar);
+   G2.setFEval(value,i,j,NLeb3);
+     }
+    }
+   cout << "Test 3d = " << G2.integrate() <<endl;
 //   
-   */
+   
   time(&currentTime);
   fileIO->out<<"\nJob finished: "<<ctime(&currentTime)<<endl;
 /*

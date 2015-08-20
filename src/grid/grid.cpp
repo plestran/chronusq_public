@@ -31,7 +31,18 @@ namespace ChronusQ{
   double OneDGrid::f_val(double rad){
   // Test Function to be integrated by One-dimensional grid
   // INT[0,1] r^2 * exp(-r^2);
-         return (std::pow(rad,2.0))*(std::exp(-((std::pow(rad,2.0)))));
+//         return (std::pow(rad,2.0))*(std::exp(-((std::pow(rad,2.0)))));
+//         return (std::pow(rad,2.0))*(std::exp(-((std::pow(rad,2.0)))));
+//         return std::exp(-(std::pow(rad,2.0)));
+
+   double a0=0.9996651;
+   double val;
+// 1s H
+   val = rad*(std::exp(-rad/a0))/ ((std::pow(a0,1.5))*(std::sqrt(math.pi)));
+
+
+   return val*val;
+         //return std::pow(math.pi,-1.5)*(std::pow(rad,2.0))*(std::exp(-((std::pow(rad,2.0)))));
          } 
 
   double OneDGrid::f2_val(double elevation,double azimut){
@@ -53,7 +64,9 @@ namespace ChronusQ{
      if(this->intas2GPt_){
        return 4.0*math.pi*sum;
        }else{
+       cout << "before norm 1d "  << sum <<endl;
        return sum*this->norm_;
+//       return sum;
      }
   }
 void OneDGrid::printGrid(){
@@ -68,32 +81,84 @@ void OneDGrid::printGrid(){
 
 };
 
-  double TwoDGrid::fsphe(double r, double elevation, double azimut){
+  double * TwoDGrid::ftestVal(cartGP *pt){
   // Test Function to be integrated by Two-dimensional grid
-     return r*r;
+     sph3GP  ptSPH;
+     double val;
+     double * gEval;   
+     bg::transform(*pt,ptSPH);
+//     val = this->ftest(bg::get<2>(ptSPH),bg::get<1>(ptSPH),bg::get<0>(ptSPH)); 
+     cout << "Test1 " <<endl;
+     val = this->ftest(bg::get<2>(ptSPH),bg::get<1>(ptSPH),bg::get<0>(ptSPH)); 
+//     cout << "Test2 " <<endl;
+//     *gEval = val;
+//     cout << "Test3 " <<endl;
+//     cout << " value " << *gEval << endl;
+     return &val;
    } 
 
   double TwoDGrid::ftest(double rad, double elevation, double azimut) {
 //  return std::sin(elevation)*(std::pow(rad,2.0))*(std::exp( -std::pow(rad,2.0)-std::pow((elevation-azimut),2.0)) );
-  return (std::pow(rad,2.0))*(std::exp( -std::pow(rad,2.0)-std::pow((elevation-azimut),2.0)) );
+ // return (std::pow(rad,2.0))*(std::exp( -std::pow(rad,2.0)-std::pow((elevation-azimut),2.0)) );
+   double a0=0.9996651;
+   double val;
+//  H 1s
+//   val = rad*(std::exp(-rad/a0))/ ((std::pow(a0,1.5))*(std::sqrt(math.pi)));
+//  H 2p_0
+//     cout << "2p_0 " << endl;
+     val = rad*rad*std::sin(elevation)*(std::exp(-rad/(2.0*a0))) / (8.0*(std::pow(a0,2.5))*(std::sqrt(math.pi)));
+   return val*val;
+//         return std::exp(-(std::pow(rad,2.0)));
+//    return (std::pow(rad,2.0))*(std::exp(-((std::pow(rad,2.0)))));
 }
 
-  double TwoDGrid::gtest(sph3GP ptSph) {
-  double sum;
-  return sum;
-}
+  double TwoDGrid::foxy(cartGP pt, cartGP O,double a1, double a2, double a3, double d1, double d2, double d3, double lx, double ly, double lz) {
+     double x = bg::get<0>(pt)-bg::get<0>(O);
+     double y = bg::get<1>(pt)-bg::get<1>(O);
+     double z = bg::get<2>(pt)-bg::get<2>(O);
+//     cout << "x "<<x <<" y "<< y << " z " << z <<endl;
+     double fun = 0.0;
+     double rSq;
+     rSq = (x*x + y*y + z*z);
+      fun  += d1*std::exp(-a1*rSq);
+      fun  += d2*std::exp(-a2*rSq);
+      fun  += d3*std::exp(-a3*rSq);
+      fun *= std::pow(x,lx);
+      fun *= std::pow(y,ly);
+      fun *= std::pow(z,lz);
+     return fun*fun*rSq;
+  }
 
   double TwoDGrid::integrate(){
   // Integrate a test function for a one dimensional grid radial part
    double sum = 0.0;
      std::cout << "Number of Radial-grid points= "<< Gr_->npts()  <<std::endl;
      std::cout << "Number of Solid Angle-grid points= "<< Gs_->npts()  <<std::endl;
+//     cartGP ptCarO(0.0,0.0,1.150061);
+//     sph3GP ptSPH;
+//     cartGP ptCar;
+//  for(auto i = 0, ij = 0; i < Gr_->npts(); i++)
+//  for(auto j = 0; j < Gs_->npts(); j++, ij++){
      for(int i = 0; i < Gr_->npts(); i++){
       for(int j = 0; j < Gs_->npts(); j++){
-         sum += (this->ftest(Gr_->gridPts()[i],bg::get<1>(Gs_->grid2GPts()[j]),bg::get<0>(Gs_->grid2GPts()[j])))*(Gs_->weights()[j])*(Gr_->weights()[i]);
+//          ptSPH.set<0>(bg::get<0>(Gs_->grid2GPts()[j])); 
+//          ptSPH.set<1>(bg::get<1>(Gs_->grid2GPts()[j])); 
+//          ptSPH.set<2>(Gr_->gridPts()[i]); 
+//          bg::transform(ptSPH,ptCar);
+//          sum += this->foxy(ptCar,ptCarO,130.709320,23.808861,6.443608,4.251943,4.112294,1.281623,0.0,0.0,0.0)*(Gs_->weights()[j])*(Gr_->weights()[i]);
+
+
+
+//           cout << "Print rad " << Gr_->gridPts()[i] <<"  " <<(std::pow(Gr_->gridPts()[i],2.0)) <<endl;
+//         sum += (this->ftest(Gr_->gridPts()[i],bg::get<1>(Gs_->grid2GPts()[j]),bg::get<0>(Gs_->grid2GPts()[j])))*(Gs_->weights()[j])*(Gr_->weights()[i]);
+//           sum += this->fEVal[i*Gs_->npts() + j]*(Gs_->weights()[j])*(Gr_->weights()[i]);
+           sum += this->fEVal[i*Gs_->npts() + j]*(Gs_->weights()[j])*(Gr_->weights()[i])*(std::pow(Gr_->gridPts()[i],2.0));
         }
       }
-        return 4.0*(math.pi)*sum*(Gr_->norm());
+           cout << "before norm "<< sum <<endl;
+//        return 4.0*(math.pi)*sum*(Gr_->norm());
+        return 4.0*math.pi*sum;
+//        return sum;
   }
 
 /*
@@ -172,26 +237,33 @@ void OneDGrid::printGrid(){
   void GaussChebyshev1stGridInf::genGrid(){
      // Gauss-Chebyshev 1st kind grid
      // Int {a,b} f(x) = Int {-1,1} g(x')/sqrt(1-x'^2) ~ Sum [1, NGrid] weights[i] * g(zeta[i])
-     // Where g(zeta[i]) = [(b-a)/2] * sqrt(1-zeta[i]^2) f( [(b-a)/2]*zeta[i] + [(b+a)/2] )
-     // and   zeta[i] = gridPts_[i] = cos ( [(2*i-1)*math.pi/2*NGrid])
      // weights[i] = math.pi/NGrid
-     // Note I have included the "sqrt(1-zeta[i]^2)" of the transformation in the actual weights[i] .
      // Note in c++ i starts from 0, so has been shifted i = i+1 
     for(int i = 0; i < this->nPts_; i++) {
       this->gridPts_[i] = cos(( (2.0*(i+1)-1.0)/(2.0*this->nPts_))*math.pi);
-      this->weights_[i] = (math.pi/this->nPts_)*(sqrt(1-(this->gridPts_[i]*this->gridPts_[i]))) ;
-//    the weights are only (math.pi/this->nPts_), the second term is including the integrand transformation factor in Eq.25.4.38 Abramowitz Handbook     
-//    std::cout << i <<" " <<this->gridPts_[i] << " "<< this->weights_[i]  << std::endl;
+      this->weights_[i] = (math.pi/this->nPts_);
       }
     this->transformPts(); 
   }
 
   
   void GaussChebyshev1stGridInf::transformPts(){
-      double rOxy= 0.60;
-      double toau = 1.889726;
-    for(int i = 0; i < this->nPts_; i++)
-      this->gridPts_[i] = toau * rOxy * (1+this->gridPts_[i]) / (1-this->gridPts_[i]);
+      double rOxy= 0.60/2.0;
+//      double rOxy= 0.529;
+      double toau = (1.0)/phys.bohr;
+      double val;
+      double dmu;
+      double den;
+      double rOri =1.150061;
+    cout << " Transformed Becke " << endl;
+    for(int i = 0; i < this->nPts_; i++){
+       
+      dmu = (std::pow((1-this->gridPts_[i]),2.0)) / (2.0*toau*rOxy);
+      val = toau * rOxy *  (1+this->gridPts_[i]) / (1-this->gridPts_[i]);
+      den = std::sqrt(1.0-(std::pow(this->gridPts_[i],2.0)));
+      this->weights_[i] = this->weights_[i]*den/dmu;
+      this->gridPts_[i] = val;
+      }
   }
 
  
@@ -204,7 +276,9 @@ void OneDGrid::printGrid(){
      double A2;
      double A3;
      double C1;
+     double B1;
      double q1;
+     double l1;
 // We are using the values in Lebedev75 Zh. vychisl Mat mat Fiz 15, 1, 48-54, 1975
 // For nPts == 38
      if(this->nPts_ == 6){
@@ -214,7 +288,7 @@ void OneDGrid::printGrid(){
        A1= 0.6666666666666667e-1;
        A3= 0.7500000000000000e-1;
        gen6_A1(0,one,A1);
-       gen8_A3(6,overradtwo,A3);
+       gen8_A3(6,overradthree,A3);
     }else if(this->nPts_ == 26){
        A1 = 0.4761904761904762e-1;
        A2 = 0.3809523809523810e-1;
@@ -223,7 +297,7 @@ void OneDGrid::printGrid(){
        gen12_A2(6,overradtwo,A2);
        gen8_A3(18,overradthree,A3); 
     }else if(this->nPts_ == 38){
-// Lebedev N=38; eta 0.877 Lebedev 1973 ZVMMF_15_48 table 9.1;
+// Lebedev N=38; eta 0.877 Lebedev 1976 ZVMMF_15_48 table 9.1;
       A1 = double(1)/double(105);
       A3 = double(9)/double(280);
       q1 = 0.4597008433809831;
@@ -231,6 +305,35 @@ void OneDGrid::printGrid(){
       gen6_A1(0,one,A1);
       gen8_A3(6,overradthree,A3);
       gen24_Cn(14,q1,C1);
+    }else if(this->nPts_ == 50){
+// Lebedev N=50; eta 0.96 Lebedev 1976 ZVMMF_15_48 table 11.1;
+      A1 = double(4)/double(315);
+      A2 = double(64)/double(2835);
+      A3 = double(27)/double(1280);
+      B1 = double(std::pow(11.0,4.0))/double(725760);
+      l1 = 0.301511344578;
+      gen6_A1(0,one,A1);
+      gen12_A2(6,overradtwo,A2);
+      gen8_A3(18,overradthree,A3);
+      gen24_Bn(26,l1,B1);
+    }else if(this->nPts_ == 110){
+// Lebedev N=110; eta 0.982 Lebedev 1976 ZVMMF_15_48 table 11.1;
+      A1 = 0.00382827049494;
+      A3 = 0.00988550016044;
+      B1 = 0.00844068048232;
+      l1 = 0.185115635345;
+      gen6_A1(0,one,A1); 
+      gen8_A3(6,overradthree,A3); 
+      gen24_Bn(14,l1,B1);
+      double B2 = 0.00959547133607;
+      double l2 = 0.383386152638; 
+      gen24_Bn(38,l2,B2);
+      double B3 = 0.00994281489118;
+      double l3 = 0.690421048382;
+      gen24_Bn(62,l2,B2);
+      C1 = 4.0 * (std::pow(17.0,3.0)) / 2027025.0;
+      q1 = 0.478369028812;
+      gen24_Cn(86,q1,C1);
       }else{
       CErr("Number of points not available in Lebedev quadrature");
       }
