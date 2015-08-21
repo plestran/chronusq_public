@@ -28,6 +28,7 @@
 #include <grid.h>
 using namespace ChronusQ;
 
+/*
   //  Test Function for One-dimensional grid
 void func(Grid *g){
   // Reference numeric integration computed with Mathematica
@@ -45,7 +46,6 @@ void func2D(OneDGrid *g){
    (*g).printGrid(); 
    cout << "Test Integral value= "<< (*g).integrate() << endl;
 }
-
   double foxy(cartGP pt, cartGP O,double a1, double a2, double a3, double d1, double d2, double d3, double lx, double ly, double lz) {
      double x = bg::get<0>(pt)-bg::get<0>(O);
      double y = bg::get<1>(pt)-bg::get<1>(O);
@@ -62,6 +62,7 @@ void func2D(OneDGrid *g){
       fun *= std::pow(z,lz);
      return fun*fun;
   }
+*/
 
 //void func2D_plus(OneDGrid *gr, OneDGrid *gs){
 //   (*gr).genGrid();
@@ -177,39 +178,66 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 
 
   fileIO->out << "**AP One dimensional grid test**" << endl;
-  int Ngridr =   30;
-//  int NLeb1    = 14;
-//  int NLeb2    = 26;
-//    int NLeb3 = 38;
-//    int NLeb3    = 50;
-    int NLeb3    = 110;
+//  int NLeb = 14;
+//  int NLeb = 26;
+//  int NLeb = 38;
+//  int NLeb = 110;
+    int Ngridr =   30;
+    int NLeb    = 50;
   double radius = 5.0;
 //   GaussChebyshev1stGrid Rad(Ngridr,0.0,radius);
+// Defining Grids
    GaussChebyshev1stGridInf Rad(Ngridr,0.0,radius);
-   LebedevGrid GridLeb2(NLeb3);
-   
-//
+   LebedevGrid GridLeb2(NLeb);
+// Generating Grids   
    Rad.genGrid();
    GridLeb2.genGrid();
    TwoDGrid G2(&Rad,&GridLeb2);
 
    sph3GP ptSPH;
    cartGP ptCar;
-   auto center = basisset->shells(0).O;
-   double value;
+   int n3 = basisset->nBasis();
+//   std::unique_ptr<RealMatrix> WOver_;
+//   WOver_ = std::unique_ptr<RealMatrix>(new RealMatrix(n3,n3)); // SUM over grid W_i Smunu(xi)
+   RealMatrix WOver(n3,n3);
+// Loop over shells
+   std::cout << "Number of Radial-grid points= "<< Ngridr  << endl;
+   std::cout << "Number of Solid Angle-grid points= "<< NLeb<< endl;
+   cout << "NofBasis = " << basisset->nBasis() << endl;
+   for(int s1 = 0; s1 < basisset->nShell(); s1++){
+     cout << "NofShells = " << basisset->nShell() << endl;
+     int n1  = basisset->shells(s1).size();
+     cout << "S1 ShellSize = " << n1 << endl;
+     for(int s2=0; s2 <= s1; s2++){
+       int n2  = basisset->shells(s2).size();
+       cout << "S2 ShellSize = " << n2 << endl;
+       double *WOverPar_ ;
+//       WOverPar_ = new double [n1*n2] ; // SUM over grid W_i Smunu(xi)
+       auto center = basisset->shells(s1).O;
 //   cout << basisset->shells(0) << endl;
-   for(int i = 0; i < Ngridr; i++){
-      for(int j = 0; j < NLeb3; j++){
-    ptSPH = G2.gridPt(i,j);
-    bg::transform(ptSPH,ptCar);
-    ptCar.set<0>(bg::get<0>(ptCar) + center[0]);
-    ptCar.set<1>(bg::get<1>(ptCar) + center[1]);
-    ptCar.set<2>(bg::get<2>(ptCar) + center[2]);
-    value = *(basisset->basisProdEval(basisset->shells(0),basisset->shells(0),&ptCar));
-   G2.setFEval(value,i,j,NLeb3);
+
+//  Loop over Grid Poind Radial x Angular
+         for(int i = 0; i < Ngridr; i++){
+           for(int j = 0; j < NLeb; j++){
+             ptSPH = G2.gridPt(i,j);
+             bg::transform(ptSPH,ptCar);
+             ptCar.set<0>(bg::get<0>(ptCar) + center[0]);
+             ptCar.set<1>(bg::get<1>(ptCar) + center[1]);
+             ptCar.set<2>(bg::get<2>(ptCar) + center[2]);
+// Loop inside shell
+                 WOverPar_ = basisset->basisProdEval(basisset->shells(s1),basisset->shells(s2),&ptCar);
+//             for(int shmu = 0; shmu < n1; shmu++ ) {
+//               for(int shnu = 0; shnu < n2; shnu++ ) {
+                 G2.setFEval(*WOverPar_,i,j,NLeb);
+                 
+//                }
+//              }
+            }
+          }
+                 WOver(s1,s2) = G2.integrate();
+                 cout << "Test 3d = " << WOver(s1,s2) <<endl;
+        }
      }
-    }
-   cout << "Test 3d = " << G2.integrate() <<endl;
 //   
    
   time(&currentTime);

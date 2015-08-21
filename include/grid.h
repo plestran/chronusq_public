@@ -87,8 +87,8 @@ class TwoDGrid : public Grid {
             OneDGrid * Gs_;
       double   fsphe(double,double,double);
       double * fEVal;
-      double foxy(cartGP pt, cartGP O,double a1, double a2, double a3, double d1, double d2, double d3, double lx, double ly, double lz); 
-      double   ftest(double,double,double);
+////      double foxy(cartGP pt, cartGP O,double a1, double a2, double a3, double d1, double d2, double d3, double lx, double ly, double lz); 
+////      double   ftest(double,double,double);
 //            int * Gsnpts_;
       public:
         TwoDGrid(OneDGrid *Gr, OneDGrid *Gs){
@@ -101,12 +101,13 @@ class TwoDGrid : public Grid {
       void printGrid();
       void genGrid();
       void transformPts();
-      double  * ftestVal(cartGP *pt);
+////      double  * ftestVal(cartGP *pt);
       inline sph3GP gridPt(int i, int j){
          sph3GP x(bg::get<0>(Gs_->grid2GPts(j)),bg::get<1>(Gs_->grid2GPts(j)),Gr_->gridPts(i));
         return x;
       };
       inline void setFEval(double fx,int i, int j, int width){ this->fEVal[i*width +j] = fx;};
+//      inline void setFEval(double *fx, int mu, int nu, int mnwidth, int i, int j, int width){ this->fEVal[i*width +j] = *(fx+(mu*mnwidth +nu));};
   }; //   Class TwoDGrid
 
 

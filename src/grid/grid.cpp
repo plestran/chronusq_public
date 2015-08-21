@@ -28,6 +28,8 @@
 
 namespace ChronusQ{
 
+
+//// TEST FUNCTIONS
   double OneDGrid::f_val(double rad){
   // Test Function to be integrated by One-dimensional grid
   // INT[0,1] r^2 * exp(-r^2);
@@ -50,37 +52,7 @@ namespace ChronusQ{
          return (15.0)*(std::pow(sin(elevation),4.0))/(32.0*math.pi);
          } 
 
-  double OneDGrid::integrate(){
-  // Integrate a test function for a one dimensional grid radial part
-   double sum = 0.0;
-     std::cout << "Number of One-grid points= "<< this->nPts_  <<std::endl;
-     for(int i = 0; i < this->nPts_; i++){
-       if(this->intas2GPt_){
-         sum += (this->f2_val(bg::get<0>(this->grid2GPts_[i]),bg::get<1>(this->grid2GPts_[i])))*(this->weights_[i]);
-         }else{
-         sum += (this->f_val(this->gridPts_[i]))*(this->weights_[i]);
-       }
-      }
-     if(this->intas2GPt_){
-       return 4.0*math.pi*sum;
-       }else{
-       cout << "before norm 1d "  << sum <<endl;
-       return sum*this->norm_;
-//       return sum;
-     }
-  }
-void OneDGrid::printGrid(){
-    for(int i = 0; i < this->nPts_; i++){
-//  Printing for mathematica
-    if(this->intas2GPt_){
-      cout << "{ 1.0, "<<bg::get<1>(this->grid2GPts_[i])<<", " <<bg::get<0>(this->grid2GPts_[i]) <<"}, "<< endl;
-      }else{
-      cout << this->gridPts_[i] << endl;
-      }    
-}
-
-};
-
+/*/
   double * TwoDGrid::ftestVal(cartGP *pt){
   // Test Function to be integrated by Two-dimensional grid
      sph3GP  ptSPH;
@@ -129,22 +101,56 @@ void OneDGrid::printGrid(){
      return fun*fun*rSq;
   }
 
+// END TEST FUNCTIONS
+*/
+
+double OneDGrid::integrate(){
+  // Integrate a test function for a one dimensional grid radial part
+   double sum = 0.0;
+   std::cout << "Number of One-grid points= "<< this->nPts_  <<std::endl;
+   for(int i = 0; i < this->nPts_; i++){
+     if(this->intas2GPt_){
+       sum += (this->f2_val(bg::get<0>(this->grid2GPts_[i]),bg::get<1>(this->grid2GPts_[i])))*(this->weights_[i]);
+       }else{
+       sum += (this->f_val(this->gridPts_[i]))*(this->weights_[i]);
+       }
+     }
+   if(this->intas2GPt_){
+     return 4.0*math.pi*sum;
+     }else{
+     cout << "before norm 1d "  << sum <<endl;
+     return sum*this->norm_;
+//       return sum;
+     }
+ }
+
+void OneDGrid::printGrid(){
+  for(int i = 0; i < this->nPts_; i++){
+//  Printing for mathematica
+    if(this->intas2GPt_){
+      cout << "{ 1.0, "<<bg::get<1>(this->grid2GPts_[i])<<", " <<bg::get<0>(this->grid2GPts_[i]) <<"}, "<< endl;
+      }else{
+      cout << this->gridPts_[i] << endl;
+      }    
+    }
+ }
+
   double TwoDGrid::integrate(){
   // Integrate a test function for a one dimensional grid radial part
    double sum = 0.0;
-     std::cout << "Number of Radial-grid points= "<< Gr_->npts()  <<std::endl;
-     std::cout << "Number of Solid Angle-grid points= "<< Gs_->npts()  <<std::endl;
+//     std::cout << "Number of Radial-grid points= "<< Gr_->npts()  <<std::endl;
+//     std::cout << "Number of Solid Angle-grid points= "<< Gs_->npts()  <<std::endl;
      for(int i = 0; i < Gr_->npts(); i++){
       for(int j = 0; j < Gs_->npts(); j++){
            sum += this->fEVal[i*Gs_->npts() + j]*(Gs_->weights()[j])*(Gr_->weights()[i])*(std::pow(Gr_->gridPts()[i],2.0));
         }
       }
-           cout << "before norm "<< sum <<endl;
+//           cout << "before norm "<< sum <<endl;
 //        return 4.0*(math.pi)*sum*(Gr_->norm());
         return 4.0*math.pi*sum;
   }
 
-/*
+/* OLD
   double TwoDGrid::integrate(){
 //  auto basisset     	= std::unique_ptr<BasisSet>(new BasisSet());
   // Integrate a test function for a one dimensional grid radial part
@@ -175,23 +181,25 @@ void OneDGrid::printGrid(){
         return 4.0*(math.pi)*sum*(Gr_->norm());
   }
 */
-    void TwoDGrid::transformPts(){
+
+void TwoDGrid::transformPts(){
 };
 
-    void TwoDGrid::printGrid(){
-     for(int i = 0; i < Gr_->npts(); i++){
-      for(int j = 0; j < Gs_->npts(); j++){
+void TwoDGrid::printGrid(){
+  for(int i = 0; i < Gr_->npts(); i++){
+    for(int j = 0; j < Gs_->npts(); j++){
       cout << "{" << Gr_->gridPts()[i] << ", "<<bg::get<1>(Gs_->grid2GPts()[j])<<", " <<bg::get<0>(Gs_->grid2GPts()[j]) <<"}, "<< endl;
-        
-        }
-      }
-};
-    void TwoDGrid::genGrid(){
-};
-  // Class Functions Declaration
+       }
+    }
+  };
 
-  // Function Gauss-Chebyshev 1st kind 
-  void GaussChebyshev1stGrid::genGrid(){
+void TwoDGrid::genGrid(){
+  };
+
+// Specific Grid Functions Declaration
+
+// Function Gauss-Chebyshev 1st kind 
+void GaussChebyshev1stGrid::genGrid(){
      // Gauss-Chebyshev 1st kind grid
      // Int {a,b} f(x) = Int {-1,1} g(x')/sqrt(1-x'^2) ~ Sum [1, NGrid] weights[i] * g(zeta[i])
      // Where g(zeta[i]) = [(b-a)/2] * sqrt(1-zeta[i]^2) f( [(b-a)/2]*zeta[i] + [(b+a)/2] )
@@ -199,53 +207,57 @@ void OneDGrid::printGrid(){
      // weights[i] = math.pi/NGrid
      // Note I have included the "sqrt(1-zeta[i]^2)" of the transformation in the actual weights[i] .
      // Note in c++ i starts from 0, so has been shifted i = i+1 
-    for(int i = 0; i < this->nPts_; i++) {
-      this->gridPts_[i] = cos(( (2.0*(i+1)-1.0)/(2.0*this->nPts_))*math.pi);
-      this->weights_[i] = (math.pi/this->nPts_)*(sqrt(1-(this->gridPts_[i]*this->gridPts_[i]))) ;
+  for(int i = 0; i < this->nPts_; i++) {
+    this->gridPts_[i] = cos(( (2.0*(i+1)-1.0)/(2.0*this->nPts_))*math.pi);
+    this->weights_[i] = (math.pi/this->nPts_)*(sqrt(1-(this->gridPts_[i]*this->gridPts_[i]))) ;
 //    the weights are only (math.pi/this->nPts_), the second term is including the integrand transformation factor in Eq.25.4.38 Abramowitz Handbook     
 //    std::cout << i <<" " <<this->gridPts_[i] << " "<< this->weights_[i]  << std::endl;
-      }
-    this->transformPts(); 
-  }
+    }
+  this->transformPts(); 
+}
 
-  void GaussChebyshev1stGrid::transformPts(){
-    for(int i = 0; i < this->nPts_; i++)
-      this->gridPts_[i] = 
-        (this->range_[1] - this->range_[0]) / 2.0 * this->gridPts_[i] +
-        (this->range_[1] + this->range_[0]) / 2.0;
-  } 
+void GaussChebyshev1stGrid::transformPts(){
+  for(int i = 0; i < this->nPts_; i++)
+    this->gridPts_[i] = 
+     (this->range_[1] - this->range_[0]) / 2.0 * this->gridPts_[i] +
+     (this->range_[1] + this->range_[0]) / 2.0;
+    } 
   
 
-  // Function Gauss-Chebyshev 1st kind 
-  void GaussChebyshev1stGridInf::genGrid(){
+// Function Gauss-Chebyshev 1st kind (From 0 to Inf)
+void GaussChebyshev1stGridInf::genGrid(){
      // Gauss-Chebyshev 1st kind grid
      // Int {a,b} f(x) = Int {-1,1} g(x')/sqrt(1-x'^2) ~ Sum [1, NGrid] weights[i] * g(zeta[i])
      // weights[i] = math.pi/NGrid
      // Note in c++ i starts from 0, so has been shifted i = i+1 
-    for(int i = 0; i < this->nPts_; i++) {
-      this->gridPts_[i] = cos(( (2.0*(i+1)-1.0)/(2.0*this->nPts_))*math.pi);
-      this->weights_[i] = (math.pi/this->nPts_);
-      }
-    this->transformPts(); 
-  }
+  for(int i = 0; i < this->nPts_; i++) {
+    this->gridPts_[i] = cos(( (2.0*(i+1)-1.0)/(2.0*this->nPts_))*math.pi);
+    this->weights_[i] = (math.pi/this->nPts_);
+    }
+  this->transformPts(); 
+ }
 
   
-  void GaussChebyshev1stGridInf::transformPts(){
-      double rOxy= 0.60/2.0;
-//      double rOxy= 0.529;
-      double toau = (1.0)/phys.bohr;
-      double val;
-      double dmu;
-      double den;
-      for(int i = 0; i < this->nPts_; i++){
-        dmu = (std::pow((1-this->gridPts_[i]),2.0)) / (2.0*toau*rOxy);
-        val = toau * rOxy *  (1+this->gridPts_[i]) / (1-this->gridPts_[i]);
-        den = std::sqrt(1.0-(std::pow(this->gridPts_[i],2.0)));
-        this->weights_[i] = this->weights_[i]*den/dmu;
-        this->gridPts_[i] = val;
-        }
+void GaussChebyshev1stGridInf::transformPts(){
+//   Hydrogen
+   double ralpha= 0.529;
+//   Oxygen
+//     double ralpha= 0.60/2.0;
+//   Lithium
+//   double ralpha= 1.45/2.0;
+     double toau = (1.0)/phys.bohr;
+     double val;
+     double dmu;
+     double den;
+     for(int i = 0; i < this->nPts_; i++){
+       dmu = (std::pow((1-this->gridPts_[i]),2.0)) / (2.0*toau*ralpha);
+       val = toau * ralpha *  (1+this->gridPts_[i]) / (1-this->gridPts_[i]);
+       den = std::sqrt(1.0-(std::pow(this->gridPts_[i],2.0)));
+       this->weights_[i] = this->weights_[i]*den/dmu;
+       this->gridPts_[i] = val;
+       }
       cout << " Transformed Becke " << endl;
-  }
+ }
 
  
 // Function definition for Lebedev
@@ -261,7 +273,6 @@ void OneDGrid::printGrid(){
      double q1;
      double l1;
 // We are using the values in Lebedev75 Zh. vychisl Mat mat Fiz 15, 1, 48-54, 1975
-// For nPts == 38
      if(this->nPts_ == 6){
        A1 = 1.0/6.0;
        gen6_A1(0,one,A1);
@@ -299,6 +310,7 @@ void OneDGrid::printGrid(){
       gen24_Bn(26,l1,B1);
     }else if(this->nPts_ == 110){
 // Lebedev N=110; eta 0.982 Lebedev 1976 ZVMMF_15_48 table 11.1;
+// Note the commented ones are from the original paper ...
       A1 = 0.00382827049494;
 //      A3 = 0.00988550016044;
       A3 = 0.009793737512487512;
