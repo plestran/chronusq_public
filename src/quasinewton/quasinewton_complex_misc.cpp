@@ -27,42 +27,42 @@
 
 namespace ChronusQ {
   template<>
-  void QuasiNewton<double>::Orth(RealCMMap &A){
+  void QuasiNewton<dcomplex>::Orth(ComplexCMMap &A){
     int N   = A.cols();
     int M   = A.rows();
     int LDA = M;
     int INFO;
-    double * AMAT = A.data();
-    double * TAU = this->LAPACK_SCR;
+    dcomplex * AMAT = A.data();
+    dcomplex * TAU = this->LAPACK_SCR;
     this->WORK = TAU + N;
 
-    dgeqrf_(&M,&N,AMAT,&LDA,TAU,this->WORK,&this->LWORK,&INFO);
-    dorgqr_(&M,&N,&N,AMAT,&LDA,TAU,this->WORK,&this->LWORK,&INFO);
+    zgeqrf_(&M,&N,AMAT,&LDA,TAU,this->WORK,&this->LWORK,&INFO);
+    zungqr_(&M,&N,&N,AMAT,&LDA,TAU,this->WORK,&this->LWORK,&INFO);
     
   }
 
   template<>
-  void QuasiNewton<double>::Orth(RealCMMatrix &A){
+  void QuasiNewton<dcomplex>::Orth(ComplexCMMatrix &A){
     int N   = A.cols();
     int M   = A.rows();
     int LDA = M;
     int INFO;
-    double * AMAT = A.data();
-    double * TAU = this->LAPACK_SCR;
+    dcomplex * AMAT = A.data();
+    dcomplex * TAU = this->LAPACK_SCR;
     this->WORK = TAU + N;
 
-    dgeqrf_(&M,&N,AMAT,&LDA,TAU,this->WORK,&this->LWORK,&INFO);
-    dorgqr_(&M,&N,&N,AMAT,&LDA,TAU,this->WORK,&this->LWORK,&INFO);
+    zgeqrf_(&M,&N,AMAT,&LDA,TAU,this->WORK,&this->LWORK,&INFO);
+    zungqr_(&M,&N,&N,AMAT,&LDA,TAU,this->WORK,&this->LWORK,&INFO);
     
   }
 
   template<>
-  void QuasiNewton<double>::metBiOrth(RealCMMap &A, const RealCMMatrix &Met){
+  void QuasiNewton<dcomplex>::metBiOrth(ComplexCMMap &A, const ComplexCMMatrix &Met){
     int N = A.cols();
-    RealCMMap AX(this->BiOrthMem,Met.rows(),N);
+    ComplexCMMap AX(this->BiOrthMem,Met.rows(),N);
     AX = Met*A;
     for(auto i = 0; i < N; i++){
-      double inner = A.col(i).dot(AX.col(i));
+      double inner = A.col(i).dot(AX.col(i)).real();
       int sgn = inner / std::abs(inner);
       inner = sgn*std::sqrt(sgn*inner);
       A.col(i) /= inner;
@@ -73,12 +73,12 @@ namespace ChronusQ {
   }
 
   template<>
-  void QuasiNewton<double>::eigSrt(RealCMMap &V, RealVecMap &E){
+  void QuasiNewton<dcomplex>::eigSrt(ComplexCMMap &V, ComplexVecMap &E){
     auto N = V.cols();
     while( N != 0){
       auto newn = 0;
       for(auto i = 1; i < N; i++){
-        if( E(i-1) > E(i) ){
+        if( std::abs(E(i-1)) > std::abs(E(i)) ){
           auto tmp = E(i);
           E(i) = E(i-1);
           E(i-1) = tmp;
@@ -91,7 +91,7 @@ namespace ChronusQ {
   }
 
   template<>
-  void QuasiNewton<double>::initLAPACKScrLen(){
+  void QuasiNewton<dcomplex>::initLAPACKScrLen(){
 /*
  * (1) Local copy of the real part of the eigenvalues (reused for Tau storage 
  *      for QR)
@@ -102,18 +102,19 @@ namespace ChronusQ {
  *
  * (4) Length of LAPACK workspace (used in all LAPACK Calls)
  *
- * (5) Total double precision words required for LAPACK
+ * (5) Total complex double precision words required for LAPACK
  *
  */
     this->LWORK          = 6*this->N_;
     this->LEN_LAPACK_SCR += this->maxSubSpace_;   // 1
     if(!this->isHermetian_ || this->symmetrizedTrial_)
       this->LEN_LAPACK_SCR += this->maxSubSpace_; // 2
-    if(!this->isHermetian_ && this->symmetrizedTrial_)
-      this->LEN_LAPACK_SCR += 2*this->maxSubSpace_; // 3
+//  if(!this->isHermetian_ && this->symmetrizedTrial_)
+//    this->LEN_LAPACK_SCR += 2*this->maxSubSpace_; // 3
     this->LEN_LAPACK_SCR += this->LWORK;          // 4
     this->LenScr += this->LEN_LAPACK_SCR;         // 5
 
-    this->LenRealScr = 1; // SCR is REAL_SCR...
+    this->LenRealScr = 2*this->N_;         // RWORK
+    this->LenRealScr = this->maxSubSpace_; // Real Eigenvalues
   }
 }; // namespace ChronusQ

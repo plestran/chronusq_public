@@ -28,22 +28,22 @@ using ChronusQ::SDResponse;
 
 namespace ChronusQ {
 template<>
-void SDResponse<dcomplex>::formTransDipole(){
-   ComplexMatrix TAOA(this->nBasis_,this->nBasis_);
-   ComplexMatrix TAOB(this->nBasis_,this->nBasis_);
+void SDResponse<double>::formTransDipole(){
+   RealMatrix TAOA(this->nBasis_,this->nBasis_);
+   RealMatrix TAOB(this->nBasis_,this->nBasis_);
    auto NBSq = this->nBasis_*this->nBasis_;
    for(auto iSt = 0; iSt < this->nSek_; iSt++){
-     ComplexVecMap TMOV(this->transDen_->data()+iSt*this->nSingleDim_,this->nSingleDim_);
+     RealVecMap TMOV(this->transDen_->data()+iSt*this->nSingleDim_,this->nSingleDim_);
      this->formAOTDen(TMOV,TAOA,TAOB);
      for(auto iXYZ = 0, iOff = 0; iXYZ < 3; iXYZ++, iOff += NBSq){
        RealMap dipole(&this->elecDipole_->storage()[iOff],this->nBasis_,this->nBasis_);
-       (*this->transDipole_)(0,iSt+1,iXYZ) = (TAOA+TAOB).real().frobInner(dipole);
+       (*this->transDipole_)(0,iSt+1,iXYZ) = (TAOA+TAOB).frobInner(dipole);
      }
    }
 } //formTransDipole
 
 template<>
-void SDResponse<dcomplex>::formOscStrength(){
+void SDResponse<double>::formOscStrength(){
   this->oscStrength_->setZero();
   for(auto iSt  = 0; iSt  < this->nSek_; iSt++ )
   for(auto iXYZ = 0; iXYZ < 3;           iXYZ++){

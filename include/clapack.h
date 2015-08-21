@@ -21,10 +21,15 @@ void pkconv_(int*,char*,int*,double*,int*,double*);
 void eigsrt_(int*,double*,double*,double*,double*,int*,int*);
 void dgegv_(char*,char*,int*,double*,int*,double*,int*,double*,double*,double*,double*,int*,double*,int*,double*,int*,int*);
 void dsygv_(int*,char*,char*,int*,double*,int*,double*,int*,double*,double*,int*,int*);
+void zhegv_(int*,char*,char*,int*,dcomplex*,int*,dcomplex*,int*,double*,dcomplex*,int*,double*,int*);
 void dgeqrf_(int *, int *, double *, int *, double *, double *, int *, int *);
 void dorgqr_(int *, int *, int *, double *, int *, double *, double *, int *, int *);
+void zgeqrf_(int *, int *, dcomplex *, int *, dcomplex *, dcomplex *, int *, int *);
+void zungqr_(int *, int *, int *, dcomplex *, int *, dcomplex *, dcomplex *, int *, int *);
 void dgesvd_(char*,char*,int*,int*,double*,int*,double*,double*,int*,double*,int*,double*,int*,int*);
 void dgetrf_(int*,int*,double*,int*,int*,int*);
 void dgetri_(int*,double*,int*,int*,double*,int*,int*);
+void zgetrf_(int*,int*,dcomplex*,int*,int*,int*);
+void zgetri_(int*,dcomplex*,int*,int*,dcomplex*,int*,int*);
 }
 

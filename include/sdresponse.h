@@ -92,15 +92,15 @@ class SDResponse {
   std::unique_ptr<TCMMatrix>  transDen_;
   std::unique_ptr<RealMatrix> oscStrength_;
   std::unique_ptr<VectorXd>   omega_;
-  std::unique_ptr<TTensor3d>  transDipole_;
+  std::unique_ptr<RealTensor3d>  transDipole_;
   BasisSet        * basisSet_;
   Molecule        * molecule_;
   FileIO          * fileio_;
   Controls        * controls_;
   MOIntegrals<T>  * mointegrals_;
   SingleSlater<T> * singleSlater_;
-  TTensor4d       * aoERI_;
-  TTensor3d       * elecDipole_;
+  RealTensor4d       * aoERI_;
+  RealTensor3d       * elecDipole_;
 
   std::unique_ptr<RealCMMatrix> rmDiag_;
   std::unique_ptr<TMatrix>  davGuess_;
