@@ -76,15 +76,14 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   time_t currentTime;
 
   // Pointers for important storage 
-  auto molecule           = std::unique_ptr<Molecule>(new Molecule());
-  auto basisset           = std::unique_ptr<BasisSet>(new BasisSet());
-  auto dfBasisset         = std::unique_ptr<BasisSet>(new BasisSet());
-  auto controls           = std::unique_ptr<Controls>(new Controls());
-  auto aointegrals        = std::unique_ptr<AOIntegrals>(new AOIntegrals());
-  auto mointegrals        = std::unique_ptr<MOIntegrals<double>>(new MOIntegrals<double>());
-  auto hartreeFockReal	  = std::unique_ptr<SingleSlater<double>>(  new SingleSlater<double>()  );
-  auto hartreeFockComplex = std::unique_ptr<SingleSlater<dcomplex>>(new SingleSlater<dcomplex>());
-  auto sdResponse         = std::unique_ptr<SDResponse>(new SDResponse());
+  auto molecule     	= std::unique_ptr<Molecule>(new Molecule());
+  auto basisset     	= std::unique_ptr<BasisSet>(new BasisSet());
+  auto dfBasisset     	= std::unique_ptr<BasisSet>(new BasisSet());
+  auto controls     	= std::unique_ptr<Controls>(new Controls());
+  auto aointegrals	= std::unique_ptr<AOIntegrals>(new AOIntegrals());
+  auto mointegrals	= std::unique_ptr<MOIntegrals<double>>(new MOIntegrals<double>());
+  auto hartreeFock	= std::unique_ptr<SingleSlater<double>>(new SingleSlater<double>());
+  auto sdResponse       = std::unique_ptr<SDResponse>(new SDResponse());
   std::unique_ptr<FileIO> fileIO;
   std::unique_ptr<GauJob> gauJob;
 
@@ -103,7 +102,6 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   // Initialize default settings and read input
   controls->iniControls();
 //controls->doTCS = true;
-//controls->doComplex = true;
   readInput(fileIO.get(),molecule.get(),basisset.get(),controls.get(),dfBasisset.get());
 //  fileIO->iniFileIO(controls->restart);
 
@@ -114,58 +112,30 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 
 //dfBasisset->printInfo();
 
-  aointegrals->iniAOIntegrals(molecule.get(),basisset.get(),fileIO.get(),controls.get(),
-    dfBasisset.get());
-  if(!controls->doComplex){
-    hartreeFockReal->iniSingleSlater(molecule.get(),basisset.get(),aointegrals.get(),
-      fileIO.get(),controls.get());
-    hartreeFockReal->printInfo();
-  } else {
-    hartreeFockComplex->iniSingleSlater(molecule.get(),basisset.get(),aointegrals.get(),
-      fileIO.get(),controls.get());
-    hartreeFockComplex->printInfo();
+  aointegrals->iniAOIntegrals(molecule.get(),basisset.get(),fileIO.get(),controls.get(),dfBasisset.get());
+  hartreeFock->iniSingleSlater(molecule.get(),basisset.get(),aointegrals.get(),fileIO.get(),controls.get());
+  hartreeFock->printInfo();
+  if(controls->guess==0) hartreeFock->formGuess();
+  else if(controls->guess==1) hartreeFock->readGuessIO();
+  else if(controls->guess==2) {
+    GauMatEl matEl(controls->gauMatElName);
+    hartreeFock->readGuessGauMatEl(matEl);
   }
-
-  if(!controls->doComplex){
-    if(controls->guess==0) hartreeFockReal->formGuess();
-    else if(controls->guess==1) hartreeFockReal->readGuessIO();
-    else if(controls->guess==2) {
-      GauMatEl matEl(controls->gauMatElName);
-      hartreeFockReal->readGuessGauMatEl(matEl);
-    }
-    else if(controls->guess==3) hartreeFockReal->readGuessGauFChk(controls->gauFChkName);
-  } else {
-    if(controls->guess==0) hartreeFockComplex->formGuess();
-    else CErr("Cannot Read Guess for Complex Wavefunctions (NYI)",fileIO->out);
-  }
+  else if(controls->guess==3) hartreeFock->readGuessGauFChk(controls->gauFChkName);
 //APS I have MO Please check in which controls call the following function
-//hartreeFockReal->matchord();
+//hartreeFock->matchord();
 //APE
-
-  if(!controls->doComplex){
-    hartreeFockReal->formFock();
-    aointegrals->printTimings();
-    hartreeFockReal->computeEnergy();
-    prettyPrint(cout,*(hartreeFockReal->densityA()),"DA");
-    prettyPrint(cout,*(hartreeFockReal->fockA()),"FA");
-    if(controls->optWaveFunction)  hartreeFockReal->SCF();
-    else fileIO->out << "**Skipping SCF Optimization**" << endl; 
-    hartreeFockReal->computeMultipole();
-  } else {
-    hartreeFockComplex->formFock();
-    aointegrals->printTimings();
-    hartreeFockComplex->computeEnergy();
-    prettyPrintComplex(cout,*(hartreeFockComplex->densityA()),"DA");
-    prettyPrintComplex(cout,*(hartreeFockComplex->fockA()),"FA");
-    if(controls->optWaveFunction)  hartreeFockComplex->SCF();
-    else fileIO->out << "**Skipping SCF Optimization**" << endl; 
-    hartreeFockComplex->computeMultipole();
-  }
-  mointegrals->iniMOIntegrals(molecule.get(),basisset.get(),fileIO.get(),controls.get(),aointegrals.get(),hartreeFockReal.get());
+  hartreeFock->formFock();
+  aointegrals->printTimings();
+  hartreeFock->computeEnergy();
+  if(controls->optWaveFunction)  hartreeFock->SCF();
+  else fileIO->out << "**Skipping SCF Optimization**" << endl; 
+  hartreeFock->computeMultipole();
+  mointegrals->iniMOIntegrals(molecule.get(),basisset.get(),fileIO.get(),controls.get(),aointegrals.get(),hartreeFock.get());
   if(controls->doSDR) {
     sdResponse->setPPRPA(1);
     sdResponse->iniSDResponse(molecule.get(),basisset.get(),mointegrals.get(),fileIO.get(),
-                              controls.get(),hartreeFockReal.get());
+                              controls.get(),hartreeFock.get());
     
     sdResponse->IterativeRPA();
   //sdResponse->incorePPRPA();
@@ -175,14 +145,14 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   }
   auto mp       = std::unique_ptr<MollerPlesset>(new MollerPlesset());
     mp->iniMollerPlesset(molecule.get(),basisset.get(),mointegrals.get(),fileIO.get(),
-                              controls.get(),hartreeFockReal.get());
+                              controls.get(),hartreeFock.get());
   //mp->MP2();
 //mointegrals->testLocMO();
 
 //if(controls->doDF) aointegrals->compareRI();
 /*
   MOIntegrals *moIntegrals = new MOIntegrals();
-  moIntegrals->iniMOIntegrals(molecule,basisset,fileIO,controls,aointegrals,hartreeFockReal);
+  moIntegrals->iniMOIntegrals(molecule,basisset,fileIO,controls,aointegrals,hartreeFock);
 
 
  int Iop=0;
@@ -212,7 +182,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 //  int NLeb = 26;
 //  int NLeb = 38;
 //  int NLeb = 110;
-    int Ngridr =   30;
+    int Ngridr =   100;
     int NLeb    = 50;
   double radius = 5.0;
 //   GaussChebyshev1stGrid Rad(Ngridr,0.0,radius);
@@ -236,6 +206,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
    std::cout << "Number of Solid Angle-grid points= "<< NLeb<< endl;
    cout << "NofBasis = " << basisset->nBasis() << endl;
    cout << "NofShells = " << basisset->nShell() << endl;
+/*
    for(int s1 = 0; s1 < basisset->nShell(); s1++){
      int n1  = basisset->shells(s1).size();
      cout << "S1 ShellSize = " << n1 << endl;
@@ -271,14 +242,45 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
         }
      }
 //   
+*/
+RealMatrix STmp(n3,n3);
+for(auto s1=0l, s12=0l; s1 < basisset->nShell(); s1++){
+  int bf1_s = basisset->mapSh2Bf(s1);
+  int n1  = basisset->shells(s1).size();
+  for(int s2=0; s2 <= s1; s2++, s12++){
+    int bf2_s = basisset->mapSh2Bf(s2);
+    int n2  = basisset->shells(s2).size();
+    auto center = basisset->shells(s1).O;
+
+    double *shIntBuff = new double [n1*n2];
+    RealMap shInt(shIntBuff,n1,n2);
+    shInt.setZero();
+    for(int i = 0; i < Ngridr; i++)
+    for(int j = 0; j < NLeb; j++){
+      ptSPH = G2.gridPt(i,j);
+      bg::transform(ptSPH,ptCar);
+      ptCar.set<0>(bg::get<0>(ptCar) + center[0]);
+      ptCar.set<1>(bg::get<1>(ptCar) + center[1]);
+      ptCar.set<2>(bg::get<2>(ptCar) + center[2]);
+      const double * fEvalBuff = 
+        basisset->basisProdEval(basisset->shells(s1),basisset->shells(s2),&ptCar);
+      ConstRealMap fEval(fEvalBuff,n1,n2);
+      shInt += 4.0*math.pi*Rad.gridPts()[i]*Rad.gridPts()[i]*Rad.weights()[i]*GridLeb2.weights()[j]*fEval; 
+    }
+    STmp.block(bf1_s,bf2_s,n1,n2) = shInt;
+    delete [] shIntBuff;
+  }
+}
+STmp = STmp.selfadjointView<Lower>(); 
+cout << "DIFF" << endl;
+cout << STmp-(*aointegrals->overlap_)  << endl;
    
   time(&currentTime);
   fileIO->out<<"\nJob finished: "<<ctime(&currentTime)<<endl;
-
-//SingleSlater<dcomplex> newSS(hartreeFockReal.get());
-//newSS.formFock();
-//newSS.computeEnergy();
-//cout << "DIFF" << endl << (*newSS.fockA()).real() - (*hartreeFockReal->fockA()) << endl;
+/*
+  SingleSlater<dcomplex> newSS(hartreeFock.get());
+  newSS.formFock();
+*/
 /*
   double *tmp = new double[3*2];
   for(auto i =0; i < 6; i++) tmp[i] = 0.0;
@@ -291,14 +293,14 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 */
 /*
   Eigen::SelfAdjointEigenSolver<RealMatrix> ES;
-  ES.compute((*hartreeFockReal->densityA())+(*hartreeFockReal->densityB())/2);
+  ES.compute((*hartreeFock->densityA())+(*hartreeFock->densityB())/2);
   cout << ES.eigenvalues() << endl;
-  cout << endl <<ES.eigenvectors()*(*hartreeFockReal->densityA())*ES.eigenvectors().transpose() << endl;
-  cout << endl << (hartreeFockReal->moB()->transpose())*(*aointegrals->overlap_)*(*hartreeFockReal->densityB())*(*aointegrals->overlap_)*(*hartreeFockReal->moB()) << endl;
+  cout << endl <<ES.eigenvectors()*(*hartreeFock->densityA())*ES.eigenvectors().transpose() << endl;
+  cout << endl << (hartreeFock->moB()->transpose())*(*aointegrals->overlap_)*(*hartreeFock->densityB())*(*aointegrals->overlap_)*(*hartreeFock->moB()) << endl;
   RealMatrix X = aointegrals->overlap_->pow(-0.5);
-  ES.compute(X*((*hartreeFockReal->densityA())+(*hartreeFockReal->densityB()))*X.transpose()/2);
+  ES.compute(X*((*hartreeFock->densityA())+(*hartreeFock->densityB()))*X.transpose()/2);
   cout << endl << ES.eigenvalues() << endl;
-  cout << endl << ES.eigenvectors().transpose()*(*hartreeFockReal->densityA())*ES.eigenvectors() << endl;
+  cout << endl << ES.eigenvectors().transpose()*(*hartreeFock->densityA())*ES.eigenvectors() << endl;
 */
 #ifdef USE_LIBINT
   libint2::cleanup();
