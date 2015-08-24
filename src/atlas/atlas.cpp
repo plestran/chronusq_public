@@ -196,22 +196,23 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 
    sph3GP ptSPH;
    cartGP ptCar;
+   double *WOverPar_;
    int n3 = basisset->nBasis();
-//   std::unique_ptr<RealMatrix> WOver_;
+   std::unique_ptr<RealMatrix> WOver_;
 //   WOver_ = std::unique_ptr<RealMatrix>(new RealMatrix(n3,n3)); // SUM over grid W_i Smunu(xi)
    RealMatrix WOver(n3,n3);
 // Loop over shells
    std::cout << "Number of Radial-grid points= "<< Ngridr  << endl;
    std::cout << "Number of Solid Angle-grid points= "<< NLeb<< endl;
    cout << "NofBasis = " << basisset->nBasis() << endl;
+   cout << "NofShells = " << basisset->nShell() << endl;
    for(int s1 = 0; s1 < basisset->nShell(); s1++){
-     cout << "NofShells = " << basisset->nShell() << endl;
      int n1  = basisset->shells(s1).size();
      cout << "S1 ShellSize = " << n1 << endl;
      for(int s2=0; s2 <= s1; s2++){
        int n2  = basisset->shells(s2).size();
-       cout << "S2 ShellSize = " << n2 << endl;
-       double *WOverPar_ ;
+       cout << "S2 ShellSize = " << n2  << endl;
+//       double *WOverPar_ ;
 //       WOverPar_ = new double [n1*n2] ; // SUM over grid W_i Smunu(xi)
        auto center = basisset->shells(s1).O;
 //   cout << basisset->shells(0) << endl;
@@ -234,8 +235,9 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 //              }
             }
           }
+//                 WOver(s1,s2) = G2.integrate();
                  WOver(s1,s2) = G2.integrate();
-                 cout << "Test 3d = " << WOver(s1,s2) <<endl;
+                 cout << "s1=" << s1 << " s2= " << s2 << " Integrate = " << WOver(s1,s2) <<endl;
         }
      }
 //   
