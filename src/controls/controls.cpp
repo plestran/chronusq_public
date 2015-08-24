@@ -53,6 +53,7 @@ void Controls::iniControls(){
   this->doOctpole =         true;
   this->doSDR     =         false;
   this->doCUHF    =         false;
+  this->doComplex =         false;
   this->SDMethod  =         0;
   this->SCFdenTol_ = 1e-10;
   this->SCFeneTol_ = 1e-12;

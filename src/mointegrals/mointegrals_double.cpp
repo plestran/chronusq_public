@@ -30,10 +30,12 @@ using ChronusQ::BasisSet;
 using ChronusQ::Controls;
 using ChronusQ::FileIO;
 using ChronusQ::MOIntegrals;
+namespace ChronusQ{
 //---------------------
 // initialize MOIntegrals
 //---------------------
-void MOIntegrals::iniMOIntegrals(   Molecule * molecule, BasisSet * basisSet, FileIO * fileio, 
+template<>
+void MOIntegrals<double>::iniMOIntegrals(   Molecule * molecule, BasisSet * basisSet, FileIO * fileio, 
                                     Controls * controls, AOIntegrals * aointegrals, SingleSlater<double> * singleSlater){
   this->molecule_ = molecule;
   this->basisSet_ = basisSet;
@@ -67,8 +69,8 @@ void MOIntegrals::iniMOIntegrals(   Molecule * molecule, BasisSet * basisSet, Fi
   this->nV_     = this->nVA_ + this->nVB_;
 };
 
-
-void MOIntegrals::getLocMO(){
+template<>
+void MOIntegrals<double>::getLocMO(){
   if(this->haveLocMO) return;
 
   if(this->Ref_ == SingleSlater<double>::TCS){
@@ -257,7 +259,8 @@ void MOIntegrals::formIAJB(bool doDBar){
   this->iajbIsDBar = doDBar;
 }
 */
-void MOIntegrals::testLocMO(){
+template<>
+void MOIntegrals<double>::testLocMO(){
   this->getLocMO();
   RealTensor2d P,S,C,I;
 
@@ -302,7 +305,8 @@ void MOIntegrals::testLocMO(){
   }
 }
 
-void MOIntegrals::formIAJB(bool doDBar){
+template<>
+void MOIntegrals<double>::formIAJB(bool doDBar){
   if(this->haveMOiajb && (this->iajbIsDBar == doDBar)) return;
   else if(this->iajbIsDBar != doDBar) {
     if(this->Ref_ == SingleSlater<double>::TCS)
@@ -521,7 +525,8 @@ void MOIntegrals::formIAJB(bool doDBar){
 */
 }
 
-void MOIntegrals::formABCD(bool doDBar){
+template<>
+void MOIntegrals<double>::formABCD(bool doDBar){
   if(this->haveMOabcd && (this->abcdIsDBar == doDBar)) return;
   else if(this->abcdIsDBar != doDBar) {
     if(this->Ref_ == SingleSlater<double>::TCS)
@@ -740,7 +745,8 @@ void MOIntegrals::formABCD(bool doDBar){
 */
 }
 
-void MOIntegrals::formIJKL(bool doDBar){
+template<>
+void MOIntegrals<double>::formIJKL(bool doDBar){
   if(this->haveMOijkl && (this->ijklIsDBar == doDBar)) return;
   else if(this->ijklIsDBar != doDBar) {
     if(this->Ref_ == SingleSlater<double>::TCS)
@@ -950,7 +956,8 @@ void MOIntegrals::formIJKL(bool doDBar){
   }
 }
 
-void MOIntegrals::formIJAB(bool doDBar){
+template<>
+void MOIntegrals<double>::formIJAB(bool doDBar){
   if(this->haveMOijab && (this->ijabIsDBar == doDBar)) return;
   else if(this->ijabIsDBar != doDBar) {
     if(this->Ref_ == SingleSlater<double>::TCS)
@@ -1121,3 +1128,4 @@ void MOIntegrals::formIJAB(bool doDBar){
   }
 
 }
+}//namespace ChronusQ

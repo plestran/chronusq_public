@@ -6,6 +6,8 @@ Copyright (C) 2014-2015 Li Research Group (University of Washington)
 
 INSERT EXPLAINATION HERE
 
+[![Build Status](https://travis-ci.org/wavefunction91/chronusq.svg?branch=devel)](https://travis-ci.org/wavefunction91/chronusq)
+
 ChronusQ uses the high-performace Libint library [1] for the evaluation of 
 molecular integrals over gaussian type functions. A preconfigured copy
 (uncompiled) is located in the /deps directory.
