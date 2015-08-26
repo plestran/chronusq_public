@@ -159,6 +159,8 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
  molecule->toCOM(Iop);  // call object molecule pointing to function toCOM-Iop=0 Center of Mass
  Iop=1;
  molecule->toCOM(Iop);  // call object molecule pointing to function toCOM-Iop=1 Center of Nuclear Charges
+
+////// AP ////
 */
 //Test one dimensional grid
 //
@@ -184,29 +186,34 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 //  int NLeb = 110;
     int Ngridr =   100;
     int NLeb    = 50;
-  double radius = 5.0;
-//   GaussChebyshev1stGrid Rad(Ngridr,0.0,radius);
 // Defining Grids
+     double radius = 5.0;  //It is actually useless using the [0,inf] RadGrid
+   //   GaussChebyshev1stGrid Rad(Ngridr,0.0,radius);
    GaussChebyshev1stGridInf Rad(Ngridr,0.0,radius);
    LebedevGrid GridLeb2(NLeb);
 // Generating Grids   
    Rad.genGrid();
    GridLeb2.genGrid();
-   TwoDGrid G2(&Rad,&GridLeb2);
+   TwoDGrid G2(basisset.get(),&Rad,&GridLeb2);
+// Integrate and Return a Nbase by Nbase Matrix of the Overlap numerically integrated
+   RealMatrix * Integral3D;
+   Integral3D=G2.integrateO();
+   cout << "Numeric - Analytic: Overlap" << endl;
+   cout << ((*Integral3D)-(*aointegrals->overlap_))  << endl;
 
+/*
    sph3GP ptSPH;
    cartGP ptCar;
-   double *WOverPar_;
+//   double *WOverPar_;
    int n3 = basisset->nBasis();
-   std::unique_ptr<RealMatrix> WOver_;
+//   std::unique_ptr<RealMatrix> WOver_;
 //   WOver_ = std::unique_ptr<RealMatrix>(new RealMatrix(n3,n3)); // SUM over grid W_i Smunu(xi)
-   RealMatrix WOver(n3,n3);
+//   RealMatrix WOver(n3,n3);
 // Loop over shells
    std::cout << "Number of Radial-grid points= "<< Ngridr  << endl;
    std::cout << "Number of Solid Angle-grid points= "<< NLeb<< endl;
    cout << "NofBasis = " << basisset->nBasis() << endl;
    cout << "NofShells = " << basisset->nShell() << endl;
-/*
    for(int s1 = 0; s1 < basisset->nShell(); s1++){
      int n1  = basisset->shells(s1).size();
      cout << "S1 ShellSize = " << n1 << endl;
@@ -242,7 +249,10 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
         }
      }
 //   
+
 */
+
+/*
 RealMatrix STmp(n3,n3);
 for(auto s1=0l, s12=0l; s1 < basisset->nShell(); s1++){
   int bf1_s = basisset->mapSh2Bf(s1);
@@ -252,28 +262,40 @@ for(auto s1=0l, s12=0l; s1 < basisset->nShell(); s1++){
     int n2  = basisset->shells(s2).size();
     auto center = basisset->shells(s1).O;
 
-    double *shIntBuff = new double [n1*n2];
-    RealMap shInt(shIntBuff,n1,n2);
-    shInt.setZero();
+///    double *shIntBuff = new double [n1*n2];
+    double *pointProd; 
+    double *SumInt = new double [n1*n2];
+    double val;
+///    RealMap shInt(shIntBuff,n1,n2);
+///    shInt.setZero();
+    RealMap BlockInt(SumInt,n1,n2);
+    BlockInt.setZero();
     for(int i = 0; i < Ngridr; i++)
+    
     for(int j = 0; j < NLeb; j++){
       ptSPH = G2.gridPt(i,j);
       bg::transform(ptSPH,ptCar);
       ptCar.set<0>(bg::get<0>(ptCar) + center[0]);
       ptCar.set<1>(bg::get<1>(ptCar) + center[1]);
       ptCar.set<2>(bg::get<2>(ptCar) + center[2]);
-      const double * fEvalBuff = 
-        basisset->basisProdEval(basisset->shells(s1),basisset->shells(s2),&ptCar);
-      ConstRealMap fEval(fEvalBuff,n1,n2);
-      shInt += 4.0*math.pi*Rad.gridPts()[i]*Rad.gridPts()[i]*Rad.weights()[i]*GridLeb2.weights()[j]*fEval; 
+///      const double * fEvalBuff = 
+///        basisset->basisProdEval(basisset->shells(s1),basisset->shells(s2),&ptCar);
+      pointProd = basisset->basisProdEval(basisset->shells(s1),basisset->shells(s2),&ptCar);
+      SumInt=G2.Buffintegrate(SumInt,pointProd,n1,n2,i,j);
+      
+///      ConstRealMap fEval(fEvalBuff,n1,n2);
+///      shInt += 4.0*math.pi*Rad.gridPts()[i]*Rad.gridPts()[i]*Rad.weights()[i]*GridLeb2.weights()[j]*fEval; 
     }
-    STmp.block(bf1_s,bf2_s,n1,n2) = shInt;
-    delete [] shIntBuff;
+///    STmp.block(bf1_s,bf2_s,n1,n2) = shInt;
+    STmp.block(bf1_s,bf2_s,n1,n2) = 4*math.pi*BlockInt;
+///    delete [] shIntBuff;
+    delete [] SumInt;
   }
 }
-STmp = STmp.selfadjointView<Lower>(); 
-cout << "DIFF" << endl;
-cout << STmp-(*aointegrals->overlap_)  << endl;
+//STmp = STmp.selfadjointView<Lower>(); 
+//cout << "DIFF" << endl;
+//cout << STmp-(*aointegrals->overlap_)  << endl;
+*/
    
   time(&currentTime);
   fileIO->out<<"\nJob finished: "<<ctime(&currentTime)<<endl;

@@ -28,23 +28,21 @@
 
 namespace ChronusQ{
 
-
-//// TEST FUNCTIONS
+  
+  //// TEST FUNCTIONS
   double OneDGrid::f_val(double rad){
   // Test Function to be integrated by One-dimensional grid
   // INT[0,1] r^2 * exp(-r^2);
+/*
 //         return (std::pow(rad,2.0))*(std::exp(-((std::pow(rad,2.0)))));
 //         return (std::pow(rad,2.0))*(std::exp(-((std::pow(rad,2.0)))));
 //         return std::exp(-(std::pow(rad,2.0)));
-
+*/
    double a0=0.9996651;
    double val;
 // 1s H
    val = rad*(std::exp(-rad/a0))/ ((std::pow(a0,1.5))*(std::sqrt(math.pi)));
-
-
    return val*val;
-         //return std::pow(math.pi,-1.5)*(std::pow(rad,2.0))*(std::exp(-((std::pow(rad,2.0)))));
          } 
 
   double OneDGrid::f2_val(double elevation,double azimut){
@@ -106,6 +104,7 @@ namespace ChronusQ{
 
 double OneDGrid::integrate(){
   // Integrate a test function for a one dimensional grid radial part
+  // intas2GPt_ is a logical to integrad a 2D angular gris as OneD Grid
    double sum = 0.0;
    std::cout << "Number of One-grid points= "<< this->nPts_  <<std::endl;
    for(int i = 0; i < this->nPts_; i++){
@@ -135,6 +134,57 @@ void OneDGrid::printGrid(){
     }
  }
 
+
+  double * TwoDGrid::Buffintegrate(double * Sum,double * Buff,int n1, int n2, int i, int j){
+  //  Integration over batches : Overlap (numerical)
+     double fact = (Gs_->weights()[j])*(Gr_->weights()[i])*(std::pow(Gr_->gridPts()[i],2.0));
+     ConstRealMap fBuff(Buff,n1,n2); 
+     RealMap Sout(Sum,n1,n2); 
+     Sout += fBuff*fact;  
+     return Sum;
+}
+
+  RealMatrix * TwoDGrid::integrateO(){
+  // Integrated Over a TWODGrid (Radial x Angular) the basisProdEval (shells(s1),shells(s2))
+  // function, returning the pointer of the whole (Nbasis,Nbasis) Matrix
+    int    nBase = basisSet_->nBasis();
+    int    Ngridr = Gr_->npts();
+    int    NLeb   = Gs_->npts();
+    sph3GP ptSPH;
+    cartGP ptCar;
+    RealMatrix *Integral = new RealMatrix(nBase,nBase);  ///< (NBase,Nbase) Integral ove Grid Point
+    for(auto s1=0l, s12=0l; s1 < basisSet_->nShell(); s1++){
+      int bf1_s = basisSet_->mapSh2Bf(s1);
+      int n1    = basisSet_->shells(s1).size();
+      for(int s2=0; s2 <= s1; s2++, s12++){
+        int bf2_s   = basisSet_->mapSh2Bf(s2);
+        int n2      = basisSet_->shells(s2).size();
+        auto center = basisSet_->shells(s1).O;
+        double *pointProd; 
+        double *SumInt = new double [n1*n2];
+        double val;
+        RealMap BlockInt(SumInt,n1,n2);
+        BlockInt.setZero();
+        for(int i = 0; i < Ngridr; i++)
+        for(int j = 0; j < NLeb; j++){
+        ptSPH = this->gridPt(i,j);
+        bg::transform(ptSPH,ptCar);
+        ptCar.set<0>(bg::get<0>(ptCar) + center[0]);
+        ptCar.set<1>(bg::get<1>(ptCar) + center[1]);
+        ptCar.set<2>(bg::get<2>(ptCar) + center[2]);
+        pointProd = basisSet_->basisProdEval(basisSet_->shells(s1),basisSet_->shells(s2),&ptCar);
+        SumInt=this->Buffintegrate(SumInt,pointProd,n1,n2,i,j);
+        }
+      Integral->block(bf1_s,bf2_s,n1,n2) = 4*math.pi*BlockInt;
+      delete [] SumInt;
+      }
+    }
+    (*Integral) = Integral->selfadjointView<Lower>(); 
+//    cout << (*Integral)  << endl;
+    return Integral;
+ }  //
+
+
   double TwoDGrid::integrate(){
   // Integrate a test function for a one dimensional grid radial part
    double sum = 0.0;
@@ -142,13 +192,14 @@ void OneDGrid::printGrid(){
 //     std::cout << "Number of Solid Angle-grid points= "<< Gs_->npts()  <<std::endl;
      for(int i = 0; i < Gr_->npts(); i++){
       for(int j = 0; j < Gs_->npts(); j++){
-           sum += this->fEVal[i*Gs_->npts() + j]*(Gs_->weights()[j])*(Gr_->weights()[i])*(std::pow(Gr_->gridPts()[i],2.0));
+//           sum += this->fEVal[i*Gs_->npts() + j]*(Gs_->weights()[j])*(Gr_->weights()[i])*(std::pow(Gr_->gridPts()[i],2.0));
         }
       }
 //           cout << "before norm "<< sum <<endl;
 //        return 4.0*(math.pi)*sum*(Gr_->norm());
         return 4.0*math.pi*sum;
   }
+
 
 /* OLD
   double TwoDGrid::integrate(){

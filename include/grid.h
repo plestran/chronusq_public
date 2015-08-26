@@ -24,6 +24,7 @@
  *  
  */
 #include <global.h>
+#include <basisset.h>
 
 namespace ChronusQ {
 
@@ -83,21 +84,33 @@ class OneDGrid : public Grid {
 
 class TwoDGrid : public Grid {
       protected:
-            OneDGrid * Gr_;
-            OneDGrid * Gs_;
-      double   fsphe(double,double,double);
-      double * fEVal;
+            OneDGrid * Gr_;        ///< pointer to Radial OneD grid
+            OneDGrid * Gs_;        ///< pointer to Angular OneD grid
+            BasisSet *  basisSet_; ///< Smart pointer to primary basis set
+/*            double **gEval_;
+////      fEval = new double*[Gr_->npts()*Gs_->npts()];
 ////      double foxy(cartGP pt, cartGP O,double a1, double a2, double a3, double d1, double d2, double d3, double lx, double ly, double lz); 
 ////      double   ftest(double,double,double);
 //            int * Gsnpts_;
+*/
       public:
-        TwoDGrid(OneDGrid *Gr, OneDGrid *Gs){
+        TwoDGrid(BasisSet * basisset,OneDGrid *Gr, OneDGrid *Gs){
         this->Gr_ =  Gr;
         this->Gs_ =  Gs;
-        this->fEVal =  new double[Gr_->npts()*Gs_->npts()];
+        this->basisSet_ = basisset;
+/*
+////        this->gEval_  = new double *[Gr_->npts()*Gs_->npts()];
+//        inline double * getfEval(int i,int j, int width){ return this->fEval_[i*width +j];};
+//        this->basisSet_ = basisset;
+//        BasisSet *  basisSet_; ///< Smart pointer to primary basis set
+//        this->fEval =  new double*[Gr_->npts()*Gs_->npts()];
+*/
           };
-        ~TwoDGrid(){delete [] this->fEVal;};
+////        ~TwoDGrid(){delete [] this->fEval_;};
+//      ~TwoDGrid(){delete [] this->gEval_;};
+      RealMatrix * integrateO();
       double integrate();
+      double * Buffintegrate(double * Sum,double * Buff,int n1, int n2, int i, int j);
       void printGrid();
       void genGrid();
       void transformPts();
@@ -106,7 +119,24 @@ class TwoDGrid : public Grid {
          sph3GP x(bg::get<0>(Gs_->grid2GPts(j)),bg::get<1>(Gs_->grid2GPts(j)),Gr_->gridPts(i));
         return x;
       };
-      inline void setFEval(double fx,int i, int j, int width){ this->fEVal[i*width +j] = fx;};
+//        inline void gengEval(int n1, int n2){
+//        for (int i=0;i < Gr_->npts()*Gs_->npts(); i++) {
+//          ConstRealMap gBuff(this->gEval_[i],n1,n2);}
+//           };
+//         return this->(this->gEval_[i*width+j]);
+//      };
+
+//       inline void setgEval(const double *Buff, int n1, int n2, int i, int j, int width){
+//         cout << "Test AP 1" << " i "<< i << " j " << j <<endl;
+//         ConstRealMap gBuff(Buff,n1,n2);
+//           gengEval(n1,n2);
+//         gEval_[i] = new double[n1*n2];
+//         cout << "Test AP 2" << endl;
+//         std:memcpy(gEval_[i*width+j],gBuff,n1*n2);
+//        cout << "Test AP 3" << endl;
+//       };
+
+//      inline void setFEval(double fx,int i, int j, int width){ this->fEVal[i*width +j] = fx;};
 //      inline void setFEval(double *fx, int mu, int nu, int mnwidth, int i, int j, int width){ this->fEVal[i*width +j] = *(fx+(mu*mnwidth +nu));};
   }; //   Class TwoDGrid
 
