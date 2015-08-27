@@ -32,12 +32,12 @@ void SDResponse<double>::formTransDipole(){
    auto NBSq = this->nTCS_*this->nTCS_*this->nBasis_*this->nBasis_;
    if(this->iMeth_ == CIS || this->iMeth_ == RPA || this->iMeth_ == STAB){
      if(this->Ref_ == SingleSlater<double>::TCS) {
-       RealMatrix TAO(this->nBasis_,this->nBasis_);
+       RealMatrix TAO(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
        for(auto iSt = 0; iSt < this->nSek_; iSt++){
          RealVecMap TMOV(this->transDen_->data()+iSt*this->nSingleDim_,this->nSingleDim_);
          this->formAOTDen(TMOV,TAO,TAO);
          for(auto iXYZ = 0, iOff = 0; iXYZ < 3; iXYZ++, iOff += NBSq){
-           RealMap dipole(&this->elecDipole_->storage()[iOff],this->nBasis_,this->nBasis_);
+           RealMap dipole(&this->elecDipole_->storage()[iOff],this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
            (*this->transDipole_)(0,iSt+1,iXYZ) = TAO.frobInner(dipole);
          }
        }
@@ -80,7 +80,7 @@ void SDResponse<double>::formTransDipole(){
            (*this->transDipole_)(jSt,iSt,iXYZ) = (*this->transDipole_)(iSt,jSt,iXYZ);
          }
        }
-     } else CErr("Transition for non-TCS ppTDA NYI",this->fileio_->out); 
+     } else CErr("Transition Dipole for non-TCS ppTDA NYI",this->fileio_->out); 
    } else CErr("Transition Dipole not defined to PSCF Method",this->fileio_->out);
 } //formTransDipole
 
