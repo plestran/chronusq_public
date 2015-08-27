@@ -152,6 +152,16 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
                                 controls.get(),hartreeFockReal.get());
       
       sdResponseReal->IterativeRPA();
+    prettyPrint(fileIO->out,*hartreeFockReal->epsA(),"EPS");
+    prettyPrintTCSOD(fileIO->out,*hartreeFockReal->moA(),"MO");
+    controls->SDMethod = 4;
+    controls->SDNSek   = 12;
+    SDResponse<double> ppTDA;
+    ppTDA.setPPRPA(1);
+    ppTDA.iniSDResponse(molecule.get(),basisset.get(),mointegralsReal.get(),
+      fileIO.get(),controls.get(),hartreeFockReal.get());
+    ppTDA.IterativeRPA();
+//  ppTDA.incorePPRPAnew();
     //sdResponseReal->incorePPRPA();
     //sdResponseReal->incoreCIS();
     //sdResponseReal->incoreRPA();

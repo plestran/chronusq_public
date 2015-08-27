@@ -2335,11 +2335,15 @@ void SDResponse<double>::incorePPRPAnew(){
     Eigen::SelfAdjointEigenSolver<RealMatrix> ES;
     ES.compute(A);
     Eigen::VectorXd EATDA = ES.eigenvalues().real();
+
+    double valATDA = EATDA(0);
     EATDA = -EATDA;
     std::sort(EATDA.data(),EATDA.data()+EATDA.size());
     EATDA = -EATDA;
+    VectorXd LowATDA = EATDA;
+    for(auto i = 0; i < LowATDA.size(); i++) LowATDA(i) = valATDA;
     cout << std::fixed << std::setprecision(12);
-    cout << EATDA << endl;
+    cout << EATDA-LowATDA << endl;
 
     if(!this->haveDag_) this->getDiag();
     RealCMMatrix TATDA = ES.eigenvectors().real();
@@ -2361,7 +2365,7 @@ void SDResponse<double>::incorePPRPAnew(){
 */
    
     this->formRM4(TATDAMap,ATATDAMap,ATATDAMap);
-    prettyPrint(cout,A*TATDA - ATATDAMap,"DIFF");
+//  prettyPrint(cout,A*TATDA - ATATDAMap,"DIFF");
 /*
     if(!this->haveDag_) this->getDiag();
     RealCMMatrix Vec(this->nVV_SLT_,8);
@@ -2390,7 +2394,10 @@ void SDResponse<double>::incorePPRPAnew(){
     ERPA = -ERPA;
     std::sort(ERPA.data(),ERPA.data()+ERPA.size());
     ERPA = -ERPA;
-    cout << endl << endl << ERPA << endl;
+    double valRPA = ERPA(this->nVV_SLT_-1);
+    VectorXd LowRPA = ERPA;
+    for(auto i = 0; i < LowRPA.size(); i++) LowRPA(i) = valRPA;
+    cout << endl << endl << ERPA-LowRPA << endl;
     
   } else {
     for(auto a = 0, ab = 0; a < this->nVA_; a++      )

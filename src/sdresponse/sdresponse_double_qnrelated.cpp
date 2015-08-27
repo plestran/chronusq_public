@@ -180,7 +180,7 @@ void SDResponse<double>::getDiag(){
 
 template<>
 void SDResponse<double>::reoptWF(){
-  int maxStabIter = 4;
+  int maxStabIter = 20;
   double small = 1e-10;
   bool stable = false;
   int NTCSxNBASIS = this->nTCS_*this->nBasis_;
@@ -324,16 +324,20 @@ void SDResponse<double>::formGuess(){
 
 template<>
 void SDResponse<double>::IterativeRPA(){
-  bool hasProp = ((this->iMeth_==CIS || this->iMeth_==RPA) && this->Ref_ != SingleSlater<double>::TCS);
+  bool hasProp = ((this->iMeth_==CIS || this->iMeth_==RPA || this->iMeth_==PPATDA));
   this->formGuess();
 //if(this->iMeth_ == PPATDA) CErr();
   QuasiNewton<double> davA(this);
   davA.run(this->fileio_->out);
   if(hasProp){
+    cout << "HERE" << endl;
     this->formTransDipole();
+    cout << "HERE" << endl;
     this->formOscStrength();
-    this->printExcitedStateEnergies();
   }
+//prettyPrint(this->fileio_->out,*this->transDen_,"Trans den");
+  this->printExcitedStateEnergies();
+  
   if(this->iMeth_ == STAB) this->reoptWF();
 } // IterativeRPA
 
