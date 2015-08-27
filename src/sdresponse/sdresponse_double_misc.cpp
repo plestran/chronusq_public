@@ -2076,15 +2076,29 @@ void SDResponse<double>::incoreRPA(){
   ABBA.block(0,this->nOV_,this->nOV_,this->nOV_) = B;
   ABBA.block(this->nOV_,this->nOV_,this->nOV_,this->nOV_) = -A;
   Eigen::EigenSolver<RealMatrix> EA(ABBA);
+  cout << "LR EIG" << endl;
   cout << endl << EA.eigenvalues() << endl;
   RealMatrix AmB = A-B;
   RealMatrix ApB = A+B;
 
-  EA.compute(ApB);
-  cout << endl << EA.eigenvalues() << endl;
-  EA.compute(AmB);
-  cout << endl << EA.eigenvalues() << endl;
-  CErr();
+//EA.compute(ApB);
+//cout << endl << EA.eigenvalues() << endl;
+//EA.compute(AmB);
+//cout << endl << EA.eigenvalues() << endl;
+
+
+  
+  ABBA.block(0,0,this->nOV_,this->nOV_) = A;
+  ABBA.block(this->nOV_,0,this->nOV_,this->nOV_) = B;
+  ABBA.block(0,this->nOV_,this->nOV_,this->nOV_) = B;
+  ABBA.block(this->nOV_,this->nOV_,this->nOV_,this->nOV_) = A;
+    if(!this->haveDag_) this->getDiag();
+    RealCMMatrix Vec(2*this->nOV_,3);
+    VectorXd Eig(3);
+    RealCMMatrix ACM = ABBA;
+    QuasiNewton<double> davA(false,true,3,&ACM,this->rmDiag_.get(),&Vec,&Eig);
+    davA.run(cout);
+
 
 //RealMatrix Vec = ES.eigenvectors().col(0);
 //RealMatrix AX(this->nOV_,1);

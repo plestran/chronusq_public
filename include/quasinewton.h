@@ -441,30 +441,29 @@ template <typename T>
       if(this->genGuess_) this->nGuess_ = this->stdNGuess();
       this->checkValid(SDR->fileio()->out);
       this->allocGuess();
-      if(!this->genGuess_) *this->guessR_ = *SDR->davGuess();
+//    if(!this->genGuess_) *this->guessR_ = *SDR->davGuess();
+      if(!this->genGuess_) *this->guessR_ = TMat::Identity(this->N_,this->nGuess_);;
       this->allocScr();
     };
 
-    QuasiNewton(int n, TMat *A,RealCMMatrix* diag,TMat *Vc, VectorXd *Eig) : QuasiNewton() {
+    QuasiNewton(bool isH, bool sT, int n, TMat *A,RealCMMatrix* diag,TMat *Vc, VectorXd *Eig) : QuasiNewton() {
       this->N_ = A->rows();
       this->A_ = A;
       this->nSek_ = n;
       this->solutionValues_ = Eig;
       this->solutionVector_ = Vc;
       this->diag_           = diag;
-      this->symmetrizedTrial_ = false;
+      this->symmetrizedTrial_ = sT;
       this->doGEP_            = false;
       this->genGuess_         = true;
       this->maxSubSpace_      = this->stdSubSpace();
-      this->isHermetian_      = true;
+      this->isHermetian_      = isH;
       this->initScrLen();
 
       if(this->genGuess_) this->nGuess_ = this->stdNGuess();
       this->checkValid(cout);
       this->allocGuess();
       this->allocScr();
-    
-
     }
     /** Public inline functions **/
     inline TVec* eigenValues(){return this->solutionValues_;};
@@ -554,6 +553,10 @@ template <typename T>
       new (&NewSL  ) TCMMap(this->SigmaLMem+NOld*this->N_,this->N_,NNew);
       new (&NewVecL) TCMMap(this->TVecLMem+ NOld*this->N_,this->N_,NNew);
     }
+//      NewVecR.block(this->N_/2,0,this->N_/2,NNew) *= 0.0;
+//      NewVecL.block(this->N_/2,0,this->N_/2,NNew) *= 0.0;
+//      cout << "VecR" << endl << NewVecR << endl;
+//      cout << "VecL" << endl << NewVecL << endl;
     if(this->sdr_ != NULL){
       if(this->sdr_->iMeth() == SDResponse<T>::CIS || this->sdr_->iMeth() == SDResponse<T>::RPA ||
          this->sdr_->iMeth() == SDResponse<T>::STAB){
@@ -562,9 +565,9 @@ template <typename T>
         if(this->sdr_->iMeth() == SDResponse<T>::RPA){
           // Linear trasnformation onto left / ungerade
           this->sdr_->formRM3(NewVecL,NewSL,NewRhoR);
-          cout << "VecR" << endl << NewVecR << endl;
+          cout << "SR" << endl << NewSR << endl;
           cout << "RhoR" << endl << NewRhoR << endl;
-          cout << "VecL" << endl << NewVecL << endl;
+          cout << "SL" << endl << NewSL << endl;
           cout << "RhoL" << endl << NewRhoL << endl;
         }
       } else if(this->sdr_->iMeth() == SDResponse<T>::PPRPA  || 
@@ -575,7 +578,21 @@ template <typename T>
           // Linear trasnformation onto left / ungerade
           this->sdr_->formRM4(NewVecL,NewSL,NewRhoR);
       }
-    } else NewSR = (*this->A_) * NewVecR;
+    } else {
+      NewSR = (*this->A_) * NewVecR;
+      if(!this->isHermetian_ || this->symmetrizedTrial_){
+        NewSL = (*this->A_) * NewVecL;
+        NewRhoR = NewVecL;
+        NewRhoL = NewVecR;
+        NewRhoR.block(this->N_/2,0,this->N_/2,NNew) *= -1.0;
+        NewRhoL.block(this->N_/2,0,this->N_/2,NNew) *= -1.0;
+          cout << "SR" << endl << std::setprecision(6) << NewSR << endl;
+          cout << "RhoR" << endl << std::setprecision(6) << NewRhoR << endl;
+          cout << "SL" << endl << std::setprecision(6) << NewSL << endl;
+          cout << "RhoL" << endl << std::setprecision(6) << NewRhoL << endl;
+      }
+    }
+  //CErr();
   } // linearTrans
   /** Full projection onto reduced space  **/
   /*  Full projection of the matrix (and the metric) onto the reduced subspace

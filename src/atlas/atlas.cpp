@@ -151,7 +151,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
       sdResponseReal->iniSDResponse(molecule.get(),basisset.get(),mointegralsReal.get(),fileIO.get(),
                                 controls.get(),hartreeFockReal.get());
       
-      sdResponseReal->IterativeRPA();
+    //sdResponseReal->IterativeRPA();
 //  prettyPrint(fileIO->out,*hartreeFockReal->epsA(),"EPS");
 //  prettyPrintTCSOD(fileIO->out,*hartreeFockReal->moA(),"MO");
 //  controls->SDMethod = 4;
@@ -164,7 +164,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 //  ppTDA.incorePPRPAnew();
     //sdResponseReal->incorePPRPA();
     //sdResponseReal->incoreCIS();
-    //sdResponseReal->incoreRPA();
+      sdResponseReal->incoreRPA();
     //sdResponseReal->incorePPRPAnew();
     } else {
       sdResponseComplex->setPPRPA(1);
