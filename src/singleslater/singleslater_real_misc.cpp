@@ -153,6 +153,16 @@ SingleSlater<double>::SingleSlater(SingleSlater<double> * other){
        };
      prettyPrint(this->fileio_->out,(*this->moA_),"APS PRINT GUESS SWAP");
    };
+//----------------------------//
+// form the Vxc matrix        //
+//----------------------------//
+template<>
+void SingleSlater<double>::formVXC(RealMatrix * Integral3D){
+  (*this->vXCA_) = (*Integral3D);
+  cout << " Number Electron = " << (*this->vXCA_).frobInner(this->densityA_->conjugate()) <<endl;
+ cout << "Single Slater Numeric : Density Contracted" <<endl;
+ cout << (*this->vXCA_)  << endl;
+};
 ////APE
 //
 /************************

@@ -25,6 +25,8 @@
  */
 #include <global.h>
 #include <basisset.h>
+#include <molecule.h>
+#include <fileio.h>
 
 namespace ChronusQ {
 
@@ -87,6 +89,12 @@ class TwoDGrid : public Grid {
             OneDGrid * Gr_;        ///< pointer to Radial OneD grid
             OneDGrid * Gs_;        ///< pointer to Angular OneD grid
             BasisSet *  basisSet_; ///< Smart pointer to primary basis set
+            Molecule * 	molecule_; ///< Smart pointer to molecule specification
+            FileIO *    fileio_;   ///< Smart pointer to fileIO
+            std::unique_ptr<RealMatrix> GridCar_;
+            std::unique_ptr<RealMatrix> weightsAtom_; ///< Atomic weight
+            double   *   weightsGrid_; ///< weight(NGrids*NAtoms)
+            
 /*            double **gEval_;
 ////      fEval = new double*[Gr_->npts()*Gs_->npts()];
 ////      double foxy(cartGP pt, cartGP O,double a1, double a2, double a3, double d1, double d2, double d3, double lx, double ly, double lz); 
@@ -94,10 +102,15 @@ class TwoDGrid : public Grid {
 //            int * Gsnpts_;
 */
       public:
-        TwoDGrid(BasisSet * basisset,OneDGrid *Gr, OneDGrid *Gs){
+        TwoDGrid(FileIO * fileio,Molecule * molecule,BasisSet * basisset,OneDGrid *Gr, OneDGrid *Gs){
         this->Gr_ =  Gr;
         this->Gs_ =  Gs;
         this->basisSet_ = basisset;
+        this->fileio_ = fileio;
+        this->molecule_ = molecule;
+        this->weightsAtom_   =std::unique_ptr<RealMatrix>(new RealMatrix(this->molecule_->nAtoms(),Gr_->npts()*Gs_->npts()));
+        this->GridCar_   =std::unique_ptr<RealMatrix>(new RealMatrix(this->molecule_->nAtoms()*Gr_->npts()*Gs_->npts(),3));
+        this->weightsGrid_  = new double [Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms()];
 /*
 ////        this->gEval_  = new double *[Gr_->npts()*Gs_->npts()];
 //        inline double * getfEval(int i,int j, int width){ return this->fEval_[i*width +j];};
@@ -109,16 +122,32 @@ class TwoDGrid : public Grid {
 ////        ~TwoDGrid(){delete [] this->fEval_;};
 //      ~TwoDGrid(){delete [] this->gEval_;};
       RealMatrix * integrateO();
+      RealMatrix * integrateAtoms();
       double integrate();
-      double * Buffintegrate(double * Sum,double * Buff,int n1, int n2, int i, int j);
+      double * Buffintegrate(double * Sum,double * Buff,int n1, int n2, double fact);
       void printGrid();
       void genGrid();
       void transformPts();
+      void makeWAtoms();
+      double voronoii(double mu);
+      inline double * weightsGrid(){ return this->weightsGrid_;};
+      inline double getweightsGrid(int i){ return this->weightsGrid_[i];};
+//      inline double * weightsAtom(){ return this->weightsAtom_;};
+//      inline double   getweightsAtom(int i){ return this->weightsAtom_[i];};
+      inline RealMatrix* weightsAtom() {return this->weightsAtom_.get();}
 ////      double  * ftestVal(cartGP *pt);
       inline sph3GP gridPt(int i, int j){
          sph3GP x(bg::get<0>(Gs_->grid2GPts(j)),bg::get<1>(Gs_->grid2GPts(j)),Gr_->gridPts(i));
         return x;
       };
+      inline cartGP gridPtCart(int ipts){
+         cartGP x(((*this->GridCar_)(ipts,0)),((*this->GridCar_)(ipts,1)),((*this->GridCar_)(ipts,2)));
+        return x;
+      };
+      ~TwoDGrid(){
+      delete [] this->weightsGrid_;
+      cout << "Deliting TwoDGrid"; 
+     };
 //        inline void gengEval(int n1, int n2){
 //        for (int i=0;i < Gr_->npts()*Gs_->npts(); i++) {
 //          ConstRealMap gBuff(this->gEval_[i],n1,n2);}

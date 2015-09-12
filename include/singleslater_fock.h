@@ -70,7 +70,9 @@ void SingleSlater<T>::formFock(){
 //  this->basisset_->resetMapSh2Bf(); 
 //  this->basisset_->makeMapSh2Bf(this->nTCS_);
 //}
-
+  if(this->controls_->DFT){
+    // Form VXC
+  }
   this->fockA_->setZero();
 /*
   if(this->Ref_ != TCS) fockA_->real()+=(*this->aointegrals_->oneE_);
@@ -89,6 +91,9 @@ void SingleSlater<T>::formFock(){
 #else
   *(fockA_)+=(*this->PTA_);
 #endif
+  if(this->controls_->DFT){
+    (*this->fockA_) += (*this->vXCA_);
+  }
   if(!this->isClosedShell && this->Ref_ != TCS){
     this->fockB_->setZero();
     fockB_->real()+=(*this->aointegrals_->oneE_);
@@ -98,6 +103,9 @@ void SingleSlater<T>::formFock(){
 #else
     *(fockB_)+=(*this->PTB_);
 #endif
+    if(this->controls_->DFT){
+      (*this->fockB_) += (*this->vXCB_);
+    }
   };
   if(this->controls_->printLevel>=2) {
     if(this->Ref_ != TCS){

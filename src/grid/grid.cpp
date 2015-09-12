@@ -135,24 +135,31 @@ void OneDGrid::printGrid(){
  }
 
 
-  double * TwoDGrid::Buffintegrate(double * Sum,double * Buff,int n1, int n2, int i, int j){
+  double * TwoDGrid::Buffintegrate(double * Sum,double * Buff,int n1, int n2, double fact){
+
   //  Integration over batches : Overlap (numerical)
-     double fact = (Gs_->weights()[j])*(Gr_->weights()[i])*(std::pow(Gr_->gridPts()[i],2.0));
+//     double fact = (Gs_->weights()[j])*(Gr_->weights()[i])*(std::pow(Gr_->gridPts()[i],2.0));
      ConstRealMap fBuff(Buff,n1,n2); 
      RealMap Sout(Sum,n1,n2); 
      Sout += fBuff*fact;  
      return Sum;
+
 }
 
   RealMatrix * TwoDGrid::integrateO(){
+
   // Integrated Over a TWODGrid (Radial x Angular) the basisProdEval (shells(s1),shells(s2))
   // function, returning the pointer of the whole (Nbasis,Nbasis) Matrix
     int    nBase = basisSet_->nBasis();
     int    Ngridr = Gr_->npts();
     int    NLeb   = Gs_->npts();
+    double fact;
     sph3GP ptSPH;
     cartGP ptCar;
     RealMatrix *Integral = new RealMatrix(nBase,nBase);  ///< (NBase,Nbase) Integral ove Grid Point
+    std::cout <<" --- Numerical Quadrature ---- " <<std::endl;
+    std::cout << "Number of Radial-grid points      = "<< Ngridr  <<std::endl;
+    std::cout << "Number of Solid Angle-grid points = "<< NLeb  <<std::endl;
     for(auto s1=0l, s12=0l; s1 < basisSet_->nShell(); s1++){
       int bf1_s = basisSet_->mapSh2Bf(s1);
       int n1    = basisSet_->shells(s1).size();
@@ -172,8 +179,9 @@ void OneDGrid::printGrid(){
         ptCar.set<0>(bg::get<0>(ptCar) + center[0]);
         ptCar.set<1>(bg::get<1>(ptCar) + center[1]);
         ptCar.set<2>(bg::get<2>(ptCar) + center[2]);
+        fact = (Gs_->weights()[j])*(Gr_->weights()[i])*(std::pow(Gr_->gridPts()[i],2.0));
         pointProd = basisSet_->basisProdEval(basisSet_->shells(s1),basisSet_->shells(s2),&ptCar);
-        SumInt=this->Buffintegrate(SumInt,pointProd,n1,n2,i,j);
+        SumInt=this->Buffintegrate(SumInt,pointProd,n1,n2,fact);
         }
       Integral->block(bf1_s,bf2_s,n1,n2) = 4*math.pi*BlockInt;
       delete [] SumInt;
@@ -182,8 +190,49 @@ void OneDGrid::printGrid(){
     (*Integral) = Integral->selfadjointView<Lower>(); 
 //    cout << (*Integral)  << endl;
     return Integral;
- }  //
+ 
+}  //
 
+  RealMatrix * TwoDGrid::integrateAtoms(){
+
+  // Integrated Over a TWODGrid (Radial x Angular) the basisProdEval (shells(s1),shells(s2))
+  // function, returning the pointer of the whole (Nbasis,Nbasis) Matrix
+    int    nBase = basisSet_->nBasis();
+    int    Ngridpts = (Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms());
+    double fact;
+    sph3GP ptSPH;
+    cartGP ptCar;
+    RealMatrix *Integral = new RealMatrix(nBase,nBase);  ///< (NBase,Nbase) Integral ove Grid Point
+    std::cout <<" --- Numerical Quadrature ---- " <<std::endl;
+//    std::cout << "Number of Radial-grid points      = "<< Ngridr  <<std::endl;
+//    std::cout << "Number of Solid Angle-grid points = "<< NLeb  <<std::endl;
+    std::cout << "Total Number of grid points = "<< Ngridpts  <<std::endl;
+    for(auto s1=0l, s12=0l; s1 < basisSet_->nShell(); s1++){
+      int bf1_s = basisSet_->mapSh2Bf(s1);
+      int n1    = basisSet_->shells(s1).size();
+      for(int s2=0; s2 <= s1; s2++, s12++){
+        int bf2_s   = basisSet_->mapSh2Bf(s2);
+        int n2      = basisSet_->shells(s2).size();
+        auto center = basisSet_->shells(s1).O;
+        double *pointProd; 
+        double *SumInt = new double [n1*n2];
+        double val;
+        RealMap BlockInt(SumInt,n1,n2);
+        BlockInt.setZero();
+        for(int ipts = 0; ipts < Ngridpts; ipts++){
+          ptCar = this->gridPtCart(ipts);
+          pointProd = basisSet_->basisProdEval(basisSet_->shells(s1),basisSet_->shells(s2),&ptCar);
+          SumInt=this->Buffintegrate(SumInt,pointProd,n1,n2,getweightsGrid(ipts));
+        }
+      Integral->block(bf1_s,bf2_s,n1,n2) = 4*math.pi*BlockInt;
+      delete [] SumInt;
+      }
+    }
+    (*Integral) = Integral->selfadjointView<Lower>(); 
+//    cout << (*Integral)  << endl;
+    return Integral;
+ 
+}  //
 
   double TwoDGrid::integrate(){
   // Integrate a test function for a one dimensional grid radial part
@@ -236,6 +285,60 @@ void OneDGrid::printGrid(){
 void TwoDGrid::transformPts(){
 };
 
+double TwoDGrid::voronoii( double mu){
+       double p;
+       p = (1.5)*(mu) - 0.5*(std::pow(mu,3.0));
+       return p;
+};
+
+void TwoDGrid::makeWAtoms(){
+     cout << "nAtoms= "<<this->molecule_->nAtoms() << endl;
+     cartGP rj;
+     cartGP ri;
+     sph3GP ptSPH;
+     cartGP ptCar;
+     double muij;
+     int igrid = 0;
+     double norm;     
+     int    Ngridr = Gr_->npts();
+     int    NLeb   = Gs_->npts();
+     for(int i = 0; i < Ngridr; i++)
+     for(int j = 0; j < NLeb; j++){
+       ptSPH = this->gridPt(i,j);
+       bg::transform(ptSPH,ptCar);
+       norm = 0.0;
+//     cout << "AP:Interatomic Distance Matrix (bohr)"<<endl;
+//     prettyPrint(this->fileio_->out,*(this->molecule_->rIJ()),"Interatomic Distance Matrix (bohr)");
+       for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
+          (*this->weightsAtom_)(iAtm,igrid) = 1.0;
+          ri.set<0>((*this->molecule_->cart())(0,iAtm) );
+          ri.set<1>((*this->molecule_->cart())(1,iAtm) );
+          ri.set<2>((*this->molecule_->cart())(2,iAtm) );
+       for(auto jAtm = 0; jAtm < this->molecule_->nAtoms(); jAtm++){
+            if (jAtm != iAtm){
+            rj.set<0>((*this->molecule_->cart())(0,jAtm) );
+            rj.set<1>((*this->molecule_->cart())(1,jAtm) );
+            rj.set<2>((*this->molecule_->cart())(2,jAtm) );
+//        cout << "IAtI= " << iAtm << " IAtJ= "<< jAtm << " Interatomic (bohr) = " <<(*this->molecule_->rIJ())(iAtm,jAtm) <<endl;
+            muij = (boost::geometry::distance(ptCar,ri) - boost::geometry::distance(ptCar,rj))/(*this->molecule_->rIJ())(iAtm,jAtm) ;
+            (*this->weightsAtom_)(iAtm,igrid) *= 0.5*(1.0-voronoii(voronoii(voronoii(muij))));
+//              cout << "mu " << muij  <<" ri "<< boost::geometry::distance(ptCar,ri) << " rj " << boost::geometry::distance(ptCar,rj) << " Rij " << (*this->molecule_->rIJ())(iAtm,jAtm) << "iAtom " << iAtm << "jAtom " << jAtm << endl;
+//            cout << "{" << muij << ", " << (*this->weightsAtom_)(0,igrid) << "}, "<<endl; 
+             }
+           }
+          norm += (*this->weightsAtom_)(iAtm,igrid); 
+          }
+//          (*this->weightsAtom_)(0,igrid) = (*this->weightsAtom_)(0,igrid) / norm;
+//          (*this->weightsAtom_)(1,igrid) = (*this->weightsAtom_)(1,igrid) / norm;
+//          cout << (*this->weightsAtom_)(1,igrid)+(*this->weightsAtom_)(0,igrid) <<endl;
+//          ri.set<0>((*this->molecule_->cart())(0,0) );
+//          ri.set<1>((*this->molecule_->cart())(1,0) );
+//          ri.set<2>((*this->molecule_->cart())(2,0) );
+          cout << "{" <<(boost::geometry::distance(ptCar,ri)) << ", " << (*this->weightsAtom_)(0,igrid) << "}, "<<endl; 
+       igrid ++;
+       }
+};
+
 void TwoDGrid::printGrid(){
   for(int i = 0; i < Gr_->npts(); i++){
     for(int j = 0; j < Gs_->npts(); j++){
@@ -245,6 +348,23 @@ void TwoDGrid::printGrid(){
   };
 
 void TwoDGrid::genGrid(){
+  int ipts = 0;
+  sph3GP ptSPH;
+  cartGP ptCar;
+  for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++) {
+    for(int i = 0; i < Gr_->npts(); i++){
+    for(int j = 0; j < Gs_->npts(); j++){
+      ptSPH = this->gridPt(i,j);
+      bg::transform(ptSPH,ptCar);
+      (*this->GridCar_)(ipts,0) = (bg::get<0>(ptCar) + (*this->molecule_->cart())(0,iAtm) );
+      (*this->GridCar_)(ipts,1) = (bg::get<1>(ptCar) + (*this->molecule_->cart())(1,iAtm) );
+      (*this->GridCar_)(ipts,2) = (bg::get<2>(ptCar) + (*this->molecule_->cart())(2,iAtm) );
+      this->weightsGrid_[ipts] = (Gs_->weights()[j])*(Gr_->weights()[i])*(std::pow(Gr_->gridPts()[i],2.0));
+//      cout << "{" << (*this->GridCar_)(ipts,0) << ", "<< (*this->GridCar_)(ipts,1) <<", " <<(*this->GridCar_)(ipts,2) <<"}, "<< endl;
+      ipts ++;
+       }
+    }
+}
   };
 
 // Specific Grid Functions Declaration
@@ -291,11 +411,11 @@ void GaussChebyshev1stGridInf::genGrid(){
   
 void GaussChebyshev1stGridInf::transformPts(){
 //   Hydrogen
-//   double ralpha= 0.529;
+   double ralpha= 0.529;
 //   Oxygen
 //     double ralpha= 0.60/2.0;
 //   Lithium
-   double ralpha= 1.45/2.0;
+//   double ralpha= 1.45/2.0;
      double toau = (1.0)/phys.bohr;
      double val;
      double dmu;

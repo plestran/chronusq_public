@@ -63,6 +63,8 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
 
   this->nTCS_ = 1;
   if(this->Ref_ == TCS) this->nTCS_ = 2;
+// Comment out to get rid of DFT tests
+  this->controls_->DFT = true;
   
 
   // Alpha / TCS Density
@@ -112,6 +114,17 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
     else CErr(std::current_exception(),"Alpha Perturbation Tensor (G[P]) Allocation"); 
   }
 #endif
+  if(this->controls_->DFT) {
+    // Alpha / TCS VXC
+    try { 
+      this->vXCA_  = std::unique_ptr<TMatrix>(
+        new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
+    } catch (...) { 
+      if(this->Ref_ == TCS) CErr(std::current_exception(),
+        "TCS VXC Allocation"); 
+      else CErr(std::current_exception(),"Alpha VXC  Allocation"); 
+    }
+  }
   // Alpha / TCS Molecular Orbital Coefficients
   try { 
     this->moA_ = std::unique_ptr<TMatrix>(
@@ -144,6 +157,10 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
     try { this->PTB_  = std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_)); } // Beta Perturbation Tensor
     catch (...) { CErr(std::current_exception(),"Beta Perturbation Tensor (G[P]) Allocation"); }
 #endif
+    if(this->controls_->DFT){
+      try { this->vXCB_  = std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_)); } // Beta VXC
+      catch (...) { CErr(std::current_exception(),"Beta VXC Allocation"); }
+    }
     try { this->moB_       = std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_)); } // Beta Molecular Orbital Coefficients
     catch (...) { CErr(std::current_exception(),"Beta MO Coefficients Allocation"); }
     try { this->epsB_       = std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,1)); } // Beta Eigenorbital Energies

@@ -183,24 +183,32 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 //  int NLeb = 14;
 //  int NLeb = 26;
 //  int NLeb = 38;
-//  int NLeb = 110;
-    int Ngridr =   100;
-    int NLeb    = 50;
+  int NLeb = 110;
+  int Ngridr =  50;
+//  int NLeb    = 50;
 // Defining Grids
-     double radius = 5.0;  //It is actually useless using the [0,inf] RadGrid
-   //   GaussChebyshev1stGrid Rad(Ngridr,0.0,radius);
-   GaussChebyshev1stGridInf Rad(Ngridr,0.0,radius);
-   LebedevGrid GridLeb2(NLeb);
+  double radius = 1.0;  //It is actually useless using the [0,inf] RadGrid
+//      GaussChebyshev1stGrid Rad(Ngridr,0.0,radius);
+  GaussChebyshev1stGridInf Rad(Ngridr,0.0,radius);
+  LebedevGrid GridLeb2(NLeb);
 // Generating Grids   
-   Rad.genGrid();
-   GridLeb2.genGrid();
-   TwoDGrid G2(basisset.get(),&Rad,&GridLeb2);
+  Rad.genGrid();
+  GridLeb2.genGrid();
+  TwoDGrid G2(fileIO.get(),molecule.get(),basisset.get(),&Rad,&GridLeb2);
 // Integrate and Return a Nbase by Nbase Matrix of the Overlap numerically integrated
-   RealMatrix * Integral3D;
-   Integral3D=G2.integrateO();
-   cout << "Numeric - Analytic: Overlap" << endl;
-   cout << ((*Integral3D)-(*aointegrals->overlap_))  << endl;
-
+   G2.genGrid();
+//  G2.makeWAtoms();
+  RealMatrix * Integral3D;
+//  Integral3D=G2.integrateO();
+  Integral3D=G2.integrateAtoms();
+  std::cout.precision(10);
+  cout << "Analitic : Overlap" << endl;
+  cout << (*aointegrals->overlap_)  << endl;
+//  cout << "Numeric : Overlap" << endl;
+//  cout << (*Integral3D)  << endl;
+  hartreeFock->formVXC(Integral3D);
+  cout << "Numeric - Analytic: Overlap" << endl;
+  cout << ((*Integral3D)-(*aointegrals->overlap_))  << endl;
 /*
    sph3GP ptSPH;
    cartGP ptCar;
