@@ -158,8 +158,15 @@ SingleSlater<double>::SingleSlater(SingleSlater<double> * other){
 //----------------------------//
 template<>
 void SingleSlater<double>::formVXC(RealMatrix * Integral3D){
+  double Cx = -(3.0/4.0)*(std::pow((3.0/math.pi),(1.0/3.0)));
+  double Ne;
   (*this->vXCA_) = (*Integral3D);
-  cout << " Number Electron = " << (*this->vXCA_).frobInner(this->densityA_->conjugate()) <<endl;
+  Ne = (*this->vXCA_).frobInner(this->densityA_->conjugate());
+//  (*this->vXCA_) = Cx*((*Integral3D).pow(4.0/3.0));
+//  (*this->vXCA_) = (*Integral3D)*(*Integral3D);
+  
+  cout << " Number Electron = " << Ne <<endl;
+//  cout << " Number Electron = " << Cx*pow(Ne,4.0/3.0) <<endl;
  cout << "Single Slater Numeric : Density Contracted" <<endl;
  cout << (*this->vXCA_)  << endl;
 };

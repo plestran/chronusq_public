@@ -97,6 +97,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   // print out the starting time of the job
   time(&currentTime);
   fileIO->out<<"Job started: "<<ctime(&currentTime)<<endl;
+#include <singleslater.h>
   //fileIO->out<<"Central control process is on "<<globalMPI->nodeName<<endl;
 
   // Initialize default settings and read input
@@ -183,9 +184,10 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 //  int NLeb = 14;
 //  int NLeb = 26;
 //  int NLeb = 38;
-  int NLeb = 110;
+//  int NLeb = 110;
   int Ngridr =  50;
-//  int NLeb    = 50;
+  double densityNumatr;
+  int NLeb    = 50;
 // Defining Grids
   double radius = 1.0;  //It is actually useless using the [0,inf] RadGrid
 //      GaussChebyshev1stGrid Rad(Ngridr,0.0,radius);
@@ -194,21 +196,26 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 // Generating Grids   
   Rad.genGrid();
   GridLeb2.genGrid();
-  TwoDGrid G2(fileIO.get(),molecule.get(),basisset.get(),&Rad,&GridLeb2);
+  TwoDGrid G2(fileIO.get(),molecule.get(),basisset.get(),hartreeFock.get(),&Rad,&GridLeb2);
 // Integrate and Return a Nbase by Nbase Matrix of the Overlap numerically integrated
    G2.genGrid();
 //  G2.makeWAtoms();
   RealMatrix * Integral3D;
 //  Integral3D=G2.integrateO();
-  Integral3D=G2.integrateAtoms();
+//  Integral3D=G2.integrateAtoms();
+  densityNumatr=G2.integrateDensity();
   std::cout.precision(10);
-  cout << "Analitic : Overlap" << endl;
-  cout << (*aointegrals->overlap_)  << endl;
+  cout << "LDA with Numeric Density = " << densityNumatr << endl;
+//  cout << "Analitic : Overlap" << endl;
+//  cout << (*aointegrals->overlap_)  << endl;
 //  cout << "Numeric : Overlap" << endl;
 //  cout << (*Integral3D)  << endl;
-  hartreeFock->formVXC(Integral3D);
-  cout << "Numeric - Analytic: Overlap" << endl;
-  cout << ((*Integral3D)-(*aointegrals->overlap_))  << endl;
+//  hartreeFock->formVXC(Integral3D);
+//  cout << "Numeric - Analytic: Overlap" << endl;
+//  cout << ((*Integral3D)-(*aointegrals->overlap_))  << endl;
+
+
+
 /*
    sph3GP ptSPH;
    cartGP ptCar;

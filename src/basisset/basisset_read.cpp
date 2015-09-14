@@ -363,7 +363,7 @@ double * BasisSet::basisProdEval(libint2::Shell s1, libint2::Shell s2, cartGP *p
   double *s1Eval = basisEval(s1,pt);
   double *s2Eval = basisEval(s2,pt);
 
-  double Cx = -(3.0/4.0)*(std::pow((3.0/math.pi),(1.0/3.0)));
+//  double Cx = -(3.0/4.0)*(std::pow((3.0/math.pi),(1.0/3.0)));
 //  cout << "Fact " << fact << endl;
   double   temp;
   double   temp2;

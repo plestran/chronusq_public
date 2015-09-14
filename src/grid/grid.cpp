@@ -142,6 +142,16 @@ void OneDGrid::printGrid(){
      ConstRealMap fBuff(Buff,n1,n2); 
      RealMap Sout(Sum,n1,n2); 
      Sout += fBuff*fact;  
+     
+     return Sum;
+
+}
+  double * TwoDGrid::BuildDensity(double * Sum,double * Buff,int n1, int n2){
+
+  //  Integration over batches : Overlap (numerical)
+     ConstRealMap fBuff(Buff,n1,n2); 
+     RealMap Sout(Sum,n1,n2); 
+     Sout = fBuff;  
      return Sum;
 
 }
@@ -234,8 +244,61 @@ void OneDGrid::printGrid(){
  
 }  //
 
-  double TwoDGrid::integrate(){
+  double TwoDGrid::integrateDensity(){
   // Integrate a test function for a one dimensional grid radial part
+   double sum = 0.0;
+   int    nBase = basisSet_->nBasis();
+   auto NOcc = this->singleSlater_->nOccA();
+   int    Ngridpts = (Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms());
+   double fact;
+//   double Slater = 2.0/3.0;
+   double Cx = -(3.0/4.0)*(std::pow((3.0/math.pi),(1.0/3.0)));
+//   double Cx = -(9.0/8.0)*Slater*(std::pow((3.0/(8.0*math.pi)),(1.0/3.0)));
+   double val;
+   double *pointProd; 
+   sph3GP ptSPH;
+   cartGP ptCar;
+   RealMatrix *OveratR = new RealMatrix(nBase,nBase);  ///< (NBase,Nbase) Integral ove Grid Point
+   (*this->singleSlater_->vXCA()).setZero(); 
+   std::cout <<" --- Numerical Quadrature ---- " <<std::endl;
+   std::cout << "Total Number of grid points = "<< Ngridpts  <<std::endl;
+   for(int ipts = 0; ipts < Ngridpts; ipts++){
+     ptCar = this->gridPtCart(ipts);
+//     (*OveratR).setZero();
+   double rhor = 0.0;
+     for(auto s1=0l, s12=0l; s1 < basisSet_->nShell(); s1++){
+       int bf1_s = basisSet_->mapSh2Bf(s1);
+       int n1    = basisSet_->shells(s1).size();
+        for(int s2=0; s2 <= s1; s2++, s12++){
+          int bf2_s   = basisSet_->mapSh2Bf(s2);
+          int n2      = basisSet_->shells(s2).size();
+          auto center = basisSet_->shells(s1).O;
+          double *Buff = new double [n1*n2];
+          RealMap fBuff(Buff,n1,n2);
+          fBuff.setZero();
+          pointProd = basisSet_->basisProdEval(basisSet_->shells(s1),basisSet_->shells(s2),&ptCar);
+          Buff = this->BuildDensity(Buff,pointProd,n1,n2);
+          OveratR->block(bf1_s,bf2_s,n1,n2) = fBuff;
+          }
+       }
+
+       (*OveratR) = OveratR->selfadjointView<Lower>(); 
+       val = 4.0*math.pi*getweightsGrid(ipts);
+//       (*this->singleSlater_->vXCA()) += val*(*OveratR);
+//        Ask David what is better
+//         rhor = ((*OveratR)*(this->singleSlater_->densityA()->conjugate())).trace();
+         rhor = ((*OveratR).frobInner(this->singleSlater_->densityA()->conjugate()));
+//       Un comment to get the Numeber of Electron
+//         sum  +=  val*rhor;
+//       Slater LDA        
+          sum  +=  val*(std::pow(rhor,(4.0/3.0)));
+         
+    }
+        return Cx*sum;
+
+  }  //End
+
+  double TwoDGrid::integrate(){
    double sum = 0.0;
 //     std::cout << "Number of Radial-grid points= "<< Gr_->npts()  <<std::endl;
 //     std::cout << "Number of Solid Angle-grid points= "<< Gs_->npts()  <<std::endl;

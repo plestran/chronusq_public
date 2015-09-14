@@ -26,6 +26,7 @@
 #include <global.h>
 #include <basisset.h>
 #include <molecule.h>
+#include <singleslater.h>
 #include <fileio.h>
 
 namespace ChronusQ {
@@ -91,6 +92,8 @@ class TwoDGrid : public Grid {
             BasisSet *  basisSet_; ///< Smart pointer to primary basis set
             Molecule * 	molecule_; ///< Smart pointer to molecule specification
             FileIO *    fileio_;   ///< Smart pointer to fileIO
+//            SingleSlater<T> *  singleSlater_;  ///<Smart Pointer to Single Slater
+            SingleSlater<double> *  singleSlater_;
             std::unique_ptr<RealMatrix> GridCar_;
             std::unique_ptr<RealMatrix> weightsAtom_; ///< Atomic weight
             double   *   weightsGrid_; ///< weight(NGrids*NAtoms)
@@ -102,12 +105,14 @@ class TwoDGrid : public Grid {
 //            int * Gsnpts_;
 */
       public:
-        TwoDGrid(FileIO * fileio,Molecule * molecule,BasisSet * basisset,OneDGrid *Gr, OneDGrid *Gs){
+//        TwoDGrid(FileIO * fileio,Molecule * molecule,BasisSet * basisset,OneDGrid *Gr, OneDGrid *Gs){
+        TwoDGrid(FileIO * fileio,Molecule * molecule,BasisSet * basisset, SingleSlater<double> * singleSlater,OneDGrid *Gr, OneDGrid *Gs){
         this->Gr_ =  Gr;
         this->Gs_ =  Gs;
         this->basisSet_ = basisset;
         this->fileio_ = fileio;
         this->molecule_ = molecule;
+        this->singleSlater_ = singleSlater;
         this->weightsAtom_   =std::unique_ptr<RealMatrix>(new RealMatrix(this->molecule_->nAtoms(),Gr_->npts()*Gs_->npts()));
         this->GridCar_   =std::unique_ptr<RealMatrix>(new RealMatrix(this->molecule_->nAtoms()*Gr_->npts()*Gs_->npts(),3));
         this->weightsGrid_  = new double [Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms()];
@@ -123,8 +128,10 @@ class TwoDGrid : public Grid {
 //      ~TwoDGrid(){delete [] this->gEval_;};
       RealMatrix * integrateO();
       RealMatrix * integrateAtoms();
+      double  integrateDensity();
       double integrate();
       double * Buffintegrate(double * Sum,double * Buff,int n1, int n2, double fact);
+      double * BuildDensity(double * Sum,double * Buff,int n1, int n2);
       void printGrid();
       void genGrid();
       void transformPts();
