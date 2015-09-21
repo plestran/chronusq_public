@@ -179,13 +179,12 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 //  cout << "FEVAL " << *(f+i) <<endl;
 //cout << "FEVAL " << *(f+i) << " " << *(g+i) <<endl;
 
-
   fileIO->out << "**AP One dimensional grid test**" << endl;
 //  int NLeb = 14;
 //  int NLeb = 26;
 //  int NLeb = 38;
 //  int NLeb = 110;
-  int Ngridr =  50;
+ int Ngridr =  50;
   double densityNumatr;
   int NLeb    = 50;
 // Defining Grids
@@ -198,23 +197,25 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   GridLeb2.genGrid();
   TwoDGrid G2(fileIO.get(),molecule.get(),basisset.get(),hartreeFock.get(),&Rad,&GridLeb2);
 // Integrate and Return a Nbase by Nbase Matrix of the Overlap numerically integrated
+
+
    G2.genGrid();
-//  G2.makeWAtoms();
+//   G2.printGrid();
+
   RealMatrix * Integral3D;
 //  Integral3D=G2.integrateO();
-//  Integral3D=G2.integrateAtoms();
+   Integral3D=G2.integrateAtoms();
   densityNumatr=G2.integrateDensity();
   std::cout.precision(10);
   cout << "LDA with Numeric Density = " << densityNumatr << endl;
-//  cout << "Analitic : Overlap" << endl;
-//  cout << (*aointegrals->overlap_)  << endl;
-//  cout << "Numeric : Overlap" << endl;
-//  cout << (*Integral3D)  << endl;
-//  hartreeFock->formVXC(Integral3D);
-//  cout << "Numeric - Analytic: Overlap" << endl;
-//  cout << ((*Integral3D)-(*aointegrals->overlap_))  << endl;
 
-
+  cout << "Analitic : Overlap" << endl;
+  cout << (*aointegrals->overlap_)  << endl;
+  cout << "Numeric : Overlap" << endl;
+  cout << (*Integral3D)  << endl;
+  hartreeFock->formVXC(Integral3D);
+  cout << "Numeric - Analytic: Overlap" << endl;
+  cout << ((*Integral3D)-(*aointegrals->overlap_))  << endl;
 
 /*
    sph3GP ptSPH;

@@ -139,6 +139,7 @@ void OneDGrid::printGrid(){
 
   //  Integration over batches : Overlap (numerical)
 //     double fact = (Gs_->weights()[j])*(Gr_->weights()[i])*(std::pow(Gr_->gridPts()[i],2.0));
+//     cout << " W= " << fact << endl;
      ConstRealMap fBuff(Buff,n1,n2); 
      RealMap Sout(Sum,n1,n2); 
      Sout += fBuff*fact;  
@@ -210,7 +211,7 @@ void OneDGrid::printGrid(){
     int    nBase = basisSet_->nBasis();
     int    Ngridpts = (Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms());
     double fact;
-    sph3GP ptSPH;
+////    sph3GP ptSPH;
     cartGP ptCar;
     RealMatrix *Integral = new RealMatrix(nBase,nBase);  ///< (NBase,Nbase) Integral ove Grid Point
     std::cout <<" --- Numerical Quadrature ---- " <<std::endl;
@@ -234,7 +235,8 @@ void OneDGrid::printGrid(){
           pointProd = basisSet_->basisProdEval(basisSet_->shells(s1),basisSet_->shells(s2),&ptCar);
           SumInt=this->Buffintegrate(SumInt,pointProd,n1,n2,getweightsGrid(ipts));
         }
-      Integral->block(bf1_s,bf2_s,n1,n2) = 4*math.pi*BlockInt;
+///    Check weight and 4*pi factor (cartesian???)
+      Integral->block(bf1_s,bf2_s,n1,n2) = (4.0*math.pi*BlockInt);
       delete [] SumInt;
       }
     }
@@ -244,31 +246,29 @@ void OneDGrid::printGrid(){
  
 }  //
 
-  double TwoDGrid::integrateDensity(){
-  // Integrate a test function for a one dimensional grid radial part
-   double sum = 0.0;
+double TwoDGrid::integrateDensity(){
+//  Build the density at each Grid Points end 
+//  return the LDA XC 
    int    nBase = basisSet_->nBasis();
-   auto NOcc = this->singleSlater_->nOccA();
    int    Ngridpts = (Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms());
-   double fact;
-//   double Slater = 2.0/3.0;
-   double Cx = -(3.0/4.0)*(std::pow((3.0/math.pi),(1.0/3.0)));
-//   double Cx = -(9.0/8.0)*Slater*(std::pow((3.0/(8.0*math.pi)),(1.0/3.0)));
+   double sum = 0.0;
+   double Cx = -(3.0/4.0)*(std::pow((3.0/math.pi),(1.0/3.0)));   //TF LDA Prefactor
    double val;
    double *pointProd; 
-   sph3GP ptSPH;
+   double rhor;
    cartGP ptCar;
    RealMatrix *OveratR = new RealMatrix(nBase,nBase);  ///< (NBase,Nbase) Integral ove Grid Point
-   (*this->singleSlater_->vXCA()).setZero(); 
    std::cout <<" --- Numerical Quadrature ---- " <<std::endl;
    std::cout << "Total Number of grid points = "<< Ngridpts  <<std::endl;
+// Loop Over Grid Points
    for(int ipts = 0; ipts < Ngridpts; ipts++){
      ptCar = this->gridPtCart(ipts);
-//     (*OveratR).setZero();
-   double rhor = 0.0;
+     rhor = 0.0;
+//   Evaluate the density at each grid points (rhor)
+//   Loops over shells
      for(auto s1=0l, s12=0l; s1 < basisSet_->nShell(); s1++){
-       int bf1_s = basisSet_->mapSh2Bf(s1);
-       int n1    = basisSet_->shells(s1).size();
+        int bf1_s = basisSet_->mapSh2Bf(s1);
+        int n1    = basisSet_->shells(s1).size();
         for(int s2=0; s2 <= s1; s2++, s12++){
           int bf2_s   = basisSet_->mapSh2Bf(s2);
           int n2      = basisSet_->shells(s2).size();
@@ -281,22 +281,20 @@ void OneDGrid::printGrid(){
           OveratR->block(bf1_s,bf2_s,n1,n2) = fBuff;
           }
        }
-
        (*OveratR) = OveratR->selfadjointView<Lower>(); 
+//     Ask David what is better
+//     rhor = ((*OveratR)*(this->singleSlater_->densityA()->conjugate())).trace();
+       rhor = ((*OveratR).frobInner(this->singleSlater_->densityA()->conjugate()));
+//     Grid points weights
        val = 4.0*math.pi*getweightsGrid(ipts);
-//       (*this->singleSlater_->vXCA()) += val*(*OveratR);
-//        Ask David what is better
-//         rhor = ((*OveratR)*(this->singleSlater_->densityA()->conjugate())).trace();
-         rhor = ((*OveratR).frobInner(this->singleSlater_->densityA()->conjugate()));
-//       Un comment to get the Numeber of Electron
-//         sum  +=  val*rhor;
-//       Slater LDA        
-          sum  +=  val*(std::pow(rhor,(4.0/3.0)));
-         
+//     Slater LDA        
+       sum  +=  val*(std::pow(rhor,(4.0/3.0)));
+//     Uncomment to get the Number of Electron
+//     sum  +=  val*rhor;
     }
-        return Cx*sum;
-
-  }  //End
+    return Cx*sum;
+  
+}  //End
 
   double TwoDGrid::integrate(){
    double sum = 0.0;
@@ -354,83 +352,118 @@ double TwoDGrid::voronoii( double mu){
        return p;
 };
 
-void TwoDGrid::makeWAtoms(){
-     cout << "nAtoms= "<<this->molecule_->nAtoms() << endl;
-     cartGP rj;
-     cartGP ri;
-     sph3GP ptSPH;
-     cartGP ptCar;
-     double muij;
-     int igrid = 0;
-     double norm;     
-     int    Ngridr = Gr_->npts();
-     int    NLeb   = Gs_->npts();
-     for(int i = 0; i < Ngridr; i++)
-     for(int j = 0; j < NLeb; j++){
-       ptSPH = this->gridPt(i,j);
-       bg::transform(ptSPH,ptCar);
-       norm = 0.0;
-//     cout << "AP:Interatomic Distance Matrix (bohr)"<<endl;
-//     prettyPrint(this->fileio_->out,*(this->molecule_->rIJ()),"Interatomic Distance Matrix (bohr)");
-       for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
-          (*this->weightsAtom_)(iAtm,igrid) = 1.0;
-          ri.set<0>((*this->molecule_->cart())(0,iAtm) );
-          ri.set<1>((*this->molecule_->cart())(1,iAtm) );
-          ri.set<2>((*this->molecule_->cart())(2,iAtm) );
-       for(auto jAtm = 0; jAtm < this->molecule_->nAtoms(); jAtm++){
-            if (jAtm != iAtm){
-            rj.set<0>((*this->molecule_->cart())(0,jAtm) );
-            rj.set<1>((*this->molecule_->cart())(1,jAtm) );
-            rj.set<2>((*this->molecule_->cart())(2,jAtm) );
-//        cout << "IAtI= " << iAtm << " IAtJ= "<< jAtm << " Interatomic (bohr) = " <<(*this->molecule_->rIJ())(iAtm,jAtm) <<endl;
-            muij = (boost::geometry::distance(ptCar,ri) - boost::geometry::distance(ptCar,rj))/(*this->molecule_->rIJ())(iAtm,jAtm) ;
-            (*this->weightsAtom_)(iAtm,igrid) *= 0.5*(1.0-voronoii(voronoii(voronoii(muij))));
-//              cout << "mu " << muij  <<" ri "<< boost::geometry::distance(ptCar,ri) << " rj " << boost::geometry::distance(ptCar,rj) << " Rij " << (*this->molecule_->rIJ())(iAtm,jAtm) << "iAtom " << iAtm << "jAtom " << jAtm << endl;
-//            cout << "{" << muij << ", " << (*this->weightsAtom_)(0,igrid) << "}, "<<endl; 
-             }
-           }
-          norm += (*this->weightsAtom_)(iAtm,igrid); 
-          }
-//          (*this->weightsAtom_)(0,igrid) = (*this->weightsAtom_)(0,igrid) / norm;
-//          (*this->weightsAtom_)(1,igrid) = (*this->weightsAtom_)(1,igrid) / norm;
-//          cout << (*this->weightsAtom_)(1,igrid)+(*this->weightsAtom_)(0,igrid) <<endl;
-//          ri.set<0>((*this->molecule_->cart())(0,0) );
-//          ri.set<1>((*this->molecule_->cart())(1,0) );
-//          ri.set<2>((*this->molecule_->cart())(2,0) );
-          cout << "{" <<(boost::geometry::distance(ptCar,ri)) << ", " << (*this->weightsAtom_)(0,igrid) << "}, "<<endl; 
-       igrid ++;
-       }
+double TwoDGrid::step_fun( double mu){
+       double p = 0.0;
+       if (mu < 0 ){p = 1.0;}
+       return p;
 };
 
-void TwoDGrid::printGrid(){
-  for(int i = 0; i < Gr_->npts(); i++){
-    for(int j = 0; j < Gs_->npts(); j++){
-      cout << "{" << Gr_->gridPts()[i] << ", "<<bg::get<1>(Gs_->grid2GPts()[j])<<", " <<bg::get<0>(Gs_->grid2GPts()[j]) <<"}, "<< endl;
-       }
-    }
-  };
+
+double TwoDGrid::BeckeW(cartGP GridPt, int iAtm){
+//     Generate Becke Weights according to the partition schems in
+//     (J. Chem. Phys., 88 (4),2457 (1988)) using Voronoii Fuzzi Cells
+//     Note these Weights have to be normailzed (see NormBeckeW) 
+       int nAtom = this->molecule_->nAtoms();
+       double WW = 1.0;
+       double muij;   /// elliptical coordinate (ri -rj / Rij)
+       cartGP rj;  ///< Cartisian position of Atom j
+       cartGP ri;  ///< Cartisian position of Atom i
+       ri.set<0>((*this->molecule_->cart())(0,iAtm) );
+       ri.set<1>((*this->molecule_->cart())(1,iAtm) );
+       ri.set<2>((*this->molecule_->cart())(2,iAtm) );
+       for(auto jAtm = 0; jAtm < nAtom; jAtm++){
+         if (jAtm != iAtm){
+           muij = 0.0;
+//       Vector rj (Atoms (j.ne.i) position)
+           rj.set<0>((*this->molecule_->cart())(0,jAtm));
+           rj.set<1>((*this->molecule_->cart())(1,jAtm));
+           rj.set<2>((*this->molecule_->cart())(2,jAtm));
+//       Coordinate of the Grid point in elleptical 
+           muij = (boost::geometry::distance(GridPt,ri) - boost::geometry::distance(GridPt,rj))/(*this->molecule_->rIJ())(iAtm,jAtm) ;
+//       Do the product over all atoms i .ne. j
+           WW *= 0.5*(1.0-voronoii(voronoii(voronoii(muij))));
+           }
+         }
+       return WW;
+};
+
+double TwoDGrid::NormBeckeW(cartGP GridPt){
+//     Normalization of Becke Weights
+       int nAtom = this->molecule_->nAtoms();
+       double norm = 0.0;
+       for(auto iAtm = 0; iAtm < nAtom; iAtm++){
+         norm += BeckeW(GridPt,iAtm);
+         }
+       return norm ;
+};
 
 void TwoDGrid::genGrid(){
-  int ipts = 0;
-  sph3GP ptSPH;
-  cartGP ptCar;
-  for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++) {
-    for(int i = 0; i < Gr_->npts(); i++){
-    for(int j = 0; j < Gs_->npts(); j++){
-      ptSPH = this->gridPt(i,j);
-      bg::transform(ptSPH,ptCar);
-      (*this->GridCar_)(ipts,0) = (bg::get<0>(ptCar) + (*this->molecule_->cart())(0,iAtm) );
-      (*this->GridCar_)(ipts,1) = (bg::get<1>(ptCar) + (*this->molecule_->cart())(1,iAtm) );
-      (*this->GridCar_)(ipts,2) = (bg::get<2>(ptCar) + (*this->molecule_->cart())(2,iAtm) );
-      this->weightsGrid_[ipts] = (Gs_->weights()[j])*(Gr_->weights()[i])*(std::pow(Gr_->gridPts()[i],2.0));
-//      cout << "{" << (*this->GridCar_)(ipts,0) << ", "<< (*this->GridCar_)(ipts,1) <<", " <<(*this->GridCar_)(ipts,2) <<"}, "<< endl;
-      ipts ++;
-       }
-    }
-}
-  };
+//   Given a general origin center 3D grid (r_p,Omega_p), it will
+//   generate nAtoms 3D grid center on the each atom position
+//   by transforming the grid in spherical into cartesian first and
+//   adding sequentially each atom cartian coordinates
+//   in the end we will have NAtoms time 3D grids (NRad times N Ang)
+//   all the grid points cartesian components will be collected in the
+//   GridCar_(NtotGrid,3)
+//
+//   This routine also will build the final weight for each grip points
+//   by multiplying the actual gridweight (due to the single center integration scheme)
+//   by the Becke (J. Chem. Phys., 88 (4),2457 (1988)) partition scheme for the Atomic
+//   weights (based on Voronoii Cells). The final weights will be storered into 
+//   this->weightsGrid_
 
-// Specific Grid Functions Declaration
+
+     int nAtom = this->molecule_->nAtoms();
+     sph3GP ptSPH; ///< Temp spherical point to store the 3D Grid point (not yet translated over atoms centers)
+     cartGP ptCarGrid; /// Several Temp Cartesian Points to perform the translation, cell wieghts funtion
+     int ipts  = 0;
+     int ipts2 = 0;
+     double rad;    /// distance of the each point from the atom over 
+     int    Ngridr = Gr_->npts();
+     int    NLeb   = Gs_->npts();
+     double Cartx = 0.0;
+     double Carty = 0.0;
+     double Cartz = 0.0;
+//   Loop over 3D grid points
+     for(int i = 0; i < Ngridr; i++)
+     for(int j = 0; j < NLeb; j++){
+       double norm = 0;    ///< Voronoi weights normalization factor 
+       ptSPH = this->gridPt(i,j);
+       bg::transform(ptSPH,ptCarGrid);
+      ///Loop over NAtoms
+      for(auto iAtm = 0; iAtm < nAtom; iAtm++){
+//     Center each 3D over each Atom centers
+       Cartx = (bg::get<0>(ptCarGrid) + (*this->molecule_->cart())(0,iAtm) );
+       Carty = (bg::get<1>(ptCarGrid) + (*this->molecule_->cart())(1,iAtm) );
+       Cartz = (bg::get<2>(ptCarGrid) + (*this->molecule_->cart())(2,iAtm) );
+       this->SetgridPtCart(ipts,Cartx, Carty, Cartz);
+//     store all in the GridCar_(NtotGrid,3) thanks to this function
+//     Start to Evaluate WA (over each center/atom)       
+//     Final Weight W_Ang * W_Rad * W_Atom * _ r^2 :
+//     W_Atom = BeckeW/NormBeckeW for each Atom i given a grid poin (ipts) 
+       this->weightsGrid_[ipts] = (Gs_->weights()[j])
+                                * (Gr_->weights()[i])
+                                * (std::pow(Gr_->gridPts()[i],2.0))
+                                * ((this->BeckeW((this->gridPtCart(ipts)),iAtm))/(this->NormBeckeW(gridPtCart(ipts))) );
+       ipts ++;
+      }
+    }
+}; //End
+
+
+void TwoDGrid::printGrid(){
+//  Call to print Grid point to be poletted (Mathematica Format)
+    int    Ngridpts = (Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms());
+    cartGP ptCar;
+    for(int ipts = 0; ipts < Ngridpts; ipts++){
+       ptCar = this->gridPtCart(ipts);
+       cout << "{" <<bg::get<0>(ptCar) << ", "<<bg::get<1>(ptCar)<<", " <<bg::get<2>(ptCar) <<"}, "<< endl;
+      }
+
+}; // End
+
+
+// Specific Grid Functions Declaration //
 
 // Function Gauss-Chebyshev 1st kind 
 void GaussChebyshev1stGrid::genGrid(){
@@ -474,7 +507,9 @@ void GaussChebyshev1stGridInf::genGrid(){
   
 void GaussChebyshev1stGridInf::transformPts(){
 //   Hydrogen
-   double ralpha= 0.529;
+//   double ralpha= 0.529;
+//   Nitrogen
+     double ralpha= 0.65/2.0;
 //   Oxygen
 //     double ralpha= 0.60/2.0;
 //   Lithium

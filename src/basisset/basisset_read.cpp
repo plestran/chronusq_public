@@ -359,34 +359,18 @@ double * BasisSet::basisEval(libint2::Shell &liShell, sph3GP *ptSph){
 
 template<>
 double * BasisSet::basisProdEval(libint2::Shell s1, libint2::Shell s2, cartGP *pt){
+          
+//  cout << "{" <<bg::get<0>(pt) << ", "<<bg::get<1>(pt)<<", " <<bg::get<2>(pt) <<"}, "<< endl;
   double *fEVal = new double[s1.size()*s2.size()];
   double *s1Eval = basisEval(s1,pt);
   double *s2Eval = basisEval(s2,pt);
 
-//  double Cx = -(3.0/4.0)*(std::pow((3.0/math.pi),(1.0/3.0)));
-//  cout << "Fact " << fact << endl;
   double   temp;
   double   temp2;
   double   zero = 0.0;
   for(auto i = 0, ij = 0; i < s1.size(); i++)
   for(auto j = 0; j < s2.size(); j++, ij++){
     fEVal[ij] = s1Eval[i]*s2Eval[j];
-/*
-    temp      = s1Eval[i]*s2Eval[j];
-    if (temp < zero)
-      {
-      temp = -temp;
-//      cout      << "base neg "  << " " << -temp <<endl;
-      temp2     = -Cx*(std::pow(temp,4.0/3.0));
-//      cout      << "final " << temp2 <<endl;
-      }else{
-//      cout      << "base pos "  << " " << temp <<endl;
-      temp2     = Cx*(std::pow(temp,4.0/3.0));
-//      cout      << "final pos " << temp2 <<endl;
-      }
-    fEVal[ij] = temp2;
-//    cout << "Print Inside =" << fEVal[ij] <<"  " << temp <<endl;
-*/
   }
   delete [] s1Eval;
   delete [] s2Eval;

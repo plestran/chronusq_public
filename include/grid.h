@@ -94,8 +94,11 @@ class TwoDGrid : public Grid {
             FileIO *    fileio_;   ///< Smart pointer to fileIO
 //            SingleSlater<T> *  singleSlater_;  ///<Smart Pointer to Single Slater
             SingleSlater<double> *  singleSlater_;
-            std::unique_ptr<RealMatrix> GridCar_;
-            std::unique_ptr<RealMatrix> weightsAtom_; ///< Atomic weight
+//            std::unique_ptr<RealMatrix> GridCar_;
+            double *  GridCarX_;
+            double *  GridCarY_;
+            double *  GridCarZ_;
+//            std::unique_ptr<RealMatrix> weightsAtom_; ///< Atomic weight
             double   *   weightsGrid_; ///< weight(NGrids*NAtoms)
             
 /*            double **gEval_;
@@ -113,9 +116,13 @@ class TwoDGrid : public Grid {
         this->fileio_ = fileio;
         this->molecule_ = molecule;
         this->singleSlater_ = singleSlater;
-        this->weightsAtom_   =std::unique_ptr<RealMatrix>(new RealMatrix(this->molecule_->nAtoms(),Gr_->npts()*Gs_->npts()));
-        this->GridCar_   =std::unique_ptr<RealMatrix>(new RealMatrix(this->molecule_->nAtoms()*Gr_->npts()*Gs_->npts(),3));
-        this->weightsGrid_  = new double [Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms()];
+//        this->weightsAtom_   =std::unique_ptr<RealMatrix>(new RealMatrix(this->molecule_->nAtoms(),Gr_->npts()*Gs_->npts()));
+//        this->GridCar_   =std::unique_ptr<RealMatrix>(new RealMatrix(this->molecule_->nAtoms()*Gr_->npts()*Gs_->npts(),3));
+         this->GridCarX_ = new double [Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms()]; ;
+         this->GridCarY_ = new double [Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms()]; ;
+         this->GridCarZ_ = new double [Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms()]; ;
+//         this->weightsGrid_  = new double [Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms()];
+         this->weightsGrid_  = new double [Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms()*this->molecule_->nAtoms()];
 /*
 ////        this->gEval_  = new double *[Gr_->npts()*Gs_->npts()];
 //        inline double * getfEval(int i,int j, int width){ return this->fEval_[i*width +j];};
@@ -135,25 +142,42 @@ class TwoDGrid : public Grid {
       void printGrid();
       void genGrid();
       void transformPts();
-      void makeWAtoms();
+      double BeckeW(cartGP GridPt, int IAtm);
+      double NormBeckeW(cartGP GridPt);
       double voronoii(double mu);
+      double step_fun(double mu);
       inline double * weightsGrid(){ return this->weightsGrid_;};
       inline double getweightsGrid(int i){ return this->weightsGrid_[i];};
 //      inline double * weightsAtom(){ return this->weightsAtom_;};
 //      inline double   getweightsAtom(int i){ return this->weightsAtom_[i];};
-      inline RealMatrix* weightsAtom() {return this->weightsAtom_.get();}
+//      inline RealMatrix* weightsAtom() {return this->weightsAtom_.get();}
 ////      double  * ftestVal(cartGP *pt);
       inline sph3GP gridPt(int i, int j){
          sph3GP x(bg::get<0>(Gs_->grid2GPts(j)),bg::get<1>(Gs_->grid2GPts(j)),Gr_->gridPts(i));
         return x;
       };
       inline cartGP gridPtCart(int ipts){
-         cartGP x(((*this->GridCar_)(ipts,0)),((*this->GridCar_)(ipts,1)),((*this->GridCar_)(ipts,2)));
-        return x;
+         cartGP pt ( this->GridCarX_[ipts],this->GridCarY_[ipts],this->GridCarZ_[ipts]);
+        return pt;
       };
+      inline void SetgridPtCart(int ipts, double x, double y, double z){
+         this->GridCarX_[ipts] = x;
+         this->GridCarY_[ipts] = y;
+         this->GridCarZ_[ipts] = z;
+      };
+///      inline void  SetgridPtCart(int ipts, int icart, double val){
+///         (*this->GridCar_)(ipts,icart) = val;
+///         };
       ~TwoDGrid(){
       delete [] this->weightsGrid_;
-      cout << "Deliting TwoDGrid"; 
+      cout << "Deliting weightsGrid" <<endl; 
+      delete [] this->GridCarX_;
+      cout << "Deliting GridCarX"<<endl; 
+      delete [] this->GridCarY_;
+      cout << "Deliting GridCarY"<<endl; 
+      delete [] this->GridCarZ_;
+      cout << "Deliting GridCarZ"<<endl; 
+      cout << "Deliting TWOD GRID OK "<<endl; 
      };
 //        inline void gengEval(int n1, int n2){
 //        for (int i=0;i < Gr_->npts()*Gs_->npts(); i++) {
