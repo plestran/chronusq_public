@@ -23,30 +23,27 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
-#include <sdresponse.h>
-using ChronusQ::SDResponse;
+#include <quasinewton.h>
 
-void SDResponse::formTransDipole(){
-   RealMatrix TAOA(this->nBasis_,this->nBasis_);
-   RealMatrix TAOB(this->nBasis_,this->nBasis_);
-   auto NBSq = this->nBasis_*this->nBasis_;
-   for(auto iSt = 0; iSt < this->nSek_; iSt++){
-     RealVecMap TMOV(this->transDen_->data()+iSt*this->nSingleDim_,this->nSingleDim_);
-     this->formAOTDen(TMOV,TAOA,TAOB);
-     for(auto iXYZ = 0, iOff = 0; iXYZ < 3; iXYZ++, iOff += NBSq){
-       RealMap dipole(&this->elecDipole_->storage()[iOff],this->nBasis_,this->nBasis_);
-       (*this->transDipole_)(0,iSt+1,iXYZ) = (TAOA+TAOB).frobInner(dipole);
-     }
-   }
-} //formTransDipole
+namespace ChronusQ {
+  template<>
+  void QuasiNewton<dcomplex>::setupRestart(){
+    this->allocGuess();
+    ComplexCMMap UR(this->URMem,this->N_,this->nGuess_);
+    (*this->guessR_) = UR;
+    if(this->symmetrizedTrial_){
+      ComplexCMMap UL(this->ULMem,this->N_,this->nGuess_);
+      (*this->guessL_) = UL;
+    } 
+    // Zero out scratch space
+    std::memset(this->SCR,0.0,this->LenScr*sizeof(dcomplex));
 
-void SDResponse::formOscStrength(){
-  this->oscStrength_->setZero();
-  for(auto iSt  = 0; iSt  < this->nSek_; iSt++ )
-  for(auto iXYZ = 0; iXYZ < 3;           iXYZ++){
-    (*this->oscStrength_)(0,iSt+1) +=
-      (2.0/3.0)*(*this->omega_)(iSt)*
-      std::pow((*this->transDipole_)(0,iSt+1,iXYZ),2.0);
-  }
-} //formOscStrength
+    // Ensure that the the new guess vectors are orthonormal
+    this->Orth(*this->guessR_);
+    if(this->symmetrizedTrial_) this->Orth(*this->guessL_);  
 
+    /** DO NOT RESET doRestart_ here! next iteration needs to know that we
+        restarted **/
+  } // setupRestart
+
+}; // namespace ChronusQ

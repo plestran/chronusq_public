@@ -28,51 +28,9 @@
 using ChronusQ::SDResponse;
 using ChronusQ::QuasiNewton;
 
-void SDResponse::formAOTDen(const RealVecMap &TMOV, RealMatrix &TAOA, RealMatrix &TAOB){
-  bool doVOOV = (this->iMeth_ == CIS || this->iMeth_ == RPA || this->iMeth_ == STAB); 
-  bool doVVOO = (this->iMeth_ == PPRPA || this->iMeth_ == PPATDA || this->iMeth_ == PPCTDA);
-
-  auto NTCSxNBASIS = this->nTCS_ * this->nBasis_;
-  RealMatrix TMOA,TMOB;
-  TMOA = RealMatrix::Zero(NTCSxNBASIS,NTCSxNBASIS);
-  if(!doVVOO && this->Ref_ != SingleSlater<double>::TCS) 
-    TMOB = RealMatrix::Zero(NTCSxNBASIS,NTCSxNBASIS);
-
-  if(doVOOV) this->placeVOOV(TMOV,TMOA,TMOB);
-  else if(doVVOO) this->placeVVOO(TMOV,TMOA);
-
-  TAOA = (*this->singleSlater_->moA()) * TMOA * this->singleSlater_->moA()->adjoint();
-  if(!doVVOO && this->Ref_ != SingleSlater<double>::TCS){
-    if(this->Ref_ == SingleSlater<double>::RHF)
-      TAOB = (*this->singleSlater_->moA()) * TMOB * this->singleSlater_->moA()->adjoint();
-    else
-      TAOB = (*this->singleSlater_->moB()) * TMOB * this->singleSlater_->moB()->adjoint();
-  }
-} //formAOTDen
-
-void SDResponse::formMOTDen(RealVecMap &TMOV, const RealMatrix &TAOA, const RealMatrix &TAOB){
-  bool doVOOV = (this->iMeth_ == CIS || this->iMeth_ == RPA || this->iMeth_ == STAB); 
-  bool doVVOO = (this->iMeth_ == PPRPA || this->iMeth_ == PPATDA || this->iMeth_ == PPCTDA);
-  auto NTCSxNBASIS = this->nTCS_ * this->nBasis_;
-
-  RealMatrix TMOA,TMOB;
-  TMOA = RealMatrix::Zero(NTCSxNBASIS,NTCSxNBASIS);
-  if(!doVVOO && this->Ref_ != SingleSlater<double>::TCS) 
-    TMOB = RealMatrix::Zero(NTCSxNBASIS,NTCSxNBASIS);
-
-  TMOA = this->singleSlater_->moA()->adjoint() * TAOA * (*this->singleSlater_->moA());
-  if(!doVVOO && this->Ref_ != SingleSlater<double>::TCS) {
-    if(this->Ref_ == SingleSlater<double>::RHF)
-      TMOB = this->singleSlater_->moA()->adjoint() * TAOB * (*this->singleSlater_->moA());
-    else 
-      TMOB = this->singleSlater_->moB()->adjoint() * TAOB * (*this->singleSlater_->moB());
-  }
-  if(doVOOV) this->retrvVOOV(TMOV,TMOA,TMOB);
-  else if(doVVOO) this->retrvVVOO(TMOV,TMOA);
-  
-}// formMOTDen
-
-void SDResponse::placeVOOV(const RealVecMap &TMOV, RealMatrix &TMOA, RealMatrix &TMOB){
+namespace ChronusQ {
+template<>
+void SDResponse<double>::placeVOOV(const RealVecMap &TMOV, RealMatrix &TMOA, RealMatrix &TMOB){
   int iOff = this->nOAVA_ + this->nOBVB_;
   if(this->Ref_ == SingleSlater<double>::TCS) iOff = this->nOV_;
 
@@ -96,7 +54,8 @@ void SDResponse::placeVOOV(const RealVecMap &TMOV, RealMatrix &TMOA, RealMatrix 
   }
 } //placeVOOV
 
-void SDResponse::placeVVOO(const RealVecMap &TMOV, RealMatrix &TMO){
+template<>
+void SDResponse<double>::placeVVOO(const RealVecMap &TMOV, RealMatrix &TMO){
   bool doX = ( (this->iMeth_ == PPATDA) || (this->iMeth_ == PPRPA) );
   bool doY = ( (this->iMeth_ == PPCTDA) || (this->iMeth_ == PPRPA) );
 
@@ -166,7 +125,8 @@ void SDResponse::placeVVOO(const RealVecMap &TMOV, RealMatrix &TMO){
   }
 } // placeVVOO
 
-void SDResponse::retrvVOOV(RealVecMap &TMOV, const RealMatrix &TMOA, const RealMatrix &TMOB){
+template<>
+void SDResponse<double>::retrvVOOV(RealVecMap &TMOV, const RealMatrix &TMOA, const RealMatrix &TMOB){
   int iOff = this->nOAVA_ + this->nOBVB_;
   if(this->Ref_ == SingleSlater<double>::TCS) iOff = this->nOV_;
 
@@ -190,7 +150,8 @@ void SDResponse::retrvVOOV(RealVecMap &TMOV, const RealMatrix &TMOA, const RealM
   }
 } // retrvVOOV
 
-void SDResponse::retrvVVOO(RealVecMap &TMOV, const RealMatrix &TMO){
+template<>
+void SDResponse<double>::retrvVVOO(RealVecMap &TMOV, const RealMatrix &TMO){
   bool doX = ( (this->iMeth_ == PPATDA) || (this->iMeth_ == PPRPA) );
   bool doY = ( (this->iMeth_ == PPCTDA) || (this->iMeth_ == PPRPA) );
 
@@ -258,7 +219,54 @@ void SDResponse::retrvVVOO(RealVecMap &TMOV, const RealMatrix &TMO){
   }
 } //retrvVVOO
 
-void SDResponse::initRMu(){
+template<>
+void SDResponse<double>::formAOTDen(const RealVecMap &TMOV, RealMatrix &TAOA, RealMatrix &TAOB){
+  bool doVOOV = (this->iMeth_ == CIS || this->iMeth_ == RPA || this->iMeth_ == STAB); 
+  bool doVVOO = (this->iMeth_ == PPRPA || this->iMeth_ == PPATDA || this->iMeth_ == PPCTDA);
+
+  auto NTCSxNBASIS = this->nTCS_ * this->nBasis_;
+  RealMatrix TMOA,TMOB;
+  TMOA = RealMatrix::Zero(NTCSxNBASIS,NTCSxNBASIS);
+  if(!doVVOO && this->Ref_ != SingleSlater<double>::TCS) 
+    TMOB = RealMatrix::Zero(NTCSxNBASIS,NTCSxNBASIS);
+
+  if(doVOOV) this->placeVOOV(TMOV,TMOA,TMOB);
+  else if(doVVOO) this->placeVVOO(TMOV,TMOA);
+
+  TAOA = (*this->singleSlater_->moA()) * TMOA * this->singleSlater_->moA()->adjoint();
+  if(!doVVOO && this->Ref_ != SingleSlater<double>::TCS){
+    if(this->Ref_ == SingleSlater<double>::RHF)
+      TAOB = (*this->singleSlater_->moA()) * TMOB * this->singleSlater_->moA()->adjoint();
+    else
+      TAOB = (*this->singleSlater_->moB()) * TMOB * this->singleSlater_->moB()->adjoint();
+  }
+} //formAOTDen
+
+template<>
+void SDResponse<double>::formMOTDen(RealVecMap &TMOV, const RealMatrix &TAOA, const RealMatrix &TAOB){
+  bool doVOOV = (this->iMeth_ == CIS || this->iMeth_ == RPA || this->iMeth_ == STAB); 
+  bool doVVOO = (this->iMeth_ == PPRPA || this->iMeth_ == PPATDA || this->iMeth_ == PPCTDA);
+  auto NTCSxNBASIS = this->nTCS_ * this->nBasis_;
+
+  RealMatrix TMOA,TMOB;
+  TMOA = RealMatrix::Zero(NTCSxNBASIS,NTCSxNBASIS);
+  if(!doVVOO && this->Ref_ != SingleSlater<double>::TCS) 
+    TMOB = RealMatrix::Zero(NTCSxNBASIS,NTCSxNBASIS);
+
+  TMOA = this->singleSlater_->moA()->adjoint() * TAOA * (*this->singleSlater_->moA());
+  if(!doVVOO && this->Ref_ != SingleSlater<double>::TCS) {
+    if(this->Ref_ == SingleSlater<double>::RHF)
+      TMOB = this->singleSlater_->moA()->adjoint() * TAOB * (*this->singleSlater_->moA());
+    else 
+      TMOB = this->singleSlater_->moB()->adjoint() * TAOB * (*this->singleSlater_->moB());
+  }
+  if(doVOOV) this->retrvVOOV(TMOV,TMOA,TMOB);
+  else if(doVVOO) this->retrvVVOO(TMOV,TMOA);
+  
+}// formMOTDen
+
+template<>
+void SDResponse<double>::initRMu(){
   // RMu = [ e(HOMO) + e(LUMO) ] / 2
   if(this->Ref_ == SingleSlater<double>::TCS){
     this->rMu_ = ( (*this->singleSlater_->epsA())(this->nO_-1) + 
@@ -275,7 +283,8 @@ void SDResponse::initRMu(){
   }
 } // initRMu
 
-void SDResponse::scaleDagPPRPA(bool inplace, RealVecMap &T, RealVecMap &IX, RealVecMap *AX){
+template<>
+void SDResponse<double>::scaleDagPPRPA(bool inplace, RealVecMap &T, RealVecMap &IX, RealVecMap *AX){
   // inplace triggers whether or not AX is populated (or touched for that matter)
 /*
   bool doX = ( (this->iMeth_ == PPATDA) || (this->iMeth_ == PPRPA) );
@@ -415,7 +424,8 @@ void SDResponse::scaleDagPPRPA(bool inplace, RealVecMap &T, RealVecMap &IX, Real
   else        (*AX) = IX + T.cwiseProduct(*this->rmDiag_);
 } // scaleDagPPRPA
 
-void SDResponse::initMeth(){
+template<>
+void SDResponse<double>::initMeth(){
   if(this->nSek_ == 0) 
     CErr("Must set NSek before initializing a PSCF method",this->fileio_->out);
   if((this->iMeth_ == PPRPA || this->iMeth_ == PPATDA || this->iMeth_ == PPCTDA)
@@ -481,7 +491,8 @@ void SDResponse::initMeth(){
   }
 } // initMeth
 
-void SDResponse::checkValid(){
+template<>
+void SDResponse<double>::checkValid(){
   if(this->nSek_ == 0)
     CErr("Specification of zero desired roots is not acceptable",
          this->fileio_->out);
@@ -515,12 +526,14 @@ void SDResponse::checkValid(){
 } //checkValid
 
 
-void SDResponse::mpiSend(int toID,int tag) {
+template<>
+void SDResponse<double>::mpiSend(int toID,int tag) {
   //OOMPI_COMM_WORLD[toID].Send(this->nAtoms_,tag);
   //OOMPI_COMM_WORLD[toID].Send(this->index_,this->nAtoms_,tag);
   //this->cart_->mpiSend(toID,tag);
 }; //mpiSend
-void SDResponse::mpiRecv(int fromID,int tag) {
+template<>
+void SDResponse<double>::mpiRecv(int fromID,int tag) {
   //OOMPI_COMM_WORLD[fromID].Recv(this->nAtoms_,tag);
   //this->index_=new int[this->nAtoms_];
   //this->cart_ =new Matrix(3, this->nAtoms_, "Molecule");
@@ -528,7 +541,8 @@ void SDResponse::mpiRecv(int fromID,int tag) {
   //this->cart_->mpiRecv(fromID,tag);
 }; //mpiRecv
 
-void SDResponse::incorePPRPA(){
+template<>
+void SDResponse<double>::incorePPRPA(){
   enum{a,b,c,d,i,j,k,l,mu,nu,lam,sig};
   Tensor<double> LocMoAO(this->nBasis_,this->nOA_);
   Tensor<double> LocMoAV(this->nBasis_,this->nVA_);
@@ -1415,7 +1429,8 @@ void SDResponse::incorePPRPA(){
   cout << "Checking Full AX function A TDA (AB)... |AX| = " << RPAAXABMOTmp2.norm() << " |R| = " << (RPAAXMOAB - RPAAXABMOTmp2).norm() << endl;
 } //incorePPRPA
 
-void SDResponse::formRM(){
+template<>
+void SDResponse<double>::formRM(){
   // Get info from SCF and make Local copy of MO
   int nOA = this->singleSlater_->nOccA();
   int nVA = this->singleSlater_->nVirA();
@@ -1844,7 +1859,8 @@ void SDResponse::formRM(){
 */
 } //formRM
 
-RealMatrix SDResponse::formRM2(RealMatrix &XMO){
+template<>
+RealMatrix SDResponse<double>::formRM2(RealMatrix &XMO){
   RealMatrix AX(this->nSingleDim_,XMO.cols());
   RealMatrix X(this->nSingleDim_,1);
   RealMatrix XAAO(this->nBasis_,this->nBasis_);
@@ -1961,7 +1977,8 @@ RealMatrix SDResponse::formRM2(RealMatrix &XMO){
   return AX;
 } //formRM2
 
-void SDResponse::incoreCIS(){
+template<>
+void SDResponse<double>::incoreCIS(){
   RealMatrix A;
   if(this->Ref_ == SingleSlater<double>::TCS) A = RealMatrix(this->nOV_,this->nOV_);
   else A = RealMatrix(this->nOAVA_ + this->nOBVB_, this->nOAVA_ + this->nOBVB_);
@@ -2009,7 +2026,8 @@ void SDResponse::incoreCIS(){
 */
 
 }
-void SDResponse::incoreRPA(){
+template<>
+void SDResponse<double>::incoreRPA(){
   RealMatrix A,B,ABBA;
   if(this->Ref_ == SingleSlater<double>::TCS) {
     A = RealMatrix(this->nOV_,this->nOV_);
@@ -2058,15 +2076,29 @@ void SDResponse::incoreRPA(){
   ABBA.block(0,this->nOV_,this->nOV_,this->nOV_) = B;
   ABBA.block(this->nOV_,this->nOV_,this->nOV_,this->nOV_) = -A;
   Eigen::EigenSolver<RealMatrix> EA(ABBA);
+  cout << "LR EIG" << endl;
   cout << endl << EA.eigenvalues() << endl;
   RealMatrix AmB = A-B;
   RealMatrix ApB = A+B;
 
-  EA.compute(ApB);
-  cout << endl << EA.eigenvalues() << endl;
-  EA.compute(AmB);
-  cout << endl << EA.eigenvalues() << endl;
-  CErr();
+//EA.compute(ApB);
+//cout << endl << EA.eigenvalues() << endl;
+//EA.compute(AmB);
+//cout << endl << EA.eigenvalues() << endl;
+
+
+  
+  ABBA.block(0,0,this->nOV_,this->nOV_) = A;
+  ABBA.block(this->nOV_,0,this->nOV_,this->nOV_) = B;
+  ABBA.block(0,this->nOV_,this->nOV_,this->nOV_) = B;
+  ABBA.block(this->nOV_,this->nOV_,this->nOV_,this->nOV_) = A;
+    if(!this->haveDag_) this->getDiag();
+    RealCMMatrix Vec(2*this->nOV_,3);
+    VectorXd Eig(3);
+    RealCMMatrix ACM = ABBA;
+    QuasiNewton<double> davA(false,true,3,&ACM,this->rmDiag_.get(),&Vec,&Eig);
+    davA.run(cout);
+
 
 //RealMatrix Vec = ES.eigenvectors().col(0);
 //RealMatrix AX(this->nOV_,1);
@@ -2248,7 +2280,8 @@ void SDResponse::incoreRPA(){
 //  }
 //  
 //}
-void SDResponse::incorePPRPAnew(){
+template<>
+void SDResponse<double>::incorePPRPAnew(){
   RealMatrix A,B,C;
   RealMatrix AAA,BAA,CAA;
   RealMatrix AAB,BAB,CAB;
@@ -2316,11 +2349,15 @@ void SDResponse::incorePPRPAnew(){
     Eigen::SelfAdjointEigenSolver<RealMatrix> ES;
     ES.compute(A);
     Eigen::VectorXd EATDA = ES.eigenvalues().real();
+
+    double valATDA = EATDA(0);
     EATDA = -EATDA;
     std::sort(EATDA.data(),EATDA.data()+EATDA.size());
     EATDA = -EATDA;
+    VectorXd LowATDA = EATDA;
+    for(auto i = 0; i < LowATDA.size(); i++) LowATDA(i) = valATDA;
     cout << std::fixed << std::setprecision(12);
-    cout << EATDA << endl;
+    cout << EATDA-LowATDA << endl;
 
     if(!this->haveDag_) this->getDiag();
     RealCMMatrix TATDA = ES.eigenvectors().real();
@@ -2342,7 +2379,7 @@ void SDResponse::incorePPRPAnew(){
 */
    
     this->formRM4(TATDAMap,ATATDAMap,ATATDAMap);
-    prettyPrint(cout,A*TATDA - ATATDAMap,"DIFF");
+//  prettyPrint(cout,A*TATDA - ATATDAMap,"DIFF");
 /*
     if(!this->haveDag_) this->getDiag();
     RealCMMatrix Vec(this->nVV_SLT_,8);
@@ -2371,7 +2408,10 @@ void SDResponse::incorePPRPAnew(){
     ERPA = -ERPA;
     std::sort(ERPA.data(),ERPA.data()+ERPA.size());
     ERPA = -ERPA;
-    cout << endl << endl << ERPA << endl;
+    double valRPA = ERPA(this->nVV_SLT_-1);
+    VectorXd LowRPA = ERPA;
+    for(auto i = 0; i < LowRPA.size(); i++) LowRPA(i) = valRPA;
+    cout << endl << endl << ERPA-LowRPA << endl;
     
   } else {
     for(auto a = 0, ab = 0; a < this->nVA_; a++      )
@@ -2417,3 +2457,4 @@ void SDResponse::incorePPRPAnew(){
   }
   
 }
+} // namespace ChronusQ

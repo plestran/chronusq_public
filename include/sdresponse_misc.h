@@ -25,14 +25,14 @@
  */
 
 
-  void formAOTDen(const RealVecMap &, RealMatrix &, RealMatrix &);
-  void formMOTDen(RealVecMap &, const RealMatrix &, const RealMatrix &);
-  void placeVOOV(const RealVecMap &,RealMatrix &, RealMatrix&);
-  void placeVVOO(const RealVecMap &,RealMatrix &);
-  void retrvVOOV(RealVecMap &,const RealMatrix &,const RealMatrix&);
-  void retrvVVOO(RealVecMap &,const RealMatrix &);
+  void formAOTDen(const TVecMap &, TMatrix &, TMatrix &);
+  void formMOTDen(TVecMap &, const TMatrix &, const TMatrix &);
+  void placeVOOV(const TVecMap &,TMatrix &, TMatrix&);
+  void placeVVOO(const TVecMap &,TMatrix &);
+  void retrvVOOV(TVecMap &,const TMatrix &,const TMatrix&);
+  void retrvVVOO(TVecMap &,const TMatrix &);
   void initRMu();
-  void scaleDagPPRPA(bool,RealVecMap &,RealVecMap &,RealVecMap *AX=NULL); 
+  void scaleDagPPRPA(bool,TVecMap &,TVecMap &,TVecMap *AX=NULL); 
   void initMeth();
   void checkValid();
 
@@ -48,4 +48,4 @@
   void incoreCIS();
   void incoreRPA();
   void formRM();
-  RealMatrix formRM2(RealMatrix &XMO);
+  TMatrix formRM2(TMatrix &XMO);

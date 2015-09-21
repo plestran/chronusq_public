@@ -62,10 +62,12 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   auto dfBasisset         = std::unique_ptr<BasisSet>(new BasisSet());
   auto controls           = std::unique_ptr<Controls>(new Controls());
   auto aointegrals        = std::unique_ptr<AOIntegrals>(new AOIntegrals());
-  auto mointegrals        = std::unique_ptr<MOIntegrals<double>>(new MOIntegrals<double>());
+  auto mointegralsReal    = std::unique_ptr<MOIntegrals<double>>(new MOIntegrals<double>());
+  auto mointegralsComplex = std::unique_ptr<MOIntegrals<dcomplex>>(new MOIntegrals<dcomplex>());
   auto hartreeFockReal	  = std::unique_ptr<SingleSlater<double>>(  new SingleSlater<double>()  );
   auto hartreeFockComplex = std::unique_ptr<SingleSlater<dcomplex>>(new SingleSlater<dcomplex>());
-  auto sdResponse         = std::unique_ptr<SDResponse>(new SDResponse());
+  auto sdResponseReal     = std::unique_ptr<SDResponse<double>>(new SDResponse<double>());
+  auto sdResponseComplex  = std::unique_ptr<SDResponse<dcomplex>>(new SDResponse<dcomplex>());
   std::unique_ptr<FileIO> fileIO;
   std::unique_ptr<GauJob> gauJob;
 
@@ -127,8 +129,8 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
     hartreeFockReal->formFock();
     aointegrals->printTimings();
     hartreeFockReal->computeEnergy();
-    prettyPrint(cout,*(hartreeFockReal->densityA()),"DA");
-    prettyPrint(cout,*(hartreeFockReal->fockA()),"FA");
+//  prettyPrint(cout,*(hartreeFockReal->densityA()),"DA");
+//  prettyPrint(cout,*(hartreeFockReal->fockA()),"FA");
     if(controls->optWaveFunction)  hartreeFockReal->SCF();
     else fileIO->out << "**Skipping SCF Optimization**" << endl; 
     hartreeFockReal->computeMultipole();
@@ -136,27 +138,50 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
     hartreeFockComplex->formFock();
     aointegrals->printTimings();
     hartreeFockComplex->computeEnergy();
-    prettyPrintComplex(cout,*(hartreeFockComplex->densityA()),"DA");
-    prettyPrintComplex(cout,*(hartreeFockComplex->fockA()),"FA");
+//  prettyPrintComplex(cout,*(hartreeFockComplex->densityA()),"DA");
+//  prettyPrintComplex(cout,*(hartreeFockComplex->fockA()),"FA");
     if(controls->optWaveFunction)  hartreeFockComplex->SCF();
     else fileIO->out << "**Skipping SCF Optimization**" << endl; 
     hartreeFockComplex->computeMultipole();
   }
-  mointegrals->iniMOIntegrals(molecule.get(),basisset.get(),fileIO.get(),controls.get(),aointegrals.get(),hartreeFockReal.get());
   if(controls->doSDR) {
-    sdResponse->setPPRPA(1);
-    sdResponse->iniSDResponse(molecule.get(),basisset.get(),mointegrals.get(),fileIO.get(),
-                              controls.get(),hartreeFockReal.get());
-    
-    sdResponse->IterativeRPA();
-  //sdResponse->incorePPRPA();
-//sdResponse->incoreCIS();
-//sdResponse->incoreRPA();
-//sdResponse->incorePPRPAnew();
+    if(!controls->doComplex){
+      mointegralsReal->iniMOIntegrals(molecule.get(),basisset.get(),fileIO.get(),controls.get(),aointegrals.get(),hartreeFockReal.get());
+      sdResponseReal->setPPRPA(1);
+      sdResponseReal->iniSDResponse(molecule.get(),basisset.get(),mointegralsReal.get(),fileIO.get(),
+                                controls.get(),hartreeFockReal.get());
+      
+    //sdResponseReal->IterativeRPA();
+//  prettyPrint(fileIO->out,*hartreeFockReal->epsA(),"EPS");
+//  prettyPrintTCSOD(fileIO->out,*hartreeFockReal->moA(),"MO");
+//  controls->SDMethod = 4;
+//  controls->SDNSek   = 12;
+//  SDResponse<double> ppTDA;
+//  ppTDA.setPPRPA(1);
+//  ppTDA.iniSDResponse(molecule.get(),basisset.get(),mointegralsReal.get(),
+//    fileIO.get(),controls.get(),hartreeFockReal.get());
+//  ppTDA.IterativeRPA();
+//  ppTDA.incorePPRPAnew();
+    //sdResponseReal->incorePPRPA();
+    //sdResponseReal->incoreCIS();
+      sdResponseReal->incoreRPA();
+    //sdResponseReal->incorePPRPAnew();
+    } else {
+      sdResponseComplex->setPPRPA(1);
+      mointegralsComplex->iniMOIntegrals(molecule.get(),basisset.get(),fileIO.get(),controls.get(),aointegrals.get(),hartreeFockComplex.get());
+      sdResponseComplex->iniSDResponse(molecule.get(),basisset.get(),mointegralsComplex.get(),fileIO.get(),
+                                controls.get(),hartreeFockComplex.get());
+      
+      sdResponseComplex->IterativeRPA();
+    //sdResponseComplex->incorePPRPA();
+    //sdResponseComplex->incoreCIS();
+    //sdResponseComplex->incoreRPA();
+    //sdResponseComplex->incorePPRPAnew();
+    }
   }
-  auto mp       = std::unique_ptr<MollerPlesset>(new MollerPlesset());
-    mp->iniMollerPlesset(molecule.get(),basisset.get(),mointegrals.get(),fileIO.get(),
-                              controls.get(),hartreeFockReal.get());
+//auto mp       = std::unique_ptr<MollerPlesset>(new MollerPlesset());
+//  mp->iniMollerPlesset(molecule.get(),basisset.get(),mointegrals.get(),fileIO.get(),
+//                            controls.get(),hartreeFockReal.get());
   //mp->MP2();
 //mointegrals->testLocMO();
 

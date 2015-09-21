@@ -36,7 +36,9 @@ using std::setw;
 //------------------------------//
 // allocate memory for matrices //
 //------------------------------//
-void SDResponse::iniSDResponse( Molecule * molecule, BasisSet * basisSet, MOIntegrals<double> * mointegrals, 
+namespace ChronusQ {
+template<>
+void SDResponse<double>::iniSDResponse( Molecule * molecule, BasisSet * basisSet, MOIntegrals<double> * mointegrals, 
                                 FileIO * fileio, Controls * controls, SingleSlater<double> * singleSlater) {
   this->nBasis_         = basisSet->nBasis();
   this->nTCS_           = singleSlater->nTCS();
@@ -86,4 +88,5 @@ void SDResponse::iniSDResponse( Molecule * molecule, BasisSet * basisSet, MOInte
   this->oscStrength_ = std::unique_ptr<RealMatrix>(new RealMatrix(this->nSek_+1,this->nSek_+1));
   this->transDipole_ = std::unique_ptr<RealTensor3d>(new RealTensor3d(this->nSek_+1,this->nSek_+1,3));
 };
+} // namespace ChronusQ
 //dbwye

@@ -40,22 +40,22 @@ namespace ChronusQ {
    *  | X_u > = | {b_u}_i > {X(R)_u}_i
    */ 
   template<>
-  void QuasiNewton<double>::reconstructSolution(const int NTrial){
-    RealCMMap XTSigmaR (this->XTSigmaRMem,NTrial,  NTrial);
-    RealCMMap UR       (this->URMem,      this->N_,NTrial);
-    RealCMMap TrialVecR(this->TVecRMem,   this->N_,NTrial);
-    RealCMMap XTRhoR   (this->XTRhoRMem,  0,0);
-    RealCMMap XTSigmaL (this->XTSigmaLMem,0,0);
-    RealCMMap XTRhoL   (this->XTRhoLMem,  0,0);
-    RealCMMap UL       (this->ULMem,      0,0);
-    RealCMMap TrialVecL(this->TVecLMem,   0,0);
-    RealVecMap ER(this->ERMem,NTrial);
+  void QuasiNewton<dcomplex>::reconstructSolution(const int NTrial){
+    ComplexCMMap XTSigmaR (this->XTSigmaRMem,NTrial,  NTrial);
+    ComplexCMMap UR       (this->URMem,      this->N_,NTrial);
+    ComplexCMMap TrialVecR(this->TVecRMem,   this->N_,NTrial);
+    ComplexCMMap XTRhoR   (this->XTRhoRMem,  0,0);
+    ComplexCMMap XTSigmaL (this->XTSigmaLMem,0,0);
+    ComplexCMMap XTRhoL   (this->XTRhoLMem,  0,0);
+    ComplexCMMap UL       (this->ULMem,      0,0);
+    ComplexCMMap TrialVecL(this->TVecLMem,   0,0);
+    RealVecMap ER(this->RealEMem,NTrial);
     if(!this->isHermetian_ || this->symmetrizedTrial_){
-      new (&XTRhoR   ) RealCMMap(this->XTRhoRMem,  NTrial,  NTrial);
-      new (&XTSigmaL ) RealCMMap(this->XTSigmaLMem,NTrial,  NTrial);
-      new (&XTRhoL   ) RealCMMap(this->XTRhoLMem,  NTrial,  NTrial);
-      new (&UL       ) RealCMMap(this->ULMem,      this->N_,NTrial);
-      new (&TrialVecL) RealCMMap(this->TVecLMem,   this->N_,NTrial);
+      new (&XTRhoR   ) ComplexCMMap(this->XTRhoRMem,  NTrial,  NTrial);
+      new (&XTSigmaL ) ComplexCMMap(this->XTSigmaLMem,NTrial,  NTrial);
+      new (&XTRhoL   ) ComplexCMMap(this->XTRhoLMem,  NTrial,  NTrial);
+      new (&UL       ) ComplexCMMap(this->ULMem,      this->N_,NTrial);
+      new (&TrialVecL) ComplexCMMap(this->TVecLMem,   this->N_,NTrial);
     }
     UR = TrialVecR * XTSigmaR;
     if(this->symmetrizedTrial_) UL = TrialVecL * XTSigmaL;
@@ -68,17 +68,17 @@ namespace ChronusQ {
 
   /** Run Micro Iteration **/
   template<>
-  void QuasiNewton<double>::runMicro(ostream &output){
+  void QuasiNewton<dcomplex>::runMicro(ostream &output){
     // Inital Values
     int NTrial = this->nGuess_;
     int NOld   = 0;
     int NNew   = this->nGuess_;
   
     // Initialize Trial Vectors
-    RealCMMap TrialVecR(this->TVecRMem,this->N_,NTrial);
-    RealCMMap TrialVecL(this->TVecLMem,0,0);
+    ComplexCMMap TrialVecR(this->TVecRMem,this->N_,NTrial);
+    ComplexCMMap TrialVecL(this->TVecLMem,0,0);
     if(!this->isHermetian_ || this->symmetrizedTrial_){
-      new (&TrialVecL) RealCMMap(this->TVecLMem,this->N_,NTrial);
+      new (&TrialVecL) ComplexCMMap(this->TVecLMem,this->N_,NTrial);
     }
 
     // Copy guess into Trial Vec

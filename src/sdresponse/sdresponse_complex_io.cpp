@@ -26,7 +26,9 @@
 #include <sdresponse.h>
 using ChronusQ::SDResponse;
 
-void SDResponse::printPrinciple(int iSt){
+namespace ChronusQ {
+template<>
+void SDResponse<dcomplex>::printPrinciple(int iSt){
   double printTol = 0.1;
 
   this->fileio_->out << "  Principle Transitions   ( tol = 0.1 )" << endl;
@@ -38,21 +40,25 @@ void SDResponse::printPrinciple(int iSt){
 
     double absXIA_Alpha, absYIA_Alpha;
 
-    absXIA_Alpha = std::abs((*this->transDen_)(xIA_Alpha,iSt));
+    absXIA_Alpha = std::norm((*this->transDen_)(xIA_Alpha,iSt));
     if(this->iMeth_ == RPA)
-      absYIA_Alpha = std::abs((*this->transDen_)(yIA_Alpha,iSt));
+      absYIA_Alpha = std::norm((*this->transDen_)(yIA_Alpha,iSt));
 
     if(absXIA_Alpha > printTol)
         this->fileio_->out << "    "
                            << alphaOccOrb << "A -> " << alphaVirOrb << "A   "
-                           << std::fixed << std::setw(10) << std::right <<
-                           (*this->transDen_)(xIA_Alpha,iSt) << endl;
+                           << std::fixed << std::setw(10) << std::right 
+                           << std::norm((*this->transDen_)(xIA_Alpha,iSt)) 
+                           << std::fixed << std::setw(10) << std::right 
+                           << std::arg((*this->transDen_)(xIA_Alpha,iSt)) << endl;
     if(this->iMeth_ == RPA){
       if(absYIA_Alpha > printTol)
           this->fileio_->out << "    "
                              << alphaOccOrb << "A <- " << alphaVirOrb << "A   "
-                             << std::fixed << std::setw(10) << std::right <<
-                             (*this->transDen_)(yIA_Alpha,iSt) << endl;
+                             << std::fixed << std::setw(10) << std::right 
+                             << std::norm((*this->transDen_)(yIA_Alpha,iSt))
+                             << std::fixed << std::setw(10) << std::right 
+                             << std::arg((*this->transDen_)(yIA_Alpha,iSt)) << endl;
     }
   }
   for(auto ia = this->nOAVA_; ia < this->nOAVA_ + this->nOBVB_; ia++){
@@ -63,30 +69,36 @@ void SDResponse::printPrinciple(int iSt){
 
     double absXIA_Beta, absYIA_Beta;
 
-    absXIA_Beta = std::abs((*this->transDen_)(xIA_Beta,iSt));
+    absXIA_Beta = std::norm((*this->transDen_)(xIA_Beta,iSt));
     if(this->iMeth_ == RPA)
-      absYIA_Beta = std::abs((*this->transDen_)(yIA_Beta,iSt));
+      absYIA_Beta = std::norm((*this->transDen_)(yIA_Beta,iSt));
 
     if(absXIA_Beta > printTol)
         this->fileio_->out << "    "
                            << betaOccOrb << "B -> " << betaVirOrb << "B   "
-                           << std::fixed << std::setw(10) << std::right <<
-                           (*this->transDen_)(xIA_Beta,iSt) << endl;
+                           << std::fixed << std::setw(10) << std::right 
+                           << std::norm((*this->transDen_)(xIA_Beta,iSt))
+                           << std::fixed << std::setw(10) << std::right 
+                           << std::arg((*this->transDen_)(xIA_Beta,iSt)) << endl;
     if(this->iMeth_ == RPA){
       if(absYIA_Beta > printTol)
           this->fileio_->out << "    "
                              << betaOccOrb << "B <- " << betaVirOrb << "B   "
-                             << std::fixed << std::setw(10) << std::right <<
-                             (*this->transDen_)(yIA_Beta,iSt) << endl;
+                             << std::fixed << std::setw(10) << std::right
+                             << std::norm((*this->transDen_)(yIA_Beta,iSt))
+                             << std::fixed << std::setw(10) << std::right 
+                             << std::arg((*this->transDen_)(yIA_Beta,iSt)) << endl;
     }
   }
   this->fileio_->out << bannerMid << endl << endl;
 }
 
-void SDResponse::printInfo() {
+template<>
+void SDResponse<dcomplex>::printInfo() {
 };//printInfo
 
-void SDResponse::printExcitedStateEnergies(){
+template<>
+void SDResponse<dcomplex>::printExcitedStateEnergies(){
   this->fileio_->out << bannerTop << endl;
   if(this->iMeth_ == CIS)
     this->fileio_->out << "CIS";
@@ -107,3 +119,4 @@ void SDResponse::printExcitedStateEnergies(){
     this->printPrinciple(iSt);
   }
 } //printExcitedStateEnergies()
+} // namespace ChronusQ

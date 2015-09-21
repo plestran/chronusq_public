@@ -67,7 +67,6 @@ FileIO::FileIO(std::vector<std::string> nm_input) {
   this->sizeDouble_ = sizeof(testDouble)/sizeof(testChar);
 
   if(nm_input.size()==0) CErr("Fatal: Input File Required");
-  cout << "HERE" << endl;
 
   std::string inputTag = "--inp=";
   std::string outputTag = "--out=";
@@ -88,7 +87,6 @@ FileIO::FileIO(std::vector<std::string> nm_input) {
       this->name_bin = nm_input[i];
     } else CErr("Input \""+nm_input[i]+"\" not recognized");
   }
-  cout << "HERE" << endl;
 
   if(this->name_in.empty()) CErr("Fatal: Must specify an input file");
   if(this->name_out.empty()) this->name_out = this->name_in + ".out";

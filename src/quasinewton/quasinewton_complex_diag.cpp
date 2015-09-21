@@ -27,21 +27,22 @@
 
 namespace ChronusQ {
   template<>
-  void QuasiNewton<double>::stdHerDiag(int NTrial, ostream &output){
+  void QuasiNewton<dcomplex>::stdHerDiag(int NTrial, ostream &output){
     // Solve E(R)| X(R) > = | X(R) > ω
     char JOBV = 'V';
     char UPLO = 'L';
     int INFO;
-    RealCMMap A(this->XTSigmaRMem,NTrial,NTrial);
+    ComplexCMMap A(this->XTSigmaRMem,NTrial,NTrial);
   //cout << "HERE" << endl;
   //cout << endl << A << endl;
-    dsyev_(&JOBV,&UPLO,&NTrial,this->XTSigmaRMem,&NTrial,
-           this->ERMem,this->WORK,&this->LWORK,&INFO); 
-    if(INFO!=0) CErr("DSYEV failed to converge in Davison Iterations",output);
+    zheev_(&JOBV,&UPLO,&NTrial,this->XTSigmaRMem,&NTrial,
+           this->RealEMem,this->WORK,&this->LWORK,this->RWORK,
+           &INFO); 
+    if(INFO!=0) CErr("ZHEEV failed to converge in Davison Iterations",output);
   } // stdHerDiag
 
   template<>
-  void QuasiNewton<double>::symmHerDiag(int NTrial, ostream &output){
+  void QuasiNewton<dcomplex>::symmHerDiag(int NTrial, ostream &output){
     /*
      * Solve S(R)| X(R) > = E(R)| X(R) > (1/ω)
      *
@@ -59,21 +60,21 @@ namespace ChronusQ {
     int TwoNTrial = 2*NTrial;
     int INFO;
 
-    RealCMMap SSuper(this->SSuperMem, 2*NTrial,2*NTrial);
-    RealCMMap    SCPY(this->SCPYMem,   TwoNTrial,TwoNTrial);
+    ComplexCMMap SSuper(this->SSuperMem, 2*NTrial,2*NTrial);
+    ComplexCMMap    SCPY(this->SCPYMem,   TwoNTrial,TwoNTrial);
 
     SCPY = SSuper; // Copy of original matrix to use for re-orthogonalization
 
     // Perform diagonalization of reduced subspace using DSYGV
-    dsygv_(&iType,&JOBV,&UPLO,&TwoNTrial,this->SSuperMem,&TwoNTrial,
-           this->ASuperMem,&TwoNTrial,this->ERMem,this->WORK,&this->LWORK,
-           &INFO);
-    if(INFO!=0) CErr("DSYGV failed to converge in Davison Iterations",output);
+    zhegv_(&iType,&JOBV,&UPLO,&TwoNTrial,this->SSuperMem,&TwoNTrial,
+           this->ASuperMem,&TwoNTrial,this->RealEMem,this->WORK,&this->LWORK,
+           this->RWORK,&INFO);
+    if(INFO!=0) CErr("ZHEGV failed to converge in Davison Iterations",output);
     
     // Grab the "positive paired" roots (throw away other element of the pair)
-    this->ERMem += NTrial;
-    RealVecMap ER    (this->ERMem,NTrial);
-    new (&SSuper) RealCMMap(this->SSuperMem+2*NTrial*NTrial,2*NTrial,NTrial);
+    this->RealEMem += NTrial;
+    RealVecMap ER    (this->RealEMem,NTrial);
+    new (&SSuper) ComplexCMMap(this->SSuperMem+2*NTrial*NTrial,2*NTrial,NTrial);
 
     // Swap the ordering because we solve for (1/ω)
     for(auto i = 0 ; i < NTrial; i++) ER(i) = 1.0/ER(i);
@@ -94,50 +95,52 @@ namespace ChronusQ {
     this->metBiOrth(SSuper,SCPY);
 
     // Separate the eigenvectors into gerade and ungerade parts
-    RealCMMap XTSigmaR(this->XTSigmaRMem,NTrial,NTrial);
-    RealCMMap XTSigmaL(this->XTSigmaLMem,NTrial,NTrial);
+    ComplexCMMap XTSigmaR(this->XTSigmaRMem,NTrial,NTrial);
+    ComplexCMMap XTSigmaL(this->XTSigmaLMem,NTrial,NTrial);
     XTSigmaR = SSuper.block(0,     0,NTrial,NTrial);
     XTSigmaL = SSuper.block(NTrial,0,NTrial,NTrial);
   } // symmHerDiag
 
   template<>
-  void QuasiNewton<double>::symmNonHerDiag(int NTrial, ostream &output){
+  void QuasiNewton<dcomplex>::symmNonHerDiag(int NTrial, ostream &output){
     char JOBVL = 'N';
     char JOBVR = 'V';
     int TwoNTrial = 2*NTrial;
     int *IPIV = new int[TwoNTrial];
     int INFO;
 
-    RealCMMap  SSuper(this->SSuperMem, TwoNTrial,TwoNTrial);
-    RealCMMap  ASuper(this->ASuperMem, TwoNTrial,TwoNTrial);
-    RealCMMap    SCPY(this->SCPYMem,   TwoNTrial,TwoNTrial);
-    RealCMMap NHrProd(this->NHrProdMem,TwoNTrial,TwoNTrial);
+    ComplexCMMap  SSuper(this->SSuperMem, TwoNTrial,TwoNTrial);
+    ComplexCMMap  ASuper(this->ASuperMem, TwoNTrial,TwoNTrial);
+    ComplexCMMap    SCPY(this->SCPYMem,   TwoNTrial,TwoNTrial);
+    ComplexCMMap NHrProd(this->NHrProdMem,TwoNTrial,TwoNTrial);
 
     SCPY = SSuper; // Copy of original matrix to use for re-orthogonalization
 
     // Invert the metric (maybe not needed?)
-    dgetrf_(&TwoNTrial,&TwoNTrial,this->SSuperMem,&TwoNTrial,IPIV,&INFO);
-    dgetri_(&TwoNTrial,this->SSuperMem,&TwoNTrial,IPIV,this->WORK,&this->LWORK,&INFO);
+    zgetrf_(&TwoNTrial,&TwoNTrial,this->SSuperMem,&TwoNTrial,IPIV,&INFO);
+    zgetri_(&TwoNTrial,this->SSuperMem,&TwoNTrial,IPIV,this->WORK,&this->LWORK,
+            &INFO);
     delete [] IPIV;
 
     NHrProd = SSuper * ASuper;
-    cout << endl << "PROD" << endl << NHrProd << endl;
+//  cout << "PROD" << endl << NHrProd << endl;
 
-    dgeev_(&JOBVL,&JOBVR,&TwoNTrial,NHrProd.data(),&TwoNTrial,this->ERMem,this->EIMem,
-           this->SSuperMem,&TwoNTrial,this->SSuperMem,&TwoNTrial,this->WORK,&this->LWORK,
-           &INFO);
+    zgeev_(&JOBVL,&JOBVR,&TwoNTrial,NHrProd.data(),&TwoNTrial,this->ERMem,
+           this->SSuperMem,&TwoNTrial,this->SSuperMem,&TwoNTrial,
+           this->WORK,&this->LWORK,this->RWORK,&INFO);
     // Sort eigensystem using Bubble Sort
-    RealVecMap ER(this->ERMem,TwoNTrial);
-    RealVecMap EI(this->EIMem,TwoNTrial);
-    RealCMMap  VR(this->SSuperMem,TwoNTrial,TwoNTrial);
+    ComplexVecMap E(this->ERMem,TwoNTrial);
+    ComplexCMMap  VR(this->SSuperMem,TwoNTrial,TwoNTrial);
 //  cout << endl << ER << endl;
-    this->eigSrt(VR,ER);
+    this->eigSrt(VR,E);
 //  cout << endl << ER << endl;
   
     // Grab the "positive paired" roots (throw away other element of the pair)
     this->ERMem += NTrial;
-    new (&ER    ) RealVecMap(this->ERMem,NTrial);
-    new (&SSuper) RealCMMap(this->SSuperMem+2*NTrial*NTrial,2*NTrial,NTrial);
+    new (&E    ) ComplexVecMap(this->ERMem,NTrial);
+    new (&SSuper) ComplexCMMap(this->SSuperMem+2*NTrial*NTrial,2*NTrial,NTrial);
+    RealVecMap ER(this->RealEMem,NTrial);
+    ER = E.real();
 
     /*
      * Re-orthogonalize the eigenvectors with respect to the metric S(R)
@@ -149,36 +152,34 @@ namespace ChronusQ {
     this->metBiOrth(SSuper,SCPY);
 
     // Separate the eigenvectors into gerade and ungerade parts
-    RealCMMap XTSigmaR(this->XTSigmaRMem,NTrial,NTrial);
-    RealCMMap XTSigmaL(this->XTSigmaLMem,NTrial,NTrial);
+    ComplexCMMap XTSigmaR(this->XTSigmaRMem,NTrial,NTrial);
+    ComplexCMMap XTSigmaL(this->XTSigmaLMem,NTrial,NTrial);
     XTSigmaR = SSuper.block(0,     0,NTrial,NTrial);
     XTSigmaL = SSuper.block(NTrial,0,NTrial,NTrial);
-    cout << endl << "ER" << endl << ER << endl << endl;
-    cout << endl << "CR" << endl << XTSigmaR << endl << endl;
-    cout << endl << "CR" << endl << XTSigmaL << endl << endl;
 //  CErr();
   }
 
   template<>
-  void QuasiNewton<double>::diagMem(int NTrial){
+  void QuasiNewton<dcomplex>::diagMem(int NTrial){
     int IOff = NTrial;
     if(!this->isHermetian_ || this->symmetrizedTrial_){
-      IOff += NTrial; // Space for paired eigenvalues or imaginary part
+      IOff += NTrial; // Space for paired eigenvalues
     }
-    if(!this->isHermetian_ && this->symmetrizedTrial_){
-      IOff += 2*NTrial; // Space for paired eigenvalues or imaginary part
+    if(this->isHermetian_){
+      this->RealEMem = this->REAL_SCR; 
+      this->RWORK    = this->RealEMem + IOff;
+      this->WORK     = this->LAPACK_SCR;
+    } else {
+      this->RealEMem = this->REAL_SCR; 
+      this->RWORK    = this->RealEMem + IOff;
+      this->ERMem    = this->LAPACK_SCR;
+      this->WORK     = this->ERMem + IOff;
     }
-    this->ERMem = LAPACK_SCR;
-    if(!this->isHermetian_){
-      if(this->symmetrizedTrial_) this->EIMem = this->ERMem + 2*NTrial;
-      else                        this->EIMem = this->ERMem +   NTrial;
-    }
-    this->WORK  = this->ERMem + IOff;
   } // diagMem
 
   /** Diagoanlize Reduced Problem **/
   template<>
-  void QuasiNewton<double>::redDiag(int NTrial,ostream &output){
+  void QuasiNewton<dcomplex>::redDiag(int NTrial,ostream &output){
     this->diagMem(NTrial); 
   //cout << "HERE" << endl;
     if(this->isHermetian_) {

@@ -241,8 +241,7 @@ void SingleSlater<dcomplex>::mixOrbitalsSCF(){
   }
 
   if(indxHOMOA == -1 || indxLUMOB == -1){
-    cout << "HERE 1" << endl;
-   this->fileio_->out << "TCS orbital swap failed to find suitable Alpha-Beta pair" << endl;
+    this->fileio_->out << "TCS orbital swap failed to find suitable Alpha-Beta pair" << endl;
     return;
   }
   
@@ -251,9 +250,9 @@ void SingleSlater<dcomplex>::mixOrbitalsSCF(){
 //indxLUMOB = 5;
   HOMOA = this->moA_->col(indxHOMOA) ;
   LUMOB = this->moA_->col(indxLUMOB) ;
-  cout << HOMOA << endl << endl;
-  cout << LUMOB << endl << endl;
-  prettyPrintComplex(cout,*this->moA_,"MO");
+//cout << HOMOA << endl << endl;
+//cout << LUMOB << endl << endl;
+//prettyPrintComplex(cout,*this->moA_,"MO");
   this->moA_->col(indxHOMOA) = std::sqrt(0.5) * (HOMOA + LUMOB);
   this->moA_->col(indxLUMOB) = std::sqrt(0.5) * (HOMOA - LUMOB);
 /*
