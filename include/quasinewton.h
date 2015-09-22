@@ -565,10 +565,10 @@ template <typename T>
         if(this->sdr_->iMeth() == SDResponse<T>::RPA){
           // Linear trasnformation onto left / ungerade
           this->sdr_->formRM3(NewVecL,NewSL,NewRhoR);
-          cout << "SR" << endl << NewSR << endl;
-          cout << "RhoR" << endl << NewRhoR << endl;
-          cout << "SL" << endl << NewSL << endl;
-          cout << "RhoL" << endl << NewRhoL << endl;
+        //cout << "SR" << endl << NewSR << endl;
+        //cout << "RhoR" << endl << NewRhoR << endl;
+        //cout << "SL" << endl << NewSL << endl;
+        //cout << "RhoL" << endl << NewRhoL << endl;
         }
       } else if(this->sdr_->iMeth() == SDResponse<T>::PPRPA  || 
                 this->sdr_->iMeth() == SDResponse<T>::PPATDA ||
@@ -586,10 +586,10 @@ template <typename T>
         NewRhoL = NewVecR;
         NewRhoR.block(this->N_/2,0,this->N_/2,NNew) *= -1.0;
         NewRhoL.block(this->N_/2,0,this->N_/2,NNew) *= -1.0;
-          cout << "SR" << endl << std::setprecision(6) << NewSR << endl;
-          cout << "RhoR" << endl << std::setprecision(6) << NewRhoR << endl;
-          cout << "SL" << endl << std::setprecision(6) << NewSL << endl;
-          cout << "RhoL" << endl << std::setprecision(6) << NewRhoL << endl;
+        //cout << "SR" << endl << std::setprecision(6) << NewSR << endl;
+        //cout << "RhoR" << endl << std::setprecision(6) << NewRhoR << endl;
+        //cout << "SL" << endl << std::setprecision(6) << NewSL << endl;
+        //cout << "RhoL" << endl << std::setprecision(6) << NewRhoL << endl;
       }
     }
   //CErr();
