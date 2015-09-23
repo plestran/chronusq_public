@@ -1,0 +1,10 @@
+$geom read
+1
+Li 0 0.000000 0.000000 0.000000
+
+$method hf
+$charge 0
+$spin 2
+$basis sto3g.gbs
+$nsmp 4
+$print 1
