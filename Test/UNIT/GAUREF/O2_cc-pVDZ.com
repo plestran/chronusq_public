@@ -1,4 +1,4 @@
-#p uhf/cc-pVDZ gfinput pop=full nosymm
+#p uhf/cc-pVDZ gfinput pop=full nosymm 6D
 
 O2 cc-pVDZ
 

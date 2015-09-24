@@ -9,4 +9,4 @@ $spin 3
 $basis sto3g.gbs
 $nsmp 1
 $print 1
-
+$unittest scf

@@ -1,4 +1,4 @@
-#p rohf/cc-pVDZ nosymm
+#p rohf/cc-pVDZ nosymm 6D
 
 Li  cc-pVDZ
 

@@ -1,4 +1,4 @@
-#p uhf/cc-pVDZ nosymm cis(full,nstates=12,50-50)
+#p uhf/cc-pVDZ nosymm cis(full,nstates=12,50-50) 6D
 
 Li  cc-pVDZ
 

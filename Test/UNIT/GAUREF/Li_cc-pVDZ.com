@@ -1,4 +1,4 @@
-#p uhf/cc-pVDZ nosymm
+#p uhf/cc-pVDZ nosymm 6D
 
 Li  cc-pVDZ
 

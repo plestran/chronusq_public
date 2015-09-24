@@ -10,4 +10,5 @@ $spin 1
 $basis cc-pVDZ.gbs
 $nsmp 4
 $print 1
+$unittest scf
 

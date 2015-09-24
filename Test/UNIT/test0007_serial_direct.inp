@@ -8,4 +8,5 @@ $spin 2
 $basis sto3g.gbs
 $nsmp 1
 $print 1
+$unittest scf
 

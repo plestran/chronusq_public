@@ -17,28 +17,28 @@ test0002_serial_incore.inp          H2O/6-31G   Serial SCF - In-Core Integrals
 test0002_serial_direct.inp          H2O/6-31G   Serial SCF - Direct Integrals
 test0002_smp_incore.inp             H2O/6-31G   OpenMP SCF - In-Core Integrals
 test0002_smp_direct.inp             H2O/6-31G   OpenMP SCF - Direct Integrals
-test0003_serial_incore.inp          H2O/cc-pVDZ Serial SCF - In-Core Integrals
-test0003_serial_direct.inp          H2O/cc-pVDZ Serial SCF - Direct Integrals
-test0003_serial_denfit.inp          H2O/cc-pVDZ Serial SCF - RI Integrals
-test0003_smp_incore.inp             H2O/cc-pVDZ OpenMP SCF - In-Core Integrals
-test0003_smp_direct.inp             H2O/cc-pVDZ OpenMP SCF - Direct Integrals
-test0003_smp_denfit.inp             H2O/cc-pVDZ OpenMP SCF - RI Integrals
+test0003_serial_incore.inp          H2O/cc-pVDZ Serial SCF - In-Core Integrals (6D)
+test0003_serial_direct.inp          H2O/cc-pVDZ Serial SCF - Direct Integrals (6D)
+test0003_serial_denfit.inp          H2O/cc-pVDZ Serial SCF - RI Integrals (6D)
+test0003_smp_incore.inp             H2O/cc-pVDZ OpenMP SCF - In-Core Integrals (6D)
+test0003_smp_direct.inp             H2O/cc-pVDZ OpenMP SCF - Direct Integrals (6D)
+test0003_smp_denfit.inp             H2O/cc-pVDZ OpenMP SCF - RI Integrals (6D)
 
 ** test0004-0006 Test moderately large molecule RHF SCF code **
-test0004_serial_incore.inp          Benzene/STO-3G  Serial SCF - In-core Ints
-test0004_serial_direct.inp          Benzene/STO-3G  Serial SCF - Direct Ints
-test0004_smp_incore.inp             Benzene/STO-3G  OpenMP SCF - In-core Ints
-test0004_smp_direct.inp             Benzene/STO-3G  OpenMP SCF - Direct Ints
-test0005_serial_incore.inp          Benzene/6-31G   Serial SCF - In-core Ints
-test0005_serial_direct.inp          Benzene/6-31G   Serial SCF - Direct Ints
-test0005_smp_incore.inp             Benzene/6-31G   OpenMP SCF - In-core Ints
-test0005_smp_direct.inp             Benzene/6-31G   OpenMP SCF - Direct Ints
-test0006_serial_incore.inp          Benzene/cc-pVDZ Serial SCF - In-core Ints
-test0006_serial_direct.inp          Benzene/cc-pVDZ Serial SCF - Direct Ints
-test0006_serial_denfit.inp          Benzene/cc-pVDZ Serial SCF - RI Ints
-test0006_smp_incore.inp             Benzene/cc-pVDZ OpenMP SCF - In-core Ints
-test0006_smp_direct.inp             Benzene/cc-pVDZ OpenMP SCF - Direct Ints
-test0006_smp_denfit.inp             Benzene/cc-pVDZ OpenMP SCF - RI Ints
+#test0004_serial_incore.inp          Benzene/STO-3G  Serial SCF - In-core Ints
+#test0004_serial_direct.inp          Benzene/STO-3G  Serial SCF - Direct Ints
+#test0004_smp_incore.inp             Benzene/STO-3G  OpenMP SCF - In-core Ints
+#test0004_smp_direct.inp             Benzene/STO-3G  OpenMP SCF - Direct Ints
+#test0005_serial_incore.inp          Benzene/6-31G   Serial SCF - In-core Ints
+#test0005_serial_direct.inp          Benzene/6-31G   Serial SCF - Direct Ints
+#test0005_smp_incore.inp             Benzene/6-31G   OpenMP SCF - In-core Ints
+#test0005_smp_direct.inp             Benzene/6-31G   OpenMP SCF - Direct Ints
+#test0006_serial_incore.inp          Benzene/cc-pVDZ Serial SCF - In-core Ints (6D)
+#test0006_serial_direct.inp          Benzene/cc-pVDZ Serial SCF - Direct Ints (6D)
+#test0006_serial_denfit.inp          Benzene/cc-pVDZ Serial SCF - RI Ints (6D)
+#test0006_smp_incore.inp             Benzene/cc-pVDZ OpenMP SCF - In-core Ints (6D)
+#test0006_smp_direct.inp             Benzene/cc-pVDZ OpenMP SCF - Direct Ints (6D)
+#test0006_smp_denfit.inp             Benzene/cc-pVDZ OpenMP SCF - RI Ints (6D)
 
 ** test0007-0012 Test small molecule UHF SCF code **
 test0007_serial_incore.inp          Li/STO-3G  Serial SCF - In-Core Integrals
@@ -49,12 +49,10 @@ test0008_serial_incore.inp          Li/6-31G   Serial SCF - In-Core Integrals
 test0008_serial_direct.inp          Li/6-31G   Serial SCF - Direct Integrals
 test0008_smp_incore.inp             Li/6-31G   OpenMP SCF - In-Core Integrals
 test0008_smp_direct.inp             Li/6-31G   OpenMP SCF - Direct Integrals
-test0009_serial_incore.inp          Li/cc-pVDZ Serial SCF - In-Core Integrals
-test0009_serial_direct.inp          Li/cc-pVDZ Serial SCF - Direct Integrals
-test0009_serial_denfit.inp          Li/cc-pVDZ Serial SCF - RI Integrals
-test0009_smp_incore.inp             Li/cc-pVDZ OpenMP SCF - In-Core Integrals
-test0009_smp_direct.inp             Li/cc-pVDZ OpenMP SCF - Direct Integrals
-test0009_smp_denfit.inp             Li/cc-pVDZ OpenMP SCF - RI Integrals
+test0009_serial_incore.inp          Li/cc-pVDZ Serial SCF - In-Core Integrals (6D)
+test0009_serial_direct.inp          Li/cc-pVDZ Serial SCF - Direct Integrals (6D)
+test0009_smp_incore.inp             Li/cc-pVDZ OpenMP SCF - In-Core Integrals (6D)
+test0009_smp_direct.inp             Li/cc-pVDZ OpenMP SCF - Direct Integrals (6D)
 test0010_serial_incore.inp          O2/STO-3G  Serial SCF - In-Core Integrals
 test0010_serial_direct.inp          O2/STO-3G  Serial SCF - Direct Integrals
 test0010_smp_incore.inp             O2/STO-3G  OpenMP SCF - In-Core Integrals
@@ -63,12 +61,10 @@ test0011_serial_incore.inp          O2/6-31G   Serial SCF - In-Core Integrals
 test0011_serial_direct.inp          O2/6-31G   Serial SCF - Direct Integrals
 test0011_smp_incore.inp             O2/6-31G   OpenMP SCF - In-Core Integrals
 test0011_smp_direct.inp             O2/6-31G   OpenMP SCF - Direct Integrals
-test0012_serial_incore.inp          O2/cc-pVDZ Serial SCF - In-Core Integrals
-test0012_serial_direct.inp          O2/cc-pVDZ Serial SCF - Direct Integrals
-test0012_serial_denfit.inp          O2/cc-pVDZ Serial SCF - RI Integrals
-test0012_smp_incore.inp             O2/cc-pVDZ OpenMP SCF - In-Core Integrals
-test0012_smp_direct.inp             O2/cc-pVDZ OpenMP SCF - Direct Integrals
-test0012_smp_denfit.inp             O2/cc-pVDZ OpenMP SCF - RI Integrals
+test0012_serial_incore.inp          O2/cc-pVDZ Serial SCF - In-Core Integrals (6D)
+test0012_serial_direct.inp          O2/cc-pVDZ Serial SCF - Direct Integrals (6D)
+test0012_smp_incore.inp             O2/cc-pVDZ OpenMP SCF - In-Core Integrals (6D)
+test0012_smp_direct.inp             O2/cc-pVDZ OpenMP SCF - Direct Integrals (6D)
 
 ** test0013-0018 Test small molecule ROHF (CUHF) SCF code **
 test0013_serial_incore.inp          Li/STO-3G  Serial SCF - In-Core Integrals
@@ -79,12 +75,12 @@ test0014_serial_incore.inp          Li/6-31G   Serial SCF - In-Core Integrals
 test0014_serial_direct.inp          Li/6-31G   Serial SCF - Direct Integrals
 test0014_smp_incore.inp             Li/6-31G   OpenMP SCF - In-Core Integrals
 test0014_smp_direct.inp             Li/6-31G   OpenMP SCF - Direct Integrals
-test0015_serial_incore.inp          Li/cc-pVDZ Serial SCF - In-Core Integrals
-test0015_serial_direct.inp          Li/cc-pVDZ Serial SCF - Direct Integrals
-test0015_serial_denfit.inp          Li/cc-pVDZ Serial SCF - RI Integrals
-test0015_smp_incore.inp             Li/cc-pVDZ OpenMP SCF - In-Core Integrals
-test0015_smp_direct.inp             Li/cc-pVDZ OpenMP SCF - Direct Integrals
-test0015_smp_denfit.inp             Li/cc-pVDZ OpenMP SCF - RI Integrals
+test0015_serial_incore.inp          Li/cc-pVDZ Serial SCF - In-Core Integrals (6D)
+test0015_serial_direct.inp          Li/cc-pVDZ Serial SCF - Direct Integrals (6D)
+#test0015_serial_denfit.inp          Li/cc-pVDZ Serial SCF - RI Integrals (6D)
+test0015_smp_incore.inp             Li/cc-pVDZ OpenMP SCF - In-Core Integrals (6D)
+test0015_smp_direct.inp             Li/cc-pVDZ OpenMP SCF - Direct Integrals (6D)
+#test0015_smp_denfit.inp             Li/cc-pVDZ OpenMP SCF - RI Integrals (6D)
 test0016_serial_incore.inp          O2/STO-3G  Serial SCF - In-Core Integrals
 test0016_serial_direct.inp          O2/STO-3G  Serial SCF - Direct Integrals
 test0016_smp_incore.inp             O2/STO-3G  OpenMP SCF - In-Core Integrals
@@ -93,133 +89,133 @@ test0017_serial_incore.inp          O2/6-31G   Serial SCF - In-Core Integrals
 test0017_serial_direct.inp          O2/6-31G   Serial SCF - Direct Integrals
 test0017_smp_incore.inp             O2/6-31G   OpenMP SCF - In-Core Integrals
 test0017_smp_direct.inp             O2/6-31G   OpenMP SCF - Direct Integrals
-test0018_serial_incore.inp          O2/cc-pVDZ Serial SCF - In-Core Integrals
-test0018_serial_direct.inp          O2/cc-pVDZ Serial SCF - Direct Integrals
-test0018_serial_denfit.inp          O2/cc-pVDZ Serial SCF - RI Integrals
-test0018_smp_incore.inp             O2/cc-pVDZ OpenMP SCF - In-Core Integrals
-test0018_smp_direct.inp             O2/cc-pVDZ OpenMP SCF - Direct Integrals
-test0018_smp_denfit.inp             O2/cc-pVDZ OpenMP SCF - RI Integrals
+test0018_serial_incore.inp          O2/cc-pVDZ Serial SCF - In-Core Integrals (6D)
+test0018_serial_direct.inp          O2/cc-pVDZ Serial SCF - Direct Integrals (6D)
+#test0018_serial_denfit.inp          O2/cc-pVDZ Serial SCF - RI Integrals (6D)
+test0018_smp_incore.inp             O2/cc-pVDZ OpenMP SCF - In-Core Integrals (6D)
+test0018_smp_direct.inp             O2/cc-pVDZ OpenMP SCF - Direct Integrals (6D)
+#test0018_smp_denfit.inp             O2/cc-pVDZ OpenMP SCF - RI Integrals (6D)
 
-** test0019-00021 Test Small Molecule RHF CIS code **
-test0019_serial_incore.inp          H2O/STO-3G  Serial CIS - In-Core Integrals
-test0019_serial_direct.inp          H2O/STO-3G  Serial CIS - Direct Integrals
-test0019_smp_incore.inp             H2O/STO-3G  OpenMP CIS - In-Core Integrals
-test0019_smp_direct.inp             H2O/STO-3G  OpenMP CIS - Direct Integrals
-test0020_serial_incore.inp          H2O/6-31G   Serial CIS - In-Core Integrals
-test0020_serial_direct.inp          H2O/6-31G   Serial CIS - Direct Integrals
-test0020_smp_incore.inp             H2O/6-31G   OpenMP CIS - In-Core Integrals
-test0020_smp_direct.inp             H2O/6-31G   OpenMP CIS - Direct Integrals
-test0021_serial_incore.inp          H2O/cc-pVDZ Serial CIS - In-Core Integrals
-test0021_serial_direct.inp          H2O/cc-pVDZ Serial CIS - Direct Integrals
-test0021_serial_denfit.inp          H2O/cc-pVDZ Serial CIS - RI Integrals
-test0021_smp_incore.inp             H2O/cc-pVDZ OpenMP CIS - In-Core Integrals
-test0021_smp_direct.inp             H2O/cc-pVDZ OpenMP CIS - Direct Integrals
-test0021_smp_denfit.inp             H2O/cc-pVDZ OpenMP CIS - RI Integrals
-
-** test0022-0024 Test moderately large molecule RHF CIS code **
-test0022_serial_incore.inp          Benzene/STO-3G  Serial CIS - In-core Ints
-test0022_serial_direct.inp          Benzene/STO-3G  Serial CIS - Direct Ints
-test0022_smp_incore.inp             Benzene/STO-3G  OpenMP CIS - In-core Ints
-test0022_smp_direct.inp             Benzene/STO-3G  OpenMP CIS - Direct Ints
-test0023_serial_incore.inp          Benzene/6-31G   Serial CIS - In-core Ints
-test0023_serial_direct.inp          Benzene/6-31G   Serial CIS - Direct Ints
-test0023_smp_incore.inp             Benzene/6-31G   OpenMP CIS - In-core Ints
-test0023_smp_direct.inp             Benzene/6-31G   OpenMP CIS - Direct Ints
-test0024_serial_incore.inp          Benzene/cc-pVDZ Serial CIS - In-core Ints
-test0024_serial_direct.inp          Benzene/cc-pVDZ Serial CIS - Direct Ints
-test0024_serial_denfit.inp          Benzene/cc-pVDZ Serial CIS - RI Ints
-test0024_smp_incore.inp             Benzene/cc-pVDZ OpenMP CIS - In-core Ints
-test0024_smp_direct.inp             Benzene/cc-pVDZ OpenMP CIS - Direct Ints
-test0024_smp_denfit.inp             Benzene/cc-pVDZ OpenMP CIS - RI Ints
-
-** test0025-0030 Test small molecule UHF CIS code **
-test0025_serial_incore.inp          Li/STO-3G  Serial CIS - In-Core Integrals
-test0025_serial_direct.inp          Li/STO-3G  Serial CIS - Direct Integrals
-test0025_smp_incore.inp             Li/STO-3G  OpenMP CIS - In-Core Integrals
-test0025_smp_direct.inp             Li/STO-3G  OpenMP CIS - Direct Integrals
-test0026_serial_incore.inp          Li/6-31G   Serial CIS - In-Core Integrals
-test0026_serial_direct.inp          Li/6-31G   Serial CIS - Direct Integrals
-test0026_smp_incore.inp             Li/6-31G   OpenMP CIS - In-Core Integrals
-test0026_smp_direct.inp             Li/6-31G   OpenMP CIS - Direct Integrals
-test0027_serial_incore.inp          Li/cc-pVDZ Serial CIS - In-Core Integrals
-test0027_serial_direct.inp          Li/cc-pVDZ Serial CIS - Direct Integrals
-test0027_serial_denfit.inp          Li/cc-pVDZ Serial CIS - RI Integrals
-test0027_smp_incore.inp             Li/cc-pVDZ OpenMP CIS - In-Core Integrals
-test0027_smp_direct.inp             Li/cc-pVDZ OpenMP CIS - Direct Integrals
-test0027_smp_denfit.inp             Li/cc-pVDZ OpenMP CIS - RI Integrals
-test0028_serial_incore.inp          O2/STO-3G  Serial CIS - In-Core Integrals
-test0028_serial_direct.inp          O2/STO-3G  Serial CIS - Direct Integrals
-test0028_smp_incore.inp             O2/STO-3G  OpenMP CIS - In-Core Integrals
-test0028_smp_direct.inp             O2/STO-3G  OpenMP CIS - Direct Integrals
-test0029_serial_incore.inp          O2/6-31G   Serial CIS - In-Core Integrals
-test0029_serial_direct.inp          O2/6-31G   Serial CIS - Direct Integrals
-test0029_smp_incore.inp             O2/6-31G   OpenMP CIS - In-Core Integrals
-test0029_smp_direct.inp             O2/6-31G   OpenMP CIS - Direct Integrals
-test0030_serial_incore.inp          O2/cc-pVDZ Serial CIS - In-Core Integrals
-test0030_serial_direct.inp          O2/cc-pVDZ Serial CIS - Direct Integrals
-test0030_serial_denfit.inp          O2/cc-pVDZ Serial CIS - RI Integrals
-test0030_smp_incore.inp             O2/cc-pVDZ OpenMP CIS - In-Core Integrals
-test0030_smp_direct.inp             O2/cc-pVDZ OpenMP CIS - Direct Integrals
-test0030_smp_denfit.inp             O2/cc-pVDZ OpenMP CIS - RI Integrals
-
-** test0031-00033 Test Small Molecule RHF RPA code **
-test0031_serial_incore.inp          H2O/STO-3G  Serial RPA - In-Core Integrals
-test0031_serial_direct.inp          H2O/STO-3G  Serial RPA - Direct Integrals
-test0031_smp_incore.inp             H2O/STO-3G  OpenMP RPA - In-Core Integrals
-test0031_smp_direct.inp             H2O/STO-3G  OpenMP RPA - Direct Integrals
-test0032_serial_incore.inp          H2O/6-31G   Serial RPA - In-Core Integrals
-test0032_serial_direct.inp          H2O/6-31G   Serial RPA - Direct Integrals
-test0032_smp_incore.inp             H2O/6-31G   OpenMP RPA - In-Core Integrals
-test0032_smp_direct.inp             H2O/6-31G   OpenMP RPA - Direct Integrals
-test0033_serial_incore.inp          H2O/cc-pVDZ Serial RPA - In-Core Integrals
-test0033_serial_direct.inp          H2O/cc-pVDZ Serial RPA - Direct Integrals
-test0033_serial_denfit.inp          H2O/cc-pVDZ Serial RPA - RI Integrals
-test0033_smp_incore.inp             H2O/cc-pVDZ OpenMP RPA - In-Core Integrals
-test0033_smp_direct.inp             H2O/cc-pVDZ OpenMP RPA - Direct Integrals
-test0033_smp_denfit.inp             H2O/cc-pVDZ OpenMP RPA - RI Integrals
-
-** test0034-0036 Test moderately large molecule RHF RPA code **
-test0034_serial_incore.inp          Benzene/STO-3G  Serial RPA - In-core Ints
-test0034_serial_direct.inp          Benzene/STO-3G  Serial RPA - Direct Ints
-test0034_smp_incore.inp             Benzene/STO-3G  OpenMP RPA - In-core Ints
-test0034_smp_direct.inp             Benzene/STO-3G  OpenMP RPA - Direct Ints
-test0035_serial_incore.inp          Benzene/6-31G   Serial RPA - In-core Ints
-test0035_serial_direct.inp          Benzene/6-31G   Serial RPA - Direct Ints
-test0035_smp_incore.inp             Benzene/6-31G   OpenMP RPA - In-core Ints
-test0035_smp_direct.inp             Benzene/6-31G   OpenMP RPA - Direct Ints
-test0036_serial_incore.inp          Benzene/cc-pVDZ Serial RPA - In-core Ints
-test0036_serial_direct.inp          Benzene/cc-pVDZ Serial RPA - Direct Ints
-test0036_serial_denfit.inp          Benzene/cc-pVDZ Serial RPA - RI Ints
-test0036_smp_incore.inp             Benzene/cc-pVDZ OpenMP RPA - In-core Ints
-test0036_smp_direct.inp             Benzene/cc-pVDZ OpenMP RPA - Direct Ints
-test0036_smp_denfit.inp             Benzene/cc-pVDZ OpenMP RPA - RI Ints
-
-** test0037-0042 Test small molecule UHF RPA code **
-test0037_serial_incore.inp          Li/STO-3G  Serial RPA - In-Core Integrals
-test0037_serial_direct.inp          Li/STO-3G  Serial RPA - Direct Integrals
-test0037_smp_incore.inp             Li/STO-3G  OpenMP RPA - In-Core Integrals
-test0037_smp_direct.inp             Li/STO-3G  OpenMP RPA - Direct Integrals
-test0038_serial_incore.inp          Li/6-31G   Serial RPA - In-Core Integrals
-test0038_serial_direct.inp          Li/6-31G   Serial RPA - Direct Integrals
-test0038_smp_incore.inp             Li/6-31G   OpenMP RPA - In-Core Integrals
-test0038_smp_direct.inp             Li/6-31G   OpenMP RPA - Direct Integrals
-test0039_serial_incore.inp          Li/cc-pVDZ Serial RPA - In-Core Integrals
-test0039_serial_direct.inp          Li/cc-pVDZ Serial RPA - Direct Integrals
-test0039_serial_denfit.inp          Li/cc-pVDZ Serial RPA - RI Integrals
-test0039_smp_incore.inp             Li/cc-pVDZ OpenMP RPA - In-Core Integrals
-test0039_smp_direct.inp             Li/cc-pVDZ OpenMP RPA - Direct Integrals
-test0039_smp_denfit.inp             Li/cc-pVDZ OpenMP RPA - RI Integrals
-test0040_serial_incore.inp          O2/STO-3G  Serial RPA - In-Core Integrals
-test0040_serial_direct.inp          O2/STO-3G  Serial RPA - Direct Integrals
-test0040_smp_incore.inp             O2/STO-3G  OpenMP RPA - In-Core Integrals
-test0040_smp_direct.inp             O2/STO-3G  OpenMP RPA - Direct Integrals
-test0041_serial_incore.inp          O2/6-31G   Serial RPA - In-Core Integrals
-test0041_serial_direct.inp          O2/6-31G   Serial RPA - Direct Integrals
-test0041_smp_incore.inp             O2/6-31G   OpenMP RPA - In-Core Integrals
-test0041_smp_direct.inp             O2/6-31G   OpenMP RPA - Direct Integrals
-test0042_serial_incore.inp          O2/cc-pVDZ Serial RPA - In-Core Integrals
-test0042_serial_direct.inp          O2/cc-pVDZ Serial RPA - Direct Integrals
-test0042_serial_denfit.inp          O2/cc-pVDZ Serial RPA - RI Integrals
-test0042_smp_incore.inp             O2/cc-pVDZ OpenMP RPA - In-Core Integrals
-test0042_smp_direct.inp             O2/cc-pVDZ OpenMP RPA - Direct Integrals
-test0042_smp_denfit.inp             O2/cc-pVDZ OpenMP RPA - RI Integrals
+#** test0019-00021 Test Small Molecule RHF CIS code **
+#test0019_serial_incore.inp          H2O/STO-3G  Serial CIS - In-Core Integrals
+#test0019_serial_direct.inp          H2O/STO-3G  Serial CIS - Direct Integrals
+#test0019_smp_incore.inp             H2O/STO-3G  OpenMP CIS - In-Core Integrals
+#test0019_smp_direct.inp             H2O/STO-3G  OpenMP CIS - Direct Integrals
+#test0020_serial_incore.inp          H2O/6-31G   Serial CIS - In-Core Integrals
+#test0020_serial_direct.inp          H2O/6-31G   Serial CIS - Direct Integrals
+#test0020_smp_incore.inp             H2O/6-31G   OpenMP CIS - In-Core Integrals
+#test0020_smp_direct.inp             H2O/6-31G   OpenMP CIS - Direct Integrals
+#test0021_serial_incore.inp          H2O/cc-pVDZ Serial CIS - In-Core Integrals (6D)
+#test0021_serial_direct.inp          H2O/cc-pVDZ Serial CIS - Direct Integrals (6D)
+#test0021_serial_denfit.inp          H2O/cc-pVDZ Serial CIS - RI Integrals (6D)
+#test0021_smp_incore.inp             H2O/cc-pVDZ OpenMP CIS - In-Core Integrals (6D)
+#test0021_smp_direct.inp             H2O/cc-pVDZ OpenMP CIS - Direct Integrals (6D)
+#test0021_smp_denfit.inp             H2O/cc-pVDZ OpenMP CIS - RI Integrals (6D)
+#
+#** test0022-0024 Test moderately large molecule RHF CIS code **
+#test0022_serial_incore.inp          Benzene/STO-3G  Serial CIS - In-core Ints
+#test0022_serial_direct.inp          Benzene/STO-3G  Serial CIS - Direct Ints
+#test0022_smp_incore.inp             Benzene/STO-3G  OpenMP CIS - In-core Ints
+#test0022_smp_direct.inp             Benzene/STO-3G  OpenMP CIS - Direct Ints
+#test0023_serial_incore.inp          Benzene/6-31G   Serial CIS - In-core Ints
+#test0023_serial_direct.inp          Benzene/6-31G   Serial CIS - Direct Ints
+#test0023_smp_incore.inp             Benzene/6-31G   OpenMP CIS - In-core Ints
+#test0023_smp_direct.inp             Benzene/6-31G   OpenMP CIS - Direct Ints
+#test0024_serial_incore.inp          Benzene/cc-pVDZ Serial CIS - In-core Ints (6D)
+#test0024_serial_direct.inp          Benzene/cc-pVDZ Serial CIS - Direct Ints (6D)
+#test0024_serial_denfit.inp          Benzene/cc-pVDZ Serial CIS - RI Ints (6D)
+#test0024_smp_incore.inp             Benzene/cc-pVDZ OpenMP CIS - In-core Ints (6D)
+#test0024_smp_direct.inp             Benzene/cc-pVDZ OpenMP CIS - Direct Ints (6D)
+#test0024_smp_denfit.inp             Benzene/cc-pVDZ OpenMP CIS - RI Ints (6D)
+#
+#** test0025-0030 Test small molecule UHF CIS code **
+#test0025_serial_incore.inp          Li/STO-3G  Serial CIS - In-Core Integrals
+#test0025_serial_direct.inp          Li/STO-3G  Serial CIS - Direct Integrals
+#test0025_smp_incore.inp             Li/STO-3G  OpenMP CIS - In-Core Integrals
+#test0025_smp_direct.inp             Li/STO-3G  OpenMP CIS - Direct Integrals
+#test0026_serial_incore.inp          Li/6-31G   Serial CIS - In-Core Integrals
+#test0026_serial_direct.inp          Li/6-31G   Serial CIS - Direct Integrals
+#test0026_smp_incore.inp             Li/6-31G   OpenMP CIS - In-Core Integrals
+#test0026_smp_direct.inp             Li/6-31G   OpenMP CIS - Direct Integrals
+#test0027_serial_incore.inp          Li/cc-pVDZ Serial CIS - In-Core Integrals (6D)
+#test0027_serial_direct.inp          Li/cc-pVDZ Serial CIS - Direct Integrals (6D)
+#test0027_serial_denfit.inp          Li/cc-pVDZ Serial CIS - RI Integrals (6D)
+#test0027_smp_incore.inp             Li/cc-pVDZ OpenMP CIS - In-Core Integrals (6D)
+#test0027_smp_direct.inp             Li/cc-pVDZ OpenMP CIS - Direct Integrals (6D)
+#test0027_smp_denfit.inp             Li/cc-pVDZ OpenMP CIS - RI Integrals (6D)
+#test0028_serial_incore.inp          O2/STO-3G  Serial CIS - In-Core Integrals
+#test0028_serial_direct.inp          O2/STO-3G  Serial CIS - Direct Integrals
+#test0028_smp_incore.inp             O2/STO-3G  OpenMP CIS - In-Core Integrals
+#test0028_smp_direct.inp             O2/STO-3G  OpenMP CIS - Direct Integrals
+#test0029_serial_incore.inp          O2/6-31G   Serial CIS - In-Core Integrals
+#test0029_serial_direct.inp          O2/6-31G   Serial CIS - Direct Integrals
+#test0029_smp_incore.inp             O2/6-31G   OpenMP CIS - In-Core Integrals
+#test0029_smp_direct.inp             O2/6-31G   OpenMP CIS - Direct Integrals
+#test0030_serial_incore.inp          O2/cc-pVDZ Serial CIS - In-Core Integrals (6D)
+#test0030_serial_direct.inp          O2/cc-pVDZ Serial CIS - Direct Integrals (6D)
+#test0030_serial_denfit.inp          O2/cc-pVDZ Serial CIS - RI Integrals (6D)
+#test0030_smp_incore.inp             O2/cc-pVDZ OpenMP CIS - In-Core Integrals (6D)
+#test0030_smp_direct.inp             O2/cc-pVDZ OpenMP CIS - Direct Integrals (6D)
+#test0030_smp_denfit.inp             O2/cc-pVDZ OpenMP CIS - RI Integrals (6D)
+#
+#** test0031-00033 Test Small Molecule RHF RPA code **
+#test0031_serial_incore.inp          H2O/STO-3G  Serial RPA - In-Core Integrals
+#test0031_serial_direct.inp          H2O/STO-3G  Serial RPA - Direct Integrals
+#test0031_smp_incore.inp             H2O/STO-3G  OpenMP RPA - In-Core Integrals
+#test0031_smp_direct.inp             H2O/STO-3G  OpenMP RPA - Direct Integrals
+#test0032_serial_incore.inp          H2O/6-31G   Serial RPA - In-Core Integrals
+#test0032_serial_direct.inp          H2O/6-31G   Serial RPA - Direct Integrals
+#test0032_smp_incore.inp             H2O/6-31G   OpenMP RPA - In-Core Integrals
+#test0032_smp_direct.inp             H2O/6-31G   OpenMP RPA - Direct Integrals
+#test0033_serial_incore.inp          H2O/cc-pVDZ Serial RPA - In-Core Integrals (6D)
+#test0033_serial_direct.inp          H2O/cc-pVDZ Serial RPA - Direct Integrals (6D)
+#test0033_serial_denfit.inp          H2O/cc-pVDZ Serial RPA - RI Integrals (6D)
+#test0033_smp_incore.inp             H2O/cc-pVDZ OpenMP RPA - In-Core Integrals (6D)
+#test0033_smp_direct.inp             H2O/cc-pVDZ OpenMP RPA - Direct Integrals (6D)
+#test0033_smp_denfit.inp             H2O/cc-pVDZ OpenMP RPA - RI Integrals (6D)
+#
+#** test0034-0036 Test moderately large molecule RHF RPA code **
+#test0034_serial_incore.inp          Benzene/STO-3G  Serial RPA - In-core Ints
+#test0034_serial_direct.inp          Benzene/STO-3G  Serial RPA - Direct Ints
+#test0034_smp_incore.inp             Benzene/STO-3G  OpenMP RPA - In-core Ints
+#test0034_smp_direct.inp             Benzene/STO-3G  OpenMP RPA - Direct Ints
+#test0035_serial_incore.inp          Benzene/6-31G   Serial RPA - In-core Ints
+#test0035_serial_direct.inp          Benzene/6-31G   Serial RPA - Direct Ints
+#test0035_smp_incore.inp             Benzene/6-31G   OpenMP RPA - In-core Ints
+#test0035_smp_direct.inp             Benzene/6-31G   OpenMP RPA - Direct Ints
+#test0036_serial_incore.inp          Benzene/cc-pVDZ Serial RPA - In-core Ints (6D)
+#test0036_serial_direct.inp          Benzene/cc-pVDZ Serial RPA - Direct Ints (6D)
+#test0036_serial_denfit.inp          Benzene/cc-pVDZ Serial RPA - RI Ints (6D)
+#test0036_smp_incore.inp             Benzene/cc-pVDZ OpenMP RPA - In-core Ints (6D)
+#test0036_smp_direct.inp             Benzene/cc-pVDZ OpenMP RPA - Direct Ints (6D)
+#test0036_smp_denfit.inp             Benzene/cc-pVDZ OpenMP RPA - RI Ints (6D)
+#
+#** test0037-0042 Test small molecule UHF RPA code **
+#test0037_serial_incore.inp          Li/STO-3G  Serial RPA - In-Core Integrals
+#test0037_serial_direct.inp          Li/STO-3G  Serial RPA - Direct Integrals
+#test0037_smp_incore.inp             Li/STO-3G  OpenMP RPA - In-Core Integrals
+#test0037_smp_direct.inp             Li/STO-3G  OpenMP RPA - Direct Integrals
+#test0038_serial_incore.inp          Li/6-31G   Serial RPA - In-Core Integrals
+#test0038_serial_direct.inp          Li/6-31G   Serial RPA - Direct Integrals
+#test0038_smp_incore.inp             Li/6-31G   OpenMP RPA - In-Core Integrals
+#test0038_smp_direct.inp             Li/6-31G   OpenMP RPA - Direct Integrals
+#test0039_serial_incore.inp          Li/cc-pVDZ Serial RPA - In-Core Integrals (6D)
+#test0039_serial_direct.inp          Li/cc-pVDZ Serial RPA - Direct Integrals (6D)
+#test0039_serial_denfit.inp          Li/cc-pVDZ Serial RPA - RI Integrals (6D)
+#test0039_smp_incore.inp             Li/cc-pVDZ OpenMP RPA - In-Core Integrals (6D)
+#test0039_smp_direct.inp             Li/cc-pVDZ OpenMP RPA - Direct Integrals (6D)
+#test0039_smp_denfit.inp             Li/cc-pVDZ OpenMP RPA - RI Integrals (6D)
+#test0040_serial_incore.inp          O2/STO-3G  Serial RPA - In-Core Integrals
+#test0040_serial_direct.inp          O2/STO-3G  Serial RPA - Direct Integrals
+#test0040_smp_incore.inp             O2/STO-3G  OpenMP RPA - In-Core Integrals
+#test0040_smp_direct.inp             O2/STO-3G  OpenMP RPA - Direct Integrals
+#test0041_serial_incore.inp          O2/6-31G   Serial RPA - In-Core Integrals
+#test0041_serial_direct.inp          O2/6-31G   Serial RPA - Direct Integrals
+#test0041_smp_incore.inp             O2/6-31G   OpenMP RPA - In-Core Integrals
+#test0041_smp_direct.inp             O2/6-31G   OpenMP RPA - Direct Integrals
+#test0042_serial_incore.inp          O2/cc-pVDZ Serial RPA - In-Core Integrals (6D)
+#test0042_serial_direct.inp          O2/cc-pVDZ Serial RPA - Direct Integrals (6D)
+#test0042_serial_denfit.inp          O2/cc-pVDZ Serial RPA - RI Integrals (6D)
+#test0042_smp_incore.inp             O2/cc-pVDZ OpenMP RPA - In-Core Integrals (6D)
+#test0042_smp_direct.inp             O2/cc-pVDZ OpenMP RPA - Direct Integrals (6D)
+#test0042_smp_denfit.inp             O2/cc-pVDZ OpenMP RPA - RI Integrals (6D)

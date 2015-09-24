@@ -1,4 +1,4 @@
-#p hf/cc-pVDZ gfinput pop=full nosymm cis(full,nstates=12,50-50)
+#p hf/cc-pVDZ gfinput pop=full nosymm cis(full,nstates=12,50-50) 6D
 
 Water cc-pVDZ 
 

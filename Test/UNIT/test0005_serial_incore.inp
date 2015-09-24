@@ -16,7 +16,8 @@ H 0 -2.44562149    1.44946684   -0.00131200
 $method hf
 $charge 0
 $spin 1
-$basis 3-21G.gbs
+$basis 6-31G.gbs
 $nsmp 1
 $print 1
 $scf incore
+$unittest scf

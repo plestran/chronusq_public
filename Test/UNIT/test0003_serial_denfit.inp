@@ -11,3 +11,4 @@ $basis cc-pVDZ.gbs
 $dfbasis cc-pVDZ_RI.gbs on
 $nsmp 1
 $print 1
+$unittest scf

@@ -1,4 +1,4 @@
-#p hf/cc-pVDZ gfinput pop=full nosymm
+#p hf/cc-pVDZ gfinput pop=full nosymm 6D
 
 Water cc-pVDZ 
 

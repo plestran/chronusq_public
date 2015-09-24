@@ -11,3 +11,4 @@ $basis cc-pVDZ.gbs
 $nsmp 1
 $print 1
 $scf incore
+$unittest scf

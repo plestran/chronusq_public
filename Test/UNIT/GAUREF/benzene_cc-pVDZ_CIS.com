@@ -1,4 +1,4 @@
-# hf/cc-pVDZ gfinput pop=full nosymm cis(full,nstates=12,50-50)
+# hf/cc-pVDZ gfinput pop=full nosymm cis(full,nstates=12,50-50) 6D
 
 Benzene cc-pVDZ
 
