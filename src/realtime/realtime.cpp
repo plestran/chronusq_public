@@ -51,7 +51,9 @@ void RealTime::iniRealTime(Molecule * molecule, BasisSet *basisset, FileIO *file
   this->maxSteps_	= 10;
   this->stepSize_	= 0.05;
   this->typeOrtho_	= 1;  
-  this->initDensity_	= 1;
+//  this->initDensity_	= 1;
+// JJG initDens is converged so I can add perturbing field
+  this->initDensity_	= 0;
   this->swapMOA_	= 0;
   this->swapMOB_	= 7008;
   this->methFormU_	= 2;
