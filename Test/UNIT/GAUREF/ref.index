@@ -2,47 +2,47 @@ Index reference for which Gaussian input file corresponds
 to which ChronusQ Test
 
 
-ChronusQ Test Number          Gaussian Input File
---------------------          -------------------  
-test0001                    h2o_sto3g.com
-test0002                    h2o_631G.com
-test0003                    h2o_ccpVDZ.com
-test0004                    benzene_sto3g.com
-test0005                    benzene_6-31G.com
-test0006                    benzene_cc-pVDZ.com
-test0007                    Li_sto3g.com
-test0008                    Li_6-31G.com
-test0009                    Li_cc-pVDZ.com
-test0010                    O2_sto3g.com
-test0011                    O2_6-31G.com
-test0012                    O2_cc-pVDZ.com
-test0013                    Li_sto3g_ROHF.com
-test0014                    Li_6-31G_ROHF.com
-test0015                    Li_cc-pVDZ_ROHF.com
-test0016                    O2_sto3g_ROHF.com
-test0017                    O2_6-31G_ROHF.com
-test0018                    O2_cc-pVDZ_ROHF.com
-test0019                    h2o_sto3g_CIS.com
-test0020                    h2o_631G_CIS.com
-test0021                    h2o_ccpVDZ_CIS.com
-test0022                    benzene_sto3g_CIS.com
-test0023                    benzene_6-31G_CIS.com
-test0024                    benzene_cc-pVDZ_CIS.com
-test0025                    Li_sto3g_CIS.com
-test0026                    Li_6-31G_CIS.com
-test0027                    Li_cc-pVDZ_CIS.com
-test0028                    O2_sto3g_CIS.com
-test0029                    O2_6-31G_CIS.com
-test0030                    O2_cc-pVDZ_CIS.com
-test0031                    h2o_sto3g_TD.com
-test0032                    h2o_631G_TD.com
-test0033                    h2o_ccpVDZ_TD.com
-test0034                    benzene_sto3g_TD.com
-test0035                    benzene_6-31G_TD.com
-test0036                    benzene_cc-pVDZ_TD.com
-test0037                    Li_sto3g_TD.com
-test0038                    Li_6-31G_TD.com
-test0039                    Li_cc-pVDZ_TD.com
-test0040                    O2_sto3g_TD.com
-test0041                    O2_6-31G_TD.com
-test0042                    O2_cc-pVDZ_TD.com
+ChronusQ Test Number            Gaussian Input File
+--------------------            -------------------  
+test0001                SCF     h2o_sto3g.com
+test0002                SCF     h2o_631G.com
+test0003                SCF     h2o_ccpVDZ.com
+test0004                SCF     benzene_sto3g.com
+test0005                SCF     benzene_6-31G.com
+test0006                SCF     benzene_cc-pVDZ.com
+test0007                SCF     Li_sto3g.com
+test0008                SCF     Li_6-31G.com
+test0009                SCF     Li_cc-pVDZ.com
+test0010                SCF     O2_sto3g.com
+test0011                SCF     O2_6-31G.com
+test0012                SCF     O2_cc-pVDZ.com
+test0013                SCF     Li_sto3g_ROHF.com
+test0014                SCF     Li_6-31G_ROHF.com
+test0015                SCF     Li_cc-pVDZ_ROHF.com
+test0016                SCF     O2_sto3g_ROHF.com
+test0017                SCF     O2_6-31G_ROHF.com
+test0018                SCF     O2_cc-pVDZ_ROHF.com
+test0019                RESP    h2o_sto3g_CIS.com
+test0020                RESP    h2o_631G_CIS.com
+test0021                RESP    h2o_ccpVDZ_CIS.com
+test0022                RESP    benzene_sto3g_CIS.com
+test0023                RESP    benzene_6-31G_CIS.com
+test0024                RESP    benzene_cc-pVDZ_CIS.com
+test0025                RESP    Li_sto3g_CIS.com
+test0026                RESP    Li_6-31G_CIS.com
+test0027                RESP    Li_cc-pVDZ_CIS.com
+test0028                RESP    O2_sto3g_CIS.com
+test0029                RESP    O2_6-31G_CIS.com
+test0030                RESP    O2_cc-pVDZ_CIS.com
+test0031                RESP    h2o_sto3g_TD.com
+test0032                RESP    h2o_631G_TD.com
+test0033                RESP    h2o_ccpVDZ_TD.com
+test0034                RESP    benzene_sto3g_TD.com
+test0035                RESP    benzene_6-31G_TD.com
+test0036                RESP    benzene_cc-pVDZ_TD.com
+test0037                RESP    Li_sto3g_TD.com
+test0038                RESP    Li_6-31G_TD.com
+test0039                RESP    Li_cc-pVDZ_TD.com
+test0040                RESP    O2_sto3g_TD.com
+test0041                RESP    O2_6-31G_TD.com
+test0042                RESP    O2_cc-pVDZ_TD.com
