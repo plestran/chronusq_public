@@ -244,13 +244,13 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
    */
   time(&currentTime);
   fileIO->out<<"\nJob finished: "<<ctime(&currentTime)<<endl;
-/*
+
 //fds
   realtime->iniRealTime(molecule.get(),basisset.get(),fileIO.get(),controls.get(),aointegrals.get(),hartreeFockReal.get());
   realtime->iniDensity();
   realtime->doPropagation();
 //fde
-*/
+
 
 //SingleSlater<dcomplex> newSS(hartreeFockReal.get());
 //newSS.formFock();
