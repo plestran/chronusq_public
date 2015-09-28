@@ -135,7 +135,11 @@ public:
     RHF,
     UHF,
     CUHF,
-    TCS
+    TCS,
+    RKS,
+    UKS,
+    CUKS,
+    GKS
   }; ///< Supported references
   bool	haveMO;      ///< Have MO coefficients?
   bool	haveDensity; ///< Computed Density? (Not sure if this is used anymore)

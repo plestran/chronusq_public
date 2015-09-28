@@ -29,7 +29,8 @@
 namespace ChronusQ{
 
   
-  //// TEST FUNCTIONS
+//// TEST FUNCTIONS  ///
+
   double OneDGrid::f_val(double rad){
   // Test Function to be integrated by One-dimensional grid
   // INT[0,1] r^2 * exp(-r^2);
@@ -102,6 +103,9 @@ namespace ChronusQ{
 // END TEST FUNCTIONS
 */
 
+
+///  ONE GRID GENERAL ///
+
 double OneDGrid::integrate(){
   // Integrate a test function for a one dimensional grid radial part
   // intas2GPt_ is a logical to integrad a 2D angular gris as OneD Grid
@@ -134,29 +138,25 @@ void OneDGrid::printGrid(){
     }
  }
 
+///  TWO GRID GENERAL ///
 
-  double * TwoDGrid::Buffintegrate(double * Sum,double * Buff,int n1, int n2, double fact){
+double * TwoDGrid::Buffintegrate(double * Sum,double * Buff,int n1, int n2, double fact){
+  //  Integration over batches : Overlap at each point (numerical)
+  ConstRealMap fBuff(Buff,n1,n2); 
+  RealMap Sout(Sum,n1,n2); 
+  Sout += fBuff*fact;  
+  return Sum;
+} //End
 
-  //  Integration over batches : Overlap (numerical)
-//     double fact = (Gs_->weights()[j])*(Gr_->weights()[i])*(std::pow(Gr_->gridPts()[i],2.0));
-//     cout << " W= " << fact << endl;
-     ConstRealMap fBuff(Buff,n1,n2); 
-     RealMap Sout(Sum,n1,n2); 
-     Sout += fBuff*fact;  
-     
-     return Sum;
+double * TwoDGrid::BuildDensity(double * Sum,double * Buff,int n1, int n2){
+  //  Integration over batches : Density at each point (numerical)
+  ConstRealMap fBuff(Buff,n1,n2); 
+  RealMap Sout(Sum,n1,n2); 
+  Sout = fBuff;  
+  return Sum;
+} //End
 
-}
-  double * TwoDGrid::BuildDensity(double * Sum,double * Buff,int n1, int n2){
-
-  //  Integration over batches : Overlap (numerical)
-     ConstRealMap fBuff(Buff,n1,n2); 
-     RealMap Sout(Sum,n1,n2); 
-     Sout = fBuff;  
-     return Sum;
-
-}
-
+/*
   RealMatrix * TwoDGrid::integrateO(){
 
   // Integrated Over a TWODGrid (Radial x Angular) the basisProdEval (shells(s1),shells(s2))
@@ -202,49 +202,44 @@ void OneDGrid::printGrid(){
 //    cout << (*Integral)  << endl;
     return Integral;
  
-}  //
+}  //End
+*/
 
-  RealMatrix * TwoDGrid::integrateAtoms(){
-
-  // Integrated Over a TWODGrid (Radial x Angular) the basisProdEval (shells(s1),shells(s2))
-  // function, returning the pointer of the whole (Nbasis,Nbasis) Matrix
-    int    nBase = basisSet_->nBasis();
-    int    Ngridpts = (Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms());
-    double fact;
-////    sph3GP ptSPH;
-    cartGP ptCar;
-    RealMatrix *Integral = new RealMatrix(nBase,nBase);  ///< (NBase,Nbase) Integral ove Grid Point
-    std::cout <<" --- Numerical Quadrature ---- " <<std::endl;
-//    std::cout << "Number of Radial-grid points      = "<< Ngridr  <<std::endl;
-//    std::cout << "Number of Solid Angle-grid points = "<< NLeb  <<std::endl;
-    std::cout << "Total Number of grid points = "<< Ngridpts  <<std::endl;
-    for(auto s1=0l, s12=0l; s1 < basisSet_->nShell(); s1++){
-      int bf1_s = basisSet_->mapSh2Bf(s1);
-      int n1    = basisSet_->shells(s1).size();
-      for(int s2=0; s2 <= s1; s2++, s12++){
-        int bf2_s   = basisSet_->mapSh2Bf(s2);
-        int n2      = basisSet_->shells(s2).size();
-        auto center = basisSet_->shells(s1).O;
-        double *pointProd; 
-        double *SumInt = new double [n1*n2];
-        double val;
-        RealMap BlockInt(SumInt,n1,n2);
-        BlockInt.setZero();
-        for(int ipts = 0; ipts < Ngridpts; ipts++){
-          ptCar = this->gridPtCart(ipts);
-          pointProd = basisSet_->basisProdEval(basisSet_->shells(s1),basisSet_->shells(s2),&ptCar);
-          SumInt=this->Buffintegrate(SumInt,pointProd,n1,n2,getweightsGrid(ipts));
+   RealMatrix * TwoDGrid::integrateAtoms(){
+// Integrated Over a TWODGrid (Radial x Angular) the basisProdEval (shells(s1),shells(s2))
+// function, returning the pointer of the whole (Nbasis,Nbasis) Matrix
+   int    nBase = basisSet_->nBasis();
+   int    Ngridpts = (Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms());
+   cartGP ptCar;
+   RealMatrix *Integral = new RealMatrix(nBase,nBase);  ///< (NBase,Nbase) Integral ove Grid Point
+   std::cout <<" --- Numerical Quadrature to build overlap ---- " <<std::endl;
+   std::cout << "Total Number of grid points = "<< Ngridpts  <<std::endl;
+// Loop Over Shells To build the overlap at each grid point
+   for(auto s1=0l, s12=0l; s1 < basisSet_->nShell(); s1++){
+    int bf1_s = basisSet_->mapSh2Bf(s1);
+    int n1    = basisSet_->shells(s1).size();
+    for(int s2=0; s2 <= s1; s2++, s12++){
+      int bf2_s   = basisSet_->mapSh2Bf(s2);
+      int n2      = basisSet_->shells(s2).size();
+      auto center = basisSet_->shells(s1).O;
+      double *pointProd; 
+      double *SumInt = new double [n1*n2];
+      double val;
+      RealMap BlockInt(SumInt,n1,n2);
+      BlockInt.setZero();
+//    Loop over grid points
+      for(int ipts = 0; ipts < Ngridpts; ipts++){
+        ptCar = this->gridPtCart(ipts);
+        pointProd = basisSet_->basisProdEval(basisSet_->shells(s1),basisSet_->shells(s2),&ptCar);
+        SumInt=this->Buffintegrate(SumInt,pointProd,n1,n2,getweightsGrid(ipts));
         }
-///    Check weight and 4*pi factor (cartesian???)
       Integral->block(bf1_s,bf2_s,n1,n2) = (4.0*math.pi*BlockInt);
       delete [] SumInt;
       }
     }
     (*Integral) = Integral->selfadjointView<Lower>(); 
-//    cout << (*Integral)  << endl;
     return Integral;
- 
-}  //
+}  //End
 
 double TwoDGrid::integrateDensity(){
 //  Build the density at each Grid Points end 
@@ -258,7 +253,8 @@ double TwoDGrid::integrateDensity(){
    double rhor;
    cartGP ptCar;
    RealMatrix *OveratR = new RealMatrix(nBase,nBase);  ///< (NBase,Nbase) Integral ove Grid Point
-   std::cout <<" --- Numerical Quadrature ---- " <<std::endl;
+   std::cout <<" --- Numerical Quadrature for LDA ---- " <<std::endl;
+   std::cout << "Number Radial "<< Gr_->npts() << " Number of Angular " << Gs_->npts() <<std::endl;
    std::cout << "Total Number of grid points = "<< Ngridpts  <<std::endl;
 // Loop Over Grid Points
    for(int ipts = 0; ipts < Ngridpts; ipts++){
@@ -296,20 +292,17 @@ double TwoDGrid::integrateDensity(){
   
 }  //End
 
-  double TwoDGrid::integrate(){
-   double sum = 0.0;
-//     std::cout << "Number of Radial-grid points= "<< Gr_->npts()  <<std::endl;
-//     std::cout << "Number of Solid Angle-grid points= "<< Gs_->npts()  <<std::endl;
-     for(int i = 0; i < Gr_->npts(); i++){
-      for(int j = 0; j < Gs_->npts(); j++){
-//           sum += this->fEVal[i*Gs_->npts() + j]*(Gs_->weights()[j])*(Gr_->weights()[i])*(std::pow(Gr_->gridPts()[i],2.0));
-        }
-      }
-//           cout << "before norm "<< sum <<endl;
-//        return 4.0*(math.pi)*sum*(Gr_->norm());
-        return 4.0*math.pi*sum;
-  }
 
+  double TwoDGrid::integrate(){
+//  OLD
+   double sum = 0.0;
+   for(int i = 0; i < Gr_->npts(); i++){
+    for(int j = 0; j < Gs_->npts(); j++){
+//           sum += this->fEVal[i*Gs_->npts() + j]*(Gs_->weights()[j])*(Gr_->weights()[i])*(std::pow(Gr_->gridPts()[i],2.0));
+      }
+    }
+    return 4.0*math.pi*sum;
+  }
 
 /* OLD
   double TwoDGrid::integrate(){
@@ -357,7 +350,6 @@ double TwoDGrid::step_fun( double mu){
        if (mu < 0 ){p = 1.0;}
        return p;
 };
-
 
 double TwoDGrid::BeckeW(cartGP GridPt, int iAtm){
 //     Generate Becke Weights according to the partition schems in
@@ -412,13 +404,10 @@ void TwoDGrid::genGrid(){
 //   weights (based on Voronoii Cells). The final weights will be storered into 
 //   this->weightsGrid_
 
-
      int nAtom = this->molecule_->nAtoms();
      sph3GP ptSPH; ///< Temp spherical point to store the 3D Grid point (not yet translated over atoms centers)
      cartGP ptCarGrid; /// Several Temp Cartesian Points to perform the translation, cell wieghts funtion
      int ipts  = 0;
-     int ipts2 = 0;
-     double rad;    /// distance of the each point from the atom over 
      int    Ngridr = Gr_->npts();
      int    NLeb   = Gs_->npts();
      double Cartx = 0.0;
@@ -450,7 +439,6 @@ void TwoDGrid::genGrid(){
     }
 }; //End
 
-
 void TwoDGrid::printGrid(){
 //  Call to print Grid point to be poletted (Mathematica Format)
     int    Ngridpts = (Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms());
@@ -459,7 +447,6 @@ void TwoDGrid::printGrid(){
        ptCar = this->gridPtCart(ipts);
        cout << "{" <<bg::get<0>(ptCar) << ", "<<bg::get<1>(ptCar)<<", " <<bg::get<2>(ptCar) <<"}, "<< endl;
       }
-
 }; // End
 
 
@@ -509,11 +496,11 @@ void GaussChebyshev1stGridInf::transformPts(){
 //   Hydrogen
 //   double ralpha= 0.529;
 //   Nitrogen
-     double ralpha= 0.65/2.0;
+//     double ralpha= 0.65/2.0;
 //   Oxygen
 //     double ralpha= 0.60/2.0;
 //   Lithium
-//   double ralpha= 1.45/2.0;
+   double ralpha= 1.45/2.0;
      double toau = (1.0)/phys.bohr;
      double val;
      double dmu;
@@ -558,7 +545,13 @@ void GaussChebyshev1stGridInf::transformPts(){
        gen12_A2(6,overradtwo,A2);
        gen8_A3(18,overradthree,A3); 
     }else if(this->nPts_ == 38){
-// Lebedev N=38; eta 0.877 Lebedev 1976 ZVMMF_15_48 table 9.1;
+
+// Values of the nodes and weights of ninth to seventeenth order gauss-markov quadrature formulae invariant under the octahedron group with inversion
+// V.I. Lebedev Vol 15, pg.44-51, 1975
+// USSR Computational Mathematics and Mathematical Physics 
+// http://dx.doi.org//10.1016/0041-5553(75)90133-0
+
+// Lebedev N=38; n=9, eta 0.877 Lebedev 1976 ZVMMF_15_48 table 9.1;
       A1 = double(1)/double(105);
       A3 = double(9)/double(280);
       q1 = 0.4597008433809831;
@@ -567,7 +560,7 @@ void GaussChebyshev1stGridInf::transformPts(){
       gen8_A3(6,overradthree,A3);
       gen24_Cn(14,q1,C1);
     }else if(this->nPts_ == 50){
-// Lebedev N=50; eta 0.96 Lebedev 1976 ZVMMF_15_48 table 11.1;
+// Lebedev N=50; n= 11, eta 0.960 Lebedev 1976 ZVMMF_15_48 table 11.1;
       A1 = double(4)/double(315);
       A2 = double(64)/double(2835);
       A3 = double(27)/double(1280);
@@ -578,7 +571,7 @@ void GaussChebyshev1stGridInf::transformPts(){
       gen8_A3(18,overradthree,A3);
       gen24_Bn(26,l1,B1);
     }else if(this->nPts_ == 110){
-// Lebedev N=110; eta 0.982 Lebedev 1976 ZVMMF_15_48 table 11.1;
+// Lebedev N=110; n=17, eta 0.982 Lebedev 1976 ZVMMF_15_48 table 17.1;
 // Note the commented ones are from the original paper ...
       A1 = 0.00382827049494;
 //      A3 = 0.00988550016044;
@@ -597,9 +590,44 @@ void GaussChebyshev1stGridInf::transformPts(){
       double l3 = 0.690421048382;
       gen24_Bn(62,l3,B3);
 //      C1 = 4.0 * (std::pow(17.0,3.0)) / 2027025.0;
+//      in the paper see few lines before the table (the same for table 17.1,17.2)
       C1 = 0.00969499636166;
       q1 = 0.478369028812;
       gen24_Cn(86,q1,C1);
+      }else if(this->nPts_ == 194){
+// Quadratures on a sphere 
+// V.I. Lebedev Vol 16, pg.10-24, 1976
+// USSR Computational Mathematics and Mathematical Physics 
+// http://dx.doi.org/10.1016/0041-5553(76)90100-2
+
+// Lebedev N=194; n=23, eta 0.990  
+// page 18;
+
+      A1 = 0.001782340447244611; 
+      gen6_A1(0,one,A1); 
+      A2 = 0.005716905949977102;
+      gen12_A2(6,overradtwo,A2);
+      A3 = 0.005573383178848738;
+      gen8_A3(18,overradthree,A3); 
+      l1 = 0.4446933178717437;
+      B1 = 0.005518771467273614;
+      gen24_Bn(26,l1,B1);
+      double l2 = 0.2892465627575439;
+      double B2 = 0.005158237711805383;
+      gen24_Bn(50,l2,B2);
+      double l3 = 0.6712973442695226;
+      double B3 = 0.005608704082587997;
+      gen24_Bn(74,l3,B3);
+      double l4 = 0.1299335447650067;
+      double B4 = 0.004106777028169394;
+      gen24_Bn(98,l4,B4);
+      q1 = 0.3457702197611283;
+      C1 = 0.005051846064614808;
+      gen24_Cn(122,q1,C1);
+      double u1 = 0.1590417105383530;
+      double r1 = 0.8360360154824589;
+      double D1 = 0.005530248916233094;
+      gen48_Dn(146, u1, r1, D1);
       }else{
       CErr("Number of points not available in Lebedev quadrature");
       }
@@ -1080,6 +1108,304 @@ void LebedevGrid::gen24_Bn(int num, double l, double v){
     tmpCart.set<2>(-l);
     this->weights_[num+23] =  v;
     bg::transform(tmpCart,(this->grid2GPts_[num+23]));
+
+}
+
+void LebedevGrid::gen48_Dn(int num, double u, double r, double v){
+//  v is Dn in Lebedev
+//  Because We are on unit sphere the 3rd coefficient w is:
+    double w = std::sqrt(1.0 - (u * u) - (r * r));
+    cartGP tmpCart;
+
+    tmpCart.set<0>(r);
+    tmpCart.set<1>(u);
+    tmpCart.set<2>(w);
+    this->weights_[num+0] = v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+0]));
+
+    tmpCart.set<0>(-r);
+    tmpCart.set<1>(u);
+    tmpCart.set<2>(w);
+    this->weights_[num+1] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+1]));
+    
+    tmpCart.set<0>(r);
+    tmpCart.set<1>(-u);
+    tmpCart.set<2>(w);
+    this->weights_[num+2] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+2]));
+
+    tmpCart.set<0>(-r);
+    tmpCart.set<1>(-u);
+    tmpCart.set<2>(w);
+    this->weights_[num+3] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+3]));
+ 
+    tmpCart.set<0>(u);
+    tmpCart.set<1>(r);
+    tmpCart.set<2>(w);
+    this->weights_[num+4] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+4]));
+
+    tmpCart.set<0>(-u);
+    tmpCart.set<1>(r);
+    tmpCart.set<2>(w);
+    this->weights_[num+5] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+5]));
+
+    tmpCart.set<0>(u);
+    tmpCart.set<1>(-r);
+    tmpCart.set<2>(w);
+    this->weights_[num+6] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+6]));
+
+    tmpCart.set<0>(-u);
+    tmpCart.set<1>(-r);
+    tmpCart.set<2>(w);
+    this->weights_[num+7] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+7]));
+
+    tmpCart.set<0>(r);
+    tmpCart.set<1>(w);
+    tmpCart.set<2>(u);
+    this->weights_[num+8] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+8]));
+
+    tmpCart.set<0>(-r);
+    tmpCart.set<1>(w);
+    tmpCart.set<2>(u);
+    this->weights_[num+9] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+9]));
+//x[10]
+    tmpCart.set<0>(r);
+    tmpCart.set<1>(w);
+    tmpCart.set<2>(-u);
+    this->weights_[num+10] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+10]));
+
+    tmpCart.set<0>(-r);
+    tmpCart.set<1>(w);
+    tmpCart.set<2>(-u);
+    this->weights_[num+11] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+11]));
+//check
+    tmpCart.set<0>(u);
+    tmpCart.set<1>(w);
+    tmpCart.set<2>(r);
+    this->weights_[num+12] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+12]));
+
+    tmpCart.set<0>(-u);
+    tmpCart.set<1>(w);
+    tmpCart.set<2>(r);
+    this->weights_[num+13] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+13]));
+
+    tmpCart.set<0>(u);
+    tmpCart.set<1>(w);
+    tmpCart.set<2>(-r);
+    this->weights_[num+14] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+14]));
+
+    tmpCart.set<0>(-u);
+    tmpCart.set<1>(w);
+    tmpCart.set<2>(-r);
+    this->weights_[num+15] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+15]));
+
+    tmpCart.set<0>(w);
+    tmpCart.set<1>(r);
+    tmpCart.set<2>(u);
+    this->weights_[num+16] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+16]));
+
+    tmpCart.set<0>(w);
+    tmpCart.set<1>(-r);
+    tmpCart.set<2>(u);
+    this->weights_[num+17] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+17]));
+
+    tmpCart.set<0>(w);
+    tmpCart.set<1>(r);
+    tmpCart.set<2>(-u);
+    this->weights_[num+18] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+18]));
+
+    tmpCart.set<0>(w);
+    tmpCart.set<1>(-r);
+    tmpCart.set<2>(-u);
+    this->weights_[num+19] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+19]));
+//20
+    tmpCart.set<0>(w);
+    tmpCart.set<1>(u);
+    tmpCart.set<2>(r);
+    this->weights_[num+20] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+20]));
+
+    tmpCart.set<0>(w);
+    tmpCart.set<1>(-u);
+    tmpCart.set<2>(r);
+    this->weights_[num+21] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+21]));
+
+    tmpCart.set<0>(w);
+    tmpCart.set<1>(u);
+    tmpCart.set<2>(-r);
+    this->weights_[num+22] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+22]));
+
+    tmpCart.set<0>(w);
+    tmpCart.set<1>(-u);
+    tmpCart.set<2>(-r);
+    this->weights_[num+23] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+23]));
+
+
+    tmpCart.set<0>(r);
+    tmpCart.set<1>(u);
+    tmpCart.set<2>(-w);
+    this->weights_[num+24] = v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+24]));
+
+    tmpCart.set<0>(-r);
+    tmpCart.set<1>(u);
+    tmpCart.set<2>(-w);
+    this->weights_[num+25] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+25]));
+    
+    tmpCart.set<0>(r);
+    tmpCart.set<1>(-u);
+    tmpCart.set<2>(-w);
+    this->weights_[num+26] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+26]));
+
+    tmpCart.set<0>(-r);
+    tmpCart.set<1>(-u);
+    tmpCart.set<2>(-w);
+    this->weights_[num+27] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+27]));
+ 
+    tmpCart.set<0>(u);
+    tmpCart.set<1>(r);
+    tmpCart.set<2>(-w);
+    this->weights_[num+28] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+28]));
+
+    tmpCart.set<0>(-u);
+    tmpCart.set<1>(r);
+    tmpCart.set<2>(-w);
+    this->weights_[num+29] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+29]));
+
+    tmpCart.set<0>(u);
+    tmpCart.set<1>(-r);
+    tmpCart.set<2>(-w);
+    this->weights_[num+30] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+30]));
+
+    tmpCart.set<0>(-u);
+    tmpCart.set<1>(-r);
+    tmpCart.set<2>(-w);
+    this->weights_[num+31] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+31]));
+
+    tmpCart.set<0>(r);
+    tmpCart.set<1>(-w);
+    tmpCart.set<2>(u);
+    this->weights_[num+32] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+32]));
+
+    tmpCart.set<0>(-r);
+    tmpCart.set<1>(-w);
+    tmpCart.set<2>(u);
+    this->weights_[num+33] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+33]));
+//x[10]
+    tmpCart.set<0>(r);
+    tmpCart.set<1>(-w);
+    tmpCart.set<2>(-u);
+    this->weights_[num+34] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+34]));
+
+    tmpCart.set<0>(-r);
+    tmpCart.set<1>(-w);
+    tmpCart.set<2>(-u);
+    this->weights_[num+35] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+35]));
+//check
+    tmpCart.set<0>(u);
+    tmpCart.set<1>(-w);
+    tmpCart.set<2>(r);
+    this->weights_[num+36] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+36]));
+
+    tmpCart.set<0>(-u);
+    tmpCart.set<1>(-w);
+    tmpCart.set<2>(r);
+    this->weights_[num+37] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+37]));
+
+    tmpCart.set<0>(u);
+    tmpCart.set<1>(-w);
+    tmpCart.set<2>(-r);
+    this->weights_[num+38] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+38]));
+
+    tmpCart.set<0>(-u);
+    tmpCart.set<1>(-w);
+    tmpCart.set<2>(-r);
+    this->weights_[num+39] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+39]));
+
+    tmpCart.set<0>(-w);
+    tmpCart.set<1>(r);
+    tmpCart.set<2>(u);
+    this->weights_[num+40] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+40]));
+
+    tmpCart.set<0>(-w);
+    tmpCart.set<1>(-r);
+    tmpCart.set<2>(u);
+    this->weights_[num+41] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+41]));
+
+    tmpCart.set<0>(-w);
+    tmpCart.set<1>(r);
+    tmpCart.set<2>(-u);
+    this->weights_[num+42] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+42]));
+
+    tmpCart.set<0>(-w);
+    tmpCart.set<1>(-r);
+    tmpCart.set<2>(-u);
+    this->weights_[num+43] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+43]));
+//20
+    tmpCart.set<0>(-w);
+    tmpCart.set<1>(u);
+    tmpCart.set<2>(r);
+    this->weights_[num+44] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+44]));
+
+    tmpCart.set<0>(-w);
+    tmpCart.set<1>(-u);
+    tmpCart.set<2>(r);
+    this->weights_[num+45] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+45]));
+
+    tmpCart.set<0>(-w);
+    tmpCart.set<1>(u);
+    tmpCart.set<2>(-r);
+    this->weights_[num+46] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+46]));
+
+    tmpCart.set<0>(-w);
+    tmpCart.set<1>(-u);
+    tmpCart.set<2>(-r);
+    this->weights_[num+47] =  v;
+    bg::transform(tmpCart,(this->grid2GPts_[num+47]));
+
 
 }
 

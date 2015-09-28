@@ -54,17 +54,25 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
   this->maxSCFIter_ = controls->SCFmaxIter_;
 
   this->isClosedShell = (this->multip_ == 1);
-  if(this->isClosedShell && !controls->doCUHF
-     && !controls->doTCS)                        this->Ref_ = RHF ; // RHF
-  else if(!controls->doCUHF && !controls->doTCS) this->Ref_ = UHF ; // UHF
-  else if(controls->doCUHF)                      this->Ref_ = CUHF; // CUHF
-  else if(controls->doTCS)                       this->Ref_ = TCS ; // TCS
+  if(controls->HF){
+    if(this->isClosedShell && !controls->doCUHF
+       && !controls->doTCS)                        this->Ref_ = RHF ; // RHF
+    else if(!controls->doCUHF && !controls->doTCS) this->Ref_ = UHF ; // UHF
+    else if(controls->doCUHF)                      this->Ref_ = CUHF; // CUHF
+    else if(controls->doTCS)                       this->Ref_ = TCS ; // TCS
+  } else if(controls->DFT) {
+    if(this->isClosedShell && !controls->doCUHF
+       && !controls->doTCS)                        this->Ref_ = RKS ; // RKS
+    else if(!controls->doCUHF && !controls->doTCS) this->Ref_ = UKS ; // UKs
+    else if(controls->doCUHF)                      this->Ref_ = CUKS; // CUKS
+    else if(controls->doTCS)                       this->Ref_ = GKS ; // GKS
+   }
 
 
   this->nTCS_ = 1;
   if(this->Ref_ == TCS) this->nTCS_ = 2;
 // Comment out to get rid of DFT tests
-  this->controls_->DFT = true;
+//  this->controls_->DFT = true;
   
 
   // Alpha / TCS Density

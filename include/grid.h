@@ -92,15 +92,11 @@ class TwoDGrid : public Grid {
             BasisSet *  basisSet_; ///< Smart pointer to primary basis set
             Molecule * 	molecule_; ///< Smart pointer to molecule specification
             FileIO *    fileio_;   ///< Smart pointer to fileIO
-//            SingleSlater<T> *  singleSlater_;  ///<Smart Pointer to Single Slater
-            SingleSlater<double> *  singleSlater_;
-//            std::unique_ptr<RealMatrix> GridCar_;
-            double *  GridCarX_;
-            double *  GridCarY_;
-            double *  GridCarZ_;
-//            std::unique_ptr<RealMatrix> weightsAtom_; ///< Atomic weight
-            double   *   weightsGrid_; ///< weight(NGrids*NAtoms)
-            
+            SingleSlater<double> *  singleSlater_; ///< Smart pointer to SingleSlater
+            double *  GridCarX_;  ///<  Cartesian X component of Grid points
+            double *  GridCarY_;  ///<  Cartesian Y component of Grid points
+            double *  GridCarZ_;  ///<  Cartesian Z component of Grid points
+            double   *   weightsGrid_; ///< weights
 /*            double **gEval_;
 ////      fEval = new double*[Gr_->npts()*Gs_->npts()];
 ////      double foxy(cartGP pt, cartGP O,double a1, double a2, double a3, double d1, double d2, double d3, double lx, double ly, double lz); 
@@ -108,21 +104,19 @@ class TwoDGrid : public Grid {
 //            int * Gsnpts_;
 */
       public:
-//        TwoDGrid(FileIO * fileio,Molecule * molecule,BasisSet * basisset,OneDGrid *Gr, OneDGrid *Gs){
+//      Constructor
         TwoDGrid(FileIO * fileio,Molecule * molecule,BasisSet * basisset, SingleSlater<double> * singleSlater,OneDGrid *Gr, OneDGrid *Gs){
+//      Pointers
         this->Gr_ =  Gr;
         this->Gs_ =  Gs;
         this->basisSet_ = basisset;
         this->fileio_ = fileio;
         this->molecule_ = molecule;
         this->singleSlater_ = singleSlater;
-//        this->weightsAtom_   =std::unique_ptr<RealMatrix>(new RealMatrix(this->molecule_->nAtoms(),Gr_->npts()*Gs_->npts()));
-//        this->GridCar_   =std::unique_ptr<RealMatrix>(new RealMatrix(this->molecule_->nAtoms()*Gr_->npts()*Gs_->npts(),3));
-         this->GridCarX_ = new double [Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms()]; ;
-         this->GridCarY_ = new double [Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms()]; ;
-         this->GridCarZ_ = new double [Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms()]; ;
-//         this->weightsGrid_  = new double [Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms()];
-         this->weightsGrid_  = new double [Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms()*this->molecule_->nAtoms()];
+        this->GridCarX_ = new double [Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms()]; ;
+        this->GridCarY_ = new double [Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms()]; ;
+        this->GridCarZ_ = new double [Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms()]; ;
+        this->weightsGrid_  = new double [Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms()*this->molecule_->nAtoms()];
 /*
 ////        this->gEval_  = new double *[Gr_->npts()*Gs_->npts()];
 //        inline double * getfEval(int i,int j, int width){ return this->fEval_[i*width +j];};
@@ -131,9 +125,9 @@ class TwoDGrid : public Grid {
 //        this->fEval =  new double*[Gr_->npts()*Gs_->npts()];
 */
           };
-////        ~TwoDGrid(){delete [] this->fEval_;};
-//      ~TwoDGrid(){delete [] this->gEval_;};
-      RealMatrix * integrateO();
+
+//    Function Declaration //
+//    RealMatrix * integrateO();
       RealMatrix * integrateAtoms();
       double  integrateDensity();
       double integrate();
@@ -148,10 +142,6 @@ class TwoDGrid : public Grid {
       double step_fun(double mu);
       inline double * weightsGrid(){ return this->weightsGrid_;};
       inline double getweightsGrid(int i){ return this->weightsGrid_[i];};
-//      inline double * weightsAtom(){ return this->weightsAtom_;};
-//      inline double   getweightsAtom(int i){ return this->weightsAtom_[i];};
-//      inline RealMatrix* weightsAtom() {return this->weightsAtom_.get();}
-////      double  * ftestVal(cartGP *pt);
       inline sph3GP gridPt(int i, int j){
          sph3GP x(bg::get<0>(Gs_->grid2GPts(j)),bg::get<1>(Gs_->grid2GPts(j)),Gr_->gridPts(i));
         return x;
@@ -164,10 +154,12 @@ class TwoDGrid : public Grid {
          this->GridCarX_[ipts] = x;
          this->GridCarY_[ipts] = y;
          this->GridCarZ_[ipts] = z;
+//    inline double * weightsAtom(){ return this->weightsAtom_;};
+//    inline double   getweightsAtom(int i){ return this->weightsAtom_[i];};
+//    inline RealMatrix* weightsAtom() {return this->weightsAtom_.get();}
+//    double  * ftestVal(cartGP *pt);
       };
-///      inline void  SetgridPtCart(int ipts, int icart, double val){
-///         (*this->GridCar_)(ipts,icart) = val;
-///         };
+//    Deconstructors //
       ~TwoDGrid(){
       delete [] this->weightsGrid_;
       cout << "Deliting weightsGrid" <<endl; 
@@ -179,26 +171,8 @@ class TwoDGrid : public Grid {
       cout << "Deliting GridCarZ"<<endl; 
       cout << "Deliting TWOD GRID OK "<<endl; 
      };
-//        inline void gengEval(int n1, int n2){
-//        for (int i=0;i < Gr_->npts()*Gs_->npts(); i++) {
-//          ConstRealMap gBuff(this->gEval_[i],n1,n2);}
-//           };
-//         return this->(this->gEval_[i*width+j]);
-//      };
 
-//       inline void setgEval(const double *Buff, int n1, int n2, int i, int j, int width){
-//         cout << "Test AP 1" << " i "<< i << " j " << j <<endl;
-//         ConstRealMap gBuff(Buff,n1,n2);
-//           gengEval(n1,n2);
-//         gEval_[i] = new double[n1*n2];
-//         cout << "Test AP 2" << endl;
-//         std:memcpy(gEval_[i*width+j],gBuff,n1*n2);
-//        cout << "Test AP 3" << endl;
-//       };
-
-//      inline void setFEval(double fx,int i, int j, int width){ this->fEVal[i*width +j] = fx;};
-//      inline void setFEval(double *fx, int mu, int nu, int mnwidth, int i, int j, int width){ this->fEVal[i*width +j] = *(fx+(mu*mnwidth +nu));};
-  }; //   Class TwoDGrid
+}; //   Class TwoDGrid
 
 
 class LebedevGrid : public OneDGrid {
@@ -215,8 +189,9 @@ class LebedevGrid : public OneDGrid {
       void gen6_A1(int num, double a, double v);
       void gen12_A2(int num, double a, double v);
       void gen8_A3(int num, double a, double v);
-      void gen24_Cn(int num, double a, double v);
-      void gen24_Bn(int num, double a, double v);
+      void gen24_Cn(int num, double q, double v);
+      void gen24_Bn(int num, double l, double v);
+      void gen48_Dn(int num, double u, double r, double v);
   }; // class LebedevGrid
 
   class GaussChebyshev1stGrid : public OneDGrid {
