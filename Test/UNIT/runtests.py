@@ -1,4 +1,5 @@
 import os,sys
+import getopt
 import GAUREF.genref as GR
 from tabulate import tabulate
 
@@ -108,12 +109,11 @@ def genSummary(testtable,summary):
 #
 #  Runs Unit Tests
 #
-def runUnit():
+def runUnit(doKill):
 	testtable = genTable()
 	refdict = genRefDict()
 		
 	summary = []
-	doKill = False
 	for i in testtable:
 		if findFile(i.infile,"."):
 			print "../../chronusQ "+i.infile.replace(".inp",'')
@@ -144,4 +144,17 @@ def runUnit():
 
 
 if __name__ in "__main__":
-	runUnit()	
+	doKill = False
+	try:
+		opts, args = getopt.getopt(sys.argv[1:],"h",["enable-travisci","enable-kill"])
+	except getopt.GetoptError:
+		print 'python runtests.py [--option]'
+		sys.exit(2)
+	for opt, arg in opts:
+		if opt == '-h':
+			print 'python runtests.py [--option]'
+			sys.exit()
+		elif opt in ("--enable-travisci","--enable-kill"):
+			doKill = True
+
+	runUnit(doKill)	
