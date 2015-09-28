@@ -22,5 +22,7 @@ install:
   - cd ..
 script:
   - ./util/travisci_build.sh
-  - cd build_gcc_libint_openmp/Test/UNIT
+  - cd build_gcc_libint_openmp
+  - ln -s src/chronusQ/chronusQ .
+  - cd Test/UNIT
   - python runtests.py --enable-travisci 
