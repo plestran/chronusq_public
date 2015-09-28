@@ -88,6 +88,7 @@ public:
   inline int index(int i) { return this->index_[i];};
   inline int nAtoms() {return this->nAtoms_;};
   inline RealMatrix* cart() {return this->cart_.get();}
+  inline RealMatrix* rIJ() {return this->rIJ_.get();}
   inline int charge() {return this->charge_;}
   inline int multip() {return this->multip_;}
   inline int nTotalE() {return this->nTotalE_;};

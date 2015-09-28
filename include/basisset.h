@@ -193,7 +193,7 @@ public:
   
   template <typename T> double * basisEval(int,std::array<double,3>,T*);
   template <typename T> double * basisEval(libint2::Shell&,T*);
-  template <typename T> double * basisProdEval(libint2::Shell&,libint2::Shell&,T*);
+  template <typename T> double * basisProdEval(libint2::Shell,libint2::Shell,T*);
   inline libint2::Shell      shells(int i) {return this->shells_[i];    };
   inline int                nLShell(int L) {return this->nLShell_[L];   };
   inline int               mapSh2Bf(int i) {return this->mapSh2Bf_[i];  };

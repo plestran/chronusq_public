@@ -229,22 +229,29 @@ double * BasisSet::basisEval(int iShell, std::array<double,3> center,sph3GP *ptS
   } else CErr("L > 2 NYI");
 
   std::memset(fEVal,0,shSize*sizeof(double));
-
+  cout << "Point Cart " << bg::get<0>(pt) << " " << bg::get<1>(pt) << " " << bg::get<2>(pt) <<endl;
+  cout << "Center     " << center[0] << " " << center[1] << " " << center[2] <<endl;
   double x = bg::get<0>(pt) - center[0];
   double y = bg::get<1>(pt) - center[1];
   double z = bg::get<2>(pt) - center[2];
+  cout << "Point Scaled" << x << " " << y << " " << z << endl;
   double rSq = x*x + y*y + z*z;
+  cout << " rSq " << rSq << endl;
+  cout << "shSize " << shSize << endl;
+  cout << "contDepth " << contDepth << endl;
   for(auto i = 0; i < shSize; i++){
-    cout << endl << fEVal[i] << endl;
+//    cout << endl << fEVal[i] << endl;
     for(auto k = 0; k < contDepth; k++){
       fEVal[i] += 
         this->shells(iShell).contr[0].coeff[k] *
         std::exp(-this->shells(iShell).alpha[k]*rSq);
+//        cout << "AP " << this->shells(iShell).contr[0].coeff[k] << endl;
+//        cout <<  this->shells(iShell).alpha[k] << endl;
     }
     auto l = L[i][0];
     auto m = L[i][1];
     auto n = L[i][2];
-
+    cout << "l= " << l << "m= " << m << "n= " << n << endl;
     fEVal[i] *= std::pow(x,l);
     fEVal[i] *= std::pow(y,m);
     fEVal[i] *= std::pow(z,n);
@@ -282,7 +289,7 @@ double * BasisSet::basisEval(libint2::Shell &liShell, cartGP *pt){
   double z = bg::get<2>(*pt) - center[2];
   double rSq = x*x + y*y + z*z;
   for(auto i = 0; i < shSize; i++){
-    cout << endl << fEVal[i] << endl;
+//    cout << endl << fEVal[i] << endl;
     for(auto k = 0; k < contDepth; k++){
       fEVal[i] += 
         liShell.contr[0].coeff[k] *
@@ -331,7 +338,7 @@ double * BasisSet::basisEval(libint2::Shell &liShell, sph3GP *ptSph){
   double z = bg::get<2>(pt) - center[2];
   double rSq = x*x + y*y + z*z;
   for(auto i = 0; i < shSize; i++){
-    cout << endl << fEVal[i] << endl;
+//    cout << endl << fEVal[i] << endl;
     for(auto k = 0; k < contDepth; k++){
       fEVal[i] += 
         liShell.contr[0].coeff[k] *
@@ -344,13 +351,36 @@ double * BasisSet::basisEval(libint2::Shell &liShell, sph3GP *ptSph){
     fEVal[i] *= std::pow(x,l);
     fEVal[i] *= std::pow(y,m);
     fEVal[i] *= std::pow(z,n);
+//    cout << "inside " << i << "  " << fEVal[i] << endl;
   }
 
   return fEVal;
 }
 
 template<>
-double * BasisSet::basisProdEval(libint2::Shell &s1, libint2::Shell &s2, cartGP *pt){
+double * BasisSet::basisProdEval(libint2::Shell s1, libint2::Shell s2, cartGP *pt){
+          
+//  cout << "{" <<bg::get<0>(pt) << ", "<<bg::get<1>(pt)<<", " <<bg::get<2>(pt) <<"}, "<< endl;
+  double *fEVal = new double[s1.size()*s2.size()];
+  double *s1Eval = basisEval(s1,pt);
+  double *s2Eval = basisEval(s2,pt);
+
+  double   temp;
+  double   temp2;
+  double   zero = 0.0;
+  for(auto i = 0, ij = 0; i < s1.size(); i++)
+  for(auto j = 0; j < s2.size(); j++, ij++){
+    fEVal[ij] = s1Eval[i]*s2Eval[j];
+  }
+  delete [] s1Eval;
+  delete [] s2Eval;
+  
+  return fEVal;
+  
+}
+
+template<>
+double * BasisSet::basisProdEval(libint2::Shell s1, libint2::Shell s2, sph3GP *pt){
   double *fEVal = new double[s1.size()*s2.size()];
   double *s1Eval = basisEval(s1,pt);
   double *s2Eval = basisEval(s2,pt);
@@ -358,12 +388,14 @@ double * BasisSet::basisProdEval(libint2::Shell &s1, libint2::Shell &s2, cartGP 
   for(auto i = 0, ij = 0; i < s1.size(); i++)
   for(auto j = 0; j < s2.size(); j++, ij++){
     fEVal[ij] = s1Eval[i]*s2Eval[j];
-  }
+//    cout << "Print Inside =" << fEVal[ij] <<endl;
+}
   delete [] s1Eval;
   delete [] s2Eval;
-
+  
   return fEVal;
   
 }
+
 } // namespace ChronusQ
 
