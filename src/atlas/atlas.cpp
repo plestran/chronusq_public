@@ -247,8 +247,11 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 
 //fds
   realtime->iniRealTime(molecule.get(),basisset.get(),fileIO.get(),controls.get(),aointegrals.get(),hartreeFockReal.get());
+  fileIO->out<<"\niniRealTime Done: "<<ctime(&currentTime)<<endl;
   realtime->iniDensity();
+  fileIO->out<<"\niniDensity Done: "<<ctime(&currentTime)<<endl;
   realtime->doPropagation();
+  fileIO->out<<"\ndoPropagation Done: "<<ctime(&currentTime)<<endl;
 //fde
 
 
