@@ -15,4 +15,4 @@ def grabinfoRESP(fname):
 	stry = ''
 	for i in range(len(es)):
 		stry += str(es[i])+','+str(osc[i])+'/'
-	return stry
+	return stry[:-1]

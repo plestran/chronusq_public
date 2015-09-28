@@ -31,14 +31,15 @@
   inline void setPPRPA(int n){ this->iPPRPA_ = n;                      };
 
   // Getters
-  inline int           nGuess(){     return this->nGuess_;               };
-  inline int           nSek(){       return this->nSek_;                 };
-  inline int           iMeth(){      return this->iMeth_;                };
-  inline int           nSingleDim(){ return this->nSingleDim_;           };
-  inline int           nOVA(){       return this->singleSlater_->nOVA(); };
-  inline int           nOVB(){       return this->singleSlater_->nOVB(); };
-  inline VectorXd*     omega(){      return this->omega_.get();          };
-  inline TCMMatrix*    transDen(){   return this->transDen_.get();       };
-  inline RealCMMatrix* rmDiag(){     return this->rmDiag_.get();         };
-  inline TMatrix*      davGuess(){   return this->davGuess_.get();       };
-  inline FileIO*       fileio(){     return this->fileio_;               };
+  inline int           nGuess(){      return this->nGuess_;               };
+  inline int           nSek(){        return this->nSek_;                 };
+  inline int           iMeth(){       return this->iMeth_;                };
+  inline int           nSingleDim(){  return this->nSingleDim_;           };
+  inline int           nOVA(){        return this->singleSlater_->nOVA(); };
+  inline int           nOVB(){        return this->singleSlater_->nOVB(); };
+  inline VectorXd*     omega(){       return this->omega_.get();          };
+  inline TCMMatrix*    transDen(){    return this->transDen_.get();       };
+  inline RealCMMatrix* rmDiag(){      return this->rmDiag_.get();         };
+  inline TMatrix*      davGuess(){    return this->davGuess_.get();       };
+  inline FileIO*       fileio(){      return this->fileio_;               };
+  inline RealMatrix*   oscStrength(){ return this->oscStrength_.get();    };

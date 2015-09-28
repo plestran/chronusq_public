@@ -330,9 +330,7 @@ void SDResponse<double>::IterativeRPA(){
   QuasiNewton<double> davA(this);
   davA.run(this->fileio_->out);
   if(hasProp){
-    cout << "HERE" << endl;
     this->formTransDipole();
-    cout << "HERE" << endl;
     this->formOscStrength();
   }
 //prettyPrint(this->fileio_->out,*this->transDen_,"Trans den");
