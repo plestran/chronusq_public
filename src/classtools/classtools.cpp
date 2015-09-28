@@ -136,6 +136,16 @@ void readInput(FileIO * fileio, Molecule * mol, BasisSet * basis, Controls * con
       controls->readDebug(readString);
     } else if(!readString.compare("$PSCF")) {
       controls->readPSCF(fileio->in,fileio->out);
+    } else if(!readString.compare("$UNITTEST")) {
+      controls->doUnit = true;
+      fileio->in >> readString;
+      readString = stringupper(readString);
+      if(!readString.compare("SCF")) 
+        controls->unitTest = Controls::UnitSCF;
+      else if(!readString.compare("RESP")) 
+        controls->unitTest = Controls::UnitResp;
+      else
+        CErr("Unit Test Option: "+readString+" not recognized",fileio->out);
     }
     fileio->in >> readString;
   };
@@ -152,5 +162,42 @@ double traceSymm(RealMatrix* a, RealMatrix* b) {
 
   return tmpVal;
  };
+
+void printUnitInfo(Controls * controls, SingleSlater<double> * singleSlater, SDResponse<double> * sdResponse){
+  if(controls->unitTest == Controls::UnitSCF)
+    cout << std::setprecision(10) << singleSlater->totalEnergy << "/"
+         << std::setprecision(4)
+         << (*singleSlater->dipole())(0)/phys.debye << "/"
+         << (*singleSlater->dipole())(1)/phys.debye << "/"
+         << (*singleSlater->dipole())(2)/phys.debye << "/"
+         << (*singleSlater->quadpole())(0,0)*phys.bohr/phys.debye << "/"
+         << (*singleSlater->quadpole())(1,1)*phys.bohr/phys.debye << "/"
+         << (*singleSlater->quadpole())(2,2)*phys.bohr/phys.debye << "/"
+         << (*singleSlater->quadpole())(0,1)*phys.bohr/phys.debye << "/"
+         << (*singleSlater->quadpole())(0,2)*phys.bohr/phys.debye << "/"
+         << (*singleSlater->quadpole())(1,2)*phys.bohr/phys.debye << "/"
+        << (*singleSlater->tracelessQuadpole())(0,0)*phys.bohr/phys.debye << "/"
+        << (*singleSlater->tracelessQuadpole())(1,1)*phys.bohr/phys.debye << "/"
+        << (*singleSlater->tracelessQuadpole())(2,2)*phys.bohr/phys.debye << "/"
+        << (*singleSlater->tracelessQuadpole())(0,1)*phys.bohr/phys.debye << "/"
+        << (*singleSlater->tracelessQuadpole())(0,2)*phys.bohr/phys.debye << "/"
+        << (*singleSlater->tracelessQuadpole())(1,2)*phys.bohr/phys.debye << "/"
+     << (*singleSlater->octpole())(0,0,0)*phys.bohr*phys.bohr/phys.debye << "/"
+     << (*singleSlater->octpole())(1,1,1)*phys.bohr*phys.bohr/phys.debye << "/"
+     << (*singleSlater->octpole())(2,2,2)*phys.bohr*phys.bohr/phys.debye << "/"
+     << (*singleSlater->octpole())(0,1,1)*phys.bohr*phys.bohr/phys.debye << "/"
+     << (*singleSlater->octpole())(0,0,1)*phys.bohr*phys.bohr/phys.debye << "/"
+     << (*singleSlater->octpole())(0,0,2)*phys.bohr*phys.bohr/phys.debye << "/"
+     << (*singleSlater->octpole())(0,2,2)*phys.bohr*phys.bohr/phys.debye << "/"
+     << (*singleSlater->octpole())(1,2,2)*phys.bohr*phys.bohr/phys.debye << "/"
+     << (*singleSlater->octpole())(1,1,2)*phys.bohr*phys.bohr/phys.debye << "/"
+    << (*singleSlater->octpole())(0,1,2)*phys.bohr*phys.bohr/phys.debye << endl;
+  else if(controls->unitTest == Controls::UnitResp){
+    for(auto iSt = 0; iSt < sdResponse->nSek(); iSt++){
+      cout << (*sdResponse->omega())(iSt)*phys.eVPerHartree << "," << (*sdResponse->oscStrength())(0,iSt);
+      if(iSt != (sdResponse->nSek() - 1)) cout << "/";
+    }
+    cout << endl;
+  }
 }
-// namespace ChronusQ
+} // namespace ChronusQ

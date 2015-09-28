@@ -58,6 +58,7 @@ public:
   bool          doSDR;          // Perform Response calculation
   bool          doCUHF;         // To CUHF (Eigenfunction of S x S)
   bool          doComplex;      // Find complex solution
+  bool          doUnit;         // Print consolidated infor for unit tests
   double 	thresholdS;
   double 	thresholdAB;
   double	thresholdSchawrtz;
@@ -68,8 +69,15 @@ public:
   int           nthreads;       // Number of OpenMP threads
   int           SDMethod;
   int           SDNSek;
+  int           unitTest;       // Which class of unit test to perform
   std::string   gauFChkName;	// Gaussian formatted checkpoint filename
   std::string   gauMatElName;   // Gaussian raw matrix element file
+
+  // Enum for Unit Tests
+  enum{
+    UnitSCF,
+    UnitResp
+  };
 
   Controls(){;};
   ~Controls(){;};
