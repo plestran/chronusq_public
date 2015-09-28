@@ -29,6 +29,7 @@ template<>
 template<>
 SingleSlater<double>::SingleSlater(SingleSlater<double> * other){
     this->nBasis_ = other->nBasis_;
+    this->nTCS_   = other->nTCS_;
     this->nTT_    = other->nTT_;
 //APS 
     this->nShell_ = other->nShell_;

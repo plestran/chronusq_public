@@ -29,6 +29,7 @@ template<>
 template<>
 SingleSlater<dcomplex>::SingleSlater(SingleSlater<dcomplex> * other){
     this->nBasis_ = other->nBasis_;
+    this->nTCS_   = other->nTCS_;
     this->nTT_    = other->nTT_;
     this->nAE_    = other->nAE_;
     this->nBE_    = other->nBE_; 
@@ -68,6 +69,7 @@ template<>
 template<>
 SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other){
     this->nBasis_ = other->nBasis();
+    this->nTCS_   = other->nTCS();
     this->nTT_    = other->nTT();
     this->nAE_    = other->nAE();
     this->nBE_    = other->nBE(); 
