@@ -144,15 +144,21 @@ def runUnit(doKill):
 
 
 if __name__ in "__main__":
+	msg = """python runtests.py [-o --option]
+
+  Options:
+    -h, --help		Print usage instructions
+    --enable-kill	Enable script termination on Unit Test failure
+    --enable-travisci	Enable options for Travis-CI run"""
 	doKill = False
 	try:
-		opts, args = getopt.getopt(sys.argv[1:],"h",["enable-travisci","enable-kill"])
+		opts, args = getopt.getopt(sys.argv[1:],"h",["enable-travisci","enable-kill","help"])
 	except getopt.GetoptError:
-		print 'python runtests.py [--option]'
+		print msg
 		sys.exit(2)
 	for opt, arg in opts:
-		if opt == '-h':
-			print 'python runtests.py [--option]'
+		if opt in ('-h',"--help"):
+			print msg
 			sys.exit()
 		elif opt in ("--enable-travisci","--enable-kill"):
 			doKill = True
