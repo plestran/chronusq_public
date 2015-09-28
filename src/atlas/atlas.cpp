@@ -152,7 +152,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   }
   if(controls->doUnit) printUnitInfo(controls.get(),hartreeFockReal.get(),sdResponseReal.get());
 
-/*
+
 //fds
   realtime->iniRealTime(molecule.get(),basisset.get(),fileIO.get(),controls.get(),aointegrals.get(),hartreeFockReal.get());
   fileIO->out<<"\niniRealTime Done: "<<ctime(&currentTime)<<endl;
@@ -161,7 +161,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   realtime->doPropagation();
   fileIO->out<<"\ndoPropagation Done: "<<ctime(&currentTime)<<endl;
 //fds
-*/
+
   // Cleanup Libint env
 #ifdef USE_LIBINT
   libint2::cleanup();

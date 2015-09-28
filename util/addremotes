@@ -1,4 +1,4 @@
-$!/bin/csh
+#!/bin/csh
 
 git remote add dbwy https://github.com/wavefunction91/chronusq.git
 git remote add ligroup https://github.com/liresearchgroup/chronusq.git
