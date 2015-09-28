@@ -48,8 +48,8 @@ void RealTime::iniRealTime(Molecule * molecule, BasisSet *basisset, FileIO *file
   this->nOccB_ 	= this->groundState_->nOccB();
 
   this->frozenNuc_	= true;
-  this->maxSteps_	= 10;
-  this->stepSize_	= 0.05;
+  this->maxSteps_	= 100;
+  this->stepSize_	= 0.005;
   this->typeOrtho_	= 1;  
   this->initDensity_	= 1;
   this->swapMOA_	= 5006;
