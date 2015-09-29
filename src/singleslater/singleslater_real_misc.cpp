@@ -215,6 +215,7 @@ void SingleSlater<double>::computeEnergy(){
     this->energyTwoE += 0.5*(*this->PTB_).frobInner(this->densityB_->conjugate());
   }
 
+/*
   // Add in the electric field component if they are non-zero
   std::array<double,3> null{{0,0,0}};
   if((*this->elecField_) != null){
@@ -231,6 +232,7 @@ void SingleSlater<double>::computeEnergy(){
       iBuf += NBSq;
     }
   }
+*/
   this->totalEnergy= this->energyOneE + this->energyTwoE + this->energyNuclei;
   this->printEnergy();
 };

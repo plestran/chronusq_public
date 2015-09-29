@@ -109,6 +109,7 @@ void SingleSlater<T>::formFock(){
   };
 
   // Add in the electric field component if they are non-zero
+/*
   std::array<double,3> null{{0,0,0}};
   if((*this->elecField_) != null){
     this->fileio_->out << "Adding in Electric Field Contribution" << endl;
@@ -123,6 +124,7 @@ void SingleSlater<T>::formFock(){
       iBuf += NBSq;
     }
   }
+*/
   if(this->controls_->printLevel>=2) {
     if(this->Ref_ != TCS){
       prettyPrint(this->fileio_->out,(*this->fockA_),"Alpha Fock");

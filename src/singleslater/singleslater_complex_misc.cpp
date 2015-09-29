@@ -138,7 +138,7 @@ void SingleSlater<dcomplex>::computeEnergy(){
     this->energyOneE += (*this->aointegrals_->oneE_).frobInner(this->densityB_->real());
     this->energyTwoE += 0.5*(*this->PTB_).frobInner(this->densityB_->conjugate()).real();
   }
-
+/*
   // Add in the electric field component if they are non-zero
   std::array<double,3> null{{0,0,0}};
   if((*this->elecField_) != null){
@@ -155,6 +155,7 @@ void SingleSlater<dcomplex>::computeEnergy(){
       iBuf += NBSq;
     }
   }
+*/
 
   this->totalEnergy= this->energyOneE + this->energyTwoE + this->energyNuclei;
   this->printEnergy();
