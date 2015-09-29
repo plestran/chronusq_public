@@ -44,6 +44,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   auto realtime		  = std::unique_ptr<RealTime>(new RealTime());
   auto sdResponseReal     = std::unique_ptr<SDResponse<double>>(new SDResponse<double>());
   auto sdResponseComplex  = std::unique_ptr<SDResponse<dcomplex>>(new SDResponse<dcomplex>());
+  auto twoDGrid     	= std::unique_ptr<TwoDGrid>(new TwoDGrid());
   std::unique_ptr<FileIO> fileIO;
   std::unique_ptr<GauJob> gauJob;
 
@@ -152,7 +153,15 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   }
   if(controls->doUnit) printUnitInfo(controls.get(),hartreeFockReal.get(),sdResponseReal.get());
 
+<<<<<<< HEAD
 
+||||||| merged common ancestors
+/*
+////// APS ////
+  twoDGrid->iniTwoDGrid(fileIO.get(),molecule.get(),basisset.get(),aointegrals.get(),hartreeFockReal.get(),100,194);
+////// APE ////
+*/
+/*
 //fds
   realtime->iniRealTime(molecule.get(),basisset.get(),fileIO.get(),controls.get(),aointegrals.get(),hartreeFockReal.get());
   fileIO->out<<"\niniRealTime Done: "<<ctime(&currentTime)<<endl;
@@ -161,6 +170,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   realtime->doPropagation();
   fileIO->out<<"\ndoPropagation Done: "<<ctime(&currentTime)<<endl;
 //fds
+*/
 
   // Cleanup Libint env
 #ifdef USE_LIBINT

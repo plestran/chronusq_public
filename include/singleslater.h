@@ -230,6 +230,7 @@ public:
   void formExchange();		// form the exchange matrix
   void formPT();
   void formVXC(RealMatrix *);   // Form DFT VXC Term
+  void EnVXC();                 // DFT VXC Energy Term
   void matchord();              // match Guassian order of guess
   void readGuessIO();       	// read the initial guess of MO's from the input stream
   void readGuessGauMatEl(GauMatEl&); // read the intial guess of MO's from Gaussian raw matrix element file

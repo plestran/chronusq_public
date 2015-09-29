@@ -158,6 +158,7 @@ SingleSlater<double>::SingleSlater(SingleSlater<double> * other){
 //----------------------------//
 // form the Vxc matrix        //
 //----------------------------//
+
 template<>
 void SingleSlater<double>::formVXC(RealMatrix * Integral3D){
 //  Right now is just a place holder (we print the overlap, the actual
@@ -174,6 +175,18 @@ void SingleSlater<double>::formVXC(RealMatrix * Integral3D){
 //  cout << " Number Electron = " << Cx*pow(Ne,4.0/3.0) <<endl;
  cout << "Single Slater Numeric : Print" <<endl;
  cout << (*this->vXCA_)  << endl;
+};
+
+
+template<>
+void SingleSlater<double>::EnVXC(){
+  double Energy;
+  double resLDA = -11.611162519357;
+  Energy = (*this->vXCA_).frobInner(this->densityA_->conjugate());
+  cout << " E_XC = " << Energy <<endl;
+  cout << "LDA Err " << (Energy-resLDA) << endl;
+  cout << "Single Slater Numeric : Print" <<endl;
+  cout << (*this->vXCA_)  << endl;
 };
 ////APE
 //
