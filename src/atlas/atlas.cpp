@@ -41,7 +41,8 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   auto mointegralsComplex = std::unique_ptr<MOIntegrals<dcomplex>>(new MOIntegrals<dcomplex>());
   auto hartreeFockReal	  = std::unique_ptr<SingleSlater<double>>(  new SingleSlater<double>()  );
   auto hartreeFockComplex = std::unique_ptr<SingleSlater<dcomplex>>(new SingleSlater<dcomplex>());
-  auto realtime		  = std::unique_ptr<RealTime<double>>(new RealTime<double>());
+  auto realtimeReal	  = std::unique_ptr<RealTime<double>>(new RealTime<double>());
+  auto realtimeComplex	  = std::unique_ptr<RealTime<dcomplex>>(new RealTime<dcomplex>());
   auto sdResponseReal     = std::unique_ptr<SDResponse<double>>(new SDResponse<double>());
   auto sdResponseComplex  = std::unique_ptr<SDResponse<dcomplex>>(new SDResponse<dcomplex>());
 //auto twoDGrid     	= std::unique_ptr<TwoDGrid>(new TwoDGrid());
@@ -161,18 +162,14 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 
 //fds
   if(!controls->doComplex) {
-    realtime->iniRealTime(molecule.get(),basisset.get(),fileIO.get(),controls.get(),aointegrals.get(),hartreeFockReal.get());
+    realtimeReal->iniRealTime(molecule.get(),basisset.get(),fileIO.get(),controls.get(),aointegrals.get(),hartreeFockReal.get());
+    realtimeReal->iniDensity();
+    realtimeReal->doPropagation();
   } else {
-    fileIO->out<<"\nComplex Real Time NYI"<<endl;
-    exit (EXIT_FAILURE);
-    //complex rttdhf
-    //realtime->iniRealTime(molecule.get(),basisset.get(),fileIO.get(),controls.get(),aointegrals.get(),hartreeFockComplex.get());
+    realtimeComplex->iniRealTime(molecule.get(),basisset.get(),fileIO.get(),controls.get(),aointegrals.get(),hartreeFockComplex.get());
+    realtimeComplex->iniDensity();
+    realtimeComplex->doPropagation();
   }
-  fileIO->out<<"\niniRealTime Done: "<<ctime(&currentTime)<<endl;
-  realtime->iniDensity();
-  fileIO->out<<"\niniDensity Done: "<<ctime(&currentTime)<<endl;
-  realtime->doPropagation();
-  fileIO->out<<"\ndoPropagation Done: "<<ctime(&currentTime)<<endl;
 //fds
 
 
