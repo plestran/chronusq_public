@@ -29,6 +29,7 @@ template<>
 template<>
 SingleSlater<dcomplex>::SingleSlater(SingleSlater<dcomplex> * other){
     this->nBasis_ = other->nBasis_;
+    this->nTCS_   = other->nTCS_;
     this->nTT_    = other->nTT_;
     this->nAE_    = other->nAE_;
     this->nBE_    = other->nBE_; 
@@ -42,6 +43,7 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<dcomplex> * other){
     this->haveDensity = true;
     this->haveMO	    = true;
     this->havePT      = true;
+    this->isClosedShell = other->isClosedShell;
     // Hardcoded for Libint route
     this->densityA_           = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(*other->densityA_));
     this->fockA_              = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(*other->fockA_));
@@ -67,6 +69,7 @@ template<>
 template<>
 SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other){
     this->nBasis_ = other->nBasis();
+    this->nTCS_   = other->nTCS();
     this->nTT_    = other->nTT();
     this->nAE_    = other->nAE();
     this->nBE_    = other->nBE(); 
@@ -80,6 +83,7 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other){
     this->haveDensity = true;
     this->haveMO	    = true;
     this->havePT      = true;
+    this->isClosedShell = other->isClosedShell;
     // Hardcoded for Libint route
     this->densityA_           = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
     this->fockA_              = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
@@ -129,10 +133,29 @@ void SingleSlater<dcomplex>::computeEnergy(){
 */
   this->energyOneE = (*this->aointegrals_->oneE_).frobInner(this->densityA_->real());
   this->energyTwoE = 0.5*(*this->PTA_).frobInner(this->densityA_->conjugate()).real();
+
   if(!this->isClosedShell && this->Ref_ != TCS){
     this->energyOneE += (*this->aointegrals_->oneE_).frobInner(this->densityB_->real());
     this->energyTwoE += 0.5*(*this->PTB_).frobInner(this->densityB_->conjugate()).real();
   }
+
+  // Add in the electric field component if they are non-zero
+  std::array<double,3> null{{0,0,0}};
+  if((*this->elecField_) != null){
+    int NB = this->nTCS_*this->nBasis_;
+    int NBSq = NB*NB;
+    int iBuf = 0;
+    for(auto iXYZ = 0; iXYZ < 3; iXYZ++){
+      ConstRealMap mu(&this->aointegrals_->elecDipole_->storage()[iBuf],NB,NB);
+      this->energyOneE += 
+        this->elecField_->at(iXYZ) * mu.frobInner(this->densityA_->real());
+      if(!this->isClosedShell && this->Ref_ != TCS)
+      this->energyOneE += 
+        this->elecField_->at(iXYZ) * mu.frobInner(this->densityB_->real());
+      iBuf += NBSq;
+    }
+  }
+
   this->totalEnergy= this->energyOneE + this->energyTwoE + this->energyNuclei;
   this->printEnergy();
 };

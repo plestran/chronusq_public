@@ -41,6 +41,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   auto mointegralsComplex = std::unique_ptr<MOIntegrals<dcomplex>>(new MOIntegrals<dcomplex>());
   auto hartreeFockReal	  = std::unique_ptr<SingleSlater<double>>(  new SingleSlater<double>()  );
   auto hartreeFockComplex = std::unique_ptr<SingleSlater<dcomplex>>(new SingleSlater<dcomplex>());
+  auto realtime		  = std::unique_ptr<RealTime>(new RealTime());
   auto sdResponseReal     = std::unique_ptr<SDResponse<double>>(new SDResponse<double>());
   auto sdResponseComplex  = std::unique_ptr<SDResponse<dcomplex>>(new SDResponse<dcomplex>());
   std::unique_ptr<FileIO> fileIO;
@@ -151,6 +152,16 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   }
   if(controls->doUnit) printUnitInfo(controls.get(),hartreeFockReal.get(),sdResponseReal.get());
 
+/*
+//fds
+  realtime->iniRealTime(molecule.get(),basisset.get(),fileIO.get(),controls.get(),aointegrals.get(),hartreeFockReal.get());
+  fileIO->out<<"\niniRealTime Done: "<<ctime(&currentTime)<<endl;
+  realtime->iniDensity();
+  fileIO->out<<"\niniDensity Done: "<<ctime(&currentTime)<<endl;
+  realtime->doPropagation();
+  fileIO->out<<"\ndoPropagation Done: "<<ctime(&currentTime)<<endl;
+//fds
+*/
   // Cleanup Libint env
 #ifdef USE_LIBINT
   libint2::cleanup();

@@ -36,6 +36,7 @@
 #include <mointegrals.h>
 #include <sdresponse.h>
 #include <singleslater.h>
+#include <realtime.h>
 #include <tools.h>
 #include <classtools.h>
 
