@@ -393,7 +393,7 @@ void SDResponse<dcomplex>::formRM3(ComplexCMMap &XMO, ComplexCMMap &Sigma, Compl
     }
   }
 
-  this->singleSlater_->aointegrals()->multTwoEContractDirect(XMO.cols(),false,false,false,
+  this->singleSlater_->aointegrals()->multTwoEContractDirect(XMO.cols(),false,false,false,false,
     (this->nTCS_==2),CommA,GCommA,CommB,GCommB);
 
 
@@ -467,7 +467,7 @@ void SDResponse<dcomplex>::formRM4(ComplexCMMap& XMO, ComplexCMMap &Sigma, Compl
 //  doTCS,XAO,IXAO,XAO,IXAO);
 //cout << "HERE" << endl;
   for(auto idx = 0; idx < XMO.cols(); idx++)
-    this->singleSlater_->aointegrals()->twoEContractN4(false,false,true,doTCS,XAO[idx],
+    this->singleSlater_->aointegrals()->twoEContractN4(false,false,false,true,doTCS,XAO[idx],
       IXAO[idx],XAO[idx],IXAO[idx]);
 //cout << "HERE" << endl;
 

@@ -26,7 +26,7 @@
 #include <aointegrals.h>
 namespace ChronusQ{
   template<>
-  void AOIntegrals::twoEContractDF(bool RHF, bool doFock, const RealMatrix &XAlpha, 
+  void AOIntegrals::twoEContractDF(bool RHF, bool KS, bool doFock, const RealMatrix &XAlpha, 
     RealMatrix &AXAlpha, const RealMatrix &XBeta, RealMatrix &AXBeta) {
 
     this->fileio_->out << "Contracting with in-core density fitting integrals" << endl;

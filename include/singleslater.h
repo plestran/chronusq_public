@@ -149,6 +149,7 @@ public:
   bool  havePT;      ///< Computed Perturbation Tensor?
   bool  isClosedShell;
   bool  isConverged;
+  bool  isDFT;
 
   double   energyOneE; ///< One-bodied operator tensors traced with Density
   double   energyTwoE; ///< Two-bodied operator tensors traced with Density

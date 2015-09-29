@@ -26,7 +26,7 @@
 #include <aointegrals.h>
 namespace ChronusQ{
   template<>
-  void AOIntegrals::twoEContractN4(bool RHF, bool doFock, bool do24, bool doTCS,
+  void AOIntegrals::twoEContractN4(bool RHF, bool KS, bool doFock, bool do24, bool doTCS,
     const RealMatrix &XAlpha, RealMatrix &AXAlpha, const RealMatrix &XBeta, 
     RealMatrix &AXBeta) {
 

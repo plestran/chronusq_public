@@ -26,7 +26,7 @@
 #include <aointegrals.h>
 namespace ChronusQ{
   template<>
-  void AOIntegrals::twoEContractDirect(bool RHF, bool doFock, bool do24, bool doTCS, 
+  void AOIntegrals::twoEContractDirect(bool RHF, bool KS, bool doFock, bool do24, bool doTCS, 
     const ComplexMatrix &XAlpha, ComplexMatrix &AXAlpha, const ComplexMatrix &XBeta, 
     ComplexMatrix &AXBeta) {
 
@@ -119,13 +119,13 @@ namespace ChronusQ{
               double s1234_deg = s12_deg * s34_deg * s12_34_deg;
   
               if(RHF && doFock) 
-                this->Restricted34Contract(G[0][thread_id],XAlpha,n1,n2,n3,n4,
+                this->Restricted34Contract(KS,G[0][thread_id],XAlpha,n1,n2,n3,n4,
                   bf1_s,bf2_s,bf3_s,bf4_s,buff,s1234_deg);
               else if(!do24 && !doTCS)
-                this->UnRestricted34Contract(G[0][thread_id],XAlpha,G[1][thread_id],
+                this->UnRestricted34Contract(KS,G[0][thread_id],XAlpha,G[1][thread_id],
                   XBeta,XTotal,n1,n2,n3,n4,bf1_s,bf2_s,bf3_s,bf4_s,buff,s1234_deg);
               else if(doTCS && !do24)
-                this->Spinor34Contract(G[0][thread_id],XAlpha,n1,n2,n3,n4,
+                this->Spinor34Contract(KS,G[0][thread_id],XAlpha,n1,n2,n3,n4,
                   bf1_s,bf2_s,bf3_s,bf4_s,buff,s1234_deg);
               else if(!doTCS && do24)
                 this->General24CouContract(G[0][thread_id],XAlpha,n1,n2,n3,n4,
@@ -164,7 +164,7 @@ namespace ChronusQ{
      
   }
   template<>
-  void AOIntegrals::multTwoEContractDirect(int nVec, bool RHF, bool doFock, bool do24, 
+  void AOIntegrals::multTwoEContractDirect(int nVec, bool RHF, bool KS, bool doFock, bool do24, 
     bool doTCS, const std::vector<ComplexMatrix> &XAlpha, std::vector<ComplexMatrix> &AXAlpha, 
     const std::vector<ComplexMatrix> &XBeta, std::vector<ComplexMatrix> &AXBeta) {
 
@@ -267,14 +267,14 @@ namespace ChronusQ{
   
               for(auto iX = 0; iX < nVec; iX++){
                 if(RHF && doFock) 
-                  this->Restricted34Contract(G[0][iX][thread_id],XAlpha[iX],n1,n2,n3,n4,
+                  this->Restricted34Contract(KS,G[0][iX][thread_id],XAlpha[iX],n1,n2,n3,n4,
                     bf1_s,bf2_s,bf3_s,bf4_s,buff,s1234_deg);
                 else if(!do24 && !doTCS)
-                  this->UnRestricted34Contract(G[0][iX][thread_id],XAlpha[iX],
+                  this->UnRestricted34Contract(KS,G[0][iX][thread_id],XAlpha[iX],
                     G[1][iX][thread_id],XBeta[iX],XTotal[iX],n1,n2,n3,n4,bf1_s,bf2_s,bf3_s,
                     bf4_s,buff,s1234_deg);
                 else if(doTCS && !do24)
-                  this->Spinor34Contract(G[0][iX][thread_id],XAlpha[iX],n1,n2,n3,n4,
+                  this->Spinor34Contract(KS,G[0][iX][thread_id],XAlpha[iX],n1,n2,n3,n4,
                     bf1_s,bf2_s,bf3_s,bf4_s,buff,s1234_deg);
                 else if(!doTCS && do24)
                   this->General24CouContract(G[0][iX][thread_id],XAlpha[iX],n1,n2,n3,n4,
