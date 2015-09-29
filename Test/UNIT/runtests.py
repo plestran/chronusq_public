@@ -105,7 +105,7 @@ def genSummary(testtable,summary):
 			entry.append(max(summary[j][1:4]))
 			entry.append(max(summary[j][5:11]))
 			entry.append(max(summary[j][12:22]))
-			if summary[j][0] < 1E-08 and max(summary[j][1:4]) < 1E-8 and max(summary[j][5:11]) < 1E-8 and max(summary[j][12:22]) < 1E-8:
+			if summary[j][0] < 1E-7 and max(summary[j][1:4]) < 1E-7 and max(summary[j][5:11]) < 1E-7 and max(summary[j][12:22]) < 1E-7:
 				entry.append('YES')
 			else:
 				entry.append('** NO **')
@@ -114,7 +114,7 @@ def genSummary(testtable,summary):
 	outf.write(tabulate(sumrytable,headers,tablefmt="simple",floatfmt=".4E"))
 
 # RESP output
-	headers = ["Test Job","max(|omega|)","max(|f|)","Passed"]
+	headers = ["Test Job","max(|omega|)","max(|f|)","NStates","Passed"]
 	sumrytable = []
 	j = 0
 	for i in testtable:
@@ -123,30 +123,28 @@ def genSummary(testtable,summary):
 			entry.append(testtable[j].infile.replace(".inp",''))
 			entry.append(summary[j][0])
 			entry.append(summary[j][1])
-			if summary[j][0] < 1E-03 and summary[j][1] < 1E-3:
+			entry.append(nstates[j])
+			if summary[j][0] < 1E-4 and summary[j][1] < 1E-4:
 				entry.append('YES')
 			else:
 				entry.append('** NO **')
 			sumrytable.append(entry)
 		j += 1
-
 	outf.write("\n\n")
 	outf.write(tabulate(sumrytable,headers,tablefmt="simple",floatfmt=".4E"))
-
-
 
 #
 #  Runs Unit Tests
 #
 def runUnit(doKill):
-	global reftype 
+	global reftype, nstates
 	reftype = {}
 	testtable = genTable()
 	refdict = genRefDict()
 	summary = []
+	nstates = {}
 
-	engmax = 0.
-	fmax   = 0.
+	k = 0
 	for i in testtable:
 		if findFile(i.infile,"."):
 			print "../../chronusQ "+i.infile.replace(".inp",'')
@@ -158,21 +156,23 @@ def runUnit(doKill):
 			strx = line.split()
 			time = float(strx[6])
 			err = []
+			engmax = 0.
+			fmax   = 0.
 			for j in range(len(vals)):
 				try: # SCF
 					abserr = abs(float(vals[j]) - refdict[i.infile[:8]][j])
-#					if refdict[i.infile[:8]][j] != 0:
-#						abserr /= refdict[i.infile[:8]][j]
 					err.append(abserr)
-					if abserr > 1E-8:
+					if abserr > 1E-7:
 						raise MaxErrorExcedeed(abserr)
 				except ValueError: # RESP
-					if 'RESP' in reftype[i.infile[:8]]:
-						strx  = vals[j].split(',')
-						engtmp = abs(float(strx[0]) - refdict[i.infile[:8]][j].energy)
-						ftmp   = abs(float(strx[1]) - refdict[i.infile[:8]][j].f)
-						if (engtmp > engmax): engmax = engtmp 
-						if (ftmp > fmax): fmax = ftmp 
+					nstates[k] = len(vals)
+					strx  = vals[j].split(',')
+					engtmp = abs(float(strx[0]) - refdict[i.infile[:8]][j].energy)
+					ftmp   = abs(float(strx[1]) - refdict[i.infile[:8]][j].f)
+					if (engtmp > engmax): engmax = engtmp 
+					if (ftmp > fmax): fmax = ftmp 
+					if engmax > 1E-4 or fmax > 1E-4:
+						raise MaxErrorExcedeed(engmax)
 				except MaxErrorExcedeed:
 					if doKill:
 						raise
@@ -181,10 +181,11 @@ def runUnit(doKill):
 			if 'SCF' in reftype[i.infile[:8]]:
 				summary.append(err)
 			else:
-				print "engmax = ", engmax, "fmax = ", fmax
+# 				print "engmax = ", engmax, "fmax = ", fmax
 				err.append(engmax)
 				err.append(fmax)
 				summary.append(err)
+		k += 1
 	genSummary(testtable,summary)
 
 #
