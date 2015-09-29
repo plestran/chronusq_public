@@ -158,6 +158,7 @@ SingleSlater<double>::SingleSlater(SingleSlater<double> * other){
 //----------------------------//
 // form the Vxc matrix        //
 //----------------------------//
+
 template<>
 void SingleSlater<double>::formVXC(RealMatrix * Integral3D){
 //  Right now is just a place holder (we print the overlap, the actual
@@ -174,6 +175,18 @@ void SingleSlater<double>::formVXC(RealMatrix * Integral3D){
 //  cout << " Number Electron = " << Cx*pow(Ne,4.0/3.0) <<endl;
  cout << "Single Slater Numeric : Print" <<endl;
  cout << (*this->vXCA_)  << endl;
+};
+
+
+template<>
+void SingleSlater<double>::EnVXC(){
+  double Energy;
+  double resLDA = -11.611162519357;
+  Energy = (*this->vXCA_).frobInner(this->densityA_->conjugate());
+  cout << " E_XC = " << Energy <<endl;
+  cout << "LDA Err " << (Energy-resLDA) << endl;
+  cout << "Single Slater Numeric : Print" <<endl;
+  cout << (*this->vXCA_)  << endl;
 };
 ////APE
 //
@@ -200,6 +213,23 @@ void SingleSlater<double>::computeEnergy(){
   if(!this->isClosedShell && this->Ref_ != TCS){
     this->energyOneE += (*this->aointegrals_->oneE_).frobInner(this->densityB_->conjugate());
     this->energyTwoE += 0.5*(*this->PTB_).frobInner(this->densityB_->conjugate());
+  }
+
+  // Add in the electric field component if they are non-zero
+  std::array<double,3> null{{0,0,0}};
+  if((*this->elecField_) != null){
+    int NB = this->nTCS_*this->nBasis_;
+    int NBSq = NB*NB;
+    int iBuf = 0;
+    for(auto iXYZ = 0; iXYZ < 3; iXYZ++){
+      ConstRealMap mu(&this->aointegrals_->elecDipole_->storage()[iBuf],NB,NB);
+      this->energyOneE += 
+        this->elecField_->at(iXYZ) * mu.frobInner(this->densityA_->conjugate());
+      if(!this->isClosedShell && this->Ref_ != TCS)
+      this->energyOneE += 
+        this->elecField_->at(iXYZ) * mu.frobInner(this->densityB_->conjugate());
+      iBuf += NBSq;
+    }
   }
   this->totalEnergy= this->energyOneE + this->energyTwoE + this->energyNuclei;
   this->printEnergy();

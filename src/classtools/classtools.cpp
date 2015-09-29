@@ -146,6 +146,10 @@ void readInput(FileIO * fileio, Molecule * mol, BasisSet * basis, Controls * con
         controls->unitTest = Controls::UnitResp;
       else
         CErr("Unit Test Option: "+readString+" not recognized",fileio->out);
+    } else if(!readString.compare("$FIELD")) {
+      for(auto iXYZ = 0; iXYZ < 3; iXYZ++){
+        fileio->in >> controls->field_[iXYZ];
+      } 
     }
     fileio->in >> readString;
   };

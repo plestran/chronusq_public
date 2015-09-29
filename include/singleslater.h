@@ -75,6 +75,7 @@ class SingleSlater {
   std::unique_ptr<RealMatrix>  quadpole_; ///< Electric Quadrupole Moment
   std::unique_ptr<RealMatrix>  tracelessQuadpole_; ///< Traceless Electric Quadrupole Moment
   std::unique_ptr<RealTensor3d>  octpole_; ///< Electric Octupole Moment
+  std::unique_ptr<std::array<double,3>> elecField_;
   BasisSet *    basisset_;               ///< Basis Set
   Molecule *    molecule_;               ///< Molecular specificiations
   FileIO *      fileio_;                 ///< Access to output file
@@ -169,6 +170,14 @@ public:
   inline void setNAE(int nAE)    { this->nAE_ = nAE;};
   inline void setNBE(int nBE)    { this->nBE_ = nBE;};
   inline void setRef(int Ref)    { this->Ref_ = Ref;};
+  inline void setField(double x, double y, double z){
+    (*this->elecField_)[0] = x;
+    (*this->elecField_)[1] = y;
+    (*this->elecField_)[2] = z;
+  }
+  inline void setField(std::array<double,3> field){
+    (*this->elecField_) = field;
+  }
 
   // access to private data
   inline int nBasis() { return this->nBasis_;};
@@ -185,6 +194,7 @@ public:
   inline int multip()  { return this->multip_;};
   inline int nOVA()    { return nOccA_*nVirA_;};
   inline int nOVB()    { return nOccB_*nVirB_;};
+  inline std::array<double,3> elecField(){ return (*this->elecField_);  };
   inline TMatrix* densityA() { return this->densityA_.get();};
   inline TMatrix* densityB() { return this->densityB_.get();};
   inline TMatrix* fockA()    { return this->fockA_.get();};
@@ -220,6 +230,7 @@ public:
   void formExchange();		// form the exchange matrix
   void formPT();
   void formVXC(RealMatrix *);   // Form DFT VXC Term
+  void EnVXC();                 // DFT VXC Energy Term
   void matchord();              // match Guassian order of guess
   void readGuessIO();       	// read the initial guess of MO's from the input stream
   void readGuessGauMatEl(GauMatEl&); // read the intial guess of MO's from Gaussian raw matrix element file

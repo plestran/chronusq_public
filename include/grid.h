@@ -123,6 +123,8 @@ class TwoDGrid : public Grid {
 //    RealMatrix * integrateO();
       RealMatrix * integrateAtoms();
       double  integrateDensity();
+      void    BuildVxc();
+      double  rhor(cartGP ptCar);
       double integrate();
       double * Buffintegrate(double * Sum,double * Buff,int n1, int n2, double fact);
       double * BuildDensity(double * Sum,double * Buff,int n1, int n2);

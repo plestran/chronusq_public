@@ -53,6 +53,11 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
   this->eneTol_ = controls->SCFeneTol_;
   this->maxSCFIter_ = controls->SCFmaxIter_;
 
+  this->elecField_ = 
+    std::unique_ptr<std::array<double,3>>(
+      new std::array<double,3>{{0.0,0.0,0.0}});
+  (*this->elecField_) = controls->field_;
+
   this->isClosedShell = (this->multip_ == 1);
   if(controls->HF){
     if(this->isClosedShell && !controls->doCUHF
@@ -72,7 +77,7 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
   this->nTCS_ = 1;
   if(this->Ref_ == TCS) this->nTCS_ = 2;
 // Comment out to get rid of DFT tests
-  this->controls_->DFT = true;
+//this->controls_->DFT = true;
   
 
   // Alpha / TCS Density
