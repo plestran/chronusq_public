@@ -139,8 +139,8 @@ def runUnit(doKill):
 			for j in range(len(vals)):
 				try:
 					abserr = abs(float(vals[j]) - refdict[i.infile[:8]][j])
-#					if refdict[i.infile[:8]][j] != 0:
-#						abserr /= refdict[i.infile[:8]][j]
+					if refdict[i.infile[:8]][j] != 0:
+						abserr /= refdict[i.infile[:8]][j]
 					err.append(abserr)
 					if abserr > 1E-8:
 						raise MaxErrorExcedeed(abserr)
