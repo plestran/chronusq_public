@@ -44,7 +44,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   auto realtime		  = std::unique_ptr<RealTime>(new RealTime());
   auto sdResponseReal     = std::unique_ptr<SDResponse<double>>(new SDResponse<double>());
   auto sdResponseComplex  = std::unique_ptr<SDResponse<dcomplex>>(new SDResponse<dcomplex>());
-  auto twoDGrid     	= std::unique_ptr<TwoDGrid>(new TwoDGrid());
+//auto twoDGrid     	= std::unique_ptr<TwoDGrid>(new TwoDGrid());
   std::unique_ptr<FileIO> fileIO;
   std::unique_ptr<GauJob> gauJob;
 

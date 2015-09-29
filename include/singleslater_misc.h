@@ -56,7 +56,7 @@ void SingleSlater<T>::formDensity(){
     (*this->densityA_) = 
       this->moA_->block(0,0,this->nBasis_,this->nOccA_)*
       this->moA_->block(0,0,this->nBasis_,this->nOccA_).adjoint();
-    if(this->Ref_ == RHF) (*this->densityA_) *= math.two;// D(a) is actually total D for RHF
+    if(this->isClosedShell) (*this->densityA_) *= math.two;// D(a) is actually total D for RHF
     else {
       (*this->densityB_) = 
         this->moB_->block(0,0,this->nBasis_,this->nOccB_)*
@@ -66,7 +66,7 @@ void SingleSlater<T>::formDensity(){
   if(this->controls_->printLevel>=2) {
     if(this->Ref_ != TCS) {
       prettyPrint(this->fileio_->out,(*this->densityA_),"Alpha Density");
-      if(this->Ref_ != RHF) prettyPrint(this->fileio_->out,(*this->densityB_),"Beta Density");
+      if(!this->isClosedShell) prettyPrint(this->fileio_->out,(*this->densityB_),"Beta Density");
     } else
       prettyPrintTCS(this->fileio_->out,(*this->densityA_),"Density");
   };
