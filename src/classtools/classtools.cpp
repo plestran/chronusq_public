@@ -198,7 +198,7 @@ void printUnitInfo(Controls * controls, SingleSlater<double> * singleSlater, SDR
     << (*singleSlater->octpole())(0,1,2)*phys.bohr*phys.bohr/phys.debye << endl;
   else if(controls->unitTest == Controls::UnitResp){
     for(auto iSt = 0; iSt < sdResponse->nSek(); iSt++){
-      cout << (*sdResponse->omega())(iSt)*phys.eVPerHartree << "," << (*sdResponse->oscStrength())(0,iSt);
+      cout << (*sdResponse->omega())(iSt)*phys.eVPerHartree << "," << (*sdResponse->oscStrength())(0,iSt+1);
       if(iSt != (sdResponse->nSek() - 1)) cout << "/";
     }
     cout << endl;

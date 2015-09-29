@@ -67,7 +67,6 @@ def findFile(name,path):
 def genRefDict():
 	ref = open("GAUREF/ref.val",'r')
 	refdict = {}
-#	reftype = {}
 	for line in ref:
 		strx=line.split('/')
 		refdict[strx[0]] = strx[1:]
@@ -104,10 +103,10 @@ def genSummary(testtable,summary):
 		entry.append(max(summary[i][1:4]))
 		entry.append(max(summary[i][5:11]))
 		entry.append(max(summary[i][12:22]))
-		if summary[i][0] < 1E-08 and max(summary[i][1:4]) < 1E-8 and max(summary[i][5:11]) < 1E-8 and max(summary[i][12:22]) < 1E-8:
-			entry.append('YES')
-		else:
-			entry.append('** NO **')
+#		if summary[i][0] < 1E-08 and max(summary[i][1:4]) < 1E-8 and max(summary[i][5:11]) < 1E-8 and max(summary[i][12:22]) < 1E-8:
+#			entry.append('YES')
+#		else:
+#			entry.append('** NO **')
 		sumrytable.append(entry)
 	
 	outf.write(tabulate(sumrytable,headers,tablefmt="simple",floatfmt=".4E"))
@@ -124,6 +123,8 @@ def runUnit(doKill):
 	refdict = genRefDict()
 	summary = []
 
+	engmax = 0.
+	fmax   = 0.
 	for i in testtable:
 		if findFile(i.infile,"."):
 			print "../../chronusQ "+i.infile.replace(".inp",'')
@@ -137,22 +138,36 @@ def runUnit(doKill):
 			err = []
 #			for j in range(len(refdict[i.infile[:8]])):
 			for j in range(len(vals)):
-				try:
+				try: # SCF
 					abserr = abs(float(vals[j]) - refdict[i.infile[:8]][j])
-					if refdict[i.infile[:8]][j] != 0:
-						abserr /= refdict[i.infile[:8]][j]
+##				if refdict[i.infile[:8]][j] != 0:
+##					abserr /= refdict[i.infile[:8]][j]
 					err.append(abserr)
 					if abserr > 1E-8:
 						raise MaxErrorExcedeed(abserr)
-				except ValueError: 
+				except ValueError: # RESP
 					if 'RESP' in reftype[i.infile[:8]]:
 						print "RESP type "+i.infile.replace(".inp",'')
+						strx  = vals[j].split(',')
+##					engcq = float(strx[0])
+##					fcq   = float(strx[1])
+##					print "CQ  energy = ", engcq, "f = ", fcq
+##					print "REF energy = ", refdict[i.infile[:8]][j].energy, "f = ", refdict[i.infile[:8]][j].f
+						engtmp = abs(float(strx[0]) - refdict[i.infile[:8]][j].energy)
+						ftmp   = abs(float(strx[1]) - refdict[i.infile[:8]][j].f)
+						if (engtmp > engmax): engmax = engtmp 
+						if (ftmp > fmax): fmax = ftmp 
 				except MaxErrorExcedeed:
 					if doKill:
 						raise
 					else:
 						continue
-			summary.append(err)
+			if 'SCF' in reftype[i.infile[:8]]:
+				summary.append(err)
+			else:
+				print "engmax = ", engmax, "fmax = ", fmax
+				summary.append(engmax)
+				summary.append(fmax)
 	genSummary(testtable,summary)
 
 #
