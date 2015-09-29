@@ -13,6 +13,7 @@ before_install:
   - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
   - sudo apt-get install -y libblas-dev liblapack-dev
   - sudo apt-get install -y libboost1.55-all-dev
+  - pip install --user tabulate
 install:
   - ./util/buildlibint 4
   - cd deps
@@ -21,3 +22,7 @@ install:
   - cd ..
 script:
   - ./util/travisci_build.sh
+  - cd build_gcc_libint_openmp
+  - ln -s src/chronusQ/chronusQ .
+  - cd Test/UNIT
+  - python runtests.py --enable-travisci 

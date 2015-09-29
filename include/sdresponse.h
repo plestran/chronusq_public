@@ -38,7 +38,16 @@
 /****************************/
 
 namespace ChronusQ {
+template<typename T>
 class SDResponse {
+  typedef Eigen::Matrix<T,Dynamic,Dynamic,ColMajor> TCMMatrix;
+  typedef Eigen::Matrix<T,Dynamic,Dynamic,RowMajor> TMatrix;
+  typedef Tensor<T,Range3d> TTensor3d;
+  typedef Tensor<T,Range4d> TTensor4d;
+  typedef Eigen::Matrix<T,Dynamic,1> TVec;
+  typedef Eigen::Map<TVec> TVecMap;
+  typedef Eigen::Map<TCMMatrix> TCMMap;
+
   int       nBasis_;
   int       nTCS_;
   int       Ref_;
@@ -80,21 +89,21 @@ class SDResponse {
   int       nSingleDim_; // Single dimension of response matrix
   double    rMu_;
 
-  std::unique_ptr<RealCMMatrix>    transDen_;
-  std::unique_ptr<RealMatrix>      oscStrength_;
-  std::unique_ptr<VectorXd>        omega_;
-  std::unique_ptr<RealTensor3d>    transDipole_;
-  BasisSet *      basisSet_;
-  Molecule *      molecule_;
-  FileIO *        fileio_;
-  Controls *      controls_;
-  MOIntegrals<double> *   mointegrals_;
-  SingleSlater<double> *  singleSlater_;
-  RealTensor4d *  aoERI_;
-  RealTensor3d *  elecDipole_;
+  std::unique_ptr<TCMMatrix>  transDen_;
+  std::unique_ptr<RealMatrix> oscStrength_;
+  std::unique_ptr<VectorXd>   omega_;
+  std::unique_ptr<RealTensor3d>  transDipole_;
+  BasisSet        * basisSet_;
+  Molecule        * molecule_;
+  FileIO          * fileio_;
+  Controls        * controls_;
+  MOIntegrals<T>  * mointegrals_;
+  SingleSlater<T> * singleSlater_;
+  RealTensor4d       * aoERI_;
+  RealTensor3d       * elecDipole_;
 
   std::unique_ptr<RealCMMatrix> rmDiag_;
-  std::unique_ptr<RealMatrix>  davGuess_;
+  std::unique_ptr<TMatrix>  davGuess_;
 
 public:
   enum{
@@ -112,8 +121,8 @@ public:
   SDResponse(){;};
   ~SDResponse() {;};
   // pseudo-constructor
-  void iniSDResponse(Molecule *,BasisSet *,MOIntegrals<double> *,FileIO *,
-                     Controls *, SingleSlater<double> *);
+  void iniSDResponse(Molecule *,BasisSet *,MOIntegrals<T> *,FileIO *,
+                     Controls *, SingleSlater<T> *);
 
   #include <sdresponse_getset.h>
   #include <sdresponse_qnrelated.h>

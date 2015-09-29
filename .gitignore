@@ -24,3 +24,6 @@ deps/include/
 deps/lib/
 deps/src/libint-2.1.0-beta2/
 deps/share/
+*.pyc
+fort.7
+tmp

@@ -29,6 +29,7 @@ template<>
 template<>
 SingleSlater<dcomplex>::SingleSlater(SingleSlater<dcomplex> * other){
     this->nBasis_ = other->nBasis_;
+    this->nTCS_   = other->nTCS_;
     this->nTT_    = other->nTT_;
     this->nAE_    = other->nAE_;
     this->nBE_    = other->nBE_; 
@@ -42,6 +43,7 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<dcomplex> * other){
     this->haveDensity = true;
     this->haveMO	    = true;
     this->havePT      = true;
+    this->isClosedShell = other->isClosedShell;
     // Hardcoded for Libint route
     this->densityA_           = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(*other->densityA_));
     this->fockA_              = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(*other->fockA_));
@@ -67,6 +69,7 @@ template<>
 template<>
 SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other){
     this->nBasis_ = other->nBasis();
+    this->nTCS_   = other->nTCS();
     this->nTT_    = other->nTT();
     this->nAE_    = other->nAE();
     this->nBE_    = other->nBE(); 
@@ -80,6 +83,7 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other){
     this->haveDensity = true;
     this->haveMO	    = true;
     this->havePT      = true;
+    this->isClosedShell = other->isClosedShell;
     // Hardcoded for Libint route
     this->densityA_           = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
     this->fockA_              = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));

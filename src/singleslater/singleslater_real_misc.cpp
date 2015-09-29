@@ -29,6 +29,7 @@ template<>
 template<>
 SingleSlater<double>::SingleSlater(SingleSlater<double> * other){
     this->nBasis_ = other->nBasis_;
+    this->nTCS_   = other->nTCS_;
     this->nTT_    = other->nTT_;
 //APS 
     this->nShell_ = other->nShell_;
@@ -45,6 +46,7 @@ SingleSlater<double>::SingleSlater(SingleSlater<double> * other){
     this->haveDensity = true;
     this->haveMO	    = true;
     this->havePT      = true;
+    this->isClosedShell = other->isClosedShell;
     // Hardcoded for Libint route
     this->densityA_           = std::unique_ptr<RealMatrix>(new RealMatrix(*other->densityA_));
     this->fockA_              = std::unique_ptr<RealMatrix>(new RealMatrix(*other->fockA_));

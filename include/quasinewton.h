@@ -72,16 +72,17 @@ template <typename T>
 
     // Templated pointers to Eigen storage
     TMat * A_;                // Pointer to full matrix to be diagonalized
-    TMat * diag_;             // Pointer to diagonal storage
+    RealCMMatrix * diag_;             // Pointer to diagonal storage
     TMat * solutionVector_;   // Solution vectors at current iteration 
-    TVec * solutionValues_;   // Solution values (eigen) at current iteration 
+    VectorXd * solutionValues_;   // Solution values (eigen) at current iteration 
     std::unique_ptr<TMat> guessR_;   // Guess vectors (always local copy)
     std::unique_ptr<TMat> guessL_;   // Guess vectors (always local copy)
 
-    SDResponse * sdr_; // Pointer to SDResponse object
+    SDResponse<T> * sdr_; // Pointer to SDResponse object
     /** Scratch Variables **/
     // Length of memory partitions
     int LenScr        ; 
+    int LenRealScr    ;
     int LenSigma      ; 
     int LenRho        ;
     int LenXTSigma    ;
@@ -93,6 +94,9 @@ template <typename T>
     int LEN_LAPACK_SCR; 
     int LWORK         ;
     
+    double * REAL_SCR;
+    double * RWORK;
+    double * RealEMem;
     // Templated pointers for scratch and paritions
     T * SCR        ; 
     T * SigmaRMem  ; 
@@ -164,6 +168,7 @@ template <typename T>
       this->sdr_              = NULL;
      
       this->SCR         = NULL; 
+      this->REAL_SCR    = NULL; 
       this->SigmaRMem   = NULL; 
       this->SigmaLMem   = NULL; 
       this->XTSigmaRMem = NULL; 
@@ -187,6 +192,8 @@ template <typename T>
       this->ERMem       = NULL;
       this->EIMem       = NULL;
       this->WORK        = NULL;
+      this->RWORK       = NULL;
+      this->RealEMem    = NULL;
     };
   inline void initScrLen(){
 /** DETERMINE LENGTH OF SCRATCH SPACE **
@@ -227,17 +234,6 @@ template <typename T>
  * (16) Supermatrix of reduced dimension A onto the two subspaces
  *
  * (17) Supermatrix of reduced dimension S onto the two subspaces
- *
- * (18) Local copy of the real part of the eigenvalues (reused for Tau storage 
- *      for QR)
- *
- * (19) Space for the paired / imaginary part of the eigenvalues
- *
- * (20) Length of LAPACK workspace (used in all LAPACK Calls)
- *
- * (21) Total double precision words required for LAPACK
- *
- * (22) Space for imaginary parts of paired eigenvalues
  *
  * (23) Space for a copy of the S supermatrix to use for re-orthogonalization
  *
@@ -286,17 +282,11 @@ template <typename T>
     if(!this->isHermetian_ && this->symmetrizedTrial_){
       this->LenScr += this->LenSuper; // 24
     }
-  
+
     // LAPACK Storage Space Length
-    this->LWORK          = 6*this->N_;
-    this->LEN_LAPACK_SCR += this->maxSubSpace_;   // 18
-    if(!this->isHermetian_ || this->symmetrizedTrial_)
-      this->LEN_LAPACK_SCR += this->maxSubSpace_; // 19
-    if(!this->isHermetian_ && this->symmetrizedTrial_)
-      this->LEN_LAPACK_SCR += 2*this->maxSubSpace_; // 22
-    this->LEN_LAPACK_SCR += this->LWORK;          // 20
-    this->LenScr += this->LEN_LAPACK_SCR;         // 21
+    this->initLAPACKScrLen();  
   }
+  
     inline int stdSubSpace(){
       // Standard value for the maximum dimension of the
       // iterative subspace min(6*NSek,N/2)
@@ -324,8 +314,10 @@ template <typename T>
     };
   inline void allocScr(){
     // Allocate scratch space
-    this->SCR = new double [this->LenScr]; 
-    std::memset((void*)this->SCR,0.0,this->LenScr*sizeof(double));
+    this->SCR      = new T      [this->LenScr]; 
+    this->REAL_SCR = new double [this->LenRealScr];
+    std::memset((void*)this->SCR,     0.0,this->LenScr     * sizeof(T));
+    std::memset((void*)this->REAL_SCR,0.0,this->LenRealScr * sizeof(double));
   
     // Partition scratch space
     this->SigmaRMem     = this->SCR;
@@ -352,9 +344,12 @@ template <typename T>
     if(!this->isHermetian_ && this->symmetrizedTrial_){
       this->NHrProdMem    = this->BiOrthMem   + this->LenSuper;
     }
+
+    this->RWORK = this->REAL_SCR;
   }
   inline void cleanupScr(){
-    delete [] this->SCR;
+    delete [] this->SCR     ;
+    delete [] this->REAL_SCR;
   }
   inline void checkValid(ostream &output=cout){
     if(this->A_ != NULL){
@@ -366,8 +361,8 @@ template <typename T>
   } // checkValid
     inline void allocSolution(){
       // Allocate space for solution
-      this->solutionVector_ = new TMat(this->nSek_,1);
-      this->solutionValues_ = new TMat(this->n_,this->nSek_);
+      this->solutionValues_ = new VectorXd(this->nSek_,1);
+      this->solutionVector_ = new TMat(this->n_,this->nSek_);
       this->cleanupMem_ = true;
     };
     /** Quasi-Newton Procedural Functions **/
@@ -384,14 +379,16 @@ template <typename T>
     void genRes(const int);
     std::vector<bool> checkConv(const int, int &,ostream &output=cout);
     void formNewGuess(std::vector<bool> &,int&,int,int&,int&);
-    void formResidualGuess(double,const RealCMMap &, RealCMMap &, const RealCMMap &, RealCMMap &);
-    void genStdHerResGuess(double, const RealCMMap &, RealCMMap &);
-    void genSymmResGuess(double,const RealCMMap &, RealCMMap &, const RealCMMap &, RealCMMap &);
+    void formResidualGuess(double,const TCMMap &, TCMMap &, const TCMMap &, TCMMap &);
+    void genStdHerResGuess(double, const TCMMap &, TCMMap &);
+    void genSymmResGuess(double,const TCMMap &, TCMMap &, const TCMMap &, TCMMap &);
     void setupRestart();
-    void Orth(RealCMMap &);
-    void Orth(RealCMMatrix &);
-    void metBiOrth(RealCMMap &, const RealCMMatrix &);
-    void eigSrt(RealCMMap &, RealVecMap &);
+    void Orth(TCMMap &);
+    void Orth(TMat &);
+    void metBiOrth(TCMMap &, const TMat &);
+    void eigSrt(TCMMap &, TVecMap &);
+    void initLAPACKScrLen();
+
   public:
     /** Destructor
      *  
@@ -426,7 +423,7 @@ template <typename T>
      *   -  Standard Frequency Dependent Linear Response (SFDLR)
      *   -  Damped Frequency Dependent Linear Response   (DFDLR)
      */ 
-    QuasiNewton(SDResponse * SDR) : QuasiNewton(){
+    QuasiNewton(SDResponse<T> * SDR) : QuasiNewton(){
       this->sdr_              = SDR; 
       this->N_                = SDR->nSingleDim();
       this->nSek_             = SDR->nSek();
@@ -434,40 +431,39 @@ template <typename T>
       this->solutionValues_   = SDR->omega();
       this->solutionVector_   = SDR->transDen();
       this->diag_             = SDR->rmDiag();
-      this->symmetrizedTrial_ = (SDR->iMeth() == SDResponse::RPA);
-      this->doGEP_            = (SDR->iMeth() == SDResponse::RPA);
+      this->symmetrizedTrial_ = (SDR->iMeth() == SDResponse<T>::RPA);
+      this->doGEP_            = (SDR->iMeth() == SDResponse<T>::RPA);
       this->genGuess_         = (this->nGuess_ == 0);
       this->maxSubSpace_      = this->stdSubSpace();
-      this->isHermetian_      = !(SDR->iMeth() == SDResponse::RPA);
+      this->isHermetian_      = !(SDR->iMeth() == SDResponse<T>::RPA);
       this->initScrLen();
 
       if(this->genGuess_) this->nGuess_ = this->stdNGuess();
       this->checkValid(SDR->fileio()->out);
       this->allocGuess();
-      if(!this->genGuess_) *this->guessR_ = *SDR->davGuess();
+//    if(!this->genGuess_) *this->guessR_ = *SDR->davGuess();
+      if(!this->genGuess_) *this->guessR_ = TMat::Identity(this->N_,this->nGuess_);;
       this->allocScr();
     };
 
-    QuasiNewton(int n, TMat *A,TMat* diag,TMat *Vc, TVec *Eig) : QuasiNewton() {
+    QuasiNewton(bool isH, bool sT, int n, TMat *A,RealCMMatrix* diag,TMat *Vc, VectorXd *Eig) : QuasiNewton() {
       this->N_ = A->rows();
       this->A_ = A;
       this->nSek_ = n;
       this->solutionValues_ = Eig;
       this->solutionVector_ = Vc;
       this->diag_           = diag;
-      this->symmetrizedTrial_ = false;
+      this->symmetrizedTrial_ = sT;
       this->doGEP_            = false;
       this->genGuess_         = true;
       this->maxSubSpace_      = this->stdSubSpace();
-      this->isHermetian_      = true;
+      this->isHermetian_      = isH;
       this->initScrLen();
 
       if(this->genGuess_) this->nGuess_ = this->stdNGuess();
       this->checkValid(cout);
       this->allocGuess();
       this->allocScr();
-    
-
     }
     /** Public inline functions **/
     inline TVec* eigenValues(){return this->solutionValues_;};
@@ -516,6 +512,7 @@ template <typename T>
       this->runMicro(output);
       if(this->isConverged_) break;
     }
+    this->cleanupScr();
     finish = std::chrono::high_resolution_clock::now();
     elapsed = finish - start;
     time(&currentTime);
@@ -556,28 +553,46 @@ template <typename T>
       new (&NewSL  ) TCMMap(this->SigmaLMem+NOld*this->N_,this->N_,NNew);
       new (&NewVecL) TCMMap(this->TVecLMem+ NOld*this->N_,this->N_,NNew);
     }
+//      NewVecR.block(this->N_/2,0,this->N_/2,NNew) *= 0.0;
+//      NewVecL.block(this->N_/2,0,this->N_/2,NNew) *= 0.0;
+//      cout << "VecR" << endl << NewVecR << endl;
+//      cout << "VecL" << endl << NewVecL << endl;
     if(this->sdr_ != NULL){
-      if(this->sdr_->iMeth() == SDResponse::CIS || this->sdr_->iMeth() == SDResponse::RPA ||
-         this->sdr_->iMeth() == SDResponse::STAB){
+      if(this->sdr_->iMeth() == SDResponse<T>::CIS || this->sdr_->iMeth() == SDResponse<T>::RPA ||
+         this->sdr_->iMeth() == SDResponse<T>::STAB){
         // Linear transformation onto right / gerade
         this->sdr_->formRM3(NewVecR,NewSR,NewRhoL); 
-        if(this->sdr_->iMeth() == SDResponse::RPA){
+        if(this->sdr_->iMeth() == SDResponse<T>::RPA){
           // Linear trasnformation onto left / ungerade
           this->sdr_->formRM3(NewVecL,NewSL,NewRhoR);
-          cout << "VecR" << endl << NewVecR << endl;
-          cout << "RhoR" << endl << NewRhoR << endl;
-          cout << "VecL" << endl << NewVecL << endl;
-          cout << "RhoL" << endl << NewRhoL << endl;
+        //cout << "SR" << endl << NewSR << endl;
+        //cout << "RhoR" << endl << NewRhoR << endl;
+        //cout << "SL" << endl << NewSL << endl;
+        //cout << "RhoL" << endl << NewRhoL << endl;
         }
-      } else if(this->sdr_->iMeth() == SDResponse::PPRPA  || 
-                this->sdr_->iMeth() == SDResponse::PPATDA ||
-                this->sdr_->iMeth() == SDResponse::PPCTDA) {
+      } else if(this->sdr_->iMeth() == SDResponse<T>::PPRPA  || 
+                this->sdr_->iMeth() == SDResponse<T>::PPATDA ||
+                this->sdr_->iMeth() == SDResponse<T>::PPCTDA) {
         this->sdr_->formRM4(NewVecR,NewSR,NewRhoL); 
-        if(this->sdr_->iMeth() == SDResponse::PPRPA)   
+        if(this->sdr_->iMeth() == SDResponse<T>::PPRPA)   
           // Linear trasnformation onto left / ungerade
           this->sdr_->formRM4(NewVecL,NewSL,NewRhoR);
       }
-    } else NewSR = (*this->A_) * NewVecR;
+    } else {
+      NewSR = (*this->A_) * NewVecR;
+      if(!this->isHermetian_ || this->symmetrizedTrial_){
+        NewSL = (*this->A_) * NewVecL;
+        NewRhoR = NewVecL;
+        NewRhoL = NewVecR;
+        NewRhoR.block(this->N_/2,0,this->N_/2,NNew) *= -1.0;
+        NewRhoL.block(this->N_/2,0,this->N_/2,NNew) *= -1.0;
+        //cout << "SR" << endl << std::setprecision(6) << NewSR << endl;
+        //cout << "RhoR" << endl << std::setprecision(6) << NewRhoR << endl;
+        //cout << "SL" << endl << std::setprecision(6) << NewSL << endl;
+        //cout << "RhoL" << endl << std::setprecision(6) << NewRhoL << endl;
+      }
+    }
+  //CErr();
   } // linearTrans
   /** Full projection onto reduced space  **/
   /*  Full projection of the matrix (and the metric) onto the reduced subspace
@@ -617,11 +632,11 @@ template <typename T>
       new (&XTRhoL)    TCMMap(this->XTRhoLMem,  NTrial,  NTrial);
       new (&TrialVecL) TCMMap(this->TVecLMem,   this->N_,NTrial);
     }
-    XTSigmaR = TrialVecR.transpose()*SigmaR; // E(R) or E(R)_gg
+    XTSigmaR = TrialVecR.adjoint()*SigmaR; // E(R) or E(R)_gg
     if(!isHermetian_ || symmetrizedTrial_){
-      XTRhoR   = TrialVecR.transpose()*RhoR;   // S(R)_gu
-      XTSigmaL = TrialVecL.transpose()*SigmaL; // E(R)_uu
-      XTRhoL   = TrialVecL.transpose()*RhoL;   // S(R)_ug
+      XTRhoR   = TrialVecR.adjoint()*RhoR;   // S(R)_gu
+      XTSigmaL = TrialVecL.adjoint()*SigmaL; // E(R)_uu
+      XTRhoL   = TrialVecL.adjoint()*RhoL;   // S(R)_ug
     }
   } // fullProjection
   /** Build Supermatricies in reduced dimension **/
@@ -651,45 +666,7 @@ template <typename T>
     SSuper.block(0,     NTrial,NTrial,NTrial) = XTRhoR;
     SSuper.block(NTrial,0,     NTrial,NTrial) = XTRhoL;
   } // buildSuperMat
-  /** Reconstruct full dimenstion solution **/
-  /*
-   *  Reconstruct the approximate eigenvectors
-   *
-   *  For Hermetian matricies in general (viz. Davidson J. Comput. Phys. 17 (1975))
-   *
-   *  | X > = | b_i > X(R)_i
-   *
-   *  For RPA (viz. Kauczor et al. JCTC 7 (2010) p. 1610  (Eq 90,91)):
-   *
-   *  | X_g > = | {b_g}_i > {X(R)_g}_i
-   *  | X_u > = | {b_u}_i > {X(R)_u}_i
-   */ 
-  template<typename T>
-  void QuasiNewton<T>::reconstructSolution(const int NTrial){
-    TCMMap XTSigmaR (this->XTSigmaRMem,NTrial,  NTrial);
-    TCMMap UR       (this->URMem,      this->N_,NTrial);
-    TCMMap TrialVecR(this->TVecRMem,   this->N_,NTrial);
-    TCMMap XTRhoR   (this->XTRhoRMem,  0,0);
-    TCMMap XTSigmaL (this->XTSigmaLMem,0,0);
-    TCMMap XTRhoL   (this->XTRhoLMem,  0,0);
-    TCMMap UL       (this->ULMem,      0,0);
-    TCMMap TrialVecL(this->TVecLMem,   0,0);
-    TVecMap ER(this->ERMem,NTrial);
-    if(!this->isHermetian_ || this->symmetrizedTrial_){
-      new (&XTRhoR   ) TCMMap(this->XTRhoRMem,  NTrial,  NTrial);
-      new (&XTSigmaL ) TCMMap(this->XTSigmaLMem,NTrial,  NTrial);
-      new (&XTRhoL   ) TCMMap(this->XTRhoLMem,  NTrial,  NTrial);
-      new (&UL       ) TCMMap(this->ULMem,      this->N_,NTrial);
-      new (&TrialVecL) TCMMap(this->TVecLMem,   this->N_,NTrial);
-    }
-    UR = TrialVecR * XTSigmaR;
-    if(this->symmetrizedTrial_) UL = TrialVecL * XTSigmaL;
-    // Stash away current approximation of eigenvalues and eigenvectors (NSek)
-    (*this->solutionValues_) = ER.block(0,0,nSek_,1);
-    (*this->solutionVector_) = UR.block(0,0,N_,nSek_); 
-    // | X > = | X_g > + | X_u > (viz. Kauczor et al. JCTC 7 (2010) p. 1610  (Eq 80))
-    if(this->symmetrizedTrial_)(*solutionVector_) += UL.block(0,0,N_,nSek_); 
-  } // reconstructSolution
+
   /** Construct the residual vector **/
   /*
    *  For Hermetian matricies in general (viz. Davidson J. Comput. Phys. 17 (1975))
