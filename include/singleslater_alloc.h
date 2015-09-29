@@ -56,6 +56,7 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
   this->elecField_ = 
     std::unique_ptr<std::array<double,3>>(
       new std::array<double,3>{{0.0,0.0,0.0}});
+  (*this->elecField_) = controls->field_;
 
   this->isClosedShell = (this->multip_ == 1);
   if(this->isClosedShell && !controls->doCUHF

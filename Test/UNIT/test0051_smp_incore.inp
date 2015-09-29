@@ -1,0 +1,13 @@
+$geom read
+1
+Li 0 0.000000 0.000000 0.000000
+
+$method hf
+$charge 0
+$spin 2
+$basis cc-pVDZ.gbs
+$nsmp 4
+$print 1
+$scf incore
+$unittest scf
+$field 0.01 0.0 0.0

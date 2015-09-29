@@ -181,6 +181,23 @@ void SingleSlater<double>::computeEnergy(){
     this->energyOneE += (*this->aointegrals_->oneE_).frobInner(this->densityB_->conjugate());
     this->energyTwoE += 0.5*(*this->PTB_).frobInner(this->densityB_->conjugate());
   }
+
+  // Add in the electric field component if they are non-zero
+  std::array<double,3> null{{0,0,0}};
+  if((*this->elecField_) != null){
+    int NB = this->nTCS_*this->nBasis_;
+    int NBSq = NB*NB;
+    int iBuf = 0;
+    for(auto iXYZ = 0; iXYZ < 3; iXYZ++){
+      ConstRealMap mu(&this->aointegrals_->elecDipole_->storage()[iBuf],NB,NB);
+      this->energyOneE += 
+        this->elecField_->at(iXYZ) * mu.frobInner(this->densityA_->conjugate());
+      if(!this->isClosedShell && this->Ref_ != TCS)
+      this->energyOneE += 
+        this->elecField_->at(iXYZ) * mu.frobInner(this->densityB_->conjugate());
+      iBuf += NBSq;
+    }
+  }
   this->totalEnergy= this->energyOneE + this->energyTwoE + this->energyNuclei;
   this->printEnergy();
 };

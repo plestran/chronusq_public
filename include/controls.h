@@ -64,6 +64,7 @@ public:
   double	thresholdSchawrtz;
   double        SCFdenTol_;
   double        SCFeneTol_;
+  std::array<double,3> field_;
   int           SCFmaxIter_;
   int    	guess;         	// how to get the initial guess
   int           nthreads;       // Number of OpenMP threads
