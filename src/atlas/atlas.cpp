@@ -153,11 +153,12 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   }
   if(controls->doUnit) printUnitInfo(controls.get(),hartreeFockReal.get(),sdResponseReal.get());
 
-/*
+
 ////// APS ////
-  twoDGrid->iniTwoDGrid(fileIO.get(),molecule.get(),basisset.get(),aointegrals.get(),hartreeFockReal.get(),100,194);
+  cout << " Before TwoDGrid" <<endl;
+//  twoDGrid->iniTwoDGrid(fileIO.get(),molecule.get(),basisset.get(),aointegrals.get(),hartreeFockReal.get(),100,194);
 ////// APE ////
-*/
+
 /*
 //fds
   realtime->iniRealTime(molecule.get(),basisset.get(),fileIO.get(),controls.get(),aointegrals.get(),hartreeFockReal.get());
