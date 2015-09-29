@@ -92,26 +92,48 @@ def genRefDict():
 #
 def genSummary(testtable,summary):
 	outf = open('summary.txt','w')
-	
+
+# SCF output	
 	headers = ["Test Job","|dEnergy|","max(|dDipole|)","max(|dQuadrupole|)","max(|dOctupole|)","Passed"]
 	sumrytable = []
-	for i in range(len(testtable)):
-		print "i = ", i
-		entry = []
-		entry.append(testtable[i].infile.replace(".inp",''))
-		entry.append(summary[i][0])
-		entry.append(max(summary[i][1:4]))
-		entry.append(max(summary[i][5:11]))
-		entry.append(max(summary[i][12:22]))
-#		if summary[i][0] < 1E-08 and max(summary[i][1:4]) < 1E-8 and max(summary[i][5:11]) < 1E-8 and max(summary[i][12:22]) < 1E-8:
-#			entry.append('YES')
-#		else:
-#			entry.append('** NO **')
-		sumrytable.append(entry)
-	
+	j = 0
+	for i in testtable:
+		if 'SCF' in reftype[i.infile[:8]]:
+			entry = []
+			entry.append(testtable[j].infile.replace(".inp",''))
+			entry.append(summary[j][0])
+			entry.append(max(summary[j][1:4]))
+			entry.append(max(summary[j][5:11]))
+			entry.append(max(summary[j][12:22]))
+			if summary[j][0] < 1E-08 and max(summary[j][1:4]) < 1E-8 and max(summary[j][5:11]) < 1E-8 and max(summary[j][12:22]) < 1E-8:
+				entry.append('YES')
+			else:
+				entry.append('** NO **')
+			sumrytable.append(entry)
+		j += 1
 	outf.write(tabulate(sumrytable,headers,tablefmt="simple",floatfmt=".4E"))
+
+# RESP output
+	headers = ["Test Job","max(|omega|)","max(|f|)","Passed"]
+	sumrytable = []
+	j = 0
+	for i in testtable:
+		if 'RESP' in reftype[i.infile[:8]]:
+			entry = []
+			entry.append(testtable[j].infile.replace(".inp",''))
+			entry.append(summary[j][0])
+			entry.append(summary[j][1])
+			if summary[j][0] < 1E-03 and summary[j][1] < 1E-3:
+				entry.append('YES')
+			else:
+				entry.append('** NO **')
+			sumrytable.append(entry)
+		j += 1
+
 	outf.write("\n\n")
 	outf.write(tabulate(sumrytable,headers,tablefmt="simple",floatfmt=".4E"))
+
+
 
 #
 #  Runs Unit Tests
@@ -136,23 +158,17 @@ def runUnit(doKill):
 			strx = line.split()
 			time = float(strx[6])
 			err = []
-#			for j in range(len(refdict[i.infile[:8]])):
 			for j in range(len(vals)):
 				try: # SCF
 					abserr = abs(float(vals[j]) - refdict[i.infile[:8]][j])
-##				if refdict[i.infile[:8]][j] != 0:
-##					abserr /= refdict[i.infile[:8]][j]
+#					if refdict[i.infile[:8]][j] != 0:
+#						abserr /= refdict[i.infile[:8]][j]
 					err.append(abserr)
 					if abserr > 1E-8:
 						raise MaxErrorExcedeed(abserr)
 				except ValueError: # RESP
 					if 'RESP' in reftype[i.infile[:8]]:
-						print "RESP type "+i.infile.replace(".inp",'')
 						strx  = vals[j].split(',')
-##					engcq = float(strx[0])
-##					fcq   = float(strx[1])
-##					print "CQ  energy = ", engcq, "f = ", fcq
-##					print "REF energy = ", refdict[i.infile[:8]][j].energy, "f = ", refdict[i.infile[:8]][j].f
 						engtmp = abs(float(strx[0]) - refdict[i.infile[:8]][j].energy)
 						ftmp   = abs(float(strx[1]) - refdict[i.infile[:8]][j].f)
 						if (engtmp > engmax): engmax = engtmp 
@@ -166,8 +182,9 @@ def runUnit(doKill):
 				summary.append(err)
 			else:
 				print "engmax = ", engmax, "fmax = ", fmax
-				summary.append(engmax)
-				summary.append(fmax)
+				err.append(engmax)
+				err.append(fmax)
+				summary.append(err)
 	genSummary(testtable,summary)
 
 #
