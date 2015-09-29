@@ -30,8 +30,8 @@
 #ifdef USE_LIBINT
 template<typename T>
 void SingleSlater<T>::formPT(){
-  bool doRHF = (this->Ref_ == RHF);
   bool doTCS = (this->Ref_ == TCS);
+  bool doRHF = (this->isClosedShell && !doTCS);
   if(!this->haveDensity) this->formDensity();
   if(this->controls_->directTwoE && !this->controls_->doDF)
     this->aointegrals_->twoEContractDirect(doRHF,true,false,doTCS,*this->densityA_,*this->PTA_,*this->densityB_,*this->PTB_);
@@ -42,7 +42,7 @@ void SingleSlater<T>::formPT(){
   if(this->controls_->printLevel >= 3) {
     if(!doTCS){
       prettyPrint(this->fileio_->out,(*this->PTA_),"Alpha Perturbation Tensor");
-      if(this->Ref_ != RHF) prettyPrint(this->fileio_->out,(*this->PTB_),"Beta Perturbation Tensor");
+      if(this->isClosedShell) prettyPrint(this->fileio_->out,(*this->PTB_),"Beta Perturbation Tensor");
     } else {
       prettyPrintTCS(this->fileio_->out,(*this->PTA_),"Perturbation Tensor");
     }
@@ -110,7 +110,7 @@ void SingleSlater<T>::formFock(){
   if(this->controls_->printLevel>=2) {
     if(this->Ref_ != TCS){
       prettyPrint(this->fileio_->out,(*this->fockA_),"Alpha Fock");
-      if(this->Ref_ != RHF) prettyPrint(this->fileio_->out,(*this->fockB_),"Beta Fock");
+      if(this->isClosedShell) prettyPrint(this->fileio_->out,(*this->fockB_),"Beta Fock");
     } else {
       prettyPrintTCS(this->fileio_->out,(*this->fockA_),"Fock");
     }

@@ -44,7 +44,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   auto realtime		  = std::unique_ptr<RealTime>(new RealTime());
   auto sdResponseReal     = std::unique_ptr<SDResponse<double>>(new SDResponse<double>());
   auto sdResponseComplex  = std::unique_ptr<SDResponse<dcomplex>>(new SDResponse<dcomplex>());
-  auto twoDGrid     	= std::unique_ptr<TwoDGrid>(new TwoDGrid());
+//auto twoDGrid     	= std::unique_ptr<TwoDGrid>(new TwoDGrid());
   std::unique_ptr<FileIO> fileIO;
   std::unique_ptr<GauJob> gauJob;
 
@@ -76,9 +76,12 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   // Initialize memory for wave function related quantities
   // Logic for Real / Complex
   if(!controls->doComplex){
+    cout << "HERE" << endl;
     hartreeFockReal->iniSingleSlater(molecule.get(),basisset.get(),aointegrals.get(),
       fileIO.get(),controls.get());
+    cout << "HERE" << endl;
     hartreeFockReal->printInfo();
+    cout << "HERE" << endl;
   } else {
     hartreeFockComplex->iniSingleSlater(molecule.get(),basisset.get(),aointegrals.get(),
       fileIO.get(),controls.get());
@@ -105,15 +108,20 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   // Optimize wave function (?)
   if(!controls->doComplex){
     // Form initial (primer) Fock matrix
+    cout << "HERE" << endl;
     hartreeFockReal->formFock();
+    cout << "HERE" << endl;
     aointegrals->printTimings();
+    cout << "HERE" << endl;
 
     // Compute initial energy
     hartreeFockReal->computeEnergy();
+    cout << "HERE" << endl;
 
     // Optionally optimize the wavefunction through SCF (unless told to skip)
     if(controls->optWaveFunction)  hartreeFockReal->SCF();
     else fileIO->out << "**Skipping SCF Optimization**" << endl; 
+    cout << "HERE" << endl;
 
     // Compute the Electric Multipole Moments
     hartreeFockReal->computeMultipole();
@@ -153,9 +161,11 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   }
   if(controls->doUnit) printUnitInfo(controls.get(),hartreeFockReal.get(),sdResponseReal.get());
 
+/*
 ////// APS ////
   twoDGrid->iniTwoDGrid(fileIO.get(),molecule.get(),basisset.get(),aointegrals.get(),hartreeFockReal.get(),100,194);
 ////// APE ////
+*/
 /*
 //fds
   realtime->iniRealTime(molecule.get(),basisset.get(),fileIO.get(),controls.get(),aointegrals.get(),hartreeFockReal.get());
