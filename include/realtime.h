@@ -34,12 +34,13 @@
 #include <basisset.h>
 
 namespace ChronusQ {
+template<typename T>
 class RealTime {
   FileIO *        fileio_;
   Controls *      controls_;
   BasisSet *	  basisset_;
   AOIntegrals *   aointegrals_;
-  SingleSlater<double> *  groundState_;
+  SingleSlater<T> *  groundState_;
 
   std::unique_ptr<SingleSlater<dcomplex>> ssPropagator_;
 
@@ -84,11 +85,13 @@ public:
   ~RealTime() {;};
 
   // pseudo-constructor
-  void iniRealTime(Molecule *,BasisSet *,FileIO *,Controls *,AOIntegrals *,SingleSlater<double> *);
+  void iniRealTime(Molecule *,BasisSet *,FileIO *,Controls *,AOIntegrals *,SingleSlater<T> *);
   void iniDensity(); // initialize density
 //  void formComplexFock();
   void formUTrans();
   void doPropagation();
 };
+
+#include <realtime_alloc.h>
 } // namespace ChronusQ
 #endif
