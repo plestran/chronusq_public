@@ -173,7 +173,7 @@ void SingleSlater<dcomplex>::evalConver(){
   EDelta = this->totalEnergy - EOld;
 
   PAlphaRMS = ((*this->densityA_).cwiseAbs() - POldAlpha.cwiseAbs()).norm();
-  if(!this->isClosedShell && this->Ref_ != TCS) PBetaRMS = ((*this->densityB_).abs() - POldBeta.abs()).norm();
+  if(!this->isClosedShell && this->Ref_ != TCS) PBetaRMS = ((*this->densityB_).cwiseAbs() - POldBeta.cwiseAbs()).norm();
 
   if(this->isClosedShell)    this->printDensityInfo(PAlphaRMS,EDelta);
   else if(this->Ref_ != TCS) this->printDensityInfo(PAlphaRMS,PBetaRMS,EDelta);

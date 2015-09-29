@@ -233,7 +233,6 @@ void RealTime::doPropagation() {
 //  Form AO Fock matrix
     this->ssPropagator_->formFock();
     this->ssPropagator_->computeEnergy();
-//  jjg add compute multipole
     this->ssPropagator_->computeMultipole();
 
 //  Transform Fock from AO to orthonormal basis

@@ -91,9 +91,9 @@ void SingleSlater<T>::formFock(){
 #else
   *(fockA_)+=(*this->PTA_);
 #endif
-  if(this->controls_->DFT){
-    (*this->fockA_) += (*this->vXCA_);
-  }
+//  if(this->controls_->DFT){
+//    (*this->fockA_) += (*this->vXCA_);
+//  }
   if(!this->isClosedShell && this->Ref_ != TCS){
     this->fockB_->setZero();
     fockB_->real()+=(*this->aointegrals_->oneE_);
@@ -103,9 +103,9 @@ void SingleSlater<T>::formFock(){
 #else
     *(fockB_)+=(*this->PTB_);
 #endif
-    if(this->controls_->DFT){
-      (*this->fockB_) += (*this->vXCB_);
-    }
+//    if(this->controls_->DFT){
+//      (*this->fockB_) += (*this->vXCB_);
+//    }
   };
   if(this->controls_->printLevel>=2) {
     if(this->Ref_ != TCS){
