@@ -49,11 +49,11 @@ void RealTime::iniRealTime(Molecule * molecule, BasisSet *basisset, FileIO *file
 
   this->frozenNuc_	= true;
   this->maxSteps_	= 100;
-  this->stepSize_	= 0.005;
+  this->stepSize_	= 0.05;
   this->typeOrtho_	= 1;  
   this->initDensity_	= 1;
-  this->swapMOA_	= 5006;
-  this->swapMOB_	= 0;
+  this->swapMOA_	= 0;
+  this->swapMOB_	= 3010;
   this->methFormU_	= 1;
 
   this->fileio_->out<<"\nReal-time TDHF: "<<endl;
