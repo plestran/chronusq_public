@@ -159,29 +159,33 @@ def runUnit(doKill):
 			engmax = 0.
 			fmax   = 0.
 			for j in range(len(vals)):
-				try: # SCF
-					abserr = abs(float(vals[j]) - refdict[i.infile[:8]][j])
-					err.append(abserr)
-					if abserr > 1E-7:
-						raise MaxErrorExcedeed(abserr)
-				except ValueError: # RESP
-					nstates[k] = len(vals)
-					strx  = vals[j].split(',')
-					engtmp = abs(float(strx[0]) - refdict[i.infile[:8]][j].energy)
-					ftmp   = abs(float(strx[1]) - refdict[i.infile[:8]][j].f)
-					if (engtmp > engmax): engmax = engtmp 
-					if (ftmp > fmax): fmax = ftmp 
-					if engmax > 1E-4 or fmax > 1E-4:
-						raise MaxErrorExcedeed(engmax)
-				except MaxErrorExcedeed:
-					if doKill:
-						raise
-					else:
-						continue
+				if 'SCF' in reftype[i.infile[:8]]:
+					try: # SCF
+						abserr = abs(float(vals[j]) - refdict[i.infile[:8]][j])
+						err.append(abserr)
+						if abserr > 1E-7: raise MaxErrorExcedeed(abserr)
+					except MaxErrorExcedeed:
+						if doKill:
+							raise
+						else:
+							continue
+				elif 'RESP' in reftype[i.infile[:8]]:
+					try:
+						nstates[k] = len(vals)
+						strx  = vals[j].split(',')
+						engtmp = abs(float(strx[0]) - refdict[i.infile[:8]][j].energy)
+						ftmp   = abs(float(strx[1]) - refdict[i.infile[:8]][j].f)
+						if (engtmp > engmax): engmax = engtmp 
+						if (ftmp > fmax): fmax = ftmp 
+						if engmax > 1E-4 or fmax > 1E-4: raise MaxErrorExcedeed(engmax)
+					except MaxErrorExcedeed:
+						if doKill:
+							raise
+						else:
+							continue
 			if 'SCF' in reftype[i.infile[:8]]:
 				summary.append(err)
-			else:
-# 				print "engmax = ", engmax, "fmax = ", fmax
+			elif 'RESP' in reftype[i.infile[:8]]:
 				err.append(engmax)
 				err.append(fmax)
 				summary.append(err)
