@@ -158,16 +158,24 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   twoDGrid->iniTwoDGrid(fileIO.get(),molecule.get(),basisset.get(),aointegrals.get(),hartreeFockReal.get(),100,194);
 ////// APE ////
 */
-/*
+
 //fds
-  realtime->iniRealTime(molecule.get(),basisset.get(),fileIO.get(),controls.get(),aointegrals.get(),hartreeFockReal.get());
+  fileIO->out<<"\n JJG Begin Real-Time TDHF: "<<ctime(&currentTime)<<endl;
+  if(!controls->doComplex) {
+    realtime->iniRealTime(molecule.get(),basisset.get(),fileIO.get(),controls.get(),aointegrals.get(),hartreeFockReal.get());
+  } else {
+     fileIO->out<<"Complex-based RT NYI"<<endl;
+     exit (EXIT_FAILURE);
+  // complex case
+  //  realtime->iniRealTime(molecule.get(),basisset.get(),fileIO.get(),controls.get(),aointegrals.get(),hartreeFockComplex.get());
+  }
   fileIO->out<<"\niniRealTime Done: "<<ctime(&currentTime)<<endl;
   realtime->iniDensity();
   fileIO->out<<"\niniDensity Done: "<<ctime(&currentTime)<<endl;
   realtime->doPropagation();
   fileIO->out<<"\ndoPropagation Done: "<<ctime(&currentTime)<<endl;
 //fds
-*/
+
 
   // Cleanup Libint env
 #ifdef USE_LIBINT

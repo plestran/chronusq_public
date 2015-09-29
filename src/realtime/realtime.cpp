@@ -39,7 +39,7 @@ void RealTime::iniRealTime(Molecule * molecule, BasisSet *basisset, FileIO *file
   this->controls_       = controls;
   this->aointegrals_	= aointegrals;
   this->groundState_   	= groundState;
-
+  // ssPropagator loses its mind when it has a complex reference, despite the fact that it is complex object
   this->ssPropagator_	= std::unique_ptr<SingleSlater<dcomplex>>(new SingleSlater<dcomplex>(groundState));
 
   this->nBasis_ = basisset->nBasis();
@@ -231,8 +231,11 @@ void RealTime::doPropagation() {
       if(!this->RHF_) prettyPrintComplex(this->fileio_->out,(*this->ssPropagator_->densityB()),"Beta AO Density");
 
 //  Form AO Fock matrix
+//    cout<<"before Fock"<<endl;
     this->ssPropagator_->formFock();
+//    cout<<"before Energy"<<endl;
     this->ssPropagator_->computeEnergy();
+//    cout<<"before Multipole"<<endl;
     this->ssPropagator_->computeMultipole();
 
 //  Transform Fock from AO to orthonormal basis

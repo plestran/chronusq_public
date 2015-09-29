@@ -214,7 +214,6 @@ void SingleSlater<double>::computeEnergy(){
     this->energyOneE += (*this->aointegrals_->oneE_).frobInner(this->densityB_->conjugate());
     this->energyTwoE += 0.5*(*this->PTB_).frobInner(this->densityB_->conjugate());
   }
-
   // Add in the electric field component if they are non-zero
   std::array<double,3> null{{0,0,0}};
   if((*this->elecField_) != null){
