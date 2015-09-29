@@ -110,7 +110,7 @@ void SingleSlater<T>::formFock(){
   if(this->controls_->printLevel>=2) {
     if(this->Ref_ != TCS){
       prettyPrint(this->fileio_->out,(*this->fockA_),"Alpha Fock");
-      if(this->isClosedShell) prettyPrint(this->fileio_->out,(*this->fockB_),"Beta Fock");
+      if(!this->isClosedShell) prettyPrint(this->fileio_->out,(*this->fockB_),"Beta Fock");
     } else {
       prettyPrintTCS(this->fileio_->out,(*this->fockA_),"Fock");
     }
