@@ -45,6 +45,7 @@ def genTable():
 				table.append(entry)
 	f.close()
 	return table
+
 #
 #  Checks whether file "name" exists in "path"
 #
@@ -66,30 +67,37 @@ def findFile(name,path):
 def genRefDict():
 	ref = open("GAUREF/ref.val",'r')
 	refdict = {}
+#	reftype = {}
 	for line in ref:
 		strx=line.split('/')
 		refdict[strx[0]] = strx[1:]
 	
 	for i in refdict:
 		for j in range(len(refdict[i])):
-			try:
+			try: # SCF tests
 				refdict[i][j] = float(refdict[i][j])
-			except ValueError:
-				if ',' in refdict[i][j]:
+				reftype[i] = 'SCF'
+			except ValueError: # RESP tests
+				if ',' in refdict[i][j]: 
 			 		sp = refdict[i][j].split(',')
 					refdict[i][j] = RespData(float(sp[0]),float(sp[1]))
+					reftype[i] = 'RESP'
 				else:
 					raise
 			
 	ref.close()
 	return refdict
 
+#
+#  Prints the results in summary.txt
+#
 def genSummary(testtable,summary):
 	outf = open('summary.txt','w')
 	
 	headers = ["Test Job","|dEnergy|","max(|dDipole|)","max(|dQuadrupole|)","max(|dOctupole|)","Passed"]
 	sumrytable = []
 	for i in range(len(testtable)):
+		print "i = ", i
 		entry = []
 		entry.append(testtable[i].infile.replace(".inp",''))
 		entry.append(summary[i][0])
@@ -103,17 +111,19 @@ def genSummary(testtable,summary):
 		sumrytable.append(entry)
 	
 	outf.write(tabulate(sumrytable,headers,tablefmt="simple",floatfmt=".4E"))
-
-
+	outf.write("\n\n")
+	outf.write(tabulate(sumrytable,headers,tablefmt="simple",floatfmt=".4E"))
 
 #
 #  Runs Unit Tests
 #
 def runUnit(doKill):
+	global reftype 
+	reftype = {}
 	testtable = genTable()
 	refdict = genRefDict()
-		
 	summary = []
+
 	for i in testtable:
 		if findFile(i.infile,"."):
 			print "../../chronusQ "+i.infile.replace(".inp",'')
@@ -125,15 +135,18 @@ def runUnit(doKill):
 			strx = line.split()
 			time = float(strx[6])
 			err = []
-			for j in range(len(refdict[i.infile[:8]])):
+#			for j in range(len(refdict[i.infile[:8]])):
+			for j in range(len(vals)):
 				try:
-					if refdict[i.infile[:8]][j] == 0:
-						abserr = abs(float(vals[j]) - refdict[i.infile[:8]][j])
-					else:
-						abserr = abs(float(vals[j]) - refdict[i.infile[:8]][j])/refdict[i.infile[:8]][j]
-					err.append(abs(abserr))
-					if abs(abserr) > 1E-8:
-						raise MaxErrorExcedeed(abs(abserr))
+					abserr = abs(float(vals[j]) - refdict[i.infile[:8]][j])
+#					if refdict[i.infile[:8]][j] != 0:
+#						abserr /= refdict[i.infile[:8]][j]
+					err.append(abserr)
+					if abserr > 1E-8:
+						raise MaxErrorExcedeed(abserr)
+				except ValueError: 
+					if 'RESP' in reftype[i.infile[:8]]:
+						print "RESP type "+i.infile.replace(".inp",'')
 				except MaxErrorExcedeed:
 					if doKill:
 						raise
@@ -142,7 +155,9 @@ def runUnit(doKill):
 			summary.append(err)
 	genSummary(testtable,summary)
 
-
+#
+#  Parse input options
+#
 if __name__ in "__main__":
 	msg = """python runtests.py [-o --option]
 

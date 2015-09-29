@@ -9,11 +9,11 @@ ChronusQ Input File                 Description
 -------------------                 -----------
 
 ** test0001-0003 Test Small Molecule RHF SCF code **
-#test0001_serial_incore.inp   SCF    H2O/STO-3G  Serial SCF - In-Core Integrals
+test0001_serial_incore.inp   SCF    H2O/STO-3G  Serial SCF - In-Core Integrals
 #test0001_serial_direct.inp   SCF    H2O/STO-3G  Serial SCF - Direct Integrals
 #test0001_smp_incore.inp      SCF    H2O/STO-3G  OpenMP SCF - In-Core Integrals
 #test0001_smp_direct.inp      SCF    H2O/STO-3G  OpenMP SCF - Direct Integrals
-#test0002_serial_incore.inp   SCF    H2O/6-31G   Serial SCF - In-Core Integrals
+test0002_serial_incore.inp   SCF    H2O/6-31G   Serial SCF - In-Core Integrals
 #test0002_serial_direct.inp   SCF    H2O/6-31G   Serial SCF - Direct Integrals
 #test0002_smp_incore.inp      SCF    H2O/6-31G   OpenMP SCF - In-Core Integrals
 #test0002_smp_direct.inp      SCF    H2O/6-31G   OpenMP SCF - Direct Integrals
@@ -97,7 +97,7 @@ ChronusQ Input File                 Description
 ##test0018_smp_denfit.inp     SCF     O2/cc-pVDZ OpenMP SCF - RI Integrals (6D)
 
 ** test0019-00021 Test Small Molecule RHF CIS code **
-test0019_serial_incore.inp   RESP    H2O/STO-3G  Serial CIS - In-Core Integrals
+#test0019_serial_incore.inp   RESP    H2O/STO-3G  Serial CIS - In-Core Integrals
 #test0019_serial_direct.inp  RESP    H2O/STO-3G  Serial CIS - Direct Integrals
 #test0019_smp_incore.inp     RESP    H2O/STO-3G  OpenMP CIS - In-Core Integrals
 #test0019_smp_direct.inp     RESP    H2O/STO-3G  OpenMP CIS - Direct Integrals
