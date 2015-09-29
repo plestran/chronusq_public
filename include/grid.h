@@ -92,6 +92,7 @@ class TwoDGrid : public Grid {
             BasisSet *  basisSet_; ///< Smart pointer to primary basis set
             Molecule * 	molecule_; ///< Smart pointer to molecule specification
             FileIO *    fileio_;   ///< Smart pointer to fileIO
+            AOIntegrals * aointegrals_;  ///< Molecular Integrals over GTOs (AO basis)
             SingleSlater<double> *  singleSlater_; ///< Smart pointer to SingleSlater
             double *  GridCarX_;  ///<  Cartesian X component of Grid points
             double *  GridCarY_;  ///<  Cartesian Y component of Grid points
@@ -105,18 +106,10 @@ class TwoDGrid : public Grid {
 */
       public:
 //      Constructor
-        TwoDGrid(FileIO * fileio,Molecule * molecule,BasisSet * basisset, SingleSlater<double> * singleSlater,OneDGrid *Gr, OneDGrid *Gs){
+      TwoDGrid(){;};
+//        TwoDGrid(FileIO * fileio,Molecule * molecule,BasisSet * basisset, SingleSlater<double> * singleSlater,OneDGrid *Gr, OneDGrid *Gs){
+//        TwoDGrid{
 //      Pointers
-        this->Gr_ =  Gr;
-        this->Gs_ =  Gs;
-        this->basisSet_ = basisset;
-        this->fileio_ = fileio;
-        this->molecule_ = molecule;
-        this->singleSlater_ = singleSlater;
-        this->GridCarX_ = new double [Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms()]; ;
-        this->GridCarY_ = new double [Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms()]; ;
-        this->GridCarZ_ = new double [Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms()]; ;
-        this->weightsGrid_  = new double [Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms()*this->molecule_->nAtoms()];
 /*
 ////        this->gEval_  = new double *[Gr_->npts()*Gs_->npts()];
 //        inline double * getfEval(int i,int j, int width){ return this->fEval_[i*width +j];};
@@ -124,7 +117,7 @@ class TwoDGrid : public Grid {
 //        BasisSet *  basisSet_; ///< Smart pointer to primary basis set
 //        this->fEval =  new double*[Gr_->npts()*Gs_->npts()];
 */
-          };
+//          };
 
 //    Function Declaration //
 //    RealMatrix * integrateO();
@@ -135,6 +128,8 @@ class TwoDGrid : public Grid {
       double * BuildDensity(double * Sum,double * Buff,int n1, int n2);
       void printGrid();
       void genGrid();
+      void buildGrid(OneDGrid *Gr, OneDGrid *Gs);
+      void iniTwoDGrid(FileIO * fileio,Molecule * molecule,BasisSet * basisset, AOIntegrals * aointegrals, SingleSlater<double> * singleSlater,int Ngridr, int NLeb);
       void transformPts();
       double BeckeW(cartGP GridPt, int IAtm);
       double NormBeckeW(cartGP GridPt);

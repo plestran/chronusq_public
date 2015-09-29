@@ -28,54 +28,11 @@
 #include <grid.h>
 using namespace ChronusQ;
 
-/*
-  //  Test Function for One-dimensional grid
-void func(Grid *g){
-  // Reference numeric integration computed with Mathematica
-  double ref = 0.18947234582049224;
-   (*g).genGrid();
-//   (*g).printGrid(); 
-   cout << "Test Integral value= "<< (*g).integrate() << endl;
-//   cout << "Test Integral err  = "<< std::scientific <<std::abs((*g).integrate() - ref)/ref << endl;
-   cout << "Test Integral err  = "<<std::abs((*g).integrate() - ref)/ref << endl;
-}
-
-
-void func2D(OneDGrid *g){
-   (*g).genGrid();
-   (*g).printGrid(); 
-   cout << "Test Integral value= "<< (*g).integrate() << endl;
-}
-  double foxy(cartGP pt, cartGP O,double a1, double a2, double a3, double d1, double d2, double d3, double lx, double ly, double lz) {
-     double x = bg::get<0>(pt)-bg::get<0>(O);
-     double y = bg::get<1>(pt)-bg::get<1>(O);
-     double z = bg::get<2>(pt)-bg::get<2>(O);
-//     cout << "x "<<x <<" y "<< y << " z " << z <<endl;
-     double fun = 0.0;
-     double rSq;
-     rSq = (x*x + y*y + z*z);
-      fun  += d1*std::exp(-a1*rSq);
-      fun  += d2*std::exp(-a2*rSq);
-      fun  += d3*std::exp(-a3*rSq);
-      fun *= std::pow(x,lx);
-      fun *= std::pow(y,ly);
-      fun *= std::pow(z,lz);
-     return fun*fun;
-  }
-*/
-
-//void func2D_plus(OneDGrid *gr, OneDGrid *gs){
-//   (*gr).genGrid();
-//   (*gs).genGrid();
-//     TwoDGrid(*gr, *gs) grs2;
-//   TwoDGrid *G3(*gr,*gs);
-//   cout << "Test Integral value= "<< (g2d).integrate() << endl;
-//}
-
 int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   time_t currentTime;
 
   // Pointers for important storage 
+  auto twoDGrid     	= std::unique_ptr<TwoDGrid>(new TwoDGrid());
   auto molecule     	= std::unique_ptr<Molecule>(new Molecule());
   auto basisset     	= std::unique_ptr<BasisSet>(new BasisSet());
   auto dfBasisset     	= std::unique_ptr<BasisSet>(new BasisSet());
@@ -161,162 +118,14 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
  Iop=1;
  molecule->toCOM(Iop);  // call object molecule pointing to function toCOM-Iop=1 Center of Nuclear Charges
 
-////// AP ////
-*/
-//Test one dimensional grid
-//
-//
-
-//  cartGP pt(0.01,0.02,0.03);
-  
-
-
-//  double *f = basisset->basisEval(2,basisset->shells(2).O,&ptSPH);
-//  double *f = basisset->basisEval(2,basisset->shells(2).O,&ptSPH);
-//double *g = basisset->basisEval(basisset->shells(2),&ptSPH);
-//  cout << basisset->shells(2) << endl;
-//  for(auto i = 0; i < 3; i++)
-//  cout << "FEVAL " << *(f+i) <<endl;
-//cout << "FEVAL " << *(f+i) << " " << *(g+i) <<endl;
-
-  fileIO->out << "**AP One dimensional grid test**" << endl;
-//  int NLeb = 14;
-//  int NLeb = 26;
-//  int NLeb = 38;
-//  int NLeb = 194;
-  int Ngridr =  100;
-  double densityNumatr;
-//  int NLeb    = 110;
-  int NLeb    = 194;
-// Defining Grids
-  double radius = 1.0;  //It is actually useless using the [0,inf] RadGrid
-//      GaussChebyshev1stGrid Rad(Ngridr,0.0,radius);
-  GaussChebyshev1stGridInf Rad(Ngridr,0.0,radius);
-  LebedevGrid GridLeb2(NLeb);
-// Generating Grids   
-// 1D X 2D;
-  Rad.genGrid();
-  GridLeb2.genGrid();
-  TwoDGrid G2(fileIO.get(),molecule.get(),basisset.get(),hartreeFock.get(),&Rad,&GridLeb2);
-  G2.genGrid();
-//   G2.printGrid();
-
-/*
-  RealMatrix * Integral3D;
-  Integral3D=G2.integrateAtoms();
-*/
-  std::unique_ptr<RealMatrix> Integral3D(G2.integrateAtoms());
-  std::cout.precision(10);
-  cout << "Analitic : Overlap" << endl;
-  cout << (*aointegrals->overlap_)  << endl;
-  cout << "Numeric : Overlap" << endl;
-  cout << (*Integral3D)  << endl;
-  hartreeFock->formVXC(Integral3D.get());
-  cout << "Numeric - Analytic: Overlap" << endl;
-  cout << ((*Integral3D)-(*aointegrals->overlap_))  << endl;
-  densityNumatr=G2.integrateDensity();
-  cout << "LDA with Numeric Density = " << densityNumatr << endl;
-//  double resLDA = -11.611162519357;
-//   cout << "LDA Err " << (densityNumatr-resLDA) << endl;
-//  cout <<  (*Integra3D).Abs() <<endl;
-/*
-   sph3GP ptSPH;
-   cartGP ptCar;
-//   double *WOverPar_;
-   int n3 = basisset->nBasis();
-//   std::unique_ptr<RealMatrix> WOver_;
-//   WOver_ = std::unique_ptr<RealMatrix>(new RealMatrix(n3,n3)); // SUM over grid W_i Smunu(xi)
-//   RealMatrix WOver(n3,n3);
-// Loop over shells
-   std::cout << "Number of Radial-grid points= "<< Ngridr  << endl;
-   std::cout << "Number of Solid Angle-grid points= "<< NLeb<< endl;
-   cout << "NofBasis = " << basisset->nBasis() << endl;
-   cout << "NofShells = " << basisset->nShell() << endl;
-   for(int s1 = 0; s1 < basisset->nShell(); s1++){
-     int n1  = basisset->shells(s1).size();
-     cout << "S1 ShellSize = " << n1 << endl;
-     for(int s2=0; s2 <= s1; s2++){
-       int n2  = basisset->shells(s2).size();
-       cout << "S2 ShellSize = " << n2  << endl;
-//       double *WOverPar_ ;
-//       WOverPar_ = new double [n1*n2] ; // SUM over grid W_i Smunu(xi)
-       auto center = basisset->shells(s1).O;
-//   cout << basisset->shells(0) << endl;
-
-//  Loop over Grid Poind Radial x Angular
-         for(int i = 0; i < Ngridr; i++){
-           for(int j = 0; j < NLeb; j++){
-             ptSPH = G2.gridPt(i,j);
-             bg::transform(ptSPH,ptCar);
-             ptCar.set<0>(bg::get<0>(ptCar) + center[0]);
-             ptCar.set<1>(bg::get<1>(ptCar) + center[1]);
-             ptCar.set<2>(bg::get<2>(ptCar) + center[2]);
-// Loop inside shell
-                 WOverPar_ = basisset->basisProdEval(basisset->shells(s1),basisset->shells(s2),&ptCar);
-//             for(int shmu = 0; shmu < n1; shmu++ ) {
-//               for(int shnu = 0; shnu < n2; shnu++ ) {
-                 G2.setFEval(*WOverPar_,i,j,NLeb);
-                 
-//                }
-//              }
-            }
-          }
-//                 WOver(s1,s2) = G2.integrate();
-                 WOver(s1,s2) = G2.integrate();
-                 cout << "s1=" << s1 << " s2= " << s2 << " Integrate = " << WOver(s1,s2) <<endl;
-        }
-     }
-//   
-
 */
 
-/*
-RealMatrix STmp(n3,n3);
-for(auto s1=0l, s12=0l; s1 < basisset->nShell(); s1++){
-  int bf1_s = basisset->mapSh2Bf(s1);
-  int n1  = basisset->shells(s1).size();
-  for(int s2=0; s2 <= s1; s2++, s12++){
-    int bf2_s = basisset->mapSh2Bf(s2);
-    int n2  = basisset->shells(s2).size();
-    auto center = basisset->shells(s1).O;
-
-///    double *shIntBuff = new double [n1*n2];
-    double *pointProd; 
-    double *SumInt = new double [n1*n2];
-    double val;
-///    RealMap shInt(shIntBuff,n1,n2);
-///    shInt.setZero();
-    RealMap BlockInt(SumInt,n1,n2);
-    BlockInt.setZero();
-    for(int i = 0; i < Ngridr; i++)
-    
-    for(int j = 0; j < NLeb; j++){
-      ptSPH = G2.gridPt(i,j);
-      bg::transform(ptSPH,ptCar);
-      ptCar.set<0>(bg::get<0>(ptCar) + center[0]);
-      ptCar.set<1>(bg::get<1>(ptCar) + center[1]);
-      ptCar.set<2>(bg::get<2>(ptCar) + center[2]);
-///      const double * fEvalBuff = 
-///        basisset->basisProdEval(basisset->shells(s1),basisset->shells(s2),&ptCar);
-      pointProd = basisset->basisProdEval(basisset->shells(s1),basisset->shells(s2),&ptCar);
-      SumInt=G2.Buffintegrate(SumInt,pointProd,n1,n2,i,j);
-      
-///      ConstRealMap fEval(fEvalBuff,n1,n2);
-///      shInt += 4.0*math.pi*Rad.gridPts()[i]*Rad.gridPts()[i]*Rad.weights()[i]*GridLeb2.weights()[j]*fEval; 
-    }
-///    STmp.block(bf1_s,bf2_s,n1,n2) = shInt;
-    STmp.block(bf1_s,bf2_s,n1,n2) = 4*math.pi*BlockInt;
-///    delete [] shIntBuff;
-    delete [] SumInt;
-  }
-}
-//STmp = STmp.selfadjointView<Lower>(); 
-//cout << "DIFF" << endl;
-//cout << STmp-(*aointegrals->overlap_)  << endl;
-*/
-   
+////// APS ////
+  twoDGrid->iniTwoDGrid(fileIO.get(),molecule.get(),basisset.get(),aointegrals.get(),hartreeFock.get(),100,194);
+////// APE ////
   time(&currentTime);
   fileIO->out<<"\nJob finished: "<<ctime(&currentTime)<<endl;
+
 /*
   SingleSlater<dcomplex> newSS(hartreeFock.get());
   newSS.formFock();

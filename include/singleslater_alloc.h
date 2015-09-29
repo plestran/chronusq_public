@@ -72,7 +72,7 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
   this->nTCS_ = 1;
   if(this->Ref_ == TCS) this->nTCS_ = 2;
 // Comment out to get rid of DFT tests
-//  this->controls_->DFT = true;
+  this->controls_->DFT = true;
   
 
   // Alpha / TCS Density
