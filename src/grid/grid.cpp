@@ -140,6 +140,50 @@ void OneDGrid::printGrid(){
 
 ///  TWO GRID GENERAL ///
 
+	void TwoDGrid::iniTwoDGrid(FileIO * fileio,Molecule * molecule,BasisSet * basisset, AOIntegrals * aointegrals, SingleSlater<double> * singleSlater,int Ngridr, int NLeb){
+
+  this->basisSet_ = basisset;
+  this->fileio_ = fileio;
+  this->molecule_ = molecule;
+  this->aointegrals_= aointegrals;
+  this->singleSlater_ = singleSlater;
+  double radius = 1.0;  //It is actually useless using the [0,inf] RadGrid
+  double densityNumatr;
+  GaussChebyshev1stGridInf Rad(Ngridr,0.0,radius);
+  LebedevGrid GridLeb(NLeb);
+  Rad.genGrid();
+  GridLeb.genGrid();
+  buildGrid(&Rad,&GridLeb);
+  genGrid();
+  std::unique_ptr<RealMatrix> Integral3D(integrateAtoms());
+  std::cout.precision(10);
+  cout << "Analitic : Overlap" << endl;
+  cout << (*aointegrals->overlap_)  << endl;
+  cout << "Numeric : Overlap" << endl;
+  cout << (*Integral3D)  << endl;
+  singleSlater_->formVXC(Integral3D.get());
+  cout << "Numeric - Analytic: Overlap" << endl;
+  cout << ((*Integral3D)-(*aointegrals->overlap_))  << endl;
+  densityNumatr=integrateDensity();
+  cout << "LDA with Numeric Density = " << densityNumatr << endl;
+//  double resLDA = -11.611162519357;
+//  cout << "LDA Err " << (densityNumatr-resLDA) << endl;
+
+
+}//End
+
+void TwoDGrid::buildGrid(OneDGrid *Gr, OneDGrid *Gs){
+  this->fileio_->out << "**AP One dimensional grid test**" << endl;
+  this->Gr_ =  Gr;
+  this->Gs_ =  Gs;
+  this->GridCarX_ = new double [Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms()]; ;
+  this->GridCarY_ = new double [Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms()]; ;
+  this->GridCarZ_ = new double [Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms()]; ;
+  this->weightsGrid_  = new double [Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms()*this->molecule_->nAtoms()];
+
+
+} // End
+
 double * TwoDGrid::Buffintegrate(double * Sum,double * Buff,int n1, int n2, double fact){
   //  Integration over batches : Overlap at each point (numerical)
   ConstRealMap fBuff(Buff,n1,n2); 
@@ -496,11 +540,11 @@ void GaussChebyshev1stGridInf::transformPts(){
 //   Hydrogen
 //   double ralpha= 0.529;
 //   Nitrogen
-//     double ralpha= 0.65/2.0;
+     double ralpha= 0.65/2.0;
 //   Oxygen
 //     double ralpha= 0.60/2.0;
 //   Lithium
-   double ralpha= 1.45/2.0;
+//   double ralpha= 1.45/2.0;
      double toau = (1.0)/phys.bohr;
      double val;
      double dmu;
