@@ -69,6 +69,8 @@ class SingleSlater {
   std::unique_ptr<RealMatrix>  epsB_;       ///< Beta Fock Eigenenergie
   std::unique_ptr<TMatrix>  PTA_;        ///< Alpha or Full (TCS) Perturbation Tensor
   std::unique_ptr<TMatrix>  PTB_;        ///< Beta Perturbation Tensor
+  std::unique_ptr<TMatrix>  vXCA_;        ///< Alpha or Full (TCS) VXC
+  std::unique_ptr<TMatrix>  vXCB_;        ///< Beta VXC
   std::unique_ptr<RealMatrix>  dipole_;  ///< Electric Dipole Moment
   std::unique_ptr<RealMatrix>  quadpole_; ///< Electric Quadrupole Moment
   std::unique_ptr<RealMatrix>  tracelessQuadpole_; ///< Traceless Electric Quadrupole Moment
@@ -134,7 +136,11 @@ public:
     RHF,
     UHF,
     CUHF,
-    TCS
+    TCS,
+    RKS,
+    UKS,
+    CUKS,
+    GKS
   }; ///< Supported references
   bool	haveMO;      ///< Have MO coefficients?
   bool	haveDensity; ///< Computed Density? (Not sure if this is used anymore)
@@ -199,6 +205,8 @@ public:
   inline TMatrix* exchangeB(){ return this->exchangeB_.get();};
   inline TMatrix* moA()      { return this->moA_.get();};
   inline TMatrix* moB()      { return this->moB_.get();};
+  inline TMatrix* vXCA()      { return this->vXCA_.get();};
+  inline TMatrix* vXCB()      { return this->vXCB_.get();};
   inline RealMatrix* epsA()     { return this->epsA_.get();};
   inline RealMatrix* epsB()     { return this->epsB_.get();};
   inline TMatrix* PTA()      { return this->PTA_.get();};
@@ -221,6 +229,7 @@ public:
   void formCoulomb();		// form the Coulomb matrix
   void formExchange();		// form the exchange matrix
   void formPT();
+  void formVXC(RealMatrix *);   // Form DFT VXC Term
   void matchord();              // match Guassian order of guess
   void readGuessIO();       	// read the initial guess of MO's from the input stream
   void readGuessGauMatEl(GauMatEl&); // read the intial guess of MO's from Gaussian raw matrix element file

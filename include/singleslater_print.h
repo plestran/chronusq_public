@@ -62,6 +62,14 @@ void SingleSlater<T>::printMultipole(){
   this->fileio_->out << std::left << std::setw(5) <<"Z=" 
                      << std::fixed << std::right << std::setw(20) 
                      << (*this->dipole_)(2,0)/phys.debye << endl;
+// jjg add total electric dipole moment
+  this->fileio_->out << std::left << std::setw(5) <<"Tot=" 
+                     << std::fixed << std::right << std::setw(20) 
+                     << std::sqrt((*this->dipole_)(2,0)*(*this->dipole_)(2,0) + 
+                         (*this->dipole_)(1,0)*(*this->dipole_)(1,0) + 
+                         (*this->dipole_)(0,0)*(*this->dipole_)(0,0)  
+                         )/phys.debye << endl;
+// jjg end total
   if(this->controls_->doQuadpole) {
     this->fileio_->out << bannerMid << endl;
     this->fileio_->out << std::setw(50) << std::left << "Electric Quadrupole Moment" 

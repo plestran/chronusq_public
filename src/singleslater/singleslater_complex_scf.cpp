@@ -172,8 +172,8 @@ void SingleSlater<dcomplex>::evalConver(){
   this->computeEnergy();
   EDelta = this->totalEnergy - EOld;
 
-  PAlphaRMS = ((*this->densityA_) - POldAlpha).norm();
-  if(!this->isClosedShell && this->Ref_ != TCS) PBetaRMS = ((*this->densityB_) - POldBeta).norm();
+  PAlphaRMS = ((*this->densityA_).cwiseAbs() - POldAlpha.cwiseAbs()).norm();
+  if(!this->isClosedShell && this->Ref_ != TCS) PBetaRMS = ((*this->densityB_).abs() - POldBeta.abs()).norm();
 
   if(this->isClosedShell)    this->printDensityInfo(PAlphaRMS,EDelta);
   else if(this->Ref_ != TCS) this->printDensityInfo(PAlphaRMS,PBetaRMS,EDelta);
@@ -268,10 +268,17 @@ void SingleSlater<dcomplex>::mixOrbitalsSCF(){
    cout << endl << endl <<  this->moA_->col(this->nTCS_*this->nBasis_-1) << endl;
 */
   }
-//auto HOMO = this->moA_->col(nO-1);
-//auto LUMO = this->moA_->col(nO);
-//this->moA_->col(nO-1) = std::sqrt(0.5) * (HOMO + math.ii*LUMO);
-//this->moA_->col(nO)   = std::sqrt(0.5) * (HOMO - math.ii*LUMO);
+  if (this->Ref_==TCS) {
+    auto HOMO = this->moA_->col(nO-1);
+    auto LUMO = this->moA_->col(nO);
+    this->moA_->col(nO-1) = std::sqrt(0.5) * (HOMO + math.ii*LUMO);
+    this->moA_->col(nO)   = std::sqrt(0.5) * (HOMO - math.ii*LUMO);
+  } else {
+    auto HOMO = this->moA_->col(this->nOccA_-1);
+    auto LUMO = this->moA_->col(this->nOccA_);
+    this->moA_->col(this->nOccA_-1) = std::sqrt(0.5) * (HOMO + math.ii*LUMO);
+    this->moA_->col(this->nOccA_)   = std::sqrt(0.5) * (HOMO - math.ii*LUMO);
+  }
 }
 
 } // namespace ChronusQ

@@ -5,3 +5,4 @@ cmake -DCMAKE_CXX_COMPILER=$CXX -DCMAKE_C_COMPILER=$CC -DCMAKE_CXX_FLAGS='-w -O3
 make VERBOSE=1 
 cp -r ../Test/ .
 cd ..
+
