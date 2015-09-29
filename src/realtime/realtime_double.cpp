@@ -33,49 +33,10 @@ using ChronusQ::FileIO;
 using ChronusQ::SingleSlater;
 using ChronusQ::RealTime;
 
-void RealTime::iniRealTime(Molecule * molecule, BasisSet *basisset, FileIO *fileio, Controls *controls, AOIntegrals *aointegrals,SingleSlater<double> *groundState) {
+namespace ChronusQ {
 
-  this->fileio_         = fileio;
-  this->controls_       = controls;
-  this->aointegrals_	= aointegrals;
-  this->groundState_   	= groundState;
-
-  this->ssPropagator_	= std::unique_ptr<SingleSlater<dcomplex>>(new SingleSlater<dcomplex>(groundState));
-
-  this->nBasis_ = basisset->nBasis();
-  this->RHF_	= this->groundState_->isClosedShell;
-  this->nOccA_ 	= this->groundState_->nOccA();
-  this->nOccB_ 	= this->groundState_->nOccB();
-
-  this->frozenNuc_	= true;
-  this->maxSteps_	= 100;
-  this->stepSize_	= 0.05;
-  this->typeOrtho_	= 1;  
-  this->initDensity_	= 1;
-  this->swapMOA_	= 0;
-  this->swapMOB_	= 3010;
-  this->methFormU_	= 1;
-
-  this->fileio_->out<<"\nReal-time TDHF: "<<endl;
-  this->fileio_->out<<std::right<<std::setw(20)<<"Number of steps = "<<std::setw(15)<<this->maxSteps_<<std::setw(5)<<endl;
-  this->fileio_->out<<std::right<<std::setw(20)<<"Step size = "<<std::setw(15)<<this->stepSize_<<std::setw(5)<<" a.u. "<<endl;
-
-  this->oTrans1_ = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-  this->oTrans2_ = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-  this->POA_  	 = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-  this->POAsav_  = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-  this->POB_  	 = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-  this->POBsav_  = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-  this->FOA_ 	 = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-  this->FOB_ 	 = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-  this->initMOA_ = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-  this->initMOB_ = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-  this->uTransA_ = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-  this->uTransB_ = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-  this->scratch_ = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-};
-
-void RealTime::iniDensity() {
+template<>
+void RealTime<double>::iniDensity() {
   bool inOrthoBas;
   bool idempotent;
 
@@ -161,8 +122,8 @@ void RealTime::iniDensity() {
   }
 };
 
-
-void RealTime::formUTrans() {  
+template<>
+void RealTime<double>::formUTrans() {  
 //
 // Form the unitary transformation matrix: 
 // U = exp(-i*dT*F)
@@ -204,7 +165,8 @@ void RealTime::formUTrans() {
 //    if(!this->RHF_) prettyPrint(this->fileio_->out,(*this->uTransB_),"uTransB");
 };
   
-void RealTime::doPropagation() {
+template<>
+void RealTime<double>::doPropagation() {
   long int iStep;
   bool checkFP = true;
 
@@ -272,3 +234,4 @@ void RealTime::doPropagation() {
   }
 };
 
+} // namespace ChronusQ
