@@ -19,7 +19,7 @@ if(USE_MPI)
   find_package(MPI)
 endif(USE_MPI)
 
-option(USE_LIBINT "Use LibInt Integral Driver" OFF) # Default use in-house integrals
+option(USE_LIBINT "Use LibInt Integral Driver" ON) # Default LibInt Integrals
 option(USE_BOOST_TIMER "Use Boost High Performace Timer" OFF) # Default use built in timer
 
 if(USE_LIBINT)
@@ -40,7 +40,7 @@ configure_file(
 
 # Define include Dir
 include_directories("${PROJECT_SOURCE_DIR}/include")
-include_directories("${PROJECT_BINARY_DIR}/include")
+include_directories("${PROJECT_BINARY_DIR}/include") # Generated Config.h 
 
 # Recurse into src
 add_subdirectory(src)
