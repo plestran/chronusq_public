@@ -159,14 +159,14 @@ class TwoDGrid : public Grid {
 //    Deconstructors //
       ~TwoDGrid(){
       delete [] this->weightsGrid_;
-      cout << "Deliting weightsGrid" <<endl; 
+//    cout << "Deliting weightsGrid" <<endl; 
       delete [] this->GridCarX_;
-      cout << "Deliting GridCarX"<<endl; 
+//    cout << "Deliting GridCarX"<<endl; 
       delete [] this->GridCarY_;
-      cout << "Deliting GridCarY"<<endl; 
+//    cout << "Deliting GridCarY"<<endl; 
       delete [] this->GridCarZ_;
-      cout << "Deliting GridCarZ"<<endl; 
-      cout << "Deliting TWOD GRID OK "<<endl; 
+//    cout << "Deliting GridCarZ"<<endl; 
+//    cout << "Deliting TWOD GRID OK "<<endl; 
      };
 
 }; //   Class TwoDGrid
