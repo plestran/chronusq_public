@@ -43,7 +43,7 @@ void SingleSlater<T>::formPT(){
   if(this->controls_->printLevel >= 3) {
     if(!doTCS){
       prettyPrint(this->fileio_->out,(*this->PTA_),"Alpha Perturbation Tensor");
-      if(this->isClosedShell) prettyPrint(this->fileio_->out,(*this->PTB_),"Beta Perturbation Tensor");
+      if(!this->isClosedShell) prettyPrint(this->fileio_->out,(*this->PTB_),"Beta Perturbation Tensor");
     } else {
       prettyPrintTCS(this->fileio_->out,(*this->PTA_),"Perturbation Tensor");
     }

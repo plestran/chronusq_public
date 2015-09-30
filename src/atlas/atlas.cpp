@@ -44,7 +44,6 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   auto realtime		  = std::unique_ptr<RealTime<double>>(new RealTime<double>());
   auto sdResponseReal     = std::unique_ptr<SDResponse<double>>(new SDResponse<double>());
   auto sdResponseComplex  = std::unique_ptr<SDResponse<dcomplex>>(new SDResponse<dcomplex>());
-//auto twoDGrid     	= std::unique_ptr<TwoDGrid>(new TwoDGrid());
   std::unique_ptr<FileIO> fileIO;
   std::unique_ptr<GauJob> gauJob;
 
@@ -67,6 +66,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   controls->printSettings(fileIO->out);
   molecule->printInfo(fileIO.get(),controls.get());
   basisset->printInfo();
+  if(controls->doDF) dfBasisset->printInfo();
 
 
   // Initialize memory for AO integral storage
@@ -153,11 +153,15 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   }
   if(controls->doUnit) printUnitInfo(controls.get(),hartreeFockReal.get(),sdResponseReal.get());
 
-/*
+
 ////// APS ////
-  twoDGrid->iniTwoDGrid(fileIO.get(),molecule.get(),basisset.get(),aointegrals.get(),hartreeFockReal.get(),100,194);
+  if(controls->DFT){
+    cout << " Before TwoDGrid" <<endl;
+    auto twoDGrid     	= std::unique_ptr<TwoDGrid>(new TwoDGrid());
+    twoDGrid->iniTwoDGrid(fileIO.get(),molecule.get(),basisset.get(),aointegrals.get(),hartreeFockReal.get(),100,194);
+  }
 ////// APE ////
-*/
+
 /*
 //fds
   realtime->iniRealTime(molecule.get(),basisset.get(),fileIO.get(),controls.get(),aointegrals.get(),hartreeFockReal.get());
