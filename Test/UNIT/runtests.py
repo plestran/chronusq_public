@@ -158,9 +158,12 @@ def runUnit(doKill):
 			err = []
 			engmax = 0.
 			fmax   = 0.
+#
+#			store errors in summary
+#
 			for j in range(len(vals)):
 				if 'SCF' in reftype[i.infile[:8]]:
-					try: # SCF
+					try: 
 						abserr = abs(float(vals[j]) - refdict[i.infile[:8]][j])
 						err.append(abserr)
 						if abserr > 1E-7: raise MaxErrorExcedeed(abserr)
@@ -189,6 +192,7 @@ def runUnit(doKill):
 				err.append(engmax)
 				err.append(fmax)
 				summary.append(err)
+
 		k += 1
 	genSummary(testtable,summary)
 
