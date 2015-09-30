@@ -92,6 +92,7 @@ void readInput(FileIO * fileio, Molecule * mol, BasisSet * basis, Controls * con
       basis->basisSetRead(fileio,mol,controls);
     } else if(!readString.compare("$DFBASIS")) {
       fileio->in >> readString;
+      readString = stringupper(readString);
       if(!readString.compare("ON")) controls->doDF = true;
       if(controls->doDF) {
         //basis->readBasisSet(fileio,mol);

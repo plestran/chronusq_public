@@ -67,6 +67,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   controls->printSettings(fileIO->out);
   molecule->printInfo(fileIO.get(),controls.get());
   basisset->printInfo();
+  if(controls->doDF) dfBasisset->printInfo();
 
 
   // Initialize memory for AO integral storage
