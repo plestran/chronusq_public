@@ -82,6 +82,11 @@ class SingleSlater {
   Controls *    controls_;               ///< General ChronusQ flow parameters
   AOIntegrals * aointegrals_;            ///< Molecular Integrals over GTOs (AO basis)
 
+  std::string SCFType_;                  ///< String containing SCF Type (R/C) (R/U/G/CU)
+  std::string SCFTypeShort_;             ///< String containing SCF Type (R/C) (R/U/G/CU)
+  std::string algebraicField_;           ///< String Real/Complex/(Quaternion)
+  std::string algebraicFieldShort_;      ///< String Real/Complex/(Quaternion)
+
   int lenX_;
   int lenXp_;
   int lenF_;
@@ -124,7 +129,7 @@ class SingleSlater {
   void formNO();
   void diagFock();
   void mixOrbitalsSCF();
-  void evalConver();
+  void evalConver(int);
 
   double denTol_;
   double eneTol_;
@@ -247,6 +252,9 @@ public:
   void printInfo();
   void printDensityInfo(double,double,double);
   void printDensityInfo(double,double);
+  void printSCFHeader(ostream &output=cout);
+  void printSCFIter(int,double,double,double);
+  void getAlgebraicField();
 
   /*************************/
   /* MPI Related Routines  */

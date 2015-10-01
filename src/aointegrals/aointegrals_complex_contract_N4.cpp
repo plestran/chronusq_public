@@ -30,7 +30,7 @@ namespace ChronusQ{
     const ComplexMatrix &XAlpha, ComplexMatrix &AXAlpha, const ComplexMatrix &XBeta, 
     ComplexMatrix &AXBeta) {
 
-    this->fileio_->out << "Contracting with in-core two-electron integrals" << endl;
+//  this->fileio_->out << "Contracting with in-core two-electron integrals" << endl;
     if(!this->haveAOTwoE) this->computeAOTwoE();
   
     RealTensor2d ReXAlphaTensor, ReXBetaTensor;

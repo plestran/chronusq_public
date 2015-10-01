@@ -220,3 +220,45 @@ void SingleSlater<T>::printMultipole(){
   }
   this->fileio_->out << endl << bannerEnd << endl;
 }
+
+template<typename T>
+void SingleSlater<T>::printSCFHeader(ostream &output){
+  output << bannerTop << endl;
+  output << "Self Consistant Field (SCF) Settings:" << endl << endl;
+//cout << std::setprecision(6);
+
+  output << std::setw(38) << std::left << "  SCF Type:" << this->SCFType_ << endl;
+  output << std::setw(38) << std::left << "  Density Convergence Tolerence:" << std::scientific << std::setprecision(6) << this->denTol_ << endl;
+  output << std::setw(38) << std::left << "  Energy Convergence Tolerence:" << std::scientific << std::setprecision(6) << this->eneTol_ << endl;
+  output << std::setw(38) << std::left << "  Maximum Number of SCF Cycles:" << this->maxSCFIter_ << endl;
+  output << std::setw(38) << std::left << "  Integral Contraction Algorithm:";
+  if(this->controls_->directTwoE && !this->controls_->doDF)
+    output << "Direct";
+  else if (this->controls_->doDF)
+    output << "Density-Fitting (BTAS)";
+  else
+    output << "In-Core (BTAS)";
+  output << endl;
+  output << endl << bannerMid << endl;
+}
+
+template<typename T>
+void SingleSlater<T>::printSCFIter(int iter, double EDel,double PARMS,double PBRMS){
+  this->fileio_->out << std::setw(16) << std::left 
+                     << "  SCFIt: " + std::to_string(iter+1);
+  this->fileio_->out << std::setw(18) << std::fixed << std::setprecision(10)
+                     << std::left << this->totalEnergy;
+  this->fileio_->out << std::setw(14) << std::scientific << std::right 
+                     << std::setprecision(7) << EDel;
+  this->fileio_->out << "   ";
+  this->fileio_->out << std::setw(13) << std::scientific << std::right 
+                     << std::setprecision(7) << PARMS;
+  if(!this->isClosedShell && this->Ref_ != TCS) {
+    this->fileio_->out << "   ";
+    this->fileio_->out << std::setw(13) << std::scientific << std::right 
+                       << std::setprecision(7) << PBRMS;
+  }
+  
+
+  this->fileio_->out << endl;
+}      

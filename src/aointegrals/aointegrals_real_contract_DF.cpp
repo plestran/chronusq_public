@@ -29,7 +29,7 @@ namespace ChronusQ{
   void AOIntegrals::twoEContractDF(bool RHF, bool KS, bool doFock, const RealMatrix &XAlpha, 
     RealMatrix &AXAlpha, const RealMatrix &XBeta, RealMatrix &AXBeta) {
 
-    this->fileio_->out << "Contracting with in-core density fitting integrals" << endl;
+//  this->fileio_->out << "Contracting with in-core density fitting integrals" << endl;
     if(!this->haveRIS)  this->computeAORIS();
     if(!this->haveRII)  this->computeAORII();
     if(!this->haveTRII) this->transformAORII();

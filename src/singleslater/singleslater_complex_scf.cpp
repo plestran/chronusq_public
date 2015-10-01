@@ -156,7 +156,7 @@ void SingleSlater<dcomplex>::diagFock(){
 }
 
 template<>
-void SingleSlater<dcomplex>::evalConver(){
+void SingleSlater<dcomplex>::evalConver(int iter){
   double EOld;
   double EDelta;
   double PAlphaRMS;
@@ -175,8 +175,9 @@ void SingleSlater<dcomplex>::evalConver(){
   PAlphaRMS = ((*this->densityA_).cwiseAbs() - POldAlpha.cwiseAbs()).norm();
   if(!this->isClosedShell && this->Ref_ != TCS) PBetaRMS = ((*this->densityB_).cwiseAbs() - POldBeta.cwiseAbs()).norm();
 
-  if(this->isClosedShell)    this->printDensityInfo(PAlphaRMS,EDelta);
-  else if(this->Ref_ != TCS) this->printDensityInfo(PAlphaRMS,PBetaRMS,EDelta);
+//if(this->isClosedShell)    this->printDensityInfo(PAlphaRMS,EDelta);
+//else if(this->Ref_ != TCS) this->printDensityInfo(PAlphaRMS,PBetaRMS,EDelta);
+  this->printSCFIter(iter,EDelta,PAlphaRMS,PBetaRMS);
 
   this->isConverged = (PAlphaRMS < this->denTol_) && (std::pow(EDelta,2) < this->eneTol_);
   if(!this->isClosedShell)
