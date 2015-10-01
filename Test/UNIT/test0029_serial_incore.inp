@@ -6,7 +6,7 @@ O 0 0.000000    0.000000    -0.608586
 $method hf
 $charge 0
 $spin 3
-$basis sto3g.gbs
+$basis 6-31G.gbs
 $nsmp 1
 $print 1
 $scf incore
