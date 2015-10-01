@@ -29,6 +29,8 @@
 #include <singleslater.h>
 #include <fileio.h>
 
+#ifndef INCLUDED_GRID
+#define INCLUDED_GRID
 namespace ChronusQ {
 
 // Classes
@@ -218,3 +220,4 @@ class LebedevGrid : public OneDGrid {
   }; // class GaussChebyshev1stGridInf
 
 }; // namespace ChronusQ
+#endif
