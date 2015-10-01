@@ -113,8 +113,7 @@ public:
     PPRPA,
     PPATDA,
     PPCTDA,
-    STAB,
-    CCSD
+    STAB
   };
  
   // constructor & destructor

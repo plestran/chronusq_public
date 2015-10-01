@@ -6,6 +6,7 @@ git remote add apetrone https://github.com/alessiopetrone/chronusq.git
 git remote add ssilwal https://github.com/silwalsajan/chronusq.git
 git remote add hbliu https://github.com/uwhbliu/chronusq.git
 git remote add jjgoings https://github.com/jjgoings/chronusq.git
+git remote add plestran https://github.com/plestran/chronusq.git
 
 git fetch dbwy
 git fetch ligroup
@@ -13,3 +14,4 @@ git fetch apetrone
 #git fetch ssilwal
 git fetch hbliu
 git fetch jjgoings
+git fetch plestran

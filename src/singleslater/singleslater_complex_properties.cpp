@@ -98,7 +98,7 @@ void SingleSlater<dcomplex>::computeMultipole(){
             (*this->molecule_->cart())(kxyz,iA);
     
   }
-  this->printMultipole();
+//this->printMultipole();
 
 }
 }; // namespace ChronusQ

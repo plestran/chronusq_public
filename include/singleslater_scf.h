@@ -140,12 +140,36 @@ void SingleSlater<T>::SCF(){
   int iter; 
   this->printSCFHeader(this->fileio_->out);
 
+  this->fileio_->out << std::setw(16) << "SCF Iteration";
+  this->fileio_->out << std::setw(18) << "Energy (Eh)";
+  this->fileio_->out << std::setw(18) << "\u0394E (Eh)";
+  if(this->Ref_ == TCS)
+    this->fileio_->out << std::setw(18) << "|\u0394P|";
+  else {
+    this->fileio_->out << std::setw(18) << "|\u0394P(\u03B1)|";
+    if(!this->isClosedShell)
+      this->fileio_->out << std::setw(18) << "|\u0394P(\u03B2)|";
+  }
+  this->fileio_->out << endl;
+  this->fileio_->out << std::setw(16) << "-------------";
+  this->fileio_->out << std::setw(18) << "-----------";
+  this->fileio_->out << std::setw(18) << "-------";
+  if(this->Ref_ == TCS)
+    this->fileio_->out << std::setw(18) << "----";
+  else {
+    this->fileio_->out << std::setw(18) << "-------";
+    if(!this->isClosedShell)
+      this->fileio_->out << std::setw(18) << "-------";
+  }
+  this->fileio_->out << endl;
   this->initSCFMem();
   this->formX();
   for (iter = 0; iter < this->maxSCFIter_; iter++){
+/*
     this->fileio_->out << endl << endl << bannerTop <<endl;  
     this->fileio_->out << "SCF iteration:"<< iter+1 <<endl;  
     this->fileio_->out << bannerEnd <<endl;  
+*/
 
     if(this->Ref_ == CUHF) this->formNO();
     this->diagFock();
@@ -158,7 +182,7 @@ void SingleSlater<T>::SCF(){
       this->CpyFock(iter);   
       if(iter % (this->lenCoeff_-1) == (this->lenCoeff_-2) && iter != 0) this->CDIIS();
     }
-    this->evalConver();
+    this->evalConver(iter);
     if(this->isConverged) break;
 
   }; // SCF Loop
@@ -167,13 +191,13 @@ void SingleSlater<T>::SCF(){
 
   if(!this->isConverged)
     CErr("SCF Failed to converge within maximum number of iterations",this->fileio_->out);
-  this->fileio_->out <<"\n"<<endl; 
-  this->fileio_->out << bannerEnd <<endl<<std::fixed;
-  this->fileio_->out << "\nRequested convergence on RMS density matrix = " <<std::setw(5)<<this->denTol_ <<"  within  " << this->maxSCFIter_ <<"  cycles."<<endl;
-  this->fileio_->out << "Requested convergence on             energy = " <<this->eneTol_ << endl;
+//this->fileio_->out <<"\n"<<endl; 
+//this->fileio_->out << bannerEnd <<endl<<std::fixed;
+//this->fileio_->out << "\nRequested convergence on RMS density matrix = " <<std::setw(5)<<this->denTol_ <<"  within  " << this->maxSCFIter_ <<"  cycles."<<endl;
+//this->fileio_->out << "Requested convergence on             energy = " <<this->eneTol_ << endl;
   if(this->isConverged){
     this->fileio_->out << endl << "SCF Completed: E(" << this->SCFTypeShort_ << ") = ";
-    this->fileio_->out << this->totalEnergy << "  Eh after  " << iter + 1 << "  SCF Iterations" << endl;
+    this->fileio_->out << std::fixed << std::setprecision(10) << this->totalEnergy << "  Eh after  " << iter + 1 << "  SCF Iterations" << endl;
   }
   this->fileio_->out << bannerEnd <<endl;
 }

@@ -117,6 +117,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 
     // Compute the Electric Multipole Moments
     hartreeFockReal->computeMultipole();
+    hartreeFockReal->printMultipole();
   } else {
     // Form initial (primer) Fock matrix
     hartreeFockComplex->formFock();
@@ -131,6 +132,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 
     // Compute the Electric Multipole Moments
     hartreeFockComplex->computeMultipole();
+    hartreeFockComplex->printMultipole();
   }
 
   // Run PSCF Calculations

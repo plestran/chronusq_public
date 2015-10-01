@@ -129,7 +129,7 @@ class SingleSlater {
   void formNO();
   void diagFock();
   void mixOrbitalsSCF();
-  void evalConver();
+  void evalConver(int);
 
   double denTol_;
   double eneTol_;
@@ -252,6 +252,7 @@ public:
   void printDensityInfo(double,double,double);
   void printDensityInfo(double,double);
   void printSCFHeader(ostream &output=cout);
+  void printSCFIter(int,double,double,double);
   void getAlgebraicField();
 
   /*************************/
