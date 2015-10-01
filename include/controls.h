@@ -69,6 +69,7 @@ public:
   int    	guess;         	// how to get the initial guess
   int           nthreads;       // Number of OpenMP threads
   int           SDMethod;
+  bool          doRealTime;     // do RT-TDSCF?
   int           rtMaxSteps;     // Max number steps for RT-TDSCF
   double        rtTimeStep;     // Size of time step for RT-TDSCF
   int           rtTypeOrtho;    // Type of orthogonalization for RT-TDSCF.
