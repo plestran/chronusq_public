@@ -150,6 +150,20 @@ void readInput(FileIO * fileio, Molecule * mol, BasisSet * basis, Controls * con
       for(auto iXYZ = 0; iXYZ < 3; iXYZ++){
         fileio->in >> controls->field_[iXYZ];
       } 
+    } else if(!readString.compare("$RT_MAXSTEP")) {
+      fileio->in >> (controls->rtMaxSteps);
+    } else if(!readString.compare("$RT_TIMESTEP")) {
+      fileio->in >> (controls->rtTimeStep);
+    } else if(!readString.compare("$RT_ORTHO")) {
+      fileio->in >> (controls->rtTypeOrtho);
+    } else if(!readString.compare("$RT_INIDEN")) {
+      fileio->in >> (controls->rtInitDensity);
+    } else if(!readString.compare("$RT_SWAPMOA")) {
+      fileio->in >> (controls->rtSwapMOA);
+    } else if(!readString.compare("$RT_SWAPMOB")) {
+      fileio->in >> (controls->rtSwapMOB);
+    } else if(!readString.compare("$RT_UPROP")) {
+      fileio->in >> (controls->rtMethFormU);
     }
     fileio->in >> readString;
   };
