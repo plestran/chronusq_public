@@ -138,6 +138,7 @@ template<typename T>
 void SingleSlater<T>::SCF(){
   if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
   int iter; 
+  this->printSCFHeader(this->fileio_->out);
 
   this->initSCFMem();
   this->formX();
@@ -171,12 +172,7 @@ void SingleSlater<T>::SCF(){
   this->fileio_->out << "\nRequested convergence on RMS density matrix = " <<std::setw(5)<<this->denTol_ <<"  within  " << this->maxSCFIter_ <<"  cycles."<<endl;
   this->fileio_->out << "Requested convergence on             energy = " <<this->eneTol_ << endl;
   if(this->isConverged){
-    this->fileio_->out << endl << "SCF Completed: E(\u211D-";
-    if(this->Ref_ == RHF)  this->fileio_->out << "RHF";
-    if(this->Ref_ == UHF)  this->fileio_->out << "UHF";
-    if(this->Ref_ == CUHF) this->fileio_->out << "CUHF";
-    if(this->Ref_ == TCS)  this->fileio_->out << "TCS";
-    this->fileio_->out << ") = ";
+    this->fileio_->out << endl << "SCF Completed: E(" << this->SCFTypeShort_ << ") = ";
     this->fileio_->out << this->totalEnergy << "  Eh after  " << iter + 1 << "  SCF Iterations" << endl;
   }
   this->fileio_->out << bannerEnd <<endl;

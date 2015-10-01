@@ -72,5 +72,3 @@ void SingleSlater<T>::formDensity(){
   };
   this->haveDensity = true;
 }
-
-

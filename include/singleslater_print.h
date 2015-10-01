@@ -220,3 +220,23 @@ void SingleSlater<T>::printMultipole(){
   }
   this->fileio_->out << endl << bannerEnd << endl;
 }
+
+template<typename T>
+void SingleSlater<T>::printSCFHeader(ostream &output){
+  output << bannerTop << endl;
+  output << "Self Consistant Field (SCF) Settings:" << endl << endl;
+
+  output << std::setw(38) << std::left << "  SCF Type:" << this->SCFType_ << endl;
+  output << std::setw(38) << std::left << "  Density Convergence Tolerence:" << std::scientific << this->denTol_ << endl;
+  output << std::setw(38) << std::left << "  Energy Convergence Tolerence:" << std::scientific << this->eneTol_ << endl;
+  output << std::setw(38) << std::left << "  Maximum Number of SCF Cycles:" << this->maxSCFIter_ << endl;
+  output << std::setw(38) << std::left << "  Integral Contraction Algorithm:";
+  if(this->controls_->directTwoE && !this->controls_->doDF)
+    output << "Direct";
+  else if (this->controls_->doDF)
+    output << "Density-Fitting (BTAS)";
+  else
+    output << "In-Core (BTAS)";
+  output << endl;
+  output << endl << bannerEnd << endl;
+}
