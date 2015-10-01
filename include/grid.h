@@ -85,8 +85,10 @@ class OneDGrid : public Grid {
        void printGrid();
 }; // Class OneGrid (one dimensional grid)
 
+//      template<typename T>
 class TwoDGrid : public Grid {
       protected:
+//            typedef Eigen::Matrix<T,Dynamic,Dynamic,RowMajor> TMatrix;
             OneDGrid * Gr_;        ///< pointer to Radial OneD grid
             OneDGrid * Gs_;        ///< pointer to Angular OneD grid
             BasisSet *  basisSet_; ///< Smart pointer to primary basis set
@@ -98,6 +100,7 @@ class TwoDGrid : public Grid {
             double *  GridCarY_;  ///<  Cartesian Y component of Grid points
             double *  GridCarZ_;  ///<  Cartesian Z component of Grid points
             double   *   weightsGrid_; ///< weights
+            std::unique_ptr<RealMatrix>  overlapR_;        ///< Alpha or Full (TCS) VXC
 /*            double **gEval_;
 ////      fEval = new double*[Gr_->npts()*Gs_->npts()];
 ////      double foxy(cartGP pt, cartGP O,double a1, double a2, double a3, double d1, double d2, double d3, double lx, double ly, double lz); 
@@ -122,8 +125,10 @@ class TwoDGrid : public Grid {
 //    Function Declaration //
 //    RealMatrix * integrateO();
       RealMatrix * integrateAtoms();
+      inline RealMatrix * overlapR()      { return this->overlapR_.get();};
       double  integrateDensity();
       void    BuildVxc();
+      void    BuildVxc2();
       double  rhor(cartGP ptCar);
       double integrate();
       double * Buffintegrate(double * Sum,double * Buff,int n1, int n2, double fact);

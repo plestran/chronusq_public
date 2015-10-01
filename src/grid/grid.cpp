@@ -170,7 +170,7 @@ void OneDGrid::printGrid(){
 
 //  double resLDA = -11.611162519357;
 //  cout << "LDA Err " << (densityNumatr-resLDA) << endl;
-  BuildVxc();
+  BuildVxc2();
   this->singleSlater_->EnVXC();
 
 }//End
@@ -183,8 +183,9 @@ void TwoDGrid::buildGrid(OneDGrid *Gr, OneDGrid *Gs){
   this->GridCarY_ = new double [Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms()]; ;
   this->GridCarZ_ = new double [Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms()]; ;
   this->weightsGrid_  = new double [Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms()*this->molecule_->nAtoms()];
-
-
+  int    nBasis = this->basisSet_->nBasis();
+  int    nTCS  = this->singleSlater_->nTCS();
+  this->overlapR_ = std::unique_ptr<RealMatrix>(new RealMatrix(nTCS*nBasis,nTCS*nBasis));
 } // End
 
 double * TwoDGrid::Buffintegrate(double * Sum,double * Buff,int n1, int n2, double fact){
@@ -336,6 +337,58 @@ double TwoDGrid::integrateDensity(){
 //     sum  +=  val*rhor;
     }
     return Cx*sum;
+  
+}  //End
+
+void TwoDGrid::BuildVxc2(){
+//  Build the density at each Grid Points end 
+//  return the LDA XC 
+   int    nBase = basisSet_->nBasis();
+   int    Ngridpts = (Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms());
+   double sum = 0.0;
+   double Cx = -(3.0/4.0)*(std::pow((3.0/math.pi),(1.0/3.0)));   //TF LDA Prefactor
+   double val;
+   double *pointProd; 
+   double rhor;
+   cartGP ptCar;
+   std::cout <<" --- Numerical Quadrature for LDA ---- " <<std::endl;
+   std::cout << "Number Radial "<< Gr_->npts() << " Number of Angular " << Gs_->npts() <<std::endl;
+   std::cout << "Total Number of grid points = "<< Ngridpts  <<std::endl;
+// Loop Over Grid Points
+   for(int ipts = 0; ipts < Ngridpts; ipts++){
+     ptCar = this->gridPtCart(ipts);
+     rhor = 0.0;
+//   Evaluate the density at each grid points (rhor)
+//   Loops over shells
+     this->overlapR()->setZero();
+     for(auto s1=0l, s12=0l; s1 < basisSet_->nShell(); s1++){
+        int bf1_s = basisSet_->mapSh2Bf(s1);
+        int n1    = basisSet_->shells(s1).size();
+        for(int s2=0; s2 <= s1; s2++, s12++){
+          int bf2_s   = basisSet_->mapSh2Bf(s2);
+          int n2      = basisSet_->shells(s2).size();
+          auto center = basisSet_->shells(s1).O;
+          double *Buff = new double [n1*n2];
+          RealMap fBuff(Buff,n1,n2);
+          fBuff.setZero();
+          pointProd = basisSet_->basisProdEval(basisSet_->shells(s1),basisSet_->shells(s2),&ptCar);
+          Buff = this->BuildDensity(Buff,pointProd,n1,n2);
+          this->overlapR()->block(bf1_s,bf2_s,n1,n2) = fBuff; 
+          }
+       }
+       (*this->overlapR()) = this->overlapR()->selfadjointView<Lower>();
+//     Ask David what is better
+//     rhor = ((*OveratR)*(this->singleSlater_->densityA()->conjugate())).trace();
+       rhor = ((*this->overlapR()).frobInner(this->singleSlater_->densityA()->conjugate()));
+//     Grid points weights
+//     Slater LDA        
+       (*this->singleSlater_->vXCA()) += getweightsGrid(ipts)*(*this->overlapR())*(std::pow(rhor,(1.0/3.0)));
+//     Uncomment to get the Number of Electron
+    }
+    val = 4.0*math.pi*Cx;
+    (*this->singleSlater_->vXCA()) =  val * (*this->singleSlater_->vXCA()) ;
+
+    return;
   
 }  //End
 
