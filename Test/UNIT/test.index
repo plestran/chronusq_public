@@ -287,31 +287,41 @@ ChronusQ Input File                 Description
 ##test0054_smp_denfit.inp     SCF     O2/cc-pVDZ OpenMP DField SCF - RI Integrals (6D)
 
 ** test0055-0060 Test small molecule ROHF (CUHF) SCF in Dipole Field code **
-test0055_serial_incore.inp   SCF    Li/STO-3G  Serial SCF - In-Core Integrals
-test0055_serial_direct.inp   SCF    Li/STO-3G  Serial SCF - Direct Integrals
-#test0055_smp_incore.inp      SCF    Li/STO-3G  OpenMP SCF - In-Core Integrals
-test0055_smp_direct.inp      SCF    Li/STO-3G  OpenMP SCF - Direct Integrals
-test0056_serial_incore.inp   SCF    Li/6-31G   Serial SCF - In-Core Integrals
-test0056_serial_direct.inp   SCF    Li/6-31G   Serial SCF - Direct Integrals
-#test0056_smp_incore.inp      SCF    Li/6-31G   OpenMP SCF - In-Core Integrals
-test0056_smp_direct.inp      SCF    Li/6-31G   OpenMP SCF - Direct Integrals
-test0057_serial_incore.inp   SCF    Li/cc-pVDZ Serial SCF - In-Core Integrals (6D)
-test0057_serial_direct.inp   SCF    Li/cc-pVDZ Serial SCF - Direct Integrals (6D)
-#test0057_serial_denfit.inp  SCF     Li/cc-pVDZ Serial SCF - RI Integrals (6D)
-#test0057_smp_incore.inp      SCF    Li/cc-pVDZ OpenMP SCF - In-Core Integrals (6D)
-test0057_smp_direct.inp      SCF    Li/cc-pVDZ OpenMP SCF - Direct Integrals (6D)
-#test0057_smp_denfit.inp     SCF     Li/cc-pVDZ OpenMP SCF - RI Integrals (6D)
-test0058_serial_incore.inp   SCF    O2/STO-3G  Serial SCF - In-Core Integrals
-test0058_serial_direct.inp   SCF    O2/STO-3G  Serial SCF - Direct Integrals
-#test0058_smp_incore.inp      SCF    O2/STO-3G  OpenMP SCF - In-Core Integrals
-test0058_smp_direct.inp      SCF    O2/STO-3G  OpenMP SCF - Direct Integrals
-test0059_serial_incore.inp   SCF    O2/6-31G   Serial SCF - In-Core Integrals
-test0059_serial_direct.inp   SCF    O2/6-31G   Serial SCF - Direct Integrals
-#test0059_smp_incore.inp      SCF    O2/6-31G   OpenMP SCF - In-Core Integrals
-test0059_smp_direct.inp      SCF    O2/6-31G   OpenMP SCF - Direct Integrals
-test0060_serial_incore.inp   SCF    O2/cc-pVDZ Serial SCF - In-Core Integrals (6D)
-#test0060_serial_direct.inp   SCF    O2/cc-pVDZ Serial SCF - Direct Integrals (6D)
-#test0060_serial_denfit.inp  SCF     O2/cc-pVDZ Serial SCF - RI Integrals (6D)
-#test0060_smp_incore.inp      SCF    O2/cc-pVDZ OpenMP SCF - In-Core Integrals (6D)
-#test0060_smp_direct.inp      SCF    O2/cc-pVDZ OpenMP SCF - Direct Integrals (6D)
-#test0060_smp_denfit.inp     SCF     O2/cc-pVDZ OpenMP SCF - RI Integrals (6D)
+#test0055_serial_incore.inp   SCF    Li/STO-3G  Serial SCF - In-Core Integrals
+#test0055_serial_direct.inp   SCF    Li/STO-3G  Serial SCF - Direct Integrals
+##test0055_smp_incore.inp      SCF    Li/STO-3G  OpenMP SCF - In-Core Integrals
+#test0055_smp_direct.inp      SCF    Li/STO-3G  OpenMP SCF - Direct Integrals
+#test0056_serial_incore.inp   SCF    Li/6-31G   Serial SCF - In-Core Integrals
+#test0056_serial_direct.inp   SCF    Li/6-31G   Serial SCF - Direct Integrals
+##test0056_smp_incore.inp      SCF    Li/6-31G   OpenMP SCF - In-Core Integrals
+#test0056_smp_direct.inp      SCF    Li/6-31G   OpenMP SCF - Direct Integrals
+#test0057_serial_incore.inp   SCF    Li/cc-pVDZ Serial SCF - In-Core Integrals (6D)
+#test0057_serial_direct.inp   SCF    Li/cc-pVDZ Serial SCF - Direct Integrals (6D)
+##test0057_serial_denfit.inp  SCF     Li/cc-pVDZ Serial SCF - RI Integrals (6D)
+##test0057_smp_incore.inp      SCF    Li/cc-pVDZ OpenMP SCF - In-Core Integrals (6D)
+#test0057_smp_direct.inp      SCF    Li/cc-pVDZ OpenMP SCF - Direct Integrals (6D)
+##test0057_smp_denfit.inp     SCF     Li/cc-pVDZ OpenMP SCF - RI Integrals (6D)
+#test0058_serial_incore.inp   SCF    O2/STO-3G  Serial SCF - In-Core Integrals
+#test0058_serial_direct.inp   SCF    O2/STO-3G  Serial SCF - Direct Integrals
+##test0058_smp_incore.inp      SCF    O2/STO-3G  OpenMP SCF - In-Core Integrals
+#test0058_smp_direct.inp      SCF    O2/STO-3G  OpenMP SCF - Direct Integrals
+#test0059_serial_incore.inp   SCF    O2/6-31G   Serial SCF - In-Core Integrals
+#test0059_serial_direct.inp   SCF    O2/6-31G   Serial SCF - Direct Integrals
+##test0059_smp_incore.inp      SCF    O2/6-31G   OpenMP SCF - In-Core Integrals
+#test0059_smp_direct.inp      SCF    O2/6-31G   OpenMP SCF - Direct Integrals
+#test0060_serial_incore.inp   SCF    O2/cc-pVDZ Serial SCF - In-Core Integrals (6D)
+##test0060_serial_direct.inp   SCF    O2/cc-pVDZ Serial SCF - Direct Integrals (6D)
+##test0060_serial_denfit.inp  SCF     O2/cc-pVDZ Serial SCF - RI Integrals (6D)
+##test0060_smp_incore.inp      SCF    O2/cc-pVDZ OpenMP SCF - In-Core Integrals (6D)
+##test0060_smp_direct.inp      SCF    O2/cc-pVDZ OpenMP SCF - Direct Integrals (6D)
+##test0060_smp_denfit.inp     SCF     O2/cc-pVDZ OpenMP SCF - RI Integrals (6D)
+
+** test0061-0066 Test moderately large molecule UHF SCF code ** (SP = S-propylene oxide)
+#test0061_serial_incore.inp   SCF    SP/STO-3G  Serial SCF - In-Core Integrals
+#test0061_serial_direct.inp   SCF    SP/STO-3G  Serial SCF - In-Core Integrals
+#test0061_smp_incore.inp      SCF    SP/STO-3G  Serial SCF - In-Core Integrals
+#test0061_smp_direct.inp      SCF    SP/STO-3G  Serial SCF - In-Core Integrals
+
+
+
+
