@@ -253,6 +253,9 @@ public:
   void printDensityInfo(double,double);
   void printSCFHeader(ostream &output=cout);
   void printSCFIter(int,double,double,double);
+  void printDensity();
+  void printPT();
+  void printFock();
   void getAlgebraicField();
 
   /*************************/
