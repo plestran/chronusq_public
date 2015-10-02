@@ -56,8 +56,8 @@ void Controls::iniControls(){
   this->doComplex =         false;
   this->doUnit    =         false;
   this->SDMethod  =         0;
-  this->SCFdenTol_ = 1e-10;
-  this->SCFeneTol_ = 1e-12;
+  this->SCFdenTol_ = 1e-8;
+  this->SCFeneTol_ = 1e-10;
   this->SCFmaxIter_ = 128;
   this->unitTest    = 0;
   this->field_      = {0.0,0.0,0.0};
