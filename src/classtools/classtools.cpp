@@ -211,13 +211,13 @@ void readInput(FileIO * fileio, Molecule * mol, BasisSet * basis, Controls * con
       } else {
           CErr("Real Time Option: "+readString+" not recognized. \n"+
                "Valid options: \n"+
-               "\t DEFAULT:   RT-TDSCF with default settings.\n"+ 
                "\t MAXSTEP:   Maximum number of time steps.   Default = 10 \n"+
                "\t TIMESTEP:  Size of time steps (au).        Default = 0.05 \n"+
                "\t ORTHO:     Type of orthogonalization.      Default = LOWDIN \n"+
                "\t INIDEN:    Initial density for system.     Default = SCF \n"+
                "\t UPROP:     How the propagator is formed.   Default = EIGEN \n"+ 
-               "\n Note: if you ran just '$RT' with no options, try '$RT DEFAULT'. Otherwise, you see this message! \n",fileio->out); 
+               "\t DEFAULT:   RT-TDSCF with default settings.\n"+ 
+               "\n Note: if you get 'Real Time Option: $RT not recognized',  try '$RT DEFAULT' instead of just '$RT'. \n",fileio->out); 
       
       }
     }
