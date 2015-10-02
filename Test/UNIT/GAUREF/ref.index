@@ -70,3 +70,9 @@ test0063                SCF     propylene-oxide_ccpVDZ.com
 test0067                SCF     propylene-oxide_sto3g_field.com
 test0068                SCF     propylene-oxide_6-31G_field.com
 test0069                SCF     propylene-oxide_ccpVDZ_field.com
+test0073                SCF     propylene-oxide_sto3g_ROHF.com
+test0074                SCF     propylene-oxide_6-31G_ROHF.com
+test0075                SCF     propylene-oxide_ccpVDZ_ROHF.com
+test0079                SCF     propylene-oxide_sto3g_ROHF_field.com
+test0080                SCF     propylene-oxide_6-31G_ROHF_field.com
+test0081                SCF     propylene-oxide_ccpVDZ_ROHF_field.com
