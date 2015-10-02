@@ -39,6 +39,7 @@
 #include <realtime.h>
 #include <tools.h>
 #include <classtools.h>
+#include <grid.h>
 
 namespace ChronusQ {
 int atlas(int, char**, GlobalMPI*);

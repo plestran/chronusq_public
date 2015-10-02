@@ -23,6 +23,8 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
+#ifndef INCLUDED_GRID
+#define INCLUDED_GRID
 #include <global.h>
 #include <basisset.h>
 #include <molecule.h>
@@ -31,6 +33,8 @@
 
 namespace ChronusQ {
 
+//  template<typename T>
+//  typedef Eigen::Matrix<T,Dynamic,Dynamic,RowMajor> TMatrix;
 // Classes
 
 class Grid {
@@ -85,10 +89,8 @@ class OneDGrid : public Grid {
        void printGrid();
 }; // Class OneGrid (one dimensional grid)
 
-//      template<typename T>
 class TwoDGrid : public Grid {
       protected:
-//            typedef Eigen::Matrix<T,Dynamic,Dynamic,RowMajor> TMatrix;
             OneDGrid * Gr_;        ///< pointer to Radial OneD grid
             OneDGrid * Gs_;        ///< pointer to Angular OneD grid
             BasisSet *  basisSet_; ///< Smart pointer to primary basis set
@@ -100,7 +102,8 @@ class TwoDGrid : public Grid {
             double *  GridCarY_;  ///<  Cartesian Y component of Grid points
             double *  GridCarZ_;  ///<  Cartesian Z component of Grid points
             double   *   weightsGrid_; ///< weights
-            std::unique_ptr<RealMatrix>  overlapR_;        ///< Alpha or Full (TCS) VXC
+            std::unique_ptr<RealMatrix>  overlapR_;        ///< numeric overlap at grid point
+            std::unique_ptr<RealMatrix>  tmpVxc_;         ///< temp Vxc term to be passed in single slater
 /*            double **gEval_;
 ////      fEval = new double*[Gr_->npts()*Gs_->npts()];
 ////      double foxy(cartGP pt, cartGP O,double a1, double a2, double a3, double d1, double d2, double d3, double lx, double ly, double lz); 
@@ -126,6 +129,8 @@ class TwoDGrid : public Grid {
 //    RealMatrix * integrateO();
       RealMatrix * integrateAtoms();
       inline RealMatrix * overlapR()      { return this->overlapR_.get();};
+      inline RealMatrix * tmpVxc()      { return this->tmpVxc_.get();};
+      RealMatrix * formVxc2();
       double  integrateDensity();
       void    BuildVxc();
       void    BuildVxc2();
@@ -223,3 +228,5 @@ class LebedevGrid : public OneDGrid {
   }; // class GaussChebyshev1stGridInf
 
 }; // namespace ChronusQ
+#endif
+

@@ -163,18 +163,22 @@ template<>
 void SingleSlater<double>::formVXC(RealMatrix * Integral3D){
 //  Right now is just a place holder (we print the overlap, the actual
 //  integration is perfomed in the grid class. see scr/grid/grid.cpp
-  double Cx = -(3.0/4.0)*(std::pow((3.0/math.pi),(1.0/3.0)));
-  double Ne;
- (*this->vXCA_) = (*Integral3D);
+//  double Cx = -(3.0/4.0)*(std::pow((3.0/math.pi),(1.0/3.0)));
+    double Ne;
+    (*this->vXCA_) = (*Integral3D);
+
   Ne = (*this->vXCA_).frobInner(this->densityA_->conjugate());
 //  (*this->vXCA_) = Cx*((*Integral3D).pow(4.0/3.0));
 //  (*this->vXCA_) = (*Integral3D)*(*Integral3D);
-//  double NeAn = 14.0; 
-  cout << " Number Electron = " << Ne <<endl;
-//  cout << " Number Electron Err = " << (Ne-NeAn) <<endl;
+  double NeAn = 14.0; 
+  std::cout.precision(10);
+  cout << " Ne tot = " << Ne <<endl;
+  cout << " Number Electron Err = " << (Ne-NeAn) <<endl;
 //  cout << " Number Electron = " << Cx*pow(Ne,4.0/3.0) <<endl;
- cout << "Single Slater Numeric : Print" <<endl;
- cout << (*this->vXCA_)  << endl;
+// cout << "Single Slater Numeric : Print" <<endl;
+// cout << (*this->vXCA_)  << endl;
+
+    return;
 };
 
 
@@ -183,6 +187,7 @@ void SingleSlater<double>::EnVXC(){
   double Energy;
   double resLDA = -11.611162519357;
   Energy = (*this->vXCA_).frobInner(this->densityA_->conjugate());
+  std::cout.precision(10);
   cout << " E_XC = " << Energy <<endl;
   cout << "LDA Err " << (Energy-resLDA) << endl;
   cout << "Single Slater Numeric : Print" <<endl;

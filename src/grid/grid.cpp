@@ -147,14 +147,19 @@ void OneDGrid::printGrid(){
   this->molecule_ = molecule;
   this->aointegrals_= aointegrals;
   this->singleSlater_ = singleSlater;
-  double radius = 1.0;  //It is actually useless using the [0,inf] RadGrid
-  double densityNumatr;
-  GaussChebyshev1stGridInf Rad(Ngridr,0.0,radius);
+  GaussChebyshev1stGridInf Rad(Ngridr,0.0,1.0);
   LebedevGrid GridLeb(NLeb);
   Rad.genGrid();
   GridLeb.genGrid();
   buildGrid(&Rad,&GridLeb);
   genGrid();
+
+//  singleSlater_->formVXC((this->integrateAtoms()));
+  singleSlater_->formVXC((this->formVxc2()));
+  this->singleSlater_->EnVXC();
+
+//  (this->singleSlater_->vXCA()) = this->formVxc2();
+/*
   std::unique_ptr<RealMatrix> Integral3D(integrateAtoms());
   std::cout.precision(10);
   cout << "Analitic : Overlap" << endl;
@@ -172,20 +177,21 @@ void OneDGrid::printGrid(){
 //  cout << "LDA Err " << (densityNumatr-resLDA) << endl;
   BuildVxc2();
   this->singleSlater_->EnVXC();
-
+*/
 }//End
 
 void TwoDGrid::buildGrid(OneDGrid *Gr, OneDGrid *Gs){
   this->fileio_->out << "**AP One dimensional grid test**" << endl;
   this->Gr_ =  Gr;
   this->Gs_ =  Gs;
-  this->GridCarX_ = new double [Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms()]; ;
+  this->GridCarX_ = new double [Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms()]; ;   ///< x component
   this->GridCarY_ = new double [Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms()]; ;
   this->GridCarZ_ = new double [Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms()]; ;
   this->weightsGrid_  = new double [Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms()*this->molecule_->nAtoms()];
-  int    nBasis = this->basisSet_->nBasis();
-  int    nTCS  = this->singleSlater_->nTCS();
+  int    nBasis   = this->basisSet_->nBasis();
+  int    nTCS     = this->singleSlater_->nTCS();
   this->overlapR_ = std::unique_ptr<RealMatrix>(new RealMatrix(nTCS*nBasis,nTCS*nBasis));
+  this->tmpVxc_   = std::unique_ptr<RealMatrix>(new RealMatrix(nTCS*nBasis,nTCS*nBasis));
 } // End
 
 double * TwoDGrid::Buffintegrate(double * Sum,double * Buff,int n1, int n2, double fact){
@@ -389,6 +395,58 @@ void TwoDGrid::BuildVxc2(){
     (*this->singleSlater_->vXCA()) =  val * (*this->singleSlater_->vXCA()) ;
 
     return;
+  
+}  //End
+
+ RealMatrix * TwoDGrid::formVxc2(){
+//  Build the density at each Grid Points end 
+//  return the LDA XC 
+   int    nBase = basisSet_->nBasis();
+   int    Ngridpts = (Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms());
+   double sum = 0.0;
+   double Cx = -(3.0/4.0)*(std::pow((3.0/math.pi),(1.0/3.0)));   //TF LDA Prefactor
+   double val;
+   double *pointProd; 
+   double rhor;
+   cartGP ptCar;
+   std::cout <<" --- Numerical Quadrature for LDA ---- " <<std::endl;
+   std::cout << "Number Radial "<< Gr_->npts() << " Number of Angular " << Gs_->npts() <<std::endl;
+   std::cout << "Total Number of grid points = "<< Ngridpts  <<std::endl;
+// Loop Over Grid Points
+   for(int ipts = 0; ipts < Ngridpts; ipts++){
+     ptCar = this->gridPtCart(ipts);
+     rhor = 0.0;
+//   Evaluate the density at each grid points (rhor)
+//   Loops over shells
+     this->overlapR()->setZero();
+     for(auto s1=0l, s12=0l; s1 < basisSet_->nShell(); s1++){
+        int bf1_s = basisSet_->mapSh2Bf(s1);
+        int n1    = basisSet_->shells(s1).size();
+        for(int s2=0; s2 <= s1; s2++, s12++){
+          int bf2_s   = basisSet_->mapSh2Bf(s2);
+          int n2      = basisSet_->shells(s2).size();
+          auto center = basisSet_->shells(s1).O;
+          double *Buff = new double [n1*n2];
+          RealMap fBuff(Buff,n1,n2);
+          fBuff.setZero();
+          pointProd = basisSet_->basisProdEval(basisSet_->shells(s1),basisSet_->shells(s2),&ptCar);
+          Buff = this->BuildDensity(Buff,pointProd,n1,n2);
+          this->overlapR()->block(bf1_s,bf2_s,n1,n2) = fBuff; 
+          }
+       }
+       (*this->overlapR()) = this->overlapR()->selfadjointView<Lower>();
+//     Ask David what is better
+//     rhor = ((*OveratR)*(this->singleSlater_->densityA()->conjugate())).trace();
+       rhor = ((*this->overlapR()).frobInner(this->singleSlater_->densityA()->conjugate()));
+//     Grid points weights
+//     Slater LDA        
+       (*this->tmpVxc()) += getweightsGrid(ipts)*(*this->overlapR())*(std::pow(rhor,(1.0/3.0)));
+//     Uncomment to get the Number of Electron
+    }
+    val = 4.0*math.pi*Cx;
+    (*this->tmpVxc()) =  val * (*this->tmpVxc()) ;
+
+    return tmpVxc() ;
   
 }  //End
 
@@ -667,6 +725,7 @@ void GaussChebyshev1stGridInf::genGrid(){
 
   
 void GaussChebyshev1stGridInf::transformPts(){
+//     if (INuc == 7){
 //   Hydrogen
 //   double ralpha= 0.529;
 //   Nitrogen
@@ -675,6 +734,7 @@ void GaussChebyshev1stGridInf::transformPts(){
 //     double ralpha= 0.60/2.0;
 //   Lithium
 //   double ralpha= 1.45/2.0;
+//     }
      double toau = (1.0)/phys.bohr;
      double val;
      double dmu;
@@ -802,6 +862,53 @@ void GaussChebyshev1stGridInf::transformPts(){
       double r1 = 0.8360360154824589;
       double D1 = 0.005530248916233094;
       gen48_Dn(146, u1, r1, D1);
+      }else if(this->nPts_ == 302){
+// Spherical Quadrature Formula Exact to Orders 25-29 
+// V.I. Lebedev Vol 18, pg.99-107, 1977
+// Siberian Mathematical Journal 
+// http://dx.doi.org/10.1007/BF00966954
+// Lebedev N=302; n=29, eta 0.993  
+// page 7;
+      A1 = 0.0008545911725128148;
+      gen6_A1(0,one,A1);
+      A3 = 0.003599119285025571;
+      gen8_A3(6,overradthree,A3);
+      B1 = 0.003650045807677255;
+      l1 = 0.7011766416089545;
+      gen24_Bn(14,l1,B1);
+      double B2 = 0.003604822601419882;
+      double l2 = 0.6566329410219612;
+      gen24_Bn(38,l2,B2);
+      double B3 = 0.003576729661743367;
+      double l3 = 0.4729054132581005;
+      gen24_Bn(62,l3,B3);
+      double B4 = 0.003449788424305883;
+      double l4 = 0.3515640345570105;
+      gen24_Bn(86,l4,B4);
+      double B5 = 0.003108953122413675;
+      double l5 = 0.2219645236294178;
+      gen24_Bn(110,l5,B5);
+      double B6 = 0.002352101413689164;
+      double l6 = 0.09618308522614784;
+      gen24_Bn(134,l6,B6);
+      C1 = 0.003600820932216460;
+      q1 = 0.5718955891878961;
+      gen24_Cn(158,q1,C1);
+      double C2 = 0.002982344963171804;
+      double q2 = 0.2644152887060663;
+      gen24_Cn(182,q2,C2);
+      double D1 = 0.003571540554273387;
+//    Note u1 correspond to r1 in the paper
+//    Note r1 correspond to s1 in the paper
+      double u1 = 0.2510034751770465;
+      double r1 = 0.8000727494073952;
+      gen48_Dn(206,u1,r1,D1);
+//    Note u2 corresponds to w2 in the paper
+//    Note r2 corresponds to s2 in the paper
+      double u2 = 0.1233548532583327;
+      double r2 = 0.4127724083168531;
+      double D2 = 0.003392312205006170;
+      gen48_Dn(254,u2,r2,D2);
       }else{
       CErr("Number of points not available in Lebedev quadrature");
       }

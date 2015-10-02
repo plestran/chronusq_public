@@ -30,7 +30,8 @@
 #include <molecule.h>
 #include <controls.h>
 #include <aointegrals.h>
-
+//AP
+//#include <grid.h>
 /****************************/
 /* Error Messages 5000-5999 */
 /****************************/
@@ -81,7 +82,9 @@ class SingleSlater {
   FileIO *      fileio_;                 ///< Access to output file
   Controls *    controls_;               ///< General ChronusQ flow parameters
   AOIntegrals * aointegrals_;            ///< Molecular Integrals over GTOs (AO basis)
-
+//AP
+//  TwoDGrid    * twodgrid_   ;            ///< 3D grid (1Rad time 1 Ang) 
+//APE
   int lenX_;
   int lenXp_;
   int lenF_;
@@ -165,6 +168,8 @@ public:
   SingleSlater(SingleSlater<U> *); ///< Copy Constructor
   // pseudo-constructor
   void iniSingleSlater(Molecule *,BasisSet *,AOIntegrals *,FileIO *,Controls *);
+//AP
+//  void iniSingleSlaterKS(Molecule *,BasisSet *,AOIntegrals *,TwoDGrid *, FileIO *,Controls *);
   //set private data
   inline void setNBasis(int nBasis) { this->nBasis_ = nBasis;};
   inline void setNAE(int nAE)    { this->nAE_ = nAE;};
@@ -220,6 +225,8 @@ public:
   inline FileIO *      fileio(){return this->fileio_;};
   inline Controls *    controls(){return this->controls_;};
   inline AOIntegrals * aointegrals(){return this->aointegrals_;};
+//AP
+ // inline TwoDGrid *    twodgrid(){return this->twodgrid_;};
 
   void formGuess();	        // form the intial guess of MO's (Density)
   void placeAtmDen(std::vector<int>, SingleSlater<double> &);           // Place the atomic densities into total densities for guess

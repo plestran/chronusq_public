@@ -25,7 +25,6 @@
  */
 #include <workers.h>
 #include <mollerplesset.h>
-#include <grid.h>
 using namespace ChronusQ;
 
 int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
@@ -79,6 +78,12 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
     hartreeFockReal->iniSingleSlater(molecule.get(),basisset.get(),aointegrals.get(),
       fileIO.get(),controls.get());
     hartreeFockReal->printInfo();
+    // Initialize Grid
+    if(controls->DFT){
+      cout << " First DFT form initial KS" <<endl;
+//      auto twoDGrid = std::unique_ptr<TwoDGrid>(new TwoDGrid());
+//      twoDGrid->iniTwoDGrid(fileIO.get(),molecule.get(),basisset.get(),aointegrals.get(),hartreeFockReal.get(),100,194);
+    }
   } else {
     hartreeFockComplex->iniSingleSlater(molecule.get(),basisset.get(),aointegrals.get(),
       fileIO.get(),controls.get());
@@ -104,6 +109,8 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 
   // Optimize wave function (?)
   if(!controls->doComplex){
+
+
     // Form initial (primer) Fock matrix
     hartreeFockReal->formFock();
     aointegrals->printTimings();
@@ -155,11 +162,13 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 
 
 ////// APS ////
+
   if(controls->DFT){
     cout << " Before TwoDGrid" <<endl;
     auto twoDGrid     	= std::unique_ptr<TwoDGrid>(new TwoDGrid());
     twoDGrid->iniTwoDGrid(fileIO.get(),molecule.get(),basisset.get(),aointegrals.get(),hartreeFockReal.get(),100,194);
   }
+
 ////// APE ////
 
 /*
