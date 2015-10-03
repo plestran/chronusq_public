@@ -122,10 +122,9 @@ class TwoDGrid : public Grid {
       double integrate();
       double * Buffintegrate(double * Sum,double * Buff,int n1, int n2, double fact);
       double * BuildDensity(double * Sum,double * Buff,int n1, int n2);
-      void     buildGrid(OneDGrid *Gr, OneDGrid *Gs);
       void printGrid();
 //      void genGrid();
-//      void buildGrid(OneDGrid *Gr, OneDGrid *Gs);
+      void buildGrid(OneDGrid *Gr, OneDGrid *Gs);
       void iniTwoDGrid(int Ngridr, int NLeb);
       void transformPts();
 //      double BeckeW(cartGP GridPt, int IAtm);

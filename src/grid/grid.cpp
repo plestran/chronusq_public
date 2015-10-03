@@ -146,21 +146,21 @@ void OneDGrid::printGrid(){
     LebedevGrid GridLeb(NLeb);
     Rad.genGrid();
     GridLeb.genGrid();
+    cout << "Here" <<endl;
     buildGrid(&Rad,&GridLeb);
-
+    cout << "Here" <<endl;
+    nrad = Ngridr;
+    cout << "Here" <<endl;
 }//End
 
 void TwoDGrid::buildGrid(OneDGrid *Gr, OneDGrid *Gs){
-//     this->Gr_ =  Gr;
-//     cout << "Here" <<endl;
-//     this->Gs_ =  Gs;
-     cout << "Here" <<endl;
-     this->nrad = Gr->npts(); 
-     cout << "Here" <<endl;
-     this->nang = Gs->npts(); 
-     cout << "Here" <<endl;
-
-} //End
+  this->Gr_ =  Gr;
+  this->Gs_ =  Gs;
+  this->GridCarX_     = new double [Gr_->npts()*Gs_->npts()];    ///< x component
+  this->GridCarY_     = new double [Gr_->npts()*Gs_->npts()]; 
+  this->GridCarZ_     = new double [Gr_->npts()*Gs_->npts()]; 
+  this->weightsGrid_  = new double [Gr_->npts()*Gs_->npts()];
+} // End
 
 /*
 void TwoDGrid::buildGrid(OneDGrid *Gr, OneDGrid *Gs){
