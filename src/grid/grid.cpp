@@ -139,59 +139,39 @@ void OneDGrid::printGrid(){
  }
 
 ///  TWO GRID GENERAL ///
-
-	void TwoDGrid::iniTwoDGrid(FileIO * fileio,Molecule * molecule,BasisSet * basisset, AOIntegrals * aointegrals, SingleSlater<double> * singleSlater,int Ngridr, int NLeb){
-
-  this->basisSet_ = basisset;
-  this->fileio_ = fileio;
-  this->molecule_ = molecule;
-  this->aointegrals_= aointegrals;
-  this->singleSlater_ = singleSlater;
-  GaussChebyshev1stGridInf Rad(Ngridr,0.0,1.0);
-  LebedevGrid GridLeb(NLeb);
-  Rad.genGrid();
-  GridLeb.genGrid();
-  buildGrid(&Rad,&GridLeb);
-  genGrid();
-
-//  singleSlater_->formVXC((this->integrateAtoms()));
-  singleSlater_->formVXC((this->formVxc2()));
-  this->singleSlater_->EnVXC();
-
-//  (this->singleSlater_->vXCA()) = this->formVxc2();
-/*
-  std::unique_ptr<RealMatrix> Integral3D(integrateAtoms());
-  std::cout.precision(10);
-  cout << "Analitic : Overlap" << endl;
-  cout << (*aointegrals->overlap_)  << endl;
-  cout << "Numeric : Overlap" << endl;
-  cout << (*Integral3D)  << endl;
 //
-//  singleSlater_->formVXC(Integral3D.get());
-//  cout << "Numeric - Analytic: Overlap" << endl;
-//  cout << ((*Integral3D)-(*aointegrals->overlap_))  << endl;
-//  densityNumatr=integrateDensity();
-//  cout << "LDA with Numeric Density = " << densityNumatr << endl;
+  void TwoDGrid::iniTwoDGrid(int Ngridr, int NLeb){
+    
+    GaussChebyshev1stGridInf Rad(Ngridr,0.0,1.0);
+    LebedevGrid GridLeb(NLeb);
+    Rad.genGrid();
+    GridLeb.genGrid();
+    buildGrid(&Rad,&GridLeb);
 
-//  double resLDA = -11.611162519357;
-//  cout << "LDA Err " << (densityNumatr-resLDA) << endl;
-  BuildVxc2();
-  this->singleSlater_->EnVXC();
-*/
 }//End
 
 void TwoDGrid::buildGrid(OneDGrid *Gr, OneDGrid *Gs){
-  this->fileio_->out << "**AP One dimensional grid test**" << endl;
+//     this->Gr_ =  Gr;
+//     cout << "Here" <<endl;
+//     this->Gs_ =  Gs;
+     cout << "Here" <<endl;
+     this->nrad = Gr->npts(); 
+     cout << "Here" <<endl;
+     this->nang = Gs->npts(); 
+     cout << "Here" <<endl;
+
+} //End
+
+/*
+void TwoDGrid::buildGrid(OneDGrid *Gr, OneDGrid *Gs){
   this->Gr_ =  Gr;
   this->Gs_ =  Gs;
   this->GridCarX_ = new double [Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms()]; ;   ///< x component
   this->GridCarY_ = new double [Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms()]; ;
   this->GridCarZ_ = new double [Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms()]; ;
   this->weightsGrid_  = new double [Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms()*this->molecule_->nAtoms()];
-  int    nBasis   = this->basisSet_->nBasis();
-  int    nTCS     = this->singleSlater_->nTCS();
-  this->overlapR_ = std::unique_ptr<RealMatrix>(new RealMatrix(nTCS*nBasis,nTCS*nBasis));
-  this->tmpVxc_   = std::unique_ptr<RealMatrix>(new RealMatrix(nTCS*nBasis,nTCS*nBasis));
+//  this->overlapR_ = std::unique_ptr<RealMatrix>(new RealMatrix(nTCS*nBasis,nTCS*nBasis));
+//  this->tmpVxc_   = std::unique_ptr<RealMatrix>(new RealMatrix(nTCS*nBasis,nTCS*nBasis));
 } // End
 
 double * TwoDGrid::Buffintegrate(double * Sum,double * Buff,int n1, int n2, double fact){
@@ -209,6 +189,7 @@ double * TwoDGrid::BuildDensity(double * Sum,double * Buff,int n1, int n2){
   Sout = fBuff;  
   return Sum;
 } //End
+*/
 
 /*
   RealMatrix * TwoDGrid::integrateO(){
@@ -259,6 +240,7 @@ double * TwoDGrid::BuildDensity(double * Sum,double * Buff,int n1, int n2){
 }  //End
 */
 
+/*
    RealMatrix * TwoDGrid::integrateAtoms(){
 // Integrated Over a TWODGrid (Radial x Angular) the basisProdEval (shells(s1),shells(s2))
 // function, returning the pointer of the whole (Nbasis,Nbasis) Matrix
@@ -294,7 +276,10 @@ double * TwoDGrid::BuildDensity(double * Sum,double * Buff,int n1, int n2){
     (*Integral) = Integral->selfadjointView<Lower>(); 
     return Integral;
 }  //End
+*/
 
+
+/*
 double TwoDGrid::integrateDensity(){
 //  Build the density at each Grid Points end 
 //  return the LDA XC 
@@ -345,7 +330,9 @@ double TwoDGrid::integrateDensity(){
     return Cx*sum;
   
 }  //End
+*/
 
+/*
 void TwoDGrid::BuildVxc2(){
 //  Build the density at each Grid Points end 
 //  return the LDA XC 
@@ -491,7 +478,6 @@ void TwoDGrid::BuildVxc(){
 
 }  //End
 
-
 double TwoDGrid::rhor(cartGP ptCar){
 //  return the density at each Grid Points. 
    int    nBase = basisSet_->nBasis();
@@ -524,6 +510,7 @@ double TwoDGrid::rhor(cartGP ptCar){
   
 }  //End
 
+*/
 
   double TwoDGrid::integrate(){
 //  OLD
@@ -583,6 +570,7 @@ double TwoDGrid::step_fun( double mu){
        return p;
 };
 
+/*
 double TwoDGrid::BeckeW(cartGP GridPt, int iAtm){
 //     Generate Becke Weights according to the partition schems in
 //     (J. Chem. Phys., 88 (4),2457 (1988)) using Voronoii Fuzzi Cells
@@ -671,16 +659,10 @@ void TwoDGrid::genGrid(){
     }
 }; //End
 
+*/
 void TwoDGrid::printGrid(){
 //  Call to print Grid point to be poletted (Mathematica Format)
-    int    Ngridpts = (Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms());
-    cartGP ptCar;
-    for(int ipts = 0; ipts < Ngridpts; ipts++){
-       ptCar = this->gridPtCart(ipts);
-       cout << "{" <<bg::get<0>(ptCar) << ", "<<bg::get<1>(ptCar)<<", " <<bg::get<2>(ptCar) <<"}, "<< endl;
-      }
 }; // End
-
 
 // Specific Grid Functions Declaration //
 

@@ -79,11 +79,6 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
       fileIO.get(),controls.get());
     hartreeFockReal->printInfo();
     // Initialize Grid
-    if(controls->DFT){
-      cout << " First DFT form initial KS" <<endl;
-//      auto twoDGrid = std::unique_ptr<TwoDGrid>(new TwoDGrid());
-//      twoDGrid->iniTwoDGrid(fileIO.get(),molecule.get(),basisset.get(),aointegrals.get(),hartreeFockReal.get(),100,194);
-    }
   } else {
     hartreeFockComplex->iniSingleSlater(molecule.get(),basisset.get(),aointegrals.get(),
       fileIO.get(),controls.get());
@@ -159,17 +154,6 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
     }
   }
   if(controls->doUnit) printUnitInfo(controls.get(),hartreeFockReal.get(),sdResponseReal.get());
-
-
-////// APS ////
-
-  if(controls->DFT){
-    cout << " Before TwoDGrid" <<endl;
-    auto twoDGrid     	= std::unique_ptr<TwoDGrid>(new TwoDGrid());
-    twoDGrid->iniTwoDGrid(fileIO.get(),molecule.get(),basisset.get(),aointegrals.get(),hartreeFockReal.get(),100,194);
-  }
-
-////// APE ////
 
 /*
 //fds

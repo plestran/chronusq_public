@@ -26,10 +26,6 @@
 #ifndef INCLUDED_GRID
 #define INCLUDED_GRID
 #include <global.h>
-#include <basisset.h>
-#include <molecule.h>
-#include <singleslater.h>
-#include <fileio.h>
 
 namespace ChronusQ {
 
@@ -93,17 +89,12 @@ class TwoDGrid : public Grid {
       protected:
             OneDGrid * Gr_;        ///< pointer to Radial OneD grid
             OneDGrid * Gs_;        ///< pointer to Angular OneD grid
-            BasisSet *  basisSet_; ///< Smart pointer to primary basis set
-            Molecule * 	molecule_; ///< Smart pointer to molecule specification
-            FileIO *    fileio_;   ///< Smart pointer to fileIO
-            AOIntegrals * aointegrals_;  ///< Molecular Integrals over GTOs (AO basis)
-            SingleSlater<double> *  singleSlater_; ///< Smart pointer to SingleSlater
             double *  GridCarX_;  ///<  Cartesian X component of Grid points
             double *  GridCarY_;  ///<  Cartesian Y component of Grid points
             double *  GridCarZ_;  ///<  Cartesian Z component of Grid points
             double   *   weightsGrid_; ///< weights
-            std::unique_ptr<RealMatrix>  overlapR_;        ///< numeric overlap at grid point
-            std::unique_ptr<RealMatrix>  tmpVxc_;         ///< temp Vxc term to be passed in single slater
+            int nrad ;            ///< number radial points
+            int nang ;            ///< number angular points
 /*            double **gEval_;
 ////      fEval = new double*[Gr_->npts()*Gs_->npts()];
 ////      double foxy(cartGP pt, cartGP O,double a1, double a2, double a3, double d1, double d2, double d3, double lx, double ly, double lz); 
@@ -127,26 +118,22 @@ class TwoDGrid : public Grid {
 
 //    Function Declaration //
 //    RealMatrix * integrateO();
-      RealMatrix * integrateAtoms();
-      inline RealMatrix * overlapR()      { return this->overlapR_.get();};
-      inline RealMatrix * tmpVxc()      { return this->tmpVxc_.get();};
-      RealMatrix * formVxc2();
-      double  integrateDensity();
-      void    BuildVxc();
-      void    BuildVxc2();
-      double  rhor(cartGP ptCar);
+//      RealMatrix * integrateAtoms();
       double integrate();
       double * Buffintegrate(double * Sum,double * Buff,int n1, int n2, double fact);
       double * BuildDensity(double * Sum,double * Buff,int n1, int n2);
+      void     buildGrid(OneDGrid *Gr, OneDGrid *Gs);
       void printGrid();
-      void genGrid();
-      void buildGrid(OneDGrid *Gr, OneDGrid *Gs);
-      void iniTwoDGrid(FileIO * fileio,Molecule * molecule,BasisSet * basisset, AOIntegrals * aointegrals, SingleSlater<double> * singleSlater,int Ngridr, int NLeb);
+//      void genGrid();
+//      void buildGrid(OneDGrid *Gr, OneDGrid *Gs);
+      void iniTwoDGrid(int Ngridr, int NLeb);
       void transformPts();
-      double BeckeW(cartGP GridPt, int IAtm);
-      double NormBeckeW(cartGP GridPt);
+//      double BeckeW(cartGP GridPt, int IAtm);
+//      double NormBeckeW(cartGP GridPt);
       double voronoii(double mu);
       double step_fun(double mu);
+      int    getnrad(){return this->nrad;};
+      int    getnang(){return this->nang;};
       inline double * weightsGrid(){ return this->weightsGrid_;};
       inline double getweightsGrid(int i){ return this->weightsGrid_[i];};
       inline sph3GP gridPt(int i, int j){

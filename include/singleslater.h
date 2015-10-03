@@ -30,8 +30,7 @@
 #include <molecule.h>
 #include <controls.h>
 #include <aointegrals.h>
-//AP
-//#include <grid.h>
+#include <grid.h>
 /****************************/
 /* Error Messages 5000-5999 */
 /****************************/
@@ -82,9 +81,9 @@ class SingleSlater {
   FileIO *      fileio_;                 ///< Access to output file
   Controls *    controls_;               ///< General ChronusQ flow parameters
   AOIntegrals * aointegrals_;            ///< Molecular Integrals over GTOs (AO basis)
-//AP
-//  TwoDGrid    * twodgrid_   ;            ///< 3D grid (1Rad time 1 Ang) 
-//APE
+// APS //
+  TwoDGrid    * twodgrid_   ;            ///< 3D grid (1Rad time 1 Ang) 
+//APE  //
   int lenX_;
   int lenXp_;
   int lenF_;
@@ -168,8 +167,6 @@ public:
   SingleSlater(SingleSlater<U> *); ///< Copy Constructor
   // pseudo-constructor
   void iniSingleSlater(Molecule *,BasisSet *,AOIntegrals *,FileIO *,Controls *);
-//AP
-//  void iniSingleSlaterKS(Molecule *,BasisSet *,AOIntegrals *,TwoDGrid *, FileIO *,Controls *);
   //set private data
   inline void setNBasis(int nBasis) { this->nBasis_ = nBasis;};
   inline void setNAE(int nAE)    { this->nAE_ = nAE;};
@@ -226,8 +223,8 @@ public:
   inline Controls *    controls(){return this->controls_;};
   inline AOIntegrals * aointegrals(){return this->aointegrals_;};
 //AP
- // inline TwoDGrid *    twodgrid(){return this->twodgrid_;};
-
+  inline TwoDGrid *    twodgrid(){return this->twodgrid_;};
+//
   void formGuess();	        // form the intial guess of MO's (Density)
   void placeAtmDen(std::vector<int>, SingleSlater<double> &);           // Place the atomic densities into total densities for guess
   void scaleDen();              // Scale the unrestricted densities for correct # electrons
@@ -236,7 +233,7 @@ public:
   void formCoulomb();		// form the Coulomb matrix
   void formExchange();		// form the exchange matrix
   void formPT();
-  void formVXC(RealMatrix *);   // Form DFT VXC Term
+  void formVXC();               // Form DFT VXC Term
   void EnVXC();                 // DFT VXC Energy Term
   void matchord();              // match Guassian order of guess
   void readGuessIO();       	// read the initial guess of MO's from the input stream
