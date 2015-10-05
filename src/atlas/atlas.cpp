@@ -163,13 +163,21 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 //fds
   if(controls->doRealTime) {
     if(!controls->doComplex) {
+      cout << "JJG before real iniRealTime" << endl;
       realtimeReal->iniRealTime(molecule.get(),basisset.get(),fileIO.get(),controls.get(),aointegrals.get(),hartreeFockReal.get());
+      cout << "JJG before real iniDensity" << endl;
       realtimeReal->iniDensity();
+      cout << "JJG before real doPropagation" << endl;
       realtimeReal->doPropagation();
+      cout << "JJG after real doPropagation" << endl;
     } else {
+      cout << "JJG before complex iniRealTime" << endl;
       realtimeComplex->iniRealTime(molecule.get(),basisset.get(),fileIO.get(),controls.get(),aointegrals.get(),hartreeFockComplex.get());
+      cout << "JJG before complex iniDensity" << endl;
       realtimeComplex->iniDensity();
+      cout << "JJG before complex doPropagation" << endl;
       realtimeComplex->doPropagation();
+      cout << "JJG after complex doPropagation" << endl;
     }
   }
 //fds

@@ -112,9 +112,11 @@ void SingleSlater<T>::formFock(){
   };
 
   // Add in the electric field component if they are non-zero
-/*
+  cout << "JJG before field" << endl;
   std::array<double,3> null{{0,0,0}};
+  cout << "JJG after array of field" << endl;
   if((*this->elecField_) != null){
+    cout << "JJG after field IF logic" << endl;
     this->fileio_->out << "Adding in Electric Field Contribution" << endl;
     int NB = this->nTCS_*this->nBasis_;
     int NBSq = NB*NB;
@@ -127,7 +129,7 @@ void SingleSlater<T>::formFock(){
       iBuf += NBSq;
     }
   }
-*/
+
   if(this->controls_->printLevel>=2) {
     if(this->Ref_ != TCS){
       prettyPrint(this->fileio_->out,(*this->fockA_),"Alpha Fock");

@@ -197,9 +197,13 @@ void RealTime<double>::doPropagation() {
       if(!this->RHF_) prettyPrintComplex(this->fileio_->out,(*this->ssPropagator_->densityB()),"Beta AO Density");
 
 //  Form AO Fock matrix
+    cout << "JJG before real formFock" << endl;
     this->ssPropagator_->formFock();
+    cout << "JJG before real computeEnergy" << endl;
     this->ssPropagator_->computeEnergy();
+    cout << "JJG before real computeMultipole" << endl;
     this->ssPropagator_->computeMultipole();
+    cout << "JJG after real computeMultipole" << endl;
 
 //  Transform Fock from AO to orthonormal basis
     *this->ssPropagator_->fockA() = (*this->oTrans1_)*(*this->ssPropagator_->fockA())*(*this->oTrans1_);
