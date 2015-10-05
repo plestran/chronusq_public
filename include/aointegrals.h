@@ -273,6 +273,9 @@ public:
   double twoevRRa0c0(ShellPair*,ShellPair*,int,int,int*,int,int*,int*,int*,int*,int*);
   double twoevRRa000(ShellPair*,ShellPair*,int,int,int*,int*,int*,int*,int*);
   double twoeSSSS0(int*,ShellPair*,ShellPair*);
+
+  // Python API
+  void Wrapper_iniAOIntegrals(Molecule&,BasisSet&,FileIO&,Controls&); 
 };
 } // namespace ChronusQ
 

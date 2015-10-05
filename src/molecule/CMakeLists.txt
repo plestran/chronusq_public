@@ -1,1 +1,1 @@
-add_library(molecule molecule.cpp)
+add_library(molecule SHARED molecule.cpp)

@@ -258,6 +258,10 @@ public:
   void printFock();
   void getAlgebraicField();
 
+  // Python API
+  void Wrapper_iniSingleSlater(Molecule&,BasisSet&,AOIntegrals&,FileIO&,
+    Controls&); 
+
   /*************************/
   /* MPI Related Routines  */
   /*************************/

@@ -84,6 +84,9 @@ public:
   // print
   void printInfo(FileIO *,Controls *);
 
+  // Python API
+  void Wrapper_printInfo(FileIO &, Controls &);
+
   // access to private data
   inline int index(int i) { return this->index_[i];};
   inline int nAtoms() {return this->nAtoms_;};
