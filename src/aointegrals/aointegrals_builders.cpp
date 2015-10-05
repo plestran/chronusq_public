@@ -462,7 +462,7 @@ void AOIntegrals::computeSchwartz(){
                                     this->basisSet_->maxL(),0);
   engine.set_precision(0.); // Don't screen primitives during schwartz
 
-  this->fileio_->out << "Computing Schwartz Bound Tensor ... ";
+//this->fileio_->out << "Computing Schwartz Bound Tensor ... ";
   auto start =  std::chrono::high_resolution_clock::now();
   for(int s1=0; s1 < this->basisSet_->nShell(); s1++){
     int n1  = this->basisSet_->shells(s1).size();
@@ -497,7 +497,7 @@ void AOIntegrals::computeSchwartz(){
   this->SchwartzD = finish - start;
   (*this->schwartz_) = this->schwartz_->selfadjointView<Lower>();
 
-  this->fileio_->out << "done (" << this->SchwartzD.count() << ")" << endl;
+//this->fileio_->out << "done (" << this->SchwartzD.count() << ")" << endl;
   this->haveSchwartz = true;
 }
 void AOIntegrals::computeAOTwoE(){

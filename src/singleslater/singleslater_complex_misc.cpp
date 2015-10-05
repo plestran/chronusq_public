@@ -161,6 +161,12 @@ void SingleSlater<dcomplex>::computeEnergy(){
 
 
   this->totalEnergy= this->energyOneE + this->energyTwoE + this->energyNuclei;
-  this->printEnergy();
+//this->printEnergy();
 };
+
+template<>
+void SingleSlater<dcomplex>::getAlgebraicField(){ 
+  this->algebraicField_      = "Complex";
+  this->algebraicFieldShort_ = "\u2102";
+}
 } // Namespace ChronusQ

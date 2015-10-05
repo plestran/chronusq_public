@@ -156,7 +156,7 @@ void SingleSlater<dcomplex>::diagFock(){
 }
 
 template<>
-void SingleSlater<dcomplex>::evalConver(){
+void SingleSlater<dcomplex>::evalConver(int iter){
   double EOld;
   double EDelta;
   double PAlphaRMS;
@@ -175,8 +175,9 @@ void SingleSlater<dcomplex>::evalConver(){
   PAlphaRMS = ((*this->densityA_).cwiseAbs() - POldAlpha.cwiseAbs()).norm();
   if(!this->isClosedShell && this->Ref_ != TCS) PBetaRMS = ((*this->densityB_).cwiseAbs() - POldBeta.cwiseAbs()).norm();
 
-  if(this->isClosedShell)    this->printDensityInfo(PAlphaRMS,EDelta);
-  else if(this->Ref_ != TCS) this->printDensityInfo(PAlphaRMS,PBetaRMS,EDelta);
+//if(this->isClosedShell)    this->printDensityInfo(PAlphaRMS,EDelta);
+//else if(this->Ref_ != TCS) this->printDensityInfo(PAlphaRMS,PBetaRMS,EDelta);
+  this->printSCFIter(iter,EDelta,PAlphaRMS,PBetaRMS);
 
   this->isConverged = (PAlphaRMS < this->denTol_) && (std::pow(EDelta,2) < this->eneTol_);
   if(!this->isClosedShell)
@@ -188,6 +189,7 @@ void SingleSlater<dcomplex>::mixOrbitalsSCF(){
   auto nO = this->nAE_ + this->nBE_;
   if(this->Ref_ == TCS){
   //CErr();
+  this->fileio_->out << "** Mixing Alpha-Beta Orbitals for 2C Guess **" << endl;
   Eigen::VectorXcd HOMOA,LUMOB;
   int indxHOMOA = -1, indxLUMOB = -1;
 /*
@@ -268,6 +270,7 @@ void SingleSlater<dcomplex>::mixOrbitalsSCF(){
    cout << endl << endl <<  this->moA_->col(this->nTCS_*this->nBasis_-1) << endl;
 */
   }
+  this->fileio_->out << "** Mixing HOMO and LUMO for Complex Guess **" << endl;
   if (this->Ref_==TCS) {
     auto HOMO = this->moA_->col(nO-1);
     auto LUMO = this->moA_->col(nO);

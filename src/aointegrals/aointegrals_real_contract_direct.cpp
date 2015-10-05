@@ -32,7 +32,7 @@ namespace ChronusQ{
 
     int nTCS = 1;
     if(doTCS) nTCS = 2;
-    this->fileio_->out << "Contracting Directly with two-electron integrals" << endl;
+//  this->fileio_->out << "Contracting Directly with two-electron integrals" << endl;
     if(!this->haveSchwartz) this->computeSchwartz();
     if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(nTCS); 
     AXAlpha.setZero();
@@ -168,7 +168,7 @@ namespace ChronusQ{
     bool doTCS, const std::vector<RealMatrix> &XAlpha, std::vector<RealMatrix> &AXAlpha, 
     const std::vector<RealMatrix> &XBeta, std::vector<RealMatrix> &AXBeta) {
 
-    this->fileio_->out << "Contracting Directly with two-electron integrals" << endl;
+//  this->fileio_->out << "Contracting Directly with two-electron integrals" << endl;
   
     int nTCS = 1;
     if(doTCS) nTCS = 2;

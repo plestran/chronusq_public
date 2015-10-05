@@ -29,6 +29,8 @@
 #include <singleslater.h>
 #include <fileio.h>
 
+#ifndef INCLUDED_GRID
+#define INCLUDED_GRID
 namespace ChronusQ {
 
 // Classes
@@ -72,6 +74,7 @@ class OneDGrid : public Grid {
          delete [] this->gridPts_;
          }
          delete [] this->weights_;
+       cout << "Deleting" <<endl;
        };
 // access to protected data
        inline double * gridPts(){ return this->gridPts_;};
@@ -158,9 +161,14 @@ class TwoDGrid : public Grid {
 //    Deconstructors //
       ~TwoDGrid(){
       delete [] this->weightsGrid_;
+//    cout << "Deliting weightsGrid" <<endl; 
       delete [] this->GridCarX_;
+//    cout << "Deliting GridCarX"<<endl; 
       delete [] this->GridCarY_;
+//    cout << "Deliting GridCarY"<<endl; 
       delete [] this->GridCarZ_;
+//    cout << "Deliting GridCarZ"<<endl; 
+//    cout << "Deliting TWOD GRID OK "<<endl; 
      };
 
 }; //   Class TwoDGrid
@@ -212,3 +220,4 @@ class LebedevGrid : public OneDGrid {
   }; // class GaussChebyshev1stGridInf
 
 }; // namespace ChronusQ
+#endif

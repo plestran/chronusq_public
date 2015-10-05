@@ -155,7 +155,7 @@ void SingleSlater<double>::diagFock(){
 }
 
 template<>
-void SingleSlater<double>::evalConver(){
+void SingleSlater<double>::evalConver(int iter){
   double EOld;
   double EDelta;
   double PAlphaRMS;
@@ -174,9 +174,9 @@ void SingleSlater<double>::evalConver(){
   PAlphaRMS = ((*this->densityA_) - POldAlpha).norm();
   if(!this->isClosedShell && this->Ref_ != TCS) PBetaRMS = ((*this->densityB_) - POldBeta).norm();
 
-  if(this->isClosedShell)    this->printDensityInfo(PAlphaRMS,EDelta);
-  else if(this->Ref_ != TCS) this->printDensityInfo(PAlphaRMS,PBetaRMS,EDelta);
-
+//if(this->isClosedShell)    this->printDensityInfo(PAlphaRMS,EDelta);
+//else if(this->Ref_ != TCS) this->printDensityInfo(PAlphaRMS,PBetaRMS,EDelta);
+  this->printSCFIter(iter,EDelta,PAlphaRMS,PBetaRMS);
   this->isConverged = (PAlphaRMS < this->denTol_) && (std::pow(EDelta,2) < this->eneTol_);
   if(!this->isClosedShell)
     this->isConverged = this->isConverged && (PBetaRMS < this->denTol_);
@@ -185,6 +185,7 @@ void SingleSlater<double>::evalConver(){
 template<>
 void SingleSlater<double>::mixOrbitalsSCF(){
   if(this->Ref_ == TCS){
+  this->fileio_->out << "** Mixing Alpha-Beta Orbitals for 2C Guess **" << endl;
   //CErr();
   auto nO = this->nAE_ + this->nBE_;
   VectorXd HOMOA,LUMOB;

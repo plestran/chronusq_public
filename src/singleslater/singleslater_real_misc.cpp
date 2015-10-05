@@ -236,6 +236,12 @@ void SingleSlater<double>::computeEnergy(){
   }
 
   this->totalEnergy= this->energyOneE + this->energyTwoE + this->energyNuclei;
-  this->printEnergy();
+//this->printEnergy();
 };
+
+template<>
+void SingleSlater<double>::getAlgebraicField(){ 
+  this->algebraicField_      = "Real";
+  this->algebraicFieldShort_ = "\u211D";
+}
 } // Namespace ChronusQ

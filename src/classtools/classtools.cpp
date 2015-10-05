@@ -92,6 +92,7 @@ void readInput(FileIO * fileio, Molecule * mol, BasisSet * basis, Controls * con
       basis->basisSetRead(fileio,mol,controls);
     } else if(!readString.compare("$DFBASIS")) {
       fileio->in >> readString;
+      readString = stringupper(readString);
       if(!readString.compare("ON")) controls->doDF = true;
       if(controls->doDF) {
         //basis->readBasisSet(fileio,mol);
@@ -268,7 +269,7 @@ void printUnitInfo(Controls * controls, SingleSlater<double> * singleSlater, SDR
     << (*singleSlater->octpole())(0,1,2)*phys.bohr*phys.bohr/phys.debye << endl;
   else if(controls->unitTest == Controls::UnitResp){
     for(auto iSt = 0; iSt < sdResponse->nSek(); iSt++){
-      cout << (*sdResponse->omega())(iSt)*phys.eVPerHartree << "," << (*sdResponse->oscStrength())(0,iSt);
+      cout << (*sdResponse->omega())(iSt)*phys.eVPerHartree << "," << (*sdResponse->oscStrength())(0,iSt+1);
       if(iSt != (sdResponse->nSek() - 1)) cout << "/";
     }
     cout << endl;

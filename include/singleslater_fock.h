@@ -39,17 +39,7 @@ void SingleSlater<T>::formPT(){
     this->aointegrals_->twoEContractDF(doRHF,true,*this->densityA_,*this->PTA_,*this->densityB_,*this->PTB_);
   else
     this->aointegrals_->twoEContractN4(doRHF,true,false,doTCS,*this->densityA_,*this->PTA_,*this->densityB_,*this->PTB_);
-  if(this->controls_->printLevel >= 3) {
-    if(!doTCS){
-      prettyPrint(this->fileio_->out,(*this->PTA_),"Alpha Perturbation Tensor");
-//jjgs fix faulty closed shell logic
-//      if(this->isClosedShell) prettyPrint(this->fileio_->out,(*this->PTB_),"Beta Perturbation Tensor");
-      if(!this->isClosedShell) prettyPrint(this->fileio_->out,(*this->PTB_),"Beta Perturbation Tensor");
-//jjge
-    } else {
-      prettyPrintTCS(this->fileio_->out,(*this->PTA_),"Perturbation Tensor");
-    }
-  }
+  if(this->controls_->printLevel >= 3) this->printPT();
 //if(doTCS)CErr();
 }
 #endif
@@ -126,14 +116,6 @@ void SingleSlater<T>::formFock(){
       iBuf += NBSq;
     }
   }
-
-  if(this->controls_->printLevel>=2) {
-    if(this->Ref_ != TCS){
-      prettyPrint(this->fileio_->out,(*this->fockA_),"Alpha Fock");
-      if(!this->isClosedShell) prettyPrint(this->fileio_->out,(*this->fockB_),"Beta Fock");
-    } else {
-      prettyPrintTCS(this->fileio_->out,(*this->fockA_),"Fock");
-    }
-  };
+  if(this->controls_->printLevel>=2) this->printFock(); 
 };
 
