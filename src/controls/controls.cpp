@@ -56,6 +56,14 @@ void Controls::iniControls(){
   this->doComplex =         false;
   this->doUnit    =         false;
   this->SDMethod  =         0;
+  this->doRealTime =        false;
+  this->rtMaxSteps =        10;
+  this->rtTimeStep =        0.05;
+  this->rtTypeOrtho =       1;
+  this->rtInitDensity =     0;
+  this->rtSwapMOA     =     0; 
+  this->rtSwapMOB     =     0; 
+  this->rtMethFormU   =     1;
   this->SCFdenTol_ = 1e-10;
   this->SCFeneTol_ = 1e-12;
   this->SCFmaxIter_ = 128;

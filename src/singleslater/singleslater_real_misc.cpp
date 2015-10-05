@@ -62,6 +62,8 @@ SingleSlater<double>::SingleSlater(SingleSlater<double> * other){
     this->quadpole_           = std::unique_ptr<RealMatrix>(new RealMatrix(*other->quadpole_));
     this->tracelessQuadpole_  = std::unique_ptr<RealMatrix>(new RealMatrix(*other->tracelessQuadpole_));
     this->octpole_            = std::unique_ptr<RealTensor3d>(new RealTensor3d(*other->octpole_));
+    this->elecField_          = std::unique_ptr<std::array<double,3>>(new std::array<double,3>{{0,0,0}});
+    (*this->elecField_)       = (*other->elecField_);
     this->basisset_    = other->basisset_;    
     this->molecule_    = other->molecule_;
     this->fileio_      = other->fileio_;
@@ -215,6 +217,7 @@ void SingleSlater<double>::computeEnergy(){
     this->energyTwoE += 0.5*(*this->PTB_).frobInner(this->densityB_->conjugate());
   }
 
+
   // Add in the electric field component if they are non-zero
   std::array<double,3> null{{0,0,0}};
   if((*this->elecField_) != null){
@@ -231,6 +234,7 @@ void SingleSlater<double>::computeEnergy(){
       iBuf += NBSq;
     }
   }
+
   this->totalEnergy= this->energyOneE + this->energyTwoE + this->energyNuclei;
 //this->printEnergy();
 };

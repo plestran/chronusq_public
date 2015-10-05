@@ -54,8 +54,10 @@ void RealTime<double>::iniDensity() {
   }
   else if (this->typeOrtho_ == 2) {  
   // Cholesky transformation
+    CErr("Cholesky orthogonalization NYI",this->fileio_->out);
   }
   else if (this->typeOrtho_ == 3) {  	
+    CErr("Canonical orthogonalization NYI",this->fileio_->out);
   // Canonical orthogonalization
   // V1 = U*s^(-1/2)
   // V2 = S*V1
@@ -101,9 +103,11 @@ void RealTime<double>::iniDensity() {
   }
   else if (this->initDensity_ == 2) { 
 // Read in the AO density from checkpoint file
+    CErr("Read in the AO density from checkpint file NYI",this->fileio_->out);
   }
   else if (this->initDensity_ == 3) { 
 // Read in the orthonormal density from checkpoint file
+    CErr("Read in the orthonormal density from checkpoint file NYI",this->fileio_->out);
   }
 
   if (!inOrthoBas) { 
@@ -195,7 +199,6 @@ void RealTime<double>::doPropagation() {
 //  Form AO Fock matrix
     this->ssPropagator_->formFock();
     this->ssPropagator_->computeEnergy();
-//  jjg add compute multipole
     this->ssPropagator_->computeMultipole();
 
 //  Transform Fock from AO to orthonormal basis

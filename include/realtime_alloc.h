@@ -39,13 +39,13 @@ void RealTime<T>::iniRealTime(Molecule * molecule, BasisSet *basisset, FileIO *f
   this->nOccB_ 	= this->groundState_->nOccB();
 
   this->frozenNuc_	= true;
-  this->maxSteps_	= 100;
-  this->stepSize_	= 0.05;
-  this->typeOrtho_	= 1;  
-  this->initDensity_	= 1;
-  this->swapMOA_	= 0;
-  this->swapMOB_	= 3010;
-  this->methFormU_	= 1;
+  this->maxSteps_	= this->controls_->rtMaxSteps;
+  this->stepSize_	= this->controls_->rtTimeStep;
+  this->typeOrtho_	= this->controls_->rtTypeOrtho; 
+  this->initDensity_	= this->controls_->rtInitDensity;
+  this->swapMOA_	= this->controls_->rtSwapMOA;
+  this->swapMOB_	= this->controls_->rtSwapMOB;
+  this->methFormU_	= this->controls_->rtMethFormU;
 
   this->fileio_->out<<"\nReal-time TDHF: "<<endl;
   this->fileio_->out<<std::right<<std::setw(20)<<"Number of steps = "<<std::setw(15)<<this->maxSteps_<<std::setw(5)<<endl;
