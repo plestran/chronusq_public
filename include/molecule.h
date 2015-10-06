@@ -87,22 +87,30 @@ public:
   void toCOM(int Iop0);    
   void computeI();
   void computeRij();
-  void printInfo(std::ostream &);
+  void printInfo(std::ostream & out=cout );
 
   // Python API
   void Wrapper_printInfo(FileIO &);
+  void Wrapper_alloc(FileIO &);
 
-  // access to private data
-  inline int index(int i) { return this->index_[i];};
+  // Reference Access
+  inline int& index(int i) { return this->index_[i];};
+
+  // Getters
   inline int nAtoms() {return this->nAtoms_;};
-  inline RealMatrix* cart() {return this->cart_.get();}
-  inline RealMatrix* rIJ() {return this->rIJ_.get();}
   inline int charge() {return this->charge_;}
   inline int multip() {return this->multip_;}
   inline int nTotalE() {return this->nTotalE_;};
-  inline void readCharge(int charge) {this->charge_=charge; this->nTotalE_ -= charge;};
-  inline void readMultip(int multip) {this->multip_=multip;};
+
   inline double energyNuclei() { return this->energyNuclei_;};
+
+  inline RealMatrix* cart() {return this->cart_.get();}
+  inline RealMatrix* rIJ() {return this->rIJ_.get();}
+
+  // Setters
+  inline void setCharge(int i) {this->charge_ = i; this->nTotalE_ -= i;};
+  inline void setMultip(int i) {this->multip_ = i;};
+  inline void setNAtoms(int i) {this->nAtoms_ = i;};
 
   // read from input file
   void readMolecule(FileIO *, std::istream &);

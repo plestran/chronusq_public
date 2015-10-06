@@ -43,10 +43,10 @@ void readInput(FileIO * fileio, Molecule * mol, BasisSet * basis, Controls * con
     if(!readString.compare("/*")) while(readString.compare("*/")) fileio->in >> readString;
     else if(!readString.compare("$CHARGE")) {
       fileio->in >> readInt;
-      mol->readCharge(readInt);
+      mol->setCharge(readInt);
     } else if(!readString.compare("$SPIN")) {
       fileio->in >> readInt;
-      mol->readMultip(readInt);
+      mol->setMultip(readInt);
     } else if(!readString.compare("$EXTRA")) {
       fileio->in>>readString;
       readString=stringupper(readString);
