@@ -159,6 +159,10 @@ void readInput(FileIO * fileio, Molecule * mol, BasisSet * basis, Controls * con
         fileio->in >> (controls->rtMaxSteps);
       } else if(!readString.compare("TIMESTEP")) {
         fileio->in >> (controls->rtTimeStep);
+      } else if(!readString.compare("EDFIELD")) {
+        for(auto iXYZ = 0; iXYZ < 3; iXYZ++){
+          fileio->in >> controls->rtField_[iXYZ];
+        } 
       } else if(!readString.compare("ORTHO")) {
         fileio->in>>readString;
         readString=stringupper(readString);
@@ -214,6 +218,7 @@ void readInput(FileIO * fileio, Molecule * mol, BasisSet * basis, Controls * con
                "Valid options: \n"+
                "\t MAXSTEP:   Maximum number of time steps.   Default = 10 \n"+
                "\t TIMESTEP:  Size of time steps (au).        Default = 0.05 \n"+
+               "\t EDFIELD:   Electric dipole Ex,Ey,Ez (au).  Default = 0.0 0.0 0.0 \n"+
                "\t ORTHO:     Type of orthogonalization.      Default = LOWDIN \n"+
                "\t INIDEN:    Initial density for system.     Default = SCF \n"+
                "\t UPROP:     How the propagator is formed.   Default = EIGEN \n"+ 

@@ -77,6 +77,11 @@ public:
   int           rtSwapMOA;      // which alpha MOs to swap for RT-TDSCF
   int           rtSwapMOB;      // which beta MOs to swap for RT-TDSCF
   int           rtMethFormU;    // Which method to form U propagator for RT-TDSCF
+  std::array<double,3> rtField_;// Real Time Electric field magnitude Ex,Ey,Ez 
+  double        rtFreq_;        // Frequency of electric field
+  double        rtPhase_;       // Phase offset for electromagnetic field
+  double        rtTOn_;         // Time field is applied
+  double        rtTOff_;        // Time field is turned off 
   int           SDNSek;
   int           unitTest;       // Which class of unit test to perform
   std::string   gauFChkName;	// Gaussian formatted checkpoint filename
