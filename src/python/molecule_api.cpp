@@ -13,4 +13,5 @@ namespace ChronusQ {
   void Molecule::Wrapper_printInfo(FileIO& fileio){
     this->printInfo(fileio.out);
   }
+  void Molecule::Wrapper_alloc(FileIO& fileio){ this->alloc(fileio.out); }
 }
