@@ -74,6 +74,7 @@ void Controls::iniControls(){
   this->rtPhase_   =        0.0;
   this->rtTOn_ =            0.0;
   this->rtTOff_ =       10000.0;
+  this->rtEnvelope_ =       1;
  
 #ifdef USE_LIBINT
   // Bootstrap Libint env

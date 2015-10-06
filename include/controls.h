@@ -82,6 +82,7 @@ public:
   double        rtPhase_;       // Phase offset for electromagnetic field
   double        rtTOn_;         // Time field is applied
   double        rtTOff_;        // Time field is turned off 
+  int           rtEnvelope_;    // Envelope function for RT EM field
   int           SDNSek;
   int           unitTest;       // Which class of unit test to perform
   std::string   gauFChkName;	// Gaussian formatted checkpoint filename

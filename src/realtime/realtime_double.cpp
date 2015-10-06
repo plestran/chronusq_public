@@ -128,7 +128,7 @@ void RealTime<double>::iniDensity() {
 
 template<>
 void RealTime<double>::formEDField() {  
-  int IEnvlp   = 1;
+  int IEnvlp   = this->controls_->rtEnvelope_;
   double Ex    = this->controls_->rtField_[0]; 
   double Ey    = this->controls_->rtField_[1]; 
   double Ez    = this->controls_->rtField_[2]; 
