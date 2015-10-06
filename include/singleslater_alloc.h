@@ -130,8 +130,10 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
   if(this->controls_->DFT) {
     // Alpha / TCS VXC
     try { 
-      this->vXCA_  = std::unique_ptr<TMatrix>(
+      this->vXCA_ = std::unique_ptr<TMatrix>(
         new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
+      this->overlapR_ = std::unique_ptr<RealMatrix>(
+        new RealMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
     } catch (...) { 
       if(this->Ref_ == TCS) CErr(std::current_exception(),
         "TCS VXC Allocation"); 

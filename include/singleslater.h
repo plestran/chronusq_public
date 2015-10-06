@@ -71,6 +71,7 @@ class SingleSlater {
   std::unique_ptr<TMatrix>  PTB_;        ///< Beta Perturbation Tensor
   std::unique_ptr<TMatrix>  vXCA_;        ///< Alpha or Full (TCS) VXC
   std::unique_ptr<TMatrix>  vXCB_;        ///< Beta VXC
+  std::unique_ptr<RealMatrix>  overlapR_;        ///< Overlap at grid point
   std::unique_ptr<RealMatrix>  dipole_;  ///< Electric Dipole Moment
   std::unique_ptr<RealMatrix>  quadpole_; ///< Electric Quadrupole Moment
   std::unique_ptr<RealMatrix>  tracelessQuadpole_; ///< Traceless Electric Quadrupole Moment
@@ -209,6 +210,7 @@ public:
   inline TMatrix* moB()      { return this->moB_.get();};
   inline TMatrix* vXCA()      { return this->vXCA_.get();};
   inline TMatrix* vXCB()      { return this->vXCB_.get();};
+  inline RealMatrix* overlapR() { return this->overlapR_.get();};
   inline RealMatrix* epsA()     { return this->epsA_.get();};
   inline RealMatrix* epsB()     { return this->epsB_.get();};
   inline TMatrix* PTA()      { return this->PTA_.get();};
@@ -234,6 +236,9 @@ public:
   void formExchange();		// form the exchange matrix
   void formPT();
   void formVXC();               // Form DFT VXC Term
+  double formBeckeW(cartGP gridPt, int iAtm);            // Evaluate Becke Weights
+  double normBeckeW(cartGP gridPt);            // Evaluate Becke Weights
+  void   buildVxc(cartGP gridPt, double weight);            // function to build the Vxc therm
   void EnVXC();                 // DFT VXC Energy Term
   void matchord();              // match Guassian order of guess
   void readGuessIO();       	// read the initial guess of MO's from the input stream
@@ -263,6 +268,7 @@ public:
 #include <singleslater_fock.h>
 #include <singleslater_misc.h>
 #include <singleslater_scf.h>
+#include <singleslater_dft.h>
 
 
 } // namespace ChronusQ

@@ -146,21 +146,19 @@ void OneDGrid::printGrid(){
     LebedevGrid GridLeb(NLeb);
     Rad.genGrid();
     GridLeb.genGrid();
+//    TwoDGrid   Raw3Dg((Ngridr*NLeb),&Rad,&GridLeb);
     cout << "Here" <<endl;
-    buildGrid(&Rad,&GridLeb);
-    cout << "Here" <<endl;
-    nrad = Ngridr;
-    cout << "Here" <<endl;
+//    TwoDGrid RawGrid(&Rad,&GridLeb);
 }//End
 
-void TwoDGrid::buildGrid(OneDGrid *Gr, OneDGrid *Gs){
-  this->Gr_ =  Gr;
-  this->Gs_ =  Gs;
-  this->GridCarX_     = new double [Gr_->npts()*Gs_->npts()];    ///< x component
-  this->GridCarY_     = new double [Gr_->npts()*Gs_->npts()]; 
-  this->GridCarZ_     = new double [Gr_->npts()*Gs_->npts()]; 
-  this->weightsGrid_  = new double [Gr_->npts()*Gs_->npts()];
-} // End
+double * TwoDGrid::BuildDensity(double * Sum,double * Buff,int n1, int n2){
+  //  Integration over batches : Density at each point (numerical)
+  ConstRealMap fBuff(Buff,n1,n2); 
+  RealMap Sout(Sum,n1,n2); 
+  Sout = fBuff;  
+  return Sum;
+} //End
+
 
 /*
 void TwoDGrid::buildGrid(OneDGrid *Gr, OneDGrid *Gs){
@@ -570,6 +568,56 @@ double TwoDGrid::step_fun( double mu){
        return p;
 };
 
+
+void TwoDGrid::genGrid(){
+};
+
+
+void TwoDGrid::centerGrid(double cx, double cy, double cz){
+//   Given a general 3D grid (r_p,Omega_p), it will
+//   generate a centerd 3D grid center on iAtm position
+//   by transforming the grid in spherical into cartesian first and
+//   adding atom cartian coordinates (cx, cy, cz)
+//   we will have a  3D grid (NRad times N Ang)
+//   all the grid points cartesian components will be collected in the
+//   GridCar_(NtotGrid,3) and the weight will be still raw
+//
+//   This routine also will build the final weight for each grip points
+//   by multiplying the actual gridweight (due to the single center integration scheme)
+//   by the Becke (J. Chem. Phys., 88 (4),2457 (1988)) partition scheme for the Atomic
+//   weights (based on Voronoii Cells). The final weights will be storered into 
+//   this->weightsGrid_
+
+     sph3GP ptSPH; ///< Temp spherical point to store the 3D Grid point (not yet translated over atoms centers)
+     cartGP ptCarGrid; /// Several Temp Cartesian Points to perform the translation, cell wieghts funtion
+     int ipts  = 0;
+     int    nRad   = Gr_->npts();
+     int    nAng   = Gs_->npts();
+     double Cartx = 0.0;
+     double Carty = 0.0;
+     double Cartz = 0.0;
+//   Loop over 3D grid points
+     for(int i = 0; i < nRad; i++)
+     for(int j = 0; j < nAng; j++){
+       ptSPH = this->gridPt(i,j);
+       bg::transform(ptSPH,ptCarGrid);
+      ///Loop over NAtoms
+//     Center each 3D over each Atom centers
+       Cartx = (bg::get<0>(ptCarGrid) + cx );
+       Carty = (bg::get<1>(ptCarGrid) + cy );
+       Cartz = (bg::get<2>(ptCarGrid) + cz );
+       this->SetgridPtCart(ipts,Cartx, Carty, Cartz);
+//     store all in the GridCar_(NtotGrid,3) thanks to this function
+//     Start to Evaluate WA (over each center/atom)       
+//     Final Weight W_Ang * W_Rad * W_Atom * _ r^2 :
+//     W_Atom = BeckeW/NormBeckeW for each Atom i given a grid poin (ipts) 
+       this->weightsGrid_[ipts] = (Gs_->weights()[j])
+                                * (Gr_->weights()[i])
+                                * (std::pow(Gr_->gridPts()[i],2.0));
+       ipts ++;
+      }
+}; //End
+
 /*
 double TwoDGrid::BeckeW(cartGP GridPt, int iAtm){
 //     Generate Becke Weights according to the partition schems in
@@ -655,6 +703,7 @@ void TwoDGrid::genGrid(){
                                 * (std::pow(Gr_->gridPts()[i],2.0))
                                 * ((this->BeckeW((this->gridPtCart(ipts)),iAtm))/(this->NormBeckeW(gridPtCart(ipts))) );
        ipts ++;
+DGrid::
       }
     }
 }; //End

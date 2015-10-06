@@ -72,7 +72,7 @@ void SingleSlater<T>::formFock(){
 //}
   if(this->controls_->DFT){
     // Form VXC
-     this->twodgrid_->iniTwoDGrid(100,194);
+//     this->twodgrid_->iniTwoDGrid(100,194);
      this->formVXC();
   }
   this->fockA_->setZero();
