@@ -99,6 +99,7 @@ void SingleSlater<dcomplex>::computeMultipole(){
     
   }
 //this->printMultipole();
+this->printRTDipole();
 
 }
 }; // namespace ChronusQ

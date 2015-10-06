@@ -193,8 +193,8 @@ void RealTime<double>::doPropagation() {
 
 //  Print 
     if(this->controls_->printLevel>=1) {
-      prettyPrintComplex(this->fileio_->out,(*this->ssPropagator_->densityA()),"Alpha AO Density");
-      if(!this->RHF_) prettyPrintComplex(this->fileio_->out,(*this->ssPropagator_->densityB()),"Beta AO Density");
+//      prettyPrintComplex(this->fileio_->out,(*this->ssPropagator_->densityA()),"Alpha AO Density");
+//      if(!this->RHF_) prettyPrintComplex(this->fileio_->out,(*this->ssPropagator_->densityB()),"Beta AO Density");
 
 //  Form AO Fock matrix
     this->ssPropagator_->formFock();
