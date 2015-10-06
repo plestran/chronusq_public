@@ -50,35 +50,43 @@ class Molecule {
 public:
 
   // constructor
-  Molecule(){ 
-    this->nTotalE_ = 0;
-  };
+  Molecule(){ this->loadDefaults();};
 
-  Molecule(Atoms atm, std::ostream &out){
-    this->iniMolecule(1,out);
+  Molecule(Atoms atm, std::ostream &out) : Molecule(){
+    this->nAtoms_ = 1;
+    this->alloc(out);
     auto n = HashAtom(atm.symbol,atm.massNumber);
-    if(n!=-1) index_[0] = n;
+    if(n != -1) index_[0] = n;
     else
       CErr("Error: invalid atomic symbol or mass number!",out);
-    nTotalE_ = atm.atomicNumber;
-    (*cart_)(0,0) = 0.0;
-    (*cart_)(1,0) = 0.0;
-    (*cart_)(2,0) = 0.0;
-    energyNuclei_ = 0.0;
+    this->nTotalE_ = atm.atomicNumber;
     this->computeRij();
     this->toCOM(0);
     this->computeI();
   }
+
   ~Molecule(){
     delete[] index_;
   };
-  void iniMolecule(int,std::ostream &out=cout);
-//APS Compute center of mass (or center of nuclear charges) of a molecule
+
+ 
+  inline void loadDefaults(){
+    this->nAtoms_          = 0;
+    this->charge_          = 0; 
+    this->multip_          = 0;
+    this->nTotalE_         = 0;
+    this->index_           = NULL;
+    this->energyNuclei_    = 0.0;
+    this->cart_            = nullptr;
+    this->COM_             = nullptr;
+    this->momentOfInertia_ = nullptr;
+    this->rIJ_             = nullptr;
+  }
+  
+  void alloc(std::ostream &out=cout);
   void toCOM(int Iop0);    
-//APE
   void computeI();
   void computeRij();
-  // print
   void printInfo(std::ostream &);
 
   // Python API

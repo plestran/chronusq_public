@@ -28,9 +28,8 @@ using ChronusQ::Molecule;
 //-------------//
 // initializer //
 //-------------//
-void Molecule::iniMolecule(int nAtoms, std::ostream &out) {
-  if(nAtoms < 1) CErr("No Atoms given to build Molecule",out);
-  this->nAtoms_= nAtoms;
+void Molecule::alloc(std::ostream &out) {
+  if(this->nAtoms_ < 1) CErr("No Atoms given to build Molecule",out);
   this->cart_  = std::unique_ptr<RealMatrix>(new RealMatrix(3, this->nAtoms_));
   this->index_ = new int[this->nAtoms_];
 };
@@ -41,7 +40,8 @@ void Molecule::readMolecule(FileIO * fileio, std::istream &geomRead){
   int i, j, n, readInt;
   std::string readString;
   geomRead >> readInt;
-  iniMolecule(readInt,fileio->out);
+  this->nAtoms_ = readInt;
+  this->alloc(fileio->out);
   nTotalE_ = 0;
   for(i=0;i<nAtoms_;i++) {
     geomRead >> readString;
