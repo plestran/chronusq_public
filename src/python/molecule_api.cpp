@@ -10,7 +10,7 @@ using ChronusQ::Controls;
 using ChronusQ::AOIntegrals;
 
 namespace ChronusQ {
-  void Molecule::Wrapper_printInfo(FileIO& fileio, Controls &cont){
-    this->printInfo(&fileio, &cont);
+  void Molecule::Wrapper_printInfo(FileIO& fileio){
+    this->printInfo(fileio.out);
   }
 }

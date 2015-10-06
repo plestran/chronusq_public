@@ -64,7 +64,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 
   // print out molecular and basis set information
   controls->printSettings(fileIO->out);
-  molecule->printInfo(fileIO.get(),controls.get());
+  molecule->printInfo(fileIO->out);
   basisset->printInfo();
   if(controls->doDF) dfBasisset->printInfo();
 

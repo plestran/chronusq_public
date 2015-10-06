@@ -41,28 +41,25 @@ class Molecule {
   int                          charge_;      // total charge
   int                          multip_;      // spin multiplicity
   int                          nTotalE_;     // total number of electrons
-  int                          size_;        // size of the object in terms of sizeof(char)
-  int                         *index_;       // index of atom in the atoms[] array
+  int                         *index_;       // center index in the atoms[] array
   double                       energyNuclei_;// nuclear repulsion energy
   std::unique_ptr<RealMatrix>  cart_;        // cartesian coordinates
-//APS
-  std::unique_ptr<RealMatrix>  COM_;         // center of mass coordinate or center of nuclear charges 
-//APE
+  std::unique_ptr<VectorXd>  COM_;         // center of mass coordinate or center of nuclear charges 
   std::unique_ptr<RealMatrix>  momentOfInertia_; // Moment of inertia
   std::unique_ptr<RealMatrix>  rIJ_;             // Interatomic distance matrix
 public:
 
   // constructor
-  Molecule(int nAtoms=0,FileIO * fileio=NULL){ 
+  Molecule(){ 
     this->nTotalE_ = 0;
-    if(nAtoms>0) iniMolecule(nAtoms,fileio);
   };
-  Molecule(Atoms atm, FileIO *fileio=NULL){
-    this->iniMolecule(1,fileio);
+
+  Molecule(Atoms atm, std::ostream &out){
+    this->iniMolecule(1,out);
     auto n = HashAtom(atm.symbol,atm.massNumber);
     if(n!=-1) index_[0] = n;
     else
-      CErr("Error: invalid atomic symbol or mass number!",fileio->out);
+      CErr("Error: invalid atomic symbol or mass number!",out);
     nTotalE_ = atm.atomicNumber;
     (*cart_)(0,0) = 0.0;
     (*cart_)(1,0) = 0.0;
@@ -75,17 +72,17 @@ public:
   ~Molecule(){
     delete[] index_;
   };
-  void iniMolecule(int,FileIO *);
+  void iniMolecule(int,std::ostream &out=cout);
 //APS Compute center of mass (or center of nuclear charges) of a molecule
   void toCOM(int Iop0);    
 //APE
   void computeI();
   void computeRij();
   // print
-  void printInfo(FileIO *,Controls *);
+  void printInfo(std::ostream &);
 
   // Python API
-  void Wrapper_printInfo(FileIO &, Controls &);
+  void Wrapper_printInfo(FileIO &);
 
   // access to private data
   inline int index(int i) { return this->index_[i];};
@@ -97,7 +94,6 @@ public:
   inline int nTotalE() {return this->nTotalE_;};
   inline void readCharge(int charge) {this->charge_=charge; this->nTotalE_ -= charge;};
   inline void readMultip(int multip) {this->multip_=multip;};
-  inline int size() { return this->size_;};
   inline double energyNuclei() { return this->energyNuclei_;};
 
   // read from input file
