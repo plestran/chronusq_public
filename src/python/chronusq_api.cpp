@@ -17,6 +17,17 @@ BOOST_PYTHON_MODULE(libpythonapi){
 
   class_<Molecule,boost::noncopyable>("Molecule",init<>())
     .def("printInfo", &Molecule::Wrapper_printInfo)
+    .def("alloc"    , &Molecule::Wrapper_alloc    )
+    .def("setCharge", &Molecule::setCharge        )
+    .def("setMultip", &Molecule::setMultip        )
+    .def("setNAtoms", &Molecule::setNAtoms        )
+    .def("setIndex",  &Molecule::setIndex         )
+    .def("setCart",   &Molecule::setCart          )
+    .def("computeRij",&Molecule::computeRij       )
+    .def("toCOM",     &Molecule::toCOM            )
+    .def("computeI",  &Molecule::computeI         )
+    .def("setNTotalE",&Molecule::setNTotalE       )
+    .def("convBohr",  &Molecule::convBohr         )
   ;
 
   class_<BasisSet,boost::noncopyable>("BasisSet",init<>())
@@ -40,6 +51,8 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("printTimings"  , &AOIntegrals::printTimings          )
   ;
 
-  def("readInput", ChronusQ::Wrapper_readInput);
+  def("readInput",       ChronusQ::Wrapper_readInput);
+  def("HashAtom",        ChronusQ::HashAtom         );
+  def("getAtomicNumber", ChronusQ::getAtomicNumber  );
 };
 

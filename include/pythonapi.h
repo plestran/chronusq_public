@@ -1,5 +1,6 @@
 #include <workers.h>
 #include <global.h>
+#include <atoms.h>
 #include <boost/python.hpp>
 
 using namespace boost::python;
@@ -13,4 +14,5 @@ using ChronusQ::AOIntegrals;
 
 namespace ChronusQ{
   void Wrapper_readInput(FileIO&,Molecule&,BasisSet&,Controls&,BasisSet&);
+  int getAtomicNumber(int);
 }

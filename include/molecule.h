@@ -111,6 +111,18 @@ public:
   inline void setCharge(int i) {this->charge_ = i; this->nTotalE_ -= i;};
   inline void setMultip(int i) {this->multip_ = i;};
   inline void setNAtoms(int i) {this->nAtoms_ = i;};
+  inline void setIndex(int i, int n){ this->index_[i] = n; };
+  inline void setCart(int i, double x, double y, double z){
+    (*this->cart_)(0,i) = x;
+    (*this->cart_)(1,i) = y;
+    (*this->cart_)(2,i) = z;
+  }
+  inline void setNTotalE(int i){ this->nTotalE_ = i;};
+
+
+  inline void convBohr(){
+    (*this->cart_) /= phys.bohr;
+  }
 
   // read from input file
   void readMolecule(FileIO *, std::istream &);
