@@ -170,8 +170,9 @@ class SingleSlater {
       CErr(std::string("Fatal: The specified multiplicity is impossible within")
            +std::string(" the number of electrons given"),this->fileio_->out);
 
-    if(this->Ref_ == _INVALID) 
-      CErr("Fatal: SingleSlater reference not set!",this->fileio_->out);
+    // This is often called before the method is set
+//  if(this->Ref_ == _INVALID) 
+//    CErr("Fatal: SingleSlater reference not set!",this->fileio_->out);
   }
 
 
@@ -400,6 +401,28 @@ public:
   void printPT();
   void printFock();
   void getAlgebraicField();
+  
+  inline void genMethString(){
+    if(this->Ref_ == _INVALID) 
+      CErr("Fatal: SingleSlater reference not set!",this->fileio_->out);
+
+    this->getAlgebraicField(); 
+    this->SCFType_      = this->algebraicField_      + " ";
+    this->SCFTypeShort_ = this->algebraicFieldShort_ + "-";
+    if(this->Ref_ == RHF) {
+      this->SCFType_      += "Resricted Hartree-Fock"; 
+      this->SCFTypeShort_ += "RHF";
+    } else if(this->Ref_ == UHF) {
+      this->SCFType_      += "Unresricted Hartree-Fock"; 
+      this->SCFTypeShort_ += "UHF";
+    } else if(this->Ref_ == CUHF) {
+      this->SCFType_      += "Constrained Unresricted Hartree-Fock"; 
+      this->SCFTypeShort_ += "CUHF";
+    } else if(this->Ref_ == TCS) {
+      this->SCFType_      += "Generalized Hartree-Fock"; 
+      this->SCFTypeShort_ += "GHF";
+    }
+  }
 
   // Python API
   void Wrapper_iniSingleSlater(Molecule&,BasisSet&,AOIntegrals&,FileIO&,

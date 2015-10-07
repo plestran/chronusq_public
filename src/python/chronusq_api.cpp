@@ -16,6 +16,16 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("communicate"     , &SingleSlater<double>::communicate            )
     .def("initMeta"        , &SingleSlater<double>::initMeta               )
     .def("alloc"           , &SingleSlater<double>::alloc                  )
+
+//  .value("_INVALID"      , &SingleSlater<double>::_INVALID               )
+//  .value("RHF"           , &SingleSlater<double>::RHF                    )
+//  .value("UHF"           , &SingleSlater<double>::UHF                    )
+//  .value("CUHF"          , &SingleSlater<double>::CUHF                   )
+//  .value("TCS"           , &SingleSlater<double>::TCS                    )
+//  .value("RKS"           , &SingleSlater<double>::RKS                    )
+//  .value("UKS"           , &SingleSlater<double>::UKS                    )
+//  .value("CUKS"          , &SingleSlater<double>::CUKS                   )
+//  .value("GKS"           , &SingleSlater<double>::GKS                    )
   ;
 
   class_<Molecule,boost::noncopyable>("Molecule",init<>())

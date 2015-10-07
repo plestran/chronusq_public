@@ -30,41 +30,9 @@ template<typename T>
 void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset, 
                                    AOIntegrals * aointegrals, FileIO * fileio, 
                                    Controls * controls) {
-/*
-  this->molecule_ = molecule;
-  this->basisset_ = basisset;
-  this->fileio_   = fileio;
-  this->controls_ = controls;
-  this->aointegrals_= aointegrals;
-*/
-  // Replaced the previous block with communicate
   this->communicate(*molecule,*basisset,*aointegrals,*fileio,*controls);
-/*
-  int nTotalE = molecule->nTotalE();
-  this->nBasis_  = basisset->nBasis();
-  this->nTT_   = this->nBasis_*(this->nBasis_+1)/2;
-  this->multip_  = molecule->multip();
-  this->nShell_ = basisset->nShell();
-  int nSingleE = this->multip_ - 1;
-  this->nOccB_ = (nTotalE - nSingleE)/2;
-  this->nVirB_ = this->nBasis_ - this->nOccB_;
-  this->nOccA_ = this->nOccB_ + nSingleE;
-  this->nVirA_ = this->nBasis_ - this->nOccA_;
-  this->nAE_   = this->nOccA_;
-  this->nBE_   = this->nOccB_;
-  this->energyNuclei = molecule->energyNuclei();
-*/
-  // Replaced the previous block with initMeta
   this->initMeta();
 
-/* **** In the constructor now (for default values) ****
-  this->isConverged = false;
-  this->denTol_ = controls->SCFdenTol_;
-  this->eneTol_ = controls->SCFeneTol_;
-  this->maxSCFIter_ = controls->SCFmaxIter_;
-*/
-
-  // This needs to stay around for now (not reading the inputs into SS)
   this->elecField_ = controls->field_;
 
   this->isClosedShell = (this->multip_ == 1);
@@ -82,6 +50,7 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
     else if(controls->doTCS)                       this->Ref_ = GKS ; // GKS
   }
 
+/*
   this->getAlgebraicField(); 
   this->SCFType_      = this->algebraicField_      + " ";
   this->SCFTypeShort_ = this->algebraicFieldShort_ + "-";
@@ -98,141 +67,19 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
     this->SCFType_      += "Generalized Hartree-Fock"; 
     this->SCFTypeShort_ += "GHF";
   }
+*/
+
+  this->genMethString();
 
 
-//this->nTCS_ = 1;
   if(this->Ref_ == TCS) this->nTCS_ = 2;
 
   // This is the only way via the C++ interface to set this flag (needed
   // for allocDFT)
   this->isDFT = controls->DFT;
   
-/*
-  // Alpha / TCS Density
-  try { 
-    this->densityA_  = std::unique_ptr<TMatrix>( 
-      new TMatrix(this->nTCS_*this->nBasis_, this->nTCS_*this->nBasis_));
-  } catch (...) { 
-    if(this->Ref_ == TCS) CErr(std::current_exception(),"TCS Density Matrix Allocation"  ); 
-    else                  CErr(std::current_exception(),"Alpha Density Matrix Allocation"); 
-  }
-
-  // Alpha / TCS Fock
-  try { 
-    this->fockA_ = std::unique_ptr<TMatrix>(
-      new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
-  } catch (...) { 
-    if(this->Ref_ == TCS) CErr(std::current_exception(),"TCS Fock Matrix Allocation"); 
-    else                  CErr(std::current_exception(),"Alpha Fock Matrix Allocation"); 
-  }
-
-#ifndef USE_LIBINT
-  // Alpha / TCS Coulomb Matrix
-  try { 
-    this->coulombA_  = std::unique_ptr<TMatrix>(
-      new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_)); 
-  } catch (...) { 
-    if(this->Ref_ == TCS) CErr(std::current_exception(),"TCS Coulomb Tensor Allocation"); 
-    else                  CErr(std::current_exception(),"Alpha Coulomb Tensor Allocation"); 
-  }
-
-  // Alpha / TCS Exchange Matrix
-  try { 
-    this->exchangeA_ = std::unique_ptr<TMatrix>(
-      new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
-  } catch (...) { 
-    if(this->Ref_ == TCS) CErr(std::current_exception(),"TCS Exchange Tensor Allocation"); 
-    else                  CErr(std::current_exception(),"Alpha Exchange Tensor Allocation"); 
-  }
-#else // USE_LIBINT
-  // Alpha / TCS Perturbation Tensor
-  try { 
-    this->PTA_  = std::unique_ptr<TMatrix>(
-      new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
-  } catch (...) { 
-    if(this->Ref_ == TCS) CErr(std::current_exception(),
-      "TCS Perturbation Tensor (G[P]) Allocation"); 
-    else CErr(std::current_exception(),"Alpha Perturbation Tensor (G[P]) Allocation"); 
-  }
-#endif
-  if(this->controls_->DFT) {
-    // Alpha / TCS VXC
-    try { 
-      this->vXCA_  = std::unique_ptr<TMatrix>(
-        new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
-    } catch (...) { 
-      if(this->Ref_ == TCS) CErr(std::current_exception(),
-        "TCS VXC Allocation"); 
-      else CErr(std::current_exception(),"Alpha VXC  Allocation"); 
-    }
-  }
-  // Alpha / TCS Molecular Orbital Coefficients
-  try { 
-    this->moA_ = std::unique_ptr<TMatrix>(
-      new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_)); 
-  } catch (...) { 
-    if(this->Ref_ == TCS) CErr(std::current_exception(),"TCS MO Coefficients Allocation");
-    else                  CErr(std::current_exception(),"Alpha MO Coefficients Allocation"); 
-  }
-
-  // Alpha / TCS Eigenorbital Energies
-  try { 
-    this->epsA_ = std::unique_ptr<RealMatrix>(new RealMatrix(this->nTCS_*this->nBasis_,1)); 
-  } catch (...) { 
-    if(this->Ref_ == TCS) CErr(std::current_exception(),"TCS Eigenorbital Energies"); 
-    else                  CErr(std::current_exception(),"Alpha Eigenorbital Energies"); 
-  }
-  
-
-  if(!this->isClosedShell && this->Ref_ != TCS) {
-    try { this->densityB_  = std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_)); } // Beta Density
-    catch (...) { CErr(std::current_exception(),"Beta Density Matrix Allocation"); }
-    try { this->fockB_     = std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_)); } // Beta Fock
-    catch (...) { CErr(std::current_exception(),"Beta Fock Matrix Allocation"); }
-#ifndef USE_LIBINT
-    try { this->coulombB_  = std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_)); } // Beta Coulomb Integral
-    catch (...) { CErr(std::current_exception(),"Beta Coulomb Tensor Allocation"); }
-    try { this->exchangeB_ = std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_)); } // Beta Exchange Integral
-    catch (...) { CErr(std::current_exception(),"Beta Exchange Tensor Allocation"); }
-#else // USE_LIBINT
-    try { this->PTB_  = std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_)); } // Beta Perturbation Tensor
-    catch (...) { CErr(std::current_exception(),"Beta Perturbation Tensor (G[P]) Allocation"); }
-#endif
-    if(this->controls_->DFT){
-      try { this->vXCB_  = std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_)); } // Beta VXC
-      catch (...) { CErr(std::current_exception(),"Beta VXC Allocation"); }
-    }
-    try { this->moB_       = std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_)); } // Beta Molecular Orbital Coefficients
-    catch (...) { CErr(std::current_exception(),"Beta MO Coefficients Allocation"); }
-    try { this->epsB_       = std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,1)); } // Beta Eigenorbital Energies
-    catch (...) { CErr(std::current_exception(),"Beta Eigenorbital Energies"); }
-  };
-
-  this->dipole_ = std::unique_ptr<RealMatrix>(new RealMatrix(3,1));
-  this->quadpole_ = std::unique_ptr<RealMatrix>(new RealMatrix(3,3));
-  this->tracelessQuadpole_ = std::unique_ptr<RealMatrix>(new RealMatrix(3,3));
-  this->octpole_  = std::unique_ptr<RealTensor3d>(new RealTensor3d(3,3,3));
-*/
-/* Leaks memory
-  int i,j,ij;
-  this->R2Index_ = new int*[nBasis];
-  for(i=0;i<nBasis;i++) this->R2Index_[i] = new int[nBasis];
-  for(i=0;i<nBasis;i++) for(j=0;j<nBasis;j++) {
-    if(i>=j) ij=j*(nBasis)-j*(j-1)/2+i-j;
-    else ij=i*(nBasis)-i*(i-1)/2+j-i;
-    this->R2Index_[i][j] = ij;
-  };
-*/
-  // Replaced the previous two blocks with alloc
   this->alloc();
 
-/*  **** This is in the constructor now ****
-  this->haveCoulomb = false;
-  this->haveExchange= false;
-  this->haveDensity = false;
-  this->haveMO	    = false;
-  this->havePT      = false;
-*/
 };
 
 template<typename T>
