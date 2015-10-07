@@ -28,6 +28,8 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("computeI",  &Molecule::computeI         )
     .def("setNTotalE",&Molecule::setNTotalE       )
     .def("convBohr",  &Molecule::convBohr         )
+    .def("computeNucRep", &Molecule::computeNucRep)
+    .def("energyNuclei",  &Molecule::energyNuclei )
   ;
 
   class_<BasisSet,boost::noncopyable>("BasisSet",init<>())

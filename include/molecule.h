@@ -87,7 +87,9 @@ public:
   void toCOM(int Iop0);    
   void computeI();
   void computeRij();
+  void computeNucRep();
   void printInfo(std::ostream & out=cout );
+  inline void convBohr(){ (*this->cart_) /= phys.bohr; }
 
   // Python API
   void Wrapper_printInfo(FileIO &);
@@ -120,9 +122,6 @@ public:
   inline void setNTotalE(int i){ this->nTotalE_ = i;};
 
 
-  inline void convBohr(){
-    (*this->cart_) /= phys.bohr;
-  }
 
   // read from input file
   void readMolecule(FileIO *, std::istream &);

@@ -58,14 +58,7 @@ void Molecule::readMolecule(FileIO * fileio, std::istream &geomRead){
     geomRead >> (*cart_)(2,i);
     (*cart_)(2,i) = (*cart_)(2,i)/phys.bohr;
   };
-  double sqrAB;
-  energyNuclei_ = 0.0;
-  for(i=0;i<nAtoms_;i++) 
-    for(j=i+1;j<nAtoms_;j++) {
-      sqrAB = 0.0;
-      for(n=0;n<3;n++) sqrAB += ((*cart_)(n,i)-(*cart_)(n,j))*((*cart_)(n,i)-(*cart_)(n,j));
-      energyNuclei_ += atom[index_[i]].atomicNumber*atom[index_[j]].atomicNumber/sqrt(sqrAB);
-  };
+  this->computeNucRep();
   this->computeRij();
   this->toCOM(0);
   this->computeI();
@@ -136,4 +129,17 @@ void Molecule::computeRij(){
     (*this->rIJ_)(iAtm,jAtm) = (cart_->col(iAtm) - cart_->col(jAtm)).norm();
   }
   (*this->rIJ_) = this->rIJ_->selfadjointView<Lower>();
+}
+
+void Molecule::computeNucRep(){
+
+  this->energyNuclei_ = 0.0;
+  for(auto iAtm = 0       ; iAtm < this->nAtoms_; iAtm++)
+  for(auto jAtm = iAtm + 1; jAtm < this->nAtoms_; jAtm++){
+    auto rDist = this->cart_->col(iAtm) - this->cart_->col(jAtm);
+    auto sqrDistAB = rDist.dot(rDist);
+    this->energyNuclei_ += atom[this->index_[iAtm]].atomicNumber *
+                           atom[this->index_[jAtm]].atomicNumber /
+                           std::sqrt(sqrDistAB);
+  }
 }
