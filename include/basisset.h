@@ -183,6 +183,8 @@ public:
 */
   };
 
+  inline void communicate(FileIO &fileio){ this->fileio_ = &fileio;};
+
   // Getters
   inline int     nBasis() {return this->nBasis_;       }; ///< Return # of basis functions
   inline int nPrimitive() {return this->nPrimitive_;   }; ///< Return # of primitive GTOs
@@ -225,6 +227,16 @@ public:
   template<typename TMat> void computeShBlkNorm(bool,int,const TMat*, const TMat*);
 
   void constructExtrn(Molecule *, BasisSet *); ///< Generate new basis from refernce shells
+
+  inline void makeMaps(int nTCS, Molecule* mol){
+    this->makeMapSh2Bf(nTCS);
+    this->makeMapSh2Cen(mol);
+    this->makeMapCen2Bf(nTCS,mol);
+  }
+
+  // Python API
+  void Wrapper_constructLocal(Molecule&);
+  void Wrapper_makeMaps(int,Molecule&);
 
 }; // class BasisSet
 }; // namespace ChronusQ

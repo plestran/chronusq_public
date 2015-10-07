@@ -4,6 +4,7 @@ import os,sys
 import libpythonapi as chronusQ
 
 def parseMolecule(workers,settings): 
+  print 'Parsing Molecular Information'
   workers["CQMolecule"].setCharge(int(settings['charge']))
   workers["CQMolecule"].setMultip(int(settings['mult'  ]))
   readGeom(workers,settings)
@@ -22,7 +23,6 @@ def readGeom(workers,settings):
   oldLen = len(geomStr)
   for i in range(oldLen - nAtoms):
     geomStr.remove('')
-  print oldLen,len(geomStr)
   workers["CQMolecule"].setNAtoms(nAtoms)
   workers["CQMolecule"].alloc(workers["CQFileIO"])
   

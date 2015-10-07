@@ -27,6 +27,8 @@ controls.iniControls()
 
 PI.parseInput(workers,fname+".inp")
 mol.printInfo(out)
+hf.printInfo()
+basisSet.printInfo()
 
 #controls.printSettings()
 #mol.printInfo(out,controls)

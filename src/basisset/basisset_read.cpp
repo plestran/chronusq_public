@@ -34,15 +34,14 @@ void BasisSet::basisSetRead(FileIO * fileio, Molecule * mol, Controls *controls)
   int nTCS = 1;
   if(controls->doTCS) nTCS = 2;
   
-  this->fileio_ = fileio;
+  //this->fileio_ = fileio;
+  this->communicate(*fileio);
  
   this->fileio_->in >> readString; // read the name of the basis set file
   this->findBasisFile(readString); // Try to find the basis set file
   this->parseGlobal();
   this->constructLocal(mol);
-  this->makeMapSh2Bf(nTCS);
-  this->makeMapSh2Cen(mol);
-  this->makeMapCen2Bf(nTCS,mol);
+  this->makeMaps(nTCS,mol);
   this->printInfo();
   this->renormShells();
 

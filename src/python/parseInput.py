@@ -4,6 +4,7 @@ import os,sys
 import configparser
 import libpythonapi as chronusQ
 from parseMolecule import parseMolecule
+from parseQM import parseQM
 
 class CQError(Exception):
   def __init__(self,msg):
@@ -22,8 +23,6 @@ def genSecDict(parser,section):
   return dict1
 
 
-def parseQM(workers,settings): 
-  print 'hello'
 def parseMisc(workers,settings): 
   print 'hello'
 
@@ -50,6 +49,8 @@ def parseInput(workers,iFileName):
 # print secDict['molecule']['charge']
 # print secDict['molecule']['mult']
 # print secDict['molecule']['geom']
-  for i in secDict: 
-    parseFunctions[i](workers,secDict[i])
+# for i in secDict: 
+#   parseFunctions[i](workers,secDict[i])
 
+  parseFunctions["molecule"](workers,secDict["molecule"])
+  parseFunctions["qm"](workers,secDict["qm"])

@@ -178,7 +178,7 @@ class SingleSlater {
 
 public:
  
-  enum{
+  enum REFERENCE {
     _INVALID,
     RHF,
     UHF,
@@ -257,6 +257,7 @@ public:
     this->haveMO       = false;
     this->havePT       = false;
     this->isDFT        = false;
+    this->isCloseShell = false;
 
     this->isHF         = true;
     this->doMultipole  = true;
@@ -327,6 +328,7 @@ public:
   inline void setField(std::array<double,3> field){
     this->elecField_ = field;
   }
+  inline void setNTCS(int i){ this->nTCS_ = i;};
 
   // access to private data
   inline int nBasis() { return this->nBasis_;};
