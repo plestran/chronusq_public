@@ -13,6 +13,9 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("computeMultipole", &SingleSlater<double>::computeMultipole       )
     .def("printMultipole"  , &SingleSlater<double>::printMultipole         )
     .def("SCF"             , &SingleSlater<double>::SCF                    )
+    .def("communicate"     , &SingleSlater<double>::communicate            )
+    .def("initMeta"        , &SingleSlater<double>::initMeta               )
+    .def("alloc"           , &SingleSlater<double>::alloc                  )
   ;
 
   class_<Molecule,boost::noncopyable>("Molecule",init<>())

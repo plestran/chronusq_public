@@ -53,10 +53,7 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
   this->eneTol_ = controls->SCFeneTol_;
   this->maxSCFIter_ = controls->SCFmaxIter_;
 
-  this->elecField_ = 
-    std::unique_ptr<std::array<double,3>>(
-      new std::array<double,3>{{0.0,0.0,0.0}});
-  (*this->elecField_) = controls->field_;
+  this->elecField_ = controls->field_;
 
   this->isClosedShell = (this->multip_ == 1);
   if(controls->HF){
@@ -219,3 +216,190 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
   this->havePT      = false;
 };
 
+template<typename T>
+void SingleSlater<T>::alloc(){
+  this->checkMeta();
+  this->allocOp();
+  if(this->doMultipole) this->allocMultipole(); 
+/* Leaks memory
+  int i,j,ij;
+  this->R2Index_ = new int*[nBasis];
+  for(i=0;i<nBasis;i++) this->R2Index_[i] = new int[nBasis];
+  for(i=0;i<nBasis;i++) for(j=0;j<nBasis;j++) {
+    if(i>=j) ij=j*(nBasis)-j*(j-1)/2+i-j;
+    else ij=i*(nBasis)-i*(i-1)/2+j-i;
+    this->R2Index_[i][j] = ij;
+  };
+*/
+}
+
+template<typename T>
+void SingleSlater<T>::allocOp(){
+  // Alpha / TCS Density Matrix
+  try { 
+    this->densityA_  = std::unique_ptr<TMatrix>( 
+      new TMatrix(this->nTCS_*this->nBasis_, this->nTCS_*this->nBasis_));
+  } catch (...) { 
+    if(this->Ref_ == TCS) 
+      CErr(std::current_exception(),"TCS Density Matrix Allocation"  ); 
+    else CErr(std::current_exception(),"Alpha Density Matrix Allocation"); 
+  }
+
+  // Alpha / TCS Fock Matrix
+  try { 
+    this->fockA_ = std::unique_ptr<TMatrix>(
+      new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
+  } catch (...) { 
+    if(this->Ref_ == TCS) 
+      CErr(std::current_exception(),"TCS Fock Matrix Allocation"); 
+    else CErr(std::current_exception(),"Alpha Fock Matrix Allocation"); 
+  }
+
+  // Alpha / TCS Molecular Orbital Coefficients
+  try { 
+    this->moA_ = std::unique_ptr<TMatrix>(
+      new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_)); 
+  } catch (...) { 
+    if(this->Ref_ == TCS) 
+      CErr(std::current_exception(),"TCS MO Coefficients Allocation");
+    else CErr(std::current_exception(),"Alpha MO Coefficients Allocation"); 
+  }
+
+  // Alpha / TCS Eigenorbital Energies
+  try { 
+    this->epsA_ = std::unique_ptr<RealMatrix>(
+      new RealMatrix(this->nTCS_*this->nBasis_,1)); 
+  } catch (...) { 
+    if(this->Ref_ == TCS) 
+      CErr(std::current_exception(),"TCS Eigenorbital Energies"); 
+    else CErr(std::current_exception(),"Alpha Eigenorbital Energies"); 
+  }
+
+  if(!this->isClosedShell && this->Ref_ != TCS) {
+    // Beta Density Matrix
+    try { 
+      this->densityB_ = std::unique_ptr<TMatrix>(
+        new TMatrix(this->nBasis_,this->nBasis_)); 
+    } catch (...) { 
+      CErr(std::current_exception(),"Beta Density Matrix Allocation"); 
+    }
+
+    // Beta Fock Matrix
+    try { 
+      this->fockB_ = std::unique_ptr<TMatrix>(
+        new TMatrix(this->nBasis_,this->nBasis_)); 
+    } catch (...) { 
+      CErr(std::current_exception(),"Beta Fock Matrix Allocation");
+    }
+
+    // Beta Molecular Orbital Coefficients
+    try { 
+      this->moB_ = std::unique_ptr<TMatrix>(
+        new TMatrix(this->nBasis_,this->nBasis_));
+    } catch (...) { 
+      CErr(std::current_exception(),"Beta MO Coefficients Allocation"); 
+    }
+
+    // Beta Eigenorbital Energies
+    try { 
+      this->epsB_ = std::unique_ptr<RealMatrix>(
+        new RealMatrix(this->nBasis_,1)); 
+    } catch (...) { 
+      CErr(std::current_exception(),"Beta Eigenorbital Energies");
+    }
+  }
+#ifndef USE_LIBINT
+  // Alpha / TCS Coulomb Matrix
+  try { 
+    this->coulombA_  = std::unique_ptr<TMatrix>(
+      new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_)); 
+  } catch (...) { 
+    if(this->Ref_ == TCS) 
+      CErr(std::current_exception(),"TCS Coulomb Tensor Allocation"); 
+    else CErr(std::current_exception(),"Alpha Coulomb Tensor Allocation"); 
+  }
+
+  // Alpha / TCS Exchange Matrix
+  try { 
+    this->exchangeA_ = std::unique_ptr<TMatrix>(
+      new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
+  } catch (...) { 
+    if(this->Ref_ == TCS) 
+      CErr(std::current_exception(),"TCS Exchange Tensor Allocation"); 
+    else CErr(std::current_exception(),"Alpha Exchange Tensor Allocation"); 
+  }
+
+  if(!this->isClosedShell && this->Ref_ != TCS) {
+    // Beta Coulomb Matrix
+    try { 
+      this->coulombB_  = std::unique_ptr<TMatrix>(
+        new TMatrix(this->nBasis_,this->nBasis_)); 
+    } catch (...) { 
+      CErr(std::current_exception(),"Beta Coulomb Tensor Allocation"); 
+    }
+ 
+    // Beta Exchange Matrix
+    try { 
+      this->exchangeB_ = std::unique_ptr<TMatrix>(
+        new TMatrix(this->nBasis_,this->nBasis_));
+    } catch (...) { 
+      CErr(std::current_exception(),"Beta Exchange Tensor Allocation"); 
+    }
+  }
+#else
+  // Alpha / TCS Perturbation Tensor
+  try { 
+    this->PTA_  = std::unique_ptr<TMatrix>(
+      new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
+  } catch (...) { 
+    if(this->Ref_ == TCS) CErr(std::current_exception(),"TCS G[P] Allocation"); 
+    else CErr(std::current_exception(),"Alpha G[P] Allocation"); 
+  }
+
+  if(!this->isClosedShell && this->Ref_ != TCS) {
+    // Beta Perturbation Tensor
+    try { 
+      this->PTB_  = std::unique_ptr<TMatrix>(
+        new TMatrix(this->nBasis_,this->nBasis_));
+    } catch (...) { 
+      CErr(std::current_exception(),"Beta G[P] Allocation"); 
+    }
+  }
+#endif
+
+  if(this->isDFT) this->allocDFT();
+}
+
+template<typename T>
+void SingleSlater<T>::allocDFT(){
+  // Alpha / TCS VXC
+  try { 
+    this->vXCA_  = std::unique_ptr<TMatrix>(
+      new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
+  } catch (...) { 
+    if(this->Ref_ == TCS) CErr(std::current_exception(), "TCS VXC Allocation"); 
+    else CErr(std::current_exception(),"Alpha VXC  Allocation"); 
+  }
+
+  if(!this->isClosedShell && this->Ref_ != TCS) {
+    // Beta VXC
+    try { 
+      this->vXCB_  = std::unique_ptr<TMatrix>(
+        new TMatrix(this->nBasis_,this->nBasis_));
+    } catch (...) { 
+      CErr(std::current_exception(),"Beta VXC  Allocation"); 
+    }
+  }
+}
+
+template<typename T>
+void SingleSlater<T>::allocMultipole(){
+  if(this->maxMultipole_ >= 1)
+    this->dipole_ = std::unique_ptr<RealMatrix>(new RealMatrix(3,1));
+  if(this->maxMultipole_ >= 2){
+    this->quadpole_ = std::unique_ptr<RealMatrix>(new RealMatrix(3,3));
+    this->tracelessQuadpole_ = std::unique_ptr<RealMatrix>(new RealMatrix(3,3));
+  }
+  if(this->maxMultipole_ >= 3)
+    this->octpole_  = std::unique_ptr<RealTensor3d>(new RealTensor3d(3,3,3));
+}
