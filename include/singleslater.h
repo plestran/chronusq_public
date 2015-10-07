@@ -71,7 +71,6 @@ class SingleSlater {
   std::unique_ptr<TMatrix>  PTB_;        ///< Beta Perturbation Tensor
   std::unique_ptr<TMatrix>  vXCA_;        ///< Alpha or Full (TCS) VXC
   std::unique_ptr<TMatrix>  vXCB_;        ///< Beta VXC
-  std::unique_ptr<RealMatrix>  overlapR_;        ///< Overlap at grid point
   std::unique_ptr<RealMatrix>  dipole_;  ///< Electric Dipole Moment
   std::unique_ptr<RealMatrix>  quadpole_; ///< Electric Quadrupole Moment
   std::unique_ptr<RealMatrix>  tracelessQuadpole_; ///< Traceless Electric Quadrupole Moment
@@ -82,9 +81,7 @@ class SingleSlater {
   FileIO *      fileio_;                 ///< Access to output file
   Controls *    controls_;               ///< General ChronusQ flow parameters
   AOIntegrals * aointegrals_;            ///< Molecular Integrals over GTOs (AO basis)
-// APS //
   TwoDGrid    * twodgrid_   ;            ///< 3D grid (1Rad time 1 Ang) 
-//APE  //
   int lenX_;
   int lenXp_;
   int lenF_;
@@ -210,7 +207,6 @@ public:
   inline TMatrix* moB()      { return this->moB_.get();};
   inline TMatrix* vXCA()      { return this->vXCA_.get();};
   inline TMatrix* vXCB()      { return this->vXCB_.get();};
-  inline RealMatrix* overlapR() { return this->overlapR_.get();};
   inline RealMatrix* epsA()     { return this->epsA_.get();};
   inline RealMatrix* epsB()     { return this->epsB_.get();};
   inline TMatrix* PTA()      { return this->PTA_.get();};

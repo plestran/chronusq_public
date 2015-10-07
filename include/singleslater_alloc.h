@@ -76,9 +76,6 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
 
   this->nTCS_ = 1;
   if(this->Ref_ == TCS) this->nTCS_ = 2;
-// Comment out to get rid of DFT tests
-//this->controls_->DFT = true;
-  
 
   // Alpha / TCS Density
   try { 
@@ -132,8 +129,6 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
     try { 
       this->vXCA_ = std::unique_ptr<TMatrix>(
         new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
-      this->overlapR_ = std::unique_ptr<RealMatrix>(
-        new RealMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
     } catch (...) { 
       if(this->Ref_ == TCS) CErr(std::current_exception(),
         "TCS VXC Allocation"); 
