@@ -26,6 +26,7 @@ workers = {"CQMolecule":mol,
 controls.iniControls()
 
 PI.parseInput(workers,fname+".inp")
+mol.printInfo(out)
 
 #controls.printSettings()
 #mol.printInfo(out,controls)

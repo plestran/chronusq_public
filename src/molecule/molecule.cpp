@@ -72,19 +72,36 @@ void Molecule::printInfo(std::ostream &out) {
   out.fill(' ');
   out.setf(ios::right,ios::adjustfield);
   out.setf(ios::fixed,ios::floatfield);
-  out<<"\nMolecular Information:"<<endl;
-  out<<std::setw(15)<<"nAtoms ="<<std::setw(8)<<nAtoms_<<std::setw(5)<<" "
-	     <<std::setw(20)<<"Charge ="<<std::setw(8)<<charge_<<endl;
-  out<<std::setw(15)<<"nElectrons ="<<std::setw(8)<<nTotalE_<<endl;
-  out<<"\nCartesian coordinates (bohr):"<<endl;
-  out<<bannerTop<<endl;
-  out<<std::setw(24)<<" "<<std::setw(15)<<"X"<<std::setw(15)<<"Y"<<std::setw(15)<<"Z"<<endl;
-  out<<bannerMid<<endl;
-  for(int i=0;i<nAtoms_;i++)
-    out<<std::setw(8)<<i+1<<std::setw(8)<<atom[index_[i]].symbol<<std::setw(8)<<atom[index_[i]].atomicNumber
-	       <<std::setw(15)<<(*cart_)(0,i)<<std::setw(15)<<(*cart_)(1,i)<<std::setw(15)<<(*cart_)(2,i)<<endl;
-  out<<bannerMid<<endl;
-  prettyPrint(out,*this->momentOfInertia_,"Moment of Inertia Tensor (AMU-bohr\u00B2)");
+  out << endl << "Molecular Information:" << endl;
+
+  out << std::setw(15) << "nAtoms =" << std::setw(8) << this->nAtoms_
+      << std::setw(5)  << " "        
+      << std::setw(25) << "Charge =" << std::setw(12) << this->charge_ << endl;
+
+  out << std::setw(15) << "nElectrons =" << std::setw(8) << this->nTotalE_
+      << std::setw(5)  << " "
+      << std::setw(25) << "Nuclear Repulsion =" << std::setw(12) << std::setprecision(5) << std::scientific << this->energyNuclei_ << " Eh"
+      << endl;
+
+  out << endl << "Cartesian coordinates (bohr):" << endl;
+  out << bannerTop<< endl;
+  out << std::setw(24) << " "
+      << std::setw(15) << "X" << std::setw(15) << "Y" 
+      << std::setw(15) << "Z" << endl;
+  out << bannerMid << endl;
+
+  for(auto i = 0; i < this->nAtoms_; i++)
+    out << std::setw(8)  << i+1 << std::setw(8) << atom[index_[i]].symbol
+        << std::setw(8)  << atom[index_[i]].atomicNumber
+	<< std::setw(15) << (*cart_)(0,i) 
+        << std::setw(15) << (*cart_)(1,i)
+        << std::setw(15) << (*cart_)(2,i)
+        << endl;
+  out << bannerMid << endl;
+
+  prettyPrint(out,*this->momentOfInertia_,
+              "Moment of Inertia Tensor (AMU-bohr\u00B2)");
+
   prettyPrint(out,*this->rIJ_,"Interatomic Distance Matrix (bohr)");
 };
 

@@ -68,11 +68,6 @@ def readGeom(workers,settings):
   workers["CQMolecule"].convBohr()
   workers["CQMolecule"].computeRij()
   workers["CQMolecule"].computeI()
-  workers["CQFileIO"].write(str(workers["CQMolecule"].energyNuclei()))
-  print 'HELLO'
-  
-  
-  workers["CQMolecule"].printInfo(workers["CQFileIO"])
     
     
 
