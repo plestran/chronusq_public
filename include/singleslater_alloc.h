@@ -30,11 +30,16 @@ template<typename T>
 void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset, 
                                    AOIntegrals * aointegrals, FileIO * fileio, 
                                    Controls * controls) {
+/*
   this->molecule_ = molecule;
   this->basisset_ = basisset;
   this->fileio_   = fileio;
   this->controls_ = controls;
   this->aointegrals_= aointegrals;
+*/
+  // Replaced the previous block with communicate
+  this->communicate(*molecule,*basisset,*aointegrals,*fileio,*controls);
+/*
   int nTotalE = molecule->nTotalE();
   this->nBasis_  = basisset->nBasis();
   this->nTT_   = this->nBasis_*(this->nBasis_+1)/2;
@@ -48,11 +53,18 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
   this->nAE_   = this->nOccA_;
   this->nBE_   = this->nOccB_;
   this->energyNuclei = molecule->energyNuclei();
+*/
+  // Replaced the previous block with initMeta
+  this->initMeta();
+
+/* **** In the constructor now (for default values) ****
   this->isConverged = false;
   this->denTol_ = controls->SCFdenTol_;
   this->eneTol_ = controls->SCFeneTol_;
   this->maxSCFIter_ = controls->SCFmaxIter_;
+*/
 
+  // This needs to stay around for now (not reading the inputs into SS)
   this->elecField_ = controls->field_;
 
   this->isClosedShell = (this->multip_ == 1);
@@ -88,12 +100,14 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
   }
 
 
-  this->nTCS_ = 1;
+//this->nTCS_ = 1;
   if(this->Ref_ == TCS) this->nTCS_ = 2;
-// Comment out to get rid of DFT tests
-//this->controls_->DFT = true;
-  
 
+  // This is the only way via the C++ interface to set this flag (needed
+  // for allocDFT)
+  this->isDFT = controls->DFT;
+  
+/*
   // Alpha / TCS Density
   try { 
     this->densityA_  = std::unique_ptr<TMatrix>( 
@@ -198,6 +212,7 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
   this->quadpole_ = std::unique_ptr<RealMatrix>(new RealMatrix(3,3));
   this->tracelessQuadpole_ = std::unique_ptr<RealMatrix>(new RealMatrix(3,3));
   this->octpole_  = std::unique_ptr<RealTensor3d>(new RealTensor3d(3,3,3));
+*/
 /* Leaks memory
   int i,j,ij;
   this->R2Index_ = new int*[nBasis];
@@ -208,12 +223,16 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
     this->R2Index_[i][j] = ij;
   };
 */
+  // Replaced the previous two blocks with alloc
+  this->alloc();
 
+/*  **** This is in the constructor now ****
   this->haveCoulomb = false;
   this->haveExchange= false;
   this->haveDensity = false;
   this->haveMO	    = false;
   this->havePT      = false;
+*/
 };
 
 template<typename T>

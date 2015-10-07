@@ -169,6 +169,9 @@ class SingleSlater {
        (this->molecule_->nTotalE() % 2 != 0 && this->multip_ % 2 != 0))
       CErr(std::string("Fatal: The specified multiplicity is impossible within")
            +std::string(" the number of electrons given"),this->fileio_->out);
+
+    if(this->Ref_ == _INVALID) 
+      CErr("Fatal: SingleSlater reference not set!",this->fileio_->out);
   }
 
 
