@@ -249,8 +249,8 @@ void readInput(FileIO * fileio, Molecule * mol, BasisSet * basis, Controls * con
                "\t EDFIELD:   Electric dipole Ex,Ey,Ez (au).   Default = 0.0 0.0 0.0 \n"+
                "\t TIME_ON:   Time (au) field is applied.      Default = 0.0 \n"+ 
                "\t TIME_OFF:  Time (au) field is removed.      Default = 10000.0 \n"+ 
-               "\t FREQUENCY: Field frequency (au).            Default = 0.0 \n"+ 
-               "\t PHASE:     Field phase offset (au).         Default = 0.0 \n"+ 
+               "\t FREQUENCY: Field frequency (eV).            Default = 0.0 \n"+ 
+               "\t PHASE:     Field phase offset (rad).        Default = 0.0 \n"+ 
                "\t ENVELOPE:  Type of field envelope function. Default = PW \n"+
                "\t ORTHO:     Type of orthogonalization.       Default = LOWDIN \n"+
                "\t INIDEN:    Initial density for system.      Default = SCF \n"+

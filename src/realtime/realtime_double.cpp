@@ -138,6 +138,7 @@ void RealTime<double>::formEDField() {
   double Phase = this->controls_->rtPhase_;
   double Time  = currentTime_;
   double OmegT;
+  Omega = Omega/phys.eVPerHartree;
   if (IEnvlp == 1) { 
   //   Constant envelope (plane wave)
     if(Time >= TOn && Time <= TOff) {
@@ -292,6 +293,7 @@ void RealTime<double>::doPropagation() {
 //  Form AO Fock matrix
     this->formEDField();
     this->ssPropagator_->setField(*this->EDField_);
+    this->fileio_->out<<"\nCurrent Elec Field: "<<(*this->EDField_)[0]<<", "<<(*this->EDField_)[1] << ", " << (*this->EDField_)[2]<<endl;
     this->ssPropagator_->formFock();
     this->ssPropagator_->computeEnergy();
     this->ssPropagator_->computeMultipole();

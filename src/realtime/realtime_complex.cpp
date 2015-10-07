@@ -138,6 +138,7 @@ void RealTime<dcomplex>::formEDField() {
   double Phase = this->controls_->rtPhase_;
   double Time  = currentTime_;
   double OmegT;
+  Omega = Omega/phys.eVPerHartree;
   if (IEnvlp == 1) { 
   //   Constant envelope (plane wave)
     if(Time >= TOn && Time <= TOff) {
@@ -288,10 +289,9 @@ void RealTime<dcomplex>::doPropagation() {
       //if(!this->RHF_) prettyPrintComplex(this->fileio_->out,(*this->ssPropagator_->densityB()),"Beta AO Density");
 
 //  Form AO Fock matrix
-    //  JJG for now, just have EDfield = rtField
-    //(*this->EDField_) = this->controls_->rtField_;
     this->formEDField();
     this->ssPropagator_->setField(*this->EDField_);
+    this->fileio_->out<<"\nCurrent Elec Field: "<<(*this->EDField_)[0]<<", "<<(*this->EDField_)[1] << ", " << (*this->EDField_)[2]<<endl;
     this->ssPropagator_->formFock();
     this->ssPropagator_->computeEnergy();
     this->ssPropagator_->computeMultipole();
