@@ -89,7 +89,8 @@ public:
   ~RealTime() {;};
 
   // pseudo-constructor
-  void iniRealTime(Molecule *,BasisSet *,FileIO *,Controls *,AOIntegrals *,SingleSlater<T> *);
+  void iniRealTime(Molecule *,BasisSet *,FileIO *,Controls *,AOIntegrals *,
+                   SingleSlater<T> *);
   void iniDensity(); // initialize density
 //  void formComplexFock();
   void formEDField();

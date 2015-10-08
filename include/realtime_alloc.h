@@ -24,14 +24,17 @@
  *  
  */
 template<typename T>
-void RealTime<T>::iniRealTime(Molecule * molecule, BasisSet *basisset, FileIO *fileio, Controls *controls, AOIntegrals *aointegrals,SingleSlater<T> *groundState) {
+void RealTime<T>::iniRealTime(Molecule * molecule, BasisSet *basisset, 
+       FileIO *fileio, Controls *controls, AOIntegrals *aointegrals,
+       SingleSlater<T> *groundState) {
 
   this->fileio_         = fileio;
   this->controls_       = controls;
   this->aointegrals_	= aointegrals;
   this->groundState_   	= groundState;
 
-  this->ssPropagator_	= std::unique_ptr<SingleSlater<dcomplex>>(new SingleSlater<dcomplex>(groundState));
+  this->ssPropagator_	= std::unique_ptr<SingleSlater<dcomplex>>(
+                            new SingleSlater<dcomplex>(groundState));
 
   this->nBasis_         = basisset->nBasis();
   this->isClosedShell_	= this->groundState_->isClosedShell;
@@ -55,22 +58,42 @@ void RealTime<T>::iniRealTime(Molecule * molecule, BasisSet *basisset, FileIO *f
       new std::array<double,3>{{0.0,0.0,0.0}});
   //JJGE
 
-  this->fileio_->out<<"\nReal-time TDHF: "<<endl;
-  this->fileio_->out<<std::right<<std::setw(20)<<"Number of steps = "<<std::setw(15)<<this->maxSteps_<<std::setw(5)<<endl;
-  this->fileio_->out<<std::right<<std::setw(20)<<"Step size = "<<std::setw(15)<<this->stepSize_<<std::setw(5)<<" a.u. "<<endl;
+  this->fileio_->out << endl << "Real-time TDHF: "<< endl;
+  this->fileio_->out << std::right << std::setw(20) << "Number of steps = "
+                     << std::setw(15) << this->maxSteps_ << std::setw(5)
+                     << endl;
+  this->fileio_->out << std::right << std::setw(20) << "Step size = "
+                     <<std::setw(15) << this->stepSize_ << std::setw(5) 
+                     << " a.u. " << endl;
 
-  this->oTrans1_ = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-  this->oTrans2_ = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-  this->POA_  	 = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-  this->POAsav_  = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-  this->POB_  	 = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-  this->POBsav_  = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-  this->FOA_ 	 = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-  this->FOB_ 	 = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-  this->initMOA_ = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-  this->initMOB_ = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-  this->uTransA_ = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-  this->uTransB_ = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-  this->scratch_ = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
+  // FIXME: Allocate only what you need to
+  // FIXME: Add try/catch statements to check if memory couldn't be allocated
+  auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
+  this->oTrans1_ = 
+    std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+  this->oTrans2_ = 
+    std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+  this->POA_  	 = 
+    std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+  this->POAsav_  = 
+    std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+  this->POB_  	 = 
+    std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+  this->POBsav_  = 
+    std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+  this->FOA_ 	 = 
+    std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+  this->FOB_ 	 = 
+    std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+  this->initMOA_ = 
+    std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+  this->initMOB_ = 
+    std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+  this->uTransA_ = 
+    std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+  this->uTransB_ = 
+    std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+  this->scratch_ = 
+    std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
 };
 
