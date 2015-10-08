@@ -33,10 +33,10 @@ void RealTime<T>::iniRealTime(Molecule * molecule, BasisSet *basisset, FileIO *f
 
   this->ssPropagator_	= std::unique_ptr<SingleSlater<dcomplex>>(new SingleSlater<dcomplex>(groundState));
 
-  this->nBasis_ = basisset->nBasis();
-  this->RHF_	= this->groundState_->isClosedShell;
-  this->nOccA_ 	= this->groundState_->nOccA();
-  this->nOccB_ 	= this->groundState_->nOccB();
+  this->nBasis_         = basisset->nBasis();
+  this->isClosedShell_	= this->groundState_->isClosedShell;
+  this->nOccA_ 	        = this->groundState_->nOccA();
+  this->nOccB_ 	        = this->groundState_->nOccB();
 
   this->frozenNuc_	= true;
   this->maxSteps_	= this->controls_->rtMaxSteps;

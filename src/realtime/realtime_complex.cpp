@@ -81,7 +81,7 @@ void RealTime<dcomplex>::iniDensity() {
       }
       this->ssPropagator_->moA()->col(jA-1).swap(this->ssPropagator_->moA()->col(iA-1));
     }
-    if (this->swapMOB_ != 0 && !this->RHF_) {
+    if (this->swapMOB_ != 0 && !this->isClosedShell_) {
       int iB = (this->swapMOB_/1000), jB = (this->swapMOB_%1000); // MOs to swap
       this->fileio_->out<<"\nBeta MOs swapped: "<<iB<<" <-> "<<jB<<endl;
       if(this->controls_->printLevel>3) {
@@ -95,7 +95,7 @@ void RealTime<dcomplex>::iniDensity() {
     this->initMOA_->setZero();
     *this->initMOA_= *this->groundState_->moA();
     *this->initMOA_ = (*this->oTrans2_)*(*this->initMOA_);
-    if(!this->RHF_) {
+    if(!this->isClosedShell_) {
       this->initMOB_->setZero();
       *this->initMOB_ = *this->groundState_->moB();
       *this->initMOB_ = (*this->oTrans2_)*(*this->initMOB_);
@@ -114,7 +114,7 @@ void RealTime<dcomplex>::iniDensity() {
 // Transform density from AO to orthonormal basis
     *this->POA_    = (*this->oTrans2_)*(*this->ssPropagator_->densityA())*(*this->oTrans2_);
     *this->POAsav_ = *this->POA_;
-    if(!this->RHF_) {
+    if(!this->isClosedShell_) {
       *this->POB_    = (*this->oTrans2_)*(*this->ssPropagator_->densityB())*(*this->oTrans2_);
       *this->POBsav_ = *this->POB_;
     }
@@ -122,7 +122,7 @@ void RealTime<dcomplex>::iniDensity() {
   else { 
 // Transform density from orthonormal to AO basis
     *this->ssPropagator_->densityA() = (*this->oTrans1_)*(*this->POAsav_)*(*this->oTrans1_);
-    if(!this->RHF_) *this->ssPropagator_->densityB() = (*this->oTrans1_)*(*this->POB_)*(*this->oTrans1_);
+    if(!this->isClosedShell_) *this->ssPropagator_->densityB() = (*this->oTrans1_)*(*this->POB_)*(*this->oTrans1_);
   }
 };
 
@@ -132,13 +132,14 @@ void RealTime<dcomplex>::formEDField() {
   double Ex    = this->controls_->rtField_[0]; 
   double Ey    = this->controls_->rtField_[1]; 
   double Ez    = this->controls_->rtField_[2]; 
-  double TOn   = this->controls_->rtTOn_;
-  double TOff  = this->controls_->rtTOff_;
-  double Omega = this->controls_->rtFreq_;
+  double TOn   = (this->controls_->rtTOn_)*phys.AuToFs;
+  double TOff  = (this->controls_->rtTOff_)*phys.AuToFs;
+  double Omega = this->controls_->rtFreq_/phys.eVPerHartree;
   double Phase = this->controls_->rtPhase_;
   double Time  = currentTime_;
   double OmegT;
-  Omega = Omega/phys.eVPerHartree;
+  double TMax;
+
   if (IEnvlp == 1) { 
   //   Constant envelope (plane wave)
     if(Time >= TOn && Time <= TOff) {
@@ -238,7 +239,7 @@ void RealTime<dcomplex>::formUTrans() {
       (*this->uTransA_)(i,i) = dcomplex(cos(deltaT_*EVal(i,0)),-sin(deltaT_*EVal(i,0)));
     }
     *this->uTransA_ = EVec*(*this->uTransA_)*(EVec.adjoint());
-    if(!this->RHF_) {
+    if(!this->isClosedShell_) {
       Eigen::SelfAdjointEigenSolver<ComplexMatrix> sys(*this->ssPropagator_->fockB());
       EVec = sys.eigenvectors();
       EVal = sys.eigenvalues();
@@ -253,13 +254,13 @@ void RealTime<dcomplex>::formUTrans() {
   // Taylor expansion
     *this->scratch_ = -math.ii*deltaT_*(*this->ssPropagator_->fockA());
     *this->uTransA_ = (*this->scratch_).exp();
-    if(!this->RHF_) {
+    if(!this->isClosedShell_) {
       *this->scratch_ = -math.ii*deltaT_*(*this->ssPropagator_->fockB());
       *this->uTransB_ = (*this->scratch_).exp();
     }
   }
 //    prettyPrint(this->fileio_->out,(*this->uTransA_),"uTransA");
-//    if(!this->RHF_) prettyPrint(this->fileio_->out,(*this->uTransB_),"uTransB");
+//    if(!this->isClosedShell_) prettyPrint(this->fileio_->out,(*this->uTransB_),"uTransB");
 };
   
 template<>
@@ -278,7 +279,7 @@ void RealTime<dcomplex>::doPropagation() {
     *this->scratch_ = *this->POA_;
     *this->POA_	    = *this->POAsav_;
     *this->POAsav_  = *this->scratch_;
-    if (!this->RHF_) {
+    if (!this->isClosedShell_) {
       *this->scratch_ = *this->POB_;
       *this->POB_     = *this->POBsav_;
       *this->POBsav_  = *this->scratch_;
@@ -286,7 +287,7 @@ void RealTime<dcomplex>::doPropagation() {
 //  Print 
     if(this->controls_->printLevel>=1) {
       //prettyPrintComplex(this->fileio_->out,(*this->ssPropagator_->densityA()),"Alpha AO Density");
-      //if(!this->RHF_) prettyPrintComplex(this->fileio_->out,(*this->ssPropagator_->densityB()),"Beta AO Density");
+      //if(!this->isClosedShell_) prettyPrintComplex(this->fileio_->out,(*this->ssPropagator_->densityB()),"Beta AO Density");
 
 //  Form AO Fock matrix
     this->formEDField();
@@ -299,7 +300,7 @@ void RealTime<dcomplex>::doPropagation() {
 
 //  Transform Fock from AO to orthonormal basis
     *this->ssPropagator_->fockA() = (*this->oTrans1_)*(*this->ssPropagator_->fockA())*(*this->oTrans1_);
-    if (!this->RHF_) {
+    if (!this->isClosedShell_) {
       *this->ssPropagator_->fockB() = (*this->oTrans1_)*(*this->ssPropagator_->fockB())*(*this->oTrans1_);
     }
 
@@ -310,7 +311,7 @@ void RealTime<dcomplex>::doPropagation() {
 //    Check [F,P] for converged density, should equal to zero
       *this->scratch_ = (*this->ssPropagator_->fockA())*(*this->POAsav_) - (*this->POAsav_)*(*this->ssPropagator_->fockA());
       prettyPrint(this->fileio_->out,(*this->scratch_),"[FOA,POA]");
-      if (!this->RHF_) {
+      if (!this->isClosedShell_) {
         *this->scratch_ = (*this->ssPropagator_->fockB())*(*this->POBsav_) - (*this->POBsav_)*(*this->ssPropagator_->fockB());
         prettyPrint(this->fileio_->out,(*this->scratch_),"[FOB,POB]");
       }
@@ -318,13 +319,13 @@ void RealTime<dcomplex>::doPropagation() {
 
 //  Propagate the density matrix
     *this->POA_ = (*this->uTransA_)*(*this->POA_)*((*this->uTransA_).adjoint());
-    if (!this->RHF_) {
+    if (!this->isClosedShell_) {
       *this->POB_ = (*this->uTransB_)*(*this->POB_)*((*this->uTransB_).adjoint());
     }
 
 //  Transform density matrix from orthonormal to AO basis
     *this->ssPropagator_->densityA() = (*this->oTrans1_)*(*this->POA_)*(*this->oTrans1_);
-    if (!this->RHF_) {
+    if (!this->isClosedShell_) {
       *this->ssPropagator_->densityB() = (*this->oTrans1_)*(*this->POB_)*(*this->oTrans1_);
     }
 

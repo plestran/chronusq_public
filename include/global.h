@@ -201,9 +201,10 @@ struct Phys {
   double debye; ///< e*bohr in 1 Debye
   double eVPerHartree;
   double nmPerHartree;
+  double AuToFs;
   //number of cartesian AO's in a shell
 };
-const Phys phys = {0.5291772083000001,0.393430307,27.211396132,45.56335};
+const Phys phys = {0.5291772083000001,0.393430307,27.211396132,45.56335,0.02418884326505};
 
 
 //------------------//

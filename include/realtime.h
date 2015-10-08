@@ -45,7 +45,7 @@ class RealTime {
   std::unique_ptr<SingleSlater<dcomplex>> ssPropagator_;
 
   int	nBasis_;
-  int   RHF_;
+  int   isClosedShell_;
   int 	nOccA_;
   int 	nOccB_;
   int	maxSteps_;	// Maximum number of steps
