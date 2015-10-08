@@ -35,6 +35,8 @@ void RealTime<T>::iniRealTime(Molecule * molecule, BasisSet *basisset, FileIO *f
 
   this->nBasis_         = basisset->nBasis();
   this->isClosedShell_	= this->groundState_->isClosedShell;
+  this->Ref_            = this->groundState_->Ref();
+  this->nTCS_           = this->groundState_->nTCS();
   this->nOccA_ 	        = this->groundState_->nOccA();
   this->nOccB_ 	        = this->groundState_->nOccB();
 
