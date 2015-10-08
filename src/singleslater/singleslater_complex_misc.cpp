@@ -59,8 +59,8 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<dcomplex> * other){
     this->quadpole_           = std::unique_ptr<RealMatrix>(new RealMatrix(*other->quadpole_));
     this->tracelessQuadpole_  = std::unique_ptr<RealMatrix>(new RealMatrix(*other->tracelessQuadpole_));
     this->octpole_            = std::unique_ptr<RealTensor3d>(new RealTensor3d(*other->octpole_));
-    this->elecField_          = std::unique_ptr<std::array<double,3>>(new std::array<double,3>{{0,0,0}});
-    (*this->elecField_)       = (*other->elecField_);
+//  this->elecField_          = std::unique_ptr<std::array<double,3>>(new std::array<double,3>{{0,0,0}});
+    this->elecField_       = other->elecField_;
     this->basisset_    = other->basisset_;    
     this->molecule_    = other->molecule_;
     this->fileio_      = other->fileio_;
@@ -109,8 +109,8 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other){
     this->quadpole_           = std::unique_ptr<RealMatrix>(new RealMatrix(*other->quadpole()));
     this->tracelessQuadpole_  = std::unique_ptr<RealMatrix>(new RealMatrix(*other->tracelessQuadpole()));
     this->octpole_            = std::unique_ptr<RealTensor3d>(new RealTensor3d(*other->octpole()));
-    this->elecField_          = std::unique_ptr<std::array<double,3>>(new std::array<double,3>{{0,0,0}});
-    (*this->elecField_)       = (other->elecField());
+//  this->elecField_          = std::unique_ptr<std::array<double,3>>(new std::array<double,3>{{0,0,0}});
+    this->elecField_       = (other->elecField());
     this->basisset_    = other->basisset();    
     this->molecule_    = other->molecule();
     this->fileio_      = other->fileio();
