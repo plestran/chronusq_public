@@ -20,6 +20,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("genMethString"   , &SingleSlater<double>::genMethString          )
     .def("setRef"          , &SingleSlater<double>::setRef                 )
     .def("setNTCS"         , &SingleSlater<double>::setNTCS                )
+    .def("setMaxMultipole" , &SingleSlater<double>::setMaxMultipole        )
 
     .def("Ref"             , &SingleSlater<double>::Ref                    )
     .def("nTCS"            , &SingleSlater<double>::nTCS                   ) 
@@ -80,8 +81,17 @@ BOOST_PYTHON_MODULE(libpythonapi){
 
   
   class_<AOIntegrals,boost::noncopyable>("AOIntegrals",init<>())
-    .def("iniAOIntegrals", &AOIntegrals::Wrapper_iniAOIntegrals)
-    .def("printTimings"  , &AOIntegrals::printTimings          )
+    .def("iniAOIntegrals" , &AOIntegrals::Wrapper_iniAOIntegrals)
+    .def("printTimings"   , &AOIntegrals::printTimings          )
+    .def("communicate"    , &AOIntegrals::communicate           )
+    .def("initMeta"       , &AOIntegrals::initMeta              )
+    .def("alloc"          , &AOIntegrals::alloc                 )
+    .def("nTCS"           , &AOIntegrals::nTCS                  )
+    .def("setNTCS"        , &AOIntegrals::setNTCS               )
+    .def("setMaxMultipole", &AOIntegrals::setMaxMultipole       )
+    
+    .def_readwrite("allocERI", &AOIntegrals::allocERI           )
+    .def_readwrite("doDF"    , &AOIntegrals::doDF               )
   ;
 
   def("readInput",       ChronusQ::Wrapper_readInput);

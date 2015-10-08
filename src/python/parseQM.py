@@ -3,7 +3,7 @@ import os,sys
 #sys.path.append('/home/dbwy/git_repo/chronusq/src/python')
 import libpythonapi as chronusQ
 from parseBasis import parseBasis
-#from standardJobs import *
+from standardJobs import *
 
 def handleReference(workers,ref):
   mult = workers["CQMolecule"].multip()
@@ -43,12 +43,12 @@ def parseQM(workers,settings):
   except KeyError:
     print 'No Basis Set keyword found'
 
-  # Space filler to pasify error 
-  workers["CQSingleSlaterDouble"].communicate(
-    workers["CQMolecule"], workers["CQBasisSet"], workers["CQAOIntegrals"],
-    workers["CQFileIO"], workers["CQControls"]
-  )
-  workers["CQSingleSlaterDouble"].initMeta()
-  workers["CQSingleSlaterDouble"].genMethString()
-  workers["CQSingleSlaterDouble"].alloc()
-  
+#  # Space filler to pasify error 
+#  workers["CQSingleSlaterDouble"].communicate(
+#    workers["CQMolecule"], workers["CQBasisSet"], workers["CQAOIntegrals"],
+#    workers["CQFileIO"], workers["CQControls"]
+#  )
+#  workers["CQSingleSlaterDouble"].initMeta()
+#  workers["CQSingleSlaterDouble"].genMethString()
+#  workers["CQSingleSlaterDouble"].alloc()
+  runSCF(workers)  
