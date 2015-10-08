@@ -100,7 +100,8 @@ public:
   void readSMP(int &);
   void readPSCF(std::fstream &,std::fstream &);
   void readDebug(std::string);
-  void printSettings(std::fstream &);
+  void printSettings(std::ostream &out=cout);
+//inline void printSettings(){this->printSettings(cout);};
 };
 } // namespace ChronusQ
 #endif

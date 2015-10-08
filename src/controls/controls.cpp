@@ -121,7 +121,7 @@ void Controls::readDebug(std::string str){
   }
 }
 
-void Controls::printSettings(fstream &out){
+void Controls::printSettings(ostream &out){
 //out << bannerTop << endl;
   out << endl << "ChronusQ Control Settings:" << endl << bannerMid << endl;
 

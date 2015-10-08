@@ -1,1 +1,1 @@
-add_library(memory memory.cpp)
+add_library(memory SHARED memory.cpp)

@@ -75,7 +75,6 @@ class SingleSlater {
   std::unique_ptr<RealMatrix>  quadpole_; ///< Electric Quadrupole Moment
   std::unique_ptr<RealMatrix>  tracelessQuadpole_; ///< Traceless Electric Quadrupole Moment
   std::unique_ptr<RealTensor3d>  octpole_; ///< Electric Octupole Moment
-  std::unique_ptr<std::array<double,3>> elecField_;
   BasisSet *    basisset_;               ///< Basis Set
   Molecule *    molecule_;               ///< Molecular specificiations
   FileIO *      fileio_;                 ///< Access to output file
@@ -86,6 +85,7 @@ class SingleSlater {
   std::string SCFTypeShort_;             ///< String containing SCF Type (R/C) (R/U/G/CU)
   std::string algebraicField_;           ///< String Real/Complex/(Quaternion)
   std::string algebraicFieldShort_;      ///< String Real/Complex/(Quaternion)
+  std::array<double,3> elecField_;
 
   int lenX_;
   int lenXp_;
@@ -134,10 +134,52 @@ class SingleSlater {
   double denTol_;
   double eneTol_;
   int maxSCFIter_;
+  int maxMultipole_;
+
+  void allocOp();
+  void allocDFT();
+  void allocMultipole();
+
+  inline void checkWorkers(){
+    if(this->fileio_  == NULL) 
+      CErr("Fatal: Must initialize SingleSlater with FileIO Object");
+    if(this->basisset_ == NULL) 
+      CErr("Fatal: Must initialize SingleSlater with BasisSet Object",
+           this->fileio_->out);
+    if(this->molecule_ == NULL) 
+      CErr("Fatal: Must initialize SingleSlater with Molecule Object",
+           this->fileio_->out);
+    if(this->controls_ == NULL) 
+      CErr("Fatal: Must initialize SingleSlater with Controls Object",
+           this->fileio_->out);
+    if(this->aointegrals_== NULL)
+      CErr("Fatal: Must initialize SingleSlater with AOIntegrals Object",
+           this->fileio_->out);
+    
+  }
+
+  inline void checkMeta(){
+    this->checkWorkers();
+    if(this->nBasis_ == 0 || this->nShell_ == 0)
+      CErr(
+        "Fatal: SingleSlater Object Initialized with NBasis = 0 or NShell = 0",
+        this->fileio_->out);
+
+    if((this->molecule_->nTotalE() % 2 == 0 && this->multip_ % 2 == 0) ||
+       (this->molecule_->nTotalE() % 2 != 0 && this->multip_ % 2 != 0))
+      CErr(std::string("Fatal: The specified multiplicity is impossible within")
+           +std::string(" the number of electrons given"),this->fileio_->out);
+
+    // This is often called before the method is set
+//  if(this->Ref_ == _INVALID) 
+//    CErr("Fatal: SingleSlater reference not set!",this->fileio_->out);
+  }
+
 
 public:
  
-  enum{
+  enum REFERENCE {
+    _INVALID,
     RHF,
     UHF,
     CUHF,
@@ -154,6 +196,8 @@ public:
   bool  havePT;      ///< Computed Perturbation Tensor?
   bool  isClosedShell;
   bool  isConverged;
+  bool  isHF;
+  bool  isDFT;
 
   double   energyOneE; ///< One-bodied operator tensors traced with Density
   double   energyTwoE; ///< Two-bodied operator tensors traced with Density
@@ -161,28 +205,129 @@ public:
   double   totalEnergy; ///< Sum of all energetic contributions
 
   // constructor & destructor
-  SingleSlater(){;};
+  SingleSlater(){
+    // Zero out integers to be set
+    this->nBasis_ = 0;
+    this->nShell_ = 0;
+    this->nTT_    = 0;
+    this->nAE_    = 0;
+    this->nBE_    = 0;
+    this->nOccA_  = 0;
+    this->nOccB_  = 0;
+    this->nVirA_  = 0;
+    this->nVirB_  = 0;
+    this->multip_ = 0;
+
+    // Initialize Smart Pointers
+    this->densityA_          = nullptr;   
+    this->densityB_          = nullptr;   
+    this->fockA_             = nullptr;      
+    this->fockB_             = nullptr;      
+    this->coulombA_          = nullptr;   
+    this->coulombB_          = nullptr;   
+    this->exchangeA_         = nullptr;  
+    this->exchangeB_         = nullptr;  
+    this->moA_               = nullptr;        
+    this->moB_               = nullptr;        
+    this->epsA_              = nullptr;    
+    this->epsB_              = nullptr;    
+    this->PTA_               = nullptr;        
+    this->PTB_               = nullptr;        
+    this->vXCA_              = nullptr;       
+    this->vXCB_              = nullptr;       
+    this->dipole_            = nullptr;  
+    this->quadpole_          = nullptr;
+    this->tracelessQuadpole_ = nullptr; 
+    this->octpole_           = nullptr;
+
+    // Initialize Raw Pointers
+    this->R2Index_     = NULL;
+    this->basisset_    = NULL;               
+    this->molecule_    = NULL;               
+    this->fileio_      = NULL;                 
+    this->controls_    = NULL;               
+    this->aointegrals_ = NULL;            
+
+    // Initialize Booleans
+    this->isConverged   = false;
+    this->haveCoulomb   = false;
+    this->haveExchange  = false;
+    this->haveDensity   = false;
+    this->haveMO        = false;
+    this->havePT        = false;
+    this->isDFT         = false;
+    this->isClosedShell = false;
+
+    this->isHF         = true;
+
+    // Standard Values
+    this->Ref_         = _INVALID;
+    this->denTol_      = 1e-10;
+    this->eneTol_      = 1e-12;
+    this->maxSCFIter_  = 128;
+    this->nTCS_        = 1;
+    this->maxMultipole_ = 3;
+    this->elecField_   = {0.0,0.0,0.0};
+
+  };
   ~SingleSlater() {
   //if(this->SCF_SCR != NULL) delete [] this->SCF_SCR;
   };
 
   template<typename U>
   SingleSlater(SingleSlater<U> *); ///< Copy Constructor
+
   // pseudo-constructor
   void iniSingleSlater(Molecule *,BasisSet *,AOIntegrals *,FileIO *,Controls *);
+
+  // Link up to all of the other worker classes
+  inline void communicate(Molecule &mol, BasisSet&basis, AOIntegrals &aoints, 
+    FileIO &fileio, Controls &controls){
+
+    this->molecule_    = &mol;
+    this->basisset_    = &basis;
+    this->fileio_      = &fileio;
+    this->controls_    = &controls;
+    this->aointegrals_ = &aoints;
+  }
+
+  // Initialize Meta data from other worker classes
+  inline void initMeta(){
+    
+    this->checkWorkers();
+
+    this->nBasis_      = this->basisset_->nBasis();
+    this->nTT_         = this->nBasis_ * (this->nBasis_ + 1) / 2;
+    this->multip_      = this->molecule_->multip();
+    this->nShell_      = this->basisset_->nShell();
+    this->energyNuclei = this->molecule_->energyNuclei();
+
+    int nTotalE  = this->molecule_->nTotalE();
+    int nSingleE = this->multip_ - 1;
+    this->nOccB_ = (nTotalE - nSingleE)/2;
+    this->nVirB_ = this->nBasis_ - this->nOccB_;
+    this->nOccA_ = this->nOccB_ + nSingleE;
+    this->nVirA_ = this->nBasis_ - this->nOccA_;
+    this->nAE_   = this->nOccA_;
+    this->nBE_   = this->nOccB_;
+  }
+  void alloc();
+
   //set private data
   inline void setNBasis(int nBasis) { this->nBasis_ = nBasis;};
   inline void setNAE(int nAE)    { this->nAE_ = nAE;};
   inline void setNBE(int nBE)    { this->nBE_ = nBE;};
   inline void setRef(int Ref)    { this->Ref_ = Ref;};
   inline void setField(double x, double y, double z){
-    (*this->elecField_)[0] = x;
-    (*this->elecField_)[1] = y;
-    (*this->elecField_)[2] = z;
+    this->elecField_[0] = x;
+    this->elecField_[1] = y;
+    this->elecField_[2] = z;
   }
   inline void setField(std::array<double,3> field){
-    (*this->elecField_) = field;
+    this->elecField_ = field;
   }
+  inline void setNTCS(int i){ this->nTCS_ = i;};
+  inline void setMaxMultipole(int i){ this->maxMultipole_ = i;};
 
   // access to private data
   inline int nBasis() { return this->nBasis_;};
@@ -199,7 +344,7 @@ public:
   inline int multip()  { return this->multip_;};
   inline int nOVA()    { return nOccA_*nVirA_;};
   inline int nOVB()    { return nOccB_*nVirB_;};
-  inline std::array<double,3> elecField(){ return (*this->elecField_);  };
+  inline std::array<double,3> elecField(){ return this->elecField_;  };
   inline TMatrix* densityA() { return this->densityA_.get();};
   inline TMatrix* densityB() { return this->densityB_.get();};
   inline TMatrix* fockA()    { return this->fockA_.get();};
@@ -258,6 +403,32 @@ public:
   void printPT();
   void printFock();
   void getAlgebraicField();
+  
+  inline void genMethString(){
+    if(this->Ref_ == _INVALID) 
+      CErr("Fatal: SingleSlater reference not set!",this->fileio_->out);
+
+    this->getAlgebraicField(); 
+    this->SCFType_      = this->algebraicField_      + " ";
+    this->SCFTypeShort_ = this->algebraicFieldShort_ + "-";
+    if(this->Ref_ == RHF) {
+      this->SCFType_      += "Resricted Hartree-Fock"; 
+      this->SCFTypeShort_ += "RHF";
+    } else if(this->Ref_ == UHF) {
+      this->SCFType_      += "Unresricted Hartree-Fock"; 
+      this->SCFTypeShort_ += "UHF";
+    } else if(this->Ref_ == CUHF) {
+      this->SCFType_      += "Constrained Unresricted Hartree-Fock"; 
+      this->SCFTypeShort_ += "CUHF";
+    } else if(this->Ref_ == TCS) {
+      this->SCFType_      += "Generalized Hartree-Fock"; 
+      this->SCFTypeShort_ += "GHF";
+    }
+  }
+
+  // Python API
+  void Wrapper_iniSingleSlater(Molecule&,BasisSet&,AOIntegrals&,FileIO&,
+    Controls&); 
 
   /*************************/
   /* MPI Related Routines  */

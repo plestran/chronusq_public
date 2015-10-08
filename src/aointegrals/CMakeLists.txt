@@ -1,4 +1,4 @@
-add_library(aointegrals aointegrals.cpp aointegrals_builders.cpp
+add_library(aointegrals SHARED aointegrals.cpp aointegrals_builders.cpp
 aointegrals_onee.cpp aointegrals_twoe.cpp aointegrals_complex_contract.cpp
 aointegrals_real_contract_uniquegen.cpp
 aointegrals_complex_contract_uniquegen.cpp

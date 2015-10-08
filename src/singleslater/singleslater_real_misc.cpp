@@ -220,17 +220,17 @@ void SingleSlater<double>::computeEnergy(){
 
   // Add in the electric field component if they are non-zero
   std::array<double,3> null{{0,0,0}};
-  if((*this->elecField_) != null){
+  if(this->elecField_ != null){
     int NB = this->nTCS_*this->nBasis_;
     int NBSq = NB*NB;
     int iBuf = 0;
     for(auto iXYZ = 0; iXYZ < 3; iXYZ++){
       ConstRealMap mu(&this->aointegrals_->elecDipole_->storage()[iBuf],NB,NB);
       this->energyOneE += 
-        this->elecField_->at(iXYZ) * mu.frobInner(this->densityA_->conjugate());
+        this->elecField_[iXYZ] * mu.frobInner(this->densityA_->conjugate());
       if(!this->isClosedShell && this->Ref_ != TCS)
       this->energyOneE += 
-        this->elecField_->at(iXYZ) * mu.frobInner(this->densityB_->conjugate());
+        this->elecField_[iXYZ] * mu.frobInner(this->densityB_->conjugate());
       iBuf += NBSq;
     }
   }

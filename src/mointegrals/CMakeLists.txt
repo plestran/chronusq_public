@@ -1,1 +1,1 @@
-add_library(mointegrals mointegrals_double.cpp mointegrals_complex.cpp)
+add_library(mointegrals SHARED mointegrals_double.cpp mointegrals_complex.cpp)
