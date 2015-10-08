@@ -258,6 +258,7 @@ public:
   }
 
   inline void initMeta(){
+    this->checkWorkers();
     this->nBasis_ = this->basisSet_->nBasis();
     auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
     this->nTT_    = NTCSxNBASIS * (NTCSxNBASIS+1) / 2;

@@ -78,16 +78,24 @@ static double factTLarge[21] = {
 //---------------------
 void AOIntegrals::iniAOIntegrals(Molecule * molecule, BasisSet * basisset, 
                                  FileIO * fileio, Controls * controls,BasisSet * DFbasisSet){
+/*
   this->molecule_ = molecule;
   this->basisSet_ = basisset;
   this->DFbasisSet_ = DFbasisSet;
   this->fileio_   = fileio;
   this->controls_ = controls;
+*/
+  this->communicate(*molecule,*basisset,*fileio,*controls);
+
+/*
   this->nBasis_   = basisset->nBasis();
   this->nTCS_     = 1;
   if(controls->doTCS) this->nTCS_ = 2;
   this->nTT_      = this->nTCS_*this->nBasis_*(this->nTCS_*this->nBasis_+1)/2;
+*/
+  this->initMeta();
 
+/*
 #ifndef USE_LIBINT // We don't need to allocate these if we're using Libint
   try {
     this->twoEC_ = std::unique_ptr<RealMatrix>(new RealMatrix(this->nTT_,this->nTT_)); // Raffenetti Two Electron Coulomb AOIntegrals
@@ -135,12 +143,20 @@ void AOIntegrals::iniAOIntegrals(Molecule * molecule, BasisSet * basisset,
   pairConstants_ = std::unique_ptr<PairConstants>(new PairConstants);
   molecularConstants_ = std::unique_ptr<MolecularConstants>(new MolecularConstants);
   quartetConstants_ = std::unique_ptr<QuartetConstants>(new QuartetConstants);
+*/
+  
+  if(controls->doTCS) this->nTCS_ = 2;
+  this->allocERI = this->controls_->buildn4eri;
+  this->doDF     = this->controls_->doDF;
+  this->alloc();
 
+/*
   this->haveAOTwoE = false;
   this->haveAOOneE = false;
   this->haveSchwartz = false;
   this->haveRIS = false;
   this->haveRII = false;
+*/
 /* This whole block leaks memory like a siv (~ 8MB leaked for test 4!)
   int i,j,ij;
   this->R2Index_ = new int*[this->nBasis_];
