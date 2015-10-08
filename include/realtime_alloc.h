@@ -58,33 +58,99 @@ void RealTime<T>::alloc(){
                             new SingleSlater<dcomplex>(
                               this->groundState_));
 
-  // FIXME: Allocate only what you need to
-  // FIXME: Add try/catch statements to check if memory couldn't be allocated
   auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
-  this->oTrans1_ = 
-    std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
-  this->oTrans2_ = 
-    std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
-  this->POA_  	 = 
-    std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
-  this->POAsav_  = 
-    std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
-  this->POB_  	 = 
-    std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
-  this->POBsav_  = 
-    std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
-  this->FOA_ 	 = 
-    std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
-  this->FOB_ 	 = 
-    std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
-  this->initMOA_ = 
-    std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
-  this->initMOB_ = 
-    std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
-  this->uTransA_ = 
-    std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
-  this->uTransB_ = 
-    std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
-  this->scratch_ = 
-    std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+  try {
+    this->oTrans1_ = 
+      std::unique_ptr<ComplexMatrix>(
+        new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+  } catch(...) {
+    CErr(std::current_exception(),"");
+  }
+  try {
+    this->oTrans2_ = 
+      std::unique_ptr<ComplexMatrix>(
+        new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+  } catch(...) {
+    CErr(std::current_exception(),"");
+  }
+  try {
+    this->POA_  	 = 
+      std::unique_ptr<ComplexMatrix>(
+        new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+  } catch(...) {
+    CErr(std::current_exception(),"");
+  }
+  try {
+    this->POAsav_  = 
+      std::unique_ptr<ComplexMatrix>(
+        new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+  } catch(...) {
+    CErr(std::current_exception(),"");
+  }
+  try {
+    this->FOA_ 	 = 
+      std::unique_ptr<ComplexMatrix>(
+        new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+  } catch(...) {
+    CErr(std::current_exception(),"");
+  }
+  try {
+    this->initMOA_ = 
+      std::unique_ptr<ComplexMatrix>(
+        new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+  } catch(...) {
+    CErr(std::current_exception(),"");
+  }
+  try {
+    this->uTransA_ = 
+      std::unique_ptr<ComplexMatrix>(
+        new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+  } catch(...) {
+    CErr(std::current_exception(),"");
+  }
+  try {
+    this->scratch_ = 
+      std::unique_ptr<ComplexMatrix>(
+        new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+  } catch(...) {
+    CErr(std::current_exception(),"");
+  }
+
+  if(!this->isClosedShell_ && this->Ref_ != SingleSlater<T>::TCS){
+    try {
+      this->POB_  	 = 
+        std::unique_ptr<ComplexMatrix>(
+          new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+    } catch(...) {
+      CErr(std::current_exception(),"");
+    }
+    try {
+      this->POBsav_  = 
+        std::unique_ptr<ComplexMatrix>(
+          new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+    } catch(...) {
+      CErr(std::current_exception(),"");
+    }
+    try {
+      this->FOB_ 	 = 
+        std::unique_ptr<ComplexMatrix>(
+          new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+    } catch(...) {
+      CErr(std::current_exception(),"");
+    }
+    try {
+      this->initMOB_ = 
+        std::unique_ptr<ComplexMatrix>(
+          new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+    } catch(...) {
+      CErr(std::current_exception(),"");
+    }
+    try {
+      this->uTransB_ = 
+        std::unique_ptr<ComplexMatrix>(
+          new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+    } catch(...) {
+      CErr(std::current_exception(),"");
+    }
+  }
 }

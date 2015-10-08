@@ -66,6 +66,7 @@ class RealTime {
 
   std::array<double,3> EDField_;
 
+  // FIXME: Need documentation for what these things actually are!
   std::unique_ptr<ComplexMatrix>  oTrans1_;
   std::unique_ptr<ComplexMatrix>  oTrans2_;
 //  std::unique_ptr<ComplexMatrix>  PA_;
