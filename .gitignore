@@ -29,6 +29,5 @@ fort.7
 tmp
 *~
 *.out
-*.txt
 chronusQ
 Test/UNIT/new-tests

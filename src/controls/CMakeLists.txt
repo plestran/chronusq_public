@@ -1,1 +1,1 @@
-add_library(controls controls.cpp)
+add_library(controls SHARED controls.cpp)

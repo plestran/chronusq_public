@@ -1,1 +1,1 @@
-add_library(tools tools.cpp)
+add_library(tools SHARED tools.cpp)
