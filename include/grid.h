@@ -23,18 +23,12 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
-#include <global.h>
-#include <basisset.h>
-#include <molecule.h>
-#include <singleslater.h>
-#include <fileio.h>
-
 #ifndef INCLUDED_GRID
 #define INCLUDED_GRID
+#include <global.h>
 namespace ChronusQ {
 
 // Classes
-
 class Grid {
    protected:
       int                            nPts_;  ///< number of grid points       
@@ -74,7 +68,7 @@ class OneDGrid : public Grid {
          delete [] this->gridPts_;
          }
          delete [] this->weights_;
-       cout << "Deleting" <<endl;
+//       cout << "Deleting" <<endl;
        };
 // access to protected data
        inline double * gridPts(){ return this->gridPts_;};
@@ -91,88 +85,58 @@ class TwoDGrid : public Grid {
       protected:
             OneDGrid * Gr_;        ///< pointer to Radial OneD grid
             OneDGrid * Gs_;        ///< pointer to Angular OneD grid
-            BasisSet *  basisSet_; ///< Smart pointer to primary basis set
-            Molecule * 	molecule_; ///< Smart pointer to molecule specification
-            FileIO *    fileio_;   ///< Smart pointer to fileIO
-            AOIntegrals * aointegrals_;  ///< Molecular Integrals over GTOs (AO basis)
-            SingleSlater<double> *  singleSlater_; ///< Smart pointer to SingleSlater
             double *  GridCarX_;  ///<  Cartesian X component of Grid points
             double *  GridCarY_;  ///<  Cartesian Y component of Grid points
             double *  GridCarZ_;  ///<  Cartesian Z component of Grid points
             double   *   weightsGrid_; ///< weights
-/*            double **gEval_;
-////      fEval = new double*[Gr_->npts()*Gs_->npts()];
-////      double foxy(cartGP pt, cartGP O,double a1, double a2, double a3, double d1, double d2, double d3, double lx, double ly, double lz); 
-////      double   ftest(double,double,double);
-//            int * Gsnpts_;
-*/
       public:
 //      Constructor
-      TwoDGrid(){;};
-//        TwoDGrid(FileIO * fileio,Molecule * molecule,BasisSet * basisset, SingleSlater<double> * singleSlater,OneDGrid *Gr, OneDGrid *Gs){
-//        TwoDGrid{
+        TwoDGrid(
+          int npts = 0,OneDGrid *Gr = NULL, OneDGrid *Gs = NULL):
+          Grid(npts){
 //      Pointers
-/*
-////        this->gEval_  = new double *[Gr_->npts()*Gs_->npts()];
-//        inline double * getfEval(int i,int j, int width){ return this->fEval_[i*width +j];};
-//        this->basisSet_ = basisset;
-//        BasisSet *  basisSet_; ///< Smart pointer to primary basis set
-//        this->fEval =  new double*[Gr_->npts()*Gs_->npts()];
-*/
-//          };
-
+          this->Gr_ =  Gr;
+          this->Gs_ =  Gs;
+          this->GridCarX_     = new double [npts];    ///< x component
+          this->GridCarY_     = new double [npts]; 
+          this->GridCarZ_     = new double [npts]; 
+          this->weightsGrid_  = new double [npts];
+          };
 //    Function Declaration //
-//    RealMatrix * integrateO();
-      RealMatrix * integrateAtoms();
-      double  integrateDensity();
-      void    BuildVxc();
-      double  rhor(cartGP ptCar);
+//    Grid ones 
       double integrate();
-      double * Buffintegrate(double * Sum,double * Buff,int n1, int n2, double fact);
+      void   printGrid();
+      void   genGrid();
+      void   centerGrid (double cx, double cy, double cz);
+      void   transformPts();
+//    TwdDgrid ones
       double * BuildDensity(double * Sum,double * Buff,int n1, int n2);
-      void printGrid();
-      void genGrid();
-      void buildGrid(OneDGrid *Gr, OneDGrid *Gs);
-      void iniTwoDGrid(FileIO * fileio,Molecule * molecule,BasisSet * basisset, AOIntegrals * aointegrals, SingleSlater<double> * singleSlater,int Ngridr, int NLeb);
-      void transformPts();
-      double BeckeW(cartGP GridPt, int IAtm);
-      double NormBeckeW(cartGP GridPt);
+      void iniTwoDGrid(int Ngridr, int NLeb);
       double voronoii(double mu);
       double step_fun(double mu);
       inline double * weightsGrid(){ return this->weightsGrid_;};
       inline double getweightsGrid(int i){ return this->weightsGrid_[i];};
       inline sph3GP gridPt(int i, int j){
-         sph3GP x(bg::get<0>(Gs_->grid2GPts(j)),bg::get<1>(Gs_->grid2GPts(j)),Gr_->gridPts(i));
+        sph3GP x(bg::get<0>(Gs_->grid2GPts(j)),bg::get<1>(Gs_->grid2GPts(j)),Gr_->gridPts(i));
         return x;
       };
       inline cartGP gridPtCart(int ipts){
-         cartGP pt ( this->GridCarX_[ipts],this->GridCarY_[ipts],this->GridCarZ_[ipts]);
+        cartGP pt ( this->GridCarX_[ipts],this->GridCarY_[ipts],this->GridCarZ_[ipts]);
         return pt;
       };
       inline void SetgridPtCart(int ipts, double x, double y, double z){
-         this->GridCarX_[ipts] = x;
-         this->GridCarY_[ipts] = y;
-         this->GridCarZ_[ipts] = z;
-//    inline double * weightsAtom(){ return this->weightsAtom_;};
-//    inline double   getweightsAtom(int i){ return this->weightsAtom_[i];};
-//    inline RealMatrix* weightsAtom() {return this->weightsAtom_.get();}
-//    double  * ftestVal(cartGP *pt);
+        this->GridCarX_[ipts] = x;
+        this->GridCarY_[ipts] = y;
+        this->GridCarZ_[ipts] = z;
       };
 //    Deconstructors //
       ~TwoDGrid(){
-      delete [] this->weightsGrid_;
-//    cout << "Deliting weightsGrid" <<endl; 
-      delete [] this->GridCarX_;
-//    cout << "Deliting GridCarX"<<endl; 
-      delete [] this->GridCarY_;
-//    cout << "Deliting GridCarY"<<endl; 
-      delete [] this->GridCarZ_;
-//    cout << "Deliting GridCarZ"<<endl; 
-//    cout << "Deliting TWOD GRID OK "<<endl; 
+        delete [] this->weightsGrid_;
+        delete [] this->GridCarX_;
+        delete [] this->GridCarY_;
+        delete [] this->GridCarZ_;
      };
-
 }; //   Class TwoDGrid
-
 
 class LebedevGrid : public OneDGrid {
     public:
