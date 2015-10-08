@@ -40,7 +40,7 @@ double SingleSlater<T>::formBeckeW(cartGP gridPt, int iAtm){
        ri.set<1>((*this->molecule_->cart())(1,iAtm) );
        ri.set<2>((*this->molecule_->cart())(2,iAtm) );
        for(auto jAtm = 0; jAtm < nAtom; jAtm++){
-         if (jAtm != iAtm){
+         if(jAtm != iAtm){
            muij = 0.0;
 //       Vector rj (Atoms (j.ne.i) position)
            rj.set<0>((*this->molecule_->cart())(0,jAtm));
@@ -59,7 +59,7 @@ double SingleSlater<T>::formBeckeW(cartGP gridPt, int iAtm){
 template<typename T>
 double SingleSlater<T>::normBeckeW(cartGP gridPt){
 //     Normalization of Becke Weights
-       int nAtom = this->molecule_->nAtoms();
+       int   nAtom = this->molecule_->nAtoms();
        double norm = 0.0;
        for(auto iAtm = 0; iAtm < nAtom; iAtm++){
          norm += this->formBeckeW(gridPt,iAtm);
@@ -70,17 +70,14 @@ double SingleSlater<T>::normBeckeW(cartGP gridPt){
 template<typename T>
 void SingleSlater<T>::buildVxc(cartGP gridPt, double weight){
 //  Build the Vxc therm at each Grid Points  
-   double Cx = -(3.0/4.0)*(std::pow((3.0/math.pi),(1.0/3.0)));   //TF LDA Prefactor
-   double val;
    double *pointProd; 
    double rhor;
    std::unique_ptr<RealMatrix>  overlapR_;        ///< Overlap at grid point
    overlapR_ = std::unique_ptr<RealMatrix>(
      new RealMatrix(this->nBasis_,this->nBasis_));
    rhor = 0.0;
-//   Evaluate the density at each grid points (rhor)
-//   Loops over shells
    overlapR_->setZero();
+// Loops over shells
    for(auto s1=0l, s12=0l; s1 < this->basisset_->nShell(); s1++){
       int bf1_s = this->basisset_->mapSh2Bf(s1);
       int n1    = this->basisset_->shells(s1).size();
@@ -98,6 +95,6 @@ void SingleSlater<T>::buildVxc(cartGP gridPt, double weight){
      }
      (*overlapR_) = overlapR_->selfadjointView<Lower>();;
      rhor = overlapR_->frobInner(this->densityA()->conjugate());
-//     Slater LDA        
+//   Slater LDA (not yet ready. completated outside)       
      (*this->vXCA()) += weight*(*overlapR_)*(std::pow(rhor,(1.0/3.0)));
 };

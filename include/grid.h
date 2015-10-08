@@ -29,10 +29,7 @@
 
 namespace ChronusQ {
 
-//  template<typename T>
-//  typedef Eigen::Matrix<T,Dynamic,Dynamic,RowMajor> TMatrix;
 // Classes
-
 class Grid {
    protected:
       int                            nPts_;  ///< number of grid points       
@@ -72,7 +69,7 @@ class OneDGrid : public Grid {
          delete [] this->gridPts_;
          }
          delete [] this->weights_;
-       cout << "Deleting" <<endl;
+//       cout << "Deleting" <<endl;
        };
 // access to protected data
        inline double * gridPts(){ return this->gridPts_;};
@@ -95,7 +92,6 @@ class TwoDGrid : public Grid {
             double   *   weightsGrid_; ///< weights
       public:
 //      Constructor
-//      TwoDGrid(){;};
         TwoDGrid(
           int npts = 0,OneDGrid *Gr = NULL, OneDGrid *Gs = NULL):
           Grid(npts){
@@ -133,18 +129,6 @@ class TwoDGrid : public Grid {
         this->GridCarX_[ipts] = x;
         this->GridCarY_[ipts] = y;
         this->GridCarZ_[ipts] = z;
-//      RealMatrix * integrateO();
-//      RealMatrix * integrateAtoms();
-//      void genGrid();
-//      void buildGrid(OneDGrid *Gr, OneDGrid *Gs);
-//      double BeckeW(cartGP GridPt, int IAtm);
-//      double NormBeckeW(cartGP GridPt);
-//      int    getnang(){return this->nang;};
-//      inline double * weightsAtom(){ return this->weightsAtom_;};
-//      inline double   getweightsAtom(int i){ return this->weightsAtom_[i];};
-//      inline RealMatrix* weightsAtom() {return this->weightsAtom_.get();}
-//       double  * ftestVal(cartGP *pt);
-//      double * Buffintegrate(double * Sum,double * Buff,int n1, int n2, double fact);
       };
 //    Deconstructors //
       ~TwoDGrid(){

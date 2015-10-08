@@ -31,46 +31,49 @@ namespace ChronusQ {
 
 template<>
 void SingleSlater<double>::formVXC(){
-//  Right now is just a place holder (we print the overlap, the actual
-//  integration is perfomed in the grid class. see scr/grid/grid.cpp
-//  Variable Definitions:
     int nAtom    = this->molecule_->nAtoms();    // Number of Atoms
     int nRad     = 100;                          // Number of Radial grid points for each center
     int nAng     = 194;                          // Number of Angular grid points for each center (only certain values are allowed - see grid.h)
     int npts     = nRad*nAng;                    // Total Number of grid point for each center
-    int ipts     = 0;                            
     double weight= 0.0;                            
     double Cx = -(3.0/4.0)*(std::pow((3.0/math.pi),(1.0/3.0)));    //TF LDA Prefactor
     double val = 4.0*math.pi*Cx;
-//  Generating grids (Raw grid, it has to be centered and integrated over each center
-    GaussChebyshev1stGridInf Rad(nRad,0.0,1.0);
-    LebedevGrid GridLeb(nAng);
-    Rad.genGrid();
+//  Generating grids (Raw grid, it has to be centered and integrated over each center and centered over each atom)
+    GaussChebyshev1stGridInf Rad(nRad,0.0,1.0);   // Radial Grid
+    LebedevGrid GridLeb(nAng);                    // Angular Grid
+    Rad.genGrid();                               
     GridLeb.genGrid();
-    TwoDGrid Raw3Dg(npts,&Rad,&GridLeb);
-    this->vXCA()->setZero(); 
-    cout << "Erased Vxc term " << endl;
+    TwoDGrid Raw3Dg(npts,&Rad,&GridLeb);          // Final Raw (not centered) 3D grid (Radial times Angular grid)
+    this->vXCA()->setZero();                      // Set to zero every occurence of the SCF
+//    cout << "Erased Vxc term " << endl;
 //  Loop over each centers (Atoms) (I think can be distribuited over different cpus)
     for(int iAtm = 0; iAtm < nAtom; iAtm++){
+      // Center the Grid at iAtom
       Raw3Dg.centerGrid((*this->molecule_->cart())(0,iAtm),(*this->molecule_->cart())(1,iAtm),(*this->molecule_->cart())(2,iAtm));
-     for(int ipts = 0; ipts < npts; ipts++){
+//    Loop over grid points
+      for(int ipts = 0; ipts < npts; ipts++){
+//    Evaluate each Becke fuzzy call weight, normalize it and muliply by the Rwa grid weight at that point
         weight = Raw3Dg.getweightsGrid(ipts)  
                  * (this->formBeckeW((Raw3Dg.gridPtCart(ipts)),iAtm))
                  / (this->normBeckeW(Raw3Dg.gridPtCart(ipts))) ;
+//    Build the Vxc for the ipts grid point (Vxc will be ready at the end of the two loop
         this->buildVxc((Raw3Dg.gridPtCart(ipts)),weight);
-        }
+        } //end loop over Raw grid points
     } // end loop natoms
+//  Finishing the Vxc using the TF factor and the integration prefactor over a solid sphere
     (*this->vXCA()) =  val * (*this->vXCA());
-  double Energy;
-  Energy = (*this->vXCA_).frobInner(this->densityA_->conjugate());
-  std::cout.precision(10);
-  cout << " E_XC = " << Energy <<endl;
-  cout << "Single Slater Numeric : Print" <<endl;
-  cout << (*this->vXCA_)  << endl;
+//  Comment to avoid the printing
+//  double Energy;
+//  Energy = (*this->vXCA_).frobInner(this->densityA_->conjugate());
+//  std::cout.precision(10);
+//  cout << " E_XC = " << Energy <<endl;
+//  cout << "Single Slater Numeric : Print" <<endl;
+//  cout << (*this->vXCA_)  << endl;
 }; //End
 
 template<>
 void SingleSlater<double>::EnVXC(){
+//  Place holder 
   double Energy;
   double resLDA = -11.611162519357;
   Energy = (*this->vXCA_).frobInner(this->densityA_->conjugate());

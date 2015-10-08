@@ -81,7 +81,7 @@ class SingleSlater {
   FileIO *      fileio_;                 ///< Access to output file
   Controls *    controls_;               ///< General ChronusQ flow parameters
   AOIntegrals * aointegrals_;            ///< Molecular Integrals over GTOs (AO basis)
-  TwoDGrid    * twodgrid_   ;            ///< 3D grid (1Rad time 1 Ang) 
+  TwoDGrid    * twodgrid_   ;            ///< 3D grid (1Rad times 1 Ang) 
   int lenX_;
   int lenXp_;
   int lenF_;
@@ -220,9 +220,7 @@ public:
   inline FileIO *      fileio(){return this->fileio_;};
   inline Controls *    controls(){return this->controls_;};
   inline AOIntegrals * aointegrals(){return this->aointegrals_;};
-//AP
   inline TwoDGrid *    twodgrid(){return this->twodgrid_;};
-//
   void formGuess();	        // form the intial guess of MO's (Density)
   void placeAtmDen(std::vector<int>, SingleSlater<double> &);           // Place the atomic densities into total densities for guess
   void scaleDen();              // Scale the unrestricted densities for correct # electrons

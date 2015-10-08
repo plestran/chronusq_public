@@ -51,61 +51,7 @@ namespace ChronusQ{
          return (15.0)*(std::pow(sin(elevation),4.0))/(32.0*math.pi);
          } 
 
-/*/
-  double * TwoDGrid::ftestVal(cartGP *pt){
-  // Test Function to be integrated by Two-dimensional grid
-     sph3GP  ptSPH;
-     double val;
-     double * gEval;   
-     bg::transform(*pt,ptSPH);
-//     val = this->ftest(bg::get<2>(ptSPH),bg::get<1>(ptSPH),bg::get<0>(ptSPH)); 
-     cout << "Test1 " <<endl;
-     val = this->ftest(bg::get<2>(ptSPH),bg::get<1>(ptSPH),bg::get<0>(ptSPH)); 
-//     cout << "Test2 " <<endl;
-//     *gEval = val;
-//     cout << "Test3 " <<endl;
-//     cout << " value " << *gEval << endl;
-     return &val;
-   } 
-
-  double TwoDGrid::ftest(double rad, double elevation, double azimut) {
-//  return std::sin(elevation)*(std::pow(rad,2.0))*(std::exp( -std::pow(rad,2.0)-std::pow((elevation-azimut),2.0)) );
- // return (std::pow(rad,2.0))*(std::exp( -std::pow(rad,2.0)-std::pow((elevation-azimut),2.0)) );
-   double a0=0.9996651;
-   double val;
-//  H 1s
-//   val = rad*(std::exp(-rad/a0))/ ((std::pow(a0,1.5))*(std::sqrt(math.pi)));
-//  H 2p_0
-//     cout << "2p_0 " << endl;
-     val = rad*rad*std::sin(elevation)*(std::exp(-rad/(2.0*a0))) / (8.0*(std::pow(a0,2.5))*(std::sqrt(math.pi)));
-   return val*val;
-//         return std::exp(-(std::pow(rad,2.0)));
-//    return (std::pow(rad,2.0))*(std::exp(-((std::pow(rad,2.0)))));
-}
-
-  double TwoDGrid::foxy(cartGP pt, cartGP O,double a1, double a2, double a3, double d1, double d2, double d3, double lx, double ly, double lz) {
-     double x = bg::get<0>(pt)-bg::get<0>(O);
-     double y = bg::get<1>(pt)-bg::get<1>(O);
-     double z = bg::get<2>(pt)-bg::get<2>(O);
-//     cout << "x "<<x <<" y "<< y << " z " << z <<endl;
-     double fun = 0.0;
-     double rSq;
-     rSq = (x*x + y*y + z*z);
-      fun  += d1*std::exp(-a1*rSq);
-      fun  += d2*std::exp(-a2*rSq);
-      fun  += d3*std::exp(-a3*rSq);
-      fun *= std::pow(x,lx);
-      fun *= std::pow(y,ly);
-      fun *= std::pow(z,lz);
-     return fun*fun*rSq;
-  }
-
-// END TEST FUNCTIONS
-*/
-
-
 ///  ONE GRID GENERAL ///
-
 double OneDGrid::integrate(){
   // Integrate a test function for a one dimensional grid radial part
   // intas2GPt_ is a logical to integrad a 2D angular gris as OneD Grid
@@ -139,17 +85,6 @@ void OneDGrid::printGrid(){
  }
 
 ///  TWO GRID GENERAL ///
-//
-  void TwoDGrid::iniTwoDGrid(int Ngridr, int NLeb){
-    
-    GaussChebyshev1stGridInf Rad(Ngridr,0.0,1.0);
-    LebedevGrid GridLeb(NLeb);
-    Rad.genGrid();
-    GridLeb.genGrid();
-//    TwoDGrid   Raw3Dg((Ngridr*NLeb),&Rad,&GridLeb);
-    cout << "Here" <<endl;
-//    TwoDGrid RawGrid(&Rad,&GridLeb);
-}//End
 
 double * TwoDGrid::BuildDensity(double * Sum,double * Buff,int n1, int n2){
   //  Integration over batches : Density at each point (numerical)
@@ -159,358 +94,7 @@ double * TwoDGrid::BuildDensity(double * Sum,double * Buff,int n1, int n2){
   return Sum;
 } //End
 
-
-/*
-void TwoDGrid::buildGrid(OneDGrid *Gr, OneDGrid *Gs){
-  this->Gr_ =  Gr;
-  this->Gs_ =  Gs;
-  this->GridCarX_ = new double [Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms()]; ;   ///< x component
-  this->GridCarY_ = new double [Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms()]; ;
-  this->GridCarZ_ = new double [Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms()]; ;
-  this->weightsGrid_  = new double [Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms()*this->molecule_->nAtoms()];
-//  this->overlapR_ = std::unique_ptr<RealMatrix>(new RealMatrix(nTCS*nBasis,nTCS*nBasis));
-//  this->tmpVxc_   = std::unique_ptr<RealMatrix>(new RealMatrix(nTCS*nBasis,nTCS*nBasis));
-} // End
-
-double * TwoDGrid::Buffintegrate(double * Sum,double * Buff,int n1, int n2, double fact){
-  //  Integration over batches : Overlap at each point (numerical)
-  ConstRealMap fBuff(Buff,n1,n2); 
-  RealMap Sout(Sum,n1,n2); 
-  Sout += fBuff*fact;  
-  return Sum;
-} //End
-
-double * TwoDGrid::BuildDensity(double * Sum,double * Buff,int n1, int n2){
-  //  Integration over batches : Density at each point (numerical)
-  ConstRealMap fBuff(Buff,n1,n2); 
-  RealMap Sout(Sum,n1,n2); 
-  Sout = fBuff;  
-  return Sum;
-} //End
-*/
-
-/*
-  RealMatrix * TwoDGrid::integrateO(){
-
-  // Integrated Over a TWODGrid (Radial x Angular) the basisProdEval (shells(s1),shells(s2))
-  // function, returning the pointer of the whole (Nbasis,Nbasis) Matrix
-    int    nBase = basisSet_->nBasis();
-    int    Ngridr = Gr_->npts();
-    int    NLeb   = Gs_->npts();
-    double fact;
-    sph3GP ptSPH;
-    cartGP ptCar;
-    RealMatrix *Integral = new RealMatrix(nBase,nBase);  ///< (NBase,Nbase) Integral ove Grid Point
-    std::cout <<" --- Numerical Quadrature ---- " <<std::endl;
-    std::cout << "Number of Radial-grid points      = "<< Ngridr  <<std::endl;
-    std::cout << "Number of Solid Angle-grid points = "<< NLeb  <<std::endl;
-    for(auto s1=0l, s12=0l; s1 < basisSet_->nShell(); s1++){
-      int bf1_s = basisSet_->mapSh2Bf(s1);
-      int n1    = basisSet_->shells(s1).size();
-      for(int s2=0; s2 <= s1; s2++, s12++){
-        int bf2_s   = basisSet_->mapSh2Bf(s2);
-        int n2      = basisSet_->shells(s2).size();
-        auto center = basisSet_->shells(s1).O;
-        double *pointProd; 
-        double *SumInt = new double [n1*n2];
-        double val;
-        RealMap BlockInt(SumInt,n1,n2);
-        BlockInt.setZero();
-        for(int i = 0; i < Ngridr; i++)
-        for(int j = 0; j < NLeb; j++){
-        ptSPH = this->gridPt(i,j);
-        bg::transform(ptSPH,ptCar);
-        ptCar.set<0>(bg::get<0>(ptCar) + center[0]);
-        ptCar.set<1>(bg::get<1>(ptCar) + center[1]);
-        ptCar.set<2>(bg::get<2>(ptCar) + center[2]);
-        fact = (Gs_->weights()[j])*(Gr_->weights()[i])*(std::pow(Gr_->gridPts()[i],2.0));
-        pointProd = basisSet_->basisProdEval(basisSet_->shells(s1),basisSet_->shells(s2),&ptCar);
-        SumInt=this->Buffintegrate(SumInt,pointProd,n1,n2,fact);
-        }
-      Integral->block(bf1_s,bf2_s,n1,n2) = 4*math.pi*BlockInt;
-      delete [] SumInt;
-      }
-    }
-    (*Integral) = Integral->selfadjointView<Lower>(); 
-//    cout << (*Integral)  << endl;
-    return Integral;
- 
-}  //End
-*/
-
-/*
-   RealMatrix * TwoDGrid::integrateAtoms(){
-// Integrated Over a TWODGrid (Radial x Angular) the basisProdEval (shells(s1),shells(s2))
-// function, returning the pointer of the whole (Nbasis,Nbasis) Matrix
-   int    nBase = basisSet_->nBasis();
-   int    Ngridpts = (Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms());
-   cartGP ptCar;
-   RealMatrix *Integral = new RealMatrix(nBase,nBase);  ///< (NBase,Nbase) Integral ove Grid Point
-   std::cout <<" --- Numerical Quadrature to build overlap ---- " <<std::endl;
-   std::cout << "Total Number of grid points = "<< Ngridpts  <<std::endl;
-// Loop Over Shells To build the overlap at each grid point
-   for(auto s1=0l, s12=0l; s1 < basisSet_->nShell(); s1++){
-    int bf1_s = basisSet_->mapSh2Bf(s1);
-    int n1    = basisSet_->shells(s1).size();
-    for(int s2=0; s2 <= s1; s2++, s12++){
-      int bf2_s   = basisSet_->mapSh2Bf(s2);
-      int n2      = basisSet_->shells(s2).size();
-      auto center = basisSet_->shells(s1).O;
-      double *pointProd; 
-      double *SumInt = new double [n1*n2];
-      double val;
-      RealMap BlockInt(SumInt,n1,n2);
-      BlockInt.setZero();
-//    Loop over grid points
-      for(int ipts = 0; ipts < Ngridpts; ipts++){
-        ptCar = this->gridPtCart(ipts);
-        pointProd = basisSet_->basisProdEval(basisSet_->shells(s1),basisSet_->shells(s2),&ptCar);
-        SumInt=this->Buffintegrate(SumInt,pointProd,n1,n2,getweightsGrid(ipts));
-        }
-      Integral->block(bf1_s,bf2_s,n1,n2) = (4.0*math.pi*BlockInt);
-      delete [] SumInt;
-      }
-    }
-    (*Integral) = Integral->selfadjointView<Lower>(); 
-    return Integral;
-}  //End
-*/
-
-
-/*
-double TwoDGrid::integrateDensity(){
-//  Build the density at each Grid Points end 
-//  return the LDA XC 
-   int    nBase = basisSet_->nBasis();
-   int    Ngridpts = (Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms());
-   double sum = 0.0;
-   double Cx = -(3.0/4.0)*(std::pow((3.0/math.pi),(1.0/3.0)));   //TF LDA Prefactor
-   double val;
-   double *pointProd; 
-   double rhor;
-   cartGP ptCar;
-   RealMatrix *OveratR = new RealMatrix(nBase,nBase);  ///< (NBase,Nbase) Integral ove Grid Point
-   std::cout <<" --- Numerical Quadrature for LDA ---- " <<std::endl;
-   std::cout << "Number Radial "<< Gr_->npts() << " Number of Angular " << Gs_->npts() <<std::endl;
-   std::cout << "Total Number of grid points = "<< Ngridpts  <<std::endl;
-// Loop Over Grid Points
-   for(int ipts = 0; ipts < Ngridpts; ipts++){
-     ptCar = this->gridPtCart(ipts);
-     rhor = 0.0;
-//   Evaluate the density at each grid points (rhor)
-//   Loops over shells
-     for(auto s1=0l, s12=0l; s1 < basisSet_->nShell(); s1++){
-        int bf1_s = basisSet_->mapSh2Bf(s1);
-        int n1    = basisSet_->shells(s1).size();
-        for(int s2=0; s2 <= s1; s2++, s12++){
-          int bf2_s   = basisSet_->mapSh2Bf(s2);
-          int n2      = basisSet_->shells(s2).size();
-          auto center = basisSet_->shells(s1).O;
-          double *Buff = new double [n1*n2];
-          RealMap fBuff(Buff,n1,n2);
-          fBuff.setZero();
-          pointProd = basisSet_->basisProdEval(basisSet_->shells(s1),basisSet_->shells(s2),&ptCar);
-          Buff = this->BuildDensity(Buff,pointProd,n1,n2);
-          OveratR->block(bf1_s,bf2_s,n1,n2) = fBuff;
-          }
-       }
-       (*OveratR) = OveratR->selfadjointView<Lower>(); 
-//     Ask David what is better
-//     rhor = ((*OveratR)*(this->singleSlater_->densityA()->conjugate())).trace();
-       rhor = ((*OveratR).frobInner(this->singleSlater_->densityA()->conjugate()));
-//     Grid points weights
-       val = 4.0*math.pi*getweightsGrid(ipts);
-//     Slater LDA        
-       sum  +=  val*(std::pow(rhor,(4.0/3.0)));
-//     Uncomment to get the Number of Electron
-//     sum  +=  val*rhor;
-    }
-    return Cx*sum;
-  
-}  //End
-*/
-
-/*
-void TwoDGrid::BuildVxc2(){
-//  Build the density at each Grid Points end 
-//  return the LDA XC 
-   int    nBase = basisSet_->nBasis();
-   int    Ngridpts = (Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms());
-   double sum = 0.0;
-   double Cx = -(3.0/4.0)*(std::pow((3.0/math.pi),(1.0/3.0)));   //TF LDA Prefactor
-   double val;
-   double *pointProd; 
-   double rhor;
-   cartGP ptCar;
-   std::cout <<" --- Numerical Quadrature for LDA ---- " <<std::endl;
-   std::cout << "Number Radial "<< Gr_->npts() << " Number of Angular " << Gs_->npts() <<std::endl;
-   std::cout << "Total Number of grid points = "<< Ngridpts  <<std::endl;
-// Loop Over Grid Points
-   for(int ipts = 0; ipts < Ngridpts; ipts++){
-     ptCar = this->gridPtCart(ipts);
-     rhor = 0.0;
-//   Evaluate the density at each grid points (rhor)
-//   Loops over shells
-     this->overlapR()->setZero();
-     for(auto s1=0l, s12=0l; s1 < basisSet_->nShell(); s1++){
-        int bf1_s = basisSet_->mapSh2Bf(s1);
-        int n1    = basisSet_->shells(s1).size();
-        for(int s2=0; s2 <= s1; s2++, s12++){
-          int bf2_s   = basisSet_->mapSh2Bf(s2);
-          int n2      = basisSet_->shells(s2).size();
-          auto center = basisSet_->shells(s1).O;
-          double *Buff = new double [n1*n2];
-          RealMap fBuff(Buff,n1,n2);
-          fBuff.setZero();
-          pointProd = basisSet_->basisProdEval(basisSet_->shells(s1),basisSet_->shells(s2),&ptCar);
-          Buff = this->BuildDensity(Buff,pointProd,n1,n2);
-          this->overlapR()->block(bf1_s,bf2_s,n1,n2) = fBuff; 
-          }
-       }
-       (*this->overlapR()) = this->overlapR()->selfadjointView<Lower>();
-//     Ask David what is better
-//     rhor = ((*OveratR)*(this->singleSlater_->densityA()->conjugate())).trace();
-       rhor = ((*this->overlapR()).frobInner(this->singleSlater_->densityA()->conjugate()));
-//     Grid points weights
-//     Slater LDA        
-       (*this->singleSlater_->vXCA()) += getweightsGrid(ipts)*(*this->overlapR())*(std::pow(rhor,(1.0/3.0)));
-//     Uncomment to get the Number of Electron
-    }
-    val = 4.0*math.pi*Cx;
-    (*this->singleSlater_->vXCA()) =  val * (*this->singleSlater_->vXCA()) ;
-
-    return;
-  
-}  //End
-
- RealMatrix * TwoDGrid::formVxc2(){
-//  Build the density at each Grid Points end 
-//  return the LDA XC 
-   int    nBase = basisSet_->nBasis();
-   int    Ngridpts = (Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms());
-   double sum = 0.0;
-   double Cx = -(3.0/4.0)*(std::pow((3.0/math.pi),(1.0/3.0)));   //TF LDA Prefactor
-   double val;
-   double *pointProd; 
-   double rhor;
-   cartGP ptCar;
-   std::cout <<" --- Numerical Quadrature for LDA ---- " <<std::endl;
-   std::cout << "Number Radial "<< Gr_->npts() << " Number of Angular " << Gs_->npts() <<std::endl;
-   std::cout << "Total Number of grid points = "<< Ngridpts  <<std::endl;
-// Loop Over Grid Points
-   for(int ipts = 0; ipts < Ngridpts; ipts++){
-     ptCar = this->gridPtCart(ipts);
-     rhor = 0.0;
-//   Evaluate the density at each grid points (rhor)
-//   Loops over shells
-     this->overlapR()->setZero();
-     for(auto s1=0l, s12=0l; s1 < basisSet_->nShell(); s1++){
-        int bf1_s = basisSet_->mapSh2Bf(s1);
-        int n1    = basisSet_->shells(s1).size();
-        for(int s2=0; s2 <= s1; s2++, s12++){
-          int bf2_s   = basisSet_->mapSh2Bf(s2);
-          int n2      = basisSet_->shells(s2).size();
-          auto center = basisSet_->shells(s1).O;
-          double *Buff = new double [n1*n2];
-          RealMap fBuff(Buff,n1,n2);
-          fBuff.setZero();
-          pointProd = basisSet_->basisProdEval(basisSet_->shells(s1),basisSet_->shells(s2),&ptCar);
-          Buff = this->BuildDensity(Buff,pointProd,n1,n2);
-          this->overlapR()->block(bf1_s,bf2_s,n1,n2) = fBuff; 
-          }
-       }
-       (*this->overlapR()) = this->overlapR()->selfadjointView<Lower>();
-//     Ask David what is better
-//     rhor = ((*OveratR)*(this->singleSlater_->densityA()->conjugate())).trace();
-       rhor = ((*this->overlapR()).frobInner(this->singleSlater_->densityA()->conjugate()));
-//     Grid points weights
-//     Slater LDA        
-       (*this->tmpVxc()) += getweightsGrid(ipts)*(*this->overlapR())*(std::pow(rhor,(1.0/3.0)));
-//     Uncomment to get the Number of Electron
-    }
-    val = 4.0*math.pi*Cx;
-    (*this->tmpVxc()) =  val * (*this->tmpVxc()) ;
-
-    return tmpVxc() ;
-  
-}  //End
-
-void TwoDGrid::BuildVxc(){
-//  Build the density at each Grid Points end 
-//  return the LDA XC 
-   int    Ngridpts = (Gr_->npts()*Gs_->npts()*this->molecule_->nAtoms());
-   double Cx = -(3.0/4.0)*(std::pow((3.0/math.pi),(1.0/3.0)));   //TF LDA Prefactor
-   double *pointProd; 
-   double dens;
-   cartGP ptCar;
-   std::cout <<" --- Numerical Quadrature form Vxc ---- " <<std::endl;
-   std::cout << "Number Radial "<< Gr_->npts() << " Number of Angular " << Gs_->npts() <<std::endl;
-   std::cout << "Total Number of grid points = "<< Ngridpts  <<std::endl;
-   this->singleSlater_->vXCA()->setZero();
-// Loop Over Shells To build the overlap at each grid point
-   for(auto s1=0l, s12=0l; s1 < basisSet_->nShell(); s1++){
-    int bf1_s = basisSet_->mapSh2Bf(s1);
-    int n1    = basisSet_->shells(s1).size();
-    for(int s2=0; s2 <= s1; s2++, s12++){
-      int bf2_s   = basisSet_->mapSh2Bf(s2);
-      int n2      = basisSet_->shells(s2).size();
-      auto center = basisSet_->shells(s1).O;
-      double *pointProd; 
-      double *SumInt = new double [n1*n2];
-      RealMap BlockInt(SumInt,n1,n2);
-      BlockInt.setZero();
-//    Loop over grid points
-      for(int ipts = 0; ipts < Ngridpts; ipts++){
-        ptCar = this->gridPtCart(ipts);
-        dens = rhor(ptCar);
-        dens = (std::pow(dens,(1.0/3.0))) * getweightsGrid(ipts);
-        pointProd = basisSet_->basisProdEval(basisSet_->shells(s1),basisSet_->shells(s2),&ptCar);
-        SumInt=this->Buffintegrate(SumInt,pointProd,n1,n2,dens);
-        }
-      this->singleSlater_->vXCA()->block(bf1_s,bf2_s,n1,n2) = (4.0*math.pi*Cx*BlockInt);
-      delete [] SumInt;
-      }
-    }
-    (*this->singleSlater_->vXCA())  = this->singleSlater_->vXCA()->selfadjointView<Lower>(); 
-    return;
-
-}  //End
-
-double TwoDGrid::rhor(cartGP ptCar){
-//  return the density at each Grid Points. 
-   int    nBase = basisSet_->nBasis();
-   double sum = 0.0;
-   double val;
-   double *pointProd; 
-   double dens = 0.0;
-   RealMatrix *OveratR = new RealMatrix(nBase,nBase);  ///< (NBase,Nbase) Integral ove Grid Point
-//   Evaluate the density at each grid points (dens)
-//   Loops over shells
-     for(auto s1=0l, s12=0l; s1 < basisSet_->nShell(); s1++){
-        int bf1_s = basisSet_->mapSh2Bf(s1);
-        int n1    = basisSet_->shells(s1).size();
-        for(int s2=0; s2 <= s1; s2++, s12++){
-          int bf2_s   = basisSet_->mapSh2Bf(s2);
-          int n2      = basisSet_->shells(s2).size();
-          auto center = basisSet_->shells(s1).O;
-          double *Buff = new double [n1*n2];
-          RealMap fBuff(Buff,n1,n2);
-          fBuff.setZero();
-          pointProd = basisSet_->basisProdEval(basisSet_->shells(s1),basisSet_->shells(s2),&ptCar);
-          Buff = this->BuildDensity(Buff,pointProd,n1,n2);
-          OveratR->block(bf1_s,bf2_s,n1,n2) = fBuff;
-          }
-       }
-       (*OveratR) = OveratR->selfadjointView<Lower>(); 
-       dens = ((*OveratR).frobInner(this->singleSlater_->densityA()->conjugate()));
-//     Grid points weights
-    return dens;
-  
-}  //End
-
-*/
-
-  double TwoDGrid::integrate(){
+double TwoDGrid::integrate(){
 //  OLD
    double sum = 0.0;
    for(int i = 0; i < Gr_->npts(); i++){
@@ -520,38 +104,6 @@ double TwoDGrid::rhor(cartGP ptCar){
     }
     return 4.0*math.pi*sum;
   }
-
-/* OLD
-  double TwoDGrid::integrate(){
-//  auto basisset     	= std::unique_ptr<BasisSet>(new BasisSet());
-  // Integrate a test function for a one dimensional grid radial part
-   double sum;
-   cartGP pt(0.01,0.02,0.03);
-   sph3GP ptSph;
-   bg::transform(pt,ptSph);
-   cout << this->basisSet_->shells(2) << endl;
- //  double *f = basisset->basisEval(2,basisset->shells(2).O,&ptSph);
-     std::cout << "Number of Radial-grid points= "<< Gr_->npts()  <<std::endl;
-     std::cout << "Number of Solid Angle-grid points= "<< Gs_->npts()  <<std::endl;
-     for(int i = 0; i < Gr_->npts(); i++){
-      for(int j = 0; j < Gs_->npts(); j++){
-            
-//          ptSph.set<0>(bg::get<0>(Gs_->grid2GPts()[j])); 
-//          ptSph.set<1>(bg::get<1>(Gs_->grid2GPts()[j])); 
-//          ptSph.set<2>(Gr_->gridPts()[i]); 
-//          cout << bg::get<0>(ptSph)-bg::get<0>(Gs_->grid2GPts()[j]);
-//          cout << bg::get<1>(ptSph)-bg::get<1>(Gs_->grid2GPts()[j]);
-//          cout << bg::get<2>(ptSph)-(Gr_->gridPts()[i]);
-//         double  *val = basisset->basisEval(2,basisset->shells(2).O,&ptSph);
-       for(auto k = 0; k < 3; k++) { 
-//          sum += *(val+k)*(Gs_->weights()[j])*(Gr_->weights()[i]);
-//            cout << *(val+k) <<endl;
-         }
-        }
-      }
-        return 4.0*(math.pi)*sum*(Gr_->norm());
-  }
-*/
 
 void TwoDGrid::transformPts(){
 };
@@ -568,10 +120,8 @@ double TwoDGrid::step_fun( double mu){
        return p;
 };
 
-
 void TwoDGrid::genGrid(){
 };
-
 
 void TwoDGrid::centerGrid(double cx, double cy, double cz){
 //   Given a general 3D grid (r_p,Omega_p), it will
@@ -580,13 +130,8 @@ void TwoDGrid::centerGrid(double cx, double cy, double cz){
 //   adding atom cartian coordinates (cx, cy, cz)
 //   we will have a  3D grid (NRad times N Ang)
 //   all the grid points cartesian components will be collected in the
-//   GridCar_(NtotGrid,3) and the weight will be still raw
+//   GridCar_(NtotGrid,3) and the weight will be still raw.
 //
-//   This routine also will build the final weight for each grip points
-//   by multiplying the actual gridweight (due to the single center integration scheme)
-//   by the Becke (J. Chem. Phys., 88 (4),2457 (1988)) partition scheme for the Atomic
-//   weights (based on Voronoii Cells). The final weights will be storered into 
-//   this->weightsGrid_
 
      sph3GP ptSPH; ///< Temp spherical point to store the 3D Grid point (not yet translated over atoms centers)
      cartGP ptCarGrid; /// Several Temp Cartesian Points to perform the translation, cell wieghts funtion
@@ -601,16 +146,12 @@ void TwoDGrid::centerGrid(double cx, double cy, double cz){
      for(int j = 0; j < nAng; j++){
        ptSPH = this->gridPt(i,j);
        bg::transform(ptSPH,ptCarGrid);
-      ///Loop over NAtoms
 //     Center each 3D over each Atom centers
        Cartx = (bg::get<0>(ptCarGrid) + cx );
        Carty = (bg::get<1>(ptCarGrid) + cy );
        Cartz = (bg::get<2>(ptCarGrid) + cz );
        this->SetgridPtCart(ipts,Cartx, Carty, Cartz);
 //     store all in the GridCar_(NtotGrid,3) thanks to this function
-//     Start to Evaluate WA (over each center/atom)       
-//     Final Weight W_Ang * W_Rad * W_Atom * _ r^2 :
-//     W_Atom = BeckeW/NormBeckeW for each Atom i given a grid poin (ipts) 
        this->weightsGrid_[ipts] = (Gs_->weights()[j])
                                 * (Gr_->weights()[i])
                                 * (std::pow(Gr_->gridPts()[i],2.0));
@@ -618,97 +159,6 @@ void TwoDGrid::centerGrid(double cx, double cy, double cz){
       }
 }; //End
 
-/*
-double TwoDGrid::BeckeW(cartGP GridPt, int iAtm){
-//     Generate Becke Weights according to the partition schems in
-//     (J. Chem. Phys., 88 (4),2457 (1988)) using Voronoii Fuzzi Cells
-//     Note these Weights have to be normailzed (see NormBeckeW) 
-       int nAtom = this->molecule_->nAtoms();
-       double WW = 1.0;
-       double muij;   /// elliptical coordinate (ri -rj / Rij)
-       cartGP rj;  ///< Cartisian position of Atom j
-       cartGP ri;  ///< Cartisian position of Atom i
-       ri.set<0>((*this->molecule_->cart())(0,iAtm) );
-       ri.set<1>((*this->molecule_->cart())(1,iAtm) );
-       ri.set<2>((*this->molecule_->cart())(2,iAtm) );
-       for(auto jAtm = 0; jAtm < nAtom; jAtm++){
-         if (jAtm != iAtm){
-           muij = 0.0;
-//       Vector rj (Atoms (j.ne.i) position)
-           rj.set<0>((*this->molecule_->cart())(0,jAtm));
-           rj.set<1>((*this->molecule_->cart())(1,jAtm));
-           rj.set<2>((*this->molecule_->cart())(2,jAtm));
-//       Coordinate of the Grid point in elleptical 
-           muij = (boost::geometry::distance(GridPt,ri) - boost::geometry::distance(GridPt,rj))/(*this->molecule_->rIJ())(iAtm,jAtm) ;
-//       Do the product over all atoms i .ne. j
-           WW *= 0.5*(1.0-voronoii(voronoii(voronoii(muij))));
-           }
-         }
-       return WW;
-};
-
-double TwoDGrid::NormBeckeW(cartGP GridPt){
-//     Normalization of Becke Weights
-       int nAtom = this->molecule_->nAtoms();
-       double norm = 0.0;
-       for(auto iAtm = 0; iAtm < nAtom; iAtm++){
-         norm += BeckeW(GridPt,iAtm);
-         }
-       return norm ;
-};
-
-void TwoDGrid::genGrid(){
-//   Given a general origin center 3D grid (r_p,Omega_p), it will
-//   generate nAtoms 3D grid center on the each atom position
-//   by transforming the grid in spherical into cartesian first and
-//   adding sequentially each atom cartian coordinates
-//   in the end we will have NAtoms time 3D grids (NRad times N Ang)
-//   all the grid points cartesian components will be collected in the
-//   GridCar_(NtotGrid,3)
-//
-//   This routine also will build the final weight for each grip points
-//   by multiplying the actual gridweight (due to the single center integration scheme)
-//   by the Becke (J. Chem. Phys., 88 (4),2457 (1988)) partition scheme for the Atomic
-//   weights (based on Voronoii Cells). The final weights will be storered into 
-//   this->weightsGrid_
-
-     int nAtom = this->molecule_->nAtoms();
-     sph3GP ptSPH; ///< Temp spherical point to store the 3D Grid point (not yet translated over atoms centers)
-     cartGP ptCarGrid; /// Several Temp Cartesian Points to perform the translation, cell wieghts funtion
-     int ipts  = 0;
-     int    Ngridr = Gr_->npts();
-     int    NLeb   = Gs_->npts();
-     double Cartx = 0.0;
-     double Carty = 0.0;
-     double Cartz = 0.0;
-//   Loop over 3D grid points
-     for(int i = 0; i < Ngridr; i++)
-     for(int j = 0; j < NLeb; j++){
-       double norm = 0;    ///< Voronoi weights normalization factor 
-       ptSPH = this->gridPt(i,j);
-       bg::transform(ptSPH,ptCarGrid);
-      ///Loop over NAtoms
-      for(auto iAtm = 0; iAtm < nAtom; iAtm++){
-//     Center each 3D over each Atom centers
-       Cartx = (bg::get<0>(ptCarGrid) + (*this->molecule_->cart())(0,iAtm) );
-       Carty = (bg::get<1>(ptCarGrid) + (*this->molecule_->cart())(1,iAtm) );
-       Cartz = (bg::get<2>(ptCarGrid) + (*this->molecule_->cart())(2,iAtm) );
-       this->SetgridPtCart(ipts,Cartx, Carty, Cartz);
-//     store all in the GridCar_(NtotGrid,3) thanks to this function
-//     Start to Evaluate WA (over each center/atom)       
-//     Final Weight W_Ang * W_Rad * W_Atom * _ r^2 :
-//     W_Atom = BeckeW/NormBeckeW for each Atom i given a grid poin (ipts) 
-       this->weightsGrid_[ipts] = (Gs_->weights()[j])
-                                * (Gr_->weights()[i])
-                                * (std::pow(Gr_->gridPts()[i],2.0))
-                                * ((this->BeckeW((this->gridPtCart(ipts)),iAtm))/(this->NormBeckeW(gridPtCart(ipts))) );
-       ipts ++;
-DGrid::
-      }
-    }
-}; //End
-
-*/
 void TwoDGrid::printGrid(){
 //  Call to print Grid point to be poletted (Mathematica Format)
 }; // End
@@ -777,7 +227,7 @@ void GaussChebyshev1stGridInf::transformPts(){
        this->weights_[i] = this->weights_[i]*den/dmu;
        this->gridPts_[i] = val;
        }
-      cout << " Transformed Becke " << endl;
+//      cout << " Transformed Becke " << endl;
  }
 
  
