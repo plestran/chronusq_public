@@ -91,6 +91,7 @@ public:
   void iniDensity(); // initialize density
 //  void formComplexFock();
   void formEDField();
+  void printRT();
   void formUTrans();
   void doPropagation();
 };

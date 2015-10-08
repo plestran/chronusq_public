@@ -104,7 +104,7 @@ void SingleSlater<T>::formFock(){
   // Add in the electric field component if they are non-zero
   std::array<double,3> null{{0,0,0}};
   if((*this->elecField_) != null){
-    this->fileio_->out << "Adding in Electric Field Contribution" << endl;
+//    this->fileio_->out << "Adding in Electric Field Contribution" << endl;
     int NB = this->nTCS_*this->nBasis_;
     int NBSq = NB*NB;
     int iBuf = 0;

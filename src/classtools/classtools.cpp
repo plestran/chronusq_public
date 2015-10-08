@@ -247,8 +247,8 @@ void readInput(FileIO * fileio, Molecule * mol, BasisSet * basis, Controls * con
                "\t MAXSTEP:   Maximum number of time steps.    Default = 10 \n"+
                "\t TIMESTEP:  Size of time steps (au).         Default = 0.05 \n"+
                "\t EDFIELD:   Electric dipole Ex,Ey,Ez (au).   Default = 0.0 0.0 0.0 \n"+
-               "\t TIME_ON:   Time (au) field is applied.      Default = 0.0 \n"+ 
-               "\t TIME_OFF:  Time (au) field is removed.      Default = 10000.0 \n"+ 
+               "\t TIME_ON:   Time (fs) field is applied.      Default = 0.0 \n"+ 
+               "\t TIME_OFF:  Time (fs) field is removed.      Default = 10000.0 \n"+ 
                "\t FREQUENCY: Field frequency (eV).            Default = 0.0 \n"+ 
                "\t PHASE:     Field phase offset (rad).        Default = 0.0 \n"+ 
                "\t ENVELOPE:  Type of field envelope function. Default = PW \n"+
