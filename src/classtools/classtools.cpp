@@ -177,7 +177,7 @@ void readInput(FileIO * fileio, Molecule * mol, BasisSet * basis, Controls * con
         if(!readString.compare("PW")) {
           controls->rtEnvelope_ = 1; 
         } else if(!readString.compare("LINEAR_RAMP")) {
-          CErr("Real Time Envelope Option: "+readString+" not yet implemented. \n",fileio->out); 
+//          CErr("Real Time Envelope Option: "+readString+" not yet implemented. \n",fileio->out); 
           controls->rtEnvelope_ = 2;
         } else if(!readString.compare("GAUSSIAN")) {
           CErr("Real Time Envelope Option: "+readString+" not yet implemented. \n",fileio->out); 

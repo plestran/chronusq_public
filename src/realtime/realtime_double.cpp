@@ -161,6 +161,22 @@ void RealTime<double>::formEDField() {
   */
     if(Time >= TOn && Time <= TOff) {
       OmegT = Omega*(Time-TOn) + Phase;
+      TMax = 2.0*math.pi/Omega;
+      if(Time <= (TOn+TMax)) {
+        (*this->EDField_)[0] = Ex*((Time-TOn)/TMax)*std::cos(OmegT);
+        (*this->EDField_)[1] = Ey*((Time-TOn)/TMax)*std::cos(OmegT);
+        (*this->EDField_)[2] = Ez*((Time-TOn)/TMax)*std::cos(OmegT);
+      }
+      else if(Time > (TOn+TMax) && Time < (TOff-TMax)) {
+        (*this->EDField_)[0] = Ex*std::cos(OmegT);
+        (*this->EDField_)[1] = Ey*std::cos(OmegT);
+        (*this->EDField_)[2] = Ez*std::cos(OmegT);
+      }
+      else if(Time > (TOff-TMax)) {
+        (*this->EDField_)[0] = Ex*((TOff-Time)/TMax)*std::cos(OmegT);
+        (*this->EDField_)[1] = Ey*((TOff-Time)/TMax)*std::cos(OmegT);
+        (*this->EDField_)[2] = Ez*((TOff-Time)/TMax)*std::cos(OmegT);
+      }
     } else {
       (*this->EDField_)[0] = 0.0;
       (*this->EDField_)[1] = 0.0;
