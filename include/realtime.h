@@ -45,7 +45,6 @@ class RealTime {
   std::unique_ptr<SingleSlater<dcomplex>> ssPropagator_;
 
   int	nBasis_;
-  int   isClosedShell_;
   int 	nOccA_;
   int 	nOccB_;
   int   nTCS_;
@@ -63,8 +62,9 @@ class RealTime {
   double currentTime_;	// Current time
 
   bool	frozenNuc_;     // Whether to freeze nuclei
+  bool  isClosedShell_;
 
-  std::unique_ptr<std::array<double,3>> EDField_;
+  std::array<double,3> EDField_;
 
   std::unique_ptr<ComplexMatrix>  oTrans1_;
   std::unique_ptr<ComplexMatrix>  oTrans2_;
@@ -81,16 +81,99 @@ class RealTime {
   std::unique_ptr<ComplexMatrix>  uTransA_;
   std::unique_ptr<ComplexMatrix>  uTransB_;
   std::unique_ptr<ComplexMatrix>  scratch_;
+  
+  inline void checkWorkers(){
+    if(this->fileio_  == NULL) 
+      CErr("Fatal: Must initialize RealTime with FileIO Object");
+    if(this->controls_ == NULL) 
+      CErr("Fatal: Must initialize RealTime with Controls Object",
+           this->fileio_->out);
+    if(this->aointegrals_== NULL)
+      CErr("Fatal: Must initialize RealTime with AOIntegrals Object",
+           this->fileio_->out);
+    if(this->groundState_== NULL)
+      CErr("Fatal: Must initialize RealTime with SingleSlater Reference Object",
+           this->fileio_->out);
+  }
+
+  inline void checkMeta(){
+    this->checkWorkers();
+    if(this->nBasis_ == 0)
+      CErr( "Fatal: RealTime Object Initialized with NBasis = 0",
+        this->fileio_->out);
+    if(this->Ref_ == SingleSlater<double>::_INVALID) 
+      CErr("Fatal: RealTime reference not valid!",this->fileio_->out);
+  }
 
 public:
 
   // constructor & destructor
-  RealTime(){;};
+  RealTime(){
+    this->nBasis_      = 0;
+    this->Ref_         = 0;
+    this->nOccA_       = 0;
+    this->nOccB_       = 0;
+    this->maxSteps_    = 0;
+    this->nSkip_       = 0;
+    this->initDensity_ = 0;
+    this->swapMOA_     = 0;
+    this->swapMOB_     = 0;
+    this->typeOrtho_   = 0;
+    this->methFormU_   = 0;
+
+    this->stepSize_    = 0.0;
+    this->deltaT_      = 0.0;
+    this->currentTime_ = 0.0;
+
+    this->fileio_      = NULL;
+    this->controls_    = NULL;
+    this->aointegrals_ = NULL;
+    this->groundState_ = NULL;
+
+    this->oTrans1_ = nullptr;
+    this->oTrans2_ = nullptr;
+    this->POA_     = nullptr;
+    this->POAsav_  = nullptr;
+    this->POB_     = nullptr;
+    this->POBsav_  = nullptr;
+    this->FOA_     = nullptr;
+    this->FOB_     = nullptr;
+    this->initMOA_ = nullptr;
+    this->initMOB_ = nullptr;
+    this->uTransA_ = nullptr;
+    this->uTransB_ = nullptr;
+    this->scratch_ = nullptr;
+
+    this->isClosedShell_ = false;
+
+    // Standard Values
+    this->frozenNuc_ = true;
+    this->EDField_   = {0.0,0.0,0.0};
+    this->nTCS_      = 1;
+  };
   ~RealTime() {;};
 
+  inline void communicate(FileIO &fileio, Controls &cont, AOIntegrals &aoints, 
+                SingleSlater<T> &groundState){
+    this->fileio_      = &fileio;
+    this->controls_    = &cont;
+    this->aointegrals_ = &aoints;
+    this->groundState_ = &groundState;
+  }
+
+  inline void initMeta(){
+    this->nBasis_        = this->groundState_->nBasis();
+    this->isClosedShell_ = this->groundState_->isClosedShell;
+    this->Ref_           = this->groundState_->Ref();
+    this->nTCS_          = this->groundState_->nTCS();
+    this->nOccA_         = this->groundState_->nOccA();
+    this->nOccB_         = this->groundState_->nOccB();
+  }
+
+  void alloc();
+
   // pseudo-constructor
-  void iniRealTime(Molecule *,BasisSet *,FileIO *,Controls *,AOIntegrals *,
-                   SingleSlater<T> *);
+  void iniRealTime(FileIO *,Controls *,AOIntegrals *,SingleSlater<T> *);
   void iniDensity(); // initialize density
 //  void formComplexFock();
   void formEDField();

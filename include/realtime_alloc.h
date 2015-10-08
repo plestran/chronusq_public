@@ -24,26 +24,33 @@
  *  
  */
 template<typename T>
-void RealTime<T>::iniRealTime(Molecule * molecule, BasisSet *basisset, 
-       FileIO *fileio, Controls *controls, AOIntegrals *aointegrals,
-       SingleSlater<T> *groundState) {
+void RealTime<T>::iniRealTime(FileIO *fileio, Controls *controls, 
+       AOIntegrals *aointegrals, SingleSlater<T> *groundState) {
 
+/*
   this->fileio_         = fileio;
   this->controls_       = controls;
   this->aointegrals_	= aointegrals;
   this->groundState_   	= groundState;
+*/
+  this->communicate(*fileio,*controls,*aointegrals,*groundState);
 
-  this->ssPropagator_	= std::unique_ptr<SingleSlater<dcomplex>>(
-                            new SingleSlater<dcomplex>(groundState));
+//this->ssPropagator_	= std::unique_ptr<SingleSlater<dcomplex>>(
+//                          new SingleSlater<dcomplex>(groundState));
 
+/*
   this->nBasis_         = basisset->nBasis();
   this->isClosedShell_	= this->groundState_->isClosedShell;
   this->Ref_            = this->groundState_->Ref();
   this->nTCS_           = this->groundState_->nTCS();
   this->nOccA_ 	        = this->groundState_->nOccA();
   this->nOccB_ 	        = this->groundState_->nOccB();
+*/
+  this->initMeta();
 
-  this->frozenNuc_	= true;
+//this->frozenNuc_	= true;
+//
+// Keep around for C++ interface (for now)
   this->maxSteps_	= this->controls_->rtMaxSteps;
   this->stepSize_	= this->controls_->rtTimeStep;
   this->typeOrtho_	= this->controls_->rtTypeOrtho; 
@@ -52,11 +59,13 @@ void RealTime<T>::iniRealTime(Molecule * molecule, BasisSet *basisset,
   this->swapMOB_	= this->controls_->rtSwapMOB;
   this->methFormU_	= this->controls_->rtMethFormU;
 
+/*
   //JJGS init electric dipole field
   this->EDField_ =
     std::unique_ptr<std::array<double,3>>(
       new std::array<double,3>{{0.0,0.0,0.0}});
   //JJGE
+*/
 
   this->fileio_->out << endl << "Real-time TDHF: "<< endl;
   this->fileio_->out << std::right << std::setw(20) << "Number of steps = "
@@ -65,6 +74,47 @@ void RealTime<T>::iniRealTime(Molecule * molecule, BasisSet *basisset,
   this->fileio_->out << std::right << std::setw(20) << "Step size = "
                      <<std::setw(15) << this->stepSize_ << std::setw(5) 
                      << " a.u. " << endl;
+/*
+  // FIXME: Allocate only what you need to
+  // FIXME: Add try/catch statements to check if memory couldn't be allocated
+  auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
+  this->oTrans1_ = 
+    std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+  this->oTrans2_ = 
+    std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+  this->POA_  	 = 
+    std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+  this->POAsav_  = 
+    std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+  this->POB_  	 = 
+    std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+  this->POBsav_  = 
+    std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+  this->FOA_ 	 = 
+    std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+  this->FOB_ 	 = 
+    std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+  this->initMOA_ = 
+    std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+  this->initMOB_ = 
+    std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+  this->uTransA_ = 
+    std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+  this->uTransB_ = 
+    std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+  this->scratch_ = 
+    std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+*/
+  this->alloc();
+};
+
+template<typename T>
+void RealTime<T>::alloc(){
+  this->checkMeta();
+
+  this->ssPropagator_	= std::unique_ptr<SingleSlater<dcomplex>>(
+                            new SingleSlater<dcomplex>(
+                              this->groundState_));
 
   // FIXME: Allocate only what you need to
   // FIXME: Add try/catch statements to check if memory couldn't be allocated
@@ -95,5 +145,4 @@ void RealTime<T>::iniRealTime(Molecule * molecule, BasisSet *basisset,
     std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
   this->scratch_ = 
     std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
-};
-
+}

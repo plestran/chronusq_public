@@ -170,13 +170,13 @@ void RealTime<dcomplex>::formEDField() {
   //   Constant envelope (plane wave)
     if(Time >= TOn && Time <= TOff) {
       OmegT = Omega*(Time-TOn) + Phase;
-      (*this->EDField_)[0] = Ex*std::cos(OmegT);
-      (*this->EDField_)[1] = Ey*std::cos(OmegT);
-      (*this->EDField_)[2] = Ez*std::cos(OmegT);
+      this->EDField_[0] = Ex*std::cos(OmegT);
+      this->EDField_[1] = Ey*std::cos(OmegT);
+      this->EDField_[2] = Ez*std::cos(OmegT);
     } else {
-      (*this->EDField_)[0] = 0.0;
-      (*this->EDField_)[1] = 0.0;
-      (*this->EDField_)[2] = 0.0;
+      this->EDField_[0] = 0.0;
+      this->EDField_[1] = 0.0;
+      this->EDField_[2] = 0.0;
     }
   } 
   else if (IEnvlp == 2) { 
@@ -188,9 +188,9 @@ void RealTime<dcomplex>::formEDField() {
     if(Time >= TOn && Time <= TOff) {
       OmegT = Omega * (Time-TOn) + Phase;
     } else {
-      (*this->EDField_)[0] = 0.0;
-      (*this->EDField_)[1] = 0.0;
-      (*this->EDField_)[2] = 0.0;
+      this->EDField_[0] = 0.0;
+      this->EDField_[1] = 0.0;
+      this->EDField_[2] = 0.0;
     }
 
   }
@@ -207,9 +207,9 @@ void RealTime<dcomplex>::formEDField() {
     if(Time >= TOn && Time <= TOff) {
       OmegT = Omega * (Time-TOn) + Phase;
     } else {
-      (*this->EDField_)[0] = 0.0;
-      (*this->EDField_)[1] = 0.0;
-      (*this->EDField_)[2] = 0.0;
+      this->EDField_[0] = 0.0;
+      this->EDField_[1] = 0.0;
+      this->EDField_[2] = 0.0;
     }
 
   }
@@ -218,13 +218,13 @@ void RealTime<dcomplex>::formEDField() {
         Step function
   */
     if(Time >= TOn && Time <= TOff) {
-      (*this->EDField_)[0] = Ex;
-      (*this->EDField_)[1] = Ey;
-      (*this->EDField_)[2] = Ez;
+      this->EDField_[0] = Ex;
+      this->EDField_[1] = Ey;
+      this->EDField_[2] = Ez;
     } else {
-      (*this->EDField_)[0] = 0.0;
-      (*this->EDField_)[1] = 0.0;
-      (*this->EDField_)[2] = 0.0;
+      this->EDField_[0] = 0.0;
+      this->EDField_[1] = 0.0;
+      this->EDField_[2] = 0.0;
     }
 
   }
@@ -239,9 +239,9 @@ void RealTime<dcomplex>::formEDField() {
     if(Time >= TOn && Time <= TOff) {
       OmegT = Omega * (Time-TOn) + Phase;
     } else {
-      (*this->EDField_)[0] = 0.0;
-      (*this->EDField_)[1] = 0.0;
-      (*this->EDField_)[2] = 0.0;
+      this->EDField_[0] = 0.0;
+      this->EDField_[1] = 0.0;
+      this->EDField_[2] = 0.0;
     }
   }
 };
@@ -378,7 +378,7 @@ void RealTime<dcomplex>::doPropagation() {
 
 //  Form AO Fock matrix
     this->formEDField();
-    this->ssPropagator_->setField(*this->EDField_);
+    this->ssPropagator_->setField(this->EDField_);
     this->ssPropagator_->formFock();
     this->ssPropagator_->computeEnergy();
     this->ssPropagator_->computeMultipole();
