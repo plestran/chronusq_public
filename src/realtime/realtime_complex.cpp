@@ -127,6 +127,99 @@ void RealTime<dcomplex>::iniDensity() {
 };
 
 template<>
+void RealTime<dcomplex>::formEDField() {  
+  int IEnvlp   = this->controls_->rtEnvelope_;
+  double Ex    = this->controls_->rtField_[0]; 
+  double Ey    = this->controls_->rtField_[1]; 
+  double Ez    = this->controls_->rtField_[2]; 
+  double TOn   = this->controls_->rtTOn_;
+  double TOff  = this->controls_->rtTOff_;
+  double Omega = this->controls_->rtFreq_;
+  double Phase = this->controls_->rtPhase_;
+  double Time  = currentTime_;
+  double OmegT;
+  Omega = Omega/phys.eVPerHartree;
+  if (IEnvlp == 1) { 
+  //   Constant envelope (plane wave)
+    if(Time >= TOn && Time <= TOff) {
+      OmegT = Omega*(Time-TOn) + Phase;
+      (*this->EDField_)[0] = Ex*std::cos(OmegT);
+      (*this->EDField_)[1] = Ey*std::cos(OmegT);
+      (*this->EDField_)[2] = Ez*std::cos(OmegT);
+    } else {
+      (*this->EDField_)[0] = 0.0;
+      (*this->EDField_)[1] = 0.0;
+      (*this->EDField_)[2] = 0.0;
+    }
+  } 
+  else if (IEnvlp == 2) { 
+  /*   
+       Linearly ramping up to the maximum in the first cycle
+       Constant envelope afterwards
+       Linearly ramping off to zero
+  */
+    if(Time >= TOn && Time <= TOff) {
+      OmegT = Omega*(Time-TOn) + Phase;
+    } else {
+      (*this->EDField_)[0] = 0.0;
+      (*this->EDField_)[1] = 0.0;
+      (*this->EDField_)[2] = 0.0;
+    }
+
+  }
+  else if (IEnvlp == 3) { 
+  /*
+       Gaussian envelope: E(t) = E * exp(-(a*(t-t0))^2) * Sin(wt)
+           a  = the range of frequency (FWHM) 
+           t0 = the time when the amplitude reaches maximum 
+                  the default for t0 = sqrt(LN(1000))/a 
+                  (at t=0, the amplitude is 1/1000 times maximum. 
+                  This ensures a smooth turning-on of the field)             
+        Dipole length approximation only
+  */
+    if(Time >= TOn && Time <= TOff) {
+      OmegT = Omega*(Time-TOn) + Phase;
+    } else {
+      (*this->EDField_)[0] = 0.0;
+      (*this->EDField_)[1] = 0.0;
+      (*this->EDField_)[2] = 0.0;
+    }
+
+  }
+  else if (IEnvlp == 4) { 
+  /*
+        Step function
+  */
+    if(Time >= TOn && Time <= TOff) {
+      (*this->EDField_)[0] = Ex;
+      (*this->EDField_)[1] = Ey;
+      (*this->EDField_)[2] = Ez;
+    } else {
+      (*this->EDField_)[0] = 0.0;
+      (*this->EDField_)[1] = 0.0;
+      (*this->EDField_)[2] = 0.0;
+    }
+
+  }
+  else if (IEnvlp == 5) { 
+  /*
+        Sine-square envelope: 
+          A(r,t) = (E0/w)*(sin(Pi*t/T))^2*sin(k*r-w*t) 
+          E(r,t) = E0*(sin(Pi*t/T))^2*cos(k*r-w*t)
+                    -(E0*Pi/w*T)*sin(2*Pi*t/T)*sin(k*r-w*t)
+        only dipole length/velocity and quardrupole velocity
+  */
+    if(Time >= TOn && Time <= TOff) {
+      OmegT = Omega*(Time-TOn) + Phase;
+    } else {
+      (*this->EDField_)[0] = 0.0;
+      (*this->EDField_)[1] = 0.0;
+      (*this->EDField_)[2] = 0.0;
+    }
+  }
+};
+
+template<>
 void RealTime<dcomplex>::formUTrans() {  
 //
 // Form the unitary transformation matrix: 
@@ -190,16 +283,19 @@ void RealTime<dcomplex>::doPropagation() {
       *this->POB_     = *this->POBsav_;
       *this->POBsav_  = *this->scratch_;
     }
-
 //  Print 
     if(this->controls_->printLevel>=1) {
-      prettyPrintComplex(this->fileio_->out,(*this->ssPropagator_->densityA()),"Alpha AO Density");
-      if(!this->RHF_) prettyPrintComplex(this->fileio_->out,(*this->ssPropagator_->densityB()),"Beta AO Density");
+      //prettyPrintComplex(this->fileio_->out,(*this->ssPropagator_->densityA()),"Alpha AO Density");
+      //if(!this->RHF_) prettyPrintComplex(this->fileio_->out,(*this->ssPropagator_->densityB()),"Beta AO Density");
 
 //  Form AO Fock matrix
+    this->formEDField();
+    this->ssPropagator_->setField(*this->EDField_);
+    this->fileio_->out<<"\nCurrent Elec Field: "<<(*this->EDField_)[0]<<", "<<(*this->EDField_)[1] << ", " << (*this->EDField_)[2]<<endl;
     this->ssPropagator_->formFock();
     this->ssPropagator_->computeEnergy();
     this->ssPropagator_->computeMultipole();
+
 
 //  Transform Fock from AO to orthonormal basis
     *this->ssPropagator_->fockA() = (*this->oTrans1_)*(*this->ssPropagator_->fockA())*(*this->oTrans1_);

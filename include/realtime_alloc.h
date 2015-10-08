@@ -47,6 +47,12 @@ void RealTime<T>::iniRealTime(Molecule * molecule, BasisSet *basisset, FileIO *f
   this->swapMOB_	= this->controls_->rtSwapMOB;
   this->methFormU_	= this->controls_->rtMethFormU;
 
+  //JJGS init electric dipole field
+  this->EDField_ =
+    std::unique_ptr<std::array<double,3>>(
+      new std::array<double,3>{{0.0,0.0,0.0}});
+  //JJGE
+
   this->fileio_->out<<"\nReal-time TDHF: "<<endl;
   this->fileio_->out<<std::right<<std::setw(20)<<"Number of steps = "<<std::setw(15)<<this->maxSteps_<<std::setw(5)<<endl;
   this->fileio_->out<<std::right<<std::setw(20)<<"Step size = "<<std::setw(15)<<this->stepSize_<<std::setw(5)<<" a.u. "<<endl;

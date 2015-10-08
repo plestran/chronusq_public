@@ -34,6 +34,30 @@ void SingleSlater<T>::printEnergy(){
   this->fileio_->out<<std::right<<std::setw(30)<<std::fixed<<"E(nuclear repulsion) = "<<std::setw(15)<<this->energyNuclei<<std::setw(5)<<" Eh "<<endl;
   this->fileio_->out<<std::right<<std::setw(30)<<std::fixed<<"E(total) = "<<std::setw(15)<<this->totalEnergy<<std::setw(5)<<" Eh "<<endl;
 };
+/******************************
+ * Print Energy Contributions *
+ ******************************/
+template<typename T>
+void SingleSlater<T>::printRTDipole(){
+  this->fileio_->out<< std::right << std::setw(5) << std::fixed << "E = " << std::setw(15) << this->totalEnergy << "," 
+                    << std::setw(5)<<"X="
+                    << std::fixed << std::right << std::setw(15)
+                    << (*this->dipole_)(0,0)/phys.debye << "," 
+                    << std::setw(5)<<"Y="
+                    << std::fixed << std::right << std::setw(15)
+                    << (*this->dipole_)(1,0)/phys.debye << "," 
+                    << std::setw(5)<<"Z="
+                    << std::fixed << std::right << std::setw(15)
+                    << (*this->dipole_)(2,0)/phys.debye << "," 
+                    << std::setw(5)<<"Tot="
+                    << std::fixed << std::right << std::setw(15)
+                    << std::sqrt((*this->dipole_)(2,0)*(*this->dipole_)(2,0) +
+                                 (*this->dipole_)(1,0)*(*this->dipole_)(1,0) +
+                                 (*this->dipole_)(0,0)*(*this->dipole_)(0,0)
+                                )/phys.debye
+                    << endl;
+};
+
 
 /**********************************
  * Print Wavefunction Information *

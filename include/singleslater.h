@@ -248,6 +248,7 @@ public:
   void GenDComm(int);
   void printEnergy(); 
   void printMultipole();
+  void printRTDipole();
   void printInfo();
   void printDensityInfo(double,double,double);
   void printDensityInfo(double,double);

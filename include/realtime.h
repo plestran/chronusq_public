@@ -62,6 +62,8 @@ class RealTime {
 
   bool	frozenNuc_;     // Whether to freeze nuclei
 
+  std::unique_ptr<std::array<double,3>> EDField_;
+
   std::unique_ptr<ComplexMatrix>  oTrans1_;
   std::unique_ptr<ComplexMatrix>  oTrans2_;
 //  std::unique_ptr<ComplexMatrix>  PA_;
@@ -88,6 +90,7 @@ public:
   void iniRealTime(Molecule *,BasisSet *,FileIO *,Controls *,AOIntegrals *,SingleSlater<T> *);
   void iniDensity(); // initialize density
 //  void formComplexFock();
+  void formEDField();
   void formUTrans();
   void doPropagation();
 };

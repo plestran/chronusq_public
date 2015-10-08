@@ -165,7 +165,11 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   }
 ////// APE ////
 
-//fds
+// REAL-TIME TD-SCF 
+  
+//  if(controls->doRealTime && controls->directTwoE) {
+//    CErr("REAL TIME CURRENTLY NOT WORKING WITH DIRECT TWO-E INTS",fileIO->out);
+//  }
   if(controls->doRealTime) {
     if(!controls->doComplex) {
       realtimeReal->iniRealTime(molecule.get(),basisset.get(),fileIO.get(),controls.get(),aointegrals.get(),hartreeFockReal.get());
@@ -177,8 +181,6 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
       realtimeComplex->doPropagation();
     }
   }
-//fds
-
 
   // Cleanup Libint env
 #ifdef USE_LIBINT
