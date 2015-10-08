@@ -48,6 +48,8 @@ class RealTime {
   int   isClosedShell_;
   int 	nOccA_;
   int 	nOccB_;
+  int   nTCS_;
+  int   Ref_;
   int	maxSteps_;	// Maximum number of steps
   int	nSkip_;		// Number of Steps to skpi printing
   int	initDensity_;  	// Initial density
@@ -87,7 +89,8 @@ public:
   ~RealTime() {;};
 
   // pseudo-constructor
-  void iniRealTime(Molecule *,BasisSet *,FileIO *,Controls *,AOIntegrals *,SingleSlater<T> *);
+  void iniRealTime(Molecule *,BasisSet *,FileIO *,Controls *,AOIntegrals *,
+                   SingleSlater<T> *);
   void iniDensity(); // initialize density
 //  void formComplexFock();
   void formEDField();

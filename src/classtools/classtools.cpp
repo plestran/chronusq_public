@@ -171,16 +171,16 @@ void readInput(FileIO * fileio, Molecule * mol, BasisSet * basis, Controls * con
         fileio->in >> (controls->rtFreq_);
       } else if(!readString.compare("PHASE")) {
         fileio->in >> (controls->rtPhase_);
+      } else if(!readString.compare("SIGMA")) {
+        fileio->in >> (controls->rtSigma_);
       } else if(!readString.compare("ENVELOPE")) {
         fileio->in>>readString;
         readString=stringupper(readString);
         if(!readString.compare("PW")) {
           controls->rtEnvelope_ = 1; 
         } else if(!readString.compare("LINEAR_RAMP")) {
-//          CErr("Real Time Envelope Option: "+readString+" not yet implemented. \n",fileio->out); 
           controls->rtEnvelope_ = 2;
         } else if(!readString.compare("GAUSSIAN")) {
-          CErr("Real Time Envelope Option: "+readString+" not yet implemented. \n",fileio->out); 
           controls->rtEnvelope_ = 3;
         } else if(!readString.compare("STEP")) {
           controls->rtEnvelope_ = 4;
@@ -244,17 +244,20 @@ void readInput(FileIO * fileio, Molecule * mol, BasisSet * basis, Controls * con
       } else {
           CErr("Real Time Option: "+readString+" not recognized. \n"+
                "Valid options: \n"+
-               "\t MAXSTEP:   Maximum number of time steps.    Default = 10 \n"+
-               "\t TIMESTEP:  Size of time steps (au).         Default = 0.05 \n"+
-               "\t EDFIELD:   Electric dipole Ex,Ey,Ez (au).   Default = 0.0 0.0 0.0 \n"+
-               "\t TIME_ON:   Time (fs) field is applied.      Default = 0.0 \n"+ 
-               "\t TIME_OFF:  Time (fs) field is removed.      Default = 10000.0 \n"+ 
-               "\t FREQUENCY: Field frequency (eV).            Default = 0.0 \n"+ 
-               "\t PHASE:     Field phase offset (rad).        Default = 0.0 \n"+ 
-               "\t ENVELOPE:  Type of field envelope function. Default = PW \n"+
-               "\t ORTHO:     Type of orthogonalization.       Default = LOWDIN \n"+
-               "\t INIDEN:    Initial density for system.      Default = SCF \n"+
-               "\t UPROP:     How the propagator is formed.    Default = EIGEN \n"+ 
+               "\t MAXSTEP:   Maximum number of time steps.       Default = 10 \n"+
+               "\t TIMESTEP:  Size of time steps (au).            Default = 0.05 \n"+
+               "\t EDFIELD:   Electric dipole Ex,Ey,Ez (au).      Default = 0.0 0.0 0.0 \n"+
+               "\t TIME_ON:   Time (fs) field is applied.         Default = 0.0 \n"+ 
+               "\t TIME_OFF:  Time (fs) field is removed.         Default = 10000.0 \n"+ 
+               "\t FREQUENCY: Field frequency (eV).               Default = 0.0 \n"+ 
+               "\t PHASE:     Field phase offset (rad).           Default = 0.0 \n"+ 
+               "\t SIGMA:     For Gaussian envelope, this sets"+ 
+                                "the range of the frequency"+ 
+                                "(FWHM, in eV)                     Default = 0.0 \n"+ 
+               "\t ENVELOPE:  Type of field envelope function.    Default = PW \n"+
+               "\t ORTHO:     Type of orthogonalization.          Default = LOWDIN \n"+
+               "\t INIDEN:    Initial density for system.         Default = SCF \n"+
+               "\t UPROP:     How the propagator is formed.       Default = EIGEN \n"+ 
                "\t DEFAULT:   RT-TDSCF with default settings.\n"+ 
                "\n Note: if you get 'Real Time Option: $RT not recognized',  try '$RT DEFAULT' instead of just '$RT'. \n",fileio->out); 
       

@@ -196,7 +196,7 @@ void SDResponse<double>::reoptWF(){
   lenRealScr += lenMat; // Stability step in MO basis
   lenRealScr += lenMat; // Matrix exponential
   lenRealScr += lenEig; // Eigenvalues
-  lenRealScr += std::max(1,3*NTCSxNBASIS-1); // RWORK LAPACK Workspace
+  lenRealScr += std::max(1,3*NTCSxNBASIS-2); // RWORK LAPACK Workspace
 
 
   lenComplexScr += lenMat; // Stability step in MO basis
