@@ -86,7 +86,7 @@ template<typename T>
 void SingleSlater<T>::alloc(){
   this->checkMeta();
   this->allocOp();
-  if(this->doMultipole) this->allocMultipole(); 
+  if(this->maxMultipole_ > 0) this->allocMultipole(); 
 /* Leaks memory
   int i,j,ij;
   this->R2Index_ = new int*[nBasis];

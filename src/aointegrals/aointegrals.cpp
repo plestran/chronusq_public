@@ -88,7 +88,6 @@ void AOIntegrals::iniAOIntegrals(Molecule * molecule, BasisSet * basisset,
   if(controls->doTCS) this->nTCS_ = 2;
   this->nTT_      = this->nTCS_*this->nBasis_*(this->nTCS_*this->nBasis_+1)/2;
 
-  // FIXME need a try statement for alloc
 #ifndef USE_LIBINT // We don't need to allocate these if we're using Libint
   try {
     this->twoEC_ = std::unique_ptr<RealMatrix>(new RealMatrix(this->nTT_,this->nTT_)); // Raffenetti Two Electron Coulomb AOIntegrals
@@ -476,5 +475,97 @@ void AOIntegrals::printOneE(){
     prettyPrint(this->fileio_->out,(mat[1]),"Kinetic");
     prettyPrint(this->fileio_->out,(mat[2]),"Potential");
     prettyPrint(this->fileio_->out,(mat[3]),"Core Hamiltonian");
+  }
+}
+
+void AOIntegrals::alloc(){
+  this->checkMeta();
+  this->allocOp();
+  if(this->maxMultipole_ > 1) this->allocMultipole();
+
+  this->pairConstants_ = std::unique_ptr<PairConstants>(new PairConstants);
+  this->molecularConstants_ = std::unique_ptr<MolecularConstants>(new MolecularConstants);
+  this->quartetConstants_ = std::unique_ptr<QuartetConstants>(new QuartetConstants);
+
+/* This whole block leaks memory like a siv (~ 8MB leaked for test 4!)
+  int i,j,ij;
+  this->R2Index_ = new int*[this->nBasis_];
+  for(i=0;i<this->nBasis_;i++) this->R2Index_[i] = new int[this->nBasis_];
+  for(i=0;i<this->nBasis_;i++) for(j=0;j<this->nBasis_;j++) {
+    if(i>=j) ij=j*(this->nBasis_)-j*(j-1)/2+i-j;
+    else ij=i*(this->nBasis_)-i*(i-1)/2+j-i;
+    this->R2Index_[i][j] = ij;
+  };
+
+
+// initialize the FmT table
+// Need to know the max L first
+  this->FmTTable_ = new double*[MaxFmTPt];
+  for(i=0;i<MaxFmTPt;i++) this->FmTTable_[i] = new double[MaxTotalL];
+  this->generateFmTTable();
+*/
+}
+
+void AOIntegrals::allocOp(){
+  auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
+#ifndef USE_LIBINT
+  try {
+    this->twoEC_ = std::unique_ptr<RealMatrix>(new RealMatrix(this->nTT_,this->nTT_)); // Raffenetti Two Electron Coulomb AOIntegrals
+    this->twoEX_ = std::unique_ptr<RealMatrix>(new RealMatrix(this->nTT_,this->nTT_)); // Raffenetti Two Electron Exchange AOIntegrals
+  } catch (...) {
+    CErr(std::current_exception(),"Coulomb and Exchange Tensor(R4) Allocation");
+  }
+#else
+  try {
+    if(this->allocERI){ // Allocate R4 ERI Tensor
+      this->aoERI_ = std::unique_ptr<RealTensor4d>(
+        new RealTensor4d(NTCSxNBASIS,NTCSxNBASIS,NTCSxNBASIS,NTCSxNBASIS)); 
+    }
+  } catch (...) {
+    CErr(std::current_exception(),"N^4 ERI Tensor Allocation");
+  }
+#endif
+  try {
+    this->oneE_         = std::unique_ptr<RealMatrix>(new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); // One Electron Integral
+    this->overlap_      = std::unique_ptr<RealMatrix>(new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); // Overlap
+    this->kinetic_      = std::unique_ptr<RealMatrix>(new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); // Kinetic
+    this->potential_    = std::unique_ptr<RealMatrix>(new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); // Potential
+  } catch(...) {
+    CErr(std::current_exception(),"One Electron Integral Tensor Allocation");
+  }
+
+#ifdef USE_LIBINT
+  try { 
+    this->schwartz_ = std::unique_ptr<RealMatrix>(
+      new RealMatrix(this->basisSet_->nShell(),this->basisSet_->nShell())); 
+  } catch(...) {
+    CErr(std::current_exception(),"Schwartx Bound Tensor Allocation");
+  } 
+
+  if(this->doDF){
+    try { 
+      this->aoRII_ = std::unique_ptr<RealTensor3d>(
+        new RealTensor3d(NTCSxNBASIS,NTCSxNBASIS,this->nTCS_*this->DFbasisSet_->nBasis())); 
+
+      this->aoRIS_ = std::unique_ptr<RealTensor2d>(
+        new RealTensor2d(this->nTCS_*this->DFbasisSet_->nBasis(),this->nTCS_*this->DFbasisSet_->nBasis()));
+    } catch (...) { 
+      CErr(std::current_exception(),"Density Fitting Tensor Allocation");
+    }
+  }
+#endif
+}
+
+void AOIntegrals::allocMultipole(){
+  auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
+  try {
+    if(this->maxMultipole_ >= 1)
+      this->elecDipole_ = std::unique_ptr<RealTensor3d>(new RealTensor3d(3,NTCSxNBASIS,NTCSxNBASIS));
+    if(this->maxMultipole_ >= 2)
+      this->elecQuadpole_ = std::unique_ptr<RealTensor3d>(new RealTensor3d(6,NTCSxNBASIS,NTCSxNBASIS));
+    if(this->maxMultipole_ >= 3)
+      this->elecOctpole_ = std::unique_ptr<RealTensor3d>(new RealTensor3d(10,NTCSxNBASIS,NTCSxNBASIS));
+  } catch(...) {
+    CErr(std::current_exception(),"Multipole Tensor Allocation");
   }
 }

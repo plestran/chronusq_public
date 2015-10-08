@@ -198,7 +198,6 @@ public:
   bool  isConverged;
   bool  isHF;
   bool  isDFT;
-  bool  doMultipole;
 
   double   energyOneE; ///< One-bodied operator tensors traced with Density
   double   energyTwoE; ///< Two-bodied operator tensors traced with Density
@@ -250,17 +249,16 @@ public:
     this->aointegrals_ = NULL;            
 
     // Initialize Booleans
-    this->isConverged  = false;
-    this->haveCoulomb  = false;
-    this->haveExchange = false;
-    this->haveDensity  = false;
-    this->haveMO       = false;
-    this->havePT       = false;
-    this->isDFT        = false;
-    this->isCloseShell = false;
+    this->isConverged   = false;
+    this->haveCoulomb   = false;
+    this->haveExchange  = false;
+    this->haveDensity   = false;
+    this->haveMO        = false;
+    this->havePT        = false;
+    this->isDFT         = false;
+    this->isClosedShell = false;
 
     this->isHF         = true;
-    this->doMultipole  = true;
 
     // Standard Values
     this->Ref_         = _INVALID;
@@ -329,6 +327,7 @@ public:
     this->elecField_ = field;
   }
   inline void setNTCS(int i){ this->nTCS_ = i;};
+  inline void setMaxMultipole(int i){ this->maxMultipole_ = i;};
 
   // access to private data
   inline int nBasis() { return this->nBasis_;};
