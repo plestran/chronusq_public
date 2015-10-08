@@ -28,7 +28,7 @@ using ChronusQ::FileIO;
 //-------------//
 // constructor //
 //-------------//
-FileIO::FileIO(std::string nm_input) {
+FileIO::FileIO(const std::string nm_input) {
   char   testChar;
   int    testInt;
   long   testLong;

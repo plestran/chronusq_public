@@ -1,1 +1,1 @@
-add_library(atlas atlas.cpp)
+add_library(atlas SHARED atlas.cpp)

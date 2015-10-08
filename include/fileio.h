@@ -56,7 +56,7 @@ public:
   fstream bin;                   // file handler of the binary file
 
   // constructor and destructor
-  FileIO(std::string );
+  FileIO(const std::string );
   FileIO(std::vector<std::string> );
   void iniFileIO(bool);
   ~FileIO();
@@ -85,6 +85,9 @@ public:
   void iniBlock(int);
   void readBlock();
   void writeBlock();
+
+  // Python API
+  void write(std::string);
 
   // read||write scratch and binary files
   /*
