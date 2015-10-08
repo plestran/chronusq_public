@@ -267,6 +267,8 @@ void SDResponse<double>::reoptWF(){
    dav.run(this->fileio_->out);
  //CErr();
   } // loop iter
+  delete [] COMPLEX_SCR;
+  delete [] REAL_SCR;
   if(stable){
     this->singleSlater_->computeEnergy();
     this->singleSlater_->computeMultipole();

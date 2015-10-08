@@ -78,102 +78,15 @@ static double factTLarge[21] = {
 //---------------------
 void AOIntegrals::iniAOIntegrals(Molecule * molecule, BasisSet * basisset, 
                                  FileIO * fileio, Controls * controls,BasisSet * DFbasisSet){
-/*
-  this->molecule_ = molecule;
-  this->basisSet_ = basisset;
-  this->DFbasisSet_ = DFbasisSet;
-  this->fileio_   = fileio;
-  this->controls_ = controls;
-*/
   this->communicate(*molecule,*basisset,*fileio,*controls);
-
-/*
-  this->nBasis_   = basisset->nBasis();
-  this->nTCS_     = 1;
-  if(controls->doTCS) this->nTCS_ = 2;
-  this->nTT_      = this->nTCS_*this->nBasis_*(this->nTCS_*this->nBasis_+1)/2;
-*/
   this->initMeta();
 
-/*
-#ifndef USE_LIBINT // We don't need to allocate these if we're using Libint
-  try {
-    this->twoEC_ = std::unique_ptr<RealMatrix>(new RealMatrix(this->nTT_,this->nTT_)); // Raffenetti Two Electron Coulomb AOIntegrals
-    this->twoEX_ = std::unique_ptr<RealMatrix>(new RealMatrix(this->nTT_,this->nTT_)); // Raffenetti Two Electron Exchange AOIntegrals
-  } catch (...) {
-    CErr(std::current_exception(),"Coulomb and Exchange Tensor(R4) Allocation");
-  }
-#else 
-  try {
-    if(this->controls_->buildn4eri && !this->controls_->doDF) {
-      this->fileio_->out << "Allocating N4 ERI" << endl;
-      this->aoERI_ = std::unique_ptr<RealTensor4d>(new RealTensor4d(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
-    } 
-  } catch (...) {
-    CErr(std::current_exception(),"N^4 ERI Tensor Allocation");
-  }
-#endif
-  try {
-    this->oneE_         = std::unique_ptr<RealMatrix>(new RealMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_)); // One Electron Integral
-    this->overlap_      = std::unique_ptr<RealMatrix>(new RealMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_)); // Overlap
-    this->kinetic_      = std::unique_ptr<RealMatrix>(new RealMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_)); // Kinetic
-    this->potential_    = std::unique_ptr<RealMatrix>(new RealMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_)); // Potential
-    if(this->controls_->doDipole || this->controls_->doQuadpole || this->controls_->doOctpole){
-      this->elecDipole_   = std::unique_ptr<RealTensor3d>(new RealTensor3d(3,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_)); // Electic Dipole
-    }
-    if(this->controls_->doQuadpole || this->controls_->doOctpole) {
-      this->elecQuadpole_ = std::unique_ptr<RealTensor3d>(new RealTensor3d(6,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_)); // Electic Quadrupole
-    }
-    if(this->controls_->doOctpole){
-      this->elecOctpole_ = std::unique_ptr<RealTensor3d>(new RealTensor3d(10,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_)); // Electic Octupole
-    }
-  } catch (...) {
-    CErr(std::current_exception(),"One Electron Integral Tensor Alloation (All)");
-  }
-#ifdef USE_LIBINT
-  try { this->schwartz_ = std::unique_ptr<RealMatrix>(new RealMatrix(this->basisSet_->nShell(),this->basisSet_->nShell())); }// Schwartz  
-  catch (...) { CErr(std::current_exception(),"Schwartz Bound Tensor Allocation"); }
-  if(this->controls_->doDF) {
-    try { 
-      this->aoRII_ = std::unique_ptr<RealTensor3d>(new RealTensor3d(this->basisSet_->nBasis(),this->basisSet_->nBasis(),this->DFbasisSet_->nBasis())); 
-      this->aoRIS_ = std::unique_ptr<RealTensor2d>(new RealTensor2d(this->DFbasisSet_->nBasis(),this->DFbasisSet_->nBasis()));
-    } catch (...) { CErr(std::current_exception(),"Density Fitting Tensor Allocation");}
-  }
-#endif
-  pairConstants_ = std::unique_ptr<PairConstants>(new PairConstants);
-  molecularConstants_ = std::unique_ptr<MolecularConstants>(new MolecularConstants);
-  quartetConstants_ = std::unique_ptr<QuartetConstants>(new QuartetConstants);
-*/
   
   if(controls->doTCS) this->nTCS_ = 2;
   this->allocERI = this->controls_->buildn4eri;
   this->doDF     = this->controls_->doDF;
   this->alloc();
 
-/*
-  this->haveAOTwoE = false;
-  this->haveAOOneE = false;
-  this->haveSchwartz = false;
-  this->haveRIS = false;
-  this->haveRII = false;
-*/
-/* This whole block leaks memory like a siv (~ 8MB leaked for test 4!)
-  int i,j,ij;
-  this->R2Index_ = new int*[this->nBasis_];
-  for(i=0;i<this->nBasis_;i++) this->R2Index_[i] = new int[this->nBasis_];
-  for(i=0;i<this->nBasis_;i++) for(j=0;j<this->nBasis_;j++) {
-    if(i>=j) ij=j*(this->nBasis_)-j*(j-1)/2+i-j;
-    else ij=i*(this->nBasis_)-i*(i-1)/2+j-i;
-    this->R2Index_[i][j] = ij;
-  };
-
-
-// initialize the FmT table
-// Need to know the max L first
-  this->FmTTable_ = new double*[MaxFmTPt];
-  for(i=0;i<MaxFmTPt;i++) this->FmTTable_[i] = new double[MaxTotalL];
-  this->generateFmTTable();
-*/
 };
 
 void AOIntegrals::generateFmTTable() {

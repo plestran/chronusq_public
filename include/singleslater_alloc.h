@@ -50,25 +50,6 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
     else if(controls->doTCS)                       this->Ref_ = GKS ; // GKS
   }
 
-/*
-  this->getAlgebraicField(); 
-  this->SCFType_      = this->algebraicField_      + " ";
-  this->SCFTypeShort_ = this->algebraicFieldShort_ + "-";
-  if(this->Ref_ == RHF) {
-    this->SCFType_      += "Resricted Hartree-Fock"; 
-    this->SCFTypeShort_ += "RHF";
-  } else if(this->Ref_ == UHF) {
-    this->SCFType_      += "Unresricted Hartree-Fock"; 
-    this->SCFTypeShort_ += "UHF";
-  } else if(this->Ref_ == CUHF) {
-    this->SCFType_      += "Constrained Unresricted Hartree-Fock"; 
-    this->SCFTypeShort_ += "CUHF";
-  } else if(this->Ref_ == TCS) {
-    this->SCFType_      += "Generalized Hartree-Fock"; 
-    this->SCFTypeShort_ += "GHF";
-  }
-*/
-
   this->genMethString();
 
 
