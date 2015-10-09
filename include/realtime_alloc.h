@@ -40,6 +40,7 @@ void RealTime<T>::iniRealTime(FileIO *fileio, Controls *controls,
   this->swapMOB_	= this->controls_->rtSwapMOB;
   this->methFormU_	= this->controls_->rtMethFormU;
 
+  // FIXME: It doesn't make sense to have print here
   this->fileio_->out << endl << "Real-time TDHF: "<< endl;
   this->fileio_->out << std::right << std::setw(20) << "Number of steps = "
                      << std::setw(15) << this->maxSteps_ << std::setw(5)
@@ -57,6 +58,9 @@ void RealTime<T>::alloc(){
   this->ssPropagator_	= std::unique_ptr<SingleSlater<dcomplex>>(
                             new SingleSlater<dcomplex>(
                               this->groundState_));
+  this->initMem();
+  this->initMaps();
+/*
 
   auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
   try {
@@ -153,4 +157,113 @@ void RealTime<T>::alloc(){
       CErr(std::current_exception(),"Unitary Trans. Matrix Beta [exp(-i*dt*F)]");
     }
   }
+*/
+}
+
+template<typename T>
+void RealTime<T>::initRTPtr(){
+  this->SCR         = NULL;
+  this->oTrans1Mem_ = NULL;
+  this->oTrans2Mem_ = NULL;
+  this->POAMem_     = NULL;
+  this->POBMem_     = NULL;
+  this->POAsavMem_  = NULL;
+  this->POBsavMem_  = NULL;
+  this->FOAMem_     = NULL;
+  this->FOBMem_     = NULL;
+  this->initMOAMem_ = NULL;
+  this->initMOBMem_ = NULL;
+  this->uTransAMem_ = NULL;
+  this->uTransBMem_ = NULL;
+  this->scratchMem_ = NULL;
+}
+
+template<typename T>
+void RealTime<T>::initMemLen(){
+  auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
+
+  this->lenOTrans1_ = NTCSxNBASIS * NTCSxNBASIS;
+  this->lenOTrans2_ = NTCSxNBASIS * NTCSxNBASIS;
+  this->lenPOA_     = NTCSxNBASIS * NTCSxNBASIS;
+  this->lenPOB_     = NTCSxNBASIS * NTCSxNBASIS;
+  this->lenPOAsav_  = NTCSxNBASIS * NTCSxNBASIS;
+  this->lenPOBsav_  = NTCSxNBASIS * NTCSxNBASIS;
+  this->lenFOA_     = NTCSxNBASIS * NTCSxNBASIS;
+  this->lenFOB_     = NTCSxNBASIS * NTCSxNBASIS;
+  this->lenInitMOA_ = NTCSxNBASIS * NTCSxNBASIS;
+  this->lenInitMOB_ = NTCSxNBASIS * NTCSxNBASIS;
+  this->lenUTransA_ = NTCSxNBASIS * NTCSxNBASIS;
+  this->lenUTransB_ = NTCSxNBASIS * NTCSxNBASIS;
+  this->lenScratch_ = NTCSxNBASIS * NTCSxNBASIS;
+
+  this->lenScr_ = 0;
+  
+  this->lenScr_ += this->lenOTrans1_; 
+  this->lenScr_ += this->lenOTrans2_; 
+  this->lenScr_ += this->lenPOA_    ; 
+  this->lenScr_ += this->lenPOAsav_ ; 
+  this->lenScr_ += this->lenFOA_    ; 
+  this->lenScr_ += this->lenInitMOA_; 
+  this->lenScr_ += this->lenUTransA_; 
+  this->lenScr_ += this->lenScratch_; 
+  if(!this->isClosedShell_ && this->Ref_ != SingleSlater<T>::TCS){
+    this->lenScr_ += this->lenPOB_    ; 
+    this->lenScr_ += this->lenPOBsav_ ; 
+    this->lenScr_ += this->lenFOB_    ; 
+    this->lenScr_ += this->lenInitMOB_; 
+    this->lenScr_ += this->lenUTransB_; 
+  }
+}
+
+template<typename T>
+void RealTime<T>::initMem(){
+  try{ this->SCR = new dcomplex[this->lenScr_]; } 
+  catch (...) { CErr(std::current_exception(),"RT Allocation"); }
+  dcomplex *LAST_OF_SECTION ;
+  int  LEN_LAST_OF_SECTION  ;
+
+  this->oTrans1Mem_ = this->SCR;
+  this->oTrans2Mem_ = this->oTrans1Mem_ + this->lenOTrans1_;
+  this->POAMem_     = this->oTrans2Mem_ + this->lenOTrans2_;
+  this->POAsavMem_  = this->POAMem_     + this->lenPOA_;
+  this->FOAMem_     = this->POAsavMem_  + this->lenPOAsav_;
+  this->initMOAMem_ = this->FOAMem_     + this->lenFOA_;
+  this->uTransAMem_ = this->initMOAMem_ + this->lenInitMOA_;
+  LAST_OF_SECTION      = this->uTransAMem_;
+  LEN_LAST_OF_SECTION  = this->lenUTransA_;
+
+  if(!this->isClosedShell_ && this->Ref_ != SingleSlater<T>::TCS){
+    this->POBMem_     = LAST_OF_SECTION + LEN_LAST_OF_SECTION;
+    this->POBsavMem_  = this->POBMem_     + this->lenPOB_;
+    this->FOBMem_     = this->POBsavMem_  + this->lenPOBsav_;
+    this->initMOBMem_ = this->FOBMem_     + this->lenFOB_;
+    this->uTransBMem_ = this->initMOBMem_ + this->lenInitMOB_;
+    LAST_OF_SECTION      = this->uTransBMem_;
+    LEN_LAST_OF_SECTION  = this->lenUTransB_;
+  }
+
+  this->scratchMem_ = LAST_OF_SECTION + LEN_LAST_OF_SECTION;
+}
+
+template<typename T>
+void RealTime<T>::initMaps(){
+/*
+  auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
+  new (&this->oTrans1_) ComplexMap(this->oTrans1Mem_,NTCSxNBASIS,NTCSxNBASIS); 
+  new (&this->oTrans2_) ComplexMap(this->oTrans2Mem_,NTCSxNBASIS,NTCSxNBASIS);
+  new (&this->POA_    ) ComplexMap(this->POAMem_    ,NTCSxNBASIS,NTCSxNBASIS);
+  new (&this->POAsav_ ) ComplexMap(this->POAsavMem_ ,NTCSxNBASIS,NTCSxNBASIS);
+  new (&this->FOA_    ) ComplexMap(this->FOAMem_    ,NTCSxNBASIS,NTCSxNBASIS);
+  new (&this->initMOA_) ComplexMap(this->initMOAMem_,NTCSxNBASIS,NTCSxNBASIS);
+  new (&this->uTransA_) ComplexMap(this->uTransAMem_,NTCSxNBASIS,NTCSxNBASIS);
+  new (&this->scratch_) ComplexMap(this->scratchMem_,NTCSxNBASIS,NTCSxNBASIS);
+
+  if(!this->isClosedShell_ && this->Ref_ != SingleSlater<T>::TCS){
+    new (&this->POB_    ) ComplexMap(this->POBMem_    ,NTCSxNBASIS,NTCSxNBASIS);
+    new (&this->POBsav_ ) ComplexMap(this->POBsavMem_ ,NTCSxNBASIS,NTCSxNBASIS);
+    new (&this->FOB_    ) ComplexMap(this->FOBMem_    ,NTCSxNBASIS,NTCSxNBASIS);
+    new (&this->initMOB_) ComplexMap(this->initMOBMem_,NTCSxNBASIS,NTCSxNBASIS);
+    new (&this->uTransB_) ComplexMap(this->uTransBMem_,NTCSxNBASIS,NTCSxNBASIS);
+  }
+*/
 }

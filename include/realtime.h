@@ -64,7 +64,37 @@ class RealTime {
   bool	frozenNuc_;     // Whether to freeze nuclei
   bool  isClosedShell_;
 
+  dcomplex * SCR;
+  dcomplex * oTrans1Mem_;
+  dcomplex * oTrans2Mem_;
+  dcomplex * POAMem_;
+  dcomplex * POBMem_;
+  dcomplex * POAsavMem_;
+  dcomplex * POBsavMem_;
+  dcomplex * FOAMem_;
+  dcomplex * FOBMem_;
+  dcomplex * initMOAMem_;
+  dcomplex * initMOBMem_;
+  dcomplex * uTransAMem_;
+  dcomplex * uTransBMem_;
+  dcomplex * scratchMem_;
+  int lenScr_;
+  int lenOTrans1_;
+  int lenOTrans2_;
+  int lenPOA_;
+  int lenPOB_;
+  int lenPOAsav_;
+  int lenPOBsav_;
+  int lenFOA_;
+  int lenFOB_;
+  int lenInitMOA_;
+  int lenInitMOB_;
+  int lenUTransA_;
+  int lenUTransB_;
+  int lenScratch_;
+
   std::array<double,3> EDField_;
+/*
   // subsequent Matrices are all of the same dimension
   std::unique_ptr<ComplexMatrix>  oTrans1_; // Orthogonalizing Transformation Matrix from Overlap
   std::unique_ptr<ComplexMatrix>  oTrans2_; // Orthogonalizing Transformation Matrix from Overlap Inverse
@@ -81,6 +111,23 @@ class RealTime {
   std::unique_ptr<ComplexMatrix>  uTransA_; // Unitary Transformation Matrix [exp(-i*dt*F)] Alpha
   std::unique_ptr<ComplexMatrix>  uTransB_; // Unitary Transformation Matrix [exp(-i*dt*F)] Beta
   std::unique_ptr<ComplexMatrix>  scratch_; // NBas x NBas scratch Matrix
+*/
+
+/*
+  ComplexMap  oTrans1_; // Orthogonalizing Transformation Matrix from Overlap
+  ComplexMap  oTrans2_; // Orthogonalizing Transformation Matrix from Overlap Inverse
+  ComplexMap  POA_; // Density Alpha in Orthonormal Basis
+  ComplexMap  POAsav_; // saved copy of Density Alpha in Orthonormal Basis
+  ComplexMap  POB_; // Density Beta in Orthonormal Basis
+  ComplexMap  POBsav_; // saved copy of Density Beta in Orthonormal Basis
+  ComplexMap  FOA_; // Fock Matrix Alpha in Orthonormal Basis 
+  ComplexMap  FOB_; // Fock Matrix Beta in Orthonormal Basis
+  ComplexMap  initMOA_; // Ground State MO Alpha in orthonormal basis
+  ComplexMap  initMOB_; // Ground State MO Beta in orthonormal basis
+  ComplexMap  uTransA_; // Unitary Transformation Matrix [exp(-i*dt*F)] Alpha
+  ComplexMap  uTransB_; // Unitary Transformation Matrix [exp(-i*dt*F)] Beta
+  ComplexMap  GLOBAL_JUNKatch_; // NBas x NBas GLOBAL_JUNKatch Matrix
+*/
   
   inline void checkWorkers(){
     if(this->fileio_  == NULL) 
@@ -103,7 +150,14 @@ class RealTime {
         this->fileio_->out);
     if(this->Ref_ == SingleSlater<double>::_INVALID) 
       CErr("Fatal: RealTime reference not valid!",this->fileio_->out);
+    if(this->lenScr_ == 0)
+      CErr("Fatal: RealTime given no scratch space",this->fileio_->out);
   }
+
+  void initRTPtr();
+  void initMemLen();
+  void initMem();
+  void initMaps();
 
 public:
 
@@ -123,19 +177,21 @@ public:
     this->aointegrals_ = NULL;
     this->groundState_ = NULL;
 
-    this->oTrans1_ = nullptr;
-    this->oTrans2_ = nullptr;
-    this->POA_     = nullptr;
-    this->POAsav_  = nullptr;
-    this->POB_     = nullptr;
-    this->POBsav_  = nullptr;
-    this->FOA_     = nullptr;
-    this->FOB_     = nullptr;
-    this->initMOA_ = nullptr;
-    this->initMOB_ = nullptr;
-    this->uTransA_ = nullptr;
-    this->uTransB_ = nullptr;
-    this->scratch_ = nullptr;
+    this->initRTPtr();
+
+  //this->oTrans1_ = nullptr;
+  //this->oTrans2_ = nullptr;
+  //this->POA_     = nullptr;
+  //this->POAsav_  = nullptr;
+  //this->POB_     = nullptr;
+  //this->POBsav_  = nullptr;
+  //this->FOA_     = nullptr;
+  //this->FOB_     = nullptr;
+  //this->initMOA_ = nullptr;
+  //this->initMOB_ = nullptr;
+  //this->uTransA_ = nullptr;
+  //this->uTransB_ = nullptr;
+  //this->scratch_ = nullptr;
 
     this->isClosedShell_ = false;
 
@@ -168,6 +224,8 @@ public:
     this->nTCS_          = this->groundState_->nTCS();
     this->nOccA_         = this->groundState_->nOccA();
     this->nOccB_         = this->groundState_->nOccB();
+
+    this->initMemLen();
   }
 
   void alloc();
