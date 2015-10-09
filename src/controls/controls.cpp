@@ -72,6 +72,7 @@ void Controls::iniControls(){
   this->rtField_      =     {0.0,0.0,0.0};
   this->rtFreq_   =         0.0;
   this->rtPhase_   =        0.0;
+  this->rtSigma_   =        0.0;
   this->rtTOn_ =            0.0;
   this->rtTOff_ =       10000.0;
   this->rtEnvelope_ =       1;

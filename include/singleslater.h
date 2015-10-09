@@ -265,7 +265,8 @@ public:
     this->Ref_         = _INVALID;
     this->denTol_      = 1e-10;
     this->eneTol_      = 1e-12;
-    this->maxSCFIter_  = 128;
+    this->maxSCFIter_  = 256;
+    //this->maxSCFIter_  = 128;
     this->nTCS_        = 1;
     this->maxMultipole_ = 3;
     this->elecField_   = {0.0,0.0,0.0};

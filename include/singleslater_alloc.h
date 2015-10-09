@@ -30,6 +30,7 @@ template<typename T>
 void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset, 
                                    AOIntegrals * aointegrals, FileIO * fileio, 
                                    Controls * controls) {
+
   this->communicate(*molecule,*basisset,*aointegrals,*fileio,*controls);
   this->initMeta();
 
@@ -58,7 +59,6 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
   // This is the only way via the C++ interface to set this flag (needed
   // for allocDFT)
   this->isDFT = controls->DFT;
-  
   this->alloc();
 
 };

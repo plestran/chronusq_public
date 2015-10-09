@@ -36,54 +36,12 @@ namespace ChronusQ{
   void AOIntegrals::Gen34Contract(ComplexMatrix &G, const ComplexMatrix &X, int bf1, int bf2, 
     int bf3, int bf4, double v){
 
-    G(bf1,bf2) += X(bf4,bf3)*v;
-    G(bf3,bf4) += X(bf2,bf1)*v;
-    G(bf2,bf1) += X(bf3,bf4)*v;
-    G(bf4,bf3) += X(bf1,bf2)*v;
+    G(bf1,bf2) += X(bf4,bf3).real()*v;
+    G(bf3,bf4) += X(bf2,bf1).real()*v;
+    G(bf2,bf1) += X(bf3,bf4).real()*v;
+    G(bf4,bf3) += X(bf1,bf2).real()*v;
   } // Gen34Contract
 
-  template<>
-  void AOIntegrals::GenCouContractSpinor(ComplexMatrix &G, const ComplexMatrix &X, int bf1, 
-    int bf2, int bf3, int bf4, double v){
-/*
-    // Alpha-Alpha
-    G(bf1,bf2)     += X(bf4,bf3)*v;
-    G(bf3,bf4)     += X(bf2,bf1)*v;
-    G(bf2,bf1)     += X(bf3,bf4)*v;
-    G(bf4,bf3)     += X(bf1,bf2)*v;
-    G(bf1+1,bf2+1) += X(bf4,bf3)*v;
-    G(bf3+1,bf4+1) += X(bf2,bf1)*v;
-    G(bf2+1,bf1+1) += X(bf3,bf4)*v;
-    G(bf4+1,bf3+1) += X(bf1,bf2)*v;
-    // Beta-Beta
-    G(bf1,bf2)     += X(bf4+1,bf3+1)*v;
-    G(bf3,bf4)     += X(bf2+1,bf1+1)*v;
-    G(bf2,bf1)     += X(bf3+1,bf4+1)*v;
-    G(bf4,bf3)     += X(bf1+1,bf2+1)*v;
-    G(bf1+1,bf2+1) += X(bf4+1,bf3+1)*v;
-    G(bf3+1,bf4+1) += X(bf2+1,bf1+1)*v;
-    G(bf2+1,bf1+1) += X(bf3+1,bf4+1)*v;
-    G(bf4+1,bf3+1) += X(bf1+1,bf2+1)*v;
-*/
-
-    G(bf1,bf2)     += 0.5*(X(bf4,bf3)+X(bf3,bf4))*v;
-    G(bf3,bf4)     += 0.5*(X(bf2,bf1)+X(bf1,bf2))*v;
-    G(bf2,bf1)     += 0.5*(X(bf3,bf4)+X(bf4,bf3))*v;
-    G(bf4,bf3)     += 0.5*(X(bf1,bf2)+X(bf2,bf1))*v;
-    G(bf1+1,bf2+1) += 0.5*(X(bf4,bf3)+X(bf3,bf4))*v;
-    G(bf3+1,bf4+1) += 0.5*(X(bf2,bf1)+X(bf1,bf2))*v;
-    G(bf2+1,bf1+1) += 0.5*(X(bf3,bf4)+X(bf4,bf3))*v;
-    G(bf4+1,bf3+1) += 0.5*(X(bf1,bf2)+X(bf2,bf1))*v;
-    G(bf1,bf2)     += 0.5*(X(bf4+1,bf3+1)+X(bf3+1,bf4+1))*v;
-    G(bf3,bf4)     += 0.5*(X(bf2+1,bf1+1)+X(bf1+1,bf2+1))*v;
-    G(bf2,bf1)     += 0.5*(X(bf3+1,bf4+1)+X(bf4+1,bf3+1))*v;
-    G(bf4,bf3)     += 0.5*(X(bf1+1,bf2+1)+X(bf2+1,bf1+1))*v;
-    G(bf1+1,bf2+1) += 0.5*(X(bf4+1,bf3+1)+X(bf3+1,bf4+1))*v;
-    G(bf3+1,bf4+1) += 0.5*(X(bf2+1,bf1+1)+X(bf1+1,bf2+1))*v;
-    G(bf2+1,bf1+1) += 0.5*(X(bf3+1,bf4+1)+X(bf4+1,bf3+1))*v;
-    G(bf4+1,bf3+1) += 0.5*(X(bf1+1,bf2+1)+X(bf2+1,bf1+1))*v;
-  } // GenCouContractSpinor
-  
   /**
    * Forms the unique contributions for a 23 contraction
    * given the permutational symmetry of real ERIs
@@ -105,6 +63,30 @@ namespace ChronusQ{
     G(bf4,bf1) -= fact*X(bf3,bf2)*v;
     G(bf3,bf2) -= fact*X(bf4,bf1)*v;
   } // Gen23Contract
+
+  template<>
+  void AOIntegrals::GenCouContractSpinor(ComplexMatrix &G, const ComplexMatrix &X, int bf1, 
+    int bf2, int bf3, int bf4, double v){
+
+    // This should work for comple GHF, be careful though!
+    G(bf1,bf2)     += 0.5*(X(bf4,bf3)+X(bf3,bf4))*v;
+    G(bf3,bf4)     += 0.5*(X(bf2,bf1)+X(bf1,bf2))*v;
+    G(bf2,bf1)     += 0.5*(X(bf3,bf4)+X(bf4,bf3))*v;
+    G(bf4,bf3)     += 0.5*(X(bf1,bf2)+X(bf2,bf1))*v;
+    G(bf1+1,bf2+1) += 0.5*(X(bf4,bf3)+X(bf3,bf4))*v;
+    G(bf3+1,bf4+1) += 0.5*(X(bf2,bf1)+X(bf1,bf2))*v;
+    G(bf2+1,bf1+1) += 0.5*(X(bf3,bf4)+X(bf4,bf3))*v;
+    G(bf4+1,bf3+1) += 0.5*(X(bf1,bf2)+X(bf2,bf1))*v;
+    G(bf1,bf2)     += 0.5*(X(bf4+1,bf3+1)+X(bf3+1,bf4+1))*v;
+    G(bf3,bf4)     += 0.5*(X(bf2+1,bf1+1)+X(bf1+1,bf2+1))*v;
+    G(bf2,bf1)     += 0.5*(X(bf3+1,bf4+1)+X(bf4+1,bf3+1))*v;
+    G(bf4,bf3)     += 0.5*(X(bf1+1,bf2+1)+X(bf2+1,bf1+1))*v;
+    G(bf1+1,bf2+1) += 0.5*(X(bf4+1,bf3+1)+X(bf3+1,bf4+1))*v;
+    G(bf3+1,bf4+1) += 0.5*(X(bf2+1,bf1+1)+X(bf1+1,bf2+1))*v;
+    G(bf2+1,bf1+1) += 0.5*(X(bf3+1,bf4+1)+X(bf4+1,bf3+1))*v;
+    G(bf4+1,bf3+1) += 0.5*(X(bf1+1,bf2+1)+X(bf2+1,bf1+1))*v;
+  } // GenCouContractSpinor
+  
 
   template<> 
   void AOIntegrals::GenExchContractSpinor(ComplexMatrix &G, const ComplexMatrix &X, int bf1, 

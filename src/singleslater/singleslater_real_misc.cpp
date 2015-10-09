@@ -47,12 +47,15 @@ SingleSlater<double>::SingleSlater(SingleSlater<double> * other){
     this->haveMO	    = true;
     this->havePT      = true;
     this->isClosedShell = other->isClosedShell;
+
+    auto NTCSxNBASIS = this->nBasis_*this->nTCS_;
+
     // Hardcoded for Libint route
     this->densityA_           = std::unique_ptr<RealMatrix>(new RealMatrix(*other->densityA_));
     this->fockA_              = std::unique_ptr<RealMatrix>(new RealMatrix(*other->fockA_));
     this->moA_                = std::unique_ptr<RealMatrix>(new RealMatrix(*other->moA_));
     this->PTA_                = std::unique_ptr<RealMatrix>(new RealMatrix(*other->PTA_));
-    if(this->Ref_ != RHF){
+    if(this->Ref_ != isClosedShell && this->Ref_ != TCS ){
       this->densityB_           = std::unique_ptr<RealMatrix>(new RealMatrix(*other->densityB_));
       this->fockB_              = std::unique_ptr<RealMatrix>(new RealMatrix(*other->fockB_));
       this->moB_                = std::unique_ptr<RealMatrix>(new RealMatrix(*other->moB_));

@@ -165,11 +165,11 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 //  }
   if(controls->doRealTime) {
     if(!controls->doComplex) {
-      realtimeReal->iniRealTime(molecule.get(),basisset.get(),fileIO.get(),controls.get(),aointegrals.get(),hartreeFockReal.get());
+      realtimeReal->iniRealTime(fileIO.get(),controls.get(),aointegrals.get(),hartreeFockReal.get());
       realtimeReal->iniDensity();
       realtimeReal->doPropagation();
     } else {
-      realtimeComplex->iniRealTime(molecule.get(),basisset.get(),fileIO.get(),controls.get(),aointegrals.get(),hartreeFockComplex.get());
+      realtimeComplex->iniRealTime(fileIO.get(),controls.get(),aointegrals.get(),hartreeFockComplex.get());
       realtimeComplex->iniDensity();
       realtimeComplex->doPropagation();
     }
