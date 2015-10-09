@@ -11,6 +11,7 @@ using ChronusQ::FileIO;
 using ChronusQ::BasisSet;
 using ChronusQ::Controls;
 using ChronusQ::AOIntegrals;
+using ChronusQ::RealTime;
 
 namespace ChronusQ{
   void Wrapper_readInput(FileIO&,Molecule&,BasisSet&,Controls&,BasisSet&);

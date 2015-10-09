@@ -114,15 +114,8 @@ public:
     this->Ref_         = 0;
     this->nOccA_       = 0;
     this->nOccB_       = 0;
-    this->maxSteps_    = 0;
     this->nSkip_       = 0;
-    this->initDensity_ = 0;
-    this->swapMOA_     = 0;
-    this->swapMOB_     = 0;
-    this->typeOrtho_   = 0;
-    this->methFormU_   = 0;
 
-    this->stepSize_    = 0.0;
     this->deltaT_      = 0.0;
     this->currentTime_ = 0.0;
 
@@ -148,9 +141,16 @@ public:
     this->isClosedShell_ = false;
 
     // Standard Values
-    this->frozenNuc_ = true;
-    this->EDField_   = {0.0,0.0,0.0};
-    this->nTCS_      = 1;
+    this->frozenNuc_   = true;
+    this->EDField_     = {0.0,0.0,0.0};
+    this->nTCS_        = 1;
+    this->maxSteps_    = 50;
+    this->stepSize_    = 0.05;
+    this->typeOrtho_   = 1;
+    this->initDensity_ = 0;
+    this->swapMOA_     = 0;
+    this->swapMOB_     = 0;
+    this->methFormU_   = 1;
   };
   ~RealTime() {;};
 
