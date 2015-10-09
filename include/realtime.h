@@ -196,5 +196,6 @@ public:
 };
 
 #include <realtime_alloc.h>
+#include <realtime_print.h>
 } // namespace ChronusQ
 #endif
