@@ -68,10 +68,6 @@ void RealTime<dcomplex>::iniDensity() {
    // V1 = S^(-1/2)
    // V2 = S^(1/2)
 
-/*
-    oTrans1.real() = (*this->aointegrals_->overlap_).pow(-0.5);
-    oTrans2.real() = (*this->aointegrals_->overlap_).pow(0.5);
-*/
     char JOBZ = 'V';
     char UPLO = 'L';
     int INFO;
@@ -218,36 +214,6 @@ void RealTime<dcomplex>::formUTrans() {
   // FIXME: Eigen's Eigensolver is terrible, replace with LAPACK routines
   if (this->methFormU_ == 1) { 
    //  Eigen-decomposition
-/*
-    ComplexMatrix EVec(NTCSxNBASIS,NTCSxNBASIS);
-    RealMatrix 	  EVal(NTCSxNBASIS,1);
-
-    Eigen::SelfAdjointEigenSolver<ComplexMatrix> 
-      sys(*this->ssPropagator_->fockA());
-
-    EVec = sys.eigenvectors();
-    EVal = sys.eigenvalues();
-    uTransA.setZero();
-    for (int i = 0; i < NTCSxNBASIS; i++) {
-      uTransA(i,i) = 
-        dcomplex( cos(deltaT_ * EVal(i,0)), -sin(deltaT_ * EVal(i,0)) );
-    }
-
-    uTransA = EVec * uTransA * EVec.adjoint();
-    if(!this->isClosedShell_ && this->Ref_ != SingleSlater<dcomplex>::TCS) {
-      Eigen::SelfAdjointEigenSolver<ComplexMatrix> 
-        sys(*this->ssPropagator_->fockB());
-
-      EVec = sys.eigenvectors();
-      EVal = sys.eigenvalues();
-      uTransB.setZero();
-      for (int i = 0; i < NTCSxNBASIS; i++) {
-        uTransB(i,i) = 
-          dcomplex( cos(deltaT_ * EVal(i,0)), -sin(deltaT_ * EVal(i,0)) );
-      }
-      uTransB = EVec * uTransB * EVec.adjoint();
-    }
-*/
     
     char JOBZ = 'V';
     char UPLO = 'L';
