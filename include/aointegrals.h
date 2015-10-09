@@ -141,15 +141,15 @@ class AOIntegrals{
 
   inline void checkWorkers(){
     if(this->fileio_  == NULL) 
-      CErr("Fatal: Must initialize SingleSlater with FileIO Object");
+      CErr("Fatal: Must initialize AOIntegrals with FileIO Object");
     if(this->basisSet_ == NULL) 
-      CErr("Fatal: Must initialize SingleSlater with BasisSet Object",
+      CErr("Fatal: Must initialize AOIntegrals with BasisSet Object",
            this->fileio_->out);
     if(this->molecule_ == NULL) 
-      CErr("Fatal: Must initialize SingleSlater with Molecule Object",
+      CErr("Fatal: Must initialize AOIntegrals with Molecule Object",
            this->fileio_->out);
     if(this->controls_ == NULL) 
-      CErr("Fatal: Must initialize SingleSlater with Controls Object",
+      CErr("Fatal: Must initialize AOIntegrals with Controls Object",
            this->fileio_->out);
   }
 

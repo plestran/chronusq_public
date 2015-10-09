@@ -94,6 +94,14 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def_readwrite("doDF"    , &AOIntegrals::doDF               )
   ;
 
+  class_<RealTime<double>,boost::noncopyable>("RealTime_double",init<>())
+    .def("communicate"  , &RealTime<double>::communicate  )
+    .def("initMeta"     , &RealTime<double>::initMeta     )
+    .def("alloc"        , &RealTime<double>::alloc        )
+    .def("iniDensity"   , &RealTime<double>::iniDensity   )
+    .def("doPropagation", &RealTime<double>::doPropagation)
+  ;
+
   def("readInput",       ChronusQ::Wrapper_readInput);
   def("HashAtom",        ChronusQ::HashAtom         );
   def("getAtomicNumber", ChronusQ::getAtomicNumber  );
