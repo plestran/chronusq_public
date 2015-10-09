@@ -64,56 +64,56 @@ void RealTime<T>::alloc(){
       std::unique_ptr<ComplexMatrix>(
         new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
   } catch(...) {
-    CErr(std::current_exception(),"");
+    CErr(std::current_exception(),"Orthog. Trans. Matrix 1");
   }
   try {
     this->oTrans2_ = 
       std::unique_ptr<ComplexMatrix>(
         new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
   } catch(...) {
-    CErr(std::current_exception(),"");
+    CErr(std::current_exception(),"Orthog. Trans. Matrix 2 (Inverse)");
   }
   try {
     this->POA_  	 = 
       std::unique_ptr<ComplexMatrix>(
         new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
   } catch(...) {
-    CErr(std::current_exception(),"");
+    CErr(std::current_exception(),"Density Alpha in Orthonormal Basis");
   }
   try {
     this->POAsav_  = 
       std::unique_ptr<ComplexMatrix>(
         new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
   } catch(...) {
-    CErr(std::current_exception(),"");
+    CErr(std::current_exception(),"copy of Density Alpha in Orthonormal Basis");
   }
   try {
     this->FOA_ 	 = 
       std::unique_ptr<ComplexMatrix>(
         new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
   } catch(...) {
-    CErr(std::current_exception(),"");
+    CErr(std::current_exception(),"Fock Matrix Alpha in Ortho. Basis");
   }
   try {
     this->initMOA_ = 
       std::unique_ptr<ComplexMatrix>(
         new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
   } catch(...) {
-    CErr(std::current_exception(),"");
+    CErr(std::current_exception(),"GS MO Alpha in orthonormal basis");
   }
   try {
     this->uTransA_ = 
       std::unique_ptr<ComplexMatrix>(
         new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
   } catch(...) {
-    CErr(std::current_exception(),"");
+    CErr(std::current_exception(),"Unitary Trans. Matrix Alpha [exp(-i*dt*F)] ");
   }
   try {
     this->scratch_ = 
       std::unique_ptr<ComplexMatrix>(
         new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
   } catch(...) {
-    CErr(std::current_exception(),"");
+    CErr(std::current_exception(),"N x N scratch for RT");
   }
 
   if(!this->isClosedShell_ && this->Ref_ != SingleSlater<T>::TCS){
@@ -122,35 +122,35 @@ void RealTime<T>::alloc(){
         std::unique_ptr<ComplexMatrix>(
           new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
     } catch(...) {
-      CErr(std::current_exception(),"");
+      CErr(std::current_exception(),"Density Beta in Ortho. Basis");
     }
     try {
       this->POBsav_  = 
         std::unique_ptr<ComplexMatrix>(
           new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
     } catch(...) {
-      CErr(std::current_exception(),"");
+      CErr(std::current_exception(),"copy of Density Beta in Ortho. Basis");
     }
     try {
       this->FOB_ 	 = 
         std::unique_ptr<ComplexMatrix>(
           new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
     } catch(...) {
-      CErr(std::current_exception(),"");
+      CErr(std::current_exception(),"Fock Matrix Beta in Ortho. Basis");
     }
     try {
       this->initMOB_ = 
         std::unique_ptr<ComplexMatrix>(
           new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
     } catch(...) {
-      CErr(std::current_exception(),"");
+      CErr(std::current_exception(),"GS MO Beta in Ortho. Basis");
     }
     try {
       this->uTransB_ = 
         std::unique_ptr<ComplexMatrix>(
           new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
     } catch(...) {
-      CErr(std::current_exception(),"");
+      CErr(std::current_exception(),"Unitary Trans. Matrix Beta [exp(-i*dt*F)]");
     }
   }
 }

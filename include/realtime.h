@@ -65,23 +65,22 @@ class RealTime {
   bool  isClosedShell_;
 
   std::array<double,3> EDField_;
-
-  // FIXME: Need documentation for what these things actually are!
-  std::unique_ptr<ComplexMatrix>  oTrans1_;
-  std::unique_ptr<ComplexMatrix>  oTrans2_;
+  // subsequent Matrices are all of the same dimension
+  std::unique_ptr<ComplexMatrix>  oTrans1_; // Orthogonalizing Transformation Matrix from Overlap
+  std::unique_ptr<ComplexMatrix>  oTrans2_; // Orthogonalizing Transformation Matrix from Overlap Inverse
 //  std::unique_ptr<ComplexMatrix>  PA_;
 //  std::unique_ptr<ComplexMatrix>  PB_;
-  std::unique_ptr<ComplexMatrix>  POA_;
-  std::unique_ptr<ComplexMatrix>  POAsav_;
-  std::unique_ptr<ComplexMatrix>  POB_;
-  std::unique_ptr<ComplexMatrix>  POBsav_;
-  std::unique_ptr<ComplexMatrix>  FOA_;
-  std::unique_ptr<ComplexMatrix>  FOB_;
-  std::unique_ptr<ComplexMatrix>  initMOA_;
-  std::unique_ptr<ComplexMatrix>  initMOB_;
-  std::unique_ptr<ComplexMatrix>  uTransA_;
-  std::unique_ptr<ComplexMatrix>  uTransB_;
-  std::unique_ptr<ComplexMatrix>  scratch_;
+  std::unique_ptr<ComplexMatrix>  POA_; // Density Alpha in Orthonormal Basis
+  std::unique_ptr<ComplexMatrix>  POAsav_; // saved copy of Density Alpha in Orthonormal Basis
+  std::unique_ptr<ComplexMatrix>  POB_; // Density Beta in Orthonormal Basis
+  std::unique_ptr<ComplexMatrix>  POBsav_; // saved copy of Density Beta in Orthonormal Basis
+  std::unique_ptr<ComplexMatrix>  FOA_; // Fock Matrix Alpha in Orthonormal Basis 
+  std::unique_ptr<ComplexMatrix>  FOB_; // Fock Matrix Beta in Orthonormal Basis
+  std::unique_ptr<ComplexMatrix>  initMOA_; // Ground State MO Alpha in orthonormal basis
+  std::unique_ptr<ComplexMatrix>  initMOB_; // Ground State MO Beta in orthonormal basis
+  std::unique_ptr<ComplexMatrix>  uTransA_; // Unitary Transformation Matrix [exp(-i*dt*F)] Alpha
+  std::unique_ptr<ComplexMatrix>  uTransB_; // Unitary Transformation Matrix [exp(-i*dt*F)] Beta
+  std::unique_ptr<ComplexMatrix>  scratch_; // NBas x NBas scratch Matrix
   
   inline void checkWorkers(){
     if(this->fileio_  == NULL) 
