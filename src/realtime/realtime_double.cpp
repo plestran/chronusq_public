@@ -67,11 +67,45 @@ void RealTime<double>::iniDensity() {
    // Lowdin transformation 
    // V1 = S^(-1/2)
    // V2 = S^(1/2)
+
+/*
     oTrans1.real() = (*this->aointegrals_->overlap_).pow(-0.5);
     oTrans2.real() = (*this->aointegrals_->overlap_).pow(0.5);
+*/
+
+    char JOBZ = 'V';
+    char UPLO = 'L';
+    int INFO;
+
+    double *A =    this->REAL_LAPACK_SCR;
+    double *W =    A + NTCSxNBASIS * NTCSxNBASIS;
+    double *WORK = W + NTCSxNBASIS;
+
+    RealVecMap E(W,NTCSxNBASIS);
+    RealMap    V(A,NTCSxNBASIS,NTCSxNBASIS);
+    RealMap    S(WORK,NTCSxNBASIS,NTCSxNBASIS); // Requires WORK to be NBSq
+
+    E.setZero();
+    V.setZero();
+    S.setZero();
+
+    std::memcpy(A,this->aointegrals_->overlap_->data(),
+      NTCSxNBASIS*NTCSxNBASIS*sizeof(double));
+
+    dsyev_(&JOBZ,&UPLO,&NTCSxNBASIS,A,&NTCSxNBASIS,W,WORK,&this->lWORK,&INFO);
+
+    V.transposeInPlace(); // BC Col major
+    std::memcpy(WORK,A,NTCSxNBASIS*NTCSxNBASIS*sizeof(double));
+
+    for(auto i = 0; i < NTCSxNBASIS; i++){ S.col(i) *= std::sqrt(W[i]); }
+    oTrans2.real() = S * V.adjoint();
+
+    for(auto i = 0; i < NTCSxNBASIS; i++){ S.col(i) /= W[i]; }
+    oTrans1.real() = S * V.adjoint();
+
     if(this->controls_->printLevel>3) {
-      prettyPrint(this->fileio_->out,oTrans1,"S^(-1/2)");
-      prettyPrint(this->fileio_->out,oTrans2,"S^(1/2)");
+      prettyPrintComplex(this->fileio_->out,oTrans1,"S^(-1/2)");
+      prettyPrintComplex(this->fileio_->out,oTrans2,"S^(1/2)");
     }
   }
   else if (this->typeOrtho_ == 2) {  
@@ -189,6 +223,8 @@ void RealTime<double>::formUTrans() {
   // FIXME: Eigen's Eigensolver is terrible, replace with LAPACK routines
   if (this->methFormU_ == 1) { 
    //  Eigen-decomposition
+
+/*     
     ComplexMatrix EVec(NTCSxNBASIS,NTCSxNBASIS);
     RealMatrix 	  EVal(NTCSxNBASIS,1);
 
@@ -197,6 +233,7 @@ void RealTime<double>::formUTrans() {
 
     EVec = sys.eigenvectors();
     EVal = sys.eigenvalues();
+    
     uTransA.setZero();
     for (int i = 0; i < NTCSxNBASIS; i++) {
       uTransA(i,i) = 
@@ -216,6 +253,64 @@ void RealTime<double>::formUTrans() {
           dcomplex( cos(deltaT_ * EVal(i,0)), -sin(deltaT_ * EVal(i,0)) );
       }
       uTransB = EVec * uTransB * EVec.adjoint();
+    }
+*/
+    char JOBZ = 'V';
+    char UPLO = 'L';
+    int INFO;
+
+    dcomplex *A     = this->scratchMem_;
+    double   *W     = this->REAL_LAPACK_SCR;
+    double   *RWORK = W + std::max(1,3*NTCSxNBASIS-2);
+    dcomplex *WORK  = this->CMPLX_LAPACK_SCR;
+
+    RealVecMap E(W,NTCSxNBASIS);
+    ComplexMap V(A,NTCSxNBASIS,NTCSxNBASIS);
+    ComplexMap S(WORK,NTCSxNBASIS,NTCSxNBASIS);
+
+    E.setZero();
+    V.setZero();
+    S.setZero();
+
+    std::memcpy(A,this->ssPropagator_->fockA()->data(),
+      NTCSxNBASIS*NTCSxNBASIS*sizeof(dcomplex));
+
+    V.transposeInPlace(); // BC Col major
+    zheev_(&JOBZ,&UPLO,&NTCSxNBASIS,A,&NTCSxNBASIS,W,WORK,&this->lWORK,RWORK,
+      &INFO);
+
+    V.transposeInPlace(); // BC Col major
+    std::memcpy(WORK,A,NTCSxNBASIS*NTCSxNBASIS*sizeof(dcomplex));
+
+
+    for(auto i = 0; i < NTCSxNBASIS; i++){ 
+      S.col(i) *= dcomplex(std::cos(this->deltaT_ * W[i]),
+                          -std::sin(this->deltaT_ * W[i])); 
+    }
+
+    uTransA = S * V.adjoint();
+
+    if(!this->isClosedShell_ && this->Ref_ != SingleSlater<dcomplex>::TCS) {
+      E.setZero();
+      V.setZero();
+      S.setZero();
+     
+      std::memcpy(A,this->ssPropagator_->fockB()->data(),
+        NTCSxNBASIS*NTCSxNBASIS*sizeof(dcomplex));
+     
+      V.transposeInPlace(); // BC Col major
+      zheev_(&JOBZ,&UPLO,&NTCSxNBASIS,A,&NTCSxNBASIS,W,WORK,&this->lWORK,RWORK,
+        &INFO);
+     
+      V.transposeInPlace(); // BC Col major
+      std::memcpy(WORK,A,NTCSxNBASIS*NTCSxNBASIS*sizeof(dcomplex));
+     
+     
+      for(auto i = 0; i < NTCSxNBASIS; i++){ 
+        S.col(i) *= dcomplex(std::cos(this->deltaT_ * W[i]),
+                            -std::sin(this->deltaT_ * W[i])); 
+      }
+      uTransB = S * V.adjoint();
     }
   }
   else if (this->methFormU_ == 2) { 
@@ -345,6 +440,7 @@ void RealTime<double>::doPropagation() {
     };
   }
   delete [] this->SCR;
+  delete [] this->REAL_LAPACK_SCR;
 };
 
 } // namespace ChronusQ

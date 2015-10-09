@@ -80,6 +80,9 @@ class RealTime {
   dcomplex * uTransBMem_; // Unitary Transformation Matrix [exp(-i*dt*F)] Beta
   dcomplex * scratchMem_; // NBas x NBas scratch Matrix
 
+  double   * REAL_LAPACK_SCR;
+  dcomplex * CMPLX_LAPACK_SCR;
+
   // Memory Lengths
   int lenScr_;
   int lenOTrans1_;
@@ -95,6 +98,10 @@ class RealTime {
   int lenUTransA_;
   int lenUTransB_;
   int lenScratch_;
+
+  int lenREAL_LAPACK_SCR;
+  int lenCMPLX_LAPACK_SCR;
+  int lWORK;
 
   std::array<double,3> EDField_;
   

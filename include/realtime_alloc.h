@@ -77,6 +77,9 @@ void RealTime<T>::initRTPtr(){
   this->uTransAMem_ = NULL;
   this->uTransBMem_ = NULL;
   this->scratchMem_ = NULL;
+
+  this->REAL_LAPACK_SCR  = NULL;
+  this->CMPLX_LAPACK_SCR = NULL;
 }
 
 template<typename T>
@@ -114,6 +117,19 @@ void RealTime<T>::initMemLen(){
     this->lenScr_ += this->lenInitMOB_; 
     this->lenScr_ += this->lenUTransB_; 
   }
+
+  this->lWORK               =  NTCSxNBASIS * NTCSxNBASIS;
+  this->lenREAL_LAPACK_SCR  =  0;
+  this->lenREAL_LAPACK_SCR  += NTCSxNBASIS * NTCSxNBASIS;   // DSYEV::A
+  this->lenREAL_LAPACK_SCR  += NTCSxNBASIS;                 // DSYEV/ZHEEV::W
+  this->lenREAL_LAPACK_SCR  += this->lWORK;                 // DSYEV::WORK
+  this->lenREAL_LAPACK_SCR  += std::max(1,3*NTCSxNBASIS-2); // ZHEEV::RWORK
+  this->lenCMPLX_LAPACK_SCR =  0;
+  // This can be handled my the scratch space
+//this->lenCMPLX_LAPACK_SCR += NTCSxNBASIS * NTCSxNBASIS;   // ZHEEV::A
+  this->lenCMPLX_LAPACK_SCR += this->lWORK;                 // ZHEEV::WORK
+
+  this->lenScr_ += this->lenCMPLX_LAPACK_SCR;
 }
 
 template<typename T>
@@ -134,7 +150,7 @@ void RealTime<T>::initMem(){
   LEN_LAST_OF_SECTION  = this->lenUTransA_;
 
   if(!this->isClosedShell_ && this->Ref_ != SingleSlater<T>::TCS){
-    this->POBMem_     = LAST_OF_SECTION + LEN_LAST_OF_SECTION;
+    this->POBMem_     = LAST_OF_SECTION   + LEN_LAST_OF_SECTION;
     this->POBsavMem_  = this->POBMem_     + this->lenPOB_;
     this->FOBMem_     = this->POBsavMem_  + this->lenPOBsav_;
     this->initMOBMem_ = this->FOBMem_     + this->lenFOB_;
@@ -143,6 +159,9 @@ void RealTime<T>::initMem(){
     LEN_LAST_OF_SECTION  = this->lenUTransB_;
   }
 
-  this->scratchMem_ = LAST_OF_SECTION + LEN_LAST_OF_SECTION;
+  this->scratchMem_      = LAST_OF_SECTION       + LEN_LAST_OF_SECTION;
+  this->CMPLX_LAPACK_SCR = this->scratchMem_     + this->lenScratch_;
+
+  this->REAL_LAPACK_SCR = new double[this->lenREAL_LAPACK_SCR];
 }
 
