@@ -26,7 +26,6 @@
 template<typename T>
 void RealTime<T>::iniRealTime(FileIO *fileio, Controls *controls, 
        AOIntegrals *aointegrals, SingleSlater<T> *groundState) {
-
   this->communicate(*fileio,*controls,*aointegrals,*groundState);
   this->initMeta();
 
