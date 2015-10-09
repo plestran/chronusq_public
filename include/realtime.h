@@ -64,20 +64,23 @@ class RealTime {
   bool	frozenNuc_;     // Whether to freeze nuclei
   bool  isClosedShell_;
 
-  dcomplex * SCR;
-  dcomplex * oTrans1Mem_;
-  dcomplex * oTrans2Mem_;
-  dcomplex * POAMem_;
-  dcomplex * POBMem_;
-  dcomplex * POAsavMem_;
-  dcomplex * POBsavMem_;
-  dcomplex * FOAMem_;
-  dcomplex * FOBMem_;
-  dcomplex * initMOAMem_;
-  dcomplex * initMOBMem_;
-  dcomplex * uTransAMem_;
-  dcomplex * uTransBMem_;
-  dcomplex * scratchMem_;
+  // Memory pointers
+  dcomplex * SCR;         // Total Scratch space for RT
+  dcomplex * oTrans1Mem_; // Orthogonalizing Transformation Matrix from Overlap
+  dcomplex * oTrans2Mem_; // Orthogonalizing Transformation Matrix from Overlap Inverse
+  dcomplex * POAMem_;     // Density Alpha in Orthonormal Basis
+  dcomplex * POBMem_;     // Density Beta in Orthonormal Basis
+  dcomplex * POAsavMem_;  // Saved copy of Density Alpha in Orthonormal Basis
+  dcomplex * POBsavMem_;  // Saved copy of Density Beta in Orthonormal Basis
+  dcomplex * FOAMem_;     // Fock Matrix Alpha in Orthonormal Basis 
+  dcomplex * FOBMem_;     // Fock Matrix Beta in Orthonormal Basis
+  dcomplex * initMOAMem_; // Ground State MO Alpha in orthonormal basis
+  dcomplex * initMOBMem_; // Ground State MO Beta in orthonormal basis
+  dcomplex * uTransAMem_; // Unitary Transformation Matrix [exp(-i*dt*F)] Alpha
+  dcomplex * uTransBMem_; // Unitary Transformation Matrix [exp(-i*dt*F)] Beta
+  dcomplex * scratchMem_; // NBas x NBas scratch Matrix
+
+  // Memory Lengths
   int lenScr_;
   int lenOTrans1_;
   int lenOTrans2_;
@@ -94,40 +97,6 @@ class RealTime {
   int lenScratch_;
 
   std::array<double,3> EDField_;
-/*
-  // subsequent Matrices are all of the same dimension
-  std::unique_ptr<ComplexMatrix>  oTrans1_; // Orthogonalizing Transformation Matrix from Overlap
-  std::unique_ptr<ComplexMatrix>  oTrans2_; // Orthogonalizing Transformation Matrix from Overlap Inverse
-//  std::unique_ptr<ComplexMatrix>  PA_;
-//  std::unique_ptr<ComplexMatrix>  PB_;
-  std::unique_ptr<ComplexMatrix>  POA_; // Density Alpha in Orthonormal Basis
-  std::unique_ptr<ComplexMatrix>  POAsav_; // saved copy of Density Alpha in Orthonormal Basis
-  std::unique_ptr<ComplexMatrix>  POB_; // Density Beta in Orthonormal Basis
-  std::unique_ptr<ComplexMatrix>  POBsav_; // saved copy of Density Beta in Orthonormal Basis
-  std::unique_ptr<ComplexMatrix>  FOA_; // Fock Matrix Alpha in Orthonormal Basis 
-  std::unique_ptr<ComplexMatrix>  FOB_; // Fock Matrix Beta in Orthonormal Basis
-  std::unique_ptr<ComplexMatrix>  initMOA_; // Ground State MO Alpha in orthonormal basis
-  std::unique_ptr<ComplexMatrix>  initMOB_; // Ground State MO Beta in orthonormal basis
-  std::unique_ptr<ComplexMatrix>  uTransA_; // Unitary Transformation Matrix [exp(-i*dt*F)] Alpha
-  std::unique_ptr<ComplexMatrix>  uTransB_; // Unitary Transformation Matrix [exp(-i*dt*F)] Beta
-  std::unique_ptr<ComplexMatrix>  scratch_; // NBas x NBas scratch Matrix
-*/
-
-/*
-  ComplexMap  oTrans1_; // Orthogonalizing Transformation Matrix from Overlap
-  ComplexMap  oTrans2_; // Orthogonalizing Transformation Matrix from Overlap Inverse
-  ComplexMap  POA_; // Density Alpha in Orthonormal Basis
-  ComplexMap  POAsav_; // saved copy of Density Alpha in Orthonormal Basis
-  ComplexMap  POB_; // Density Beta in Orthonormal Basis
-  ComplexMap  POBsav_; // saved copy of Density Beta in Orthonormal Basis
-  ComplexMap  FOA_; // Fock Matrix Alpha in Orthonormal Basis 
-  ComplexMap  FOB_; // Fock Matrix Beta in Orthonormal Basis
-  ComplexMap  initMOA_; // Ground State MO Alpha in orthonormal basis
-  ComplexMap  initMOB_; // Ground State MO Beta in orthonormal basis
-  ComplexMap  uTransA_; // Unitary Transformation Matrix [exp(-i*dt*F)] Alpha
-  ComplexMap  uTransB_; // Unitary Transformation Matrix [exp(-i*dt*F)] Beta
-  ComplexMap  GLOBAL_JUNKatch_; // NBas x NBas GLOBAL_JUNKatch Matrix
-*/
   
   inline void checkWorkers(){
     if(this->fileio_  == NULL) 
@@ -178,20 +147,6 @@ public:
     this->groundState_ = NULL;
 
     this->initRTPtr();
-
-  //this->oTrans1_ = nullptr;
-  //this->oTrans2_ = nullptr;
-  //this->POA_     = nullptr;
-  //this->POAsav_  = nullptr;
-  //this->POB_     = nullptr;
-  //this->POBsav_  = nullptr;
-  //this->FOA_     = nullptr;
-  //this->FOB_     = nullptr;
-  //this->initMOA_ = nullptr;
-  //this->initMOB_ = nullptr;
-  //this->uTransA_ = nullptr;
-  //this->uTransB_ = nullptr;
-  //this->scratch_ = nullptr;
 
     this->isClosedShell_ = false;
 

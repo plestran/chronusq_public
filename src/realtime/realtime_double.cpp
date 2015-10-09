@@ -271,12 +271,16 @@ void RealTime<double>::formUTrans() {
   }
   else if (this->methFormU_ == 2) { 
   // Taylor expansion
-//  scratch = -math.ii * deltaT_ * (*this->ssPropagator_->fockA());
-//  uTransA = scratch.exp(); // FIXME
-//  if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
-//    scratch = -math.ii * deltaT_ * (*this->ssPropagator_->fockB());
-//    uTransB = scratch.exp(); // FIXME
-//  }
+ 
+/*  This is not taylor and breaks with the new memory scheme
+ 
+    scratch = -math.ii * deltaT_ * (*this->ssPropagator_->fockA());
+    uTransA = scratch.exp(); // FIXME
+    if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
+      scratch = -math.ii * deltaT_ * (*this->ssPropagator_->fockB());
+      uTransB = scratch.exp(); // FIXME
+    }
+*/
   }
 //    prettyPrint(this->fileio_->out,(*this->uTransA_),"uTransA");
 //    if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) prettyPrint(this->fileio_->out,(*this->uTransB_),"uTransB");
@@ -391,6 +395,7 @@ void RealTime<double>::doPropagation() {
     currentTime_ += this->stepSize_;
     };
   }
+  delete [] this->SCR;
 };
 
 } // namespace ChronusQ
