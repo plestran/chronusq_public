@@ -324,14 +324,14 @@ void RealTime<double>::doPropagation() {
 
 //  Propagate the density matrix
 //
-//  FIXME: I'm actually not sure why this even works, but statements like these:
-//    A = B*A are dangerous (DBWY)
+    (*this->scratch_) = (*this->POA_);
     (*this->POA_) = 
-      (*this->uTransA_) * (*this->POA_) * this->uTransA_->adjoint();
+      (*this->uTransA_) * (*this->scratch_) * this->uTransA_->adjoint();
 
     if (!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
+      (*this->scratch_) = (*this->POB_);
       (*this->POB_) = 
-        (*this->uTransB_) * (*this->POB_) * this->uTransB_->adjoint();
+        (*this->uTransB_) * (*this->scratch_) * this->uTransB_->adjoint();
     }
 
 //  Transform density matrix from orthonormal to AO basis
