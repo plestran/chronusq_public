@@ -84,8 +84,8 @@ void SingleSlater<T>::formFock(){
   *(fockA_)+=(*this->PTA_);
 #endif
   if(this->controls_->DFT){
-//    cout << "Single Slater Numeric : Print" <<endl;
-//    cout << (*this->vXCA_)  << endl;
+    cout << "Single Slater Numeric : Print" <<endl;
+    cout << (*this->vXCA_)  << endl;
     (*this->fockA_) += (*this->vXCA_);
   }
   if(!this->isClosedShell && this->Ref_ != TCS){
@@ -98,7 +98,8 @@ void SingleSlater<T>::formFock(){
     *(fockB_)+=(*this->PTB_);
 #endif
     if(this->controls_->DFT){
-//    cout << "Single Slater Numeric : Beta" <<endl;
+    cout << "Single Slater Numeric : Print" <<endl;
+    cout << (*this->vXCB_)  << endl;
       (*this->fockB_) += (*this->vXCB_);
     }
   };

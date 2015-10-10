@@ -97,4 +97,5 @@ void SingleSlater<T>::buildVxc(cartGP gridPt, double weight){
      rhor = overlapR_->frobInner(this->densityA()->conjugate());
 //   Slater LDA (not yet ready. completated outside)       
      (*this->vXCA()) += weight*(*overlapR_)*(std::pow(rhor,(1.0/3.0)));
+     if(!this->isClosedShell && this->Ref_ != TCS) (*this->vXCB()) += weight*(*overlapR_)*(std::pow(rhor,(1.0/3.0)));
 };

@@ -45,6 +45,7 @@ void SingleSlater<double>::formVXC(){
     GridLeb.genGrid();
     TwoDGrid Raw3Dg(npts,&Rad,&GridLeb);          // Final Raw (not centered) 3D grid (Radial times Angular grid)
     this->vXCA()->setZero();                      // Set to zero every occurence of the SCF
+    if(!this->isClosedShell && this->Ref_ != TCS) this->vXCB()->setZero();
 //    cout << "Erased Vxc term " << endl;
 //  Loop over each centers (Atoms) (I think can be distribuited over different cpus)
     for(int iAtm = 0; iAtm < nAtom; iAtm++){
@@ -63,12 +64,19 @@ void SingleSlater<double>::formVXC(){
 //  Finishing the Vxc using the TF factor and the integration prefactor over a solid sphere
     (*this->vXCA()) =  val * (*this->vXCA());
 //  Comment to avoid the printing
-//  double Energy;
-//  Energy = (*this->vXCA_).frobInner(this->densityA_->conjugate());
-//  std::cout.precision(10);
-//  cout << " E_XC = " << Energy <<endl;
-//  cout << "Single Slater Numeric : Print" <<endl;
-//  cout << (*this->vXCA_)  << endl;
+  double Energy;
+  Energy = (*this->vXCA_).frobInner(this->densityA_->conjugate());
+  std::cout.precision(10);
+  cout << " E_XC = " << Energy <<endl;
+  if(!this->isClosedShell && this->Ref_ != TCS) {
+  (*this->vXCB()) =  val * (*this->vXCB());
+  double EnergyB;
+  EnergyB = (*this->vXCB_).frobInner(this->densityB_->conjugate());
+  std::cout.precision(10);
+  cout << " E_XCiB = " << EnergyB <<endl;
+  cout << " E_Xalpha_beta = " << Energy+EnergyB <<endl;
+}
+
 }; //End
 
 template<>
