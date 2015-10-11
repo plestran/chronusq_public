@@ -24,45 +24,143 @@
  *  
  */
 template<typename T>
-void RealTime<T>::iniRealTime(Molecule * molecule, BasisSet *basisset, FileIO *fileio, Controls *controls, AOIntegrals *aointegrals,SingleSlater<T> *groundState) {
+void RealTime<T>::iniRealTime(FileIO *fileio, Controls *controls, 
+       AOIntegrals *aointegrals, SingleSlater<T> *groundState) {
+  this->communicate(*fileio,*controls,*aointegrals,*groundState);
+  this->initMeta();
 
-  this->fileio_         = fileio;
-  this->controls_       = controls;
-  this->aointegrals_	= aointegrals;
-  this->groundState_   	= groundState;
 
-  this->ssPropagator_	= std::unique_ptr<SingleSlater<dcomplex>>(new SingleSlater<dcomplex>(groundState));
+// Keep around for C++ interface (for now)
+  this->maxSteps_	= this->controls_->rtMaxSteps;
+  this->stepSize_	= this->controls_->rtTimeStep;
+  this->typeOrtho_	= this->controls_->rtTypeOrtho; 
+  this->initDensity_	= this->controls_->rtInitDensity;
+  this->swapMOA_	= this->controls_->rtSwapMOA;
+  this->swapMOB_	= this->controls_->rtSwapMOB;
+  this->methFormU_	= this->controls_->rtMethFormU;
 
-  this->nBasis_ = basisset->nBasis();
-  this->RHF_	= this->groundState_->isClosedShell;
-  this->nOccA_ 	= this->groundState_->nOccA();
-  this->nOccB_ 	= this->groundState_->nOccB();
-
-  this->frozenNuc_	= true;
-  this->maxSteps_	= 100;
-  this->stepSize_	= 0.05;
-  this->typeOrtho_	= 1;  
-  this->initDensity_	= 1;
-  this->swapMOA_	= 0;
-  this->swapMOB_	= 3010;
-  this->methFormU_	= 1;
-
-  this->fileio_->out<<"\nReal-time TDHF: "<<endl;
-  this->fileio_->out<<std::right<<std::setw(20)<<"Number of steps = "<<std::setw(15)<<this->maxSteps_<<std::setw(5)<<endl;
-  this->fileio_->out<<std::right<<std::setw(20)<<"Step size = "<<std::setw(15)<<this->stepSize_<<std::setw(5)<<" a.u. "<<endl;
-
-  this->oTrans1_ = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-  this->oTrans2_ = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-  this->POA_  	 = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-  this->POAsav_  = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-  this->POB_  	 = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-  this->POBsav_  = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-  this->FOA_ 	 = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-  this->FOB_ 	 = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-  this->initMOA_ = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-  this->initMOB_ = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-  this->uTransA_ = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-  this->uTransB_ = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-  this->scratch_ = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
+  // FIXME: It doesn't make sense to have print here
+  this->fileio_->out << endl << "Real-time TDHF: "<< endl;
+  this->fileio_->out << std::right << std::setw(20) << "Number of steps = "
+                     << std::setw(15) << this->maxSteps_ << std::setw(5)
+                     << endl;
+  this->fileio_->out << std::right << std::setw(20) << "Step size = "
+                     <<std::setw(15) << this->stepSize_ << std::setw(5) 
+                     << " a.u. " << endl;
+  this->alloc();
 };
+
+template<typename T>
+void RealTime<T>::alloc(){
+  this->checkMeta();
+
+  this->ssPropagator_	= std::unique_ptr<SingleSlater<dcomplex>>(
+                            new SingleSlater<dcomplex>(
+                              this->groundState_));
+  this->initMem();
+}
+
+template<typename T>
+void RealTime<T>::initRTPtr(){
+  this->SCR         = NULL;
+  this->oTrans1Mem_ = NULL;
+  this->oTrans2Mem_ = NULL;
+  this->POAMem_     = NULL;
+  this->POBMem_     = NULL;
+  this->POAsavMem_  = NULL;
+  this->POBsavMem_  = NULL;
+  this->FOAMem_     = NULL;
+  this->FOBMem_     = NULL;
+  this->initMOAMem_ = NULL;
+  this->initMOBMem_ = NULL;
+  this->uTransAMem_ = NULL;
+  this->uTransBMem_ = NULL;
+  this->scratchMem_ = NULL;
+
+  this->REAL_LAPACK_SCR  = NULL;
+  this->CMPLX_LAPACK_SCR = NULL;
+}
+
+template<typename T>
+void RealTime<T>::initMemLen(){
+  auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
+
+  this->lenOTrans1_ = NTCSxNBASIS * NTCSxNBASIS;
+  this->lenOTrans2_ = NTCSxNBASIS * NTCSxNBASIS;
+  this->lenPOA_     = NTCSxNBASIS * NTCSxNBASIS;
+  this->lenPOB_     = NTCSxNBASIS * NTCSxNBASIS;
+  this->lenPOAsav_  = NTCSxNBASIS * NTCSxNBASIS;
+  this->lenPOBsav_  = NTCSxNBASIS * NTCSxNBASIS;
+  this->lenFOA_     = NTCSxNBASIS * NTCSxNBASIS;
+  this->lenFOB_     = NTCSxNBASIS * NTCSxNBASIS;
+  this->lenInitMOA_ = NTCSxNBASIS * NTCSxNBASIS;
+  this->lenInitMOB_ = NTCSxNBASIS * NTCSxNBASIS;
+  this->lenUTransA_ = NTCSxNBASIS * NTCSxNBASIS;
+  this->lenUTransB_ = NTCSxNBASIS * NTCSxNBASIS;
+  this->lenScratch_ = NTCSxNBASIS * NTCSxNBASIS;
+
+  this->lenScr_ = 0;
+  
+  this->lenScr_ += this->lenOTrans1_; 
+  this->lenScr_ += this->lenOTrans2_; 
+  this->lenScr_ += this->lenPOA_    ; 
+  this->lenScr_ += this->lenPOAsav_ ; 
+  this->lenScr_ += this->lenFOA_    ; 
+  this->lenScr_ += this->lenInitMOA_; 
+  this->lenScr_ += this->lenUTransA_; 
+  this->lenScr_ += this->lenScratch_; 
+  if(!this->isClosedShell_ && this->Ref_ != SingleSlater<T>::TCS){
+    this->lenScr_ += this->lenPOB_    ; 
+    this->lenScr_ += this->lenPOBsav_ ; 
+    this->lenScr_ += this->lenFOB_    ; 
+    this->lenScr_ += this->lenInitMOB_; 
+    this->lenScr_ += this->lenUTransB_; 
+  }
+
+  this->lWORK               =  NTCSxNBASIS * NTCSxNBASIS;
+  this->lenREAL_LAPACK_SCR  =  0;
+  this->lenREAL_LAPACK_SCR  += NTCSxNBASIS * NTCSxNBASIS;   // DSYEV::A
+  this->lenREAL_LAPACK_SCR  += NTCSxNBASIS;                 // DSYEV/ZHEEV::W
+  this->lenREAL_LAPACK_SCR  += this->lWORK;                 // DSYEV::WORK
+  this->lenREAL_LAPACK_SCR  += std::max(1,3*NTCSxNBASIS-2); // ZHEEV::RWORK
+  this->lenCMPLX_LAPACK_SCR =  0;
+  // This can be handled my the scratch space
+//this->lenCMPLX_LAPACK_SCR += NTCSxNBASIS * NTCSxNBASIS;   // ZHEEV::A
+  this->lenCMPLX_LAPACK_SCR += this->lWORK;                 // ZHEEV::WORK
+
+  this->lenScr_ += this->lenCMPLX_LAPACK_SCR;
+}
+
+template<typename T>
+void RealTime<T>::initMem(){
+  try{ this->SCR = new dcomplex[this->lenScr_]; } 
+  catch (...) { CErr(std::current_exception(),"RT Allocation"); }
+  dcomplex *LAST_OF_SECTION ;
+  int  LEN_LAST_OF_SECTION  ;
+
+  this->oTrans1Mem_ = this->SCR;
+  this->oTrans2Mem_ = this->oTrans1Mem_ + this->lenOTrans1_;
+  this->POAMem_     = this->oTrans2Mem_ + this->lenOTrans2_;
+  this->POAsavMem_  = this->POAMem_     + this->lenPOA_;
+  this->FOAMem_     = this->POAsavMem_  + this->lenPOAsav_;
+  this->initMOAMem_ = this->FOAMem_     + this->lenFOA_;
+  this->uTransAMem_ = this->initMOAMem_ + this->lenInitMOA_;
+  LAST_OF_SECTION      = this->uTransAMem_;
+  LEN_LAST_OF_SECTION  = this->lenUTransA_;
+
+  if(!this->isClosedShell_ && this->Ref_ != SingleSlater<T>::TCS){
+    this->POBMem_     = LAST_OF_SECTION   + LEN_LAST_OF_SECTION;
+    this->POBsavMem_  = this->POBMem_     + this->lenPOB_;
+    this->FOBMem_     = this->POBsavMem_  + this->lenPOBsav_;
+    this->initMOBMem_ = this->FOBMem_     + this->lenFOB_;
+    this->uTransBMem_ = this->initMOBMem_ + this->lenInitMOB_;
+    LAST_OF_SECTION      = this->uTransBMem_;
+    LEN_LAST_OF_SECTION  = this->lenUTransB_;
+  }
+
+  this->scratchMem_      = LAST_OF_SECTION       + LEN_LAST_OF_SECTION;
+  this->CMPLX_LAPACK_SCR = this->scratchMem_     + this->lenScratch_;
+
+  this->REAL_LAPACK_SCR = new double[this->lenREAL_LAPACK_SCR];
+}
 

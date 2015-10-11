@@ -38,7 +38,7 @@ namespace ChronusQ{
   void AOIntegrals::Restricted34Contract(bool KS, ComplexMatrix &G, const ComplexMatrix &X, int n1, 
     int n2, int n3, int n4, int bf1_s, int bf2_s, int bf3_s, int bf4_s, const double* buff, 
     double deg){
-
+    
     for(int i = 0, bf1 = bf1_s, ijkl = 0 ; i < n1; ++i, ++bf1) {
       for(int j = 0, bf2 = bf2_s; j < n2; ++j, ++bf2) {
         for(int k = 0, bf3 = bf3_s; k < n3; ++k, ++bf3) {

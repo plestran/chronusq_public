@@ -118,6 +118,7 @@ class AOIntegrals{
   int       nBasis_; ///< Number of basis functions \f$N_{b}\f$
   int       nTCS_;
   int       nTT_; ///< Reduced number of basis functions (lower triangle) \f$ N_b (N_b+1) / 2\f$
+  int       maxMultipole_;
   int       **R2Index_;
   double	**FmTTable_;
 
@@ -136,6 +137,29 @@ class AOIntegrals{
   void OneEDriver(libint2::OneBodyEngine::integral_type); ///< General wrapper for one-electron integrals using Libint integral engine
 #endif
 //dbwye
+
+
+  inline void checkWorkers(){
+    if(this->fileio_  == NULL) 
+      CErr("Fatal: Must initialize AOIntegrals with FileIO Object");
+    if(this->basisSet_ == NULL) 
+      CErr("Fatal: Must initialize AOIntegrals with BasisSet Object",
+           this->fileio_->out);
+    if(this->molecule_ == NULL) 
+      CErr("Fatal: Must initialize AOIntegrals with Molecule Object",
+           this->fileio_->out);
+    if(this->controls_ == NULL) 
+      CErr("Fatal: Must initialize AOIntegrals with Controls Object",
+           this->fileio_->out);
+  }
+
+  inline void checkMeta(){
+    this->checkWorkers();
+    if(this->nBasis_ == 0)
+      CErr(
+        "Fatal: SingleSlater Object Initialized with NBasis = 0 or NShell = 0",
+        this->fileio_->out);
+  }
 
 public:
   // these should be protected
@@ -159,6 +183,8 @@ public:
   bool          haveRIS; ///< Whether or not the DFI tensor has been evaluated for the density-fiting basis set
   bool          haveRII; ///< Whether or not the Metric overlap tensor has been evaluated for the density-fitting basis set
   bool          haveTRII;
+  bool          allocERI;
+  bool          doDF;
 
 
   // Timing Stats
@@ -172,12 +198,82 @@ public:
   std::chrono::duration<double> SchwartzD; ///< High-precision timing for Schwartz bound evaluation
   std::chrono::duration<double> DenShBlkD; ///< High-precision timing for Density shell-block norm evaluation
 
-  AOIntegrals(){;};
+  AOIntegrals(){
+    this->nBasis_ = 0;
+    this->nTT_    = 0;
+
+    this->R2Index_  = NULL;
+    this->FmTTable_ = NULL;
+
+    this->molecule_   = NULL; 
+    this->basisSet_   = NULL; 
+    this->fileio_     = NULL; 
+    this->controls_   = NULL; 
+    this->DFbasisSet_ = NULL;
+
+    this->pairConstants_      = nullptr;
+    this->molecularConstants_ = nullptr;
+    this->quartetConstants_   = nullptr;
+
+    this->twoEC_        = nullptr;
+    this->twoEX_        = nullptr;
+    this->oneE_         = nullptr;
+    this->overlap_      = nullptr;
+    this->kinetic_      = nullptr;
+    this->potential_    = nullptr;
+    this->schwartz_     = nullptr;
+    this->aoERI_        = nullptr;
+    this->aoRII_        = nullptr;
+    this->aoRIS_        = nullptr;
+    this->elecDipole_   = nullptr;
+    this->elecQuadpole_ = nullptr;
+    this->elecOctpole_  = nullptr;
+
+    this->haveAOTwoE   = false;
+    this->haveAOOneE   = false;
+    this->haveSchwartz = false;
+    this->haveRIS      = false;
+    this->haveRII      = false;
+    this->haveTRII     = false;
+    this->allocERI     = false;
+    this->doDF         = false;
+
+    // Standard Values
+    this->nTCS_         = 1;
+    this->maxMultipole_ = 3;
+  };
   ~AOIntegrals(){;};
   
   void iniAOIntegrals(Molecule *,BasisSet *,
                       FileIO *,Controls *,
                       BasisSet * DFbasisSet=NULL); ///< Initialization function
+
+  inline void communicate(Molecule &mol, BasisSet &basis, FileIO &fileio, 
+                          Controls &controls){
+    this->molecule_   = &mol;
+    this->basisSet_   = &basis;
+    this->fileio_     = &fileio;
+    this->controls_   = &controls;
+    this->DFbasisSet_ = NULL;
+  }
+
+  inline void initMeta(){
+    this->checkWorkers();
+    this->nBasis_ = this->basisSet_->nBasis();
+    auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
+    this->nTT_    = NTCSxNBASIS * (NTCSxNBASIS+1) / 2;
+  }
+
+  void alloc();
+  void allocOp();
+  void allocMultipole();
+
+  // Getters
+  inline int nTCS(){ return this->nTCS_;}
+
+  // Setters
+  inline void setNTCS(int i)        { this->nTCS_         = i;}
+  inline void setMaxMultipole(int i){ this->maxMultipole_ = i;}
 
   inline double &twoEC(int i, int j, int k, int l){
     return (*twoEC_)(this->R2Index_[i][j],this->R2Index_[k][l]);
@@ -273,6 +369,9 @@ public:
   double twoevRRa0c0(ShellPair*,ShellPair*,int,int,int*,int,int*,int*,int*,int*,int*);
   double twoevRRa000(ShellPair*,ShellPair*,int,int,int*,int*,int*,int*,int*);
   double twoeSSSS0(int*,ShellPair*,ShellPair*);
+
+  // Python API
+  void Wrapper_iniAOIntegrals(Molecule&,BasisSet&,FileIO&,Controls&); 
 };
 } // namespace ChronusQ
 

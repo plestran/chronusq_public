@@ -44,12 +44,15 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<dcomplex> * other){
     this->haveMO	    = true;
     this->havePT      = true;
     this->isClosedShell = other->isClosedShell;
+
+    auto NTCSxNBASIS = this->nBasis_*this->nTCS_;
+
     // Hardcoded for Libint route
     this->densityA_           = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(*other->densityA_));
     this->fockA_              = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(*other->fockA_));
     this->moA_                = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(*other->moA_));
     this->PTA_                = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(*other->PTA_));
-    if(this->Ref_ != RHF){
+    if(this->Ref_ != isClosedShell && this->Ref_ != TCS ){
       this->densityB_           = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(*other->densityB_));
       this->fockB_              = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(*other->fockB_));
       this->moB_                = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(*other->moB_));
@@ -59,6 +62,8 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<dcomplex> * other){
     this->quadpole_           = std::unique_ptr<RealMatrix>(new RealMatrix(*other->quadpole_));
     this->tracelessQuadpole_  = std::unique_ptr<RealMatrix>(new RealMatrix(*other->tracelessQuadpole_));
     this->octpole_            = std::unique_ptr<RealTensor3d>(new RealTensor3d(*other->octpole_));
+//  this->elecField_          = std::unique_ptr<std::array<double,3>>(new std::array<double,3>{{0,0,0}});
+    this->elecField_       = other->elecField_;
     this->basisset_    = other->basisset_;    
     this->molecule_    = other->molecule_;
     this->fileio_      = other->fileio_;
@@ -84,20 +89,23 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other){
     this->haveMO	    = true;
     this->havePT      = true;
     this->isClosedShell = other->isClosedShell;
+
+    auto NTCSxNBASIS = this->nBasis_*this->nTCS_;
+
     // Hardcoded for Libint route
-    this->densityA_           = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-    this->fockA_              = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-    this->moA_                = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-    this->PTA_                = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
+    this->densityA_           = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+    this->fockA_              = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+    this->moA_                = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+    this->PTA_                = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
     this->densityA_->real()    = *other->densityA();
     this->fockA_->real()       = *other->fockA();
     this->moA_->real()         = *other->moA();
     this->PTA_->real()         = *other->PTA();
-    if(this->Ref_ != RHF){
-      this->densityB_           = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-      this->fockB_              = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-      this->moB_                = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-      this->PTB_                = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
+    if(this->Ref_ != isClosedShell && this->Ref_ != TCS ){
+      this->densityB_           = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+      this->fockB_              = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+      this->moB_                = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+      this->PTB_                = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
       this->densityB_->real()    = *other->densityB();
       this->fockB_->real()       = *other->fockB();
       this->moB_->real()         = *other->moB();
@@ -107,6 +115,8 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other){
     this->quadpole_           = std::unique_ptr<RealMatrix>(new RealMatrix(*other->quadpole()));
     this->tracelessQuadpole_  = std::unique_ptr<RealMatrix>(new RealMatrix(*other->tracelessQuadpole()));
     this->octpole_            = std::unique_ptr<RealTensor3d>(new RealTensor3d(*other->octpole()));
+//  this->elecField_          = std::unique_ptr<std::array<double,3>>(new std::array<double,3>{{0,0,0}});
+    this->elecField_       = (other->elecField());
     this->basisset_    = other->basisset();    
     this->molecule_    = other->molecule();
     this->fileio_      = other->fileio();
@@ -138,23 +148,23 @@ void SingleSlater<dcomplex>::computeEnergy(){
     this->energyOneE += (*this->aointegrals_->oneE_).frobInner(this->densityB_->real());
     this->energyTwoE += 0.5*(*this->PTB_).frobInner(this->densityB_->conjugate()).real();
   }
-
   // Add in the electric field component if they are non-zero
   std::array<double,3> null{{0,0,0}};
-  if((*this->elecField_) != null){
+  if(this->elecField_ != null){
     int NB = this->nTCS_*this->nBasis_;
     int NBSq = NB*NB;
     int iBuf = 0;
     for(auto iXYZ = 0; iXYZ < 3; iXYZ++){
       ConstRealMap mu(&this->aointegrals_->elecDipole_->storage()[iBuf],NB,NB);
       this->energyOneE += 
-        this->elecField_->at(iXYZ) * mu.frobInner(this->densityA_->real());
+        this->elecField_[iXYZ] * mu.frobInner(this->densityA_->real());
       if(!this->isClosedShell && this->Ref_ != TCS)
       this->energyOneE += 
-        this->elecField_->at(iXYZ) * mu.frobInner(this->densityB_->real());
+        this->elecField_[iXYZ] * mu.frobInner(this->densityB_->real());
       iBuf += NBSq;
     }
   }
+
 
   this->totalEnergy= this->energyOneE + this->energyTwoE + this->energyNuclei;
 //this->printEnergy();

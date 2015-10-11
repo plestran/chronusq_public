@@ -196,7 +196,7 @@ void SDResponse<double>::reoptWF(){
   lenRealScr += lenMat; // Stability step in MO basis
   lenRealScr += lenMat; // Matrix exponential
   lenRealScr += lenEig; // Eigenvalues
-  lenRealScr += std::max(1,3*NTCSxNBASIS-1); // RWORK LAPACK Workspace
+  lenRealScr += std::max(1,3*NTCSxNBASIS-2); // RWORK LAPACK Workspace
 
 
   lenComplexScr += lenMat; // Stability step in MO basis
@@ -251,7 +251,7 @@ void SDResponse<double>::reoptWF(){
     zheev_(&JOBZ,&UPLO,&NTCSxNBASIS,complexStab,&NTCSxNBASIS,W,WORK,&lWork,RWORK,&INFO);
     std::memcpy(BSCR,complexStab,lenMat*sizeof(dcomplex));
     for(auto i = 0; i < NTCSxNBASIS; i++){
-      dcomplex scal = std::exp(dcomplex(0.0,-2.0*W[i]));
+      dcomplex scal = std::exp(dcomplex(0.0,-1.0*W[i]));
       BComplex.col(i) *= scal;
     }
    ExpAComplex = BComplex * AComplex.adjoint();
@@ -267,6 +267,8 @@ void SDResponse<double>::reoptWF(){
    dav.run(this->fileio_->out);
  //CErr();
   } // loop iter
+  delete [] COMPLEX_SCR;
+  delete [] REAL_SCR;
   if(stable){
     this->singleSlater_->computeEnergy();
     this->singleSlater_->computeMultipole();

@@ -34,6 +34,9 @@ void SingleSlater<T>::printEnergy(){
   this->fileio_->out<<std::right<<std::setw(30)<<std::fixed<<"E(nuclear repulsion) = "<<std::setw(15)<<this->energyNuclei<<std::setw(5)<<" Eh "<<endl;
   this->fileio_->out<<std::right<<std::setw(30)<<std::fixed<<"E(total) = "<<std::setw(15)<<this->totalEnergy<<std::setw(5)<<" Eh "<<endl;
 };
+/******************************
+ * Print Energy Contributions *
+ ******************************/
 
 /**********************************
  * Print Wavefunction Information *

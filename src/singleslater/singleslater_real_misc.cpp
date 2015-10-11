@@ -47,12 +47,15 @@ SingleSlater<double>::SingleSlater(SingleSlater<double> * other){
     this->haveMO	    = true;
     this->havePT      = true;
     this->isClosedShell = other->isClosedShell;
+
+    auto NTCSxNBASIS = this->nBasis_*this->nTCS_;
+
     // Hardcoded for Libint route
     this->densityA_           = std::unique_ptr<RealMatrix>(new RealMatrix(*other->densityA_));
     this->fockA_              = std::unique_ptr<RealMatrix>(new RealMatrix(*other->fockA_));
     this->moA_                = std::unique_ptr<RealMatrix>(new RealMatrix(*other->moA_));
     this->PTA_                = std::unique_ptr<RealMatrix>(new RealMatrix(*other->PTA_));
-    if(this->Ref_ != RHF){
+    if(this->Ref_ != isClosedShell && this->Ref_ != TCS ){
       this->densityB_           = std::unique_ptr<RealMatrix>(new RealMatrix(*other->densityB_));
       this->fockB_              = std::unique_ptr<RealMatrix>(new RealMatrix(*other->fockB_));
       this->moB_                = std::unique_ptr<RealMatrix>(new RealMatrix(*other->moB_));
@@ -62,6 +65,8 @@ SingleSlater<double>::SingleSlater(SingleSlater<double> * other){
     this->quadpole_           = std::unique_ptr<RealMatrix>(new RealMatrix(*other->quadpole_));
     this->tracelessQuadpole_  = std::unique_ptr<RealMatrix>(new RealMatrix(*other->tracelessQuadpole_));
     this->octpole_            = std::unique_ptr<RealTensor3d>(new RealTensor3d(*other->octpole_));
+//  this->elecField_          = std::unique_ptr<std::array<double,3>>(new std::array<double,3>{{0,0,0}});
+    this->elecField_       = other->elecField_;
     this->basisset_    = other->basisset_;    
     this->molecule_    = other->molecule_;
     this->fileio_      = other->fileio_;
@@ -215,22 +220,24 @@ void SingleSlater<double>::computeEnergy(){
     this->energyTwoE += 0.5*(*this->PTB_).frobInner(this->densityB_->conjugate());
   }
 
+
   // Add in the electric field component if they are non-zero
   std::array<double,3> null{{0,0,0}};
-  if((*this->elecField_) != null){
+  if(this->elecField_ != null){
     int NB = this->nTCS_*this->nBasis_;
     int NBSq = NB*NB;
     int iBuf = 0;
     for(auto iXYZ = 0; iXYZ < 3; iXYZ++){
       ConstRealMap mu(&this->aointegrals_->elecDipole_->storage()[iBuf],NB,NB);
       this->energyOneE += 
-        this->elecField_->at(iXYZ) * mu.frobInner(this->densityA_->conjugate());
+        this->elecField_[iXYZ] * mu.frobInner(this->densityA_->conjugate());
       if(!this->isClosedShell && this->Ref_ != TCS)
       this->energyOneE += 
-        this->elecField_->at(iXYZ) * mu.frobInner(this->densityB_->conjugate());
+        this->elecField_[iXYZ] * mu.frobInner(this->densityB_->conjugate());
       iBuf += NBSq;
     }
   }
+
   this->totalEnergy= this->energyOneE + this->energyTwoE + this->energyNuclei;
 //this->printEnergy();
 };

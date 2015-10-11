@@ -189,6 +189,7 @@ void SingleSlater<dcomplex>::mixOrbitalsSCF(){
   auto nO = this->nAE_ + this->nBE_;
   if(this->Ref_ == TCS){
   //CErr();
+  this->fileio_->out << "** Mixing Alpha-Beta Orbitals for 2C Guess **" << endl;
   Eigen::VectorXcd HOMOA,LUMOB;
   int indxHOMOA = -1, indxLUMOB = -1;
 /*
@@ -269,6 +270,7 @@ void SingleSlater<dcomplex>::mixOrbitalsSCF(){
    cout << endl << endl <<  this->moA_->col(this->nTCS_*this->nBasis_-1) << endl;
 */
   }
+  this->fileio_->out << "** Mixing HOMO and LUMO for Complex Guess **" << endl;
   if (this->Ref_==TCS) {
     auto HOMO = this->moA_->col(nO-1);
     auto LUMO = this->moA_->col(nO);

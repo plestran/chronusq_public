@@ -1,1 +1,1 @@
-add_library(worker worker.cpp)
+add_library(worker SHARED worker.cpp)

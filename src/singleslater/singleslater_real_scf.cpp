@@ -185,6 +185,7 @@ void SingleSlater<double>::evalConver(int iter){
 template<>
 void SingleSlater<double>::mixOrbitalsSCF(){
   if(this->Ref_ == TCS){
+  this->fileio_->out << "** Mixing Alpha-Beta Orbitals for 2C Guess **" << endl;
   //CErr();
   auto nO = this->nAE_ + this->nBE_;
   VectorXd HOMOA,LUMOB;

@@ -56,11 +56,27 @@ void Controls::iniControls(){
   this->doComplex =         false;
   this->doUnit    =         false;
   this->SDMethod  =         0;
-  this->SCFdenTol_ = 1e-10;
-  this->SCFeneTol_ = 1e-12;
-  this->SCFmaxIter_ = 128;
-  this->unitTest    = 0;
-  this->field_      = {0.0,0.0,0.0};
+  this->doRealTime =        false;
+  this->rtMaxSteps =        10;
+  this->rtTimeStep =        0.05;
+  this->rtTypeOrtho =       1;
+  this->rtInitDensity =     0;
+  this->rtSwapMOA     =     0; 
+  this->rtSwapMOB     =     0; 
+  this->rtMethFormU   =     1;
+  this->SCFdenTol_ =        1e-10;
+  this->SCFeneTol_ =        1e-12;
+  this->SCFmaxIter_ =       128;
+  this->unitTest    =       0;
+  this->field_      =       {0.0,0.0,0.0};
+  this->rtField_      =     {0.0,0.0,0.0};
+  this->rtFreq_   =         0.0;
+  this->rtPhase_   =        0.0;
+  this->rtSigma_   =        0.0;
+  this->rtTOn_ =            0.0;
+  this->rtTOff_ =       10000.0;
+  this->rtEnvelope_ =       1;
+ 
 #ifdef USE_LIBINT
   // Bootstrap Libint env
   libint2::init(); 
@@ -106,7 +122,7 @@ void Controls::readDebug(std::string str){
   }
 }
 
-void Controls::printSettings(fstream &out){
+void Controls::printSettings(ostream &out){
 //out << bannerTop << endl;
   out << endl << "ChronusQ Control Settings:" << endl << bannerMid << endl;
 

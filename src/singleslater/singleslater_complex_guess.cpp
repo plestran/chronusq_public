@@ -169,11 +169,11 @@ void SingleSlater<dcomplex>::formGuess() {
       Controls controlAtom;
       BasisSet basisSetAtom;
       BasisSet dfBasisSetAtom;
-      Molecule uniqueAtom(uniqueElement[iUn],this->fileio_);
+      Molecule uniqueAtom(uniqueElement[iUn],this->fileio_->out);
  
       // FIXME: This only makes sense for neutral molecules
-      uniqueAtom.readCharge(0);
-      uniqueAtom.readMultip(uniqueElement[iUn].defaultMult);
+      uniqueAtom.setCharge(0);
+      uniqueAtom.setMultip(uniqueElement[iUn].defaultMult);
  
       // Construct atomic basis set from the reference
       this->basisset_->constructExtrn(&uniqueAtom,&basisSetAtom);
