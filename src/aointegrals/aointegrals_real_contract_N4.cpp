@@ -26,34 +26,38 @@
 #include <aointegrals.h>
 namespace ChronusQ{
   template<>
-  void AOIntegrals::twoEContractN4(bool RHF, bool doFock, bool doTCS,
+  void AOIntegrals::twoEContractN4(bool RHF, bool doFock, bool do24, bool doTCS,
     const RealMatrix &XAlpha, RealMatrix &AXAlpha, const RealMatrix &XBeta, 
     RealMatrix &AXBeta) {
 
-    this->fileio_->out << "Contracting with in-core two-electron integrals" << endl;
+//  this->fileio_->out << "Contracting with in-core two-electron integrals" << endl;
     if(!this->haveAOTwoE) this->computeAOTwoE();
   
     RealTensor2d XAlphaTensor,XBetaTensor;
     RealTensor2d AXAlphaTensor,AXBetaTensor;
+    RealTensor2d XTotalTensor;
+
+    XAlphaTensor  = RealTensor2d(XAlpha.rows(),XAlpha.cols());
+    AXAlphaTensor = RealTensor2d(AXAlpha.rows(),AXAlpha.cols());
+    for(auto i = 0; i < XAlpha.size(); i++) XAlphaTensor.storage()[i] = XAlpha.data()[i];
+    AXAlphaTensor.fill(0.0);
+    if(!RHF && !doTCS && !do24){
+      XBetaTensor  = RealTensor2d(XBeta.rows(),XBeta.cols());
+      AXBetaTensor = RealTensor2d(AXBeta.rows(),AXBeta.cols());
+      for(auto i = 0; i < XBeta.size(); i++) XBetaTensor.storage()[i] = XBeta.data()[i];
+      AXBetaTensor.fill(0.0);
+
+      XTotalTensor = RealTensor2d(XAlpha.rows(),XBeta.cols());
+      XTotalTensor = XAlphaTensor + XBetaTensor;
+    }
+
     enum{i,j,k,l}; 
   
     if(doFock)  {
-      XAlphaTensor  = RealTensor2d(XAlpha.rows(),XAlpha.cols());
-      AXAlphaTensor = RealTensor2d(AXAlpha.rows(),AXAlpha.cols());
-      for(auto i = 0; i < XAlpha.size(); i++) XAlphaTensor.storage()[i] = XAlpha.data()[i];
-      AXAlphaTensor.fill(0.0);
       if(RHF){
         contract(1.0,*this->aoERI_,{i,j,k,l},XAlphaTensor,{l,k},0.0,AXAlphaTensor,{i,j});
         contract(-0.5,*this->aoERI_,{i,l,k,j},XAlphaTensor,{l,k},1.0,AXAlphaTensor,{i,j});
       } else if(!doTCS) {
-        XBetaTensor  = RealTensor2d(XBeta.rows(),XBeta.cols());
-        AXBetaTensor = RealTensor2d(AXBeta.rows(),AXBeta.cols());
-        for(auto i = 0; i < XBeta.size(); i++) XBetaTensor.storage()[i] = XBeta.data()[i];
-        AXBetaTensor.fill(0.0);
-        RealTensor2d XTotalTensor(XAlpha.rows(),XBeta.cols());
-  
-        XTotalTensor = XAlphaTensor + XBetaTensor;
-  
         contract(1.0,*this->aoERI_,{i,j,k,l},XTotalTensor,{l,k},0.0,AXAlphaTensor,{i,j});
         AXBetaTensor = AXAlphaTensor;
         contract(-1.0,*this->aoERI_,{i,l,k,j},XAlphaTensor,{l,k},1.0,AXAlphaTensor,{i,j});
@@ -62,9 +66,11 @@ namespace ChronusQ{
         contract(1.0 ,*this->aoERI_,{i,j,k,l},XAlphaTensor,{l,k},0.0,AXAlphaTensor,{i,j});
         contract(-1.0,*this->aoERI_,{i,l,k,j},XAlphaTensor,{l,k},1.0,AXAlphaTensor,{i,j});
       }
-    } else CErr("General Contraction NYI for in-core integrals");
-     for(auto i = 0; i < AXAlpha.size(); i++) AXAlpha.data()[i] = AXAlphaTensor.storage()[i];
-     if(!RHF && !doTCS)
-       for(auto i = 0; i < AXBeta.size(); i++) AXBeta.data()[i] = AXBetaTensor.storage()[i];
+    } else if(do24) {
+      contract(1.0,*this->aoERI_,{i,k,j,l},XAlphaTensor,{k,l},0.0,AXAlphaTensor,{i,j});
+    }
+    for(auto i = 0; i < AXAlpha.size(); i++) AXAlpha.data()[i] = AXAlphaTensor.storage()[i];
+    if(!RHF && !doTCS && !do24)
+      for(auto i = 0; i < AXBeta.size(); i++) AXBeta.data()[i] = AXBetaTensor.storage()[i];
   }  // twoEContractN4
 }; // namespace ChronusQ

@@ -30,23 +30,16 @@
 #ifdef USE_LIBINT
 template<typename T>
 void SingleSlater<T>::formPT(){
-  bool doRHF = (this->Ref_ == RHF);
   bool doTCS = (this->Ref_ == TCS);
+  bool doRHF = (this->isClosedShell && !doTCS);
   if(!this->haveDensity) this->formDensity();
   if(this->controls_->directTwoE && !this->controls_->doDF)
     this->aointegrals_->twoEContractDirect(doRHF,true,false,doTCS,*this->densityA_,*this->PTA_,*this->densityB_,*this->PTB_);
   else if(this->controls_->doDF)
     this->aointegrals_->twoEContractDF(doRHF,true,*this->densityA_,*this->PTA_,*this->densityB_,*this->PTB_);
   else
-    this->aointegrals_->twoEContractN4(doRHF,true,doTCS,*this->densityA_,*this->PTA_,*this->densityB_,*this->PTB_);
-  if(this->controls_->printLevel >= 3) {
-    if(!doTCS){
-      prettyPrint(this->fileio_->out,(*this->PTA_),"Alpha Perturbation Tensor");
-      if(this->Ref_ != RHF) prettyPrint(this->fileio_->out,(*this->PTB_),"Beta Perturbation Tensor");
-    } else {
-      prettyPrintTCS(this->fileio_->out,(*this->PTA_),"Perturbation Tensor");
-    }
-  }
+    this->aointegrals_->twoEContractN4(doRHF,true,false,doTCS,*this->densityA_,*this->PTA_,*this->densityB_,*this->PTB_);
+  if(this->controls_->printLevel >= 3) this->printPT();
 //if(doTCS)CErr();
 }
 #endif
@@ -70,7 +63,9 @@ void SingleSlater<T>::formFock(){
 //  this->basisset_->resetMapSh2Bf(); 
 //  this->basisset_->makeMapSh2Bf(this->nTCS_);
 //}
-
+  if(this->controls_->DFT){
+    // Form VXC
+  }
   this->fockA_->setZero();
 /*
   if(this->Ref_ != TCS) fockA_->real()+=(*this->aointegrals_->oneE_);
@@ -89,6 +84,9 @@ void SingleSlater<T>::formFock(){
 #else
   *(fockA_)+=(*this->PTA_);
 #endif
+//  if(this->controls_->DFT){
+//    (*this->fockA_) += (*this->vXCA_);
+//  }
   if(!this->isClosedShell && this->Ref_ != TCS){
     this->fockB_->setZero();
     fockB_->real()+=(*this->aointegrals_->oneE_);
@@ -98,14 +96,26 @@ void SingleSlater<T>::formFock(){
 #else
     *(fockB_)+=(*this->PTB_);
 #endif
+//    if(this->controls_->DFT){
+//      (*this->fockB_) += (*this->vXCB_);
+//    }
   };
-  if(this->controls_->printLevel>=2) {
-    if(this->Ref_ != TCS){
-      prettyPrint(this->fileio_->out,(*this->fockA_),"Alpha Fock");
-      if(this->Ref_ != RHF) prettyPrint(this->fileio_->out,(*this->fockB_),"Beta Fock");
-    } else {
-      prettyPrintTCS(this->fileio_->out,(*this->fockA_),"Fock");
+
+  // Add in the electric field component if they are non-zero
+  std::array<double,3> null{{0,0,0}};
+  if(this->elecField_ != null){
+    //this->fileio_->out << "Adding in Electric Field Contribution" << endl;
+    int NB = this->nTCS_*this->nBasis_;
+    int NBSq = NB*NB;
+    int iBuf = 0;
+    for(auto iXYZ = 0; iXYZ < 3; iXYZ++){
+      ConstRealMap mu(&this->aointegrals_->elecDipole_->storage()[iBuf],NB,NB);
+      fockA_->real() += this->elecField_[iXYZ] * mu;
+      if(!this->isClosedShell && this->Ref_ != TCS) 
+        fockB_->real() += this->elecField_[iXYZ] * mu;
+      iBuf += NBSq;
     }
-  };
+  }
+  if(this->controls_->printLevel>=2) this->printFock(); 
 };
 

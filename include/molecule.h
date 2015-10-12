@@ -41,60 +41,87 @@ class Molecule {
   int                          charge_;      // total charge
   int                          multip_;      // spin multiplicity
   int                          nTotalE_;     // total number of electrons
-  int                          size_;        // size of the object in terms of sizeof(char)
-  int                         *index_;       // index of atom in the atoms[] array
+  int                         *index_;       // center index in the atoms[] array
   double                       energyNuclei_;// nuclear repulsion energy
   std::unique_ptr<RealMatrix>  cart_;        // cartesian coordinates
-//APS
-  std::unique_ptr<RealMatrix>  COM_;         // center of mass coordinate or center of nuclear charges 
-//APE
+  std::unique_ptr<VectorXd>  COM_;         // center of mass coordinate or center of nuclear charges 
   std::unique_ptr<RealMatrix>  momentOfInertia_; // Moment of inertia
   std::unique_ptr<RealMatrix>  rIJ_;             // Interatomic distance matrix
 public:
 
   // constructor
-  Molecule(int nAtoms=0,FileIO * fileio=NULL){ 
-    this->nTotalE_ = 0;
-    if(nAtoms>0) iniMolecule(nAtoms,fileio);
-  };
-  Molecule(Atoms atm, FileIO *fileio=NULL){
-    this->iniMolecule(1,fileio);
+  Molecule(){ this->loadDefaults();};
+
+  Molecule(Atoms atm, std::ostream &out) : Molecule(){
+    this->nAtoms_ = 1;
+    this->alloc(out);
     auto n = HashAtom(atm.symbol,atm.massNumber);
-    if(n!=-1) index_[0] = n;
+    if(n != -1) index_[0] = n;
     else
-      CErr("Error: invalid atomic symbol or mass number!",fileio->out);
-    nTotalE_ = atm.atomicNumber;
-    (*cart_)(0,0) = 0.0;
-    (*cart_)(1,0) = 0.0;
-    (*cart_)(2,0) = 0.0;
-    energyNuclei_ = 0.0;
+      CErr("Error: invalid atomic symbol or mass number!",out);
+    this->nTotalE_ = atm.atomicNumber;
     this->computeRij();
     this->toCOM(0);
     this->computeI();
   }
+
   ~Molecule(){
     delete[] index_;
   };
-  void iniMolecule(int,FileIO *);
-//APS Compute center of mass (or center of nuclear charges) of a molecule
+
+ 
+  inline void loadDefaults(){
+    this->nAtoms_          = 0;
+    this->charge_          = 0; 
+    this->multip_          = 0;
+    this->nTotalE_         = 0;
+    this->index_           = NULL;
+    this->energyNuclei_    = 0.0;
+    this->cart_            = nullptr;
+    this->COM_             = nullptr;
+    this->momentOfInertia_ = nullptr;
+    this->rIJ_             = nullptr;
+  }
+  
+  void alloc(std::ostream &out=cout);
   void toCOM(int Iop0);    
-//APE
   void computeI();
   void computeRij();
-  // print
-  void printInfo(FileIO *,Controls *);
+  void computeNucRep();
+  void printInfo(std::ostream & out=cout );
+  inline void convBohr(){ (*this->cart_) /= phys.bohr; }
 
-  // access to private data
-  inline int index(int i) { return this->index_[i];};
+  // Python API
+  void Wrapper_printInfo(FileIO &);
+  void Wrapper_alloc(FileIO &);
+
+  // Reference Access
+  inline int& index(int i) { return this->index_[i];};
+
+  // Getters
   inline int nAtoms() {return this->nAtoms_;};
-  inline RealMatrix* cart() {return this->cart_.get();}
   inline int charge() {return this->charge_;}
   inline int multip() {return this->multip_;}
   inline int nTotalE() {return this->nTotalE_;};
-  inline void readCharge(int charge) {this->charge_=charge; this->nTotalE_ -= charge;};
-  inline void readMultip(int multip) {this->multip_=multip;};
-  inline int size() { return this->size_;};
+
   inline double energyNuclei() { return this->energyNuclei_;};
+
+  inline RealMatrix* cart() {return this->cart_.get();}
+  inline RealMatrix* rIJ() {return this->rIJ_.get();}
+
+  // Setters
+  inline void setCharge(int i) {this->charge_ = i; this->nTotalE_ -= i;};
+  inline void setMultip(int i) {this->multip_ = i;};
+  inline void setNAtoms(int i) {this->nAtoms_ = i;};
+  inline void setIndex(int i, int n){ this->index_[i] = n; };
+  inline void setCart(int i, double x, double y, double z){
+    (*this->cart_)(0,i) = x;
+    (*this->cart_)(1,i) = y;
+    (*this->cart_)(2,i) = z;
+  }
+  inline void setNTotalE(int i){ this->nTotalE_ = i;};
+
+
 
   // read from input file
   void readMolecule(FileIO *, std::istream &);

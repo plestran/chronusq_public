@@ -26,6 +26,46 @@
 #include <quasinewton.h>
 
 namespace ChronusQ {
+  /** Reconstruct full dimenstion solution **/
+  /*
+   *  Reconstruct the approximate eigenvectors
+   *
+   *  For Hermetian matricies in general (viz. Davidson J. Comput. Phys. 17 (1975))
+   *
+   *  | X > = | b_i > X(R)_i
+   *
+   *  For RPA (viz. Kauczor et al. JCTC 7 (2010) p. 1610  (Eq 90,91)):
+   *
+   *  | X_g > = | {b_g}_i > {X(R)_g}_i
+   *  | X_u > = | {b_u}_i > {X(R)_u}_i
+   */ 
+  template<>
+  void QuasiNewton<double>::reconstructSolution(const int NTrial){
+    RealCMMap XTSigmaR (this->XTSigmaRMem,NTrial,  NTrial);
+    RealCMMap UR       (this->URMem,      this->N_,NTrial);
+    RealCMMap TrialVecR(this->TVecRMem,   this->N_,NTrial);
+    RealCMMap XTRhoR   (this->XTRhoRMem,  0,0);
+    RealCMMap XTSigmaL (this->XTSigmaLMem,0,0);
+    RealCMMap XTRhoL   (this->XTRhoLMem,  0,0);
+    RealCMMap UL       (this->ULMem,      0,0);
+    RealCMMap TrialVecL(this->TVecLMem,   0,0);
+    RealVecMap ER(this->ERMem,NTrial);
+    if(!this->isHermetian_ || this->symmetrizedTrial_){
+      new (&XTRhoR   ) RealCMMap(this->XTRhoRMem,  NTrial,  NTrial);
+      new (&XTSigmaL ) RealCMMap(this->XTSigmaLMem,NTrial,  NTrial);
+      new (&XTRhoL   ) RealCMMap(this->XTRhoLMem,  NTrial,  NTrial);
+      new (&UL       ) RealCMMap(this->ULMem,      this->N_,NTrial);
+      new (&TrialVecL) RealCMMap(this->TVecLMem,   this->N_,NTrial);
+    }
+    UR = TrialVecR * XTSigmaR;
+    if(this->symmetrizedTrial_) UL = TrialVecL * XTSigmaL;
+    // Stash away current approximation of eigenvalues and eigenvectors (NSek)
+    (*this->solutionValues_) = ER.block(0,0,nSek_,1);
+    (*this->solutionVector_) = UR.block(0,0,N_,nSek_); 
+    // | X > = | X_g > + | X_u > (viz. Kauczor et al. JCTC 7 (2010) p. 1610  (Eq 80))
+    if(this->symmetrizedTrial_)(*solutionVector_) += UL.block(0,0,N_,nSek_); 
+  } // reconstructSolution
+
   /** Run Micro Iteration **/
   template<>
   void QuasiNewton<double>::runMicro(ostream &output){

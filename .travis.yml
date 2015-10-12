@@ -1,0 +1,28 @@
+os:
+  - linux
+language: cpp
+compiler:
+  - gcc
+env:
+  - GCC_VERSION=4.8
+before_install:
+  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+  - sudo add-apt-repository ppa:boost-latest/ppa -y
+  - sudo apt-get update -qq
+  - if [ "$CXX" = "g++" ]; then sudo apt-get install -qq g++-4.8; fi
+  - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
+  - sudo apt-get install -y libblas-dev liblapack-dev
+  - sudo apt-get install -y libboost1.55-all-dev
+  - pip install --user tabulate
+install:
+  - ./util/buildlibint 4
+  - cd deps
+  - git clone https://github.com/wavefunction91/eigen.git
+  - git clone https://github.com/wavefunction91/BTAS.git
+  - cd ..
+script:
+  - ./util/travisci_build.sh
+  - cd build_gcc_libint_openmp
+  - ln -s src/chronusQ/chronusQ .
+  - cd Test/UNIT
+  - python runtests.py --enable-travisci 

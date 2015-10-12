@@ -1,1 +1,1 @@
-add_library(fileio fileio.cpp)
+add_library(fileio SHARED fileio.cpp)

@@ -1,1 +1,1 @@
-add_library(cerr cerr.cpp)
+add_library(cerr SHARED cerr.cpp)

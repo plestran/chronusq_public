@@ -89,4 +89,31 @@ namespace ChronusQ {
       N = newn;
     }
   }
+
+  template<>
+  void QuasiNewton<double>::initLAPACKScrLen(){
+/*
+ * (1) Local copy of the real part of the eigenvalues (reused for Tau storage 
+ *      for QR)
+ *
+ * (2) Space for the paired / imaginary part of the eigenvalues
+ *
+ * (3) Space for imaginary parts of paired eigenvalues
+ *
+ * (4) Length of LAPACK workspace (used in all LAPACK Calls)
+ *
+ * (5) Total double precision words required for LAPACK
+ *
+ */
+    this->LWORK          = 6*this->N_;
+    this->LEN_LAPACK_SCR += this->maxSubSpace_;   // 1
+    if(!this->isHermetian_ || this->symmetrizedTrial_)
+      this->LEN_LAPACK_SCR += this->maxSubSpace_; // 2
+    if(!this->isHermetian_ && this->symmetrizedTrial_)
+      this->LEN_LAPACK_SCR += 2*this->maxSubSpace_; // 3
+    this->LEN_LAPACK_SCR += this->LWORK;          // 4
+    this->LenScr += this->LEN_LAPACK_SCR;         // 5
+
+    this->LenRealScr = 1; // SCR is REAL_SCR...
+  }
 }; // namespace ChronusQ

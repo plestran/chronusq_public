@@ -50,12 +50,12 @@ namespace ChronusQ {
     Molecule *      molecule_;
     FileIO *        fileio_;
     Controls *      controls_;
-    MOIntegrals *   mointegrals_;
+    MOIntegrals<double> *   mointegrals_;
     SingleSlater<double> *  singleSlater_;
   public:
     MollerPlesset(){;};
     ~MollerPlesset(){;};
-    void iniMollerPlesset(Molecule *,BasisSet *,MOIntegrals *,FileIO *,Controls *,
+    void iniMollerPlesset(Molecule *,BasisSet *,MOIntegrals<double> *,FileIO *,Controls *,
                           SingleSlater<double> *);
     double MP2();
     double MP3();

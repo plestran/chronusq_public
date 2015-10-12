@@ -1,0 +1,592 @@
+ Entering Gaussian System, Link 0=gdv
+ Input=Li_sto3g_TD.com
+ Output=Li_sto3g_TD.log
+ Initial command:
+ /home/gauss/gdvi01p/gdv/l1.exe "/home/GauScr/Gau-22281.inp" -scrdir="/home/GauScr/"
+ Entering Link 1 = /home/gauss/gdvi01p/gdv/l1.exe PID=     22282.
+  
+ Copyright (c) 1988,1990,1992,1993,1995,1998,2003,2009,2014,
+            Gaussian, Inc.  All Rights Reserved.
+  
+ This is the private, development version of
+ the Gaussian(R) DV system of programs. It is based on
+ the Gaussian(R) 09 system (copyright 2009, Gaussian, Inc.),
+ the Gaussian(R) 03 system (copyright 2003, Gaussian, Inc.),
+ the Gaussian(R) 98 system (copyright 1998, Gaussian, Inc.),
+ the Gaussian(R) 94 system (copyright 1995, Gaussian, Inc.),
+ the Gaussian 92(TM) system (copyright 1992, Gaussian, Inc.),
+ the Gaussian 90(TM) system (copyright 1990, Gaussian, Inc.),
+ the Gaussian 88(TM) system (copyright 1988, Gaussian, Inc.),
+ the Gaussian 86(TM) system (copyright 1986, Carnegie Mellon
+ University), and the Gaussian 82(TM) system (copyright 1983,
+ Carnegie Mellon University). Gaussian is a federally registered
+ trademark of Gaussian, Inc.
+  
+ This software contains proprietary and confidential information,
+ including trade secrets, belonging to Gaussian, Inc.
+  
+ This software is provided under written license and may be
+ used, copied, transmitted, or stored only in accord with that
+ written license.
+  
+ The following legend is applicable only to US Government
+ contracts under FAR:
+  
+                    RESTRICTED RIGHTS LEGEND
+  
+ Use, reproduction and disclosure by the US Government is
+ subject to restrictions as set forth in subparagraphs (a)
+ and (c) of the Commercial Computer Software - Restricted
+ Rights clause in FAR 52.227-19.
+  
+ Gaussian, Inc.
+ 340 Quinnipiac St., Bldg. 40, Wallingford CT 06492
+  
+  
+ ---------------------------------------------------------------
+ Warning -- This program may not be used in any manner that
+ competes with the business of Gaussian, Inc. or will provide
+ assistance to any competitor of Gaussian, Inc.  The licensee
+ of this program is prohibited from giving any competitor of
+ Gaussian, Inc. access to this program.  By using this program,
+ the user acknowledges that Gaussian, Inc. is engaged in the
+ business of creating and licensing software in the field of
+ computational chemistry and represents and warrants to the
+ licensee that it is not a competitor of Gaussian, Inc. and that
+ it will not use this program in any manner prohibited above.
+ ---------------------------------------------------------------
+  
+
+ Cite this work as:
+ Gaussian Development Version, Revision I.01+,
+ M. J. Frisch, G. W. Trucks, H. B. Schlegel, G. E. Scuseria, 
+ M. A. Robb, J. R. Cheeseman, G. Scalmani, V. Barone, B. Mennucci, 
+ G. A. Petersson, H. Nakatsuji, M. Caricato, X. Li, H. P. Hratchian, 
+ A. F. Izmaylov, J. Bloino, B. G. Janesko, F. Lipparini, G. Zheng, 
+ J. L. Sonnenberg, W. Liang, M. Hada, M. Ehara, K. Toyota, R. Fukuda, 
+ J. Hasegawa, M. Ishida, T. Nakajima, Y. Honda, O. Kitao, H. Nakai, 
+ T. Vreven, J. A. Montgomery, Jr., J. E. Peralta, F. Ogliaro, 
+ M. Bearpark, J. J. Heyd, E. Brothers, K. N. Kudin, V. N. Staroverov, 
+ T. Keith, R. Kobayashi, J. Normand, K. Raghavachari, A. Rendell, 
+ J. C. Burant, S. S. Iyengar, J. Tomasi, M. Cossi, N. Rega, 
+ J. M. Millam, M. Klene, J. E. Knox, J. B. Cross, V. Bakken, 
+ C. Adamo, J. Jaramillo, R. Gomperts, R. E. Stratmann, O. Yazyev, 
+ A. J. Austin, R. Cammi, C. Pomelli, J. W. Ochterski, R. L. Martin, 
+ K. Morokuma, V. G. Zakrzewski, G. A. Voth, P. Salvador, 
+ J. J. Dannenberg, S. Dapprich, P. V. Parandekar, N. J. Mayhall, 
+ A. D. Daniels, O. Farkas, J. B. Foresman, J. V. Ortiz, 
+ J. Cioslowski, and D. J. Fox, Gaussian, Inc., Wallingford CT, 2010.
+ 
+ *******************************************
+ Gaussian DV:  ES64L-GDVRevI.01+ 11-Sep-2014
+                 22-Sep-2015 
+ *******************************************
+ ----------------------------------------------
+ #p uhf/sto-3g nosymm td(full,nstates=12,50-50)
+ ----------------------------------------------
+ 1/38=1,172=1/1;
+ 2/12=2,15=1,17=6,18=5,40=1/2;
+ 3/6=3,11=2,25=1,30=1,116=2/1,2,8,3;
+ 4//1;
+ 5/5=2,38=5/2;
+ 8/6=1,10=90,108=12/1,4;
+ 9/41=12,42=3,48=2,70=2/14;
+ 6/7=2,8=2,9=2,10=2/1;
+ 99/5=1,9=1/99;
+ Leave Link    1 at Tue Sep 22 15:17:26 2015, MaxMem=           0 cpu:               0.0 elap:               0.0
+ (Enter /home/gauss/gdvi01p/gdv/l101.exe)
+ ---------
+ Li STO-3G
+ ---------
+ Symbolic Z-matrix:
+ Charge =  0 Multiplicity = 2
+ Li                    0.        0.        0. 
+ 
+ ITRead=  0
+ MicOpt= -1
+ NAtoms=      1 NQM=        1 NQMF=       0 NMMI=      0 NMMIF=      0
+                NMic=       0 NMicF=      0.
+                    Isotopes and Nuclear Properties:
+ (Nuclear quadrupole moments (NQMom) in fm**2, nuclear magnetic moments (NMagM)
+  in nuclear magnetons)
+
+  Atom         1
+ IAtWgt=           7
+ AtmWgt=   7.0160045
+ NucSpn=           3
+ AtZEff=   0.0000000
+ NQMom=   -4.0100000
+ NMagM=    3.2564240
+ AtZNuc=   3.0000000
+ Leave Link  101 at Tue Sep 22 15:17:26 2015, MaxMem=    33554432 cpu:               0.1 elap:               0.1
+ (Enter /home/gauss/gdvi01p/gdv/l202.exe)
+                          Input orientation:                          
+ ---------------------------------------------------------------------
+ Center     Atomic      Atomic             Coordinates (Angstroms)
+ Number     Number       Type             X           Y           Z
+ ---------------------------------------------------------------------
+      1          3           0        0.000000    0.000000    0.000000
+ ---------------------------------------------------------------------
+ Symmetry turned off by external request.
+ Stoichiometry    Li(2)
+ Framework group  OH[O(Li)]
+ Deg. of freedom     0
+ Full point group                 OH      NOp  48
+ Leave Link  202 at Tue Sep 22 15:17:26 2015, MaxMem=    33554432 cpu:               0.0 elap:               0.0
+ (Enter /home/gauss/gdvi01p/gdv/l301.exe)
+ Standard basis: STO-3G (5D, 7F)
+ Ernie: Thresh=  0.10000D-02 Tol=  0.10000D-05 Strict=F.
+     5 basis functions,    15 primitive gaussians,     5 cartesian basis functions
+     2 alpha electrons        1 beta electrons
+       nuclear repulsion energy         0.0000000000 Hartrees.
+ IExCor=    0 DFT=F Ex=HF Corr=None ExCW=0 ScaHFX=  1.000000
+ ScaDFX=  1.000000  1.000000  1.000000  1.000000 ScalE2=  1.000000  1.000000
+ IRadAn=      0 IRanWt=     -1 IRanGd=            0 ICorTp=0 IEmpDi=  4
+ NAtoms=    1 NActive=    1 NUniq=    1 SFac= 1.00D+00 NAtFMM=   60 NAOKFM=F Big=F
+ Integral buffers will be    131072 words long.
+ Raffenetti 2 integral format.
+ Two-electron integral symmetry is turned off.
+ Leave Link  301 at Tue Sep 22 15:17:26 2015, MaxMem=    33554432 cpu:               0.0 elap:               0.1
+ (Enter /home/gauss/gdvi01p/gdv/l302.exe)
+ NPDir=0 NMtPBC=     1 NCelOv=     1 NCel=       1 NClECP=     1 NCelD=      1
+         NCelK=      1 NCelE2=     1 NClLst=     1 CellRange=     0.0.
+ One-electron integrals computed using PRISM.
+ One-electron integral symmetry used in STVInt
+ NBasis=     5 RedAO= T EigKep=  7.59D-01  NBF=     5
+ NBsUse=     5 1.00D-06 EigRej= -1.00D+00 NBFU=     5
+ Leave Link  302 at Tue Sep 22 15:17:26 2015, MaxMem=    33554432 cpu:               0.1 elap:               0.1
+ (Enter /home/gauss/gdvi01p/gdv/l308.exe)
+ Leave Link  308 at Tue Sep 22 15:17:26 2015, MaxMem=    33554432 cpu:               0.0 elap:               0.0
+ (Enter /home/gauss/gdvi01p/gdv/l303.exe)
+ DipDrv:  MaxL=1.
+ Leave Link  303 at Tue Sep 22 15:17:26 2015, MaxMem=    33554432 cpu:               0.0 elap:               0.0
+ (Enter /home/gauss/gdvi01p/gdv/l401.exe)
+ ExpMin= 4.81D-02 ExpMax= 1.61D+01 ExpMxC= 1.61D+01 IAcc=2 IRadAn=         4 AccDes= 0.00D+00
+ Harris functional with IExCor=  205 and IRadAn=       4 diagonalized for initial guess.
+ HarFok:  IExCor=  205 AccDes= 0.00D+00 IRadAn=         4 IDoV= 1 UseB2=F ITyADJ=14
+ ICtDFT=  3500011 ScaDFX=  1.000000  1.000000  1.000000  1.000000
+ FoFCou: FMM=F IPFlag=           0 FMFlag=      100000 FMFlg1=           0
+         NFxFlg=           0 DoJE=T BraDBF=F KetDBF=T FulRan=T
+         wScrn=  0.000000 ICntrl=       500 IOpCl=  0 I1Cent=   200000004 NGrid=           0
+         NMat0=    1 NMatS0=      1 NMatT0=    0 NMatD0=    1 NMtDS0=    0 NMtDT0=    0
+ Symmetry not used in FoFCou.
+ Harris En= -7.26465469888667    
+ JPrj=0 DoOrth=F DoCkMO=F.
+ Initial guess <Sx>= 0.0000 <Sy>= 0.0000 <Sz>= 0.5000 <S**2>= 0.7500 S= 0.5000
+ Leave Link  401 at Tue Sep 22 15:17:27 2015, MaxMem=    33554432 cpu:               0.1 elap:               0.1
+ (Enter /home/gauss/gdvi01p/gdv/l502.exe)
+ Keep R1 and R2 ints in memory in canonical form, NReq=801487.
+ FoFCou: FMM=F IPFlag=           0 FMFlag=           0 FMFlg1=           0
+         NFxFlg=           0 DoJE=F BraDBF=F KetDBF=F FulRan=T
+         wScrn=  0.000000 ICntrl=       600 IOpCl=  0 I1Cent=           0 NGrid=           0
+         NMat0=    1 NMatS0=     15 NMatT0=    0 NMatD0=    1 NMtDS0=    0 NMtDT0=    0
+ Symmetry not used in FoFCou.
+ Two-electron integral symmetry not used.
+ UHF open shell SCF:
+ Using DIIS extrapolation, IDIIS=  1040.
+ NGot=    33554432 LenX=    33552898 LenY=    33552016
+ Requested convergence on RMS density matrix=1.00D-08 within 128 cycles.
+ Requested convergence on MAX density matrix=1.00D-06.
+ Requested convergence on             energy=1.00D-06.
+ No special actions if energy rises.
+
+ Cycle   1  Pass 1  IDiag  1:
+ E= -7.31471881031596    
+ DIIS: error= 2.04D-02 at cycle   1 NSaved=   1.
+ NSaved= 1 IEnMin= 1 EnMin= -7.31471881031596     IErMin= 1 ErrMin= 2.04D-02
+ ErrMax= 2.04D-02  0.00D+00 EMaxC= 1.00D-01 BMatC= 3.34D-03 BMatP= 3.34D-03
+ IDIUse=3 WtCom= 7.96D-01 WtEn= 2.04D-01
+ Coeff-Com:  0.100D+01
+ Coeff-En:   0.100D+01
+ Coeff:      0.100D+01
+ Gap=     0.312 Goal=   None    Shift=    0.000
+ Gap=     2.438 Goal=   None    Shift=    0.000
+ GapD=    0.312 DampG=1.000 DampE=0.500 DampFc=0.5000 IDamp=-1.
+ Damping current iteration by 5.00D-01
+ RMSDP=3.64D-03 MaxDP=1.68D-02              OVMax= 1.68D-02
+
+ Cycle   2  Pass 1  IDiag  1:
+ E= -7.31508724827646     Delta-E=       -0.000368437960 Rises=F Damp=T
+ DIIS: error= 1.18D-02 at cycle   2 NSaved=   2.
+ NSaved= 2 IEnMin= 2 EnMin= -7.31508724827646     IErMin= 2 ErrMin= 1.18D-02
+ ErrMax= 1.18D-02  0.00D+00 EMaxC= 1.00D-01 BMatC= 1.11D-03 BMatP= 3.34D-03
+ IDIUse=3 WtCom= 8.82D-01 WtEn= 1.18D-01
+ Coeff-Com: -0.136D+01 0.236D+01
+ Coeff-En:   0.000D+00 0.100D+01
+ Coeff:     -0.120D+01 0.220D+01
+ Gap=     0.310 Goal=   None    Shift=    0.000
+ Gap=     2.440 Goal=   None    Shift=    0.000
+ RMSDP=2.42D-03 MaxDP=1.12D-02 DE=-3.68D-04 OVMax= 2.79D-03
+
+ Cycle   3  Pass 1  IDiag  1:
+ E= -7.31552592079444     Delta-E=       -0.000438672518 Rises=F Damp=F
+ DIIS: error= 2.09D-04 at cycle   3 NSaved=   3.
+ NSaved= 3 IEnMin= 3 EnMin= -7.31552592079444     IErMin= 3 ErrMin= 2.09D-04
+ ErrMax= 2.09D-04  0.00D+00 EMaxC= 1.00D-01 BMatC= 3.51D-07 BMatP= 1.11D-03
+ IDIUse=3 WtCom= 9.98D-01 WtEn= 2.09D-03
+ Large coefficients: NSaved=  3 BigCof=    0.00 CofMax=   10.00 Det= 0.00D+00
+ Inversion failed.  Reducing to  2 matrices.
+ Coeff-Com: -0.181D-01 0.102D+01
+ Coeff-En:   0.000D+00 0.100D+01
+ Coeff:     -0.181D-01 0.102D+01
+ Gap=     0.310 Goal=   None    Shift=    0.000
+ Gap=     2.440 Goal=   None    Shift=    0.000
+ RMSDP=4.40D-05 MaxDP=2.05D-04 DE=-4.39D-04 OVMax= 2.02D-04
+
+ Cycle   4  Pass 1  IDiag  1:
+ E= -7.31552600556331     Delta-E=       -0.000000084769 Rises=F Damp=F
+ DIIS: error= 6.64D-08 at cycle   4 NSaved=   3.
+ NSaved= 3 IEnMin= 3 EnMin= -7.31552600556331     IErMin= 3 ErrMin= 6.64D-08
+ ErrMax= 6.64D-08  0.00D+00 EMaxC= 1.00D-01 BMatC= 3.53D-14 BMatP= 3.51D-07
+ IDIUse=1 WtCom= 1.00D+00 WtEn= 0.00D+00
+ Large coefficients: NSaved=  3 BigCof=    0.00 CofMax=   10.00 Det= 5.29D-23
+ Inversion failed.  Reducing to  2 matrices.
+ Coeff-Com: -0.317D-03 0.100D+01
+ Coeff:     -0.317D-03 0.100D+01
+ Gap=     0.310 Goal=   None    Shift=    0.000
+ Gap=     2.440 Goal=   None    Shift=    0.000
+ RMSDP=1.39D-08 MaxDP=6.49D-08 DE=-8.48D-08 OVMax= 6.41D-08
+
+ Cycle   5  Pass 1  IDiag  1:
+ E= -7.31552600556331     Delta-E=        0.000000000000 Rises=F Damp=F
+ DIIS: error= 3.43D-16 at cycle   5 NSaved=   3.
+ NSaved= 3 IEnMin= 3 EnMin= -7.31552600556331     IErMin= 3 ErrMin= 3.43D-16
+ ErrMax= 3.43D-16  0.00D+00 EMaxC= 1.00D-01 BMatC= 1.05D-30 BMatP= 3.53D-14
+ IDIUse=1 WtCom= 1.00D+00 WtEn= 0.00D+00
+ Coeff-Com:  0.000D+00 0.000D+00 0.100D+01
+ Coeff:      0.000D+00 0.000D+00 0.100D+01
+ Gap=     0.310 Goal=   None    Shift=    0.000
+ Gap=     2.440 Goal=   None    Shift=    0.000
+ RMSDP=6.59D-17 MaxDP=4.44D-16 DE=-7.99D-15 OVMax= 7.77D-17
+
+ SCF Done:  E(UHF) =  -7.31552600556     A.U. after    5 cycles
+            NFock=  5  Conv=0.66D-16     -V/T= 1.9847
+ <Sx>= 0.0000 <Sy>= 0.0000 <Sz>= 0.5000 <S**2>= 0.7500 S= 0.5000
+ <L.S>= 0.000000000000E+00
+ KE= 7.429424133898D+00 PE=-1.717332251576D+01 EE= 2.428372376303D+00
+ Annihilation of the first spin contaminant:
+ S**2 before annihilation     0.7500,   after     0.7500
+ Leave Link  502 at Tue Sep 22 15:17:27 2015, MaxMem=    33554432 cpu:               0.1 elap:               0.1
+ (Enter /home/gauss/gdvi01p/gdv/l801.exe)
+ Range of M.O.s used for correlation:     1     5
+ NBasis=     5 NAE=     2 NBE=     1 NFC=     0 NFV=     0
+ NROrb=      5 NOA=     2 NOB=     1 NVA=     3 NVB=     4
+ Leave Link  801 at Tue Sep 22 15:17:27 2015, MaxMem=    33554432 cpu:               0.0 elap:               0.0
+ (Enter /home/gauss/gdvi01p/gdv/l804.exe)
+ Open-shell transformation, MDV=    33554432 ITran=3 ISComp=1.
+ Unit  1 TFree=          3096 TCopy=        146349.
+ Semi-Direct transformation.
+ ModeAB=           2 MOrb=             2 LenV=      33436253
+ LASXX=           46 LTotXX=          46 LenRXX=          46
+ LTotAB=          75 MaxLAS=         150 LenRXY=         150
+ NonZer=         210 LenScr=      785920 LnRSAI=           0
+ LnScr1=           0 LExtra=           0 Total=       786116
+ MaxDsk=          -1 SrtSym=           F ITran=            3
+ DoSDTr:  NPSUse=  1
+ JobTyp=1 Pass  1:  I=   1 to   2.
+ (rs|ai) integrals will be sorted in core.
+ Complete sort for first half transformation.
+ First half transformation complete.
+ Complete sort for second half transformation.
+ Second half transformation complete.
+ ModeAB=           2 MOrb=             1 LenV=      33436253
+ LASXX=           16 LTotXX=          16 LenRXX=          75
+ LTotAB=           6 MaxLAS=          75 LenRXY=           6
+ NonZer=         105 LenScr=      785920 LnRSAI=           0
+ LnScr1=           0 LExtra=           0 Total=       786001
+ MaxDsk=          -1 SrtSym=           F ITran=            3
+ DoSDTr:  NPSUse=  1
+ JobTyp=2 Pass  1:  I=   1 to   1.
+ (rs|ai) integrals will be sorted in core.
+ Complete sort for first half transformation.
+ First half transformation complete.
+ Complete sort for second half transformation.
+ Second half transformation complete.
+ Spin components of T(2) and E(2):
+     alpha-alpha T2 =       0.0000000000D+00 E2=      0.0000000000D+00
+     alpha-beta  T2 =       0.8158595713D-04 E2=     -0.2564092537D-03
+     beta-beta   T2 =       0.0000000000D+00 E2=      0.0000000000D+00
+ ANorm=    0.1000040792D+01
+ E2 =    -0.2564092537D-03 EUMP2 =    -0.73157824148170D+01
+ (S**2,0)=  0.75000D+00           (S**2,1)=  0.75000D+00
+ E(PUHF)=      -0.73155260056D+01        E(PMP2)=      -0.73157824148D+01
+ Leave Link  804 at Tue Sep 22 15:17:27 2015, MaxMem=    33554432 cpu:               0.1 elap:               0.0
+ (Enter /home/gauss/gdvi01p/gdv/l914.exe)
+ UHF ground state
+ Ignoring spin specification with unrestricted ground state.
+ MDV=    33554432 DFT=F DoStab=F Mixed=F DoRPA=T DoScal=F NonHer=T
+ Making orbital integer symmetry assigments:
+ FoFJK:  IHMeth= 1 ICntrl=       0 DoSepK=F KAlg= 0 I1Cent=           0 FoldK=F
+ IRaf=         0 NMat=       2 IRICut=       1 DoRegI=T DoRafI=F ISym2E= 0 IDoP0=0 IntGTp=1.
+ FoFCou: FMM=F IPFlag=           0 FMFlag=      100000 FMFlg1=           0
+         NFxFlg=           0 DoJE=F BraDBF=F KetDBF=F FulRan=T
+         wScrn=  0.000000 ICntrl=         0 IOpCl=  1 I1Cent=           0 NGrid=           0
+         NMat0=    2 NMatS0=      2 NMatT0=    0 NMatD0=    2 NMtDS0=    0 NMtDT0=    0
+ Symmetry not used in FoFCou.
+    10 initial guesses have been made.
+ Convergence on wavefunction:    0.001000000000000
+ Davidson Disk Diagonalization:  ConvIn= 1.00D-03 SkipCon=T Conv= 1.00D-03.
+ Max sub-space:   200 roots to seek:    10 dimension of matrix:           10
+ Iteration     1 Dimension    10 NMult     0 NNew     10
+ New state      5 was old state      9
+ New state      6 was old state     10
+ New state      7 was old state      8
+ New state      8 was old state      6
+ New state      9 was old state      7
+ New state     10 was old state      5
+ Excitation Energies [eV] at current iteration:
+ Root      1 :     2.318279754641996
+ Root      2 :     2.318279754642103
+ Root      3 :     2.318279754642315
+ Root      4 :    56.350814430098480
+ Root      5 :    57.409580992431860
+ Root      6 :    57.409580992431910
+ Root      7 :    57.409580992431940
+ Root      8 :    58.375970629046500
+ Root      9 :    58.375970629046530
+ Root     10 :    58.375970629046560
+ Convergence achieved for final wavefunctions.
+ ***********************************************************************
+ Excited states from <AA,BB:AA,BB> singles matrix:
+ ***********************************************************************
+ 
+ ExtSpn:  IState=     1 X2= 1.000 Y2= 0.000 X2-Y2-1= 0.00D+00
+          S2Grnd=  0.750 Ra=  0.000 Rb=  0.000 T=  0.000 S2Ext=  0.000 S2=  0.750
+ ExtSpn:  IState=     2 X2= 1.000 Y2= 0.000 X2-Y2-1=-1.11D-16
+          S2Grnd=  0.750 Ra=  0.000 Rb=  0.000 T=  0.000 S2Ext=  0.000 S2=  0.750
+ ExtSpn:  IState=     3 X2= 1.000 Y2= 0.000 X2-Y2-1= 4.44D-16
+          S2Grnd=  0.750 Ra=  0.000 Rb=  0.000 T=  0.000 S2Ext=  0.000 S2=  0.750
+ ExtSpn:  IState=     4 X2= 1.000 Y2= 0.000 X2-Y2-1=-2.22D-16
+          S2Grnd=  0.750 Ra=  0.000 Rb=  0.000 T=  0.000 S2Ext=  0.000 S2=  0.750
+ ExtSpn:  IState=     5 X2= 1.000 Y2= 0.000 X2-Y2-1= 2.22D-16
+          S2Grnd=  0.750 Ra=  0.915 Rb=  0.085 T=  0.557 S2Ext=  1.557 S2=  2.307
+ ExtSpn:  IState=     6 X2= 1.000 Y2= 0.000 X2-Y2-1= 0.00D+00
+          S2Grnd=  0.750 Ra=  0.915 Rb=  0.085 T=  0.557 S2Ext=  1.557 S2=  2.307
+ ExtSpn:  IState=     7 X2= 1.000 Y2= 0.000 X2-Y2-1=-2.22D-16
+          S2Grnd=  0.750 Ra=  0.915 Rb=  0.085 T=  0.557 S2Ext=  1.557 S2=  2.307
+ ExtSpn:  IState=     8 X2= 1.000 Y2= 0.000 X2-Y2-1= 0.00D+00
+          S2Grnd=  0.750 Ra=  0.085 Rb=  0.915 T= -0.557 S2Ext=  0.443 S2=  1.193
+ ExtSpn:  IState=     9 X2= 1.000 Y2= 0.000 X2-Y2-1=-3.33D-16
+          S2Grnd=  0.750 Ra=  0.085 Rb=  0.915 T= -0.557 S2Ext=  0.443 S2=  1.193
+ ExtSpn:  IState=    10 X2= 1.000 Y2= 0.000 X2-Y2-1=-3.33D-16
+          S2Grnd=  0.750 Ra=  0.085 Rb=  0.915 T= -0.557 S2Ext=  0.443 S2=  1.193
+ 1PDM for each excited state written to RWF  633
+ Ground to excited state transition densities written to RWF  633
+ Ground to excited state transition electric dipole moments (Au):
+       state          X           Y           Z        Dip. S.      Osc.
+         1         0.0000     -1.3540     -1.2070      3.2901      0.1869
+         2         0.0000      1.2070     -1.3540      3.2901      0.1869
+         3        -1.8139      0.0000      0.0000      3.2901      0.1869
+         4         0.0000      0.0000      0.0000      0.0000      0.0000
+         5        -0.0032      0.0140     -0.1453      0.0213      0.0300
+         6        -0.1445     -0.0207      0.0012      0.0213      0.0300
+         7         0.0205     -0.1438     -0.0143      0.0213      0.0300
+         8         0.1359      0.0198     -0.2229      0.0686      0.0981
+         9        -0.2229      0.0359     -0.1327      0.0686      0.0981
+        10        -0.0205     -0.2586     -0.0355      0.0686      0.0981
+ Ground to excited state transition velocity dipole moments (Au):
+       state          X           Y           Z        Dip. S.      Osc.
+         1         0.0000      0.1013      0.0903      0.0184      0.1441
+         2         0.0000     -0.0903      0.1013      0.0184      0.1441
+         3         0.1357      0.0000      0.0000      0.0184      0.1441
+         4         0.0000      0.0000      0.0000      0.0000      0.0000
+         5         0.0053     -0.0232      0.2416      0.0589      0.0186
+         6         0.2403      0.0345     -0.0020      0.0589      0.0186
+         7        -0.0341      0.2392      0.0237      0.0589      0.0186
+         8        -0.2372     -0.0346      0.3892      0.2089      0.0649
+         9         0.3890     -0.0626      0.2316      0.2089      0.0649
+        10         0.0358      0.4514      0.0619      0.2089      0.0649
+ Ground to excited state transition magnetic dipole moments (Au):
+       state          X           Y           Z
+         1         0.0000      0.0000      0.0000
+         2         0.0000      0.0000      0.0000
+         3         0.0000      0.0000      0.0000
+         4         0.0000      0.0000      0.0000
+         5         0.0000      0.0000      0.0000
+         6         0.0000      0.0000      0.0000
+         7         0.0000      0.0000      0.0000
+         8         0.0000      0.0000      0.0000
+         9         0.0000      0.0000      0.0000
+        10         0.0000      0.0000      0.0000
+ Ground to excited state transition velocity quadrupole moments (Au):
+       state          XX          YY          ZZ          XY          XZ          YZ
+         1         0.0000      0.0000      0.0000      0.0000      0.0000      0.0000
+         2         0.0000      0.0000      0.0000      0.0000      0.0000      0.0000
+         3         0.0000      0.0000      0.0000      0.0000      0.0000      0.0000
+         4         0.2475      0.2475      0.2475      0.0000      0.0000      0.0000
+         5         0.0000      0.0000      0.0000      0.0000      0.0000      0.0000
+         6         0.0000      0.0000      0.0000      0.0000      0.0000      0.0000
+         7         0.0000      0.0000      0.0000      0.0000      0.0000      0.0000
+         8         0.0000      0.0000      0.0000      0.0000      0.0000      0.0000
+         9         0.0000      0.0000      0.0000      0.0000      0.0000      0.0000
+        10         0.0000      0.0000      0.0000      0.0000      0.0000      0.0000
+ <0|del|b> * <b|rxdel|0> + <0|del|b> * <b|delr+rdel|0>
+ Rotatory Strengths (R) in cgs (10**-40 erg-esu-cm/Gauss)
+       state          XX          YY          ZZ    R(velocity)    E-M Angle
+         1         0.0000      0.0000      0.0000      0.0000       90.00
+         2         0.0000      0.0000      0.0000      0.0000       90.00
+         3         0.0000      0.0000      0.0000      0.0000       90.00
+         4         0.0000      0.0000      0.0000      0.0000       90.00
+         5         0.0000      0.0000      0.0000      0.0000       90.00
+         6         0.0000      0.0000      0.0000      0.0000       90.00
+         7         0.0000      0.0000      0.0000      0.0000       90.00
+         8         0.0000      0.0000      0.0000      0.0000       90.00
+         9         0.0000      0.0000      0.0000      0.0000       90.00
+        10         0.0000      0.0000      0.0000      0.0000       90.00
+ 1/2[<0|r|b>*<b|rxdel|0> + (<0|rxdel|b>*<b|r|0>)*]
+ Rotatory Strengths (R) in cgs (10**-40 erg-esu-cm/Gauss)
+       state          XX          YY          ZZ     R(length)
+         1         0.0000      0.0000      0.0000      0.0000
+         2         0.0000      0.0000      0.0000      0.0000
+         3         0.0000      0.0000      0.0000      0.0000
+         4         0.0000      0.0000      0.0000      0.0000
+         5         0.0000      0.0000      0.0000      0.0000
+         6         0.0000      0.0000      0.0000      0.0000
+         7         0.0000      0.0000      0.0000      0.0000
+         8         0.0000      0.0000      0.0000      0.0000
+         9         0.0000      0.0000      0.0000      0.0000
+        10         0.0000      0.0000      0.0000      0.0000
+  1/2[<0|del|b>*<b|r|0> + (<0|r|b>*<b|del|0>)*] (Au)
+       state          X           Y           Z        Dip. S.   Osc.(frdel)
+         1         0.0000     -0.1371     -0.1090      0.2461      0.1641
+         2         0.0000     -0.1090     -0.1371      0.2461      0.1641
+         3        -0.2461      0.0000      0.0000      0.2461      0.1641
+         4         0.0000      0.0000      0.0000      0.0000      0.0000
+         5         0.0000     -0.0003     -0.0351      0.0354      0.0236
+         6        -0.0347     -0.0007      0.0000      0.0354      0.0236
+         7        -0.0007     -0.0344     -0.0003      0.0354      0.0236
+         8        -0.0322     -0.0007     -0.0868      0.1197      0.0798
+         9        -0.0867     -0.0022     -0.0307      0.1197      0.0798
+        10        -0.0007     -0.1167     -0.0022      0.1197      0.0798
+
+ Excitation energies and oscillator strengths:
+ 
+ Excited state symmetry could not be determined.
+ Excited State   1:  2.000-?Sym    2.3183 eV  534.81 nm  f=0.1869  <S**2>=0.750
+      2A ->  3A        0.74642
+      2A ->  4A        0.66540
+ This state for optimization and/or second-order correction.
+ Total Energy, E(TD-HF/TD-KS) =  -7.23033079217    
+ Copying the excited state density for this state as the 1-particle RhoCI density.
+ 
+ Excited state symmetry could not be determined.
+ Excited State   2:  2.000-?Sym    2.3183 eV  534.81 nm  f=0.1869  <S**2>=0.750
+      2A ->  3A       -0.66540
+      2A ->  4A        0.74642
+ 
+ Excited state symmetry could not be determined.
+ Excited State   3:  2.000-?Sym    2.3183 eV  534.81 nm  f=0.1869  <S**2>=0.750
+      2A ->  5A        0.99995
+ 
+ LASSW sees vector with all elements less than  0.100000000000E-03
+ LASSW sees vector with all elements less than  0.100000000000E-03
+ LASSW sees vector with all elements less than  0.100000000000E-03
+ LASSW sees vector with all elements less than  0.100000000000E-03
+ Excited state symmetry could not be determined.
+ Excited State   4:  2.000-?Sym   56.3508 eV   22.00 nm  f=0.0000  <S**2>=0.750
+      1B ->  2B        1.00000
+ 
+ Excited state symmetry could not be determined.
+ Excited State   5:  3.198-?Sym   57.4096 eV   21.60 nm  f=0.0300  <S**2>=2.307
+      1A ->  4A        0.95197
+      1B ->  4B       -0.28999
+ 
+ Excited state symmetry could not be determined.
+ Excited State   6:  3.198-?Sym   57.4096 eV   21.60 nm  f=0.0300  <S**2>=2.307
+      1A ->  3A        0.13590
+      1A ->  5A        0.94685
+      1B ->  5B       -0.28843
+ 
+ Excited state symmetry could not be determined.
+ Excited State   7:  3.198-?Sym   57.4096 eV   21.60 nm  f=0.0300  <S**2>=2.307
+      1A ->  3A        0.94245
+      1A ->  5A       -0.13451
+      1B ->  3B       -0.28709
+ 
+ Excited state symmetry could not be determined.
+ Excited State   8:  2.402-?Sym   58.3760 eV   21.24 nm  f=0.0981  <S**2>=1.193
+      1A ->  4A        0.24805
+      1A ->  5A       -0.15118
+      1B ->  4B        0.81451
+      1B ->  5B       -0.49642
+ 
+ Excited state symmetry could not be determined.
+ Excited State   9:  2.402-?Sym   58.3760 eV   21.24 nm  f=0.0981  <S**2>=1.193
+      1A ->  4A        0.14759
+      1A ->  5A        0.24798
+      1B ->  3B       -0.13104
+      1B ->  4B        0.48464
+      1B ->  5B        0.81427
+ 
+ Excited state symmetry could not be determined.
+ Excited State  10:  2.402-?Sym   58.3760 eV   21.24 nm  f=0.0981  <S**2>=1.193
+      1A ->  3A        0.28773
+      1B ->  3B        0.94482
+      1B ->  4B        0.12959
+ SavETr:  write IOETrn=   770 NScale= 10 NData=  16 NLR=1 NState=   10 LETran=     190.
+ Leave Link  914 at Tue Sep 22 15:17:27 2015, MaxMem=    33554432 cpu:               0.1 elap:               0.1
+ (Enter /home/gauss/gdvi01p/gdv/l601.exe)
+ Copying SCF densities to generalized density rwf, IOpCl= 1 IROHF=0.
+
+ **********************************************************************
+
+            Population analysis using the SCF density.
+
+ **********************************************************************
+
+ Alpha  occ. eigenvalues --   -2.36917  -0.18012
+ Alpha virt. eigenvalues --    0.13013   0.13013   0.13013
+  Beta  occ. eigenvalues --   -2.33786
+  Beta virt. eigenvalues --    0.10225   0.19092   0.19092   0.19092
+          Condensed to atoms (all electrons):
+               1
+     1  Li   3.000000
+          Atomic-Atomic Spin Densities.
+               1
+     1  Li   1.000000
+ Mulliken charges and spin densities:
+               1          2
+     1  Li   0.000000   1.000000
+ Sum of Mulliken charges =   0.00000   1.00000
+ Mulliken charges and spin densities with hydrogens summed into heavy atoms:
+               1          2
+     1  Li   0.000000   1.000000
+ Electronic spatial extent (au):  <R**2>=             13.0955
+ Charge=              0.0000 electrons
+ Dipole moment (field-independent basis, Debye):
+    X=              0.0000    Y=              0.0000    Z=              0.0000  Tot=              0.0000
+ Quadrupole moment (field-independent basis, Debye-Ang):
+   XX=             -5.8713   YY=             -5.8713   ZZ=             -5.8713
+   XY=              0.0000   XZ=              0.0000   YZ=              0.0000
+ Traceless Quadrupole moment (field-independent basis, Debye-Ang):
+   XX=              0.0000   YY=              0.0000   ZZ=              0.0000
+   XY=              0.0000   XZ=              0.0000   YZ=              0.0000
+ Octapole moment (field-independent basis, Debye-Ang**2):
+  XXX=              0.0000  YYY=              0.0000  ZZZ=              0.0000  XYY=              0.0000
+  XXY=              0.0000  XXZ=              0.0000  XZZ=              0.0000  YZZ=              0.0000
+  YYZ=              0.0000  XYZ=              0.0000
+ Hexadecapole moment (field-independent basis, Debye-Ang**3):
+ XXXX=            -19.9270 YYYY=            -19.9270 ZZZZ=            -19.9270 XXXY=              0.0000
+ XXXZ=              0.0000 YYYX=              0.0000 YYYZ=              0.0000 ZZZX=              0.0000
+ ZZZY=              0.0000 XXYY=             -6.6423 XXZZ=             -6.6423 YYZZ=             -6.6423
+ XXYZ=              0.0000 YYXZ=              0.0000 ZZXY=              0.0000
+ N-N= 0.000000000000D+00 E-N=-1.717332251576D+01  KE= 7.429424133898D+00
+ Leave Link  601 at Tue Sep 22 15:17:27 2015, MaxMem=    33554432 cpu:               0.0 elap:               0.0
+ (Enter /home/gauss/gdvi01p/gdv/l9999.exe)
+ Unable to Open any file for archive entry.
+ 1\1\GINC-MEDUSA\SP\UTD-Full\STO-3G\Li1(2)\DBWY\22-Sep-2015\0\\#p uhf/s
+ to-3g nosymm td(full,nstates=12,50-50)\\Li STO-3G\\0,2\Li,0,0.,0.,0.\\
+ Version=ES64L-GDVRevI.01+\HF=-7.315526\MP2=-7.3157824\PUHF=-7.315526\P
+ MP2-0=-7.3157824\S2=0.75\S2-1=0.75\S2A=0.75\RMSD=6.592e-17\PG=OH [O(Li
+ 1)]\\@
+ The archive entry for this job was punched.
+
+
+ HICKORY, DICKORY, DOCK
+ TWO MICE RAN UP THE CLOCK
+ THE CLOCK STRUCK ONE...
+ THE OTHER ESCAPED WITH MINOR INJURIES.
+ Job cpu time:       0 days  0 hours  0 minutes  0.9 seconds.
+ Elapsed time:       0 days  0 hours  0 minutes  0.6 seconds.
+ File lengths (MBytes):  RWF=     12 Int=      0 D2E=      0 Chk=      1 Scr=      1
+ Normal termination of Gaussian DV at Tue Sep 22 15:17:27 2015.

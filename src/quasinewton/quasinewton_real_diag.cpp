@@ -121,7 +121,7 @@ namespace ChronusQ {
     delete [] IPIV;
 
     NHrProd = SSuper * ASuper;
-//  cout << "PROD" << endl << NHrProd << endl;
+  //cout << endl << "PROD" << endl << NHrProd << endl;
 
     dgeev_(&JOBVL,&JOBVR,&TwoNTrial,NHrProd.data(),&TwoNTrial,this->ERMem,this->EIMem,
            this->SSuperMem,&TwoNTrial,this->SSuperMem,&TwoNTrial,this->WORK,&this->LWORK,
@@ -153,6 +153,9 @@ namespace ChronusQ {
     RealCMMap XTSigmaL(this->XTSigmaLMem,NTrial,NTrial);
     XTSigmaR = SSuper.block(0,     0,NTrial,NTrial);
     XTSigmaL = SSuper.block(NTrial,0,NTrial,NTrial);
+  //cout << endl << "ER" << endl << ER << endl << endl;
+  //cout << endl << "CR" << endl << XTSigmaR << endl << endl;
+  //cout << endl << "CR" << endl << XTSigmaL << endl << endl;
 //  CErr();
   }
 

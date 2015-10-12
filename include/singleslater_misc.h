@@ -56,48 +56,13 @@ void SingleSlater<T>::formDensity(){
     (*this->densityA_) = 
       this->moA_->block(0,0,this->nBasis_,this->nOccA_)*
       this->moA_->block(0,0,this->nBasis_,this->nOccA_).adjoint();
-    if(this->Ref_ == RHF) (*this->densityA_) *= math.two;// D(a) is actually total D for RHF
+    if(this->isClosedShell) (*this->densityA_) *= math.two;// D(a) is actually total D for RHF
     else {
       (*this->densityB_) = 
         this->moB_->block(0,0,this->nBasis_,this->nOccB_)*
         this->moB_->block(0,0,this->nBasis_,this->nOccB_).adjoint();
     }
   }
-  if(this->controls_->printLevel>=2) {
-    if(this->Ref_ != TCS) {
-      prettyPrint(this->fileio_->out,(*this->densityA_),"Alpha Density");
-      if(this->Ref_ != RHF) prettyPrint(this->fileio_->out,(*this->densityB_),"Beta Density");
-    } else
-      prettyPrintTCS(this->fileio_->out,(*this->densityA_),"Density");
-  };
+  if(this->controls_->printLevel>=2) this->printDensity();
   this->haveDensity = true;
 }
-/************************
- * Compute Total Energy *
- ************************/
-template<typename T>
-void SingleSlater<T>::computeEnergy(){
-/*
-  if(this->Ref_ != TCS)
-    this->energyOneE = (*this->aointegrals_->oneE_).frobInner(this->densityA_->conjugate());
-  else {
-    this->energyOneE = 0.0;
-    for(auto I = 0, i = 0; i < this->nBasis_; I += 2, i++)    
-    for(auto J = 0, j = 0; j < this->nBasis_; J += 2, j++){
-      this->energyOneE += 
-        this->densityA_->conjugate()(I,J)*(*this->aointegrals_->oneE_)(i,j) + 
-        this->densityA_->conjugate()(I+1,J+1)*(*this->aointegrals_->oneE_)(i,j);
-    } 
-  }
-*/
-  this->energyOneE = (*this->aointegrals_->oneE_).frobInner(this->densityA_->conjugate());
-  this->energyTwoE = 0.5*(*this->PTA_).frobInner(this->densityA_->conjugate());
-  if(!this->isClosedShell && this->Ref_ != TCS){
-    this->energyOneE += (*this->aointegrals_->oneE_).frobInner(this->densityB_->conjugate());
-    this->energyTwoE += 0.5*(*this->PTB_).frobInner(this->densityB_->conjugate());
-  }
-  this->totalEnergy= this->energyOneE + this->energyTwoE + this->energyNuclei;
-  this->printEnergy();
-};
-
-

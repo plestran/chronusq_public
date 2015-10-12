@@ -1,1 +1,1 @@
-add_library(classtools classtools.cpp)
+add_library(classtools SHARED classtools.cpp)

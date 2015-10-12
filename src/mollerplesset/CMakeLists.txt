@@ -1,2 +1,2 @@
-add_library(mollerplesset mollerplesset.cpp)
+add_library(mollerplesset SHARED mollerplesset.cpp)
 

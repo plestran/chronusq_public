@@ -320,28 +320,10 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
           this->basisSet_->shells(s1),
           this->basisSet_->shells(s2)
         );
-/*
-        if(this->nTCS_ == 1){
-          for(int i = 0, ij=0; i < n1; i++) {
-            for(int j = 0; j < n2; j++, ij++) {
-              (*mat)(bf1+i,bf2+j) = buff[ij];
-            }
-          }
-        } else {
-          for(int i = 0, ij=0; i < n1; i+=2) {
-            for(int j = 0; j < n2; j+=2, ij++) {
-              (*mat)(bf1+i,bf2+j)     = buff[ij];
-              (*mat)(bf1+i+1,bf2+j+1) = buff[ij];
-            }
-          }
-        }
-*/
+
         int IOff = 0;
         for(auto nMat = 0; nMat < mat.size(); nMat++) {
           ConstRealMap bufMat(&buff[IOff],n1,n2); // Read only map
-//        mat[nMat].block(bf1,bf2,n1,n2) = bufMat;
-//        for(auto i = 0, ij = 0; i < n1; i += this->nTCS_)
-//        for(auto j = 0; j < n2; j += this->nTCS_, ij++  ){
           for(auto i = 0, bf1 = bf1_s; i < n1; i++, bf1 += this->nTCS_)            
           for(auto j = 0, bf2 = bf2_s; j < n2; j++, bf2 += this->nTCS_){            
             mat[nMat](bf1,bf2) = bufMat(i,j);
@@ -434,6 +416,8 @@ void AOIntegrals::computeAOOneE(){
   OneEDriver(OneBodyEngine::nuclear);
   auto VEnd = std::chrono::high_resolution_clock::now();
 //this->oneE_->add(this->kinetic_,this->potential_);
+
+// Build Core Hamiltonian
   (*this->oneE_) = (*this->kinetic_) + (*this->potential_);
 
   // Get end time of one-electron integral evaluation
@@ -478,7 +462,7 @@ void AOIntegrals::computeSchwartz(){
                                     this->basisSet_->maxL(),0);
   engine.set_precision(0.); // Don't screen primitives during schwartz
 
-  this->fileio_->out << "Computing Schwartz Bound Tensor ... ";
+//this->fileio_->out << "Computing Schwartz Bound Tensor ... ";
   auto start =  std::chrono::high_resolution_clock::now();
   for(int s1=0; s1 < this->basisSet_->nShell(); s1++){
     int n1  = this->basisSet_->shells(s1).size();
@@ -513,7 +497,7 @@ void AOIntegrals::computeSchwartz(){
   this->SchwartzD = finish - start;
   (*this->schwartz_) = this->schwartz_->selfadjointView<Lower>();
 
-  this->fileio_->out << "done (" << this->SchwartzD.count() << ")" << endl;
+//this->fileio_->out << "done (" << this->SchwartzD.count() << ")" << endl;
   this->haveSchwartz = true;
 }
 void AOIntegrals::computeAOTwoE(){

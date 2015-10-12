@@ -27,6 +27,7 @@
   void IterativeRPA();
   void formGuess();
   void getDiag();
-  void formPerturbedGuess(double,const RealCMMap&, RealCMMap&,const RealCMMap&, RealCMMap&);
-  void formRM3(RealCMMap&, RealCMMap&, RealCMMap&);
-  void formRM4(RealCMMap&, RealCMMap&, RealCMMap&);
+  void formPerturbedGuess(double,const TCMMap&, TCMMap&,const TCMMap&, TCMMap&);
+  void formRM3(TCMMap&, TCMMap&, TCMMap&);
+  void formRM4(TCMMap&, TCMMap&, TCMMap&);
+  void reoptWF();

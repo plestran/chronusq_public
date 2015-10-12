@@ -183,6 +183,8 @@ public:
 */
   };
 
+  inline void communicate(FileIO &fileio){ this->fileio_ = &fileio;};
+
   // Getters
   inline int     nBasis() {return this->nBasis_;       }; ///< Return # of basis functions
   inline int nPrimitive() {return this->nPrimitive_;   }; ///< Return # of primitive GTOs
@@ -191,6 +193,9 @@ public:
   inline int       maxL() {return this->maxL_;         }; ///< Return max angular momentum
   inline int    maxPrim() {return this->maxPrim_;      }; ///< Return max # primitive GTOs
   
+  template <typename T> double * basisEval(int,std::array<double,3>,T*);
+  template <typename T> double * basisEval(libint2::Shell&,T*);
+  template <typename T> double * basisProdEval(libint2::Shell,libint2::Shell,T*);
   inline libint2::Shell      shells(int i) {return this->shells_[i];    };
   inline int                nLShell(int L) {return this->nLShell_[L];   };
   inline int               mapSh2Bf(int i) {return this->mapSh2Bf_[i];  };
@@ -222,6 +227,16 @@ public:
   template<typename TMat> void computeShBlkNorm(bool,int,const TMat*, const TMat*);
 
   void constructExtrn(Molecule *, BasisSet *); ///< Generate new basis from refernce shells
+
+  inline void makeMaps(int nTCS, Molecule* mol){
+    this->makeMapSh2Bf(nTCS);
+    this->makeMapSh2Cen(mol);
+    this->makeMapCen2Bf(nTCS,mol);
+  }
+
+  // Python API
+  void Wrapper_constructLocal(Molecule&);
+  void Wrapper_makeMaps(int,Molecule&);
 
 }; // class BasisSet
 }; // namespace ChronusQ

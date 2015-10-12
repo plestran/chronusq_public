@@ -1,3 +1,5 @@
-add_library(quasinewton quasinewton_real_diag.cpp quasinewton_real_guess.cpp
+add_library(quasinewton SHARED quasinewton_real_diag.cpp quasinewton_real_guess.cpp
 quasinewton_real_proc.cpp quasinewton_real_restart.cpp
-quasinewton_real_misc.cpp)
+quasinewton_real_misc.cpp quasinewton_complex_diag.cpp quasinewton_complex_guess.cpp
+ quasinewton_complex_proc.cpp quasinewton_complex_restart.cpp
+quasinewton_complex_misc.cpp)

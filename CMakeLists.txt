@@ -1,6 +1,6 @@
 # Configure Project ChronusQ
 cmake_minimum_required(VERSION 2.8)
-project(ChronusQ C CXX Fortran)
+project(ChronusQ CXX C)
 set(ChronusQ_VERSION_MAJOR 1)
 set(ChronusQ_VERSION_MINOR 0)
 
@@ -10,6 +10,7 @@ find_package(LAPACK REQUIRED) # Required for now
 
 option(USE_OMP "Use SMP Parallelization" OFF) # Default serial processing
 option(USE_MPI "Use MPI Parallelization" OFF)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
 if(USE_OMP)
   find_package(OpenMP)

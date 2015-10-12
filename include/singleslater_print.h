@@ -34,6 +34,9 @@ void SingleSlater<T>::printEnergy(){
   this->fileio_->out<<std::right<<std::setw(30)<<std::fixed<<"E(nuclear repulsion) = "<<std::setw(15)<<this->energyNuclei<<std::setw(5)<<" Eh "<<endl;
   this->fileio_->out<<std::right<<std::setw(30)<<std::fixed<<"E(total) = "<<std::setw(15)<<this->totalEnergy<<std::setw(5)<<" Eh "<<endl;
 };
+/******************************
+ * Print Energy Contributions *
+ ******************************/
 
 /**********************************
  * Print Wavefunction Information *
@@ -62,6 +65,14 @@ void SingleSlater<T>::printMultipole(){
   this->fileio_->out << std::left << std::setw(5) <<"Z=" 
                      << std::fixed << std::right << std::setw(20) 
                      << (*this->dipole_)(2,0)/phys.debye << endl;
+// jjg add total electric dipole moment
+  this->fileio_->out << std::left << std::setw(5) <<"Tot=" 
+                     << std::fixed << std::right << std::setw(20) 
+                     << std::sqrt((*this->dipole_)(2,0)*(*this->dipole_)(2,0) + 
+                         (*this->dipole_)(1,0)*(*this->dipole_)(1,0) + 
+                         (*this->dipole_)(0,0)*(*this->dipole_)(0,0)  
+                         )/phys.debye << endl;
+// jjg end total
   if(this->controls_->doQuadpole) {
     this->fileio_->out << bannerMid << endl;
     this->fileio_->out << std::setw(50) << std::left << "Electric Quadrupole Moment" 
@@ -212,3 +223,45 @@ void SingleSlater<T>::printMultipole(){
   }
   this->fileio_->out << endl << bannerEnd << endl;
 }
+
+template<typename T>
+void SingleSlater<T>::printSCFHeader(ostream &output){
+  output << bannerTop << endl;
+  output << "Self Consistant Field (SCF) Settings:" << endl << endl;
+//cout << std::setprecision(6);
+
+  output << std::setw(38) << std::left << "  SCF Type:" << this->SCFType_ << endl;
+  output << std::setw(38) << std::left << "  Density Convergence Tolerence:" << std::scientific << std::setprecision(6) << this->denTol_ << endl;
+  output << std::setw(38) << std::left << "  Energy Convergence Tolerence:" << std::scientific << std::setprecision(6) << this->eneTol_ << endl;
+  output << std::setw(38) << std::left << "  Maximum Number of SCF Cycles:" << this->maxSCFIter_ << endl;
+  output << std::setw(38) << std::left << "  Integral Contraction Algorithm:";
+  if(this->controls_->directTwoE && !this->controls_->doDF)
+    output << "Direct";
+  else if (this->controls_->doDF)
+    output << "Density-Fitting (BTAS)";
+  else
+    output << "In-Core (BTAS)";
+  output << endl;
+  output << endl << bannerMid << endl;
+}
+
+template<typename T>
+void SingleSlater<T>::printSCFIter(int iter, double EDel,double PARMS,double PBRMS){
+  this->fileio_->out << std::setw(16) << std::left 
+                     << "  SCFIt: " + std::to_string(iter+1);
+  this->fileio_->out << std::setw(18) << std::fixed << std::setprecision(10)
+                     << std::left << this->totalEnergy;
+  this->fileio_->out << std::setw(14) << std::scientific << std::right 
+                     << std::setprecision(7) << EDel;
+  this->fileio_->out << "   ";
+  this->fileio_->out << std::setw(13) << std::scientific << std::right 
+                     << std::setprecision(7) << PARMS;
+  if(!this->isClosedShell && this->Ref_ != TCS) {
+    this->fileio_->out << "   ";
+    this->fileio_->out << std::setw(13) << std::scientific << std::right 
+                       << std::setprecision(7) << PBRMS;
+  }
+  
+
+  this->fileio_->out << endl;
+}      

@@ -57,18 +57,43 @@ public:
   bool          doOctpole;      // Use Libint octapole integrals?
   bool          doSDR;          // Perform Response calculation
   bool          doCUHF;         // To CUHF (Eigenfunction of S x S)
+  bool          doComplex;      // Find complex solution
+  bool          doUnit;         // Print consolidated infor for unit tests
   double 	thresholdS;
   double 	thresholdAB;
   double	thresholdSchawrtz;
   double        SCFdenTol_;
   double        SCFeneTol_;
+  std::array<double,3> field_;
   int           SCFmaxIter_;
   int    	guess;         	// how to get the initial guess
   int           nthreads;       // Number of OpenMP threads
   int           SDMethod;
+  bool          doRealTime;     // do RT-TDSCF?
+  int           rtMaxSteps;     // Max number steps for RT-TDSCF
+  double        rtTimeStep;     // Size of time step for RT-TDSCF
+  int           rtTypeOrtho;    // Type of orthogonalization for RT-TDSCF.
+  int           rtInitDensity;  // Initial Density for RT-TDSCF
+  int           rtSwapMOA;      // which alpha MOs to swap for RT-TDSCF
+  int           rtSwapMOB;      // which beta MOs to swap for RT-TDSCF
+  int           rtMethFormU;    // Which method to form U propagator for RT-TDSCF
+  std::array<double,3> rtField_;// Real Time Electric field magnitude Ex,Ey,Ez 
+  double        rtFreq_;        // Frequency of electric field
+  double        rtPhase_;       // Phase offset for electromagnetic field
+  double        rtSigma_;       // Phase offset for electromagnetic field
+  double        rtTOn_;         // Time field is applied
+  double        rtTOff_;        // Time field is turned off 
+  int           rtEnvelope_;    // Envelope function for RT EM field
   int           SDNSek;
+  int           unitTest;       // Which class of unit test to perform
   std::string   gauFChkName;	// Gaussian formatted checkpoint filename
   std::string   gauMatElName;   // Gaussian raw matrix element file
+
+  // Enum for Unit Tests
+  enum{
+    UnitSCF,
+    UnitResp
+  };
 
   Controls(){;};
   ~Controls(){;};
@@ -76,7 +101,8 @@ public:
   void readSMP(int &);
   void readPSCF(std::fstream &,std::fstream &);
   void readDebug(std::string);
-  void printSettings(std::fstream &);
+  void printSettings(std::ostream &out=cout);
+//inline void printSettings(){this->printSettings(cout);};
 };
 } // namespace ChronusQ
 #endif
