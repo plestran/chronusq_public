@@ -59,6 +59,48 @@ void SingleSlater<double>::formX(){
     RealMap Xp(this->XpMem_,this->nBasis_,this->nBasis_);
     Xp = (*this->aointegrals_->overlap_).pow(0.5); // Make this more efficient... FIXME
   }
+
+  char JOBZ = 'V';
+  char UPLO = 'L';
+  int INFO;
+  auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
+
+  RealVecMap E(this->SEVlMem_,NTCSxNBASIS);
+  RealMatrix XNew(NTCSxNBASIS,NTCSxNBASIS);
+  RealMap    V(this->SEVcMem_,NTCSxNBASIS,NTCSxNBASIS);
+  RealMap    S(this->SCpyMem_,NTCSxNBASIS,NTCSxNBASIS);
+
+  E.setZero();
+  V.setZero();
+  S.setZero();
+
+  std::memcpy(this->SEVcMem_,this->aointegrals_->overlap_->data(),
+    NTCSxNBASIS*NTCSxNBASIS*sizeof(double));
+
+  dsyev_(&JOBZ,&UPLO,&NTCSxNBASIS,this->SEVcMem_,&NTCSxNBASIS,this->SEVlMem_,
+    this->WORK_,&this->LWORK_,&INFO);
+  
+  V.transposeInPlace(); // b/c Row Major...
+  std::memcpy(this->SCpyMem_,this->SEVcMem_,NTCSxNBASIS * NTCSxNBASIS *
+    sizeof(double));
+
+  for(auto i = 0; i < NTCSxNBASIS; i++)
+    S.col(i) /= std::sqrt(this->SEVlMem_[i]);
+
+  XNew = S * V.transpose();
+
+/*
+  if(this->Ref_ == CUHF){
+    RealMap    Xp(this->XpMem_    ,NTCSxNBASIS,NTCSxNBASIS);
+
+    for(auto i = 0; i < NTCSxNBASIS; i++)
+      S.col(i) *= this->SEValMem_[i];
+ 
+    Xp = S * V.transpose();
+  }
+*/
+  prettyPrint(this->fileio_->out,XNew-X,"X Diff");
+  X = XNew;
 }
 
 template<>
