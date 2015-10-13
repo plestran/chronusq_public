@@ -122,6 +122,17 @@ class SingleSlater {
   
 
   void initSCFMem();
+  void allocAlphaScr();
+  void allocBetaScr();
+  void allocCUHFScr();
+  void allocLAPACKScr();
+  void allocLowdin();
+  void cleanupSCFMem();
+  void cleanupAlphaScr();
+  void cleanupBetaScr();
+  void cleanupCUHFScr();
+  void cleanupLAPACKScr();
+  void cleanupLowdin();
   void complexMem();
   void initMemLen();
   void initSCFPtr();
