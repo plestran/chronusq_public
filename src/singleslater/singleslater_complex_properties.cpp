@@ -24,9 +24,9 @@
  *  
  */
 #include <singleslater.h>
-/************************************
- * Compute Multipole Moments (REAL) *
- ************************************/
+/***************************************
+ * Compute Multipole Moments (COMPLEX) *
+ ***************************************/
 namespace ChronusQ {
 template<>
 void SingleSlater<dcomplex>::computeMultipole(){
