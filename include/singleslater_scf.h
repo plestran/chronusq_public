@@ -72,6 +72,7 @@ void SingleSlater<T>::initSCFPtr(){
   this->SCpyMem_       = NULL;
   this->SEVlMem_       = NULL;
   this->SEVcMem_       = NULL;
+  this->LowdinWORK_    = NULL;
 
   this->SCF_SCR        = NULL;
   this->XMem_          = NULL;
@@ -153,6 +154,7 @@ void SingleSlater<T>::allocLowdin(){
   this->SCpyMem_ = new double[this->lenX_];
   this->SEVcMem_ = new double[this->lenX_];
   this->SEVlMem_ = new double[NTCSxNBASIS];
+  this->LowdinWORK_ = new double[this->LWORK_];
 }
 
 template<typename T>
@@ -192,6 +194,7 @@ void SingleSlater<T>::cleanupLowdin(){
   delete [] this->SCpyMem_;
   delete [] this->SEVcMem_;
   delete [] this->SEVlMem_;
+  delete [] this->LowdinWORK_;
 }
 
 template<typename T>

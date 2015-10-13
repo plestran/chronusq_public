@@ -107,6 +107,7 @@ class SingleSlater {
   double *SCpyMem_;
   double *SEVlMem_;
   double *SEVcMem_;
+  double *LowdinWORK_;
 
   T *SCF_SCR;
   T *XMem_;
