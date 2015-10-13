@@ -154,7 +154,10 @@ void SingleSlater<T>::allocLowdin(){
   this->SCpyMem_ = new double[this->lenX_];
   this->SEVcMem_ = new double[this->lenX_];
   this->SEVlMem_ = new double[NTCSxNBASIS];
-  this->LowdinWORK_ = new double[this->LWORK_];
+  if(typeid(T).hash_code() == typeid(dcomplex).hash_code()){
+//  this->fileio_->out << "Allocating Extra LAPACK WORK in SCF" << endl;
+    this->LowdinWORK_ = new double[this->LWORK_];
+  }
 }
 
 template<typename T>
@@ -185,7 +188,10 @@ void SingleSlater<T>::allocCUHFScr(){
 template<typename T>
 void SingleSlater<T>::allocLAPACKScr(){
   this->WORK_  = new T[this->LWORK_];
-  this->RWORK_ = new double[this->LRWORK_];
+  if(typeid(T).hash_code() == typeid(dcomplex).hash_code()){
+//  this->fileio_->out << "Allocating RWORK in SCF" << endl;
+    this->RWORK_ = new double[this->LRWORK_];
+  }
 }
 
 template<typename T>
