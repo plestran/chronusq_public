@@ -82,6 +82,13 @@ void SingleSlater<T>::alloc(){
 
 template<typename T>
 void SingleSlater<T>::allocOp(){
+  this->allocAlphaOp();
+  if(!this->isClosedShell && this->Ref_ != TCS) 
+    this->allocBetaOp();
+}
+
+template<typename T>
+void SingleSlater<T>::allocAlphaOp(){
   // Alpha / TCS Density Matrix
   try { 
     this->densityA_  = std::unique_ptr<TMatrix>( 
@@ -122,39 +129,6 @@ void SingleSlater<T>::allocOp(){
     else CErr(std::current_exception(),"Alpha Eigenorbital Energies"); 
   }
 
-  if(!this->isClosedShell && this->Ref_ != TCS) {
-    // Beta Density Matrix
-    try { 
-      this->densityB_ = std::unique_ptr<TMatrix>(
-        new TMatrix(this->nBasis_,this->nBasis_)); 
-    } catch (...) { 
-      CErr(std::current_exception(),"Beta Density Matrix Allocation"); 
-    }
-
-    // Beta Fock Matrix
-    try { 
-      this->fockB_ = std::unique_ptr<TMatrix>(
-        new TMatrix(this->nBasis_,this->nBasis_)); 
-    } catch (...) { 
-      CErr(std::current_exception(),"Beta Fock Matrix Allocation");
-    }
-
-    // Beta Molecular Orbital Coefficients
-    try { 
-      this->moB_ = std::unique_ptr<TMatrix>(
-        new TMatrix(this->nBasis_,this->nBasis_));
-    } catch (...) { 
-      CErr(std::current_exception(),"Beta MO Coefficients Allocation"); 
-    }
-
-    // Beta Eigenorbital Energies
-    try { 
-      this->epsB_ = std::unique_ptr<RealMatrix>(
-        new RealMatrix(this->nBasis_,1)); 
-    } catch (...) { 
-      CErr(std::current_exception(),"Beta Eigenorbital Energies");
-    }
-  }
 #ifndef USE_LIBINT
   // Alpha / TCS Coulomb Matrix
   try { 
@@ -176,23 +150,6 @@ void SingleSlater<T>::allocOp(){
     else CErr(std::current_exception(),"Alpha Exchange Tensor Allocation"); 
   }
 
-  if(!this->isClosedShell && this->Ref_ != TCS) {
-    // Beta Coulomb Matrix
-    try { 
-      this->coulombB_  = std::unique_ptr<TMatrix>(
-        new TMatrix(this->nBasis_,this->nBasis_)); 
-    } catch (...) { 
-      CErr(std::current_exception(),"Beta Coulomb Tensor Allocation"); 
-    }
- 
-    // Beta Exchange Matrix
-    try { 
-      this->exchangeB_ = std::unique_ptr<TMatrix>(
-        new TMatrix(this->nBasis_,this->nBasis_));
-    } catch (...) { 
-      CErr(std::current_exception(),"Beta Exchange Tensor Allocation"); 
-    }
-  }
 #else
   // Alpha / TCS Perturbation Tensor
   try { 
@@ -203,22 +160,83 @@ void SingleSlater<T>::allocOp(){
     else CErr(std::current_exception(),"Alpha G[P] Allocation"); 
   }
 
-  if(!this->isClosedShell && this->Ref_ != TCS) {
-    // Beta Perturbation Tensor
-    try { 
-      this->PTB_  = std::unique_ptr<TMatrix>(
-        new TMatrix(this->nBasis_,this->nBasis_));
-    } catch (...) { 
-      CErr(std::current_exception(),"Beta G[P] Allocation"); 
-    }
+#endif
+
+  if(this->isDFT) this->allocAlphaDFT();
+}
+
+template<typename T>
+void SingleSlater<T>::allocBetaOp(){
+  // Beta Density Matrix
+  try { 
+    this->densityB_ = std::unique_ptr<TMatrix>(
+      new TMatrix(this->nBasis_,this->nBasis_)); 
+  } catch (...) { 
+    CErr(std::current_exception(),"Beta Density Matrix Allocation"); 
+  }
+
+  // Beta Fock Matrix
+  try { 
+    this->fockB_ = std::unique_ptr<TMatrix>(
+      new TMatrix(this->nBasis_,this->nBasis_)); 
+  } catch (...) { 
+    CErr(std::current_exception(),"Beta Fock Matrix Allocation");
+  }
+
+  // Beta Molecular Orbital Coefficients
+  try { 
+    this->moB_ = std::unique_ptr<TMatrix>(
+      new TMatrix(this->nBasis_,this->nBasis_));
+  } catch (...) { 
+    CErr(std::current_exception(),"Beta MO Coefficients Allocation"); 
+  }
+
+  // Beta Eigenorbital Energies
+  try { 
+    this->epsB_ = std::unique_ptr<RealMatrix>(
+      new RealMatrix(this->nBasis_,1)); 
+  } catch (...) { 
+    CErr(std::current_exception(),"Beta Eigenorbital Energies");
+  }
+#ifndef USE_LIBINT
+  // Beta Coulomb Matrix
+  try { 
+    this->coulombB_  = std::unique_ptr<TMatrix>(
+      new TMatrix(this->nBasis_,this->nBasis_)); 
+  } catch (...) { 
+    CErr(std::current_exception(),"Beta Coulomb Tensor Allocation"); 
+  }
+ 
+  // Beta Exchange Matrix
+  try { 
+    this->exchangeB_ = std::unique_ptr<TMatrix>(
+      new TMatrix(this->nBasis_,this->nBasis_));
+  } catch (...) { 
+    CErr(std::current_exception(),"Beta Exchange Tensor Allocation"); 
+  }
+#else
+  // Beta Perturbation Tensor
+  try { 
+    this->PTB_  = std::unique_ptr<TMatrix>(
+      new TMatrix(this->nBasis_,this->nBasis_));
+  } catch (...) { 
+    CErr(std::current_exception(),"Beta G[P] Allocation"); 
   }
 #endif
 
-  if(this->isDFT) this->allocDFT();
+  if(this->isDFT) this->allocBetaDFT();
+
 }
 
 template<typename T>
 void SingleSlater<T>::allocDFT(){
+  this->allocAlphaDFT();
+  if(!this->isClosedShell && this->Ref_ != TCS) 
+    this->allocBetaDFT();
+}
+
+template<typename T>
+void SingleSlater<T>::allocAlphaDFT(){
   // Alpha / TCS VXC
   try { 
     this->vXCA_  = std::unique_ptr<TMatrix>(
@@ -227,15 +245,16 @@ void SingleSlater<T>::allocDFT(){
     if(this->Ref_ == TCS) CErr(std::current_exception(), "TCS VXC Allocation"); 
     else CErr(std::current_exception(),"Alpha VXC  Allocation"); 
   }
+}
 
-  if(!this->isClosedShell && this->Ref_ != TCS) {
-    // Beta VXC
-    try { 
-      this->vXCB_  = std::unique_ptr<TMatrix>(
-        new TMatrix(this->nBasis_,this->nBasis_));
-    } catch (...) { 
-      CErr(std::current_exception(),"Beta VXC  Allocation"); 
-    }
+template<typename T>
+void SingleSlater<T>::allocBetaDFT(){
+  // Alpha / TCS VXC
+  try { 
+    this->vXCB_  = std::unique_ptr<TMatrix>(
+      new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
+  } catch (...) { 
+    CErr(std::current_exception(),"Beta VXC  Allocation"); 
   }
 }
 

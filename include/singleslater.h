@@ -153,7 +153,11 @@ class SingleSlater {
   int maxMultipole_;
 
   void allocOp();
+  void allocAlphaOp();
+  void allocBetaOp();
   void allocDFT();
+  void allocAlphaDFT();
+  void allocBetaDFT();
   void allocMultipole();
 
   inline void checkWorkers(){
