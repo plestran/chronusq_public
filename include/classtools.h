@@ -42,6 +42,7 @@ namespace ChronusQ {
 // read input files and initialize everything
 void readInput(FileIO *,Molecule *, BasisSet *, Controls *, BasisSet * dfBasis=NULL);
 void printUnitInfo(Controls *, SingleSlater<double> *, SDResponse<double> *);
+void printUnitInfo(Controls *, SingleSlater<dcomplex> *, SDResponse<double> *);
 
 // trace of product of two symmetric matrices
 double traceSymm(RealMatrix *,RealMatrix *);

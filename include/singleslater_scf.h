@@ -291,6 +291,7 @@ void SingleSlater<T>::SCF(){
       this->CpyFock(iter);   
       if(iter % (this->lenCoeff_-1) == (this->lenCoeff_-2) && iter != 0) this->CDIIS();
     }
+
     this->evalConver(iter);
     if(this->isConverged) break;
 

@@ -316,4 +316,42 @@ void printUnitInfo(Controls * controls, SingleSlater<double> * singleSlater, SDR
     cout << endl;
   }
 }
+
+void printUnitInfo(Controls * controls, SingleSlater<dcomplex> * singleSlater, SDResponse<double> * sdResponse){
+  if(controls->unitTest == Controls::UnitSCF)
+    cout << std::setprecision(10) << singleSlater->totalEnergy << "/"
+         << std::setprecision(4)
+         << (*singleSlater->dipole())(0)/phys.debye << "/"
+         << (*singleSlater->dipole())(1)/phys.debye << "/"
+         << (*singleSlater->dipole())(2)/phys.debye << "/"
+         << (*singleSlater->quadpole())(0,0)*phys.bohr/phys.debye << "/"
+         << (*singleSlater->quadpole())(1,1)*phys.bohr/phys.debye << "/"
+         << (*singleSlater->quadpole())(2,2)*phys.bohr/phys.debye << "/"
+         << (*singleSlater->quadpole())(0,1)*phys.bohr/phys.debye << "/"
+         << (*singleSlater->quadpole())(0,2)*phys.bohr/phys.debye << "/"
+         << (*singleSlater->quadpole())(1,2)*phys.bohr/phys.debye << "/"
+        << (*singleSlater->tracelessQuadpole())(0,0)*phys.bohr/phys.debye << "/"
+        << (*singleSlater->tracelessQuadpole())(1,1)*phys.bohr/phys.debye << "/"
+        << (*singleSlater->tracelessQuadpole())(2,2)*phys.bohr/phys.debye << "/"
+        << (*singleSlater->tracelessQuadpole())(0,1)*phys.bohr/phys.debye << "/"
+        << (*singleSlater->tracelessQuadpole())(0,2)*phys.bohr/phys.debye << "/"
+        << (*singleSlater->tracelessQuadpole())(1,2)*phys.bohr/phys.debye << "/"
+     << (*singleSlater->octpole())(0,0,0)*phys.bohr*phys.bohr/phys.debye << "/"
+     << (*singleSlater->octpole())(1,1,1)*phys.bohr*phys.bohr/phys.debye << "/"
+     << (*singleSlater->octpole())(2,2,2)*phys.bohr*phys.bohr/phys.debye << "/"
+     << (*singleSlater->octpole())(0,1,1)*phys.bohr*phys.bohr/phys.debye << "/"
+     << (*singleSlater->octpole())(0,0,1)*phys.bohr*phys.bohr/phys.debye << "/"
+     << (*singleSlater->octpole())(0,0,2)*phys.bohr*phys.bohr/phys.debye << "/"
+     << (*singleSlater->octpole())(0,2,2)*phys.bohr*phys.bohr/phys.debye << "/"
+     << (*singleSlater->octpole())(1,2,2)*phys.bohr*phys.bohr/phys.debye << "/"
+     << (*singleSlater->octpole())(1,1,2)*phys.bohr*phys.bohr/phys.debye << "/"
+    << (*singleSlater->octpole())(0,1,2)*phys.bohr*phys.bohr/phys.debye << endl;
+  else if(controls->unitTest == Controls::UnitResp){
+    for(auto iSt = 0; iSt < sdResponse->nSek(); iSt++){
+      cout << (*sdResponse->omega())(iSt)*phys.eVPerHartree << "," << (*sdResponse->oscStrength())(0,iSt+1);
+      if(iSt != (sdResponse->nSek() - 1)) cout << "/";
+    }
+    cout << endl;
+  }
+}
 } // namespace ChronusQ
