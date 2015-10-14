@@ -31,6 +31,7 @@
 const std::string bannerTop="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 const std::string bannerMid="--------------------------------------------------------------------------------";
 const std::string bannerEnd="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+const auto PRINT_SMALL = 1e-10;
 
 
 namespace Eigen {
@@ -55,7 +56,12 @@ namespace Eigen {
     for(j = 0;j < m.rows(); j++) {
       output << std::setw(5) << std::left << j+1;
 //    for(n=i;n<i+end;n++) output<<std::setw(15)<<m.data()[j*m.rows()+n]; // n in the column index (dbwy)
-      for(n = i; n < i+end; n++) output << std::setw(15) << std::right << m(j,n); // n in the column index (dbwy)
+      for(n = i; n < i+end; n++) {
+        if(std::abs(m(j,n)) > PRINT_SMALL)
+          output << std::setw(15) << std::right << m(j,n); // n in the column index (dbwy)
+        else
+          output << std::setw(15) << std::right << std::abs(m(j,n)); // n in the column index (dbwy)
+      }
       output << std::endl;
     };
   };
@@ -83,7 +89,12 @@ namespace Eigen {
     for(j = 0;j < m.rows(); j++) {
       output << std::setw(5) << std::left << j+1;
 //    for(n=i;n<i+end;n++) output<<std::setw(15)<<m.data()[j*m.rows()+n]; // n in the column index (dbwy)
-      for(n = i; n < i+end; n++) output << std::setw(15) << std::right << m(j,n).real(); // n in the column index (dbwy)
+      for(n = i; n < i+end; n++) {
+        if(std::abs(m(j,n).real()) > PRINT_SMALL)
+          output << std::setw(15) << std::right << m(j,n).real(); // n in the column index (dbwy)
+        else
+          output << std::setw(15) << std::right << std::abs(m(j,n).real()); // n in the column index (dbwy)
+      }
       output << std::endl;
     };
   };
@@ -101,7 +112,12 @@ namespace Eigen {
     for(j = 0;j < m.rows(); j++) {
       output << std::setw(5) << std::left << j+1;
 //    for(n=i;n<i+end;n++) output<<std::setw(15)<<m.data()[j*m.rows()+n]; // n in the column index (dbwy)
-      for(n = i; n < i+end; n++) output << std::setw(15) << std::right << m(j,n).imag(); // n in the column index (dbwy)
+      for(n = i; n < i+end; n++) {
+        if(std::abs(m(j,n).imag()) > PRINT_SMALL)
+          output << std::setw(15) << std::right << m(j,n).imag(); // n in the column index (dbwy)
+        else
+          output << std::setw(15) << std::right << std::abs(m(j,n).imag()); // n in the column index (dbwy)
+      }
       output << std::endl;
     };
   };
