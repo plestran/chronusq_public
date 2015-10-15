@@ -217,7 +217,7 @@ void SingleSlater<dcomplex>::evalConver(int iter){
 
 //if(this->isClosedShell)    this->printDensityInfo(PAlphaRMS,EDelta);
 //else if(this->Ref_ != TCS) this->printDensityInfo(PAlphaRMS,PBetaRMS,EDelta);
-  this->printSCFIter(iter,EDelta,PAlphaRMS,PBetaRMS);
+  if(this->printLevel_ > 0) this->printSCFIter(iter,EDelta,PAlphaRMS,PBetaRMS);
 
   this->isConverged = (PAlphaRMS < this->denTol_) && (std::pow(EDelta,2) < this->eneTol_);
   if(!this->isClosedShell)

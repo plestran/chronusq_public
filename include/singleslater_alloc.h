@@ -34,7 +34,8 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
   this->communicate(*molecule,*basisset,*aointegrals,*fileio,*controls);
   this->initMeta();
 
-  this->elecField_ = controls->field_;
+  this->elecField_  = controls->field_;
+  this->printLevel_ = controls->printLevel;
 
   this->isClosedShell = (this->multip_ == 1);
   if(controls->HF){

@@ -123,6 +123,8 @@ class BasisSet{
 
   FileIO *fileio_; ///< FileIO Object for output file
 
+  int printLevel_; ///< Level of print for basis set object
+
 
 public:
   AOCartesian *ao;
@@ -154,18 +156,14 @@ public:
     this->haveMapSh2Cen    = false  ;
     this->basisFile_       = nullptr;
     this->fileio_          = NULL   ;
+   
+    this->printLevel_      = 1      ;
   };
 
   /**
    *  Copy Constructor
    */ 
-  BasisSet(const BasisSet &basis){
-    this->nBasis_          = 0      ;
-    this->nPrimitive_      = 0      ;
-    this->nShell_          = 0      ;
-    this->nShellPair_      = 0      ;
-    this->maxPrim_         = 0      ;
-    this->maxL_            = 0      ;
+  BasisSet(const BasisSet &basis) : BasisSet(){
     this->doSph_           = basis.doSph_       ; 
     this->fileio_          = basis.fileio_      ; 
     this->basisPath_       = basis.basisPath_   ;
@@ -192,6 +190,7 @@ public:
   inline int nShellPair() {return this->nShellPair_;   }; ///< Return # of unique shell pairs
   inline int       maxL() {return this->maxL_;         }; ///< Return max angular momentum
   inline int    maxPrim() {return this->maxPrim_;      }; ///< Return max # primitive GTOs
+  inline int printLevel() {return this->printLevel_;   }; ///< Return printLevel
   
   template <typename T> double * basisEval(int,std::array<double,3>,T*);
   template <typename T> double * basisEval(libint2::Shell&,T*);
@@ -207,7 +206,8 @@ public:
   inline void resetMapCen2Bf(){this->mapCen2Bf_.clear();this->haveMapCen2Bf = false;};
   
 
-  inline void setBasisPath(std::string str){ this->basisPath_ = str;};
+  inline void setBasisPath( std::string str){ this->basisPath_  = str;};
+  inline void setPrintLevel(int i          ){ this->printLevel_ = i  ;};
 
 
   void printInfo();   ///< Print all info

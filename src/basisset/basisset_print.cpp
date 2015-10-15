@@ -45,17 +45,25 @@ namespace ChronusQ{
    */ 
   void BasisSet::printMeta(){
     
+    this->fileio_->out << "  Basis Set path: " << this->basisPath_ << endl;
+    this->fileio_->out << endl;
+
     this->fileio_->out << "  nBasis      =  " <<  this->nBasis_     << endl; 
     this->fileio_->out << "  nPrimitive  =  " <<  this->nPrimitive_ << endl; 
-    this->fileio_->out << "  maxPrim     =  " <<  this->maxPrim_    << endl; 
-    this->fileio_->out << "  maxL        =  " <<  this->maxL_       << endl; 
+    if(this->printLevel_ > 1) {
+      this->fileio_->out << "  maxPrim     =  " <<  this->maxPrim_    << endl; 
+      this->fileio_->out << "  maxL        =  " <<  this->maxL_       << endl; 
+    }
     this->fileio_->out << "  nShell      =  " <<  this->nShell_     << endl; 
+    if(this->printLevel_ > 2) { 
+      for(auto i = 0; i < this->nLShell_.size(); i++){
+        this->fileio_->out << "  n" << HashS(i) << "Shell     =  "
+                           << this->nLShell_[i] << endl;
+      } // loop i
      
-    for(auto i = 0; i < this->nLShell_.size(); i++){
-      this->fileio_->out <<"  n" << HashS(i) << "Shell     =  "<< this->nLShell_[i] << endl;
-    } // loop i
-
-    this->fileio_->out << "  nShellPair  =  " <<  this->nShellPair_ << endl; 
+      this->fileio_->out << "  nShellPair  =  " <<  this->nShellPair_ << endl; 
+    }
+    this->fileio_->out << endl << endl;
   } // BasisSet::printMeta
 
 
@@ -100,7 +108,7 @@ namespace ChronusQ{
   void BasisSet::printInfo(){
     this->printHeader();
     this->printMeta();
-    this->printBasis();
+    if(this->printLevel_ > 3) this->printBasis();
   } // BasisSet::printInfo
 } // namespace ChronusQ
 
