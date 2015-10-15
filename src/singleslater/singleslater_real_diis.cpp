@@ -56,7 +56,17 @@ void SingleSlater<double>::CDIIS(){
   B(N-1,N-1)=0;
   for(auto k = 0; k < N;k++) coef[k] = 0.0; 
   coef[N-1]=-1.0;
+/*
+  prettyPrint(this->fileio_->out,B,"B");
+  this->fileio_->out << "COEFF" << endl;
+  for(auto k = 0; k < N;k++) this->fileio_->out << coef[k] << endl;
+  this->fileio_->out << endl; 
   dgesv_(&N,&NRHS,B.data(),&N,iPiv,coef,&N,&INFO);
+*/
+  RealVecMap COEFF(coef,N);
+  VectorXd   RHS(COEFF);
+  COEFF = B.fullPivLu().solve(RHS);
+  
   this->fockA_->setZero();
   if(!this->isClosedShell && this->Ref_ != TCS) this->fockB_->setZero();
   for(auto j = 0; j < N-1; j++) {

@@ -69,6 +69,10 @@ void SingleSlater<T>::initSCFPtr(){
   this->REAL_SCF_SCR   = NULL;
   this->occNumMem_     = NULL;
   this->RWORK_         = NULL;
+  this->SCpyMem_       = NULL;
+  this->SEVlMem_       = NULL;
+  this->SEVcMem_       = NULL;
+  this->LowdinWORK_    = NULL;
 
   this->SCF_SCR        = NULL;
   this->XMem_          = NULL;
@@ -92,6 +96,7 @@ void SingleSlater<T>::initSCFMem(){
   this->initSCFPtr();
   this->initMemLen();
 
+/*  This kind of allocation should be handled by a memory manager
   T* LAST_FOR_SECTION;
   int LEN_LAST_FOR_SECTION;
 
@@ -132,7 +137,111 @@ void SingleSlater<T>::initSCFMem(){
   }
   
   this->WORK_  = LAST_FOR_SECTION + LEN_LAST_FOR_SECTION;
+*/
+  this->allocLowdin();
+  this->allocAlphaScr();
+  if(!this->isClosedShell && this->Ref_ != TCS) this->allocBetaScr();
+  if(this->Ref_ == CUHF) this->allocCUHFScr();
+  this->allocLAPACKScr();
+
+  
 }; //initSCFMem
+
+template<typename T>
+void SingleSlater<T>::allocLowdin(){
+  auto NTCSxNBASIS = this->nBasis_*this->nTCS_;
+  this->XMem_    = new T[this->lenX_];
+  this->SCpyMem_ = new double[this->lenX_];
+  this->SEVcMem_ = new double[this->lenX_];
+  this->SEVlMem_ = new double[NTCSxNBASIS];
+  if(typeid(T).hash_code() == typeid(dcomplex).hash_code()){
+//  this->fileio_->out << "Allocating Extra LAPACK WORK in SCF" << endl;
+    this->LowdinWORK_ = new double[this->LWORK_];
+  }
+}
+
+template<typename T>
+void SingleSlater<T>::allocAlphaScr(){
+  this->FpAlphaMem_    = new T[this->lenF_];
+  this->POldAlphaMem_  = new T[this->lenP_];
+  this->ErrorAlphaMem_ = new T[this->lenF_*(this->lenCoeff_ -1)];
+  this->FADIIS_        = new T[this->lenF_*(this->lenCoeff_ -1)];
+}
+
+template<typename T>
+void SingleSlater<T>::allocBetaScr(){
+  this->FpBetaMem_    = new T[this->lenF_];
+  this->POldBetaMem_  = new T[this->lenP_];
+  this->ErrorBetaMem_ = new T[this->lenF_*(this->lenCoeff_ -1)];
+  this->FBDIIS_       = new T[this->lenF_*(this->lenCoeff_ -1)];
+}
+
+template<typename T>
+void SingleSlater<T>::allocCUHFScr(){
+  this->XpMem_     = new T[this->lenX_];
+  this->delFMem_   = new T[this->lenDelF_];
+  this->lambdaMem_ = new T[this->lenLambda_];
+  this->PNOMem_    = new T[this->lenP_];
+  this->occNumMem_ = new double[this->lenOccNum_];
+}
+
+template<typename T>
+void SingleSlater<T>::allocLAPACKScr(){
+  this->WORK_  = new T[this->LWORK_];
+  if(typeid(T).hash_code() == typeid(dcomplex).hash_code()){
+//  this->fileio_->out << "Allocating RWORK in SCF" << endl;
+    this->RWORK_ = new double[this->LRWORK_];
+  }
+}
+
+template<typename T>
+void SingleSlater<T>::cleanupLowdin(){
+  delete [] this->XMem_;
+  delete [] this->SCpyMem_;
+  delete [] this->SEVcMem_;
+  delete [] this->SEVlMem_;
+  delete [] this->LowdinWORK_;
+}
+
+template<typename T>
+void SingleSlater<T>::cleanupSCFMem(){
+  this->cleanupLowdin();
+  this->cleanupAlphaScr();
+  if(!this->isClosedShell && this->Ref_ != TCS) this->cleanupBetaScr();
+  if(this->Ref_ == CUHF) this->cleanupCUHFScr();
+  this->cleanupLAPACKScr();
+}
+
+template<typename T>
+void SingleSlater<T>::cleanupAlphaScr(){
+  delete [] this->FpAlphaMem_    ;
+  delete [] this->POldAlphaMem_  ;
+  delete [] this->ErrorAlphaMem_ ;
+  delete [] this->FADIIS_        ;
+}
+
+template<typename T>
+void SingleSlater<T>::cleanupBetaScr(){
+  delete [] this->FpBetaMem_    ;
+  delete [] this->POldBetaMem_  ;
+  delete [] this->ErrorBetaMem_ ;
+  delete [] this->FBDIIS_       ;
+}
+
+template<typename T>
+void SingleSlater<T>::cleanupCUHFScr(){
+  delete [] this->XpMem_     ;
+  delete [] this->delFMem_   ;
+  delete [] this->lambdaMem_ ;
+  delete [] this->PNOMem_    ;
+  delete [] this->occNumMem_ ;
+}
+
+template<typename T>
+void SingleSlater<T>::cleanupLAPACKScr(){
+  delete [] this->WORK_  ;
+  delete [] this->RWORK_ ;
+}
 
 template<typename T>
 void SingleSlater<T>::SCF(){
@@ -187,8 +296,11 @@ void SingleSlater<T>::SCF(){
     if(this->isConverged) break;
 
   }; // SCF Loop
+/*
   delete [] this->SCF_SCR;
   delete [] this->REAL_SCF_SCR;
+*/
+  this->cleanupSCFMem();
 
   if(!this->isConverged)
     CErr("SCF Failed to converge within maximum number of iterations",this->fileio_->out);

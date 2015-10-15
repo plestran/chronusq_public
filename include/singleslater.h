@@ -104,6 +104,11 @@ class SingleSlater {
   double *REAL_SCF_SCR;
   double *occNumMem_;
   double *RWORK_;
+  double *SCpyMem_;
+  double *SEVlMem_;
+  double *SEVcMem_;
+  double *LowdinWORK_;
+
   T *SCF_SCR;
   T *XMem_;
   T *FpAlphaMem_;
@@ -122,6 +127,17 @@ class SingleSlater {
   
 
   void initSCFMem();
+  void allocAlphaScr();
+  void allocBetaScr();
+  void allocCUHFScr();
+  void allocLAPACKScr();
+  void allocLowdin();
+  void cleanupSCFMem();
+  void cleanupAlphaScr();
+  void cleanupBetaScr();
+  void cleanupCUHFScr();
+  void cleanupLAPACKScr();
+  void cleanupLowdin();
   void complexMem();
   void initMemLen();
   void initSCFPtr();
@@ -137,7 +153,11 @@ class SingleSlater {
   int maxMultipole_;
 
   void allocOp();
+  void allocAlphaOp();
+  void allocBetaOp();
   void allocDFT();
+  void allocAlphaDFT();
+  void allocBetaDFT();
   void allocMultipole();
 
   inline void checkWorkers(){
