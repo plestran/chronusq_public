@@ -432,13 +432,13 @@ public:
     this->SCFType_      = this->algebraicField_      + " ";
     this->SCFTypeShort_ = this->algebraicFieldShort_ + "-";
     if(this->Ref_ == RHF) {
-      this->SCFType_      += "Resricted Hartree-Fock"; 
+      this->SCFType_      += "Restricted Hartree-Fock"; 
       this->SCFTypeShort_ += "RHF";
     } else if(this->Ref_ == UHF) {
-      this->SCFType_      += "Unresricted Hartree-Fock"; 
+      this->SCFType_      += "Unrestricted Hartree-Fock"; 
       this->SCFTypeShort_ += "UHF";
     } else if(this->Ref_ == CUHF) {
-      this->SCFType_      += "Constrained Unresricted Hartree-Fock"; 
+      this->SCFType_      += "Constrained Unrestricted Hartree-Fock"; 
       this->SCFTypeShort_ += "CUHF";
     } else if(this->Ref_ == TCS) {
       this->SCFType_      += "Generalized Hartree-Fock"; 
