@@ -105,6 +105,7 @@ void RealTime<double>::iniDensity() {
     }
   }
   else if (this->typeOrtho_ == 2) {  
+    // FIXME: replace Cholesky with LAPACK instead of EIGEN
     // Cholesky transformation
     Eigen::LLT<RealMatrix> LLT(*this->aointegrals_->overlap_);
     oTrans2.real() = LLT.matrixL(); // oTrans2 = L 
@@ -219,16 +220,16 @@ void RealTime<double>::iniDensity() {
 // Transform density from orthonormal to AO basis
     if (this->typeOrtho_ == 1) {
       // Lowdin
-        (*this->ssPropagator_->densityA()) = oTrans1 * POAsav * oTrans1;
+      (*this->ssPropagator_->densityA()) = oTrans1 * POAsav * oTrans1;
 
-        if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) 
-          (*this->ssPropagator_->densityB()) = oTrans1 * POB * oTrans1;
+      if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) 
+        (*this->ssPropagator_->densityB()) = oTrans1 * POB * oTrans1;
     } else if (this->typeOrtho_ == 2) {
       // Cholesky
-        (*this->ssPropagator_->densityA()) = oTrans1.adjoint() * POAsav * oTrans1;
+      (*this->ssPropagator_->densityA()) = oTrans1.adjoint() * POAsav * oTrans1;
 
-        if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) 
-          (*this->ssPropagator_->densityB()) = oTrans1.adjoint() * POB * oTrans1;
+      if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) 
+        (*this->ssPropagator_->densityB()) = oTrans1.adjoint() * POB * oTrans1;
     }
   }
 };
@@ -311,8 +312,7 @@ void RealTime<double>::formUTrans() {
       }
       uTransB = S * V.adjoint();
     }
-  }
-  else if (this->methFormU_ == 2) { 
+  } else if (this->methFormU_ == 2) { 
   // Taylor expansion
     CErr("Taylor expansion NYI",this->fileio_->out);
  
