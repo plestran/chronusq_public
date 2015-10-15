@@ -152,6 +152,8 @@ class SingleSlater {
   int maxSCFIter_;
   int maxMultipole_;
 
+  int printLevel_;
+
   void allocOp();
   void allocAlphaOp();
   void allocBetaOp();
@@ -289,6 +291,7 @@ public:
     this->nTCS_        = 1;
     this->maxMultipole_ = 3;
     this->elecField_   = {0.0,0.0,0.0};
+    this->printLevel_  = 1;
 
   };
   ~SingleSlater() {
@@ -349,6 +352,7 @@ public:
   }
   inline void setNTCS(int i){ this->nTCS_ = i;};
   inline void setMaxMultipole(int i){ this->maxMultipole_ = i;};
+  inline void setPrintLevel(int i){ this->printLevel_ = i;};
 
   // access to private data
   inline int nBasis() { return this->nBasis_;};
@@ -365,6 +369,7 @@ public:
   inline int multip()  { return this->multip_;};
   inline int nOVA()    { return nOccA_*nVirA_;};
   inline int nOVB()    { return nOccB_*nVirB_;};
+  inline int printLevel(){ return this->printLevel_;};
   inline std::array<double,3> elecField(){ return this->elecField_;  };
   inline TMatrix* densityA() { return this->densityA_.get();};
   inline TMatrix* densityB() { return this->densityB_.get();};

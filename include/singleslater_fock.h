@@ -39,7 +39,7 @@ void SingleSlater<T>::formPT(){
     this->aointegrals_->twoEContractDF(doRHF,true,*this->densityA_,*this->PTA_,*this->densityB_,*this->PTB_);
   else
     this->aointegrals_->twoEContractN4(doRHF,true,false,doTCS,*this->densityA_,*this->PTA_,*this->densityB_,*this->PTB_);
-  if(this->controls_->printLevel >= 3) this->printPT();
+  if(this->printLevel_ >= 3) this->printPT();
 //if(doTCS)CErr();
 }
 #endif
@@ -116,6 +116,6 @@ void SingleSlater<T>::formFock(){
       iBuf += NBSq;
     }
   }
-  if(this->controls_->printLevel>=2) this->printFock(); 
+  if(this->printLevel_ >= 2) this->printFock(); 
 };
 

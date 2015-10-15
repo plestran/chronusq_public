@@ -21,6 +21,8 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setRef"          , &SingleSlater<double>::setRef                 )
     .def("setNTCS"         , &SingleSlater<double>::setNTCS                )
     .def("setMaxMultipole" , &SingleSlater<double>::setMaxMultipole        )
+    .def("printLevel"      , &SingleSlater<double>::printLevel             )
+    .def("setPrintLevel"   , &SingleSlater<double>::setPrintLevel          )
 
     .def("Ref"             , &SingleSlater<double>::Ref                    )
     .def("nTCS"            , &SingleSlater<double>::nTCS                   ) 

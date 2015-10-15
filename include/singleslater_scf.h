@@ -247,30 +247,32 @@ template<typename T>
 void SingleSlater<T>::SCF(){
   if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
   int iter; 
-  this->printSCFHeader(this->fileio_->out);
+  if(this->printLevel_ > 0) {
+    this->printSCFHeader(this->fileio_->out);
 
-  this->fileio_->out << std::setw(16) << "SCF Iteration";
-  this->fileio_->out << std::setw(18) << "Energy (Eh)";
-  this->fileio_->out << std::setw(18) << "\u0394E (Eh)";
-  if(this->Ref_ == TCS)
-    this->fileio_->out << std::setw(18) << "|\u0394P|";
-  else {
-    this->fileio_->out << std::setw(18) << "|\u0394P(\u03B1)|";
-    if(!this->isClosedShell)
-      this->fileio_->out << std::setw(18) << "|\u0394P(\u03B2)|";
-  }
-  this->fileio_->out << endl;
-  this->fileio_->out << std::setw(16) << "-------------";
-  this->fileio_->out << std::setw(18) << "-----------";
-  this->fileio_->out << std::setw(18) << "-------";
-  if(this->Ref_ == TCS)
-    this->fileio_->out << std::setw(18) << "----";
-  else {
+    this->fileio_->out << std::setw(16) << "SCF Iteration";
+    this->fileio_->out << std::setw(18) << "Energy (Eh)";
+    this->fileio_->out << std::setw(18) << "\u0394E (Eh)";
+    if(this->Ref_ == TCS)
+      this->fileio_->out << std::setw(18) << "|\u0394P|";
+    else {
+      this->fileio_->out << std::setw(18) << "|\u0394P(\u03B1)|";
+      if(!this->isClosedShell)
+        this->fileio_->out << std::setw(18) << "|\u0394P(\u03B2)|";
+    }
+    this->fileio_->out << endl;
+    this->fileio_->out << std::setw(16) << "-------------";
+    this->fileio_->out << std::setw(18) << "-----------";
     this->fileio_->out << std::setw(18) << "-------";
-    if(!this->isClosedShell)
+    if(this->Ref_ == TCS)
+      this->fileio_->out << std::setw(18) << "----";
+    else {
       this->fileio_->out << std::setw(18) << "-------";
+      if(!this->isClosedShell)
+        this->fileio_->out << std::setw(18) << "-------";
+    }
+    this->fileio_->out << endl;
   }
-  this->fileio_->out << endl;
   this->initSCFMem();
   this->formX();
   for (iter = 0; iter < this->maxSCFIter_; iter++){
@@ -308,10 +310,15 @@ void SingleSlater<T>::SCF(){
 //this->fileio_->out << bannerEnd <<endl<<std::fixed;
 //this->fileio_->out << "\nRequested convergence on RMS density matrix = " <<std::setw(5)<<this->denTol_ <<"  within  " << this->maxSCFIter_ <<"  cycles."<<endl;
 //this->fileio_->out << "Requested convergence on             energy = " <<this->eneTol_ << endl;
-  if(this->isConverged){
-    this->fileio_->out << endl << "SCF Completed: E(" << this->SCFTypeShort_ << ") = ";
-    this->fileio_->out << std::fixed << std::setprecision(10) << this->totalEnergy << "  Eh after  " << iter + 1 << "  SCF Iterations" << endl;
+  if(this->printLevel_ > 0){
+    if(this->isConverged){
+      this->fileio_->out << endl << "SCF Completed: E(" << this->SCFTypeShort_ 
+                         << ") = ";
+      this->fileio_->out << std::fixed << std::setprecision(10) 
+                         << this->totalEnergy << "  Eh after  " << iter + 1 
+                         << "  SCF Iterations" << endl;
+    }
+    this->fileio_->out << bannerEnd <<endl;
   }
-  this->fileio_->out << bannerEnd <<endl;
 }
 

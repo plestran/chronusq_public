@@ -192,6 +192,7 @@ void SingleSlater<double>::formGuess() {
         &dfBasisSetAtom);
       hartreeFockAtom.iniSingleSlater(&uniqueAtom,&basisSetAtom,&aointegralsAtom,
         this->fileio_,&controlAtom);
+      if(this->printLevel_ < 4) hartreeFockAtom.setPrintLevel(0);
  
       // Zero out the MO coeff for local SS object
       hartreeFockAtom.moA_->setZero();
@@ -235,7 +236,7 @@ void SingleSlater<double>::readGuessIO() {
     this->fileio_->in>>(*(this->moA_))(j,i);
   };
   this->fileio_->in.close();
-  if(this->controls_->printLevel>=3) {
+  if(this->printLevel_ >= 3) {
     prettyPrint(this->fileio_->out,(*this->moA_),"Alpha MO Coeff");
     if(this->Ref_ != RHF) prettyPrint(this->fileio_->out,(*this->moB_),"Beta MO Coeff");
   };
@@ -261,7 +262,7 @@ void SingleSlater<double>::readGuessGauMatEl(GauMatEl& matEl){
     delete [] scr;
   }
   this->matchord();
-  if(this->controls_->printLevel>=3) {
+  if(this->printLevel_ >= 3) {
     prettyPrint(this->fileio_->out,(*this->moA_),"Alpha MO Coeff");
     if(this->Ref_ != RHF) prettyPrint(this->fileio_->out,(*this->moB_),"Beta MO Coeff");
   };
@@ -310,7 +311,7 @@ void SingleSlater<double>::readGuessGauFChk(std::string &filename) {
   };
 
   fchk->close();
-  if(this->controls_->printLevel>=3) {
+  if(this->printLevel_ >= 3) {
     prettyPrint(this->fileio_->out,(*this->moA_),"Alpha MO Coeff");
     if(this->Ref_ != RHF) prettyPrint(this->fileio_->out,(*this->moB_),"Beta MO Coeff");
   };
