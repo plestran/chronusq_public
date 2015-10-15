@@ -56,6 +56,15 @@ class RealTime {
   int   swapMOB_;	// Beta MOs to swap, Format: MMMNNN, swap M with N
   int   typeOrtho_;   	// Type of orthonormal transformation
   int   methFormU_;	// Method of forming unitary transformation matrix
+  int   IEnvlp_;        // Type of envelope function
+  double Ex_;           // Magnitude of electric field x-component
+  double Ey_;           // Magnitude of electric field y-component
+  double Ez_;           // Magnitude of electric field z-component
+  double TOn_;          // Time field is turned on (fs)
+  double TOff_;         // Time field is turned off (fs)
+  double Freq_;         // Frequency of field (eV)
+  double Phase_;        // Phase offset of field (rad)
+  double Sigma_;        // Width of Gaussian envelope (eV)
 
   double stepSize_;	// Input step size
   double deltaT_;	// Actual step size
