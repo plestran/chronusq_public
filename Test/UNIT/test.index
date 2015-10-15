@@ -322,6 +322,13 @@ test0059_smp_direct.inp      SCF    O2/6-31G   OpenMP SCF - Direct Integrals
 #test0061_smp_incore.inp      SCF    SP/STO-3G  Serial SCF - In-Core Integrals
 #test0061_smp_direct.inp      SCF    SP/STO-3G  Serial SCF - In-Core Integrals
 
+** test0666- complex SCF**
+test0666_serial_incore.inp   SCF    O2/STO-3G  Serial SCF = In-Core Integrals 
+test0666_serial_direct.inp   SCF    O2/STO-3G  Serial SCF = Direct Integrals 
+test0666_smp_incore.inp      SCF    O2/STO-3G  SMP    SCF = In-Core Integrals 
+test0666_smp_direct.inp      SCF    O2/STO-3G  SMP    SCF = Direct Integrals 
+
+
 
 
 

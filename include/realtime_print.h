@@ -30,7 +30,90 @@ void RealTime<T>::printRT() {
   double EDz = (*this->ssPropagator_->dipole())(2)/phys.debye;
 
   if (currentTime_ <= 0.0) {
-    this->fileio_->out << bannerMid << endl;
+    this->fileio_->out << std::left << "\n *** Real-Time Time-Dependent Hartree-Fock ***" << endl; 
+    this->fileio_->out << std::left << "\n * General Parameters:" << endl; 
+    this->fileio_->out << std::setw(33) << std::right << " Number of steps =" 
+                       << std::setw(14) << this->maxSteps_ << endl;
+    this->fileio_->out << std::setw(33) << std::right << " Step size =" 
+                       << std::setw(14) << std::setprecision(5) 
+                       << this->stepSize_ << std::setw(5) << " a.u."
+                       << std::setw(14) << std::setprecision(7) 
+                       << this->stepSize_*phys.AuToFs 
+                       << std::setw(3) << " fs" << endl;
+    this->fileio_->out << std::setw(33) << std::right << " Orthonormalization method =" 
+                       << std::setw(14) << std::right ;
+    if (this->typeOrtho_ == Lowdin) this->fileio_->out << " L\u00F6wdin" << endl; 
+    if (this->typeOrtho_ == Cholesky) this->fileio_->out << " Cholesky (NYI)" << endl; 
+    if (this->typeOrtho_ == Canonical) this->fileio_->out << " Canonical (NYI)" << endl; 
+
+    this->fileio_->out << std::left << "\n * Integration Parameters:" << endl; 
+    this->fileio_->out << std::right << std::setw(33) 
+                       << " Electronic integration =" << std::setw(14) << std::right; 
+    this->fileio_->out << " Modified mid-point" << endl;
+
+    this->fileio_->out << std::left << "\n * External Field Parameters:" << endl; 
+    this->fileio_->out << std::right << std::setw(33) 
+                       << " Field type =" << std::setw(14) << std::right; 
+    if (IEnvlp_ == Constant) this->fileio_->out << " Constant" << endl;
+    if (IEnvlp_ == LinRamp) this->fileio_->out << " Linear ramp" << endl;
+    if (IEnvlp_ == Gaussian) this->fileio_->out << " Gaussian" << endl;
+    if (IEnvlp_ == Step) this->fileio_->out << " Step function" << endl;
+    if (IEnvlp_ == SinSq) this->fileio_->out << " Sine-square (NYI)" << endl;
+    this->fileio_->out << std::right << std::setw(33) 
+                       << " Terms Included =" << std::setw(14) << std::right; 
+    this->fileio_->out << " Electric Dipole Only" << endl;
+    this->fileio_->out << std::right << std::setw(33) 
+                       << " Gauge =" << std::setw(14) << std::right; 
+    this->fileio_->out << " Length" << endl;
+    this->fileio_->out << std::right << std::setw(33) 
+                       << " Update Method =" << std::setw(14) << std::right; 
+    this->fileio_->out << " MMUT" << endl;
+ 
+    this->fileio_->out << std::setw(33) << std::right << " Ex =" 
+                       << std::setw(14) << std::setprecision(5) 
+                       << this->Ex_ << std::setw(5) << " a.u."
+                       << endl; 
+    this->fileio_->out << std::setw(33) << std::right << " Ey =" 
+                       << std::setw(14) << std::setprecision(5) 
+                       << this->Ey_ << std::setw(5) << " a.u."
+                       << endl; 
+    this->fileio_->out << std::setw(33) << std::right << " Ez =" 
+                       << std::setw(14) << std::setprecision(5) 
+                       << this->Ez_ << std::setw(5) << " a.u."
+                       << endl; 
+    if (this->IEnvlp_ != Step) {
+      this->fileio_->out << std::setw(33) << std::right << " Frequency =" 
+                         << std::setw(14) << std::setprecision(5) 
+                         << this->Freq_ << std::setw(3) << " eV"
+                         << endl;
+      this->fileio_->out << std::setw(33) << std::right << " Phase =" 
+                         << std::setw(14) << std::setprecision(5) 
+                         << this->Phase_ << std::setw(4) << " rad"
+                         << endl; 
+    }
+    this->fileio_->out << std::setw(33) << std::right << " Time On =" 
+                       << std::setw(14) << std::setprecision(5) 
+                       << this->TOn_ << std::setw(3) << " fs"
+                       << endl; 
+    this->fileio_->out << std::setw(33) << std::right << " Time Off =" 
+                       << std::setw(14) << std::setprecision(5) 
+                       << this->TOff_ << std::setw(3) << " fs"
+                       << endl; 
+    if (this->IEnvlp_ == Gaussian) {
+      this->fileio_->out << std::setw(33) << std::right << " FWHM =" 
+                         << std::setw(14) << std::setprecision(5) 
+                         << this->Sigma_ << std::setw(3) << " eV"
+                         << endl; 
+    }
+/*
+  int           rtInitDensity;  // Initial Density for RT-TDSCF
+  int           rtSwapMOA;      // which alpha MOs to swap for RT-TDSCF
+  int           rtSwapMOB;      // which beta MOs to swap for RT-TDSCF
+  int           rtMethFormU;    // Which method to form U propagator for RT-TDSCF
+*/
+                        
+    this->fileio_->out << endl;
+    this->fileio_->out << bannerTop << endl;
     this->fileio_->out << std::setw(11) << std::right << "Time" 
                        << std::setw(1)  << " "
                        << std::setw(16) << std::right << "Energy"

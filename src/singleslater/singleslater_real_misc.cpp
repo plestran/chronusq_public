@@ -47,6 +47,7 @@ SingleSlater<double>::SingleSlater(SingleSlater<double> * other){
     this->haveMO	    = true;
     this->havePT      = true;
     this->isClosedShell = other->isClosedShell;
+    this->printLevel_ = other->printLevel_;
 
     auto NTCSxNBASIS = this->nBasis_*this->nTCS_;
 

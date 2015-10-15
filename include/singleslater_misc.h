@@ -63,6 +63,6 @@ void SingleSlater<T>::formDensity(){
         this->moB_->block(0,0,this->nBasis_,this->nOccB_).adjoint();
     }
   }
-  if(this->controls_->printLevel>=2) this->printDensity();
+  if(this->printLevel_ >= 2) this->printDensity();
   this->haveDensity = true;
 }

@@ -37,21 +37,21 @@ namespace ChronusQ {
 
 template<>
 void RealTime<dcomplex>::formEDField() {  
-  int IEnvlp   = this->controls_->rtEnvelope_;
-  double Ex    = this->controls_->rtField_[0]; 
-  double Ey    = this->controls_->rtField_[1]; 
-  double Ez    = this->controls_->rtField_[2]; 
-  double TOn   = (this->controls_->rtTOn_)/phys.AuToFs;
-  double TOff  = (this->controls_->rtTOff_)/phys.AuToFs;
-  double Omega = (this->controls_->rtFreq_)/phys.eVPerHartree;
-  double Phase = this->controls_->rtPhase_;
-  double Sigma = (this->controls_->rtSigma_)/phys.eVPerHartree;
+  int IEnvlp   = this->IEnvlp_;
+  double Ex    = this->Ex_;
+  double Ey    = this->Ey_;
+  double Ez    = this->Ez_;
+  double TOn   = (this->TOn_)/phys.AuToFs;
+  double TOff  = (this->TOff_)/phys.AuToFs;
+  double Omega = (this->Freq_)/phys.eVPerHartree;
+  double Phase = this->Phase_;
+  double Sigma = (this->Sigma_)/phys.eVPerHartree;
   double Time  = currentTime_;
   double OmegT;
   double TMax;
   double TCntr;
 
-  if (IEnvlp == 1) { 
+  if (IEnvlp == Constant) { 
   //   Constant envelope (plane wave)
     if(Time >= TOn && Time <= TOff) {
       OmegT = Omega*(Time-TOn) + Phase;
@@ -64,7 +64,7 @@ void RealTime<dcomplex>::formEDField() {
       this->EDField_[2] = 0.0;
     }
   } 
-  else if (IEnvlp == 2) { 
+  else if (IEnvlp == LinRamp) { 
   /*   
        Linearly ramping up to the maximum in the first cycle
        Constant envelope afterwards
@@ -95,7 +95,7 @@ void RealTime<dcomplex>::formEDField() {
     }
 
   }
-  else if (IEnvlp == 3) { 
+  else if (IEnvlp == Gaussian) { 
   /*
        Gaussian envelope: E(t) = E * exp(-(a*(t-t0))^2) * Sin(wt)
            a  = the range of frequency (FWHM) 
@@ -118,7 +118,7 @@ void RealTime<dcomplex>::formEDField() {
     }
 
   }
-  else if (IEnvlp == 4) { 
+  else if (IEnvlp == Step) { 
   /*
         Step function
   */
@@ -133,7 +133,7 @@ void RealTime<dcomplex>::formEDField() {
     }
 
   }
-  else if (IEnvlp == 5) { 
+  else if (IEnvlp == SinSq) { 
   /*
         Sine-square envelope: 
           A(r,t) = (E0/w)*(sin(Pi*t/T))^2*sin(k*r-w*t) 

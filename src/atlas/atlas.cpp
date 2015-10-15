@@ -156,7 +156,8 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
       sdResponseComplex->IterativeRPA();
     }
   }
-  if(controls->doUnit) printUnitInfo(controls.get(),hartreeFockReal.get(),sdResponseReal.get());
+  if(controls->doUnit && !controls->doComplex) printUnitInfo(controls.get(),hartreeFockReal.get(),sdResponseReal.get());
+  if(controls->doUnit && controls->doComplex) printUnitInfo(controls.get(),hartreeFockComplex.get(),sdResponseReal.get());
 
 // REAL-TIME TD-SCF 
   

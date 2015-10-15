@@ -64,3 +64,4 @@ test0057                SCF     Li_cc-pVDZ_ROHF_field.com
 test0058                SCF     O2_sto3g_ROHF_field.com
 test0059                SCF     O2_6-31G_ROHF_field.com
 test0060                SCF     O2_cc-pVDZ_ROHF_field.com
+test0666                SCF     O2_sto3g_CRHF.com

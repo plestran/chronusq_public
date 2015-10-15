@@ -105,6 +105,11 @@ class SingleSlater {
   double *REAL_SCF_SCR;
   double *occNumMem_;
   double *RWORK_;
+  double *SCpyMem_;
+  double *SEVlMem_;
+  double *SEVcMem_;
+  double *LowdinWORK_;
+
   T *SCF_SCR;
   T *XMem_;
   T *FpAlphaMem_;
@@ -123,6 +128,17 @@ class SingleSlater {
   
 
   void initSCFMem();
+  void allocAlphaScr();
+  void allocBetaScr();
+  void allocCUHFScr();
+  void allocLAPACKScr();
+  void allocLowdin();
+  void cleanupSCFMem();
+  void cleanupAlphaScr();
+  void cleanupBetaScr();
+  void cleanupCUHFScr();
+  void cleanupLAPACKScr();
+  void cleanupLowdin();
   void complexMem();
   void initMemLen();
   void initSCFPtr();
@@ -137,8 +153,14 @@ class SingleSlater {
   int maxSCFIter_;
   int maxMultipole_;
 
+  int printLevel_;
+
   void allocOp();
+  void allocAlphaOp();
+  void allocBetaOp();
   void allocDFT();
+  void allocAlphaDFT();
+  void allocBetaDFT();
   void allocMultipole();
 
   inline void checkWorkers(){
@@ -270,6 +292,7 @@ public:
     this->nTCS_        = 1;
     this->maxMultipole_ = 3;
     this->elecField_   = {0.0,0.0,0.0};
+    this->printLevel_  = 1;
 
   };
   ~SingleSlater() {
@@ -330,6 +353,7 @@ public:
   }
   inline void setNTCS(int i){ this->nTCS_ = i;};
   inline void setMaxMultipole(int i){ this->maxMultipole_ = i;};
+  inline void setPrintLevel(int i){ this->printLevel_ = i;};
 
   // access to private data
   inline int nBasis() { return this->nBasis_;};
@@ -346,6 +370,7 @@ public:
   inline int multip()  { return this->multip_;};
   inline int nOVA()    { return nOccA_*nVirA_;};
   inline int nOVB()    { return nOccB_*nVirB_;};
+  inline int printLevel(){ return this->printLevel_;};
   inline std::array<double,3> elecField(){ return this->elecField_;  };
   inline TMatrix* densityA() { return this->densityA_.get();};
   inline TMatrix* densityB() { return this->densityB_.get();};
@@ -416,13 +441,13 @@ public:
     this->SCFType_      = this->algebraicField_      + " ";
     this->SCFTypeShort_ = this->algebraicFieldShort_ + "-";
     if(this->Ref_ == RHF) {
-      this->SCFType_      += "Resricted Hartree-Fock"; 
+      this->SCFType_      += "Restricted Hartree-Fock"; 
       this->SCFTypeShort_ += "RHF";
     } else if(this->Ref_ == UHF) {
-      this->SCFType_      += "Unresricted Hartree-Fock"; 
+      this->SCFType_      += "Unrestricted Hartree-Fock"; 
       this->SCFTypeShort_ += "UHF";
     } else if(this->Ref_ == CUHF) {
-      this->SCFType_      += "Constrained Unresricted Hartree-Fock"; 
+      this->SCFType_      += "Constrained Unrestricted Hartree-Fock"; 
       this->SCFTypeShort_ += "CUHF";
     } else if(this->Ref_ == TCS) {
       this->SCFType_      += "Generalized Hartree-Fock"; 

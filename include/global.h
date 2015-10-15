@@ -77,6 +77,7 @@
 #include <algorithm>
 #include <gauinterface.h>
 #include <iterator>
+#include <typeinfo>
 
 //using namespace std;
 /* Things from STD that we need always */
