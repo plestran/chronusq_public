@@ -42,7 +42,7 @@ void RealTime<T>::printRT() {
                        << std::setw(3) << " fs" << endl;
     this->fileio_->out << std::setw(33) << std::right << " Orthonormalization method =" 
                        << std::setw(14) << std::right ;
-    if (this->typeOrtho_ == 1) this->fileio_->out << " Lowdin" << endl; 
+    if (this->typeOrtho_ == 1) this->fileio_->out << " L\u00F6wdin" << endl; 
     if (this->typeOrtho_ == 2) this->fileio_->out << " Cholesky (NYI)" << endl; 
     if (this->typeOrtho_ == 3) this->fileio_->out << " Canonical (NYI)" << endl; 
 
