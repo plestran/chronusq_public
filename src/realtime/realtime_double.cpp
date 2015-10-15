@@ -105,8 +105,13 @@ void RealTime<double>::iniDensity() {
     }
   }
   else if (this->typeOrtho_ == 2) {  
+    cout << "Begin Cholesky" << endl;
+    Eigen::LLT<RealMatrix> LLT(*this->aointegrals_->overlap_);
+    oTrans1.real() = LLT.matrixL();
+    
+
   // Cholesky transformation
-    CErr("Cholesky orthogonalization NYI",this->fileio_->out);
+  //  CErr("Cholesky orthogonalization NYI",this->fileio_->out);
   }
   else if (this->typeOrtho_ == 3) {  	
     CErr("Canonical orthogonalization NYI",this->fileio_->out);
@@ -162,11 +167,15 @@ void RealTime<double>::iniDensity() {
     // Transform the ground state MO to orthonormal basis
     initMOA.setZero();
     initMOA.real() = *this->groundState_->moA();
-    initMOA = oTrans2 * initMOA;
-    if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
-      initMOB.setZero();
-      initMOB.real() = *this->groundState_->moB();
-      initMOB = oTrans2 * initMOB;
+    if (this->typeOrtho_ == 1) {
+      initMOA = oTrans2 * initMOA;
+      if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
+        initMOB.setZero();
+        initMOB.real() = *this->groundState_->moB();
+        initMOB = oTrans2 * initMOB;
+      }
+    } else if (this->typeOrtho_ == 2) {
+      // Cholesky TX of GS MO to ON basis
     }
   }
   else if (this->initDensity_ == 2) { 
@@ -181,12 +190,17 @@ void RealTime<double>::iniDensity() {
 
   if (!inOrthoBas) { 
 // Transform density from AO to orthonormal basis
-    POA    = oTrans2 * (*this->ssPropagator_->densityA()) * oTrans2;
+    if (this->typeOrtho_ == 1) {
+      // Lowdin TX of density from AO to MO
+      POA    = oTrans2 * (*this->ssPropagator_->densityA()) * oTrans2;
 
-    POAsav = POA;
-    if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
-      POB    = oTrans2 * (*this->ssPropagator_->densityB()) * oTrans2;
-      POBsav = POB;
+      POAsav = POA;
+      if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
+        POB    = oTrans2 * (*this->ssPropagator_->densityB()) * oTrans2;
+        POBsav = POB;
+      }
+    } else if (this->typeOrtho_ == 2) {
+      // Cholesky TX of density from AO to MO
     }
   }
   else { 
@@ -280,6 +294,7 @@ void RealTime<double>::formUTrans() {
   }
   else if (this->methFormU_ == 2) { 
   // Taylor expansion
+    CErr("Taylor expansion NYI",this->fileio_->out);
  
 /*  This is not taylor and breaks with the new memory scheme
  

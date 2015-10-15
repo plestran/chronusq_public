@@ -275,6 +275,7 @@ void RealTime<dcomplex>::formUTrans() {
     
   } else if (this->methFormU_ == 2) { 
   // Taylor expansion
+    CErr("Taylor expansion NYI",this->fileio_->out);
 
 /*  This is not actually Taylor and breaks with new mem scheme
 
