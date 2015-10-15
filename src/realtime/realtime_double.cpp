@@ -105,13 +105,16 @@ void RealTime<double>::iniDensity() {
     }
   }
   else if (this->typeOrtho_ == 2) {  
+    // Cholesky transformation
     cout << "Begin Cholesky" << endl;
     Eigen::LLT<RealMatrix> LLT(*this->aointegrals_->overlap_);
-    oTrans1.real() = LLT.matrixL();
-    
+    oTrans1.real() = LLT.matrixL(); // oTrans1 = L = S*L^{-T}
+    scratch.real() = RealMatrix::Identity(NTCSxNBASIS,NTCSxNBASIS);
+    scratch.real() = LLT.solve(scratch.real()); // Eigen will auto do SolveInPlace
+    oTrans2.real() = oTrans1.real().adjoint() * scratch.real();
+  
 
-  // Cholesky transformation
-  //  CErr("Cholesky orthogonalization NYI",this->fileio_->out);
+    // CErr("Cholesky orthogonalization NYI",this->fileio_->out);
   }
   else if (this->typeOrtho_ == 3) {  	
     CErr("Canonical orthogonalization NYI",this->fileio_->out);
@@ -168,6 +171,7 @@ void RealTime<double>::iniDensity() {
     initMOA.setZero();
     initMOA.real() = *this->groundState_->moA();
     if (this->typeOrtho_ == 1) {
+      // Lowdin
       initMOA = oTrans2 * initMOA;
       if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
         initMOB.setZero();
@@ -175,7 +179,7 @@ void RealTime<double>::iniDensity() {
         initMOB = oTrans2 * initMOB;
       }
     } else if (this->typeOrtho_ == 2) {
-      // Cholesky TX of GS MO to ON basis
+      // Cholesky 
     }
   }
   else if (this->initDensity_ == 2) { 
@@ -191,7 +195,7 @@ void RealTime<double>::iniDensity() {
   if (!inOrthoBas) { 
 // Transform density from AO to orthonormal basis
     if (this->typeOrtho_ == 1) {
-      // Lowdin TX of density from AO to MO
+      // Lowdin 
       POA    = oTrans2 * (*this->ssPropagator_->densityA()) * oTrans2;
 
       POAsav = POA;
@@ -200,18 +204,21 @@ void RealTime<double>::iniDensity() {
         POBsav = POB;
       }
     } else if (this->typeOrtho_ == 2) {
-      // Cholesky TX of density from AO to MO
+      // Cholesky
+      }
+    } else { 
+// Transform density from orthonormal to AO basis
+    if (this->typeOrtho_ == 1) {
+      // Lowdin
+        (*this->ssPropagator_->densityA()) = oTrans1 * POAsav * oTrans1;
+
+        if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) 
+          (*this->ssPropagator_->densityB()) = oTrans1 * POB * oTrans1;
+    } else if (this->typeOrtho_ == 2) {
+      // Cholesky
     }
   }
-  else { 
-// Transform density from orthonormal to AO basis
-    (*this->ssPropagator_->densityA()) = oTrans1 * POAsav * oTrans1;
-
-    if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) 
-      (*this->ssPropagator_->densityB()) = oTrans1 * POB * oTrans1;
-  }
 };
-
 
 template<>
 void RealTime<double>::formUTrans() {  
@@ -372,12 +379,17 @@ void RealTime<double>::doPropagation() {
     this->printRT();
 
 //  Transform Fock from AO to orthonormal basis
-    scratch = (*this->ssPropagator_->fockA());
-    (*this->ssPropagator_->fockA()) = oTrans1 * scratch * oTrans1;
+    if (this->typeOrtho_ == 1) {
+      // Lowdin 
+      scratch = (*this->ssPropagator_->fockA());
+      (*this->ssPropagator_->fockA()) = oTrans1 * scratch * oTrans1;
 
-    if (!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
-      scratch = (*this->ssPropagator_->fockB());
-      (*this->ssPropagator_->fockB()) = oTrans1 * scratch * oTrans1;
+      if (!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
+        scratch = (*this->ssPropagator_->fockB());
+        (*this->ssPropagator_->fockB()) = oTrans1 * scratch * oTrans1;
+      }
+    } else if (this->typeOrtho_ == 2) {
+      // Cholesky
     }
 
 //  Form the unitary propagation matrix
@@ -409,12 +421,16 @@ void RealTime<double>::doPropagation() {
     }
 
 //  Transform density matrix from orthonormal to AO basis
-    (*this->ssPropagator_->densityA()) = oTrans1 * POA * oTrans1;
+    if (this->typeOrtho_ == 1) {
+      // Lowdin 
+      (*this->ssPropagator_->densityA()) = oTrans1 * POA * oTrans1;
 
-    if (!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
-      (*this->ssPropagator_->densityB()) = oTrans1 * POB * oTrans1;
+      if (!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
+        (*this->ssPropagator_->densityB()) = oTrans1 * POB * oTrans1;
+      }
+    } else if (this->typeOrtho_ == 2) {
+      // Cholesky
     }
-
 //  Advance step
     currentTime_ += this->stepSize_;
     };
