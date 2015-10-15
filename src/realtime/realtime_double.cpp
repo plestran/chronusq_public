@@ -106,15 +106,11 @@ void RealTime<double>::iniDensity() {
   }
   else if (this->typeOrtho_ == 2) {  
     // Cholesky transformation
-    cout << "Begin Cholesky" << endl;
     Eigen::LLT<RealMatrix> LLT(*this->aointegrals_->overlap_);
-    oTrans1.real() = LLT.matrixL(); // oTrans1 = L = S*L^{-T}
+    oTrans2.real() = LLT.matrixL(); // oTrans2 = L 
     scratch.real() = RealMatrix::Identity(NTCSxNBASIS,NTCSxNBASIS);
-    scratch.real() = LLT.solve(scratch.real()); // Eigen will auto do SolveInPlace
-    oTrans2.real() = oTrans1.real().adjoint() * scratch.real();
-  
-
-    // CErr("Cholesky orthogonalization NYI",this->fileio_->out);
+    RealMatrix B  = LLT.solve(scratch.real()); // not sure why I can't use oTrans1 as scratch
+    oTrans1.real() = oTrans2.adjoint().real() * B; // oTrans1 = L^-1
   }
   else if (this->typeOrtho_ == 3) {  	
     CErr("Canonical orthogonalization NYI",this->fileio_->out);
@@ -180,6 +176,12 @@ void RealTime<double>::iniDensity() {
       }
     } else if (this->typeOrtho_ == 2) {
       // Cholesky 
+      initMOA = oTrans2.adjoint() * initMOA;
+      if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
+        initMOB.setZero();
+        initMOB.real() = *this->groundState_->moB();
+        initMOB = oTrans2.adjoint() * initMOB;
+      }
     }
   }
   else if (this->initDensity_ == 2) { 
@@ -205,8 +207,15 @@ void RealTime<double>::iniDensity() {
       }
     } else if (this->typeOrtho_ == 2) {
       // Cholesky
+      POA    = oTrans2.adjoint() * (*this->ssPropagator_->densityA()) * oTrans2;
+
+      POAsav = POA;
+      if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
+        POB    = oTrans2.adjoint() * (*this->ssPropagator_->densityB()) * oTrans2;
+        POBsav = POB;
       }
-    } else { 
+    }
+  } else { 
 // Transform density from orthonormal to AO basis
     if (this->typeOrtho_ == 1) {
       // Lowdin
@@ -216,6 +225,10 @@ void RealTime<double>::iniDensity() {
           (*this->ssPropagator_->densityB()) = oTrans1 * POB * oTrans1;
     } else if (this->typeOrtho_ == 2) {
       // Cholesky
+        (*this->ssPropagator_->densityA()) = oTrans1.adjoint() * POAsav * oTrans1;
+
+        if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) 
+          (*this->ssPropagator_->densityB()) = oTrans1.adjoint() * POB * oTrans1;
     }
   }
 };
@@ -390,6 +403,13 @@ void RealTime<double>::doPropagation() {
       }
     } else if (this->typeOrtho_ == 2) {
       // Cholesky
+      scratch = (*this->ssPropagator_->fockA());
+      (*this->ssPropagator_->fockA()) = oTrans1 * scratch * oTrans1.adjoint();
+
+      if (!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
+        scratch = (*this->ssPropagator_->fockB());
+        (*this->ssPropagator_->fockB()) = oTrans1 * scratch * oTrans1.adjoint();
+      }
     }
 
 //  Form the unitary propagation matrix
@@ -430,6 +450,11 @@ void RealTime<double>::doPropagation() {
       }
     } else if (this->typeOrtho_ == 2) {
       // Cholesky
+      (*this->ssPropagator_->densityA()) = oTrans1.adjoint() * POA * oTrans1;
+
+      if (!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
+        (*this->ssPropagator_->densityB()) = oTrans1.adjoint() * POB * oTrans1;
+      }
     }
 //  Advance step
     currentTime_ += this->stepSize_;
