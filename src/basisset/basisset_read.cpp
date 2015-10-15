@@ -61,7 +61,7 @@ void BasisSet::findBasisFile(std::string fName){
 
   
   if(!this->basisFile_->fail()){ // Check if file is in BASIS_PATH
-    this->fileio_->out << "Reading Basis Set from: " << this->basisPath_ << endl;
+//  this->fileio_->out << "Reading Basis Set from: " << this->basisPath_ << endl;
   } else {
     this->basisFile_.reset();
     this->setBasisPath(fName);

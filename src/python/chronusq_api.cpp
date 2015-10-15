@@ -68,6 +68,8 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("constructLocal", &BasisSet::Wrapper_constructLocal ) 
     .def("makeMaps"     ,  &BasisSet::Wrapper_makeMaps       )
     .def("renormShells" ,  &BasisSet::renormShells           )
+    .def("printLevel"   ,  &BasisSet::printLevel             )
+    .def("setPrintLevel",  &BasisSet::setPrintLevel          )
   ;
 
   class_<Controls,boost::noncopyable>("Controls",init<>())
