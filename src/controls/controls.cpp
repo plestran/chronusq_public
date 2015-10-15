@@ -59,23 +59,23 @@ void Controls::iniControls(){
   this->doRealTime =        false;
   this->rtMaxSteps =        10;
   this->rtTimeStep =        0.05;
-  this->rtTypeOrtho =       1;
+  this->rtTypeOrtho =       0;
   this->rtInitDensity =     0;
   this->rtSwapMOA     =     0; 
   this->rtSwapMOB     =     0; 
-  this->rtMethFormU   =     1;
-  this->SCFdenTol_ =        1e-10;
-  this->SCFeneTol_ =        1e-12;
-  this->SCFmaxIter_ =       128;
-  this->unitTest    =       0;
-  this->field_      =       {0.0,0.0,0.0};
+  this->rtMethFormU   =     0;
   this->rtField_      =     {0.0,0.0,0.0};
   this->rtFreq_   =         0.0;
   this->rtPhase_   =        0.0;
   this->rtSigma_   =        0.0;
   this->rtTOn_ =            0.0;
   this->rtTOff_ =       10000.0;
-  this->rtEnvelope_ =       1;
+  this->rtEnvelope_ =       0;
+  this->SCFdenTol_ =        1e-10;
+  this->SCFeneTol_ =        1e-12;
+  this->SCFmaxIter_ =       128;
+  this->unitTest    =       0;
+  this->field_      =       {0.0,0.0,0.0};
  
 #ifdef USE_LIBINT
   // Bootstrap Libint env

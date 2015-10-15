@@ -168,17 +168,42 @@ public:
 
     // Standard Values
     this->frozenNuc_   = true;
-    this->EDField_     = {0.0,0.0,0.0};
     this->nTCS_        = 1;
-    this->maxSteps_    = 50;
+    this->maxSteps_    = 10;
     this->stepSize_    = 0.05;
-    this->typeOrtho_   = 1;
+    this->typeOrtho_   = Lowdin;
     this->initDensity_ = 0;
     this->swapMOA_     = 0;
     this->swapMOB_     = 0;
-    this->methFormU_   = 1;
+    this->methFormU_   = EigenDecomp;
+    this->EDField_     = {0.0,0.0,0.0};
+    this->Freq_        = 0.0;
+    this->Phase_       = 0.0;
+    this->Sigma_       = 0.0;
+    this->TOn_         = 0.0;
+    this->TOff_        = 1.0e4;
+    this->IEnvlp_      = Constant;
   };
   ~RealTime() {;};
+
+  enum ORTHO {
+    Lowdin,
+    Cholesky,
+    Canonical 
+  };
+
+  enum FORM_U {
+    EigenDecomp,
+    Taylor
+  };
+
+  enum ENVELOPE {
+    Constant, 
+    LinRamp,
+    Gaussian,
+    Step,
+    SinSq
+  };
 
   inline void communicate(FileIO &fileio, Controls &cont, AOIntegrals &aoints, 
                 SingleSlater<T> &groundState){
@@ -201,6 +226,27 @@ public:
 
   void alloc();
 
+  // Getters
+
+  // Setters
+  inline void setMaxSteps(int i){ this->maxStep_  = i;};
+  inline void setStepSize(int i){ this->stepSize_ = i;};
+  inline void setOrthoTyp(RealTime<T>::ORTHO i){ this->typeOrtho_ = i;};
+  inline void setInitDen(int i){ this->initDensity_ = i;};
+  inline void setSwapMOA(int i){ this->swapMOA_     = i;};
+  inline void setSwapMOB(int i){ this->swapMOB_     = i;};
+  inline void setFormU(RealTime<T>::FORM_U i){ this->methFormU_ = i;};
+  inline void setEnvelope(RealTime<T>::ENVELOPE i){ this->IEnvlp_ = i;};
+  inline void setFieldAmp(std::array<double,3> x){ 
+    this->Ex = x[0];
+    this->Ey = x[1];
+    this->Ez = x[2];
+  };
+  inline void setTOn(double x){   this->TOn_   = x;};
+  inline void setTOff(double x){  this->TOff_  = x;};
+  inline void setFreq(double x){  this->Freq_  = x;};
+  inline void setPhase(double x){ this->Phase_ = x;};
+  inline void setSigma(double x){ this->Sigma_ = x;};
   // pseudo-constructor
   void iniRealTime(FileIO *,Controls *,AOIntegrals *,SingleSlater<T> *);
   void iniDensity(); // initialize density

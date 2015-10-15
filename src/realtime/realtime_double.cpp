@@ -63,7 +63,7 @@ void RealTime<double>::iniDensity() {
   }
 
 // Form the orthonormal transformation matrices
-  if (this->typeOrtho_ == 1) {  
+  if (this->typeOrtho_ == Lowdin) {  
    // Lowdin transformation 
    // V1 = S^(-1/2)
    // V2 = S^(1/2)
@@ -104,11 +104,11 @@ void RealTime<double>::iniDensity() {
       prettyPrintComplex(this->fileio_->out,oTrans2,"S^(1/2)");
     }
   }
-  else if (this->typeOrtho_ == 2) {  
+  else if (this->typeOrtho_ == Cholesky) {  
   // Cholesky transformation
     CErr("Cholesky orthogonalization NYI",this->fileio_->out);
   }
-  else if (this->typeOrtho_ == 3) {  	
+  else if (this->typeOrtho_ == Canonical) {  	
     CErr("Canonical orthogonalization NYI",this->fileio_->out);
   // Canonical orthogonalization
   // V1 = U*s^(-1/2)
@@ -217,7 +217,7 @@ void RealTime<double>::formUTrans() {
     new (&uTransB) ComplexMap(this->uTransBMem_,NTCSxNBASIS,NTCSxNBASIS);
   }
   // FIXME: Eigen's Eigensolver is terrible, replace with LAPACK routines
-  if (this->methFormU_ == 1) { 
+  if (this->methFormU_ == EigenDecomp) { 
    //  Eigen-decomposition
 
     char JOBZ = 'V';
@@ -278,7 +278,7 @@ void RealTime<double>::formUTrans() {
       uTransB = S * V.adjoint();
     }
   }
-  else if (this->methFormU_ == 2) { 
+  else if (this->methFormU_ == Taylor) { 
   // Taylor expansion
  
 /*  This is not taylor and breaks with the new memory scheme

@@ -42,9 +42,9 @@ void RealTime<T>::printRT() {
                        << std::setw(3) << " fs" << endl;
     this->fileio_->out << std::setw(33) << std::right << " Orthonormalization method =" 
                        << std::setw(14) << std::right ;
-    if (this->typeOrtho_ == 1) this->fileio_->out << " L\u00F6wdin" << endl; 
-    if (this->typeOrtho_ == 2) this->fileio_->out << " Cholesky (NYI)" << endl; 
-    if (this->typeOrtho_ == 3) this->fileio_->out << " Canonical (NYI)" << endl; 
+    if (this->typeOrtho_ == Lowdin) this->fileio_->out << " L\u00F6wdin" << endl; 
+    if (this->typeOrtho_ == Cholesky) this->fileio_->out << " Cholesky (NYI)" << endl; 
+    if (this->typeOrtho_ == Canonical) this->fileio_->out << " Canonical (NYI)" << endl; 
 
     this->fileio_->out << std::left << "\n * Integration Parameters:" << endl; 
     this->fileio_->out << std::right << std::setw(33) 
@@ -54,11 +54,11 @@ void RealTime<T>::printRT() {
     this->fileio_->out << std::left << "\n * External Field Parameters:" << endl; 
     this->fileio_->out << std::right << std::setw(33) 
                        << " Field type =" << std::setw(14) << std::right; 
-    if (IEnvlp_ == 1) this->fileio_->out << " Constant" << endl;
-    if (IEnvlp_ == 2) this->fileio_->out << " Linear ramp" << endl;
-    if (IEnvlp_ == 3) this->fileio_->out << " Gaussian" << endl;
-    if (IEnvlp_ == 4) this->fileio_->out << " Step function" << endl;
-    if (IEnvlp_ == 5) this->fileio_->out << " Sine-square (NYI)" << endl;
+    if (IEnvlp_ == Constant) this->fileio_->out << " Constant" << endl;
+    if (IEnvlp_ == LinRamp) this->fileio_->out << " Linear ramp" << endl;
+    if (IEnvlp_ == Gaussian) this->fileio_->out << " Gaussian" << endl;
+    if (IEnvlp_ == Step) this->fileio_->out << " Step function" << endl;
+    if (IEnvlp_ == SinSq) this->fileio_->out << " Sine-square (NYI)" << endl;
     this->fileio_->out << std::right << std::setw(33) 
                        << " Terms Included =" << std::setw(14) << std::right; 
     this->fileio_->out << " Electric Dipole Only" << endl;
@@ -81,7 +81,7 @@ void RealTime<T>::printRT() {
                        << std::setw(14) << std::setprecision(5) 
                        << this->Ez_ << std::setw(5) << " a.u."
                        << endl; 
-    if (this->IEnvlp_ != 4) {
+    if (this->IEnvlp_ != Step) {
       this->fileio_->out << std::setw(33) << std::right << " Frequency =" 
                          << std::setw(14) << std::setprecision(5) 
                          << this->Freq_ << std::setw(3) << " eV"
@@ -99,7 +99,7 @@ void RealTime<T>::printRT() {
                        << std::setw(14) << std::setprecision(5) 
                        << this->TOff_ << std::setw(3) << " fs"
                        << endl; 
-    if (this->IEnvlp_ == 3) {
+    if (this->IEnvlp_ == Gaussian) {
       this->fileio_->out << std::setw(33) << std::right << " FWHM =" 
                          << std::setw(14) << std::setprecision(5) 
                          << this->Sigma_ << std::setw(3) << " eV"
