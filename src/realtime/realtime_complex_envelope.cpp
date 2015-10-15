@@ -37,15 +37,15 @@ namespace ChronusQ {
 
 template<>
 void RealTime<dcomplex>::formEDField() {  
-  int IEnvlp   = this->controls_->rtEnvelope_;
-  double Ex    = this->controls_->rtField_[0]; 
-  double Ey    = this->controls_->rtField_[1]; 
-  double Ez    = this->controls_->rtField_[2]; 
-  double TOn   = (this->controls_->rtTOn_)/phys.AuToFs;
-  double TOff  = (this->controls_->rtTOff_)/phys.AuToFs;
-  double Omega = (this->controls_->rtFreq_)/phys.eVPerHartree;
-  double Phase = this->controls_->rtPhase_;
-  double Sigma = (this->controls_->rtSigma_)/phys.eVPerHartree;
+  int IEnvlp   = this->IEnvlp_;
+  double Ex    = this->Ex_;
+  double Ey    = this->Ey_;
+  double Ez    = this->Ez_;
+  double TOn   = (this->TOn_)/phys.AuToFs;
+  double TOff  = (this->TOff_)/phys.AuToFs;
+  double Omega = (this->Freq_)/phys.eVPerHartree;
+  double Phase = this->Phase_;
+  double Sigma = (this->Sigma_)/phys.eVPerHartree;
   double Time  = currentTime_;
   double OmegT;
   double TMax;

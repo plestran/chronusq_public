@@ -251,9 +251,9 @@ void readInput(FileIO * fileio, Molecule * mol, BasisSet * basis, Controls * con
                "\t TIME_OFF:  Time (fs) field is removed.         Default = 10000.0 \n"+ 
                "\t FREQUENCY: Field frequency (eV).               Default = 0.0 \n"+ 
                "\t PHASE:     Field phase offset (rad).           Default = 0.0 \n"+ 
-               "\t SIGMA:     For Gaussian envelope, this sets"+ 
-                                "the range of the frequency"+ 
-                                "(FWHM, in eV)                     Default = 0.0 \n"+ 
+               "\t SIGMA:     For Gaussian envelope, this sets    Default = 0.0 \n"+ 
+               "\t              the range of the frequency\n"+ 
+               "\t              (FWHM, in eV)\n"+ 
                "\t ENVELOPE:  Type of field envelope function.    Default = PW \n"+
                "\t ORTHO:     Type of orthogonalization.          Default = LOWDIN \n"+
                "\t INIDEN:    Initial density for system.         Default = SCF \n"+
