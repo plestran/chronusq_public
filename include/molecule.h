@@ -47,6 +47,9 @@ class Molecule {
   std::unique_ptr<VectorXd>  COM_;         // center of mass coordinate or center of nuclear charges 
   std::unique_ptr<RealMatrix>  momentOfInertia_; // Moment of inertia
   std::unique_ptr<RealMatrix>  rIJ_;             // Interatomic distance matrix
+
+  // Misc options
+  int                          printLevel_;  // Level of print
 public:
 
   // constructor
@@ -81,6 +84,8 @@ public:
     this->COM_             = nullptr;
     this->momentOfInertia_ = nullptr;
     this->rIJ_             = nullptr;
+
+    this->printLevel_      = 1;
   }
   
   void alloc(std::ostream &out=cout);
@@ -103,6 +108,7 @@ public:
   inline int charge() {return this->charge_;}
   inline int multip() {return this->multip_;}
   inline int nTotalE() {return this->nTotalE_;};
+  inline int printLevel(){return this->printLevel_;};
 
   inline double energyNuclei() { return this->energyNuclei_;};
 
@@ -119,7 +125,8 @@ public:
     (*this->cart_)(1,i) = y;
     (*this->cart_)(2,i) = z;
   }
-  inline void setNTotalE(int i){ this->nTotalE_ = i;};
+  inline void setNTotalE(int i){   this->nTotalE_    = i;};
+  inline void setPrintLevel(int i){this->printLevel_ = i;};
 
 
 
