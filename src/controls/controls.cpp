@@ -77,6 +77,11 @@ void Controls::iniControls(){
   this->unitTest    =       0;
   this->field_      =       {0.0,0.0,0.0};
  
+  this->SCFdenTol_ = 1e-10;
+  this->SCFeneTol_ = 1e-12;
+  this->SCFmaxIter_ = 128;
+  this->unitTest    = 0;
+  this->field_      = {0.0,0.0,0.0};
 #ifdef USE_LIBINT
   // Bootstrap Libint env
   libint2::init(); 
