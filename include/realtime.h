@@ -229,7 +229,7 @@ public:
   // Getters
 
   // Setters
-  inline void setMaxSteps(int i){ this->maxStep_  = i;};
+  inline void setMaxSteps(int i){ this->maxSteps_  = i;};
   inline void setStepSize(int i){ this->stepSize_ = i;};
   inline void setOrthoTyp(RealTime<T>::ORTHO i){ this->typeOrtho_ = i;};
   inline void setInitDen(int i){ this->initDensity_ = i;};
@@ -238,9 +238,9 @@ public:
   inline void setFormU(RealTime<T>::FORM_U i){ this->methFormU_ = i;};
   inline void setEnvelope(RealTime<T>::ENVELOPE i){ this->IEnvlp_ = i;};
   inline void setFieldAmp(std::array<double,3> x){ 
-    this->Ex = x[0];
-    this->Ey = x[1];
-    this->Ez = x[2];
+    this->Ex_ = x[0];
+    this->Ey_ = x[1];
+    this->Ez_ = x[2];
   };
   inline void setTOn(double x){   this->TOn_   = x;};
   inline void setTOff(double x){  this->TOff_  = x;};

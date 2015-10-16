@@ -6,23 +6,28 @@ from parseBasis import parseBasis
 #
 #  Parse the QM section of the input file and populate
 #  the CQ::SingleSlater<T> and CQ::BasisSet objects
+#  as well as any subsequent job objects:
+#
+#    - RealTime<T>
+#    - SDResponse<T>
+#
 #
 #  ** Note that this does DOES NOT allocate the SingleSlater **
 #  ** object, but does allocate the BasisSet object          **
 #
 #  Input:
 #    workers      -     the workers array of CQ objects
-#    settings     -     the settings parsed by configparser for 
-#                       the QM section
+#    secDict      -     total parsed section dictionary
 #
-def parseQM(workers,settings): 
+def parseQM(workers,secDict): 
   print 'Parsing QM Information'
+  ssSettings = secDict["qm"]
 
 #
 # Check for unknown keywords in the QM section
 #
   knownKeywords = [ 'reference', 'basis' ]
-  for i in settings:
+  for i in ssSettings:
     if i not in knownKeywords:
       print "Keyword Molecule."+ str(i) +" not recognized"
 
@@ -30,7 +35,7 @@ def parseQM(workers,settings):
 # Try to set the reference for CQ::SingleSlater
 #
   try:
-    handleReference(workers,settings['reference'])
+    handleReference(workers,ssSettings['reference'])
   except KeyError:
     print 'No Reference keyword found'
 
@@ -38,7 +43,7 @@ def parseQM(workers,settings):
 # Try to set the basis for the QM Job
 #
   try:
-    parseBasis(workers,settings['basis'])
+    parseBasis(workers,ssSettings['basis'])
   except KeyError:
     print 'No Basis Set keyword found'
 
