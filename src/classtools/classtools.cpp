@@ -319,7 +319,12 @@ void printUnitInfo(Controls * controls, SingleSlater<double> * singleSlater, SDR
     cout << endl;
   }
   else if(controls->unitTest == Controls::UnitRT){
-    cout << "RT DOUBLE UNIT" << endl;
+    cout <<  std::setprecision(4) << (realTime->maxTime())     << "/" 
+         << std::setprecision(10) << (realTime->Energy())      << "/"
+         <<  std::setprecision(6) << (realTime->EDx())         << "/"
+                                  << (realTime->EDy())         << "/"
+                                  << (realTime->EDz())         << "/"
+                                  << (realTime->EDtot())       << endl;
     }
 }
 
