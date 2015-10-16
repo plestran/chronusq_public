@@ -177,16 +177,16 @@ void readInput(FileIO * fileio, Molecule * mol, BasisSet * basis, Controls * con
         fileio->in>>readString;
         readString=stringupper(readString);
         if(!readString.compare("PW")) {
-          controls->rtEnvelope_ = 1; 
+          controls->rtEnvelope_ = 0; 
         } else if(!readString.compare("LINEAR_RAMP")) {
-          controls->rtEnvelope_ = 2;
+          controls->rtEnvelope_ = 1;
         } else if(!readString.compare("GAUSSIAN")) {
-          controls->rtEnvelope_ = 3;
+          controls->rtEnvelope_ = 2;
         } else if(!readString.compare("STEP")) {
-          controls->rtEnvelope_ = 4;
+          controls->rtEnvelope_ = 3;
         } else if(!readString.compare("SINE_SQUARE")) {
           CErr("Real Time Envelope Option: "+readString+" not yet implemented. \n",fileio->out); 
-          controls->rtEnvelope_ = 5;
+          controls->rtEnvelope_ = 4;
         } else { 
           CErr("Real Time Envelope Option: "+readString+" not recognized. \n"+
                "Try PW, LINEAR_RAMP, GAUSSIAN, STEP, or SINE_SQUARE",fileio->out); 
@@ -195,11 +195,11 @@ void readInput(FileIO * fileio, Molecule * mol, BasisSet * basis, Controls * con
         fileio->in>>readString;
         readString=stringupper(readString);
         if(!readString.compare("LOWDIN"))
-          controls->rtTypeOrtho = 1;
+          controls->rtTypeOrtho = 0;
         else if(!readString.compare("CHOLESKY"))
-          controls->rtTypeOrtho = 2;
+          controls->rtTypeOrtho = 1;
         else if(!readString.compare("CANONICAL"))
-          controls->rtTypeOrtho = 3;
+          controls->rtTypeOrtho = 2;
         else 
           CErr("Real Time Orthogonalization Option: "+readString+" not recognized. \n"+
                "Try LOWDIN, CHOLESKY, or CANONICAL",fileio->out); 
@@ -232,9 +232,9 @@ void readInput(FileIO * fileio, Molecule * mol, BasisSet * basis, Controls * con
         fileio->in>>readString;
         readString=stringupper(readString);
         if(!readString.compare("EIGEN"))
-          controls->rtMethFormU = 1;
+          controls->rtMethFormU = 0;
         else if(!readString.compare("TAYLOR"))
-          controls->rtMethFormU = 2;
+          controls->rtMethFormU = 1;
         else {
           CErr("Real Time U Matrix / Propagator Option: "+readString+" not recognized. \n"+
                "Try EIGEN or TAYLOR",fileio->out); 
