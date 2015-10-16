@@ -92,7 +92,8 @@ public:
   // Enum for Unit Tests
   enum{
     UnitSCF,
-    UnitResp
+    UnitResp,
+    UnitRT
   };
 
   Controls(){;};

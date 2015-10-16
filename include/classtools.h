@@ -33,6 +33,7 @@
 #include <controls.h>
 #include <singleslater.h>
 #include <sdresponse.h>
+#include <realtime.h>
 
 /*****************************/
 /*Error Messages 15000-19999 */
@@ -41,8 +42,8 @@
 namespace ChronusQ {
 // read input files and initialize everything
 void readInput(FileIO *,Molecule *, BasisSet *, Controls *, BasisSet * dfBasis=NULL);
-void printUnitInfo(Controls *, SingleSlater<double> *, SDResponse<double> *);
-void printUnitInfo(Controls *, SingleSlater<dcomplex> *, SDResponse<double> *);
+void printUnitInfo(Controls *, SingleSlater<double> *, SDResponse<double> *, RealTime<double> *);
+void printUnitInfo(Controls *, SingleSlater<dcomplex> *, SDResponse<double> *, RealTime<dcomplex> *);
 
 // trace of product of two symmetric matrices
 double traceSymm(RealMatrix *,RealMatrix *);
