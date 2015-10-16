@@ -106,6 +106,39 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("alloc"        , &RealTime<double>::alloc        )
     .def("iniDensity"   , &RealTime<double>::iniDensity   )
     .def("doPropagation", &RealTime<double>::doPropagation)
+    .def("setMaxSteps"  , &RealTime<double>::setMaxSteps  ) 
+    .def("setStepSize"  , &RealTime<double>::setStepSize  )
+    .def("setOrthoTyp"  , &RealTime<double>::setOrthoTyp  )
+    .def("setInitDen"   , &RealTime<double>::setInitDen   )
+    .def("setSwapMOA"   , &RealTime<double>::setSwapMOA   )
+    .def("setSwapMOB"   , &RealTime<double>::setSwapMOB   )
+    .def("setFormU"     , &RealTime<double>::setFormU     )
+    .def("setEnvelope"  , &RealTime<double>::setEnvelope  )
+    .def("setFieldAmp"  , &RealTime<double>::setFieldAmp  )
+    .def("setTOn"       , &RealTime<double>::setTOn       )
+    .def("setTOff"      , &RealTime<double>::setTOff      )
+    .def("setFreq"      , &RealTime<double>::setFreq      )
+    .def("setPhase"     , &RealTime<double>::setPhase     )
+    .def("setSigma"     , &RealTime<double>::setSigma     )
+  ;
+
+  enum_<RealTime<double>::ORTHO>("RealTime_ORTHO"   )
+    .value("Lowdin"   , RealTime<double>::Lowdin    )
+    .value("Cholesky" , RealTime<double>::Cholesky  )
+    .value("Canonical", RealTime<double>::Canonical )
+  ;
+
+  enum_<RealTime<double>::FORM_U>("RealTime_FORM_U"    )
+    .value("EigenDecomp", RealTime<double>::EigenDecomp)
+    .value("Taylor"     , RealTime<double>::Taylor     )
+  ;
+
+  enum_<RealTime<double>::ENVELOPE>("RealTime_ENVELOPE")
+    .value("Constant", RealTime<double>::Constant      )
+    .value("LinRamp" , RealTime<double>::LinRamp       )
+    .value("Gaussian", RealTime<double>::Gaussian      )
+    .value("Step"    , RealTime<double>::Step          )
+    .value("SinSq"   , RealTime<double>::SinSq         )
   ;
 
   def("readInput",       ChronusQ::Wrapper_readInput);
