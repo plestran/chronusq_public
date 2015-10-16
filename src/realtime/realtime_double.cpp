@@ -132,7 +132,6 @@ void RealTime<double>::iniDensity() {
     oTrans1.real() = oTrans2.adjoint().real() * V; 
     oTrans1 = oTrans1.triangularView<Lower>(); // Upper elements junk
 
->>>>>>> jjgoings/rt
   }
   else if (this->typeOrtho_ == Canonical) {  	
     CErr("Canonical orthogonalization NYI",this->fileio_->out);
