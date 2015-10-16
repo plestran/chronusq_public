@@ -103,10 +103,36 @@ void RealTime<double>::iniDensity() {
       prettyPrintComplex(this->fileio_->out,oTrans1,"S^(-1/2)");
       prettyPrintComplex(this->fileio_->out,oTrans2,"S^(1/2)");
     }
-  }
-  else if (this->typeOrtho_ == Cholesky) {  
-  // Cholesky transformation
-    CErr("Cholesky orthogonalization NYI",this->fileio_->out);
+  } else if (this->typeOrtho_ == Cholesky) {  
+    char UPLO = 'L';
+    int  INFO;
+
+    double *A = this->REAL_LAPACK_SCR;
+    
+    RealMap V(A,NTCSxNBASIS,NTCSxNBASIS);
+
+    V.setZero();
+
+    std::memcpy(A,this->aointegrals_->overlap_->data(),
+      NTCSxNBASIS*NTCSxNBASIS*sizeof(double));
+
+    // compute L = A * L^(-T)
+    dpotrf_(&UPLO,&NTCSxNBASIS,A,&NTCSxNBASIS,&INFO);
+
+    V.transposeInPlace(); // BC Col major
+    V = V.triangularView<Lower>(); // Upper elements are junk 
+    oTrans2.real() = V; // oTrans2 = L
+    V.transposeInPlace(); // BC Row major
+
+    // Given L, compute S^(-1) = L^(-T) * L^(-1)
+    dpotri_(&UPLO,&NTCSxNBASIS,A,&NTCSxNBASIS,&INFO);
+    
+    V.transposeInPlace(); // BC Col major
+    // oTrans1 = L^(-1) = L^(T) * S^(-1)
+    oTrans1.real() = oTrans2.adjoint().real() * V; 
+    oTrans1 = oTrans1.triangularView<Lower>(); // Upper elements junk
+
+>>>>>>> jjgoings/rt
   }
   else if (this->typeOrtho_ == Canonical) {  	
     CErr("Canonical orthogonalization NYI",this->fileio_->out);
@@ -162,11 +188,22 @@ void RealTime<double>::iniDensity() {
     // Transform the ground state MO to orthonormal basis
     initMOA.setZero();
     initMOA.real() = *this->groundState_->moA();
-    initMOA = oTrans2 * initMOA;
-    if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
-      initMOB.setZero();
-      initMOB.real() = *this->groundState_->moB();
-      initMOB = oTrans2 * initMOB;
+    if (this->typeOrtho_ == 1) {
+      // Lowdin
+      initMOA = oTrans2 * initMOA;
+      if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
+        initMOB.setZero();
+        initMOB.real() = *this->groundState_->moB();
+        initMOB = oTrans2 * initMOB;
+      }
+    } else if (this->typeOrtho_ == 2) {
+      // Cholesky 
+      initMOA = oTrans2.adjoint() * initMOA;
+      if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
+        initMOB.setZero();
+        initMOB.real() = *this->groundState_->moB();
+        initMOB = oTrans2.adjoint() * initMOB;
+      }
     }
   }
   else if (this->initDensity_ == 2) { 
@@ -181,23 +218,42 @@ void RealTime<double>::iniDensity() {
 
   if (!inOrthoBas) { 
 // Transform density from AO to orthonormal basis
-    POA    = oTrans2 * (*this->ssPropagator_->densityA()) * oTrans2;
+    if (this->typeOrtho_ == 1) {
+      // Lowdin 
+      POA    = oTrans2 * (*this->ssPropagator_->densityA()) * oTrans2;
 
-    POAsav = POA;
-    if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
-      POB    = oTrans2 * (*this->ssPropagator_->densityB()) * oTrans2;
-      POBsav = POB;
+      POAsav = POA;
+      if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
+        POB    = oTrans2 * (*this->ssPropagator_->densityB()) * oTrans2;
+        POBsav = POB;
+      }
+    } else if (this->typeOrtho_ == 2) {
+      // Cholesky
+      POA    = oTrans2.adjoint() * (*this->ssPropagator_->densityA()) * oTrans2;
+
+      POAsav = POA;
+      if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
+        POB    = oTrans2.adjoint() * (*this->ssPropagator_->densityB()) * oTrans2;
+        POBsav = POB;
+      }
+    }
+  } else { 
+// Transform density from orthonormal to AO basis
+    if (this->typeOrtho_ == 1) {
+      // Lowdin
+      (*this->ssPropagator_->densityA()) = oTrans1 * POAsav * oTrans1;
+
+      if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) 
+        (*this->ssPropagator_->densityB()) = oTrans1 * POB * oTrans1;
+    } else if (this->typeOrtho_ == 2) {
+      // Cholesky
+      (*this->ssPropagator_->densityA()) = oTrans1.adjoint() * POAsav * oTrans1;
+
+      if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) 
+        (*this->ssPropagator_->densityB()) = oTrans1.adjoint() * POB * oTrans1;
     }
   }
-  else { 
-// Transform density from orthonormal to AO basis
-    (*this->ssPropagator_->densityA()) = oTrans1 * POAsav * oTrans1;
-
-    if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) 
-      (*this->ssPropagator_->densityB()) = oTrans1 * POB * oTrans1;
-  }
 };
-
 
 template<>
 void RealTime<double>::formUTrans() {  
@@ -277,9 +333,9 @@ void RealTime<double>::formUTrans() {
       }
       uTransB = S * V.adjoint();
     }
-  }
-  else if (this->methFormU_ == Taylor) { 
+  } else if (this->methFormU_ == Taylor) { 
   // Taylor expansion
+    CErr("Taylor expansion NYI",this->fileio_->out);
  
 /*  This is not taylor and breaks with the new memory scheme
  
@@ -357,12 +413,24 @@ void RealTime<double>::doPropagation() {
     this->printRT();
 
 //  Transform Fock from AO to orthonormal basis
-    scratch = (*this->ssPropagator_->fockA());
-    (*this->ssPropagator_->fockA()) = oTrans1 * scratch * oTrans1;
+    if (this->typeOrtho_ == 1) {
+      // Lowdin 
+      scratch = (*this->ssPropagator_->fockA());
+      (*this->ssPropagator_->fockA()) = oTrans1 * scratch * oTrans1;
 
-    if (!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
-      scratch = (*this->ssPropagator_->fockB());
-      (*this->ssPropagator_->fockB()) = oTrans1 * scratch * oTrans1;
+      if (!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
+        scratch = (*this->ssPropagator_->fockB());
+        (*this->ssPropagator_->fockB()) = oTrans1 * scratch * oTrans1;
+      }
+    } else if (this->typeOrtho_ == 2) {
+      // Cholesky
+      scratch = (*this->ssPropagator_->fockA());
+      (*this->ssPropagator_->fockA()) = oTrans1 * scratch * oTrans1.adjoint();
+
+      if (!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
+        scratch = (*this->ssPropagator_->fockB());
+        (*this->ssPropagator_->fockB()) = oTrans1 * scratch * oTrans1.adjoint();
+      }
     }
 
 //  Form the unitary propagation matrix
@@ -394,12 +462,21 @@ void RealTime<double>::doPropagation() {
     }
 
 //  Transform density matrix from orthonormal to AO basis
-    (*this->ssPropagator_->densityA()) = oTrans1 * POA * oTrans1;
+    if (this->typeOrtho_ == 1) {
+      // Lowdin 
+      (*this->ssPropagator_->densityA()) = oTrans1 * POA * oTrans1;
 
-    if (!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
-      (*this->ssPropagator_->densityB()) = oTrans1 * POB * oTrans1;
+      if (!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
+        (*this->ssPropagator_->densityB()) = oTrans1 * POB * oTrans1;
+      }
+    } else if (this->typeOrtho_ == 2) {
+      // Cholesky
+      (*this->ssPropagator_->densityA()) = oTrans1.adjoint() * POA * oTrans1;
+
+      if (!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
+        (*this->ssPropagator_->densityB()) = oTrans1.adjoint() * POB * oTrans1;
+      }
     }
-
 //  Advance step
     currentTime_ += this->stepSize_;
     };

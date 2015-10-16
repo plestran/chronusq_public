@@ -31,5 +31,7 @@ void dgetrf_(int*,int*,double*,int*,int*,int*);
 void dgetri_(int*,double*,int*,int*,double*,int*,int*);
 void zgetrf_(int*,int*,dcomplex*,int*,int*,int*);
 void zgetri_(int*,dcomplex*,int*,int*,dcomplex*,int*,int*);
+void dpotrf_(char*,int*,double*,int*,int*); 
+void dpotri_(char*,int*,double*,int*,int*); 
 }
 
