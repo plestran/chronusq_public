@@ -100,13 +100,35 @@ void RealTime<dcomplex>::iniDensity() {
     }
   }
   else if (this->typeOrtho_ == 2) {  
-    // FIXME: Replace Cholesky with LAPACK instead of EIGEN
-    // Cholesky transformation
-    Eigen::LLT<RealMatrix> LLT(*this->aointegrals_->overlap_);
-    oTrans2.real() = LLT.matrixL(); // oTrans2 = L 
-    scratch.real() = RealMatrix::Identity(NTCSxNBASIS,NTCSxNBASIS);
-    RealMatrix B  = LLT.solve(scratch.real()); // not sure why I can't use oTrans1 as scratch
-    oTrans1.real() = oTrans2.adjoint().real() * B; // oTrans1 = L^-1
+    
+    char UPLO = 'L';
+    int  INFO;
+
+    double *A = this->REAL_LAPACK_SCR;
+    
+    RealMap V(A,NTCSxNBASIS,NTCSxNBASIS);
+
+    V.setZero();
+
+    std::memcpy(A,this->aointegrals_->overlap_->data(),
+      NTCSxNBASIS*NTCSxNBASIS*sizeof(double));
+
+    // compute L = A * L^(-T)
+    dpotrf_(&UPLO,&NTCSxNBASIS,A,&NTCSxNBASIS,&INFO);
+
+    V.transposeInPlace(); // BC Col major
+    V = V.triangularView<Lower>(); // Upper elements are junk 
+    oTrans2.real() = V; // oTrans2 = L
+    V.transposeInPlace(); // BC Row major
+
+    // Given L, compute S^(-1) = L^(-T) * L^(-1)
+    dpotri_(&UPLO,&NTCSxNBASIS,A,&NTCSxNBASIS,&INFO);
+    
+    V.transposeInPlace(); // BC Col major
+    // oTrans1 = L^(-1) = L^(T) * S^(-1)
+    oTrans1.real() = oTrans2.adjoint().real() * V; 
+    oTrans1 = oTrans1.triangularView<Lower>(); // Upper elements junk
+
   }
   else if (this->typeOrtho_ == 3) {  	
     CErr("Canonical orthogonalization NYI",this->fileio_->out);
