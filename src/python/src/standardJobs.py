@@ -10,6 +10,8 @@ def communicate(workers):
     workers["CQMolecule"], workers["CQBasisSet"], workers["CQAOIntegrals"],
     workers["CQFileIO"], workers["CQControls"]
   )
+  workers["CQRealTime"].communicate(workers["CQFileIO"],workers["CQControls"],
+    workers["CQAOIntegrals"],workers["CQSingleSlaterDouble"])
 
 def initialize(workers):
   # Set Up AOIntegrals Metadata
@@ -18,12 +20,18 @@ def initialize(workers):
   # Set up Wavefunction Information
   workers["CQSingleSlaterDouble"].initMeta()
   workers["CQSingleSlaterDouble"].genMethString()
+
+  # RT
+  workers["CQSingleSlaterDouble"].initMeta()
   
 def alloc(workers):
   # Allocate Space for AO Integrals
   workers["CQAOIntegrals"].alloc()
 
   # Allocate Space for Wavefunction Information
+  workers["CQSingleSlaterDouble"].alloc()
+
+  # RT
   workers["CQSingleSlaterDouble"].alloc()
 
 def runSCF(workers):
@@ -40,5 +48,7 @@ def runSCF(workers):
   workers["CQSingleSlaterDouble"].SCF()
   workers["CQSingleSlaterDouble"].computeMultipole()
   workers["CQSingleSlaterDouble"].printMultipole()
+  workers["CQRealTime"].iniDensity()
+  workers["CQRealTime"].doPropagation()
   
   

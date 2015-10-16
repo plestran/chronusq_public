@@ -120,6 +120,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setFreq"      , &RealTime<double>::setFreq      )
     .def("setPhase"     , &RealTime<double>::setPhase     )
     .def("setSigma"     , &RealTime<double>::setSigma     )
+    .def("printRT"      , &RealTime<double>::printRT      )
   ;
 
   enum_<RealTime<double>::ORTHO>("RealTime_ORTHO"   )

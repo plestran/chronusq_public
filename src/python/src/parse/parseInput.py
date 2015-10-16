@@ -25,7 +25,7 @@ def parseInput(workers,iFileName):
 
   secDict = {}
 
-  knownSections  = [ "molecule", "qm", "misc"  ]
+  knownSections  = [ "molecule", "qm", "misc","rt"  ]
   parseFunctions = { "molecule":parseMolecule ,
                      "qm":parseQM             ,
                      "misc":parseMisc          }
@@ -38,4 +38,4 @@ def parseInput(workers,iFileName):
     secDict[secStr] = genSecDict(inputParser,section) 
 
   parseFunctions["molecule"](workers,secDict["molecule"])
-  parseFunctions["qm"](workers,secDict["qm"])
+  parseFunctions["qm"](workers,secDict)

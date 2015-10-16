@@ -47,6 +47,9 @@ def parseQM(workers,secDict):
   except KeyError:
     print 'No Basis Set keyword found'
 
+  if ssSettings['job'] in ('RT'):
+    parseRT(workers,secDict['rt']) 
+
 #  # Space filler to pasify error 
 #  workers["CQSingleSlaterDouble"].communicate(
 #    workers["CQMolecule"], workers["CQBasisSet"], workers["CQAOIntegrals"],
@@ -81,4 +84,64 @@ def handleReference(workers,ref):
   TCMethods = [chronusQ.Reference.TCS, chronusQ.Reference.GKS]
   if workers["CQSingleSlaterDouble"].Ref() in TCMethods:
     workers["CQSingleSlaterDouble"].setNTCS(2)
+
+def parseRT(workers,settings):
+  requiredKeywords = []
+  optionalKeywords = [ 'maxstep' , 'timestep' , 'edfield' , 'time_on',
+                       'time_off', 'frequency', 'phase'   , 'sigma'  ,
+                       'envelope', 'ortho'    , 'iniden'  , 'uprop'  ]
+  knownKeywords = requiredKeywords + optionalKeywords
+
+  reqMap = {}
+  optMap = {   'maxstep':workers['CQRealTime'].setMaxSteps ,
+              'timestep':workers['CQRealTime'].setStepSize ,
+               'edfield':workers['CQRealTime'].setFieldAmp ,
+               'time_on':workers['CQRealTime'].setTOn      ,
+              'time_off':workers['CQRealTime'].setTOff     ,
+             'frequency':workers['CQRealTime'].setFreq     ,
+                 'phase':workers['CQRealTime'].setPhase    ,
+                 'sigma':workers['CQRealTime'].setSigma    ,
+              'envelope':workers['CQRealTime'].setEnvelope ,
+                 'ortho':workers['CQRealTime'].setOrthoTyp ,
+                'iniden':workers['CQRealTime'].setInitDen  ,
+                 'uprop':workers['CQRealTime'].setFormU    }
+
+  orthoMap = {    'lowdin':chronusQ.RealTime_ORTHO.Lowdin    ,
+                'cholesky':chronusQ.RealTime_ORTHO.Cholesky  ,
+               'canonical':chronusQ.RealTime_ORTHO.Canonical }
+
+  formUMap = { 'eigendecomp':chronusQ.RealTime_FORM_U.EigenDecomp ,
+                    'taylor':chronusQ.RealTime_FORM_U.Taylor      }
+
+  envMap   = {       'pw':chronusQ.RealTime_ENVELOPE.Constant ,
+                'linramp':chronusQ.RealTime_ENVELOPE.LinRamp  ,
+               'gaussian':chronusQ.RealTime_ENVELOPE.Gaussian ,
+                   'step':chronusQ.RealTime_ENVELOPE.Step     ,
+                  'sinsq':chronusQ.RealTime_ENVELOPE.SinSq    }
+
+  for i in settings:
+    if i not in knownKeywords:
+      print "Keyword RealTime."+ str(i) +" not recognized"
+    elif i in ('maxstep','MaxStep','MAXSTEP','iniden','IniDen','INIDEN'):
+      settings[i] = int(settings[i])
+    elif i in ('ortho','Ortho','ORTHO'):
+      settings[i] = orthoMap[i]
+    elif i in ('envelope','Envelope','ENVELOPE'):
+      settings[i] = envMap[i]
+    elif i in ('uprop','Uprop','UProp','UPROP'):
+      settings[i] = formUMap[i]
+    else:
+      settings[i] = float(settings[i])
+
+
+  for i in optMap:
+    try:
+      optMap[i](settings[i])
+    except KeyError:
+      continue
+
+  workers["CQRealTime"].communicate(workers["CQFileIO"],workers["CQControls"],
+    workers["CQAOIntegrals"],workers["CQSingleSlaterDouble"])
+
+  
 
