@@ -114,7 +114,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setSwapMOB"   , &RealTime<double>::setSwapMOB   )
     .def("setFormU"     , &RealTime<double>::setFormU     )
     .def("setEnvelope"  , &RealTime<double>::setEnvelope  )
-    .def("setFieldAmp"  , &RealTime<double>::setFieldAmp  )
+    .def("setFieldAmp"  , &RealTime<double>::Wrapper_setFieldAmp  )
     .def("setTOn"       , &RealTime<double>::setTOn       )
     .def("setTOff"      , &RealTime<double>::setTOff      )
     .def("setFreq"      , &RealTime<double>::setFreq      )

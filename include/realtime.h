@@ -73,6 +73,8 @@ class RealTime {
   bool	frozenNuc_;     // Whether to freeze nuclei
   bool  isClosedShell_;
 
+  int printLevel_;
+
   // Memory pointers
   dcomplex * SCR;         // Total Scratch space for RT
   dcomplex * oTrans1Mem_; // Orthogonalizing Transformation Matrix from Overlap
@@ -183,6 +185,7 @@ public:
     this->TOn_         = 0.0;
     this->TOff_        = 1.0e4;
     this->IEnvlp_      = Constant;
+    this->printLevel_  = 1;
   };
   ~RealTime() {;};
 
@@ -242,11 +245,16 @@ public:
     this->Ey_ = x[1];
     this->Ez_ = x[2];
   };
+  inline void Wrapper_setFieldAmp(double x, double y, double z){
+    this->setFieldAmp({{x,y,z}});
+  }
   inline void setTOn(double x){   this->TOn_   = x;};
   inline void setTOff(double x){  this->TOff_  = x;};
   inline void setFreq(double x){  this->Freq_  = x;};
   inline void setPhase(double x){ this->Phase_ = x;};
   inline void setSigma(double x){ this->Sigma_ = x;};
+  inline void setPrintLevel(int i){ this->printLevel_ = i;};
+
   // pseudo-constructor
   void iniRealTime(FileIO *,Controls *,AOIntegrals *,SingleSlater<T> *);
   void iniDensity(); // initialize density

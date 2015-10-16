@@ -26,10 +26,10 @@ def parseQM(workers,secDict):
 #
 # Check for unknown keywords in the QM section
 #
-  knownKeywords = [ 'reference', 'basis' ]
+  knownKeywords = [ 'reference', 'basis', 'job' ]
   for i in ssSettings:
     if i not in knownKeywords:
-      print "Keyword Molecule."+ str(i) +" not recognized"
+      print "Keyword QM."+ str(i) +" not recognized"
 
 #
 # Try to set the reference for CQ::SingleSlater
@@ -130,18 +130,23 @@ def parseRT(workers,settings):
       settings[i] = envMap[i]
     elif i in ('uprop','Uprop','UProp','UPROP'):
       settings[i] = formUMap[i]
+    elif i in ('edfield','EDfield','EDField'):
+      settings[i] = settings[i].split()
+      for j in range(len(settings[i])): settings[i][j] = float(settings[i][j])
     else:
       settings[i] = float(settings[i])
 
 
   for i in optMap:
     try:
-      optMap[i](settings[i])
+      if i not in ('edfield','EDfield','EDField'):
+        optMap[i](settings[i])
+      else:
+        optMap[i](settings[i][0],settings[i][1],settings[i][2])
+        
     except KeyError:
       continue
 
-  workers["CQRealTime"].communicate(workers["CQFileIO"],workers["CQControls"],
-    workers["CQAOIntegrals"],workers["CQSingleSlaterDouble"])
 
   
 
