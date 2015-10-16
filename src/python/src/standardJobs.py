@@ -22,7 +22,6 @@ def initialize(workers):
   workers["CQSingleSlaterDouble"].genMethString()
 
   # RT
-  workers["CQSingleSlaterDouble"].initMeta()
   
 def alloc(workers):
   # Allocate Space for AO Integrals
@@ -32,7 +31,6 @@ def alloc(workers):
   workers["CQSingleSlaterDouble"].alloc()
 
   # RT
-  workers["CQSingleSlaterDouble"].alloc()
 
 def runSCF(workers):
   communicate(workers)
@@ -48,6 +46,8 @@ def runSCF(workers):
   workers["CQSingleSlaterDouble"].SCF()
   workers["CQSingleSlaterDouble"].computeMultipole()
   workers["CQSingleSlaterDouble"].printMultipole()
+  workers["CQRealTime"].initMeta()
+  workers["CQRealTime"].alloc()
   workers["CQRealTime"].iniDensity()
   workers["CQRealTime"].doPropagation()
   

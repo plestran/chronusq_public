@@ -98,7 +98,7 @@ void RealTime<double>::iniDensity() {
     for(auto i = 0; i < NTCSxNBASIS; i++){ S.col(i) /= W[i]; }
     oTrans1.real() = S * V.adjoint();
 
-    if(this->controls_->printLevel>3) {
+    if(this->printLevel_>3) {
       prettyPrintComplex(this->fileio_->out,oTrans1,"S^(-1/2)");
       prettyPrintComplex(this->fileio_->out,oTrans2,"S^(1/2)");
     }
@@ -158,7 +158,7 @@ void RealTime<double>::iniDensity() {
       this->fileio_->out << endl << "Alpha MOs swapped: "
                          << iA << " <-> " << jA << endl;
 
-      if(this->controls_->printLevel > 3) {
+      if(this->printLevel_ > 3) {
         prettyPrint(this->fileio_->out,
                     (*this->ssPropagator_->moA()),"Initial Alpha MO");
       }
@@ -174,7 +174,7 @@ void RealTime<double>::iniDensity() {
       this->fileio_->out << endl << "Beta MOs swapped: "
                          << iB << " <-> " << jB << endl;
 
-      if(this->controls_->printLevel > 3) {
+      if(this->printLevel_ > 3) {
         prettyPrint(this->fileio_->out,
                     (*this->ssPropagator_->moB()),"Initial Beta MO");
       }
@@ -399,7 +399,7 @@ void RealTime<double>::doPropagation() {
     }
 
 //  Print 
-    if(this->controls_->printLevel >= 1) {
+    if(this->printLevel_ >= 1) {
       //prettyPrintComplex(this->fileio_->out,(*this->ssPropagator_->densityA()),"Alpha AO Density");
       //if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) prettyPrintComplex(this->fileio_->out,(*this->ssPropagator_->densityB()),"Beta AO Density");
 
