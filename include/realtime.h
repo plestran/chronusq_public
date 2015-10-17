@@ -230,6 +230,15 @@ public:
   void alloc();
 
   // Getters
+  inline double      currentTime(){ return this->currentTime_;                             };
+  inline double          maxTime(){ return (this->maxSteps_)*(this->stepSize_);            };
+  inline double           Energy(){ return this->ssPropagator_->totalEnergy;               };
+  inline double              EDx(){ return (*this->ssPropagator_->dipole())(0)/phys.debye; };
+  inline double              EDy(){ return (*this->ssPropagator_->dipole())(1)/phys.debye; };
+  inline double              EDz(){ return (*this->ssPropagator_->dipole())(2)/phys.debye; };
+  inline double            EDtot(){ return std::sqrt( std::pow(EDx(),2.0) +
+                                                      std::pow(EDy(),2.0) +
+                                                      std::pow(EDz(),2.0));};
 
   // Setters
   inline void setMaxSteps(int i){ this->maxSteps_  = i;};

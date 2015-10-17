@@ -78,7 +78,7 @@ def genRefDict():
                 reftype[i] = 'SCF'
             except ValueError: # RESP tests
                 if ',' in refdict[i][j]: 
-                     sp = refdict[i][j].split(',')
+                    sp = refdict[i][j].split(',')
                     refdict[i][j] = RespData(float(sp[0]),float(sp[1]))
                     reftype[i] = 'RESP'
                 else:
