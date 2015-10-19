@@ -42,33 +42,8 @@ def genSecDict(parser,section):
     'o-formu':parserFormU,
     'd3'     :parserDoubleArray
   }
-  
-# for opt in opts:
-#    dict1[opt] = parser.get(section,opt)
-#    try:
-#      readTyp = knownKeywords[section][opt.lower()].typ
-##      print opt
-#      if readTyp in ('i','d','s'):
-#        print 'reading I, D, or S: '+ repr(parseMap[readTyp])
-#      elif readTyp in ('o-orth','o-env','o-formu'):
-#        print 'reading something from RT: '+ repr(parseMap[readTyp])
-#        dict1[opt.lower()] = parseMap[readTyp](parser,section,opt)
-#      elif 'd' in readTyp and len(readTyp) > 1:
-#        print 'reading a double array of dim ' + readTyp[1:] + ": " + repr(parseMap[readTyp])
-#      else:
-#        print 'reading something else: '+str(opt)
-#     if readTyp in ('i','d','s'):
-#       dict1[opt.lower()] = parseMap[readTyp](section,opt)
-#     elif readTyp in ('o-orth','o-env','o-formu','d3'):
-#       dict1[opt.lower()] = parseMap[readTyp](parser,section,opt)
-#     else:
-#       print 'reading something else: '+str(opt)
-      
-#    except KeyError:
-#     print 'unrecognized keyword: '+str(opt)
-#    else:
-#      continue
 
+  keydict = ''
   try: 
     keydict = knownKeywords[section]
   except KeyError:
@@ -76,7 +51,6 @@ def genSecDict(parser,section):
     return
 
   for opt in opts:
-    keydict = ''
     keyword = ''
     readtyp = ''
 
@@ -88,12 +62,15 @@ def genSecDict(parser,section):
      
     readTyp = keyword.typ
 
-    if readTyp in ('i','s','d'):
+    if readTyp in ('i','d'):
       dict1[opt.lower()] = parseMap[readTyp](section,opt)
+    elif readTyp in ('s'):
+      dict1[opt.lower()] = parseMap[readTyp](section,opt).lower()
     elif readTyp in ('o-orth','o-env','o-formu','d3'):
       dict1[opt.lower()] = parseMap[readTyp](parser,section,opt)
     else:
       print 'Option data type not recognized'
+
   return dict1
 
 

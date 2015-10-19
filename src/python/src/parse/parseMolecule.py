@@ -2,6 +2,7 @@ import os,sys
 #sys.path.append('/home/dbwy/git_repo/chronusq/build_gcc_libint_openmp/src/python')
 #sys.path.append('/home/dbwy/git_repo/chronusq/src/python')
 import libpythonapi as chronusQ
+from meta.knownKeywords import requiredKeywords
 
 #
 #  Parse the Molecule section of the input file and populate
@@ -18,17 +19,15 @@ def parseMolecule(workers,settings):
   print 'Parsing Molecular Information'
 
 #
-# Check for unknown keywords in the Molecules section
+#  Check that all of the required keywords for Molecule
+#  object are found
 #
-# knownKeywords = [ 'charge', 'mult', 'geom' ]
-# for i in settings:
-#   if i not in knownKeywords:
-#     print "Keyword Molecule."+ str(i) +" not recognized"
+  for i in requiredKeywords['Molecule']:
+    if i not in settings:
+      print 'Required keyword Molecule.' + str(i) + ' not found'
+      exit(1)
 #
 # Grab charge and multiplicity
-#
-# FIXME: Need a check if these keywords aren't there
-#        or an ugly python error occurs
 #
   charge = settings['charge']
   mult   = settings['mult'  ]

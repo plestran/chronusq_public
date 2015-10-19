@@ -34,3 +34,12 @@ knownKeywords['RT'] = {
 }
 
 
+requiredKeywords = {}
+requiredKeywords['Molecule'] = []
+requiredKeywords['QM'] = []
+requiredKeywords['RT'] = []
+
+for sec in knownKeywords:
+  for keyWord in knownKeywords[sec]:
+    if knownKeywords[sec][keyWord].req:
+      requiredKeywords[sec].append(keyWord)
