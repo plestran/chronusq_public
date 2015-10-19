@@ -20,18 +20,18 @@ def parseMolecule(workers,settings):
 #
 # Check for unknown keywords in the Molecules section
 #
-  knownKeywords = [ 'charge', 'mult', 'geom' ]
-  for i in settings:
-    if i not in knownKeywords:
-      print "Keyword Molecule."+ str(i) +" not recognized"
+# knownKeywords = [ 'charge', 'mult', 'geom' ]
+# for i in settings:
+#   if i not in knownKeywords:
+#     print "Keyword Molecule."+ str(i) +" not recognized"
 #
 # Grab charge and multiplicity
 #
 # FIXME: Need a check if these keywords aren't there
 #        or an ugly python error occurs
 #
-  charge = int(settings['charge'])
-  mult   = int(settings['mult'  ])
+  charge = settings['charge']
+  mult   = settings['mult'  ]
 #
 # Populate charge and multiplicity of the
 # CQ Molecules object

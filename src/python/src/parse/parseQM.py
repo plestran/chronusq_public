@@ -106,35 +106,35 @@ def parseRT(workers,settings):
                 'iniden':workers['CQRealTime'].setInitDen  ,
                  'uprop':workers['CQRealTime'].setFormU    }
 
-  orthoMap = {    'lowdin':chronusQ.RealTime_ORTHO.Lowdin    ,
-                'cholesky':chronusQ.RealTime_ORTHO.Cholesky  ,
-               'canonical':chronusQ.RealTime_ORTHO.Canonical }
+# orthoMap = {    'lowdin':chronusQ.RealTime_ORTHO.Lowdin    ,
+#               'cholesky':chronusQ.RealTime_ORTHO.Cholesky  ,
+#              'canonical':chronusQ.RealTime_ORTHO.Canonical }
 
-  formUMap = { 'eigendecomp':chronusQ.RealTime_FORM_U.EigenDecomp ,
-                    'taylor':chronusQ.RealTime_FORM_U.Taylor      }
+# formUMap = { 'eigendecomp':chronusQ.RealTime_FORM_U.EigenDecomp ,
+#                   'taylor':chronusQ.RealTime_FORM_U.Taylor      }
 
-  envMap   = {       'pw':chronusQ.RealTime_ENVELOPE.Constant ,
-                'linramp':chronusQ.RealTime_ENVELOPE.LinRamp  ,
-               'gaussian':chronusQ.RealTime_ENVELOPE.Gaussian ,
-                   'step':chronusQ.RealTime_ENVELOPE.Step     ,
-                  'sinsq':chronusQ.RealTime_ENVELOPE.SinSq    }
+# envMap   = {       'pw':chronusQ.RealTime_ENVELOPE.Constant ,
+#               'linramp':chronusQ.RealTime_ENVELOPE.LinRamp  ,
+#              'gaussian':chronusQ.RealTime_ENVELOPE.Gaussian ,
+#                  'step':chronusQ.RealTime_ENVELOPE.Step     ,
+#                 'sinsq':chronusQ.RealTime_ENVELOPE.SinSq    }
 
-  for i in settings:
-    if i not in knownKeywords:
-      print "Keyword RealTime."+ str(i) +" not recognized"
-    elif i in ('maxstep','MaxStep','MAXSTEP','iniden','IniDen','INIDEN'):
-      settings[i] = int(settings[i])
-    elif i in ('ortho','Ortho','ORTHO'):
-      settings[i] = orthoMap[i]
-    elif i in ('envelope','Envelope','ENVELOPE'):
-      settings[i] = envMap[i]
-    elif i in ('uprop','Uprop','UProp','UPROP'):
-      settings[i] = formUMap[i]
-    elif i in ('edfield','EDfield','EDField'):
-      settings[i] = settings[i].split()
-      for j in range(len(settings[i])): settings[i][j] = float(settings[i][j])
-    else:
-      settings[i] = float(settings[i])
+# for i in settings:
+#   if i not in knownKeywords:
+#     print "Keyword RealTime."+ str(i) +" not recognized"
+#   elif i in ('maxstep','MaxStep','MAXSTEP','iniden','IniDen','INIDEN'):
+#     settings[i] = int(settings[i])
+#   elif i in ('ortho','Ortho','ORTHO'):
+#     settings[i] = orthoMap[i]
+#   elif i in ('envelope','Envelope','ENVELOPE'):
+#     settings[i] = envMap[i]
+#   elif i in ('uprop','Uprop','UProp','UPROP'):
+#     settings[i] = formUMap[i]
+#   elif i in ('edfield','EDfield','EDField'):
+#     settings[i] = settings[i].split()
+#     for j in range(len(settings[i])): settings[i][j] = float(settings[i][j])
+#   else:
+#     settings[i] = float(settings[i])
 
 
   for i in optMap:
