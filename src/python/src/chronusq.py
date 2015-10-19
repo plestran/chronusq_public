@@ -1,9 +1,10 @@
 import os,sys
 sys.path.append('/home/dbwy/git_repo/chronusq/build_gcc_libint_openmp/src/python')
-#sys.path.append('/home/dbwy/git_repo/chronusq/src/python')
-import parse.parseInput as PI
 import libpythonapi as chronusQ
 from meta.standardJobs import *
+from parse.parseInput import parseInput
+from parse.parseMolecule import parseMolecule
+from parse.parseQM import parseQM
 
 fname = sys.argv[1]
 
@@ -13,8 +14,9 @@ DFbasisSet = chronusQ.BasisSet()
 controls   = chronusQ.Controls()
 aoints     = chronusQ.AOIntegrals()
 hf         = chronusQ.SingleSlater_double()
-out        = chronusQ.FileIO(fname)
 rt         = chronusQ.RealTime_double()
+
+out        = chronusQ.FileIO(fname)
 
 workers = {"CQMolecule":mol,
            "CQBasisSet":basisSet,
@@ -28,7 +30,9 @@ workers = {"CQMolecule":mol,
 
 controls.iniControls()
 
-PI.parseInput(workers,fname+".inp")
+secDict = parseInput(workers,fname+".inp")
+parseMolecule(workers,secDict["molecule"])
+parseQM(workers,secDict)
 runSCF(workers)
 
 #controls.printSettings()
