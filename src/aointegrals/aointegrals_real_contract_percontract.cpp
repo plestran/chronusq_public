@@ -49,7 +49,7 @@ namespace ChronusQ{
             this->Gen34Contract(G,X,bf1,bf2,bf3,bf4,v);
   
             // Exchange
-            this->Gen23Contract(G,X,bf1,bf2,bf3,bf4,v,0.25);
+            if(!KS) this->Gen23Contract(G,X,bf1,bf2,bf3,bf4,v,0.25);
           }
         }
       }
@@ -73,8 +73,10 @@ namespace ChronusQ{
             this->Gen34Contract(GBeta, XTotal,bf1,bf2,bf3,bf4,v);
   
             // Exchange
-            this->Gen23Contract(GAlpha,XAlpha,bf1,bf2,bf3,bf4,v,0.5);
-            this->Gen23Contract(GBeta, XBeta, bf1,bf2,bf3,bf4,v,0.5);
+            if(!KS){
+              this->Gen23Contract(GAlpha,XAlpha,bf1,bf2,bf3,bf4,v,0.5);
+              this->Gen23Contract(GBeta, XBeta, bf1,bf2,bf3,bf4,v,0.5);
+            }
           }
         }
       }
@@ -104,7 +106,7 @@ namespace ChronusQ{
 //          this->Gen23Contract(G,X,bf1+1,bf2,bf3+1,bf4,v,0.5);
 //          this->Gen23Contract(G,X,bf1,bf2+1,bf3,bf4+1,v,0.5);
 */
-            this->GenExchContractSpinor(G,X,bf1,bf2,bf3,bf4,v,0.5);
+            if(!KS) this->GenExchContractSpinor(G,X,bf1,bf2,bf3,bf4,v,0.5);
           }
         }
       }
