@@ -33,7 +33,7 @@ controls.iniControls()
 
 secDict = parseInput(workers,fname+".inp")
 
-parseMolecule(workers,secDict["molecule"])
+parseMolecule(workers,secDict["MOLECULE"])
 parseQM(workers,secDict)
 
 runSCF(workers)

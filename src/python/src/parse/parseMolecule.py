@@ -22,15 +22,15 @@ def parseMolecule(workers,settings):
 #  Check that all of the required keywords for Molecule
 #  object are found
 #
-  for i in requiredKeywords['Molecule']:
+  for i in requiredKeywords['MOLECULE']:
     if i not in settings:
       print 'Required keyword Molecule.' + str(i) + ' not found'
       exit(1)
 #
 # Grab charge and multiplicity
 #
-  charge = settings['charge']
-  mult   = settings['mult'  ]
+  charge = settings['CHARGE']
+  mult   = settings['MULT'  ]
 #
 # Populate charge and multiplicity of the
 # CQ Molecules object
@@ -65,7 +65,7 @@ def readGeom(workers,settings):
 # Grab the string that contains the molecular geometry
 # and split up by line ends
 #
-  geomStr = settings['geom']
+  geomStr = settings['GEOM']
   geomStr = geomStr.split('\n')
 #
 # Determine how many atoms we have and try to remove

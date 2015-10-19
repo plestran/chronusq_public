@@ -10,17 +10,17 @@ import meta.enumMaps as enumMaps
 
 def parserOrth(parser,section,opt):
   strX = parser.get(section,opt)
-  strX = str(strX).lower()
+  strX = str(strX).upper()
   return enumMaps.orthoMap[strX]
 
 def parserEnv(parser,section,opt):
   strX = parser.get(section,opt)
-  strX = str(strX).lower()
+  strX = str(strX).upper()
   return enumMaps.envMap[strX]
 
 def parserFormU(parser,section,opt):
   strX = parser.get(section,opt)
-  strX = str(strX).lower()
+  strX = str(strX).upper()
   return enumMaps.formUMap[strX]
 
 def parserDoubleArray(parser,section,opt):
@@ -34,18 +34,18 @@ def genSecDict(parser,section):
   opts  = parser.options(section)
 
   parseMap = { 
-    'i'      :parser.getint,
-    'd'      :parser.getfloat,
-    's'      :parser.get,
-    'o-env'  :parserEnv,
-    'o-orth' :parserOrth,
-    'o-formu':parserFormU,
-    'd3'     :parserDoubleArray
+    'I'      :parser.getint,
+    'D'      :parser.getfloat,
+    'S'      :parser.get,
+    'O-ENV'  :parserEnv,
+    'O-ORTH' :parserOrth,
+    'O-FORMU':parserFormU,
+    'D3'     :parserDoubleArray
   }
 
   keydict = ''
   try: 
-    keydict = knownKeywords[section]
+    keydict = knownKeywords[section.upper()]
   except KeyError:
     print 'No dictionary of known keywords is known for ' + section
     return
@@ -55,19 +55,19 @@ def genSecDict(parser,section):
     readtyp = ''
 
     try: 
-      keyword = knownKeywords[section][opt.lower()]
+      keyword = knownKeywords[section.upper()][opt.upper()]
     except KeyError:
       print 'Keyword: '+str(opt)+' not recognized for section '+section
       continue
      
     readTyp = keyword.typ
 
-    if readTyp in ('i','d'):
-      dict1[opt.lower()] = parseMap[readTyp](section,opt)
-    elif readTyp in ('s'):
-      dict1[opt.lower()] = parseMap[readTyp](section,opt).lower()
-    elif readTyp in ('o-orth','o-env','o-formu','d3'):
-      dict1[opt.lower()] = parseMap[readTyp](parser,section,opt)
+    if readTyp in ('I','D'):
+      dict1[opt.upper()] = parseMap[readTyp](section,opt)
+    elif readTyp in ('S'):
+      dict1[opt.upper()] = parseMap[readTyp](section,opt).upper()
+    elif readTyp in ('O-ORTH','O-ENV','O-FORMU','D3'):
+      dict1[opt.upper()] = parseMap[readTyp](parser,section,opt)
     else:
       print 'Option data type not recognized'
 
@@ -83,15 +83,15 @@ def parseInput(workers,iFileName):
 
   secDict = {}
 
-  knownSections  = [ "molecule", "qm", "misc","rt"  ]
+  knownSections  = [ "MOLECULE", "QM", "MISC","RT"  ]
 # parseFunctions = { "molecule":parseMolecule ,
 #                    "qm":parseQM             ,
 #                    "misc":parseMisc          }
 
   for section in inputParser.sections():
-    secStr = str(section).lower()
+    secStr = str(section).upper()
     if secStr not in knownSections:
-      print "Keyword " + secStr + " not recognized"
+      print "Keyword section " + secStr + " not recognized"
       continue
     secDict[secStr] = genSecDict(inputParser,section) 
 

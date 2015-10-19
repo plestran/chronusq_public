@@ -22,7 +22,7 @@ from meta.knownKeywords import requiredKeywords
 #
 def parseQM(workers,secDict): 
   print 'Parsing QM Information'
-  ssSettings = secDict["qm"]
+  ssSettings = secDict["QM"]
 
 #
 # Check for unknown keywords in the QM section
@@ -44,21 +44,15 @@ def parseQM(workers,secDict):
 #
 # Try to set the reference for CQ::SingleSlater
 #
-  try:
-    handleReference(workers,ssSettings['reference'])
-  except KeyError:
-    print 'No Reference keyword found'
+  handleReference(workers,ssSettings['REFERENCE'])
 
 #
 # Try to set the basis for the QM Job
 #
-  try:
-    parseBasis(workers,ssSettings['basis'])
-  except KeyError:
-    print 'No Basis Set keyword found'
+  parseBasis(workers,ssSettings['BASIS'])
 
-  if ssSettings['job'] in ('rt'):
-    parseRT(workers,secDict['rt']) 
+  if ssSettings['JOB'] in ('RT'):
+    parseRT(workers,secDict['RT']) 
 
 #  # Space filler to pasify error 
 #  workers["CQSingleSlaterDouble"].communicate(
@@ -76,27 +70,25 @@ def parseQM(workers,secDict):
 def handleReference(workers,ref):
   mult = workers["CQMolecule"].multip()
   ref = ref.split()
-  if 'complex' in ref:
+  if 'COMPLEX' in ref:
     workers["CQSingleSlater"] = workers["CQSingleSlaterComplex"]
   else:
     workers["CQSingleSlater"] = workers["CQSingleSlaterDouble"]
 
-  print workers["CQSingleSlater"]
-  print workers["CQSingleSlaterDouble"]
-  if 'hf' in ref:
+  if 'HF' in ref:
     if mult == 1:
       workers["CQSingleSlater"].setRef(chronusQ.Reference.RHF)
       workers["CQSingleSlater"].isClosedShell = True
     else:
       workers["CQSingleSlater"].setRef(chronusQ.Reference.UHF)
-  elif 'rhf' in ref:
+  elif 'RHF' in ref:
     workers["CQSingleSlater"].setRef(chronusQ.Reference.RHF)
     workers["CQSingleSlater"].isClosedShell = True
-  elif 'uhf' in ref:
+  elif 'UHF' in ref:
     workers["CQSingleSlater"].setRef(chronusQ.Reference.UHF)
-  elif 'cuhf' in ref:
+  elif 'CUHF' in ref:
     workers["CQSingleSlater"].setRef(chronusQ.Reference.CUHF)
-  elif 'ghf' in ref:
+  elif 'GHF' in ref:
     workers["CQSingleSlater"].setRef(chronusQ.Reference.TCS)
 
   TCMethods = [chronusQ.Reference.TCS, chronusQ.Reference.GKS]
@@ -111,31 +103,27 @@ def parseRT(workers,settings):
 # knownKeywords = requiredKeywords + optionalKeywords
 
 # reqMap = {}
-  optMap = {   'maxstep':workers['CQRealTime'].setMaxSteps ,
-              'timestep':workers['CQRealTime'].setStepSize ,
-               'edfield':workers['CQRealTime'].setFieldAmp ,
-               'time_on':workers['CQRealTime'].setTOn      ,
-              'time_off':workers['CQRealTime'].setTOff     ,
-             'frequency':workers['CQRealTime'].setFreq     ,
-                 'phase':workers['CQRealTime'].setPhase    ,
-                 'sigma':workers['CQRealTime'].setSigma    ,
-              'envelope':workers['CQRealTime'].setEnvelope ,
-                 'ortho':workers['CQRealTime'].setOrthoTyp ,
-                'iniden':workers['CQRealTime'].setInitDen  ,
-                 'uprop':workers['CQRealTime'].setFormU    }
+  optMap = {   'MAXSTEP':workers['CQRealTime'].setMaxSteps ,
+              'TIMESTEP':workers['CQRealTime'].setStepSize ,
+               'EDFIELD':workers['CQRealTime'].setFieldAmp ,
+               'TIME_ON':workers['CQRealTime'].setTOn      ,
+              'TIME_OFF':workers['CQRealTime'].setTOff     ,
+             'FREQUENCY':workers['CQRealTime'].setFreq     ,
+                 'PHASE':workers['CQRealTime'].setPhase    ,
+                 'SIGMA':workers['CQRealTime'].setSigma    ,
+              'ENVELOPE':workers['CQRealTime'].setEnvelope ,
+                 'ORTHO':workers['CQRealTime'].setOrthoTyp ,
+                'INIDEN':workers['CQRealTime'].setInitDen  ,
+                 'UPROP':workers['CQRealTime'].setFormU    }
 
 
 
   for i in optMap:
     try:
-      if i not in ('edfield'):
+      if i not in ('EDFIELD'):
         optMap[i](settings[i])
       else:
         optMap[i](settings[i][0],settings[i][1],settings[i][2])
-        
     except KeyError:
       continue
-
-
-  
 

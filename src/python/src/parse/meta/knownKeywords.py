@@ -6,36 +6,36 @@ class CQKeyword:
     self.req  = req
 
 knownKeywords = {}
-knownKeywords['Molecule'] = {
-  'charge':CQKeyword('charge','i',True),
-  'mult'  :CQKeyword('mult'  ,'i',True),
-  'geom'  :CQKeyword('geom'  ,'s',True)
+knownKeywords['MOLECULE'] = {
+  'CHARGE':CQKeyword('CHARGE','I',True),
+  'MULT'  :CQKeyword('MULT'  ,'I',True),
+  'GEOM'  :CQKeyword('GEOM'  ,'S',True)
 } 
 
 knownKeywords['QM'] = {
-  'reference':CQKeyword('reference','s',True),
-  'basis'    :CQKeyword('basis'    ,'s',True),
-  'job'      :CQKeyword('job'      ,'s',True)
+  'REFERENCE':CQKeyword('REFERENCE','S',True),
+  'BASIS'    :CQKeyword('BASIS'    ,'S',True),
+  'JOB'      :CQKeyword('JOB'      ,'S',True)
 }
 
 knownKeywords['RT'] = {
-  'maxstep'  :CQKeyword('maxstep'  ,'i'      ,False),    
-  'timestep' :CQKeyword('timestep' ,'d'      ,False), 
-  'edfield'  :CQKeyword('edfield'  ,'d3'     ,False),
-  'time_on'  :CQKeyword('time_on'  ,'d'      ,False),
-  'time_off' :CQKeyword('time_off' ,'d'      ,False),
-  'frequency':CQKeyword('frequency','d'      ,False), 
-  'phase'    :CQKeyword('phase'    ,'d'      ,False),
-  'sigma'    :CQKeyword('sigma'    ,'d'      ,False),
-  'envelope' :CQKeyword('envelope' ,'o-env'  ,False),
-  'ortho'    :CQKeyword('ortho'    ,'o-orth' ,False), 
-  'iniden'   :CQKeyword('iniden'   ,'i'      ,False),
-  'uprop'    :CQKeyword('uprop'    ,'o-formu',False)
+  'MAXSTEP'  :CQKeyword('MAXSTEP'  ,'I'      ,False),    
+  'TIMESTEP' :CQKeyword('TIMESTEP' ,'D'      ,False), 
+  'EDFIELD'  :CQKeyword('EDFIELD'  ,'D3'     ,False),
+  'TIME_ON'  :CQKeyword('TIME_ON'  ,'D'      ,False),
+  'TIME_OFF' :CQKeyword('TIME_OFF' ,'D'      ,False),
+  'FREQUENCY':CQKeyword('FREQUENCY','D'      ,False), 
+  'PHASE'    :CQKeyword('PHASE'    ,'D'      ,False),
+  'SIGMA'    :CQKeyword('SIGMA'    ,'D'      ,False),
+  'ENVELOPE' :CQKeyword('ENVELOPE' ,'O-ENV'  ,False),
+  'ORTHO'    :CQKeyword('ORTHO'    ,'O-ORTH' ,False), 
+  'INIDEN'   :CQKeyword('INIDEN'   ,'I'      ,False),
+  'UPROP'    :CQKeyword('UPROP'    ,'O-FORMU',False)
 }
 
 
 requiredKeywords = {}
-requiredKeywords['Molecule'] = []
+requiredKeywords['MOLECULE'] = []
 requiredKeywords['QM'] = []
 requiredKeywords['RT'] = []
 
