@@ -57,7 +57,7 @@ def parseQM(workers,secDict):
   except KeyError:
     print 'No Basis Set keyword found'
 
-  if ssSettings['job'] in ('RT'):
+  if ssSettings['job'] in ('rt'):
     parseRT(workers,secDict['rt']) 
 
 #  # Space filler to pasify error 
