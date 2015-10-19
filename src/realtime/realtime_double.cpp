@@ -36,6 +36,15 @@ using ChronusQ::RealTime;
 namespace ChronusQ {
 
 template<>
+void RealTime<double>::writeCSV(){
+  std::ofstream csv("rt_output.csv");
+  for(auto it = this->propInfo.begin(); it != this->propInfo.end(); it++) {
+     csv << std::fixed << std::setprecision(10) << it->timeStep << "," << it->energy << "," << it->xDipole 
+         << "," << it->yDipole << "," << it->zDipole << "," << it->tDipole << endl;
+  } 
+};
+
+template<>
 void RealTime<double>::iniDensity() {
   bool inOrthoBas;
   bool idempotent;
@@ -419,12 +428,20 @@ void RealTime<double>::doPropagation() {
     if (!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
       (*this->ssPropagator_->densityB()) = oTrans1.adjoint() * POB * oTrans1;
     }
+
+    this->propInfo.push_back(PropInfo(this->currentTime_,this->ssPropagator_->totalEnergy,
+      (*this->ssPropagator_->dipole())(0)/phys.debye,(*this->ssPropagator_->dipole())(1)/phys.debye,
+      (*this->ssPropagator_->dipole())(2)/phys.debye));
+
 //  Advance step
     currentTime_ += this->stepSize_;
     };
   }
   delete [] this->SCR;
   delete [] this->REAL_LAPACK_SCR;
-};
 
+  this->writeCSV();
+
+};
+  
 } // namespace ChronusQ
