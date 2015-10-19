@@ -192,16 +192,6 @@ void RealTime<double>::iniDensity() {
         );
     }
     this->ssPropagator_->formDensity();
-
-    // Transform the ground state MO to orthonormal basis
-    initMOA.setZero();
-    initMOA.real() = *this->groundState_->moA();
-    initMOA = oTrans2.adjoint() * initMOA;
-    if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
-      initMOB.setZero();
-      initMOB.real() = *this->groundState_->moB();
-      initMOB = oTrans2.adjoint() * initMOB;
-    }
   }
   else if (this->initDensity_ == 2) { 
 // Read in the AO density from checkpoint file
@@ -227,6 +217,17 @@ void RealTime<double>::iniDensity() {
     if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) 
       (*this->ssPropagator_->densityB()) = oTrans1.adjoint() * POB * oTrans1;
   }
+
+// Need ground state MO in orthonormal basis for orbital occupation
+  initMOA.setZero();
+  initMOA.real() = *this->groundState_->moA();
+  initMOA = oTrans2.adjoint() * initMOA;
+  if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
+    initMOB.setZero();
+    initMOB.real() = *this->groundState_->moB();
+    initMOB = oTrans2.adjoint() * initMOB;
+  }
+
 };
 
 template<>
@@ -413,7 +414,12 @@ void RealTime<double>::doPropagation() {
     }
 
 //  Propagate the density matrix
-//
+//  Print dat orbital occupation
+      prettyPrint(this->fileio_->out,(initMOA.adjoint() * POA * initMOA).real().diagonal().adjoint(),"Alpha Orbital Occupation");
+      if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS){
+        prettyPrint(this->fileio_->out,(initMOB.adjoint() * POB * initMOB).real().diagonal().adjoint(),"Beta Orbital Occupation");
+      }
+
     scratch = POA;
     POA     = uTransA * scratch * uTransA.adjoint();
 

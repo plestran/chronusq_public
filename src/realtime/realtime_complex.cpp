@@ -36,6 +36,15 @@ using ChronusQ::RealTime;
 namespace ChronusQ {
 
 template<>
+void RealTime<dcomplex>::writeCSV(){
+  std::ofstream csv("rt_output.csv");
+  for(auto it = this->propInfo.begin(); it != this->propInfo.end(); it++) {
+     csv << std::fixed << std::setprecision(10) << it->timeStep << "," << it->energy << "," << it->xDipole 
+         << "," << it->yDipole << "," << it->zDipole << "," << it->tDipole << endl;
+  } 
+};
+
+template<>
 void RealTime<dcomplex>::iniDensity() {
   bool inOrthoBas;
   bool idempotent;
@@ -179,16 +188,6 @@ void RealTime<dcomplex>::iniDensity() {
         );
     }
     this->ssPropagator_->formDensity();
-
-    // Transform the ground state MO to orthonormal basis
-    initMOA.setZero();
-    initMOA = *this->groundState_->moA();
-    initMOA = oTrans2.adjoint() * initMOA;
-    if(!this->isClosedShell_ && this->Ref_ != SingleSlater<dcomplex>::TCS) {
-      initMOB.setZero();
-      initMOB = *this->groundState_->moB();
-      initMOB = oTrans2.adjoint() * initMOB;
-    }
   }
   else if (this->initDensity_ == 2) { 
 // Read in the AO density from checkpoint file
@@ -214,6 +213,17 @@ void RealTime<dcomplex>::iniDensity() {
     if(!this->isClosedShell_ && this->Ref_ != SingleSlater<dcomplex>::TCS) 
       (*this->ssPropagator_->densityB()) = oTrans1.adjoint() * POB * oTrans1;
   }
+
+// Need ground state MO in orthonormal basis for orbital occupation
+  initMOA.setZero();
+  initMOA = *this->groundState_->moA();
+  initMOA = oTrans2.adjoint() * initMOA;
+  if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
+    initMOB.setZero();
+    initMOB = *this->groundState_->moB();
+    initMOB = oTrans2.adjoint() * initMOB;
+  }
+
 };
 
 template<>
@@ -400,7 +410,12 @@ void RealTime<dcomplex>::doPropagation() {
     }
 
 //  Propagate the density matrix
-//
+//  Print dat orbital occupation
+      prettyPrint(this->fileio_->out,(initMOA.adjoint() * POA * initMOA).real().diagonal().adjoint(),"Alpha Orbital Occupation");
+      if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS){
+        prettyPrint(this->fileio_->out,(initMOB.adjoint() * POB * initMOB).real().diagonal().adjoint(),"Beta Orbital Occupation");
+      }
+
     scratch = POA;
     POA     = uTransA * scratch * uTransA.adjoint();
 
