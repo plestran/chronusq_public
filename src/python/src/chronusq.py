@@ -3,7 +3,7 @@ sys.path.append('/home/dbwy/git_repo/chronusq/build_gcc_libint_openmp/src/python
 #sys.path.append('/home/dbwy/git_repo/chronusq/src/python')
 import parse.parseInput as PI
 import libpythonapi as chronusQ
-from standardJobs import *
+from meta.standardJobs import *
 
 fname = sys.argv[1]
 
