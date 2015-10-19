@@ -156,7 +156,10 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
       sdResponseComplex->IterativeRPA();
     }
   }
-  if(controls->doUnit) printUnitInfo(controls.get(),hartreeFockReal.get(),sdResponseReal.get());
+/*
+  if(controls->doUnit && !controls->doComplex) printUnitInfo(controls.get(),hartreeFockReal.get(),sdResponseReal.get(),realtimeReal.get());
+  if(controls->doUnit && controls->doComplex) printUnitInfo(controls.get(),hartreeFockComplex.get(),sdResponseReal.get(),realtimeComplex.get());
+*/
 
 // REAL-TIME TD-SCF 
   
@@ -165,15 +168,19 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 //  }
   if(controls->doRealTime) {
     if(!controls->doComplex) {
-      realtimeReal->iniRealTime(molecule.get(),basisset.get(),fileIO.get(),controls.get(),aointegrals.get(),hartreeFockReal.get());
+      realtimeReal->iniRealTime(fileIO.get(),controls.get(),aointegrals.get(),hartreeFockReal.get());
       realtimeReal->iniDensity();
       realtimeReal->doPropagation();
     } else {
-      realtimeComplex->iniRealTime(molecule.get(),basisset.get(),fileIO.get(),controls.get(),aointegrals.get(),hartreeFockComplex.get());
+      realtimeComplex->iniRealTime(fileIO.get(),controls.get(),aointegrals.get(),hartreeFockComplex.get());
       realtimeComplex->iniDensity();
       realtimeComplex->doPropagation();
     }
   }
+  if(controls->doUnit && !controls->doComplex) printUnitInfo(controls.get(),hartreeFockReal.get(),sdResponseReal.get(),realtimeReal.get());
+  if(controls->doUnit && controls->doComplex) printUnitInfo(controls.get(),hartreeFockComplex.get(),sdResponseReal.get(),realtimeComplex.get());
+
+
 
   // Cleanup Libint env
 #ifdef USE_LIBINT

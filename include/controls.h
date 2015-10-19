@@ -80,6 +80,7 @@ public:
   std::array<double,3> rtField_;// Real Time Electric field magnitude Ex,Ey,Ez 
   double        rtFreq_;        // Frequency of electric field
   double        rtPhase_;       // Phase offset for electromagnetic field
+  double        rtSigma_;       // Phase offset for electromagnetic field
   double        rtTOn_;         // Time field is applied
   double        rtTOff_;        // Time field is turned off 
   int           rtEnvelope_;    // Envelope function for RT EM field
@@ -91,7 +92,8 @@ public:
   // Enum for Unit Tests
   enum{
     UnitSCF,
-    UnitResp
+    UnitResp,
+    UnitRT
   };
 
   Controls(){;};

@@ -196,7 +196,7 @@ void SDResponse<double>::reoptWF(){
   lenRealScr += lenMat; // Stability step in MO basis
   lenRealScr += lenMat; // Matrix exponential
   lenRealScr += lenEig; // Eigenvalues
-  lenRealScr += std::max(1,3*NTCSxNBASIS-1); // RWORK LAPACK Workspace
+  lenRealScr += std::max(1,3*NTCSxNBASIS-2); // RWORK LAPACK Workspace
 
 
   lenComplexScr += lenMat; // Stability step in MO basis
@@ -251,7 +251,7 @@ void SDResponse<double>::reoptWF(){
     zheev_(&JOBZ,&UPLO,&NTCSxNBASIS,complexStab,&NTCSxNBASIS,W,WORK,&lWork,RWORK,&INFO);
     std::memcpy(BSCR,complexStab,lenMat*sizeof(dcomplex));
     for(auto i = 0; i < NTCSxNBASIS; i++){
-      dcomplex scal = std::exp(dcomplex(0.0,-2.0*W[i]));
+      dcomplex scal = std::exp(dcomplex(0.0,-1.0*W[i]));
       BComplex.col(i) *= scal;
     }
    ExpAComplex = BComplex * AComplex.adjoint();
@@ -430,7 +430,7 @@ void SDResponse<double>::formRM3(RealCMMap &XMO, RealCMMap &Sigma, RealCMMap &Rh
 //this->singleSlater_->aointegrals()->multTwoEContractDirect(XMO.cols(),false,false,false,
 //  (this->nTCS_==2),CommA,GCommA,CommB,GCommB);
   for(auto idx = 0; idx < XMO.cols(); idx++)
-    this->singleSlater_->aointegrals()->twoEContractN4(false,true,false,(this->nTCS_==2),CommA[idx],
+    this->singleSlater_->aointegrals()->twoEContractN4(false,false,true,false,(this->nTCS_==2),CommA[idx],
       GCommA[idx],CommB[idx],GCommB[idx]);
 
 
@@ -529,7 +529,7 @@ void SDResponse<double>::formRM4(RealCMMap& XMO, RealCMMap &Sigma, RealCMMap &Rh
 //  doTCS,XAO,IXAO,XAO,IXAO);
 //cout << "HERE" << endl;
   for(auto idx = 0; idx < XMO.cols(); idx++)
-    this->singleSlater_->aointegrals()->twoEContractN4(false,false,true,doTCS,XAO[idx],
+    this->singleSlater_->aointegrals()->twoEContractN4(false,false,false,true,doTCS,XAO[idx],
       IXAO[idx],XAO[idx],IXAO[idx]);
 //cout << "HERE" << endl;
 

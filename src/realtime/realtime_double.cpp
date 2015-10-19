@@ -40,23 +40,100 @@ void RealTime<double>::iniDensity() {
   bool inOrthoBas;
   bool idempotent;
 
+  auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
+  // Set up Eigen Maps
+  ComplexMap oTrans1(this->oTrans1Mem_,NTCSxNBASIS,NTCSxNBASIS); 
+  ComplexMap oTrans2(this->oTrans2Mem_,NTCSxNBASIS,NTCSxNBASIS);
+  ComplexMap POA    (this->POAMem_    ,NTCSxNBASIS,NTCSxNBASIS);
+  ComplexMap POAsav (this->POAsavMem_ ,NTCSxNBASIS,NTCSxNBASIS);
+  ComplexMap FOA    (this->FOAMem_    ,NTCSxNBASIS,NTCSxNBASIS);
+  ComplexMap initMOA(this->initMOAMem_,NTCSxNBASIS,NTCSxNBASIS);
+  ComplexMap scratch(this->scratchMem_,NTCSxNBASIS,NTCSxNBASIS);
+
+  ComplexMap POB    (this->POBMem_    ,0,0);
+  ComplexMap POBsav (this->POBsavMem_ ,0,0);
+  ComplexMap FOB    (this->FOBMem_    ,0,0);
+  ComplexMap initMOB(this->initMOBMem_,0,0);
+
+  if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS){
+    new (&POB    ) ComplexMap(this->POBMem_    ,NTCSxNBASIS,NTCSxNBASIS);
+    new (&POBsav ) ComplexMap(this->POBsavMem_ ,NTCSxNBASIS,NTCSxNBASIS);
+    new (&FOB    ) ComplexMap(this->FOBMem_    ,NTCSxNBASIS,NTCSxNBASIS);
+    new (&initMOB) ComplexMap(this->initMOBMem_,NTCSxNBASIS,NTCSxNBASIS);
+  }
+
 // Form the orthonormal transformation matrices
-  if (this->typeOrtho_ == 1) {  
+  if (this->typeOrtho_ == Lowdin) {  
    // Lowdin transformation 
    // V1 = S^(-1/2)
    // V2 = S^(1/2)
-    (*this->oTrans1_).real() = (*this->aointegrals_->overlap_).pow(-0.5);
-    (*this->oTrans2_).real() = (*this->aointegrals_->overlap_).pow(0.5);
-    if(this->controls_->printLevel>3) {
-      prettyPrint(this->fileio_->out,(*this->oTrans1_),"S^(-1/2)");
-      prettyPrint(this->fileio_->out,(*this->oTrans2_),"S^(1/2)");
+
+    char JOBZ = 'V';
+    char UPLO = 'L';
+    int INFO;
+
+    double *A =    this->REAL_LAPACK_SCR;
+    double *W =    A + NTCSxNBASIS * NTCSxNBASIS;
+    double *WORK = W + NTCSxNBASIS;
+
+    RealVecMap E(W,NTCSxNBASIS);
+    RealMap    V(A,NTCSxNBASIS,NTCSxNBASIS);
+    RealMap    S(WORK,NTCSxNBASIS,NTCSxNBASIS); // Requires WORK to be NBSq
+
+    E.setZero();
+    V.setZero();
+    S.setZero();
+
+    std::memcpy(A,this->aointegrals_->overlap_->data(),
+      NTCSxNBASIS*NTCSxNBASIS*sizeof(double));
+
+    dsyev_(&JOBZ,&UPLO,&NTCSxNBASIS,A,&NTCSxNBASIS,W,WORK,&this->lWORK,&INFO);
+
+    V.transposeInPlace(); // BC Col major
+    std::memcpy(WORK,A,NTCSxNBASIS*NTCSxNBASIS*sizeof(double));
+
+    for(auto i = 0; i < NTCSxNBASIS; i++){ S.col(i) *= std::sqrt(W[i]); }
+    oTrans2.real() = S * V.adjoint();
+
+    for(auto i = 0; i < NTCSxNBASIS; i++){ S.col(i) /= W[i]; }
+    oTrans1.real() = S * V.adjoint();
+
+    if(this->printLevel_>3) {
+      prettyPrintComplex(this->fileio_->out,oTrans1,"S^(-1/2)");
+      prettyPrintComplex(this->fileio_->out,oTrans2,"S^(1/2)");
     }
+  } else if (this->typeOrtho_ == Cholesky) {  
+
+    char UPLO = 'L';
+    int  INFO;
+
+    double *A = this->REAL_LAPACK_SCR;
+    
+    RealMap V(A,NTCSxNBASIS,NTCSxNBASIS);
+
+    V.setZero();
+
+    std::memcpy(A,this->aointegrals_->overlap_->data(),
+      NTCSxNBASIS*NTCSxNBASIS*sizeof(double));
+
+    // compute L = A * L^(-T)
+    dpotrf_(&UPLO,&NTCSxNBASIS,A,&NTCSxNBASIS,&INFO);
+
+    V.transposeInPlace(); // BC Col major
+    V = V.triangularView<Lower>(); // Upper elements are junk 
+    oTrans2.real() = V; // oTrans2 = L
+    V.transposeInPlace(); // BC Row major
+
+    // Given L, compute S^(-1) = L^(-T) * L^(-1)
+    dpotri_(&UPLO,&NTCSxNBASIS,A,&NTCSxNBASIS,&INFO);
+    
+    V.transposeInPlace(); // BC Col major
+    // oTrans1 = L^(-1) = L^(T) * S^(-1)
+    oTrans1.real() = oTrans2.adjoint().real() * V; 
+    oTrans1 = oTrans1.triangularView<Lower>(); // Upper elements junk
+
   }
-  else if (this->typeOrtho_ == 2) {  
-  // Cholesky transformation
-    CErr("Cholesky orthogonalization NYI",this->fileio_->out);
-  }
-  else if (this->typeOrtho_ == 3) {  	
+  else if (this->typeOrtho_ == Canonical) {  	
     CErr("Canonical orthogonalization NYI",this->fileio_->out);
   // Canonical orthogonalization
   // V1 = U*s^(-1/2)
@@ -74,31 +151,58 @@ void RealTime<double>::iniDensity() {
     inOrthoBas = false;
     idempotent = true;
     if (this->swapMOA_ != 0) {
-      int iA = ((this->swapMOA_)/1000), jA = ((this->swapMOA_)%1000); // MOs to swap
-      this->fileio_->out<<"\nAlpha MOs swapped: "<<iA<<" <-> "<<jA<<endl;
-      if(this->controls_->printLevel>3) {
-        prettyPrint(this->fileio_->out,(*this->ssPropagator_->moA()),"Initial Alpha MO");
+      // MOs to swap
+      int iA = ((this->swapMOA_)/1000); 
+      int jA = ((this->swapMOA_)%1000); 
+
+      this->fileio_->out << endl << "Alpha MOs swapped: "
+                         << iA << " <-> " << jA << endl;
+
+      if(this->printLevel_ > 3) {
+        prettyPrint(this->fileio_->out,
+                    (*this->ssPropagator_->moA()),"Initial Alpha MO");
       }
-      this->ssPropagator_->moA()->col(jA-1).swap(this->ssPropagator_->moA()->col(iA-1));
+      this->ssPropagator_->moA()->col(jA-1).swap(
+        this->ssPropagator_->moA()->col(iA-1)
+        );
     }
-    if (this->swapMOB_ != 0 && !this->isClosedShell_) {
-      int iB = (this->swapMOB_/1000), jB = (this->swapMOB_%1000); // MOs to swap
-      this->fileio_->out<<"\nBeta MOs swapped: "<<iB<<" <-> "<<jB<<endl;
-      if(this->controls_->printLevel>3) {
-        prettyPrint(this->fileio_->out,(*this->ssPropagator_->moB()),"Initial Beta MO");
+    if (this->swapMOB_ != 0 && 
+        !this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
+      // MOs to swap
+      int iB = (this->swapMOB_/1000); 
+      int jB = (this->swapMOB_%1000); 
+      this->fileio_->out << endl << "Beta MOs swapped: "
+                         << iB << " <-> " << jB << endl;
+
+      if(this->printLevel_ > 3) {
+        prettyPrint(this->fileio_->out,
+                    (*this->ssPropagator_->moB()),"Initial Beta MO");
       }
-      this->ssPropagator_->moB()->col(jB-1).swap(this->ssPropagator_->moB()->col(iB-1));
+      this->ssPropagator_->moB()->col(jB-1).swap(
+        this->ssPropagator_->moB()->col(iB-1)
+        );
     }
     this->ssPropagator_->formDensity();
 
     // Transform the ground state MO to orthonormal basis
-    this->initMOA_->setZero();
-    (*this->initMOA_).real() = *this->groundState_->moA();
-    *this->initMOA_ = (*this->oTrans2_)*(*this->initMOA_);
-    if(!this->isClosedShell_) {
-      this->initMOB_->setZero();
-      (*this->initMOB_).real() = *this->groundState_->moB();
-      *this->initMOB_ = (*this->oTrans2_)*(*this->initMOB_);
+    initMOA.setZero();
+    initMOA.real() = *this->groundState_->moA();
+    if (this->typeOrtho_ == Lowdin) {
+      // Lowdin
+      initMOA = oTrans2 * initMOA;
+      if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
+        initMOB.setZero();
+        initMOB.real() = *this->groundState_->moB();
+        initMOB = oTrans2 * initMOB;
+      }
+    } else if (this->typeOrtho_ == Cholesky) {
+      // Cholesky 
+      initMOA = oTrans2.adjoint() * initMOA;
+      if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
+        initMOB.setZero();
+        initMOB.real() = *this->groundState_->moB();
+        initMOB = oTrans2.adjoint() * initMOB;
+      }
     }
   }
   else if (this->initDensity_ == 2) { 
@@ -107,170 +211,48 @@ void RealTime<double>::iniDensity() {
   }
   else if (this->initDensity_ == 3) { 
 // Read in the orthonormal density from checkpoint file
-    CErr("Read in the orthonormal density from checkpoint file NYI",this->fileio_->out);
+    CErr("Read in the orthonormal density from checkpoint file NYI",
+         this->fileio_->out);
   }
 
   if (!inOrthoBas) { 
 // Transform density from AO to orthonormal basis
-    *this->POA_    = (*this->oTrans2_)*(*this->ssPropagator_->densityA())*(*this->oTrans2_);
-    *this->POAsav_ = *this->POA_;
-    if(!this->isClosedShell_) {
-      *this->POB_    = (*this->oTrans2_)*(*this->ssPropagator_->densityB())*(*this->oTrans2_);
-      *this->POBsav_ = *this->POB_;
+    if (this->typeOrtho_ == Lowdin) {
+      // Lowdin 
+      POA    = oTrans2 * (*this->ssPropagator_->densityA()) * oTrans2;
+
+      POAsav = POA;
+      if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
+        POB    = oTrans2 * (*this->ssPropagator_->densityB()) * oTrans2;
+        POBsav = POB;
+      }
+    } else if (this->typeOrtho_ == Cholesky) {
+      // Cholesky
+      POA    = oTrans2.adjoint() * (*this->ssPropagator_->densityA()) * oTrans2;
+
+      POAsav = POA;
+      if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
+        POB    = oTrans2.adjoint() * (*this->ssPropagator_->densityB()) * oTrans2;
+        POBsav = POB;
+      }
     }
-  }
-  else { 
+  } else { 
 // Transform density from orthonormal to AO basis
-    *this->ssPropagator_->densityA() = (*this->oTrans1_)*(*this->POAsav_)*(*this->oTrans1_);
-    if(!this->isClosedShell_) *this->ssPropagator_->densityB() = (*this->oTrans1_)*(*this->POB_)*(*this->oTrans1_);
-  }
-};
+    if (this->typeOrtho_ == Lowdin) {
+      // Lowdin
+      (*this->ssPropagator_->densityA()) = oTrans1 * POAsav * oTrans1;
 
-template<>
-void RealTime<double>::formEDField() {  
-  int IEnvlp   = this->controls_->rtEnvelope_;
-  double Ex    = this->controls_->rtField_[0]; 
-  double Ey    = this->controls_->rtField_[1]; 
-  double Ez    = this->controls_->rtField_[2]; 
-  double TOn   = (this->controls_->rtTOn_)/phys.AuToFs;
-  double TOff  = (this->controls_->rtTOff_)/phys.AuToFs;
-  double Omega = this->controls_->rtFreq_/phys.eVPerHartree;
-  double Phase = this->controls_->rtPhase_;
-  double Time  = currentTime_;
-  double OmegT;
-  double TMax;
+      if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) 
+        (*this->ssPropagator_->densityB()) = oTrans1 * POB * oTrans1;
+    } else if (this->typeOrtho_ == Cholesky) {
+      // Cholesky
+      (*this->ssPropagator_->densityA()) = oTrans1.adjoint() * POAsav * oTrans1;
 
-  if (IEnvlp == 1) { 
-  //   Constant envelope (plane wave)
-    if(Time >= TOn && Time <= TOff) {
-      OmegT = Omega*(Time-TOn) + Phase;
-      (*this->EDField_)[0] = Ex*std::cos(OmegT);
-      (*this->EDField_)[1] = Ey*std::cos(OmegT);
-      (*this->EDField_)[2] = Ez*std::cos(OmegT);
-    } else {
-      (*this->EDField_)[0] = 0.0;
-      (*this->EDField_)[1] = 0.0;
-      (*this->EDField_)[2] = 0.0;
-    }
-  } 
-  else if (IEnvlp == 2) { 
-  /*   
-       Linearly ramping up to the maximum in the first cycle
-       Constant envelope afterwards
-       Linearly ramping off to zero
-  */
-    if(Time >= TOn && Time <= TOff) {
-      OmegT = Omega*(Time-TOn) + Phase;
-    } else {
-      (*this->EDField_)[0] = 0.0;
-      (*this->EDField_)[1] = 0.0;
-      (*this->EDField_)[2] = 0.0;
-    }
-
-  }
-  else if (IEnvlp == 3) { 
-  /*
-       Gaussian envelope: E(t) = E * exp(-(a*(t-t0))^2) * Sin(wt)
-           a  = the range of frequency (FWHM) 
-           t0 = the time when the amplitude reaches maximum 
-                  the default for t0 = sqrt(LN(1000))/a 
-                  (at t=0, the amplitude is 1/1000 times maximum. 
-                  This ensures a smooth turning-on of the field)             
-        Dipole length approximation only
-  */
-    if(Time >= TOn && Time <= TOff) {
-      OmegT = Omega*(Time-TOn) + Phase;
-    } else {
-      (*this->EDField_)[0] = 0.0;
-      (*this->EDField_)[1] = 0.0;
-      (*this->EDField_)[2] = 0.0;
-    }
-
-  }
-  else if (IEnvlp == 4) { 
-  /*
-        Step function
-  */
-    if(Time >= TOn && Time <= TOff) {
-      (*this->EDField_)[0] = Ex;
-      (*this->EDField_)[1] = Ey;
-      (*this->EDField_)[2] = Ez;
-    } else {
-      (*this->EDField_)[0] = 0.0;
-      (*this->EDField_)[1] = 0.0;
-      (*this->EDField_)[2] = 0.0;
-    }
-
-  }
-  else if (IEnvlp == 5) { 
-  /*
-        Sine-square envelope: 
-          A(r,t) = (E0/w)*(sin(Pi*t/T))^2*sin(k*r-w*t) 
-          E(r,t) = E0*(sin(Pi*t/T))^2*cos(k*r-w*t)
-                    -(E0*Pi/w*T)*sin(2*Pi*t/T)*sin(k*r-w*t)
-        only dipole length/velocity and quardrupole velocity
-  */
-    if(Time >= TOn && Time <= TOff) {
-      OmegT = Omega*(Time-TOn) + Phase;
-    } else {
-      (*this->EDField_)[0] = 0.0;
-      (*this->EDField_)[1] = 0.0;
-      (*this->EDField_)[2] = 0.0;
+      if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) 
+        (*this->ssPropagator_->densityB()) = oTrans1.adjoint() * POB * oTrans1;
     }
   }
 };
-
-template<>
-void RealTime<double>::printRT() {
-  double EDx = (*this->ssPropagator_->dipole())(0)/phys.debye;
-  double EDy = (*this->ssPropagator_->dipole())(1)/phys.debye;
-  double EDz = (*this->ssPropagator_->dipole())(2)/phys.debye;
-
-  if (currentTime_ <= 0.0) {
-    this->fileio_->out << bannerMid << endl;
-    this->fileio_->out << std::setw(11) << std::right << "Time" 
-                       << std::setw(1)  << " "
-                       << std::setw(16) << std::right << "Energy"
-                       << std::setw(1)  << " "
-                       << std::setw(12) << std::right << "Ex Dipole"
-                       << std::setw(1)  << " "
-                       << std::setw(12) << std::right << " Ey Dipole" 
-                       << std::setw(1)  << " "
-                       << std::setw(12) << std::right << " Ez Dipole"
-                       << std::setw(1)  << " "
-                       << std::setw(12) << std::right << " Etot Dipole"
-                       << std::endl;
-    this->fileio_->out << std::setw(11) << std::right << "    (au)" 
-                       << std::setw(1)  << " "
-                       << std::setw(16) << std::right << "    (Eh)"
-                       << std::setw(1)  << " "
-                       << std::setw(12) << std::right << " (debye)"
-                       << std::setw(1)  << " "
-                       << std::setw(12) << std::right << " (debye)" 
-                       << std::setw(1)  << " "
-                       << std::setw(12) << std::right << " (debye)"
-                       << std::setw(1)  << " "
-                       << std::setw(12) << std::right << " (debye)"
-                       << std::endl;
-    this->fileio_->out << bannerMid << endl;
-  }
-  this->fileio_->out << std::setw(11) << std::right << std::setprecision(4) << currentTime_
-                     << std::setw(1)  << " "
-                     << std::setw(16) << std::right << std::setprecision(10) << this->ssPropagator_->totalEnergy
-                     << std::setw(1)  << " "
-                     << std::setw(12) << std::right << std::setprecision(6) << EDx 
-                     << std::setw(1)  << " "
-                     << std::setw(12) << std::right << std::setprecision(6) << EDy
-                     << std::setw(1)  << " "
-                     << std::setw(12) << std::right << std::setprecision(6) << EDz 
-                     << std::setw(1)  << " "
-                     << std::setw(12) << std::right << std::setprecision(6) <<
-                        std::sqrt( std::pow(EDx,2.0) +
-                                   std::pow(EDy,2.0) +
-                                   std::pow(EDz,2.0))
-                     << std::endl;
-};
-
 
 template<>
 void RealTime<double>::formUTrans() {  
@@ -278,41 +260,94 @@ void RealTime<double>::formUTrans() {
 // Form the unitary transformation matrix: 
 // U = exp(-i*dT*F)
 //
-  if (this->methFormU_ == 1) { 
-   //  Eigen-decomposition
-    ComplexMatrix EVec(this->nBasis_,this->nBasis_);
-    RealMatrix 	  EVal(this->nBasis_,1);
 
-    Eigen::SelfAdjointEigenSolver<ComplexMatrix> sys(*this->ssPropagator_->fockA());
-    EVec = sys.eigenvectors();
-    EVal = sys.eigenvalues();
-    this->uTransA_->setZero();
-    for (int i=0;i<this->nBasis_;i++) {
-      (*this->uTransA_)(i,i) = dcomplex(cos(deltaT_*EVal(i,0)),-sin(deltaT_*EVal(i,0)));
-    }
-    *this->uTransA_ = EVec*(*this->uTransA_)*(EVec.adjoint());
-    if(!this->isClosedShell_) {
-      Eigen::SelfAdjointEigenSolver<ComplexMatrix> sys(*this->ssPropagator_->fockB());
-      EVec = sys.eigenvectors();
-      EVal = sys.eigenvalues();
-      this->uTransB_->setZero();
-      for (int i=0;i<this->nBasis_;i++) {
-        (*this->uTransB_)(i,i) = dcomplex(cos(deltaT_*EVal(i,0)),-sin(deltaT_*EVal(i,0)));
-      }
-    *this->uTransB_ = EVec*(*this->uTransB_)*(EVec.adjoint());
-    }
+  auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
+  // Set up Eigen Maps
+  ComplexMap uTransA(this->uTransAMem_,NTCSxNBASIS,NTCSxNBASIS);
+  ComplexMap scratch(this->scratchMem_,NTCSxNBASIS,NTCSxNBASIS);
+
+  ComplexMap uTransB(this->uTransBMem_,0,0);
+
+  if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS){
+    new (&uTransB) ComplexMap(this->uTransBMem_,NTCSxNBASIS,NTCSxNBASIS);
   }
-  else if (this->methFormU_ == 2) { 
-  // Taylor expansion
-    *this->scratch_ = -math.ii*deltaT_*(*this->ssPropagator_->fockA());
-    *this->uTransA_ = (*this->scratch_).exp();
-    if(!this->isClosedShell_) {
-      *this->scratch_ = -math.ii*deltaT_*(*this->ssPropagator_->fockB());
-      *this->uTransB_ = (*this->scratch_).exp();
+  // FIXME: Eigen's Eigensolver is terrible, replace with LAPACK routines
+  if (this->methFormU_ == EigenDecomp) { 
+   //  Eigen-decomposition
+
+    char JOBZ = 'V';
+    char UPLO = 'L';
+    int INFO;
+
+    dcomplex *A     = this->scratchMem_;
+    double   *W     = this->REAL_LAPACK_SCR;
+    double   *RWORK = W + std::max(1,3*NTCSxNBASIS-2);
+    dcomplex *WORK  = this->CMPLX_LAPACK_SCR;
+
+    RealVecMap E(W,NTCSxNBASIS);
+    ComplexMap V(A,NTCSxNBASIS,NTCSxNBASIS);
+    ComplexMap S(WORK,NTCSxNBASIS,NTCSxNBASIS);
+
+    E.setZero();
+    V.setZero();
+    S.setZero();
+
+    std::memcpy(A,this->ssPropagator_->fockA()->data(),
+      NTCSxNBASIS*NTCSxNBASIS*sizeof(dcomplex));
+
+    V.transposeInPlace(); // BC Col major
+    zheev_(&JOBZ,&UPLO,&NTCSxNBASIS,A,&NTCSxNBASIS,W,WORK,&this->lWORK,RWORK,
+      &INFO);
+
+    V.transposeInPlace(); // BC Col major
+    std::memcpy(WORK,A,NTCSxNBASIS*NTCSxNBASIS*sizeof(dcomplex));
+
+
+    for(auto i = 0; i < NTCSxNBASIS; i++){ 
+      S.col(i) *= dcomplex(std::cos(this->deltaT_ * W[i]),
+                          -std::sin(this->deltaT_ * W[i])); 
     }
+
+    uTransA = S * V.adjoint();
+
+    if(!this->isClosedShell_ && this->Ref_ != SingleSlater<dcomplex>::TCS) {
+      E.setZero();
+      V.setZero();
+      S.setZero();
+     
+      std::memcpy(A,this->ssPropagator_->fockB()->data(),
+        NTCSxNBASIS*NTCSxNBASIS*sizeof(dcomplex));
+     
+      V.transposeInPlace(); // BC Col major
+      zheev_(&JOBZ,&UPLO,&NTCSxNBASIS,A,&NTCSxNBASIS,W,WORK,&this->lWORK,RWORK,
+        &INFO);
+     
+      V.transposeInPlace(); // BC Col major
+      std::memcpy(WORK,A,NTCSxNBASIS*NTCSxNBASIS*sizeof(dcomplex));
+     
+     
+      for(auto i = 0; i < NTCSxNBASIS; i++){ 
+        S.col(i) *= dcomplex(std::cos(this->deltaT_ * W[i]),
+                            -std::sin(this->deltaT_ * W[i])); 
+      }
+      uTransB = S * V.adjoint();
+    }
+  } else if (this->methFormU_ == Taylor) { 
+  // Taylor expansion
+    CErr("Taylor expansion NYI",this->fileio_->out);
+ 
+/*  This is not taylor and breaks with the new memory scheme
+ 
+    scratch = -math.ii * deltaT_ * (*this->ssPropagator_->fockA());
+    uTransA = scratch.exp(); // FIXME
+    if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
+      scratch = -math.ii * deltaT_ * (*this->ssPropagator_->fockB());
+      uTransB = scratch.exp(); // FIXME
+    }
+*/
   }
 //    prettyPrint(this->fileio_->out,(*this->uTransA_),"uTransA");
-//    if(!this->isClosedShell_) prettyPrint(this->fileio_->out,(*this->uTransB_),"uTransB");
+//    if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) prettyPrint(this->fileio_->out,(*this->uTransB_),"uTransB");
 };
   
 template<>
@@ -321,70 +356,132 @@ void RealTime<double>::doPropagation() {
   bool checkFP = false;
 
   currentTime_ = 0.0;
-  for (iStep=0; iStep<=this->maxSteps_; iStep++) {
+
+  auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
+  // Set up Eigen Maps
+  ComplexMap oTrans1(this->oTrans1Mem_,NTCSxNBASIS,NTCSxNBASIS); 
+  ComplexMap oTrans2(this->oTrans2Mem_,NTCSxNBASIS,NTCSxNBASIS);
+  ComplexMap POA    (this->POAMem_    ,NTCSxNBASIS,NTCSxNBASIS);
+  ComplexMap POAsav (this->POAsavMem_ ,NTCSxNBASIS,NTCSxNBASIS);
+  ComplexMap FOA    (this->FOAMem_    ,NTCSxNBASIS,NTCSxNBASIS);
+  ComplexMap initMOA(this->initMOAMem_,NTCSxNBASIS,NTCSxNBASIS);
+  ComplexMap uTransA(this->uTransAMem_,NTCSxNBASIS,NTCSxNBASIS);
+  ComplexMap scratch(this->scratchMem_,NTCSxNBASIS,NTCSxNBASIS);
+
+  ComplexMap POB    (this->POBMem_    ,0,0);
+  ComplexMap POBsav (this->POBsavMem_ ,0,0);
+  ComplexMap FOB    (this->FOBMem_    ,0,0);
+  ComplexMap initMOB(this->initMOBMem_,0,0);
+  ComplexMap uTransB(this->uTransBMem_,0,0);
+
+  if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS){
+    new (&POB    ) ComplexMap(this->POBMem_    ,NTCSxNBASIS,NTCSxNBASIS);
+    new (&POBsav ) ComplexMap(this->POBsavMem_ ,NTCSxNBASIS,NTCSxNBASIS);
+    new (&FOB    ) ComplexMap(this->FOBMem_    ,NTCSxNBASIS,NTCSxNBASIS);
+    new (&initMOB) ComplexMap(this->initMOBMem_,NTCSxNBASIS,NTCSxNBASIS);
+    new (&uTransB) ComplexMap(this->uTransBMem_,NTCSxNBASIS,NTCSxNBASIS);
+  }
+
+  for (iStep = 0; iStep <= this->maxSteps_; iStep++) {
     //this->fileio_->out<<"\nStep "<<iStep<<":\n"<<endl;
     //this->fileio_->out<<std::right<<std::setw(20)<<"Time = "<<std::setw(15)<<currentTime_<<std::setw(5)<<" a.u. "<<endl;
 
-    if (iStep==0) deltaT_ = this->stepSize_;
-    else deltaT_ = 2.0*(this->stepSize_);
+    if (iStep == 0) deltaT_ = this->stepSize_;
+    else            deltaT_ = 2.0 * (this->stepSize_);
 
-    *this->scratch_ = *this->POA_;
-    *this->POA_	    = *this->POAsav_;
-    *this->POAsav_  = *this->scratch_;
-    if (!this->isClosedShell_) {
-      *this->scratch_ = *this->POB_;
-      *this->POB_     = *this->POBsav_;
-      *this->POBsav_  = *this->scratch_;
+    scratch = POA;
+    POA     = POAsav;
+    POAsav  = scratch;
+    if (!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
+      scratch = POB;
+      POB     = POBsav;
+      POBsav  = scratch;
     }
 
 //  Print 
-    if(this->controls_->printLevel>=1) {
+    if(this->printLevel_ >= 1) {
       //prettyPrintComplex(this->fileio_->out,(*this->ssPropagator_->densityA()),"Alpha AO Density");
-      //if(!this->isClosedShell_) prettyPrintComplex(this->fileio_->out,(*this->ssPropagator_->densityB()),"Beta AO Density");
+      //if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) prettyPrintComplex(this->fileio_->out,(*this->ssPropagator_->densityB()),"Beta AO Density");
 
 //  Form AO Fock matrix
     this->formEDField();
-    this->ssPropagator_->setField(*this->EDField_);
+    this->ssPropagator_->setField(this->EDField_);
     this->ssPropagator_->formFock();
     this->ssPropagator_->computeEnergy();
     this->ssPropagator_->computeMultipole();
     this->printRT();
 
 //  Transform Fock from AO to orthonormal basis
-    *this->ssPropagator_->fockA() = (*this->oTrans1_)*(*this->ssPropagator_->fockA())*(*this->oTrans1_);
-    if (!this->isClosedShell_) {
-      *this->ssPropagator_->fockB() = (*this->oTrans1_)*(*this->ssPropagator_->fockB())*(*this->oTrans1_);
+    if (this->typeOrtho_ == Lowdin) {
+      // Lowdin 
+      scratch = (*this->ssPropagator_->fockA());
+      (*this->ssPropagator_->fockA()) = oTrans1 * scratch * oTrans1;
+
+      if (!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
+        scratch = (*this->ssPropagator_->fockB());
+        (*this->ssPropagator_->fockB()) = oTrans1 * scratch * oTrans1;
+      }
+    } else if (this->typeOrtho_ == Cholesky) {
+      // Cholesky
+      scratch = (*this->ssPropagator_->fockA());
+      (*this->ssPropagator_->fockA()) = oTrans1 * scratch * oTrans1.adjoint();
+
+      if (!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
+        scratch = (*this->ssPropagator_->fockB());
+        (*this->ssPropagator_->fockB()) = oTrans1 * scratch * oTrans1.adjoint();
+      }
     }
 
 //  Form the unitary propagation matrix
     this->formUTrans();
 
-    if ((this->initDensity_==0) && checkFP) {
+    if ((this->initDensity_ == 0) && checkFP) {
 //    Check [F,P] for converged density, should equal to zero
-      *this->scratch_ = (*this->ssPropagator_->fockA())*(*this->POAsav_) - (*this->POAsav_)*(*this->ssPropagator_->fockA());
-      prettyPrint(this->fileio_->out,(*this->scratch_),"[FOA,POA]");
-      if (!this->isClosedShell_) {
-        *this->scratch_ = (*this->ssPropagator_->fockB())*(*this->POBsav_) - (*this->POBsav_)*(*this->ssPropagator_->fockB());
-        prettyPrint(this->fileio_->out,(*this->scratch_),"[FOB,POB]");
+      scratch =  (*this->ssPropagator_->fockA()) * POAsav; 
+      scratch -= POAsav * (*this->ssPropagator_->fockA());
+
+      prettyPrint(this->fileio_->out,scratch,"[FOA,POA]");
+
+      if (!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
+        scratch =  (*this->ssPropagator_->fockB()) * POBsav; 
+        scratch -= POBsav * (*this->ssPropagator_->fockB());
+
+        prettyPrint(this->fileio_->out,scratch,"[FOB,POB]");
       }
     }
 
 //  Propagate the density matrix
-    *this->POA_ = (*this->uTransA_)*(*this->POA_)*((*this->uTransA_).adjoint());
-    if (!this->isClosedShell_) {
-      *this->POB_ = (*this->uTransB_)*(*this->POB_)*((*this->uTransB_).adjoint());
+//
+    scratch = POA;
+    POA     = uTransA * scratch * uTransA.adjoint();
+
+    if (!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
+      scratch = POB;
+      POB     = uTransB * scratch * uTransB.adjoint();
     }
 
 //  Transform density matrix from orthonormal to AO basis
-    *this->ssPropagator_->densityA() = (*this->oTrans1_)*(*this->POA_)*(*this->oTrans1_);
-    if (!this->isClosedShell_) {
-      *this->ssPropagator_->densityB() = (*this->oTrans1_)*(*this->POB_)*(*this->oTrans1_);
-    }
+    if (this->typeOrtho_ == Lowdin) {
+      // Lowdin 
+      (*this->ssPropagator_->densityA()) = oTrans1 * POA * oTrans1;
 
+      if (!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
+        (*this->ssPropagator_->densityB()) = oTrans1 * POB * oTrans1;
+      }
+    } else if (this->typeOrtho_ == Cholesky) {
+      // Cholesky
+      (*this->ssPropagator_->densityA()) = oTrans1.adjoint() * POA * oTrans1;
+
+      if (!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
+        (*this->ssPropagator_->densityB()) = oTrans1.adjoint() * POB * oTrans1;
+      }
+    }
 //  Advance step
     currentTime_ += this->stepSize_;
     };
   }
+  delete [] this->SCR;
+  delete [] this->REAL_LAPACK_SCR;
 };
 
 } // namespace ChronusQ

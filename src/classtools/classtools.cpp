@@ -145,6 +145,8 @@ void readInput(FileIO * fileio, Molecule * mol, BasisSet * basis, Controls * con
         controls->unitTest = Controls::UnitSCF;
       else if(!readString.compare("RESP")) 
         controls->unitTest = Controls::UnitResp;
+      else if(!readString.compare("RT")) 
+        controls->unitTest = Controls::UnitRT;
       else
         CErr("Unit Test Option: "+readString+" not recognized",fileio->out);
     } else if(!readString.compare("$FIELD")) {
@@ -171,22 +173,22 @@ void readInput(FileIO * fileio, Molecule * mol, BasisSet * basis, Controls * con
         fileio->in >> (controls->rtFreq_);
       } else if(!readString.compare("PHASE")) {
         fileio->in >> (controls->rtPhase_);
+      } else if(!readString.compare("SIGMA")) {
+        fileio->in >> (controls->rtSigma_);
       } else if(!readString.compare("ENVELOPE")) {
         fileio->in>>readString;
         readString=stringupper(readString);
         if(!readString.compare("PW")) {
-          controls->rtEnvelope_ = 1; 
+          controls->rtEnvelope_ = 0; 
         } else if(!readString.compare("LINEAR_RAMP")) {
-          CErr("Real Time Envelope Option: "+readString+" not yet implemented. \n",fileio->out); 
-          controls->rtEnvelope_ = 2;
+          controls->rtEnvelope_ = 1;
         } else if(!readString.compare("GAUSSIAN")) {
-          CErr("Real Time Envelope Option: "+readString+" not yet implemented. \n",fileio->out); 
-          controls->rtEnvelope_ = 3;
+          controls->rtEnvelope_ = 2;
         } else if(!readString.compare("STEP")) {
-          controls->rtEnvelope_ = 4;
+          controls->rtEnvelope_ = 3;
         } else if(!readString.compare("SINE_SQUARE")) {
           CErr("Real Time Envelope Option: "+readString+" not yet implemented. \n",fileio->out); 
-          controls->rtEnvelope_ = 5;
+          controls->rtEnvelope_ = 4;
         } else { 
           CErr("Real Time Envelope Option: "+readString+" not recognized. \n"+
                "Try PW, LINEAR_RAMP, GAUSSIAN, STEP, or SINE_SQUARE",fileio->out); 
@@ -195,11 +197,11 @@ void readInput(FileIO * fileio, Molecule * mol, BasisSet * basis, Controls * con
         fileio->in>>readString;
         readString=stringupper(readString);
         if(!readString.compare("LOWDIN"))
-          controls->rtTypeOrtho = 1;
+          controls->rtTypeOrtho = 0;
         else if(!readString.compare("CHOLESKY"))
-          controls->rtTypeOrtho = 2;
+          controls->rtTypeOrtho = 1;
         else if(!readString.compare("CANONICAL"))
-          controls->rtTypeOrtho = 3;
+          controls->rtTypeOrtho = 2;
         else 
           CErr("Real Time Orthogonalization Option: "+readString+" not recognized. \n"+
                "Try LOWDIN, CHOLESKY, or CANONICAL",fileio->out); 
@@ -232,9 +234,9 @@ void readInput(FileIO * fileio, Molecule * mol, BasisSet * basis, Controls * con
         fileio->in>>readString;
         readString=stringupper(readString);
         if(!readString.compare("EIGEN"))
-          controls->rtMethFormU = 1;
+          controls->rtMethFormU = 0;
         else if(!readString.compare("TAYLOR"))
-          controls->rtMethFormU = 2;
+          controls->rtMethFormU = 1;
         else {
           CErr("Real Time U Matrix / Propagator Option: "+readString+" not recognized. \n"+
                "Try EIGEN or TAYLOR",fileio->out); 
@@ -244,17 +246,20 @@ void readInput(FileIO * fileio, Molecule * mol, BasisSet * basis, Controls * con
       } else {
           CErr("Real Time Option: "+readString+" not recognized. \n"+
                "Valid options: \n"+
-               "\t MAXSTEP:   Maximum number of time steps.    Default = 10 \n"+
-               "\t TIMESTEP:  Size of time steps (au).         Default = 0.05 \n"+
-               "\t EDFIELD:   Electric dipole Ex,Ey,Ez (au).   Default = 0.0 0.0 0.0 \n"+
-               "\t TIME_ON:   Time (fs) field is applied.      Default = 0.0 \n"+ 
-               "\t TIME_OFF:  Time (fs) field is removed.      Default = 10000.0 \n"+ 
-               "\t FREQUENCY: Field frequency (eV).            Default = 0.0 \n"+ 
-               "\t PHASE:     Field phase offset (rad).        Default = 0.0 \n"+ 
-               "\t ENVELOPE:  Type of field envelope function. Default = PW \n"+
-               "\t ORTHO:     Type of orthogonalization.       Default = LOWDIN \n"+
-               "\t INIDEN:    Initial density for system.      Default = SCF \n"+
-               "\t UPROP:     How the propagator is formed.    Default = EIGEN \n"+ 
+               "\t MAXSTEP:   Maximum number of time steps.       Default = 10 \n"+
+               "\t TIMESTEP:  Size of time steps (au).            Default = 0.05 \n"+
+               "\t EDFIELD:   Electric dipole Ex,Ey,Ez (au).      Default = 0.0 0.0 0.0 \n"+
+               "\t TIME_ON:   Time (fs) field is applied.         Default = 0.0 \n"+ 
+               "\t TIME_OFF:  Time (fs) field is removed.         Default = 10000.0 \n"+ 
+               "\t FREQUENCY: Field frequency (eV).               Default = 0.0 \n"+ 
+               "\t PHASE:     Field phase offset (rad).           Default = 0.0 \n"+ 
+               "\t SIGMA:     For Gaussian envelope, this sets    Default = 0.0 \n"+ 
+               "\t              the range of the frequency\n"+ 
+               "\t              (FWHM, in eV)\n"+ 
+               "\t ENVELOPE:  Type of field envelope function.    Default = PW \n"+
+               "\t ORTHO:     Type of orthogonalization.          Default = LOWDIN \n"+
+               "\t INIDEN:    Initial density for system.         Default = SCF \n"+
+               "\t UPROP:     How the propagator is formed.       Default = EIGEN \n"+ 
                "\t DEFAULT:   RT-TDSCF with default settings.\n"+ 
                "\n Note: if you get 'Real Time Option: $RT not recognized',  try '$RT DEFAULT' instead of just '$RT'. \n",fileio->out); 
       
@@ -276,7 +281,8 @@ double traceSymm(RealMatrix* a, RealMatrix* b) {
   return tmpVal;
  };
 
-void printUnitInfo(Controls * controls, SingleSlater<double> * singleSlater, SDResponse<double> * sdResponse){
+void printUnitInfo(Controls * controls, SingleSlater<double> * singleSlater, SDResponse<double> * sdResponse,
+                   RealTime<double> * realTime){
   if(controls->unitTest == Controls::UnitSCF)
     cout << std::setprecision(10) << singleSlater->totalEnergy << "/"
          << std::setprecision(4)
@@ -312,5 +318,61 @@ void printUnitInfo(Controls * controls, SingleSlater<double> * singleSlater, SDR
     }
     cout << endl;
   }
+  else if(controls->unitTest == Controls::UnitRT){
+    cout <<  std::setprecision(4) << (realTime->maxTime())     << "/" 
+         << std::setprecision(10) << (realTime->Energy())      << "/"
+         <<  std::setprecision(6) << (realTime->EDx())         << "/"
+                                  << (realTime->EDy())         << "/"
+                                  << (realTime->EDz())         << "/"
+                                  << (realTime->EDtot())       << endl;
+    }
+}
+
+void printUnitInfo(Controls * controls, SingleSlater<dcomplex> * singleSlater, SDResponse<double> * sdResponse, 
+                   RealTime<dcomplex> * realTime){
+  if(controls->unitTest == Controls::UnitSCF)
+    cout << std::setprecision(10) << singleSlater->totalEnergy << "/"
+         << std::setprecision(4)
+         << (*singleSlater->dipole())(0)/phys.debye << "/"
+         << (*singleSlater->dipole())(1)/phys.debye << "/"
+         << (*singleSlater->dipole())(2)/phys.debye << "/"
+         << (*singleSlater->quadpole())(0,0)*phys.bohr/phys.debye << "/"
+         << (*singleSlater->quadpole())(1,1)*phys.bohr/phys.debye << "/"
+         << (*singleSlater->quadpole())(2,2)*phys.bohr/phys.debye << "/"
+         << (*singleSlater->quadpole())(0,1)*phys.bohr/phys.debye << "/"
+         << (*singleSlater->quadpole())(0,2)*phys.bohr/phys.debye << "/"
+         << (*singleSlater->quadpole())(1,2)*phys.bohr/phys.debye << "/"
+        << (*singleSlater->tracelessQuadpole())(0,0)*phys.bohr/phys.debye << "/"
+        << (*singleSlater->tracelessQuadpole())(1,1)*phys.bohr/phys.debye << "/"
+        << (*singleSlater->tracelessQuadpole())(2,2)*phys.bohr/phys.debye << "/"
+        << (*singleSlater->tracelessQuadpole())(0,1)*phys.bohr/phys.debye << "/"
+        << (*singleSlater->tracelessQuadpole())(0,2)*phys.bohr/phys.debye << "/"
+        << (*singleSlater->tracelessQuadpole())(1,2)*phys.bohr/phys.debye << "/"
+     << (*singleSlater->octpole())(0,0,0)*phys.bohr*phys.bohr/phys.debye << "/"
+     << (*singleSlater->octpole())(1,1,1)*phys.bohr*phys.bohr/phys.debye << "/"
+     << (*singleSlater->octpole())(2,2,2)*phys.bohr*phys.bohr/phys.debye << "/"
+     << (*singleSlater->octpole())(0,1,1)*phys.bohr*phys.bohr/phys.debye << "/"
+     << (*singleSlater->octpole())(0,0,1)*phys.bohr*phys.bohr/phys.debye << "/"
+     << (*singleSlater->octpole())(0,0,2)*phys.bohr*phys.bohr/phys.debye << "/"
+     << (*singleSlater->octpole())(0,2,2)*phys.bohr*phys.bohr/phys.debye << "/"
+     << (*singleSlater->octpole())(1,2,2)*phys.bohr*phys.bohr/phys.debye << "/"
+     << (*singleSlater->octpole())(1,1,2)*phys.bohr*phys.bohr/phys.debye << "/"
+    << (*singleSlater->octpole())(0,1,2)*phys.bohr*phys.bohr/phys.debye << endl;
+  else if(controls->unitTest == Controls::UnitResp){
+    for(auto iSt = 0; iSt < sdResponse->nSek(); iSt++){
+      cout << (*sdResponse->omega())(iSt)*phys.eVPerHartree << "," << (*sdResponse->oscStrength())(0,iSt+1);
+      if(iSt != (sdResponse->nSek() - 1)) cout << "/";
+    }
+    cout << endl;
+  }
+  else if(controls->unitTest == Controls::UnitRT){
+    cout <<  std::setprecision(4) << (realTime->maxTime())     << "/" 
+         << std::setprecision(10) << (realTime->Energy())      << "/"
+         <<  std::setprecision(6) << (realTime->EDx())         << "/"
+                                  << (realTime->EDy())         << "/"
+                                  << (realTime->EDz())         << "/"
+                                  << (realTime->EDtot())       << "/"
+         << endl;
+    }
 }
 } // namespace ChronusQ

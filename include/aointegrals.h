@@ -141,15 +141,15 @@ class AOIntegrals{
 
   inline void checkWorkers(){
     if(this->fileio_  == NULL) 
-      CErr("Fatal: Must initialize SingleSlater with FileIO Object");
+      CErr("Fatal: Must initialize AOIntegrals with FileIO Object");
     if(this->basisSet_ == NULL) 
-      CErr("Fatal: Must initialize SingleSlater with BasisSet Object",
+      CErr("Fatal: Must initialize AOIntegrals with BasisSet Object",
            this->fileio_->out);
     if(this->molecule_ == NULL) 
-      CErr("Fatal: Must initialize SingleSlater with Molecule Object",
+      CErr("Fatal: Must initialize AOIntegrals with Molecule Object",
            this->fileio_->out);
     if(this->controls_ == NULL) 
-      CErr("Fatal: Must initialize SingleSlater with Controls Object",
+      CErr("Fatal: Must initialize AOIntegrals with Controls Object",
            this->fileio_->out);
   }
 
@@ -306,26 +306,26 @@ public:
   void computeAORII();
   void computeAORIS();
   void transformAORII();
-  template<typename T> void twoEContractDirect(bool,bool,bool,bool,const T&,T&,const T&,T&);
-  template<typename T> void twoEContractN4(bool,bool,bool,bool,const T &,T &,const T &, T &);
-  template<typename T> void twoEContractDF(bool,bool,const T &,T &,const T &, T &);
+  template<typename T> void twoEContractDirect(bool,bool,bool,bool,bool,const T&,T&,const T&,T&);
+  template<typename T> void twoEContractN4(bool,bool,bool,bool,bool,const T &,T &,const T &, T &);
+  template<typename T> void twoEContractDF(bool,bool,bool,const T &,T &,const T &, T &);
   template<typename T>
-    void multTwoEContractDirect(int, bool,bool,bool,bool,const std::vector<T> &,std::vector<T> &,
+    void multTwoEContractDirect(int, bool,bool,bool,bool,bool,const std::vector<T> &,std::vector<T> &,
                                 const std::vector<T> &,std::vector<T> &);
   template<typename T> 
-    void multTwoEContractN4(int, bool,bool,const std::vector<T> &,std::vector<T> &,
+    void multTwoEContractN4(int, bool,bool,bool,const std::vector<T> &,std::vector<T> &,
                             const std::vector<T> &,std::vector<T> &);
   template<typename T> 
-    void multTwoEContractDF(int, bool,bool,const std::vector<T> &,std::vector<T> &,
+    void multTwoEContractDF(int, bool,bool,bool,const std::vector<T> &,std::vector<T> &,
                             const std::vector<T> &,std::vector<T> &);
   template<typename TMat,typename T> 
-    void Restricted34Contract(TMat&, const TMat &, int,int,int,int,int,int,int,int,
+    void Restricted34Contract(bool,TMat&, const TMat &, int,int,int,int,int,int,int,int,
                                  const T*,T);
   template<typename TMat,typename T> 
-    void UnRestricted34Contract(TMat&, const TMat &, TMat&, const TMat &, const TMat &, 
+    void UnRestricted34Contract(bool,TMat&, const TMat &, TMat&, const TMat &, const TMat &, 
                                    int,int,int,int,int,int,int,int,const T*,T);
   template<typename TMat,typename T>
-    void Spinor34Contract(TMat&,const TMat&,int,int,int,int,int,int,int,int,const T*,T);
+    void Spinor34Contract(bool,TMat&,const TMat&,int,int,int,int,int,int,int,int,const T*,T);
   template<typename TMat,typename T> 
     void General24CouContract(TMat&, const TMat &, int,int,int,int,int,int,int,int,
                               const T*,T);

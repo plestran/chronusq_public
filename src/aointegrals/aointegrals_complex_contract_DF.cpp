@@ -26,7 +26,7 @@
 #include <aointegrals.h>
 namespace ChronusQ{
   template<>
-  void AOIntegrals::twoEContractDF(bool RHF, bool doFock, const ComplexMatrix &XAlpha, ComplexMatrix &AXAlpha,
+  void AOIntegrals::twoEContractDF(bool RHF, bool KS, bool doFock, const ComplexMatrix &XAlpha, ComplexMatrix &AXAlpha,
                                    const ComplexMatrix &XBeta, ComplexMatrix &AXBeta) {
     CErr("No Density Fitting Contraction for Complex Matricies Implemented");
   }

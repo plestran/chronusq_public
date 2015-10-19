@@ -55,8 +55,8 @@ void SingleSlater<double>::formCoulomb(){
   this->aointegrals_->CoulD = finish - start; 
   this->fileio_->out<<"\nCPU time for building the Coulomb matrix:  "<< this->aointegrals_->CoulD.count() <<" seconds."<<endl;
 
-//if(this->controls_->printLevel>=2) this->coulombA_->printAll(5,this->fileio_->out);
-  if(this->controls_->printLevel>=2) prettyPrint(this->fileio_->out,(*this->coulombA_),"Alpha Coulomb");
+//if(this->printLevel_ >= 2) this->coulombA_->printAll(5,this->fileio_->out);
+  if(this->printLevel_ >= 2) prettyPrint(this->fileio_->out,(*this->coulombA_),"Alpha Coulomb");
   this->haveCoulomb = true;
 };
 //----------------------------//
@@ -89,8 +89,8 @@ void SingleSlater<double>::formExchange(){
   this->aointegrals_->ExchD = finish - start; 
   this->fileio_->out<<"\nCPU time for building the Exchange matrix:  "<< this->aointegrals_->ExchD.count() <<" seconds."<<endl;
 
-//if(this->controls_->printLevel>=2) this->exchangeA_->printAll(5,this->fileio_->out);
-  if(this->controls_->printLevel>=2) prettyPrint(this->fileio_->out,(*this->exchangeA_),"Alpha Exchange");
+//if(this->printLevel_ >= 2) this->exchangeA_->printAll(5,this->fileio_->out);
+  if(this->printLevel_ >= 2) prettyPrint(this->fileio_->out,(*this->exchangeA_),"Alpha Exchange");
 
   this->haveExchange = true;
 };

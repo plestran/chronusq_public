@@ -21,6 +21,8 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setRef"          , &SingleSlater<double>::setRef                 )
     .def("setNTCS"         , &SingleSlater<double>::setNTCS                )
     .def("setMaxMultipole" , &SingleSlater<double>::setMaxMultipole        )
+    .def("printLevel"      , &SingleSlater<double>::printLevel             )
+    .def("setPrintLevel"   , &SingleSlater<double>::setPrintLevel          )
 
     .def("Ref"             , &SingleSlater<double>::Ref                    )
     .def("nTCS"            , &SingleSlater<double>::nTCS                   ) 
@@ -41,21 +43,23 @@ BOOST_PYTHON_MODULE(libpythonapi){
   ;
 
   class_<Molecule,boost::noncopyable>("Molecule",init<>())
-    .def("printInfo", &Molecule::Wrapper_printInfo)
-    .def("alloc"    , &Molecule::Wrapper_alloc    )
-    .def("setCharge", &Molecule::setCharge        )
-    .def("setMultip", &Molecule::setMultip        )
-    .def("setNAtoms", &Molecule::setNAtoms        )
-    .def("setIndex",  &Molecule::setIndex         )
-    .def("setCart",   &Molecule::setCart          )
-    .def("computeRij",&Molecule::computeRij       )
-    .def("toCOM",     &Molecule::toCOM            )
-    .def("computeI",  &Molecule::computeI         )
-    .def("setNTotalE",&Molecule::setNTotalE       )
-    .def("convBohr",  &Molecule::convBohr         )
-    .def("computeNucRep", &Molecule::computeNucRep)
-    .def("energyNuclei",  &Molecule::energyNuclei )
-    .def("multip"      ,  &Molecule::multip       )
+    .def("printInfo",     &Molecule::Wrapper_printInfo)
+    .def("alloc"    ,     &Molecule::Wrapper_alloc    )
+    .def("setCharge",     &Molecule::setCharge        )
+    .def("setMultip",     &Molecule::setMultip        )
+    .def("setNAtoms",     &Molecule::setNAtoms        )
+    .def("setIndex",      &Molecule::setIndex         )
+    .def("setCart",       &Molecule::setCart          )
+    .def("setPrintLevel", &Molecule::setPrintLevel    )
+    .def("setNTotalE",    &Molecule::setNTotalE       )
+    .def("printLevel",    &Molecule::printLevel       )
+    .def("energyNuclei",  &Molecule::energyNuclei     )
+    .def("multip"      ,  &Molecule::multip           )
+    .def("toCOM",         &Molecule::toCOM            )
+    .def("convBohr",      &Molecule::convBohr         )
+    .def("computeNucRep", &Molecule::computeNucRep    )
+    .def("computeI",      &Molecule::computeI         )
+    .def("computeRij",    &Molecule::computeRij       )
   ;
 
   class_<BasisSet,boost::noncopyable>("BasisSet",init<>())
@@ -66,6 +70,8 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("constructLocal", &BasisSet::Wrapper_constructLocal ) 
     .def("makeMaps"     ,  &BasisSet::Wrapper_makeMaps       )
     .def("renormShells" ,  &BasisSet::renormShells           )
+    .def("printLevel"   ,  &BasisSet::printLevel             )
+    .def("setPrintLevel",  &BasisSet::setPrintLevel          )
   ;
 
   class_<Controls,boost::noncopyable>("Controls",init<>())
@@ -92,6 +98,48 @@ BOOST_PYTHON_MODULE(libpythonapi){
     
     .def_readwrite("allocERI", &AOIntegrals::allocERI           )
     .def_readwrite("doDF"    , &AOIntegrals::doDF               )
+  ;
+
+  class_<RealTime<double>,boost::noncopyable>("RealTime_double",init<>())
+    .def("communicate"  , &RealTime<double>::communicate  )
+    .def("initMeta"     , &RealTime<double>::initMeta     )
+    .def("alloc"        , &RealTime<double>::alloc        )
+    .def("iniDensity"   , &RealTime<double>::iniDensity   )
+    .def("doPropagation", &RealTime<double>::doPropagation)
+    .def("setMaxSteps"  , &RealTime<double>::setMaxSteps  ) 
+    .def("setStepSize"  , &RealTime<double>::setStepSize  )
+    .def("setOrthoTyp"  , &RealTime<double>::setOrthoTyp  )
+    .def("setInitDen"   , &RealTime<double>::setInitDen   )
+    .def("setSwapMOA"   , &RealTime<double>::setSwapMOA   )
+    .def("setSwapMOB"   , &RealTime<double>::setSwapMOB   )
+    .def("setFormU"     , &RealTime<double>::setFormU     )
+    .def("setEnvelope"  , &RealTime<double>::setEnvelope  )
+    .def("setFieldAmp"  , &RealTime<double>::Wrapper_setFieldAmp  )
+    .def("setTOn"       , &RealTime<double>::setTOn       )
+    .def("setTOff"      , &RealTime<double>::setTOff      )
+    .def("setFreq"      , &RealTime<double>::setFreq      )
+    .def("setPhase"     , &RealTime<double>::setPhase     )
+    .def("setSigma"     , &RealTime<double>::setSigma     )
+    .def("printRT"      , &RealTime<double>::printRT      )
+  ;
+
+  enum_<RealTime<double>::ORTHO>("RealTime_ORTHO"   )
+    .value("Lowdin"   , RealTime<double>::Lowdin    )
+    .value("Cholesky" , RealTime<double>::Cholesky  )
+    .value("Canonical", RealTime<double>::Canonical )
+  ;
+
+  enum_<RealTime<double>::FORM_U>("RealTime_FORM_U"    )
+    .value("EigenDecomp", RealTime<double>::EigenDecomp)
+    .value("Taylor"     , RealTime<double>::Taylor     )
+  ;
+
+  enum_<RealTime<double>::ENVELOPE>("RealTime_ENVELOPE")
+    .value("Constant", RealTime<double>::Constant      )
+    .value("LinRamp" , RealTime<double>::LinRamp       )
+    .value("Gaussian", RealTime<double>::Gaussian      )
+    .value("Step"    , RealTime<double>::Step          )
+    .value("SinSq"   , RealTime<double>::SinSq         )
   ;
 
   def("readInput",       ChronusQ::Wrapper_readInput);

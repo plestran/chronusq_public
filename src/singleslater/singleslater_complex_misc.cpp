@@ -44,12 +44,16 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<dcomplex> * other){
     this->haveMO	    = true;
     this->havePT      = true;
     this->isClosedShell = other->isClosedShell;
+    this->printLevel_ = other->printLevel_;
+
+    auto NTCSxNBASIS = this->nBasis_*this->nTCS_;
+
     // Hardcoded for Libint route
     this->densityA_           = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(*other->densityA_));
     this->fockA_              = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(*other->fockA_));
     this->moA_                = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(*other->moA_));
     this->PTA_                = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(*other->PTA_));
-    if(this->Ref_ != RHF){
+    if(this->Ref_ != isClosedShell && this->Ref_ != TCS ){
       this->densityB_           = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(*other->densityB_));
       this->fockB_              = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(*other->fockB_));
       this->moB_                = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(*other->moB_));
@@ -86,20 +90,24 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other){
     this->haveMO	    = true;
     this->havePT      = true;
     this->isClosedShell = other->isClosedShell;
+    this->printLevel_ = other->printLevel();
+
+    auto NTCSxNBASIS = this->nBasis_*this->nTCS_;
+
     // Hardcoded for Libint route
-    this->densityA_           = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-    this->fockA_              = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-    this->moA_                = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-    this->PTA_                = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
+    this->densityA_           = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+    this->fockA_              = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+    this->moA_                = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+    this->PTA_                = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
     this->densityA_->real()    = *other->densityA();
     this->fockA_->real()       = *other->fockA();
     this->moA_->real()         = *other->moA();
     this->PTA_->real()         = *other->PTA();
-    if(this->Ref_ != RHF){
-      this->densityB_           = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-      this->fockB_              = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-      this->moB_                = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
-      this->PTB_                = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(this->nBasis_,this->nBasis_));
+    if(this->Ref_ != isClosedShell && this->Ref_ != TCS ){
+      this->densityB_           = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+      this->fockB_              = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+      this->moB_                = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
+      this->PTB_                = std::unique_ptr<ComplexMatrix>(new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS));
       this->densityB_->real()    = *other->densityB();
       this->fockB_->real()       = *other->fockB();
       this->moB_->real()         = *other->moB();

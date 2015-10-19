@@ -6,13 +6,6 @@ import libpythonapi as chronusQ
 from parseMolecule import parseMolecule
 from parseQM import parseQM
 
-class CQError(Exception):
-  def __init__(self,msg):
-    self.msg = msg
-  def __str__(self):
-    return msg
-
-
 def genSecDict(parser,section):
   dict1 = {}
   opts  = parser.options(section)
@@ -32,25 +25,17 @@ def parseInput(workers,iFileName):
 
   secDict = {}
 
-  knownKeywords  = [ "molecule", "qm", "misc"  ]
+  knownSections  = [ "molecule", "qm", "misc","rt"  ]
   parseFunctions = { "molecule":parseMolecule ,
                      "qm":parseQM             ,
                      "misc":parseMisc          }
 
   for section in inputParser.sections():
     secStr = str(section).lower()
-    if secStr not in knownKeywords:
+    if secStr not in knownSections:
       print "Keyword " + secStr + " not recognized"
       continue
     secDict[secStr] = genSecDict(inputParser,section) 
 
-
-
-# print secDict['molecule']['charge']
-# print secDict['molecule']['mult']
-# print secDict['molecule']['geom']
-# for i in secDict: 
-#   parseFunctions[i](workers,secDict[i])
-
   parseFunctions["molecule"](workers,secDict["molecule"])
-  parseFunctions["qm"](workers,secDict["qm"])
+  parseFunctions["qm"](workers,secDict)
