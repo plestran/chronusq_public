@@ -94,12 +94,12 @@ void RealTime<dcomplex>::iniDensity() {
     for(auto i = 0; i < NTCSxNBASIS; i++){ S.col(i) /= W[i]; }
     oTrans1.real() = S * V.adjoint();
 
-    if(this->controls_->printLevel>3) {
+    if(this->printLevel_>3) {
       prettyPrint(this->fileio_->out,oTrans1,"S^(-1/2)");
       prettyPrint(this->fileio_->out,oTrans2,"S^(1/2)");
     }
   } else if (this->typeOrtho_ == Cholesky) {  
-    
+
     char UPLO = 'L';
     int  INFO;
 
@@ -154,7 +154,7 @@ void RealTime<dcomplex>::iniDensity() {
       this->fileio_->out << endl << "Alpha MOs swapped: "
                          << iA << " <-> " << jA << endl;
 
-      if(this->controls_->printLevel > 3) {
+      if(this->printLevel_ > 3) {
         prettyPrint(this->fileio_->out,
                     (*this->ssPropagator_->moA()),"Initial Alpha MO");
       }
@@ -170,7 +170,7 @@ void RealTime<dcomplex>::iniDensity() {
       this->fileio_->out << endl << "Beta MOs swapped: "
                          << iB << " <-> " << jB << endl;
 
-      if(this->controls_->printLevel > 3) {
+      if(this->printLevel_ > 3) {
         prettyPrint(this->fileio_->out,
                     (*this->ssPropagator_->moB()),"Initial Beta MO");
       }
@@ -183,7 +183,7 @@ void RealTime<dcomplex>::iniDensity() {
     // Transform the ground state MO to orthonormal basis
     initMOA.setZero();
     initMOA = *this->groundState_->moA();
-    if (this->typeOrtho_ == 1) {
+    if (this->typeOrtho_ == Lowdin) {
       // Lowdin
       initMOA = oTrans2 * initMOA;
       if(!this->isClosedShell_ && this->Ref_ != SingleSlater<dcomplex>::TCS) {
@@ -191,7 +191,7 @@ void RealTime<dcomplex>::iniDensity() {
         initMOB = *this->groundState_->moB();
         initMOB = oTrans2 * initMOB;
       }
-    } else if (this->typeOrtho_ == 2) {
+    } else if (this->typeOrtho_ == Cholesky) {
       // Cholesky
       initMOA = oTrans2.adjoint() * initMOA;
       if(!this->isClosedShell_ && this->Ref_ != SingleSlater<dcomplex>::TCS) {
@@ -213,7 +213,7 @@ void RealTime<dcomplex>::iniDensity() {
 
   if (!inOrthoBas) { 
 // Transform density from AO to orthonormal basis
-    if (this->typeOrtho_ == 1) {
+    if (this->typeOrtho_ == Lowdin) {
       // Lowdin 
       POA    = oTrans2 * (*this->ssPropagator_->densityA()) * oTrans2;
 
@@ -222,7 +222,7 @@ void RealTime<dcomplex>::iniDensity() {
         POB    = oTrans2 * (*this->ssPropagator_->densityB()) * oTrans2;
         POBsav = POB;
       }
-    } else if (this->typeOrtho_ == 2) {
+    } else if (this->typeOrtho_ == Cholesky) {
       // Cholesky
       POA    = oTrans2.adjoint() * (*this->ssPropagator_->densityA()) * oTrans2;
 
@@ -234,13 +234,13 @@ void RealTime<dcomplex>::iniDensity() {
     }
   } else { 
 // Transform density from orthonormal to AO basis
-    if (this->typeOrtho_ == 1) {
+    if (this->typeOrtho_ == Lowdin) {
       // Lowdin
       (*this->ssPropagator_->densityA()) = oTrans1 * POAsav * oTrans1;
 
       if(!this->isClosedShell_ && this->Ref_ != SingleSlater<dcomplex>::TCS) 
         (*this->ssPropagator_->densityB()) = oTrans1 * POB * oTrans1;
-    } else if (this->typeOrtho_ == 2) {
+    } else if (this->typeOrtho_ == Cholesky) {
       // Cholesky
       (*this->ssPropagator_->densityA()) = oTrans1.adjoint() * POAsav * oTrans1;
 
@@ -395,7 +395,7 @@ void RealTime<dcomplex>::doPropagation() {
     }
 
 //  Print 
-    if(this->controls_->printLevel >= 1) {
+    if(this->printLevel_ >= 1) {
       //prettyPrintComplex(this->fileio_->out,(*this->ssPropagator_->densityA()),"Alpha AO Density");
       //if(!this->isClosedShell_ && this->Ref_ != SingleSlater<dcomplex>::TCS) prettyPrintComplex(this->fileio_->out,(*this->ssPropagator_->densityB()),"Beta AO Density");
 
@@ -408,7 +408,7 @@ void RealTime<dcomplex>::doPropagation() {
     this->printRT();
 
 //  Transform Fock from AO to orthonormal basis
-    if (this->typeOrtho_ == 1) {
+    if (this->typeOrtho_ == Lowdin) {
       // Lowdin 
       scratch = (*this->ssPropagator_->fockA());
       (*this->ssPropagator_->fockA()) = oTrans1 * scratch * oTrans1;
@@ -417,7 +417,7 @@ void RealTime<dcomplex>::doPropagation() {
         scratch = (*this->ssPropagator_->fockB());
         (*this->ssPropagator_->fockB()) = oTrans1 * scratch * oTrans1;
       }
-    } else if (this->typeOrtho_ == 2) {
+    } else if (this->typeOrtho_ == Cholesky) {
       // Cholesky
       scratch = (*this->ssPropagator_->fockA());
       (*this->ssPropagator_->fockA()) = oTrans1 * scratch * oTrans1.adjoint();
@@ -457,14 +457,14 @@ void RealTime<dcomplex>::doPropagation() {
     }
 
 //  Transform density matrix from orthonormal to AO basis
-    if (this->typeOrtho_ == 1) {
+    if (this->typeOrtho_ == Lowdin) {
       // Lowdin 
       (*this->ssPropagator_->densityA()) = oTrans1 * POA * oTrans1;
 
       if (!this->isClosedShell_ && this->Ref_ != SingleSlater<dcomplex>::TCS) {
         (*this->ssPropagator_->densityB()) = oTrans1 * POB * oTrans1;
       }
-    } else if (this->typeOrtho_ == 2) {
+    } else if (this->typeOrtho_ == Cholesky) {
       // Cholesky
       (*this->ssPropagator_->densityA()) = oTrans1.adjoint() * POA * oTrans1;
 

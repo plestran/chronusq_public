@@ -145,6 +145,8 @@ void readInput(FileIO * fileio, Molecule * mol, BasisSet * basis, Controls * con
         controls->unitTest = Controls::UnitSCF;
       else if(!readString.compare("RESP")) 
         controls->unitTest = Controls::UnitResp;
+      else if(!readString.compare("RT")) 
+        controls->unitTest = Controls::UnitRT;
       else
         CErr("Unit Test Option: "+readString+" not recognized",fileio->out);
     } else if(!readString.compare("$FIELD")) {
@@ -279,7 +281,8 @@ double traceSymm(RealMatrix* a, RealMatrix* b) {
   return tmpVal;
  };
 
-void printUnitInfo(Controls * controls, SingleSlater<double> * singleSlater, SDResponse<double> * sdResponse){
+void printUnitInfo(Controls * controls, SingleSlater<double> * singleSlater, SDResponse<double> * sdResponse,
+                   RealTime<double> * realTime){
   if(controls->unitTest == Controls::UnitSCF)
     cout << std::setprecision(10) << singleSlater->totalEnergy << "/"
          << std::setprecision(4)
@@ -315,9 +318,18 @@ void printUnitInfo(Controls * controls, SingleSlater<double> * singleSlater, SDR
     }
     cout << endl;
   }
+  else if(controls->unitTest == Controls::UnitRT){
+    cout <<  std::setprecision(4) << (realTime->maxTime())     << "/" 
+         << std::setprecision(10) << (realTime->Energy())      << "/"
+         <<  std::setprecision(6) << (realTime->EDx())         << "/"
+                                  << (realTime->EDy())         << "/"
+                                  << (realTime->EDz())         << "/"
+                                  << (realTime->EDtot())       << endl;
+    }
 }
 
-void printUnitInfo(Controls * controls, SingleSlater<dcomplex> * singleSlater, SDResponse<double> * sdResponse){
+void printUnitInfo(Controls * controls, SingleSlater<dcomplex> * singleSlater, SDResponse<double> * sdResponse, 
+                   RealTime<dcomplex> * realTime){
   if(controls->unitTest == Controls::UnitSCF)
     cout << std::setprecision(10) << singleSlater->totalEnergy << "/"
          << std::setprecision(4)
@@ -353,5 +365,14 @@ void printUnitInfo(Controls * controls, SingleSlater<dcomplex> * singleSlater, S
     }
     cout << endl;
   }
+  else if(controls->unitTest == Controls::UnitRT){
+    cout <<  std::setprecision(4) << (realTime->maxTime())     << "/" 
+         << std::setprecision(10) << (realTime->Energy())      << "/"
+         <<  std::setprecision(6) << (realTime->EDx())         << "/"
+                                  << (realTime->EDy())         << "/"
+                                  << (realTime->EDz())         << "/"
+                                  << (realTime->EDtot())       << "/"
+         << endl;
+    }
 }
 } // namespace ChronusQ

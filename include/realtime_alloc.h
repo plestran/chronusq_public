@@ -47,6 +47,7 @@ void RealTime<T>::iniRealTime(FileIO *fileio, Controls *controls,
   this->Freq_          = this->controls_->rtFreq_;
   this->Phase_          = this->controls_->rtPhase_;
   this->Sigma_          = this->controls_->rtSigma_;
+  this->printLevel_     = this->controls_->printLevel;
 
   this->alloc();
 };

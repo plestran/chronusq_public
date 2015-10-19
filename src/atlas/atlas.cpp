@@ -156,8 +156,10 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
       sdResponseComplex->IterativeRPA();
     }
   }
-  if(controls->doUnit && !controls->doComplex) printUnitInfo(controls.get(),hartreeFockReal.get(),sdResponseReal.get());
-  if(controls->doUnit && controls->doComplex) printUnitInfo(controls.get(),hartreeFockComplex.get(),sdResponseReal.get());
+/*
+  if(controls->doUnit && !controls->doComplex) printUnitInfo(controls.get(),hartreeFockReal.get(),sdResponseReal.get(),realtimeReal.get());
+  if(controls->doUnit && controls->doComplex) printUnitInfo(controls.get(),hartreeFockComplex.get(),sdResponseReal.get(),realtimeComplex.get());
+*/
 
 // REAL-TIME TD-SCF 
   
@@ -175,6 +177,10 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
       realtimeComplex->doPropagation();
     }
   }
+  if(controls->doUnit && !controls->doComplex) printUnitInfo(controls.get(),hartreeFockReal.get(),sdResponseReal.get(),realtimeReal.get());
+  if(controls->doUnit && controls->doComplex) printUnitInfo(controls.get(),hartreeFockComplex.get(),sdResponseReal.get(),realtimeComplex.get());
+
+
 
   // Cleanup Libint env
 #ifdef USE_LIBINT

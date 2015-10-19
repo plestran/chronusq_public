@@ -440,6 +440,11 @@ test0081_smp_direct.inp      SCF    SP/cc-pVDZ  Serial DField SCF - In-Core Inte
 #test0084_smp_direct.inp      SCF    ??/cc-pVDZ  Serial DField SCF - In-Core Integrals
 #test0084_smp_denfit.inp      SCF    ??/cc-pVDZ  Serial DField SCF - RI Integrals (6D)
 
+** test0100- realtime SCF
+#test0100_serial_incore.inp   RT     O2/6-31G Serial RT - In-Core Integrals 
+#test0100_serial_direct.inp   RT     O2/6-31G Serial RT - Direct Integrals 
+#test0100_smp_incore.inp      RT     O2/6-31G SMP    RT - In-Core Integrals 
+#test0100_smp_direct.inp      RT     O2/6-31G SMP    RT - Direct Integrals 
 
 ** test0666- complex SCF**
 test0666_serial_incore.inp   SCF    O2/STO-3G  Serial SCF = In-Core Integrals 
