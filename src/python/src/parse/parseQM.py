@@ -103,6 +103,12 @@ def parseRT(workers,settings):
 # knownKeywords = requiredKeywords + optionalKeywords
 
 # reqMap = {}
+
+  if workers['CQSingleSlater'] == workers['CQSingleSlaterDouble']:
+    workers['CQRealTime'] = workers['CQRealTimeDouble']
+  else:
+    workers['CQRealTime'] = workers['CQRealTimeComplex']
+
   optMap = {   'MAXSTEP':workers['CQRealTime'].setMaxSteps ,
               'TIMESTEP':workers['CQRealTime'].setStepSize ,
                'EDFIELD':workers['CQRealTime'].setFieldAmp ,

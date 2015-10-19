@@ -25,7 +25,7 @@ workers = {"CQMolecule":mol,
            "CQControls":controls,
            "CQAOIntegrals":aoints,
            "CQSingleSlaterDouble":hf_double,
-           "CQRealTime":rt_double,
+           "CQRealTimeDouble":rt_double,
            "CQFileIO":out}
 
 

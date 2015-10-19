@@ -6,20 +6,20 @@ def communicate(workers):
     workers["CQMolecule"], workers["CQBasisSet"], workers["CQFileIO"], 
     workers["CQControls"]
   )
-  workers["CQSingleSlaterDouble"].communicate(
+  workers["CQSingleSlater"].communicate(
     workers["CQMolecule"], workers["CQBasisSet"], workers["CQAOIntegrals"],
     workers["CQFileIO"], workers["CQControls"]
   )
   workers["CQRealTime"].communicate(workers["CQFileIO"],workers["CQControls"],
-    workers["CQAOIntegrals"],workers["CQSingleSlaterDouble"])
+    workers["CQAOIntegrals"],workers["CQSingleSlater"])
 
 def initialize(workers):
   # Set Up AOIntegrals Metadata
   workers["CQAOIntegrals"].initMeta()
 
   # Set up Wavefunction Information
-  workers["CQSingleSlaterDouble"].initMeta()
-  workers["CQSingleSlaterDouble"].genMethString()
+  workers["CQSingleSlater"].initMeta()
+  workers["CQSingleSlater"].genMethString()
 
   # RT
   
@@ -28,7 +28,7 @@ def alloc(workers):
   workers["CQAOIntegrals"].alloc()
 
   # Allocate Space for Wavefunction Information
-  workers["CQSingleSlaterDouble"].alloc()
+  workers["CQSingleSlater"].alloc()
 
   # RT
 
@@ -40,12 +40,12 @@ def runSCF(workers):
   workers["CQMolecule"].printInfo(workers["CQFileIO"])
   workers["CQBasisSet"].printInfo();
 
-  workers["CQSingleSlaterDouble"].formGuess()
-  workers["CQSingleSlaterDouble"].formFock()
-  workers["CQSingleSlaterDouble"].computeEnergy()
-  workers["CQSingleSlaterDouble"].SCF()
-  workers["CQSingleSlaterDouble"].computeMultipole()
-  workers["CQSingleSlaterDouble"].printMultipole()
+  workers["CQSingleSlater"].formGuess()
+  workers["CQSingleSlater"].formFock()
+  workers["CQSingleSlater"].computeEnergy()
+  workers["CQSingleSlater"].SCF()
+  workers["CQSingleSlater"].computeMultipole()
+  workers["CQSingleSlater"].printMultipole()
   workers["CQRealTime"].initMeta()
   workers["CQRealTime"].alloc()
   workers["CQRealTime"].iniDensity()
