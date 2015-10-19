@@ -75,25 +75,33 @@ def parseQM(workers,secDict):
 #
 def handleReference(workers,ref):
   mult = workers["CQMolecule"].multip()
-  if ref in ('hf'):
+  ref = ref.split()
+  if 'complex' in ref:
+    workers["CQSingleSlater"] = workers["CQSingleSlaterComplex"]
+  else:
+    workers["CQSingleSlater"] = workers["CQSingleSlaterDouble"]
+
+  print workers["CQSingleSlater"]
+  print workers["CQSingleSlaterDouble"]
+  if 'hf' in ref:
     if mult == 1:
-      workers["CQSingleSlaterDouble"].setRef(chronusQ.Reference.RHF)
-      workers["CQSingleSlaterDouble"].isClosedShell = True
+      workers["CQSingleSlater"].setRef(chronusQ.Reference.RHF)
+      workers["CQSingleSlater"].isClosedShell = True
     else:
-      workers["CQSingleSlaterDouble"].setRef(chronusQ.Reference.UHF)
-  elif ref in ('rhf'):
-    workers["CQSingleSlaterDouble"].setRef(chronusQ.Reference.RHF)
-    workers["CQSingleSlaterDouble"].isClosedShell = True
-  elif ref in ('uhf'):
-    workers["CQSingleSlaterDouble"].setRef(chronusQ.Reference.UHF)
-  elif ref in ('cuhf'):
-    workers["CQSingleSlaterDouble"].setRef(chronusQ.Reference.CUHF)
-  elif ref in ('ghf'):
-    workers["CQSingleSlaterDouble"].setRef(chronusQ.Reference.TCS)
+      workers["CQSingleSlater"].setRef(chronusQ.Reference.UHF)
+  elif 'rhf' in ref:
+    workers["CQSingleSlater"].setRef(chronusQ.Reference.RHF)
+    workers["CQSingleSlater"].isClosedShell = True
+  elif 'uhf' in ref:
+    workers["CQSingleSlater"].setRef(chronusQ.Reference.UHF)
+  elif 'cuhf' in ref:
+    workers["CQSingleSlater"].setRef(chronusQ.Reference.CUHF)
+  elif 'ghf' in ref:
+    workers["CQSingleSlater"].setRef(chronusQ.Reference.TCS)
 
   TCMethods = [chronusQ.Reference.TCS, chronusQ.Reference.GKS]
-  if workers["CQSingleSlaterDouble"].Ref() in TCMethods:
-    workers["CQSingleSlaterDouble"].setNTCS(2)
+  if workers["CQSingleSlater"].Ref() in TCMethods:
+    workers["CQSingleSlater"].setNTCS(2)
 
 def parseRT(workers,settings):
 # requiredKeywords = []

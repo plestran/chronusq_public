@@ -13,8 +13,9 @@ basisSet   = chronusQ.BasisSet()
 DFbasisSet = chronusQ.BasisSet()
 controls   = chronusQ.Controls()
 aoints     = chronusQ.AOIntegrals()
-hf         = chronusQ.SingleSlater_double()
-rt         = chronusQ.RealTime_double()
+
+hf_double  = chronusQ.SingleSlater_double()
+rt_double  = chronusQ.RealTime_double()
 
 out        = chronusQ.FileIO(fname)
 
@@ -23,8 +24,8 @@ workers = {"CQMolecule":mol,
            "CQDFBasisSet":DFbasisSet,
            "CQControls":controls,
            "CQAOIntegrals":aoints,
-           "CQSingleSlaterDouble":hf,
-           "CQRealTime":rt,
+           "CQSingleSlaterDouble":hf_double,
+           "CQRealTime":rt_double,
            "CQFileIO":out}
 
 
