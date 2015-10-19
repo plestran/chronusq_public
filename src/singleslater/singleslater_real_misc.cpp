@@ -182,9 +182,21 @@ void SingleSlater<double>::computeEnergy(){
 */
   this->energyOneE = (*this->aointegrals_->oneE_).frobInner(this->densityA_->conjugate());
   this->energyTwoE = 0.5*(*this->PTA_).frobInner(this->densityA_->conjugate());
+  if(this->isDFT) {
+    cout << "Density Matrix "<<endl;
+    cout << (*this->densityA_) <<endl;
+    cout <<endl;
+    cout << "OneE " << this->energyOneE <<endl;
+    cout << "1/2 Coul " << this->energyTwoE <<endl;
+    cout << "Ex " << (*this->vXCA_).frobInner(this->densityA_->conjugate()) <<endl;
+    }
+  if(this->isDFT) this->energyTwoE += (*this->vXCA_).frobInner(this->densityA_->conjugate());
+  if(this->isDFT) cout << "1/2 Coul + Ex " << this->energyTwoE <<endl;
   if(!this->isClosedShell && this->Ref_ != TCS){
     this->energyOneE += (*this->aointegrals_->oneE_).frobInner(this->densityB_->conjugate());
     this->energyTwoE += 0.5*(*this->PTB_).frobInner(this->densityB_->conjugate());
+    if(this->isDFT) this->energyTwoE += (*this->vXCB_).frobInner(this->densityB_->conjugate());
+
   }
 
 

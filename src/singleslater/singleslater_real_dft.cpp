@@ -33,7 +33,7 @@ template<>
 void SingleSlater<double>::formVXC(){
     int nAtom    = this->molecule_->nAtoms();    // Number of Atoms
     int nRad     = 100;                          // Number of Radial grid points for each center
-    int nAng     = 194;                          // Number of Angular grid points for each center (only certain values are allowed - see grid.h)
+    int nAng     = 302;                          // Number of Angular grid points for each center (only certain values are allowed - see grid.h)
     int npts     = nRad*nAng;                    // Total Number of grid point for each center
     double weight= 0.0;                            
     double Cx = -(3.0/4.0)*(std::pow((3.0/math.pi),(1.0/3.0)));    //TF LDA Prefactor
