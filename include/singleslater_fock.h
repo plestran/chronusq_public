@@ -65,7 +65,7 @@ void SingleSlater<T>::formFock(){
 //  this->basisset_->makeMapSh2Bf(this->nTCS_);
 //}
 // Form Vxc for DFT
-  if(this->controls_->DFT) this->formVXC();
+  if(this->isDFT) this->formVXC();
   this->fockA_->setZero();
 /*
   if(this->Ref_ != TCS) fockA_->real()+=(*this->aointegrals_->oneE_);
@@ -84,11 +84,8 @@ void SingleSlater<T>::formFock(){
 #else
   *(fockA_)+=(*this->PTA_);
 #endif
-  if(this->controls_->DFT){
-//    cout << "Single Slater Numeric : Print" <<endl;
-//    cout << (*this->vXCA_)  << endl;
-    (*this->fockA_) += (*this->vXCA_);
-  }
+  if(this->isDFT) (*fockA_) += (*this->vXCA_);
+
   if(!this->isClosedShell && this->Ref_ != TCS){
     this->fockB_->setZero();
     fockB_->real()+=(*this->aointegrals_->oneE_);
@@ -98,12 +95,8 @@ void SingleSlater<T>::formFock(){
 #else
     *(fockB_)+=(*this->PTB_);
 #endif
-    if(this->controls_->DFT){
-//    cout << "Single Slater Numeric : Beta" <<endl;
-      (*this->fockB_) += (*this->vXCB_);
-    }
-  };
-
+    if(this->isDFT) (*fockB_) += (*this->vXCB_);
+   }
   // Add in the electric field component if they are non-zero
   std::array<double,3> null{{0,0,0}};
   if(this->elecField_ != null){

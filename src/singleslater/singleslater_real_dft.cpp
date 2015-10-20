@@ -33,11 +33,12 @@ template<>
 void SingleSlater<double>::formVXC(){
     int nAtom    = this->molecule_->nAtoms();    // Number of Atoms
     int nRad     = 100;                          // Number of Radial grid points for each center
-    int nAng     = 194;                          // Number of Angular grid points for each center (only certain values are allowed - see grid.h)
+    int nAng     = 302;                          // Number of Angular grid points for each center (only certain values are allowed - see grid.h)
     int npts     = nRad*nAng;                    // Total Number of grid point for each center
     double weight= 0.0;                            
-    double Cx = -(3.0/4.0)*(std::pow((3.0/math.pi),(1.0/3.0)));    //TF LDA Prefactor
-    double val = 4.0*math.pi*Cx;
+    double CxVx = -(std::pow((3.0/math.pi),(1.0/3.0)));    //TF LDA Prefactor
+//    double CxEn =  (3.0/4.0);    //TF LDA Prefactor
+    double val = 4.0*math.pi*CxVx;
 //  Generating grids (Raw grid, it has to be centered and integrated over each center and centered over each atom)
     GaussChebyshev1stGridInf Rad(nRad,0.0,1.0);   // Radial Grid
     LebedevGrid GridLeb(nAng);                    // Angular Grid
@@ -45,6 +46,7 @@ void SingleSlater<double>::formVXC(){
     GridLeb.genGrid();
     TwoDGrid Raw3Dg(npts,&Rad,&GridLeb);          // Final Raw (not centered) 3D grid (Radial times Angular grid)
     this->vXCA()->setZero();                      // Set to zero every occurence of the SCF
+    if(!this->isClosedShell && this->Ref_ != TCS) this->vXCB()->setZero();
 //    cout << "Erased Vxc term " << endl;
 //  Loop over each centers (Atoms) (I think can be distribuited over different cpus)
     for(int iAtm = 0; iAtm < nAtom; iAtm++){
@@ -62,28 +64,22 @@ void SingleSlater<double>::formVXC(){
     } // end loop natoms
 //  Finishing the Vxc using the TF factor and the integration prefactor over a solid sphere
     (*this->vXCA()) =  val * (*this->vXCA());
+    if(!this->isClosedShell && this->Ref_ != TCS) (*this->vXCB()) =  (*this->vXCA());
 //  Comment to avoid the printing
-//  double Energy;
-//  Energy = (*this->vXCA_).frobInner(this->densityA_->conjugate());
-//  std::cout.precision(10);
-//  cout << " E_XC = " << Energy <<endl;
-//  cout << "Single Slater Numeric : Print" <<endl;
-//  cout << (*this->vXCA_)  << endl;
-}; //End
-
-template<>
-void SingleSlater<double>::EnVXC(){
-//  Place holder 
+/*
   double Energy;
-  double resLDA = -11.611162519357;
-  Energy = (*this->vXCA_).frobInner(this->densityA_->conjugate());
+  Energy = CxEn*((*this->vXCA_).frobInner(this->densityA_->conjugate()));
   std::cout.precision(10);
   cout << " E_XC = " << Energy <<endl;
-  cout << "LDA Err " << (Energy-resLDA) << endl;
-  cout << "Single Slater Numeric : Print" <<endl;
-  cout << (*this->vXCA_)  << endl;
-};
-
-
+  if(!this->isClosedShell && this->Ref_ != TCS) {
+  (*this->vXCB()) =  (*this->vXCA());
+  double EnergyB;
+  EnergyB = CxEn*((*this->vXCB_).frobInner(this->densityB_->conjugate()));
+  std::cout.precision(10);
+  cout << " E_XCiB = " << EnergyB <<endl;
+  cout << " E_Xalpha_beta = " << Energy+EnergyB <<endl;
+  }
+*/
+}; //End
 
 } // Namespace ChronusQ

@@ -410,7 +410,6 @@ public:
   double formBeckeW(cartGP gridPt, int iAtm);            // Evaluate Becke Weights
   double normBeckeW(cartGP gridPt);            // Evaluate Becke Weights
   void   buildVxc(cartGP gridPt, double weight);            // function to build the Vxc therm
-  void EnVXC();                 // DFT VXC Energy Term
   void matchord();              // match Guassian order of guess
   void readGuessIO();       	// read the initial guess of MO's from the input stream
   void readGuessGauMatEl(GauMatEl&); // read the intial guess of MO's from Gaussian raw matrix element file

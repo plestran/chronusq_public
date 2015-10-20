@@ -35,11 +35,4 @@ void SingleSlater<dcomplex>::formVXC(){
 
 };
 
-template<>
-void SingleSlater<dcomplex>::EnVXC(){
-};
-
-
-
-
 } // Namespace ChronusQ
