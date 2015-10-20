@@ -6,6 +6,7 @@ from libpythonapi import CErr
 from parseMolecule import parseMolecule
 from parseQM import parseQM
 from meta.knownKeywords import knownKeywords
+from meta.knownKeywords import knownSections
 import meta.enumMaps as enumMaps
 
 #
@@ -121,10 +122,6 @@ def parseInput(workers,iFileName):
   inputParser.read(iFileName)
 
   secDict = {}
-
-  # Dictionary of known sections
-  # FIXME: This should be in meta somehow
-  knownSections  = [ "MOLECULE", "QM", "MISC","RT"  ]
 
   # Loop over all of the sections parser by ConfigParse
   # and generate a dictionary for each of them to populate

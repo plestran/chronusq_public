@@ -38,7 +38,6 @@ struct Atoms {
   int defaultMult;
 }; 
  
-
 static const Atoms elements[] = { 
   {1  ,"H" ,1  ,1.0078250321,"Y",2}, // 0 
   {1  ,"D" ,2  ,2.0141017780,"N",2}, // 1

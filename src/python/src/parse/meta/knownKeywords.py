@@ -9,6 +9,9 @@ class CQKeyword:
     self.typ  = typ
     self.req  = req
 
+# Dictionary of known sections
+knownSections  = [ "MOLECULE", "QM", "MISC","RT"  ]
+
 #
 # Initialize an empty dictionary to store known
 # keywords for each known section
