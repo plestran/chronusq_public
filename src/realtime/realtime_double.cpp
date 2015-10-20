@@ -36,12 +36,36 @@ using ChronusQ::RealTime;
 namespace ChronusQ {
 
 template<>
-void RealTime<double>::writeCSV(){
-  std::ofstream csv("rt_output.csv");
+void RealTime<double>::writeDipoleCSV(){
+  std::ofstream csv("RealTime_Dipole.csv");
+  csv << "Time Step (a.u.), Energy (Eh), Dipole X debye), Dipole Y (debye),"
+      << "Dipole Z (debye), Dipole Tot (debye)" << endl;
   for(auto it = this->propInfo.begin(); it != this->propInfo.end(); it++) {
-     csv << std::fixed << std::setprecision(10) << it->timeStep << "," << it->energy << "," << it->xDipole 
-         << "," << it->yDipole << "," << it->zDipole << "," << it->tDipole << endl;
+     csv << std::fixed << std::setprecision(10) << it->timeStep << ", " << it->energy << ", " << it->dipole[0] 
+         << ", " << it->dipole[1] << ", " << it->dipole[2] << ", " << it->dipole[3] << endl;
   } 
+};
+
+template<>
+void RealTime<double>::writeOrbitalCSV(){
+  std::ofstream csv("RealTime_OrbOcc_Alpha.csv");
+  for(auto it = this->propInfo.begin(); it != this->propInfo.end(); it++) {
+    csv << std::fixed << std::setprecision(6) << it->timeStep; 
+      for(auto idx = 0; idx != this->nBasis_*this->nTCS_; idx++) {
+        csv << ", " << it->orbitalOccA[idx];
+      }
+    csv << endl;
+  }
+  if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS){
+    std::ofstream csv("RealTime_OrbOcc_Beta.csv");
+    for(auto it = this->propInfo.begin(); it != this->propInfo.end(); it++) {
+      csv << std::fixed << std::setprecision(6) << it->timeStep; 
+        for(auto idx = 0; idx != this->nBasis_*this->nTCS_; idx++) {
+          csv << ", " << it->orbitalOccB[idx];
+        }
+      csv << endl;
+    }
+  }
 };
 
 template<>
@@ -414,16 +438,34 @@ void RealTime<double>::doPropagation() {
     }
 
 //  Propagate the density matrix
-//  Print dat orbital occupation
-      prettyPrint(this->fileio_->out,(initMOA.adjoint() * POA * initMOA).real().diagonal().adjoint(),"Alpha Orbital Occupation");
-      if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS){
-        prettyPrint(this->fileio_->out,(initMOB.adjoint() * POB * initMOB).real().diagonal().adjoint(),"Beta Orbital Occupation");
+
+  //  Populate information for printing.
+    PropInfo rec;
+      rec.timeStep  = this->currentTime_;
+      rec.energy    = this->ssPropagator_->totalEnergy;
+      rec.dipole[0] = (*this->ssPropagator_->dipole())(0)/phys.debye;
+      rec.dipole[1] = (*this->ssPropagator_->dipole())(1)/phys.debye;
+      rec.dipole[2] = (*this->ssPropagator_->dipole())(2)/phys.debye;
+      rec.dipole[3] = std::sqrt( std::pow(rec.dipole[0],2.0) +
+                                 std::pow(rec.dipole[1],2.0) +
+                                 std::pow(rec.dipole[2],2.0) );
+      scratch = (initMOA.adjoint() * POA * initMOA);
+      for(auto idx = 0; idx != NTCSxNBASIS; idx++) {
+        rec.orbitalOccA.push_back(scratch(idx,idx).real());
       }
+      if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS){
+        scratch = (initMOB.adjoint() * POB * initMOB);
+        for(auto idx = 0; idx != NTCSxNBASIS; idx++) {
+          rec.orbitalOccB.push_back(scratch(idx,idx).real());
+        }
+      }
+
+    this->propInfo.push_back(rec);
 
     scratch = POA;
     POA     = uTransA * scratch * uTransA.adjoint();
 
-    if (!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
+    if (!this->isClosedShell_ && this->Ref_ != SingleSlater<dcomplex>::TCS) {
       scratch = POB;
       POB     = uTransB * scratch * uTransB.adjoint();
     }
@@ -431,13 +473,9 @@ void RealTime<double>::doPropagation() {
 //  Transform density matrix from orthonormal to AO basis
     (*this->ssPropagator_->densityA()) = oTrans1.adjoint() * POA * oTrans1;
 
-    if (!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
+    if (!this->isClosedShell_ && this->Ref_ != SingleSlater<dcomplex>::TCS) {
       (*this->ssPropagator_->densityB()) = oTrans1.adjoint() * POB * oTrans1;
     }
-
-    this->propInfo.push_back(PropInfo(this->currentTime_,this->ssPropagator_->totalEnergy,
-      (*this->ssPropagator_->dipole())(0)/phys.debye,(*this->ssPropagator_->dipole())(1)/phys.debye,
-      (*this->ssPropagator_->dipole())(2)/phys.debye));
 
 //  Advance step
     currentTime_ += this->stepSize_;
@@ -446,8 +484,10 @@ void RealTime<double>::doPropagation() {
   delete [] this->SCR;
   delete [] this->REAL_LAPACK_SCR;
 
-  this->writeCSV();
-
+  //  Write energy/dipole information
+  this->writeDipoleCSV();
+  //  Write orbital occupation information
+  this->writeOrbitalCSV();
 };
-  
+
 } // namespace ChronusQ
