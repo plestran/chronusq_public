@@ -120,27 +120,26 @@ def parseRT(workers,settings):
     workers['CQRealTime'] = workers['CQRealTimeComplex']
 
   # Define a map from keyword to function
-  # FIXME: Should be in meta somehow
-  optMap = {   'MAXSTEP':workers['CQRealTime'].setMaxSteps ,
-              'TIMESTEP':workers['CQRealTime'].setStepSize ,
-               'EDFIELD':workers['CQRealTime'].setFieldAmp ,
-               'TIME_ON':workers['CQRealTime'].setTOn      ,
-              'TIME_OFF':workers['CQRealTime'].setTOff     ,
-             'FREQUENCY':workers['CQRealTime'].setFreq     ,
-                 'PHASE':workers['CQRealTime'].setPhase    ,
-                 'SIGMA':workers['CQRealTime'].setSigma    ,
-              'ENVELOPE':workers['CQRealTime'].setEnvelope ,
-                 'ORTHO':workers['CQRealTime'].setOrthoTyp ,
-                'INIDEN':workers['CQRealTime'].setInitDen  ,
-                 'UPROP':workers['CQRealTime'].setFormU    }
+  optMap = {
+    'MAXSTEP'  :workers['CQRealTime'].setMaxSteps ,
+    'TIMESTEP' :workers['CQRealTime'].setStepSize ,
+    'EDFIELD'  :workers['CQRealTime'].setFieldAmp ,
+    'TIME_ON'  :workers['CQRealTime'].setTOn      ,
+    'TIME_OFF' :workers['CQRealTime'].setTOff     ,
+    'FREQUENCY':workers['CQRealTime'].setFreq     ,
+    'PHASE'    :workers['CQRealTime'].setPhase    ,
+    'SIGMA'    :workers['CQRealTime'].setSigma    ,
+    'ENVELOPE' :workers['CQRealTime'].setEnvelope ,
+    'ORTHO'    :workers['CQRealTime'].setOrthoTyp ,
+    'INIDEN'   :workers['CQRealTime'].setInitDen  ,
+    'UPROP'    :workers['CQRealTime'].setFormU    
+  }
 
 
   # Loop over optional keywords, set options accordingly
   # note that because these are optional, if the keyword
   # is not found in setings, no error is thrown and the
   # next keyword is processed
-  #
-  # FIXME: make this more general for any class of CQ
   for i in optMap:
     try:
       if i not in ('EDFIELD'):
