@@ -72,7 +72,7 @@ void SingleSlater<T>::buildVxc(cartGP gridPt, double weight){
 //  Build the Vxc therm at each Grid Points  
    double *pointProd; 
    double rhor = 0.0;
-///   double rhorB = 0.0;
+   double rhorB = 0.0;
    std::unique_ptr<RealMatrix>  overlapR_;        ///< Overlap at grid point
    overlapR_ = std::unique_ptr<RealMatrix>(
      new RealMatrix(this->nBasis_,this->nBasis_));
@@ -95,12 +95,8 @@ void SingleSlater<T>::buildVxc(cartGP gridPt, double weight){
      }
      (*overlapR_) = overlapR_->selfadjointView<Lower>();;
      rhor = overlapR_->frobInner(this->densityA()->conjugate());
-///     if(!this->isClosedShell && this->Ref_ != TCS) {
-///     rhorB = overlapR_->frobInner(this->densityB()->conjugate());
-///     rhor += rhorB;
-///     }
+     if(!this->isClosedShell && this->Ref_ != TCS) rhor = overlapR_->frobInner(this->densityA_->conjugate()+this->densityB()->conjugate());
 //   Slater LDA (not yet ready. completated outside)       
      (*this->vXCA()) += weight*(*overlapR_)*(std::pow(rhor,(1.0/3.0)));
-//     if(!this->isClosedShell && this->Ref_ != TCS) (*this->vXCB()) = (*this->vXCA());
 };
 

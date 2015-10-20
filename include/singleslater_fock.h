@@ -84,19 +84,8 @@ void SingleSlater<T>::formFock(){
 #else
   *(fockA_)+=(*this->PTA_);
 #endif
-  if(this->isDFT){
-//    cout << "Fock Before : Print" <<endl;
-//    cout << (*fockA_);
-//    cout << endl;
-//    cout << "Single Slater Numeric : Print" <<endl;
-//    cout << (*this->vXCA_)  << endl;
-//    cout << endl;
-//}
-    (*fockA_) += (*this->vXCA_);
-    cout << "Fock alpha After : Print" <<endl;
-    cout << (*fockA_)  << endl;
-    cout << endl;
-  }
+  if(this->isDFT) (*fockA_) += (*this->vXCA_);
+
   if(!this->isClosedShell && this->Ref_ != TCS){
     this->fockB_->setZero();
     fockB_->real()+=(*this->aointegrals_->oneE_);
@@ -106,13 +95,8 @@ void SingleSlater<T>::formFock(){
 #else
     *(fockB_)+=(*this->PTB_);
 #endif
-    if(this->isDFT){
-    cout << "Fock Beta : Print" <<endl;
-    cout << (*this->vXCB_)  << endl;
-      (*fockB_) += (*this->vXCB_);
-    }
-  };
-
+    if(this->isDFT) (*fockB_) += (*this->vXCB_);
+   }
   // Add in the electric field component if they are non-zero
   std::array<double,3> null{{0,0,0}};
   if(this->elecField_ != null){

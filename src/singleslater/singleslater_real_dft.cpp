@@ -37,10 +37,7 @@ void SingleSlater<double>::formVXC(){
     int npts     = nRad*nAng;                    // Total Number of grid point for each center
     double weight= 0.0;                            
     double CxVx = -(std::pow((3.0/math.pi),(1.0/3.0)));    //TF LDA Prefactor
-    double CxEn =  (3.0/4.0);    //TF LDA Prefactor
-    cout << "CxVx= " << CxVx <<endl;
-    cout << "CxEn= " << CxVx*CxEn <<endl;
-//    double Cx = -(std::pow((3.0/math.pi),(1.0/3.0)));    //TF LDA Prefactor
+//    double CxEn =  (3.0/4.0);    //TF LDA Prefactor
     double val = 4.0*math.pi*CxVx;
 //  Generating grids (Raw grid, it has to be centered and integrated over each center and centered over each atom)
     GaussChebyshev1stGridInf Rad(nRad,0.0,1.0);   // Radial Grid
@@ -63,12 +60,13 @@ void SingleSlater<double>::formVXC(){
                  / (this->normBeckeW(Raw3Dg.gridPtCart(ipts))) ;
 //    Build the Vxc for the ipts grid point (Vxc will be ready at the end of the two loop
         this->buildVxc((Raw3Dg.gridPtCart(ipts)),weight);
-//        this->buildVxcII((Raw3Dg.gridPtCart(ipts)),weight);
         } //end loop over Raw grid points
     } // end loop natoms
 //  Finishing the Vxc using the TF factor and the integration prefactor over a solid sphere
     (*this->vXCA()) =  val * (*this->vXCA());
+    if(!this->isClosedShell && this->Ref_ != TCS) (*this->vXCB()) =  (*this->vXCA());
 //  Comment to avoid the printing
+/*
   double Energy;
   Energy = CxEn*((*this->vXCA_).frobInner(this->densityA_->conjugate()));
   std::cout.precision(10);
@@ -80,23 +78,8 @@ void SingleSlater<double>::formVXC(){
   std::cout.precision(10);
   cout << " E_XCiB = " << EnergyB <<endl;
   cout << " E_Xalpha_beta = " << Energy+EnergyB <<endl;
-}
-
+  }
+*/
 }; //End
-
-template<>
-void SingleSlater<double>::EnVXC(){
-//  Place holder 
-  double Energy;
-  double resLDA = -11.611162519357;
-  Energy = (*this->vXCA_).frobInner(this->densityA_->conjugate());
-  std::cout.precision(10);
-  cout << " E_XC = " << Energy <<endl;
-  cout << "LDA Err " << (Energy-resLDA) << endl;
-  cout << "Single Slater Numeric : Print" <<endl;
-  cout << (*this->vXCA_)  << endl;
-};
-
-
 
 } // Namespace ChronusQ
