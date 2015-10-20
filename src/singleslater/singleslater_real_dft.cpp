@@ -50,7 +50,8 @@ void SingleSlater<double>::formVXC(){
 //    cout << "Erased Vxc term " << endl;
 //  Loop over each centers (Atoms) (I think can be distribuited over different cpus)
     for(int iAtm = 0; iAtm < nAtom; iAtm++){
-      // Center the Grid at iAtom
+      cout << "Atmoic Radius Slater " << elements[this->molecule_->index(iAtm)].sradius << endl; 
+     // Center the Grid at iAtom
       Raw3Dg.centerGrid((*this->molecule_->cart())(0,iAtm),(*this->molecule_->cart())(1,iAtm),(*this->molecule_->cart())(2,iAtm));
 //    Loop over grid points
       for(int ipts = 0; ipts < npts; ipts++){
