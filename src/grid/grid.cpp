@@ -212,9 +212,9 @@ void GaussChebyshev1stGridInf::transformPts(){
 //   Nitrogen
 //     double ralpha= 0.65/2.0;
 //   Oxygen
-//     double ralpha= 0.60/2.0;
+     double ralpha= 0.60/2.0;
 //   Lithium
-   double ralpha= 1.45/2.0;
+//   double ralpha= 1.45/2.0;
 //     }
      double toau = (1.0)/phys.bohr;
      double val;

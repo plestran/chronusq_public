@@ -182,24 +182,26 @@ void SingleSlater<double>::computeEnergy(){
 */
   this->energyOneE = (*this->aointegrals_->oneE_).frobInner(this->densityA_->conjugate());
   this->energyTwoE = 0.5*(*this->PTA_).frobInner(this->densityA_->conjugate());
-  if(this->isDFT) {
-    cout << "Density Matrix "<<endl;
-    cout << (*this->densityA_) <<endl;
-    cout <<endl;
-    cout << "OneE " << this->energyOneE <<endl;
-    cout << "1/2 Coul " << this->energyTwoE <<endl;
-    cout << "Ex " << (*this->vXCA_).frobInner(this->densityA_->conjugate()) <<endl;
-    }
-  if(this->isDFT) this->energyTwoE += (*this->vXCA_).frobInner(this->densityA_->conjugate());
-  if(this->isDFT) cout << "1/2 Coul + Ex " << this->energyTwoE <<endl;
+  if(this->isDFT) this->energyTwoE += (3.0/4.0)*((*this->vXCA_).frobInner(this->densityA_->conjugate()));
+//
+//  if(this->isDFT) {
+//    cout << "Density Matrix "<<endl;
+//    cout << (*this->densityA_) <<endl;
+//    cout <<endl;
+//    cout << "OneE " << this->energyOneE <<endl;
+//    cout << "1/2 Coul " << this->energyTwoE <<endl;
+//    cout << "Ex " << (3.0/4.0)*((*this->vXCA_).frobInner(this->densityA_->conjugate())) <<endl;
+//    }
+//
   if(!this->isClosedShell && this->Ref_ != TCS){
     this->energyOneE += (*this->aointegrals_->oneE_).frobInner(this->densityB_->conjugate());
     this->energyTwoE += 0.5*(*this->PTB_).frobInner(this->densityB_->conjugate());
-    if(this->isDFT) this->energyTwoE += (*this->vXCB_).frobInner(this->densityB_->conjugate());
-
-  }
-
-
+    if(this->isDFT){
+      this->energyTwoE += (3.0/8.0)*((*this->vXCA_).frobInner(2.0*(this->densityA_->conjugate())));
+      this->energyTwoE += (3.0/8.0)*((*this->vXCB_).frobInner(2.0*(this->densityB_->conjugate())));
+      }
+     }
+    
   // Add in the electric field component if they are non-zero
   std::array<double,3> null{{0,0,0}};
   if(this->elecField_ != null){

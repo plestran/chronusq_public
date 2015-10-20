@@ -85,17 +85,18 @@ void SingleSlater<T>::formFock(){
   *(fockA_)+=(*this->PTA_);
 #endif
   if(this->isDFT){
-    cout << "Fock Before : Print" <<endl;
-    cout << (*fockA_);
-    cout << endl;
-    cout << "Single Slater Numeric : Print" <<endl;
-    cout << (*this->vXCA_)  << endl;
+//    cout << "Fock Before : Print" <<endl;
+//    cout << (*fockA_);
+//    cout << endl;
+//    cout << "Single Slater Numeric : Print" <<endl;
+//    cout << (*this->vXCA_)  << endl;
+//    cout << endl;
+//}
     (*fockA_) += (*this->vXCA_);
-    cout << endl;
-}
-    cout << "Single Slater Fock After : Print" <<endl;
+    cout << "Fock alpha After : Print" <<endl;
     cout << (*fockA_)  << endl;
     cout << endl;
+  }
   if(!this->isClosedShell && this->Ref_ != TCS){
     this->fockB_->setZero();
     fockB_->real()+=(*this->aointegrals_->oneE_);
@@ -106,7 +107,7 @@ void SingleSlater<T>::formFock(){
     *(fockB_)+=(*this->PTB_);
 #endif
     if(this->isDFT){
-    cout << "Single Slater Numeric : Print" <<endl;
+    cout << "Fock Beta : Print" <<endl;
     cout << (*this->vXCB_)  << endl;
       (*fockB_) += (*this->vXCB_);
     }
