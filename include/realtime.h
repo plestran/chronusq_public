@@ -147,6 +147,26 @@ class RealTime {
   void initMaps();
 
 public:
+  struct PropInfo {
+    double timeStep;
+    double energy;
+    double xDipole;
+    double yDipole;
+    double zDipole;
+    double tDipole;
+    PropInfo(double ts,  double e,   double edx, 
+             double edy, double edz){
+      timeStep=ts;
+      energy=e;
+      xDipole=edx;
+      yDipole=edy;
+      zDipole=edz;
+      tDipole=std::sqrt( std::pow(edx,2.0) +
+                         std::pow(edy,2.0) +
+                         std::pow(edz,2.0));
+    };
+  };
+  std::vector<PropInfo> propInfo;
 
   // constructor & destructor
   RealTime(){
@@ -272,6 +292,7 @@ public:
   void printRT();
   void formUTrans();
   void doPropagation();
+  void writeCSV();
 };
 
 #include <realtime_alloc.h>
