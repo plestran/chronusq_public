@@ -77,7 +77,6 @@ def handleReference(workers,ref):
     workers["CQSingleSlater"] = workers["CQSingleSlaterDouble"]
 
   # Set SS Reference
-  # FIXME: Need to kill the job if reference is not recognized
   if 'HF' in ref:
     # Smartly figure out of reference is R/U
     if mult == 1:
@@ -87,7 +86,10 @@ def handleReference(workers,ref):
       workers["CQSingleSlater"].setRef(chronusQ.Reference.UHF)
   elif 'RHF' in ref:
     # Force RHF
-    # FIXME: Need a check if reference cannot be R
+    if mult != 1:
+      mas = 'Non-singlet multiplicity is not suitable for RHF'
+      CErrMsg(workers['CQFileIO'],str(msg))
+ 
     workers["CQSingleSlater"].setRef(chronusQ.Reference.RHF)
     workers["CQSingleSlater"].isClosedShell = True
   elif 'UHF' in ref:
@@ -100,6 +102,9 @@ def handleReference(workers,ref):
   elif 'GHF' in ref:
     # Do GHF
     workers["CQSingleSlater"].setRef(chronusQ.Reference.TCS)
+  else:
+    msg = 'Reference ' + str(sum(ref)) + ' not able to be parsed'
+    CErrMsg(workers['CQFileIO'],str(msg))
 
   # Check if reference is 2-Component
   TCMethods = [chronusQ.Reference.TCS, chronusQ.Reference.GKS]

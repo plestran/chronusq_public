@@ -1,6 +1,8 @@
 import os,sys
 import configparser
 import libpythonapi as chronusQ
+from libpythonapi import CErrMsg
+from libpythonapi import CErr
 from parseMolecule import parseMolecule
 from parseQM import parseQM
 from meta.knownKeywords import knownKeywords
@@ -47,7 +49,7 @@ def parserDoubleArray(parser,section,opt):
 # Generate a dictionary for a given section of
 # the input file
 #
-def genSecDict(parser,section):
+def genSecDict(workers,parser,section):
 
   # Initialize an empy dictionary
   dict1 = {}
@@ -68,12 +70,12 @@ def genSecDict(parser,section):
   }
 
   # Check if a dictionary exists for this section
-  # FIXME: Need to kill the job if a dict can't be found
   keydict = ''
   try: 
     keydict = knownKeywords[section.upper()]
   except KeyError:
-    print 'No dictionary of known keywords is known for ' + section
+    msg = 'No dictionary of known keywords is known for ' + section
+    CErrMsg(workers['CQFileIO'],str(msg))
     return
 
   # Loop for options for section
@@ -82,17 +84,16 @@ def genSecDict(parser,section):
     readtyp = ''
 
     # Check if opt is a known keyword for the section
-    # FIXME: Need to kill the job if keyword is not recognized
     try: 
       keyword = knownKeywords[section.upper()][opt.upper()]
     except KeyError:
-      print 'Keyword: '+str(opt)+' not recognized for section '+section
+      msg = 'Keyword: ' + str(opt) + ' not recognized for section ' + section
+      CErrMsg(workers['CQFileIO'],str(msg))
       continue
      
     readTyp = keyword.typ
 
     # Call the proper function for the type being read
-    # FIXME: Need to kill the job if the type is not recognized
     if readTyp in ('I','D'):
       dict1[opt.upper()] = parseMap[readTyp](section,opt)
     elif readTyp in ('S'):
@@ -100,7 +101,8 @@ def genSecDict(parser,section):
     elif readTyp in ('O-ORTH','O-ENV','O-FORMU','D3'):
       dict1[opt.upper()] = parseMap[readTyp](parser,section,opt)
     else:
-      print 'Option data type not recognized'
+      msg = 'Option data ' + str(readTyp) + ' type not recognized'
+      CErrMsg(workers['CQFileIO'],str(msg))
   # END LOOP
 
   # Return the dictionary
@@ -130,11 +132,11 @@ def parseInput(workers,iFileName):
   for section in inputParser.sections():
     secStr = str(section).upper()
     # Check if section is a known section
-    # FIXME: Need to kill the job if not recognized
     if secStr not in knownSections:
-      print "Keyword section " + secStr + " not recognized"
+      msg = "Keyword section " + secStr + " not recognized"
+      CErrMsg(workers['CQFileIO'],str(msg))
       continue
-    secDict[secStr] = genSecDict(inputParser,section) 
+    secDict[secStr] = genSecDict(workers,inputParser,section) 
   # END LOOP
 
   # Return the dictionary

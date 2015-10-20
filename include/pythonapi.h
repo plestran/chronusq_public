@@ -18,6 +18,6 @@ namespace ChronusQ{
   void Wrapper_readInput(FileIO&,Molecule&,BasisSet&,Controls&,BasisSet&);
 
   void Wrapper_CErr_Default(FileIO &);
-  void Wrapper_CErr_Message(FileIO &, std::string &);
+  void Wrapper_CErr_Message(FileIO &, std::string );
   int getAtomicNumber(int);
 }

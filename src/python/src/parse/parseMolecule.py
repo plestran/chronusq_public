@@ -1,6 +1,4 @@
 import os,sys
-#sys.path.append('/home/dbwy/git_repo/chronusq/build_gcc_libint_openmp/src/python')
-#sys.path.append('/home/dbwy/git_repo/chronusq/src/python')
 import libpythonapi as chronusQ
 from meta.knownKeywords import requiredKeywords
 
@@ -24,8 +22,8 @@ def parseMolecule(workers,settings):
 #
   for i in requiredKeywords['MOLECULE']:
     if i not in settings:
-      print 'Required keyword Molecule.' + str(i) + ' not found'
-      exit(1)
+      msg = 'Required keyword Molecule.' + str(i) + ' not found'
+      CErrMsg(workers['CQFileIO'],str(msg))
 #
 # Grab charge and multiplicity
 #
@@ -109,18 +107,19 @@ def readGeom(workers,settings):
     line = geomStr[i]
     lineSplit = line.split()
     indx = -1
-    # FIXME: Need to kill the job if Input Error
     if len(lineSplit) == 5:
       indx = chronusQ.HashAtom(str(lineSplit[0]),int(lineSplit[1]))
     elif len(lineSplit) == 4:
       indx = chronusQ.HashAtom(str(lineSplit[0]),0)
     else:
-      print 'Input Error: Invalid Geometry Specification'
+      msg = 'Input Error: Invalid Geometry Specification'
+      CErrMsg(workers['CQFileIO'],str(msg))
 
     if indx != -1:
       workers["CQMolecule"].setIndex(i,indx)
     else:
-      print 'Input Error: Invalid Atomic Symbol or Mass Number'
+      msg = 'Input Error: Invalid Atomic Symbol or Mass Number'
+      CErrMsg(workers['CQFileIO'],str(msg))
 
     nTotalE += chronusQ.getAtomicNumber(indx)
 
