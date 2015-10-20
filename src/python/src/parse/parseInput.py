@@ -1,6 +1,4 @@
 import os,sys
-#sys.path.append('/home/dbwy/git_repo/chronusq/build_gcc_libint_openmp/src/python')
-#sys.path.append('/home/dbwy/git_repo/chronusq/src/python')
 import configparser
 import libpythonapi as chronusQ
 from parseMolecule import parseMolecule

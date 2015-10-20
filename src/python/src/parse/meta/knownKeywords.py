@@ -1,23 +1,35 @@
 
+#
+# Class to store metadata about a keyword
+# (self explanitory)
+#
 class CQKeyword:
   def __init__(self,name,typ,req):
     self.name = name
     self.typ  = typ
     self.req  = req
 
+#
+# Initialize an empty dictionary to store known
+# keywords for each known section
+#
 knownKeywords = {}
+
+# Dictionary for known keywords in the MOLECULE input section
 knownKeywords['MOLECULE'] = {
   'CHARGE':CQKeyword('CHARGE','I',True),
   'MULT'  :CQKeyword('MULT'  ,'I',True),
   'GEOM'  :CQKeyword('GEOM'  ,'S',True)
 } 
 
+# Dictionary for known keywords in the QM input section
 knownKeywords['QM'] = {
   'REFERENCE':CQKeyword('REFERENCE','S',True),
   'BASIS'    :CQKeyword('BASIS'    ,'S',True),
   'JOB'      :CQKeyword('JOB'      ,'S',True)
 }
 
+# Dictionary for known keywords in the RT input section
 knownKeywords['RT'] = {
   'MAXSTEP'  :CQKeyword('MAXSTEP'  ,'I'      ,False),    
   'TIMESTEP' :CQKeyword('TIMESTEP' ,'D'      ,False), 
@@ -34,6 +46,7 @@ knownKeywords['RT'] = {
 }
 
 
+# Create a dictionary of required keywords
 requiredKeywords = {}
 requiredKeywords['MOLECULE'] = []
 requiredKeywords['QM'] = []

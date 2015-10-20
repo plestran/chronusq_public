@@ -109,6 +109,7 @@ def readGeom(workers,settings):
     line = geomStr[i]
     lineSplit = line.split()
     indx = -1
+    # FIXME: Need to kill the job if Input Error
     if len(lineSplit) == 5:
       indx = chronusQ.HashAtom(str(lineSplit[0]),int(lineSplit[1]))
     elif len(lineSplit) == 4:

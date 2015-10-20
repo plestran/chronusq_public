@@ -19,7 +19,7 @@ def parseBasis(workers,basis):
 # 4) Construct the varios maps incolving the basis set
 # 5) Renormalize the LibInt2::Shell's (this is outdated in newer Libint)
 #
-  # FIXME: BasisSet Keywords??
+  # FIXME: BasisSet Keywords?? str(basis).lower() is a hack
   workers["CQBasisSet"].findBasisFile(str(basis).lower())     # 1
   workers["CQBasisSet"].parseGlobal()                         # 2
   workers["CQBasisSet"].constructLocal(workers["CQMolecule"]) # 3

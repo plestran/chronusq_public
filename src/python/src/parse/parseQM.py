@@ -70,45 +70,52 @@ def parseQM(workers,secDict):
 def handleReference(workers,ref):
   mult = workers["CQMolecule"].multip()
   ref = ref.split()
+  # Decide if reference is complex or not (defaults to real if not specified
   if 'COMPLEX' in ref:
     workers["CQSingleSlater"] = workers["CQSingleSlaterComplex"]
   else:
     workers["CQSingleSlater"] = workers["CQSingleSlaterDouble"]
 
+  # Set SS Reference
+  # FIXME: Need to kill the job if reference is not recognized
   if 'HF' in ref:
+    # Smartly figure out of reference is R/U
     if mult == 1:
       workers["CQSingleSlater"].setRef(chronusQ.Reference.RHF)
       workers["CQSingleSlater"].isClosedShell = True
     else:
       workers["CQSingleSlater"].setRef(chronusQ.Reference.UHF)
   elif 'RHF' in ref:
+    # Force RHF
+    # FIXME: Need a check if reference cannot be R
     workers["CQSingleSlater"].setRef(chronusQ.Reference.RHF)
     workers["CQSingleSlater"].isClosedShell = True
   elif 'UHF' in ref:
+    # Forch UHF
     workers["CQSingleSlater"].setRef(chronusQ.Reference.UHF)
+    workers["CQSingleSlater"].isClosedShell = False
   elif 'CUHF' in ref:
+    # Use Constrained UHF (not complex UHF) 
     workers["CQSingleSlater"].setRef(chronusQ.Reference.CUHF)
   elif 'GHF' in ref:
+    # Do GHF
     workers["CQSingleSlater"].setRef(chronusQ.Reference.TCS)
 
+  # Check if reference is 2-Component
   TCMethods = [chronusQ.Reference.TCS, chronusQ.Reference.GKS]
   if workers["CQSingleSlater"].Ref() in TCMethods:
     workers["CQSingleSlater"].setNTCS(2)
 
 def parseRT(workers,settings):
-# requiredKeywords = []
-# optionalKeywords = [ 'maxstep' , 'timestep' , 'edfield' , 'time_on',
-#                      'time_off', 'frequency', 'phase'   , 'sigma'  ,
-#                      'envelope', 'ortho'    , 'iniden'  , 'uprop'  ]
-# knownKeywords = requiredKeywords + optionalKeywords
 
-# reqMap = {}
-
+  # Set RT object based on SS reference
   if workers['CQSingleSlater'] == workers['CQSingleSlaterDouble']:
     workers['CQRealTime'] = workers['CQRealTimeDouble']
   else:
     workers['CQRealTime'] = workers['CQRealTimeComplex']
 
+  # Define a map from keyword to function
+  # FIXME: Should be in meta somehow
   optMap = {   'MAXSTEP':workers['CQRealTime'].setMaxSteps ,
               'TIMESTEP':workers['CQRealTime'].setStepSize ,
                'EDFIELD':workers['CQRealTime'].setFieldAmp ,
@@ -123,7 +130,12 @@ def parseRT(workers,settings):
                  'UPROP':workers['CQRealTime'].setFormU    }
 
 
-
+  # Loop over optional keywords, set options accordingly
+  # note that because these are optional, if the keyword
+  # is not found in setings, no error is thrown and the
+  # next keyword is processed
+  #
+  # FIXME: make this more general for any class of CQ
   for i in optMap:
     try:
       if i not in ('EDFIELD'):
