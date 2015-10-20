@@ -142,8 +142,10 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("SinSq"   , RealTime<double>::SinSq         )
   ;
 
-  def("readInput",       ChronusQ::Wrapper_readInput);
-  def("HashAtom",        ChronusQ::HashAtom         );
-  def("getAtomicNumber", ChronusQ::getAtomicNumber  );
+  def("readInput",       ChronusQ::Wrapper_readInput    );
+  def("HashAtom",        ChronusQ::HashAtom             );
+  def("getAtomicNumber", ChronusQ::getAtomicNumber      );
+  def("CErr",            ChronusQ::Wrapper_CErr_Default );
+  def("CErrMsg",         ChronusQ::Wrapper_CErr_Message );
 };
 
