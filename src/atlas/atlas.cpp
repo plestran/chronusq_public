@@ -58,6 +58,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   // print out the starting time of the job
   time(&currentTime);
   fileIO->out<<"Job started: "<<ctime(&currentTime)<<endl;
+  initCQ();
 
   // Initialize default settings and read input
   controls->iniControls();
@@ -189,11 +190,8 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 
 
 
-  // Cleanup Libint env
-#ifdef USE_LIBINT
-  libint2::cleanup();
-#endif
 
+  finalizeCQ();
 
   return  1;
 };

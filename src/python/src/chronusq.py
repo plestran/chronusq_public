@@ -29,6 +29,7 @@ workers = {"CQMolecule":mol,
            "CQFileIO":out}
 
 
+chronusQ.initCQ()
 controls.iniControls()
 
 secDict = parseInput(workers,fname+".inp")
@@ -37,6 +38,7 @@ parseMolecule(workers,secDict["MOLECULE"])
 parseQM(workers,secDict)
 
 runSCF(workers)
+chronusQ.finalizeCQ()
 
 #controls.printSettings()
 #mol.printInfo(out,controls)
