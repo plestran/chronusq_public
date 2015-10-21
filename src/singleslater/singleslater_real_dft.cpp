@@ -42,16 +42,19 @@ void SingleSlater<double>::formVXC(){
 //  Generating grids (Raw grid, it has to be centered and integrated over each center and centered over each atom)
     GaussChebyshev1stGridInf Rad(nRad,0.0,1.0);   // Radial Grid
     LebedevGrid GridLeb(nAng);                    // Angular Grid
-    Rad.genGrid();                               
     GridLeb.genGrid();
-    TwoDGrid Raw3Dg(npts,&Rad,&GridLeb);          // Final Raw (not centered) 3D grid (Radial times Angular grid)
+//    Rad.genGrid();                               
+//    TwoDGrid Raw3Dg(npts,&Rad,&GridLeb);          // Final Raw (not centered) 3D grid (Radial times Angular grid)
     this->vXCA()->setZero();                      // Set to zero every occurence of the SCF
     if(!this->isClosedShell && this->Ref_ != TCS) this->vXCB()->setZero();
-//    cout << "Erased Vxc term " << endl;
 //  Loop over each centers (Atoms) (I think can be distribuited over different cpus)
     for(int iAtm = 0; iAtm < nAtom; iAtm++){
-      cout << "Atmoic Radius Slater " << elements[this->molecule_->index(iAtm)].sradius << endl; 
-     // Center the Grid at iAtom
+//    cout << "Atmoic Radius Slater " << elements[this->molecule_->index(iAtm)].sradius << endl; 
+//    The Radial grid is generated and scaled for each atom
+      Rad.genGrid();
+      Rad.scalePts((elements[this->molecule_->index(iAtm)].sradius)) ; 
+      TwoDGrid Raw3Dg(npts,&Rad,&GridLeb);          // Final Raw (not centered) 3D grid (Radial times Angular grid)
+      //Center the Grid at iAtom
       Raw3Dg.centerGrid((*this->molecule_->cart())(0,iAtm),(*this->molecule_->cart())(1,iAtm),(*this->molecule_->cart())(2,iAtm));
 //    Loop over grid points
       for(int ipts = 0; ipts < npts; ipts++){

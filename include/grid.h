@@ -68,7 +68,7 @@ class OneDGrid : public Grid {
          delete [] this->gridPts_;
          }
          delete [] this->weights_;
-//       cout << "Deleting" <<endl;
+//       cout << "Deleting One Grid" <<endl;
        };
 // access to protected data
        inline double * gridPts(){ return this->gridPts_;};
@@ -181,6 +181,7 @@ class LebedevGrid : public OneDGrid {
   // Class Functions
     void genGrid();                                      
     void transformPts();
+    void scalePts(double sradius);
   }; // class GaussChebyshev1stGridInf
 
 }; // namespace ChronusQ
