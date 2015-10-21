@@ -1,0 +1,25 @@
+\documentclass[10pt]{article}
+\usepackage{amsmath}
+\usepackage{mathrsfs}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage[margin=1in]{geometry}
+
+\begin{document}
+\begin{equation}
+F^\sigma_{\mu\nu} = h_{\mu\nu} + G^\sigma_{\mu\nu}
+\end{equation}
+\begin{align}
+G^\sigma_{\mu\nu} &= \sum_{\lambda\kappa}(\mu\nu\vert\lambda\kappa)P^T_{\kappa\lambda} -\sum_{\lambda\kappa}(\mu\kappa\vert\lambda\nu)P^\sigma_{\kappa\lambda}\\
+&=\sum_{\lambda\kappa}(\mu\nu\vert\lambda\kappa)P^T_{\kappa\lambda} -\frac{1}{2}\sum_{\lambda\kappa}(\mu\kappa\vert\lambda\nu)P^\sigma_{\kappa\lambda} -\frac{1}{2}\sum_{\lambda\kappa}(\mu\kappa\vert\lambda\nu)P^\sigma_{\kappa\lambda}\\
+&=\sum_{\lambda\kappa}(\mu\nu\vert\lambda\kappa)P^T_{\kappa\lambda} -\frac{1}{2}\sum_{\lambda\kappa}(\mu\kappa\vert\lambda\nu)P^\sigma_{\kappa\lambda} -\frac{1}{2}\sum_{\lambda\kappa}(\mu\lambda\vert\kappa\nu)P^\sigma_{\lambda\kappa}\\
+&=\sum_{\lambda\kappa}(\mu\nu\vert\lambda\kappa)P^T_{\kappa\lambda} -\frac{1}{2}\sum_{\lambda\kappa}(\mu\kappa\vert\nu\lambda)P^\sigma_{\kappa\lambda} -\frac{1}{2}\sum_{\lambda\kappa}(\mu\lambda\vert\nu\kappa)P^{\sigma}_{\lambda\kappa} \qquad\qquad (\mu\nu\vert\lambda\kappa)\in\mathbb{R}\\
+&=\sum_{\lambda\kappa}(\mu\nu\vert\lambda\kappa)P^T_{\kappa\lambda} -\frac{1}{2}\sum_{\lambda\kappa}(\mu\kappa\vert\nu\lambda)P^\sigma_{\kappa\lambda} -\frac{1}{2}\sum_{\lambda\kappa}(\mu\lambda\vert\nu\kappa)P^{\sigma*}_{\kappa\lambda} \qquad\qquad \mathbf{P}=\mathbf{P}^\dagger
+\end{align}
+\begin{align}
+&G^\sigma_{\mu\nu} = G^\sigma_{\mu\nu} + (\mu\nu\vert\lambda\kappa)P^T_{\kappa\lambda}\\
+&G^\sigma_{\lambda\kappa} = G^\sigma_{\lambda\kappa} + (\mu\nu\vert\lambda\kappa)P^T_{\nu\mu}\\
+\end{align}
+\end{document}
