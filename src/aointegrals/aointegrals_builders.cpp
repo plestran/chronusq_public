@@ -275,7 +275,7 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
  
   // Check to see if the basisset had been converted
   // Define integral Engine
-  std::vector<OneBodyEngine> engines(this->controls_->nthreads);
+  std::vector<OneBodyEngine> engines(omp_get_max_threads());
   engines[0] = OneBodyEngine(iType,this->basisSet_->maxPrim(),this->basisSet_->maxL(),0);
   // If engine is V, define nuclear charges
   if(iType == OneBodyEngine::nuclear){
@@ -296,7 +296,7 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
     }
     engines[0].set_q(q);
   }
-  for(size_t i = 1; i < this->controls_->nthreads; i++) engines[i] = engines[0];
+  for(size_t i = 1; i < omp_get_max_threads(); i++) engines[i] = engines[0];
 
   if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(this->nTCS_); 
 #ifdef USE_OMP
@@ -312,7 +312,7 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
       int bf1_s = this->basisSet_->mapSh2Bf(s1);
       int n1  = this->basisSet_->shells(s1).size();
       for(int s2=0; s2 <= s1; s2++, s12++){
-        if(s12 % this->controls_->nthreads != thread_id) continue;
+        if(s12 % omp_get_max_threads() != thread_id) continue;
         int bf2_s = this->basisSet_->mapSh2Bf(s2);
         int n2  = this->basisSet_->shells(s2).size();
   
@@ -504,11 +504,11 @@ void AOIntegrals::computeAOTwoE(){
   if(!this->haveSchwartz) this->computeSchwartz();
 
 
-  std::vector<coulombEngine> engines(this->controls_->nthreads);
+  std::vector<coulombEngine> engines(omp_get_max_threads());
   engines[0] = coulombEngine(this->basisSet_->maxPrim(),this->basisSet_->maxL(),0);
   engines[0].set_precision(std::numeric_limits<double>::epsilon());
 
-  for(int i=1; i<this->controls_->nthreads; i++) engines[i] = engines[0];
+  for(int i=1; i<omp_get_max_threads(); i++) engines[i] = engines[0];
   if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(this->nTCS_); 
 
   this->aoERI_->fill(0.0);
@@ -534,7 +534,7 @@ void AOIntegrals::computeAOTwoE(){
         int s4_max = (s1 == s3) ? s2 : s3;
         for(int s4 = 0; s4 <= s4_max; s4++, s1234++) {
 
-          if(s1234 % this->controls_->nthreads != thread_id) continue;
+          if(s1234 % omp_get_max_threads() != thread_id) continue;
 
           int bf4_s = this->basisSet_->mapSh2Bf(s4);
           int n4    = this->basisSet_->shells(s4).size();
@@ -656,13 +656,13 @@ void AOIntegrals::computeAORII(){
   if(!this->haveRIS)      this->computeAORIS(); 
 
 
-  std::vector<coulombEngine> engines(this->controls_->nthreads);
+  std::vector<coulombEngine> engines(omp_get_max_threads());
   engines[0] = coulombEngine(
     std::max(this->basisSet_->maxPrim(),this->DFbasisSet_->maxPrim()),
     std::max(this->basisSet_->maxL(),this->DFbasisSet_->maxL()),0);
   engines[0].set_precision(std::numeric_limits<double>::epsilon());
 
-  for(int i=1; i<this->controls_->nthreads; i++) engines[i] = engines[0];
+  for(int i=1; i<omp_get_max_threads(); i++) engines[i] = engines[0];
   if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(1); 
   if(!this->DFbasisSet_->haveMapSh2Bf) this->DFbasisSet_->makeMapSh2Bf(1); 
 
@@ -682,7 +682,7 @@ void AOIntegrals::computeAORII(){
       int bf2_s = this->basisSet_->mapSh2Bf(s2);
       int n2    = this->basisSet_->shells(s2).size();
       for(int dfs = 0; dfs < this->DFbasisSet_->nShell(); dfs++,s123++) {
-        if(s123 % this->controls_->nthreads != thread_id) continue;
+        if(s123 % omp_get_max_threads() != thread_id) continue;
         int dfbf3_s = this->DFbasisSet_->mapSh2Bf(dfs);
         int dfn3    = this->DFbasisSet_->shells(dfs).size();
 
@@ -711,12 +711,12 @@ void AOIntegrals::computeAORII(){
 
 void AOIntegrals::computeAORIS(){
   this->haveRIS= true;
-  std::vector<coulombEngine> engines(this->controls_->nthreads);
+  std::vector<coulombEngine> engines(omp_get_max_threads());
   engines[0] = coulombEngine( this->DFbasisSet_->maxPrim(), 
                               this->DFbasisSet_->maxL(),0);
   engines[0].set_precision(std::numeric_limits<double>::epsilon());
 
-  for(int i=1; i<this->controls_->nthreads; i++) engines[i] = engines[0];
+  for(int i=1; i<omp_get_max_threads(); i++) engines[i] = engines[0];
   if(!this->DFbasisSet_->haveMapSh2Bf) this->DFbasisSet_->makeMapSh2Bf(1); 
 
   RealMap aoRISMap(&this->aoRIS_->storage()[0],
@@ -738,7 +738,7 @@ void AOIntegrals::computeAORIS(){
       int bf2_s = this->DFbasisSet_->mapSh2Bf(s2);
       int n2    = this->DFbasisSet_->shells(s2).size();
  
-      if(s12 % this->controls_->nthreads != thread_id) continue;
+      if(s12 % omp_get_max_threads() != thread_id) continue;
 
       const double* buff = engines[thread_id].compute(
         this->DFbasisSet_->shells(s1),
