@@ -31,46 +31,6 @@ using ChronusQ::Controls;
 using ChronusQ::FileIO;
 using ChronusQ::MOIntegrals;
 namespace ChronusQ{
-/*
-//---------------------
-// initialize MOIntegrals
-//---------------------
-template<>
-void MOIntegrals<dcomplex>::iniMOIntegrals(   Molecule * molecule, BasisSet * basisSet, FileIO * fileio, 
-                                    Controls * controls, AOIntegrals * aointegrals, SingleSlater<dcomplex> * singleSlater){
-  this->molecule_ = molecule;
-  this->basisSet_ = basisSet;
-  this->fileio_   = fileio;
-  this->controls_ = controls;
-  this->aointegrals_ = aointegrals;
-  this->singleSlater_ = singleSlater;
-
-  this->haveMOiajb = false;
-  this->haveMOijab = false;
-  this->haveMOijka = false;
-  this->haveMOijkl = false;
-  this->haveMOiabc = false;
-  this->haveMOabcd = false;
-  this->iajbIsDBar = false;
-  this->ijabIsDBar = false;
-  this->ijkaIsDBar = false;
-  this->ijklIsDBar = false;
-  this->iabcIsDBar = false;
-  this->abcdIsDBar = false;
-  this->haveLocMO  = false;
-
-  this->nBasis_ = singleSlater->nBasis();
-  this->Ref_    = singleSlater->Ref();
-  this->nTCS_   = singleSlater->nTCS();
-  this->nOA_    = singleSlater->nOccA();
-  this->nOB_    = singleSlater->nOccB();
-  this->nVA_    = singleSlater->nVirA();
-  this->nVB_    = singleSlater->nVirB();
-  this->nO_     = this->nOA_ + this->nOB_;  
-  this->nV_     = this->nVA_ + this->nVB_;
-};
-*/
-
 template<>
 void MOIntegrals<dcomplex>::getLocMO(){
   if(this->haveLocMO) return;
