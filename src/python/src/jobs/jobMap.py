@@ -1,6 +1,6 @@
 from standardJobs import *
 
-knownJobs = {
+jobMap = {
   'SCF':runSCF,
   'RT' :runRT
 }

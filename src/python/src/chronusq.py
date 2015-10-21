@@ -50,7 +50,7 @@ parseMisc(workers,secDict["MISC"])
 parseMolecule(workers,secDict["MOLECULE"])
 jobStr = parseQM(workers,secDict)
 
-knownJobs[jobStr](workers)
+jobMap[jobStr](workers)
 
 chronusQ.finalizeCQ()
 
