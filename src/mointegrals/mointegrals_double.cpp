@@ -31,6 +31,7 @@ using ChronusQ::Controls;
 using ChronusQ::FileIO;
 using ChronusQ::MOIntegrals;
 namespace ChronusQ{
+/*
 //---------------------
 // initialize MOIntegrals
 //---------------------
@@ -43,7 +44,6 @@ void MOIntegrals<double>::iniMOIntegrals(   Molecule * molecule, BasisSet * basi
   this->controls_ = controls;
   this->aointegrals_ = aointegrals;
   this->singleSlater_ = singleSlater;
-
   this->haveMOiajb = false;
   this->haveMOijab = false;
   this->haveMOijka = false;
@@ -57,7 +57,6 @@ void MOIntegrals<double>::iniMOIntegrals(   Molecule * molecule, BasisSet * basi
   this->iabcIsDBar = false;
   this->abcdIsDBar = false;
   this->haveLocMO  = false;
-
   this->nBasis_ = singleSlater->nBasis();
   this->Ref_    = singleSlater->Ref();
   this->nTCS_   = singleSlater->nTCS();
@@ -67,7 +66,12 @@ void MOIntegrals<double>::iniMOIntegrals(   Molecule * molecule, BasisSet * basi
   this->nVB_    = singleSlater->nVirB();
   this->nO_     = this->nOA_ + this->nOB_;  
   this->nV_     = this->nVA_ + this->nVB_;
+
+  this->communicate(*molecule,*basisSet,*fileio,*controls,*aointegrals,
+    *singleSlater);
+  this->initMeta();
 };
+*/
 
 template<>
 void MOIntegrals<double>::getLocMO(){

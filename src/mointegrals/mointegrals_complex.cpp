@@ -31,6 +31,7 @@ using ChronusQ::Controls;
 using ChronusQ::FileIO;
 using ChronusQ::MOIntegrals;
 namespace ChronusQ{
+/*
 //---------------------
 // initialize MOIntegrals
 //---------------------
@@ -68,6 +69,7 @@ void MOIntegrals<dcomplex>::iniMOIntegrals(   Molecule * molecule, BasisSet * ba
   this->nO_     = this->nOA_ + this->nOB_;  
   this->nV_     = this->nVA_ + this->nVB_;
 };
+*/
 
 template<>
 void MOIntegrals<dcomplex>::getLocMO(){
