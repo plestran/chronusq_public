@@ -1,5 +1,6 @@
 
 knownJobs = [
   'SCF',
-  'RT'
+  'RT',
+  'RPA', 'CIS', 'STAB'
 ]

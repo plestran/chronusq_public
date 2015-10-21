@@ -10,7 +10,15 @@ class CQKeyword:
     self.req  = req
 
 # Dictionary of known sections
-knownSections  = [ "MOLECULE", "QM", "MISC","RT"  ]
+knownSections  = [ 
+  "MOLECULE", 
+  "QM", 
+  "MISC",
+  "RT",
+  "CIS",
+  "RPA",
+  "STAB" 
+]
 
 #
 # Initialize an empty dictionary to store known
@@ -52,6 +60,19 @@ knownKeywords['MISC'] = {
   'NSMP' :CQKeyword('NSMP','I',False)
 }
 
+knownKeywords['CIS'] = {
+  'NSTATES':CQKeyword("NSTATES",'I',True)
+}
+
+knownKeywords['RPA'] = {
+  'NSTATES':CQKeyword("NSTATES",'I',True)
+}
+
+knownKeywords['STAB'] = {
+  'NSTATES':CQKeyword("NSTATES",'I',False)
+}
+
+
 
 # Create a dictionary of required keywords
 requiredKeywords = {}
@@ -59,6 +80,9 @@ requiredKeywords['MOLECULE'] = []
 requiredKeywords['QM'] = []
 requiredKeywords['RT'] = []
 requiredKeywords['MISC'] = []
+requiredKeywords['CIS'] = []
+requiredKeywords['RPA'] = []
+requiredKeywords['STAB'] = []
 
 for sec in knownKeywords:
   for keyWord in knownKeywords[sec]:
