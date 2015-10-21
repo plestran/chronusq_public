@@ -37,10 +37,10 @@ using std::setw;
 // allocate memory for matrices //
 //------------------------------//
 namespace ChronusQ {
+/*
 template<>
 void SDResponse<dcomplex>::iniSDResponse( Molecule * molecule, BasisSet * basisSet, MOIntegrals<dcomplex> * mointegrals, 
                                 FileIO * fileio, Controls * controls, SingleSlater<dcomplex> * singleSlater) {
-/*
   this->nBasis_         = basisSet->nBasis();
   this->nTCS_           = singleSlater->nTCS();
   this->molecule_       = molecule;
@@ -82,19 +82,17 @@ void SDResponse<dcomplex>::iniSDResponse( Molecule * molecule, BasisSet * basisS
   this->nOO_SLT_        = this->nO_*(this->nO_-1)/2;
   this->nOO_LT_         = this->nO_*(this->nO_+1)/2;
   this->nOO_            = this->nO_*this->nO_;
-*/
   this->communicate(*molecule,*basisSet,*singleSlater,*mointegrals,*fileio,
                     *controls);
   this->initMeta();
   this->setNSek(this->controls_->SDNSek);
   this->setMeth(this->controls_->SDMethod);
   this->alloc();
-/*
   this->omega_ = std::unique_ptr<VectorXd>(new VectorXd(this->nSek_));
   this->transDen_ = std::unique_ptr<ComplexCMMatrix>(new ComplexCMMatrix(this->nSingleDim_,this->nSek_));
   this->oscStrength_ = std::unique_ptr<RealMatrix>(new RealMatrix(this->nSek_+1,this->nSek_+1));
   this->transDipole_ = std::unique_ptr<RealTensor3d>(new RealTensor3d(this->nSek_+1,this->nSek_+1,3));
-*/
 };
+*/
 } // namespace ChronusQ
 //dbwye

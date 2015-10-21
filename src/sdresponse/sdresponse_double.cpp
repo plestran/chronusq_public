@@ -37,24 +37,19 @@ using std::setw;
 // allocate memory for matrices //
 //------------------------------//
 namespace ChronusQ {
+/*
 template<>
 void SDResponse<double>::iniSDResponse( Molecule * molecule, BasisSet * basisSet, MOIntegrals<double> * mointegrals, 
                                 FileIO * fileio, Controls * controls, SingleSlater<double> * singleSlater) {
-/* initMeta
   this->nBasis_         = basisSet->nBasis();
   this->nTCS_           = singleSlater->nTCS();
-*/
 
-/* communicate
   this->molecule_       = molecule;
   this->basisSet_       = basisSet;
   this->fileio_         = fileio;
   this->controls_       = controls;
   this->mointegrals_    = mointegrals;
   this->singleSlater_   = singleSlater;
-*/
-
-/* initMeta
   this->aoERI_          = singleSlater->aointegrals()->aoERI_.get();
   this->elecDipole_     = singleSlater->aointegrals()->elecDipole_.get();
   this->Ref_            = singleSlater->Ref();
@@ -88,7 +83,6 @@ void SDResponse<double>::iniSDResponse( Molecule * molecule, BasisSet * basisSet
   this->nOO_SLT_        = this->nO_*(this->nO_-1)/2;
   this->nOO_LT_         = this->nO_*(this->nO_+1)/2;
   this->nOO_            = this->nO_*this->nO_;
-*/
 
   this->communicate(*molecule,*basisSet,*singleSlater,*mointegrals,*fileio,
                     *controls);
@@ -97,12 +91,11 @@ void SDResponse<double>::iniSDResponse( Molecule * molecule, BasisSet * basisSet
   this->setMeth(this->controls_->SDMethod);
   this->alloc();
 
-/* alloc
   this->omega_ = std::unique_ptr<VectorXd>(new VectorXd(this->nSek_));
   this->transDen_ = std::unique_ptr<RealCMMatrix>(new RealCMMatrix(this->nSingleDim_,this->nSek_));
   this->oscStrength_ = std::unique_ptr<RealMatrix>(new RealMatrix(this->nSek_+1,this->nSek_+1));
   this->transDipole_ = std::unique_ptr<RealTensor3d>(new RealTensor3d(this->nSek_+1,this->nSek_+1,3));
-*/
 };
+*/
 } // namespace ChronusQ
 //dbwye
