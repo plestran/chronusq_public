@@ -13,32 +13,50 @@ def communicate(workers):
   workers["CQRealTime"].communicate(workers["CQFileIO"],workers["CQControls"],
     workers["CQAOIntegrals"],workers["CQSingleSlater"])
 
-def initialize(workers):
+#def initialize(workers):
+#  # Set Up AOIntegrals Metadata
+#  workers["CQAOIntegrals"].initMeta()
+#
+#  # Set up Wavefunction Information
+#  workers["CQSingleSlater"].initMeta()
+#  workers["CQSingleSlater"].genMethString()
+#
+#  # RT
+#  
+#def alloc(workers):
+#  # Allocate Space for AO Integrals
+#  workers["CQAOIntegrals"].alloc()
+#
+#  # Allocate Space for Wavefunction Information
+#  workers["CQSingleSlater"].alloc()
+#
+#  # RT
+
+def runSCF(workers):
+  # Make the classes know about eachother
+  communicate(workers)
+# initialize(workers)
+# alloc(workers)
+
+  # Print some information pertaining to the job
+  # FIXME: These two are general and should always be printed
+  #        regardless of job
+  workers["CQMolecule"].printInfo(workers["CQFileIO"])
+  workers["CQBasisSet"].printInfo();
+
+  
   # Set Up AOIntegrals Metadata
   workers["CQAOIntegrals"].initMeta()
 
-  # Set up Wavefunction Information
+  # Set up Wavefunction Metadata
   workers["CQSingleSlater"].initMeta()
   workers["CQSingleSlater"].genMethString()
 
-  # RT
-  
-def alloc(workers):
   # Allocate Space for AO Integrals
   workers["CQAOIntegrals"].alloc()
 
   # Allocate Space for Wavefunction Information
   workers["CQSingleSlater"].alloc()
-
-  # RT
-
-def runSCF(workers):
-  communicate(workers)
-  initialize(workers)
-  alloc(workers)
-
-  workers["CQMolecule"].printInfo(workers["CQFileIO"])
-  workers["CQBasisSet"].printInfo();
 
   workers["CQSingleSlater"].formGuess()
   workers["CQSingleSlater"].formFock()
@@ -46,9 +64,9 @@ def runSCF(workers):
   workers["CQSingleSlater"].SCF()
   workers["CQSingleSlater"].computeMultipole()
   workers["CQSingleSlater"].printMultipole()
-  workers["CQRealTime"].initMeta()
-  workers["CQRealTime"].alloc()
-  workers["CQRealTime"].iniDensity()
-  workers["CQRealTime"].doPropagation()
+#  workers["CQRealTime"].initMeta()
+#  workers["CQRealTime"].alloc()
+#  workers["CQRealTime"].iniDensity()
+#  workers["CQRealTime"].doPropagation()
   
   
