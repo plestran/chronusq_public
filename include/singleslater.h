@@ -226,6 +226,7 @@ public:
   double   energyTwoE; ///< Two-bodied operator tensors traced with Density
   double   energyNuclei; ///< N-N Repulsion Energy
   double   totalEnergy; ///< Sum of all energetic contributions
+  double   totalEx;    ///< LDA Exchange
 
   // constructor & destructor
   SingleSlater(){

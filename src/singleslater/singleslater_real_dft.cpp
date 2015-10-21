@@ -37,8 +37,9 @@ void SingleSlater<double>::formVXC(){
     int npts     = nRad*nAng;                    // Total Number of grid point for each center
     double weight= 0.0;                            
     double CxVx = -(std::pow((3.0/math.pi),(1.0/3.0)));    //TF LDA Prefactor
-//    double CxEn =  (3.0/4.0);    //TF LDA Prefactor
+    double CxEn =  (3.0/4.0);    //TF LDA Prefactor
     double val = 4.0*math.pi*CxVx;
+    this->totalEx = 0.0;
 //  Generating grids (Raw grid, it has to be centered and integrated over each center and centered over each atom)
     GaussChebyshev1stGridInf Rad(nRad,0.0,1.0);   // Radial Grid
     LebedevGrid GridLeb(nAng);                    // Angular Grid
@@ -68,7 +69,11 @@ void SingleSlater<double>::formVXC(){
     } // end loop natoms
 //  Finishing the Vxc using the TF factor and the integration prefactor over a solid sphere
     (*this->vXCA()) =  val * (*this->vXCA());
+    this->totalEx   =  val * CxEn * (this->totalEx);
+    cout << "TotalEx "  << this->totalEx  <<endl;
+
     if(!this->isClosedShell && this->Ref_ != TCS) (*this->vXCB()) =  (*this->vXCA());
+
 //  Comment to avoid the printing
 /*
   double Energy;
