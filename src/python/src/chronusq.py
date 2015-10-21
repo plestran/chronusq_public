@@ -28,6 +28,17 @@ workers = {"CQMolecule":mol,
            "CQRealTimeDouble":rt_double,
            "CQFileIO":out}
 
+header = """
+   ______ __                                      ____ 
+  / ____// /_   _____ ____   ____   __  __ _____ / __ \ 
+ / /    / __ \ / ___// __ \ / __ \ / / / // ___// / / /
+/ /___ / / / // /   / /_/ // / / // /_/ /(__  )/ /_/ / 
+\____//_/ /_//_/    \____//_/ /_/ \__,_//____/ \___\_\ 
+                                                       
+"""
+
+out.write(header)
+
 
 chronusQ.initCQ()
 controls.iniControls()
