@@ -142,6 +142,30 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("SinSq"   , RealTime<double>::SinSq         )
   ;
 
+  class_<MOIntegrals<double>,boost::noncopyable>("MOIntegrals_double",init<>())
+    .def("communicate" , &MOIntegrals<double>::communicate)
+    .def("initMeta"    , &MOIntegrals<double>::initMeta   )
+  ;
+
+  class_<SDResponse<double>,boost::noncopyable>("SDResponse_double",init<>())
+    .def("communicate", &SDResponse<double>::communicate)
+    .def("initMeta"   , &SDResponse<double>::initMeta   )
+    .def("alloc"      , &SDResponse<double>::alloc      )
+    .def("setNSek"    , &SDResponse<double>::setNSek    )
+    .def("setMeth"    , &SDResponse<double>::setMeth    )
+  ;
+
+  enum_<SDResponse<double>::METHOD>("SDResponse_METHOD")
+    .value("INVALID", SDResponse<double>::__invalid    )
+    .value("CIS"    , SDResponse<double>::CIS          )
+    .value("RPA"    , SDResponse<double>::RPA          )
+    .value("PPRPA"  , SDResponse<double>::PPRPA        )
+    .value("PPATDA" , SDResponse<double>::PPATDA       )
+    .value("PPCTDA" , SDResponse<double>::PPCTDA       )
+    .value("STAB"   , SDResponse<double>::STAB         )
+  ;
+
+
   def("readInput",       ChronusQ::Wrapper_readInput    );
   def("HashAtom",        ChronusQ::HashAtom             );
   def("getAtomicNumber", ChronusQ::getAtomicNumber      );

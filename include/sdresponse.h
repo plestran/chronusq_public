@@ -127,7 +127,7 @@ class SDResponse {
   }
 
 public:
-  enum{
+  enum METHOD {
     __invalid,
     CIS,
     RPA,
