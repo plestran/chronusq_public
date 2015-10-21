@@ -48,12 +48,17 @@ knownKeywords['RT'] = {
   'UPROP'    :CQKeyword('UPROP'    ,'O-FORMU',False)
 }
 
+knownKeywords['MISC'] = {
+  'NSMP' :CQKeyword('NSMP','I',False)
+}
+
 
 # Create a dictionary of required keywords
 requiredKeywords = {}
 requiredKeywords['MOLECULE'] = []
 requiredKeywords['QM'] = []
 requiredKeywords['RT'] = []
+requiredKeywords['MISC'] = []
 
 for sec in knownKeywords:
   for keyWord in knownKeywords[sec]:

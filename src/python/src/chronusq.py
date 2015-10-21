@@ -1,10 +1,11 @@
 import os,sys
 sys.path.append('/home/dbwy/git_repo/chronusq/build_gcc_libint_openmp/src/python')
 import libpythonapi as chronusQ
-from jobs.standardJobs import *
+from jobs.jobMap import *
 from parse.parseInput import parseInput
 from parse.parseMolecule import parseMolecule
 from parse.parseQM import parseQM
+from parse.parseMisc import parseMisc
 
 fname = sys.argv[1]
 
@@ -28,16 +29,29 @@ workers = {"CQMolecule":mol,
            "CQRealTimeDouble":rt_double,
            "CQFileIO":out}
 
+header = """
+   ______ __                                      ____ 
+  / ____// /_   _____ ____   ____   __  __ _____ / __ \ 
+ / /    / __ \ / ___// __ \ / __ \ / / / // ___// / / /
+/ /___ / / / // /   / /_/ // / / // /_/ /(__  )/ /_/ / 
+\____//_/ /_//_/    \____//_/ /_/ \__,_//____/ \___\_\ 
+                                                       
+"""
+
+out.write(header)
+
 
 chronusQ.initCQ()
 controls.iniControls()
 
 secDict = parseInput(workers,fname+".inp")
 
+parseMisc(workers,secDict["MISC"])
 parseMolecule(workers,secDict["MOLECULE"])
-parseQM(workers,secDict)
+jobStr = parseQM(workers,secDict)
 
-runSCF(workers)
+jobMap[jobStr](workers)
+
 chronusQ.finalizeCQ()
 
 #controls.printSettings()

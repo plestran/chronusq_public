@@ -1,0 +1,5 @@
+
+knownJobs = [
+  'SCF',
+  'RT'
+]

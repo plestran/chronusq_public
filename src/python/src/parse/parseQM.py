@@ -1,8 +1,9 @@
 import os,sys
 import libpythonapi as chronusQ
+from libpythonapi import CErrMsg
 from parseBasis import parseBasis
 from meta.knownKeywords import requiredKeywords
-#from standardJobs import *
+from meta.knownJobs import *
 
 #
 #  Parse the QM section of the input file and populate
@@ -19,6 +20,10 @@ from meta.knownKeywords import requiredKeywords
 #  Input:
 #    workers      -     the workers array of CQ objects
 #    secDict      -     total parsed section dictionary
+#
+#  Output:
+#    JobStr       -     string containing a map to standard
+#                       job functions
 #
 def parseQM(workers,secDict): 
   print 'Parsing QM Information'
@@ -38,8 +43,8 @@ def parseQM(workers,secDict):
 #
   for i in requiredKeywords['QM']:
     if i not in ssSettings:
-      print 'Required keyword QM.' + str(i) + ' not found'
-      exit(1)
+      msg = 'Required keyword QM.' + str(i) + ' not found'
+      CErrMsg(workers['CQFileIO'],msg)
 
 #
 # Try to set the reference for CQ::SingleSlater
@@ -51,8 +56,14 @@ def parseQM(workers,secDict):
 #
   parseBasis(workers,ssSettings['BASIS'])
 
-  if ssSettings['JOB'] in ('RT'):
-    parseRT(workers,secDict['RT']) 
+  if str(ssSettings['JOB']) in knownJobs:
+    if ssSettings['JOB'] in ('RT'):
+      parseRT(workers,secDict['RT']) 
+  else:
+    msg = 'QM.Job ' + str(ssSettings['JOB']) + ' not recognized'
+    CErrMsg(workers['CQFileIO'],str(msg))
+
+  return str(ssSettings['JOB'])
 
 #  # Space filler to pasify error 
 #  workers["CQSingleSlaterDouble"].communicate(
