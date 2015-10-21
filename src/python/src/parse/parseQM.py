@@ -20,6 +20,10 @@ from meta.knownKeywords import requiredKeywords
 #    workers      -     the workers array of CQ objects
 #    secDict      -     total parsed section dictionary
 #
+#  Output:
+#    JobStr       -     string containing a map to standard
+#                       job functions
+#
 def parseQM(workers,secDict): 
   print 'Parsing QM Information'
   ssSettings = secDict["QM"]
@@ -53,6 +57,8 @@ def parseQM(workers,secDict):
 
   if ssSettings['JOB'] in ('RT'):
     parseRT(workers,secDict['RT']) 
+
+  return str(ssSettings['JOB'])
 
 #  # Space filler to pasify error 
 #  workers["CQSingleSlaterDouble"].communicate(

@@ -1,7 +1,7 @@
 import os,sys
 sys.path.append('/home/dbwy/git_repo/chronusq/build_gcc_libint_openmp/src/python')
 import libpythonapi as chronusQ
-from jobs.standardJobs import *
+from jobs.jobMap import *
 from parse.parseInput import parseInput
 from parse.parseMolecule import parseMolecule
 from parse.parseQM import parseQM
@@ -48,9 +48,10 @@ secDict = parseInput(workers,fname+".inp")
 
 parseMisc(workers,secDict["MISC"])
 parseMolecule(workers,secDict["MOLECULE"])
-parseQM(workers,secDict)
+jobStr = parseQM(workers,secDict)
 
-runSCF(workers)
+knownJobs[jobStr](workers)
+
 chronusQ.finalizeCQ()
 
 #controls.printSettings()

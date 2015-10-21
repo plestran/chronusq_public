@@ -10,33 +10,16 @@ def communicate(workers):
     workers["CQMolecule"], workers["CQBasisSet"], workers["CQAOIntegrals"],
     workers["CQFileIO"], workers["CQControls"]
   )
-  workers["CQRealTime"].communicate(workers["CQFileIO"],workers["CQControls"],
-    workers["CQAOIntegrals"],workers["CQSingleSlater"])
+  try:
+    workers["CQRealTime"].communicate(workers["CQFileIO"],workers["CQControls"],
+      workers["CQAOIntegrals"],workers["CQSingleSlater"])
+  except KeyError:
+    pass
 
-#def initialize(workers):
-#  # Set Up AOIntegrals Metadata
-#  workers["CQAOIntegrals"].initMeta()
-#
-#  # Set up Wavefunction Information
-#  workers["CQSingleSlater"].initMeta()
-#  workers["CQSingleSlater"].genMethString()
-#
-#  # RT
-#  
-#def alloc(workers):
-#  # Allocate Space for AO Integrals
-#  workers["CQAOIntegrals"].alloc()
-#
-#  # Allocate Space for Wavefunction Information
-#  workers["CQSingleSlater"].alloc()
-#
-#  # RT
 
 def runSCF(workers):
   # Make the classes know about eachother
   communicate(workers)
-# initialize(workers)
-# alloc(workers)
 
   # Print some information pertaining to the job
   # FIXME: These two are general and should always be printed
@@ -64,9 +47,13 @@ def runSCF(workers):
   workers["CQSingleSlater"].SCF()
   workers["CQSingleSlater"].computeMultipole()
   workers["CQSingleSlater"].printMultipole()
-#  workers["CQRealTime"].initMeta()
-#  workers["CQRealTime"].alloc()
-#  workers["CQRealTime"].iniDensity()
-#  workers["CQRealTime"].doPropagation()
+
+def runRT(workers):
+  runSCF(workers)
+  workers["CQRealTime"].initMeta()
+  workers["CQRealTime"].alloc()
+  workers["CQRealTime"].iniDensity()
+  workers["CQRealTime"].doPropagation()
+
   
   
