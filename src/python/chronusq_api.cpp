@@ -149,5 +149,6 @@ BOOST_PYTHON_MODULE(libpythonapi){
   def("CErrMsg",         ChronusQ::Wrapper_CErr_Message );
   def("initCQ",          ChronusQ::initCQ               );
   def("finalizeCQ",      ChronusQ::finalizeCQ           );
+  def("CQSetNumThreads", ChronusQ::CQSetNumThreads      );
 };
 

@@ -3,8 +3,6 @@ import configparser
 import libpythonapi as chronusQ
 from libpythonapi import CErrMsg
 from libpythonapi import CErr
-from parseMolecule import parseMolecule
-from parseQM import parseQM
 from meta.knownKeywords import knownKeywords
 from meta.knownKeywords import knownSections
 import meta.enumMaps as enumMaps
@@ -109,9 +107,6 @@ def genSecDict(workers,parser,section):
   # Return the dictionary
   return dict1
 
-
-def parseMisc(workers,settings): 
-  print 'hello'
 
 #
 # Parse the input file

@@ -5,6 +5,7 @@ from jobs.standardJobs import *
 from parse.parseInput import parseInput
 from parse.parseMolecule import parseMolecule
 from parse.parseQM import parseQM
+from parse.parseMisc import parseMisc
 
 fname = sys.argv[1]
 
@@ -45,6 +46,7 @@ controls.iniControls()
 
 secDict = parseInput(workers,fname+".inp")
 
+parseMisc(workers,secDict["MISC"])
 parseMolecule(workers,secDict["MOLECULE"])
 parseQM(workers,secDict)
 
