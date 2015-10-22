@@ -1,0 +1,119 @@
+
+Molecular Information:
+       nAtoms =       3                      Charge =           0
+   nElectrons =      10           Nuclear Repulsion = 8.00237e+00 Eh
+
+Cartesian coordinates (bohr):
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                                      X              Y              Z
+--------------------------------------------------------------------------------
+       1       O       8    0.00000e+00   -1.43226e-01    0.00000e+00
+       2       H       1    1.63804e+00    1.13655e+00    0.00000e+00
+       3       H       1   -1.63804e+00    1.13655e+00    0.00000e+00
+--------------------------------------------------------------------------------
+
+Basis Function Information:
+
+  Basis Set path: /home/dbwy/git_repo/chronusq/basis/sto3g.gbs
+
+  nBasis      =  7
+  nPrimitive  =  21
+  nShell      =  5
+
+
+Found 2 unique atoms in molecule
+
+Atomic SCF Starting.............
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+Self Consistant Field (SCF) Settings:
+
+  SCF Type:                           Real Restricted Hartree-Fock
+  Density Convergence Tolerence:      1.000000e-10
+  Energy Convergence Tolerence:       1.000000e-12
+  Maximum Number of SCF Cycles:       256
+  Integral Contraction Algorithm:     Direct
+
+--------------------------------------------------------------------------------
+SCF Iteration   Energy (Eh)       ΔE (Eh)          |ΔP(α)|         
+-------------   -----------       -------           -------           
+  SCFIt: 1      -74.8749392555    -3.9671535e-01   2.0386303e+00
+  SCFIt: 2      -74.9381834290    -6.3244173e-02   6.8448936e-01
+  SCFIt: 3      -74.9414265478    -3.2431189e-03   1.2919179e-01
+  SCFIt: 4      -74.9419370087    -5.1046089e-04   5.7926335e-02
+  SCFIt: 5      -74.9420469702    -1.0996144e-04   2.4808865e-02
+  SCFIt: 6      -74.9420722506    -2.5280437e-05   1.2054431e-02
+  SCFIt: 7      -74.9420798968    -7.6462320e-06   1.1052335e-02
+  SCFIt: 8      -74.9420798968    -4.4337867e-12   5.9411627e-06
+  SCFIt: 9      -74.9420798968    -2.7000624e-13   1.0888458e-06
+  SCFIt: 10     -74.9420798968     2.8421709e-14   4.5029536e-07
+  SCFIt: 11     -74.9420798968    -4.2632564e-14   1.7644889e-07
+  SCFIt: 12     -74.9420798968     0.0000000e+00   8.5174374e-08
+  SCFIt: 13     -74.9420798968    -1.4210855e-14   7.7070086e-08
+  SCFIt: 14     -74.9420798968    -1.4210855e-14   1.4448594e-14
+
+SCF Completed: E(ℝ-RHF) = -74.9420798968  Eh after  14  SCF Iterations
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+Electric Dipole Moment                            (Debye)
+X=           0.0000000000
+Y=           1.5339978634
+Z=           0.0000000000
+Tot=         1.5339978634
+--------------------------------------------------------------------------------
+Electric Quadrupole Moment                        (Debye-Å)
+XX=         -4.3168030816 XY=         0.0000000000 XZ=         0.0000000000
+YX=          0.0000000000 YY=        -5.2054199183 YZ=         0.0000000000
+ZX=          0.0000000000 ZY=         0.0000000000 ZZ=        -6.2075726299
+--------------------------------------------------------------------------------
+Electric Quadrupole Moment (Traceless)            (Debye-Å)
+XX=          0.9264621283 XY=         0.0000000000 XZ=         0.0000000000
+YX=          0.0000000000 YY=         0.0378452916 YZ=         0.0000000000
+ZX=          0.0000000000 ZY=         0.0000000000 ZZ=        -0.9643074200
+--------------------------------------------------------------------------------
+Electric Octupole Moment                          (Debye-Å²)
+XXX=         0.0000000000 XXY=        0.3915839028 XXZ=       -0.0000000000
+XYX=         0.3915839028 XYY=        0.0000000000 XYZ=        0.0000000000
+XZX=        -0.0000000000 XZY=        0.0000000000 XZZ=        0.0000000000
+YXX=         0.3915839028 YXY=        0.0000000000 YXZ=        0.0000000000
+YYX=         0.0000000000 YYY=       -0.9571748287 YYZ=       -0.0000000000
+YZX=         0.0000000000 YZY=       -0.0000000000 YZZ=       -0.4476335386
+ZXX=        -0.0000000000 ZXY=        0.0000000000 ZXZ=        0.0000000000
+ZYX=         0.0000000000 ZYY=       -0.0000000000 ZYZ=       -0.4476335386
+ZZX=         0.0000000000 ZZY=       -0.4476335386 ZZZ=       -0.0000000000
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+ *** Real-Time Time-Dependent Hartree-Fock ***
+
+ * General Parameters:
+                Number of steps =             5
+                      Step size =       0.05000 a.u.     0.0012094 fs
+      Orthonormalization method =       Löwdin
+
+ * Integration Parameters:
+         Electronic integration = Modified mid-point
+
+ * External Field Parameters:
+                     Field type =      Constant
+                 Terms Included = Electric Dipole Only
+                          Gauge =        Length
+                  Update Method =          MMUT
+                             Ex =       0.10000 a.u.
+                             Ey =       4.50000 a.u.
+                             Ez =       8.60000 a.u.
+                      Frequency =       0.00000 eV
+                          Phase =       0.00000 rad
+                        Time On =       0.00000 fs
+                       Time Off =   10000.00000 fs
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+       Time           Energy    Ex Dipole    Ey Dipole    Ez Dipole  Etot Dipole
+       (au)             (Eh)      (debye)      (debye)      (debye)      (debye)
+--------------------------------------------------------------------------------
+     0.0000   -72.5851151256     0.000000     1.533998     0.000000     1.533998
+     0.0500   -72.6239785531     0.001922     1.578272     0.004729     1.578280
+     0.1000   -72.5847530315     0.004125     1.621217     0.017152     1.621313
+     0.1500   -72.6227644340     0.008987     1.737945     0.037126     1.738365
+     0.2000   -72.5839110770     0.011987     1.831820     0.063533     1.832960
+     0.2500   -72.6210714603     0.014253     1.973704     0.097533     1.976164

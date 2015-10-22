@@ -7,6 +7,10 @@ set(ChronusQ_VERSION_MINOR 0)
 # Check for Dependencies
 find_package(BLAS REQUIRED)   # Required for now
 find_package(LAPACK REQUIRED) # Required for now
+find_package(PythonLibs)
+find_package(Boost REQUIRED)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I ${Boost_INCLUDE_DIRS}")
 
 option(USE_OMP "Use SMP Parallelization" OFF) # Default serial processing
 option(USE_MPI "Use MPI Parallelization" OFF)
