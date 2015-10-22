@@ -19,6 +19,7 @@ find_package(Boost REQUIRED python)
 find_package(Eigen3 REQUIRED)
 find_package(OpenMP)
 
+<<<<<<< HEAD
 # Define include directories
 include_directories("${PROJECT_SOURCE_DIR}/include")
 include_directories("${PROJECT_BINARY_DIR}/include")
@@ -28,6 +29,10 @@ include_directories("${EIGEN3_INCLUDE_DIR}")
 # Append flags for compilation
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+=======
+option(USE_LIBINT "Use LibInt Integral Driver" ON) # Default LibInt Integrals
+option(USE_BOOST_TIMER "Use Boost High Performace Timer" OFF) # Default use built in timer
+>>>>>>> origin/DFT
 
 # Set up Libint environment
 if(USE_LIBINT)
@@ -50,6 +55,12 @@ configure_file(
   "${PROJECT_BINARY_DIR}/src/python/chronusq.py"
 )
 
+<<<<<<< HEAD
+=======
+# Define include Dir
+include_directories("${PROJECT_SOURCE_DIR}/include")
+include_directories("${PROJECT_BINARY_DIR}/include") # Generated Config.h 
+>>>>>>> origin/DFT
 
 # Recurse into src
 add_subdirectory(src)

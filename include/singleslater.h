@@ -30,7 +30,7 @@
 #include <molecule.h>
 #include <controls.h>
 #include <aointegrals.h>
-
+#include <grid.h>
 /****************************/
 /* Error Messages 5000-5999 */
 /****************************/
@@ -122,6 +122,7 @@ class SingleSlater {
   FileIO *      fileio_;                 ///< Access to output file
   Controls *    controls_;               ///< General ChronusQ flow parameters
   AOIntegrals * aointegrals_;            ///< Molecular Integrals over GTOs (AO basis)
+  TwoDGrid    * twodgrid_   ;            ///< 3D grid (1Rad times 1 Ang) 
 
   std::string SCFType_;                  ///< String containing SCF Type (R/C) (R/U/G/CU)
   std::string SCFTypeShort_;             ///< String containing SCF Type (R/C) (R/U/G/CU)
@@ -442,7 +443,7 @@ public:
   inline FileIO *      fileio(){return this->fileio_;};
   inline Controls *    controls(){return this->controls_;};
   inline AOIntegrals * aointegrals(){return this->aointegrals_;};
-
+  inline TwoDGrid *    twodgrid(){return this->twodgrid_;};
   void formGuess();	        // form the intial guess of MO's (Density)
   void placeAtmDen(std::vector<int>, SingleSlater<double> &);           // Place the atomic densities into total densities for guess
   void scaleDen();              // Scale the unrestricted densities for correct # electrons
@@ -451,8 +452,10 @@ public:
   void formCoulomb();		// form the Coulomb matrix
   void formExchange();		// form the exchange matrix
   void formPT();
-  void formVXC(RealMatrix *);   // Form DFT VXC Term
-  void EnVXC();                 // DFT VXC Energy Term
+  void formVXC();               // Form DFT VXC Term
+  double formBeckeW(cartGP gridPt, int iAtm);            // Evaluate Becke Weights
+  double normBeckeW(cartGP gridPt);            // Evaluate Becke Weights
+  void   buildVxc(cartGP gridPt, double weight);            // function to build the Vxc therm
   void matchord();              // match Guassian order of guess
   void readGuessIO();       	// read the initial guess of MO's from the input stream
   void readGuessGauMatEl(GauMatEl&); // read the intial guess of MO's from Gaussian raw matrix element file
@@ -513,6 +516,7 @@ public:
 #include <singleslater_fock.h>
 #include <singleslater_misc.h>
 #include <singleslater_scf.h>
+#include <singleslater_dft.h>
 
 
 } // namespace ChronusQ

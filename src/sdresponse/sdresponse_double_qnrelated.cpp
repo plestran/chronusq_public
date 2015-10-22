@@ -429,7 +429,6 @@ void SDResponse<double>::formRM3(RealCMMap &XMO, RealCMMap &Sigma, RealCMMap &Rh
 
 //this->singleSlater_->aointegrals()->multTwoEContractDirect(XMO.cols(),false,false,false,
 //  (this->nTCS_==2),CommA,GCommA,CommB,GCommB);
-
   if(this->singleSlater_->aointegrals()->integralAlgorithm == AOIntegrals::DIRECT && this->nTCS_ != 2)
     this->singleSlater_->aointegrals()->multTwoEContractDirect(XMO.cols(),false,false,false,
       (this->nTCS_==2),CommA,GCommA,CommB,GCommB);
@@ -536,7 +535,7 @@ void SDResponse<double>::formRM4(RealCMMap& XMO, RealCMMap &Sigma, RealCMMap &Rh
 //  doTCS,XAO,IXAO,XAO,IXAO);
 //cout << "HERE" << endl;
   for(auto idx = 0; idx < XMO.cols(); idx++)
-    this->singleSlater_->aointegrals()->twoEContractN4(false,false,true,doTCS,XAO[idx],
+    this->singleSlater_->aointegrals()->twoEContractN4(false,false,false,true,doTCS,XAO[idx],
       IXAO[idx],XAO[idx],IXAO[idx]);
 //cout << "HERE" << endl;
 

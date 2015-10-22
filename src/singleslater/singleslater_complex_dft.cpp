@@ -23,12 +23,16 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
-#include <aointegrals.h>
-namespace ChronusQ{
-  template<>
-  void AOIntegrals::twoEContractDF(bool RHF, bool KS, bool doFock, const ComplexMatrix &XAlpha, ComplexMatrix &AXAlpha,
-                                   const ComplexMatrix &XBeta, ComplexMatrix &AXBeta) {
-    CErr("No Density Fitting Contraction for Complex Matricies Implemented");
-  }
-} // namespace ChronusQ
+#include <singleslater.h>
+namespace ChronusQ {
+//----------------------------//
+// form the Vxc matrix        //
+//----------------------------//
 
+
+template<>
+void SingleSlater<dcomplex>::formVXC(){
+
+};
+
+} // Namespace ChronusQ

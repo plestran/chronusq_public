@@ -4,7 +4,7 @@ cd deps/src
 echo "Unpacking Libint"
 tar xf libint-2.1.0-beta2.tgz
 cd libint-2.1.0-beta2
-./configure --prefix=$PWD/../.. --with-cxx=$CXX
+./configure --prefix=$PWD/../.. --with-cxx=$CXX CXXFLAGS='-fPIC'
 echo "Compiling Libint"
 make install -s -j$1
 echo "Libint Compiled!"

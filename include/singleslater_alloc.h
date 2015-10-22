@@ -38,13 +38,14 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
   this->printLevel_ = controls->printLevel;
 
   this->isClosedShell = (this->multip_ == 1);
+  this->isDFT         = controls->DFT;
   if(controls->HF){
     if(this->isClosedShell && !controls->doCUHF
        && !controls->doTCS)                        this->Ref_ = RHF ; // RHF
     else if(!controls->doCUHF && !controls->doTCS) this->Ref_ = UHF ; // UHF
     else if(controls->doCUHF)                      this->Ref_ = CUHF; // CUHF
     else if(controls->doTCS)                       this->Ref_ = TCS ; // TCS
-  } else if(controls->DFT) {
+  } else if(this->isDFT) {
     if(this->isClosedShell && !controls->doCUHF
        && !controls->doTCS)                        this->Ref_ = RKS ; // RKS
     else if(!controls->doCUHF && !controls->doTCS) this->Ref_ = UKS ; // UKs

@@ -1199,15 +1199,15 @@ void SDResponse<double>::incorePPRPA(){
   std::memcpy(RPAIXAOSing.data(),&RPAIXAOTenSing.storage()[0],RPAIXAOTenSing.size()*sizeof(double));
 */
 
-  this->singleSlater_->aointegrals()->twoEContractDirect(true,false,true,false,ATDAAOAA,ATDAIXAOAA,ATDAAOAA,ATDAIXAOAA);
-  this->singleSlater_->aointegrals()->twoEContractDirect(true,false,true,false,CTDAAOAA,CTDAIXAOAA,CTDAAOAA,CTDAIXAOAA);
-  this->singleSlater_->aointegrals()->twoEContractDirect(true,false,true,false,RPAAOAA,RPAIXAOAA,RPAAOAA,RPAIXAOAA);
-  this->singleSlater_->aointegrals()->twoEContractDirect(true,false,true,false,ATDAAOAB,ATDAIXAOAB,ATDAAOAB,ATDAIXAOAA);
-  this->singleSlater_->aointegrals()->twoEContractDirect(true,false,true,false,CTDAAOAB,CTDAIXAOAB,CTDAAOAB,CTDAIXAOAA);
-  this->singleSlater_->aointegrals()->twoEContractDirect(true,false,true,false,RPAAOAB,RPAIXAOAB,RPAAOAB,RPAIXAOAA);
-  this->singleSlater_->aointegrals()->twoEContractDirect(true,false,true,false,ATDAAOSing,ATDAIXAOSing,ATDAAOSing,ATDAIXAOAA);
-  this->singleSlater_->aointegrals()->twoEContractDirect(true,false,true,false,CTDAAOSing,CTDAIXAOSing,CTDAAOSing,CTDAIXAOAA);
-  this->singleSlater_->aointegrals()->twoEContractDirect(true,false,true,false,RPAAOSing,RPAIXAOSing,RPAAOSing,RPAIXAOAA);
+  this->singleSlater_->aointegrals()->twoEContractDirect(true,false,false,true,false,ATDAAOAA,ATDAIXAOAA,ATDAAOAA,ATDAIXAOAA);
+  this->singleSlater_->aointegrals()->twoEContractDirect(true,false,false,true,false,CTDAAOAA,CTDAIXAOAA,CTDAAOAA,CTDAIXAOAA);
+  this->singleSlater_->aointegrals()->twoEContractDirect(true,false,false,true,false,RPAAOAA,RPAIXAOAA,RPAAOAA,RPAIXAOAA);
+  this->singleSlater_->aointegrals()->twoEContractDirect(true,false,false,true,false,ATDAAOAB,ATDAIXAOAB,ATDAAOAB,ATDAIXAOAA);
+  this->singleSlater_->aointegrals()->twoEContractDirect(true,false,false,true,false,CTDAAOAB,CTDAIXAOAB,CTDAAOAB,CTDAIXAOAA);
+  this->singleSlater_->aointegrals()->twoEContractDirect(true,false,false,true,false,RPAAOAB,RPAIXAOAB,RPAAOAB,RPAIXAOAA);
+  this->singleSlater_->aointegrals()->twoEContractDirect(true,false,false,true,false,ATDAAOSing,ATDAIXAOSing,ATDAAOSing,ATDAIXAOAA);
+  this->singleSlater_->aointegrals()->twoEContractDirect(true,false,false,true,false,CTDAAOSing,CTDAIXAOSing,CTDAAOSing,CTDAIXAOAA);
+  this->singleSlater_->aointegrals()->twoEContractDirect(true,false,false,true,false,RPAAOSing,RPAIXAOSing,RPAAOSing,RPAIXAOAA);
 
 
   ATDAIXMOAA = this->singleSlater_->moA()->adjoint() * ATDAIXAOAA * (*this->singleSlater_->moA()); 
