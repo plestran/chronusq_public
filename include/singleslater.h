@@ -86,6 +86,7 @@ class SingleSlater {
   std::string algebraicField_;           ///< String Real/Complex/(Quaternion)
   std::string algebraicFieldShort_;      ///< String Real/Complex/(Quaternion)
   std::array<double,3> elecField_;
+  std::vector<double> mullPop_; ///< mulliken partial charge
 
   int lenX_;
   int lenXp_;
@@ -417,6 +418,7 @@ public:
   void CDIIS();
   void CpyFock(int);
   void GenDComm(int);
+  void mullikenPop();
   void printEnergy(); 
   void printMultipole();
   void printInfo();

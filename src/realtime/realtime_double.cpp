@@ -409,6 +409,9 @@ void RealTime<double>::doPropagation() {
     this->ssPropagator_->formFock();
     this->ssPropagator_->computeEnergy();
     this->ssPropagator_->computeMultipole();
+
+    this->ssPropagator_->mullikenPop();
+
     this->printRT();
 
 //  Transform Fock from AO to orthonormal basis

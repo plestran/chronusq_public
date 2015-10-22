@@ -66,3 +66,19 @@ void SingleSlater<T>::formDensity(){
   if(this->printLevel_ >= 2) this->printDensity();
   this->haveDensity = true;
 }
+
+template<typename T>
+void SingleSlater<T>::mullikenPop() {
+  double charge;
+  this->mullPop_.clear();
+  RealMatrix PS = (*this->densityA_).real() * (*this->aointegrals_->overlap_); 
+  for (auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++) {
+    auto iBfSt = this->basisset_->mapCen2Bf(iAtm)[0];
+    auto iSize = this->basisset_->mapCen2Bf(iAtm)[1];
+    charge  = elements[this->molecule_->index(iAtm)].atomicNumber;
+    charge -= PS.block(iBfSt,iBfSt,iSize,iSize).trace();
+    this->mullPop_.push_back(charge); 
+  cout << this->mullPop_[0] << endl;
+  } 
+}
+

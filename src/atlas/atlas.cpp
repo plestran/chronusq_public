@@ -170,9 +170,6 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 
 // REAL-TIME TD-SCF 
   
-//  if(controls->doRealTime && controls->directTwoE) {
-//    CErr("REAL TIME CURRENTLY NOT WORKING WITH DIRECT TWO-E INTS",fileIO->out);
-//  }
   if(controls->doRealTime) {
     if(!controls->doComplex) {
       realtimeReal->iniRealTime(fileIO.get(),controls.get(),aointegrals.get(),hartreeFockReal.get());
