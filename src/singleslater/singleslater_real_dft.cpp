@@ -47,6 +47,7 @@ void SingleSlater<double>::formVXC(){
 //    Rad.genGrid();                               
 //    TwoDGrid Raw3Dg(npts,&Rad,&GridLeb);          // Final Raw (not centered) 3D grid (Radial times Angular grid)
     this->vXCA()->setZero();                      // Set to zero every occurence of the SCF
+    this->vCorA()->setZero();                      // Set to zero every occurence of the SCF
     if(!this->isClosedShell && this->Ref_ != TCS) this->vXCB()->setZero();
 //  Loop over each centers (Atoms) (I think can be distribuited over different cpus)
     for(int iAtm = 0; iAtm < nAtom; iAtm++){
@@ -73,7 +74,11 @@ void SingleSlater<double>::formVXC(){
     if(!this->isClosedShell && this->Ref_ != TCS) (*this->vXCA()) =  std::pow(2.0,(1.0/3.0)) * (*this->vXCA()) ;
     if(!this->isClosedShell && this->Ref_ != TCS) (*this->vXCB()) =  std::pow(2.0,(1.0/3.0)) * val * (*this->vXCB()) ;
     if(!this->isClosedShell && this->Ref_ != TCS) this->totalEx = std::pow(2.0,(1.0/3.0)) * this->totalEx;
-    cout << "TotalEx "  << this->totalEx  <<endl;
+    prettyPrint(this->fileio_->out,(*this->vXCA()),"LDA Vx alpha");
+    if(!this->isClosedShell && this->Ref_ != TCS) prettyPrint(this->fileio_->out,(*this->vXCB()),"LDA Vx beta");
+    this->fileio_->out << "Total LDA Ex =" << this->totalEx <<endl;
+//    cout << "TotalEx "  << this->totalEx  <<endl;
+//    cout << "Factor "  << CxVx*CxEn*std::pow(2.0,(1.0/3.0))  <<endl;
 //    cout << "Vx_A" <<endl;
 //    cout << (*this->vXCA()) <<endl;
 //    cout << "Vx_B" <<endl;

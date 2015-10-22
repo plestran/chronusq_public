@@ -71,6 +71,8 @@ class SingleSlater {
   std::unique_ptr<TMatrix>  PTB_;        ///< Beta Perturbation Tensor
   std::unique_ptr<TMatrix>  vXCA_;        ///< Alpha or Full (TCS) VXC
   std::unique_ptr<TMatrix>  vXCB_;        ///< Beta VXC
+  std::unique_ptr<TMatrix>  vCorA_;        ///< Alpha or Full Vcorr
+  std::unique_ptr<TMatrix>  vCorB_;        ///< Beta Vcorr
   std::unique_ptr<RealMatrix>  dipole_;  ///< Electric Dipole Moment
   std::unique_ptr<RealMatrix>  quadpole_; ///< Electric Quadrupole Moment
   std::unique_ptr<RealMatrix>  tracelessQuadpole_; ///< Traceless Electric Quadrupole Moment
@@ -259,6 +261,8 @@ public:
     this->PTB_               = nullptr;        
     this->vXCA_              = nullptr;       
     this->vXCB_              = nullptr;       
+    this->vCorA_              = nullptr;       
+    this->vCorB_              = nullptr;       
     this->dipole_            = nullptr;  
     this->quadpole_          = nullptr;
     this->tracelessQuadpole_ = nullptr; 
@@ -385,6 +389,8 @@ public:
   inline TMatrix* moB()      { return this->moB_.get();};
   inline TMatrix* vXCA()      { return this->vXCA_.get();};
   inline TMatrix* vXCB()      { return this->vXCB_.get();};
+  inline TMatrix* vCorA()      { return this->vCorA_.get();};
+  inline TMatrix* vCorB()      { return this->vCorB_.get();};
   inline RealMatrix* epsA()     { return this->epsA_.get();};
   inline RealMatrix* epsB()     { return this->epsB_.get();};
   inline TMatrix* PTA()      { return this->PTA_.get();};
