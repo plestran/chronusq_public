@@ -8,7 +8,7 @@ set(ChronusQ_VERSION_MINOR 0)
 find_package(BLAS REQUIRED)   # Required for now
 find_package(LAPACK REQUIRED) # Required for now
 find_package(PythonLibs)
-find_package(Boost REQUIRED)
+find_package(Boost REQUIRED python)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I ${Boost_INCLUDE_DIRS}")
 

@@ -1,5 +1,5 @@
 import os,sys
-sys.path.append('/home/dbwy/git_repo/chronusq/build_gcc_libint_openmp/src/python')
+sys.path.append('/home/dbwy/git_repo/chronusq/build_gcc/src/python')
 import libpythonapi as chronusQ
 from jobs.jobMap import *
 from parse.parseInput import parseInput
