@@ -299,11 +299,11 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
   for(size_t i = 1; i < omp_get_max_threads(); i++) engines[i] = engines[0];
 
   if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(this->nTCS_); 
-#ifdef USE_OMP
+#ifdef _OPENMP
   #pragma omp parallel
 #endif
   {
-#ifdef USE_OMP
+#ifdef _OPENMP
     int thread_id = omp_get_thread_num();
 #else
     int thread_id = 0;
@@ -513,11 +513,11 @@ void AOIntegrals::computeAOTwoE(){
 
   this->aoERI_->fill(0.0);
 
-#ifdef USE_OMP
+#ifdef _OPENMP
   #pragma omp parallel
 #endif
   {
-#ifdef USE_OMP
+#ifdef _OPENMP
     int thread_id = omp_get_thread_num();
 #else
     int thread_id = 0;
@@ -666,11 +666,11 @@ void AOIntegrals::computeAORII(){
   if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(1); 
   if(!this->DFbasisSet_->haveMapSh2Bf) this->DFbasisSet_->makeMapSh2Bf(1); 
 
-#ifdef USE_OMP
+#ifdef _OPENMP
   #pragma omp parallel
 #endif
   {
-#ifdef USE_OMP
+#ifdef _OPENMP
     int thread_id = omp_get_thread_num();
 #else
     int thread_id = 0;
@@ -722,11 +722,11 @@ void AOIntegrals::computeAORIS(){
   RealMap aoRISMap(&this->aoRIS_->storage()[0],
     this->DFbasisSet_->nBasis(),this->DFbasisSet_->nBasis());
 
-#ifdef USE_OMP
+#ifdef _OPENMP
   #pragma omp parallel
 #endif
   {
-#ifdef USE_OMP
+#ifdef _OPENMP
     int thread_id = omp_get_thread_num();
 #else
     int thread_id = 0;

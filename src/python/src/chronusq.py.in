@@ -1,5 +1,6 @@
+#!@PYTHON_EXECUTABLE@
 import os,sys
-sys.path.append('/home/jjgoings/chronusq/build_gcc_libint_openmp/src/python')
+sys.path.append('@PYTHONAPI_PATH@')
 import libpythonapi as chronusQ
 from jobs.jobMap import *
 from parse.parseInput import parseInput
@@ -54,7 +55,7 @@ chronusQ.initCQ()
 controls.iniControls()
 
 secDict = parseInput(workers,fname+".inp")
-print secDict
+#print secDict
 
 parseMisc(workers,secDict["MISC"])
 parseMolecule(workers,secDict["MOLECULE"])

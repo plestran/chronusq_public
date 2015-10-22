@@ -381,7 +381,7 @@ void initCQ(){
   // Bootstrap Libint env
   libint2::init(); 
 #endif
-#ifdef USE_OMP
+#ifdef _OPENMP
   // Set up Thread Pool (Default serial)
   omp_set_num_threads(1);
 #endif

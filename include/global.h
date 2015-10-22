@@ -55,7 +55,7 @@
 #include <btas/btas.h> // BTAS Tensor Algebra library (header only)
 
 // Parallelization
-#ifdef USE_OMP
+#ifdef _OPENMP
 #include <omp.h>
 #endif
 //#include "oompi.h"

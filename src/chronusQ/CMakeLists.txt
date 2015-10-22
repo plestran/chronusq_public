@@ -1,5 +1,5 @@
 add_executable(chronusQ chronusQ.cpp)
 target_link_libraries(chronusQ LINK_PUBLIC atlas classtools basisset controls
 mointegrals molecule tools sdresponse realtime mollerplesset singleslater aointegrals worker
-quasinewton grid fileio cerr gauinterface lapack blas ${LIBINT_LIB} m ${OpenMP_CXX_FLAGS})
+quasinewton grid fileio cerr gauinterface ${LAPACK_LINKER_FLAGS} ${LAPACK_LIBRARIES} ${BLAS_LINKER_FLAGS} ${BLAS_LIBRARIES} ${LIBINT_LIB} m ${OpenMP_CXX_FLAGS})
 
