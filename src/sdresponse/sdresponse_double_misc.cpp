@@ -1915,9 +1915,9 @@ RealMatrix SDResponse<double>::formRM2(RealMatrix &XMO){
      *  IXAO(s)_{i,j} = [ (ij,s|kl,s') + delta_{s,s'}*(il,s|kj,s) ] * XAO(s')_{l,k}
      */ 
     if(this->singleSlater_->aointegrals()->integralAlgorithm == AOIntegrals::DIRECT)
-      this->singleSlater_->aointegrals()->twoEContractDirect(false,false,false,false,XAAO,IXA,XBAO,IXB);
+      this->singleSlater_->aointegrals()->twoEContractDirect(false,false,false,false,false,XAAO,IXA,XBAO,IXB);
     else if(this->singleSlater_->aointegrals()->integralAlgorithm == AOIntegrals::INCORE)
-      this->singleSlater_->aointegrals()->twoEContractN4(false,true,false,false,XAAO,IXA,XBAO,IXB);
+      this->singleSlater_->aointegrals()->twoEContractN4(false,false,true,false,false,XAAO,IXA,XBAO,IXB);
     
 
     /*
