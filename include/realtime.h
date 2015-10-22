@@ -151,6 +151,7 @@ public:
     double timeStep;
     double energy;
     std::array<double,4> dipole;
+    std::vector<double> mullPop;
     std::vector<double> orbitalOccA;
     std::vector<double> orbitalOccB;
   };
@@ -282,6 +283,7 @@ public:
   void doPropagation();
   void writeDipoleCSV();
   void writeOrbitalCSV();
+  void writeMullikenCSV();
 };
 
 #include <realtime_alloc.h>

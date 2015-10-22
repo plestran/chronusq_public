@@ -371,6 +371,7 @@ public:
   inline int nOVA()    { return nOccA_*nVirA_;};
   inline int nOVB()    { return nOccB_*nVirB_;};
   inline int printLevel(){ return this->printLevel_;};
+  inline std::vector<double> mullPop(){ return this->mullPop_;};
   inline std::array<double,3> elecField(){ return this->elecField_;  };
   inline TMatrix* densityA() { return this->densityA_.get();};
   inline TMatrix* densityB() { return this->densityB_.get();};

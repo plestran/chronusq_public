@@ -47,6 +47,29 @@ void RealTime<double>::writeDipoleCSV(){
 };
 
 template<>
+void RealTime<double>::writeMullikenCSV(){
+  std::ofstream csv("RealTime_Mulliken.csv");
+  csv << std::setw(14) << "Atom number";
+  for(auto iAtm = 0; iAtm < this->ssPropagator_->molecule()->nAtoms(); iAtm++) {
+    csv << std::setw(14) << iAtm;
+  }
+  csv << endl;
+  csv << std::setw(14) << "Atom symbol";
+  for(auto iAtm = 0; iAtm < this->ssPropagator_->molecule()->nAtoms(); iAtm++) {
+    csv << std::setw(14) << elements[this->ssPropagator_->molecule()->index(iAtm)].symbol;
+  }
+  csv << endl;
+  csv << std::setw(14) << "Time (a.u.)" << endl;
+  for(auto it = this->propInfo.begin(); it != this->propInfo.end(); it++) {
+    csv << std::fixed << std::setw(14) << std::setprecision(10) << it->timeStep;
+    for(auto iAtm = 0; iAtm < this->ssPropagator_->molecule()->nAtoms(); iAtm++) {
+      csv << ", " << std::setw(14) << it->mullPop[iAtm];
+    }
+    csv << endl;
+  } 
+};
+
+template<>
 void RealTime<double>::writeOrbitalCSV(){
   std::ofstream csv("RealTime_OrbOcc_Alpha.csv");
   for(auto it = this->propInfo.begin(); it != this->propInfo.end(); it++) {
@@ -452,6 +475,7 @@ void RealTime<double>::doPropagation() {
       rec.dipole[3] = std::sqrt( std::pow(rec.dipole[0],2.0) +
                                  std::pow(rec.dipole[1],2.0) +
                                  std::pow(rec.dipole[2],2.0) );
+      rec.mullPop    = (this->ssPropagator_->mullPop());
       scratch = (initMOA.adjoint() * POA * initMOA);
       for(auto idx = 0; idx != NTCSxNBASIS; idx++) {
         rec.orbitalOccA.push_back(scratch(idx,idx).real());
@@ -491,6 +515,8 @@ void RealTime<double>::doPropagation() {
   this->writeDipoleCSV();
   //  Write orbital occupation information
   this->writeOrbitalCSV();
+  // Write Mulliken partial charges
+  this->writeMullikenCSV();
 };
 
 } // namespace ChronusQ
