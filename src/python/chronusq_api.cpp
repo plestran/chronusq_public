@@ -96,8 +96,8 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setNTCS"        , &AOIntegrals::setNTCS               )
     .def("setMaxMultipole", &AOIntegrals::setMaxMultipole       )
     
-    .def_readwrite("allocERI", &AOIntegrals::allocERI           )
-    .def_readwrite("doDF"    , &AOIntegrals::doDF               )
+//  .def_readwrite("allocERI", &AOIntegrals::allocERI           )
+//  .def_readwrite("doDF"    , &AOIntegrals::doDF               )
   ;
 
   class_<RealTime<double>,boost::noncopyable>("RealTime_double",init<>())
@@ -142,8 +142,39 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("SinSq"   , RealTime<double>::SinSq         )
   ;
 
-  def("readInput",       ChronusQ::Wrapper_readInput);
-  def("HashAtom",        ChronusQ::HashAtom         );
-  def("getAtomicNumber", ChronusQ::getAtomicNumber  );
+  class_<MOIntegrals<double>,boost::noncopyable>("MOIntegrals_double",init<>())
+    .def("communicate" , &MOIntegrals<double>::communicate)
+    .def("initMeta"    , &MOIntegrals<double>::initMeta   )
+  ;
+
+  class_<SDResponse<double>,boost::noncopyable>("SDResponse_double",init<>())
+    .def("communicate" , &SDResponse<double>::communicate )
+    .def("initMeta"    , &SDResponse<double>::initMeta    )
+    .def("alloc"       , &SDResponse<double>::alloc       )
+    .def("setNSek"     , &SDResponse<double>::setNSek     )
+    .def("setMeth"     , &SDResponse<double>::setMeth     )
+    .def("initMeth"    , &SDResponse<double>::initMeth    )
+    .def("IterativeRPA", &SDResponse<double>::IterativeRPA)
+  ;
+
+  enum_<SDResponse<double>::METHOD>("SDResponse_METHOD")
+    .value("INVALID", SDResponse<double>::__invalid    )
+    .value("CIS"    , SDResponse<double>::CIS          )
+    .value("RPA"    , SDResponse<double>::RPA          )
+    .value("PPRPA"  , SDResponse<double>::PPRPA        )
+    .value("PPATDA" , SDResponse<double>::PPATDA       )
+    .value("PPCTDA" , SDResponse<double>::PPCTDA       )
+    .value("STAB"   , SDResponse<double>::STAB         )
+  ;
+
+
+  def("readInput",       ChronusQ::Wrapper_readInput    );
+  def("HashAtom",        ChronusQ::HashAtom             );
+  def("getAtomicNumber", ChronusQ::getAtomicNumber      );
+  def("CErr",            ChronusQ::Wrapper_CErr_Default );
+  def("CErrMsg",         ChronusQ::Wrapper_CErr_Message );
+  def("initCQ",          ChronusQ::initCQ               );
+  def("finalizeCQ",      ChronusQ::finalizeCQ           );
+  def("CQSetNumThreads", ChronusQ::CQSetNumThreads      );
 };
 

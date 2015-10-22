@@ -118,6 +118,26 @@ class MOIntegrals{
 
   void getLocMO();
 
+  inline void checkWorkers(){
+    if(this->fileio_  == NULL) 
+      CErr("Fatal: Must initialize MOIntegrals with FileIO Object");
+    if(this->basisSet_ == NULL) 
+      CErr("Fatal: Must initialize MOIntegrals with BasisSet Object",
+           this->fileio_->out);
+    if(this->molecule_ == NULL) 
+      CErr("Fatal: Must initialize MOIntegrals with Molecule Object",
+           this->fileio_->out);
+    if(this->singleSlater_ == NULL) 
+      CErr("Fatal: Must initialize MOIntegrals with SingleSlater Object",
+           this->fileio_->out);
+    if(this->aointegrals_ == NULL) 
+      CErr("Fatal: Must initialize MOIntegrals with AOIntegrals Object",
+           this->fileio_->out);
+    if(this->controls_ == NULL) 
+      CErr("Fatal: Must initialize MOIntegrals with Controls Object",
+           this->fileio_->out);
+  }
+
 public:
   void testLocMO();
 
@@ -128,13 +148,112 @@ public:
   bool      haveMOiabc;
   bool      haveMOabcd;
  
-  MOIntegrals(){;};
+  MOIntegrals(){
+    this->molecule_     = NULL; 
+    this->basisSet_     = NULL;
+    this->fileio_       = NULL;
+    this->controls_     = NULL;
+    this->aointegrals_  = NULL;
+    this->singleSlater_ = NULL;
+
+    this->iajb_        = nullptr;
+    this->ijab_        = nullptr;
+    this->ijka_        = nullptr;
+    this->ijkl_        = nullptr;
+    this->iabc_        = nullptr;
+    this->abcd_        = nullptr;
+    this->iajbAAAA_    = nullptr;
+    this->ijabAAAA_    = nullptr;
+    this->ijkaAAAA_    = nullptr;
+    this->ijklAAAA_    = nullptr;
+    this->iabcAAAA_    = nullptr;
+    this->abcdAAAA_    = nullptr;
+    this->iajbAABB_    = nullptr;
+    this->ijabAABB_    = nullptr;
+    this->ijkaAABB_    = nullptr;
+    this->ijklAABB_    = nullptr;
+    this->iabcAABB_    = nullptr;
+    this->abcdAABB_    = nullptr;
+    this->iajbBBBB_    = nullptr;
+    this->ijabBBBB_    = nullptr;
+    this->ijkaBBBB_    = nullptr;
+    this->ijklBBBB_    = nullptr;
+    this->iabcBBBB_    = nullptr;
+    this->abcdBBBB_    = nullptr;
+    this->locMOOcc_    = nullptr;
+    this->locMOVir_    = nullptr;
+    this->locMOAOcc_   = nullptr;
+    this->locMOAVir_   = nullptr;
+    this->locMOBOcc_   = nullptr;
+    this->locMOBVir_   = nullptr;
+    this->reLocMOOcc_  = nullptr;
+    this->reLocMOVir_  = nullptr;
+    this->reLocMOAOcc_ = nullptr;
+    this->reLocMOAVir_ = nullptr;
+    this->reLocMOBOcc_ = nullptr;
+    this->reLocMOBVir_ = nullptr;
+    this->imLocMOOcc_  = nullptr;
+    this->imLocMOVir_  = nullptr;
+    this->imLocMOAOcc_ = nullptr;
+    this->imLocMOAVir_ = nullptr;
+    this->imLocMOBOcc_ = nullptr;
+    this->imLocMOBVir_ = nullptr;
+ 
+    this->haveMOiajb = false;
+    this->haveMOijab = false;
+    this->haveMOijka = false;
+    this->haveMOijkl = false;
+    this->haveMOiabc = false;
+    this->haveMOabcd = false;
+    this->iajbIsDBar = false;
+    this->ijabIsDBar = false;
+    this->ijkaIsDBar = false;
+    this->ijklIsDBar = false;
+    this->iabcIsDBar = false;
+    this->abcdIsDBar = false;
+    this->haveLocMO  = false;
+ 
+    this->nBasis_ = 0;
+    this->Ref_    = 0;
+    this->nTCS_   = 0;
+    this->nOA_    = 0;
+    this->nOB_    = 0;
+    this->nVA_    = 0;
+    this->nVB_    = 0;
+    this->nO_     = 0;  
+    this->nV_     = 0;
+  }
   ~MOIntegrals(){;};
   
   // initialization function
   void iniMOIntegrals(Molecule *,BasisSet *,
                       FileIO *,Controls *,
                       AOIntegrals *,SingleSlater<T> *);
+
+  inline void communicate(Molecule &mol,BasisSet &basis, FileIO &fileio,
+    Controls &controls, AOIntegrals &aoints,SingleSlater<T> &ss){
+
+    this->molecule_     = &mol;
+    this->basisSet_     = &basis;
+    this->fileio_       = &fileio;
+    this->controls_     = &controls;
+    this->aointegrals_  = &aoints;
+    this->singleSlater_ = &ss;
+  }
+
+  inline void initMeta(){
+    this->checkWorkers();
+    this->nBasis_ = this->singleSlater_->nBasis();
+    this->Ref_    = this->singleSlater_->Ref();
+    this->nTCS_   = this->singleSlater_->nTCS();
+    this->nOA_    = this->singleSlater_->nOccA();
+    this->nOB_    = this->singleSlater_->nOccB();
+    this->nVA_    = this->singleSlater_->nVirA();
+    this->nVB_    = this->singleSlater_->nVirB();
+    this->nO_     = this->nOA_ + this->nOB_;  
+    this->nV_     = this->nVA_ + this->nVB_;
+
+  }
 
   void formIAJB(bool);
   void formIJAB(bool);
@@ -255,6 +374,7 @@ public:
     }
   } 
 }; //template Class MOIntegrals
+#include <mointegrals_alloc.h>
 } // namespace ChronusQ
 
 #endif

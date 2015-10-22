@@ -429,9 +429,16 @@ void SDResponse<double>::formRM3(RealCMMap &XMO, RealCMMap &Sigma, RealCMMap &Rh
 
 //this->singleSlater_->aointegrals()->multTwoEContractDirect(XMO.cols(),false,false,false,
 //  (this->nTCS_==2),CommA,GCommA,CommB,GCommB);
-  for(auto idx = 0; idx < XMO.cols(); idx++)
-    this->singleSlater_->aointegrals()->twoEContractN4(false,true,false,(this->nTCS_==2),CommA[idx],
-      GCommA[idx],CommB[idx],GCommB[idx]);
+
+  if(this->singleSlater_->aointegrals()->integralAlgorithm == AOIntegrals::DIRECT && this->nTCS_ != 2)
+    this->singleSlater_->aointegrals()->multTwoEContractDirect(XMO.cols(),false,false,false,
+      (this->nTCS_==2),CommA,GCommA,CommB,GCommB);
+  else if(this->singleSlater_->aointegrals()->integralAlgorithm == AOIntegrals::INCORE)
+    for(auto idx = 0; idx < XMO.cols(); idx++)
+      this->singleSlater_->aointegrals()->twoEContractN4(false,true,false,(this->nTCS_==2),CommA[idx],
+        GCommA[idx],CommB[idx],GCommB[idx]);
+  else
+    CErr("Integral Contraction logic for SDR is not defined",this->fileio_->out);
 
 
   for(auto idx = 0; idx < XMO.cols(); idx++){

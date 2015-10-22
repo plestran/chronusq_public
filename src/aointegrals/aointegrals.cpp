@@ -83,8 +83,10 @@ void AOIntegrals::iniAOIntegrals(Molecule * molecule, BasisSet * basisset,
 
   
   if(controls->doTCS) this->nTCS_ = 2;
-  this->allocERI = this->controls_->buildn4eri;
-  this->doDF     = this->controls_->doDF;
+//this->allocERI = this->controls_->buildn4eri;
+//this->doDF     = this->controls_->doDF;
+  if(this->controls_->buildn4eri) this->integralAlgorithm = INCORE;
+  if(this->controls_->doDF     ) this->integralAlgorithm = DENFIT;
   this->alloc();
 
 };
@@ -446,7 +448,7 @@ void AOIntegrals::allocOp(){
   }
 #else
   try {
-    if(this->allocERI){ // Allocate R4 ERI Tensor
+    if(this->integralAlgorithm == INCORE){ // Allocate R4 ERI Tensor
       this->aoERI_ = std::unique_ptr<RealTensor4d>(
         new RealTensor4d(NTCSxNBASIS,NTCSxNBASIS,NTCSxNBASIS,NTCSxNBASIS)); 
     }
@@ -471,7 +473,7 @@ void AOIntegrals::allocOp(){
     CErr(std::current_exception(),"Schwartx Bound Tensor Allocation");
   } 
 
-  if(this->doDF){
+  if(this->integralAlgorithm == DENFIT){
     try { 
       this->aoRII_ = std::unique_ptr<RealTensor3d>(
         new RealTensor3d(NTCSxNBASIS,NTCSxNBASIS,this->nTCS_*this->DFbasisSet_->nBasis())); 

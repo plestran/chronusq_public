@@ -105,8 +105,29 @@ class SDResponse {
   std::unique_ptr<RealCMMatrix> rmDiag_;
   std::unique_ptr<TMatrix>  davGuess_;
 
+  inline void checkWorkers(){
+    if(this->fileio_  == NULL) 
+      CErr("Fatal: Must initialize SDResponse with FileIO Object");
+    if(this->basisSet_ == NULL) 
+      CErr("Fatal: Must initialize SDResponse with BasisSet Object",
+           this->fileio_->out);
+    if(this->molecule_ == NULL) 
+      CErr("Fatal: Must initialize SDResponse with Molecule Object",
+           this->fileio_->out);
+    if(this->singleSlater_ == NULL) 
+      CErr("Fatal: Must initialize SDResponse with SingleSlater Object",
+           this->fileio_->out);
+    if(this->mointegrals_ == NULL) 
+      CErr("Fatal: Must initialize SDResponse with MOIntegrals Object",
+           this->fileio_->out);
+    if(this->controls_ == NULL) 
+      CErr("Fatal: Must initialize SDResponse with Controls Object",
+           this->fileio_->out);
+    
+  }
+
 public:
-  enum{
+  enum METHOD {
     __invalid,
     CIS,
     RPA,
@@ -117,11 +138,124 @@ public:
   };
  
   // constructor & destructor
-  SDResponse(){;};
+  SDResponse(){
+    this->nBasis_     = 0;
+    this->nTCS_       = 0;
+    this->Ref_        = 0;
+    this->nSek_       = 0;
+    this->nGuess_     = 0;
+    this->iMeth_      = 0;
+    this->iPPRPA_     = 0;
+    this->nOA_        = 0;
+    this->nVA_        = 0;
+    this->nOB_        = 0;
+    this->nVB_        = 0;
+    this->nOAVA_      = 0;      
+    this->nOBVB_      = 0;      
+    this->nOAVB_      = 0;      
+    this->nOBVA_      = 0;      
+    this->nVAVA_SLT_  = 0;  
+    this->nVBVB_SLT_  = 0;  
+    this->nVAVA_LT_   = 0;   
+    this->nVAVA_      = 0;      
+    this->nVBVB_      = 0;      
+    this->nOAOA_SLT_  = 0;  
+    this->nOBOB_SLT_  = 0;  
+    this->nOAOA_LT_   = 0;   
+    this->nOAOA_      = 0;      
+    this->nOBOB_      = 0;      
+    this->nVAVB_      = 0;      
+    this->nOAOB_      = 0;      
+    this->nO_         = 0;         
+    this->nV_         = 0;         
+    this->nOV_        = 0;        
+    this->nVV_SLT_    = 0;    
+    this->nVV_LT_     = 0;     
+    this->nVV_        = 0;        
+    this->nOO_SLT_    = 0;    
+    this->nOO_LT_     = 0;     
+    this->nOO_        = 0;        
+    this->nSingleDim_ = 0; 
+
+    this->haveDag_    = false;
+
+    this->rMu_        = 0;
+
+    this->basisSet_     = NULL;
+    this->molecule_     = NULL;
+    this->fileio_       = NULL;
+    this->controls_     = NULL;
+    this->mointegrals_  = NULL;
+    this->singleSlater_ = NULL;
+    this->aoERI_        = NULL;
+    this->elecDipole_   = NULL;
+
+    this->transDen_    = nullptr;
+    this->oscStrength_ = nullptr;
+    this->omega_       = nullptr;
+    this->transDipole_ = nullptr;
+    this->rmDiag_      = nullptr;
+    this->davGuess_    = nullptr;
+  };
   ~SDResponse() {;};
   // pseudo-constructor
   void iniSDResponse(Molecule *,BasisSet *,MOIntegrals<T> *,FileIO *,
                      Controls *, SingleSlater<T> *);
+
+  inline void communicate(Molecule &mol, BasisSet &basis, SingleSlater<T> &ss,
+    MOIntegrals<T> &moints, FileIO &fileio, Controls &controls) {
+
+    this->molecule_     = &mol;
+    this->basisSet_     = &basis;
+    this->singleSlater_ = &ss;
+    this->mointegrals_  = &moints;
+    this->fileio_       = &fileio;
+    this->controls_     = &controls;
+
+  }
+
+  inline void initMeta() {
+    this->checkWorkers();
+
+    this->nBasis_         = this->basisSet_->nBasis();
+    this->nTCS_           = this->singleSlater_->nTCS();
+    this->Ref_            = this->singleSlater_->Ref();
+    this->nOA_            = this->singleSlater_->nOccA();
+    this->nOB_            = this->singleSlater_->nOccB();
+    this->nVA_            = this->singleSlater_->nVirA();
+    this->nVB_            = this->singleSlater_->nVirB();
+    this->aoERI_          = this->singleSlater_->aointegrals()->aoERI_.get();
+    this->elecDipole_     = 
+      this->singleSlater_->aointegrals()->elecDipole_.get();
+
+    this->nOAVA_          = this->nOA_*this->nVA_;
+    this->nOBVB_          = this->nOB_*this->nVB_;
+    this->nOAVB_          = this->nOA_*this->nVB_;
+    this->nOBVA_          = this->nOB_*this->nVA_;
+    this->nVAVA_SLT_      = this->nVA_*(this->nVA_-1)/2;
+    this->nVBVB_SLT_      = this->nVB_*(this->nVB_-1)/2;
+    this->nVAVA_LT_       = this->nVA_*(this->nVA_+1)/2;
+    this->nVAVA_          = this->nVA_*this->nVA_;
+    this->nVBVB_          = this->nVB_*this->nVB_;
+    this->nOAOA_SLT_      = this->nOA_*(this->nOA_-1)/2;
+    this->nOBOB_SLT_      = this->nOB_*(this->nOB_-1)/2;
+    this->nOAOA_LT_       = this->nOA_*(this->nOA_+1)/2;
+    this->nOAOA_          = this->nOA_*this->nOA_;
+    this->nOBOB_          = this->nOB_*this->nOB_;
+    this->nVAVB_          = this->nVA_*this->nVB_;
+    this->nOAOB_          = this->nOA_*this->nOB_;
+    this->nO_             = this->nOA_ + this->nOB_;
+    this->nV_             = this->nVA_ + this->nVB_;
+    this->nOV_            = this->nO_  * this->nV_;
+    this->nVV_SLT_        = this->nV_*(this->nV_-1)/2;
+    this->nVV_LT_         = this->nV_*(this->nV_+1)/2;
+    this->nVV_            = this->nV_*this->nV_;
+    this->nOO_SLT_        = this->nO_*(this->nO_-1)/2;
+    this->nOO_LT_         = this->nO_*(this->nO_+1)/2;
+    this->nOO_            = this->nO_*this->nO_;
+
+  }
+  void alloc();
 
   #include <sdresponse_getset.h>
   #include <sdresponse_qnrelated.h>
@@ -130,5 +264,7 @@ public:
   #include <sdresponse_prop.h>
 
 };
+
+#include <sdresponse_alloc.h>
 } // namespace ChronusQ
 #endif

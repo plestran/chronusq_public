@@ -1,7 +1,10 @@
 import os,sys
 import libpythonapi as chronusQ
+from libpythonapi import CErrMsg
 from parseBasis import parseBasis
-#from standardJobs import *
+from meta.knownKeywords import requiredKeywords
+from meta.knownJobs import *
+from meta.enumMaps import sdrMethodMap
 
 #
 #  Parse the QM section of the input file and populate
@@ -19,36 +22,51 @@ from parseBasis import parseBasis
 #    workers      -     the workers array of CQ objects
 #    secDict      -     total parsed section dictionary
 #
+#  Output:
+#    JobStr       -     string containing a map to standard
+#                       job functions
+#
 def parseQM(workers,secDict): 
   print 'Parsing QM Information'
-  ssSettings = secDict["qm"]
+  ssSettings = secDict["QM"]
 
 #
 # Check for unknown keywords in the QM section
 #
-  knownKeywords = [ 'reference', 'basis', 'job' ]
-  for i in ssSettings:
-    if i not in knownKeywords:
-      print "Keyword QM."+ str(i) +" not recognized"
+# knownKeywords = [ 'reference', 'basis', 'job' ]
+# for i in ssSettings:
+#   if i not in knownKeywords:
+#     print "Keyword QM."+ str(i) +" not recognized"
+
+#
+#  Check that all of the required keywords for Molecule
+#  object are found
+#
+  for i in requiredKeywords['QM']:
+    if i not in ssSettings:
+      msg = 'Required keyword QM.' + str(i) + ' not found'
+      CErrMsg(workers['CQFileIO'],msg)
 
 #
 # Try to set the reference for CQ::SingleSlater
 #
-  try:
-    handleReference(workers,ssSettings['reference'])
-  except KeyError:
-    print 'No Reference keyword found'
+  handleReference(workers,ssSettings['REFERENCE'])
 
 #
 # Try to set the basis for the QM Job
 #
-  try:
-    parseBasis(workers,ssSettings['basis'])
-  except KeyError:
-    print 'No Basis Set keyword found'
+  parseBasis(workers,ssSettings['BASIS'])
 
-  if ssSettings['job'] in ('RT'):
-    parseRT(workers,secDict['rt']) 
+  if str(ssSettings['JOB']) in knownJobs:
+    if ssSettings['JOB'] in ('RT'):
+      parseRT(workers,secDict['RT']) 
+    elif ssSettings['JOB'] in ('RPA','CIS','STAB'):
+      parseSDR(workers,secDict)
+  else:
+    msg = 'QM.Job ' + str(ssSettings['JOB']) + ' not recognized'
+    CErrMsg(workers['CQFileIO'],str(msg))
+
+  return str(ssSettings['JOB'])
 
 #  # Space filler to pasify error 
 #  workers["CQSingleSlaterDouble"].communicate(
@@ -65,88 +83,114 @@ def parseQM(workers,secDict):
 #
 def handleReference(workers,ref):
   mult = workers["CQMolecule"].multip()
-  if ref in ('HF','hf'):
-    if mult == 1:
-      workers["CQSingleSlaterDouble"].setRef(chronusQ.Reference.RHF)
-      workers["CQSingleSlaterDouble"].isClosedShell = True
-    else:
-      workers["CQSingleSlaterDouble"].setRef(chronusQ.Reference.UHF)
-  elif ref in ('RHF','rhf'):
-    workers["CQSingleSlaterDouble"].setRef(chronusQ.Reference.RHF)
-    workers["CQSingleSlaterDouble"].isClosedShell = True
-  elif ref in ('UHF','uhf'):
-    workers["CQSingleSlaterDouble"].setRef(chronusQ.Reference.UHF)
-  elif ref in ('CUHF','cuhf'):
-    workers["CQSingleSlaterDouble"].setRef(chronusQ.Reference.CUHF)
-  elif ref in ('GHF','ghf'):
-    workers["CQSingleSlaterDouble"].setRef(chronusQ.Reference.TCS)
+  ref = ref.split()
+  # Decide if reference is complex or not (defaults to real if not specified
+  if 'COMPLEX' in ref:
+    workers["CQSingleSlater"] = workers["CQSingleSlaterComplex"]
+  else:
+    workers["CQSingleSlater"] = workers["CQSingleSlaterDouble"]
 
+  # Set SS Reference
+  if 'HF' in ref:
+    # Smartly figure out of reference is R/U
+    if mult == 1:
+      workers["CQSingleSlater"].setRef(chronusQ.Reference.RHF)
+      workers["CQSingleSlater"].isClosedShell = True
+    else:
+      workers["CQSingleSlater"].setRef(chronusQ.Reference.UHF)
+  elif 'RHF' in ref:
+    # Force RHF
+    if mult != 1:
+      mas = 'Non-singlet multiplicity is not suitable for RHF'
+      CErrMsg(workers['CQFileIO'],str(msg))
+ 
+    workers["CQSingleSlater"].setRef(chronusQ.Reference.RHF)
+    workers["CQSingleSlater"].isClosedShell = True
+  elif 'UHF' in ref:
+    # Forch UHF
+    workers["CQSingleSlater"].setRef(chronusQ.Reference.UHF)
+    workers["CQSingleSlater"].isClosedShell = False
+  elif 'CUHF' in ref:
+    # Use Constrained UHF (not complex UHF) 
+    workers["CQSingleSlater"].setRef(chronusQ.Reference.CUHF)
+  elif 'GHF' in ref:
+    # Do GHF
+    workers["CQSingleSlater"].setRef(chronusQ.Reference.TCS)
+  else:
+    msg = 'Reference ' + str(sum(ref)) + ' not able to be parsed'
+    CErrMsg(workers['CQFileIO'],str(msg))
+
+  # Check if reference is 2-Component
   TCMethods = [chronusQ.Reference.TCS, chronusQ.Reference.GKS]
-  if workers["CQSingleSlaterDouble"].Ref() in TCMethods:
-    workers["CQSingleSlaterDouble"].setNTCS(2)
+  if workers["CQSingleSlater"].Ref() in TCMethods:
+    workers["CQSingleSlater"].setNTCS(2)
+    workers["CQAOIntegrals"].setNTCS(2)
 
 def parseRT(workers,settings):
-  requiredKeywords = []
-  optionalKeywords = [ 'maxstep' , 'timestep' , 'edfield' , 'time_on',
-                       'time_off', 'frequency', 'phase'   , 'sigma'  ,
-                       'envelope', 'ortho'    , 'iniden'  , 'uprop'  ]
-  knownKeywords = requiredKeywords + optionalKeywords
 
-  reqMap = {}
-  optMap = {   'maxstep':workers['CQRealTime'].setMaxSteps ,
-              'timestep':workers['CQRealTime'].setStepSize ,
-               'edfield':workers['CQRealTime'].setFieldAmp ,
-               'time_on':workers['CQRealTime'].setTOn      ,
-              'time_off':workers['CQRealTime'].setTOff     ,
-             'frequency':workers['CQRealTime'].setFreq     ,
-                 'phase':workers['CQRealTime'].setPhase    ,
-                 'sigma':workers['CQRealTime'].setSigma    ,
-              'envelope':workers['CQRealTime'].setEnvelope ,
-                 'ortho':workers['CQRealTime'].setOrthoTyp ,
-                'iniden':workers['CQRealTime'].setInitDen  ,
-                 'uprop':workers['CQRealTime'].setFormU    }
+  # Set RT object based on SS reference
+  if workers['CQSingleSlater'] == workers['CQSingleSlaterDouble']:
+    workers['CQRealTime'] = workers['CQRealTimeDouble']
+  else:
+    workers['CQRealTime'] = workers['CQRealTimeComplex']
 
-  orthoMap = {    'lowdin':chronusQ.RealTime_ORTHO.Lowdin    ,
-                'cholesky':chronusQ.RealTime_ORTHO.Cholesky  ,
-               'canonical':chronusQ.RealTime_ORTHO.Canonical }
-
-  formUMap = { 'eigendecomp':chronusQ.RealTime_FORM_U.EigenDecomp ,
-                    'taylor':chronusQ.RealTime_FORM_U.Taylor      }
-
-  envMap   = {       'pw':chronusQ.RealTime_ENVELOPE.Constant ,
-                'linramp':chronusQ.RealTime_ENVELOPE.LinRamp  ,
-               'gaussian':chronusQ.RealTime_ENVELOPE.Gaussian ,
-                   'step':chronusQ.RealTime_ENVELOPE.Step     ,
-                  'sinsq':chronusQ.RealTime_ENVELOPE.SinSq    }
-
-  for i in settings:
-    if i not in knownKeywords:
-      print "Keyword RealTime."+ str(i) +" not recognized"
-    elif i in ('maxstep','MaxStep','MAXSTEP','iniden','IniDen','INIDEN'):
-      settings[i] = int(settings[i])
-    elif i in ('ortho','Ortho','ORTHO'):
-      settings[i] = orthoMap[i]
-    elif i in ('envelope','Envelope','ENVELOPE'):
-      settings[i] = envMap[i]
-    elif i in ('uprop','Uprop','UProp','UPROP'):
-      settings[i] = formUMap[i]
-    elif i in ('edfield','EDfield','EDField'):
-      settings[i] = settings[i].split()
-      for j in range(len(settings[i])): settings[i][j] = float(settings[i][j])
-    else:
-      settings[i] = float(settings[i])
+  # Define a map from keyword to function
+  optMap = {
+    'MAXSTEP'  :workers['CQRealTime'].setMaxSteps ,
+    'TIMESTEP' :workers['CQRealTime'].setStepSize ,
+    'EDFIELD'  :workers['CQRealTime'].setFieldAmp ,
+    'TIME_ON'  :workers['CQRealTime'].setTOn      ,
+    'TIME_OFF' :workers['CQRealTime'].setTOff     ,
+    'FREQUENCY':workers['CQRealTime'].setFreq     ,
+    'PHASE'    :workers['CQRealTime'].setPhase    ,
+    'SIGMA'    :workers['CQRealTime'].setSigma    ,
+    'ENVELOPE' :workers['CQRealTime'].setEnvelope ,
+    'ORTHO'    :workers['CQRealTime'].setOrthoTyp ,
+    'INIDEN'   :workers['CQRealTime'].setInitDen  ,
+    'UPROP'    :workers['CQRealTime'].setFormU    
+  }
 
 
+  # Loop over optional keywords, set options accordingly
+  # note that because these are optional, if the keyword
+  # is not found in setings, no error is thrown and the
+  # next keyword is processed
   for i in optMap:
     try:
-      if i not in ('edfield','EDfield','EDField'):
+      if i not in ('EDFIELD'):
         optMap[i](settings[i])
       else:
         optMap[i](settings[i][0],settings[i][1],settings[i][2])
-        
     except KeyError:
       continue
 
+def parseSDR(workers,secDict):
+  jobSettings = {}
+  JOB = secDict['QM']['JOB']
+  try:
+    jobSettings = secDict[JOB]
+  except KeyError:
+    if JOB in ('STAB'):
+      pass
+    else: 
+      msg = "Must specify an options sections for " + JOB
+      CErrMsg(workers['CQFileIO'],str(msg))
 
-  
+   
+  # Set SDR object based on SS reference
+  if workers['CQSingleSlater'] == workers['CQSingleSlaterDouble']:
+    workers['CQSDResponse']  = workers['CQSDResponseDouble']
+#   workers['CQMOIntegrals'] = workers['CQMOIntegrals']
+  else:
+    workers['CQSDResponse'] = workers['CQSDResponseComplex']
 
+  try:
+    workers['CQSDResponse'].setNSek(jobSettings['NSTATES'])
+  except KeyError:
+    if JOB in ('STAB'):
+      workers['CQSDResponse'].setNSek(3)
+    else: 
+      msg = "Must specify number of desired roots for " + JOB
+      CErrMsg(workers['CQFileIO'],str(msg))
+     
+  workers['CQSDResponse'].setMeth(sdrMethodMap[str(JOB)])
