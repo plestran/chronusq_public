@@ -16,6 +16,21 @@ def communicate(workers):
   except KeyError:
     pass
 
+  try:
+    workers["CQSDResponse"].communicate(workers["CQMolecule"],
+      workers["CQBasisSet"],workers["CQSingleSlater"],workers["CQMOIntegrals"],
+      workers["CQFileIO"],workers["CQControls"])
+  except KeyError:
+    pass
+
+  try:
+    workers["CQMOIntegrals"].communicate(workers["CQMolecule"],
+      workers["CQBasisSet"],workers["CQFileIO"],workers["CQControls"],
+      workers["CQAOIntegrals"],workers["CQSingleSlater"])
+  except KeyError:
+    pass
+
+
 
 def runSCF(workers):
   # Make the classes know about eachother
@@ -55,5 +70,10 @@ def runRT(workers):
   workers["CQRealTime"].iniDensity()
   workers["CQRealTime"].doPropagation()
 
-  
-  
+def runSDR(workers):
+  runSCF(workers)
+  workers["CQMOIntegrals"].initMeta()
+  workers["CQSDResponse"].initMeta()
+  workers["CQSDResponse"].initMeth()
+  workers["CQSDResponse"].alloc()
+  workers["CQSDResponse"].IterativeRPA()

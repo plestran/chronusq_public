@@ -4,6 +4,7 @@ from libpythonapi import CErrMsg
 from parseBasis import parseBasis
 from meta.knownKeywords import requiredKeywords
 from meta.knownJobs import *
+from meta.enumMaps import sdrMethodMap
 
 #
 #  Parse the QM section of the input file and populate
@@ -178,17 +179,18 @@ def parseSDR(workers,secDict):
    
   # Set SDR object based on SS reference
   if workers['CQSingleSlater'] == workers['CQSingleSlaterDouble']:
-    workers['CQSDResponse'] = workers['CQSDResponseDouble']
+    workers['CQSDResponse']  = workers['CQSDResponseDouble']
+#   workers['CQMOIntegrals'] = workers['CQMOIntegrals']
   else:
     workers['CQSDResponse'] = workers['CQSDResponseComplex']
 
   try:
-    workers['CQResponse'].setNSek(jobSettings['NSTATES'])
+    workers['CQSDResponse'].setNSek(jobSettings['NSTATES'])
   except KeyError:
     if JOB in ('STAB'):
-      workers['CQResponse'].setNSek(3)
+      workers['CQSDResponse'].setNSek(3)
     else: 
       msg = "Must specify number of desired roots for " + JOB
       CErrMsg(workers['CQFileIO'],str(msg))
      
-  workers['CQResponse'].setMeth(str(JOB))
+  workers['CQSDResponse'].setMeth(sdrMethodMap[str(JOB)])

@@ -148,11 +148,13 @@ BOOST_PYTHON_MODULE(libpythonapi){
   ;
 
   class_<SDResponse<double>,boost::noncopyable>("SDResponse_double",init<>())
-    .def("communicate", &SDResponse<double>::communicate)
-    .def("initMeta"   , &SDResponse<double>::initMeta   )
-    .def("alloc"      , &SDResponse<double>::alloc      )
-    .def("setNSek"    , &SDResponse<double>::setNSek    )
-    .def("setMeth"    , &SDResponse<double>::setMeth    )
+    .def("communicate" , &SDResponse<double>::communicate )
+    .def("initMeta"    , &SDResponse<double>::initMeta    )
+    .def("alloc"       , &SDResponse<double>::alloc       )
+    .def("setNSek"     , &SDResponse<double>::setNSek     )
+    .def("setMeth"     , &SDResponse<double>::setMeth     )
+    .def("initMeth"    , &SDResponse<double>::initMeth    )
+    .def("IterativeRPA", &SDResponse<double>::IterativeRPA)
   ;
 
   enum_<SDResponse<double>::METHOD>("SDResponse_METHOD")
