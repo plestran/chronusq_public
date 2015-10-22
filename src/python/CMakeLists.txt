@@ -1,9 +1,11 @@
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I ${PYTHON_INCLUDE_DIRS}")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I ${PYTHON_INCLUDE_DIRS}")
 
 
 add_library(pythonapi SHARED singleslater_api.cpp molecule_api.cpp 
 aointegrals_api.cpp chronusq_api.cpp classtools_api.cpp fileio_api.cpp
 tools_api.cpp basisset_api.cpp cerr_api.cpp)
+
+target_include_directories(pythonapi PUBLIC ${PYTHON_INCLUDE_DIRS})
 
 target_link_libraries(pythonapi LINK_PUBLIC basisset classtools controls
 mointegrals molecule tools sdresponse realtime mollerplesset singleslater 

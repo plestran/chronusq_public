@@ -4,13 +4,18 @@ project(ChronusQ CXX C)
 set(ChronusQ_VERSION_MAJOR BETA)
 set(ChronusQ_VERSION_MINOR 0)
 
+set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake")
+
 # Check for Dependencies
 find_package(BLAS REQUIRED)   # Required for now
 find_package(LAPACK REQUIRED) # Required for now
 find_package(PythonLibs)
 find_package(Boost REQUIRED python)
+find_package(Eigen3 REQUIRED)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I ${Boost_INCLUDE_DIRS}")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I ${Boost_INCLUDE_DIRS}")
+include_directories("${Boost_INCLUDE_DIRS}")
+include_directories("${EIGEN3_INCLUDE_DIR}")
 
 option(USE_OMP "Use SMP Parallelization" OFF) # Default serial processing
 option(USE_MPI "Use MPI Parallelization" OFF)
@@ -31,7 +36,6 @@ if(USE_LIBINT)
   find_library(LIBINT_LIB int2 ${PROJECT_SOURCE_DIR}/deps/lib)
   include_directories("${PROJECT_SOURCE_DIR}/deps/include")
   include_directories("${PROJECT_SOURCE_DIR}/deps/include/libint2")
-  include_directories("/usr/local/include/eigen3")
 endif(USE_LIBINT)
 
 
