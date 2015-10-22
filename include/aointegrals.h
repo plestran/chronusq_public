@@ -279,6 +279,7 @@ public:
 
   // Getters
   inline int nTCS(){ return this->nTCS_;}
+  inline int maxMultipole(){ return this->maxMultipole_;}
 
   // Setters
   inline void setNTCS(int i)        { this->nTCS_         = i;}

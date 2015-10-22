@@ -1,7 +1,7 @@
 # Configure Project ChronusQ
 cmake_minimum_required(VERSION 2.8)
 project(ChronusQ CXX C)
-set(ChronusQ_VERSION_MAJOR 1)
+set(ChronusQ_VERSION_MAJOR BETA)
 set(ChronusQ_VERSION_MINOR 0)
 
 # Check for Dependencies
