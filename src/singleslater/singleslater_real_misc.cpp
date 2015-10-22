@@ -183,6 +183,12 @@ void SingleSlater<double>::computeEnergy(){
 */
   this->energyOneE = (*this->aointegrals_->oneE_).frobInner(this->densityA_->conjugate());
   this->energyTwoE = 0.5*(*this->PTA_).frobInner(this->densityA_->conjugate());
+
+  if(!this->isClosedShell && this->Ref_ != TCS){
+    this->energyOneE += (*this->aointegrals_->oneE_).frobInner(this->densityB_->conjugate());
+    this->energyTwoE += 0.5*(*this->PTB_).frobInner(this->densityB_->conjugate());
+  }
+  
   if(this->isDFT) this->energyTwoE += this->totalEx;
     
   // Add in the electric field component if they are non-zero

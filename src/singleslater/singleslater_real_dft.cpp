@@ -70,9 +70,14 @@ void SingleSlater<double>::formVXC(){
 //  Finishing the Vxc using the TF factor and the integration prefactor over a solid sphere
     (*this->vXCA()) =  val * (*this->vXCA());
     this->totalEx   =  val * CxEn * (this->totalEx);
+    if(!this->isClosedShell && this->Ref_ != TCS) (*this->vXCA()) =  std::pow(2.0,(1.0/3.0)) * (*this->vXCA()) ;
+    if(!this->isClosedShell && this->Ref_ != TCS) (*this->vXCB()) =  std::pow(2.0,(1.0/3.0)) * val * (*this->vXCB()) ;
+    if(!this->isClosedShell && this->Ref_ != TCS) this->totalEx = std::pow(2.0,(1.0/3.0)) * this->totalEx;
     cout << "TotalEx "  << this->totalEx  <<endl;
-
-    if(!this->isClosedShell && this->Ref_ != TCS) (*this->vXCB()) =  (*this->vXCA());
+//    cout << "Vx_A" <<endl;
+//    cout << (*this->vXCA()) <<endl;
+//    cout << "Vx_B" <<endl;
+//    cout << (*this->vXCB()) <<endl;
 
 //  Comment to avoid the printing
 /*
