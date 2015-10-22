@@ -82,13 +82,13 @@ The aim of this guide is to provide a comprehensive tool to aid in the use and d
 \subsection{GitHub Repository}
 
 Currently, the only method for obtaining ChronusQ is through the Li Research Group GitHub repository located
-at \texttt{https://github.com/liresearchgroup/chronusq} . To obtain a copy (via command line) of the source code, the \texttt{git} program must be installed and in the shell working path. This can be confirmed via the following command:
+at \texttt{https://github.com/liresearchgroup/chronusq\_PUBLIC} . To obtain a copy of the source code (via command line), the \texttt{git} program must be installed and in the shell working path. This can be confirmed via the following command:
 
 \begin{lstlisting}
 $ which git
 /usr/local/bin/git
 \end{lstlisting}
-where \texttt{/usr/local/bin/git} is the location of the \texttt{git} program installed on (my) system. The location may vary, but as long as you get a location, \texttt{git} is installed. Once a \texttt{git} installation has been verified, obtaining a copy of the ChronusQ is trivial:
+where \texttt{/usr/local/bin/git} is the location of the \texttt{git} program installed on the (my) system. The location may vary, but as long as you get a location, \texttt{git} is installed. Once a \texttt{git} installation has been verified, obtaining a copy of the ChronusQ is trivial:
 
 \begin{lstlisting}
 $ git clone https://github.com/liresearchgroup/chronusq.git
@@ -114,7 +114,7 @@ The ChronusQ software package depends on a number of other open source packages 
 
 \item \texttt{Libint}: For the evaluation of molecular integrals over gaussian-type functions (GTOs), ChronusQ relies on the \texttt{Libint} library of E. Valeev. A preconfigured (uncompiled) library is shipped with ChronusQ (located in the \texttt{/deps/src} directory. For directions as to how to compile and set up the locally shipped version of \texttt{Libint} or to point ChronusQ to an already compiled version of \texttt{Libint}, please see Section \ref{subsubsec:libintcomp}
 
-\item \texttt{Eigen}: ChronusQ currently utilizes \texttt{Eigen} as a high-level C++ API for various trivial linear-algebra tasks (i.e. storage, multiplication, addition, etc). \texttt{Eigen} is a header-only API, so installing is as easy an placing the library in a place that ChronusQ can ``see" it. If \texttt{Eigen} is not currently installed on your system, the following will place it in a location readily accessable by ChronusQ (don't do this inside of the \texttt{chronusq} directory):
+\item \texttt{Eigen}: ChronusQ currently utilizes \texttt{Eigen} as a high-level C++ API for various trivial linear-algebra tasks (i.e. storage, multiplication, addition, etc). \texttt{Eigen} is a header-only API, so installing is as easy an placing the library in a place that ChronusQ can ``see" it. If \texttt{Eigen} is not currently installed on your system, the following will place it in a location readily accessible by ChronusQ (don't do this inside of the \texttt{chronusq} directory):
 \begin{lstlisting}
 $ git clone https://github.com/RLovelett/eigen.git
 $ sudo cp -fr eigen/Eigen /usr/local/include
@@ -128,7 +128,7 @@ $ sudo cp -fr BTAS/btas /usr/local/include
 \end{lstlisting}
 As with \texttt{Eigen}, if \texttt{BTAS} is already installed on your machine in a non-standard location, see Section \ref{subsubsec:chronusqcomp}.
 
-\item \texttt{boost}: Various parts of code depend on the C++ \texttt{boost} libraries to varying degrees (such as numerical quadrature for handling of the grid points). As a result boost must be installed on the compiling machine. It should be noted that we held out for as long as possible before integrating various \texttt{boost} functionality before the convenience factor became to large to ignore (transforming between spherical and cartesian coordinates [and many other coordinate systems] in a systematic way, taking into account octant, etc, can be performed by an incredibly simple function call!). \texttt{boost} is a very ``heavy" dependency (not in w much it is used, but on how long the installation takes), but not terribly difficult to install. A tarball containing the latest \texttt{boost} source may be obtained from \texttt{http://www.boost.org}. Once this tarball is obtained, navigate to the download location and perform the following
+\item \texttt{boost}: Various parts of code depend on the C++ \texttt{boost} libraries to varying degrees (such as numerical quadrature for handling of the grid points). As a result boost must be installed on the compiling machine. \texttt{boost} is a very ``heavy" dependency (not in how much it is used, but on how long the installation takes), but not terribly difficult to install. A tarball containing the latest \texttt{boost} source may be obtained from \texttt{http://www.boost.org}. Once this tarball is obtained, navigate to the download location and perform the following
 \begin{lstlisting}
 $ cd /path/to/boost/download
 $ tar xvf boost_<boost_version>.tar.gz
