@@ -27,7 +27,7 @@ from meta.enumMaps import sdrMethodMap
 #                       job functions
 #
 def parseQM(workers,secDict): 
-  print 'Parsing QM Information'
+#  print 'Parsing QM Information'
   ssSettings = secDict["QM"]
 
 #

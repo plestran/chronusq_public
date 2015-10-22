@@ -52,7 +52,7 @@ chronusQ.initCQ()
 controls.iniControls()
 
 secDict = parseInput(workers,fname+".inp")
-print secDict
+#print secDict
 
 parseMisc(workers,secDict["MISC"])
 parseMolecule(workers,secDict["MOLECULE"])

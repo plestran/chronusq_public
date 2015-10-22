@@ -3,7 +3,7 @@ import libpythonapi as chronusQ
 from meta.knownKeywords import requiredKeywords
 
 def parseMisc(workers,settings):
-  print 'Parsing Misc Information'
+#  print 'Parsing Misc Information'
 
 #
 #  Check that all of the required keywords for Molecule

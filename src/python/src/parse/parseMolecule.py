@@ -14,7 +14,7 @@ from meta.knownKeywords import requiredKeywords
 #                       the Molecules section
 #
 def parseMolecule(workers,settings): 
-  print 'Parsing Molecular Information'
+#  print 'Parsing Molecular Information'
 
 #
 #  Check that all of the required keywords for Molecule
