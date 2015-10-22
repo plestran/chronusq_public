@@ -243,6 +243,8 @@ void SingleSlater<T>::allocAlphaDFT(){
   try { 
     this->vXCA_  = std::unique_ptr<TMatrix>(
       new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
+    this->vCorA_  = std::unique_ptr<TMatrix>(
+      new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
   } catch (...) { 
     if(this->Ref_ == TCS) CErr(std::current_exception(), "TCS VXC Allocation"); 
     else CErr(std::current_exception(),"Alpha VXC  Allocation"); 
@@ -254,6 +256,8 @@ void SingleSlater<T>::allocBetaDFT(){
   // Alpha / TCS VXC
   try { 
     this->vXCB_  = std::unique_ptr<TMatrix>(
+      new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
+    this->vCorB_  = std::unique_ptr<TMatrix>(
       new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
   } catch (...) { 
     CErr(std::current_exception(),"Beta VXC  Allocation"); 

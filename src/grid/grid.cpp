@@ -201,9 +201,25 @@ void GaussChebyshev1stGridInf::genGrid(){
     this->gridPts_[i] = cos(( (2.0*(i+1)-1.0)/(2.0*this->nPts_))*math.pi);
     this->weights_[i] = (math.pi/this->nPts_);
     }
-  this->transformPts(); 
+//  this->transformPts(); 
  }
 
+void GaussChebyshev1stGridInf::scalePts(double sradius) {
+//   Given the Slater Radius of the given atom, all the radial point and weight are scaled
+//   according to Becke Fuzzi Cell Prescription 
+     sradius = 0.5*sradius;
+     double toau = (1.0)/phys.bohr;
+     double val;
+     double dmu;
+     double den;
+     for(int i = 0; i < this->nPts_; i++){
+       dmu = (std::pow((1-this->gridPts_[i]),2.0)) / (2.0*toau*sradius);
+       val = toau * sradius *  (1+this->gridPts_[i]) / (1-this->gridPts_[i]);
+       den = std::sqrt(1.0-(std::pow(this->gridPts_[i],2.0)));
+       this->weights_[i] = this->weights_[i]*den/dmu;
+       this->gridPts_[i] = val;
+       }
+}  //End
   
 void GaussChebyshev1stGridInf::transformPts(){
 //     if (INuc == 7){

@@ -72,7 +72,14 @@ void SingleSlater<T>::buildVxc(cartGP gridPt, double weight){
 //  Build the Vxc therm at each Grid Points  
    double *pointProd; 
    double rhor = 0.0;
-   double rhorB = 0.0;
+   double rhor_B = 0.0;
+//   double rhor_t = 0.0;
+//   double rhor_pol = 0.0;
+//   double fact_43_A = 0.0;
+//   double fact_43_B = 0.0;
+//   double f_Z = 0.0;
+//   double dfZ_dA = 0.0;
+//   double dfZ_dB = 0.0;
    std::unique_ptr<RealMatrix>  overlapR_;        ///< Overlap at grid point
    overlapR_ = std::unique_ptr<RealMatrix>(
      new RealMatrix(this->nBasis_,this->nBasis_));
@@ -94,9 +101,35 @@ void SingleSlater<T>::buildVxc(cartGP gridPt, double weight){
         }
      }
      (*overlapR_) = overlapR_->selfadjointView<Lower>();;
-     rhor = overlapR_->frobInner(this->densityA()->conjugate());
-     if(!this->isClosedShell && this->Ref_ != TCS) rhor = overlapR_->frobInner(this->densityA_->conjugate()+this->densityB()->conjugate());
-//   Slater LDA (not yet ready. completated outside)       
-     (*this->vXCA()) += weight*(*overlapR_)*(std::pow(rhor,(1.0/3.0)));
+   if(this->isClosedShell && this->Ref_ != TCS) {
+    rhor = overlapR_->frobInner(this->densityA()->conjugate());
+    (*this->vXCA()) += weight*(*overlapR_)*(std::pow(rhor,(1.0/3.0)));
+    this->totalEx   += weight*(std::pow(rhor,(4.0/3.0)));
+    }
+    if(!this->isClosedShell && this->Ref_ != TCS) {
+    rhor   = overlapR_->frobInner(this->densityA()->conjugate());
+    rhor_B = overlapR_->frobInner(this->densityB()->conjugate());
+//    rhor_t = rhor + rhor_B;
+//    if (rhor_t > 0.00001)  {
+//    cout << "rhor_t= " << rhor_t <<endl;
+//    rhor_pol = (rhor - rhor_B) / rhor_t;
+//    fact_43_A  = (std::pow(rhor,(4.0/3.0)));
+//    fact_43_B  =(std::pow(rhor_B,(4.0/3.0)));
+//    f_Z = (std::pow((1+rhor_pol),(4.0/3.0)) + std::pow((1-rhor_pol),(4.0/3.0))) ;
+//    dfZ_dA = (std::pow((1+rhor_pol),(1.0/3.0)) + std::pow((1-rhor_pol),(1.0/3.0)))*((rhor_B)/(rhor_t*rhor_t));
+//    dfZ_dB = (std::pow((1+rhor_pol),(1.0/3.0)) + std::pow((1-rhor_pol),(1.0/3.0)))*(-(rhor)/(rhor_t*rhor_t));
+//    cout <<  "rhor_t " << rhor_t << "rhor " << rhor << "rhor_B " << rhor_B << endl;
+//    cout << "f_Z " << f_Z <<  endl;
+//    cout << "dfZ_dA " << dfZ_dA <<endl;
+//    cout << "dfZ_dB " << dfZ_dB <<endl;
+
+//    (*this->vXCA()) += weight*(*overlapR_)*(std::pow(rhor_t,(1.0/3.0))) * (f_Z + dfZ_dA);
+//    (*this->vXCB()) += weight*(*overlapR_)*(std::pow(rhor_t,(1.0/3.0))) * (f_Z + dfZ_dB);
+//    this->totalEx   += weight*((std::pow(rhor_t,(4.0/3.0)))*f_Z);
+      (*this->vXCA()) += weight*(*overlapR_)*(std::pow(rhor,(1.0/3.0)));
+      (*this->vXCB()) += weight*(*overlapR_)*(std::pow(rhor_B,(1.0/3.0)));
+      this->totalEx   += weight*((std::pow(rhor,(4.0/3.0)))+(std::pow(rhor_B,(4.0/3.0))));
+//    }
+    }
 };
 

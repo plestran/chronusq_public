@@ -37,20 +37,26 @@ void SingleSlater<double>::formVXC(){
     int npts     = nRad*nAng;                    // Total Number of grid point for each center
     double weight= 0.0;                            
     double CxVx = -(std::pow((3.0/math.pi),(1.0/3.0)));    //TF LDA Prefactor
-//    double CxEn =  (3.0/4.0);    //TF LDA Prefactor
+    double CxEn =  (3.0/4.0);    //TF LDA Prefactor
     double val = 4.0*math.pi*CxVx;
+    this->totalEx = 0.0;
 //  Generating grids (Raw grid, it has to be centered and integrated over each center and centered over each atom)
     GaussChebyshev1stGridInf Rad(nRad,0.0,1.0);   // Radial Grid
     LebedevGrid GridLeb(nAng);                    // Angular Grid
-    Rad.genGrid();                               
     GridLeb.genGrid();
-    TwoDGrid Raw3Dg(npts,&Rad,&GridLeb);          // Final Raw (not centered) 3D grid (Radial times Angular grid)
+//    Rad.genGrid();                               
+//    TwoDGrid Raw3Dg(npts,&Rad,&GridLeb);          // Final Raw (not centered) 3D grid (Radial times Angular grid)
     this->vXCA()->setZero();                      // Set to zero every occurence of the SCF
+    this->vCorA()->setZero();                      // Set to zero every occurence of the SCF
     if(!this->isClosedShell && this->Ref_ != TCS) this->vXCB()->setZero();
-//    cout << "Erased Vxc term " << endl;
 //  Loop over each centers (Atoms) (I think can be distribuited over different cpus)
     for(int iAtm = 0; iAtm < nAtom; iAtm++){
-      // Center the Grid at iAtom
+//    cout << "Atmoic Radius Slater " << elements[this->molecule_->index(iAtm)].sradius << endl; 
+//    The Radial grid is generated and scaled for each atom
+      Rad.genGrid();
+      Rad.scalePts((elements[this->molecule_->index(iAtm)].sradius)) ; 
+      TwoDGrid Raw3Dg(npts,&Rad,&GridLeb);          // Final Raw (not centered) 3D grid (Radial times Angular grid)
+      //Center the Grid at iAtom
       Raw3Dg.centerGrid((*this->molecule_->cart())(0,iAtm),(*this->molecule_->cart())(1,iAtm),(*this->molecule_->cart())(2,iAtm));
 //    Loop over grid points
       for(int ipts = 0; ipts < npts; ipts++){
@@ -64,7 +70,20 @@ void SingleSlater<double>::formVXC(){
     } // end loop natoms
 //  Finishing the Vxc using the TF factor and the integration prefactor over a solid sphere
     (*this->vXCA()) =  val * (*this->vXCA());
-    if(!this->isClosedShell && this->Ref_ != TCS) (*this->vXCB()) =  (*this->vXCA());
+    this->totalEx   =  val * CxEn * (this->totalEx);
+    if(!this->isClosedShell && this->Ref_ != TCS) (*this->vXCA()) =  std::pow(2.0,(1.0/3.0)) * (*this->vXCA()) ;
+    if(!this->isClosedShell && this->Ref_ != TCS) (*this->vXCB()) =  std::pow(2.0,(1.0/3.0)) * val * (*this->vXCB()) ;
+    if(!this->isClosedShell && this->Ref_ != TCS) this->totalEx = std::pow(2.0,(1.0/3.0)) * this->totalEx;
+    prettyPrint(this->fileio_->out,(*this->vXCA()),"LDA Vx alpha");
+    if(!this->isClosedShell && this->Ref_ != TCS) prettyPrint(this->fileio_->out,(*this->vXCB()),"LDA Vx beta");
+    this->fileio_->out << "Total LDA Ex =" << this->totalEx <<endl;
+//    cout << "TotalEx "  << this->totalEx  <<endl;
+//    cout << "Factor "  << CxVx*CxEn*std::pow(2.0,(1.0/3.0))  <<endl;
+//    cout << "Vx_A" <<endl;
+//    cout << (*this->vXCA()) <<endl;
+//    cout << "Vx_B" <<endl;
+//    cout << (*this->vXCB()) <<endl;
+
 //  Comment to avoid the printing
 /*
   double Energy;
