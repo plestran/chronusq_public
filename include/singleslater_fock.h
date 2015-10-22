@@ -33,11 +33,11 @@ void SingleSlater<T>::formPT(){
   bool doTCS = (this->Ref_ == TCS);
   bool doRHF = (this->isClosedShell && !doTCS);
   if(!this->haveDensity) this->formDensity();
-  if(this->controls_->directTwoE && !this->controls_->doDF)
+  if(this->aointegrals_->integralAlgorithm == AOIntegrals::DIRECT)
     this->aointegrals_->twoEContractDirect(doRHF,true,false,doTCS,*this->densityA_,*this->PTA_,*this->densityB_,*this->PTB_);
-  else if(this->controls_->doDF)
+  else if(this->aointegrals_->integralAlgorithm == AOIntegrals::DENFIT)
     this->aointegrals_->twoEContractDF(doRHF,true,*this->densityA_,*this->PTA_,*this->densityB_,*this->PTB_);
-  else
+  else if(this->aointegrals_->integralAlgorithm == AOIntegrals::INCORE)
     this->aointegrals_->twoEContractN4(doRHF,true,false,doTCS,*this->densityA_,*this->PTA_,*this->densityB_,*this->PTB_);
   if(this->printLevel_ >= 3) this->printPT();
 //if(doTCS)CErr();

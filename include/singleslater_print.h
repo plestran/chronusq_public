@@ -235,11 +235,11 @@ void SingleSlater<T>::printSCFHeader(ostream &output){
   output << std::setw(38) << std::left << "  Energy Convergence Tolerence:" << std::scientific << std::setprecision(6) << this->eneTol_ << endl;
   output << std::setw(38) << std::left << "  Maximum Number of SCF Cycles:" << this->maxSCFIter_ << endl;
   output << std::setw(38) << std::left << "  Integral Contraction Algorithm:";
-  if(this->controls_->directTwoE && !this->controls_->doDF)
+  if(this->aointegrals_->integralAlgorithm == AOIntegrals::DIRECT)
     output << "Direct";
-  else if (this->controls_->doDF)
+  else if (this->aointegrals_->integralAlgorithm == AOIntegrals::DENFIT)
     output << "Density-Fitting (BTAS)";
-  else
+  else if (this->aointegrals_->integralAlgorithm == AOIntegrals::INCORE)
     output << "In-Core (BTAS)";
   output << endl;
   output << endl << bannerMid << endl;

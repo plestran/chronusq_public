@@ -4,6 +4,7 @@ from libpythonapi import CErrMsg
 from parseBasis import parseBasis
 from meta.knownKeywords import requiredKeywords
 from meta.knownJobs import *
+from meta.enumMaps import sdrMethodMap
 
 #
 #  Parse the QM section of the input file and populate
@@ -59,6 +60,8 @@ def parseQM(workers,secDict):
   if str(ssSettings['JOB']) in knownJobs:
     if ssSettings['JOB'] in ('RT'):
       parseRT(workers,secDict['RT']) 
+    elif ssSettings['JOB'] in ('RPA','CIS','STAB'):
+      parseSDR(workers,secDict)
   else:
     msg = 'QM.Job ' + str(ssSettings['JOB']) + ' not recognized'
     CErrMsg(workers['CQFileIO'],str(msg))
@@ -161,3 +164,33 @@ def parseRT(workers,settings):
     except KeyError:
       continue
 
+def parseSDR(workers,secDict):
+  jobSettings = {}
+  JOB = secDict['QM']['JOB']
+  try:
+    jobSettings = secDict[JOB]
+  except KeyError:
+    if JOB in ('STAB'):
+      pass
+    else: 
+      msg = "Must specify an options sections for " + JOB
+      CErrMsg(workers['CQFileIO'],str(msg))
+
+   
+  # Set SDR object based on SS reference
+  if workers['CQSingleSlater'] == workers['CQSingleSlaterDouble']:
+    workers['CQSDResponse']  = workers['CQSDResponseDouble']
+#   workers['CQMOIntegrals'] = workers['CQMOIntegrals']
+  else:
+    workers['CQSDResponse'] = workers['CQSDResponseComplex']
+
+  try:
+    workers['CQSDResponse'].setNSek(jobSettings['NSTATES'])
+  except KeyError:
+    if JOB in ('STAB'):
+      workers['CQSDResponse'].setNSek(3)
+    else: 
+      msg = "Must specify number of desired roots for " + JOB
+      CErrMsg(workers['CQFileIO'],str(msg))
+     
+  workers['CQSDResponse'].setMeth(sdrMethodMap[str(JOB)])

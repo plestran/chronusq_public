@@ -15,19 +15,25 @@ DFbasisSet = chronusQ.BasisSet()
 controls   = chronusQ.Controls()
 aoints     = chronusQ.AOIntegrals()
 
-hf_double  = chronusQ.SingleSlater_double()
-rt_double  = chronusQ.RealTime_double()
+hf_double     = chronusQ.SingleSlater_double()
+rt_double     = chronusQ.RealTime_double()
+sdr_double    = chronusQ.SDResponse_double()
+moints_double = chronusQ.MOIntegrals_double()
 
 out        = chronusQ.FileIO(fname)
 
-workers = {"CQMolecule":mol,
-           "CQBasisSet":basisSet,
-           "CQDFBasisSet":DFbasisSet,
-           "CQControls":controls,
-           "CQAOIntegrals":aoints,
-           "CQSingleSlaterDouble":hf_double,
-           "CQRealTimeDouble":rt_double,
-           "CQFileIO":out}
+workers = {
+  "CQMolecule"          :mol,
+  "CQBasisSet"          :basisSet,
+  "CQDFBasisSet"        :DFbasisSet,
+  "CQControls"          :controls,
+  "CQAOIntegrals"       :aoints,
+  "CQSingleSlaterDouble":hf_double,
+  "CQRealTimeDouble"    :rt_double,
+  "CQSDResponseDouble"  :sdr_double,
+  "CQMOIntegrals"       :moints_double,
+  "CQFileIO"            :out
+}
 
 header = """
    ______ __                                      ____ 
@@ -45,6 +51,7 @@ chronusQ.initCQ()
 controls.iniControls()
 
 secDict = parseInput(workers,fname+".inp")
+print secDict
 
 parseMisc(workers,secDict["MISC"])
 parseMolecule(workers,secDict["MOLECULE"])
