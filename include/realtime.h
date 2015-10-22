@@ -250,7 +250,7 @@ public:
 
   // Setters
   inline void setMaxSteps(int i){ this->maxSteps_  = i;};
-  inline void setStepSize(int i){ this->stepSize_ = i;};
+  inline void setStepSize(double i){ this->stepSize_ = i;};
   inline void setOrthoTyp(RealTime<T>::ORTHO i){ this->typeOrtho_ = i;};
   inline void setInitDen(int i){ this->initDensity_ = i;};
   inline void setSwapMOA(int i){ this->swapMOA_     = i;};

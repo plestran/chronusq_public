@@ -1,5 +1,5 @@
 import os,sys
-sys.path.append('/home/dbwy/git_repo/chronusq/build_gcc_libint_openmp/src/python')
+sys.path.append('/home/jjgoings/chronusq/build_gcc_libint_openmp/src/python')
 import libpythonapi as chronusQ
 from jobs.jobMap import *
 from parse.parseInput import parseInput
@@ -7,7 +7,10 @@ from parse.parseMolecule import parseMolecule
 from parse.parseQM import parseQM
 from parse.parseMisc import parseMisc
 
-fname = sys.argv[1]
+try:
+    fname = sys.argv[1]
+except IndexError:
+    sys.exit("Please specify the input filename")
 
 mol        = chronusQ.Molecule()
 basisSet   = chronusQ.BasisSet()
@@ -23,16 +26,16 @@ moints_double = chronusQ.MOIntegrals_double()
 out        = chronusQ.FileIO(fname)
 
 workers = {
-  "CQMolecule"          :mol,
-  "CQBasisSet"          :basisSet,
-  "CQDFBasisSet"        :DFbasisSet,
-  "CQControls"          :controls,
-  "CQAOIntegrals"       :aoints,
-  "CQSingleSlaterDouble":hf_double,
-  "CQRealTimeDouble"    :rt_double,
-  "CQSDResponseDouble"  :sdr_double,
-  "CQMOIntegrals"       :moints_double,
-  "CQFileIO"            :out
+    "CQMolecule"          :mol,
+    "CQBasisSet"          :basisSet,
+    "CQDFBasisSet"        :DFbasisSet,
+    "CQControls"          :controls,
+    "CQAOIntegrals"       :aoints,
+    "CQSingleSlaterDouble":hf_double,
+    "CQRealTimeDouble"    :rt_double,
+    "CQSDResponseDouble"  :sdr_double,
+    "CQMOIntegrals"       :moints_double,
+    "CQFileIO"            :out
 }
 
 header = """
