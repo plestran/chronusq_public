@@ -183,8 +183,8 @@ public:
   bool          haveRIS; ///< Whether or not the DFI tensor has been evaluated for the density-fiting basis set
   bool          haveRII; ///< Whether or not the Metric overlap tensor has been evaluated for the density-fitting basis set
   bool          haveTRII;
-  bool          allocERI;
-  bool          doDF;
+//bool          allocERI;
+//bool          doDF;
 
 
   // Timing Stats
@@ -197,6 +197,14 @@ public:
   std::chrono::duration<double> PTD; ///< High-precision timing for Perturbation tensor evaluation, \f$G[P]\f$
   std::chrono::duration<double> SchwartzD; ///< High-precision timing for Schwartz bound evaluation
   std::chrono::duration<double> DenShBlkD; ///< High-precision timing for Density shell-block norm evaluation
+
+  enum INTEGRAL_ALGORITHM {
+    DIRECT,
+    INCORE,
+    DENFIT
+  };
+
+  int integralAlgorithm;
 
   AOIntegrals(){
     this->nBasis_ = 0;
@@ -235,12 +243,13 @@ public:
     this->haveRIS      = false;
     this->haveRII      = false;
     this->haveTRII     = false;
-    this->allocERI     = false;
-    this->doDF         = false;
+//  this->allocERI     = false;
+//  this->doDF         = false;
 
     // Standard Values
-    this->nTCS_         = 1;
-    this->maxMultipole_ = 3;
+    this->nTCS_             = 1;
+    this->maxMultipole_     = 3;
+    this->integralAlgorithm = DIRECT;
   };
   ~AOIntegrals(){;};
   

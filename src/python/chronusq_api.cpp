@@ -96,8 +96,8 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setNTCS"        , &AOIntegrals::setNTCS               )
     .def("setMaxMultipole", &AOIntegrals::setMaxMultipole       )
     
-    .def_readwrite("allocERI", &AOIntegrals::allocERI           )
-    .def_readwrite("doDF"    , &AOIntegrals::doDF               )
+//  .def_readwrite("allocERI", &AOIntegrals::allocERI           )
+//  .def_readwrite("doDF"    , &AOIntegrals::doDF               )
   ;
 
   class_<RealTime<double>,boost::noncopyable>("RealTime_double",init<>())
