@@ -140,7 +140,7 @@ namespace ChronusQ{
     };
   
   
-  #ifdef USE_OMP
+  #ifdef _OPENMP
     #pragma omp parallel
     {
       int thread_id = omp_get_thread_num();
@@ -290,7 +290,7 @@ namespace ChronusQ{
     };// efficient_twoe 
   
   
-  #ifdef USE_OMP
+  #ifdef _OPENMP
     #pragma omp parallel
     {
       int thread_id = omp_get_thread_num();

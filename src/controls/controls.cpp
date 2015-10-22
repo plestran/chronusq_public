@@ -86,7 +86,7 @@ void Controls::iniControls(){
 };
 
 void Controls::readSMP(int &n) {
-#ifdef USE_OMP
+#ifdef _OPENMP
   this->nthreads = n;
   omp_set_num_threads(n);
 #endif
