@@ -56,7 +56,8 @@ header = """
 """
 
 out.write(header)
-
+authors = open(authorfname, 'r')
+out.write(authors.read())
 
 chronusQ.initCQ()
 controls.iniControls()

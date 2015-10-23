@@ -31,3 +31,4 @@ tmp
 *.out
 chronusQ
 Test/UNIT/new-tests
+Test/UNIT/*.txt
