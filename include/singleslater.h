@@ -39,6 +39,48 @@ namespace ChronusQ {
 template<typename T>
 class SingleSlater {
   typedef Eigen::Matrix<T,Dynamic,Dynamic,RowMajor> TMatrix;
+
+  struct MetaData_ {
+    int nBasis;      ///< Number of basis functions (inherited from BasisSet)
+    int nShell;      ///< Number of basis shells (inherited from BasisSet)
+    int nTT;         ///< LT NBasis dimenstion (N(N+1)/2)
+    int nAE;         ///< Total number of alpha electrons
+    int nBE;         ///< Total number of beta electrons
+    int nOccA;       ///< Number of occupied alpha electrons
+    int nOccB;       ///< Number of occupied beta electrons
+    int nVirA;       ///< Number of virtual (unoccupied) alpha electrons
+    int nVirB;       ///< Number of virtual (unoccupied) beta electrons
+    int multip;      ///< Spin multiplicity (inherited from Molecule)
+    int nTCS;        ///< Integer to scale the dimension of matricies for TCS's
+    int maxSCFIter;  ///< Maximum number of SCF Cycles
+    int maxMultipole;///< Maximum multipole order (inherited from AOIntegrals)
+    int printLevel;  ///< Print level (Verbosity)
+
+    bool isClosedShell; ///< Boolean to run through closed shell machinery
+    bool isHF;          ///< Boolean of whether or not it's a HF reference
+    bool isDFT;         ///< Boolean of whether or not it's a DFT reference
+
+    double denTol; ///< SCF tolerence on the density
+    double eneTol; ///< SCF tolerence on the energy
+
+    int Ref;         ///< Specifies the Reference via enum
+
+    std::string SCFType;      ///< String containing SCF Type (R/C) (R/U/G/CU)
+    std::string SCFTypeShort; ///< String containing SCF Type (R/C) (R/U/G/CU)
+    std::string algebraicField;      ///< String Real/Complex/(Quaternion)
+    std::string algebraicFieldShort; ///< String Real/Complex/(Quaternion)
+
+    std::array<double,3> elecField; ///< Static electric field
+
+
+    int        ** R2Index;     ///< Not sure? artifact of in-house integrals
+    BasisSet    * basisset;    ///< Basis Set
+    Molecule    * molecule;    ///< Molecular specificiations
+    FileIO      * fileio;      ///< Access to output file
+    Controls    * controls;    ///< General ChronusQ flow parameters
+    AOIntegrals * aointegrals; ///< Molecular Integrals over GTOs (AO basis)
+  };
+
   int      nBasis_;
   int      nShell_;
   int      nTT_;
@@ -90,6 +132,7 @@ class SingleSlater {
   std::string algebraicFieldShort_;      ///< String Real/Complex/(Quaternion)
   std::array<double,3> elecField_;
 
+  // Lengths of scratch partitions (NOT MEANT TO BE COPIED)
   int lenX_;
   int lenXp_;
   int lenF_;
@@ -104,6 +147,7 @@ class SingleSlater {
   int lenScr_;
   int lenRealScr_;
 
+  // Pointers of scratch partitions (NOT MEANT TO BE COPIED)
   double *REAL_SCF_SCR;
   double *occNumMem_;
   double *RWORK_;
@@ -129,26 +173,27 @@ class SingleSlater {
   T *PNOMem_;
   
 
-  void initSCFMem();
-  void allocAlphaScr();
-  void allocBetaScr();
-  void allocCUHFScr();
-  void allocLAPACKScr();
-  void allocLowdin();
-  void cleanupSCFMem();
-  void cleanupAlphaScr();
-  void cleanupBetaScr();
-  void cleanupCUHFScr();
-  void cleanupLAPACKScr();
-  void cleanupLowdin();
-  void complexMem();
-  void initMemLen();
-  void initSCFPtr();
-  void formX();
-  void formNO();
-  void diagFock();
-  void mixOrbitalsSCF();
-  void evalConver(int);
+  // Various functions the perform SCF and SCR allocation
+  void initSCFMem();       ///< Initialize scratch memory for SCF
+  void allocAlphaScr();    ///< Allocate scratch for Alpha related quantities
+  void allocBetaScr();     ///< Allocate scratch for Beta related quantities
+  void allocCUHFScr();     ///< Allocate scratch for CUHF realted quantities
+  void allocLAPACKScr();   ///< Allocate LAPACK scratch space
+  void allocLowdin();      ///< Allocate space for Lowin intermediates
+  void cleanupSCFMem();    ///< Cleanup scratch memoty for SCF
+  void cleanupAlphaScr();  ///< Cleanup scratch for Alpha related quantities
+  void cleanupBetaScr();   ///< Cleanup scratch for Beta related quantities
+  void cleanupCUHFScr();   ///< Cleanup scratch for CUHF realted quantities
+  void cleanupLAPACKScr(); ///< Cleanup LAPACK scratch space
+  void cleanupLowdin();    ///< Cleanup space for Lowin intermediates
+  void complexMem();       ///< Add scratch space for Complex intermediates (?)
+  void initMemLen();       ///< Populate lengths of scratch partitions
+  void initSCFPtr();       ///< NULL-out pointers to scratch partitions
+  void formX();            ///< Form orthonormal basis transformation matrix
+  void formNO();           ///< Form Natural Orbitals
+  void diagFock();         ///< Diagonalize Fock Matrix
+  void mixOrbitalsSCF();   ///< Mix the orbitals for Complex / TCS SCF
+  void evalConver(int);    ///< Evaluate convergence criteria for SCF
 
   double denTol_;
   double eneTol_;
@@ -333,6 +378,7 @@ public:
     this->nTT_         = this->nBasis_ * (this->nBasis_ + 1) / 2;
     this->multip_      = this->molecule_->multip();
     this->nShell_      = this->basisset_->nShell();
+    this->maxMultipole_= this->aointegrals_->maxMultipole();
     this->energyNuclei = this->molecule_->energyNuclei();
 
     int nTotalE  = this->molecule_->nTotalE();

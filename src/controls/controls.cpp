@@ -76,26 +76,17 @@ void Controls::iniControls(){
   this->SCFmaxIter_ =       128;
   this->unitTest    =       0;
   this->field_      =       {0.0,0.0,0.0};
+  this->nthreads    = 1;
  
   this->SCFdenTol_ = 1e-10;
   this->SCFeneTol_ = 1e-12;
   this->SCFmaxIter_ = 128;
   this->unitTest    = 0;
   this->field_      = {0.0,0.0,0.0};
-#ifdef USE_LIBINT
-  // Bootstrap Libint env
-  libint2::init(); 
-#endif
-  this->nthreads = 1;
-#ifdef USE_OMP
-  // Set up Thread Pool
-  this->nthreads = omp_get_max_threads();
-  omp_set_num_threads(this->nthreads);
-#endif
 };
 
 void Controls::readSMP(int &n) {
-#ifdef USE_OMP
+#ifdef _OPENMP
   this->nthreads = n;
   omp_set_num_threads(n);
 #endif

@@ -45,6 +45,9 @@ void readInput(FileIO *,Molecule *, BasisSet *, Controls *, BasisSet * dfBasis=N
 void printUnitInfo(Controls *, SingleSlater<double> *, SDResponse<double> *, RealTime<double> *);
 void printUnitInfo(Controls *, SingleSlater<dcomplex> *, SDResponse<double> *, RealTime<dcomplex> *);
 
+void initCQ();
+void finalizeCQ();
+
 // trace of product of two symmetric matrices
 double traceSymm(RealMatrix *,RealMatrix *);
 } // namespace ChronusQ

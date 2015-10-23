@@ -36,6 +36,39 @@ using ChronusQ::RealTime;
 namespace ChronusQ {
 
 template<>
+void RealTime<double>::writeDipoleCSV(){
+  std::ofstream csv("RealTime_Dipole.csv");
+  csv << "Time Step (a.u.), Energy (Eh), Dipole X debye), Dipole Y (debye),"
+      << "Dipole Z (debye), Dipole Tot (debye)" << endl;
+  for(auto it = this->propInfo.begin(); it != this->propInfo.end(); it++) {
+     csv << std::fixed << std::setprecision(10) << it->timeStep << ", " << it->energy << ", " << it->dipole[0] 
+         << ", " << it->dipole[1] << ", " << it->dipole[2] << ", " << it->dipole[3] << endl;
+  } 
+};
+
+template<>
+void RealTime<double>::writeOrbitalCSV(){
+  std::ofstream csv("RealTime_OrbOcc_Alpha.csv");
+  for(auto it = this->propInfo.begin(); it != this->propInfo.end(); it++) {
+    csv << std::fixed << std::setprecision(6) << it->timeStep; 
+      for(auto idx = 0; idx != this->nBasis_*this->nTCS_; idx++) {
+        csv << ", " << it->orbitalOccA[idx];
+      }
+    csv << endl;
+  }
+  if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS){
+    std::ofstream csv("RealTime_OrbOcc_Beta.csv");
+    for(auto it = this->propInfo.begin(); it != this->propInfo.end(); it++) {
+      csv << std::fixed << std::setprecision(6) << it->timeStep; 
+        for(auto idx = 0; idx != this->nBasis_*this->nTCS_; idx++) {
+          csv << ", " << it->orbitalOccB[idx];
+        }
+      csv << endl;
+    }
+  }
+};
+
+template<>
 void RealTime<double>::iniDensity() {
   bool inOrthoBas;
   bool idempotent;
@@ -183,27 +216,6 @@ void RealTime<double>::iniDensity() {
         );
     }
     this->ssPropagator_->formDensity();
-
-    // Transform the ground state MO to orthonormal basis
-    initMOA.setZero();
-    initMOA.real() = *this->groundState_->moA();
-    if (this->typeOrtho_ == Lowdin) {
-      // Lowdin
-      initMOA = oTrans2 * initMOA;
-      if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
-        initMOB.setZero();
-        initMOB.real() = *this->groundState_->moB();
-        initMOB = oTrans2 * initMOB;
-      }
-    } else if (this->typeOrtho_ == Cholesky) {
-      // Cholesky 
-      initMOA = oTrans2.adjoint() * initMOA;
-      if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
-        initMOB.setZero();
-        initMOB.real() = *this->groundState_->moB();
-        initMOB = oTrans2.adjoint() * initMOB;
-      }
-    }
   }
   else if (this->initDensity_ == 2) { 
 // Read in the AO density from checkpoint file
@@ -217,41 +229,29 @@ void RealTime<double>::iniDensity() {
 
   if (!inOrthoBas) { 
 // Transform density from AO to orthonormal basis
-    if (this->typeOrtho_ == Lowdin) {
-      // Lowdin 
-      POA    = oTrans2 * (*this->ssPropagator_->densityA()) * oTrans2;
-
-      POAsav = POA;
-      if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
-        POB    = oTrans2 * (*this->ssPropagator_->densityB()) * oTrans2;
-        POBsav = POB;
-      }
-    } else if (this->typeOrtho_ == Cholesky) {
-      // Cholesky
-      POA    = oTrans2.adjoint() * (*this->ssPropagator_->densityA()) * oTrans2;
-
-      POAsav = POA;
-      if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
-        POB    = oTrans2.adjoint() * (*this->ssPropagator_->densityB()) * oTrans2;
-        POBsav = POB;
-      }
+    POA    = oTrans2.adjoint() * (*this->ssPropagator_->densityA()) * oTrans2;
+    POAsav = POA;
+    if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
+      POB    = oTrans2.adjoint() * (*this->ssPropagator_->densityB()) * oTrans2;
+      POBsav = POB;
     }
   } else { 
 // Transform density from orthonormal to AO basis
-    if (this->typeOrtho_ == Lowdin) {
-      // Lowdin
-      (*this->ssPropagator_->densityA()) = oTrans1 * POAsav * oTrans1;
-
-      if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) 
-        (*this->ssPropagator_->densityB()) = oTrans1 * POB * oTrans1;
-    } else if (this->typeOrtho_ == Cholesky) {
-      // Cholesky
-      (*this->ssPropagator_->densityA()) = oTrans1.adjoint() * POAsav * oTrans1;
-
-      if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) 
-        (*this->ssPropagator_->densityB()) = oTrans1.adjoint() * POB * oTrans1;
-    }
+    (*this->ssPropagator_->densityA()) = oTrans1.adjoint() * POAsav * oTrans1;
+    if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) 
+      (*this->ssPropagator_->densityB()) = oTrans1.adjoint() * POB * oTrans1;
   }
+
+// Need ground state MO in orthonormal basis for orbital occupation
+  initMOA.setZero();
+  initMOA.real() = *this->groundState_->moA();
+  initMOA = oTrans2.adjoint() * initMOA;
+  if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
+    initMOB.setZero();
+    initMOB.real() = *this->groundState_->moB();
+    initMOB = oTrans2.adjoint() * initMOB;
+  }
+
 };
 
 template<>
@@ -412,24 +412,11 @@ void RealTime<double>::doPropagation() {
     this->printRT();
 
 //  Transform Fock from AO to orthonormal basis
-    if (this->typeOrtho_ == Lowdin) {
-      // Lowdin 
-      scratch = (*this->ssPropagator_->fockA());
-      (*this->ssPropagator_->fockA()) = oTrans1 * scratch * oTrans1;
-
-      if (!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
-        scratch = (*this->ssPropagator_->fockB());
-        (*this->ssPropagator_->fockB()) = oTrans1 * scratch * oTrans1;
-      }
-    } else if (this->typeOrtho_ == Cholesky) {
-      // Cholesky
-      scratch = (*this->ssPropagator_->fockA());
-      (*this->ssPropagator_->fockA()) = oTrans1 * scratch * oTrans1.adjoint();
-
-      if (!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
-        scratch = (*this->ssPropagator_->fockB());
-        (*this->ssPropagator_->fockB()) = oTrans1 * scratch * oTrans1.adjoint();
-      }
+    scratch = (*this->ssPropagator_->fockA());
+    (*this->ssPropagator_->fockA()) = oTrans1 * scratch * oTrans1.adjoint();
+    if (!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
+      scratch = (*this->ssPropagator_->fockB());
+      (*this->ssPropagator_->fockB()) = oTrans1 * scratch * oTrans1.adjoint();
     }
 
 //  Form the unitary propagation matrix
@@ -451,37 +438,56 @@ void RealTime<double>::doPropagation() {
     }
 
 //  Propagate the density matrix
-//
+
+  //  Populate information for printing.
+    PropInfo rec;
+      rec.timeStep  = this->currentTime_;
+      rec.energy    = this->ssPropagator_->totalEnergy;
+      rec.dipole[0] = (*this->ssPropagator_->dipole())(0)/phys.debye;
+      rec.dipole[1] = (*this->ssPropagator_->dipole())(1)/phys.debye;
+      rec.dipole[2] = (*this->ssPropagator_->dipole())(2)/phys.debye;
+      rec.dipole[3] = std::sqrt( std::pow(rec.dipole[0],2.0) +
+                                 std::pow(rec.dipole[1],2.0) +
+                                 std::pow(rec.dipole[2],2.0) );
+      scratch = (initMOA.adjoint() * POA * initMOA);
+      for(auto idx = 0; idx != NTCSxNBASIS; idx++) {
+        rec.orbitalOccA.push_back(scratch(idx,idx).real());
+      }
+      if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS){
+        scratch = (initMOB.adjoint() * POB * initMOB);
+        for(auto idx = 0; idx != NTCSxNBASIS; idx++) {
+          rec.orbitalOccB.push_back(scratch(idx,idx).real());
+        }
+      }
+
+    this->propInfo.push_back(rec);
+
     scratch = POA;
     POA     = uTransA * scratch * uTransA.adjoint();
 
-    if (!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
+    if (!this->isClosedShell_ && this->Ref_ != SingleSlater<dcomplex>::TCS) {
       scratch = POB;
       POB     = uTransB * scratch * uTransB.adjoint();
     }
 
 //  Transform density matrix from orthonormal to AO basis
-    if (this->typeOrtho_ == Lowdin) {
-      // Lowdin 
-      (*this->ssPropagator_->densityA()) = oTrans1 * POA * oTrans1;
+    (*this->ssPropagator_->densityA()) = oTrans1.adjoint() * POA * oTrans1;
 
-      if (!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
-        (*this->ssPropagator_->densityB()) = oTrans1 * POB * oTrans1;
-      }
-    } else if (this->typeOrtho_ == Cholesky) {
-      // Cholesky
-      (*this->ssPropagator_->densityA()) = oTrans1.adjoint() * POA * oTrans1;
-
-      if (!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
-        (*this->ssPropagator_->densityB()) = oTrans1.adjoint() * POB * oTrans1;
-      }
+    if (!this->isClosedShell_ && this->Ref_ != SingleSlater<dcomplex>::TCS) {
+      (*this->ssPropagator_->densityB()) = oTrans1.adjoint() * POB * oTrans1;
     }
+
 //  Advance step
     currentTime_ += this->stepSize_;
     };
   }
   delete [] this->SCR;
   delete [] this->REAL_LAPACK_SCR;
+
+  //  Write energy/dipole information
+  this->writeDipoleCSV();
+  //  Write orbital occupation information
+  this->writeOrbitalCSV();
 };
 
 } // namespace ChronusQ

@@ -26,6 +26,7 @@
 #ifndef INCLUDED_CERR
 #define INCLUDED_CERR
 #include <global.h>
+#include <fileio.h>
 namespace ChronusQ {
 void CErr(std::ostream & out=std::cout);
 void CErr(std::string,std::ostream & out=std::cout );

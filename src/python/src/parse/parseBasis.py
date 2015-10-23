@@ -7,7 +7,7 @@ import libpythonapi as chronusQ
 # ** Note that this allocates the CQ::BasisSet Object **
 #
 def parseBasis(workers,basis):
-  nTCS = workers["CQSingleSlaterDouble"].nTCS()
+  nTCS = workers["CQSingleSlater"].nTCS()
 
   # Make CQ::BasisSet aware of CQ::FileIO
   workers["CQBasisSet"].communicate(workers["CQFileIO"])
@@ -19,7 +19,8 @@ def parseBasis(workers,basis):
 # 4) Construct the varios maps incolving the basis set
 # 5) Renormalize the LibInt2::Shell's (this is outdated in newer Libint)
 #
-  workers["CQBasisSet"].findBasisFile(str(basis))             # 1
+  # FIXME: BasisSet Keywords?? str(basis).lower() is a hack
+  workers["CQBasisSet"].findBasisFile(str(basis).lower())     # 1
   workers["CQBasisSet"].parseGlobal()                         # 2
   workers["CQBasisSet"].constructLocal(workers["CQMolecule"]) # 3
   workers["CQBasisSet"].makeMaps(nTCS,workers["CQMolecule"])  # 4

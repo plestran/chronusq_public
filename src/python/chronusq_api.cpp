@@ -30,6 +30,33 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def_readwrite("isClosedShell", &SingleSlater<double>::isClosedShell   )
   ;
 
+  class_<SingleSlater<dcomplex>,boost::noncopyable>("SingleSlater_complex",
+    init<>())
+    .def("iniSingleSlater" , &SingleSlater<dcomplex>::Wrapper_iniSingleSlater)
+    .def("printInfo"       , &SingleSlater<dcomplex>::printInfo              )
+    .def("printDensity"    , &SingleSlater<dcomplex>::printDensity           )
+    .def("formGuess"       , &SingleSlater<dcomplex>::formGuess              )
+    .def("formFock"        , &SingleSlater<dcomplex>::formFock               )
+    .def("computeEnergy"   , &SingleSlater<dcomplex>::computeEnergy          )
+    .def("computeMultipole", &SingleSlater<dcomplex>::computeMultipole       )
+    .def("printMultipole"  , &SingleSlater<dcomplex>::printMultipole         )
+    .def("SCF"             , &SingleSlater<dcomplex>::SCF                    )
+    .def("communicate"     , &SingleSlater<dcomplex>::communicate            )
+    .def("initMeta"        , &SingleSlater<dcomplex>::initMeta               )
+    .def("alloc"           , &SingleSlater<dcomplex>::alloc                  )
+    .def("genMethString"   , &SingleSlater<dcomplex>::genMethString          )
+    .def("setRef"          , &SingleSlater<dcomplex>::setRef                 )
+    .def("setNTCS"         , &SingleSlater<dcomplex>::setNTCS                )
+    .def("setMaxMultipole" , &SingleSlater<dcomplex>::setMaxMultipole        )
+    .def("printLevel"      , &SingleSlater<dcomplex>::printLevel             )
+    .def("setPrintLevel"   , &SingleSlater<dcomplex>::setPrintLevel          )
+
+    .def("Ref"             , &SingleSlater<dcomplex>::Ref                    )
+    .def("nTCS"            , &SingleSlater<dcomplex>::nTCS                   ) 
+
+    .def_readwrite("isClosedShell", &SingleSlater<dcomplex>::isClosedShell   )
+  ;
+
   enum_<SingleSlater<double>::REFERENCE>("Reference")
     .value("_INVALID"      , SingleSlater<double>::_INVALID               )
     .value("RHF"           , SingleSlater<double>::RHF                    )
@@ -96,8 +123,8 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setNTCS"        , &AOIntegrals::setNTCS               )
     .def("setMaxMultipole", &AOIntegrals::setMaxMultipole       )
     
-    .def_readwrite("allocERI", &AOIntegrals::allocERI           )
-    .def_readwrite("doDF"    , &AOIntegrals::doDF               )
+//  .def_readwrite("allocERI", &AOIntegrals::allocERI           )
+//  .def_readwrite("doDF"    , &AOIntegrals::doDF               )
   ;
 
   class_<RealTime<double>,boost::noncopyable>("RealTime_double",init<>())
@@ -123,6 +150,29 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("printRT"      , &RealTime<double>::printRT      )
   ;
 
+  class_<RealTime<dcomplex>,boost::noncopyable>("RealTime_complex",init<>())
+    .def("communicate"  , &RealTime<dcomplex>::communicate  )
+    .def("initMeta"     , &RealTime<dcomplex>::initMeta     )
+    .def("alloc"        , &RealTime<dcomplex>::alloc        )
+    .def("iniDensity"   , &RealTime<dcomplex>::iniDensity   )
+    .def("doPropagation", &RealTime<dcomplex>::doPropagation)
+    .def("setMaxSteps"  , &RealTime<dcomplex>::setMaxSteps  ) 
+    .def("setStepSize"  , &RealTime<dcomplex>::setStepSize  )
+    .def("setOrthoTyp"  , &RealTime<dcomplex>::setOrthoTyp  )
+    .def("setInitDen"   , &RealTime<dcomplex>::setInitDen   )
+    .def("setSwapMOA"   , &RealTime<dcomplex>::setSwapMOA   )
+    .def("setSwapMOB"   , &RealTime<dcomplex>::setSwapMOB   )
+    .def("setFormU"     , &RealTime<dcomplex>::setFormU     )
+    .def("setEnvelope"  , &RealTime<dcomplex>::setEnvelope  )
+    .def("setFieldAmp"  , &RealTime<dcomplex>::Wrapper_setFieldAmp  )
+    .def("setTOn"       , &RealTime<dcomplex>::setTOn       )
+    .def("setTOff"      , &RealTime<dcomplex>::setTOff      )
+    .def("setFreq"      , &RealTime<dcomplex>::setFreq      )
+    .def("setPhase"     , &RealTime<dcomplex>::setPhase     )
+    .def("setSigma"     , &RealTime<dcomplex>::setSigma     )
+    .def("printRT"      , &RealTime<dcomplex>::printRT      )
+  ;
+
   enum_<RealTime<double>::ORTHO>("RealTime_ORTHO"   )
     .value("Lowdin"   , RealTime<double>::Lowdin    )
     .value("Cholesky" , RealTime<double>::Cholesky  )
@@ -142,8 +192,53 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("SinSq"   , RealTime<double>::SinSq         )
   ;
 
-  def("readInput",       ChronusQ::Wrapper_readInput);
-  def("HashAtom",        ChronusQ::HashAtom         );
-  def("getAtomicNumber", ChronusQ::getAtomicNumber  );
+  class_<MOIntegrals<double>,boost::noncopyable>("MOIntegrals_double",init<>())
+    .def("communicate" , &MOIntegrals<double>::communicate)
+    .def("initMeta"    , &MOIntegrals<double>::initMeta   )
+  ;
+  class_<MOIntegrals<dcomplex>,boost::noncopyable>("MOIntegrals_complex",init<>())
+    .def("communicate" , &MOIntegrals<dcomplex>::communicate)
+    .def("initMeta"    , &MOIntegrals<dcomplex>::initMeta   )
+  ;
+
+  class_<SDResponse<double>,boost::noncopyable>("SDResponse_double",init<>())
+    .def("communicate" , &SDResponse<double>::communicate )
+    .def("initMeta"    , &SDResponse<double>::initMeta    )
+    .def("alloc"       , &SDResponse<double>::alloc       )
+    .def("setNSek"     , &SDResponse<double>::setNSek     )
+    .def("setMeth"     , &SDResponse<double>::setMeth     )
+    .def("initMeth"    , &SDResponse<double>::initMeth    )
+    .def("IterativeRPA", &SDResponse<double>::IterativeRPA)
+  ;
+
+  class_<SDResponse<dcomplex>,boost::noncopyable>("SDResponse_complex",init<>())
+    .def("communicate" , &SDResponse<dcomplex>::communicate )
+    .def("initMeta"    , &SDResponse<dcomplex>::initMeta    )
+    .def("alloc"       , &SDResponse<dcomplex>::alloc       )
+    .def("setNSek"     , &SDResponse<dcomplex>::setNSek     )
+    .def("setMeth"     , &SDResponse<dcomplex>::setMeth     )
+    .def("initMeth"    , &SDResponse<dcomplex>::initMeth    )
+    .def("IterativeRPA", &SDResponse<dcomplex>::IterativeRPA)
+  ;
+
+  enum_<SDResponse<double>::METHOD>("SDResponse_METHOD")
+    .value("INVALID", SDResponse<double>::__invalid    )
+    .value("CIS"    , SDResponse<double>::CIS          )
+    .value("RPA"    , SDResponse<double>::RPA          )
+    .value("PPRPA"  , SDResponse<double>::PPRPA        )
+    .value("PPATDA" , SDResponse<double>::PPATDA       )
+    .value("PPCTDA" , SDResponse<double>::PPCTDA       )
+    .value("STAB"   , SDResponse<double>::STAB         )
+  ;
+
+
+  def("readInput",       ChronusQ::Wrapper_readInput    );
+  def("HashAtom",        ChronusQ::HashAtom             );
+  def("getAtomicNumber", ChronusQ::getAtomicNumber      );
+  def("CErr",            ChronusQ::Wrapper_CErr_Default );
+  def("CErrMsg",         ChronusQ::Wrapper_CErr_Message );
+  def("initCQ",          ChronusQ::initCQ               );
+  def("finalizeCQ",      ChronusQ::finalizeCQ           );
+  def("CQSetNumThreads", ChronusQ::CQSetNumThreads      );
 };
 

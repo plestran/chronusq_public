@@ -147,6 +147,14 @@ class RealTime {
   void initMaps();
 
 public:
+  struct PropInfo {
+    double timeStep;
+    double energy;
+    std::array<double,4> dipole;
+    std::vector<double> orbitalOccA;
+    std::vector<double> orbitalOccB;
+  };
+  std::vector<PropInfo> propInfo;
 
   // constructor & destructor
   RealTime(){
@@ -272,6 +280,8 @@ public:
   void printRT();
   void formUTrans();
   void doPropagation();
+  void writeDipoleCSV();
+  void writeOrbitalCSV();
 };
 
 #include <realtime_alloc.h>

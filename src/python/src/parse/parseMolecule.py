@@ -1,7 +1,6 @@
 import os,sys
-#sys.path.append('/home/dbwy/git_repo/chronusq/build_gcc_libint_openmp/src/python')
-#sys.path.append('/home/dbwy/git_repo/chronusq/src/python')
 import libpythonapi as chronusQ
+from meta.knownKeywords import requiredKeywords
 
 #
 #  Parse the Molecule section of the input file and populate
@@ -15,23 +14,21 @@ import libpythonapi as chronusQ
 #                       the Molecules section
 #
 def parseMolecule(workers,settings): 
-  print 'Parsing Molecular Information'
+#  print 'Parsing Molecular Information'
 
 #
-# Check for unknown keywords in the Molecules section
+#  Check that all of the required keywords for Molecule
+#  object are found
 #
-  knownKeywords = [ 'charge', 'mult', 'geom' ]
-  for i in settings:
-    if i not in knownKeywords:
-      print "Keyword Molecule."+ str(i) +" not recognized"
+  for i in requiredKeywords['MOLECULE']:
+    if i not in settings:
+      msg = 'Required keyword Molecule.' + str(i) + ' not found'
+      CErrMsg(workers['CQFileIO'],str(msg))
 #
 # Grab charge and multiplicity
 #
-# FIXME: Need a check if these keywords aren't there
-#        or an ugly python error occurs
-#
-  charge = int(settings['charge'])
-  mult   = int(settings['mult'  ])
+  charge = settings['CHARGE']
+  mult   = settings['MULT'  ]
 #
 # Populate charge and multiplicity of the
 # CQ Molecules object
@@ -66,7 +63,7 @@ def readGeom(workers,settings):
 # Grab the string that contains the molecular geometry
 # and split up by line ends
 #
-  geomStr = settings['geom']
+  geomStr = settings['GEOM']
   geomStr = geomStr.split('\n')
 #
 # Determine how many atoms we have and try to remove
@@ -115,12 +112,14 @@ def readGeom(workers,settings):
     elif len(lineSplit) == 4:
       indx = chronusQ.HashAtom(str(lineSplit[0]),0)
     else:
-      print 'Input Error: Invalid Geometry Specification'
+      msg = 'Input Error: Invalid Geometry Specification'
+      CErrMsg(workers['CQFileIO'],str(msg))
 
     if indx != -1:
       workers["CQMolecule"].setIndex(i,indx)
     else:
-      print 'Input Error: Invalid Atomic Symbol or Mass Number'
+      msg = 'Input Error: Invalid Atomic Symbol or Mass Number'
+      CErrMsg(workers['CQFileIO'],str(msg))
 
     nTotalE += chronusQ.getAtomicNumber(indx)
 

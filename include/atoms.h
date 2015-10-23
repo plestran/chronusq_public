@@ -41,7 +41,6 @@ struct Atoms {
  // all noble gasses values are computed values from Reinhardt J. Chem. Phys. 47, pg 1300 (1967)
  // after Am all set to 2.01 (Ang)
 }; 
-
 static const Atoms elements[] = { 
   {1  ,"H" ,1  ,1.0078250321,"Y",2,1.058}, // 0 
   {1  ,"D" ,2  ,2.0141017780,"N",2,1.058}, // 1

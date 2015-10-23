@@ -11,9 +11,16 @@ using ChronusQ::FileIO;
 using ChronusQ::BasisSet;
 using ChronusQ::Controls;
 using ChronusQ::AOIntegrals;
+using ChronusQ::MOIntegrals;
 using ChronusQ::RealTime;
+using ChronusQ::CErr;
+using ChronusQ::SDResponse;
 
 namespace ChronusQ{
   void Wrapper_readInput(FileIO&,Molecule&,BasisSet&,Controls&,BasisSet&);
+
+  void Wrapper_CErr_Default(FileIO &);
+  void Wrapper_CErr_Message(FileIO &, std::string );
+  inline void CQSetNumThreads(int n) {omp_set_num_threads(n);};
   int getAtomicNumber(int);
 }
