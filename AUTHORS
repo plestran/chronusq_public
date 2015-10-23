@@ -1,19 +1,25 @@
-Name                   Institution                      Major Contributions
----------------------------------------------------------------------------
-Xiaosong Li            University of Washington         Principal Developer
+Name                   Institution                 Major Contributions
+-------------------------------------------------------------------------------
+Feizhi Ding            University of Washington    Real-Time Quantum Dynamics
 
-David Williams-Young   University of Washington         General Infrastructure, Parallelism, 
-                                                        Density Fitting, Post-SCF methods, 
-                                                        Real-Time Quantum Dynamics, Response Theory
+Joshua Goings          University of Washington    Real-Time Quantum Dynamics
 
-Sajan Silwal           University of Washington         General infrastructure, SCF
+Patrick Lestrange      University of Washington    General Infrastructure
 
-Feizhi Ding            University of Washington         Real-Time Quantum Dynamics
+Xiaosong Li            University of Washington    Principal Developer
 
-Hongbin Liu            University of Washington         General Infrastructure, Post-SCF methods
+Hongbin Liu            University of Washington    General Infrastructure 
+																									 Post-SCF methods
 
-Alessio Petrone        University of Washington         Density Functional Theory
+Alessio Petrone        University of Washington    Density Functional Theory
 
-Joshua Goings          University of Washington         Real-Time Quantum Dynamics
+Sajan Silwal           University of Washington    General infrastructure 
+																									 Self Consistent Field
 
-Patrick Lestrange      University of Washington         General Infrastructure
+David Williams-Young   University of Washington    General Infrastructure 
+																									 Parallelism, 
+																									 Density Fitting
+																									 Post-SCF methods
+                                                   Real-Time Quantum Dynamics 
+																									 Response Theory
+-------------------------------------------------------------------------------

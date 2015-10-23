@@ -54,10 +54,17 @@ header = """
 \____//_/ /_//_/    \____//_/ /_/ \__,_//____/ \___\_\ 
                                                        
 """
+banner = "-------------------------------------------------------------------------------\n"
 
 out.write(header)
+
 authors = open(authorfname, 'r')
-out.write(authors.read())
+out.write("Author List:\n"+banner+authors.read())
+authors.close()
+
+inputf = open(fname+".inp", 'r')
+out.write("Input File:\n"+banner+inputf.read()+banner)
+inputf.close()
 
 chronusQ.initCQ()
 controls.iniControls()
