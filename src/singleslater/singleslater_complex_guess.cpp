@@ -156,10 +156,8 @@ void SingleSlater<dcomplex>::formGuess() {
       }
     }
  
-    this->fileio_->out << "Found " << uniqueElement.size() << 
-                          " unique atoms in molecule" << endl;
-    
-    this->fileio_->out << endl << "Atomic SCF Starting............." << endl << endl;
+    this->fileio_->out << "Running " << uniqueElement.size() << 
+                          " atomic SCF calculations to form the initial guess" << endl;
  
     // Loop and perform CUHF on each atomic center
     for(auto iUn = 0; iUn < uniqueElement.size(); iUn++){

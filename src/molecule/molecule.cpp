@@ -73,25 +73,27 @@ void Molecule::printInfo(std::ostream &out) {
   out.setf(ios::right,ios::adjustfield);
   out.setf(ios::fixed,ios::floatfield);
   if(this->printLevel_ > 0) {
-    out << endl << "Molecular Information:" << endl;
+    out << "Molecular Information:" << endl;
+    out << bannerTop<< endl;
  
     out << std::setw(15) << "nAtoms =" << std::setw(8) << this->nAtoms_
-        << std::setw(5)  << " "        
-        << std::setw(25) << "Charge =" << std::setw(12) << this->charge_ 
+    		<< std::setw(30) << "nElectrons   =" << std::setw(8) << this->nTotalE_
         << endl;
  
-    out << std::setw(15) << "nElectrons =" << std::setw(8) << this->nTotalE_
-        << std::setw(5)  << " "
-        << std::setw(25) << "Nuclear Repulsion =" << std::setw(12) 
+    out << std::setw(15) << "Charge =" << std::setw(8) << this->charge_ 
+     		<< std::setw(30) << "Multiplicity ="  << std::setw(8) << this->multip_
+        << endl;
+
+    out << std::setw(26) << "Nuclear Repulsion =" << std::setw(24) 
         << std::setprecision(5) << std::scientific 
         << this->energyNuclei_ << " Eh"
         << endl;
+    out << bannerEnd << endl;
 
-    out << endl << "Cartesian coordinates (bohr):" << endl;
+    out << endl << "Cartesian Coordinates (bohr):" << endl;
     out << bannerTop<< endl;
-    out << std::setw(24) << " "
-        << std::setw(15) << "X" << std::setw(15) << "Y" 
-        << std::setw(15) << "Z" << endl;
+    out << std::setw(18) << "Atom" << std::setw(21) << "X" 
+				<< std::setw(15) << "Y" 	 << std::setw(15) << "Z" << endl;
     out << bannerMid << endl;
  
     for(auto i = 0; i < this->nAtoms_; i++)
