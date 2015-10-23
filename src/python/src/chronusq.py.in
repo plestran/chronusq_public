@@ -13,6 +13,8 @@ try:
 except IndexError:
     sys.exit("Please specify the input filename")
 
+authorfname = '@AUTHOR_PATH@'
+
 mol        = chronusQ.Molecule()
 basisSet   = chronusQ.BasisSet()
 DFbasisSet = chronusQ.BasisSet()

@@ -44,4 +44,8 @@ sdrMethodMap = {
   "STAB"   :chronusQ.SDResponse_METHOD.STAB     
 }
 
-
+aointAlg = {
+  "DIRECT":chronusQ.AOIntegrals_INTEGRAL_ALGORITHM.DIRECT,
+  "INCORE":chronusQ.AOIntegrals_INTEGRAL_ALGORITHM.INCORE,
+  "DENFIT":chronusQ.AOIntegrals_INTEGRAL_ALGORITHM.DENFIT
+}

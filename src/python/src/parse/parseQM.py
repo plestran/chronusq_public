@@ -5,6 +5,7 @@ from parseBasis import parseBasis
 from meta.knownKeywords import requiredKeywords
 from meta.knownJobs import *
 from meta.enumMaps import sdrMethodMap
+from meta.enumMaps import aointAlg
 
 #
 #  Parse the QM section of the input file and populate
@@ -57,6 +58,16 @@ def parseQM(workers,secDict):
 #
   parseBasis(workers,ssSettings['BASIS'])
 
+#
+# Set integral algorithm
+#
+
+  try:
+    workers['CQAOIntegrals'].setAlgorithm(aointAlg[str(ssSettings['INTS'])])
+  except KeyError:
+    pass
+
+  parseSCF(workers,secDict['SCF'])
   if str(ssSettings['JOB']) in knownJobs:
     if ssSettings['JOB'] in ('RT'):
       parseRT(workers,secDict['RT']) 
@@ -195,3 +206,23 @@ def parseSDR(workers,secDict):
       CErrMsg(workers['CQFileIO'],str(msg))
      
   workers['CQSDResponse'].setMeth(sdrMethodMap[str(JOB)])
+
+def parseSCF(workers,scfSettings):
+  optMap = {
+    'SCFDENTOL' :workers['CQSingleSlater'].setSCFDenTol,
+    'SCFENETOL' :workers['CQSingleSlater'].setSCFEneTol,
+    'SCFMAXITER':workers['CQSingleSlater'].setSCFMaxIter,
+    'FIELD'     :workers['CQSingleSlater'].setField
+  }
+  # Loop over optional keywords, set options accordingly
+  # note that because these are optional, if the keyword
+  # is not found in setings, no error is thrown and the
+  # next keyword is processed
+  for i in optMap:
+    try:
+      if i not in ('FIELD'):
+        optMap[i](scfSettings[i])
+      else:
+        optMap[i](scfSettings[i][0],scfSettings[i][1],scfSettings[i][2])
+    except KeyError:
+      continue

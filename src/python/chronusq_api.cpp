@@ -23,6 +23,10 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setMaxMultipole" , &SingleSlater<double>::setMaxMultipole        )
     .def("printLevel"      , &SingleSlater<double>::printLevel             )
     .def("setPrintLevel"   , &SingleSlater<double>::setPrintLevel          )
+    .def("setSCFDenTol"    , &SingleSlater<double>::setSCFDenTol           )
+    .def("setSCFEneTol"    , &SingleSlater<double>::setSCFEneTol           )
+    .def("setSCFMaxIter"   , &SingleSlater<double>::setSCFMaxIter          )
+    .def("setField"        , &SingleSlater<double>::Wrapper_setField       )
 
     .def("Ref"             , &SingleSlater<double>::Ref                    )
     .def("nTCS"            , &SingleSlater<double>::nTCS                   ) 
@@ -50,6 +54,10 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setMaxMultipole" , &SingleSlater<dcomplex>::setMaxMultipole        )
     .def("printLevel"      , &SingleSlater<dcomplex>::printLevel             )
     .def("setPrintLevel"   , &SingleSlater<dcomplex>::setPrintLevel          )
+    .def("setSCFDenTol"    , &SingleSlater<dcomplex>::setSCFDenTol           )
+    .def("setSCFEneTol"    , &SingleSlater<dcomplex>::setSCFEneTol           )
+    .def("setSCFMaxIter"   , &SingleSlater<dcomplex>::setSCFMaxIter          )
+    .def("setField"        , &SingleSlater<dcomplex>::Wrapper_setField       )
 
     .def("Ref"             , &SingleSlater<dcomplex>::Ref                    )
     .def("nTCS"            , &SingleSlater<dcomplex>::nTCS                   ) 
@@ -122,9 +130,16 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("nTCS"           , &AOIntegrals::nTCS                  )
     .def("setNTCS"        , &AOIntegrals::setNTCS               )
     .def("setMaxMultipole", &AOIntegrals::setMaxMultipole       )
+    .def("setAlgorithm"   , &AOIntegrals::setAlgorithm          )
     
 //  .def_readwrite("allocERI", &AOIntegrals::allocERI           )
 //  .def_readwrite("doDF"    , &AOIntegrals::doDF               )
+  ;
+
+  enum_<AOIntegrals::INTEGRAL_ALGORITHM>("AOIntegrals_INTEGRAL_ALGORITHM")
+    .value("DIRECT"   , AOIntegrals::DIRECT)
+    .value("INCORE"   , AOIntegrals::INCORE)
+    .value("DENFIT"   , AOIntegrals::DENFIT)
   ;
 
   class_<RealTime<double>,boost::noncopyable>("RealTime_double",init<>())
