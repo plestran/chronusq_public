@@ -40,6 +40,7 @@ endif(USE_LIBINT)
 
 # Set configure time variables
 set(BASIS_PATH "${PROJECT_SOURCE_DIR}/basis")
+set(AUTHOR_PATH "${PROJECT_SOURCE_DIR}/AUTHORS")
 set(PYTHONAPI_PATH "${PROJECT_BINARY_DIR}/src/python")
 
 # Set up config.h with configure time settings

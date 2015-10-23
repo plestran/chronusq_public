@@ -9,6 +9,7 @@ from parse.parseQM import parseQM
 from parse.parseMisc import parseMisc
 
 fname = sys.argv[1]
+authorfname = '@AUTHOR_PATH@'
 
 mol        = chronusQ.Molecule()
 basisSet   = chronusQ.BasisSet()
