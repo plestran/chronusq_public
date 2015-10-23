@@ -49,10 +49,13 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   std::unique_ptr<GauJob> gauJob;
 
   // Initialize the FileIO object
+/*
   std::vector<std::string> argv_string;
   for(auto i = 1; i < argc; ++i) if(argv[i][0]=='-') argv_string.push_back(argv[i]);
   if(argv_string.size()==0) fileIO = std::unique_ptr<FileIO>(new FileIO(argv[1]));
   else fileIO = std::unique_ptr<FileIO>(new FileIO(argv_string));
+*/
+  fileIO = std::unique_ptr<FileIO>(new FileIO(argv[1]));
 
 
   // print out the starting time of the job

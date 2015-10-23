@@ -40,13 +40,6 @@ class FileIO {
   std::string  name_out;                // name of the output file
   std::string  name_scr;                // name of the scratch file
   std::string  name_bin;                // name of the binary file
-  int   sizeInt_;                // size of an integer in terms of sizeof(char)
-  int   sizeLong_;               // size of a long integer in terms of sizeof(char)
-  int   sizeFloat_;              // size of a float point in terms of sizeof(char)
-  int   sizeDouble_;             // size of a double precision float point in terms of sizeof(char)
-  long  block[MAXBLOCK];         // block pointers
-  long  readPointer[2*MAXBLOCK]; // read pointers
-  long  writePointer[2*MAXBLOCK];// write pointers
 
 public:
 
@@ -56,49 +49,19 @@ public:
   fstream bin;                   // file handler of the binary file
 
   // constructor and destructor
-  FileIO(const std::string );
-  FileIO(std::vector<std::string> );
-  void iniFileIO(bool);
-  ~FileIO();
-
-  // open files
-  inline void openIn() {
-    if(this->in.is_open()) this->in.close();
-    this->in.open(this->name_in,ios::in);
-    if(this->in.fail()) throw 1020;
-  };
-
-  // determine if a block is initialized
-  inline bool isOpen(int blockNumber) {
-    if(blockNumber<0||blockNumber>MAXBLOCK) throw 1008;
-    if(block[blockNumber]<=0) return false;
-    return true;
-  };
-
-  // access to private data
-  int sizeInt()    { return this->sizeInt_;};
-  int sizeLong()   { return this->sizeLong_;};
-  int sizeFloat()  { return this->sizeFloat_;};
-  int sizeDouble() { return this->sizeDouble_;};
-
-  // read||write block pointers from||to binary file
-  void iniBlock(int);
-  void readBlock();
-  void writeBlock();
+  FileIO(const std::string);
+  ~FileIO() {
+    if(in.is_open()) in.close();
+    if(scr.is_open()) scr.close();
+    if(bin.is_open()) bin.close();
+    if(scr.is_open()) scr.close();
+    if(bin.is_open()) bin.close();
+    if(out.is_open()) out.close();
+  }
 
   // Python API
   void write(std::string);
 
-  // read||write scratch and binary files
-  /*
-  void io(std::string &, int, std::string &, std::string &, int, int offset=-1,std::string offsetType="");
-  void io(std::string &, int, std::string &, int*, int, int offset=-1,std::string offsetType="");
-  void io(std::string &, int, std::string &, long*, int, int offset=-1,std::string offsetType="");
-  void io(std::string &, int, std::string &, float*, int, int offset=-1,std::string offsetType="");
-  void io(std::string &, int, std::string &, double*, int, int offset=-1,std::string offsetType="");
-  void rw(std::string &, int, std::string &, std::string &, int, int offset=-1);
-  int charOffset(int,char*);
-*/
 };
 } // namespace ChronusQ
 #endif
