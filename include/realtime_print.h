@@ -29,7 +29,7 @@ void RealTime<T>::printRT() {
   double EDy = (*this->ssPropagator_->dipole())(1)/phys.debye;
   double EDz = (*this->ssPropagator_->dipole())(2)/phys.debye;
 
-  // FIXME: fix print so that all of the fields are consistant
+  // FIXME: fix print so that all of the fields are consistent
   // i.e. Electric Dipole Onl and Modified mid-point
   if (currentTime_ <= 0.0) {
     this->fileio_->out << std::left << "\n *** Real-Time Time-Dependent Hartree-Fock ***" << endl; 
