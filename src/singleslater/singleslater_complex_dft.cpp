@@ -35,4 +35,13 @@ void SingleSlater<dcomplex>::formVXC(){
 
 };
 
+template<>
+void SingleSlater<dcomplex>::formVWNPara(double rho){
+};
+
+template<>
+void SingleSlater<dcomplex>::formVWNFerr(double rho_A, double rho_B){
+};
+
+
 } // Namespace ChronusQ

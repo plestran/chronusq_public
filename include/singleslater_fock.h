@@ -85,6 +85,8 @@ void SingleSlater<T>::formFock(){
   *(fockA_)+=(*this->PTA_);
 #endif
   if(this->isDFT) (*fockA_) += (*this->vXCA_);
+// VWN Corr
+  if(this->isDFT) (*fockA_) += (*this->vCorA_);
 
   if(!this->isClosedShell && this->Ref_ != TCS){
     this->fockB_->setZero();

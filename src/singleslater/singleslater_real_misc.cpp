@@ -190,6 +190,8 @@ void SingleSlater<double>::computeEnergy(){
   }
   
   if(this->isDFT) this->energyTwoE += this->totalEx;
+// VWN Corr
+  if(this->isDFT) this->energyTwoE += this->totalEcorr;
     
   // Add in the electric field component if they are non-zero
   std::array<double,3> null{{0,0,0}};

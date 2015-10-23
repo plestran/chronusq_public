@@ -73,6 +73,7 @@ void SingleSlater<T>::buildVxc(cartGP gridPt, double weight){
    double *pointProd; 
    double rhor = 0.0;
    double rhor_B = 0.0;
+   bool   do_corr = false;
 //   double rhor_t = 0.0;
 //   double rhor_pol = 0.0;
 //   double fact_43_A = 0.0;
@@ -103,9 +104,20 @@ void SingleSlater<T>::buildVxc(cartGP gridPt, double weight){
      (*overlapR_) = overlapR_->selfadjointView<Lower>();;
    if(this->isClosedShell && this->Ref_ != TCS) {
     rhor = overlapR_->frobInner(this->densityA()->conjugate());
+//
+//  LDA Slater Exchange
     (*this->vXCA()) += weight*(*overlapR_)*(std::pow(rhor,(1.0/3.0)));
     this->totalEx   += weight*(std::pow(rhor,(4.0/3.0)));
+//  VWN Correlation
+    if (do_corr) {
+    if (rhor > 0.000001) {
+      this->formVWNPara(rhor);
+      (*this->vCorA())    += weight*(*overlapR_)*this->mu_corr;
+      this->totalEcorr += weight*rhor*this->eps_corr;
+     }
     }
+
+   }
     if(!this->isClosedShell && this->Ref_ != TCS) {
     rhor   = overlapR_->frobInner(this->densityA()->conjugate());
     rhor_B = overlapR_->frobInner(this->densityB()->conjugate());

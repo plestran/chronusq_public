@@ -229,6 +229,9 @@ public:
   double   energyNuclei; ///< N-N Repulsion Energy
   double   totalEnergy; ///< Sum of all energetic contributions
   double   totalEx;    ///< LDA Exchange
+  double   totalEcorr;    ///< Total VWN Energy
+  double   eps_corr;    ///< VWN Correlation Energy Density
+  double   mu_corr;    ///<  VWN Correlation Potential
 
   // constructor & destructor
   SingleSlater(){
@@ -414,6 +417,8 @@ public:
   void formExchange();		// form the exchange matrix
   void formPT();
   void formVXC();               // Form DFT VXC Term
+  void formVWNPara(double rho);               // Form DFT Vosko-Wilk-Nusair parametrization for correlarion potential (Paramagnetic)
+  void formVWNFerr(double rho_A, double rho_B);               // Form DFT Vosko-Wilk-Nusair parametrization for correlarion potential (Ferromagnetic) 
   double formBeckeW(cartGP gridPt, int iAtm);            // Evaluate Becke Weights
   double normBeckeW(cartGP gridPt);            // Evaluate Becke Weights
   void   buildVxc(cartGP gridPt, double weight);            // function to build the Vxc therm
