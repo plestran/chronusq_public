@@ -179,9 +179,20 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("Canonical", RealTime<double>::Canonical )
   ;
 
+  enum_<RealTime<dcomplex>::ORTHO>("RealTime_ORTHO"   )
+    .value("Lowdin"   , RealTime<dcomplex>::Lowdin    )
+    .value("Cholesky" , RealTime<dcomplex>::Cholesky  )
+    .value("Canonical", RealTime<dcomplex>::Canonical )
+  ;
+
   enum_<RealTime<double>::FORM_U>("RealTime_FORM_U"    )
     .value("EigenDecomp", RealTime<double>::EigenDecomp)
     .value("Taylor"     , RealTime<double>::Taylor     )
+  ;
+
+  enum_<RealTime<dcomplex>::FORM_U>("RealTime_FORM_U"    )
+    .value("EigenDecomp", RealTime<dcomplex>::EigenDecomp)
+    .value("Taylor"     , RealTime<dcomplex>::Taylor     )
   ;
 
   enum_<RealTime<double>::ENVELOPE>("RealTime_ENVELOPE")
@@ -190,6 +201,14 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("Gaussian", RealTime<double>::Gaussian      )
     .value("Step"    , RealTime<double>::Step          )
     .value("SinSq"   , RealTime<double>::SinSq         )
+  ;
+
+  enum_<RealTime<dcomplex>::ENVELOPE>("RealTime_ENVELOPE")
+    .value("Constant", RealTime<dcomplex>::Constant      )
+    .value("LinRamp" , RealTime<dcomplex>::LinRamp       )
+    .value("Gaussian", RealTime<dcomplex>::Gaussian      )
+    .value("Step"    , RealTime<dcomplex>::Step          )
+    .value("SinSq"   , RealTime<dcomplex>::SinSq         )
   ;
 
   class_<MOIntegrals<double>,boost::noncopyable>("MOIntegrals_double",init<>())
