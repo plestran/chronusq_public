@@ -17,6 +17,7 @@ find_package(PythonLibs REQUIRED)
 find_package(PythonInterp REQUIRED)
 find_package(Boost REQUIRED python)
 find_package(Eigen3 REQUIRED)
+find_package(HDF5 REQUIRED)
 find_package(OpenMP)
 
 # Define include directories
@@ -24,6 +25,7 @@ include_directories("${PROJECT_SOURCE_DIR}/include")
 include_directories("${PROJECT_BINARY_DIR}/include")
 include_directories("${Boost_INCLUDE_DIRS}")
 include_directories("${EIGEN3_INCLUDE_DIR}")
+include_directories("${HDF5_INCLUDE_DIRS}")
 
 # Append flags for compilation
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")

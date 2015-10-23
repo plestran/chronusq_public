@@ -180,9 +180,10 @@ def parseSDR(workers,secDict):
   # Set SDR object based on SS reference
   if workers['CQSingleSlater'] == workers['CQSingleSlaterDouble']:
     workers['CQSDResponse']  = workers['CQSDResponseDouble']
-#   workers['CQMOIntegrals'] = workers['CQMOIntegrals']
+    workers['CQMOIntegrals'] = workers['CQMOIntegralsDouble']
   else:
-    workers['CQSDResponse'] = workers['CQSDResponseComplex']
+    workers['CQSDResponse']  = workers['CQSDResponseComplex']
+    workers['CQMOIntegrals'] = workers['CQMOIntegralsComplex']
 
   try:
     workers['CQSDResponse'].setNSek(jobSettings['NSTATES'])
