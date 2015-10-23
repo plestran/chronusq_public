@@ -428,6 +428,9 @@ void RealTime<dcomplex>::doPropagation() {
     this->ssPropagator_->formFock();
     this->ssPropagator_->computeEnergy();
     this->ssPropagator_->computeMultipole();
+
+    this->ssPropagator_->mullikenPop();
+
     this->printRT();
 
 //  Transform Fock from AO to orthonormal basis
@@ -468,7 +471,7 @@ void RealTime<dcomplex>::doPropagation() {
       rec.dipole[3] = std::sqrt( std::pow(rec.dipole[0],2.0) +
                                  std::pow(rec.dipole[1],2.0) +
                                  std::pow(rec.dipole[2],2.0) );
-     // rec.mullPop    = (this->ssPropagator_->mullPop());
+      rec.mullPop    = (this->ssPropagator_->mullPop());
       scratch = (initMOA.adjoint() * POA * initMOA);
       for(auto idx = 0; idx != NTCSxNBASIS; idx++) {
         rec.orbitalOccA.push_back(scratch(idx,idx).real());
@@ -509,7 +512,7 @@ void RealTime<dcomplex>::doPropagation() {
   //  Write orbital occupation information
   this->writeOrbitalCSV();
   // Write Mulliken partial charges
-//  this->writeMullikenCSV();
+  this->writeMullikenCSV();
 };
 
 } // namespace ChronusQ
