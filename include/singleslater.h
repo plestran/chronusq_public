@@ -388,13 +388,16 @@ public:
   inline void setNAE(int nAE)    { this->nAE_ = nAE;};
   inline void setNBE(int nBE)    { this->nBE_ = nBE;};
   inline void setRef(int Ref)    { this->Ref_ = Ref;};
-  inline void setField(double x, double y, double z){
-    this->elecField_[0] = x;
-    this->elecField_[1] = y;
-    this->elecField_[2] = z;
-  }
+//inline void setField(double x, double y, double z){
+//  this->elecField_[0] = x;
+//  this->elecField_[1] = y;
+//  this->elecField_[2] = z;
+//}
   inline void setField(std::array<double,3> field){
     this->elecField_ = field;
+  }
+  inline void Wrapper_setField(double x, double y, double z){
+    this->setField({{x,y,z}});
   }
   inline void setNTCS(int i){ this->nTCS_ = i;};
   inline void setMaxMultipole(int i){ this->maxMultipole_ = i;};

@@ -20,7 +20,7 @@ set(PFOLDER  ${PROJECT_SOURCE_DIR}/src/python/src/parse)
 set(JFOLDER  ${PROJECT_SOURCE_DIR}/src/python/src/jobs)
 
 add_custom_target(copyapi ALL
-  ${CMAKE_COMMAND} -E copy ${APIPY} ${PROJECT_BINARY_DIR}
+  ${CMAKE_COMMAND} -E copy_if_different ${APIPY} ${PROJECT_BINARY_DIR}
   COMMAND ${CMAKE_COMMAND} -E make_directory ${APIINST}/parse
   COMMAND ${CMAKE_COMMAND} -E make_directory ${APIINST}/jobs
   COMMAND ${CMAKE_COMMAND} -E copy_directory ${PFOLDER} ${APIINST}/parse

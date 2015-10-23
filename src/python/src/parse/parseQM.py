@@ -57,6 +57,7 @@ def parseQM(workers,secDict):
 #
   parseBasis(workers,ssSettings['BASIS'])
 
+  parseSCF(workers,secDict['SCF'])
   if str(ssSettings['JOB']) in knownJobs:
     if ssSettings['JOB'] in ('RT'):
       parseRT(workers,secDict['RT']) 
@@ -195,3 +196,23 @@ def parseSDR(workers,secDict):
       CErrMsg(workers['CQFileIO'],str(msg))
      
   workers['CQSDResponse'].setMeth(sdrMethodMap[str(JOB)])
+
+def parseSCF(workers,scfSettings):
+  optMap = {
+    'SCFDENTOL' :workers['CQSingleSlater'].setSCFDenTol,
+    'SCFENETOL' :workers['CQSingleSlater'].setSCFEneTol,
+    'SCFMAXITER':workers['CQSingleSlater'].setSCFMaxIter,
+    'FIELD'     :workers['CQSingleSlater'].setField
+  }
+  # Loop over optional keywords, set options accordingly
+  # note that because these are optional, if the keyword
+  # is not found in setings, no error is thrown and the
+  # next keyword is processed
+  for i in optMap:
+    try:
+      if i not in ('FIELD'):
+        optMap[i](scfSettings[i])
+      else:
+        optMap[i](scfSettings[i][0],scfSettings[i][1],scfSettings[i][2])
+    except KeyError:
+      continue

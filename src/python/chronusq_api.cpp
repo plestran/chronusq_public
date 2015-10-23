@@ -26,6 +26,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setSCFDenTol"    , &SingleSlater<double>::setSCFDenTol           )
     .def("setSCFEneTol"    , &SingleSlater<double>::setSCFEneTol           )
     .def("setSCFMaxIter"   , &SingleSlater<double>::setSCFMaxIter          )
+    .def("setField"        , &SingleSlater<double>::Wrapper_setField       )
 
     .def("Ref"             , &SingleSlater<double>::Ref                    )
     .def("nTCS"            , &SingleSlater<double>::nTCS                   ) 
@@ -56,6 +57,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setSCFDenTol"    , &SingleSlater<dcomplex>::setSCFDenTol           )
     .def("setSCFEneTol"    , &SingleSlater<dcomplex>::setSCFEneTol           )
     .def("setSCFMaxIter"   , &SingleSlater<dcomplex>::setSCFMaxIter          )
+    .def("setField"        , &SingleSlater<dcomplex>::Wrapper_setField       )
 
     .def("Ref"             , &SingleSlater<dcomplex>::Ref                    )
     .def("nTCS"            , &SingleSlater<dcomplex>::nTCS                   ) 

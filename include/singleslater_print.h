@@ -234,6 +234,9 @@ void SingleSlater<T>::printSCFHeader(ostream &output){
   output << std::setw(38) << std::left << "  Density Convergence Tolerence:" << std::scientific << std::setprecision(6) << this->denTol_ << endl;
   output << std::setw(38) << std::left << "  Energy Convergence Tolerence:" << std::scientific << std::setprecision(6) << this->eneTol_ << endl;
   output << std::setw(38) << std::left << "  Maximum Number of SCF Cycles:" << this->maxSCFIter_ << endl;
+  output << std::setw(38) << std::left << "  Static Electric Field (Dipole):";
+  output << "{" << this->elecField_[0] << ", " << this->elecField_[1] << ", "
+         << this->elecField_[2] << "}" << endl;
   output << std::setw(38) << std::left << "  Integral Contraction Algorithm:";
   if(this->aointegrals_->integralAlgorithm == AOIntegrals::DIRECT)
     output << "Direct";
