@@ -53,20 +53,18 @@ void SingleSlater<T>::printInfo() {
  ***********************************************/
 template<typename T>
 void SingleSlater<T>::printMultipole(){
-  this->fileio_->out << "\nMultipole Information:" << endl;
   this->fileio_->out << bannerTop << endl;
   this->fileio_->out << std::setw(50) << std::left <<"Electric Dipole Moment"
                         << "(Debye)" << endl;
-    this->fileio_->out << std::left << std::setw(5) <<"X=" 
-                       << std::fixed << std::right << std::setw(20) 
-                       << (*this->dipole_)(0,0)*phys.bohr/phys.debye;
-    this->fileio_->out << std::left << std::setw(5) <<" Y=" 
-                       << std::fixed << std::right << std::setw(20) 
-                       << (*this->dipole_)(0,1)*phys.bohr/phys.debye;
-    this->fileio_->out << std::left << std::setw(5) <<" Z=" 
-                       << std::fixed << std::right << std::setw(20) 
-                       << (*this->dipole_)(0,2)*phys.bohr/phys.debye << endl;
-
+  this->fileio_->out << std::left << std::setw(5) <<"X=" 
+                     << std::fixed << std::right << std::setw(20) 
+                     << (*this->dipole_)(0,0)/phys.debye << endl;
+  this->fileio_->out << std::left << std::setw(5) <<"Y=" 
+                     << std::fixed << std::right << std::setw(20) 
+                     << (*this->dipole_)(1,0)/phys.debye << endl;
+  this->fileio_->out << std::left << std::setw(5) <<"Z=" 
+                     << std::fixed << std::right << std::setw(20) 
+                     << (*this->dipole_)(2,0)/phys.debye << endl;
 // jjg add total electric dipole moment
   this->fileio_->out << std::left << std::setw(5) <<"Tot=" 
                      << std::fixed << std::right << std::setw(20) 
@@ -107,7 +105,6 @@ void SingleSlater<T>::printMultipole(){
                        << std::fixed << std::right << std::setw(20) 
                        << (*this->quadpole_)(2,2)*phys.bohr/phys.debye << endl;
     this->fileio_->out << bannerMid << endl;
-
     this->fileio_->out << std::setw(50) << std::left << "Electric Quadrupole Moment (Traceless)" 
                        <<  "(Debye-\u212B)" << endl;
     this->fileio_->out << std::left << std::setw(5) <<"XX=" 
@@ -224,13 +221,13 @@ void SingleSlater<T>::printMultipole(){
                        << std::fixed << std::right << std::setw(20) 
                        << (*this->octpole_)(2,2,2)*phys.bohr*phys.bohr/phys.debye << endl;
   }
-  this->fileio_->out << bannerEnd << endl << endl;
+  this->fileio_->out << endl << bannerEnd << endl;
 }
 
 template<typename T>
 void SingleSlater<T>::printSCFHeader(ostream &output){
   output << bannerTop << endl;
-  output << "Self Consistent Field (SCF) Settings:" << endl << endl;
+  output << "Self Consistant Field (SCF) Settings:" << endl << endl;
 //cout << std::setprecision(6);
 
   output << std::setw(38) << std::left << "  SCF Type:" << this->SCFType_ << endl;
