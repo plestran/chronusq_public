@@ -25,6 +25,7 @@
  */
 #include <workers.h>
 #include <mollerplesset.h>
+#include <coupledcluster.h>
 #include <grid.h>
 using namespace ChronusQ;
 
@@ -168,6 +169,16 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
     twoDGrid->iniTwoDGrid(fileIO.get(),molecule.get(),basisset.get(),aointegrals.get(),hartreeFockReal.get(),100,194);
   }
 ////// APE ////
+
+  // CCSD
+  cout << "Doing CCSD" << endl;
+  if(!controls->doComplex) {
+    auto coupledclusterReal = std::unique_ptr<CoupledCluster>(new CoupledCluster());
+    coupledclusterReal->iniCoupledCluster(molecule.get(),basisset.get(), mointegralsReal.get(),fileIO.get(),
+                           controls.get(),hartreeFockReal.get());
+    //coupledclusterReal->CCSD();
+  }
+  //
 
 // REAL-TIME TD-SCF 
   
