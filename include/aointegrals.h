@@ -284,6 +284,7 @@ public:
   // Setters
   inline void setNTCS(int i)        { this->nTCS_         = i;}
   inline void setMaxMultipole(int i){ this->maxMultipole_ = i;}
+  inline void setAlgorithm(int i)   { this->integralAlgorithm = i;}
 
   inline double &twoEC(int i, int j, int k, int l){
     return (*twoEC_)(this->R2Index_[i][j],this->R2Index_[k][l]);

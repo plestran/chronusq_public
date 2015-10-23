@@ -36,9 +36,10 @@ knownKeywords['MOLECULE'] = {
 
 # Dictionary for known keywords in the QM input section
 knownKeywords['QM'] = {
-  'REFERENCE':CQKeyword('REFERENCE','S',True),
-  'BASIS'    :CQKeyword('BASIS'    ,'S',True),
-  'JOB'      :CQKeyword('JOB'      ,'S',True)
+  'REFERENCE':CQKeyword('REFERENCE','S',True ),
+  'BASIS'    :CQKeyword('BASIS'    ,'S',True ),
+  'JOB'      :CQKeyword('JOB'      ,'S',True ),
+  'INTS'     :CQKeyword('INTS'     ,'S',False)
 }
 
 # Dictionary for known keywords in the RT input section

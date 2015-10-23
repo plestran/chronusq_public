@@ -5,6 +5,7 @@ from parseBasis import parseBasis
 from meta.knownKeywords import requiredKeywords
 from meta.knownJobs import *
 from meta.enumMaps import sdrMethodMap
+from meta.enumMaps import aointAlg
 
 #
 #  Parse the QM section of the input file and populate
@@ -56,6 +57,15 @@ def parseQM(workers,secDict):
 # Try to set the basis for the QM Job
 #
   parseBasis(workers,ssSettings['BASIS'])
+
+#
+# Set integral algorithm
+#
+
+  try:
+    workers['CQAOIntegrals'].setAlgorithm(aointAlg[str(ssSettings['INTS'])])
+  except KeyError:
+    pass
 
   parseSCF(workers,secDict['SCF'])
   if str(ssSettings['JOB']) in knownJobs:

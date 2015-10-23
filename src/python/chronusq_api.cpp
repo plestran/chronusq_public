@@ -130,9 +130,16 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("nTCS"           , &AOIntegrals::nTCS                  )
     .def("setNTCS"        , &AOIntegrals::setNTCS               )
     .def("setMaxMultipole", &AOIntegrals::setMaxMultipole       )
+    .def("setAlgorithm"   , &AOIntegrals::setAlgorithm          )
     
 //  .def_readwrite("allocERI", &AOIntegrals::allocERI           )
 //  .def_readwrite("doDF"    , &AOIntegrals::doDF               )
+  ;
+
+  enum_<AOIntegrals::INTEGRAL_ALGORITHM>("AOIntegrals_INTEGRAL_ALGORITHM")
+    .value("DIRECT"   , AOIntegrals::DIRECT)
+    .value("INCORE"   , AOIntegrals::INCORE)
+    .value("DENFIT"   , AOIntegrals::DENFIT)
   ;
 
   class_<RealTime<double>,boost::noncopyable>("RealTime_double",init<>())
