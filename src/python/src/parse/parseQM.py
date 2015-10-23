@@ -67,7 +67,11 @@ def parseQM(workers,secDict):
   except KeyError:
     pass
 
-  parseSCF(workers,secDict['SCF'])
+  try:
+    parseSCF(workers,secDict['SCF'])
+  except KeyError:
+    pass
+
   if str(ssSettings['JOB']) in knownJobs:
     if ssSettings['JOB'] in ('RT'):
       parseRT(workers,secDict['RT']) 
