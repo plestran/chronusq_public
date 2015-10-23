@@ -14,6 +14,7 @@ knownSections  = [
   "MOLECULE", 
   "QM", 
   "MISC",
+  "SCF",
   "RT",
   "CIS",
   "RPA",
@@ -60,6 +61,12 @@ knownKeywords['MISC'] = {
   'NSMP' :CQKeyword('NSMP','I',False)
 }
 
+knownKeywords['SCF'] = {
+  'SCFDENTOL' :CQKeyword('SCFDENTOL' ,'D',False),
+  'SCFENETOL' :CQKeyword('SCFENETOL' ,'D',False),
+  'SCFMAXITER':CQKeyword('SCFMAXITER','I',False),
+}
+
 knownKeywords['CIS'] = {
   'NSTATES':CQKeyword("NSTATES",'I',True)
 }
@@ -76,15 +83,17 @@ knownKeywords['STAB'] = {
 
 # Create a dictionary of required keywords
 requiredKeywords = {}
-requiredKeywords['MOLECULE'] = []
-requiredKeywords['QM'] = []
-requiredKeywords['RT'] = []
-requiredKeywords['MISC'] = []
-requiredKeywords['CIS'] = []
-requiredKeywords['RPA'] = []
-requiredKeywords['STAB'] = []
+#requiredKeywords['MOLECULE'] = []
+#requiredKeywords['QM'] = []
+#requiredKeywords['RT'] = []
+#requiredKeywords['SCF'] = []
+#requiredKeywords['MISC'] = []
+#requiredKeywords['CIS'] = []
+#requiredKeywords['RPA'] = []
+#requiredKeywords['STAB'] = []
 
 for sec in knownKeywords:
+  requiredKeywords[sec] = []
   for keyWord in knownKeywords[sec]:
     if knownKeywords[sec][keyWord].req:
       requiredKeywords[sec].append(keyWord)
