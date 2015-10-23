@@ -399,6 +399,9 @@ public:
   inline void setNTCS(int i){ this->nTCS_ = i;};
   inline void setMaxMultipole(int i){ this->maxMultipole_ = i;};
   inline void setPrintLevel(int i){ this->printLevel_ = i;};
+  inline void setSCFDenTol(double x){ this->denTol_ = x;};
+  inline void setSCFEneTol(double x){ this->eneTol_ = x;};
+  inline void setSCFMaxIter(int i){ this->maxSCFIter_ = i;};
 
   // access to private data
   inline int nBasis() { return this->nBasis_;};

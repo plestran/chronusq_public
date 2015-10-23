@@ -23,6 +23,9 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setMaxMultipole" , &SingleSlater<double>::setMaxMultipole        )
     .def("printLevel"      , &SingleSlater<double>::printLevel             )
     .def("setPrintLevel"   , &SingleSlater<double>::setPrintLevel          )
+    .def("setSCFDenTol"    , &SingleSlater<double>::setSCFDenTol           )
+    .def("setSCFEneTol"    , &SingleSlater<double>::setSCFEneTol           )
+    .def("setSCFMaxIter"   , &SingleSlater<double>::setSCFMaxIter          )
 
     .def("Ref"             , &SingleSlater<double>::Ref                    )
     .def("nTCS"            , &SingleSlater<double>::nTCS                   ) 
@@ -50,6 +53,9 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setMaxMultipole" , &SingleSlater<dcomplex>::setMaxMultipole        )
     .def("printLevel"      , &SingleSlater<dcomplex>::printLevel             )
     .def("setPrintLevel"   , &SingleSlater<dcomplex>::setPrintLevel          )
+    .def("setSCFDenTol"    , &SingleSlater<dcomplex>::setSCFDenTol           )
+    .def("setSCFEneTol"    , &SingleSlater<dcomplex>::setSCFEneTol           )
+    .def("setSCFMaxIter"   , &SingleSlater<dcomplex>::setSCFMaxIter          )
 
     .def("Ref"             , &SingleSlater<dcomplex>::Ref                    )
     .def("nTCS"            , &SingleSlater<dcomplex>::nTCS                   ) 
