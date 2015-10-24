@@ -10,8 +10,11 @@ target_include_directories(pythonapi PUBLIC ${PYTHON_INCLUDE_DIRS})
 target_link_libraries(pythonapi LINK_PUBLIC basisset classtools controls
 mointegrals molecule tools sdresponse realtime mollerplesset singleslater 
 aointegrals worker quasinewton grid fileio cerr gauinterface ${Boost_LIBRARIES} 
-${PYTHON_LIBRARIES} ${LAPACK_LINKER_FLAGS} ${LAPACK_LIBRARIES} 
-${BLAS_LINKER_FLAGS} ${BLAS_LIBRARIES} ${LIBINT_LIB} m ${OpenMP_CXX_FLAGS}
+${PYTHON_LIBRARIES} 
+#${LAPACK_LINKER_FLAGS} ${LAPACK_LIBRARIES} 
+#${BLAS_LINKER_FLAGS} ${BLAS_LIBRARIES} 
+${LOCAL_BLAS} ${LOCAL_LAPACK}
+${LIBINT_LIB} m ${OpenMP_CXX_FLAGS}
 ${HDF5_CXX_LIBRARIES})
 
 file(COPY "${PROJECT_BINARY_DIR}/src/python/chronusq.py"
