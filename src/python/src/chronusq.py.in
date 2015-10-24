@@ -7,13 +7,15 @@ from parse.parseInput import parseInput
 from parse.parseMolecule import parseMolecule
 from parse.parseQM import parseQM
 from parse.parseMisc import parseMisc
+import time 
 
+authorfname = '@AUTHOR_PATH@'
+starttime= time.strftime("%c")
 try:
     fname = sys.argv[1]
 except IndexError:
     sys.exit("Please specify the input filename")
 
-authorfname = '@AUTHOR_PATH@'
 
 mol        = chronusQ.Molecule()
 basisSet   = chronusQ.BasisSet()
@@ -58,9 +60,18 @@ header = """
 \____//_/ /_//_/    \____//_/ /_/ \__,_//____/ \___\_\ 
                                                        
 """
+banner = "-------------------------------------------------------------------------------\n"
 
+out.write("Job Started: %s"  % starttime )
 out.write(header)
 
+authors = open(authorfname, 'r')
+out.write("Author List:\n"+banner+authors.read())
+authors.close()
+
+inputf = open(fname+".inp", 'r')
+out.write("Input File:\n"+banner+inputf.read()+banner)
+inputf.close()
 
 chronusQ.initCQ()
 controls.iniControls()
@@ -75,6 +86,9 @@ jobStr = parseQM(workers,secDict)
 jobMap[jobStr](workers)
 
 chronusQ.finalizeCQ()
+
+endtime= time.strftime("%c")
+out.write("Job Ended: %s"  % endtime )
 
 #controls.printSettings()
 #mol.printInfo(out,controls)

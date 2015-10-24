@@ -28,9 +28,9 @@
 //----------------//
 //String constants//
 //----------------//
-const std::string bannerTop="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+const std::string bannerTop="--------------------------------------------------------------------------------";
 const std::string bannerMid="--------------------------------------------------------------------------------";
-const std::string bannerEnd="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+const std::string bannerEnd="--------------------------------------------------------------------------------";
 const auto PRINT_SMALL = 1e-10;
 
 
