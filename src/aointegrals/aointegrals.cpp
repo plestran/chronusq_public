@@ -508,8 +508,10 @@ void AOIntegrals::writeOneE(){
   this->fileio_->nucRepl->write(this->potential_->data(),H5::PredType::NATIVE_DOUBLE);
   this->fileio_->coreHam->write(this->oneE_->data(),H5::PredType::NATIVE_DOUBLE);
   // FIXME: This is buggy because we need to write to a slab of the data as opposed 
-  // the the whole thing
+  // the the whole thing (hyperSlabs)
+  /*
   this->fileio_->dipole->write(&this->elecDipole_->storage()[0],H5::PredType::NATIVE_DOUBLE);
   this->fileio_->quadpole->write(&this->elecQuadpole_->storage()[0],H5::PredType::NATIVE_DOUBLE);
   this->fileio_->octupole->write(&this->elecOctpole_->storage()[0],H5::PredType::NATIVE_DOUBLE);
+  */
 }

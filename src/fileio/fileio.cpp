@@ -126,3 +126,10 @@ void FileIO::iniStdOpFiles(int nBasis){
     )
   );
 }
+
+template<>
+void FileIO::iniStdSCFFiles<double>(int nBasis){
+  hsize_t NBSq[] = {nBasis,nBasis};
+  H5::DataSpace NBSqDataSpace(2,NBSq);
+  
+}

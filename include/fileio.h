@@ -76,6 +76,12 @@ public:
   std::unique_ptr<H5::DataSet> quadpole;
   std::unique_ptr<H5::DataSet> octupole;
 
+  std::unique_ptr<H5::DataSet> alphaSCFDen;
+  std::unique_ptr<H5::DataSet> betaSCFDen;
+  std::unique_ptr<H5::DataSet> alphaMO;
+  std::unique_ptr<H5::DataSet> betaMO;
+  
+
   // constructor and destructor
   FileIO(const std::string);
   ~FileIO() {
@@ -100,6 +106,7 @@ public:
   void iniH5Files();
   void iniStdGroups();
   void iniStdOpFiles(int);
+  template<typename T> void iniStdSCFFiles(int);
 
   // Python API
   void write(std::string);
