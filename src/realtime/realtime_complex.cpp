@@ -72,19 +72,29 @@ void RealTime<dcomplex>::writeMullikenCSV(){
 template<>
 void RealTime<dcomplex>::writeOrbitalCSV(){
   std::ofstream csv("RealTime_OrbOcc_Alpha.csv");
+  csv << std::setw(10) << "Time (au)";
+  for(auto idx = 0; idx != this->nBasis_*this->nTCS_; idx++){
+    csv << ", " << std::setw(10) << idx + 1;
+  }
+  csv << endl;
   for(auto it = this->propInfo.begin(); it != this->propInfo.end(); it++) {
-    csv << std::fixed << std::setprecision(6) << it->timeStep; 
+    csv << std::fixed << std::setw(10) << std::setprecision(6) << it->timeStep; 
       for(auto idx = 0; idx != this->nBasis_*this->nTCS_; idx++) {
-        csv << ", " << it->orbitalOccA[idx];
+        csv << ", " << std::setw(10) << std::setprecision(6) << it->orbitalOccA[idx];
       }
     csv << endl;
   }
   if(!this->isClosedShell_ && this->Ref_ != SingleSlater<dcomplex>::TCS){
     std::ofstream csv("RealTime_OrbOcc_Beta.csv");
+    csv << std::setw(10) << "Time (au)";
+    for(auto idx = 0; idx != this->nBasis_*this->nTCS_; idx++){
+      csv << ", " << std::setw(10) << idx + 1;
+    }
+    csv << endl;
     for(auto it = this->propInfo.begin(); it != this->propInfo.end(); it++) {
-      csv << std::fixed << std::setprecision(6) << it->timeStep; 
+      csv << std::fixed << std::setw(10) << std::setprecision(6) << it->timeStep; 
         for(auto idx = 0; idx != this->nBasis_*this->nTCS_; idx++) {
-          csv << ", " << it->orbitalOccB[idx];
+          csv << ", " << std::setw(10) << std::setprecision(6) <<  it->orbitalOccB[idx];
         }
       csv << endl;
     }
@@ -428,6 +438,9 @@ void RealTime<dcomplex>::doPropagation() {
     this->ssPropagator_->formFock();
     this->ssPropagator_->computeEnergy();
     this->ssPropagator_->computeMultipole();
+
+    this->ssPropagator_->mullikenPop();
+
     this->printRT();
 
 //  Transform Fock from AO to orthonormal basis
@@ -468,7 +481,7 @@ void RealTime<dcomplex>::doPropagation() {
       rec.dipole[3] = std::sqrt( std::pow(rec.dipole[0],2.0) +
                                  std::pow(rec.dipole[1],2.0) +
                                  std::pow(rec.dipole[2],2.0) );
-     // rec.mullPop    = (this->ssPropagator_->mullPop());
+      rec.mullPop    = (this->ssPropagator_->mullPop());
       scratch = (initMOA.adjoint() * POA * initMOA);
       for(auto idx = 0; idx != NTCSxNBASIS; idx++) {
         rec.orbitalOccA.push_back(scratch(idx,idx).real());
@@ -509,7 +522,7 @@ void RealTime<dcomplex>::doPropagation() {
   //  Write orbital occupation information
   this->writeOrbitalCSV();
   // Write Mulliken partial charges
-//  this->writeMullikenCSV();
+  this->writeMullikenCSV();
 };
 
 } // namespace ChronusQ
