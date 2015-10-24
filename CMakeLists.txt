@@ -13,8 +13,6 @@ option(USE_LIBINT "Use LibInt Integral Driver"  ON) # Default Libint
 option(BUILD_LA   "Build LAPACK and BLAS locally" OFF)
 
 # Check for dependencies
-find_package(BLAS REQUIRED)  
-find_package(LAPACK REQUIRED)
 find_package(PythonLibs REQUIRED)
 find_package(PythonInterp REQUIRED)
 find_package(Boost REQUIRED python)
@@ -68,6 +66,13 @@ if(BUILD_LA)
   set(LOCAL_BLAS   ${PROJECT_BINARY_DIR}/deps/lib/libblas.a  )
   set(LOCAL_LAPACK ${PROJECT_BINARY_DIR}/deps/lib/liblapack.a)
 #  set(LOCAL_BLAS ${PROJECT_BINARY_DIR}/deps/lib/libblas.a)
+
+  set(LA_LINK ${LOCAL_LAPACK} ${LOCAL_BLAS} gfortran)
+else()
+  find_package(BLAS REQUIRED)  
+  find_package(LAPACK REQUIRED)
+  set(LA_LINK ${LAPACK_LINKER_FLAGS} ${LAPACK_LIBRARIES})
+  set(LA_LINK ${LA_LINK} ${BLAS_LINKER_FLAGS} ${BLAS_LIBRARIES})
 endif()
 
 # Set configure time variables
