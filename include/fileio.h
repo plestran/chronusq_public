@@ -106,7 +106,7 @@ public:
   void iniH5Files();
   void iniStdGroups();
   void iniStdOpFiles(int);
-  template<typename T> void iniStdSCFFiles(int);
+  void iniStdSCFFiles(bool,int);
 
   // Python API
   void write(std::string);

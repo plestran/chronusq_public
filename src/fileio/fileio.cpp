@@ -26,6 +26,7 @@
 #include <fileio.h>
 using ChronusQ::FileIO;
 
+namespace ChronusQ {
 FileIO::FileIO(const std::string nm_input) {
   if(nm_input.empty()) 
     CErr("Fatal: Input File Required");
@@ -127,9 +128,35 @@ void FileIO::iniStdOpFiles(int nBasis){
   );
 }
 
-template<>
-void FileIO::iniStdSCFFiles<double>(int nBasis){
+void FileIO::iniStdSCFFiles(bool allocBeta, int nBasis){
   hsize_t NBSq[] = {nBasis,nBasis};
   H5::DataSpace NBSqDataSpace(2,NBSq);
-  
+
+  this->alphaSCFDen = std::unique_ptr<H5::DataSet>(
+    new H5::DataSet(
+      this->restart->createDataSet(this->alphaSCFDenPath,H5::PredType::NATIVE_DOUBLE,NBSqDataSpace)
+    )
+  );
+
+  this->alphaMO = std::unique_ptr<H5::DataSet>(
+    new H5::DataSet(
+      this->restart->createDataSet(this->alphaMOPath,H5::PredType::NATIVE_DOUBLE,NBSqDataSpace)
+    )
+  );
+
+  if(allocBeta) {
+    this->betaSCFDen = std::unique_ptr<H5::DataSet>(
+      new H5::DataSet(
+        this->restart->createDataSet(this->betaSCFDenPath,H5::PredType::NATIVE_DOUBLE,NBSqDataSpace)
+      )
+    );
+ 
+    this->betaMO = std::unique_ptr<H5::DataSet>(
+      new H5::DataSet(
+        this->restart->createDataSet(this->betaMOPath,H5::PredType::NATIVE_DOUBLE,NBSqDataSpace)
+      )
+    );
+  }
 }
+
+}; // namespace ChronusQ

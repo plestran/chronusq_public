@@ -487,6 +487,7 @@ public:
   void printPT();
   void printFock();
   void getAlgebraicField();
+  void writeSCFFiles();
   
   inline void genMethString(){
     if(this->Ref_ == _INVALID) 
