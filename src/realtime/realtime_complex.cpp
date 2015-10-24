@@ -72,19 +72,29 @@ void RealTime<dcomplex>::writeMullikenCSV(){
 template<>
 void RealTime<dcomplex>::writeOrbitalCSV(){
   std::ofstream csv("RealTime_OrbOcc_Alpha.csv");
+  csv << std::setw(10) << "Time (au)";
+  for(auto idx = 0; idx != this->nBasis_*this->nTCS_; idx++){
+    csv << ", " << std::setw(10) << idx + 1;
+  }
+  csv << endl;
   for(auto it = this->propInfo.begin(); it != this->propInfo.end(); it++) {
-    csv << std::fixed << std::setprecision(6) << it->timeStep; 
+    csv << std::fixed << std::setw(10) << std::setprecision(6) << it->timeStep; 
       for(auto idx = 0; idx != this->nBasis_*this->nTCS_; idx++) {
-        csv << ", " << it->orbitalOccA[idx];
+        csv << ", " << std::setw(10) << std::setprecision(6) << it->orbitalOccA[idx];
       }
     csv << endl;
   }
   if(!this->isClosedShell_ && this->Ref_ != SingleSlater<dcomplex>::TCS){
     std::ofstream csv("RealTime_OrbOcc_Beta.csv");
+    csv << std::setw(10) << "Time (au)";
+    for(auto idx = 0; idx != this->nBasis_*this->nTCS_; idx++){
+      csv << ", " << std::setw(10) << idx + 1;
+    }
+    csv << endl;
     for(auto it = this->propInfo.begin(); it != this->propInfo.end(); it++) {
-      csv << std::fixed << std::setprecision(6) << it->timeStep; 
+      csv << std::fixed << std::setw(10) << std::setprecision(6) << it->timeStep; 
         for(auto idx = 0; idx != this->nBasis_*this->nTCS_; idx++) {
-          csv << ", " << it->orbitalOccB[idx];
+          csv << ", " << std::setw(10) << std::setprecision(6) <<  it->orbitalOccB[idx];
         }
       csv << endl;
     }
