@@ -185,6 +185,7 @@ public:
   bool          haveTRII;
 //bool          allocERI;
 //bool          doDF;
+  bool          isPrimary;
 
 
   // Timing Stats
@@ -250,6 +251,7 @@ public:
     this->nTCS_             = 1;
     this->maxMultipole_     = 3;
     this->integralAlgorithm = DIRECT;
+    this->isPrimary         = true;
   };
   ~AOIntegrals(){;};
   
@@ -276,6 +278,10 @@ public:
   void alloc();
   void allocOp();
   void allocMultipole();
+
+
+  // IO
+  void writeOneE();
 
   // Getters
   inline int nTCS(){ return this->nTCS_;}

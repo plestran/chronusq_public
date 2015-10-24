@@ -56,6 +56,9 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   else fileIO = std::unique_ptr<FileIO>(new FileIO(argv_string));
 */
   fileIO = std::unique_ptr<FileIO>(new FileIO(argv[1]));
+  fileIO->iniH5Files();
+  fileIO->iniStdGroups();
+//fileIO->iniStdOpFiles(100);
 
 
   // print out the starting time of the job

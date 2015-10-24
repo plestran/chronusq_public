@@ -59,6 +59,7 @@ class SingleSlater {
     bool isClosedShell; ///< Boolean to run through closed shell machinery
     bool isHF;          ///< Boolean of whether or not it's a HF reference
     bool isDFT;         ///< Boolean of whether or not it's a DFT reference
+    bool isPrimary;
 
     double denTol; ///< SCF tolerence on the density
     double eneTol; ///< SCF tolerence on the energy
@@ -266,6 +267,7 @@ public:
   bool  isConverged;
   bool  isHF;
   bool  isDFT;
+  bool  isPrimary;
 
   double   energyOneE; ///< One-bodied operator tensors traced with Density
   double   energyTwoE; ///< Two-bodied operator tensors traced with Density
@@ -338,6 +340,7 @@ public:
     this->maxMultipole_ = 3;
     this->elecField_   = {0.0,0.0,0.0};
     this->printLevel_  = 1;
+    this->isPrimary    = true;
 
   };
   ~SingleSlater() {
@@ -406,6 +409,7 @@ public:
   inline void setSCFDenTol(double x){ this->denTol_ = x;};
   inline void setSCFEneTol(double x){ this->eneTol_ = x;};
   inline void setSCFMaxIter(int i){ this->maxSCFIter_ = i;};
+  inline void isNotPrimary(){this->isPrimary = false;};
 
   // access to private data
   inline int nBasis() { return this->nBasis_;};

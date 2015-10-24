@@ -39,25 +39,61 @@ class FileIO {
   std::string  name_in;                 // name of the input file
   std::string  name_out;                // name of the output file
   std::string  name_scr;                // name of the scratch file
-  std::string  name_bin;                // name of the binary file
+  std::string  name_restart;            // name of the restart file
+
+  std::string  operatorGroupPath;
+  std::string  SCFGroupPath;
+  std::string  overlapPath;
+  std::string  kineticPath;
+  std::string  nucReplPath  ;
+  std::string  coreHamPath  ;
+  std::string  dipolePath   ;
+  std::string  quadpolePath ;
+  std::string  octupolePath ;
+
+  std::string  alphaSCFDenPath ;
+  std::string  betaSCFDenPath  ;
+  std::string  alphaMOPath     ;
+  std::string  betaMOPath      ;
 
 public:
 
   fstream in;                    // file handler of the input file
   fstream out;                   // file handler of the output file
-  fstream scr;                   // file handler of the scratch file
-  fstream bin;                   // file handler of the binary file
+
+  std::unique_ptr<H5::H5File> scr;
+  std::unique_ptr<H5::H5File> restart;
+  
+  std::unique_ptr<H5::Group>  Operators;
+  std::unique_ptr<H5::Group>  SCF;
+
+  std::unique_ptr<H5::DataSet> overlap;
+  std::unique_ptr<H5::DataSet> kinetic;
 
   // constructor and destructor
   FileIO(const std::string);
   ~FileIO() {
-    if(in.is_open()) in.close();
-    if(scr.is_open()) scr.close();
-    if(bin.is_open()) bin.close();
-    if(scr.is_open()) scr.close();
-    if(bin.is_open()) bin.close();
+    if(in.is_open())  in.close();
     if(out.is_open()) out.close();
   }
+
+  enum STDFILES {
+    Overlap,
+    Kinetic,
+    NuclearRepulsion,
+    CoreHamiltonian,
+    Dipole,
+    Quadrupole,
+    Octupole,
+    AlphaSCFDensity,
+    BetaSCFDensity,
+    AlphaMO,
+    BetaMO
+  };
+
+  void iniH5Files();
+  void iniStdGroups();
+  void iniStdOpFiles(int);
 
   // Python API
   void write(std::string);

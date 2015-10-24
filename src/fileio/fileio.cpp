@@ -27,15 +27,67 @@
 using ChronusQ::FileIO;
 
 FileIO::FileIO(const std::string nm_input) {
-  if(nm_input.empty()) {
+  if(nm_input.empty()) 
     CErr("Fatal: Input File Required");
-  } else {
-    this->name_in = nm_input + ".inp";
-    this->in.open(name_in,ios::in);
-    if(this->in.fail()) CErr("Unable to open "+this->name_in);
 
-    this->name_out = nm_input + ".out";
-    this->out.open(name_out,ios::out);
-    if(this->out.fail()) CErr("Unable to open "+this->name_out);
-  };
+  this->name_in = nm_input + ".inp";
+  this->name_out = nm_input + ".out";
+  this->name_scr = nm_input + ".scr";
+  this->name_restart = nm_input + ".bin";
+
+  this->operatorGroupPath = "/OPERATORS";
+  this->SCFGroupPath      = "/SCF";
+
+  this->overlapPath  = this->operatorGroupPath + "/OVERLAP";
+  this->kineticPath  = this->operatorGroupPath + "/KINETIC";
+  this->nucReplPath  = this->operatorGroupPath + "/NUCLEAR_REPULSION";
+  this->coreHamPath  = this->operatorGroupPath + "/CORE_HAMILTONIAN";
+  this->dipolePath   = this->operatorGroupPath + "/DIPOLE";
+  this->quadpolePath = this->operatorGroupPath + "/QUADRUPOLE";
+  this->octupolePath = this->operatorGroupPath + "/OCTUPOLE";
+
+  this->alphaSCFDenPath = this->SCFGroupPath + "/ALPHA_DENSITY";
+  this->betaSCFDenPath  = this->SCFGroupPath + "/BETA_DENSITY";
+  this->alphaMOPath     = this->SCFGroupPath + "/ALPHA_MO";
+  this->betaMOPath      = this->SCFGroupPath + "/BETA>MO";
+
+  this->in.open(name_in,ios::in);
+  this->out.open(name_out,ios::out);
 };
+
+void FileIO::iniH5Files(){
+  this->scr = std::unique_ptr<H5::H5File>(
+    new H5::H5File(this->name_scr,H5F_ACC_TRUNC)
+  );
+  this->restart = std::unique_ptr<H5::H5File>(
+    new H5::H5File(this->name_restart,H5F_ACC_TRUNC)
+  );
+}
+
+void FileIO::iniStdGroups(){
+  this->Operators = std::unique_ptr<H5::Group>(
+    new H5::Group(this->restart->createGroup(operatorGroupPath))
+  );
+  this->SCF = std::unique_ptr<H5::Group>(
+    new H5::Group(this->restart->createGroup(SCFGroupPath))
+  );
+}
+
+void FileIO::iniStdOpFiles(int nBasis){
+  hsize_t NBSq[] = {nBasis,nBasis};
+//  hsize_t dipoleDim[] = {3,nBasis,nBasis};
+  H5::DataSpace NBSqDataSpace(2,NBSq);
+//  H5::DataSpace DipoleDataSpace(3,dipoleDim);
+//
+  this->overlap = std::unique_ptr<H5::DataSet>(
+    new H5::DataSet(
+      this->restart->createDataSet(this->overlapPath,H5::PredType::NATIVE_DOUBLE,NBSqDataSpace)
+    )
+  );
+  this->kinetic = std::unique_ptr<H5::DataSet>(
+    new H5::DataSet(
+      this->restart->createDataSet(this->kineticPath,H5::PredType::NATIVE_DOUBLE,NBSqDataSpace)
+    )
+  );
+
+}

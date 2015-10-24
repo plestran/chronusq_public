@@ -89,6 +89,7 @@ void AOIntegrals::iniAOIntegrals(Molecule * molecule, BasisSet * basisset,
   if(this->controls_->doDF     ) this->integralAlgorithm = DENFIT;
   this->alloc();
 
+  if(this->isPrimary) this->fileio_->iniStdOpFiles(basisset->nBasis());
 };
 
 void AOIntegrals::generateFmTTable() {
@@ -499,4 +500,9 @@ void AOIntegrals::allocMultipole(){
   } catch(...) {
     CErr(std::current_exception(),"Multipole Tensor Allocation");
   }
+}
+
+void AOIntegrals::writeOneE(){
+  this->fileio_->overlap->write(this->overlap_->data(),H5::PredType::NATIVE_DOUBLE);
+  this->fileio_->kinetic->write(this->kinetic_->data(),H5::PredType::NATIVE_DOUBLE);
 }

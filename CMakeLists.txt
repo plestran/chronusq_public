@@ -17,8 +17,9 @@ find_package(PythonLibs REQUIRED)
 find_package(PythonInterp REQUIRED)
 find_package(Boost REQUIRED python)
 find_package(Eigen3 REQUIRED)
-find_package(HDF5 REQUIRED)
+find_package(HDF5 REQUIRED CXX)
 find_package(OpenMP)
+
 
 # Define include directories
 include_directories("${PROJECT_SOURCE_DIR}/include")
