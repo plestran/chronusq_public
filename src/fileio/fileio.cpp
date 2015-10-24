@@ -75,19 +75,54 @@ void FileIO::iniStdGroups(){
 
 void FileIO::iniStdOpFiles(int nBasis){
   hsize_t NBSq[] = {nBasis,nBasis};
-//  hsize_t dipoleDim[] = {3,nBasis,nBasis};
+  hsize_t dipoleDim[] = {3,nBasis,nBasis};
+  hsize_t quadpoleDim[] = {6,nBasis,nBasis};
+  hsize_t octpoleDim[] = {10,nBasis,nBasis};
+
   H5::DataSpace NBSqDataSpace(2,NBSq);
-//  H5::DataSpace DipoleDataSpace(3,dipoleDim);
-//
+  H5::DataSpace DipoleDataSpace(3,dipoleDim);
+  H5::DataSpace QuadrupoleDataSpace(3,quadpoleDim);
+  H5::DataSpace OctupoleDataSpace(3,octpoleDim);
+
   this->overlap = std::unique_ptr<H5::DataSet>(
     new H5::DataSet(
       this->restart->createDataSet(this->overlapPath,H5::PredType::NATIVE_DOUBLE,NBSqDataSpace)
     )
   );
+
   this->kinetic = std::unique_ptr<H5::DataSet>(
     new H5::DataSet(
       this->restart->createDataSet(this->kineticPath,H5::PredType::NATIVE_DOUBLE,NBSqDataSpace)
     )
   );
 
+  this->nucRepl = std::unique_ptr<H5::DataSet>(
+    new H5::DataSet(
+      this->restart->createDataSet(this->nucReplPath,H5::PredType::NATIVE_DOUBLE,NBSqDataSpace)
+    )
+  );
+
+  this->coreHam = std::unique_ptr<H5::DataSet>(
+    new H5::DataSet(
+      this->restart->createDataSet(this->coreHamPath,H5::PredType::NATIVE_DOUBLE,NBSqDataSpace)
+    )
+  );
+
+  this->dipole = std::unique_ptr<H5::DataSet>(
+    new H5::DataSet(
+      this->restart->createDataSet(this->dipolePath,H5::PredType::NATIVE_DOUBLE,DipoleDataSpace)
+    )
+  );
+
+  this->quadpole = std::unique_ptr<H5::DataSet>(
+    new H5::DataSet(
+      this->restart->createDataSet(this->quadpolePath,H5::PredType::NATIVE_DOUBLE,QuadrupoleDataSpace)
+    )
+  );
+
+  this->octupole = std::unique_ptr<H5::DataSet>(
+    new H5::DataSet(
+      this->restart->createDataSet(this->octupolePath,H5::PredType::NATIVE_DOUBLE,OctupoleDataSpace)
+    )
+  );
 }

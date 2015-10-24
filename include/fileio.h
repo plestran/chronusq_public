@@ -69,6 +69,12 @@ public:
 
   std::unique_ptr<H5::DataSet> overlap;
   std::unique_ptr<H5::DataSet> kinetic;
+  std::unique_ptr<H5::DataSet> nucRepl;
+  std::unique_ptr<H5::DataSet> coreHam;
+
+  std::unique_ptr<H5::DataSet> dipole;
+  std::unique_ptr<H5::DataSet> quadpole;
+  std::unique_ptr<H5::DataSet> octupole;
 
   // constructor and destructor
   FileIO(const std::string);
