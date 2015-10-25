@@ -11,6 +11,7 @@ message(STATUS "Using ${CMAKE_MODULE_PATH}")
 # Set default options
 option(USE_LIBINT "Use LibInt Integral Driver"  ON) # Default Libint
 option(BUILD_LA   "Build LAPACK and BLAS locally" OFF)
+option(BUILD_LIBINT "Build Libint via cmake" OFF)
 
 # Check for dependencies
 find_package(PythonLibs REQUIRED)
@@ -34,23 +35,37 @@ include_directories("${PROJECT_BINARY_DIR}/include")
 include_directories("${Boost_INCLUDE_DIRS}")
 include_directories("${EIGEN3_INCLUDE_DIR}")
 include_directories("${BTAS_INCLUDE_DIR}")
-#include_directories("${HDF5_INCLUDE_DIRS}")
+include_directories("${HDF5_INCLUDE_DIRS}")
 
 # Append flags for compilation
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 
 # Set up Libint environment
+include(ExternalProject)
 if(USE_LIBINT)
-  find_library(LIBINT_LIB int2 ${PROJECT_SOURCE_DIR}/deps/lib)
-  include_directories("${PROJECT_SOURCE_DIR}/deps/include")
-  include_directories("${PROJECT_SOURCE_DIR}/deps/include/libint2")
+  if(BUILD_LIBINT)
+    ExternalProject_Add(libint
+      PREFIX ${PROJECT_BINARY_DIR}/deps/libint
+      URL "${PROJECT_SOURCE_DIR}/deps/src/libint-2.1.0-beta2.tgz"
+      CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/deps/libint/src/libint/configure --prefix=${PROJECT_BINARY_DIR}/deps CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${CMAKE_CXX_FLAGS}
+      BUILD_COMMAND make -j8
+      BUILD_IN_SOURCE 1
+      INSTALL_COMMAND make install
+    )  
+    set(LIBINT_LIB ${PROJECT_BINARY_DIR}/deps/lib/libint2.a)
+    include_directories("${PROJECT_BINARY_DIR}/deps/include")
+    include_directories("${PROJECT_BINARY_DIR}/deps/include/libint2")
+  else()
+    find_library(LIBINT_LIB int2 ${PROJECT_SOURCE_DIR}/deps/lib)
+    include_directories("${PROJECT_SOURCE_DIR}/deps/include")
+    include_directories("${PROJECT_SOURCE_DIR}/deps/include/libint2")
+  endif(BUILD_LIBINT)
 endif(USE_LIBINT)
 
 # Optinally build BLAS and LAPACK
 
 if(BUILD_LA)
-  include(ExternalProject)
   ExternalProject_Add(lapack
     PREFIX ${PROJECT_BINARY_DIR}/deps/lapack
     URL "http://www.netlib.org/lapack/lapack-3.5.0.tgz"
