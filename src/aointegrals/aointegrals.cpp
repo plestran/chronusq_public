@@ -89,7 +89,6 @@ void AOIntegrals::iniAOIntegrals(Molecule * molecule, BasisSet * basisset,
   if(this->controls_->doDF     ) this->integralAlgorithm = DENFIT;
   this->alloc();
 
-  if(this->isPrimary) this->fileio_->iniStdOpFiles(basisset->nBasis());
 };
 
 void AOIntegrals::generateFmTTable() {
@@ -419,6 +418,7 @@ void AOIntegrals::alloc(){
   this->molecularConstants_ = std::unique_ptr<MolecularConstants>(new MolecularConstants);
   this->quartetConstants_ = std::unique_ptr<QuartetConstants>(new QuartetConstants);
 
+  if(this->isPrimary) this->fileio_->iniStdOpFiles(this->basisSet_->nBasis());
 /* This whole block leaks memory like a siv (~ 8MB leaked for test 4!)
   int i,j,ij;
   this->R2Index_ = new int*[this->nBasis_];

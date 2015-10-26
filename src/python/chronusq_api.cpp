@@ -117,7 +117,11 @@ BOOST_PYTHON_MODULE(libpythonapi){
   ;
 
   class_<FileIO,boost::noncopyable>("FileIO",init<std::string>())
-    .def("write", &FileIO::write)
+    .def("write"      , &FileIO::write         )
+    .def("iniH5Files" , &FileIO::iniH5Files    )
+    .def("iniStdGroups", &FileIO::iniStdGroups )
+    .def("iniStdSCFFilesDouble", &FileIO::iniStdSCFFilesDouble)
+    .def("iniStdSCFFilesComplex", &FileIO::iniStdSCFFilesComplex)
   ;
 
   
