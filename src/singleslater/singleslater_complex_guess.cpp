@@ -118,7 +118,7 @@ void SingleSlater<dcomplex>::scaleDen(){
 // form the initial guess of MO's //
 //--------------------------------//
 template<>
-void SingleSlater<dcomplex>::formGuess() {
+void SingleSlater<dcomplex>::SADGuess() {
   
   int readNPGTO,L, nsize;
   this->moA_->setZero();

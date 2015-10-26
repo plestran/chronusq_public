@@ -97,6 +97,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   // guess from scratch or read off input / gaussian
   //
   // ** Note that guess from Gaussian is buggy **
+/* 
   if(!controls->doComplex){
     if(controls->guess==0) hartreeFockReal->formGuess();
     else if(controls->guess==1) hartreeFockReal->readGuessIO();
@@ -109,6 +110,12 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
     if(controls->guess==0) hartreeFockComplex->formGuess();
     else CErr("Cannot Read Guess for Complex Wavefunctions (NYI)",fileIO->out);
   }
+*/
+  if(!controls->doComplex)
+    hartreeFockReal->formGuess();
+  else
+    hartreeFockComplex->formGuess();
+
 
   // Optimize wave function (?)
   if(!controls->doComplex){

@@ -36,6 +36,7 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
 
   this->elecField_  = controls->field_;
   this->printLevel_ = controls->printLevel;
+  this->guess_      = controls->guess;
 
   this->isClosedShell = (this->multip_ == 1);
   if(controls->HF){

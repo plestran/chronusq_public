@@ -118,7 +118,7 @@ void SingleSlater<double>::scaleDen(){
 // form the initial guess of MO's //
 //--------------------------------//
 template<>
-void SingleSlater<double>::formGuess() {
+void SingleSlater<double>::SADGuess() {
   
   std::vector<RealMatrix> atomMO;
   std::vector<RealMatrix> atomMOB;
