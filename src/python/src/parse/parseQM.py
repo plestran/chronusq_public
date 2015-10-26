@@ -6,6 +6,7 @@ from meta.knownKeywords import requiredKeywords
 from meta.knownJobs import *
 from meta.enumMaps import sdrMethodMap
 from meta.enumMaps import aointAlg
+from meta.enumMaps import guessMap
 
 #
 #  Parse the QM section of the input file and populate
@@ -216,7 +217,8 @@ def parseSCF(workers,scfSettings):
     'SCFDENTOL' :workers['CQSingleSlater'].setSCFDenTol,
     'SCFENETOL' :workers['CQSingleSlater'].setSCFEneTol,
     'SCFMAXITER':workers['CQSingleSlater'].setSCFMaxIter,
-    'FIELD'     :workers['CQSingleSlater'].setField
+    'FIELD'     :workers['CQSingleSlater'].setField,
+    'GUESS'     :workers['CQSingleSlater'].setGuess 
   }
   # Loop over optional keywords, set options accordingly
   # note that because these are optional, if the keyword
@@ -230,3 +232,6 @@ def parseSCF(workers,scfSettings):
         optMap[i](scfSettings[i][0],scfSettings[i][1],scfSettings[i][2])
     except KeyError:
       continue
+
+  if scfSettings['GUESS'] == guessMap['READ']:
+    workers['CQFileIO'].doRestart = True

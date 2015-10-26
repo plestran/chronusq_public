@@ -151,6 +151,7 @@ public:
     double timeStep;
     double energy;
     std::array<double,4> dipole;
+    std::vector<double> mullPop;
     std::vector<double> orbitalOccA;
     std::vector<double> orbitalOccB;
   };
@@ -250,13 +251,13 @@ public:
 
   // Setters
   inline void setMaxSteps(int i){ this->maxSteps_  = i;};
-  inline void setStepSize(int i){ this->stepSize_ = i;};
-  inline void setOrthoTyp(RealTime<T>::ORTHO i){ this->typeOrtho_ = i;};
+  inline void setStepSize(double i){ this->stepSize_ = i;};
+  inline void setOrthoTyp(int i){ this->typeOrtho_ = i;};
   inline void setInitDen(int i){ this->initDensity_ = i;};
   inline void setSwapMOA(int i){ this->swapMOA_     = i;};
   inline void setSwapMOB(int i){ this->swapMOB_     = i;};
-  inline void setFormU(RealTime<T>::FORM_U i){ this->methFormU_ = i;};
-  inline void setEnvelope(RealTime<T>::ENVELOPE i){ this->IEnvlp_ = i;};
+  inline void setFormU(int i){ this->methFormU_ = i;};
+  inline void setEnvelope(int i){ this->IEnvlp_ = i;};
   inline void setFieldAmp(std::array<double,3> x){ 
     this->Ex_ = x[0];
     this->Ey_ = x[1];
@@ -282,6 +283,7 @@ public:
   void doPropagation();
   void writeDipoleCSV();
   void writeOrbitalCSV();
+  void writeMullikenCSV();
 };
 
 #include <realtime_alloc.h>

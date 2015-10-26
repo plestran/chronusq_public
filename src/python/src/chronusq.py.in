@@ -9,9 +9,13 @@ from parse.parseQM import parseQM
 from parse.parseMisc import parseMisc
 import time 
 
-starttime= time.strftime("%c")
-fname = sys.argv[1]
 authorfname = '@AUTHOR_PATH@'
+starttime= time.strftime("%c")
+try:
+    fname = sys.argv[1]
+except IndexError:
+    sys.exit("Please specify the input filename")
+
 
 mol        = chronusQ.Molecule()
 basisSet   = chronusQ.BasisSet()
@@ -73,11 +77,13 @@ chronusQ.initCQ()
 controls.iniControls()
 
 secDict = parseInput(workers,fname+".inp")
-#print secDict
 
 parseMisc(workers,secDict["MISC"])
 parseMolecule(workers,secDict["MOLECULE"])
 jobStr = parseQM(workers,secDict)
+
+out.iniH5Files()
+out.iniStdGroups()
 
 jobMap[jobStr](workers)
 

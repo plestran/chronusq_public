@@ -118,7 +118,7 @@ void SingleSlater<dcomplex>::scaleDen(){
 // form the initial guess of MO's //
 //--------------------------------//
 template<>
-void SingleSlater<dcomplex>::formGuess() {
+void SingleSlater<dcomplex>::SADGuess() {
   
   int readNPGTO,L, nsize;
   this->moA_->setZero();
@@ -184,6 +184,8 @@ void SingleSlater<dcomplex>::formGuess() {
       controlAtom.doCUHF = true; // Can set to false too if UHF guess is desired
  
       // Initialize the local integral and SS classes
+      aointegralsAtom.isPrimary = false;
+      hartreeFockAtom.isNotPrimary();
       aointegralsAtom.iniAOIntegrals(&uniqueAtom,&basisSetAtom,this->fileio_,&controlAtom,
         &dfBasisSetAtom);
       hartreeFockAtom.iniSingleSlater(&uniqueAtom,&basisSetAtom,&aointegralsAtom,
@@ -211,5 +213,18 @@ void SingleSlater<dcomplex>::formGuess() {
   this->haveMO = true;
   if(this->molecule_->nAtoms() > 1) this->haveDensity = true;
 };
+
+template<>
+void SingleSlater<dcomplex>::READGuess(){
+  H5::DataSpace dataspace = this->fileio_->alphaSCFDen->getSpace();
+  this->fileio_->alphaSCFDen->read(this->densityA_->data(),*(this->fileio_->complexType),dataspace,dataspace);
+  this->fileio_->alphaMO->read(this->moA_->data(),*(this->fileio_->complexType),dataspace,dataspace);
+  if(!this->isClosedShell && this->Ref_ != TCS){
+    this->fileio_->betaSCFDen->read(this->densityB_->data(),*(this->fileio_->complexType),dataspace,dataspace);
+    this->fileio_->betaMO->read(this->moB_->data(),*(this->fileio_->complexType),dataspace,dataspace);
+  }
+  this->haveMO = true;
+  if(this->molecule_->nAtoms() > 1) this->haveDensity = true;
+}
 }; //namespace ChronusQ
 #endif

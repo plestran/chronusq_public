@@ -59,6 +59,7 @@ class SingleSlater {
     bool isClosedShell; ///< Boolean to run through closed shell machinery
     bool isHF;          ///< Boolean of whether or not it's a HF reference
     bool isDFT;         ///< Boolean of whether or not it's a DFT reference
+    bool isPrimary;
 
     double denTol; ///< SCF tolerence on the density
     double eneTol; ///< SCF tolerence on the energy
@@ -95,6 +96,7 @@ class SingleSlater {
   int    **R2Index_;
 
   int      nTCS_; ///< Integer to scale the dimension of matricies for TCS's
+  int      guess_;
 
   // Internal Storage
   std::unique_ptr<TMatrix>  densityA_;   ///< Alpha or Full (TCS) Density Matrix
@@ -128,6 +130,7 @@ class SingleSlater {
   std::string algebraicField_;           ///< String Real/Complex/(Quaternion)
   std::string algebraicFieldShort_;      ///< String Real/Complex/(Quaternion)
   std::array<double,3> elecField_;
+  std::vector<double> mullPop_; ///< mulliken partial charge
 
   // Lengths of scratch partitions (NOT MEANT TO BE COPIED)
   int lenX_;
@@ -256,6 +259,12 @@ public:
     CUKS,
     GKS
   }; ///< Supported references
+
+  enum GUESS {
+    SAD,
+    CORE,
+    READ
+  }; // Supported Guess Types
   bool	haveMO;      ///< Have MO coefficients?
   bool	haveDensity; ///< Computed Density? (Not sure if this is used anymore)
   bool	haveCoulomb; ///< Computed Coulomb Matrix?
@@ -265,6 +274,7 @@ public:
   bool  isConverged;
   bool  isHF;
   bool  isDFT;
+  bool  isPrimary;
 
   double   energyOneE; ///< One-bodied operator tensors traced with Density
   double   energyTwoE; ///< Two-bodied operator tensors traced with Density
@@ -337,6 +347,8 @@ public:
     this->maxMultipole_ = 3;
     this->elecField_   = {0.0,0.0,0.0};
     this->printLevel_  = 1;
+    this->isPrimary    = true;
+    this->guess_       = SAD;
 
   };
   ~SingleSlater() {
@@ -405,6 +417,8 @@ public:
   inline void setSCFDenTol(double x){ this->denTol_ = x;};
   inline void setSCFEneTol(double x){ this->eneTol_ = x;};
   inline void setSCFMaxIter(int i){ this->maxSCFIter_ = i;};
+  inline void setGuess(int i){ this->guess_ = i;};
+  inline void isNotPrimary(){this->isPrimary = false;};
 
   // access to private data
   inline int nBasis() { return this->nBasis_;};
@@ -422,6 +436,7 @@ public:
   inline int nOVA()    { return nOccA_*nVirA_;};
   inline int nOVB()    { return nOccB_*nVirB_;};
   inline int printLevel(){ return this->printLevel_;};
+  inline std::vector<double> mullPop(){ return this->mullPop_;};
   inline std::array<double,3> elecField(){ return this->elecField_;  };
   inline TMatrix* densityA() { return this->densityA_.get();};
   inline TMatrix* densityB() { return this->densityB_.get();};
@@ -449,7 +464,10 @@ public:
   inline Controls *    controls(){return this->controls_;};
   inline AOIntegrals * aointegrals(){return this->aointegrals_;};
 
-  void formGuess();	        // form the intial guess of MO's (Density)
+  void formGuess();	        // form the intial guess
+  void SADGuess();
+  void COREGuess();
+  void READGuess();
   void placeAtmDen(std::vector<int>, SingleSlater<double> &);           // Place the atomic densities into total densities for guess
   void scaleDen();              // Scale the unrestricted densities for correct # electrons
   void formDensity();		// form the density matrix
@@ -469,6 +487,7 @@ public:
   void CDIIS();
   void CpyFock(int);
   void GenDComm(int);
+  void mullikenPop();
   void printEnergy(); 
   void printMultipole();
   void printInfo();
@@ -480,6 +499,7 @@ public:
   void printPT();
   void printFock();
   void getAlgebraicField();
+  void writeSCFFiles();
   
   inline void genMethString(){
     if(this->Ref_ == _INVALID) 
@@ -515,6 +535,7 @@ public:
 };
 
 #include <singleslater_alloc.h>
+#include <singleslater_guess.h>
 #include <singleslater_print.h>
 #include <singleslater_fock.h>
 #include <singleslater_misc.h>

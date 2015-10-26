@@ -63,10 +63,11 @@ knownKeywords['MISC'] = {
 }
 
 knownKeywords['SCF'] = {
-  'SCFDENTOL' :CQKeyword('SCFDENTOL' ,'D' ,False),
-  'SCFENETOL' :CQKeyword('SCFENETOL' ,'D' ,False),
-  'SCFMAXITER':CQKeyword('SCFMAXITER','I' ,False),
-  'FIELD'     :CQKeyword('FIELD'     ,'D3',False)
+  'SCFDENTOL' :CQKeyword('SCFDENTOL' ,'D'    ,False),
+  'SCFENETOL' :CQKeyword('SCFENETOL' ,'D'    ,False),
+  'SCFMAXITER':CQKeyword('SCFMAXITER','I'    ,False),
+  'FIELD'     :CQKeyword('FIELD'     ,'D3'   ,False),
+  'GUESS'     :CQKeyword('GUESS'     ,'O-GS' ,False)
 }
 
 knownKeywords['CIS'] = {

@@ -27,6 +27,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setSCFEneTol"    , &SingleSlater<double>::setSCFEneTol           )
     .def("setSCFMaxIter"   , &SingleSlater<double>::setSCFMaxIter          )
     .def("setField"        , &SingleSlater<double>::Wrapper_setField       )
+    .def("setGuess"        , &SingleSlater<double>::setGuess               )
 
     .def("Ref"             , &SingleSlater<double>::Ref                    )
     .def("nTCS"            , &SingleSlater<double>::nTCS                   ) 
@@ -58,6 +59,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setSCFEneTol"    , &SingleSlater<dcomplex>::setSCFEneTol           )
     .def("setSCFMaxIter"   , &SingleSlater<dcomplex>::setSCFMaxIter          )
     .def("setField"        , &SingleSlater<dcomplex>::Wrapper_setField       )
+    .def("setGuess"        , &SingleSlater<dcomplex>::setGuess               )
 
     .def("Ref"             , &SingleSlater<dcomplex>::Ref                    )
     .def("nTCS"            , &SingleSlater<dcomplex>::nTCS                   ) 
@@ -75,6 +77,12 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("UKS"           , SingleSlater<double>::UKS                    )
     .value("CUKS"          , SingleSlater<double>::CUKS                   )
     .value("GKS"           , SingleSlater<double>::GKS                    )
+  ;
+
+  enum_<SingleSlater<double>::GUESS>("Guess")
+    .value("SAD"  , SingleSlater<double>::SAD  )
+    .value("CORE" , SingleSlater<double>::CORE )
+    .value("READ" , SingleSlater<double>::READ )
   ;
 
   class_<Molecule,boost::noncopyable>("Molecule",init<>())
@@ -117,7 +125,12 @@ BOOST_PYTHON_MODULE(libpythonapi){
   ;
 
   class_<FileIO,boost::noncopyable>("FileIO",init<std::string>())
-    .def("write", &FileIO::write)
+    .def("write"      , &FileIO::write         )
+    .def("iniH5Files" , &FileIO::iniH5Files    )
+    .def("iniStdGroups", &FileIO::iniStdGroups )
+    .def("iniStdSCFFilesDouble", &FileIO::iniStdSCFFilesDouble)
+    .def("iniStdSCFFilesComplex", &FileIO::iniStdSCFFilesComplex)
+    .def_readwrite("doRestart", &FileIO::doRestart   )
   ;
 
   
@@ -194,9 +207,20 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("Canonical", RealTime<double>::Canonical )
   ;
 
+  enum_<RealTime<dcomplex>::ORTHO>("RealTime_ORTHO"   )
+    .value("Lowdin"   , RealTime<dcomplex>::Lowdin    )
+    .value("Cholesky" , RealTime<dcomplex>::Cholesky  )
+    .value("Canonical", RealTime<dcomplex>::Canonical )
+  ;
+
   enum_<RealTime<double>::FORM_U>("RealTime_FORM_U"    )
     .value("EigenDecomp", RealTime<double>::EigenDecomp)
     .value("Taylor"     , RealTime<double>::Taylor     )
+  ;
+
+  enum_<RealTime<dcomplex>::FORM_U>("RealTime_FORM_U"    )
+    .value("EigenDecomp", RealTime<dcomplex>::EigenDecomp)
+    .value("Taylor"     , RealTime<dcomplex>::Taylor     )
   ;
 
   enum_<RealTime<double>::ENVELOPE>("RealTime_ENVELOPE")
@@ -205,6 +229,14 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("Gaussian", RealTime<double>::Gaussian      )
     .value("Step"    , RealTime<double>::Step          )
     .value("SinSq"   , RealTime<double>::SinSq         )
+  ;
+
+  enum_<RealTime<dcomplex>::ENVELOPE>("RealTime_ENVELOPE")
+    .value("Constant", RealTime<dcomplex>::Constant      )
+    .value("LinRamp" , RealTime<dcomplex>::LinRamp       )
+    .value("Gaussian", RealTime<dcomplex>::Gaussian      )
+    .value("Step"    , RealTime<dcomplex>::Step          )
+    .value("SinSq"   , RealTime<dcomplex>::SinSq         )
   ;
 
   class_<MOIntegrals<double>,boost::noncopyable>("MOIntegrals_double",init<>())
