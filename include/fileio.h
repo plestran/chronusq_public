@@ -56,7 +56,6 @@ class FileIO {
   std::string  alphaMOPath     ;
   std::string  betaMOPath      ;
 
-  bool doRestart;
 
 public:
 
@@ -84,6 +83,8 @@ public:
   std::unique_ptr<H5::DataSet> betaMO;
 
   std::unique_ptr<H5::CompType> complexType;
+
+  bool doRestart;
   
 
   // constructor and destructor

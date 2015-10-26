@@ -79,12 +79,21 @@ void FileIO::iniH5Files(){
 }
 
 void FileIO::iniStdGroups(){
-  this->Operators = std::unique_ptr<H5::Group>(
-    new H5::Group(this->restart->createGroup(operatorGroupPath))
-  );
-  this->SCF = std::unique_ptr<H5::Group>(
-    new H5::Group(this->restart->createGroup(SCFGroupPath))
-  );
+  if(doRestart){
+    this->Operators = std::unique_ptr<H5::Group>(
+      new H5::Group(this->restart->openGroup(operatorGroupPath))
+    );
+    this->SCF = std::unique_ptr<H5::Group>(
+      new H5::Group(this->restart->openGroup(SCFGroupPath))
+    );
+  } else {
+    this->Operators = std::unique_ptr<H5::Group>(
+      new H5::Group(this->restart->createGroup(operatorGroupPath))
+    );
+    this->SCF = std::unique_ptr<H5::Group>(
+      new H5::Group(this->restart->createGroup(SCFGroupPath))
+    );
+  }
 }
 
 void FileIO::iniStdOpFiles(int nBasis){
@@ -98,47 +107,93 @@ void FileIO::iniStdOpFiles(int nBasis){
   H5::DataSpace QuadrupoleDataSpace(3,quadpoleDim);
   H5::DataSpace OctupoleDataSpace(3,octpoleDim);
 
-  this->overlap = std::unique_ptr<H5::DataSet>(
-    new H5::DataSet(
-      this->restart->createDataSet(this->overlapPath,H5::PredType::NATIVE_DOUBLE,NBSqDataSpace)
-    )
-  );
+  if(this->doRestart) {
+    this->overlap = std::unique_ptr<H5::DataSet>(
+      new H5::DataSet(this->restart->openDataSet(this->overlapPath))
+    );
+ 
+    this->kinetic = std::unique_ptr<H5::DataSet>(
+      new H5::DataSet(this->restart->openDataSet(this->kineticPath))
+    );
+ 
+    this->nucRepl = std::unique_ptr<H5::DataSet>(
+      new H5::DataSet(this->restart->openDataSet(this->nucReplPath))
+    );
+ 
+    this->coreHam = std::unique_ptr<H5::DataSet>(
+      new H5::DataSet(this->restart->openDataSet(this->coreHamPath))
+    );
+ 
+    this->dipole = std::unique_ptr<H5::DataSet>(
+      new H5::DataSet(this->restart->openDataSet(this->dipolePath))
+    );
+ 
+    this->quadpole = std::unique_ptr<H5::DataSet>(
+      new H5::DataSet(this->restart->openDataSet(this->quadpolePath))
+    );
+ 
+    this->octupole = std::unique_ptr<H5::DataSet>(
+      new H5::DataSet(this->restart->openDataSet(this->octupolePath))
+    );
 
-  this->kinetic = std::unique_ptr<H5::DataSet>(
-    new H5::DataSet(
-      this->restart->createDataSet(this->kineticPath,H5::PredType::NATIVE_DOUBLE,NBSqDataSpace)
-    )
-  );
+  } else { 
 
-  this->nucRepl = std::unique_ptr<H5::DataSet>(
-    new H5::DataSet(
-      this->restart->createDataSet(this->nucReplPath,H5::PredType::NATIVE_DOUBLE,NBSqDataSpace)
-    )
-  );
-
-  this->coreHam = std::unique_ptr<H5::DataSet>(
-    new H5::DataSet(
-      this->restart->createDataSet(this->coreHamPath,H5::PredType::NATIVE_DOUBLE,NBSqDataSpace)
-    )
-  );
-
-  this->dipole = std::unique_ptr<H5::DataSet>(
-    new H5::DataSet(
-      this->restart->createDataSet(this->dipolePath,H5::PredType::NATIVE_DOUBLE,DipoleDataSpace)
-    )
-  );
-
-  this->quadpole = std::unique_ptr<H5::DataSet>(
-    new H5::DataSet(
-      this->restart->createDataSet(this->quadpolePath,H5::PredType::NATIVE_DOUBLE,QuadrupoleDataSpace)
-    )
-  );
-
-  this->octupole = std::unique_ptr<H5::DataSet>(
-    new H5::DataSet(
-      this->restart->createDataSet(this->octupolePath,H5::PredType::NATIVE_DOUBLE,OctupoleDataSpace)
-    )
-  );
+    this->overlap = std::unique_ptr<H5::DataSet>(
+      new H5::DataSet(
+        this->restart->createDataSet(
+          this->overlapPath,H5::PredType::NATIVE_DOUBLE,NBSqDataSpace
+        )
+      )
+    );
+ 
+    this->kinetic = std::unique_ptr<H5::DataSet>(
+      new H5::DataSet(
+        this->restart->createDataSet(
+          this->kineticPath,H5::PredType::NATIVE_DOUBLE,NBSqDataSpace
+        )
+      )
+    );
+ 
+    this->nucRepl = std::unique_ptr<H5::DataSet>(
+      new H5::DataSet(
+        this->restart->createDataSet(
+          this->nucReplPath,H5::PredType::NATIVE_DOUBLE,NBSqDataSpace
+        )
+      )
+    );
+ 
+    this->coreHam = std::unique_ptr<H5::DataSet>(
+      new H5::DataSet(
+        this->restart->createDataSet(
+          this->coreHamPath,H5::PredType::NATIVE_DOUBLE,NBSqDataSpace
+        )
+      )
+    );
+ 
+    this->dipole = std::unique_ptr<H5::DataSet>(
+      new H5::DataSet(
+        this->restart->createDataSet(
+          this->dipolePath,H5::PredType::NATIVE_DOUBLE,DipoleDataSpace
+        )
+      )
+    );
+ 
+    this->quadpole = std::unique_ptr<H5::DataSet>(
+      new H5::DataSet(
+        this->restart->createDataSet(
+          this->quadpolePath,H5::PredType::NATIVE_DOUBLE,QuadrupoleDataSpace
+        )
+      )
+    );
+ 
+    this->octupole = std::unique_ptr<H5::DataSet>(
+      new H5::DataSet(
+        this->restart->createDataSet(
+          this->octupolePath,H5::PredType::NATIVE_DOUBLE,OctupoleDataSpace
+        )
+      )
+    );
+  }
 }
 
 /*
@@ -150,73 +205,126 @@ void FileIO::iniStdSCFFilesDouble(bool allocBeta, int nBasis){
   hsize_t NBSq[] = {nBasis,nBasis};
   H5::DataSpace NBSqDataSpace(2,NBSq);
 
-  this->alphaSCFDen = std::unique_ptr<H5::DataSet>(
-    new H5::DataSet(
-      this->restart->createDataSet(this->alphaSCFDenPath,H5::PredType::NATIVE_DOUBLE,NBSqDataSpace)
-    )
-  );
+  if(doRestart) {
+    this->alphaSCFDen = std::unique_ptr<H5::DataSet>(
+      new H5::DataSet(this->restart->openDataSet(this->alphaSCFDenPath))
+    );
+ 
+    this->alphaMO = std::unique_ptr<H5::DataSet>(
+      new H5::DataSet(this->restart->openDataSet(this->alphaMOPath))
+    );
+ 
+    if(allocBeta) {
+      this->betaSCFDen = std::unique_ptr<H5::DataSet>(
+        new H5::DataSet(this->restart->openDataSet(this->betaSCFDenPath))
+      );
+  
+      this->betaMO = std::unique_ptr<H5::DataSet>(
+        new H5::DataSet(this->restart->openDataSet(this->betaMOPath))
+      );
+    }
+ 
+  } else {
 
-  this->alphaMO = std::unique_ptr<H5::DataSet>(
-    new H5::DataSet(
-      this->restart->createDataSet(this->alphaMOPath,H5::PredType::NATIVE_DOUBLE,NBSqDataSpace)
-    )
-  );
-
-  if(allocBeta) {
-    this->betaSCFDen = std::unique_ptr<H5::DataSet>(
+    this->alphaSCFDen = std::unique_ptr<H5::DataSet>(
       new H5::DataSet(
-        this->restart->createDataSet(this->betaSCFDenPath,H5::PredType::NATIVE_DOUBLE,NBSqDataSpace)
+        this->restart->createDataSet(
+          this->alphaSCFDenPath,H5::PredType::NATIVE_DOUBLE,NBSqDataSpace
+        )
       )
     );
  
-    this->betaMO = std::unique_ptr<H5::DataSet>(
+    this->alphaMO = std::unique_ptr<H5::DataSet>(
       new H5::DataSet(
-        this->restart->createDataSet(this->betaMOPath,H5::PredType::NATIVE_DOUBLE,NBSqDataSpace)
+        this->restart->createDataSet(
+          this->alphaMOPath,H5::PredType::NATIVE_DOUBLE,NBSqDataSpace
+        )
       )
     );
+ 
+    if(allocBeta) {
+      this->betaSCFDen = std::unique_ptr<H5::DataSet>(
+        new H5::DataSet(
+          this->restart->createDataSet(
+            this->betaSCFDenPath,H5::PredType::NATIVE_DOUBLE,NBSqDataSpace
+          )
+        )
+      );
+  
+      this->betaMO = std::unique_ptr<H5::DataSet>(
+        new H5::DataSet(
+          this->restart->createDataSet(
+            this->betaMOPath,H5::PredType::NATIVE_DOUBLE,NBSqDataSpace
+          )
+        )
+      );
+    }
+
   }
+
 }
 
 void FileIO::iniStdSCFFilesComplex(bool allocBeta, int nBasis){
   hsize_t NBSq[] = {nBasis,nBasis};
   H5::DataSpace NBSqDataSpace(2,NBSq);
 
-  this->alphaSCFDen = std::unique_ptr<H5::DataSet>(
-    new H5::DataSet(
-      this->restart->createDataSet(
-        this->alphaSCFDenPath,*this->complexType,NBSqDataSpace
-      )
-    )
-  );
+  if(this->doRestart) {
+    this->alphaSCFDen = std::unique_ptr<H5::DataSet>(
+      new H5::DataSet(this->restart->openDataSet(this->alphaSCFDenPath))
+    );
+ 
+    this->alphaMO = std::unique_ptr<H5::DataSet>(
+      new H5::DataSet(this->restart->openDataSet(this->alphaMOPath))
+    );
+ 
+    if(allocBeta) {
+      this->betaSCFDen = std::unique_ptr<H5::DataSet>(
+        new H5::DataSet(this->restart->openDataSet(this->betaSCFDenPath))
+      );
+      this->betaMO = std::unique_ptr<H5::DataSet>(
+        new H5::DataSet(this->restart->openDataSet(this->betaMOPath))
+      );
+    }
 
-  this->alphaMO = std::unique_ptr<H5::DataSet>(
-    new H5::DataSet(
-      this->restart->createDataSet(
-        this->alphaMOPath,*this->complexType,NBSqDataSpace
-      )
-    )
-  );
+  } else {
 
-  if(allocBeta) {
-
-    this->betaSCFDen = std::unique_ptr<H5::DataSet>(
+    this->alphaSCFDen = std::unique_ptr<H5::DataSet>(
       new H5::DataSet(
         this->restart->createDataSet(
-          this->betaSCFDenPath,*this->complexType,NBSqDataSpace
+          this->alphaSCFDenPath,*this->complexType,NBSqDataSpace
         )
       )
     );
  
-    this->betaMO = std::unique_ptr<H5::DataSet>(
+    this->alphaMO = std::unique_ptr<H5::DataSet>(
       new H5::DataSet(
         this->restart->createDataSet(
-          this->betaMOPath,*this->complexType,NBSqDataSpace
+          this->alphaMOPath,*this->complexType,NBSqDataSpace
         )
       )
     );
+ 
+    if(allocBeta) {
+ 
+      this->betaSCFDen = std::unique_ptr<H5::DataSet>(
+        new H5::DataSet(
+          this->restart->createDataSet(
+            this->betaSCFDenPath,*this->complexType,NBSqDataSpace
+          )
+        )
+      );
+  
+      this->betaMO = std::unique_ptr<H5::DataSet>(
+        new H5::DataSet(
+          this->restart->createDataSet(
+            this->betaMOPath,*this->complexType,NBSqDataSpace
+          )
+        )
+      );
+ 
+    }
 
   }
-
 }
 
 void FileIO::iniCompType(){

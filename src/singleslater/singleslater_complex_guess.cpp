@@ -213,5 +213,18 @@ void SingleSlater<dcomplex>::SADGuess() {
   this->haveMO = true;
   if(this->molecule_->nAtoms() > 1) this->haveDensity = true;
 };
+
+template<>
+void SingleSlater<dcomplex>::READGuess(){
+  H5::DataSpace dataspace = this->fileio_->alphaSCFDen->getSpace();
+  this->fileio_->alphaSCFDen->read(this->densityA_->data(),*(this->fileio_->complexType),dataspace,dataspace);
+  this->fileio_->alphaMO->read(this->moA_->data(),*(this->fileio_->complexType),dataspace,dataspace);
+  if(!this->isClosedShell && this->Ref_ != TCS){
+    this->fileio_->betaSCFDen->read(this->densityB_->data(),*(this->fileio_->complexType),dataspace,dataspace);
+    this->fileio_->betaMO->read(this->moB_->data(),*(this->fileio_->complexType),dataspace,dataspace);
+  }
+  this->haveMO = true;
+  if(this->molecule_->nAtoms() > 1) this->haveDensity = true;
+}
 }; //namespace ChronusQ
 #endif

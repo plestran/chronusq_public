@@ -56,8 +56,6 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   else fileIO = std::unique_ptr<FileIO>(new FileIO(argv_string));
 */
   fileIO = std::unique_ptr<FileIO>(new FileIO(argv[1]));
-  fileIO->iniH5Files();
-  fileIO->iniStdGroups();
 //fileIO->iniStdOpFiles(100);
 
 
@@ -69,6 +67,10 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   // Initialize default settings and read input
   controls->iniControls();
   readInput(fileIO.get(),molecule.get(),basisset.get(),controls.get(),dfBasisset.get());
+ 
+  // Initialize HDF5Files
+  fileIO->iniH5Files();
+  fileIO->iniStdGroups();
 
   // print out molecular and basis set information
   controls->printSettings(fileIO->out);
