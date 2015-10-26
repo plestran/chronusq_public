@@ -82,6 +82,8 @@ public:
   std::unique_ptr<H5::DataSet> betaSCFDen;
   std::unique_ptr<H5::DataSet> alphaMO;
   std::unique_ptr<H5::DataSet> betaMO;
+
+  std::unique_ptr<H5::CompType> complexType;
   
 
   // constructor and destructor
@@ -106,6 +108,7 @@ public:
   };
 
   void iniH5Files();
+  void iniCompType();
   void iniStdGroups();
   void iniStdOpFiles(int);
 //template<typename T> void iniStdSCFFiles(bool,int);

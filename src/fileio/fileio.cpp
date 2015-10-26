@@ -56,6 +56,8 @@ FileIO::FileIO(const std::string nm_input) {
 
   this->in.open(name_in,ios::in);
   this->out.open(name_out,ios::out);
+
+  this->iniCompType();
 };
 
 void FileIO::iniH5Files(){
@@ -176,43 +178,64 @@ void FileIO::iniStdSCFFilesDouble(bool allocBeta, int nBasis){
 }
 
 void FileIO::iniStdSCFFilesComplex(bool allocBeta, int nBasis){
-  typedef struct {
-    double re;
-    double im;
-  } complex_t;
-
-  H5::CompType complex_id(sizeof(complex_t));
-  complex_id.insertMember("RE",HOFFSET(complex_t,re),H5::PredType::NATIVE_DOUBLE);
-  complex_id.insertMember("IM",HOFFSET(complex_t,im),H5::PredType::NATIVE_DOUBLE);
-
   hsize_t NBSq[] = {nBasis,nBasis};
   H5::DataSpace NBSqDataSpace(2,NBSq);
 
   this->alphaSCFDen = std::unique_ptr<H5::DataSet>(
     new H5::DataSet(
-      this->restart->createDataSet(this->alphaSCFDenPath,complex_id,NBSqDataSpace)
+      this->restart->createDataSet(
+        this->alphaSCFDenPath,*this->complexType,NBSqDataSpace
+      )
     )
   );
 
   this->alphaMO = std::unique_ptr<H5::DataSet>(
     new H5::DataSet(
-      this->restart->createDataSet(this->alphaMOPath,complex_id,NBSqDataSpace)
+      this->restart->createDataSet(
+        this->alphaMOPath,*this->complexType,NBSqDataSpace
+      )
     )
   );
 
   if(allocBeta) {
+
     this->betaSCFDen = std::unique_ptr<H5::DataSet>(
       new H5::DataSet(
-        this->restart->createDataSet(this->betaSCFDenPath,complex_id,NBSqDataSpace)
+        this->restart->createDataSet(
+          this->betaSCFDenPath,*this->complexType,NBSqDataSpace
+        )
       )
     );
  
     this->betaMO = std::unique_ptr<H5::DataSet>(
       new H5::DataSet(
-        this->restart->createDataSet(this->betaMOPath,complex_id,NBSqDataSpace)
+        this->restart->createDataSet(
+          this->betaMOPath,*this->complexType,NBSqDataSpace
+        )
       )
     );
+
   }
+
+}
+
+void FileIO::iniCompType(){
+  typedef struct {
+    double re;
+    double im;
+  } complex_t;
+
+  this->complexType = std::unique_ptr<H5::CompType>(
+    new H5::CompType(sizeof(complex_t))
+  );
+  this->complexType->insertMember(
+    "RE",HOFFSET(complex_t,re),H5::PredType::NATIVE_DOUBLE
+  );
+  this->complexType->insertMember(
+    "IM",HOFFSET(complex_t,im),H5::PredType::NATIVE_DOUBLE
+  );
+
+
 }
 
 }; // namespace ChronusQ
