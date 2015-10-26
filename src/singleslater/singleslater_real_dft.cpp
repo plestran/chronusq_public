@@ -72,15 +72,17 @@ void SingleSlater<double>::formVXC(){
 //  Finishing the Vxc using the TF factor and the integration prefactor over a solid sphere
     (*this->vXCA()) =  val * (*this->vXCA());
     this->totalEx   =  val * CxEn * (this->totalEx);
-    (*this->vCorA()) =  4.0*math.pi * (*this->vCorA());
-    this->totalEcorr   =  4.0*math.pi * (this->totalEcorr);
+    (*this->vCorA()) =   4.0*math.pi * (*this->vCorA());
+    this->totalEcorr   = 4.0*math.pi * (this->totalEcorr);
     if(!this->isClosedShell && this->Ref_ != TCS) (*this->vXCA()) =  std::pow(2.0,(1.0/3.0)) * (*this->vXCA()) ;
     if(!this->isClosedShell && this->Ref_ != TCS) (*this->vXCB()) =  std::pow(2.0,(1.0/3.0)) * val * (*this->vXCB()) ;
     if(!this->isClosedShell && this->Ref_ != TCS) this->totalEx = std::pow(2.0,(1.0/3.0)) * this->totalEx;
     prettyPrint(this->fileio_->out,(*this->vXCA()),"LDA Vx alpha");
-    if(!this->isClosedShell && this->Ref_ != TCS) prettyPrint(this->fileio_->out,(*this->vXCB()),"LDA Vx beta");
+//    if(!this->isClosedShell && this->Ref_ != TCS) prettyPrint(this->fileio_->out,(*this->vXCB()),"LDA Vx beta");
     this->fileio_->out << "Total LDA Ex =" << this->totalEx <<endl;
+    cout.precision(15);
     cout << "Total LDA Ex =" << this->totalEx << " Total VWN Corr= " << this->totalEcorr <<endl;
+
 //    cout << "TotalEx "  << this->totalEx  <<endl;
 //    cout << "Factor "  << CxVx*CxEn*std::pow(2.0,(1.0/3.0))  <<endl;
 //    cout << "Vx_A" <<endl;
@@ -108,10 +110,16 @@ void SingleSlater<double>::formVXC(){
 template<>
 void SingleSlater<double>::formVWNPara(double rho){
 // Parameter for the fit (according Eq 4.4 Vosko Can. J. Phys. 1980
-   double A  = 0.0621814; // In the text page 1207 (A^P)
+   double A1  = 0.0621814; // In the text page 1207 (A^P)
+   double A  = A1/2.0; // to Hartree
+//   VWN5
    double b  = 3.72744;  // Caption Table 5
    double c  = 12.9352;  // Caption Table 5
    double x0 = -0.10498; // Caption Table 5
+//  VWN3
+//   double b  = 13.0720;  // Caption Table 5
+//   double c  = 42.7198;  // Caption Table 5
+//   double x0 = -0.409286; // Caption Table 5
    double b1 = (b*x0 - c)/(c*x0); 
    double b2 = (x0 - b)/(c*x0); 
    double b3 = (-1.0)/(c*x0); 
@@ -120,21 +128,37 @@ void SingleSlater<double>::formVWNPara(double rho){
    double r_s_sqrt = std::pow(((3.0)/(4.0*math.pi*rho)),(1.0/6.0));
    double r_s_32 = std::pow(((3.0)/(4.0*math.pi*rho)),(1.0/2.0));
    double X = r_s + b*(r_s_sqrt) + c; 
-   double X_x0 = x0*x0 + b*(x0) + c; 
+   double X_x0 = x0*x0 + b*x0 + c; 
    this->eps_corr = 0.0;
    this->mu_corr  = 0.0;
    this->eps_corr = A *
           ( std::log(r_s/X) + 
             2.0*b*(std::atan(Q/(2.0*r_s_sqrt + b)))/Q  -
-            b*x0*(std::log( (std::pow((r_s_sqrt-x0),2.0))/X ))/X_x0 +
-            2.0*(b + 2.0*x0)*(std::atan(Q/(2.0*r_s_sqrt + b)))/ Q           );
+            b*x0*(1.0/X_x0) * ( 
+                 (std::log( (std::pow((r_s_sqrt-x0),2.0))/X )) +
+                 (2.0*(b + 2.0*x0)*(1.0/Q)*(std::atan(Q/(2.0*r_s_sqrt + b))) ) 
+                 ) );
    this->mu_corr = -A * ( (1.0 + b1*r_s_sqrt)/(1.0 + b1*r_s_sqrt + b2*r_s + b3*r_s_32)) / 3.0 ;
    this->mu_corr += this->eps_corr ;
-//   cout << "rho " << rho << " eps "<< this->eps_corr << " mu " << this->mu_corr <<endl;
+//   cout << "r_s " << r_s << " r_s_sqrt " << r_s_sqrt << " r_s_32 " << r_s_32 <<endl;
+//   cout << " eps "<< this->eps_corr*1000.0 << " mu " << this->mu_corr <<endl;
 };
 
 template<>
 void SingleSlater<double>::formVWNFerr(double rho_A, double rho_B){
 };
+
+template<>
+double SingleSlater<double>::spindens(double rho_A, double rho_B){
+      double spindens;
+      double spinrho;
+      spindens = (rho_A + rho_B)/ (rho_A + rho_B);
+      spinrho = -2.0;
+      spinrho += std::pow((1.0+spindens),(4.0/3.0)); 
+      spinrho += std::pow((1.0-spindens),(4.0/3.0)); 
+      spinrho = spinrho/(2.0) ;
+      spinrho = spinrho/(-1.0+std::pow((2.0),(1.0/3.0))); 
+      return spinrho;
+};  //end
 
 } // Namespace ChronusQ

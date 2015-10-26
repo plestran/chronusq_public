@@ -43,5 +43,9 @@ template<>
 void SingleSlater<dcomplex>::formVWNFerr(double rho_A, double rho_B){
 };
 
+template<>
+double SingleSlater<dcomplex>::spindens(double rho_A, double rho_B){
+};
+
 
 } // Namespace ChronusQ

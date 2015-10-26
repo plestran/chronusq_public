@@ -465,6 +465,7 @@ public:
   void formVXC();               // Form DFT VXC Term
   void formVWNPara(double rho);               // Form DFT Vosko-Wilk-Nusair parametrization for correlarion potential (Paramagnetic)
   void formVWNFerr(double rho_A, double rho_B);               // Form DFT Vosko-Wilk-Nusair parametrization for correlarion potential (Ferromagnetic) 
+  double spindens(double rho_A,double rho_B);               // Form DFT Vosko-Wilk-Nusair parametrization for correlarion potential (Paramagnetic)
   double formBeckeW(cartGP gridPt, int iAtm);            // Evaluate Becke Weights
   double normBeckeW(cartGP gridPt);            // Evaluate Becke Weights
   void   buildVxc(cartGP gridPt, double weight);            // function to build the Vxc therm

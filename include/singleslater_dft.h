@@ -73,14 +73,8 @@ void SingleSlater<T>::buildVxc(cartGP gridPt, double weight){
    double *pointProd; 
    double rhor = 0.0;
    double rhor_B = 0.0;
-   bool   do_corr = false;
-//   double rhor_t = 0.0;
-//   double rhor_pol = 0.0;
-//   double fact_43_A = 0.0;
-//   double fact_43_B = 0.0;
-//   double f_Z = 0.0;
-//   double dfZ_dA = 0.0;
-//   double dfZ_dB = 0.0;
+   bool   do_corr = true;
+   bool   do_ex = true;
    std::unique_ptr<RealMatrix>  overlapR_;        ///< Overlap at grid point
    overlapR_ = std::unique_ptr<RealMatrix>(
      new RealMatrix(this->nBasis_,this->nBasis_));
@@ -106,14 +100,19 @@ void SingleSlater<T>::buildVxc(cartGP gridPt, double weight){
     rhor = overlapR_->frobInner(this->densityA()->conjugate());
 //
 //  LDA Slater Exchange
+    if (do_ex) {
     (*this->vXCA()) += weight*(*overlapR_)*(std::pow(rhor,(1.0/3.0)));
     this->totalEx   += weight*(std::pow(rhor,(4.0/3.0)));
+    }
 //  VWN Correlation
     if (do_corr) {
-    if (rhor > 0.000001) {
+    if (rhor > 1.0e-20) {
+//      this->formVWNPara(2.38732414637843e-04);
+//      this->formVWNPara(2.98415518297304e-05);
+//      this->formVWNPara(2.3873e-07);
       this->formVWNPara(rhor);
       (*this->vCorA())    += weight*(*overlapR_)*this->mu_corr;
-      this->totalEcorr += weight*rhor*this->eps_corr;
+      this->totalEcorr    += weight*rhor*this->eps_corr;
      }
     }
 
