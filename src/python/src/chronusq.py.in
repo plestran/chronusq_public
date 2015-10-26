@@ -78,7 +78,7 @@ controls.iniControls()
 
 secDict = parseInput(workers,fname+".inp")
 
-parseMisc(workers,secDict["MISC"])
+unittest = parseMisc(workers,secDict["MISC"])
 parseMolecule(workers,secDict["MOLECULE"])
 jobStr = parseQM(workers,secDict)
 
@@ -87,6 +87,7 @@ out.iniStdGroups()
 
 jobMap[jobStr](workers)
 
+print unittest
 chronusQ.finalizeCQ()
 
 endtime= time.strftime("%c")
