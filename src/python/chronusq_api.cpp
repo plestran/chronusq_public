@@ -27,6 +27,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setSCFEneTol"    , &SingleSlater<double>::setSCFEneTol           )
     .def("setSCFMaxIter"   , &SingleSlater<double>::setSCFMaxIter          )
     .def("setField"        , &SingleSlater<double>::Wrapper_setField       )
+    .def("setGuess"        , &SingleSlater<double>::setGuess               )
 
     .def("Ref"             , &SingleSlater<double>::Ref                    )
     .def("nTCS"            , &SingleSlater<double>::nTCS                   ) 
@@ -58,6 +59,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setSCFEneTol"    , &SingleSlater<dcomplex>::setSCFEneTol           )
     .def("setSCFMaxIter"   , &SingleSlater<dcomplex>::setSCFMaxIter          )
     .def("setField"        , &SingleSlater<dcomplex>::Wrapper_setField       )
+    .def("setGuess"        , &SingleSlater<dcomplex>::setGuess               )
 
     .def("Ref"             , &SingleSlater<dcomplex>::Ref                    )
     .def("nTCS"            , &SingleSlater<dcomplex>::nTCS                   ) 
@@ -75,6 +77,12 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("UKS"           , SingleSlater<double>::UKS                    )
     .value("CUKS"          , SingleSlater<double>::CUKS                   )
     .value("GKS"           , SingleSlater<double>::GKS                    )
+  ;
+
+  enum_<SingleSlater<double>::GUESS>("Guess")
+    .value("SAD"  , SingleSlater<double>::SAD  )
+    .value("CORE" , SingleSlater<double>::CORE )
+    .value("READ" , SingleSlater<double>::READ )
   ;
 
   class_<Molecule,boost::noncopyable>("Molecule",init<>())
@@ -122,6 +130,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("iniStdGroups", &FileIO::iniStdGroups )
     .def("iniStdSCFFilesDouble", &FileIO::iniStdSCFFilesDouble)
     .def("iniStdSCFFilesComplex", &FileIO::iniStdSCFFilesComplex)
+    .def_readwrite("doRestart", &FileIO::doRestart   )
   ;
 
   

@@ -49,3 +49,9 @@ aointAlg = {
   "INCORE":chronusQ.AOIntegrals_INTEGRAL_ALGORITHM.INCORE,
   "DENFIT":chronusQ.AOIntegrals_INTEGRAL_ALGORITHM.DENFIT
 }
+
+guessMap = {
+  "SAD" :chronusQ.Guess.SAD  ,
+  "CORE":chronusQ.Guess.CORE ,
+  "READ":chronusQ.Guess.READ  
+}
