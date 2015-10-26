@@ -31,6 +31,8 @@ FileIO::FileIO(const std::string nm_input) {
   if(nm_input.empty()) 
     CErr("Fatal: Input File Required");
 
+  this->doRestart = false;
+  
   this->name_in = nm_input + ".inp";
   this->name_out = nm_input + ".out";
   this->name_scr = nm_input + ".scr";
@@ -57,12 +59,21 @@ FileIO::FileIO(const std::string nm_input) {
 };
 
 void FileIO::iniH5Files(){
-  this->scr = std::unique_ptr<H5::H5File>(
-    new H5::H5File(this->name_scr,H5F_ACC_TRUNC)
-  );
-  this->restart = std::unique_ptr<H5::H5File>(
-    new H5::H5File(this->name_restart,H5F_ACC_TRUNC)
-  );
+  if(doRestart) {
+    this->scr = std::unique_ptr<H5::H5File>(
+      new H5::H5File(this->name_scr,H5F_ACC_RDWR)
+    );
+    this->restart = std::unique_ptr<H5::H5File>(
+      new H5::H5File(this->name_restart,H5F_ACC_RDWR)
+    );
+  } else {
+    this->scr = std::unique_ptr<H5::H5File>(
+      new H5::H5File(this->name_scr,H5F_ACC_TRUNC)
+    );
+    this->restart = std::unique_ptr<H5::H5File>(
+      new H5::H5File(this->name_restart,H5F_ACC_TRUNC)
+    );
+  }
 }
 
 void FileIO::iniStdGroups(){
@@ -128,7 +139,12 @@ void FileIO::iniStdOpFiles(int nBasis){
   );
 }
 
-void FileIO::iniStdSCFFiles(bool allocBeta, int nBasis){
+/*
+template<>
+void FileIO::iniStdSCFFiles<double>(bool allocBeta, int nBasis){
+*/
+//void FileIO::iniStdSCFFiles(bool allocBeta, int nBasis){
+void FileIO::iniStdSCFFilesDouble(bool allocBeta, int nBasis){
   hsize_t NBSq[] = {nBasis,nBasis};
   H5::DataSpace NBSqDataSpace(2,NBSq);
 
@@ -154,6 +170,46 @@ void FileIO::iniStdSCFFiles(bool allocBeta, int nBasis){
     this->betaMO = std::unique_ptr<H5::DataSet>(
       new H5::DataSet(
         this->restart->createDataSet(this->betaMOPath,H5::PredType::NATIVE_DOUBLE,NBSqDataSpace)
+      )
+    );
+  }
+}
+
+void FileIO::iniStdSCFFilesComplex(bool allocBeta, int nBasis){
+  typedef struct {
+    double re;
+    double im;
+  } complex_t;
+
+  H5::CompType complex_id(sizeof(complex_t));
+  complex_id.insertMember("RE",HOFFSET(complex_t,re),H5::PredType::NATIVE_DOUBLE);
+  complex_id.insertMember("IM",HOFFSET(complex_t,im),H5::PredType::NATIVE_DOUBLE);
+
+  hsize_t NBSq[] = {nBasis,nBasis};
+  H5::DataSpace NBSqDataSpace(2,NBSq);
+
+  this->alphaSCFDen = std::unique_ptr<H5::DataSet>(
+    new H5::DataSet(
+      this->restart->createDataSet(this->alphaSCFDenPath,complex_id,NBSqDataSpace)
+    )
+  );
+
+  this->alphaMO = std::unique_ptr<H5::DataSet>(
+    new H5::DataSet(
+      this->restart->createDataSet(this->alphaMOPath,complex_id,NBSqDataSpace)
+    )
+  );
+
+  if(allocBeta) {
+    this->betaSCFDen = std::unique_ptr<H5::DataSet>(
+      new H5::DataSet(
+        this->restart->createDataSet(this->betaSCFDenPath,complex_id,NBSqDataSpace)
+      )
+    );
+ 
+    this->betaMO = std::unique_ptr<H5::DataSet>(
+      new H5::DataSet(
+        this->restart->createDataSet(this->betaMOPath,complex_id,NBSqDataSpace)
       )
     );
   }

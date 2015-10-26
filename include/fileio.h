@@ -56,6 +56,8 @@ class FileIO {
   std::string  alphaMOPath     ;
   std::string  betaMOPath      ;
 
+  bool doRestart;
+
 public:
 
   fstream in;                    // file handler of the input file
@@ -106,7 +108,10 @@ public:
   void iniH5Files();
   void iniStdGroups();
   void iniStdOpFiles(int);
-  void iniStdSCFFiles(bool,int);
+//template<typename T> void iniStdSCFFiles(bool,int);
+//void iniStdSCFFiles(bool,int);
+  void iniStdSCFFilesDouble(bool,int);
+  void iniStdSCFFilesComplex(bool,int);
 
   // Python API
   void write(std::string);
