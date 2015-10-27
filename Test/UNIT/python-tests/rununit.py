@@ -18,6 +18,37 @@ class UnitTest:
 #     Routine Definitions    #
 ##############################
 
+def findFile(name,path):
+#  Checks whether file "name" exists in "path"
+	found = False
+	for root, dirs, files in os.walk(path):
+		if name in files:
+			found = True
+			break
+	return found
+
+def genSummary(testtable,summary):
+#  Prints the results in summary.txt
+	outf = open('summary.txt','w')
+
+# SCF output    
+	headers = ["Test Job","|dEnergy|","max(|dDipole|)","max(|dQuadrupole|)","max(|dOctupole|)","Passed"]
+	sumrytable = []
+	j = 0
+	for i in testtable:
+		if 'SCF' in ref[j].typ:
+			entry = []
+			entry.append(testtable[j].infile.replace(".inp",''))
+			for k in range(4):
+				entry.append(summary[j][k])
+			if summary[j][0] < 1E-7 and summary[j][1] < 1E-4 and summary[j][2] < 1E-7 and summary[j][3] < 1E-7:
+				entry.append('YES')
+			else:
+				entry.append('** NO **')
+			sumrytable.append(entry)
+		j += 1
+	outf.write(tabulate(sumrytable,headers,tablefmt="simple",floatfmt=".4E"))
+
 def genTable():
 # Reads test.index to see which tests to run
 	start = False
@@ -36,29 +67,72 @@ def genTable():
  	f.close()
  	return table
 
-def findFile(name,path):
-#  Checks whether file "name" exists in "path"
-	found = False
-	for root, dirs, files in os.walk(path):
-		if name in files:
-			found = True
-			break
-	return found
-
 def runUnit(doKill,doPrint):
 # Runs the unit tests
+	global errors, summary
+	refvalues()
 	tests = [[None for x in xrange(100000)] for y in xrange(10)]
 	testtable = genTable()
-	refvalues()
+	summary = []
+	errors  = []
 
 	k = 0
 	for i in testtable:
 		if findFile(i.infile,"."):
-			print "file = "+i.infile.replace(".inp",'')
-#			print ref[k].scf
+#
+#			run chronus
+			if doPrint:
+				print "running file: "+i.infile.replace(".inp",'')
 			tests[k][0] = runCQ(i.infile.replace(".inp",''))
 			print tests[k][0].E
+#
+#			test SCF values
+			if 'SCF' in ref[k].typ:
+				testSCF(ref[k],tests[k][0])
+				summary.append(errors)
+
 		k += 1
+	genSummary(testtable,summary)
+
+def testSCF(ref,tests):
+
+	auToD = 0.393456
+	auToAng = 0.529177
+# test SCF energy
+	abserr = abs(ref.scf - tests.E)
+	errors.append(abserr)
+
+# test molecular dipoles
+	maxerr = 0.0
+	for i in range(3):
+		abserr = abs(ref.dip[i] - tests.dipole[i]/auToD)
+		if abserr > maxerr:
+			maxerr = abserr
+	errors.append(maxerr)
+
+# test molecular quadrupole
+	k = 0
+	maxerr = 0.0
+	for i in range(3):
+		for j in range(i,3):
+			abserr = abs(ref.quad[k] - tests.quadrupole[i][j]*auToAng/auToD)
+			if abserr > maxerr:
+				maxerr = abserr
+			k += 1
+	errors.append(maxerr)
+
+# test molecular octupole
+	l = 0
+	maxerr = 0.0
+	for i in range(3):
+		for j in range(i,3):
+			for k in range(j,3):
+				abserr = abs(ref.octu[l] - tests.octupole[i][j][k]*auToAng*auToAng/auToD)
+				if abserr > maxerr:
+					maxerr = abserr
+				l += 1
+	errors.append(maxerr)
+
 
 ##############################
 #        Main Program        #
@@ -87,17 +161,6 @@ if __name__ in "__main__":
 			doKill = True
 		elif opt in ('-s',"--silent"):
 			doPrint = False
+
 	runUnit(doKill,doPrint)    
-
-
-# Load the reference values into ref
-#refvalues()
-#print ref[0].scf
-#
-#fname = "test0001_serial_incore"
-#tests = [[None for x in xrange(100000)] for y in xrange(10)]
-#tests[0][0] = runCQ(fname)
-#print tests[0][0].E
-
-
 
