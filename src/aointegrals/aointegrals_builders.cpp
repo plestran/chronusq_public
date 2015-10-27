@@ -400,9 +400,9 @@ void AOIntegrals::computeAOOneE(){
 
   // Compute and time overlap integrals
   auto OStart = std::chrono::high_resolution_clock::now();
-  if(this->controls_->doOctpole) OneEDriver(OneBodyEngine::emultipole3);
-  else if(this->controls_->doQuadpole) OneEDriver(OneBodyEngine::emultipole2);
-  else if(this->controls_->doDipole) OneEDriver(OneBodyEngine::emultipole1);
+  if(this->maxMultipole_ ==3) OneEDriver(OneBodyEngine::emultipole3);
+  else if(this->maxMultipole_ == 2) OneEDriver(OneBodyEngine::emultipole2);
+  else if(this->maxMultipole_ == 1) OneEDriver(OneBodyEngine::emultipole1);
   else OneEDriver(OneBodyEngine::overlap);
   auto OEnd = std::chrono::high_resolution_clock::now();
 
@@ -448,6 +448,7 @@ void AOIntegrals::computeAOOneE(){
   }
 */
   this->haveAOOneE = true;
+  if(this->isPrimary) this->writeOneE();
 }
 
 using libint2::TwoBodyEngine;

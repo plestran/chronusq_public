@@ -186,6 +186,8 @@ void SingleSlater<double>::formGuess() {
       controlAtom.doCUHF = true; // Can set to false too if UHF guess is desired
  
       // Initialize the local integral and SS classes
+      aointegralsAtom.isPrimary = false;
+      hartreeFockAtom.isNotPrimary();
       aointegralsAtom.iniAOIntegrals(&uniqueAtom,&basisSetAtom,this->fileio_,&controlAtom,
         &dfBasisSetAtom);
       hartreeFockAtom.iniSingleSlater(&uniqueAtom,&basisSetAtom,&aointegralsAtom,

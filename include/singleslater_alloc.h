@@ -62,6 +62,9 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
   this->isDFT = controls->DFT;
   this->alloc();
 
+  // FIXME: This will not do the right thing for complex!
+  if(this->isPrimary) this->fileio_->iniStdSCFFiles(!this->isClosedShell && this->Ref_ != TCS,this->nTCS_*this->nBasis_);
+
 };
 
 template<typename T>
