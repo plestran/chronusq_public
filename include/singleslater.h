@@ -559,18 +559,29 @@ public:
     this->getAlgebraicField(); 
     this->SCFType_      = this->algebraicField_      + " ";
     this->SCFTypeShort_ = this->algebraicFieldShort_ + "-";
+    
+    std::string generalReference;
+    std::string generalRefShort;
+    if(this->isHF){
+      generalReference = "Hartree-Fock";
+      generalRefShort  = "HF";
+    } else if(this->isDFT) {
+      generalReference = "Kohn-Sham";
+      generalRefShort  = "KS";
+    }
+
     if(this->Ref_ == RHF) {
-      this->SCFType_      += "Restricted Hartree-Fock"; 
-      this->SCFTypeShort_ += "RHF";
+      this->SCFType_      += "Restricted " + generalReference; 
+      this->SCFTypeShort_ += "R" + generalRefShort;
     } else if(this->Ref_ == UHF) {
-      this->SCFType_      += "Unrestricted Hartree-Fock"; 
-      this->SCFTypeShort_ += "UHF";
+      this->SCFType_      += "Unrestricted " + generalReference; 
+      this->SCFTypeShort_ += "U" + generalRefShort;
     } else if(this->Ref_ == CUHF) {
-      this->SCFType_      += "Constrained Unrestricted Hartree-Fock"; 
-      this->SCFTypeShort_ += "CUHF";
+      this->SCFType_      += "Constrained Unrestricted " + generalReference; 
+      this->SCFTypeShort_ += "CU" + generalRefShort;
     } else if(this->Ref_ == TCS) {
-      this->SCFType_      += "Generalized Hartree-Fock"; 
-      this->SCFTypeShort_ += "GHF";
+      this->SCFType_      += "Generalized " + generalReference; 
+      this->SCFTypeShort_ += "G" + generalRefShort;
     }
   }
 

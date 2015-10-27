@@ -146,12 +146,27 @@ def handleReference(workers,settings):
     workers["CQSingleSlater"].isDFT = True
     workers["CQSingleSlater"].isHF  = False
   
+    corrKernel = 0
+    exchKernel = 0
     try:
-      workers["CQSingleSlater"].setCorrKernel(corrMap[settings['CORR']])
-      workers["CQSingleSlater"].setExchKernel(exchMap[settings['EXCHANGE']])
+      corrKernel = settings['CORR']
+      exchKernel = settings['EXCHANGE']
     except KeyError:
-      msg = "you messed up DFT"
-      CErrMeg(workers['CQFileIO'],str(msg))
+      msg = "Must specify both Correlation and Exchange Kernel\n"
+      msg = msg + " for user defined QM.KS reference"
+      CErrMsg(workers['CQFileIO'],str(msg))
+
+    try:
+      workers["CQSingleSlater"].setCorrKernel(corrMap[corrKernel])
+    except KeyError:
+      msg = "Specified Correlation Kernel is not Defined"
+      CErrMsg(workers['CQFileIO'],str(msg))
+
+    try:
+      workers["CQSingleSlater"].setExchKernel(exchMap[exchKernel])
+    except KeyError:
+      msg = "Specified Exchange Kernel is not Defined"
+      CErrMsg(workers['CQFileIO'],str(msg))
 
 # elif 'RKS' in ref:
 # elif 'UKS' in ref:
