@@ -1,4 +1,4 @@
-#  test0025 serial incore Real UHF CIS STO-3G
+#  test0039 serial incore Real UHF RPA cc-pVDZ
 #
 #  Molecule Specification
 #
@@ -13,12 +13,12 @@ geom:
 #
 [QM]
 reference = Real UHF
-job       = CIS
-basis     = sto3g.gbs
+job       = RPA
+basis     = cc-pVDZ.gbs
 ints			= incore
 
-[CIS]
-nstates = 1
+[RPA]
+nstates = 3
 
 #
 #  Misc Settings

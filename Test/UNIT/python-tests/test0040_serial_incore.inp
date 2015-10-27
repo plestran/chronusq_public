@@ -1,24 +1,25 @@
-#  test0025 serial incore Real UHF CIS STO-3G
+#  test0040 serial incore Real UHF RPA STO-3G
 #
 #  Molecule Specification
 #
 [Molecule]
 charge = 0
-mult = 2
+mult = 3
 geom:
-	Li 0   0.000000 0.000000 0.000000
+	O 0   0.000000    0.000000    0.608586
+	O 0   0.000000    0.000000    -0.608586
   
 #
 #  Job Specification
 #
 [QM]
 reference = Real UHF
-job       = CIS
+job       = RPA
 basis     = sto3g.gbs
 ints			= incore
 
-[CIS]
-nstates = 1
+[RPA]
+nstates = 3
 
 #
 #  Misc Settings
