@@ -64,6 +64,7 @@
 // Boost Headers
 #include <boost/geometry/geometry.hpp>
 #include <boost/math/constants/constants.hpp>
+#include <boost/python.hpp>
 
 // Misc
 #include <stdlib.h>

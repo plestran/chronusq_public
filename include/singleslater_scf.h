@@ -295,6 +295,7 @@ void SingleSlater<T>::SCF(){
     }
 
     this->evalConver(iter);
+    this->nSCFIter++;
     if(this->isConverged) break;
 
   }; // SCF Loop

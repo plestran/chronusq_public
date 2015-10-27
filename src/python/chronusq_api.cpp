@@ -29,10 +29,16 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setField"        , &SingleSlater<double>::Wrapper_setField       )
     .def("setGuess"        , &SingleSlater<double>::setGuess               )
 
+    .def("dipole"          , &SingleSlater<double>::Wrapper_dipole         )
+    .def("quadrupole"      , &SingleSlater<double>::Wrapper_quadrupole     )
+    .def("octupole"        , &SingleSlater<double>::Wrapper_octupole       )
+
     .def("Ref"             , &SingleSlater<double>::Ref                    )
     .def("nTCS"            , &SingleSlater<double>::nTCS                   ) 
 
     .def_readwrite("isClosedShell", &SingleSlater<double>::isClosedShell   )
+    .def_readonly("totalEnergy"   , &SingleSlater<double>::totalEnergy     )
+    .def_readonly("nSCFIter"      , &SingleSlater<double>::nSCFIter        )
   ;
 
   class_<SingleSlater<dcomplex>,boost::noncopyable>("SingleSlater_complex",
@@ -61,10 +67,16 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setField"        , &SingleSlater<dcomplex>::Wrapper_setField       )
     .def("setGuess"        , &SingleSlater<dcomplex>::setGuess               )
 
+    .def("dipole"          , &SingleSlater<dcomplex>::Wrapper_dipole         )
+    .def("quadrupole"      , &SingleSlater<dcomplex>::Wrapper_quadrupole     )
+    .def("octupole"        , &SingleSlater<dcomplex>::Wrapper_octupole       )
+
     .def("Ref"             , &SingleSlater<dcomplex>::Ref                    )
     .def("nTCS"            , &SingleSlater<dcomplex>::nTCS                   ) 
 
     .def_readwrite("isClosedShell", &SingleSlater<dcomplex>::isClosedShell   )
+    .def_readonly("totalEnergy"   , &SingleSlater<dcomplex>::totalEnergy     )
+    .def_readonly("nSCFIter"      , &SingleSlater<dcomplex>::nSCFIter        )
   ;
 
   enum_<SingleSlater<double>::REFERENCE>("Reference")

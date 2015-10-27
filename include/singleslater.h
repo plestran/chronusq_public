@@ -280,20 +280,23 @@ public:
   double   energyTwoE; ///< Two-bodied operator tensors traced with Density
   double   energyNuclei; ///< N-N Repulsion Energy
   double   totalEnergy; ///< Sum of all energetic contributions
+ 
+  int      nSCFIter;
 
   // constructor & destructor
   SingleSlater(){
     // Zero out integers to be set
-    this->nBasis_ = 0;
-    this->nShell_ = 0;
-    this->nTT_    = 0;
-    this->nAE_    = 0;
-    this->nBE_    = 0;
-    this->nOccA_  = 0;
-    this->nOccB_  = 0;
-    this->nVirA_  = 0;
-    this->nVirB_  = 0;
-    this->multip_ = 0;
+    this->nBasis_  = 0;
+    this->nShell_  = 0;
+    this->nTT_     = 0;
+    this->nAE_     = 0;
+    this->nBE_     = 0;
+    this->nOccA_   = 0;
+    this->nOccB_   = 0;
+    this->nVirA_   = 0;
+    this->nVirB_   = 0;
+    this->multip_  = 0;
+    this->nSCFIter = 0;
 
     // Initialize Smart Pointers
     this->densityA_          = nullptr;   
@@ -526,6 +529,9 @@ public:
   // Python API
   void Wrapper_iniSingleSlater(Molecule&,BasisSet&,AOIntegrals&,FileIO&,
     Controls&); 
+  boost::python::list Wrapper_dipole();
+  boost::python::list Wrapper_quadrupole();
+  boost::python::list Wrapper_octupole();
 
   /*************************/
   /* MPI Related Routines  */

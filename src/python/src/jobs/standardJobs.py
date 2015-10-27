@@ -32,7 +32,7 @@ def communicate(workers):
 
 
 
-def runSCF(workers):
+def runSCF(workers,meta):
   # Make the classes know about eachother
   communicate(workers)
 
@@ -63,14 +63,14 @@ def runSCF(workers):
   workers["CQSingleSlater"].computeMultipole()
   workers["CQSingleSlater"].printMultipole()
 
-def runRT(workers):
+def runRT(workers,meta):
   runSCF(workers)
   workers["CQRealTime"].initMeta()
   workers["CQRealTime"].alloc()
   workers["CQRealTime"].iniDensity()
   workers["CQRealTime"].doPropagation()
 
-def runSDR(workers):
+def runSDR(workers,meta):
   runSCF(workers)
   workers["CQMOIntegrals"].initMeta()
   workers["CQSDResponse"].initMeta()
