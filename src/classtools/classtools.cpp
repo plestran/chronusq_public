@@ -402,7 +402,54 @@ void finalizeCQ(){
 #ifdef USE_LIBINT
   libint2::cleanup();
 #endif
+}
 
+template<> 
+void writeJobMeta(SingleSlater<double> &ss, SDResponse<double> &sdr, 
+  RealTime<double> &rt, Molecule &mol, AOIntegrals &aoints, FileIO &fileio){
+
+  fileio.iniMetaFiles();
+  FileIO::jobMeta metaData;
+
+  auto length = ss.SCFType().copy(metaData.ref,45,0);
+  metaData.ref[length] = '\0';
+  
+  if(ss.guess() == SingleSlater<double>::SAD)
+    strcpy(metaData.guess,"SAD");
+  else if(ss.guess() == SingleSlater<double>::READ)
+    strcpy(metaData.guess,"READ");
+  else if(ss.guess() == SingleSlater<double>::CORE)
+    strcpy(metaData.guess,"CORE");
+
+  metaData.nBasis = ss.nBasis();
+  metaData.charge = mol.charge();
+  metaData.mult   = mol.multip();
+
+  fileio.jobMetaFile->write(&metaData,(*fileio.jobMetaType));
+}
+
+template<> 
+void writeJobMeta(SingleSlater<dcomplex> &ss, SDResponse<dcomplex> &sdr, 
+  RealTime<dcomplex> &rt, Molecule &mol, AOIntegrals &aoints, FileIO &fileio){
+
+  fileio.iniMetaFiles();
+  FileIO::jobMeta metaData;
+
+  auto length = ss.SCFType().copy(metaData.ref,45,0);
+  metaData.ref[length] = '\0';
+  
+  if(ss.guess() == SingleSlater<dcomplex>::SAD)
+    strcpy(metaData.guess,"SAD");
+  else if(ss.guess() == SingleSlater<dcomplex>::READ)
+    strcpy(metaData.guess,"READ");
+  else if(ss.guess() == SingleSlater<dcomplex>::CORE)
+    strcpy(metaData.guess,"CORE");
+
+  metaData.nBasis = ss.nBasis();
+  metaData.charge = mol.charge();
+  metaData.mult   = mol.multip();
+
+  fileio.jobMetaFile->write(&metaData,(*fileio.jobMetaType));
 }
 
 } // namespace ChronusQ

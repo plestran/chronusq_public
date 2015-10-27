@@ -195,7 +195,8 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 
 
 
-
+  writeJobMeta(*hartreeFockReal,*sdResponseReal,*realtimeReal,*molecule,
+    *aointegrals,*fileIO);
   finalizeCQ();
 
   return  1;

@@ -197,9 +197,20 @@ def parseSDR(workers,secDict):
   if workers['CQSingleSlater'] == workers['CQSingleSlaterDouble']:
     workers['CQSDResponse']  = workers['CQSDResponseDouble']
     workers['CQMOIntegrals'] = workers['CQMOIntegralsDouble']
-  else:
+  elif workers['CQSingleSlater'] == workers['CQSingleSlaterComplex']:
+    msg = "Wave Function Response using a Complex Reference is NYI"
+    CErrMsg(workers['CQFileIO'],str(msg))
     workers['CQSDResponse']  = workers['CQSDResponseComplex']
     workers['CQMOIntegrals'] = workers['CQMOIntegralsComplex']
+  else:
+    msg = "Error in Reference Recieved by SDResponse"
+    CErrMsg(workers['CQFileIO'],str(msg))
+
+  if workers['CQSingleSlater'].nTCS() == 2 and workers['CQAOIntegrals'].integralAlgorithm != aointAlg['INCORE']:
+    msg = "Wave Function Response using a Two-Component Reference is\n"
+    msg = msg + "Only Implemented using INCORE integrals (QM.ints = INCORE)"
+    CErrMsg(workers['CQFileIO'],str(msg))
+    
 
   try:
     workers['CQSDResponse'].setNSek(jobSettings['NSTATES'])

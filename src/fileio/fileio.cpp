@@ -40,6 +40,9 @@ FileIO::FileIO(const std::string nm_input) {
 
   this->operatorGroupPath = "/OPERATORS";
   this->SCFGroupPath      = "/SCF";
+  this->metaDataGroupPath = "/Meta";
+
+  this->jobMetaPath = this->metaDataGroupPath + "/REFERENCE";
 
   this->overlapPath  = this->operatorGroupPath + "/OVERLAP";
   this->kineticPath  = this->operatorGroupPath + "/KINETIC";
@@ -80,6 +83,9 @@ void FileIO::iniH5Files(){
 
 void FileIO::iniStdGroups(){
   if(doRestart){
+    this->Meta = std::unique_ptr<H5::Group>(
+      new H5::Group(this->restart->openGroup(metaDataGroupPath))
+    );
     this->Operators = std::unique_ptr<H5::Group>(
       new H5::Group(this->restart->openGroup(operatorGroupPath))
     );
@@ -87,6 +93,9 @@ void FileIO::iniStdGroups(){
       new H5::Group(this->restart->openGroup(SCFGroupPath))
     );
   } else {
+    this->Meta = std::unique_ptr<H5::Group>(
+      new H5::Group(this->restart->createGroup(metaDataGroupPath))
+    );
     this->Operators = std::unique_ptr<H5::Group>(
       new H5::Group(this->restart->createGroup(operatorGroupPath))
     );
@@ -94,6 +103,19 @@ void FileIO::iniStdGroups(){
       new H5::Group(this->restart->createGroup(SCFGroupPath))
     );
   }
+}
+
+void FileIO::iniMetaFiles(){
+  hsize_t dim = 1;
+  H5::DataSpace dataspace(1,&dim);
+
+  this->jobMetaFile = std::unique_ptr<H5::DataSet>(
+    new H5::DataSet(
+      this->restart->createDataSet(
+        this->jobMetaPath,(*this->jobMetaType),dataspace
+      )
+    )  
+  );
 }
 
 void FileIO::iniStdOpFiles(int nBasis){
@@ -343,6 +365,46 @@ void FileIO::iniCompType(){
     "IM",HOFFSET(complex_t,im),H5::PredType::NATIVE_DOUBLE
   );
 
+
+  this->metaDataTypeDouble = std::unique_ptr<H5::CompType>(
+    new H5::CompType(sizeof(metaData<double>))
+  );
+  this->metaDataTypeDouble->insertMember(
+    "VALUE",HOFFSET(metaData<double>,val),H5::PredType::NATIVE_DOUBLE
+  );
+  this->metaDataTypeDouble->insertMember(
+    "DESC",HOFFSET(metaData<double>,desc),H5::StrType(H5::PredType::C_S1,45)
+  );
+
+  this->metaDataTypeInt = std::unique_ptr<H5::CompType>(
+    new H5::CompType(sizeof(metaData<int>))
+  );
+  this->metaDataTypeInt->insertMember(
+    "VALUE",HOFFSET(metaData<int>,val),H5::PredType::NATIVE_INT
+  );
+  this->metaDataTypeInt->insertMember(
+    "DESC",HOFFSET(metaData<int>,desc),H5::StrType(H5::PredType::C_S1,45)
+  );
+
+  this->jobMetaType = std::unique_ptr<H5::CompType>(
+    new H5::CompType(sizeof(jobMeta))
+  );
+
+  this->jobMetaType->insertMember(
+    "REFERENCE",HOFFSET(jobMeta,ref),H5::StrType(H5::PredType::C_S1,45)
+  );
+  this->jobMetaType->insertMember(
+    "NBASIS",HOFFSET(jobMeta,nBasis),H5::PredType::NATIVE_INT
+  );
+  this->jobMetaType->insertMember(
+    "CHARGE",HOFFSET(jobMeta,charge),H5::PredType::NATIVE_INT
+  );
+  this->jobMetaType->insertMember(
+    "MULT",HOFFSET(jobMeta,mult),H5::PredType::NATIVE_INT
+  );
+  this->jobMetaType->insertMember(
+    "GUESS",HOFFSET(jobMeta,guess),H5::StrType(H5::PredType::C_S1,45)
+  );
 
 }
 

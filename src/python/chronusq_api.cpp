@@ -157,6 +157,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setMaxMultipole", &AOIntegrals::setMaxMultipole       )
     .def("setAlgorithm"   , &AOIntegrals::setAlgorithm          )
     
+    .def_readonly("integralAlgorithm", &AOIntegrals::integralAlgorithm)
 //  .def_readwrite("allocERI", &AOIntegrals::allocERI           )
 //  .def_readwrite("doDF"    , &AOIntegrals::doDF               )
   ;
