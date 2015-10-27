@@ -14,6 +14,7 @@ knownSections  = [
   "MOLECULE", 
   "QM", 
   "MISC",
+  "SCF",
   "RT",
   "CIS",
   "RPA",
@@ -35,9 +36,10 @@ knownKeywords['MOLECULE'] = {
 
 # Dictionary for known keywords in the QM input section
 knownKeywords['QM'] = {
-  'REFERENCE':CQKeyword('REFERENCE','S',True),
-  'BASIS'    :CQKeyword('BASIS'    ,'S',True),
-  'JOB'      :CQKeyword('JOB'      ,'S',True)
+  'REFERENCE':CQKeyword('REFERENCE','S',True ),
+  'BASIS'    :CQKeyword('BASIS'    ,'S',True ),
+  'JOB'      :CQKeyword('JOB'      ,'S',True ),
+  'INTS'     :CQKeyword('INTS'     ,'S',False)
 }
 
 # Dictionary for known keywords in the RT input section
@@ -57,7 +59,16 @@ knownKeywords['RT'] = {
 }
 
 knownKeywords['MISC'] = {
-  'NSMP' :CQKeyword('NSMP','I',False)
+  'NSMP'     :CQKeyword('NSMP'    ,'I',False),
+  'UNITTEST' :CQKeyword('UNITTEST','S',False)
+}
+
+knownKeywords['SCF'] = {
+  'SCFDENTOL' :CQKeyword('SCFDENTOL' ,'D'    ,False),
+  'SCFENETOL' :CQKeyword('SCFENETOL' ,'D'    ,False),
+  'SCFMAXITER':CQKeyword('SCFMAXITER','I'    ,False),
+  'FIELD'     :CQKeyword('FIELD'     ,'D3'   ,False),
+  'GUESS'     :CQKeyword('GUESS'     ,'O-GS' ,False)
 }
 
 knownKeywords['CIS'] = {
@@ -76,15 +87,17 @@ knownKeywords['STAB'] = {
 
 # Create a dictionary of required keywords
 requiredKeywords = {}
-requiredKeywords['MOLECULE'] = []
-requiredKeywords['QM'] = []
-requiredKeywords['RT'] = []
-requiredKeywords['MISC'] = []
-requiredKeywords['CIS'] = []
-requiredKeywords['RPA'] = []
-requiredKeywords['STAB'] = []
+#requiredKeywords['MOLECULE'] = []
+#requiredKeywords['QM'] = []
+#requiredKeywords['RT'] = []
+#requiredKeywords['SCF'] = []
+#requiredKeywords['MISC'] = []
+#requiredKeywords['CIS'] = []
+#requiredKeywords['RPA'] = []
+#requiredKeywords['STAB'] = []
 
 for sec in knownKeywords:
+  requiredKeywords[sec] = []
   for keyWord in knownKeywords[sec]:
     if knownKeywords[sec][keyWord].req:
       requiredKeywords[sec].append(keyWord)

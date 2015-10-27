@@ -105,6 +105,14 @@ void readInput(FileIO * fileio, Molecule * mol, BasisSet * basis, Controls * con
     } else if(!readString.compare("$GUESS")) {
       fileio->in>>readString;
       readString=stringupper(readString);  
+      if(!readString.compare("SAD"))
+        controls->guess = 0;
+      else if(!readString.compare("READ")){
+        controls->guess = 2;
+        fileio->doRestart = true;
+      }
+    
+/*
       if(!readString.compare("INPUT")) {
         controls->guess = 1;
       } else if(!readString.compare("GAUMATEL")) {
@@ -114,6 +122,7 @@ void readInput(FileIO * fileio, Molecule * mol, BasisSet * basis, Controls * con
         controls->guess = 3;
         fileio->in>>controls->gauFChkName;
       };
+*/
     } else if(!readString.compare("$SCF")) {
       fileio->in>>readString;
       readString=stringupper(readString);

@@ -284,7 +284,7 @@ void SingleSlater<T>::SCF(){
 
     if(this->Ref_ == CUHF) this->formNO();
     this->diagFock();
-    if(iter == 0) this->mixOrbitalsSCF();
+    if(iter == 0 && this->guess_ != READ) this->mixOrbitalsSCF();
     this->formDensity();
     this->formFock();
 
@@ -295,6 +295,7 @@ void SingleSlater<T>::SCF(){
     }
 
     this->evalConver(iter);
+    this->nSCFIter++;
     if(this->isConverged) break;
 
   }; // SCF Loop

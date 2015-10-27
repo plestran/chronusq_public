@@ -48,10 +48,14 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   std::unique_ptr<GauJob> gauJob;
 
   // Initialize the FileIO object
+/*
   std::vector<std::string> argv_string;
   for(auto i = 1; i < argc; ++i) if(argv[i][0]=='-') argv_string.push_back(argv[i]);
   if(argv_string.size()==0) fileIO = std::unique_ptr<FileIO>(new FileIO(argv[1]));
   else fileIO = std::unique_ptr<FileIO>(new FileIO(argv_string));
+*/
+  fileIO = std::unique_ptr<FileIO>(new FileIO(argv[1]));
+//fileIO->iniStdOpFiles(100);
 
 
   // print out the starting time of the job
@@ -62,6 +66,10 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   // Initialize default settings and read input
   controls->iniControls();
   readInput(fileIO.get(),molecule.get(),basisset.get(),controls.get(),dfBasisset.get());
+ 
+  // Initialize HDF5Files
+  fileIO->iniH5Files();
+  fileIO->iniStdGroups();
 
   // print out molecular and basis set information
   controls->printSettings(fileIO->out);
@@ -91,6 +99,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   // guess from scratch or read off input / gaussian
   //
   // ** Note that guess from Gaussian is buggy **
+/* 
   if(!controls->doComplex){
     if(controls->guess==0) hartreeFockReal->formGuess();
     else if(controls->guess==1) hartreeFockReal->readGuessIO();
@@ -103,6 +112,12 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
     if(controls->guess==0) hartreeFockComplex->formGuess();
     else CErr("Cannot Read Guess for Complex Wavefunctions (NYI)",fileIO->out);
   }
+*/
+  if(!controls->doComplex)
+    hartreeFockReal->formGuess();
+  else
+    hartreeFockComplex->formGuess();
+
 
   // Optimize wave function (?)
   if(!controls->doComplex){
@@ -164,9 +179,6 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 
 // REAL-TIME TD-SCF 
   
-//  if(controls->doRealTime && controls->directTwoE) {
-//    CErr("REAL TIME CURRENTLY NOT WORKING WITH DIRECT TWO-E INTS",fileIO->out);
-//  }
   if(controls->doRealTime) {
     if(!controls->doComplex) {
       realtimeReal->iniRealTime(fileIO.get(),controls.get(),aointegrals.get(),hartreeFockReal.get());

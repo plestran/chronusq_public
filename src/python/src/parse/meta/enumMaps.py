@@ -44,4 +44,14 @@ sdrMethodMap = {
   "STAB"   :chronusQ.SDResponse_METHOD.STAB     
 }
 
+aointAlg = {
+  "DIRECT":chronusQ.AOIntegrals_INTEGRAL_ALGORITHM.DIRECT,
+  "INCORE":chronusQ.AOIntegrals_INTEGRAL_ALGORITHM.INCORE,
+  "DENFIT":chronusQ.AOIntegrals_INTEGRAL_ALGORITHM.DENFIT
+}
 
+guessMap = {
+  "SAD" :chronusQ.Guess.SAD  ,
+  "CORE":chronusQ.Guess.CORE ,
+  "READ":chronusQ.Guess.READ  
+}

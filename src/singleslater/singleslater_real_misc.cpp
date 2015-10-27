@@ -219,4 +219,15 @@ void SingleSlater<double>::getAlgebraicField(){
   this->algebraicField_      = "Real";
   this->algebraicFieldShort_ = "\u211D";
 }
+
+template<>
+void SingleSlater<double>::writeSCFFiles(){
+  this->fileio_->alphaSCFDen->write(this->densityA_->data(),H5::PredType::NATIVE_DOUBLE);
+  this->fileio_->alphaMO->write(this->moA_->data(),H5::PredType::NATIVE_DOUBLE);
+  if(!this->isClosedShell && this->Ref_ != TCS){
+    this->fileio_->betaSCFDen->write(this->densityB_->data(),H5::PredType::NATIVE_DOUBLE);
+    this->fileio_->betaMO->write(this->moB_->data(),H5::PredType::NATIVE_DOUBLE);
+  }
+}
+
 } // Namespace ChronusQ

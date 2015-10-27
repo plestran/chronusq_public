@@ -418,6 +418,7 @@ void AOIntegrals::alloc(){
   this->molecularConstants_ = std::unique_ptr<MolecularConstants>(new MolecularConstants);
   this->quartetConstants_ = std::unique_ptr<QuartetConstants>(new QuartetConstants);
 
+  if(this->isPrimary) this->fileio_->iniStdOpFiles(this->basisSet_->nBasis());
 /* This whole block leaks memory like a siv (~ 8MB leaked for test 4!)
   int i,j,ij;
   this->R2Index_ = new int*[this->nBasis_];
@@ -499,4 +500,18 @@ void AOIntegrals::allocMultipole(){
   } catch(...) {
     CErr(std::current_exception(),"Multipole Tensor Allocation");
   }
+}
+
+void AOIntegrals::writeOneE(){
+  this->fileio_->overlap->write(this->overlap_->data(),H5::PredType::NATIVE_DOUBLE);
+  this->fileio_->kinetic->write(this->kinetic_->data(),H5::PredType::NATIVE_DOUBLE);
+  this->fileio_->nucRepl->write(this->potential_->data(),H5::PredType::NATIVE_DOUBLE);
+  this->fileio_->coreHam->write(this->oneE_->data(),H5::PredType::NATIVE_DOUBLE);
+  // FIXME: This is buggy because we need to write to a slab of the data as opposed 
+  // the the whole thing (hyperSlabs)
+  /*
+  this->fileio_->dipole->write(&this->elecDipole_->storage()[0],H5::PredType::NATIVE_DOUBLE);
+  this->fileio_->quadpole->write(&this->elecQuadpole_->storage()[0],H5::PredType::NATIVE_DOUBLE);
+  this->fileio_->octupole->write(&this->elecOctpole_->storage()[0],H5::PredType::NATIVE_DOUBLE);
+  */
 }

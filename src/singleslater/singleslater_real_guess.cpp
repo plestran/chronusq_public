@@ -118,7 +118,7 @@ void SingleSlater<double>::scaleDen(){
 // form the initial guess of MO's //
 //--------------------------------//
 template<>
-void SingleSlater<double>::formGuess() {
+void SingleSlater<double>::SADGuess() {
   
   std::vector<RealMatrix> atomMO;
   std::vector<RealMatrix> atomMOB;
@@ -158,10 +158,8 @@ void SingleSlater<double>::formGuess() {
       }
     }
  
-    this->fileio_->out << "Found " << uniqueElement.size() << 
-                          " unique atoms in molecule" << endl;
-    
-    this->fileio_->out << endl << "Atomic SCF Starting............." << endl << endl;
+    this->fileio_->out << "Running " << uniqueElement.size() << 
+                          " atomic SCF calculations to form the initial guess" << endl;
  
     // Loop and perform CUHF on each atomic center
     for(auto iUn = 0; iUn < uniqueElement.size(); iUn++){
@@ -188,6 +186,8 @@ void SingleSlater<double>::formGuess() {
       controlAtom.doCUHF = true; // Can set to false too if UHF guess is desired
  
       // Initialize the local integral and SS classes
+      aointegralsAtom.isPrimary = false;
+      hartreeFockAtom.isNotPrimary();
       aointegralsAtom.iniAOIntegrals(&uniqueAtom,&basisSetAtom,this->fileio_,&controlAtom,
         &dfBasisSetAtom);
       hartreeFockAtom.iniSingleSlater(&uniqueAtom,&basisSetAtom,&aointegralsAtom,
@@ -317,5 +317,19 @@ void SingleSlater<double>::readGuessGauFChk(std::string &filename) {
   };
   this->haveMO = true;
 };
+
+template<>
+void SingleSlater<double>::READGuess(){
+  this->fileio_->out << "Reading SCF Density from disk" << endl;
+  H5::DataSpace dataspace = this->fileio_->alphaSCFDen->getSpace();
+  this->fileio_->alphaSCFDen->read(this->densityA_->data(),H5::PredType::NATIVE_DOUBLE,dataspace,dataspace);
+  this->fileio_->alphaMO->read(this->moA_->data(),H5::PredType::NATIVE_DOUBLE,dataspace,dataspace);
+  if(!this->isClosedShell && this->Ref_ != TCS){
+    this->fileio_->betaSCFDen->read(this->densityB_->data(),H5::PredType::NATIVE_DOUBLE,dataspace,dataspace);
+    this->fileio_->betaMO->read(this->moB_->data(),H5::PredType::NATIVE_DOUBLE,dataspace,dataspace);
+  }
+  this->haveMO = true;
+  if(this->molecule_->nAtoms() > 1) this->haveDensity = true;
+}
 }; //namespace ChronusQ
 #endif

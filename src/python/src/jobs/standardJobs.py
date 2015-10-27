@@ -32,7 +32,7 @@ def communicate(workers):
 
 
 
-def runSCF(workers):
+def runSCF(workers,meta):
   # Make the classes know about eachother
   communicate(workers)
 
@@ -63,17 +63,26 @@ def runSCF(workers):
   workers["CQSingleSlater"].computeMultipole()
   workers["CQSingleSlater"].printMultipole()
 
-def runRT(workers):
-  runSCF(workers)
+  meta.E          = workers["CQSingleSlater"].totalEnergy
+  meta.scfIters   = workers["CQSingleSlater"].nSCFIter
+  meta.dipole     = workers["CQSingleSlater"].dipole()
+  meta.quadrupole = workers["CQSingleSlater"].quadrupole()
+  meta.octupole   = workers["CQSingleSlater"].octupole()
+
+def runRT(workers,meta):
+  runSCF(workers,meta)
   workers["CQRealTime"].initMeta()
   workers["CQRealTime"].alloc()
   workers["CQRealTime"].iniDensity()
   workers["CQRealTime"].doPropagation()
 
-def runSDR(workers):
-  runSCF(workers)
+def runSDR(workers,meta):
+  runSCF(workers,meta)
   workers["CQMOIntegrals"].initMeta()
   workers["CQSDResponse"].initMeta()
   workers["CQSDResponse"].initMeth()
   workers["CQSDResponse"].alloc()
   workers["CQSDResponse"].IterativeRPA()
+  meta.davIters = workers["CQSDResponse"].nIter
+  meta.excEne   = workers["CQSDResponse"].excitationEnergies()
+  meta.oscStr   = workers["CQSDResponse"].oscStrengths()

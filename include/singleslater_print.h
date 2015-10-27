@@ -53,16 +53,17 @@ void SingleSlater<T>::printInfo() {
  ***********************************************/
 template<typename T>
 void SingleSlater<T>::printMultipole(){
+  this->fileio_->out << "\nMultipole Information:" << endl;
   this->fileio_->out << bannerTop << endl;
   this->fileio_->out << std::setw(50) << std::left <<"Electric Dipole Moment"
                         << "(Debye)" << endl;
   this->fileio_->out << std::left << std::setw(5) <<"X=" 
                      << std::fixed << std::right << std::setw(20) 
-                     << (*this->dipole_)(0,0)/phys.debye << endl;
-  this->fileio_->out << std::left << std::setw(5) <<"Y=" 
+                     << (*this->dipole_)(0,0)/phys.debye;
+  this->fileio_->out << std::left << std::setw(5) <<" Y=" 
                      << std::fixed << std::right << std::setw(20) 
-                     << (*this->dipole_)(1,0)/phys.debye << endl;
-  this->fileio_->out << std::left << std::setw(5) <<"Z=" 
+                     << (*this->dipole_)(1,0)/phys.debye;
+  this->fileio_->out << std::left << std::setw(5) <<" Z=" 
                      << std::fixed << std::right << std::setw(20) 
                      << (*this->dipole_)(2,0)/phys.debye << endl;
 // jjg add total electric dipole moment
@@ -221,7 +222,7 @@ void SingleSlater<T>::printMultipole(){
                        << std::fixed << std::right << std::setw(20) 
                        << (*this->octpole_)(2,2,2)*phys.bohr*phys.bohr/phys.debye << endl;
   }
-  this->fileio_->out << endl << bannerEnd << endl;
+  this->fileio_->out << bannerEnd << endl << endl;
 }
 
 template<typename T>
@@ -234,6 +235,9 @@ void SingleSlater<T>::printSCFHeader(ostream &output){
   output << std::setw(38) << std::left << "  Density Convergence Tolerence:" << std::scientific << std::setprecision(6) << this->denTol_ << endl;
   output << std::setw(38) << std::left << "  Energy Convergence Tolerence:" << std::scientific << std::setprecision(6) << this->eneTol_ << endl;
   output << std::setw(38) << std::left << "  Maximum Number of SCF Cycles:" << this->maxSCFIter_ << endl;
+  output << std::setw(38) << std::left << "  Static Electric Field (Dipole):";
+  output << "{" << this->elecField_[0] << ", " << this->elecField_[1] << ", "
+         << this->elecField_[2] << "}" << endl;
   output << std::setw(38) << std::left << "  Integral Contraction Algorithm:";
   if(this->aointegrals_->integralAlgorithm == AOIntegrals::DIRECT)
     output << "Direct";

@@ -63,6 +63,7 @@
 // Boost Headers
 #include <boost/geometry/geometry.hpp>
 #include <boost/math/constants/constants.hpp>
+#include <boost/python.hpp>
 
 // Misc
 #include <stdlib.h>
@@ -78,6 +79,7 @@
 #include <gauinterface.h>
 #include <iterator>
 #include <typeinfo>
+#include <H5Cpp.h>
 
 //using namespace std;
 /* Things from STD that we need always */
