@@ -331,6 +331,7 @@ void SDResponse<double>::IterativeRPA(){
 //if(this->iMeth_ == PPATDA) CErr();
   QuasiNewton<double> davA(this);
   davA.run(this->fileio_->out);
+  this->nQNIter = davA.nIter();
   if(hasProp){
     this->formTransDipole();
     this->formOscStrength();

@@ -261,23 +261,33 @@ BOOST_PYTHON_MODULE(libpythonapi){
   ;
 
   class_<SDResponse<double>,boost::noncopyable>("SDResponse_double",init<>())
-    .def("communicate" , &SDResponse<double>::communicate )
-    .def("initMeta"    , &SDResponse<double>::initMeta    )
-    .def("alloc"       , &SDResponse<double>::alloc       )
-    .def("setNSek"     , &SDResponse<double>::setNSek     )
-    .def("setMeth"     , &SDResponse<double>::setMeth     )
-    .def("initMeth"    , &SDResponse<double>::initMeth    )
-    .def("IterativeRPA", &SDResponse<double>::IterativeRPA)
+    .def("communicate"       , &SDResponse<double>::communicate               )
+    .def("initMeta"          , &SDResponse<double>::initMeta                  )
+    .def("alloc"             , &SDResponse<double>::alloc                     )
+    .def("setNSek"           , &SDResponse<double>::setNSek                   )
+    .def("setMeth"           , &SDResponse<double>::setMeth                   )
+    .def("initMeth"          , &SDResponse<double>::initMeth                  )
+    .def("IterativeRPA"      , &SDResponse<double>::IterativeRPA              )
+    .def("excitationEnergies", &SDResponse<double>::Wrapper_excitationEnergies)
+    .def("oscStrengths"      , &SDResponse<double>::Wrapper_oscStrengths      )
+    
+    .def_readonly("nIter"    ,&SDResponse<double>::nQNIter                   )
+    
+    
   ;
 
   class_<SDResponse<dcomplex>,boost::noncopyable>("SDResponse_complex",init<>())
-    .def("communicate" , &SDResponse<dcomplex>::communicate )
-    .def("initMeta"    , &SDResponse<dcomplex>::initMeta    )
-    .def("alloc"       , &SDResponse<dcomplex>::alloc       )
-    .def("setNSek"     , &SDResponse<dcomplex>::setNSek     )
-    .def("setMeth"     , &SDResponse<dcomplex>::setMeth     )
-    .def("initMeth"    , &SDResponse<dcomplex>::initMeth    )
-    .def("IterativeRPA", &SDResponse<dcomplex>::IterativeRPA)
+    .def("communicate"       , &SDResponse<dcomplex>::communicate              )
+    .def("initMeta"          , &SDResponse<dcomplex>::initMeta                 )
+    .def("alloc"             , &SDResponse<dcomplex>::alloc                    )
+    .def("setNSek"           , &SDResponse<dcomplex>::setNSek                  )
+    .def("setMeth"           , &SDResponse<dcomplex>::setMeth                  )
+    .def("initMeth"          , &SDResponse<dcomplex>::initMeth                 )
+    .def("IterativeRPA"      , &SDResponse<dcomplex>::IterativeRPA             )
+    .def("excitationEnergies",&SDResponse<dcomplex>::Wrapper_excitationEnergies)
+    .def("oscStrengths"      ,&SDResponse<dcomplex>::Wrapper_oscStrengths      )
+    
+    .def_readonly("nIter"    ,&SDResponse<dcomplex>::nQNIter                   )
   ;
 
   enum_<SDResponse<double>::METHOD>("SDResponse_METHOD")

@@ -70,16 +70,19 @@ def runSCF(workers,meta):
   meta.octupole   = workers["CQSingleSlater"].octupole()
 
 def runRT(workers,meta):
-  runSCF(workers)
+  runSCF(workers,meta)
   workers["CQRealTime"].initMeta()
   workers["CQRealTime"].alloc()
   workers["CQRealTime"].iniDensity()
   workers["CQRealTime"].doPropagation()
 
 def runSDR(workers,meta):
-  runSCF(workers)
+  runSCF(workers,meta)
   workers["CQMOIntegrals"].initMeta()
   workers["CQSDResponse"].initMeta()
   workers["CQSDResponse"].initMeth()
   workers["CQSDResponse"].alloc()
   workers["CQSDResponse"].IterativeRPA()
+  meta.davIters = workers["CQSDResponse"].nIter
+  meta.excEne   = workers["CQSDResponse"].excitationEnergies()
+  meta.oscStr   = workers["CQSDResponse"].oscStrengths()

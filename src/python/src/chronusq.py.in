@@ -100,18 +100,12 @@ def runCQ(fname):
   
   jobMeta = MetaData()
   jobMap[jobStr](workers,jobMeta)
- 
-  print jobMeta.E
-  print jobMeta.scfIters
-  print jobMeta.dipole
-  print jobMeta.quadrupole
-  print jobMeta.octupole
-  
-  
+
   chronusQ.finalizeCQ()
   
   endtime= time.strftime("%c")
   out.write("Job Ended: %s"  % endtime )
+  return jobMeta
 
 
 if __name__ in '__main__':
@@ -120,4 +114,4 @@ if __name__ in '__main__':
   except IndexError:
       sys.exit("Please specify the input filename")
 
-  runCQ(fname)
+  jobMeta = runCQ(fname)
