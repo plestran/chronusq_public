@@ -40,6 +40,8 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
 
   this->isClosedShell = (this->multip_ == 1);
   this->isDFT         = controls->DFT;
+  this->ExchKernel_   = SLATER;
+  this->CorrKernel_   = VWN5;
   if(controls->HF){
     if(this->isClosedShell && !controls->doCUHF
        && !controls->doTCS)                        this->Ref_ = RHF ; // RHF

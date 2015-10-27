@@ -28,6 +28,8 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setSCFMaxIter"   , &SingleSlater<double>::setSCFMaxIter          )
     .def("setField"        , &SingleSlater<double>::Wrapper_setField       )
     .def("setGuess"        , &SingleSlater<double>::setGuess               )
+    .def("setCorrKernel"   , &SingleSlater<double>::setCorrKernel          )
+    .def("setExchKernel"   , &SingleSlater<double>::setExchKernel          )
 
     .def("dipole"          , &SingleSlater<double>::Wrapper_dipole         )
     .def("quadrupole"      , &SingleSlater<double>::Wrapper_quadrupole     )
@@ -39,6 +41,8 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def_readwrite("isClosedShell", &SingleSlater<double>::isClosedShell   )
     .def_readonly("totalEnergy"   , &SingleSlater<double>::totalEnergy     )
     .def_readonly("nSCFIter"      , &SingleSlater<double>::nSCFIter        )
+    .def_readwrite("isDFT"        , &SingleSlater<double>::isDFT           )
+    .def_readwrite("isHF"         , &SingleSlater<double>::isHF            )
   ;
 
   class_<SingleSlater<dcomplex>,boost::noncopyable>("SingleSlater_complex",
@@ -66,6 +70,8 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setSCFMaxIter"   , &SingleSlater<dcomplex>::setSCFMaxIter          )
     .def("setField"        , &SingleSlater<dcomplex>::Wrapper_setField       )
     .def("setGuess"        , &SingleSlater<dcomplex>::setGuess               )
+    .def("setCorrKernel"   , &SingleSlater<dcomplex>::setCorrKernel          )
+    .def("setExchKernel"   , &SingleSlater<dcomplex>::setExchKernel          )
 
     .def("dipole"          , &SingleSlater<dcomplex>::Wrapper_dipole         )
     .def("quadrupole"      , &SingleSlater<dcomplex>::Wrapper_quadrupole     )
@@ -77,6 +83,8 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def_readwrite("isClosedShell", &SingleSlater<dcomplex>::isClosedShell   )
     .def_readonly("totalEnergy"   , &SingleSlater<dcomplex>::totalEnergy     )
     .def_readonly("nSCFIter"      , &SingleSlater<dcomplex>::nSCFIter        )
+    .def_readwrite("isDFT"        , &SingleSlater<dcomplex>::isDFT           )
+    .def_readwrite("isHF"         , &SingleSlater<dcomplex>::isHF            )
   ;
 
   enum_<SingleSlater<double>::REFERENCE>("Reference")
@@ -95,6 +103,17 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("SAD"  , SingleSlater<double>::SAD  )
     .value("CORE" , SingleSlater<double>::CORE )
     .value("READ" , SingleSlater<double>::READ )
+  ;
+
+  enum_<SingleSlater<double>::EXCH>("EXCH")
+    .value("NOEXCH"  , SingleSlater<double>::NOEXCH) 
+    .value("EXACT"   , SingleSlater<double>::EXACT )
+    .value("SLATER"  , SingleSlater<double>::SLATER)
+  ;
+  enum_<SingleSlater<double>::CORR>("CORR")
+    .value("NOCORR", SingleSlater<double>::NOCORR) 
+    .value("VWN3"  , SingleSlater<double>::VWN3  )
+    .value("VWN5"  , SingleSlater<double>::VWN5  )
   ;
 
   class_<Molecule,boost::noncopyable>("Molecule",init<>())

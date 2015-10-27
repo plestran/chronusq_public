@@ -7,6 +7,8 @@ from meta.knownJobs import *
 from meta.enumMaps import sdrMethodMap
 from meta.enumMaps import aointAlg
 from meta.enumMaps import guessMap
+from meta.enumMaps import exchMap 
+from meta.enumMaps import corrMap 
 
 #
 #  Parse the QM section of the input file and populate
@@ -52,7 +54,7 @@ def parseQM(workers,secDict):
 #
 # Try to set the reference for CQ::SingleSlater
 #
-  handleReference(workers,ssSettings['REFERENCE'])
+  handleReference(workers,ssSettings)
 
 #
 # Try to set the basis for the QM Job
@@ -97,8 +99,9 @@ def parseQM(workers,secDict):
 #
 # Set the reference for CQ::SingleSlater
 #
-def handleReference(workers,ref):
+def handleReference(workers,settings):
   mult = workers["CQMolecule"].multip()
+  ref = settings['REFERENCE']
   ref = ref.split()
   # Decide if reference is complex or not (defaults to real if not specified
   if 'COMPLEX' in ref:
@@ -132,6 +135,26 @@ def handleReference(workers,ref):
   elif 'GHF' in ref:
     # Do GHF
     workers["CQSingleSlater"].setRef(chronusQ.Reference.TCS)
+  elif 'KS' in ref:
+    # Smartly figure out of reference is R/U
+    if mult == 1:
+      workers["CQSingleSlater"].setRef(chronusQ.Reference.RHF)
+      workers["CQSingleSlater"].isClosedShell = True
+    else:
+      workers["CQSingleSlater"].setRef(chronusQ.Reference.UHF)
+
+    workers["CQSingleSlater"].isDFT = True
+    workers["CQSingleSlater"].isHF  = False
+  
+    try:
+      workers["CQSingleSlater"].setCorrKernel(corrMap[settings['CORR']])
+      workers["CQSingleSlater"].setExchKernel(exchMap[settings['EXCHANGE']])
+    except KeyError:
+      msg = "you messed up DFT"
+      CErrMeg(workers['CQFileIO'],str(msg))
+
+# elif 'RKS' in ref:
+# elif 'UKS' in ref:
   else:
     msg = 'Reference ' + str(sum(ref)) + ' not able to be parsed'
     CErrMsg(workers['CQFileIO'],str(msg))

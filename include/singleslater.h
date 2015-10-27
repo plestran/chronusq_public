@@ -88,6 +88,8 @@ class SingleSlater {
   int      nAE_;
   int      nBE_;
   int      Ref_;
+  int      CorrKernel_;
+  int      ExchKernel_;
   int      nOccA_;
   int      nOccB_;
   int      nVirA_;
@@ -268,6 +270,24 @@ public:
     CORE,
     READ
   }; // Supported Guess Types
+
+  enum DFT {
+    USERDEFINED,
+    LDA
+  };
+
+  enum CORR {
+    NOCORR,
+    VWN3,
+    VWN5
+  };
+
+  enum EXCH {
+    NOEXCH,
+    EXACT,
+    SLATER
+  };
+
   bool	haveMO;      ///< Have MO coefficients?
   bool	haveDensity; ///< Computed Density? (Not sure if this is used anymore)
   bool	haveCoulomb; ///< Computed Coulomb Matrix?
@@ -283,12 +303,11 @@ public:
   double   energyTwoE; ///< Two-bodied operator tensors traced with Density
   double   energyNuclei; ///< N-N Repulsion Energy
   double   totalEnergy; ///< Sum of all energetic contributions
+
   double   totalEx;     ///< LDA Exchange
   double   totalEcorr;  ///< Total VWN Energy
   double   eps_corr;    ///< VWN Correlation Energy Density
-  double   mu_corr;     ///<  VWN Correlation Potential
-  int      ex_type;     ///< Exchange Energy Density (1 = TFD-LDA)
-  int      cor_type;    ///< Correlation Energy Density (1 VWN3, 2VWN5)
+  double   mu_corr;     ///< VWN Correlation Potential
 
   int      nSCFIter;
 
@@ -353,6 +372,8 @@ public:
 
     // Standard Values
     this->Ref_         = _INVALID;
+    this->CorrKernel_  = NOCORR;
+    this->ExchKernel_  = NOEXCH;
     this->denTol_      = 1e-10;
     this->eneTol_      = 1e-12;
     this->maxSCFIter_  = 256;
@@ -433,6 +454,8 @@ public:
   inline void setSCFMaxIter(int i){ this->maxSCFIter_ = i;};
   inline void setGuess(int i){ this->guess_ = i;};
   inline void isNotPrimary(){this->isPrimary = false;};
+  inline void setCorrKernel(int i){this->CorrKernel_ = i;};
+  inline void setExchKernel(int i){this->ExchKernel_ = i;};
 
   // access to private data
   inline int nBasis() { return this->nBasis_;};
@@ -449,6 +472,8 @@ public:
   inline int multip()  { return this->multip_;};
   inline int nOVA()    { return nOccA_*nVirA_;};
   inline int nOVB()    { return nOccB_*nVirB_;};
+  inline int CorrKernel(){return this->CorrKernel_;};
+  inline int ExchKernel(){return this->ExchKernel_;};
   inline int printLevel(){ return this->printLevel_;};
   inline std::vector<double> mullPop(){ return this->mullPop_;};
   inline std::array<double,3> elecField(){ return this->elecField_;  };

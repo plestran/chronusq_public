@@ -46,7 +46,6 @@ void SingleSlater<double>::formVXC(){
     double val = 4.0*math.pi*CxVx;
     this->totalEx = 0.0;           // Total Exchange Energy
     this->totalEcorr = 0.0;        // Total Correlation Energy
-    this->cor_type = 2;  // Define Correlation Type (1 for VWN5 and 2 for VWN3)
 
 /*  
  *  Generate grids 
@@ -127,11 +126,11 @@ void SingleSlater<double>::formCor(double rho, double spindensity){
    double c;
    double x0;
 //   VWN5
-   if (this->cor_type == 1){
+   if (this->CorrKernel_ == VWN5){
      b  = 3.72744;  // Caption Table 5
      c  = 12.9352;  // Caption Table 5
      x0 = -0.10498; // Caption Table 5
-   }else if(this->cor_type == 2){
+   }else if(this->CorrKernel_ == VWN3){
 //  VWN3
      b  = 13.0720;  // into text page 1207
      c  = 42.7198;  // into text page 1207
