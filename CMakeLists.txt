@@ -36,6 +36,7 @@ include_directories("${Boost_INCLUDE_DIRS}")
 include_directories("${EIGEN3_INCLUDE_DIR}")
 include_directories("${BTAS_INCLUDE_DIR}")
 include_directories("${HDF5_INCLUDE_DIRS}")
+include_directories("${PYTHON_INCLUDE_DIRS}")
 
 # Append flags for compilation
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")

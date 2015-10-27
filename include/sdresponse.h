@@ -202,6 +202,8 @@ public:
   void iniSDResponse(Molecule *,BasisSet *,MOIntegrals<T> *,FileIO *,
                      Controls *, SingleSlater<T> *);
 
+  int       nQNIter;
+
   inline void communicate(Molecule &mol, BasisSet &basis, SingleSlater<T> &ss,
     MOIntegrals<T> &moints, FileIO &fileio, Controls &controls) {
 
@@ -256,6 +258,10 @@ public:
 
   }
   void alloc();
+
+  // Python API
+  boost::python::list Wrapper_excitationEnergies();
+  boost::python::list Wrapper_oscStrengths();
 
   #include <sdresponse_getset.h>
   #include <sdresponse_qnrelated.h>

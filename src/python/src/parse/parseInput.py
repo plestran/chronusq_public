@@ -70,6 +70,7 @@ def genSecDict(workers,parser,section):
   parseMap = { 
     'I'      :parser.getint,
     'D'      :parser.getfloat,
+    'B'      :parser.getboolean,
     'S'      :parser.get,
     'O-ENV'  :parserEnv,
     'O-ORTH' :parserOrth,

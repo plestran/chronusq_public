@@ -137,6 +137,7 @@ namespace ChronusQ {
                << elapsed.count() << " secs" << endl << endl;
         break;
       }
+      this->nMicroIter_++;
       if(this->doRestart_) {
         this->setupRestart();
         break;

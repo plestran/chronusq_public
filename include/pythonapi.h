@@ -1,7 +1,6 @@
 #include <workers.h>
 #include <global.h>
 #include <atoms.h>
-#include <boost/python.hpp>
 
 using namespace boost::python;
 using ChronusQ::SingleSlater;
