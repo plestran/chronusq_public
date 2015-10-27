@@ -60,17 +60,25 @@ double CoupledCluster::CCSD(){
   this->mointegrals_->formIJKA(true);
   
   double ECorr = 0.0;
+  double Denom = 1.0;
 
+  // One-time intermediates
+  RealTensor2d Zbc
+  RealTensor4d Sijkl, Yjkbc
   // Intermediates
   RealTensor2d Hba, Hbj, Hij, Gca, Gik; 
   RealTensor4d Aijkl, Babcd, Hicak;
   // Amplitudes
   RealTensor2d Tia, Wia;
-  RealTensor4d Tiajb, Tau, Wiajb;
+  RealTensor4d Tijab, Tau, Wiajb;
 
   auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
 
   if(this->Ref_ == SingleSlater<double>::TCS){
+    // Static (one-time) intermediates
+    Sijkl   = RealTensor4d(this->nO_,this->nO_,this->nO_,this->nO_);
+    Yjkbc   = RealTensor4d(this->nO_,this->nO_,this->nV_,this->nV_);
+    Zbc     = RealTensir2d(this->nV_,this->nV_);
     // Intermediates
     Hba     = RealTensor2d(this->nV_,this->nV_);
     Hbj     = RealTensor2d(this->nV_,this->nO_);
@@ -83,11 +91,31 @@ double CoupledCluster::CCSD(){
     // Amplitudes 
     Tia     = RealTensor2d(this->nO_,this->nV_);
     Wia     = RealTensor2d(this->nO_,this->nV_);
-    Tiajb   = RealTensor4d(this->nO_,this->nV_,this->nO_,this->nV_);
+    Tijab   = RealTensor4d(this->nO_,this->nO_,this->nV_,this->nV_);
     Tau     = RealTensor4d(this->nO_,this->nV_,this->nO_,this->nV_);
     Wiajb   = RealTensor4d(this->nO_,this->nV_,this->nO_,this->nV_);
-  } else {
-  }
 
 
+
+    // Initialize T1 and T2 amplitudes
+    for(auto i = 0; i < this->nO_; i++)
+    for(auto a = 0; a < this->nV_; a++) {
+      Tia(i,a) = 0.0;
+      }
+    for(auto i = 0; i < this->nO_; i++) 
+    for(auto j = 0; j < this->nO_; j++) 
+    for(auto a = 0; a < this->nV_; a++) 
+    for(auto b = 0; b < this->nV_; b++) { 
+      Denom = (*this->singleSlater_->epsA())(i)
+               + (*this->singleSlater_->epsA())(j)
+               - (*this->singleSlater_->epsA())(a + this->nO_)
+               - (*this->singleSlater_->epsA())(b + this->nO_);
+      Tijab(i,j,a,b) = (this->mointegrals_->IAJB(i,a,j,b))/Denom; 
+    }
+
+   
+
+
+  } 
+  return ECorr;
 };
