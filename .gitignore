@@ -32,3 +32,5 @@ tmp
 chronusQ
 Test/UNIT/new-tests
 Test/UNIT/*.txt
+Test/UNIT/*/*.bin
+Test/UNIT/*/*.scr

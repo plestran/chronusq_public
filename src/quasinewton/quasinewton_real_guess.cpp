@@ -76,7 +76,7 @@ namespace ChronusQ {
 
     new (&TrialVecR) RealCMMap(this->TVecRMem,this->N_,NTrial+NNotConv);
     new (&ResR) RealCMMap(this->ResRMem,this->N_,NTrial);
-    if(this->symmetrizedTrial_ || !this->isHermetian_){
+    if(this->symmetrizedTrial_ || !this->isHermitian_){
       new (&TrialVecL) RealCMMap(this->TVecLMem,this->N_,NTrial+NNotConv);
       new (&ResL) RealCMMap(this->ResLMem,this->N_,NTrial);
     }
@@ -94,7 +94,7 @@ namespace ChronusQ {
       if(!resConv[k]) {
         new (&RR) RealCMMap(this->ResRMem + k*this->N_,this->N_,1);
         new (&QR) RealCMMap(this->TVecRMem+(NTrial+INDX)*this->N_,this->N_,1);
-        if(this->symmetrizedTrial_ || !this->isHermetian_){
+        if(this->symmetrizedTrial_ || !this->isHermitian_){
           new (&RL) RealCMMap(this->ResLMem + k*this->N_,this->N_,1);
           new (&QL) RealCMMap(this->TVecLMem+(NTrial+INDX)*this->N_,this->N_,1);
         }

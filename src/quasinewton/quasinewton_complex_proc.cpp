@@ -30,7 +30,7 @@ namespace ChronusQ {
   /*
    *  Reconstruct the approximate eigenvectors
    *
-   *  For Hermetian matricies in general (viz. Davidson J. Comput. Phys. 17 (1975))
+   *  For Hermitian matricies in general (viz. Davidson J. Comput. Phys. 17 (1975))
    *
    *  | X > = | b_i > X(R)_i
    *
@@ -50,7 +50,7 @@ namespace ChronusQ {
     ComplexCMMap UL       (this->ULMem,      0,0);
     ComplexCMMap TrialVecL(this->TVecLMem,   0,0);
     RealVecMap ER(this->RealEMem,NTrial);
-    if(!this->isHermetian_ || this->symmetrizedTrial_){
+    if(!this->isHermitian_ || this->symmetrizedTrial_){
       new (&XTRhoR   ) ComplexCMMap(this->XTRhoRMem,  NTrial,  NTrial);
       new (&XTSigmaL ) ComplexCMMap(this->XTSigmaLMem,NTrial,  NTrial);
       new (&XTRhoL   ) ComplexCMMap(this->XTRhoLMem,  NTrial,  NTrial);
@@ -77,21 +77,21 @@ namespace ChronusQ {
     // Initialize Trial Vectors
     ComplexCMMap TrialVecR(this->TVecRMem,this->N_,NTrial);
     ComplexCMMap TrialVecL(this->TVecLMem,0,0);
-    if(!this->isHermetian_ || this->symmetrizedTrial_){
+    if(!this->isHermitian_ || this->symmetrizedTrial_){
       new (&TrialVecL) ComplexCMMap(this->TVecLMem,this->N_,NTrial);
     }
 
     // Copy guess into Trial Vec
     TrialVecR = (*this->guessR_);
   //cout << TrialVecR << endl << endl;
-    if(this->symmetrizedTrial_ || !this->isHermetian_){
+    if(this->symmetrizedTrial_ || !this->isHermitian_){
       if(this->doRestart_) TrialVecL = (*this->guessL_);
       else                 TrialVecL = (*this->guessR_);
     }
 
     // Deallocate extraneous Guess storage
     this->guessR_.reset();
-    if(this->doRestart_ && (this->symmetrizedTrial_ || !this->isHermetian_)) 
+    if(this->doRestart_ && (this->symmetrizedTrial_ || !this->isHermitian_)) 
       this->guessL_.reset();
     // Symmetrize the trial vectors viz Kauczor et al. JCTC 7 (2010)
     if(!this->doRestart_ && this->symmetrizedTrial_){
