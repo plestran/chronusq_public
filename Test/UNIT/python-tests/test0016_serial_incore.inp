@@ -1,4 +1,4 @@
-#  test0011 serial incore Real UHF 6-31G
+#  test0016 serial incore Real CUHF STO-3G
 #
 #  Molecule Specification
 #
@@ -13,9 +13,9 @@ geom:
 #  Job Specification
 #
 [QM]
-reference = Real UHF
+reference = Real CUHF
 job       = SCF
-basis     = 6-31G.gbs
+basis     = sto3g.gbs
 ints			= incore
 
 #

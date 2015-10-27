@@ -1,4 +1,4 @@
-#  test0003 serial incore Real RHF cc-pVDZ
+#  test0019 serial incore Real RHF CIS STO-3G
 #
 #  Molecule Specification
 #
@@ -15,9 +15,12 @@ geom:
 #
 [QM]
 reference = Real RHF
-job       = SCF
-basis     = cc-pVDZ.gbs
+job       = CIS
+basis     = sto3g.gbs
 ints			= incore
+
+[CIS]
+nstates = 3
 
 #
 #  Misc Settings
