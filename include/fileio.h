@@ -41,16 +41,23 @@ class FileIO {
   std::string  name_scr;                // name of the scratch file
   std::string  name_restart;            // name of the restart file
 
+  std::string  metaDataGroupPath;
   std::string  operatorGroupPath;
   std::string  SCFGroupPath;
-  std::string  overlapPath;
-  std::string  kineticPath;
+
+  std::string  referenceMetaPath;
+  std::string  scfMetaPath;
+
+  // Operator Paths
+  std::string  overlapPath  ;
+  std::string  kineticPath  ;
   std::string  nucReplPath  ;
   std::string  coreHamPath  ;
   std::string  dipolePath   ;
   std::string  quadpolePath ;
   std::string  octupolePath ;
 
+  // SCF Paths
   std::string  alphaSCFDenPath ;
   std::string  betaSCFDenPath  ;
   std::string  alphaMOPath     ;
@@ -65,8 +72,12 @@ public:
   std::unique_ptr<H5::H5File> scr;
   std::unique_ptr<H5::H5File> restart;
   
+  std::unique_ptr<H5::Group>  Meta;
   std::unique_ptr<H5::Group>  Operators;
   std::unique_ptr<H5::Group>  SCF;
+
+  std::unique_ptr<H5::DataSet> referenceMeta;
+  std::unique_ptr<H5::DataSet> scfMeta;
 
   std::unique_ptr<H5::DataSet> overlap;
   std::unique_ptr<H5::DataSet> kinetic;
@@ -82,9 +93,16 @@ public:
   std::unique_ptr<H5::DataSet> alphaMO;
   std::unique_ptr<H5::DataSet> betaMO;
 
+  template<typename T> struct metaData {
+    T val;
+    char desc[25];
+  };
+  std::unique_ptr<H5::CompType> metaDataTypeDouble;
+  std::unique_ptr<H5::CompType> metaDataTypeInt;
   std::unique_ptr<H5::CompType> complexType;
 
   bool doRestart;
+
   
 
   // constructor and destructor

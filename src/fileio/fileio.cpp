@@ -344,6 +344,27 @@ void FileIO::iniCompType(){
   );
 
 
+  this->metaDataTypeDouble = std::unique_ptr<H5::CompType>(
+    new H5::CompType(sizeof(metaData<double>))
+  );
+  this->metaDataTypeDouble->insertMember(
+    "VALUE",HOFFSET(metaData<double>,val),H5::PredType::NATIVE_DOUBLE
+  );
+  this->metaDataTypeDouble->insertMember(
+    "DESC",HOFFSET(metaData<double>,desc),H5::StrType(H5::PredType::C_S1,25)
+  );
+
+  this->metaDataTypeInt = std::unique_ptr<H5::CompType>(
+    new H5::CompType(sizeof(metaData<int>))
+  );
+  this->metaDataTypeInt->insertMember(
+    "VALUE",HOFFSET(metaData<int>,val),H5::PredType::NATIVE_INT
+  );
+  this->metaDataTypeInt->insertMember(
+    "DESC",HOFFSET(metaData<int>,desc),H5::StrType(H5::PredType::C_S1,25)
+  );
+
+
 }
 
 }; // namespace ChronusQ
