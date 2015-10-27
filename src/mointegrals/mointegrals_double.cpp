@@ -1088,7 +1088,39 @@ void MOIntegrals<double>::formIJAB(bool doDBar){
                0.0,(*this->ijabAABB_),{i,j,a,b});
     }
   }
-
+  if(doDBar){
+    if(this->Ref_ == SingleSlater<double>::TCS)
+      for(auto i = 0; i < this->nO_; i++)
+      for(auto j = 0; j < this->nO_; j++)
+      for(auto a = 0; a < this->nV_; a++)
+      for(auto b = 0; b < this->nV_; b++)
+        (*this->ijab_)(i,j,a,b) = Sijab(i,j,a,b) - Sijab(i,b,a,j);
+    else {
+      for(auto i = 0; i < this->nOA_; i++)
+      for(auto j = 0; j < this->nOA_; j++)
+      for(auto a = 0; a < this->nVA_; a++)
+      for(auto b = 0; b < this->nVA_; b++){
+        /*
+         * In the case of RHF, we can reuse the "mixed-spin" storage to build the
+         * double bar integrals, as the mixed-spin storage is simply the single
+         * bar integrals. This does not work for UHF
+         */ 
+        if(this->singleSlater_->isClosedShell)
+          (*this->ijabAAAA_)(i,j,a,b) =
+            (*this->ijabAABB_)(i,j,a,b)-(*this->ijabAABB_)(i,b,a,j);
+        else {
+          (*this->ijabAAAA_)(i,j,a,b) = SijabAAAA(i,j,a,b) - SijabAAAA(i,b,a,j);
+          (*this->ijabBBBB_)(i,j,a,b) = SijabBBBB(i,j,a,b) - SijabBBBB(i,b,a,j);
+        }
+      }
+      if(!this->singleSlater_->isClosedShell)
+        for(auto i = 0; i < this->nOB_; i++)
+        for(auto j = 0; j < this->nOB_; j++)
+        for(auto a = 0; a < this->nVB_; a++)
+        for(auto b = 0; b < this->nVB_; b++)
+          (*this->ijabBBBB_)(i,j,a,b) = SijabBBBB(i,j,a,b) - SijabBBBB(i,b,a,j);
+    }
+  }
 }
 
 template<>
@@ -1263,6 +1295,39 @@ void MOIntegrals<double>::formIABC(bool doDBar){
                0.0,(*this->iabcAABB_),{i,a,b,c});
     }
   }
+  if(doDBar){
+    if(this->Ref_ == SingleSlater<double>::TCS)
+      for(auto i = 0; i < this->nO_; i++)
+      for(auto a = 0; a < this->nV_; a++)
+      for(auto b = 0; b < this->nV_; b++)
+      for(auto c = 0; c < this->nV_; c++)
+        (*this->iabc_)(i,a,b,c) = Siabc(i,a,b,c) - Siabc(i,c,b,a);
+    else {
+      for(auto i = 0; i < this->nOA_; i++)
+      for(auto a = 0; a < this->nVA_; a++)
+      for(auto b = 0; b < this->nVA_; b++)
+      for(auto c = 0; c < this->nVA_; c++){
+        /*
+         * In the case of RHF, we can reuse the "mixed-spin" storage to build the
+         * double bar integrals, as the mixed-spin storage is simply the single
+         * bar integrals. This does not work for UHF
+         */ 
+        if(this->singleSlater_->isClosedShell)
+          (*this->iabcAAAA_)(i,a,b,c) =
+            (*this->iabcAABB_)(i,a,b,c)-(*this->iabcAABB_)(i,c,b,a);
+        else {
+          (*this->iabcAAAA_)(i,a,b,c) = SiabcAAAA(i,a,b,c) - SiabcAAAA(i,c,b,a);
+          (*this->iabcBBBB_)(i,a,b,c) = SiabcBBBB(i,a,b,c) - SiabcBBBB(i,c,b,a);
+        }
+      }
+      if(!this->singleSlater_->isClosedShell)
+        for(auto i = 0; i < this->nOB_; i++)
+        for(auto a = 0; a < this->nVB_; a++)
+        for(auto b = 0; b < this->nVB_; b++)
+        for(auto c = 0; c < this->nVB_; c++)
+          (*this->iabcBBBB_)(i,a,b,c) = SiabcBBBB(i,a,b,c) - SiabcBBBB(i,c,b,a);
+    }
+  }
 
 }
 
@@ -1433,6 +1498,39 @@ void MOIntegrals<double>::formIJKA(bool doDBar){
       // (RHF) Last Quarter Transformation Alpha-Alpha-Beta-Beta (a b | c d) [AA|BB]
       contract(1.0,(*this->locMOAVir_),{sg,a},IijksAAA,{i,j,k,sg},
                0.0,(*this->ijkaAABB_),{i,j,k,a});
+    }
+  }
+  if(doDBar){
+    if(this->Ref_ == SingleSlater<double>::TCS)
+      for(auto i = 0; i < this->nO_; i++)
+      for(auto j = 0; j < this->nO_; j++)
+      for(auto k = 0; k < this->nO_; k++)
+      for(auto a = 0; a < this->nV_; a++)
+        (*this->ijka_)(i,j,k,a) = Sijka(i,j,k,a) - Sijka(i,a,k,j);
+    else {
+      for(auto i = 0; i < this->nOA_; i++)
+      for(auto j = 0; j < this->nOA_; j++)
+      for(auto k = 0; k < this->nOA_; k++)
+      for(auto a = 0; a < this->nVA_; a++){
+        /*
+         * In the case of RHF, we can reuse the "mixed-spin" storage to build the
+         * double bar integrals, as the mixed-spin storage is simply the single
+         * bar integrals. This does not work for UHF
+         */ 
+        if(this->singleSlater_->isClosedShell)
+          (*this->ijkaAAAA_)(i,j,k,a) =
+            (*this->ijkaAABB_)(i,j,k,a)-(*this->ijkaAABB_)(i,a,k,j);
+        else {
+          (*this->ijkaAAAA_)(i,j,k,a) = SijkaAAAA(i,j,k,a) - SijkaAAAA(i,a,k,j);
+          (*this->ijkaBBBB_)(i,j,k,a) = SijkaBBBB(i,j,k,a) - SijkaBBBB(i,a,k,j);
+        }
+      }
+      if(!this->singleSlater_->isClosedShell)
+        for(auto i = 0; i < this->nOB_; i++)
+        for(auto j = 0; j < this->nOB_; j++)
+        for(auto k = 0; k < this->nOB_; k++)
+        for(auto a = 0; a < this->nVB_; a++)
+          (*this->ijkaBBBB_)(i,j,k,a) = SijkaBBBB(i,j,k,a) - SijkaBBBB(i,a,k,j);
     }
   }
 }

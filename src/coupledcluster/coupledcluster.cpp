@@ -51,11 +51,43 @@ void CoupledCluster::iniCoupledCluster( Molecule * molecule, BasisSet * basisSet
   this->nV_             = this->nVA_ + this->nVB_;
 }
 
-void CoupledCluster::CCSD(){
-  this->mointegrals_->formIJAB(false);
-  this->mointegrals_->formIJKL(false);
-  this->mointegrals_->formABCD(false);
-  this->mointegrals_->formIAJB(false);
-  this->mointegrals_->formIABC(false);
-  this->mointegrals_->formIJKA(false);
+double CoupledCluster::CCSD(){
+  this->mointegrals_->formIJAB(true);
+  this->mointegrals_->formIJKL(true);
+  this->mointegrals_->formABCD(true);
+  this->mointegrals_->formIAJB(true);
+  this->mointegrals_->formIABC(true);
+  this->mointegrals_->formIJKA(true);
+  
+  double ECorr = 0.0;
+
+  // Intermediates
+  RealTensor2d Hba, Hbj, Hij, Gca, Gik; 
+  RealTensor4d Aijkl, Babcd, Hicak;
+  // Amplitudes
+  RealTensor2d Tia, Wia;
+  RealTensor4d Tiajb, Tau, Wiajb;
+
+  auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
+
+  if(this->Ref_ == SingleSlater<double>::TCS){
+    // Intermediates
+    Hba     = RealTensor2d(this->nV_,this->nV_);
+    Hbj     = RealTensor2d(this->nV_,this->nO_);
+    Hij     = RealTensor2d(this->nO_,this->nO_);
+    Gik     = RealTensor2d(this->nO_,this->nO_);
+    Gca     = RealTensor2d(this->nV_,this->nV_);
+    Aijkl   = RealTensor4d(this->nO_,this->nO_,this->nO_,this->nO_);
+    Babcd   = RealTensor4d(this->nV_,this->nV_,this->nV_,this->nV_);
+    Hicak   = RealTensor4d(this->nO_,this->nV_,this->nV_,this->nO_);
+    // Amplitudes 
+    Tia     = RealTensor2d(this->nO_,this->nV_);
+    Wia     = RealTensor2d(this->nO_,this->nV_);
+    Tiajb   = RealTensor4d(this->nO_,this->nV_,this->nO_,this->nV_);
+    Tau     = RealTensor4d(this->nO_,this->nV_,this->nO_,this->nV_);
+    Wiajb   = RealTensor4d(this->nO_,this->nV_,this->nO_,this->nV_);
+  } else {
+  }
+
+
 };
