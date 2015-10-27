@@ -261,6 +261,7 @@ public:
   void formIJKL(bool);
   void formIABC(bool);
   void formABCD(bool);
+  void formDBar();
 
   inline T IAJB(int i,int a,int j,int b,std::string spn="AAAA"){
     if(this->Ref_ == SingleSlater<T>::TCS){

@@ -1089,6 +1089,7 @@ void MOIntegrals<double>::formIJAB(bool doDBar){
     }
   }
   if(doDBar){
+    /// THIS IS WRONG --- DO NOT USE
     if(this->Ref_ == SingleSlater<double>::TCS)
       for(auto i = 0; i < this->nO_; i++)
       for(auto j = 0; j < this->nO_; j++)
@@ -1126,6 +1127,7 @@ void MOIntegrals<double>::formIJAB(bool doDBar){
 template<>
 //DO IABC
 void MOIntegrals<double>::formIABC(bool doDBar){
+    /// THIS IS WRONG --- DO NOT USE
   if(this->haveMOiabc && (this->iabcIsDBar == doDBar)) return;
   else if(this->iabcIsDBar != doDBar) {
     if(this->Ref_ == SingleSlater<double>::TCS)
@@ -1501,6 +1503,7 @@ void MOIntegrals<double>::formIJKA(bool doDBar){
     }
   }
   if(doDBar){
+    /// THIS IS WRONG --- DO NOT USE
     if(this->Ref_ == SingleSlater<double>::TCS)
       for(auto i = 0; i < this->nO_; i++)
       for(auto j = 0; j < this->nO_; j++)
@@ -1534,4 +1537,72 @@ void MOIntegrals<double>::formIJKA(bool doDBar){
     }
   }
 }
+
+template<>
+void MOIntegrals<double>::formDBar(){
+
+  this->formIJAB(false);
+  this->formIJKL(false);
+  this->formABCD(false);
+  this->formIAJB(false);
+  this->formIABC(false);
+  this->formIJKA(false);
+
+  RealTensor4d Sijka, Sijab, Siabc, Siajb, Sabcd, Sijkl;
+  Sijka = RealTensor4d(*this->ijka_);
+  Sijab = RealTensor4d(*this->ijab_);
+  Siabc = RealTensor4d(*this->iabc_);
+  Siajb = RealTensor4d(*this->iajb_);
+  Sabcd = RealTensor4d(*this->abcd_);
+  Sijkl = RealTensor4d(*this->ijkl_);
+
+  if(this->Ref_ == SingleSlater<double>::TCS) {
+    // IJKA
+    for(auto i = 0; i < this->nO_; i++)
+    for(auto j = 0; j < this->nO_; j++)
+    for(auto k = 0; k < this->nO_; k++)
+    for(auto a = 0; a < this->nV_; a++) {
+      (*this->ijka_)(i,j,k,a) = Sijka(i,k,j,a) - Sijka(j,k,i,a);
+    }
+    // IJAB
+    for(auto i = 0; i < this->nO_; i++)
+    for(auto j = 0; j < this->nO_; j++)
+    for(auto a = 0; a < this->nV_; a++)
+    for(auto b = 0; b < this->nV_; b++) {
+      (*this->ijab_)(i,j,a,b) = Siajb(i,a,j,b) - Siajb(i,b,j,a);
+    }
+    // ABCD
+    for(auto a = 0; a < this->nV_; a++)
+    for(auto b = 0; b < this->nV_; b++)
+    for(auto c = 0; c < this->nV_; c++)
+    for(auto d = 0; d < this->nV_; d++) {
+      (*this->abcd_)(a,b,c,d) = Sabcd(a,c,b,d) - Sabcd(a,c,d,b);
+    }
+
+    // IAJB
+    for(auto i = 0; i < this->nO_; i++)
+    for(auto a = 0; a < this->nV_; a++)
+    for(auto j = 0; j < this->nO_; j++)
+    for(auto b = 0; b < this->nV_; b++) {
+      (*this->iajb_)(i,a,j,b) = Sijab(i,j,a,b) - Siajb(i,b,j,a);
+    }
+  
+    // IABC
+    for(auto i = 0; i < this->nO_; i++)
+    for(auto a = 0; a < this->nV_; a++)
+    for(auto b = 0; b < this->nV_; b++)
+    for(auto c = 0; c < this->nV_; c++) {
+      (*this->iabc_)(i,a,b,c) = Siabc(i,b,a,c) - Siabc(i,c,a,b);
+    }
+
+    // IJKL
+    for(auto i = 0; i < this->nO_; i++)
+    for(auto j = 0; j < this->nO_; j++)
+    for(auto k = 0; k < this->nO_; k++)
+    for(auto l = 0; l < this->nO_; l++) {
+      (*this->ijkl_)(i,j,k,l) = Sijkl(i,k,j,l) - Sijkl(i,k,l,j);
+    }
+  }
+}
+
 }//namespace ChronusQ

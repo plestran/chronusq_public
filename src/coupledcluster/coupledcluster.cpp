@@ -49,16 +49,11 @@ void CoupledCluster::iniCoupledCluster( Molecule * molecule, BasisSet * basisSet
   this->nVB_            = this->singleSlater_->nVirB();
   this->nO_             = this->nOA_ + this->nOB_;
   this->nV_             = this->nVA_ + this->nVB_;
+  // forms all necessary double bar integrals, replaces them in MOint objects in Dirac notation
+  this->mointegrals_->formDBar();
 }
 
 double CoupledCluster::CCSD(){
-  this->mointegrals_->formIJAB(true);
-  this->mointegrals_->formIJKL(true);
-  this->mointegrals_->formABCD(true);
-  this->mointegrals_->formIAJB(true);
-  this->mointegrals_->formIABC(true);
-  this->mointegrals_->formIJKA(true);
-  
   double ECorr = 0.0;
   double EInit = 0.0;
   double Denom = 1.0;
@@ -110,7 +105,7 @@ double CoupledCluster::CCSD(){
                + (*this->singleSlater_->epsA())(j)
                - (*this->singleSlater_->epsA())(a + this->nO_)
                - (*this->singleSlater_->epsA())(b + this->nO_);
-      Tijab(i,j,a,b) = (this->mointegrals_->IAJB(i,a,j,b))/Denom; 
+      Tijab(i,j,a,b) = (this->mointegrals_->IJAB(i,j,a,b))/Denom; 
     }
 
     // Form our first Tau
@@ -119,14 +114,18 @@ double CoupledCluster::CCSD(){
     for(auto a = 0; a < this->nV_; a++) 
     for(auto b = 0; b < this->nV_; b++) { 
       Tau(i,j,a,b) = Tijab(i,j,a,b) + (Tia(i,a)*Tia(j,b) - Tia(i,b)*Tia(j,a));
-      EInit = EInit + (0.25)*(this->mointegrals_->IAJB(i,a,j,b))*Tijab(i,j,a,b);
+      EInit += (0.25)*(this->mointegrals_->IJAB(i,j,a,b))*Tijab(i,j,a,b);
     }
+    // Check... if we made Tau correctly we should get MP2 energy expression back
     cout << "MP2 ENERGY = " << endl; 
     cout << EInit << endl;
 
-   
-
-
+    // Sijkl intermediate
+    for(auto i = 0; i < this->nO_; i++) 
+    for(auto j = 0; j < this->nO_; j++) 
+    for(auto k = 0; k < this->nO_; k++) 
+    for(auto l = 0; l < this->nO_; l++) { 
+    }
   } 
   return ECorr;
 };
