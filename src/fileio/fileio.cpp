@@ -32,6 +32,8 @@ FileIO::FileIO(const std::string nm_input) {
     CErr("Fatal: Input File Required");
 
   this->doRestart = false;
+
+  this->name = nm_input;
   
   this->name_in = nm_input + ".inp";
   this->name_out = nm_input + ".out";
