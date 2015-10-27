@@ -18,7 +18,7 @@ class data:
 #	Grab the reference values and store them
 #
 ref = {}
-with open("ref.val") as f:
+with open("chronus-ref.val") as f:
 	for line in f:
 		dipole     = []
 		quadrupole = []

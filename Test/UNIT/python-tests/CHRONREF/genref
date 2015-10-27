@@ -5,19 +5,57 @@ use strict;
 use warnings;
 use Tie::File;
 
-our (@file);
+our (@file,@lines);
+our $output = "chronus-ref.val";
+our ($testline,$name);
 
 #Makes new input files based on old serial_incore.inp file
+
+open(OUT, '>', $output);
 for(my $i = 0; $i < scalar @ARGV; $i++){
 	my @string = split /_/, $ARGV[$i];
-	$file[$i] = $string[0];
-	print "file = $file[$i]\n";
-	system(`cp $ARGV[$i] $file[$i]_serial_direct.inp `);
-	system(`cp $ARGV[$i] $file[$i]_smp_incore.inp `);
-	system(`cp $ARGV[$i] $file[$i]_smp_direct.inp `); }
+	$name = $string[0];
+	print "file = $name\n";
+	$testline = "$name";
 
-system(`sed -i -e 's/incore/direct/g' *direct*.inp`);
-system(`sed -i -e 's/nsmp = 1/nsmp = 2/g' *smp*.inp`);
-system(`sed -i -e 's/serial/smp/g' *smp*.inp`);
+	tie @lines, 'Tie::File', $ARGV[$i] or die;
+	for (my $j = 0; $j <= $#lines; $j++){
+
+		if ($lines[$j] =~ /SCF Completed/) {
+			@string = split(/ +/,$lines[$j]);
+			$testline = "$testline/$string[4]"; }
+
+		if ($lines[$j] =~ / Y=/) {
+			@string = split(/ +/,$lines[$j]);
+			$testline = "$testline/$string[1]/$string[3]/$string[5]"; }
+
+		if ($lines[$j] =~ /Quadrupole Moment/ and $lines[$j] !~ /Traceless/) {
+			@string = split(/ +/,$lines[$j+1]);
+			$testline = "$testline/$string[1]/$string[3]/$string[5]"; 
+			@string = split(/ +/,$lines[$j+2]);
+			$testline = "$testline/$string[3]/$string[5]"; 
+			@string = split(/ +/,$lines[$j+3]);
+			$testline = "$testline/$string[5]"; }
+			
+		if ($lines[$j] =~ /Octupole Moment/){
+			@string = split(/ +/,$lines[$j+1]);
+			$testline = "$testline/$string[1]/$string[3]/$string[5]"; 
+			@string = split(/ +/,$lines[$j+2]);
+			$testline = "$testline/$string[3]/$string[5]"; 
+			@string = split(/ +/,$lines[$j+3]);
+			$testline = "$testline/$string[5]"; 
+			@string = split(/ +/,$lines[$j+5]);
+			$testline = "$testline/$string[3]/$string[5]"; 
+			@string = split(/ +/,$lines[$j+6]);
+			$testline = "$testline/$string[5]"; 
+			@string = split(/ +/,$lines[$j+9]);
+			$testline = "$testline/$string[5]"; }
+
+		} #end loop over j
+	untie @lines;
+	print OUT "$testline\n";
+	} #end loop over i
+
+close OUT
 
 

@@ -41,7 +41,7 @@ def genSummary(testtable,summary):
 			entry.append(testtable[j].infile.replace(".inp",''))
 			for k in range(4):
 				entry.append(summary[j][k])
-			if summary[j][0] < 1E-7 and summary[j][1] < 1E-3 and summary[j][2] < 1E-3 and summary[j][3] < 1E-3:
+			if summary[j][0] < 1E-10 and summary[j][1] < 1E-9 and summary[j][2] < 1E-9 and summary[j][3] < 1E-9:
 				entry.append('YES')
 			else:
 				entry.append('** NO **')
@@ -95,16 +95,18 @@ def runUnit(doKill,doPrint):
 
 def testSCF(ref,tests):
 
-	auToD = 0.393456
-	auToAng = 0.529177
+	auToD   = 0.3934303070
+	auToAng = 0.5291772083
 # test SCF energy
 	abserr = abs(ref.scf - tests.E)
 	errors.append(abserr)
 
 # test molecular dipoles
+#print ref.dip
 	maxerr = 0.0
 	for i in range(3):
 		abserr = abs(ref.dip[i] - tests.dipole[i]/auToD)
+#	print tests.dipole[i]/auToD
 		if abserr > maxerr:
 			maxerr = abserr
 	errors.append(maxerr)
