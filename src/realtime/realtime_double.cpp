@@ -350,11 +350,11 @@ void RealTime<double>::doPropagation() {
   }
 
   // Create/open CSVs for printing results
-  csvs.push_back(new std::ofstream("RealTime_Dipole.csv"));
-  csvs.push_back(new std::ofstream("RealTime_Mulliken.csv"));
-  csvs.push_back(new std::ofstream("RealTime_OrbOcc_Alpha.csv"));
+  csvs.push_back(new std::ofstream(this->fileio_->fileName() + "_RealTime_Dipole.csv"));
+  csvs.push_back(new std::ofstream(this->fileio_->fileName() + "_RealTime_Mulliken.csv"));
+  csvs.push_back(new std::ofstream(this->fileio_->fileName() + "_RealTime_OrbOcc_Alpha.csv"));
   if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS){
-    csvs.push_back(new std::ofstream("RealTime_OrbOcc_Beta.csv"));
+    csvs.push_back(new std::ofstream(this->fileio_->fileName() + "_RealTime_OrbOcc_Beta.csv"));
   }
 
   for (iStep = 0; iStep <= this->maxSteps_; iStep++) {

@@ -36,6 +36,8 @@
 namespace ChronusQ {
 class FileIO {
 
+  std::string  name;                    // name of general file
+
   std::string  name_in;                 // name of the input file
   std::string  name_out;                // name of the output file
   std::string  name_scr;                // name of the scratch file
@@ -119,6 +121,8 @@ public:
 
   // Python API
   void write(std::string);
+
+  inline std::string fileName(){return this->name;};
 
 };
 } // namespace ChronusQ
