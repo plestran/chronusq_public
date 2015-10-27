@@ -36,6 +36,15 @@ def parserFormU(parser,section,opt):
 
 #
 # Convert string obtained from ConfigParser
+# for SCF.guess into Guess enum
+#
+def parserGuess(parser,section,opt):
+  strX = parser.get(section,opt)
+  strX = str(strX).upper()
+  return enumMaps.guessMap[strX]
+
+#
+# Convert string obtained from ConfigParser
 # into an N dimenstional float array
 #
 def parserDoubleArray(parser,section,opt):
@@ -65,6 +74,7 @@ def genSecDict(workers,parser,section):
     'O-ENV'  :parserEnv,
     'O-ORTH' :parserOrth,
     'O-FORMU':parserFormU,
+    'O-GS'   :parserGuess,
     'D3'     :parserDoubleArray
   }
 
@@ -97,7 +107,7 @@ def genSecDict(workers,parser,section):
       dict1[opt.upper()] = parseMap[readTyp](section,opt)
     elif readTyp in ('S'):
       dict1[opt.upper()] = parseMap[readTyp](section,opt).upper()
-    elif readTyp in ('O-ORTH','O-ENV','O-FORMU','D3'):
+    elif readTyp in ('O-ORTH','O-ENV','O-FORMU','O-GS','D3'):
       dict1[opt.upper()] = parseMap[readTyp](parser,section,opt)
     else:
       msg = 'Option data ' + str(readTyp) + ' type not recognized'

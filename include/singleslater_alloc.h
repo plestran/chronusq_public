@@ -36,6 +36,7 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
 
   this->elecField_  = controls->field_;
   this->printLevel_ = controls->printLevel;
+  this->guess_      = controls->guess;
 
   this->isClosedShell = (this->multip_ == 1);
   if(controls->HF){
@@ -62,8 +63,6 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
   this->isDFT = controls->DFT;
   this->alloc();
 
-  // FIXME: This will not do the right thing for complex!
-  if(this->isPrimary) this->fileio_->iniStdSCFFiles(!this->isClosedShell && this->Ref_ != TCS,this->nTCS_*this->nBasis_);
 
 };
 
@@ -72,6 +71,15 @@ void SingleSlater<T>::alloc(){
   this->checkMeta();
   this->allocOp();
   if(this->maxMultipole_ > 0) this->allocMultipole(); 
+
+//if(this->isPrimary) this->fileio_->iniStdSCFFiles<double>(!this->isClosedShell && this->Ref_ != TCS,this->nTCS_*this->nBasis_);
+//if(this->isPrimary) this->fileio_->iniStdSCFFiles(!this->isClosedShell && this->Ref_ != TCS,this->nTCS_*this->nBasis_);
+  if(this->isPrimary) {
+    if(typeid(T).hash_code() == typeid(double).hash_code())
+      this->fileio_->iniStdSCFFilesDouble(!this->isClosedShell && this->Ref_ != TCS,this->nTCS_*this->nBasis_);
+    else if(typeid(T).hash_code() == typeid(dcomplex).hash_code())
+      this->fileio_->iniStdSCFFilesComplex(!this->isClosedShell && this->Ref_ != TCS,this->nTCS_*this->nBasis_);
+  }
 /* Leaks memory
   int i,j,ij;
   this->R2Index_ = new int*[nBasis];
