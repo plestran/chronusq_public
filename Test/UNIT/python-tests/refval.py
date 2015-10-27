@@ -14,13 +14,24 @@ class data:
 #		self.w     = w
 		self.typ   = typ
 
-ref = [None]*100000
-dipole = [0.0000,1.5340,0.0000]
-#quadrupole = [-4.3168,-5.2054,-6.2076,0.0000,0.0000,0.0000]
-quadrupole = [-4.3168,0.0,0.0,-5.2054,0.0,-6.2076] #XX, XY, XZ, YY, YZ, ZZ
-#octupole = [0.0000,-0.9572,0.0000,0.0000,0.3916,0.0000,0.0000,-0.4476,0.0000,0.0000]
-octupole = [0.0000,0.3916,0.0,0.0,0.0,0.0,-0.9572,0.0,-0.4476,0.0] #XXX, XXy, XXZ, XYY, XYZ, XZZ, YYY, YYZ, YZZ, ZZZ
-ref[0] = data(-74.9420799245,dipole,quadrupole,octupole,'SCF');
+#
+#	Grab the reference values and store them
+#
+ref = {}
+with open("ref.val") as f:
+	for line in f:
+		dipole     = []
+		quadrupole = []
+		octupole   = []
+		val        = line.split('/')
+		for i in range(2,5):
+			dipole.append(float(val[i]))
+		for i in range(5,11):
+			quadrupole.append(float(val[i]))
+		for i in range(11,20):
+			octupole.append(float(val[i]))
+		octupole.append(float(val[20].rstrip()))
+		ref[val[0]] = data(float(val[1]),dipole,quadrupole,octupole,'SCF'); 
 
 def refvalues():
 	return ref

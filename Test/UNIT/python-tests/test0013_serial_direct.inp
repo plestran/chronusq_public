@@ -1,0 +1,24 @@
+#  test0013 serial direct Real CUHF STO-3G
+#
+#  Molecule Specification
+#
+[Molecule]
+charge = 0
+mult = 2
+geom:
+	Li 0   0.000000 0.000000 0.000000
+  
+#
+#  Job Specification
+#
+[QM]
+reference = Real CUHF
+job       = SCF
+basis     = sto3g.gbs
+ints			= direct
+
+#
+#  Misc Settings
+#
+[Misc]
+nsmp = 1

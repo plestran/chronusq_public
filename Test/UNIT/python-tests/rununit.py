@@ -36,12 +36,12 @@ def genSummary(testtable,summary):
 	sumrytable = []
 	j = 0
 	for i in testtable:
-		if 'SCF' in ref[j].typ:
+		if 'SCF' in ref[i.infile[:8]].typ:
 			entry = []
 			entry.append(testtable[j].infile.replace(".inp",''))
 			for k in range(4):
 				entry.append(summary[j][k])
-			if summary[j][0] < 1E-7 and summary[j][1] < 1E-4 and summary[j][2] < 1E-7 and summary[j][3] < 1E-7:
+			if summary[j][0] < 1E-7 and summary[j][1] < 1E-3 and summary[j][2] < 1E-3 and summary[j][3] < 1E-3:
 				entry.append('YES')
 			else:
 				entry.append('** NO **')
@@ -71,24 +71,23 @@ def runUnit(doKill,doPrint):
 # Runs the unit tests
 	global errors, summary
 	refvalues()
-	tests = [[None for x in xrange(100000)] for y in xrange(10)]
+	tests = [[None for x in xrange(1000)] for y in xrange(1000)]
 	testtable = genTable()
 	summary = []
-	errors  = []
 
 	k = 0
 	for i in testtable:
+		errors  = []
 		if findFile(i.infile,"."):
 #
 #			run chronus
-			if doPrint:
-				print "running file: "+i.infile.replace(".inp",'')
+			print "running file: "+i.infile.replace(".inp",'')
 			tests[k][0] = runCQ(i.infile.replace(".inp",''))
-			print tests[k][0].E
+#			print tests[k][0].E
 #
 #			test SCF values
-			if 'SCF' in ref[k].typ:
-				testSCF(ref[k],tests[k][0])
+			if 'SCF' in ref[i.infile[:8]].typ:
+				testSCF(ref[i.infile[:8]],tests[k][0])
 				summary.append(errors)
 
 		k += 1

@@ -1,0 +1,28 @@
+#  test0070 smp direct Real CUHF RPA STO-3G 
+#
+#  Molecule Specification
+#
+[Molecule]
+charge = 0
+mult = 3
+geom:
+	O 0   0.000000    0.000000    0.608586
+	O 0   0.000000    0.000000    -0.608586
+  
+#
+#  Job Specification
+#
+[QM]
+reference = Real CUHF
+job       = SCF
+basis     = sto3g.gbs
+ints			= direct
+
+[RPA]
+nstates = 3
+
+#
+#  Misc Settings
+#
+[Misc]
+nsmp = 2

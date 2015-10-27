@@ -1,0 +1,23 @@
+#!/usr/bin/perl 
+#Patrick Lestrange
+
+use strict;
+use warnings;
+use Tie::File;
+
+our (@file);
+
+#Makes new input files based on old serial_incore.inp file
+for(my $i = 0; $i < scalar @ARGV; $i++){
+	my @string = split /_/, $ARGV[$i];
+	$file[$i] = $string[0];
+	print "file = $file[$i]\n";
+	system(`cp $ARGV[$i] $file[$i]_serial_direct.inp `);
+	system(`cp $ARGV[$i] $file[$i]_smp_incore.inp `);
+	system(`cp $ARGV[$i] $file[$i]_smp_direct.inp `); }
+
+system(`sed -i -e 's/incore/direct/g' *direct*.inp`);
+system(`sed -i -e 's/nsmp = 1/nsmp = 2/g' *smp*.inp`);
+system(`sed -i -e 's/serial/smp/g' *smp*.inp`);
+
+
