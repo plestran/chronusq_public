@@ -284,6 +284,28 @@ public:
       }
     }
   } 
+  inline T IABC(int i,int a,int b,int c,std::string spn="AAAA"){
+    if(this->Ref_ == SingleSlater<T>::TCS){
+      return (*this->iabc_)(i,a,b,c);
+    } else {
+      if(this->singleSlater_->isClosedShell){
+//cout << "(" << i << " " << a + this->nOA_ << " | " << j << " " << this->nOA_+b << ") " <<(*this->ijabAABB_)(i,j,a,b) << endl;
+        if(!spn.compare("AAAA") || !spn.compare("BBBB"))
+          return (*this->iabcAAAA_)(i,a,b,c);
+        else if(!spn.compare("AABB"))
+          return (*this->iabcAABB_)(i,a,b,c);
+        else CErr(spn+" is not a recognized spin order for iabc",this->fileio_->out);
+      } else {
+        if(!spn.compare("AAAA"))
+          return (*this->iabcAAAA_)(i,a,b,c);
+        else if(!spn.compare("AABB"))
+          return (*this->iabcAABB_)(i,a,b,c);
+        else if(!spn.compare("BBBB"))
+          return (*this->iabcBBBB_)(i,a,b,c);
+        else CErr(spn+" is not a regocnized spin order for iabc",this->fileio_->out);
+      }
+    }
+  } 
   inline T IJAB(int i,int j,int a,int b,std::string spn="AAAA"){
     if(this->Ref_ == SingleSlater<T>::TCS){
       return (*this->ijab_)(i,j,a,b);
@@ -370,6 +392,29 @@ public:
         else if(!spn.compare("BBBB"))
           return (*this->ijklBBBB_)(i,j,k,l);
         else CErr(spn+" is not a regocnized spin order for ijkl",this->fileio_->out);
+      }
+    }
+  } 
+  inline T IJKA(int i,int j,int k,int a,std::string spn="AAAA"){
+    if(this->Ref_ == SingleSlater<T>::TCS){
+//    cout << "DjM " << this->ijkl_->size() << endl;
+      return (*this->ijka_)(i,j,k,a);
+    } else {
+      if(this->singleSlater_->isClosedShell){
+//cout << "(" << a + this->nOA_ << " " << b + this->nOA_ << " | " << c + this->nOA_ << " " << this->nOA_+d << ") " <<(*this->ijklAABB_)(i,j,k,l) << endl;
+        if(!spn.compare("AAAA") || !spn.compare("BBBB"))
+          return (*this->ijkaAAAA_)(i,j,k,a);
+        else if(!spn.compare("AABB"))
+          return (*this->ijkaAABB_)(i,j,k,a);
+        else CErr(spn+" is not a recognized spin order for ijka",this->fileio_->out);
+      } else {
+        if(!spn.compare("AAAA"))
+          return (*this->ijkaAAAA_)(i,j,k,a);
+        else if(!spn.compare("AABB"))
+          return (*this->ijkaAABB_)(i,j,k,a);
+        else if(!spn.compare("BBBB"))
+          return (*this->ijkaBBBB_)(i,j,k,a);
+        else CErr(spn+" is not a regocnized spin order for ijka",this->fileio_->out);
       }
     }
   } 

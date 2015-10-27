@@ -1122,6 +1122,7 @@ void MOIntegrals<double>::formIABC(bool doDBar){
         new RealTensor4d(this->nOB_,this->nVB_,this->nVB_,this->nVB_));
   }
 
+
   RealTensor4d Iinls , Iials  , Iiabs   ;
   RealTensor4d Siabc ;
   RealTensor4d IinlsA, IialsAA, IiabsAAA;  
@@ -1160,7 +1161,7 @@ void MOIntegrals<double>::formIABC(bool doDBar){
              0.0,Iinls,{i,nu,lm,sg});
  
     // First Half Transformation     (i a | λ κ)
-    contract(1.0,(*this->locMOOcc_),{nu,a},Iinls,{i,nu,lm,sg},0.0,Iials,{i,a,lm,sg});
+    contract(1.0,(*this->locMOVir_),{nu,a},Iinls,{i,nu,lm,sg},0.0,Iials,{i,a,lm,sg});
  
     // Third Quarter Transformation  (i a | b κ)
     contract(1.0,(*this->locMOVir_),{lm,b},Iials,{i,a,lm,sg},0.0,Iiabs,{i,a,b,sg});
@@ -1172,7 +1173,7 @@ void MOIntegrals<double>::formIABC(bool doDBar){
              0.0,IinlsA,{i,nu,lm,sg});
  
     // First Half Transformation Alpha-Alpha          (i a | λ κ) [AA]
-    contract(1.0,(*this->locMOAOcc_),{nu,a},IinlsA,{i,nu,lm,sg},0.0,IialsAA,{i,a,lm,sg});
+    contract(1.0,(*this->locMOAVir_),{nu,a},IinlsA,{i,nu,lm,sg},0.0,IialsAA,{i,a,lm,sg});
  
     // Third Quarter Transformation Alpha-Alpha-Alpha (i a | b κ) [AA|A]
     contract(1.0,(*this->locMOAVir_),{lm,b},IialsAA,{i,a,lm,sg},0.0,IiabsAAA,{i,a,b,sg});
@@ -1187,7 +1188,7 @@ void MOIntegrals<double>::formIABC(bool doDBar){
                0.0,IinlsB,{i,nu,lm,sg});
  
       // First Half Transformation Beta-Beta          (i a | λ κ) [BB]
-      contract(1.0,(*this->locMOBOcc_),{nu,a},IinlsB,{i,nu,lm,sg},0.0,IialsBB,{i,a,lm,sg});
+      contract(1.0,(*this->locMOBVir_),{nu,a},IinlsB,{i,nu,lm,sg},0.0,IialsBB,{i,a,lm,sg});
  
       // Third Quarter Transformation Beta-Beta-Beta    (i a | b κ) [BB|B]
       contract(1.0,(*this->locMOBVir_),{lm,b},IialsBB,{i,a,lm,sg},0.0,IiabsBBB,{i,a,b,sg});
@@ -1263,5 +1264,176 @@ void MOIntegrals<double>::formIABC(bool doDBar){
     }
   }
 
+}
+
+template<>
+void MOIntegrals<double>::formIJKA(bool doDBar){
+  if(this->haveMOijka && (this->ijkaIsDBar == doDBar)) return;
+  else if(this->ijkaIsDBar != doDBar) {
+    if(this->Ref_ == SingleSlater<double>::TCS)
+      this->ijka_.reset();
+    else {
+      this->ijkaAAAA_.reset();
+      this->ijkaAABB_.reset();
+      if(!this->singleSlater_->isClosedShell) 
+        this->ijkaBBBB_.reset();
+    }
+  }
+
+  this->getLocMO();
+
+  if(this->Ref_ == SingleSlater<double>::TCS){
+    this->ijka_ = std::unique_ptr<RealTensor4d>(
+      new RealTensor4d(this->nO_,this->nO_,this->nO_,this->nV_));
+  } else {
+    this->ijkaAAAA_ = std::unique_ptr<RealTensor4d>(
+      new RealTensor4d(this->nOA_,this->nOA_,this->nOA_,this->nVA_));
+    this->ijkaAABB_ = std::unique_ptr<RealTensor4d>(
+      new RealTensor4d(this->nOA_,this->nOA_,this->nOB_,this->nVB_));
+    if(!this->singleSlater_->isClosedShell)
+      this->ijkaBBBB_ = std::unique_ptr<RealTensor4d>(
+        new RealTensor4d(this->nOB_,this->nOB_,this->nOB_,this->nVB_));
+  }
+
+  RealTensor4d Iinls , Iijls  , Iijks   ;
+  RealTensor4d Sijka ;
+  RealTensor4d IinlsA, IijlsAA, IijksAAA;  
+  RealTensor4d IinlsB, IijlsBB, IijksBBB;
+  RealTensor4d IijksAAB, SijkaAAAA, SijkaBBBB;
+  auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
+
+  if(this->Ref_ == SingleSlater<double>::TCS){
+    Iinls = RealTensor4d(this->nO_,NTCSxNBASIS,NTCSxNBASIS,NTCSxNBASIS);
+    Iijls = RealTensor4d(this->nO_,this->nO_,NTCSxNBASIS,NTCSxNBASIS);
+    Iijks = RealTensor4d(this->nO_,this->nO_,this->nO_,NTCSxNBASIS);
+    if(doDBar)
+      Sijka  = RealTensor4d(this->nO_,this->nO_,this->nO_,this->nV_);
+  } else {
+    IinlsA    = RealTensor4d(this->nOA_,this->nBasis_,this->nBasis_,this->nBasis_);
+    IijlsAA   = RealTensor4d(this->nOA_,this->nOA_,this->nBasis_,this->nBasis_);
+    IijksAAA  = RealTensor4d(this->nOA_,this->nOA_,this->nOA_,this->nBasis_);
+    if(!this->singleSlater_->isClosedShell){
+      IinlsB     = RealTensor4d(this->nOB_,this->nBasis_,this->nBasis_,this->nBasis_);
+      IijlsBB    = RealTensor4d(this->nOB_,this->nOB_,this->nBasis_,this->nBasis_);
+      IijksBBB   = RealTensor4d(this->nOB_,this->nOB_,this->nOB_,this->nBasis_);
+      IijksAAB   = RealTensor4d(this->nOA_,this->nOA_,this->nOB_,this->nBasis_);
+      if(doDBar){
+        SijkaAAAA  = RealTensor4d(this->nOA_,this->nOA_,this->nOA_,this->nVA_);
+        SijkaBBBB  = RealTensor4d(this->nOB_,this->nOB_,this->nOB_,this->nVB_);
+      }
+    }
+  }
+
+  enum{mu,nu,lm,sg,i,j,k,a};
+
+  if(this->Ref_ == SingleSlater<double>::TCS){
+
+    // First Quarter Transformation  (a ν | λ κ)
+    contract(1.0,(*this->locMOOcc_),{mu,i},(*this->aointegrals_->aoERI_),{mu,nu,lm,sg},
+             0.0,Iinls,{i,nu,lm,sg});
+ 
+    // First Half Transformation     (a b | λ κ)
+    contract(1.0,(*this->locMOOcc_),{nu,j},Iinls,{i,nu,lm,sg},0.0,Iijls,{i,j,lm,sg});
+ 
+    // Third Quarter Transformation  (a b | c κ)
+    contract(1.0,(*this->locMOOcc_),{lm,k},Iijls,{i,j,lm,sg},0.0,Iijks,{i,j,k,sg});
+
+  } else {
+
+    // First Quarter Transformation Alpha             (a ν | λ κ) [A]
+    contract(1.0,(*this->locMOAOcc_),{mu,i},(*this->aointegrals_->aoERI_),{mu,nu,lm,sg},
+             0.0,IinlsA,{i,nu,lm,sg});
+ 
+    // First Half Transformation Alpha-Alpha          (a b | λ κ) [AA]
+    contract(1.0,(*this->locMOAOcc_),{nu,j},IinlsA,{i,nu,lm,sg},0.0,IijlsAA,{i,j,lm,sg});
+ 
+    // Third Quarter Transformation Alpha-Alpha-Alpha (a b | c κ) [AA|A]
+    contract(1.0,(*this->locMOAOcc_),{lm,k},IijlsAA,{i,j,lm,sg},0.0,IijksAAA,{i,j,k,sg});
+ 
+    /******************************/
+    /* ONLY BUILD IF CLOSED SHELL */
+    /******************************/
+    if(!this->singleSlater_->isClosedShell){
+ 
+      // First Quarter Transformation Beta            (a ν | λ κ) [B]
+      contract(1.0,(*this->locMOBOcc_),{mu,i},(*this->aointegrals_->aoERI_),{mu,nu,lm,sg},
+               0.0,IinlsB,{i,nu,lm,sg});
+ 
+      // First Half Transformation Beta-Beta          (a b | λ κ) [BB]
+      contract(1.0,(*this->locMOBOcc_),{nu,j},IinlsB,{i,nu,lm,sg},0.0,IijlsBB,{i,j,lm,sg});
+ 
+      // Third Quarter Transformation Beta-Beta-Beta    (a b | c κ) [BB|B]
+      contract(1.0,(*this->locMOBOcc_),{lm,k},IijlsBB,{i,j,lm,sg},0.0,IijksBBB,{i,j,k,sg});
+ 
+      // Third Quarter Transformation Alpha-Alpha-Beta  (a b | c κ) [AA|B]
+      contract(1.0,(*this->locMOBOcc_),{lm,k},IijlsAA,{i,j,lm,sg},0.0,IijksAAB,{i,j,k,sg});
+ 
+    }
+  }
+
+  /******************************/
+  /*  IF ONLY DOING SINGLE BAR  */
+  /******************************/
+  if(!doDBar){
+    /*
+     * If only doing single bar integrals, populate the pure spin
+     * storage with the single bar MO integrals
+     */ 
+ 
+    if(this->Ref_ == SingleSlater<double>::TCS){
+      // Last Quarter Transformation (a b | c d) 
+      contract(1.0,(*this->locMOVir_),{sg,a},Iijks,{i,j,k,sg},
+               0.0,(*this->ijka_),{i,j,k,a});
+    } else {
+
+      // Last Quarter Transformation Alpha-Alpha-Alpha-Alpha (a b | c d) [AA|AA]
+      contract(1.0,(*this->locMOAVir_),{sg,a},IijksAAA,{i,j,k,sg},
+               0.0,(*this->ijkaAAAA_),{i,j,k,a});
+     
+      /******************************/
+      /* ONLY BUILD IF CLOSED SHELL */
+      /******************************/
+      // Last Quarter Transformation Beta-Beta-Beta-Beta (a b | c d) [BB|BB]
+      if(!this->singleSlater_->isClosedShell)
+        contract(1.0,(*this->locMOBVir_),{sg,a},IijksBBB,{i,j,k,sg},
+                 0.0,(*this->ijkaBBBB_),{i,j,k,a});
+    }
+
+  /****************************************/
+  /*  IF DOING DOUBLE AND OPEN-SHELL BAR  */
+  /****************************************/
+  } else if(!this->singleSlater_->isClosedShell || this->Ref_ == SingleSlater<double>::TCS) {
+    /*
+     * If doing double bar integrals with an open-shell or two-component reference, 
+     * populate previously allocated intermetiates with the single bar MO integrals
+     */ 
+
+    if(this->Ref_ == SingleSlater<double>::TCS)
+      // Last Quarter Transformation (a b | c d)
+      contract(1.0,(*this->locMOVir_),{sg,a},Iijks,{i,j,k,sg},0.0,Sijka,{i,j,k,a});
+    else {
+      // Last Quarter Transformation Alpha-Alpha-Alpha-Alpha (a b | c d) [AA|AA]
+      contract(1.0,(*this->locMOAVir_),{sg,a},IijksAAA,{i,j,k,sg},0.0,SijkaAAAA,{i,j,k,a});
+      // Last Quarter Transformation Beta-Beta-Beta-Beta (a b | c d) [BB|BB]
+      contract(1.0,(*this->locMOBVir_),{sg,a},IijksBBB,{i,j,k,sg},0.0,SijkaBBBB,{i,j,k,a});
+    }
+  }
+
+  if(this->Ref_ != SingleSlater<double>::TCS){
+    /*
+     * Regardless of whether or not we are doing double-bar integrals, populate
+     * the mixed spin storage with single-bar integrals (for RHF and UHF, the spin
+     * integration removes the exchange term)
+     */ 
+    if(!this->singleSlater_->isClosedShell){
+      // (UHF) Last Quarter Transformation Alpha-Alpha-Beta-Beta (a b | c d) [AA|BB]
+      contract(1.0,(*this->locMOBVir_),{sg,a},IijksAAB,{i,j,k,sg},
+               0.0,(*this->ijkaAABB_),{i,j,k,a});
+    } else {
+      // (RHF) Last Quarter Transformation Alpha-Alpha-Beta-Beta (a b | c d) [AA|BB]
+      contract(1.0,(*this->locMOAVir_),{sg,a},IijksAAA,{i,j,k,sg},
+               0.0,(*this->ijkaAABB_),{i,j,k,a});
+    }
+  }
 }
 }//namespace ChronusQ

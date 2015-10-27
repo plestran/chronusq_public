@@ -173,6 +173,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   // CCSD
   cout << "Doing CCSD" << endl;
   if(!controls->doComplex) {
+    mointegralsReal->iniMOIntegrals(molecule.get(),basisset.get(),fileIO.get(),controls.get(),aointegrals.get(),hartreeFockReal.get());
     auto coupledclusterReal = std::unique_ptr<CoupledCluster>(new CoupledCluster());
     coupledclusterReal->iniCoupledCluster(molecule.get(),basisset.get(), mointegralsReal.get(),fileIO.get(),
                            controls.get(),hartreeFockReal.get());
