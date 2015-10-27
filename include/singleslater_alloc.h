@@ -241,7 +241,7 @@ template<typename T>
 void SingleSlater<T>::allocAlphaDFT(){
   // Alpha / TCS VXC
   try { 
-    this->vXCA_  = std::unique_ptr<TMatrix>(
+    this->vXA_  = std::unique_ptr<TMatrix>(
       new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
     this->vCorA_  = std::unique_ptr<TMatrix>(
       new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
@@ -255,7 +255,7 @@ template<typename T>
 void SingleSlater<T>::allocBetaDFT(){
   // Alpha / TCS VXC
   try { 
-    this->vXCB_  = std::unique_ptr<TMatrix>(
+    this->vXB_  = std::unique_ptr<TMatrix>(
       new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
     this->vCorB_  = std::unique_ptr<TMatrix>(
       new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));

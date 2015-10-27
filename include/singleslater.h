@@ -111,8 +111,8 @@ class SingleSlater {
   std::unique_ptr<RealMatrix>  epsB_;       ///< Beta Fock Eigenenergie
   std::unique_ptr<TMatrix>  PTA_;        ///< Alpha or Full (TCS) Perturbation Tensor
   std::unique_ptr<TMatrix>  PTB_;        ///< Beta Perturbation Tensor
-  std::unique_ptr<TMatrix>  vXCA_;        ///< Alpha or Full (TCS) VXC
-  std::unique_ptr<TMatrix>  vXCB_;        ///< Beta VXC
+  std::unique_ptr<TMatrix>  vXA_;        ///< Alpha or Full (TCS) VX
+  std::unique_ptr<TMatrix>  vXB_;        ///< Beta VXC
   std::unique_ptr<TMatrix>  vCorA_;        ///< Alpha or Full Vcorr
   std::unique_ptr<TMatrix>  vCorB_;        ///< Beta Vcorr
   std::unique_ptr<RealMatrix>  dipole_;  ///< Electric Dipole Moment
@@ -273,10 +273,12 @@ public:
   double   energyTwoE; ///< Two-bodied operator tensors traced with Density
   double   energyNuclei; ///< N-N Repulsion Energy
   double   totalEnergy; ///< Sum of all energetic contributions
-  double   totalEx;    ///< LDA Exchange
-  double   totalEcorr;    ///< Total VWN Energy
+  double   totalEx;     ///< LDA Exchange
+  double   totalEcorr;  ///< Total VWN Energy
   double   eps_corr;    ///< VWN Correlation Energy Density
-  double   mu_corr;    ///<  VWN Correlation Potential
+  double   mu_corr;     ///<  VWN Correlation Potential
+  int      ex_type;     ///< Exchange Energy Density (1 = TFD-LDA)
+  int      cor_type;    ///< Correlation Energy Density (1 VWN3, 2VWN5)
 
   // constructor & destructor
   SingleSlater(){
@@ -307,8 +309,8 @@ public:
     this->epsB_              = nullptr;    
     this->PTA_               = nullptr;        
     this->PTB_               = nullptr;        
-    this->vXCA_              = nullptr;       
-    this->vXCB_              = nullptr;       
+    this->vXA_              = nullptr;       
+    this->vXB_              = nullptr;       
     this->vCorA_              = nullptr;       
     this->vCorB_              = nullptr;       
     this->dipole_            = nullptr;  
@@ -436,8 +438,8 @@ public:
   inline TMatrix* exchangeB(){ return this->exchangeB_.get();};
   inline TMatrix* moA()      { return this->moA_.get();};
   inline TMatrix* moB()      { return this->moB_.get();};
-  inline TMatrix* vXCA()      { return this->vXCA_.get();};
-  inline TMatrix* vXCB()      { return this->vXCB_.get();};
+  inline TMatrix* vXA()      { return this->vXA_.get();};
+  inline TMatrix* vXB()      { return this->vXB_.get();};
   inline TMatrix* vCorA()      { return this->vCorA_.get();};
   inline TMatrix* vCorB()      { return this->vCorB_.get();};
   inline RealMatrix* epsA()     { return this->epsA_.get();};
@@ -463,9 +465,9 @@ public:
   void formExchange();		// form the exchange matrix
   void formPT();
   void formVXC();               // Form DFT VXC Term
-  void formVWNPara(double rho);               // Form DFT Vosko-Wilk-Nusair parametrization for correlarion potential (Paramagnetic)
-  void formVWNFerr(double rho_A, double rho_B);               // Form DFT Vosko-Wilk-Nusair parametrization for correlarion potential (Ferromagnetic) 
-  double spindens(double rho_A,double rho_B);               // Form DFT Vosko-Wilk-Nusair parametrization for correlarion potential (Paramagnetic)
+  void formCor(double rho, double spindensity); // Form DFT correlarion potential 
+  void formEx(double rho); // Form DFT exchange
+  double spindens(double rho_A,double rho_B);  // define f(spindendity)
   double formBeckeW(cartGP gridPt, int iAtm);            // Evaluate Becke Weights
   double normBeckeW(cartGP gridPt);            // Evaluate Becke Weights
   void   buildVxc(cartGP gridPt, double weight);            // function to build the Vxc therm

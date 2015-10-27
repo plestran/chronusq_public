@@ -36,90 +36,71 @@ void SingleSlater<double>::formVXC(){
     int nAng     = 302;                          // Number of Angular grid points for each center (only certain values are allowed - see grid.h)
     int npts     = nRad*nAng;                    // Total Number of grid point for each center
     double weight= 0.0;                            
-    double CxVx = -(std::pow((3.0/math.pi),(1.0/3.0)));    //TF LDA Prefactor
-    double CxEn =  (3.0/4.0);    //TF LDA Prefactor
+    double CxVx = -(std::pow((3.0/math.pi),(1.0/3.0)));    //TF LDA Prefactor (for Vx)
+    double CxEn =  (3.0/4.0);                              //TF LDA Prefactor to finish the X-Energy
     double val = 4.0*math.pi*CxVx;
-    this->totalEx = 0.0;
-    this->totalEcorr = 0.0;
+    this->totalEx = 0.0;                                  // Total Exchange Energy
+    this->totalEcorr = 0.0;                               // Total Correlation Energy
+    this->cor_type = 2;                                  // Define Correlation Type (1 for VWN5 and 2 for VWN3)
 //  Generating grids (Raw grid, it has to be centered and integrated over each center and centered over each atom)
     GaussChebyshev1stGridInf Rad(nRad,0.0,1.0);   // Radial Grid
     LebedevGrid GridLeb(nAng);                    // Angular Grid
-    GridLeb.genGrid();
-//    Rad.genGrid();                               
-//    TwoDGrid Raw3Dg(npts,&Rad,&GridLeb);          // Final Raw (not centered) 3D grid (Radial times Angular grid)
-    this->vXCA()->setZero();                      // Set to zero every occurence of the SCF
-    this->vCorA()->setZero();                      // Set to zero every occurence of the SCF
-    if(!this->isClosedShell && this->Ref_ != TCS) this->vXCB()->setZero();
+    GridLeb.genGrid();                            // Generate Angular Grid (it alwais the same for all atoms)
+    this->vXA()->setZero();                       // Set to zero every occurence of the SCF
+    this->vCorA()->setZero();                     // Set to zero every occurence of the SCF
+    if(!this->isClosedShell && this->Ref_ != TCS) this->vXB()->setZero();
 //  Loop over each centers (Atoms) (I think can be distribuited over different cpus)
     for(int iAtm = 0; iAtm < nAtom; iAtm++){
-//    cout << "Atmoic Radius Slater " << elements[this->molecule_->index(iAtm)].sradius << endl; 
 //    The Radial grid is generated and scaled for each atom
       Rad.genGrid();
-      Rad.scalePts((elements[this->molecule_->index(iAtm)].sradius)) ; 
-      TwoDGrid Raw3Dg(npts,&Rad,&GridLeb);          // Final Raw (not centered) 3D grid (Radial times Angular grid)
+      Rad.scalePts((elements[this->molecule_->index(iAtm)].sradius)) ;  // Scale the grid according the Atomic Bragg-Slater Radius 
+      TwoDGrid Raw3Dg(npts,&Rad,&GridLeb);                              // Final Raw (not centered) 3D grid (Radial times Angular grid)
       //Center the Grid at iAtom
       Raw3Dg.centerGrid((*this->molecule_->cart())(0,iAtm),(*this->molecule_->cart())(1,iAtm),(*this->molecule_->cart())(2,iAtm));
 //    Loop over grid points
       for(int ipts = 0; ipts < npts; ipts++){
-//    Evaluate each Becke fuzzy call weight, normalize it and muliply by the Rwa grid weight at that point
+//    Evaluate each Becke fuzzy call weight, normalize it and muliply by the Raw grid weight at that point
         weight = Raw3Dg.getweightsGrid(ipts)  
                  * (this->formBeckeW((Raw3Dg.gridPtCart(ipts)),iAtm))
                  / (this->normBeckeW(Raw3Dg.gridPtCart(ipts))) ;
-//    Build the Vxc for the ipts grid point (Vxc will be ready at the end of the two loop
+//    Build the Vxc for the ipts grid point (Vxc will be ready at the end of the two loop, to be finalized)
         this->buildVxc((Raw3Dg.gridPtCart(ipts)),weight);
         } //end loop over Raw grid points
     } // end loop natoms
 //  Finishing the Vxc using the TF factor and the integration prefactor over a solid sphere
-    (*this->vXCA()) =  val * (*this->vXCA());
-    this->totalEx   =  val * CxEn * (this->totalEx);
-    (*this->vCorA()) =   4.0*math.pi * (*this->vCorA());
-    this->totalEcorr   = 4.0*math.pi * (this->totalEcorr);
-    if(!this->isClosedShell && this->Ref_ != TCS) (*this->vXCA()) =  std::pow(2.0,(1.0/3.0)) * (*this->vXCA()) ;
-    if(!this->isClosedShell && this->Ref_ != TCS) (*this->vXCB()) =  std::pow(2.0,(1.0/3.0)) * val * (*this->vXCB()) ;
+    (*this->vXA())    =  val * (*this->vXA());
+    this->totalEx     =  val * CxEn * (this->totalEx);
+    (*this->vCorA())  =  4.0 * math.pi * (*this->vCorA());
+    this->totalEcorr  =  4.0 * math.pi * (this->totalEcorr);
+    if(!this->isClosedShell && this->Ref_ != TCS) (*this->vXA()) =  std::pow(2.0,(1.0/3.0)) * (*this->vXA()) ;  // For open shell averything has to be scaled by 2^(1/3)
+    if(!this->isClosedShell && this->Ref_ != TCS) (*this->vXB()) =  std::pow(2.0,(1.0/3.0)) * val * (*this->vXB()) ;
     if(!this->isClosedShell && this->Ref_ != TCS) this->totalEx = std::pow(2.0,(1.0/3.0)) * this->totalEx;
-    prettyPrint(this->fileio_->out,(*this->vXCA()),"LDA Vx alpha");
-//    if(!this->isClosedShell && this->Ref_ != TCS) prettyPrint(this->fileio_->out,(*this->vXCB()),"LDA Vx beta");
-    this->fileio_->out << "Total LDA Ex =" << this->totalEx <<endl;
-    cout.precision(15);
-    cout << "Total LDA Ex =" << this->totalEx << " Total VWN Corr= " << this->totalEcorr <<endl;
-
-//    cout << "TotalEx "  << this->totalEx  <<endl;
-//    cout << "Factor "  << CxVx*CxEn*std::pow(2.0,(1.0/3.0))  <<endl;
-//    cout << "Vx_A" <<endl;
-//    cout << (*this->vXCA()) <<endl;
-//    cout << "Vx_B" <<endl;
-//    cout << (*this->vXCB()) <<endl;
-
-//  Comment to avoid the printing
-/*
-  double Energy;
-  Energy = CxEn*((*this->vXCA_).frobInner(this->densityA_->conjugate()));
-  std::cout.precision(10);
-  cout << " E_XC = " << Energy <<endl;
-  if(!this->isClosedShell && this->Ref_ != TCS) {
-  (*this->vXCB()) =  (*this->vXCA());
-  double EnergyB;
-  EnergyB = CxEn*((*this->vXCB_).frobInner(this->densityB_->conjugate()));
-  std::cout.precision(10);
-  cout << " E_XCiB = " << EnergyB <<endl;
-  cout << " E_Xalpha_beta = " << Energy+EnergyB <<endl;
-  }
-*/
+    prettyPrint(this->fileio_->out,(*this->vXA()),"LDA Vx alpha");
+    prettyPrint(this->fileio_->out,(*this->vCorA()),"Vc Vc alpha");
+    if(!this->isClosedShell && this->Ref_ != TCS) prettyPrint(this->fileio_->out,(*this->vXB()),"LDA Vx beta");
+    this->fileio_->out << "Total LDA Ex =" << this->totalEx << " Total VWN Corr= " << this->totalEcorr <<endl;
 }; //End
 
 template<>
-void SingleSlater<double>::formVWNPara(double rho){
+void SingleSlater<double>::formCor(double rho, double spindensity){
 // Parameter for the fit (according Eq 4.4 Vosko Can. J. Phys. 1980
    double A1  = 0.0621814; // In the text page 1207 (A^P)
    double A  = A1/2.0; // to Hartree
+   double b;
+   double c;
+   double x0;
 //   VWN5
-   double b  = 3.72744;  // Caption Table 5
-   double c  = 12.9352;  // Caption Table 5
-   double x0 = -0.10498; // Caption Table 5
+   if (this->cor_type == 1){
+     b  = 3.72744;  // Caption Table 5
+     c  = 12.9352;  // Caption Table 5
+     x0 = -0.10498; // Caption Table 5
+   }else if(this->cor_type == 2){
 //  VWN3
-//   double b  = 13.0720;  // Caption Table 5
-//   double c  = 42.7198;  // Caption Table 5
-//   double x0 = -0.409286; // Caption Table 5
+     b  = 13.0720;  // into text page 1207
+     c  = 42.7198;  // into text page 1207
+     x0 = -0.409286; // into text page 1207
+   }
+//  Derivatives therms
    double b1 = (b*x0 - c)/(c*x0); 
    double b2 = (x0 - b)/(c*x0); 
    double b3 = (-1.0)/(c*x0); 
@@ -144,9 +125,6 @@ void SingleSlater<double>::formVWNPara(double rho){
 //   cout << " eps "<< this->eps_corr*1000.0 << " mu " << this->mu_corr <<endl;
 };
 
-template<>
-void SingleSlater<double>::formVWNFerr(double rho_A, double rho_B){
-};
 
 template<>
 double SingleSlater<double>::spindens(double rho_A, double rho_B){

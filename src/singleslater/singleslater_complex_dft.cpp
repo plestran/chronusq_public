@@ -36,12 +36,9 @@ void SingleSlater<dcomplex>::formVXC(){
 };
 
 template<>
-void SingleSlater<dcomplex>::formVWNPara(double rho){
+void SingleSlater<dcomplex>::formCor(double rho, double spindensity){
 };
 
-template<>
-void SingleSlater<dcomplex>::formVWNFerr(double rho_A, double rho_B){
-};
 
 template<>
 double SingleSlater<dcomplex>::spindens(double rho_A, double rho_B){
