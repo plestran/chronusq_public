@@ -100,6 +100,13 @@ def runCQ(fname):
   
   jobMeta = MetaData()
   jobMap[jobStr](workers,jobMeta)
+ 
+  print jobMeta.E
+  print jobMeta.scfIters
+  print jobMeta.dipole
+  print jobMeta.quadrupole
+  print jobMeta.octupole
+  
   
   chronusQ.finalizeCQ()
   

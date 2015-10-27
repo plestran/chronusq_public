@@ -63,6 +63,12 @@ def runSCF(workers,meta):
   workers["CQSingleSlater"].computeMultipole()
   workers["CQSingleSlater"].printMultipole()
 
+  meta.E          = workers["CQSingleSlater"].totalEnergy
+  meta.scfIters   = workers["CQSingleSlater"].nSCFIter
+  meta.dipole     = workers["CQSingleSlater"].dipole()
+  meta.quadrupole = workers["CQSingleSlater"].quadrupole()
+  meta.octupole   = workers["CQSingleSlater"].octupole()
+
 def runRT(workers,meta):
   runSCF(workers)
   workers["CQRealTime"].initMeta()
