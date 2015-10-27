@@ -83,4 +83,3 @@ void SingleSlater<T>::mullikenPop() {
     this->mullPop_.push_back(charge); 
   } 
 }
-

@@ -466,6 +466,9 @@ public:
   inline FileIO *      fileio(){return this->fileio_;};
   inline Controls *    controls(){return this->controls_;};
   inline AOIntegrals * aointegrals(){return this->aointegrals_;};
+  
+  inline std::string SCFType(){return this->SCFType_;};
+  inline int         guess(){return this->guess_;};
 
   void formGuess();	        // form the intial guess
   void SADGuess();
@@ -503,6 +506,7 @@ public:
   void printFock();
   void getAlgebraicField();
   void writeSCFFiles();
+  void checkReadReference();
   
   inline void genMethString(){
     if(this->Ref_ == _INVALID) 

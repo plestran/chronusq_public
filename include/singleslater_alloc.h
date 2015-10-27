@@ -75,6 +75,7 @@ void SingleSlater<T>::alloc(){
 //if(this->isPrimary) this->fileio_->iniStdSCFFiles<double>(!this->isClosedShell && this->Ref_ != TCS,this->nTCS_*this->nBasis_);
 //if(this->isPrimary) this->fileio_->iniStdSCFFiles(!this->isClosedShell && this->Ref_ != TCS,this->nTCS_*this->nBasis_);
   if(this->isPrimary) {
+
     if(typeid(T).hash_code() == typeid(double).hash_code())
       this->fileio_->iniStdSCFFilesDouble(!this->isClosedShell && this->Ref_ != TCS,this->nTCS_*this->nBasis_);
     else if(typeid(T).hash_code() == typeid(dcomplex).hash_code())
