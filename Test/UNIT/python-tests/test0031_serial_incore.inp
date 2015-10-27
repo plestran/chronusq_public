@@ -1,0 +1,29 @@
+#  test0031 serial incore Real RHF RPA STO-3G
+#
+#  Molecule Specification
+#
+[Molecule]
+charge = 0
+mult = 1
+geom:
+  O 0   0.000000000 -0.07579184359 0.0
+  H 0   0.866811829  0.6014357793  0.0
+  H 0  -0.866811829  0.6014357793  0.0
+  
+#
+#  Job Specification
+#
+[QM]
+reference = Real RHF
+job       = RPA
+basis     = sto3g.gbs
+ints			= incore
+
+[RPA]
+nstates = 3
+
+#
+#  Misc Settings
+#
+[Misc]
+nsmp = 1
