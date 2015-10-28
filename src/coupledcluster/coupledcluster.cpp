@@ -75,7 +75,7 @@ void CoupledCluster::MollerPlesset(){
     E2 += (0.25)*(this->mointegrals_->IJAB(i,j,a,b))*Aijab1(i,j,a,b);
     }
 
-  cout << "EMP2(corr) = " << E2 << endl;
+  cout << "EMP2(corr) = " << std::setprecision(14) << E2 << endl;
 
 // Now try MP3
   double EMP3   = 0.0;
@@ -146,7 +146,7 @@ void CoupledCluster::MollerPlesset(){
   }  
   EMP3 = EMP3A/8.0 + EMP3B/8.0 + EMP3C; 
 
-  cout << "EMP3(corr) = " << EMP3 << endl;
+  cout << "EMP3(corr) = " << std::setprecision(14) << EMP3 << endl;
 
 
 }
