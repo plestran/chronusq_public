@@ -1,24 +1,25 @@
-#  test0063 serial incore Real CUHF CIS cc-pVDZ 
+#  test0060 serial incore Real CUHF cc-pVDZ w/ field
 #
 #  Molecule Specification
 #
 [Molecule]
 charge = 0
-mult = 2
+mult = 3
 geom:
-	Li 0   0.000000 0.000000 0.000000
+	O 0   0.000000    0.000000    0.608586
+	O 0   0.000000    0.000000    -0.608586
   
 #
 #  Job Specification
 #
 [QM]
 reference = Real CUHF
-job       = CIS
+job       = SCF
 basis     = cc-pVDZ.gbs
 ints			= incore
 
-[CIS]
-nstates		= 6
+[SCF]
+field 		= 0.01 0.0 0.0
 
 #
 #  Misc Settings

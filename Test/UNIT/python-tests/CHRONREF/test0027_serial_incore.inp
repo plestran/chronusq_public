@@ -18,7 +18,7 @@ basis     = cc-pVDZ.gbs
 ints			= incore
 
 [CIS]
-nstates = 3
+nstates = 6
 
 #
 #  Misc Settings

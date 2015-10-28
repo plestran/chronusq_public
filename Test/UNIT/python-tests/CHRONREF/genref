@@ -26,7 +26,6 @@ for(my $i = 0; $i < scalar @ARGV; $i++){
 			elsif ($_ =~ /rt/i){$jobtype = "RT";}
 			else {$jobtype = "RESP"; } } }
 	close IN;
-	print "jobtype = $jobtype\n";
 
 	tie @lines, 'Tie::File', $ARGV[$i] or die;
 	for (my $j = 0; $j <= $#lines; $j++){
@@ -63,7 +62,23 @@ for(my $i = 0; $i < scalar @ARGV; $i++){
 				@string = split(/ +/,$lines[$j+9]);
 				$testline = "$testline/$string[5]"; }
 
-			}
+			} # SCF job
+
+		elsif ($jobtype eq "RESP") {
+
+			if ($lines[$j] =~ /Excited State/) {
+				@string = split(/ +/,$lines[$j+1]);
+				$testline = "$testline/$string[7]";
+				@string = split(/ +/,$lines[$j+2]);
+				$testline = "$testline/$string[3]"; }
+
+			} # RESP job
+
+		elsif ($jobtype eq "RT") {
+
+			print "RT job analysis NYI\n";
+
+			} # RT job
 
 		} #end loop over j
 	untie @lines;
