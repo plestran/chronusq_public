@@ -18,7 +18,7 @@ basis     = sto3g.gbs
 ints			= incore
 
 [RPA]
-nstates = 5
+nstates = 3
 
 #
 #  Misc Settings

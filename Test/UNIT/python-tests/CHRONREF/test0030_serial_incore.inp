@@ -1,4 +1,4 @@
-#  test0030 serial incore Real UHF CIS cc-pVDZ
+#  test0030 serial incore Real UHF CIS def2-SVPD
 #
 #  Molecule Specification
 #
@@ -15,11 +15,11 @@ geom:
 [QM]
 reference = Real UHF
 job       = CIS
-basis     = cc-pVDZ.gbs
+basis     = def2-svpd.gbs
 ints			= incore
 
 [CIS]
-nstates = 3
+nstates = 20
 
 #
 #  Misc Settings

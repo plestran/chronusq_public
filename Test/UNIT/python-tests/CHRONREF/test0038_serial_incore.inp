@@ -18,7 +18,7 @@ basis     = 6-31G.gbs
 ints			= incore
 
 [RPA]
-nstates = 6
+nstates = 3
 
 #
 #  Misc Settings

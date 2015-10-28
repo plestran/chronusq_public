@@ -1,4 +1,4 @@
-#  test0029 serial incore Real UHF CIS 6-31G
+#  test0029 serial incore Real UHF CIS cc-pVDZ
 #
 #  Molecule Specification
 #
@@ -15,11 +15,11 @@ geom:
 [QM]
 reference = Real UHF
 job       = CIS
-basis     = 6-31G.gbs
+basis     = cc-pVDZ.gbs
 ints			= incore
 
 [CIS]
-nstates = 3
+nstates = 12
 
 #
 #  Misc Settings

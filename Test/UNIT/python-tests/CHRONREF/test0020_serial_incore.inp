@@ -20,7 +20,7 @@ basis     = 6-31G.gbs
 ints			= incore
 
 [CIS]
-nstates = 12
+nstates = 5
 
 #
 #  Misc Settings
