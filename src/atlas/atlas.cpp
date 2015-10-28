@@ -178,7 +178,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
     coupledclusterReal->iniCoupledCluster(molecule.get(),basisset.get(), mointegralsReal.get(),fileIO.get(),
                            controls.get(),hartreeFockReal.get());
     coupledclusterReal->MollerPlesset();
-    //coupledclusterReal->CCSD();
+    coupledclusterReal->CCSD();
   }
   //
 
