@@ -264,7 +264,10 @@ void SingleSlater<T>::printSCFHeader(ostream &output){
   if(this->isDFT){
     output << std::setw(38) << std::left << "  Density Functional:";
 
-    output << "User Defined";
+    if(this->DFTKernel_ == USERDEFINED)
+      output << "User Defined";
+    else if(this->DFTKernel_ == LSDA)
+      output << "LSDA";
 
     output << endl;
 

@@ -30,6 +30,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setGuess"        , &SingleSlater<double>::setGuess               )
     .def("setCorrKernel"   , &SingleSlater<double>::setCorrKernel          )
     .def("setExchKernel"   , &SingleSlater<double>::setExchKernel          )
+    .def("setDFTKernel"    , &SingleSlater<double>::setDFTKernel           )
 
     .def("dipole"          , &SingleSlater<double>::Wrapper_dipole         )
     .def("quadrupole"      , &SingleSlater<double>::Wrapper_quadrupole     )
@@ -73,6 +74,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setGuess"        , &SingleSlater<dcomplex>::setGuess               )
     .def("setCorrKernel"   , &SingleSlater<dcomplex>::setCorrKernel          )
     .def("setExchKernel"   , &SingleSlater<dcomplex>::setExchKernel          )
+    .def("setDFTKernel"    , &SingleSlater<dcomplex>::setDFTKernel           )
 
     .def("dipole"          , &SingleSlater<dcomplex>::Wrapper_dipole         )
     .def("quadrupole"      , &SingleSlater<dcomplex>::Wrapper_quadrupole     )
@@ -116,6 +118,11 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("NOCORR", SingleSlater<double>::NOCORR) 
     .value("VWN3"  , SingleSlater<double>::VWN3  )
     .value("VWN5"  , SingleSlater<double>::VWN5  )
+  ;
+  enum_<SingleSlater<double>::DFT>("DFT")
+    .value("NODFT"      , SingleSlater<double>::NODFT      )
+    .value("USERDEFINED", SingleSlater<double>::USERDEFINED)
+    .value("LSDA"       , SingleSlater<double>::LSDA       )
   ;
 
   class_<Molecule,boost::noncopyable>("Molecule",init<>())

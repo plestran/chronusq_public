@@ -40,6 +40,7 @@ template<typename T>
 class SingleSlater {
   typedef Eigen::Matrix<T,Dynamic,Dynamic,RowMajor> TMatrix;
 
+/*
   struct MetaData_ {
     int nBasis;      ///< Number of basis functions (inherited from BasisSet)
     int nShell;      ///< Number of basis shells (inherited from BasisSet)
@@ -81,6 +82,7 @@ class SingleSlater {
     Controls    * controls;    ///< General ChronusQ flow parameters
     AOIntegrals * aointegrals; ///< Molecular Integrals over GTOs (AO basis)
   };
+*/
 
   int      nBasis_;
   int      nShell_;
@@ -90,6 +92,7 @@ class SingleSlater {
   int      Ref_;
   int      CorrKernel_;
   int      ExchKernel_;
+  int      DFTKernel_;
   int      nOccA_;
   int      nOccB_;
   int      nVirA_;
@@ -272,8 +275,9 @@ public:
   }; // Supported Guess Types
 
   enum DFT {
+    NODFT,
     USERDEFINED,
-    LDA
+    LSDA
   };
 
   enum CORR {
@@ -373,6 +377,7 @@ public:
     this->Ref_         = _INVALID;
     this->CorrKernel_  = NOCORR;
     this->ExchKernel_  = NOEXCH;
+    this->DFTKernel_   = NODFT;
     this->denTol_      = 1e-10;
     this->eneTol_      = 1e-12;
     this->maxSCFIter_  = 256;
@@ -458,6 +463,7 @@ public:
   inline void isNotPrimary(){this->isPrimary = false;};
   inline void setCorrKernel(int i){this->CorrKernel_ = i;};
   inline void setExchKernel(int i){this->ExchKernel_ = i;};
+  inline void setDFTKernel( int i){this->DFTKernel_  = i;};
 
   // access to private data
   inline int nBasis() { return this->nBasis_;};
@@ -476,6 +482,7 @@ public:
   inline int nOVB()    { return nOccB_*nVirB_;};
   inline int CorrKernel(){return this->CorrKernel_;};
   inline int ExchKernel(){return this->ExchKernel_;};
+  inline int DFTKernel(){ return this->DFTKernel_ ;};
   inline int printLevel(){ return this->printLevel_;};
   inline std::vector<double> mullPop(){ return this->mullPop_;};
   inline std::array<double,3> elecField(){ return this->elecField_;  };
@@ -569,7 +576,12 @@ public:
       generalRefShort  = "HF";
     } else if(this->isDFT) {
       generalReference = "Kohn-Sham";
-      generalRefShort  = "KS";
+      if(this->DFTKernel_ == USERDEFINED)
+        generalRefShort  = "KS";
+      else if(this->DFTKernel_ == LSDA) {
+        generalReference += " (LSDA)";
+        generalRefShort  = "LSDA";
+      }
     }
 
     if(this->Ref_ == RHF) {
