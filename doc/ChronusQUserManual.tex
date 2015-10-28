@@ -251,7 +251,13 @@
 	If for some reason \LAPACK~and \BLAS~cannot be installed in this manner 
 	(i.e. no root access), we have included an automatic build of these packages
 	through our configuration procedure. Please see Section 
-	\ref{subsec:ChronusQConfigCompile}. for details.
+	\ref{subsec:ChronusQConfigCompile}. for details.\\
+	\\
+	\textbf{IMPORTANT:} While it is encouraged to attempt to link to optimized
+	\LAPACK~and \BLAS~libraries, the developers have experienced many issues 
+	when linking to Intel MKL libraries. Please link to the traditional
+	\LAPACK~and \BLAS~libraries or \texttt{ATLAS} optimized libraries when
+	configuring ChronusQ.
 
     \end{itemize}
 
