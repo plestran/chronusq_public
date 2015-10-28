@@ -71,7 +71,8 @@ knownKeywords['SCF'] = {
   'SCFMAXITER':CQKeyword('SCFMAXITER','I'    ,False),
   'FIELD'     :CQKeyword('FIELD'     ,'D3'   ,False),
   'GUESS'     :CQKeyword('GUESS'     ,'O-GS' ,False),
-  'DIIS'      :CQKeyword('DIIS'      ,'B'    ,False)
+  'DIIS'      :CQKeyword('DIIS'      ,'B'    ,False),
+  'PRINT'     :CQKeyword('PRINT'     ,'I'    ,False)
 }
 
 knownKeywords['CIS'] = {

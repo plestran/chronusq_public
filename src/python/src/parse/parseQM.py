@@ -414,7 +414,8 @@ def parseSCF(workers,scfSettings):
     'SCFENETOL' :workers['CQSingleSlater'].setSCFEneTol,
     'SCFMAXITER':workers['CQSingleSlater'].setSCFMaxIter,
     'FIELD'     :workers['CQSingleSlater'].setField,
-    'GUESS'     :workers['CQSingleSlater'].setGuess 
+    'GUESS'     :workers['CQSingleSlater'].setGuess ,
+    'PRINT'     :workers['CQSingleSlater'].setPrintLevel
   }
   # Loop over optional keywords, set options accordingly
   # note that because these are optional, if the keyword

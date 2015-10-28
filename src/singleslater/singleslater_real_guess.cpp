@@ -188,10 +188,39 @@ void SingleSlater<double>::SADGuess() {
       // Initialize the local integral and SS classes
       aointegralsAtom.isPrimary = false;
       hartreeFockAtom.isNotPrimary();
-      aointegralsAtom.iniAOIntegrals(&uniqueAtom,&basisSetAtom,this->fileio_,&controlAtom,
-        &dfBasisSetAtom);
-      hartreeFockAtom.iniSingleSlater(&uniqueAtom,&basisSetAtom,&aointegralsAtom,
-        this->fileio_,&controlAtom);
+    //aointegralsAtom.iniAOIntegrals(&uniqueAtom,&basisSetAtom,this->fileio_,&controlAtom,
+    //  &dfBasisSetAtom);
+    //hartreeFockAtom.iniSingleSlater(&uniqueAtom,&basisSetAtom,&aointegralsAtom,
+    //  this->fileio_,&controlAtom);
+      
+      // Replaces iniAOIntegrals
+      aointegralsAtom.communicate(uniqueAtom,basisSetAtom,*this->fileio_,
+        controlAtom);
+      aointegralsAtom.initMeta();
+      aointegralsAtom.integralAlgorithm = this->aointegrals_->integralAlgorithm;
+      aointegralsAtom.alloc();
+
+      // Replaces iniSingleSlater
+      hartreeFockAtom.communicate(uniqueAtom,basisSetAtom,aointegralsAtom,
+        *this->fileio_,controlAtom);
+      hartreeFockAtom.initMeta();
+      hartreeFockAtom.setField(this->elecField_);
+      hartreeFockAtom.isClosedShell = (hartreeFockAtom.multip() == 1); 
+      hartreeFockAtom.doDIIS = false;
+/*
+      hartreeFockAtom.isDFT = this->isDFT;
+      hartreeFockAtom.isHF  = this->isHF;
+      hartreeFockAtom.setExchKernel(this->ExchKernel_);
+      hartreeFockAtom.setCorrKernel(this->CorrKernel_);
+      hartreeFockAtom.setDFTKernel(this->DFTKernel_);
+*/
+      hartreeFockAtom.isDFT = false;
+      hartreeFockAtom.isHF  = true;
+
+      hartreeFockAtom.setRef(CUHF);
+      hartreeFockAtom.genMethString();
+      hartreeFockAtom.alloc();
+
       if(this->printLevel_ < 4) hartreeFockAtom.setPrintLevel(0);
  
       // Zero out the MO coeff for local SS object
