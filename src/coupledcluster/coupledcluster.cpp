@@ -53,6 +53,107 @@ void CoupledCluster::iniCoupledCluster( Molecule * molecule, BasisSet * basisSet
   this->mointegrals_->formDBar();
 }
 
+void CoupledCluster::MollerPlesset(){
+
+  double E2    = 0.0;
+  double Denom = 1.0;
+
+// First, calculate MP2 energy and MP1 coefficient
+
+  RealTensor4d Aijab1;
+  Aijab1 = RealTensor4d(this->nO_,this->nO_,this->nV_,this->nV_);
+
+  for(auto i = 0; i < this->nO_; i++) 
+  for(auto j = 0; j < this->nO_; j++) 
+  for(auto a = 0; a < this->nV_; a++) 
+  for(auto b = 0; b < this->nV_; b++) { 
+    Denom = (*this->singleSlater_->epsA())(a + this->nO_)
+             + (*this->singleSlater_->epsA())(b + this->nO_)
+             - (*this->singleSlater_->epsA())(i)
+             - (*this->singleSlater_->epsA())(j);
+    Aijab1(i,j,a,b) = -(this->mointegrals_->IJAB(i,j,a,b))/Denom;
+    E2 += (0.25)*(this->mointegrals_->IJAB(i,j,a,b))*Aijab1(i,j,a,b);
+    }
+
+  cout << "EMP2(corr) = " << E2 << endl;
+
+// Now try MP3
+  double EMP3   = 0.0;
+  double EMP3A  = 0.0;
+  double EMP3B  = 0.0;
+  double EMP3C  = 0.0;
+  double Denom1 = 1.0;
+  double Denom2 = 1.0;
+
+  for(auto i = 0; i < this->nO_; i++) 
+  for(auto j = 0; j < this->nO_; j++) 
+  for(auto a = 0; a < this->nV_; a++) 
+  for(auto b = 0; b < this->nV_; b++)  
+  for(auto c = 0; c < this->nV_; c++)  
+  for(auto d = 0; d < this->nV_; d++) {
+    Denom1 =   (*this->singleSlater_->epsA())(a + this->nO_)
+             + (*this->singleSlater_->epsA())(b + this->nO_)
+             - (*this->singleSlater_->epsA())(i)
+             - (*this->singleSlater_->epsA())(j);
+    Denom2 =   (*this->singleSlater_->epsA())(c + this->nO_)
+             + (*this->singleSlater_->epsA())(d + this->nO_)
+             - (*this->singleSlater_->epsA())(i)
+             - (*this->singleSlater_->epsA())(j);
+    EMP3A += (this->mointegrals_->IJAB(i,j,a,b))*
+             (this->mointegrals_->IJAB(i,j,c,d))*
+             (this->mointegrals_->ABCD(a,b,c,d))/
+             (Denom1*Denom2);
+  }  
+
+  for(auto i = 0; i < this->nO_; i++) 
+  for(auto j = 0; j < this->nO_; j++) 
+  for(auto a = 0; a < this->nV_; a++) 
+  for(auto b = 0; b < this->nV_; b++)  
+  for(auto k = 0; k < this->nO_; k++)  
+  for(auto l = 0; l < this->nO_; l++) {
+    Denom1 =   (*this->singleSlater_->epsA())(a + this->nO_)
+             + (*this->singleSlater_->epsA())(b + this->nO_)
+             - (*this->singleSlater_->epsA())(i)
+             - (*this->singleSlater_->epsA())(j);
+    Denom2 =   (*this->singleSlater_->epsA())(a + this->nO_)
+             + (*this->singleSlater_->epsA())(b + this->nO_)
+             - (*this->singleSlater_->epsA())(k)
+             - (*this->singleSlater_->epsA())(l);
+    EMP3B += (this->mointegrals_->IJAB(i,j,a,b))*
+             (this->mointegrals_->IJAB(k,l,a,b))*
+             (this->mointegrals_->IJKL(k,l,i,j))/
+             (Denom1*Denom2);
+  }  
+
+  for(auto i = 0; i < this->nO_; i++) 
+  for(auto j = 0; j < this->nO_; j++) 
+  for(auto a = 0; a < this->nV_; a++) 
+  for(auto b = 0; b < this->nV_; b++)  
+  for(auto k = 0; k < this->nO_; k++)  
+  for(auto c = 0; c < this->nV_; c++) {
+    Denom1 =   (*this->singleSlater_->epsA())(a + this->nO_)
+             + (*this->singleSlater_->epsA())(b + this->nO_)
+             - (*this->singleSlater_->epsA())(i)
+             - (*this->singleSlater_->epsA())(j);
+    Denom2 =   (*this->singleSlater_->epsA())(c + this->nO_)
+             + (*this->singleSlater_->epsA())(b + this->nO_)
+             - (*this->singleSlater_->epsA())(k)
+             - (*this->singleSlater_->epsA())(j);
+    EMP3C -= (this->mointegrals_->IJAB(i,j,a,b))*
+             (this->mointegrals_->IJAB(k,j,c,b))*
+             (this->mointegrals_->IAJB(k,a,i,c))/
+             (Denom1*Denom2);
+  }  
+  EMP3 = EMP3A/8.0 + EMP3B/8.0 + EMP3C; 
+
+  cout << "EMP3(corr) = " << EMP3 << endl;
+
+
+}
+
+
+
+
 double CoupledCluster::CCSD(){
   double ECorr = 0.0;
   double ECCSD = 0.0;
@@ -179,7 +280,7 @@ double CoupledCluster::CCSD(){
    }
 
    // Done with one time intermediates, begin iterations
-   for(auto niter = 0; niter < 40; niter++) {
+   for(auto niter = 0; niter < 10; niter++) {
      // Hab
      for(auto b = 0; b < this->nV_; b++)
      for(auto a = 0; a < this->nV_; a++)

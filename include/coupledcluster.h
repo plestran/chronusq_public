@@ -57,6 +57,7 @@ namespace ChronusQ {
     CoupledCluster(){;};
     ~CoupledCluster(){;};
     void iniCoupledCluster(Molecule *,BasisSet *,MOIntegrals<double> *,FileIO *,Controls *, SingleSlater<double> *);
+    void MollerPlesset();
     double CCSD();
   };
 }
