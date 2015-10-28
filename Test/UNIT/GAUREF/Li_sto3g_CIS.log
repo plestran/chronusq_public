@@ -2,10 +2,10 @@
  Input=Li_sto3g_CIS.com
  Output=Li_sto3g_CIS.log
  Initial command:
- /home/gauss/gdvi01p/gdv/l1.exe "/home/GauScr/Gau-16987.inp" -scrdir="/home/GauScr/"
- Entering Link 1 = /home/gauss/gdvi01p/gdv/l1.exe PID=     16988.
+ /home/gauss/gdvi03p/gdv/l1.exe "/home/GauScr/Gau-20602.inp" -scrdir="/home/GauScr/"
+ Entering Link 1 = /home/gauss/gdvi03p/gdv/l1.exe PID=     20603.
   
- Copyright (c) 1988,1990,1992,1993,1995,1998,2003,2009,2014,
+ Copyright (c) 1988,1990,1992,1993,1995,1998,2003,2009,2015,
             Gaussian, Inc.  All Rights Reserved.
   
  This is the private, development version of
@@ -58,43 +58,44 @@
   
 
  Cite this work as:
- Gaussian Development Version, Revision I.01+,
+ Gaussian Development Version, Revision I.03+,
  M. J. Frisch, G. W. Trucks, H. B. Schlegel, G. E. Scuseria, 
  M. A. Robb, J. R. Cheeseman, G. Scalmani, V. Barone, B. Mennucci, 
  G. A. Petersson, H. Nakatsuji, M. Caricato, X. Li, H. P. Hratchian, 
- A. F. Izmaylov, J. Bloino, B. G. Janesko, F. Lipparini, G. Zheng, 
- J. L. Sonnenberg, W. Liang, M. Hada, M. Ehara, K. Toyota, R. Fukuda, 
- J. Hasegawa, M. Ishida, T. Nakajima, Y. Honda, O. Kitao, H. Nakai, 
- T. Vreven, J. A. Montgomery, Jr., J. E. Peralta, F. Ogliaro, 
- M. Bearpark, J. J. Heyd, E. Brothers, K. N. Kudin, V. N. Staroverov, 
- T. Keith, R. Kobayashi, J. Normand, K. Raghavachari, A. Rendell, 
- J. C. Burant, S. S. Iyengar, J. Tomasi, M. Cossi, N. Rega, 
- J. M. Millam, M. Klene, J. E. Knox, J. B. Cross, V. Bakken, 
- C. Adamo, J. Jaramillo, R. Gomperts, R. E. Stratmann, O. Yazyev, 
- A. J. Austin, R. Cammi, C. Pomelli, J. W. Ochterski, R. L. Martin, 
- K. Morokuma, V. G. Zakrzewski, G. A. Voth, P. Salvador, 
- J. J. Dannenberg, S. Dapprich, P. V. Parandekar, N. J. Mayhall, 
- A. D. Daniels, O. Farkas, J. B. Foresman, J. V. Ortiz, 
- J. Cioslowski, and D. J. Fox, Gaussian, Inc., Wallingford CT, 2010.
+ J. Bloino, B. G. Janesko, A. F. Izmaylov, A. Marenich, F. Lipparini, 
+ G. Zheng, J. L. Sonnenberg, W. Liang, M. Hada, M. Ehara, K. Toyota, 
+ R. Fukuda, J. Hasegawa, M. Ishida, T. Nakajima, Y. Honda, O. Kitao, 
+ H. Nakai, T. Vreven, K. Throssell, J. A. Montgomery, Jr., 
+ J. E. Peralta, F. Ogliaro, M. Bearpark, J. J. Heyd, E. Brothers, 
+ K. N. Kudin, V. N. Staroverov, T. Keith, R. Kobayashi, J. Normand, 
+ K. Raghavachari, A. Rendell, J. C. Burant, S. S. Iyengar, J. Tomasi, 
+ M. Cossi, N. Rega, J. M. Millam, M. Klene, J. E. Knox, J. B. Cross, 
+ V. Bakken, C. Adamo, J. Jaramillo, R. Gomperts, R. E. Stratmann, 
+ O. Yazyev, A. J. Austin, R. Cammi, C. Pomelli, J. W. Ochterski, 
+ R. L. Martin, K. Morokuma, V. G. Zakrzewski, G. A. Voth, 
+ P. Salvador, J. J. Dannenberg, S. Dapprich, P. V. Parandekar, 
+ N. J. Mayhall, A. D. Daniels, O. Farkas, J. B. Foresman, 
+ J. V. Ortiz, J. Cioslowski, and D. J. Fox, 
+ Gaussian, Inc., Wallingford CT, 2014.
  
  *******************************************
- Gaussian DV:  ES64L-GDVRevI.01+ 11-Sep-2014
-                 22-Sep-2015 
+ Gaussian DV:  ES64L-GDVRevI.03+  2-May-2015
+                 28-Oct-2015 
  *******************************************
- -----------------------------------------------
- #p uhf/sto-3g nosymm cis(full,nstates=12,50-50)
- -----------------------------------------------
+ -----------------------------------------
+ #p uhf/sto-3g nosymm cis(full,nstates=12)
+ -----------------------------------------
  1/38=1,172=1/1;
  2/12=2,15=1,17=6,18=5,40=1/2;
- 3/6=3,11=2,25=1,30=1,116=2/1,2,8,3;
+ 3/6=3,11=2,25=1,30=1,116=2/1,2,3,8;
  4//1;
  5/5=2,38=5/2;
  8/6=1,10=90,108=12/1,4;
- 9/41=12,42=3,48=2/14;
+ 9/41=12,42=3/14;
  6/7=2,8=2,9=2,10=2/1;
  99/5=1,9=1/99;
- Leave Link    1 at Tue Sep 22 14:54:34 2015, MaxMem=           0 cpu:               0.0 elap:               0.0
- (Enter /home/gauss/gdvi01p/gdv/l101.exe)
+ Leave Link    1 at Wed Oct 28 10:10:26 2015, MaxMem=           0 cpu:               0.0 elap:               0.0
+ (Enter /home/gauss/gdvi03p/gdv/l101.exe)
  ---------
  Li STO-3G
  ---------
@@ -118,8 +119,8 @@
  NQMom=   -4.0100000
  NMagM=    3.2564240
  AtZNuc=   3.0000000
- Leave Link  101 at Tue Sep 22 14:54:35 2015, MaxMem=    33554432 cpu:               0.1 elap:               0.1
- (Enter /home/gauss/gdvi01p/gdv/l202.exe)
+ Leave Link  101 at Wed Oct 28 10:10:26 2015, MaxMem=    33554432 cpu:               0.1 elap:               0.1
+ (Enter /home/gauss/gdvi03p/gdv/l202.exe)
                           Input orientation:                          
  ---------------------------------------------------------------------
  Center     Atomic      Atomic             Coordinates (Angstroms)
@@ -132,8 +133,8 @@
  Framework group  OH[O(Li)]
  Deg. of freedom     0
  Full point group                 OH      NOp  48
- Leave Link  202 at Tue Sep 22 14:54:35 2015, MaxMem=    33554432 cpu:               0.0 elap:               0.0
- (Enter /home/gauss/gdvi01p/gdv/l301.exe)
+ Leave Link  202 at Wed Oct 28 10:10:26 2015, MaxMem=    33554432 cpu:               0.0 elap:               0.0
+ (Enter /home/gauss/gdvi03p/gdv/l301.exe)
  Standard basis: STO-3G (5D, 7F)
  Ernie: Thresh=  0.10000D-02 Tol=  0.10000D-05 Strict=F.
      5 basis functions,    15 primitive gaussians,     5 cartesian basis functions
@@ -146,21 +147,21 @@
  Integral buffers will be    131072 words long.
  Raffenetti 2 integral format.
  Two-electron integral symmetry is turned off.
- Leave Link  301 at Tue Sep 22 14:54:35 2015, MaxMem=    33554432 cpu:               0.0 elap:               0.1
- (Enter /home/gauss/gdvi01p/gdv/l302.exe)
+ Leave Link  301 at Wed Oct 28 10:10:26 2015, MaxMem=    33554432 cpu:               0.0 elap:               0.0
+ (Enter /home/gauss/gdvi03p/gdv/l302.exe)
  NPDir=0 NMtPBC=     1 NCelOv=     1 NCel=       1 NClECP=     1 NCelD=      1
          NCelK=      1 NCelE2=     1 NClLst=     1 CellRange=     0.0.
  One-electron integrals computed using PRISM.
  One-electron integral symmetry used in STVInt
  NBasis=     5 RedAO= T EigKep=  7.59D-01  NBF=     5
  NBsUse=     5 1.00D-06 EigRej= -1.00D+00 NBFU=     5
- Leave Link  302 at Tue Sep 22 14:54:35 2015, MaxMem=    33554432 cpu:               0.1 elap:               0.1
- (Enter /home/gauss/gdvi01p/gdv/l308.exe)
- Leave Link  308 at Tue Sep 22 14:54:35 2015, MaxMem=    33554432 cpu:               0.0 elap:               0.0
- (Enter /home/gauss/gdvi01p/gdv/l303.exe)
+ Leave Link  302 at Wed Oct 28 10:10:26 2015, MaxMem=    33554432 cpu:               0.1 elap:               0.1
+ (Enter /home/gauss/gdvi03p/gdv/l303.exe)
  DipDrv:  MaxL=1.
- Leave Link  303 at Tue Sep 22 14:54:35 2015, MaxMem=    33554432 cpu:               0.0 elap:               0.0
- (Enter /home/gauss/gdvi01p/gdv/l401.exe)
+ Leave Link  303 at Wed Oct 28 10:10:26 2015, MaxMem=    33554432 cpu:               0.0 elap:               0.0
+ (Enter /home/gauss/gdvi03p/gdv/l308.exe)
+ Leave Link  308 at Wed Oct 28 10:10:26 2015, MaxMem=    33554432 cpu:               0.0 elap:               0.0
+ (Enter /home/gauss/gdvi03p/gdv/l401.exe)
  ExpMin= 4.81D-02 ExpMax= 1.61D+01 ExpMxC= 1.61D+01 IAcc=2 IRadAn=         4 AccDes= 0.00D+00
  Harris functional with IExCor=  205 and IRadAn=       4 diagonalized for initial guess.
  HarFok:  IExCor=  205 AccDes= 0.00D+00 IRadAn=         4 IDoV= 1 UseB2=F ITyADJ=14
@@ -173,8 +174,8 @@
  Harris En= -7.26465469888667    
  JPrj=0 DoOrth=F DoCkMO=F.
  Initial guess <Sx>= 0.0000 <Sy>= 0.0000 <Sz>= 0.5000 <S**2>= 0.7500 S= 0.5000
- Leave Link  401 at Tue Sep 22 14:54:35 2015, MaxMem=    33554432 cpu:               0.1 elap:               0.1
- (Enter /home/gauss/gdvi01p/gdv/l502.exe)
+ Leave Link  401 at Wed Oct 28 10:10:27 2015, MaxMem=    33554432 cpu:               0.1 elap:               0.1
+ (Enter /home/gauss/gdvi03p/gdv/l502.exe)
  Keep R1 and R2 ints in memory in canonical form, NReq=801487.
  FoFCou: FMM=F IPFlag=           0 FMFlag=           0 FMFlg1=           0
          NFxFlg=           0 DoJE=F BraDBF=F KetDBF=F FulRan=T
@@ -266,15 +267,15 @@
  KE= 7.429424133898D+00 PE=-1.717332251576D+01 EE= 2.428372376303D+00
  Annihilation of the first spin contaminant:
  S**2 before annihilation     0.7500,   after     0.7500
- Leave Link  502 at Tue Sep 22 14:54:35 2015, MaxMem=    33554432 cpu:               0.1 elap:               0.1
- (Enter /home/gauss/gdvi01p/gdv/l801.exe)
+ Leave Link  502 at Wed Oct 28 10:10:27 2015, MaxMem=    33554432 cpu:               0.1 elap:               0.1
+ (Enter /home/gauss/gdvi03p/gdv/l801.exe)
  Range of M.O.s used for correlation:     1     5
  NBasis=     5 NAE=     2 NBE=     1 NFC=     0 NFV=     0
  NROrb=      5 NOA=     2 NOB=     1 NVA=     3 NVB=     4
- Leave Link  801 at Tue Sep 22 14:54:35 2015, MaxMem=    33554432 cpu:               0.0 elap:               0.0
- (Enter /home/gauss/gdvi01p/gdv/l804.exe)
+ Leave Link  801 at Wed Oct 28 10:10:27 2015, MaxMem=    33554432 cpu:               0.0 elap:               0.0
+ (Enter /home/gauss/gdvi03p/gdv/l804.exe)
  Open-shell transformation, MDV=    33554432 ITran=3 ISComp=1.
- Unit  1 TFree=          3096 TCopy=        146349.
+ Unit  1 TFree=          3096 TCopy=        166353.
  Semi-Direct transformation.
  ModeAB=           2 MOrb=             2 LenV=      33436253
  LASXX=           46 LTotXX=          46 LenRXX=          46
@@ -310,10 +311,9 @@
  E2 =    -0.2564092537D-03 EUMP2 =    -0.73157824148170D+01
  (S**2,0)=  0.75000D+00           (S**2,1)=  0.75000D+00
  E(PUHF)=      -0.73155260056D+01        E(PMP2)=      -0.73157824148D+01
- Leave Link  804 at Tue Sep 22 14:54:35 2015, MaxMem=    33554432 cpu:               0.1 elap:               0.0
- (Enter /home/gauss/gdvi01p/gdv/l914.exe)
+ Leave Link  804 at Wed Oct 28 10:10:27 2015, MaxMem=    33554432 cpu:               0.1 elap:               0.1
+ (Enter /home/gauss/gdvi03p/gdv/l914.exe)
  UHF ground state
- Ignoring spin specification with unrestricted ground state.
  MDV=    33554432 DFT=F DoStab=F Mixed=F DoRPA=F DoScal=F NonHer=F
  Making orbital integer symmetry assigments:
  FoFJK:  IHMeth= 1 ICntrl=       0 DoSepK=F KAlg= 0 I1Cent=           0 FoldK=F
@@ -522,8 +522,8 @@
       1A ->  3A        0.28936
       1B ->  3B        0.95242
  SavETr:  write IOETrn=   770 NScale= 10 NData=  16 NLR=1 NState=   10 LETran=     190.
- Leave Link  914 at Tue Sep 22 14:54:35 2015, MaxMem=    33554432 cpu:               0.1 elap:               0.1
- (Enter /home/gauss/gdvi01p/gdv/l601.exe)
+ Leave Link  914 at Wed Oct 28 10:10:27 2015, MaxMem=    33554432 cpu:               0.1 elap:               0.1
+ (Enter /home/gauss/gdvi03p/gdv/l601.exe)
  Copying SCF densities to generalized density rwf, IOpCl= 1 IROHF=0.
 
  **********************************************************************
@@ -569,19 +569,20 @@
  ZZZY=              0.0000 XXYY=             -6.6423 XXZZ=             -6.6423 YYZZ=             -6.6423
  XXYZ=              0.0000 YYXZ=              0.0000 ZZXY=              0.0000
  N-N= 0.000000000000D+00 E-N=-1.717332251576D+01  KE= 7.429424133898D+00
- Leave Link  601 at Tue Sep 22 14:54:35 2015, MaxMem=    33554432 cpu:               0.0 elap:               0.0
- (Enter /home/gauss/gdvi01p/gdv/l9999.exe)
+ Leave Link  601 at Wed Oct 28 10:10:27 2015, MaxMem=    33554432 cpu:               0.0 elap:               0.0
+ (Enter /home/gauss/gdvi03p/gdv/l9999.exe)
  Unable to Open any file for archive entry.
- 1\1\GINC-MEDUSA\SP\UCIS-Full\STO-3G\Li1(2)\DBWY\22-Sep-2015\0\\#p uhf/
- sto-3g nosymm cis(full,nstates=12,50-50)\\Li STO-3G\\0,2\Li,0,0.,0.,0.
- \\Version=ES64L-GDVRevI.01+\HF=-7.315526\MP2=-7.3157824\PUHF=-7.315526
- \PMP2-0=-7.3157824\S2=0.75\S2-1=0.75\S2A=0.75\RMSD=6.592e-17\PG=OH [O(
- Li1)]\\@
+ 1\1\GINC-MEDUSA\SP\UCIS-Full\STO-3G\Li1(2)\PLESTRAN\28-Oct-2015\0\\#p 
+ uhf/sto-3g nosymm cis(full,nstates=12)\\Li STO-3G\\0,2\Li,0,0.,0.,0.\\
+ Version=ES64L-GDVRevI.03+\HF=-7.315526\MP2=-7.3157824\PUHF=-7.315526\P
+ MP2-0=-7.3157824\EFC=0.\S2=0.75\S2-1=0.75\S2A=0.75\RMSD=6.592e-17\PG=O
+ H [O(Li1)]\\@
  The archive entry for this job was punched.
 
 
- BULLDOZER: SOMEONE WHO SLEEPS THROUGH SPEECHES.
+ Spring appears, and we are once more children.
+                                  -- Anonymous
  Job cpu time:       0 days  0 hours  0 minutes  0.9 seconds.
  Elapsed time:       0 days  0 hours  0 minutes  0.6 seconds.
  File lengths (MBytes):  RWF=     12 Int=      0 D2E=      0 Chk=      1 Scr=      1
- Normal termination of Gaussian DV at Tue Sep 22 14:54:35 2015.
+ Normal termination of Gaussian DV at Wed Oct 28 10:10:27 2015.
