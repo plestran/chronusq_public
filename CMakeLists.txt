@@ -106,6 +106,5 @@ configure_file(
   "${PROJECT_BINARY_DIR}/src/python/chronusq.py"
 )
 
-
 # Recurse into src
 add_subdirectory(src)

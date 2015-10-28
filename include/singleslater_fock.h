@@ -32,13 +32,14 @@ template<typename T>
 void SingleSlater<T>::formPT(){
   bool doTCS = (this->Ref_ == TCS);
   bool doRHF = (this->isClosedShell && !doTCS);
+  bool doKS  = this->isDFT;
   if(!this->haveDensity) this->formDensity();
   if(this->aointegrals_->integralAlgorithm == AOIntegrals::DIRECT)
-    this->aointegrals_->twoEContractDirect(doRHF,true,false,doTCS,*this->densityA_,*this->PTA_,*this->densityB_,*this->PTB_);
+    this->aointegrals_->twoEContractDirect(doRHF,doKS,true,false,doTCS,*this->densityA_,*this->PTA_,*this->densityB_,*this->PTB_);
   else if(this->aointegrals_->integralAlgorithm == AOIntegrals::DENFIT)
-    this->aointegrals_->twoEContractDF(doRHF,true,*this->densityA_,*this->PTA_,*this->densityB_,*this->PTB_);
+    this->aointegrals_->twoEContractDF(doRHF,doKS,true,*this->densityA_,*this->PTA_,*this->densityB_,*this->PTB_);
   else if(this->aointegrals_->integralAlgorithm == AOIntegrals::INCORE)
-    this->aointegrals_->twoEContractN4(doRHF,true,false,doTCS,*this->densityA_,*this->PTA_,*this->densityB_,*this->PTB_);
+    this->aointegrals_->twoEContractN4(doRHF,doKS,true,false,doTCS,*this->densityA_,*this->PTA_,*this->densityB_,*this->PTB_);
   if(this->printLevel_ >= 3) this->printPT();
 //if(doTCS)CErr();
 }
@@ -63,9 +64,8 @@ void SingleSlater<T>::formFock(){
 //  this->basisset_->resetMapSh2Bf(); 
 //  this->basisset_->makeMapSh2Bf(this->nTCS_);
 //}
-  if(this->controls_->DFT){
-    // Form VXC
-  }
+// Form Vxc for DFT
+  if(this->isDFT) this->formVXC();
   this->fockA_->setZero();
 /*
   if(this->Ref_ != TCS) fockA_->real()+=(*this->aointegrals_->oneE_);
@@ -84,9 +84,10 @@ void SingleSlater<T>::formFock(){
 #else
   *(fockA_)+=(*this->PTA_);
 #endif
-//  if(this->controls_->DFT){
-//    (*this->fockA_) += (*this->vXCA_);
-//  }
+  if(this->isDFT) (*fockA_) += (*this->vXA_);
+// VWN Corr
+  if(this->isDFT) (*fockA_) += (*this->vCorA_);
+
   if(!this->isClosedShell && this->Ref_ != TCS){
     this->fockB_->setZero();
     fockB_->real()+=(*this->aointegrals_->oneE_);
@@ -96,11 +97,8 @@ void SingleSlater<T>::formFock(){
 #else
     *(fockB_)+=(*this->PTB_);
 #endif
-//    if(this->controls_->DFT){
-//      (*this->fockB_) += (*this->vXCB_);
-//    }
-  };
-
+    if(this->isDFT) (*fockB_) += (*this->vXB_);
+   }
   // Add in the electric field component if they are non-zero
   std::array<double,3> null{{0,0,0}};
   if(this->elecField_ != null){

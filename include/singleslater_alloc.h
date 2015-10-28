@@ -39,13 +39,16 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
   this->guess_      = controls->guess;
 
   this->isClosedShell = (this->multip_ == 1);
+  this->isDFT         = controls->DFT;
+  this->ExchKernel_   = SLATER;
+  this->CorrKernel_   = VWN5;
   if(controls->HF){
     if(this->isClosedShell && !controls->doCUHF
        && !controls->doTCS)                        this->Ref_ = RHF ; // RHF
     else if(!controls->doCUHF && !controls->doTCS) this->Ref_ = UHF ; // UHF
     else if(controls->doCUHF)                      this->Ref_ = CUHF; // CUHF
     else if(controls->doTCS)                       this->Ref_ = TCS ; // TCS
-  } else if(controls->DFT) {
+  } else if(this->isDFT) {
     if(this->isClosedShell && !controls->doCUHF
        && !controls->doTCS)                        this->Ref_ = RKS ; // RKS
     else if(!controls->doCUHF && !controls->doTCS) this->Ref_ = UKS ; // UKs
@@ -75,6 +78,7 @@ void SingleSlater<T>::alloc(){
 //if(this->isPrimary) this->fileio_->iniStdSCFFiles<double>(!this->isClosedShell && this->Ref_ != TCS,this->nTCS_*this->nBasis_);
 //if(this->isPrimary) this->fileio_->iniStdSCFFiles(!this->isClosedShell && this->Ref_ != TCS,this->nTCS_*this->nBasis_);
   if(this->isPrimary) {
+
     if(typeid(T).hash_code() == typeid(double).hash_code())
       this->fileio_->iniStdSCFFilesDouble(!this->isClosedShell && this->Ref_ != TCS,this->nTCS_*this->nBasis_);
     else if(typeid(T).hash_code() == typeid(dcomplex).hash_code())
@@ -251,7 +255,9 @@ template<typename T>
 void SingleSlater<T>::allocAlphaDFT(){
   // Alpha / TCS VXC
   try { 
-    this->vXCA_  = std::unique_ptr<TMatrix>(
+    this->vXA_  = std::unique_ptr<TMatrix>(
+      new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
+    this->vCorA_  = std::unique_ptr<TMatrix>(
       new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
   } catch (...) { 
     if(this->Ref_ == TCS) CErr(std::current_exception(), "TCS VXC Allocation"); 
@@ -263,7 +269,9 @@ template<typename T>
 void SingleSlater<T>::allocBetaDFT(){
   // Alpha / TCS VXC
   try { 
-    this->vXCB_  = std::unique_ptr<TMatrix>(
+    this->vXB_  = std::unique_ptr<TMatrix>(
+      new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
+    this->vCorB_  = std::unique_ptr<TMatrix>(
       new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
   } catch (...) { 
     CErr(std::current_exception(),"Beta VXC  Allocation"); 

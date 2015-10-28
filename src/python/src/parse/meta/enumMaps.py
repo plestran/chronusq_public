@@ -55,3 +55,15 @@ guessMap = {
   "CORE":chronusQ.Guess.CORE ,
   "READ":chronusQ.Guess.READ  
 }
+
+exchMap = {
+  "NOEXCH":chronusQ.EXCH.NOEXCH,
+  "EXACT" :chronusQ.EXCH.EXACT ,
+  "SLATER":chronusQ.EXCH.SLATER
+}
+
+corrMap = {
+  "NOCORR":chronusQ.CORR.NOCORR,
+  "VWN3"  :chronusQ.CORR.VWN3,
+  "VWN5"  :chronusQ.CORR.VWN5
+}

@@ -35,7 +35,7 @@ namespace ChronusQ{
    *  X-Total, i.e. X = X-Alpha + X-Beta (hence the 0.5 on the exchange part)
    */
   template<>
-  void AOIntegrals::Restricted34Contract(ComplexMatrix &G, const ComplexMatrix &X, int n1, 
+  void AOIntegrals::Restricted34Contract(bool KS, ComplexMatrix &G, const ComplexMatrix &X, int n1, 
     int n2, int n3, int n4, int bf1_s, int bf2_s, int bf3_s, int bf4_s, const double* buff, 
     double deg){
     
@@ -49,7 +49,7 @@ namespace ChronusQ{
             this->Gen34Contract(G,X,bf1,bf2,bf3,bf4,v);
   
             // Exchange
-            this->Gen23Contract(G,X,bf1,bf2,bf3,bf4,v,0.25);
+            if(!KS)  this->Gen23Contract(G,X,bf1,bf2,bf3,bf4,v,0.25);
           }
         }
       }
@@ -57,7 +57,7 @@ namespace ChronusQ{
   } // Restricted34Contract 
 
   template<>
-  void AOIntegrals::UnRestricted34Contract(ComplexMatrix &GAlpha, const ComplexMatrix &XAlpha, 
+  void AOIntegrals::UnRestricted34Contract(bool KS, ComplexMatrix &GAlpha, const ComplexMatrix &XAlpha, 
     ComplexMatrix &GBeta, const ComplexMatrix &XBeta, const ComplexMatrix &XTotal, int n1, int n2, 
     int n3, int n4, int bf1_s, int bf2_s, int bf3_s, int bf4_s, const double* buff, 
     double deg){
@@ -73,8 +73,10 @@ namespace ChronusQ{
             this->Gen34Contract(GBeta, XTotal,bf1,bf2,bf3,bf4,v);
   
             // Exchange
-            this->Gen23Contract(GAlpha,XAlpha,bf1,bf2,bf3,bf4,v,0.5);
-            this->Gen23Contract(GBeta, XBeta, bf1,bf2,bf3,bf4,v,0.5);
+            if(!KS){
+              this->Gen23Contract(GAlpha,XAlpha,bf1,bf2,bf3,bf4,v,0.5);
+              this->Gen23Contract(GBeta, XBeta, bf1,bf2,bf3,bf4,v,0.5);
+            }
           }
         }
       }
@@ -82,7 +84,7 @@ namespace ChronusQ{
   } // UnRestricted34Contract
 
   template<>
-  void AOIntegrals::Spinor34Contract(ComplexMatrix &G, const ComplexMatrix &X, int n1, int n2, 
+  void AOIntegrals::Spinor34Contract(bool KS, ComplexMatrix &G, const ComplexMatrix &X, int n1, int n2, 
     int n3, int n4, int bf1_s, int bf2_s, int bf3_s, int bf4_s, const double* buff, 
     double deg){
 
@@ -104,7 +106,7 @@ namespace ChronusQ{
 //          this->Gen23Contract(G,X,bf1+1,bf2,bf3+1,bf4,v,0.5);
 //          this->Gen23Contract(G,X,bf1,bf2+1,bf3,bf4+1,v,0.5);
 */
-            this->GenExchContractSpinor(G,X,bf1,bf2,bf3,bf4,v,0.5);
+            if(!KS) this->GenExchContractSpinor(G,X,bf1,bf2,bf3,bf4,v,0.5);
           }
         }
       }

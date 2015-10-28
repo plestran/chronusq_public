@@ -39,7 +39,9 @@ knownKeywords['QM'] = {
   'REFERENCE':CQKeyword('REFERENCE','S',True ),
   'BASIS'    :CQKeyword('BASIS'    ,'S',True ),
   'JOB'      :CQKeyword('JOB'      ,'S',True ),
-  'INTS'     :CQKeyword('INTS'     ,'S',False)
+  'INTS'     :CQKeyword('INTS'     ,'S',False),
+  'EXCHANGE' :CQKeyword('EXCHANGE' ,'S',False),
+  'CORR'     :CQKeyword('CORR'     ,'S',False)
 }
 
 # Dictionary for known keywords in the RT input section

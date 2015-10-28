@@ -231,13 +231,22 @@ void SingleSlater<T>::printSCFHeader(ostream &output){
   output << "Self Consistant Field (SCF) Settings:" << endl << endl;
 //cout << std::setprecision(6);
 
-  output << std::setw(38) << std::left << "  SCF Type:" << this->SCFType_ << endl;
-  output << std::setw(38) << std::left << "  Density Convergence Tolerence:" << std::scientific << std::setprecision(6) << this->denTol_ << endl;
-  output << std::setw(38) << std::left << "  Energy Convergence Tolerence:" << std::scientific << std::setprecision(6) << this->eneTol_ << endl;
-  output << std::setw(38) << std::left << "  Maximum Number of SCF Cycles:" << this->maxSCFIter_ << endl;
-  output << std::setw(38) << std::left << "  Static Electric Field (Dipole):";
-  output << "{" << this->elecField_[0] << ", " << this->elecField_[1] << ", "
+  output << std::setw(38) << std::left << "  SCF Type:" << this->SCFType_ 
+         << endl;
+
+  output << std::setw(38)   << std::left << "  Density Convergence Tolerence:" 
+         << std::scientific << std::setprecision(6) << this->denTol_ << endl;
+
+  output << std::setw(38)   << std::left << "  Energy Convergence Tolerence:" 
+         << std::scientific << std::setprecision(6) << this->eneTol_ << endl;
+
+  output << std::setw(38) << std::left << "  Maximum Number of SCF Cycles:" 
+         << this->maxSCFIter_ << endl;
+
+  output << std::setw(38) << std::left << "  Static Electric Field (Dipole):"
+         << "{" << this->elecField_[0] << ", " << this->elecField_[1] << ", "
          << this->elecField_[2] << "}" << endl;
+
   output << std::setw(38) << std::left << "  Integral Contraction Algorithm:";
   if(this->aointegrals_->integralAlgorithm == AOIntegrals::DIRECT)
     output << "Direct";
@@ -246,6 +255,43 @@ void SingleSlater<T>::printSCFHeader(ostream &output){
   else if (this->aointegrals_->integralAlgorithm == AOIntegrals::INCORE)
     output << "In-Core (BTAS)";
   output << endl;
+
+  output << std::setw(38) << std::left << "  Initial Guess:";
+  if(this->guess_ == SAD)
+    output << "Superposition of Atomic Densities";
+  else if(this->guess_ == CORE)
+    output << "Core Hamiltonian";
+  else if(this->guess_ == READ)
+    output << "Read";
+  output << endl;
+
+  if(this->isDFT){
+    output << std::setw(38) << std::left << "  Density Functional:";
+
+    output << "User Defined";
+
+    output << endl;
+
+
+    output << std::setw(38) << std::left << "    Exchange Kernel:";
+    if(this->ExchKernel_ == NOEXCH)
+      output << "No Exchange";
+    else if(this->ExchKernel_ == SLATER)
+      output << "Slater";
+    else if(this->ExchKernel_ == EXACT)
+      output << "Exact (Hartree-Fock)";
+    output << endl;
+
+    output << std::setw(38) << std::left << "    Correlation Kernel:";
+    if(this->CorrKernel_ == NOCORR)
+      output << "No Correlation";
+    else if(this->CorrKernel_ == VWN3)
+      output << "VWN3";
+    else if(this->CorrKernel_ == VWN5)
+      output << "VWN5";
+    output << endl;
+  }
+
   output << endl << bannerMid << endl;
 }
 

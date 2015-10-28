@@ -1,1 +1,3 @@
-add_library(realtime SHARED realtime_double.cpp realtime_complex.cpp realtime_double_envelope.cpp realtime_complex_envelope.cpp)
+add_library(realtime SHARED realtime_double.cpp realtime_complex.cpp 
+realtime_double_envelope.cpp realtime_complex_envelope.cpp 
+realtime_double_csv.cpp realtime_complex_csv.cpp)

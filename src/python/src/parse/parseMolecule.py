@@ -102,7 +102,8 @@ def readGeom(workers,settings):
 #   CQ::Molecule::nTotalE  -   total Number of electrons 
 #                                (modulated by CQ::Molecule::charge)
 #
-  nTotalE = 0
+#  nTotalE = 0
+  nTotalE = - settings['CHARGE']
   for i in range(len(geomStr)):
     line = geomStr[i]
     lineSplit = line.split()

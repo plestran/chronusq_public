@@ -30,7 +30,7 @@
 #include <molecule.h>
 #include <controls.h>
 #include <aointegrals.h>
-
+#include <grid.h>
 /****************************/
 /* Error Messages 5000-5999 */
 /****************************/
@@ -88,6 +88,8 @@ class SingleSlater {
   int      nAE_;
   int      nBE_;
   int      Ref_;
+  int      CorrKernel_;
+  int      ExchKernel_;
   int      nOccA_;
   int      nOccB_;
   int      nVirA_;
@@ -113,8 +115,10 @@ class SingleSlater {
   std::unique_ptr<RealMatrix>  epsB_;       ///< Beta Fock Eigenenergie
   std::unique_ptr<TMatrix>  PTA_;        ///< Alpha or Full (TCS) Perturbation Tensor
   std::unique_ptr<TMatrix>  PTB_;        ///< Beta Perturbation Tensor
-  std::unique_ptr<TMatrix>  vXCA_;        ///< Alpha or Full (TCS) VXC
-  std::unique_ptr<TMatrix>  vXCB_;        ///< Beta VXC
+  std::unique_ptr<TMatrix>  vXA_;        ///< Alpha or Full (TCS) VX
+  std::unique_ptr<TMatrix>  vXB_;        ///< Beta VXC
+  std::unique_ptr<TMatrix>  vCorA_;        ///< Alpha or Full Vcorr
+  std::unique_ptr<TMatrix>  vCorB_;        ///< Beta Vcorr
   std::unique_ptr<RealMatrix>  dipole_;  ///< Electric Dipole Moment
   std::unique_ptr<RealMatrix>  quadpole_; ///< Electric Quadrupole Moment
   std::unique_ptr<RealMatrix>  tracelessQuadpole_; ///< Traceless Electric Quadrupole Moment
@@ -124,6 +128,7 @@ class SingleSlater {
   FileIO *      fileio_;                 ///< Access to output file
   Controls *    controls_;               ///< General ChronusQ flow parameters
   AOIntegrals * aointegrals_;            ///< Molecular Integrals over GTOs (AO basis)
+  TwoDGrid    * twodgrid_   ;            ///< 3D grid (1Rad times 1 Ang) 
 
   std::string SCFType_;                  ///< String containing SCF Type (R/C) (R/U/G/CU)
   std::string SCFTypeShort_;             ///< String containing SCF Type (R/C) (R/U/G/CU)
@@ -265,6 +270,24 @@ public:
     CORE,
     READ
   }; // Supported Guess Types
+
+  enum DFT {
+    USERDEFINED,
+    LDA
+  };
+
+  enum CORR {
+    NOCORR,
+    VWN3,
+    VWN5
+  };
+
+  enum EXCH {
+    NOEXCH,
+    EXACT,
+    SLATER
+  };
+
   bool	haveMO;      ///< Have MO coefficients?
   bool	haveDensity; ///< Computed Density? (Not sure if this is used anymore)
   bool	haveCoulomb; ///< Computed Coulomb Matrix?
@@ -280,7 +303,12 @@ public:
   double   energyTwoE; ///< Two-bodied operator tensors traced with Density
   double   energyNuclei; ///< N-N Repulsion Energy
   double   totalEnergy; ///< Sum of all energetic contributions
- 
+
+  double   totalEx;     ///< LDA Exchange
+  double   totalEcorr;  ///< Total VWN Energy
+  double   eps_corr;    ///< VWN Correlation Energy Density
+  double   mu_corr;     ///< VWN Correlation Potential
+
   int      nSCFIter;
 
   // constructor & destructor
@@ -313,8 +341,10 @@ public:
     this->epsB_              = nullptr;    
     this->PTA_               = nullptr;        
     this->PTB_               = nullptr;        
-    this->vXCA_              = nullptr;       
-    this->vXCB_              = nullptr;       
+    this->vXA_              = nullptr;       
+    this->vXB_              = nullptr;       
+    this->vCorA_              = nullptr;       
+    this->vCorB_              = nullptr;       
     this->dipole_            = nullptr;  
     this->quadpole_          = nullptr;
     this->tracelessQuadpole_ = nullptr; 
@@ -342,6 +372,8 @@ public:
 
     // Standard Values
     this->Ref_         = _INVALID;
+    this->CorrKernel_  = NOCORR;
+    this->ExchKernel_  = NOEXCH;
     this->denTol_      = 1e-10;
     this->eneTol_      = 1e-12;
     this->maxSCFIter_  = 256;
@@ -422,6 +454,8 @@ public:
   inline void setSCFMaxIter(int i){ this->maxSCFIter_ = i;};
   inline void setGuess(int i){ this->guess_ = i;};
   inline void isNotPrimary(){this->isPrimary = false;};
+  inline void setCorrKernel(int i){this->CorrKernel_ = i;};
+  inline void setExchKernel(int i){this->ExchKernel_ = i;};
 
   // access to private data
   inline int nBasis() { return this->nBasis_;};
@@ -438,6 +472,8 @@ public:
   inline int multip()  { return this->multip_;};
   inline int nOVA()    { return nOccA_*nVirA_;};
   inline int nOVB()    { return nOccB_*nVirB_;};
+  inline int CorrKernel(){return this->CorrKernel_;};
+  inline int ExchKernel(){return this->ExchKernel_;};
   inline int printLevel(){ return this->printLevel_;};
   inline std::vector<double> mullPop(){ return this->mullPop_;};
   inline std::array<double,3> elecField(){ return this->elecField_;  };
@@ -451,8 +487,10 @@ public:
   inline TMatrix* exchangeB(){ return this->exchangeB_.get();};
   inline TMatrix* moA()      { return this->moA_.get();};
   inline TMatrix* moB()      { return this->moB_.get();};
-  inline TMatrix* vXCA()      { return this->vXCA_.get();};
-  inline TMatrix* vXCB()      { return this->vXCB_.get();};
+  inline TMatrix* vXA()      { return this->vXA_.get();};
+  inline TMatrix* vXB()      { return this->vXB_.get();};
+  inline TMatrix* vCorA()      { return this->vCorA_.get();};
+  inline TMatrix* vCorB()      { return this->vCorB_.get();};
   inline RealMatrix* epsA()     { return this->epsA_.get();};
   inline RealMatrix* epsB()     { return this->epsB_.get();};
   inline TMatrix* PTA()      { return this->PTA_.get();};
@@ -466,6 +504,10 @@ public:
   inline FileIO *      fileio(){return this->fileio_;};
   inline Controls *    controls(){return this->controls_;};
   inline AOIntegrals * aointegrals(){return this->aointegrals_;};
+  inline TwoDGrid *    twodgrid(){return this->twodgrid_;};
+  
+  inline std::string SCFType(){return this->SCFType_;};
+  inline int         guess(){return this->guess_;};
 
   void formGuess();	        // form the intial guess
   void SADGuess();
@@ -478,8 +520,13 @@ public:
   void formCoulomb();		// form the Coulomb matrix
   void formExchange();		// form the exchange matrix
   void formPT();
-  void formVXC(RealMatrix *);   // Form DFT VXC Term
-  void EnVXC();                 // DFT VXC Energy Term
+  void formVXC();               // Form DFT VXC Term
+  void formCor(double rho, double spindensity); // Form DFT correlarion potential 
+  void formEx(double rho); // Form DFT exchange
+  double spindens(double rho_A,double rho_B);  // define f(spindendity)
+  double formBeckeW(cartGP gridPt, int iAtm);            // Evaluate Becke Weights
+  double normBeckeW(cartGP gridPt);            // Evaluate Becke Weights
+  void   buildVxc(cartGP gridPt, double weight);            // function to build the Vxc therm
   void matchord();              // match Guassian order of guess
   void readGuessIO();       	// read the initial guess of MO's from the input stream
   void readGuessGauMatEl(GauMatEl&); // read the intial guess of MO's from Gaussian raw matrix element file
@@ -503,6 +550,7 @@ public:
   void printFock();
   void getAlgebraicField();
   void writeSCFFiles();
+  void checkReadReference();
   
   inline void genMethString(){
     if(this->Ref_ == _INVALID) 
@@ -511,18 +559,29 @@ public:
     this->getAlgebraicField(); 
     this->SCFType_      = this->algebraicField_      + " ";
     this->SCFTypeShort_ = this->algebraicFieldShort_ + "-";
+    
+    std::string generalReference;
+    std::string generalRefShort;
+    if(this->isHF){
+      generalReference = "Hartree-Fock";
+      generalRefShort  = "HF";
+    } else if(this->isDFT) {
+      generalReference = "Kohn-Sham";
+      generalRefShort  = "KS";
+    }
+
     if(this->Ref_ == RHF) {
-      this->SCFType_      += "Restricted Hartree-Fock"; 
-      this->SCFTypeShort_ += "RHF";
+      this->SCFType_      += "Restricted " + generalReference; 
+      this->SCFTypeShort_ += "R" + generalRefShort;
     } else if(this->Ref_ == UHF) {
-      this->SCFType_      += "Unrestricted Hartree-Fock"; 
-      this->SCFTypeShort_ += "UHF";
+      this->SCFType_      += "Unrestricted " + generalReference; 
+      this->SCFTypeShort_ += "U" + generalRefShort;
     } else if(this->Ref_ == CUHF) {
-      this->SCFType_      += "Constrained Unrestricted Hartree-Fock"; 
-      this->SCFTypeShort_ += "CUHF";
+      this->SCFType_      += "Constrained Unrestricted " + generalReference; 
+      this->SCFTypeShort_ += "CU" + generalRefShort;
     } else if(this->Ref_ == TCS) {
-      this->SCFType_      += "Generalized Hartree-Fock"; 
-      this->SCFTypeShort_ += "GHF";
+      this->SCFType_      += "Generalized " + generalReference; 
+      this->SCFTypeShort_ += "G" + generalRefShort;
     }
   }
 
@@ -546,6 +605,7 @@ public:
 #include <singleslater_fock.h>
 #include <singleslater_misc.h>
 #include <singleslater_scf.h>
+#include <singleslater_dft.h>
 
 
 } // namespace ChronusQ

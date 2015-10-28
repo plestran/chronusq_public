@@ -25,7 +25,6 @@
  */
 #include <workers.h>
 #include <mollerplesset.h>
-#include <grid.h>
 using namespace ChronusQ;
 
 int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
@@ -89,6 +88,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
     hartreeFockReal->iniSingleSlater(molecule.get(),basisset.get(),aointegrals.get(),
       fileIO.get(),controls.get());
     hartreeFockReal->printInfo();
+    // Initialize Grid
   } else {
     hartreeFockComplex->iniSingleSlater(molecule.get(),basisset.get(),aointegrals.get(),
       fileIO.get(),controls.get());
@@ -121,6 +121,8 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 
   // Optimize wave function (?)
   if(!controls->doComplex){
+
+
     // Form initial (primer) Fock matrix
     hartreeFockReal->formFock();
     aointegrals->printTimings();
@@ -175,15 +177,6 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   if(controls->doUnit && controls->doComplex) printUnitInfo(controls.get(),hartreeFockComplex.get(),sdResponseReal.get(),realtimeComplex.get());
 */
 
-
-////// APS ////
-  if(controls->DFT){
-    cout << " Before TwoDGrid" <<endl;
-    auto twoDGrid     	= std::unique_ptr<TwoDGrid>(new TwoDGrid());
-    twoDGrid->iniTwoDGrid(fileIO.get(),molecule.get(),basisset.get(),aointegrals.get(),hartreeFockReal.get(),100,194);
-  }
-////// APE ////
-
 // REAL-TIME TD-SCF 
   
   if(controls->doRealTime) {
@@ -202,7 +195,8 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 
 
 
-
+  writeJobMeta(*hartreeFockReal,*sdResponseReal,*realtimeReal,*molecule,
+    *aointegrals,*fileIO);
   finalizeCQ();
 
   return  1;

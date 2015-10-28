@@ -161,46 +161,13 @@ SingleSlater<double>::SingleSlater(SingleSlater<double> * other){
        };
      prettyPrint(this->fileio_->out,(*this->moA_),"APS PRINT GUESS SWAP");
    };
-//----------------------------//
-// form the Vxc matrix        //
-//----------------------------//
-
-template<>
-void SingleSlater<double>::formVXC(RealMatrix * Integral3D){
-//  Right now is just a place holder (we print the overlap, the actual
-//  integration is perfomed in the grid class. see scr/grid/grid.cpp
-  double Cx = -(3.0/4.0)*(std::pow((3.0/math.pi),(1.0/3.0)));
-  double Ne;
- (*this->vXCA_) = (*Integral3D);
-  Ne = (*this->vXCA_).frobInner(this->densityA_->conjugate());
-//  (*this->vXCA_) = Cx*((*Integral3D).pow(4.0/3.0));
-//  (*this->vXCA_) = (*Integral3D)*(*Integral3D);
-//  double NeAn = 14.0; 
-  cout << " Number Electron = " << Ne <<endl;
-//  cout << " Number Electron Err = " << (Ne-NeAn) <<endl;
-//  cout << " Number Electron = " << Cx*pow(Ne,4.0/3.0) <<endl;
- cout << "Single Slater Numeric : Print" <<endl;
- cout << (*this->vXCA_)  << endl;
-};
-
-
-template<>
-void SingleSlater<double>::EnVXC(){
-  double Energy;
-  double resLDA = -11.611162519357;
-  Energy = (*this->vXCA_).frobInner(this->densityA_->conjugate());
-  cout << " E_XC = " << Energy <<endl;
-  cout << "LDA Err " << (Energy-resLDA) << endl;
-  cout << "Single Slater Numeric : Print" <<endl;
-  cout << (*this->vXCA_)  << endl;
-};
-////APE
 //
 /************************
  * Compute Total Energy *
  ************************/
 template<>
 void SingleSlater<double>::computeEnergy(){
+  double energyXC;
 /*
   if(this->Ref_ != TCS)
     this->energyOneE = (*this->aointegrals_->oneE_).frobInner(this->densityA_->conjugate());
@@ -216,12 +183,16 @@ void SingleSlater<double>::computeEnergy(){
 */
   this->energyOneE = (*this->aointegrals_->oneE_).frobInner(this->densityA_->conjugate());
   this->energyTwoE = 0.5*(*this->PTA_).frobInner(this->densityA_->conjugate());
+
   if(!this->isClosedShell && this->Ref_ != TCS){
     this->energyOneE += (*this->aointegrals_->oneE_).frobInner(this->densityB_->conjugate());
     this->energyTwoE += 0.5*(*this->PTB_).frobInner(this->densityB_->conjugate());
   }
-
-
+  
+  if(this->isDFT) this->energyTwoE += this->totalEx;
+// VWN Corr
+  if(this->isDFT) this->energyTwoE += this->totalEcorr;
+    
   // Add in the electric field component if they are non-zero
   std::array<double,3> null{{0,0,0}};
   if(this->elecField_ != null){

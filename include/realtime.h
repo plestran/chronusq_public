@@ -68,7 +68,7 @@ class RealTime {
 
   double stepSize_;	// Input step size
   double deltaT_;	// Actual step size
-  double currentTime_;	// Current time
+  long double currentTime_;	// Current time
 
   bool	frozenNuc_;     // Whether to freeze nuclei
   bool  isClosedShell_;
@@ -145,6 +145,8 @@ class RealTime {
   void initMemLen();
   void initMem();
   void initMaps();
+  std::vector<std::ofstream*> csvs;
+  
 
 public:
   struct PropInfo {
@@ -281,9 +283,9 @@ public:
   void printRT();
   void formUTrans();
   void doPropagation();
-  void writeDipoleCSV();
-  void writeOrbitalCSV();
-  void writeMullikenCSV();
+  void writeDipoleCSV(PropInfo & propInfo, long int & iStep);
+  void writeMullikenCSV(PropInfo & propInfo, long int & iStep);
+  void writeOrbitalCSV(PropInfo & propInfo, long int & iStep);
 };
 
 #include <realtime_alloc.h>
