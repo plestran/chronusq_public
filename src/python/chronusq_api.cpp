@@ -216,6 +216,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setFreq"      , &RealTime<double>::setFreq      )
     .def("setPhase"     , &RealTime<double>::setPhase     )
     .def("setSigma"     , &RealTime<double>::setSigma     )
+    .def("setPrintLevel", &RealTime<double>::setPrintLevel)
     .def("printRT"      , &RealTime<double>::printRT      )
   ;
 
@@ -239,6 +240,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setFreq"      , &RealTime<dcomplex>::setFreq      )
     .def("setPhase"     , &RealTime<dcomplex>::setPhase     )
     .def("setSigma"     , &RealTime<dcomplex>::setSigma     )
+    .def("setPrintLevel", &RealTime<dcomplex>::setPrintLevel)
     .def("printRT"      , &RealTime<dcomplex>::printRT      )
   ;
 

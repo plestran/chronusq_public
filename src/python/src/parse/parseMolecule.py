@@ -50,6 +50,11 @@ def parseMolecule(workers,settings):
   workers["CQMolecule"].computeRij()    # 3
   workers["CQMolecule"].computeI()      # 4
 
+  try:
+    workers["CQMolecule"].setPrintLevel(settings['PRINT'])
+  except KeyError:
+    pass
+
 
 #
 # Read the molecular geometry from input file

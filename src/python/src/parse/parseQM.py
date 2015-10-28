@@ -62,6 +62,7 @@ def parseQM(workers,secDict):
 #
   parseBasis(workers,ssSettings['BASIS'])
 
+
 #
 # Set integral algorithm
 #
@@ -84,6 +85,17 @@ def parseQM(workers,secDict):
   else:
     msg = 'QM.Job ' + str(ssSettings['JOB']) + ' not recognized'
     CErrMsg(workers['CQFileIO'],str(msg))
+
+#
+# Set global print level
+#
+  try:
+    workers['CQMolecule'].setPrintLevel(ssSettings['PRINT'])
+    workers['CQBasisSet'].setPrintLevel(ssSettings['PRINT'])
+    workers['CQSingleSlater'].setPrintLevel(ssSettings['PRINT'])
+    workers['CQRealTime'].setPrintLevel(ssSettings['PRINT'])
+  except KeyError:
+    pass
 
   return str(ssSettings['JOB'])
 
