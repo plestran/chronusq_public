@@ -146,8 +146,43 @@ void CoupledCluster::MollerPlesset(){
   }  
   EMP3 = EMP3A/8.0 + EMP3B/8.0 + EMP3C; 
 
-  cout << "EMP3(corr) = " << std::setprecision(14) << EMP3 << endl;
+  cout << "EMP3(corr) = " << EMP3 << endl;
 
+// Now onto MP4, first compute EMP4(S)
+
+  double EUMP4S = 0.0;
+
+  RealTensor2d Ubbia, Aia;
+  RealTensor4d Ubb2, Aijab2;
+  
+  Ubbia  = RealTensor2d(this->nO_,this->nV_);
+  Aia    = RealTensor2d(this->nO_,this->nV_);
+  Ubb2   = RealTensor4d(this->nO_,this->nO_,this->nV_,this->nV_);
+  Aijab2 = RealTensor4d(this->nO_,this->nO_,this->nV_,this->nV_);
+
+  for(auto i = 0; i < this->nO_; i++) 
+  for(auto a = 0; a < this->nV_; a++) { 
+    for(auto j = 0; j < this->nO_; j++) 
+    for(auto b = 0; b < this->nV_; b++)  
+    for(auto c = 0; c < this->nV_; c++) {
+      Ubbia(i,a) -= (this->mointegrals_->IABC(j,a,b,c))*Aijab1(i,j,b,c)*(0.5);
+    }
+    for(auto j = 0; j < this->nO_; j++) 
+    for(auto k = 0; k < this->nO_; k++)  
+    for(auto b = 0; b < this->nV_; b++) {
+      Ubbia(i,a) -= (this->mointegrals_->IJKA(j,k,i,b))*Aijab1(j,k,a,b)*(0.5);
+    }
+    Denom =    (*this->singleSlater_->epsA())(i)
+             - (*this->singleSlater_->epsA())(a + this->nO_);
+    Aia(i,a) = Ubbia(i,a)/Denom;
+  }
+  
+  for(auto i = 0; i < this->nO_; i++) 
+  for(auto a = 0; a < this->nV_; a++) { 
+    EUMP4S += Aia(i,a)*Ubbia(i,a);
+  }
+
+  cout << "EMP4(S)(corr) = " << EUMP4S << endl;
 
 }
 
