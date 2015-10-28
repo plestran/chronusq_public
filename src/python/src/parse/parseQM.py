@@ -282,5 +282,17 @@ def parseSCF(workers,scfSettings):
     except KeyError:
       continue
 
-  if scfSettings['GUESS'] == guessMap['READ']:
-    workers['CQFileIO'].doRestart = True
+  try:
+    if scfSettings['GUESS'] == guessMap['READ']:
+      workers['CQFileIO'].doRestart = True
+  except KeyError:
+    pass
+
+  try:
+    if scfSettings['DIIS']:
+      workers['CQSingleSlater'].doDIIS = True
+    else:
+      workers['CQSingleSlater'].doDIIS = False
+  except KeyError:
+    pass
+

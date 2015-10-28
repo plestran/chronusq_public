@@ -43,6 +43,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def_readonly("nSCFIter"      , &SingleSlater<double>::nSCFIter        )
     .def_readwrite("isDFT"        , &SingleSlater<double>::isDFT           )
     .def_readwrite("isHF"         , &SingleSlater<double>::isHF            )
+    .def_readwrite("doDIIS"       , &SingleSlater<double>::doDIIS          )
   ;
 
   class_<SingleSlater<dcomplex>,boost::noncopyable>("SingleSlater_complex",
@@ -85,6 +86,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def_readonly("nSCFIter"      , &SingleSlater<dcomplex>::nSCFIter        )
     .def_readwrite("isDFT"        , &SingleSlater<dcomplex>::isDFT           )
     .def_readwrite("isHF"         , &SingleSlater<dcomplex>::isHF            )
+    .def_readwrite("doDIIS"       , &SingleSlater<dcomplex>::doDIIS          )
   ;
 
   enum_<SingleSlater<double>::REFERENCE>("Reference")

@@ -288,7 +288,7 @@ void SingleSlater<T>::SCF(){
     this->formDensity();
     this->formFock();
 
-    if(this->Ref_ != CUHF){ // DIIS NYI for CUHF
+    if(this->Ref_ != CUHF && this->doDIIS){ // DIIS NYI for CUHF
       this->GenDComm(iter);
       this->CpyFock(iter);   
       if(iter % (this->lenCoeff_-1) == (this->lenCoeff_-2) && iter != 0) this->CDIIS();

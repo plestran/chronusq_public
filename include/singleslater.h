@@ -298,6 +298,7 @@ public:
   bool  isHF;
   bool  isDFT;
   bool  isPrimary;
+  bool  doDIIS;
 
   double   energyOneE; ///< One-bodied operator tensors traced with Density
   double   energyTwoE; ///< Two-bodied operator tensors traced with Density
@@ -365,10 +366,8 @@ public:
     this->haveDensity   = false;
     this->haveMO        = false;
     this->havePT        = false;
-    this->isDFT         = false;
     this->isClosedShell = false;
 
-    this->isHF         = true;
 
     // Standard Values
     this->Ref_         = _INVALID;
@@ -383,6 +382,9 @@ public:
     this->elecField_   = {0.0,0.0,0.0};
     this->printLevel_  = 1;
     this->isPrimary    = true;
+    this->doDIIS       = true;
+    this->isHF         = true;
+    this->isDFT         = false;
     this->guess_       = SAD;
 
   };
