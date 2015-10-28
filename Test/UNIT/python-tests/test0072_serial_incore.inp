@@ -14,7 +14,7 @@ geom:
 #
 [QM]
 reference = Real CUHF
-job       = SCF
+job       = RPA
 basis     = cc-pVDZ.gbs
 ints			= incore
 

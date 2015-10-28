@@ -14,7 +14,7 @@ geom:
 #
 [QM]
 reference = Real CUHF
-job       = SCF
+job       = CIS
 basis     = sto3g.gbs
 ints			= incore
 

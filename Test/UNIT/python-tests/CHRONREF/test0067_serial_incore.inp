@@ -13,7 +13,7 @@ geom:
 #
 [QM]
 reference = Real CUHF
-job       = SCF
+job       = RPA
 basis     = sto3g.gbs
 ints			= incore
 
