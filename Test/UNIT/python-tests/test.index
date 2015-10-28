@@ -7,7 +7,7 @@ software.
 ChronusQ Input File                 Description
 -------------------                 -----------
 
-#** test0001-0003 Test Small Molecule RHF SCF code **
+** test0001-0003 Test Small Molecule RHF SCF code **
 test0001_serial_incore.inp   SCF    H2O/STO-3G  Serial SCF - In-Core Integrals
 test0001_serial_direct.inp   SCF    H2O/STO-3G  Serial SCF - Direct  Integrals
 test0001_smp_incore.inp      SCF    H2O/STO-3G  OpenMP SCF - In-Core Integrals
@@ -209,6 +209,7 @@ test0045_serial_direct.inp   SCF    H2O/cc-pVDZ Serial DField SCF - Direct  Inte
 test0045_smp_incore.inp      SCF    H2O/cc-pVDZ OpenMP DField SCF - In-Core Integrals (6D)
 test0045_smp_direct.inp      SCF    H2O/cc-pVDZ OpenMP DField SCF - Direct  Integrals (6D)
 
+#NOTE: THESE TESTS DO NOT MATCH GAUSSIAN VALUES
 #** test0046-0048 Test moderately large molecule RHF SCF in Dipole Field code **
 #test0046_serial_incore.inp   SCF     Benzene/STO-3G  Serial DField SCF - In-core Integrals
 #test0046_serial_direct.inp   SCF     Benzene/STO-3G  Serial DField SCF - Direct  Integrals
@@ -249,6 +250,7 @@ test0054_serial_direct.inp   SCF    O2/cc-pVDZ Serial DField SCF - Direct  Integ
 test0054_smp_incore.inp      SCF    O2/cc-pVDZ OpenMP DField SCF - In-Core Integrals (6D)
 test0054_smp_direct.inp      SCF    O2/cc-pVDZ OpenMP DField SCF - Direct  Integrals (6D)
 
+#NOTE: TEST0060 DOES NOT CONVERGE
 ** test0055-0060 Test small molecule ROHF (CUHF) SCF in Dipole Field code **
 test0055_serial_incore.inp   SCF    Li/STO-3G  Serial DField SCF - In-Core Integrals
 test0055_serial_direct.inp   SCF    Li/STO-3G  Serial DField SCF - Direct  Integrals
