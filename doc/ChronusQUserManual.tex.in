@@ -57,7 +57,7 @@
   \begin{titlepage}
     \vspace*{\fill}
     \begin{center}
-      \includegraphics[width=0.25\textwidth]{./chronus_quantum_logo.png}~\\[1cm]
+      \includegraphics[width=0.25\textwidth]{@LOGO@}~\\[1cm]
       \textsc{\LARGE The Chronus Quantum (ChronusQ) Software Package}~\\[0.5cm]
       \textsc{\Large User's guide}~\\[5cm]
       \large David Williams-Young\\
