@@ -237,10 +237,8 @@ double CoupledCluster::CCSD(){
 
 
     // Initialize T1 and T2 amplitudes
-    for(auto i = 0; i < this->nO_; i++)
-    for(auto a = 0; a < this->nV_; a++) {
-      Tia(i,a) = 0.0;
-      }
+    Tia.fill(0.0);
+     
     for(auto i = 0; i < this->nO_; i++) 
     for(auto j = 0; j < this->nO_; j++) 
     for(auto a = 0; a < this->nV_; a++) 
@@ -318,7 +316,8 @@ double CoupledCluster::CCSD(){
    }
 */
    // Done with one time intermediates, begin iterations
-    for(auto niter = 0; niter < 15; niter++) {
+    for(auto niter = 0; niter < 50; niter++) {
+      double SUM = 0.0;
       ECorr = ECCSD;
       // Hba
       Hba.fill(0.0);
@@ -329,6 +328,9 @@ double CoupledCluster::CCSD(){
       for(auto c = 0; c < this->nV_; c++) {
         Hba(b,a) -= (this->mointegrals_->IJAB(j,k,b,c))*Tau(j,k,a,c)*(0.5);
       }
+      SUM = 0.0;
+      for(double x : Hba) SUM += x*x;
+      cout << "Hba = " << SUM << endl;
 
      // Hij
       Hij.fill(0.0);
@@ -339,6 +341,9 @@ double CoupledCluster::CCSD(){
       for(auto c = 0; c < this->nV_; c++) {
         Hij(i,j) += (this->mointegrals_->IJAB(j,k,b,c))*Tau(i,k,b,c)*(0.5);
       }
+      SUM = 0.0;
+      for(double x : Hij) SUM += x*x;
+      cout << "Hij = " << SUM << endl;
 
     // Hbj
       Hbj.fill(0.0);
@@ -348,6 +353,9 @@ double CoupledCluster::CCSD(){
       for(auto c = 0; c < this->nV_; c++) {
         Hbj(b,j) += (this->mointegrals_->IJAB(j,k,b,c))*Tia(k,c);
       }
+      SUM = 0.0;
+      for(double x : Hbj) SUM += x*x;
+      cout << "Hbj = " << SUM << endl;
 
     // Gca
       Gca.fill(0.0);
@@ -359,7 +367,9 @@ double CoupledCluster::CCSD(){
           Gca(c,a) -= (this->mointegrals_->IABC(k,a,c,d))*Tia(k,d);
         } 
       }
-
+      SUM = 0.0;
+      for(double x : Gca) SUM += x*x;
+      cout << "Gca = " << SUM << endl;
 
     // Gik
       Gik.fill(0.0);
@@ -371,6 +381,11 @@ double CoupledCluster::CCSD(){
           Gik(i,k) += (this->mointegrals_->IJKA(k,l,i,c))*Tia(l,c);
         }
       }
+      SUM = 0.0;
+      for(double x : Gik) SUM += x*x;
+      cout << "Gik = " << SUM << endl;
+
+      
 
     // Aijkl
       Aijkl.fill(0.0);
@@ -387,6 +402,9 @@ double CoupledCluster::CCSD(){
           }
         }
       }
+      SUM = 0.0;
+      for(double x : Aijkl) SUM += x*x;
+      cout << "Aijkl = " << SUM << endl;
 
     // Babcd
       Babcd.fill(0.0); 
@@ -400,6 +418,9 @@ double CoupledCluster::CCSD(){
                            -(this->mointegrals_->IABC(k,b,c,d))*Tia(k,a);
         }
       }
+      SUM = 0.0;
+      for(double x : Babcd) SUM += x*x;
+      cout << "Babcd = " << SUM << endl;
 
    // Hicak 
       Hicak.fill(0.0);
@@ -420,6 +441,9 @@ double CoupledCluster::CCSD(){
           Hicak(i,c,a,k) -= (this->mointegrals_->IJKA(l,k,i,c))*Tia(l,a);
         }
       }
+      SUM = 0.0;
+      for(double x : Hicak) SUM += x*x;
+      cout << "Hicak = " << SUM << endl;
 
    // Wia time!
       Wia.fill(0.0);
@@ -440,12 +464,15 @@ double CoupledCluster::CCSD(){
         for(auto j = 0; j < this->nO_; j++)
         for(auto b = 0; b < this->nV_; b++) {
           Wia(i,a) += Hbj(b,j)*(Tijab(i,j,a,b) + Tia(i,b)*Tia(j,a))
-                     -(this->mointegrals_->IAJB(i,b,j,a)*Tia(j,b));
+                     -(this->mointegrals_->IAJB(i,b,j,a))*Tia(j,b);
           for(auto k = 0; k < this->nO_; k++) {
             Wia(i,a) -= (this->mointegrals_->IJKA(j,k,i,b))*Tau(j,k,a,b)*(0.5);
           }
         }
       }
+      SUM = 0.0;
+      for(double x : Wia) SUM += x*x;
+      cout << "WIA " << SUM << endl;
       
     // Wijab
       Wijab.fill(0.0);
@@ -489,16 +516,30 @@ double CoupledCluster::CCSD(){
                             (this->mointegrals_->IAJB(j,c,k,b))*Tia(i,c)*Tia(k,a); 
         }
         E5 += Wijab(i,j,a,b)*Tijab(i,j,a,b);
-      } // end ijab 
+      }  // end ijab 
+      SUM = 0.0;
+      for(double x : Wijab) SUM += x*x;
+      cout << "WIJAB " << SUM << endl;
+
+      E1 = 0.0;
+      E2 = 0.0;
+      E3 = 0.0;
+      E4 = 0.0;
+      E5 = 0.0;
  
      // Make new T amplitudes
       Tia.fill(0.0);
       for(auto i = 0; i < this->nO_; i++)
-      for(auto a = 0; i < this->nO_; i++) {
+      for(auto a = 0; a < this->nV_; a++) {
         Denom = (*this->singleSlater_->epsA())(i)
                 - (*this->singleSlater_->epsA())(a + this->nO_);
         Tia(i,a) = Wia(i,a)/Denom;
       }
+
+      SUM = 0.0;
+      for(double x : Tia) SUM += x*x;
+      cout << "TIA " << SUM << endl;
+
       Tijab.fill(0.0);
       for(auto i = 0; i < this->nO_; i++) 
       for(auto j = 0; j < this->nO_; j++) 
@@ -510,6 +551,11 @@ double CoupledCluster::CCSD(){
                 - (*this->singleSlater_->epsA())(b + this->nO_);
         Tijab(i,j,a,b) = (Wijab(i,j,a,b) + (this->mointegrals_->IJAB(i,j,a,b)))/Denom; 
       }
+
+      SUM = 0.0;
+      for(double x : Tijab) SUM += x*x;
+      cout << "TIJAB " << SUM << endl;
+
       ECCSD = 0.0;
       for(auto i = 0; i < this->nO_; i++) 
       for(auto j = 0; j < this->nO_; j++) 
@@ -519,9 +565,15 @@ double CoupledCluster::CCSD(){
                                          Tia(i,b)*Tia(j,a));
         ECCSD += (this->mointegrals_->IJAB(i,j,a,b))*Tau(i,j,a,b);
       }
+
+      SUM = 0.0;
+      for(double x : Tau) SUM += x*x;
+      cout << "TAU " << SUM << endl;
+
       ECCSD = ECCSD*(0.25);
       deltaE = ECCSD - ECorr; 
       cout << "iter # " << niter << "   " << ECCSD << "  Delta-E = " << deltaE << endl;
+      if (std::abs(deltaE) < 1.0e-10) break;
      
 
 

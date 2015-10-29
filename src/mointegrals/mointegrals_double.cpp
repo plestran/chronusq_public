@@ -1549,6 +1549,7 @@ void MOIntegrals<double>::formDBar(){
   this->formIJKA(false);
 
   RealTensor4d Sijka, Sijab, Siabc, Siajb, Sabcd, Sijkl;
+  RealTensor4d Dijka, Dijab, Diabc, Diajb, Dabcd, Dijkl;
   Sijka = RealTensor4d(*this->ijka_);
   Sijab = RealTensor4d(*this->ijab_);
   Siabc = RealTensor4d(*this->iabc_);
@@ -1557,6 +1558,7 @@ void MOIntegrals<double>::formDBar(){
   Sijkl = RealTensor4d(*this->ijkl_);
 
   if(this->Ref_ == SingleSlater<double>::TCS) {
+    double SUM = 0.0;
 
     // IJKA
     for(auto i = 0; i < this->nO_; i++)
@@ -1566,6 +1568,12 @@ void MOIntegrals<double>::formDBar(){
       (*this->ijka_)(i,j,k,a) = Sijka(i,k,j,a) - Sijka(j,k,i,a);
     }
 
+    Dijka = RealTensor4d(*this->ijka_);
+    SUM = 0.0;
+    for(double x : Dijka) SUM += x*x;
+    cout << std::setprecision(12) << "IJKA = " << SUM << endl;
+    
+
     // IJAB
     for(auto i = 0; i < this->nO_; i++)
     for(auto j = 0; j < this->nO_; j++)
@@ -1573,6 +1581,12 @@ void MOIntegrals<double>::formDBar(){
     for(auto b = 0; b < this->nV_; b++) {
       (*this->ijab_)(i,j,a,b) = Siajb(i,a,j,b) - Siajb(i,b,j,a);
     }
+
+    Dijab = RealTensor4d(*this->ijab_);
+    SUM = 0.0;
+    for(double x : Dijab) SUM += x*x;
+    cout << "IJAB = " << SUM << endl;
+
     // ABCD
     for(auto a = 0; a < this->nV_; a++)
     for(auto b = 0; b < this->nV_; b++)
@@ -1580,6 +1594,11 @@ void MOIntegrals<double>::formDBar(){
     for(auto d = 0; d < this->nV_; d++) {
       (*this->abcd_)(a,b,c,d) = Sabcd(a,c,b,d) - Sabcd(a,d,b,c);
     }
+
+    Dabcd = RealTensor4d(*this->abcd_);
+    SUM = 0.0;
+    for(double x : Dabcd) SUM += x*x;
+    cout << "ABCD = " << SUM << endl;
 
     // IAJB
     for(auto i = 0; i < this->nO_; i++)
@@ -1589,6 +1608,11 @@ void MOIntegrals<double>::formDBar(){
       (*this->iajb_)(i,a,j,b) = Sijab(i,j,a,b) - Siajb(i,b,j,a);
     }
   
+    Diajb = RealTensor4d(*this->iajb_);
+    SUM = 0.0;
+    for(double x : Diajb) SUM += x*x;
+    cout << "IAJB = " << SUM << endl;
+
     // IABC
     for(auto i = 0; i < this->nO_; i++)
     for(auto a = 0; a < this->nV_; a++)
@@ -1597,6 +1621,11 @@ void MOIntegrals<double>::formDBar(){
       (*this->iabc_)(i,a,b,c) = Siabc(i,b,a,c) - Siabc(i,c,a,b);
     }
 
+    Diabc = RealTensor4d(*this->iabc_);
+    SUM = 0.0;
+    for(double x : Diabc) SUM += x*x;
+    cout << "IABC = " << SUM << endl;
+
     // IJKL
     for(auto i = 0; i < this->nO_; i++)
     for(auto j = 0; j < this->nO_; j++)
@@ -1604,6 +1633,11 @@ void MOIntegrals<double>::formDBar(){
     for(auto l = 0; l < this->nO_; l++) {
       (*this->ijkl_)(i,j,k,l) = Sijkl(i,k,j,l) - Sijkl(i,l,j,k);
     }
+
+    Dijkl = RealTensor4d(*this->ijkl_);
+    SUM = 0.0;
+    for(double x : Dijkl) SUM += x*x;
+    cout << "IJKL = " << SUM << endl;
   }
 }
 
