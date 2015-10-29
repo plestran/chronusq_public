@@ -63,7 +63,7 @@ def genSummary(testtable,summary):
 			entry.append(summary[j][0])
 			entry.append(summary[j][1])
 			entry.append(len(ref[i.infile[:8]].w))
-			if summary[j][0] < 1E-4 and summary[j][1] < 1E-4:
+			if summary[j][0] < 1E-7 and summary[j][1] < 1E-7:
 				entry.append('YES')
 			else:
 				entry.append('** NO **')
