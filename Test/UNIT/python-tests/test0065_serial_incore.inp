@@ -1,0 +1,28 @@
+#  test0065 serial incore Complex UHF 6-31G w/ field
+#
+#  Molecule Specification
+#
+[Molecule]
+charge = 0
+mult = 1
+geom:
+	O 0   0.000000    0.000000    0.608586
+	O 0   0.000000    0.000000    -0.608586
+  
+#
+#  Job Specification
+#
+[QM]
+reference = Complex UHF
+job       = SCF
+basis     = 6-31G.gbs
+ints			= incore
+
+[SCF]
+field 		= 0.01 0.0 0.0
+
+#
+#  Misc Settings
+#
+[Misc]
+nsmp = 1
