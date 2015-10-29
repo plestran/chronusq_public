@@ -277,59 +277,6 @@ test0059_smp_direct.inp      SCF    O2/6-31G   OpenMP DField SCF - Direct  Integ
 #test0060_smp_incore.inp      SCF    O2/cc-pVDZ OpenMP DField SCF - In-Core Integrals (6D)
 #test0060_smp_direct.inp      SCF    O2/cc-pVDZ OpenMP DField SCF - Direct  Integrals (6D)
 
-#** test0061-0066 Test Small molecule ROHF (CUHF) CIS code **
-#test0061_serial_incore.inp   RESP    Li/STO-3G    Serial CIS - In-Core Integrals
-#test0061_serial_direct.inp   RESP    Li/STO-3G    Serial CIS - Direct  Integrals
-#test0061_smp_incore.inp      RESP    Li/STO-3G    OpenMP CIS - In-Core Integrals
-#test0061_smp_direct.inp      RESP    Li/STO-3G    OpenMP CIS - Direct  Integrals
-#test0062_serial_incore.inp   RESP    Li/6-31G     Serial CIS - In-Core Integrals
-#test0062_serial_direct.inp   RESP    Li/6-31G     Serial CIS - Direct  Integrals
-#test0062_smp_incore.inp      RESP    Li/6-31G     OpenMP CIS - In-Core Integrals
-#test0062_smp_direct.inp      RESP    Li/6-31G     OpenMP CIS - Direct  Integrals
-#test0063_serial_incore.inp   RESP    Li/cc-pVDZ   Serial CIS - In-Core Integrals (6D)
-#test0063_serial_direct.inp   RESP    Li/cc-pVDZ   Serial CIS - Direct  Integrals (6D)
-#test0063_smp_incore.inp      RESP    Li/cc-pVDZ   OpenMP CIS - In-Core Integrals (6D)
-#test0063_smp_direct.inp      RESP    Li/cc-pVDZ   OpenMP CIS - Direct  Integrals (6D)
-#test0064_serial_incore.inp   RESP    O2/6-31G     Serial CIS - In-Core Integrals
-#test0064_serial_direct.inp   RESP    O2/6-31G     Serial CIS - Direct  Integrals
-#test0064_smp_incore.inp      RESP    O2/6-31G     OpenMP CIS - In-Core Integrals
-#test0064_smp_direct.inp      RESP    O2/6-31G     OpenMP CIS - Direct  Integrals
-#test0065_serial_incore.inp   RESP    O2/cc-pVDZ   Serial CIS - In-Core Integrals (6D)
-#test0065_serial_direct.inp   RESP    O2/cc-pVDZ   Serial CIS - Direct  Integrals (6D)
-#test0065_smp_incore.inp      RESP    O2/cc-pVDZ   OpenMP CIS - In-Core Integrals (6D)
-#test0065_smp_direct.inp      RESP    O2/cc-pVDZ   OpenMP CIS - Direct  Integrals (6D)
-#test0066_serial_incore.inp   RESP    O2/def2-SVPD Serial CIS - In-Core Integrals (6D)
-#test0066_serial_direct.inp   RESP    O2/def2-SVPD Serial CIS - Direct  Integrals (6D)
-#test0066_smp_incore.inp      RESP    O2/def2-SVPD OpenMP CIS - In-Core Integrals (6D)
-#test0066_smp_direct.inp      RESP    O2/def2-SVPD OpenMP CIS - Direct  Integrals (6D)
-
-#** test0067-0072 Test Small molecule ROHF (CUHF) RPA code **
-#test0067_serial_incore.inp   RESP    Li/STO-3G    Serial RPA - In-Core Integrals
-#test0067_serial_direct.inp   RESP    Li/STO-3G    Serial RPA - Direct  Integrals
-#test0067_smp_incore.inp      RESP    Li/STO-3G    OpenMP RPA - In-Core Integrals
-#test0067_smp_direct.inp      RESP    Li/STO-3G    OpenMP RPA - Direct  Integrals
-#test0068_serial_incore.inp   RESP    Li/6-31G     Serial RPA - In-Core Integrals
-#test0068_serial_direct.inp   RESP    Li/6-31G     Serial RPA - Direct  Integrals
-#test0068_smp_incore.inp      RESP    Li/6-31G     OpenMP RPA - In-Core Integrals
-#test0068_smp_direct.inp      RESP    Li/6-31G     OpenMP RPA - Direct  Integrals
-#test0069_serial_incore.inp   RESP    Li/cc-pVDZ   Serial RPA - In-Core Integrals (6D)
-#test0069_serial_direct.inp   RESP    Li/cc-pVDZ   Serial RPA - Direct  Integrals (6D)
-#test0069_smp_incore.inp      RESP    Li/cc-pVDZ   OpenMP RPA - In-Core Integrals (6D)
-#test0069_smp_direct.inp      RESP    Li/cc-pVDZ   OpenMP RPA - Direct  Integrals (6D)
-#test0070_serial_incore.inp   RESP    O2/6-31G     Serial RPA - In-Core Integrals
-#test0070_serial_direct.inp   RESP    O2/6-31G     Serial RPA - Direct  Integrals
-#test0070_smp_incore.inp      RESP    O2/6-31G     OpenMP RPA - In-Core Integrals
-#test0070_smp_direct.inp      RESP    O2/6-31G     OpenMP RPA - Direct  Integrals
-#test0071_serial_incore.inp   RESP    O2/cc-pVDZ   Serial RPA - In-Core Integrals (6D)
-#test0071_serial_direct.inp   RESP    O2/cc-pVDZ   Serial RPA - Direct  Integrals (6D)
-#test0071_smp_incore.inp      RESP    O2/cc-pVDZ   OpenMP RPA - In-Core Integrals (6D)
-#test0071_smp_direct.inp      RESP    O2/cc-pVDZ   OpenMP RPA - Direct  Integrals (6D)
-#test0072_serial_incore.inp   RESP    O2/def2-SVPD Serial RPA - In-Core Integrals (6D)
-#test0072_serial_direct.inp   RESP    O2/def2-SVPD Serial RPA - Direct  Integrals (6D)
-#test0072_smp_incore.inp      RESP    O2/def2-SVPD OpenMP RPA - In-Core Integrals (6D)
-#test0072_smp_direct.inp      RESP    O2/def2-SVPD OpenMP RPA - Direct  Integrals (6D)
-
-
 ## # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 #
 #TESTS ARE BROKEN OR MISLABELED BELOW THIS POINT
