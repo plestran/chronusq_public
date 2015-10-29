@@ -1,4 +1,4 @@
-#  test0065 serial incore Complex UHF 6-31G w/ field
+#  test0065 serial incore Complex RHF 6-31G w/ field
 #
 #  Molecule Specification
 #
@@ -13,7 +13,7 @@ geom:
 #  Job Specification
 #
 [QM]
-reference = Complex UHF
+reference = Complex RHF
 job       = SCF
 basis     = 6-31G.gbs
 ints			= incore

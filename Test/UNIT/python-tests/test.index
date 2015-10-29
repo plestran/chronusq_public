@@ -276,7 +276,7 @@ ChronusQ Input File                 Description
 ##test0060_smp_incore.inp      SCF    O2/cc-pVDZ OpenMP DField SCF - In-Core Integrals (6D)
 ##test0060_smp_direct.inp      SCF    O2/cc-pVDZ OpenMP DField SCF - Direct  Integrals (6D)
 #
-** test0061-0063 Test Small molecule Complex UHF SCF code **
+** test0061-0063 Test Small molecule Complex RHF SCF code **
 test0061_serial_incore.inp   SCF    O2/STO-3G  Serial SCF - In-Core Integrals
 test0061_serial_direct.inp   SCF    O2/STO-3G  Serial SCF - Direct  Integrals
 test0061_smp_incore.inp      SCF    O2/STO-3G  OpenMP SCF - In-Core Integrals
@@ -290,7 +290,7 @@ test0063_serial_direct.inp   SCF    O2/cc-pVDZ Serial SCF - Direct  Integrals (6
 test0063_smp_incore.inp      SCF    O2/cc-pVDZ OpenMP SCF - In-Core Integrals (6D)
 test0063_smp_direct.inp      SCF    O2/cc-pVDZ OpenMP SCF - Direct  Integrals (6D)
 
-** test0064-0066 Test Small molecule Complex UHF SCF in Dipole Field code **
+** test0064-0066 Test Small molecule Complex RHF SCF in Dipole Field code **
 test0064_serial_incore.inp   SCF    O2/STO-3G  Serial DField SCF - In-Core Integrals
 test0064_serial_direct.inp   SCF    O2/STO-3G  Serial DField SCF - Direct  Integrals
 test0064_smp_incore.inp      SCF    O2/STO-3G  OpenMP DField SCF - In-Core Integrals
@@ -299,10 +299,10 @@ test0065_serial_incore.inp   SCF    O2/6-31G   Serial DField SCF - In-Core Integ
 test0065_serial_direct.inp   SCF    O2/6-31G   Serial DField SCF - Direct  Integrals
 test0065_smp_incore.inp      SCF    O2/6-31G   OpenMP DField SCF - In-Core Integrals
 test0065_smp_direct.inp      SCF    O2/6-31G   OpenMP DField SCF - Direct  Integrals
-#test0066_serial_incore.inp   SCF    O2/cc-pVDZ Serial DField SCF - In-Core Integrals (6D)
-#test0066_serial_direct.inp   SCF    O2/cc-pVDZ Serial DField SCF - Direct  Integrals (6D)
-#test0066_smp_incore.inp      SCF    O2/cc-pVDZ OpenMP DField SCF - In-Core Integrals (6D)
-#test0066_smp_direct.inp      SCF    O2/cc-pVDZ OpenMP DField SCF - Direct  Integrals (6D)
+test0066_serial_incore.inp   SCF    O2/cc-pVDZ Serial DField SCF - In-Core Integrals (6D)
+test0066_serial_direct.inp   SCF    O2/cc-pVDZ Serial DField SCF - Direct  Integrals (6D)
+test0066_smp_incore.inp      SCF    O2/cc-pVDZ OpenMP DField SCF - In-Core Integrals (6D)
+test0066_smp_direct.inp      SCF    O2/cc-pVDZ OpenMP DField SCF - Direct  Integrals (6D)
 
 ## # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 #
@@ -315,10 +315,4 @@ test0065_smp_direct.inp      SCF    O2/6-31G   OpenMP DField SCF - Direct  Integ
 ##test0100_serial_direct.inp   RT     O2/6-31G Serial RT - Direct  Integrals 
 ##test0100_smp_incore.inp      RT     O2/6-31G SMP    RT - In-Core Integrals 
 ##test0100_smp_direct.inp      RT     O2/6-31G SMP    RT - Direct  Integrals 
-#
-#** test0666- complex SCF**
-##test0666_serial_incore.inp   SCF    O2/STO-3G  Serial SCF = In-Core Integrals 
-##test0666_serial_direct.inp   SCF    O2/STO-3G  Serial SCF = Direct  Integrals 
-##test0666_smp_incore.inp      SCF    O2/STO-3G  SMP    SCF = In-Core Integrals 
-##test0666_smp_direct.inp      SCF    O2/STO-3G  SMP    SCF = Direct  Integrals 
 #

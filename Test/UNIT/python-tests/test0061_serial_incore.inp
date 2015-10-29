@@ -1,4 +1,4 @@
-#  test0061 serial incore Complex UHF STO-3G
+#  test0061 serial incore Complex RHF STO-3G
 #
 #  Molecule Specification
 #
@@ -13,7 +13,7 @@ geom:
 #  Job Specification
 #
 [QM]
-reference = Complex UHF
+reference = Complex RHF
 job       = SCF
 basis     = sto3g.gbs
 ints			= incore
