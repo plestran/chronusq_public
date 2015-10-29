@@ -12,6 +12,7 @@ message(STATUS "Using ${CMAKE_MODULE_PATH}")
 option(USE_LIBINT "Use LibInt Integral Driver"  ON) # Default Libint
 option(BUILD_LA   "Build LAPACK and BLAS locally" OFF)
 option(BUILD_LIBINT "Build Libint via cmake" OFF)
+option(NCORE_LIBINT "Number of Cores to build Libint" 4)
 
 # Check for dependencies
 find_package(PythonLibs REQUIRED)
@@ -50,7 +51,7 @@ if(USE_LIBINT)
       PREFIX ${PROJECT_BINARY_DIR}/deps/libint
       URL "${PROJECT_SOURCE_DIR}/deps/src/libint-2.1.0-beta2.tgz"
       CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/deps/libint/src/libint/configure --prefix=${PROJECT_BINARY_DIR}/deps CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${CMAKE_CXX_FLAGS}
-      BUILD_COMMAND make -j8
+      BUILD_COMMAND make -j${NCORE_LIBINT}
       BUILD_IN_SOURCE 1
       INSTALL_COMMAND make install
     )  

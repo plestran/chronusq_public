@@ -408,5 +408,32 @@ cmake \
   ..
     \end{lstlisting}
 
+    \subsubsection{Compilation} \label{subsubsec:ChronusQCompile}
+    
+    Once a successful configuration has been acheived, compilation is very simple.
+    From the build directory, simply type
+
+    \begin{lstlisting}
+      > make
+    \end{lstlisting}
+    and compilation will begin. ChronusQ does not currently have a standard install
+    protocol once the compilation has been successful, so it is not suggested that
+    the user performs a \texttt{make install} command, as we are not sure if this
+    will work on all machines. Note that this is being looked into and will be
+    handled before the first non-Beta release.
+
+    \textbf{Note on parallel builds}: If you wish to compile ChronusQ in parallel,
+    i.e.
+    \begin{lstlisting}
+      > make -j <NCORES>
+    \end{lstlisting}
+
+    you will likely experience very many errors as the \CMake~configuration has not
+    been set up to smartly do things in the correct order. It will try to build
+    \Libint~and ChronusQ at the same time, and because \Libint~is a dependency of
+    ChronusQ, the build won't be able to find the correct headers, and error 
+    messages will ensue.
+
+
 
 \end{document}
