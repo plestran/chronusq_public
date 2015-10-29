@@ -47,6 +47,8 @@ void printUnitInfo(Controls *, SingleSlater<dcomplex> *, SDResponse<double> *, R
 
 void initCQ();
 void finalizeCQ();
+template<typename T> void writeJobMeta(SingleSlater<T>&,SDResponse<T>&,
+  RealTime<T>&,Molecule&,AOIntegrals&,FileIO&);
 
 // trace of product of two symmetric matrices
 double traceSymm(RealMatrix *,RealMatrix *);

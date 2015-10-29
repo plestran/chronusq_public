@@ -31,58 +31,88 @@ namespace ChronusQ {
 
 template<>
 void SingleSlater<double>::formVXC(){
-    int nAtom    = this->molecule_->nAtoms();    // Number of Atoms
-    int nRad     = 100;                          // Number of Radial grid points for each center
-    int nAng     = 302;                          // Number of Angular grid points for each center (only certain values are allowed - see grid.h)
-    int npts     = nRad*nAng;                    // Total Number of grid point for each center
+    int nAtom    = this->molecule_->nAtoms(); // Number of Atoms
+    int nRad     = 100;       // Number of Radial grid points for each center
+    int nAng     = 302;       // Number of Angular grid points for each center 
+                              //  (only certain values are allowed - see grid.h)
+
+    int npts     = nRad*nAng; // Total Number of grid point for each center
+
     double weight= 0.0;                            
-    double CxVx = -(std::pow((3.0/math.pi),(1.0/3.0)));    //TF LDA Prefactor (for Vx)
-    double CxEn =  (3.0/4.0);                              //TF LDA Prefactor to finish the X-Energy
+
+    //TF LDA Prefactor (for Vx)
+    double CxVx = -(std::pow((3.0/math.pi),(1.0/3.0)));    
+    double CxEn =  (3.0/4.0);      //TF LDA Prefactor to finish the X-Energy
     double val = 4.0*math.pi*CxVx;
     this->totalEx = 0.0;                                  // Total Exchange Energy
     this->totalEcorr = 0.0;                               // Total Correlation Energy
-    this->cor_type = 1;                                  // Define Correlation Type (1 for VWN5 and 2 for VWN3)
-//  Generating grids (Raw grid, it has to be centered and integrated over each center and centered over each atom)
+/*  
+ *  Generate grids 
+ *
+ *    Raw grid, it has to be centered and integrated over each center and 
+ *    centered over each atom
+ */
     GaussChebyshev1stGridInf Rad(nRad,0.0,1.0);   // Radial Grid
     LebedevGrid GridLeb(nAng);                    // Angular Grid
-    GridLeb.genGrid();                            // Generate Angular Grid (it alwais the same for all atoms)
-    this->vXA()->setZero();                       // Set to zero every occurence of the SCF
-    this->vCorA()->setZero();                     // Set to zero every occurence of the SCF
+    GridLeb.genGrid();                            // Generate Angular Grid
+    this->vXA()->setZero();   // Set to zero every occurence of the SCF
+    this->vCorA()->setZero(); // Set to zero every occurence of the SCF
     if(!this->isClosedShell && this->Ref_ != TCS) this->vXB()->setZero();
     if(!this->isClosedShell && this->Ref_ != TCS) this->vCorB()->setZero();
-//  Loop over each centers (Atoms) (I think can be distribuited over different cpus)
+    // Loop over atomic centers
     for(int iAtm = 0; iAtm < nAtom; iAtm++){
-//    The Radial grid is generated and scaled for each atom
+
+      // The Radial grid is generated and scaled for each atom
       Rad.genGrid();
-      Rad.scalePts((elements[this->molecule_->index(iAtm)].sradius)) ;  // Scale the grid according the Atomic Bragg-Slater Radius 
-      TwoDGrid Raw3Dg(npts,&Rad,&GridLeb);                              // Final Raw (not centered) 3D grid (Radial times Angular grid)
+      // Scale the grid according the Atomic Bragg-Slater Radius 
+      Rad.scalePts((elements[this->molecule_->index(iAtm)].sradius)) ;  
+      // Final Raw (not centered) 3D grid (Radial times Angular grid)
+      TwoDGrid Raw3Dg(npts,&Rad,&GridLeb);                              
+
       //Center the Grid at iAtom
-      Raw3Dg.centerGrid((*this->molecule_->cart())(0,iAtm),(*this->molecule_->cart())(1,iAtm),(*this->molecule_->cart())(2,iAtm));
-//    Loop over grid points
+      Raw3Dg.centerGrid(
+        (*this->molecule_->cart())(0,iAtm),
+        (*this->molecule_->cart())(1,iAtm),
+        (*this->molecule_->cart())(2,iAtm)
+      );
+
+      // Loop over grid points
       for(int ipts = 0; ipts < npts; ipts++){
-//    Evaluate each Becke fuzzy call weight, normalize it and muliply by the Raw grid weight at that point
+
+        // Evaluate each Becke fuzzy call weight, normalize it and muliply by 
+        //   the Raw grid weight at that point
         weight = Raw3Dg.getweightsGrid(ipts)  
                  * (this->formBeckeW((Raw3Dg.gridPtCart(ipts)),iAtm))
                  / (this->normBeckeW(Raw3Dg.gridPtCart(ipts))) ;
-//    Build the Vxc for the ipts grid point (Vxc will be ready at the end of the two loop, to be finalized)
+        // Build the Vxc for the ipts grid point 
+        //  ** Vxc will be ready at the end of the two loop, to be finalized ** 
         this->buildVxc((Raw3Dg.gridPtCart(ipts)),weight);
-        } //end loop over Raw grid points
-    } // end loop natoms
-//  Finishing the Vxc using the TF factor and the integration prefactor over a solid sphere
+
+      } // loop ipts
+    } // loop natoms
+
+    //  Finishing the Vxc using the TF factor and the integration 
+    //    prefactor over a solid sphere
     (*this->vXA())    =  val * (*this->vXA());
     this->totalEx     =  val * CxEn * (this->totalEx);
     (*this->vCorA())  =  4.0 * math.pi * (*this->vCorA());
     if(!this->isClosedShell && this->Ref_ != TCS) (*this->vCorB())  =  4.0 * math.pi * (*this->vCorB());
     this->totalEcorr  =  4.0 * math.pi * (this->totalEcorr);
-    if(!this->isClosedShell && this->Ref_ != TCS) (*this->vXA()) =  std::pow(2.0,(1.0/3.0)) * (*this->vXA()) ;  // For open shell averything has to be scaled by 2^(1/3)
-    if(!this->isClosedShell && this->Ref_ != TCS) (*this->vXB()) =  std::pow(2.0,(1.0/3.0)) * val * (*this->vXB()) ;
-//    if(!this->isClosedShell && this->Ref_ != TCS) this->totalEx = std::pow(2.0,(1.0/3.0)) * this->totalEx;
-    prettyPrint(this->fileio_->out,(*this->vXA()),"LDA Vx alpha");
-    prettyPrint(this->fileio_->out,(*this->vCorA()),"Vc alpha");
-    if(!this->isClosedShell && this->Ref_ != TCS) prettyPrint(this->fileio_->out,(*this->vXB()),"LDA Vx beta");
-    if(!this->isClosedShell && this->Ref_ != TCS) prettyPrint(this->fileio_->out,(*this->vCorB())," Vc beta");
-    this->fileio_->out << "Total LDA Ex =" << this->totalEx << " Total VWN Corr= " << this->totalEcorr <<endl;
-//    cout << "Total LDA Ex =" << this->totalEx << " Total VWN Corr= " << this->totalEcorr <<endl;
+    // For open shell averything has to be scaled by 2^(1/3)
+    if(!this->isClosedShell && this->Ref_ != TCS){
+      (*this->vXA()) *= std::pow(2.0,(1.0/3.0));  
+      (*this->vXB()) *= std::pow(2.0,(1.0/3.0)) * val;
+    }
+
+    if(this->printLevel_ >= 3) {
+      prettyPrint(this->fileio_->out,(*this->vXA()),"LDA Vx alpha");
+      prettyPrint(this->fileio_->out,(*this->vCorA()),"Vc Vc alpha");
+      if(!this->isClosedShell && this->Ref_ != TCS) 
+        prettyPrint(this->fileio_->out,(*this->vXB()),"LDA Vx beta");
+
+      this->fileio_->out << "Total LDA Ex ="    << this->totalEx 
+                         << " Total VWN Corr= " << this->totalEcorr << endl;
+    }
 }; //End
 
 template<>
@@ -123,8 +153,9 @@ void SingleSlater<double>::formCor(double rho, double spindensity){
    double rs_da_drs    = 0.0;
    double spindensity_4 = std::pow(spindensity,4.0);
    double spindensity_3 = std::pow(spindensity,3.0);
+
 //   VWN5
-   if (this->cor_type == 1){
+   if (this->CorrKernel_ == VWN5){
      b_f  =  7.06042;  // Caption Table 5
      c_f  = 18.0578;   // Caption Table 5
      x0_f = -0.32500;  // Caption Table 5
@@ -134,7 +165,7 @@ void SingleSlater<double>::formCor(double rho, double spindensity){
      b_a  =  1.13107;   // intext page
      c_a  = 13.0045;    // intext page
      x0_a = -0.00475840; // intext page
-   }else if(this->cor_type == 2){
+   }else if(this->CorrKernel_ == VWN3){
 //  VWN3
      b_p  =  13.0720;  // into text page 1207
      c_p  =  42.7198;  // into text page 1207

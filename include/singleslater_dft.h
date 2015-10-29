@@ -73,8 +73,8 @@ void SingleSlater<T>::buildVxc(cartGP gridPt, double weight){
    double *pointProd; 
    double rhor = 0.0;
    double rhor_B = 0.0;
-   bool   do_corr = true;                   //Activate Correlation
-   bool   do_ex = true;                      //Activate Exchange
+// bool   do_corr = false;                   //Activate Correlation
+// bool   do_ex = true;                      //Activate Exchange
    std::unique_ptr<RealMatrix>  overlapR_;        ///< Overlap at grid point
    overlapR_ = std::unique_ptr<RealMatrix>(
      new RealMatrix(this->nBasis_,this->nBasis_));
@@ -90,7 +90,12 @@ void SingleSlater<T>::buildVxc(cartGP gridPt, double weight){
         double *Buff = new double [n1*n2];
         RealMap fBuff(Buff,n1,n2);
         fBuff.setZero();
-        pointProd = this->basisset_->basisProdEval(this->basisset_->shells(s1),this->basisset_->shells(s2),&gridPt);
+        pointProd = 
+          this->basisset_->basisProdEval(
+            this->basisset_->shells(s1),
+            this->basisset_->shells(s2),
+            &gridPt
+          );
         Buff = this->twodgrid_->BuildDensity(Buff,pointProd,n1,n2);
         overlapR_->block(bf1_s,bf2_s,n1,n2) = fBuff; 
         }
@@ -100,12 +105,12 @@ void SingleSlater<T>::buildVxc(cartGP gridPt, double weight){
     rhor = overlapR_->frobInner(this->densityA()->conjugate());
 //
 //  LDA Slater Exchange
-    if (do_ex) {
+    if (this->ExchKernel_ != NOEXCH) {
     (*this->vXA())  += weight*(*overlapR_)*(std::pow(rhor,(1.0/3.0)));
     this->totalEx   += weight*(std::pow(rhor,(4.0/3.0)));
     }
 //  VWN Correlation
-    if (do_corr) {
+    if (this->CorrKernel_ != NOCORR) {
     if (rhor > 1.0e-20) {                       //this if statement prevent numerical instability with zero guesses
 //      this->formVWNPara(2.38732414637843e-04);
 //      this->formVWNPara(2.98415518297304e-05);
@@ -117,16 +122,16 @@ void SingleSlater<T>::buildVxc(cartGP gridPt, double weight){
     }
    }
    if(!this->isClosedShell && this->Ref_ != TCS) {
+    if (this->ExchKernel_ != NOEXCH){
      rhor   = overlapR_->frobInner(this->densityA()->conjugate());
      rhor_B = overlapR_->frobInner(this->densityB()->conjugate());
-    if (do_ex){
      (*this->vXA()) += weight*(*overlapR_)*(std::pow(rhor,(1.0/3.0)));
      (*this->vXB()) += weight*(*overlapR_)*(std::pow(rhor_B,(1.0/3.0)));
-//     this->totalEx   += weight*((std::pow(rhor,(4.0/3.0)))+(std::pow(rhor_B,(4.0/3.0))));
-//     if((rhor+rhor_B) > 1.0e-20) this->totalEx   += weight*( (std::pow((rhor+rhor_B),(4.0/3.0)))*(this->f_spindens(1,this->spindens(rhor,rhor_B))));
-     if((rhor+rhor_B) > 1.0e-20) this->totalEx   += weight*(std::pow((rhor+rhor_B),(4.0/3.0)))*(1.0+( (-1.0+std::pow(2.0,(1.0/3.0)))*(this->f_spindens(0,this->spindens(rhor,rhor_B)))));
+     if((rhor+rhor_B) > 1.0e-20) this->totalEx   += 
+                                   weight*(std::pow((rhor+rhor_B),(4.0/3.0)))*
+                                     (this->f_spindens(1,this->spindens(rhor,rhor_B)));
       }
-    if (do_corr) {
+    if (this->CorrKernel_ != NOCORR) {
     if (rhor+rhor_B > 1.0e-20) {                       //this if statement prevent numerical instability with zero guesses
      this->formCor((rhor+rhor_B),(this->spindens(rhor,rhor_B)));
       (*this->vCorA())    += weight*(*overlapR_)*this->mu_corr;
@@ -135,6 +140,7 @@ void SingleSlater<T>::buildVxc(cartGP gridPt, double weight){
       }
      }
     }
+//  }
 };  //End
 
 

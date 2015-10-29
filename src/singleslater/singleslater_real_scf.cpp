@@ -220,6 +220,7 @@ void SingleSlater<double>::evalConver(int iter){
   this->isConverged = (PAlphaRMS < this->denTol_) && (std::pow(EDelta,2) < this->eneTol_);
   if(!this->isClosedShell)
     this->isConverged = this->isConverged && (PBetaRMS < this->denTol_);
+  if(this->isPrimary) this->writeSCFFiles();
 }
 
 template<>

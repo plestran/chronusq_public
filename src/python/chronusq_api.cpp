@@ -23,11 +23,28 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setMaxMultipole" , &SingleSlater<double>::setMaxMultipole        )
     .def("printLevel"      , &SingleSlater<double>::printLevel             )
     .def("setPrintLevel"   , &SingleSlater<double>::setPrintLevel          )
+    .def("setSCFDenTol"    , &SingleSlater<double>::setSCFDenTol           )
+    .def("setSCFEneTol"    , &SingleSlater<double>::setSCFEneTol           )
+    .def("setSCFMaxIter"   , &SingleSlater<double>::setSCFMaxIter          )
+    .def("setField"        , &SingleSlater<double>::Wrapper_setField       )
+    .def("setGuess"        , &SingleSlater<double>::setGuess               )
+    .def("setCorrKernel"   , &SingleSlater<double>::setCorrKernel          )
+    .def("setExchKernel"   , &SingleSlater<double>::setExchKernel          )
+    .def("setDFTKernel"    , &SingleSlater<double>::setDFTKernel           )
+
+    .def("dipole"          , &SingleSlater<double>::Wrapper_dipole         )
+    .def("quadrupole"      , &SingleSlater<double>::Wrapper_quadrupole     )
+    .def("octupole"        , &SingleSlater<double>::Wrapper_octupole       )
 
     .def("Ref"             , &SingleSlater<double>::Ref                    )
     .def("nTCS"            , &SingleSlater<double>::nTCS                   ) 
 
     .def_readwrite("isClosedShell", &SingleSlater<double>::isClosedShell   )
+    .def_readonly("totalEnergy"   , &SingleSlater<double>::totalEnergy     )
+    .def_readonly("nSCFIter"      , &SingleSlater<double>::nSCFIter        )
+    .def_readwrite("isDFT"        , &SingleSlater<double>::isDFT           )
+    .def_readwrite("isHF"         , &SingleSlater<double>::isHF            )
+    .def_readwrite("doDIIS"       , &SingleSlater<double>::doDIIS          )
   ;
 
   class_<SingleSlater<dcomplex>,boost::noncopyable>("SingleSlater_complex",
@@ -50,11 +67,28 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setMaxMultipole" , &SingleSlater<dcomplex>::setMaxMultipole        )
     .def("printLevel"      , &SingleSlater<dcomplex>::printLevel             )
     .def("setPrintLevel"   , &SingleSlater<dcomplex>::setPrintLevel          )
+    .def("setSCFDenTol"    , &SingleSlater<dcomplex>::setSCFDenTol           )
+    .def("setSCFEneTol"    , &SingleSlater<dcomplex>::setSCFEneTol           )
+    .def("setSCFMaxIter"   , &SingleSlater<dcomplex>::setSCFMaxIter          )
+    .def("setField"        , &SingleSlater<dcomplex>::Wrapper_setField       )
+    .def("setGuess"        , &SingleSlater<dcomplex>::setGuess               )
+    .def("setCorrKernel"   , &SingleSlater<dcomplex>::setCorrKernel          )
+    .def("setExchKernel"   , &SingleSlater<dcomplex>::setExchKernel          )
+    .def("setDFTKernel"    , &SingleSlater<dcomplex>::setDFTKernel           )
+
+    .def("dipole"          , &SingleSlater<dcomplex>::Wrapper_dipole         )
+    .def("quadrupole"      , &SingleSlater<dcomplex>::Wrapper_quadrupole     )
+    .def("octupole"        , &SingleSlater<dcomplex>::Wrapper_octupole       )
 
     .def("Ref"             , &SingleSlater<dcomplex>::Ref                    )
     .def("nTCS"            , &SingleSlater<dcomplex>::nTCS                   ) 
 
     .def_readwrite("isClosedShell", &SingleSlater<dcomplex>::isClosedShell   )
+    .def_readonly("totalEnergy"   , &SingleSlater<dcomplex>::totalEnergy     )
+    .def_readonly("nSCFIter"      , &SingleSlater<dcomplex>::nSCFIter        )
+    .def_readwrite("isDFT"        , &SingleSlater<dcomplex>::isDFT           )
+    .def_readwrite("isHF"         , &SingleSlater<dcomplex>::isHF            )
+    .def_readwrite("doDIIS"       , &SingleSlater<dcomplex>::doDIIS          )
   ;
 
   enum_<SingleSlater<double>::REFERENCE>("Reference")
@@ -67,6 +101,28 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("UKS"           , SingleSlater<double>::UKS                    )
     .value("CUKS"          , SingleSlater<double>::CUKS                   )
     .value("GKS"           , SingleSlater<double>::GKS                    )
+  ;
+
+  enum_<SingleSlater<double>::GUESS>("Guess")
+    .value("SAD"  , SingleSlater<double>::SAD  )
+    .value("CORE" , SingleSlater<double>::CORE )
+    .value("READ" , SingleSlater<double>::READ )
+  ;
+
+  enum_<SingleSlater<double>::EXCH>("EXCH")
+    .value("NOEXCH"  , SingleSlater<double>::NOEXCH) 
+    .value("EXACT"   , SingleSlater<double>::EXACT )
+    .value("SLATER"  , SingleSlater<double>::SLATER)
+  ;
+  enum_<SingleSlater<double>::CORR>("CORR")
+    .value("NOCORR", SingleSlater<double>::NOCORR) 
+    .value("VWN3"  , SingleSlater<double>::VWN3  )
+    .value("VWN5"  , SingleSlater<double>::VWN5  )
+  ;
+  enum_<SingleSlater<double>::DFT>("DFT")
+    .value("NODFT"      , SingleSlater<double>::NODFT      )
+    .value("USERDEFINED", SingleSlater<double>::USERDEFINED)
+    .value("LSDA"       , SingleSlater<double>::LSDA       )
   ;
 
   class_<Molecule,boost::noncopyable>("Molecule",init<>())
@@ -109,7 +165,12 @@ BOOST_PYTHON_MODULE(libpythonapi){
   ;
 
   class_<FileIO,boost::noncopyable>("FileIO",init<std::string>())
-    .def("write", &FileIO::write)
+    .def("write"      , &FileIO::write         )
+    .def("iniH5Files" , &FileIO::iniH5Files    )
+    .def("iniStdGroups", &FileIO::iniStdGroups )
+    .def("iniStdSCFFilesDouble", &FileIO::iniStdSCFFilesDouble)
+    .def("iniStdSCFFilesComplex", &FileIO::iniStdSCFFilesComplex)
+    .def_readwrite("doRestart", &FileIO::doRestart   )
   ;
 
   
@@ -122,9 +183,17 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("nTCS"           , &AOIntegrals::nTCS                  )
     .def("setNTCS"        , &AOIntegrals::setNTCS               )
     .def("setMaxMultipole", &AOIntegrals::setMaxMultipole       )
+    .def("setAlgorithm"   , &AOIntegrals::setAlgorithm          )
     
+    .def_readonly("integralAlgorithm", &AOIntegrals::integralAlgorithm)
 //  .def_readwrite("allocERI", &AOIntegrals::allocERI           )
 //  .def_readwrite("doDF"    , &AOIntegrals::doDF               )
+  ;
+
+  enum_<AOIntegrals::INTEGRAL_ALGORITHM>("AOIntegrals_INTEGRAL_ALGORITHM")
+    .value("DIRECT"   , AOIntegrals::DIRECT)
+    .value("INCORE"   , AOIntegrals::INCORE)
+    .value("DENFIT"   , AOIntegrals::DENFIT)
   ;
 
   class_<RealTime<double>,boost::noncopyable>("RealTime_double",init<>())
@@ -147,6 +216,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setFreq"      , &RealTime<double>::setFreq      )
     .def("setPhase"     , &RealTime<double>::setPhase     )
     .def("setSigma"     , &RealTime<double>::setSigma     )
+    .def("setPrintLevel", &RealTime<double>::setPrintLevel)
     .def("printRT"      , &RealTime<double>::printRT      )
   ;
 
@@ -170,6 +240,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setFreq"      , &RealTime<dcomplex>::setFreq      )
     .def("setPhase"     , &RealTime<dcomplex>::setPhase     )
     .def("setSigma"     , &RealTime<dcomplex>::setSigma     )
+    .def("setPrintLevel", &RealTime<dcomplex>::setPrintLevel)
     .def("printRT"      , &RealTime<dcomplex>::printRT      )
   ;
 
@@ -179,9 +250,20 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("Canonical", RealTime<double>::Canonical )
   ;
 
+  enum_<RealTime<dcomplex>::ORTHO>("RealTime_ORTHO"   )
+    .value("Lowdin"   , RealTime<dcomplex>::Lowdin    )
+    .value("Cholesky" , RealTime<dcomplex>::Cholesky  )
+    .value("Canonical", RealTime<dcomplex>::Canonical )
+  ;
+
   enum_<RealTime<double>::FORM_U>("RealTime_FORM_U"    )
     .value("EigenDecomp", RealTime<double>::EigenDecomp)
     .value("Taylor"     , RealTime<double>::Taylor     )
+  ;
+
+  enum_<RealTime<dcomplex>::FORM_U>("RealTime_FORM_U"    )
+    .value("EigenDecomp", RealTime<dcomplex>::EigenDecomp)
+    .value("Taylor"     , RealTime<dcomplex>::Taylor     )
   ;
 
   enum_<RealTime<double>::ENVELOPE>("RealTime_ENVELOPE")
@@ -190,6 +272,14 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("Gaussian", RealTime<double>::Gaussian      )
     .value("Step"    , RealTime<double>::Step          )
     .value("SinSq"   , RealTime<double>::SinSq         )
+  ;
+
+  enum_<RealTime<dcomplex>::ENVELOPE>("RealTime_ENVELOPE")
+    .value("Constant", RealTime<dcomplex>::Constant      )
+    .value("LinRamp" , RealTime<dcomplex>::LinRamp       )
+    .value("Gaussian", RealTime<dcomplex>::Gaussian      )
+    .value("Step"    , RealTime<dcomplex>::Step          )
+    .value("SinSq"   , RealTime<dcomplex>::SinSq         )
   ;
 
   class_<MOIntegrals<double>,boost::noncopyable>("MOIntegrals_double",init<>())
@@ -202,23 +292,33 @@ BOOST_PYTHON_MODULE(libpythonapi){
   ;
 
   class_<SDResponse<double>,boost::noncopyable>("SDResponse_double",init<>())
-    .def("communicate" , &SDResponse<double>::communicate )
-    .def("initMeta"    , &SDResponse<double>::initMeta    )
-    .def("alloc"       , &SDResponse<double>::alloc       )
-    .def("setNSek"     , &SDResponse<double>::setNSek     )
-    .def("setMeth"     , &SDResponse<double>::setMeth     )
-    .def("initMeth"    , &SDResponse<double>::initMeth    )
-    .def("IterativeRPA", &SDResponse<double>::IterativeRPA)
+    .def("communicate"       , &SDResponse<double>::communicate               )
+    .def("initMeta"          , &SDResponse<double>::initMeta                  )
+    .def("alloc"             , &SDResponse<double>::alloc                     )
+    .def("setNSek"           , &SDResponse<double>::setNSek                   )
+    .def("setMeth"           , &SDResponse<double>::setMeth                   )
+    .def("initMeth"          , &SDResponse<double>::initMeth                  )
+    .def("IterativeRPA"      , &SDResponse<double>::IterativeRPA              )
+    .def("excitationEnergies", &SDResponse<double>::Wrapper_excitationEnergies)
+    .def("oscStrengths"      , &SDResponse<double>::Wrapper_oscStrengths      )
+    
+    .def_readonly("nIter"    ,&SDResponse<double>::nQNIter                   )
+    
+    
   ;
 
   class_<SDResponse<dcomplex>,boost::noncopyable>("SDResponse_complex",init<>())
-    .def("communicate" , &SDResponse<dcomplex>::communicate )
-    .def("initMeta"    , &SDResponse<dcomplex>::initMeta    )
-    .def("alloc"       , &SDResponse<dcomplex>::alloc       )
-    .def("setNSek"     , &SDResponse<dcomplex>::setNSek     )
-    .def("setMeth"     , &SDResponse<dcomplex>::setMeth     )
-    .def("initMeth"    , &SDResponse<dcomplex>::initMeth    )
-    .def("IterativeRPA", &SDResponse<dcomplex>::IterativeRPA)
+    .def("communicate"       , &SDResponse<dcomplex>::communicate              )
+    .def("initMeta"          , &SDResponse<dcomplex>::initMeta                 )
+    .def("alloc"             , &SDResponse<dcomplex>::alloc                    )
+    .def("setNSek"           , &SDResponse<dcomplex>::setNSek                  )
+    .def("setMeth"           , &SDResponse<dcomplex>::setMeth                  )
+    .def("initMeth"          , &SDResponse<dcomplex>::initMeth                 )
+    .def("IterativeRPA"      , &SDResponse<dcomplex>::IterativeRPA             )
+    .def("excitationEnergies",&SDResponse<dcomplex>::Wrapper_excitationEnergies)
+    .def("oscStrengths"      ,&SDResponse<dcomplex>::Wrapper_oscStrengths      )
+    
+    .def_readonly("nIter"    ,&SDResponse<dcomplex>::nQNIter                   )
   ;
 
   enum_<SDResponse<double>::METHOD>("SDResponse_METHOD")

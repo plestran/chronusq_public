@@ -284,17 +284,18 @@ void SingleSlater<T>::SCF(){
 
     if(this->Ref_ == CUHF) this->formNO();
     this->diagFock();
-    if(iter == 0) this->mixOrbitalsSCF();
+    if(iter == 0 && this->guess_ != READ) this->mixOrbitalsSCF();
     this->formDensity();
     this->formFock();
 
-    if(this->Ref_ != CUHF){ // DIIS NYI for CUHF
+    if(this->Ref_ != CUHF && this->doDIIS){ // DIIS NYI for CUHF
       this->GenDComm(iter);
       this->CpyFock(iter);   
       if(iter % (this->lenCoeff_-1) == (this->lenCoeff_-2) && iter != 0) this->CDIIS();
     }
 
     this->evalConver(iter);
+    this->nSCFIter++;
     if(this->isConverged) break;
 
   }; // SCF Loop
