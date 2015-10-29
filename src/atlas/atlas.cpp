@@ -25,8 +25,6 @@
  */
 #include <workers.h>
 #include <mollerplesset.h>
-#include <coupledcluster.h>
-#include <grid.h>
 using namespace ChronusQ;
 
 int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
@@ -50,10 +48,14 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   std::unique_ptr<GauJob> gauJob;
 
   // Initialize the FileIO object
+/*
   std::vector<std::string> argv_string;
   for(auto i = 1; i < argc; ++i) if(argv[i][0]=='-') argv_string.push_back(argv[i]);
   if(argv_string.size()==0) fileIO = std::unique_ptr<FileIO>(new FileIO(argv[1]));
   else fileIO = std::unique_ptr<FileIO>(new FileIO(argv_string));
+*/
+  fileIO = std::unique_ptr<FileIO>(new FileIO(argv[1]));
+//fileIO->iniStdOpFiles(100);
 
 
   // print out the starting time of the job
@@ -64,6 +66,10 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   // Initialize default settings and read input
   controls->iniControls();
   readInput(fileIO.get(),molecule.get(),basisset.get(),controls.get(),dfBasisset.get());
+ 
+  // Initialize HDF5Files
+  fileIO->iniH5Files();
+  fileIO->iniStdGroups();
 
   // print out molecular and basis set information
   controls->printSettings(fileIO->out);
@@ -82,6 +88,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
     hartreeFockReal->iniSingleSlater(molecule.get(),basisset.get(),aointegrals.get(),
       fileIO.get(),controls.get());
     hartreeFockReal->printInfo();
+    // Initialize Grid
   } else {
     hartreeFockComplex->iniSingleSlater(molecule.get(),basisset.get(),aointegrals.get(),
       fileIO.get(),controls.get());
@@ -92,6 +99,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   // guess from scratch or read off input / gaussian
   //
   // ** Note that guess from Gaussian is buggy **
+/* 
   if(!controls->doComplex){
     if(controls->guess==0) hartreeFockReal->formGuess();
     else if(controls->guess==1) hartreeFockReal->readGuessIO();
@@ -104,9 +112,17 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
     if(controls->guess==0) hartreeFockComplex->formGuess();
     else CErr("Cannot Read Guess for Complex Wavefunctions (NYI)",fileIO->out);
   }
+*/
+  if(!controls->doComplex)
+    hartreeFockReal->formGuess();
+  else
+    hartreeFockComplex->formGuess();
+
 
   // Optimize wave function (?)
   if(!controls->doComplex){
+
+
     // Form initial (primer) Fock matrix
     hartreeFockReal->formFock();
     aointegrals->printTimings();
@@ -161,26 +177,6 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   if(controls->doUnit && controls->doComplex) printUnitInfo(controls.get(),hartreeFockComplex.get(),sdResponseReal.get(),realtimeComplex.get());
 */
 
-
-////// APS ////
-  if(controls->DFT){
-    cout << " Before TwoDGrid" <<endl;
-    auto twoDGrid     	= std::unique_ptr<TwoDGrid>(new TwoDGrid());
-    twoDGrid->iniTwoDGrid(fileIO.get(),molecule.get(),basisset.get(),aointegrals.get(),hartreeFockReal.get(),100,194);
-  }
-////// APE ////
-
-  // CCSD
-  if(!controls->doComplex) {
-    mointegralsReal->iniMOIntegrals(molecule.get(),basisset.get(),fileIO.get(),controls.get(),aointegrals.get(),hartreeFockReal.get());
-    auto coupledclusterReal = std::unique_ptr<CoupledCluster>(new CoupledCluster());
-    coupledclusterReal->iniCoupledCluster(molecule.get(),basisset.get(), mointegralsReal.get(),fileIO.get(),
-                           controls.get(),hartreeFockReal.get());
-    coupledclusterReal->MollerPlesset();
-    coupledclusterReal->CCSD();
-  }
-  //
-
 // REAL-TIME TD-SCF 
   
   if(controls->doRealTime) {
@@ -199,7 +195,8 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
 
 
 
-
+  writeJobMeta(*hartreeFockReal,*sdResponseReal,*realtimeReal,*molecule,
+    *aointegrals,*fileIO);
   finalizeCQ();
 
   return  1;

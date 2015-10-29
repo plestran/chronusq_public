@@ -30,7 +30,7 @@
 #include <molecule.h>
 #include <controls.h>
 #include <aointegrals.h>
-
+#include <grid.h>
 /****************************/
 /* Error Messages 5000-5999 */
 /****************************/
@@ -40,6 +40,7 @@ template<typename T>
 class SingleSlater {
   typedef Eigen::Matrix<T,Dynamic,Dynamic,RowMajor> TMatrix;
 
+/*
   struct MetaData_ {
     int nBasis;      ///< Number of basis functions (inherited from BasisSet)
     int nShell;      ///< Number of basis shells (inherited from BasisSet)
@@ -59,6 +60,7 @@ class SingleSlater {
     bool isClosedShell; ///< Boolean to run through closed shell machinery
     bool isHF;          ///< Boolean of whether or not it's a HF reference
     bool isDFT;         ///< Boolean of whether or not it's a DFT reference
+    bool isPrimary;
 
     double denTol; ///< SCF tolerence on the density
     double eneTol; ///< SCF tolerence on the energy
@@ -80,6 +82,7 @@ class SingleSlater {
     Controls    * controls;    ///< General ChronusQ flow parameters
     AOIntegrals * aointegrals; ///< Molecular Integrals over GTOs (AO basis)
   };
+*/
 
   int      nBasis_;
   int      nShell_;
@@ -87,6 +90,9 @@ class SingleSlater {
   int      nAE_;
   int      nBE_;
   int      Ref_;
+  int      CorrKernel_;
+  int      ExchKernel_;
+  int      DFTKernel_;
   int      nOccA_;
   int      nOccB_;
   int      nVirA_;
@@ -95,6 +101,7 @@ class SingleSlater {
   int    **R2Index_;
 
   int      nTCS_; ///< Integer to scale the dimension of matricies for TCS's
+  int      guess_;
 
   // Internal Storage
   std::unique_ptr<TMatrix>  densityA_;   ///< Alpha or Full (TCS) Density Matrix
@@ -111,8 +118,10 @@ class SingleSlater {
   std::unique_ptr<RealMatrix>  epsB_;       ///< Beta Fock Eigenenergie
   std::unique_ptr<TMatrix>  PTA_;        ///< Alpha or Full (TCS) Perturbation Tensor
   std::unique_ptr<TMatrix>  PTB_;        ///< Beta Perturbation Tensor
-  std::unique_ptr<TMatrix>  vXCA_;        ///< Alpha or Full (TCS) VXC
-  std::unique_ptr<TMatrix>  vXCB_;        ///< Beta VXC
+  std::unique_ptr<TMatrix>  vXA_;        ///< Alpha or Full (TCS) VX
+  std::unique_ptr<TMatrix>  vXB_;        ///< Beta VXC
+  std::unique_ptr<TMatrix>  vCorA_;        ///< Alpha or Full Vcorr
+  std::unique_ptr<TMatrix>  vCorB_;        ///< Beta Vcorr
   std::unique_ptr<RealMatrix>  dipole_;  ///< Electric Dipole Moment
   std::unique_ptr<RealMatrix>  quadpole_; ///< Electric Quadrupole Moment
   std::unique_ptr<RealMatrix>  tracelessQuadpole_; ///< Traceless Electric Quadrupole Moment
@@ -122,6 +131,7 @@ class SingleSlater {
   FileIO *      fileio_;                 ///< Access to output file
   Controls *    controls_;               ///< General ChronusQ flow parameters
   AOIntegrals * aointegrals_;            ///< Molecular Integrals over GTOs (AO basis)
+  TwoDGrid    * twodgrid_   ;            ///< 3D grid (1Rad times 1 Ang) 
 
   std::string SCFType_;                  ///< String containing SCF Type (R/C) (R/U/G/CU)
   std::string SCFTypeShort_;             ///< String containing SCF Type (R/C) (R/U/G/CU)
@@ -257,6 +267,31 @@ public:
     CUKS,
     GKS
   }; ///< Supported references
+
+  enum GUESS {
+    SAD,
+    CORE,
+    READ
+  }; // Supported Guess Types
+
+  enum DFT {
+    NODFT,
+    USERDEFINED,
+    LSDA
+  };
+
+  enum CORR {
+    NOCORR,
+    VWN3,
+    VWN5
+  };
+
+  enum EXCH {
+    NOEXCH,
+    EXACT,
+    SLATER
+  };
+
   bool	haveMO;      ///< Have MO coefficients?
   bool	haveDensity; ///< Computed Density? (Not sure if this is used anymore)
   bool	haveCoulomb; ///< Computed Coulomb Matrix?
@@ -266,25 +301,35 @@ public:
   bool  isConverged;
   bool  isHF;
   bool  isDFT;
+  bool  isPrimary;
+  bool  doDIIS;
 
   double   energyOneE; ///< One-bodied operator tensors traced with Density
   double   energyTwoE; ///< Two-bodied operator tensors traced with Density
   double   energyNuclei; ///< N-N Repulsion Energy
   double   totalEnergy; ///< Sum of all energetic contributions
 
+  double   totalEx;     ///< LDA Exchange
+  double   totalEcorr;  ///< Total VWN Energy
+  double   eps_corr;    ///< VWN Correlation Energy Density
+  double   mu_corr;     ///< VWN Correlation Potential
+
+  int      nSCFIter;
+
   // constructor & destructor
   SingleSlater(){
     // Zero out integers to be set
-    this->nBasis_ = 0;
-    this->nShell_ = 0;
-    this->nTT_    = 0;
-    this->nAE_    = 0;
-    this->nBE_    = 0;
-    this->nOccA_  = 0;
-    this->nOccB_  = 0;
-    this->nVirA_  = 0;
-    this->nVirB_  = 0;
-    this->multip_ = 0;
+    this->nBasis_  = 0;
+    this->nShell_  = 0;
+    this->nTT_     = 0;
+    this->nAE_     = 0;
+    this->nBE_     = 0;
+    this->nOccA_   = 0;
+    this->nOccB_   = 0;
+    this->nVirA_   = 0;
+    this->nVirB_   = 0;
+    this->multip_  = 0;
+    this->nSCFIter = 0;
 
     // Initialize Smart Pointers
     this->densityA_          = nullptr;   
@@ -301,8 +346,10 @@ public:
     this->epsB_              = nullptr;    
     this->PTA_               = nullptr;        
     this->PTB_               = nullptr;        
-    this->vXCA_              = nullptr;       
-    this->vXCB_              = nullptr;       
+    this->vXA_              = nullptr;       
+    this->vXB_              = nullptr;       
+    this->vCorA_              = nullptr;       
+    this->vCorB_              = nullptr;       
     this->dipole_            = nullptr;  
     this->quadpole_          = nullptr;
     this->tracelessQuadpole_ = nullptr; 
@@ -323,13 +370,14 @@ public:
     this->haveDensity   = false;
     this->haveMO        = false;
     this->havePT        = false;
-    this->isDFT         = false;
     this->isClosedShell = false;
 
-    this->isHF         = true;
 
     // Standard Values
     this->Ref_         = _INVALID;
+    this->CorrKernel_  = NOCORR;
+    this->ExchKernel_  = NOEXCH;
+    this->DFTKernel_   = NODFT;
     this->denTol_      = 1e-10;
     this->eneTol_      = 1e-12;
     this->maxSCFIter_  = 256;
@@ -338,6 +386,11 @@ public:
     this->maxMultipole_ = 3;
     this->elecField_   = {0.0,0.0,0.0};
     this->printLevel_  = 1;
+    this->isPrimary    = true;
+    this->doDIIS       = true;
+    this->isHF         = true;
+    this->isDFT         = false;
+    this->guess_       = SAD;
 
   };
   ~SingleSlater() {
@@ -389,17 +442,28 @@ public:
   inline void setNAE(int nAE)    { this->nAE_ = nAE;};
   inline void setNBE(int nBE)    { this->nBE_ = nBE;};
   inline void setRef(int Ref)    { this->Ref_ = Ref;};
-  inline void setField(double x, double y, double z){
-    this->elecField_[0] = x;
-    this->elecField_[1] = y;
-    this->elecField_[2] = z;
-  }
+//inline void setField(double x, double y, double z){
+//  this->elecField_[0] = x;
+//  this->elecField_[1] = y;
+//  this->elecField_[2] = z;
+//}
   inline void setField(std::array<double,3> field){
     this->elecField_ = field;
+  }
+  inline void Wrapper_setField(double x, double y, double z){
+    this->setField({{x,y,z}});
   }
   inline void setNTCS(int i){ this->nTCS_ = i;};
   inline void setMaxMultipole(int i){ this->maxMultipole_ = i;};
   inline void setPrintLevel(int i){ this->printLevel_ = i;};
+  inline void setSCFDenTol(double x){ this->denTol_ = x;};
+  inline void setSCFEneTol(double x){ this->eneTol_ = x;};
+  inline void setSCFMaxIter(int i){ this->maxSCFIter_ = i;};
+  inline void setGuess(int i){ this->guess_ = i;};
+  inline void isNotPrimary(){this->isPrimary = false;};
+  inline void setCorrKernel(int i){this->CorrKernel_ = i;};
+  inline void setExchKernel(int i){this->ExchKernel_ = i;};
+  inline void setDFTKernel( int i){this->DFTKernel_  = i;};
 
   // access to private data
   inline int nBasis() { return this->nBasis_;};
@@ -416,6 +480,9 @@ public:
   inline int multip()  { return this->multip_;};
   inline int nOVA()    { return nOccA_*nVirA_;};
   inline int nOVB()    { return nOccB_*nVirB_;};
+  inline int CorrKernel(){return this->CorrKernel_;};
+  inline int ExchKernel(){return this->ExchKernel_;};
+  inline int DFTKernel(){ return this->DFTKernel_ ;};
   inline int printLevel(){ return this->printLevel_;};
   inline std::vector<double> mullPop(){ return this->mullPop_;};
   inline std::array<double,3> elecField(){ return this->elecField_;  };
@@ -429,8 +496,10 @@ public:
   inline TMatrix* exchangeB(){ return this->exchangeB_.get();};
   inline TMatrix* moA()      { return this->moA_.get();};
   inline TMatrix* moB()      { return this->moB_.get();};
-  inline TMatrix* vXCA()      { return this->vXCA_.get();};
-  inline TMatrix* vXCB()      { return this->vXCB_.get();};
+  inline TMatrix* vXA()      { return this->vXA_.get();};
+  inline TMatrix* vXB()      { return this->vXB_.get();};
+  inline TMatrix* vCorA()      { return this->vCorA_.get();};
+  inline TMatrix* vCorB()      { return this->vCorB_.get();};
   inline RealMatrix* epsA()     { return this->epsA_.get();};
   inline RealMatrix* epsB()     { return this->epsB_.get();};
   inline TMatrix* PTA()      { return this->PTA_.get();};
@@ -444,8 +513,15 @@ public:
   inline FileIO *      fileio(){return this->fileio_;};
   inline Controls *    controls(){return this->controls_;};
   inline AOIntegrals * aointegrals(){return this->aointegrals_;};
+  inline TwoDGrid *    twodgrid(){return this->twodgrid_;};
+  
+  inline std::string SCFType(){return this->SCFType_;};
+  inline int         guess(){return this->guess_;};
 
-  void formGuess();	        // form the intial guess of MO's (Density)
+  void formGuess();	        // form the intial guess
+  void SADGuess();
+  void COREGuess();
+  void READGuess();
   void placeAtmDen(std::vector<int>, SingleSlater<double> &);           // Place the atomic densities into total densities for guess
   void scaleDen();              // Scale the unrestricted densities for correct # electrons
   void formDensity();		// form the density matrix
@@ -453,8 +529,13 @@ public:
   void formCoulomb();		// form the Coulomb matrix
   void formExchange();		// form the exchange matrix
   void formPT();
-  void formVXC(RealMatrix *);   // Form DFT VXC Term
-  void EnVXC();                 // DFT VXC Energy Term
+  void formVXC();               // Form DFT VXC Term
+  void formCor(double rho, double spindensity); // Form DFT correlarion potential 
+  void formEx(double rho); // Form DFT exchange
+  double spindens(double rho_A,double rho_B);  // define f(spindendity)
+  double formBeckeW(cartGP gridPt, int iAtm);            // Evaluate Becke Weights
+  double normBeckeW(cartGP gridPt);            // Evaluate Becke Weights
+  void   buildVxc(cartGP gridPt, double weight);            // function to build the Vxc therm
   void matchord();              // match Guassian order of guess
   void readGuessIO();       	// read the initial guess of MO's from the input stream
   void readGuessGauMatEl(GauMatEl&); // read the intial guess of MO's from Gaussian raw matrix element file
@@ -477,6 +558,8 @@ public:
   void printPT();
   void printFock();
   void getAlgebraicField();
+  void writeSCFFiles();
+  void checkReadReference();
   
   inline void genMethString(){
     if(this->Ref_ == _INVALID) 
@@ -485,24 +568,43 @@ public:
     this->getAlgebraicField(); 
     this->SCFType_      = this->algebraicField_      + " ";
     this->SCFTypeShort_ = this->algebraicFieldShort_ + "-";
+    
+    std::string generalReference;
+    std::string generalRefShort;
+    if(this->isHF){
+      generalReference = "Hartree-Fock";
+      generalRefShort  = "HF";
+    } else if(this->isDFT) {
+      generalReference = "Kohn-Sham";
+      if(this->DFTKernel_ == USERDEFINED)
+        generalRefShort  = "KS";
+      else if(this->DFTKernel_ == LSDA) {
+        generalReference += " (LSDA)";
+        generalRefShort  = "LSDA";
+      }
+    }
+
     if(this->Ref_ == RHF) {
-      this->SCFType_      += "Restricted Hartree-Fock"; 
-      this->SCFTypeShort_ += "RHF";
+      this->SCFType_      += "Restricted " + generalReference; 
+      this->SCFTypeShort_ += "R" + generalRefShort;
     } else if(this->Ref_ == UHF) {
-      this->SCFType_      += "Unrestricted Hartree-Fock"; 
-      this->SCFTypeShort_ += "UHF";
+      this->SCFType_      += "Unrestricted " + generalReference; 
+      this->SCFTypeShort_ += "U" + generalRefShort;
     } else if(this->Ref_ == CUHF) {
-      this->SCFType_      += "Constrained Unrestricted Hartree-Fock"; 
-      this->SCFTypeShort_ += "CUHF";
+      this->SCFType_      += "Constrained Unrestricted " + generalReference; 
+      this->SCFTypeShort_ += "CU" + generalRefShort;
     } else if(this->Ref_ == TCS) {
-      this->SCFType_      += "Generalized Hartree-Fock"; 
-      this->SCFTypeShort_ += "GHF";
+      this->SCFType_      += "Generalized " + generalReference; 
+      this->SCFTypeShort_ += "G" + generalRefShort;
     }
   }
 
   // Python API
   void Wrapper_iniSingleSlater(Molecule&,BasisSet&,AOIntegrals&,FileIO&,
     Controls&); 
+  boost::python::list Wrapper_dipole();
+  boost::python::list Wrapper_quadrupole();
+  boost::python::list Wrapper_octupole();
 
   /*************************/
   /* MPI Related Routines  */
@@ -512,10 +614,12 @@ public:
 };
 
 #include <singleslater_alloc.h>
+#include <singleslater_guess.h>
 #include <singleslater_print.h>
 #include <singleslater_fock.h>
 #include <singleslater_misc.h>
 #include <singleslater_scf.h>
+#include <singleslater_dft.h>
 
 
 } // namespace ChronusQ

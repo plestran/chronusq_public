@@ -23,35 +23,26 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
-#ifndef  INCLUDED_CLASSTOOLS
-#define  INCLUDED_CLASSTOOLS
-#include <global.h>
-#include <cerr.h>
-#include <fileio.h>
-#include <molecule.h>
-#include <basisset.h>
-#include <controls.h>
 #include <singleslater.h>
-#include <sdresponse.h>
-#include <realtime.h>
-
-/*****************************/
-/*Error Messages 15000-19999 */
-/*****************************/
-
 namespace ChronusQ {
-// read input files and initialize everything
-void readInput(FileIO *,Molecule *, BasisSet *, Controls *, BasisSet * dfBasis=NULL);
-void printUnitInfo(Controls *, SingleSlater<double> *, SDResponse<double> *, RealTime<double> *);
-void printUnitInfo(Controls *, SingleSlater<dcomplex> *, SDResponse<double> *, RealTime<dcomplex> *);
+//----------------------------//
+// form the Vxc matrix        //
+//----------------------------//
 
-void initCQ();
-void finalizeCQ();
-template<typename T> void writeJobMeta(SingleSlater<T>&,SDResponse<T>&,
-  RealTime<T>&,Molecule&,AOIntegrals&,FileIO&);
 
-// trace of product of two symmetric matrices
-double traceSymm(RealMatrix *,RealMatrix *);
-} // namespace ChronusQ
+template<>
+void SingleSlater<dcomplex>::formVXC(){
 
-#endif
+};
+
+template<>
+void SingleSlater<dcomplex>::formCor(double rho, double spindensity){
+};
+
+
+template<>
+double SingleSlater<dcomplex>::spindens(double rho_A, double rho_B){
+};
+
+
+} // Namespace ChronusQ

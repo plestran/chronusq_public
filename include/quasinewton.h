@@ -66,6 +66,8 @@ template <typename T>
     // Integer iteration related variables
     int maxIter_;          // Maximum number of miro iterations
     int MaxIter_;          // Maximum number of macro iterations
+    int nMicroIter_;
+    int nIter_;
 
     // Double precision variables related to convergence tolerence
     double resTol_;        // Residual norm tolerence for convergence
@@ -127,6 +129,8 @@ template <typename T>
       // Defaults for # of interations
       this->maxIter_          = 128;
       this->MaxIter_          = 20;
+      this->nMicroIter_       = 0;
+      this->nIter_            = 0;
       
       // Default tolerence 
       this->resTol_           = 5.0e-6;
@@ -495,6 +499,8 @@ template <typename T>
       output << endl << bannerEnd << endl;
     }
     void run(ostream &output=cout);
+  
+    inline int nIter(){ return this->nIter_;};
     
   }; // class QuasiNewton
   /** Run the Quasi-Newton Calculation (templated) **/
@@ -509,7 +515,9 @@ template <typename T>
     this->printInfo(output);
     start = std::chrono::high_resolution_clock::now();
     for(auto iter = 0; iter < this->MaxIter_; iter++){
+      this->nMicroIter_ = 0;
       this->runMicro(output);
+      this->nIter_ += this->nMicroIter_;
       if(this->isConverged_) break;
     }
     this->cleanupScr();

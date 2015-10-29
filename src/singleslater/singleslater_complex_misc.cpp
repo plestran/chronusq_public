@@ -177,4 +177,23 @@ void SingleSlater<dcomplex>::getAlgebraicField(){
   this->algebraicField_      = "Complex";
   this->algebraicFieldShort_ = "\u2102";
 }
+
+template<>
+void SingleSlater<dcomplex>::writeSCFFiles(){
+
+  this->fileio_->alphaSCFDen->write(this->densityA_->data(),
+    *(this->fileio_->complexType)
+  );
+  this->fileio_->alphaMO->write(this->moA_->data(),
+    *(this->fileio_->complexType)
+  );
+  if(!this->isClosedShell && this->Ref_ != TCS){
+    this->fileio_->betaSCFDen->write(this->densityB_->data(),
+      *(this->fileio_->complexType)
+    );
+    this->fileio_->betaMO->write(this->moB_->data(),
+      *(this->fileio_->complexType)
+    );
+  }
+}
 } // Namespace ChronusQ

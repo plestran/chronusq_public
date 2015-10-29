@@ -50,6 +50,11 @@ def parseMolecule(workers,settings):
   workers["CQMolecule"].computeRij()    # 3
   workers["CQMolecule"].computeI()      # 4
 
+  try:
+    workers["CQMolecule"].setPrintLevel(settings['PRINT'])
+  except KeyError:
+    pass
+
 
 #
 # Read the molecular geometry from input file
@@ -102,7 +107,8 @@ def readGeom(workers,settings):
 #   CQ::Molecule::nTotalE  -   total Number of electrons 
 #                                (modulated by CQ::Molecule::charge)
 #
-  nTotalE = 0
+#  nTotalE = 0
+  nTotalE = - settings['CHARGE']
   for i in range(len(geomStr)):
     line = geomStr[i]
     lineSplit = line.split()

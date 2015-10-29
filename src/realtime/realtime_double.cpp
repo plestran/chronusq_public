@@ -36,62 +36,6 @@ using ChronusQ::RealTime;
 namespace ChronusQ {
 
 template<>
-void RealTime<double>::writeDipoleCSV(){
-  std::ofstream csv("RealTime_Dipole.csv");
-  csv << "Time Step (a.u.), Energy (Eh), Dipole X debye), Dipole Y (debye),"
-      << "Dipole Z (debye), Dipole Tot (debye)" << endl;
-  for(auto it = this->propInfo.begin(); it != this->propInfo.end(); it++) {
-     csv << std::fixed << std::setprecision(10) << it->timeStep << ", " << it->energy << ", " << it->dipole[0] 
-         << ", " << it->dipole[1] << ", " << it->dipole[2] << ", " << it->dipole[3] << endl;
-  } 
-};
-
-template<>
-void RealTime<double>::writeMullikenCSV(){
-  std::ofstream csv("RealTime_Mulliken.csv");
-  csv << std::setw(14) << "Atom number";
-  for(auto iAtm = 0; iAtm < this->ssPropagator_->molecule()->nAtoms(); iAtm++) {
-    csv << std::setw(14) << iAtm;
-  }
-  csv << endl;
-  csv << std::setw(14) << "Atom symbol";
-  for(auto iAtm = 0; iAtm < this->ssPropagator_->molecule()->nAtoms(); iAtm++) {
-    csv << std::setw(14) << elements[this->ssPropagator_->molecule()->index(iAtm)].symbol;
-  }
-  csv << endl;
-  csv << std::setw(14) << "Time (a.u.)" << endl;
-  for(auto it = this->propInfo.begin(); it != this->propInfo.end(); it++) {
-    csv << std::fixed << std::setw(14) << std::setprecision(10) << it->timeStep;
-    for(auto iAtm = 0; iAtm < this->ssPropagator_->molecule()->nAtoms(); iAtm++) {
-      csv << ", " << std::setw(14) << it->mullPop[iAtm];
-    }
-    csv << endl;
-  } 
-};
-
-template<>
-void RealTime<double>::writeOrbitalCSV(){
-  std::ofstream csv("RealTime_OrbOcc_Alpha.csv");
-  for(auto it = this->propInfo.begin(); it != this->propInfo.end(); it++) {
-    csv << std::fixed << std::setprecision(6) << it->timeStep; 
-      for(auto idx = 0; idx != this->nBasis_*this->nTCS_; idx++) {
-        csv << ", " << it->orbitalOccA[idx];
-      }
-    csv << endl;
-  }
-  if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS){
-    std::ofstream csv("RealTime_OrbOcc_Beta.csv");
-    for(auto it = this->propInfo.begin(); it != this->propInfo.end(); it++) {
-      csv << std::fixed << std::setprecision(6) << it->timeStep; 
-        for(auto idx = 0; idx != this->nBasis_*this->nTCS_; idx++) {
-          csv << ", " << it->orbitalOccB[idx];
-        }
-      csv << endl;
-    }
-  }
-};
-
-template<>
 void RealTime<double>::iniDensity() {
   bool inOrthoBas;
   bool idempotent;
@@ -405,6 +349,14 @@ void RealTime<double>::doPropagation() {
     new (&uTransB) ComplexMap(this->uTransBMem_,NTCSxNBASIS,NTCSxNBASIS);
   }
 
+  // Create/open CSVs for printing results
+  csvs.push_back(new std::ofstream(this->fileio_->fileName() + "_RealTime_Dipole.csv"));
+  csvs.push_back(new std::ofstream(this->fileio_->fileName() + "_RealTime_Mulliken.csv"));
+  csvs.push_back(new std::ofstream(this->fileio_->fileName() + "_RealTime_OrbOcc_Alpha.csv"));
+  if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS){
+    csvs.push_back(new std::ofstream(this->fileio_->fileName() + "_RealTime_OrbOcc_Beta.csv"));
+  }
+
   for (iStep = 0; iStep <= this->maxSteps_; iStep++) {
     //this->fileio_->out<<"\nStep "<<iStep<<":\n"<<endl;
     //this->fileio_->out<<std::right<<std::setw(20)<<"Time = "<<std::setw(15)<<currentTime_<<std::setw(5)<<" a.u. "<<endl;
@@ -486,6 +438,9 @@ void RealTime<double>::doPropagation() {
           rec.orbitalOccB.push_back(scratch(idx,idx).real());
         }
       }
+    this->writeDipoleCSV(rec,iStep);
+    this->writeMullikenCSV(rec,iStep);
+    this->writeOrbitalCSV(rec,iStep);
 
     this->propInfo.push_back(rec);
 
@@ -511,12 +466,6 @@ void RealTime<double>::doPropagation() {
   delete [] this->SCR;
   delete [] this->REAL_LAPACK_SCR;
 
-  //  Write energy/dipole information
-  this->writeDipoleCSV();
-  //  Write orbital occupation information
-  this->writeOrbitalCSV();
-  // Write Mulliken partial charges
-  this->writeMullikenCSV();
 };
 
 } // namespace ChronusQ

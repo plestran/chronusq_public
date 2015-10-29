@@ -25,7 +25,6 @@
  */
 #ifndef INCLUDED_GLOBAL
 #define INCLUDED_GLOBAL
-// Hello
 
 #define MAXNAMELEN 50 ///< Define maximum length for char arrays
 #define MAXANGULARMOMENTUM 6 ///< Define maximum allowed total angular momentum for basis functions
@@ -64,6 +63,7 @@
 // Boost Headers
 #include <boost/geometry/geometry.hpp>
 #include <boost/math/constants/constants.hpp>
+#include <boost/python.hpp>
 
 // Misc
 #include <stdlib.h>
@@ -79,6 +79,7 @@
 #include <gauinterface.h>
 #include <iterator>
 #include <typeinfo>
+#include <H5Cpp.h>
 
 //using namespace std;
 /* Things from STD that we need always */
@@ -118,6 +119,9 @@ typedef Eigen::Matrix<dcomplex,Dynamic,Dynamic,RowMajor>   ComplexMatrix; ///< D
 typedef Eigen::Matrix<double,Dynamic,Dynamic,ColMajor>     RealCMMatrix;    ///< Dynamically allocated Real (double) matrix. Row major for integration with Libint
 typedef Eigen::Matrix<dcomplex,Dynamic,Dynamic,ColMajor>   ComplexCMMatrix; ///< Dynamically allocated Complex (dcomplex) matrix. Row major for integration with Libint
 typedef Eigen::Map<VectorXd> RealVecMap;
+//AP
+typedef Eigen::SelfAdjointView<RealMatrix,Lower> RealSelfAdjLow;
+//APE
 typedef Eigen::Map<VectorXcd> ComplexVecMap;
 typedef Eigen::Map<RealMatrix> RealMap; ///< Map double precision real array onto RealMatrix object
 typedef Eigen::Map<RealCMMatrix> RealCMMap; ///< Map double precision real array onto RealMatrix object

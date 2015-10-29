@@ -44,4 +44,32 @@ sdrMethodMap = {
   "STAB"   :chronusQ.SDResponse_METHOD.STAB     
 }
 
+aointAlg = {
+  "DIRECT":chronusQ.AOIntegrals_INTEGRAL_ALGORITHM.DIRECT,
+  "INCORE":chronusQ.AOIntegrals_INTEGRAL_ALGORITHM.INCORE,
+  "DENFIT":chronusQ.AOIntegrals_INTEGRAL_ALGORITHM.DENFIT
+}
 
+guessMap = {
+  "SAD" :chronusQ.Guess.SAD  ,
+  "CORE":chronusQ.Guess.CORE ,
+  "READ":chronusQ.Guess.READ  
+}
+
+exchMap = {
+  "NOEXCH":chronusQ.EXCH.NOEXCH,
+  "EXACT" :chronusQ.EXCH.EXACT ,
+  "SLATER":chronusQ.EXCH.SLATER
+}
+
+corrMap = {
+  "NOCORR":chronusQ.CORR.NOCORR,
+  "VWN3"  :chronusQ.CORR.VWN3,
+  "VWN5"  :chronusQ.CORR.VWN5
+}
+
+kernelMap = {
+  "NODFT"      :chronusQ.DFT.NODFT,
+  "USERDEFINED":chronusQ.DFT.USERDEFINED,
+  "LSDA"       :chronusQ.DFT.LSDA
+}

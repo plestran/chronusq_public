@@ -14,6 +14,7 @@ knownSections  = [
   "MOLECULE", 
   "QM", 
   "MISC",
+  "SCF",
   "RT",
   "CIS",
   "RPA",
@@ -30,14 +31,19 @@ knownKeywords = {}
 knownKeywords['MOLECULE'] = {
   'CHARGE':CQKeyword('CHARGE','I',True),
   'MULT'  :CQKeyword('MULT'  ,'I',True),
-  'GEOM'  :CQKeyword('GEOM'  ,'S',True)
+  'GEOM'  :CQKeyword('GEOM'  ,'S',True),
+  'PRINT' :CQKeyword('PRINT' ,'I',False)
 } 
 
 # Dictionary for known keywords in the QM input section
 knownKeywords['QM'] = {
-  'REFERENCE':CQKeyword('REFERENCE','S',True),
-  'BASIS'    :CQKeyword('BASIS'    ,'S',True),
-  'JOB'      :CQKeyword('JOB'      ,'S',True)
+  'REFERENCE':CQKeyword('REFERENCE','S',True ),
+  'BASIS'    :CQKeyword('BASIS'    ,'S',True ),
+  'JOB'      :CQKeyword('JOB'      ,'S',True ),
+  'INTS'     :CQKeyword('INTS'     ,'S',False),
+  'EXCHANGE' :CQKeyword('EXCHANGE' ,'S',False),
+  'CORR'     :CQKeyword('CORR'     ,'S',False),
+  'PRINT'    :CQKeyword('PRINT'    ,'I',False)
 }
 
 # Dictionary for known keywords in the RT input section
@@ -53,11 +59,23 @@ knownKeywords['RT'] = {
   'ENVELOPE' :CQKeyword('ENVELOPE' ,'O-ENV'  ,False),
   'ORTHO'    :CQKeyword('ORTHO'    ,'O-ORTH' ,False), 
   'INIDEN'   :CQKeyword('INIDEN'   ,'I'      ,False),
-  'UPROP'    :CQKeyword('UPROP'    ,'O-FORMU',False)
+  'UPROP'    :CQKeyword('UPROP'    ,'O-FORMU',False),
+  'PRINT'    :CQKeyword('PRINT'    ,'I'      ,False)
 }
 
 knownKeywords['MISC'] = {
-  'NSMP' :CQKeyword('NSMP','I',False)
+  'NSMP'     :CQKeyword('NSMP'    ,'I',False),
+  'UNITTEST' :CQKeyword('UNITTEST','S',False)
+}
+
+knownKeywords['SCF'] = {
+  'SCFDENTOL' :CQKeyword('SCFDENTOL' ,'D'    ,False),
+  'SCFENETOL' :CQKeyword('SCFENETOL' ,'D'    ,False),
+  'SCFMAXITER':CQKeyword('SCFMAXITER','I'    ,False),
+  'FIELD'     :CQKeyword('FIELD'     ,'D3'   ,False),
+  'GUESS'     :CQKeyword('GUESS'     ,'O-GS' ,False),
+  'DIIS'      :CQKeyword('DIIS'      ,'B'    ,False),
+  'PRINT'     :CQKeyword('PRINT'     ,'I'    ,False)
 }
 
 knownKeywords['CIS'] = {
@@ -76,15 +94,17 @@ knownKeywords['STAB'] = {
 
 # Create a dictionary of required keywords
 requiredKeywords = {}
-requiredKeywords['MOLECULE'] = []
-requiredKeywords['QM'] = []
-requiredKeywords['RT'] = []
-requiredKeywords['MISC'] = []
-requiredKeywords['CIS'] = []
-requiredKeywords['RPA'] = []
-requiredKeywords['STAB'] = []
+#requiredKeywords['MOLECULE'] = []
+#requiredKeywords['QM'] = []
+#requiredKeywords['RT'] = []
+#requiredKeywords['SCF'] = []
+#requiredKeywords['MISC'] = []
+#requiredKeywords['CIS'] = []
+#requiredKeywords['RPA'] = []
+#requiredKeywords['STAB'] = []
 
 for sec in knownKeywords:
+  requiredKeywords[sec] = []
   for keyWord in knownKeywords[sec]:
     if knownKeywords[sec][keyWord].req:
       requiredKeywords[sec].append(keyWord)
