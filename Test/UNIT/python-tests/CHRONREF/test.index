@@ -304,7 +304,7 @@ test0066_serial_direct.inp   SCF    O2/cc-pVDZ Serial DField SCF - Direct  Integ
 test0066_smp_incore.inp      SCF    O2/cc-pVDZ OpenMP DField SCF - In-Core Integrals (6D)
 test0066_smp_direct.inp      SCF    O2/cc-pVDZ OpenMP DField SCF - Direct  Integrals (6D)
 
-#** test0067-0081 Test Small molecule RHF RT **
+#** test0067-0080 Test Small molecule Real RHF RT **
 #*no field Cholesky
 #test0067_serial_incore.inp   RT    H2O/STO-3G  Serial RT Cholesky - In-Core Integrals
 #test0067_serial_direct.inp   RT    H2O/STO-3G  Serial RT Cholesky - Direct  Integrals
@@ -368,5 +368,67 @@ test0066_smp_direct.inp      SCF    O2/cc-pVDZ OpenMP DField SCF - Direct  Integ
 #test0080_smp_incore.inp      RT    H2O/STO-3G  OpenMP RT w/ Step Lowdin   - In-Core Integrals
 #test0080_smp_direct.inp      RT    H2O/STO-3G  OpenMP RT w/ Step Lowdin   - Direct  Integrals
 
-
+#** test0081-0094 Test Small molecule Real UHF RT **
+#*no field Cholesky
+#test0081_serial_incore.inp   RT    Li/STO-3G  Serial RT Cholesky - In-Core Integrals
+#test0081_serial_direct.inp   RT    Li/STO-3G  Serial RT Cholesky - Direct  Integrals
+#test0081_smp_incore.inp      RT    Li/STO-3G  OpenMP RT Cholesky - In-Core Integrals
+#test0081_smp_direct.inp      RT    Li/STO-3G  OpenMP RT Cholesky - Direct  Integrals
+#test0082_serial_incore.inp   RT    Li/6-31G   Serial RT Cholesky - In-Core Integrals
+#test0082_serial_direct.inp   RT    Li/6-31G   Serial RT Cholesky - Direct  Integrals
+#test0082_smp_incore.inp      RT    Li/6-31G   OpenMP RT Cholesky - In-Core Integrals
+#test0082_smp_direct.inp      RT    Li/6-31G   OpenMP RT Cholesky - Direct  Integrals
+#test0083_serial_incore.inp   RT    Li/cc-pVDZ Serial RT Cholesky - In-Core Integrals (6D)
+#test0083_serial_direct.inp   RT    Li/cc-pVDZ Serial RT Cholesky - Direct  Integrals (6D)
+#test0083_smp_incore.inp      RT    Li/cc-pVDZ OpenMP RT Cholesky - In-Core Integrals (6D)
+#test0083_smp_direct.inp      RT    Li/cc-pVDZ OpenMP RT Cholesky - Direct  Integrals (6D)
+#*no field Lowdin
+#test0084_serial_incore.inp   RT    Li/STO-3G  Serial RT Lowdin   - In-Core Integrals
+#test0084_serial_direct.inp   RT    Li/STO-3G  Serial RT Lowdin   - Direct  Integrals
+#test0084_smp_incore.inp      RT    Li/STO-3G  OpenMP RT Lowdin   - In-Core Integrals
+#test0084_smp_direct.inp      RT    Li/STO-3G  OpenMP RT Lowdin   - Direct  Integrals
+#test0085_serial_incore.inp   RT    Li/6-31G   Serial RT Lowdin   - In-Core Integrals
+#test0085_serial_direct.inp   RT    Li/6-31G   Serial RT Lowdin   - Direct  Integrals
+#test0085_smp_incore.inp      RT    Li/6-31G   OpenMP RT Lowdin   - In-Core Integrals
+#test0085_smp_direct.inp      RT    Li/6-31G   OpenMP RT Lowdin   - Direct  Integrals
+#test0086_serial_incore.inp   RT    Li/cc-pVDZ Serial RT Lowdin   - In-Core Integrals (6D)
+#test0086_serial_direct.inp   RT    Li/cc-pVDZ Serial RT Lowdin   - Direct  Integrals (6D)
+#test0086_smp_incore.inp      RT    Li/cc-pVDZ OpenMP RT Lowdin   - In-Core Integrals (6D)
+#test0086_smp_direct.inp      RT    Li/cc-pVDZ OpenMP RT Lowdin   - Direct  Integrals (6D)
+#*plane wave
+#test0087_serial_incore.inp   RT    Li/STO-3G  Serial RT w/ PW Cholesky - In-Core Integrals
+#test0087_serial_direct.inp   RT    Li/STO-3G  Serial RT w/ PW Cholesky - Direct  Integrals
+#test0087_smp_incore.inp      RT    Li/STO-3G  OpenMP RT w/ PW Cholesky - In-Core Integrals
+#test0087_smp_direct.inp      RT    Li/STO-3G  OpenMP RT w/ PW Cholesky - Direct  Integrals
+#test0088_serial_incore.inp   RT    Li/STO-3G  Serial RT w/ PW Lowdin   - In-Core Integrals
+#test0088_serial_direct.inp   RT    Li/STO-3G  Serial RT w/ PW Lowdin   - Direct  Integrals
+#test0088_smp_incore.inp      RT    Li/STO-3G  OpenMP RT w/ PW Lowdin   - In-Core Integrals
+#test0088_smp_direct.inp      RT    Li/STO-3G  OpenMP RT w/ PW Lowdin   - Direct  Integrals
+#*linearly ramped field
+#test0089_serial_incore.inp   RT    Li/STO-3G  Serial RT w/ LinRamp Cholesky - In-Core Integrals
+#test0089_serial_direct.inp   RT    Li/STO-3G  Serial RT w/ LinRamp Cholesky - Direct  Integrals
+#test0089_smp_incore.inp      RT    Li/STO-3G  OpenMP RT w/ LinRamp Cholesky - In-Core Integrals
+#test0089_smp_direct.inp      RT    Li/STO-3G  OpenMP RT w/ LinRamp Cholesky - Direct  Integrals
+#test0089_serial_incore.inp   RT    Li/STO-3G  Serial RT w/ LinRamp Lowdin   - In-Core Integrals
+#test0089_serial_direct.inp   RT    Li/STO-3G  Serial RT w/ LinRamp Lowdin   - Direct  Integrals
+#test0089_smp_incore.inp      RT    Li/STO-3G  OpenMP RT w/ LinRamp Lowdin   - In-Core Integrals
+#test0089_smp_direct.inp      RT    Li/STO-3G  OpenMP RT w/ LinRamp Lowdin   - Direct  Integrals
+#*Gaussian envelope
+#test0091_serial_incore.inp   RT    Li/STO-3G  Serial RT w/ Gauss Cholesky - In-Core Integrals
+#test0091_serial_direct.inp   RT    Li/STO-3G  Serial RT w/ Gauss Cholesky - Direct  Integrals
+#test0091_smp_incore.inp      RT    Li/STO-3G  OpenMP RT w/ Gauss Cholesky - In-Core Integrals
+#test0091_smp_direct.inp      RT    Li/STO-3G  OpenMP RT w/ Gauss Cholesky - Direct  Integrals
+#test0092_serial_incore.inp   RT    Li/STO-3G  Serial RT w/ Gauss Lowdin   - In-Core Integrals
+#test0092_serial_direct.inp   RT    Li/STO-3G  Serial RT w/ Gauss Lowdin   - Direct  Integrals
+#test0092_smp_incore.inp      RT    Li/STO-3G  OpenMP RT w/ Gauss Lowdin   - In-Core Integrals
+#test0092_smp_direct.inp      RT    Li/STO-3G  OpenMP RT w/ Gauss Lowdin   - Direct  Integrals
+#*step function
+#test0093_serial_incore.inp   RT    Li/STO-3G  Serial RT w/ Step Cholesky - In-Core Integrals
+#test0093_serial_direct.inp   RT    Li/STO-3G  Serial RT w/ Step Cholesky - Direct  Integrals
+#test0093_smp_incore.inp      RT    Li/STO-3G  OpenMP RT w/ Step Cholesky - In-Core Integrals
+#test0093_smp_direct.inp      RT    Li/STO-3G  OpenMP RT w/ Step Cholesky - Direct  Integrals
+#test0094_serial_incore.inp   RT    Li/STO-3G  Serial RT w/ Step Lowdin   - In-Core Integrals
+#test0094_serial_direct.inp   RT    Li/STO-3G  Serial RT w/ Step Lowdin   - Direct  Integrals
+#test0094_smp_incore.inp      RT    Li/STO-3G  OpenMP RT w/ Step Lowdin   - In-Core Integrals
+#test0094_smp_direct.inp      RT    Li/STO-3G  OpenMP RT w/ Step Lowdin   - Direct  Integrals
 
