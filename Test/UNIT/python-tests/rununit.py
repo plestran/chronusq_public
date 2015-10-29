@@ -83,30 +83,50 @@ def runUnit(doKill,doPrint):
 #			run chronus
 			print "running file: "+i.infile.replace(".inp",'')
 			tests[k][0] = runCQ(i.infile.replace(".inp",''))
-#			print tests[k][0].E
 #
 #			test SCF values
 			if 'SCF' in ref[i.infile[:8]].typ:
 				testSCF(ref[i.infile[:8]],tests[k][0])
 				summary.append(errors)
 
+#			test RESP values
+			elif 'RESP' in ref[i.infile[:8]].typ:
+				testRESP(ref[i.infile[:8]],tests[k][0])
+
 		k += 1
 	genSummary(testtable,summary)
 
-def testSCF(ref,tests):
+def testRESP(ref,tests):
+	auToeV = 27.2113961
 
+#	test excitation energies
+	maxerr = 0.0
+	for i in range(0,len(ref.w)):
+		abserr = abs(ref.w[i]   - tests.excEne[i]*auToeV)
+		if abserr > maxerr:
+			maxerr = abserr
+	errors.append(abserr)
+
+#	test oscillator strengths
+	maxerr = 0.0
+	for i in range(0,len(ref.w)):
+		abserr = abs(ref.osc[i] - tests.oscStr[i])
+		if abserr > maxerr:
+			maxerr = abserr
+	errors.append(abserr)
+
+def testSCF(ref,tests):
 	auToD   = 0.3934303070
 	auToAng = 0.5291772083
+
 # test SCF energy
 	abserr = abs(ref.scf - tests.E)
 	errors.append(abserr)
 
 # test molecular dipoles
-#print ref.dip
 	maxerr = 0.0
 	for i in range(3):
 		abserr = abs(ref.dip[i] - tests.dipole[i]/auToD)
-#	print tests.dipole[i]/auToD
 		if abserr > maxerr:
 			maxerr = abserr
 	errors.append(maxerr)
