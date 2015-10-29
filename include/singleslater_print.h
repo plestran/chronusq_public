@@ -228,7 +228,7 @@ void SingleSlater<T>::printMultipole(){
 template<typename T>
 void SingleSlater<T>::printSCFHeader(ostream &output){
   output << bannerTop << endl;
-  output << "Self Consistant Field (SCF) Settings:" << endl << endl;
+  output << "Self Consistent Field (SCF) Settings:" << endl << endl;
 //cout << std::setprecision(6);
 
   output << std::setw(38) << std::left << "  SCF Type:" << this->SCFType_ 

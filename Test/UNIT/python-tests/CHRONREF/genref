@@ -77,7 +77,6 @@ for(my $i = 0; $i < scalar @ARGV; $i++){
 		elsif ($jobtype eq "RT") {
 
 			print "RT job analysis NYI\n";
-			die;
 
 			} # RT job
 
