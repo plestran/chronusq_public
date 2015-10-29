@@ -4,6 +4,7 @@
 \usepackage{tocloft}
 \usepackage{listings}
 \usepackage{color}
+\usepackage{pbox}
 
 \definecolor{dkgreen}{rgb}{0,0.6,0}
 \definecolor{gray}{rgb}{0.5,0.5,0.5}
@@ -11,6 +12,8 @@
 \definecolor{light-gray}{gray}{0.95}
 
 \renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}} % I forget what this does...
+\newcommand\T{\rule{0pt}{2.6ex}}       % Top strut
+\newcommand\B{\rule[-1.2ex]{0pt}{0pt}} % Bottom strut
 
 \newcommand{\ChronusQGitHubPUBLIC}{
   \texttt{http://github.com/liresearchgroup/chronusq\_public.git}
@@ -295,60 +298,115 @@
 
     \begin{table}[h!]
       \begin{center}
-        \begin{tabular}{|l|l|l|l|}
+        \begin{tabular}{|l|l|l|}
 	  \hline
 	  Variable        & 
 	  Purpose         & 
-	  Possible Values & 
 	  Default Value  \\
 	  \hline
 	  \hline
 
-	  \texttt{CMAKE\_CXX\_COMPILER}      & 
-	  Set the C++ Compiler (full path)   & 
-	  --                                 & 
-	  g++                                \\
+	  \texttt{CMAKE\_CXX\_COMPILER}                 & 
+	  \pbox{7cm}{Set the C++ Compiler (full path)}  & 
+	  g++                                           \\
 
 	  \hline
 
-	  \texttt{CMAKE\_C\_COMPILER}      & 
-	  Set the C Compiler (full path)   & 
-	  --                               & 
-	  gcc                              \\
+	  \texttt{CMAKE\_C\_COMPILER}                  & 
+	  \pbox{7cm}{Set the C Compiler (full path)}   & 
+	  gcc                                          \\
 
 	  \hline
 
-	  \texttt{CMAKE\_Fortran\_COMPILER}      & 
-	  Set the FORTRAN Compiler (full path)   & 
-	  --                                     & 
-	  gfortran                               \\
+	  \texttt{CMAKE\_Fortran\_COMPILER}                 & 
+	  \pbox{7cm}{Set the FORTRAN Compiler (full path)}  & 
+	  gfortran                                          \\
 
 	  \hline
 
-	  \texttt{CMAKE\_CXX\_FLAGS} & 
-	  Set the C++ Compile Flags  &
-	  --                         &
-	  --                         \\
+	  \texttt{CMAKE\_CXX\_FLAGS}             & 
+	  \pbox{7cm}{Set the C++ Compile Flags}  &
+	  --                                     \\
 
 	  \hline
 
-	  \texttt{BOOST\_ROOT}                       &
-	  The root directory of a boost installation &
-	  --                                         &
-	  /usr                                       \\
+	  \texttt{BOOST\_ROOT}                                   &
+	  \pbox{7cm}{The root directory of a boost installation} &
+	  /usr                                                   \\
 
 	  \hline
 
-	  \texttt{BOOST\_LIBRARY\_DIR}  &
-	  Location of Boost libraries &
-	  --                          &
-	  \$(BOOST\_ROOT)/lib         \\
+	  \texttt{BOOST\_LIBRARYDIR}              &
+	  \pbox{7cm}{Location of Boost libraries} &
+	  \$(BOOST\_ROOT)/lib                     \\
 
+	  \hline
 
+	  \texttt{BOOST\_INCLUDEDIR}            &
+	  \pbox{7cm}{Location of Boost headers} &
+	  \$(BOOST\_ROOT)/include               \\
+
+	  \hline
+
+	  \texttt{Boost\_NO\_SYSTEM\_PATHS} &
+	  \pbox{7cm}{Whether or not to use the system paths to find Boost 
+	    installation} &
+	  \texttt{OFF} \\
+
+	  \hline
+
+	  \texttt{EIGEN3\_ROOT} &
+	  \pbox{7cm}{Path that contains the \Eigen~directory} &
+	  /usr/include/eigen3 \\
+
+	  \hline
+
+	  \texttt{BTAS\_ROOT} &
+	  \pbox{7cm}{Path that contains the \texttt{btas}~directory} &
+	  /usr/include/btas \\
+
+	  \hline
+
+	  \texttt{BUILD\_LA} &
+	  \pbox{7cm}{Build \LAPACK~and \BLAS~locally} &
+	  \texttt{OFF} \\
+
+	  \hline
+
+	  \texttt{BUILD\_LIBINT} &
+	  \pbox{7cm}{Build \Libint~locally} &
+	  \texttt{ON} \\
+
+	  \hline
 	\end{tabular}
       \end{center}
     \end{table}
 
+    \newpage
+    As a working example, on a machine that all of the dependencies had to be 
+    installed as a non-root user, the following script generated a successful
+    configuration:
+
+    \begin{lstlisting}
+#!/bin/sh
+
+cmake \
+  -DCMAKE_CXX_COMPILER=\$(HOME)/gcc/gcc-4.9.2/bin/g++ \
+  -DCMAKE_C_COMPILER=\$(HOME)/gcc/gcc-4.9.2/bin/gcc \
+  -DCMAKE_Fortran_COMPILER=\$(HOME)/gcc/gcc-4.9.2/bin/gfortran \
+  -DCMAKE_CXX_FLAGS='-w -O2 -std=c++11'\
+  -DUSE_LIBINT=ON \
+  -DBOOST_ROOT=\$(HOME)/boost/1.59.0 \
+  -DBOOST_LIBRARYDIR=\$(HOME)/boost/1.59.0/stage-1_59_0/lib \
+  -DBOOST_INCLUDEDIR=\$(HOME)/boost/1.59.0/include \
+  -DBoost_NO_SYSTEM_PATHS=ON  \
+  -DEIGEN3_ROOT=\$(HOME)/eigen/eigen-eigen-c58038c56923 \
+  -DBTAS_ROOT=\$(HOME)/github/BTAS \
+  -DBUILD_LA=ON \
+  -DBUILD_LIBINT=ON \
+  HDF5_ROOT=\$(HOME)/HDF5 \
+  ..
+    \end{lstlisting}
 
 
 \end{document}
