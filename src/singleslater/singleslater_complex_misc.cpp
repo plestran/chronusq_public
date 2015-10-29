@@ -45,6 +45,10 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<dcomplex> * other){
     this->havePT      = true;
     this->isClosedShell = other->isClosedShell;
     this->printLevel_ = other->printLevel_;
+    this->doDIIS = other->doDIIS;
+    this->isHF   = other->isHF;
+    this->isDFT  = other->isDFT;
+    this->guess_ = other->guess_;
 
     auto NTCSxNBASIS = this->nBasis_*this->nTCS_;
 
@@ -91,6 +95,10 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other){
     this->havePT      = true;
     this->isClosedShell = other->isClosedShell;
     this->printLevel_ = other->printLevel();
+    this->doDIIS = other->doDIIS;
+    this->isHF   = other->isHF;
+    this->isDFT  = other->isDFT;
+    this->guess_ = other->guess();
 
     auto NTCSxNBASIS = this->nBasis_*this->nTCS_;
 
