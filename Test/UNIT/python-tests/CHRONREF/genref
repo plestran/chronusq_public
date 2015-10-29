@@ -77,11 +77,15 @@ for(my $i = 0; $i < scalar @ARGV; $i++){
 		elsif ($jobtype eq "RT") {
 
 			print "RT job analysis NYI\n";
+			die;
 
 			} # RT job
 
 		} #end loop over j
 	untie @lines;
+	if ($jobtype eq "SCF") { $testline = "$testline/SCF"; }
+	elsif ($jobtype eq "RESP") { $testline = "$testline/RESP"; }
+	elsif ($jobtype eq "RT") { $testline = "$testline/RT"; }
 	print OUT "$testline\n";
 	} #end loop over i
 

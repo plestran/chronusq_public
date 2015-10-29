@@ -1,4 +1,4 @@
-#  test0071 serial incore Real CUHF RPA 6-31G 
+#  test0071 serial incore Real CUHF RPA cc-pVDZ 
 #
 #  Molecule Specification
 #
@@ -15,11 +15,11 @@ geom:
 [QM]
 reference = Real CUHF
 job       = RPA
-basis     = 6-31G.gbs
+basis     = cc-pVDZ.gbs
 ints			= incore
 
 [RPA]
-nstates = 3
+nstates = 12
 
 #
 #  Misc Settings

@@ -18,7 +18,7 @@ basis     = sto3g.gbs
 ints			= incore
 
 [CIS]
-nstates		= 1
+nstates = 1
 
 #
 #  Misc Settings

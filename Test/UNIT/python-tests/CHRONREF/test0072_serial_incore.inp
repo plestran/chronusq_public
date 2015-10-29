@@ -1,4 +1,4 @@
-#  test0072 serial incore Real CUHF RPA cc-pVDZ 
+#  test0072 serial incore Real CUHF RPA def2-SVPD
 #
 #  Molecule Specification
 #
@@ -15,11 +15,11 @@ geom:
 [QM]
 reference = Real CUHF
 job       = RPA
-basis     = cc-pVDZ.gbs
+basis     = def2-svpd.gbs
 ints			= incore
 
 [RPA]
-nstates = 3
+nstates = 20
 
 #
 #  Misc Settings

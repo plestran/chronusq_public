@@ -1,4 +1,4 @@
-#  test0065 serial incore Real CUHF CIS 6-31G 
+#  test0065 serial incore Real CUHF CIS cc-pVDZ 
 #
 #  Molecule Specification
 #
@@ -15,11 +15,11 @@ geom:
 [QM]
 reference = Real CUHF
 job       = CIS
-basis     = 6-31G.gbs
+basis     = cc-pVDZ.gbs
 ints			= incore
 
 [CIS]
-nstates = 3
+nstates = 12
 
 #
 #  Misc Settings
