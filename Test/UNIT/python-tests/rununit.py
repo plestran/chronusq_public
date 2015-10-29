@@ -44,7 +44,7 @@ def genSummary(testtable,summary):
 			entry.append(testtable[j].infile.replace(".inp",''))
 			for k in range(4):
 				entry.append(summary[j][k])
-			if summary[j][0] < 1E-10 and summary[j][1] < 1E-9 and summary[j][2] < 1E-9 and summary[j][3] < 1E-9:
+			if summary[j][0] < 1E-10 and summary[j][1] < 1E-8 and summary[j][2] < 1E-8 and summary[j][3] < 1E-8:
 				entry.append('YES')
 			else:
 				entry.append('** NO **')

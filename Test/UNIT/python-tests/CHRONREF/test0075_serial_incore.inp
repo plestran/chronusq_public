@@ -1,0 +1,33 @@
+#  test0075 serial incore Real RHF RT Cholesky STO-3G w/ LinRamp
+#
+#  Molecule Specification
+#
+[Molecule]
+charge = 0
+mult = 1
+geom:
+  O 0   0.000000000 -0.07579184359 0.0
+  H 0   0.866811829  0.6014357793  0.0
+  H 0  -0.866811829  0.6014357793  0.0
+  
+#
+#  Job Specification
+#
+[QM]
+reference = Real RHF
+job       = RT
+basis     = sto3g.gbs
+ints			= incore
+
+[RT]
+maxstep  = 20
+uprop    = eigendecomp
+ortho    = cholesky
+envelope = linramp
+edfield  = 0.01 0.0 0.0
+
+#
+#  Misc Settings
+#
+[Misc]
+nsmp = 1

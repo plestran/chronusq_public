@@ -1,3 +1,4 @@
+#  test0077 serial incore Real RHF RT Cholesky STO-3G w/ Gauss
 #
 #  Molecule Specification
 #
@@ -16,13 +17,14 @@ geom:
 reference = Real RHF
 job       = RT
 basis     = sto3g.gbs
+ints			= incore
 
 [RT]
-maxstep = 5
-edfield = 0.1 4.5 8.6
-envelope = pw
-uprop = eigendecomp
-ortho = lowdin
+maxstep  = 20
+uprop    = eigendecomp
+ortho    = cholesky
+envelope = gaussian
+edfield  = 0.01 0.0 0.0
 
 #
 #  Misc Settings
