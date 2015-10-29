@@ -189,23 +189,13 @@ void CoupledCluster::MollerPlesset(){
 }
 
 
-
-
 double CoupledCluster::CCSD(){
-  double ECorr = 0.0;
-  double ECCSD = 0.0;
-  double deltaE = 50.0;
-  double EInit = 0.0;
-  double Denom = 1.0;
-  double E1    = 0.0;
-  double E2    = 0.0;
-  double E3    = 0.0;
-  double E4    = 0.0;
-  double E5    = 0.0;
+  double ECorr  = 0.0;
+  double ECCSD  = 0.0;
+  double EMP2   = 0.0;
+  double deltaE = 50.0; // randomly set higher than criterion for 1st iter
+  double Denom;
 
-  // One-time intermediates
-  RealTensor2d Zbc, Tjk;
-  RealTensor4d Sijkl, Yjkbc;
   // Intermediates
   RealTensor2d Hba, Hbj, Hij, Gca, Gik; 
   RealTensor4d Aijkl, Babcd, Hicak;
@@ -214,11 +204,6 @@ double CoupledCluster::CCSD(){
   RealTensor4d Tijab, Tau, Wijab;
 
   if(this->Ref_ == SingleSlater<double>::TCS){
-    // Static (one-time) intermediates
-    Sijkl   = RealTensor4d(this->nO_,this->nO_,this->nO_,this->nO_);
-    Yjkbc   = RealTensor4d(this->nO_,this->nO_,this->nV_,this->nV_);
-    Zbc     = RealTensor2d(this->nV_,this->nV_);
-    Tjk     = RealTensor2d(this->nO_,this->nO_);
     // Intermediates
     Hba     = RealTensor2d(this->nV_,this->nV_);
     Hbj     = RealTensor2d(this->nV_,this->nO_);
@@ -237,8 +222,7 @@ double CoupledCluster::CCSD(){
 
 
     // Initialize T1 and T2 amplitudes
-    Tia.fill(0.0);
-     
+    Tia.fill(0.0); // T1 is zero with canonical HF ref
     for(auto i = 0; i < this->nO_; i++) 
     for(auto j = 0; j < this->nO_; j++) 
     for(auto a = 0; a < this->nV_; a++) 
@@ -250,74 +234,19 @@ double CoupledCluster::CCSD(){
       Tijab(i,j,a,b) = (this->mointegrals_->IJAB(i,j,a,b))/Denom; 
     }
 
-    // Form our first Tau
+    // Initialize Tau
     for(auto i = 0; i < this->nO_; i++) 
     for(auto j = 0; j < this->nO_; j++) 
     for(auto a = 0; a < this->nV_; a++) 
     for(auto b = 0; b < this->nV_; b++) { 
       Tau(i,j,a,b) = Tijab(i,j,a,b) + (Tia(i,a)*Tia(j,b) - Tia(i,b)*Tia(j,a));
-      EInit += (0.25)*(this->mointegrals_->IJAB(i,j,a,b))*Tijab(i,j,a,b);
+      EMP2 += (0.25)*(this->mointegrals_->IJAB(i,j,a,b))*Tijab(i,j,a,b);
     }
     // Check... if we made Tau correctly we should get MP2 energy expression back
-    cout << "MP2 ENERGY = " << endl; 
-    cout << EInit << endl;
-/*
-    // Sijkl intermediate
-    for(auto i = 0; i < this->nO_; i++) 
-    for(auto j = 0; j < this->nO_; j++) 
-    for(auto k = 0; k < this->nO_; k++) 
-    for(auto l = 0; l < this->nO_; l++) { 
-      Sijkl(i,j,k,l) += (this->mointegrals_->IJKL(i,j,k,l))*(0.5);
-      for(auto c = 0; c < this->nV_; c++) {
-        Sijkl(i,j,k,l) -= (this->mointegrals_->IJKA(i,j,l,c))*Tia(k,c);
-        for(auto d = 0; d < this->nV_; d++) {
-          Sijkl(i,j,k,l) += (this->mointegrals_->IJAB(i,j,c,d))*Tau(k,l,c,d)*(0.25);
-        }
-      }
-    }
+    cout << "E(MP2,corr) = " << EMP2 << endl; 
 
-   // Zbc intermediate
-   for(auto b = 0; b < this->nV_; b++)
-   for(auto c = 0; c < this->nV_; c++)
-   for(auto k = 0; k < this->nO_; k++)
-   for(auto d = 0; d < this->nV_; d++) {
-     Zbc(b,c) -= (this->mointegrals_->IABC(k,c,d,b))*Tia(k,d);
-     for(auto l = 0; l < this->nO_; l++) {
-       Zbc(b,c) -= (this->mointegrals_->IJAB(k,l,d,b))*Tau(k,l,c,d)*(0.5);
-     }
-   }
-   // Tjk intermediate
-   for(auto j = 0; j < this->nO_; j++)
-   for(auto k = 0; k < this->nO_; k++)
-   for(auto l = 0; l < this->nO_; l++)
-   for(auto c = 0; c < this->nV_; c++) {
-     Tjk(j,k) -= (this->mointegrals_->IJKA)(l,j,k,c)*Tia(l,c);
-     for(auto d = 0; d < this->nV_; d++) {
-       Tjk(j,k) -= (this->mointegrals_->IJAB(l,j,c,d))*Tau(k,l,c,d)*(0.5);
-     }
-   }
-
-   // Yjkbc intermediate
-   for(auto j = 0; j < this->nO_; j++)
-   for(auto k = 0; k < this->nO_; k++)
-   for(auto b = 0; b < this->nV_; b++)
-   for(auto c = 0; c < this->nV_; c++) {
-      Yjkbc(j,k,b,c) -= this->mointegrals_->IAJB(j,c,k,b);
-     for(auto d = 0; d < this->nV_; d++) {
-       Yjkbc(j,k,b,c) -= (this->mointegrals_->IABC(j,c,d,b))*Tia(k,d);
-     }
-     for(auto l = 0; l < this->nO_; l++) {
-       Yjkbc(j,k,b,c) -= (this->mointegrals_->IJKA(l,j,k,b))*Tia(l,c);
-       for(auto d = 0; d < this->nV_; d++) {
-         Yjkbc(j,k,b,c) += (this->mointegrals_->IJAB(l,j,d,b))*
-                          (Tijab(k,l,c,d) - Tia(l,c)*Tia(k,d));
-       }
-     }
-   }
-*/
-   // Done with one time intermediates, begin iterations
+    // Top of CCSD amplitude iteration
     for(auto niter = 0; niter < 50; niter++) {
-      double SUM = 0.0;
       ECorr = ECCSD;
       // Hba
       Hba.fill(0.0);
@@ -328,9 +257,6 @@ double CoupledCluster::CCSD(){
       for(auto c = 0; c < this->nV_; c++) {
         Hba(b,a) -= (this->mointegrals_->IJAB(j,k,b,c))*Tau(j,k,a,c)*(0.5);
       }
-      SUM = 0.0;
-      for(double x : Hba) SUM += x*x;
-      cout << "Hba = " << SUM << endl;
 
      // Hij
       Hij.fill(0.0);
@@ -341,9 +267,6 @@ double CoupledCluster::CCSD(){
       for(auto c = 0; c < this->nV_; c++) {
         Hij(i,j) += (this->mointegrals_->IJAB(j,k,b,c))*Tau(i,k,b,c)*(0.5);
       }
-      SUM = 0.0;
-      for(double x : Hij) SUM += x*x;
-      cout << "Hij = " << SUM << endl;
 
     // Hbj
       Hbj.fill(0.0);
@@ -353,9 +276,6 @@ double CoupledCluster::CCSD(){
       for(auto c = 0; c < this->nV_; c++) {
         Hbj(b,j) += (this->mointegrals_->IJAB(j,k,b,c))*Tia(k,c);
       }
-      SUM = 0.0;
-      for(double x : Hbj) SUM += x*x;
-      cout << "Hbj = " << SUM << endl;
 
     // Gca
       Gca.fill(0.0);
@@ -367,9 +287,6 @@ double CoupledCluster::CCSD(){
           Gca(c,a) -= (this->mointegrals_->IABC(k,a,c,d))*Tia(k,d);
         } 
       }
-      SUM = 0.0;
-      for(double x : Gca) SUM += x*x;
-      cout << "Gca = " << SUM << endl;
 
     // Gik
       Gik.fill(0.0);
@@ -381,11 +298,6 @@ double CoupledCluster::CCSD(){
           Gik(i,k) += (this->mointegrals_->IJKA(k,l,i,c))*Tia(l,c);
         }
       }
-      SUM = 0.0;
-      for(double x : Gik) SUM += x*x;
-      cout << "Gik = " << SUM << endl;
-
-      
 
     // Aijkl
       Aijkl.fill(0.0);
@@ -402,9 +314,6 @@ double CoupledCluster::CCSD(){
           }
         }
       }
-      SUM = 0.0;
-      for(double x : Aijkl) SUM += x*x;
-      cout << "Aijkl = " << SUM << endl;
 
     // Babcd
       Babcd.fill(0.0); 
@@ -418,9 +327,6 @@ double CoupledCluster::CCSD(){
                            -(this->mointegrals_->IABC(k,b,c,d))*Tia(k,a);
         }
       }
-      SUM = 0.0;
-      for(double x : Babcd) SUM += x*x;
-      cout << "Babcd = " << SUM << endl;
 
    // Hicak 
       Hicak.fill(0.0);
@@ -441,11 +347,8 @@ double CoupledCluster::CCSD(){
           Hicak(i,c,a,k) -= (this->mointegrals_->IJKA(l,k,i,c))*Tia(l,a);
         }
       }
-      SUM = 0.0;
-      for(double x : Hicak) SUM += x*x;
-      cout << "Hicak = " << SUM << endl;
 
-   // Wia time!
+   // Wia
       Wia.fill(0.0);
       for(auto i = 0; i < this->nO_; i++) 
       for(auto a = 0; a < this->nV_; a++) 
@@ -470,9 +373,6 @@ double CoupledCluster::CCSD(){
           }
         }
       }
-      SUM = 0.0;
-      for(double x : Wia) SUM += x*x;
-      cout << "WIA " << SUM << endl;
       
     // Wijab
       Wijab.fill(0.0);
@@ -484,26 +384,22 @@ double CoupledCluster::CCSD(){
         for(auto l = 0; l < this->nO_; l++) {
         Wijab(i,j,a,b) += Aijkl(i,j,k,l)*Tau(k,l,a,b)*(0.5);
         }
-        E1 += Wijab(i,j,a,b)*Tijab(i,j,a,b);
         for(auto c = 0; c < this->nV_; c++)  
         for(auto d = 0; d < this->nV_; d++) {
           Wijab(i,j,a,b) += Babcd(a,b,c,d)*Tau(i,j,c,d)*(0.5);
         }
-        E2 += Wijab(i,j,a,b)*Tijab(i,j,a,b);
         for(auto c = 0; c < this->nV_; c++) {
           Wijab(i,j,a,b) += Gca(c,a)*Tijab(i,j,c,b) -
                             Gca(c,b)*Tijab(i,j,c,a) -
                             (this->mointegrals_->IABC(j,c,a,b))*Tia(i,c) +
                             (this->mointegrals_->IABC(i,c,a,b))*Tia(j,c); 
         }
-        E3 += Wijab(i,j,a,b)*Tijab(i,j,a,b);
         for(auto k = 0; k < this->nO_; k++) {
           Wijab(i,j,a,b) += (this->mointegrals_->IJKA(i,j,k,a))*Tia(k,b) -
                             (this->mointegrals_->IJKA(i,j,k,b))*Tia(k,a) -
                             Gik(i,k)*Tijab(k,j,a,b) +
                             Gik(j,k)*Tijab(k,i,a,b); 
         }
-        E4 += Wijab(i,j,a,b)*Tijab(i,j,a,b);
         for(auto k = 0; k < this->nO_; k++) 
         for(auto c = 0; c < this->nV_; c++) {
           Wijab(i,j,a,b) += Hicak(i,c,a,k)*Tijab(j,k,b,c) -
@@ -515,19 +411,10 @@ double CoupledCluster::CCSD(){
                             (this->mointegrals_->IAJB(i,c,k,b))*Tia(j,c)*Tia(k,a) +
                             (this->mointegrals_->IAJB(j,c,k,b))*Tia(i,c)*Tia(k,a); 
         }
-        E5 += Wijab(i,j,a,b)*Tijab(i,j,a,b);
-      }  // end ijab 
-      SUM = 0.0;
-      for(double x : Wijab) SUM += x*x;
-      cout << "WIJAB " << SUM << endl;
+      }  
 
-      E1 = 0.0;
-      E2 = 0.0;
-      E3 = 0.0;
-      E4 = 0.0;
-      E5 = 0.0;
- 
-     // Make new T amplitudes
+      // Make new T amplitudes
+      // T1
       Tia.fill(0.0);
       for(auto i = 0; i < this->nO_; i++)
       for(auto a = 0; a < this->nV_; a++) {
@@ -536,10 +423,7 @@ double CoupledCluster::CCSD(){
         Tia(i,a) = Wia(i,a)/Denom;
       }
 
-      SUM = 0.0;
-      for(double x : Tia) SUM += x*x;
-      cout << "TIA " << SUM << endl;
-
+      // T2
       Tijab.fill(0.0);
       for(auto i = 0; i < this->nO_; i++) 
       for(auto j = 0; j < this->nO_; j++) 
@@ -552,10 +436,8 @@ double CoupledCluster::CCSD(){
         Tijab(i,j,a,b) = (Wijab(i,j,a,b) + (this->mointegrals_->IJAB(i,j,a,b)))/Denom; 
       }
 
-      SUM = 0.0;
-      for(double x : Tijab) SUM += x*x;
-      cout << "TIJAB " << SUM << endl;
 
+      // Update Tau and evaluate E(corr) for CCSD
       ECCSD = 0.0;
       for(auto i = 0; i < this->nO_; i++) 
       for(auto j = 0; j < this->nO_; j++) 
@@ -566,17 +448,12 @@ double CoupledCluster::CCSD(){
         ECCSD += (this->mointegrals_->IJAB(i,j,a,b))*Tau(i,j,a,b);
       }
 
-      SUM = 0.0;
-      for(double x : Tau) SUM += x*x;
-      cout << "TAU " << SUM << endl;
-
       ECCSD = ECCSD*(0.25);
       deltaE = ECCSD - ECorr; 
-      cout << "iter # " << niter << "   " << ECCSD << "  Delta-E = " << deltaE << endl;
+      cout << "Iter #: " << niter << "   " << ECCSD << "  Delta-E = " << deltaE << endl;
+
+      // threshold, right now we do energy
       if (std::abs(deltaE) < 1.0e-10) break;
-     
-
-
 
       } // end CCSD iteration
    } // end if TCS
