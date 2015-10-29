@@ -1,4 +1,4 @@
-#  test0040 serial incore Real UHF RPA STO-3G
+#  test0040 serial incore Real UHF RPA 6-31G
 #
 #  Molecule Specification
 #
@@ -15,11 +15,11 @@ geom:
 [QM]
 reference = Real UHF
 job       = RPA
-basis     = sto3g.gbs
+basis     = 6-31G.gbs
 ints			= incore
 
 [RPA]
-nstates = 3
+nstates = 10
 
 #
 #  Misc Settings
