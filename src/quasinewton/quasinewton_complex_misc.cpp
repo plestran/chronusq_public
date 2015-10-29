@@ -107,9 +107,9 @@ namespace ChronusQ {
  */
     this->LWORK          = 6*this->N_;
     this->LEN_LAPACK_SCR += this->maxSubSpace_;   // 1
-    if(!this->isHermetian_ || this->symmetrizedTrial_)
+    if(!this->isHermitian_ || this->symmetrizedTrial_)
       this->LEN_LAPACK_SCR += this->maxSubSpace_; // 2
-//  if(!this->isHermetian_ && this->symmetrizedTrial_)
+//  if(!this->isHermitian_ && this->symmetrizedTrial_)
 //    this->LEN_LAPACK_SCR += 2*this->maxSubSpace_; // 3
     this->LEN_LAPACK_SCR += this->LWORK;          // 4
     this->LenScr += this->LEN_LAPACK_SCR;         // 5

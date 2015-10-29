@@ -59,6 +59,7 @@ void RealTime<T>::alloc(){
   this->ssPropagator_	= std::unique_ptr<SingleSlater<dcomplex>>(
                             new SingleSlater<dcomplex>(
                               this->groundState_));
+	this->ssPropagator_->isNotPrimary();
   this->initMem();
 }
 
