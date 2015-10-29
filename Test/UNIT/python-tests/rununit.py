@@ -18,6 +18,7 @@ class UnitTest:
 #     Routine Definitions    #
 ##############################
 
+#--------------------------------------------------------------------
 def findFile(name,path):
 #  Checks whether file "name" exists in "path"
 	found = False
@@ -26,7 +27,9 @@ def findFile(name,path):
 			found = True
 			break
 	return found
+#--------------------------------------------------------------------
 
+#--------------------------------------------------------------------
 def genSummary(testtable,summary):
 #  Prints the results in summary.txt
 	outf = open('summary.txt','w')
@@ -49,6 +52,28 @@ def genSummary(testtable,summary):
 		j += 1
 	outf.write(tabulate(sumrytable,headers,tablefmt="simple",floatfmt=".4E"))
 
+# RESP output
+	headers = ["Test Job","max(|f|)","max(|omega|)","NStates","Passed"]
+	sumrytable = []
+	j = 0
+	for i in testtable:
+		if 'RESP' in ref[i.infile[:8]].typ:
+			entry = []
+			entry.append(testtable[j].infile.replace(".inp",''))
+			entry.append(summary[j][0])
+			entry.append(summary[j][1])
+			entry.append(len(ref[i.infile[:8]].w))
+			if summary[j][0] < 1E-4 and summary[j][1] < 1E-4:
+				entry.append('YES')
+			else:
+				entry.append('** NO **')
+			sumrytable.append(entry)
+		j += 1
+	outf.write("\n\n")
+	outf.write(tabulate(sumrytable,headers,tablefmt="simple",floatfmt=".4E"))
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
 def genTable():
 # Reads test.index to see which tests to run
 	start = False
@@ -66,7 +91,9 @@ def genTable():
 				table.append(entry)
  	f.close()
  	return table
+#--------------------------------------------------------------------
 
+#--------------------------------------------------------------------
 def runUnit(doKill,doPrint):
 # Runs the unit tests
 	global errors, summary
@@ -92,10 +119,13 @@ def runUnit(doKill,doPrint):
 #			test RESP values
 			elif 'RESP' in ref[i.infile[:8]].typ:
 				testRESP(ref[i.infile[:8]],tests[k][0])
+				summary.append(errors)
 
 		k += 1
 	genSummary(testtable,summary)
+#--------------------------------------------------------------------
 
+#--------------------------------------------------------------------
 def testRESP(ref,tests):
 	auToeV = 27.2113961
 
@@ -114,7 +144,9 @@ def testRESP(ref,tests):
 		if abserr > maxerr:
 			maxerr = abserr
 	errors.append(abserr)
+#--------------------------------------------------------------------
 
+#--------------------------------------------------------------------
 def testSCF(ref,tests):
 	auToD   = 0.3934303070
 	auToAng = 0.5291772083
@@ -153,7 +185,7 @@ def testSCF(ref,tests):
 					maxerr = abserr
 				l += 1
 	errors.append(maxerr)
-
+#--------------------------------------------------------------------
 
 ##############################
 #        Main Program        #
