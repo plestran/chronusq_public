@@ -98,6 +98,7 @@ void SingleSlater<T>::formFock(){
     *(fockB_)+=(*this->PTB_);
 #endif
     if(this->isDFT) (*fockB_) += (*this->vXB_);
+    if(this->isDFT)   (*fockB_) += (*this->vCorB_);
    }
   // Add in the electric field component if they are non-zero
   std::array<double,3> null{{0,0,0}};
