@@ -67,3 +67,9 @@ corrMap = {
   "VWN3"  :chronusQ.CORR.VWN3,
   "VWN5"  :chronusQ.CORR.VWN5
 }
+
+kernelMap = {
+  "NODFT"      :chronusQ.DFT.NODFT,
+  "USERDEFINED":chronusQ.DFT.USERDEFINED,
+  "LSDA"       :chronusQ.DFT.LSDA
+}

@@ -243,10 +243,6 @@ void SingleSlater<T>::printSCFHeader(ostream &output){
   output << std::setw(38) << std::left << "  Maximum Number of SCF Cycles:" 
          << this->maxSCFIter_ << endl;
 
-  output << std::setw(38) << std::left << "  Static Electric Field (Dipole):"
-         << "{" << this->elecField_[0] << ", " << this->elecField_[1] << ", "
-         << this->elecField_[2] << "}" << endl;
-
   output << std::setw(38) << std::left << "  Integral Contraction Algorithm:";
   if(this->aointegrals_->integralAlgorithm == AOIntegrals::DIRECT)
     output << "Direct";
@@ -268,7 +264,10 @@ void SingleSlater<T>::printSCFHeader(ostream &output){
   if(this->isDFT){
     output << std::setw(38) << std::left << "  Density Functional:";
 
-    output << "User Defined";
+    if(this->DFTKernel_ == USERDEFINED)
+      output << "User Defined";
+    else if(this->DFTKernel_ == LSDA)
+      output << "LSDA";
 
     output << endl;
 
@@ -291,6 +290,15 @@ void SingleSlater<T>::printSCFHeader(ostream &output){
       output << "VWN5";
     output << endl;
   }
+
+  std::array<double,3> null = {{0,0,0}};
+  if(this->elecField_ != null) {
+    output << endl;
+    output << std::setw(38) << std::left << "  Static Electric Field (Dipole):"
+           << "{" << this->elecField_[0] << ", " << this->elecField_[1] << ", "
+           << this->elecField_[2] << "}" << endl;
+  }
+
 
   output << endl << bannerMid << endl;
 }

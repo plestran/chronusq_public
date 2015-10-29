@@ -91,28 +91,20 @@ $ which git
 where \texttt{/usr/local/bin/git} is the location of the \texttt{git} program installed on the (my) system. The location may vary, but as long as you get a location, \texttt{git} is installed. Once a \texttt{git} installation has been verified, obtaining a copy of the ChronusQ is trivial:
 
 \begin{lstlisting}
-$ git clone https://github.com/liresearchgroup/chronusq.git
+$ git clone https://github.com/liresearchgroup/chronusq_PUBLIC.git
 \end{lstlisting}
-which will place a copy of the ChronusQ source into the directory \texttt{./chronusq}. To confirm that the git-clone was successful, verify the following (current file structure as of \today):
-
-\begin{lstlisting}
-$ cd chronusq
-$ ls
-AUTHORS  basis    CMakeLists.txt  DEPENDS  deps  Doxyfile  include  
-INSTALL  LICENSE README  src  tags  test  Test  TODO.txt  util
-\end{lstlisting}
-Any comments, concerns or problems regarding obtaining source code from the \texttt{git} repository may be directed towards David Williams (\texttt{dbwy@u.washington.edu}).
+which will place a copy of the ChronusQ source into the directory \texttt{./chronusq\_PUBLIC}. Any comments, concerns or problems regarding obtaining source code from the \texttt{git} repository may be directed towards David Williams (\texttt{dbwy@u.washington.edu}).
 
 \subsection{Dependencies} \label{subsec:deps}
 
-The ChronusQ software package depends on a number of other open source packages to perform some of the more monotonous tasks required by approximate quantum mechanical methods (i.e. (multi-)linear algebra, gaussian integral evaluation, etc). While ChronusQ strives to be a stand alone package, much of the algorithms depend heavily on other open source software, and therefore the following dependencies \textbf{\textit{\underline{must}}} be installed for ChronusQ to compile:
+The ChronusQ software package depends on a number of other open source packages to perform some of the more monotonous tasks required by approximate quantum mechanical methods (i.e. (multi-)linear algebra, gaussian integral evaluation, etc). While ChronusQ strives to be a stand alone package, many of the algorithms depend heavily on other open source software, and therefore the following dependencies \textbf{\textit{\underline{must}}} be installed for ChronusQ to compile:
 
 \begin{itemize}
 \item C++11: ChronusQ (and it's dependencies) \emph{strongly} rely on the C++11 standard. Unless you are working on a very old machine, this should not be an issue, but in some cases (i.e. most cluster distributions of Linux), the standard GCC compiler suite \emph{does not have C++11 functionality}. Before you go any further, \emph{\textbf{\underline{you must have a C++11 compiler installed}}}. If using GCC, anything 4.7+ should suffice.
 
 \item \texttt{CMake}: ChronusQ utilizes \texttt{CMake} to facilitated portability of compilation through Makefile generation. \texttt{CMake} will usually be available though (if using Linux or OSX) your OS distribution's package manager. Most problems regarding \texttt{CMake} can be solved by studying \texttt{http://www.cmake.org}
 
-\item \texttt{Libint}: For the evaluation of molecular integrals over gaussian-type functions (GTOs), ChronusQ relies on the \texttt{Libint} library of E. Valeev. A preconfigured (uncompiled) library is shipped with ChronusQ (located in the \texttt{/deps/src} directory. For directions as to how to compile and set up the locally shipped version of \texttt{Libint} or to point ChronusQ to an already compiled version of \texttt{Libint}, please see Section \ref{subsubsec:libintcomp}
+\item \texttt{Libint}: For the evaluation of molecular integrals over gaussian-type functions (GTOs), ChronusQ relies on the \texttt{Libint} library of E. Valeev. A preconfigured (uncompiled) library is shipped with ChronusQ (located in the \texttt{/deps/src} directory. For directions as to how to compile and set up the locally shipped version of \texttt{Libint} or to point ChronusQ to an already compiled version of \texttt{Libint}, please see Section \ref{subsubsec:chronusqcomp}
 
 \item \texttt{Eigen}: ChronusQ currently utilizes \texttt{Eigen} as a high-level C++ API for various trivial linear-algebra tasks (i.e. storage, multiplication, addition, etc). \texttt{Eigen} is a header-only API, so installing is as easy an placing the library in a place that ChronusQ can ``see" it. If \texttt{Eigen} is not currently installed on your system, the following will place it in a location readily accessible by ChronusQ (don't do this inside of the \texttt{chronusq} directory):
 \begin{lstlisting}
@@ -136,38 +128,38 @@ $ cd boost_<boost_version>
 $ ./bootstrap
 $ ./b2 install --prefix=/usr/local
 \end{lstlisting}
-there are much more involved and detailed versions of how to install \texttt{boost} (i.e. with the Intel compilers, etc), both those are only applicable in very special cases and are described well and often on the web.
+there are much more involved and detailed versions of how to install \texttt{boost} (i.e. with the Intel compilers, etc), both those are only applicable in very special cases and are described well and often on the web.  if \texttt{boost} is already installed on your machine in a non-standard location, see Section \ref{subsubsec:chronusqcomp}.
 
-\item LAPACK and BLAS: ChronusQ depends on the standard (FORTRAN) LAPACK and BLAS libraries to perform many of the ``heavier" linear-algebra required by our algorithms (i.e. eigenvalue decomposition, QR decomposition, singular value decomposition, etc). These will usually come standard (at least for Linux) with your OS distribution, but if not, they can be obtained and compiled by the instructions on \texttt{http://www.netlib.org/lapack/}
+\item LAPACK and BLAS: ChronusQ depends on the standard (FORTRAN) LAPACK and BLAS libraries to perform many of the ``heavier" linear-algebra required by our algorithms (i.e. eigenvalue decomposition, QR decomposition, singular value decomposition, etc). These will usually come standard (at least for Linux) with your OS distribution, but if not, we do offer a local LAPACK/BLAS install via our cmake build (see Section \ref{subsubsec:chronusqcomp}).
 \end{itemize}
 
 \subsection{Compilation}
 Compilation of the entire ChronusQ software package takes place in two steps: compilation of the dependencies and compilation of the program itself. In Section \ref{subsec:deps}, installation of three of the major dependencies (\texttt{boost}, \texttt{Eigen} and \texttt{BTAS}) was discussed. Here we discuss the compilation of \texttt{Libint} and \texttt{ChronusQ}, and give some general notes as to how to change the installation procedure if you have preinstalled (in non-standard locations) versions of the dependencies.
 
-\subsubsection{Libint} \label{subsubsec:libintcomp}
-The compilation of \texttt{Libint} actually takes place in two stages, but we have taken care of the first step for you by packaging a preconfigured version of \texttt{Libint} is be compiled with \texttt{Libint}. User's who are curious about this configuration step should read the \texttt{Libint} wiki on GitHub (\texttt{https://github.com/evaleev/libint/wiki}). From the top directory of the ChronusQ filesystem (\texttt{/chronusq}), use the following to compile in pre-packaged version of \texttt{Libint}:
-\begin{lstlisting}
-$ cd deps/src
-$ tar xvf libint-2.1.0-beta2.tgz
-$ cd libint-2.1.0-beta2
-$ ./configure CXX=<YOUR_C++_COMPILER> --prefix=$PWD/../..
-$ make install
-\end{lstlisting}
-optionally, the option \texttt{-j N}, where \texttt{N} is the number of concurrent processes, may be added in the make command (i.e. \texttt{make -j N install}) to perform a parallel compilation of \texttt{Libint}. This option is suggested when possible as \texttt{Libint} can take a while to compile.
+%\subsubsection{Libint} \label{subsubsec:libintcomp}
+%The compilation of \texttt{Libint} actually takes place in two stages, but we have taken care of the first step for you by packaging a preconfigured version of \texttt{Libint} is be compiled with \texttt{Libint}. User's who are curious about this configuration step should read the \texttt{Libint} wiki on GitHub (\texttt{https://github.com/evaleev/libint/wiki}). From the top directory of the ChronusQ filesystem (\texttt{/chronusq}), use the following to compile in pre-packaged version of \texttt{Libint}:
+%\begin{lstlisting}
+%$ cd deps/src
+%$ tar xvf libint-2.1.0-beta2.tgz
+%$ cd libint-2.1.0-beta2
+%$ ./configure CXX=<YOUR_C++_COMPILER> --prefix=$PWD/../..
+%$ make install
+%\end{lstlisting}
+%optionally, the option \texttt{-j N}, where \texttt{N} is the number of concurrent processes, may be added in the make command (i.e. \texttt{make -j N install}) to perform a parallel compilation of \texttt{Libint}. This option is suggested when possible as \texttt{Libint} can take a while to compile.
 
-If you have a precompiled version of \texttt{Libint}, \emph{we will not be responsible for ensuring compatibility}. \texttt{Libint} is an actively developed open source project, and while we attempt to integrate the latest version, constant insistence that the developers and users of this problem constantly compile and re-compile \texttt{Libint} is unrealistic. The only version of \texttt{Libint} that we ensure compatibility with ChronusQ is the pre-packaged version shipped with ChronusQ. 
+%If you have a precompiled version of \texttt{Libint}, \emph{we will not be responsible for ensuring compatibility}. \texttt{Libint} is an actively developed open source project, and while we attempt to integrate the latest version, constant insistence that the developers and users of this problem constantly compile and re-compile \texttt{Libint} is unrealistic. The only version of \texttt{Libint} that we ensure compatibility with ChronusQ is the pre-packaged version shipped with ChronusQ. 
 
-\subsubsection{ChronusQ} \label{subsubsec:chronusqcomp}
-Once the dependencies have been successfully installed (see Sections \ref{subsec:deps} and \ref{subsubsec:libintcomp}, ChronusQ compilation is relatively straight forward. We use an out-of-source compilation model, i.e. the object code and compiled binaries are kept separate from the actual source code. To compile ChronusQ, one must first make a \texttt{build} directory to store these compiled entities
+\subsubsection{Compilation of ChronusQ} \label{subsubsec:chronusqcomp}
+Once the dependencies have been successfully installed (see Section \ref{subsec:deps}), ChronusQ compilation is relatively straight forward. We use an out-of-source compilation model, i.e. the object code and compiled binaries are kept separate from the actual source code. To compile ChronusQ, one must first make a \texttt{build} directory to store these compiled entities
 \begin{lstlisting}
 $ mkdir build
 \end{lstlisting}
-we suggest naming the build directory something useful to indicate the compiler and options used during the compilation (i.e. using OpenMP, etc). This is not required by any means, but it may make it easier to remember how to reproduce the compilation. Once this directory is made, the compile-type Makefiles must be generated using \texttt{CMake}:
+we suggest naming the build directory something useful to indicate the compiler and options used during the compilation (i.e. using OpenMP, etc). This is not required by any means, but it may make it easier to remember how to reproduce the compilation. Once this directory is made, the Makefiles must be generated using \texttt{CMake}:
 \begin{lstlisting}
 $ cd build
-$ cmake -DCMAKE_CXX_COMPILER=<YOUR_C++_COMPILER> -DUSE_LIBINT=ON ..
+$ cmake -D<CMAKE_OPTION1>=<value1> -D<CMAKE_OPTION2>=<value2> ..
 \end{lstlisting}
-the \texttt{USE\_LIBINT} variable \emph{must} be turned \texttt{ON} (we are working to remove this need in the compile procedure, it just hasn't happened yet) for historical reasons. Here is a current list of configure-time options that we support:
+Here is a current list of configure-time options that we support:
 \begin{table}[h!]
 \begin{center}
 \begin{tabular}{|l|l|l|}
@@ -177,7 +169,7 @@ Variable & Values & Function\\
 \hline
 \texttt{USE\_LIBINT} & \texttt{ON}/\texttt{OFF} & Enable / disable \texttt{Libint} for molecular integral evaluation\\
 \hline
-\texttt{USE\_OMP} & \texttt{ON}/\texttt{OFF} & Enable / diable OpenMP shared-memory parallelism\\
+\texttt{asdsa} \\ 
 \hline
 \end{tabular}
 \end{center}

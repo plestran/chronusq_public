@@ -9,6 +9,7 @@ from meta.enumMaps import aointAlg
 from meta.enumMaps import guessMap
 from meta.enumMaps import exchMap 
 from meta.enumMaps import corrMap 
+from meta.enumMaps import kernelMap 
 
 #
 #  Parse the QM section of the input file and populate
@@ -61,6 +62,7 @@ def parseQM(workers,secDict):
 #
   parseBasis(workers,ssSettings['BASIS'])
 
+
 #
 # Set integral algorithm
 #
@@ -83,6 +85,17 @@ def parseQM(workers,secDict):
   else:
     msg = 'QM.Job ' + str(ssSettings['JOB']) + ' not recognized'
     CErrMsg(workers['CQFileIO'],str(msg))
+
+#
+# Set global print level
+#
+  try:
+    workers['CQMolecule'].setPrintLevel(ssSettings['PRINT'])
+    workers['CQBasisSet'].setPrintLevel(ssSettings['PRINT'])
+    workers['CQSingleSlater'].setPrintLevel(ssSettings['PRINT'])
+    workers['CQRealTime'].setPrintLevel(ssSettings['PRINT'])
+  except KeyError:
+    pass
 
   return str(ssSettings['JOB'])
 
@@ -145,6 +158,7 @@ def handleReference(workers,settings):
 
     workers["CQSingleSlater"].isDFT = True
     workers["CQSingleSlater"].isHF  = False
+    workers["CQSingleSlater"].setDFTKernel(kernelMap['USERDEFINED'])
   
     corrKernel = 0
     exchKernel = 0
@@ -168,8 +182,153 @@ def handleReference(workers,settings):
       msg = "Specified Exchange Kernel is not Defined"
       CErrMsg(workers['CQFileIO'],str(msg))
 
-# elif 'RKS' in ref:
-# elif 'UKS' in ref:
+  elif 'RKS' in ref:
+    # Force RKS
+    if mult != 1:
+      mas = 'Non-singlet multiplicity is not suitable for RKS'
+      CErrMsg(workers['CQFileIO'],str(msg))
+ 
+    workers["CQSingleSlater"].setRef(chronusQ.Reference.RHF)
+    workers["CQSingleSlater"].isClosedShell = True
+
+    workers["CQSingleSlater"].isDFT = True
+    workers["CQSingleSlater"].isHF  = False
+    workers["CQSingleSlater"].setDFTKernel(kernelMap['USERDEFINED'])
+  
+    corrKernel = 0
+    exchKernel = 0
+    try:
+      corrKernel = settings['CORR']
+      exchKernel = settings['EXCHANGE']
+    except KeyError:
+      msg = "Must specify both Correlation and Exchange Kernel\n"
+      msg = msg + " for user defined QM.KS reference"
+      CErrMsg(workers['CQFileIO'],str(msg))
+
+    try:
+      workers["CQSingleSlater"].setCorrKernel(corrMap[corrKernel])
+    except KeyError:
+      msg = "Specified Correlation Kernel is not Defined"
+      CErrMsg(workers['CQFileIO'],str(msg))
+
+    try:
+      workers["CQSingleSlater"].setExchKernel(exchMap[exchKernel])
+    except KeyError:
+      msg = "Specified Exchange Kernel is not Defined"
+      CErrMsg(workers['CQFileIO'],str(msg))
+  elif 'UKS' in ref:
+    # forch uhf
+    workers["cqsingleslater"].setref(chronusq.reference.uhf)
+    workers["cqsingleslater"].isclosedshell = false
+
+    workers["cqsingleslater"].isdft = true
+    workers["cqsingleslater"].ishf  = false
+    workers["cqsingleslater"].setdftkernel(kernelmap['userdefined'])
+  
+    corrKernel = 0
+    exchKernel = 0
+    try:
+      corrKernel = settings['CORR']
+      exchKernel = settings['EXCHANGE']
+    except KeyError:
+      msg = "Must specify both Correlation and Exchange Kernel\n"
+      msg = msg + " for user defined QM.KS reference"
+      CErrMsg(workers['CQFileIO'],str(msg))
+
+    try:
+      workers["CQSingleSlater"].setCorrKernel(corrMap[corrKernel])
+    except KeyError:
+      msg = "Specified Correlation Kernel is not Defined"
+      CErrMsg(workers['CQFileIO'],str(msg))
+
+    try:
+      workers["CQSingleSlater"].setExchKernel(exchMap[exchKernel])
+    except KeyError:
+      msg = "Specified Exchange Kernel is not Defined"
+      CErrMsg(workers['CQFileIO'],str(msg))
+
+  elif 'CUKS' in ref:
+    # Use Constrained UHF (not complex UHF) 
+    workers["CQSingleSlater"].setRef(chronusQ.Reference.CUHF)
+
+    workers["CQSingleSlater"].isDFT = True
+    workers["CQSingleSlater"].isHF  = False
+    workers["CQSingleSlater"].setDFTKernel(kernelMap['USERDEFINED'])
+  
+    corrKernel = 0
+    exchKernel = 0
+    try:
+      corrKernel = settings['CORR']
+      exchKernel = settings['EXCHANGE']
+    except KeyError:
+      msg = "Must specify both Correlation and Exchange Kernel\n"
+      msg = msg + " for user defined QM.KS reference"
+      CErrMsg(workers['CQFileIO'],str(msg))
+
+    try:
+      workers["CQSingleSlater"].setCorrKernel(corrMap[corrKernel])
+    except KeyError:
+      msg = "Specified Correlation Kernel is not Defined"
+      CErrMsg(workers['CQFileIO'],str(msg))
+
+    try:
+      workers["CQSingleSlater"].setExchKernel(exchMap[exchKernel])
+    except KeyError:
+      msg = "Specified Exchange Kernel is not Defined"
+      CErrMsg(workers['CQFileIO'],str(msg))
+
+  elif 'LSDA' in ref:
+    # Smartly figure out of reference is R/U
+    if mult == 1:
+      workers["CQSingleSlater"].setRef(chronusQ.Reference.RHF)
+      workers["CQSingleSlater"].isClosedShell = True
+    else:
+      workers["CQSingleSlater"].setRef(chronusQ.Reference.UHF)
+
+    workers["CQSingleSlater"].isDFT = True
+    workers["CQSingleSlater"].isHF  = False
+    workers["CQSingleSlater"].setDFTKernel(kernelMap['LSDA'])
+    workers["CQSingleSlater"].setCorrKernel(corrMap['VWN3'])
+    workers["CQSingleSlater"].setExchKernel(exchMap['SLATER'])
+  elif 'RLSDA' in ref:
+    # Force RKS
+    if mult != 1:
+      mas = 'Non-singlet multiplicity is not suitable for RKS'
+      CErrMsg(workers['CQFileIO'],str(msg))
+ 
+    workers["CQSingleSlater"].setRef(chronusQ.Reference.RHF)
+    workers["CQSingleSlater"].isClosedShell = True
+
+    workers["CQSingleSlater"].isDFT = True
+    workers["CQSingleSlater"].isHF  = False
+    workers["CQSingleSlater"].setDFTKernel(kernelMap['LSDA'])
+    workers["CQSingleSlater"].setCorrKernel(corrMap['VWN3'])
+    workers["CQSingleSlater"].setExchKernel(exchMap['SLATER'])
+  elif 'ULSDA' in ref:
+    # Force RKS
+    if mult != 1:
+      mas = 'Non-singlet multiplicity is not suitable for RKS'
+      CErrMsg(workers['CQFileIO'],str(msg))
+ 
+    workers["CQSingleSlater"].setRef(chronusQ.Reference.RHF)
+    workers["CQSingleSlater"].isClosedShell = True
+
+    workers["CQSingleSlater"].isDFT = True
+    workers["CQSingleSlater"].isHF  = False
+    workers["CQSingleSlater"].setDFTKernel(kernelMap['LSDA'])
+    workers["CQSingleSlater"].setCorrKernel(corrMap['VWN3'])
+    workers["CQSingleSlater"].setExchKernel(exchMap['SLATER'])
+  elif 'CULSDA' in ref:
+    # Use Constrained UHF (not complex UHF) 
+    workers["CQSingleSlater"].setRef(chronusQ.Reference.CUHF)
+
+    workers["CQSingleSlater"].isDFT = True
+    workers["CQSingleSlater"].isHF  = False
+    workers["CQSingleSlater"].setDFTKernel(kernelMap['LSDA'])
+    workers["CQSingleSlater"].setCorrKernel(corrMap['VWN3'])
+    workers["CQSingleSlater"].setExchKernel(exchMap['SLATER'])
+
+
   else:
     msg = 'Reference ' + str(sum(ref)) + ' not able to be parsed'
     CErrMsg(workers['CQFileIO'],str(msg))
@@ -267,7 +426,8 @@ def parseSCF(workers,scfSettings):
     'SCFENETOL' :workers['CQSingleSlater'].setSCFEneTol,
     'SCFMAXITER':workers['CQSingleSlater'].setSCFMaxIter,
     'FIELD'     :workers['CQSingleSlater'].setField,
-    'GUESS'     :workers['CQSingleSlater'].setGuess 
+    'GUESS'     :workers['CQSingleSlater'].setGuess ,
+    'PRINT'     :workers['CQSingleSlater'].setPrintLevel
   }
   # Loop over optional keywords, set options accordingly
   # note that because these are optional, if the keyword
@@ -282,5 +442,17 @@ def parseSCF(workers,scfSettings):
     except KeyError:
       continue
 
-  if scfSettings['GUESS'] == guessMap['READ']:
-    workers['CQFileIO'].doRestart = True
+  try:
+    if scfSettings['GUESS'] == guessMap['READ']:
+      workers['CQFileIO'].doRestart = True
+  except KeyError:
+    pass
+
+  try:
+    if scfSettings['DIIS']:
+      workers['CQSingleSlater'].doDIIS = True
+    else:
+      workers['CQSingleSlater'].doDIIS = False
+  except KeyError:
+    pass
+

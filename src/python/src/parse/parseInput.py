@@ -104,7 +104,7 @@ def genSecDict(workers,parser,section):
     readTyp = keyword.typ
 
     # Call the proper function for the type being read
-    if readTyp in ('I','D'):
+    if readTyp in ('I','D','B'):
       dict1[opt.upper()] = parseMap[readTyp](section,opt)
     elif readTyp in ('S'):
       dict1[opt.upper()] = parseMap[readTyp](section,opt).upper()

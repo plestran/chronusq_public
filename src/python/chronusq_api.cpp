@@ -30,6 +30,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setGuess"        , &SingleSlater<double>::setGuess               )
     .def("setCorrKernel"   , &SingleSlater<double>::setCorrKernel          )
     .def("setExchKernel"   , &SingleSlater<double>::setExchKernel          )
+    .def("setDFTKernel"    , &SingleSlater<double>::setDFTKernel           )
 
     .def("dipole"          , &SingleSlater<double>::Wrapper_dipole         )
     .def("quadrupole"      , &SingleSlater<double>::Wrapper_quadrupole     )
@@ -43,6 +44,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def_readonly("nSCFIter"      , &SingleSlater<double>::nSCFIter        )
     .def_readwrite("isDFT"        , &SingleSlater<double>::isDFT           )
     .def_readwrite("isHF"         , &SingleSlater<double>::isHF            )
+    .def_readwrite("doDIIS"       , &SingleSlater<double>::doDIIS          )
   ;
 
   class_<SingleSlater<dcomplex>,boost::noncopyable>("SingleSlater_complex",
@@ -72,6 +74,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setGuess"        , &SingleSlater<dcomplex>::setGuess               )
     .def("setCorrKernel"   , &SingleSlater<dcomplex>::setCorrKernel          )
     .def("setExchKernel"   , &SingleSlater<dcomplex>::setExchKernel          )
+    .def("setDFTKernel"    , &SingleSlater<dcomplex>::setDFTKernel           )
 
     .def("dipole"          , &SingleSlater<dcomplex>::Wrapper_dipole         )
     .def("quadrupole"      , &SingleSlater<dcomplex>::Wrapper_quadrupole     )
@@ -85,6 +88,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def_readonly("nSCFIter"      , &SingleSlater<dcomplex>::nSCFIter        )
     .def_readwrite("isDFT"        , &SingleSlater<dcomplex>::isDFT           )
     .def_readwrite("isHF"         , &SingleSlater<dcomplex>::isHF            )
+    .def_readwrite("doDIIS"       , &SingleSlater<dcomplex>::doDIIS          )
   ;
 
   enum_<SingleSlater<double>::REFERENCE>("Reference")
@@ -114,6 +118,11 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("NOCORR", SingleSlater<double>::NOCORR) 
     .value("VWN3"  , SingleSlater<double>::VWN3  )
     .value("VWN5"  , SingleSlater<double>::VWN5  )
+  ;
+  enum_<SingleSlater<double>::DFT>("DFT")
+    .value("NODFT"      , SingleSlater<double>::NODFT      )
+    .value("USERDEFINED", SingleSlater<double>::USERDEFINED)
+    .value("LSDA"       , SingleSlater<double>::LSDA       )
   ;
 
   class_<Molecule,boost::noncopyable>("Molecule",init<>())
@@ -207,6 +216,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setFreq"      , &RealTime<double>::setFreq      )
     .def("setPhase"     , &RealTime<double>::setPhase     )
     .def("setSigma"     , &RealTime<double>::setSigma     )
+    .def("setPrintLevel", &RealTime<double>::setPrintLevel)
     .def("printRT"      , &RealTime<double>::printRT      )
   ;
 
@@ -230,6 +240,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setFreq"      , &RealTime<dcomplex>::setFreq      )
     .def("setPhase"     , &RealTime<dcomplex>::setPhase     )
     .def("setSigma"     , &RealTime<dcomplex>::setSigma     )
+    .def("setPrintLevel", &RealTime<dcomplex>::setPrintLevel)
     .def("printRT"      , &RealTime<dcomplex>::printRT      )
   ;
 
