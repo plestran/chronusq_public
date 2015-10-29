@@ -122,8 +122,11 @@
     quantum mechanical methods (i.e. (multi-)linear algebra, gaussian integral 
     evaluation, etc). While ChronusQ strives to be a stand alone package, many
     of the incorporated functionality depend heavily on outside open source 
-    software. Therefore the following dependencies must be installed for ChronusQ
-    to be used:
+    software. Any problems regarding the installation of these dependencies can
+    be resolved via the website of the software. Any problems regarding the
+    communication of these dependencies and ChronusQ can be directed to
+    \DBWYContact.
+    
     
     % List of Dependencies
     \begin{itemize}
@@ -262,5 +265,90 @@
     \end{itemize}
 
     \subsection{Configure and Compilation} \label{subsec:ChronusQConfigCompile}
+    
+    This section outlines the configuration and compilation of the ChronusQ
+    software package via \CMake. Before this procedure can be carried out,
+    all of the dependencies (unless otherwise stated) from the previous section
+    must be installed. Any problems regarding the configuration or compliation
+    may be directed toward \DBWYContact.
+
+    \subsubsection{Configure} \label{subsubsec:ChronusQConfig}
+
+    The configuration of the machine specific Makefiles to compile ChronusQ are
+    handled by \CMake. ChronusQ has adopted an ``out-of-source" compilation model
+    to better seperate source and compiled code. In this manner, if a compilation
+    or configuration goes wrong, one must simple delete the build directory and 
+    start over with no risk of editing the source code. Configuration of ChronusQ
+    takes place via the following general scheme
+    
+    \begin{lstlisting}
+      > cd /path/to/chronusq
+      > mkdir build && cd build
+      > cmake -D<OPT1>=<V1> -D<OPT2>=<V2> [ETC] ..
+    \end{lstlisting}
+    where \texttt{<OPT1>} and \texttt{<OPT2>} are \CMake~variables and \texttt{V1}
+    and \texttt{V2} are the corresponding values to set these variables. The
+    ``.." must be present at the end of the command to let \CMake~know that there
+    is a file in the previous directory called ``CMakeLists.txt", which contains
+    the \CMake~configuration instructions. The following \CMake~variables may be
+    influential to a successful configuration of ChronusQ:
+
+    \begin{table}[h!]
+      \begin{center}
+        \begin{tabular}{|l|l|l|l|}
+	  \hline
+	  Variable        & 
+	  Purpose         & 
+	  Possible Values & 
+	  Default Value  \\
+	  \hline
+	  \hline
+
+	  \texttt{CMAKE\_CXX\_COMPILER}      & 
+	  Set the C++ Compiler (full path)   & 
+	  --                                 & 
+	  g++                                \\
+
+	  \hline
+
+	  \texttt{CMAKE\_C\_COMPILER}      & 
+	  Set the C Compiler (full path)   & 
+	  --                               & 
+	  gcc                              \\
+
+	  \hline
+
+	  \texttt{CMAKE\_Fortran\_COMPILER}      & 
+	  Set the FORTRAN Compiler (full path)   & 
+	  --                                     & 
+	  gfortran                               \\
+
+	  \hline
+
+	  \texttt{CMAKE\_CXX\_FLAGS} & 
+	  Set the C++ Compile Flags  &
+	  --                         &
+	  --                         \\
+
+	  \hline
+
+	  \texttt{BOOST\_ROOT}                       &
+	  The root directory of a boost installation &
+	  --                                         &
+	  /usr                                       \\
+
+	  \hline
+
+	  \texttt{BOOST\_LIBRARY\_DIR}  &
+	  Location of Boost libraries &
+	  --                          &
+	  \$(BOOST\_ROOT)/lib         \\
+
+
+	\end{tabular}
+      \end{center}
+    \end{table}
+
+
 
 \end{document}
