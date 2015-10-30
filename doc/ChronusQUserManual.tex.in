@@ -714,7 +714,7 @@ ChronusQ input files are divided into sections that specify the molecular geomet
 
 	%bibliography    
     \bibliographystyle{unsrt}
-    \bibliography{ChronusQ}
+    \bibliography{@CHRONUSQ_BIB@}
     
 \end{document}
 
