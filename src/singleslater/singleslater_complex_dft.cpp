@@ -40,9 +40,6 @@ void SingleSlater<dcomplex>::formCor(double rho, double spindensity){
 };
 
 
-template<>
-double SingleSlater<dcomplex>::spindens(double rho_A, double rho_B){
-};
 
 
 } // Namespace ChronusQ
