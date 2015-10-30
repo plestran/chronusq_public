@@ -384,8 +384,8 @@ def parseRT(workers,settings):
       optMap[i](settings[i][0],settings[i][1],settings[i][2])
 
 
-  if 'EDFIELD' not in settings:
-    optMap['EDFIELD'](0.0,0.0,0.0)
+  #if 'EDFIELD' not in settings:
+  #  optMap['EDFIELD'](0.0,0.0,0.0)
     
   # Idiot Checks
 
