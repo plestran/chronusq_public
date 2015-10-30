@@ -1,4 +1,4 @@
-import sys,os
+import sys,os,time
 import getopt
 from refval import *
 from chronusq import *
@@ -35,7 +35,7 @@ def genSummary(testtable,summary):
 	outf = open('summary.txt','w')
 
 # SCF output    
-	headers = ["Test Job","|dEnergy|","max(|dDipole|)","max(|dQuadrupole|)","max(|dOctupole|)","Passed"]
+	headers = ["SCF Test Job","|dEnergy|","max(|dDipole|)","max(|dQuadrupole|)","max(|dOctupole|)","Passed"]
 	sumrytable = []
 	j = 0
 	for i in testtable:
@@ -53,7 +53,7 @@ def genSummary(testtable,summary):
 	outf.write(tabulate(sumrytable,headers,tablefmt="simple",floatfmt=".4E"))
 
 # RESP output
-	headers = ["Test Job","max(|f|)","max(|omega|)","NStates","Passed"]
+	headers = ["RESP Test Job","max(|f|)","max(|omega|)","NStates","Passed"]
 	sumrytable = []
 	j = 0
 	for i in testtable:
@@ -64,6 +64,25 @@ def genSummary(testtable,summary):
 			entry.append(summary[j][1])
 			entry.append(len(ref[i.infile[:8]].w))
 			if summary[j][0] < 1E-7 and summary[j][1] < 1E-7:
+				entry.append('YES')
+			else:
+				entry.append('** NO **')
+			sumrytable.append(entry)
+		j += 1
+	outf.write("\n\n")
+	outf.write(tabulate(sumrytable,headers,tablefmt="simple",floatfmt=".4E"))
+
+# RT output    
+	headers = ["RT Test Job","|dLastEnergy|","max(|dLastDipole|)","Passed"]
+	sumrytable = []
+	j = 0
+	for i in testtable:
+		if 'RT' in ref[i.infile[:8]].typ:
+			entry = []
+			entry.append(testtable[j].infile.replace(".inp",''))
+			entry.append(summary[j][0])
+			entry.append(summary[j][1])
+			if summary[j][0] < 1E-10 and summary[j][1] < 1E-6:
 				entry.append('YES')
 			else:
 				entry.append('** NO **')
@@ -110,6 +129,7 @@ def runUnit(doKill,doPrint):
 #			run chronus
 			print "running file: "+i.infile.replace(".inp",'')
 			tests[k][0] = runCQ(i.infile.replace(".inp",''))
+#			time.sleep(2)
 #
 #			test SCF values
 			if 'SCF' in ref[i.infile[:8]].typ:
@@ -121,8 +141,9 @@ def runUnit(doKill,doPrint):
 				testRESP(ref[i.infile[:8]],tests[k][0])
 				summary.append(errors)
 
-#			elif 'RT' in ref[i.infile[:8]].typ:
-#				testRT(ref[i.infile[:8]],tests[k][0])
+			elif 'RT' in ref[i.infile[:8]].typ:
+				testRT(ref[i.infile[:8]],tests[k][0])
+				summary.append(errors)
 
 			else:
 				print "Not recognize job type for ", ref[i.infile[:8]].typ
@@ -154,21 +175,21 @@ def testRESP(ref,tests):
 #--------------------------------------------------------------------
 
 #--------------------------------------------------------------------
-#def testRT(ref,tests):
-#	auToD   = 0.3934303070
-#	auToAng = 0.5291772083
-#
-## test RT energy
-#	abserr = abs(ref.eng - tests.E)
-#	errors.append(abserr)
-#
-## test time evolving molecular dipoles
-#	maxerr = 0.0
-#	for i in range(4):
-#		abserr = abs(ref.dip[i] - tests.dipole[i]/auToD)
-#		if abserr > maxerr:
-#			maxerr = abserr
-#	errors.append(maxerr)
+def testRT(ref,tests):
+	auToD   = 0.3934303070
+	auToAng = 0.5291772083
+
+# test RT energy
+	abserr = abs(ref.eng - tests.lastEnergy)
+	errors.append(abserr)
+
+# test time evolving molecular dipoles
+	maxerr = 0.0
+	for i in range(4):
+		abserr = abs(ref.dip[i] - tests.lastDipole[i])
+		if abserr > maxerr:
+			maxerr = abserr
+	errors.append(maxerr)
 #--------------------------------------------------------------------
 
 #--------------------------------------------------------------------
