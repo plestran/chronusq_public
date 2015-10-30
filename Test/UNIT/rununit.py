@@ -186,7 +186,7 @@ def testRT(ref,tests):
 # test time evolving molecular dipoles
 	maxerr = 0.0
 	for i in range(4):
-		abserr = abs(ref.dip[i] - tests.lastDipole[i])
+		abserr = abs(abs(ref.dip[i]) - abs(tests.lastDipole[i]))
 		if abserr > maxerr:
 			maxerr = abserr
 	errors.append(maxerr)
