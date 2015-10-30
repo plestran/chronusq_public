@@ -163,7 +163,7 @@
 
       \subsubsection{\Libint} \label{subsubsec:Libint}
         For the evaluation of molecule integrals over gaussian-type
-        function (GTOs), ChronusQ relies on the \Libint~library of E. Valeev. A
+        function (GTOs), ChronusQ relies on the \Libint~library of E. Valeev \cite{libint15}. A
 	preconfigured (uncompiled) library is shipped with ChronusQ (located in
 	the \texttt{/deps/src} directory). The configure/compile procedure
 	described in Section \ref{subsec:ChronusQConfigCompile} details the
@@ -173,7 +173,7 @@
 	may be different between versions.
 
       \subsubsection{\Eigen} \label{subsubsec:Eigen}
-        ChronusQ currently utilizes \Eigen~as a high-level C++ API for
+        ChronusQ currently utilizes \Eigen~\cite{eigen} as a high-level C++ API for
         various light-weight linear algebra tasks (i.e. storage, multiplication,
 	etc). \Eigen~is also made available through most (GNU/Linux) OS distributions
 	via a standard package manager. One may obtain a pre-packaged \Eigen~
@@ -191,10 +191,10 @@
 	\CMake~variables that need to be set for a non-standard installation 
 	of \Eigen~can be found
 	in Section \ref{subsec:ChronusQConfigCompile}.
-
+I
       \subsubsection{\BTAS} \label{subsubsec:BTAS}
         ChronusQ currently utilizes \BTAS~(\textbf{B}asic \textbf{T}ensor
-        \textbf{A}lgebra \textbf{S}ubroutines) as a C++11 API for multi-linear 
+        \textbf{A}lgebra \textbf{S}ubroutines) \cite{btas} as a C++11 API for multi-linear 
 	algebra. \BTAS~is a header-only API (see \Eigen), so one only needs to place
 	the headers in a place that ChronusQ can find them. The \BTAS~source code
 	may be obtained from the \BTAS~GitHub via
@@ -208,7 +208,7 @@
 	\ref{subsec:ChronusQConfigCompile}.
 
       \subsubsection{\Boost} \label{subsubsec:boost} 
-        Various parts of the code depend on the C++ \Boost~libraries to
+        Various parts of the code depend on the C++ \Boost~libraries \cite{boost} to
         varying degrees (namely the \Python API from which ChronusQ can be 
 	executed). Given that \Boost~is not already installed on your system,
 	one may compile and place boost in the usual (root) place by obtaining
@@ -248,7 +248,7 @@
 	\end{lstlisting}
 
       \subsubsection{\HDF} \label{subsubsec:HDF5} 
-        ChronusQ utilizes \HDF~for binary file IO for use with 
+        ChronusQ utilizes \HDF~\cite{hdf5} for binary file IO for use with 
         checkpointing and scratch file generation. \HDF~is made available
 	though the standard (GNU/Linux) OS distribution package manager via
 	(Fedora 22 / root access):
@@ -264,7 +264,7 @@
 	can be found in Section \ref{subsec:ChronusQConfigCompile}.
 
       \subsubsection{\LAPACK~and \BLAS} \label{subsubsec:LA} 
-        ChronusQ utilizes \LAPACK~and \BLAS~to perform
+        ChronusQ utilizes \LAPACK~\cite{lapack} and \BLAS~\cite{blas1,blas2,blas3,atlas} to perform
         the most important linear-algebra functionality (i.e. SVD, QR, 
 	diagonalization, etc). \LAPACK~and \BLAS~come standard on most
 	(GNU/Linux) OS distributions, and if not, the are easily obtained via
@@ -528,6 +528,10 @@ test.index
     
     \noindent and checking the generated \texttt{summary.txt}. If you identify a bug or error that is not 
     addressed in \texttt{buglist.txt}, please contact \DBWYContact.
+
+	%bibliography    
+    \bibliographystyle{unsrt}
+    \bibliography{ChronusQ}
     
 \end{document}
 

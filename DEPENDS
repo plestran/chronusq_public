@@ -1,27 +1,51 @@
 This file contains information pertaining to the dependencies
 of ChronusQ on other open-source software.
 
-
 C++11 is required for all of the dependencies. The developers
 have tested with the following compilers:
 
  GCC 4.8+
 
-
-
-
 Below are the current dependencies of ChronusQ:
-
 
 Molecular integrals over Gaussians:     Libint [1]
 Threaded and Vectorized Linear Algebra: Eigen  [2]
-Multi-Linear Algebra:                   BTAS   [3]
+Tensor Algebra:                         BTAS   [3]
+Binary File Management:                 HDF5   [4]
+Linear Algebra:													LAPACK [5]
+																				BLAS   [6,7,8]
+General Infrastructure:                 Boost  [9]
 
-[1] Edward F. Valeev; Libint: machine-generated library for efficient evaluation
-      of molecular integrals over Gaussians, version 2.1.0;
-      https://github.com/evaleev/libint/; 2015.
+[1] Edward F. Valeev. Libint: machine-generated library for efficient evaluation
+      of molecular integrals over Gaussians, version 2.1.0.
+      https://github.com/evaleev/libint/. 2015.
 
-[2] Gaël Guenebaud and Benoît Jacob and others; Eigen v3;
-      http://eigen.tuxfamily.org; 2010.
+[2] Gaël Guenebaud and Benoît Jacob and others. Eigen v3.
+      http://eigen.tuxfamily.org. 2010.
 
-[3] http://itensor.org/btas
+[3] https://github.com/BTAS/BTAS
+
+[4] The HDF Group. Hierarchical Data Format, version 5, 1997-2015.
+      http://www.hdfgroup.org/HDF5/.
+
+[5] E. Anderson, Z. Bai, C. Bischof, S. Blackford, J. Demmel, J. Dongarra, 
+      J. Du Croz, A. Greenbaum, S. Hammarling, A. McKenney, and D. Sorensen. 
+      LAPACK Users’ Guide. Society for Industrial and Applied Mathematics, 
+      Philadelphia, PA, Third edition, 1999.
+
+[6] L. S. Blackford, J. Demmel, J. Dongarra, I. Duff, S. Hammarling, G. Henry, 
+      M. Heroux, L. Kauf- man, A. Lumsdaine, A. Petitet, R. Pozo, K. Remington, 
+      and R. C. Whaley. An Updated Set of Basic Linear Algebra Subprograms (BLAS). 
+      ACM Transactions on Mathematical Software (TOMS), 28(2):135–151, 2002.
+
+[7] J. Dongarra. Basic Linear Algebra Subprograms Technical Forum Standard. 
+      International Journal of High Performance Applications and Supercomputing, 
+      16(1):1–111, 2002.
+
+[8] J. Dongarra. Basic Linear Algebra Subprograms Technical Forum Standard. 
+      International Journal of High Performance Applications and Supercomputing, 
+      16(2):115-199, 2002.
+
+[9] Boris Schäling. The Boost C++ Libraries. XML Press, Second edition, 2014.
+
+
