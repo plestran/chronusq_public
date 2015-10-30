@@ -121,6 +121,13 @@ def runUnit(doKill,doPrint):
 				testRESP(ref[i.infile[:8]],tests[k][0])
 				summary.append(errors)
 
+#			elif 'RT' in ref[i.infile[:8]].typ:
+#				testRT(ref[i.infile[:8]],tests[k][0])
+
+			else:
+				print "Not recognize job type for ", ref[i.infile[:8]].typ
+				sys.exit()
+
 		k += 1
 	genSummary(testtable,summary)
 #--------------------------------------------------------------------
@@ -147,12 +154,30 @@ def testRESP(ref,tests):
 #--------------------------------------------------------------------
 
 #--------------------------------------------------------------------
+#def testRT(ref,tests):
+#	auToD   = 0.3934303070
+#	auToAng = 0.5291772083
+#
+## test RT energy
+#	abserr = abs(ref.eng - tests.E)
+#	errors.append(abserr)
+#
+## test time evolving molecular dipoles
+#	maxerr = 0.0
+#	for i in range(4):
+#		abserr = abs(ref.dip[i] - tests.dipole[i]/auToD)
+#		if abserr > maxerr:
+#			maxerr = abserr
+#	errors.append(maxerr)
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
 def testSCF(ref,tests):
 	auToD   = 0.3934303070
 	auToAng = 0.5291772083
 
 # test SCF energy
-	abserr = abs(ref.scf - tests.E)
+	abserr = abs(ref.eng - tests.E)
 	errors.append(abserr)
 
 # test molecular dipoles
