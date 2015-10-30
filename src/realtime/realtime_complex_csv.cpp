@@ -46,56 +46,63 @@ void RealTime<dcomplex>::writeDipoleCSV(PropInfo & rec, long int & iStep){
 };
 
 template<>
+void RealTime<dcomplex>::writeAppliedFieldCSV(PropInfo & rec, long int & iStep){
+    if (iStep == 0) {
+      *csvs[1] << "Time Step (a.u.), Ex (a.u), Ey (a.u.), Ez (a.u.), || E total || (a.u.)" << endl;
+    }
+    *csvs[1] << std::fixed << std::setprecision(10) << rec.timeStep << ", " << rec.appliedfield[0] 
+             << ", " << rec.appliedfield[1] << ", " << rec.appliedfield[2] << ", " << rec.appliedfield[3] << endl;
+};
+
+template<>
 void RealTime<dcomplex>::writeMullikenCSV(PropInfo & rec, long int & iStep){
   if (iStep == 0) {   
-    *csvs[1] << std::setw(14) << "Atom number";
+    *csvs[2] << std::setw(14) << "Atom number";
     for(auto iAtm = 0; iAtm < this->ssPropagator_->molecule()->nAtoms(); iAtm++) {
-      *csvs[1] << std::setw(14) << iAtm;
+      *csvs[2] << std::setw(14) << iAtm;
     }
-    *csvs[1] << endl;
-    *csvs[1] << std::setw(14) << "Atom symbol";
+    *csvs[2] << endl;
+    *csvs[2] << std::setw(14) << "Atom symbol";
     for(auto iAtm = 0; iAtm < this->ssPropagator_->molecule()->nAtoms(); iAtm++) {
-      *csvs[1] << std::setw(14) << elements[this->ssPropagator_->molecule()->index(iAtm)].symbol;
+      *csvs[2] << std::setw(14) << elements[this->ssPropagator_->molecule()->index(iAtm)].symbol;
     }
-    *csvs[1] << endl;
-    *csvs[1] << std::setw(14) << "Time (a.u.)" << endl;
+    *csvs[2] << endl;
+    *csvs[2] << std::setw(14) << "Time (a.u.)" << endl;
   }
-    *csvs[1] << std::fixed << std::setw(14) << std::setprecision(10) << rec.timeStep;
+    *csvs[2] << std::fixed << std::setw(14) << std::setprecision(10) << rec.timeStep;
     for(auto iAtm = 0; iAtm < this->ssPropagator_->molecule()->nAtoms(); iAtm++) {
-      *csvs[1] << ", " << std::setw(14) << rec.mullPop[iAtm];
+      *csvs[2] << ", " << std::setw(14) << rec.mullPop[iAtm];
     }
-    *csvs[1] << endl;
+    *csvs[2] << endl;
 };
 
 template<>
 void RealTime<dcomplex>::writeOrbitalCSV(PropInfo & ref, long int & iStep){
   if(iStep == 0) {
-    *csvs[2] << std::setw(10) << "Time (au)";
+    *csvs[3] << std::setw(10) << "Time (au)";
     for(auto idx = 0; idx != this->nBasis_*this->nTCS_; idx++){
-      *csvs[2] << ", " << std::setw(10) << idx + 1;
-    }
-    *csvs[2] << endl;
-  }
-  *csvs[2] << std::fixed << std::setw(10) << std::setprecision(6) << ref.timeStep; 
-  for(auto idx = 0; idx != this->nBasis_*this->nTCS_; idx++) {
-    *csvs[2] << ", " << std::setw(10) << std::setprecision(6) << ref.orbitalOccA[idx];
-  }
-  *csvs[2] << endl;
-  if(!this->isClosedShell_ && this->Ref_ != SingleSlater<dcomplex>::TCS){
-    if(iStep == 0) {
-      //*csvs[3] << std::setw(10) << "Time (au)";
-      for(auto idx = 0; idx != this->nBasis_*this->nTCS_; idx++){
-        *csvs[3] << ", " << std::setw(10) << idx + 1;
-      }
-      *csvs[3] << endl;
-    }
-    *csvs[3] << std::fixed << std::setw(10) << std::setprecision(6) << ref.timeStep; 
-    for(auto idx = 0; idx != this->nBasis_*this->nTCS_; idx++) {
-      *csvs[3] << ", " << std::setw(10) << std::setprecision(6) << ref.orbitalOccB[idx];
+      *csvs[3] << ", " << std::setw(10) << idx + 1;
     }
     *csvs[3] << endl;
   }
+  *csvs[3] << std::fixed << std::setw(10) << std::setprecision(6) << ref.timeStep; 
+  for(auto idx = 0; idx != this->nBasis_*this->nTCS_; idx++) {
+    *csvs[3] << ", " << std::setw(10) << std::setprecision(6) << ref.orbitalOccA[idx];
+  }
+  *csvs[3] << endl;
+  if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS){
+    if(iStep == 0) {
+      for(auto idx = 0; idx != this->nBasis_*this->nTCS_; idx++){
+        *csvs[4] << ", " << std::setw(10) << idx + 1;
+      }
+      *csvs[4] << endl;
+    }
+    *csvs[4] << std::fixed << std::setw(10) << std::setprecision(6) << ref.timeStep; 
+    for(auto idx = 0; idx != this->nBasis_*this->nTCS_; idx++) {
+      *csvs[4] << ", " << std::setw(10) << std::setprecision(6) << ref.orbitalOccB[idx];
+    }
+    *csvs[4] << endl;
+  }
 };
 
-} // namespace ChronusQ
-
+} //namespace ChronusQ
