@@ -381,6 +381,7 @@ void RealTime<double>::doPropagation() {
 //  Form AO Fock matrix
     this->formEDField();
     this->ssPropagator_->setField(this->EDField_);
+    this->ssPropagator_->formFock();
     this->ssPropagator_->computeEnergy();
     this->ssPropagator_->computeMultipole();
 
