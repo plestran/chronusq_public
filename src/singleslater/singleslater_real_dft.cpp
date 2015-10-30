@@ -133,26 +133,27 @@ void SingleSlater<double>::formCor(double rho, double spindensity){
    double x0_a = 0.0;
    double eps_p = 0.0;
    double eps_f = 0.0;
-   double alpha = 0.0;
-   double mu_p = 0.0;
-   double mu_f = 0.0;
    double over3 = 1.0/3.0;
-   double df2_deta2_0 = 4.0*over3*over3*(-1.0+std::pow((2.0),(1.0/3.0)));
-   double beta = 0.0;
-   double delta_eps_etha = 0.0;
    double delta_eps_1    = 0.0;
    double S1    = 0.0;
    double S2    = 0.0;
+   double M3_A    = 0.0;
+   double M3_B    = 0.0;
+   double rs      = std::pow(((3.0)/(4.0*math.pi*rho)),(1.0/3.0));
+/*
+   double alpha = 0.0;
+   double mu_p = 0.0;
+   double mu_f = 0.0;
+   double df2_deta2_0 = 4.0*over3*over3*(-1.0+std::pow((2.0),(1.0/3.0)));
+   double beta = 0.0;
    double S3    = 0.0;
    double S4    = 0.0;
    double M1    = 0.0;
    double M2    = 0.0;
-   double M3_A    = 0.0;
-   double M3_B    = 0.0;
-   double rs_db_drs    = 0.0;
-   double rs_da_drs    = 0.0;
+   double delta_eps_etha = 0.0;
    double spindensity_4 = std::pow(spindensity,4.0);
    double spindensity_3 = std::pow(spindensity,3.0);
+*/
 
 //   VWN5
    if (this->CorrKernel_ == VWN5){
@@ -162,30 +163,61 @@ void SingleSlater<double>::formCor(double rho, double spindensity){
      b_p  =  3.72744;  // Caption Table 5
      c_p  = 12.9352;   // Caption Table 5
      x0_p = -0.10498;   // Caption Table 5
-     b_a  =  1.13107;   // intext page
-     c_a  = 13.0045;    // intext page
-     x0_a = -0.00475840; // intext page
+     b_a  =  1.13107;   // intext page 1209
+     c_a  = 13.0045;    // intext page 1209
+     x0_a = -0.00475840; // intext page 1209
    }else if(this->CorrKernel_ == VWN3){
 //  VWN3
-     b_p  =  13.0720;  // into text page 1207
-     c_p  =  42.7198;  // into text page 1207
+     b_p  =  13.0720;   // into text page 1207
+     c_p  =  42.7198;   // into text page 1207
      x0_p =  -0.409286; // into text page 1207
+     b_f  =  20.1231;   // into text pagr 1207
+     c_f  =  101.578;   // into text pagr 1207
+     x0_f = -0.743294;  // into text pagr 1207
+     b_a  =  1.13107;   // intext page 1209
+     c_a  = 13.0045;    // intext page 1209
+     x0_a = -0.00475840; // intext page 1209
    }
+/*  // Debug
+    cout << "**********" <<endl;
+    double rho1;
+    rho1 = 0.238732414637843;   //rs=1
+    cout << "EpsP " <<   EvepsVWN(0,A_p,b_p,c_p,x0_p,rho1) << endl; 
+    cout << "EpsF " <<   EvepsVWN(0,A_f,b_f,c_f,x0_f,rho1) << endl; 
+    cout << "dEpsP " <<  EvepsVWN(2,A_p,b_p,c_p,x0_p,rho1) << endl; 
+    cout << "dEpsF " <<  EvepsVWN(2,A_f,b_f,c_f,x0_f,rho1) << endl; 
+    cout << "**********" <<endl;
+*/
 // Closed Shell
    if(this->isClosedShell && this->Ref_ != TCS) {
      this->eps_corr = 0.0;
      this->mu_corr  = 0.0;
      this->eps_corr =  EvepsVWN(0,A_p,b_p,c_p,x0_p,rho);
-     this->mu_corr  = -over3*EvepsVWN(1,A_p,b_p,c_p,x0_p,rho);
+//     this->mu_corr  = -over3*EvepsVWN(1,A_p,b_p,c_p,x0_p,rho);
+     this->mu_corr  = -over3*rs*EvepsVWN(2,A_p,b_p,c_p,x0_p,rho);
      this->mu_corr += this->eps_corr ;
    }else{
 //   Energy density Eq.2.4/2.2 of ref
-/*
+
      this->eps_corr  = 0.0;
      this->mu_corr   = 0.0;
      this->mu_corr_B = 0.0;
      eps_p = EvepsVWN(0,A_p,b_p,c_p,x0_p,rho);
      eps_f = EvepsVWN(0,A_f,b_f,c_f,x0_f,rho);
+     delta_eps_1 = eps_f - eps_p;
+     this->eps_corr  = eps_p + delta_eps_1*f_spindens(0,spindensity);
+     S1 =  -rs*over3*EvepsVWN(2,A_p,b_p,c_p,x0_p,rho);
+     S2 =  -rs*over3*f_spindens(0,spindensity)*(EvepsVWN(2,A_f,b_f,c_f,x0_f,rho) - EvepsVWN(2,A_p,b_p,c_p,x0_p,rho));
+//     S1 =  -over3*EvepsVWN(1,A_p,b_p,c_p,x0_p,rho);
+//     S2 =  -over3*f_spindens(0,spindensity)*(EvepsVWN(1,A_f,b_f,c_f,x0_f,rho) - EvepsVWN(1,A_p,b_p,c_p,x0_p,rho));
+     M3_A =   1.0 - spindensity; 
+     M3_B = -(1.0 + spindensity);
+     this->mu_corr   = S1 + S2 + this->eps_corr;
+     this->mu_corr_B = S1 + S2 + this->eps_corr;     
+    
+     this->mu_corr   +=  delta_eps_1*M3_A*df_spindens(spindensity);
+     this->mu_corr_B +=  delta_eps_1*M3_B*df_spindens(spindensity);
+/*
      alpha = EvepsVWN(0,A_a,b_a,c_a,x0_a,rho);
      delta_eps_1 = eps_f - eps_p;
      beta  = df2_deta2_0 * delta_eps_1 / alpha;
