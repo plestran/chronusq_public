@@ -368,14 +368,22 @@ def parseRT(workers,settings):
   # note that because these are optional, if the keyword
   # is not found in setings, no error is thrown and the
   # next keyword is processed
+# for i in optMap:
+#   try:
+#     if i not in ('EDFIELD'):
+#       optMap[i](settings[i])
+#     else:
+#       optMap[i](settings[i][0],settings[i][1],settings[i][2])
+#   except KeyError:
+#     continue
   for i in optMap:
-    try:
-      if i not in ('EDFIELD'):
-        optMap[i](settings[i])
-      else:
-        optMap[i](settings[i][0],settings[i][1],settings[i][2])
-    except KeyError:
-      continue
+    if (i in settings) and (i not in ('EDFIELD')):
+      optMap[i](settings[i])
+    elif (i in settings) and (i in('EDFIELD')):
+      optMap[i](settings[i][0],settings[i][1],settings[i][2])
+    else:
+      pass
+
 
 def parseSDR(workers,secDict):
   jobSettings = {}
