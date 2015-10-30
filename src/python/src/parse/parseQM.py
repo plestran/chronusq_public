@@ -10,6 +10,7 @@ from meta.enumMaps import guessMap
 from meta.enumMaps import exchMap 
 from meta.enumMaps import corrMap 
 from meta.enumMaps import kernelMap 
+from meta.enumMaps import envMap
 
 #
 #  Parse the QM section of the input file and populate
@@ -381,8 +382,44 @@ def parseRT(workers,settings):
       optMap[i](settings[i])
     elif (i in settings) and (i in('EDFIELD')):
       optMap[i](settings[i][0],settings[i][1],settings[i][2])
-    else:
-      pass
+
+  # Idiot Checks
+
+  if 'ENVELOPE' in settings:
+    env = settings['ENVELOPE']
+
+    if (env == envMap['PW']) and ('EDFIELD' not in settings):
+      msg = "Must specify EDFIELD with PW envelope for RT"
+      CErrMsg(workers['CQFileIO'],str(msg))
+ 
+    if (env == envMap['LINRAMP']) and ('EDFIELD' not in settings):
+      msg = "Must specify EDFIELD with LINRAMP envelope for RT"
+      CErrMsg(workers['CQFileIO'],str(msg))
+ 
+    if (env == envMap['LINRAMP']) and ('FREQUENCY' not in settings):
+      msg = "Must specify FREQUENCY with LINRAMP envelope for RT"
+      CErrMsg(workers['CQFileIO'],str(msg))
+
+    if (env == envMap['GAUSSIAN']) and ('EDFIELD' not in settings):
+      msg = "Must specify EDFIELD with GAUSSIAN envelope for RT"
+      CErrMsg(workers['CQFileIO'],str(msg))
+
+    if (env == envMap['GAUSSIAN']) and ('SIGMA' not in settings):
+      msg = "Must specify SIGMA with GAUSSIAN envelope for RT"
+      CErrMsg(workers['CQFileIO'],str(msg))
+
+    if (env == envMap['STEP']) and ('TIME_ON' not in settings):
+      msg = "Must specify TIME_ON with STEP envelope for RT"
+      CErrMsg(workers['CQFileIO'],str(msg))
+
+    if (env == envMap['STEP']) and ('TIME_OFF' not in settings):
+      msg = "Must specify TIME_OFF with STEP envelope for RT"
+      CErrMsg(workers['CQFileIO'],str(msg))
+
+    if (env == envMap['SINSQ']):
+      msg = "SINSQ envelope NYI"
+      CErrMsg(workers['CQFileIO'],str(msg))
+
 
 
 def parseSDR(workers,secDict):
