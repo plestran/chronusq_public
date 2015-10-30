@@ -1,0 +1,28 @@
+#  test0084 serial incore Real UHF RT Lowdin STO-3G
+#
+#  Molecule Specification
+#
+[Molecule]
+charge = 0
+mult = 2
+geom:
+	Li 0   0.000000 0.000000 0.000000
+  
+#
+#  Job Specification
+#
+[QM]
+reference = Real UHF
+job       = RT
+basis     = sto3g.gbs
+ints			= incore
+
+[RT]
+maxstep  = 20
+ortho    = lowdin
+
+#
+#  Misc Settings
+#
+[Misc]
+nsmp = 1

@@ -219,6 +219,8 @@ void SingleSlater<dcomplex>::SADGuess() {
       hartreeFockAtom.setRef(CUHF);
       hartreeFockAtom.genMethString();
       hartreeFockAtom.alloc();
+
+      if(this->printLevel_ < 4) hartreeFockAtom.setPrintLevel(0);
  
       // Zero out the MO coeff for local SS object
       hartreeFockAtom.moA()->setZero();

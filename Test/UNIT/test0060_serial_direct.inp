@@ -1,13 +1,28 @@
-$geom read
-2
-O 0 0.000000    0.000000    0.608586
-O 0 0.000000    0.000000    -0.608586
+#  test0060 serial direct Real CUHF cc-pVDZ w/ field
+#
+#  Molecule Specification
+#
+[Molecule]
+charge = 0
+mult = 3
+geom:
+	O 0   0.000000    0.000000    0.608586
+	O 0   0.000000    0.000000    -0.608586
+  
+#
+#  Job Specification
+#
+[QM]
+reference = Real CUHF
+job       = SCF
+basis     = cc-pVDZ.gbs
+ints			= direct
 
-$method rohf
-$charge 0
-$spin 3
-$basis cc-pVDZ.gbs
-$nsmp 1
-$print 1
-$unittest scf
-$field 0.01 0.0 0.0
+[SCF]
+field 		= 0.01 0.0 0.0
+
+#
+#  Misc Settings
+#
+[Misc]
+nsmp = 1

@@ -1,12 +1,24 @@
-$geom read
-1
-Li 0 0.000000 0.000000 0.000000
+#  test0013 serial direct Real CUHF STO-3G
+#
+#  Molecule Specification
+#
+[Molecule]
+charge = 0
+mult = 2
+geom:
+	Li 0   0.000000 0.000000 0.000000
+  
+#
+#  Job Specification
+#
+[QM]
+reference = Real CUHF
+job       = SCF
+basis     = sto3g.gbs
+ints			= direct
 
-$method rohf
-$charge 0
-$spin 2
-$basis sto3g.gbs
-$nsmp 1
-$print 1
-$scf incore
-$unittest scf
+#
+#  Misc Settings
+#
+[Misc]
+nsmp = 1

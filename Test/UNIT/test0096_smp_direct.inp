@@ -1,0 +1,29 @@
+#  test0096 smp direct Complex RHF RT Cholesky 6-31G
+#
+#  Molecule Specification
+#
+[Molecule]
+charge = 0
+mult = 1
+geom:
+	O 0   0.000000    0.000000    0.608586
+	O 0   0.000000    0.000000    -0.608586
+  
+#
+#  Job Specification
+#
+[QM]
+reference = Complex RHF
+job       = RT
+basis     = 6-31G.gbs
+ints			= direct
+
+[RT]
+maxstep  = 20
+ortho    = cholesky
+
+#
+#  Misc Settings
+#
+[Misc]
+nsmp = 2
