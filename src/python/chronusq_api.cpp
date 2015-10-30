@@ -218,6 +218,10 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setSigma"     , &RealTime<double>::setSigma     )
     .def("setPrintLevel", &RealTime<double>::setPrintLevel)
     .def("printRT"      , &RealTime<double>::printRT      )
+    //.def("recs"         , &RealTime<double>::Wrapper_recs )
+    .def("lastDipole"   , &RealTime<double>::lastDipole   )
+    .def("lastEnergy"   , &RealTime<double>::lastEnergy   )
+    .def("getTimeStep"  , &RealTime<double>::getTimeStep  )
   ;
 
   class_<RealTime<dcomplex>,boost::noncopyable>("RealTime_complex",init<>())
@@ -242,7 +246,31 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setSigma"     , &RealTime<dcomplex>::setSigma     )
     .def("setPrintLevel", &RealTime<dcomplex>::setPrintLevel)
     .def("printRT"      , &RealTime<dcomplex>::printRT      )
+//    .def("recs"         , &RealTime<dcomplex>::Wrapper_recs )
+    .def("lastDipole"   , &RealTime<dcomplex>::lastDipole   )
+    .def("lastEnergy"   , &RealTime<dcomplex>::lastEnergy   )
+    .def("getTimeStep"  , &RealTime<dcomplex>::getTimeStep  )
   ;
+
+/*
+  class_<RealTime<double>::Wrapper_PropInfo,boost::noncopyable>("RTD_PropInfo",init<>())
+    .def_readwrite("timeStep"    , &RealTime<double>::Wrapper_PropInfo::timeStep)
+    .def_readwrite("energy"      , &RealTime<double>::Wrapper_PropInfo::energy)
+    .def("dipole"      , &RealTime<double>::Wrapper_PropInfo::dipole)
+    .def_readwrite("mullPop"     , &RealTime<double>::Wrapper_PropInfo::mullPop)
+    .def_readwrite("orbitalOccA" , &RealTime<double>::Wrapper_PropInfo::orbitalOccA)
+    .def_readwrite("orbitalOccB" , &RealTime<double>::Wrapper_PropInfo::orbitalOccB)
+  ;
+
+  class_<RealTime<dcomplex>::Wrapper_PropInfo,boost::noncopyable>("RTC_PropInfo",init<>())
+    .def_readwrite("timeStep"    , &RealTime<dcomplex>::Wrapper_PropInfo::timeStep)
+    .def_readwrite("energy"      , &RealTime<dcomplex>::Wrapper_PropInfo::energy)
+    .def_readwrite("dipole"      , &RealTime<dcomplex>::Wrapper_PropInfo::dipole)
+    .def_readwrite("mullPop"     , &RealTime<dcomplex>::Wrapper_PropInfo::mullPop)
+    .def_readwrite("orbitalOccA" , &RealTime<dcomplex>::Wrapper_PropInfo::orbitalOccA)
+    .def_readwrite("orbitalOccB" , &RealTime<dcomplex>::Wrapper_PropInfo::orbitalOccB)
+  ;
+*/
 
   enum_<RealTime<double>::ORTHO>("RealTime_ORTHO"   )
     .value("Lowdin"   , RealTime<double>::Lowdin    )

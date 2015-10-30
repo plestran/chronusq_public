@@ -153,6 +153,7 @@ public:
     double timeStep;
     double energy;
     std::array<double,4> dipole;
+    std::array<double,4> appliedfield;
     std::vector<double> mullPop;
     std::vector<double> orbitalOccA;
     std::vector<double> orbitalOccB;
@@ -284,8 +285,47 @@ public:
   void formUTrans();
   void doPropagation();
   void writeDipoleCSV(PropInfo & propInfo, long int & iStep);
+  void writeAppliedFieldCSV(PropInfo & propInfo, long int & iStep);
   void writeMullikenCSV(PropInfo & propInfo, long int & iStep);
   void writeOrbitalCSV(PropInfo & propInfo, long int & iStep);
+
+  // Python API
+/*
+  boost::python::list Wrapper_recs();
+  struct Wrapper_PropInfo {
+    double timeStep;
+    double energy;
+    boost::python::list dipole_;
+    boost::python::list mullPop;
+    boost::python::list orbitalOccA;
+    boost::python::list orbitalOccB;
+
+    Wrapper_PropInfo(){ ; };
+
+    Wrapper_PropInfo(PropInfo &rec){
+      this->timeStep = rec.timeStep;
+      this->energy   = rec.energy;
+
+      for(auto i = 0; i < 4; i++)
+        this->dipole_.append(rec.dipole[i]);
+
+      for(auto i = rec.mullPop.begin(); i < rec.mullPop.end(); i++)
+        this->mullPop.append(*i);
+      for(auto i = rec.orbitalOccA.begin(); i < rec.orbitalOccA.end(); i++)
+        this->orbitalOccA.append(*i);
+      for(auto i = rec.orbitalOccB.begin(); i < rec.orbitalOccB.end(); i++)
+        this->orbitalOccB.append(*i);
+     
+    };
+
+    inline boost::python::list dipole(){ return this->dipole_;};
+  };
+*/
+  boost::python::list lastDipole();
+  double              lastEnergy();
+  double              getTimeStep();
+
+  
 };
 
 #include <realtime_alloc.h>

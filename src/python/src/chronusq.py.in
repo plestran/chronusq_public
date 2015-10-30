@@ -22,6 +22,8 @@ class MetaData:
     self.oscStr = []
     self.davIters = []
 #   RT Info
+    self.lastEnergy = 0
+    self.lastDipole = []
     
 
 def runCQ(fname):
