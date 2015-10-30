@@ -109,4 +109,4 @@ configure_file(
 
 # Recurse into src
 add_subdirectory(src)
-add_subdirectory(doc)
+#add_subdirectory(doc)
