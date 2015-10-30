@@ -1,0 +1,117 @@
+#!/home/plestran/bin/miniconda/bin/python
+import os,sys
+sys.path.append('/home/plestran/devel/chronusq/build_gcc_libint_openmp/src/python')
+import libpythonapi as chronusQ
+from jobs.jobMap import *
+from parse.parseInput import parseInput
+from parse.parseMolecule import parseMolecule
+from parse.parseQM import parseQM
+from parse.parseMisc import parseMisc
+import time 
+
+class MetaData:
+  def init(self):
+#   SCF Info
+    self.scfIters = 0 
+    self.E      = 0 
+    self.dipole     = []
+    self.quadrupole = []
+    self.octupole   = []
+#   RESP Info
+    self.excEne = []
+    self.oscStr = []
+    self.davIters = []
+#   RT Info
+    
+
+def runCQ(fname):
+  authorfname = '/home/plestran/devel/chronusq/AUTHORS'
+  header = """
+     ______ __                                      ____ 
+    / ____// /_   _____ ____   ____   __  __ _____ / __ \ 
+   / /    / __ \ / ___// __ \ / __ \ / / / // ___// / / /
+  / /___ / / / // /   / /_/ // / / // /_/ /(__  )/ /_/ / 
+  \____//_/ /_//_/    \____//_/ /_/ \__,_//____/ \___\_\ 
+                                                         
+  """
+  banner = "-------------------------------------------------------------------------------\n"
+
+  starttime= time.strftime("%c")
+  
+  
+  mol        = chronusQ.Molecule()
+  basisSet   = chronusQ.BasisSet()
+  DFbasisSet = chronusQ.BasisSet()
+  controls   = chronusQ.Controls()
+  aoints     = chronusQ.AOIntegrals()
+  
+  hf_double     = chronusQ.SingleSlater_double()
+  rt_double     = chronusQ.RealTime_double()
+  sdr_double    = chronusQ.SDResponse_double()
+  moints_double = chronusQ.MOIntegrals_double()
+  
+  hf_complex     = chronusQ.SingleSlater_complex()
+  rt_complex     = chronusQ.RealTime_complex()
+  sdr_complex    = chronusQ.SDResponse_complex()
+  moints_complex = chronusQ.MOIntegrals_complex()
+  
+  out        = chronusQ.FileIO(fname)
+  
+  workers = {
+    "CQMolecule"          :mol,
+    "CQBasisSet"          :basisSet,
+    "CQDFBasisSet"        :DFbasisSet,
+    "CQControls"          :controls,
+    "CQAOIntegrals"       :aoints,
+    "CQSingleSlaterDouble":hf_double,
+    "CQRealTimeDouble"    :rt_double,
+    "CQSDResponseDouble"  :sdr_double,
+    "CQMOIntegralsDouble" :moints_double,
+    "CQSingleSlaterComplex":hf_complex,
+    "CQRealTimeComplex"    :rt_complex,
+    "CQSDResponseComplex"  :sdr_complex,
+    "CQMOIntegralsComplex" :moints_complex,
+    "CQFileIO"            :out
+  }
+  
+  
+  out.write("Job Started: %s"  % starttime )
+  out.write(header)
+  
+  authors = open(authorfname, 'r')
+  out.write("Author List:\n"+banner+authors.read())
+  authors.close()
+  
+  inputf = open(fname+".inp", 'r')
+  out.write("Input File:\n"+banner+inputf.read()+banner)
+  inputf.close()
+  
+  chronusQ.initCQ()
+  controls.iniControls()
+  
+  secDict = parseInput(workers,fname+".inp")
+  
+  unittest = parseMisc(workers,secDict["MISC"])
+  parseMolecule(workers,secDict["MOLECULE"])
+  jobStr = parseQM(workers,secDict)
+  
+  out.iniH5Files()
+  out.iniStdGroups()
+  
+  jobMeta = MetaData()
+  jobMap[jobStr](workers,jobMeta)
+
+  chronusQ.finalizeCQ()
+  
+  endtime= time.strftime("%c")
+  out.write("Job Ended: %s"  % endtime )
+  return jobMeta
+
+
+if __name__ in '__main__':
+  try:
+      fname = sys.argv[1]
+  except IndexError:
+      sys.exit("Please specify the input filename")
+
+  jobMeta = runCQ(fname)
