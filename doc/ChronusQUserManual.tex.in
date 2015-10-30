@@ -1,7 +1,9 @@
 \documentclass[12pt]{article}
 \usepackage[top=0.75in, bottom=0.75in, left=0.75in, right=0.75in]{geometry}
 \usepackage{graphicx}
+\usepackage{amsmath}
 \usepackage{tocloft}
+\usepackage{tabto}
 \usepackage{listings}
 \usepackage{color}
 \usepackage{pbox}
@@ -493,5 +495,185 @@ cmake \
 > chronusq.py <input_file>
     \end{lstlisting}
 
+\newpage
+  \section{Input Files} \label{sec:InputFiles}
+To use ChronusQ, it is necessary to specify the molecule and job type within an input file. The easiest way to understand the input for ChronusQ is to take a look at an example. Here is a sample input file for water, \texttt{h2o.inp}. As written, it performs an HF/STO-3G calculation on neutral, singlet water with a single processor.
+\begin{lstlisting}
+#
+#  Molecule Specification
+#
+[Molecule]
+charge = 0
+mult   = 1
+geom:
+  O    0.000000000 -0.0757918436  0.0
+  H    0.866811829  0.6014357793  0.0
+  H   -0.866811829  0.6014357793  0.0
+
+#
+#  Job Specification
+#
+[QM]
+reference = HF
+job       = SCF 
+basis     = sto3g.gbs
+
+#
+#  Misc Settings
+#
+[Misc]
+nsmp = 1
+\end{lstlisting}
+ChronusQ input files are divided into sections that specify the molecular geometry, the type of job, and other miscellaneous options. Lines beginning with \texttt{\#} are ignored. Inputs are not case-sensitive. Sections are defined by the square bracket, e.g. \texttt{[Molecule]} specifies the molecular geometry, charge, etc. When ChronusQ encounters a section, it then searches the following lines for the appropriate commands and keywords. We will look at these sections each in turn. 
+   
+    \subsection{Specifying your molecule: the \texttt{[Molecule]} section} \label{subsec:MoleculeInput}
+    The \texttt{[Molecule]} section specifies the geometry, charge, and multiplicity of the system. 
+    \begin{description}
+    \item[\texttt{charge}] \hfill \\
+    A signed integer that defines the overall electric charge of your molecule.
+    \item[\texttt{mult}] \hfill \\
+    An integer that defines the multiplicity of the molecule. Singlets correspond to 1, doublets to 2, triplets to 3, and so on.
+    \item[\texttt{geom}] \hfill \\
+    Specifies the geometry of the molecule. The input is always Cartesian, and the default units are in Angstroms. Each line corresponds to one atom. Each line here follows the following format
+          \begin{lstlisting}
+          <atomic symbol> <x-coordinate> <y-coordinate> <z-coordinate>
+          \end{lstlisting} 
+    \end{description}
+    That's all there is to the \texttt{[Molecule]} specification!
+
+    \subsection{Defining the type of job with the \texttt{[QM]} section} \label{subsec:QMInput}
+    The \texttt{[QM]} section sets up the type of job you want to run, be it a single point Hartree-Fock energy calculation or a real-time propagation. It is also where you specify your basis set and many other options.
+    \begin{description}
+    \item[\texttt{Basis}] \hfill \\
+    Defines your basis set. Available options can be found in the \texttt{basis} directory. Note that you will need to specify the filename, hence the \texttt{.gbs} extension.
+    \item[\texttt{Job}] \hfill \\
+    Defines what kind of job you want to do. Available options:
+      \begin{description}
+      \item[\texttt{SCF}] Default. Perform self-consistent field energy optimization. Defaults to Hartree-Fock (DFT on its way!) 
+      \item[\texttt{RT}] Perform real-time propagation. ChronusQ will know to look for section \texttt{[RT]} (described later). 
+      \item[\texttt{CIS}] Perform Configuration Interaction Singles (CIS). 
+      \item[\texttt{RPA}] Perform Random Phase Approximation (RPA), also known as linear-response time-dependent Hartree-Fock (LR-TDHF).
+      %\item[\texttt{STAB}] Perform wave function stability analysis.
+      \end{description}
+    \item[\texttt{Ints}] \hfill \\
+    Defines the integral routine. Available options: 
+      \begin{description}
+      \item[\texttt{DIRECT}] Default. Direct integral evaluation.  
+      \item[\texttt{INCORE}] Integral evaluation and storage in memory.  
+      \end{description}
+    \item[\texttt{Reference}] \hfill \\
+    Defines your reference wave function. Available options:
+      \begin{description}
+      \item[\texttt{REAL/COMPLEX RHF/UHF/CUHF/GHF}] Default is real, and RHF or UHF depending on multiplicity of the molecule.  
+      \begin{itemize}
+        \item NOTE: \texttt{CUHF} is constrained UHF, not complex UHF.
+      \end{itemize}
+      \end{description}
+    \item[\texttt{Print}] \hfill \\
+    An integer [1$\leq$\texttt{print}$\leq$4] that toggles how much information is printed to the output file.
+    \end{description}
+    \subsection{Controlling the SCF optimization: the \texttt{[SCF]} section} \label{subsec:SCFInput}
+    ChronusQ allows you to take finer control over the self-consistent field optimization through the \texttt{[SCF]} section. You can add an external electric field to the SCF here, as well as turn on and off DIIS acceleration and fiddle with the convergence tolerances. Here are the available options:
+     \begin{description}
+       \item[\texttt{SCFDENTOL}] Floating point number that specifies the desired convergence of the density. \\
+        Default = \texttt{1e-10} 
+       \item[\texttt{SCFENETOL}] Floating point number that specifies the desired convergence of the energy. \\
+        Default = \texttt{1e-12}
+       \item[\texttt{SCFMAXITER}] Integer that specifies the maximum number of SCF iterations. \\
+        Default = \texttt{256}
+       \item[\texttt{DIIS}] Boolean that specifies whether to do DIIS acceleration of SCF. \\
+        Default = \texttt{true} \\
+        Note the DIIS algorithm is Pulay's Commutator-based DIIS.
+       \item[\texttt{FIELD}] Three floats that specify the external static electric field to be applied. \\
+       Default is zero field, equivalent to: \texttt{FIELD = 0.0 0.0 0.0}
+       \item[\texttt{GUESS}] Type of guess for the wave function. \\
+       Available options: 
+         \begin{description}
+           \item[\texttt{SAD}] \textbf{S}uperposition of \textbf{A}tomic \textbf{D}ensities. Default.
+           \item[\texttt{READ}] Read density 
+         \end{description}
+       \item[\texttt{PRINT}] An integer [1$\leq$\texttt{print}$\leq$4] that toggles how much information is printed to the output file.
+         
+     \end{description}
+
+    \subsection{Parallelism and other miscellaenous options: the \texttt{[MISC]} section}
+     If you compiled ChronusQ to work with SMP parallelism, you can change the number processors to be used in this section. All the keywords in \texttt{[MISC]} are totally optional. The default behavior of parallelism in ChronusQ is to use just one processor.
+     Available options:
+     \begin{description}
+     \item[\texttt{NSMP}] An integer number of processors to use. \\
+     Default = \texttt{1}
+     \end{description}
+
+    \subsection{Real time time-dependent Hartree-Fock: the \texttt{[RT]} section} \label{subsec:RTInput}
+    If in the \texttt{[QM]} section you have set \texttt{Job = RT}, ChronusQ will search for additional commands and options specified in the \texttt{[RT]} section. Here we can define the type of perturbing field (currently based on the electric dipole only), as well as the type of orthonormalization, and how long we want our time-evolution to last. Below are the possible flags:
+    \begin{description}
+      \item[\texttt{MAXSTEP}] \hfill \\ 
+        An integer that defines how many time steps you want to take. \\
+         Default = \texttt{10}.
+      \item[\texttt{TIMESTEP}] \hfill \\ 
+        A floating point number that defines how large your time step is (in au).  \\
+        Default = \texttt{0.05} au.
+      \item[\texttt{EDFIELD}] \hfill \\ 
+        Three floats that indicate the magnitude of the x, y, and z dipole components of the electric field. \\
+          Default is zero field, equivalent to: \texttt{EDFIELD = 0.0 0.0 0.0}
+      \item[\texttt{TIME\_ON}] \hfill \\ 
+        A floating point time, $t_{on}$, (in fs) we want the external field turned on. \\
+        Default = \texttt{0.0} fs.
+      \item[\texttt{TIME\_OFF}] \hfill \\ 
+        A floating point time, $t_{off}$, (in fs) we want the external field turned off. \\
+        Default = \texttt{1000.0} fs.
+      \item[\texttt{FREQUENCY}] \hfill \\ 
+        A floating point number that sets the frequency, $\omega$, (in eV) of the applied field. \\
+        Default = \texttt{0.0} eV.
+      \item[\texttt{PHASE}] \hfill \\ 
+        A floating point number that defines the phase offset, $\phi$, (in radians) of the applied field. \\
+        Default = \texttt{0.0} rad.
+      \item[\texttt{ENVELOPE}] \hfill \\ 
+        Envelope function that describes the shape of the external field. Possible options:
+        \begin{description}
+          \item[\texttt{PW}] Plane-wave, $E(t) = E \cdot \cos(\omega (t - t_{on}) + \phi)$ \\
+            Note that setting frequency to zero gives the static field.
+          \item[\texttt{LINRAMP}] Linear ramping up to the maximum in the first cycle, then constant envelope afterwards until we linearly ramp off to zero. \\
+            For $t_{on} \leq t \leq t_{off}$: \\
+            \begin{equation*}
+            E(t) = \begin{cases}
+              E \cdot (\omega(t - t_{on})/2\pi) \cos(\omega (t - t_{on}) + \phi)  & t\leq t_{on} + 2\pi/\omega\\
+              E \cdot \cos(\omega (t - t_{on}) + \phi)  & t_{on} + 2\pi/\omega < t < t_{off} - 2\pi/\omega\\
+              E \cdot (\omega(t_{off} - t)/2\pi) \cos(\omega (t - t_{on}) + \phi)  & t \geq t_{off} - 2\pi/\omega  
+            \end{cases}
+            \end{equation*}
+ 
+          \item[\texttt{GAUSSIAN}] Gaussian envelope, $E(t) = E \cdot \exp{(-(\sigma ( t - t_{m}))^{2})} \sin(\omega (t - t_{on}) + \phi)$ \hfill \\
+           $\sigma$  = the range of frequency (FWHM) \\
+           $t_m$ = the time when the amplitude reaches maximum \\
+                  The default for $t_m = \sqrt{(\ln(1000))}/\sigma$ 
+                  (at $t_{on}$, the amplitude is 1/1000 times maximum. This ensures a smooth turning-on of the field) \\
+           Note that this requires you to define $\sigma$ through the \texttt{SIGMA} keyword, explained below.
+          \item[\texttt{STEP}] Step function,
+            \begin{equation*}
+            E(t) = \begin{cases}
+              E  & t_{on} \leq t \leq t_{off} \\
+              0  & else 
+            \end{cases}
+            \end{equation*}
+        \end{description}
+
+      \item[\texttt{SIGMA}] \hfill \\ 
+         A floating point number, in eV, that defines the full-width half-max (FWHM) of the Gaussian envelope, $\sigma$. This keyword is necessary (and meaningful) only for the Gaussian envelope.  \\
+         Default = \texttt{0.0} eV
+      \item[\texttt{ORTHO}] \hfill \\ 
+       Type of orthogonalization. Available options are \texttt{LOWDIN} and \texttt{CHOLESKY}. \\ 
+       Default = \texttt{LOWDIN}.
+      % I don't think we need to worry about the following keywords for the time being.
+      %\item[\texttt{INIDEN}] \hfill \\ 
+      % Type of initial density. Available options
+      %\item[\texttt{UPROP}] \hfill \\ 
+    \end{description}
+    \subsection{Response theory: the \texttt{[CIS]} and \texttt{[RPA]} section} \label{subsec:ResponseInput}
+    In the \texttt{[QM]} section, if you set \texttt{Job} equal to \texttt{CIS} or \texttt{RPA}, you can set the number of roots to look for here. This  
+     \begin{description}
+       \item{\texttt{NSTATES}} an integer number of roots to find in either CIS or RPA. \\
+       There is no default, and the number of roots must be specified manually.
+     \end{description}
 
 \end{document}
