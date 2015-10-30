@@ -153,6 +153,7 @@ public:
     double timeStep;
     double energy;
     std::array<double,4> dipole;
+    std::array<double,4> appliedfield;
     std::vector<double> mullPop;
     std::vector<double> orbitalOccA;
     std::vector<double> orbitalOccB;
@@ -284,6 +285,7 @@ public:
   void formUTrans();
   void doPropagation();
   void writeDipoleCSV(PropInfo & propInfo, long int & iStep);
+  void writeAppliedFieldCSV(PropInfo & propInfo, long int & iStep);
   void writeMullikenCSV(PropInfo & propInfo, long int & iStep);
   void writeOrbitalCSV(PropInfo & propInfo, long int & iStep);
 
