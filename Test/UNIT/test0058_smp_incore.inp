@@ -1,14 +1,28 @@
-$geom read
-2
-O 0 0.000000    0.000000    0.608586
-O 0 0.000000    0.000000    -0.608586
+#  test0058 smp incore Real CUHF STO-3G w/ field
+#
+#  Molecule Specification
+#
+[Molecule]
+charge = 0
+mult = 3
+geom:
+	O 0   0.000000    0.000000    0.608586
+	O 0   0.000000    0.000000    -0.608586
+  
+#
+#  Job Specification
+#
+[QM]
+reference = Real CUHF
+job       = SCF
+basis     = sto3g.gbs
+ints			= incore
 
-$method rohf
-$charge 0
-$spin 3
-$basis sto3g.gbs
-$nsmp 4
-$print 1
-$scf incore
-$unittest scf
-$field 0.01 0.0 0.0
+[SCF]
+field 		= 0.01 0.0 0.0
+
+#
+#  Misc Settings
+#
+[Misc]
+nsmp = 2

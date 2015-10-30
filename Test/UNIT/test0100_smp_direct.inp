@@ -1,21 +1,29 @@
-$geom read
-2
-O 0 0.000000    0.000000    0.608586
-O 0 0.000000    0.000000   -0.608586
+#  test0100 smp direct Complex RHF RT Lowdin cc-pVDZ
+#
+#  Molecule Specification
+#
+[Molecule]
+charge = 0
+mult = 1
+geom:
+	O 0   0.000000    0.000000    0.608586
+	O 0   0.000000    0.000000    -0.608586
+  
+#
+#  Job Specification
+#
+[QM]
+reference = Complex RHF
+job       = RT
+basis     = cc-pvdz.gbs
+ints			= direct
 
-$method hf
-$nsmp 4
-$charge 0
-$spin 3
-$basis 6-31G.gbs
-$print 1
-$rt envelope pw
-$rt edfield 0.314 0.159 0.265
-$rt frequency 3.58
-$rt phase 9.79
-$rt time_on 0.00323
-$rt time_off 0.00846
-$rt sigma 0.264
-$rt maxstep 20
-$unittest rt
+[RT]
+maxstep  = 20
+ortho    = lowdin
 
+#
+#  Misc Settings
+#
+[Misc]
+nsmp = 2
