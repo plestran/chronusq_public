@@ -1,0 +1,28 @@
+#  test0029 serial direct Real UHF CIS cc-pVDZ
+#
+#  Molecule Specification
+#
+[Molecule]
+charge = 0
+mult = 3
+geom:
+	O 0   0.000000    0.000000    0.608586
+	O 0   0.000000    0.000000    -0.608586
+  
+#
+#  Job Specification
+#
+[QM]
+reference = Real UHF
+job       = CIS
+basis     = cc-pVDZ.gbs
+ints			= direct
+
+[CIS]
+nstates = 12
+
+#
+#  Misc Settings
+#
+[Misc]
+nsmp = 1

@@ -1,12 +1,24 @@
-$geom read
-1
-Li 0 0.000000 0.000000 0.000000
+#  test0014 serial direct Real CUHF 6-31G
+#
+#  Molecule Specification
+#
+[Molecule]
+charge = 0
+mult = 2
+geom:
+	Li 0   0.000000 0.000000 0.000000
+  
+#
+#  Job Specification
+#
+[QM]
+reference = Real CUHF
+job       = SCF
+basis     = 6-31G.gbs
+ints			= direct
 
-$method rohf
-$charge 0
-$spin 2
-$basis 6-31G.gbs
-$nsmp 1
-$print 1
-$unittest scf
-
+#
+#  Misc Settings
+#
+[Misc]
+nsmp = 1

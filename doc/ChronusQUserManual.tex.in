@@ -493,5 +493,29 @@ cmake \
 > chronusq.py <input_file>
     \end{lstlisting}
 
+    \subsection{Testing Installation} \label{subsec:ChronusQTest}
+
+    After you've compiled ChronusQ, you'll want to test that things are functioning 
+    correctly. We've added a set of unit tests that are available in the \texttt{Test/UNIT} 
+    folder. Inside that directory you will find:
+    
+    \begin{lstlisting}
+> rununit.py
+> test.index
+> refval.py
+> chronus-ref.val
+> testXXXX*.inp
+> buglist.txt
+    \end{lstlisting}
+    
+    The \texttt{rununit.py} utility will run the unit tests and compare against reference 
+    values that are stored in \texttt{chronus-ref.val}. Upon completion, the results of each
+    test will be printed out in \texttt{summary.txt}. 
+    
+    You can change which tests are run by editing the \texttt{text.index} file. Simple comment
+    out the tests that you don't want to run and they will be ignored. We are aware of some
+    bugs in several of the tests, so we have left them commented out for now and added details
+    about them in \texttt{buglist.txt}. 
+  
 
 \end{document}

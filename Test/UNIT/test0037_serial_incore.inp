@@ -1,13 +1,27 @@
-$geom read
-1
-Li 0 0.000000 0.000000 0.000000
+#  test0037 serial incore Real UHF RPA STO-3G
+#
+#  Molecule Specification
+#
+[Molecule]
+charge = 0
+mult = 2
+geom:
+	Li 0   0.000000 0.000000 0.000000
+  
+#
+#  Job Specification
+#
+[QM]
+reference = Real UHF
+job       = RPA
+basis     = sto3g.gbs
+ints			= incore
 
-$method hf
-$charge 0
-$spin 2
-$basis sto3g.gbs
-$nsmp 1
-$print 1
-$scf incore
-$pscf rpa 1
-$unittest resp
+[RPA]
+nstates = 3
+
+#
+#  Misc Settings
+#
+[Misc]
+nsmp = 1

@@ -1,20 +1,25 @@
-$geom read
-10
-C 0   0.152133  -0.035800   0.485797
-C 0  -1.039475   0.615938  -0.061249
-C 0   1.507144   0.097806  -0.148460
-O 0  -0.828215  -0.788248  -0.239431
-H 0   0.153725  -0.249258   1.552136
-H 0  -1.863178   0.881921   0.593333
-H 0  -0.949807   1.214210  -0.962771
-H 0   2.076806  -0.826189  -0.036671
-H 0   2.074465   0.901788   0.325106
-H 0   1.414895   0.315852  -1.212218
+#  test0062 serial direct Complex RHF 6-31G
+#
+#  Molecule Specification
+#
+[Molecule]
+charge = 0
+mult = 1
+geom:
+	O 0   0.000000    0.000000    0.608586
+	O 0   0.000000    0.000000    -0.608586
+  
+#
+#  Job Specification
+#
+[QM]
+reference = Complex RHF
+job       = SCF
+basis     = 6-31G.gbs
+ints			= direct
 
-$method hf
-$charge 1
-$spin 2
-$basis 6-31G.gbs
-$nsmp 1
-$print 1
-$unittest scf
+#
+#  Misc Settings
+#
+[Misc]
+nsmp = 1
