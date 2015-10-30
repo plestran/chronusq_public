@@ -1,0 +1,521 @@
+\documentclass[12pt]{article}
+\usepackage[top=0.75in, bottom=0.75in, left=0.75in, right=0.75in]{geometry}
+\usepackage{graphicx}
+\usepackage{tocloft}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{pbox}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+\definecolor{light-gray}{gray}{0.95}
+
+\renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}} % I forget what this does...
+\newcommand\T{\rule{0pt}{2.6ex}}       % Top strut
+\newcommand\B{\rule[-1.2ex]{0pt}{0pt}} % Bottom strut
+
+\newcommand{\ChronusQGitHubPUBLIC}{
+  \texttt{http://github.com/liresearchgroup/chronusq\_public.git}
+}
+\newcommand{\XiaosongContact}{Xiaosong Li (\texttt{xsli@u.washington.edu})}
+\newcommand{\DBWYContact}{David Williams (\texttt{dbwy@u.washington.edu})}
+\newcommand{\CMake}{\texttt{CMake}}
+\newcommand{\Libint}{\texttt{Libint}}
+\newcommand{\Eigen}{\texttt{Eigen}}
+\newcommand{\BTAS}{\texttt{BTAS}}
+\newcommand{\Boost}{\texttt{Boost}}
+\newcommand{\HDF}{\texttt{HDF5}}
+\newcommand{\LAPACK}{\texttt{LAPACK}}
+\newcommand{\BLAS}{\texttt{BLAS}}
+\newcommand{\Python}{\texttt{Python}}
+
+% Sets up environment for verbatium code typing
+\lstset{frame=tb,
+  language=bash,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  frame=,
+  backgroundcolor=\color{light-gray},
+  xleftmargin=.25in,
+  xrightmargin=.25in,
+  tabsize=3
+}
+
+\begin{document}
+  % Title Page
+  \begin{titlepage}
+    \vspace*{\fill}
+    \begin{center}
+      \includegraphics[width=0.25\textwidth]{@LOGO@}~\\[1cm]
+      \textsc{\LARGE The Chronus Quantum (ChronusQ) Software Package}~\\[0.5cm]
+      \textsc{\Large User's guide}~\\[5cm]
+      \large David Williams-Young\\
+      \large Joshua Goings\\
+      \large Patrick Lestrange\\[1.5cm]
+      \large Last Revised: October 29, 2015
+    \end{center}
+    \vspace*{\fill}
+  \end{titlepage}
+  \tableofcontents
+
+  \newpage
+
+  % General Overview of ChronusQ
+  \section{General Overview} \label{sec:GeneralOverView}
+
+  The aim of this guide is to help facilitate easy compilation and general use of
+  the Chronus Quantum Chemistry (ChronusQ) Software Package. Detailed descriptions
+  of the compilation procedure and anatomy of the input file will be discussed.
+  This is not meant to be a guide for developers (i.e. there will be no mention of
+  the actual structure of the ChronusQ code), but a ChronusQ Developer's guide is
+  also currently being written and will be made publically available shortly.
+
+  ChronusQ aims to provide a open-source avenue for the development of real-time
+  quantum dynamicial simulations and cutting-edge post self-consistant field (SCF)
+  methods.  As ChronusQ is an ``free" (both in the finacial and the GNU definitions)  software package, use and development by the scientific community as a whole is 
+  strongly encouraged. Those interested in the development of ChronusQ should send 
+  inquiries to \XiaosongContact.
+
+  Please see the table of contents and the begining of this document to easily find
+  the information you desire regarding the compilation or use of ChronusQ.
+
+  % Instructions on how to obtain and compile ChronusQ
+  \section{Obtaining and Compiling ChronusQ} \label{sec:ObtainAndCompile}
+    % Instructions regarding the GitHub Repository
+    \subsection{GitHub Repository} \label{subsec:ChronusQGitHub}
+
+    Currently, the only method for obtaining ChronusQ is through the Li Research
+    Group GitHub repository located at \ChronusQGitHubPUBLIC. Those interested in
+    the development of ChronusQ may request access to the private development GitHub
+    repository though \XiaosongContact. To obtain a copy of the source code (via 
+    command line), the \texttt{git} program must be installed and in the shell 
+    working path. This can be confirmed via the following command:
+
+    \begin{lstlisting}
+> which git
+/usr/local/bin/git
+    \end{lstlisting}
+
+    \noindent where \texttt{/usr/local/bin/git} is the location of the \texttt{git} 
+    program installed on the (my) system. The location may vary, but as long as 
+    you get a location, \texttt{git} is installed. Once a \texttt{git} 
+    installation has been verified, obtaining a copy of the ChronusQ is as 
+    simple as:
+
+    \begin{lstlisting}
+> git clone http://github.com/liresearchgroup/chronusq_public.git
+    \end{lstlisting}
+    
+    \noindent which will place a copy of the ChronusQ source into the directory 
+    \texttt{./chronusq\_public}. Any comments, concerns or problems regarding 
+    obtaining source code from the \texttt{git} repository may be directed 
+    towards \DBWYContact. 
+
+    % Instructions regarding dependencies
+    \subsection{Dependencies} \label{subsec:ChronusQDeps}
+
+    The ChronusQ software package depends on a number of other open source packages
+    to perform some of the underlying tasks that are required by approximate
+    quantum mechanical methods (i.e. (multi-)linear algebra, gaussian integral 
+    evaluation, etc). While ChronusQ strives to be a stand alone package, many
+    of the incorporated functionality depend heavily on outside open source 
+    software. Any problems regarding the installation of these dependencies can
+    be resolved via the website of the software. Any problems regarding the
+    communication of these dependencies and ChronusQ can be directed to
+    \DBWYContact.
+    
+    
+    % List of Dependencies
+      \subsubsection{C++11} \label{subsubsec:C++11} 
+        ChronusQ (and some of its dependencies) rely on the C++11 
+        standard. The GNU Compilers have already incorporated this standard, but
+	not as the default. Unless you are using GCC 5.X+, you will likely have
+	to add \texttt{-std=c++0x} or \texttt{-std=c++11} to the compile flags
+	to force use of C++11. The configure/compile procedure described in
+	Section \ref{subsec:ChronusQConfigCompile} will try to smartly figure out
+	the C++11 compile flags, but one may have to manually set the compile flags
+	via \CMake~variables (also in Section \ref{subsec:ChronusQConfigCompile})
+
+      \subsubsection{\CMake} \label{subsubsec:cmake} 
+        ChronusQ utilizes the \CMake~utility to facilitate
+        portability and flexibility of compilation through automatic Makefile 
+	generation. \CMake~is readily available through your OS distribution
+	package manager (GNU/Linux or OSX). For example, in Fedora 22, one may 
+	obtain (if one has root privlidges) \CMake~via
+
+	\begin{lstlisting}
+> sudo dnf install cmake
+	\end{lstlisting}
+
+	\noindent If for some reason you are unable to obtain a pre-packaged 
+	version of \CMake~through a package manager, the source and installation 
+	instructions may be obtained from \texttt{http://www.cmake.org}.
+
+      \subsubsection{\Libint} \label{subsubsec:Libint}
+        For the evaluation of molecule integrals over gaussian-type
+        function (GTOs), ChronusQ relies on the \Libint~library of E. Valeev. A
+	preconfigure (uncompiled) library is shipped with ChronusQ (located in
+	the \texttt{/deps/src} directory). The configure/compile procedure
+	described in Section \ref{subsec:ChronusQConfigCompile} details the
+	\CMake~options to facilitate compilation of \Libint. As ChronusQ attempts
+	to use the latest version of \Libint, we only will support compilation
+	and linking to the locally stored version of \Libint, as the functionality
+	may be different between versions.
+
+      \subsubsection{\Eigen} \label{subsubsec:Eigen}
+        ChronusQ currently utilizes \Eigen~as a high-level C++ API for
+        various light-weight linear albegra tasks (i.e. storage, multiplication,
+	etc). \Eigen~is also made available through most (GNU/Linux) OS distribtions
+	via a standard package manager. One may obtain a pre-packaged \Eigen~
+	installation (with root access / Fedora 22) via
+
+	\begin{lstlisting}
+> sudo dnf install eigen3-devel
+	\end{lstlisting}
+
+        \noindent If for some reason you are unable to obtain a pre-packaged 
+	version, installation of \Eigen~is quite easy as it is a header-only 
+	library. One need simply download the source tar file from \\
+	\texttt{http://http://eigen.tuxfamily.org/} and place the contents 
+	somewhere that ChronusQ can find them. An explanation of the 
+	\CMake~variables that need to be set for a non-standard installation 
+	of \Eigen~can be found
+	in Section \ref{subsec:ChronusQConfigCompile}.
+
+      \subsubsection{\BTAS} \label{subsubsec:BTAS}
+        ChronusQ currently utilizes \BTAS~(\textbf{B}asic \textbf{T}ensor
+        \textbf{A}lgebra \textbf{S}ubroutines) as a C++11 API for multi-linear 
+	algebra. \BTAS~is a header-only API (see \Eigen), so one only need to place
+	the headers in a place that ChronusQ can find them. The \BTAS~source code
+	may be obtained from the \BTAS~GitHub via
+
+	\begin{lstlisting}
+> git clone https://github.com/BTAS/BTAS.git
+	\end{lstlisting}
+
+	\noindent Instructions regarding the \CMake~variables that need to be set 
+	for a non-root installation of \BTAS~may be found in Section 
+	\ref{subsec:ChronusQConfigCompile}.
+
+      \subsubsection{\Boost} \label{subsubsec:boost} 
+        Various parts of the code depend on the C++ \Boost~libraries to
+        varying degrees (namely the Python API from which ChronusQ is made 
+	executable). Given that \Boost~is not already installed on your system,
+	one may compile and place boost in the usual (root) place by obtaining
+	the latest \Boost~source from \texttt{http://www.boost.org} and following
+
+        \begin{lstlisting}
+> cd /path/to/boost/download
+> tar xvf boost_<boost_version>.tar.gz
+> cd boost_<boost_version>
+> ./bootstrap
+> ./b2 install --prefix=/usr/local
+        \end{lstlisting}
+
+	\noindent If you already have \Boost~installed on your machine (in a 
+	non-standard location) or are unable to perform the above procedure (i.e. 
+	no root access), instructions regarding the \CMake~variables that must be 
+	set are described in Section \ref{subsec:ChronusQConfigCompile}.
+
+      \subsubsection{\Python} \label{subsubsec:Python} 
+        ChronusQ utilizes \Python~as a high level API for input
+        file digestion and the actual running of the ChronusQ software. One
+	must have the development versions of \Python~as well as \texttt{libxml2} 
+	and \texttt{libxslt} to use ChronusQ. These may be obtained through the 
+	standard package manager of your (GNU/Linux) OS distribution (Fedora 22 /
+	root access) via:
+
+	\begin{lstlisting}
+> sudo dnf install python-devel libxml2-devel libxslt-devel
+	\end{lstlisting}
+
+        \noindent To parse the input file, ChrounusQ relies on the \Python~module 
+	\texttt{ConfigParser}. One may obtain \texttt{ConfigParser} through
+	the \Python~\texttt{pip} module via:
+	 
+	\begin{lstlisting}
+> pip install configparser
+	\end{lstlisting}
+
+      \subsubsection{\HDF} \label{subsubsec:HDF5} 
+        ChronusQ utilizes \HDF~for binary file IO for use with 
+        checkpointing and scratch file generation. \HDF~is made available
+	though the standard (GNU/Linux) OS distribution package manager via
+	(Fedora 22 / root access):
+
+	\begin{lstlisting}
+> sudo dnf install hdf5-devel
+	\end{lstlisting}
+
+	\noindent If for some reason \HDF~cannot be installed in this manner (i.e. 
+	no root access), it may be compiled from source from the tar files on
+	\texttt{https://www.hdfgroup.org/}. Instructions on how one may set
+	the \CMake~and shell environment variables to work with ChronusQ
+	can be found in Section \ref{subsec:ChronusQConfigCompile}.
+
+      \subsubsection{\LAPACK~and \BLAS} \label{subsubsec:LA} 
+        ChronusQ utilizes \LAPACK~and \BLAS~to perform
+        the most important linear-algebra functionality (i.e. SVD, QR, 
+	diagonalization, etc). \LAPACK~and \BLAS~come standard on most
+	(GNU/Linux) OS distributions, and if not, the are easily obtained via
+	the standard package manager (i.e. Fedora 22 / root access) via:
+
+	\begin{lstlisting}
+> sudo dnf install lapack-devel blas-devel
+	\end{lstlisting}
+
+	\noindent If for some reason \LAPACK~and \BLAS~cannot be installed in this 
+	manner (i.e. no root access), we have included an automatic build of these 
+	packages through our configuration procedure. Please see Section 
+	\ref{subsec:ChronusQConfigCompile}. for details.
+
+	\noindent \textbf{IMPORTANT:} While it is encouraged to attempt to link to 
+	optimized \LAPACK~and \BLAS~libraries, the developers have experienced many 
+	issues when linking to Intel MKL libraries. Please link to the traditional 
+	\LAPACK~and \BLAS~libraries or \texttt{ATLAS} optimized libraries when 
+	configuring ChronusQ.
+
+
+    \subsection{Configure and Compilation} \label{subsec:ChronusQConfigCompile}
+    
+    This section outlines the configuration and compilation of the ChronusQ
+    software package via \CMake. Before this procedure can be carried out,
+    all of the dependencies (unless otherwise stated) from the previous section
+    must be installed. Any problems regarding the configuration or compliation
+    may be directed toward \DBWYContact.
+
+    \subsubsection{Configure} \label{subsubsec:ChronusQConfig}
+
+    The configuration of the machine specific Makefiles to compile ChronusQ are
+    handled by \CMake. ChronusQ has adopted an ``out-of-source" compilation model
+    to better seperate source and compiled code. In this manner, if a compilation
+    or configuration goes wrong, one must simple delete the build directory and 
+    start over with no risk of editing the source code. Configuration of ChronusQ
+    takes place via the following general scheme
+    
+    \begin{lstlisting}
+> cd /path/to/chronusq
+> mkdir build && cd build
+> cmake -D<OPT1>=<V1> -D<OPT2>=<V2> [ETC] ..
+    \end{lstlisting}
+
+    \noindent where \texttt{<OPT1>} and \texttt{<OPT2>} are \CMake~variables 
+    and \texttt{V1} and \texttt{V2} are the corresponding values to set these 
+    variables. The ``.." must be present at the end of the command to let 
+    \CMake~know that there is a file in the previous directory called 
+    ``CMakeLists.txt", which contains the \CMake~configuration instructions. The 
+    following \CMake~variables may be influential to a successful configuration of 
+    ChronusQ:
+
+    \begin{table}[h!]
+      \begin{center}
+        \begin{tabular}{|l|l|l|}
+	  \hline
+	  Variable        & 
+	  Purpose         & 
+	  Default Value  \\
+	  \hline
+	  \hline
+
+	  \texttt{CMAKE\_CXX\_COMPILER}                 & 
+	  \pbox{7cm}{Set the C++ Compiler (full path)}  & 
+	  g++                                           \\
+
+	  \hline
+
+	  \texttt{CMAKE\_C\_COMPILER}                  & 
+	  \pbox{7cm}{Set the C Compiler (full path)}   & 
+	  gcc                                          \\
+
+	  \hline
+
+	  \texttt{CMAKE\_Fortran\_COMPILER}                 & 
+	  \pbox{7cm}{Set the FORTRAN Compiler (full path)}  & 
+	  gfortran                                          \\
+
+	  \hline
+
+	  \texttt{CMAKE\_CXX\_FLAGS}             & 
+	  \pbox{7cm}{Set the C++ Compile Flags}  &
+	  --                                     \\
+
+	  \hline
+
+	  \texttt{BOOST\_ROOT}                                   &
+	  \pbox{7cm}{The root directory of a boost installation} &
+	  /usr                                                   \\
+
+	  \hline
+
+	  \texttt{BOOST\_LIBRARYDIR}              &
+	  \pbox{7cm}{Location of Boost libraries} &
+	  \$(BOOST\_ROOT)/lib                     \\
+
+	  \hline
+
+	  \texttt{BOOST\_INCLUDEDIR}            &
+	  \pbox{7cm}{Location of Boost headers} &
+	  \$(BOOST\_ROOT)/include               \\
+
+	  \hline
+
+	  \texttt{Boost\_NO\_SYSTEM\_PATHS} &
+	  \pbox{7cm}{Whether or not to use the system paths to find Boost 
+	    installation} &
+	  \texttt{OFF} \\
+
+	  \hline
+
+	  \texttt{EIGEN3\_ROOT} &
+	  \pbox{7cm}{Path that contains the \Eigen~directory} &
+	  /usr/include/eigen3 \\
+
+	  \hline
+
+	  \texttt{BTAS\_ROOT} &
+	  \pbox{7cm}{Path that contains the \texttt{btas}~directory} &
+	  /usr/include/btas \\
+
+	  \hline
+
+	  \texttt{BUILD\_LA} &
+	  \pbox{7cm}{Build \LAPACK~and \BLAS~locally} &
+	  \texttt{OFF} \\
+
+	  \hline
+
+	  \texttt{BUILD\_LIBINT} &
+	  \pbox{7cm}{Build \Libint~locally} &
+	  \texttt{ON} \\
+
+	  \hline
+	\end{tabular}
+      \end{center}
+    \end{table}
+
+    \newpage
+    As a working example, on a machine that all of the dependencies had to be 
+    installed as a non-root user, the following script generated a successful
+    configuration:
+
+    \begin{lstlisting}
+#!/bin/sh
+
+echo "Building ChronusQ in "$PWD
+export HDF5_ROOT=$(HOME)/HDF5
+cmake \
+  -DCMAKE_CXX_COMPILER=$(HOME)/gcc/gcc-4.9.2/bin/g++ \
+  -DCMAKE_C_COMPILER=$(HOME)/gcc/gcc-4.9.2/bin/gcc \
+  -DCMAKE_Fortran_COMPILER=$(HOME)/gcc/gcc-4.9.2/bin/gfortran \
+  -DCMAKE_CXX_FLAGS='-w -O2 -std=c++11'\
+  -DUSE_LIBINT=ON \
+  -DBOOST_ROOT=$(HOME)/boost/1.59.0 \
+  -DBOOST_LIBRARYDIR=$(HOME)/boost/1.59.0/stage-1_59_0/lib \
+  -DBOOST_INCLUDEDIR=$(HOME)/boost/1.59.0/include \
+  -DBoost_NO_SYSTEM_PATHS=ON  \
+  -DEIGEN3_ROOT=$(HOME)/eigen/eigen-eigen-c58038c56923 \
+  -DBTAS_ROOT=$(HOME)/github/BTAS \
+  -DBUILD_LA=ON \
+  -DBUILD_LIBINT=ON \
+  ..
+    \end{lstlisting}
+
+    \subsubsection{Compilation} \label{subsubsec:ChronusQCompile}
+    
+    Once a successful configuration has been acheived, compilation is very simple.
+    From the build directory, simply type
+
+    \begin{lstlisting}
+> make
+    \end{lstlisting}
+
+    \noindent and compilation will begin. ChronusQ does not currently have a 
+    standard install protocol once the compilation has been successful, so it is
+    not suggested that the user performs a \texttt{make install} command, as we are 
+    not sure if this will work on all machines. Note that this is being looked into 
+    and will be handled before the first non-Beta release.
+
+    ~\\
+    ~\\
+    \noindent \textbf{Note on parallel builds}: If you wish to compile ChronusQ in 
+    parallel, i.e.
+
+    \begin{lstlisting}
+> make -j <NCORES>
+    \end{lstlisting}
+
+    \noindent you will likely experience very many errors as the 
+    \CMake~configuration has not been set up to smartly do things in the correct 
+    order. It will try to build \Libint~and ChronusQ at the same time, and because 
+    \Libint~is a dependency of ChronusQ, the build won't be able to find the 
+    correct headers, and error messages will ensue. \textbf{TO FIX THIS} one can 
+    build things in two (or three if building \LAPACK~and \BLAS)
+    
+    \begin{lstlisting}
+> cmake <PARAMETERS> ..
+> make libint
+> make lapack # if building LAPACK and BLAS
+> make -j <NCORES>
+    \end{lstlisting}
+    
+    \noindent Once ChronusQ has been sucessfully compiled, you should find a file
+    named ``chronusq.py" in the main build directory. This is the ChronusQ python
+    script and it may be run in two ways. The first is directly through python:
+
+    \begin{lstlisting}
+> python chronusq.py <input_file>
+    \end{lstlisting}
+
+    \noindent The next is to create an executable out of the script and run it
+    directly
+
+    \begin{lstlisting}
+> chmod +x chronusq.py
+> ./chronusq.py <input_file>
+    \end{lstlisting}
+
+    \noindent With this last method, it is possible to place chronusq.py into you
+    PATH and run it from outside directories:
+
+    \begin{lstlisting}
+> export PATH=$PATH":"$PWD
+> chronusq.py <input_file>
+    \end{lstlisting}
+
+    \subsection{Testing Installation} \label{subsec:ChronusQTest}
+
+    After you've compiled ChronusQ, you'll want to test that things are functioning 
+    correctly. We've added a set of unit tests that are available in the \texttt{Test/UNIT} 
+    folder. Inside that directory you will find:
+    
+    \begin{lstlisting}
+> rununit.py
+> test.index
+> refval.py
+> chronus-ref.val
+> testXXXX*.inp
+> buglist.txt
+    \end{lstlisting}
+    
+    The \texttt{rununit.py} utility will run the unit tests and compare against reference 
+    values that are stored in \texttt{chronus-ref.val}. Upon completion, the results of each
+    test will be printed out in \texttt{summary.txt}. 
+    
+    You can change which tests are run by editing the \texttt{text.index} file. Simple comment
+    out the tests that you don't want to run and they will be ignored. We are aware of some
+    bugs in several of the tests, so we have left them commented out for now and added details
+    about them in \texttt{buglist.txt}. 
+  
+
+\end{document}

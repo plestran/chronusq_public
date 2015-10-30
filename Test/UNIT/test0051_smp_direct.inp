@@ -1,0 +1,27 @@
+#  test0051 smp direct Real UHF cc-pVDZ w/ field
+#
+#  Molecule Specification
+#
+[Molecule]
+charge = 0
+mult = 2
+geom:
+	Li 0   0.000000 0.000000 0.000000
+  
+#
+#  Job Specification
+#
+[QM]
+reference = Real UHF
+job       = SCF
+basis     = cc-pVDZ.gbs
+ints			= direct
+
+[SCF]
+field 		= 0.01 0.0 0.0
+
+#
+#  Misc Settings
+#
+[Misc]
+nsmp = 2

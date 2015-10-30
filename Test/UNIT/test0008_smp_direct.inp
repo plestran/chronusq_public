@@ -1,0 +1,24 @@
+#  test0008 smp direct Real UHF 6-31G
+#
+#  Molecule Specification
+#
+[Molecule]
+charge = 0
+mult = 2
+geom:
+	Li 0   0.000000 0.000000 0.000000
+  
+#
+#  Job Specification
+#
+[QM]
+reference = Real UHF
+job       = SCF
+basis     = 6-31G.gbs
+ints			= direct
+
+#
+#  Misc Settings
+#
+[Misc]
+nsmp = 2
