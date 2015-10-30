@@ -8,3 +8,4 @@ test0060 All        - Real CUHF w/ field   - Does not converge
 test0061 SMP Direct - Complex RHF          - XY quadrupole moments are nonzero
 test0064 All        - Complex RHF w/ field - Does not converge 
 test0067-80 All     - Real RHF RT          - Bug with reading real SCF
+SMP InCore All      -                      - Does not efficiently use all processor yet
