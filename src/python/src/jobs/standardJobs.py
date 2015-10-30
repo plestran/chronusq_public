@@ -76,6 +76,9 @@ def runRT(workers,meta):
   workers["CQRealTime"].iniDensity()
   workers["CQRealTime"].doPropagation()
 
+  meta.lastDipole = workers['CQRealTime'].lastDipole()
+  meta.lastEnergy = workers['CQRealTime'].lastEnergy()
+
 def runSDR(workers,meta):
   runSCF(workers,meta)
   workers["CQMOIntegrals"].initMeta()
