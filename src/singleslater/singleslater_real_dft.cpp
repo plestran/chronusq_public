@@ -140,20 +140,20 @@ void SingleSlater<double>::formCor(double rho, double spindensity){
    double M3_A    = 0.0;
    double M3_B    = 0.0;
    double rs      = std::pow(((3.0)/(4.0*math.pi*rho)),(1.0/3.0));
-/*
+
    double alpha = 0.0;
    double mu_p = 0.0;
    double mu_f = 0.0;
-   double df2_deta2_0 = 4.0*over3*over3*(-1.0+std::pow((2.0),(1.0/3.0)));
    double beta = 0.0;
    double S3    = 0.0;
    double S4    = 0.0;
    double M1    = 0.0;
    double M2    = 0.0;
+   double db_dr = 0.0; 
    double delta_eps_etha = 0.0;
    double spindensity_4 = std::pow(spindensity,4.0);
    double spindensity_3 = std::pow(spindensity,3.0);
-*/
+
 
 //   VWN5
    if (this->CorrKernel_ == VWN5){
@@ -197,57 +197,90 @@ void SingleSlater<double>::formCor(double rho, double spindensity){
      this->mu_corr  = -over3*rs*EvepsVWN(2,A_p,b_p,c_p,x0_p,rho);
      this->mu_corr += this->eps_corr ;
    }else{
-//   Energy density Eq.2.4/2.2 of ref
+//   Open Shell Case
+     if(this->CorrKernel_ == VWN3){
+//     Used Linear Interpolation between parg and ferr 
+//     Eq 2.4 and its analytic derivative for VWN3
+       this->eps_corr  = 0.0;
+       this->mu_corr   = 0.0;
+       this->mu_corr_B = 0.0;
+       eps_p = EvepsVWN(0,A_p,b_p,c_p,x0_p,rho);
+       eps_f = EvepsVWN(0,A_f,b_f,c_f,x0_f,rho);
+       delta_eps_1 = eps_f - eps_p;
+       this->eps_corr  = eps_p + delta_eps_1*f_spindens(0,spindensity);
+       S1 =  -rs*over3*EvepsVWN(2,A_p,b_p,c_p,x0_p,rho);
+       S2 =  -rs*over3*f_spindens(0,spindensity)*(EvepsVWN(2,A_f,b_f,c_f,x0_f,rho) - EvepsVWN(2,A_p,b_p,c_p,x0_p,rho));
+//     S1 =  -over3*EvepsVWN(1,A_p,b_p,c_p,x0_p,rho);
+//     S2 =  -over3*f_spindens(0,spindensity)*(EvepsVWN(1,A_f,b_f,c_f,x0_f,rho) - EvepsVWN(1,A_p,b_p,c_p,x0_p,rho));
+       M3_A =   1.0 - spindensity; 
+       M3_B = -(1.0 + spindensity);
+       this->mu_corr   = S1 + S2 + this->eps_corr;
+       this->mu_corr_B = S1 + S2 + this->eps_corr;     
+       this->mu_corr   +=  delta_eps_1*M3_A*df_spindens(spindensity);
+       this->mu_corr_B +=  delta_eps_1*M3_B*df_spindens(spindensity);
+     }else if(this->CorrKernel_ == VWN5){
+//     Used improved Interpolation between parg and ferr 
+//     Eq 3.2  and 3.3 and its analytic derivative for VWN5
 
-     this->eps_corr  = 0.0;
-     this->mu_corr   = 0.0;
-     this->mu_corr_B = 0.0;
+     alpha = EvepsVWN(0,A_a,b_a,c_a,x0_a,rho);
      eps_p = EvepsVWN(0,A_p,b_p,c_p,x0_p,rho);
      eps_f = EvepsVWN(0,A_f,b_f,c_f,x0_f,rho);
      delta_eps_1 = eps_f - eps_p;
-     this->eps_corr  = eps_p + delta_eps_1*f_spindens(0,spindensity);
-     S1 =  -rs*over3*EvepsVWN(2,A_p,b_p,c_p,x0_p,rho);
-     S2 =  -rs*over3*f_spindens(0,spindensity)*(EvepsVWN(2,A_f,b_f,c_f,x0_f,rho) - EvepsVWN(2,A_p,b_p,c_p,x0_p,rho));
-//     S1 =  -over3*EvepsVWN(1,A_p,b_p,c_p,x0_p,rho);
-//     S2 =  -over3*f_spindens(0,spindensity)*(EvepsVWN(1,A_f,b_f,c_f,x0_f,rho) - EvepsVWN(1,A_p,b_p,c_p,x0_p,rho));
-     M3_A =   1.0 - spindensity; 
-     M3_B = -(1.0 + spindensity);
-     this->mu_corr   = S1 + S2 + this->eps_corr;
-     this->mu_corr_B = S1 + S2 + this->eps_corr;     
-    
-     this->mu_corr   +=  delta_eps_1*M3_A*df_spindens(spindensity);
-     this->mu_corr_B +=  delta_eps_1*M3_B*df_spindens(spindensity);
-/*
-     alpha = EvepsVWN(0,A_a,b_a,c_a,x0_a,rho);
-     delta_eps_1 = eps_f - eps_p;
-     beta  = df2_deta2_0 * delta_eps_1 / alpha;
+     beta  = this->df2_spindens(0.0) * delta_eps_1 / alpha;
      beta  += -1.0;
      delta_eps_etha = alpha;
-     delta_eps_etha *= f_spindens(0,spindensity)/df2_deta2_0;
+     delta_eps_etha *= (f_spindens(0,spindensity)/this->df2_spindens(0.0));
      delta_eps_etha *= (1.0 + beta*spindensity_4);
      this->eps_corr  = eps_p + delta_eps_etha ;
 //   build the potential
-     mu_p = EvepsVWN(0,A_p,b_p,c_p,x0_p,rho) - over3*EvepsVWN(1,A_p,b_p,c_p,x0_p,rho);
-     rs_da_drs = EvepsVWN(1,A_a,b_a,c_a,x0_a,rho);
-     rs_db_drs = EvepsVWN(1,A_f,b_f,c_f,x0_f,rho) - EvepsVWN(1,A_p,b_p,c_p,x0_p,rho);
-     rs_db_drs *= df2_deta2_0/alpha;
-     rs_db_drs += -df2_deta2_0*delta_eps_1*rs_da_drs/(alpha*alpha);// complete 
-     S1 = -over3*rs_da_drs*(1.0 + beta*spindensity_4);
-     S2 = -alpha*over3*rs_db_drs*spindensity_4;
-     S3 = 4.0*beta*f_spindens(0,spindensity)*spindensity_3;
-     S4 = (1.0 + beta*spindensity_4)*df_spindens(spindensity);
-     M1 = f_spindens(0,spindensity)/df2_deta2_0;
-     M2 = alpha/df2_deta2_0;
-     M3_A = 1.0 - spindensity; 
-     M3_B = 1.0 + spindensity;
-    
-     this->mu_corr  = mu_p + delta_eps_etha; 
-     this->mu_corr += M1*(S1+S2);
-     this->mu_corr_B = this->mu_corr;
-     this->mu_corr   += M2*(S3+S4)*M3_A; 
-     this->mu_corr_B += -M2*(S3+S4)*M3_B; 
-*/
-     }  //Open Shell
+
+//   dbeta/dr
+     db_dr = -delta_eps_1 * EvepsVWN(2,A_a,b_a,c_a,x0_a,rho);
+     db_dr += (EvepsVWN(2,A_f,b_f,c_f,x0_f,rho) - EvepsVWN(2,A_p,b_p,c_p,x0_p,rho)) * alpha;
+     db_dr *= this->df2_spindens(0.0);
+     db_dr /= alpha*alpha;
+//   S1 = da/dr * (f(zeta))*(1+zeta^4*beta)/ df2_spindens(0.0)
+     S1 = this->f_spindens(0,spindensity);
+     S1 *= (1.0 + beta*spindensity_4);
+     S1 *= EvepsVWN(2,A_a,b_a,c_a,x0_a,rho);
+     S1 /= this->df2_spindens(0.0);
+//   S2 = d eps_p/ dr
+     S2  = EvepsVWN(2,A_p,b_p,c_p,x0_p,rho);
+//   S3 = df(zeta)/dr * alpha* (1+zeta^4*beta)/df2_spindens(0.0)
+     S3  = alpha;
+     S3 *= (1.0 + beta*spindensity_4);
+     S3 *= this->df_spindens(spindensity); 
+     S3 /= this->df2_spindens(0.0);
+//   M1 alpha * f(zeta)/this->df2_spindens(0.0)
+     M1  = alpha;
+     M1 *= this->f_spindens(0,spindensity); 
+     M1 /= this->df2_spindens(0.0);
+//   M2  zeta^4 * dbeta/dr
+     M2  = spindensity_4 * db_dr;
+//   dzeta/drho_x 
+     M3_A =   1.0 - spindensity; 
+     M3_B = -(1.0 + spindensity);
+     M3_A *= spindensity_3 * beta * 4.0;
+     M3_B *= spindensity_3 * beta * 4.0;
+     M3_A += M2;
+     M3_B += M2;
+     M3_A *= M1;
+     M3_B *= M1;
+     M3_A +=  S3*(1.0 - spindensity);   
+     M3_B += -S3*(1.0 + spindensity);   
+     this->mu_corr   = -rs*over3*(S1 + S2);
+     this->mu_corr_B = -rs*over3*(S1 + S2);
+     
+     this->mu_corr     += M3_A;
+     this->mu_corr_B   += M3_B;
+
+
+     this->mu_corr     += this->eps_corr;
+     this->mu_corr_B   += this->eps_corr;
+
+
+     }
+  }  //Open Shell
 };
 
 } // Namespace ChronusQ
