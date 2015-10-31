@@ -198,6 +198,9 @@ public:
     this->TOff_        = 1.0e4;
     this->IEnvlp_      = Constant;
     this->printLevel_  = 1;
+    this->Ex_          = 0.0;
+    this->Ey_          = 0.0;
+    this->Ez_          = 0.0;
   };
   ~RealTime() {;};
 
@@ -267,7 +270,9 @@ public:
     this->Ez_ = x[2];
   };
   inline void Wrapper_setFieldAmp(double x, double y, double z){
+//    cout << this->Ex_ << " " << this->Ey_ << " " << this->Ez_ << endl;
     this->setFieldAmp({{x,y,z}});
+//    cout << this->Ex_ << " " << this->Ey_ << " " << this->Ez_ << endl;
   }
   inline void setTOn(double x){   this->TOn_   = x;};
   inline void setTOff(double x){  this->TOff_  = x;};

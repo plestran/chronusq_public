@@ -17,9 +17,7 @@
 \newcommand\T{\rule{0pt}{2.6ex}}       % Top strut
 \newcommand\B{\rule[-1.2ex]{0pt}{0pt}} % Bottom strut
 
-\newcommand{\ChronusQGitHubPUBLIC}{
-  \texttt{http://github.com/liresearchgroup/chronusq\_public.git}
-}
+\newcommand{\ChronusQGitHubPUBLIC}{\texttt{http://github.com/liresearchgroup/chronusq\_public.git}}
 \newcommand{\XiaosongContact}{Xiaosong Li (\texttt{xsli@u.washington.edu})}
 \newcommand{\DBWYContact}{David Williams (\texttt{dbwy@u.washington.edu})}
 \newcommand{\CMake}{\texttt{CMake}}
@@ -60,11 +58,12 @@
     \vspace*{\fill}
     \begin{center}
       \includegraphics[width=0.25\textwidth]{@LOGO@}~\\[1cm]
-      \textsc{\LARGE The Chronus Quantum (ChronusQ) Software Package}~\\[0.5cm]
+      \textsc{\LARGE The Chronus Quantum (ChronusQ) \\ Software Package}~\\[0.5cm]
       \textsc{\Large User's guide}~\\[5cm]
-      \large David Williams-Young\\
-      \large Joshua Goings\\
-      \large Patrick Lestrange\\[1.5cm]
+      \large David Williams\\
+      \large Joshua J. Goings\\
+      \large Patrick J. Lestrange\\
+      \large Xiaosong Li \\[1.5cm]
       \large Last Revised: October 29, 2015
     \end{center}
     \vspace*{\fill}
@@ -81,15 +80,16 @@
   of the compilation procedure and anatomy of the input file will be discussed.
   This is not meant to be a guide for developers (i.e. there will be no mention of
   the actual structure of the ChronusQ code), but a ChronusQ Developer's guide is
-  also currently being written and will be made publically available shortly.
+  also currently being written and will be made publicly available shortly.
 
-  ChronusQ aims to provide a open-source avenue for the development of real-time
-  quantum dynamicial simulations and cutting-edge post self-consistant field (SCF)
-  methods.  As ChronusQ is an ``free" (both in the finacial and the GNU definitions)  software package, use and development by the scientific community as a whole is 
+  ChronusQ aims to provide an open-source avenue for the development of real-time
+  quantum dynamical simulations and cutting-edge post self-consistent field (SCF)
+  methods.  As ChronusQ is a ``free" (both in the financial and the GNU definitions)  
+  software package, use and development by the scientific community as a whole is 
   strongly encouraged. Those interested in the development of ChronusQ should send 
   inquiries to \XiaosongContact.
 
-  Please see the table of contents and the begining of this document to easily find
+  Please see the Table of Contents at the beginning of this document to find
   the information you desire regarding the compilation or use of ChronusQ.
 
   % Instructions on how to obtain and compile ChronusQ
@@ -101,7 +101,7 @@
     Group GitHub repository located at \ChronusQGitHubPUBLIC. Those interested in
     the development of ChronusQ may request access to the private development GitHub
     repository though \XiaosongContact. To obtain a copy of the source code (via 
-    command line), the \texttt{git} program must be installed and in the shell 
+    command line), the \texttt{git} program must be installed and be in the shell 
     working path. This can be confirmed via the following command:
 
     \begin{lstlisting}
@@ -132,13 +132,12 @@
     quantum mechanical methods (i.e. (multi-)linear algebra, gaussian integral 
     evaluation, etc). While ChronusQ strives to be a stand alone package, many
     of the incorporated functionality depend heavily on outside open source 
-    software. Any problems regarding the installation of these dependencies can
-    be resolved via the website of the software. Any problems regarding the
+    software. Any problems regarding the installation of these dependencies should
+    be resolved via the website of that software. Any problems regarding the
     communication of these dependencies and ChronusQ can be directed to
     \DBWYContact.
     
-    
-    % List of Dependencies
+        % List of Dependencies
       \subsubsection{C++11} \label{subsubsec:C++11} 
         ChronusQ (and some of its dependencies) rely on the C++11 
         standard. The GNU Compilers have already incorporated this standard, but
@@ -154,7 +153,7 @@
         portability and flexibility of compilation through automatic Makefile 
 	generation. \CMake~is readily available through your OS distribution
 	package manager (GNU/Linux or OSX). For example, in Fedora 22, one may 
-	obtain (if one has root privlidges) \CMake~via
+	obtain (if one has root privileges) \CMake~via
 
 	\begin{lstlisting}
 > sudo dnf install cmake
@@ -166,19 +165,19 @@
 
       \subsubsection{\Libint} \label{subsubsec:Libint}
         For the evaluation of molecule integrals over gaussian-type
-        function (GTOs), ChronusQ relies on the \Libint~library of E. Valeev. A
-	preconfigure (uncompiled) library is shipped with ChronusQ (located in
+        function (GTOs), ChronusQ relies on the \Libint~library of E. Valeev \cite{libint15}. A
+	preconfigured (uncompiled) library is shipped with ChronusQ (located in
 	the \texttt{/deps/src} directory). The configure/compile procedure
 	described in Section \ref{subsec:ChronusQConfigCompile} details the
 	\CMake~options to facilitate compilation of \Libint. As ChronusQ attempts
-	to use the latest version of \Libint, we only will support compilation
-	and linking to the locally stored version of \Libint, as the functionality
+	to use the latest version of \Libint, but we will only support compilation
+	and linking to the locally stored version of \Libint as the functionality
 	may be different between versions.
 
       \subsubsection{\Eigen} \label{subsubsec:Eigen}
-        ChronusQ currently utilizes \Eigen~as a high-level C++ API for
-        various light-weight linear albegra tasks (i.e. storage, multiplication,
-	etc). \Eigen~is also made available through most (GNU/Linux) OS distribtions
+        ChronusQ currently utilizes \Eigen~\cite{eigen} as a high-level C++ API for
+        various light-weight linear algebra tasks (i.e. storage, multiplication,
+	etc). \Eigen~is also made available through most (GNU/Linux) OS distributions
 	via a standard package manager. One may obtain a pre-packaged \Eigen~
 	installation (with root access / Fedora 22) via
 
@@ -194,11 +193,11 @@
 	\CMake~variables that need to be set for a non-standard installation 
 	of \Eigen~can be found
 	in Section \ref{subsec:ChronusQConfigCompile}.
-
+I
       \subsubsection{\BTAS} \label{subsubsec:BTAS}
         ChronusQ currently utilizes \BTAS~(\textbf{B}asic \textbf{T}ensor
-        \textbf{A}lgebra \textbf{S}ubroutines) as a C++11 API for multi-linear 
-	algebra. \BTAS~is a header-only API (see \Eigen), so one only need to place
+        \textbf{A}lgebra \textbf{S}ubroutines) \cite{btas} as a C++11 API for multi-linear 
+	algebra. \BTAS~is a header-only API (see \Eigen), so one only needs to place
 	the headers in a place that ChronusQ can find them. The \BTAS~source code
 	may be obtained from the \BTAS~GitHub via
 
@@ -211,9 +210,9 @@
 	\ref{subsec:ChronusQConfigCompile}.
 
       \subsubsection{\Boost} \label{subsubsec:boost} 
-        Various parts of the code depend on the C++ \Boost~libraries to
-        varying degrees (namely the Python API from which ChronusQ is made 
-	executable). Given that \Boost~is not already installed on your system,
+        Various parts of the code depend on the C++ \Boost~libraries \cite{boost} to
+        varying degrees (namely the \Python API from which ChronusQ can be 
+	executed). Given that \Boost~is not already installed on your system,
 	one may compile and place boost in the usual (root) place by obtaining
 	the latest \Boost~source from \texttt{http://www.boost.org} and following
 
@@ -251,7 +250,7 @@
 	\end{lstlisting}
 
       \subsubsection{\HDF} \label{subsubsec:HDF5} 
-        ChronusQ utilizes \HDF~for binary file IO for use with 
+        ChronusQ utilizes \HDF~\cite{hdf5} for binary file IO for use with 
         checkpointing and scratch file generation. \HDF~is made available
 	though the standard (GNU/Linux) OS distribution package manager via
 	(Fedora 22 / root access):
@@ -267,7 +266,7 @@
 	can be found in Section \ref{subsec:ChronusQConfigCompile}.
 
       \subsubsection{\LAPACK~and \BLAS} \label{subsubsec:LA} 
-        ChronusQ utilizes \LAPACK~and \BLAS~to perform
+        ChronusQ utilizes \LAPACK~\cite{lapack} and \BLAS~\cite{blas1,blas2,blas3,atlas} to perform
         the most important linear-algebra functionality (i.e. SVD, QR, 
 	diagonalization, etc). \LAPACK~and \BLAS~come standard on most
 	(GNU/Linux) OS distributions, and if not, the are easily obtained via
@@ -294,14 +293,14 @@
     This section outlines the configuration and compilation of the ChronusQ
     software package via \CMake. Before this procedure can be carried out,
     all of the dependencies (unless otherwise stated) from the previous section
-    must be installed. Any problems regarding the configuration or compliation
+    must be installed. Any problems regarding the configuration or compilation
     may be directed toward \DBWYContact.
 
     \subsubsection{Configure} \label{subsubsec:ChronusQConfig}
 
     The configuration of the machine specific Makefiles to compile ChronusQ are
     handled by \CMake. ChronusQ has adopted an ``out-of-source" compilation model
-    to better seperate source and compiled code. In this manner, if a compilation
+    to better separate source and compiled code. In this manner, if a compilation
     or configuration goes wrong, one must simple delete the build directory and 
     start over with no risk of editing the source code. Configuration of ChronusQ
     takes place via the following general scheme
@@ -435,7 +434,7 @@ cmake \
 
     \subsubsection{Compilation} \label{subsubsec:ChronusQCompile}
     
-    Once a successful configuration has been acheived, compilation is very simple.
+    Once a successful configuration has been achieved, compilation is very simple.
     From the build directory, simply type
 
     \begin{lstlisting}
@@ -471,7 +470,7 @@ cmake \
 > make -j <NCORES>
     \end{lstlisting}
     
-    \noindent Once ChronusQ has been sucessfully compiled, you should find a file
+    \noindent Once ChronusQ has been successfully compiled, you should find a file
     named ``chronusq.py" in the main build directory. This is the ChronusQ python
     script and it may be run in two ways. The first is directly through python:
 
@@ -487,13 +486,50 @@ cmake \
 > ./chronusq.py <input_file>
     \end{lstlisting}
 
-    \noindent With this last method, it is possible to place chronusq.py into you
+    \noindent With this last method, it is possible to place chronusq.py into your
     PATH and run it from outside directories:
 
     \begin{lstlisting}
 > export PATH=$PATH":"$PWD
 > chronusq.py <input_file>
     \end{lstlisting}
+
+    \subsection{Testing Installation} \label{subsec:ChronusQTest}
+
+    After you've compiled ChronusQ, it is recommended that users test that
+    everything is functioning correctly. We've added a set of unit tests that are 
+    available in the \texttt{Test/UNIT} folder. Inside that directory you will find:
+    
+    \begin{lstlisting}
+buglist.txt
+chronusq.py
+refval.py
+rununit.py
+testXXXX*.inp
+test.index
+    \end{lstlisting}
+    
+    \noindent The \texttt{rununit.py} utility will run the unit tests and compare against reference 
+    values that are stored in \texttt{chronus-ref.val}. Upon completion, the results of each
+    test will be printed out in \texttt{summary.txt}. This file will show the differences between
+    the test and reference values and will say if that test passed or not.   
+    
+    You can change which tests are run by editing the \texttt{text.index} file. Simple comment
+    out the tests that you don't want to run and they will be ignored. There are tests using a single 
+    core (serial) and multiple cores (SMP) as well as tests contracting the two-electron integrals 
+    in core and calculating and contracting them directly. We are aware of some bugs in several 
+    of the tests, so we have left them commented out for now and added details about them in \texttt{buglist.txt}. 
+    Many of these are not really bugs and simply require more robust optimization schemes, but they
+    are left as things that need to be addressed in the future. 
+    
+    One can run the unit tests by simply running
+    
+    \begin{lstlisting}
+> python rununit.py
+    \end{lstlisting}
+    
+    \noindent and checking the generated \texttt{summary.txt}. If you identify a bug or error that is not 
+    addressed in \texttt{buglist.txt}, please contact \DBWYContact.
 
 \newpage
   \section{Input Files} \label{sec:InputFiles}
@@ -676,4 +712,15 @@ ChronusQ input files are divided into sections that specify the molecular geomet
        There is no default, and the number of roots must be specified manually.
      \end{description}
 
+	%bibliography    
+    \bibliographystyle{unsrt}
+    \bibliography{@CHRONUSQ_BIB@}
+    
 \end{document}
+
+
+
+
+
+
+

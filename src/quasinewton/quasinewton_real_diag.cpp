@@ -162,14 +162,14 @@ namespace ChronusQ {
   template<>
   void QuasiNewton<double>::diagMem(int NTrial){
     int IOff = NTrial;
-    if(!this->isHermetian_ || this->symmetrizedTrial_){
+    if(!this->isHermitian_ || this->symmetrizedTrial_){
       IOff += NTrial; // Space for paired eigenvalues or imaginary part
     }
-    if(!this->isHermetian_ && this->symmetrizedTrial_){
+    if(!this->isHermitian_ && this->symmetrizedTrial_){
       IOff += 2*NTrial; // Space for paired eigenvalues or imaginary part
     }
     this->ERMem = LAPACK_SCR;
-    if(!this->isHermetian_){
+    if(!this->isHermitian_){
       if(this->symmetrizedTrial_) this->EIMem = this->ERMem + 2*NTrial;
       else                        this->EIMem = this->ERMem +   NTrial;
     }
@@ -181,7 +181,7 @@ namespace ChronusQ {
   void QuasiNewton<double>::redDiag(int NTrial,ostream &output){
     this->diagMem(NTrial); 
   //cout << "HERE" << endl;
-    if(this->isHermetian_) {
+    if(this->isHermitian_) {
       if(!this->symmetrizedTrial_) this->stdHerDiag(NTrial,output);
       else                         this->symmHerDiag(NTrial,output);
     } else {

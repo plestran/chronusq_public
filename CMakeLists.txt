@@ -1,4 +1,4 @@
-@# Configure Project ChronusQ
+# Configure Project ChronusQ
 cmake_minimum_required(VERSION 3.0)
 project(ChronusQ CXX C)
 set(ChronusQ_VERSION_MAJOR BETA)
@@ -102,10 +102,11 @@ endif()
 set(BASIS_PATH "${PROJECT_SOURCE_DIR}/basis")
 set(AUTHOR_PATH "${PROJECT_SOURCE_DIR}/AUTHORS")
 set(PYTHONAPI_PATH "${PROJECT_BINARY_DIR}/src/python")
-
-# Set up config.h with configure time settings
 set(USERMANUAL "${CMAKE_BINARY_DIR}/doc/ChronusQUserManual")
 set(LOGO "${CMAKE_SOURCE_DIR}/doc/chronus_quantum_logo.png")
+set(CHRONUSQ_BIB ${CMAKE_SOURCE_DIR}/doc/ChronusQ)
+
+# Set up config.h with configure time settings
 configure_file(
   "${PROJECT_SOURCE_DIR}/include/config.h.in"
   "${PROJECT_BINARY_DIR}/include/config_chronusq.h"
@@ -114,15 +115,7 @@ configure_file(
   "${PROJECT_SOURCE_DIR}/src/python/src/chronusq.py.in"
   "${PROJECT_BINARY_DIR}/src/python/chronusq.py"
 )
-configure_file(
-  "${PROJECT_SOURCE_DIR}/doc/ChronusQUserManual.tex.in"
-  "${PROJECT_BINARY_DIR}/doc/ChronusQUserManual.tex"
-  @@ONLY
-)
 
 # Recurse into src
 add_subdirectory(src)
-if(BUILD_DOC)
-  add_subdirectory(doc)
-endif()
-
+add_subdirectory(doc)
