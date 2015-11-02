@@ -1,0 +1,32 @@
+#  test0094 smp direct Real UHF RT Lowdin STO-3G w/ Step
+#
+#  Molecule Specification
+#
+[Molecule]
+charge = 0
+mult = 2
+geom:
+	Li 0   0.000000 0.000000 0.000000
+  
+#
+#  Job Specification
+#
+[QM]
+reference = Real UHF
+job       = RT
+basis     = sto3g.gbs
+ints			= direct
+
+[RT]
+maxstep  = 20
+ortho    = lowdin
+envelope = step
+edfield  = 0.01 0.0 0.0
+time_on  = 0.
+time_off = 0.002
+
+#
+#  Misc Settings
+#
+[Misc]
+nsmp = 2

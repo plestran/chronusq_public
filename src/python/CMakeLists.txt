@@ -3,7 +3,8 @@
 
 add_library(pythonapi SHARED singleslater_api.cpp molecule_api.cpp 
 aointegrals_api.cpp chronusq_api.cpp classtools_api.cpp fileio_api.cpp
-tools_api.cpp basisset_api.cpp cerr_api.cpp sdresponse_api.cpp)
+tools_api.cpp basisset_api.cpp cerr_api.cpp sdresponse_api.cpp
+realtime_api.cpp)
 
 #target_include_directories(pythonapi PUBLIC ${PYTHON_INCLUDE_DIRS})
 
@@ -20,6 +21,7 @@ set(JFOLDER  ${PROJECT_SOURCE_DIR}/src/python/src/jobs)
 
 add_custom_target(copyapi ALL
   ${CMAKE_COMMAND} -E copy_if_different ${APIPY} ${PROJECT_BINARY_DIR}
+  COMMAND chmod +x ${PROJECT_BINARY_DIR}/chronusq.py
   COMMAND ${CMAKE_COMMAND} -E make_directory ${APIINST}/parse
   COMMAND ${CMAKE_COMMAND} -E make_directory ${APIINST}/jobs
   COMMAND ${CMAKE_COMMAND} -E copy_directory ${PFOLDER} ${APIINST}/parse

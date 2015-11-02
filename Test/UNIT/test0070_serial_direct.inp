@@ -1,0 +1,30 @@
+#  test0070 serial direct Real RHF RT Lowdin STO-3G
+#
+#  Molecule Specification
+#
+[Molecule]
+charge = 0
+mult = 1
+geom:
+  O 0   0.000000000 -0.07579184359 0.0
+  H 0   0.866811829  0.6014357793  0.0
+  H 0  -0.866811829  0.6014357793  0.0
+  
+#
+#  Job Specification
+#
+[QM]
+reference = Real RHF
+job       = RT
+basis     = sto3g.gbs
+ints			= direct
+
+[RT]
+maxstep  = 20
+ortho    = lowdin
+
+#
+#  Misc Settings
+#
+[Misc]
+nsmp = 1

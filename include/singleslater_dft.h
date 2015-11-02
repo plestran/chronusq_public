@@ -122,14 +122,120 @@ void SingleSlater<T>::buildVxc(cartGP gridPt, double weight){
     }
    }
    if(!this->isClosedShell && this->Ref_ != TCS) {
-    if (this->ExchKernel_ != NOEXCH){
      rhor   = overlapR_->frobInner(this->densityA()->conjugate());
      rhor_B = overlapR_->frobInner(this->densityB()->conjugate());
+    if (this->ExchKernel_ != NOEXCH){
      (*this->vXA()) += weight*(*overlapR_)*(std::pow(rhor,(1.0/3.0)));
      (*this->vXB()) += weight*(*overlapR_)*(std::pow(rhor_B,(1.0/3.0)));
-     this->totalEx  += 
-       weight*((std::pow(rhor,(4.0/3.0)))+(std::pow(rhor_B,(4.0/3.0))));
+     if((rhor+rhor_B) > 1.0e-20) this->totalEx   += 
+                                   weight*(std::pow((rhor+rhor_B),(4.0/3.0)))*
+                                     (this->f_spindens(1,this->spindens(rhor,rhor_B)));
+      }
+    if (this->CorrKernel_ != NOCORR) {
+    if (rhor+rhor_B > 1.0e-20) {                       //this if statement prevent numerical instability with zero guesses
+     this->formCor((rhor+rhor_B),(this->spindens(rhor,rhor_B)));
+      (*this->vCorA())    += weight*(*overlapR_)*this->mu_corr;
+      (*this->vCorB())    += weight*(*overlapR_)*this->mu_corr_B;
+      this->totalEcorr    += weight*(rhor+rhor_B)*this->eps_corr;
+      }
+     }
     }
-  }
+//  }
 };  //End
 
+
+template<typename T>
+double SingleSlater<T>::EvepsVWN(int iop, double A_x, double b_x, double c_x, double x0_x, double rho){
+//    From Reference Vosko en Al., Can. J. Phys., 58, 1200 (1980). VWN3 and VWN5 interpolation formula   
+//    IOP 0 -> Eq 4.4 
+//    IOP 1 Eq. 4.3 (finishing the derivate of eps , rs factor already included)
+//    IOP 2 Analitic Derv of Eq 4.4 (note this one has to be moltiplied outside by rs to get the final needed term)
+    double val      = 0.0;
+    double b1       = (b_x*x0_x - c_x)/(c_x*x0_x); 
+    double b2       = (x0_x - b_x)/(c_x*x0_x); 
+    double b3       = (-1.0)/(c_x*x0_x); 
+    double Q        = std::pow((4.0*c_x - b_x*b_x),(1.0/2.0)); 
+    double r_s      = std::pow(((3.0)/(4.0*math.pi*rho)),(1.0/3.0));
+    double r_s_sqrt = std::pow(((3.0)/(4.0*math.pi*rho)),(1.0/6.0));
+    double r_s_32   = std::pow(((3.0)/(4.0*math.pi*rho)),(1.0/2.0));
+    double X        = r_s + b_x*(r_s_sqrt) + c_x; 
+    double X_x0     = x0_x*x0_x + b_x*x0_x + c_x; 
+    double x        = r_s_sqrt;
+    double S1 = 0.0;
+    double S2 = 0.0;
+    double S3 = 0.0;
+    if (iop == 0){
+     val = A_x *
+         ( std::log(r_s/X) + 
+           2.0*b_x*(std::atan(Q/(2.0*r_s_sqrt + b_x)))/Q  -
+           b_x*x0_x*(1.0/X_x0) * ( 
+                                 (std::log( (std::pow((r_s_sqrt-x0_x),2.0))/X )) +
+                                 (2.0*(b_x + 2.0*x0_x)*(1.0/Q)*(std::atan(Q/(2.0*r_s_sqrt + b_x))) ) 
+                                 ) 
+         );
+     }else if (iop == 1){
+//           A_x * ( (1.0 + b1*r_s_sqrt)/(1.0 + b1*r_s_sqrt + b2*r_s + b3*r_s_32)) / 3.0 ;
+            val = A_x* ( (1.0 + b1*r_s_sqrt)/(1.0 + b1*r_s_sqrt + b2*r_s + b3*r_s_32));
+
+     }else if (iop == 2){
+            S1 = r_s_sqrt - x0_x;  //dxx0
+            S2 = b_x * r_s_sqrt * x0_x; // bxx0
+            S3 = X ; //c +bx+r
+            val  = A_x*(c_x*S1 - S2);
+            val /= (r_s*S3*S1);
+     }
+     return val;
+};  //end
+
+template<typename T>
+double SingleSlater<T>::f_spindens(int iop, double spindensity){
+      double f_spindensity;
+      double thrs = 1.11e-16;
+      double fact = (-2.0+std::pow((2.0),(4.0/3.0)));
+      if (iop == 0) {
+      f_spindensity = 0.0;
+      if ((1.0+spindensity) >= thrs)   f_spindensity += std::pow((1.0+spindensity),(4.0/3.0)); 
+      if ((1.0-spindensity) >= thrs)   f_spindensity += std::pow((1.0-spindensity),(4.0/3.0)); 
+      f_spindensity += -2.0;
+      f_spindensity /= fact; 
+      }else if(iop ==1){
+      f_spindensity  = std::pow((1.0+spindensity),(4.0/3.0)); 
+      f_spindensity += std::pow((1.0-spindensity),(4.0/3.0)); 
+      f_spindensity /= (2.0) ;
+      }
+      return f_spindensity;
+};  //end
+
+
+template<typename T>
+double SingleSlater<T>::df_spindens(double spindensity){
+      double df_spindensity;
+      double thrs = 1.11e-16;
+      double fact = (-2.0+std::pow((2.0),(4.0/3.0)));
+      df_spindensity = 0.0;
+      if ((1.0+spindensity) >= thrs) df_spindensity +=  std::pow((1.0+spindensity),(1.0/3.0)); 
+      if ((1.0-spindensity) >= thrs) df_spindensity -= std::pow((1.0-spindensity),(1.0/3.0)); 
+      df_spindensity *= (4.0/3.0);
+      df_spindensity /= fact; 
+      return df_spindensity;
+};  //end
+
+
+template<typename T>
+double SingleSlater<T>::df2_spindens(double spindensity){
+      double df2_spindensity;
+      double thrs = 1.11e-16;
+      double fact = (-1.0+std::pow((2.0),(1.0/3.0)));
+      df2_spindensity = 0.0;
+      if ((1.0+spindensity) >= thrs) df2_spindensity +=  std::pow((1.0+spindensity),(-2.0/3.0)); 
+      if ((1.0-spindensity) >= thrs) df2_spindensity +=  std::pow((1.0-spindensity),(-2.0/3.0)); 
+      df2_spindensity *= (2.0/9.0);
+      df2_spindensity /= fact; 
+      return df2_spindensity;
+};  //end
+
+
+  template<typename T> 
+  double SingleSlater<T>::spindens(double rho_A, double rho_B) {
+  return (rho_A - rho_B)/ (rho_A + rho_B);
+  };  // 

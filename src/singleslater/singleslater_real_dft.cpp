@@ -44,9 +44,8 @@ void SingleSlater<double>::formVXC(){
     double CxVx = -(std::pow((3.0/math.pi),(1.0/3.0)));    
     double CxEn =  (3.0/4.0);      //TF LDA Prefactor to finish the X-Energy
     double val = 4.0*math.pi*CxVx;
-    this->totalEx = 0.0;           // Total Exchange Energy
-    this->totalEcorr = 0.0;        // Total Correlation Energy
-
+    this->totalEx = 0.0;                                  // Total Exchange Energy
+    this->totalEcorr = 0.0;                               // Total Correlation Energy
 /*  
  *  Generate grids 
  *
@@ -59,7 +58,7 @@ void SingleSlater<double>::formVXC(){
     this->vXA()->setZero();   // Set to zero every occurence of the SCF
     this->vCorA()->setZero(); // Set to zero every occurence of the SCF
     if(!this->isClosedShell && this->Ref_ != TCS) this->vXB()->setZero();
-
+    if(!this->isClosedShell && this->Ref_ != TCS) this->vCorB()->setZero();
     // Loop over atomic centers
     for(int iAtm = 0; iAtm < nAtom; iAtm++){
 
@@ -97,13 +96,12 @@ void SingleSlater<double>::formVXC(){
     (*this->vXA())    =  val * (*this->vXA());
     this->totalEx     =  val * CxEn * (this->totalEx);
     (*this->vCorA())  =  4.0 * math.pi * (*this->vCorA());
+    if(!this->isClosedShell && this->Ref_ != TCS) (*this->vCorB())  =  4.0 * math.pi * (*this->vCorB());
     this->totalEcorr  =  4.0 * math.pi * (this->totalEcorr);
-
     // For open shell averything has to be scaled by 2^(1/3)
     if(!this->isClosedShell && this->Ref_ != TCS){
       (*this->vXA()) *= std::pow(2.0,(1.0/3.0));  
       (*this->vXB()) *= std::pow(2.0,(1.0/3.0)) * val;
-      this->totalEx  *= std::pow(2.0,(1.0/3.0));
     }
 
     if(this->printLevel_ >= 3) {
@@ -121,58 +119,168 @@ template<>
 void SingleSlater<double>::formCor(double rho, double spindensity){
 // Parameter for the fit (according Eq 4.4 Vosko Can. J. Phys. 1980
    double A1  = 0.0621814; // In the text page 1207 (A^P)
-   double A  = A1/2.0; // to Hartree
-   double b;
-   double c;
-   double x0;
+   double A_p   = A1/2.0; // to Hartree
+   double A_f   = A1/4.0; // to Hartree
+   double A_a   = -(1.0/(6.0*math.pi*math.pi)) ;// to hartree already
+   double b_p  = 0.0;
+   double b_f  = 0.0;
+   double b_a  = 0.0;
+   double c_p  = 0.0;
+   double c_f  = 0.0;
+   double c_a  = 0.0;
+   double x0_p = 0.0;
+   double x0_f = 0.0;
+   double x0_a = 0.0;
+   double eps_p = 0.0;
+   double eps_f = 0.0;
+   double over3 = 1.0/3.0;
+   double delta_eps_1    = 0.0;
+   double S1    = 0.0;
+   double S2    = 0.0;
+   double M3_A    = 0.0;
+   double M3_B    = 0.0;
+   double rs      = std::pow(((3.0)/(4.0*math.pi*rho)),(1.0/3.0));
+
+   double alpha = 0.0;
+   double mu_p = 0.0;
+   double mu_f = 0.0;
+   double beta = 0.0;
+   double S3    = 0.0;
+   double S4    = 0.0;
+   double M1    = 0.0;
+   double M2    = 0.0;
+   double db_dr = 0.0; 
+   double delta_eps_etha = 0.0;
+   double spindensity_4 = std::pow(spindensity,4.0);
+   double spindensity_3 = std::pow(spindensity,3.0);
+
+
 //   VWN5
    if (this->CorrKernel_ == VWN5){
-     b  = 3.72744;  // Caption Table 5
-     c  = 12.9352;  // Caption Table 5
-     x0 = -0.10498; // Caption Table 5
+     b_f  =  7.06042;  // Caption Table 5
+     c_f  = 18.0578;   // Caption Table 5
+     x0_f = -0.32500;  // Caption Table 5
+     b_p  =  3.72744;  // Caption Table 5
+     c_p  = 12.9352;   // Caption Table 5
+     x0_p = -0.10498;   // Caption Table 5
+     b_a  =  1.13107;   // intext page 1209
+     c_a  = 13.0045;    // intext page 1209
+     x0_a = -0.00475840; // intext page 1209
    }else if(this->CorrKernel_ == VWN3){
 //  VWN3
-     b  = 13.0720;  // into text page 1207
-     c  = 42.7198;  // into text page 1207
-     x0 = -0.409286; // into text page 1207
+     b_p  =  13.0720;   // into text page 1207
+     c_p  =  42.7198;   // into text page 1207
+     x0_p =  -0.409286; // into text page 1207
+     b_f  =  20.1231;   // into text pagr 1207
+     c_f  =  101.578;   // into text pagr 1207
+     x0_f = -0.743294;  // into text pagr 1207
+     b_a  =  1.13107;   // intext page 1209
+     c_a  = 13.0045;    // intext page 1209
+     x0_a = -0.00475840; // intext page 1209
    }
-//  Derivatives therms
-   double b1 = (b*x0 - c)/(c*x0); 
-   double b2 = (x0 - b)/(c*x0); 
-   double b3 = (-1.0)/(c*x0); 
-   double Q =std::pow((4.0*c - b*b),(1.0/2.0)); 
-   double r_s = std::pow(((3.0)/(4.0*math.pi*rho)),(1.0/3.0));
-   double r_s_sqrt = std::pow(((3.0)/(4.0*math.pi*rho)),(1.0/6.0));
-   double r_s_32 = std::pow(((3.0)/(4.0*math.pi*rho)),(1.0/2.0));
-   double X = r_s + b*(r_s_sqrt) + c; 
-   double X_x0 = x0*x0 + b*x0 + c; 
-   this->eps_corr = 0.0;
-   this->mu_corr  = 0.0;
-   this->eps_corr = A *
-          ( std::log(r_s/X) + 
-            2.0*b*(std::atan(Q/(2.0*r_s_sqrt + b)))/Q  -
-            b*x0*(1.0/X_x0) * ( 
-                 (std::log( (std::pow((r_s_sqrt-x0),2.0))/X )) +
-                 (2.0*(b + 2.0*x0)*(1.0/Q)*(std::atan(Q/(2.0*r_s_sqrt + b))) ) 
-                 ) );
-   this->mu_corr = -A * ( (1.0 + b1*r_s_sqrt)/(1.0 + b1*r_s_sqrt + b2*r_s + b3*r_s_32)) / 3.0 ;
-   this->mu_corr += this->eps_corr ;
-//   cout << "r_s " << r_s << " r_s_sqrt " << r_s_sqrt << " r_s_32 " << r_s_32 <<endl;
-//   cout << " eps "<< this->eps_corr*1000.0 << " mu " << this->mu_corr <<endl;
+/*  // Debug
+    cout << "**********" <<endl;
+    double rho1;
+    rho1 = 0.238732414637843;   //rs=1
+    cout << "EpsP " <<   EvepsVWN(0,A_p,b_p,c_p,x0_p,rho1) << endl; 
+    cout << "EpsF " <<   EvepsVWN(0,A_f,b_f,c_f,x0_f,rho1) << endl; 
+    cout << "dEpsP " <<  EvepsVWN(2,A_p,b_p,c_p,x0_p,rho1) << endl; 
+    cout << "dEpsF " <<  EvepsVWN(2,A_f,b_f,c_f,x0_f,rho1) << endl; 
+    cout << "**********" <<endl;
+*/
+// Closed Shell
+   if(this->isClosedShell && this->Ref_ != TCS) {
+     this->eps_corr = 0.0;
+     this->mu_corr  = 0.0;
+     this->eps_corr =  EvepsVWN(0,A_p,b_p,c_p,x0_p,rho);
+//     this->mu_corr  = -over3*EvepsVWN(1,A_p,b_p,c_p,x0_p,rho);
+     this->mu_corr  = -over3*rs*EvepsVWN(2,A_p,b_p,c_p,x0_p,rho);
+     this->mu_corr += this->eps_corr ;
+   }else{
+//   Open Shell Case
+     if(this->CorrKernel_ == VWN3){
+//     Used Linear Interpolation between parg and ferr 
+//     Eq 2.4 and its analytic derivative for VWN3
+       this->eps_corr  = 0.0;
+       this->mu_corr   = 0.0;
+       this->mu_corr_B = 0.0;
+       eps_p = EvepsVWN(0,A_p,b_p,c_p,x0_p,rho);
+       eps_f = EvepsVWN(0,A_f,b_f,c_f,x0_f,rho);
+       delta_eps_1 = eps_f - eps_p;
+       this->eps_corr  = eps_p + delta_eps_1*f_spindens(0,spindensity);
+       S1 =  -rs*over3*EvepsVWN(2,A_p,b_p,c_p,x0_p,rho);
+       S2 =  -rs*over3*f_spindens(0,spindensity)*(EvepsVWN(2,A_f,b_f,c_f,x0_f,rho) - EvepsVWN(2,A_p,b_p,c_p,x0_p,rho));
+//     S1 =  -over3*EvepsVWN(1,A_p,b_p,c_p,x0_p,rho);
+//     S2 =  -over3*f_spindens(0,spindensity)*(EvepsVWN(1,A_f,b_f,c_f,x0_f,rho) - EvepsVWN(1,A_p,b_p,c_p,x0_p,rho));
+       M3_A =   1.0 - spindensity; 
+       M3_B = -(1.0 + spindensity);
+       this->mu_corr   = S1 + S2 + this->eps_corr;
+       this->mu_corr_B = S1 + S2 + this->eps_corr;     
+       this->mu_corr   +=  delta_eps_1*M3_A*df_spindens(spindensity);
+       this->mu_corr_B +=  delta_eps_1*M3_B*df_spindens(spindensity);
+     }else if(this->CorrKernel_ == VWN5){
+//     Used improved Interpolation between parg and ferr 
+//     Eq 3.2  and 3.3 and its analytic derivative for VWN5
+
+     alpha = EvepsVWN(0,A_a,b_a,c_a,x0_a,rho);
+     eps_p = EvepsVWN(0,A_p,b_p,c_p,x0_p,rho);
+     eps_f = EvepsVWN(0,A_f,b_f,c_f,x0_f,rho);
+     delta_eps_1 = eps_f - eps_p;
+     beta  = this->df2_spindens(0.0) * delta_eps_1 / alpha;
+     beta  += -1.0;
+     delta_eps_etha = alpha;
+     delta_eps_etha *= (f_spindens(0,spindensity)/this->df2_spindens(0.0));
+     delta_eps_etha *= (1.0 + beta*spindensity_4);
+     this->eps_corr  = eps_p + delta_eps_etha ;
+//   build the potential
+
+//   dbeta/dr
+     db_dr = -delta_eps_1 * EvepsVWN(2,A_a,b_a,c_a,x0_a,rho);
+     db_dr += (EvepsVWN(2,A_f,b_f,c_f,x0_f,rho) - EvepsVWN(2,A_p,b_p,c_p,x0_p,rho)) * alpha;
+     db_dr *= this->df2_spindens(0.0);
+     db_dr /= alpha*alpha;
+//   S1 = da/dr * (f(zeta))*(1+zeta^4*beta)/ df2_spindens(0.0)
+     S1 = this->f_spindens(0,spindensity);
+     S1 *= (1.0 + beta*spindensity_4);
+     S1 *= EvepsVWN(2,A_a,b_a,c_a,x0_a,rho);
+     S1 /= this->df2_spindens(0.0);
+//   S2 = d eps_p/ dr
+     S2  = EvepsVWN(2,A_p,b_p,c_p,x0_p,rho);
+//   S3 = df(zeta)/dr * alpha* (1+zeta^4*beta)/df2_spindens(0.0)
+     S3  = alpha;
+     S3 *= (1.0 + beta*spindensity_4);
+     S3 *= this->df_spindens(spindensity); 
+     S3 /= this->df2_spindens(0.0);
+//   M1 alpha * f(zeta)/this->df2_spindens(0.0)
+     M1  = alpha;
+     M1 *= this->f_spindens(0,spindensity); 
+     M1 /= this->df2_spindens(0.0);
+//   M2  zeta^4 * dbeta/dr
+     M2  = spindensity_4 * db_dr;
+//   dzeta/drho_x 
+     M3_A =   1.0 - spindensity; 
+     M3_B = -(1.0 + spindensity);
+     M3_A *= spindensity_3 * beta * 4.0;
+     M3_B *= spindensity_3 * beta * 4.0;
+     M3_A += M2;
+     M3_B += M2;
+     M3_A *= M1;
+     M3_B *= M1;
+     M3_A +=  S3*(1.0 - spindensity);   
+     M3_B += -S3*(1.0 + spindensity);   
+     this->mu_corr   = -rs*over3*(S1 + S2);
+     this->mu_corr_B = -rs*over3*(S1 + S2);
+     
+     this->mu_corr     += M3_A;
+     this->mu_corr_B   += M3_B;
+
+
+     this->mu_corr     += this->eps_corr;
+     this->mu_corr_B   += this->eps_corr;
+
+
+     }
+  }  //Open Shell
 };
-
-
-template<>
-double SingleSlater<double>::spindens(double rho_A, double rho_B){
-      double spindens;
-      double spinrho;
-      spindens = (rho_A + rho_B)/ (rho_A + rho_B);
-      spinrho = -2.0;
-      spinrho += std::pow((1.0+spindens),(4.0/3.0)); 
-      spinrho += std::pow((1.0-spindens),(4.0/3.0)); 
-      spinrho = spinrho/(2.0) ;
-      spinrho = spinrho/(-1.0+std::pow((2.0),(1.0/3.0))); 
-      return spinrho;
-};  //end
 
 } // Namespace ChronusQ

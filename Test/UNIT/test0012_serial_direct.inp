@@ -1,12 +1,25 @@
-$geom read
-2
-O 0 0.000000    0.000000    0.608586
-O 0 0.000000    0.000000    -0.608586
+#  test0012 serial direct Real UHF cc-pVDZ
+#
+#  Molecule Specification
+#
+[Molecule]
+charge = 0
+mult = 3
+geom:
+	O 0   0.000000    0.000000    0.608586
+	O 0   0.000000    0.000000    -0.608586
+  
+#
+#  Job Specification
+#
+[QM]
+reference = Real UHF
+job       = SCF
+basis     = cc-pVDZ.gbs
+ints			= direct
 
-$method hf
-$charge 0
-$spin 3
-$basis cc-pVDZ.gbs
-$nsmp 1
-$print 1
-$unittest scf
+#
+#  Misc Settings
+#
+[Misc]
+nsmp = 1

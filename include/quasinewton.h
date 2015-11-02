@@ -45,7 +45,7 @@ template <typename T>
     typedef Eigen::Map<TVec> TVecMap;
 
     // Boolean logic member variables
-    bool isHermetian_;     // Hermetian Scheme
+    bool isHermitian_;     // Hermitian Scheme
     bool doDiag_;          // Quasi-Newton Diagonalization (Davidson)
     bool doGEP_;           // Generalized Eigenproblem
     bool doLin_;           // Quasi-Newton Linear Equation Solve
@@ -142,7 +142,7 @@ template <typename T>
       this->initScrLen();
     };
     inline void initBoolean(){
-      this->isHermetian_      = true;  // Default to Hermetian Scheme
+      this->isHermitian_      = true;  // Default to Hermitian Scheme
       this->doDiag_           = true;  // Defualt to diagonalization
       this->doGEP_            = false; // Default standard eigenproblem if doing a diagonalization
       this->doLin_            = false; // Mildly redundent, as it will currently always be the opposite of doDiag
@@ -267,7 +267,7 @@ template <typename T>
     this->LenScr += this->LenRes;     // 4 
     this->LenScr += this->LenTVec;    // 5
   
-    if(!this->isHermetian_ || this->symmetrizedTrial_){
+    if(!this->isHermitian_ || this->symmetrizedTrial_){
       this->LenScr += this->LenRho;     // 7
       this->LenScr += this->LenXTRho;   // 8 
       this->LenScr += this->LenSigma;   // 9
@@ -283,7 +283,7 @@ template <typename T>
       this->LenScr += this->LenSuper;   // 25
     }
 
-    if(!this->isHermetian_ && this->symmetrizedTrial_){
+    if(!this->isHermitian_ && this->symmetrizedTrial_){
       this->LenScr += this->LenSuper; // 24
     }
 
@@ -330,7 +330,7 @@ template <typename T>
     this->ResRMem       = this->URMem       + this->LenU; 
     this->TVecRMem      = this->ResRMem     + this->LenRes;
     this->LAPACK_SCR    = this->TVecRMem    + this->LenTVec;
-    if(!this->isHermetian_ || this->symmetrizedTrial_){
+    if(!this->isHermitian_ || this->symmetrizedTrial_){
       this->RhoRMem       = this->LAPACK_SCR  + this->LEN_LAPACK_SCR;
       this->XTRhoRMem     = this->RhoRMem     + this->LenRho;
       this->SigmaLMem     = this->XTRhoRMem   + this->LenXTRho;
@@ -345,7 +345,7 @@ template <typename T>
       this->SCPYMem       = this->SSuperMem   + this->LenSuper;
       this->BiOrthMem     = this->SCPYMem     + this->LenSuper;
     }
-    if(!this->isHermetian_ && this->symmetrizedTrial_){
+    if(!this->isHermitian_ && this->symmetrizedTrial_){
       this->NHrProdMem    = this->BiOrthMem   + this->LenSuper;
     }
 
@@ -439,7 +439,7 @@ template <typename T>
       this->doGEP_            = (SDR->iMeth() == SDResponse<T>::RPA);
       this->genGuess_         = (this->nGuess_ == 0);
       this->maxSubSpace_      = this->stdSubSpace();
-      this->isHermetian_      = !(SDR->iMeth() == SDResponse<T>::RPA);
+      this->isHermitian_      = !(SDR->iMeth() == SDResponse<T>::RPA);
       this->initScrLen();
 
       if(this->genGuess_) this->nGuess_ = this->stdNGuess();
@@ -461,7 +461,7 @@ template <typename T>
       this->doGEP_            = false;
       this->genGuess_         = true;
       this->maxSubSpace_      = this->stdSubSpace();
-      this->isHermetian_      = isH;
+      this->isHermitian_      = isH;
       this->initScrLen();
 
       if(this->genGuess_) this->nGuess_ = this->stdNGuess();
@@ -487,8 +487,8 @@ template <typename T>
            << this->maxIter_ << endl;
       output << std::setw(50) << std::left << "  Maximum Number of Macro Iterations:"
            << this->MaxIter_ << endl;
-      output << std::setw(50) << std::left << "  Using an Hermetian algorithm?:";
-      if(this->isHermetian_) output << "Yes";
+      output << std::setw(50) << std::left << "  Using an Hermitian algorithm?:";
+      if(this->isHermitian_) output << "Yes";
       else output << "No";
       output << endl;
       output << std::setw(50) << std::left << "  Full Matrix Passed to for AX:";
@@ -533,7 +533,7 @@ template <typename T>
   /*  Compute the linear transformation of the matrix (σ) [and possibly the 
    *  metric (ρ)] onto the basis vectors (b)
    *
-   *  For Hermetian matricies in general (viz. Davidson J. Comput. Phys. 17 (1975))
+   *  For Hermitian matricies in general (viz. Davidson J. Comput. Phys. 17 (1975))
    *
    *  σ = E| b >
    *
@@ -555,7 +555,7 @@ template <typename T>
     TCMMap NewRhoL(this->SCR,0,0);
     TCMMap NewSL  (this->SCR,0,0);
     TCMMap NewVecL(this->SCR,0,0);
-    if(!this->isHermetian_ || this->symmetrizedTrial_){
+    if(!this->isHermitian_ || this->symmetrizedTrial_){
       new (&NewRhoR) TCMMap(this->RhoRMem + NOld*this->N_,this->N_,NNew);
       new (&NewRhoL) TCMMap(this->RhoLMem + NOld*this->N_,this->N_,NNew);
       new (&NewSL  ) TCMMap(this->SigmaLMem+NOld*this->N_,this->N_,NNew);
@@ -588,7 +588,7 @@ template <typename T>
       }
     } else {
       NewSR = (*this->A_) * NewVecR;
-      if(!this->isHermetian_ || this->symmetrizedTrial_){
+      if(!this->isHermitian_ || this->symmetrizedTrial_){
         NewSL = (*this->A_) * NewVecL;
         NewRhoR = NewVecL;
         NewRhoL = NewVecR;
@@ -605,7 +605,7 @@ template <typename T>
   /** Full projection onto reduced space  **/
   /*  Full projection of the matrix (and the metric) onto the reduced subspace
    *
-   *  For Hermetian matricies in general (viz. Davidson J. Comput. Phys. 17 (1975))
+   *  For Hermitian matricies in general (viz. Davidson J. Comput. Phys. 17 (1975))
    *
    *  E(R) = < b | σ >
    *
@@ -631,7 +631,7 @@ template <typename T>
     TCMMap RhoL     (this->RhoLMem,    0,0);
     TCMMap XTRhoL   (this->XTRhoLMem,  0,0);
     TCMMap TrialVecL(this->TVecLMem,   0,0);
-    if(!this->isHermetian_ || this->symmetrizedTrial_){
+    if(!this->isHermitian_ || this->symmetrizedTrial_){
       new (&RhoR)      TCMMap(this->RhoRMem,    this->N_,NTrial);
       new (&XTRhoR)    TCMMap(this->XTRhoRMem,  NTrial,  NTrial);
       new (&SigmaL)    TCMMap(this->SigmaLMem,  this->N_,NTrial);
@@ -641,7 +641,7 @@ template <typename T>
       new (&TrialVecL) TCMMap(this->TVecLMem,   this->N_,NTrial);
     }
     XTSigmaR = TrialVecR.adjoint()*SigmaR; // E(R) or E(R)_gg
-    if(!isHermetian_ || symmetrizedTrial_){
+    if(!isHermitian_ || symmetrizedTrial_){
       XTRhoR   = TrialVecR.adjoint()*RhoR;   // S(R)_gu
       XTSigmaL = TrialVecL.adjoint()*SigmaL; // E(R)_uu
       XTRhoL   = TrialVecL.adjoint()*RhoL;   // S(R)_ug
@@ -677,7 +677,7 @@ template <typename T>
 
   /** Construct the residual vector **/
   /*
-   *  For Hermetian matricies in general (viz. Davidson J. Comput. Phys. 17 (1975))
+   *  For Hermitian matricies in general (viz. Davidson J. Comput. Phys. 17 (1975))
    *
    *  R = A| X > - | X > * ω = | σ_i > * X(R)_i - | X > ω
    *
@@ -701,7 +701,7 @@ template <typename T>
     TCMMap RhoL     (this->RhoLMem,    0,0);
     TCMMap ResL     (this->ResLMem,    0,0);
     TCMMap UL       (this->ULMem,      0,0);
-    if(!this->isHermetian_ || this->symmetrizedTrial_){
+    if(!this->isHermitian_ || this->symmetrizedTrial_){
       new (&RhoR)      TCMMap(this->RhoRMem,    this->N_,NTrial);
       new (&SigmaL)    TCMMap(this->SigmaLMem,  this->N_,NTrial);
       new (&XTSigmaL)  TCMMap(this->XTSigmaLMem,NTrial,  NTrial);
@@ -709,7 +709,7 @@ template <typename T>
       new (&ResL)      TCMMap(this->ResLMem,    this->N_,NTrial);
       new (&UL)        TCMMap(this->ULMem,      this->N_,NTrial);
     }
-    if(this->isHermetian_ && !this->symmetrizedTrial_) 
+    if(this->isHermitian_ && !this->symmetrizedTrial_) 
       ResR = SigmaR*XTSigmaR - UR*ER.asDiagonal();
     if(symmetrizedTrial_) {
       ResR = SigmaR*XTSigmaR - RhoR*XTSigmaL*ER.asDiagonal();
@@ -724,7 +724,7 @@ template <typename T>
 
     // Initialize these Eigen Maps so they remain in scope
     TCMMap ResL     (this->ResLMem,    0,0);
-    if(!this->isHermetian_ || this->symmetrizedTrial_){
+    if(!this->isHermitian_ || this->symmetrizedTrial_){
       new (&ResL)      TCMMap(this->ResLMem,    this->N_,NTrial);
     }
     // Vector to store convergence info
@@ -735,7 +735,7 @@ template <typename T>
     // will be made perturbed guess vectors
     for(auto k = 0; k < this->nSek_; k++) {
       double NORM = ResR.col(k).norm();
-      if(!this->isHermetian_ || this->symmetrizedTrial_) 
+      if(!this->isHermitian_ || this->symmetrizedTrial_) 
         NORM = std::max(NORM,ResL.col(k).norm());
       if(NORM < this->resTol_) resConv.push_back(true);
       else {
@@ -748,7 +748,7 @@ template <typename T>
     output << std::setw(32) << std::left << "    (Max) Norm of Residual(s):" << endl;
     for(auto k = 0 ; k < this->nSek_; k++){
       double NORM = ResR.col(k).norm();
-      if(!this->isHermetian_ || this->symmetrizedTrial_) 
+      if(!this->isHermitian_ || this->symmetrizedTrial_) 
         NORM = std::max(NORM,ResL.col(k).norm());
 
       output << "    " << std::setw(12) << "State " + std::to_string(k+1) + ":";

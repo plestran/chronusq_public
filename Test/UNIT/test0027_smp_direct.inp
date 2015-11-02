@@ -1,0 +1,27 @@
+#  test0027 smp direct Real UHF CIS cc-pVDZ
+#
+#  Molecule Specification
+#
+[Molecule]
+charge = 0
+mult = 2
+geom:
+	Li 0   0.000000 0.000000 0.000000
+  
+#
+#  Job Specification
+#
+[QM]
+reference = Real UHF
+job       = CIS
+basis     = cc-pVDZ.gbs
+ints			= direct
+
+[CIS]
+nstates = 6
+
+#
+#  Misc Settings
+#
+[Misc]
+nsmp = 2

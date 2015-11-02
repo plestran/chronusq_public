@@ -13,6 +13,8 @@ option(USE_LIBINT "Use LibInt Integral Driver"  ON) # Default Libint
 option(BUILD_LA   "Build LAPACK and BLAS locally" OFF)
 option(BUILD_LIBINT "Build Libint via cmake" OFF)
 option(NCORE_LIBINT "Number of Cores to build Libint" 4)
+option(CQ_ENABLE_ATLAS "Whether or not to search for ATLAS" OFF)
+option(BUILD_DOC  "Build Documentation" OFF)
 
 # Check for dependencies
 find_package(PythonLibs REQUIRED)
@@ -86,6 +88,10 @@ if(BUILD_LA)
 
   set(LA_LINK ${LOCAL_LAPACK} ${LOCAL_BLAS} gfortran)
 else()
+  if(CQ_ENABLE_ATLAS)
+    set(BLA_VENDOR ATLAS)
+  endif(CQ_ENABLE_ATLAS)
+
   find_package(BLAS REQUIRED)  
   find_package(LAPACK REQUIRED)
   set(LA_LINK ${LAPACK_LINKER_FLAGS} ${LAPACK_LIBRARIES})
@@ -96,6 +102,9 @@ endif()
 set(BASIS_PATH "${PROJECT_SOURCE_DIR}/basis")
 set(AUTHOR_PATH "${PROJECT_SOURCE_DIR}/AUTHORS")
 set(PYTHONAPI_PATH "${PROJECT_BINARY_DIR}/src/python")
+set(USERMANUAL "${CMAKE_BINARY_DIR}/doc/ChronusQUserManual")
+set(LOGO "${CMAKE_SOURCE_DIR}/doc/chronus_quantum_logo.png")
+set(CHRONUSQ_BIB ${CMAKE_SOURCE_DIR}/doc/ChronusQ)
 
 # Set up config.h with configure time settings
 configure_file(
@@ -109,4 +118,4 @@ configure_file(
 
 # Recurse into src
 add_subdirectory(src)
-#add_subdirectory(doc)
+add_subdirectory(doc)

@@ -312,7 +312,8 @@ public:
   double   totalEx;     ///< LDA Exchange
   double   totalEcorr;  ///< Total VWN Energy
   double   eps_corr;    ///< VWN Correlation Energy Density
-  double   mu_corr;     ///< VWN Correlation Potential
+  double   mu_corr;     ///<  VWN Correlation Potential
+  double   mu_corr_B;   ///<  VWN Correlation Potential (beta)
 
   int      nSCFIter;
 
@@ -530,9 +531,13 @@ public:
   void formExchange();		// form the exchange matrix
   void formPT();
   void formVXC();               // Form DFT VXC Term
-  void formCor(double rho, double spindensity); // Form DFT correlarion potential 
+  void formCor (double rho, double spindensity); // Form DFT correlarion potential 
+  double EvepsVWN(int iop,double a_x, double b_x, double c_x, double x0_x, double rho ); // Form DFT correlarion potential 
   void formEx(double rho); // Form DFT exchange
-  double spindens(double rho_A,double rho_B);  // define f(spindendity)
+  double f_spindens(int iop, double spindens);  // define f(spindendity)
+  double df_spindens(double spindens);  // define df(spindendity)/dspindensity
+  double df2_spindens(double spindens);  // define df2(spindendity)/dspindensity2
+  double spindens(double rho_A, double rho_B);  // define spindendity
   double formBeckeW(cartGP gridPt, int iAtm);            // Evaluate Becke Weights
   double normBeckeW(cartGP gridPt);            // Evaluate Becke Weights
   void   buildVxc(cartGP gridPt, double weight);            // function to build the Vxc therm
