@@ -536,6 +536,7 @@ public:
   void formEx(double rho); // Form DFT exchange
   double f_spindens(int iop, double spindens);  // define f(spindendity)
   double df_spindens(double spindens);  // define df(spindendity)/dspindensity
+  double df2_spindens(double spindens);  // define df2(spindendity)/dspindensity2
   double spindens(double rho_A, double rho_B);  // define spindendity
   double formBeckeW(cartGP gridPt, int iAtm);            // Evaluate Becke Weights
   double normBeckeW(cartGP gridPt);            // Evaluate Becke Weights

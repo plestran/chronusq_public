@@ -221,6 +221,20 @@ double SingleSlater<T>::df_spindens(double spindensity){
 };  //end
 
 
+template<typename T>
+double SingleSlater<T>::df2_spindens(double spindensity){
+      double df2_spindensity;
+      double thrs = 1.11e-16;
+      double fact = (-1.0+std::pow((2.0),(1.0/3.0)));
+      df2_spindensity = 0.0;
+      if ((1.0+spindensity) >= thrs) df2_spindensity +=  std::pow((1.0+spindensity),(-2.0/3.0)); 
+      if ((1.0-spindensity) >= thrs) df2_spindensity +=  std::pow((1.0-spindensity),(-2.0/3.0)); 
+      df2_spindensity *= (2.0/9.0);
+      df2_spindensity /= fact; 
+      return df2_spindensity;
+};  //end
+
+
   template<typename T> 
   double SingleSlater<T>::spindens(double rho_A, double rho_B) {
   return (rho_A - rho_B)/ (rho_A + rho_B);
