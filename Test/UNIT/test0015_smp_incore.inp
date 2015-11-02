@@ -1,12 +1,24 @@
-$geom read
-1
-Li 0 0.000000 0.000000 0.000000
+#  test0015 smp incore Real CUHF cc-pVDZ
+#
+#  Molecule Specification
+#
+[Molecule]
+charge = 0
+mult = 2
+geom:
+	Li 0   0.000000 0.000000 0.000000
+  
+#
+#  Job Specification
+#
+[QM]
+reference = Real CUHF
+job       = SCF
+basis     = cc-pVDZ.gbs
+ints			= incore
 
-$method rohf
-$charge 0
-$spin 2
-$basis cc-pVDZ.gbs
-$nsmp 4
-$print 1
-$scf incore
-$unittest scf
+#
+#  Misc Settings
+#
+[Misc]
+nsmp = 2

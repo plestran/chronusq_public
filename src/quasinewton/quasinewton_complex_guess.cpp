@@ -76,7 +76,7 @@ namespace ChronusQ {
 
     new (&TrialVecR) ComplexCMMap(this->TVecRMem,this->N_,NTrial+NNotConv);
     new (&ResR) ComplexCMMap(this->ResRMem,this->N_,NTrial);
-    if(this->symmetrizedTrial_ || !this->isHermetian_){
+    if(this->symmetrizedTrial_ || !this->isHermitian_){
       new (&TrialVecL) ComplexCMMap(this->TVecLMem,this->N_,NTrial+NNotConv);
       new (&ResL) ComplexCMMap(this->ResLMem,this->N_,NTrial);
     }
@@ -94,7 +94,7 @@ namespace ChronusQ {
       if(!resConv[k]) {
         new (&RR) ComplexCMMap(this->ResRMem + k*this->N_,this->N_,1);
         new (&QR) ComplexCMMap(this->TVecRMem+(NTrial+INDX)*this->N_,this->N_,1);
-        if(this->symmetrizedTrial_ || !this->isHermetian_){
+        if(this->symmetrizedTrial_ || !this->isHermitian_){
           new (&RL) ComplexCMMap(this->ResLMem + k*this->N_,this->N_,1);
           new (&QL) ComplexCMMap(this->TVecLMem+(NTrial+INDX)*this->N_,this->N_,1);
         }

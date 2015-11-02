@@ -1,3 +1,28 @@
+/* 
+ *  The Chronus Quantum (ChronusQ) software package is high-performace 
+ *  computational chemistry software with a strong emphasis on explicitly 
+ *  time-dependent and post-SCF quantum mechanical methods.
+ *  
+ *  Copyright (C) 2014-2015 Li Research Group (University of Washington)
+ *  
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *  
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program; if not, write to the Free Software Foundation, Inc.,
+ *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *  
+ *  Contact the Developers:
+ *    E-Mail: xsli@uw.edu
+ *  
+ */
 #include <pythonapi.h>
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(printSettings_Overload,
   Controls::printSettings,0,1);
@@ -218,6 +243,10 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setSigma"     , &RealTime<double>::setSigma     )
     .def("setPrintLevel", &RealTime<double>::setPrintLevel)
     .def("printRT"      , &RealTime<double>::printRT      )
+    //.def("recs"         , &RealTime<double>::Wrapper_recs )
+    .def("lastDipole"   , &RealTime<double>::lastDipole   )
+    .def("lastEnergy"   , &RealTime<double>::lastEnergy   )
+    .def("getTimeStep"  , &RealTime<double>::getTimeStep  )
   ;
 
   class_<RealTime<dcomplex>,boost::noncopyable>("RealTime_complex",init<>())
@@ -242,7 +271,31 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setSigma"     , &RealTime<dcomplex>::setSigma     )
     .def("setPrintLevel", &RealTime<dcomplex>::setPrintLevel)
     .def("printRT"      , &RealTime<dcomplex>::printRT      )
+//    .def("recs"         , &RealTime<dcomplex>::Wrapper_recs )
+    .def("lastDipole"   , &RealTime<dcomplex>::lastDipole   )
+    .def("lastEnergy"   , &RealTime<dcomplex>::lastEnergy   )
+    .def("getTimeStep"  , &RealTime<dcomplex>::getTimeStep  )
   ;
+
+/*
+  class_<RealTime<double>::Wrapper_PropInfo,boost::noncopyable>("RTD_PropInfo",init<>())
+    .def_readwrite("timeStep"    , &RealTime<double>::Wrapper_PropInfo::timeStep)
+    .def_readwrite("energy"      , &RealTime<double>::Wrapper_PropInfo::energy)
+    .def("dipole"      , &RealTime<double>::Wrapper_PropInfo::dipole)
+    .def_readwrite("mullPop"     , &RealTime<double>::Wrapper_PropInfo::mullPop)
+    .def_readwrite("orbitalOccA" , &RealTime<double>::Wrapper_PropInfo::orbitalOccA)
+    .def_readwrite("orbitalOccB" , &RealTime<double>::Wrapper_PropInfo::orbitalOccB)
+  ;
+
+  class_<RealTime<dcomplex>::Wrapper_PropInfo,boost::noncopyable>("RTC_PropInfo",init<>())
+    .def_readwrite("timeStep"    , &RealTime<dcomplex>::Wrapper_PropInfo::timeStep)
+    .def_readwrite("energy"      , &RealTime<dcomplex>::Wrapper_PropInfo::energy)
+    .def_readwrite("dipole"      , &RealTime<dcomplex>::Wrapper_PropInfo::dipole)
+    .def_readwrite("mullPop"     , &RealTime<dcomplex>::Wrapper_PropInfo::mullPop)
+    .def_readwrite("orbitalOccA" , &RealTime<dcomplex>::Wrapper_PropInfo::orbitalOccA)
+    .def_readwrite("orbitalOccB" , &RealTime<dcomplex>::Wrapper_PropInfo::orbitalOccB)
+  ;
+*/
 
   enum_<RealTime<double>::ORTHO>("RealTime_ORTHO"   )
     .value("Lowdin"   , RealTime<double>::Lowdin    )

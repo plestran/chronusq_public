@@ -347,6 +347,7 @@ void RealTime<dcomplex>::doPropagation() {
 
   // Create/open CSVs for printing results
   csvs.push_back(new std::ofstream(this->fileio_->fileName() + "_RealTime_Dipole.csv"));
+  csvs.push_back(new std::ofstream(this->fileio_->fileName() + "_RealTime_AppliedField.csv"));
   csvs.push_back(new std::ofstream(this->fileio_->fileName() + "_RealTime_Mulliken.csv"));
   csvs.push_back(new std::ofstream(this->fileio_->fileName() + "_RealTime_OrbOcc_Alpha.csv"));
   if(!this->isClosedShell_ && this->Ref_ != SingleSlater<dcomplex>::TCS){
@@ -423,6 +424,12 @@ void RealTime<dcomplex>::doPropagation() {
       rec.dipole[3] = std::sqrt( std::pow(rec.dipole[0],2.0) +
                                  std::pow(rec.dipole[1],2.0) +
                                  std::pow(rec.dipole[2],2.0) );
+      rec.appliedfield[0] = this->EDField_[0];
+      rec.appliedfield[1] = this->EDField_[1];
+      rec.appliedfield[2] = this->EDField_[2];
+      rec.appliedfield[3] = std::sqrt( std::pow(rec.appliedfield[0],2.0) +
+                                 std::pow(rec.appliedfield[1],2.0) +
+                                 std::pow(rec.appliedfield[2],2.0) );
       rec.mullPop    = (this->ssPropagator_->mullPop());
       scratch = (initMOA.adjoint() * POA * initMOA);
       for(auto idx = 0; idx != NTCSxNBASIS; idx++) {
@@ -435,6 +442,7 @@ void RealTime<dcomplex>::doPropagation() {
         }
       }
     this->writeDipoleCSV(rec,iStep);
+    this->writeAppliedFieldCSV(rec,iStep);
     this->writeMullikenCSV(rec,iStep);
     this->writeOrbitalCSV(rec,iStep);
 

@@ -1,14 +1,28 @@
-$geom read
-2
-O 0 0.000000    0.000000    0.608586
-O 0 0.000000    0.000000    -0.608586
+#  test0028 smp incore Real UHF CIS 6-31G
+#
+#  Molecule Specification
+#
+[Molecule]
+charge = 0
+mult = 3
+geom:
+	O 0   0.000000    0.000000    0.608586
+	O 0   0.000000    0.000000    -0.608586
+  
+#
+#  Job Specification
+#
+[QM]
+reference = Real UHF
+job       = CIS
+basis     = 6-31G.gbs
+ints			= incore
 
-$method hf
-$charge 0
-$spin 3
-$basis sto3g.gbs
-$nsmp 4
-$print 1
-$scf incore
-$pscf cis 3
-$unittest resp
+[CIS]
+nstates = 10
+
+#
+#  Misc Settings
+#
+[Misc]
+nsmp = 2

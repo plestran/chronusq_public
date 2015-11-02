@@ -1,14 +1,28 @@
-$geom read
-2
-O 0 0.000000    0.000000    0.608586
-O 0 0.000000    0.000000    -0.608586
+#  test0042 serial incore Real UHF RPA def2-SVPD
+#
+#  Molecule Specification
+#
+[Molecule]
+charge = 0
+mult = 3
+geom:
+	O 0   0.000000    0.000000    0.608586
+	O 0   0.000000    0.000000    -0.608586
+  
+#
+#  Job Specification
+#
+[QM]
+reference = Real UHF
+job       = RPA
+basis     = def2-svpd.gbs
+ints			= incore
 
-$method hf
-$charge 0
-$spin 3
-$basis cc-pVDZ.gbs
-$nsmp 1
-$print 1
-$scf incore
-$pscf rpa 3
-$unittest resp
+[RPA]
+nstates = 20
+
+#
+#  Misc Settings
+#
+[Misc]
+nsmp = 1
