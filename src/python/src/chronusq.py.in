@@ -26,6 +26,7 @@
 #
 
 import os,sys
+import getopt
 sys.path.append('@PYTHONAPI_PATH@')
 import libpythonapi as chronusQ
 from jobs.jobMap import *
@@ -137,9 +138,66 @@ def runCQ(fname):
 
 
 if __name__ in '__main__':
+# try:
+#     fname = sys.argv[1]
+# except IndexError:
+#     sys.exit("Please specify the input filename")
+
+  msg = """python chronusq.py -i <input file> [-o --option]
+  
+  Options:
+    -h,--help    Print usage instructions
+    -i,--input   Specify input file
+  
+    --dump       Dump Unit Test Information"""
   try:
-      fname = sys.argv[1]
-  except IndexError:
-      sys.exit("Please specify the input filename")
+    opts, args = getopt.getopt(sys.argv[1:],"hi:",["help","input=","dump="])
+  except getopt.GetoptError:
+    print msg
+    sys.exit(2)
+
+  fname = ''
+  if len(opts) == 0 and len(args) == 1:
+    fname = args[0] 
+  elif len(opts) == 0 and len(args) == 0:
+    print msg
+    sys.exit(2)
+
+  dumpSCF = False
+  for opt, arg in opts:
+    if opt in ('-h',"--help"):
+      print msg
+      sys.exit()
+    if opt in ('-i',"--input"):
+      if '.inp' in arg: fname = arg.replace('.inp','')
+      else:             fname = arg
+    if opt in ('--dump'):
+      if arg in ('SCF'): dumpSCF = True
+    
 
   jobMeta = runCQ(fname)
+  if dumpSCF:
+    strX = ''
+    strX = strX + "{0:.10f}/".format(jobMeta.E)
+    strX = strX + "{0:.10f}/".format(jobMeta.dipole[0])
+    strX = strX + "{0:.10f}/".format(jobMeta.dipole[1])
+    strX = strX + "{0:.10f}/".format(jobMeta.dipole[2])
+    strX = strX + "{0:.10f}/".format(jobMeta.quadrupole[0][0])
+    strX = strX + "{0:.10f}/".format(jobMeta.quadrupole[0][1])
+    strX = strX + "{0:.10f}/".format(jobMeta.quadrupole[0][2])
+    strX = strX + "{0:.10f}/".format(jobMeta.quadrupole[1][1])
+    strX = strX + "{0:.10f}/".format(jobMeta.quadrupole[1][2])
+    strX = strX + "{0:.10f}/".format(jobMeta.quadrupole[2][2])
+    strX = strX + "{0:.10f}/".format(jobMeta.octupole[0][0][0])
+    strX = strX + "{0:.10f}/".format(jobMeta.octupole[0][0][1])
+    strX = strX + "{0:.10f}/".format(jobMeta.octupole[0][0][2])
+    strX = strX + "{0:.10f}/".format(jobMeta.octupole[0][1][1])
+    strX = strX + "{0:.10f}/".format(jobMeta.octupole[0][1][2])
+    strX = strX + "{0:.10f}/".format(jobMeta.octupole[0][2][2])
+    strX = strX + "{0:.10f}/".format(jobMeta.octupole[1][1][1])
+    strX = strX + "{0:.10f}/".format(jobMeta.octupole[1][1][2])
+    strX = strX + "{0:.10f}/".format(jobMeta.octupole[1][2][2])
+    strX = strX + "{0:.10f}/".format(jobMeta.octupole[2][2][2])
+
+    strX = strX + "SCF"
+    print strX
