@@ -176,28 +176,32 @@ if __name__ in '__main__':
     
 
   jobMeta = runCQ(fname)
+
+  auToD   = 0.3934303070
+  auToAng = 0.5291772083
+  auToAng2 = auToAng*auToAng 
   if dumpSCF:
     strX = ''
     strX = strX + "{0:.10f}/".format(jobMeta.E)
-    strX = strX + "{0:.10f}/".format(jobMeta.dipole[0])
-    strX = strX + "{0:.10f}/".format(jobMeta.dipole[1])
-    strX = strX + "{0:.10f}/".format(jobMeta.dipole[2])
-    strX = strX + "{0:.10f}/".format(jobMeta.quadrupole[0][0])
-    strX = strX + "{0:.10f}/".format(jobMeta.quadrupole[0][1])
-    strX = strX + "{0:.10f}/".format(jobMeta.quadrupole[0][2])
-    strX = strX + "{0:.10f}/".format(jobMeta.quadrupole[1][1])
-    strX = strX + "{0:.10f}/".format(jobMeta.quadrupole[1][2])
-    strX = strX + "{0:.10f}/".format(jobMeta.quadrupole[2][2])
-    strX = strX + "{0:.10f}/".format(jobMeta.octupole[0][0][0])
-    strX = strX + "{0:.10f}/".format(jobMeta.octupole[0][0][1])
-    strX = strX + "{0:.10f}/".format(jobMeta.octupole[0][0][2])
-    strX = strX + "{0:.10f}/".format(jobMeta.octupole[0][1][1])
-    strX = strX + "{0:.10f}/".format(jobMeta.octupole[0][1][2])
-    strX = strX + "{0:.10f}/".format(jobMeta.octupole[0][2][2])
-    strX = strX + "{0:.10f}/".format(jobMeta.octupole[1][1][1])
-    strX = strX + "{0:.10f}/".format(jobMeta.octupole[1][1][2])
-    strX = strX + "{0:.10f}/".format(jobMeta.octupole[1][2][2])
-    strX = strX + "{0:.10f}/".format(jobMeta.octupole[2][2][2])
+    strX = strX + "{0:.10f}/".format(jobMeta.dipole[0]/auToD)
+    strX = strX + "{0:.10f}/".format(jobMeta.dipole[1]/auToD)
+    strX = strX + "{0:.10f}/".format(jobMeta.dipole[2]/auToD)
+    strX = strX + "{0:.10f}/".format(jobMeta.quadrupole[0][0]*auToAng/auToD)
+    strX = strX + "{0:.10f}/".format(jobMeta.quadrupole[0][1]*auToAng/auToD)
+    strX = strX + "{0:.10f}/".format(jobMeta.quadrupole[0][2]*auToAng/auToD)
+    strX = strX + "{0:.10f}/".format(jobMeta.quadrupole[1][1]*auToAng/auToD)
+    strX = strX + "{0:.10f}/".format(jobMeta.quadrupole[1][2]*auToAng/auToD)
+    strX = strX + "{0:.10f}/".format(jobMeta.quadrupole[2][2]*auToAng/auToD)
+    strX = strX + "{0:.10f}/".format(jobMeta.octupole[0][0][0]*auToAng2/auToD)
+    strX = strX + "{0:.10f}/".format(jobMeta.octupole[0][0][1]*auToAng2/auToD)
+    strX = strX + "{0:.10f}/".format(jobMeta.octupole[0][0][2]*auToAng2/auToD)
+    strX = strX + "{0:.10f}/".format(jobMeta.octupole[0][1][1]*auToAng2/auToD)
+    strX = strX + "{0:.10f}/".format(jobMeta.octupole[0][1][2]*auToAng2/auToD)
+    strX = strX + "{0:.10f}/".format(jobMeta.octupole[0][2][2]*auToAng2/auToD)
+    strX = strX + "{0:.10f}/".format(jobMeta.octupole[1][1][1]*auToAng2/auToD)
+    strX = strX + "{0:.10f}/".format(jobMeta.octupole[1][1][2]*auToAng2/auToD)
+    strX = strX + "{0:.10f}/".format(jobMeta.octupole[1][2][2]*auToAng2/auToD)
+    strX = strX + "{0:.10f}/".format(jobMeta.octupole[2][2][2]*auToAng2/auToD)
 
     strX = strX + "SCF"
     print strX
