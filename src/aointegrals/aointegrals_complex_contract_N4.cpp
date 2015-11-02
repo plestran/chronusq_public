@@ -74,22 +74,28 @@ namespace ChronusQ{
       if(RHF){
         contract(1.0,*this->aoERI_,{i,j,k,l},ReXAlphaTensor,{l,k},0.0,ReAXAlphaTensor,{i,j});
         contract(1.0,*this->aoERI_,{i,j,k,l},ImXAlphaTensor,{l,k},0.0,ImAXAlphaTensor,{i,j});
-        contract(-0.5,*this->aoERI_,{i,l,k,j},ReXAlphaTensor,{l,k},1.0,ReAXAlphaTensor,{i,j});
-        contract(-0.5,*this->aoERI_,{i,l,k,j},ImXAlphaTensor,{l,k},1.0,ImAXAlphaTensor,{i,j});
+        if(!KS){
+          contract(-0.5,*this->aoERI_,{i,l,k,j},ReXAlphaTensor,{l,k},1.0,ReAXAlphaTensor,{i,j});
+          contract(-0.5,*this->aoERI_,{i,l,k,j},ImXAlphaTensor,{l,k},1.0,ImAXAlphaTensor,{i,j});
+        }
       } else if(!doTCS) {
         contract(1.0,*this->aoERI_,{i,j,k,l},ReXTotalTensor,{l,k},0.0,ReAXAlphaTensor,{i,j});
         contract(1.0,*this->aoERI_,{i,j,k,l},ImXTotalTensor,{l,k},0.0,ImAXAlphaTensor,{i,j});
         ReAXBetaTensor = ReAXAlphaTensor;
         ImAXBetaTensor = ImAXAlphaTensor;
-        contract(-1.0,*this->aoERI_,{i,l,k,j},ReXAlphaTensor,{l,k},1.0,ReAXAlphaTensor,{i,j});
-        contract(-1.0,*this->aoERI_,{i,l,k,j},ImXAlphaTensor,{l,k},1.0,ImAXAlphaTensor,{i,j});
-        contract(-1.0,*this->aoERI_,{i,l,k,j},ReXBetaTensor,{l,k},1.0,ReAXBetaTensor,{i,j});
-        contract(-1.0,*this->aoERI_,{i,l,k,j},ImXBetaTensor,{l,k},1.0,ImAXBetaTensor,{i,j});
+        if(!KS) {
+          contract(-1.0,*this->aoERI_,{i,l,k,j},ReXAlphaTensor,{l,k},1.0,ReAXAlphaTensor,{i,j});
+          contract(-1.0,*this->aoERI_,{i,l,k,j},ImXAlphaTensor,{l,k},1.0,ImAXAlphaTensor,{i,j});
+          contract(-1.0,*this->aoERI_,{i,l,k,j},ReXBetaTensor,{l,k},1.0,ReAXBetaTensor,{i,j});
+          contract(-1.0,*this->aoERI_,{i,l,k,j},ImXBetaTensor,{l,k},1.0,ImAXBetaTensor,{i,j});
+        }
       } else if(doTCS) {
         contract(1.0,*this->aoERI_,{i,j,k,l},ReXAlphaTensor,{l,k},0.0,ReAXAlphaTensor,{i,j});
         contract(1.0,*this->aoERI_,{i,j,k,l},ImXAlphaTensor,{l,k},0.0,ImAXAlphaTensor,{i,j});
-        contract(-1.0,*this->aoERI_,{i,l,k,j},ReXAlphaTensor,{l,k},1.0,ReAXAlphaTensor,{i,j});
-        contract(-1.0,*this->aoERI_,{i,l,k,j},ImXAlphaTensor,{l,k},1.0,ImAXAlphaTensor,{i,j});
+        if(!KS) {
+          contract(-1.0,*this->aoERI_,{i,l,k,j},ReXAlphaTensor,{l,k},1.0,ReAXAlphaTensor,{i,j});
+          contract(-1.0,*this->aoERI_,{i,l,k,j},ImXAlphaTensor,{l,k},1.0,ImAXAlphaTensor,{i,j});
+        }
       }
     } else if(do24) {
       contract(1.0,*this->aoERI_,{i,k,j,l},ReXAlphaTensor,{k,l},0.0,ReAXAlphaTensor,{i,j});
