@@ -1,3 +1,4 @@
+#!@PYTHON_EXECUTABLE@
 #
 # The Chronus Quantum (ChronusQ) software package is high-performace 
 # computational chemistry software with a strong emphasis on explicitly 
@@ -24,7 +25,6 @@
 # 
 #
 
-#!@PYTHON_EXECUTABLE@
 import os,sys
 sys.path.append('@PYTHONAPI_PATH@')
 import libpythonapi as chronusQ
