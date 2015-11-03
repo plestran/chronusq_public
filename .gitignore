@@ -33,3 +33,4 @@ chronusQ
 Test/UNIT/*.bin
 Test/UNIT/*.scr
 Test/UNIT/*.csv
+Test/UNIT/*.tar

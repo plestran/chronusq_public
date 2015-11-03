@@ -349,14 +349,7 @@ void RealTime<double>::doPropagation() {
     new (&uTransB) ComplexMap(this->uTransBMem_,NTCSxNBASIS,NTCSxNBASIS);
   }
 
-  // Create/open CSVs for printing results
-  csvs.push_back(new std::ofstream(this->fileio_->fileName() + "_RealTime_Dipole.csv"));
-  csvs.push_back(new std::ofstream(this->fileio_->fileName() + "_RealTime_AppliedField.csv"));
-  csvs.push_back(new std::ofstream(this->fileio_->fileName() + "_RealTime_Mulliken.csv"));
-  csvs.push_back(new std::ofstream(this->fileio_->fileName() + "_RealTime_OrbOcc_Alpha.csv"));
-  if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS){
-    csvs.push_back(new std::ofstream(this->fileio_->fileName() + "_RealTime_OrbOcc_Beta.csv"));
-  }
+  this->initCSV();
 
   for (iStep = 0; iStep <= this->maxSteps_; iStep++) {
     //this->fileio_->out<<"\nStep "<<iStep<<":\n"<<endl;
@@ -473,6 +466,8 @@ void RealTime<double>::doPropagation() {
   }
   delete [] this->SCR;
   delete [] this->REAL_LAPACK_SCR;
+
+  if(this->tarCSVs) this->tarCSVFiles();
 
 };
 

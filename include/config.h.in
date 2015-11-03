@@ -20,3 +20,5 @@
 
 // Libint Information
 #cmakedefine USE_LIBINT
+
+#cmakedefine UNIX
