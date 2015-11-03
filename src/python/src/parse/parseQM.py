@@ -244,12 +244,13 @@ def handleReference(workers,settings):
       CErrMsg(workers['CQFileIO'],str(msg))
   elif 'UKS' in ref:
     # forch uhf
-    workers["cqsingleslater"].setref(chronusq.reference.uhf)
-    workers["cqsingleslater"].isclosedshell = false
+    workers["CQSingleSlater"].setRef(chronusQ.Reference.UHF)
+    workers["CQSingleSlater"].isClosedShell = False
 
-    workers["cqsingleslater"].isdft = true
-    workers["cqsingleslater"].ishf  = false
-    workers["cqsingleslater"].setdftkernel(kernelmap['userdefined'])
+
+    workers["CQSingleSlater"].isDFT = True
+    workers["CQSingleSlater"].isHF  = False
+    workers["CQSingleSlater"].setDFTKernel(kernelMap['USERDEFINED'])
   
     corrKernel = 0
     exchKernel = 0
@@ -276,6 +277,7 @@ def handleReference(workers,settings):
   elif 'CUKS' in ref:
     # Use Constrained UHF (not complex UHF) 
     workers["CQSingleSlater"].setRef(chronusQ.Reference.CUHF)
+    workers["CQSingleSlater"].isClosedShell = False
 
     workers["CQSingleSlater"].isDFT = True
     workers["CQSingleSlater"].isHF  = False
