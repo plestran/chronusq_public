@@ -105,4 +105,20 @@ void RealTime<dcomplex>::writeOrbitalCSV(PropInfo & ref, long int & iStep){
   }
 };
 
+template<>
+void RealTime<dcomplex>::tarCSVFiles(){
+#ifdef UNIX
+  this->fileio_->out << "Tarring CSV files for Real-Time Propagation...";
+  if(!system(NULL)) CErr("Cannot find available processor",this->fileio_->out);
+  std::string command = "tar -cf " + this->fileio_->fileName() + ".tar ";
+  for(auto i = this->csvFiles.begin(); i != this->csvFiles.end(); i++)
+    command += i->second + " ";
+  auto info = system(command.c_str());
+  command = "rm "; 
+  for(auto i = this->csvFiles.begin(); i != this->csvFiles.end(); i++)
+    command += i->second + " ";
+  info = system(command.c_str());
+#endif
+};
+
 } //namespace ChronusQ

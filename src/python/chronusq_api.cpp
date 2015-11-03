@@ -247,6 +247,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("lastDipole"   , &RealTime<double>::lastDipole   )
     .def("lastEnergy"   , &RealTime<double>::lastEnergy   )
     .def("getTimeStep"  , &RealTime<double>::getTimeStep  )
+    .def("doNotTarCSV"  , &RealTime<double>::doNotTarCSV  )
   ;
 
   class_<RealTime<dcomplex>,boost::noncopyable>("RealTime_complex",init<>())
@@ -275,6 +276,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("lastDipole"   , &RealTime<dcomplex>::lastDipole   )
     .def("lastEnergy"   , &RealTime<dcomplex>::lastEnergy   )
     .def("getTimeStep"  , &RealTime<dcomplex>::getTimeStep  )
+    .def("doNotTarCSV"  , &RealTime<dcomplex>::doNotTarCSV  )
   ;
 
 /*

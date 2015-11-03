@@ -145,7 +145,10 @@ class RealTime {
   void initMemLen();
   void initMem();
   void initMaps();
+  void initCSV();
   std::vector<std::ofstream*> csvs;
+  std::map<std::ofstream*,std::string> csvFiles;
+  bool tarCSVs;
   
 
 public:
@@ -201,6 +204,7 @@ public:
     this->Ex_          = 0.0;
     this->Ey_          = 0.0;
     this->Ez_          = 0.0;
+    this->tarCSVs      = true;
   };
   ~RealTime() {;};
 
@@ -280,6 +284,7 @@ public:
   inline void setPhase(double x){ this->Phase_ = x;};
   inline void setSigma(double x){ this->Sigma_ = x;};
   inline void setPrintLevel(int i){ this->printLevel_ = i;};
+  inline void doNotTarCSV(){ this->tarCSVs = false;};
 
   // pseudo-constructor
   void iniRealTime(FileIO *,Controls *,AOIntegrals *,SingleSlater<T> *);
@@ -293,6 +298,7 @@ public:
   void writeAppliedFieldCSV(PropInfo & propInfo, long int & iStep);
   void writeMullikenCSV(PropInfo & propInfo, long int & iStep);
   void writeOrbitalCSV(PropInfo & propInfo, long int & iStep);
+  void tarCSVFiles();
 
   // Python API
 /*
