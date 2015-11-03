@@ -412,6 +412,10 @@ def parseRT(workers,settings):
   #if 'EDFIELD' not in settings:
   #  optMap['EDFIELD'](0.0,0.0,0.0)
     
+  if 'TARCSVS' in settings:
+    if not settings['TARCSVS']:
+      workers['CQRealTime'].doNotTarCSV()
+
   # Idiot Checks
 
   if 'ENVELOPE' in settings:

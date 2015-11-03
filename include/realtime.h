@@ -284,6 +284,7 @@ public:
   inline void setPhase(double x){ this->Phase_ = x;};
   inline void setSigma(double x){ this->Sigma_ = x;};
   inline void setPrintLevel(int i){ this->printLevel_ = i;};
+  inline void doNotTarCSV(){ this->tarCSVs = false;};
 
   // pseudo-constructor
   void iniRealTime(FileIO *,Controls *,AOIntegrals *,SingleSlater<T> *);

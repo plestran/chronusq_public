@@ -85,7 +85,8 @@ knownKeywords['RT'] = {
   'ORTHO'    :CQKeyword('ORTHO'    ,'O-ORTH' ,False), 
   'INIDEN'   :CQKeyword('INIDEN'   ,'I'      ,False),
   'UPROP'    :CQKeyword('UPROP'    ,'O-FORMU',False),
-  'PRINT'    :CQKeyword('PRINT'    ,'I'      ,False)
+  'PRINT'    :CQKeyword('PRINT'    ,'I'      ,False),
+  'TARCSVS'  :CQKeyword('TARCSVS'  ,'B'      ,False)
 }
 
 knownKeywords['MISC'] = {
