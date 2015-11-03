@@ -119,6 +119,9 @@ public:
 
   // constructor and destructor
   FileIO(const std::string);
+  FileIO(const std::string, const std::string);
+  FileIO(const std::string, const std::string,
+         const std::string);
   ~FileIO() {
     if(in.is_open())  in.close();
     if(out.is_open()) out.close();
@@ -138,6 +141,7 @@ public:
     BetaMO
   };
 
+  void iniH5Paths();
   void iniH5Files();
   void iniCompType();
   void iniStdGroups();

@@ -53,7 +53,7 @@ class MetaData:
     self.lastDipole = []
     
 
-def runCQ(fname):
+def runCQ(ifname,ofname):
   authorfname = '@AUTHOR_PATH@'
   header = """
      ______ __                                      ____ 
@@ -84,7 +84,7 @@ def runCQ(fname):
   sdr_complex    = chronusQ.SDResponse_complex()
   moints_complex = chronusQ.MOIntegrals_complex()
   
-  out        = chronusQ.FileIO(fname)
+  out        = chronusQ.FileIO(ifname,ofname)
   
   workers = {
     "CQMolecule"          :mol,
@@ -111,14 +111,14 @@ def runCQ(fname):
   out.write("Author List:\n"+banner+authors.read())
   authors.close()
   
-  inputf = open(fname+".inp", 'r')
+  inputf = open(ifname, 'r')
   out.write("Input File:\n"+banner+inputf.read()+banner)
   inputf.close()
   
   chronusQ.initCQ()
   controls.iniControls()
   
-  secDict = parseInput(workers,fname+".inp")
+  secDict = parseInput(workers,ifname)
   
   unittest = parseMisc(workers,secDict["MISC"])
   parseMolecule(workers,secDict["MOLECULE"])
@@ -138,45 +138,69 @@ def runCQ(fname):
 
 
 if __name__ in '__main__':
-# try:
-#     fname = sys.argv[1]
-# except IndexError:
-#     sys.exit("Please specify the input filename")
 
+  # Usage Message for incorrect input
   msg = """python chronusq.py -i <input file> [-o --option]
   
   Options:
-    -h,--help    Print usage instructions
-    -i,--input   Specify input file
+    -h,--help     Print usage instructions
+    -i,--input    Specify input file
+    -o,--output   Specify input file
   
-    --dump       Dump Unit Test Information"""
+    --dump        Dump Unit Test Information"""
+
+
+  # Get CLI options
   try:
-    opts, args = getopt.getopt(sys.argv[1:],"hi:",["help","input=","dump="])
+    opts, args = getopt.getopt(
+      sys.argv[1:],
+      "hi:o:",
+      ["help","input=","output=","dump="]
+    )
   except getopt.GetoptError:
     print msg
     sys.exit(2)
 
-  fname = ''
+  # Null out filenames by default
+  ifname = ''
+  ofname = ''
+
+  # No info dump at the end
+  dumpSCF = False
+
+  # Default that if only one parameter, is input file
   if len(opts) == 0 and len(args) == 1:
-    fname = args[0] 
+    ifname = args[0] 
+  # Error if no arguments given
   elif len(opts) == 0 and len(args) == 0:
     print msg
     sys.exit(2)
 
-  dumpSCF = False
+  # Loop over CLI options / arguements
   for opt, arg in opts:
+    # Print Help message
     if opt in ('-h',"--help"):
       print msg
       sys.exit()
+
+    # Set input file
     if opt in ('-i',"--input"):
-      if '.inp' in arg: fname = arg.replace('.inp','')
-      else:             fname = arg
+      ifname = arg
+
+    # Set output file
+    if opt in ('-o',"--output"):
+      ofname = arg
+
+    # Info dump
     if opt in ('--dump'):
       if arg in ('SCF'): dumpSCF = True
     
 
-  jobMeta = runCQ(fname)
+  # Run ChronusQ
+  jobMeta = runCQ(ifname,ofname)
 
+
+  # Dump info (if set)
   auToD   = 0.3934303070
   auToAng = 0.5291772083
   auToAng2 = auToAng*auToAng 

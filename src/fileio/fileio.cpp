@@ -40,6 +40,50 @@ FileIO::FileIO(const std::string nm_input) {
   this->name_scr = nm_input + ".scr";
   this->name_restart = nm_input + ".bin";
 
+  this->in.open(name_in,ios::in);
+  this->out.open(name_out,ios::out);
+
+  this->iniH5Paths();
+  this->iniCompType();
+};
+
+FileIO::FileIO(const std::string inFile, const std::string outFile) {
+ 
+  // Remove Extension from inFile to get basename
+  auto extIndex = inFile.find_last_of(".");
+  this->name = inFile.substr(0,extIndex);
+
+  this->name_in = inFile;
+  
+  if(outFile.empty())
+    this->name_out = this->name + ".out";
+  else
+    this->name_out = outFile;
+
+  this->name_restart = this->name + ".bin";
+  this->name_scr     = this->name + ".scr";
+
+  this->in.open(name_in,ios::in);
+  this->out.open(name_out,ios::out);
+
+  this->iniH5Paths();
+  this->iniCompType();
+  this->doRestart = false;
+
+};
+
+FileIO::FileIO(const std::string inFile,  const std::string outFile,
+               const std::string rstFile) : 
+               FileIO(inFile,outFile) {
+
+  if(!rstFile.empty())
+    this->name_restart = rstFile;
+//if(!scrFile.empty())
+//  this->name_scr = scrFile;
+
+};
+
+void FileIO::iniH5Paths() {
   this->operatorGroupPath = "/OPERATORS";
   this->SCFGroupPath      = "/SCF";
   this->metaDataGroupPath = "/Meta";
@@ -58,11 +102,6 @@ FileIO::FileIO(const std::string nm_input) {
   this->betaSCFDenPath  = this->SCFGroupPath + "/BETA_DENSITY";
   this->alphaMOPath     = this->SCFGroupPath + "/ALPHA_MO";
   this->betaMOPath      = this->SCFGroupPath + "/BETA>MO";
-
-  this->in.open(name_in,ios::in);
-  this->out.open(name_out,ios::out);
-
-  this->iniCompType();
 };
 
 void FileIO::iniH5Files(){
