@@ -172,10 +172,5 @@ void SingleSlater<dcomplex>::computeSExpect(){
     this->Ssq_ += this->Sz_*this->Sz_;
 
   }
-
-  this->fileio_->out << " <Sx> = " << this->Sx_ << endl;
-  this->fileio_->out << " <Sy> = " << this->Sy_ << endl;
-  this->fileio_->out << " <Sz> = " << this->Sz_ << endl;
-  this->fileio_->out << " <Ssq> = " << this->Ssq_ << endl;
 };
 }; // namespace ChronusQ

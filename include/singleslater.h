@@ -532,7 +532,6 @@ public:
   void formExchange();		// form the exchange matrix
   void formPT();
   void formVXC();               // Form DFT VXC Term
-  void computeSExpect();
   void formCor (double rho, double spindensity); // Form DFT correlarion potential 
   double EvepsVWN(int iop,double a_x, double b_x, double c_x, double x0_x, double rho ); // Form DFT correlarion potential 
   void formEx(double rho); // Form DFT exchange
@@ -549,13 +548,24 @@ public:
   void readGuessGauFChk(std::string &);	// read the initial guess of MO's from the Gaussian formatted checkpoint file
   void computeEnergy();         // compute the total electronic energy
   void computeMultipole();      // compute multipole properties
+  void computeSExpect();        // compute <S> <S^2>
+  inline void computeProperties(){
+    this->computeMultipole();
+    this->computeSExpect();
+  };
   void SCF();  
   void CDIIS();
   void CpyFock(int);
   void GenDComm(int);
   void mullikenPop();
+
   void printEnergy(); 
   void printMultipole();
+  void printSExpect();
+  inline void printProperties() {
+    this->printSExpect();
+    this->printMultipole();
+  };
   void printInfo();
   void printDensityInfo(double,double,double);
   void printDensityInfo(double,double);
