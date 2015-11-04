@@ -139,6 +139,7 @@ class SingleSlater {
   std::string algebraicFieldShort_;      ///< String Real/Complex/(Quaternion)
   std::array<double,3> elecField_;
   std::vector<double> mullPop_; ///< mulliken partial charge
+  double Sx_, Sy_, Sz_, Ssq_;
 
   // Lengths of scratch partitions (NOT MEANT TO BE COPIED)
   int lenX_;
@@ -531,6 +532,7 @@ public:
   void formExchange();		// form the exchange matrix
   void formPT();
   void formVXC();               // Form DFT VXC Term
+  void computeSExpect();
   void formCor (double rho, double spindensity); // Form DFT correlarion potential 
   double EvepsVWN(int iop,double a_x, double b_x, double c_x, double x0_x, double rho ); // Form DFT correlarion potential 
   void formEx(double rho); // Form DFT exchange
