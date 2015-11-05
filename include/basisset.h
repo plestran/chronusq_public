@@ -224,9 +224,11 @@ public:
   void makeMapSh2Cen(Molecule *);          ///< generate mapSh2Cen
   void makeMapCen2Bf(int,Molecule *);          ///< generate mapCen2Bf
   void renormShells();                     ///< Renormalize Libint2::Shell set
+  std::vector<libint2::Shell> uncontractBasis(); ///< Unconctract the basis
   template<typename TMat> void computeShBlkNorm(bool,int,const TMat*, const TMat*);
 
   void constructExtrn(Molecule *, BasisSet *); ///< Generate new basis from refernce shells
+  void genUCvomLocal(BasisSet *);
 
   inline void makeMaps(int nTCS, Molecule* mol){
     this->makeMapSh2Bf(nTCS);
