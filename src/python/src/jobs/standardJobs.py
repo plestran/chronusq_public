@@ -85,8 +85,8 @@ def runSCF(workers,meta):
   workers["CQSingleSlater"].formFock()
   workers["CQSingleSlater"].computeEnergy()
   workers["CQSingleSlater"].SCF()
-  workers["CQSingleSlater"].computeMultipole()
-  workers["CQSingleSlater"].printMultipole()
+  workers["CQSingleSlater"].computeProperties()
+  workers["CQSingleSlater"].printProperties()
 
   meta.E          = workers["CQSingleSlater"].totalEnergy
   meta.scfIters   = workers["CQSingleSlater"].nSCFIter

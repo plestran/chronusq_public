@@ -37,7 +37,9 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("formFock"        , &SingleSlater<double>::formFock               )
     .def("computeEnergy"   , &SingleSlater<double>::computeEnergy          )
     .def("computeMultipole", &SingleSlater<double>::computeMultipole       )
+    .def("computeProperties",&SingleSlater<double>::computeProperties      )
     .def("printMultipole"  , &SingleSlater<double>::printMultipole         )
+    .def("printProperties" , &SingleSlater<double>::printProperties        )
     .def("SCF"             , &SingleSlater<double>::SCF                    )
     .def("communicate"     , &SingleSlater<double>::communicate            )
     .def("initMeta"        , &SingleSlater<double>::initMeta               )
@@ -81,7 +83,9 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("formFock"        , &SingleSlater<dcomplex>::formFock               )
     .def("computeEnergy"   , &SingleSlater<dcomplex>::computeEnergy          )
     .def("computeMultipole", &SingleSlater<dcomplex>::computeMultipole       )
+    .def("computeProperties",&SingleSlater<dcomplex>::computeProperties      )
     .def("printMultipole"  , &SingleSlater<dcomplex>::printMultipole         )
+    .def("printProperties" , &SingleSlater<dcomplex>::printProperties        )
     .def("SCF"             , &SingleSlater<dcomplex>::SCF                    )
     .def("communicate"     , &SingleSlater<dcomplex>::communicate            )
     .def("initMeta"        , &SingleSlater<dcomplex>::initMeta               )
@@ -190,6 +194,8 @@ BOOST_PYTHON_MODULE(libpythonapi){
   ;
 
   class_<FileIO,boost::noncopyable>("FileIO",init<std::string>())
+    .def(init<std::string,std::string>())
+    .def(init<std::string,std::string,std::string>())
     .def("write"      , &FileIO::write         )
     .def("iniH5Files" , &FileIO::iniH5Files    )
     .def("iniStdGroups", &FileIO::iniStdGroups )
