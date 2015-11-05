@@ -315,13 +315,14 @@ public:
   double   eps_corr;    ///< VWN Correlation Energy Density
   double   mu_corr;     ///<  VWN Correlation Potential
   double   mu_corr_B;   ///<  VWN Correlation Potential (beta)
+/* TIMING
   std::chrono::duration<double> duration_dens;
   std::chrono::duration<double> duration_1;
   std::chrono::duration<double> duration_2;
   std::chrono::duration<double> duration_3;
   std::chrono::duration<double> duration_4;
   std::chrono::duration<double> duration_5;
-
+*/
   int      nSCFIter;
 
   // constructor & destructor
