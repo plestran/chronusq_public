@@ -417,6 +417,10 @@ void AOIntegrals::computeAOOneE(){
   auto VEnd = std::chrono::high_resolution_clock::now();
 //this->oneE_->add(this->kinetic_,this->potential_);
 
+// add DKH correction to kinetic energy
+  
+  if (this->isPrimary) this->DKH0();
+
 // Build Core Hamiltonian
   (*this->oneE_) = (*this->kinetic_) + (*this->potential_);
 

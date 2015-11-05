@@ -461,6 +461,7 @@ void AOIntegrals::allocOp(){
     this->oneE_         = std::unique_ptr<RealMatrix>(new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); // One Electron Integral
     this->overlap_      = std::unique_ptr<RealMatrix>(new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); // Overlap
     this->kinetic_      = std::unique_ptr<RealMatrix>(new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); // Kinetic
+    this->kineticP_     = std::unique_ptr<RealMatrix>(new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); // Kinetic (p-space)
     this->potential_    = std::unique_ptr<RealMatrix>(new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); // Potential
   } catch(...) {
     CErr(std::current_exception(),"One Electron Integral Tensor Allocation");
