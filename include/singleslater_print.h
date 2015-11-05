@@ -226,6 +226,15 @@ void SingleSlater<T>::printMultipole(){
 }
 
 template<typename T>
+void SingleSlater<T>::printSExpect(){
+  this->fileio_->out << "Spin Information:" << endl;
+  this->fileio_->out << "  <Sx> = " << this->Sx_ << endl;
+  this->fileio_->out << "  <Sy> = " << this->Sy_ << endl;
+  this->fileio_->out << "  <Sz> = " << this->Sz_ << endl;
+  this->fileio_->out << "  <S\u00B2> = " << this->Ssq_ << endl;
+};
+
+template<typename T>
 void SingleSlater<T>::printSCFHeader(ostream &output){
   output << bannerTop << endl;
   output << "Self Consistent Field (SCF) Settings:" << endl << endl;

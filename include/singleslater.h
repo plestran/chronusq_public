@@ -139,6 +139,7 @@ class SingleSlater {
   std::string algebraicFieldShort_;      ///< String Real/Complex/(Quaternion)
   std::array<double,3> elecField_;
   std::vector<double> mullPop_; ///< mulliken partial charge
+  double Sx_, Sy_, Sz_, Ssq_;
 
   // Lengths of scratch partitions (NOT MEANT TO BE COPIED)
   int lenX_;
@@ -547,13 +548,24 @@ public:
   void readGuessGauFChk(std::string &);	// read the initial guess of MO's from the Gaussian formatted checkpoint file
   void computeEnergy();         // compute the total electronic energy
   void computeMultipole();      // compute multipole properties
+  void computeSExpect();        // compute <S> <S^2>
+  inline void computeProperties(){
+    this->computeMultipole();
+    this->computeSExpect();
+  };
   void SCF();  
   void CDIIS();
   void CpyFock(int);
   void GenDComm(int);
   void mullikenPop();
+
   void printEnergy(); 
   void printMultipole();
+  void printSExpect();
+  inline void printProperties() {
+    this->printSExpect();
+    this->printMultipole();
+  };
   void printInfo();
   void printDensityInfo(double,double,double);
   void printDensityInfo(double,double);

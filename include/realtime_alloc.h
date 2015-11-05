@@ -167,3 +167,38 @@ void RealTime<T>::initMem(){
   this->REAL_LAPACK_SCR = new double[this->lenREAL_LAPACK_SCR];
 }
 
+template<typename T>
+void RealTime<T>::initCSV(){
+  // Create/open CSVs for printing results
+  csvs.push_back(
+    new std::ofstream(this->fileio_->fileName() + "_RealTime_Dipole.csv")
+  );
+  this->csvFiles[this->csvs[0]] = 
+    this->fileio_->fileName() + "_RealTime_Dipole.csv";
+
+  csvs.push_back(
+    new std::ofstream(this->fileio_->fileName() + "_RealTime_AppliedField.csv")
+  );
+  this->csvFiles[this->csvs[1]] = 
+    this->fileio_->fileName() + "_RealTime_AppliedField.csv";
+
+  csvs.push_back(
+    new std::ofstream(this->fileio_->fileName() + "_RealTime_Mulliken.csv")
+  );
+  this->csvFiles[this->csvs[2]] = 
+    this->fileio_->fileName() + "_RealTime_Mulliken.csv";
+
+  csvs.push_back(
+    new std::ofstream(this->fileio_->fileName() + "_RealTime_OrbOcc_Alpha.csv")
+  );
+  this->csvFiles[this->csvs[3]] = 
+    this->fileio_->fileName() + "_RealTime_OrbOcc_Alpha.csv";
+
+  if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS){
+    csvs.push_back(
+      new std::ofstream(this->fileio_->fileName() + "_RealTime_OrbOcc_Beta.csv")
+    );
+    this->csvFiles[this->csvs[4]] = 
+      this->fileio_->fileName() + "_RealTime_OrbOcc_Beta.csv";
+  }
+};

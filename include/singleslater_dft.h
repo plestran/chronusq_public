@@ -46,9 +46,9 @@ double SingleSlater<T>::formBeckeW(cartGP gridPt, int iAtm){
            rj.set<0>((*this->molecule_->cart())(0,jAtm));
            rj.set<1>((*this->molecule_->cart())(1,jAtm));
            rj.set<2>((*this->molecule_->cart())(2,jAtm));
-//       Coordinate of the Grid point in elleptical 
+//       Coordinate of the Grid point in elleptical (Eq. 11) 
            muij = (boost::geometry::distance(gridPt,ri) - boost::geometry::distance(gridPt,rj))/(*this->molecule_->rIJ())(iAtm,jAtm) ;
-//       Do the product over all atoms i .ne. j
+//       Do the product over all atoms i .ne. j (Eq. 13 using definition Eq. 21 with k=3)
            WW *= 0.5*(1.0-this->twodgrid_->voronoii(this->twodgrid_->voronoii(this->twodgrid_->voronoii(muij))));
            }
          }
@@ -59,6 +59,8 @@ double SingleSlater<T>::formBeckeW(cartGP gridPt, int iAtm){
 template<typename T>
 double SingleSlater<T>::normBeckeW(cartGP gridPt){
 //     Normalization of Becke Weights
+//     (J. Chem. Phys., 88 (4),2457 (1988)) using Voronoii Fuzzi Cells
+//     Eq. 22
        int   nAtom = this->molecule_->nAtoms();
        double norm = 0.0;
        for(auto iAtm = 0; iAtm < nAtom; iAtm++){

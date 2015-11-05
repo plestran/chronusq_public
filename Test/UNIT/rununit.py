@@ -41,7 +41,7 @@ def genSummary(testtable,summary):
   for i in testtable:
     if 'SCF' in ref[i.infile[:8]].typ:
       entry = []
-      entry.append(testtable[j].infile.replace(".inp",''))
+      entry.append(testtable[j].infile)
       for k in range(4):
         entry.append(summary[j][k])
       if summary[j][0] < 1E-10 and summary[j][1] < 1E-8 and summary[j][2] < 1E-8 and summary[j][3] < 1E-8:
@@ -59,7 +59,7 @@ def genSummary(testtable,summary):
   for i in testtable:
     if 'RESP' in ref[i.infile[:8]].typ:
       entry = []
-      entry.append(testtable[j].infile.replace(".inp",''))
+      entry.append(testtable[j].infile)
       entry.append(summary[j][0])
       entry.append(summary[j][1])
       entry.append(len(ref[i.infile[:8]].w))
@@ -79,7 +79,7 @@ def genSummary(testtable,summary):
   for i in testtable:
     if 'RT' in ref[i.infile[:8]].typ:
       entry = []
-      entry.append(testtable[j].infile.replace(".inp",''))
+      entry.append(testtable[j].infile)
       entry.append(summary[j][0])
       entry.append(summary[j][1])
       if summary[j][0] < 1E-10 and summary[j][1] < 1E-6:
@@ -127,8 +127,8 @@ def runUnit(doKill,doPrint):
     if findFile(i.infile,"."):
 #
 #      run chronus
-      print "running file: "+i.infile.replace(".inp",'')
-      tests[k][0] = runCQ(i.infile.replace(".inp",''))
+      print "running file: "+i.infile
+      tests[k][0] = runCQ(i.infile,'')
 #      time.sleep(2)
 #
 #      test SCF values

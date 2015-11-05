@@ -109,6 +109,9 @@ void TwoDGrid::transformPts(){
 };
 
 double TwoDGrid::voronoii( double mu){
+//     Generate Becke Weights according to the partition schems in
+//     (J. Chem. Phys., 88 (4),2457 (1988)) using Voronoii Fuzzi Cells
+//     Eq. 19
        double p;
        p = (1.5)*(mu) - 0.5*(std::pow(mu,3.0));
        return p;

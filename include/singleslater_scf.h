@@ -321,5 +321,6 @@ void SingleSlater<T>::SCF(){
     }
     this->fileio_->out << bannerEnd <<endl;
   }
+  this->computeSExpect();
 }
 
