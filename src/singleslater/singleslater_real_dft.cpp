@@ -46,6 +46,14 @@ void SingleSlater<double>::formVXC(){
     double val = 4.0*math.pi*CxVx;
     this->totalEx = 0.0;                                  // Total Exchange Energy
     this->totalEcorr = 0.0;                               // Total Correlation Energy
+//  Timing
+/*
+    duration_dens = std::chrono::seconds(0) ;
+    duration_1 = std::chrono::seconds(0) ;
+    duration_2 = std::chrono::seconds(0) ;
+    duration_5 = std::chrono::seconds(0) ;
+*/
+
 /*  
  *  Generate grids 
  *
@@ -75,10 +83,9 @@ void SingleSlater<double>::formVXC(){
         (*this->molecule_->cart())(1,iAtm),
         (*this->molecule_->cart())(2,iAtm)
       );
-
+       double rad;
       // Loop over grid points
       for(int ipts = 0; ipts < npts; ipts++){
-
         // Evaluate each Becke fuzzy call weight, normalize it and muliply by 
         //   the Raw grid weight at that point
         weight = Raw3Dg.getweightsGrid(ipts)  
@@ -113,6 +120,12 @@ void SingleSlater<double>::formVXC(){
       this->fileio_->out << "Total LDA Ex ="    << this->totalEx 
                          << " Total VWN Corr= " << this->totalEcorr << endl;
     }
+/*
+    this->fileio_->out << "PointProd Total Time " << duration_1.count() <<endl;
+    this->fileio_->out << "BuildDens Total Time " << duration_2.count() <<endl;
+    this->fileio_->out << "ZeroOver Total Time " << duration_5.count() <<endl;
+    this->fileio_->out << "Density Total Time " << duration_dens.count() <<endl;
+*/
 }; //End
 
 template<>
@@ -147,6 +160,7 @@ void SingleSlater<double>::formCor(double rho, double spindensity){
    double beta = 0.0;
    double S3    = 0.0;
    double S4    = 0.0;
+   double S5    = 0.0;
    double M1    = 0.0;
    double M2    = 0.0;
    double db_dr = 0.0; 
@@ -255,24 +269,19 @@ void SingleSlater<double>::formCor(double rho, double spindensity){
      M1  = alpha;
      M1 *= this->f_spindens(0,spindensity); 
      M1 /= this->df2_spindens(0.0);
-//   M2  zeta^4 * dbeta/dr
-     M2  = spindensity_4 * db_dr;
+//   S4  zeta^4 * dbeta/dr
+     S4  = spindensity_4 * db_dr;
+//   S5  4 * beta * zeta^3
+     S5  = 4.0 * beta * spindensity_3;
 //   dzeta/drho_x 
      M3_A =   1.0 - spindensity; 
      M3_B = -(1.0 + spindensity);
-     M3_A *= spindensity_3 * beta * 4.0;
-     M3_B *= spindensity_3 * beta * 4.0;
-     M3_A += M2;
-     M3_B += M2;
-     M3_A *= M1;
-     M3_B *= M1;
-     M3_A +=  S3*(1.0 - spindensity);   
-     M3_B += -S3*(1.0 + spindensity);   
-     this->mu_corr   = -rs*over3*(S1 + S2);
-     this->mu_corr_B = -rs*over3*(S1 + S2);
+
+     this->mu_corr   = -rs*over3*(S1 + S2 + M1*S4);
+     this->mu_corr_B = this->mu_corr;
      
-     this->mu_corr     += M3_A;
-     this->mu_corr_B   += M3_B;
+     this->mu_corr     += M3_A*(M1*S5 + S3);
+     this->mu_corr_B   += M3_B*(M1*S5 + S3);
 
 
      this->mu_corr     += this->eps_corr;

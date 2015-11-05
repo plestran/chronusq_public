@@ -396,5 +396,15 @@ double * BasisSet::basisProdEval(libint2::Shell s1, libint2::Shell s2, sph3GP *p
   
 }
 
+double radcut(int IAtom, double thr){
+  double radius = 0.0;
+//  double *s1Eval = basisEval(s1,pt);
+//  for(auto i = 0; i < s1.size(); i++){
+//     s1Eval[i] 
+//  }
+  return radius;
+};
+
+
 } // namespace ChronusQ
 

@@ -70,6 +70,12 @@ double SingleSlater<T>::normBeckeW(cartGP gridPt){
 };
 
 template<typename T>
+double SingleSlater<T>::radsphe(int iAtm, double thr){
+       double rad = this->basisset_->radcut(iAtm,1.0e-10);
+       return rad ;
+};
+
+template<typename T>
 void SingleSlater<T>::buildVxc(cartGP gridPt, double weight){
 //  Build the Vxc therm at each Grid Points  
    double *pointProd; 
@@ -82,6 +88,10 @@ void SingleSlater<T>::buildVxc(cartGP gridPt, double weight){
      new RealMatrix(this->nBasis_,this->nBasis_));
    overlapR_->setZero();
 // Loops over shells
+
+///Timing
+   
+///T   auto start_dens = std::chrono::high_resolution_clock::now();  
    for(auto s1=0l, s12=0l; s1 < this->basisset_->nShell(); s1++){
       int bf1_s = this->basisset_->mapSh2Bf(s1);
       int n1    = this->basisset_->shells(s1).size();
@@ -90,18 +100,29 @@ void SingleSlater<T>::buildVxc(cartGP gridPt, double weight){
         int n2      = this->basisset_->shells(s2).size();
         auto center = this->basisset_->shells(s1).O;
         double *Buff = new double [n1*n2];
+///T   auto start_5 = std::chrono::high_resolution_clock::now();  
         RealMap fBuff(Buff,n1,n2);
         fBuff.setZero();
+///T   auto finish_5 = std::chrono::high_resolution_clock::now();  
+///T   this->duration_5 += finish_5 - start_5;
+///T   auto start_1 = std::chrono::high_resolution_clock::now();  
         pointProd = 
           this->basisset_->basisProdEval(
             this->basisset_->shells(s1),
             this->basisset_->shells(s2),
             &gridPt
           );
+///T   auto finish_1 = std::chrono::high_resolution_clock::now();  
+///T   this->duration_1 += finish_1 - start_1;
+///T   auto start_2 = std::chrono::high_resolution_clock::now();  
         Buff = this->twodgrid_->BuildDensity(Buff,pointProd,n1,n2);
         overlapR_->block(bf1_s,bf2_s,n1,n2) = fBuff; 
+///T   auto finish_2 = std::chrono::high_resolution_clock::now();  
+///T   this->duration_2 += finish_2 - start_2;
         }
      }
+///T    auto finish_dens = std::chrono::high_resolution_clock::now();  
+///T    this->duration_dens += finish_dens - start_dens;
      (*overlapR_) = overlapR_->selfadjointView<Lower>();;
    if(this->isClosedShell && this->Ref_ != TCS) {
     rhor = overlapR_->frobInner(this->densityA()->conjugate());
