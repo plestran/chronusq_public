@@ -51,6 +51,7 @@ void SingleSlater<T>::formPT(){
 template<typename T>
 void SingleSlater<T>::formFock(){
   
+  auto start_3 = std::chrono::high_resolution_clock::now();  
   if(!this->haveDensity) this->formDensity();
 #ifndef USE_LIBINT
   if(!this->haveCoulomb) this->formCoulomb();
@@ -65,7 +66,14 @@ void SingleSlater<T>::formFock(){
 //  this->basisset_->makeMapSh2Bf(this->nTCS_);
 //}
 // Form Vxc for DFT
+  auto finish_3 = std::chrono::high_resolution_clock::now();  
+  this->duration_3 = finish_3 - start_3;
+  this->fileio_->out << "FormOther Out  " << duration_3.count() <<endl;
+  auto start_4 = std::chrono::high_resolution_clock::now();  
   if(this->isDFT) this->formVXC();
+  auto finish_4 = std::chrono::high_resolution_clock::now();  
+  this->duration_4 = finish_4 - start_4;
+  this->fileio_->out << "FormVxc Out  " << duration_4.count() <<endl;
   this->fockA_->setZero();
 /*
   if(this->Ref_ != TCS) fockA_->real()+=(*this->aointegrals_->oneE_);

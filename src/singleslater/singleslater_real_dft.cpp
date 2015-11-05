@@ -46,6 +46,13 @@ void SingleSlater<double>::formVXC(){
     double val = 4.0*math.pi*CxVx;
     this->totalEx = 0.0;                                  // Total Exchange Energy
     this->totalEcorr = 0.0;                               // Total Correlation Energy
+//  Timing
+    duration_dens = std::chrono::seconds(0) ;
+    duration_1 = std::chrono::seconds(0) ;
+    duration_2 = std::chrono::seconds(0) ;
+    duration_5 = std::chrono::seconds(0) ;
+
+
 /*  
  *  Generate grids 
  *
@@ -75,10 +82,9 @@ void SingleSlater<double>::formVXC(){
         (*this->molecule_->cart())(1,iAtm),
         (*this->molecule_->cart())(2,iAtm)
       );
-
+       double rad;
       // Loop over grid points
       for(int ipts = 0; ipts < npts; ipts++){
-
         // Evaluate each Becke fuzzy call weight, normalize it and muliply by 
         //   the Raw grid weight at that point
         weight = Raw3Dg.getweightsGrid(ipts)  
@@ -113,6 +119,10 @@ void SingleSlater<double>::formVXC(){
       this->fileio_->out << "Total LDA Ex ="    << this->totalEx 
                          << " Total VWN Corr= " << this->totalEcorr << endl;
     }
+    this->fileio_->out << "PointProd Total Time " << duration_1.count() <<endl;
+    this->fileio_->out << "BuildDens Total Time " << duration_2.count() <<endl;
+    this->fileio_->out << "ZeroOver Total Time " << duration_5.count() <<endl;
+    this->fileio_->out << "Density Total Time " << duration_dens.count() <<endl;
 }; //End
 
 template<>

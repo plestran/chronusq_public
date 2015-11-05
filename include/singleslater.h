@@ -314,6 +314,12 @@ public:
   double   eps_corr;    ///< VWN Correlation Energy Density
   double   mu_corr;     ///<  VWN Correlation Potential
   double   mu_corr_B;   ///<  VWN Correlation Potential (beta)
+  std::chrono::duration<double> duration_dens;
+  std::chrono::duration<double> duration_1;
+  std::chrono::duration<double> duration_2;
+  std::chrono::duration<double> duration_3;
+  std::chrono::duration<double> duration_4;
+  std::chrono::duration<double> duration_5;
 
   int      nSCFIter;
 
@@ -540,6 +546,7 @@ public:
   double spindens(double rho_A, double rho_B);  // define spindendity
   double formBeckeW(cartGP gridPt, int iAtm);            // Evaluate Becke Weights
   double normBeckeW(cartGP gridPt);            // Evaluate Becke Weights
+  double radsphe(int iAtm, double thr);        // radius within evaluate density;
   void   buildVxc(cartGP gridPt, double weight);            // function to build the Vxc therm
   void matchord();              // match Guassian order of guess
   void readGuessIO();       	// read the initial guess of MO's from the input stream
