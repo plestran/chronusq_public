@@ -380,7 +380,7 @@ void AOIntegrals::computeAOOneE(){
 
 // add DKH correction to kinetic energy
   
-  if (this->isPrimary) this->DKH0();
+//  if (this->isPrimary) this->DKH0();
 
 // Build Core Hamiltonian
   (*this->oneE_) = (*this->kinetic_) + (*this->potential_);

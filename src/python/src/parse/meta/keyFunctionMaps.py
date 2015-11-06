@@ -38,6 +38,7 @@ def genkeyFuncMap(workers):
     'ENVELOPE' :workers['CQRealTime'].setEnvelope ,
     'ORTHO'    :workers['CQRealTime'].setOrthoTyp ,
     'INIDEN'   :workers['CQRealTime'].setInitDen  ,
-    'UPROP'    :workers['CQRealTime'].setFormU    
+    'UPROP'    :workers['CQRealTime'].setFormU    ,
+    'ELL_POL'  :workers['CQRealTime'].setEllPol    
   }
 

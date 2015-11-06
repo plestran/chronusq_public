@@ -241,6 +241,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setSwapMOB"   , &RealTime<double>::setSwapMOB   )
     .def("setFormU"     , &RealTime<double>::setFormU     )
     .def("setEnvelope"  , &RealTime<double>::setEnvelope  )
+    .def("setEllPol"    , &RealTime<double>::setEllPol    )
     .def("setFieldAmp"  , &RealTime<double>::Wrapper_setFieldAmp  )
     .def("setTOn"       , &RealTime<double>::setTOn       )
     .def("setTOff"      , &RealTime<double>::setTOff      )
@@ -270,6 +271,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setSwapMOB"   , &RealTime<dcomplex>::setSwapMOB   )
     .def("setFormU"     , &RealTime<dcomplex>::setFormU     )
     .def("setEnvelope"  , &RealTime<dcomplex>::setEnvelope  )
+    .def("setEllPol"    , &RealTime<dcomplex>::setEllPol    )
     .def("setFieldAmp"  , &RealTime<dcomplex>::Wrapper_setFieldAmp  )
     .def("setTOn"       , &RealTime<dcomplex>::setTOn       )
     .def("setTOff"      , &RealTime<dcomplex>::setTOff      )
@@ -333,6 +335,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("Gaussian", RealTime<double>::Gaussian      )
     .value("Step"    , RealTime<double>::Step          )
     .value("SinSq"   , RealTime<double>::SinSq         )
+    .value("Elliptic", RealTime<double>::Elliptic      )
   ;
 
   enum_<RealTime<dcomplex>::ENVELOPE>("RealTime_ENVELOPE")
@@ -341,6 +344,25 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("Gaussian", RealTime<dcomplex>::Gaussian      )
     .value("Step"    , RealTime<dcomplex>::Step          )
     .value("SinSq"   , RealTime<dcomplex>::SinSq         )
+    .value("Elliptic", RealTime<dcomplex>::Elliptic      )
+  ;
+
+  enum_<RealTime<double>::ELL_POL>("RealTime_ELL_POL")
+    .value("LXY", RealTime<double>::LXY)
+    .value("LXZ", RealTime<double>::LXZ)
+    .value("LYZ", RealTime<double>::LYZ)
+    .value("RXY", RealTime<double>::RXY)
+    .value("RXZ", RealTime<double>::RXZ)
+    .value("RYZ", RealTime<double>::RYZ)
+  ;
+
+  enum_<RealTime<dcomplex>::ELL_POL>("RealTime_ELL_POL")
+    .value("LXY", RealTime<dcomplex>::LXY)
+    .value("LXZ", RealTime<dcomplex>::LXZ)
+    .value("LYZ", RealTime<dcomplex>::LYZ)
+    .value("RXY", RealTime<dcomplex>::RXY)
+    .value("RXZ", RealTime<dcomplex>::RXZ)
+    .value("RYZ", RealTime<dcomplex>::RYZ)
   ;
 
   class_<MOIntegrals<double>,boost::noncopyable>("MOIntegrals_double",init<>())
