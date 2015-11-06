@@ -31,6 +31,7 @@
 \usepackage{tabto}
 \usepackage{listings}
 \usepackage{color}
+\usepackage{pbox}
 
 \definecolor{dkgreen}{rgb}{0,0.6,0}
 \definecolor{gray}{rgb}{0.5,0.5,0.5}
@@ -38,6 +39,8 @@
 \definecolor{light-gray}{gray}{0.95}
 
 \renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}} % I forget what this does...
+\newcommand\T{\rule{0pt}{2.6ex}}       % Top strut
+\newcommand\B{\rule[-1.2ex]{0pt}{0pt}} % Bottom strut
 
 \newcommand{\ChronusQGitHubPUBLIC}{\texttt{http://github.com/liresearchgroup/chronusq\_public.git}}
 \newcommand{\XiaosongContact}{Xiaosong Li (\texttt{xsli@u.washington.edu})}
@@ -127,18 +130,21 @@
     working path. This can be confirmed via the following command:
 
     \begin{lstlisting}
-      > which git
-      /usr/local/bin/git
+> which git
+/usr/local/bin/git
     \end{lstlisting}
-    where \texttt{/usr/local/bin/git} is the location of the \texttt{git} program 
-    installed on the (my) system. The location may vary, but as long as you get a 
-    location, \texttt{git} is installed. Once a \texttt{git} installation has been 
-    verified, obtaining a copy of the ChronusQ is as simple as:
+
+    \noindent where \texttt{/usr/local/bin/git} is the location of the \texttt{git} 
+    program installed on the (my) system. The location may vary, but as long as 
+    you get a location, \texttt{git} is installed. Once a \texttt{git} 
+    installation has been verified, obtaining a copy of the ChronusQ is as 
+    simple as:
 
     \begin{lstlisting}
-     > git clone http://github.com/liresearchgroup/chronusq_public.git
+> git clone http://github.com/liresearchgroup/chronusq_public.git
     \end{lstlisting}
-    which will place a copy of the ChronusQ source into the directory 
+    
+    \noindent which will place a copy of the ChronusQ source into the directory 
     \texttt{./chronusq\_public}. Any comments, concerns or problems regarding 
     obtaining source code from the \texttt{git} repository may be directed 
     towards \DBWYContact. 
@@ -167,17 +173,19 @@
 	the C++11 compile flags, but one may have to manually set the compile flags
 	via \CMake~variables (also in Section \ref{subsec:ChronusQConfigCompile})
 
-      \item \CMake: ChronusQ utilizes the \CMake~utility to facilitate
+      \subsubsection{\CMake} \label{subsubsec:cmake} 
+        ChronusQ utilizes the \CMake~utility to facilitate
         portability and flexibility of compilation through automatic Makefile 
 	generation. \CMake~is readily available through your OS distribution
 	package manager (GNU/Linux or OSX). For example, in Fedora 22, one may 
 	obtain (if one has root privileges) \CMake~via
 
 	\begin{lstlisting}
-	  > sudo dnf install cmake
+> sudo dnf install cmake
 	\end{lstlisting}
-	If for some reason you are unable to obtain a pre-packaged version of 
-	\CMake~through a package manager, the source and installation
+
+	\noindent If for some reason you are unable to obtain a pre-packaged 
+	version of \CMake~through a package manager, the source and installation 
 	instructions may be obtained from \texttt{http://www.cmake.org}.
 
       \subsubsection{\Libint} \label{subsubsec:Libint}
@@ -199,15 +207,18 @@
 	installation (with root access / Fedora 22) via
 
 	\begin{lstlisting}
-	  > sudo dnf install eigen3-devel
+> sudo dnf install eigen3-devel
 	\end{lstlisting}
-        If for some reason you are unable to obtain a pre-packaged version, 
-	installation of \Eigen~is quite easy as it is a header-only library. One
-	need simply download the source tar file from 
-	\texttt{http://http://eigen.tuxfamily.org/} and place the contents somewhere
-	that ChronusQ can find them. An explanation of the \CMake~variables that
-	need to be set for a non-standard installation of \Eigen~can be found
+
+        \noindent If for some reason you are unable to obtain a pre-packaged 
+	version, installation of \Eigen~is quite easy as it is a header-only 
+	library. One need simply download the source tar file from \\
+	\texttt{http://http://eigen.tuxfamily.org/} and place the contents 
+	somewhere that ChronusQ can find them. An explanation of the 
+	\CMake~variables that need to be set for a non-standard installation 
+	of \Eigen~can be found
 	in Section \ref{subsec:ChronusQConfigCompile}.
+I
       \subsubsection{\BTAS} \label{subsubsec:BTAS}
         ChronusQ currently utilizes \BTAS~(\textbf{B}asic \textbf{T}ensor
         \textbf{A}lgebra \textbf{S}ubroutines) \cite{btas} as a C++11 API for multi-linear 
@@ -216,10 +227,11 @@
 	may be obtained from the \BTAS~GitHub via
 
 	\begin{lstlisting}
-	  > git clone https://github.com/BTAS/BTAS.git
+> git clone https://github.com/BTAS/BTAS.git
 	\end{lstlisting}
-	Instructions regarding the \CMake~variables that need to be set for a 
-	non-root installation of \BTAS~may be found in Section 
+
+	\noindent Instructions regarding the \CMake~variables that need to be set 
+	for a non-root installation of \BTAS~may be found in Section 
 	\ref{subsec:ChronusQConfigCompile}.
 
       \subsubsection{\Boost} \label{subsubsec:boost} 
@@ -230,18 +242,20 @@
 	the latest \Boost~source from \texttt{http://www.boost.org} and following
 
         \begin{lstlisting}
-          > cd /path/to/boost/download
-          > tar xvf boost_<boost_version>.tar.gz
-          > cd boost_<boost_version>
-          > ./bootstrap
-          > ./b2 install --prefix=/usr/local
+> cd /path/to/boost/download
+> tar xvf boost_<boost_version>.tar.gz
+> cd boost_<boost_version>
+> ./bootstrap
+> ./b2 install --prefix=/usr/local
         \end{lstlisting}
-	If you already have \Boost~installed on your machine (in a non-standard
-	location) or are unable to perform the above procedure (i.e. no root 
-	access), instructions regarding the \CMake~variables that must be set are 
-	described in Section \ref{subsec:ChronusQConfigCompile}.
 
-      \item \Python: ChronusQ utilizes \Python~as a high level API for input
+	\noindent If you already have \Boost~installed on your machine (in a 
+	non-standard location) or are unable to perform the above procedure (i.e. 
+	no root access), instructions regarding the \CMake~variables that must be 
+	set are described in Section \ref{subsec:ChronusQConfigCompile}.
+
+      \subsubsection{\Python} \label{subsubsec:Python} 
+        ChronusQ utilizes \Python~as a high level API for input
         file digestion and the actual running of the ChronusQ software. One
 	must have the development versions of \Python~as well as \texttt{libxml2} 
 	and \texttt{libxslt} to use ChronusQ. These may be obtained through the 
@@ -249,14 +263,15 @@
 	root access) via:
 
 	\begin{lstlisting}
-          > sudo dnf install python-devel libxml2-devel libxslt-devel
+> sudo dnf install python-devel libxml2-devel libxslt-devel
 	\end{lstlisting}
-        To parse the input file, ChrounusQ relies on the \Python~module 
+
+        \noindent To parse the input file, ChrounusQ relies on the \Python~module 
 	\texttt{ConfigParser}. One may obtain \texttt{ConfigParser} through
 	the \Python~\texttt{pip} module via:
 	 
 	\begin{lstlisting}
-	  > pip install configparser
+> pip install configparser
 	\end{lstlisting}
 
       \subsubsection{\HDF} \label{subsubsec:HDF5} 
@@ -266,10 +281,11 @@
 	(Fedora 22 / root access):
 
 	\begin{lstlisting}
-          > sudo dnf install hdf5-devel
+> sudo dnf install hdf5-devel
 	\end{lstlisting}
-	If for some reason \HDF~cannot be installed in this manner (i.e. no
-	root access), it may be compiled from source from the tar files on
+
+	\noindent If for some reason \HDF~cannot be installed in this manner (i.e. 
+	no root access), it may be compiled from source from the tar files on
 	\texttt{https://www.hdfgroup.org/}. Instructions on how one may set
 	the \CMake~and shell environment variables to work with ChronusQ
 	can be found in Section \ref{subsec:ChronusQConfigCompile}.
@@ -282,20 +298,20 @@
 	the standard package manager (i.e. Fedora 22 / root access) via:
 
 	\begin{lstlisting}
-          > sudo dnf install lapack-devel blas-devel
+> sudo dnf install lapack-devel blas-devel
 	\end{lstlisting}
-	If for some reason \LAPACK~and \BLAS~cannot be installed in this manner 
-	(i.e. no root access), we have included an automatic build of these packages
-	through our configuration procedure. Please see Section 
-	\ref{subsec:ChronusQConfigCompile}. for details.\\
-	\\
-	\textbf{IMPORTANT:} While it is encouraged to attempt to link to optimized
-	\LAPACK~and \BLAS~libraries, the developers have experienced many issues 
-	when linking to Intel MKL libraries. Please link to the traditional
-	\LAPACK~and \BLAS~libraries or \texttt{ATLAS} optimized libraries when
+
+	\noindent If for some reason \LAPACK~and \BLAS~cannot be installed in this 
+	manner (i.e. no root access), we have included an automatic build of these 
+	packages through our configuration procedure. Please see Section 
+	\ref{subsec:ChronusQConfigCompile}. for details.
+
+	\noindent \textbf{IMPORTANT:} While it is encouraged to attempt to link to 
+	optimized \LAPACK~and \BLAS~libraries, the developers have experienced many 
+	issues when linking to Intel MKL libraries. Please link to the traditional 
+	\LAPACK~and \BLAS~libraries or \texttt{ATLAS} optimized libraries when 
 	configuring ChronusQ.
 
-    \end{itemize}
 
     \subsection{Configure and Compilation} \label{subsec:ChronusQConfigCompile}
     
@@ -315,264 +331,104 @@
     takes place via the following general scheme
     
     \begin{lstlisting}
-      > cd /path/to/chronusq
-      > mkdir build && cd build
-      > cmake -D<OPT1>=<V1> -D<OPT2>=<V2> [ETC] ..
+> cd /path/to/chronusq
+> mkdir build && cd build
+> cmake -D<OPT1>=<V1> -D<OPT2>=<V2> [ETC] ..
     \end{lstlisting}
-    where \texttt{<OPT1>} and \texttt{<OPT2>} are \CMake~variables and \texttt{V1}
-    and \texttt{V2} are the corresponding values to set these variables. The
-    ``.." must be present at the end of the command to let \CMake~know that there
-    is a file in the previous directory called ``CMakeLists.txt", which contains
-    the \CMake~configuration instructions. The following \CMake~variables may be
-    influential to a successful configuration of ChronusQ:
+
+    \noindent where \texttt{<OPT1>} and \texttt{<OPT2>} are \CMake~variables 
+    and \texttt{V1} and \texttt{V2} are the corresponding values to set these 
+    variables. The ``.." must be present at the end of the command to let 
+    \CMake~know that there is a file in the previous directory called 
+    ``CMakeLists.txt", which contains the \CMake~configuration instructions. The 
+    following \CMake~variables may be influential to a successful configuration of 
+    ChronusQ:
 
     \begin{table}[h!]
       \begin{center}
-        \begin{tabular}{|l|l|l|l|}
+        \begin{tabular}{|l|l|l|}
 	  \hline
 	  Variable        & 
 	  Purpose         & 
-	  Possible Values & 
 	  Default Value  \\
 	  \hline
 	  \hline
 
-	  \texttt{CMAKE\_CXX\_COMPILER}      & 
-	  Set the C++ Compiler (full path)   & 
-	  --                                 & 
-	  g++                                \\
+	  \texttt{CMAKE\_CXX\_COMPILER}                 & 
+	  \pbox{7cm}{Set the C++ Compiler (full path)}  & 
+	  g++                                           \\
 
 	  \hline
 
-	  \texttt{CMAKE\_C\_COMPILER}      & 
-	  Set the C Compiler (full path)   & 
-	  --                               & 
-	  gcc                              \\
+	  \texttt{CMAKE\_C\_COMPILER}                  & 
+	  \pbox{7cm}{Set the C Compiler (full path)}   & 
+	  gcc                                          \\
 
 	  \hline
 
-	  \texttt{CMAKE\_Fortran\_COMPILER}      & 
-	  Set the FORTRAN Compiler (full path)   & 
-	  --                                     & 
-	  gfortran                               \\
+	  \texttt{CMAKE\_Fortran\_COMPILER}                 & 
+	  \pbox{7cm}{Set the FORTRAN Compiler (full path)}  & 
+	  gfortran                                          \\
 
 	  \hline
 
-	  \texttt{CMAKE\_CXX\_FLAGS} & 
-	  Set the C++ Compile Flags  &
-	  --                         &
-	  --                         \\
+	  \texttt{CMAKE\_CXX\_FLAGS}             & 
+	  \pbox{7cm}{Set the C++ Compile Flags}  &
+	  --                                     \\
 
 	  \hline
 
-	  \texttt{BOOST\_ROOT}                       &
-	  The root directory of a boost installation &
-	  --                                         &
-	  /usr                                       \\
+	  \texttt{BOOST\_ROOT}                                   &
+	  \pbox{7cm}{The root directory of a boost installation} &
+	  /usr                                                   \\
 
 	  \hline
 
-	  \texttt{BOOST\_LIBRARY\_DIR}  &
-	  Location of Boost libraries &
-	  --                          &
-	  \$(BOOST\_ROOT)/lib         \\
+	  \texttt{BOOST\_LIBRARYDIR}              &
+	  \pbox{7cm}{Location of Boost libraries} &
+	  \$(BOOST\_ROOT)/lib                     \\
 
+	  \hline
 
+	  \texttt{BOOST\_INCLUDEDIR}            &
+	  \pbox{7cm}{Location of Boost headers} &
+	  \$(BOOST\_ROOT)/include               \\
+
+	  \hline
+
+	  \texttt{Boost\_NO\_SYSTEM\_PATHS} &
+	  \pbox{7cm}{Whether or not to use the system paths to find Boost 
+	    installation} &
+	  \texttt{OFF} \\
+
+	  \hline
+
+	  \texttt{EIGEN3\_ROOT} &
+	  \pbox{7cm}{Path that contains the \Eigen~directory} &
+	  /usr/include/eigen3 \\
+
+	  \hline
+
+	  \texttt{BTAS\_ROOT} &
+	  \pbox{7cm}{Path that contains the \texttt{btas}~directory} &
+	  /usr/include/btas \\
+
+	  \hline
+
+	  \texttt{BUILD\_LA} &
+	  \pbox{7cm}{Build \LAPACK~and \BLAS~locally} &
+	  \texttt{OFF} \\
+
+	  \hline
+
+	  \texttt{BUILD\_LIBINT} &
+	  \pbox{7cm}{Build \Libint~locally} &
+	  \texttt{ON} \\
+
+	  \hline
 	\end{tabular}
       \end{center}
     \end{table}
-
-\newpage
-  \section{Input Files} \label{sec:InputFiles}
-To use ChronusQ, it is necessary to specify the molecule and job type within an input file. The easiest way to understand the input for ChronusQ is to take a look at an example. Here is a sample input file for water, \texttt{h2o.inp}. As written, it performs an HF/STO-3G calculation on neutral, singlet water with a single processor.
-\begin{lstlisting}
-#
-#  Molecule Specification
-#
-[Molecule]
-charge = 0
-mult   = 1
-geom:
-  O    0.000000000 -0.0757918436  0.0
-  H    0.866811829  0.6014357793  0.0
-  H   -0.866811829  0.6014357793  0.0
-
-#
-#  Job Specification
-#
-[QM]
-reference = HF
-job       = SCF 
-basis     = sto3g.gbs
-
-#
-#  Misc Settings
-#
-[Misc]
-nsmp = 1
-\end{lstlisting}
-ChronusQ input files are divided into sections that specify the molecular geometry, the type of job, and other miscellaneous options. Lines beginning with \texttt{\#} are ignored. Inputs are not case-sensitive. Sections are defined by the square bracket, e.g. \texttt{[Molecule]} specifies the molecular geometry, charge, etc. When ChronusQ encounters a section, it then searches the following lines for the appropriate commands and keywords. We will look at these sections each in turn. 
-   
-    \subsection{Specifying your molecule: the \texttt{[Molecule]} section} \label{subsec:MoleculeInput}
-    The \texttt{[Molecule]} section specifies the geometry, charge, and multiplicity of the system. 
-    \begin{description}
-    \item[\texttt{charge}] \hfill \\
-    A signed integer that defines the overall electric charge of your molecule.
-    \item[\texttt{mult}] \hfill \\
-    An integer that defines the multiplicity of the molecule. Singlets correspond to 1, doublets to 2, triplets to 3, and so on.
-    \item[\texttt{geom}] \hfill \\
-    Specifies the geometry of the molecule. The input is always Cartesian, and the default units are in Angstroms. Each line corresponds to one atom. Each line here follows the following format
-          \begin{lstlisting}
-          <atomic symbol> <x-coordinate> <y-coordinate> <z-coordinate>
-          \end{lstlisting} 
-    \end{description}
-    That's all there is to the \texttt{[Molecule]} specification!
-
-    \subsection{Defining the type of job with the \texttt{[QM]} section} \label{subsec:QMInput}
-    The \texttt{[QM]} section sets up the type of job you want to run, be it a single point Hartree-Fock energy calculation or a real-time propagation. It is also where you specify your basis set and many other options.
-    \begin{description}
-    \item[\texttt{Basis}] \hfill \\
-    Defines your basis set. Available options can be found in the \texttt{basis} directory. Note that you will need to specify the filename, hence the \texttt{.gbs} extension.
-    \item[\texttt{Job}] \hfill \\
-    Defines what kind of job you want to do. Available options:
-      \begin{description}
-      \item[\texttt{SCF}] Default. Perform self-consistent field energy optimization. Defaults to Hartree-Fock (DFT on its way!) 
-      \item[\texttt{RT}] Perform real-time propagation. ChronusQ will know to look for section \texttt{[RT]} (described later). 
-      \item[\texttt{CIS}] Perform Configuration Interaction Singles (CIS). 
-      \item[\texttt{RPA}] Perform Random Phase Approximation (RPA), also known as linear-response time-dependent Hartree-Fock (LR-TDHF).
-      %\item[\texttt{STAB}] Perform wave function stability analysis.
-      \end{description}
-    \item[\texttt{Ints}] \hfill \\
-    Defines the integral routine. Available options: 
-      \begin{description}
-      \item[\texttt{DIRECT}] Default. Direct integral evaluation.  
-      \item[\texttt{INCORE}] Integral evaluation and storage in memory.  
-      \end{description}
-    \item[\texttt{Reference}] \hfill \\
-    Defines your reference wave function. Available options:
-      \begin{description}
-      \item[\texttt{REAL/COMPLEX RHF/UHF/GHF}] Default is real, and RHF or UHF depending on multiplicity of the molecule.  
-      \end{description}
-    \item[\texttt{Print}] \hfill \\
-    An integer [1$\leq$\texttt{print}$\leq$4] that toggles how much information is printed to the output file.
-    \end{description}
-    \subsection{Controlling the SCF optimization: the \texttt{[SCF]} section} \label{subsec:SCFInput}
-    ChronusQ allows you to take finer control over the self-consistent field optimization through the \texttt{[SCF]} section. You can add an external electric field to the SCF here, as well as turn on and off DIIS acceleration and fiddle with the convergence tolerances. Here are the available options:
-     \begin{description}
-       \item[\texttt{SCFDENTOL}] Floating point number that specifies the desired convergence of the density. \\
-        Default = \texttt{1e-10} 
-       \item[\texttt{SCFENETOL}] Floating point number that specifies the desired convergence of the energy. \\
-        Default = \texttt{1e-12}
-       \item[\texttt{SCFMAXITER}] Integer that specifies the maximum number of SCF iterations. \\
-        Default = \texttt{256}
-       \item[\texttt{DIIS}] Boolean that specifies whether to do DIIS acceleration of SCF. \\
-        Default = \texttt{true} \\
-        Note the DIIS algorithm is Pulay's Commutator-based DIIS.
-       \item[\texttt{FIELD}] Three floats that specify the external static electric field to be applied. \\
-       Default is zero field, equivalent to: \texttt{FIELD = 0.0 0.0 0.0}
-       \item[\texttt{GUESS}] Type of guess for the wave function. \\
-       Available options: 
-         \begin{description}
-           \item[\texttt{SAD}] \textbf{S}uperposition of \textbf{A}tomic \textbf{D}ensities. Default.
-           \item[\texttt{READ}] Read density 
-         \end{description}
-       \item[\texttt{PRINT}] An integer [1$\leq$\texttt{print}$\leq$4] that toggles how much information is printed to the output file.
-         
-     \end{description}
-
-    \subsection{Parallelism and other miscellaenous options: the \texttt{[MISC]} section}
-     If you compiled ChronusQ to work with SMP parallelism, you can change the number processors to be used in this section. All the keywords in \texttt{[MISC]} are totally optional. The default behavior of parallelism in ChronusQ is to use just one processor.
-     Available options:
-     \begin{description}
-     \item[\texttt{NSMP}] An integer number of processors to use. \\
-     Default = \texttt{1}
-     \end{description}
-
-    \subsection{Real time time-dependent Hartree-Fock: the \texttt{[RT]} section} \label{subsec:RTInput}
-    If in the \texttt{[QM]} section you have set \texttt{Job = RT}, ChronusQ will search for additional commands and options specified in the \texttt{[RT]} section. Here we can define the type of perturbing field (currently based on the electric dipole only), as well as the type of orthonormalization, and how long we want our time-evolution to last. Below are the possible flags:
-    \begin{description}
-      \item[\texttt{MAXSTEP}] \hfill \\ 
-        An integer that defines how many time steps you want to take. \\
-         Default = \texttt{10}.
-      \item[\texttt{TIMESTEP}] \hfill \\ 
-        A floating point number that defines how large your time step is (in au).  \\
-        Default = \texttt{0.05} au.
-      \item[\texttt{EDFIELD}] \hfill \\ 
-        Three floats that indicate the magnitude of the x, y, and z dipole components of the electric field. \\
-          Default is zero field, equivalent to: \texttt{EDFIELD = 0.0 0.0 0.0}
-      \item[\texttt{TIME\_ON}] \hfill \\ 
-        A floating point time, $t_{on}$, (in fs) we want the external field turned on. \\
-        Default = \texttt{0.0} fs.
-      \item[\texttt{TIME\_OFF}] \hfill \\ 
-        A floating point time, $t_{off}$, (in fs) we want the external field turned off. \\
-        Default = \texttt{1000.0} fs.
-      \item[\texttt{FREQUENCY}] \hfill \\ 
-        A floating point number that sets the frequency, $\omega$, (in eV) of the applied field. \\
-        Default = \texttt{0.0} eV.
-      \item[\texttt{PHASE}] \hfill \\ 
-        A floating point number that defines the phase offset, $\phi$, (in radians) of the applied field. \\
-        Default = \texttt{0.0} rad.
-      \item[\texttt{ENVELOPE}] \hfill \\ 
-        Envelope function that describes the shape of the external field. Possible options:
-        \begin{description}
-          \item[\texttt{PW}] Plane-wave, $E(t) = E \cdot \cos(\omega (t - t_{on}) + \phi)$ \\
-            Note that setting frequency to zero gives the static field.
-          \item[\texttt{LINRAMP}] Linear ramping up to the maximum in the first cycle, then constant envelope afterwards until we linearly ramp off to zero. \\
-            For $t_{on} \leq t \leq t_{off}$: \\
-            \begin{equation*}
-            E(t) = \begin{cases}
-              E \cdot (\omega(t - t_{on})/2\pi) \cos(\omega (t - t_{on}) + \phi)  & t\leq t_{on} + 2\pi/\omega\\
-              E \cdot \cos(\omega (t - t_{on}) + \phi)  & t_{on} + 2\pi/\omega < t < t_{off} - 2\pi/\omega\\
-              E \cdot (\omega(t_{off} - t)/2\pi) \cos(\omega (t - t_{on}) + \phi)  & t \geq t_{off} - 2\pi/\omega  
-            \end{cases}
-            \end{equation*}
- 
-          \item[\texttt{GAUSSIAN}] Gaussian envelope, $E(t) = E \cdot \exp{(-(\sigma ( t - t_{m}))^{2})} \sin(\omega (t - t_{on}) + \phi)$ \hfill \\
-           $\sigma$  = the range of frequency (FWHM) \\
-           $t_m$ = the time when the amplitude reaches maximum \\
-                  The default for $t_m = \sqrt{(\ln(1000))}/\sigma$ 
-                  (at $t_{on}$, the amplitude is 1/1000 times maximum. This ensures a smooth turning-on of the field) \\
-           Note that this requires you to define $\sigma$ through the \texttt{SIGMA} keyword, explained below.
-          \item[\texttt{STEP}] Step function,
-            \begin{equation*}
-            E(t) = \begin{cases}
-              E  & t_{on} \leq t \leq t_{off} \\
-              0  & else 
-            \end{cases}
-            \end{equation*}
-          \item[\texttt{ELLIPTIC}] Elliptically polarized light, requires \texttt{ELL_POL} keyword, described below. Note that
-             this will only use \textbf{two} of the field magnitudes in the \texttt{EDFIELD} keyword. It will zero out the magnitude
-             of polarization not in use. Choose the two orthogonal polarization components with \texttt{ELL_POL}.
-        \end{description}
-      \item[\texttt{ELL_POL}] \hfill \\ 
-        Type of polarization for the elliptically polarized light, only meaningful for \texttt{ENVELOPE = ELLIPTIC} \\
-        \begin{description}
-          \item[\texttt{LXY}] Left handed X-Y elliptically polarized light
-          \item[\texttt{LXZ}] Left handed X-Z elliptically polarized light
-          \item[\texttt{LYZ}] Left handed Y-Z elliptically polarized light
-          \item[\texttt{RXY}] Right handed X-Y elliptically polarized light
-          \item[\texttt{RXZ}] Right handed X-Z elliptically polarized light
-          \item[\texttt{RYZ}] Right handed Y-Z elliptically polarized light
-        \end{description}
-        Default = \texttt{LXY}.
-
-      \item[\texttt{SIGMA}] \hfill \\ 
-         A floating point number, in eV, that defines the full-width half-max (FWHM) of the Gaussian envelope, $\sigma$. This keyword is necessary (and meaningful) only for the Gaussian envelope.  \\
-         Default = \texttt{0.0} eV
-      \item[\texttt{ORTHO}] \hfill \\ 
-       Type of orthogonalization. Available options are \texttt{LOWDIN} and \texttt{CHOLESKY}. \\ 
-       Default = \texttt{LOWDIN}.
-      % I don't think we need to worry about the following keywords for the time being.
-      %\item[\texttt{INIDEN}] \hfill \\ 
-      % Type of initial density. Available options
-      %\item[\texttt{UPROP}] \hfill \\ 
-    \end{description}
-    \subsection{Response theory: the \texttt{[CIS]} and \texttt{[RPA]} section} \label{subsec:ResponseInput}
-    In the \texttt{[QM]} section, if you set \texttt{Job} equal to \texttt{CIS} or \texttt{RPA}, you can set the number of roots to look for here. This  
-     \begin{description}
-       \item{\texttt{NSTATES}} an integer number of roots to find in either CIS or RPA. \\
-       There is no default, and the number of roots must be specified manually.
-     \end{description}
 
     \newpage
     As a working example, on a machine that all of the dependencies had to be 
