@@ -540,7 +540,21 @@ ChronusQ input files are divided into sections that specify the molecular geomet
               0  & else 
             \end{cases}
             \end{equation*}
+          \item[\texttt{ELLIPTIC}] Elliptically polarized light, requires \texttt{ELL_POL} keyword, described below. Note that
+             this will only use \textbf{two} of the field magnitudes in the \texttt{EDFIELD} keyword. It will zero out the magnitude
+             of polarization not in use. Choose the two orthogonal polarization components with \texttt{ELL_POL}.
         \end{description}
+      \item[\texttt{ELL_POL}] \hfill \\ 
+        Type of polarization for the elliptically polarized light, only meaningful for \texttt{ENVELOPE = ELLIPTIC} \\
+        \begin{description}
+          \item[\texttt{LXY}] Left handed X-Y elliptically polarized light
+          \item[\texttt{LXZ}] Left handed X-Z elliptically polarized light
+          \item[\texttt{LYZ}] Left handed Y-Z elliptically polarized light
+          \item[\texttt{RXY}] Right handed X-Y elliptically polarized light
+          \item[\texttt{RXZ}] Right handed X-Z elliptically polarized light
+          \item[\texttt{RYZ}] Right handed Y-Z elliptically polarized light
+        \end{description}
+        Default = \texttt{LXY}.
 
       \item[\texttt{SIGMA}] \hfill \\ 
          A floating point number, in eV, that defines the full-width half-max (FWHM) of the Gaussian envelope, $\sigma$. This keyword is necessary (and meaningful) only for the Gaussian envelope.  \\
