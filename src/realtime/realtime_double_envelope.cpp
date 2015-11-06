@@ -38,9 +38,10 @@ namespace ChronusQ {
 template<>
 void RealTime<double>::formEDField() {  
   int IEnvlp   = this->IEnvlp_;
-  double Ex    = this->Ex_; 
-  double Ey    = this->Ey_; 
-  double Ez    = this->Ez_; 
+  int IEllPol  = this->IEllPol_;
+  double Ex    = this->Ex_;
+  double Ey    = this->Ey_;
+  double Ez    = this->Ez_;
   double TOn   = (this->TOn_)/phys.AuToFs;
   double TOff  = (this->TOff_)/phys.AuToFs;
   double Omega = (this->Freq_)/phys.eVPerHartree;
@@ -71,7 +72,7 @@ void RealTime<double>::formEDField() {
        Linearly ramping off to zero
   */
     if(Time >= TOn && Time <= TOff) {
-      OmegT = Omega*(Time-TOn) + Phase;
+      OmegT = Omega * (Time-TOn) + Phase;
       TMax = 2.0*math.pi/Omega;
       if(Time <= (TOn+TMax)) {
         this->EDField_[0] = Ex*((Time-TOn)/TMax)*std::cos(OmegT);
@@ -143,6 +144,57 @@ void RealTime<double>::formEDField() {
   */
     if(Time >= TOn && Time <= TOff) {
       OmegT = Omega * (Time-TOn) + Phase;
+    } else {
+      this->EDField_[0] = 0.0;
+      this->EDField_[1] = 0.0;
+      this->EDField_[2] = 0.0;
+    }
+  }
+  else if (IEnvlp == Elliptic) { 
+  /*
+     Elliptically polarized light. Effectively the same 
+      behavior as plane-wave / linearly polarized light,
+      but with two orthogonal components 90 degrees out
+      of phase with each other.
+     
+     Circularly polarized light is limiting case when two
+      orthogonal fields have the same E magnitude.
+
+     Need to specify components, as well as left or right
+      handedness. E.g. LXZ = left-handed XZ polarized light
+  */
+    if(Time >= TOn && Time <= TOff) {
+      OmegT = Omega*(Time-TOn) + Phase;
+      if(IEllPol == RXY) {
+        this->EDField_[0] = Ex*std::cos(OmegT);
+        this->EDField_[1] = Ey*std::sin(OmegT);
+        this->EDField_[2] = 0.0;
+      }
+      else if (IEllPol == RXZ) {
+        this->EDField_[0] = Ex*std::cos(OmegT);
+        this->EDField_[1] = 0.0;
+        this->EDField_[2] = Ez*std::sin(OmegT);
+      }
+      else if (IEllPol == RYZ) {
+        this->EDField_[0] = 0.0;
+        this->EDField_[1] = Ey*std::cos(OmegT);
+        this->EDField_[2] = Ez*std::sin(OmegT);
+      }
+      else if(IEllPol == LXY) {
+        this->EDField_[0] = Ex*std::sin(OmegT);
+        this->EDField_[1] = Ey*std::cos(OmegT);
+        this->EDField_[2] = 0.0;
+      }
+      else if (IEllPol == LXZ) {
+        this->EDField_[0] = Ex*std::sin(OmegT);
+        this->EDField_[1] = 0.0;
+        this->EDField_[2] = Ez*std::cos(OmegT);
+      }
+      else if (IEllPol == LYZ) {
+        this->EDField_[0] = 0.0;
+        this->EDField_[1] = Ey*std::sin(OmegT);
+        this->EDField_[2] = Ez*std::cos(OmegT);
+      }
     } else {
       this->EDField_[0] = 0.0;
       this->EDField_[1] = 0.0;

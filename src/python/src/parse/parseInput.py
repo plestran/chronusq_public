@@ -43,6 +43,15 @@ def parserOrth(parser,section,opt):
 
 #
 # Convert string obtained from ConfigParser
+# for RT.ell_pol into RT.ELL_POL enum
+#
+def parserEllPol(parser,section,opt):
+  strX = parser.get(section,opt)
+  strX = str(strX).upper()
+  return enumMaps.ellPolMap[strX]
+
+#
+# Convert string obtained from ConfigParser
 # for RT.envelope into RT.ENVELOPE enum
 #
 def parserEnv(parser,section,opt):
@@ -101,7 +110,8 @@ def genSecDict(workers,parser,section):
     'O-ORTH' :parserOrth,
     'O-FORMU':parserFormU,
     'O-GS'   :parserGuess,
-    'D3'     :parserDoubleArray
+    'D3'     :parserDoubleArray,
+    'O-ELL'  :parserEllPol
   }
 
   # Check if a dictionary exists for this section
@@ -133,7 +143,7 @@ def genSecDict(workers,parser,section):
       dict1[opt.upper()] = parseMap[readTyp](section,opt)
     elif readTyp in ('S'):
       dict1[opt.upper()] = parseMap[readTyp](section,opt).upper()
-    elif readTyp in ('O-ORTH','O-ENV','O-FORMU','O-GS','D3'):
+    elif readTyp in ('O-ORTH','O-ENV','O-FORMU','O-GS','D3','O-ELL'):
       dict1[opt.upper()] = parseMap[readTyp](parser,section,opt)
     else:
       msg = 'Option data ' + str(readTyp) + ' type not recognized'

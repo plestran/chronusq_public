@@ -52,7 +52,17 @@ envMap   = {
   'LINRAMP' :chronusQ.RealTime_ENVELOPE.LinRamp  ,
   'GAUSSIAN':chronusQ.RealTime_ENVELOPE.Gaussian ,
   'STEP'    :chronusQ.RealTime_ENVELOPE.Step     ,
-  'SINSQ'   :chronusQ.RealTime_ENVELOPE.SinSq    
+  'SINSQ'   :chronusQ.RealTime_ENVELOPE.SinSq    ,
+  'ELLIPTIC':chronusQ.RealTime_ENVELOPE.Elliptic    
+}
+
+ellPolMap = {
+  'LXY' :chronusQ.RealTime_ELL_POL.LXY,
+  'LXZ' :chronusQ.RealTime_ELL_POL.LXZ,
+  'LYZ' :chronusQ.RealTime_ELL_POL.LYZ,
+  'RXY' :chronusQ.RealTime_ELL_POL.RXY,
+  'RXZ' :chronusQ.RealTime_ELL_POL.RXZ,
+  'RYZ' :chronusQ.RealTime_ELL_POL.RYZ,
 }
 
 #
