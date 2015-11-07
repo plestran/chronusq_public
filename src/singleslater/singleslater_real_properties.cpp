@@ -32,23 +32,26 @@ template<>
 void SingleSlater<double>::computeMultipole(){
   if(!this->haveDensity) this->formDensity();
   if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
-  if(!this->controls_->doDipole && !this->controls_->doQuadpole) return;
+  if(this->maxMultipole_ < 1) return;
 
   int NB = this->nTCS_*this->nBasis_;
   int NBSq = NB*NB;
   int iBuf = 0;
-  for(auto ixyz = 0; ixyz < 3; ixyz++){
-    ConstRealMap mu(&this->aointegrals_->elecDipole_->storage()[iBuf],NB,NB);
-    (*dipole_)(ixyz,0) = -this->densityA_->frobInner(mu);
-    if(!this->isClosedShell && this->Ref_ != TCS) 
-      (*dipole_)(ixyz,0) += -this->densityB_->frobInner(mu);
-    iBuf += NBSq;
+
+  if(this->maxMultipole_ >= 1) {
+    for(auto ixyz = 0; ixyz < 3; ixyz++){
+      ConstRealMap mu(&this->aointegrals_->elecDipole_->storage()[iBuf],NB,NB);
+      (*dipole_)(ixyz,0) = -this->densityA_->frobInner(mu);
+      if(!this->isClosedShell && this->Ref_ != TCS) 
+        (*dipole_)(ixyz,0) += -this->densityB_->frobInner(mu);
+      iBuf += NBSq;
+    }
+    for(int iA = 0; iA < this->molecule_->nAtoms(); iA++)
+      *this->dipole_ += elements[this->molecule_->index(iA)].atomicNumber *
+            this->molecule_->cart()->col(iA);
   }
-  for(int iA = 0; iA < this->molecule_->nAtoms(); iA++)
-    *this->dipole_ += elements[this->molecule_->index(iA)].atomicNumber *
-          this->molecule_->cart()->col(iA);
   
-  if(this->controls_->doQuadpole){
+  if(this->maxMultipole_ >= 2){
     iBuf = 0;
     for(auto jxyz = 0; jxyz < 3; jxyz++)
     for(auto ixyz = jxyz; ixyz < 3; ixyz++){
@@ -64,10 +67,11 @@ void SingleSlater<double>::computeMultipole(){
             this->molecule_->cart()->col(iA) * 
             this->molecule_->cart()->col(iA).transpose();
 
-    (*this->tracelessQuadpole_) = (*this->quadpole_) - RealMatrix::Identity(3,3)*this->quadpole_->trace()/3;
+    (*this->tracelessQuadpole_) = 
+      (*this->quadpole_) - RealMatrix::Identity(3,3)*this->quadpole_->trace()/3;
   }
 
-  if(this->controls_->doOctpole){
+  if(this->maxMultipole_ >= 3){
     iBuf = 0;
     for(auto kxyz = 0;    kxyz < 3; kxyz++)
     for(auto jxyz = kxyz; jxyz < 3; jxyz++)
@@ -92,13 +96,13 @@ void SingleSlater<double>::computeMultipole(){
     for(auto ixyz = 0; ixyz < 3; ixyz++)
     for(auto jxyz = 0; jxyz < 3; jxyz++)
     for(auto kxyz = 0; kxyz < 3; kxyz++)
-      (*this->octpole_)(ixyz,jxyz,kxyz) += elements[this->molecule_->index(iA)].atomicNumber *
+      (*this->octpole_)(ixyz,jxyz,kxyz) += 
+            elements[this->molecule_->index(iA)].atomicNumber *
             (*this->molecule_->cart())(ixyz,iA)*
             (*this->molecule_->cart())(jxyz,iA)*
             (*this->molecule_->cart())(kxyz,iA);
     
   }
-//this->printMultipole();
 
 }
 
@@ -121,7 +125,9 @@ void SingleSlater<double>::computeSExpect(){
     for(auto i = 0; i < this->nOccA_; i++)
     for(auto j = 0; j < this->nOccB_; j++){
 
-      auto Sij = this->moA_->col(i).dot((*this->aointegrals_->overlap_) * this->moB_->col(j));
+      auto Sij = 
+        this->moA_->col(i).dot((*this->aointegrals_->overlap_) * this->moB_->col(j));
+
       this->Ssq_ -= Sij*Sij;
 
     }

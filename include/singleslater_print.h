@@ -53,28 +53,29 @@ void SingleSlater<T>::printInfo() {
  ***********************************************/
 template<typename T>
 void SingleSlater<T>::printMultipole(){
-  this->fileio_->out << "\nMultipole Information:" << endl;
-  this->fileio_->out << bannerTop << endl;
-  this->fileio_->out << std::setw(50) << std::left <<"Electric Dipole Moment"
-                        << "(Debye)" << endl;
-  this->fileio_->out << std::left << std::setw(5) <<"X=" 
-                     << std::fixed << std::right << std::setw(20) 
-                     << (*this->dipole_)(0,0)/phys.debye;
-  this->fileio_->out << std::left << std::setw(5) <<" Y=" 
-                     << std::fixed << std::right << std::setw(20) 
-                     << (*this->dipole_)(1,0)/phys.debye;
-  this->fileio_->out << std::left << std::setw(5) <<" Z=" 
-                     << std::fixed << std::right << std::setw(20) 
-                     << (*this->dipole_)(2,0)/phys.debye << endl;
-// jjg add total electric dipole moment
-  this->fileio_->out << std::left << std::setw(5) <<"Tot=" 
-                     << std::fixed << std::right << std::setw(20) 
-                     << std::sqrt((*this->dipole_)(2,0)*(*this->dipole_)(2,0) + 
-                         (*this->dipole_)(1,0)*(*this->dipole_)(1,0) + 
-                         (*this->dipole_)(0,0)*(*this->dipole_)(0,0)  
-                         )/phys.debye << endl;
-// jjg end total
-  if(this->controls_->doQuadpole) {
+  if(this->maxMultipole_ >= 1) {
+    this->fileio_->out << "\nMultipole Information:" << endl;
+    this->fileio_->out << bannerTop << endl;
+    this->fileio_->out << std::setw(50) << std::left <<"Electric Dipole Moment"
+                          << "(Debye)" << endl;
+    this->fileio_->out << std::left << std::setw(5) <<"X=" 
+                       << std::fixed << std::right << std::setw(20) 
+                       << (*this->dipole_)(0,0)/phys.debye;
+    this->fileio_->out << std::left << std::setw(5) <<" Y=" 
+                       << std::fixed << std::right << std::setw(20) 
+                       << (*this->dipole_)(1,0)/phys.debye;
+    this->fileio_->out << std::left << std::setw(5) <<" Z=" 
+                       << std::fixed << std::right << std::setw(20) 
+                       << (*this->dipole_)(2,0)/phys.debye << endl;
+    this->fileio_->out << std::left << std::setw(5) <<"Tot=" 
+                       << std::fixed << std::right << std::setw(20) 
+                       << std::sqrt((*this->dipole_)(2,0)*(*this->dipole_)(2,0) + 
+                             (*this->dipole_)(1,0)*(*this->dipole_)(1,0) + 
+                             (*this->dipole_)(0,0)*(*this->dipole_)(0,0)  
+                           )/phys.debye << endl;
+   }
+
+  if(this->maxMultipole_ >= 2) {
     this->fileio_->out << bannerMid << endl;
     this->fileio_->out << std::setw(50) << std::left << "Electric Quadrupole Moment" 
                        <<  "(Debye-\u212B)" << endl;
@@ -106,8 +107,9 @@ void SingleSlater<T>::printMultipole(){
                        << std::fixed << std::right << std::setw(20) 
                        << (*this->quadpole_)(2,2)*phys.bohr/phys.debye << endl;
     this->fileio_->out << bannerMid << endl;
-    this->fileio_->out << std::setw(50) << std::left << "Electric Quadrupole Moment (Traceless)" 
-                       <<  "(Debye-\u212B)" << endl;
+    this->fileio_->out << std::setw(50) << std::left 
+                       << "Electric Quadrupole Moment (Traceless)" <<  "(Debye-\u212B)" 
+                       << endl;
     this->fileio_->out << std::left << std::setw(5) <<"XX=" 
                        << std::fixed << std::right << std::setw(20) 
                        << (*this->tracelessQuadpole_)(0,0)*phys.bohr/phys.debye;
@@ -136,7 +138,8 @@ void SingleSlater<T>::printMultipole(){
                        << std::fixed << std::right << std::setw(20) 
                        << (*this->tracelessQuadpole_)(2,2)*phys.bohr/phys.debye << endl;
   }
-  if(this->controls_->doOctpole) {
+
+  if(this->maxMultipole_ > 3) {
     this->fileio_->out << bannerMid << endl;
     this->fileio_->out << std::setw(50) << std::left << "Electric Octupole Moment" 
                        << "(Debye-\u212B\u00B2)" << endl;
