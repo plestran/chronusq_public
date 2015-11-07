@@ -45,6 +45,7 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<dcomplex> * other){
     this->havePT      = true;
     this->isClosedShell = other->isClosedShell;
     this->printLevel_ = other->printLevel_;
+    this->maxMultipole_ = other->maxMultipole_;
     this->doDIIS = other->doDIIS;
     this->isHF   = other->isHF;
     this->isDFT  = other->isDFT;
@@ -95,6 +96,7 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other){
     this->havePT      = true;
     this->isClosedShell = other->isClosedShell;
     this->printLevel_ = other->printLevel();
+    this->maxMultipole_ = other->maxMultipole();
     this->doDIIS = other->doDIIS;
     this->isHF   = other->isHF;
     this->isDFT  = other->isDFT;
