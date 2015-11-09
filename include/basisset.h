@@ -109,6 +109,7 @@ class BasisSet{
   int  maxPrim_     ; ///< Maximum number of Gaußian primitives for a single basis function
   int  maxL_        ; ///< Maximum angular momentum for a single basis function
   bool doSph_       ; ///< Whether or not to make the cartesian -> spherical transformation
+  double      * radCutSh_ ; ///< CutOff Radius for each Shell
 
   std::vector<int>               nLShell_  ; ///< Maps L value to # of shells of that L
   std::vector<int>               mapSh2Bf_ ; ///< Maps shell number to first basis funtion
@@ -156,7 +157,7 @@ public:
     this->haveMapSh2Cen    = false  ;
     this->basisFile_       = nullptr;
     this->fileio_          = NULL   ;
-   
+    this->radCutSh_        = NULL   ; 
     this->printLevel_      = 1      ;
   };
 
@@ -179,6 +180,7 @@ public:
     delete[] shells_old;
     delete[] sortedShells;
 */
+    delete[] this->radCutSh_;
   };
 
   inline void communicate(FileIO &fileio){ this->fileio_ = &fileio;};
@@ -191,11 +193,16 @@ public:
   inline int       maxL() {return this->maxL_;         }; ///< Return max angular momentum
   inline int    maxPrim() {return this->maxPrim_;      }; ///< Return max # primitive GTOs
   inline int printLevel() {return this->printLevel_;   }; ///< Return printLevel
+  inline double * radCutSh() {return this->radCutSh_;  }; ///< Return radCutSh
+  inline  double getradCutSh(int iShell) {return this->radCutSh_[iShell];   }; ///< Return radCutSh
   
   template <typename T> double * basisEval(int,std::array<double,3>,T*);
   template <typename T> double * basisEval(libint2::Shell&,T*);
   template <typename T> double * basisProdEval(libint2::Shell,libint2::Shell,T*);
-  double radcut(int IAtom, double thr);
+  std::vector<bool> MapGridBasis(cartGP pt);  ///< Create a Mapping of basis over grid points
+  void     radcut(double thr, int maxiter, double epsConv);   //return all shell cut off radius
+  double   fSpAv (int iop,int l, double alpha, double r);   //Evaluate Spheric Average of a Shell
+  double   fRmax (int l, double alpha, double thr, double epsConv, int maxiter);   //Evaluate Spheric Average of a Shell
   inline libint2::Shell      shells(int i) {return this->shells_[i];    };
   inline int                nLShell(int L) {return this->nLShell_[L];   };
   inline int               mapSh2Bf(int i) {return this->mapSh2Bf_[i];  };

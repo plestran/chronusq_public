@@ -69,63 +69,81 @@ double SingleSlater<T>::normBeckeW(cartGP gridPt){
        return norm ;
 };
 
-template<typename T>
-double SingleSlater<T>::radsphe(int iAtm, double thr){
-       double rad = this->basisset_->radcut(iAtm,1.0e-10);
-       return rad ;
-};
 
 template<typename T>
-void SingleSlater<T>::buildVxc(cartGP gridPt, double weight){
+void SingleSlater<T>::buildVxc(cartGP gridPt, double weight, std::vector<bool> mapRad_){
 //  Build the Vxc therm at each Grid Points  
+   auto startVxc = std::chrono::high_resolution_clock::now();  
    double *pointProd; 
    double rhor = 0.0;
    double rhor_B = 0.0;
-// bool   do_corr = false;                   //Activate Correlation
-// bool   do_ex = true;                      //Activate Exchange
+//T   
+   auto start_2 = std::chrono::high_resolution_clock::now();  // Timing to allocate and set to zero S(r)
+//T
    std::unique_ptr<RealMatrix>  overlapR_;        ///< Overlap at grid point
    overlapR_ = std::unique_ptr<RealMatrix>(
      new RealMatrix(this->nBasis_,this->nBasis_));
    overlapR_->setZero();
+//T
+   auto finish_2 = std::chrono::high_resolution_clock::now();  
+   this->duration_2 += finish_2 - start_2;
+//T
 // Loops over shells
-
-///Timing
-   
-///T   auto start_dens = std::chrono::high_resolution_clock::now();  
+//T
+   auto start_4 = std::chrono::high_resolution_clock::now();  // Timing to allocate and set to zero S(r)
    for(auto s1=0l, s12=0l; s1 < this->basisset_->nShell(); s1++){
-      int bf1_s = this->basisset_->mapSh2Bf(s1);
-      int n1    = this->basisset_->shells(s1).size();
-      for(int s2=0; s2 <= s1; s2++, s12++){
-        int bf2_s   = this->basisset_->mapSh2Bf(s2);
-        int n2      = this->basisset_->shells(s2).size();
-        auto center = this->basisset_->shells(s1).O;
-        double *Buff = new double [n1*n2];
-///T   auto start_5 = std::chrono::high_resolution_clock::now();  
-        RealMap fBuff(Buff,n1,n2);
-        fBuff.setZero();
-///T   auto finish_5 = std::chrono::high_resolution_clock::now();  
-///T   this->duration_5 += finish_5 - start_5;
-///T   auto start_1 = std::chrono::high_resolution_clock::now();  
-        pointProd = 
-          this->basisset_->basisProdEval(
-            this->basisset_->shells(s1),
-            this->basisset_->shells(s2),
-            &gridPt
-          );
-///T   auto finish_1 = std::chrono::high_resolution_clock::now();  
-///T   this->duration_1 += finish_1 - start_1;
-///T   auto start_2 = std::chrono::high_resolution_clock::now();  
-        Buff = this->twodgrid_->BuildDensity(Buff,pointProd,n1,n2);
-        overlapR_->block(bf1_s,bf2_s,n1,n2) = fBuff; 
-///T   auto finish_2 = std::chrono::high_resolution_clock::now();  
-///T   this->duration_2 += finish_2 - start_2;
+      if (mapRad_[s1+1] ){
+        int bf1_s = this->basisset_->mapSh2Bf(s1);
+        int n1    = this->basisset_->shells(s1).size();
+        for(int s2=0; s2 <= s1; s2++, s12++){
+          if (mapRad_[s2+1] ){
+            int bf2_s   = this->basisset_->mapSh2Bf(s2);
+            int n2      = this->basisset_->shells(s2).size();
+            auto center = this->basisset_->shells(s1).O;
+            double *Buff = new double [n1*n2];
+            RealMap fBuff(Buff,n1,n2);
+            fBuff.setZero();
+            pointProd = 
+              this->basisset_->basisProdEval(
+                this->basisset_->shells(s1),
+                this->basisset_->shells(s2),
+                &gridPt
+              );
+            Buff = this->twodgrid_->BuildDensity(Buff,pointProd,n1,n2);
+            overlapR_->block(bf1_s,bf2_s,n1,n2) = fBuff; 
+          }
         }
-     }
-///T    auto finish_dens = std::chrono::high_resolution_clock::now();  
-///T    this->duration_dens += finish_dens - start_dens;
+      }
+    }  
+     delete[] pointProd;
+//T
+   auto finish_4 = std::chrono::high_resolution_clock::now();  
+   this->duration_4 += finish_4 - start_4;
+//T
+//T
+   auto start_3 = std::chrono::high_resolution_clock::now();  // Timing S contraction
+//T
      (*overlapR_) = overlapR_->selfadjointView<Lower>();;
    if(this->isClosedShell && this->Ref_ != TCS) {
     rhor = overlapR_->frobInner(this->densityA()->conjugate());
+//T
+   auto finish_3 = std::chrono::high_resolution_clock::now();  
+   this->duration_3 += finish_3 - start_3;
+//T
+    if(rhor    <= 0.0 ) {
+    if((std::abs(rhor)) <= 1.0e10) rhor = 0.0;
+    }
+/*      if (std::isnan(rhor))  cout << "HELP rho" <<endl;
+      if (std::isnan(std::pow(rhor,(1.0/3.0))))  {
+       cout << "HELP rho^1/3" <<endl;
+       cout << "rho = " << rhor << endl;
+       cout <<" Overlap " <<endl;
+       cout << (*overlapR_) << endl;
+       cout <<" DensityMatrix Conjugate " <<endl;
+       cout << this->densityA()->conjugate() << endl;
+        }
+      if (std::isnan(weight))  cout << "HELP weight" <<endl;
+*/
 //
 //  LDA Slater Exchange
     if (this->ExchKernel_ != NOEXCH) {
@@ -163,6 +181,8 @@ void SingleSlater<T>::buildVxc(cartGP gridPt, double weight){
       }
      }
     }
+    auto finish_Vxc = std::chrono::high_resolution_clock::now();  
+    this->duration_1 += finish_Vxc - startVxc;
 //  }
 };  //End
 

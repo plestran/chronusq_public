@@ -31,35 +31,47 @@ namespace ChronusQ {
 
 template<>
 void SingleSlater<double>::formVXC(){
+//Timing
+    this->duration_1 = std::chrono::seconds(0) ;
+    this->duration_2 = std::chrono::seconds(0) ;
+    this->duration_3 = std::chrono::seconds(0) ;
+    this->duration_4 = std::chrono::seconds(0) ;
+    this->duration_5 = std::chrono::seconds(0) ;
+    this->duration_6 = std::chrono::seconds(0) ;
+//T
+
+
     int nAtom    = this->molecule_->nAtoms(); // Number of Atoms
     int nRad     = 100;       // Number of Radial grid points for each center
     int nAng     = 302;       // Number of Angular grid points for each center 
                               //  (only certain values are allowed - see grid.h)
-
     int npts     = nRad*nAng; // Total Number of grid point for each center
 
-    double weight= 0.0;                            
-
+    double weight  = 0.0;                            
+    double bweight = 0.0;
     //TF LDA Prefactor (for Vx)
     double CxVx = -(std::pow((3.0/math.pi),(1.0/3.0)));    
     double CxEn =  (3.0/4.0);      //TF LDA Prefactor to finish the X-Energy
     double val = 4.0*math.pi*CxVx;
     this->totalEx = 0.0;                                  // Total Exchange Energy
     this->totalEcorr = 0.0;                               // Total Correlation Energy
-//  Timing
-/*
-    duration_dens = std::chrono::seconds(0) ;
-    duration_1 = std::chrono::seconds(0) ;
-    duration_2 = std::chrono::seconds(0) ;
-    duration_5 = std::chrono::seconds(0) ;
-*/
-
+    bool nodens;
+    this->epsScreen = 1.0e-5;
+    this->epsConv   = 1.0e-7;
+    this->maxiter   = 50;
+    this->screenVxc = false;
+    std::vector<bool> tmpnull(this->basisset_->nShell()+1);
 /*  
  *  Generate grids 
  *
  *    Raw grid, it has to be centered and integrated over each center and 
  *    centered over each atom
  */
+    if (this->screenVxc ) {
+      this->basisset_->radcut(this->epsScreen, this->maxiter, this->epsConv);
+    } else {
+      std::fill(tmpnull.begin(),tmpnull.end(),true);
+    }
     GaussChebyshev1stGridInf Rad(nRad,0.0,1.0);   // Radial Grid
     LebedevGrid GridLeb(nAng);                    // Angular Grid
     GridLeb.genGrid();                            // Generate Angular Grid
@@ -68,6 +80,7 @@ void SingleSlater<double>::formVXC(){
     if(!this->isClosedShell && this->Ref_ != TCS) this->vXB()->setZero();
     if(!this->isClosedShell && this->Ref_ != TCS) this->vCorB()->setZero();
     // Loop over atomic centers
+     
     for(int iAtm = 0; iAtm < nAtom; iAtm++){
 
       // The Radial grid is generated and scaled for each atom
@@ -86,17 +99,35 @@ void SingleSlater<double>::formVXC(){
        double rad;
       // Loop over grid points
       for(int ipts = 0; ipts < npts; ipts++){
+//T   
+   auto start_5 = std::chrono::high_resolution_clock::now();  // Timing weights
+//T
+        nodens =false;
         // Evaluate each Becke fuzzy call weight, normalize it and muliply by 
         //   the Raw grid weight at that point
-        weight = Raw3Dg.getweightsGrid(ipts)  
-                 * (this->formBeckeW((Raw3Dg.gridPtCart(ipts)),iAtm))
-                 / (this->normBeckeW(Raw3Dg.gridPtCart(ipts))) ;
+        bweight = (this->formBeckeW((Raw3Dg.gridPtCart(ipts)),iAtm)) 
+                  / (this->normBeckeW(Raw3Dg.gridPtCart(ipts))) ;
+        weight = Raw3Dg.getweightsGrid(ipts) * bweight;
+        
+//T
+   auto finish_5 = std::chrono::high_resolution_clock::now();  
+   this->duration_5 += finish_5 - start_5;
+//T
         // Build the Vxc for the ipts grid point 
         //  ** Vxc will be ready at the end of the two loop, to be finalized ** 
-        this->buildVxc((Raw3Dg.gridPtCart(ipts)),weight);
+        if (this->screenVxc ) {
+          auto mapRad_ = this->basisset_->MapGridBasis(Raw3Dg.gridPtCart(ipts));
+          if (mapRad_[0] || (bweight < this->epsScreen)) nodens = true;
+          if(!nodens) this->buildVxc((Raw3Dg.gridPtCart(ipts)),weight,mapRad_);
+        } else {
+          this->buildVxc((Raw3Dg.gridPtCart(ipts)),weight,tmpnull);
+        }
 
       } // loop ipts
     } // loop natoms
+//T   
+   auto start_6 = std::chrono::high_resolution_clock::now();  // Timing Digestion VXC
+//T
 
     //  Finishing the Vxc using the TF factor and the integration 
     //    prefactor over a solid sphere
@@ -110,6 +141,10 @@ void SingleSlater<double>::formVXC(){
       (*this->vXA()) *= std::pow(2.0,(1.0/3.0));  
       (*this->vXB()) *= std::pow(2.0,(1.0/3.0)) * val;
     }
+//T
+   auto finish_6 = std::chrono::high_resolution_clock::now();  
+   this->duration_6 += finish_6 - start_6;
+//T
 
     if(this->printLevel_ >= 3) {
       prettyPrint(this->fileio_->out,(*this->vXA()),"LDA Vx alpha");
@@ -120,12 +155,12 @@ void SingleSlater<double>::formVXC(){
       this->fileio_->out << "Total LDA Ex ="    << this->totalEx 
                          << " Total VWN Corr= " << this->totalEcorr << endl;
     }
-/*
-    this->fileio_->out << "PointProd Total Time " << duration_1.count() <<endl;
-    this->fileio_->out << "BuildDens Total Time " << duration_2.count() <<endl;
-    this->fileio_->out << "ZeroOver Total Time " << duration_5.count() <<endl;
-    this->fileio_->out << "Density Total Time " << duration_dens.count() <<endl;
-*/
+    this->fileio_->out << "Weights Evaluation       Total Time " << duration_5.count() <<endl;
+    this->fileio_->out << "Overlap Alloc + set Zero Total Time " << duration_2.count() <<endl;
+    this->fileio_->out << "Overlap Creation         Total Time " << duration_4.count() <<endl;
+    this->fileio_->out << "Overlap Contraction      Total Time " << duration_3.count() <<endl;
+    this->fileio_->out << "Form (Vx + Vc)           Total Time " << duration_1.count() <<endl;
+    this->fileio_->out << "Vxc Digestion            Total Time " << duration_6.count() <<endl;
 }; //End
 
 template<>
@@ -162,7 +197,6 @@ void SingleSlater<double>::formCor(double rho, double spindensity){
    double S4    = 0.0;
    double S5    = 0.0;
    double M1    = 0.0;
-   double M2    = 0.0;
    double db_dr = 0.0; 
    double delta_eps_etha = 0.0;
    double spindensity_4 = std::pow(spindensity,4.0);

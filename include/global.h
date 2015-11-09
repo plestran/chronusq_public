@@ -64,7 +64,7 @@
 #include <boost/geometry/geometry.hpp>
 #include <boost/math/constants/constants.hpp>
 #include <boost/python.hpp>
-
+#include <boost/math/special_functions/gamma.hpp>
 // Misc
 #include <stdlib.h>
 //#include <sys/stat.h>

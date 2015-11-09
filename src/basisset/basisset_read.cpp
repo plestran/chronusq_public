@@ -396,15 +396,104 @@ double * BasisSet::basisProdEval(libint2::Shell s1, libint2::Shell s2, sph3GP *p
   
 }
 
-double radcut(int IAtom, double thr){
-  double radius = 0.0;
-//  double *s1Eval = basisEval(s1,pt);
-//  for(auto i = 0; i < s1.size(); i++){
-//     s1Eval[i] 
-//  }
-  return radius;
-};
 
+std::vector<bool> BasisSet::MapGridBasis(cartGP pt){
+//  Set map_[ishell] to be avaluated (true) or not (false)
+//  note: radCutSh_ has to be already populated by calling before radcut
+//bool * map_ = new bool[this->nShell()+1];
+  std::vector<bool> map_(this->nShell()+1);
+  double x ;
+  double y ;
+  double z ;
+  double r ;
+  bool   nodens = true;  //becomes truee if at least one shell hs to evaluated and it is stored in map_[0]
+  for(auto s1=0l; s1 < this->nShell(); s1++){  //loop over shells
+    auto center = shells(s1).O;
+    x = bg::get<0>(pt) - center[0];
+    y = bg::get<1>(pt) - center[1];
+    z = bg::get<2>(pt) - center[2];
+    r = std::pow((x*x + y*y + z*z),(0.5));
+    map_[s1+1] = false;        
+    if (r < this->radCutSh_[s1]) {
+      map_[s1+1] = true;
+      nodens = false;
+      }
+    } //End loop over shells
+  map_[0] = nodens;
+  return map_;
+}
+
+
+void BasisSet::radcut(double thr, int maxiter, double epsConv){
+  this->radCutSh_ = new double[this->nShell()];
+  double alphaMin;
+//  double *s1Eval = basisEval(s1,pt);
+  for(auto s1=0l; s1 < this->nShell(); s1++){
+//    find smallest alpha coeff for each shell
+      auto contDepth = this->shells(s1).alpha.size(); 
+      alphaMin = 1.0e15;
+      for(auto k = 0; k < contDepth; k++){
+        if (this->shells(s1).alpha[k] <= alphaMin){
+        alphaMin = this->shells(s1).alpha[k];
+        }
+      }
+//       cout << "s1 " << s1 << endl;
+//       this->fSpAv (2, shells(s1).contr[0].l, alphaMin, 1.0e-5);
+//       this->fSpAv (1, shells(s1).contr[0].l, alphaMin, 3);
+//     Populate a Vector storing all the cut off radius (Av_xi(r_cut)<thr)
+       radCutSh_[s1] = this->fRmax (shells(s1).contr[0].l, alphaMin, thr, epsConv, maxiter);
+
+  }
+  return ;
+}
+
+double BasisSet::fRmax (int l, double alpha, double thr, double epsConv, int maxiter){
+  double root ;
+  double root1 ;
+       root =  fSpAv (2, l,alpha, thr);
+  for (auto i=0; i < maxiter; i++){
+       root1  =  - (this->fSpAv(0, l,alpha, root) - thr);
+       root1 /=  this->fSpAv (1, l,alpha, root);
+       root1 +=  root;
+       if(std::abs(root1-root) <= epsConv){
+//       cout << "l "<< l << " alpha " << alpha <<endl;
+//       cout << "root(n-1)= " << root  << " root(n)= "<<root1 <<" abs_err " << std::abs(root1-root)  << endl;
+//       cout << "Root found " << root1 << " It " << i << " froot " << this->fSpAv(0, l,alpha, root) << endl;
+         return root1;
+       }else{     
+           root = root1;
+    }
+   }
+           cout << "Convergence Failure in fRmax, change maxiter or turn off screening " << endl;    
+           cout << "root(n-1)= " << root  << " root(n)= "<<root1 <<" abs_err " << std::abs(root1-root)  << endl;
+           CErr("Convergence Failure",this->fileio_->out);
+}   
+
+double BasisSet::fSpAv (int iop, int l, double alpha, double r){
+       double fAv = 0.0;
+       double two = 2.0;
+       double threeOv2 = 1.5;
+       double oneOv2 = 0.5;
+       fAv = std::pow((two*alpha),(l+threeOv2)) ;
+       fAv /= two*math.pi*boost::math::tgamma(l+threeOv2); 
+       fAv  = std::pow(fAv,(oneOv2)) ;
+
+       if (iop == 0){
+       fAv *= std::exp(-alpha*r*r) ;
+       fAv *= std::pow(r,l) ;
+       }else if(iop ==1){
+       fAv *= std::exp(-alpha*r*r);
+       fAv *= std::pow(r,(l-1)) ;
+       fAv *= (l - two*alpha*r*r);
+       }else if(iop = 2){
+       fAv = -std::log(fAv);
+       fAv += std::log(r);
+       fAv /= -alpha;
+       fAv = std::pow(fAv,0.5);
+      }   
+//       cout << "l "<< l << " alpha " << alpha << " fAv " << fAv <<endl;
+       return fAv;
+     }
 
 } // namespace ChronusQ
 
