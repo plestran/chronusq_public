@@ -1,6 +1,0 @@
-mkdir build_gcc_libint
-cp -r Test build_gcc_libint
-cd build_gcc_libint
-cmake -DCMAKE_CXX_COMPILER=g++ -DCMAKE_Fortran_COMPILER=gfortran -DCMAKE_CXX_FLAGS='-w -O3 -std=c++11' -DCMAKE_C_COMPILER=gcc -DUSE_LIBINT=ON ..
-make
-ln -s src/chronusQ/chronusQ .
