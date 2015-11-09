@@ -99,5 +99,26 @@ void BasisSet::renormShells(){
     iShell->renorm();
 } // BasisSet::renormShells
 
+/**
+ * Uncontract the basis
+ */
+std::vector<libint2::Shell> BasisSet::uncontractBasis(){
+  std::vector<libint2::Shell> newShells;
+
+  for(auto iShell = this->shells_.begin(); iShell != this->shells_.end(); ++iShell) {
+//  cout << " New Shell " << endl;
+    for(auto i = 0; i < iShell->alpha.size(); ++i){
+      newShells.push_back(libint2::Shell{
+        { iShell->alpha[i] },
+        { {iShell->contr[0].l,this->doSph_,{1.0}  }},
+        { {iShell->O[0],iShell->O[1],iShell->O[2]}}
+      } );
+//    cout << iShell->alpha[i] << " " << iShell->contr[0].l << endl;
+    }
+  }
+
+  return newShells;
+} // BasisSet::uncontractBasis
+
 
 }; //namespace ChronusQ

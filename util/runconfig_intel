@@ -1,6 +1,0 @@
-mkdir build
-cp -r Test build
-cd build
-cmake -DCMAKE_CXX_COMPILER=icpc -DCMAKE_Fortran_COMPILER=ifort -DCMAKE_CXX_FLAGS='-w -O3' -DCMAKE_C_COMPILER=icc ..
-make
-ln -s src/chronusQ/chronusQ .

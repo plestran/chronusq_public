@@ -83,6 +83,7 @@ knownKeywords['RT'] = {
   'SIGMA'    :CQKeyword('SIGMA'    ,'D'      ,False),
   'ENVELOPE' :CQKeyword('ENVELOPE' ,'O-ENV'  ,False),
   'ORTHO'    :CQKeyword('ORTHO'    ,'O-ORTH' ,False), 
+  'ELL_POL'  :CQKeyword('ELL_POL'  ,'O-ELL'  ,False), 
   'INIDEN'   :CQKeyword('INIDEN'   ,'I'      ,False),
   'UPROP'    :CQKeyword('UPROP'    ,'O-FORMU',False),
   'PRINT'    :CQKeyword('PRINT'    ,'I'      ,False),

@@ -207,9 +207,11 @@ struct Phys {
   double eVPerHartree;
   double nmPerHartree;
   double AuToFs;
+  double SPEED_OF_LIGHT;
   //number of cartesian AO's in a shell
 };
-const Phys phys = {0.5291772083000001,0.393430307,27.211396132,45.56335,0.02418884326505};
+const Phys phys = {0.5291772083000001,0.393430307,27.211396132,45.56335,0.02418884326505,
+                   137.035999139};
 
 
 //------------------//

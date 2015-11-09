@@ -77,14 +77,13 @@ static double factTLarge[21] = {
 // initialize AOIntegrals
 //---------------------
 void AOIntegrals::iniAOIntegrals(Molecule * molecule, BasisSet * basisset, 
-                                 FileIO * fileio, Controls * controls,BasisSet * DFbasisSet){
+                                 FileIO * fileio, Controls * controls,
+                                 BasisSet * DFbasisSet)
+{
   this->communicate(*molecule,*basisset,*fileio,*controls);
   this->initMeta();
 
-  
   if(controls->doTCS) this->nTCS_ = 2;
-//this->allocERI = this->controls_->buildn4eri;
-//this->doDF     = this->controls_->doDF;
   if(this->controls_->buildn4eri) this->integralAlgorithm = INCORE;
   if(this->controls_->doDF     ) this->integralAlgorithm = DENFIT;
   this->alloc();
@@ -97,30 +96,32 @@ void AOIntegrals::generateFmTTable() {
   int i,m;
   double critT = 33.0;
   double expT, factor, term, sum, twoT, Tn;
-  for(i=0;i<MaxFmTPt;i++){
-    if(std::abs(T)<= math.small) {
-      for(m=0;m<=MaxTotalL;m++) this->FmTTable_[i][m]=math.one/(math.two*m+1);
-    } else if(T>critT) {
-      this->FmTTable_[i][0] = math.half*sqrt(math.pi/T);
-      twoT = math.two*T;
-      Tn=math.one;
-      for(m=1;m<=MaxTotalL;m++) {
-        Tn*=twoT;
-        this->FmTTable_[i][m] = this->FmTTable_[i][0]*dFactorial[m]/Tn;
+  for(i = 0; i < MaxFmTPt; i++){
+    if(std::abs(T) <= math.small) {
+      for(m = 0; m <= MaxTotalL; m++) 
+        this->FmTTable_[i][m] = math.one / (math.two * m + 1);
+    } else if(T > critT) {
+      this->FmTTable_[i][0] = math.half * sqrt(math.pi / T);
+      twoT = math.two * T;
+      Tn = math.one;
+      for(m = 1; m <= MaxTotalL; m++) {
+        Tn *= twoT;
+        this->FmTTable_[i][m] = this->FmTTable_[i][0] * dFactorial[m] / Tn;
       };
     } else {
       expT   = exp(-T);
       factor = MaxTotalL + math.half;
-      term   = math.half/factor;
+      term   = math.half / factor;
       sum    = term;
-      while(term>math.small) {
+      while(term > math.small) {
         factor += math.one;
-        term   *= T/factor;
+        term   *= T / factor;
         sum    += term;
       };
-      this->FmTTable_[i][MaxTotalL] = expT*sum;
-      twoT = math.two*T;
-      for(m=MaxTotalL-1;m>=0;m--) this->FmTTable_[i][m] = (twoT*this->FmTTable_[i][m+1]+expT)/(2*m+1);
+      this->FmTTable_[i][MaxTotalL] = expT * sum;
+      twoT = math.two * T;
+      for(m = MaxTotalL - 1; m >= 0; m--) 
+        this->FmTTable_[i][m] = (twoT * this->FmTTable_[i][m+1] + expT)/(2*m + 1);
     };
     T += intervalFmT;
   };
@@ -130,30 +131,30 @@ void AOIntegrals::computeFmTTaylor(double *FmT, double T, int maxM, int minM){
   int m,i;
   double intervalFmT = 0.025;
   double critT = 33.0;
-  if(T>critT) {
-    double Tn=sqrt(T);
-    FmT[0] = factTLarge[0]/Tn;
-    for(m=minM+1;m<=maxM;m++) {
-      Tn*=T;
+  if(T > critT) {
+    double Tn = sqrt(T);
+    FmT[0] = factTLarge[0] / Tn;
+    for(m = minM + 1; m <= maxM; m++) {
+      Tn    *= T;
       FmT[m] = factTLarge[m]/Tn;
     };
   } else {
-    int j=T/intervalFmT;
-    double deltaT = j*intervalFmT-T;
+    int    j      = T / intervalFmT;
+    double deltaT = j * intervalFmT - T;
     double sum = this->FmTTable_[j][maxM];
     double tmp = math.one;
     double change;
-    for(i=1;i<5;i++){
-      tmp   *= deltaT/i;
-      change = tmp*this->FmTTable_[j][maxM+i];
+    for(i = 1; i < 5; i++){
+      tmp   *= deltaT / i;
+      change = tmp * this->FmTTable_[j][maxM + i];
       sum   += change;
     };
 //  down-recursion to obtain m<maxM values
-    FmT[maxM]=sum;
-    if(minM<maxM) {
-      double twoT = math.two*T;
+    FmT[maxM] = sum;
+    if(minM < maxM) {
+      double twoT = math.two * T;
       double expT = exp(-T);
-      for(m=maxM-1;m>=minM;m--) FmT[m] = (twoT*FmT[m+1]+expT)*smallT[m];
+      for(m = maxM - 1; m >= minM; m--) FmT[m] = (twoT * FmT[m+1] + expT) * smallT[m];
     };
   };
 };
@@ -167,44 +168,56 @@ void AOIntegrals::iniQuartetConstants(ShellPair *ijShellPair, ShellPair *klShell
   nPGTOs[1] = ijShellPair->nPGTOs[1];
   nPGTOs[2] = klShellPair->nPGTOs[0];
   nPGTOs[3] = klShellPair->nPGTOs[1];
-  int totalL = (*ijShellPair).LTotal+(*klShellPair).LTotal;
+  int totalL = ijShellPair->LTotal + klShellPair->LTotal;
   double PQ,sqrPQ=0.0;
   double T,Upq,normijkl;
   double *FmT = new double[totalL+1];
   double expo1,expo2,expoT;
-  for(i=0;i<nPGTOs[0];i++) for(j=0;j<nPGTOs[1];j++) for(k=0;k<nPGTOs[2];k++) for(l=0;l<nPGTOs[3];l++) {
-    Upq = ((*ijShellPair).UAB[i][j])*((*klShellPair).UAB[k][l]);
-//  Upq = ((*ijShellPair).KAB[i][j])*((*klShellPair).KAB[k][l]);
-    if(std::abs(Upq)>this->controls_->thresholdS) {
-      expo1=(*ijShellPair).zeta[i][j];
-      expo2=(*klShellPair).zeta[k][l];
-      expoT=expo1+expo2;
-      for(m=0;m<3;m++) {
-        centerQuartet[m][i][j][k][l]=((*ijShellPair).centerPZeta[m][i][j]+(*klShellPair).centerPZeta[m][k][l])/expoT;
-        this->quartetConstants_->deltaWP[m][i][j][k][l] = centerQuartet[m][i][j][k][l] - (*ijShellPair).centerP[m][i][j];
-        this->quartetConstants_->deltaWQ[m][i][j][k][l] = centerQuartet[m][i][j][k][l] - (*klShellPair).centerP[m][k][l];
+  for(i = 0; i < nPGTOs[0]; i++) 
+  for(j = 0; j < nPGTOs[1]; j++) 
+  for(k = 0; k < nPGTOs[2]; k++) 
+  for(l = 0; l < nPGTOs[3]; l++) {
+    Upq = ijShellPair->UAB[i][j] * klShellPair->UAB[k][l];
+    if(std::abs(Upq) > this->controls_->thresholdS) {
+      expo1 = ijShellPair->zeta[i][j];
+      expo2 = klShellPair->zeta[k][l];
+      expoT = expo1 + expo2;
+      for(m = 0; m < 3; m++) {
+        centerQuartet[m][i][j][k][l]=
+          (ijShellPair->centerPZeta[m][i][j] + klShellPair->centerPZeta[m][k][l]) / expoT;
+
+        this->quartetConstants_->deltaWP[m][i][j][k][l] = 
+          centerQuartet[m][i][j][k][l] - ijShellPair->centerP[m][i][j];
+        this->quartetConstants_->deltaWQ[m][i][j][k][l] = 
+          centerQuartet[m][i][j][k][l] - klShellPair->centerP[m][k][l];
       };
-      if(totalL>1) {
-        this->quartetConstants_->a0c0Par2[i][j][k][l] = expo1/expoT;
-        this->quartetConstants_->a000Par2[i][j][k][l] = expo2/expoT;
-        this->quartetConstants_->a0c0Par3[i][j][k][l] = math.half/expoT;
+      if(totalL > 1) {
+        this->quartetConstants_->a0c0Par2[i][j][k][l] = expo1 / expoT;
+        this->quartetConstants_->a000Par2[i][j][k][l] = expo2 / expoT;
+        this->quartetConstants_->a0c0Par3[i][j][k][l] = math.half / expoT;
       };
 
       sqrPQ = math.zero;
-      for(m=0;m<3;m++) {
-        PQ = ((*ijShellPair).centerP[m][i][j]-(*klShellPair).centerP[m][k][l]);
+      for(m = 0; m < 3; m++) {
+        PQ = ijShellPair->centerP[m][i][j] - klShellPair->centerP[m][k][l];
         sqrPQ += PQ*PQ;
       };
-      Upq = Upq/sqrt(expoT);
-      if(sqrPQ>this->controls_->thresholdAB) {
-        T = sqrPQ/((*ijShellPair).invzeta[i][j]+(*klShellPair).invzeta[k][l]);
+      Upq = Upq / sqrt(expoT);
+      if(sqrPQ > this->controls_->thresholdAB) {
+
+        T = sqrPQ / (ijShellPair->invzeta[i][j] + klShellPair->invzeta[k][l]);
         this->computeFmTTaylor(FmT,T,totalL,0);
-        for(m=0;m<=totalL;m++) this->quartetConstants_->FmT[m][i][j][k][l] = Upq*FmT[m];
-      }else{
-        for(m=0;m<=totalL;m++) this->quartetConstants_->FmT[m][i][j][k][l] = Upq*smallT[m];
+
+        for(m = 0; m<= totalL; m++) 
+          this->quartetConstants_->FmT[m][i][j][k][l] = Upq * FmT[m];
+
+      } else {
+        for(m = 0; m <= totalL; m++) 
+          this->quartetConstants_->FmT[m][i][j][k][l] = Upq * smallT[m];
       };
     } else {
-      for(m=0;m<=totalL;m++) this->quartetConstants_->FmT[m][i][j][k][l] = math.zero;
+      for(m = 0; m <= totalL; m++) 
+        this->quartetConstants_->FmT[m][i][j][k][l] = math.zero;
     };
   };
 //  for(i=0;i<nPGTOs[0];i++) for(j=0;j<nPGTOs[1];j++) for(k=0;k<nPGTOs[2];k++) for(l=0;l<nPGTOs[3];l++) {
@@ -224,60 +237,74 @@ void AOIntegrals::iniPairConstants(ShellPair *ijShellPair){
   /* compute one-center info */
   /*-------------------------*/
   int totalL = ijShellPair->LTotal;
-  for(i=0;i<2;i++) {
-    this->pairConstants_->nPGTOs[i]=ijShellPair->nPGTOs[i];
-    this->pairConstants_->aoIndex[i]=ijShellPair->aoIndex[i];
-    this->pairConstants_->L[i]=ijShellPair->L[i];
-    this->pairConstants_->nBasis[i]=ijShellPair->nBasis[i];
+  for(i = 0; i < 2; i++) {
+    this->pairConstants_->nPGTOs[i]  = ijShellPair->nPGTOs[i];
+    this->pairConstants_->aoIndex[i] = ijShellPair->aoIndex[i];
+    this->pairConstants_->L[i]       = ijShellPair->L[i];
+    this->pairConstants_->nBasis[i]  = ijShellPair->nBasis[i];
   };
-  for(j=0;j<2;j++) {
-    for(k=0;k<3;k++) center[k][j]=(*(molecule_->cart()))(k,((*ijShellPair).center[j]));
-    for(i=0;i<this->pairConstants_->nPGTOs[j];i++){
-      expo[i][j]=(basisSet_->shells_old[(*ijShellPair).shIndex[j]]).expo[i];
-    };
+  for(j = 0; j < 2; j++) {
+    for(k = 0; k < 3; k++)  
+      center[k][j] = (*(molecule_->cart()))(k,(ijShellPair->center[j]));
+
+    for(i = 0; i < this->pairConstants_->nPGTOs[j];i++)
+      expo[i][j] = (basisSet_->shells_old[ijShellPair->shIndex[j]]).expo[i];
   };
   /*-------------------------*/
   /* compute two-center info */
   /*-------------------------*/
   double expo1,expo2,expoT,constAtom;
-  double sqrAB=0.0, sqrPZ;
-  double *FmT = new double[totalL+1];
+  double sqrAB = 0.0, sqrPZ;
+  double *FmT = new double[totalL + 1];
   int m,iAtom;
-  for(k=0;k<3;k++) {
+  for(k = 0; k < 3; k++) {
     this->pairConstants_->deltaAB[k] = ijShellPair->deltaAB[k];
-    sqrAB += (this->pairConstants_->deltaAB[k])*(this->pairConstants_->deltaAB[k]);
+    sqrAB += this->pairConstants_->deltaAB[k]*this->pairConstants_->deltaAB[k];
   };
   this->pairConstants_->ssPairTotal = 0.0;
-  for(i=0;i<this->pairConstants_->nPGTOs[0];i++) for(j=0;j<this->pairConstants_->nPGTOs[1];j++){
-    expo1=expo[i][0];
-    expo2=expo[j][1];
-    expoT=ijShellPair->zeta[i][j];
-    for(k=0;k<3;k++) {
+  for(i = 0; i < this->pairConstants_->nPGTOs[0]; i++) 
+  for(j = 0; j < this->pairConstants_->nPGTOs[1]; j++){
+    expo1 = expo[i][0];
+    expo2 = expo[j][1];
+    expoT = ijShellPair->zeta[i][j];
+    for(k = 0; k < 3; k++) {
       this->pairConstants_->deltaPA[k][i][j] = ijShellPair->deltaPA[k][i][j];
       this->pairConstants_->deltaPB[k][i][j] = ijShellPair->deltaPB[k][i][j];
     };
-    this->pairConstants_->Sa0Par[i][j] = ijShellPair->inversezeta[i][j];
-    this->pairConstants_->TabPar1[i][j] = math.three*expo1*expo2/expoT - math.two*(expo1*expo2/expoT)*(expo1*expo2/expoT)*sqrAB;
-    this->pairConstants_->TabPar2[i][j] = math.two*expo1*expo2/expoT;
-    this->pairConstants_->TabPar3[i][j] = this->pairConstants_->TabPar2[i][j]/(math.two*expo2);
-    this->pairConstants_->Ta0Par3[i][j] = this->pairConstants_->TabPar2[i][j]/(math.two*expo1);
-    this->pairConstants_->ssPair[i][j]  = ijShellPair->norm[i][j]*sqrt((math.pi/expoT)*(math.pi/expoT)*(math.pi/expoT))*exp(-expo1*expo2*sqrAB/expoT);
+    this->pairConstants_->Sa0Par[i][j]  = ijShellPair->inversezeta[i][j];
+    this->pairConstants_->TabPar1[i][j] = 
+      math.three * expo1 * expo2/expoT - 
+      math.two   * (expo1 * expo2 / expoT) * (expo1*expo2/expoT) * sqrAB;
+    this->pairConstants_->TabPar2[i][j] = math.two * expo1 * expo2 / expoT;
+    this->pairConstants_->TabPar3[i][j] = 
+      this->pairConstants_->TabPar2[i][j] / (math.two * expo2);
+    this->pairConstants_->Ta0Par3[i][j] = 
+      this->pairConstants_->TabPar2[i][j] / (math.two * expo1);
+    this->pairConstants_->ssPair[i][j]  = 
+      ijShellPair->norm[i][j] * 
+      sqrt((math.pi/expoT) * (math.pi/expoT) * (math.pi/expoT)) * 
+      exp(- expo1 * expo2 * sqrAB / expoT);
     this->pairConstants_->ssPairTotal += this->pairConstants_->ssPair[i][j];
-    if(std::abs(this->pairConstants_->ssPair[i][j])>this->pairConstants_->intSmall) this->pairConstants_->ssNonzero[i][j] = true;
+    if(std::abs(this->pairConstants_->ssPair[i][j]) > this->pairConstants_->intSmall) 
+      this->pairConstants_->ssNonzero[i][j] = true;
     else this->pairConstants_->ssNonzero[i][j] = false;
     /*******************************/
     /* compute FmU[m][i][j][iAtom] */
     /*******************************/
     if(this->pairConstants_->ssNonzero[i][j]) {
-      constAtom = math.two*sqrt(expoT/math.pi)*this->pairConstants_->ssPair[i][j];
-      for(iAtom=0;iAtom<molecularConstants_->nAtom;iAtom++){
-	sqrPZ=0.0;
-	for(k=0;k<3;k++) {
-	  this->pairConstants_->deltaPZ[k][i][j][iAtom] = ijShellPair->centerP[k][i][j]-molecularConstants_->cart[k][iAtom];
-	  sqrPZ += (this->pairConstants_->deltaPZ[k][i][j][iAtom])*(this->pairConstants_->deltaPZ[k][i][j][iAtom]);
+      constAtom = math.two * sqrt(expoT/math.pi) * this->pairConstants_->ssPair[i][j];
+      for(iAtom = 0; iAtom < molecularConstants_->nAtom; iAtom++){
+	sqrPZ = 0.0;
+	for(k = 0; k < 3; k++) {
+	  this->pairConstants_->deltaPZ[k][i][j][iAtom] = 
+            ijShellPair->centerP[k][i][j]-molecularConstants_->cart[k][iAtom];
+	  sqrPZ += 
+            (this->pairConstants_->deltaPZ[k][i][j][iAtom]) * 
+            (this->pairConstants_->deltaPZ[k][i][j][iAtom]);
 	};
 	this->computeFmTTaylor(FmT,expoT*sqrPZ,totalL,0);
-	for(m=0;m<=totalL;m++) this->pairConstants_->FmU[m][i][j][iAtom]=constAtom*FmT[m];
+	for(m = 0; m <= totalL; m++) 
+          this->pairConstants_->FmU[m][i][j][iAtom]=constAtom*FmT[m];
       };
     };
   };
@@ -285,42 +312,66 @@ void AOIntegrals::iniPairConstants(ShellPair *ijShellPair){
 
 void AOIntegrals::iniMolecularConstants(){
   this->molecularConstants_->nAtom=molecule_->nAtoms();
-  for(int i=0;i<this->molecularConstants_->nAtom;i++){
-    this->molecularConstants_->atomZ[i]=atom[molecule_->index(i)].atomicNumber;
-    for(int j=0;j<3;j++) this->molecularConstants_->cart[j][i]=(*(molecule_->cart()))(j,i);
+  for(int i = 0; i < this->molecularConstants_->nAtom ; i++){
+    this->molecularConstants_->atomZ[i] = atom[molecule_->index(i)].atomicNumber;
+    for(int j = 0; j < 3; j++) 
+      this->molecularConstants_->cart[j][i]=(*(molecule_->cart()))(j,i);
   };
 };
 
 void AOIntegrals::printTimings() {
     this->fileio_->out << endl << "Timing Statistics: "<<endl << bannerTop << endl;
-    this->fileio_->out << endl << "One Electron Integral Timings" << endl << bannerMid << endl;
-    if(this->controls_->doOctpole) {
-      this->fileio_->out << std::left << std::setw(60) << "Wall time for Overlap + Dipole + Quadrupole + Octupole"; 
-    } else if(this->controls_->doQuadpole) {
-      this->fileio_->out << std::left << std::setw(60) << "Wall time for Overlap + Dipole + Quadrupole evaluation:"; 
-    } else if(this->controls_->doDipole) {
-      this->fileio_->out << std::left << std::setw(60) << "Wall time for Overlap + Dipole evaluation:"; 
+    this->fileio_->out << endl << "One Electron Integral Timings" << endl 
+                       << bannerMid << endl;
+
+    if(this->maxMultipole_ >= 3) {
+      this->fileio_->out << std::left << std::setw(60) 
+                         << "Wall time for Overlap + Dipole + Quadrupole + Octupole"; 
+    } else if(this->maxMultipole_ >= 2) {
+      this->fileio_->out << std::left << std::setw(60) 
+                         << "Wall time for Overlap + Dipole + Quadrupole evaluation:"; 
+    } else if(this->maxMultipole_ >= 1) {
+      this->fileio_->out << std::left << std::setw(60) 
+                         << "Wall time for Overlap + Dipole evaluation:"; 
     } else {
-      this->fileio_->out << std::left << std::setw(60) << "Wall time for Overlap evaluation:"; 
+      this->fileio_->out << std::left << std::setw(60) 
+                         << "Wall time for Overlap evaluation:"; 
     }
     this->fileio_->out << std::left << std::setw(15) << this->SED.count() << " sec" << endl;
-    if(this->controls_->doOctpole)
-      this->fileio_->out << std::left << "evaluation:" << endl;
+
+    if(this->maxMultipole_ >= 3) this->fileio_->out << std::left << "evaluation:" << endl;
+
     this->fileio_->out << std::left << std::setw(60) << "Wall time for Kinetic evaluation:" 
                        << std::left << std::setw(15) << this->TED.count() << " sec" << endl;
-    this->fileio_->out << std::left << std::setw(60) << "Wall time for Nuclear Attraction Potential evaluation:" 
+
+    this->fileio_->out << std::left << std::setw(60) 
+                       << "Wall time for Nuclear Attraction Potential evaluation:" 
                        << std::left << std::setw(15) << this->VED.count() << " sec" << endl;
+
     this->fileio_->out << std::left << std::setw(60) << " "
                        << std::left << std::setw(15) << "---------------" << "----" << endl;
-    this->fileio_->out << std::left << std::setw(60) << "Total wall time for one-electron integral evaluation:" 
-                       << std::left << std::setw(15) << this->OneED.count() << " sec" << endl;
+
+    this->fileio_->out << std::left << std::setw(60) 
+                       << "Total wall time for one-electron integral evaluation:" 
+                       << std::left << std::setw(15) << this->OneED.count() << " sec" 
+                       << endl;
     this->fileio_->out << endl << endl;
+
+
     this->fileio_->out << "Two Electron Integral Timings" << endl << bannerMid << endl;
-    this->fileio_->out << std::left << std::setw(60) << "Wall time for Schwartz Bound evaluation:" 
-                       << std::left << std::setw(15) << this->SchwartzD.count() << " sec" << endl;
-    this->fileio_->out << std::left << std::setw(60) << "Wall time for Density Shell Block Norm evaluation:" 
-                       << std::left << std::setw(15) << this->DenShBlkD.count() << " sec" << endl;
-    this->fileio_->out << std::left << std::setw(60) << "Wall time for Perturbation Tensor evaluation:" 
+
+    this->fileio_->out << std::left << std::setw(60) 
+                       << "Wall time for Schwartz Bound evaluation:" 
+                       << std::left << std::setw(15) << this->SchwartzD.count() << " sec" 
+                       << endl;
+
+    this->fileio_->out << std::left << std::setw(60) 
+                       << "Wall time for Density Shell Block Norm evaluation:" 
+                       << std::left << std::setw(15) << this->DenShBlkD.count() << " sec" 
+                       << endl;
+
+    this->fileio_->out << std::left << std::setw(60) 
+                       << "Wall time for Perturbation Tensor evaluation:" 
                        << std::left << std::setw(15) << this->PTD.count() << " sec" << endl;
       
     this->fileio_->out << bannerEnd << endl;
@@ -335,25 +386,25 @@ void AOIntegrals::printOneE(){
   mat.push_back(RealMap(this->kinetic_->data(),NB,NB));
   mat.push_back(RealMap(this->potential_->data(),NB,NB));
   mat.push_back(RealMap(this->oneE_->data(),NB,NB));
-  if(this->controls_->doOctpole||this->controls_->doQuadpole||this->controls_->doDipole)
+  if(this->maxMultipole_ >= 1)
     for(auto i = 0, IOff=0; i < 3; i++,IOff+=NBSq)
       mat.push_back(RealMap(&this->elecDipole_->storage()[IOff],NB,NB));
-  if(this->controls_->doOctpole||this->controls_->doQuadpole)
+  if(this->maxMultipole_ >= 2)
     for(auto i = 0, IOff=0; i < 6; i++,IOff+=NBSq)
       mat.push_back(RealMap(&this->elecQuadpole_->storage()[IOff],NB,NB));
-  if(this->controls_->doOctpole)
+  if(this->maxMultipole_ >= 3)
     for(auto i = 0, IOff=0; i < 10; i++,IOff+=NBSq)
       mat.push_back(RealMap(&this->elecOctpole_->storage()[IOff],NB,NB));
   
   
   if(this->nTCS_ == 2){
     prettyPrintTCS(this->fileio_->out,(mat[0]),"Overlap");
-    if(this->controls_->doOctpole||this->controls_->doQuadpole||this->controls_->doDipole){
+    if(this->maxMultipole_ >= 1){
       prettyPrintTCS(this->fileio_->out,(mat[4]),"Electric Dipole (x)");
       prettyPrintTCS(this->fileio_->out,(mat[5]),"Electric Dipole (y)");
       prettyPrintTCS(this->fileio_->out,(mat[6]),"Electric Dipole (z)");
     }
-    if(this->controls_->doOctpole||this->controls_->doQuadpole){
+    if(this->maxMultipole_ >= 2){
       prettyPrintTCS(this->fileio_->out,(mat[7]), "Electric Quadrupole (xx)");
       prettyPrintTCS(this->fileio_->out,(mat[8]), "Electric Quadrupole (xy)");
       prettyPrintTCS(this->fileio_->out,(mat[9]), "Electric Quadrupole (xz)");
@@ -361,7 +412,7 @@ void AOIntegrals::printOneE(){
       prettyPrintTCS(this->fileio_->out,(mat[11]),"Electric Quadrupole (yz)");
       prettyPrintTCS(this->fileio_->out,(mat[12]),"Electric Quadrupole (zz)");
     }
-    if(this->controls_->doOctpole){
+    if(this->maxMultipole_ >= 3){
       prettyPrintTCS(this->fileio_->out,(mat[13]),"Electric Octupole (xxx)");
       prettyPrintTCS(this->fileio_->out,(mat[14]),"Electric Octupole (xxy)");
       prettyPrintTCS(this->fileio_->out,(mat[15]),"Electric Octupole (xxz)");
@@ -378,12 +429,12 @@ void AOIntegrals::printOneE(){
     prettyPrintTCS(this->fileio_->out,(mat[3]),"Core Hamiltonian");
   } else {
     prettyPrint(this->fileio_->out,(mat[0]),"Overlap");
-    if(this->controls_->doOctpole||this->controls_->doQuadpole||this->controls_->doDipole){
+    if(this->maxMultipole_ >= 1){
       prettyPrint(this->fileio_->out,(mat[4]),"Electric Dipole (x)");
       prettyPrint(this->fileio_->out,(mat[5]),"Electric Dipole (y)");
       prettyPrint(this->fileio_->out,(mat[6]),"Electric Dipole (z)");
     }
-    if(this->controls_->doOctpole||this->controls_->doQuadpole){
+    if(this->maxMultipole_ >= 2){
       prettyPrint(this->fileio_->out,(mat[7]), "Electric Quadrupole (xx)");
       prettyPrint(this->fileio_->out,(mat[8]), "Electric Quadrupole (xy)");
       prettyPrint(this->fileio_->out,(mat[9]), "Electric Quadrupole (xz)");
@@ -391,7 +442,7 @@ void AOIntegrals::printOneE(){
       prettyPrint(this->fileio_->out,(mat[11]),"Electric Quadrupole (yz)");
       prettyPrint(this->fileio_->out,(mat[12]),"Electric Quadrupole (zz)");
     }
-    if(this->controls_->doOctpole){
+    if(this->maxMultipole_ >= 3){
       prettyPrint(this->fileio_->out,(mat[13]),"Electric Octupole (xxx)");
       prettyPrint(this->fileio_->out,(mat[14]),"Electric Octupole (xxy)");
       prettyPrint(this->fileio_->out,(mat[15]),"Electric Octupole (xxz)");
@@ -412,7 +463,7 @@ void AOIntegrals::printOneE(){
 void AOIntegrals::alloc(){
   this->checkMeta();
   this->allocOp();
-  if(this->maxMultipole_ > 1) this->allocMultipole();
+  if(this->maxMultipole_ >= 1) this->allocMultipole();
 
   this->pairConstants_ = std::unique_ptr<PairConstants>(new PairConstants);
   this->molecularConstants_ = std::unique_ptr<MolecularConstants>(new MolecularConstants);
@@ -442,8 +493,10 @@ void AOIntegrals::allocOp(){
   auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
 #ifndef USE_LIBINT
   try {
-    this->twoEC_ = std::unique_ptr<RealMatrix>(new RealMatrix(this->nTT_,this->nTT_)); // Raffenetti Two Electron Coulomb AOIntegrals
-    this->twoEX_ = std::unique_ptr<RealMatrix>(new RealMatrix(this->nTT_,this->nTT_)); // Raffenetti Two Electron Exchange AOIntegrals
+    // Raffenetti Two Electron Coulomb AOIntegrals
+    this->twoEC_ = std::unique_ptr<RealMatrix>(new RealMatrix(this->nTT_,this->nTT_)); 
+    // Raffenetti Two Electron Exchange AOIntegrals
+    this->twoEX_ = std::unique_ptr<RealMatrix>(new RealMatrix(this->nTT_,this->nTT_)); 
   } catch (...) {
     CErr(std::current_exception(),"Coulomb and Exchange Tensor(R4) Allocation");
   }
@@ -458,10 +511,18 @@ void AOIntegrals::allocOp(){
   }
 #endif
   try {
-    this->oneE_         = std::unique_ptr<RealMatrix>(new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); // One Electron Integral
-    this->overlap_      = std::unique_ptr<RealMatrix>(new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); // Overlap
-    this->kinetic_      = std::unique_ptr<RealMatrix>(new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); // Kinetic
-    this->potential_    = std::unique_ptr<RealMatrix>(new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); // Potential
+
+    // One Electron Integral
+    this->oneE_      = std::unique_ptr<RealMatrix>(new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); 
+    // Overlap
+    this->overlap_   = std::unique_ptr<RealMatrix>(new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); 
+    // Kinetic
+    this->kinetic_   = std::unique_ptr<RealMatrix>(new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); 
+    // Kinetic (p-space)
+    this->kineticP_  = std::unique_ptr<RealMatrix>(new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); 
+    // Potential
+    this->potential_ = std::unique_ptr<RealMatrix>(new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); 
+
   } catch(...) {
     CErr(std::current_exception(),"One Electron Integral Tensor Allocation");
   }
@@ -475,12 +536,17 @@ void AOIntegrals::allocOp(){
   } 
 
   if(this->integralAlgorithm == DENFIT){
+
     try { 
       this->aoRII_ = std::unique_ptr<RealTensor3d>(
         new RealTensor3d(NTCSxNBASIS,NTCSxNBASIS,this->nTCS_*this->DFbasisSet_->nBasis())); 
 
       this->aoRIS_ = std::unique_ptr<RealTensor2d>(
-        new RealTensor2d(this->nTCS_*this->DFbasisSet_->nBasis(),this->nTCS_*this->DFbasisSet_->nBasis()));
+        new RealTensor2d(
+          this->nTCS_*this->DFbasisSet_->nBasis(),this->nTCS_*this->DFbasisSet_->nBasis()
+        )
+      );
+
     } catch (...) { 
       CErr(std::current_exception(),"Density Fitting Tensor Allocation");
     }
@@ -491,12 +557,22 @@ void AOIntegrals::allocOp(){
 void AOIntegrals::allocMultipole(){
   auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
   try {
+
     if(this->maxMultipole_ >= 1)
-      this->elecDipole_ = std::unique_ptr<RealTensor3d>(new RealTensor3d(3,NTCSxNBASIS,NTCSxNBASIS));
+      this->elecDipole_ = std::unique_ptr<RealTensor3d>(
+        new RealTensor3d(3,NTCSxNBASIS,NTCSxNBASIS)
+      );
+
     if(this->maxMultipole_ >= 2)
-      this->elecQuadpole_ = std::unique_ptr<RealTensor3d>(new RealTensor3d(6,NTCSxNBASIS,NTCSxNBASIS));
+      this->elecQuadpole_ = std::unique_ptr<RealTensor3d>(
+        new RealTensor3d(6,NTCSxNBASIS,NTCSxNBASIS)
+      );
+
     if(this->maxMultipole_ >= 3)
-      this->elecOctpole_ = std::unique_ptr<RealTensor3d>(new RealTensor3d(10,NTCSxNBASIS,NTCSxNBASIS));
+      this->elecOctpole_ = std::unique_ptr<RealTensor3d>(
+        new RealTensor3d(10,NTCSxNBASIS,NTCSxNBASIS)
+      );
+
   } catch(...) {
     CErr(std::current_exception(),"Multipole Tensor Allocation");
   }

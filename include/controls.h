@@ -52,9 +52,6 @@ public:
   bool  	directTwoE;     // if direct two-electron will performed
   bool          buildn4eri;     // Build N^4 AO ERI tensor
   bool          doDF;           // Density fitting (RI) flag
-  bool          doDipole;       // Use Libint dipole integrals?
-  bool          doQuadpole;     // Use Libint quadrapole integrals?
-  bool          doOctpole;      // Use Libint octapole integrals?
   bool          doSDR;          // Perform Response calculation
   bool          doCUHF;         // To CUHF (Eigenfunction of S x S)
   bool          doComplex;      // Find complex solution

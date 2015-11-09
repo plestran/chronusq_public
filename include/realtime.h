@@ -57,6 +57,7 @@ class RealTime {
   int   typeOrtho_;   	// Type of orthonormal transformation
   int   methFormU_;	// Method of forming unitary transformation matrix
   int   IEnvlp_;        // Type of envelope function
+  int   IEllPol_;       // Type of elliptic polarization. e.g. left X-Y polar light 
   double Ex_;           // Magnitude of electric field x-component
   double Ey_;           // Magnitude of electric field y-component
   double Ez_;           // Magnitude of electric field z-component
@@ -200,6 +201,7 @@ public:
     this->TOn_         = 0.0;
     this->TOff_        = 1.0e4;
     this->IEnvlp_      = Constant;
+    this->IEllPol_     = LXZ;
     this->printLevel_  = 1;
     this->Ex_          = 0.0;
     this->Ey_          = 0.0;
@@ -224,7 +226,17 @@ public:
     LinRamp,
     Gaussian,
     Step,
-    SinSq
+    SinSq,
+    Elliptic
+  };
+
+  enum ELL_POL {
+    LXY,
+    LXZ,
+    LYZ,
+    RXY,
+    RXZ,
+    RYZ
   };
 
   inline void communicate(FileIO &fileio, Controls &cont, AOIntegrals &aoints, 
@@ -268,6 +280,7 @@ public:
   inline void setSwapMOB(int i){ this->swapMOB_     = i;};
   inline void setFormU(int i){ this->methFormU_ = i;};
   inline void setEnvelope(int i){ this->IEnvlp_ = i;};
+  inline void setEllPol(int i){ this->IEllPol_ = i;};
   inline void setFieldAmp(std::array<double,3> x){ 
     this->Ex_ = x[0];
     this->Ey_ = x[1];
