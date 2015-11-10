@@ -26,6 +26,7 @@
 /***********************
  * Form Becke Weights *
  ***********************/
+/*
 template<typename T>
 double SingleSlater<T>::formBeckeW(cartGP gridPt, int iAtm){
 //     Generate Becke Weights according to the partition schems in
@@ -69,12 +70,11 @@ double SingleSlater<T>::normBeckeW(cartGP gridPt){
        return norm ;
 };
 
-
 template<typename T>
 void SingleSlater<T>::buildVxc(cartGP gridPt, double weight, std::vector<bool> mapRad_){
 //  Build the Vxc therm at each Grid Points  
    auto startVxc = std::chrono::high_resolution_clock::now();  
-   double *pointProd; 
+//   double *pointProd; 
    double rhor = 0.0;
    double rhor_B = 0.0;
 //T   
@@ -100,22 +100,29 @@ void SingleSlater<T>::buildVxc(cartGP gridPt, double weight, std::vector<bool> m
             int bf2_s   = this->basisset_->mapSh2Bf(s2);
             int n2      = this->basisset_->shells(s2).size();
             auto center = this->basisset_->shells(s1).O;
-            double *Buff = new double [n1*n2];
-            RealMap fBuff(Buff,n1,n2);
-            fBuff.setZero();
-            pointProd = 
+//            double *Buff = new double [n1*n2];
+//            RealMap fBuff(Buff,n1,n2);
+//            fBuff.setZero();
+            auto start_7 = std::chrono::high_resolution_clock::now();
+            auto pointProd = 
               this->basisset_->basisProdEval(
                 this->basisset_->shells(s1),
                 this->basisset_->shells(s2),
                 &gridPt
               );
-            Buff = this->twodgrid_->BuildDensity(Buff,pointProd,n1,n2);
+            auto finish_7 = std::chrono::high_resolution_clock::now();  
+            this->duration_7 += finish_7 - start_7;
+            auto start_8 = std::chrono::high_resolution_clock::now();
+//            Buff = this->twodgrid_->BuildDensity(Buff,pointProd,n1,n2);
+            RealMap fBuff(pointProd,n1,n2);
             overlapR_->block(bf1_s,bf2_s,n1,n2) = fBuff; 
+            delete[] pointProd;
+            auto finish_8 = std::chrono::high_resolution_clock::now();  
+            this->duration_8 += finish_8 - start_8;
           }
         }
       }
     }  
-     delete[] pointProd;
 //T
    auto finish_4 = std::chrono::high_resolution_clock::now();  
    this->duration_4 += finish_4 - start_4;
@@ -133,7 +140,6 @@ void SingleSlater<T>::buildVxc(cartGP gridPt, double weight, std::vector<bool> m
     if(rhor    <= 0.0 ) {
     if((std::abs(rhor)) <= 1.0e10) rhor = 0.0;
     }
-/*      if (std::isnan(rhor))  cout << "HELP rho" <<endl;
       if (std::isnan(std::pow(rhor,(1.0/3.0))))  {
        cout << "HELP rho^1/3" <<endl;
        cout << "rho = " << rhor << endl;
@@ -143,7 +149,6 @@ void SingleSlater<T>::buildVxc(cartGP gridPt, double weight, std::vector<bool> m
        cout << this->densityA()->conjugate() << endl;
         }
       if (std::isnan(weight))  cout << "HELP weight" <<endl;
-*/
 //
 //  LDA Slater Exchange
     if (this->ExchKernel_ != NOEXCH) {
@@ -185,7 +190,7 @@ void SingleSlater<T>::buildVxc(cartGP gridPt, double weight, std::vector<bool> m
     this->duration_1 += finish_Vxc - startVxc;
 //  }
 };  //End
-
+*/
 
 template<typename T>
 double SingleSlater<T>::EvepsVWN(int iop, double A_x, double b_x, double c_x, double x0_x, double rho){
@@ -229,7 +234,7 @@ double SingleSlater<T>::EvepsVWN(int iop, double A_x, double b_x, double c_x, do
      }
      return val;
 };  //end
-
+/*
 template<typename T>
 double SingleSlater<T>::f_spindens(int iop, double spindensity){
       double f_spindensity;
@@ -282,3 +287,4 @@ double SingleSlater<T>::df2_spindens(double spindensity){
   double SingleSlater<T>::spindens(double rho_A, double rho_B) {
   return (rho_A - rho_B)/ (rho_A + rho_B);
   };  // 
+*/

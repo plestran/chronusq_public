@@ -184,5 +184,18 @@ class LebedevGrid : public OneDGrid {
     void scalePts(double sradius);
   }; // class GaussChebyshev1stGridInf
 
+  class EulerMaclaurinGrid : public OneDGrid {
+    public:
+      EulerMaclaurinGrid(
+        int npts = 0, double beg = 0.0, double end = 0.0):
+        OneDGrid(npts,beg,end){
+          this->gridPts_ = new double[this->nPts_];        ///< Grid Points
+          this->weights_ = new double[this->nPts_];        ///< Weights
+        };
+  // Class Functions
+    void genGrid(double sradius);                                      
+    void transformPts();
+  }; // class GaussChebyshev1stGridInf
+
 }; // namespace ChronusQ
 #endif

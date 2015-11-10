@@ -87,7 +87,6 @@ void OneDGrid::printGrid(){
 ///  TWO GRID GENERAL ///
 
 double * TwoDGrid::BuildDensity(double * Sum,double * Buff,int n1, int n2){
-  //  Integration over batches : Density at each point (numerical)
   ConstRealMap fBuff(Buff,n1,n2); 
   RealMap Sout(Sum,n1,n2); 
   Sout = fBuff;  
@@ -1189,5 +1188,14 @@ void LebedevGrid::gen48_Dn(int num, double u, double r, double v){
 
 
 }
+
+// Euler Maclaurin one dimensional grid functions
+void EulerMaclaurinGrid::genGrid(double sradius){
+
+     }                                      
+
+void EulerMaclaurinGrid::transformPts(){
+
+     }                                      
 
 }; // namespace ChronusQ

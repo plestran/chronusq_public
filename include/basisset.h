@@ -142,6 +142,12 @@ public:
   std::unique_ptr<RealMatrix> shBlkNormAlpha; ///< Shell Block (Inf) norm for Alpha matrix
   std::unique_ptr<RealMatrix> shBlkNormBeta;  ///< Shell Block (Inf) norm for Beta  matrix
 
+////TIMING
+//  std::chrono::duration<double> duration_1;
+//  std::chrono::duration<double> duration_2;
+//  std::chrono::duration<double> duration_3;
+//  std::chrono::duration<double> duration_4;
+//TIMING
   /**
    *  Default Constructor
    */ 
