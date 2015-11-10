@@ -162,14 +162,14 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
       sdResponseReal->iniSDResponse(molecule.get(),basisset.get(),mointegralsReal.get(),fileIO.get(),
                                 controls.get(),hartreeFockReal.get());
       
-      sdResponseReal->IterativeRPA();
+      sdResponseReal->IterativeRESP();
     } else {
       mointegralsComplex->iniMOIntegrals(molecule.get(),basisset.get(),fileIO.get(),controls.get(),aointegrals.get(),hartreeFockComplex.get());
       sdResponseComplex->setPPRPA(1);
       sdResponseComplex->iniSDResponse(molecule.get(),basisset.get(),mointegralsComplex.get(),fileIO.get(),
                                 controls.get(),hartreeFockComplex.get());
       
-      sdResponseComplex->IterativeRPA();
+      sdResponseComplex->IterativeRESP();
     }
   }
 /*

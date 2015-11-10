@@ -325,7 +325,7 @@ void SDResponse<double>::formGuess(){
 
 
 template<>
-void SDResponse<double>::IterativeRPA(){
+void SDResponse<double>::IterativeRESP(){
   bool hasProp = ((this->iMeth_==CIS || this->iMeth_==RPA || this->iMeth_==PPATDA));
   this->formGuess();
 //if(this->iMeth_ == PPATDA) CErr();
@@ -340,7 +340,7 @@ void SDResponse<double>::IterativeRPA(){
   this->printExcitedStateEnergies();
   
   if(this->iMeth_ == STAB) this->reoptWF();
-} // IterativeRPA
+} // IterativeRESP
 
 template<>
 void SDResponse<double>::formRM3(RealCMMap &XMO, RealCMMap &Sigma, RealCMMap &Rho){

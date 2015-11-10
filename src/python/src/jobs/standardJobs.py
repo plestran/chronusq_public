@@ -110,7 +110,7 @@ def runSDR(workers,meta):
   workers["CQSDResponse"].initMeta()
   workers["CQSDResponse"].initMeth()
   workers["CQSDResponse"].alloc()
-  workers["CQSDResponse"].IterativeRPA()
+  workers["CQSDResponse"].IterativeRESP()
   meta.davIters = workers["CQSDResponse"].nIter
   meta.excEne   = workers["CQSDResponse"].excitationEnergies()
   meta.oscStr   = workers["CQSDResponse"].oscStrengths()

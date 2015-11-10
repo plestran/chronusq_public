@@ -381,7 +381,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setNSek"           , &SDResponse<double>::setNSek                   )
     .def("setMeth"           , &SDResponse<double>::setMeth                   )
     .def("initMeth"          , &SDResponse<double>::initMeth                  )
-    .def("IterativeRPA"      , &SDResponse<double>::IterativeRPA              )
+    .def("IterativeRESP"      , &SDResponse<double>::IterativeRESP              )
     .def("excitationEnergies", &SDResponse<double>::Wrapper_excitationEnergies)
     .def("oscStrengths"      , &SDResponse<double>::Wrapper_oscStrengths      )
     
@@ -397,7 +397,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setNSek"           , &SDResponse<dcomplex>::setNSek                  )
     .def("setMeth"           , &SDResponse<dcomplex>::setMeth                  )
     .def("initMeth"          , &SDResponse<dcomplex>::initMeth                 )
-    .def("IterativeRPA"      , &SDResponse<dcomplex>::IterativeRPA             )
+    .def("IterativeRESP"      , &SDResponse<dcomplex>::IterativeRESP             )
     .def("excitationEnergies",&SDResponse<dcomplex>::Wrapper_excitationEnergies)
     .def("oscStrengths"      ,&SDResponse<dcomplex>::Wrapper_oscStrengths      )
     
