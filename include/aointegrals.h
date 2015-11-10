@@ -168,6 +168,7 @@ public:
   std::unique_ptr<RealMatrix>    oneE_; ///< Core Hamiltonian \f$ h = T + V \f$
   std::unique_ptr<RealMatrix>    overlap_; ///< Overlap matrix \f$ S_{\mu\nu} = \langle \mu \vert \nu \rangle \f$
   std::unique_ptr<RealMatrix>    kinetic_; ///< Kinetic energy tensor \f$ T_{\mu\nu} = \langle \mu \vert \Delta \vert \nu \rangle \f$
+  std::unique_ptr<RealMatrix>    kineticP_; ///< Kinetic energy tensor in momentum space \f$ T_{\mu\nu} = \langle \mu \vert \Delta \vert \nu \rangle \f$
   std::unique_ptr<RealMatrix>    potential_; ///< Potential (nuclear attraction) energy tensor \f$ V_{\mu\nu} = \sum_A \left\langle \mu \vert r_{1A}^{-1}\vert \nu\right\rangle\f$
   std::unique_ptr<RealMatrix>    schwartz_; ///< Schwartz bounds for ERI screening
   std::unique_ptr<RealTensor4d>  aoERI_; ///< Rank-4 ERI tensor over primary basis functions \f$ (\mu \nu \vert \lambda\delta )\f$
@@ -229,6 +230,7 @@ public:
     this->oneE_         = nullptr;
     this->overlap_      = nullptr;
     this->kinetic_      = nullptr;
+    this->kineticP_     = nullptr;
     this->potential_    = nullptr;
     this->schwartz_     = nullptr;
     this->aoERI_        = nullptr;
@@ -317,6 +319,7 @@ public:
 //--------------------------------------------//
   void computeAOTwoE(); // build two-electron AO integral matrices
   void computeAOOneE(); // build one-electron AO integral matrices
+  void DKH0(); // compute DKH0 relativistic correction to kinetic energy
   void printOneE();
 #ifdef USE_LIBINT
   void computeSchwartz();

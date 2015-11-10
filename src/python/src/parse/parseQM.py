@@ -1,3 +1,28 @@
+#
+# The Chronus Quantum (ChronusQ) software package is high-performace 
+# computational chemistry software with a strong emphasis on explicitly 
+# time-dependent and post-SCF quantum mechanical methods.
+# 
+# Copyright (C) 2014-2015 Li Research Group (University of Washington)
+# 
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+# 
+# Contact the Developers:
+#   E-Mail: xsli@uw.edu
+# 
+#
 import os,sys
 import libpythonapi as chronusQ
 from libpythonapi import CErrMsg
@@ -219,12 +244,13 @@ def handleReference(workers,settings):
       CErrMsg(workers['CQFileIO'],str(msg))
   elif 'UKS' in ref:
     # forch uhf
-    workers["cqsingleslater"].setref(chronusq.reference.uhf)
-    workers["cqsingleslater"].isclosedshell = false
+    workers["CQSingleSlater"].setRef(chronusQ.Reference.UHF)
+    workers["CQSingleSlater"].isClosedShell = False
 
-    workers["cqsingleslater"].isdft = true
-    workers["cqsingleslater"].ishf  = false
-    workers["cqsingleslater"].setdftkernel(kernelmap['userdefined'])
+
+    workers["CQSingleSlater"].isDFT = True
+    workers["CQSingleSlater"].isHF  = False
+    workers["CQSingleSlater"].setDFTKernel(kernelMap['USERDEFINED'])
   
     corrKernel = 0
     exchKernel = 0
@@ -251,6 +277,7 @@ def handleReference(workers,settings):
   elif 'CUKS' in ref:
     # Use Constrained UHF (not complex UHF) 
     workers["CQSingleSlater"].setRef(chronusQ.Reference.CUHF)
+    workers["CQSingleSlater"].isClosedShell = False
 
     workers["CQSingleSlater"].isDFT = True
     workers["CQSingleSlater"].isHF  = False
@@ -361,7 +388,8 @@ def parseRT(workers,settings):
     'ENVELOPE' :workers['CQRealTime'].setEnvelope ,
     'ORTHO'    :workers['CQRealTime'].setOrthoTyp ,
     'INIDEN'   :workers['CQRealTime'].setInitDen  ,
-    'UPROP'    :workers['CQRealTime'].setFormU    
+    'UPROP'    :workers['CQRealTime'].setFormU    ,
+    'ELL_POL'  :workers['CQRealTime'].setEllPol     
   }
 
 
@@ -387,6 +415,10 @@ def parseRT(workers,settings):
   #if 'EDFIELD' not in settings:
   #  optMap['EDFIELD'](0.0,0.0,0.0)
     
+  if 'TARCSVS' in settings:
+    if not settings['TARCSVS']:
+      workers['CQRealTime'].doNotTarCSV()
+
   # Idiot Checks
 
   if 'ENVELOPE' in settings:

@@ -1,3 +1,28 @@
+#
+# The Chronus Quantum (ChronusQ) software package is high-performace 
+# computational chemistry software with a strong emphasis on explicitly 
+# time-dependent and post-SCF quantum mechanical methods.
+# 
+# Copyright (C) 2014-2015 Li Research Group (University of Washington)
+# 
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+# 
+# Contact the Developers:
+#   E-Mail: xsli@uw.edu
+# 
+#
 import os,sys
 import configparser
 import libpythonapi as chronusQ
@@ -15,6 +40,15 @@ def parserOrth(parser,section,opt):
   strX = parser.get(section,opt)
   strX = str(strX).upper()
   return enumMaps.orthoMap[strX]
+
+#
+# Convert string obtained from ConfigParser
+# for RT.ell_pol into RT.ELL_POL enum
+#
+def parserEllPol(parser,section,opt):
+  strX = parser.get(section,opt)
+  strX = str(strX).upper()
+  return enumMaps.ellPolMap[strX]
 
 #
 # Convert string obtained from ConfigParser
@@ -76,7 +110,8 @@ def genSecDict(workers,parser,section):
     'O-ORTH' :parserOrth,
     'O-FORMU':parserFormU,
     'O-GS'   :parserGuess,
-    'D3'     :parserDoubleArray
+    'D3'     :parserDoubleArray,
+    'O-ELL'  :parserEllPol
   }
 
   # Check if a dictionary exists for this section
@@ -108,7 +143,7 @@ def genSecDict(workers,parser,section):
       dict1[opt.upper()] = parseMap[readTyp](section,opt)
     elif readTyp in ('S'):
       dict1[opt.upper()] = parseMap[readTyp](section,opt).upper()
-    elif readTyp in ('O-ORTH','O-ENV','O-FORMU','O-GS','D3'):
+    elif readTyp in ('O-ORTH','O-ENV','O-FORMU','O-GS','D3','O-ELL'):
       dict1[opt.upper()] = parseMap[readTyp](parser,section,opt)
     else:
       msg = 'Option data ' + str(readTyp) + ' type not recognized'

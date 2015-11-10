@@ -48,9 +48,6 @@ void Controls::iniControls(){
   this->directTwoE =        true;
   this->buildn4eri =        false;
   this->doDF =              false;
-  this->doDipole =          true;
-  this->doQuadpole =        true;
-  this->doOctpole =         true;
   this->doSDR     =         false;
   this->doCUHF    =         false;
   this->doComplex =         false;
@@ -141,15 +138,6 @@ void Controls::printSettings(ostream &out){
   if(this->doDF) out << "ON" << endl;
   else out << "OFF" << endl;
 
-  out << std::setw(35) << std::left << "  Compute Dipole Moment:";
-  if(this->doDipole) out << "YES" << endl;
-  else out << "NO" << endl;
-  out << std::setw(35) << std::left << "  Compute Quadrupole Moment:";
-  if(this->doDipole) out << "YES" << endl;
-  else out << "NO" << endl;
-  out << std::setw(35) << std::left << "  Compute Octupole Moment:";
-  if(this->doDipole) out << "YES" << endl;
-  else out << "NO" << endl;
   out << std::fixed;
 //out << bannerEnd << endl;
 }

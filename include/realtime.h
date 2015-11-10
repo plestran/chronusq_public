@@ -57,6 +57,7 @@ class RealTime {
   int   typeOrtho_;   	// Type of orthonormal transformation
   int   methFormU_;	// Method of forming unitary transformation matrix
   int   IEnvlp_;        // Type of envelope function
+  int   IEllPol_;       // Type of elliptic polarization. e.g. left X-Y polar light 
   double Ex_;           // Magnitude of electric field x-component
   double Ey_;           // Magnitude of electric field y-component
   double Ez_;           // Magnitude of electric field z-component
@@ -145,7 +146,10 @@ class RealTime {
   void initMemLen();
   void initMem();
   void initMaps();
+  void initCSV();
   std::vector<std::ofstream*> csvs;
+  std::map<std::ofstream*,std::string> csvFiles;
+  bool tarCSVs;
   
 
 public:
@@ -197,10 +201,12 @@ public:
     this->TOn_         = 0.0;
     this->TOff_        = 1.0e4;
     this->IEnvlp_      = Constant;
+    this->IEllPol_     = LXZ;
     this->printLevel_  = 1;
     this->Ex_          = 0.0;
     this->Ey_          = 0.0;
     this->Ez_          = 0.0;
+    this->tarCSVs      = true;
   };
   ~RealTime() {;};
 
@@ -220,7 +226,17 @@ public:
     LinRamp,
     Gaussian,
     Step,
-    SinSq
+    SinSq,
+    Elliptic
+  };
+
+  enum ELL_POL {
+    LXY,
+    LXZ,
+    LYZ,
+    RXY,
+    RXZ,
+    RYZ
   };
 
   inline void communicate(FileIO &fileio, Controls &cont, AOIntegrals &aoints, 
@@ -264,6 +280,7 @@ public:
   inline void setSwapMOB(int i){ this->swapMOB_     = i;};
   inline void setFormU(int i){ this->methFormU_ = i;};
   inline void setEnvelope(int i){ this->IEnvlp_ = i;};
+  inline void setEllPol(int i){ this->IEllPol_ = i;};
   inline void setFieldAmp(std::array<double,3> x){ 
     this->Ex_ = x[0];
     this->Ey_ = x[1];
@@ -280,6 +297,7 @@ public:
   inline void setPhase(double x){ this->Phase_ = x;};
   inline void setSigma(double x){ this->Sigma_ = x;};
   inline void setPrintLevel(int i){ this->printLevel_ = i;};
+  inline void doNotTarCSV(){ this->tarCSVs = false;};
 
   // pseudo-constructor
   void iniRealTime(FileIO *,Controls *,AOIntegrals *,SingleSlater<T> *);
@@ -293,6 +311,7 @@ public:
   void writeAppliedFieldCSV(PropInfo & propInfo, long int & iStep);
   void writeMullikenCSV(PropInfo & propInfo, long int & iStep);
   void writeOrbitalCSV(PropInfo & propInfo, long int & iStep);
+  void tarCSVFiles();
 
   // Python API
 /*

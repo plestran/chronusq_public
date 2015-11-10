@@ -62,6 +62,7 @@ void RealTime<T>::printRT() {
     if (IEnvlp_ == Gaussian) this->fileio_->out << " Gaussian" << endl;
     if (IEnvlp_ == Step) this->fileio_->out << " Step function" << endl;
     if (IEnvlp_ == SinSq) this->fileio_->out << " Sine-square (NYI)" << endl;
+    if (IEnvlp_ == Elliptic) this->fileio_->out << " Elliptic" << endl;
     this->fileio_->out << std::right << std::setw(33) 
                        << " Terms Included =" << std::setw(14) << std::right; 
     this->fileio_->out << " Electric Dipole Only" << endl;

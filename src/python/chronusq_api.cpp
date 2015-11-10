@@ -1,3 +1,28 @@
+/* 
+ *  The Chronus Quantum (ChronusQ) software package is high-performace 
+ *  computational chemistry software with a strong emphasis on explicitly 
+ *  time-dependent and post-SCF quantum mechanical methods.
+ *  
+ *  Copyright (C) 2014-2015 Li Research Group (University of Washington)
+ *  
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *  
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program; if not, write to the Free Software Foundation, Inc.,
+ *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *  
+ *  Contact the Developers:
+ *    E-Mail: xsli@uw.edu
+ *  
+ */
 #include <pythonapi.h>
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(printSettings_Overload,
   Controls::printSettings,0,1);
@@ -12,7 +37,9 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("formFock"        , &SingleSlater<double>::formFock               )
     .def("computeEnergy"   , &SingleSlater<double>::computeEnergy          )
     .def("computeMultipole", &SingleSlater<double>::computeMultipole       )
+    .def("computeProperties",&SingleSlater<double>::computeProperties      )
     .def("printMultipole"  , &SingleSlater<double>::printMultipole         )
+    .def("printProperties" , &SingleSlater<double>::printProperties        )
     .def("SCF"             , &SingleSlater<double>::SCF                    )
     .def("communicate"     , &SingleSlater<double>::communicate            )
     .def("initMeta"        , &SingleSlater<double>::initMeta               )
@@ -56,7 +83,9 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("formFock"        , &SingleSlater<dcomplex>::formFock               )
     .def("computeEnergy"   , &SingleSlater<dcomplex>::computeEnergy          )
     .def("computeMultipole", &SingleSlater<dcomplex>::computeMultipole       )
+    .def("computeProperties",&SingleSlater<dcomplex>::computeProperties      )
     .def("printMultipole"  , &SingleSlater<dcomplex>::printMultipole         )
+    .def("printProperties" , &SingleSlater<dcomplex>::printProperties        )
     .def("SCF"             , &SingleSlater<dcomplex>::SCF                    )
     .def("communicate"     , &SingleSlater<dcomplex>::communicate            )
     .def("initMeta"        , &SingleSlater<dcomplex>::initMeta               )
@@ -165,6 +194,8 @@ BOOST_PYTHON_MODULE(libpythonapi){
   ;
 
   class_<FileIO,boost::noncopyable>("FileIO",init<std::string>())
+    .def(init<std::string,std::string>())
+    .def(init<std::string,std::string,std::string>())
     .def("write"      , &FileIO::write         )
     .def("iniH5Files" , &FileIO::iniH5Files    )
     .def("iniStdGroups", &FileIO::iniStdGroups )
@@ -210,6 +241,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setSwapMOB"   , &RealTime<double>::setSwapMOB   )
     .def("setFormU"     , &RealTime<double>::setFormU     )
     .def("setEnvelope"  , &RealTime<double>::setEnvelope  )
+    .def("setEllPol"    , &RealTime<double>::setEllPol    )
     .def("setFieldAmp"  , &RealTime<double>::Wrapper_setFieldAmp  )
     .def("setTOn"       , &RealTime<double>::setTOn       )
     .def("setTOff"      , &RealTime<double>::setTOff      )
@@ -222,6 +254,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("lastDipole"   , &RealTime<double>::lastDipole   )
     .def("lastEnergy"   , &RealTime<double>::lastEnergy   )
     .def("getTimeStep"  , &RealTime<double>::getTimeStep  )
+    .def("doNotTarCSV"  , &RealTime<double>::doNotTarCSV  )
   ;
 
   class_<RealTime<dcomplex>,boost::noncopyable>("RealTime_complex",init<>())
@@ -238,6 +271,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setSwapMOB"   , &RealTime<dcomplex>::setSwapMOB   )
     .def("setFormU"     , &RealTime<dcomplex>::setFormU     )
     .def("setEnvelope"  , &RealTime<dcomplex>::setEnvelope  )
+    .def("setEllPol"    , &RealTime<dcomplex>::setEllPol    )
     .def("setFieldAmp"  , &RealTime<dcomplex>::Wrapper_setFieldAmp  )
     .def("setTOn"       , &RealTime<dcomplex>::setTOn       )
     .def("setTOff"      , &RealTime<dcomplex>::setTOff      )
@@ -250,6 +284,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("lastDipole"   , &RealTime<dcomplex>::lastDipole   )
     .def("lastEnergy"   , &RealTime<dcomplex>::lastEnergy   )
     .def("getTimeStep"  , &RealTime<dcomplex>::getTimeStep  )
+    .def("doNotTarCSV"  , &RealTime<dcomplex>::doNotTarCSV  )
   ;
 
 /*
@@ -300,6 +335,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("Gaussian", RealTime<double>::Gaussian      )
     .value("Step"    , RealTime<double>::Step          )
     .value("SinSq"   , RealTime<double>::SinSq         )
+    .value("Elliptic", RealTime<double>::Elliptic      )
   ;
 
   enum_<RealTime<dcomplex>::ENVELOPE>("RealTime_ENVELOPE")
@@ -308,6 +344,25 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("Gaussian", RealTime<dcomplex>::Gaussian      )
     .value("Step"    , RealTime<dcomplex>::Step          )
     .value("SinSq"   , RealTime<dcomplex>::SinSq         )
+    .value("Elliptic", RealTime<dcomplex>::Elliptic      )
+  ;
+
+  enum_<RealTime<double>::ELL_POL>("RealTime_ELL_POL")
+    .value("LXY", RealTime<double>::LXY)
+    .value("LXZ", RealTime<double>::LXZ)
+    .value("LYZ", RealTime<double>::LYZ)
+    .value("RXY", RealTime<double>::RXY)
+    .value("RXZ", RealTime<double>::RXZ)
+    .value("RYZ", RealTime<double>::RYZ)
+  ;
+
+  enum_<RealTime<dcomplex>::ELL_POL>("RealTime_ELL_POL")
+    .value("LXY", RealTime<dcomplex>::LXY)
+    .value("LXZ", RealTime<dcomplex>::LXZ)
+    .value("LYZ", RealTime<dcomplex>::LYZ)
+    .value("RXY", RealTime<dcomplex>::RXY)
+    .value("RXZ", RealTime<dcomplex>::RXZ)
+    .value("RYZ", RealTime<dcomplex>::RYZ)
   ;
 
   class_<MOIntegrals<double>,boost::noncopyable>("MOIntegrals_double",init<>())

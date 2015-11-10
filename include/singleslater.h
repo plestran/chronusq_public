@@ -139,6 +139,7 @@ class SingleSlater {
   std::string algebraicFieldShort_;      ///< String Real/Complex/(Quaternion)
   std::array<double,3> elecField_;
   std::vector<double> mullPop_; ///< mulliken partial charge
+  double Sx_, Sy_, Sz_, Ssq_;
 
   // Lengths of scratch partitions (NOT MEANT TO BE COPIED)
   int lenX_;
@@ -312,8 +313,16 @@ public:
   double   totalEx;     ///< LDA Exchange
   double   totalEcorr;  ///< Total VWN Energy
   double   eps_corr;    ///< VWN Correlation Energy Density
-  double   mu_corr;     ///< VWN Correlation Potential
-
+  double   mu_corr;     ///<  VWN Correlation Potential
+  double   mu_corr_B;   ///<  VWN Correlation Potential (beta)
+/* TIMING
+  std::chrono::duration<double> duration_dens;
+  std::chrono::duration<double> duration_1;
+  std::chrono::duration<double> duration_2;
+  std::chrono::duration<double> duration_3;
+  std::chrono::duration<double> duration_4;
+  std::chrono::duration<double> duration_5;
+*/
   int      nSCFIter;
 
   // constructor & destructor
@@ -438,91 +447,82 @@ public:
   void alloc();
 
   //set private data
-  inline void setNBasis(int nBasis) { this->nBasis_ = nBasis;};
-  inline void setNAE(int nAE)    { this->nAE_ = nAE;};
-  inline void setNBE(int nBE)    { this->nBE_ = nBE;};
-  inline void setRef(int Ref)    { this->Ref_ = Ref;};
-//inline void setField(double x, double y, double z){
-//  this->elecField_[0] = x;
-//  this->elecField_[1] = y;
-//  this->elecField_[2] = z;
-//}
-  inline void setField(std::array<double,3> field){
-    this->elecField_ = field;
-  }
-  inline void Wrapper_setField(double x, double y, double z){
-    this->setField({{x,y,z}});
-  }
-  inline void setNTCS(int i){ this->nTCS_ = i;};
-  inline void setMaxMultipole(int i){ this->maxMultipole_ = i;};
-  inline void setPrintLevel(int i){ this->printLevel_ = i;};
-  inline void setSCFDenTol(double x){ this->denTol_ = x;};
-  inline void setSCFEneTol(double x){ this->eneTol_ = x;};
-  inline void setSCFMaxIter(int i){ this->maxSCFIter_ = i;};
-  inline void setGuess(int i){ this->guess_ = i;};
-  inline void isNotPrimary(){this->isPrimary = false;};
-  inline void setCorrKernel(int i){this->CorrKernel_ = i;};
-  inline void setExchKernel(int i){this->ExchKernel_ = i;};
-  inline void setDFTKernel( int i){this->DFTKernel_  = i;};
+  inline void setNBasis(int nBasis)                         { this->nBasis_ = nBasis;    };
+  inline void setNAE(int nAE)                               { this->nAE_ = nAE;          };
+  inline void setNBE(int nBE)                               { this->nBE_ = nBE;          };
+  inline void setRef(int Ref)                               { this->Ref_ = Ref;          };
+  inline void setField(std::array<double,3> field)          { this->elecField_ = field;  };
+  inline void Wrapper_setField(double x, double y, double z){ this->setField({{x,y,z}}); };
+  inline void setNTCS(int i)                                { this->nTCS_ = i;           };
+  inline void setMaxMultipole(int i)                        { this->maxMultipole_ = i;   };
+  inline void setPrintLevel(int i)                          { this->printLevel_ = i;     };
+  inline void setSCFDenTol(double x)                        { this->denTol_ = x;         };
+  inline void setSCFEneTol(double x)                        { this->eneTol_ = x;         };
+  inline void setSCFMaxIter(int i)                          { this->maxSCFIter_ = i;     };
+  inline void setGuess(int i)                               { this->guess_ = i;          };
+  inline void isNotPrimary()                                { this->isPrimary = false;   };
+  inline void setCorrKernel(int i)                          { this->CorrKernel_ = i;     };
+  inline void setExchKernel(int i)                          { this->ExchKernel_ = i;     };
+  inline void setDFTKernel( int i)                          { this->DFTKernel_  = i;     };
 
   // access to private data
-  inline int nBasis() { return this->nBasis_;};
-  inline int nTCS()   { return this->nTCS_;};
-  inline int nTT()     { return this->nTT_;};
-  inline int nShell() { return this->nShell_;};
-  inline int nAE()    { return this->nAE_;};
-  inline int nBE()    { return this->nBE_;};
-  inline int nOccA()  { return this->nOccA_;};
-  inline int nOccB()  { return this->nOccB_;}
-  inline int nVirA()  { return this->nVirA_;};
-  inline int nVirB()  { return this->nVirB_;};
-  inline int Ref()    { return this->Ref_; };
-  inline int multip()  { return this->multip_;};
-  inline int nOVA()    { return nOccA_*nVirA_;};
-  inline int nOVB()    { return nOccB_*nVirB_;};
-  inline int CorrKernel(){return this->CorrKernel_;};
-  inline int ExchKernel(){return this->ExchKernel_;};
-  inline int DFTKernel(){ return this->DFTKernel_ ;};
-  inline int printLevel(){ return this->printLevel_;};
-  inline std::vector<double> mullPop(){ return this->mullPop_;};
-  inline std::array<double,3> elecField(){ return this->elecField_;  };
-  inline TMatrix* densityA() { return this->densityA_.get();};
-  inline TMatrix* densityB() { return this->densityB_.get();};
-  inline TMatrix* fockA()    { return this->fockA_.get();};
-  inline TMatrix* fockB()    { return this->fockB_.get();};
-  inline TMatrix* coulombA() { return this->coulombA_.get();};
-  inline TMatrix* coulombB() { return this->coulombB_.get();};
-  inline TMatrix* exchangeA(){ return this->exchangeA_.get();};
-  inline TMatrix* exchangeB(){ return this->exchangeB_.get();};
-  inline TMatrix* moA()      { return this->moA_.get();};
-  inline TMatrix* moB()      { return this->moB_.get();};
-  inline TMatrix* vXA()      { return this->vXA_.get();};
-  inline TMatrix* vXB()      { return this->vXB_.get();};
-  inline TMatrix* vCorA()      { return this->vCorA_.get();};
-  inline TMatrix* vCorB()      { return this->vCorB_.get();};
-  inline RealMatrix* epsA()     { return this->epsA_.get();};
-  inline RealMatrix* epsB()     { return this->epsB_.get();};
-  inline TMatrix* PTA()      { return this->PTA_.get();};
-  inline TMatrix* PTB()      { return this->PTB_.get();};
-  inline RealMatrix* dipole(){ return this->dipole_.get();};
-  inline RealMatrix* quadpole(){ return this->quadpole_.get();};
-  inline RealMatrix* tracelessQuadpole(){ return this->tracelessQuadpole_.get();};
-  inline RealTensor3d* octpole(){ return this->octpole_.get();};
-  inline BasisSet *    basisset(){return this->basisset_;};
-  inline Molecule *    molecule(){return this->molecule_;};
-  inline FileIO *      fileio(){return this->fileio_;};
-  inline Controls *    controls(){return this->controls_;};
-  inline AOIntegrals * aointegrals(){return this->aointegrals_;};
-  inline TwoDGrid *    twodgrid(){return this->twodgrid_;};
-  
-  inline std::string SCFType(){return this->SCFType_;};
-  inline int         guess(){return this->guess_;};
+  inline int nBasis()                    { return this->nBasis_;                  };
+  inline int nTCS()                      { return this->nTCS_;                    };      
+  inline int nTT()                       { return this->nTT_;                     };
+  inline int nShell()                    { return this->nShell_;                  };
+  inline int nAE()                       { return this->nAE_;                     };
+  inline int nBE()                       { return this->nBE_;                     };
+  inline int nOccA()                     { return this->nOccA_;                   };
+  inline int nOccB()                     { return this->nOccB_;                   };     
+  inline int nVirA()                     { return this->nVirA_;                   };
+  inline int nVirB()                     { return this->nVirB_;                   };
+  inline int Ref()                       { return this->Ref_;                     };      
+  inline int multip()                    { return this->multip_;                  };
+  inline int nOVA()                      { return nOccA_*nVirA_;                  };
+  inline int nOVB()                      { return nOccB_*nVirB_;                  };
+  inline int CorrKernel()                { return this->CorrKernel_;              };
+  inline int ExchKernel()                { return this->ExchKernel_;              };
+  inline int DFTKernel()                 { return this->DFTKernel_ ;              };
+  inline int printLevel()                { return this->printLevel_;              };
+  inline int maxMultipole()              { return this->maxMultipole_;            };
+  inline std::vector<double> mullPop()   { return this->mullPop_;                 };
+  inline std::array<double,3> elecField(){ return this->elecField_;               };
+  inline TMatrix* densityA()             { return this->densityA_.get();          };
+  inline TMatrix* densityB()             { return this->densityB_.get();          };
+  inline TMatrix* fockA()                { return this->fockA_.get();             };
+  inline TMatrix* fockB()                { return this->fockB_.get();             };
+  inline TMatrix* coulombA()             { return this->coulombA_.get();          };
+  inline TMatrix* coulombB()             { return this->coulombB_.get();          };
+  inline TMatrix* exchangeA()            { return this->exchangeA_.get();         };
+  inline TMatrix* exchangeB()            { return this->exchangeB_.get();         };
+  inline TMatrix* moA()                  { return this->moA_.get();               };
+  inline TMatrix* moB()                  { return this->moB_.get();               };
+  inline TMatrix* vXA()                  { return this->vXA_.get();               };
+  inline TMatrix* vXB()                  { return this->vXB_.get();               };
+  inline TMatrix* vCorA()                { return this->vCorA_.get();             };
+  inline TMatrix* vCorB()                { return this->vCorB_.get();             };
+  inline RealMatrix* epsA()              { return this->epsA_.get();              };
+  inline RealMatrix* epsB()              { return this->epsB_.get();              };
+  inline TMatrix* PTA()                  { return this->PTA_.get();               };
+  inline TMatrix* PTB()                  { return this->PTB_.get();               };
+  inline RealMatrix* dipole()            { return this->dipole_.get();            };
+  inline RealMatrix* quadpole()          { return this->quadpole_.get();          };
+  inline RealMatrix* tracelessQuadpole() { return this->tracelessQuadpole_.get(); };
+  inline RealTensor3d * octpole()        { return this->octpole_.get();           };
+  inline BasisSet     * basisset()       { return this->basisset_;                };
+  inline Molecule     * molecule()       { return this->molecule_;                };
+  inline FileIO       * fileio()         { return this->fileio_;                  };
+  inline Controls     * controls()       { return this->controls_;                };
+  inline AOIntegrals  * aointegrals()    { return this->aointegrals_;             };
+  inline TwoDGrid     * twodgrid()       { return this->twodgrid_;                };
+  inline std::string SCFType()           { return this->SCFType_;                 };
+  inline int         guess()             { return this->guess_;                   };
 
   void formGuess();	        // form the intial guess
   void SADGuess();
   void COREGuess();
   void READGuess();
-  void placeAtmDen(std::vector<int>, SingleSlater<double> &);           // Place the atomic densities into total densities for guess
+  void placeAtmDen(std::vector<int>, SingleSlater<double> &); // Place the atomic densities into total densities for guess
   void scaleDen();              // Scale the unrestricted densities for correct # electrons
   void formDensity();		// form the density matrix
   void formFock();	        // form the Fock matrix
@@ -530,11 +530,16 @@ public:
   void formExchange();		// form the exchange matrix
   void formPT();
   void formVXC();               // Form DFT VXC Term
-  void formCor(double rho, double spindensity); // Form DFT correlarion potential 
+  void formCor (double rho, double spindensity); // Form DFT correlarion potential 
+  double EvepsVWN(int iop,double a_x, double b_x, double c_x, double x0_x, double rho ); // Form DFT correlarion potential 
   void formEx(double rho); // Form DFT exchange
-  double spindens(double rho_A,double rho_B);  // define f(spindendity)
+  double f_spindens(int iop, double spindens);  // define f(spindendity)
+  double df_spindens(double spindens);  // define df(spindendity)/dspindensity
+  double df2_spindens(double spindens);  // define df2(spindendity)/dspindensity2
+  double spindens(double rho_A, double rho_B);  // define spindendity
   double formBeckeW(cartGP gridPt, int iAtm);            // Evaluate Becke Weights
   double normBeckeW(cartGP gridPt);            // Evaluate Becke Weights
+  double radsphe(int iAtm, double thr);        // radius within evaluate density;
   void   buildVxc(cartGP gridPt, double weight);            // function to build the Vxc therm
   void matchord();              // match Guassian order of guess
   void readGuessIO();       	// read the initial guess of MO's from the input stream
@@ -542,13 +547,24 @@ public:
   void readGuessGauFChk(std::string &);	// read the initial guess of MO's from the Gaussian formatted checkpoint file
   void computeEnergy();         // compute the total electronic energy
   void computeMultipole();      // compute multipole properties
+  void computeSExpect();        // compute <S> <S^2>
+  inline void computeProperties(){
+    this->computeMultipole();
+    this->computeSExpect();
+  };
   void SCF();  
   void CDIIS();
   void CpyFock(int);
   void GenDComm(int);
   void mullikenPop();
+
   void printEnergy(); 
   void printMultipole();
+  void printSExpect();
+  inline void printProperties() {
+    this->printSExpect();
+    this->printMultipole();
+  };
   void printInfo();
   void printDensityInfo(double,double,double);
   void printDensityInfo(double,double);

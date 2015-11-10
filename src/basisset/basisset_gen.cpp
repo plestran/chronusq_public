@@ -89,6 +89,16 @@ void BasisSet::constructExtrn(Molecule * mol, BasisSet *genBasis){
 } // BasisSet::constructExtrn
 
 /**
+ *  Generate uncontracted basis definition from local shells
+ */
+
+void BasisSet::genUCvomLocal(BasisSet *genBasis){
+  genBasis->fileio_ = this->fileio_;
+  genBasis->shells_ = this->uncontractBasis();
+  genBasis->computeMeta();
+} // BasisSet::genUCausLocal
+
+/**
  *  Compute BasisSet metadata
  */
 void BasisSet::computeMeta(){
