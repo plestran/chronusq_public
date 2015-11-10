@@ -286,139 +286,6 @@ void SDResponse<double>::initRMu(){
 template<>
 void SDResponse<double>::scaleDagPPRPA(bool inplace, RealVecMap &T, RealVecMap &IX, RealVecMap *AX){
   // inplace triggers whether or not AX is populated (or touched for that matter)
-/*
-  bool doX = ( (this->iMeth_ == PPATDA) || (this->iMeth_ == PPRPA) );
-  bool doY = ( (this->iMeth_ == PPCTDA) || (this->iMeth_ == PPRPA) );
-
-  int iOff = 0;
-  // Offset in the eigenvector for PPRPA Y amplitudes
-  if((this->iMeth_ == PPRPA) && (this->iPPRPA_ == 0)) iOff = this->nVA_*(this->nVA_-1)/2;
-  if((this->iMeth_ == PPRPA) && (this->iPPRPA_ == 1)) iOff = this->nVA_*this->nVB_;
-  if((this->iMeth_ == PPRPA) && (this->iPPRPA_ == 2)) iOff = this->nVB_*(this->nVB_-1)/2;
-  double fact = -1.0;
-  if(this->iMeth_ == PPRPA) fact *= -1.0;
- 
-
-  if(inplace){
-    if(doX){
-      if(this->iPPRPA_ == 0){ // AA block
-        for(auto a = 0, ab = 0; a < this->nVA_; a++)
-        for(auto b = 0; b  < a;           b++, ab++){
-          IX(ab) = IX(ab) + T(ab) * 
-            ( (*this->singleSlater_->epsA())(a+this->nOA_) +
-              (*this->singleSlater_->epsA())(b+this->nOA_) - 2*this->rMu_);
-        } // loop AB A < B (A-Alpha B-Alpha)
-      } else if(this->iPPRPA_ == 1) { // AB block
-        for(auto a = 0, ab = 0; a < this->nVA_; a++)
-        for(auto b = 0;  b < this->nVB_;  b++, ab++){
-          if(this->Ref_ == SingleSlater<double>::RHF)
-            IX(ab) = IX(ab) + T(ab) * 
-              ( (*this->singleSlater_->epsA())(a+this->nOA_) +
-                (*this->singleSlater_->epsA())(b+this->nOA_) - 2*this->rMu_);
-          else
-            IX(ab) = IX(ab) + T(ab) * 
-              ( (*this->singleSlater_->epsA())(a+this->nOA_) +
-                (*this->singleSlater_->epsB())(b+this->nOB_) - 2*this->rMu_);
-        } // loop AB (A-Alpha B-Beta)
-      } else if(this->iPPRPA_ == 2) { // BB block
-        for(auto a = 0, ab = 0; a < this->nVB_; a++)
-        for(auto b = 0; b  < a;           b++, ab++){
-          IX(ab) = IX(ab) + T(ab) * 
-            ( (*this->singleSlater_->epsB())(a+this->nOB_) +
-              (*this->singleSlater_->epsB())(b+this->nOB_) - 2*this->rMu_);
-        } // loop AB A < B (A-Alpha B-Alpha)
-      }
-    } // doX
-    if(doY){
-      if(this->iPPRPA_ == 0) { // AA Block
-        for(auto i = 0, ij = iOff; i < this->nOA_; i++)
-        for(auto j = 0; j  < i   ;           j++, ij++){
-          IX(ij) = IX(ij) + T(ij) * fact * 
-            ( (*this->singleSlater_->epsA())(i) +
-              (*this->singleSlater_->epsA())(j) - 2*this->rMu_);
-        } // loop IJ I < J (I-Alpha J-Alpha)
-      } else if(this->iPPRPA_ == 1) { // AB Block
-        for(auto i = 0, ij = iOff; i < this->nOA_; i++)
-        for(auto j = 0;  j < this->nOB_;     j++, ij++){
-          if(this->Ref_ == SingleSlater<double>::RHF)
-            IX(ij) = IX(ij) + T(ij) * fact * 
-              ( (*this->singleSlater_->epsA())(i) +
-                (*this->singleSlater_->epsA())(j) - 2*this->rMu_);
-          else
-            IX(ij) = IX(ij) + T(ij) * fact * 
-              ( (*this->singleSlater_->epsA())(i) +
-                (*this->singleSlater_->epsB())(j) - 2*this->rMu_);
-        } // loop IJ (I-Alpha J-Beta)
-      } else if(this->iPPRPA_ == 2) { // BB Block
-        for(auto i = 0, ij = iOff; i < this->nOB_; i++)
-        for(auto j = 0; j  < i   ;           j++, ij++){
-          IX(ij) = IX(ij) + T(ij) * fact * 
-            ( (*this->singleSlater_->epsB())(i) +
-              (*this->singleSlater_->epsB())(j) - 2*this->rMu_);
-        } // loop IJ I < J (I-Beta J-Beta)
-      }
-    } // doY
-  } else { // inplace if-block end
-    if(doX){
-      if(this->iPPRPA_ == 0){ // AA block
-        for(auto a = 0, ab = 0; a < this->nVA_; a++)
-        for(auto b = 0; b  < a;           b++, ab++){
-          (*AX)(ab) = IX(ab) + T(ab) * 
-            ( (*this->singleSlater_->epsA())(a+this->nOA_) +
-              (*this->singleSlater_->epsA())(b+this->nOA_) - 2*this->rMu_);
-        } // loop AB A < B (A-Alpha B-Alpha)
-      } else if(this->iPPRPA_ == 1) { // AB block
-        for(auto a = 0, ab = 0; a < this->nVA_; a++)
-        for(auto b = 0;  b < this->nVB_;  b++, ab++){
-          if(this->Ref_ == SingleSlater<double>::RHF)
-            (*AX)(ab) = IX(ab) + T(ab) * 
-              ( (*this->singleSlater_->epsA())(a+this->nOA_) +
-                (*this->singleSlater_->epsA())(b+this->nOA_) - 2*this->rMu_);
-          else
-            (*AX)(ab) = IX(ab) + T(ab) * 
-              ( (*this->singleSlater_->epsA())(a+this->nOA_) +
-                (*this->singleSlater_->epsB())(b+this->nOB_) - 2*this->rMu_);
-        } // loop AB (A-Alpha B-Beta)
-      } else if(this->iPPRPA_ == 2) { // BB block
-        for(auto a = 0, ab = 0; a < this->nVB_; a++)
-        for(auto b = 0; b  < a;           b++, ab++){
-          (*AX)(ab) = IX(ab) + T(ab) * 
-            ( (*this->singleSlater_->epsB())(a+this->nOB_) +
-              (*this->singleSlater_->epsB())(b+this->nOB_) - 2*this->rMu_);
-        } // loop AB A < B (A-Alpha B-Alpha)
-      }
-    } // doX
-    if(doY){
-      if(this->iPPRPA_ == 0) { // AA Block
-        for(auto i = 0, ij = iOff; i < this->nOA_; i++)
-        for(auto j = 0; j  < i   ;           j++, ij++){
-          (*AX)(ij) = IX(ij) + T(ij) * fact * 
-            ( (*this->singleSlater_->epsA())(i) +
-              (*this->singleSlater_->epsA())(j) - 2*this->rMu_);
-        } // loop IJ I < J (I-Alpha J-Alpha)
-      } else if(this->iPPRPA_ == 1) { // AB Block
-        for(auto i = 0, ij = iOff; i < this->nOA_; i++)
-        for(auto j = 0;  j < this->nOB_;     j++, ij++){
-          if(this->Ref_ == SingleSlater<double>::RHF)
-            (*AX)(ij) = IX(ij) + T(ij) * fact * 
-              ( (*this->singleSlater_->epsA())(i) +
-                (*this->singleSlater_->epsA())(j) - 2*this->rMu_);
-          else
-            (*AX)(ij) = IX(ij) + T(ij) * fact * 
-              ( (*this->singleSlater_->epsA())(i) +
-                (*this->singleSlater_->epsB())(j) - 2*this->rMu_);
-        } // loop IJ (I-Alpha J-Beta)
-      } else if(this->iPPRPA_ == 2) { // BB Block
-        for(auto i = 0, ij = iOff; i < this->nOB_; i++)
-        for(auto j = 0; j  < i   ;           j++, ij++){
-          (*AX)(ij) = IX(ij) + T(ij) * fact * 
-            ( (*this->singleSlater_->epsB())(i) +
-              (*this->singleSlater_->epsB())(j) - 2*this->rMu_);
-        } // loop IJ I < J (I-Beta J-Beta)
-      }
-    } // doY
-  } // inplace else-block end
-*/
   if(!this->haveDag_) this->getDiag();
   if(inplace) IX    = IX + T.cwiseProduct(*this->rmDiag_);
   else        (*AX) = IX + T.cwiseProduct(*this->rmDiag_);
@@ -437,58 +304,13 @@ void SDResponse<double>::initMeth(){
     CErr("PPRPA/PPTDA NYI for Spinor Reference");
 */
 
-  if(this->iMeth_ == CIS){
-    /******************/
-    /* CIS Single Dim */
-    if(this->Ref_ == SingleSlater<double>::TCS)
-      this->nSingleDim_ = this->nOV_;
-    else 
-      this->nSingleDim_ = this->nOAVA_ + this->nOBVB_;
-    /******************/
-  } else if(this->iMeth_ == RPA || this->iMeth_ == STAB){
-    /******************/
-    /* RPA Single Dim */
-    if(this->Ref_ == SingleSlater<double>::TCS)
-      this->nSingleDim_ = 2*this->nOV_;
-    else
-      this->nSingleDim_ = 2*(this->nOAVA_ + this->nOBVB_);
-    /******************/
-  } else if(this->iMeth_ == PPRPA){
-    /*********************/
-    /* pp-RPA Single Dim */
-    if(this->Ref_ == SingleSlater<double>::TCS)
-      this->nSingleDim_ = this->nVV_SLT_ + this->nOO_SLT_;
-    else {
-      if(this->iPPRPA_ == 0)      this->nSingleDim_ = this->nVAVA_SLT_ + this->nOAOA_SLT_;
-      else if(this->iPPRPA_ == 1) this->nSingleDim_ = this->nVAVB_     + this->nOAOB_;
-      else if(this->iPPRPA_ == 2) this->nSingleDim_ = this->nVBVB_SLT_ + this->nOBOB_SLT_;
-    }
-    /*********************/
-  } else if(this->iMeth_ == PPATDA){
-    /*************************/
-    /* pp-TDA (A) Single Dim */
-    if(this->Ref_ == SingleSlater<double>::TCS)
-      this->nSingleDim_ = this->nVV_SLT_;
-    else {
-      if(this->iPPRPA_ == 0)      this->nSingleDim_ = this->nVAVA_SLT_;
-      else if(this->iPPRPA_ == 1) this->nSingleDim_ = this->nVAVB_    ; 
-      else if(this->iPPRPA_ == 2) this->nSingleDim_ = this->nVBVB_SLT_;
-    }
-    /*************************/
-  } else if(this->iMeth_ == PPCTDA){
-    /*************************/
-    /* pp-TDA (C) Single Dim */
-    if(this->Ref_ == SingleSlater<double>::TCS)
-      this->nSingleDim_ = this->nOO_SLT_;
-    else {
-      if(this->iPPRPA_ == 0)      this->nSingleDim_ = this->nOAOA_SLT_;
-      else if(this->iPPRPA_ == 1) this->nSingleDim_ = this->nOAOB_;
-      else if(this->iPPRPA_ == 2) this->nSingleDim_ = this->nOBOB_SLT_;
-    }
-    /*************************/
-  } else {
+  if(this->iMeth_ == CIS)                              this->nSingleDimCIS();
+  else if(this->iMeth_ == RPA || this->iMeth_ == STAB) this->nSingleDimFOPP();
+  else if(this->iMeth_ == PPRPA)                       this->nSingleDimPPRPA();
+  else if(this->iMeth_ == PPATDA)                      this->nSingleDimPPATDA();
+  else if(this->iMeth_ == PPCTDA)                      this->nSingleDimPPCTDA();
+  else 
     CErr("PSCF Method " + std::to_string(this->iMeth_) + " NYI",this->fileio_->out);
-  }
 } // initMeth
 
 template<>

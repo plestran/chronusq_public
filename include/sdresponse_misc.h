@@ -36,6 +36,87 @@
   void initMeth();
   void checkValid();
 
+  // Get the running dimension of the response matrix
+
+  /**
+   * Get the Single Dimension for the A Matrix for TDA
+   */ 
+  inline void nSingleDimCIS(){
+    if(this->Ref_ == SingleSlater<double>::TCS)
+      this->nSingleDim_ = this->nOV_;
+    else 
+      this->nSingleDim_ = this->nOAVA_ + this->nOBVB_;
+  };
+
+  /**
+   * Get the dimension for the First Order Polarization Propagator (FOPP)
+   */
+  inline void nSingleDimFOPP(){
+    if(this->Ref_ == SingleSlater<double>::TCS)
+      this->nSingleDim_ = 2*this->nOV_;
+    else 
+      this->nSingleDim_ = 2*this->nOAVA_ + 2*this->nOBVB_;
+  };
+
+  /**
+   * Get the dimension for the Particle-Particle Random Phase Approximation (PPRPA)
+   *
+   *   IPPRPA toggles the spin separation for the response matrix:
+   *     IPPRPA = 0 ... All Alpha Block
+   *     IPPRPA = 1 ... Mixed Alpha-Beta Block
+   *     IPPRPA = 2 ... All Beta Block
+   */ 
+  inline void nSingleDimPPRPA(){
+    if(this->Ref_ == SingleSlater<double>::TCS)
+      this->nSingleDim_ = this->nVV_SLT_ + this->nOO_SLT_;
+    else {
+      if(this->iPPRPA_ == 0)      this->nSingleDim_ = this->nVAVA_SLT_ + this->nOAOA_SLT_;
+      else if(this->iPPRPA_ == 1) this->nSingleDim_ = this->nVAVB_     + this->nOAOB_;
+      else if(this->iPPRPA_ == 2) this->nSingleDim_ = this->nVBVB_SLT_ + this->nOBOB_SLT_;
+    }
+  };
+
+  /**
+   * Get the dimension for the Particle-Particle Tamm-Danckoff Approximation (PPTDA)
+   *
+   *   (N+2) -> N
+   *
+   *   IPPRPA toggles the spin separation for the response matrix:
+   *     IPPRPA = 0 ... All Alpha Block
+   *     IPPRPA = 1 ... Mixed Alpha-Beta Block
+   *     IPPRPA = 2 ... All Beta Block
+   */
+  inline void nSingleDimPPATDA(){
+    if(this->Ref_ == SingleSlater<double>::TCS)
+      this->nSingleDim_ = this->nVV_SLT_;
+    else {
+      if(this->iPPRPA_ == 0)      this->nSingleDim_ = this->nVAVA_SLT_;
+      else if(this->iPPRPA_ == 1) this->nSingleDim_ = this->nVAVB_    ; 
+      else if(this->iPPRPA_ == 2) this->nSingleDim_ = this->nVBVB_SLT_;
+    }
+  };
+
+  /**
+   * Get the dimension for the Particle-Particle Tamm-Danckoff Approximation (PPTDA)
+   *
+   *   (N-2) -> N
+   *
+   *   IPPRPA toggles the spin separation for the response matrix:
+   *     IPPRPA = 0 ... All Alpha Block
+   *     IPPRPA = 1 ... Mixed Alpha-Beta Block
+   *     IPPRPA = 2 ... All Beta Block
+   */
+  inline void nSingleDimPPCTDA(){
+    if(this->Ref_ == SingleSlater<double>::TCS)
+      this->nSingleDim_ = this->nVV_SLT_;
+    else {
+      if(this->iPPRPA_ == 0)      this->nSingleDim_ = this->nOAOA_SLT_;
+      else if(this->iPPRPA_ == 1) this->nSingleDim_ = this->nOAOB_    ; 
+      else if(this->iPPRPA_ == 2) this->nSingleDim_ = this->nOBOB_SLT_;
+    }
+  };
+
+
   /*************************/
   /* MPI Related Routines  */
   /*************************/

@@ -298,58 +298,13 @@ void SDResponse<dcomplex>::initMeth(){
       && !(this->iPPRPA_ >= 0 && this->iPPRPA_ <= 2))
     CErr("Invalid iPPRPA_ in SDResponse::initMeth()",this->fileio_->out);
 
-  if(this->iMeth_ == CIS){
-    /******************/
-    /* CIS Single Dim */
-    if(this->Ref_ == SingleSlater<dcomplex>::TCS)
-      this->nSingleDim_ = this->nOV_;
-    else 
-      this->nSingleDim_ = this->nOAVA_ + this->nOBVB_;
-    /******************/
-  } else if(this->iMeth_ == RPA || this->iMeth_ == STAB){
-    /******************/
-    /* RPA Single Dim */
-    if(this->Ref_ == SingleSlater<dcomplex>::TCS)
-      this->nSingleDim_ = 2*this->nOV_;
-    else
-      this->nSingleDim_ = 2*(this->nOAVA_ + this->nOBVB_);
-    /******************/
-  } else if(this->iMeth_ == PPRPA){
-    /*********************/
-    /* pp-RPA Single Dim */
-    if(this->Ref_ == SingleSlater<dcomplex>::TCS)
-      this->nSingleDim_ = this->nVV_SLT_ + this->nOO_SLT_;
-    else {
-      if(this->iPPRPA_ == 0)      this->nSingleDim_ = this->nVAVA_SLT_ + this->nOAOA_SLT_;
-      else if(this->iPPRPA_ == 1) this->nSingleDim_ = this->nVAVB_     + this->nOAOB_;
-      else if(this->iPPRPA_ == 2) this->nSingleDim_ = this->nVBVB_SLT_ + this->nOBOB_SLT_;
-    }
-    /*********************/
-  } else if(this->iMeth_ == PPATDA){
-    /*************************/
-    /* pp-TDA (A) Single Dim */
-    if(this->Ref_ == SingleSlater<dcomplex>::TCS)
-      this->nSingleDim_ = this->nVV_SLT_;
-    else {
-      if(this->iPPRPA_ == 0)      this->nSingleDim_ = this->nVAVA_SLT_;
-      else if(this->iPPRPA_ == 1) this->nSingleDim_ = this->nVAVB_    ; 
-      else if(this->iPPRPA_ == 2) this->nSingleDim_ = this->nVBVB_SLT_;
-    }
-    /*************************/
-  } else if(this->iMeth_ == PPCTDA){
-    /*************************/
-    /* pp-TDA (C) Single Dim */
-    if(this->Ref_ == SingleSlater<dcomplex>::TCS)
-      this->nSingleDim_ = this->nOO_SLT_;
-    else {
-      if(this->iPPRPA_ == 0)      this->nSingleDim_ = this->nOAOA_SLT_;
-      else if(this->iPPRPA_ == 1) this->nSingleDim_ = this->nOAOB_;
-      else if(this->iPPRPA_ == 2) this->nSingleDim_ = this->nOBOB_SLT_;
-    }
-    /*************************/
-  } else {
+  if(this->iMeth_ == CIS)                              this->nSingleDimCIS();
+  else if(this->iMeth_ == RPA || this->iMeth_ == STAB) this->nSingleDimFOPP();
+  else if(this->iMeth_ == PPRPA)                       this->nSingleDimPPRPA();
+  else if(this->iMeth_ == PPATDA)                      this->nSingleDimPPATDA();
+  else if(this->iMeth_ == PPCTDA)                      this->nSingleDimPPCTDA();
+  else 
     CErr("PSCF Method " + std::to_string(this->iMeth_) + " NYI",this->fileio_->out);
-  }
 } // initMeth
 
 template<>
