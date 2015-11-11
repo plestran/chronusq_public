@@ -100,20 +100,41 @@ def genTable():
   table = []
   for line in f:
     strx = line.split()
-    if '-----' in line:
-      start = True
-      continue
-    if start:    
-      if ".inp" in line and '#' not in line:
+    if ".inp" in line and '#' not in line:
+
+#     check if the type falls within the set we want to run
+      runTest = False
+      for sub in subTests:
+        if sub in line.lower():
+          runTest = True
+          continue
+
+#     run all the tests not commented out
+      if testType == 'all': runTest = True
+
+#     checks for exclusive options
+      if testSize == 'large' and "small" in line.lower(): runTest = False
+      if testSize == 'small' and "large" in line.lower(): runTest = False
+      if testPar  == 'no'  and "openmp" in line.lower(): runTest = False
+      if testPar  == 'yes' and "serial" in line.lower(): runTest = False
+      if testInts == 'incore' and "direct" in line.lower(): runTest = False
+      if testInts == 'direct' and "incore" in line.lower(): runTest = False
+      if "dfield" in subTests and "dfield" not in line.lower(): runTest = False
+      if testComp == 'no' and "complex" in line.lower(): runTest = False
+      if testComp == 'yes'and "real"    in line.lower(): runTest = False
+
+#     add the tests to the list
+      if runTest:
         desc = ' '.join(strx[2:])
         entry = UnitTest(strx[0],strx[1],desc)
         table.append(entry)
+
   f.close()
   return table
 #--------------------------------------------------------------------
 
 #--------------------------------------------------------------------
-def runUnit(doKill,doPrint):
+def runUnit(doPrint):
 # Runs the unit tests
   global errors, summary
   refvalues()
@@ -126,17 +147,17 @@ def runUnit(doKill,doPrint):
     errors  = []
     if findFile(i.infile,"."):
 #
-#      run chronus
-      print "running file: "+i.infile
+#     run chronus
+      if doPrint:
+        print "running file: "+i.infile
       tests[k][0] = runCQ(i.infile,'')
-#      time.sleep(2)
 #
-#      test SCF values
+#     test SCF values
       if 'SCF' in ref[i.infile[:8]].typ:
         testSCF(ref[i.infile[:8]],tests[k][0])
         summary.append(errors)
 
-#      test RESP values
+#     test RESP values
       elif 'RESP' in ref[i.infile[:8]].typ:
         testRESP(ref[i.infile[:8]],tests[k][0])
         summary.append(errors)
@@ -157,7 +178,7 @@ def runUnit(doKill,doPrint):
 def testRESP(ref,tests):
   auToeV = 27.2113961
 
-#  test excitation energies
+# test excitation energies
   maxerr = 0.0
   for i in range(0,len(ref.w)):
     abserr = abs(ref.w[i]   - tests.excEne[i]*auToeV)
@@ -239,17 +260,37 @@ def testSCF(ref,tests):
 ##############################
 
 if __name__ in "__main__":
+
+# parse user options
   msg = """python runtests.py [-o --option]
 
   Options:
     -h, --help        Print usage instructions
-    --enable-kill    Enable script termination on Unit Test failure
-    --enable-travisci    Enable options for Travis-CI run
-    -s, --silent        Disable Print"""
-  doKill = False
-  doPrint = True
+    -s, --silent      Disable Print
+    --type=XXX        Determines types of tests to run. Multiple options
+                      can be specified by separating with a comma.
+                      3 classes of tests  = [SCF,RESP,RT] 
+                      Specify References  = [RHF,UHF,CUHF,GHF,RKS,UKS]
+                      Reference and Type  = [RHF-SCF,UHF-CIS,etc.] 
+                      Dipole Field        = [DField]
+    --integrals=XXX   Integral evaluation = [incore] or [direct]
+    --parallel=XXX    Whether to run parallel jobs = [yes] or [no]
+    --size=XXX        Size of jobs to run = [small] or [large] or [both]
+                      [small] is the default
+    --complex=XXX     Complex Jobs = [yes] or [no] or [both]
+                      [both] is the default
+    --basis=XXX       Only tests for this basis set
+                      [STO-3G,6-31G,cc-pVDZ,def2-SVPD]
+"""
+  doPrint  = True
+  testType = 'all'
+  testInts = ''
+  testPar  = ''
+  testSize = 'small'
+  testComp = ''
+  testBasis = 'all'
   try:
-    opts, args = getopt.getopt(sys.argv[1:],"hs",["enable-travisci","enable-kill","help","silent"])
+    opts, args = getopt.getopt(sys.argv[1:],"hs",["help","silent","type=","integrals=","parallel=","size=","complex=","basis="])
   except getopt.GetoptError:
     print msg
     sys.exit(2)
@@ -257,10 +298,25 @@ if __name__ in "__main__":
     if opt in ('-h',"--help"):
       print msg
       sys.exit()
-    elif opt in ("--enable-travisci","--enable-kill"):
-      doKill = True
     elif opt in ('-s',"--silent"):
       doPrint = False
+    elif opt in ("--type"):
+      testType = arg.lower()
+    elif opt in ("--integrals"):
+      testInts = arg.lower()
+    elif opt in ("--parallel"):
+      testPar  = arg.lower()
+    elif opt in ("--size"):
+      testSize = arg.lower()
+    elif opt in ("--complex"):
+      testComp = arg.lower()
+    elif opt in ("--basis"):
+      testBasis = arg.lower()
 
-  runUnit(doKill,doPrint)    
+  subTests = testType.split(',')
+  subBasis = testBasis.split(',')
+
+# run unit tests
+  runUnit(doPrint)    
+#--------------------------------------------------------------------
 
