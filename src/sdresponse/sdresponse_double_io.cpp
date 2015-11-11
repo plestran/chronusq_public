@@ -362,17 +362,32 @@ void SDResponse<double>::printExcitedStateEnergies(){
     this->fileio_->out << "pp-RPA";
   if(this->Ref_ != SingleSlater<double>::TCS &&
      (this->iMeth_ == PPATDA || this->iMeth_ == PPCTDA || this->iMeth_ == PPRPA)) {
-    if(this->iPPRPA_ == 0) this->fileio_->out << " (All Alpha Spin Separated)";
+    if(this->iPPRPA_ == 0)      this->fileio_->out << " (All Alpha - Spin Separated)";
+    else if(this->iPPRPA_ == 1) this->fileio_->out << " (Mixed Spin - Spin Separated)";
 
   }
-  this->fileio_->out << " Diagonalization for lowest " << this->nSek_ << " eigenstates" << endl;
+  this->fileio_->out << " Diagonalization for lowest " << this->nSek_ << " eigenstates" 
+                     << endl;
   this->fileio_->out << bannerMid << endl << endl;
+
   if(this->iMeth_ == PPATDA || this->iMeth_ == PPCTDA || this->iMeth_ == PPRPA){
     double Omega = (*this->omega_)(0);
     this->fileio_->out << "Lowest Eigenenergie:" << endl;
-    this->fileio_->out << "  \u03C9 = " << std::setw(10) << std::setprecision(7) << std::fixed << Omega                   << " Eh   ";
-    this->fileio_->out << "  \u03C9 = " << std::setw(10) << std::setprecision(7) << std::fixed << Omega*phys.eVPerHartree << " eV   ";
-    this->fileio_->out << "  \u03C9 = " << std::setw(10) << std::setprecision(7) << std::fixed << phys.nmPerHartree/Omega << " nm   " << endl;
+    this->fileio_->out << "  \u03C9 = " 
+                       << std::setw(10) << std::setprecision(7) << std::fixed 
+                       << Omega << " Eh   ";
+
+    if(std::abs(Omega) > 1e-8) {
+      this->fileio_->out << "  \u03C9 = " 
+                         << std::setw(10) << std::setprecision(7) << std::fixed 
+                         << Omega * phys.eVPerHartree << " eV   ";
+     
+      this->fileio_->out << "  \u03C9 = " 
+                         << std::setw(10) << std::setprecision(7) << std::fixed 
+                         << phys.nmPerHartree / Omega << " nm   ";
+    }
+    this->fileio_->out << endl;
+
     this->fileio_->out << endl << endl;
     this->fileio_->out << "*** Printing Eigenenergies with GS correction ***";
     this->fileio_->out << endl << endl ;
@@ -391,20 +406,24 @@ void SDResponse<double>::printExcitedStateEnergies(){
                        << std::setw(10) << std::setprecision(7) << std::fixed 
                        << Omega << " Eh   ";
 
-    this->fileio_->out << "  \u03C9 = " 
-                       << std::setw(10) << std::setprecision(7) << std::fixed 
-                       << Omega * phys.eVPerHartree << " eV   ";
-
-    this->fileio_->out << "  \u03C9 = " << std::setw(10) 
-                       << std::setprecision(7) << std::fixed 
-                       << phys.nmPerHartree / Omega << " nm   " << endl;
+    if(std::abs(Omega) > 1e-8) {
+      this->fileio_->out << "  \u03C9 = " 
+                         << std::setw(10) << std::setprecision(7) << std::fixed 
+                         << Omega * phys.eVPerHartree << " eV   ";
+     
+      this->fileio_->out << "  \u03C9 = " << std::setw(10) 
+                         << std::setprecision(7) << std::fixed 
+                         << phys.nmPerHartree / Omega << " nm   ";
+    }
+    this->fileio_->out << endl;
 
     if(this->iMeth_ == PPATDA || this->iMeth_ == PPCTDA || this->iMeth_ == PPRPA)
       this->fileio_->out << "  f(" << 0 << "," << iSt << ") = " 
                          << (*this->oscStrength_)(0,iSt) << endl;
-    else
+    else if(this->iMeth_ != STAB)
       this->fileio_->out << "  f(" << 0 << "," << iSt+1 << ") = " 
                          << (*this->oscStrength_)(0,iSt+1) << endl;
+
     this->printPrinciple(iSt);
   }
 } //printExcitedStateEnergies()

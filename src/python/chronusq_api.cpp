@@ -384,6 +384,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("IterativeRESP"      , &SDResponse<double>::IterativeRESP              )
     .def("excitationEnergies", &SDResponse<double>::Wrapper_excitationEnergies)
     .def("oscStrengths"      , &SDResponse<double>::Wrapper_oscStrengths      )
+    .def("setPPRPA"          , &SDResponse<double>::setPPRPA                  )
     
     .def_readonly("nIter"    ,&SDResponse<double>::nQNIter                   )
     
@@ -400,6 +401,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("IterativeRESP"      , &SDResponse<dcomplex>::IterativeRESP             )
     .def("excitationEnergies",&SDResponse<dcomplex>::Wrapper_excitationEnergies)
     .def("oscStrengths"      ,&SDResponse<dcomplex>::Wrapper_oscStrengths      )
+    .def("setPPRPA"          , &SDResponse<dcomplex>::setPPRPA                  )
     
     .def_readonly("nIter"    ,&SDResponse<dcomplex>::nQNIter                   )
   ;

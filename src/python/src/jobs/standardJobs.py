@@ -108,6 +108,7 @@ def runSDR(workers,meta):
   runSCF(workers,meta)
   workers["CQMOIntegrals"].initMeta()
   workers["CQSDResponse"].initMeta()
+  workers["CQSDResponse"].setPPRPA(1)
   workers["CQSDResponse"].initMeth()
   workers["CQSDResponse"].alloc()
   workers["CQSDResponse"].IterativeRESP()
