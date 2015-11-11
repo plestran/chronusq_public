@@ -264,31 +264,47 @@ double * BasisSet::basisEval(libint2::Shell &liShell, cartGP *pt){
   auto contDepth = liShell.alpha.size(); 
   auto center = liShell.O;
   double * fEVal = new double[shSize];
-  
-  std::vector<std::array<int,3>> L;
+   
+////T
+////  auto start_1 = std::chrono::high_resolution_clock::now();
+////T
+  std::vector<std::array<int,3>> L(shSize);
   if(liShell.contr[0].l == 0){
-    L.push_back({{0,0,0}});
+    L[0] = {0,0,0};
   } else if(liShell.contr[0].l == 1){
-    L.push_back({{1,0,0}});
-    L.push_back({{0,1,0}});
-    L.push_back({{0,0,1}});
+    L[0] = {1,0,0};
+    L[1] = {0,1,0};
+    L[2] = {0,0,1};
   } else if(liShell.contr[0].l == 2){
-    L.push_back({{2,0,0}});
-    L.push_back({{1,1,0}});
-    L.push_back({{1,0,1}});
-    L.push_back({{0,2,0}});
-    L.push_back({{0,1,1}});
-    L.push_back({{0,0,2}});
+    L[0] = {2,0,0};
+    L[1] = {1,1,0};
+    L[2] = {1,0,1};
+    L[3] = {0,2,0};
+    L[4] = {0,1,1};
+    L[5] = {0,0,2};
   } else CErr("L > 2 NYI");
+////T
+////  auto finish_1 = std::chrono::high_resolution_clock::now();  
+////  this->duration_1 += finish_1 - start_1;
+////T
 
   std::memset(fEVal,0,shSize*sizeof(double));
-
+////T
+////  auto start_2 = std::chrono::high_resolution_clock::now();
+////T
   double x = bg::get<0>(*pt) - center[0];
   double y = bg::get<1>(*pt) - center[1];
   double z = bg::get<2>(*pt) - center[2];
   double rSq = x*x + y*y + z*z;
+////T
+////  auto finish_2 = std::chrono::high_resolution_clock::now();  
+////  this->duration_2 += finish_2 - start_2;
+////T
+////T
+////  auto start_3 = std::chrono::high_resolution_clock::now();
+////T
   for(auto i = 0; i < shSize; i++){
-//    cout << endl << fEVal[i] << endl;
+////    cout << endl << fEVal[i] << endl;
     for(auto k = 0; k < contDepth; k++){
       fEVal[i] += 
         liShell.contr[0].coeff[k] *
@@ -302,6 +318,10 @@ double * BasisSet::basisEval(libint2::Shell &liShell, cartGP *pt){
     fEVal[i] *= std::pow(y,m);
     fEVal[i] *= std::pow(z,n);
   }
+////T
+//  auto finish_3 = std::chrono::high_resolution_clock::now();  
+//  this->duration_3 += finish_3 - start_3;
+////T
 
   return fEVal;
 }

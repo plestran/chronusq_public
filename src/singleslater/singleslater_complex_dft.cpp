@@ -29,6 +29,38 @@ namespace ChronusQ {
 // form the Vxc matrix        //
 //----------------------------//
 
+template<>
+double SingleSlater<dcomplex>::formBeckeW(cartGP gridPt, int iAtm){
+
+};
+template<>
+double SingleSlater<dcomplex>::normBeckeW(cartGP gridPt){
+
+};
+
+template<>
+double SingleSlater<dcomplex>::f_spindens(int iop, double spindensity){
+
+};
+
+template<>
+double SingleSlater<dcomplex>::EvepsVWN(int iop, double A_x, double b_x, double c_x, double x0_x, double rho){
+};
+
+template<>
+double SingleSlater<dcomplex>::df_spindens(double spindensity){
+
+};
+
+template<>
+double SingleSlater<dcomplex>::df2_spindens(double spindensity){
+
+};
+
+template<>
+double SingleSlater<dcomplex>::spindens(double rho_A, double rho_B){
+
+};
 
 template<>
 void SingleSlater<dcomplex>::formVXC(){
@@ -36,10 +68,15 @@ void SingleSlater<dcomplex>::formVXC(){
 };
 
 template<>
-void SingleSlater<dcomplex>::formCor(double rho, double spindensity){
+void SingleSlater<dcomplex>::evalVXC(cartGP gridPt, double weight, std::vector<bool> mapRad_){
+
 };
 
 
+
+template<>
+void SingleSlater<dcomplex>::formCor(double rho, double spindensity){
+};
 
 
 } // Namespace ChronusQ
