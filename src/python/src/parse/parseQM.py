@@ -106,7 +106,7 @@ def parseQM(workers,secDict):
   if str(ssSettings['JOB']) in knownJobs:
     if ssSettings['JOB'] in ('RT'):
       parseRT(workers,secDict['RT']) 
-    elif ssSettings['JOB'] in ('RPA','CIS','STAB'):
+    elif ssSettings['JOB'] in ('RPA','CIS','STAB','PPRPA','PPATDA','PPCTDA'):
       parseSDR(workers,secDict)
   else:
     msg = 'QM.Job ' + str(ssSettings['JOB']) + ' not recognized'

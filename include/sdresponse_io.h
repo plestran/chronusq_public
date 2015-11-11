@@ -25,5 +25,12 @@
  */
 
   void printPrinciple(int);
+  void printPrincipleTDA(int,double);
+  void printPrincipleFOPP(int,double);
+  void printPrinciplePPRPA(int,double);
+  void printPrinciplePPATDA(int,double);
+  void printPrinciplePPCTDA(int,double);
+  void printPrinciplePPX(int,double);
+  void printPrinciplePPY(int,int,double);
   void printInfo();
   void printExcitedStateEnergies(); 

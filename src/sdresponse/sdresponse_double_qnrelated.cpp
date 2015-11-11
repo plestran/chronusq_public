@@ -326,7 +326,7 @@ void SDResponse<double>::formGuess(){
 
 template<>
 void SDResponse<double>::IterativeRESP(){
-  bool hasProp = ((this->iMeth_==CIS || this->iMeth_==RPA || this->iMeth_==PPATDA));
+  bool hasProp = ((this->iMeth_==CIS || this->iMeth_==RPA));
   this->formGuess();
 //if(this->iMeth_ == PPATDA) CErr();
   QuasiNewton<double> davA(this);

@@ -306,7 +306,7 @@ void SDResponse<double>::initMeth(){
 
   if(this->iMeth_ == CIS)                              this->nSingleDimCIS();
   else if(this->iMeth_ == RPA || this->iMeth_ == STAB) this->nSingleDimFOPP();
-  else if(this->iMeth_ == PPRPA)                       this->nSingleDimPPRPA();
+  else if(this->iMeth_ == PPRPA)                       {cout << "HERE" << endl; this->nSingleDimPPRPA();}
   else if(this->iMeth_ == PPATDA)                      this->nSingleDimPPATDA();
   else if(this->iMeth_ == PPCTDA)                      this->nSingleDimPPCTDA();
   else 
