@@ -297,6 +297,7 @@ public:
   bool	haveDensity; ///< Computed Density? (Not sure if this is used anymore)
   bool	haveCoulomb; ///< Computed Coulomb Matrix?
   bool	haveExchange;///< Computed Exchange Matrix?
+  bool	screenVxc   ;///< Do the screening for Vxc?
   bool  havePT;      ///< Computed Perturbation Tensor?
   bool  isClosedShell;
   bool  isConverged;
@@ -315,14 +316,18 @@ public:
   double   eps_corr;    ///< VWN Correlation Energy Density
   double   mu_corr;     ///<  VWN Correlation Potential
   double   mu_corr_B;   ///<  VWN Correlation Potential (beta)
-/* TIMING
-  std::chrono::duration<double> duration_dens;
-  std::chrono::duration<double> duration_1;
-  std::chrono::duration<double> duration_2;
-  std::chrono::duration<double> duration_3;
-  std::chrono::duration<double> duration_4;
-  std::chrono::duration<double> duration_5;
-*/
+  double   epsScreen;   ///<  Screening value for both basis and Bweight
+  double   epsConv;     ///<  Threshold value for converging cutoff radius given epsScreen
+  int      maxiter;     ///<  Maximum number of iteration to find cutoff radius
+//// T
+//  std::chrono::duration<double> duration_1;
+//  std::chrono::duration<double> duration_2;
+//  std::chrono::duration<double> duration_3;
+//  std::chrono::duration<double> duration_4;
+//  std::chrono::duration<double> duration_5;
+//  std::chrono::duration<double> duration_6;
+//  std::chrono::duration<double> duration_7;
+//  std::chrono::duration<double> duration_8;
   int      nSCFIter;
 
   // constructor & destructor
@@ -530,6 +535,7 @@ public:
   void formExchange();		// form the exchange matrix
   void formPT();
   void formVXC();               // Form DFT VXC Term
+  void evalVXC(cartGP gridPt, double weight, std::vector<bool> mapRad_); // evaluate DFT VXC Matrix Term( at a given pts)
   void formCor (double rho, double spindensity); // Form DFT correlarion potential 
   double EvepsVWN(int iop,double a_x, double b_x, double c_x, double x0_x, double rho ); // Form DFT correlarion potential 
   void formEx(double rho); // Form DFT exchange
@@ -539,8 +545,7 @@ public:
   double spindens(double rho_A, double rho_B);  // define spindendity
   double formBeckeW(cartGP gridPt, int iAtm);            // Evaluate Becke Weights
   double normBeckeW(cartGP gridPt);            // Evaluate Becke Weights
-  double radsphe(int iAtm, double thr);        // radius within evaluate density;
-  void   buildVxc(cartGP gridPt, double weight);            // function to build the Vxc therm
+//  void   buildVxc(cartGP gridPt, double weight, std::vector<bool> mapRad_);            // function to build the Vxc therm
   void matchord();              // match Guassian order of guess
   void readGuessIO();       	// read the initial guess of MO's from the input stream
   void readGuessGauMatEl(GauMatEl&); // read the intial guess of MO's from Gaussian raw matrix element file
@@ -635,7 +640,7 @@ public:
 #include <singleslater_fock.h>
 #include <singleslater_misc.h>
 #include <singleslater_scf.h>
-#include <singleslater_dft.h>
+//#include <singleslater_dft.h>
 
 
 } // namespace ChronusQ

@@ -30,5 +30,8 @@ jobMap = {
   'RT' :runRT,
   'RPA':runSDR,
   'CIS':runSDR,
-  'STAB':runSDR
+  'STAB':runSDR,
+  'PPRPA':runSDR,
+  'PPATDA':runSDR,
+  'PPCTDA':runSDR
 }

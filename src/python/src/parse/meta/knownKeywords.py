@@ -43,7 +43,10 @@ knownSections  = [
   "RT",
   "CIS",
   "RPA",
-  "STAB" 
+  "STAB",
+  "PPRPA",
+  "PPATDA",
+  "PPCTDA"
 ]
 
 #
@@ -110,6 +113,16 @@ knownKeywords['CIS'] = {
 }
 
 knownKeywords['RPA'] = {
+  'NSTATES':CQKeyword("NSTATES",'I',True)
+}
+
+knownKeywords['PPRPA'] = {
+  'NSTATES':CQKeyword("NSTATES",'I',True)
+}
+knownKeywords['PPATDA'] = {
+  'NSTATES':CQKeyword("NSTATES",'I',True)
+}
+knownKeywords['PPCTDA'] = {
   'NSTATES':CQKeyword("NSTATES",'I',True)
 }
 
