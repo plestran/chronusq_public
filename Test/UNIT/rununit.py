@@ -154,7 +154,7 @@ def runUnit(doPrint):
 #
 #     run chronus
       if doPrint:
-        print "running file: "+i.infile
+        print "running job: "+i.infile
       tests[k] = runCQ(i.infile,'')
 #
 #     test SCF values
@@ -172,7 +172,7 @@ def runUnit(doPrint):
         summary.append(errors)
 
       else:
-        print "Not recognize job type for ", ref[i.infile[:8]].typ
+        print "Not recognized job type for ", ref[i.infile[:8]].typ
         sys.exit()
 
     k += 1
