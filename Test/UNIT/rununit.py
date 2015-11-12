@@ -143,7 +143,7 @@ def runUnit(doPrint):
 # Runs the unit tests
   global errors, summary
   refvalues()
-  tests = [[None for x in xrange(1000)] for y in xrange(1000)]
+  tests = [None for x in xrange(1000)] 
   testtable = genTable()
   summary = []
 
@@ -155,20 +155,20 @@ def runUnit(doPrint):
 #     run chronus
       if doPrint:
         print "running file: "+i.infile
-      tests[k][0] = runCQ(i.infile,'')
+      tests[k] = runCQ(i.infile,'')
 #
 #     test SCF values
       if 'SCF' in ref[i.infile[:8]].typ:
-        testSCF(ref[i.infile[:8]],tests[k][0])
+        testSCF(ref[i.infile[:8]],tests[k])
         summary.append(errors)
 
 #     test RESP values
       elif 'RESP' in ref[i.infile[:8]].typ:
-        testRESP(ref[i.infile[:8]],tests[k][0])
+        testRESP(ref[i.infile[:8]],tests[k])
         summary.append(errors)
 
       elif 'RT' in ref[i.infile[:8]].typ:
-        testRT(ref[i.infile[:8]],tests[k][0])
+        testRT(ref[i.infile[:8]],tests[k])
         summary.append(errors)
 
       else:
