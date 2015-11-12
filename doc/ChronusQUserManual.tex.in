@@ -189,7 +189,7 @@
 	instructions may be obtained from \texttt{http://www.cmake.org}.
 
       \subsubsection{\Libint} \label{subsubsec:Libint}
-        For the evaluation of molecule integrals over gaussian-type
+        For the evaluation of molecular integrals over gaussian-type
         function (GTOs), ChronusQ relies on the \Libint~library of E. Valeev \cite{libint15}. A
 	preconfigured (uncompiled) library is shipped with ChronusQ (located in
 	the \texttt{/deps/src} directory). The configure/compile procedure
@@ -558,7 +558,7 @@ test.index
 
 \newpage
   \section{Input Files} \label{sec:InputFiles}
-To use ChronusQ, it is necessary to specify the molecule and job type within an input file. The easiest way to understand the input for ChronusQ is to take a look at an example. Here is a sample input file for water, \texttt{h2o.inp}. As written, it performs an HF/STO-3G calculation on neutral, singlet water with a single processor.
+  To use ChronusQ, it is necessary to specify the molecule and job type within an input file. The easiest way to understand the input for ChronusQ is to take a look at an example. Here is a sample input file for water, \texttt{h2o.inp}. As written, it performs an HF/STO-3G calculation on neutral, singlet water with a single processor.
 \begin{lstlisting}
 #
 #  Molecule Specification
@@ -597,10 +597,10 @@ ChronusQ input files are divided into sections that specify the molecular geomet
     \item[\texttt{geom}] \hfill \\
     Specifies the geometry of the molecule. The input is always Cartesian, and the default units are in Angstroms. Each line corresponds to one atom. Each line here follows the following format
           \begin{lstlisting}
-          <atomic symbol> <x-coordinate> <y-coordinate> <z-coordinate>
+          <sp> <atomic symbol> <x-coordinate> <y-coordinate> <z-coordinate>
           \end{lstlisting} 
     \end{description}
-    That's all there is to the \texttt{[Molecule]} specification!
+    Please note that the $<sp>$ is a required space at the begining of the line. This is an artifact of the input file parser, and must be included. That's all there is to the \texttt{[Molecule]} specification!
 
     \subsection{Defining the type of job with the \texttt{[QM]} section} \label{subsec:QMInput}
     The \texttt{[QM]} section sets up the type of job you want to run, be it a single point Hartree-Fock energy calculation or a real-time propagation. It is also where you specify your basis set and many other options.
