@@ -468,14 +468,14 @@ test0102_serial_direct.inp - Complex RHF-RT - STO-3G  - Small Serial w/ PW Lowdi
 #test0102_smp_incore.inp    - Complex RHF-RT - STO-3G  - Small OpenMP w/ PW Lowdin   - In-Core Integrals
 test0102_smp_direct.inp    - Complex RHF-RT - STO-3G  - Small OpenMP w/ PW Lowdin   - Direct  Integrals
 *linearly ramped field
-test0103_serial_incore.inp - Complex RHF-RT - STO-3G  - Small Serial w/ O2nRamp Cholesky - In-Core Integrals
-test0103_serial_direct.inp - Complex RHF-RT - STO-3G  - Small Serial w/ O2nRamp Cholesky - Direct  Integrals
-#test0103_smp_incore.inp    - Complex RHF-RT - STO-3G  - Small OpenMP w/ O2nRamp Cholesky - In-Core Integrals
-test0103_smp_direct.inp    - Complex RHF-RT - STO-3G  - Small OpenMP w/ O2nRamp Cholesky - Direct  Integrals
-test0104_serial_incore.inp - Complex RHF-RT - STO-3G  - Small Serial w/ O2nRamp Lowdin   - In-Core Integrals
-test0104_serial_direct.inp - Complex RHF-RT - STO-3G  - Small Serial w/ O2nRamp Lowdin   - Direct  Integrals
-#test0104_smp_incore.inp    - Complex RHF-RT - STO-3G  - Small OpenMP w/ O2nRamp Lowdin   - In-Core Integrals
-test0104_smp_direct.inp    - Complex RHF-RT - STO-3G  - Small OpenMP w/ O2nRamp Lowdin   - Direct  Integrals
+test0103_serial_incore.inp - Complex RHF-RT - STO-3G  - Small Serial w/ LinRamp Cholesky - In-Core Integrals
+test0103_serial_direct.inp - Complex RHF-RT - STO-3G  - Small Serial w/ LinRamp Cholesky - Direct  Integrals
+#test0103_smp_incore.inp    - Complex RHF-RT - STO-3G  - Small OpenMP w/ LinRamp Cholesky - In-Core Integrals
+test0103_smp_direct.inp    - Complex RHF-RT - STO-3G  - Small OpenMP w/ LinRamp Cholesky - Direct  Integrals
+test0104_serial_incore.inp - Complex RHF-RT - STO-3G  - Small Serial w/ LinRamp Lowdin   - In-Core Integrals
+test0104_serial_direct.inp - Complex RHF-RT - STO-3G  - Small Serial w/ LinRamp Lowdin   - Direct  Integrals
+#test0104_smp_incore.inp    - Complex RHF-RT - STO-3G  - Small OpenMP w/ LinRamp Lowdin   - In-Core Integrals
+test0104_smp_direct.inp    - Complex RHF-RT - STO-3G  - Small OpenMP w/ LinRamp Lowdin   - Direct  Integrals
 *Gaussian envelope
 test0105_serial_incore.inp - Complex RHF-RT - STO-3G  - Small Serial w/ Gauss Cholesky - In-Core Integrals
 test0105_serial_direct.inp - Complex RHF-RT - STO-3G  - Small Serial w/ Gauss Cholesky - Direct  Integrals
@@ -496,113 +496,114 @@ test0108_serial_direct.inp - Complex RHF-RT - STO-3G  - Small Serial w/ Step Low
 test0108_smp_direct.inp    - Complex RHF-RT - STO-3G  - Small OpenMP w/ Step Lowdin   - Direct  Integrals
 
 ** test0109-0117 Test Small Molecule RKS SCF code - H2O **
-test0109_serial_incore.inp - Real RKS-SCF - STO-3G/SLATER  - Small Serial - In-Core Integrals
-test0109_serial_direct.inp - Real RKS-SCF - STO-3G/SLATER  - Small Serial - Direct  Integrals
-#test0109_smp_incore.inp    - Real RKS-SCF - STO-3G/SLATER  - Small OpenMP - In-Core Integrals
-#test0109_smp_direct.inp    - Real RKS-SCF - STO-3G/SLATER  - Small OpenMP - Direct  Integrals
-#test0110_serial_incore.inp - Real RKS-SCF - 6-31G/SLATER   - Small Serial - In-Core Integrals
-#test0110_serial_direct.inp - Real RKS-SCF - 6-31G/SLATER   - Small Serial - Direct  Integrals
-#test0110_smp_incore.inp    - Real RKS-SCF - 6-31G/SLATER   - Small OpenMP - In-Core Integrals
-#test0110_smp_direct.inp    - Real RKS-SCF - 6-31G/SLATER   - Small OpenMP - Direct  Integrals
-#test0111_serial_incore.inp - Real RKS-SCF - cc-pVDZ/SLATER - Small Serial - In-Core Integrals (6D)
-#test0111_serial_direct.inp - Real RKS-SCF - cc-pVDZ/SLATER - Small Serial - Direct  Integrals (6D)
-#test0111_smp_incore.inp    - Real RKS-SCF - cc-pVDZ/SLATER - Small OpenMP - In-Core Integrals (6D)
-#test0111_smp_direct.inp    - Real RKS-SCF - cc-pVDZ/SLATER - Small OpenMP - Direct  Integrals (6D)
-test0112_serial_incore.inp - Real RKS-SCF - STO-3G/LSDA    - Small Serial - In-Core Integrals
-test0112_serial_direct.inp - Real RKS-SCF - STO-3G/LSDA    - Small Serial - Direct  Integrals
-#test0112_smp_incore.inp    - Real RKS-SCF - STO-3G/LSDA    - Small OpenMP - In-Core Integrals
-#test0112_smp_direct.inp    - Real RKS-SCF - STO-3G/LSDA    - Small OpenMP - Direct  Integrals
-#test0113_serial_incore.inp - Real RKS-SCF - 6-31G/LSDA     - Small Serial - In-Core Integrals
-#test0113_serial_direct.inp - Real RKS-SCF - 6-31G/LSDA     - Small Serial - Direct  Integrals
-#test0113_smp_incore.inp    - Real RKS-SCF - 6-31G/LSDA     - Small OpenMP - In-Core Integrals
-#test0113_smp_direct.inp    - Real RKS-SCF - 6-31G/LSDA     - Small OpenMP - Direct  Integrals
-#test0114_serial_incore.inp - Real RKS-SCF - cc-pVDZ/LSDA   - Small Serial - In-Core Integrals (6D)
-#test0114_serial_direct.inp - Real RKS-SCF - cc-pVDZ/LSDA   - Small Serial - Direct  Integrals (6D)
-#test0114_smp_incore.inp    - Real RKS-SCF - cc-pVDZ/LSDA   - Small OpenMP - In-Core Integrals (6D)
-#test0114_smp_direct.inp    - Real RKS-SCF - cc-pVDZ/LSDA   - Small OpenMP - Direct  Integrals (6D)
-test0115_serial_incore.inp - Real RKS-SCF - STO-3G/SVWN5   - Small Serial - In-Core Integrals
-test0115_serial_direct.inp - Real RKS-SCF - STO-3G/SVWN5   - Small Serial - Direct  Integrals
-#test0115_smp_incore.inp    - Real RKS-SCF - STO-3G/SVWN5   - Small OpenMP - In-Core Integrals
-#test0115_smp_direct.inp    - Real RKS-SCF - STO-3G/SVWN5   - Small OpenMP - Direct  Integrals
-#test0116_serial_incore.inp - Real RKS-SCF - 6-31G/SVWN5    - Small Serial - In-Core Integrals
-#test0116_serial_direct.inp - Real RKS-SCF - 6-31G/SVWN5    - Small Serial - Direct  Integrals
-#test0116_smp_incore.inp    - Real RKS-SCF - 6-31G/SVWN5    - Small OpenMP - In-Core Integrals
-#test0116_smp_direct.inp    - Real RKS-SCF - 6-31G/SVWN5    - Small OpenMP - Direct  Integrals
-#test0117_serial_incore.inp - Real RKS-SCF - cc-pVDZ/SVWN5  - Small Serial - In-Core Integrals (6D)
-#test0117_serial_direct.inp - Real RKS-SCF - cc-pVDZ/SVWN5  - Small Serial - Direct  Integrals (6D)
-#test0117_smp_incore.inp    - Real RKS-SCF - cc-pVDZ/SVWN5  - Small OpenMP - In-Core Integrals (6D)
-#test0117_smp_direct.inp    - Real RKS-SCF - cc-pVDZ/SVWN5  - Small OpenMP - Direct  Integrals (6D)
+test0109_serial_incore.inp - Real RKS-SCF-SLATER - STO-3G  - Small Serial - In-Core Integrals
+test0109_serial_direct.inp - Real RKS-SCF-SLATER - STO-3G  - Small Serial - Direct  Integrals
+#test0109_smp_incore.inp    - Real RKS-SCF-SLATER - STO-3G  - Small OpenMP - In-Core Integrals
+#test0109_smp_direct.inp    - Real RKS-SCF-SLATER - STO-3G  - Small OpenMP - Direct  Integrals
+#test0110_serial_incore.inp - Real RKS-SCF-SLATER - 6-31G   - Small Serial - In-Core Integrals
+#test0110_serial_direct.inp - Real RKS-SCF-SLATER - 6-31G   - Small Serial - Direct  Integrals
+#test0110_smp_incore.inp    - Real RKS-SCF-SLATER - 6-31G   - Small OpenMP - In-Core Integrals
+#test0110_smp_direct.inp    - Real RKS-SCF-SLATER - 6-31G   - Small OpenMP - Direct  Integrals
+#test0111_serial_incore.inp - Real RKS-SCF-SLATER - cc-pVDZ - Small Serial - In-Core Integrals (6D)
+#test0111_serial_direct.inp - Real RKS-SCF-SLATER - cc-pVDZ - Small Serial - Direct  Integrals (6D)
+#test0111_smp_incore.inp    - Real RKS-SCF-SLATER - cc-pVDZ - Small OpenMP - In-Core Integrals (6D)
+#test0111_smp_direct.inp    - Real RKS-SCF-SLATER - cc-pVDZ - Small OpenMP - Direct  Integrals (6D)
+test0112_serial_incore.inp - Real RKS-SCF-LSDA - STO-3G  - Small Serial - In-Core Integrals
+test0112_serial_direct.inp - Real RKS-SCF-LSDA - STO-3G  - Small Serial - Direct  Integrals
+#test0112_smp_incore.inp    - Real RKS-SCF-LSDA - STO-3G  - Small OpenMP - In-Core Integrals
+#test0112_smp_direct.inp    - Real RKS-SCF-LSDA - STO-3G  - Small OpenMP - Direct  Integrals
+#test0113_serial_incore.inp - Real RKS-SCF-LSDA - 6-31G   - Small Serial - In-Core Integrals
+#test0113_serial_direct.inp - Real RKS-SCF-LSDA - 6-31G   - Small Serial - Direct  Integrals
+#test0113_smp_incore.inp    - Real RKS-SCF-LSDA - 6-31G   - Small OpenMP - In-Core Integrals
+#test0113_smp_direct.inp    - Real RKS-SCF-LSDA - 6-31G   - Small OpenMP - Direct  Integrals
+#test0114_serial_incore.inp - Real RKS-SCF-LSDA - cc-pVDZ - Small Serial - In-Core Integrals (6D)
+#test0114_serial_direct.inp - Real RKS-SCF-LSDA - cc-pVDZ - Small Serial - Direct  Integrals (6D)
+#test0114_smp_incore.inp    - Real RKS-SCF-LSDA - cc-pVDZ - Small OpenMP - In-Core Integrals (6D)
+#test0114_smp_direct.inp    - Real RKS-SCF-LSDA - cc-pVDZ - Small OpenMP - Direct  Integrals (6D)
+test0115_serial_incore.inp - Real RKS-SCF-SVWN5 - STO-3G  - Small Serial - In-Core Integrals
+test0115_serial_direct.inp - Real RKS-SCF-SVWN5 - STO-3G  - Small Serial - Direct  Integrals
+#test0115_smp_incore.inp    - Real RKS-SCF-SVWN5 - STO-3G  - Small OpenMP - In-Core Integrals
+#test0115_smp_direct.inp    - Real RKS-SCF-SVWN5 - STO-3G  - Small OpenMP - Direct  Integrals
+#test0116_serial_incore.inp - Real RKS-SCF-SVWN5 - 6-31G   - Small Serial - In-Core Integrals
+#test0116_serial_direct.inp - Real RKS-SCF-SVWN5 - 6-31G   - Small Serial - Direct  Integrals
+#test0116_smp_incore.inp    - Real RKS-SCF-SVWN5 - 6-31G   - Small OpenMP - In-Core Integrals
+#test0116_smp_direct.inp    - Real RKS-SCF-SVWN5 - 6-31G   - Small OpenMP - Direct  Integrals
+#test0117_serial_incore.inp - Real RKS-SCF-SVWN5 - cc-pVDZ - Small Serial - In-Core Integrals (6D)
+#test0117_serial_direct.inp - Real RKS-SCF-SVWN5 - cc-pVDZ - Small Serial - Direct  Integrals (6D)
+#test0117_smp_incore.inp    - Real RKS-SCF-SVWN5 - cc-pVDZ - Small OpenMP - In-Core Integrals (6D)
+#test0117_smp_direct.inp    - Real RKS-SCF-SVWN5 - cc-pVDZ - Small OpenMP - Direct  Integrals (6D)
 
-** test0118-0135 Test Small Molecule UKS SCF code - Li(118-120,124-126,130-132) & O2(121-123,127-129,133-135)**
-#test0118_serial_incore.inp - Real UKS-SCF - STO-3G/SLATER  - Small Serial - In-Core Integrals
-#test0118_serial_direct.inp - Real UKS-SCF - STO-3G/SLATER  - Small Serial - Direct  Integrals
-#test0118_smp_incore.inp    - Real UKS-SCF - STO-3G/SLATER  - Small OpenMP - In-Core Integrals
-#test0118_smp_direct.inp    - Real UKS-SCF - STO-3G/SLATER  - Small OpenMP - Direct  Integrals
-#test0119_serial_incore.inp - Real UKS-SCF - 6-31G/SLATER   - Small Serial - In-Core Integrals
-#test0119_serial_direct.inp - Real UKS-SCF - 6-31G/SLATER   - Small Serial - Direct  Integrals
-#test0119_smp_incore.inp    - Real UKS-SCF - 6-31G/SLATER   - Small OpenMP - In-Core Integrals
-#test0119_smp_direct.inp    - Real UKS-SCF - 6-31G/SLATER   - Small OpenMP - Direct  Integrals
-#test0120_serial_incore.inp - Real UKS-SCF - cc-pVDZ/SLATER - Small Serial - In-Core Integrals (6D)
-#test0120_serial_direct.inp - Real UKS-SCF - cc-pVDZ/SLATER - Small Serial - Direct  Integrals (6D)
-#test0120_smp_incore.inp    - Real UKS-SCF - cc-pVDZ/SLATER - Small OpenMP - In-Core Integrals (6D)
-#test0120_smp_direct.inp    - Real UKS-SCF - cc-pVDZ/SLATER - Small OpenMP - Direct  Integrals (6D)
-test0121_serial_incore.inp - Real UKS-SCF - STO-3G/SLATER  - Small Serial - In-Core Integrals
-test0121_serial_direct.inp - Real UKS-SCF - STO-3G/SLATER  - Small Serial - Direct  Integrals
-#test0121_smp_incore.inp    - Real UKS-SCF - STO-3G/SLATER  - Small OpenMP - In-Core Integrals
-#test0121_smp_direct.inp    - Real UKS-SCF - STO-3G/SLATER  - Small OpenMP - Direct  Integrals
-#test0122_serial_incore.inp - Real UKS-SCF - 6-31G/SLATER   - Small Serial - In-Core Integrals
-#test0122_serial_direct.inp - Real UKS-SCF - 6-31G/SLATER   - Small Serial - Direct  Integrals
-#test0122_smp_incore.inp    - Real UKS-SCF - 6-31G/SLATER   - Small OpenMP - In-Core Integrals
-#test0122_smp_direct.inp    - Real UKS-SCF - 6-31G/SLATER   - Small OpenMP - Direct  Integrals
-#test0123_serial_incore.inp - Real UKS-SCF - cc-pVDZ/SLATER - Small Serial - In-Core Integrals (6D)
-#test0123_serial_direct.inp - Real UKS-SCF - cc-pVDZ/SLATER - Small Serial - Direct  Integrals (6D)
-#test0123_smp_incore.inp    - Real UKS-SCF - cc-pVDZ/SLATER - Small OpenMP - In-Core Integrals (6D)
-#test0123_smp_direct.inp    - Real UKS-SCF - cc-pVDZ/SLATER - Small OpenMP - Direct  Integrals (6D)
-test0124_serial_incore.inp - Real UKS-SCF - STO-3G/LSDA    - Small Serial - In-Core Integrals
-test0124_serial_direct.inp - Real UKS-SCF - STO-3G/LSDA    - Small Serial - Direct  Integrals
-#test0124_smp_incore.inp    - Real UKS-SCF - STO-3G/LSDA    - Small OpenMP - In-Core Integrals
-#test0124_smp_direct.inp    - Real UKS-SCF - STO-3G/LSDA    - Small OpenMP - Direct  Integrals
-#test0125_serial_incore.inp - Real UKS-SCF - 6-31G/LSDA     - Small Serial - In-Core Integrals
-#test0125_serial_direct.inp - Real UKS-SCF - 6-31G/LSDA     - Small Serial - Direct  Integrals
-#test0125_smp_incore.inp    - Real UKS-SCF - 6-31G/LSDA     - Small OpenMP - In-Core Integrals
-#test0125_smp_direct.inp    - Real UKS-SCF - 6-31G/LSDA     - Small OpenMP - Direct  Integrals
-#test0126_serial_incore.inp - Real UKS-SCF - cc-pVDZ/LSDA   - Small Serial - In-Core Integrals (6D)
-#test0126_serial_direct.inp - Real UKS-SCF - cc-pVDZ/LSDA   - Small Serial - Direct  Integrals (6D)
-#test0126_smp_incore.inp    - Real UKS-SCF - cc-pVDZ/LSDA   - Small OpenMP - In-Core Integrals (6D)
-#test0126_smp_direct.inp    - Real UKS-SCF - cc-pVDZ/LSDA   - Small OpenMP - Direct  Integrals (6D)
-test0127_serial_incore.inp - Real UKS-SCF - STO-3G/LSDA    - Small Serial - In-Core Integrals
-test0127_serial_direct.inp - Real UKS-SCF - STO-3G/LSDA    - Small Serial - Direct  Integrals
-#test0127_smp_incore.inp    - Real UKS-SCF - STO-3G/LSDA    - Small OpenMP - In-Core Integrals
-#test0127_smp_direct.inp    - Real UKS-SCF - STO-3G/LSDA    - Small OpenMP - Direct  Integrals
-#test0128_serial_incore.inp - Real UKS-SCF - 6-31G/LSDA     - Small Serial - In-Core Integrals
-#test0128_serial_direct.inp - Real UKS-SCF - 6-31G/LSDA     - Small Serial - Direct  Integrals
-#test0128_smp_incore.inp    - Real UKS-SCF - 6-31G/LSDA     - Small OpenMP - In-Core Integrals
-#test0128_smp_direct.inp    - Real UKS-SCF - 6-31G/LSDA     - Small OpenMP - Direct  Integrals
-#test0129_serial_incore.inp - Real UKS-SCF - cc-pVDZ/LSDA   - Small Serial - In-Core Integrals (6D)
-#test0129_serial_direct.inp - Real UKS-SCF - cc-pVDZ/LSDA   - Small Serial - Direct  Integrals (6D)
-#test0129_smp_incore.inp    - Real UKS-SCF - cc-pVDZ/LSDA   - Small OpenMP - In-Core Integrals (6D)
-#test0129_smp_direct.inp    - Real UKS-SCF - cc-pVDZ/LSDA   - Small OpenMP - Direct  Integrals (6D)
-test0130_serial_incore.inp - Real UKS-SCF - STO-3G/SVWN5   - Small Serial - In-Core Integrals
-test0130_serial_direct.inp - Real UKS-SCF - STO-3G/SVWN5   - Small Serial - Direct  Integrals
-#test0130_smp_incore.inp    - Real UKS-SCF - STO-3G/SVWN5   - Small OpenMP - In-Core Integrals
-#test0130_smp_direct.inp    - Real UKS-SCF - STO-3G/SVWN5   - Small OpenMP - Direct  Integrals
-#test0131_serial_incore.inp - Real UKS-SCF - 6-31G/SVWN5    - Small Serial - In-Core Integrals
-#test0131_serial_direct.inp - Real UKS-SCF - 6-31G/SVWN5    - Small Serial - Direct  Integrals
-#test0131_smp_incore.inp    - Real UKS-SCF - 6-31G/SVWN5    - Small OpenMP - In-Core Integrals
-#test0131_smp_direct.inp    - Real UKS-SCF - 6-31G/SVWN5    - Small OpenMP - Direct  Integrals
-#test0132_serial_incore.inp - Real UKS-SCF - cc-pVDZ/SVWN5  - Small Serial - In-Core Integrals (6D)
-#test0132_serial_direct.inp - Real UKS-SCF - cc-pVDZ/SVWN5  - Small Serial - Direct  Integrals (6D)
-#test0132_smp_incore.inp    - Real UKS-SCF - cc-pVDZ/SVWN5  - Small OpenMP - In-Core Integrals (6D)
-#test0132_smp_direct.inp    - Real UKS-SCF - cc-pVDZ/SVWN5  - Small OpenMP - Direct  Integrals (6D)
-test0133_serial_incore.inp - Real UKS-SCF - STO-3G/SVWN5   - Small Serial - In-Core Integrals
-test0133_serial_direct.inp - Real UKS-SCF - STO-3G/SVWN5   - Small Serial - Direct  Integrals
-#test0133_smp_incore.inp    - Real UKS-SCF - STO-3G/SVWN5   - Small OpenMP - In-Core Integrals
-#test0133_smp_direct.inp    - Real UKS-SCF - STO-3G/SVWN5   - Small OpenMP - Direct  Integrals
-#test0134_serial_incore.inp - Real UKS-SCF - 6-31G/SVWN5    - Small Serial - In-Core Integrals
-#test0134_serial_direct.inp - Real UKS-SCF - 6-31G/SVWN5    - Small Serial - Direct  Integrals
-#test0134_smp_incore.inp    - Real UKS-SCF - 6-31G/SVWN5    - Small OpenMP - In-Core Integrals
-#test0134_smp_direct.inp    - Real UKS-SCF - 6-31G/SVWN5    - Small OpenMP - Direct  Integrals
-#test0135_serial_incore.inp - Real UKS-SCF - cc-pVDZ/SVWN5  - Small Serial - In-Core Integrals (6D)
-#test0135_serial_direct.inp - Real UKS-SCF - cc-pVDZ/SVWN5  - Small Serial - Direct  Integrals (6D)
-#test0135_smp_incore.inp    - Real UKS-SCF - cc-pVDZ/SVWN5  - Small OpenMP - In-Core Integrals (6D)
-#test0135_smp_direct.inp    - Real UKS-SCF - cc-pVDZ/SVWN5  - Small OpenMP - Direct  Integrals (6D)
+** test0118-0135 Test Small Molecule UKS SCF code - Li(118-120,124-126,130-132) & O2(121-123,127-129,133-135) **
+test0118_serial_incore.inp - Real UKS-SCF-SLATER - STO-3G  - Small Serial - In-Core Integrals
+test0118_serial_direct.inp - Real UKS-SCF-SLATER - STO-3G  - Small Serial - Direct  Integrals
+#test0118_smp_incore.inp    - Real UKS-SCF-SLATER - STO-3G  - Small OpenMP - In-Core Integrals
+#test0118_smp_direct.inp    - Real UKS-SCF-SLATER - STO-3G  - Small OpenMP - Direct  Integrals
+#test0119_serial_incore.inp - Real UKS-SCF-SLATER - 6-31G   - Small Serial - In-Core Integrals
+#test0119_serial_direct.inp - Real UKS-SCF-SLATER - 6-31G   - Small Serial - Direct  Integrals
+#test0119_smp_incore.inp    - Real UKS-SCF-SLATER - 6-31G   - Small OpenMP - In-Core Integrals
+#test0119_smp_direct.inp    - Real UKS-SCF-SLATER - 6-31G   - Small OpenMP - Direct  Integrals
+#test0120_serial_incore.inp - Real UKS-SCF-SLATER - cc-pVDZ - Small Serial - In-Core Integrals (6D)
+#test0120_serial_direct.inp - Real UKS-SCF-SLATER - cc-pVDZ - Small Serial - Direct  Integrals (6D)
+#test0120_smp_incore.inp    - Real UKS-SCF-SLATER - cc-pVDZ - Small OpenMP - In-Core Integrals (6D)
+#test0120_smp_direct.inp    - Real UKS-SCF-SLATER - cc-pVDZ - Small OpenMP - Direct  Integrals (6D)
+test0121_serial_incore.inp - Real UKS-SCF-SLATER - STO-3G  - Small Serial - In-Core Integrals
+test0121_serial_direct.inp - Real UKS-SCF-SLATER - STO-3G  - Small Serial - Direct  Integrals
+#test0121_smp_incore.inp    - Real UKS-SCF-SLATER - STO-3G  - Small OpenMP - In-Core Integrals
+#test0121_smp_direct.inp    - Real UKS-SCF-SLATER - STO-3G  - Small OpenMP - Direct  Integrals
+#test0122_serial_incore.inp - Real UKS-SCF-SLATER - 6-31G   - Small Serial - In-Core Integrals
+#test0122_serial_direct.inp - Real UKS-SCF-SLATER - 6-31G   - Small Serial - Direct  Integrals
+#test0122_smp_incore.inp    - Real UKS-SCF-SLATER - 6-31G   - Small OpenMP - In-Core Integrals
+#test0122_smp_direct.inp    - Real UKS-SCF-SLATER - 6-31G   - Small OpenMP - Direct  Integrals
+#test0123_serial_incore.inp - Real UKS-SCF-SLATER - cc-pVDZ - Small Serial - In-Core Integrals (6D)
+#test0123_serial_direct.inp - Real UKS-SCF-SLATER - cc-pVDZ - Small Serial - Direct  Integrals (6D)
+#test0123_smp_incore.inp    - Real UKS-SCF-SLATER - cc-pVDZ - Small OpenMP - In-Core Integrals (6D)
+#test0123_smp_direct.inp    - Real UKS-SCF-SLATER - cc-pVDZ - Small OpenMP - Direct  Integrals (6D)
+#
+test0124_serial_incore.inp - Real UKS-SCF-LSDA - STO-3G  - Small Serial - In-Core Integrals
+test0124_serial_direct.inp - Real UKS-SCF-LSDA - STO-3G  - Small Serial - Direct  Integrals
+#test0124_smp_incore.inp    - Real UKS-SCF-LSDA - STO-3G  - Small OpenMP - In-Core Integrals
+#test0124_smp_direct.inp    - Real UKS-SCF-LSDA - STO-3G  - Small OpenMP - Direct  Integrals
+#test0125_serial_incore.inp - Real UKS-SCF-LSDA - 6-31G   - Small Serial - In-Core Integrals
+#test0125_serial_direct.inp - Real UKS-SCF-LSDA - 6-31G   - Small Serial - Direct  Integrals
+#test0125_smp_incore.inp    - Real UKS-SCF-LSDA - 6-31G   - Small OpenMP - In-Core Integrals
+#test0125_smp_direct.inp    - Real UKS-SCF-LSDA - 6-31G   - Small OpenMP - Direct  Integrals
+#test0126_serial_incore.inp - Real UKS-SCF-LSDA - cc-pVDZ - Small Serial - In-Core Integrals (6D)
+#test0126_serial_direct.inp - Real UKS-SCF-LSDA - cc-pVDZ - Small Serial - Direct  Integrals (6D)
+#test0126_smp_incore.inp    - Real UKS-SCF-LSDA - cc-pVDZ - Small OpenMP - In-Core Integrals (6D)
+#test0126_smp_direct.inp    - Real UKS-SCF-LSDA - cc-pVDZ - Small OpenMP - Direct  Integrals (6D)
+test0127_serial_incore.inp - Real UKS-SCF-LSDA - STO-3G  - Small Serial - In-Core Integrals
+test0127_serial_direct.inp - Real UKS-SCF-LSDA - STO-3G  - Small Serial - Direct  Integrals
+#test0127_smp_incore.inp    - Real UKS-SCF-LSDA - STO-3G  - Small OpenMP - In-Core Integrals
+#test0127_smp_direct.inp    - Real UKS-SCF-LSDA - STO-3G  - Small OpenMP - Direct  Integrals
+#test0128_serial_incore.inp - Real UKS-SCF-LSDA - 6-31G   - Small Serial - In-Core Integrals
+#test0128_serial_direct.inp - Real UKS-SCF-LSDA - 6-31G   - Small Serial - Direct  Integrals
+#test0128_smp_incore.inp    - Real UKS-SCF-LSDA - 6-31G   - Small OpenMP - In-Core Integrals
+#test0128_smp_direct.inp    - Real UKS-SCF-LSDA - 6-31G   - Small OpenMP - Direct  Integrals
+#test0129_serial_incore.inp - Real UKS-SCF-LSDA - cc-pVDZ - Small Serial - In-Core Integrals (6D)
+#test0129_serial_direct.inp - Real UKS-SCF-LSDA - cc-pVDZ - Small Serial - Direct  Integrals (6D)
+#test0129_smp_incore.inp    - Real UKS-SCF-LSDA - cc-pVDZ - Small OpenMP - In-Core Integrals (6D)
+#test0129_smp_direct.inp    - Real UKS-SCF-LSDA - cc-pVDZ - Small OpenMP - Direct  Integrals (6D)
+test0130_serial_incore.inp - Real UKS-SCF-SVWN5 - STO-3G  - Small Serial - In-Core Integrals
+test0130_serial_direct.inp - Real UKS-SCF-SVWN5 - STO-3G  - Small Serial - Direct  Integrals
+#test0130_smp_incore.inp    - Real UKS-SCF-SVWN5 - STO-3G  - Small OpenMP - In-Core Integrals
+#test0130_smp_direct.inp    - Real UKS-SCF-SVWN5 - STO-3G  - Small OpenMP - Direct  Integrals
+#test0131_serial_incore.inp - Real UKS-SCF-SVWN5 - 6-31G   - Small Serial - In-Core Integrals
+#test0131_serial_direct.inp - Real UKS-SCF-SVWN5 - 6-31G   - Small Serial - Direct  Integrals
+#test0131_smp_incore.inp    - Real UKS-SCF-SVWN5 - 6-31G   - Small OpenMP - In-Core Integrals
+#test0131_smp_direct.inp    - Real UKS-SCF-SVWN5 - 6-31G   - Small OpenMP - Direct  Integrals
+#test0132_serial_incore.inp - Real UKS-SCF-SVWN5 - cc-pVDZ - Small Serial - In-Core Integrals (6D)
+#test0132_serial_direct.inp - Real UKS-SCF-SVWN5 - cc-pVDZ - Small Serial - Direct  Integrals (6D)
+#test0132_smp_incore.inp    - Real UKS-SCF-SVWN5 - cc-pVDZ - Small OpenMP - In-Core Integrals (6D)
+#test0132_smp_direct.inp    - Real UKS-SCF-SVWN5 - cc-pVDZ - Small OpenMP - Direct  Integrals (6D)
+test0133_serial_incore.inp - Real UKS-SCF-SVWN5 - STO-3G  - Small Serial - In-Core Integrals
+test0133_serial_direct.inp - Real UKS-SCF-SVWN5 - STO-3G  - Small Serial - Direct  Integrals
+#test0133_smp_incore.inp    - Real UKS-SCF-SVWN5 - STO-3G  - Small OpenMP - In-Core Integrals
+#test0133_smp_direct.inp    - Real UKS-SCF-SVWN5 - STO-3G  - Small OpenMP - Direct  Integrals
+#test0134_serial_incore.inp - Real UKS-SCF-SVWN5 - 6-31G   - Small Serial - In-Core Integrals
+#test0134_serial_direct.inp - Real UKS-SCF-SVWN5 - 6-31G   - Small Serial - Direct  Integrals
+#test0134_smp_incore.inp    - Real UKS-SCF-SVWN5 - 6-31G   - Small OpenMP - In-Core Integrals
+#test0134_smp_direct.inp    - Real UKS-SCF-SVWN5 - 6-31G   - Small OpenMP - Direct  Integrals
+#test0135_serial_incore.inp - Real UKS-SCF-SVWN5 - cc-pVDZ - Small Serial - In-Core Integrals (6D)
+#test0135_serial_direct.inp - Real UKS-SCF-SVWN5 - cc-pVDZ - Small Serial - Direct  Integrals (6D)
+#test0135_smp_incore.inp    - Real UKS-SCF-SVWN5 - cc-pVDZ - Small OpenMP - In-Core Integrals (6D)
+#test0135_smp_direct.inp    - Real UKS-SCF-SVWN5 - cc-pVDZ - Small OpenMP - Direct  Integrals (6D)

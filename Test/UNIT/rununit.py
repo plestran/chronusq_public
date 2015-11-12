@@ -1,4 +1,4 @@
-import sys,os,time
+import sys,os
 import getopt
 from refval import *
 from chronusq import *
@@ -115,13 +115,18 @@ def genTable():
 #     checks for exclusive options
       if testSize == 'large' and "small" in line.lower(): runTest = False
       if testSize == 'small' and "large" in line.lower(): runTest = False
-      if testPar  == 'no'  and "openmp" in line.lower(): runTest = False
-      if testPar  == 'yes' and "serial" in line.lower(): runTest = False
+      if testPar  == 'off' and "openmp" in line.lower(): runTest = False
+      if testPar  == 'on'  and "serial" in line.lower(): runTest = False
       if testInts == 'incore' and "direct" in line.lower(): runTest = False
       if testInts == 'direct' and "incore" in line.lower(): runTest = False
       if "dfield" in subTests and "dfield" not in line.lower(): runTest = False
       if testComp == 'no' and "complex" in line.lower(): runTest = False
       if testComp == 'yes'and "real"    in line.lower(): runTest = False
+      if testBasis != 'all':
+        for basis in subBasis:
+          if basis not in line.lower(): 
+            runTest = False
+            continue
 
 #     add the tests to the list
       if runTest:
@@ -215,7 +220,6 @@ def testRT(ref,tests):
 
 #--------------------------------------------------------------------
 def testSCF(ref,tests):
-# FIXME: (DBWY) these are in global to a higher precision, consider changing
   auToD   = 0.3934303070
   auToAng = 0.5291772083
 
@@ -262,7 +266,8 @@ def testSCF(ref,tests):
 if __name__ in "__main__":
 
 # parse user options
-  msg = """python runtests.py [-o --option]
+  msg = """
+  python runtests.py [-o --option=]
 
   Options:
     -h, --help        Print usage instructions
@@ -270,16 +275,18 @@ if __name__ in "__main__":
     --type=XXX        Determines types of tests to run. Multiple options
                       can be specified by separating with a comma.
                       3 classes of tests  = [SCF,RESP,RT] 
-                      Specify References  = [RHF,UHF,CUHF,GHF,RKS,UKS]
-                      Reference and Type  = [RHF-SCF,UHF-CIS,etc.] 
+                      Specify References  = [RHF,UHF,CUHF,GHF]
+                                            [RKS,UKS,SLATER,LSDA,SVWN5]
+                      Reference and Type  = [(R|U|CU)HF-SCF,HF-CIS,HF-RPA]
+                                            [(R|U)KS-SCF,SCF-LSDA] 
                       Dipole Field        = [DField]
     --integrals=XXX   Integral evaluation = [incore] or [direct]
-    --parallel=XXX    Whether to run parallel jobs = [yes] or [no]
+    --parallel=XXX    Whether to run parallel jobs = [on] or [off]
     --size=XXX        Size of jobs to run = [small] or [large] or [both]
                       [small] is the default
     --complex=XXX     Complex Jobs = [yes] or [no] or [both]
                       [both] is the default
-    --basis=XXX       Only tests for this basis set
+    --basis=XXX       Only run tests for this basis set
                       [STO-3G,6-31G,cc-pVDZ,def2-SVPD]
 """
   doPrint  = True
