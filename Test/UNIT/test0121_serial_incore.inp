@@ -16,9 +16,7 @@ geom:
 reference = UKS
 job       = SCF
 basis     = sto3g.gbs
-print     = 5
 ints			= incore
-
 exchange  = Slater
 corr      = NOCORR
 

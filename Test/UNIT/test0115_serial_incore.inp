@@ -17,9 +17,7 @@ geom:
 reference = RKS
 job       = SCF
 basis     = sto3g.gbs
-print     = 5
 ints			= incore
-
 exchange  = Slater
 corr      = VWN5
 

@@ -1,4 +1,4 @@
-#  test0109 serial incore Real RKS Slater sto-3g
+#  test0109 serial incore Real RKS Slater STO-3G
 #
 #  Molecule Specification
 #
@@ -14,12 +14,10 @@ geom:
 #  Job Specification
 #
 [QM]
-reference = RKS
+reference = Real RKS
 job       = SCF
 basis     = sto3g.gbs
-print     = 5
-ints			= incore
-
+ints			= incore 
 exchange  = Slater
 corr      = NOCORR
 

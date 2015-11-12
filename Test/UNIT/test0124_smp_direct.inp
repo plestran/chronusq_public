@@ -15,7 +15,6 @@ geom:
 reference = LSDA
 job       = SCF
 basis     = sto3g.gbs
-print     = 5
 ints			= direct
 
 #

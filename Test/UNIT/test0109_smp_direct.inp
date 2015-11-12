@@ -1,4 +1,4 @@
-#  test0109 smp direct Real RKS Slater sto-3g
+#  test0109 smp direct Real RKS Slater STO-3G
 #
 #  Molecule Specification
 #
@@ -14,12 +14,10 @@ geom:
 #  Job Specification
 #
 [QM]
-reference = RKS
+reference = Real RKS
 job       = SCF
 basis     = sto3g.gbs
-print     = 5
 ints			= direct
-
 exchange  = Slater
 corr      = NOCORR
 
