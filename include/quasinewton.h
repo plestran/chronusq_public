@@ -561,22 +561,15 @@ template <typename T>
       new (&NewSL  ) TCMMap(this->SigmaLMem+NOld*this->N_,this->N_,NNew);
       new (&NewVecL) TCMMap(this->TVecLMem+ NOld*this->N_,this->N_,NNew);
     }
-//      NewVecR.block(this->N_/2,0,this->N_/2,NNew) *= 0.0;
-//      NewVecL.block(this->N_/2,0,this->N_/2,NNew) *= 0.0;
-//      cout << "VecR" << endl << NewVecR << endl;
-//      cout << "VecL" << endl << NewVecL << endl;
     if(this->sdr_ != NULL){
-      if(this->sdr_->iMeth() == SDResponse<T>::CIS || this->sdr_->iMeth() == SDResponse<T>::RPA ||
+      if(this->sdr_->iMeth() == SDResponse<T>::CIS || 
+         this->sdr_->iMeth() == SDResponse<T>::RPA ||
          this->sdr_->iMeth() == SDResponse<T>::STAB){
         // Linear transformation onto right / gerade
         this->sdr_->formRM3(NewVecR,NewSR,NewRhoL); 
+        // Linear trasnformation onto left / ungerade
         if(this->sdr_->iMeth() == SDResponse<T>::RPA){
-          // Linear trasnformation onto left / ungerade
           this->sdr_->formRM3(NewVecL,NewSL,NewRhoR);
-        //cout << "SR" << endl << NewSR << endl;
-        //cout << "RhoR" << endl << NewRhoR << endl;
-        //cout << "SL" << endl << NewSL << endl;
-        //cout << "RhoL" << endl << NewRhoL << endl;
         }
       } else if(this->sdr_->iMeth() == SDResponse<T>::PPRPA  || 
                 this->sdr_->iMeth() == SDResponse<T>::PPATDA ||

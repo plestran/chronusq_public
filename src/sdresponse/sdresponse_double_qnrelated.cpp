@@ -535,13 +535,18 @@ void SDResponse<double>::formRM4(RealCMMap& XMO, RealCMMap &Sigma, RealCMMap &Rh
 //this->singleSlater_->aointegrals()->multTwoEContractDirect(XMO.cols(),RHF,false,true,
 //  doTCS,XAO,IXAO,XAO,IXAO);
 //cout << "HERE" << endl;
-  if(this->singleSlater_->aointegrals()->integralAlgorithm == AOIntegrals::DIRECT && this->nTCS_ != 2)
-    this->singleSlater_->aointegrals()->multTwoEContractDirect(XMO.cols(),false,false,false,true,
-      (this->nTCS_==2),XAO,IXAO,XAO,IXAO);
+
+  if(this->singleSlater_->aointegrals()->integralAlgorithm == AOIntegrals::DIRECT && 
+     this->nTCS_ != 2)
+    this->singleSlater_->aointegrals()->multTwoEContractDirect(XMO.cols(),true,false,false,
+      true,(this->nTCS_==2),XAO,IXAO,XAO,IXAO);
   else if(this->singleSlater_->aointegrals()->integralAlgorithm == AOIntegrals::INCORE)
-    for(auto idx = 0; idx < XMO.cols(); idx++)
-      this->singleSlater_->aointegrals()->twoEContractN4(false,false,false,true,(this->nTCS_==2),XAO[idx],
-        IXAO[idx],XAO[idx],IXAO[idx]);
+    for(auto idx = 0; idx < XMO.cols(); idx++) {
+      prettyPrint(this->fileio_->out,XAO[idx],"XAO "+std::to_string(idx));
+      this->singleSlater_->aointegrals()->twoEContractN4(false,false,false,true,
+        (this->nTCS_==2),XAO[idx],IXAO[idx],XAO[idx],IXAO[idx]);
+      prettyPrint(this->fileio_->out,IXAO[idx],"IXAO "+std::to_string(idx));
+    }
   else
     CErr("Integral Contraction logic for SDR is not defined",this->fileio_->out);
 /*
@@ -557,6 +562,8 @@ void SDResponse<double>::formRM4(RealCMMap& XMO, RealCMMap &Sigma, RealCMMap &Rh
     this->formMOTDen(SVec,IXAO[idx],IXAO[idx]);
     this->scaleDagPPRPA(true,X,SVec);
   }
+//prettyPrint(this->fileio_->out,XMO,"B:");
+//prettyPrint(this->fileio_->out,Sigma,"Sigma:");
 
 } // formRM4
 
