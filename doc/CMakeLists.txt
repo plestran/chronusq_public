@@ -13,7 +13,7 @@ add_custom_target(copydoc ALL
 )
 
 if(PDFLATEX_COMPILER)
-  message(STATUS "PDFLatex Compiler Found! Building Documentaion Target")
+  message(STATUS "PDFLatex Compiler Found! Building Documentation Target")
   add_custom_target(docs
     ${PDFLATEX_COMPILER} ${USERMANUAL} 
     COMMAND ${BIBTEX_COMMAND} ${USERMANUAL}
@@ -23,5 +23,5 @@ if(PDFLATEX_COMPILER)
   )
 #  add_dependencies(documentation ${USERMANUAL}.tex)
 else()
-  message(STATUS "PDFLatex Compiler Not Found! No Building Documentaion Target")
+  message(STATUS "PDFLatex Compiler Not Found! No Building Documentation Target")
 endif()
