@@ -298,6 +298,8 @@ public:
   bool	haveCoulomb; ///< Computed Coulomb Matrix?
   bool	haveExchange;///< Computed Exchange Matrix?
   bool	screenVxc   ;///< Do the screening for Vxc?
+  bool	frischW     ;///< Do the Frisch Weight?
+  bool	beckeW      ;///< Do the Becke  Weight?
   bool  havePT;      ///< Computed Perturbation Tensor?
   bool  isClosedShell;
   bool  isConverged;
@@ -319,6 +321,7 @@ public:
   double   epsScreen;   ///<  Screening value for both basis and Bweight
   double   epsConv;     ///<  Threshold value for converging cutoff radius given epsScreen
   int      maxiter;     ///<  Maximum number of iteration to find cutoff radius
+  int      ngpts;       ///<  Total number of grid pts
 //// T
 //  std::chrono::duration<double> duration_1;
 //  std::chrono::duration<double> duration_2;
@@ -542,9 +545,9 @@ public:
   double f_spindens(int iop, double spindens);  // define f(spindendity)
   double df_spindens(double spindens);  // define df(spindendity)/dspindensity
   double df2_spindens(double spindens);  // define df2(spindendity)/dspindensity2
-  double spindens(double rho_A, double rho_B);  // define spindendity
-  double formBeckeW(cartGP gridPt, int iAtm);            // Evaluate Becke Weights
-  double normBeckeW(cartGP gridPt);            // Evaluate Becke Weights
+  double spindens(double rho_A, double rho_B);   // define spindendity
+  double formBeckeW(cartGP gridPt, int iAtm);    // Evaluate Becke Weights
+  double normBeckeW(cartGP gridPt);             // Normalize Becke Weights
 //  void   buildVxc(cartGP gridPt, double weight, std::vector<bool> mapRad_);            // function to build the Vxc therm
   void matchord();              // match Guassian order of guess
   void readGuessIO();       	// read the initial guess of MO's from the input stream

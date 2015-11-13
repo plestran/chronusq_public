@@ -116,6 +116,24 @@ double TwoDGrid::voronoii( double mu){
        return p;
 };
 
+double TwoDGrid::frischpol( double mu, double alpha){
+//     Eq. 14 of Chem. Phys. Let. 257 , 213-223 (1996).
+//     used in FrischWeight
+       double p;
+       double mua = mu /alpha;
+       if (mu <= -alpha) { 
+          p = -1.0;
+       }else if (mu >= alpha){
+       }else {
+          p  = 35.0*(mua) ;
+          p += -35.0*(std::pow(mua,3.0));
+          p +=  21.0*(std::pow(mua,5.0));
+          p +=  -5.0*(std::pow(mua,7.0));
+          p /=  16.0;
+       }
+       return p;
+};
+
 double TwoDGrid::step_fun( double mu){
        double p = 0.0;
        if (mu < 0 ){p = 1.0;}
@@ -1191,8 +1209,14 @@ void LebedevGrid::gen48_Dn(int num, double u, double r, double v){
 
 // Euler Maclaurin one dimensional grid functions
 void EulerMaclaurinGrid::genGrid(double sradius){
-
-     }                                      
+     double rd2 = sradius*sradius;
+     double rd3 = sradius*sradius*sradius;
+     for(int i = 0; i < this->nPts_; i++) {
+     this->gridPts_[i]  = rd2;
+     this->gridPts_[i] /=std::pow((this->nPts_+1.0-i-1.0),2.0);
+//     this->weights_[i]  = 2.0*(this->nPts_+1.0+i+1.0)
+      } 
+ }                                      
 
 void EulerMaclaurinGrid::transformPts(){
 

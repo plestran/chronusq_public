@@ -65,14 +65,25 @@ void SingleSlater<T>::formFock(){
 //  this->basisset_->makeMapSh2Bf(this->nTCS_);
 //}
 // Form Vxc for DFT
-
-  std::chrono::duration<double> duration_formVxc;
-  auto start = std::chrono::high_resolution_clock::now();
-  if(this->isDFT) this->formVXC();
-  auto finish = std::chrono::high_resolution_clock::now();
-  duration_formVxc = finish - start;
-  this->fileio_->out<<"\nCPU time for VXC integral:  "<< duration_formVxc.count() <<" seconds."<<endl;
-   
+  if (this->isDFT){
+//   Timing
+     std::chrono::high_resolution_clock::time_point start;
+     std::chrono::high_resolution_clock::time_point finish;
+     std::chrono::duration<double> duration_formVxc;
+     
+     if(this->printLevel_ >= 3) {
+       start = std::chrono::high_resolution_clock::now();
+       }
+//
+     this->formVXC();
+// Timing
+    if(this->printLevel_ >= 3) {
+      finish = std::chrono::high_resolution_clock::now();
+      duration_formVxc = finish - start;
+      this->fileio_->out<<"\nCPU time for VXC integral:  "<< duration_formVxc.count() <<" seconds."<<endl;
+      }
+   }
+//
   this->fockA_->setZero();
 /*
   if(this->Ref_ != TCS) fockA_->real()+=(*this->aointegrals_->oneE_);
