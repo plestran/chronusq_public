@@ -164,10 +164,13 @@ void FileIO::iniMetaFiles(){
 }
 
 void FileIO::iniStdOpFiles(int nBasis){
-  hsize_t NBSq[] = {nBasis,nBasis};
-  hsize_t dipoleDim[] = {3,nBasis,nBasis};
-  hsize_t quadpoleDim[] = {6,nBasis,nBasis};
-  hsize_t octpoleDim[] = {10,nBasis,nBasis};
+  hsize_t NBSq[] = {static_cast<hsize_t>(nBasis),static_cast<hsize_t>(nBasis)};
+  hsize_t dipoleDim[] = {3,
+    static_cast<hsize_t>(nBasis),static_cast<hsize_t>(nBasis)};
+  hsize_t quadpoleDim[] = {6,
+    static_cast<hsize_t>(nBasis),static_cast<hsize_t>(nBasis)};
+  hsize_t octpoleDim[] = {10,
+    static_cast<hsize_t>(nBasis),static_cast<hsize_t>(nBasis)};
 
   H5::DataSpace NBSqDataSpace(2,NBSq);
   H5::DataSpace DipoleDataSpace(3,dipoleDim);
@@ -269,7 +272,7 @@ void FileIO::iniStdSCFFiles<double>(bool allocBeta, int nBasis){
 */
 //void FileIO::iniStdSCFFiles(bool allocBeta, int nBasis){
 void FileIO::iniStdSCFFilesDouble(bool allocBeta, int nBasis){
-  hsize_t NBSq[] = {nBasis,nBasis};
+  hsize_t NBSq[] = {static_cast<hsize_t>(nBasis),static_cast<hsize_t>(nBasis)};
   H5::DataSpace NBSqDataSpace(2,NBSq);
 
   if(doRestart) {
@@ -332,7 +335,7 @@ void FileIO::iniStdSCFFilesDouble(bool allocBeta, int nBasis){
 }
 
 void FileIO::iniStdSCFFilesComplex(bool allocBeta, int nBasis){
-  hsize_t NBSq[] = {nBasis,nBasis};
+  hsize_t NBSq[] = {static_cast<hsize_t>(nBasis),static_cast<hsize_t>(nBasis)};
   H5::DataSpace NBSqDataSpace(2,NBSq);
 
   if(this->doRestart) {

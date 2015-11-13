@@ -1,1 +1,6 @@
 add_library(memory SHARED memory.cpp)
+if(USE_LIBINT)
+if(BUILD_LIBINT)
+ add_dependencies(memory libint)
+endif()
+endif()
