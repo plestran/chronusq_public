@@ -265,7 +265,7 @@ if __name__ in "__main__":
     -h, --help        Print usage instructions
     -s, --silent      Disable Print
     -k, --kill        Stop testing if a job fails
-    --type=XXX        Determines types of tests to run. Multiple options
+    --type=           Determines types of tests to run. Multiple options
                       can be specified by separating with a comma.
                       3 classes of tests  = [SCF,RESP,RT] 
                       Specify References  = [RHF,UHF,CUHF,GHF]
@@ -273,13 +273,13 @@ if __name__ in "__main__":
                       Reference and Type  = [(R|U|CU)HF-SCF,HF-CIS,HF-RPA]
                                             [(R|U)KS-SCF,SCF-LSDA] 
                       Dipole Field        = [DField]
-    --integrals=XXX   Integral evaluation = [incore] or [direct]
-    --parallel=XXX    Whether to run parallel jobs = [on] or [off]
-    --size=XXX        Size of jobs to run = [small] or [large] or [both]
+    --integrals=      Integral evaluation = [incore] or [direct]
+    --parallel=       Whether to run parallel jobs = [on] or [off]
+    --size=           Size of jobs to run = [small] or [large] or [both]
                       [small] is the default
-    --complex=XXX     Complex Jobs = [yes] or [no] or [both]
+    --complex=        Complex Jobs = [yes] or [no] or [both]
                       [both] is the default
-    --basis=XXX       Only run tests for this basis set
+    --basis=          Only run tests for this basis set
                       [STO-3G,6-31G,cc-pVDZ,def2-SVPD]
 """
   doPrint  = True
