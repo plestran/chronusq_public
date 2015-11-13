@@ -1,1 +1,7 @@
 add_library(worker SHARED worker.cpp)
+target_link_libraries(worker LINK_PUBLIC ${EXTERNAL_CQ_DEPS})
+if(USE_LIBINT)
+if(BUILD_LIBINT)
+ add_dependencies(worker libint)
+endif()
+endif()

@@ -1,1 +1,10 @@
 add_library(molecule SHARED molecule.cpp)
+target_link_libraries(molecule LINK_PUBLIC tools)
+target_link_libraries(molecule LINK_PUBLIC cerr)
+target_link_libraries(molecule LINK_PUBLIC ${EXTERNAL_CQ_DEPS})
+
+if(USE_LIBINT)
+if(BUILD_LIBINT)
+ add_dependencies(molecule libint)
+endif()
+endif()

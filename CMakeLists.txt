@@ -70,7 +70,13 @@ ExternalProject_Add(boost
   INSTALL_COMMAND echo "Boost Build Sucess!"
 )
 include_directories("${PROJECT_BINARY_DIR}/deps/include")
-set(Boost_LIBRARIES ${PROJECT_BINARY_DIR}/deps/lib/libboost_python.so)
+
+if(APPLE)
+  set(Boost_LIBRARIES ${PROJECT_BINARY_DIR}/deps/lib/libboost_python.dylib)
+else()
+  set(Boost_LIBRARIES ${PROJECT_BINARY_DIR}/deps/lib/libboost_python.so)
+endif()
+
 link_directories("${PROJECT_BINARY_DIR}/deps/lib")
 
 # Set up Libint environment
@@ -80,7 +86,7 @@ if(USE_LIBINT)
       PREFIX ${PROJECT_BINARY_DIR}/deps/libint
       URL "${PROJECT_SOURCE_DIR}/deps/src/libint-2.1.0-beta2.tgz"
       CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/deps/libint/src/libint/configure --prefix=${PROJECT_BINARY_DIR}/deps CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${CMAKE_CXX_FLAGS}
-      BUILD_COMMAND make -j${NCORE_LIBINT}
+      BUILD_COMMAND make -j8
       BUILD_IN_SOURCE 1
       INSTALL_COMMAND make install
     )  
@@ -124,6 +130,9 @@ else()
   set(LA_LINK ${LAPACK_LINKER_FLAGS} ${LAPACK_LIBRARIES})
   set(LA_LINK ${LA_LINK} ${BLAS_LINKER_FLAGS} ${BLAS_LIBRARIES})
 endif()
+
+set(EXTERNAL_CQ_DEPS ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${LA_LINK} 
+  ${LIBINT_LIB} m ${OpenMP_CXX_FLAGS} ${HDF5_CXX_LIBRARIES})
 
 # Set configure time variables
 set(BASIS_PATH "${PROJECT_SOURCE_DIR}/basis")
