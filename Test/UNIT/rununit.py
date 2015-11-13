@@ -17,6 +17,43 @@ class UnitTest:
 ##############################
 #     Routine Definitions    #
 ##############################
+#--------------------------------------------------------------------
+def appendSummary(fname,errors,jobtype):
+# find where to insert the new results
+  outf = open(summaryf,'r')
+  contents = outf.readlines()
+  find = False
+  index  = 0
+  for line in contents:
+    index += 1
+    if jobtype in line: find = True
+    if line in ['\n', '\r\n'] and find :
+      insert = index
+      find = False
+  outf.close()
+#
+# insert the new results
+  if jobtype == 'SCF':
+    string = '%-28s %.4E %6s %.4E %10s %.4E %8s %.4E' % (fname,errors[0],"",errors[1],"",errors[2],"",errors[3])
+    if errors[0] < 1E-10 and errors[1] < 1E-8 and errors[2] < 1E-8 and errors[3] < 1E-8: string = string+"  YES\n"
+    else: string = string+"  ** NO **\n"
+  elif jobtype == 'RESP':
+    nstates = len(ref[fname[:8]].w)
+    string = '%-28s %.4E %5s %.4E %6s %3d' % (fname,errors[0],"",errors[1],"",nstates)
+    if errors[0] < 1E-7 and errors[1] < 1E-7: string = string+"  YES\n"
+    else: string = string+"  ** NO **\n"
+  elif jobtype == 'RT':
+    string = '%-32s %.4E %10s %.4E' % (fname,errors[0],"",errors[1])
+    if errors[0] < 1E-10 and errors[1] < 1E-6: string = string+"  YES\n"
+    else: string = string+"  ** NO **\n"
+  else:
+    print "Job type not recognized: "+jobtype
+    sys.exit()
+  contents.insert(insert-1,string)
+  outf = open(summaryf, "w")
+  for line in contents: outf.write(line)
+  outf.close()
+#--------------------------------------------------------------------
 
 #--------------------------------------------------------------------
 def findFile(name,path):
@@ -141,6 +178,7 @@ def genTable():
 #--------------------------------------------------------------------
 def initSummary():
 # Opens the output file and adds headers for the different tests
+  global summaryf
   summaryf = "summary2.txt"
   exists = os.path.exists(summaryf)
   if exists: os.remove(summaryf)
@@ -150,6 +188,7 @@ def initSummary():
   RESPheader = "RESP Test Job                 max(|df|)    max(|domega|)    NStates  Passed\n--------------------------  -----------  ---------------  ---------  --------\n\n"
   RTheader = "RT Test Job                   |dLastEnergy|    max(|dLastDipole|)  Passed\n--------------------------  ---------------  --------------------  --------\n\n"
   outf.write(SCFheader+RESPheader+RTheader)
+  outf.close()
 #--------------------------------------------------------------------
 
 #--------------------------------------------------------------------
@@ -174,16 +213,19 @@ def runUnit(doPrint):
       if 'SCF' in ref[i.infile[:8]].typ:
         testSCF(ref[i.infile[:8]],tests[k])
         summary.append(errors)
+        appendSummary(i.infile,errors,'SCF')
 #
 #     test RESP values
       elif 'RESP' in ref[i.infile[:8]].typ:
         testRESP(ref[i.infile[:8]],tests[k])
         summary.append(errors)
+        appendSummary(i.infile,errors,'RESP')
 #
 #     test RT values 
       elif 'RT' in ref[i.infile[:8]].typ:
         testRT(ref[i.infile[:8]],tests[k])
         summary.append(errors)
+        appendSummary(i.infile,errors,'RT')
 
       else:
         print "Job type not recognized: "+ref[i.infile[:8]].typ
