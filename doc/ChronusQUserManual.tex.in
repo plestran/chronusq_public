@@ -523,10 +523,12 @@ cmake \
 
     After compiling ChronusQ, it is recommended that users test that
     the code is functioning correctly. We've added a set of unit tests that are 
-    available in the \texttt{tests} folder. Inside that directory you will find:
+    available in the \texttt{tests} folder in the source directory. Inside that 
+    directory you will find:
     
     \begin{lstlisting}
 buglist.txt
+chronusq.py -> <build directory>/chronusq.py
 chronus-ref.val
 refval.py
 rununit.py
@@ -534,12 +536,6 @@ testXXXX*.inp <many input files>
 test.index
     \end{lstlisting}
 
-    \noindent Before runing the tests, you'll first need to add a symbolic link to 
-    the \texttt{chronusq.py} utility in the \texttt{tests} directory
-    \begin{lstlisting}
-ln -s ../<build-directory>/chronusq.py .
-    \end{lstlisting}
-    
     \noindent The \texttt{rununit.py} utility will run all the tests specified in \texttt{text.index} 
     and compare against reference values that are stored in \texttt{chronus-ref.val}. Upon 
     completion, the results of each test will be printed in \texttt{summary.txt}. 
