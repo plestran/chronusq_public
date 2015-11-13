@@ -2,7 +2,6 @@ import sys,os
 import getopt
 from refval import *
 from chronusq import *
-from tabulate import tabulate
 
 ##############################
 #      Class Definitions     #
@@ -53,80 +52,22 @@ def appendSummary(fname,errors,jobtype):
   outf = open(summaryf, "w")
   for line in contents: outf.write(line)
   outf.close()
+#
+# kill the run if a job fails and doKill is set to True
+  if "** NO **" in string: 
+    if doPrint: print "\n** WARNING: Job "+fname+" did not pass**\n"
+    if doKill: sys.exit(1)
 #--------------------------------------------------------------------
 
 #--------------------------------------------------------------------
 def findFile(name,path):
-#  Checks whether file "name" exists in "path"
+# Checks whether file "name" exists in "path"
   found = False
   for root, dirs, files in os.walk(path):
     if name in files:
       found = True
       break
   return found
-#--------------------------------------------------------------------
-
-#--------------------------------------------------------------------
-def genSummary(testtable,summary):
-#  Prints the results in summary.txt
-  outf = open('summary.txt','w')
-
-# SCF output    
-  headers = ["SCF Test Job","|dEnergy|","max(|dDipole|)","max(|dQuadrupole|)","max(|dOctupole|)","Passed"]
-  sumrytable = []
-  j = 0
-  for i in testtable:
-    if 'SCF' in ref[i.infile[:8]].typ:
-      entry = []
-      entry.append(testtable[j].infile)
-      for k in range(4):
-        entry.append(summary[j][k])
-      if summary[j][0] < 1E-10 and summary[j][1] < 1E-8 and summary[j][2] < 1E-8 and summary[j][3] < 1E-8:
-        entry.append('YES')
-      else:
-        entry.append('** NO **')
-      sumrytable.append(entry)
-    j += 1
-  outf.write(tabulate(sumrytable,headers,tablefmt="simple",floatfmt=".4E"))
-
-# RESP output
-  headers = ["RESP Test Job","max(|df|)","max(|domega|)","NStates","Passed"]
-  sumrytable = []
-  j = 0
-  for i in testtable:
-    if 'RESP' in ref[i.infile[:8]].typ:
-      entry = []
-      entry.append(testtable[j].infile)
-      entry.append(summary[j][0])
-      entry.append(summary[j][1])
-      entry.append(len(ref[i.infile[:8]].w))
-      if summary[j][0] < 1E-7 and summary[j][1] < 1E-7:
-        entry.append('YES')
-      else:
-        entry.append('** NO **')
-      sumrytable.append(entry)
-    j += 1
-  outf.write("\n\n")
-  outf.write(tabulate(sumrytable,headers,tablefmt="simple",floatfmt=".4E"))
-
-# RT output    
-  headers = ["RT Test Job","|dLastEnergy|","max(|dLastDipole|)","Passed"]
-  sumrytable = []
-  j = 0
-  for i in testtable:
-    if 'RT' in ref[i.infile[:8]].typ:
-      entry = []
-      entry.append(testtable[j].infile)
-      entry.append(summary[j][0])
-      entry.append(summary[j][1])
-      if summary[j][0] < 1E-10 and summary[j][1] < 1E-6:
-        entry.append('YES')
-      else:
-        entry.append('** NO **')
-      sumrytable.append(entry)
-    j += 1
-  outf.write("\n\n")
-  outf.write(tabulate(sumrytable,headers,tablefmt="simple",floatfmt=".4E"))
 #--------------------------------------------------------------------
 
 #--------------------------------------------------------------------
@@ -179,7 +120,7 @@ def genTable():
 def initSummary():
 # Opens the output file and adds headers for the different tests
   global summaryf
-  summaryf = "summary2.txt"
+  summaryf = "summary.txt"
   exists = os.path.exists(summaryf)
   if exists: os.remove(summaryf)
   outf = open(summaryf,'w')
@@ -194,11 +135,10 @@ def initSummary():
 #--------------------------------------------------------------------
 def runUnit(doPrint):
 # Runs the unit tests
-  global errors, summary
+  global errors
   refvalues()
   tests = [None for x in xrange(1000)] 
   testtable = genTable()
-  summary = []
 
   k = 0
   for i in testtable:
@@ -212,19 +152,16 @@ def runUnit(doPrint):
 #     test SCF values
       if 'SCF' in ref[i.infile[:8]].typ:
         testSCF(ref[i.infile[:8]],tests[k])
-        summary.append(errors)
         appendSummary(i.infile,errors,'SCF')
 #
 #     test RESP values
       elif 'RESP' in ref[i.infile[:8]].typ:
         testRESP(ref[i.infile[:8]],tests[k])
-        summary.append(errors)
         appendSummary(i.infile,errors,'RESP')
 #
 #     test RT values 
       elif 'RT' in ref[i.infile[:8]].typ:
         testRT(ref[i.infile[:8]],tests[k])
-        summary.append(errors)
         appendSummary(i.infile,errors,'RT')
 
       else:
@@ -232,7 +169,6 @@ def runUnit(doPrint):
         sys.exit()
 
     k += 1
-  genSummary(testtable,summary)
 #--------------------------------------------------------------------
 
 #--------------------------------------------------------------------
@@ -328,6 +264,7 @@ if __name__ in "__main__":
   Options:
     -h, --help        Print usage instructions
     -s, --silent      Disable Print
+    -k, --kill        Stop testing if a job fails
     --type=XXX        Determines types of tests to run. Multiple options
                       can be specified by separating with a comma.
                       3 classes of tests  = [SCF,RESP,RT] 
@@ -346,6 +283,7 @@ if __name__ in "__main__":
                       [STO-3G,6-31G,cc-pVDZ,def2-SVPD]
 """
   doPrint  = True
+  doKill   = False
   testType = 'all'
   testInts = ''
   testPar  = ''
@@ -353,7 +291,7 @@ if __name__ in "__main__":
   testComp = ''
   testBasis = 'all'
   try:
-    opts, args = getopt.getopt(sys.argv[1:],"hs",["help","silent","type=","integrals=","parallel=","size=","complex=","basis="])
+    opts, args = getopt.getopt(sys.argv[1:],"hks",["help","silent","kill","type=","integrals=","parallel=","size=","complex=","basis="])
   except getopt.GetoptError:
     print msg
     sys.exit(2)
@@ -363,6 +301,8 @@ if __name__ in "__main__":
       sys.exit()
     elif opt in ('-s',"--silent"):
       doPrint = False
+    elif opt in ('-k',"--kill"):
+      doKill = True
     elif opt in ("--type"):
       testType = arg.lower()
     elif opt in ("--integrals"):
