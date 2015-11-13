@@ -24,7 +24,7 @@
  *  
  */
 
-  void IterativeRPA();
+  void IterativeRESP();
   void formGuess();
   void getDiag();
   void formPerturbedGuess(double,const TCMMap&, TCMMap&,const TCMMap&, TCMMap&);

@@ -27,5 +27,6 @@
 knownJobs = [
   'SCF',
   'RT',
-  'RPA', 'CIS', 'STAB'
+  'RPA', 'CIS', 'STAB',
+  'PPRPA','PPATDA','PPCTDA'
 ]

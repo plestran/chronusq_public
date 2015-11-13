@@ -16,10 +16,22 @@ option(NCORE_LIBINT "Number of Cores to build Libint" 4)
 option(CQ_ENABLE_ATLAS "Whether or not to search for ATLAS" OFF)
 option(BUILD_DOC  "Build Documentation" OFF)
 
+# Check for C++11
+include(CheckCXXCompilerFlag)
+CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+if(COMPILER_SUPPORTS_CXX11)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+elseif(COMPILER_SUPPORTS_CXX0X)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+else()
+  message(FATAL "${CMAKE_CXX_COMPILER} does not seem to support C++11!")
+endif()
+
 # Check for dependencies
 find_package(PythonLibs REQUIRED)
 find_package(PythonInterp REQUIRED)
-find_package(Boost REQUIRED python)
+#find_package(Boost REQUIRED python)
 find_package(Eigen3 REQUIRED)
 find_package(HDF5 REQUIRED CXX)
 find_package(OpenMP)
@@ -35,18 +47,33 @@ endif()
 # Define include directories
 include_directories("${PROJECT_SOURCE_DIR}/include")
 include_directories("${PROJECT_BINARY_DIR}/include")
-include_directories("${Boost_INCLUDE_DIRS}")
+#include_directories("${Boost_INCLUDE_DIRS}")
 include_directories("${EIGEN3_INCLUDE_DIR}")
 include_directories("${BTAS_INCLUDE_DIR}")
 include_directories("${HDF5_INCLUDE_DIRS}")
 include_directories("${PYTHON_INCLUDE_DIRS}")
 
+
 # Append flags for compilation
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 
-# Set up Libint environment
 include(ExternalProject)
+
+# Build Needed Parts of Boost
+ExternalProject_Add(boost
+  PREFIX ${PROJECT_BINARY_DIR}/deps/boost
+  URL "${PROJECT_SOURCE_DIR}/deps/src/boost_1_59_0.tar.gz"
+  CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/deps/boost/src/boost/bootstrap.sh
+  BUILD_COMMAND ${PROJECT_BINARY_DIR}/deps/boost/src/boost/b2 --prefix=${PROJECT_BINARY_DIR}/deps --with-python install
+  BUILD_IN_SOURCE 1
+  INSTALL_COMMAND echo "Boost Build Sucess!"
+)
+include_directories("${PROJECT_BINARY_DIR}/deps/include")
+set(Boost_LIBRARIES ${PROJECT_BINARY_DIR}/deps/lib/libboost_python.so)
+link_directories("${PROJECT_BINARY_DIR}/deps/lib")
+
+# Set up Libint environment
 if(USE_LIBINT)
   if(BUILD_LIBINT)
     ExternalProject_Add(libint

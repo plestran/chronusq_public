@@ -1,4 +1,4 @@
-#  test0112 smp direct Real RKS LSDA (S-VWN3) sto-3g
+#  test0112 smp direct Real RKS LSDA(S-VWN3) sto-3g
 #
 #  Molecule Specification
 #
@@ -6,9 +6,9 @@
 charge = 0
 mult = 1
 geom:
-  O 0   0.000000000 -0.07579184359 0.0
-  H 0   0.866811829  0.6014357793  0.0
-  H 0  -0.866811829  0.6014357793  0.0
+ O  0.000000000  -0.07579184359  0.0
+ H  0.866811829  0.6014357793  0.0
+ H  -0.866811829  0.6014357793  0.0
   
 #
 #  Job Specification
@@ -17,7 +17,6 @@ geom:
 reference = LSDA
 job       = SCF
 basis     = sto3g.gbs
-print     = 5
 ints			= direct
 
 #

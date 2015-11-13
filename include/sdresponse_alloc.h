@@ -20,6 +20,7 @@ void SDResponse<T>::iniSDResponse( Molecule * molecule, BasisSet * basisSet,
   this->initMeta();
   this->setNSek(this->controls_->SDNSek);
   this->setMeth(this->controls_->SDMethod);
+  this->initMeth();
   this->alloc();
 
 }

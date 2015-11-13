@@ -1,0 +1,26 @@
+#  test0118 smp incore Real UKS Slater STO-3G
+#
+#  Molecule Specification
+#
+[Molecule]
+charge = 0
+mult = 2
+geom:
+ Li  0.000000  0.000000  0.000000
+  
+#
+#  Job Specification
+#
+[QM]
+reference = UKS
+job       = SCF
+basis     = sto3g.gbs
+ints			= incore
+exchange  = Slater
+corr      = NOCORR
+
+#
+#  Misc Settings
+#
+[Misc]
+nsmp = 2

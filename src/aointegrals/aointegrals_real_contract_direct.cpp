@@ -105,7 +105,7 @@ namespace ChronusQ{
                         (*this->schwartz_)(s1,s2) * (*this->schwartz_)(s3,s4);
               }
   
-              if(shMax < this->controls_->thresholdSchawrtz ) continue;
+              //if(shMax < this->controls_->thresholdSchawrtz ) continue;
    
               const double* buff = engine.compute(
                 this->basisSet_->shells(s1),
@@ -276,9 +276,10 @@ namespace ChronusQ{
                 else if(doTCS && !do24)
                   this->Spinor34Contract(KS,G[0][iX][thread_id],XAlpha[iX],n1,n2,n3,n4,
                     bf1_s,bf2_s,bf3_s,bf4_s,buff,s1234_deg);
-                else if(!doTCS && do24)
+                else if(!doTCS && do24){
                   this->General24CouContract(G[0][iX][thread_id],XAlpha[iX],n1,n2,n3,n4,
                     bf1_s,bf2_s,bf3_s,bf4_s,buff,s1234_deg);
+                }
                 else if(doTCS && do24)
                   this->Spinor24CouContract(G[0][iX][thread_id],XAlpha[iX],n1,n2,n3,n4,
                     bf1_s,bf2_s,bf3_s,bf4_s,buff,s1234_deg);

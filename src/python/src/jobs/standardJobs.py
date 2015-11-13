@@ -108,9 +108,10 @@ def runSDR(workers,meta):
   runSCF(workers,meta)
   workers["CQMOIntegrals"].initMeta()
   workers["CQSDResponse"].initMeta()
+  workers["CQSDResponse"].setPPRPA(1)
   workers["CQSDResponse"].initMeth()
   workers["CQSDResponse"].alloc()
-  workers["CQSDResponse"].IterativeRPA()
+  workers["CQSDResponse"].IterativeRESP()
   meta.davIters = workers["CQSDResponse"].nIter
   meta.excEne   = workers["CQSDResponse"].excitationEnergies()
   meta.oscStr   = workers["CQSDResponse"].oscStrengths()

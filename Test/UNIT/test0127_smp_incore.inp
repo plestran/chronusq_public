@@ -1,0 +1,25 @@
+#  test0127 smp incore Real UKS LSDA(S-VWN3) STO-3G
+#
+#  Molecule Specification
+#
+[Molecule]
+charge = 0
+mult = 3
+geom:
+ O  0.000000  0.000000  0.608586
+ O  0.000000  0.000000  -0.608586
+  
+#
+#  Job Specification
+#
+[QM]
+reference = LSDA
+job       = SCF
+basis     = sto3g.gbs
+ints			= incore
+
+#
+#  Misc Settings
+#
+[Misc]
+nsmp = 2

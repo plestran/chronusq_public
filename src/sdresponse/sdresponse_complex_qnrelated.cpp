@@ -312,7 +312,7 @@ void SDResponse<dcomplex>::formGuess(){
 
 
 template<>
-void SDResponse<dcomplex>::IterativeRPA(){
+void SDResponse<dcomplex>::IterativeRESP(){
   bool hasProp = ((this->iMeth_==CIS || this->iMeth_==RPA) && this->Ref_ != SingleSlater<dcomplex>::TCS);
   this->formGuess();
 //if(this->iMeth_ == PPATDA) CErr();
@@ -325,7 +325,7 @@ void SDResponse<dcomplex>::IterativeRPA(){
     this->printExcitedStateEnergies();
   }
   if(this->iMeth_ == STAB) this->reoptWF();
-} // IterativeRPA
+} // IterativeRESP
 
 template<>
 void SDResponse<dcomplex>::formRM3(ComplexCMMap &XMO, ComplexCMMap &Sigma, ComplexCMMap &Rho){

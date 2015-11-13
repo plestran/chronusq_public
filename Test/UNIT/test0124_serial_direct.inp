@@ -6,7 +6,7 @@
 charge = 0
 mult = 2
 geom:
-	Li 0   0.000000 0.000000 0.000000
+ Li  0.000000  0.000000  0.000000
   
 #
 #  Job Specification
@@ -15,7 +15,6 @@ geom:
 reference = LSDA
 job       = SCF
 basis     = sto3g.gbs
-print     = 5
 ints			= direct
 
 #
