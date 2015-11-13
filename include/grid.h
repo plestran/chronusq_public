@@ -113,6 +113,7 @@ class TwoDGrid : public Grid {
       double * BuildDensity(double * Sum,double * Buff,int n1, int n2);
       void iniTwoDGrid(int Ngridr, int NLeb);
       double voronoii(double mu);
+      double  frischpol(double mu, double alpha);
       double step_fun(double mu);
       inline double * weightsGrid(){ return this->weightsGrid_;};
       inline double getweightsGrid(int i){ return this->weightsGrid_[i];};

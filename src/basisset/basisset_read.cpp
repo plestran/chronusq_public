@@ -260,14 +260,32 @@ double * BasisSet::basisEval(int iShell, std::array<double,3> center,sph3GP *ptS
 }
 template<>
 double * BasisSet::basisEval(libint2::Shell &liShell, cartGP *pt){
+  bool time = false;
+  std::chrono::high_resolution_clock::time_point start_1;
+  std::chrono::high_resolution_clock::time_point start_2;
+  std::chrono::high_resolution_clock::time_point start_3;
+  std::chrono::high_resolution_clock::time_point start_4;
+  std::chrono::high_resolution_clock::time_point finish_1;
+  std::chrono::high_resolution_clock::time_point finish_2;
+  std::chrono::high_resolution_clock::time_point finish_3;
+  std::chrono::high_resolution_clock::time_point finish_4;
+//T
+  if (time) {
+     start_1 = std::chrono::high_resolution_clock::now();
+     }
+//T
   auto shSize = liShell.size(); 
   auto contDepth = liShell.alpha.size(); 
   auto center = liShell.O;
+//T
+  if (time) {
+  finish_1 = std::chrono::high_resolution_clock::now();  
+  this->duration_1 += finish_1 - start_1;
+  start_4 = std::chrono::high_resolution_clock::now();
+  }
+//T
   double * fEVal = new double[shSize];
-   
-////T
-////  auto start_1 = std::chrono::high_resolution_clock::now();
-////T
+/*
   std::vector<std::array<int,3>> L(shSize);
   if(liShell.contr[0].l == 0){
     L[0] = {0,0,0};
@@ -283,28 +301,29 @@ double * BasisSet::basisEval(libint2::Shell &liShell, cartGP *pt){
     L[4] = {0,1,1};
     L[5] = {0,0,2};
   } else CErr("L > 2 NYI");
-////T
-////  auto finish_1 = std::chrono::high_resolution_clock::now();  
-////  this->duration_1 += finish_1 - start_1;
-////T
+*/
 
   std::memset(fEVal,0,shSize*sizeof(double));
-////T
-////  auto start_2 = std::chrono::high_resolution_clock::now();
-////T
+//T
+  if (time) {
+    finish_4 = std::chrono::high_resolution_clock::now();  
+    this->duration_4 += finish_4 - start_4;
+    start_2 = std::chrono::high_resolution_clock::now();
+    }
+//T
   double x = bg::get<0>(*pt) - center[0];
   double y = bg::get<1>(*pt) - center[1];
   double z = bg::get<2>(*pt) - center[2];
   double rSq = x*x + y*y + z*z;
-////T
-////  auto finish_2 = std::chrono::high_resolution_clock::now();  
-////  this->duration_2 += finish_2 - start_2;
-////T
-////T
-////  auto start_3 = std::chrono::high_resolution_clock::now();
-////T
+//T
+  if (time) {
+    finish_2 = std::chrono::high_resolution_clock::now();  
+    this->duration_2 += finish_2 - start_2;
+    start_3 = std::chrono::high_resolution_clock::now();
+    }
+//T
+/*
   for(auto i = 0; i < shSize; i++){
-////    cout << endl << fEVal[i] << endl;
     for(auto k = 0; k < contDepth; k++){
       fEVal[i] += 
         liShell.contr[0].coeff[k] *
@@ -318,13 +337,39 @@ double * BasisSet::basisEval(libint2::Shell &liShell, cartGP *pt){
     fEVal[i] *= std::pow(y,m);
     fEVal[i] *= std::pow(z,n);
   }
-////T
-//  auto finish_3 = std::chrono::high_resolution_clock::now();  
-//  this->duration_3 += finish_3 - start_3;
-////T
+*/
+
+  double expFactor = 0.0;
+  for(auto k = 0; k < contDepth; k++){
+    expFactor += 
+      liShell.contr[0].coeff[k] *
+      std::exp(-liShell.alpha[k]*rSq);
+  }
+
+  if(liShell.contr[0].l == 0){
+    fEVal[0] = expFactor;
+  }else if(liShell.contr[0].l == 1){
+    fEVal[0] = expFactor*x;
+    fEVal[1] = expFactor*y;
+    fEVal[2] = expFactor*z;
+  } else if(liShell.contr[0].l == 2){
+    fEVal[0] = expFactor*x*x;
+    fEVal[1] = expFactor*y*x;
+    fEVal[2] = expFactor*z*x;
+    fEVal[3] = expFactor*y*y;
+    fEVal[4] = expFactor*y*z;
+    fEVal[5] = expFactor*z*z;
+  }
+//T
+  if (time) {
+    finish_3 = std::chrono::high_resolution_clock::now();  
+    this->duration_3 += finish_3 - start_3;
+  }
+//T
 
   return fEVal;
 }
+
 template<>
 double * BasisSet::basisEval(libint2::Shell &liShell, sph3GP *ptSph){
   cartGP pt;
@@ -484,8 +529,8 @@ double BasisSet::fRmax (int l, double alpha, double thr, double epsConv, int max
            root = root1;
     }
    }
-           cout << "Convergence Failure in fRmax, change maxiter or turn off screening " << endl;    
-           cout << "root(n-1)= " << root  << " root(n)= "<<root1 <<" abs_err " << std::abs(root1-root)  << endl;
+           this->fileio_->out << "Convergence Failure in fRmax, change maxiter or turn off screening " << endl;    
+           this->fileio_->out << "root(n-1)= " << root  << " root(n)= "<<root1 <<" abs_err " << std::abs(root1-root)  << endl;
            CErr("Convergence Failure",this->fileio_->out);
 }   
 

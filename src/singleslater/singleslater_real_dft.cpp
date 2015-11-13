@@ -25,13 +25,18 @@
  */
 #include <singleslater.h>
 namespace ChronusQ {
+
 template<>
 double SingleSlater<double>::formBeckeW(cartGP gridPt, int iAtm){
-//     Generate Becke Weights according to the partition schems in
+//     Generate Frisch (not-normalized yet) Weights (if frischW) according to the partition schems in
+//     (Chem. Phys. Let., 257, 213-223 (1996)) using Eq. 11 and 14
+//     Note these Weights have to be normailzed 
+//     Generate Becke not-normalized Weights (if becke) according to the partition schems in
 //     (J. Chem. Phys., 88 (4),2457 (1988)) using Voronoii Fuzzi Cells
 //     Note these Weights have to be normailzed (see normBeckeW) 
        int nAtom = this->molecule_->nAtoms();
        double WW = 1.0;
+       double tmp;
        double muij;   ///< elliptical coordinate (ri -rj / Rij)
        cartGP rj;     ///< Cartisian position of Atom j
        cartGP ri;     ///< Cartisian position of Atom i
@@ -48,7 +53,8 @@ double SingleSlater<double>::formBeckeW(cartGP gridPt, int iAtm){
 //       Coordinate of the Grid point in elleptical (Eq. 11) 
            muij = (boost::geometry::distance(gridPt,ri) - boost::geometry::distance(gridPt,rj))/(*this->molecule_->rIJ())(iAtm,jAtm) ;
 //       Do the product over all atoms i .ne. j (Eq. 13 using definition Eq. 21 with k=3)
-           WW *= 0.5*(1.0-this->twodgrid_->voronoii(this->twodgrid_->voronoii(this->twodgrid_->voronoii(muij))));
+           if (this->frischW) WW *= 0.5*(1.0-this->twodgrid_->frischpol(muij,0.64));
+           if (this->beckeW)  WW *= 0.5*(1.0-this->twodgrid_->voronoii(this->twodgrid_->voronoii(this->twodgrid_->voronoii(muij))));
            }
          }
        return WW;
@@ -57,7 +63,7 @@ double SingleSlater<double>::formBeckeW(cartGP gridPt, int iAtm){
 
 template<>
 double SingleSlater<double>::normBeckeW(cartGP gridPt){
-//     Normalization of Becke Weights
+//     Normalization of Becke/Frisch Weights
 //     (J. Chem. Phys., 88 (4),2457 (1988)) using Voronoii Fuzzi Cells
 //     Eq. 22
        int   nAtom = this->molecule_->nAtoms();
@@ -340,9 +346,13 @@ void SingleSlater<double>::evalVXC(cartGP gridPt, double weight, std::vector<boo
 ////T
    double rhor = 0.0;
    double rhor_B = 0.0;
+   bool   RHF  = this->Ref_ == RHF;
+   bool   doTCS  = this->Ref_ == TCS;
+   double shMax;
 ////T   
 //   auto start_2 = std::chrono::high_resolution_clock::now();  // Timing to allocate and set to zero S(r)
 ////T
+   std::unique_ptr<RealMatrix>  PA_;        ///< Overlap at grid point
    std::unique_ptr<RealMatrix>  overlapR_;        ///< Overlap at grid point
    overlapR_ = std::unique_ptr<RealMatrix>(
      new RealMatrix(this->nBasis_,this->nBasis_));
@@ -355,17 +365,36 @@ void SingleSlater<double>::evalVXC(cartGP gridPt, double weight, std::vector<boo
 ////T
 ////   auto start_4 = std::chrono::high_resolution_clock::now();  // Timing to allocate and set to zero S(r)
    for(auto s1=0l, s12=0l; s1 < this->basisset_->nShell(); s1++){
-      if (mapRad_[s1+1] ){
+      if (mapRad_[s1+1]){
         int bf1_s = this->basisset_->mapSh2Bf(s1);
         int n1    = this->basisset_->shells(s1).size();
         for(int s2=0; s2 <= s1; s2++, s12++){
-          if (mapRad_[s2+1] ){
+          if (mapRad_[s2+1]){
             int bf2_s   = this->basisset_->mapSh2Bf(s2);
             int n2      = this->basisset_->shells(s2).size();
-            auto center = this->basisset_->shells(s1).O;
 ////T          
 //            auto start_7 = std::chrono::high_resolution_clock::now();
 ////T
+/*
+            if (this->screenVxc){
+              if(this->isClosedShell || this->Ref_ !=TCS){
+                shMax = (*this->basisset_->shBlkNormAlpha)(s1,s2);
+                } else {
+                shMax = std::max((*this->basisset_->shBlkNormAlpha)(s1,s2),
+                         (*this->basisset_->shBlkNormBeta)(s1,s2));
+              }
+//             if(shMax < (this->controls_->thresholdSchawrtz/ngpts) ) continue;
+             if(shMax < (this->epsScreen/ngpts) ) continue;
+            }
+*/
+/* TEST
+             double * bfun = new double [n2];
+            libint2::Shell s2sh = this->basisset_->shells(s2); 
+            bfun = 
+              this->basisset_->basisEval(s2sh,&gridPt);
+            RealMap fBuff(bfun,n2,1);
+            fBuff += this->densityA()->block(bf1_s,bf2_s,n1,n2) * fBuff;
+*/
             auto pointProd = 
               this->basisset_->basisProdEval(
                 this->basisset_->shells(s1),
@@ -467,9 +496,10 @@ void SingleSlater<double>::evalVXC(cartGP gridPt, double weight, std::vector<boo
 template<>
 void SingleSlater<double>::formVXC(){
 ////Timing
-//    this->basisset_->duration_1 = std::chrono::seconds(0) ;
-//    this->basisset_->duration_2 = std::chrono::seconds(0) ;
-//    this->basisset_->duration_3 = std::chrono::seconds(0) ;
+    this->basisset_->duration_1 = std::chrono::seconds(0) ;
+    this->basisset_->duration_2 = std::chrono::seconds(0) ;
+    this->basisset_->duration_3 = std::chrono::seconds(0) ;
+    this->basisset_->duration_4 = std::chrono::seconds(0) ;
 //    this->duration_1 = std::chrono::seconds(0) ;
 //    this->duration_2 = std::chrono::seconds(0) ;
 //    this->duration_3 = std::chrono::seconds(0) ;
@@ -485,7 +515,7 @@ void SingleSlater<double>::formVXC(){
     int nRad     = 100;       // Number of Radial grid points for each center
     int nAng     = 302;       // Number of Angular grid points for each center 
                               //  (only certain values are allowed - see grid.h)
-    int npts     = nRad*nAng; // Total Number of grid point for each center
+    this->ngpts     = nRad*nAng; // Total Number of grid point for each center
 
     double weight  = 0.0;                            
     double bweight = 0.0;
@@ -500,6 +530,8 @@ void SingleSlater<double>::formVXC(){
     this->epsConv   = 1.0e-7;
     this->maxiter   = 50;
     this->screenVxc = false;
+    this->frischW   = false;
+    this->beckeW    = true;
     std::vector<bool> tmpnull(this->basisset_->nShell()+1);
 /*  
  *  Generate grids 
@@ -528,7 +560,7 @@ void SingleSlater<double>::formVXC(){
       // Scale the grid according the Atomic Bragg-Slater Radius 
       Rad.scalePts((elements[this->molecule_->index(iAtm)].sradius)) ;  
       // Final Raw (not centered) 3D grid (Radial times Angular grid)
-      TwoDGrid Raw3Dg(npts,&Rad,&GridLeb);                              
+      TwoDGrid Raw3Dg(this->ngpts,&Rad,&GridLeb);                              
 
       //Center the Grid at iAtom
       Raw3Dg.centerGrid(
@@ -538,7 +570,7 @@ void SingleSlater<double>::formVXC(){
       );
        double rad;
       // Loop over grid points
-      for(int ipts = 0; ipts < npts; ipts++){
+      for(int ipts = 0; ipts < this->ngpts; ipts++){
 ////T   
 //   auto start_5 = std::chrono::high_resolution_clock::now();  // Timing weights
 ////T
@@ -599,13 +631,15 @@ void SingleSlater<double>::formVXC(){
 //    this->fileio_->out << "Overlap Alloc + set Zero Total Time " << this->duration_2.count() <<endl;
 //    this->fileio_->out << "Overlap ProdEval         Total Time " << this->duration_7.count() <<endl;
 //    this->fileio_->out << "Overlap BuildDend        Total Time " << this->duration_8.count() <<endl;
-//    this->fileio_->out << "Overlap Creation Part1   Total Time " << this->basisset_->duration_1.count()<<endl;
-//    this->fileio_->out << "Overlap Creation Part2   Total Time " << this->basisset_->duration_2.count() <<endl;
-//    this->fileio_->out << "Overlap Creation Part3   Total Time " << this->basisset_->duration_3.count() <<endl;
+    this->fileio_->out << "Overlap Creation Part1(a)   Total Time " << this->basisset_->duration_1.count()<<endl;
+    this->fileio_->out << "Overlap Creation Part1(b)   Total Time " << this->basisset_->duration_4.count()<<endl;
+    this->fileio_->out << "Overlap Creation Part2   Total Time " << this->basisset_->duration_2.count() <<endl;
+    this->fileio_->out << "Overlap Creation Part3   Total Time " << this->basisset_->duration_3.count() <<endl;
 //    this->fileio_->out << "Overlap Creation         Total Time " << this->duration_4.count() <<endl;
 //    this->fileio_->out << "Overlap Contraction      Total Time " << this->duration_3.count() <<endl;
 //    this->fileio_->out << "Form (Vx + Vc)           Total Time " << this->duration_1.count() <<endl;
 //    this->fileio_->out << "Vxc Digestion            Total Time " << this->duration_6.count() <<endl;
+//  CErr("DIE DIE DIE");
 }; //End
 
 
