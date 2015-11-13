@@ -533,6 +533,12 @@ rununit.py
 testXXXX*.inp
 test.index
     \end{lstlisting}
+
+		\noindent You'll need to add a symbolic link to the \texttt{chronusq.py} utility in 
+    \texttt{Test/UNIT}
+    \begin{lstlisting}
+ln -s ../../build_gcc_libint_openmp/chronusq.py .
+    \end{lstlisting}
     
     \noindent The \texttt{rununit.py} utility will run the unit tests and compare against reference 
     values that are stored in \texttt{chronus-ref.val}. Upon completion, the results of each

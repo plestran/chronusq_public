@@ -6,7 +6,7 @@
 charge = 0
 mult = 2
 geom:
-	Li 0   0.000000 0.000000 0.000000
+ Li  0.000000  0.000000  0.000000
   
 #
 #  Job Specification

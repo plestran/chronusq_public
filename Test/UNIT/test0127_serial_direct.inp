@@ -6,8 +6,8 @@
 charge = 0
 mult = 3
 geom:
-	O 0   0.000000    0.000000    0.608586
-	O 0   0.000000    0.000000    -0.608586
+ O  0.000000  0.000000  0.608586
+ O  0.000000  0.000000  -0.608586
   
 #
 #  Job Specification
@@ -16,7 +16,6 @@ geom:
 reference = LSDA
 job       = SCF
 basis     = sto3g.gbs
-print     = 5
 ints			= direct
 
 #
