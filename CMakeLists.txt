@@ -16,6 +16,18 @@ option(NCORE_LIBINT "Number of Cores to build Libint" 4)
 option(CQ_ENABLE_ATLAS "Whether or not to search for ATLAS" OFF)
 option(BUILD_DOC  "Build Documentation" OFF)
 
+# Check for C++11
+include(CheckCXXCompilerFlag)
+CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+if(COMPILER_SUPPORTS_CXX11)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+elseif(COMPILER_SUPPORTS_CXX0X)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+else()
+  message(FATAL "${CMAKE_CXX_COMPILER} does not seem to support C++11!")
+endif()
+
 # Check for dependencies
 find_package(PythonLibs REQUIRED)
 find_package(PythonInterp REQUIRED)
