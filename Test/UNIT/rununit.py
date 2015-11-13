@@ -53,7 +53,7 @@ def genSummary(testtable,summary):
   outf.write(tabulate(sumrytable,headers,tablefmt="simple",floatfmt=".4E"))
 
 # RESP output
-  headers = ["RESP Test Job","max(|f|)","max(|omega|)","NStates","Passed"]
+  headers = ["RESP Test Job","max(|df|)","max(|domega|)","NStates","Passed"]
   sumrytable = []
   j = 0
   for i in testtable:
@@ -139,6 +139,20 @@ def genTable():
 #--------------------------------------------------------------------
 
 #--------------------------------------------------------------------
+def initSummary():
+# Opens the output file and adds headers for the different tests
+  summaryf = "summary2.txt"
+  exists = os.path.exists(summaryf)
+  if exists: os.remove(summaryf)
+  outf = open(summaryf,'w')
+
+  SCFheader = "SCF Test Job                  |dEnergy|    max(|dDipole|)    max(|dQuadrupole|)    max(|dOctupole|)  Passed\n--------------------------  -----------  ----------------  --------------------  ------------------  --------\n\n"
+  RESPheader = "RESP Test Job                 max(|df|)    max(|domega|)    NStates  Passed\n--------------------------  -----------  ---------------  ---------  --------\n\n"
+  RTheader = "RT Test Job                   |dLastEnergy|    max(|dLastDipole|)  Passed\n--------------------------  ---------------  --------------------  --------\n\n"
+  outf.write(SCFheader+RESPheader+RTheader)
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
 def runUnit(doPrint):
 # Runs the unit tests
   global errors, summary
@@ -153,26 +167,26 @@ def runUnit(doPrint):
     if findFile(i.infile,"."):
 #
 #     run chronus
-      if doPrint:
-        print "running job: "+i.infile
+      if doPrint: print "running job: "+i.infile
       tests[k] = runCQ(i.infile,'')
 #
 #     test SCF values
       if 'SCF' in ref[i.infile[:8]].typ:
         testSCF(ref[i.infile[:8]],tests[k])
         summary.append(errors)
-
+#
 #     test RESP values
       elif 'RESP' in ref[i.infile[:8]].typ:
         testRESP(ref[i.infile[:8]],tests[k])
         summary.append(errors)
-
+#
+#     test RT values 
       elif 'RT' in ref[i.infile[:8]].typ:
         testRT(ref[i.infile[:8]],tests[k])
         summary.append(errors)
 
       else:
-        print "Not recognized job type for ", ref[i.infile[:8]].typ
+        print "Job type not recognized: "+ref[i.infile[:8]].typ
         sys.exit()
 
     k += 1
@@ -324,6 +338,7 @@ if __name__ in "__main__":
   subBasis = testBasis.split(',')
 
 # run unit tests
+  initSummary()
   runUnit(doPrint)    
 #--------------------------------------------------------------------
 
