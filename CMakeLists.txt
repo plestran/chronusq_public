@@ -86,7 +86,7 @@ if(USE_LIBINT)
       PREFIX ${PROJECT_BINARY_DIR}/deps/libint
       URL "${PROJECT_SOURCE_DIR}/deps/src/libint-2.1.0-beta2.tgz"
       CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/deps/libint/src/libint/configure --prefix=${PROJECT_BINARY_DIR}/deps CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${CMAKE_CXX_FLAGS}
-      BUILD_COMMAND make -j8
+      BUILD_COMMAND make -j2
       BUILD_IN_SOURCE 1
       INSTALL_COMMAND make install
     )  
