@@ -235,24 +235,31 @@ I
 	\ref{subsec:ChronusQConfigCompile}.
 
       \subsubsection{\Boost} \label{subsubsec:boost} 
+%        Various parts of the code depend on the C++ \Boost~libraries \cite{boost} to
+%        varying degrees (namely the \Python API from which ChronusQ can be 
+%	executed). Given that \Boost~is not already installed on your system,
+%	one may compile and place boost in the usual (root) place by obtaining
+%	the latest \Boost~source from \texttt{http://www.boost.org} and following
+%
+%        \begin{lstlisting}
+%> cd /path/to/boost/download
+%> tar xvf boost_<boost_version>.tar.gz
+%> cd boost_<boost_version>
+%> ./bootstrap
+%> ./b2 install --prefix=/usr/local
+%        \end{lstlisting}
+%
+%	\noindent If you already have \Boost~installed on your machine (in a 
+%	non-standard location) or are unable to perform the above procedure (i.e. 
+%	no root access), instructions regarding the \CMake~variables that must be 
+%	set are described in Section \ref{subsec:ChronusQConfigCompile}.
         Various parts of the code depend on the C++ \Boost~libraries \cite{boost} to
-        varying degrees (namely the \Python API from which ChronusQ can be 
-	executed). Given that \Boost~is not already installed on your system,
-	one may compile and place boost in the usual (root) place by obtaining
-	the latest \Boost~source from \texttt{http://www.boost.org} and following
-
-        \begin{lstlisting}
-> cd /path/to/boost/download
-> tar xvf boost_<boost_version>.tar.gz
-> cd boost_<boost_version>
-> ./bootstrap
-> ./b2 install --prefix=/usr/local
-        \end{lstlisting}
-
-	\noindent If you already have \Boost~installed on your machine (in a 
-	non-standard location) or are unable to perform the above procedure (i.e. 
-	no root access), instructions regarding the \CMake~variables that must be 
-	set are described in Section \ref{subsec:ChronusQConfigCompile}.
+	varying degrees (namely the \Python~API from which ChronusQ can be execuded).
+	Although the installation of \Boost~ is relatively easy, we've found that
+	the path of leasr resistance on the end user involves an automatic installation
+	of the needed modules of \Boost~via \CMake. The needed modules are compiled
+	and linked to by default and we do not currently support linking to a compiled
+	version on the user's development environment.
 
       \subsubsection{\Python} \label{subsubsec:Python} 
         ChronusQ utilizes \Python~as a high level API for input
