@@ -27,6 +27,13 @@ add_custom_target(copyapi ALL
   COMMAND ${CMAKE_COMMAND} -E copy_directory ${JFOLDER} ${APIINST}/jobs
 )
 add_dependencies(copyapi pythonapi)
+if(APPLE)
+  add_custom_target(setupMacAPI ALL
+    ${CMAKE_COMMAND} -E create_symlink ${PROJECT_BINARY_DIR}/src/python/libpythonapi.dylib ${PROJECT_BINARY_DIR}/src/python/libpythonapi.so
+    COMMAND install_name_tool -change libboost_python.dylib ${PROJECT_BINARY_DIR}/deps/lib/libboost_python.dylib ${PROJECT_BINARY_DIR}/src/python/libpythonapi.dylib 
+  )
+  add_dependencies(setupMacAPI pythonapi)
+endif()
 #file(COPY "${PROJECT_BINARY_DIR}/src/python/chronusq.py"
 #  DESTINATION "${PROJECT_BINARY_DIR}"
 #  FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
