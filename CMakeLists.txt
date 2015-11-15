@@ -8,13 +8,10 @@ set(ChronusQ_VERSION_MINOR 0)
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 message(STATUS "Using ${CMAKE_MODULE_PATH}")
 
-# Set LIBINT to be built locally
-set(BUILD_LIBINT ON)
-
 # Set default options
 option(USE_LIBINT "Use LibInt Integral Driver"  ON) # Default Libint
 option(BUILD_LA   "Build LAPACK and BLAS locally" OFF)
-option(BUILD_LIBINT "Build Libint via cmake" OFF)
+option(BUILD_LIBINT "Build Libint via cmake" ON)
 option(NCORE_LIBINT "Number of Cores to build Libint" 4)
 option(CQ_ENABLE_ATLAS "Whether or not to search for ATLAS" OFF)
 option(BUILD_DOC  "Build Documentation" OFF)
