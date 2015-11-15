@@ -68,7 +68,8 @@ ExternalProject_Add(boost
   PREFIX ${PROJECT_BINARY_DIR}/deps/boost
   URL "${PROJECT_SOURCE_DIR}/deps/src/boost_1_59_0.tar.gz"
   CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/deps/boost/src/boost/bootstrap.sh
-  BUILD_COMMAND ${PROJECT_BINARY_DIR}/deps/boost/src/boost/b2 --prefix=${PROJECT_BINARY_DIR}/deps --with-python install
+  BUILD_COMMAND ${PROJECT_BINARY_DIR}/deps/boost/src/boost/b2
+  --prefix=${PROJECT_BINARY_DIR}/deps --with-python --ignore-site-config install
   BUILD_IN_SOURCE 1
   INSTALL_COMMAND echo "Boost Build Sucess!"
 )
