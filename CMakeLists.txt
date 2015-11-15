@@ -8,6 +8,9 @@ set(ChronusQ_VERSION_MINOR 0)
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 message(STATUS "Using ${CMAKE_MODULE_PATH}")
 
+# Set LIBINT to be built locally
+set(BUILD_LIBINT ON)
+
 # Set default options
 option(USE_LIBINT "Use LibInt Integral Driver"  ON) # Default Libint
 option(BUILD_LA   "Build LAPACK and BLAS locally" OFF)
@@ -65,7 +68,8 @@ ExternalProject_Add(boost
   PREFIX ${PROJECT_BINARY_DIR}/deps/boost
   URL "${PROJECT_SOURCE_DIR}/deps/src/boost_1_59_0.tar.gz"
   CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/deps/boost/src/boost/bootstrap.sh
-  BUILD_COMMAND ${PROJECT_BINARY_DIR}/deps/boost/src/boost/b2 --prefix=${PROJECT_BINARY_DIR}/deps --with-python install
+  BUILD_COMMAND ${PROJECT_BINARY_DIR}/deps/boost/src/boost/b2
+  --prefix=${PROJECT_BINARY_DIR}/deps --with-python --ignore-site-config install
   BUILD_IN_SOURCE 1
   INSTALL_COMMAND echo "Boost Build Sucess!"
 )
