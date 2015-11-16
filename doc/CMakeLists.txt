@@ -14,12 +14,10 @@ add_custom_target(copydoc ALL
 
 if(PDFLATEX_COMPILER)
   message(STATUS "PDFLatex Compiler Found! Building Documentation Target")
-  add_custom_target(docs
-    ${PDFLATEX_COMPILER} ${USERMANUAL} 
-    COMMAND ${BIBTEX_COMMAND} ${USERMANUAL}
-    COMMAND ${PDFLATEX_COMPILER} ${USERMANUAL} 
-    COMMAND ${PDFLATEX_COMPILER} ${USERMANUAL} 
-    DEPENDS copydoc
+  include(UseLATEX.cmake)
+  add_latex_document(
+    ${USERMANUAL}
+    BIBFILES ${CHRONUSQ_BIB}.bib
   )
 #  add_dependencies(documentation ${USERMANUAL}.tex)
 else()
