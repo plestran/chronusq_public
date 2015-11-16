@@ -82,7 +82,7 @@
   \begin{titlepage}
     \vspace*{\fill}
     \begin{center}
-      \includegraphics[width=0.25\textwidth]{@LOGO@}~\\[1cm]
+      \includegraphics[width=0.25\textwidth]{chronus_quantum_logo.png}~\\[1cm]
       \textsc{\LARGE The Chronus Quantum (ChronusQ) \\ Software Package}~\\[0.5cm]
       \textsc{\Large User's guide}~\\[5cm]
       \large David Williams\\
@@ -222,17 +222,7 @@ I
       \subsubsection{\BTAS} \label{subsubsec:BTAS}
         ChronusQ currently utilizes \BTAS~(\textbf{B}asic \textbf{T}ensor
         \textbf{A}lgebra \textbf{S}ubroutines) \cite{btas} as a C++11 API for multi-linear 
-	algebra. \BTAS~is a header-only API (see \Eigen), so one only needs to place
-	the headers in a place that ChronusQ can find them. The \BTAS~source code
-	may be obtained from the \BTAS~GitHub via
-
-	\begin{lstlisting}
-> git clone https://github.com/BTAS/BTAS.git
-	\end{lstlisting}
-
-	\noindent Instructions regarding the \CMake~variables that need to be set 
-	for a non-root installation of \BTAS~may be found in Section 
-	\ref{subsec:ChronusQConfigCompile}.
+	algebra. \BTAS~is obtained by ChronusQ automatically
 
       \subsubsection{\Boost} \label{subsubsec:boost} 
 %        Various parts of the code depend on the C++ \Boost~libraries \cite{boost} to
@@ -385,40 +375,9 @@ I
 
 	  \hline
 
-	  \texttt{BOOST\_ROOT}                                   &
-	  \pbox{7cm}{The root directory of a boost installation} &
-	  /usr                                                   \\
-
-	  \hline
-
-	  \texttt{BOOST\_LIBRARYDIR}              &
-	  \pbox{7cm}{Location of Boost libraries} &
-	  \$(BOOST\_ROOT)/lib                     \\
-
-	  \hline
-
-	  \texttt{BOOST\_INCLUDEDIR}            &
-	  \pbox{7cm}{Location of Boost headers} &
-	  \$(BOOST\_ROOT)/include               \\
-
-	  \hline
-
-	  \texttt{Boost\_NO\_SYSTEM\_PATHS} &
-	  \pbox{7cm}{Whether or not to use the system paths to find Boost 
-	    installation} &
-	  \texttt{OFF} \\
-
-	  \hline
-
 	  \texttt{EIGEN3\_ROOT} &
 	  \pbox{7cm}{Path that contains the \Eigen~directory} &
 	  /usr/include/eigen3 \\
-
-	  \hline
-
-	  \texttt{BTAS\_ROOT} &
-	  \pbox{7cm}{Path that contains the \texttt{btas}~directory} &
-	  /usr/include/btas \\
 
 	  \hline
 
@@ -452,15 +411,8 @@ cmake \
   -DCMAKE_C_COMPILER=$(HOME)/gcc/gcc-4.9.2/bin/gcc \
   -DCMAKE_Fortran_COMPILER=$(HOME)/gcc/gcc-4.9.2/bin/gfortran \
   -DCMAKE_CXX_FLAGS='-w -O2 -std=c++11'\
-  -DUSE_LIBINT=ON \
-  -DBOOST_ROOT=$(HOME)/boost/1.59.0 \
-  -DBOOST_LIBRARYDIR=$(HOME)/boost/1.59.0/stage-1_59_0/lib \
-  -DBOOST_INCLUDEDIR=$(HOME)/boost/1.59.0/include \
-  -DBoost_NO_SYSTEM_PATHS=ON  \
   -DEIGEN3_ROOT=$(HOME)/eigen/eigen-eigen-c58038c56923 \
-  -DBTAS_ROOT=$(HOME)/github/BTAS \
   -DBUILD_LA=ON \
-  -DBUILD_LIBINT=ON \
   ..
     \end{lstlisting}
 
@@ -470,7 +422,7 @@ cmake \
     From the build directory, simply type
 
     \begin{lstlisting}
-> make
+> make -j <NCORES>
     \end{lstlisting}
 
     \noindent and compilation will begin. ChronusQ does not currently have a 
@@ -478,29 +430,12 @@ cmake \
     not suggested that the user performs a \texttt{make install} command, as we are 
     not sure if this will work on all machines. Note that this is being looked into 
     and will be handled before the first non-Beta release.
-
     ~\\
     ~\\
-    \noindent \textbf{Note on parallel builds}: If you wish to compile ChronusQ in 
-    parallel, i.e.
 
-    \begin{lstlisting}
-> make -j <NCORES>
-    \end{lstlisting}
-
-    \noindent you will likely experience very many errors as the 
-    \CMake~configuration has not been set up to smartly do things in the correct 
-    order. It will try to build \Libint~and ChronusQ at the same time, and because 
-    \Libint~is a dependency of ChronusQ, the build won't be able to find the 
-    correct headers, and error messages will ensue. \textbf{TO FIX THIS} one can 
-    build things in two (or three if building \LAPACK~and \BLAS)
-    
-    \begin{lstlisting}
-> cmake <PARAMETERS> ..
-> make libint
-> make lapack # if building LAPACK and BLAS
-> make -j <NCORES>
-    \end{lstlisting}
+    \noindent \textbf{Note on Boost Build}: The compilation of \Boost~via ChronusQ will
+    throw many warnings. These are not to be of concern.\\
+    \\
     
     \noindent Once ChronusQ has been successfully compiled, you should find a file
     named ``chronusq.py" in the main build directory. This is the ChronusQ python
@@ -798,7 +733,7 @@ ChronusQ input files are divided into sections that specify the molecular geomet
 
 	%bibliography    
     \bibliographystyle{unsrt}
-    \bibliography{@CHRONUSQ_BIB@}
+    \bibliography{ChronusQ.bib}
     
 \end{document}
 

@@ -14,7 +14,7 @@ option(BUILD_LA   "Build LAPACK and BLAS locally" OFF)
 option(BUILD_LIBINT "Build Libint via cmake" ON)
 option(NCORE_LIBINT "Number of Cores to build Libint" 4)
 option(CQ_ENABLE_ATLAS "Whether or not to search for ATLAS" OFF)
-option(BUILD_DOC  "Build Documentation" OFF)
+#option(BUILD_DOC  "Build Documentation" OFF)
 
 # Check for C++11
 include(CheckCXXCompilerFlag)
@@ -139,9 +139,9 @@ set(EXTERNAL_CQ_DEPS ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${LA_LINK}
 set(BASIS_PATH "${PROJECT_SOURCE_DIR}/basis")
 set(AUTHOR_PATH "${PROJECT_SOURCE_DIR}/AUTHORS")
 set(PYTHONAPI_PATH "${PROJECT_BINARY_DIR}/src/python")
-set(USERMANUAL "${CMAKE_BINARY_DIR}/doc/ChronusQUserManual")
-set(LOGO "${CMAKE_SOURCE_DIR}/doc/chronus_quantum_logo.png")
-set(CHRONUSQ_BIB ${CMAKE_SOURCE_DIR}/doc/ChronusQ)
+#set(USERMANUAL "${CMAKE_BINARY_DIR}/doc/ChronusQUserManual.tex")
+#set(LOGO "${CMAKE_SOURCE_DIR}/doc/chronus_quantum_logo.png")
+#set(CHRONUSQ_BIB ${CMAKE_SOURCE_DIR}/doc/ChronusQ)
 
 # Set up config.h with configure time settings
 configure_file(
@@ -155,5 +155,5 @@ configure_file(
 
 # Recurse into src
 add_subdirectory(src)
-add_subdirectory(doc)
+#add_subdirectory(doc)
 add_subdirectory(tests)
