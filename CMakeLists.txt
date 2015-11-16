@@ -29,27 +29,27 @@ else()
 endif()
 
 # Check for dependencies
-find_package(PythonLibs 2.7 REQUIRED)
-find_package(PythonInterp 2.7 REQUIRED)
+find_package(PythonLibs 2.6 REQUIRED)
+find_package(PythonInterp 2.6 REQUIRED)
 #find_package(Boost REQUIRED python)
 find_package(Eigen3 REQUIRED)
 find_package(HDF5 REQUIRED CXX)
 find_package(OpenMP)
 
-find_path(BTAS_INCLUDE_DIR btas/btas.h
-  HINTS ${BTAS_ROOT} ENV CPATH)
-if(BTAS_INCLUDE_DIR)
-  message(STATUS "Found BTAS: " ${BTAS_INCLUDE_DIR})
-else()
-  message(FATAL "Could not find BTAS" )
-endif()
+#find_path(BTAS_INCLUDE_DIR btas/btas.h
+#  HINTS ${BTAS_ROOT} ENV CPATH)
+#if(BTAS_INCLUDE_DIR)
+#  message(STATUS "Found BTAS: " ${BTAS_INCLUDE_DIR})
+#else()
+#  message(FATAL "Could not find BTAS" )
+#endif()
 
 # Define include directories
 include_directories("${PROJECT_SOURCE_DIR}/include")
 include_directories("${PROJECT_BINARY_DIR}/include")
 #include_directories("${Boost_INCLUDE_DIRS}")
 include_directories("${EIGEN3_INCLUDE_DIR}")
-include_directories("${BTAS_INCLUDE_DIR}")
+#include_directories("${BTAS_INCLUDE_DIR}")
 include_directories("${HDF5_INCLUDE_DIRS}")
 include_directories("${PYTHON_INCLUDE_DIRS}")
 
@@ -66,11 +66,10 @@ ExternalProject_Add(boost
   URL "${PROJECT_SOURCE_DIR}/deps/src/boost_1_59_0.tar.gz"
   CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/deps/boost/src/boost/bootstrap.sh
   BUILD_COMMAND ${PROJECT_BINARY_DIR}/deps/boost/src/boost/b2
-  --prefix=${PROJECT_BINARY_DIR}/deps --with-python --ignore-site-config install
+  --prefix=${PROJECT_BINARY_DIR}/deps --with-python --ignore-site-config --cxxflags="-Wall" install
   BUILD_IN_SOURCE 1
   INSTALL_COMMAND echo "Boost Build Sucess!"
 )
-include_directories("${PROJECT_BINARY_DIR}/deps/include")
 
 if(APPLE)
   set(Boost_LIBRARIES ${PROJECT_BINARY_DIR}/deps/lib/libboost_python.dylib)
@@ -78,6 +77,15 @@ else()
   set(Boost_LIBRARIES ${PROJECT_BINARY_DIR}/deps/lib/libboost_python.so)
 endif()
 
+ExternalProject_Add(btas
+  PREFIX ${PROJECT_BINARY_DIR}/deps/btas
+  GIT_REPOSITORY https://github.com/BTAS/BTAS.git
+  CONFIGURE_COMMAND echo 'Skipping BTAS Configure'
+  BUILD_COMMAND echo 'Skipping BTAS Build'
+  INSTALL_COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/deps/include/btas && ${CMAKE_COMMAND} -E copy_directory ${PROJECT_BINARY_DIR}/deps/btas/src/btas/btas ${PROJECT_BINARY_DIR}/deps/include/btas
+)
+
+include_directories("${PROJECT_BINARY_DIR}/deps/include")
 link_directories("${PROJECT_BINARY_DIR}/deps/lib")
 
 # Set up Libint environment
