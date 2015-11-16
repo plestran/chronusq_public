@@ -18,7 +18,7 @@ install-sh
 missing
 stamp-h1
 test
-build_*
+build*
 .COPY
 deps/include/
 deps/lib/
@@ -34,3 +34,8 @@ tests/*.out
 tests/*.csv
 tests/*.scr
 tests/*.tar
+doc/ChronusQUserManual.aux
+doc/ChronusQUserManual.bbl
+doc/ChronusQUserManual.blg
+doc/ChronusQUserManual.log
+doc/ChronusQUserManual.toc
