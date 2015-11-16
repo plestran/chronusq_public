@@ -29,8 +29,8 @@ else()
 endif()
 
 # Check for dependencies
-find_package(PythonLibs REQUIRED)
-find_package(PythonInterp REQUIRED)
+find_package(PythonLibs 2.7 REQUIRED)
+find_package(PythonInterp 2.7 REQUIRED)
 #find_package(Boost REQUIRED python)
 find_package(Eigen3 REQUIRED)
 find_package(HDF5 REQUIRED CXX)
