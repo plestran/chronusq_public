@@ -12,9 +12,7 @@ message(STATUS "Using ${CMAKE_MODULE_PATH}")
 option(USE_LIBINT "Use LibInt Integral Driver"  ON) # Default Libint
 option(BUILD_LA   "Build LAPACK and BLAS locally" OFF)
 option(BUILD_LIBINT "Build Libint via cmake" ON)
-option(NCORE_LIBINT "Number of Cores to build Libint" 4)
 option(CQ_ENABLE_ATLAS "Whether or not to search for ATLAS" OFF)
-#option(BUILD_DOC  "Build Documentation" OFF)
 
 # Check for C++11
 include(CheckCXXCompilerFlag)
@@ -36,20 +34,11 @@ find_package(Eigen3 REQUIRED)
 find_package(HDF5 REQUIRED CXX)
 find_package(OpenMP)
 
-#find_path(BTAS_INCLUDE_DIR btas/btas.h
-#  HINTS ${BTAS_ROOT} ENV CPATH)
-#if(BTAS_INCLUDE_DIR)
-#  message(STATUS "Found BTAS: " ${BTAS_INCLUDE_DIR})
-#else()
-#  message(FATAL "Could not find BTAS" )
-#endif()
 
 # Define include directories
 include_directories("${PROJECT_SOURCE_DIR}/include")
 include_directories("${PROJECT_BINARY_DIR}/include")
-#include_directories("${Boost_INCLUDE_DIRS}")
 include_directories("${EIGEN3_INCLUDE_DIR}")
-#include_directories("${BTAS_INCLUDE_DIR}")
 include_directories("${HDF5_INCLUDE_DIRS}")
 include_directories("${PYTHON_INCLUDE_DIRS}")
 
@@ -120,13 +109,9 @@ if(BUILD_LA)
                -DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR}/deps
   )
 
-# find_library(LOCAL_BLAS blas ${PROJECT_BINARY_DIR}/deps/lib)
-# find_library(LOCAL_LAPACK lapack ${PROJECT_BINARY_DIR}/deps/lib)
-# find_library(LOCAL_MGLIB tmglib ${PROJECT_BINARY_DIR}/deps/lib)
 
   set(LOCAL_BLAS   ${PROJECT_BINARY_DIR}/deps/lib/libblas.a  )
   set(LOCAL_LAPACK ${PROJECT_BINARY_DIR}/deps/lib/liblapack.a)
-#  set(LOCAL_BLAS ${PROJECT_BINARY_DIR}/deps/lib/libblas.a)
 
   set(LA_LINK ${LOCAL_LAPACK} ${LOCAL_BLAS} gfortran)
 else()
@@ -147,9 +132,6 @@ set(EXTERNAL_CQ_DEPS ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${LA_LINK}
 set(BASIS_PATH "${PROJECT_SOURCE_DIR}/basis")
 set(AUTHOR_PATH "${PROJECT_SOURCE_DIR}/AUTHORS")
 set(PYTHONAPI_PATH "${PROJECT_BINARY_DIR}/src/python")
-#set(USERMANUAL "${CMAKE_BINARY_DIR}/doc/ChronusQUserManual.tex")
-#set(LOGO "${CMAKE_SOURCE_DIR}/doc/chronus_quantum_logo.png")
-#set(CHRONUSQ_BIB ${CMAKE_SOURCE_DIR}/doc/ChronusQ)
 
 # Set up config.h with configure time settings
 configure_file(
@@ -163,5 +145,4 @@ configure_file(
 
 # Recurse into src
 add_subdirectory(src)
-#add_subdirectory(doc)
 add_subdirectory(tests)
