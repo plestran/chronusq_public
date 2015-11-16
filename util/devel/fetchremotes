@@ -1,0 +1,9 @@
+#!/bin/sh
+
+git fetch dbwy
+git fetch ligroup
+git fetch apetrone
+#git fetch ssilwal
+git fetch hbliu
+git fetch jjgoings
+git fetch plestran
