@@ -65,6 +65,8 @@
 #include <boost/math/constants/constants.hpp>
 #include <boost/python.hpp>
 #include <boost/math/special_functions/gamma.hpp>
+#include <boost/algorithm/string.hpp>
+
 // Misc
 #include <stdlib.h>
 //#include <sys/stat.h>

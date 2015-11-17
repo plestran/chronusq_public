@@ -152,6 +152,7 @@ public:
   };
 
   std::map<BASISSETS,std::string> basisMap;
+  std::map<std::string,BASISSETS> basisKey;
 
 
 
