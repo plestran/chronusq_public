@@ -33,6 +33,7 @@ find_package(PythonInterp 2.6 REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(HDF5 REQUIRED CXX)
 find_package(OpenMP)
+find_program(RSYNC_EXECUTABLE rsync)
 
 
 # Define include directories
@@ -71,7 +72,7 @@ ExternalProject_Add(btas
   GIT_REPOSITORY https://github.com/BTAS/BTAS.git
   CONFIGURE_COMMAND echo 'Skipping BTAS Configure'
   BUILD_COMMAND echo 'Skipping BTAS Build'
-  INSTALL_COMMAND rsync -r ${PROJECT_BINARY_DIR}/deps/btas/src/btas/btas ${PROJECT_BINARY_DIR}/deps/include
+  INSTALL_COMMAND ${RSYNC_EXECUTABLE} -r ${PROJECT_BINARY_DIR}/deps/btas/src/btas/btas ${PROJECT_BINARY_DIR}/deps/include
 )
 
 include_directories("${PROJECT_BINARY_DIR}/deps/include")
