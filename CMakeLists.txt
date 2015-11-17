@@ -71,7 +71,7 @@ ExternalProject_Add(btas
   GIT_REPOSITORY https://github.com/BTAS/BTAS.git
   CONFIGURE_COMMAND echo 'Skipping BTAS Configure'
   BUILD_COMMAND echo 'Skipping BTAS Build'
-  INSTALL_COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/deps/include/btas && ${CMAKE_COMMAND} -E copy_directory ${PROJECT_BINARY_DIR}/deps/btas/src/btas/btas ${PROJECT_BINARY_DIR}/deps/include/btas
+  INSTALL_COMMAND rsync -r ${PROJECT_BINARY_DIR}/deps/btas/src/btas/btas ${PROJECT_BINARY_DIR}/deps/include
 )
 
 include_directories("${PROJECT_BINARY_DIR}/deps/include")
