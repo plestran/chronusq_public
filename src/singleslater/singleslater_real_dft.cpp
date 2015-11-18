@@ -534,8 +534,8 @@ void SingleSlater<double>::formVXC(){
     this->screenVxc = false;
     this->frischW   = false;
     this->beckeW    = true;
-    this->gc1kGrid  = true;
-    this->emlGrid   = false;
+    this->gc1kGrid  = false;
+    this->emlGrid   = true;
     std::vector<bool> tmpnull(this->basisset_->nShell()+1);
     OneDGrid * Rad ;
 /*  
