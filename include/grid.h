@@ -79,6 +79,7 @@ class OneDGrid : public Grid {
        inline double norm(){ return this->norm_;};
        double integrate();
        void printGrid();
+       virtual void atomGrid(double sradius) = 0;
 }; // Class OneGrid (one dimensional grid)
 
 class TwoDGrid : public Grid {
@@ -149,6 +150,7 @@ class LebedevGrid : public OneDGrid {
           this->intas2GPt_ = true;
         };
       void transformPts();
+      void atomGrid(double sradius);
       void genGrid();
       void gen6_A1(int num, double a, double v);
       void gen12_A2(int num, double a, double v);
@@ -169,6 +171,7 @@ class LebedevGrid : public OneDGrid {
   // Class Functions
     void genGrid();                                      
     void transformPts();
+    void atomGrid(double sradius);
   }; // class GaussChebyshev1stGrid
 
   class GaussChebyshev1stGridInf : public OneDGrid {
@@ -182,7 +185,8 @@ class LebedevGrid : public OneDGrid {
   // Class Functions
     void genGrid();                                      
     void transformPts();
-    void scalePts(double sradius);
+    void atomGrid(double sradius);
+//    void scalePts(double sradius);
   }; // class GaussChebyshev1stGridInf
 
   class EulerMaclaurinGrid : public OneDGrid {
@@ -194,8 +198,10 @@ class LebedevGrid : public OneDGrid {
           this->weights_ = new double[this->nPts_];        ///< Weights
         };
   // Class Functions
-    void genGrid(double sradius);                                      
+    void genGrid();                                      
+//    void popGrid(double sradius);                                      
     void transformPts();
+    void atomGrid(double sradius);
   }; // class GaussChebyshev1stGridInf
 
 }; // namespace ChronusQ

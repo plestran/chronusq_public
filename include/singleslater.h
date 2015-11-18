@@ -300,6 +300,8 @@ public:
   bool	screenVxc   ;///< Do the screening for Vxc?
   bool	frischW     ;///< Do the Frisch Weight?
   bool	beckeW      ;///< Do the Becke  Weight?
+  bool	gc1kGrid    ;///< Use Gauss-Chebyshev 1kind grid (radial)?
+  bool	emlGrid     ;///< Use Euler-MacLaurin grid (radial) ?
   bool  havePT;      ///< Computed Perturbation Tensor?
   bool  isClosedShell;
   bool  isConverged;

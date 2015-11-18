@@ -39,11 +39,12 @@ namespace ChronusQ{
 //         return (std::pow(rad,2.0))*(std::exp(-((std::pow(rad,2.0)))));
 //         return std::exp(-(std::pow(rad,2.0)));
 */
-   double a0=0.9996651;
-   double val;
+////   double a0=0.9996651;
+////   double val;
 // 1s H
-   val = rad*(std::exp(-rad/a0))/ ((std::pow(a0,1.5))*(std::sqrt(math.pi)));
-   return val*val;
+////   val = rad*(std::exp(-rad/a0))/ ((std::pow(a0,1.5))*(std::sqrt(math.pi)));
+////   return val*val;
+         return std::exp(-(std::pow(rad,2.0)));
          } 
 
   double OneDGrid::f2_val(double elevation,double azimut){
@@ -83,6 +84,8 @@ void OneDGrid::printGrid(){
       }    
     }
  }
+
+
 
 ///  TWO GRID GENERAL ///
 
@@ -124,6 +127,7 @@ double TwoDGrid::frischpol( double mu, double alpha){
        if (mu <= -alpha) { 
           p = -1.0;
        }else if (mu >= alpha){
+          p = 1.0;
        }else {
           p  = 35.0*(mua) ;
           p += -35.0*(std::pow(mua,3.0));
@@ -181,6 +185,11 @@ void TwoDGrid::centerGrid(double cx, double cy, double cz){
 
 void TwoDGrid::printGrid(){
 //  Call to print Grid point to be poletted (Mathematica Format)
+    int    npts  = Gr_->npts()*Gs_->npts();
+    cout << std::fixed;
+    for(int i = 0; i < npts; i++){
+    cout << "{ "<<this->GridCarX_[i] << ", " <<this->GridCarY_[i] << ", "<<this->GridCarZ_[i] <<"}, "<< endl;
+    }
 }; // End
 
 // Specific Grid Functions Declaration //
@@ -211,6 +220,10 @@ void GaussChebyshev1stGrid::transformPts(){
     } 
   
 
+void GaussChebyshev1stGrid::atomGrid(double srad){
+    } 
+  
+
 // Function Gauss-Chebyshev 1st kind (From 0 to Inf)
 void GaussChebyshev1stGridInf::genGrid(){
      // Gauss-Chebyshev 1st kind grid
@@ -224,7 +237,7 @@ void GaussChebyshev1stGridInf::genGrid(){
 //  this->transformPts(); 
  }
 
-void GaussChebyshev1stGridInf::scalePts(double sradius) {
+void GaussChebyshev1stGridInf::atomGrid(double sradius) {
 //   Given the Slater Radius of the given atom, all the radial point and weight are scaled
 //   according to Becke Fuzzi Cell Prescription 
      sradius = 0.5*sradius;
@@ -1207,19 +1220,32 @@ void LebedevGrid::gen48_Dn(int num, double u, double r, double v){
 
 }
 
+void LebedevGrid::atomGrid(double sradius){
+}
+
 // Euler Maclaurin one dimensional grid functions
-void EulerMaclaurinGrid::genGrid(double sradius){
-     double rd2 = sradius*sradius;
-     double rd3 = sradius*sradius*sradius;
-     for(int i = 0; i < this->nPts_; i++) {
-     this->gridPts_[i]  = rd2;
-     this->gridPts_[i] /=std::pow((this->nPts_+1.0-i-1.0),2.0);
-//     this->weights_[i]  = 2.0*(this->nPts_+1.0+i+1.0)
-      } 
+void EulerMaclaurinGrid::genGrid(){
  }                                      
 
 void EulerMaclaurinGrid::transformPts(){
 
-     }                                      
+}                                      
+
+// Euler Maclaurin one dimensional grid functions
+void EulerMaclaurinGrid::atomGrid(double sradius){
+//   Eq. 24 and 25 from "Modern Density Functional Theroy: A tool
+//   for chemistry. Theor. Comp. Chem., Vol 2, 169-219 (1995)
+//   Note that i = i+1 (do 0 initialization of i)
+     double rd3 = sradius*sradius*sradius;
+     for(int i = 0; i < this->nPts_; i++) {
+     this->gridPts_[i]  = sradius*(i+1.0)*(i+1.0);
+     this->gridPts_[i] /= std::pow((this->nPts_+1.0-i-1.0),2.0);
+//     this->weights_[i]  = 2.0*(this->nPts_+1.0)*rd3*std::pow((i+1),5.0);
+//     this->weights_[i] /= std::pow((this->nPts_+1.0-i-1.0),7.0);
+     this->weights_[i]  = 2.0*(this->nPts_+1.0)*sradius*(i+1);
+     this->weights_[i] /= std::pow((this->nPts_+1.0-i-1.0),3.0);
+      } 
+ }                                      
+
 
 }; // namespace ChronusQ

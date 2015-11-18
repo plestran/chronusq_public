@@ -375,6 +375,7 @@ void SingleSlater<double>::evalVXC(cartGP gridPt, double weight, std::vector<boo
 ////T          
 //            auto start_7 = std::chrono::high_resolution_clock::now();
 ////T
+
 /*
             if (this->screenVxc){
               if(this->isClosedShell || this->Ref_ !=TCS){
@@ -500,6 +501,7 @@ void SingleSlater<double>::formVXC(){
     this->basisset_->duration_2 = std::chrono::seconds(0) ;
     this->basisset_->duration_3 = std::chrono::seconds(0) ;
     this->basisset_->duration_4 = std::chrono::seconds(0) ;
+    this->basisset_->duration_5 = std::chrono::seconds(0) ;
 //    this->duration_1 = std::chrono::seconds(0) ;
 //    this->duration_2 = std::chrono::seconds(0) ;
 //    this->duration_3 = std::chrono::seconds(0) ;
@@ -532,19 +534,29 @@ void SingleSlater<double>::formVXC(){
     this->screenVxc = false;
     this->frischW   = false;
     this->beckeW    = true;
+    this->gc1kGrid  = true;
+    this->emlGrid   = false;
     std::vector<bool> tmpnull(this->basisset_->nShell()+1);
+    OneDGrid * Rad ;
 /*  
  *  Generate grids 
  *
  *    Raw grid, it has to be centered and integrated over each center and 
  *    centered over each atom
  */
+
+//  Evaluate average cutoff radia for shells given epsScreen - if screenVxc ON
     if (this->screenVxc ) {
       this->basisset_->radcut(this->epsScreen, this->maxiter, this->epsConv);
     } else {
       std::fill(tmpnull.begin(),tmpnull.end(),true);
     }
-    GaussChebyshev1stGridInf Rad(nRad,0.0,1.0);   // Radial Grid
+//  Select Radial Grid
+    if (gc1kGrid)  {
+      Rad = new GaussChebyshev1stGridInf(nRad,0.0,1.0);   // Radial Grid
+    } else if (emlGrid) {
+      Rad = new  EulerMaclaurinGrid(nRad,0.0,1.0);   // Radial Grid
+    }
     LebedevGrid GridLeb(nAng);                    // Angular Grid
     GridLeb.genGrid();                            // Generate Angular Grid
     this->vXA()->setZero();   // Set to zero every occurence of the SCF
@@ -552,23 +564,17 @@ void SingleSlater<double>::formVXC(){
     if(!this->isClosedShell && this->Ref_ != TCS) this->vXB()->setZero();
     if(!this->isClosedShell && this->Ref_ != TCS) this->vCorB()->setZero();
     // Loop over atomic centers
-     
     for(int iAtm = 0; iAtm < nAtom; iAtm++){
-
+      if (gc1kGrid)  Rad->genGrid(); 
       // The Radial grid is generated and scaled for each atom
-      Rad.genGrid();
-      // Scale the grid according the Atomic Bragg-Slater Radius 
-      Rad.scalePts((elements[this->molecule_->index(iAtm)].sradius)) ;  
-      // Final Raw (not centered) 3D grid (Radial times Angular grid)
-      TwoDGrid Raw3Dg(this->ngpts,&Rad,&GridLeb);                              
-
+      Rad->atomGrid((elements[this->molecule_->index(iAtm)].sradius)) ;  
+      TwoDGrid Raw3Dg(this->ngpts,Rad,&GridLeb);             
       //Center the Grid at iAtom
       Raw3Dg.centerGrid(
         (*this->molecule_->cart())(0,iAtm),
         (*this->molecule_->cart())(1,iAtm),
         (*this->molecule_->cart())(2,iAtm)
       );
-       double rad;
       // Loop over grid points
       for(int ipts = 0; ipts < this->ngpts; ipts++){
 ////T   
@@ -633,6 +639,7 @@ void SingleSlater<double>::formVXC(){
 //    this->fileio_->out << "Overlap BuildDend        Total Time " << this->duration_8.count() <<endl;
     this->fileio_->out << "Overlap Creation Part1(a)   Total Time " << this->basisset_->duration_1.count()<<endl;
     this->fileio_->out << "Overlap Creation Part1(b)   Total Time " << this->basisset_->duration_4.count()<<endl;
+    this->fileio_->out << "Overlap Creation Part1(c)   Total Time " << this->basisset_->duration_5.count()<<endl;
     this->fileio_->out << "Overlap Creation Part2   Total Time " << this->basisset_->duration_2.count() <<endl;
     this->fileio_->out << "Overlap Creation Part3   Total Time " << this->basisset_->duration_3.count() <<endl;
 //    this->fileio_->out << "Overlap Creation         Total Time " << this->duration_4.count() <<endl;
@@ -640,6 +647,9 @@ void SingleSlater<double>::formVXC(){
 //    this->fileio_->out << "Form (Vx + Vc)           Total Time " << this->duration_1.count() <<endl;
 //    this->fileio_->out << "Vxc Digestion            Total Time " << this->duration_6.count() <<endl;
 //  CErr("DIE DIE DIE");
+
+//  Cleaning
+    delete Rad;
 }; //End
 
 

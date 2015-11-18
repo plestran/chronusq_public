@@ -110,6 +110,7 @@ class BasisSet{
   int  maxL_        ; ///< Maximum angular momentum for a single basis function
   bool doSph_       ; ///< Whether or not to make the cartesian -> spherical transformation
   double      * radCutSh_ ; ///< CutOff Radius for each Shell
+  double      * expPairSh_ ; ///< SS Exp for each Shel Pair
 
   std::vector<int>               nLShell_  ; ///< Maps L value to # of shells of that L
   std::vector<int>               mapSh2Bf_ ; ///< Maps shell number to first basis funtion
@@ -147,6 +148,7 @@ public:
   std::chrono::duration<double> duration_2;
   std::chrono::duration<double> duration_3;
   std::chrono::duration<double> duration_4;
+  std::chrono::duration<double> duration_5;
 //TIMING
   /**
    *  Default Constructor
@@ -164,6 +166,7 @@ public:
     this->basisFile_       = nullptr;
     this->fileio_          = NULL   ;
     this->radCutSh_        = NULL   ; 
+    this->expPairSh_        = NULL   ; 
     this->printLevel_      = 1      ;
   };
 
@@ -187,6 +190,7 @@ public:
     delete[] sortedShells;
 */
     delete[] this->radCutSh_;
+    delete[] this->expPairSh_;
   };
 
   inline void communicate(FileIO &fileio){ this->fileio_ = &fileio;};
@@ -200,13 +204,16 @@ public:
   inline int    maxPrim() {return this->maxPrim_;      }; ///< Return max # primitive GTOs
   inline int printLevel() {return this->printLevel_;   }; ///< Return printLevel
   inline double * radCutSh() {return this->radCutSh_;  }; ///< Return radCutSh
+  inline double * expPairSh() {return this->expPairSh_;  }; ///< Return expPairSh
   inline  double getradCutSh(int iShell) {return this->radCutSh_[iShell];   }; ///< Return radCutSh
   
   template <typename T> double * basisEval(int,std::array<double,3>,T*);
   template <typename T> double * basisEval(libint2::Shell&,T*);
   template <typename T> double * basisProdEval(libint2::Shell,libint2::Shell,T*);
+  double * basisonFlyProdEval(libint2::Shell s1, int s1size, libint2::Shell s2, int s2size,double rx, double ry, double rz);
   std::vector<bool> MapGridBasis(cartGP pt);  ///< Create a Mapping of basis over grid points
-  void     radcut(double thr, int maxiter, double epsConv);   //return all shell cut off radius
+  void     radcut(double thr, int maxiter, double epsConv);   //Populate all shell cut off radius
+  void     popExpPairSh();   // Populate expPairSh
   double   fSpAv (int iop,int l, double alpha, double r);   //Evaluate Spheric Average of a Shell
   double   fRmax (int l, double alpha, double thr, double epsConv, int maxiter);   //Evaluate Spheric Average of a Shell
   inline libint2::Shell      shells(int i) {return this->shells_[i];    };

@@ -265,10 +265,12 @@ double * BasisSet::basisEval(libint2::Shell &liShell, cartGP *pt){
   std::chrono::high_resolution_clock::time_point start_2;
   std::chrono::high_resolution_clock::time_point start_3;
   std::chrono::high_resolution_clock::time_point start_4;
+  std::chrono::high_resolution_clock::time_point start_5;
   std::chrono::high_resolution_clock::time_point finish_1;
   std::chrono::high_resolution_clock::time_point finish_2;
   std::chrono::high_resolution_clock::time_point finish_3;
   std::chrono::high_resolution_clock::time_point finish_4;
+  std::chrono::high_resolution_clock::time_point finish_5;
 //T
   if (time) {
      start_1 = std::chrono::high_resolution_clock::now();
@@ -303,11 +305,16 @@ double * BasisSet::basisEval(libint2::Shell &liShell, cartGP *pt){
   } else CErr("L > 2 NYI");
 */
 
+  if (time) {
+  finish_4 = std::chrono::high_resolution_clock::now();  
+  this->duration_4 += finish_4 - start_4;
+  start_5 = std::chrono::high_resolution_clock::now();
+  }
   std::memset(fEVal,0,shSize*sizeof(double));
 //T
   if (time) {
-    finish_4 = std::chrono::high_resolution_clock::now();  
-    this->duration_4 += finish_4 - start_4;
+    finish_5 = std::chrono::high_resolution_clock::now();  
+    this->duration_5 += finish_5 - start_5;
     start_2 = std::chrono::high_resolution_clock::now();
     }
 //T
@@ -559,6 +566,84 @@ double BasisSet::fSpAv (int iop, int l, double alpha, double r){
 //       cout << "l "<< l << " alpha " << alpha << " fAv " << fAv <<endl;
        return fAv;
      }
+
+double * BasisSet::basisonFlyProdEval(libint2::Shell s1, int s1size, libint2::Shell s2, int s2size, double rx, double ry, double rz){
+          
+  double *fEVal = new double[s1size*s2size];
+
+// Evaluate shell pair new center and i think the distance of r from the new center
+// Evaluate the shell pair exponential factor (is going to be the same no matter the angular momentum)
+// build the angular momentum part and ad in f[ij]
+
+/*  
+  auto contDepth1 = s1.alpha.size(); 
+  auto center1 = s1.O;
+  auto contDepth2 = s2.alpha.size(); 
+  auto center2 = s2.O;
+  double x1 = rx - center1[0];
+  double y1 = ry - center1[1];
+  double z1 = rz - center1[2];
+  double rSq1 = x1*x1 + y1*y1 + z1*z1;
+  double x2 = rx - center2[0];
+  double y2 = ry - center2[1];
+  double z2 = rz - center2[2];
+  double rSq2 = x2*x2 + y2*y2 + z2*z2;
+
+  double expFactor1 = 0.0;
+  double expFactor2 = 0.0;
+  for(auto k1 = 0; k1 < contDepth1; k1++){
+    expFactor1 += 
+      s1.contr[0].coeff[k1] *
+      std::exp(-s1.alpha[k1]*rSq1);
+  }
+
+  for(auto k2 = 0; k2 < contDepth2; k2++){
+    expFactor2 += 
+      s2.contr[0].coeff[k2] *
+      std::exp(-s2.alpha[k2]*rSq2);
+  }
+*/
+/*
+  double *s1Eval = basisEval(s1,pt);
+  double *s2Eval = basisEval(s2,pt);
+
+  double   temp;
+  double   temp2;
+  double   zero = 0.0;
+  for(auto i = 0, ij = 0; i < s1.size(); i++)
+  for(auto j = 0; j < s2.size(); j++, ij++){
+    fEVal[ij] = s1Eval[i]*s2Eval[j];
+  }
+  delete [] s1Eval;
+  delete [] s2Eval;
+*/  
+  return fEVal;
+  
+}
+
+
+void BasisSet::popExpPairSh(){
+  this->expPairSh_ = new double[(this->nShell()*(this->nShell()+1))/2];
+     for(auto s1 = 0, ij = 0; s1 < this->nShell(); s1++){
+        auto contDepth1 = this->shells(s1).alpha.size(); 
+        auto center1 = this->shells(s1).O;
+        for(auto s2 = s1; s2 < this->nShell(); s2++, ij++){
+          auto contDepth2 = this->shells(s2).alpha.size(); 
+          auto center2 = this->shells(s2).O;
+          double rpx = center1[0] - center2[0];
+          double rpy = center1[1] - center2[1];
+          double rpz = center1[2] - center2[2];
+          double rpsq = rpx*rpx + rpy*rpy + rpz*rpz;
+                 for(auto k1 = 0; k1 < contDepth1; k1++){
+                    for(auto k2 = 0; k2 < contDepth2; k1++){
+                      this->expPairSh_[ij] = this->shells(s1).contr[0].coeff[k1]*this->shells(s2).contr[0].coeff[k2];
+                      this->expPairSh_[ij] *= std::exp(-this->shells(s1).alpha[k1]-this->shells(s2).alpha[k2]*rpsq);
+                 }
+               }
+             }
+           }
+  return ;
+}
 
 } // namespace ChronusQ
 
