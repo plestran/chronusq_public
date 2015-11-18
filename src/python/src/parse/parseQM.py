@@ -35,6 +35,8 @@ from meta.enumMaps import guessMap
 from meta.enumMaps import exchMap 
 from meta.enumMaps import corrMap 
 from meta.enumMaps import kernelMap 
+from meta.enumMaps import gridMap 
+from meta.enumMaps import dftWeightScheme 
 from meta.enumMaps import envMap
 
 #
@@ -230,6 +232,28 @@ def handleReference(workers,settings):
       msg = "Must specify both Correlation and Exchange Kernel\n"
       msg = msg + " for user defined QM.KS reference"
       CErrMsg(workers['CQFileIO'],str(msg))
+
+    if 'DFT_GRID' in settings:
+      workers["CQSingleSlater"].setDFTGrid(gridMap[settings['DFT_GRID']])
+    if 'DFT_WEIGHTS' in settings:
+      workers["CQSingleSlater"].setDFTWeightScheme(
+        dftWeightScheme[settings['DFT_WEIGHTS']])
+
+    if 'DFT_SCREEN' in settings:
+      if settings['DFT_SCREEN']:
+        pass
+      else:
+        workers["CQSingleSlater"].turnOffDFTScreening()
+
+    if 'DFT_SCRTOL' in settings:
+      workers["CQSingleSlater"].setDFTScreenTol(settings['DFT_SCRTOL'])
+
+    if 'DFT_NRAD' in settings:
+      workers["CQSingleSlater"].setDFTNRad(settings['DFT_NRAD'])
+
+    if 'DFT_NANG' in settings:
+      workers["CQSingleSlater"].setDFTNAng(settings['DFT_NANG'])
+
 
     try:
       workers["CQSingleSlater"].setCorrKernel(corrMap[corrKernel])

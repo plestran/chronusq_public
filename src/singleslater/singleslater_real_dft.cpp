@@ -51,10 +51,17 @@ double SingleSlater<double>::formBeckeW(cartGP gridPt, int iAtm){
            rj.set<1>((*this->molecule_->cart())(1,jAtm));
            rj.set<2>((*this->molecule_->cart())(2,jAtm));
 //       Coordinate of the Grid point in elleptical (Eq. 11) 
-           muij = (boost::geometry::distance(gridPt,ri) - boost::geometry::distance(gridPt,rj))/(*this->molecule_->rIJ())(iAtm,jAtm) ;
+           muij = (boost::geometry::distance(gridPt,ri) - 
+                   boost::geometry::distance(gridPt,rj))/
+                   (*this->molecule_->rIJ())(iAtm,jAtm) ;
 //       Do the product over all atoms i .ne. j (Eq. 13 using definition Eq. 21 with k=3)
-           if (this->frischW) WW *= 0.5*(1.0-this->twodgrid_->frischpol(muij,0.64));
-           if (this->beckeW)  WW *= 0.5*(1.0-this->twodgrid_->voronoii(this->twodgrid_->voronoii(this->twodgrid_->voronoii(muij))));
+           if (this->weightScheme_ == FRISCH) 
+             WW *= 0.5*(1.0-this->twodgrid_->frischpol(muij,0.64));
+           else if (this->weightScheme_ == BECKE)  
+             WW *= 0.5 * 
+                   (1.0-this->twodgrid_->voronoii(
+                          this->twodgrid_->voronoii(
+                            this->twodgrid_->voronoii(muij))));
            }
          }
        return WW;
@@ -514,10 +521,7 @@ void SingleSlater<double>::formVXC(){
 
 
     int nAtom    = this->molecule_->nAtoms(); // Number of Atoms
-    int nRad     = 100;       // Number of Radial grid points for each center
-    int nAng     = 302;       // Number of Angular grid points for each center 
-                              //  (only certain values are allowed - see grid.h)
-    this->ngpts     = nRad*nAng; // Total Number of grid point for each center
+    this->ngpts     = this->nRadDFTGridPts_*this->nAngDFTGridPts_; // Total Number of grid point for each center
 
     double weight  = 0.0;                            
     double bweight = 0.0;
@@ -528,14 +532,6 @@ void SingleSlater<double>::formVXC(){
     this->totalEx = 0.0;                                  // Total Exchange Energy
     this->totalEcorr = 0.0;                               // Total Correlation Energy
     bool nodens;
-    this->epsScreen = 1.0e-10;
-    this->epsConv   = 1.0e-7;
-    this->maxiter   = 50;
-    this->screenVxc = false;
-    this->frischW   = false;
-    this->beckeW    = true;
-    this->gc1kGrid  = true;
-    this->emlGrid   = false;
     std::vector<bool> tmpnull(this->basisset_->nShell()+1);
     OneDGrid * Rad ;
 /*  
@@ -552,12 +548,12 @@ void SingleSlater<double>::formVXC(){
       std::fill(tmpnull.begin(),tmpnull.end(),true);
     }
 //  Select Radial Grid
-    if (gc1kGrid)  {
-      Rad = new GaussChebyshev1stGridInf(nRad,0.0,1.0);   // Radial Grid
-    } else if (emlGrid) {
-      Rad = new  EulerMaclaurinGrid(nRad,0.0,1.0);   // Radial Grid
+    if (this->dftGrid_ == GAUSSCHEB)  {
+      Rad = new GaussChebyshev1stGridInf(this->nRadDFTGridPts_,0.0,1.0);   // Radial Grid
+    } else if (this->dftGrid_ == EULERMACL) {
+      Rad = new  EulerMaclaurinGrid(this->nRadDFTGridPts_,0.0,1.0);   // Radial Grid
     }
-    LebedevGrid GridLeb(nAng);                    // Angular Grid
+    LebedevGrid GridLeb(this->nAngDFTGridPts_);                    // Angular Grid
     GridLeb.genGrid();                            // Generate Angular Grid
     this->vXA()->setZero();   // Set to zero every occurence of the SCF
     this->vCorA()->setZero(); // Set to zero every occurence of the SCF
@@ -565,7 +561,7 @@ void SingleSlater<double>::formVXC(){
     if(!this->isClosedShell && this->Ref_ != TCS) this->vCorB()->setZero();
     // Loop over atomic centers
     for(int iAtm = 0; iAtm < nAtom; iAtm++){
-      if (gc1kGrid)  Rad->genGrid(); 
+      Rad->genGrid(); 
       // The Radial grid is generated and scaled for each atom
       Rad->atomGrid((elements[this->molecule_->index(iAtm)].sradius)) ;  
       TwoDGrid Raw3Dg(this->ngpts,Rad,&GridLeb);             
