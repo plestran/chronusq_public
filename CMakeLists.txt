@@ -70,6 +70,8 @@ endif()
 ExternalProject_Add(btas
   PREFIX ${PROJECT_BINARY_DIR}/deps/btas
   GIT_REPOSITORY https://github.com/BTAS/BTAS.git
+  UPDATE_COMMAND echo 'Skipping BTAS Update'
+  PATCH_COMMAND echo 'Skipping BTAS Patch'
   CONFIGURE_COMMAND echo 'Skipping BTAS Configure'
   BUILD_COMMAND echo 'Skipping BTAS Build'
   INSTALL_COMMAND ${RSYNC_EXECUTABLE} -r ${PROJECT_BINARY_DIR}/deps/btas/src/btas/btas ${PROJECT_BINARY_DIR}/deps/include
