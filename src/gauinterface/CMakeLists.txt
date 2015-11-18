@@ -1,1 +1,6 @@
 add_library(gauinterface SHARED gaumatel.cpp gaujob.cpp)
+if(USE_LIBINT)
+if(BUILD_LIBINT)
+ add_dependencies(gauinterface libint)
+endif()
+endif()

@@ -82,7 +82,7 @@
   \begin{titlepage}
     \vspace*{\fill}
     \begin{center}
-      \includegraphics[width=0.25\textwidth]{@LOGO@}~\\[1cm]
+      \includegraphics[width=0.25\textwidth]{chronus_quantum_logo.png}~\\[1cm]
       \textsc{\LARGE The Chronus Quantum (ChronusQ) \\ Software Package}~\\[0.5cm]
       \textsc{\Large User's guide}~\\[5cm]
       \large David Williams\\
@@ -222,37 +222,34 @@ I
       \subsubsection{\BTAS} \label{subsubsec:BTAS}
         ChronusQ currently utilizes \BTAS~(\textbf{B}asic \textbf{T}ensor
         \textbf{A}lgebra \textbf{S}ubroutines) \cite{btas} as a C++11 API for multi-linear 
-	algebra. \BTAS~is a header-only API (see \Eigen), so one only needs to place
-	the headers in a place that ChronusQ can find them. The \BTAS~source code
-	may be obtained from the \BTAS~GitHub via
-
-	\begin{lstlisting}
-> git clone https://github.com/BTAS/BTAS.git
-	\end{lstlisting}
-
-	\noindent Instructions regarding the \CMake~variables that need to be set 
-	for a non-root installation of \BTAS~may be found in Section 
-	\ref{subsec:ChronusQConfigCompile}.
+	algebra. \BTAS~is obtained by ChronusQ automatically
 
       \subsubsection{\Boost} \label{subsubsec:boost} 
+%        Various parts of the code depend on the C++ \Boost~libraries \cite{boost} to
+%        varying degrees (namely the \Python API from which ChronusQ can be 
+%	executed). Given that \Boost~is not already installed on your system,
+%	one may compile and place boost in the usual (root) place by obtaining
+%	the latest \Boost~source from \texttt{http://www.boost.org} and following
+%
+%        \begin{lstlisting}
+%> cd /path/to/boost/download
+%> tar xvf boost_<boost_version>.tar.gz
+%> cd boost_<boost_version>
+%> ./bootstrap
+%> ./b2 install --prefix=/usr/local
+%        \end{lstlisting}
+%
+%	\noindent If you already have \Boost~installed on your machine (in a 
+%	non-standard location) or are unable to perform the above procedure (i.e. 
+%	no root access), instructions regarding the \CMake~variables that must be 
+%	set are described in Section \ref{subsec:ChronusQConfigCompile}.
         Various parts of the code depend on the C++ \Boost~libraries \cite{boost} to
-        varying degrees (namely the \Python API from which ChronusQ can be 
-	executed). Given that \Boost~is not already installed on your system,
-	one may compile and place boost in the usual (root) place by obtaining
-	the latest \Boost~source from \texttt{http://www.boost.org} and following
-
-        \begin{lstlisting}
-> cd /path/to/boost/download
-> tar xvf boost_<boost_version>.tar.gz
-> cd boost_<boost_version>
-> ./bootstrap
-> ./b2 install --prefix=/usr/local
-        \end{lstlisting}
-
-	\noindent If you already have \Boost~installed on your machine (in a 
-	non-standard location) or are unable to perform the above procedure (i.e. 
-	no root access), instructions regarding the \CMake~variables that must be 
-	set are described in Section \ref{subsec:ChronusQConfigCompile}.
+	varying degrees (namely the \Python~API from which ChronusQ can be execuded).
+	Although the installation of \Boost~ is relatively easy, we've found that
+	the path of leasr resistance on the end user involves an automatic installation
+	of the needed modules of \Boost~via \CMake. The needed modules are compiled
+	and linked to by default and we do not currently support linking to a compiled
+	version on the user's development environment.
 
       \subsubsection{\Python} \label{subsubsec:Python} 
         ChronusQ utilizes \Python~as a high level API for input
@@ -378,40 +375,9 @@ I
 
 	  \hline
 
-	  \texttt{BOOST\_ROOT}                                   &
-	  \pbox{7cm}{The root directory of a boost installation} &
-	  /usr                                                   \\
-
-	  \hline
-
-	  \texttt{BOOST\_LIBRARYDIR}              &
-	  \pbox{7cm}{Location of Boost libraries} &
-	  \$(BOOST\_ROOT)/lib                     \\
-
-	  \hline
-
-	  \texttt{BOOST\_INCLUDEDIR}            &
-	  \pbox{7cm}{Location of Boost headers} &
-	  \$(BOOST\_ROOT)/include               \\
-
-	  \hline
-
-	  \texttt{Boost\_NO\_SYSTEM\_PATHS} &
-	  \pbox{7cm}{Whether or not to use the system paths to find Boost 
-	    installation} &
-	  \texttt{OFF} \\
-
-	  \hline
-
 	  \texttt{EIGEN3\_ROOT} &
 	  \pbox{7cm}{Path that contains the \Eigen~directory} &
 	  /usr/include/eigen3 \\
-
-	  \hline
-
-	  \texttt{BTAS\_ROOT} &
-	  \pbox{7cm}{Path that contains the \texttt{btas}~directory} &
-	  /usr/include/btas \\
 
 	  \hline
 
@@ -445,15 +411,8 @@ cmake \
   -DCMAKE_C_COMPILER=$(HOME)/gcc/gcc-4.9.2/bin/gcc \
   -DCMAKE_Fortran_COMPILER=$(HOME)/gcc/gcc-4.9.2/bin/gfortran \
   -DCMAKE_CXX_FLAGS='-w -O2 -std=c++11'\
-  -DUSE_LIBINT=ON \
-  -DBOOST_ROOT=$(HOME)/boost/1.59.0 \
-  -DBOOST_LIBRARYDIR=$(HOME)/boost/1.59.0/stage-1_59_0/lib \
-  -DBOOST_INCLUDEDIR=$(HOME)/boost/1.59.0/include \
-  -DBoost_NO_SYSTEM_PATHS=ON  \
   -DEIGEN3_ROOT=$(HOME)/eigen/eigen-eigen-c58038c56923 \
-  -DBTAS_ROOT=$(HOME)/github/BTAS \
   -DBUILD_LA=ON \
-  -DBUILD_LIBINT=ON \
   ..
     \end{lstlisting}
 
@@ -463,7 +422,7 @@ cmake \
     From the build directory, simply type
 
     \begin{lstlisting}
-> make
+> make -j <NCORES>
     \end{lstlisting}
 
     \noindent and compilation will begin. ChronusQ does not currently have a 
@@ -471,29 +430,12 @@ cmake \
     not suggested that the user performs a \texttt{make install} command, as we are 
     not sure if this will work on all machines. Note that this is being looked into 
     and will be handled before the first non-Beta release.
-
     ~\\
     ~\\
-    \noindent \textbf{Note on parallel builds}: If you wish to compile ChronusQ in 
-    parallel, i.e.
 
-    \begin{lstlisting}
-> make -j <NCORES>
-    \end{lstlisting}
-
-    \noindent you will likely experience very many errors as the 
-    \CMake~configuration has not been set up to smartly do things in the correct 
-    order. It will try to build \Libint~and ChronusQ at the same time, and because 
-    \Libint~is a dependency of ChronusQ, the build won't be able to find the 
-    correct headers, and error messages will ensue. \textbf{TO FIX THIS} one can 
-    build things in two (or three if building \LAPACK~and \BLAS)
-    
-    \begin{lstlisting}
-> cmake <PARAMETERS> ..
-> make libint
-> make lapack # if building LAPACK and BLAS
-> make -j <NCORES>
-    \end{lstlisting}
+    \noindent \textbf{Note on Boost Build}: The compilation of \Boost~via ChronusQ will
+    throw many warnings. These are not to be of concern.\\
+    \\
     
     \noindent Once ChronusQ has been successfully compiled, you should find a file
     named ``chronusq.py" in the main build directory. This is the ChronusQ python
@@ -521,48 +463,94 @@ cmake \
 
     \subsection{Testing Installation} \label{subsec:ChronusQTest}
 
-    After you've compiled ChronusQ, it is recommended that users test that
-    everything is functioning correctly. We've added a set of unit tests that are 
-    available in the \texttt{Test/UNIT} folder. Inside that directory you will find:
+    After compiling ChronusQ, it is recommended that users test that
+    the code is functioning correctly. We've added a set of unit tests that are 
+    available in the \texttt{tests} folder in the source directory. Inside that 
+    directory you will find:
     
     \begin{lstlisting}
 buglist.txt
-chronusq.py
+chronusq.py -> <build directory>/chronusq.py
+chronus-ref.val
 refval.py
 rununit.py
-testXXXX*.inp
+testXXXX*.inp <many input files>
 test.index
     \end{lstlisting}
 
-		\noindent You'll need to add a symbolic link to the \texttt{chronusq.py} utility in 
-    \texttt{Test/UNIT}
+    \noindent The \texttt{rununit.py} utility will run all the tests specified in \texttt{text.index} 
+    and compare against reference values that are stored in \texttt{chronus-ref.val}. Upon 
+    completion, the results of each test will be printed in \texttt{summary.txt}. 
+    
+    For typical users, we recommend that you simply run the unit tests with no options, so that the 
+    full program can be tested. If you are a developer, there are some options that will give you the 
+    flexibility to test only the area of the code that you are currently working on. 
+        
+    You can learn about the options for this utility by viewing it's help page. 
     \begin{lstlisting}
-ln -s ../../build_gcc_libint_openmp/chronusq.py .
-    \end{lstlisting}
-    
-    \noindent The \texttt{rununit.py} utility will run the unit tests and compare against reference 
-    values that are stored in \texttt{chronus-ref.val}. Upon completion, the results of each
-    test will be printed out in \texttt{summary.txt}. This file will show the differences between
-    the test and reference values and will say if that test passed or not.   
-    
-    You can change which tests are run by editing the \texttt{text.index} file. Simple comment
-    out the tests that you don't want to run and they will be ignored. There are tests using a single 
-    core (serial) and multiple cores (SMP) as well as tests contracting the two-electron integrals 
-    in core and calculating and contracting them directly. We are aware of some bugs in several 
-    of the tests, so we have left them commented out for now and added details about them in \texttt{buglist.txt}. 
-    Many of these are not really bugs and simply require more robust optimization schemes, but they
-    are left as things that need to be addressed in the future. 
-    
-    One can run the unit tests by simply running
-    
-    \begin{lstlisting}
-> python rununit.py
-    \end{lstlisting}
-    
-    \noindent and checking the generated \texttt{summary.txt}. If you identify a bug or error that is not 
-    addressed in \texttt{buglist.txt}, please contact \DBWYContact.
+> python rununit.py -h
 
-\newpage
+  python runtests.py [-o --option=]
+
+  Options:
+    -h, --help        Print usage instructions
+    -s, --silent      Disable Print
+    -k, --kill        Stop testing if a job fails
+    --type=           Determines types of tests to run. Multiple options
+                      can be specified by separating with a comma.
+                      3 classes of tests  = [SCF,RESP,RT]
+                      Specify References  = [RHF,UHF,CUHF,GHF]
+                                             [RKS,UKS,SLATER,LSDA,SVWN5]
+                      Reference and Type  = [(R|U|CU)HF-SCF,HF-CIS,HF-RPA]
+                                             [(R|U)KS-SCF,SCF-LSDA]
+                      Dipole Field         = [DField]
+    --integrals=      Integral evaluation = [incore] or [direct]
+    --parallel=       Whether to run parallel jobs = [on] or [off]
+    --size=           Size of jobs to run = [small] or [large] or [both]
+                      [small] is the default
+    --complex=        Complex Jobs = [yes] or [no] or [both]
+                      [both] is the default
+    --basis=          Only run tests for this basis set
+                      [STO-3G,6-31G,cc-pVDZ,def2-SVPD]
+    \end{lstlisting}
+   
+   The \texttt{--type} options says to only run jobs that contain the specified string in their 
+   designation in \texttt{text.index}. For example, if you specify 
+  \begin{lstlisting}
+> python rununit.py --type=SCF
+   \end{lstlisting}
+    \noindent then you will run all SCF test jobs regardless of the reference, but none of the response (RESP)
+    or real-time electronic dynamics (RT) test jobs. The \texttt{--type} option is an inclusive option and will run
+    any job that contains one the strings that you specify. 
+    \begin{lstlisting}
+> python rununit.py --type=RESP,RT
+   \end{lstlisting}
+    \noindent will run all the response and RT test jobs and 
+   \begin{lstlisting}
+> python rununit.py --type=RHF-SCF,UKS-SCF
+   \end{lstlisting}
+    \noindent will run all real and complex SCF jobs with either a restricted Hartree-Fock or unrestricted Kohn-Sham
+    reference using all available density functionals. You can look through \texttt{test.index} to determine other possible options
+    that will run the test jobs you're interested in. 
+        
+    The other options are exclusive and allow the user to eliminate specific types of jobs from their test set. 
+    For example, this command will only run the test jobs with the STO-3G basis set where the wave function 
+    is constrained to be real and the integral contractions are done in core. 
+    \begin{lstlisting}
+> python rununit.py --integrals=incore --complex=no --basis=sto-3g
+   \end{lstlisting}
+    \noindent Note that the exclusive options do not take more than one argument. 
+    
+     You can also change which tests are run by commenting out tests in \texttt{test.index}. This is 
+    not recommended since you should be able to turn tests on and off simply by using the command line
+    options. However, there are currently a number of commented out tests in \texttt{test.index}. These are
+    tests with known issues that we are currently working to address. You can find details about known issues
+    in \texttt{buglist.txt}. Many of these are not true bugs and simply require more robust optimization schemes, 
+    but they are left as things that need to be addressed in the future. 
+    
+   If you identify an issue that is not mentioned in \texttt{buglist.txt}, please add this to the issues section
+   on the Chronus Quantum Issues page:  \newline \texttt{https://github.com/liresearchgroup/chronusq\_public/issues}. 
+
   \section{Input Files} \label{sec:InputFiles}
   To use ChronusQ, it is necessary to specify the molecule and job type within an input file. The easiest way to understand the input for ChronusQ is to take a look at an example. Here is a sample input file for water, \texttt{h2o.inp}. As written, it performs an HF/STO-3G calculation on neutral, singlet water with a single processor.
 \begin{lstlisting}
@@ -603,7 +591,7 @@ ChronusQ input files are divided into sections that specify the molecular geomet
     \item[\texttt{geom}] \hfill \\
     Specifies the geometry of the molecule. The input is always Cartesian, and the default units are in Angstroms. Each line corresponds to one atom. Each line here follows the following format
           \begin{lstlisting}
-          <sp> <atomic symbol> <x-coordinate> <y-coordinate> <z-coordinate>
+<sp> <atomic symbol> <x-coordinate> <y-coordinate> <z-coordinate>
           \end{lstlisting} 
     \end{description}
     Please note that the $<sp>$ is a required space at the begining of the line. This is an artifact of the input file parser, and must be included. That's all there is to the \texttt{[Molecule]} specification!
@@ -745,7 +733,7 @@ ChronusQ input files are divided into sections that specify the molecular geomet
 
 	%bibliography    
     \bibliographystyle{unsrt}
-    \bibliography{@CHRONUSQ_BIB@}
+    \bibliography{ChronusQ.bib}
     
 \end{document}
 

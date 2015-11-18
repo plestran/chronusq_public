@@ -80,4 +80,36 @@ void BasisSet::makeMapCen2Bf(int nTCS, Molecule *mol){
   this->haveMapCen2Bf = true;
 } // BasisSet::makeMapCen2Bf
 
+void BasisSet::makeBasisMap(){
+  this->basisMap[PopleSTO3G]    = std::string(BASIS_PATH) + "/sto3g.gbs";
+  this->basisMap[PopleSTO6G]    = std::string(BASIS_PATH) + "/sto6g.gbs";
+  this->basisMap[Pople321G]     = std::string(BASIS_PATH) + "/3-21g.gbs";
+  this->basisMap[Pople431G]     = std::string(BASIS_PATH) + "/4-31g.gbs";
+  this->basisMap[Pople631G]     = std::string(BASIS_PATH) + "/6-31g.gbs";
+  this->basisMap[Pople631ppGs]  = std::string(BASIS_PATH) + "/6-31++g*.gbs";
+  this->basisMap[Pople6311pGs]  = std::string(BASIS_PATH) + "/6-311+g*.gbs";
+  this->basisMap[Pople6311pGss] = std::string(BASIS_PATH) + "/6-311+g**.gbs";
+  this->basisMap[Pople6311pG2dp]= std::string(BASIS_PATH) + "/6-311+g_2d_p.gbs";
+  this->basisMap[ccpVDZ]        = std::string(BASIS_PATH) + "/cc-pvdz.gbs";
+  this->basisMap[ccpVTZ]        = std::string(BASIS_PATH) + "/cc-pvtz.gbs";
+  this->basisMap[def2SVP]       = std::string(BASIS_PATH) + "/def2-svp.gbs";
+  this->basisMap[def2SVPD]      = std::string(BASIS_PATH) + "/def2-svpd.gbs";
+  this->basisMap[def2TZVP]      = std::string(BASIS_PATH) + "/def2-tzvp.gbs";
+
+  this->basisKey["STO3G"]         = PopleSTO3G;
+  this->basisKey["STO6G"]         = PopleSTO6G;
+  this->basisKey["3-21G"]         = Pople321G;
+  this->basisKey["4-31G"]         = Pople431G;
+  this->basisKey["6-31G"]         = Pople631G;
+  this->basisKey["6-31++G*"]      = Pople631ppGs;
+  this->basisKey["6-311+G*"]      = Pople6311pGs;
+  this->basisKey["6-311+G**"]     = Pople6311pGss;
+  this->basisKey["6-311+G(2D,P)"] = Pople6311pG2dp;
+  this->basisKey["CC-PVDZ"]       = ccpVDZ;
+  this->basisKey["CC-PVTZ"]       = ccpVTZ;
+  this->basisKey["DEF2-SVP"]      = def2SVP;
+  this->basisKey["DEF2-SVPD"]     = def2SVPD;
+  this->basisKey["DEF2-TZVP"]     = def2TZVP;
+}; // BasisSet::makeBasisMap
+
 }; // namespace ChronusQ

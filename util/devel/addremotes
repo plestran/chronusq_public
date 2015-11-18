@@ -1,4 +1,4 @@
-#!/bin/csh
+#!/bin/sh
 
 git remote add dbwy https://github.com/wavefunction91/chronusq.git
 git remote add ligroup https://github.com/liresearchgroup/chronusq.git
@@ -8,10 +8,3 @@ git remote add hbliu https://github.com/uwhbliu/chronusq.git
 git remote add jjgoings https://github.com/jjgoings/chronusq.git
 git remote add plestran https://github.com/plestran/chronusq.git
 
-git fetch dbwy
-git fetch ligroup
-git fetch apetrone
-#git fetch ssilwal
-git fetch hbliu
-git fetch jjgoings
-git fetch plestran

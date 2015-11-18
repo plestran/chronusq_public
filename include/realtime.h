@@ -208,7 +208,12 @@ public:
     this->Ez_          = 0.0;
     this->tarCSVs      = true;
   };
-  ~RealTime() {;};
+  ~RealTime() {
+    for(auto i = 0; i < this->csvs.size(); i++){
+      this->csvs[i]->close();
+      delete this->csvs[i];
+    }
+  };
 
   enum ORTHO {
     Lowdin,

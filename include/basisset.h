@@ -135,6 +135,27 @@ public:
   int         *sortedShells;
 
 
+  enum BASISSETS {
+    PopleSTO3G,
+    PopleSTO6G,
+    Pople321G,
+    Pople431G,
+    Pople631G,
+    Pople631ppGs,
+    Pople6311pGs,
+    Pople6311pGss,
+    Pople6311pG2dp,
+    ccpVDZ,
+    ccpVTZ,
+    def2SVP,
+    def2SVPD,
+    def2TZVP
+  };
+
+  std::map<BASISSETS,std::string> basisMap;
+  std::map<std::string,BASISSETS> basisKey;
+
+
 
   bool haveMapSh2Bf  ; ///< (?) The map from shells to basis functions has been made
   bool haveMapSh2Cen ; ///< (?) The map from shells to atomic centers has been made
@@ -168,6 +189,7 @@ public:
     this->radCutSh_        = NULL   ; 
     this->expPairSh_        = NULL   ; 
     this->printLevel_      = 1      ;
+    this->makeBasisMap();
   };
 
   /**
@@ -244,6 +266,7 @@ public:
   void makeMapSh2Bf(int);                  ///< generate mapSh2Bf
   void makeMapSh2Cen(Molecule *);          ///< generate mapSh2Cen
   void makeMapCen2Bf(int,Molecule *);          ///< generate mapCen2Bf
+  void makeBasisMap();  ///< Generate map from basis enum to pasis path
   void renormShells();                     ///< Renormalize Libint2::Shell set
   std::vector<libint2::Shell> uncontractBasis(); ///< Unconctract the basis
   template<typename TMat> void computeShBlkNorm(bool,int,const TMat*, const TMat*);

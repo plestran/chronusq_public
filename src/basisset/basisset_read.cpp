@@ -53,8 +53,16 @@ void BasisSet::basisSetRead(FileIO * fileio, Molecule * mol, Controls *controls)
 void BasisSet::findBasisFile(std::string fName){
   std::string tmpStr;
 
-  tmpStr = "/" + fName;
-  tmpStr.insert(0,BASIS_PATH);
+  std::string fNameUpper = boost::to_upper_copy<std::string>(fName);
+  auto isGBS = fName.find(".gbs");
+  auto isKey = this->basisKey.find(fNameUpper);
+
+  if(isGBS != std::string::npos) {
+    tmpStr = "/" + fName;
+    tmpStr.insert(0,BASIS_PATH);
+  } else if(isKey != this->basisKey.end()){
+    tmpStr = this->basisMap[this->basisKey[fNameUpper]];
+  }
   this->setBasisPath(tmpStr);
 
   this->basisFile_ = std::unique_ptr<ifstream>(new ifstream(this->basisPath_));

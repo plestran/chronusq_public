@@ -10,9 +10,8 @@ realtime_api.cpp)
 
 target_link_libraries(pythonapi LINK_PUBLIC basisset classtools controls
 mointegrals molecule tools sdresponse realtime mollerplesset singleslater 
-aointegrals worker quasinewton grid fileio cerr gauinterface ${Boost_LIBRARIES} 
-${PYTHON_LIBRARIES} ${LA_LINK} ${LIBINT_LIB} m ${OpenMP_CXX_FLAGS}
-${HDF5_CXX_LIBRARIES})
+aointegrals worker quasinewton grid fileio cerr gauinterface 
+${EXTERNAL_CQ_DEPS})
 
 set(APIINST ${PROJECT_BINARY_DIR}/src/python)
 set(APIPY   ${APIINST}/chronusq.py)
@@ -28,6 +27,13 @@ add_custom_target(copyapi ALL
   COMMAND ${CMAKE_COMMAND} -E copy_directory ${JFOLDER} ${APIINST}/jobs
 )
 add_dependencies(copyapi pythonapi)
+if(APPLE)
+  add_custom_target(setupMacAPI ALL
+    ${CMAKE_COMMAND} -E create_symlink ${PROJECT_BINARY_DIR}/src/python/libpythonapi.dylib ${PROJECT_BINARY_DIR}/src/python/libpythonapi.so
+    COMMAND install_name_tool -change libboost_python.dylib ${PROJECT_BINARY_DIR}/deps/lib/libboost_python.dylib ${PROJECT_BINARY_DIR}/src/python/libpythonapi.dylib 
+  )
+  add_dependencies(setupMacAPI pythonapi)
+endif()
 #file(COPY "${PROJECT_BINARY_DIR}/src/python/chronusq.py"
 #  DESTINATION "${PROJECT_BINARY_DIR}"
 #  FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
@@ -40,3 +46,8 @@ add_dependencies(copyapi pythonapi)
 #  DESTINATION "${PROJECT_BINARY_DIR}/src/python"
 #  FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
 #)
+if(USE_LIBINT)
+if(BUILD_LIBINT)
+ add_dependencies(pythonapi libint)
+endif()
+endif()
