@@ -103,6 +103,12 @@ class SingleSlater {
   int      nTCS_; ///< Integer to scale the dimension of matricies for TCS's
   int      guess_;
 
+  // DFT Parameters
+  int weightScheme_;
+  int dftGrid_;
+  int nRadDFTGridPts_;
+  int nAngDFTGridPts_;
+
   // Internal Storage
   std::unique_ptr<TMatrix>  densityA_;   ///< Alpha or Full (TCS) Density Matrix
   std::unique_ptr<TMatrix>  densityB_;   ///< Beta Density Matrix
@@ -293,13 +299,21 @@ public:
     SLATER
   };
 
+  enum DFT_GRID {
+    EULERMACL,
+    GAUSSCHEB
+  };
+
+  enum DFT_WEIGHT_SCHEME{
+    BECKE,
+    FRISCH
+  };
+ 
   bool	haveMO;      ///< Have MO coefficients?
   bool	haveDensity; ///< Computed Density? (Not sure if this is used anymore)
   bool	haveCoulomb; ///< Computed Coulomb Matrix?
   bool	haveExchange;///< Computed Exchange Matrix?
   bool	screenVxc   ;///< Do the screening for Vxc?
-  bool	frischW     ;///< Do the Frisch Weight?
-  bool	beckeW      ;///< Do the Becke  Weight?
   bool  havePT;      ///< Computed Perturbation Tensor?
   bool  isClosedShell;
   bool  isConverged;
@@ -333,6 +347,8 @@ public:
 //  std::chrono::duration<double> duration_8;
   int      nSCFIter;
 
+
+
   // constructor & destructor
   SingleSlater(){
     // Zero out integers to be set
@@ -347,6 +363,7 @@ public:
     this->nVirB_   = 0;
     this->multip_  = 0;
     this->nSCFIter = 0;
+    this->ngpts    = 0;
 
     // Initialize Smart Pointers
     this->densityA_          = nullptr;   
@@ -408,6 +425,17 @@ public:
     this->isHF         = true;
     this->isDFT         = false;
     this->guess_       = SAD;
+
+    this->weightScheme_ = BECKE;
+    this->dftGrid_      = GAUSSCHEB;
+    this->screenVxc     = true;
+    this->epsScreen     = 1.0e-10;
+    this->nRadDFTGridPts_ = 100;
+    this->nAngDFTGridPts_ = 302;
+
+    // FIXME: maybe hardcode these?
+    this->epsConv       = 1.0e-7;
+    this->maxiter       = 50;
 
   };
   ~SingleSlater() {
@@ -472,6 +500,16 @@ public:
   inline void setCorrKernel(int i)                          { this->CorrKernel_ = i;     };
   inline void setExchKernel(int i)                          { this->ExchKernel_ = i;     };
   inline void setDFTKernel( int i)                          { this->DFTKernel_  = i;     };
+  inline void setDFTWeightScheme(int i)                     { this->weightScheme_ = i;   };
+  inline void setDFTGrid(int i)                             { this->dftGrid_ = i;        };
+  inline void setDFTNGridPts(int i, int j)                  { this->nRadDFTGridPts_ = i;
+                                                              this->nAngDFTGridPts_ = j; };
+  inline void setDFTNRad(int i)                             { this->nRadDFTGridPts_ = i;};
+  inline void setDFTNAng(int i)                             { this->nAngDFTGridPts_ = i; };
+  inline void setDFTScreenTol(double x)                     { this->epsScreen = x;       };
+  
+
+  inline void turnOffDFTScreening()                         { this->screenVxc = false;   }; 
 
   // access to private data
   inline int nBasis()                    { return this->nBasis_;                  };

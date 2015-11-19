@@ -301,6 +301,35 @@ void SingleSlater<T>::printSCFHeader(ostream &output){
     else if(this->CorrKernel_ == VWN5)
       output << "VWN5";
     output << endl;
+
+   
+    output << std::setw(38) << std::left << "    Radial Grid:";
+    if(this->dftGrid_ == EULERMACL)
+      output << "Euler-Maclaurin";
+    else if(this->dftGrid_ == GAUSSCHEB)
+      output << "Gauss-Chebyshev (1st Kind)";
+    output << "  (" << this->nRadDFTGridPts_ << ")";
+    output << endl;
+
+    output << std::setw(38) << std::left << "    Angular Grid:";
+    output << "Lebedev";
+    output << "  (" << this->nAngDFTGridPts_ << ")" << endl;
+
+   
+    output << std::setw(38) << std::left << "    Quadrature Weight Scheme:";
+    if(this->weightScheme_ == BECKE)
+      output << "Becke";
+    else if(this->weightScheme_ == FRISCH)
+      output << "Gaussian (as in the company...)";
+    output << endl;
+
+    if(this->screenVxc){
+       output << std::setw(38) << std::left 
+              << "    Quadrature Screen Tolerence:"
+              << std::scientific << std::setprecision(6) << this->epsScreen 
+              << endl;
+    }
+    
   }
 
   std::array<double,3> null = {{0,0,0}};

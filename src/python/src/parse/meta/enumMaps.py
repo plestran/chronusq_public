@@ -108,3 +108,13 @@ kernelMap = {
   "USERDEFINED":chronusQ.DFT.USERDEFINED,
   "LSDA"       :chronusQ.DFT.LSDA
 }
+
+gridMap = {
+  "EULERMACL" : chronusQ.DFT_GRID.EULERMACL,
+  "GAUSSCHEB" : chronusQ.DFT_GRID.GAUSSCHEB
+}
+
+dftWeightScheme = {
+ "BECKE"  : chronusQ.DFT_WEIGHT_SCHEME.BECKE,
+ "FRISCH" : chronusQ.DFT_WEIGHT_SCHEME.FRISCH
+}
