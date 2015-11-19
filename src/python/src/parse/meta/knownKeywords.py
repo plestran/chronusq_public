@@ -65,13 +65,19 @@ knownKeywords['MOLECULE'] = {
 
 # Dictionary for known keywords in the QM input section
 knownKeywords['QM'] = {
-  'REFERENCE':CQKeyword('REFERENCE','S',True ),
-  'BASIS'    :CQKeyword('BASIS'    ,'S',True ),
-  'JOB'      :CQKeyword('JOB'      ,'S',True ),
-  'INTS'     :CQKeyword('INTS'     ,'S',False),
-  'EXCHANGE' :CQKeyword('EXCHANGE' ,'S',False),
-  'CORR'     :CQKeyword('CORR'     ,'S',False),
-  'PRINT'    :CQKeyword('PRINT'    ,'I',False)
+  'REFERENCE'   :CQKeyword('REFERENCE'  ,'S',True ),
+  'BASIS'       :CQKeyword('BASIS'      ,'S',True ),
+  'JOB'         :CQKeyword('JOB'        ,'S',True ),
+  'INTS'        :CQKeyword('INTS'       ,'S',False),
+  'EXCHANGE'    :CQKeyword('EXCHANGE'   ,'S',False),
+  'CORR'        :CQKeyword('CORR'       ,'S',False),
+  'DFT_GRID'    :CQKeyword('DFT_GRID'   ,'S',False),
+  'DFT_WEIGHTS' :CQKeyword('DFT_WEIGHTS','S',False),
+  'DFT_NRAD'    :CQKeyword('DFT_NRAD'   ,'I',False),
+  'DFT_NANG'    :CQKeyword('DFT_NANG'   ,'I',False),
+  'DFT_SCREEN'  :CQKeyword('DFT_SCREEN' ,'B',False),
+  'DFT_SCRTOL'  :CQKeyword('DFT_SCRTOL' ,'D',False),
+  'PRINT'       :CQKeyword('PRINT'      ,'I',False)
 }
 
 # Dictionary for known keywords in the RT input section

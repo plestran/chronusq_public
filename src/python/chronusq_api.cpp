@@ -58,6 +58,14 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setCorrKernel"   , &SingleSlater<double>::setCorrKernel          )
     .def("setExchKernel"   , &SingleSlater<double>::setExchKernel          )
     .def("setDFTKernel"    , &SingleSlater<double>::setDFTKernel           )
+    .def("setDFTWeightScheme", &SingleSlater<double>::setDFTWeightScheme)
+    .def("setDFTGrid"      , &SingleSlater<double>::setDFTGrid             ) 
+    .def("setDFTNGridPts"  , &SingleSlater<double>::setDFTNGridPts         )
+    .def("setDFTNRad"  , &SingleSlater<double>::setDFTNRad         )
+    .def("setDFTNAng"  , &SingleSlater<double>::setDFTNAng         )
+    .def("setDFTScreenTol" , &SingleSlater<double>::setDFTScreenTol        )
+  
+    .def("turnOffDFTScreening", &SingleSlater<double>::turnOffDFTScreening ) 
 
     .def("dipole"          , &SingleSlater<double>::Wrapper_dipole         )
     .def("quadrupole"      , &SingleSlater<double>::Wrapper_quadrupole     )
@@ -104,6 +112,14 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setCorrKernel"   , &SingleSlater<dcomplex>::setCorrKernel          )
     .def("setExchKernel"   , &SingleSlater<dcomplex>::setExchKernel          )
     .def("setDFTKernel"    , &SingleSlater<dcomplex>::setDFTKernel           )
+    .def("setDFTWeightScheme", &SingleSlater<dcomplex>::setDFTWeightScheme)
+    .def("setDFTGrid"      , &SingleSlater<dcomplex>::setDFTGrid             ) 
+    .def("setDFTNGridPts"  , &SingleSlater<dcomplex>::setDFTNGridPts         )
+    .def("setDFTNRad"  , &SingleSlater<dcomplex>::setDFTNRad         )
+    .def("setDFTNAng"  , &SingleSlater<dcomplex>::setDFTNAng         )
+    .def("setDFTScreenTol" , &SingleSlater<dcomplex>::setDFTScreenTol        )
+  
+    .def("turnOffDFTScreening", &SingleSlater<dcomplex>::turnOffDFTScreening ) 
 
     .def("dipole"          , &SingleSlater<dcomplex>::Wrapper_dipole         )
     .def("quadrupole"      , &SingleSlater<dcomplex>::Wrapper_quadrupole     )
@@ -153,6 +169,18 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("USERDEFINED", SingleSlater<double>::USERDEFINED)
     .value("LSDA"       , SingleSlater<double>::LSDA       )
   ;
+
+  enum_<SingleSlater<double>::DFT_GRID>("DFT_GRID")
+    .value("EULERMACL", SingleSlater<double>::EULERMACL)
+    .value("GAUSSCHEB", SingleSlater<double>::GAUSSCHEB)
+  ;
+  enum_<SingleSlater<double>::DFT_WEIGHT_SCHEME>("DFT_WEIGHT_SCHEME")
+    .value("BECKE",  SingleSlater<double>::BECKE )
+    .value("FRISCH", SingleSlater<double>::FRISCH)
+  ;
+    
+
+
 
   class_<Molecule,boost::noncopyable>("Molecule",init<>())
     .def("printInfo",     &Molecule::Wrapper_printInfo)
