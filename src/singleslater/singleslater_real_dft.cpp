@@ -628,7 +628,6 @@ void SingleSlater<double>::formVXC(){
 
       this->fileio_->out << "Total LDA Ex ="    << this->totalEx 
                          << " Total VWN Corr= " << this->totalEcorr << endl;
-    }
 //    this->fileio_->out << "Weights Evaluation       Total Time " << this->duration_5.count() <<endl;
 //    this->fileio_->out << "Overlap Alloc + set Zero Total Time " << this->duration_2.count() <<endl;
 //    this->fileio_->out << "Overlap ProdEval         Total Time " << this->duration_7.count() <<endl;
@@ -643,6 +642,7 @@ void SingleSlater<double>::formVXC(){
 //    this->fileio_->out << "Form (Vx + Vc)           Total Time " << this->duration_1.count() <<endl;
 //    this->fileio_->out << "Vxc Digestion            Total Time " << this->duration_6.count() <<endl;
 //  CErr("DIE DIE DIE");
+    }
 
 //  Cleaning
     delete Rad;
