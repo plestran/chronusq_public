@@ -520,18 +520,21 @@ void SingleSlater<double>::formVXC(){
 ////T
 
 
-    int nAtom    = this->molecule_->nAtoms(); // Number of Atoms
-    this->ngpts     = this->nRadDFTGridPts_*this->nAngDFTGridPts_; // Total Number of grid point for each center
+    int nAtom   = this->molecule_->nAtoms(); // Number of Atoms
+    // Total Number of grid point for each center
+    this->ngpts = this->nRadDFTGridPts_*this->nAngDFTGridPts_; 
 
-    double weight  = 0.0;                            
-    double bweight = 0.0;
+    int nPtsPerThread = this->ngpts / omp_get_max_threads();
+
+    //double weight  = 0.0;                            
+    //double bweight = 0.0;
     //TF LDA Prefactor (for Vx)
     double CxVx = -(std::pow((3.0/math.pi),(1.0/3.0)));    
     double CxEn =  (3.0/4.0);      //TF LDA Prefactor to finish the X-Energy
     double val = 4.0*math.pi*CxVx;
-    this->totalEx = 0.0;                                  // Total Exchange Energy
-    this->totalEcorr = 0.0;                               // Total Correlation Energy
-    bool nodens;
+    this->totalEx = 0.0;    // Total Exchange Energy
+    this->totalEcorr = 0.0; // Total Correlation Energy
+    //bool nodens;
     std::vector<bool> tmpnull(this->basisset_->nShell()+1);
     OneDGrid * Rad ;
 /*  
@@ -548,12 +551,12 @@ void SingleSlater<double>::formVXC(){
       std::fill(tmpnull.begin(),tmpnull.end(),true);
     }
 //  Select Radial Grid
-    if (this->dftGrid_ == GAUSSCHEB)  {
-      Rad = new GaussChebyshev1stGridInf(this->nRadDFTGridPts_,0.0,1.0);   // Radial Grid
-    } else if (this->dftGrid_ == EULERMACL) {
-      Rad = new  EulerMaclaurinGrid(this->nRadDFTGridPts_,0.0,1.0);   // Radial Grid
-    }
-    LebedevGrid GridLeb(this->nAngDFTGridPts_);                    // Angular Grid
+    if (this->dftGrid_ == GAUSSCHEB)  
+      Rad = new GaussChebyshev1stGridInf(this->nRadDFTGridPts_,0.0,1.0);   
+    else if (this->dftGrid_ == EULERMACL) 
+      Rad = new  EulerMaclaurinGrid(this->nRadDFTGridPts_,0.0,1.0);   
+
+    LebedevGrid GridLeb(this->nAngDFTGridPts_);   // Angular Grid
     GridLeb.genGrid();                            // Generate Angular Grid
     this->vXA()->setZero();   // Set to zero every occurence of the SCF
     this->vCorA()->setZero(); // Set to zero every occurence of the SCF
@@ -573,15 +576,16 @@ void SingleSlater<double>::formVXC(){
       );
       // Loop over grid points
       for(int ipts = 0; ipts < this->ngpts; ipts++){
+        //cout << ipts << " " << ipts/nPtsPerThread << endl;
 ////T   
 //   auto start_5 = std::chrono::high_resolution_clock::now();  // Timing weights
 ////T
-        nodens =false;
+        bool nodens = false;
         // Evaluate each Becke fuzzy call weight, normalize it and muliply by 
         //   the Raw grid weight at that point
-        bweight = (this->formBeckeW((Raw3Dg.gridPtCart(ipts)),iAtm)) 
-                  / (this->normBeckeW(Raw3Dg.gridPtCart(ipts))) ;
-        weight = Raw3Dg.getweightsGrid(ipts) * bweight;
+        auto bweight = (this->formBeckeW((Raw3Dg.gridPtCart(ipts)),iAtm)) 
+                     / (this->normBeckeW(Raw3Dg.gridPtCart(ipts))) ;
+        auto weight = Raw3Dg.getweightsGrid(ipts) * bweight;
         
 ////T
 //   auto finish_5 = std::chrono::high_resolution_clock::now();  
@@ -591,8 +595,10 @@ void SingleSlater<double>::formVXC(){
         //  ** Vxc will be ready at the end of the two loop, to be finalized ** 
         if (this->screenVxc ) {
           auto mapRad_ = this->basisset_->MapGridBasis(Raw3Dg.gridPtCart(ipts));
-          if (mapRad_[0] || (bweight < this->epsScreen)) nodens = true;
-          if(!nodens) this->evalVXC((Raw3Dg.gridPtCart(ipts)),weight,mapRad_);
+          if (mapRad_[0] || (bweight < this->epsScreen)) 
+            nodens = true;
+          if(!nodens) 
+            this->evalVXC((Raw3Dg.gridPtCart(ipts)),weight,mapRad_);
         } else {
           this->evalVXC((Raw3Dg.gridPtCart(ipts)),weight,tmpnull);
         }
@@ -608,7 +614,8 @@ void SingleSlater<double>::formVXC(){
     (*this->vXA())    =  val * (*this->vXA());
     this->totalEx     =  val * CxEn * (this->totalEx);
     (*this->vCorA())  =  4.0 * math.pi * (*this->vCorA());
-    if(!this->isClosedShell && this->Ref_ != TCS) (*this->vCorB())  =  4.0 * math.pi * (*this->vCorB());
+    if(!this->isClosedShell && this->Ref_ != TCS) 
+      (*this->vCorB())  =  4.0 * math.pi * (*this->vCorB());
     this->totalEcorr  =  4.0 * math.pi * (this->totalEcorr);
     // For open shell averything has to be scaled by 2^(1/3)
     if(!this->isClosedShell && this->Ref_ != TCS){
@@ -633,11 +640,16 @@ void SingleSlater<double>::formVXC(){
 //    this->fileio_->out << "Overlap Alloc + set Zero Total Time " << this->duration_2.count() <<endl;
 //    this->fileio_->out << "Overlap ProdEval         Total Time " << this->duration_7.count() <<endl;
 //    this->fileio_->out << "Overlap BuildDend        Total Time " << this->duration_8.count() <<endl;
-    this->fileio_->out << "Overlap Creation Part1(a)   Total Time " << this->basisset_->duration_1.count()<<endl;
-    this->fileio_->out << "Overlap Creation Part1(b)   Total Time " << this->basisset_->duration_4.count()<<endl;
-    this->fileio_->out << "Overlap Creation Part1(c)   Total Time " << this->basisset_->duration_5.count()<<endl;
-    this->fileio_->out << "Overlap Creation Part2   Total Time " << this->basisset_->duration_2.count() <<endl;
-    this->fileio_->out << "Overlap Creation Part3   Total Time " << this->basisset_->duration_3.count() <<endl;
+    this->fileio_->out << "Overlap Creation Part1(a)   Total Time " 
+                       << this->basisset_->duration_1.count() << endl;
+    this->fileio_->out << "Overlap Creation Part1(b)   Total Time " 
+                       << this->basisset_->duration_4.count() << endl;
+    this->fileio_->out << "Overlap Creation Part1(c)   Total Time " 
+                       << this->basisset_->duration_5.count() << endl;
+    this->fileio_->out << "Overlap Creation Part2   Total Time " 
+                       << this->basisset_->duration_2.count() << endl;
+    this->fileio_->out << "Overlap Creation Part3   Total Time " 
+                       << this->basisset_->duration_3.count() << endl;
 //    this->fileio_->out << "Overlap Creation         Total Time " << this->duration_4.count() <<endl;
 //    this->fileio_->out << "Overlap Contraction      Total Time " << this->duration_3.count() <<endl;
 //    this->fileio_->out << "Form (Vx + Vc)           Total Time " << this->duration_1.count() <<endl;
