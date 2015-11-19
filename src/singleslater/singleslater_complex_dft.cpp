@@ -68,7 +68,8 @@ void SingleSlater<dcomplex>::formVXC(){
 };
 
 template<>
-void SingleSlater<dcomplex>::evalVXC(cartGP gridPt, double weight, std::vector<bool> mapRad_){
+void SingleSlater<dcomplex>::evalVXC(cartGP gridPt, double weight, std::vector<bool> mapRad_,
+       RealMatrix * VXA, RealMatrix * VXB, RealMatrix * VCA, RealMatrix * VCB){
 
 };
 

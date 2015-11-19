@@ -576,7 +576,7 @@ public:
   void formExchange();		// form the exchange matrix
   void formPT();
   void formVXC();               // Form DFT VXC Term
-  void evalVXC(cartGP gridPt, double weight, std::vector<bool> mapRad_); // evaluate DFT VXC Matrix Term( at a given pts)
+  void evalVXC(cartGP, double, std::vector<bool>, RealMatrix *, RealMatrix *, RealMatrix *, RealMatrix*); // evaluate DFT VXC Matrix Term( at a given pts)
   void formCor (double rho, double spindensity); // Form DFT correlarion potential 
   double EvepsVWN(int iop,double a_x, double b_x, double c_x, double x0_x, double rho ); // Form DFT correlarion potential 
   void formEx(double rho); // Form DFT exchange

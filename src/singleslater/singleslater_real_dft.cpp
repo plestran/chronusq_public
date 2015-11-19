@@ -346,7 +346,8 @@ void SingleSlater<double>::formCor(double rho, double spindensity){
 
 
 template<>
-void SingleSlater<double>::evalVXC(cartGP gridPt, double weight, std::vector<bool> mapRad_){
+void SingleSlater<double>::evalVXC(cartGP gridPt, double weight, std::vector<bool> mapRad_,
+       RealMatrix * VXA, RealMatrix * VXB, RealMatrix * VCA, RealMatrix * VCB){
 //  Build the Vxc therm at each Grid Points  
 ////T
 //   auto startVxc = std::chrono::high_resolution_clock::now();  
@@ -446,7 +447,7 @@ void SingleSlater<double>::evalVXC(cartGP gridPt, double weight, std::vector<boo
       }
 //  LDA Slater Exchange
     if (this->ExchKernel_ != NOEXCH) {
-    (*this->vXA())  += weight*(*overlapR_)*(std::pow(rhor,(1.0/3.0)));
+    (*VXA)  += weight*(*overlapR_)*(std::pow(rhor,(1.0/3.0)));
     this->totalEx   += weight*(std::pow(rhor,(4.0/3.0)));
     }
 //  VWN Correlation
@@ -456,7 +457,7 @@ void SingleSlater<double>::evalVXC(cartGP gridPt, double weight, std::vector<boo
 //      this->formVWNPara(2.98415518297304e-05);
 //      this->formVWNPara(2.3873e-07);
       this->formCor(rhor,0.0);
-      (*this->vCorA())    += weight*(*overlapR_)*this->mu_corr;
+      (*VCA)    += weight*(*overlapR_)*this->mu_corr;
       this->totalEcorr    += weight*rhor*this->eps_corr;
      }
     }
@@ -474,8 +475,8 @@ void SingleSlater<double>::evalVXC(cartGP gridPt, double weight, std::vector<boo
           }
       }
     if (this->ExchKernel_ != NOEXCH){
-     (*this->vXA()) += weight*(*overlapR_)*(std::pow(rhor,(1.0/3.0)));
-     (*this->vXB()) += weight*(*overlapR_)*(std::pow(rhor_B,(1.0/3.0)));
+     (*VXA) += weight*(*overlapR_)*(std::pow(rhor,(1.0/3.0)));
+     (*VXB) += weight*(*overlapR_)*(std::pow(rhor_B,(1.0/3.0)));
      if((rhor+rhor_B) > 1.0e-20) this->totalEx   += 
                                    weight*(std::pow((rhor+rhor_B),(4.0/3.0)))*
                                      (this->f_spindens(1,this->spindens(rhor,rhor_B)));
@@ -483,8 +484,8 @@ void SingleSlater<double>::evalVXC(cartGP gridPt, double weight, std::vector<boo
     if (this->CorrKernel_ != NOCORR) {
     if (rhor+rhor_B > 1.0e-20) {                       //this if statement prevent numerical instability with zero guesses
      this->formCor((rhor+rhor_B),(this->spindens(rhor,rhor_B)));
-      (*this->vCorA())    += weight*(*overlapR_)*this->mu_corr;
-      (*this->vCorB())    += weight*(*overlapR_)*this->mu_corr_B;
+      (*VCA)    += weight*(*overlapR_)*this->mu_corr;
+      (*VCB)    += weight*(*overlapR_)*this->mu_corr_B;
       this->totalEcorr    += weight*(rhor+rhor_B)*this->eps_corr;
       }
      }
@@ -598,9 +599,11 @@ void SingleSlater<double>::formVXC(){
           if (mapRad_[0] || (bweight < this->epsScreen)) 
             nodens = true;
           if(!nodens) 
-            this->evalVXC((Raw3Dg.gridPtCart(ipts)),weight,mapRad_);
+            this->evalVXC((Raw3Dg.gridPtCart(ipts)),weight,mapRad_,this->vXA_.get(),this->vXB_.get(),
+                           this->vCorA_.get(),this->vCorB_.get());
         } else {
-          this->evalVXC((Raw3Dg.gridPtCart(ipts)),weight,tmpnull);
+          this->evalVXC((Raw3Dg.gridPtCart(ipts)),weight,tmpnull,this->vXA_.get(),this->vXB_.get(),
+                         this->vCorA_.get(),this->vCorB_.get());
         }
 
       } // loop ipts
