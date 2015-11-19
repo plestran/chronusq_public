@@ -63,13 +63,24 @@ double SingleSlater<dcomplex>::spindens(double rho_A, double rho_B){
 };
 
 template<>
+std::array<double,2> SingleSlater<dcomplex>::formVC (double rho, double spindensity){
+
+}; 
+
+template<>
 void SingleSlater<dcomplex>::formVXC(){
 
 };
 
 template<>
 void SingleSlater<dcomplex>::evalVXC(cartGP gridPt, double weight, std::vector<bool> mapRad_,
-       RealMatrix * VXA, RealMatrix * VXB, RealMatrix * VCA, RealMatrix * VCB){
+       double & energyX, double & energyC, RealMatrix * VXA, RealMatrix * VXB, RealMatrix * VCA, RealMatrix * VCB){
+
+};
+
+template<>
+void SingleSlater<dcomplex>::evalVXC_Par(cartGP gridPt, double weight, std::vector<bool> mapRad_,
+       double & energyX, double & energyC, RealMatrix * VXA, RealMatrix * VXB, RealMatrix * VCA, RealMatrix * VCB){
 
 };
 

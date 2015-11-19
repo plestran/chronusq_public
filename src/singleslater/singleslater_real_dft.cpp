@@ -342,24 +342,32 @@ void SingleSlater<double>::formCor(double rho, double spindensity){
 }; //End formCor
 
 
+template<>
+std::array<double,2> SingleSlater<double>::formVC (double rho, double spindensity){
 
+}; //END GENERIC FORMCOR
 
 
 template<>
 void SingleSlater<double>::evalVXC(cartGP gridPt, double weight, std::vector<bool> mapRad_,
-       RealMatrix * VXA, RealMatrix * VXB, RealMatrix * VCA, RealMatrix * VCB){
+       double & energyX, double & energyC, RealMatrix * VXA, RealMatrix * VXB, RealMatrix * VCA, 
+       RealMatrix * VCB){
 //  Build the Vxc therm at each Grid Points  
+
 ////T
 //   auto startVxc = std::chrono::high_resolution_clock::now();  
 ////T
+
    double rhor = 0.0;
    double rhor_B = 0.0;
    bool   RHF  = this->Ref_ == RHF;
    bool   doTCS  = this->Ref_ == TCS;
-   double shMax;
+//   double shMax;
+
 ////T   
 //   auto start_2 = std::chrono::high_resolution_clock::now();  // Timing to allocate and set to zero S(r)
 ////T
+
    std::unique_ptr<RealMatrix>  PA_;        ///< Overlap at grid point
    std::unique_ptr<RealMatrix>  overlapR_;        ///< Overlap at grid point
    overlapR_ = std::unique_ptr<RealMatrix>(
@@ -447,8 +455,8 @@ void SingleSlater<double>::evalVXC(cartGP gridPt, double weight, std::vector<boo
       }
 //  LDA Slater Exchange
     if (this->ExchKernel_ != NOEXCH) {
-    (*VXA)  += weight*(*overlapR_)*(std::pow(rhor,(1.0/3.0)));
-    this->totalEx   += weight*(std::pow(rhor,(4.0/3.0)));
+      (*VXA)  += weight*(*overlapR_)*(std::pow(rhor,(1.0/3.0)));
+      energyX += weight*(std::pow(rhor,(4.0/3.0)));
     }
 //  VWN Correlation
     if (this->CorrKernel_ != NOCORR) {
@@ -457,8 +465,8 @@ void SingleSlater<double>::evalVXC(cartGP gridPt, double weight, std::vector<boo
 //      this->formVWNPara(2.98415518297304e-05);
 //      this->formVWNPara(2.3873e-07);
       this->formCor(rhor,0.0);
-      (*VCA)    += weight*(*overlapR_)*this->mu_corr;
-      this->totalEcorr    += weight*rhor*this->eps_corr;
+      (*VCA)  += weight*(*overlapR_)*this->mu_corr;
+      energyC += weight*rhor*this->eps_corr;
      }
     }
    }
@@ -486,6 +494,160 @@ void SingleSlater<double>::evalVXC(cartGP gridPt, double weight, std::vector<boo
      this->formCor((rhor+rhor_B),(this->spindens(rhor,rhor_B)));
       (*VCA)    += weight*(*overlapR_)*this->mu_corr;
       (*VCB)    += weight*(*overlapR_)*this->mu_corr_B;
+      this->totalEcorr    += weight*(rhor+rhor_B)*this->eps_corr;
+      }
+     }
+    }
+
+////T
+//    auto finish_Vxc = std::chrono::high_resolution_clock::now();  
+//    this->duration_1 += finish_Vxc - startVxc;
+////T
+//  }
+
+}; //END
+
+
+template<>
+// Cleaned version to handle parallelism (no global variable)
+void SingleSlater<double>::evalVXC_Par(cartGP gridPt, double weight, std::vector<bool> mapRad_,
+       double & energyX, double & energyC, RealMatrix * VXA, RealMatrix * VXB, RealMatrix * VCA, 
+       RealMatrix * VCB){
+//  Build the Vxc therm at each Grid Points  
+////T
+//   auto startVxc = std::chrono::high_resolution_clock::now();  
+////T
+   double rhor = 0.0;
+   double rhor_B = 0.0;
+   bool   RHF  = this->Ref_ == RHF;
+   bool   doTCS  = this->Ref_ == TCS;
+   double shMax;
+////T   
+//   auto start_2 = std::chrono::high_resolution_clock::now();  // Timing to allocate and set to zero S(r)
+////T
+   RealMatrix overlapR_(this->nBasis_,this->nBasis_);        ///< Overlap at grid point
+   overlapR_.setZero();
+////T
+//   auto finish_2 = std::chrono::high_resolution_clock::now();  
+//   this->duration_2 += finish_2 - start_2;
+////T
+// Loops over shells
+////T
+////   auto start_4 = std::chrono::high_resolution_clock::now();  // Timing to allocate and set to zero S(r)
+   for(auto s1=0l, s12=0l; s1 < this->basisset_->nShell(); s1++){
+      if (mapRad_[s1+1]){
+        int bf1_s = this->basisset_->mapSh2Bf(s1);
+        int n1    = this->basisset_->shells(s1).size();
+        for(int s2=0; s2 <= s1; s2++, s12++){
+          if (mapRad_[s2+1]){
+            int bf2_s   = this->basisset_->mapSh2Bf(s2);
+            int n2      = this->basisset_->shells(s2).size();
+////T          
+//            auto start_7 = std::chrono::high_resolution_clock::now();
+////T
+
+/*
+            if (this->screenVxc){
+              if(this->isClosedShell || this->Ref_ !=TCS){
+                shMax = (*this->basisset_->shBlkNormAlpha)(s1,s2);
+                } else {
+                shMax = std::max((*this->basisset_->shBlkNormAlpha)(s1,s2),
+                         (*this->basisset_->shBlkNormBeta)(s1,s2));
+              }
+//             if(shMax < (this->controls_->thresholdSchawrtz/ngpts) ) continue;
+             if(shMax < (this->epsScreen/ngpts) ) continue;
+            }
+*/
+/* TEST
+             double * bfun = new double [n2];
+            libint2::Shell s2sh = this->basisset_->shells(s2); 
+            bfun = 
+              this->basisset_->basisEval(s2sh,&gridPt);
+            RealMap fBuff(bfun,n2,1);
+            fBuff += this->densityA()->block(bf1_s,bf2_s,n1,n2) * fBuff;
+*/
+            auto pointProd = 
+              this->basisset_->basisProdEval(
+                this->basisset_->shells(s1),
+                this->basisset_->shells(s2),
+                &gridPt
+              );
+////T
+//            auto finish_7 = std::chrono::high_resolution_clock::now();  
+//            this->duration_7 += finish_7 - start_7;
+////            auto start_8 = std::chrono::high_resolution_clock::now();
+////T
+            RealMap fBuff(pointProd,n1,n2);
+            overlapR_.block(bf1_s,bf2_s,n1,n2) = fBuff; 
+            delete[] pointProd;
+////T
+////            auto finish_8 = std::chrono::high_resolution_clock::now();  
+////            this->duration_8 += finish_8 - start_8;
+////T
+          }
+        }
+      }
+    }  
+////T
+////   auto finish_4 = std::chrono::high_resolution_clock::now();  
+////   this->duration_4 += finish_4 - start_4;
+////T
+////T
+//   auto start_3 = std::chrono::high_resolution_clock::now();  // Timing S contraction
+////T
+     overlapR_ = overlapR_.selfadjointView<Lower>();;
+   if(this->isClosedShell && this->Ref_ != TCS) {
+    rhor = overlapR_.frobInner(this->densityA()->conjugate());
+////T
+//   auto finish_3 = std::chrono::high_resolution_clock::now();  
+//   this->duration_3 += finish_3 - start_3;
+////T
+    if (this->screenVxc ) {
+      if(rhor    <= 0.0 ) {
+        if((std::abs(rhor)) <= 1.0e10) rhor = 0.0;
+        }
+      }
+//  LDA Slater Exchange
+    if (this->ExchKernel_ != NOEXCH) {
+      (*VXA)  += weight*overlapR_*(std::pow(rhor,(1.0/3.0)));
+      energyX += weight*(std::pow(rhor,(4.0/3.0)));
+    }
+//  VWN Correlation
+    if (this->CorrKernel_ != NOCORR) {
+    if (rhor > 1.0e-20) {                       //this if statement prevent numerical instability with zero guesses
+//      this->formVWNPara(2.38732414637843e-04);
+//      this->formVWNPara(2.98415518297304e-05);
+//      this->formVWNPara(2.3873e-07);
+      this->formCor(rhor,0.0);
+      (*VCA)  += weight*overlapR_*this->mu_corr;
+      energyC += weight*rhor*this->eps_corr;
+     }
+    }
+   }
+   if(!this->isClosedShell && this->Ref_ != TCS) {
+     rhor   = overlapR_.frobInner(this->densityA()->conjugate());
+     rhor_B = overlapR_.frobInner(this->densityB()->conjugate());
+//   Avoid numerical noise 
+     if (this->screenVxc ) {
+       if(rhor    <= 0.0 ) {
+          if((std::abs(rhor)) <= 1.0e10) rhor = 0.0;
+          }
+       if(rhor_B    <= 0.0 ) {
+          if((std::abs(rhor_B)) <= 1.0e10) rhor_B = 0.0;
+          }
+      }
+    if (this->ExchKernel_ != NOEXCH){
+     (*VXA) += weight*overlapR_*(std::pow(rhor,(1.0/3.0)));
+     (*VXB) += weight*overlapR_*(std::pow(rhor_B,(1.0/3.0)));
+     if((rhor+rhor_B) > 1.0e-20) this->totalEx   += 
+                                   weight*(std::pow((rhor+rhor_B),(4.0/3.0)))*
+                                     (this->f_spindens(1,this->spindens(rhor,rhor_B)));
+      }
+    if (this->CorrKernel_ != NOCORR) {
+    if (rhor+rhor_B > 1.0e-20) {                       //this if statement prevent numerical instability with zero guesses
+     this->formCor((rhor+rhor_B),(this->spindens(rhor,rhor_B)));
+      (*VCA)    += weight*overlapR_*this->mu_corr;
+      (*VCB)    += weight*overlapR_*this->mu_corr_B;
       this->totalEcorr    += weight*(rhor+rhor_B)*this->eps_corr;
       }
      }
@@ -599,11 +761,11 @@ void SingleSlater<double>::formVXC(){
           if (mapRad_[0] || (bweight < this->epsScreen)) 
             nodens = true;
           if(!nodens) 
-            this->evalVXC((Raw3Dg.gridPtCart(ipts)),weight,mapRad_,this->vXA_.get(),this->vXB_.get(),
-                           this->vCorA_.get(),this->vCorB_.get());
+            this->evalVXC((Raw3Dg.gridPtCart(ipts)),weight,mapRad_,this->totalEx, this->totalEcorr, 
+                           this->vXA_.get(),this->vXB_.get(),this->vCorA_.get(),this->vCorB_.get() );
         } else {
-          this->evalVXC((Raw3Dg.gridPtCart(ipts)),weight,tmpnull,this->vXA_.get(),this->vXB_.get(),
-                         this->vCorA_.get(),this->vCorB_.get());
+          this->evalVXC((Raw3Dg.gridPtCart(ipts)),weight,tmpnull,this->totalEx, this->totalEcorr, 
+                         this->vXA_.get(),this->vXB_.get(),this->vCorA_.get(),this->vCorB_.get() );
         }
 
       } // loop ipts

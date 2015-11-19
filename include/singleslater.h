@@ -576,8 +576,12 @@ public:
   void formExchange();		// form the exchange matrix
   void formPT();
   void formVXC();               // Form DFT VXC Term
-  void evalVXC(cartGP, double, std::vector<bool>, RealMatrix *, RealMatrix *, RealMatrix *, RealMatrix*); // evaluate DFT VXC Matrix Term( at a given pts)
+  void evalVXC(cartGP, double, std::vector<bool>, double &, double &,RealMatrix *, RealMatrix *,
+                 RealMatrix *, RealMatrix*); // evaluate DFT VXC Matrix Term( at a given pts)
+  void evalVXC_Par(cartGP, double, std::vector<bool>, double &, double &,RealMatrix *, RealMatrix *,
+                 RealMatrix *, RealMatrix*); // evaluate DFT VXC Matrix Term( at a given pts)
   void formCor (double rho, double spindensity); // Form DFT correlarion potential 
+  std::array<double,2 > formVC (double, double); // Form DFT correlarion potential 
   double EvepsVWN(int iop,double a_x, double b_x, double c_x, double x0_x, double rho ); // Form DFT correlarion potential 
   void formEx(double rho); // Form DFT exchange
   double f_spindens(int iop, double spindens);  // define f(spindendity)
