@@ -34,34 +34,106 @@ namespace ChronusQ {
     // Useful Eigen Typedefs
     typedef Eigen::Matrix<T,Dynamic,Dynamic,ColMajor> TMat;
     typedef Eigen::Matrix<T,Dynamic,1> TVec;
-    typedef Eigen::Map<TMat> TCMMap;
+    typedef Eigen::Map<TMat> TMap;
     typedef Eigen::Map<TVec> TVecMap;
 
     // Dimension Variables
     size_t nSingleDim_;  ///< Dimension of the problem
     size_t nSek_;        ///< Number of desired solution vectors
     size_t nGuess_;      ///< Number of initial guess vectors
-    size_t maxSubSpace_; ///< Maximum dimension of iterative subspace
 
-    // Iteration related variables
-    int maxMicroIter_;
-    int maxMacroIter_;
-
-    // Various tolerance values
-    double residualTol_;
-
-    // MetaData about QN Calculation
-    int nMicroIter_;
-    int nMacroIter_;
-    int nTotalIter_;
+    // Booleans for QN setup
+    bool generateGuess_;  ///< (?) Generate identity guess
+    bool allocSolution_;  ///< (?) Allocate space for solution
+    bool needsLeft_;      ///< (?) Left vectors need to be taken into account
+    bool isFullMatrix_;   ///< (?) Full matrix passes (DEBUG OPTION)
    
-    // In-Core storage of solution quantities
-    TCMMatrix * solutionVecR_; ///< In-core storage of (right) solution vectors
-    TCMMatrix * solutionVecL_; ///< In-core storage of (left)  solution vectors
-    VectorXd  * omega_;        ///< Frequencies for solution vectors
-    TCMMatrix * diag_;         ///< Diagonal elements of problem
-    
+    // In-Core storage
+    TMat        * fullMatrix_;   ///< Full Matrix (DEBUG PURPOSES)
+    TMat        * fullMetric_;   ///< Full Metric (DEBUG PURPOSES)
+    TMat        * solutionVecR_; ///< (right) solution vectors
+    TMat        * solutionVecL_; ///< (left)  solution vectors
+    VectorXd    * omega_;        ///< Frequencies for solution vectors
+    TMat        * diag_;         ///< Diagonal elements of problem
+
+    // Disk storage
+    H5::H5File  * scratchFile_; ///< Scratch file
+    H5::DataSet * guessFile_;   ///< File to store guess vectors
+
+    virtual void linearTrans(TMap &VR, TMap &SigmaR) {
+      SigmaR = (*this->fullMatrix_) * VR;
+    };
+  public:
+    /**
+     *  Defualt Constructor for QNCallable
+     *
+     *  Default constructor loads defaults
+     */ 
+    QNCallable() {
+      this->nSingleDim_   = 0;
+      this->nSek_         = 0;
+      this->nGuess_       = 0;
+      this->fullMatrix_   = NULL;
+      this->solutionVecR_ = NULL;
+      this->solutionVecL_ = NULL;
+      this->omega_        = NULL;
+      this->diag_         = NULL;
+      this->scratchFile_  = NULL;
+      this->guessFile_    = NULL;
+
+      this->generateGuess_ = false;
+      this->allocSolution_ = false;
+      this->needsLeft_     = false;
+      this->isFullMatrix_  = false;
+    };
+
+    QNCallable(TMat *A, int NSek, int NGuess) : QNCallable(){
+      this->fullMatrix_ = A;
+      this->nSek_       = NSek;
+      this->nGuess_     = NGuess;
+
+      this->nSingleDim_    = A->rows();
+      this->generateGuess_ = true;
+      this->allocSolution_ = true;
+      this->isFullMatrix_  = true;
+    };
+
+    QNCallable(TMat *A, int NSek) : QNCallable(A,NSek,0) {
+      this->nGuess = 2*NSek;
+    };
+
+    QNCallable(TMat *A, int NSek, int NGuess, H5::H5File *scr) :
+      QNCallable(A,NSek,NGuess) {
+      this->scratchFile_ = scr;
+    }
+
+    inline initQN() {
+      if(this->generateGuess_) this->generateGuess();
+      if(this->allocSolution_) this->allocSolution();
+    }
   }; // class QNCallable
+
+  // Enums for Job Control
+  enum QNProblemType {
+    DIAGONALIZATION,
+    LINEAR_SOLVE
+  };
+
+  enum QNMatrixType {
+    HERMETIAN,
+    HERMETIAN_GEP,
+    NON_HERMETIAN
+  };
+
+  enum QNGuessType {
+    RESIDUAL_DAVIDSON,
+    RESIDUAL_OLSEN
+  };
+
+  enum QNSpecialAlgorithm {
+    NOT_SPECIAL,
+    SYMMETRIZED_TRIAL
+  };
 
   template <typename T>
   class QuasiNewton2 {
@@ -72,9 +144,33 @@ namespace ChronusQ {
     typedef Eigen::Map<TMat> TCMMap;
     typedef Eigen::Map<TVec> TVecMap;
 
+    QNCallable * qnObj_;
+
+    // Dimension Variables
+    size_t maxSubSpace_; ///< Maximum dimension of iterative subspace
+
+    // Iteration related variables
+    int maxMicroIter_;
+    int maxMacroIter_;
+
+    // Various tolerance values
+    double residualTol_;
+
+    // Job Control
+    QNProblemType      problemType_;
+    QNMatrixType       matrixType_; 
+    QNGuessType        guessType_;
+    QNSpecialAlgorithm specialAlgorithm_;
+
+    // MetaData about QN Calculation
+    int  nMicroIter_;
+    int  nMacroIter_;
+    int  nTotalIter_;
+    bool isConverged_;
+
 
   public:
-    QuasiNewton2(){;};
+    #include <qn_constructors.h>
 
   }; // class QuasiNewton2
 }; // namespace ChronusQ
