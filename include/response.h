@@ -50,7 +50,7 @@ template<typename T>
 class Response : public QNCallable<T> {
 
   /** Useful TypeDefs **/
-  typedef Eigen::Matrix<T,Dynamic,Dynamic,RowMajor> TMat;
+  typedef Eigen::Matrix<T,Dynamic,Dynamic,ColMajor> TMat;
   typedef Eigen::Matrix<T,Dynamic,1>                TVec;
   typedef Eigen::Map<TVec>                          TVecMap;
   typedef Eigen::Map<TMat>                          TMap;
@@ -69,7 +69,7 @@ class Response : public QNCallable<T> {
 
   /** Job Control for response calcluation **/
   bool useIncoreInts;   ///< Use Incore Integrals
-  bool doFull;          ///< Do full diagonalization
+  bool doFull;          ///< Do full matrix problem (in-core)
   bool debugIter;       ///< Diagonalize full incore matrix iteratively
   bool doTDA;           ///< Invoke TDA
   RESPONSE_TYPE iMeth_; ///< Response type 
@@ -187,7 +187,11 @@ public:
     this->rMu_ = 0.0;
 
     // Standard (default) values
-    this->iMeth_      = NOMETHOD;
+    this->iMeth_        = NOMETHOD;
+    this->useIncoreInts = false;
+    this->doFull        = false;
+    this->debugIter     = false;
+    this->doTDA         = false;
   };
 
   // Dummy Destructor
@@ -273,17 +277,17 @@ public:
 
   // QN Related
   void IterativeResponse();
-  void linearTrans(TMap &,TMap &,TMap &,TMap &,TMap &,TMap &);
+  void linearTrans(TMap &,TMap &,TMap &,TMap &,TMap &,TMap &){;};
   void linearTransFOPPA(TMap &,TMap &,TMap &,TMap &,TMap &,TMap &);
   void linearTransSOPPA(TMap &,TMap &,TMap &,TMap &,TMap &,TMap &);
   void linearTransTOPPA(TMap &,TMap &,TMap &,TMap &,TMap &,TMap &);
   void linearTransPPRPA(TMap &,TMap &,TMap &,TMap &,TMap &,TMap &);
-  void formGuess();
+  void formGuess(){;};
   void formGuessFOPPA();
   void formGuessSOPPA();
   void formGuessTOPPA();
   void formGuessPPRPA();
-  void formDiag();
+  void formDiag(){;};
   void formDiagFOPPA();
   void formDiagSOPPA();
   void formDiagTOPPA();
