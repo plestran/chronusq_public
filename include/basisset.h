@@ -39,61 +39,132 @@
 
 namespace ChronusQ{
 struct Shell{
-  char    name[2];               // name of the shell - "S","P","D","F","G"
-  bool	  SP;			 // is this part of an SP shell?
+  std::vector<double> expo;
   int     L;                     // angular momentum  -  0 , 1 , 2,  3 , 4
-  int     center;                // index of the atom to which the shell belongs
+  bool    doSph_       ; ///< Whether or not to make the cartesian -> spherical transformation
+  std::vector<double> coef;
+  std::vector<double> cart;
+  std::vector<double> norm;
   int     nPGTOs;                // level of contraction of the shell
   int     aoIndex;               // the starting index of the ao's in the shell in the ao[] array 
   int	  nAOs;			 // number of AOs in this shell
-  double  coef[MAXCONTRACTION];  // contraction coefficients
-  double  expo[MAXCONTRACTION];  // exponents of primitive GTOs
-  double  norm[MAXCONTRACTION];  // normalization constants of primitive GTOs (divided by AOCartesian.divConst)
+  int     center;                // index of the atom to which the shell belongs
 };
 
-struct AOCartesian{
-  int     lx;                    // x angular momentum
-  int     ly;                    // y angular momentum
-  int     lz;                    // z angular momentum
-  int	  l[3];			 // x,y,z angular momentum
-  int     shIndex;               // index of the shell in the shells[] array to which current ao belongs
-  double  divConst;              // normalization constant = Shell.norm/divConst
-};
+struct ShellCQ {
+  typedef double real_t;
 
-struct BasisPair{
-  int     aoIndex[2];
-  int     nPGTOs[2];		// number of primitive Gaussian (degree of contract) on each shell
-  int     L[2];                 // angular momenta of the first and second shells
-  int     centerIndex[2];	// indices of the atom where the first and second shells are centered
-};
+  /// contracted Gaussian = angular momentum + sph/cart flag + contraction coefficients
+  int l;
+  bool pure;
+  std::vector<real_t> coeff;
+  std::vector<real_t> alpha; //!< exponents
+  std::array<real_t, 3> O;   //!< origin
+  std::vector<real_t> max_ln_coeff; //!< maximum ln of (absolute) contraction coefficient for each primitive
 
-struct ShellPair{
-  int     L[2];                 // angular momenta of the first and second shells
-  int	  LTotal;		// total angular momenta of the shell pair
-  int     aoIndex[2];		// starting indeices of AOs in the first and second shells
-  int     shIndex[2];           // indices of the first and second shell in the shells[] array to which current ao belongs
-  int     center[2];		// indices of the atom where the first and second shells are centered
-  int     nPGTOs[2];		// number of primitive Gaussian (degree of contract) on each shell
-  int     nBasis[2];		// number of basis function on each shell
-  int     nAOPair;		// number of unique AO pairs
-  int     aoPairIndex[250][2];  // the indices of the ao pair in the ao[] array
+  size_t cartesian_size() const { return (l + 1) * (l + 2) / 2; }
+  size_t size() const { return pure ? (2 * l + 1) : cartesian_size(); }
 
-  double  divConst[250];	// division constant; 
-  double  centerA[3];		// x,y,z coordinate of center A
-  double  centerB[3];		// x,y,z coordinate of center B
-  double  deltaAB[3];		// x,y,z distance between centers xA-xB, yA-yB, zA-zB
-  double  centerP[3][MAXCONTRACTION][MAXCONTRACTION];	// x,y,z coordinate of the combined center of the shellpair (alpha*A+beta*B)/(alpha+beta)
-  double  centerPZeta[3][MAXCONTRACTION][MAXCONTRACTION];	// centerP*(alpha+beta)
-  double  deltaPA[3][MAXCONTRACTION][MAXCONTRACTION];	// x,y,z distance P-A
-  double  deltaPB[3][MAXCONTRACTION][MAXCONTRACTION];	// x,y,z distance P-B
-  double  deltaPApPB[3][3][MAXCONTRACTION][MAXCONTRACTION];// PAi+PBj
-  double  deltaPAtPB[3][3][MAXCONTRACTION][MAXCONTRACTION];// PAi*PBj
-  double  zeta[MAXCONTRACTION][MAXCONTRACTION];		// the total of exponents (alpha+beta) 
-  double  inversezeta[MAXCONTRACTION][MAXCONTRACTION];	// the inverse of the total of exponents 0.5/(alpha+beta) 
-  double  invzeta[MAXCONTRACTION][MAXCONTRACTION];	// the inverse of the total of exponents 0.5/(alpha+beta) 
-  double  KAB[MAXCONTRACTION][MAXCONTRACTION];		// KAB used to compute the [ss|ss] integral
-  double  UAB[MAXCONTRACTION][MAXCONTRACTION];		// KAB used to compute the [ss|ss] integral
-  double  norm[MAXCONTRACTION][MAXCONTRACTION];		// pairwise normalization constant
+  ShellCQ(libint2::Shell& other){
+    this->alpha = other.alpha;
+    this->l = other.contr[0].l;
+    this->coeff = other.contr[0].coeff;
+    this->pure = other.contr[0].pure;
+    this->O = other.O;
+    this->max_ln_coeff = other.max_ln_coeff;
+  };
+
+
+  ShellCQ& move(const std::array<real_t, 3> new_origin) {
+    O = new_origin;
+    return *this;
+  }
+
+  /// embeds normalization constants into contraction coefficients. Do this before computing integrals.
+  /// \note Must be done only once.
+/*
+  void renorm() {
+    using libint2::math::df_Kminus1;
+    const auto sqrt_Pi_cubed = real_t{5.56832799683170784528481798212};
+    const auto np = nprim();
+    for(auto& c: contr) {
+      assert(c.l <= 15); // due to df_Kminus1[] a 64-bit integer type; kinda ridiculous restriction anyway
+      for(auto p=0; p!=np; ++p) {
+        assert(alpha[p] >= 0.0);
+        if (alpha[p] != 0.) {
+          const auto two_alpha = 2 * alpha[p];
+          const auto two_alpha_to_am32 = pow(two_alpha,c.l+1) * sqrt(two_alpha);
+          const auto norm = sqrt(pow(2,c.l) * two_alpha_to_am32/(sqrt_Pi_cubed * df_Kminus1[2*c.l] ));
+
+          c.coeff[p] *= norm;
+        }
+      }
+    }
+
+    // update max log coefficients
+    max_ln_coeff.resize(np);
+    for(auto p=0; p!=np; ++p) {
+      real_t max_ln_c = - std::numeric_limits<real_t>::max();
+      for(auto& c: contr) {
+        max_ln_c = std::max(max_ln_c, log(std::abs(c.coeff[p])));
+      }
+      max_ln_coeff[p] = max_ln_c;
+    }
+  }
+*/
+  size_t nprim() const { return alpha.size(); }
+
+  bool operator==(const ShellCQ& other) const {
+    return &other == this || (O == other.O && alpha == other.alpha && coeff == other.coeff);
+  }
+  bool operator!=(const ShellCQ& other) const {
+    return not this->operator==(other);
+  }
+
+  static char am_symbol(size_t l) {
+    static char lsymb[] = "spdfghikmnoqrtuvwxyz";
+    assert(l<=19);
+    return lsymb[l];
+  }
+  static unsigned short am_symbol_to_l(char am_symbol) {
+    const char AM_SYMBOL = ::toupper(am_symbol);
+    switch (AM_SYMBOL) {
+      case 'S': return 0;
+      case 'P': return 1;
+      case 'D': return 2;
+      case 'F': return 3;
+      case 'G': return 4;
+      case 'H': return 5;
+      case 'I': return 6;
+      case 'K': return 7;
+      case 'M': return 8;
+      case 'N': return 9;
+      case 'O': return 10;
+      case 'Q': return 11;
+      case 'R': return 12;
+      case 'T': return 13;
+      case 'U': return 14;
+      case 'V': return 15;
+      case 'W': return 16;
+      case 'X': return 17;
+      case 'Y': return 18;
+      case 'Z': return 19;
+      default: throw "invalid angular momentum label";
+    }
+  }
+
+  /// @return "unit" Shell, with exponent=0. and coefficient=1., located at the origin
+/*
+  static ShellCQ unit() {
+    ChronusQ::ShellCQ unitshell{
+                {0.0}, // exponent
+                {{0, false, {1.0}}},
+                {{0.0, 0.0, 0.0}} // placed at origin
+            };
+    unitshell.renorm();
+    return unitshell;
+  }
+*/
 };
 
 class BasisSet{
@@ -129,10 +200,10 @@ class BasisSet{
 
 
 public:
-  AOCartesian *ao;
-  ShellPair   *shellPairs;
-  Shell       *shells_old;
-  int         *sortedShells;
+//AOCartesian *ao;
+//ShellPair   *shellPairs;
+//Shell       *shells_old;
+//int         *sortedShells;
 
 
   enum BASISSETS {
@@ -160,6 +231,8 @@ public:
   bool haveMapSh2Bf  ; ///< (?) The map from shells to basis functions has been made
   bool haveMapSh2Cen ; ///< (?) The map from shells to atomic centers has been made
   bool haveMapCen2Bf ; ///< (?) The map from atomic centers to basis functions has been made
+
+  std::vector<ChronusQ::ShellCQ> shellsCQ ; ///< Local basis storage (in CQ shell format)
 
   std::unique_ptr<RealMatrix> shBlkNormAlpha; ///< Shell Block (Inf) norm for Alpha matrix
   std::unique_ptr<RealMatrix> shBlkNormBeta;  ///< Shell Block (Inf) norm for Beta  matrix

@@ -184,7 +184,6 @@ void AOIntegrals::computeAOOneE(){
   double divSTV,S,T,V;
   int i,j,m,n,ij,ijShell,nPGTOs[2];
   ShellPair *ijShellPair;
-//clock_t start,finish;
   std::chrono::high_resolution_clock::time_point start,finish;
   if(controls_->printLevel>=1) start = std::chrono::high_resolution_clock::now();
   this->iniMolecularConstants();
@@ -229,4 +228,52 @@ void AOIntegrals::computeAOOneE(){
     this->fileio_->out<<"\nCPU time for one-electron integral:  "<< this->OneED.count() <<" seconds."<<endl;
   };
   this->haveAOOneE = true;
+};
+
+
+void AOIntegrals::computeOverlapS(){
+  double S;
+  int i,j,ijShell,iAOP;
+  ShellPair_New *ijS;
+  std::chrono::high_resolution_clock::time_point start,finish;
+  if(controls_->printLevel>=1) start = std::chrono::high_resolution_clock::now();
+  this->overlap_->setZero();
+  this->createShellPairs();
+  for(ijShell=0;ijShell<this->nShellPair_;ijShell++) {
+    ijS = &(this->shellPairs_[ijShell]);
+    for(iAOP=0;iAOP<ijS->nAOPair;iAOP++) {
+      i = ijS->aoPairIndex[0][iAOP];
+      j = ijS->aoPairIndex[1][iAOP];
+      if(i==j) S = math.one;
+      else S = this->hRRSab(ijS,ijS->iShell->L,(basisSet_->ao[i]).l,ijS->jShell->L,(basisSet_->ao[j]).l);
+      (*this->overlap_)(i,j) = S;
+    };
+  };
+  if(controls_->printLevel>=1) {
+    prettyPrint(this->fileio_->out,(*this->overlap_),"Overlap");
+    this->fileio_->out<<"\nCPU time for overlap integral:  "<< this->OneED.count() <<" seconds."<<endl;
+  };
+};
+
+void AOIntegrals::computeKineticT(){
+  double T;
+  int i,j,ijShell,iAOP;
+  ShellPair_New *ijS;
+  std::chrono::high_resolution_clock::time_point start,finish;
+  if(controls_->printLevel>=1) start = std::chrono::high_resolution_clock::now();
+  this->kinetic_->setZero();
+  this->createShellPairs();
+  for(ijShell=0;ijShell<this->nShellPair_;ijShell++) {
+    ijS = &(this->shellPairs_[ijShell]);
+    for(iAOP=0;iAOP<ijS->nAOPair;iAOP++) {
+      i = ijS->aoPairIndex[0][iAOP];
+      j = ijS->aoPairIndex[1][iAOP];
+      T = this->hRRSab(ijS,ijS->iShell->L,(basisSet_->ao[i]).l,ijS->jShell->L,(basisSet_->ao[j]).l);
+      (*this->kinetic_)(i,j) = T;
+    };
+  };
+  if(controls_->printLevel>=1) {
+    prettyPrint(this->fileio_->out,(*this->kinetic_),"Kinetic");
+    this->fileio_->out<<"\nCPU time for kinetic energy integral:  "<< this->OneED.count() <<" seconds."<<endl;
+  };
 };

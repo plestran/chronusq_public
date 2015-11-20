@@ -43,6 +43,30 @@ namespace ChronusQ {
  *
  *  Mainly for use with in-house integral code
  */
+#define MAXNAOS 21
+
+struct ShellPair{
+  typedef double real_t;
+  ShellCQ  *iShell;
+  ShellCQ  *jShell;
+  int	  lTotal;		    // total angular momenta of the shell pair
+  int     nPGTOPair;
+  std::array<real_t,3> A;	// x,y,z coordinate of center A
+  std::array<real_t,3> B;	// x,y,z coordinate of center B
+  std::array<real_t,3> AB;	// x,y,z distance between centers xA-xB, yA-yB, zA-zB
+  std::vector<real_t> KAB;
+  std::vector<real_t> UAB;
+  std::vector<real_t> Zeta;	// the total of exponents (alpha+beta) 
+  std::vector<real_t> invZeta;	// the inverse of the total of exponents 1/(alpha+beta) 
+  std::vector<real_t> halfInvZeta;	// the inverse of the total of exponents 0.5/(alpha+beta) 
+  std::vector<real_t> ss;
+  std::vector<real_t> norm;
+  std::vector<std::array<real_t,3>> P;
+  std::vector<std::array<real_t,3>> PA;
+  std::vector<std::array<real_t,3>> PB;
+  std::vector<std::array<real_t,3>> PZeta;	// P*(alpha+beta)
+};
+
 struct MolecularConstants{
   int nAtom; ///< number of nuclei
   int atomZ[MAXATOMS]; ///< Classical charges of nuclei
@@ -122,11 +146,11 @@ class AOIntegrals{
   int       **R2Index_;
   double	**FmTTable_;
 
-  BasisSet *    	basisSet_; ///< Smart pointer to primary basis set
-  BasisSet *     DFbasisSet_; ///< Smart pointer to density fitting basis set
-  Molecule *   	molecule_; ///< Smart pointer to molecule specification
-  FileIO *      	fileio_; ///< Smart pointer to FileIO
-  Controls *    	controls_; ///< Smart pointer to job control
+  BasisSet *    	basisSet_; ///< Pointer to primary basis set
+  BasisSet *     DFbasisSet_; ///< Pointer to density fitting basis set
+  Molecule *   	molecule_; ///< Pointer to molecule specification
+  FileIO *      	fileio_; ///< Pointer to FileIO
+  Controls *    	controls_; ///< Pointer to job control
 
   std::unique_ptr<PairConstants>        pairConstants_; ///< Smart pointer to struct containing shell-pair meta-data
   std::unique_ptr<MolecularConstants>   molecularConstants_; ///< Smart pointer to struct containing molecular struture meta-data
@@ -368,16 +392,26 @@ public:
 //----------------------------------------//
 // member functions in integrals_onee.cpp //
 //----------------------------------------//
+//ShellPair         *shellPairs_;
+  std::vector<ShellPair> shellPairs_;
+  int  nShellPair_;
+  int  nShellQuartet_;
+  void createShellPairs();
+
   void computeOverlapS(); // Depreciated
+  double hRRSab(ShellPair*,int,int*,int,int*);
+  double vRRSa0(ShellPair*,int,int*,int);
   void computeKineticT(); // Depreciated
+  double vRRTab(ShellPair*,int,int*,int,int*,int*,int*);
+  double vRRTa0(ShellPair*,int,int*,int*,int*);
   void computePotentialV(); // Depreciated
-  double oneehRRTSab(int,int*,int,int*,int*,int*);
-  double oneehRRSab(int,int*,int,int*);
-  double oneehRRVab(int,int*,int,int*);
-  double oneevRRSa0(int,int*,int*,int*);
-  double oneevRRVa0(int*,int,int,int*,int*,int*);
-  double oneevRRTab(int,int*,int,int*,int*,int*);
-  double oneevRRTa0(int,int*,int*,int*);
+  double oneehRRTSab(ShellPair*,int,int*,int,int*,int*,int*);
+  double oneehRRSab(ShellPair*,int,int*,int,int*);
+  double oneehRRVab(ShellPair*,int,int*,int,int*);
+  double oneevRRSa0(ShellPair*,int,int*,int*,int*);
+  double oneevRRVa0(ShellPair*,int*,int,int,int*,int*,int*);
+  double oneevRRTab(ShellPair*,int,int*,int,int*,int*,int*);
+  double oneevRRTa0(ShellPair*,int,int*,int*,int*);
 //----------------------------------------//
 // member functions in integrals_twoe.cpp //
 //----------------------------------------//
