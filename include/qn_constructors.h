@@ -39,7 +39,7 @@ QuasiNewton2(){
 
 };
 
-QuasiNewton2(QNCallable * obj) : QuasiNewton2(){
+QuasiNewton2(QNCallable<T> * obj) : QuasiNewton2(){
   this->qnObj_ = obj;
   this->maxSubSpace_ = std::min(250,obj->nSingleDim_/2);
 };

@@ -19,3 +19,5 @@ add_subdirectory(tools)
 add_subdirectory(worker)
 add_subdirectory(chronusQ)
 add_subdirectory(python)
+
+add_subdirectory(newQNTest)

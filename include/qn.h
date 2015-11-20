@@ -47,6 +47,7 @@ namespace ChronusQ {
     bool allocSolution_;  ///< (?) Allocate space for solution
     bool needsLeft_;      ///< (?) Left vectors need to be taken into account
     bool isFullMatrix_;   ///< (?) Full matrix passes (DEBUG OPTION)
+    bool directDiag_;     ///< (?) Arithmetic with direct access of diagonals
    
     // In-Core storage
     TMat        * fullMatrix_;   ///< Full Matrix (DEBUG PURPOSES)
@@ -60,9 +61,6 @@ namespace ChronusQ {
     H5::H5File  * scratchFile_; ///< Scratch file
     H5::DataSet * guessFile_;   ///< File to store guess vectors
 
-    virtual void linearTrans(TMap &VR, TMap &SigmaR) {
-      SigmaR = (*this->fullMatrix_) * VR;
-    };
   public:
     /**
      *  Defualt Constructor for QNCallable
@@ -85,6 +83,7 @@ namespace ChronusQ {
       this->allocSolution_ = false;
       this->needsLeft_     = false;
       this->isFullMatrix_  = false;
+      this->directDiag_    = false;
     };
 
     QNCallable(TMat *A, int NSek, int NGuess) : QNCallable(){
@@ -99,7 +98,7 @@ namespace ChronusQ {
     };
 
     QNCallable(TMat *A, int NSek) : QNCallable(A,NSek,0) {
-      this->nGuess = 2*NSek;
+      this->nGuess_ = 2*NSek;
     };
 
     QNCallable(TMat *A, int NSek, int NGuess, H5::H5File *scr) :
@@ -107,10 +106,32 @@ namespace ChronusQ {
       this->scratchFile_ = scr;
     }
 
-    inline initQN() {
+    inline void initQN() {
       if(this->generateGuess_) this->generateGuess();
       if(this->allocSolution_) this->allocSolution();
     }
+
+    /** Function Declarations **/
+
+    // Setters
+    inline void setNSek(int n)  { this->nSek_   = n;};
+    inline void setNGuess(int n){ this->nGuess_ = n;};
+
+    // Getters
+    inline int nGuess()     { return this->nGuess_    ; };
+    inline int nSek()       { return this->nSek_      ; };
+    inline int nSingleDim() { return this->nSingleDim_; };
+
+    inline VectorXd * omega()        { return this->omega_       ; };
+    inline TMat     * solutionVecR() { return this->solutionVecR_; };
+    inline TMat     * solutionVecL() { return this->solutionVecL_; };
+
+
+    virtual void linearTrans(TMap &,TMap &,TMap &,TMap &,TMap &,TMap &) = 0;
+    virtual void formGuess() = 0;
+    virtual void formDiag()  = 0;
+
+    
   }; // class QNCallable
 
   // Enums for Job Control
@@ -144,7 +165,7 @@ namespace ChronusQ {
     typedef Eigen::Map<TMat> TCMMap;
     typedef Eigen::Map<TVec> TVecMap;
 
-    QNCallable * qnObj_;
+    QNCallable<T> * qnObj_;
 
     // Dimension Variables
     size_t maxSubSpace_; ///< Maximum dimension of iterative subspace
