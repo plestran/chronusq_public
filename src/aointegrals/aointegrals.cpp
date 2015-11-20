@@ -158,9 +158,9 @@ void AOIntegrals::computeFmTTaylor(double *FmT, double T, int maxM, int minM){
     };
   };
 };
-
+/*
 void AOIntegrals::iniQuartetConstants(ShellPair *ijShellPair, ShellPair *klShellPair){
-  /* compute four-center info for shell quartet with L >= 1*/
+  // compute four-center info for shell quartet with L >= 1
   int i,j,k,l,m,nFmT=0;
   int nPGTOs[4];
   double centerQuartet[3][MAXCONTRACTION][MAXCONTRACTION][MAXCONTRACTION][MAXCONTRACTION];
@@ -220,10 +220,6 @@ void AOIntegrals::iniQuartetConstants(ShellPair *ijShellPair, ShellPair *klShell
         this->quartetConstants_->FmT[m][i][j][k][l] = math.zero;
     };
   };
-//  for(i=0;i<nPGTOs[0];i++) for(j=0;j<nPGTOs[1];j++) for(k=0;k<nPGTOs[2];k++) for(l=0;l<nPGTOs[3];l++) {
-//    normijkl = ijShellPair->norm[i][j]*klShellPair->norm[k][l];
-//    for(m=0;m<=totalL;m++) this->quartetConstants_->FmT[m][i][j][k][l] *= normijkl; 
-//  };
 };
 //-----------------------------//
 // initialize pair constants   //
@@ -233,9 +229,7 @@ void AOIntegrals::iniPairConstants(ShellPair *ijShellPair){
   double expo[MAXCONTRACTION][2];
   double center[3][2];
   this->pairConstants_->intSmall = controls_->thresholdS;
-  /*-------------------------*/
-  /* compute one-center info */
-  /*-------------------------*/
+  // compute one-center info 
   int totalL = ijShellPair->LTotal;
   for(i = 0; i < 2; i++) {
     this->pairConstants_->nPGTOs[i]  = ijShellPair->nPGTOs[i];
@@ -250,9 +244,7 @@ void AOIntegrals::iniPairConstants(ShellPair *ijShellPair){
     for(i = 0; i < this->pairConstants_->nPGTOs[j];i++)
       expo[i][j] = (basisSet_->shells_old[ijShellPair->shIndex[j]]).expo[i];
   };
-  /*-------------------------*/
-  /* compute two-center info */
-  /*-------------------------*/
+  // compute two-center info
   double expo1,expo2,expoT,constAtom;
   double sqrAB = 0.0, sqrPZ;
   double *FmT = new double[totalL + 1];
@@ -288,9 +280,7 @@ void AOIntegrals::iniPairConstants(ShellPair *ijShellPair){
     if(std::abs(this->pairConstants_->ssPair[i][j]) > this->pairConstants_->intSmall) 
       this->pairConstants_->ssNonzero[i][j] = true;
     else this->pairConstants_->ssNonzero[i][j] = false;
-    /*******************************/
-    /* compute FmU[m][i][j][iAtom] */
-    /*******************************/
+    // compute FmU[m][i][j][iAtom]
     if(this->pairConstants_->ssNonzero[i][j]) {
       constAtom = math.two * sqrt(expoT/math.pi) * this->pairConstants_->ssPair[i][j];
       for(iAtom = 0; iAtom < molecularConstants_->nAtom; iAtom++){
@@ -309,7 +299,7 @@ void AOIntegrals::iniPairConstants(ShellPair *ijShellPair){
     };
   };
 };
-
+*/
 void AOIntegrals::iniMolecularConstants(){
   this->molecularConstants_->nAtom=molecule_->nAtoms();
   for(int i = 0; i < this->molecularConstants_->nAtom ; i++){
@@ -591,3 +581,72 @@ void AOIntegrals::writeOneE(){
   this->fileio_->octupole->write(&this->elecOctpole_->storage()[0],H5::PredType::NATIVE_DOUBLE);
   */
 }
+
+
+void AOIntegrals::createShellPairs() {
+  int i,j,k,l,m,n,nPP;
+  double squareAB,prodexp,sumexp,KAB;
+  double sqrt2pi54 = 5.91496717279561; // sqrt(2)*pi^{5/4}
+  std::array<double,3> tmpP,tmpPA,tmpPB,tmpPZeta;
+  ShellCQ *iS,*jS;
+  ShellPair *ijS;
+
+  int nShell = this->basisSet_->nShell();
+  this->nShellPair_ = nShell*(nShell+1)/2;
+  this->shellPairs_ = new ShellPair[this->nShellPair_];
+
+  n = 0;
+  for(i=0;i<nShell;i++) for(j=i;j<nShell;j++) {
+    ijS = &(this->shellPairs_[n]);
+    if(this->basisSet_->shellsCQ[i].l>this->basisSet_->shellsCQ[j].l) {    
+      ijS->iShell = &(this->basisSet_->shellsCQ[i]);
+      ijS->jShell = &(this->basisSet_->shellsCQ[j]);
+    } else {
+      ijS->iShell = &(this->basisSet_->shellsCQ[j]);
+      ijS->jShell = &(this->basisSet_->shellsCQ[i]);
+    };
+
+    iS = ijS->iShell;
+    jS = ijS->jShell;
+
+    ijS->lTotal = iS->l + jS->l;
+
+    ijS->A = iS->O;
+    ijS->B = jS->O;
+
+    squareAB = math.zero;
+    for(m=0;m<3;m++) {
+      ijS->AB[m] = ijS->A[m]-ijS->B[m];
+      squareAB += ijS->AB[m]*ijS->AB[m];
+    };
+    
+    nPP = 0;
+    for(k=0; k!=iS->coeff.size();k++) 
+    for(l=0; l!=jS->coeff.size();j++) {
+      sumexp  = iS->alpha[k] + jS->alpha[l];
+      prodexp = iS->alpha[k] * jS->alpha[l];
+      KAB = exp(-squareAB*prodexp/sumexp);
+      ijS->KAB.push_back(KAB);
+      ijS->UAB.push_back(sqrt2pi54*KAB/sumexp);
+      ijS->Zeta.push_back(sumexp);    // zeta = alpha + beta
+      ijS->invZeta.push_back(math.half/sumexp);
+      ijS->halfInvZeta.push_back(math.half/sumexp);
+
+      ijS->ss.push_back(sqrt((math.pi/sumexp)*(math.pi/sumexp)*(math.pi/sumexp))*KAB);
+      for (m=0;m<3;m++) {
+        tmpP[m]     = (iS->alpha[k]*ijS->A[m]+jS->alpha[l]*ijS->B[m])/sumexp;// P=(alpha*A+beta*B)/zeta
+        tmpPZeta[m] = tmpP[m] * sumexp;
+        tmpPA[m]    = tmpP[m] - ijS->A[m]; // PA = P - A
+        tmpPB[m]    = tmpP[m] - ijS->B[m]; // PB = P - B
+      };
+      ijS->P.push_back(tmpP);
+      ijS->PA.push_back(tmpPA);
+      ijS->PB.push_back(tmpPB);
+      ijS->PZeta.push_back(tmpPZeta);
+    };
+    nPP++;
+    ijS->nPGTOPair = nPP;
+    n++;
+  };
+};
+

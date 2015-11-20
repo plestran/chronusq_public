@@ -162,7 +162,9 @@ void SingleSlater<double>::SADGuess() {
                           " atomic SCF calculations to form the initial guess" << endl;
  
     // Loop and perform CUHF on each atomic center
+    cout<<"unique size "<<uniqueElement.size();
     for(auto iUn = 0; iUn < uniqueElement.size(); iUn++){
+    cout<<"xsli test 1: "<<iUn<<endl;
       // Local objects to be constructed and destructed at every loop
       AOIntegrals aointegralsAtom;
       SingleSlater<double> hartreeFockAtom;
@@ -236,6 +238,7 @@ void SingleSlater<double>::SADGuess() {
       // Place Atomic Densities into Total Densities
       this->placeAtmDen(atomIndex[iUn],hartreeFockAtom);
  
+    cout<<"xsli test 2: "<<iUn<<endl;
     } // Loop iUn
  
     this->scaleDen();

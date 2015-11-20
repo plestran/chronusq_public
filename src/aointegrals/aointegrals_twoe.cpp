@@ -23,12 +23,13 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
+/*
 #include <aointegrals.h>
 using ChronusQ::AOIntegrals;
-/******************************************************/
-/* two-e horizontal recursion from (ab|cd) to (a0|cd) */
-/* (ab|cd)=(a+1,b-1|cd)+(A-B)*(a,b-1|cd)              */
-/******************************************************/
+//----------------------------------------------------//
+// two-e horizontal recursion from (ab|cd) to (a0|cd) //
+// (ab|cd)=(a+1,b-1|cd)+(A-B)*(a,b-1|cd)              //
+//----------------------------------------------------//
 double AOIntegrals::twoehRRabcd(  int *nPGTOs, ShellPair *ijShellPair, ShellPair *klShellPair,
                                 int LA,int *lA,int LB,int *lB,int LC,int *lC,int LD,int *lD) {
   double tmpVal = 0.0, tmpVal1=0.0;
@@ -47,7 +48,6 @@ double AOIntegrals::twoehRRabcd(  int *nPGTOs, ShellPair *ijShellPair, ShellPair
     for(i=0;i<nPGTOs[0];i++) for(j=0;j<nPGTOs[1];j++) for(k=0;k<nPGTOs[2];k++) for(l=0;l<nPGTOs[3];l++) {
       tmpVal += (this->quartetConstants_->FmT[0][i][j][k][l]*ijShellPair->deltaPA[iWork][i][j]
                 +this->quartetConstants_->FmT[1][i][j][k][l]*this->quartetConstants_->deltaWP[iWork][i][j][k][l]);
-//              *ijShellPair->norm[i][j]*klShellPair->norm[k][l];
     };
     return tmpVal;
   } else if (totalL>4||LA==2||LB==2||LC==2||LD==2) {
@@ -91,10 +91,10 @@ double AOIntegrals::twoehRRabcd(  int *nPGTOs, ShellPair *ijShellPair, ShellPair
     return this->twoepppp(nPGTOs,ijShellPair,klShellPair,LA,lA,LB,lB,LC,lC,LD,lD);
   };
 };
-/******************************************************/
-/* two-e horizontal recursion from (a0|cd) to (a0|c0) */
-/* (a0|cd)=(a,0|c+1,d-1)+(C-D)*(a,0|c,d-1)            */
-/******************************************************/
+//----------------------------------------------------//
+// two-e horizontal recursion from (a0|cd) to (a0|c0) //
+// (a0|cd)=(a,0|c+1,d-1)+(C-D)*(a,0|c,d-1)            //
+//----------------------------------------------------//
 double AOIntegrals::twoehRRa0cd(  int *nPGTOs, ShellPair *ijShellPair, ShellPair *klShellPair,
                                 int LA,int *lA,int LC,int *lC,int LD,int *lD)  {
   int i=0,j=0,k=0,l=0;
@@ -112,7 +112,6 @@ double AOIntegrals::twoehRRa0cd(  int *nPGTOs, ShellPair *ijShellPair, ShellPair
   if(LD==0) {
     for(i=0;i<nPGTOs[0];i++) for(j=0;j<nPGTOs[1];j++) for(k=0;k<nPGTOs[2];k++) for(l=0;l<nPGTOs[3];l++)
       tmpVal +=     this->twoevRRa0c0(ijShellPair,klShellPair,0,LA,lA,LC,lC,&i,&j,&k,&l);
-//                  *ijShellPair->norm[i][j]*klShellPair->norm[k][l];
   } else {
     if(std::abs(klShellPair->deltaAB[iWork])>this->controls_->thresholdAB) {
       if(LD>1) { // (a0|cd)
@@ -123,7 +122,6 @@ double AOIntegrals::twoehRRa0cd(  int *nPGTOs, ShellPair *ijShellPair, ShellPair
         for(i=0;i<nPGTOs[0];i++) for(j=0;j<nPGTOs[1];j++) for(k=0;k<nPGTOs[2];k++) for(l=0;l<nPGTOs[3];l++)
           tmpVal += (this->twoevRRa0c0(ijShellPair,klShellPair,0,LA,lA,LC+1,lCp1,&i,&j,&k,&l) 
                     +klShellPair->deltaAB[iWork]*this->twoevRRa0c0(ijShellPair,klShellPair,0,LA,lA,LC,lC,&i,&j,&k,&l));
-//                  *ijShellPair->norm[i][j]*klShellPair->norm[k][l];
       };
     } else {
       if(LD>1) {
@@ -132,7 +130,6 @@ double AOIntegrals::twoehRRa0cd(  int *nPGTOs, ShellPair *ijShellPair, ShellPair
       } else {
         for(i=0;i<nPGTOs[0];i++) for(j=0;j<nPGTOs[1];j++) for(k=0;k<nPGTOs[2];k++) for(l=0;l<nPGTOs[3];l++)
           tmpVal +=     this->twoevRRa0c0(ijShellPair,klShellPair,0,LA,lA,LC+1,lCp1,&i,&j,&k,&l);
-//                      *ijShellPair->norm[i][j]*klShellPair->norm[k][l];
       };
     };
   };
@@ -161,7 +158,6 @@ double AOIntegrals::twoepp00( int *nPGTOs, ShellPair *ijShellPair, ShellPair *kl
           tmpVal +=     (this->quartetConstants_->FmT[0][i][j][k][l]*Par0
                         +this->quartetConstants_->FmT[1][i][j][k][l]*Par1
                         +this->quartetConstants_->FmT[2][i][j][k][l]*Par2);
-//                      *ijShellPair->norm[i][j]*klShellPair->norm[k][l];
         };
       };
       return tmpVal;
@@ -175,7 +171,6 @@ double AOIntegrals::twoepp00( int *nPGTOs, ShellPair *ijShellPair, ShellPair *kl
           tmpVal +=     (this->quartetConstants_->FmT[0][i][j][k][l]*Par0
                         +this->quartetConstants_->FmT[1][i][j][k][l]*Par1
                         +this->quartetConstants_->FmT[2][i][j][k][l]*Par2);
-//                      *ijShellPair->norm[i][j]*klShellPair->norm[k][l];
         };
       };
       return tmpVal;
@@ -198,7 +193,6 @@ double AOIntegrals::twoepp00( int *nPGTOs, ShellPair *ijShellPair, ShellPair *kl
           tmpVal +=     (this->quartetConstants_->FmT[0][i][j][k][l]*Par0
                         +this->quartetConstants_->FmT[1][i][j][k][l]*Par1
                         +this->quartetConstants_->FmT[2][i][j][k][l]*Par2);
-//                      *ijShellPair->norm[i][j]*klShellPair->norm[k][l];
         };
       };
       return tmpVal;
@@ -211,7 +205,6 @@ double AOIntegrals::twoepp00( int *nPGTOs, ShellPair *ijShellPair, ShellPair *kl
           tmpVal +=     (this->quartetConstants_->FmT[0][i][j][k][l]*Par0
                         +this->quartetConstants_->FmT[1][i][j][k][l]*Par1
                         +this->quartetConstants_->FmT[2][i][j][k][l]*Par2);
-//                      *ijShellPair->norm[i][j]*klShellPair->norm[k][l];
         };
       };
       return tmpVal;
@@ -241,7 +234,6 @@ double AOIntegrals::twoeppp0( int *nPGTOs,ShellPair *ijShellPair,ShellPair *klSh
       for(i=0;i<nPGTOs[0];i++) for(j=0;j<nPGTOs[1];j++) for(k=0;k<nPGTOs[2];k++) for(l=0;l<nPGTOs[3];l++) {
         CO1=ijShellPair->inversezeta[i][j];
         PA0=ijShellPair->deltaPA[iWork][i][j];
-//      tC1=AB0+PA0;
         tC1=ijShellPair->deltaPB[iWork][i][j];
         tC2=PA0*tC1+CO1;
         CO3=this->quartetConstants_->a0c0Par3[i][j][k][l];
@@ -256,7 +248,6 @@ double AOIntegrals::twoeppp0( int *nPGTOs,ShellPair *ijShellPair,ShellPair *klSh
                     +this->quartetConstants_->FmT[1][i][j][k][l]*(PA0*tC3+QC0*tC4+WQ0*tC2+AB0*CO3)
                     +this->quartetConstants_->FmT[2][i][j][k][l]*(WP0*tC3+PA0*tC5+WQ0*tC4)
                     +this->quartetConstants_->FmT[3][i][j][k][l]*(WP0*tC5));
-//                  *ijShellPair->norm[i][j]*klShellPair->norm[k][l];
       };
       return tmpVal;
     } else { //(xx|y0)
@@ -264,7 +255,6 @@ double AOIntegrals::twoeppp0( int *nPGTOs,ShellPair *ijShellPair,ShellPair *klSh
       for(i=0;i<nPGTOs[0];i++) for(j=0;j<nPGTOs[1];j++) for(k=0;k<nPGTOs[2];k++) for(l=0;l<nPGTOs[3];l++) {
         CO1=ijShellPair->inversezeta[i][j];
         PA0=ijShellPair->deltaPA[iWork][i][j];
-//      tC1=AB0+PA0;
         tC1=ijShellPair->deltaPB[iWork][i][j];
         tC2=tC1+PA0;
         tC3=PA0*tC1+CO1;
@@ -278,7 +268,6 @@ double AOIntegrals::twoeppp0( int *nPGTOs,ShellPair *ijShellPair,ShellPair *klSh
                     +this->quartetConstants_->FmT[1][i][j][k][l]*(QC1*tC4+WQ1*tC3)
                     +this->quartetConstants_->FmT[2][i][j][k][l]*(QC1*tC5+WQ1*tC4)
                     +this->quartetConstants_->FmT[3][i][j][k][l]*(WQ1*tC5));
-//                  *ijShellPair->norm[i][j]*klShellPair->norm[k][l];
       };
       return tmpVal;
     };
@@ -293,7 +282,6 @@ double AOIntegrals::twoeppp0( int *nPGTOs,ShellPair *ijShellPair,ShellPair *klSh
         AB1=ijShellPair->deltaAB[jWork];
         PA1=ijShellPair->deltaPA[jWork][i][j];
         WP1=this->quartetConstants_->deltaWP[jWork][i][j][k][l];                  
-//      tC1=AB1+PA1;             
         tC1=ijShellPair->deltaPB[jWork][i][j];
         tC2=PA0*QC0;             
         tC3=PA0*WQ0+QC0*WP0+CO3; 
@@ -302,7 +290,6 @@ double AOIntegrals::twoeppp0( int *nPGTOs,ShellPair *ijShellPair,ShellPair *klSh
                     +this->quartetConstants_->FmT[1][i][j][k][l]*(tC1*tC3+WP1*tC2)
                     +this->quartetConstants_->FmT[2][i][j][k][l]*(tC1*tC4+WP1*tC3)
                     +this->quartetConstants_->FmT[3][i][j][k][l]*(WP1*tC4));
-//                  *ijShellPair->norm[i][j]*klShellPair->norm[k][l];
       };
       return tmpVal;
     } else if(kWork==jWork){ //(xy|y0)   ===>>  (yx|y0)
@@ -315,7 +302,6 @@ double AOIntegrals::twoeppp0( int *nPGTOs,ShellPair *ijShellPair,ShellPair *klSh
         AB1=-ijShellPair->deltaAB[iWork];
         PA1=ijShellPair->deltaPB[iWork][i][j];
         WP1=this->quartetConstants_->deltaWP[iWork][i][j][k][l];
-//      tC1=AB1+PA1;
         tC1=ijShellPair->deltaPA[iWork][i][j];
         tC2=PA0*QC0; 
         tC3=PA0*WQ0+QC0*WP0+CO3;
@@ -324,7 +310,6 @@ double AOIntegrals::twoeppp0( int *nPGTOs,ShellPair *ijShellPair,ShellPair *klSh
                     +this->quartetConstants_->FmT[1][i][j][k][l]*(tC1*tC3+WP1*tC2)
                     +this->quartetConstants_->FmT[2][i][j][k][l]*(tC1*tC4+WP1*tC3)
                     +this->quartetConstants_->FmT[3][i][j][k][l]*(WP1*tC4));
-//                  *ijShellPair->norm[i][j]*klShellPair->norm[k][l];
       };
       return tmpVal;
     } else { //(xy|z0)
@@ -336,7 +321,6 @@ double AOIntegrals::twoeppp0( int *nPGTOs,ShellPair *ijShellPair,ShellPair *klSh
         WP1=this->quartetConstants_->deltaWP[jWork][i][j][k][l];
         QC2=klShellPair->deltaPA[kWork][k][l];
         WQ2=this->quartetConstants_->deltaWQ[kWork][i][j][k][l];
-//      tC1=AB1+PA1;
         tC1=ijShellPair->deltaPB[jWork][i][j];
         tC2=PA0*QC2;
         tC3=PA0*WQ2+QC2*WP0;
@@ -345,7 +329,6 @@ double AOIntegrals::twoeppp0( int *nPGTOs,ShellPair *ijShellPair,ShellPair *klSh
                     +this->quartetConstants_->FmT[1][i][j][k][l]*(tC1*tC3+WP1*tC2)
                     +this->quartetConstants_->FmT[2][i][j][k][l]*(WP1*tC3+tC1*tC4)
                     +this->quartetConstants_->FmT[3][i][j][k][l]*(WP1*tC4));
-//                  *ijShellPair->norm[i][j]*klShellPair->norm[k][l];
       };
       return tmpVal;
     };
@@ -414,7 +397,6 @@ double AOIntegrals::twoepppp(int *nPGTOs,ShellPair *ijShellPair,ShellPair *klShe
                         +this->quartetConstants_->FmT[2][i][j][k][l]*(tC5*tC0+tC6*tC9+tCc*WP0*WQ0-tCa*tC8-tCb*tC7-tCa*tCb+math.two*CO3*(WQ0*tC3+WP0*tC4+CO3))
                         +this->quartetConstants_->FmT[3][i][j][k][l]*(tC8*tC9+tC7*tC0+math.four*CO3*WP0*WQ0)
                         +this->quartetConstants_->FmT[4][i][j][k][l]*(tC9*tC0));
-//                      *ijShellPair->norm[i][j]*klShellPair->norm[k][l];
           };
           return tmpVal;
         } else {//<xx|xy> or <xx|xz> ==>format 3          
@@ -431,7 +413,6 @@ double AOIntegrals::twoepppp(int *nPGTOs,ShellPair *ijShellPair,ShellPair *klShe
             CD1=klShellPair->deltaAB[lWork];             
             QC1=klShellPair->deltaPA[lWork][k][l];               
             WQ1=this->quartetConstants_->deltaWQ[lWork][i][j][k][l];
-//          tC1=AB0+PA0;
             tC1=ijShellPair->deltaPB[iWork][i][j];
             tC2=CD1+QC1;
             tC3=tC1+PA0;
@@ -447,7 +428,6 @@ double AOIntegrals::twoepppp(int *nPGTOs,ShellPair *ijShellPair,ShellPair *klShe
                         +this->quartetConstants_->FmT[2][i][j][k][l]*(tC6*WQ1+tC7*tC2)
                         +this->quartetConstants_->FmT[3][i][j][k][l]*(tC7*WQ1+tC2*tCc)
                         +this->quartetConstants_->FmT[4][i][j][k][l]*(tCc*WQ1));
-//                      *ijShellPair->norm[i][j]*klShellPair->norm[k][l];
           };
           return tmpVal;
         };
@@ -466,7 +446,6 @@ double AOIntegrals::twoepppp(int *nPGTOs,ShellPair *ijShellPair,ShellPair *klShe
             CD1=-klShellPair->deltaAB[kWork];                  //-CD
             QC1=klShellPair->deltaPB[kWork][k][l];              //QD 
             WQ1=this->quartetConstants_->deltaWQ[kWork][i][j][k][l];
-//          tC1=AB0+PA0;
             tC1=ijShellPair->deltaPB[iWork][i][j];
             tC2=CD1+QC1;
             tC3=tC1+PA0;
@@ -482,7 +461,6 @@ double AOIntegrals::twoepppp(int *nPGTOs,ShellPair *ijShellPair,ShellPair *klShe
                         +this->quartetConstants_->FmT[2][i][j][k][l]*(tC6*WQ1+tC7*tC2)
                         +this->quartetConstants_->FmT[3][i][j][k][l]*(tC7*WQ1+tC2*tCc)
                         +this->quartetConstants_->FmT[4][i][j][k][l]*(tCc*WQ1));
-//                      *ijShellPair->norm[i][j]*klShellPair->norm[k][l];
           };
           return tmpVal;
         } else if(lWork==kWork){//<xx|yy> ==>format 2   
@@ -497,7 +475,6 @@ double AOIntegrals::twoepppp(int *nPGTOs,ShellPair *ijShellPair,ShellPair *klShe
             CD1=klShellPair->deltaAB[kWork];             
             QC1=klShellPair->deltaPA[kWork][k][l];              
             WQ1=this->quartetConstants_->deltaWQ[kWork][i][j][k][l];
-//          tC1=CO1+PA0*(AB0+PA0);
             tC1=CO1+PA0*ijShellPair->deltaPB[iWork][i][j];
             tC2=CO2+QC1*(CD1+QC1);
             tC3=WP0*(AB0+math.two*PA0)-CO1*CO5;
@@ -509,7 +486,6 @@ double AOIntegrals::twoepppp(int *nPGTOs,ShellPair *ijShellPair,ShellPair *klShe
                         +this->quartetConstants_->FmT[2][i][j][k][l]*(tC3*tC4+tC1*tC6+tC2*tC5)
                         +this->quartetConstants_->FmT[3][i][j][k][l]*(tC3*tC6+tC4*tC5)
                         +this->quartetConstants_->FmT[4][i][j][k][l]*(tC5*tC6));
-//                      *ijShellPair->norm[i][j]*klShellPair->norm[k][l];
           };
           return tmpVal;
         } else {//<xx|yz> ==>format 4   
@@ -539,7 +515,6 @@ double AOIntegrals::twoepppp(int *nPGTOs,ShellPair *ijShellPair,ShellPair *klShe
                         +this->quartetConstants_->FmT[2][i][j][k][l]*(tC5*tC7+tC9*tC8+tC4*tC6)
                         +this->quartetConstants_->FmT[3][i][j][k][l]*(tC8*tC7+tC9*tC6)
                         +this->quartetConstants_->FmT[4][i][j][k][l]*(tC6*tC7));
-//                      *ijShellPair->norm[i][j]*klShellPair->norm[k][l];
           };
           return tmpVal;
         };
@@ -560,7 +535,6 @@ double AOIntegrals::twoepppp(int *nPGTOs,ShellPair *ijShellPair,ShellPair *klShe
             CD1=ijShellPair->deltaAB[jWork];                 //==>AB                                                
             QC1=ijShellPair->deltaPA[jWork][i][j];           //==>PA                                                
             WQ1=this->quartetConstants_->deltaWP[jWork][i][j][k][l];      //==>WP                                   
-//          tC1=AB0+PA0;                                                                        
             tC1=klShellPair->deltaPB[kWork][k][l];
             tC2=CD1+QC1;                                                                        
             tC3=tC1+PA0;                                                                        
@@ -576,7 +550,6 @@ double AOIntegrals::twoepppp(int *nPGTOs,ShellPair *ijShellPair,ShellPair *klShe
                         +this->quartetConstants_->FmT[2][i][j][k][l]*(tC6*WQ1+tC7*tC2)
                         +this->quartetConstants_->FmT[3][i][j][k][l]*(tC7*WQ1+tC2*tCc)
                         +this->quartetConstants_->FmT[4][i][j][k][l]*(tCc*WQ1));
-//                      *ijShellPair->norm[i][j]*klShellPair->norm[k][l];
           };
           return tmpVal;
         } else if(lWork==jWork){//<xy|xy> ==>format 5           
@@ -606,7 +579,6 @@ double AOIntegrals::twoepppp(int *nPGTOs,ShellPair *ijShellPair,ShellPair *klShe
                         +this->quartetConstants_->FmT[2][i][j][k][l]*(tC4*tC5+tC3*tC7+tC6*tC8)
                         +this->quartetConstants_->FmT[3][i][j][k][l]*(tC5*tC7+tC4*tC8)
                         +this->quartetConstants_->FmT[4][i][j][k][l]*(tC7*tC8));
-//                      *ijShellPair->norm[i][j]*klShellPair->norm[k][l];
           };
           return tmpVal;
         } else {//<xy|xz> ==>format 6   
@@ -636,7 +608,6 @@ double AOIntegrals::twoepppp(int *nPGTOs,ShellPair *ijShellPair,ShellPair *klShe
                         +this->quartetConstants_->FmT[2][i][j][k][l]*(tC4*tC5+tC3*tC6+tC7*tC8)
                         +this->quartetConstants_->FmT[3][i][j][k][l]*(tC5*tC7+tC6*tC8)
                         +this->quartetConstants_->FmT[4][i][j][k][l]*(tC5*tC6));
-//                      *ijShellPair->norm[i][j]*klShellPair->norm[k][l];
           };
           return tmpVal;
         };
@@ -668,7 +639,6 @@ double AOIntegrals::twoepppp(int *nPGTOs,ShellPair *ijShellPair,ShellPair *klShe
                         +this->quartetConstants_->FmT[2][i][j][k][l]*(tC4*tC5+tC3*tC7+tC6*tC8)
                         +this->quartetConstants_->FmT[3][i][j][k][l]*(tC5*tC7+tC4*tC8)
                         +this->quartetConstants_->FmT[4][i][j][k][l]*(tC7*tC8));
-//                      *ijShellPair->norm[i][j]*klShellPair->norm[k][l];
           };
           return tmpVal;
         } else if(lWork==jWork){//<xy|yy> ==>format 3   
@@ -701,7 +671,6 @@ double AOIntegrals::twoepppp(int *nPGTOs,ShellPair *ijShellPair,ShellPair *klShe
                         +this->quartetConstants_->FmT[2][i][j][k][l]*(tC6*WQ1+tC7*tC2)
                         +this->quartetConstants_->FmT[3][i][j][k][l]*(tC7*WQ1+tC2*tCc)
                         +this->quartetConstants_->FmT[4][i][j][k][l]*(tCc*WQ1));
-//                      *ijShellPair->norm[i][j]*klShellPair->norm[k][l];
           };
           return tmpVal;
         } else {//<xy|yz> ==>format 6    
@@ -731,7 +700,6 @@ double AOIntegrals::twoepppp(int *nPGTOs,ShellPair *ijShellPair,ShellPair *klShe
                         +this->quartetConstants_->FmT[2][i][j][k][l]*(tC4*tC5+tC3*tC6+tC7*tC8)
                         +this->quartetConstants_->FmT[3][i][j][k][l]*(tC5*tC7+tC6*tC8)
                         +this->quartetConstants_->FmT[4][i][j][k][l]*(tC5*tC6));
-//                      *ijShellPair->norm[i][j]*klShellPair->norm[k][l];
           };
           return tmpVal;
         };
@@ -763,7 +731,6 @@ double AOIntegrals::twoepppp(int *nPGTOs,ShellPair *ijShellPair,ShellPair *klShe
                         +this->quartetConstants_->FmT[2][i][j][k][l]*(tC4*tC5+tC3*tC6+tC7*tC8)
                         +this->quartetConstants_->FmT[3][i][j][k][l]*(tC5*tC7+tC6*tC8)
                         +this->quartetConstants_->FmT[4][i][j][k][l]*(tC5*tC6));
-//                      *ijShellPair->norm[i][j]*klShellPair->norm[k][l];
           };
           return tmpVal;
         } else if(lWork==jWork){//<xy|zy> ==>format 6
@@ -793,7 +760,6 @@ double AOIntegrals::twoepppp(int *nPGTOs,ShellPair *ijShellPair,ShellPair *klShe
                         +this->quartetConstants_->FmT[2][i][j][k][l]*(tC4*tC5+tC3*tC6+tC7*tC8)
                         +this->quartetConstants_->FmT[3][i][j][k][l]*(tC5*tC7+tC6*tC8)
                         +this->quartetConstants_->FmT[4][i][j][k][l]*(tC5*tC6));
-//                      *ijShellPair->norm[i][j]*klShellPair->norm[k][l];
           };return tmpVal;      
         } else {//<xy|zz> ==>Format 4
           for(i=0;i<nPGTOs[0];i++) for(j=0;j<nPGTOs[1];j++) for(k=0;k<nPGTOs[2];k++) for(l=0;l<nPGTOs[3];l++){
@@ -822,7 +788,6 @@ double AOIntegrals::twoepppp(int *nPGTOs,ShellPair *ijShellPair,ShellPair *klShe
                         +this->quartetConstants_->FmT[2][i][j][k][l]*(tC5*tC7+tC9*tC8+tC4*tC6)
                         +this->quartetConstants_->FmT[3][i][j][k][l]*(tC8*tC7+tC9*tC6)
                         +this->quartetConstants_->FmT[4][i][j][k][l]*(tC6*tC7));
-//                      *ijShellPair->norm[i][j]*klShellPair->norm[k][l];
           };
           return tmpVal;
         };
@@ -831,14 +796,14 @@ double AOIntegrals::twoepppp(int *nPGTOs,ShellPair *ijShellPair,ShellPair *klShe
   };
 };
 
-/*****************************************************************/
-/* two-e vertical recursion from [a0|c0] to [a0|00]              */
-/* [a0|c0]^m = (Q-C)*[a0|c-1,0]^m                                */
-/*           + (W-Q)*[a0|c-1,0]^(m+1)                            */
-/*           + N(a)/(2*(zeta+eta))*[a-1,0|c-1,0]^(m+1)           */
-/*           + (N(c)-1)/(2*eta)*[a0|c-2,0]^m                     */
-/*           - (N(c)-1)/(2*eta)*zeta/(zeta+eta)*[a0|c-2,0]^(m+1) */
-/*****************************************************************/
+//---------------------------------------------------------------//
+// two-e vertical recursion from [a0|c0] to [a0|00]              //
+// [a0|c0]^m = (Q-C)*[a0|c-1,0]^m                                //
+//           + (W-Q)*[a0|c-1,0]^(m+1)                            //
+//           + N(a)/(2*(zeta+eta))*[a-1,0|c-1,0]^(m+1)           //
+//           + (N(c)-1)/(2*eta)*[a0|c-2,0]^m                     //
+//           - (N(c)-1)/(2*eta)*zeta/(zeta+eta)*[a0|c-2,0]^(m+1) //
+//---------------------------------------------------------------//
 double AOIntegrals::twoevRRa0c0(  ShellPair *ijShellPair, ShellPair *klShellPair,
                                 int m, int LA, int *lA, int LC, int *lC, int *i, int *j, int *k, int *l) {
   if(LC==0) return this->twoevRRa000(ijShellPair,klShellPair,m,LA,lA,i,j,k,l);
@@ -882,13 +847,13 @@ double AOIntegrals::twoevRRa0c0(  ShellPair *ijShellPair, ShellPair *klShellPair
   };
   return tmpVal;
 };
-/*****************************************************************/
-/* two-e vertical recursion from [a0|c0] to [00|00]              */
-/* [a0|00]^m = (P-A)*[a-1,0|00]^m                                */
-/*           + (W-P)*[a-1,0|00]^(m+1)                            */
-/*           + (N(a)-1)/(2*zeta)*[a-2,0|00]^m                    */
-/*           - (N(a)-1)/(2*zeta)*eta/(zeta+eta)*[a-2,0|00]^(m+1) */
-/*****************************************************************/
+//---------------------------------------------------------------//
+// two-e vertical recursion from [a0|c0] to [00|00]              //
+// [a0|00]^m = (P-A)*[a-1,0|00]^m                                //
+//           + (W-P)*[a-1,0|00]^(m+1)                            //
+//           + (N(a)-1)/(2*zeta)*[a-2,0|00]^m                    //
+//           - (N(a)-1)/(2*zeta)*eta/(zeta+eta)*[a-2,0|00]^(m+1) //
+//---------------------------------------------------------------//
 double AOIntegrals::twoevRRa000(ShellPair *ijShellPair,ShellPair *klShellPair,int m,int LA,int *lA,int *i,int *j,int *k,int *l) {
   if(LA==0) return this->quartetConstants_->FmT[m][*i][*j][*k][*l];
   double tmpVal=0.0;
@@ -922,7 +887,7 @@ double AOIntegrals::twoevRRa000(ShellPair *ijShellPair,ShellPair *klShellPair,in
 };
 
 double AOIntegrals::twoeSSSS0(int *nPGTOs, ShellPair *ijShellPair, ShellPair *klShellPair){
-  /* integrate (SS|SS) */
+  // integrate (SS|SS) 
   int i,j,k,l,m;
   double PQ,sqrPQ,SSSS0=0.0,FmT[1],T,Upq,expo1,expo2,expoT;
 
@@ -946,4 +911,4 @@ double AOIntegrals::twoeSSSS0(int *nPGTOs, ShellPair *ijShellPair, ShellPair *kl
   };
   return SSSS0;
 };
-
+*/
