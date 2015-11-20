@@ -63,12 +63,32 @@ double SingleSlater<dcomplex>::spindens(double rho_A, double rho_B){
 };
 
 template<>
-std::array<double,2> SingleSlater<dcomplex>::formVC (double rho, double spindensity){
+std::array<double,3> SingleSlater<dcomplex>::formVExSlater (double rho, double spindensity){
+
+}; 
+
+template<>
+std::array<double,3> SingleSlater<dcomplex>::formVCVWN (double rho, double spindensity){
+
+}; 
+
+template<>
+std::array<double,3> SingleSlater<dcomplex>::formVC (double rho, double spindensity){
+
+}; 
+
+template<>
+std::array<double,3> SingleSlater<dcomplex>::formVEx(double rho, double spindensity){
 
 }; 
 
 template<>
 void SingleSlater<dcomplex>::formVXC(){
+
+};
+
+template<>
+void SingleSlater<dcomplex>::formVXC_Par(){
 
 };
 
