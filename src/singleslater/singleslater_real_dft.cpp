@@ -1002,20 +1002,46 @@ void SingleSlater<double>::formVXC_Par(){
 //    this->duration_7 = std::chrono::seconds(0) ;
 //    this->duration_8 = std::chrono::seconds(0) ;
 ////T
+//    this->screenVxc  = false;
 
     int nAtom   = this->molecule_->nAtoms();                    // Number of Atoms
     this->ngpts = this->nRadDFTGridPts_*this->nAngDFTGridPts_;  // Number of grid point for each center
     int nPtsPerThread = this->ngpts / omp_get_max_threads();    //  Number of Threads
 //  Get the number of tread to dimension this last two
-    std::array<double,1> tmpEnergyEx  = {0.0} ;
-    std::array<double,1> tmpEnergyCor = {0.0} ;
+//  std::array<double,1> tmpEnergyEx  = {0.0} ;
+//  std::array<double,1> tmpEnergyCor = {0.0} ;
+    std::vector<double> tmpEnergyEx(omp_get_max_threads())  ;
+    std::vector<double> tmpEnergyCor(omp_get_max_threads()) ;
+    std::vector<int> tmpnpts(omp_get_max_threads()) ;
+
+    int nRHF;
+    if(!this->isClosedShell || this->Ref_ == TCS) nRHF = 1;
+    else    nRHF = 2;
+    std::vector<std::vector<RealMatrix>> 
+      tmpVX(nRHF,std::vector<RealMatrix>(omp_get_max_threads(),
+              RealMatrix::Zero(this->nBasis_,this->nBasis_)
+      )
+    );
+    std::vector<std::vector<RealMatrix>> 
+      tmpVC(nRHF,std::vector<RealMatrix>(omp_get_max_threads(),
+              RealMatrix::Zero(this->nBasis_,this->nBasis_)
+      )
+    );
+
     double CxVx  = -(3.0/4.0)*(std::pow((3.0/math.pi),(1.0/3.0)));  //TF LDA Prefactor (for Vx)  
     double val = 4.0*math.pi*CxVx;                                  // to take into account Ang Int
-    this->totalEx = 0.0;    // Total Exchange Energy
-    this->totalEcorr = 0.0; // Total Correlation Energy
+    this->totalEx = 0.0;    // Zero out Total Exchange Energy
+    this->totalEcorr = 0.0; // Zero out Total Correlation Energy
+    this->vXA()->setZero();   // Set to zero every occurence of the SCF
+    this->vCorA()->setZero(); // Set to zero every occurence of the SCF
+    if(!this->isClosedShell && this->Ref_ != TCS) {
+      this->vXB()->setZero();
+      this->vCorB()->setZero();
+    }
     //bool nodens;
     std::vector<bool> tmpnull(this->basisset_->nShell()+1);
-    OneDGrid * Rad ;
+    OneDGrid * Rad ;                              // Pointer for Radial Grid
+    LebedevGrid GridLeb(this->nAngDFTGridPts_);   // Angular Grid
 /*  
  *  Generate grids 
  *
@@ -1034,15 +1060,123 @@ void SingleSlater<double>::formVXC_Par(){
       Rad = new GaussChebyshev1stGridInf(this->nRadDFTGridPts_,0.0,1.0);   
     else if (this->dftGrid_ == EULERMACL) 
       Rad = new  EulerMaclaurinGrid(this->nRadDFTGridPts_,0.0,1.0);   
+//  Generare Angular Grid
+    GridLeb.genGrid();                            
+ 
+    auto batch_dft = [&] (int thread_id,int iAtm, TwoDGrid &Raw3Dg) {
+      for(int ipts = 0; ipts < this->ngpts; ipts++){
+//        printf("%d_%d_%d_%d\n", thread_id, ipts/nPtsPerThread,  ipts, iAtm);
+        if(ipts/nPtsPerThread != thread_id) continue;
+////T   
+//   auto start_5 = std::chrono::high_resolution_clock::now();  // Timing weights
+////T
+        tmpnpts[thread_id]++;
+        bool nodens = false;
+        // Evaluate each Becke fuzzy call weight, normalize it and muliply by 
+        //   the Raw grid weight at that point
+        auto bweight = (this->formBeckeW((Raw3Dg.gridPtCart(ipts)),iAtm)) 
+                     / (this->normBeckeW(Raw3Dg.gridPtCart(ipts))) ;
+        auto weight = Raw3Dg.getweightsGrid(ipts) * bweight;
+        
+////T
+//   auto finish_5 = std::chrono::high_resolution_clock::now();  
+//   this->duration_5 += finish_5 - start_5;
+////T
+        // Build the Vxc for the ipts grid point 
+        //  ** Vxc will be ready at the end of the two loop, to be finalized ** 
+        if (this->screenVxc ) {
+          auto mapRad_ = this->basisset_->MapGridBasis(Raw3Dg.gridPtCart(ipts));
+          if (mapRad_[0] || (bweight < this->epsScreen)) 
+            nodens = true;
+          if(!nodens) 
+            this->evalVXC_Par((Raw3Dg.gridPtCart(ipts)),weight,mapRad_,
+              tmpEnergyEx[thread_id],tmpEnergyCor[thread_id],&tmpVX[0][thread_id],
+              &tmpVX[1][thread_id],&tmpVC[0][thread_id],&tmpVC[1][thread_id]);
+        } else {
+            this->evalVXC_Par((Raw3Dg.gridPtCart(ipts)),weight,tmpnull,
+              tmpEnergyEx[thread_id],tmpEnergyCor[thread_id],&tmpVX[0][thread_id],
+              &tmpVX[1][thread_id],&tmpVC[0][thread_id],&tmpVC[1][thread_id]);
+        }
 
-    LebedevGrid GridLeb(this->nAngDFTGridPts_);   // Angular Grid
-    GridLeb.genGrid();                            // Generate Angular Grid
-    this->vXA()->setZero();   // Set to zero every occurence of the SCF
-    this->vCorA()->setZero(); // Set to zero every occurence of the SCF
-    if(!this->isClosedShell && this->Ref_ != TCS) this->vXB()->setZero();
-    if(!this->isClosedShell && this->Ref_ != TCS) this->vCorB()->setZero();
+      } // loop ipts
+    }; // end batch_dft
+
+   for(int iAtm = 0; iAtm < nAtom; iAtm++){
+      std::fill(tmpEnergyEx.begin(),tmpEnergyEx.end(),0.0);
+      std::fill(tmpEnergyCor.begin(),tmpEnergyCor.end(),0.0);
+      std::fill(tmpnpts.begin(),tmpnpts.end(),0);
+      Rad->genGrid(); 
+      // The Radial grid is generated and scaled for each atom
+      Rad->atomGrid((elements[this->molecule_->index(iAtm)].sradius)) ;  
+      TwoDGrid Raw3Dg(this->ngpts,Rad,&GridLeb);             
+      //Center the Grid at iAtom
+      Raw3Dg.centerGrid(
+        (*this->molecule_->cart())(0,iAtm),
+        (*this->molecule_->cart())(1,iAtm),
+        (*this->molecule_->cart())(2,iAtm)
+      );
+   #ifdef _OPENMP
+     #pragma omp parallel
+     {
+       int thread_id = omp_get_thread_num();
+       tmpVX[0][thread_id].setZero();  
+       tmpVC[0][thread_id].setZero();  
+       if(!this->isClosedShell && this->Ref_ != TCS) {
+         tmpVX[1][thread_id].setZero();  
+         tmpVC[1][thread_id].setZero();  
+       }
+       batch_dft(thread_id,iAtm,Raw3Dg);
+     }
+   #else
+     tmpVX[0][0].setZero();  
+     tmpVC[0][0].setZero();  
+     if(!this->isClosedShell && this->Ref_ != TCS) {
+       tmpVX[1][0].setZero();  
+       tmpVC[1][0].setZero();  
+     }
+     batch_dft(0,iAtm,Raw3Dg);
+   #endif
+      for(auto iThread = 0; iThread < omp_get_max_threads(); iThread++) {
+        (*this->vXA())   += tmpVX[0][iThread];
+        (*this->vCorA()) += tmpVC[0][iThread];
+        this->totalEx += tmpEnergyEx[iThread];
+        this->totalEcorr += tmpEnergyCor[iThread];
+        if(!this->isClosedShell && this->Ref_ != TCS) {
+          (*this->vXB())   += tmpVX[1][iThread];
+          (*this->vCorB()) += tmpVC[1][iThread];
+        }
+/*
+        if(this->printLevel_ >= 3 ) {
+          this->fileio_->out << "Itread ID " << iThread << " Itom " << iAtm 
+           << " NptsforThr " << tmpnpts[iThread] << endl;
+          prettyPrint(this->fileio_->out,(*this->vXA()),"LDA Vx alpha");
+          prettyPrint(this->fileio_->out,(*this->vCorA()),"Vc Vc alpha");
+          if(!this->isClosedShell && this->Ref_ != TCS) 
+            prettyPrint(this->fileio_->out,(*this->vXB()),"LDA Vx beta");
+    
+          this->fileio_->out << "Total LDA Ex ="    << this->totalEx 
+                             << " Total VWN Corr= " << this->totalEcorr << endl;
+        }
+*/
+      }
+    }; //loop atoms
+
     // Loop over atomic centers
+    //
+
+/*
     for(int iAtm = 0; iAtm < nAtom; iAtm++){
+      for(auto iThread = 0; iThread < omp_get_max_threads(); iThread++) {
+        tmpVX[0][iThread].setZero();  
+        tmpVC[0][iThread].setZero();  
+        if(!this->isClosedShell && this->Ref_ != TCS) {
+          tmpVX[1][iThread].setZero();  
+          tmpVC[1][iThread].setZero();  
+        }
+      }
+      std::fill(tmpEnergyEx.begin(),tmpEnergyEx.end(),0.0);
+      std::fill(tmpEnergyCor.begin(),tmpEnergyCor.end(),0.0);
+
       Rad->genGrid(); 
       // The Radial grid is generated and scaled for each atom
       Rad->atomGrid((elements[this->molecule_->index(iAtm)].sradius)) ;  
@@ -1077,18 +1211,31 @@ void SingleSlater<double>::formVXC_Par(){
           if (mapRad_[0] || (bweight < this->epsScreen)) 
             nodens = true;
           if(!nodens) 
-            this->evalVXC_Par((Raw3Dg.gridPtCart(ipts)),weight,mapRad_,this->totalEx, this->totalEcorr, 
-                           this->vXA_.get(),this->vXB_.get(),this->vCorA_.get(),this->vCorB_.get() );
+            this->evalVXC_Par((Raw3Dg.gridPtCart(ipts)),weight,mapRad_,tmpEnergyEx[0],
+              tmpEnergyCor[0],&tmpVX[0][0],&tmpVX[1][0],&tmpVC[0][0],&tmpVC[1][0]);
         } else {
-          this->evalVXC_Par((Raw3Dg.gridPtCart(ipts)),weight,tmpnull,this->totalEx, this->totalEcorr, 
-                         this->vXA_.get(),this->vXB_.get(),this->vCorA_.get(),this->vCorB_.get() );
+            this->evalVXC_Par((Raw3Dg.gridPtCart(ipts)),weight,tmpnull,tmpEnergyEx[0],
+              tmpEnergyCor[0],&tmpVX[0][0],&tmpVX[1][0],&tmpVC[0][0],&tmpVC[1][0]);
         }
 
       } // loop ipts
+      // Reduce for atomic center
+      for(auto iThread = 0; iThread < omp_get_max_threads(); iThread++) {
+        (*this->vXA())   += tmpVX[0][iThread];
+        (*this->vCorA()) += tmpVC[0][iThread];
+        this->totalEx += tmpEnergyEx[iThread];
+        this->totalEcorr += tmpEnergyCor[iThread];
+        if(!this->isClosedShell && this->Ref_ != TCS) {
+          (*this->vXB())   += tmpVX[1][iThread];
+          (*this->vCorB()) += tmpVC[1][iThread];
+        }
+      }
     } // loop natoms
+*/
 ////T   
 //   auto start_6 = std::chrono::high_resolution_clock::now();  // Timing Digestion VXC
 ////T
+
 
     //  Finishing the Vxc using the TF factor and the integration 
     //    prefactor over a solid sphere
@@ -1141,6 +1288,12 @@ void SingleSlater<double>::formVXC_Par(){
 
 //  Cleaning
     delete Rad;
+//    for(auto iThread = 0; iThread < omp_get_max_threads(); iThread++) {
+//       for(int ipts = 0; ipts < this->ngpts; ipts++){
+//       cout << "DivCheck " << ipts/nPtsPerThread  << " T " << (ipts/nPtsPerThread != iThread) <<endl;
+//      }
+//    }
+//    CErr("DIE DIE DIE");
 }; //End
 
 
