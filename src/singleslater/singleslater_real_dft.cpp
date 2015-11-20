@@ -1015,7 +1015,7 @@ void SingleSlater<double>::formVXC_Par(){
     std::vector<int> tmpnpts(omp_get_max_threads()) ;
 
     int nRHF;
-    if(!this->isClosedShell || this->Ref_ == TCS) nRHF = 1;
+    if(this->isClosedShell || this->Ref_ == TCS) nRHF = 1;
     else    nRHF = 2;
     std::vector<std::vector<RealMatrix>> 
       tmpVX(nRHF,std::vector<RealMatrix>(omp_get_max_threads(),
@@ -1064,9 +1064,13 @@ void SingleSlater<double>::formVXC_Par(){
     GridLeb.genGrid();                            
  
     auto batch_dft = [&] (int thread_id,int iAtm, TwoDGrid &Raw3Dg) {
-      for(int ipts = 0; ipts < this->ngpts; ipts++){
+      auto loopSt = nPtsPerThread * thread_id;
+      auto loopEn = nPtsPerThread * (thread_id + 1);
+      if (thread_id == (omp_get_max_threads() - 1))
+        loopEn = this->ngpts;
+      for(int ipts = loopSt; ipts < loopEn; ipts++){
 //        printf("%d_%d_%d_%d\n", thread_id, ipts/nPtsPerThread,  ipts, iAtm);
-        if(ipts/nPtsPerThread != thread_id) continue;
+//      if(ipts/nPtsPerThread != thread_id) continue;
 ////T   
 //   auto start_5 = std::chrono::high_resolution_clock::now();  // Timing weights
 ////T
