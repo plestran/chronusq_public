@@ -1155,7 +1155,6 @@ void SingleSlater<double>::formVXC(){
 //    this->fileio_->out << "Overlap Contraction      Total Time " << this->duration_3.count() <<endl;
 //    this->fileio_->out << "Form (Vx + Vc)           Total Time " << this->duration_1.count() <<endl;
 //    this->fileio_->out << "Vxc Digestion            Total Time " << this->duration_6.count() <<endl;
-//  CErr("DIE DIE DIE");
     }
 
 //  Cleaning
