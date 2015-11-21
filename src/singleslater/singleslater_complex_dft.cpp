@@ -87,10 +87,6 @@ void SingleSlater<dcomplex>::formVXC(){
 
 };
 
-template<>
-void SingleSlater<dcomplex>::formVXC_Par(){
-
-};
 
 template<>
 void SingleSlater<dcomplex>::evalVXC(cartGP gridPt, double weight, std::vector<bool> mapRad_,
@@ -98,17 +94,9 @@ void SingleSlater<dcomplex>::evalVXC(cartGP gridPt, double weight, std::vector<b
 
 };
 
-template<>
-void SingleSlater<dcomplex>::evalVXC_Par(cartGP gridPt, double weight, std::vector<bool> mapRad_,
-       double & energyX, double & energyC, RealMatrix * VXA, RealMatrix * VXB, RealMatrix * VCA, RealMatrix * VCB){
-
-};
 
 
 
-template<>
-void SingleSlater<dcomplex>::formCor(double rho, double spindensity){
-};
 
 
 } // Namespace ChronusQ

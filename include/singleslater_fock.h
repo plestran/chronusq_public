@@ -75,8 +75,7 @@ void SingleSlater<T>::formFock(){
        start = std::chrono::high_resolution_clock::now();
        }
 //
-//     this->formVXC();
-     this->formVXC_Par();
+     this->formVXC();
 // Timing
     if(this->printLevel_ >= 3) {
       finish = std::chrono::high_resolution_clock::now();
