@@ -34,7 +34,7 @@ void BasisSet::constructLocal(Molecule * mol){
     bool found = false;
     for(auto iRef = this->refShells_.begin(); iRef != this->refShells_.end(); ++iRef){
       if(mol->index(iAtom) == (*iRef).index){
-        for(auto iShell = (*iRef).shells.begin(); iShell != (*iRef).shells.end(); ++iShell)
+        for(auto iShell = (*iRef).shells.begin(); iShell != (*iRef).shells.end(); ++iShell){
           this->shells_.push_back(
             libint2::Shell{ 
               iShell->alpha, 
@@ -44,6 +44,8 @@ void BasisSet::constructLocal(Molecule * mol){
                  (*mol->cart())(2,iAtom)}}
             }
           );
+          this->shellsCQ.push_back(ChronusQ::ShellCQ{*iShell});
+        };
         found = true;
       }
     } // loop iRef
