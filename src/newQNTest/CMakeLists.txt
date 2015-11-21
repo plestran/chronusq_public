@@ -1,0 +1,10 @@
+add_executable(QNTest test.cpp)
+target_link_libraries(QNTest LINK_PUBLIC classtools)
+target_link_libraries(QNTest LINK_PUBLIC controls)
+target_link_libraries(QNTest LINK_PUBLIC singleslater)
+target_link_libraries(QNTest LINK_PUBLIC aointegrals)
+target_link_libraries(QNTest LINK_PUBLIC mointegrals)
+target_link_libraries(QNTest LINK_PUBLIC basisset)
+target_link_libraries(QNTest LINK_PUBLIC fileio)
+target_link_libraries(QNTest LINK_PUBLIC ${EXTERNAL_CQ_DEPS})
+

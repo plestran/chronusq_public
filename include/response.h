@@ -42,9 +42,28 @@ enum RESPONSE_TYPE {
   CIS,
   RPA,
   PPRPA,
-  PPATDA,
-  PPCTDA,
+  PPTDA,
   STAB
+};
+enum RESPONSE_MATRIX_PARTITIONING {
+  SPIN_SEPARATED,
+  SPIN_ADAPTED    ///< RHF ONLY
+};
+enum RESPONSE_PARTITION {
+  FULL,
+  FULL_A_PPTDA,
+  FULL_C_PPTDA,
+  SINGLETS,
+  TRIPLETS,
+  AA_PPRPA,
+  AB_PPRPA,
+  BB_PPRPA,
+  AAA_PPTDA,
+  AAB_PPTDA,
+  ABB_PPTDA,
+  CAA_PPTDA,
+  CAB_PPTDA,
+  CBB_PPTDA
 };
 template<typename T>
 class Response : public QNCallable<T> {
@@ -68,12 +87,29 @@ class Response : public QNCallable<T> {
   int Ref_;    ///< Reference ID
 
   /** Job Control for response calcluation **/
-  bool useIncoreInts;   ///< Use Incore Integrals
-  bool doFull;          ///< Do full matrix problem (in-core)
-  bool debugIter;       ///< Diagonalize full incore matrix iteratively
-  bool doTDA;           ///< Invoke TDA
-  RESPONSE_TYPE iMeth_; ///< Response type 
+  bool useIncoreInts_;   ///< Use Incore Integrals
+  bool doFull_;          ///< Do full matrix problem (in-core)
+  bool debugIter_;       ///< Diagonalize full incore matrix iteratively
+  bool doTDA_;           ///< Invoke TDA
+  RESPONSE_TYPE iMeth_;  ///< Response type 
   // nSek, nGuess and nSingleDim inherited from QNCallable
+  bool isFOPPA_;         ///< (?) First Order Polarization Propagator
+  bool isSOPPA_;         ///< (?) Second Order Polarization Propagator (NYI)
+  bool isTOPPA_;         ///< (?) Third Order Polarization Propagator (NYI)
+  bool isPPRPA_;         ///< (?) Particle-Particle Propagator
+
+  std::vector<int> nMatDim_;///< Dimensions of the different Response Matricies
+  std::vector<RESPONSE_PARTITION> iMatIter_; ///< Response Matrix Partition
+  RESPONSE_MATRIX_PARTITIONING iPart_;///< Type of Response matrix Partitioning
+
+  bool doSinglets_;      ///< (?) Find NSek Singlet Roots (depends on SA)
+  bool doTriplets_;      ///< (?) Find NSek Triplet Roots (depends on SA)
+
+  // Job control specific to PPRPA
+  // ** Only make sense with SP **
+  bool doAllAlpha_;      ///< (?) Do All Alpha Block ** PPRPA Only **
+  bool doMixedAB_;       ///< (?) Do Mixed Alpha-Beta Block ** PPRPA ONLY **
+  bool doAllBeta_;       ///< (?) Do All Beta Block ** PPRPA ONLY **
   
 
   /** Derived Dimensions Post-SCF **/
@@ -187,11 +223,21 @@ public:
     this->rMu_ = 0.0;
 
     // Standard (default) values
-    this->iMeth_        = NOMETHOD;
-    this->useIncoreInts = false;
-    this->doFull        = false;
-    this->debugIter     = false;
-    this->doTDA         = false;
+    this->iMeth_         = NOMETHOD;
+    this->useIncoreInts_ = false;
+    this->doFull_        = false;
+    this->debugIter_     = false;
+    this->doTDA_         = false;
+    this->isFOPPA_       = false;
+    this->isSOPPA_       = false;
+    this->isTOPPA_       = false;
+    this->isPPRPA_       = false;
+    this->iPart_         = SPIN_SEPARATED;
+    this->doSinglets_    = true;
+    this->doTriplets_    = false;
+    this->doAllAlpha_    = true;
+    this->doMixedAB_     = true;
+    this->doAllBeta_     = false;
   };
 
   // Dummy Destructor
@@ -227,53 +273,24 @@ public:
 
 
   /** Meta data routines **/
-  inline void initMeta() {
-    this->checkWorkers();
-
-    this->nBasis_         = this->singleSlater_->nBasis();
-    this->nTCS_           = this->singleSlater_->nTCS();
-    this->Ref_            = this->singleSlater_->Ref();
-    this->nOA_            = this->singleSlater_->nOccA();
-    this->nOB_            = this->singleSlater_->nOccB();
-    this->nVA_            = this->singleSlater_->nVirA();
-    this->nVB_            = this->singleSlater_->nVirB();
-
-    this->nOAVA_          = this->nOA_*this->nVA_;
-    this->nOBVB_          = this->nOB_*this->nVB_;
-    this->nOAVB_          = this->nOA_*this->nVB_;
-    this->nOBVA_          = this->nOB_*this->nVA_;
-    this->nVAVA_SLT_      = this->nVA_*(this->nVA_-1)/2;
-    this->nVBVB_SLT_      = this->nVB_*(this->nVB_-1)/2;
-    this->nVAVA_LT_       = this->nVA_*(this->nVA_+1)/2;
-    this->nVAVA_          = this->nVA_*this->nVA_;
-    this->nVBVB_          = this->nVB_*this->nVB_;
-    this->nOAOA_SLT_      = this->nOA_*(this->nOA_-1)/2;
-    this->nOBOB_SLT_      = this->nOB_*(this->nOB_-1)/2;
-    this->nOAOA_LT_       = this->nOA_*(this->nOA_+1)/2;
-    this->nOAOA_          = this->nOA_*this->nOA_;
-    this->nOBOB_          = this->nOB_*this->nOB_;
-    this->nVAVB_          = this->nVA_*this->nVB_;
-    this->nOAOB_          = this->nOA_*this->nOB_;
-    this->nO_             = this->nOA_ + this->nOB_;
-    this->nV_             = this->nVA_ + this->nVB_;
-    this->nOV_            = this->nO_  * this->nV_;
-    this->nVV_SLT_        = this->nV_*(this->nV_-1)/2;
-    this->nVV_LT_         = this->nV_*(this->nV_+1)/2;
-    this->nVV_            = this->nV_*this->nV_;
-    this->nOO_SLT_        = this->nO_*(this->nO_-1)/2;
-    this->nOO_LT_         = this->nO_*(this->nO_+1)/2;
-    this->nOO_            = this->nO_*this->nO_;
-  } //initMeta
+  void initMeta();
+  void initMetaFOPPA();
+  void initMetaSOPPA();
+  void initMetaTOPPA();
+  void initMetaPPRPA();
+  void initPSCFDims();
 
   // Setters
-  inline void setMeth(RESPONSE_TYPE n) { this->iMeth_ = n; };
+  inline void setMeth(RESPONSE_TYPE n) { this->iMeth_  = n;    };
+  inline void doFull()                 { this->doFull_ = true; };
+  inline void doTDA()                  { this->doTDA_  = true; };
   
   // IO Related
   // In-Core Related
-  void incoreFOPPA();
-  void incoreSOPPA();
-  void incoreTOPPA();
-  void incorePPRPA();
+  void fullFOPPA();
+  void fullSOPPA();
+  void fullTOPPA();
+  void fullPPRPA();
 
   // QN Related
   void IterativeResponse();
@@ -300,8 +317,9 @@ public:
   void checkValidSOPPA(); ///< Checks specific to SOPPA
   void checkValidTOPPA(); ///< Checks specific to TOPPA
   void checkValidPPRPA(); ///< Checks specific to PPRPA
-  
+
 }; // class Response
+#include <response_meta.h>
 }; // namespace ChronusQ
 
 #endif
