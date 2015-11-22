@@ -36,7 +36,7 @@
 
 namespace ChronusQ {
 
-// Enumerate possible Response Jobs
+// Enumerate possible Response Functions
 enum RESPONSE_TYPE {
   NOMETHOD,
   CIS,
@@ -101,6 +101,7 @@ class Response : public QNCallable<T> {
   std::vector<int> nMatDim_;///< Dimensions of the different Response Matricies
   std::vector<RESPONSE_PARTITION> iMatIter_; ///< Response Matrix Partition
   RESPONSE_MATRIX_PARTITIONING iPart_;///< Type of Response matrix Partitioning
+  std::map<RESPONSE_TYPE,std::string> methMap_;///< Map from Method enum to string
 
   bool doSinglets_;      ///< (?) Find NSek Singlet Roots (depends on SA)
   bool doTriplets_;      ///< (?) Find NSek Triplet Roots (depends on SA)
@@ -286,6 +287,12 @@ public:
   inline void doTDA()                  { this->doTDA_  = true; };
   
   // IO Related
+  void printInfo();
+  void printInfoFOPPA();
+  void printInfoSOPPA();
+  void printInfoTOPPA();
+  void printInfoPPRPA();
+
   // In-Core Related
   void fullFOPPA();
   void fullSOPPA();
@@ -320,6 +327,7 @@ public:
 
 }; // class Response
 #include <response_meta.h>
+#include <response_io.h>
 }; // namespace ChronusQ
 
 #endif

@@ -21,6 +21,12 @@ void Response<T>::initMeta() {
   if(this->isFOPPA_)      this->initMetaFOPPA();
   else if(this->isPPRPA_) this->initMetaPPRPA();
 
+  // Build Maps
+  this->methMap_[RESPONSE_TYPE::CIS]  = "First-Order Polarization Propagator";
+  this->methMap_[RESPONSE_TYPE::RPA]  = "First-Order Polarization Propagator";
+  this->methMap_[RESPONSE_TYPE::STAB] = "First-Order Polarization Propagator";
+  this->methMap_[RESPONSE_TYPE::PPRPA] = "Particle-Particle Polarization Propagator";
+  this->methMap_[RESPONSE_TYPE::PPTDA] = "Particle-Particle Polarization Propagator";
 } // initMeta
 
 template<typename T>
@@ -84,7 +90,7 @@ void Response<T>::initMetaPPRPA(){
 
   if(this->iPart_ == SPIN_SEPARATED) {
     if(this->Ref_ == SingleSlater<T>::TCS) {
-      if(this->doTDA) {
+      if(this->doTDA_) {
         this->iMatIter_.push_back(FULL_A_PPTDA);
         this->iMatIter_.push_back(FULL_C_PPTDA);
         this->nMatDim_.push_back(this->nVV_SLT_);
@@ -94,39 +100,41 @@ void Response<T>::initMetaPPRPA(){
         this->nMatDim_.push_back(this->nVV_SLT_ + this->nOO_SLT_);
       }
     } else {
-      if(this->doTDA) {
-        if(this->doAllAlpha) {
+      if(this->doTDA_) {
+        if(this->doAllAlpha_) {
           this->iMatIter_.push_back(AAA_PPTDA);
           this->iMatIter_.push_back(CAA_PPTDA);
           this->nMatDim_.push_back(this->nVAVA_SLT_);
           this->nMatDim_.push_back(this->nOAOA_SLT_);
         }
-        if(this->doMixedAB) {
+        if(this->doMixedAB_) {
           this->iMatIter_.push_back(AAB_PPTDA);
           this->iMatIter_.push_back(CAB_PPTDA);
           this->nMatDim_.push_back(this->nVAVB_);
           this->nMatDim_.push_back(this->nOAOB_);
         }
-        if(this->doAllBeta && !this->singleSlater_->isClosedShell) {
+        if(this->doAllBeta_ && !this->singleSlater_->isClosedShell) {
           this->iMatIter_.push_back(ABB_PPTDA);
           this->iMatIter_.push_back(CBB_PPTDA);
           this->nMatDim_.push_back(this->nVBVB_SLT_);
           this->nMatDim_.push_back(this->nOBOB_SLT_);
         }
       } else {
-        if(this->doAllAlpha) {
+        if(this->doAllAlpha_) {
           this->iMatIter_.push_back(AA_PPRPA);
           this->nMatDim_.push_back(this->nVAVA_SLT_ + this->nOAOA_SLT_);
         }
-        if(this->doMixedAB) {
+        if(this->doMixedAB_) {
           this->iMatIter_.push_back(AB_PPRPA);
           this->nMatDim_.push_back(this->nVAVB_ + this->nOAOB_);
         }
-        if(this->doAllBeta && !this->singleSlater_->isClosedShell) {
+        if(this->doAllBeta_ && !this->singleSlater_->isClosedShell) {
           this->iMatIter_.push_back(BB_PPRPA);
           this->nMatDim_.push_back(this->nVBVB_SLT_ + this->nOBOB_SLT_);
         }
       }
     }
+  } else if(this->iPart_ == SPIN_ADAPTED){
+    CErr("Spin-Adapted Particle-Particle Propagator NYI",this->fileio_->out);
   }
 };

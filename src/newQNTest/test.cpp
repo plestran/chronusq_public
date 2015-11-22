@@ -66,9 +66,10 @@ int main(){
   singleSlater.printProperties();
   
   resp.communicate(singleSlater,moints,fileio);  
-  resp.initMeta();
-  resp.setMeth(RESPONSE_TYPE::CIS);
+  resp.setMeth(RESPONSE_TYPE::PPTDA);
   resp.setNSek(3);
+  resp.initMeta();
+  resp.printInfo();
 
   finalizeCQ(); 
   return 0;
