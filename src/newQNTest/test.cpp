@@ -52,6 +52,7 @@ int main(){
   moints.communicate(molecule,basis,fileio,controls,aoints,singleSlater);
 
   aoints.initMeta();
+  aoints.integralAlgorithm = AOIntegrals::INCORE;
   singleSlater.initMeta();
   singleSlater.genMethString();
 
@@ -66,11 +67,9 @@ int main(){
   singleSlater.printProperties();
   
   resp.communicate(singleSlater,moints,fileio);  
-  resp.setMeth(RESPONSE_TYPE::PPTDA);
+  resp.setMeth(RESPONSE_TYPE::RPA);
+  resp.doResponse();
   resp.setNSek(3);
-  resp.initMeta();
-  resp.printInfo();
-
   finalizeCQ(); 
   return 0;
 };

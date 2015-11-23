@@ -53,6 +53,29 @@ void SingleSlater<T>::printInfo() {
  ***********************************************/
 template<typename T>
 void SingleSlater<T>::printMultipole(){
+
+  double xSmall = 1e-10;
+  if(this->maxMultipole_ >= 1) {
+    for(auto i = 0; i < 3; i++){
+      if(std::abs((*this->dipole_)(i,0)) < xSmall)
+        (*this->dipole_)(i,0) = std::abs((*this->dipole_)(i,0));
+      if(this->maxMultipole_ >= 2) {
+        for(auto j = 0; j < 3; j++){
+          if(std::abs((*this->quadpole_)(i,j)) < xSmall){
+            (*this->quadpole_)(i,j) = std::abs((*this->quadpole_)(i,j));
+            (*this->tracelessQuadpole_)(i,j) = 
+              std::abs((*this->tracelessQuadpole_)(i,j));
+          }
+          for(auto k = 0; k < 3; k++){
+            if(std::abs((*this->octpole_)(i,j,k)) < xSmall){
+              (*this->octpole_)(i,j,k) = std::abs((*this->octpole_)(i,j,k));
+            }
+          }
+        }
+      }
+    }
+  }
+
   if(this->maxMultipole_ >= 1) {
     this->fileio_->out << "\nMultipole Information:" << endl;
     this->fileio_->out << bannerTop << endl;
@@ -139,7 +162,7 @@ void SingleSlater<T>::printMultipole(){
                        << (*this->tracelessQuadpole_)(2,2)*phys.bohr/phys.debye << endl;
   }
 
-  if(this->maxMultipole_ > 3) {
+  if(this->maxMultipole_ >= 3) {
     this->fileio_->out << bannerMid << endl;
     this->fileio_->out << std::setw(50) << std::left << "Electric Octupole Moment" 
                        << "(Debye-\u212B\u00B2)" << endl;

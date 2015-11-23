@@ -45,10 +45,22 @@ enum RESPONSE_TYPE {
   PPTDA,
   STAB
 };
+
+// Enumerate Response Function Classes
+enum RESPONSE_CLASS {
+  NOCLASS,
+  FOPPA,
+  SOPPA,
+  TOPPA,
+  PPPA
+};
+
+// Enumerate Response Function Partitioning Schemes
 enum RESPONSE_MATRIX_PARTITIONING {
   SPIN_SEPARATED,
   SPIN_ADAPTED    ///< RHF ONLY
 };
+
 enum RESPONSE_PARTITION {
   FULL,
   FULL_A_PPTDA,
@@ -64,6 +76,12 @@ enum RESPONSE_PARTITION {
   CAA_PPTDA,
   CAB_PPTDA,
   CBB_PPTDA
+};
+
+enum RESPONSE_JOB_TYPE {
+  NOJOB,
+  EIGEN,
+  DYNAMIC
 };
 template<typename T>
 class Response : public QNCallable<T> {
@@ -92,16 +110,13 @@ class Response : public QNCallable<T> {
   bool debugIter_;       ///< Diagonalize full incore matrix iteratively
   bool doTDA_;           ///< Invoke TDA
   RESPONSE_TYPE iMeth_;  ///< Response type 
+  RESPONSE_CLASS iClass_; ///< Response Function Class
+  RESPONSE_JOB_TYPE iJob_; ///< Response Job Type
   // nSek, nGuess and nSingleDim inherited from QNCallable
-  bool isFOPPA_;         ///< (?) First Order Polarization Propagator
-  bool isSOPPA_;         ///< (?) Second Order Polarization Propagator (NYI)
-  bool isTOPPA_;         ///< (?) Third Order Polarization Propagator (NYI)
-  bool isPPRPA_;         ///< (?) Particle-Particle Propagator
 
   std::vector<int> nMatDim_;///< Dimensions of the different Response Matricies
   std::vector<RESPONSE_PARTITION> iMatIter_; ///< Response Matrix Partition
   RESPONSE_MATRIX_PARTITIONING iPart_;///< Type of Response matrix Partitioning
-  std::map<RESPONSE_TYPE,std::string> methMap_;///< Map from Method enum to string
 
   bool doSinglets_;      ///< (?) Find NSek Singlet Roots (depends on SA)
   bool doTriplets_;      ///< (?) Find NSek Triplet Roots (depends on SA)
@@ -225,14 +240,12 @@ public:
 
     // Standard (default) values
     this->iMeth_         = NOMETHOD;
+    this->iClass_        = NOCLASS;
+    this->iJob_          = EIGEN;
     this->useIncoreInts_ = false;
-    this->doFull_        = false;
+    this->doFull_        = true;
     this->debugIter_     = false;
     this->doTDA_         = false;
-    this->isFOPPA_       = false;
-    this->isSOPPA_       = false;
-    this->isTOPPA_       = false;
-    this->isPPRPA_       = false;
     this->iPart_         = SPIN_SEPARATED;
     this->doSinglets_    = true;
     this->doTriplets_    = false;
@@ -288,19 +301,38 @@ public:
   
   // IO Related
   void printInfo();
-  void printInfoFOPPA();
-  void printInfoSOPPA();
-  void printInfoTOPPA();
-  void printInfoPPRPA();
+
+  // Run a Response Calculation
+  inline void doResponse() {
+    // Initialize MetaData
+    this->initMeta();
+
+    // Print Response Module Info
+    this->printInfo();
+
+    if(this->doFull_) this->full();
+    else this->IterativeResponse();
+  };
 
   // In-Core Related
+  inline void full() {
+    if(this->singleSlater_->aointegrals()->integralAlgorithm != 
+       AOIntegrals::INCORE)
+      CErr("Full Response Problems Require InCore Integrals",
+        this->fileio_->out);
+ 
+    if(this->iClass_ == FOPPA) this->fullFOPPA();
+    else if(this->iClass_ == SOPPA) this->fullSOPPA();
+    else if(this->iClass_ == TOPPA) this->fullTOPPA();
+    else if(this->iClass_ == PPRPA) this->fullPPRPA();
+  };
   void fullFOPPA();
-  void fullSOPPA();
-  void fullTOPPA();
-  void fullPPRPA();
+  void fullSOPPA(){;}; // NYI
+  void fullTOPPA(){;}; // NYI
+  void fullPPRPA(){;}; // NYI
 
   // QN Related
-  void IterativeResponse();
+  void IterativeResponse(){;}; // NYI
   void linearTrans(TMap &,TMap &,TMap &,TMap &,TMap &,TMap &){;};
   void linearTransFOPPA(TMap &,TMap &,TMap &,TMap &,TMap &,TMap &);
   void linearTransSOPPA(TMap &,TMap &,TMap &,TMap &,TMap &,TMap &);

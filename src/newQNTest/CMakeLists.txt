@@ -5,6 +5,7 @@ target_link_libraries(QNTest LINK_PUBLIC singleslater)
 target_link_libraries(QNTest LINK_PUBLIC aointegrals)
 target_link_libraries(QNTest LINK_PUBLIC mointegrals)
 target_link_libraries(QNTest LINK_PUBLIC basisset)
+target_link_libraries(QNTest LINK_PUBLIC response)
 target_link_libraries(QNTest LINK_PUBLIC fileio)
 target_link_libraries(QNTest LINK_PUBLIC ${EXTERNAL_CQ_DEPS})
 

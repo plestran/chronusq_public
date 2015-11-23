@@ -9,24 +9,20 @@ void Response<T>::initMeta() {
 
   // Determine type of Response Function
   if(this->iMeth_ == CIS || this->iMeth_ == RPA || this->iMeth_ == STAB)
-    this->isFOPPA_ = true;
+    this->iClass_ = RESPONSE_CLASS::FOPPA;
   else if(this->iMeth_ == PPRPA || this->iMeth_ == PPTDA)
-    this->isPPRPA_ = true;
+    this->iClass_ = RESPONSE_CLASS::PPPA;
 
   // Check if TDA
   if(this->iMeth_ == CIS || this->iMeth_ == PPTDA)
     this->doTDA_ = true;
 
 
-  if(this->isFOPPA_)      this->initMetaFOPPA();
-  else if(this->isPPRPA_) this->initMetaPPRPA();
+  if(this->iClass_ == RESPONSE_CLASS::FOPPA) 
+    this->initMetaFOPPA();
+  else if(this->iClass_ == RESPONSE_CLASS::PPPA)
+    this->initMetaPPRPA();
 
-  // Build Maps
-  this->methMap_[RESPONSE_TYPE::CIS]  = "First-Order Polarization Propagator";
-  this->methMap_[RESPONSE_TYPE::RPA]  = "First-Order Polarization Propagator";
-  this->methMap_[RESPONSE_TYPE::STAB] = "First-Order Polarization Propagator";
-  this->methMap_[RESPONSE_TYPE::PPRPA] = "Particle-Particle Polarization Propagator";
-  this->methMap_[RESPONSE_TYPE::PPTDA] = "Particle-Particle Polarization Propagator";
 } // initMeta
 
 template<typename T>
