@@ -31,6 +31,7 @@
 namespace ChronusQ { 
   template<typename T>
   class QNCallable {
+  protected:
     // Useful Eigen Typedefs
     typedef Eigen::Matrix<T,Dynamic,Dynamic,ColMajor> TMat;
     typedef Eigen::Matrix<T,Dynamic,1> TVec;

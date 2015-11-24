@@ -178,7 +178,7 @@ class Response : public QNCallable<T> {
 
   // Solution Quantities
   std::vector<TMat>             transDen_;    ///< Transition Density (MO)
-  std::unique_ptr<VectorXd>     frequencies_; ///< Transition Frequencies
+  std::vector<VectorXd>         frequencies_; ///< Transition Frequencies
 
   // Properties
   std::vector<double>               oscStrength_; ///< Oscillator Strengths
@@ -197,7 +197,6 @@ public:
     this->mointegrals_  = NULL;
     this->singleSlater_ = NULL;
     this->rmDiag_       = nullptr;
-    this->frequencies_  = nullptr;
 
     // Zero out meta data to be initialized by SingleSlater
     this->nBasis_     = 0;
@@ -307,6 +306,7 @@ public:
     // Initialize MetaData
     this->initMeta();
 
+    this->alloc();
     // Print Response Module Info
     this->printInfo();
 
@@ -350,6 +350,9 @@ public:
   void formDiagPPRPA();
 
 
+  // Allocation Related
+  void alloc();
+
   // Misc
   void checkValid();      ///< Check validity of calculation with meta data
   void checkValidFOPPA(); ///< Checks specific to FOPPA
@@ -358,6 +361,7 @@ public:
   void checkValidPPRPA(); ///< Checks specific to PPRPA
 
 }; // class Response
+#include <response_alloc.h>
 #include <response_meta.h>
 #include <response_io.h>
 }; // namespace ChronusQ
