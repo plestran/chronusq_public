@@ -348,6 +348,9 @@ void Response<double>::fullPPRPA(){
       }
     } // this->iMatIter_[iMat] == AB_PPRPA
     else if(this->iMatIter_[iMat] == BB_PPRPA){ 
+    // ************************** //
+    // ** BETA-BETA BLOCKS NYI ** //
+    // ************************** //
     } // this->iMatIter_[iMat] == BB_PPRPA
     else if(this->iMatIter_[iMat] == AAA_PPTDA){
       for(auto a = 0, ab = 0; a < this->nVA_; a++      )
@@ -373,6 +376,9 @@ void Response<double>::fullPPRPA(){
       }
     } // this->iMatIter_[iMat] == AAB_PPTDA
     else if(this->iMatIter_[iMat] == ABB_PPTDA){
+    // ************************** //
+    // ** BETA-BETA BLOCKS NYI ** //
+    // ************************** //
     } // this->iMatIter_[iMat] == ABB_PPTDA
     else if(this->iMatIter_[iMat] == CAA_PPTDA){
       for(auto i = 0, ij = 0; i < this->nOA_; i++      )
@@ -398,7 +404,160 @@ void Response<double>::fullPPRPA(){
       }
     } // this->iMatIter_[iMat] == CAB_PPTDA
     else if(this->iMatIter_[iMat] == CBB_PPTDA){
+    // ************************** //
+    // ** BETA-BETA BLOCKS NYI ** //
+    // ************************** //
     } // this->iMatIter_[iMat] == CBB_PPTDA
+    else if(this->iMatIter_[iMat] == PPRPA_SINGLETS){
+      auto iOff = this->nVAVA_LT_;
+      auto iMetricScale = -1;
+      // Place A Matrix
+      for(auto a = 0, ab = 0; a < this->nVA_; a++      )
+      for(auto b = 0        ; b <= a       ;  b++, ab++)
+      for(auto c = 0, cd = 0; c < this->nVA_; c++      )
+      for(auto d = 0        ; d <= c       ;  d++, cd++){
+        double fact = 1.0;
+        if(a == b) fact *= std::sqrt(0.5);
+        if(c == d) fact *= std::sqrt(0.5);
+        this->transDen_[iMat](ab,cd) = 
+          fact * (this->mointegrals_->ABCD(a,c,b,d) +
+                  this->mointegrals_->ABCD(a,d,b,c));  
+
+        if(ab == cd) this->transDen_[iMat](ab,cd) +=
+          (*this->singleSlater_->epsA())(a+this->nOA_) + 
+          (*this->singleSlater_->epsA())(b+this->nOA_) - 2*this->rMu_; 
+      }
+
+      // Place C Matrix
+      for(auto i = 0, ij = iOff; i < this->nOA_; i++      )
+      for(auto j = 0           ; j <= i        ; j++, ij++)
+      for(auto k = 0, kl = iOff; k < this->nOA_; k++      )
+      for(auto l = 0           ; l <= k        ; l++, kl++){
+        double fact = 1.0;
+        if(i == j) fact *= std::sqrt(0.5);
+        if(k == l) fact *= std::sqrt(0.5);
+        this->transDen_[iMat](ij,kl) = 
+          fact * (this->mointegrals_->IJKL(i,k,j,l) + 
+                  this->mointegrals_->IJKL(i,l,j,k));
+
+        if(ij == kl) this->transDen_[iMat](ij,kl) -=
+          (*this->singleSlater_->epsA())(i) + 
+          (*this->singleSlater_->epsA())(j) - 2*this->rMu_; 
+
+        this->transDen_[iMat](ij,kl) *= iMetricScale;
+      }
+
+      // Place B Matricies
+      for(auto a = 0, ab =    0; a < this->nVA_; a++      )
+      for(auto b = 0           ; b <= a        ; b++, ab++)
+      for(auto i = 0, ij = iOff; i < this->nOA_; i++      )
+      for(auto j = 0           ; j <= i        ; j++, ij++) {
+        double fact = 1.0;
+        if(a == b) fact *= std::sqrt(0.5);
+        if(i == j) fact *= std::sqrt(0.5);
+        this->transDen_[iMat](ab,ij) = 
+          fact * (this->mointegrals_->IAJB(i,a,j,b) + 
+                  this->mointegrals_->IAJB(i,b,j,a));
+        this->transDen_[iMat](ij,ab) = 
+          iMetricScale*this->transDen_[iMat](ab,ij);
+      }
+    } // this->iMatIter_[iMat] == PPRPA_SINGLETS
+    else if(this->iMatIter_[iMat] == A_PPTDA_SINGLETS){
+      for(auto a = 0, ab = 0; a < this->nVA_; a++      )
+      for(auto b = 0        ; b <= a       ;  b++, ab++)
+      for(auto c = 0, cd = 0; c < this->nVA_; c++      )
+      for(auto d = 0        ; d <= c       ;  d++, cd++){
+        double fact = 1.0;
+        if(a == b) fact *= std::sqrt(0.5);
+        if(c == d) fact *= std::sqrt(0.5);
+        this->transDen_[iMat](ab,cd) = 
+          fact * (this->mointegrals_->ABCD(a,c,b,d) +
+                  this->mointegrals_->ABCD(a,d,b,c));  
+        if(ab == cd) this->transDen_[iMat](ab,cd) +=
+          (*this->singleSlater_->epsA())(a+this->nOA_) + 
+          (*this->singleSlater_->epsA())(b+this->nOA_) - 2*this->rMu_; 
+      }
+    } // this->iMatIter_[iMat] == A_PPTDA_SINGLETS
+    else if(this->iMatIter_[iMat] == C_PPTDA_SINGLETS){
+      for(auto i = 0, ij = 0; i < this->nOA_; i++      )
+      for(auto j = 0        ; j <= i        ; j++, ij++)
+      for(auto k = 0, kl = 0; k < this->nOA_; k++      )
+      for(auto l = 0        ; l <= k        ; l++, kl++){
+        double fact = 1.0;
+        if(i == j) fact *= std::sqrt(0.5);
+        if(k == l) fact *= std::sqrt(0.5);
+        this->transDen_[iMat](ij,kl) = 
+          fact * (this->mointegrals_->IJKL(i,k,j,l) + 
+                  this->mointegrals_->IJKL(i,l,j,k));
+        if(ij == kl) this->transDen_[iMat](ij,kl) -=
+          (*this->singleSlater_->epsA())(i) + 
+          (*this->singleSlater_->epsA())(j) - 2*this->rMu_; 
+      }
+    } // this->iMatIter_[iMat] == C_PPTDA_SINGLETS
+    else if(this->iMatIter_[iMat] == PPRPA_TRIPLETS){
+      auto iOff = this->nVAVA_SLT_;
+      auto iMetricScale = -1;
+      // Place A Matrix
+      for(auto a = 0, ab = 0; a < this->nVA_; a++      )
+      for(auto b = 0        ; b < a        ;  b++, ab++)
+      for(auto c = 0, cd = 0; c < this->nVA_; c++      )
+      for(auto d = 0        ; d < c        ;  d++, cd++){
+        this->transDen_[iMat](ab,cd) = this->mointegrals_->ABCD(a,c,b,d) -
+                                       this->mointegrals_->ABCD(a,d,b,c);  
+        if(ab == cd) this->transDen_[iMat](ab,cd) +=
+          (*this->singleSlater_->epsA())(a+this->nOA_) + 
+          (*this->singleSlater_->epsA())(b+this->nOA_) - 2*this->rMu_; 
+      }
+
+      // Place C Matrix
+      for(auto i = 0, ij = iOff; i < this->nOA_; i++      )
+      for(auto j = 0           ; j < i         ; j++, ij++)
+      for(auto k = 0, kl = iOff; k < this->nOA_; k++      )
+      for(auto l = 0           ; l < k         ; l++, kl++){
+        this->transDen_[iMat](ij,kl) = this->mointegrals_->IJKL(i,k,j,l) - 
+                                       this->mointegrals_->IJKL(i,l,j,k);
+        if(ij == kl) this->transDen_[iMat](ij,kl) -=
+          (*this->singleSlater_->epsA())(i) + 
+          (*this->singleSlater_->epsA())(j) - 2*this->rMu_; 
+
+        this->transDen_[iMat](ij,kl) *= iMetricScale;
+      }
+
+      // Place B Matricies
+      for(auto a = 0, ab =    0; a < this->nVA_; a++      )
+      for(auto b = 0           ; b < a        ;  b++, ab++)
+      for(auto i = 0, ij = iOff; i < this->nOA_; i++      )
+      for(auto j = 0           ; j < i         ; j++, ij++) {
+        this->transDen_[iMat](ab,ij) = this->mointegrals_->IAJB(i,a,j,b) - 
+                                       this->mointegrals_->IAJB(i,b,j,a);
+        this->transDen_[iMat](ij,ab) = 
+          iMetricScale*this->transDen_[iMat](ab,ij);
+      }
+    } // this->iMatIter_[iMat] == PPRPA_TRIPLETS
+    else if(this->iMatIter_[iMat] == A_PPTDA_TRIPLETS){
+      for(auto a = 0, ab = 0; a < this->nVA_; a++      )
+      for(auto b = 0        ; b < a        ;  b++, ab++)
+      for(auto c = 0, cd = 0; c < this->nVA_; c++      )
+      for(auto d = 0        ; d < c        ;  d++, cd++){
+        this->transDen_[iMat](ab,cd) = this->mointegrals_->ABCD(a,c,b,d) -
+                                       this->mointegrals_->ABCD(a,d,b,c);  
+        if(ab == cd) this->transDen_[iMat](ab,cd) +=
+          (*this->singleSlater_->epsA())(a+this->nOA_) + 
+          (*this->singleSlater_->epsA())(b+this->nOA_) - 2*this->rMu_; 
+      }
+    } // this->iMatIter_[iMat] == A_PPTDA_TRIPLETS
+    else if(this->iMatIter_[iMat] == C_PPTDA_TRIPLETS){
+      for(auto i = 0, ij = 0; i < this->nOA_; i++      )
+      for(auto j = 0        ; j < i         ; j++, ij++)
+      for(auto k = 0, kl = 0; k < this->nOA_; k++      )
+      for(auto l = 0        ; l < k         ; l++, kl++){
+        this->transDen_[iMat](ij,kl) = this->mointegrals_->IJKL(i,k,j,l) - 
+                                       this->mointegrals_->IJKL(i,l,j,k);
+        if(ij == kl) this->transDen_[iMat](ij,kl) -=
+          (*this->singleSlater_->epsA())(i) + 
+          (*this->singleSlater_->epsA())(j) - 2*this->rMu_; 
+      }
+    } // this->iMatIter_[iMat] == C_PPTDA_TRIPLETS
 
     int N = this->nSingleDim_;
     if(this->doTDA_)

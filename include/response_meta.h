@@ -146,7 +146,33 @@ void Response<T>::initMetaPPRPA(){
       }
     }
   } else if(this->iPart_ == SPIN_ADAPTED){
-    CErr("Spin-Adapted Particle-Particle Propagator NYI",this->fileio_->out);
+    if(this->Ref_ != SingleSlater<T>::RHF) 
+      CErr("Spin-Adaptation only avaliable for Spin Restricted Reference",
+        this->fileio_->out);
+
+      if(this->doSinglets_) {
+        if(this->doTDA_) {
+          this->iMatIter_.push_back(A_PPTDA_SINGLETS);
+          this->iMatIter_.push_back(C_PPTDA_SINGLETS);
+          this->nMatDim_.push_back(this->nVAVA_LT_);
+          this->nMatDim_.push_back(this->nOAOA_LT_);
+        } else {
+          this->iMatIter_.push_back(PPRPA_SINGLETS);
+          this->nMatDim_.push_back(this->nVAVA_LT_ + this->nOAOA_LT_);
+        }
+      }
+
+      if(this->doTriplets_) {
+        if(this->doTDA_) {
+          this->iMatIter_.push_back(A_PPTDA_TRIPLETS);
+          this->iMatIter_.push_back(C_PPTDA_TRIPLETS);
+          this->nMatDim_.push_back(this->nVAVA_SLT_);
+          this->nMatDim_.push_back(this->nOAOA_SLT_);
+        } else {
+          this->iMatIter_.push_back(PPRPA_TRIPLETS);
+          this->nMatDim_.push_back(this->nVAVA_SLT_ + this->nOAOA_SLT_);
+        }
+      }
   }
 };
 
