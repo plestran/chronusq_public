@@ -128,7 +128,8 @@ class SingleSlater {
   std::unique_ptr<TMatrix>  vXB_;        ///< Beta VXC
   std::unique_ptr<TMatrix>  vCorA_;        ///< Alpha or Full Vcorr
   std::unique_ptr<TMatrix>  vCorB_;        ///< Beta Vcorr
-  std::vector<RealSparseMatrix> sparseMap_;
+  std::vector<RealSparseMatrix> sparseMap_;     // BasisFunction Map 
+  std::vector<RealSparseMatrix> sparseWeights_; // Weights Map
 
   std::unique_ptr<RealMatrix>  dipole_;  ///< Electric Dipole Moment
   std::unique_ptr<RealMatrix>  quadpole_; ///< Electric Quadrupole Moment
@@ -578,7 +579,10 @@ public:
   void formExchange();		// form the exchange matrix
   void formPT();
   void formVXC();               // Form DFT VXC Term
-  void genSparseBasisMap(TwoDGrid &,int);     // Generate Basis Set Mapping
+  void formVXC_store();               // Form DFT VXC Term
+  void genSparseBasisMap();     // Generate Basis Set Mapping
+  void evalVXC_store(int, int, double &, double &,RealMatrix *, RealMatrix *,
+         RealMatrix *, RealMatrix *);
   void evalVXC(cartGP, double, std::vector<bool>, double &, double &,RealMatrix *, RealMatrix *,
                  RealMatrix *, RealMatrix*); // evaluate DFT VXC Matrix Term( at a given pts)
   std::array<double,3 > formVC (double, double);    // Form DFT correlarion density,potential (A and B)

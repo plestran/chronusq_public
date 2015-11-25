@@ -63,7 +63,7 @@ double SingleSlater<dcomplex>::spindens(double rho_A, double rho_B){
 };
 
 template<>
-void SingleSlater<dcomplex>::genSparseBasisMap(TwoDGrid & Raw3Dg, int iAtm){
+void SingleSlater<dcomplex>::genSparseBasisMap(){
 };
 
 template<>
@@ -91,11 +91,22 @@ void SingleSlater<dcomplex>::formVXC(){
 
 };
 
+template<>
+void SingleSlater<dcomplex>::formVXC_store(){
+
+};
+
 
 template<>
 void SingleSlater<dcomplex>::evalVXC(cartGP gridPt, double weight, std::vector<bool> mapRad_,
        double & energyX, double & energyC, RealMatrix * VXA, RealMatrix * VXB, RealMatrix * VCA, RealMatrix * VCB){
 
+};
+
+template<>
+void SingleSlater<dcomplex>::evalVXC_store(int iAtm, int ipts, double & energyX, 
+       double & energyC, RealMatrix * VXA, RealMatrix * VXB, RealMatrix * VCA, 
+       RealMatrix * VCB){
 };
 
 
