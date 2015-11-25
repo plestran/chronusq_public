@@ -48,6 +48,8 @@ void Response<double>::fullFOPPA(){
       WI   = new double[this->nSingleDim_];
     }
 
+    int nSingOff = this->nSingleDim_/2; 
+    int iMetricScale = -1;
     if(this->iMatIter_[iMat] == FULL) {
       if(this->Ref_ != SingleSlater<double>::TCS) {
         /*
@@ -58,8 +60,6 @@ void Response<double>::fullFOPPA(){
          *
          */ 
 
-        int nSingOff = this->nSingleDim_/2; 
-        int iMetricScale = -1;
         if(this->iMeth_ == STAB) iMetricScale = 1;
         // Loop over and populate All Alpha Block of A Matrix
         // ** If RPA, also populate all Alpha Block of B Matrix **
@@ -155,6 +155,20 @@ void Response<double>::fullFOPPA(){
         if(ia == jb)
           this->transDen_[iMat](ia,jb) += (*this->singleSlater_->epsA())(A) - 
                                           (*this->singleSlater_->epsA())(i);
+        if(!this->doTDA_) {
+          // Copy A into the lower right corner
+          this->transDen_[iMat](ia+nSingOff,jb+nSingOff) =
+            iMetricScale * this->transDen_[iMat](ia,jb);
+       
+          // Top Right B Matrix
+          this->transDen_[iMat](ia,jb+nSingOff) =
+            2*this->mointegrals_->IAJB(i,a,j,b) - 
+            this->mointegrals_->IAJB(i,b,j,a);
+       
+          // Bottom Left B Matrix
+          this->transDen_[iMat](ia+nSingOff,jb) =
+            iMetricScale * this->transDen_[iMat](ia,jb+nSingOff);
+        } // not TDA
       }
     } // Singlets
     else if(this->iMatIter_[iMat] == TRIPLETS){
@@ -166,6 +180,19 @@ void Response<double>::fullFOPPA(){
         if(ia == jb)
           this->transDen_[iMat](ia,jb) += (*this->singleSlater_->epsA())(A) - 
                                           (*this->singleSlater_->epsA())(i);
+        if(!this->doTDA_) {
+          // Copy A into the lower right corner
+          this->transDen_[iMat](ia+nSingOff,jb+nSingOff) =
+            iMetricScale * this->transDen_[iMat](ia,jb);
+       
+          // Top Right B Matrix
+          this->transDen_[iMat](ia,jb+nSingOff) =
+            -this->mointegrals_->IAJB(i,b,j,a);
+       
+          // Bottom Left B Matrix
+          this->transDen_[iMat](ia+nSingOff,jb) =
+            iMetricScale * this->transDen_[iMat](ia,jb+nSingOff);
+        } // not TDA
       }
     } // Triplets
 
