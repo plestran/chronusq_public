@@ -134,6 +134,49 @@ double SingleSlater<double>::spindens(double rho_A, double rho_B) {
 return (rho_A - rho_B)/ (rho_A + rho_B);
 };  // 
 
+
+
+template<>
+void SingleSlater<double>::genSparseBasisMap(TwoDGrid &Raw3Dg,int iAtm){
+  Eigen::SparseMatrix<double> Map(this->nTCS_*this->nBasis_,this->ngpts);
+  RealMatrix overlapR_(this->nBasis_,this->nBasis_);        ///< Overlap at grid point
+  for (auto ipts =0; ipts < this->ngpts; ipts++){
+    
+    cartGP pt = Raw3Dg.gridPtCart(ipts); 
+    auto mapRad_ = this->basisset_->MapGridBasis(pt);
+    // Evaluate each Becke fuzzy call weight, normalize it and muliply by 
+    //   the Raw grid weight at that point
+    auto bweight = (this->formBeckeW(pt,iAtm)) 
+                   / (this->normBeckeW(pt)) ;
+    if (mapRad_[0] || (bweight < this->epsScreen)) continue;
+    auto weight = Raw3Dg.getweightsGrid(ipts) * bweight;
+//       cout << "Here " << ipts << endl;
+       //skyp all point
+       for (int s1=0; s1 < this->basisset_->nShell(); s1++){
+         if (!mapRad_[s1+1]) continue;
+//           cout << "Here 2 " << s1 <<", " <<this->basisset_->nShell()<<endl;
+//           CErr("DIE DIE DIE");
+           int bf1_s = this->basisset_->mapSh2Bf(s1);
+           auto shSize = this->basisset_->shells(s1).size(); 
+           libint2::Shell shTmp = this->basisset_->shells(s1);
+           double * s1Eval = this->basisset_->basisEval(shTmp,&pt);
+           for (auto mu =0; mu < shSize; mu++){ 
+             if (std::abs(s1Eval[mu]) > 1.e-8){
+             Map.insert(bf1_s+mu,ipts) = s1Eval[mu];
+             }
+           } //loop over basis (within a given ishell)
+       } //loop over shells
+       overlapR_ += weight*Map.col(ipts)*Map.col(ipts).transpose();
+//       if (ipts > 3924 && ipts < 3950){ 
+//       cout << "New PTS = " << ipts <<  " iAtom =" <<iAtm <<endl;
+//       prettyPrint(cout,(overlapR_)," S(ri) New");
+//       }
+  } //loop over pts
+       cout << 4.0*math.pi*overlapR_.frobInner(this->densityA()->conjugate()) << endl;
+       cout << "NonZero " << (double)Map.nonZeros()/(this->nBasis_*this->ngpts) << " " <<iAtm <<endl;
+       cout << "NonZero " << Map.nonZeros() << " " <<iAtm <<endl;
+};// End genSparseBasisMap
+
 template<>
 double SingleSlater<double>::EvepsVWN(int iop, double A_x, double b_x, double c_x, double x0_x, double rho){
 //    From Reference Vosko en Al., Can. J. Phys., 58, 1200 (1980). VWN3 and VWN5 interpolation formula   
@@ -747,6 +790,10 @@ void SingleSlater<double>::evalVXC(cartGP gridPt, double weight, std::vector<boo
     }  
 //   Overlap at r is ready
     overlapR_ = overlapR_.selfadjointView<Lower>();
+//    if (ipts > 1500 && ipts < 1520){ 
+//    cout << "Old PTS = " << ipts <<endl;
+//    prettyPrint(cout,(overlapR_)," S(ri) Old");
+//    }
 //  Handle the total density at r for RKS or UKS
     if(!this->isClosedShell && this->Ref_ != TCS) {
       rhorA = overlapR_.frobInner(this->densityA()->conjugate());
@@ -1037,7 +1084,8 @@ void SingleSlater<double>::formVXC(){
       Rad = new  EulerMaclaurinGrid(this->nRadDFTGridPts_,0.0,1.0);   
 //  Generare Angular Grid
     GridLeb.genGrid();                            
- 
+
+//  Generate Sparse Matrix
     auto batch_dft = [&] (int thread_id,int iAtm, TwoDGrid &Raw3Dg) {
       auto loopSt = nPtsPerThread * thread_id;
       auto loopEn = nPtsPerThread * (thread_id + 1);
@@ -1087,6 +1135,10 @@ void SingleSlater<double>::formVXC(){
         (*this->molecule_->cart())(1,iAtm),
         (*this->molecule_->cart())(2,iAtm)
       );
+    if (this->screenVxc ) this->genSparseBasisMap(Raw3Dg,iAtm); 
+    else this->genSparseBasisMap(Raw3Dg,iAtm);
+//     CErr("Final");
+    
    #ifdef _OPENMP
      #pragma omp parallel
      {
@@ -1159,6 +1211,7 @@ void SingleSlater<double>::formVXC(){
 
 //  Cleaning
     delete Rad;
+    CErr("formed");
 }; //End
 
 } // Namespace ChronusQ

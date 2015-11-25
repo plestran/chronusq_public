@@ -63,6 +63,10 @@ double SingleSlater<dcomplex>::spindens(double rho_A, double rho_B){
 };
 
 template<>
+void SingleSlater<dcomplex>::genSparseBasisMap(TwoDGrid & Raw3Dg, int iAtm){
+};
+
+template<>
 std::array<double,3> SingleSlater<dcomplex>::formVExSlater (double rho, double spindensity){
 
 }; 
