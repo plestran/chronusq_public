@@ -77,8 +77,21 @@ void Response<T>::initMetaFOPPA(){
       else            this->nMatDim_.push_back(2*this->nOAVA_ + 2*this->nOBVB_);
     }
   } else if(iPart_ == SPIN_ADAPTED) {
-    CErr("Spin-Adapted First Order Polarization Propagator NYI",
-         this->fileio_->out);
+    if(this->Ref_ != SingleSlater<T>::RHF) 
+      CErr("Spin-Adaptation only avaliable for Spin Restricted Reference",
+        this->fileio_->out);
+
+    if(this->doSinglets_) {
+      this->iMatIter_.push_back(SINGLETS);
+      if(this->doTDA_) this->nMatDim_.push_back(this->nOAVA_);
+      else             this->nMatDim_.push_back(2*this->nOAVA_);
+    }
+    if(this->doTriplets_) {
+      this->iMatIter_.push_back(TRIPLETS);
+      if(this->doTDA_) this->nMatDim_.push_back(this->nOAVA_);
+      else             this->nMatDim_.push_back(2*this->nOAVA_);
+    }
+
   }
 
 }; // initMetaFOPPA

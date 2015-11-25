@@ -145,6 +145,29 @@ void Response<double>::fullFOPPA(){
         } // All Beta Loop
       } // TCS Check
     } // this->iMatIter_[iMat] == FULL
+    else if(this->iMatIter_[iMat] == SINGLETS){
+      for(auto i = 0, ia = 0; i < this->nOA_; i++)
+      for(auto a = 0, A = this->nOA_; a < this->nVA_; a++, A++, ia++)
+      for(auto j = 0, jb = 0; j < this->nOA_; j++)
+      for(auto b = 0, B = this->nOA_; b < this->nVA_; b++, B++, jb++) {
+        this->transDen_[iMat](ia,jb) = 2*this->mointegrals_->IAJB(i,a,j,b) -  
+                                         this->mointegrals_->IJAB(i,j,a,b);
+        if(ia == jb)
+          this->transDen_[iMat](ia,jb) += (*this->singleSlater_->epsA())(A) - 
+                                          (*this->singleSlater_->epsA())(i);
+      }
+    } // Singlets
+    else if(this->iMatIter_[iMat] == TRIPLETS){
+      for(auto i = 0, ia = 0; i < this->nOA_; i++)
+      for(auto a = 0, A = this->nOA_; a < this->nVA_; a++, A++, ia++)
+      for(auto j = 0, jb = 0; j < this->nOA_; j++)
+      for(auto b = 0, B = this->nOA_; b < this->nVA_; b++, B++, jb++) {
+        this->transDen_[iMat](ia,jb) = - this->mointegrals_->IJAB(i,j,a,b);
+        if(ia == jb)
+          this->transDen_[iMat](ia,jb) += (*this->singleSlater_->epsA())(A) - 
+                                          (*this->singleSlater_->epsA())(i);
+      }
+    } // Triplets
 
     int N = this->nSingleDim_;
     if(this->doTDA_ || this->iMeth_ == STAB)
@@ -350,9 +373,6 @@ void Response<double>::fullPPRPA(){
     else if(this->iMatIter_[iMat] == CBB_PPTDA){
     } // this->iMatIter_[iMat] == CBB_PPTDA
 
-
-//  prettyPrint(this->fileio_->out,this->transDen_[iMat]-this->transDen_[iMat].transpose(),"Diff");
-//  CErr();
     int N = this->nSingleDim_;
     if(this->doTDA_)
       dsyev_(&JOBZ,&UPLO,&N,this->transDen_[iMat].data(),&N,

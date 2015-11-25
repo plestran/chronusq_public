@@ -247,7 +247,7 @@ public:
     this->doTDA_         = false;
     this->iPart_         = SPIN_SEPARATED;
     this->doSinglets_    = true;
-    this->doTriplets_    = false;
+    this->doTriplets_    = true;
     this->doAllAlpha_    = true;
     this->doMixedAB_     = true;
     this->doAllBeta_     = false;
@@ -295,9 +295,10 @@ public:
   void initRMu();
 
   // Setters
-  inline void setMeth(RESPONSE_TYPE n) { this->iMeth_  = n;    };
-  inline void doFull()                 { this->doFull_ = true; };
-  inline void doTDA()                  { this->doTDA_  = true; };
+  inline void setMeth(RESPONSE_TYPE n) { this->iMeth_  = n;            };
+  inline void doFull()                 { this->doFull_ = true;         };
+  inline void doTDA()                  { this->doTDA_  = true;         };
+  inline void doSA()                   { this->iPart_  = SPIN_ADAPTED; };
   
   // IO Related
   void printInfo();
