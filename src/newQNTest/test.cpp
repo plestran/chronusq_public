@@ -83,6 +83,7 @@ int main(){
   resp.communicate(singleSlater,moints,fileio);  
   resp.setMeth(RESPONSE_TYPE::PPTDA);
   resp.doSA();
+  resp.doFull();
   resp.doResponse();
   resp.setNSek(3);
   finalizeCQ(); 

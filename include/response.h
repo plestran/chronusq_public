@@ -248,7 +248,7 @@ public:
     this->iClass_        = NOCLASS;
     this->iJob_          = EIGEN;
     this->useIncoreInts_ = false;
-    this->doFull_        = true;
+    this->doFull_        = false;
     this->debugIter_     = false;
     this->doTDA_         = false;
     this->iPart_         = SPIN_SEPARATED;

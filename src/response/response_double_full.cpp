@@ -249,7 +249,7 @@ template<>
 void Response<double>::fullPPRPA(){
   // Form Needed MO Integrals (Requires INCORE Ints)
   this->mointegrals_->formABCD(false);
-  this->mointegrals_->formIAJB(false);
+  if(!this->doTDA_) this->mointegrals_->formIAJB(false);
   this->mointegrals_->formIJKL(false);
 
   for(auto iMat = 0; iMat != iMatIter_.size(); iMat++){
