@@ -36,12 +36,17 @@ void Response<double>::fullFOPPA(){
 
     this->nSingleDim_ = this->nMatDim_[iMat];
     // LAPACK Scratch for Full Diagonalization
-    char JOBZ = 'V';
-    char UPLO = 'U';
+    char JOBZ  = 'V';
+    char JOBVL = 'N';
+    char UPLO  = 'U';
     int INFO;
     int LWORK = 6*this->nSingleDim_;
     double * WORK  = new double[LWORK]; 
-    double * W     = new double[this->nSingleDim_];
+    double * COPY, * WI;
+    if(!this->doTDA_) {
+      COPY = new double[this->nSingleDim_*this->nSingleDim_]; 
+      WI   = new double[this->nSingleDim_];
+    }
 
     if(this->iMatIter_[iMat] == FULL) {
       if(this->Ref_ != SingleSlater<double>::TCS) {
@@ -142,25 +147,34 @@ void Response<double>::fullFOPPA(){
     } // this->iMatIter_[iMat] == FULL
 
     int N = this->nSingleDim_;
-    if(this->doTDA_)
+    if(this->doTDA_ || this->iMeth_ == STAB)
+      // Diagonalize A or ABBA (for stability)
       dsyev_(&JOBZ,&UPLO,&N,this->transDen_[iMat].data(),&N,
         this->frequencies_[iMat].data(),WORK,&LWORK,&INFO);
     else {
-//    prettyPrint(this->fileio_->out,this->transDen_[iMat],"Mat");
-      double * COPY = new double[this->nSingleDim_*this->nSingleDim_]; 
-      std::memcpy(COPY,this->transDen_[iMat].data(),this->nSingleDim_*this->nSingleDim_*sizeof(double));
-      double * WI = new double[this->nSingleDim_];
-      std::memset(WI,0.0,this->nSingleDim_*sizeof(double));
-      char JOBVL = 'N';
+      // Copy the response Matrix to a Temporary for DGEEV
+      std::memcpy(COPY,this->transDen_[iMat].data(),
+        this->nSingleDim_*this->nSingleDim_*sizeof(double));
 
+      // Zero out Eigenvalue Storage
+      std::memset(WI,0.0,this->nSingleDim_*sizeof(double));
+
+      // Solve full eigenvalue problem for FOPPA
       dgeev_(&JOBVL,&JOBZ,&N,COPY,&N,this->frequencies_[iMat].data(),WI,
         this->transDen_[iMat].data(),&N,this->transDen_[iMat].data(),&N,
         WORK,&LWORK,&INFO);
 
+      // Sort the eigenvalues
       std::sort(this->frequencies_[iMat].data(),
                 this->frequencies_[iMat].data()+
                 this->frequencies_[iMat].size());
+
+      // Cleanup DGEEV required memory
+      delete [] COPY;
+      delete [] WI;
     }
+
+    // Check if the diagonalization Converged
     if(INFO != 0){
       std::string msg;
       msg = "Full In-Core Diagonalization ";
@@ -173,12 +187,10 @@ void Response<double>::fullFOPPA(){
       CErr(msg,this->fileio_->out);
     };
 
-
     RealVecMap Eig(this->frequencies_[iMat].data(),this->nSingleDim_);
     prettyPrint(this->fileio_->out,Eig*phys.eVPerHartree,"Eig");
     // Cleanup LAPACK Memory
     delete[] WORK;
-    delete[] W;
 
   } 
 
