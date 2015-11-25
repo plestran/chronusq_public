@@ -157,6 +157,7 @@ void SingleSlater<double>::genSparseBasisMap(){
     this->sparseWeights_.push_back(RealSparseMatrix(this->ngpts,1));
     RealSparseMatrix *Map        = &this->sparseMap_[iAtm];
     RealSparseMatrix *WeightsMap = &this->sparseWeights_[iAtm];
+    double val;
     // Generate grids
     Rad->genGrid(); 
     Rad->atomGrid((elements[this->molecule_->index(iAtm)].sradius)) ;  
@@ -185,8 +186,9 @@ void SingleSlater<double>::genSparseBasisMap(){
              libint2::Shell shTmp = this->basisset_->shells(s1);
              double * s1Eval = this->basisset_->basisEval(shTmp,&pt);
              for (auto mu =0; mu < shSize; mu++){ 
-               if (std::abs(s1Eval[mu]) > 1.e-8){
-               Map->insert(bf1_s+mu,ipts) = s1Eval[mu];
+               val = s1Eval[mu];
+               if (std::abs(val) > 1.e-8){
+               Map->insert(bf1_s+mu,ipts) = val;
                }
              } //loop over basis (within a given ishell)
          } //loop over shells
