@@ -192,7 +192,113 @@ void Response<double>::fullFOPPA(){
     // Cleanup LAPACK Memory
     delete[] WORK;
 
-  } 
-
+  } // loop over iMat 
 }; // fullFOPPA (T = double)
+
+template<>
+void Response<double>::fullPPRPA(){
+  // Form Needed MO Integrals (Requires INCORE Ints)
+  this->mointegrals_->formABCD(false);
+  this->mointegrals_->formIAJB(false);
+  this->mointegrals_->formIJKL(false);
+
+  for(auto iMat = 0; iMat != iMatIter_.size(); iMat++){
+
+    this->nSingleDim_ = this->nMatDim_[iMat];
+    // LAPACK Scratch for Full Diagonalization
+    char JOBZ  = 'V';
+    char JOBVL = 'N';
+    char UPLO  = 'U';
+    int INFO;
+    int LWORK = 6*this->nSingleDim_;
+    double * WORK  = new double[LWORK]; 
+    double * COPY, * WI;
+    if(!this->doTDA_) {
+      COPY = new double[this->nSingleDim_*this->nSingleDim_]; 
+      WI   = new double[this->nSingleDim_];
+    }
+
+    if(this->iMatIter_[iMat] == AA_PPRPA){ 
+    } // this->iMatIter_[iMat] == AA_PPRPA
+    else if(this->iMatIter_[iMat] == AB_PPRPA){ 
+    } // this->iMatIter_[iMat] == AB_PPRPA
+    else if(this->iMatIter_[iMat] == BB_PPRPA){ 
+    } // this->iMatIter_[iMat] == BB_PPRPA
+    else if(this->iMatIter_[iMat] == AAA_PPTDA){
+      for(auto a = 0, ab = 0; a < this->nVA_; a++      )
+      for(auto b = 0        ; b < a        ;  b++, ab++)
+      for(auto c = 0, cd = 0; c < this->nVA_; c++      )
+      for(auto d = 0        ; d < c        ;  d++, cd++){
+        this->transDen_[iMat](ab,cd) = this->mointegrals_->ABCD(a,c,b,d) -
+                                       this->mointegrals_->ABCD(a,d,b,c);  
+        if(ab == cd) this->transDen_[iMat](ab,cd) +=
+          (*this->singleSlater_->epsA())(a+this->nOA_) + 
+          (*this->singleSlater_->epsA())(b+this->nOA_) - 2*this->rMu_; 
+      }
+    } // this->iMatIter_[iMat] == AAA_PPTDA
+    else if(this->iMatIter_[iMat] == AAB_PPTDA){
+      for(auto a = 0, ab = 0; a < this->nVA_; a++      )
+      for(auto b = 0        ; b < this->nVB_; b++, ab++)
+      for(auto c = 0, cd = 0; c < this->nVA_; c++      )
+      for(auto d = 0        ; d < this->nVB_; d++, cd++){
+        this->transDen_[iMat](ab,cd) = this->mointegrals_->ABCD(a,c,b,d);
+        if(a == c && b == d) this->transDen_[iMat](ab,cd) +=
+          (*this->singleSlater_->epsA())(a+this->nOA_) + 
+          (*this->singleSlater_->epsA())(b+this->nOB_) - 2*this->rMu_; 
+      }
+    } // this->iMatIter_[iMat] == AAB_PPTDA
+    else if(this->iMatIter_[iMat] == ABB_PPTDA){
+    } // this->iMatIter_[iMat] == ABB_PPTDA
+    else if(this->iMatIter_[iMat] == CAA_PPTDA){
+      for(auto i = 0, ij = 0; i < this->nOA_; i++      )
+      for(auto j = 0        ; j < i         ; j++, ij++)
+      for(auto k = 0, kl = 0; k < this->nOA_; k++      )
+      for(auto l = 0        ; l < k         ; l++, kl++){
+        this->transDen_[iMat](ij,kl) = this->mointegrals_->IJKL(i,k,j,l) - 
+                                       this->mointegrals_->IJKL(i,l,j,k);
+        if(ij == kl) this->transDen_[iMat](ij,kl) -=
+          (*this->singleSlater_->epsA())(i) + 
+          (*this->singleSlater_->epsA())(j) - 2*this->rMu_; 
+      }
+    } // this->iMatIter_[iMat] == CAA_PPTDA
+    else if(this->iMatIter_[iMat] == CAB_PPTDA){
+      for(auto i = 0, ij = 0; i < this->nOA_; i++      )
+      for(auto j = 0        ; j < this->nOB_; j++, ij++)
+      for(auto k = 0, kl = 0; k < this->nOA_; k++      )
+      for(auto l = 0        ; l < this->nOB_; l++, kl++){
+        this->transDen_[iMat](ij,kl) = this->mointegrals_->IJKL(i,k,j,l); 
+        if(i == k && j == l) this->transDen_[iMat](ij,kl) -=
+          (*this->singleSlater_->epsA())(i) + 
+          (*this->singleSlater_->epsA())(j) - 2*this->rMu_; 
+      }
+    } // this->iMatIter_[iMat] == CAB_PPTDA
+    else if(this->iMatIter_[iMat] == CBB_PPTDA){
+    } // this->iMatIter_[iMat] == CBB_PPTDA
+
+
+    int N = this->nSingleDim_;
+    // Diagonalize A or ABBA (for stability)
+    dsyev_(&JOBZ,&UPLO,&N,this->transDen_[iMat].data(),&N,
+      this->frequencies_[iMat].data(),WORK,&LWORK,&INFO);
+
+    // Check if the diagonalization Converged
+    if(INFO != 0){
+      std::string msg;
+      msg = "Full In-Core Diagonalization ";
+      if(this->iMeth_ != PPRPA)
+        msg += "(DSYEV) ";
+      else
+        msg += "(DGEEV) ";
+      msg += "Failed for IMat = "; 
+      msg += std::to_string(static_cast<int>(this->iMatIter_[iMat]));
+      CErr(msg,this->fileio_->out);
+    };
+
+    RealVecMap Eig(this->frequencies_[iMat].data(),this->nSingleDim_);
+    prettyPrint(this->fileio_->out,Eig,"Eig");
+    // Cleanup LAPACK Memory
+    delete[] WORK;
+  }; // loop over iMat
+}; // fullPPRPA
+
 }; // namespace ChronusQ

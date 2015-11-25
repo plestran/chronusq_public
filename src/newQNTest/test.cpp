@@ -21,9 +21,12 @@ int main(){
 
   molecule.setCharge(0);
   molecule.setMultip(1);
-  molecule.setNAtoms(3);
+  //molecule.setNAtoms(3);
+  molecule.setNAtoms(2);
   molecule.alloc(fileio.out);
 
+/*
+  // Molecule Specification for Water
   molecule.setIndex(0,HashAtom("O",0));
   molecule.setIndex(1,HashAtom("H",0));
   molecule.setIndex(2,HashAtom("H",0));
@@ -31,6 +34,14 @@ int main(){
   molecule.setCart(1,0.866811829 ,0.6014357793  ,0.0);
   molecule.setCart(2,-0.866811829, 0.6014357793 ,0.0);
   molecule.setNTotalE(10);
+*/
+
+  // Molecule Specification ofr BH
+  molecule.setIndex(0,HashAtom("B",0));
+  molecule.setIndex(1,HashAtom("H",0));
+  molecule.setCart(0,0.0,0.0,0.0);
+  molecule.setCart(1,0.0,0.0,1.232);
+  molecule.setNTotalE(6);
 
   molecule.convBohr();
   molecule.computeNucRep();
@@ -41,7 +52,8 @@ int main(){
   singleSlater.isClosedShell = true;
 
   basis.communicate(fileio);
-  basis.findBasisFile("sto3g");
+  //basis.findBasisFile("sto3g");
+  basis.findBasisFile("3-21G");
   basis.parseGlobal();
   basis.constructLocal(&molecule);
   basis.makeMaps(1,&molecule);
@@ -69,7 +81,7 @@ int main(){
   moints.communicate(molecule,basis,fileio,controls,aoints,singleSlater);
   moints.initMeta();
   resp.communicate(singleSlater,moints,fileio);  
-  resp.setMeth(RESPONSE_TYPE::RPA);
+  resp.setMeth(RESPONSE_TYPE::PPTDA);
   resp.doResponse();
   resp.setNSek(3);
   finalizeCQ(); 

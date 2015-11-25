@@ -292,6 +292,7 @@ public:
   void initMetaTOPPA();
   void initMetaPPRPA();
   void initPSCFDims();
+  void initRMu();
 
   // Setters
   inline void setMeth(RESPONSE_TYPE n) { this->iMeth_  = n;    };
@@ -324,12 +325,12 @@ public:
     if(this->iClass_ == FOPPA) this->fullFOPPA();
     else if(this->iClass_ == SOPPA) this->fullSOPPA();
     else if(this->iClass_ == TOPPA) this->fullTOPPA();
-    else if(this->iClass_ == PPRPA) this->fullPPRPA();
+    else if(this->iClass_ == PPPA)  this->fullPPRPA();
   };
   void fullFOPPA();
   void fullSOPPA(){;}; // NYI
   void fullTOPPA(){;}; // NYI
-  void fullPPRPA(){;}; // NYI
+  void fullPPRPA();
 
   // QN Related
   void IterativeResponse(){;}; // NYI

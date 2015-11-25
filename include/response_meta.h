@@ -23,6 +23,8 @@ void Response<T>::initMeta() {
   else if(this->iClass_ == RESPONSE_CLASS::PPPA)
     this->initMetaPPRPA();
 
+  this->initRMu();
+
 } // initMeta
 
 template<typename T>
@@ -134,3 +136,21 @@ void Response<T>::initMetaPPRPA(){
     CErr("Spin-Adapted Particle-Particle Propagator NYI",this->fileio_->out);
   }
 };
+
+template<typename T>
+void Response<T>::initRMu(){
+  if(this->iClass_ != RESPONSE_CLASS::PPPA) return;
+  if(this->Ref_ == SingleSlater<double>::TCS){
+    this->rMu_ = ( (*this->singleSlater_->epsA())(this->nO_-1) + 
+                   (*this->singleSlater_->epsA())(this->nO_)    ) / 2.0;
+  } else {
+    if(this->Ref_ == SingleSlater<double>::RHF || this->nOB_ == 0)
+      this->rMu_ = ( (*this->singleSlater_->epsA())(this->nOA_-1) + 
+                     (*this->singleSlater_->epsA())(this->nOA_)    ) / 2.0;
+    else if(this->nOB_ > 0)
+      this->rMu_ = (std::max((*this->singleSlater_->epsA())(this->nOA_-1), 
+                             (*this->singleSlater_->epsB())(this->nOB_-1) ) +
+                    std::max((*this->singleSlater_->epsA())(this->nOA_), 
+                             (*this->singleSlater_->epsB())(this->nOB_)))/2.0;
+  }
+}; //initRMu
