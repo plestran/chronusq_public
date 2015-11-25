@@ -219,8 +219,83 @@ void Response<double>::fullPPRPA(){
     }
 
     if(this->iMatIter_[iMat] == AA_PPRPA){ 
+      auto iOff = this->nVAVA_SLT_;
+      auto iMetricScale = -1;
+      // Place A Matrix
+      for(auto a = 0, ab = 0; a < this->nVA_; a++      )
+      for(auto b = 0        ; b < a        ;  b++, ab++)
+      for(auto c = 0, cd = 0; c < this->nVA_; c++      )
+      for(auto d = 0        ; d < c        ;  d++, cd++){
+        this->transDen_[iMat](ab,cd) = this->mointegrals_->ABCD(a,c,b,d) -
+                                       this->mointegrals_->ABCD(a,d,b,c);  
+        if(ab == cd) this->transDen_[iMat](ab,cd) +=
+          (*this->singleSlater_->epsA())(a+this->nOA_) + 
+          (*this->singleSlater_->epsA())(b+this->nOA_) - 2*this->rMu_; 
+      }
+
+      // Place C Matrix
+      for(auto i = 0, ij = iOff; i < this->nOA_; i++      )
+      for(auto j = 0           ; j < i         ; j++, ij++)
+      for(auto k = 0, kl = iOff; k < this->nOA_; k++      )
+      for(auto l = 0           ; l < k         ; l++, kl++){
+        this->transDen_[iMat](ij,kl) = this->mointegrals_->IJKL(i,k,j,l) - 
+                                       this->mointegrals_->IJKL(i,l,j,k);
+        if(ij == kl) this->transDen_[iMat](ij,kl) -=
+          (*this->singleSlater_->epsA())(i) + 
+          (*this->singleSlater_->epsA())(j) - 2*this->rMu_; 
+
+        this->transDen_[iMat](ij,kl) *= iMetricScale;
+      }
+
+      // Place B Matricies
+      for(auto a = 0, ab =    0; a < this->nVA_; a++      )
+      for(auto b = 0           ; b < a        ;  b++, ab++)
+      for(auto i = 0, ij = iOff; i < this->nOA_; i++      )
+      for(auto j = 0           ; j < i         ; j++, ij++) {
+        this->transDen_[iMat](ab,ij) = this->mointegrals_->IAJB(i,a,j,b) - 
+                                       this->mointegrals_->IAJB(i,b,j,a);
+        this->transDen_[iMat](ij,ab) = 
+          iMetricScale*this->transDen_[iMat](ab,ij);
+      }
     } // this->iMatIter_[iMat] == AA_PPRPA
     else if(this->iMatIter_[iMat] == AB_PPRPA){ 
+      auto iOff = this->nVAVB_;
+      auto iMetricScale = -1;
+     
+      // Place A Matrix
+      for(auto a = 0, ab = 0; a < this->nVA_; a++      )
+      for(auto b = 0        ; b < this->nVB_; b++, ab++)
+      for(auto c = 0, cd = 0; c < this->nVA_; c++      )
+      for(auto d = 0        ; d < this->nVB_; d++, cd++){
+        this->transDen_[iMat](ab,cd) = this->mointegrals_->ABCD(a,c,b,d);
+        if(a == c && b == d) this->transDen_[iMat](ab,cd) +=
+          (*this->singleSlater_->epsA())(a+this->nOA_) + 
+          (*this->singleSlater_->epsA())(b+this->nOB_) - 2*this->rMu_; 
+      }
+
+      // Place C Matrix
+      for(auto i = 0, ij = iOff; i < this->nOA_; i++      )
+      for(auto j = 0           ; j < this->nOB_; j++, ij++)
+      for(auto k = 0, kl = iOff; k < this->nOA_; k++      )
+      for(auto l = 0           ; l < this->nOB_; l++, kl++){
+        this->transDen_[iMat](ij,kl) = this->mointegrals_->IJKL(i,k,j,l); 
+
+        if(i == k && j == l) this->transDen_[iMat](ij,kl) -=
+          (*this->singleSlater_->epsA())(i) + 
+          (*this->singleSlater_->epsA())(j) - 2*this->rMu_; 
+
+        this->transDen_[iMat](ij,kl) *= iMetricScale;
+      }
+
+      // Place B Matricies
+      for(auto a = 0, ab = 0; a < this->nVA_; a++      )
+      for(auto b = 0        ; b < this->nVB_; b++, ab++)
+      for(auto i = 0, ij = iOff; i < this->nOA_; i++      )
+      for(auto j = 0           ; j < this->nOB_; j++, ij++){
+        this->transDen_[iMat](ab,ij) = this->mointegrals_->IAJB(i,a,j,b); 
+        this->transDen_[iMat](ij,ab) = 
+          iMetricScale*this->transDen_[iMat](ab,ij);
+      }
     } // this->iMatIter_[iMat] == AB_PPRPA
     else if(this->iMatIter_[iMat] == BB_PPRPA){ 
     } // this->iMatIter_[iMat] == BB_PPRPA
@@ -276,10 +351,36 @@ void Response<double>::fullPPRPA(){
     } // this->iMatIter_[iMat] == CBB_PPTDA
 
 
+//  prettyPrint(this->fileio_->out,this->transDen_[iMat]-this->transDen_[iMat].transpose(),"Diff");
+//  CErr();
     int N = this->nSingleDim_;
-    // Diagonalize A or ABBA (for stability)
-    dsyev_(&JOBZ,&UPLO,&N,this->transDen_[iMat].data(),&N,
-      this->frequencies_[iMat].data(),WORK,&LWORK,&INFO);
+    if(this->doTDA_)
+      dsyev_(&JOBZ,&UPLO,&N,this->transDen_[iMat].data(),&N,
+        this->frequencies_[iMat].data(),WORK,&LWORK,&INFO);
+    else {
+      // Copy the response Matrix to a Temporary for DGEEV
+      std::memcpy(COPY,this->transDen_[iMat].data(),
+        this->nSingleDim_*this->nSingleDim_*sizeof(double));
+
+      // Zero out Eigenvalue Storage
+      std::memset(WI,0.0,this->nSingleDim_*sizeof(double));
+
+      // Solve full eigenvalue problem for FOPPA
+      dgeev_(&JOBVL,&JOBZ,&N,COPY,&N,this->frequencies_[iMat].data(),WI,
+        this->transDen_[iMat].data(),&N,this->transDen_[iMat].data(),&N,
+        WORK,&LWORK,&INFO);
+
+      this->frequencies_[iMat] *= -1;
+      // Sort the eigenvalues
+      std::sort(this->frequencies_[iMat].data(),
+                this->frequencies_[iMat].data()+
+                this->frequencies_[iMat].size());
+      this->frequencies_[iMat] *= -1;
+
+      // Cleanup DGEEV required memory
+      delete [] COPY;
+      delete [] WI;
+    }
 
     // Check if the diagonalization Converged
     if(INFO != 0){
