@@ -1,4 +1,4 @@
-add_library(response SHARED response_double_full.cpp)
+add_library(response SHARED response_double_full.cpp response_double_guess.cpp)
 target_link_libraries(response LINK_PUBLIC singleslater)
 target_link_libraries(response LINK_PUBLIC mointegrals)
 target_link_libraries(response LINK_PUBLIC ${EXTERNAL_CQ_DEPS})

@@ -106,20 +106,16 @@ void FileIO::iniH5Paths() {
 
 void FileIO::iniH5Files(){
   if(doRestart) {
-/*
     this->scr = std::unique_ptr<H5::H5File>(
       new H5::H5File(this->name_scr,H5F_ACC_RDWR)
     );
-*/
     this->restart = std::unique_ptr<H5::H5File>(
       new H5::H5File(this->name_restart,H5F_ACC_RDWR)
     );
   } else {
-/*
     this->scr = std::unique_ptr<H5::H5File>(
       new H5::H5File(this->name_scr,H5F_ACC_TRUNC)
     );
-*/
     this->restart = std::unique_ptr<H5::H5File>(
       new H5::H5File(this->name_restart,H5F_ACC_TRUNC)
     );

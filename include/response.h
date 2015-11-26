@@ -123,6 +123,7 @@ class Response : public QNCallable<T> {
   std::vector<int> nMatDim_;///< Dimensions of the different Response Matricies
   std::vector<RESPONSE_PARTITION> iMatIter_; ///< Response Matrix Partition
   RESPONSE_MATRIX_PARTITIONING iPart_;///< Type of Response matrix Partitioning
+  std::vector<H5::DataSet*> guessFiles_;
 
   bool doSinglets_;      ///< (?) Find NSek Singlet Roots (depends on SA)
   bool doTriplets_;      ///< (?) Find NSek Triplet Roots (depends on SA)
@@ -180,7 +181,7 @@ class Response : public QNCallable<T> {
 
   /** Internal Storage of desired quantities **/
   // Misc Required for QN
-  std::unique_ptr<VectorXd> rmDiag_; ///< Diagonal elements of response matrix
+  std::vector<VectorXd> rmDiag_; ///< Diagonal elements of response matrix
 
   // Solution Quantities
   std::vector<TMat>             transDen_;    ///< Transition Density (MO)
@@ -202,7 +203,6 @@ public:
     this->fileio_       = NULL;
     this->mointegrals_  = NULL;
     this->singleSlater_ = NULL;
-    this->rmDiag_       = nullptr;
 
     // Zero out meta data to be initialized by SingleSlater
     this->nBasis_     = 0;
@@ -340,22 +340,36 @@ public:
   void fullPPRPA();
 
   // QN Related
-  void IterativeResponse(){;}; // NYI
+  inline void IterativeResponse(){
+    this->formDiag();
+    this->formGuess();
+  }; // NYI
   void linearTrans(TMap &,TMap &,TMap &,TMap &,TMap &,TMap &){;};
   void linearTransFOPPA(TMap &,TMap &,TMap &,TMap &,TMap &,TMap &);
   void linearTransSOPPA(TMap &,TMap &,TMap &,TMap &,TMap &,TMap &);
   void linearTransTOPPA(TMap &,TMap &,TMap &,TMap &,TMap &,TMap &);
   void linearTransPPRPA(TMap &,TMap &,TMap &,TMap &,TMap &,TMap &);
-  void formGuess(){;};
+  inline void formGuess(){
+    if(this->iClass_ == FOPPA) this->formGuessFOPPA();
+    else if(this->iClass_ == SOPPA) this->formGuessSOPPA();
+    else if(this->iClass_ == TOPPA) this->formGuessTOPPA();
+    else if(this->iClass_ == PPPA)  this->formGuessPPRPA();
+  };
   void formGuessFOPPA();
-  void formGuessSOPPA();
-  void formGuessTOPPA();
-  void formGuessPPRPA();
-  void formDiag(){;};
+  void formGuessSOPPA(){;};
+  void formGuessTOPPA(){;};
+  void formGuessPPRPA(){;};
+
+  inline void formDiag(){
+    if(this->iClass_ == FOPPA) this->formDiagFOPPA();
+    else if(this->iClass_ == SOPPA) this->formDiagSOPPA();
+    else if(this->iClass_ == TOPPA) this->formDiagTOPPA();
+    else if(this->iClass_ == PPPA)  this->formDiagPPRPA();
+  };
   void formDiagFOPPA();
-  void formDiagSOPPA();
-  void formDiagTOPPA();
-  void formDiagPPRPA();
+  void formDiagSOPPA(){;};
+  void formDiagTOPPA(){;};
+  void formDiagPPRPA(){;};
 
 
   // Allocation Related

@@ -95,6 +95,20 @@ public:
   std::unique_ptr<H5::DataSet> alphaMO;
   std::unique_ptr<H5::DataSet> betaMO;
 
+  struct ScratchPartition {
+    H5::DataSet data;
+    H5::DataSpace dataspace;
+    std::string name;
+
+    ScratchPartition(std::string &nm, H5::DataSpace &space, H5::H5File &file){
+      file.createDataSet(nm,H5::PredType::NATIVE_DOUBLE,space);
+      this->name = nm;
+      this->dataspace = space;
+    };
+  };
+
+  std::vector<ScratchPartition> scratchPartitions;
+
   template<typename T> struct metaData {
     T val;
     char desc[45];
