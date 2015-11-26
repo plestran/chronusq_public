@@ -859,32 +859,38 @@ template<>
 // Cleaned version to handle parallelism (no global variable)
 void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX, 
        double & energyC, RealMatrix * VXA, RealMatrix * VXB, RealMatrix * VCA, 
-       RealMatrix * VCB) {
+       RealMatrix * VCB, RealMatrix *STmp) {
 
    RealSparseMatrix *Map        = &this->sparseMap_[iAtm];
-   if (this->screenVxc ) {
-     if (Map->col(ipts).norm() < this->epsScreen) return;
-     }
    RealSparseMatrix *WeightsMap = &this->sparseWeights_[iAtm];
+
+   if (this->screenVxc && Map->col(ipts).norm() < this->epsScreen)
+     return;
+
    double rhor  = 0.0;  // Total density at point
    double rhorA = 0.0;  // alpha density at point
    double rhorB = 0.0;  // beta  density at point
    bool   RHF  = this->Ref_ == RHF;
    bool   doTCS  = this->Ref_ == TCS;
-   RealMatrix overlapR_(this->nBasis_,this->nBasis_);        ///< Overlap at grid point
-   overlapR_.setZero();
+// RealMatrix overlapR_(this->nBasis_,this->nBasis_);        ///< Overlap at grid point
+// overlapR_.setZero();
+// STmp->setZero();
    std::array<double,3>  epsMuCor = {0.0,0.0,0.0}; ///< {energydens_corr, potential_corr_alpha, potential_corr_B}
    std::array<double,3>  epsMuExc = {0.0,0.0,0.0}; ///< {energydend_exchange, potential_exchenge_alpha, potential_exchange_beta}
 
 //   Build Overlap
-    overlapR_ = Map->col(ipts)*Map->col(ipts).transpose();
+//  overlapR_ = Map->col(ipts)*Map->col(ipts).transpose();
+    (*STmp) = Map->col(ipts)*Map->col(ipts).transpose();
 //  Handle the total density at r for RKS or UKS
     if(!this->isClosedShell && this->Ref_ != TCS) {
-      rhorA = overlapR_.frobInner(this->densityA()->conjugate());
-      rhorB = overlapR_.frobInner(this->densityB()->conjugate());
+//    rhorA = overlapR_.frobInner(this->densityA()->conjugate());
+//    rhorB = overlapR_.frobInner(this->densityB()->conjugate());
+      rhorA = STmp->frobInner(this->densityA()->conjugate());
+      rhorB = STmp->frobInner(this->densityB()->conjugate());
       rhor = rhorA + rhorB;
     } else {
-      rhor = overlapR_.frobInner(this->densityA()->conjugate()) ;
+//    rhor = overlapR_.frobInner(this->densityA()->conjugate()) ;
+      rhor = STmp->frobInner(this->densityA()->conjugate()) ;
     }
 //  Handle numerical instability if screening on
     if (this->screenVxc ) {
@@ -906,22 +912,26 @@ void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX,
       if (this->ExchKernel_ != NOEXCH) {
         if(!this->isClosedShell && this->Ref_ != TCS){
             epsMuExc = this->formVEx(rhor,this->spindens(rhorA,rhorB));
-            (*VXB)  += ((*WeightsMap).coeff(ipts,0))*overlapR_*epsMuExc[2];
+//          (*VXB)  += ((*WeightsMap).coeff(ipts,0))*overlapR_*epsMuExc[2];
+            (*VXB)  += ((*WeightsMap).coeff(ipts,0))*(*STmp)*epsMuExc[2];
         } else {
             epsMuExc = this->formVEx(rhor,0.0);
         }
-        (*VXA)  += ((*WeightsMap).coeff(ipts,0))*overlapR_*epsMuExc[1];
+//      (*VXA)  += ((*WeightsMap).coeff(ipts,0))*overlapR_*epsMuExc[1];
+        (*VXA)  += ((*WeightsMap).coeff(ipts,0))*(*STmp)*epsMuExc[1];
         energyX += ((*WeightsMap).coeff(ipts,0))*rhor*epsMuExc[0];
       }
 //  Correlation
       if (this->CorrKernel_ != NOCORR) {
         if(!this->isClosedShell && this->Ref_ != TCS){
           epsMuCor = this->formVC(rhor,(this->spindens(rhorA,rhorB)));
-          (*VCB)  += ((*WeightsMap).coeff(ipts,0))*overlapR_*epsMuCor[2];
+//        (*VCB)  += ((*WeightsMap).coeff(ipts,0))*overlapR_*epsMuCor[2];
+          (*VCB)  += ((*WeightsMap).coeff(ipts,0))*(*STmp)*epsMuCor[2];
         } else{
           epsMuCor = this->formVC(rhor,0.0);
         }
-        (*VCA)  += ((*WeightsMap).coeff(ipts,0))*overlapR_*epsMuCor[1];
+//      (*VCA)  += ((*WeightsMap).coeff(ipts,0))*overlapR_*epsMuCor[1];
+        (*VCA)  += ((*WeightsMap).coeff(ipts,0))*(*STmp)*epsMuCor[1];
         energyC += ((*WeightsMap).coeff(ipts,0))*rhor*epsMuCor[0];
       }
 
@@ -1329,6 +1339,7 @@ void SingleSlater<double>::formVXC_store(){
       )
     );
 */
+    RealMatrix overlapR_(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
 
     double CxVx  = -(3.0/4.0)*(std::pow((3.0/math.pi),(1.0/3.0)));  //TF LDA Prefactor (for Vx)  
     double val = 4.0*math.pi*CxVx;                                  // to take into account Ang Int
@@ -1424,7 +1435,8 @@ void SingleSlater<double>::formVXC_store(){
   //  ** Vxc will be ready at the end of the two loop, to be finalized ** 
 
         this->evalVXC_store(iAtm,ipts,this->totalEx,this->totalEcorr,
-              (this->vXA()),(this->vXB()),(this->vCorA()),(this->vCorB()));
+              (this->vXA()),(this->vXB()),(this->vCorA()),(this->vCorB()),
+              &overlapR_);
       }; //loop over gridpts
     }; //loop atoms
 
