@@ -187,16 +187,12 @@ void SingleSlater<double>::genSparseBasisMap(){
              double * s1Eval = this->basisset_->basisEval(shTmp,&pt);
              for (auto mu =0; mu < shSize; mu++){ 
                val = s1Eval[mu];
-               if (std::abs(val) > 1.e-8){
+               if (std::abs(val) > this->epsScreen){
                Map->insert(bf1_s+mu,ipts) = val;
                }
              } //loop over basis (within a given ishell)
          } //loop over shells
-//         overlapR_ += ((*WeightsMap).coeff(ipts,0))*Map->col(ipts)*Map->col(ipts).transpose();
     } //loop over pts
-//       cout << 4.0*math.pi*overlapR_.frobInner(this->densityA()->conjugate()) << endl;
-//       cout << "NonZero " << (double)(Map->nonZeros())/(this->nBasis_*this->ngpts) << " " <<iAtm <<endl;
-//       cout << "NonZero " << Map->nonZeros() << " " <<iAtm <<endl;
   } // loop over atoms
 };// End genSparseBasisMap
 
@@ -865,27 +861,23 @@ void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX,
        double & energyC, RealMatrix * VXA, RealMatrix * VXB, RealMatrix * VCA, 
        RealMatrix * VCB) {
 
+   RealSparseMatrix *Map        = &this->sparseMap_[iAtm];
+   if (this->screenVxc ) {
+     if (Map->col(ipts).norm() < this->epsScreen) return;
+     }
+   RealSparseMatrix *WeightsMap = &this->sparseWeights_[iAtm];
    double rhor  = 0.0;  // Total density at point
    double rhorA = 0.0;  // alpha density at point
    double rhorB = 0.0;  // beta  density at point
    bool   RHF  = this->Ref_ == RHF;
    bool   doTCS  = this->Ref_ == TCS;
-   RealSparseMatrix *Map        = &this->sparseMap_[iAtm];
-   RealSparseMatrix *WeightsMap = &this->sparseWeights_[iAtm];
    RealMatrix overlapR_(this->nBasis_,this->nBasis_);        ///< Overlap at grid point
    overlapR_.setZero();
    std::array<double,3>  epsMuCor = {0.0,0.0,0.0}; ///< {energydens_corr, potential_corr_alpha, potential_corr_B}
    std::array<double,3>  epsMuExc = {0.0,0.0,0.0}; ///< {energydend_exchange, potential_exchenge_alpha, potential_exchange_beta}
 
 //   Build Overlap
-
-
-//   Overlap at r is ready
     overlapR_ = Map->col(ipts)*Map->col(ipts).transpose();
-//    if (ipts > 1500 && ipts < 1520){ 
-//    cout << "Old PTS = " << ipts <<endl;
-//    prettyPrint(cout,(overlapR_)," S(ri) Old");
-//    }
 //  Handle the total density at r for RKS or UKS
     if(!this->isClosedShell && this->Ref_ != TCS) {
       rhorA = overlapR_.frobInner(this->densityA()->conjugate());
@@ -896,8 +888,16 @@ void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX,
     }
 //  Handle numerical instability if screening on
     if (this->screenVxc ) {
+//    check if are noise
       if(rhor    <= 0.0 ) {
-        if((std::abs(rhor)) <= 1.0e10) rhor = 0.0;
+        if((std::abs(rhor)) <= 1.0e-10) {
+          return;
+        }else{ 
+          CErr("Numerical noise in the density");
+        }
+//    skyp points based on small density
+      }else if(rhor < this->epsScreen){
+        return;
       }
     }
 //this if statement prevent numerical instability with zero guesses
