@@ -1320,7 +1320,6 @@ template<>
 void SingleSlater<double>::formVXC_store(){
     int nAtom   = this->molecule_->nAtoms();                    // Number of Atoms
     this->ngpts = this->nRadDFTGridPts_*this->nAngDFTGridPts_;  // Number of grid point for each center
-/*  Parallel
     int nPtsPerThread = this->ngpts / omp_get_max_threads();    //  Number of Threads
     std::vector<double> tmpEnergyEx(omp_get_max_threads())  ;
     std::vector<double> tmpEnergyCor(omp_get_max_threads()) ;
@@ -1338,8 +1337,7 @@ void SingleSlater<double>::formVXC_store(){
               RealMatrix::Zero(this->nBasis_,this->nBasis_)
       )
     );
-*/
-    RealMatrix overlapR_(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
+    std::vector<RealMatrix> overlapR_(omp_get_max_threads(),RealMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
 
     double CxVx  = -(3.0/4.0)*(std::pow((3.0/math.pi),(1.0/3.0)));  //TF LDA Prefactor (for Vx)  
     double val = 4.0*math.pi*CxVx;                                  // to take into account Ang Int
@@ -1389,8 +1387,8 @@ void SingleSlater<double>::formVXC_store(){
       } // loop ipts
     }; // end batch_dft
 */
-   for(int iAtm = 0; iAtm < nAtom; iAtm++){
-      for(int ipts = 0; ipts < this->ngpts; ipts++){
+///for(int iAtm = 0; iAtm < nAtom; iAtm++){
+///   for(int ipts = 0; ipts < this->ngpts; ipts++){
 
 /*    Parallel
       std::fill(tmpEnergyEx.begin(),tmpEnergyEx.end(),0.0);
@@ -1434,11 +1432,59 @@ void SingleSlater<double>::formVXC_store(){
   // Build the Vxc for the ipts grid point 
   //  ** Vxc will be ready at the end of the two loop, to be finalized ** 
 
-        this->evalVXC_store(iAtm,ipts,this->totalEx,this->totalEcorr,
-              (this->vXA()),(this->vXB()),(this->vCorA()),(this->vCorB()),
-              &overlapR_);
-      }; //loop over gridpts
-    }; //loop atoms
+///     this->evalVXC_store(iAtm,ipts,this->totalEx,this->totalEcorr,
+///           (this->vXA()),(this->vXB()),(this->vCorA()),(this->vCorB()),
+///           &overlapR_);
+///   }; //loop over gridpts
+/// }; //loop atoms
+
+    
+    auto batch_dft = [&] (int thread_id,int iAtm) {
+      auto loopSt = nPtsPerThread * thread_id;
+      auto loopEn = nPtsPerThread * (thread_id + 1);
+      for(int ipts = loopSt; ipts < loopEn; ipts++){
+        this->evalVXC_store(iAtm,ipts,tmpEnergyEx[thread_id],tmpEnergyCor[thread_id],
+              &tmpVX[0][thread_id],&tmpVX[1][thread_id],&tmpVC[0][thread_id],
+              &tmpVC[1][thread_id],&overlapR_[thread_id]);
+      } // loop ipts
+    }; // batch_dft
+
+    for(int iAtm = 0; iAtm < nAtom; iAtm++){
+      std::fill(tmpEnergyEx.begin(),tmpEnergyEx.end(),0.0);
+      std::fill(tmpEnergyCor.begin(),tmpEnergyCor.end(),0.0);
+      std::fill(tmpnpts.begin(),tmpnpts.end(),0);
+    #ifdef _OPENMP
+      #pragma omp parallel
+      {
+        int thread_id = omp_get_thread_num();
+        tmpVX[0][thread_id].setZero();  
+        tmpVC[0][thread_id].setZero();  
+        if(!this->isClosedShell && this->Ref_ != TCS) {
+          tmpVX[1][thread_id].setZero();  
+          tmpVC[1][thread_id].setZero();  
+        }
+        batch_dft(thread_id,iAtm);
+      }
+    #else
+      tmpVX[0][0].setZero();  
+      tmpVC[0][0].setZero();  
+      if(!this->isClosedShell && this->Ref_ != TCS) {
+        tmpVX[1][0].setZero();  
+        tmpVC[1][0].setZero();  
+      }
+      batch_dft(0,iAtm);
+    #endif
+      for(auto iThread = 0; iThread < omp_get_max_threads(); iThread++) {
+        (*this->vXA())   += tmpVX[0][iThread];
+        (*this->vCorA()) += tmpVC[0][iThread];
+        this->totalEx += tmpEnergyEx[iThread];
+        this->totalEcorr += tmpEnergyCor[iThread];
+        if(!this->isClosedShell && this->Ref_ != TCS) {
+          (*this->vXB())   += tmpVX[1][iThread];
+          (*this->vCorB()) += tmpVC[1][iThread];
+        }
+      }
+    }; // loop over atoms
 
     //  Finishing the Vxc using the TF factor and the integration 
     //    prefactor over a solid sphere
