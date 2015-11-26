@@ -1439,14 +1439,20 @@ void SingleSlater<double>::formVXC_store(){
 /// }; //loop atoms
 
     
+    std::vector<std::chrono::duration<double>> thread_timers(omp_get_max_threads());
     auto batch_dft = [&] (int thread_id,int iAtm) {
       auto loopSt = nPtsPerThread * thread_id;
       auto loopEn = nPtsPerThread * (thread_id + 1);
-      for(int ipts = loopSt; ipts < loopEn; ipts++){
+//      auto start = std::chrono::high_resolution_clock::now();
+//    for(int ipts = loopSt; ipts < loopEn; ipts++){
+      for(auto ipts = 0; ipts < this->ngpts; ipts++) {
+        if(ipts % omp_get_max_threads() != thread_id) continue;
         this->evalVXC_store(iAtm,ipts,tmpEnergyEx[thread_id],tmpEnergyCor[thread_id],
               &tmpVX[0][thread_id],&tmpVX[1][thread_id],&tmpVC[0][thread_id],
               &tmpVC[1][thread_id],&overlapR_[thread_id]);
       } // loop ipts
+//      auto finish = std::chrono::high_resolution_clock::now();
+//      thread_timers[thread_id] = finish - start;
     }; // batch_dft
 
     for(int iAtm = 0; iAtm < nAtom; iAtm++){
@@ -1485,6 +1491,12 @@ void SingleSlater<double>::formVXC_store(){
         }
       }
     }; // loop over atoms
+
+/* DBWY Thread Timings
+    cout << "Thread Timings" << endl;
+    for(auto i = thread_timers.begin(); i != thread_timers.end(); i++)
+      cout << "   " << i->count() << endl;
+*/
 
     //  Finishing the Vxc using the TF factor and the integration 
     //    prefactor over a solid sphere
