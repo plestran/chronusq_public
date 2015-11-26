@@ -134,6 +134,68 @@ double SingleSlater<double>::spindens(double rho_A, double rho_B) {
 return (rho_A - rho_B)/ (rho_A + rho_B);
 };  // 
 
+
+
+template<>
+void SingleSlater<double>::genSparseBasisMap(){
+//  Eigen::SparseMatrix<double> Map(this->nTCS_*this->nBasis_,this->ngpts);
+  this->basisset_->radcut(this->epsScreen, this->maxiter, this->epsConv);
+//  RealMatrix overlapR_(this->nBasis_,this->nBasis_);        ///< Overlap at grid point
+
+  this->ngpts = this->nRadDFTGridPts_*this->nAngDFTGridPts_;  // Number of grid point for each center
+  OneDGrid * Rad ;                              // Pointer for Radial Grid
+  LebedevGrid GridLeb(this->nAngDFTGridPts_);   // Angular Grid
+  if (this->dftGrid_ == GAUSSCHEB)  
+    Rad = new GaussChebyshev1stGridInf(this->nRadDFTGridPts_,0.0,1.0);   
+  else if (this->dftGrid_ == EULERMACL) 
+    Rad = new  EulerMaclaurinGrid(this->nRadDFTGridPts_,0.0,1.0);   
+
+//Generare Angular Grid
+  GridLeb.genGrid();                            
+  for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
+    this->sparseMap_.push_back(RealSparseMatrix(this->nTCS_*this->nBasis_,this->ngpts));
+    this->sparseWeights_.push_back(RealSparseMatrix(this->ngpts,1));
+    RealSparseMatrix *Map        = &this->sparseMap_[iAtm];
+    RealSparseMatrix *WeightsMap = &this->sparseWeights_[iAtm];
+    double val;
+    // Generate grids
+    Rad->genGrid(); 
+    Rad->atomGrid((elements[this->molecule_->index(iAtm)].sradius)) ;  
+    TwoDGrid Raw3Dg(this->ngpts,Rad,&GridLeb);             
+    //Center the Grid at iAtom
+    Raw3Dg.centerGrid(
+      (*this->molecule_->cart())(0,iAtm),
+      (*this->molecule_->cart())(1,iAtm),
+      (*this->molecule_->cart())(2,iAtm)
+    );
+    for (auto ipts =0; ipts < this->ngpts; ipts++){
+      
+      cartGP pt = Raw3Dg.gridPtCart(ipts); 
+      auto mapRad_ = this->basisset_->MapGridBasis(pt);
+      // Evaluate each Becke fuzzy call weight, normalize it and muliply by 
+      //   the Raw grid weight at that point
+      auto bweight = (this->formBeckeW(pt,iAtm)) 
+                     / (this->normBeckeW(pt)) ;
+      if (mapRad_[0] || (bweight < this->epsScreen)) continue;
+         WeightsMap->insert(ipts,0) = Raw3Dg.getweightsGrid(ipts) * bweight;
+         //skyp all point
+         for (int s1=0; s1 < this->basisset_->nShell(); s1++){
+           if (!mapRad_[s1+1]) continue;
+             int bf1_s = this->basisset_->mapSh2Bf(s1);
+             auto shSize = this->basisset_->shells(s1).size(); 
+             libint2::Shell shTmp = this->basisset_->shells(s1);
+             double * s1Eval = this->basisset_->basisEval(shTmp,&pt);
+             for (auto mu =0; mu < shSize; mu++){ 
+               val = s1Eval[mu];
+               if (std::abs(val) > this->epsScreen){
+               Map->insert(bf1_s+mu,ipts) = val;
+               }
+             } //loop over basis (within a given ishell)
+         } //loop over shells
+    } //loop over pts
+  } // loop over atoms
+};// End genSparseBasisMap
+
 template<>
 double SingleSlater<double>::EvepsVWN(int iop, double A_x, double b_x, double c_x, double x0_x, double rho){
 //    From Reference Vosko en Al., Can. J. Phys., 58, 1200 (1980). VWN3 and VWN5 interpolation formula   
@@ -747,6 +809,10 @@ void SingleSlater<double>::evalVXC(cartGP gridPt, double weight, std::vector<boo
     }  
 //   Overlap at r is ready
     overlapR_ = overlapR_.selfadjointView<Lower>();
+//    if (ipts > 1500 && ipts < 1520){ 
+//    cout << "Old PTS = " << ipts <<endl;
+//    prettyPrint(cout,(overlapR_)," S(ri) Old");
+//    }
 //  Handle the total density at r for RKS or UKS
     if(!this->isClosedShell && this->Ref_ != TCS) {
       rhorA = overlapR_.frobInner(this->densityA()->conjugate());
@@ -784,6 +850,79 @@ void SingleSlater<double>::evalVXC(cartGP gridPt, double weight, std::vector<boo
         }
         (*VCA)  += weight*overlapR_*epsMuCor[1];
         energyC += weight*rhor*epsMuCor[0];
+      }
+
+    }
+}; //END
+
+template<>
+// Cleaned version to handle parallelism (no global variable)
+void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX, 
+       double & energyC, RealMatrix * VXA, RealMatrix * VXB, RealMatrix * VCA, 
+       RealMatrix * VCB) {
+
+   RealSparseMatrix *Map        = &this->sparseMap_[iAtm];
+   if (this->screenVxc ) {
+     if (Map->col(ipts).norm() < this->epsScreen) return;
+     }
+   RealSparseMatrix *WeightsMap = &this->sparseWeights_[iAtm];
+   double rhor  = 0.0;  // Total density at point
+   double rhorA = 0.0;  // alpha density at point
+   double rhorB = 0.0;  // beta  density at point
+   bool   RHF  = this->Ref_ == RHF;
+   bool   doTCS  = this->Ref_ == TCS;
+   RealMatrix overlapR_(this->nBasis_,this->nBasis_);        ///< Overlap at grid point
+   overlapR_.setZero();
+   std::array<double,3>  epsMuCor = {0.0,0.0,0.0}; ///< {energydens_corr, potential_corr_alpha, potential_corr_B}
+   std::array<double,3>  epsMuExc = {0.0,0.0,0.0}; ///< {energydend_exchange, potential_exchenge_alpha, potential_exchange_beta}
+
+//   Build Overlap
+    overlapR_ = Map->col(ipts)*Map->col(ipts).transpose();
+//  Handle the total density at r for RKS or UKS
+    if(!this->isClosedShell && this->Ref_ != TCS) {
+      rhorA = overlapR_.frobInner(this->densityA()->conjugate());
+      rhorB = overlapR_.frobInner(this->densityB()->conjugate());
+      rhor = rhorA + rhorB;
+    } else {
+      rhor = overlapR_.frobInner(this->densityA()->conjugate()) ;
+    }
+//  Handle numerical instability if screening on
+    if (this->screenVxc ) {
+//    check if are noise
+      if(rhor    <= 0.0 ) {
+        if((std::abs(rhor)) <= 1.0e-10) {
+          return;
+        }else{ 
+          CErr("Numerical noise in the density");
+        }
+//    skyp points based on small density
+      }else if(rhor < this->epsScreen){
+        return;
+      }
+    }
+//this if statement prevent numerical instability with zero guesses
+    if (rhor > 1.0e-20) {     
+//  Exchange
+      if (this->ExchKernel_ != NOEXCH) {
+        if(!this->isClosedShell && this->Ref_ != TCS){
+            epsMuExc = this->formVEx(rhor,this->spindens(rhorA,rhorB));
+            (*VXB)  += ((*WeightsMap).coeff(ipts,0))*overlapR_*epsMuExc[2];
+        } else {
+            epsMuExc = this->formVEx(rhor,0.0);
+        }
+        (*VXA)  += ((*WeightsMap).coeff(ipts,0))*overlapR_*epsMuExc[1];
+        energyX += ((*WeightsMap).coeff(ipts,0))*rhor*epsMuExc[0];
+      }
+//  Correlation
+      if (this->CorrKernel_ != NOCORR) {
+        if(!this->isClosedShell && this->Ref_ != TCS){
+          epsMuCor = this->formVC(rhor,(this->spindens(rhorA,rhorB)));
+          (*VCB)  += ((*WeightsMap).coeff(ipts,0))*overlapR_*epsMuCor[2];
+        } else{
+          epsMuCor = this->formVC(rhor,0.0);
+        }
+        (*VCA)  += ((*WeightsMap).coeff(ipts,0))*overlapR_*epsMuCor[1];
+        energyC += ((*WeightsMap).coeff(ipts,0))*rhor*epsMuCor[0];
       }
 
     }
@@ -1037,7 +1176,8 @@ void SingleSlater<double>::formVXC(){
       Rad = new  EulerMaclaurinGrid(this->nRadDFTGridPts_,0.0,1.0);   
 //  Generare Angular Grid
     GridLeb.genGrid();                            
- 
+
+//  Generate Sparse Matrix
     auto batch_dft = [&] (int thread_id,int iAtm, TwoDGrid &Raw3Dg) {
       auto loopSt = nPtsPerThread * thread_id;
       auto loopEn = nPtsPerThread * (thread_id + 1);
@@ -1087,6 +1227,10 @@ void SingleSlater<double>::formVXC(){
         (*this->molecule_->cart())(1,iAtm),
         (*this->molecule_->cart())(2,iAtm)
       );
+//    if (this->screenVxc ) this->genSparseBasisMap(Raw3Dg,iAtm); 
+//    else this->genSparseBasisMap(Raw3Dg,iAtm);
+//     CErr("Final");
+    
    #ifdef _OPENMP
      #pragma omp parallel
      {
@@ -1159,6 +1303,151 @@ void SingleSlater<double>::formVXC(){
 
 //  Cleaning
     delete Rad;
+}; //End
+
+
+template<>
+void SingleSlater<double>::formVXC_store(){
+    int nAtom   = this->molecule_->nAtoms();                    // Number of Atoms
+    this->ngpts = this->nRadDFTGridPts_*this->nAngDFTGridPts_;  // Number of grid point for each center
+/*  Parallel
+    int nPtsPerThread = this->ngpts / omp_get_max_threads();    //  Number of Threads
+    std::vector<double> tmpEnergyEx(omp_get_max_threads())  ;
+    std::vector<double> tmpEnergyCor(omp_get_max_threads()) ;
+    std::vector<int> tmpnpts(omp_get_max_threads()) ;
+    int nRHF;
+    if(this->isClosedShell || this->Ref_ == TCS) nRHF = 1;
+    else    nRHF = 2;
+    std::vector<std::vector<RealMatrix>> 
+      tmpVX(nRHF,std::vector<RealMatrix>(omp_get_max_threads(),
+              RealMatrix::Zero(this->nBasis_,this->nBasis_)
+      )
+    );
+    std::vector<std::vector<RealMatrix>> 
+      tmpVC(nRHF,std::vector<RealMatrix>(omp_get_max_threads(),
+              RealMatrix::Zero(this->nBasis_,this->nBasis_)
+      )
+    );
+*/
+
+    double CxVx  = -(3.0/4.0)*(std::pow((3.0/math.pi),(1.0/3.0)));  //TF LDA Prefactor (for Vx)  
+    double val = 4.0*math.pi*CxVx;                                  // to take into account Ang Int
+    this->totalEx    = 0.0;   // Zero out Total Exchange Energy
+    this->totalEcorr = 0.0;   // Zero out Total Correlation Energy
+    this->vXA()->setZero();   // Set to zero every occurence of the SCF
+    this->vCorA()->setZero(); // Set to zero every occurence of the SCF
+    if(!this->isClosedShell && this->Ref_ != TCS) {
+      this->vXB()->setZero();
+      this->vCorB()->setZero();
+    }
+
+/*Parellel
+//  Generate Sparse Matrix
+    auto batch_dft = [&] (int thread_id,int iAtm, TwoDGrid &Raw3Dg) {
+      auto loopSt = nPtsPerThread * thread_id;
+      auto loopEn = nPtsPerThread * (thread_id + 1);
+      if (thread_id == (omp_get_max_threads() - 1))
+        loopEn = this->ngpts;
+      for(int ipts = loopSt; ipts < loopEn; ipts++){
+//      printf("%d_%d_%d_%d\n", thread_id, ipts/nPtsPerThread,  ipts, iAtm);
+//      if(ipts/nPtsPerThread != thread_id) continue;
+        tmpnpts[thread_id]++;
+        bool nodens = false;
+        // Evaluate each Becke fuzzy call weight, normalize it and muliply by 
+        //   the Raw grid weight at that point
+        auto bweight = (this->formBeckeW((Raw3Dg.gridPtCart(ipts)),iAtm)) 
+                     / (this->normBeckeW(Raw3Dg.gridPtCart(ipts))) ;
+        auto weight = Raw3Dg.getweightsGrid(ipts) * bweight;
+        
+        // Build the Vxc for the ipts grid point 
+        //  ** Vxc will be ready at the end of the two loop, to be finalized ** 
+        if (this->screenVxc ) {
+          auto mapRad_ = this->basisset_->MapGridBasis(Raw3Dg.gridPtCart(ipts));
+          if (mapRad_[0] || (bweight < this->epsScreen)) 
+            nodens = true;
+          if(!nodens) 
+            this->evalVXC((Raw3Dg.gridPtCart(ipts)),weight,mapRad_,
+              tmpEnergyEx[thread_id],tmpEnergyCor[thread_id],&tmpVX[0][thread_id],
+              &tmpVX[1][thread_id],&tmpVC[0][thread_id],&tmpVC[1][thread_id]);
+        } else {
+            this->evalVXC((Raw3Dg.gridPtCart(ipts)),weight,tmpnull,
+              tmpEnergyEx[thread_id],tmpEnergyCor[thread_id],&tmpVX[0][thread_id],
+              &tmpVX[1][thread_id],&tmpVC[0][thread_id],&tmpVC[1][thread_id]);
+        }
+
+      } // loop ipts
+    }; // end batch_dft
+*/
+   for(int iAtm = 0; iAtm < nAtom; iAtm++){
+      for(int ipts = 0; ipts < this->ngpts; ipts++){
+
+/*    Parallel
+      std::fill(tmpEnergyEx.begin(),tmpEnergyEx.end(),0.0);
+      std::fill(tmpEnergyCor.begin(),tmpEnergyCor.end(),0.0);
+      std::fill(tmpnpts.begin(),tmpnpts.end(),0);
+   #ifdef _OPENMP
+     #pragma omp parallel
+     {
+       int thread_id = omp_get_thread_num();
+       tmpVX[0][thread_id].setZero();  
+       tmpVC[0][thread_id].setZero();  
+       if(!this->isClosedShell && this->Ref_ != TCS) {
+         tmpVX[1][thread_id].setZero();  
+         tmpVC[1][thread_id].setZero();  
+       }
+       batch_dft(thread_id,iAtm,Raw3Dg);
+     }
+   #else
+     tmpVX[0][0].setZero();  
+     tmpVC[0][0].setZero();  
+     if(!this->isClosedShell && this->Ref_ != TCS) {
+       tmpVX[1][0].setZero();  
+       tmpVC[1][0].setZero();  
+     }
+     batch_dft(0,iAtm,Raw3Dg);
+   #endif
+      for(auto iThread = 0; iThread < omp_get_max_threads(); iThread++) {
+        (*this->vXA())   += tmpVX[0][iThread];
+        (*this->vCorA()) += tmpVC[0][iThread];
+        this->totalEx += tmpEnergyEx[iThread];
+        this->totalEcorr += tmpEnergyCor[iThread];
+        if(!this->isClosedShell && this->Ref_ != TCS) {
+          (*this->vXB())   += tmpVX[1][iThread];
+          (*this->vCorB()) += tmpVC[1][iThread];
+        }
+        this->evalVXC_store(iAtm,ipts,this->totalEx,tmpEnergyCor[thread_id],
+              &tmpVX[0][thread_id],&tmpVX[1][thread_id],&tmpVC[0][thread_id],
+              &tmpVC[1][thread_id]);
+      }
+*/
+  // Build the Vxc for the ipts grid point 
+  //  ** Vxc will be ready at the end of the two loop, to be finalized ** 
+
+        this->evalVXC_store(iAtm,ipts,this->totalEx,this->totalEcorr,
+              (this->vXA()),(this->vXB()),(this->vCorA()),(this->vCorB()));
+      }; //loop over gridpts
+    }; //loop atoms
+
+    //  Finishing the Vxc using the TF factor and the integration 
+    //    prefactor over a solid sphere
+    (*this->vXA())      =  val * (*this->vXA());
+    (*this->vCorA())    =  4.0 * math.pi * (*this->vCorA());
+    this->totalEx       =  val * this->totalEx;
+    this->totalEcorr    =  4.0 * math.pi * (this->totalEcorr);
+    if(!this->isClosedShell && this->Ref_ != TCS) {
+        (*this->vCorB())  =  4.0 * math.pi * (*this->vCorB());
+        (*this->vXB())    =  val * (*this->vXB());
+      }
+
+    if(this->printLevel_ >= 3) {
+      prettyPrint(this->fileio_->out,(*this->vXA()),"LDA Vx alpha");
+      prettyPrint(this->fileio_->out,(*this->vCorA()),"Vc Vc alpha");
+      if(!this->isClosedShell && this->Ref_ != TCS) 
+        prettyPrint(this->fileio_->out,(*this->vXB()),"LDA Vx beta");
+
+      this->fileio_->out << "Total LDA Ex ="    << this->totalEx 
+                         << " Total VWN Corr= " << this->totalEcorr << endl;
+    }
 }; //End
 
 } // Namespace ChronusQ

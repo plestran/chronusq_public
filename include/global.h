@@ -46,6 +46,7 @@
 #define EIGEN_MATRIXBASE_PLUGIN "eigenplugin.h" ///< ChronusQ plugin for Eigen
 #define EIGEN_INITIALIZE_MATRICES_BY_ZERO // Eröffne die Matrizen als Null.
 #include <Eigen/Core> // Eigen Linear Algebra
+#include <Eigen/SparseCore> // Eigen Sparse Linear Algebra
 #include <unsupported/Eigen/MatrixFunctions>
 #ifdef USE_LIBINT
 #  include <libint2.hpp> // Libint Gaussian Integrals library
@@ -120,6 +121,8 @@ typedef Eigen::Matrix<double,Dynamic,Dynamic,RowMajor>     RealMatrix;    ///< D
 typedef Eigen::Matrix<dcomplex,Dynamic,Dynamic,RowMajor>   ComplexMatrix; ///< Dynamically allocated Complex (dcomplex) matrix. Row major for integration with Libint
 typedef Eigen::Matrix<double,Dynamic,Dynamic,ColMajor>     RealCMMatrix;    ///< Dynamically allocated Real (double) matrix. Row major for integration with Libint
 typedef Eigen::Matrix<dcomplex,Dynamic,Dynamic,ColMajor>   ComplexCMMatrix; ///< Dynamically allocated Complex (dcomplex) matrix. Row major for integration with Libint
+typedef Eigen::SparseMatrix<double> RealSparseMatrix;
+typedef Eigen::SparseMatrix<dcomplex> ComplexSparseMatrix;
 typedef Eigen::Map<VectorXd> RealVecMap;
 //AP
 typedef Eigen::SelfAdjointView<RealMatrix,Lower> RealSelfAdjLow;

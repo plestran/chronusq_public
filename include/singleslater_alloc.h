@@ -75,6 +75,23 @@ void SingleSlater<T>::alloc(){
   this->allocOp();
   if(this->maxMultipole_ > 0) this->allocMultipole(); 
 
+  if (this->isDFT){
+//   Timing
+    std::chrono::high_resolution_clock::time_point start;
+    std::chrono::high_resolution_clock::time_point finish;
+    std::chrono::duration<double> duration_formMap;
+    if(this->printLevel_ >= 3) {
+      start = std::chrono::high_resolution_clock::now();
+    }
+    this->genSparseBasisMap();
+// Timing
+    if(this->printLevel_ >= 3) {
+      finish = std::chrono::high_resolution_clock::now();
+      duration_formMap = finish - start;
+      this->fileio_->out<<"\nCPU time for MapVXc:  "<< duration_formMap.count() <<" seconds."<<endl;
+      }
+   }
+
 //if(this->isPrimary) this->fileio_->iniStdSCFFiles<double>(!this->isClosedShell && this->Ref_ != TCS,this->nTCS_*this->nBasis_);
 //if(this->isPrimary) this->fileio_->iniStdSCFFiles(!this->isClosedShell && this->Ref_ != TCS,this->nTCS_*this->nBasis_);
   if(this->isPrimary) {
