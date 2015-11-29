@@ -130,6 +130,7 @@ class SingleSlater {
   std::unique_ptr<TMatrix>  vCorB_;        ///< Beta Vcorr
   std::vector<RealSparseMatrix> sparseMap_;     // BasisFunction Map 
   std::vector<RealSparseMatrix> sparseWeights_; // Weights Map
+  std::vector<RealSparseMatrix> sparseDoRho_; // Evaluate density Map
 
   std::unique_ptr<RealMatrix>  dipole_;  ///< Electric Dipole Moment
   std::unique_ptr<RealMatrix>  quadpole_; ///< Electric Quadrupole Moment

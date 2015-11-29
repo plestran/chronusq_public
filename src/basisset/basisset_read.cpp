@@ -653,5 +653,65 @@ void BasisSet::popExpPairSh(){
   return ;
 }
 
+template<>
+double * BasisSet::basisDEval(int iop, libint2::Shell &liShell, cartGP *pt){
+// IOP Derivative
+// DFEval = fEval *(  (l/x)  +(m/y)  + (n/z) -2a(x+y+z)  )
+
+  auto shSize = liShell.size(); 
+  auto contDepth = liShell.alpha.size(); 
+  auto center = liShell.O;
+  double * fEVal = new double[shSize];
+  double * DfEval = new double[shSize];
+
+  double x = bg::get<0>(*pt) - center[0];
+  double y = bg::get<1>(*pt) - center[1];
+  double z = bg::get<2>(*pt) - center[2];
+  double rSq = x*x + y*y + z*z;
+  double xyz ;
+  double expFactor = 0.0;
+  double dFactor   =0.0;
+  if (iop = 1)  xyz = x + y + z;
+
+  for(auto k = 0; k < contDepth; k++){
+    expFactor += 
+      liShell.contr[0].coeff[k] *
+      std::exp(-liShell.alpha[k]*rSq);
+    if (iop= 1) 
+      dFactor +=  
+      (-2.0*liShell.alpha[k]*xyz);
+  }
+ 
+  if(liShell.contr[0].l == 0){
+    fEVal[0] = expFactor;
+   if (iop = 1) DfEval[0] = fEVal[0]*dFactor;
+  }else if(liShell.contr[0].l == 1){
+    fEVal[0] = expFactor*x;
+    fEVal[1] = expFactor*y;
+    fEVal[2] = expFactor*z;
+    if (iop = 1) {
+      DfEval[0] = fEVal[0]*((1.0/x) +dFactor);
+      DfEval[1] = fEVal[1]*((1.0/y) +dFactor);
+      DfEval[2] = fEVal[2]*((1.0/z) +dFactor);
+    }
+  } else if(liShell.contr[0].l == 2){
+    fEVal[0] = expFactor*x*x;
+    fEVal[1] = expFactor*y*x;
+    fEVal[2] = expFactor*z*x;
+    fEVal[3] = expFactor*y*y;
+    fEVal[4] = expFactor*y*z;
+    fEVal[5] = expFactor*z*z;
+    if (iop = 1) {
+      DfEval[0] = fEVal[0]*((2.0/x) +dFactor);
+      DfEval[1] = fEVal[1]*((1.0/y) + (1.0/x)+ dFactor);
+      DfEval[2] = fEVal[2]*((1.0/z) + (1.0/x)+ dFactor);
+      DfEval[3] = fEVal[3]*((2.0/y) +dFactor);
+      DfEval[4] = fEVal[4]*((1.0/y) + (1.0/z)+ dFactor);
+      DfEval[5] = fEVal[5]*((2.0/z) +dFactor);
+    }
+  }
+  return fEVal;
+}
+
 } // namespace ChronusQ
 

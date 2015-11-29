@@ -155,8 +155,10 @@ void SingleSlater<double>::genSparseBasisMap(){
   for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
     this->sparseMap_.push_back(RealSparseMatrix(this->nTCS_*this->nBasis_,this->ngpts));
     this->sparseWeights_.push_back(RealSparseMatrix(this->ngpts,1));
+    this->sparseDoRho_.push_back(RealSparseMatrix(this->ngpts,1));
     RealSparseMatrix *Map        = &this->sparseMap_[iAtm];
     RealSparseMatrix *WeightsMap = &this->sparseWeights_[iAtm];
+    RealSparseMatrix *DoRhoMap   = &this->sparseDoRho_[iAtm];
     double val;
     // Generate grids
     Rad->genGrid(); 
@@ -192,7 +194,11 @@ void SingleSlater<double>::genSparseBasisMap(){
                }
              } //loop over basis (within a given ishell)
          } //loop over shells
+         if (this->screenVxc && Map->col(ipts).norm() > this->epsScreen){
+         DoRhoMap->insert(ipts,0) = 2;}
     } //loop over pts
+//     cout << "non Zero " << this->sparseDoRho_[iAtm].nonZeros() << " " << this->ngpts <<endl; 
+//     CErr();
   } // loop over atoms
 };// End genSparseBasisMap
 
@@ -864,8 +870,8 @@ void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX,
    RealSparseMatrix *Map        = &this->sparseMap_[iAtm];
    RealSparseMatrix *WeightsMap = &this->sparseWeights_[iAtm];
 
-   if (this->screenVxc && Map->col(ipts).norm() < this->epsScreen)
-     return;
+//   if (this->screenVxc && Map->col(ipts).norm() < this->epsScreen)
+//     return;
 
    double rhor  = 0.0;  // Total density at point
    double rhorA = 0.0;  // alpha density at point
@@ -1443,10 +1449,12 @@ void SingleSlater<double>::formVXC_store(){
     auto batch_dft = [&] (int thread_id,int iAtm) {
       auto loopSt = nPtsPerThread * thread_id;
       auto loopEn = nPtsPerThread * (thread_id + 1);
+      RealSparseMatrix *DoRhoMap   = &this->sparseDoRho_[iAtm];
 //      auto start = std::chrono::high_resolution_clock::now();
 //    for(int ipts = loopSt; ipts < loopEn; ipts++){
       for(auto ipts = 0; ipts < this->ngpts; ipts++) {
         if(ipts % omp_get_max_threads() != thread_id) continue;
+        if( (*DoRhoMap).coeff(ipts,0) < 1 ) continue;
         this->evalVXC_store(iAtm,ipts,tmpEnergyEx[thread_id],tmpEnergyCor[thread_id],
               &tmpVX[0][thread_id],&tmpVX[1][thread_id],&tmpVC[0][thread_id],
               &tmpVC[1][thread_id],&overlapR_[thread_id]);

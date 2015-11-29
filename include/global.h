@@ -121,6 +121,7 @@ typedef Eigen::Matrix<double,Dynamic,Dynamic,RowMajor>     RealMatrix;    ///< D
 typedef Eigen::Matrix<dcomplex,Dynamic,Dynamic,RowMajor>   ComplexMatrix; ///< Dynamically allocated Complex (dcomplex) matrix. Row major for integration with Libint
 typedef Eigen::Matrix<double,Dynamic,Dynamic,ColMajor>     RealCMMatrix;    ///< Dynamically allocated Real (double) matrix. Row major for integration with Libint
 typedef Eigen::Matrix<dcomplex,Dynamic,Dynamic,ColMajor>   ComplexCMMatrix; ///< Dynamically allocated Complex (dcomplex) matrix. Row major for integration with Libint
+typedef Eigen::SparseMatrix<int> IntSparseMatrix;
 typedef Eigen::SparseMatrix<double> RealSparseMatrix;
 typedef Eigen::SparseMatrix<dcomplex> ComplexSparseMatrix;
 typedef Eigen::Map<VectorXd> RealVecMap;
