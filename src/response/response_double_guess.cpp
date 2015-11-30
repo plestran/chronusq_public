@@ -49,20 +49,16 @@ void Response<double>::formDiagFOPPA(){
           (*this->singleSlater_->epsA())(A) - (*this->singleSlater_->epsA())(i);
       }
     } //FULL
-    else if(this->iMatIter_[iMat] == SINGLETS){
+    else if(this->iMatIter_[iMat] == SINGLETS || 
+            this->iMatIter_[iMat] == TRIPLETS){
+
       for(auto i = 0, ia = 0; i < this->nOA_; i++)
       for(auto a = 0, A = this->nOA_; a < this->nVA_; a++, A++, ia++){
         this->rmDiag_[iMat](ia) = 
           (*this->singleSlater_->epsA())(A) - (*this->singleSlater_->epsA())(i);
       }
-    } // SINGLETS
-    else if(this->iMatIter_[iMat] == TRIPLETS){
-      for(auto i = 0, ia = 0; i < this->nOA_; i++)
-      for(auto a = 0, A = this->nOA_; a < this->nVA_; a++, A++, ia++){
-        this->rmDiag_[iMat](ia) = 
-          (*this->singleSlater_->epsA())(A) - (*this->singleSlater_->epsA())(i);
-      }
-    } // TRIPLETS
+
+    } // SINGLETS or TRIPLETS
     
 
   } // loop over mats
@@ -95,10 +91,28 @@ void Response<double>::formGuessFOPPA(){
       }
     );
 
-    prettyPrint(cout,this->rmDiag_[iMat],"diag");
+  //prettyPrint(cout,this->rmDiag_[iMat],"diag");
 
     for(auto ia = 0; ia < this->nSek_; ia++){
       cout << indx[ia] << " " << this->rmDiag_[iMat](indx[ia]) << endl;
+    }
+
+    for(auto iSek = 0; iSek < this->nSek_; iSek++) {
+      double one = 1.0;
+
+      hsize_t offset[] = {indx[iSek],iSek};
+      hsize_t count[]  = {1,1};
+      hsize_t stride[] = {1,1};
+      hsize_t block[]  = {1,1};
+      hsize_t subDim[] = {1,1};
+
+      H5::DataSpace memSpace(2,subDim,NULL);
+      H5::DataSpace subDataSpace = this->guessFiles_[iMat]->getSpace();
+      subDataSpace.selectHyperslab(H5S_SELECT_SET,count,offset,stride,block);
+      this->guessFiles_[iMat]->write(
+        &one,H5::PredType::NATIVE_DOUBLE,memSpace,subDataSpace
+      );
+      
     }
     
   }

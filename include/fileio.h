@@ -101,7 +101,9 @@ public:
     std::string name;
 
     ScratchPartition(std::string &nm, H5::DataSpace &space, H5::H5File &file){
-      file.createDataSet(nm,H5::PredType::NATIVE_DOUBLE,space);
+      this->data = H5::DataSet(
+        file.createDataSet(nm,H5::PredType::NATIVE_DOUBLE,space)
+      );
       this->name = nm;
       this->dataspace = space;
     };
