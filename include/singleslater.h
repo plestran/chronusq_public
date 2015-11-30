@@ -582,7 +582,7 @@ public:
   void formVXC_store();               // Form DFT VXC Term
   void genSparseBasisMap();     // Generate Basis Set Mapping
   void evalVXC_store(int, int, double &, double &,RealMatrix *, RealMatrix *,
-         RealMatrix *, RealMatrix *);
+         RealMatrix *, RealMatrix *, RealMatrix *);
   void evalVXC(cartGP, double, std::vector<bool>, double &, double &,RealMatrix *, RealMatrix *,
                  RealMatrix *, RealMatrix*); // evaluate DFT VXC Matrix Term( at a given pts)
   std::array<double,3 > formVC (double, double);    // Form DFT correlarion density,potential (A and B)

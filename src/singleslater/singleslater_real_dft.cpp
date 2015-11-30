@@ -859,32 +859,38 @@ template<>
 // Cleaned version to handle parallelism (no global variable)
 void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX, 
        double & energyC, RealMatrix * VXA, RealMatrix * VXB, RealMatrix * VCA, 
-       RealMatrix * VCB) {
+       RealMatrix * VCB, RealMatrix *STmp) {
 
    RealSparseMatrix *Map        = &this->sparseMap_[iAtm];
-   if (this->screenVxc ) {
-     if (Map->col(ipts).norm() < this->epsScreen) return;
-     }
    RealSparseMatrix *WeightsMap = &this->sparseWeights_[iAtm];
+
+   if (this->screenVxc && Map->col(ipts).norm() < this->epsScreen)
+     return;
+
    double rhor  = 0.0;  // Total density at point
    double rhorA = 0.0;  // alpha density at point
    double rhorB = 0.0;  // beta  density at point
    bool   RHF  = this->Ref_ == RHF;
    bool   doTCS  = this->Ref_ == TCS;
-   RealMatrix overlapR_(this->nBasis_,this->nBasis_);        ///< Overlap at grid point
-   overlapR_.setZero();
+// RealMatrix overlapR_(this->nBasis_,this->nBasis_);        ///< Overlap at grid point
+// overlapR_.setZero();
+// STmp->setZero();
    std::array<double,3>  epsMuCor = {0.0,0.0,0.0}; ///< {energydens_corr, potential_corr_alpha, potential_corr_B}
    std::array<double,3>  epsMuExc = {0.0,0.0,0.0}; ///< {energydend_exchange, potential_exchenge_alpha, potential_exchange_beta}
 
 //   Build Overlap
-    overlapR_ = Map->col(ipts)*Map->col(ipts).transpose();
+//  overlapR_ = Map->col(ipts)*Map->col(ipts).transpose();
+    (*STmp) = Map->col(ipts)*Map->col(ipts).transpose();
 //  Handle the total density at r for RKS or UKS
     if(!this->isClosedShell && this->Ref_ != TCS) {
-      rhorA = overlapR_.frobInner(this->densityA()->conjugate());
-      rhorB = overlapR_.frobInner(this->densityB()->conjugate());
+//    rhorA = overlapR_.frobInner(this->densityA()->conjugate());
+//    rhorB = overlapR_.frobInner(this->densityB()->conjugate());
+      rhorA = STmp->frobInner(this->densityA()->conjugate());
+      rhorB = STmp->frobInner(this->densityB()->conjugate());
       rhor = rhorA + rhorB;
     } else {
-      rhor = overlapR_.frobInner(this->densityA()->conjugate()) ;
+//    rhor = overlapR_.frobInner(this->densityA()->conjugate()) ;
+      rhor = STmp->frobInner(this->densityA()->conjugate()) ;
     }
 //  Handle numerical instability if screening on
     if (this->screenVxc ) {
@@ -906,22 +912,26 @@ void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX,
       if (this->ExchKernel_ != NOEXCH) {
         if(!this->isClosedShell && this->Ref_ != TCS){
             epsMuExc = this->formVEx(rhor,this->spindens(rhorA,rhorB));
-            (*VXB)  += ((*WeightsMap).coeff(ipts,0))*overlapR_*epsMuExc[2];
+//          (*VXB)  += ((*WeightsMap).coeff(ipts,0))*overlapR_*epsMuExc[2];
+            (*VXB)  += ((*WeightsMap).coeff(ipts,0))*(*STmp)*epsMuExc[2];
         } else {
             epsMuExc = this->formVEx(rhor,0.0);
         }
-        (*VXA)  += ((*WeightsMap).coeff(ipts,0))*overlapR_*epsMuExc[1];
+//      (*VXA)  += ((*WeightsMap).coeff(ipts,0))*overlapR_*epsMuExc[1];
+        (*VXA)  += ((*WeightsMap).coeff(ipts,0))*(*STmp)*epsMuExc[1];
         energyX += ((*WeightsMap).coeff(ipts,0))*rhor*epsMuExc[0];
       }
 //  Correlation
       if (this->CorrKernel_ != NOCORR) {
         if(!this->isClosedShell && this->Ref_ != TCS){
           epsMuCor = this->formVC(rhor,(this->spindens(rhorA,rhorB)));
-          (*VCB)  += ((*WeightsMap).coeff(ipts,0))*overlapR_*epsMuCor[2];
+//        (*VCB)  += ((*WeightsMap).coeff(ipts,0))*overlapR_*epsMuCor[2];
+          (*VCB)  += ((*WeightsMap).coeff(ipts,0))*(*STmp)*epsMuCor[2];
         } else{
           epsMuCor = this->formVC(rhor,0.0);
         }
-        (*VCA)  += ((*WeightsMap).coeff(ipts,0))*overlapR_*epsMuCor[1];
+//      (*VCA)  += ((*WeightsMap).coeff(ipts,0))*overlapR_*epsMuCor[1];
+        (*VCA)  += ((*WeightsMap).coeff(ipts,0))*(*STmp)*epsMuCor[1];
         energyC += ((*WeightsMap).coeff(ipts,0))*rhor*epsMuCor[0];
       }
 
@@ -1310,7 +1320,6 @@ template<>
 void SingleSlater<double>::formVXC_store(){
     int nAtom   = this->molecule_->nAtoms();                    // Number of Atoms
     this->ngpts = this->nRadDFTGridPts_*this->nAngDFTGridPts_;  // Number of grid point for each center
-/*  Parallel
     int nPtsPerThread = this->ngpts / omp_get_max_threads();    //  Number of Threads
     std::vector<double> tmpEnergyEx(omp_get_max_threads())  ;
     std::vector<double> tmpEnergyCor(omp_get_max_threads()) ;
@@ -1328,7 +1337,7 @@ void SingleSlater<double>::formVXC_store(){
               RealMatrix::Zero(this->nBasis_,this->nBasis_)
       )
     );
-*/
+    std::vector<RealMatrix> overlapR_(omp_get_max_threads(),RealMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
 
     double CxVx  = -(3.0/4.0)*(std::pow((3.0/math.pi),(1.0/3.0)));  //TF LDA Prefactor (for Vx)  
     double val = 4.0*math.pi*CxVx;                                  // to take into account Ang Int
@@ -1378,8 +1387,8 @@ void SingleSlater<double>::formVXC_store(){
       } // loop ipts
     }; // end batch_dft
 */
-   for(int iAtm = 0; iAtm < nAtom; iAtm++){
-      for(int ipts = 0; ipts < this->ngpts; ipts++){
+///for(int iAtm = 0; iAtm < nAtom; iAtm++){
+///   for(int ipts = 0; ipts < this->ngpts; ipts++){
 
 /*    Parallel
       std::fill(tmpEnergyEx.begin(),tmpEnergyEx.end(),0.0);
@@ -1423,10 +1432,71 @@ void SingleSlater<double>::formVXC_store(){
   // Build the Vxc for the ipts grid point 
   //  ** Vxc will be ready at the end of the two loop, to be finalized ** 
 
-        this->evalVXC_store(iAtm,ipts,this->totalEx,this->totalEcorr,
-              (this->vXA()),(this->vXB()),(this->vCorA()),(this->vCorB()));
-      }; //loop over gridpts
-    }; //loop atoms
+///     this->evalVXC_store(iAtm,ipts,this->totalEx,this->totalEcorr,
+///           (this->vXA()),(this->vXB()),(this->vCorA()),(this->vCorB()),
+///           &overlapR_);
+///   }; //loop over gridpts
+/// }; //loop atoms
+
+    
+    std::vector<std::chrono::duration<double>> thread_timers(omp_get_max_threads());
+    auto batch_dft = [&] (int thread_id,int iAtm) {
+      auto loopSt = nPtsPerThread * thread_id;
+      auto loopEn = nPtsPerThread * (thread_id + 1);
+//      auto start = std::chrono::high_resolution_clock::now();
+//    for(int ipts = loopSt; ipts < loopEn; ipts++){
+      for(auto ipts = 0; ipts < this->ngpts; ipts++) {
+        if(ipts % omp_get_max_threads() != thread_id) continue;
+        this->evalVXC_store(iAtm,ipts,tmpEnergyEx[thread_id],tmpEnergyCor[thread_id],
+              &tmpVX[0][thread_id],&tmpVX[1][thread_id],&tmpVC[0][thread_id],
+              &tmpVC[1][thread_id],&overlapR_[thread_id]);
+      } // loop ipts
+//      auto finish = std::chrono::high_resolution_clock::now();
+//      thread_timers[thread_id] = finish - start;
+    }; // batch_dft
+
+    for(int iAtm = 0; iAtm < nAtom; iAtm++){
+      std::fill(tmpEnergyEx.begin(),tmpEnergyEx.end(),0.0);
+      std::fill(tmpEnergyCor.begin(),tmpEnergyCor.end(),0.0);
+      std::fill(tmpnpts.begin(),tmpnpts.end(),0);
+    #ifdef _OPENMP
+      #pragma omp parallel
+      {
+        int thread_id = omp_get_thread_num();
+        tmpVX[0][thread_id].setZero();  
+        tmpVC[0][thread_id].setZero();  
+        if(!this->isClosedShell && this->Ref_ != TCS) {
+          tmpVX[1][thread_id].setZero();  
+          tmpVC[1][thread_id].setZero();  
+        }
+        batch_dft(thread_id,iAtm);
+      }
+    #else
+      tmpVX[0][0].setZero();  
+      tmpVC[0][0].setZero();  
+      if(!this->isClosedShell && this->Ref_ != TCS) {
+        tmpVX[1][0].setZero();  
+        tmpVC[1][0].setZero();  
+      }
+      batch_dft(0,iAtm);
+    #endif
+      for(auto iThread = 0; iThread < omp_get_max_threads(); iThread++) {
+        (*this->vXA())   += tmpVX[0][iThread];
+        (*this->vCorA()) += tmpVC[0][iThread];
+        this->totalEx += tmpEnergyEx[iThread];
+        this->totalEcorr += tmpEnergyCor[iThread];
+        if(!this->isClosedShell && this->Ref_ != TCS) {
+          (*this->vXB())   += tmpVX[1][iThread];
+          (*this->vCorB()) += tmpVC[1][iThread];
+        }
+      }
+    }; // loop over atoms
+
+/* DBWY Thread Timings
+    cout << "Thread Timings" << endl;
+    for(auto i = thread_timers.begin(); i != thread_timers.end(); i++)
+      cout << "   " << i->count() << endl;
+*/
 
     //  Finishing the Vxc using the TF factor and the integration 
     //    prefactor over a solid sphere

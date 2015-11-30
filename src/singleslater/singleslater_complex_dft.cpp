@@ -106,7 +106,7 @@ void SingleSlater<dcomplex>::evalVXC(cartGP gridPt, double weight, std::vector<b
 template<>
 void SingleSlater<dcomplex>::evalVXC_store(int iAtm, int ipts, double & energyX, 
        double & energyC, RealMatrix * VXA, RealMatrix * VXB, RealMatrix * VCA, 
-       RealMatrix * VCB){
+       RealMatrix * VCB, RealMatrix *STmp){
 };
 
 
