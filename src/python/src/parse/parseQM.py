@@ -198,6 +198,27 @@ def handleReference(workers,settings):
       msg = msg + " for user defined QM.KS reference"
       CErrMsg(workers['CQFileIO'],str(msg))
 
+    if 'DFT_GRID' in settings:
+      workers["CQSingleSlater"].setDFTGrid(gridMap[settings['DFT_GRID']])
+    if 'DFT_WEIGHTS' in settings:
+      workers["CQSingleSlater"].setDFTWeightScheme(
+        dftWeightScheme[settings['DFT_WEIGHTS']])
+
+    if 'DFT_SCREEN' in settings:
+      if settings['DFT_SCREEN']:
+        pass
+      else:
+        workers["CQSingleSlater"].turnOffDFTScreening()
+
+    if 'DFT_SCRTOL' in settings:
+      workers["CQSingleSlater"].setDFTScreenTol(settings['DFT_SCRTOL'])
+
+    if 'DFT_NRAD' in settings:
+      workers["CQSingleSlater"].setDFTNRad(settings['DFT_NRAD'])
+
+    if 'DFT_NANG' in settings:
+      workers["CQSingleSlater"].setDFTNAng(settings['DFT_NANG'])
+
     try:
       workers["CQSingleSlater"].setCorrKernel(corrMap[corrKernel])
     except KeyError:
@@ -286,6 +307,27 @@ def handleReference(workers,settings):
       msg = msg + " for user defined QM.KS reference"
       CErrMsg(workers['CQFileIO'],str(msg))
 
+    if 'DFT_GRID' in settings:
+      workers["CQSingleSlater"].setDFTGrid(gridMap[settings['DFT_GRID']])
+    if 'DFT_WEIGHTS' in settings:
+      workers["CQSingleSlater"].setDFTWeightScheme(
+        dftWeightScheme[settings['DFT_WEIGHTS']])
+
+    if 'DFT_SCREEN' in settings:
+      if settings['DFT_SCREEN']:
+        pass
+      else:
+        workers["CQSingleSlater"].turnOffDFTScreening()
+
+    if 'DFT_SCRTOL' in settings:
+      workers["CQSingleSlater"].setDFTScreenTol(settings['DFT_SCRTOL'])
+
+    if 'DFT_NRAD' in settings:
+      workers["CQSingleSlater"].setDFTNRad(settings['DFT_NRAD'])
+
+    if 'DFT_NANG' in settings:
+      workers["CQSingleSlater"].setDFTNAng(settings['DFT_NANG'])
+
     try:
       workers["CQSingleSlater"].setCorrKernel(corrMap[corrKernel])
     except KeyError:
@@ -317,6 +359,27 @@ def handleReference(workers,settings):
       msg = msg + " for user defined QM.KS reference"
       CErrMsg(workers['CQFileIO'],str(msg))
 
+    if 'DFT_GRID' in settings:
+      workers["CQSingleSlater"].setDFTGrid(gridMap[settings['DFT_GRID']])
+    if 'DFT_WEIGHTS' in settings:
+      workers["CQSingleSlater"].setDFTWeightScheme(
+        dftWeightScheme[settings['DFT_WEIGHTS']])
+
+    if 'DFT_SCREEN' in settings:
+      if settings['DFT_SCREEN']:
+        pass
+      else:
+        workers["CQSingleSlater"].turnOffDFTScreening()
+
+    if 'DFT_SCRTOL' in settings:
+      workers["CQSingleSlater"].setDFTScreenTol(settings['DFT_SCRTOL'])
+
+    if 'DFT_NRAD' in settings:
+      workers["CQSingleSlater"].setDFTNRad(settings['DFT_NRAD'])
+
+    if 'DFT_NANG' in settings:
+      workers["CQSingleSlater"].setDFTNAng(settings['DFT_NANG'])
+
     try:
       workers["CQSingleSlater"].setCorrKernel(corrMap[corrKernel])
     except KeyError:
@@ -342,6 +405,27 @@ def handleReference(workers,settings):
     workers["CQSingleSlater"].setDFTKernel(kernelMap['LSDA'])
     workers["CQSingleSlater"].setCorrKernel(corrMap['VWN3'])
     workers["CQSingleSlater"].setExchKernel(exchMap['SLATER'])
+
+    if 'DFT_GRID' in settings:
+      workers["CQSingleSlater"].setDFTGrid(gridMap[settings['DFT_GRID']])
+    if 'DFT_WEIGHTS' in settings:
+      workers["CQSingleSlater"].setDFTWeightScheme(
+        dftWeightScheme[settings['DFT_WEIGHTS']])
+
+    if 'DFT_SCREEN' in settings:
+      if settings['DFT_SCREEN']:
+        pass
+      else:
+        workers["CQSingleSlater"].turnOffDFTScreening()
+
+    if 'DFT_SCRTOL' in settings:
+      workers["CQSingleSlater"].setDFTScreenTol(settings['DFT_SCRTOL'])
+
+    if 'DFT_NRAD' in settings:
+      workers["CQSingleSlater"].setDFTNRad(settings['DFT_NRAD'])
+
+    if 'DFT_NANG' in settings:
+      workers["CQSingleSlater"].setDFTNAng(settings['DFT_NANG'])
   elif 'RLSDA' in ref:
     # Force RKS
     if mult != 1:
@@ -356,6 +440,27 @@ def handleReference(workers,settings):
     workers["CQSingleSlater"].setDFTKernel(kernelMap['LSDA'])
     workers["CQSingleSlater"].setCorrKernel(corrMap['VWN3'])
     workers["CQSingleSlater"].setExchKernel(exchMap['SLATER'])
+
+    if 'DFT_GRID' in settings:
+      workers["CQSingleSlater"].setDFTGrid(gridMap[settings['DFT_GRID']])
+    if 'DFT_WEIGHTS' in settings:
+      workers["CQSingleSlater"].setDFTWeightScheme(
+        dftWeightScheme[settings['DFT_WEIGHTS']])
+
+    if 'DFT_SCREEN' in settings:
+      if settings['DFT_SCREEN']:
+        pass
+      else:
+        workers["CQSingleSlater"].turnOffDFTScreening()
+
+    if 'DFT_SCRTOL' in settings:
+      workers["CQSingleSlater"].setDFTScreenTol(settings['DFT_SCRTOL'])
+
+    if 'DFT_NRAD' in settings:
+      workers["CQSingleSlater"].setDFTNRad(settings['DFT_NRAD'])
+
+    if 'DFT_NANG' in settings:
+      workers["CQSingleSlater"].setDFTNAng(settings['DFT_NANG'])
   elif 'ULSDA' in ref:
     # Force RKS
     if mult != 1:
@@ -370,6 +475,27 @@ def handleReference(workers,settings):
     workers["CQSingleSlater"].setDFTKernel(kernelMap['LSDA'])
     workers["CQSingleSlater"].setCorrKernel(corrMap['VWN3'])
     workers["CQSingleSlater"].setExchKernel(exchMap['SLATER'])
+
+    if 'DFT_GRID' in settings:
+      workers["CQSingleSlater"].setDFTGrid(gridMap[settings['DFT_GRID']])
+    if 'DFT_WEIGHTS' in settings:
+      workers["CQSingleSlater"].setDFTWeightScheme(
+        dftWeightScheme[settings['DFT_WEIGHTS']])
+
+    if 'DFT_SCREEN' in settings:
+      if settings['DFT_SCREEN']:
+        pass
+      else:
+        workers["CQSingleSlater"].turnOffDFTScreening()
+
+    if 'DFT_SCRTOL' in settings:
+      workers["CQSingleSlater"].setDFTScreenTol(settings['DFT_SCRTOL'])
+
+    if 'DFT_NRAD' in settings:
+      workers["CQSingleSlater"].setDFTNRad(settings['DFT_NRAD'])
+
+    if 'DFT_NANG' in settings:
+      workers["CQSingleSlater"].setDFTNAng(settings['DFT_NANG'])
   elif 'CULSDA' in ref:
     # Use Constrained UHF (not complex UHF) 
     workers["CQSingleSlater"].setRef(chronusQ.Reference.CUHF)
@@ -379,6 +505,27 @@ def handleReference(workers,settings):
     workers["CQSingleSlater"].setDFTKernel(kernelMap['LSDA'])
     workers["CQSingleSlater"].setCorrKernel(corrMap['VWN3'])
     workers["CQSingleSlater"].setExchKernel(exchMap['SLATER'])
+
+    if 'DFT_GRID' in settings:
+      workers["CQSingleSlater"].setDFTGrid(gridMap[settings['DFT_GRID']])
+    if 'DFT_WEIGHTS' in settings:
+      workers["CQSingleSlater"].setDFTWeightScheme(
+        dftWeightScheme[settings['DFT_WEIGHTS']])
+
+    if 'DFT_SCREEN' in settings:
+      if settings['DFT_SCREEN']:
+        pass
+      else:
+        workers["CQSingleSlater"].turnOffDFTScreening()
+
+    if 'DFT_SCRTOL' in settings:
+      workers["CQSingleSlater"].setDFTScreenTol(settings['DFT_SCRTOL'])
+
+    if 'DFT_NRAD' in settings:
+      workers["CQSingleSlater"].setDFTNRad(settings['DFT_NRAD'])
+
+    if 'DFT_NANG' in settings:
+      workers["CQSingleSlater"].setDFTNAng(settings['DFT_NANG'])
 
 
   else:
