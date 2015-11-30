@@ -349,16 +349,17 @@ public:
   void linearTransSOPPA(TMap &,TMap &,TMap &,TMap &,TMap &,TMap &);
   void linearTransTOPPA(TMap &,TMap &,TMap &,TMap &,TMap &,TMap &);
   void linearTransPPRPA(TMap &,TMap &,TMap &,TMap &,TMap &,TMap &);
-  inline void formGuess(){
-    if(this->iClass_ == FOPPA) this->formGuessFOPPA();
-    else if(this->iClass_ == SOPPA) this->formGuessSOPPA();
-    else if(this->iClass_ == TOPPA) this->formGuessTOPPA();
-    else if(this->iClass_ == PPPA)  this->formGuessPPRPA();
-  };
-  void formGuessFOPPA();
-  void formGuessSOPPA(){;};
-  void formGuessTOPPA(){;};
-  void formGuessPPRPA(){;};
+  void formGuess();
+//inline void formGuess(){
+//  if(this->iClass_ == FOPPA) this->formGuessFOPPA();
+//  else if(this->iClass_ == SOPPA) this->formGuessSOPPA();
+//  else if(this->iClass_ == TOPPA) this->formGuessTOPPA();
+//  else if(this->iClass_ == PPPA)  this->formGuessPPRPA();
+//};
+//void formGuessFOPPA();
+//void formGuessSOPPA(){;};
+//void formGuessTOPPA(){;};
+//void formGuessPPRPA(){;};
 
   inline void formDiag(){
     if(this->iClass_ == FOPPA) this->formDiagFOPPA();
@@ -369,7 +370,7 @@ public:
   void formDiagFOPPA();
   void formDiagSOPPA(){;};
   void formDiagTOPPA(){;};
-  void formDiagPPRPA(){;};
+  void formDiagPPRPA();
 
 
   // Allocation Related
