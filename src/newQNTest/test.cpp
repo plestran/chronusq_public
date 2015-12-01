@@ -81,10 +81,10 @@ int main(){
   moints.communicate(molecule,basis,fileio,controls,aoints,singleSlater);
   moints.initMeta();
   resp.communicate(singleSlater,moints,fileio);  
-  resp.setMeth(RESPONSE_TYPE::PPRPA);
+  resp.setMeth(RESPONSE_TYPE::RPA);
 //resp.doSA();
   resp.setNSek(3);
-  //resp.doFull();
+    resp.doFull();
   resp.doResponse();
   finalizeCQ(); 
   return 0;

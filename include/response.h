@@ -343,23 +343,24 @@ public:
   inline void IterativeResponse(){
     this->formDiag();
     this->formGuess();
-  }; // NYI
-  void linearTrans(TMap &,TMap &,TMap &,TMap &,TMap &,TMap &){;};
+  };
+
+  // Required for QNCallable
+  inline void linearTrans(TMap &VR,TMap &VL,TMap &SR,TMap &SL,
+                          TMap &RR,TMap &RL){
+    
+    if(this->iClass_ == FOPPA) this->linearTransFOPPA(VR,VL,SR,SL,RR,RL);
+    else if(this->iClass_ == SOPPA) this->linearTransSOPPA(VR,VL,SR,SL,RR,RL);
+    else if(this->iClass_ == TOPPA) this->linearTransTOPPA(VR,VL,SR,SL,RR,RL);
+    else if(this->iClass_ == PPPA)  this->linearTransPPRPA(VR,VL,SR,SL,RR,RL);
+  };
   void linearTransFOPPA(TMap &,TMap &,TMap &,TMap &,TMap &,TMap &);
-  void linearTransSOPPA(TMap &,TMap &,TMap &,TMap &,TMap &,TMap &);
-  void linearTransTOPPA(TMap &,TMap &,TMap &,TMap &,TMap &,TMap &);
-  void linearTransPPRPA(TMap &,TMap &,TMap &,TMap &,TMap &,TMap &);
+  void linearTransSOPPA(TMap &,TMap &,TMap &,TMap &,TMap &,TMap &){;};
+  void linearTransTOPPA(TMap &,TMap &,TMap &,TMap &,TMap &,TMap &){;};
+  void linearTransPPRPA(TMap &,TMap &,TMap &,TMap &,TMap &,TMap &){;};
+
+  // Required for QNCallable
   void formGuess();
-//inline void formGuess(){
-//  if(this->iClass_ == FOPPA) this->formGuessFOPPA();
-//  else if(this->iClass_ == SOPPA) this->formGuessSOPPA();
-//  else if(this->iClass_ == TOPPA) this->formGuessTOPPA();
-//  else if(this->iClass_ == PPPA)  this->formGuessPPRPA();
-//};
-//void formGuessFOPPA();
-//void formGuessSOPPA(){;};
-//void formGuessTOPPA(){;};
-//void formGuessPPRPA(){;};
 
   inline void formDiag(){
     if(this->iClass_ == FOPPA) this->formDiagFOPPA();
@@ -382,6 +383,18 @@ public:
   void checkValidSOPPA(); ///< Checks specific to SOPPA
   void checkValidTOPPA(); ///< Checks specific to TOPPA
   void checkValidPPRPA(); ///< Checks specific to PPRPA
+
+  // Transformations of Transition Densities
+  void formAOTransDen(TVecMap&, TMat&, TMat&);
+  void formMOTransDen(TVecMap &,TMat&,TMat&);
+  void placeOccVir(TVecMap&, TMat&, TMat&);
+  void placeVirOcc(TVecMap&, TMat&, TMat&);
+  void placeOccOcc(TVecMap&, TMat&, TMat&);
+  void placeVirVir(TVecMap&, TMat&, TMat&);
+  void retrieveOccVir(TVecMap&, TMat&, TMat&);
+  void retrieveVirOcc(TVecMap&, TMat&, TMat&);
+  void retrieveOccOcc(TVecMap&, TMat&, TMat&);
+  void retrieveVirVir(TVecMap&, TMat&, TMat&);
 
 }; // class Response
 #include <response_alloc.h>
