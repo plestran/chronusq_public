@@ -128,6 +128,9 @@ class SingleSlater {
   std::unique_ptr<TMatrix>  vXB_;        ///< Beta VXC
   std::unique_ptr<TMatrix>  vCorA_;        ///< Alpha or Full Vcorr
   std::unique_ptr<TMatrix>  vCorB_;        ///< Beta Vcorr
+  std::vector<RealSparseMatrix>  sparsedmudX_; ///< basis derivative (x) (NbasisxNbasis)
+  std::vector<RealSparseMatrix>  sparsedmudY_; ///< basis derivative (y) (NbasisxNbasis)
+  std::vector<RealSparseMatrix>  sparsedmudZ_; ///< basis derivative (z) (NbasisxNbasis) 
   std::vector<RealSparseMatrix> sparseMap_;     // BasisFunction Map 
   std::vector<RealSparseMatrix> sparseWeights_; // Weights Map
   std::vector<RealSparseMatrix> sparseDoRho_; // Evaluate density Map

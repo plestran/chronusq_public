@@ -138,13 +138,15 @@ return (rho_A - rho_B)/ (rho_A + rho_B);
 
 template<>
 void SingleSlater<double>::genSparseBasisMap(){
-//  Eigen::SparseMatrix<double> Map(this->nTCS_*this->nBasis_,this->ngpts);
   this->basisset_->radcut(this->epsScreen, this->maxiter, this->epsConv);
-//  RealMatrix overlapR_(this->nBasis_,this->nBasis_);        ///< Overlap at grid point
-
+/*
+  RealMatrix overlapR(this->nBasis_,this->nBasis_);        ///< Overlap at grid point
+  overlapR.setZero();
+*/
   this->ngpts = this->nRadDFTGridPts_*this->nAngDFTGridPts_;  // Number of grid point for each center
   OneDGrid * Rad ;                              // Pointer for Radial Grid
   LebedevGrid GridLeb(this->nAngDFTGridPts_);   // Angular Grid
+  int nDer = 0 ; //Order of differenzation
   if (this->dftGrid_ == GAUSSCHEB)  
     Rad = new GaussChebyshev1stGridInf(this->nRadDFTGridPts_,0.0,1.0);   
   else if (this->dftGrid_ == EULERMACL) 
@@ -156,9 +158,16 @@ void SingleSlater<double>::genSparseBasisMap(){
     this->sparseMap_.push_back(RealSparseMatrix(this->nTCS_*this->nBasis_,this->ngpts));
     this->sparseWeights_.push_back(RealSparseMatrix(this->ngpts,1));
     this->sparseDoRho_.push_back(RealSparseMatrix(this->ngpts,1));
+//  Derivative
+    this->sparsedmudX_.push_back(RealSparseMatrix(this->nTCS_*this->nBasis_,this->ngpts));
+    this->sparsedmudY_.push_back(RealSparseMatrix(this->nTCS_*this->nBasis_,this->ngpts));
+    this->sparsedmudZ_.push_back(RealSparseMatrix(this->nTCS_*this->nBasis_,this->ngpts));
     RealSparseMatrix *Map        = &this->sparseMap_[iAtm];
     RealSparseMatrix *WeightsMap = &this->sparseWeights_[iAtm];
     RealSparseMatrix *DoRhoMap   = &this->sparseDoRho_[iAtm];
+    RealSparseMatrix *MapdX      = &this->sparsedmudX_[iAtm];
+    RealSparseMatrix *MapdY      = &this->sparsedmudY_[iAtm];
+    RealSparseMatrix *MapdZ      = &this->sparsedmudZ_[iAtm];
     double val;
     // Generate grids
     Rad->genGrid(); 
@@ -178,28 +187,55 @@ void SingleSlater<double>::genSparseBasisMap(){
       //   the Raw grid weight at that point
       auto bweight = (this->formBeckeW(pt,iAtm)) 
                      / (this->normBeckeW(pt)) ;
-      if (mapRad_[0] || (bweight < this->epsScreen)) continue;
+      if (this->screenVxc) {
+        if (mapRad_[0] || (bweight < this->epsScreen)) continue;
+        }
          WeightsMap->insert(ipts,0) = Raw3Dg.getweightsGrid(ipts) * bweight;
          //skyp all point
          for (int s1=0; s1 < this->basisset_->nShell(); s1++){
-           if (!mapRad_[s1+1]) continue;
-             int bf1_s = this->basisset_->mapSh2Bf(s1);
-             auto shSize = this->basisset_->shells(s1).size(); 
-             libint2::Shell shTmp = this->basisset_->shells(s1);
-             double * s1Eval = this->basisset_->basisEval(shTmp,&pt);
-             for (auto mu =0; mu < shSize; mu++){ 
-               val = s1Eval[mu];
-               if (std::abs(val) > this->epsScreen){
+           if (this->screenVxc) {
+             if (!mapRad_[s1+1]) continue;
+             }
+           int bf1_s = this->basisset_->mapSh2Bf(s1);
+           auto shSize = this->basisset_->shells(s1).size(); 
+           libint2::Shell shTmp = this->basisset_->shells(s1);
+           double * s1Eval = this->basisset_->basisDEval(nDer,shTmp,&pt);
+           double * ds1EvalX = s1Eval + shSize;
+           double * ds1EvalY = ds1EvalX + shSize;
+           double * ds1EvalZ = ds1EvalY + shSize;
+           for (auto mu =0; mu < shSize; mu++){ 
+             val = s1Eval[mu];
+             if (std::abs(val) > this->epsScreen){
                Map->insert(bf1_s+mu,ipts) = val;
+               }
+             if (nDer ==1) {
+               val = ds1EvalX[mu];
+               if (std::abs(val) > this->epsScreen){
+                 MapdX->insert(bf1_s+mu,ipts) = val;
+                 }
+               val = ds1EvalY[mu];
+               if (std::abs(val) > this->epsScreen){
+                 MapdY->insert(bf1_s+mu,ipts) = val;
+                 }
+               val = ds1EvalZ[mu];
+               if (std::abs(val) > this->epsScreen){
+                 MapdZ->insert(bf1_s+mu,ipts) = val;
+                 }
                }
              } //loop over basis (within a given ishell)
          } //loop over shells
+//AP
+//            overlapR += (*WeightsMap).coeff(ipts,0)*(*Map).col(ipts)*(*MapdX).col(ipts).transpose();
+//AP
          if (this->screenVxc && Map->col(ipts).norm() > this->epsScreen){
          DoRhoMap->insert(ipts,0) = 2;}
     } //loop over pts
 //     cout << "non Zero " << this->sparseDoRho_[iAtm].nonZeros() << " " << this->ngpts <<endl; 
-//     CErr();
   } // loop over atoms
+/*
+         overlapR *= 4.0*math.pi;
+         prettyPrint(cout,overlapR,"dipolex ");
+*/
 };// End genSparseBasisMap
 
 template<>

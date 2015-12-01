@@ -656,58 +656,93 @@ void BasisSet::popExpPairSh(){
 template<>
 double * BasisSet::basisDEval(int iop, libint2::Shell &liShell, cartGP *pt){
 // IOP Derivative
-// DFEval = fEval *(  (l/x)  +(m/y)  + (n/z) -2a(x+y+z)  )
 
+  if (iop >1) CErr("Derivative order NYI in basisDEval");
   auto shSize = liShell.size(); 
   auto contDepth = liShell.alpha.size(); 
   auto center = liShell.O;
-  double * fEVal = new double[shSize];
-  double * DfEval = new double[shSize];
+  double * fEVal = new double[(3*iop + 1)*shSize];
+//double * DfEval = new double[shSize];
+  double * f = fEVal;
+  double * DfEval = f + shSize;
+
+  double * dx = DfEval;
+  double * dy = dx + shSize;
+  double * dz = dy + shSize;
 
   double x = bg::get<0>(*pt) - center[0];
   double y = bg::get<1>(*pt) - center[1];
   double z = bg::get<2>(*pt) - center[2];
   double rSq = x*x + y*y + z*z;
-  double xyz ;
+  double alpha = 0.0;
   double expFactor = 0.0;
-  double dFactor   =0.0;
-  if (iop = 1)  xyz = x + y + z;
 
   for(auto k = 0; k < contDepth; k++){
     expFactor += 
       liShell.contr[0].coeff[k] *
       std::exp(-liShell.alpha[k]*rSq);
-    if (iop= 1) 
-      dFactor +=  
-      (-2.0*liShell.alpha[k]*xyz);
+      if (iop == 1) alpha += 
+      2.0*liShell.alpha[k]*liShell.contr[0].coeff[k] *
+      std::exp(-liShell.alpha[k]*rSq);
   }
  
   if(liShell.contr[0].l == 0){
-    fEVal[0] = expFactor;
-   if (iop = 1) DfEval[0] = fEVal[0]*dFactor;
+    f[0] = expFactor;
+   if (iop == 1) {
+      dx[0] =  alpha*x;
+      dy[0] =  alpha*y;
+      dz[0] =  alpha*z;
+      }
   }else if(liShell.contr[0].l == 1){
-    fEVal[0] = expFactor*x;
-    fEVal[1] = expFactor*y;
-    fEVal[2] = expFactor*z;
-    if (iop = 1) {
-      DfEval[0] = fEVal[0]*((1.0/x) +dFactor);
-      DfEval[1] = fEVal[1]*((1.0/y) +dFactor);
-      DfEval[2] = fEVal[2]*((1.0/z) +dFactor);
+    f[0] = expFactor*x;
+    f[1] = expFactor*y;
+    f[2] = expFactor*z;
+    if (iop == 1) {
+//    dpx/dxi
+      dx[0] = alpha*x*x-expFactor;
+      dy[0] = alpha*x*y;
+      dz[0] = alpha*x*z;
+//    dpy/dxi
+      dx[1] = alpha*y*x;
+      dy[1] = alpha*y*y + expFactor;
+      dz[1] = alpha*y*z;
+//    dpz/dxi
+      dx[2] = alpha*z*x;
+      dy[2] = alpha*z*y;
+      dz[2] = alpha*z*z + expFactor;
     }
   } else if(liShell.contr[0].l == 2){
-    fEVal[0] = expFactor*x*x;
-    fEVal[1] = expFactor*y*x;
-    fEVal[2] = expFactor*z*x;
-    fEVal[3] = expFactor*y*y;
-    fEVal[4] = expFactor*y*z;
-    fEVal[5] = expFactor*z*z;
-    if (iop = 1) {
-      DfEval[0] = fEVal[0]*((2.0/x) +dFactor);
-      DfEval[1] = fEVal[1]*((1.0/y) + (1.0/x)+ dFactor);
-      DfEval[2] = fEVal[2]*((1.0/z) + (1.0/x)+ dFactor);
-      DfEval[3] = fEVal[3]*((2.0/y) +dFactor);
-      DfEval[4] = fEVal[4]*((1.0/y) + (1.0/z)+ dFactor);
-      DfEval[5] = fEVal[5]*((2.0/z) +dFactor);
+    f[0] = expFactor*x*x;
+    f[1] = expFactor*y*x;
+    f[2] = expFactor*z*x;
+    f[3] = expFactor*y*y;
+    f[4] = expFactor*y*z;
+    f[5] = expFactor*z*z;
+    if (iop == 1) {
+//    dDx^2/dxi
+      dx[0] = alpha*x*x*x-2.0*x*expFactor;
+      dy[0] = alpha*x*x*y;
+      dz[0] = alpha*x*x*z;
+//    dDyx/dxi
+      dx[1] = alpha*x*x*y-y*expFactor;
+      dy[1] = alpha*x*y*y-x*expFactor;
+      dz[1] = alpha*x*y*z;
+//    dDzx/dxi
+      dx[2] = alpha*x*x*z-z*expFactor;
+      dy[2] = alpha*x*y*z;
+      dz[2] = alpha*x*z*z-x*expFactor;
+//    dDy^2/dxi
+      dx[3] = alpha*y*y*x;
+      dy[3] = alpha*y*y*y-2.0*y*expFactor;
+      dz[3] = alpha*y*y*z;
+//    dDyz/dxi
+      dx[4] = alpha*x*y*z;
+      dy[4] = alpha*y*y*z-z*expFactor;
+      dz[4] = alpha*y*z*z-y*expFactor;
+//    dDz^2/dxi
+      dx[5] = alpha*z*z*x;
+      dy[5] = alpha*z*z*y;
+      dz[5] = alpha*z*z*z-2.0*z*expFactor;
     }
   }
   return fEVal;
