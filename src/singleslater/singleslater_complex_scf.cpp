@@ -82,7 +82,7 @@ void SingleSlater<dcomplex>::formX(){
   dsyev_(&JOBZ,&UPLO,&NTCSxNBASIS,this->SEVcMem_,&NTCSxNBASIS,this->SEVlMem_,
     this->LowdinWORK_,&this->LWORK_,&INFO);
   
-  V.transposeInPlace(); // b/c Row Major...
+//V.transposeInPlace(); // b/c Row Major...
   std::memcpy(this->SCpyMem_,this->SEVcMem_,NTCSxNBASIS * NTCSxNBASIS *
     sizeof(double));
 
@@ -118,7 +118,7 @@ void SingleSlater<dcomplex>::formNO(){
   zheev_(&JOBZ,&UPLO,&this->nBasis_,this->PNOMem_,&this->nBasis_,this->occNumMem_,
          this->WORK_,&this->LWORK_,this->RWORK_,&INFO);
   if(INFO != 0) CErr("ZHEEV Failed in FormNO",this->fileio_->out);
-  P.transposeInPlace();
+//P.transposeInPlace(); //bc row major
 
   // Swap Ordering
   for(auto i = 0; i < this->nBasis_/2; i++) P.col(i).swap(P.col(this->nBasis_ - i- 1));
@@ -179,7 +179,7 @@ void SingleSlater<dcomplex>::diagFock(){
   zheev_(&JOBZ,&UPLO,&NTCSxNBASIS,this->FpAlphaMem_,&NTCSxNBASIS,this->epsA_->data(),
          this->WORK_,&this->LWORK_,this->RWORK_,&INFO);
   if(INFO != 0) CErr("ZHEEV Failed Fock Alpha",this->fileio_->out);
-  FpAlpha.transposeInPlace(); // bc row major
+//FpAlpha.transposeInPlace(); // bc row major
   (*this->moA_) = X * FpAlpha;
 
   if(!this->isClosedShell && this->Ref_ != TCS){
@@ -187,7 +187,7 @@ void SingleSlater<dcomplex>::diagFock(){
     zheev_(&JOBZ,&UPLO,&this->nBasis_,this->FpBetaMem_,&this->nBasis_,this->epsB_->data(),
            this->WORK_,&this->LWORK_,this->RWORK_,&INFO);
     if(INFO != 0) CErr("ZHEEV Failed Fock Beta",this->fileio_->out);
-    FpBeta.transposeInPlace(); // bc row major
+//  FpBeta.transposeInPlace(); // bc row major
     (*this->moB_) = X * FpBeta;
   }
 

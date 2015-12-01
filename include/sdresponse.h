@@ -41,7 +41,7 @@ namespace ChronusQ {
 template<typename T>
 class SDResponse {
   typedef Eigen::Matrix<T,Dynamic,Dynamic,ColMajor> TCMMatrix;
-  typedef Eigen::Matrix<T,Dynamic,Dynamic,RowMajor> TMatrix;
+  typedef Eigen::Matrix<T,Dynamic,Dynamic,ColMajor> TMatrix;
   typedef Tensor<T,Range3d> TTensor3d;
   typedef Tensor<T,Range4d> TTensor4d;
   typedef Eigen::Matrix<T,Dynamic,1> TVec;

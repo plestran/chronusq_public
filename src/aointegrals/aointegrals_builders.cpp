@@ -109,7 +109,9 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
 
         int IOff = 0;
         for(auto nMat = 0; nMat < mat.size(); nMat++) {
-          ConstRealMap bufMat(&buff[IOff],n1,n2); // Read only map
+//        ConstRealMap bufMat(&buff[IOff],n1,n2); // Read only map
+          Eigen::Map<const Eigen::Matrix<double,Dynamic,Dynamic,Eigen::RowMajor>>
+            bufMat(&buff[IOff],n1,n2);
           for(auto i = 0, bf1 = bf1_s; i < n1; i++, bf1 += this->nTCS_)            
           for(auto j = 0, bf2 = bf2_s; j < n2; j++, bf2 += this->nTCS_){            
             mat[nMat](bf1,bf2) = bufMat(i,j);
@@ -209,13 +211,18 @@ void AOIntegrals::computeSchwartz(){
       
       ShBlk = new RealMatrix(n1,n2);
       ShBlk->setZero();
-   
+/*   
       int ij = 0;
       for(int i = 0; i < n1; i++) {
         for(int j = 0; j < n2; j++) {
           (*ShBlk)(i,j) = buff[ij*n1*n2 + ij];
  	 ij++;
         }
+      }
+*/
+      for(auto i = 0, ij = 0; i < n1; i++)
+      for(auto j = 0; j < n2; j++, ij++){
+        (*ShBlk)(i,j) = buff[ij*n1*n2 + ij];
       }
 
       (*this->schwartz_)(s1,s2) = std::sqrt(ShBlk->lpNorm<Infinity>());

@@ -89,7 +89,7 @@ void RealTime<double>::iniDensity() {
 
     dsyev_(&JOBZ,&UPLO,&NTCSxNBASIS,A,&NTCSxNBASIS,W,WORK,&this->lWORK,&INFO);
 
-    V.transposeInPlace(); // BC Col major
+//  V.transposeInPlace(); // BC Col major
     std::memcpy(WORK,A,NTCSxNBASIS*NTCSxNBASIS*sizeof(double));
 
     for(auto i = 0; i < NTCSxNBASIS; i++){ S.col(i) *= std::sqrt(W[i]); }
@@ -119,15 +119,15 @@ void RealTime<double>::iniDensity() {
     // compute L = A * L^(-T)
     dpotrf_(&UPLO,&NTCSxNBASIS,A,&NTCSxNBASIS,&INFO);
 
-    V.transposeInPlace(); // BC Col major
+//  V.transposeInPlace(); // BC Col major
     V = V.triangularView<Lower>(); // Upper elements are junk 
     oTrans2.real() = V; // oTrans2 = L
-    V.transposeInPlace(); // BC Row major
+//  V.transposeInPlace(); // BC Row major
 
     // Given L, compute S^(-1) = L^(-T) * L^(-1)
     dpotri_(&UPLO,&NTCSxNBASIS,A,&NTCSxNBASIS,&INFO);
     
-    V.transposeInPlace(); // BC Col major
+//  V.transposeInPlace(); // BC Col major
     // oTrans1 = L^(-1) = L^(T) * S^(-1)
     oTrans1.real() = oTrans2.adjoint().real() * V; 
     oTrans1 = oTrans1.triangularView<Lower>(); // Upper elements junk
@@ -262,11 +262,11 @@ void RealTime<double>::formUTrans() {
     std::memcpy(A,this->ssPropagator_->fockA()->data(),
       NTCSxNBASIS*NTCSxNBASIS*sizeof(dcomplex));
 
-    V.transposeInPlace(); // BC Col major
+//  V.transposeInPlace(); // BC Col major
     zheev_(&JOBZ,&UPLO,&NTCSxNBASIS,A,&NTCSxNBASIS,W,WORK,&this->lWORK,RWORK,
       &INFO);
 
-    V.transposeInPlace(); // BC Col major
+//  V.transposeInPlace(); // BC Col major
     std::memcpy(WORK,A,NTCSxNBASIS*NTCSxNBASIS*sizeof(dcomplex));
 
 
@@ -285,11 +285,11 @@ void RealTime<double>::formUTrans() {
       std::memcpy(A,this->ssPropagator_->fockB()->data(),
         NTCSxNBASIS*NTCSxNBASIS*sizeof(dcomplex));
      
-      V.transposeInPlace(); // BC Col major
+//    V.transposeInPlace(); // BC Col major
       zheev_(&JOBZ,&UPLO,&NTCSxNBASIS,A,&NTCSxNBASIS,W,WORK,&this->lWORK,RWORK,
         &INFO);
      
-      V.transposeInPlace(); // BC Col major
+//    V.transposeInPlace(); // BC Col major
       std::memcpy(WORK,A,NTCSxNBASIS*NTCSxNBASIS*sizeof(dcomplex));
      
      

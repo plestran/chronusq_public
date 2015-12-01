@@ -366,10 +366,10 @@ void SDResponse<double>::mpiRecv(int fromID,int tag) {
 template<>
 void SDResponse<double>::incorePPRPA(){
   enum{a,b,c,d,i,j,k,l,mu,nu,lam,sig};
-  Tensor<double> LocMoAO(this->nBasis_,this->nOA_);
-  Tensor<double> LocMoAV(this->nBasis_,this->nVA_);
-  Tensor<double> LocMoBO(this->nBasis_,this->nOB_);
-  Tensor<double> LocMoBV(this->nBasis_,this->nVB_);  
+  RealTensor2d LocMoAO(this->nBasis_,this->nOA_);
+  RealTensor2d LocMoAV(this->nBasis_,this->nVA_);
+  RealTensor2d LocMoBO(this->nBasis_,this->nOB_);
+  RealTensor2d LocMoBV(this->nBasis_,this->nVB_);  
 
 
   for(auto ii = 0; ii < this->nBasis_; ii++) {
@@ -381,37 +381,37 @@ void SDResponse<double>::incorePPRPA(){
     }
   }
 
-  Tensor<double> IanlsA(this->nVA_,this->nBasis_,this->nBasis_,this->nBasis_); // ( a(A) nu   |  lam   sig  )
-  Tensor<double> IablsA(this->nVA_,this->nVA_   ,this->nBasis_,this->nBasis_); // ( a(A) b(A) |  lam   sig  )
-  Tensor<double> IabcsA(this->nVA_,this->nVA_   ,this->nVA_   ,this->nBasis_); // ( a(A) b(A) |  c(A)  sig  )
-  Tensor<double> SabcdA(this->nVA_,this->nVA_   ,this->nVA_   ,this->nVA_   ); // ( a(A) b(A) |  c(A)  d(A) )
-  Tensor<double> dabcdA(this->nVA_,this->nVA_   ,this->nVA_   ,this->nVA_   ); // < a(A) b(A) |  c(A)  d(A) >
-  Tensor<double> DabcdA(this->nVA_,this->nVA_   ,this->nVA_   ,this->nVA_   ); // < a(A) b(A) || c(A)  d(A) >
+  RealTensor4d IanlsA(this->nVA_,this->nBasis_,this->nBasis_,this->nBasis_); // ( a(A) nu   |  lam   sig  )
+  RealTensor4d IablsA(this->nVA_,this->nVA_   ,this->nBasis_,this->nBasis_); // ( a(A) b(A) |  lam   sig  )
+  RealTensor4d IabcsA(this->nVA_,this->nVA_   ,this->nVA_   ,this->nBasis_); // ( a(A) b(A) |  c(A)  sig  )
+  RealTensor4d SabcdA(this->nVA_,this->nVA_   ,this->nVA_   ,this->nVA_   ); // ( a(A) b(A) |  c(A)  d(A) )
+  RealTensor4d dabcdA(this->nVA_,this->nVA_   ,this->nVA_   ,this->nVA_   ); // < a(A) b(A) |  c(A)  d(A) >
+  RealTensor4d DabcdA(this->nVA_,this->nVA_   ,this->nVA_   ,this->nVA_   ); // < a(A) b(A) || c(A)  d(A) >
 
-  Tensor<double> IinlsA(this->nOA_,this->nBasis_,this->nBasis_,this->nBasis_); // ( i(A) nu   |  lam   sig  )
-  Tensor<double> IijlsA(this->nOA_,this->nOA_   ,this->nBasis_,this->nBasis_); // ( i(A) j(A) |  lam   sig  )
-  Tensor<double> IijksA(this->nOA_,this->nOA_   ,this->nOA_   ,this->nBasis_); // ( i(A) j(A) |  k(A)  sig  )
-  Tensor<double> SijklA(this->nOA_,this->nOA_   ,this->nOA_   ,this->nOA_   ); // ( i(A) j(A) |  k(A)  l(A) )
-  Tensor<double> dijklA(this->nOA_,this->nOA_   ,this->nOA_   ,this->nOA_   ); // < i(A) j(A) |  k(A)  l(A) >
-  Tensor<double> DijklA(this->nOA_,this->nOA_   ,this->nOA_   ,this->nOA_   ); // < i(A) j(A) || k(A)  l(A) >
+  RealTensor4d IinlsA(this->nOA_,this->nBasis_,this->nBasis_,this->nBasis_); // ( i(A) nu   |  lam   sig  )
+  RealTensor4d IijlsA(this->nOA_,this->nOA_   ,this->nBasis_,this->nBasis_); // ( i(A) j(A) |  lam   sig  )
+  RealTensor4d IijksA(this->nOA_,this->nOA_   ,this->nOA_   ,this->nBasis_); // ( i(A) j(A) |  k(A)  sig  )
+  RealTensor4d SijklA(this->nOA_,this->nOA_   ,this->nOA_   ,this->nOA_   ); // ( i(A) j(A) |  k(A)  l(A) )
+  RealTensor4d dijklA(this->nOA_,this->nOA_   ,this->nOA_   ,this->nOA_   ); // < i(A) j(A) |  k(A)  l(A) >
+  RealTensor4d DijklA(this->nOA_,this->nOA_   ,this->nOA_   ,this->nOA_   ); // < i(A) j(A) || k(A)  l(A) >
 
-  Tensor<double> IailsA(this->nVA_,this->nOA_   ,this->nBasis_,this->nBasis_); // ( a(A) i(A) |  lam   sig  )
-  Tensor<double> IaibsA(this->nVA_,this->nOA_   ,this->nVA_   ,this->nBasis_); // ( a(A) i(A) |  b(A)  sig  )
-  Tensor<double> SaibjA(this->nVA_,this->nOA_   ,this->nVA_   ,this->nOA_   ); // ( a(A) i(A) |  b(A)  j(A) )
-  Tensor<double> dabijA(this->nVA_,this->nVA_   ,this->nOA_   ,this->nOA_   ); // < a(A) b(A) |  i(A)  j(A) >
-  Tensor<double> DabijA(this->nVA_,this->nVA_   ,this->nOA_   ,this->nOA_   ); // < a(A) b(A) || i(A)  j(A) >
+  RealTensor4d IailsA(this->nVA_,this->nOA_   ,this->nBasis_,this->nBasis_); // ( a(A) i(A) |  lam   sig  )
+  RealTensor4d IaibsA(this->nVA_,this->nOA_   ,this->nVA_   ,this->nBasis_); // ( a(A) i(A) |  b(A)  sig  )
+  RealTensor4d SaibjA(this->nVA_,this->nOA_   ,this->nVA_   ,this->nOA_   ); // ( a(A) i(A) |  b(A)  j(A) )
+  RealTensor4d dabijA(this->nVA_,this->nVA_   ,this->nOA_   ,this->nOA_   ); // < a(A) b(A) |  i(A)  j(A) >
+  RealTensor4d DabijA(this->nVA_,this->nVA_   ,this->nOA_   ,this->nOA_   ); // < a(A) b(A) || i(A)  j(A) >
 
-  Tensor<double> IabcsAB(this->nVA_,this->nVA_   ,this->nVB_   ,this->nBasis_); // ( a(A) b(A) |  c(B)  sig  )
-  Tensor<double> SabcdAB(this->nVA_,this->nVA_   ,this->nVB_   ,this->nVB_   ); // ( a(A) b(A) |  c(B)  d(B) )
-  Tensor<double> dabcdAB(this->nVA_,this->nVB_   ,this->nVA_   ,this->nVB_   ); // < a(A) b(B) |  c(A)  d(B) >
+  RealTensor4d IabcsAB(this->nVA_,this->nVA_   ,this->nVB_   ,this->nBasis_); // ( a(A) b(A) |  c(B)  sig  )
+  RealTensor4d SabcdAB(this->nVA_,this->nVA_   ,this->nVB_   ,this->nVB_   ); // ( a(A) b(A) |  c(B)  d(B) )
+  RealTensor4d dabcdAB(this->nVA_,this->nVB_   ,this->nVA_   ,this->nVB_   ); // < a(A) b(B) |  c(A)  d(B) >
 
-  Tensor<double> IijksAB(this->nOA_,this->nOA_   ,this->nOB_   ,this->nBasis_); // ( i(A) j(A) |  k(B)  sig  )
-  Tensor<double> SijklAB(this->nOA_,this->nOA_   ,this->nOB_   ,this->nOB_   ); // ( i(A) j(A) |  k(B)  l(B) )
-  Tensor<double> dijklAB(this->nOA_,this->nOB_   ,this->nOA_   ,this->nOB_   ); // < i(A) j(B) |  k(A)  l(B) >
+  RealTensor4d IijksAB(this->nOA_,this->nOA_   ,this->nOB_   ,this->nBasis_); // ( i(A) j(A) |  k(B)  sig  )
+  RealTensor4d SijklAB(this->nOA_,this->nOA_   ,this->nOB_   ,this->nOB_   ); // ( i(A) j(A) |  k(B)  l(B) )
+  RealTensor4d dijklAB(this->nOA_,this->nOB_   ,this->nOA_   ,this->nOB_   ); // < i(A) j(B) |  k(A)  l(B) >
 
-  Tensor<double> IaibsAB(this->nVA_,this->nOA_   ,this->nVB_   ,this->nBasis_); // ( a(A) i(A) |  b(B)  sig  )
-  Tensor<double> SaibjAB(this->nVA_,this->nOA_   ,this->nVB_   ,this->nOB_   ); // ( a(A) i(A) |  b(B)  j(B) )
-  Tensor<double> dabijAB(this->nVA_,this->nVB_   ,this->nOA_   ,this->nOB_   ); // < a(A) b(B) |  i(A)  j(B) >
+  RealTensor4d IaibsAB(this->nVA_,this->nOA_   ,this->nVB_   ,this->nBasis_); // ( a(A) i(A) |  b(B)  sig  )
+  RealTensor4d SaibjAB(this->nVA_,this->nOA_   ,this->nVB_   ,this->nOB_   ); // ( a(A) i(A) |  b(B)  j(B) )
+  RealTensor4d dabijAB(this->nVA_,this->nVB_   ,this->nOA_   ,this->nOB_   ); // < a(A) b(B) |  i(A)  j(B) >
 
   // Form <AB||CD>
   
@@ -631,24 +631,24 @@ void SDResponse<double>::incorePPRPA(){
   Eigen::VectorXd RPAAXMOAB(VirSqAB + OccSqAB);
   Eigen::VectorXd RPAAXMOSing(VirSqAALT + OccSqAALT);
 
-  Tensor<double> ATDAAOTenAA(this->nBasis_,this->nBasis_);
-  Tensor<double> ATDAAOTenAB(this->nBasis_,this->nBasis_);
-  Tensor<double> ATDAAOTenSing(this->nBasis_,this->nBasis_);
-  Tensor<double> CTDAAOTenAA(this->nBasis_,this->nBasis_);
-  Tensor<double> CTDAAOTenAB(this->nBasis_,this->nBasis_);
-  Tensor<double> CTDAAOTenSing(this->nBasis_,this->nBasis_);
-  Tensor<double> RPAAOTenAA(this->nBasis_,this->nBasis_);
-  Tensor<double> RPAAOTenAB(this->nBasis_,this->nBasis_);
-  Tensor<double> RPAAOTenSing(this->nBasis_,this->nBasis_);
-  Tensor<double> ATDAIXAOTenAA(this->nBasis_,this->nBasis_);
-  Tensor<double> ATDAIXAOTenAB(this->nBasis_,this->nBasis_);
-  Tensor<double> ATDAIXAOTenSing(this->nBasis_,this->nBasis_);
-  Tensor<double> CTDAIXAOTenAA(this->nBasis_,this->nBasis_);
-  Tensor<double> CTDAIXAOTenAB(this->nBasis_,this->nBasis_);
-  Tensor<double> CTDAIXAOTenSing(this->nBasis_,this->nBasis_);
-  Tensor<double> RPAIXAOTenAA(this->nBasis_,this->nBasis_);
-  Tensor<double> RPAIXAOTenAB(this->nBasis_,this->nBasis_);
-  Tensor<double> RPAIXAOTenSing(this->nBasis_,this->nBasis_);
+  RealTensor2d ATDAAOTenAA(this->nBasis_,this->nBasis_);
+  RealTensor2d ATDAAOTenAB(this->nBasis_,this->nBasis_);
+  RealTensor2d ATDAAOTenSing(this->nBasis_,this->nBasis_);
+  RealTensor2d CTDAAOTenAA(this->nBasis_,this->nBasis_);
+  RealTensor2d CTDAAOTenAB(this->nBasis_,this->nBasis_);
+  RealTensor2d CTDAAOTenSing(this->nBasis_,this->nBasis_);
+  RealTensor2d RPAAOTenAA(this->nBasis_,this->nBasis_);
+  RealTensor2d RPAAOTenAB(this->nBasis_,this->nBasis_);
+  RealTensor2d RPAAOTenSing(this->nBasis_,this->nBasis_);
+  RealTensor2d ATDAIXAOTenAA(this->nBasis_,this->nBasis_);
+  RealTensor2d ATDAIXAOTenAB(this->nBasis_,this->nBasis_);
+  RealTensor2d ATDAIXAOTenSing(this->nBasis_,this->nBasis_);
+  RealTensor2d CTDAIXAOTenAA(this->nBasis_,this->nBasis_);
+  RealTensor2d CTDAIXAOTenAB(this->nBasis_,this->nBasis_);
+  RealTensor2d CTDAIXAOTenSing(this->nBasis_,this->nBasis_);
+  RealTensor2d RPAIXAOTenAA(this->nBasis_,this->nBasis_);
+  RealTensor2d RPAIXAOTenAB(this->nBasis_,this->nBasis_);
+  RealTensor2d RPAIXAOTenSing(this->nBasis_,this->nBasis_);
   // Build Pure-Spin Matricies
   // A
   for(auto a = 0, ab = 0; a < this->nVA_; a++      )
@@ -1262,10 +1262,10 @@ void SDResponse<double>::formRM(){
   int nOVB = this->singleSlater_->nOVB();
 //cout << "Number of Occupied Alpha: " << nOA << ", Number of Virtual Alpha" << nVA << " Number of Basis: "<<this->nBasis_<< ".\n";
 //cout << "Number of Occupied Beta: " << nOB << ", Number of Virtual Beta" << nVB << " Number of Basis: "<<this->nBasis_<< ".\n";
-  Tensor<double> LocMoAO(this->nBasis_,nOA);
-  Tensor<double> LocMoAV(this->nBasis_,nVA);
-  Tensor<double> LocMoBO(this->nBasis_,nOB);
-  Tensor<double> LocMoBV(this->nBasis_,nVB);  
+  RealTensor2d LocMoAO(this->nBasis_,nOA);
+  RealTensor2d LocMoAV(this->nBasis_,nVA);
+  RealTensor2d LocMoBO(this->nBasis_,nOB);
+  RealTensor2d LocMoBV(this->nBasis_,nVB);  
 
 
   for(auto ii = 0; ii < this->nBasis_; ii++) {
@@ -1280,32 +1280,32 @@ void SDResponse<double>::formRM(){
   // Prepare the 2e integrals
   // Ixxxx for intermediate Sxxxx for Mulliken Notation single bar
   // Dxxxx for Dirac Notation double bar, dxxxx for Dirac Notation single bar
-  Tensor<double> IanlsA(nVA,this->nBasis_,this->nBasis_,this->nBasis_); // (a nu | lam sig)
-  Tensor<double> IailsA(nVA,nOA,this->nBasis_,this->nBasis_); // (a j  | lam sig)
-  Tensor<double> IaijsAA(nVA,nOA,nOA,this->nBasis_); // (a j  | i   sig)
-  Tensor<double> SaijbAA(nVA,nOA,nOA,nVA); // ( a j | i b )
-  Tensor<double> IablsA(nVA,nVA,this->nBasis_,this->nBasis_); // ( a b | lam sig )
-  Tensor<double> IabjsA(nVA,nVA,nOA,this->nBasis_); // ( a b | j sig )
-  Tensor<double> SabjiAA(nVA,nVA,nOA,nOA); // ( a b | j i )
-  Tensor<double> DajibAA(nVA,nOA,nOA,nVA); // <aj||ib>
-  Tensor<double> dajibAB(nVA,nOB,nOA,nVB); // <aj|ib>
-  Tensor<double> DabijAA(nVA,nVA,nOA,nOA); // <ab||ij>
-  Tensor<double> dabijAB(nVA,nVB,nOA,nOB); // <ab|ij>
-  Tensor<double> IanlsB(nVB,this->nBasis_,this->nBasis_,this->nBasis_);
-  Tensor<double> IailsB(nVB,nOB,this->nBasis_,this->nBasis_);
-  Tensor<double> IaijsAB(nVA,nOA,nOB,this->nBasis_);
-  Tensor<double> IaijsBA(nVB,nOB,nOA,this->nBasis_);
-  Tensor<double> IaijsBB(nVB,nOB,nOB,this->nBasis_);
-  Tensor<double> SaijbAB(nVA,nOA,nOB,nVB);
-  Tensor<double> SaijbBA(nVB,nOB,nOA,nVA);
-  Tensor<double> SaijbBB(nVB,nOB,nOB,nVB);
-  Tensor<double> IablsB(nVB,nVB,this->nBasis_,this->nBasis_);
-  Tensor<double> IabjsB(nVB,nVB,nOB,this->nBasis_);
-  Tensor<double> SabjiBB(nVB,nVB,nOB,nOB);
-  Tensor<double> DajibBB(nVB,nOB,nOB,nVB);
-  Tensor<double> dajibBA(nVB,nOA,nOB,nVA);
-  Tensor<double> DabijBB(nVB,nVB,nOB,nOB);
-  Tensor<double> dabijBA(nVB,nVA,nOB,nOA);
+  RealTensor4d IanlsA(nVA,this->nBasis_,this->nBasis_,this->nBasis_); // (a nu | lam sig)
+  RealTensor4d IailsA(nVA,nOA,this->nBasis_,this->nBasis_); // (a j  | lam sig)
+  RealTensor4d IaijsAA(nVA,nOA,nOA,this->nBasis_); // (a j  | i   sig)
+  RealTensor4d SaijbAA(nVA,nOA,nOA,nVA); // ( a j | i b )
+  RealTensor4d IablsA(nVA,nVA,this->nBasis_,this->nBasis_); // ( a b | lam sig )
+  RealTensor4d IabjsA(nVA,nVA,nOA,this->nBasis_); // ( a b | j sig )
+  RealTensor4d SabjiAA(nVA,nVA,nOA,nOA); // ( a b | j i )
+  RealTensor4d DajibAA(nVA,nOA,nOA,nVA); // <aj||ib>
+  RealTensor4d dajibAB(nVA,nOB,nOA,nVB); // <aj|ib>
+  RealTensor4d DabijAA(nVA,nVA,nOA,nOA); // <ab||ij>
+  RealTensor4d dabijAB(nVA,nVB,nOA,nOB); // <ab|ij>
+  RealTensor4d IanlsB(nVB,this->nBasis_,this->nBasis_,this->nBasis_);
+  RealTensor4d IailsB(nVB,nOB,this->nBasis_,this->nBasis_);
+  RealTensor4d IaijsAB(nVA,nOA,nOB,this->nBasis_);
+  RealTensor4d IaijsBA(nVB,nOB,nOA,this->nBasis_);
+  RealTensor4d IaijsBB(nVB,nOB,nOB,this->nBasis_);
+  RealTensor4d SaijbAB(nVA,nOA,nOB,nVB);
+  RealTensor4d SaijbBA(nVB,nOB,nOA,nVA);
+  RealTensor4d SaijbBB(nVB,nOB,nOB,nVB);
+  RealTensor4d IablsB(nVB,nVB,this->nBasis_,this->nBasis_);
+  RealTensor4d IabjsB(nVB,nVB,nOB,this->nBasis_);
+  RealTensor4d SabjiBB(nVB,nVB,nOB,nOB);
+  RealTensor4d DajibBB(nVB,nOB,nOB,nVB);
+  RealTensor4d dajibBA(nVB,nOA,nOB,nVA);
+  RealTensor4d DabijBB(nVB,nVB,nOB,nOB);
+  RealTensor4d dabijBA(nVB,nVA,nOB,nOA);
 
   enum{a,j,i,b,mu,nu,lam,sig};
 
@@ -1629,7 +1629,7 @@ void SDResponse<double>::formRM(){
 /*
   *this->CISEnergy_   = CIS.eigenvalues();
   *this->CISTransDen_ = CIS.eigenvectors(); 
-  (*this->CISTransDen_).transposeInPlace(); 
+//(*this->CISTransDen_).transposeInPlace(); 
   int nstate =5;
   cout << "Output the lowest "<< nstate << " states" << endl;
   for (auto st_rank=0;st_rank<nstate;st_rank++)

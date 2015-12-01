@@ -69,7 +69,7 @@ void AOIntegrals::DKH0(){
 
     dsyev_(&JOBZ,&UPLO,&NTCSxNBASIS,A,&NTCSxNBASIS,W,WORK,&NSQ,&INFO);
 
-    V.transposeInPlace(); // BC Col major
+//    V.transposeInPlace(); // BC Col major
     S.setZero(); // S will become our new T matrix
   
     for(auto i = 0; i < NTCSxNBASIS; i++) {

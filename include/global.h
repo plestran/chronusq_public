@@ -99,7 +99,7 @@ using std::ifstream;
 using Eigen::Infinity;
 using Eigen::Dynamic;
 using Eigen::ColMajor;
-using Eigen::RowMajor;
+using Eigen::ColMajor;
 using Eigen::Upper;
 using Eigen::Lower;
 using Eigen::VectorXd;
@@ -117,8 +117,8 @@ namespace bg = boost::geometry;
 
 // Useful typedefs
 typedef std::complex<double> dcomplex; ///< Support for complex numbers (double precision)
-typedef Eigen::Matrix<double,Dynamic,Dynamic,RowMajor>     RealMatrix;    ///< Dynamically allocated Real (double) matrix. Row major for integration with Libint
-typedef Eigen::Matrix<dcomplex,Dynamic,Dynamic,RowMajor>   ComplexMatrix; ///< Dynamically allocated Complex (dcomplex) matrix. Row major for integration with Libint
+typedef Eigen::Matrix<double,Dynamic,Dynamic,ColMajor>     RealMatrix;    ///< Dynamically allocated Real (double) matrix. Row major for integration with Libint
+typedef Eigen::Matrix<dcomplex,Dynamic,Dynamic,ColMajor>   ComplexMatrix; ///< Dynamically allocated Complex (dcomplex) matrix. Row major for integration with Libint
 typedef Eigen::Matrix<double,Dynamic,Dynamic,ColMajor>     RealCMMatrix;    ///< Dynamically allocated Real (double) matrix. Row major for integration with Libint
 typedef Eigen::Matrix<dcomplex,Dynamic,Dynamic,ColMajor>   ComplexCMMatrix; ///< Dynamically allocated Complex (dcomplex) matrix. Row major for integration with Libint
 typedef Eigen::SparseMatrix<double> RealSparseMatrix;
@@ -137,10 +137,10 @@ typedef Eigen::Map<const ComplexMatrix> ConstComplexMap; ///< Map double precisi
 typedef Eigen::MatrixExponentialReturnValue<RealMatrix>    RealMatExp; ///< Driver for matrix exponentaial (RealMatrix)
 typedef Eigen::MatrixExponentialReturnValue<ComplexMatrix> ComplexMatExp; ///< Driver for matrix exponential (ComplexMatrix)
 typedef TwoBodyEngine<libint2::Coulomb> coulombEngine; ///< Two-body ERI engine for Libint
-typedef btas::RangeNd<CblasRowMajor,std::array<long,4>> Range4d; ///< BTAS range specification for rank-4 tensors
-typedef btas::RangeNd<CblasRowMajor,std::array<long,3>> Range3d; ///< BTAS range specification for rank-3 tensors
-typedef btas::RangeNd<CblasRowMajor,std::array<long,2>> Range2d; ///< BTAS range specification for rank-2 tensors (isomorphic with matrix)
-typedef btas::RangeNd<CblasRowMajor,std::array<long,1>> Range1d; ///< BTAS range specification for rank-1 tensors (isomorphic with vector)
+typedef btas::RangeNd<CblasColMajor,std::array<long,4>> Range4d; ///< BTAS range specification for rank-4 tensors
+typedef btas::RangeNd<CblasColMajor,std::array<long,3>> Range3d; ///< BTAS range specification for rank-3 tensors
+typedef btas::RangeNd<CblasColMajor,std::array<long,2>> Range2d; ///< BTAS range specification for rank-2 tensors (isomorphic with matrix)
+typedef btas::RangeNd<CblasColMajor,std::array<long,1>> Range1d; ///< BTAS range specification for rank-1 tensors (isomorphic with vector)
 typedef Tensor<double,Range4d> RealTensor4d; ///< Support for real-valued rank-4 tensors using BTAS
 typedef Tensor<double,Range3d> RealTensor3d; ///< Support for real-valued rank-3 tensors using BTAS
 typedef Tensor<double,Range2d> RealTensor2d; ///< Support for real-values rank-2 tensors (aka Matricies) using BTAS

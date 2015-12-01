@@ -281,13 +281,13 @@ void SingleSlater<double>::readGuessGauMatEl(GauMatEl& matEl){
   double *scr = matEl.readRec(GauMatEl::moa); 
   for(auto i = 0; i < this->nBasis_*this->nBasis_; i++)
     this->moA_->data()[i] = scr[i];
-  this->moA_->transposeInPlace(); // Row Major
+//this->moA_->transposeInPlace(); // Row Major
   delete [] scr;
   if(this->Ref_ != RHF) {
     scr = matEl.readRec(GauMatEl::mob); 
     for(auto i = 0; i < this->nBasis_*this->nBasis_; i++)
       this->moB_->data()[i] = scr[i];
-    this->moB_->transposeInPlace(); // Row Major
+//  this->moB_->transposeInPlace(); // Row Major
     delete [] scr;
   }
   this->matchord();

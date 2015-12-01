@@ -38,7 +38,7 @@
 namespace ChronusQ {
 template<typename T>
 class SingleSlater {
-  typedef Eigen::Matrix<T,Dynamic,Dynamic,RowMajor> TMatrix;
+  typedef Eigen::Matrix<T,Dynamic,Dynamic,ColMajor> TMatrix;
 
 /*
   struct MetaData_ {
