@@ -146,7 +146,7 @@ void SingleSlater<double>::genSparseBasisMap(){
   this->ngpts = this->nRadDFTGridPts_*this->nAngDFTGridPts_;  // Number of grid point for each center
   OneDGrid * Rad ;                              // Pointer for Radial Grid
   LebedevGrid GridLeb(this->nAngDFTGridPts_);   // Angular Grid
-  int nDer = 0 ; //Order of differenzation
+  int nDer = 1 ; //Order of differenzation
   if (this->dftGrid_ == GAUSSCHEB)  
     Rad = new GaussChebyshev1stGridInf(this->nRadDFTGridPts_,0.0,1.0);   
   else if (this->dftGrid_ == EULERMACL) 
@@ -912,6 +912,10 @@ void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX,
    double rhor  = 0.0;  // Total density at point
    double rhorA = 0.0;  // alpha density at point
    double rhorB = 0.0;  // beta  density at point
+   double drhorA = 0.0;  // alpha  density at point der
+   double drhorB = 0.0;  // beta  density at point  der
+   double drhor  = 0.0;  // Total density at point  der
+   int    nDer = 1   ;    // Order of Der
    bool   RHF  = this->Ref_ == RHF;
    bool   doTCS  = this->Ref_ == TCS;
 // RealMatrix overlapR_(this->nBasis_,this->nBasis_);        ///< Overlap at grid point
@@ -930,9 +934,28 @@ void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX,
       rhorA = STmp->frobInner(this->densityA()->conjugate());
       rhorB = STmp->frobInner(this->densityB()->conjugate());
       rhor = rhorA + rhorB;
+      if (nDer == 1 ){
+      (*STmp) = Map->col(ipts)*MapdX->.col(ipts).transpose();
+      drhorA = STmp->frobInner(this->densityA()->conjugate());
+      drhorB = STmp->frobInner(this->densityB()->conjugate());
+      (*STmp) = Map->col(ipts)*MapdY->.col(ipts).transpose();
+      drhorA += STmp->frobInner(this->densityA()->conjugate());
+      drhorB += STmp->frobInner(this->densityB()->conjugate());
+      (*STmp) = Map->col(ipts)*MapdX->.col(ipts).transpose();
+      drhorA += STmp->frobInner(this->densityA()->conjugate());
+      drhorB += STmp->frobInner(this->densityB()->conjugate());
+      }
     } else {
 //    rhor = overlapR_.frobInner(this->densityA()->conjugate()) ;
       rhor = STmp->frobInner(this->densityA()->conjugate()) ;
+      if (nDer == 1 ){
+      (*STmp) = Map->col(ipts)*MapdX->.col(ipts).transpose();
+      drhor = STmp->frobInner(this->densityA()->conjugate());
+      (*STmp) = Map->col(ipts)*MapdY->.col(ipts).transpose();
+      drhor += STmp->frobInner(this->densityA()->conjugate());
+      (*STmp) = Map->col(ipts)*MapdX->.col(ipts).transpose();
+      drhor += STmp->frobInner(this->densityA()->conjugate());
+      }
     }
 //  Handle numerical instability if screening on
     if (this->screenVxc ) {
