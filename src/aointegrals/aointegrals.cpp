@@ -550,17 +550,17 @@ void AOIntegrals::allocMultipole(){
 
     if(this->maxMultipole_ >= 1)
       this->elecDipole_ = std::unique_ptr<RealTensor3d>(
-        new RealTensor3d(3,NTCSxNBASIS,NTCSxNBASIS)
+        new RealTensor3d(NTCSxNBASIS,NTCSxNBASIS,3)
       );
 
     if(this->maxMultipole_ >= 2)
       this->elecQuadpole_ = std::unique_ptr<RealTensor3d>(
-        new RealTensor3d(6,NTCSxNBASIS,NTCSxNBASIS)
+        new RealTensor3d(NTCSxNBASIS,NTCSxNBASIS,6)
       );
 
     if(this->maxMultipole_ >= 3)
       this->elecOctpole_ = std::unique_ptr<RealTensor3d>(
-        new RealTensor3d(10,NTCSxNBASIS,NTCSxNBASIS)
+        new RealTensor3d(NTCSxNBASIS,NTCSxNBASIS,10)
       );
 
   } catch(...) {
