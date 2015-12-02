@@ -27,7 +27,7 @@
 
 namespace ChronusQ {
   template<>
-  void QuasiNewton<dcomplex>::Orth(ComplexCMMap &A){
+  void QuasiNewton<dcomplex>::Orth(ComplexMap &A){
     int N   = A.cols();
     int M   = A.rows();
     int LDA = M;
@@ -42,7 +42,7 @@ namespace ChronusQ {
   }
 
   template<>
-  void QuasiNewton<dcomplex>::Orth(ComplexCMMatrix &A){
+  void QuasiNewton<dcomplex>::Orth(ComplexMatrix &A){
     int N   = A.cols();
     int M   = A.rows();
     int LDA = M;
@@ -57,9 +57,9 @@ namespace ChronusQ {
   }
 
   template<>
-  void QuasiNewton<dcomplex>::metBiOrth(ComplexCMMap &A, const ComplexCMMatrix &Met){
+  void QuasiNewton<dcomplex>::metBiOrth(ComplexMap &A, const ComplexMatrix &Met){
     int N = A.cols();
-    ComplexCMMap AX(this->BiOrthMem,Met.rows(),N);
+    ComplexMap AX(this->BiOrthMem,Met.rows(),N);
     AX = Met*A;
     for(auto i = 0; i < N; i++){
       double inner = A.col(i).dot(AX.col(i)).real();
@@ -73,7 +73,7 @@ namespace ChronusQ {
   }
 
   template<>
-  void QuasiNewton<dcomplex>::eigSrt(ComplexCMMap &V, ComplexVecMap &E){
+  void QuasiNewton<dcomplex>::eigSrt(ComplexMap &V, ComplexVecMap &E){
     auto N = V.cols();
     while( N != 0){
       auto newn = 0;

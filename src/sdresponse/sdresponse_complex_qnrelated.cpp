@@ -31,7 +31,7 @@ using ChronusQ::QuasiNewton;
 namespace ChronusQ {
 template<>
 void SDResponse<dcomplex>::getDiag(){
-  this->rmDiag_ = std::unique_ptr<RealCMMatrix>(new RealCMMatrix(nSingleDim_,1)); 
+  this->rmDiag_ = std::unique_ptr<RealMatrix>(new RealMatrix(nSingleDim_,1)); 
 
   if(this->Ref_ == SingleSlater<dcomplex>::TCS) {
     if(this->iMeth_ == RPA || this->iMeth_ == CIS || this->iMeth_ == STAB){
@@ -217,9 +217,9 @@ void SDResponse<dcomplex>::reoptWF(){
   dcomplex * WORK           = BSCR           + lenMat;
 
 
-  ComplexCMMap    AComplex(complexStab   ,NTCSxNBASIS,NTCSxNBASIS);
-  ComplexCMMap    BComplex(BSCR          ,NTCSxNBASIS,NTCSxNBASIS);
-  ComplexCMMap ExpAComplex(complexExpStab,NTCSxNBASIS,NTCSxNBASIS);
+  ComplexMap    AComplex(complexStab   ,NTCSxNBASIS,NTCSxNBASIS);
+  ComplexMap    BComplex(BSCR          ,NTCSxNBASIS,NTCSxNBASIS);
+  ComplexMap ExpAComplex(complexExpStab,NTCSxNBASIS,NTCSxNBASIS);
 
 
   for(auto iter = 0; iter < maxStabIter; iter++){
@@ -328,7 +328,7 @@ void SDResponse<dcomplex>::IterativeRESP(){
 } // IterativeRESP
 
 template<>
-void SDResponse<dcomplex>::formRM3(ComplexCMMap &XMO, ComplexCMMap &Sigma, ComplexCMMap &Rho){
+void SDResponse<dcomplex>::formRM3(ComplexMap &XMO, ComplexMap &Sigma, ComplexMap &Rho){
 /*
  *  Forms sigma (and possibly rho) for the linear transfomation of E^(2)
  *  (and possibly S^(2) ) onto trial vectors (or any vector in general)
@@ -453,7 +453,7 @@ void SDResponse<dcomplex>::formRM3(ComplexCMMap &XMO, ComplexCMMap &Sigma, Compl
 } // formRM3
 
 template<>
-void SDResponse<dcomplex>::formRM4(ComplexCMMap& XMO, ComplexCMMap &Sigma, ComplexCMMap &Rho){
+void SDResponse<dcomplex>::formRM4(ComplexMap& XMO, ComplexMap &Sigma, ComplexMap &Rho){
 
   bool doA = ( (this->iMeth_ == PPATDA) || (this->iMeth_ == PPRPA) );
   bool doC = ( (this->iMeth_ == PPCTDA) || (this->iMeth_ == PPRPA) );

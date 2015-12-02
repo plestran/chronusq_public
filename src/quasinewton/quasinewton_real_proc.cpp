@@ -41,21 +41,21 @@ namespace ChronusQ {
    */ 
   template<>
   void QuasiNewton<double>::reconstructSolution(const int NTrial){
-    RealCMMap XTSigmaR (this->XTSigmaRMem,NTrial,  NTrial);
-    RealCMMap UR       (this->URMem,      this->N_,NTrial);
-    RealCMMap TrialVecR(this->TVecRMem,   this->N_,NTrial);
-    RealCMMap XTRhoR   (this->XTRhoRMem,  0,0);
-    RealCMMap XTSigmaL (this->XTSigmaLMem,0,0);
-    RealCMMap XTRhoL   (this->XTRhoLMem,  0,0);
-    RealCMMap UL       (this->ULMem,      0,0);
-    RealCMMap TrialVecL(this->TVecLMem,   0,0);
+    RealMap XTSigmaR (this->XTSigmaRMem,NTrial,  NTrial);
+    RealMap UR       (this->URMem,      this->N_,NTrial);
+    RealMap TrialVecR(this->TVecRMem,   this->N_,NTrial);
+    RealMap XTRhoR   (this->XTRhoRMem,  0,0);
+    RealMap XTSigmaL (this->XTSigmaLMem,0,0);
+    RealMap XTRhoL   (this->XTRhoLMem,  0,0);
+    RealMap UL       (this->ULMem,      0,0);
+    RealMap TrialVecL(this->TVecLMem,   0,0);
     RealVecMap ER(this->ERMem,NTrial);
     if(!this->isHermitian_ || this->symmetrizedTrial_){
-      new (&XTRhoR   ) RealCMMap(this->XTRhoRMem,  NTrial,  NTrial);
-      new (&XTSigmaL ) RealCMMap(this->XTSigmaLMem,NTrial,  NTrial);
-      new (&XTRhoL   ) RealCMMap(this->XTRhoLMem,  NTrial,  NTrial);
-      new (&UL       ) RealCMMap(this->ULMem,      this->N_,NTrial);
-      new (&TrialVecL) RealCMMap(this->TVecLMem,   this->N_,NTrial);
+      new (&XTRhoR   ) RealMap(this->XTRhoRMem,  NTrial,  NTrial);
+      new (&XTSigmaL ) RealMap(this->XTSigmaLMem,NTrial,  NTrial);
+      new (&XTRhoL   ) RealMap(this->XTRhoLMem,  NTrial,  NTrial);
+      new (&UL       ) RealMap(this->ULMem,      this->N_,NTrial);
+      new (&TrialVecL) RealMap(this->TVecLMem,   this->N_,NTrial);
     }
     UR = TrialVecR * XTSigmaR;
     if(this->symmetrizedTrial_) UL = TrialVecL * XTSigmaL;
@@ -75,10 +75,10 @@ namespace ChronusQ {
     int NNew   = this->nGuess_;
   
     // Initialize Trial Vectors
-    RealCMMap TrialVecR(this->TVecRMem,this->N_,NTrial);
-    RealCMMap TrialVecL(this->TVecLMem,0,0);
+    RealMap TrialVecR(this->TVecRMem,this->N_,NTrial);
+    RealMap TrialVecL(this->TVecLMem,0,0);
     if(!this->isHermitian_ || this->symmetrizedTrial_){
-      new (&TrialVecL) RealCMMap(this->TVecLMem,this->N_,NTrial);
+      new (&TrialVecL) RealMap(this->TVecLMem,this->N_,NTrial);
     }
 
     // Copy guess into Trial Vec

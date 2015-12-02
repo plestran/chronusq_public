@@ -27,15 +27,15 @@
 
 namespace ChronusQ {
   template<>
-  void QuasiNewton<double>::genStdHerResGuess(double Omega, const RealCMMap &Res, RealCMMap &Q){
+  void QuasiNewton<double>::genStdHerResGuess(double Omega, const RealMap &Res, RealMap &Q){
     for(auto i = 0; i < this->N_; i++)
       Q(i) = -Res(i) / ((*this->diag_)(i,0) - Omega);
   }
 
   template<>
   void QuasiNewton<double>::genSymmResGuess(double Omega, 
-                                     const RealCMMap & ResR, RealCMMap & QR, 
-                                     const RealCMMap & ResL, RealCMMap & QL){
+                                     const RealMap & ResR, RealMap & QR, 
+                                     const RealMap & ResL, RealMap & QL){
     for(auto i = 0; i < this->N_; i++){
       QR(i) = ResR(i) * (*this->diag_)(i,0);
       QL(i) = ResL(i) * (*this->diag_)(i,0);
@@ -55,8 +55,8 @@ namespace ChronusQ {
   /** Form Residual Based Guess **/
   template<>
   void QuasiNewton<double>::formResidualGuess(double Omega, 
-                                     const RealCMMap & ResR, RealCMMap & QR, 
-                                     const RealCMMap & ResL, RealCMMap & QL){
+                                     const RealMap & ResR, RealMap & QR, 
+                                     const RealMap & ResL, RealMap & QL){
     if(this->symmetrizedTrial_) this->genSymmResGuess(  Omega,ResR,QR,ResL,QL);
     else                        this->genStdHerResGuess(Omega,ResR,QR        );
   }
@@ -65,20 +65,20 @@ namespace ChronusQ {
   void QuasiNewton<double>::formNewGuess(std::vector<bool> &resConv,int &NTrial, 
                                     int NNotConv, int &NOld, int &NNew){
 
-    RealCMMap TrialVecR(this->TVecRMem,0,0);
-    RealCMMap TrialVecL(this->TVecLMem,0,0);
-    RealCMMap ResR     (this->ResRMem, 0,0);
-    RealCMMap ResL     (this->ResLMem, 0,0);
-    RealCMMap QR       (this->TVecRMem,0,0);
-    RealCMMap RR       (this->ResRMem ,0,0);
-    RealCMMap QL       (this->TVecLMem,0,0);
-    RealCMMap RL       (this->ResLMem ,0,0);
+    RealMap TrialVecR(this->TVecRMem,0,0);
+    RealMap TrialVecL(this->TVecLMem,0,0);
+    RealMap ResR     (this->ResRMem, 0,0);
+    RealMap ResL     (this->ResLMem, 0,0);
+    RealMap QR       (this->TVecRMem,0,0);
+    RealMap RR       (this->ResRMem ,0,0);
+    RealMap QL       (this->TVecLMem,0,0);
+    RealMap RL       (this->ResLMem ,0,0);
 
-    new (&TrialVecR) RealCMMap(this->TVecRMem,this->N_,NTrial+NNotConv);
-    new (&ResR) RealCMMap(this->ResRMem,this->N_,NTrial);
+    new (&TrialVecR) RealMap(this->TVecRMem,this->N_,NTrial+NNotConv);
+    new (&ResR) RealMap(this->ResRMem,this->N_,NTrial);
     if(this->symmetrizedTrial_ || !this->isHermitian_){
-      new (&TrialVecL) RealCMMap(this->TVecLMem,this->N_,NTrial+NNotConv);
-      new (&ResL) RealCMMap(this->ResLMem,this->N_,NTrial);
+      new (&TrialVecL) RealMap(this->TVecLMem,this->N_,NTrial+NNotConv);
+      new (&ResL) RealMap(this->ResLMem,this->N_,NTrial);
     }
 
     RealVecMap ER(this->ERMem,NTrial);
@@ -92,11 +92,11 @@ namespace ChronusQ {
       //             matricies. Convergence will be slow (maybe infinitely)
       //             if this criteria is not met.
       if(!resConv[k]) {
-        new (&RR) RealCMMap(this->ResRMem + k*this->N_,this->N_,1);
-        new (&QR) RealCMMap(this->TVecRMem+(NTrial+INDX)*this->N_,this->N_,1);
+        new (&RR) RealMap(this->ResRMem + k*this->N_,this->N_,1);
+        new (&QR) RealMap(this->TVecRMem+(NTrial+INDX)*this->N_,this->N_,1);
         if(this->symmetrizedTrial_ || !this->isHermitian_){
-          new (&RL) RealCMMap(this->ResLMem + k*this->N_,this->N_,1);
-          new (&QL) RealCMMap(this->TVecLMem+(NTrial+INDX)*this->N_,this->N_,1);
+          new (&RL) RealMap(this->ResLMem + k*this->N_,this->N_,1);
+          new (&QL) RealMap(this->TVecLMem+(NTrial+INDX)*this->N_,this->N_,1);
         }
          
         this->formResidualGuess(ER(k),RR,QR,RL,QL);

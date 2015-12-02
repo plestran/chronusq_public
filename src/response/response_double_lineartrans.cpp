@@ -35,31 +35,31 @@ namespace ChronusQ{
  *  DBWY (2015)
  */
 template<>
-void Response<double>::linearTransFOPPA(RealCMMap &VR, RealCMMap &VL,
-  RealCMMap &SR, RealCMMap &SL, RealCMMap &RR, RealCMMap &RL){
+void Response<double>::linearTransFOPPA(RealMap &VR, RealMap &VL,
+  RealMap &SR, RealMap &SL, RealMap &RR, RealMap &RL){
 
   auto NTCSxNBASIS = this->nTCS_ * this->nBasis_;
   auto nVec = VR.cols();
   if(!this->doTDA_) nVec *= 2;
 
-  std::vector<RealCMMatrix> CommA, CommB, GCommA, GCommB;
+  std::vector<RealMatrix> CommA, CommB, GCommA, GCommB;
 
   // Storage of commutator
   CommA =
-    std::vector<RealCMMatrix>(nVec,RealMatrix::Zero(NTCSxNBASIS,NTCSxNBASIS));
+    std::vector<RealMatrix>(nVec,RealMatrix::Zero(NTCSxNBASIS,NTCSxNBASIS));
 
   // Storage of G[commutators]
   GCommA =
-    std::vector<RealCMMatrix>(nVec,RealMatrix::Zero(NTCSxNBASIS,NTCSxNBASIS));
+    std::vector<RealMatrix>(nVec,RealMatrix::Zero(NTCSxNBASIS,NTCSxNBASIS));
 
   if(this->Ref_ != SingleSlater<double>::TCS && this->iPart_ != SPIN_ADAPTED){
     // Storage of commutator
     CommB =
-      std::vector<RealCMMatrix>(nVec,RealMatrix::Zero(NTCSxNBASIS,NTCSxNBASIS));
+      std::vector<RealMatrix>(nVec,RealMatrix::Zero(NTCSxNBASIS,NTCSxNBASIS));
  
     // Storage of G[commutators]
     GCommB =
-      std::vector<RealCMMatrix>(nVec,RealMatrix::Zero(NTCSxNBASIS,NTCSxNBASIS));
+      std::vector<RealMatrix>(nVec,RealMatrix::Zero(NTCSxNBASIS,NTCSxNBASIS));
 
   }
 
@@ -83,10 +83,10 @@ void Response<double>::linearTransFOPPA(RealCMMap &VR, RealCMMap &VL,
     SDB = (*this->singleSlater_->aointegrals()->overlap_) * 
           (*this->singleSlater_->densityB());
 
-  RealCMMatrix XAAO(NTCSxNBASIS,NTCSxNBASIS);
-  RealCMMatrix XBAO(NTCSxNBASIS,NTCSxNBASIS);
-  RealCMMatrix SigAOA(NTCSxNBASIS,NTCSxNBASIS);
-  RealCMMatrix SigAOB(NTCSxNBASIS,NTCSxNBASIS);
+  RealMatrix XAAO(NTCSxNBASIS,NTCSxNBASIS);
+  RealMatrix XBAO(NTCSxNBASIS,NTCSxNBASIS);
+  RealMatrix SigAOA(NTCSxNBASIS,NTCSxNBASIS);
+  RealMatrix SigAOB(NTCSxNBASIS,NTCSxNBASIS);
   for (auto idx = 0; idx < nVec; idx++){
     /*
      *  XAO(s) = C(s) * XMO(s) * C(s)**H

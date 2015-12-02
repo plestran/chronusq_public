@@ -242,10 +242,10 @@ void Response<double>::fullFOPPA(){
     // Cleanup LAPACK Memory
     delete[] WORK;
 
-    RealCMMap T(this->transDen_[iMat].data(),this->nSingleDim_,this->nSek_);
-    RealCMMatrix Sigma(this->nSingleDim_,2*this->nSek_);
-    RealCMMap SRVec(Sigma.data(),this->nSingleDim_,this->nSek_);
-    RealCMMap SLVec(Sigma.data()+this->nSek_*this->nSingleDim_,this->nSingleDim_,this->nSek_);
+    RealMap T(this->transDen_[iMat].data(),this->nSingleDim_,this->nSek_);
+    RealMatrix Sigma(this->nSingleDim_,2*this->nSek_);
+    RealMap SRVec(Sigma.data(),this->nSingleDim_,this->nSek_);
+    RealMap SLVec(Sigma.data()+this->nSek_*this->nSingleDim_,this->nSingleDim_,this->nSek_);
 
     this->linearTransFOPPA(T,T,SRVec,SLVec,T,T);
 

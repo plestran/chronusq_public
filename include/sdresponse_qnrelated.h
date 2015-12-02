@@ -27,7 +27,7 @@
   void IterativeRESP();
   void formGuess();
   void getDiag();
-  void formPerturbedGuess(double,const TCMMap&, TCMMap&,const TCMMap&, TCMMap&);
-  void formRM3(TCMMap&, TCMMap&, TCMMap&);
-  void formRM4(TCMMap&, TCMMap&, TCMMap&);
+  void formPerturbedGuess(double,const TMap&, TMap&,const TMap&, TMap&);
+  void formRM3(TMap&, TMap&, TMap&);
+  void formRM4(TMap&, TMap&, TMap&);
   void reoptWF();

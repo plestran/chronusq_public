@@ -1201,18 +1201,18 @@ void SDResponse<double>::incorePPRPA(){
   Eigen::VectorXd CTDAAXABMOTmp2(OccSqAB); 
   Eigen::VectorXd RPAAXABMOTmp2(VirSqAB + OccSqAB); 
 
-  RealCMMap ATDAAXAAMOTmp2Map(ATDAAXAAMOTmp2.data(),VirSqAASLT,1); 
-  RealCMMap CTDAAXAAMOTmp2Map(CTDAAXAAMOTmp2.data(),OccSqAASLT,1); 
-  RealCMMap RPAAXAAMOTmp2Map(RPAAXAAMOTmp2.data(),VirSqAASLT + OccSqAASLT,1); 
-  RealCMMap ATDAAXABMOTmp2Map(ATDAAXABMOTmp2.data(),VirSqAB,1); 
-  RealCMMap CTDAAXABMOTmp2Map(CTDAAXABMOTmp2.data(),OccSqAB,1); 
-  RealCMMap RPAAXABMOTmp2Map(RPAAXABMOTmp2.data(),VirSqAB + OccSqAB,1); 
-  RealCMMap ATDATAAMap2(ATDATAA.data(),VirSqAASLT,1);
-  RealCMMap CTDATAAMap2(CTDATAA.data(),OccSqAASLT,1);
-  RealCMMap RPATAAMap2(RPATAA.data(),VirSqAASLT + OccSqAASLT,1);
-  RealCMMap ATDATABMap2(ATDATAB.data(),VirSqAB,1);
-  RealCMMap CTDATABMap2(CTDATAB.data(),OccSqAB,1);
-  RealCMMap RPATABMap2(RPATAB.data(),VirSqAB + OccSqAB,1);
+  RealMap ATDAAXAAMOTmp2Map(ATDAAXAAMOTmp2.data(),VirSqAASLT,1); 
+  RealMap CTDAAXAAMOTmp2Map(CTDAAXAAMOTmp2.data(),OccSqAASLT,1); 
+  RealMap RPAAXAAMOTmp2Map(RPAAXAAMOTmp2.data(),VirSqAASLT + OccSqAASLT,1); 
+  RealMap ATDAAXABMOTmp2Map(ATDAAXABMOTmp2.data(),VirSqAB,1); 
+  RealMap CTDAAXABMOTmp2Map(CTDAAXABMOTmp2.data(),OccSqAB,1); 
+  RealMap RPAAXABMOTmp2Map(RPAAXABMOTmp2.data(),VirSqAB + OccSqAB,1); 
+  RealMap ATDATAAMap2(ATDATAA.data(),VirSqAASLT,1);
+  RealMap CTDATAAMap2(CTDATAA.data(),OccSqAASLT,1);
+  RealMap RPATAAMap2(RPATAA.data(),VirSqAASLT + OccSqAASLT,1);
+  RealMap ATDATABMap2(ATDATAB.data(),VirSqAB,1);
+  RealMap CTDATABMap2(CTDATAB.data(),OccSqAB,1);
+  RealMap RPATABMap2(RPATAB.data(),VirSqAB + OccSqAB,1);
 
   this->iPPRPA_ = 0;
   this->iMeth_  = PPATDA;
@@ -1667,9 +1667,9 @@ void SDResponse<double>::formRM(){
   ABBA.block(nOVA+nOVB,nOVA+nOVB,nOVA+nOVB,nOVA+nOVB) = A;
   ABBA.block(nOVA+nOVB,0,nOVA+nOVB,nOVA+nOVB) = B;
   cout << "SIG" << endl;
-  RealCMMap sMap(sigMOA.data(),this->nSingleDim_,1);
-  RealCMMap tMap(T.data(),this->nSingleDim_,1);
-  RealCMMap rMap(rhoMOA.data(),this->nSingleDim_,1);
+  RealMap sMap(sigMOA.data(),this->nSingleDim_,1);
+  RealMap tMap(T.data(),this->nSingleDim_,1);
+  RealMap rMap(rhoMOA.data(),this->nSingleDim_,1);
   formRM3(tMap,sMap,rMap);
   cout << endl << ABBA*T-sigMOA << endl;
   T.block(this->nSingleDim_/2,0,this->nSingleDim_/2,1) = -T.block(this->nSingleDim_/2,0,this->nSingleDim_/2,1);
@@ -1823,8 +1823,8 @@ void SDResponse<double>::incoreCIS(){
   cout << ES.eigenvalues()<< endl;
 //RealMatrix Vec = ES.eigenvectors().col(0);
 //RealMatrix AX(this->nOV_,1);
-//RealCMMap VMap(Vec.data(),this->nOV_,1);
-//RealCMMap AXMap(AX.data(),this->nOV_,1);
+//RealMap VMap(Vec.data(),this->nOV_,1);
+//RealMap AXMap(AX.data(),this->nOV_,1);
 //cout << "AX Before" << endl << AX << endl;
 //this->formRM3(VMap,AXMap,AXMap);
 //cout << "NOV " << this->nOV_ << endl;
@@ -1884,10 +1884,10 @@ void SDResponse<double>::incoreRPA(){
   cout << std::fixed << std::setprecision(12);
   cout << ES.eigenvalues()<< endl;
 
-  RealCMMatrix TStab = ES.eigenvectors().real();
-  RealCMMap TStabMap(TStab.data(),2*this->nOV_,2*this->nOV_);
-  RealCMMatrix ATStab(2*this->nOV_,2*this->nOV_);
-  RealCMMap ATStabMap(ATStab.data(),2*this->nOV_,2*this->nOV_);
+  RealMatrix TStab = ES.eigenvectors().real();
+  RealMap TStabMap(TStab.data(),2*this->nOV_,2*this->nOV_);
+  RealMatrix ATStab(2*this->nOV_,2*this->nOV_);
+  RealMap ATStabMap(ATStab.data(),2*this->nOV_,2*this->nOV_);
 
 //this->formRM3(TStabMap,ATStabMap,ATStabMap);
 //prettyPrint(cout,ABBA*TStab - ATStabMap,"DIFF");
@@ -1915,17 +1915,17 @@ void SDResponse<double>::incoreRPA(){
   ABBA.block(0,this->nOV_,this->nOV_,this->nOV_) = B;
   ABBA.block(this->nOV_,this->nOV_,this->nOV_,this->nOV_) = A;
     if(!this->haveDag_) this->getDiag();
-    RealCMMatrix Vec(2*this->nOV_,3);
+    RealMatrix Vec(2*this->nOV_,3);
     VectorXd Eig(3);
-    RealCMMatrix ACM = ABBA;
+    RealMatrix ACM = ABBA;
     QuasiNewton<double> davA(false,true,3,&ACM,this->rmDiag_.get(),&Vec,&Eig);
     davA.run(cout);
 
 
 //RealMatrix Vec = ES.eigenvectors().col(0);
 //RealMatrix AX(this->nOV_,1);
-//RealCMMap VMap(Vec.data(),this->nOV_,1);
-//RealCMMap AXMap(AX.data(),this->nOV_,1);
+//RealMap VMap(Vec.data(),this->nOV_,1);
+//RealMap AXMap(AX.data(),this->nOV_,1);
 //cout << "AX Before" << endl << AX << endl;
 //this->formRM3(VMap,AXMap,AXMap);
 //cout << "NOV " << this->nOV_ << endl;
@@ -2182,10 +2182,10 @@ void SDResponse<double>::incorePPRPAnew(){
     cout << EATDA-LowATDA << endl;
 
     if(!this->haveDag_) this->getDiag();
-    RealCMMatrix TATDA = ES.eigenvectors().real();
-    RealCMMap TATDAMap(TATDA.data(),this->nVV_SLT_,this->nVV_SLT_);
-    RealCMMatrix ATATDA(this->nVV_SLT_,this->nVV_SLT_);
-    RealCMMap ATATDAMap(ATATDA.data(),this->nVV_SLT_,this->nVV_SLT_);
+    RealMatrix TATDA = ES.eigenvectors().real();
+    RealMap TATDAMap(TATDA.data(),this->nVV_SLT_,this->nVV_SLT_);
+    RealMatrix ATATDA(this->nVV_SLT_,this->nVV_SLT_);
+    RealMap ATATDAMap(ATATDA.data(),this->nVV_SLT_,this->nVV_SLT_);
 /*
     for(auto iSt = 0; iSt < this->nVV_SLT_;iSt++)
     for(auto a = 0, ab = 0; a < this->nV_; a++      )
@@ -2204,9 +2204,9 @@ void SDResponse<double>::incorePPRPAnew(){
 //  prettyPrint(cout,A*TATDA - ATATDAMap,"DIFF");
 /*
     if(!this->haveDag_) this->getDiag();
-    RealCMMatrix Vec(this->nVV_SLT_,8);
+    RealMatrix Vec(this->nVV_SLT_,8);
     VectorXd Eig(8,1);
-    RealCMMatrix ACM = A;
+    RealMatrix ACM = A;
     QuasiNewton<double> davA(8,&ACM,this->rmDiag_.get(),&Vec,&Eig);
     davA.run(cout);
 */

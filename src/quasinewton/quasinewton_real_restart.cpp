@@ -29,10 +29,10 @@ namespace ChronusQ {
   template<>
   void QuasiNewton<double>::setupRestart(){
     this->allocGuess();
-    RealCMMap UR(this->URMem,this->N_,this->nGuess_);
+    RealMap UR(this->URMem,this->N_,this->nGuess_);
     (*this->guessR_) = UR;
     if(this->symmetrizedTrial_){
-      RealCMMap UL(this->ULMem,this->N_,this->nGuess_);
+      RealMap UL(this->ULMem,this->N_,this->nGuess_);
       (*this->guessL_) = UL;
     } 
     // Zero out scratch space

@@ -40,13 +40,12 @@
 namespace ChronusQ {
 template<typename T>
 class SDResponse {
-  typedef Eigen::Matrix<T,Dynamic,Dynamic,ColMajor> TCMMatrix;
   typedef Eigen::Matrix<T,Dynamic,Dynamic,ColMajor> TMatrix;
   typedef Tensor<T,Range3d> TTensor3d;
   typedef Tensor<T,Range4d> TTensor4d;
   typedef Eigen::Matrix<T,Dynamic,1> TVec;
   typedef Eigen::Map<TVec> TVecMap;
-  typedef Eigen::Map<TCMMatrix> TCMMap;
+  typedef Eigen::Map<TMatrix> TMap;
 
   int       nBasis_;
   int       nTCS_;
@@ -89,7 +88,7 @@ class SDResponse {
   int       nSingleDim_; // Single dimension of response matrix
   double    rMu_;
 
-  std::unique_ptr<TCMMatrix>  transDen_;
+  std::unique_ptr<TMatrix>  transDen_;
   std::unique_ptr<RealMatrix> oscStrength_;
   std::unique_ptr<VectorXd>   omega_;
   std::unique_ptr<RealTensor3d>  transDipole_;
@@ -102,7 +101,7 @@ class SDResponse {
   RealTensor4d       * aoERI_;
   RealTensor3d       * elecDipole_;
 
-  std::unique_ptr<RealCMMatrix> rmDiag_;
+  std::unique_ptr<RealMatrix> rmDiag_;
   std::unique_ptr<TMatrix>  davGuess_;
 
   inline void checkWorkers(){

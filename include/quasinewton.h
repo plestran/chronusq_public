@@ -41,7 +41,7 @@ template <typename T>
     // Useful Eigen Typedefs
     typedef Eigen::Matrix<T,Dynamic,Dynamic,ColMajor> TMat;
     typedef Eigen::Matrix<T,Dynamic,1> TVec;
-    typedef Eigen::Map<TMat> TCMMap;
+    typedef Eigen::Map<TMat> TMap;
     typedef Eigen::Map<TVec> TVecMap;
 
     // Boolean logic member variables
@@ -74,7 +74,7 @@ template <typename T>
 
     // Templated pointers to Eigen storage
     TMat * A_;                // Pointer to full matrix to be diagonalized
-    RealCMMatrix * diag_;             // Pointer to diagonal storage
+    RealMatrix * diag_;             // Pointer to diagonal storage
     TMat * solutionVector_;   // Solution vectors at current iteration 
     VectorXd * solutionValues_;   // Solution values (eigen) at current iteration 
     std::unique_ptr<TMat> guessR_;   // Guess vectors (always local copy)
@@ -383,14 +383,14 @@ template <typename T>
     void genRes(const int);
     std::vector<bool> checkConv(const int, int &,ostream &output=cout);
     void formNewGuess(std::vector<bool> &,int&,int,int&,int&);
-    void formResidualGuess(double,const TCMMap &, TCMMap &, const TCMMap &, TCMMap &);
-    void genStdHerResGuess(double, const TCMMap &, TCMMap &);
-    void genSymmResGuess(double,const TCMMap &, TCMMap &, const TCMMap &, TCMMap &);
+    void formResidualGuess(double,const TMap &, TMap &, const TMap &, TMap &);
+    void genStdHerResGuess(double, const TMap &, TMap &);
+    void genSymmResGuess(double,const TMap &, TMap &, const TMap &, TMap &);
     void setupRestart();
-    void Orth(TCMMap &);
+    void Orth(TMap &);
     void Orth(TMat &);
-    void metBiOrth(TCMMap &, const TMat &);
-    void eigSrt(TCMMap &, TVecMap &);
+    void metBiOrth(TMap &, const TMat &);
+    void eigSrt(TMap &, TVecMap &);
     void initLAPACKScrLen();
 
   public:
@@ -450,7 +450,7 @@ template <typename T>
       this->allocScr();
     };
 
-    QuasiNewton(bool isH, bool sT, int n, TMat *A,RealCMMatrix* diag,TMat *Vc, VectorXd *Eig) : QuasiNewton() {
+    QuasiNewton(bool isH, bool sT, int n, TMat *A,RealMatrix* diag,TMat *Vc, VectorXd *Eig) : QuasiNewton() {
       this->N_ = A->rows();
       this->A_ = A;
       this->nSek_ = n;
@@ -547,19 +547,19 @@ template <typename T>
    */
   template<typename T>
   void QuasiNewton<T>::linearTrans(const int NOld,const int NNew){
-    TCMMap NewSR  (this->SigmaRMem+NOld*this->N_,this->N_,NNew);
-    TCMMap NewVecR(this->TVecRMem+ NOld*this->N_,this->N_,NNew);
+    TMap NewSR  (this->SigmaRMem+NOld*this->N_,this->N_,NNew);
+    TMap NewVecR(this->TVecRMem+ NOld*this->N_,this->N_,NNew);
     
     // Initialize these Eigen Maps so they remain in scope
-    TCMMap NewRhoR(this->SCR,0,0);
-    TCMMap NewRhoL(this->SCR,0,0);
-    TCMMap NewSL  (this->SCR,0,0);
-    TCMMap NewVecL(this->SCR,0,0);
+    TMap NewRhoR(this->SCR,0,0);
+    TMap NewRhoL(this->SCR,0,0);
+    TMap NewSL  (this->SCR,0,0);
+    TMap NewVecL(this->SCR,0,0);
     if(!this->isHermitian_ || this->symmetrizedTrial_){
-      new (&NewRhoR) TCMMap(this->RhoRMem + NOld*this->N_,this->N_,NNew);
-      new (&NewRhoL) TCMMap(this->RhoLMem + NOld*this->N_,this->N_,NNew);
-      new (&NewSL  ) TCMMap(this->SigmaLMem+NOld*this->N_,this->N_,NNew);
-      new (&NewVecL) TCMMap(this->TVecLMem+ NOld*this->N_,this->N_,NNew);
+      new (&NewRhoR) TMap(this->RhoRMem + NOld*this->N_,this->N_,NNew);
+      new (&NewRhoL) TMap(this->RhoLMem + NOld*this->N_,this->N_,NNew);
+      new (&NewSL  ) TMap(this->SigmaLMem+NOld*this->N_,this->N_,NNew);
+      new (&NewVecL) TMap(this->TVecLMem+ NOld*this->N_,this->N_,NNew);
     }
     if(this->sdr_ != NULL){
       if(this->sdr_->iMeth() == SDResponse<T>::CIS || 
@@ -612,26 +612,26 @@ template <typename T>
    */ 
   template<typename T>
   void QuasiNewton<T>::fullProjection(const int NTrial){
-    TCMMap SigmaR   (this->SigmaRMem,  this->N_,NTrial);
-    TCMMap XTSigmaR (this->XTSigmaRMem,NTrial,  NTrial);
-    TCMMap TrialVecR(this->TVecRMem,   this->N_,NTrial);
+    TMap SigmaR   (this->SigmaRMem,  this->N_,NTrial);
+    TMap XTSigmaR (this->XTSigmaRMem,NTrial,  NTrial);
+    TMap TrialVecR(this->TVecRMem,   this->N_,NTrial);
 
     // Initialize these Eigen Maps so they remain in scope
-    TCMMap RhoR     (this->RhoRMem,    0,0);
-    TCMMap XTRhoR   (this->XTRhoRMem,  0,0);
-    TCMMap SigmaL   (this->SigmaLMem,  0,0);
-    TCMMap XTSigmaL (this->XTSigmaLMem,0,0);
-    TCMMap RhoL     (this->RhoLMem,    0,0);
-    TCMMap XTRhoL   (this->XTRhoLMem,  0,0);
-    TCMMap TrialVecL(this->TVecLMem,   0,0);
+    TMap RhoR     (this->RhoRMem,    0,0);
+    TMap XTRhoR   (this->XTRhoRMem,  0,0);
+    TMap SigmaL   (this->SigmaLMem,  0,0);
+    TMap XTSigmaL (this->XTSigmaLMem,0,0);
+    TMap RhoL     (this->RhoLMem,    0,0);
+    TMap XTRhoL   (this->XTRhoLMem,  0,0);
+    TMap TrialVecL(this->TVecLMem,   0,0);
     if(!this->isHermitian_ || this->symmetrizedTrial_){
-      new (&RhoR)      TCMMap(this->RhoRMem,    this->N_,NTrial);
-      new (&XTRhoR)    TCMMap(this->XTRhoRMem,  NTrial,  NTrial);
-      new (&SigmaL)    TCMMap(this->SigmaLMem,  this->N_,NTrial);
-      new (&XTSigmaL)  TCMMap(this->XTSigmaLMem,NTrial,  NTrial);
-      new (&RhoL)      TCMMap(this->RhoLMem,    this->N_,NTrial);
-      new (&XTRhoL)    TCMMap(this->XTRhoLMem,  NTrial,  NTrial);
-      new (&TrialVecL) TCMMap(this->TVecLMem,   this->N_,NTrial);
+      new (&RhoR)      TMap(this->RhoRMem,    this->N_,NTrial);
+      new (&XTRhoR)    TMap(this->XTRhoRMem,  NTrial,  NTrial);
+      new (&SigmaL)    TMap(this->SigmaLMem,  this->N_,NTrial);
+      new (&XTSigmaL)  TMap(this->XTSigmaLMem,NTrial,  NTrial);
+      new (&RhoL)      TMap(this->RhoLMem,    this->N_,NTrial);
+      new (&XTRhoL)    TMap(this->XTRhoLMem,  NTrial,  NTrial);
+      new (&TrialVecL) TMap(this->TVecLMem,   this->N_,NTrial);
     }
     XTSigmaR = TrialVecR.adjoint()*SigmaR; // E(R) or E(R)_gg
     if(!isHermitian_ || symmetrizedTrial_){
@@ -653,12 +653,12 @@ template <typename T>
   void QuasiNewton<T>::buildSuperMat(const int NTrial){
     // Note this routine only makes sense when two
     // sets of guess vectors are employed
-    TCMMap XTSigmaR(this->XTSigmaRMem,NTrial,  NTrial);
-    TCMMap XTRhoR  (this->XTRhoRMem,  NTrial,  NTrial);
-    TCMMap XTSigmaL(this->XTSigmaLMem,NTrial,  NTrial);
-    TCMMap XTRhoL  (this->XTRhoLMem,  NTrial,  NTrial);
-    TCMMap ASuper  (this->ASuperMem, 2*NTrial,2*NTrial);
-    TCMMap SSuper  (this->SSuperMem, 2*NTrial,2*NTrial);
+    TMap XTSigmaR(this->XTSigmaRMem,NTrial,  NTrial);
+    TMap XTRhoR  (this->XTRhoRMem,  NTrial,  NTrial);
+    TMap XTSigmaL(this->XTSigmaLMem,NTrial,  NTrial);
+    TMap XTRhoL  (this->XTRhoLMem,  NTrial,  NTrial);
+    TMap ASuper  (this->ASuperMem, 2*NTrial,2*NTrial);
+    TMap SSuper  (this->SSuperMem, 2*NTrial,2*NTrial);
 
     ASuper.setZero();
     SSuper.setZero();
@@ -681,26 +681,26 @@ template <typename T>
    */ 
   template<typename T>
   void QuasiNewton<T>::genRes(const int NTrial){
-    TCMMap SigmaR   (this->SigmaRMem,  this->N_,NTrial);
-    TCMMap XTSigmaR (this->XTSigmaRMem,NTrial,  NTrial);
-    TCMMap ResR     (this->ResRMem,    this->N_,NTrial);
-    TCMMap UR       (this->URMem,      this->N_,NTrial);
+    TMap SigmaR   (this->SigmaRMem,  this->N_,NTrial);
+    TMap XTSigmaR (this->XTSigmaRMem,NTrial,  NTrial);
+    TMap ResR     (this->ResRMem,    this->N_,NTrial);
+    TMap UR       (this->URMem,      this->N_,NTrial);
     TVecMap ER      (this->ERMem,      NTrial         );
 
     // Initialize these Eigen Maps so they remain in scope
-    TCMMap RhoR     (this->RhoRMem,    0,0);
-    TCMMap SigmaL   (this->SigmaLMem,  0,0);
-    TCMMap XTSigmaL (this->XTSigmaLMem,0,0);
-    TCMMap RhoL     (this->RhoLMem,    0,0);
-    TCMMap ResL     (this->ResLMem,    0,0);
-    TCMMap UL       (this->ULMem,      0,0);
+    TMap RhoR     (this->RhoRMem,    0,0);
+    TMap SigmaL   (this->SigmaLMem,  0,0);
+    TMap XTSigmaL (this->XTSigmaLMem,0,0);
+    TMap RhoL     (this->RhoLMem,    0,0);
+    TMap ResL     (this->ResLMem,    0,0);
+    TMap UL       (this->ULMem,      0,0);
     if(!this->isHermitian_ || this->symmetrizedTrial_){
-      new (&RhoR)      TCMMap(this->RhoRMem,    this->N_,NTrial);
-      new (&SigmaL)    TCMMap(this->SigmaLMem,  this->N_,NTrial);
-      new (&XTSigmaL)  TCMMap(this->XTSigmaLMem,NTrial,  NTrial);
-      new (&RhoL)      TCMMap(this->RhoLMem,    this->N_,NTrial);
-      new (&ResL)      TCMMap(this->ResLMem,    this->N_,NTrial);
-      new (&UL)        TCMMap(this->ULMem,      this->N_,NTrial);
+      new (&RhoR)      TMap(this->RhoRMem,    this->N_,NTrial);
+      new (&SigmaL)    TMap(this->SigmaLMem,  this->N_,NTrial);
+      new (&XTSigmaL)  TMap(this->XTSigmaLMem,NTrial,  NTrial);
+      new (&RhoL)      TMap(this->RhoLMem,    this->N_,NTrial);
+      new (&ResL)      TMap(this->ResLMem,    this->N_,NTrial);
+      new (&UL)        TMap(this->ULMem,      this->N_,NTrial);
     }
     if(this->isHermitian_ && !this->symmetrizedTrial_) 
       ResR = SigmaR*XTSigmaR - UR*ER.asDiagonal();
@@ -712,13 +712,13 @@ template <typename T>
   /** Check for convergence **/ 
   template<typename T>
   std::vector<bool> QuasiNewton<T>::checkConv(const int NTrial, int & NNotConv,ostream &output) {
-    TCMMap ResR     (this->ResRMem,    this->N_,NTrial);
+    TMap ResR     (this->ResRMem,    this->N_,NTrial);
     TVecMap ER      (this->ERMem,      NTrial         );
 
     // Initialize these Eigen Maps so they remain in scope
-    TCMMap ResL     (this->ResLMem,    0,0);
+    TMap ResL     (this->ResLMem,    0,0);
     if(!this->isHermitian_ || this->symmetrizedTrial_){
-      new (&ResL)      TCMMap(this->ResLMem,    this->N_,NTrial);
+      new (&ResL)      TMap(this->ResLMem,    this->N_,NTrial);
     }
     // Vector to store convergence info
     std::vector<bool> resConv;

@@ -41,21 +41,21 @@ namespace ChronusQ {
    */ 
   template<>
   void QuasiNewton<dcomplex>::reconstructSolution(const int NTrial){
-    ComplexCMMap XTSigmaR (this->XTSigmaRMem,NTrial,  NTrial);
-    ComplexCMMap UR       (this->URMem,      this->N_,NTrial);
-    ComplexCMMap TrialVecR(this->TVecRMem,   this->N_,NTrial);
-    ComplexCMMap XTRhoR   (this->XTRhoRMem,  0,0);
-    ComplexCMMap XTSigmaL (this->XTSigmaLMem,0,0);
-    ComplexCMMap XTRhoL   (this->XTRhoLMem,  0,0);
-    ComplexCMMap UL       (this->ULMem,      0,0);
-    ComplexCMMap TrialVecL(this->TVecLMem,   0,0);
+    ComplexMap XTSigmaR (this->XTSigmaRMem,NTrial,  NTrial);
+    ComplexMap UR       (this->URMem,      this->N_,NTrial);
+    ComplexMap TrialVecR(this->TVecRMem,   this->N_,NTrial);
+    ComplexMap XTRhoR   (this->XTRhoRMem,  0,0);
+    ComplexMap XTSigmaL (this->XTSigmaLMem,0,0);
+    ComplexMap XTRhoL   (this->XTRhoLMem,  0,0);
+    ComplexMap UL       (this->ULMem,      0,0);
+    ComplexMap TrialVecL(this->TVecLMem,   0,0);
     RealVecMap ER(this->RealEMem,NTrial);
     if(!this->isHermitian_ || this->symmetrizedTrial_){
-      new (&XTRhoR   ) ComplexCMMap(this->XTRhoRMem,  NTrial,  NTrial);
-      new (&XTSigmaL ) ComplexCMMap(this->XTSigmaLMem,NTrial,  NTrial);
-      new (&XTRhoL   ) ComplexCMMap(this->XTRhoLMem,  NTrial,  NTrial);
-      new (&UL       ) ComplexCMMap(this->ULMem,      this->N_,NTrial);
-      new (&TrialVecL) ComplexCMMap(this->TVecLMem,   this->N_,NTrial);
+      new (&XTRhoR   ) ComplexMap(this->XTRhoRMem,  NTrial,  NTrial);
+      new (&XTSigmaL ) ComplexMap(this->XTSigmaLMem,NTrial,  NTrial);
+      new (&XTRhoL   ) ComplexMap(this->XTRhoLMem,  NTrial,  NTrial);
+      new (&UL       ) ComplexMap(this->ULMem,      this->N_,NTrial);
+      new (&TrialVecL) ComplexMap(this->TVecLMem,   this->N_,NTrial);
     }
     UR = TrialVecR * XTSigmaR;
     if(this->symmetrizedTrial_) UL = TrialVecL * XTSigmaL;
@@ -75,10 +75,10 @@ namespace ChronusQ {
     int NNew   = this->nGuess_;
   
     // Initialize Trial Vectors
-    ComplexCMMap TrialVecR(this->TVecRMem,this->N_,NTrial);
-    ComplexCMMap TrialVecL(this->TVecLMem,0,0);
+    ComplexMap TrialVecR(this->TVecRMem,this->N_,NTrial);
+    ComplexMap TrialVecL(this->TVecLMem,0,0);
     if(!this->isHermitian_ || this->symmetrizedTrial_){
-      new (&TrialVecL) ComplexCMMap(this->TVecLMem,this->N_,NTrial);
+      new (&TrialVecL) ComplexMap(this->TVecLMem,this->N_,NTrial);
     }
 
     // Copy guess into Trial Vec

@@ -7,17 +7,17 @@ namespace ChronusQ {
  *  of TMOA and TMOB
  */
 template<>
-void Response<double>::placeVirOcc(RealVecMap &T, RealCMMatrix &TMOA,
-  RealCMMatrix &TMOB) {
+void Response<double>::placeVirOcc(RealVecMap &T, RealMatrix &TMOA,
+  RealMatrix &TMOB) {
 
   bool doBeta = this->iPart_ != SPIN_ADAPTED && 
                 this->Ref_ != SingleSlater<double>::TCS &&
                 this->iClass_ != PPPA;
 
-  Eigen::Map<RealCMMatrix>  TExpandedA(T.data(),this->nVA_,this->nOA_);
-  Eigen::Map<RealCMMatrix>  TExpandedB(T.data(),0,0);
+  Eigen::Map<RealMatrix>  TExpandedA(T.data(),this->nVA_,this->nOA_);
+  Eigen::Map<RealMatrix>  TExpandedB(T.data(),0,0);
   if(doBeta)
-    new (&TExpandedB) Eigen::Map<RealCMMatrix>(
+    new (&TExpandedB) Eigen::Map<RealMatrix>(
       T.data()+this->nOAVA_,this->nVB_,this->nOB_
     );
   
@@ -35,17 +35,17 @@ void Response<double>::placeVirOcc(RealVecMap &T, RealCMMatrix &TMOA,
 }; // placeVirOcc
 
 template<>
-void Response<double>::placeOccVir(RealVecMap &T, RealCMMatrix &TMOA,
-  RealCMMatrix &TMOB) {
+void Response<double>::placeOccVir(RealVecMap &T, RealMatrix &TMOA,
+  RealMatrix &TMOB) {
 
   bool doBeta = this->iPart_ != SPIN_ADAPTED && 
                 this->Ref_ != SingleSlater<double>::TCS &&
                 this->iClass_ != PPPA;
 
-  Eigen::Map<RealCMMatrix>  TExpandedA(T.data(),this->nVA_,this->nOA_);
-  Eigen::Map<RealCMMatrix>  TExpandedB(T.data(),0,0);
+  Eigen::Map<RealMatrix>  TExpandedA(T.data(),this->nVA_,this->nOA_);
+  Eigen::Map<RealMatrix>  TExpandedB(T.data(),0,0);
   if(doBeta)
-    new (&TExpandedB) Eigen::Map<RealCMMatrix>(
+    new (&TExpandedB) Eigen::Map<RealMatrix>(
       T.data()+this->nOAVA_,this->nVB_,this->nOB_
     );
   
@@ -63,8 +63,8 @@ void Response<double>::placeOccVir(RealVecMap &T, RealCMMatrix &TMOA,
 }; // placeVirOcc
 
 template<>
-void Response<double>::retrieveVirOcc(RealVecMap &T, RealCMMatrix &TMOA,
-  RealCMMatrix &TMOB) {
+void Response<double>::retrieveVirOcc(RealVecMap &T, RealMatrix &TMOA,
+  RealMatrix &TMOB) {
 
   bool doBeta = this->iPart_ != SPIN_ADAPTED && 
                 this->Ref_ != SingleSlater<double>::TCS &&
@@ -73,7 +73,7 @@ void Response<double>::retrieveVirOcc(RealVecMap &T, RealCMMatrix &TMOA,
   auto iOffA = this->nOA_;
   auto iOffB = this->nOB_;
 
-  RealCMMatrix TExpandedA, TExpandedB;
+  RealMatrix TExpandedA, TExpandedB;
   TExpandedA = TMOA.block(iOffA,0,this->nVA_,this->nOA_);
   if(doBeta) TExpandedB = TMOB.block(iOffB,0,this->nVB_,this->nOB_);
 
@@ -89,8 +89,8 @@ void Response<double>::retrieveVirOcc(RealVecMap &T, RealCMMatrix &TMOA,
 } // retrieveVirOcc
 
 template<>
-void Response<double>::retrieveOccVir(RealVecMap &T, RealCMMatrix &TMOA,
-  RealCMMatrix &TMOB) {
+void Response<double>::retrieveOccVir(RealVecMap &T, RealMatrix &TMOA,
+  RealMatrix &TMOB) {
 
   bool doBeta = this->iPart_ != SPIN_ADAPTED && 
                 this->Ref_ != SingleSlater<double>::TCS &&
@@ -99,7 +99,7 @@ void Response<double>::retrieveOccVir(RealVecMap &T, RealCMMatrix &TMOA,
   auto iOffA = this->nOA_;
   auto iOffB = this->nOB_;
 
-  RealCMMatrix TExpandedA, TExpandedB;
+  RealMatrix TExpandedA, TExpandedB;
   TExpandedA = TMOA.block(0,iOffA,this->nOA_,this->nVA_);
   if(doBeta) TExpandedB = TMOB.block(0,iOffB,this->nOB_,this->nVB_);
 
@@ -119,16 +119,16 @@ void Response<double>::retrieveOccVir(RealVecMap &T, RealCMMatrix &TMOA,
 } // retrieveOccVir
 
 template<>
-void Response<double>::formAOTransDen(RealVecMap &T, RealCMMatrix &TAOA,
-  RealCMMatrix &TAOB) {
-  RealCMMatrix TMOA,TMOB;
+void Response<double>::formAOTransDen(RealVecMap &T, RealMatrix &TAOA,
+  RealMatrix &TAOB) {
+  RealMatrix TMOA,TMOB;
   bool doBeta = this->iPart_ != SPIN_ADAPTED && 
                 this->Ref_ != SingleSlater<double>::TCS &&
                 this->iClass_ != PPPA;
 
-  TMOA = RealCMMatrix(this->nBasis_,this->nBasis_);
+  TMOA = RealMatrix(this->nBasis_,this->nBasis_);
   if(doBeta)
-    TMOB = RealCMMatrix(this->nBasis_,this->nBasis_);
+    TMOB = RealMatrix(this->nBasis_,this->nBasis_);
 
   if(this->iClass_ == FOPPA)
     this->placeVirOcc(T,TMOA,TMOB);
@@ -155,16 +155,16 @@ void Response<double>::formAOTransDen(RealVecMap &T, RealCMMatrix &TAOA,
 }; //formAOTDen
 
 template<>
-void Response<double>::formMOTransDen(RealVecMap &T, RealCMMatrix &TAOA,
-  RealCMMatrix &TAOB) {
-  RealCMMatrix TMOA,TMOB;
+void Response<double>::formMOTransDen(RealVecMap &T, RealMatrix &TAOA,
+  RealMatrix &TAOB) {
+  RealMatrix TMOA,TMOB;
   bool doBeta = this->iPart_ != SPIN_ADAPTED && 
                 this->Ref_ != SingleSlater<double>::TCS &&
                 this->iClass_ != PPPA;
 
-  TMOA = RealCMMatrix(this->nBasis_,this->nBasis_);
+  TMOA = RealMatrix(this->nBasis_,this->nBasis_);
   if(doBeta)
-    TMOB = RealCMMatrix(this->nBasis_,this->nBasis_);
+    TMOB = RealMatrix(this->nBasis_,this->nBasis_);
 
   TMOA = this->singleSlater_->moA()->adjoint() * TAOA * 
          (*this->singleSlater_->moA());

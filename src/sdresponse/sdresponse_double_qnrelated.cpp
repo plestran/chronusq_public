@@ -31,7 +31,7 @@ using ChronusQ::QuasiNewton;
 namespace ChronusQ {
 template<>
 void SDResponse<double>::getDiag(){
-  this->rmDiag_ = std::unique_ptr<RealCMMatrix>(new RealCMMatrix(nSingleDim_,1)); 
+  this->rmDiag_ = std::unique_ptr<RealMatrix>(new RealMatrix(nSingleDim_,1)); 
 
   if(this->Ref_ == SingleSlater<double>::TCS) {
     if(this->iMeth_ == RPA || this->iMeth_ == CIS || this->iMeth_ == STAB){
@@ -220,12 +220,12 @@ void SDResponse<double>::reoptWF(){
   dcomplex * BSCR           = complexExpStab + lenMat;
   dcomplex * WORK           = BSCR           + lenMat;
 
-  RealCMMap    AReal(realStab   ,NTCSxNBASIS,NTCSxNBASIS);
-  RealCMMap ExpAReal(realExpStab,NTCSxNBASIS,NTCSxNBASIS);
+  RealMap    AReal(realStab   ,NTCSxNBASIS,NTCSxNBASIS);
+  RealMap ExpAReal(realExpStab,NTCSxNBASIS,NTCSxNBASIS);
 
-  ComplexCMMap    AComplex(complexStab   ,NTCSxNBASIS,NTCSxNBASIS);
-  ComplexCMMap    BComplex(BSCR          ,NTCSxNBASIS,NTCSxNBASIS);
-  ComplexCMMap ExpAComplex(complexExpStab,NTCSxNBASIS,NTCSxNBASIS);
+  ComplexMap    AComplex(complexStab   ,NTCSxNBASIS,NTCSxNBASIS);
+  ComplexMap    BComplex(BSCR          ,NTCSxNBASIS,NTCSxNBASIS);
+  ComplexMap ExpAComplex(complexExpStab,NTCSxNBASIS,NTCSxNBASIS);
 
 
   for(auto iter = 0; iter < maxStabIter; iter++){
@@ -343,7 +343,7 @@ void SDResponse<double>::IterativeRESP(){
 } // IterativeRESP
 
 template<>
-void SDResponse<double>::formRM3(RealCMMap &XMO, RealCMMap &Sigma, RealCMMap &Rho){
+void SDResponse<double>::formRM3(RealMap &XMO, RealMap &Sigma, RealMap &Rho){
 /*
  *  Forms sigma (and possibly rho) for the linear transfomation of E^(2)
  *  (and possibly S^(2) ) onto trial vectors (or any vector in general)
@@ -514,7 +514,7 @@ void SDResponse<double>::formRM3(RealCMMap &XMO, RealCMMap &Sigma, RealCMMap &Rh
 } // formRM3
 
 template<>
-void SDResponse<double>::formRM4(RealCMMap& XMO, RealCMMap &Sigma, RealCMMap &Rho){
+void SDResponse<double>::formRM4(RealMap& XMO, RealMap &Sigma, RealMap &Rho){
 
   bool doA = ( (this->iMeth_ == PPATDA) || (this->iMeth_ == PPRPA) );
   bool doC = ( (this->iMeth_ == PPCTDA) || (this->iMeth_ == PPRPA) );

@@ -163,7 +163,7 @@ namespace ChronusQ {
     // Useful Eigen Typedefs
     typedef Eigen::Matrix<T,Dynamic,Dynamic,ColMajor> TMat;
     typedef Eigen::Matrix<T,Dynamic,1> TVec;
-    typedef Eigen::Map<TMat> TCMMap;
+    typedef Eigen::Map<TMat> TMap;
     typedef Eigen::Map<TVec> TVecMap;
 
     QNCallable<T> * qnObj_;

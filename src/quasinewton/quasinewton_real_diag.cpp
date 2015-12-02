@@ -32,7 +32,7 @@ namespace ChronusQ {
     char JOBV = 'V';
     char UPLO = 'L';
     int INFO;
-    RealCMMap A(this->XTSigmaRMem,NTrial,NTrial);
+    RealMap A(this->XTSigmaRMem,NTrial,NTrial);
   //cout << "HERE" << endl;
   //cout << endl << A << endl;
     dsyev_(&JOBV,&UPLO,&NTrial,this->XTSigmaRMem,&NTrial,
@@ -59,8 +59,8 @@ namespace ChronusQ {
     int TwoNTrial = 2*NTrial;
     int INFO;
 
-    RealCMMap SSuper(this->SSuperMem, 2*NTrial,2*NTrial);
-    RealCMMap    SCPY(this->SCPYMem,   TwoNTrial,TwoNTrial);
+    RealMap SSuper(this->SSuperMem, 2*NTrial,2*NTrial);
+    RealMap    SCPY(this->SCPYMem,   TwoNTrial,TwoNTrial);
 
     SCPY = SSuper; // Copy of original matrix to use for re-orthogonalization
 
@@ -73,7 +73,7 @@ namespace ChronusQ {
     // Grab the "positive paired" roots (throw away other element of the pair)
     this->ERMem += NTrial;
     RealVecMap ER    (this->ERMem,NTrial);
-    new (&SSuper) RealCMMap(this->SSuperMem+2*NTrial*NTrial,2*NTrial,NTrial);
+    new (&SSuper) RealMap(this->SSuperMem+2*NTrial*NTrial,2*NTrial,NTrial);
 
     // Swap the ordering because we solve for (1/ω)
     for(auto i = 0 ; i < NTrial; i++) ER(i) = 1.0/ER(i);
@@ -94,8 +94,8 @@ namespace ChronusQ {
     this->metBiOrth(SSuper,SCPY);
 
     // Separate the eigenvectors into gerade and ungerade parts
-    RealCMMap XTSigmaR(this->XTSigmaRMem,NTrial,NTrial);
-    RealCMMap XTSigmaL(this->XTSigmaLMem,NTrial,NTrial);
+    RealMap XTSigmaR(this->XTSigmaRMem,NTrial,NTrial);
+    RealMap XTSigmaL(this->XTSigmaLMem,NTrial,NTrial);
     XTSigmaR = SSuper.block(0,     0,NTrial,NTrial);
     XTSigmaL = SSuper.block(NTrial,0,NTrial,NTrial);
   } // symmHerDiag
@@ -108,10 +108,10 @@ namespace ChronusQ {
     int *IPIV = new int[TwoNTrial];
     int INFO;
 
-    RealCMMap  SSuper(this->SSuperMem, TwoNTrial,TwoNTrial);
-    RealCMMap  ASuper(this->ASuperMem, TwoNTrial,TwoNTrial);
-    RealCMMap    SCPY(this->SCPYMem,   TwoNTrial,TwoNTrial);
-    RealCMMap NHrProd(this->NHrProdMem,TwoNTrial,TwoNTrial);
+    RealMap  SSuper(this->SSuperMem, TwoNTrial,TwoNTrial);
+    RealMap  ASuper(this->ASuperMem, TwoNTrial,TwoNTrial);
+    RealMap    SCPY(this->SCPYMem,   TwoNTrial,TwoNTrial);
+    RealMap NHrProd(this->NHrProdMem,TwoNTrial,TwoNTrial);
 
     SCPY = SSuper; // Copy of original matrix to use for re-orthogonalization
 
@@ -129,7 +129,7 @@ namespace ChronusQ {
     // Sort eigensystem using Bubble Sort
     RealVecMap ER(this->ERMem,TwoNTrial);
     RealVecMap EI(this->EIMem,TwoNTrial);
-    RealCMMap  VR(this->SSuperMem,TwoNTrial,TwoNTrial);
+    RealMap  VR(this->SSuperMem,TwoNTrial,TwoNTrial);
 //  cout << endl << ER << endl;
     this->eigSrt(VR,ER);
 //  cout << endl << ER << endl;
@@ -137,7 +137,7 @@ namespace ChronusQ {
     // Grab the "positive paired" roots (throw away other element of the pair)
     this->ERMem += NTrial;
     new (&ER    ) RealVecMap(this->ERMem,NTrial);
-    new (&SSuper) RealCMMap(this->SSuperMem+2*NTrial*NTrial,2*NTrial,NTrial);
+    new (&SSuper) RealMap(this->SSuperMem+2*NTrial*NTrial,2*NTrial,NTrial);
 
     /*
      * Re-orthogonalize the eigenvectors with respect to the metric S(R)
@@ -149,8 +149,8 @@ namespace ChronusQ {
     this->metBiOrth(SSuper,SCPY);
 
     // Separate the eigenvectors into gerade and ungerade parts
-    RealCMMap XTSigmaR(this->XTSigmaRMem,NTrial,NTrial);
-    RealCMMap XTSigmaL(this->XTSigmaLMem,NTrial,NTrial);
+    RealMap XTSigmaR(this->XTSigmaRMem,NTrial,NTrial);
+    RealMap XTSigmaL(this->XTSigmaLMem,NTrial,NTrial);
     XTSigmaR = SSuper.block(0,     0,NTrial,NTrial);
     XTSigmaL = SSuper.block(NTrial,0,NTrial,NTrial);
   //cout << endl << "ER" << endl << ER << endl << endl;

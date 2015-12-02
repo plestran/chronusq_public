@@ -38,8 +38,8 @@
   inline int           nOVA(){        return this->singleSlater_->nOVA(); };
   inline int           nOVB(){        return this->singleSlater_->nOVB(); };
   inline VectorXd*     omega(){       return this->omega_.get();          };
-  inline TCMMatrix*    transDen(){    return this->transDen_.get();       };
-  inline RealCMMatrix* rmDiag(){      return this->rmDiag_.get();         };
+  inline TMatrix*      transDen(){    return this->transDen_.get();       };
+  inline RealMatrix*   rmDiag(){      return this->rmDiag_.get();         };
   inline TMatrix*      davGuess(){    return this->davGuess_.get();       };
   inline FileIO*       fileio(){      return this->fileio_;               };
   inline RealMatrix*   oscStrength(){ return this->oscStrength_.get();    };

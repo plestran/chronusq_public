@@ -27,15 +27,15 @@
 
 namespace ChronusQ {
   template<>
-  void QuasiNewton<dcomplex>::genStdHerResGuess(double Omega, const ComplexCMMap &Res, ComplexCMMap &Q){
+  void QuasiNewton<dcomplex>::genStdHerResGuess(double Omega, const ComplexMap &Res, ComplexMap &Q){
     for(auto i = 0; i < this->N_; i++)
       Q(i) = -Res(i) / ((*this->diag_)(i,0) - Omega);
   }
 
   template<>
   void QuasiNewton<dcomplex>::genSymmResGuess(double Omega, 
-                                     const ComplexCMMap & ResR, ComplexCMMap & QR, 
-                                     const ComplexCMMap & ResL, ComplexCMMap & QL){
+                                     const ComplexMap & ResR, ComplexMap & QR, 
+                                     const ComplexMap & ResL, ComplexMap & QL){
     for(auto i = 0; i < this->N_; i++){
       QR(i) = ResR(i) * (*this->diag_)(i,0);
       QL(i) = ResL(i) * (*this->diag_)(i,0);
@@ -55,8 +55,8 @@ namespace ChronusQ {
   /** Form Residual Based Guess **/
   template<>
   void QuasiNewton<dcomplex>::formResidualGuess(double Omega, 
-                                     const ComplexCMMap & ResR, ComplexCMMap & QR, 
-                                     const ComplexCMMap & ResL, ComplexCMMap & QL){
+                                     const ComplexMap & ResR, ComplexMap & QR, 
+                                     const ComplexMap & ResL, ComplexMap & QL){
     if(this->symmetrizedTrial_) this->genSymmResGuess(  Omega,ResR,QR,ResL,QL);
     else                        this->genStdHerResGuess(Omega,ResR,QR        );
   }
@@ -65,20 +65,20 @@ namespace ChronusQ {
   void QuasiNewton<dcomplex>::formNewGuess(std::vector<bool> &resConv,int &NTrial, 
                                     int NNotConv, int &NOld, int &NNew){
 
-    ComplexCMMap TrialVecR(this->TVecRMem,0,0);
-    ComplexCMMap TrialVecL(this->TVecLMem,0,0);
-    ComplexCMMap ResR     (this->ResRMem, 0,0);
-    ComplexCMMap ResL     (this->ResLMem, 0,0);
-    ComplexCMMap QR       (this->TVecRMem,0,0);
-    ComplexCMMap RR       (this->ResRMem ,0,0);
-    ComplexCMMap QL       (this->TVecLMem,0,0);
-    ComplexCMMap RL       (this->ResLMem ,0,0);
+    ComplexMap TrialVecR(this->TVecRMem,0,0);
+    ComplexMap TrialVecL(this->TVecLMem,0,0);
+    ComplexMap ResR     (this->ResRMem, 0,0);
+    ComplexMap ResL     (this->ResLMem, 0,0);
+    ComplexMap QR       (this->TVecRMem,0,0);
+    ComplexMap RR       (this->ResRMem ,0,0);
+    ComplexMap QL       (this->TVecLMem,0,0);
+    ComplexMap RL       (this->ResLMem ,0,0);
 
-    new (&TrialVecR) ComplexCMMap(this->TVecRMem,this->N_,NTrial+NNotConv);
-    new (&ResR) ComplexCMMap(this->ResRMem,this->N_,NTrial);
+    new (&TrialVecR) ComplexMap(this->TVecRMem,this->N_,NTrial+NNotConv);
+    new (&ResR) ComplexMap(this->ResRMem,this->N_,NTrial);
     if(this->symmetrizedTrial_ || !this->isHermitian_){
-      new (&TrialVecL) ComplexCMMap(this->TVecLMem,this->N_,NTrial+NNotConv);
-      new (&ResL) ComplexCMMap(this->ResLMem,this->N_,NTrial);
+      new (&TrialVecL) ComplexMap(this->TVecLMem,this->N_,NTrial+NNotConv);
+      new (&ResL) ComplexMap(this->ResLMem,this->N_,NTrial);
     }
 
     RealVecMap ER(this->RealEMem,NTrial);
@@ -92,11 +92,11 @@ namespace ChronusQ {
       //             matricies. Convergence will be slow (maybe infinitely)
       //             if this criteria is not met.
       if(!resConv[k]) {
-        new (&RR) ComplexCMMap(this->ResRMem + k*this->N_,this->N_,1);
-        new (&QR) ComplexCMMap(this->TVecRMem+(NTrial+INDX)*this->N_,this->N_,1);
+        new (&RR) ComplexMap(this->ResRMem + k*this->N_,this->N_,1);
+        new (&QR) ComplexMap(this->TVecRMem+(NTrial+INDX)*this->N_,this->N_,1);
         if(this->symmetrizedTrial_ || !this->isHermitian_){
-          new (&RL) ComplexCMMap(this->ResLMem + k*this->N_,this->N_,1);
-          new (&QL) ComplexCMMap(this->TVecLMem+(NTrial+INDX)*this->N_,this->N_,1);
+          new (&RL) ComplexMap(this->ResLMem + k*this->N_,this->N_,1);
+          new (&QL) ComplexMap(this->TVecLMem+(NTrial+INDX)*this->N_,this->N_,1);
         }
          
         this->formResidualGuess(ER(k),RR,QR,RL,QL);

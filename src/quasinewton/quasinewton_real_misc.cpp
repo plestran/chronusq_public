@@ -27,7 +27,7 @@
 
 namespace ChronusQ {
   template<>
-  void QuasiNewton<double>::Orth(RealCMMap &A){
+  void QuasiNewton<double>::Orth(RealMap &A){
     int N   = A.cols();
     int M   = A.rows();
     int LDA = M;
@@ -42,7 +42,7 @@ namespace ChronusQ {
   }
 
   template<>
-  void QuasiNewton<double>::Orth(RealCMMatrix &A){
+  void QuasiNewton<double>::Orth(RealMatrix &A){
     int N   = A.cols();
     int M   = A.rows();
     int LDA = M;
@@ -57,9 +57,9 @@ namespace ChronusQ {
   }
 
   template<>
-  void QuasiNewton<double>::metBiOrth(RealCMMap &A, const RealCMMatrix &Met){
+  void QuasiNewton<double>::metBiOrth(RealMap &A, const RealMatrix &Met){
     int N = A.cols();
-    RealCMMap AX(this->BiOrthMem,Met.rows(),N);
+    RealMap AX(this->BiOrthMem,Met.rows(),N);
     AX = Met*A;
     for(auto i = 0; i < N; i++){
       double inner = A.col(i).dot(AX.col(i));
@@ -73,7 +73,7 @@ namespace ChronusQ {
   }
 
   template<>
-  void QuasiNewton<double>::eigSrt(RealCMMap &V, RealVecMap &E){
+  void QuasiNewton<double>::eigSrt(RealMap &V, RealVecMap &E){
     auto N = V.cols();
     while( N != 0){
       auto newn = 0;

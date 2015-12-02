@@ -99,7 +99,6 @@ using std::ifstream;
 using Eigen::Infinity;
 using Eigen::Dynamic;
 using Eigen::ColMajor;
-using Eigen::ColMajor;
 using Eigen::Upper;
 using Eigen::Lower;
 using Eigen::VectorXd;
@@ -119,8 +118,6 @@ namespace bg = boost::geometry;
 typedef std::complex<double> dcomplex; ///< Support for complex numbers (double precision)
 typedef Eigen::Matrix<double,Dynamic,Dynamic,ColMajor>     RealMatrix;    ///< Dynamically allocated Real (double) matrix. Row major for integration with Libint
 typedef Eigen::Matrix<dcomplex,Dynamic,Dynamic,ColMajor>   ComplexMatrix; ///< Dynamically allocated Complex (dcomplex) matrix. Row major for integration with Libint
-typedef Eigen::Matrix<double,Dynamic,Dynamic,ColMajor>     RealCMMatrix;    ///< Dynamically allocated Real (double) matrix. Row major for integration with Libint
-typedef Eigen::Matrix<dcomplex,Dynamic,Dynamic,ColMajor>   ComplexCMMatrix; ///< Dynamically allocated Complex (dcomplex) matrix. Row major for integration with Libint
 typedef Eigen::SparseMatrix<double> RealSparseMatrix;
 typedef Eigen::SparseMatrix<dcomplex> ComplexSparseMatrix;
 typedef Eigen::Map<VectorXd> RealVecMap;
@@ -129,10 +126,8 @@ typedef Eigen::SelfAdjointView<RealMatrix,Lower> RealSelfAdjLow;
 //APE
 typedef Eigen::Map<VectorXcd> ComplexVecMap;
 typedef Eigen::Map<RealMatrix> RealMap; ///< Map double precision real array onto RealMatrix object
-typedef Eigen::Map<RealCMMatrix> RealCMMap; ///< Map double precision real array onto RealMatrix object
 typedef Eigen::Map<const RealMatrix> ConstRealMap; ///< Map double precision real array onto const RealMatrix object
 typedef Eigen::Map<ComplexMatrix> ComplexMap; ///< Map double precision complex array onto ComplexMatrix object
-typedef Eigen::Map<ComplexCMMatrix> ComplexCMMap; ///< Map double precision complex array onto ComplexMatrix object
 typedef Eigen::Map<const ComplexMatrix> ConstComplexMap; ///< Map double precision complex array onto const ComplexMatrix object
 typedef Eigen::MatrixExponentialReturnValue<RealMatrix>    RealMatExp; ///< Driver for matrix exponentaial (RealMatrix)
 typedef Eigen::MatrixExponentialReturnValue<ComplexMatrix> ComplexMatExp; ///< Driver for matrix exponential (ComplexMatrix)
