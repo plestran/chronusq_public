@@ -143,10 +143,16 @@ void SingleSlater<double>::genSparseBasisMap(){
   RealMatrix overlapR(this->nBasis_,this->nBasis_);        ///< Overlap at grid point
   overlapR.setZero();
 */
+/*
+  this->nRadDFTGridPts_ = 50;
+  this->nAngDFTGridPts_ = 434;
+  this->screenVxc = false;
+*/
+//  this->epsScreen = 1.0e-16;
   this->ngpts = this->nRadDFTGridPts_*this->nAngDFTGridPts_;  // Number of grid point for each center
   OneDGrid * Rad ;                              // Pointer for Radial Grid
   LebedevGrid GridLeb(this->nAngDFTGridPts_);   // Angular Grid
-  int nDer = 1 ; //Order of differenzation
+  int nDer = 0 ; //Order of differenzation
   if (this->dftGrid_ == GAUSSCHEB)  
     Rad = new GaussChebyshev1stGridInf(this->nRadDFTGridPts_,0.0,1.0);   
   else if (this->dftGrid_ == EULERMACL) 
@@ -230,7 +236,7 @@ void SingleSlater<double>::genSparseBasisMap(){
          if (this->screenVxc && Map->col(ipts).norm() > this->epsScreen){
          DoRhoMap->insert(ipts,0) = 2;}
     } //loop over pts
-//     cout << "non Zero " << this->sparseDoRho_[iAtm].nonZeros() << " " << this->ngpts <<endl; 
+//     cout << "non Zero " << this->sparseMap_[iAtm].nonZeros() << " " << this->ngpts <<endl; 
   } // loop over atoms
 /*
          overlapR *= 4.0*math.pi;
@@ -463,6 +469,47 @@ std::array<double,3> SingleSlater<double>::formVExSlater (double rho, double spi
 }; //End formVexSlater
 
 template<>
+double SingleSlater<double>::gB88 (int nDer, double x){
+  double beta = 0.0042;
+  double Cx   = 0.930525736349100;  // (3/2)*((3/(4*pi))^(1/3))
+  double gx;
+//  Eq A4 Pople, J. Chem. Phys. 5612, (1992) nder =0
+  if (nDer == 0 ){
+    gx  = -beta*x*x;
+    gx /= (1.0 + 6.0 * x * boost::math::asinh(x)) ;
+    gx += -Cx;
+  }else if (nDer == 1){
+//  Eq A8 Pople, J. Chem. Phys. 5612, (1992) nder =1
+    gx  = x / (std::sqrt(x*x+1.0));
+    gx += -boost::math::asinh(x) ;
+    gx *= 6.0 * beta * beta * x * x;
+    gx += -2.0*beta*x;
+    gx /= (1.0 + 6.0 * boost::math::asinh(x))*(1.0 + 6.0 * x * boost::math::asinh(x));
+  }
+ return gx; 
+};  //End Form g function for B88 Exchange
+
+template<>
+std::array<double,3> SingleSlater<double>::formVExB88 (double rhoA, double rhoB, 
+double gammaAA, double gammaBB){
+//  Becke Exchange : Eq 8 From Becke, Phys. Rev A., 3098 (1988)
+//  Becke Exchange : Implemented as Eq A3 From Pople, J. Chem. Phys. 5612, (1992)
+  std::array<double,3> epsmu = {0.0,0.0,0.0};
+  double rhoA4ov3 = std::pow(rhoA,(4.0/3.0));
+  double rhoB4ov3 = std::pow(rhoB,(4.0/3.0));
+  double xA   = gammaAA / rhoA4ov3; 
+  double xB   = gammaBB / rhoA4ov3; 
+  epsmu[0]    = rhoA4ov3*this->gB88(0,xA);
+  epsmu[0]   += rhoB4ov3*this->gB88(0,xB);
+
+};  //End Form B88 Exchange
+
+template<>
+std::array<double,3> SingleSlater<double>::formVCLYP (double rhoA, double rhoB, 
+double drhoA, double drhoB){
+};  //End Form LYP Correlation
+
+template<>
 std::array<double,3> SingleSlater<double>::formVCVWN (double rho, double spindensity){
 //  epsmu ={energydens_c, potential_c_alpha, potential_c_beta}
   std::array<double,3> epsmu = {0.0,0.0,0.0};
@@ -624,6 +671,16 @@ std::array<double,3> SingleSlater<double>::formVCVWN (double rho, double spinden
 }; //END VWN
 
 template<>
+std::array<double,3> SingleSlater<double>::formVCGGA (double rhoA, double rhoB, 
+     double drhoA, double drhoB){
+
+    std::array<double,3> corrEpsMu;
+//    if (this->CorrKernel_ == VWN3 || this->CorrKernel_ == VWN5) {
+       corrEpsMu = this->formVCLYP(rhoA, rhoB, drhoA, drhoB);
+    return corrEpsMu;
+}; //END GENERIC FORMCOR
+
+template<>
 std::array<double,3> SingleSlater<double>::formVC (double rho, double spindensity){
 
     std::array<double,3> corrEpsMu;
@@ -640,6 +697,16 @@ std::array<double,3> SingleSlater<double>::formVEx (double rho, double spindensi
        exEpsMu = this->formVExSlater(rho, spindensity);
     return exEpsMu;
 }; //END GENERIC FORMVex
+
+template<>
+std::array<double,3> SingleSlater<double>::formVExGGA (double rhoA, double rhoB, 
+     double drhoA, double drhoB){
+
+    std::array<double,3> corrEpsMu;
+//    if (this->CorrKernel_ == VWN3 || this->CorrKernel_ == VWN5) {
+       corrEpsMu = this->formVExB88(rhoA, rhoB, drhoA, drhoB);
+    return corrEpsMu;
+}; //END GENERIC FORMCOR
 
 /*
 template<>
@@ -905,17 +972,26 @@ void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX,
 
    RealSparseMatrix *Map        = &this->sparseMap_[iAtm];
    RealSparseMatrix *WeightsMap = &this->sparseWeights_[iAtm];
+   RealSparseMatrix *MapdX      = &this->sparsedmudX_[iAtm];
+   RealSparseMatrix *MapdY      = &this->sparsedmudY_[iAtm];
+   RealSparseMatrix *MapdZ      = &this->sparsedmudZ_[iAtm];
 
 //   if (this->screenVxc && Map->col(ipts).norm() < this->epsScreen)
 //     return;
 
+// Eventually Decleare outside as STmp;
+   RealMatrix dSTmp(this->nBasis_,this->nBasis_);        ///< d(Overlap) at grid point
+   dSTmp.setZero();
+   RealMatrix dSTmpR(this->nBasis_,this->nBasis_);        ///< d(Overlap) at grid point
+   dSTmpR.setZero();
+
    double rhor  = 0.0;  // Total density at point
    double rhorA = 0.0;  // alpha density at point
    double rhorB = 0.0;  // beta  density at point
-   double drhorA = 0.0;  // alpha  density at point der
-   double drhorB = 0.0;  // beta  density at point  der
-   double drhor  = 0.0;  // Total density at point  der
-   int    nDer = 1   ;    // Order of Der
+   double gammaAA = 0.0;  // alpha  density at point der
+   double gammaBB = 0.0;  // beta  density at point  der
+   double tmpval = 0.0;  // beta  density at point  der
+   int    nDer = 0   ;    // Order of Der
    bool   RHF  = this->Ref_ == RHF;
    bool   doTCS  = this->Ref_ == TCS;
 // RealMatrix overlapR_(this->nBasis_,this->nBasis_);        ///< Overlap at grid point
@@ -935,26 +1011,44 @@ void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX,
       rhorB = STmp->frobInner(this->densityB()->conjugate());
       rhor = rhorA + rhorB;
       if (nDer == 1 ){
-      (*STmp) = Map->col(ipts)*MapdX->.col(ipts).transpose();
-      drhorA = STmp->frobInner(this->densityA()->conjugate());
-      drhorB = STmp->frobInner(this->densityB()->conjugate());
-      (*STmp) = Map->col(ipts)*MapdY->.col(ipts).transpose();
-      drhorA += STmp->frobInner(this->densityA()->conjugate());
-      drhorB += STmp->frobInner(this->densityB()->conjugate());
-      (*STmp) = Map->col(ipts)*MapdX->.col(ipts).transpose();
-      drhorA += STmp->frobInner(this->densityA()->conjugate());
-      drhorB += STmp->frobInner(this->densityB()->conjugate());
+      dSTmp   = 2.0*Map->col(ipts)*MapdX->col(ipts).transpose();
+      tmpval  = dSTmp.frobInner(this->densityA()->conjugate());
+      gammaAA = tmpval*tmpval;
+      tmpval  = dSTmp.frobInner(this->densityB()->conjugate());
+      gammaBB = tmpval*tmpval;
+      dSTmp   = 2.0*Map->col(ipts)*MapdY->col(ipts).transpose();
+      tmpval  = dSTmp.frobInner(this->densityA()->conjugate());
+      gammaAA += tmpval*tmpval;
+      tmpval  = dSTmp.frobInner(this->densityB()->conjugate());
+      gammaBB += tmpval*tmpval;
+      dSTmp   = 2.0*Map->col(ipts)*MapdZ->col(ipts).transpose();
+      tmpval  = dSTmp.frobInner(this->densityA()->conjugate());
+      gammaAA += tmpval*tmpval;
+      tmpval  = dSTmp.frobInner(this->densityB()->conjugate());
+      gammaBB += tmpval*tmpval;
       }
     } else {
-//    rhor = overlapR_.frobInner(this->densityA()->conjugate()) ;
       rhor = STmp->frobInner(this->densityA()->conjugate()) ;
+//    rhor = overlapR_.frobInner(this->densityA()->conjugate()) ;
       if (nDer == 1 ){
-      (*STmp) = Map->col(ipts)*MapdX->.col(ipts).transpose();
-      drhor = STmp->frobInner(this->densityA()->conjugate());
-      (*STmp) = Map->col(ipts)*MapdY->.col(ipts).transpose();
-      drhor += STmp->frobInner(this->densityA()->conjugate());
-      (*STmp) = Map->col(ipts)*MapdX->.col(ipts).transpose();
-      drhor += STmp->frobInner(this->densityA()->conjugate());
+      dSTmp    = 2.0*(Map->col(ipts)*MapdX->col(ipts).transpose());
+      tmpval   = dSTmp.frobInner(this->densityA()->conjugate());
+      gammaAA += tmpval*tmpval;
+      dSTmp    = 2.0*Map->col(ipts)*MapdY->col(ipts).transpose();
+      tmpval   = dSTmp.frobInner(this->densityA()->conjugate());
+      gammaAA += tmpval*tmpval;
+      dSTmp    = 2.0*Map->col(ipts)*MapdZ->col(ipts).transpose();
+      tmpval   = dSTmp.frobInner(this->densityA()->conjugate());
+      gammaAA += tmpval*tmpval;
+      dSTmpR   = Map->col(ipts)*MapdY->col(ipts).transpose();
+      dSTmpR  += MapdY->col(ipts)*Map->col(ipts).transpose();
+//      dSTmp   = 2.0*(Map->col(ipts)*MapdX->col(ipts).transpose());
+//      dSTmp  += 2.0*(Map->col(ipts)*MapdY->col(ipts).transpose());
+//      dSTmp  += 2.0*(Map->col(ipts)*MapdZ->col(ipts).transpose());
+//      tmpval  = dSTmp.frobInner(this->densityA()->conjugate());
+//      gammaBB = tmpval*tmpval;
+//      if ( std::abs(gammaAA-gammaBB) > 1.0e-8 ) cout << abs(gammaAA-gammaBB) <<endl;
+//      if ( std::abs(gammaAA) > 1.0e-8 ) cout << gammaAA <<endl;
       }
     }
 //  Handle numerical instability if screening on
@@ -997,6 +1091,8 @@ void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX,
         }
 //      (*VCA)  += ((*WeightsMap).coeff(ipts,0))*overlapR_*epsMuCor[1];
         (*VCA)  += ((*WeightsMap).coeff(ipts,0))*(*STmp)*epsMuCor[1];
+//Debug       (*VCA)  += ((*WeightsMap).coeff(ipts,0))*(dSTmpR);
+//Debug      this->nElectrons_ += ((*WeightsMap).coeff(ipts,0))*STmp->frobInner(this->densityA()->conjugate()) ;
         energyC += ((*WeightsMap).coeff(ipts,0))*rhor*epsMuCor[0];
       }
 
@@ -1383,6 +1479,7 @@ void SingleSlater<double>::formVXC(){
 
 template<>
 void SingleSlater<double>::formVXC_store(){
+//    this->nElectrons_= 0.0;
     int nAtom   = this->molecule_->nAtoms();                    // Number of Atoms
     this->ngpts = this->nRadDFTGridPts_*this->nAngDFTGridPts_;  // Number of grid point for each center
     int nPtsPerThread = this->ngpts / omp_get_max_threads();    //  Number of Threads
@@ -1513,7 +1610,7 @@ void SingleSlater<double>::formVXC_store(){
 //    for(int ipts = loopSt; ipts < loopEn; ipts++){
       for(auto ipts = 0; ipts < this->ngpts; ipts++) {
         if(ipts % omp_get_max_threads() != thread_id) continue;
-        if( (*DoRhoMap).coeff(ipts,0) < 1 ) continue;
+        if( this->screenVxc && ((*DoRhoMap).coeff(ipts,0) < 1) ) continue;
         this->evalVXC_store(iAtm,ipts,tmpEnergyEx[thread_id],tmpEnergyCor[thread_id],
               &tmpVX[0][thread_id],&tmpVX[1][thread_id],&tmpVC[0][thread_id],
               &tmpVC[1][thread_id],&overlapR_[thread_id]);
@@ -1585,6 +1682,12 @@ void SingleSlater<double>::formVXC_store(){
       this->fileio_->out << "Total LDA Ex ="    << this->totalEx 
                          << " Total VWN Corr= " << this->totalEcorr << endl;
     }
+/*
+      cout << "nElectrons " << 10.0-4.0*math.pi*this->nElectrons_ << endl;
+      prettyPrint(cout,(*this->vCorA()),"Vc Vc alpha");
+      cout << "Max " << (*this->vCorA()).lpNorm<Infinity>() << endl;
+    CErr();
+*/
 }; //End
 
 } // Namespace ChronusQ

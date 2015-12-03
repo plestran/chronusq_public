@@ -704,12 +704,12 @@ double * BasisSet::basisDEval(int iop, libint2::Shell &liShell, cartGP *pt){
       dz[0] = alpha*x*z;
 //    dpy/dxi
       dx[1] = alpha*y*x;
-      dy[1] = alpha*y*y + expFactor;
+      dy[1] = alpha*y*y - expFactor;
       dz[1] = alpha*y*z;
 //    dpz/dxi
       dx[2] = alpha*z*x;
       dy[2] = alpha*z*y;
-      dz[2] = alpha*z*z + expFactor;
+      dz[2] = alpha*z*z - expFactor;
     }
   } else if(liShell.contr[0].l == 2){
     f[0] = expFactor*x*x;

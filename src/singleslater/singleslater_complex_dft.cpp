@@ -63,12 +63,22 @@ double SingleSlater<dcomplex>::spindens(double rho_A, double rho_B){
 };
 
 template<>
+double SingleSlater<dcomplex>::gB88(int nDer, double x){
+
+};
+
+template<>
 void SingleSlater<dcomplex>::genSparseBasisMap(){
 };
 
 template<>
 std::array<double,3> SingleSlater<dcomplex>::formVExSlater (double rho, double spindensity){
 
+}; 
+
+template<>
+std::array<double,3> SingleSlater<dcomplex>::formVCLYP (double rhoA, double rhoB, 
+     double drhoA, double drhoB){
 }; 
 
 template<>
@@ -79,6 +89,11 @@ std::array<double,3> SingleSlater<dcomplex>::formVCVWN (double rho, double spind
 template<>
 std::array<double,3> SingleSlater<dcomplex>::formVC (double rho, double spindensity){
 
+}; 
+
+template<>
+std::array<double,3> SingleSlater<dcomplex>::formVCGGA (double rhoA, double rhoB,
+     double drhoA, double drhoB){
 }; 
 
 template<>
