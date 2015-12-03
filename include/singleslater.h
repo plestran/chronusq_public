@@ -595,9 +595,9 @@ public:
   std::array<double,3 > formVCVWN (double, double); // Form DFT VWN correlation (VWN3 and VWN5)
   std::array<double,3 > formVCLYP (double, double, double, double); // Form DFT LYP correlation 
   std::array<double,3 > formVEx (double, double); // Form DFT exchange density, potential (A and B)  
-  std::array<double,3 > formVExGGA (double, double, double, double);    // Form DFT GGA Exchange density,potential (A and B)
+  std::array<double,5 > formVExGGA (double, double, double, double);    // Form DFT GGA Exchange density,potential (A and B)
   std::array<double,3 > formVExSlater (double, double); // Form DFT Slater exchange
-  std::array<double,3 > formVExB88 (double, double, double, double); // Form DFT Becke88 exchange
+  std::array<double,5 > formVExB88 (double, double, double, double); // Form DFT Becke88 exchange
   double EvepsVWN(int iop,double a_x, double b_x, double c_x, double x0_x, double rho ); // Form DFT correlarion potential 
   double gB88(int, double);                   //funtion used in B88 Exchange
   double f_spindens(int iop, double spindens);  // define f(spindendity)

@@ -82,6 +82,11 @@ std::array<double,3> SingleSlater<dcomplex>::formVCLYP (double rhoA, double rhoB
 }; 
 
 template<>
+std::array<double,5> SingleSlater<dcomplex>::formVExB88 (double rhoA, double rhoB, 
+     double drhoA, double drhoB){
+}; 
+
+template<>
 std::array<double,3> SingleSlater<dcomplex>::formVCVWN (double rho, double spindensity){
 
 }; 
@@ -93,6 +98,11 @@ std::array<double,3> SingleSlater<dcomplex>::formVC (double rho, double spindens
 
 template<>
 std::array<double,3> SingleSlater<dcomplex>::formVCGGA (double rhoA, double rhoB,
+     double drhoA, double drhoB){
+}; 
+
+template<>
+std::array<double,5> SingleSlater<dcomplex>::formVExGGA (double rhoA, double rhoB,
      double drhoA, double drhoB){
 }; 
 

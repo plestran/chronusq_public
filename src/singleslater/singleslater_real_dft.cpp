@@ -490,11 +490,11 @@ double SingleSlater<double>::gB88 (int nDer, double x){
 };  //End Form g function for B88 Exchange
 
 template<>
-std::array<double,3> SingleSlater<double>::formVExB88 (double rhoA, double rhoB, 
+std::array<double,5> SingleSlater<double>::formVExB88 (double rhoA, double rhoB, 
 double gammaAA, double gammaBB){
 //  Becke Exchange : Eq 8 From Becke, Phys. Rev A., 3098 (1988)
 //  Becke Exchange : Implemented as Eq A3 From Pople, J. Chem. Phys. 5612, (1992)
-  std::array<double,3> epsmu = {0.0,0.0,0.0};
+  std::array<double,5> epsmu = {0.0,0.0,0.0};
   double rhoA4ov3 = std::pow(rhoA,(4.0/3.0));
   double rhoB4ov3 = std::pow(rhoB,(4.0/3.0));
   double xA   = gammaAA / rhoA4ov3; 
@@ -699,10 +699,10 @@ std::array<double,3> SingleSlater<double>::formVEx (double rho, double spindensi
 }; //END GENERIC FORMVex
 
 template<>
-std::array<double,3> SingleSlater<double>::formVExGGA (double rhoA, double rhoB, 
+std::array<double,5> SingleSlater<double>::formVExGGA (double rhoA, double rhoB, 
      double drhoA, double drhoB){
 
-    std::array<double,3> corrEpsMu;
+    std::array<double,5> corrEpsMu;
 //    if (this->CorrKernel_ == VWN3 || this->CorrKernel_ == VWN5) {
        corrEpsMu = this->formVExB88(rhoA, rhoB, drhoA, drhoB);
     return corrEpsMu;
