@@ -196,7 +196,7 @@ void Response<double>::fullFOPPA(){
       }
     } // Triplets
 
-    RealMatrix CPY(this->transDen_[iMat]);
+//  RealMatrix CPY(this->transDen_[iMat]);
     int N = this->nSingleDim_;
     if(this->doTDA_ || this->iMeth_ == STAB)
       // Diagonalize A or ABBA (for stability)
@@ -243,6 +243,7 @@ void Response<double>::fullFOPPA(){
     // Cleanup LAPACK Memory
     delete[] WORK;
 
+/*
     this->nSek_ = this->nSingleDim_;
     RealMap T(this->transDen_[iMat].data(),this->nSingleDim_,this->nSek_);
     RealMatrix Sigma(this->nSingleDim_,2*this->nSek_);
@@ -257,6 +258,7 @@ void Response<double>::fullFOPPA(){
     prettyPrint(cout,CPY*T,"Correct");
     prettyPrint(cout,SRVec,"Test");
     prettyPrint(cout,CPY*T-SRVec,"DIFF");
+*/
 
   } // loop over iMat 
 }; // fullFOPPA (T = double)

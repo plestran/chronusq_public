@@ -28,10 +28,6 @@ void Response<double>::placeVirOcc(RealVecMap &T, RealMatrix &TMOA,
   if(doBeta)
     TMOB.block(iOffB,0,this->nVA_,this->nOA_) = TExpandedB;
 
-//prettyPrint(cout,T,"T");
-//prettyPrint(cout,TMOA,"TA");
-//prettyPrint(cout,TMOB,"TB");
-
 }; // placeVirOcc
 
 template<>
@@ -55,10 +51,6 @@ void Response<double>::placeOccVir(RealVecMap &T, RealMatrix &TMOA,
   TMOA.block(0,iOffA,this->nOA_,this->nVA_) = TExpandedA.adjoint();
   if(doBeta)
     TMOB.block(0,iOffB,this->nOA_,this->nVA_) = TExpandedB.adjoint();
-
-//prettyPrint(cout,T,"T");
-//prettyPrint(cout,TMOA,"TA");
-//prettyPrint(cout,TMOB,"TB");
 
 }; // placeVirOcc
 
@@ -139,7 +131,6 @@ void Response<double>::formAOTransDen(RealVecMap &T, RealMatrix &TAOA,
 
       this->placeOccVir(Y,TMOA,TMOB);
     }
-    cout << "isFOPPA" << endl;
   } else
     return;
 
