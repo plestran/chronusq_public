@@ -181,6 +181,27 @@ template<>
 void Response<double>::formAOTransDenPPRPA(RealVecMap &T, RealMatrix &TAOA,
   RealMatrix &TAOB) {
 
+  for(auto mu = 0; mu < this->nTCS_*this->nBasis_; mu++)
+  for(auto nu = 0; nu < this->nTCS_*this->nBasis_; nu++){
+    if(this->currentMat_ == AA_PPRPA || this->currentMat_ == AAA_PPTDA ||
+       this->currentMat_ == PPRPA_TRIPLETS) {
+      for(auto a = 0, ab = 0; a < this->nVA_; a++      )
+      for(auto b = 0        ; b < a        ;  b++, ab++){
+        TAOA(mu,nu) += (*this->singleSlater_->moA())(mu,a) *
+                       (*this->singleSlater_->moA())(nu,b) *
+                       T(ab);
+      }
+    } 
+    // FIXME: Need to generalize for UHF
+    else if(this->currentMat_ == AB_PPRPA || this->currentMat_ == AAB_PPTDA){
+      for(auto a = 0, ab = 0; a < this->nVA_; a++      )
+      for(auto b = 0        ; b < this->nVB_; b++, ab++){
+        TAOA(mu,nu) += (*this->singleSlater_->moA())(mu,a) *
+                       (*this->singleSlater_->moA())(nu,b) *
+                       T(ab);
+      }
+    }
+  }
 }; //formAOTransDenPPRPA
 
 template<>
