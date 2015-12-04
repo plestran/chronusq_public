@@ -130,7 +130,7 @@ void Response<double>::formAOTransDen(RealVecMap &T, RealMatrix &TAOA,
   if(doBeta)
     TMOB = RealMatrix(this->nBasis_,this->nBasis_);
 
-  if(this->iClass_ == FOPPA)
+  if(this->iClass_ == FOPPA) {
     this->placeVirOcc(T,TMOA,TMOB);
     if(!this->doTDA_){
       RealVecMap Y(
@@ -139,7 +139,8 @@ void Response<double>::formAOTransDen(RealVecMap &T, RealMatrix &TAOA,
 
       this->placeOccVir(Y,TMOA,TMOB);
     }
-  else
+    cout << "isFOPPA" << endl;
+  } else
     return;
 
   TAOA = (*this->singleSlater_->moA()) * TMOA * 
@@ -177,7 +178,7 @@ void Response<double>::formMOTransDen(RealVecMap &T, RealMatrix &TAOA,
              (*this->singleSlater_->moB());
   }
 
-  if(this->iClass_ == FOPPA)
+  if(this->iClass_ == FOPPA){
     this->retrieveVirOcc(T,TMOA,TMOB);
     if(!this->doTDA_){
       RealVecMap Y(
@@ -186,7 +187,7 @@ void Response<double>::formMOTransDen(RealVecMap &T, RealMatrix &TAOA,
 
       this->retrieveOccVir(Y,TMOA,TMOB);
     }
-  else
+  } else
     return;
 
 }; //formMOTDen

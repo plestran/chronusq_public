@@ -99,15 +99,21 @@ void Response<double>::linearTransFOPPA(RealMap &VR, RealMap &VL,
 
     cout << "HERE " << idx << endl;
     RealVecMap X(VR.data(),0);
-    if(idx < VR.cols())
+    if(idx < VR.cols()){
      new (&X) RealVecMap(VR.data()+idx*this->nSingleDim_,this->nSingleDim_);
-    else
+     cout << "Is1" << endl;
+    }else{
      new (&X) RealVecMap(
        VL.data()+(idx-VR.cols())*this->nSingleDim_,this->nSingleDim_
      );
+     cout << "Is2" << endl;
+    }
 
+    prettyPrint(cout,X,"X "+std::to_string(idx));
 
     this->formAOTransDen(X,XAAO,XBAO);
+    prettyPrint(cout,XAAO,"XAAO "+std::to_string(idx));
+    prettyPrint(cout,XBAO,"XBAO "+std::to_string(idx));
     CommA[idx] =  fact * XAAO * SDA; 
     CommA[idx] += fact * SDA.adjoint() * XAAO;
     if(this->iPart_ != SPIN_ADAPTED) {
