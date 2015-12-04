@@ -125,6 +125,8 @@ class Response : public QNCallable<T> {
   RESPONSE_MATRIX_PARTITIONING iPart_;///< Type of Response matrix Partitioning
   std::vector<H5::DataSet*> guessFiles_;
 
+  RESPONSE_PARTITION currentMat_;
+
   bool doSinglets_;      ///< (?) Find NSek Singlet Roots (depends on SA)
   bool doTriplets_;      ///< (?) Find NSek Triplet Roots (depends on SA)
 
@@ -385,8 +387,18 @@ public:
   void checkValidPPRPA(); ///< Checks specific to PPRPA
 
   // Transformations of Transition Densities
-  void formAOTransDen(TVecMap&, TMat&, TMat&);
-  void formMOTransDen(TVecMap &,TMat&,TMat&);
+  inline void formAOTransDen(TVecMap &TVec, TMat &TAOA, TMat &TAOB){
+    if(this->iClass_ == FOPPA) this->formAOTransDenFOPPA(TVec,TAOA,TAOB);
+    else if(this->iClass_ == PPPA) this->formAOTransDenPPRPA(TVec,TAOA,TAOB);
+  };
+  inline void formMOTransDen(TVecMap &TVec, TMat &TMOA, TMat &TMOB){
+    if(this->iClass_ == FOPPA) this->formMOTransDenFOPPA(TVec,TMOA,TMOB);
+    else if(this->iClass_ == PPPA) this->formMOTransDenPPRPA(TVec,TMOA,TMOB);
+  };
+  void formAOTransDenFOPPA(TVecMap&, TMat&, TMat&);
+  void formMOTransDenFOPPA(TVecMap&, TMat&,TMat&);
+  void formAOTransDenPPRPA(TVecMap&, TMat&, TMat&);
+  void formMOTransDenPPRPA(TVecMap&, TMat&,TMat&);
   void placeOccVir(TVecMap&, TMat&, TMat&);
   void placeVirOcc(TVecMap&, TMat&, TMat&);
   void placeOccOcc(TVecMap&, TMat&, TMat&);

@@ -111,7 +111,7 @@ void Response<double>::retrieveOccVir(RealVecMap &T, RealMatrix &TMOA,
 } // retrieveOccVir
 
 template<>
-void Response<double>::formAOTransDen(RealVecMap &T, RealMatrix &TAOA,
+void Response<double>::formAOTransDenFOPPA(RealVecMap &T, RealMatrix &TAOA,
   RealMatrix &TAOB) {
   RealMatrix TMOA,TMOB;
   bool doBeta = this->iPart_ != SPIN_ADAPTED && 
@@ -122,17 +122,14 @@ void Response<double>::formAOTransDen(RealVecMap &T, RealMatrix &TAOA,
   if(doBeta)
     TMOB = RealMatrix(this->nBasis_,this->nBasis_);
 
-  if(this->iClass_ == FOPPA) {
-    this->placeVirOcc(T,TMOA,TMOB);
-    if(!this->doTDA_){
-      RealVecMap Y(
-        T.data()+this->nSingleDim_/2,this->nSingleDim_/2
-      );
+  this->placeVirOcc(T,TMOA,TMOB);
+  if(!this->doTDA_){
+    RealVecMap Y(
+      T.data()+this->nSingleDim_/2,this->nSingleDim_/2
+    );
 
-      this->placeOccVir(Y,TMOA,TMOB);
-    }
-  } else
-    return;
+    this->placeOccVir(Y,TMOA,TMOB);
+  }
 
   TAOA = (*this->singleSlater_->moA()) * TMOA * 
          this->singleSlater_->moA()->adjoint();
@@ -144,10 +141,10 @@ void Response<double>::formAOTransDen(RealVecMap &T, RealMatrix &TAOA,
       TAOB = (*this->singleSlater_->moB()) * TMOB * 
              this->singleSlater_->moB()->adjoint();
   }
-}; //formAOTDen
+}; //formAOTDenFOPPA
 
 template<>
-void Response<double>::formMOTransDen(RealVecMap &T, RealMatrix &TAOA,
+void Response<double>::formMOTransDenFOPPA(RealVecMap &T, RealMatrix &TAOA,
   RealMatrix &TAOB) {
   RealMatrix TMOA,TMOB;
   bool doBeta = this->iPart_ != SPIN_ADAPTED && 
@@ -169,18 +166,27 @@ void Response<double>::formMOTransDen(RealVecMap &T, RealMatrix &TAOA,
              (*this->singleSlater_->moB());
   }
 
-  if(this->iClass_ == FOPPA){
-    this->retrieveVirOcc(T,TMOA,TMOB);
-    if(!this->doTDA_){
-      RealVecMap Y(
-        T.data()+this->nSingleDim_/2,this->nSingleDim_/2
-      );
+  this->retrieveVirOcc(T,TMOA,TMOB);
+  if(!this->doTDA_){
+    RealVecMap Y(
+      T.data()+this->nSingleDim_/2,this->nSingleDim_/2
+    );
 
-      this->retrieveOccVir(Y,TMOA,TMOB);
-    }
-  } else
-    return;
+    this->retrieveOccVir(Y,TMOA,TMOB);
+  }
 
-}; //formMOTDen
+}; //formMOTDenFOPPA
+
+template<>
+void Response<double>::formAOTransDenPPRPA(RealVecMap &T, RealMatrix &TAOA,
+  RealMatrix &TAOB) {
+
+}; //formAOTransDenPPRPA
+
+template<>
+void Response<double>::formMOTransDenPPRPA(RealVecMap &T, RealMatrix &TMOA,
+  RealMatrix &TMOB) {
+
+}; //formMOTransDenPPRPA
 
 }; // namespace ChronusQ

@@ -35,6 +35,7 @@ void Response<double>::fullFOPPA(){
   for(auto iMat = 0; iMat != iMatIter_.size(); iMat++){
 
     this->nSingleDim_ = this->nMatDim_[iMat];
+    this->currentMat_ = this->iMatIter_[iMat];
     // LAPACK Scratch for Full Diagonalization
     char JOBZ  = 'V';
     char JOBVL = 'N';
@@ -50,7 +51,7 @@ void Response<double>::fullFOPPA(){
 
     int nSingOff = this->nSingleDim_/2; 
     int iMetricScale = -1;
-    if(this->iMatIter_[iMat] == FULL) {
+    if(this->currentMat_ == FULL) {
       if(this->Ref_ != SingleSlater<double>::TCS) {
         /*
          *  Build the A Matrix (and B if RPA)
@@ -144,8 +145,8 @@ void Response<double>::fullFOPPA(){
           } // not TDA
         } // All Beta Loop
       } // TCS Check
-    } // this->iMatIter_[iMat] == FULL
-    else if(this->iMatIter_[iMat] == SINGLETS){
+    } // this->currentMat_ == FULL
+    else if(this->currentMat_ == SINGLETS){
       for(auto i = 0, ia = 0; i < this->nOA_; i++)
       for(auto a = 0, A = this->nOA_; a < this->nVA_; a++, A++, ia++)
       for(auto j = 0, jb = 0; j < this->nOA_; j++)
@@ -171,7 +172,7 @@ void Response<double>::fullFOPPA(){
         } // not TDA
       }
     } // Singlets
-    else if(this->iMatIter_[iMat] == TRIPLETS){
+    else if(this->currentMat_ == TRIPLETS){
       for(auto i = 0, ia = 0; i < this->nOA_; i++)
       for(auto a = 0, A = this->nOA_; a < this->nVA_; a++, A++, ia++)
       for(auto j = 0, jb = 0; j < this->nOA_; j++)
@@ -234,7 +235,7 @@ void Response<double>::fullFOPPA(){
       else
         msg += "(DGEEV) ";
       msg += "Failed for IMat = "; 
-      msg += std::to_string(static_cast<int>(this->iMatIter_[iMat]));
+      msg += std::to_string(static_cast<int>(this->currentMat_));
       CErr(msg,this->fileio_->out);
     };
 
@@ -272,6 +273,7 @@ void Response<double>::fullPPRPA(){
 
   for(auto iMat = 0; iMat != iMatIter_.size(); iMat++){
 
+    this->currentMat_ = this->iMatIter_[iMat];
     this->nSingleDim_ = this->nMatDim_[iMat];
     // LAPACK Scratch for Full Diagonalization
     char JOBZ  = 'V';
@@ -286,7 +288,7 @@ void Response<double>::fullPPRPA(){
       WI   = new double[this->nSingleDim_];
     }
 
-    if(this->iMatIter_[iMat] == AA_PPRPA){ 
+    if(this->currentMat_ == AA_PPRPA){ 
       auto iOff = this->nVAVA_SLT_;
       auto iMetricScale = -1;
       // Place A Matrix
@@ -325,8 +327,8 @@ void Response<double>::fullPPRPA(){
         this->transDen_[iMat](ij,ab) = 
           iMetricScale*this->transDen_[iMat](ab,ij);
       }
-    } // this->iMatIter_[iMat] == AA_PPRPA
-    else if(this->iMatIter_[iMat] == AB_PPRPA){ 
+    } // this->currentMat_ == AA_PPRPA
+    else if(this->currentMat_ == AB_PPRPA){ 
       auto iOff = this->nVAVB_;
       auto iMetricScale = -1;
      
@@ -364,13 +366,13 @@ void Response<double>::fullPPRPA(){
         this->transDen_[iMat](ij,ab) = 
           iMetricScale*this->transDen_[iMat](ab,ij);
       }
-    } // this->iMatIter_[iMat] == AB_PPRPA
-    else if(this->iMatIter_[iMat] == BB_PPRPA){ 
+    } // this->currentMat_ == AB_PPRPA
+    else if(this->currentMat_ == BB_PPRPA){ 
     // ************************** //
     // ** BETA-BETA BLOCKS NYI ** //
     // ************************** //
-    } // this->iMatIter_[iMat] == BB_PPRPA
-    else if(this->iMatIter_[iMat] == AAA_PPTDA){
+    } // this->currentMat_ == BB_PPRPA
+    else if(this->currentMat_ == AAA_PPTDA){
       for(auto a = 0, ab = 0; a < this->nVA_; a++      )
       for(auto b = 0        ; b < a        ;  b++, ab++)
       for(auto c = 0, cd = 0; c < this->nVA_; c++      )
@@ -381,8 +383,8 @@ void Response<double>::fullPPRPA(){
           (*this->singleSlater_->epsA())(a+this->nOA_) + 
           (*this->singleSlater_->epsA())(b+this->nOA_) - 2*this->rMu_; 
       }
-    } // this->iMatIter_[iMat] == AAA_PPTDA
-    else if(this->iMatIter_[iMat] == AAB_PPTDA){
+    } // this->currentMat_ == AAA_PPTDA
+    else if(this->currentMat_ == AAB_PPTDA){
       for(auto a = 0, ab = 0; a < this->nVA_; a++      )
       for(auto b = 0        ; b < this->nVB_; b++, ab++)
       for(auto c = 0, cd = 0; c < this->nVA_; c++      )
@@ -392,13 +394,13 @@ void Response<double>::fullPPRPA(){
           (*this->singleSlater_->epsA())(a+this->nOA_) + 
           (*this->singleSlater_->epsA())(b+this->nOB_) - 2*this->rMu_; 
       }
-    } // this->iMatIter_[iMat] == AAB_PPTDA
-    else if(this->iMatIter_[iMat] == ABB_PPTDA){
+    } // this->currentMat_ == AAB_PPTDA
+    else if(this->currentMat_ == ABB_PPTDA){
     // ************************** //
     // ** BETA-BETA BLOCKS NYI ** //
     // ************************** //
-    } // this->iMatIter_[iMat] == ABB_PPTDA
-    else if(this->iMatIter_[iMat] == CAA_PPTDA){
+    } // this->currentMat_ == ABB_PPTDA
+    else if(this->currentMat_ == CAA_PPTDA){
       for(auto i = 0, ij = 0; i < this->nOA_; i++      )
       for(auto j = 0        ; j < i         ; j++, ij++)
       for(auto k = 0, kl = 0; k < this->nOA_; k++      )
@@ -409,8 +411,8 @@ void Response<double>::fullPPRPA(){
           (*this->singleSlater_->epsA())(i) + 
           (*this->singleSlater_->epsA())(j) - 2*this->rMu_; 
       }
-    } // this->iMatIter_[iMat] == CAA_PPTDA
-    else if(this->iMatIter_[iMat] == CAB_PPTDA){
+    } // this->currentMat_ == CAA_PPTDA
+    else if(this->currentMat_ == CAB_PPTDA){
       for(auto i = 0, ij = 0; i < this->nOA_; i++      )
       for(auto j = 0        ; j < this->nOB_; j++, ij++)
       for(auto k = 0, kl = 0; k < this->nOA_; k++      )
@@ -420,13 +422,13 @@ void Response<double>::fullPPRPA(){
           (*this->singleSlater_->epsA())(i) + 
           (*this->singleSlater_->epsA())(j) - 2*this->rMu_; 
       }
-    } // this->iMatIter_[iMat] == CAB_PPTDA
-    else if(this->iMatIter_[iMat] == CBB_PPTDA){
+    } // this->currentMat_ == CAB_PPTDA
+    else if(this->currentMat_ == CBB_PPTDA){
     // ************************** //
     // ** BETA-BETA BLOCKS NYI ** //
     // ************************** //
-    } // this->iMatIter_[iMat] == CBB_PPTDA
-    else if(this->iMatIter_[iMat] == PPRPA_SINGLETS){
+    } // this->currentMat_ == CBB_PPTDA
+    else if(this->currentMat_ == PPRPA_SINGLETS){
       auto iOff = this->nVAVA_LT_;
       auto iMetricScale = -1;
       // Place A Matrix
@@ -479,8 +481,8 @@ void Response<double>::fullPPRPA(){
         this->transDen_[iMat](ij,ab) = 
           iMetricScale*this->transDen_[iMat](ab,ij);
       }
-    } // this->iMatIter_[iMat] == PPRPA_SINGLETS
-    else if(this->iMatIter_[iMat] == A_PPTDA_SINGLETS){
+    } // this->currentMat_ == PPRPA_SINGLETS
+    else if(this->currentMat_ == A_PPTDA_SINGLETS){
       for(auto a = 0, ab = 0; a < this->nVA_; a++      )
       for(auto b = 0        ; b <= a       ;  b++, ab++)
       for(auto c = 0, cd = 0; c < this->nVA_; c++      )
@@ -495,8 +497,8 @@ void Response<double>::fullPPRPA(){
           (*this->singleSlater_->epsA())(a+this->nOA_) + 
           (*this->singleSlater_->epsA())(b+this->nOA_) - 2*this->rMu_; 
       }
-    } // this->iMatIter_[iMat] == A_PPTDA_SINGLETS
-    else if(this->iMatIter_[iMat] == C_PPTDA_SINGLETS){
+    } // this->currentMat_ == A_PPTDA_SINGLETS
+    else if(this->currentMat_ == C_PPTDA_SINGLETS){
       for(auto i = 0, ij = 0; i < this->nOA_; i++      )
       for(auto j = 0        ; j <= i        ; j++, ij++)
       for(auto k = 0, kl = 0; k < this->nOA_; k++      )
@@ -511,8 +513,8 @@ void Response<double>::fullPPRPA(){
           (*this->singleSlater_->epsA())(i) + 
           (*this->singleSlater_->epsA())(j) - 2*this->rMu_; 
       }
-    } // this->iMatIter_[iMat] == C_PPTDA_SINGLETS
-    else if(this->iMatIter_[iMat] == PPRPA_TRIPLETS){
+    } // this->currentMat_ == C_PPTDA_SINGLETS
+    else if(this->currentMat_ == PPRPA_TRIPLETS){
       auto iOff = this->nVAVA_SLT_;
       auto iMetricScale = -1;
       // Place A Matrix
@@ -551,8 +553,8 @@ void Response<double>::fullPPRPA(){
         this->transDen_[iMat](ij,ab) = 
           iMetricScale*this->transDen_[iMat](ab,ij);
       }
-    } // this->iMatIter_[iMat] == PPRPA_TRIPLETS
-    else if(this->iMatIter_[iMat] == A_PPTDA_TRIPLETS){
+    } // this->currentMat_ == PPRPA_TRIPLETS
+    else if(this->currentMat_ == A_PPTDA_TRIPLETS){
       for(auto a = 0, ab = 0; a < this->nVA_; a++      )
       for(auto b = 0        ; b < a        ;  b++, ab++)
       for(auto c = 0, cd = 0; c < this->nVA_; c++      )
@@ -563,8 +565,8 @@ void Response<double>::fullPPRPA(){
           (*this->singleSlater_->epsA())(a+this->nOA_) + 
           (*this->singleSlater_->epsA())(b+this->nOA_) - 2*this->rMu_; 
       }
-    } // this->iMatIter_[iMat] == A_PPTDA_TRIPLETS
-    else if(this->iMatIter_[iMat] == C_PPTDA_TRIPLETS){
+    } // this->currentMat_ == A_PPTDA_TRIPLETS
+    else if(this->currentMat_ == C_PPTDA_TRIPLETS){
       for(auto i = 0, ij = 0; i < this->nOA_; i++      )
       for(auto j = 0        ; j < i         ; j++, ij++)
       for(auto k = 0, kl = 0; k < this->nOA_; k++      )
@@ -575,7 +577,7 @@ void Response<double>::fullPPRPA(){
           (*this->singleSlater_->epsA())(i) + 
           (*this->singleSlater_->epsA())(j) - 2*this->rMu_; 
       }
-    } // this->iMatIter_[iMat] == C_PPTDA_TRIPLETS
+    } // this->currentMat_ == C_PPTDA_TRIPLETS
 
     int N = this->nSingleDim_;
     if(this->doTDA_)
@@ -615,7 +617,7 @@ void Response<double>::fullPPRPA(){
       else
         msg += "(DGEEV) ";
       msg += "Failed for IMat = "; 
-      msg += std::to_string(static_cast<int>(this->iMatIter_[iMat]));
+      msg += std::to_string(static_cast<int>(this->currentMat_));
       CErr(msg,this->fileio_->out);
     };
 
