@@ -345,6 +345,17 @@ public:
   inline void IterativeResponse(){
     this->formDiag();
     this->formGuess();
+    for(auto iMat = 0; iMat != iMatIter_.size(); iMat++){
+      this->currentMat_ = this->iMatIter_[iMat];
+      this->nSingleDim_ = this->nMatDim_[iMat];  
+      this->nGuess_     = this->nSek_; // Quick Hack to get things working
+      this->solutionVecR_ = &this->transDen_[iMat];
+      this->omega_        = &this->frequencies_[iMat];
+      this->guessFile_    = this->guessFiles_[iMat];
+      this->diag_         = &this->rmDiag_[iMat];
+
+      QuasiNewton2<T> qn(this);
+    }
   };
 
   // Required for QNCallable

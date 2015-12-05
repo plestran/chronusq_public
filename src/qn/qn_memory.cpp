@@ -23,25 +23,32 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
+#include <qn.h>
 
-QuasiNewton2(){
-  this->maxSubSpace_ = 0;
-  this->qnObj_       = NULL;
+namespace ChronusQ{
 
-  // Default Values
-  this->maxMicroIter_     = 128;
-  this->maxMacroIter_     = 20;
-  this->residualTol_      = 5.0e-6;
-  this->problemType_      = DIAGONALIZATION;
-  this->matrixType_       = HERMETIAN;
-  this->guessType_        = RESIDUAL_DAVIDSON;
-  this->specialAlgorithm_ = NOT_SPECIAL;
-
-  this->out_              = &std::cout;
-
+template<>
+void QuasiNewton2<double>::allocScrSpecial(){
+  this->LRWORK = 0;
+  if(this->problemType_ == DIAGONALIZATION){
+    this->ERMem_ = new double[this->maxSubSpace_];
+    if(this->matrixType_ != HERMETIAN)
+      this->EIMem_ = new double[this->maxSubSpace_];
+  }
 };
 
-QuasiNewton2(QNCallable<T> * obj) : QuasiNewton2(){
-  this->qnObj_ = obj;
-  this->maxSubSpace_ = std::min(250,obj->nSingleDim()/2);
-};
+template<>
+void QuasiNewton2<dcomplex>::allocScrSpecial(){
+
+  auto N      = this->qnObj_->nSingleDim();
+
+  if(this->problemType_ == DIAGONALIZATION){
+    if(this->matrixType_ == HERMETIAN)
+      this->LRWORK = 2*N;
+    else
+      this->LWORK = 3*N;
+    this->ECMem_ = new dcomplex[this->maxSubSpace_];
+    this->RWORK_ = new   double[this->LRWORK];
+  }
+}
+}; // namespace ChronusQ

@@ -56,7 +56,7 @@ namespace ChronusQ {
     TMat        * solutionVecR_; ///< (right) solution vectors
     TMat        * solutionVecL_; ///< (left)  solution vectors
     VectorXd    * omega_;        ///< Frequencies for solution vectors
-    TMat        * diag_;         ///< Diagonal elements of problem
+    VectorXd    * diag_;         ///< Diagonal elements of problem
 
     // Disk storage
     H5::H5File  * scratchFile_; ///< Scratch file
@@ -122,6 +122,8 @@ namespace ChronusQ {
     inline int nGuess()     { return this->nGuess_    ; };
     inline int nSek()       { return this->nSek_      ; };
     inline int nSingleDim() { return this->nSingleDim_; };
+    
+    inline bool needsLeft() { return this->needsLeft_;  };
 
     inline VectorXd * omega()        { return this->omega_       ; };
     inline TMat     * solutionVecR() { return this->solutionVecR_; };
@@ -190,11 +192,68 @@ namespace ChronusQ {
     int  nTotalIter_;
     bool isConverged_;
 
+    // Output
+    std::ostream * out_;
+
+
+    /** Scratch Partitions **/
+
+    // Constant data-type storage
+    int        LRWORK; ///< Length of RWORK
+    double   * RWORK_; ///< Real workspace for ZGEEV (Complex Only!)
+    double   * ERMem_; ///< Storage of Re[omega] for subspace (Real Only!)
+    double   * EIMem_; ///< Storage of Im[omega] for subspace (Real Only!)
+    dcomplex * ECMem_; ///< Storage of omega for subspace (Complex Only!)
+
+    // Trial vector storage
+    T* TRMem_; ///< Right trial vectors
+    T* TLMem_; ///< Left trial vectors
+
+    // Matrix/Metric-Vector Product storage
+    T* SigmaRMem_; ///< Matrix-Vector Product on Right trial vectors
+    T* SigmaLMem_; ///< Matrix-Vector Product on Left trial vectors
+    T* RhoRMem_;   ///< Metric-Vector Product on Right trial vectors
+    T* RhoLMem_;   ///< Metric-Vector Product on Left trial vectors
+
+    // Full projection storage
+    T* XTSigmaRMem_; ///< Full projection of Right Sigma onto subspace
+    T* XTSigmaLMem_; ///< Full projection of Left Sigma onto subspace
+    T* XTRhoRMem_;   ///< Full projection of Right Rho onto subspace
+    T* XTRhoLMem_;   ///< Full projection of Left Rho onto subspace
+
+    // Residuals
+    T* ResRMem_; ///< Right Residuals
+    T* ResLMem_; ///< Left Residuals
+
+
+    // Reconstructed Solution Vectors
+    T* URMem_; ///< Reconstructed Right solution vectors
+    T* ULMem_; ///< Reconstructed Left solution vectors
+
+    // LAPACK Scratch Space
+    T* WORK;   ///< LAPACK scratch space
+    int LWORK; ///< Length of WORK
+
+
+    void allocScr();
+    void allocScrSpecial();
+
 
   public:
+    // Run the QN Calculation
+    void run();
+    void runMicro();
+
+    // Procedural Functions
+    void readGuess(){;};
+    void symmetrizeTrial(){;};
+    void formLinearTrans(const int, const int);
+
     #include <qn_constructors.h>
 
   }; // class QuasiNewton2
+  #include <qn_memory.h>
+  #include <qn_procedural.h>
 }; // namespace ChronusQ
 
 #endif

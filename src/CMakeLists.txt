@@ -21,4 +21,5 @@ add_subdirectory(chronusQ)
 add_subdirectory(python)
 
 add_subdirectory(response)
+add_subdirectory(qn)
 add_subdirectory(newQNTest)
