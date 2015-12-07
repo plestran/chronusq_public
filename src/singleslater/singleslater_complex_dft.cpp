@@ -72,7 +72,7 @@ void SingleSlater<dcomplex>::genSparseBasisMap(){
 };
 
 template<>
-std::array<double,3> SingleSlater<dcomplex>::formVExSlater (double rho, double spindensity){
+std::array<double,5> SingleSlater<dcomplex>::formVExSlater (double rho, double spindensity){
 
 }; 
 
@@ -107,7 +107,7 @@ std::array<double,5> SingleSlater<dcomplex>::formVExGGA (double rhoA, double rho
 }; 
 
 template<>
-std::array<double,3> SingleSlater<dcomplex>::formVEx(double rho, double spindensity){
+std::array<double,5> SingleSlater<dcomplex>::formVEx(double rho, double spindensity){
 
 }; 
 
