@@ -304,6 +304,7 @@ public:
   
   template <typename T> double * basisEval(int,std::array<double,3>,T*);
   template <typename T> double * basisEval(libint2::Shell&,T*);
+  template <typename T> double * basisDEval(int,libint2::Shell&,T*);
   template <typename T> double * basisProdEval(libint2::Shell,libint2::Shell,T*);
   double * basisonFlyProdEval(libint2::Shell s1, int s1size, libint2::Shell s2, int s2size,double rx, double ry, double rz);
   std::vector<bool> MapGridBasis(cartGP pt);  ///< Create a Mapping of basis over grid points
