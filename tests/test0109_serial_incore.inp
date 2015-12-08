@@ -20,6 +20,7 @@ basis     = sto3g.gbs
 ints			= incore 
 exchange  = Slater
 corr      = NOCORR
+print = 10
 
 #
 #  Misc Settings
