@@ -78,6 +78,7 @@ int HashIAO(int,int*);
 
 int getRank();
 int getSize();
+void mpiBarrier();
 
 
 } // namespace ChronusQ

@@ -249,18 +249,24 @@ int HashIAO(int L,int *l) {
 
 int getRank(){
   int rank = 0;
-#ifdef CQ_ENALBE_MPI
+#ifdef CQ_ENABLE_MPI
   MPI_Comm_rank(MPI_COMM_WORLD,&rank);
 #endif
   return rank;
 }; // getRank 
 
-int getsSize(){
-  int size = 0;
-#ifdef CQ_ENALBE_MPI
+int getSize(){
+  int size = 1;
+#ifdef CQ_ENABLE_MPI
   MPI_Comm_size(MPI_COMM_WORLD,&size);
 #endif
   return size;
 }; // getsSize 
+
+void mpiBarrier(){
+#ifdef CQ_ENABLE_MPI
+  MPI_Barrier(MPI_COMM_WORLD);
+#endif
+}; //mpiBarrier
 
 } // namespace ChronusQ

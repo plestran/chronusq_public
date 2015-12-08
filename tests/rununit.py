@@ -258,6 +258,11 @@ def testSCF(ref,tests):
 if __name__ in "__main__":
   chronusQ.initCQ(len(sys.argv),sys.argv)
 
+  if chronusQ.getSize() > 1:
+    if chronusQ.getRank() == 0:
+      print "Cannot run tests jobs with more than one MPI process"
+    chronusQ.finalizeCQ()
+    sys.exit(1)
 # parse user options
   msg = """
   python runtests.py [-o --option=]

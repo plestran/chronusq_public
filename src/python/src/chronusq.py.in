@@ -104,16 +104,17 @@ def runCQ(ifname,ofname):
   }
   
   
-  out.write("Job Started: %s"  % starttime )
-  out.write(header)
-  
-  authors = open(authorfname, 'r')
-  out.write("Author List:\n"+banner+authors.read())
-  authors.close()
-  
-  inputf = open(ifname, 'r')
-  out.write("Input File:\n"+banner+inputf.read()+banner)
-  inputf.close()
+  if chronusQ.getRank() == 0:
+    out.write("Job Started: %s"  % starttime )
+    out.write(header)
+
+    authors = open(authorfname, 'r')
+    out.write("Author List:\n"+banner+authors.read())
+    authors.close()
+    
+    inputf = open(ifname, 'r')
+    out.write("Input File:\n"+banner+inputf.read()+banner)
+    inputf.close()
   
   controls.iniControls()
   
@@ -123,15 +124,21 @@ def runCQ(ifname,ofname):
   parseMolecule(workers,secDict["MOLECULE"])
   jobStr = parseQM(workers,secDict)
   
-  out.iniH5Files()
-  out.iniStdGroups()
+  if chronusQ.getRank() == 0:
+    out.iniH5Files()
+    out.iniStdGroups()
   
+  chronusQ.mpiBarrier()
   jobMeta = MetaData()
-  jobMap[jobStr](workers,jobMeta)
+  if chronusQ.getRank() == 0:
+    jobMap[jobStr](workers,jobMeta)
+  chronusQ.mpiBarrier()
 
   
-  endtime= time.strftime("%c")
-  out.write("Job Completed: %s"  % endtime )
+  if chronusQ.getRank() == 0:
+    endtime= time.strftime("%c")
+    out.write("Job Completed: %s"  % endtime )
+
   return jobMeta
 
 
@@ -157,7 +164,8 @@ if __name__ in '__main__':
       ["help","input=","output=","dump="]
     )
   except getopt.GetoptError:
-    print msg
+    if chronusQ.getRank() == 0:
+      print msg
     sys.exit(2)
 
   # Null out filenames by default
@@ -172,14 +180,16 @@ if __name__ in '__main__':
     ifname = args[0] 
   # Error if no arguments given
   elif len(opts) == 0 and len(args) == 0:
-    print msg
+    if chronusQ.getRank() == 0:
+      print msg
     sys.exit(2)
 
   # Loop over CLI options / arguements
   for opt, arg in opts:
     # Print Help message
     if opt in ('-h',"--help"):
-      print msg
+      if chronusQ.getRank() == 0:
+        print msg
       sys.exit()
 
     # Set input file
@@ -196,36 +206,39 @@ if __name__ in '__main__':
     
 
   # Run ChronusQ
+  chronusQ.mpiBarrier()
   jobMeta = runCQ(ifname,ofname)
+  chronusQ.mpiBarrier()
 
 
-  # Dump info (if set)
-  auToD   = 0.3934303070
-  auToAng = 0.5291772083
-  auToAng2 = auToAng*auToAng 
-  if dumpSCF:
-    strX = ''
-    strX = strX + "{0:.10f}/".format(jobMeta.E)
-    strX = strX + "{0:.10f}/".format(jobMeta.dipole[0]/auToD)
-    strX = strX + "{0:.10f}/".format(jobMeta.dipole[1]/auToD)
-    strX = strX + "{0:.10f}/".format(jobMeta.dipole[2]/auToD)
-    strX = strX + "{0:.10f}/".format(jobMeta.quadrupole[0][0]*auToAng/auToD)
-    strX = strX + "{0:.10f}/".format(jobMeta.quadrupole[0][1]*auToAng/auToD)
-    strX = strX + "{0:.10f}/".format(jobMeta.quadrupole[0][2]*auToAng/auToD)
-    strX = strX + "{0:.10f}/".format(jobMeta.quadrupole[1][1]*auToAng/auToD)
-    strX = strX + "{0:.10f}/".format(jobMeta.quadrupole[1][2]*auToAng/auToD)
-    strX = strX + "{0:.10f}/".format(jobMeta.quadrupole[2][2]*auToAng/auToD)
-    strX = strX + "{0:.10f}/".format(jobMeta.octupole[0][0][0]*auToAng2/auToD)
-    strX = strX + "{0:.10f}/".format(jobMeta.octupole[0][0][1]*auToAng2/auToD)
-    strX = strX + "{0:.10f}/".format(jobMeta.octupole[0][0][2]*auToAng2/auToD)
-    strX = strX + "{0:.10f}/".format(jobMeta.octupole[0][1][1]*auToAng2/auToD)
-    strX = strX + "{0:.10f}/".format(jobMeta.octupole[0][1][2]*auToAng2/auToD)
-    strX = strX + "{0:.10f}/".format(jobMeta.octupole[0][2][2]*auToAng2/auToD)
-    strX = strX + "{0:.10f}/".format(jobMeta.octupole[1][1][1]*auToAng2/auToD)
-    strX = strX + "{0:.10f}/".format(jobMeta.octupole[1][1][2]*auToAng2/auToD)
-    strX = strX + "{0:.10f}/".format(jobMeta.octupole[1][2][2]*auToAng2/auToD)
-    strX = strX + "{0:.10f}/".format(jobMeta.octupole[2][2][2]*auToAng2/auToD)
-
-    strX = strX + "SCF"
-    print strX
+  if chronusQ.getRank() == 0:
+    # Dump info (if set)
+    auToD   = 0.3934303070
+    auToAng = 0.5291772083
+    auToAng2 = auToAng*auToAng 
+    if dumpSCF:
+      strX = ''
+      strX = strX + "{0:.10f}/".format(jobMeta.E)
+      strX = strX + "{0:.10f}/".format(jobMeta.dipole[0]/auToD)
+      strX = strX + "{0:.10f}/".format(jobMeta.dipole[1]/auToD)
+      strX = strX + "{0:.10f}/".format(jobMeta.dipole[2]/auToD)
+      strX = strX + "{0:.10f}/".format(jobMeta.quadrupole[0][0]*auToAng/auToD)
+      strX = strX + "{0:.10f}/".format(jobMeta.quadrupole[0][1]*auToAng/auToD)
+      strX = strX + "{0:.10f}/".format(jobMeta.quadrupole[0][2]*auToAng/auToD)
+      strX = strX + "{0:.10f}/".format(jobMeta.quadrupole[1][1]*auToAng/auToD)
+      strX = strX + "{0:.10f}/".format(jobMeta.quadrupole[1][2]*auToAng/auToD)
+      strX = strX + "{0:.10f}/".format(jobMeta.quadrupole[2][2]*auToAng/auToD)
+      strX = strX + "{0:.10f}/".format(jobMeta.octupole[0][0][0]*auToAng2/auToD)
+      strX = strX + "{0:.10f}/".format(jobMeta.octupole[0][0][1]*auToAng2/auToD)
+      strX = strX + "{0:.10f}/".format(jobMeta.octupole[0][0][2]*auToAng2/auToD)
+      strX = strX + "{0:.10f}/".format(jobMeta.octupole[0][1][1]*auToAng2/auToD)
+      strX = strX + "{0:.10f}/".format(jobMeta.octupole[0][1][2]*auToAng2/auToD)
+      strX = strX + "{0:.10f}/".format(jobMeta.octupole[0][2][2]*auToAng2/auToD)
+      strX = strX + "{0:.10f}/".format(jobMeta.octupole[1][1][1]*auToAng2/auToD)
+      strX = strX + "{0:.10f}/".format(jobMeta.octupole[1][1][2]*auToAng2/auToD)
+      strX = strX + "{0:.10f}/".format(jobMeta.octupole[1][2][2]*auToAng2/auToD)
+      strX = strX + "{0:.10f}/".format(jobMeta.octupole[2][2][2]*auToAng2/auToD)
+ 
+      strX = strX + "SCF"
+      print strX
   chronusQ.finalizeCQ()
