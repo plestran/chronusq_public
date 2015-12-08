@@ -59,8 +59,13 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
     exit(EXIT_FAILURE);
   }
  
+#ifdef _OPENMP
+  int nthreads = omp_get_max_threads();
+#else
+  int nthreads = 1;
+#endif
   // Define integral Engine
-  std::vector<OneBodyEngine> engines(omp_get_max_threads());
+  std::vector<OneBodyEngine> engines(nthreads);
   engines[0] = OneBodyEngine(iType,this->basisSet_->maxPrim(),this->basisSet_->maxL(),0);
 
   // If engine is V, define nuclear charges
@@ -82,7 +87,7 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
     }
     engines[0].set_q(q);
   }
-  for(size_t i = 1; i < omp_get_max_threads(); i++) engines[i] = engines[0];
+  for(size_t i = 1; i < nthreads; i++) engines[i] = engines[0];
 
   if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(this->nTCS_); 
 #ifdef _OPENMP
@@ -98,7 +103,7 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
       int bf1_s = this->basisSet_->mapSh2Bf(s1);
       int n1  = this->basisSet_->shells(s1).size();
       for(int s2=0; s2 <= s1; s2++, s12++){
-        if(s12 % omp_get_max_threads() != thread_id) continue;
+        if(s12 % nthreads != thread_id) continue;
         int bf2_s = this->basisSet_->mapSh2Bf(s2);
         int n2  = this->basisSet_->shells(s2).size();
   
@@ -240,11 +245,16 @@ void AOIntegrals::computeAOTwoE(){
   if(!this->haveSchwartz) this->computeSchwartz();
 
 
-  std::vector<coulombEngine> engines(omp_get_max_threads());
+#ifdef _OPENMP
+  int nthreads = omp_get_max_threads();
+#else
+  int nthreads = 1;
+#endif
+  std::vector<coulombEngine> engines(nthreads);
   engines[0] = coulombEngine(this->basisSet_->maxPrim(),this->basisSet_->maxL(),0);
   engines[0].set_precision(std::numeric_limits<double>::epsilon());
 
-  for(int i=1; i<omp_get_max_threads(); i++) engines[i] = engines[0];
+  for(int i=1; i<nthreads; i++) engines[i] = engines[0];
   if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(this->nTCS_); 
 
   this->aoERI_->fill(0.0);
@@ -270,7 +280,7 @@ void AOIntegrals::computeAOTwoE(){
         int s4_max = (s1 == s3) ? s2 : s3;
         for(int s4 = 0; s4 <= s4_max; s4++, s1234++) {
 
-          if(s1234 % omp_get_max_threads() != thread_id) continue;
+          if(s1234 % nthreads != thread_id) continue;
 
           int bf4_s = this->basisSet_->mapSh2Bf(s4);
           int n4    = this->basisSet_->shells(s4).size();

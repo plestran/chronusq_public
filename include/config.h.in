@@ -17,6 +17,7 @@
 // Parallelization Information
 #cmakedefine OPENMP_FOUND
 #cmakedefine _OPENMP
+#cmakedefine CQ_ENABLE_MPI
 
 // Libint Information
 #cmakedefine USE_LIBINT

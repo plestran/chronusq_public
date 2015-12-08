@@ -29,14 +29,19 @@ void AOIntegrals::computeAORII(){
   if(!this->haveSchwartz) this->computeSchwartz();
   if(!this->haveRIS)      this->computeAORIS(); 
 
+#ifdef _OPENMP
+  int nthreads = omp_get_max_threads();
+#else
+  int nthreads = 1;
+#endif
 
-  std::vector<coulombEngine> engines(omp_get_max_threads());
+  std::vector<coulombEngine> engines(nthreads);
   engines[0] = coulombEngine(
     std::max(this->basisSet_->maxPrim(),this->DFbasisSet_->maxPrim()),
     std::max(this->basisSet_->maxL(),this->DFbasisSet_->maxL()),0);
   engines[0].set_precision(std::numeric_limits<double>::epsilon());
 
-  for(int i=1; i<omp_get_max_threads(); i++) engines[i] = engines[0];
+  for(int i=1; i<nthreads; i++) engines[i] = engines[0];
   if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(1); 
   if(!this->DFbasisSet_->haveMapSh2Bf) this->DFbasisSet_->makeMapSh2Bf(1); 
 
@@ -56,7 +61,7 @@ void AOIntegrals::computeAORII(){
       int bf2_s = this->basisSet_->mapSh2Bf(s2);
       int n2    = this->basisSet_->shells(s2).size();
       for(int dfs = 0; dfs < this->DFbasisSet_->nShell(); dfs++,s123++) {
-        if(s123 % omp_get_max_threads() != thread_id) continue;
+        if(s123 % nthreads != thread_id) continue;
         int dfbf3_s = this->DFbasisSet_->mapSh2Bf(dfs);
         int dfn3    = this->DFbasisSet_->shells(dfs).size();
 
@@ -84,13 +89,18 @@ void AOIntegrals::computeAORII(){
 }
 
 void AOIntegrals::computeAORIS(){
+#ifdef _OPENMP
+  int nthreads = omp_get_max_threads();
+#else
+  int nthreads = 1;
+#endif
   this->haveRIS= true;
-  std::vector<coulombEngine> engines(omp_get_max_threads());
+  std::vector<coulombEngine> engines(nthreads);
   engines[0] = coulombEngine( this->DFbasisSet_->maxPrim(), 
                               this->DFbasisSet_->maxL(),0);
   engines[0].set_precision(std::numeric_limits<double>::epsilon());
 
-  for(int i=1; i<omp_get_max_threads(); i++) engines[i] = engines[0];
+  for(int i=1; i<nthreads; i++) engines[i] = engines[0];
   if(!this->DFbasisSet_->haveMapSh2Bf) this->DFbasisSet_->makeMapSh2Bf(1); 
 
   RealMap aoRISMap(&this->aoRIS_->storage()[0],
@@ -112,7 +122,7 @@ void AOIntegrals::computeAORIS(){
       int bf2_s = this->DFbasisSet_->mapSh2Bf(s2);
       int n2    = this->DFbasisSet_->shells(s2).size();
  
-      if(s12 % omp_get_max_threads() != thread_id) continue;
+      if(s12 % nthreads != thread_id) continue;
 
       const double* buff = engines[thread_id].compute(
         this->DFbasisSet_->shells(s1),

@@ -48,6 +48,9 @@
 #include <Eigen/Core> // Eigen Linear Algebra
 #include <Eigen/SparseCore> // Eigen Sparse Linear Algebra
 #include <unsupported/Eigen/MatrixFunctions>
+#ifdef CQ_ENABLE_MPI
+#  define EIGEN_DONT_PARALLELIZE
+#endif
 #ifdef USE_LIBINT
 #  include <libint2.hpp> // Libint Gaussian Integrals library
 #endif
@@ -56,7 +59,10 @@
 
 // Parallelization
 #ifdef _OPENMP
-#include <omp.h>
+#  include <omp.h>
+#endif
+#ifdef CQ_ENABLE_MPI
+#  include <mpi.h>
 #endif
 //#include "oompi.h"
 //#include <pthread.h>

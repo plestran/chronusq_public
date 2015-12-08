@@ -32,6 +32,11 @@ namespace ChronusQ{
 
     int nTCS = 1;
     if(doTCS) nTCS = 2;
+#ifdef _OPENMP
+    int nthreads = omp_get_max_threads();
+#else
+    int nthreads = 1;
+#endif
 //  this->fileio_->out << "Contracting Directly with two-electron integrals" << endl;
     if(!this->haveSchwartz) this->computeSchwartz();
     if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(nTCS); 
@@ -41,7 +46,7 @@ namespace ChronusQ{
     if(RHF || doTCS) nRHF = 1;
     else    nRHF = 2;
     std::vector<std::vector<RealMatrix>> G(nRHF,std::vector<RealMatrix>
-      (omp_get_max_threads(),RealMatrix::Zero(nTCS*this->nBasis_,nTCS*this->nBasis_)));
+      (nthreads,RealMatrix::Zero(nTCS*this->nBasis_,nTCS*this->nBasis_)));
   
     RealMatrix XTotal;
     if(!RHF && !doTCS) {
@@ -49,11 +54,11 @@ namespace ChronusQ{
       if(!doFock) XTotal = 0.5*XTotal + 0.5*(XAlpha.adjoint() + XBeta.adjoint());
     }
   
-    std::vector<coulombEngine> engines(omp_get_max_threads());
+    std::vector<coulombEngine> engines(nthreads);
     engines[0] = coulombEngine(this->basisSet_->maxPrim(),this->basisSet_->maxL(),0);
     engines[0].set_precision(std::numeric_limits<double>::epsilon());
   
-    for(int i=1; i<omp_get_max_threads(); i++) engines[i] = engines[0];
+    for(int i=1; i<nthreads; i++) engines[i] = engines[0];
   
     auto start = std::chrono::high_resolution_clock::now();
     this->basisSet_->computeShBlkNorm(!RHF && !doTCS,nTCS,&XAlpha,&XBeta);
@@ -75,7 +80,7 @@ namespace ChronusQ{
             int n3    = this->basisSet_->shells(s3).size();
             int s4_max = (s1 == s3) ? s2 : s3;
             for(int s4 = 0; s4 <= s4_max; s4++, s1234++) {
-              if(s1234 % omp_get_max_threads() != thread_id) continue;
+              if(s1234 % nthreads != thread_id) continue;
               int bf4_s = this->basisSet_->mapSh2Bf(s4);
               int n4    = this->basisSet_->shells(s4).size();
         
@@ -149,8 +154,8 @@ namespace ChronusQ{
   #else
     efficient_twoe(0);
   #endif
-    for(int i = 0; i < omp_get_max_threads(); i++) AXAlpha += G[0][i];
-    if(!RHF && !doTCS) for(int i = 0; i < omp_get_max_threads(); i++) AXBeta += G[1][i];
+    for(int i = 0; i < nthreads; i++) AXAlpha += G[0][i];
+    if(!RHF && !doTCS) for(int i = 0; i < nthreads; i++) AXBeta += G[1][i];
     AXAlpha = AXAlpha*0.5; // werid factor that comes from A + AT
     AXAlpha = AXAlpha*0.5;
     if(do24) AXAlpha *= 0.5;
@@ -172,6 +177,11 @@ namespace ChronusQ{
   
     int nTCS = 1;
     if(doTCS) nTCS = 2;
+#ifdef _OPENMP
+    int nthreads = omp_get_max_threads();
+#else
+    int nthreads = 1;
+#endif
     if(!this->haveSchwartz) this->computeSchwartz();
     if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(nTCS); 
     for(auto i = 0; i < nVec; i++) AXAlpha[i].setZero();
@@ -180,10 +190,10 @@ namespace ChronusQ{
     int nRHF;
     if(RHF || doTCS) nRHF = 1;
     else    nRHF = 2;
-  std::vector<std::vector<std::vector<RealMatrix>>> G(nRHF,
-    std::vector<std::vector<RealMatrix>>(nVec,
-      std::vector<RealMatrix>(omp_get_max_threads(),
-        RealMatrix::Zero(nTCS*this->nBasis_,nTCS*this->nBasis_))));
+    std::vector<std::vector<std::vector<RealMatrix>>> G(nRHF,
+      std::vector<std::vector<RealMatrix>>(nVec,
+        std::vector<RealMatrix>(nthreads,
+          RealMatrix::Zero(nTCS*this->nBasis_,nTCS*this->nBasis_))));
   
     std::vector<RealMatrix> XTotal;
     if(!RHF && !doTCS){
@@ -194,11 +204,11 @@ namespace ChronusQ{
       }
     }
   
-    std::vector<coulombEngine> engines(omp_get_max_threads());
+    std::vector<coulombEngine> engines(nthreads);
     engines[0] = coulombEngine(this->basisSet_->maxPrim(),this->basisSet_->maxL(),0);
     engines[0].set_precision(std::numeric_limits<double>::epsilon());
   
-    for(int i=1; i<omp_get_max_threads(); i++) engines[i] = engines[0];
+    for(int i=1; i<nthreads; i++) engines[i] = engines[0];
   
     std::vector<RealMatrix> alphaShBlk;
     std::vector<RealMatrix> betaShBlk;
@@ -227,7 +237,7 @@ namespace ChronusQ{
             int n3    = this->basisSet_->shells(s3).size();
             int s4_max = (s1 == s3) ? s2 : s3;
             for(int s4 = 0; s4 <= s4_max; s4++, s1234++) {
-              if(s1234 % omp_get_max_threads() != thread_id) continue;
+              if(s1234 % nthreads != thread_id) continue;
               int bf4_s = this->basisSet_->mapSh2Bf(s4);
               int n4    = this->basisSet_->shells(s4).size();
         
@@ -301,11 +311,11 @@ namespace ChronusQ{
     efficient_twoe(0);
   #endif
     for(int k = 0; k < nVec; k++)
-    for(int i = 0; i < omp_get_max_threads(); i++) 
+    for(int i = 0; i < nthreads; i++) 
       AXAlpha[k] += G[0][k][i];
     if(!RHF && !doTCS)
       for(int k = 0; k < nVec; k++)
-      for(int i = 0; i < omp_get_max_threads(); i++) 
+      for(int i = 0; i < nthreads; i++) 
         AXBeta[k] += G[1][k][i];
   
     double fact = 0.25;
