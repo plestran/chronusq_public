@@ -17,8 +17,8 @@ reference = UKS
 job       = SCF
 basis     = sto3g.gbs
 ints			= direct
-exchange  = Slater
-corr      = VWN5
+exchange  = B88
+corr      = NOCORR
 
 #
 #  Misc Settings

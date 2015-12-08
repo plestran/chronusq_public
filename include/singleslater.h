@@ -298,13 +298,15 @@ public:
   enum CORR {
     NOCORR,
     VWN3,
-    VWN5
+    VWN5,
+    LYP
   };
 
   enum EXCH {
     NOEXCH,
     EXACT,
-    SLATER
+    SLATER,
+    B88
   };
 
   enum DFT_GRID {
@@ -329,6 +331,7 @@ public:
   bool  isDFT;
   bool  isPrimary;
   bool  doDIIS;
+  bool  isGGA;
 
   double   energyOneE; ///< One-bodied operator tensors traced with Density
   double   energyTwoE; ///< Two-bodied operator tensors traced with Density
@@ -440,6 +443,7 @@ public:
     this->epsScreen     = 1.0e-10;
     this->nRadDFTGridPts_ = 100;
     this->nAngDFTGridPts_ = 302;
+    this->isGGA = false;
 
     // FIXME: maybe hardcode these?
     this->epsConv       = 1.0e-7;
@@ -572,6 +576,10 @@ public:
   inline std::string SCFType()           { return this->SCFType_;                 };
   inline int         guess()             { return this->guess_;                   };
 
+  inline void checkDFTType(){
+    if(this->CorrKernel_ == LYP || this->ExchKernel_ == B88)
+      this->isGGA = true;
+  };
   void formGuess();	        // form the intial guess
   void SADGuess();
   void COREGuess();

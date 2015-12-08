@@ -64,6 +64,8 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setDFTNRad"  , &SingleSlater<double>::setDFTNRad         )
     .def("setDFTNAng"  , &SingleSlater<double>::setDFTNAng         )
     .def("setDFTScreenTol" , &SingleSlater<double>::setDFTScreenTol        )
+
+    .def("checkDFTType", &SingleSlater<double>::checkDFTType)
   
     .def("turnOffDFTScreening", &SingleSlater<double>::turnOffDFTScreening ) 
 
@@ -78,6 +80,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def_readonly("totalEnergy"   , &SingleSlater<double>::totalEnergy     )
     .def_readonly("nSCFIter"      , &SingleSlater<double>::nSCFIter        )
     .def_readwrite("isDFT"        , &SingleSlater<double>::isDFT           )
+    .def_readwrite("isGGA"        , &SingleSlater<double>::isGGA           )
     .def_readwrite("isHF"         , &SingleSlater<double>::isHF            )
     .def_readwrite("doDIIS"       , &SingleSlater<double>::doDIIS          )
   ;
@@ -118,6 +121,8 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setDFTNRad"  , &SingleSlater<dcomplex>::setDFTNRad         )
     .def("setDFTNAng"  , &SingleSlater<dcomplex>::setDFTNAng         )
     .def("setDFTScreenTol" , &SingleSlater<dcomplex>::setDFTScreenTol        )
+
+    .def("checkDFTType", &SingleSlater<dcomplex>::checkDFTType)
   
     .def("turnOffDFTScreening", &SingleSlater<dcomplex>::turnOffDFTScreening ) 
 
@@ -132,6 +137,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def_readonly("totalEnergy"   , &SingleSlater<dcomplex>::totalEnergy     )
     .def_readonly("nSCFIter"      , &SingleSlater<dcomplex>::nSCFIter        )
     .def_readwrite("isDFT"        , &SingleSlater<dcomplex>::isDFT           )
+    .def_readwrite("isGGA"        , &SingleSlater<dcomplex>::isGGA           )
     .def_readwrite("isHF"         , &SingleSlater<dcomplex>::isHF            )
     .def_readwrite("doDIIS"       , &SingleSlater<dcomplex>::doDIIS          )
   ;
@@ -158,11 +164,13 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("NOEXCH"  , SingleSlater<double>::NOEXCH) 
     .value("EXACT"   , SingleSlater<double>::EXACT )
     .value("SLATER"  , SingleSlater<double>::SLATER)
+    .value("B88"     , SingleSlater<double>::B88   )
   ;
   enum_<SingleSlater<double>::CORR>("CORR")
     .value("NOCORR", SingleSlater<double>::NOCORR) 
     .value("VWN3"  , SingleSlater<double>::VWN3  )
     .value("VWN5"  , SingleSlater<double>::VWN5  )
+    .value("LYP"   , SingleSlater<double>::LYP   )
   ;
   enum_<SingleSlater<double>::DFT>("DFT")
     .value("NODFT"      , SingleSlater<double>::NODFT      )

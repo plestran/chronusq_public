@@ -152,9 +152,8 @@ void SingleSlater<double>::genSparseBasisMap(){
   this->ngpts = this->nRadDFTGridPts_*this->nAngDFTGridPts_;  // Number of grid point for each center
   OneDGrid * Rad ;                              // Pointer for Radial Grid
   LebedevGrid GridLeb(this->nAngDFTGridPts_);   // Angular Grid
-  bool isGGA = false;
   int nDer = 0 ; //Order of differenzation
-  if (isGGA) nDer = 1;
+  if (this->isGGA) nDer = 1;
   if (this->dftGrid_ == GAUSSCHEB)  
     Rad = new GaussChebyshev1stGridInf(this->nRadDFTGridPts_,0.0,1.0);   
   else if (this->dftGrid_ == EULERMACL) 
@@ -736,10 +735,10 @@ std::array<double,5> SingleSlater<double>::formVEx (double rho, double spindensi
 template<>
 std::array<double,5> SingleSlater<double>::formVExGGA (double rhoA, double rhoB, 
     double drhoA, double drhoB){
-    bool isGGA = false;
+   
     std::array<double,5> exEpsMu;
 //    if (this->CorrKernel_ == VWN3 || this->CorrKernel_ == VWN5) {
-    if (isGGA) {
+    if (this->isGGA) {
       exEpsMu = this->formVExB88(rhoA, rhoB, drhoA, drhoB);
 //       cout << exEpsMu[3] << endl;
     } else {
@@ -1018,7 +1017,7 @@ void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX,
 
 //   if (this->screenVxc && Map->col(ipts).norm() < this->epsScreen)
 //     return;
-   bool isGGA  = false;
+
 // Eventually Decleare outside as STmp;
    RealMatrix dSTmpX(this->nBasis_,this->nBasis_);        ///< d(Overlap) at grid point
    dSTmpX.setZero();
@@ -1036,7 +1035,8 @@ void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX,
    std::array<double,3>  drhoA = {0.0,0.0,0.0}; ///< array pf density gradient components
    std::array<double,3>  drhoB = {0.0,0.0,0.0}; ///< array pf density gradient components
    int    nDer   = 0;    // Order of Der
-   if (isGGA) nDer = 1;
+   if (this->isGGA) nDer = 1;
+// cout << "nDer" << nDer << endl;
    bool   RHF  = this->Ref_ == RHF;
    bool   doTCS  = this->Ref_ == TCS;
 // RealMatrix overlapR_(this->nBasis_,this->nBasis_);        ///< Overlap at grid point
@@ -1073,7 +1073,7 @@ void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX,
       }
     } else {
 //      rhor    = STmp->frobInner(this->densityA()->conjugate()) ;
-      if (isGGA) {
+      if (this->isGGA) {
         rhorA    = STmp->frobInner(this->densityA()->conjugate()/2.0) ;
       }else{ 
         rhorA    = STmp->frobInner(this->densityA()->conjugate()) ;
@@ -1114,7 +1114,7 @@ void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX,
         if(!this->isClosedShell && this->Ref_ != TCS){
           epsMuExc = this->formVExGGA(rhorA,rhorB,gammaAA,gammaBB);
           (*VXB)  += ((*WeightsMap).coeff(ipts,0))*(*STmp)*epsMuExc[2];
-          if (isGGA) {
+          if (this->isGGA) {
             (*VXB)  += 2.0*drhoB[0]*((*WeightsMap).coeff(ipts,0))*(dSTmpX)*epsMuExc[4];
             (*VXB)  += 2.0*drhoB[1]*((*WeightsMap).coeff(ipts,0))*(dSTmpY)*epsMuExc[4];
             (*VXB)  += 2.0*drhoB[2]*((*WeightsMap).coeff(ipts,0))*(dSTmpZ)*epsMuExc[4];
@@ -1125,7 +1125,7 @@ void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX,
         }
 //        (*VXA)  += ((*WeightsMap).coeff(ipts,0))*overlapR_*epsMuExc[1];
         (*VXA)  +=   ((*WeightsMap).coeff(ipts,0))*(*STmp)*epsMuExc[1];
-        if (isGGA) {
+        if (this->isGGA) {
           (*VXA)  += 2.0*drhoA[0]*((*WeightsMap).coeff(ipts,0))*(dSTmpX)*epsMuExc[3];
           (*VXA)  += 2.0*drhoA[1]*((*WeightsMap).coeff(ipts,0))*(dSTmpY)*epsMuExc[3];
           (*VXA)  += 2.0*drhoA[2]*((*WeightsMap).coeff(ipts,0))*(dSTmpZ)*epsMuExc[3];
@@ -1533,7 +1533,7 @@ void SingleSlater<double>::formVXC(){
 
 template<>
 void SingleSlater<double>::formVXC_store(){
-    bool isGGA = false;
+   
     int nAtom   = this->molecule_->nAtoms();                    // Number of Atoms
     this->ngpts = this->nRadDFTGridPts_*this->nAngDFTGridPts_;  // Number of grid point for each center
     int nPtsPerThread = this->ngpts / omp_get_max_threads();    //  Number of Threads
@@ -1557,7 +1557,7 @@ void SingleSlater<double>::formVXC_store(){
 
     double CxVx  = -(3.0/4.0)*(std::pow((3.0/math.pi),(1.0/3.0)));  //TF LDA Prefactor (for Vx)  
     double val ;                                  // to take into account Ang Int
-    if (isGGA) {
+    if (this->isGGA) {
       val = 4.0*math.pi;
 //AP      val = 4.0*math.pi*CxVx;                                  // to take into account Ang Int
     } else {
