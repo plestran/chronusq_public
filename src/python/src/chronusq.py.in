@@ -115,7 +115,6 @@ def runCQ(ifname,ofname):
   out.write("Input File:\n"+banner+inputf.read()+banner)
   inputf.close()
   
-  chronusQ.initCQ()
   controls.iniControls()
   
   secDict = parseInput(workers,ifname)
@@ -130,7 +129,6 @@ def runCQ(ifname,ofname):
   jobMeta = MetaData()
   jobMap[jobStr](workers,jobMeta)
 
-  chronusQ.finalizeCQ()
   
   endtime= time.strftime("%c")
   out.write("Job Completed: %s"  % endtime )
@@ -139,6 +137,7 @@ def runCQ(ifname,ofname):
 
 if __name__ in '__main__':
 
+  chronusQ.initCQ(len(sys.argv),sys.argv)
   # Usage Message for incorrect input
   msg = """python chronusq.py -i <input file> [-o --option]
   
@@ -229,3 +228,4 @@ if __name__ in '__main__':
 
     strX = strX + "SCF"
     print strX
+  chronusQ.finalizeCQ()

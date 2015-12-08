@@ -27,7 +27,7 @@
 #include <mollerplesset.h>
 using namespace ChronusQ;
 
-int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
+int ChronusQ::atlas(int argc, char *argv[]) {
   time_t currentTime;
 
   // Pointers for important storage and job control
@@ -61,7 +61,7 @@ int ChronusQ::atlas(int argc, char *argv[], GlobalMPI *globalMPI) {
   // print out the starting time of the job
   time(&currentTime);
   fileIO->out<<"Job started: "<<ctime(&currentTime)<<endl;
-  initCQ();
+  initCQ(argc,argv);
 
   // Initialize default settings and read input
   controls->iniControls();

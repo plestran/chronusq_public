@@ -120,8 +120,8 @@
   /*************************/
   /* MPI Related Routines  */
   /*************************/
-  void mpiSend(int,int tag=tagSDResponse);
-  void mpiRecv(int,int tag=tagSDResponse);
+  void mpiSend(int,int);
+  void mpiRecv(int,int);
 
   // Proof of concept routines
   void incorePPRPA();

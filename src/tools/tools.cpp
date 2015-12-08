@@ -247,4 +247,20 @@ int HashIAO(int L,int *l) {
   };
 };
 
+int getRank(){
+  int rank = 0;
+#ifdef CQ_ENALBE_MPI
+  MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+#endif
+  return rank;
+}; // getRank 
+
+int getsSize(){
+  int size = 0;
+#ifdef CQ_ENALBE_MPI
+  MPI_Comm_size(MPI_COMM_WORLD,&size);
+#endif
+  return size;
+}; // getsSize 
+
 } // namespace ChronusQ

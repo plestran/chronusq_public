@@ -76,6 +76,9 @@ std::string HashS(int);
 // convert angular momentum to AO index in a shell
 int HashIAO(int,int*);
 
+int getRank();
+int getSize();
+
 
 } // namespace ChronusQ
 #endif

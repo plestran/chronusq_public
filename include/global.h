@@ -219,27 +219,6 @@ struct Phys {
 const Phys phys = {0.5291772083000001,0.393430307,27.211396132,45.56335,0.02418884326505,
                    137.035999139};
 
-
-//------------------//
-// IO block numbers //
-//------------------//
-enum {blockControlFlags,blockMolecule,blockBasisSet, // 1,2,3
-      blockSingleSlater,blockIntegrals};  // 4,5,6
-
-/**
- *  Information pertaining to MPI realated states
- */
-struct GlobalMPI {
-  int  myid; ///< Global rank of current process
-  int  size; ///< Total number of processes
-//  char nodeName[MPI_MAX_PROCESSOR_NAME];;
-  int  nodeNameLen; ///< Length of process name
-};
-//---------//
-//MPI Tags //
-//---------//
-enum {tagMolecule,tagMatrix,tagBasisSet,tagSingleSlater,tagIntegrals,tagSDResponse};
-
 #include <clapack.h> // Extern "C" defs for LAPACK routines (require "_" extension)
 
 #endif

@@ -256,6 +256,7 @@ def testSCF(ref,tests):
 ##############################
 
 if __name__ in "__main__":
+  chronusQ.initCQ(len(sys.argv),sys.argv)
 
 # parse user options
   msg = """
@@ -322,5 +323,8 @@ if __name__ in "__main__":
 # run unit tests
   initSummary()
   runUnit(doPrint)    
+
+
+  chronusQ.finalizeCQ()
 #--------------------------------------------------------------------
 
