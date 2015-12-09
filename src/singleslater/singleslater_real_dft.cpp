@@ -512,7 +512,6 @@ double gammaAA, double gammaBB){
   epsmu[1]   *= 4.0*rhoA1ov3/3.0;
   epsmu[3]    = 0.5*(this->gB88(1,xA))/(std::sqrt(gammaAA));
 //Work  epsmu[3]    = 0.5*(this->gB88(1,xA))/(gammaAA);
-//  if (isnan( epsmu[3]))  cout << gammaAA << endl;
 //  cout       << "-----------------------------" <<endl;
 //  cout       << rhoA   << " " <<gammaAA << " "  << (gammaAA / rhoA4ov3) <<endl;
 //  cout       << rhoA4ov3 <<" " << xA << " "<<epsmu[3] <<endl;
