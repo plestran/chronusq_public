@@ -504,7 +504,10 @@ double gammaAA, double gammaBB){
   double rhoA4ov3 = std::pow(rhoA,(4.0/3.0));
   double rhoB1ov3 = std::pow(rhoB,(1.0/3.0));
   double rhoB4ov3 = std::pow(rhoB,(4.0/3.0));
-//Paper  double xA   = gammaAA / rhoA4ov3; 
+// Note that in Eq A5 xA   = gammaAA / rhoA4ov3; 
+// but actually they meants xA = sqrt(gammaAA) /rhoA4ov3
+// and also eq A6 rho is rho^(1/3) instead of rho^(4/3)
+
   double xA   = std::sqrt(gammaAA) / rhoA4ov3; 
   double xB   ;
   epsmu[0]    = rhoA4ov3*this->gB88(0,xA);
@@ -1006,7 +1009,8 @@ template<>
 // Cleaned version to handle parallelism (no global variable)
 void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX, 
        double & energyC, RealMatrix * VXA, RealMatrix * VXB, RealMatrix * VCA, 
-       RealMatrix * VCB, RealMatrix *STmp) {
+       RealMatrix * VCB, RealMatrix *STmp, RealMatrix *dSTmpX, RealMatrix *dSTmpY, 
+       RealMatrix *dSTmpZ) {
 
    RealSparseMatrix *Map        = &this->sparseMap_[iAtm];
    RealSparseMatrix *WeightsMap = &this->sparseWeights_[iAtm];
@@ -1018,13 +1022,14 @@ void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX,
 //     return;
 
 // Eventually Decleare outside as STmp;
+/*
    RealMatrix dSTmpX(this->nBasis_,this->nBasis_);        ///< d(Overlap) at grid point
    dSTmpX.setZero();
    RealMatrix dSTmpY(this->nBasis_,this->nBasis_);        ///< d(Overlap) at grid point
    dSTmpY.setZero();
    RealMatrix dSTmpZ(this->nBasis_,this->nBasis_);        ///< d(Overlap) at grid point
    dSTmpZ.setZero();
-
+*/
    
    double rhor  = 0.0;  // Total density at point
    double rhorA = 0.0;  // alpha density at point
@@ -1049,9 +1054,9 @@ void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX,
     (*STmp) = Map->col(ipts)*Map->col(ipts).transpose();
 //  Build Gradient components GGA
     if (nDer == 1){
-      dSTmpX   = Map->col(ipts)*MapdX->col(ipts).transpose();
-      dSTmpY   = Map->col(ipts)*MapdY->col(ipts).transpose();
-      dSTmpZ   = Map->col(ipts)*MapdZ->col(ipts).transpose();
+      (*dSTmpX)   = Map->col(ipts)*MapdX->col(ipts).transpose();
+      (*dSTmpY)   = Map->col(ipts)*MapdY->col(ipts).transpose();
+      (*dSTmpZ)   = Map->col(ipts)*MapdZ->col(ipts).transpose();
     }
 //  Handle the total density at r for RKS or UKS
     if(!this->isClosedShell && this->Ref_ != TCS) {
@@ -1061,13 +1066,13 @@ void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX,
       rhorB = STmp->frobInner(this->densityB()->conjugate());
       rhor = rhorA + rhorB;
       if (nDer == 1 ){
-        drhoA[0]   = 2.0*dSTmpX.frobInner(this->densityA()->conjugate());
-        drhoA[1]   = 2.0*dSTmpY.frobInner(this->densityA()->conjugate());
-        drhoA[2]   = 2.0*dSTmpZ.frobInner(this->densityA()->conjugate());
+        drhoA[0]   = 2.0*dSTmpX->frobInner(this->densityA()->conjugate());
+        drhoA[1]   = 2.0*dSTmpY->frobInner(this->densityA()->conjugate());
+        drhoA[2]   = 2.0*dSTmpZ->frobInner(this->densityA()->conjugate());
         gammaAA    = (drhoA[0]*drhoA[0] + drhoA[1]*drhoA[1] + drhoA[2]*drhoA[2]);
-        drhoB[0]   = 2.0*dSTmpX.frobInner(this->densityB()->conjugate());
-        drhoB[1]   = 2.0*dSTmpY.frobInner(this->densityB()->conjugate());
-        drhoB[2]   = 2.0*dSTmpZ.frobInner(this->densityB()->conjugate());
+        drhoB[0]   = 2.0*dSTmpX->frobInner(this->densityB()->conjugate());
+        drhoB[1]   = 2.0*dSTmpY->frobInner(this->densityB()->conjugate());
+        drhoB[2]   = 2.0*dSTmpZ->frobInner(this->densityB()->conjugate());
         gammaBB    = (drhoB[0]*drhoB[0] + drhoB[1]*drhoB[1] + drhoB[2]*drhoB[2]);
       }
     } else {
@@ -1081,17 +1086,17 @@ void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX,
       }
       if (nDer == 1 ){
 //        drhoA[0]   = 2.0*dSTmpX.frobInner(this->densityA()->conjugate());
-        drhoA[0]   = 2.0*(dSTmpX.frobInner(this->densityA()->conjugate()/2.0));
-        drhoA[1]   = 2.0*(dSTmpY.frobInner(this->densityA()->conjugate()/2.0));
-        drhoA[2]   = 2.0*(dSTmpZ.frobInner(this->densityA()->conjugate()/2.0));
+        drhoA[0]   = 2.0*(dSTmpX->frobInner(this->densityA()->conjugate()/2.0));
+        drhoA[1]   = 2.0*(dSTmpY->frobInner(this->densityA()->conjugate()/2.0));
+        drhoA[2]   = 2.0*(dSTmpZ->frobInner(this->densityA()->conjugate()/2.0));
         gammaAA    = (drhoA[0]*drhoA[0] + drhoA[1]*drhoA[1] + drhoA[2]*drhoA[2]);
       }
     }
 //    rhor = overlapR_.frobInner(this->densityA()->conjugate()) ;
     if (nDer ==  1 ){ 
-      dSTmpX   += MapdX->col(ipts)*Map->col(ipts).transpose();
-      dSTmpY   += MapdY->col(ipts)*Map->col(ipts).transpose();
-      dSTmpZ   += MapdZ->col(ipts)*Map->col(ipts).transpose();
+      (*dSTmpX)   += MapdX->col(ipts)*Map->col(ipts).transpose();
+      (*dSTmpY)   += MapdY->col(ipts)*Map->col(ipts).transpose();
+      (*dSTmpZ)   += MapdZ->col(ipts)*Map->col(ipts).transpose();
       }
 //  Handle numerical instability if screening on
     if (this->screenVxc ) {
@@ -1115,9 +1120,9 @@ void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX,
           epsMuExc = this->formVExGGA(rhorA,rhorB,gammaAA,gammaBB);
           (*VXB)  += ((*WeightsMap).coeff(ipts,0))*(*STmp)*epsMuExc[2];
           if (this->isGGA) {
-            (*VXB)  += 2.0*drhoB[0]*((*WeightsMap).coeff(ipts,0))*(dSTmpX)*epsMuExc[4];
-            (*VXB)  += 2.0*drhoB[1]*((*WeightsMap).coeff(ipts,0))*(dSTmpY)*epsMuExc[4];
-            (*VXB)  += 2.0*drhoB[2]*((*WeightsMap).coeff(ipts,0))*(dSTmpZ)*epsMuExc[4];
+            (*VXB)  += 2.0*drhoB[0]*((*WeightsMap).coeff(ipts,0))*(*dSTmpX)*epsMuExc[4];
+            (*VXB)  += 2.0*drhoB[1]*((*WeightsMap).coeff(ipts,0))*(*dSTmpY)*epsMuExc[4];
+            (*VXB)  += 2.0*drhoB[2]*((*WeightsMap).coeff(ipts,0))*(*dSTmpZ)*epsMuExc[4];
           }
 //          (*VXB)  += ((*WeightsMap).coeff(ipts,0))*overlapR_*epsMuExc[2];
         } else {
@@ -1126,9 +1131,9 @@ void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX,
 //        (*VXA)  += ((*WeightsMap).coeff(ipts,0))*overlapR_*epsMuExc[1];
         (*VXA)  +=   ((*WeightsMap).coeff(ipts,0))*(*STmp)*epsMuExc[1];
         if (this->isGGA) {
-          (*VXA)  += 2.0*drhoA[0]*((*WeightsMap).coeff(ipts,0))*(dSTmpX)*epsMuExc[3];
-          (*VXA)  += 2.0*drhoA[1]*((*WeightsMap).coeff(ipts,0))*(dSTmpY)*epsMuExc[3];
-          (*VXA)  += 2.0*drhoA[2]*((*WeightsMap).coeff(ipts,0))*(dSTmpZ)*epsMuExc[3];
+          (*VXA)  += 2.0*drhoA[0]*((*WeightsMap).coeff(ipts,0))*(*dSTmpX)*epsMuExc[3];
+          (*VXA)  += 2.0*drhoA[1]*((*WeightsMap).coeff(ipts,0))*(*dSTmpY)*epsMuExc[3];
+          (*VXA)  += 2.0*drhoA[2]*((*WeightsMap).coeff(ipts,0))*(*dSTmpZ)*epsMuExc[3];
           energyX += ((*WeightsMap).coeff(ipts,0))*epsMuExc[0];
         } else { 
           energyX += ((*WeightsMap).coeff(ipts,0))*rhor*epsMuExc[0];
@@ -1555,11 +1560,20 @@ void SingleSlater<double>::formVXC_store(){
     );
     std::vector<RealMatrix> overlapR_(omp_get_max_threads(),RealMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
 
+//GGA
+    std::vector<RealMatrix> dXOverlapR_(omp_get_max_threads(),
+         RealMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
+    std::vector<RealMatrix> dYOverlapR_(omp_get_max_threads(),
+         RealMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
+    std::vector<RealMatrix> dZOverlapR_(omp_get_max_threads(),
+         RealMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
+
+
     double CxVx  = -(3.0/4.0)*(std::pow((3.0/math.pi),(1.0/3.0)));  //TF LDA Prefactor (for Vx)  
     double val ;                                  // to take into account Ang Int
     if (this->isGGA) {
       val = 4.0*math.pi;
-//AP      val = 4.0*math.pi*CxVx;                                  // to take into account Ang Int
+      
     } else {
       val = 4.0*math.pi*CxVx;                                  // to take into account Ang Int
     }
@@ -1673,7 +1687,8 @@ void SingleSlater<double>::formVXC_store(){
         if( this->screenVxc && ((*DoRhoMap).coeff(ipts,0) < 1) ) continue;
         this->evalVXC_store(iAtm,ipts,tmpEnergyEx[thread_id],tmpEnergyCor[thread_id],
               &tmpVX[0][thread_id],&tmpVX[1][thread_id],&tmpVC[0][thread_id],
-              &tmpVC[1][thread_id],&overlapR_[thread_id]);
+              &tmpVC[1][thread_id],&overlapR_[thread_id],&dXOverlapR_[thread_id],
+              &dYOverlapR_[thread_id],&dZOverlapR_[thread_id]);
       } // loop ipts
 //      auto finish = std::chrono::high_resolution_clock::now();
 //      thread_timers[thread_id] = finish - start;
