@@ -1075,6 +1075,7 @@ void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX,
 //      rhor    = STmp->frobInner(this->densityA()->conjugate()) ;
       if (this->isGGA) {
         rhorA    = STmp->frobInner(this->densityA()->conjugate()/2.0) ;
+        rhor = 2.0*rhorA;
       }else{ 
         rhorA    = STmp->frobInner(this->densityA()->conjugate()) ;
         rhor = rhorA;
