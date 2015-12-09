@@ -1546,6 +1546,7 @@ void SingleSlater<double>::formVXC_store(){
     std::vector<double> tmpEnergyCor(omp_get_max_threads()) ;
     std::vector<int> tmpnpts(omp_get_max_threads()) ;
     int nRHF;
+    int nDerMatrix = 0;                                       // Number of Matrix to be allocated for GGA
     if(this->isClosedShell || this->Ref_ == TCS) nRHF = 1;
     else    nRHF = 2;
     std::vector<std::vector<RealMatrix>> 
@@ -1560,23 +1561,22 @@ void SingleSlater<double>::formVXC_store(){
     );
     std::vector<RealMatrix> overlapR_(omp_get_max_threads(),RealMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
 
-//GGA
-    std::vector<RealMatrix> dXOverlapR_(omp_get_max_threads(),
-         RealMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
-    std::vector<RealMatrix> dYOverlapR_(omp_get_max_threads(),
-         RealMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
-    std::vector<RealMatrix> dZOverlapR_(omp_get_max_threads(),
-         RealMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
-
 
     double CxVx  = -(3.0/4.0)*(std::pow((3.0/math.pi),(1.0/3.0)));  //TF LDA Prefactor (for Vx)  
     double val ;                                  // to take into account Ang Int
     if (this->isGGA) {
       val = 4.0*math.pi;
-      
+      nDerMatrix = omp_get_max_threads();  
     } else {
       val = 4.0*math.pi*CxVx;                                  // to take into account Ang Int
     }
+    std::vector<RealMatrix> dXOverlapR_(nDerMatrix,
+         RealMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
+    std::vector<RealMatrix> dYOverlapR_(nDerMatrix,
+         RealMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
+    std::vector<RealMatrix> dZOverlapR_(nDerMatrix,
+         RealMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
+
     this->totalEx    = 0.0;   // Zero out Total Exchange Energy
     this->totalEcorr = 0.0;   // Zero out Total Correlation Energy
     this->vXA()->setZero();   // Set to zero every occurence of the SCF
