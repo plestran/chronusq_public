@@ -20,9 +20,6 @@ basis     = sto3g.gbs
 ints			= direct
 print = 4
 
-[SCF]
-guess = read
-
 #
 #  Misc Settings
 #
