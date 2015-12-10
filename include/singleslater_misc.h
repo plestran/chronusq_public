@@ -50,9 +50,7 @@ void SingleSlater<T>::formDensity(){
           this->moB_->block(0,0,this->nBasis_,this->nOccB_).adjoint();
       }
     }
-    cout << "HERE 7" << endl;
     if(this->printLevel_ >= 2) this->printDensity();
-    cout << "HERE 8" << endl;
   }
   this->haveDensity = true;
 

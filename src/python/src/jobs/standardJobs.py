@@ -87,7 +87,6 @@ def runSCF(workers,meta):
   workers["CQSingleSlater"].formFock()
   workers["CQSingleSlater"].computeEnergy()
 
-  chronusQ.mpiBarrier()
   workers["CQSingleSlater"].SCF()
 
   workers["CQSingleSlater"].computeProperties()

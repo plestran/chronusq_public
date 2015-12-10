@@ -53,15 +53,12 @@ void SingleSlater<T>::formPT(){
  ********************/
 template<typename T>
 void SingleSlater<T>::formFock(){
-  printf("Here 1 %d:%d\n",getRank(),getSize());
 #ifdef CQ_ENABLE_MPI
   // Syncronize MPI processes before fock build
   MPI_Barrier(MPI_COMM_WORLD);
 #endif
   
   if(!this->haveDensity) this->formDensity();
-  std::ofstream tmp("out."+std::to_string(getRank()));
-  prettyPrint(tmp,(*this->densityA_),"DEN");
 #ifndef USE_LIBINT
   if(getRank() == 0){
     // Not even sure if these guys still work let alone are MPI

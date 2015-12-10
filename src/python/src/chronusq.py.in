@@ -138,7 +138,6 @@ def runCQ(ifname,ofname):
     endtime= time.strftime("%c")
     out.write("Job Completed: %s"  % endtime )
 
-  print 'here'
   return jobMeta
 
 

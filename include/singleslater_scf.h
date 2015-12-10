@@ -281,11 +281,6 @@ void SingleSlater<T>::SCF(){
     this->formX();
   }
   for (iter = 0; iter < this->maxSCFIter_; iter++){
-/*
-    this->fileio_->out << endl << endl << bannerTop <<endl;  
-    this->fileio_->out << "SCF iteration:"<< iter+1 <<endl;  
-    this->fileio_->out << bannerEnd <<endl;  
-*/
 
     if(getRank() == 0) {
       if(this->Ref_ == CUHF) this->formNO();
@@ -314,7 +309,6 @@ void SingleSlater<T>::SCF(){
   delete [] this->REAL_SCF_SCR;
 */
   if(getRank() == 0) this->cleanupSCFMem();
-  printf("Hello 666%d:%d",getRank(),getSize());
 
   if(!this->isConverged && getRank() == 0)
     CErr("SCF Failed to converge within maximum number of iterations",this->fileio_->out);

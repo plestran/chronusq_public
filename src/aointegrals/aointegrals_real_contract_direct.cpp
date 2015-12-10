@@ -70,7 +70,6 @@ namespace ChronusQ{
     // each MPI process gets its own engine
     coulombEngine engine(this->basisSet_->maxPrim(),this->basisSet_->maxL(),0);
     engine.set_precision(std::numeric_limits<double>::epsilon());
-    MPI_Barrier(MPI_COMM_WORLD);
 #else
     // each thread gets its own engine
     std::vector<coulombEngine> engines(nthreads);
@@ -103,7 +102,6 @@ namespace ChronusQ{
         );
     }
 
-    MPI_Barrier(MPI_COMM_WORLD);
     MPI_Bcast(this->basisSet_->shBlkNormAlpha->data(),
       this->basisSet_->nShell()*this->basisSet_->nShell(),
       MPI_DOUBLE,0,MPI_COMM_WORLD);
@@ -111,9 +109,6 @@ namespace ChronusQ{
       MPI_Bcast(this->basisSet_->shBlkNormBeta->data(),
         this->basisSet_->nShell()*this->basisSet_->nShell(),
         MPI_DOUBLE,0,MPI_COMM_WORLD);
-    std::ofstream tmp("out."+std::to_string(getRank()));
-    prettyPrint(tmp,(*this->basisSet_->shBlkNormAlpha),"SHBLK");
-    MPI_Barrier(MPI_COMM_WORLD);
 //  CErr();
 #endif
     int ijkl = 0;
@@ -232,17 +227,7 @@ namespace ChronusQ{
       efficient_twoe(thread_id);
     }
 #else
-#  ifdef CQ_ENABLE_MPI
-    MPI_Barrier(MPI_COMM_WORLD);
-    printf("Here 3 %d:%d\n",getRank(),getSize());
-#  endif
-
     efficient_twoe(getRank());
-
-#  ifdef CQ_ENABLE_MPI
-    MPI_Barrier(MPI_COMM_WORLD);
-    printf("Here 4 %d:%d\n",getRank(),getSize());
-#  endif
 #endif
 
 #ifdef CQ_ENABLE_MPI
