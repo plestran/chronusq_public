@@ -195,20 +195,27 @@ void SingleSlater<double>::SADGuess() {
       // Replaces iniSingleSlater
       hartreeFockAtom.communicate(uniqueAtom,basisSetAtom,aointegralsAtom,
         *this->fileio_,controlAtom);
+/*
+      hartreeFockAtom.isDFT = this->isDFT;
+      hartreeFockAtom.isHF = this->isHF;
+      hartreeFockAtom.weightScheme_ = this->weightScheme_ ;
+      hartreeFockAtom.dftGrid_      = this->dftGrid_      ;
+      hartreeFockAtom.screenVxc     = this->screenVxc    ; 
+      hartreeFockAtom.epsScreen     = this->epsScreen     ;
+      hartreeFockAtom.nRadDFTGridPts_ = this->nRadDFTGridPts_ ;
+      hartreeFockAtom.nAngDFTGridPts_ = this->nAngDFTGridPts_ ;
+      hartreeFockAtom.isGGA =         this->isGGA ;
+      hartreeFockAtom.CorrKernel_  =  this->CorrKernel_  ;
+      hartreeFockAtom.ExchKernel_  =  this->ExchKernel_  ;
+      hartreeFockAtom.DFTKernel_   =  this->DFTKernel_   ;
+*/
+   
       hartreeFockAtom.initMeta();
       hartreeFockAtom.setField(this->elecField_);
       hartreeFockAtom.isClosedShell = (hartreeFockAtom.multip() == 1); 
       hartreeFockAtom.doDIIS = false;
-/*
-      hartreeFockAtom.isDFT = this->isDFT;
-      hartreeFockAtom.isHF  = this->isHF;
-      hartreeFockAtom.setExchKernel(this->ExchKernel_);
-      hartreeFockAtom.setCorrKernel(this->CorrKernel_);
-      hartreeFockAtom.setDFTKernel(this->DFTKernel_);
-*/
       hartreeFockAtom.isDFT = false;
-      hartreeFockAtom.isHF  = true;
-
+      hartreeFockAtom.isHF = true;
       hartreeFockAtom.setRef(CUHF);
       hartreeFockAtom.genMethString();
       hartreeFockAtom.alloc();

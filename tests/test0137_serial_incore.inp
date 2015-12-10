@@ -1,4 +1,4 @@
-#  test0133 serial direct Real UKS S-VWN5 STO-3G
+#  test0137 serial incore Real UKS B88 STO-3G
 #
 #  Molecule Specification
 #
@@ -16,9 +16,10 @@ geom:
 reference = UKS
 job       = SCF
 basis     = sto3g.gbs
-ints			= direct
-exchange  = Slater 
-corr      = VWN5
+ints			= incore
+exchange  = B88
+corr      = NOCORR
+DFT_NRAD = 75
 
 #
 #  Misc Settings

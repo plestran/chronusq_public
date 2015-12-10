@@ -314,6 +314,8 @@ void SingleSlater<T>::printSCFHeader(ostream &output){
       output << "Slater";
     else if(this->ExchKernel_ == EXACT)
       output << "Exact (Hartree-Fock)";
+    else if(this->ExchKernel_ == B88)
+      output << "B88";
     output << endl;
 
     output << std::setw(38) << std::left << "    Correlation Kernel:";
@@ -323,6 +325,8 @@ void SingleSlater<T>::printSCFHeader(ostream &output){
       output << "VWN3";
     else if(this->CorrKernel_ == VWN5)
       output << "VWN5";
+    else if(this->CorrKernel_ == LYP)
+      output << "LYP";
     output << endl;
 
    

@@ -63,12 +63,27 @@ double SingleSlater<dcomplex>::spindens(double rho_A, double rho_B){
 };
 
 template<>
+double SingleSlater<dcomplex>::gB88(int nDer, double x){
+
+};
+
+template<>
 void SingleSlater<dcomplex>::genSparseBasisMap(){
 };
 
 template<>
-std::array<double,3> SingleSlater<dcomplex>::formVExSlater (double rho, double spindensity){
+std::array<double,5> SingleSlater<dcomplex>::formVExSlater (double rho, double spindensity){
 
+}; 
+
+template<>
+std::array<double,3> SingleSlater<dcomplex>::formVCLYP (double rhoA, double rhoB, 
+     double drhoA, double drhoB){
+}; 
+
+template<>
+std::array<double,5> SingleSlater<dcomplex>::formVExB88 (double rhoA, double rhoB, 
+     double drhoA, double drhoB){
 }; 
 
 template<>
@@ -82,7 +97,17 @@ std::array<double,3> SingleSlater<dcomplex>::formVC (double rho, double spindens
 }; 
 
 template<>
-std::array<double,3> SingleSlater<dcomplex>::formVEx(double rho, double spindensity){
+std::array<double,3> SingleSlater<dcomplex>::formVCGGA (double rhoA, double rhoB,
+     double drhoA, double drhoB){
+}; 
+
+template<>
+std::array<double,5> SingleSlater<dcomplex>::formVExGGA (double rhoA, double rhoB,
+     double drhoA, double drhoB){
+}; 
+
+template<>
+std::array<double,5> SingleSlater<dcomplex>::formVEx(double rho, double spindensity){
 
 }; 
 
@@ -106,7 +131,7 @@ void SingleSlater<dcomplex>::evalVXC(cartGP gridPt, double weight, std::vector<b
 template<>
 void SingleSlater<dcomplex>::evalVXC_store(int iAtm, int ipts, double & energyX, 
        double & energyC, RealMatrix * VXA, RealMatrix * VXB, RealMatrix * VCA, 
-       RealMatrix * VCB, RealMatrix *STmp){
+       RealMatrix * VCB, RealMatrix *STmp, RealMatrix *dSTmpX, RealMatrix *dSTmpY, RealMatrix *dSTmpZ){
 };
 
 
