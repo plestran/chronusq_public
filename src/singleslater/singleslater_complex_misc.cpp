@@ -31,6 +31,9 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<dcomplex> * other){
     this->nBasis_ = other->nBasis_;
     this->nTCS_   = other->nTCS_;
     this->nTT_    = other->nTT_;
+//APS 
+    this->nShell_ = other->nShell_;
+//APE
     this->nAE_    = other->nAE_;
     this->nBE_    = other->nBE_; 
     this->Ref_    = other->Ref();
@@ -140,45 +143,39 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other){
  ************************/
 template<>
 void SingleSlater<dcomplex>::computeEnergy(){
-/*
-  if(this->Ref_ != TCS)
-    this->energyOneE = (*this->aointegrals_->oneE_).frobInner(this->densityA_->conjugate());
-  else {
-    this->energyOneE = 0.0;
-    for(auto I = 0, i = 0; i < this->nBasis_; I += 2, i++)    
-    for(auto J = 0, j = 0; j < this->nBasis_; J += 2, j++){
-      this->energyOneE += 
-        this->densityA_->conjugate()(I,J)*(*this->aointegrals_->oneE_)(i,j) + 
-        this->densityA_->conjugate()(I+1,J+1)*(*this->aointegrals_->oneE_)(i,j);
-    } 
-  }
-*/
-  this->energyOneE = (*this->aointegrals_->oneE_).frobInner(this->densityA_->real());
-  this->energyTwoE = 0.5*(*this->PTA_).frobInner(this->densityA_->conjugate()).real();
-
-  if(!this->isClosedShell && this->Ref_ != TCS){
-    this->energyOneE += (*this->aointegrals_->oneE_).frobInner(this->densityB_->real());
-    this->energyTwoE += 0.5*(*this->PTB_).frobInner(this->densityB_->conjugate()).real();
-  }
-  // Add in the electric field component if they are non-zero
-  std::array<double,3> null{{0,0,0}};
-  if(this->elecField_ != null){
-    int NB = this->nTCS_*this->nBasis_;
-    int NBSq = NB*NB;
-    int iBuf = 0;
-    for(auto iXYZ = 0; iXYZ < 3; iXYZ++){
-      ConstRealMap mu(&this->aointegrals_->elecDipole_->storage()[iBuf],NB,NB);
-      this->energyOneE += 
-        this->elecField_[iXYZ] * mu.frobInner(this->densityA_->real());
-      if(!this->isClosedShell && this->Ref_ != TCS)
-      this->energyOneE += 
-        this->elecField_[iXYZ] * mu.frobInner(this->densityB_->real());
-      iBuf += NBSq;
+  if(getRank() == 0) {
+    this->energyOneE = (*this->aointegrals_->oneE_).frobInner(this->densityA_->real());
+    this->energyTwoE = 0.5*(*this->PTA_).frobInner(this->densityA_->conjugate()).real();
+ 
+    if(!this->isClosedShell && this->Ref_ != TCS){
+      this->energyOneE += (*this->aointegrals_->oneE_).frobInner(this->densityB_->real());
+      this->energyTwoE += 0.5*(*this->PTB_).frobInner(this->densityB_->conjugate()).real();
     }
+    // Add in the electric field component if they are non-zero
+    std::array<double,3> null{{0,0,0}};
+    if(this->elecField_ != null){
+      int NB = this->nTCS_*this->nBasis_;
+      int NBSq = NB*NB;
+      int iBuf = 0;
+      for(auto iXYZ = 0; iXYZ < 3; iXYZ++){
+        ConstRealMap mu(&this->aointegrals_->elecDipole_->storage()[iBuf],NB,NB);
+        this->energyOneE += 
+          this->elecField_[iXYZ] * mu.frobInner(this->densityA_->real());
+        if(!this->isClosedShell && this->Ref_ != TCS)
+        this->energyOneE += 
+          this->elecField_[iXYZ] * mu.frobInner(this->densityB_->real());
+        iBuf += NBSq;
+      }
+    }
+ 
+ 
+    this->totalEnergy= this->energyOneE + this->energyTwoE + this->energyNuclei;
   }
-
-
-  this->totalEnergy= this->energyOneE + this->energyTwoE + this->energyNuclei;
+#ifdef CQ_ENABLE_MPI
+  MPI_Bcast(&this->totalEnergy,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
+  MPI_Bcast(&this->energyOneE,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
+  MPI_Bcast(&this->energyTwoE,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
+#endif
 //this->printEnergy();
 };
 

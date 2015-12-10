@@ -129,7 +129,7 @@ namespace ChronusQ{
             int n3    = this->basisSet_->shells(s3).size();
             int s4_max = (s1 == s3) ? s2 : s3;
             for(int s4 = 0; s4 <= s4_max; s4++, s1234++) {
-            if(s1234 % nthreads != thread_id) continue;
+              if(s1234 % nthreads != thread_id) continue;
               int bf4_s = this->basisSet_->mapSh2Bf(s4);
               int n4    = this->basisSet_->shells(s4).size();
         
@@ -159,7 +159,7 @@ namespace ChronusQ{
                         (*this->schwartz_)(s1,s2) * (*this->schwartz_)(s3,s4);
               }
   
-              //if(shMax < this->controls_->thresholdSchawrtz ) continue;
+              if(shMax < this->controls_->thresholdSchawrtz ) continue;
    
               const double* buff = engine.compute(
                 this->basisSet_->shells(s1),
@@ -232,35 +232,6 @@ namespace ChronusQ{
   
 
 #ifdef CQ_ENABLE_MPI
-/*
-    int alphaTag = 1;
-    int betaTag = 2;
-    if(getRank() != 0){
-      MPI_Send(G[0].data(),this->nTCS_*this->nBasis_*this->nTCS_*this->nBasis_,
-        MPI_DOUBLE,0,alphaTag,MPI_COMM_WORLD);
-      if(!RHF && !doTCS)
-        MPI_Send(G[1].data(),
-          this->nTCS_*this->nBasis_*this->nTCS_*this->nBasis_,MPI_DOUBLE,0,
-          betaTag,MPI_COMM_WORLD);
-    } else {
-      AXAlpha += G[0];
-      for(auto iMPI = 1; iMPI < getSize(); iMPI++){
-        MPI_Recv(G[0].data(),
-          this->nTCS_*this->nBasis_*this->nTCS_*this->nBasis_,MPI_DOUBLE,
-          MPI_ANY_SOURCE,alphaTag,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-        AXAlpha += G[0];
-      }
-      if(!RHF && !doTCS) {
-        AXBeta += G[1];
-        for(auto iMPI = 1; iMPI < getSize(); iMPI++){
-          MPI_Recv(G[1].data(),
-            this->nTCS_*this->nBasis_*this->nTCS_*this->nBasis_,MPI_DOUBLE,
-            MPI_ANY_SOURCE,betaTag,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-          AXBeta += G[1];
-        }
-      }
-    }
-*/
     // All of the MPI processes touch the destination pointer
     // Gives a seg fault if AXAlpha storage is not allocated
     double *tmpPtr = NULL;
