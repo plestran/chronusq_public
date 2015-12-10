@@ -30,9 +30,6 @@ namespace ChronusQ{
     const RealMatrix &XAlpha, RealMatrix &AXAlpha, const RealMatrix &XBeta, 
     RealMatrix &AXBeta) {
 
-  MPI_Barrier(MPI_COMM_WORLD);
-  printf("Hello 30 %d:%d:%d\n",getRank(),getSize(),0);; 
-  sleep(1);
     int nTCS = 1;
     if(doTCS) nTCS = 2;
 #ifdef _OPENMP
@@ -43,13 +40,7 @@ namespace ChronusQ{
     int nthreads = 1;
 #endif
 
-  MPI_Barrier(MPI_COMM_WORLD);
-  printf("Hello 31 %d:%d:%d\n",getRank(),getSize(),0);; 
-  sleep(1);
     if(!this->haveSchwartz) this->computeSchwartz();
-  MPI_Barrier(MPI_COMM_WORLD);
-  printf("Hello 33 %d:%d:%d\n",getRank(),getSize(),0);; 
-  sleep(1);
 
     if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(nTCS); 
 
@@ -67,9 +58,6 @@ namespace ChronusQ{
     std::vector<std::vector<RealMatrix>> G(nRHF,std::vector<RealMatrix>
       (nthreads,RealMatrix::Zero(nTCS*this->nBasis_,nTCS*this->nBasis_)));
 #endif
-  MPI_Barrier(MPI_COMM_WORLD);
-  printf("Hello 34 %d:%d:%d\n",getRank(),getSize(),0);; 
-  sleep(1);
   
     RealMatrix XTotal;
     if(!RHF && !doTCS) {
@@ -123,9 +111,6 @@ namespace ChronusQ{
         MPI_DOUBLE,0,MPI_COMM_WORLD);
 //  CErr();
 #endif
-  MPI_Barrier(MPI_COMM_WORLD);
-  printf("Hello 35 %d:%d:%d\n",getRank(),getSize(),0);; 
-  sleep(1);
     int ijkl = 0;
     start = std::chrono::high_resolution_clock::now();
   
@@ -244,9 +229,7 @@ namespace ChronusQ{
 #else
     efficient_twoe(getRank());
 #endif
-  MPI_Barrier(MPI_COMM_WORLD);
-  printf("Hello 36 %d:%d:%d\n",getRank(),getSize(),0);; 
-  sleep(1);
+  
 
 #ifdef CQ_ENABLE_MPI
 /*
@@ -280,26 +263,17 @@ namespace ChronusQ{
 */
     // All of the MPI processes touch the destination pointer
     // Gives a seg fault if AXAlpha storage is not allocated
-  MPI_Barrier(MPI_COMM_WORLD);
-  printf("Hello 37 %d:%d:%d\n",getRank(),getSize(),0);; 
-  sleep(1);
     double *tmpPtr = NULL;
     if(getRank() == 0) tmpPtr = AXAlpha.data();
     MPI_Reduce(G[0].data(),tmpPtr,
       this->nTCS_*this->nBasis_*this->nTCS_*this->nBasis_,MPI_DOUBLE,MPI_SUM,
       0,MPI_COMM_WORLD);
-    if(getRank() == 0 && !RHF && !doTCS) tmpPtr = AXBeta.data();
-    if(getRank() == 0) cout << RHF << " " << doTCS << endl;
-  MPI_Barrier(MPI_COMM_WORLD);
-  printf("Hello 38 %d:%d:%d\n",getRank(),getSize(),0);; 
-  sleep(1);
-    if(!RHF && !doTCS) 
+    if(!RHF && !doTCS) {
+      if(getRank() == 0) tmpPtr = AXBeta.data();
       MPI_Reduce(G[1].data(),tmpPtr,
         this->nTCS_*this->nBasis_*this->nTCS_*this->nBasis_,MPI_DOUBLE,MPI_SUM,
         0,MPI_COMM_WORLD);
-  MPI_Barrier(MPI_COMM_WORLD);
-  printf("Hello 39 %d:%d:%d\n",getRank(),getSize(),0);; 
-  sleep(1);
+    }
 #else
     for(int i = 0; i < nthreads; i++) AXAlpha += G[0][i];
     if(!RHF && !doTCS) for(int i = 0; i < nthreads; i++) AXBeta += G[1][i];

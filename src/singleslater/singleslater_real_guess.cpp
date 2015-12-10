@@ -39,21 +39,15 @@ void SingleSlater<double>::placeAtmDen(std::vector<int> atomIndex,
   // Place atomic SCF densities in the right place of the total density
   // ** Note: ALWAYS spin average, even for UHF **
   for(auto iAtm : atomIndex){
-    printf("Hello 9 %d:%d:%d\n",getRank(),getSize(),iAtm); 
     auto iBfSt = this->basisset_->mapCen2Bf(iAtm)[0];
     auto iSize = this->basisset_->mapCen2Bf(iAtm)[1]; 
-    printf("Hello 10 %d:%d:%d\n",getRank(),getSize(),iAtm); 
     if(this->Ref_ != TCS){
-    printf("Hello 11 %d:%d:%d\n",getRank(),getSize(),iAtm); 
       this->densityA_->block(iBfSt,iBfSt,iSize,iSize)= (*hfA.densityA_);
-    printf("Hello 12 %d:%d:%d\n",getRank(),getSize(),iAtm); 
       if(this->isClosedShell){
-    printf("Hello 13 %d:%d:%d\n",getRank(),getSize(),iAtm); 
         if(hfA.isClosedShell) 
           this->densityA_->block(iBfSt,iBfSt,iSize,iSize) += (*hfA.densityA_);
         else
           this->densityA_->block(iBfSt,iBfSt,iSize,iSize) += (*hfA.densityB_);
-    printf("Hello 14 %d:%d:%d\n",getRank(),getSize(),iAtm); 
       } else {
         this->densityB_->block(iBfSt,iBfSt,iSize,iSize)= (*hfA.densityA_);
         if(hfA.isClosedShell){
@@ -74,7 +68,6 @@ void SingleSlater<double>::placeAtmDen(std::vector<int> atomIndex,
       }
     }
   } // loop iAtm
-    printf("Hello 15 %d:%d:%d\n",getRank(),getSize(),0); 
 }
 template<>
 void SingleSlater<double>::scaleDen(){
@@ -166,7 +159,6 @@ void SingleSlater<double>::SADGuess() {
  
     // Loop and perform CUHF on each atomic center
     for(auto iUn = 0; iUn < uniqueElement.size(); iUn++){
-      printf("Hello 1 %d:%d:%d\n",getRank(),getSize(),iUn); 
       // Local objects to be constructed and destructed at every loop
       AOIntegrals aointegralsAtom;
       SingleSlater<double> hartreeFockAtom;
@@ -174,7 +166,6 @@ void SingleSlater<double>::SADGuess() {
       BasisSet basisSetAtom;
       BasisSet dfBasisSetAtom;
       Molecule uniqueAtom(uniqueElement[iUn],this->fileio_->out);
-      printf("Hello 2 %d:%d:%d\n",getRank(),getSize(),iUn); 
  
       // FIXME: This only makes sense for neutral molecules
       uniqueAtom.setCharge(0);
@@ -193,7 +184,6 @@ void SingleSlater<double>::SADGuess() {
       // Initialize the local integral and SS classes
       aointegralsAtom.isPrimary = false;
       hartreeFockAtom.isNotPrimary();
-      printf("Hello 3 %d:%d:%d\n",getRank(),getSize(),iUn); 
       
       // Replaces iniAOIntegrals
       aointegralsAtom.communicate(uniqueAtom,basisSetAtom,*this->fileio_,
@@ -209,7 +199,6 @@ void SingleSlater<double>::SADGuess() {
       hartreeFockAtom.setField(this->elecField_);
       hartreeFockAtom.isClosedShell = (hartreeFockAtom.multip() == 1); 
       hartreeFockAtom.doDIIS = false;
-      printf("Hello 4 %d:%d:%d\n",getRank(),getSize(),iUn); 
 /*
       hartreeFockAtom.isDFT = this->isDFT;
       hartreeFockAtom.isHF  = this->isHF;
@@ -225,7 +214,6 @@ void SingleSlater<double>::SADGuess() {
       hartreeFockAtom.alloc();
 
       if(this->printLevel_ < 4) hartreeFockAtom.setPrintLevel(0);
-      printf("Hello 5 %d:%d:%d\n",getRank(),getSize(),iUn); 
  
       // Zero out the MO coeff for local SS object
       if(getRank() == 0){
@@ -236,11 +224,8 @@ void SingleSlater<double>::SADGuess() {
  
       // Prime and perform the atomic SCF
       hartreeFockAtom.formFock();
-      printf("Hello 6 %d:%d:%d\n",getRank(),getSize(),iUn); 
       hartreeFockAtom.computeEnergy();
-      printf("Hello 7 %d:%d:%d\n",getRank(),getSize(),iUn); 
       hartreeFockAtom.SCF();
-      printf("Hello 8 %d:%d:%d\n",getRank(),getSize(),iUn); 
       
       // Place Atomic Densities into Total Densities
       this->placeAtmDen(atomIndex[iUn],hartreeFockAtom);
