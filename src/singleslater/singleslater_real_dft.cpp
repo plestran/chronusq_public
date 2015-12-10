@@ -799,8 +799,8 @@ std::array<double,5> SingleSlater<double>::formVCGGA (double rhoA, double rhoB,
     std::array<double,5> corrEpsMu;
     if (this->CorrKernel_ == VWN3 || this->CorrKernel_ == VWN5) {
        corrEpsMu = this->formVCVWN((rhoA+rhoB),(this->spindens(rhoA,rhoB)));
-//    } else if (this->CorrKernel_ == LYP) {
-//       corrEpsMu = this->formVCLYP(rhoA, rhoB, gammaAA, gammaBB, gammaAB);
+    } else if (this->CorrKernel_ == LYP) {
+       corrEpsMu = this->formVCLYP(rhoA, rhoB, gammaAA, gammaBB, gammaAB);
     }
     return corrEpsMu;
 }; //END GENERIC FORMCOR
@@ -828,9 +828,10 @@ std::array<double,5> SingleSlater<double>::formVExGGA (double rhoA, double rhoB,
     double drhoA, double drhoB){
    
     std::array<double,5> exEpsMu;
-//    if (this->CorrKernel_ == VWN3 || this->CorrKernel_ == VWN5) {
     if (this->isGGA) {
+    if (this->ExchKernel_ == B88) {
       exEpsMu = this->formVExB88(rhoA, rhoB, drhoA, drhoB);
+      }
 //       cout << exEpsMu[3] << endl;
     }else {
       exEpsMu = this->formVExSlater((rhoA+rhoB),(this->spindens(rhoA,rhoB)));
@@ -1211,7 +1212,7 @@ void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX,
       if (this->ExchKernel_ != NOEXCH) {
         epsMuExc = this->formVExGGA(rhorA,rhorB,gammaAA,gammaBB);
         (*VXA)  +=   ((*WeightsMap).coeff(ipts,0))*(*STmp)*epsMuExc[1];
-        if (this->isGGA) {
+        if (this->isGGA && this->ExchKernel_ == B88) {
           (*VXA)  += 2.0*drhoA[0]*((*WeightsMap).coeff(ipts,0))*(*dSTmpX)*epsMuExc[3];
           (*VXA)  += 2.0*drhoA[1]*((*WeightsMap).coeff(ipts,0))*(*dSTmpY)*epsMuExc[3];
           (*VXA)  += 2.0*drhoA[2]*((*WeightsMap).coeff(ipts,0))*(*dSTmpZ)*epsMuExc[3];
@@ -1221,7 +1222,7 @@ void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX,
         }
         if(!this->isClosedShell && this->Ref_ != TCS){
           (*VXB)  += ((*WeightsMap).coeff(ipts,0))*(*STmp)*epsMuExc[2];
-          if (this->isGGA) {
+          if (this->isGGA && this->ExchKernel_ == B88) {
             (*VXB)  += 2.0*drhoB[0]*((*WeightsMap).coeff(ipts,0))*(*dSTmpX)*epsMuExc[4];
             (*VXB)  += 2.0*drhoB[1]*((*WeightsMap).coeff(ipts,0))*(*dSTmpY)*epsMuExc[4];
             (*VXB)  += 2.0*drhoB[2]*((*WeightsMap).coeff(ipts,0))*(*dSTmpZ)*epsMuExc[4];
@@ -1233,10 +1234,23 @@ void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX,
       if (this->CorrKernel_ != NOCORR) {
          epsMuCor = this->formVCGGA(rhorA,rhorB,gammaAA,gammaBB,gammaAB);
         (*VCA)  += ((*WeightsMap).coeff(ipts,0))*(*STmp)*epsMuCor[1];
+        if (this->isGGA && this->CorrKernel_ == LYP) {
+          (*VCA)  += 2.0*drhoA[0]*((*WeightsMap).coeff(ipts,0))*(*dSTmpX)*epsMuCor[3];
+          (*VCA)  += 2.0*drhoA[1]*((*WeightsMap).coeff(ipts,0))*(*dSTmpY)*epsMuCor[3];
+          (*VCA)  += 2.0*drhoA[2]*((*WeightsMap).coeff(ipts,0))*(*dSTmpZ)*epsMuCor[3];
+          energyC += ((*WeightsMap).coeff(ipts,0))*epsMuCor[0];
+        } else { 
+          energyC += ((*WeightsMap).coeff(ipts,0))*rhor*epsMuCor[0];
+        }
         if(!this->isClosedShell && this->Ref_ != TCS) { 
           (*VCB)  += ((*WeightsMap).coeff(ipts,0))*(*STmp)*epsMuCor[2];
+          if (this->isGGA && this->CorrKernel_ == LYP) {
+            (*VCB)  += 2.0*drhoB[0]*((*WeightsMap).coeff(ipts,0))*(*dSTmpX)*epsMuCor[4];
+            (*VCB)  += 2.0*drhoB[1]*((*WeightsMap).coeff(ipts,0))*(*dSTmpY)*epsMuCor[4];
+            (*VCB)  += 2.0*drhoB[2]*((*WeightsMap).coeff(ipts,0))*(*dSTmpZ)*epsMuCor[4];
+          }
         }
-        energyC += ((*WeightsMap).coeff(ipts,0))*rhor*epsMuCor[0];
+//        energyC += ((*WeightsMap).coeff(ipts,0))*rhor*epsMuCor[0];
       }  //End Corr
     } //End VXC
 }; //END
