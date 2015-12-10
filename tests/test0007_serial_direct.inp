@@ -17,6 +17,9 @@ job       = SCF
 basis     = sto3g.gbs
 ints			= direct
 
+[SCF]
+guess = read
+
 #
 #  Misc Settings
 #

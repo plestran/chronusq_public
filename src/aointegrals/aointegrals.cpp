@@ -453,13 +453,18 @@ void AOIntegrals::printOneE(){
 void AOIntegrals::alloc(){
   this->checkMeta();
   this->allocOp();
-  if(this->maxMultipole_ >= 1) this->allocMultipole();
-
-  this->pairConstants_ = std::unique_ptr<PairConstants>(new PairConstants);
-  this->molecularConstants_ = std::unique_ptr<MolecularConstants>(new MolecularConstants);
-  this->quartetConstants_ = std::unique_ptr<QuartetConstants>(new QuartetConstants);
-
-  if(this->isPrimary) this->fileio_->iniStdOpFiles(this->nTCS_*this->basisSet_->nBasis());
+  if(getRank() == 0) {
+    if(this->maxMultipole_ >= 1) this->allocMultipole();
+ 
+    this->pairConstants_ = std::unique_ptr<PairConstants>(new PairConstants);
+    this->molecularConstants_ = std::unique_ptr<MolecularConstants>(new MolecularConstants);
+    this->quartetConstants_ = std::unique_ptr<QuartetConstants>(new QuartetConstants);
+ 
+    if(this->isPrimary) this->fileio_->iniStdOpFiles(this->nTCS_*this->basisSet_->nBasis());
+  }
+#ifdef CQ_ENABLE_MPI
+  MPI_Barrier(MPI_COMM_WORLD);
+#endif
 /* This whole block leaks memory like a siv (~ 8MB leaked for test 4!)
   int i,j,ij;
   this->R2Index_ = new int*[this->nBasis_];
@@ -481,41 +486,43 @@ void AOIntegrals::alloc(){
 
 void AOIntegrals::allocOp(){
   auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
+  if(getRank() == 0) {
 #ifndef USE_LIBINT
-  try {
-    // Raffenetti Two Electron Coulomb AOIntegrals
-    this->twoEC_ = std::unique_ptr<RealMatrix>(new RealMatrix(this->nTT_,this->nTT_)); 
-    // Raffenetti Two Electron Exchange AOIntegrals
-    this->twoEX_ = std::unique_ptr<RealMatrix>(new RealMatrix(this->nTT_,this->nTT_)); 
-  } catch (...) {
-    CErr(std::current_exception(),"Coulomb and Exchange Tensor(R4) Allocation");
-  }
-#else
-  try {
-    if(this->integralAlgorithm == INCORE){ // Allocate R4 ERI Tensor
-      this->aoERI_ = std::unique_ptr<RealTensor4d>(
-        new RealTensor4d(NTCSxNBASIS,NTCSxNBASIS,NTCSxNBASIS,NTCSxNBASIS)); 
+    try {
+      // Raffenetti Two Electron Coulomb AOIntegrals
+      this->twoEC_ = std::unique_ptr<RealMatrix>(new RealMatrix(this->nTT_,this->nTT_)); 
+      // Raffenetti Two Electron Exchange AOIntegrals
+      this->twoEX_ = std::unique_ptr<RealMatrix>(new RealMatrix(this->nTT_,this->nTT_)); 
+    } catch (...) {
+      CErr(std::current_exception(),"Coulomb and Exchange Tensor(R4) Allocation");
     }
-  } catch (...) {
-    CErr(std::current_exception(),"N^4 ERI Tensor Allocation");
-  }
+#else
+    try {
+      if(this->integralAlgorithm == INCORE){ // Allocate R4 ERI Tensor
+        this->aoERI_ = std::unique_ptr<RealTensor4d>(
+          new RealTensor4d(NTCSxNBASIS,NTCSxNBASIS,NTCSxNBASIS,NTCSxNBASIS)); 
+      }
+    } catch (...) {
+      CErr(std::current_exception(),"N^4 ERI Tensor Allocation");
+    }
 #endif
-  try {
-
-    // One Electron Integral
-    this->oneE_      = std::unique_ptr<RealMatrix>(new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); 
-    // Overlap
-    this->overlap_   = std::unique_ptr<RealMatrix>(new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); 
-    // Kinetic
-    this->kinetic_   = std::unique_ptr<RealMatrix>(new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); 
-    // Kinetic (p-space)
-    this->kineticP_  = std::unique_ptr<RealMatrix>(new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); 
-    // Potential
-    this->potential_ = std::unique_ptr<RealMatrix>(new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); 
-
-  } catch(...) {
-    CErr(std::current_exception(),"One Electron Integral Tensor Allocation");
-  }
+    try {
+ 
+      // One Electron Integral
+      this->oneE_      = std::unique_ptr<RealMatrix>(new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); 
+      // Overlap
+      this->overlap_   = std::unique_ptr<RealMatrix>(new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); 
+      // Kinetic
+      this->kinetic_   = std::unique_ptr<RealMatrix>(new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); 
+      // Kinetic (p-space)
+      this->kineticP_  = std::unique_ptr<RealMatrix>(new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); 
+      // Potential
+      this->potential_ = std::unique_ptr<RealMatrix>(new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); 
+ 
+    } catch(...) {
+      CErr(std::current_exception(),"One Electron Integral Tensor Allocation");
+    }
+  } // End serial allocation
 
 #ifdef USE_LIBINT
   try { 
@@ -525,22 +532,24 @@ void AOIntegrals::allocOp(){
     CErr(std::current_exception(),"Schwartx Bound Tensor Allocation");
   } 
 
-  if(this->integralAlgorithm == DENFIT){
-
-    try { 
-      this->aoRII_ = std::unique_ptr<RealTensor3d>(
-        new RealTensor3d(NTCSxNBASIS,NTCSxNBASIS,this->nTCS_*this->DFbasisSet_->nBasis())); 
-
-      this->aoRIS_ = std::unique_ptr<RealTensor2d>(
-        new RealTensor2d(
-          this->nTCS_*this->DFbasisSet_->nBasis(),this->nTCS_*this->DFbasisSet_->nBasis()
-        )
-      );
-
-    } catch (...) { 
-      CErr(std::current_exception(),"Density Fitting Tensor Allocation");
+  if(getRank() == 0) {
+    if(this->integralAlgorithm == DENFIT){
+ 
+      try { 
+        this->aoRII_ = std::unique_ptr<RealTensor3d>(
+          new RealTensor3d(NTCSxNBASIS,NTCSxNBASIS,this->nTCS_*this->DFbasisSet_->nBasis())); 
+ 
+        this->aoRIS_ = std::unique_ptr<RealTensor2d>(
+          new RealTensor2d(
+            this->nTCS_*this->DFbasisSet_->nBasis(),this->nTCS_*this->DFbasisSet_->nBasis()
+          )
+        );
+ 
+      } catch (...) { 
+        CErr(std::current_exception(),"Density Fitting Tensor Allocation");
+      }
     }
-  }
+  } // End Serial Allocation
 #endif
 }
 

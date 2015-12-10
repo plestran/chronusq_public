@@ -349,16 +349,28 @@ void SingleSlater<double>::readGuessGauFChk(std::string &filename) {
 
 template<>
 void SingleSlater<double>::READGuess(){
-  this->fileio_->out << "Reading SCF Density from disk" << endl;
-  H5::DataSpace dataspace = this->fileio_->alphaSCFDen->getSpace();
-  this->fileio_->alphaSCFDen->read(this->densityA_->data(),H5::PredType::NATIVE_DOUBLE,dataspace,dataspace);
-  this->fileio_->alphaMO->read(this->moA_->data(),H5::PredType::NATIVE_DOUBLE,dataspace,dataspace);
-  if(!this->isClosedShell && this->Ref_ != TCS){
-    this->fileio_->betaSCFDen->read(this->densityB_->data(),H5::PredType::NATIVE_DOUBLE,dataspace,dataspace);
-    this->fileio_->betaMO->read(this->moB_->data(),H5::PredType::NATIVE_DOUBLE,dataspace,dataspace);
+  if(getRank() == 0) {
+    this->fileio_->out << "Reading SCF Density from disk" << endl;
+    H5::DataSpace dataspace = this->fileio_->alphaSCFDen->getSpace();
+    this->fileio_->alphaSCFDen->read(this->densityA_->data(),H5::PredType::NATIVE_DOUBLE,dataspace,dataspace);
+    this->fileio_->alphaMO->read(this->moA_->data(),H5::PredType::NATIVE_DOUBLE,dataspace,dataspace);
+    if(!this->isClosedShell && this->Ref_ != TCS){
+      this->fileio_->betaSCFDen->read(this->densityB_->data(),H5::PredType::NATIVE_DOUBLE,dataspace,dataspace);
+      this->fileio_->betaMO->read(this->moB_->data(),H5::PredType::NATIVE_DOUBLE,dataspace,dataspace);
+    }
   }
   this->haveMO = true;
   if(this->molecule_->nAtoms() > 1) this->haveDensity = true;
+#ifdef CQ_ENABLE_MPI
+  MPI_Bcast(this->densityA_->data(),
+    this->nTCS_*this->nTCS_*this->nBasis_*this->nBasis_,MPI_DOUBLE,0,
+    MPI_COMM_WORLD);
+  if(!this->isClosedShell && this->Ref_ != TCS)
+    MPI_Bcast(this->densityB_->data(),
+      this->nTCS_*this->nTCS_*this->nBasis_*this->nBasis_,MPI_DOUBLE,0,
+      MPI_COMM_WORLD);
+#endif
+  
 }
 }; //namespace ChronusQ
 #endif

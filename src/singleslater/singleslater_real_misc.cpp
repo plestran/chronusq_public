@@ -172,50 +172,49 @@ SingleSlater<double>::SingleSlater(SingleSlater<double> * other){
  ************************/
 template<>
 void SingleSlater<double>::computeEnergy(){
-  double energyXC;
-/*
-  if(this->Ref_ != TCS)
-    this->energyOneE = (*this->aointegrals_->oneE_).frobInner(this->densityA_->conjugate());
-  else {
-    this->energyOneE = 0.0;
-    for(auto I = 0, i = 0; i < this->nBasis_; I += 2, i++)    
-    for(auto J = 0, j = 0; j < this->nBasis_; J += 2, j++){
+  if(getRank() == 0) {
+    double energyXC;
+    this->energyOneE = 
+      (*this->aointegrals_->oneE_).frobInner(this->densityA_->conjugate());
+    this->energyTwoE = 
+      0.5*(*this->PTA_).frobInner(this->densityA_->conjugate());
+ 
+    if(!this->isClosedShell && this->Ref_ != TCS){
       this->energyOneE += 
-        this->densityA_->conjugate()(I,J)*(*this->aointegrals_->oneE_)(i,j) + 
-        this->densityA_->conjugate()(I+1,J+1)*(*this->aointegrals_->oneE_)(i,j);
-    } 
-  }
-*/
-  this->energyOneE = (*this->aointegrals_->oneE_).frobInner(this->densityA_->conjugate());
-  this->energyTwoE = 0.5*(*this->PTA_).frobInner(this->densityA_->conjugate());
-
-  if(!this->isClosedShell && this->Ref_ != TCS){
-    this->energyOneE += (*this->aointegrals_->oneE_).frobInner(this->densityB_->conjugate());
-    this->energyTwoE += 0.5*(*this->PTB_).frobInner(this->densityB_->conjugate());
-  }
-  
-  if(this->isDFT) this->energyTwoE += this->totalEx;
-// VWN Corr
-  if(this->isDFT) this->energyTwoE += this->totalEcorr;
-    
-  // Add in the electric field component if they are non-zero
-  std::array<double,3> null{{0,0,0}};
-  if(this->elecField_ != null){
-    int NB = this->nTCS_*this->nBasis_;
-    int NBSq = NB*NB;
-    int iBuf = 0;
-    for(auto iXYZ = 0; iXYZ < 3; iXYZ++){
-      ConstRealMap mu(&this->aointegrals_->elecDipole_->storage()[iBuf],NB,NB);
-      this->energyOneE += 
-        this->elecField_[iXYZ] * mu.frobInner(this->densityA_->conjugate());
-      if(!this->isClosedShell && this->Ref_ != TCS)
-      this->energyOneE += 
-        this->elecField_[iXYZ] * mu.frobInner(this->densityB_->conjugate());
-      iBuf += NBSq;
+        (*this->aointegrals_->oneE_).frobInner(this->densityB_->conjugate());
+      this->energyTwoE += 
+        0.5*(*this->PTB_).frobInner(this->densityB_->conjugate());
     }
-  }
+    
+    if(this->isDFT) this->energyTwoE += this->totalEx + this->totalEcorr;
+      
+    // Add in the electric field component if they are non-zero
+    std::array<double,3> null{{0,0,0}};
+    if(this->elecField_ != null){
+      int NB = this->nTCS_*this->nBasis_;
+      int NBSq = NB*NB;
+      int iBuf = 0;
+      for(auto iXYZ = 0; iXYZ < 3; iXYZ++){
+        ConstRealMap 
+          mu(&this->aointegrals_->elecDipole_->storage()[iBuf],NB,NB);
 
-  this->totalEnergy= this->energyOneE + this->energyTwoE + this->energyNuclei;
+        this->energyOneE += 
+          this->elecField_[iXYZ] * mu.frobInner(this->densityA_->conjugate());
+
+        if(!this->isClosedShell && this->Ref_ != TCS)
+          this->energyOneE += 
+            this->elecField_[iXYZ] * mu.frobInner(this->densityB_->conjugate());
+        iBuf += NBSq;
+      }
+    }
+ 
+    this->totalEnergy= this->energyOneE + this->energyTwoE + this->energyNuclei;
+  }
+#ifdef CQ_ENABLE_MPI
+  MPI_Bcast(&this->totalEnergy,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
+  MPI_Bcast(&this->energyOneE,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
+  MPI_Bcast(&this->energyTwoE,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
+#endif
 //this->printEnergy();
 };
 

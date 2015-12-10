@@ -245,9 +245,12 @@ void SingleSlater<T>::cleanupLAPACKScr(){
 
 template<typename T>
 void SingleSlater<T>::SCF(){
-  if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
+
+  if(!this->aointegrals_->haveAOOneE && getRank() == 0) 
+    this->aointegrals_->computeAOOneE();
+
   int iter; 
-  if(this->printLevel_ > 0) {
+  if(this->printLevel_ > 0 && getRank() == 0) {
     this->printSCFHeader(this->fileio_->out);
 
     this->fileio_->out << std::setw(16) << "SCF Iteration";
@@ -273,8 +276,10 @@ void SingleSlater<T>::SCF(){
     }
     this->fileio_->out << endl;
   }
-  this->initSCFMem();
-  this->formX();
+  if(getRank() == 0) {
+    this->initSCFMem();
+    this->formX();
+  }
   for (iter = 0; iter < this->maxSCFIter_; iter++){
 /*
     this->fileio_->out << endl << endl << bannerTop <<endl;  
@@ -282,16 +287,21 @@ void SingleSlater<T>::SCF(){
     this->fileio_->out << bannerEnd <<endl;  
 */
 
-    if(this->Ref_ == CUHF) this->formNO();
-    this->diagFock();
-    if(iter == 0 && this->guess_ != READ) this->mixOrbitalsSCF();
+    if(getRank() == 0) {
+      if(this->Ref_ == CUHF) this->formNO();
+      this->diagFock();
+      if(iter == 0 && this->guess_ != READ) this->mixOrbitalsSCF();
+    }
     this->formDensity();
     this->formFock();
 
-    if(this->Ref_ != CUHF && this->doDIIS){ // DIIS NYI for CUHF
-      this->GenDComm(iter);
-      this->CpyFock(iter);   
-      if(iter % (this->lenCoeff_-1) == (this->lenCoeff_-2) && iter != 0) this->CDIIS();
+    if(getRank() == 0) {
+      if(this->Ref_ != CUHF && this->doDIIS){ // DIIS NYI for CUHF
+        this->GenDComm(iter);
+        this->CpyFock(iter);   
+        if(iter % (this->lenCoeff_-1) == (this->lenCoeff_-2) && iter != 0) 
+          this->CDIIS();
+      }
     }
 
     this->evalConver(iter);
@@ -303,15 +313,13 @@ void SingleSlater<T>::SCF(){
   delete [] this->SCF_SCR;
   delete [] this->REAL_SCF_SCR;
 */
-  this->cleanupSCFMem();
+  if(getRank() == 0) this->cleanupSCFMem();
+  printf("Hello 666%d:%d",getRank(),getSize());
 
-  if(!this->isConverged)
+  if(!this->isConverged && getRank() == 0)
     CErr("SCF Failed to converge within maximum number of iterations",this->fileio_->out);
-//this->fileio_->out <<"\n"<<endl; 
-//this->fileio_->out << bannerEnd <<endl<<std::fixed;
-//this->fileio_->out << "\nRequested convergence on RMS density matrix = " <<std::setw(5)<<this->denTol_ <<"  within  " << this->maxSCFIter_ <<"  cycles."<<endl;
-//this->fileio_->out << "Requested convergence on             energy = " <<this->eneTol_ << endl;
-  if(this->printLevel_ > 0){
+
+  if(this->printLevel_ > 0 && getRank() == 0){
     if(this->isConverged){
       this->fileio_->out << endl << "SCF Completed: E(" << this->SCFTypeShort_ 
                          << ") = ";
@@ -321,6 +329,5 @@ void SingleSlater<T>::SCF(){
     }
     this->fileio_->out << bannerEnd <<endl;
   }
-  this->computeSExpect();
 }
 

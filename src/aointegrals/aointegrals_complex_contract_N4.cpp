@@ -30,6 +30,8 @@ namespace ChronusQ{
     const ComplexMatrix &XAlpha, ComplexMatrix &AXAlpha, const ComplexMatrix &XBeta, 
     ComplexMatrix &AXBeta) {
 
+    if(getRank() != 0) return;
+
 //  this->fileio_->out << "Contracting with in-core two-electron integrals" << endl;
     if(!this->haveAOTwoE) this->computeAOTwoE();
   

@@ -130,8 +130,7 @@ def runCQ(ifname,ofname):
   
   chronusQ.mpiBarrier()
   jobMeta = MetaData()
-  if chronusQ.getRank() == 0:
-    jobMap[jobStr](workers,jobMeta)
+  jobMap[jobStr](workers,jobMeta)
   chronusQ.mpiBarrier()
 
   
@@ -139,6 +138,7 @@ def runCQ(ifname,ofname):
     endtime= time.strftime("%c")
     out.write("Job Completed: %s"  % endtime )
 
+  print 'here'
   return jobMeta
 
 

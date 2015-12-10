@@ -191,53 +191,51 @@ void AOIntegrals::computeAOOneE(){
 
 using libint2::TwoBodyEngine;
 void AOIntegrals::computeSchwartz(){
-  RealMatrix *ShBlk; 
-  this->schwartz_->setZero();
-
-  // Define Integral Engine
-  TwoBodyEngine<libint2::Coulomb> engine = 
-    TwoBodyEngine<libint2::Coulomb>(this->basisSet_->maxPrim(),
-                                    this->basisSet_->maxL(),0);
-  engine.set_precision(0.); // Don't screen primitives during schwartz
-
-  auto start =  std::chrono::high_resolution_clock::now();
-  for(int s1=0; s1 < this->basisSet_->nShell(); s1++){
-    int n1  = this->basisSet_->shells(s1).size();
-    for(int s2=0; s2 <= s1; s2++){
-      int n2  = this->basisSet_->shells(s2).size();
-
-      const auto* buff = engine.compute(
-        this->basisSet_->shells(s1),
-        this->basisSet_->shells(s2),
-        this->basisSet_->shells(s1),
-        this->basisSet_->shells(s2)
-      );
-
-      
-      ShBlk = new RealMatrix(n1,n2);
-      ShBlk->setZero();
-/*   
-      int ij = 0;
-      for(int i = 0; i < n1; i++) {
-        for(int j = 0; j < n2; j++) {
+  if(getRank() == 0) {
+    RealMatrix *ShBlk; 
+    this->schwartz_->setZero();
+ 
+    // Define Integral Engine
+    TwoBodyEngine<libint2::Coulomb> engine = 
+      TwoBodyEngine<libint2::Coulomb>(this->basisSet_->maxPrim(),
+                                      this->basisSet_->maxL(),0);
+    engine.set_precision(0.); // Don't screen primitives during schwartz
+ 
+    auto start =  std::chrono::high_resolution_clock::now();
+    for(int s1=0; s1 < this->basisSet_->nShell(); s1++){
+      int n1  = this->basisSet_->shells(s1).size();
+      for(int s2=0; s2 <= s1; s2++){
+        int n2  = this->basisSet_->shells(s2).size();
+ 
+        const auto* buff = engine.compute(
+          this->basisSet_->shells(s1),
+          this->basisSet_->shells(s2),
+          this->basisSet_->shells(s1),
+          this->basisSet_->shells(s2)
+        );
+ 
+        
+        ShBlk = new RealMatrix(n1,n2);
+        ShBlk->setZero();
+ 
+        for(auto i = 0, ij = 0; i < n1; i++)
+        for(auto j = 0; j < n2; j++, ij++){
           (*ShBlk)(i,j) = buff[ij*n1*n2 + ij];
- 	 ij++;
         }
+ 
+        (*this->schwartz_)(s1,s2) = std::sqrt(ShBlk->lpNorm<Infinity>());
+        
+        delete ShBlk;
       }
-*/
-      for(auto i = 0, ij = 0; i < n1; i++)
-      for(auto j = 0; j < n2; j++, ij++){
-        (*ShBlk)(i,j) = buff[ij*n1*n2 + ij];
-      }
-
-      (*this->schwartz_)(s1,s2) = std::sqrt(ShBlk->lpNorm<Infinity>());
-      
-      delete ShBlk;
     }
+    auto finish =  std::chrono::high_resolution_clock::now();
+    this->SchwartzD = finish - start;
+    (*this->schwartz_) = this->schwartz_->selfadjointView<Lower>();
   }
-  auto finish =  std::chrono::high_resolution_clock::now();
-  this->SchwartzD = finish - start;
-  (*this->schwartz_) = this->schwartz_->selfadjointView<Lower>();
+#ifdef CQ_ENABLE_MPI
+  MPI_Bcast(this->schwartz_->data(),this->schwartz_->size(),MPI_DOUBLE,0,
+    MPI_COMM_WORLD);
+#endif
 
   this->haveSchwartz = true;
 }
