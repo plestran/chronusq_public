@@ -33,7 +33,13 @@ void SingleSlater<T>::formPT(){
   bool doTCS = (this->Ref_ == TCS);
   bool doRHF = (this->isClosedShell && !doTCS);
   bool doKS  = this->isDFT;
+  MPI_Barrier(MPI_COMM_WORLD);
+  printf("Hello 28 %d:%d:%d\n",getRank(),getSize(),0);; 
+  sleep(1);
   if(!this->haveDensity) this->formDensity();
+  MPI_Barrier(MPI_COMM_WORLD);
+  printf("Hello 29 %d:%d:%d\n",getRank(),getSize(),0);; 
+  sleep(1);
   if(this->aointegrals_->integralAlgorithm == AOIntegrals::DIRECT)
     this->aointegrals_->twoEContractDirect(doRHF,doKS,true,false,doTCS,
     *this->densityA_,*this->PTA_,*this->densityB_,*this->PTB_);
@@ -53,10 +59,15 @@ void SingleSlater<T>::formPT(){
  ********************/
 template<typename T>
 void SingleSlater<T>::formFock(){
+  MPI_Barrier(MPI_COMM_WORLD);
+  printf("Hello 20 %d:%d:%d\n",getRank(),getSize(),0);; 
+  sleep(1);
 #ifdef CQ_ENABLE_MPI
   // Syncronize MPI processes before fock build
   MPI_Barrier(MPI_COMM_WORLD);
 #endif
+  printf("Hello 21 %d:%d:%d\n",getRank(),getSize(),0);; 
+  sleep(1);
   
   if(!this->haveDensity) this->formDensity();
 #ifndef USE_LIBINT
@@ -67,9 +78,15 @@ void SingleSlater<T>::formFock(){
     if(!this->haveExchange) this->formExchange();
   }
 #else
+  MPI_Barrier(MPI_COMM_WORLD);
+  printf("Hello 22 %d:%d:%d\n",getRank(),getSize(),0);; 
+  sleep(1);
   // All MPI processes go to FormPT
   this->formPT();
 #endif
+  MPI_Barrier(MPI_COMM_WORLD);
+  printf("Hello 23 %d:%d:%d\n",getRank(),getSize(),0);; 
+  sleep(1);
 
   if(getRank() == 0) {
     if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
@@ -141,6 +158,8 @@ void SingleSlater<T>::formFock(){
     }
     if(this->printLevel_ >= 2) this->printFock(); 
   }
+  MPI_Barrier(MPI_COMM_WORLD);
+  printf("Hello 24 %d:%d:%d\n",getRank(),getSize(),0);; 
 #ifdef CQ_ENABLE_MPI
   // Syncronize MPI processes after fock build
   MPI_Barrier(MPI_COMM_WORLD);

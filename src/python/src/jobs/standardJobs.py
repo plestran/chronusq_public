@@ -84,8 +84,11 @@ def runSCF(workers,meta):
 
   workers["CQSingleSlater"].formGuess()
 
+  print 'here 17',chronusQ.getRank()
   workers["CQSingleSlater"].formFock()
+  print 'here 18',chronusQ.getRank()
   workers["CQSingleSlater"].computeEnergy()
+  print 'here 19',chronusQ.getRank()
 
   workers["CQSingleSlater"].SCF()
 

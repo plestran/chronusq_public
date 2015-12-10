@@ -18,7 +18,6 @@ reference = Real RHF
 job       = SCF
 basis     = sto3g.gbs
 ints			= direct
-print = 4
 
 #
 #  Misc Settings
