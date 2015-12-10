@@ -598,16 +598,19 @@ public:
          RealMatrix *, RealMatrix *, RealMatrix *,RealMatrix *,RealMatrix *,RealMatrix *);
   void evalVXC(cartGP, double, std::vector<bool>, double &, double &,RealMatrix *, RealMatrix *,
                  RealMatrix *, RealMatrix*); // evaluate DFT VXC Matrix Term( at a given pts)
-  std::array<double,3 > formVC (double, double);    // Form DFT correlarion density,potential (A and B)
-  std::array<double,3 > formVCGGA (double, double, double, double);    // Form DFT GGA correlarion density,potential (A and B)
-  std::array<double,3 > formVCVWN (double, double); // Form DFT VWN correlation (VWN3 and VWN5)
-  std::array<double,3 > formVCLYP (double, double, double, double); // Form DFT LYP correlation 
+  std::array<double,5 > formVC (double, double);    // Form DFT correlarion density,potential (A and B)
+  std::array<double,5 > formVCGGA (double, double, double, double, double);    // Form DFT GGA correlarion density,potential (A and B)
+  std::array<double,5 > formVCVWN (double, double); // Form DFT VWN correlation (VWN3 and VWN5)
+  std::array<double,5 > formVCLYP (double, double, double, double, double); // Form DFT LYP correlation 
   std::array<double,5 > formVEx (double, double); // Form DFT exchange density, potential (A and B)  
   std::array<double,5 > formVExGGA (double, double, double, double);    // Form DFT GGA Exchange density,potential (A and B)
   std::array<double,5 > formVExSlater (double, double); // Form DFT Slater exchange
   std::array<double,5 > formVExB88 (double, double, double, double); // Form DFT Becke88 exchange
   double EvepsVWN(int iop,double a_x, double b_x, double c_x, double x0_x, double rho ); // Form DFT correlarion potential 
   double gB88(int, double);                   //funtion used in B88 Exchange
+  double omegaLYP(int, double, double, double);                    //function used in LYP Correlation 
+  double derLYP(int, double, double, double, double, double, double);//function used in LYP Correlation 
+  double deltaLYP(int, double, double, double);  //function used in LYP Correlation
   double f_spindens(int iop, double spindens);  // define f(spindendity)
   double df_spindens(double spindens);  // define df(spindendity)/dspindensity
   double df2_spindens(double spindens);  // define df2(spindendity)/dspindensity2
