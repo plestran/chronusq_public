@@ -326,14 +326,14 @@ void RealTime<double>::doPropagation() {
 
   auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
   // Set up Eigen Maps
-  ComplexMap oTrans1(this->oTrans1Mem_,NTCSxNBASIS,NTCSxNBASIS); 
-  ComplexMap oTrans2(this->oTrans2Mem_,NTCSxNBASIS,NTCSxNBASIS);
-  ComplexMap POA    (this->POAMem_    ,NTCSxNBASIS,NTCSxNBASIS);
-  ComplexMap POAsav (this->POAsavMem_ ,NTCSxNBASIS,NTCSxNBASIS);
-  ComplexMap FOA    (this->FOAMem_    ,NTCSxNBASIS,NTCSxNBASIS);
-  ComplexMap initMOA(this->initMOAMem_,NTCSxNBASIS,NTCSxNBASIS);
-  ComplexMap uTransA(this->uTransAMem_,NTCSxNBASIS,NTCSxNBASIS);
-  ComplexMap scratch(this->scratchMem_,NTCSxNBASIS,NTCSxNBASIS);
+  ComplexMap oTrans1(this->oTrans1Mem_,0,0); 
+  ComplexMap oTrans2(this->oTrans2Mem_,0,0);
+  ComplexMap POA    (this->POAMem_    ,0,0);
+  ComplexMap POAsav (this->POAsavMem_ ,0,0);
+  ComplexMap FOA    (this->FOAMem_    ,0,0);
+  ComplexMap initMOA(this->initMOAMem_,0,0);
+  ComplexMap uTransA(this->uTransAMem_,0,0);
+  ComplexMap scratch(this->scratchMem_,0,0);
 
   ComplexMap POB    (this->POBMem_    ,0,0);
   ComplexMap POBsav (this->POBsavMem_ ,0,0);
@@ -341,15 +341,26 @@ void RealTime<double>::doPropagation() {
   ComplexMap initMOB(this->initMOBMem_,0,0);
   ComplexMap uTransB(this->uTransBMem_,0,0);
 
-  if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS){
-    new (&POB    ) ComplexMap(this->POBMem_    ,NTCSxNBASIS,NTCSxNBASIS);
-    new (&POBsav ) ComplexMap(this->POBsavMem_ ,NTCSxNBASIS,NTCSxNBASIS);
-    new (&FOB    ) ComplexMap(this->FOBMem_    ,NTCSxNBASIS,NTCSxNBASIS);
-    new (&initMOB) ComplexMap(this->initMOBMem_,NTCSxNBASIS,NTCSxNBASIS);
-    new (&uTransB) ComplexMap(this->uTransBMem_,NTCSxNBASIS,NTCSxNBASIS);
+  if(getRank == 0) {
+    new (&oTrans1) ComplexMap(this->oTrans1Mem_,NTCSxNBASIS,NTCSxNBASIS); 
+    new (&oTrans2) ComplexMap(this->oTrans2Mem_,NTCSxNBASIS,NTCSxNBASIS);
+    new (&POA    ) ComplexMap(this->POAMem_    ,NTCSxNBASIS,NTCSxNBASIS);
+    new (&POAsav ) ComplexMap(this->POAsavMem_ ,NTCSxNBASIS,NTCSxNBASIS);
+    new (&FOA    ) ComplexMap(this->FOAMem_    ,NTCSxNBASIS,NTCSxNBASIS);
+    new (&initMOA) ComplexMap(this->initMOAMem_,NTCSxNBASIS,NTCSxNBASIS);
+    new (&uTransA) ComplexMap(this->uTransAMem_,NTCSxNBASIS,NTCSxNBASIS);
+    new (&scratch) ComplexMap(this->scratchMem_,NTCSxNBASIS,NTCSxNBASIS);
+ 
+    if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS){
+      new (&POB    ) ComplexMap(this->POBMem_    ,NTCSxNBASIS,NTCSxNBASIS);
+      new (&POBsav ) ComplexMap(this->POBsavMem_ ,NTCSxNBASIS,NTCSxNBASIS);
+      new (&FOB    ) ComplexMap(this->FOBMem_    ,NTCSxNBASIS,NTCSxNBASIS);
+      new (&initMOB) ComplexMap(this->initMOBMem_,NTCSxNBASIS,NTCSxNBASIS);
+      new (&uTransB) ComplexMap(this->uTransBMem_,NTCSxNBASIS,NTCSxNBASIS);
+    }
+    this->initCSV();
   }
 
-  this->initCSV();
 
   for (iStep = 0; iStep <= this->maxSteps_; iStep++) {
     //this->fileio_->out<<"\nStep "<<iStep<<":\n"<<endl;
@@ -358,116 +369,126 @@ void RealTime<double>::doPropagation() {
     if (iStep == 0) deltaT_ = this->stepSize_;
     else            deltaT_ = 2.0 * (this->stepSize_);
 
-    scratch = POA;
-    POA     = POAsav;
-    POAsav  = scratch;
-    if (!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
-      scratch = POB;
-      POB     = POBsav;
-      POBsav  = scratch;
+    if(getRank() == 0) {
+      scratch = POA;
+      POA     = POAsav;
+      POAsav  = scratch;
+      if (!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
+        scratch = POB;
+        POB     = POBsav;
+        POBsav  = scratch;
+      }
     }
 
-//  Print 
-    if(this->printLevel_ >= 1) {
-      //prettyPrintComplex(this->fileio_->out,(*this->ssPropagator_->densityA()),"Alpha AO Density");
-      //if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) prettyPrintComplex(this->fileio_->out,(*this->ssPropagator_->densityB()),"Beta AO Density");
-
 //  Form AO Fock matrix
-    this->formEDField();
-    this->ssPropagator_->setField(this->EDField_);
+    if(getRank() == 0) {
+      this->formEDField();
+      this->ssPropagator_->setField(this->EDField_);
+    }
+
+    this->ssPropagator_->mpiBCastDensity();
     this->ssPropagator_->formFock();
     this->ssPropagator_->computeEnergy();
     this->ssPropagator_->computeMultipole();
 
-    this->ssPropagator_->mullikenPop();
-
-    this->printRT();
-
-//  Transform Fock from AO to orthonormal basis
-    scratch = (*this->ssPropagator_->fockA());
-    (*this->ssPropagator_->fockA()) = oTrans1 * scratch * oTrans1.adjoint();
-    if (!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
-      scratch = (*this->ssPropagator_->fockB());
-      (*this->ssPropagator_->fockB()) = oTrans1 * scratch * oTrans1.adjoint();
+    if(getRank() == 0) {
+      this->ssPropagator_->mullikenPop();
+      this->printRT();
     }
 
-//  Form the unitary propagation matrix
-    this->formUTrans();
-
-    if ((this->initDensity_ == 0) && checkFP) {
-//    Check [F,P] for converged density, should equal to zero
-      scratch =  (*this->ssPropagator_->fockA()) * POAsav; 
-      scratch -= POAsav * (*this->ssPropagator_->fockA());
-
-      prettyPrint(this->fileio_->out,scratch,"[FOA,POA]");
-
+    if(getRank() == 0) {
+//    Transform Fock from AO to orthonormal basis
+      scratch = (*this->ssPropagator_->fockA());
+      (*this->ssPropagator_->fockA()) = oTrans1 * scratch * oTrans1.adjoint();
       if (!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
-        scratch =  (*this->ssPropagator_->fockB()) * POBsav; 
-        scratch -= POBsav * (*this->ssPropagator_->fockB());
-
-        prettyPrint(this->fileio_->out,scratch,"[FOB,POB]");
+        scratch = (*this->ssPropagator_->fockB());
+        (*this->ssPropagator_->fockB()) = oTrans1 * scratch * oTrans1.adjoint();
       }
-    }
 
-//  Propagate the density matrix
-
-  //  Populate information for printing.
-    PropInfo rec;
-      rec.timeStep  = this->currentTime_;
-      rec.energy    = this->ssPropagator_->totalEnergy;
-      rec.dipole[0] = (*this->ssPropagator_->dipole())(0)/phys.debye;
-      rec.dipole[1] = (*this->ssPropagator_->dipole())(1)/phys.debye;
-      rec.dipole[2] = (*this->ssPropagator_->dipole())(2)/phys.debye;
-      rec.dipole[3] = std::sqrt( std::pow(rec.dipole[0],2.0) +
-                                 std::pow(rec.dipole[1],2.0) +
-                                 std::pow(rec.dipole[2],2.0) );
-      rec.appliedfield[0] = this->EDField_[0];
-      rec.appliedfield[1] = this->EDField_[1];
-      rec.appliedfield[2] = this->EDField_[2];
-      rec.appliedfield[3] = std::sqrt( std::pow(rec.appliedfield[0],2.0) +
-                                 std::pow(rec.appliedfield[1],2.0) +
-                                 std::pow(rec.appliedfield[2],2.0) );
-      rec.mullPop    = (this->ssPropagator_->mullPop());
-      scratch = (initMOA.adjoint() * POA * initMOA);
-      for(auto idx = 0; idx != NTCSxNBASIS; idx++) {
-        rec.orbitalOccA.push_back(scratch(idx,idx).real());
-      }
-      if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS){
-        scratch = (initMOB.adjoint() * POB * initMOB);
-        for(auto idx = 0; idx != NTCSxNBASIS; idx++) {
-          rec.orbitalOccB.push_back(scratch(idx,idx).real());
+//    Form the unitary propagation matrix
+      this->formUTrans();
+     
+      if ((this->initDensity_ == 0) && checkFP) {
+//      Check [F,P] for converged density, should equal to zero
+        scratch =  (*this->ssPropagator_->fockA()) * POAsav; 
+        scratch -= POAsav * (*this->ssPropagator_->fockA());
+     
+        prettyPrint(this->fileio_->out,scratch,"[FOA,POA]");
+     
+        if (!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) {
+          scratch =  (*this->ssPropagator_->fockB()) * POBsav; 
+          scratch -= POBsav * (*this->ssPropagator_->fockB());
+     
+          prettyPrint(this->fileio_->out,scratch,"[FOB,POB]");
         }
       }
-    this->writeDipoleCSV(rec,iStep);
-    this->writeAppliedFieldCSV(rec,iStep);
-    this->writeMullikenCSV(rec,iStep);
-    this->writeOrbitalCSV(rec,iStep);
 
-    this->propInfo.push_back(rec);
+//    Propagate the density matrix
 
-    scratch = POA;
-    POA     = uTransA * scratch * uTransA.adjoint();
-
-    if (!this->isClosedShell_ && this->Ref_ != SingleSlater<dcomplex>::TCS) {
-      scratch = POB;
-      POB     = uTransB * scratch * uTransB.adjoint();
-    }
-
-//  Transform density matrix from orthonormal to AO basis
-    (*this->ssPropagator_->densityA()) = oTrans1.adjoint() * POA * oTrans1;
-
-    if (!this->isClosedShell_ && this->Ref_ != SingleSlater<dcomplex>::TCS) {
-      (*this->ssPropagator_->densityB()) = oTrans1.adjoint() * POB * oTrans1;
-    }
-
+  //  Populate information for printing.
+      PropInfo rec;
+        rec.timeStep  = this->currentTime_;
+        rec.energy    = this->ssPropagator_->totalEnergy;
+        rec.dipole[0] = (*this->ssPropagator_->dipole())(0)/phys.debye;
+        rec.dipole[1] = (*this->ssPropagator_->dipole())(1)/phys.debye;
+        rec.dipole[2] = (*this->ssPropagator_->dipole())(2)/phys.debye;
+        rec.dipole[3] = std::sqrt( std::pow(rec.dipole[0],2.0) +
+                                   std::pow(rec.dipole[1],2.0) +
+                                   std::pow(rec.dipole[2],2.0) );
+        rec.appliedfield[0] = this->EDField_[0];
+        rec.appliedfield[1] = this->EDField_[1];
+        rec.appliedfield[2] = this->EDField_[2];
+        rec.appliedfield[3] = std::sqrt( std::pow(rec.appliedfield[0],2.0) +
+                                   std::pow(rec.appliedfield[1],2.0) +
+                                   std::pow(rec.appliedfield[2],2.0) );
+        rec.mullPop    = (this->ssPropagator_->mullPop());
+        scratch = (initMOA.adjoint() * POA * initMOA);
+        for(auto idx = 0; idx != NTCSxNBASIS; idx++) {
+          rec.orbitalOccA.push_back(scratch(idx,idx).real());
+        }
+        if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS){
+          scratch = (initMOB.adjoint() * POB * initMOB);
+          for(auto idx = 0; idx != NTCSxNBASIS; idx++) {
+            rec.orbitalOccB.push_back(scratch(idx,idx).real());
+          }
+        }
+      this->writeDipoleCSV(rec,iStep);
+      this->writeAppliedFieldCSV(rec,iStep);
+      this->writeMullikenCSV(rec,iStep);
+      this->writeOrbitalCSV(rec,iStep);
+     
+      this->propInfo.push_back(rec);
+     
+      scratch = POA;
+      POA     = uTransA * scratch * uTransA.adjoint();
+     
+      if (!this->isClosedShell_ && this->Ref_ != SingleSlater<dcomplex>::TCS) {
+        scratch = POB;
+        POB     = uTransB * scratch * uTransB.adjoint();
+      }
+     
+//    Transform density matrix from orthonormal to AO basis
+      (*this->ssPropagator_->densityA()) = oTrans1.adjoint() * POA * oTrans1;
+     
+      if (!this->isClosedShell_ && this->Ref_ != SingleSlater<dcomplex>::TCS) {
+        (*this->ssPropagator_->densityB()) = oTrans1.adjoint() * POB * oTrans1;
+      }
+    } // end serial code
 //  Advance step
     currentTime_ += this->stepSize_;
-    };
+#ifdef CQ_ENABLE_MPI
+    MPI_Barrier(MPI_COMM_WORLD);
+#endif
   }
-  delete [] this->SCR;
-  delete [] this->REAL_LAPACK_SCR;
+  if(getRank() == 0) {
+    delete [] this->SCR;
+    delete [] this->REAL_LAPACK_SCR;
 
-  if(this->tarCSVs) this->tarCSVFiles();
+    if(this->tarCSVs) this->tarCSVFiles();
+  }
+#ifdef CQ_ENABLE_MPI
+  MPI_Barrier(MPI_COMM_WORLD);
+#endif
 
 };
 

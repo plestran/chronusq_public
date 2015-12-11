@@ -31,9 +31,7 @@ SingleSlater<double>::SingleSlater(SingleSlater<double> * other){
     this->nBasis_ = other->nBasis_;
     this->nTCS_   = other->nTCS_;
     this->nTT_    = other->nTT_;
-//APS 
     this->nShell_ = other->nShell_;
-//APE
     this->nAE_    = other->nAE_;
     this->nBE_    = other->nBE_; 
     this->Ref_    = other->Ref();
@@ -57,22 +55,52 @@ SingleSlater<double>::SingleSlater(SingleSlater<double> * other){
     auto NTCSxNBASIS = this->nBasis_*this->nTCS_;
 
     // Hardcoded for Libint route
-    this->densityA_           = std::unique_ptr<RealMatrix>(new RealMatrix(*other->densityA_));
-    this->fockA_              = std::unique_ptr<RealMatrix>(new RealMatrix(*other->fockA_));
-    this->moA_                = std::unique_ptr<RealMatrix>(new RealMatrix(*other->moA_));
-    this->PTA_                = std::unique_ptr<RealMatrix>(new RealMatrix(*other->PTA_));
-    if(this->Ref_ != isClosedShell && this->Ref_ != TCS ){
-      this->densityB_           = std::unique_ptr<RealMatrix>(new RealMatrix(*other->densityB_));
-      this->fockB_              = std::unique_ptr<RealMatrix>(new RealMatrix(*other->fockB_));
-      this->moB_                = std::unique_ptr<RealMatrix>(new RealMatrix(*other->moB_));
-      this->PTB_                = std::unique_ptr<RealMatrix>(new RealMatrix(*other->PTB_));
+    this->densityA_           = std::unique_ptr<RealMatrix>(
+      new RealMatrix(*other->densityA_)
+    );
+    
+    if(getRank() == 0) {
+      this->fockA_              = std::unique_ptr<RealMatrix>(
+        new RealMatrix(*other->fockA_)
+      );
+      this->moA_                = std::unique_ptr<RealMatrix>(
+        new RealMatrix(*other->moA_)
+      );
+      this->PTA_                = std::unique_ptr<RealMatrix>(
+        new RealMatrix(*other->PTA_)
+      );
     }
-    this->dipole_             = std::unique_ptr<RealMatrix>(new RealMatrix(*other->dipole_));
-    this->quadpole_           = std::unique_ptr<RealMatrix>(new RealMatrix(*other->quadpole_));
-    this->tracelessQuadpole_  = std::unique_ptr<RealMatrix>(new RealMatrix(*other->tracelessQuadpole_));
-    this->octpole_            = std::unique_ptr<RealTensor3d>(new RealTensor3d(*other->octpole_));
-//  this->elecField_          = std::unique_ptr<std::array<double,3>>(new std::array<double,3>{{0,0,0}});
-    this->elecField_       = other->elecField_;
+    if(this->Ref_ != isClosedShell && this->Ref_ != TCS ){
+      this->densityB_           = std::unique_ptr<RealMatrix>(
+        new RealMatrix(*other->densityB_)
+      );
+
+      if(getRank() == 0) {
+        this->fockB_              = std::unique_ptr<RealMatrix>(
+          new RealMatrix(*other->fockB_)
+        );
+        this->moB_                = std::unique_ptr<RealMatrix>(
+          new RealMatrix(*other->moB_)
+        );
+        this->PTB_                = std::unique_ptr<RealMatrix>(
+          new RealMatrix(*other->PTB_)
+        );
+      }
+    }
+    this->dipole_             = std::unique_ptr<RealMatrix>(
+      new RealMatrix(*other->dipole_)
+    );
+    this->quadpole_           = std::unique_ptr<RealMatrix>(
+      new RealMatrix(*other->quadpole_)
+    );
+    this->tracelessQuadpole_  = std::unique_ptr<RealMatrix>(
+      new RealMatrix(*other->tracelessQuadpole_)
+    );
+    this->octpole_            = std::unique_ptr<RealTensor3d>(
+      new RealTensor3d(*other->octpole_)
+    );
+
+    this->elecField_   = other->elecField_;
     this->basisset_    = other->basisset_;    
     this->molecule_    = other->molecule_;
     this->fileio_      = other->fileio_;

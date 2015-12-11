@@ -103,10 +103,10 @@ def runRT(workers,meta):
   runSCF(workers,meta)
   workers["CQRealTime"].initMeta()
 
+  workers["CQRealTime"].alloc()
   if chronusQ.getRank() == 0:
-    workers["CQRealTime"].alloc()
     workers["CQRealTime"].iniDensity()
-    workers["CQRealTime"].doPropagation()
+  workers["CQRealTime"].doPropagation()
 
   meta.lastDipole = workers['CQRealTime'].lastDipole()
   meta.lastEnergy = workers['CQRealTime'].lastEnergy()
