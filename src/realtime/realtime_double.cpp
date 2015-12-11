@@ -341,7 +341,7 @@ void RealTime<double>::doPropagation() {
   ComplexMap initMOB(this->initMOBMem_,0,0);
   ComplexMap uTransB(this->uTransBMem_,0,0);
 
-  if(getRank == 0) {
+  if(getRank() == 0) {
     new (&oTrans1) ComplexMap(this->oTrans1Mem_,NTCSxNBASIS,NTCSxNBASIS); 
     new (&oTrans2) ComplexMap(this->oTrans2Mem_,NTCSxNBASIS,NTCSxNBASIS);
     new (&POA    ) ComplexMap(this->POAMem_    ,NTCSxNBASIS,NTCSxNBASIS);
