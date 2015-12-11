@@ -109,7 +109,11 @@ def parseQM(workers,secDict):
     if ssSettings['JOB'] in ('RT'):
       parseRT(workers,secDict['RT']) 
     elif ssSettings['JOB'] in ('RPA','CIS','STAB','PPRPA','PPATDA','PPCTDA'):
-      parseSDR(workers,secDict)
+      if chronusQ.getSize() > 1:
+        msg = "Response cannot run with >1 MPI Processes"
+        CErrMsg(workers['CQFileIO'],msg)
+      else:
+        parseSDR(workers,secDict)
   else:
     msg = 'QM.Job ' + str(ssSettings['JOB']) + ' not recognized'
     CErrMsg(workers['CQFileIO'],str(msg))

@@ -112,6 +112,7 @@ def runRT(workers,meta):
   meta.lastEnergy = workers['CQRealTime'].lastEnergy()
 
 def runSDR(workers,meta):
+
   runSCF(workers,meta)
   workers["CQMOIntegrals"].initMeta()
   workers["CQSDResponse"].initMeta()
