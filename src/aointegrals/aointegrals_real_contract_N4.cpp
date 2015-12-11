@@ -51,7 +51,8 @@ namespace ChronusQ{
       if(!RHF && !doTCS && !do24){
         XBetaTensor  = RealTensor2d(XBeta.rows(),XBeta.cols());
         AXBetaTensor = RealTensor2d(AXBeta.rows(),AXBeta.cols());
-        for(auto i = 0; i < XBeta.size(); i++) XBetaTensor.storage()[i] = XBeta.data()[i];
+        for(auto i = 0; i < XBeta.size(); i++) 
+          XBetaTensor.storage()[i] = XBeta.data()[i];
         AXBetaTensor.fill(0.0);
      
         XTotalTensor = RealTensor2d(XAlpha.rows(),XBeta.cols());
@@ -62,25 +63,35 @@ namespace ChronusQ{
    
       if(doFock)  {
         if(RHF){
-          contract(1.0,*this->aoERI_,{i,j,k,l},XAlphaTensor,{l,k},0.0,AXAlphaTensor,{i,j});
-          if(!KS) contract(-0.5,*this->aoERI_,{i,l,k,j},XAlphaTensor,{l,k},1.0,AXAlphaTensor,{i,j});
+          contract(1.0,*this->aoERI_,{i,j,k,l},XAlphaTensor,{l,k},0.0,
+            AXAlphaTensor,{i,j});
+          if(!KS) contract(-0.5,*this->aoERI_,{i,l,k,j},XAlphaTensor,{l,k},1.0,
+                    AXAlphaTensor,{i,j});
         } else if(!doTCS) {
-          contract(1.0,*this->aoERI_,{i,j,k,l},XTotalTensor,{l,k},0.0,AXAlphaTensor,{i,j});
+          contract(1.0,*this->aoERI_,{i,j,k,l},XTotalTensor,{l,k},0.0,
+            AXAlphaTensor,{i,j});
           AXBetaTensor = AXAlphaTensor;
           if(!KS) {
-            contract(-1.0,*this->aoERI_,{i,l,k,j},XAlphaTensor,{l,k},1.0,AXAlphaTensor,{i,j});
-            contract(-1.0,*this->aoERI_,{i,l,k,j},XBetaTensor,{l,k},1.0,AXBetaTensor,{i,j});
+            contract(-1.0,*this->aoERI_,{i,l,k,j},XAlphaTensor,{l,k},1.0,
+              AXAlphaTensor,{i,j});
+            contract(-1.0,*this->aoERI_,{i,l,k,j},XBetaTensor,{l,k},1.0,
+              AXBetaTensor,{i,j});
           }
         } else if(doTCS) {
-          contract(1.0 ,*this->aoERI_,{i,j,k,l},XAlphaTensor,{l,k},0.0,AXAlphaTensor,{i,j});
-          if(!KS) contract(-1.0,*this->aoERI_,{i,l,k,j},XAlphaTensor,{l,k},1.0,AXAlphaTensor,{i,j});
+          contract(1.0 ,*this->aoERI_,{i,j,k,l},XAlphaTensor,{l,k},0.0,
+            AXAlphaTensor,{i,j});
+          if(!KS) contract(-1.0,*this->aoERI_,{i,l,k,j},XAlphaTensor,{l,k},1.0,
+                    AXAlphaTensor,{i,j});
         }
       } else if(do24) {
-        contract(1.0,*this->aoERI_,{i,k,j,l},XAlphaTensor,{k,l},0.0,AXAlphaTensor,{i,j});
+        contract(1.0,*this->aoERI_,{i,k,j,l},XAlphaTensor,{k,l},0.0,
+          AXAlphaTensor,{i,j});
       }
-      for(auto i = 0; i < AXAlpha.size(); i++) AXAlpha.data()[i] = AXAlphaTensor.storage()[i];
+      for(auto i = 0; i < AXAlpha.size(); i++) 
+        AXAlpha.data()[i] = AXAlphaTensor.storage()[i];
       if(!RHF && !doTCS && !do24)
-        for(auto i = 0; i < AXBeta.size(); i++) AXBeta.data()[i] = AXBetaTensor.storage()[i];
+        for(auto i = 0; i < AXBeta.size(); i++) 
+          AXBeta.data()[i] = AXBetaTensor.storage()[i];
     } // serial code
 #ifdef CQ_ENABLE_MPI
   // Syncronize MPI processes after PT build
