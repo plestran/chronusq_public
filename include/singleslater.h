@@ -701,6 +701,7 @@ public:
   /*************************/
   void mpiSend(int,int tag);
   void mpiRecv(int,int tag);
+  void mpiBCastDensity();
 };
 
 #include <singleslater_alloc.h>
