@@ -241,7 +241,7 @@ void AOIntegrals::computeSchwartz(){
 }
 void AOIntegrals::computeAOTwoE(){
   if(!this->haveSchwartz) this->computeSchwartz();
-
+  if(getRank() != 0) return;
 
 #ifdef _OPENMP
   int nthreads = omp_get_max_threads();
