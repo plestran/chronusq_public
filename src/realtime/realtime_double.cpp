@@ -317,6 +317,7 @@ void RealTime<double>::formUTrans() {
 //    if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS) prettyPrint(this->fileio_->out,(*this->uTransB_),"uTransB");
 };
   
+/*
 template<>
 void RealTime<double>::doPropagation() {
   long int iStep;
@@ -501,5 +502,6 @@ void RealTime<double>::doPropagation() {
 #endif
 
 };
+*/
 
 } // namespace ChronusQ
