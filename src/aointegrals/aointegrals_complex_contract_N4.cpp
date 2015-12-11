@@ -128,7 +128,6 @@ namespace ChronusQ{
 #ifdef CQ_ENABLE_MPI
   // Syncronize MPI processes after PT build
   MPI_Barrier(MPI_COMM_WORLD);
-  printf("Hello 1 %d:%d\n",getRank(),getSize());
 #endif
   }  // twoEContractN4
 }; // namespace ChronusQ

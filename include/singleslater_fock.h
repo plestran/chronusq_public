@@ -56,7 +56,6 @@ void SingleSlater<T>::formFock(){
 #ifdef CQ_ENABLE_MPI
   // Syncronize MPI processes before fock build
   MPI_Barrier(MPI_COMM_WORLD);
-  printf("Hello 2 %d:%d\n",getRank(),getSize());
 #endif
   
   if(!this->haveDensity) this->formDensity();
@@ -69,11 +68,7 @@ void SingleSlater<T>::formFock(){
   }
 #else
   // All MPI processes go to FormPT
-  MPI_Barrier(MPI_COMM_WORLD);
-  printf("Hello 3 %d:%d\n",getRank(),getSize());
   this->formPT();
-  MPI_Barrier(MPI_COMM_WORLD);
-  printf("Hello 4 %d:%d\n",getRank(),getSize());
 #endif
 
   if(getRank() == 0) {

@@ -82,12 +82,9 @@ def runSCF(workers,meta):
   # Allocate Space for Wavefunction Information
   workers["CQSingleSlater"].alloc()
 
-  print 'here 1'
   workers["CQSingleSlater"].formGuess()
-  print 'here 2'
 
   workers["CQSingleSlater"].formFock()
-  print 'here 3'
   workers["CQSingleSlater"].computeEnergy()
 
   workers["CQSingleSlater"].SCF()
