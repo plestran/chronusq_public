@@ -386,6 +386,10 @@ void RealTime<double>::doPropagation() {
       this->ssPropagator_->setField(this->EDField_);
     }
 
+#ifdef CQ_ENABLE_MPI
+    MPI_Bcast(&this->EDField_[0],3,MPI_DOUBLE,0,MPI_COMM_WORLD);
+#endif
+
     this->ssPropagator_->mpiBCastDensity();
     this->ssPropagator_->formFock();
     this->ssPropagator_->computeEnergy();
@@ -423,42 +427,47 @@ void RealTime<double>::doPropagation() {
         }
       }
 
-//    Propagate the density matrix
-
+    } // end serial code
   //  Populate information for printing.
-      PropInfo rec;
-        rec.timeStep  = this->currentTime_;
-        rec.energy    = this->ssPropagator_->totalEnergy;
-        rec.dipole[0] = (*this->ssPropagator_->dipole())(0)/phys.debye;
-        rec.dipole[1] = (*this->ssPropagator_->dipole())(1)/phys.debye;
-        rec.dipole[2] = (*this->ssPropagator_->dipole())(2)/phys.debye;
-        rec.dipole[3] = std::sqrt( std::pow(rec.dipole[0],2.0) +
-                                   std::pow(rec.dipole[1],2.0) +
-                                   std::pow(rec.dipole[2],2.0) );
-        rec.appliedfield[0] = this->EDField_[0];
-        rec.appliedfield[1] = this->EDField_[1];
-        rec.appliedfield[2] = this->EDField_[2];
-        rec.appliedfield[3] = std::sqrt( std::pow(rec.appliedfield[0],2.0) +
-                                   std::pow(rec.appliedfield[1],2.0) +
-                                   std::pow(rec.appliedfield[2],2.0) );
-        rec.mullPop    = (this->ssPropagator_->mullPop());
-        scratch = (initMOA.adjoint() * POA * initMOA);
+    PropInfo rec;
+      rec.timeStep  = this->currentTime_;
+      rec.energy    = this->ssPropagator_->totalEnergy;
+      rec.dipole[0] = (*this->ssPropagator_->dipole())(0)/phys.debye;
+      rec.dipole[1] = (*this->ssPropagator_->dipole())(1)/phys.debye;
+      rec.dipole[2] = (*this->ssPropagator_->dipole())(2)/phys.debye;
+      rec.dipole[3] = std::sqrt( std::pow(rec.dipole[0],2.0) +
+                                 std::pow(rec.dipole[1],2.0) +
+                                 std::pow(rec.dipole[2],2.0) );
+      rec.appliedfield[0] = this->EDField_[0];
+      rec.appliedfield[1] = this->EDField_[1];
+      rec.appliedfield[2] = this->EDField_[2];
+      rec.appliedfield[3] = std::sqrt( std::pow(rec.appliedfield[0],2.0) +
+                                 std::pow(rec.appliedfield[1],2.0) +
+                                 std::pow(rec.appliedfield[2],2.0) );
+    if(getRank() == 0) {
+      rec.mullPop    = (this->ssPropagator_->mullPop());
+      scratch = (initMOA.adjoint() * POA * initMOA);
+      for(auto idx = 0; idx != NTCSxNBASIS; idx++) {
+        rec.orbitalOccA.push_back(scratch(idx,idx).real());
+      }
+      if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS){
+        scratch = (initMOB.adjoint() * POB * initMOB);
         for(auto idx = 0; idx != NTCSxNBASIS; idx++) {
-          rec.orbitalOccA.push_back(scratch(idx,idx).real());
+          rec.orbitalOccB.push_back(scratch(idx,idx).real());
         }
-        if(!this->isClosedShell_ && this->Ref_ != SingleSlater<double>::TCS){
-          scratch = (initMOB.adjoint() * POB * initMOB);
-          for(auto idx = 0; idx != NTCSxNBASIS; idx++) {
-            rec.orbitalOccB.push_back(scratch(idx,idx).real());
-          }
-        }
+      }
+    }
+    if(getRank() == 0) {
       this->writeDipoleCSV(rec,iStep);
       this->writeAppliedFieldCSV(rec,iStep);
       this->writeMullikenCSV(rec,iStep);
       this->writeOrbitalCSV(rec,iStep);
+    }
      
-      this->propInfo.push_back(rec);
+    this->propInfo.push_back(rec);
      
+    if(getRank() == 0){
+//    Propagate the density matrix
       scratch = POA;
       POA     = uTransA * scratch * uTransA.adjoint();
      
@@ -474,6 +483,7 @@ void RealTime<double>::doPropagation() {
         (*this->ssPropagator_->densityB()) = oTrans1.adjoint() * POB * oTrans1;
       }
     } // end serial code
+
 //  Advance step
     currentTime_ += this->stepSize_;
 #ifdef CQ_ENABLE_MPI
