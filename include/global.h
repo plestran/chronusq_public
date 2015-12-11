@@ -48,6 +48,9 @@
 #include <Eigen/Core> // Eigen Linear Algebra
 #include <Eigen/SparseCore> // Eigen Sparse Linear Algebra
 #include <unsupported/Eigen/MatrixFunctions>
+#ifdef CQ_ENABLE_MPI
+#  define EIGEN_DONT_PARALLELIZE
+#endif
 #ifdef USE_LIBINT
 #  include <libint2.hpp> // Libint Gaussian Integrals library
 #endif
@@ -56,7 +59,10 @@
 
 // Parallelization
 #ifdef _OPENMP
-#include <omp.h>
+#  include <omp.h>
+#endif
+#ifdef CQ_ENABLE_MPI
+#  include <mpi.h>
 #endif
 //#include "oompi.h"
 //#include <pthread.h>
@@ -66,6 +72,7 @@
 #include <boost/math/constants/constants.hpp>
 #include <boost/python.hpp>
 #include <boost/math/special_functions/gamma.hpp>
+#include <boost/math/special_functions/asinh.hpp>
 #include <boost/algorithm/string.hpp>
 
 // Misc
@@ -212,27 +219,6 @@ struct Phys {
 };
 const Phys phys = {0.5291772083000001,0.393430307,27.211396132,45.56335,0.02418884326505,
                    137.035999139};
-
-
-//------------------//
-// IO block numbers //
-//------------------//
-enum {blockControlFlags,blockMolecule,blockBasisSet, // 1,2,3
-      blockSingleSlater,blockIntegrals};  // 4,5,6
-
-/**
- *  Information pertaining to MPI realated states
- */
-struct GlobalMPI {
-  int  myid; ///< Global rank of current process
-  int  size; ///< Total number of processes
-//  char nodeName[MPI_MAX_PROCESSOR_NAME];;
-  int  nodeNameLen; ///< Length of process name
-};
-//---------//
-//MPI Tags //
-//---------//
-enum {tagMolecule,tagMatrix,tagBasisSet,tagSingleSlater,tagIntegrals,tagSDResponse};
 
 #include <clapack.h> // Extern "C" defs for LAPACK routines (require "_" extension)
 

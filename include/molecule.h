@@ -140,8 +140,8 @@ public:
   /*************************/
   /* MPI Related Routines  */
   /*************************/
-  void mpiSend(int,int tag=tagMolecule);
-  void mpiRecv(int,int tag=tagMolecule);
+  void mpiSend(int,int);
+  void mpiRecv(int,int);
 };
 } // namespace ChronusQ
 #endif

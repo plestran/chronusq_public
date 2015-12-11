@@ -200,27 +200,38 @@ void SingleSlater<double>::evalConver(int iter){
   double EDelta;
   double PAlphaRMS;
   double PBetaRMS;
+  RealMap POldAlpha (this->POldAlphaMem_,0,0);
+  RealMap POldBeta  (this->POldAlphaMem_,0,0);
 
-  RealMap POldAlpha(this->POldAlphaMem_,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
-  RealMap POldBeta(this->POldBetaMem_,0,0);
-  if(!this->isClosedShell && this->Ref_ != TCS){
-    new (&POldBeta)  RealMap(this->POldBetaMem_, this->nBasis_,this->nBasis_);
+  if(getRank() == 0) {
+    new (&POldAlpha) RealMap(
+      this->POldAlphaMem_,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_
+    );
+    if(!this->isClosedShell && this->Ref_ != TCS){
+      new (&POldBeta) RealMap(this->POldBetaMem_, this->nBasis_,this->nBasis_);
+    }
+ 
+    EOld = this->totalEnergy;
   }
-
-  EOld = this->totalEnergy;
   this->computeEnergy();
-  EDelta = this->totalEnergy - EOld;
-
-  PAlphaRMS = ((*this->densityA_) - POldAlpha).norm();
-  if(!this->isClosedShell && this->Ref_ != TCS) PBetaRMS = ((*this->densityB_) - POldBeta).norm();
-
-//if(this->isClosedShell)    this->printDensityInfo(PAlphaRMS,EDelta);
-//else if(this->Ref_ != TCS) this->printDensityInfo(PAlphaRMS,PBetaRMS,EDelta);
-  if(this->printLevel_ > 0) this->printSCFIter(iter,EDelta,PAlphaRMS,PBetaRMS);
-  this->isConverged = (PAlphaRMS < this->denTol_) && (std::pow(EDelta,2) < this->eneTol_);
-  if(!this->isClosedShell)
-    this->isConverged = this->isConverged && (PBetaRMS < this->denTol_);
-  if(this->isPrimary) this->writeSCFFiles();
+  if(getRank() == 0) {
+    EDelta = this->totalEnergy - EOld;
+ 
+    PAlphaRMS = ((*this->densityA_) - POldAlpha).norm();
+    if(!this->isClosedShell && this->Ref_ != TCS) 
+      PBetaRMS = ((*this->densityB_) - POldBeta).norm();
+ 
+    if(this->printLevel_ > 0) 
+      this->printSCFIter(iter,EDelta,PAlphaRMS,PBetaRMS);
+    this->isConverged = (PAlphaRMS < this->denTol_) && 
+                        (std::pow(EDelta,2) < this->eneTol_);
+    if(!this->isClosedShell)
+      this->isConverged = this->isConverged && (PBetaRMS < this->denTol_);
+    if(this->isPrimary) this->writeSCFFiles();
+  }
+#ifdef CQ_ENABLE_MPI
+  MPI_Bcast(&this->isConverged,1,MPI_LOGICAL,0,MPI_COMM_WORLD);
+#endif
 }
 
 template<>

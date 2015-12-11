@@ -13,6 +13,7 @@ option(USE_LIBINT "Use LibInt Integral Driver"  ON) # Default Libint
 option(BUILD_LA   "Build LAPACK and BLAS locally" OFF)
 option(BUILD_LIBINT "Build Libint via cmake" ON)
 option(CQ_ENABLE_ATLAS "Whether or not to search for ATLAS" OFF)
+option(CQ_ENABLE_MPI "Enable MPI Parallelism" OFF)
 
 # Check for C++11
 include(CheckCXXCompilerFlag)
@@ -32,8 +33,16 @@ find_package(PythonInterp 2.6 REQUIRED)
 #find_package(Boost REQUIRED python)
 find_package(Eigen3 REQUIRED)
 find_package(HDF5 REQUIRED CXX)
-find_package(OpenMP)
 find_program(RSYNC_EXECUTABLE rsync)
+
+if(CQ_ENABLE_MPI)
+  find_package(MPI)
+  if(NOT MPI_CXX_FOUND)
+    message(FATAL "Suitable CXX binding for MPI not found")
+  endif()
+else()
+  find_package(OpenMP)
+endif()
 
 
 # Define include directories
@@ -42,11 +51,20 @@ include_directories("${PROJECT_BINARY_DIR}/include")
 include_directories("${EIGEN3_INCLUDE_DIR}")
 include_directories("${HDF5_INCLUDE_DIRS}")
 include_directories("${PYTHON_INCLUDE_DIRS}")
+if(CQ_ENABLE_MPI)
+  include_directories("${MPI_CXX_INCLUDE_PATH}")
+endif()
 
 
 # Append flags for compilation
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+if(CQ_ENABLE_MPI)
+  # MPI Compile flags
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MPI_CXX_COMPILE_FLAGS}")
+else()
+  # OpenMP flags
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+endif()
 
 include(ExternalProject)
 
@@ -130,6 +148,9 @@ endif()
 
 set(EXTERNAL_CQ_DEPS ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${LA_LINK} 
   ${LIBINT_LIB} m ${OpenMP_CXX_FLAGS} ${HDF5_CXX_LIBRARIES})
+if(CQ_ENABLE_MPI)
+  set(EXTERNAL_CQ_DEPS ${EXTERNAL_CQ_DEPS} ${MPI_CXX_LIBRARIES})
+endif()
 
 # Set configure time variables
 set(BASIS_PATH "${PROJECT_SOURCE_DIR}/basis")

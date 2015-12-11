@@ -20,6 +20,12 @@ namespace ChronusQ{
 
   void Wrapper_CErr_Default(FileIO &);
   void Wrapper_CErr_Message(FileIO &, std::string );
-  inline void CQSetNumThreads(int n) {omp_set_num_threads(n);};
+  inline void CQSetNumThreads(int n) {
+#ifdef _OPENMP
+    omp_set_num_threads(n);
+#endif
+     int h = 0;
+  };
   int getAtomicNumber(int);
+  void Wrapper_initCQ(int,boost::python::list);
 }

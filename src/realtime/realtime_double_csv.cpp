@@ -108,7 +108,9 @@ void RealTime<double>::writeOrbitalCSV(PropInfo & ref, long int & iStep){
 template<>
 void RealTime<double>::tarCSVFiles(){
 #ifdef UNIX
-  this->fileio_->out << "Tarring CSV files for Real-Time Propagation...";
+  this->fileio_->out << "Tarring CSV files for Real-Time Propagation..." 
+                     << endl;
+
   if(!system(NULL)) CErr("Cannot find available processor",this->fileio_->out);
   std::string command = "tar -cf " + this->fileio_->fileName() + ".tar ";
   for(auto i = this->csvFiles.begin(); i != this->csvFiles.end(); i++)

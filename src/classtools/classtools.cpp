@@ -385,7 +385,7 @@ void printUnitInfo(Controls * controls, SingleSlater<dcomplex> * singleSlater, S
     }
 }
 
-void initCQ(){
+void initCQ(int argc, char** argv){
 #ifdef USE_LIBINT
   // Bootstrap Libint env
   libint2::init(); 
@@ -394,13 +394,23 @@ void initCQ(){
   // Set up Thread Pool (Default serial)
   omp_set_num_threads(1);
 #endif
-
+#ifdef CQ_ENABLE_MPI
+  int flag;
+  MPI_Initialized(&flag);
+  if(flag) return;
+  MPI_Init(&argc,&argv);
+  MPI_Barrier(MPI_COMM_WORLD);
+#endif
 }
 
 void finalizeCQ(){
   // Cleanup Libint env
 #ifdef USE_LIBINT
   libint2::cleanup();
+#endif
+
+#ifdef CQ_ENABLE_MPI
+  MPI_Finalize();
 #endif
 }
 

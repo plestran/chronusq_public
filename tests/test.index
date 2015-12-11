@@ -607,3 +607,9 @@ test0133_serial_direct.inp - Real UKS-SCF-SVWN5 - STO-3G  - Small Serial - Direc
 #test0135_serial_direct.inp - Real UKS-SCF-SVWN5 - cc-pVDZ - Small Serial - Direct  Integrals (6D)
 #test0135_smp_incore.inp    - Real UKS-SCF-SVWN5 - cc-pVDZ - Small OpenMP - In-Core Integrals (6D)
 #test0135_smp_direct.inp    - Real UKS-SCF-SVWN5 - cc-pVDZ - Small OpenMP - Direct  Integrals (6D)
+test0136_serial_incore.inp - Real RKS-SCF-GGA-B88 - STO-3G  - Small Serial - In-Core Integrals
+test0136_serial_direct.inp - Real RKS-SCF-GGA-B88 - STO-3G  - Small Serial - Direct  Integrals
+test0136_smp_incore.inp    - Real RKS-SCF-GGA-B88 - STO-3G  - Small OpenMP - In-Core Integrals
+test0137_serial_incore.inp - Real UKS-SCF-GGA-B88 - STO-3G  - Small Serial - In-Core Integrals
+test0137_serial_direct.inp - Real UKS-SCF-GGA-B88 - STO-3G  - Small Serial - Direct  Integrals
+test0137_smp_direct.inp    - Real UKS-SCF-GGA-B88 - STO-3G  - Small OpenMP - Direct  Integrals

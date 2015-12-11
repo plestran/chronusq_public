@@ -45,7 +45,7 @@ void readInput(FileIO *,Molecule *, BasisSet *, Controls *, BasisSet * dfBasis=N
 void printUnitInfo(Controls *, SingleSlater<double> *, SDResponse<double> *, RealTime<double> *);
 void printUnitInfo(Controls *, SingleSlater<dcomplex> *, SDResponse<double> *, RealTime<dcomplex> *);
 
-void initCQ();
+void initCQ(int argc, char **argv);
 void finalizeCQ();
 template<typename T> void writeJobMeta(SingleSlater<T>&,SDResponse<T>&,
   RealTime<T>&,Molecule&,AOIntegrals&,FileIO&);

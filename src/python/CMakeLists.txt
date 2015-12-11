@@ -10,7 +10,7 @@ realtime_api.cpp)
 
 target_link_libraries(pythonapi LINK_PUBLIC basisset classtools controls
 mointegrals molecule tools sdresponse realtime mollerplesset singleslater 
-aointegrals worker quasinewton grid fileio cerr gauinterface 
+aointegrals worker quasinewton grid fileio cerr gauinterface tools 
 ${EXTERNAL_CQ_DEPS})
 
 set(APIINST ${PROJECT_BINARY_DIR}/src/python)

@@ -108,6 +108,7 @@ class SingleSlater {
   int dftGrid_;
   int nRadDFTGridPts_;
   int nAngDFTGridPts_;
+  double nElectrons_;
 
   // Internal Storage
   std::unique_ptr<TMatrix>  densityA_;   ///< Alpha or Full (TCS) Density Matrix
@@ -128,8 +129,12 @@ class SingleSlater {
   std::unique_ptr<TMatrix>  vXB_;        ///< Beta VXC
   std::unique_ptr<TMatrix>  vCorA_;        ///< Alpha or Full Vcorr
   std::unique_ptr<TMatrix>  vCorB_;        ///< Beta Vcorr
+  std::vector<RealSparseMatrix>  sparsedmudX_; ///< basis derivative (x) (NbasisxNbasis)
+  std::vector<RealSparseMatrix>  sparsedmudY_; ///< basis derivative (y) (NbasisxNbasis)
+  std::vector<RealSparseMatrix>  sparsedmudZ_; ///< basis derivative (z) (NbasisxNbasis) 
   std::vector<RealSparseMatrix> sparseMap_;     // BasisFunction Map 
   std::vector<RealSparseMatrix> sparseWeights_; // Weights Map
+  std::vector<RealSparseMatrix> sparseDoRho_; // Evaluate density Map
 
   std::unique_ptr<RealMatrix>  dipole_;  ///< Electric Dipole Moment
   std::unique_ptr<RealMatrix>  quadpole_; ///< Electric Quadrupole Moment
@@ -293,13 +298,15 @@ public:
   enum CORR {
     NOCORR,
     VWN3,
-    VWN5
+    VWN5,
+    LYP
   };
 
   enum EXCH {
     NOEXCH,
     EXACT,
-    SLATER
+    SLATER,
+    B88
   };
 
   enum DFT_GRID {
@@ -324,6 +331,7 @@ public:
   bool  isDFT;
   bool  isPrimary;
   bool  doDIIS;
+  bool  isGGA;
 
   double   energyOneE; ///< One-bodied operator tensors traced with Density
   double   energyTwoE; ///< Two-bodied operator tensors traced with Density
@@ -435,6 +443,7 @@ public:
     this->epsScreen     = 1.0e-10;
     this->nRadDFTGridPts_ = 100;
     this->nAngDFTGridPts_ = 302;
+    this->isGGA = false;
 
     // FIXME: maybe hardcode these?
     this->epsConv       = 1.0e-7;
@@ -567,6 +576,10 @@ public:
   inline std::string SCFType()           { return this->SCFType_;                 };
   inline int         guess()             { return this->guess_;                   };
 
+  inline void checkDFTType(){
+    if(this->CorrKernel_ == LYP || this->ExchKernel_ == B88)
+      this->isGGA = true;
+  };
   void formGuess();	        // form the intial guess
   void SADGuess();
   void COREGuess();
@@ -582,14 +595,19 @@ public:
   void formVXC_store();               // Form DFT VXC Term
   void genSparseBasisMap();     // Generate Basis Set Mapping
   void evalVXC_store(int, int, double &, double &,RealMatrix *, RealMatrix *,
-         RealMatrix *, RealMatrix *, RealMatrix *);
+         RealMatrix *, RealMatrix *, RealMatrix *,RealMatrix *,RealMatrix *,RealMatrix *);
   void evalVXC(cartGP, double, std::vector<bool>, double &, double &,RealMatrix *, RealMatrix *,
                  RealMatrix *, RealMatrix*); // evaluate DFT VXC Matrix Term( at a given pts)
   std::array<double,3 > formVC (double, double);    // Form DFT correlarion density,potential (A and B)
+  std::array<double,3 > formVCGGA (double, double, double, double);    // Form DFT GGA correlarion density,potential (A and B)
   std::array<double,3 > formVCVWN (double, double); // Form DFT VWN correlation (VWN3 and VWN5)
-  std::array<double,3 > formVEx (double, double); // Form DFT exchange density, potential (A and B)  
-  std::array<double,3 > formVExSlater (double, double); // Form DFT Slater exchange
+  std::array<double,3 > formVCLYP (double, double, double, double); // Form DFT LYP correlation 
+  std::array<double,5 > formVEx (double, double); // Form DFT exchange density, potential (A and B)  
+  std::array<double,5 > formVExGGA (double, double, double, double);    // Form DFT GGA Exchange density,potential (A and B)
+  std::array<double,5 > formVExSlater (double, double); // Form DFT Slater exchange
+  std::array<double,5 > formVExB88 (double, double, double, double); // Form DFT Becke88 exchange
   double EvepsVWN(int iop,double a_x, double b_x, double c_x, double x0_x, double rho ); // Form DFT correlarion potential 
+  double gB88(int, double);                   //funtion used in B88 Exchange
   double f_spindens(int iop, double spindens);  // define f(spindendity)
   double df_spindens(double spindens);  // define df(spindendity)/dspindensity
   double df2_spindens(double spindens);  // define df2(spindendity)/dspindensity2
@@ -681,8 +699,9 @@ public:
   /*************************/
   /* MPI Related Routines  */
   /*************************/
-  void mpiSend(int,int tag=tagSingleSlater);
-  void mpiRecv(int,int tag=tagSingleSlater);
+  void mpiSend(int,int tag);
+  void mpiRecv(int,int tag);
+  void mpiBCastDensity();
 };
 
 #include <singleslater_alloc.h>

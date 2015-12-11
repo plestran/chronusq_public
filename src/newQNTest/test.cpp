@@ -3,7 +3,7 @@
 #include <pythonapi.h>
 
 using namespace ChronusQ;
-int main(){
+int main(int argc, char **argv){
   Molecule molecule;
   BasisSet basis;
   Controls controls;
@@ -13,7 +13,7 @@ int main(){
   Response<double> resp;
   FileIO fileio("test.inp","test.out");
 
-  initCQ();
+  initCQ(argc,argv);
   controls.iniControls();
   fileio.iniH5Files();
   fileio.iniStdGroups();

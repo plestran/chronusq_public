@@ -109,7 +109,11 @@ def parseQM(workers,secDict):
     if ssSettings['JOB'] in ('RT'):
       parseRT(workers,secDict['RT']) 
     elif ssSettings['JOB'] in ('RPA','CIS','STAB','PPRPA','PPATDA','PPCTDA'):
-      parseSDR(workers,secDict)
+      if chronusQ.getSize() > 1:
+        msg = "Response cannot run with >1 MPI Processes"
+        CErrMsg(workers['CQFileIO'],msg)
+      else:
+        parseSDR(workers,secDict)
   else:
     msg = 'QM.Job ' + str(ssSettings['JOB']) + ' not recognized'
     CErrMsg(workers['CQFileIO'],str(msg))
@@ -198,6 +202,7 @@ def handleReference(workers,settings):
       msg = msg + " for user defined QM.KS reference"
       CErrMsg(workers['CQFileIO'],str(msg))
 
+
     if 'DFT_GRID' in settings:
       workers["CQSingleSlater"].setDFTGrid(gridMap[settings['DFT_GRID']])
     if 'DFT_WEIGHTS' in settings:
@@ -231,6 +236,7 @@ def handleReference(workers,settings):
       msg = "Specified Exchange Kernel is not Defined"
       CErrMsg(workers['CQFileIO'],str(msg))
 
+    workers["CQSingleSlater"].checkDFTType()
   elif 'RKS' in ref:
     # Force RKS
     if mult != 1:
@@ -254,6 +260,7 @@ def handleReference(workers,settings):
       msg = msg + " for user defined QM.KS reference"
       CErrMsg(workers['CQFileIO'],str(msg))
 
+
     if 'DFT_GRID' in settings:
       workers["CQSingleSlater"].setDFTGrid(gridMap[settings['DFT_GRID']])
     if 'DFT_WEIGHTS' in settings:
@@ -287,6 +294,8 @@ def handleReference(workers,settings):
     except KeyError:
       msg = "Specified Exchange Kernel is not Defined"
       CErrMsg(workers['CQFileIO'],str(msg))
+
+    workers["CQSingleSlater"].checkDFTType()
   elif 'UKS' in ref:
     # forch uhf
     workers["CQSingleSlater"].setRef(chronusQ.Reference.UHF)
@@ -340,6 +349,7 @@ def handleReference(workers,settings):
       msg = "Specified Exchange Kernel is not Defined"
       CErrMsg(workers['CQFileIO'],str(msg))
 
+    workers["CQSingleSlater"].checkDFTType()
   elif 'CUKS' in ref:
     # Use Constrained UHF (not complex UHF) 
     workers["CQSingleSlater"].setRef(chronusQ.Reference.CUHF)
@@ -358,6 +368,7 @@ def handleReference(workers,settings):
       msg = "Must specify both Correlation and Exchange Kernel\n"
       msg = msg + " for user defined QM.KS reference"
       CErrMsg(workers['CQFileIO'],str(msg))
+
 
     if 'DFT_GRID' in settings:
       workers["CQSingleSlater"].setDFTGrid(gridMap[settings['DFT_GRID']])
@@ -392,6 +403,7 @@ def handleReference(workers,settings):
       msg = "Specified Exchange Kernel is not Defined"
       CErrMsg(workers['CQFileIO'],str(msg))
 
+    workers["CQSingleSlater"].checkDFTType()
   elif 'LSDA' in ref:
     # Smartly figure out of reference is R/U
     if mult == 1:

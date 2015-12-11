@@ -64,8 +64,9 @@ def runSCF(workers,meta):
   # Print some information pertaining to the job
   # FIXME: These two are general and should always be printed
   #        regardless of job
-  workers["CQMolecule"].printInfo(workers["CQFileIO"])
-  workers["CQBasisSet"].printInfo();
+  if chronusQ.getRank() == 0:
+    workers["CQMolecule"].printInfo(workers["CQFileIO"])
+    workers["CQBasisSet"].printInfo();
 
   
   # Set Up AOIntegrals Metadata
@@ -77,16 +78,20 @@ def runSCF(workers,meta):
 
   # Allocate Space for AO Integrals
   workers["CQAOIntegrals"].alloc()
-
+ 
   # Allocate Space for Wavefunction Information
   workers["CQSingleSlater"].alloc()
 
   workers["CQSingleSlater"].formGuess()
+
   workers["CQSingleSlater"].formFock()
   workers["CQSingleSlater"].computeEnergy()
+
   workers["CQSingleSlater"].SCF()
+
   workers["CQSingleSlater"].computeProperties()
-  workers["CQSingleSlater"].printProperties()
+  if chronusQ.getRank() == 0:
+    workers["CQSingleSlater"].printProperties()
 
   meta.E          = workers["CQSingleSlater"].totalEnergy
   meta.scfIters   = workers["CQSingleSlater"].nSCFIter
@@ -97,21 +102,26 @@ def runSCF(workers,meta):
 def runRT(workers,meta):
   runSCF(workers,meta)
   workers["CQRealTime"].initMeta()
+
   workers["CQRealTime"].alloc()
-  workers["CQRealTime"].iniDensity()
+  if chronusQ.getRank() == 0:
+    workers["CQRealTime"].iniDensity()
   workers["CQRealTime"].doPropagation()
 
   meta.lastDipole = workers['CQRealTime'].lastDipole()
   meta.lastEnergy = workers['CQRealTime'].lastEnergy()
 
 def runSDR(workers,meta):
+
   runSCF(workers,meta)
   workers["CQMOIntegrals"].initMeta()
   workers["CQSDResponse"].initMeta()
   workers["CQSDResponse"].setPPRPA(1)
-  workers["CQSDResponse"].initMeth()
-  workers["CQSDResponse"].alloc()
-  workers["CQSDResponse"].IterativeRESP()
+  if chronusQ.getRank() == 0:
+    workers["CQSDResponse"].initMeth()
+    workers["CQSDResponse"].alloc()
+    workers["CQSDResponse"].IterativeRESP()
+
   meta.davIters = workers["CQSDResponse"].nIter
   meta.excEne   = workers["CQSDResponse"].excitationEnergies()
   meta.oscStr   = workers["CQSDResponse"].oscStrengths()
