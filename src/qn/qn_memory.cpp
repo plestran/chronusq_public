@@ -51,4 +51,20 @@ void QuasiNewton2<dcomplex>::allocScrSpecial(){
     this->RWORK_ = new   double[this->LRWORK];
   }
 }
+
+template<>
+void QuasiNewton2<double>::cleanupScrSpecial(){
+  if(this->problemType_ == DIAGONALIZATION){
+    delete [] this->ERMem_;
+    if(this->matrixType_ != HERMETIAN) delete [] this->EIMem_;
+  }
+};
+
+template<>
+void QuasiNewton2<dcomplex>::cleanupScrSpecial(){
+  if(this->problemType_ == DIAGONALIZATION){
+    delete [] this->ECMem_; 
+    delete [] this->RWORK_; 
+  }
+}
 }; // namespace ChronusQ

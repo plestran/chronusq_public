@@ -355,6 +355,7 @@ public:
       this->diag_         = &this->rmDiag_[iMat];
 
       QuasiNewton2<T> qn(this);
+      qn.run();
     }
   };
 

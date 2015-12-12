@@ -129,6 +129,8 @@ namespace ChronusQ {
     inline TMat     * solutionVecR() { return this->solutionVecR_; };
     inline TMat     * solutionVecL() { return this->solutionVecL_; };
 
+    inline H5::H5File  * scratchFile(){ return this->scratchFile_; };
+    inline H5::DataSet * guessFile()  { return this->guessFile_;   };  
 
     virtual void linearTrans(TMap &,TMap &,TMap &,TMap &,TMap &,TMap &) = 0;
     virtual void formGuess() = 0;
@@ -237,6 +239,8 @@ namespace ChronusQ {
 
     void allocScr();
     void allocScrSpecial();
+    void cleanupScr();
+    void cleanupScrSpecial();
 
 
   public:
@@ -245,7 +249,7 @@ namespace ChronusQ {
     void runMicro();
 
     // Procedural Functions
-    void readGuess(){;};
+    void readGuess();
     void symmetrizeTrial(){;};
     void formLinearTrans(const int, const int);
 

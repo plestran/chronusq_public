@@ -26,7 +26,7 @@
 
 template<typename T>
 void QuasiNewton2<T>::allocScr(){
-
+  (*this->out_) << "Allocating Memory for QuasiNewton Calculation" << endl;
   // Linear Dimensions
   auto N      = this->qnObj_->nSingleDim();
   auto NMSS   = N*this->maxSubSpace_;
@@ -67,4 +67,38 @@ void QuasiNewton2<T>::allocScr(){
   }
 
   this->allocScrSpecial();
+};
+
+template<typename T>
+void QuasiNewton2<T>::cleanupScr(){
+  (*this->out_) << "Deallocating Memory for QuasiNewton Calculation" << endl;
+
+  delete [] this->TRMem_       ;
+  delete [] this->SigmaRMem_   ; 
+  delete [] this->XTSigmaRMem_ ;
+  delete [] this->ResRMem_     ;
+  delete [] this->URMem_       ;
+
+  if(this->matrixType_ == HERMETIAN_GEP){
+    delete [] this->RhoRMem_  ; 
+    delete [] this->XTRhoRMem_; 
+  }
+
+  if(this->qnObj_->needsLeft()){
+    delete [] this->TLMem_      ; 
+    delete [] this->SigmaLMem_  ; 
+    delete [] this->XTSigmaLMem_; 
+    delete [] this->ResLMem_    ; 
+    delete [] this->ULMem_      ; 
+ 
+    if(this->matrixType_ == HERMETIAN_GEP){
+      delete [] this->RhoLMem_  ; 
+      delete [] this->XTRhoLMem_; 
+    }
+  }
+
+  if(this->problemType_ == DIAGONALIZATION)
+    delete [] this->WORK;
+
+  this->cleanupScrSpecial();
 };

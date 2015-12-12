@@ -30,8 +30,8 @@ void QuasiNewton2<T>::run(){
 
   time(&currentClockTime);
 
-  this->out_ << "Quasi-Newton Calculation Started: " << 
-                ctime(&currentClockTime) << endl;
+  (*this->out_) << "Quasi-Newton Calculation Started: " << 
+                ctime(&currentClockTime);
 
   this->allocScr();
   auto start = std::chrono::high_resolution_clock::now();
@@ -40,26 +40,29 @@ void QuasiNewton2<T>::run(){
     if(this->isConverged_) break;
   };
   auto finish = std::chrono::high_resolution_clock::now();
+  this->cleanupScr();
 
   std::chrono::duration<double> elapsed = finish - start;
   time(&currentClockTime);
+  (*this->out_) << "Quasi-Newton Calculation Completed: " << 
+                ctime(&currentClockTime);
 
 
 }; // QuasiNewton2<T>::run
 
 template<typename T>
 void QuasiNewton2<T>::runMicro(){
-  int NTrial = this->nGuess_;
+  int NTrial = this->qnObj_->nGuess();
   int NOld   = 0;
-  int NNew   = this->nGuess_;
+  int NNew   = this->qnObj_->nGuess();
 
 
   this->readGuess();
   if(this->specialAlgorithm_ == SYMMETRIZED_TRIAL) this->symmetrizeTrial(); 
 
   for(auto iter = 0; iter < this->maxMicroIter_; iter++){
-    this->formLinearTrans(NOld,NNew);
-    CErr();
+  //this->formLinearTrans(NOld,NNew);
+  //CErr();
   };
 }; // QuasiNewton2<T>::runMicro
 
