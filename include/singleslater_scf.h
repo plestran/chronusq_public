@@ -322,7 +322,6 @@ void SingleSlater<T>::SCF(){
                          << "  SCF Iterations" << endl;
     }
     this->fileio_->out << bannerEnd <<endl;
-    prettyPrint(this->fileio_->out,(*this->epsA_),"EPSA");
   }
 }
 
