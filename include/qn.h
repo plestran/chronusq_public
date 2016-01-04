@@ -252,6 +252,12 @@ namespace ChronusQ {
     void readGuess();
     void symmetrizeTrial(){;};
     void formLinearTrans(const int, const int);
+    void fullProjection(const int);
+    void reducedDimDiag(const int);
+
+    // Diagonalization Routines
+    void stdHermetianDiag(const int);
+    void stdNonHermetianDiag(const int);
 
     #include <qn_constructors.h>
 

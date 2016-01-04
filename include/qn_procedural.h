@@ -61,7 +61,9 @@ void QuasiNewton2<T>::runMicro(){
   if(this->specialAlgorithm_ == SYMMETRIZED_TRIAL) this->symmetrizeTrial(); 
 
   for(auto iter = 0; iter < this->maxMicroIter_; iter++){
-  //this->formLinearTrans(NOld,NNew);
+    this->formLinearTrans(NOld,NNew);
+    this->fullProjection(NTrial);
+    this->reducedDimDiag(NTrial);
   //CErr();
   };
 }; // QuasiNewton2<T>::runMicro
@@ -70,6 +72,7 @@ void QuasiNewton2<T>::runMicro(){
 template<typename T>
 void QuasiNewton2<T>::formLinearTrans(const int NOld, const int NNew){
   auto N = this->qnObj_->nSingleDim();
+
   TMap NewSR  (this->SigmaRMem_ + (NOld*N),N,NNew);
   TMap NewVecR(this->TRMem_     + (NOld*N),N,NNew);
 
@@ -86,4 +89,39 @@ void QuasiNewton2<T>::formLinearTrans(const int NOld, const int NNew){
   }
 
   this->qnObj_->linearTrans(NewVecR,NewVecL,NewSR,NewSL,NewRhoR,NewRhoL);
-};
+}; // QuasiNewston<T>::formLinearTrans
+
+template<typename T>
+void QuasiNewton2<T>::fullProjection(const int NTrial){
+  auto N = this->qnObj_->nSingleDim();
+
+  TMap SigmaR  (this->SigmaRMem_  , N     , NTrial);
+  TMap XTSigmaR(this->XTSigmaRMem_, NTrial, NTrial);
+  TMap TVecR   (this->TRMem_      , N     , NTrial);
+
+  TMap SigmaL  (this->SigmaLMem_  , 0, 0);
+  TMap XTSigmaL(this->XTSigmaLMem_, 0, 0);
+  TMap TVecL   (this->TLMem_      , 0, 0);
+  TMap RhoR    (this->RhoRMem_    , 0, 0);
+  TMap XTRhoR  (this->XTRhoRMem_  , 0, 0);
+  TMap RhoL    (this->RhoLMem_    , 0, 0);
+  TMap XTRhoL  (this->XTRhoLMem_  , 0, 0);
+
+  if(this->qnObj_->needsLeft()){
+    new (&SigmaL  ) TMap(this->SigmaLMem_  , N     , NTrial);
+    new (&XTSigmaL) TMap(this->XTSigmaLMem_, NTrial, NTrial);
+    new (&TVecL   ) TMap(this->TLMem_      , N     , NTrial);
+    new (&RhoR    ) TMap(this->RhoRMem_    , N     , NTrial);
+    new (&XTRhoR  ) TMap(this->XTRhoRMem_  , NTrial, NTrial);
+    new (&RhoL    ) TMap(this->RhoLMem_    , N     , NTrial);
+    new (&XTRhoL  ) TMap(this->XTRhoLMem_  , NTrial, NTrial);
+  }
+
+  XTSigmaR = TVecR.adjoint() * SigmaR;
+  if(this->qnObj_->needsLeft()){
+    XTRhoR   = TVecR.adjoint() * RhoR;
+    XTSigmaL = TVecL.adjoint() * SigmaL;
+    XTRhoL   = TVecL.adjoint() * RhoL;
+  }
+}; // QuasiNewton2<T>::fullProjection
+
