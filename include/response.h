@@ -328,7 +328,7 @@ public:
   inline void full() {
     if(this->singleSlater_->aointegrals()->integralAlgorithm != 
        AOIntegrals::INCORE)
-      CErr("Full Response Problems Require InCore Integrals",
+      CErr("Full Response Problems Require In-Core Integrals",
         this->fileio_->out);
  
     if(this->iClass_ == FOPPA) this->fullFOPPA();
@@ -345,10 +345,10 @@ public:
   inline void IterativeResponse(){
     this->formDiag();
     this->formGuess();
+    this->nGuess_     = this->nSek_; // Quick Hack to get things working
     for(auto iMat = 0; iMat != iMatIter_.size(); iMat++){
       this->currentMat_ = this->iMatIter_[iMat];
       this->nSingleDim_ = this->nMatDim_[iMat];  
-      this->nGuess_     = this->nSek_; // Quick Hack to get things working
       this->solutionVecR_ = &this->transDen_[iMat];
       this->omega_        = &this->frequencies_[iMat];
       this->guessFile_    = this->guessFiles_[iMat];

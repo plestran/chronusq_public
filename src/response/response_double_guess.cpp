@@ -259,7 +259,10 @@ void Response<double>::formGuess(){
 
     // Create a new scratch file to store guess vectors
     std::string name = "ResponseGuess"+std::to_string(iMat);
-    hsize_t dims[] = {this->nMatDim_[iMat],this->nSek_};
+//  hsize_t dims[] = {this->nMatDim_[iMat],this->nSek_};
+     
+//  HDF5 stores things in RowMajor...
+    hsize_t dims[] = {this->nSek_,this->nMatDim_[iMat]};
     H5::DataSpace dataspace(2,dims);
     this->fileio_->scratchPartitions.push_back(
       FileIO::ScratchPartition(name,dataspace,*this->scratchFile_)
@@ -294,7 +297,10 @@ void Response<double>::formGuess(){
     for(auto iSek = 0; iSek < this->nSek_; iSek++) {
       double one = 1.0;
 
-      hsize_t offset[] = {indx[iSek],iSek};
+//    hsize_t offset[] = {indx[iSek],iSek};
+  
+//    HDF5 Stores things RowMajor...
+      hsize_t offset[] = {iSek,indx[iSek]};
       hsize_t count[]  = {1,1};
       hsize_t stride[] = {1,1};
       hsize_t block[]  = {1,1};
