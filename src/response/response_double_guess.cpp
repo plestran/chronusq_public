@@ -231,7 +231,6 @@ void Response<double>::formDiagPPRPA(){
 
 template<>
 void Response<double>::formGuess(){
-  cout << "HERE" << endl;
 
   this->scratchFile_ = this->fileio_->scr.get();
   for(auto iMat = 0; iMat != iMatIter_.size(); iMat++){
@@ -293,6 +292,7 @@ void Response<double>::formGuess(){
     }
 */
 
+    this->guessFiles_[iMat]->getSpace();
     // Write the guess vectors to disk
     for(auto iSek = 0; iSek < this->nSek_; iSek++) {
       double one = 1.0;

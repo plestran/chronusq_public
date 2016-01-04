@@ -356,6 +356,7 @@ public:
 
       QuasiNewton2<T> qn(this);
       qn.run();
+      cout << endl << endl;
     }
   };
 

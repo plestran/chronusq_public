@@ -105,6 +105,7 @@ void FileIO::iniH5Paths() {
 };
 
 void FileIO::iniH5Files(){
+  this->scratchPartitions.reserve(CQ_MAX_SCRATCH_PARTITIONS);
   if(doRestart) {
     this->scr = std::unique_ptr<H5::H5File>(
       new H5::H5File(this->name_scr,H5F_ACC_RDWR)

@@ -31,6 +31,11 @@
 #define MAXCONTRACTION 10 ///< Define maximum contraction depth for gaussian basis functions
 #define MAXATOMS 1000 ///< Define maximum number of allowed nuclei
 
+// Maximum number of FileIO Sratch Partitions (can override)
+#ifndef CQ_MAX_SCRATCH_PARTITIONS
+  #define CQ_MAX_SCRATCH_PARTITIONS 100
+#endif
+
 // CMake Compilation Configuration
 #include <config_chronusq.h>
 
