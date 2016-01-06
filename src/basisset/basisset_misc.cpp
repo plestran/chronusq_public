@@ -95,8 +95,8 @@ void BasisSet::computeShBlkNorm(bool doBeta,int nTCS,const ComplexMatrix *DAlpha
  *  Renormalize the libint2::Shell vector (this is important)
  */
 void BasisSet::renormShells(){
-  for(auto iShell = this->shells_.begin(); iShell != this->shells_.end(); ++iShell)
-    iShell->renorm();
+//for(auto iShell = this->shells_.begin(); iShell != this->shells_.end(); ++iShell)
+//  iShell->renorm();
 } // BasisSet::renormShells
 
 /**
