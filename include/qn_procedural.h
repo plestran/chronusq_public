@@ -173,7 +173,6 @@ void QuasiNewton2<T>::reconstructSolution(const int NTrial){
 
   UR = TVecR * XTSigmaR;
   (*this->qnObj_->solutionVecR()) = UR.block(0,0,N,this->qnObj_->nSek());
-  //std::memcpy(this->qnObj_->omega()->data(),this->ERMem_,NTrial*sizeof(double));
   (*this->qnObj_->omega()) = ER.head(this->qnObj_->nSek());
 }; // QuasiNewton2<T>::reconstructSolution
 
