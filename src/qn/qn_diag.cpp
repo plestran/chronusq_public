@@ -33,11 +33,11 @@ namespace ChronusQ {
     char UPLO  = 'L';
     int INFO;
 
+    (*this->out_) << "Diagonalizing Projected Matrix in QuasiNewton" << endl;
     int N = NTrial;
     if(this->specialAlgorithm_ == QNSpecialAlgorithm::SYMMETRIZED_TRIAL)
       N *= 2;
 
-    cout << "HERE" << endl;
     double *A  = this->XTSigmaRMem_;
     double *VR = this->XTSigmaRMem_;
     double *VL = this->XTSigmaRMem_;

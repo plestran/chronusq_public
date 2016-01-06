@@ -33,7 +33,7 @@
 
 // Maximum number of FileIO Sratch Partitions (can override)
 #ifndef CQ_MAX_SCRATCH_PARTITIONS
-  #define CQ_MAX_SCRATCH_PARTITIONS 100
+  #define CQ_MAX_SCRATCH_PARTITIONS 1000
 #endif
 
 // CMake Compilation Configuration

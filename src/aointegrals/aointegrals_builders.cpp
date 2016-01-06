@@ -178,7 +178,7 @@ void AOIntegrals::computeAOOneE(){
 
   // Get end time of one-electron integral evaluation
   auto oneEEnd = std::chrono::high_resolution_clock::now();
-  if(this->controls_->printLevel>=2) this->printOneE();
+  if(this->controls_->printLevel >= 2) this->printOneE();
 
   // Compute time differenes
   this->OneED = oneEEnd - oneEStart;

@@ -48,6 +48,7 @@ void QuasiNewton2<dcomplex>::allocScrSpecial(){
     else
       this->LWORK = 3*N;
     this->ECMem_ = new dcomplex[this->maxSubSpace_];
+    this->ERMem_ = new   double[this->maxSubSpace_];
     this->RWORK_ = new   double[this->LRWORK];
   }
 }
@@ -64,6 +65,7 @@ template<>
 void QuasiNewton2<dcomplex>::cleanupScrSpecial(){
   if(this->problemType_ == DIAGONALIZATION){
     delete [] this->ECMem_; 
+    delete [] this->ERMem_; 
     delete [] this->RWORK_; 
   }
 }

@@ -128,6 +128,7 @@ namespace ChronusQ {
     inline VectorXd * omega()        { return this->omega_       ; };
     inline TMat     * solutionVecR() { return this->solutionVecR_; };
     inline TMat     * solutionVecL() { return this->solutionVecL_; };
+    inline VectorXd * diag()         { return this->diag_        ; };
 
     inline H5::H5File  * scratchFile(){ return this->scratchFile_; };
     inline H5::DataSet * guessFile()  { return this->guessFile_;   };  
@@ -251,13 +252,29 @@ namespace ChronusQ {
     // Procedural Functions
     void readGuess();
     void symmetrizeTrial(){;};
+    void checkOrthogonality(int&);
     void formLinearTrans(const int, const int);
     void fullProjection(const int);
     void reducedDimDiag(const int);
+    void reconstructSolution(const int);
+    void generateResiduals(const int);
+    std::vector<bool> checkConvergence(const int, int&); 
+    void formNewGuess(std::vector<bool>&, int&, int&, int&, int&);
+
+
+    // Orthogonality Check Routines
+    void checkLinearDependence(int &);
+    void orthogonalize(int);
+
 
     // Diagonalization Routines
     void stdHermetianDiag(const int);
     void stdNonHermetianDiag(const int);
+
+    // Guess Generation Routines
+    void davResidualGuess(    T,const TMap&,TMap&,const TMap&,TMap&);
+    void davStdResidualGuess( T,const TMap&,TMap&);
+    void davSymmResidualGuess(T,const TMap&,TMap&,const TMap&,TMap&);
 
     #include <qn_constructors.h>
 
