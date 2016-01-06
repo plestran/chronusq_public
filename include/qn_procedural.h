@@ -76,6 +76,7 @@ void QuasiNewton2<T>::runMicro(){
     if(this->isConverged_) {
       break;
     }
+    if(restart) CErr("Restart NYI",(*this->out_));
 
     this->formNewGuess(resConv,NTrial,NNotConv,NOld,NNew);
   //CErr();

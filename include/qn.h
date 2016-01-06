@@ -245,6 +245,12 @@ namespace ChronusQ {
 
 
   public:
+    // Set private data
+    void setMatrixType(QNMatrixType      type){this->matrixType_       = type;};
+    void setProblemType(QNProblemType    type){this->problemType_      = type;};
+    void setGuessType(QNGuessType        type){this->guessType_        = type;};
+    void setAlgorithm(QNSpecialAlgorithm type){this->specialAlgorithm_ = type;};
+
     // Run the QN Calculation
     void run();
     void runMicro();
