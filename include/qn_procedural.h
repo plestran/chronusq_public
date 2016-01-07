@@ -329,6 +329,9 @@ void QuasiNewton2<T>::formNewGuess(std::vector<bool> &resConv, int &NTrial,
   NOld   =  NTrial;
   NNew   =  NNotConv;
   NTrial += NNew;
+
+  this->writeTrialVectors(NTrial);
+
 }; // QuasiNewton2<T>::formNewGuess
 
 template<typename T>

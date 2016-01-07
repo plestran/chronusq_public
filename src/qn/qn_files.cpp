@@ -67,6 +67,24 @@ namespace ChronusQ {
     //if(this->matrixType_ == HERMETIAN_GEP)
     //  this->RhoLFile_  = this->genScrFile_(H5::PredType::NATIVE_DOUBLE,PLName,dims);
     }
-  };
+  }; // QuasiNewton2<double>::iniScratchFiles
+
+  template<>
+  void QuasiNewton2<double>::writeTrialVectors(const int NTrial){
+    auto N      = this->qnObj_->nSingleDim();
+    hsize_t offset[] = {0,0};
+    hsize_t stride[] = {1,1};
+    hsize_t block[]  = {1,1};
+ 
+    hsize_t subDim[] = {NTrial,N};
+    hsize_t count[]  = {NTrial,N};
+
+    H5::DataSpace memSpace(2,subDim,NULL);
+    H5::DataSpace subDataSpace = this->TRFile_->getSpace();
+    subDataSpace.selectHyperslab(H5S_SELECT_SET,count,offset,stride,block);
+    this->TRFile_->write(this->TRMem_,H5::PredType::NATIVE_DOUBLE,memSpace,
+      subDataSpace);
+  
+  }; // QuasiNewton2<double>::writeTrialVectors
 
 }; // namespace ChronusQ

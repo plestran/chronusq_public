@@ -277,6 +277,7 @@ namespace ChronusQ {
     H5::DataSet * ULFile_; ///< Reconstructed Left solution vectors
 
     void iniScratchFiles();
+    void writeTrialVectors(const int);
 
   public:
     // Set private data
