@@ -95,8 +95,14 @@ void BasisSet::computeShBlkNorm(bool doBeta,int nTCS,const ComplexMatrix *DAlpha
  *  Renormalize the libint2::Shell vector (this is important)
  */
 void BasisSet::renormShells(){
-  for(auto iShell = this->shells_.begin(); iShell != this->shells_.end(); ++iShell)
+  OneBodyEngine engine(OneBodyEngine::overlap,this->maxPrim_,this->maxL_,0);
+
+  for(auto iShell = this->shells_.begin(); iShell != this->shells_.end(); ++iShell){
     iShell->renorm();
+    auto buff = engine.compute(*iShell,*iShell);
+    for(auto k = 0; k < iShell->alpha.size(); k++)
+      iShell->contr[0].coeff[k] /= std::sqrt(buff[0]);
+  }
 } // BasisSet::renormShells
 
 /**
