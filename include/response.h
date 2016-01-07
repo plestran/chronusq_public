@@ -353,6 +353,7 @@ public:
       std::vector<hsize_t>&)> fileFactory = 
         std::bind(&FileIO::createScratchPartition,this->fileio_,
         std::placeholders::_1,std::placeholders::_2,std::placeholders::_3);
+
     for(auto iMat = 0; iMat != iMatIter_.size(); iMat++){
       this->currentMat_ = this->iMatIter_[iMat];
       this->nSingleDim_ = this->nMatDim_[iMat];  

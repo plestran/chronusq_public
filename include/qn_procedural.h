@@ -34,6 +34,7 @@ void QuasiNewton2<T>::run(){
                 ctime(&currentClockTime);
 
   this->allocScr();
+  this->iniScratchFiles();
   auto start = std::chrono::high_resolution_clock::now();
   for(auto iter = 0; iter < this->maxMacroIter_; iter++){
     this->runMicro();

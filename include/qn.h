@@ -249,6 +249,35 @@ namespace ChronusQ {
     void cleanupScrSpecial();
 
 
+    // Trial vector storage (Disk)
+    H5::DataSet * TRFile_; ///< Right trial vectors
+    H5::DataSet * TLFile_; ///< Left trial vectors
+
+    // Matrix/Metric-Vector Product storage (Disk)
+    H5::DataSet * SigmaRFile_; ///< Matrix-Vector Product on Right trial vectors
+    H5::DataSet * SigmaLFile_; ///< Matrix-Vector Product on Left trial vectors
+    H5::DataSet * RhoRFile_;   ///< Metric-Vector Product on Right trial vectors
+    H5::DataSet * RhoLFile_;   ///< Metric-Vector Product on Left trial vectors
+
+/*  Should always be able to store reduced dimension in Core
+    // Full projection storage (Disk)
+    H5::DataSet * XTSigmaRFile_; ///< Full projection of Right Sigma onto subspace
+    H5::DataSet * XTSigmaLFile_; ///< Full projection of Left Sigma onto subspace
+    H5::DataSet * XTRhoRFile_;   ///< Full projection of Right Rho onto subspace
+    H5::DataSet * XTRhoLFile_;   ///< Full projection of Left Rho onto subspace
+*/
+
+    // Residuals (Disk)
+    H5::DataSet * ResRFile_; ///< Right Residuals
+    H5::DataSet * ResLFile_; ///< Left Residuals
+
+
+    // Reconstructed Solution Vectors (Disk)
+    H5::DataSet * URFile_; ///< Reconstructed Right solution vectors
+    H5::DataSet * ULFile_; ///< Reconstructed Left solution vectors
+
+    void iniScratchFiles();
+
   public:
     // Set private data
     void setMatrixType(QNMatrixType      type){this->matrixType_       = type;};
