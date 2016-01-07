@@ -49,3 +49,16 @@ QuasiNewton2(QNCallable<T> * obj) : QuasiNewton2(){
   this->qnObj_ = obj;
   this->maxSubSpace_ = std::min(250,obj->nSingleDim()/2);
 };
+
+QuasiNewton2(QNCallable<T> * obj, std::function<H5::DataSet*(const H5::PredType&,
+  std::string&, std::vector<hsize_t>&)> fileFactory) : QuasiNewton2(obj){
+  this->genScrFile_ = fileFactory;
+/*
+  std::vector<hsize_t> dims;
+  dims.push_back(1);
+  dims.push_back(1);
+
+  std::string name = "Test";
+  auto ptr = this->genScrFile_(H5::PredType::NATIVE_DOUBLE,name,dims);
+*/
+};

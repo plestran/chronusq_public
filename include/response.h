@@ -349,6 +349,10 @@ public:
     if(this->iMeth_ == RESPONSE_TYPE::RPA){
       this->needsLeft_ = true;
     }
+    std::function<H5::DataSet*(const H5::PredType&,std::string&,
+      std::vector<hsize_t>&)> fileFactory = 
+        std::bind(&FileIO::createScratchPartition,this->fileio_,
+        std::placeholders::_1,std::placeholders::_2,std::placeholders::_3);
     for(auto iMat = 0; iMat != iMatIter_.size(); iMat++){
       this->currentMat_ = this->iMatIter_[iMat];
       this->nSingleDim_ = this->nMatDim_[iMat];  
@@ -357,7 +361,7 @@ public:
       this->guessFile_    = this->guessFiles_[iMat];
       this->diag_         = &this->rmDiag_[iMat];
 
-      QuasiNewton2<T> qn(this);
+      QuasiNewton2<T> qn(this,fileFactory);
       if(this->iMeth_ == RESPONSE_TYPE::RPA){
         qn.setMatrixType( QNMatrixType::HERMETIAN_GEP           );
         qn.setAlgorithm(  QNSpecialAlgorithm::SYMMETRIZED_TRIAL );

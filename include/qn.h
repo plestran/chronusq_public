@@ -197,6 +197,11 @@ namespace ChronusQ {
 
     // Output
     std::ostream * out_;
+    
+    // Factory to create new files
+    std::function<
+      H5::DataSet*(const H5::PredType&,std::string&,std::vector<hsize_t>&)
+    > genScrFile_;
 
 
     /** Scratch Partitions **/
