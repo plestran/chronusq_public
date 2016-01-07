@@ -147,14 +147,18 @@ void BasisSet::parseGlobal(){
 
         if(!shSymb.compare("SP")) {
           tmpShell.push_back(
-            libint2::Shell{ exp, {{0,this->doSph_,contPrimary}}, {{0,0,0}} }
+            libint2::Shell{ exp, {{0,false,contPrimary}}, {{0,0,0}} }
           );
           tmpShell.push_back(
-            libint2::Shell{ exp, {{1,this->doSph_,contSecondary}}, {{0,0,0}} }
+            libint2::Shell{ exp, {{1,false,contSecondary}}, {{0,0,0}} }
           );
         } else {
+          int L = HashL(shSymb);
+          bool doSph = (L > 1);
+          if(this->forceCart_) doSph = false;
+
           tmpShell.push_back(
-            libint2::Shell{ exp, {{HashL(shSymb),this->doSph_,contPrimary}}, {{0,0,0}} }
+            libint2::Shell{ exp, {{L,doSph,contPrimary}}, {{0,0,0}} }
           );
         }
       }
