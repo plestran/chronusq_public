@@ -260,6 +260,7 @@ void Response<double>::formGuess(){
     std::string name = "ResponseGuess"+std::to_string(iMat);
 //  hsize_t dims[] = {this->nMatDim_[iMat],this->nSek_};
      
+/*
 //  HDF5 stores things in RowMajor...
     hsize_t dims[] = {this->nSek_,this->nMatDim_[iMat]};
     H5::DataSpace dataspace(2,dims);
@@ -269,6 +270,15 @@ void Response<double>::formGuess(){
 
     // Keep a pointer to the created files
     this->guessFiles_.push_back(&this->fileio_->scratchPartitions.back().data);
+*/
+
+    std::vector<hsize_t> dims; 
+    dims.push_back(this->nSek_);
+    dims.push_back(this->nMatDim_[iMat]);
+
+    H5::DataSet *gfPtr = 
+      this->fileio_->createScratchPartition(H5::PredType::NATIVE_DOUBLE,name,dims);
+    this->guessFiles_.push_back(gfPtr);
 
     // Initialize an index vector with increasing ints
     std::vector<int> indx(diagDim,0);

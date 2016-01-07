@@ -100,9 +100,11 @@ public:
     H5::DataSpace dataspace;
     std::string name;
 
-    ScratchPartition(std::string &nm, H5::DataSpace &space, H5::H5File &file){
+    ScratchPartition(std::string &nm, const H5::PredType &type, H5::DataSpace &space, 
+      H5::H5File &file){
+
       this->data = H5::DataSet(
-        file.createDataSet(nm,H5::PredType::NATIVE_DOUBLE,space)
+        file.createDataSet(nm,type,space)
       );
       this->name = nm;
       this->dataspace = space;
@@ -110,6 +112,8 @@ public:
   };
 
   std::vector<ScratchPartition> scratchPartitions;
+  H5::DataSet * createScratchPartition(const H5::PredType&, std::string &, 
+    std::vector<hsize_t>&);
 
   template<typename T> struct metaData {
     T val;

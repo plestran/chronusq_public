@@ -83,6 +83,17 @@ FileIO::FileIO(const std::string inFile,  const std::string outFile,
 
 };
 
+H5::DataSet * FileIO::createScratchPartition(const H5::PredType &type, 
+  std::string &nm, std::vector<hsize_t> &dims) {
+
+  H5::DataSpace dataspace(dims.size(),&dims[0]);
+  this->scratchPartitions.push_back(
+    ScratchPartition(nm,type,dataspace,*this->scr)
+  );
+
+  return &this->scratchPartitions.back().data;
+}; // FileIO::createScratchPartition
+
 void FileIO::iniH5Paths() {
   this->operatorGroupPath = "/OPERATORS";
   this->SCFGroupPath      = "/SCF";
