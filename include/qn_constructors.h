@@ -27,6 +27,10 @@
 QuasiNewton2(){
   this->maxSubSpace_ = 0;
   this->qnObj_       = NULL;
+  this->nMicroIter_  = 0;
+  this->nMacroIter_  = 0;
+  this->nTotalIter_  = 0;
+  this->isConverged_ = 0;
 
   // Default Values
   this->maxMicroIter_     = 128;

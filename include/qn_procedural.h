@@ -37,6 +37,8 @@ void QuasiNewton2<T>::run(){
   auto start = std::chrono::high_resolution_clock::now();
   for(auto iter = 0; iter < this->maxMacroIter_; iter++){
     this->runMicro();
+    this->nMacroIter_++;
+    this->nTotalIter_ += this->nMicroIter_;
     if(this->isConverged_) break;
   };
   auto finish = std::chrono::high_resolution_clock::now();
@@ -60,6 +62,7 @@ void QuasiNewton2<T>::runMicro(){
   this->readGuess();
   if(this->specialAlgorithm_ == SYMMETRIZED_TRIAL) this->symmetrizeTrial(); 
 
+  this->nMicroIter_ = 0;
   for(auto iter = 0; iter < this->maxMicroIter_; iter++){
     this->checkOrthogonality(NTrial);
     this->formLinearTrans(NOld,NNew);

@@ -346,6 +346,9 @@ public:
     this->formDiag();
     this->formGuess();
     this->nGuess_     = this->nSek_; // Quick Hack to get things working
+    if(this->iMeth_ == RESPONSE_TYPE::RPA){
+      this->needsLeft_ = true;
+    }
     for(auto iMat = 0; iMat != iMatIter_.size(); iMat++){
       this->currentMat_ = this->iMatIter_[iMat];
       this->nSingleDim_ = this->nMatDim_[iMat];  
@@ -355,6 +358,10 @@ public:
       this->diag_         = &this->rmDiag_[iMat];
 
       QuasiNewton2<T> qn(this);
+      if(this->iMeth_ == RESPONSE_TYPE::RPA){
+        qn.setMatrixType( QNMatrixType::HERMETIAN_GEP           );
+        qn.setAlgorithm(  QNSpecialAlgorithm::SYMMETRIZED_TRIAL );
+      }
       qn.run();
       cout << endl << endl;
     }
