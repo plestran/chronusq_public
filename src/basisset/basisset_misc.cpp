@@ -95,8 +95,14 @@ void BasisSet::computeShBlkNorm(bool doBeta,int nTCS,const ComplexMatrix *DAlpha
  *  Renormalize the libint2::Shell vector (this is important)
  */
 void BasisSet::renormShells(){
-//for(auto iShell = this->shells_.begin(); iShell != this->shells_.end(); ++iShell)
-//  iShell->renorm();
+  OneBodyEngine engine(OneBodyEngine::overlap,this->maxPrim_,this->maxL_,0);
+
+  for(auto iShell = this->shells_.begin(); iShell != this->shells_.end(); ++iShell){
+  //iShell->renorm();
+    auto buff = engine.compute(*iShell,*iShell);
+    for(auto k = 0; k < iShell->alpha.size(); k++)
+      iShell->contr[0].coeff[k] /= std::sqrt(buff[0]);
+  }
 } // BasisSet::renormShells
 
 /**
@@ -110,7 +116,7 @@ std::vector<libint2::Shell> BasisSet::uncontractBasis(){
     for(auto i = 0; i < iShell->alpha.size(); ++i){
       newShells.push_back(libint2::Shell{
         { iShell->alpha[i] },
-        { {iShell->contr[0].l,this->doSph_,{1.0}  }},
+        { {iShell->contr[0].l,iShell->contr[0].pure,{1.0}  }},
         { {iShell->O[0],iShell->O[1],iShell->O[2]}}
       } );
 //    cout << iShell->alpha[i] << " " << iShell->contr[0].l << endl;
