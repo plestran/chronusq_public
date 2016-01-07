@@ -35,12 +35,17 @@ namespace ChronusQ {
     int  INFO;
 
     (*this->out_) << "Performing SVD on Trial Vectors in QuasiNewton" << endl;
-    std::memcpy(this->URMem_,this->TRMem_,NTrial * N * sizeof(double));
+    this->writeTrialVectors(NTrial);
+  //std::memcpy(this->URMem_,this->TRMem_,NTrial * N * sizeof(double));
 
     // URMem is also passed into U and VT as dummy variables, shouldn't
     // be touched, this assumes that JOBU = JOBVT = 'N'
-    dgesvd_(&JOBU,&JOBVT,&N,&NTrial,this->URMem_,&N,this->ERMem_,this->URMem_,
+
+  //dgesvd_(&JOBU,&JOBVT,&N,&NTrial,this->URMem_,&N,this->ERMem_,this->URMem_,
+  //  &N,this->URMem_,&N,this->WORK,&this->LWORK,&INFO);
+    dgesvd_(&JOBU,&JOBVT,&N,&NTrial,this->TRMem_,&N,this->ERMem_,this->URMem_,
       &N,this->URMem_,&N,this->WORK,&this->LWORK,&INFO);
+    this->readTrialVectors(NTrial);
 
     if(INFO != 0) 
       CErr("DGESVD Failed in QuasiNewton2<double>::checkLinearDependence",

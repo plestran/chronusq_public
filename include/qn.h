@@ -278,6 +278,7 @@ namespace ChronusQ {
 
     void iniScratchFiles();
     void writeTrialVectors(const int);
+    void readTrialVectors(const int);
 
   public:
     // Set private data

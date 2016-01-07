@@ -87,4 +87,22 @@ namespace ChronusQ {
   
   }; // QuasiNewton2<double>::writeTrialVectors
 
+  template<>
+  void QuasiNewton2<double>::readTrialVectors(const int NTrial){
+    auto N      = this->qnObj_->nSingleDim();
+    hsize_t offset[] = {0,0};
+    hsize_t stride[] = {1,1};
+    hsize_t block[]  = {1,1};
+ 
+    hsize_t subDim[] = {NTrial,N};
+    hsize_t count[]  = {NTrial,N};
+
+    H5::DataSpace memSpace(2,subDim,NULL);
+    H5::DataSpace subDataSpace = this->TRFile_->getSpace();
+    subDataSpace.selectHyperslab(H5S_SELECT_SET,count,offset,stride,block);
+    this->TRFile_->read(this->TRMem_,H5::PredType::NATIVE_DOUBLE,memSpace,
+      subDataSpace);
+  
+  }; // QuasiNewton2<double>::readTrialVectors
+
 }; // namespace ChronusQ
