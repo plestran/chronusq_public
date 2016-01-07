@@ -110,7 +110,7 @@ std::vector<libint2::Shell> BasisSet::uncontractBasis(){
     for(auto i = 0; i < iShell->alpha.size(); ++i){
       newShells.push_back(libint2::Shell{
         { iShell->alpha[i] },
-        { {iShell->contr[0].l,this->doSph_,{1.0}  }},
+        { {iShell->contr[0].l,iShell->contr[0].pure,{1.0}  }},
         { {iShell->O[0],iShell->O[1],iShell->O[2]}}
       } );
 //    cout << iShell->alpha[i] << " " << iShell->contr[0].l << endl;

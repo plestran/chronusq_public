@@ -41,7 +41,7 @@ namespace ChronusQ{
 struct Shell{
   std::vector<double> expo;
   int     L;                     // angular momentum  -  0 , 1 , 2,  3 , 4
-  bool    doSph_       ; ///< Whether or not to make the cartesian -> spherical transformation
+  bool    forceCart_; ///< Whether or not to force cartesian basis functions 
   std::vector<double> coef;
   std::vector<double> cart;
   std::vector<double> norm;
@@ -179,7 +179,7 @@ class BasisSet{
   int  nShellPair_  ; ///< Number of unique basis shell pairs
   int  maxPrim_     ; ///< Maximum number of Gaußian primitives for a single basis function
   int  maxL_        ; ///< Maximum angular momentum for a single basis function
-  bool doSph_       ; ///< Whether or not to make the cartesian -> spherical transformation
+  bool forceCart_   ; ///< Whether or not to force cartesian basis functions 
   double      * radCutSh_ ; ///< CutOff Radius for each Shell
   double      * expPairSh_ ; ///< SS Exp for each Shel Pair
 
@@ -254,7 +254,7 @@ public:
     this->nShellPair_      = 0      ;
     this->maxPrim_         = 0      ;
     this->maxL_            = 0      ;
-    this->doSph_           = false  ;
+    this->forceCart_       = false  ;
     this->haveMapSh2Bf     = false  ;
     this->haveMapSh2Cen    = false  ;
     this->basisFile_       = nullptr;
@@ -269,7 +269,7 @@ public:
    *  Copy Constructor
    */ 
   BasisSet(const BasisSet &basis) : BasisSet(){
-    this->doSph_           = basis.doSph_       ; 
+    this->forceCart_       = basis.forceCart_       ; 
     this->fileio_          = basis.fileio_      ; 
     this->basisPath_       = basis.basisPath_   ;
     this->refShells_       = basis.refShells_   ;
