@@ -123,11 +123,14 @@ void QuasiNewton2<T>::formLinearTrans(const int NOld, const int NNew){
   TMap NewRhoR(this->RhoRMem_  ,0,0);
   TMap NewRhoL(this->RhoLMem_  ,0,0);
 
+  if(this->matrixType_ == HERMETIAN_GEP)
+    new (&NewRhoR) TMap(this->RhoRMem_   + (NOld*N),N,NNew);
+
   if(this->qnObj_->needsLeft()){
     new (&NewSL  ) TMap(this->SigmaLMem_ + (NOld*N),N,NNew);
     new (&NewVecL) TMap(this->TLMem_     + (NOld*N),N,NNew);
-    new (&NewRhoR) TMap(this->RhoRMem_   + (NOld*N),N,NNew);
-    new (&NewRhoL) TMap(this->RhoLMem_   + (NOld*N),N,NNew);
+    if(this->matrixType_ == HERMETIAN_GEP)
+      new (&NewRhoL) TMap(this->RhoLMem_   + (NOld*N),N,NNew);
   }
 
   this->qnObj_->linearTrans(NewVecR,NewVecL,NewSR,NewSL,NewRhoR,NewRhoL);

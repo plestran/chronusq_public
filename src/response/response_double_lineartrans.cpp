@@ -40,7 +40,7 @@ void Response<double>::linearTransFOPPA(RealMap &VR, RealMap &VL,
 
   auto NTCSxNBASIS = this->nTCS_ * this->nBasis_;
   auto nVec = VR.cols();
-  if(!this->doTDA_) nVec *= 2;
+  if(this->iMeth_ == RPA) nVec *= 2;
 
   std::vector<RealMatrix> CommA, CommB, GCommA, GCommB;
 
@@ -87,6 +87,11 @@ void Response<double>::linearTransFOPPA(RealMap &VR, RealMap &VL,
   RealMatrix XBAO(NTCSxNBASIS,NTCSxNBASIS);
   RealMatrix SigAOA(NTCSxNBASIS,NTCSxNBASIS);
   RealMatrix SigAOB(NTCSxNBASIS,NTCSxNBASIS);
+  RealMatrix RhoAOA, RhoAOB;
+  if(this->iMeth_ == RPA) {
+    RhoAOA = RealMatrix(NTCSxNBASIS,NTCSxNBASIS);
+    RhoAOB = RealMatrix(NTCSxNBASIS,NTCSxNBASIS);
+  }
   for (auto idx = 0; idx < nVec; idx++){
     /*
      *  XAO(s) = C(s) * XMO(s) * C(s)**H
@@ -98,9 +103,9 @@ void Response<double>::linearTransFOPPA(RealMap &VR, RealMap &VL,
      */ 
 
     RealVecMap X(VR.data(),0);
-    if(idx < VR.cols()){
+    if(idx < VR.cols()) {
      new (&X) RealVecMap(VR.data()+idx*this->nSingleDim_,this->nSingleDim_);
-    }else{
+    } else {
      new (&X) RealVecMap(
        VL.data()+(idx-VR.cols())*this->nSingleDim_,this->nSingleDim_
      );
@@ -169,13 +174,35 @@ void Response<double>::linearTransFOPPA(RealMap &VR, RealMap &VL,
     }
 
     RealVecMap SVec(SR.data()+idx*this->nSingleDim_,this->nSingleDim_);
+    if(idx >= VR.cols()) {
+      new (&SVec) RealVecMap(SL.data()+(idx-VR.cols())*this->nSingleDim_,
+        this->nSingleDim_);
+    }
     this->formMOTransDen(SVec,SigAOA,SigAOB);
     
+    if(this->iMeth_ == RPA){
+      RhoAOA =  
+        (*this->singleSlater_->aointegrals()->overlap_) * CommA[idx] * 
+        (*this->singleSlater_->aointegrals()->overlap_);
+      if(this->iPart_ != SPIN_ADAPTED && this->Ref_ != SingleSlater<double>::TCS) 
+        RhoAOB =  
+          (*this->singleSlater_->aointegrals()->overlap_) * CommB[idx] * 
+          (*this->singleSlater_->aointegrals()->overlap_);
 
+      // Note that there is a switch here as
+      // RR = S^(2) * VL
+      // RL = S^(2) * VR
+      RealVecMap RVec(RL.data()+idx*this->nSingleDim_,this->nSingleDim_);
+      if(idx >= VR.cols()) {
+        new (&RVec) RealVecMap(RR.data()+(idx-VR.cols())*this->nSingleDim_,
+          this->nSingleDim_);
+      }
+      this->formMOTransDen(RVec,RhoAOA,RhoAOB);
+    }
 
   }
 
-}; // linearTransFOPPA
+}; // 
 
 template<>
 void Response<double>::linearTransPPRPA(RealMap &VR, RealMap &VL,

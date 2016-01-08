@@ -249,15 +249,23 @@ void Response<double>::fullFOPPA(){
     RealMatrix Sigma(this->nSingleDim_,2*this->nSek_);
     RealMap SRVec(Sigma.data(),this->nSingleDim_,this->nSek_);
     RealMap SLVec(Sigma.data()+this->nSek_*this->nSingleDim_,this->nSingleDim_,this->nSek_);
+    RealMatrix Rho(this->nSingleDim_,2*this->nSek_);
+    RealMap RRVec(Rho.data(),this->nSingleDim_,this->nSek_);
+    RealMap RLVec(Rho.data()+this->nSek_*this->nSingleDim_,this->nSingleDim_,this->nSek_);
 
     prettyPrint(cout,T,"T");
-    this->linearTransFOPPA(T,T,SRVec,SLVec,T,T);
+    this->linearTransFOPPA(T,T,SRVec,SLVec,RRVec,RLVec);
 
-//  CPY.block(this->nSingleDim_/2,0,this->nSingleDim_/2,this->nSingleDim_/2) *= -1;
-//  CPY.block(this->nSingleDim_/2,this->nSingleDim_/2,this->nSingleDim_/2,this->nSingleDim_/2) *= -1;
+    CPY.block(this->nSingleDim_/2,0,this->nSingleDim_/2,this->nSingleDim_/2) *= -1;
+    CPY.block(this->nSingleDim_/2,this->nSingleDim_/2,this->nSingleDim_/2,this->nSingleDim_/2) *= -1;
     prettyPrint(cout,CPY*T,"Correct");
-    prettyPrint(cout,SRVec,"Test");
-    prettyPrint(cout,CPY*T-SRVec,"DIFF");
+    prettyPrint(cout,SRVec,"Test S1");
+    prettyPrint(cout,SLVec,"Test S2");
+    prettyPrint(cout,RRVec,"Test R1");
+    prettyPrint(cout,RLVec,"Test R2");
+    prettyPrint(cout,CPY*T-SRVec,"DIFF 1");
+    prettyPrint(cout,CPY*T-SLVec,"DIFF 2");
+    prettyPrint(cout,RRVec - RLVec,"DIFF 3");
 
   } // loop over iMat 
 }; // fullFOPPA (T = double)
