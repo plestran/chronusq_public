@@ -84,6 +84,9 @@ namespace ChronusQ {
     subDataSpace.selectHyperslab(H5S_SELECT_SET,count,offset,stride,block);
     this->TRFile_->write(this->TRMem_,H5::PredType::NATIVE_DOUBLE,memSpace,
       subDataSpace);
+    if(this->qnObj_->needsLeft())
+      this->TLFile_->write(this->TLMem_,H5::PredType::NATIVE_DOUBLE,memSpace,
+        subDataSpace);
   
   }; // QuasiNewton2<double>::writeTrialVectors
 
@@ -102,6 +105,9 @@ namespace ChronusQ {
     subDataSpace.selectHyperslab(H5S_SELECT_SET,count,offset,stride,block);
     this->TRFile_->read(this->TRMem_,H5::PredType::NATIVE_DOUBLE,memSpace,
       subDataSpace);
+    if(this->qnObj_->needsLeft())
+      this->TLFile_->read(this->TLMem_,H5::PredType::NATIVE_DOUBLE,memSpace,
+        subDataSpace);
   
   }; // QuasiNewton2<double>::readTrialVectors
 

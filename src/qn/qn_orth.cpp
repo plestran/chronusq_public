@@ -36,6 +36,8 @@ namespace ChronusQ {
 
     (*this->out_) << "Performing SVD on Trial Vectors in QuasiNewton" << endl;
     this->writeTrialVectors(NTrial);
+
+    /** RIGHT TRIAL VECTOR SVD **/
   //std::memcpy(this->URMem_,this->TRMem_,NTrial * N * sizeof(double));
 
     // URMem is also passed into U and VT as dummy variables, shouldn't
@@ -45,16 +47,40 @@ namespace ChronusQ {
   //  &N,this->URMem_,&N,this->WORK,&this->LWORK,&INFO);
     dgesvd_(&JOBU,&JOBVT,&N,&NTrial,this->TRMem_,&N,this->ERMem_,this->URMem_,
       &N,this->URMem_,&N,this->WORK,&this->LWORK,&INFO);
-    this->readTrialVectors(NTrial);
 
     if(INFO != 0) 
-      CErr("DGESVD Failed in QuasiNewton2<double>::checkLinearDependence",
+      CErr("DGESVD Failed in QuasiNewton2<double>::checkLinearDependence for RVcs",
         (*this->out_));
 
     for(auto i = 0; i < NTrial; i++){
       if(std::abs(this->ERMem_[i]) < 1e-08) 
-        CErr("QuasiNewton2 FATAL: Linear Dependency found in Trial Vectors");
+        CErr("QuasiNewton2 FATAL: Linear Dependency found in Right Trial Vectors");
     }
+
+
+    /** LEFT TRIAL VECTOR SVD **/
+    if(this->qnObj_->needsLeft()){
+    //std::memcpy(this->ULMem_,this->TLMem_,NTrial * N * sizeof(double));
+ 
+      // ULMem is also passed into U and VT as dummy variables, shouldn't
+      // be touched, this assumes that JOBU = JOBVT = 'N'
+ 
+    //dgesvd_(&JOBU,&JOBVT,&N,&NTrial,this->ULMem_,&N,this->ERMem_,this->ULMem_,
+    //  &N,this->ULMem_,&N,this->WORK,&this->LWORK,&INFO);
+      dgesvd_(&JOBU,&JOBVT,&N,&NTrial,this->TLMem_,&N,this->ERMem_,this->ULMem_,
+        &N,this->ULMem_,&N,this->WORK,&this->LWORK,&INFO);
+ 
+      if(INFO != 0) 
+        CErr("DGESVD Failed in QuasiNewton2<double>::checkLinearDependence for LVcs",
+          (*this->out_));
+ 
+      for(auto i = 0; i < NTrial; i++){
+        if(std::abs(this->ERMem_[i]) < 1e-08) 
+          CErr("QuasiNewton2 FATAL: Linear Dependency found in Left Trial Vectors");
+      }
+    }
+
+    this->readTrialVectors(NTrial);
   }; // QuasiNewton2<double>::checkLinearDependence
 
   template<>
@@ -65,19 +91,37 @@ namespace ChronusQ {
     (*this->out_) 
       << "Performing QR Decomposition on Trial Vectors in QuasiNewton" << endl;
 
+    /** QR on Right Vectors **/
     dgeqrf_(&N,&NTrial,this->TRMem_,&N,this->ERMem_,this->WORK,&this->LWORK,
       &INFO);
 
     if(INFO != 0) 
-      CErr("DGEQRF Failed in QuasiNewton2<double>::orthogonalize",
+      CErr("DGEQRF Failed in QuasiNewton2<double>::orthogonalize for RVcs",
         (*this->out_));
 
     dorgqr_(&N,&NTrial,&NTrial,this->TRMem_,&N,this->ERMem_,this->WORK,
       &this->LWORK,&INFO);
 
     if(INFO != 0) 
-      CErr("DORGQR Failed in QuasiNewton2<double>::orthogonalize",
+      CErr("DORGQR Failed in QuasiNewton2<double>::orthogonalize for RVcs",
         (*this->out_));
+
+    if(this->qnObj_->needsLeft()){
+      /** QR on Left Vectors **/
+      dgeqrf_(&N,&NTrial,this->TLMem_,&N,this->ERMem_,this->WORK,&this->LWORK,
+        &INFO);
+     
+      if(INFO != 0) 
+        CErr("DGEQRF Failed in QuasiNewton2<double>::orthogonalize for LVcs",
+          (*this->out_));
+     
+      dorgqr_(&N,&NTrial,&NTrial,this->TLMem_,&N,this->ERMem_,this->WORK,
+        &this->LWORK,&INFO);
+     
+      if(INFO != 0) 
+        CErr("DORGQR Failed in QuasiNewton2<double>::orthogonalize for LVcs",
+          (*this->out_));
+    }
     
   }; // QuasiNewton2<double>::orthogonalize
 

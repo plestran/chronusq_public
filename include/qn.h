@@ -293,7 +293,7 @@ namespace ChronusQ {
 
     // Procedural Functions
     void readGuess();
-    void symmetrizeTrial(){;};
+    void symmetrizeTrial();
     void checkOrthogonality(int&);
     void formLinearTrans(const int, const int);
     void fullProjection(const int);

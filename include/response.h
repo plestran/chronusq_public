@@ -349,6 +349,7 @@ public:
     if(this->iMeth_ == RESPONSE_TYPE::RPA){
       this->needsLeft_ = true;
     }
+
     std::function<H5::DataSet*(const H5::PredType&,std::string&,
       std::vector<hsize_t>&)> fileFactory = 
         std::bind(&FileIO::createScratchPartition,this->fileio_,
