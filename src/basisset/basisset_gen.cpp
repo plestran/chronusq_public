@@ -30,11 +30,14 @@ namespace ChronusQ{
  *  from the reference shells
  */
 void BasisSet::constructLocal(Molecule * mol){
+  //cout << "Reference Shells" << endl;
   for(auto iAtom = 0; iAtom < mol->nAtoms(); iAtom++){
     bool found = false;
     for(auto iRef = this->refShells_.begin(); iRef != this->refShells_.end(); ++iRef){
       if(mol->index(iAtom) == (*iRef).index){
         for(auto iShell = (*iRef).shells.begin(); iShell != (*iRef).shells.end(); ++iShell){
+          //cout << (*iShell) << endl;
+/*
           this->shells_.push_back(
             libint2::Shell{ 
               iShell->alpha, 
@@ -44,6 +47,14 @@ void BasisSet::constructLocal(Molecule * mol){
                  (*mol->cart())(2,iAtom)}}
             }
           );
+*/
+          this->shells_.push_back(libint2::Shell::unit());
+          this->shells_.back() = (*iShell);
+          this->shells_.back().O = 
+            { (*mol->cart())(0,iAtom),
+              (*mol->cart())(1,iAtom),
+              (*mol->cart())(2,iAtom)};
+
           this->shellsCQ.push_back(ChronusQ::ShellCQ{*iShell});
         };
         found = true;
@@ -56,6 +67,8 @@ void BasisSet::constructLocal(Molecule * mol){
            this->fileio_->out);
   } // loop iAtom
   this->computeMeta();
+//cout << "Construct Local Shells" << endl;
+//for(auto i = 0; i < this->shells_.size(); i++) cout << this->shells_[i] << endl;
 } // BasisSet::constructLocal
 
 /**
