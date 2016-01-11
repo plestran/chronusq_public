@@ -240,7 +240,7 @@ def handleReference(workers,settings):
   elif 'RKS' in ref:
     # Force RKS
     if mult != 1:
-      mas = 'Non-singlet multiplicity is not suitable for RKS'
+      msg = 'Non-singlet multiplicity is not suitable for RKS'
       CErrMsg(workers['CQFileIO'],str(msg))
  
     workers["CQSingleSlater"].setRef(chronusQ.Reference.RHF)
