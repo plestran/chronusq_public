@@ -289,12 +289,16 @@ void SingleSlater<T>::SCF(){
     }
     this->formDensity();
     this->formFock();
+    if(PyErr_CheckSignals() == -1)
+      CErr("Keyboard Interrupt in SCF!",this->fileio_->out);
+   
 
     if(getRank() == 0) {
       if(this->Ref_ != CUHF && this->doDIIS){ // DIIS NYI for CUHF
         this->GenDComm(iter);
         this->CpyFock(iter);   
-        if(iter % (this->lenCoeff_-1) == (this->lenCoeff_-2) && iter != 0) 
+        if(iter % (this->lenCoeff_-1) == (this->lenCoeff_-2) && 
+           iter != 0) 
           this->CDIIS();
       }
     }

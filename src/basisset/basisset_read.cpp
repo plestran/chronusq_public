@@ -166,6 +166,9 @@ void BasisSet::parseGlobal(){
   }
   // Append the last Rec
   this->refShells_.push_back(ReferenceShell{atomicNumber,indx,tmpShell}); 
+  //cout << "Reference Shells" << endl;
+//for(auto i = 0; i < this->refShells_.size(); i++) cout << this->refShells_[i].shells << endl;
+  //cout << this->refShells_.size() << endl;
  
 }; // BasisSet::parseGlobal
 
