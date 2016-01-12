@@ -233,7 +233,6 @@ namespace ChronusQ {
     T* ResRMem_; ///< Right Residuals
     T* ResLMem_; ///< Left Residuals
 
-
     // Reconstructed Solution Vectors
     T* URMem_; ///< Reconstructed Right solution vectors
     T* ULMem_; ///< Reconstructed Left solution vectors
@@ -242,7 +241,13 @@ namespace ChronusQ {
     T* WORK;   ///< LAPACK scratch space
     int LWORK; ///< Length of WORK
 
-
+    // Special Algorithm Memory
+       
+    // Symmetrized Trial Vectors
+    T* ASuperMem_; ///< Matrix in basis of gerade and ungerade vectors
+    T* SSuperMem_; ///< Metrix in basis of gerade and ungedade vectors
+      
+      
     void allocScr();
     void allocScrSpecial();
     void cleanupScr();
@@ -293,7 +298,6 @@ namespace ChronusQ {
 
     // Procedural Functions
     void readGuess();
-    void symmetrizeTrial();
     void checkOrthogonality(int&);
     void formLinearTrans(const int, const int);
     void fullProjection(const int);
@@ -318,11 +322,16 @@ namespace ChronusQ {
     void davStdResidualGuess( T,const TMap&,TMap&);
     void davSymmResidualGuess(T,const TMap&,TMap&,const TMap&,TMap&);
 
+    // Special Algorithm Routines
+    void symmetrizeTrial();
+    void buildSuperMatricies(const int);
+
     #include <qn_constructors.h>
 
   }; // class QuasiNewton2
   #include <qn_memory.h>
   #include <qn_procedural.h>
+  #include <qn_special.h>
 }; // namespace ChronusQ
 
 #endif

@@ -89,21 +89,6 @@ void QuasiNewton2<T>::runMicro(){
 }; // QuasiNewton2<T>::runMicro
 
 template<typename T>
-void QuasiNewton2<T>::symmetrizeTrial(){
-  auto N      = this->qnObj_->nSingleDim();
-  auto NGuess = this->qnObj_->nGuess();
-  TMap TVecR   (this->TRMem_, N, NGuess);
-  TMap TVecL   (this->TLMem_, N, NGuess);
-
-  TVecR.block(N/2,0,N/2,NGuess) =  TVecR.block(0,0,N/2,NGuess);
-  TVecL.block(N/2,0,N/2,NGuess) = -TVecL.block(0,0,N/2,NGuess);
-
-  TVecR *= std::sqrt(0.5);
-  TVecL *= std::sqrt(0.5);
-
-};
-
-template<typename T>
 void QuasiNewton2<T>::checkOrthogonality(int &NTrial){
   this->checkLinearDependence(NTrial);
   this->orthogonalize(NTrial);
