@@ -80,7 +80,8 @@ void BasisSet::constructExtrn(Molecule * mol, BasisSet *genBasis){
     bool found = false;
     for(auto iRef = this->refShells_.begin(); iRef != this->refShells_.end(); ++iRef){
       if(mol->index(iAtom) == (*iRef).index){
-        for(auto iShell = (*iRef).shells.begin(); iShell != (*iRef).shells.end(); ++iShell)
+        for(auto iShell = (*iRef).shells.begin(); iShell != (*iRef).shells.end(); ++iShell){
+/*
           genBasis->shells_.push_back(
             libint2::Shell{ 
               iShell->alpha, 
@@ -90,6 +91,14 @@ void BasisSet::constructExtrn(Molecule * mol, BasisSet *genBasis){
                  (*mol->cart())(2,iAtom)}}
             }
           );
+*/
+          genBasis->shells_.push_back(libint2::Shell::unit());
+          genBasis->shells_.back() = (*iShell);
+          genBasis->shells_.back().O = 
+            { (*mol->cart())(0,iAtom),
+              (*mol->cart())(1,iAtom),
+              (*mol->cart())(2,iAtom)};
+        }
         found = true;
       }
     } // Loop iRef
