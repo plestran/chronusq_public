@@ -87,7 +87,7 @@ int main(int argc, char **argv){
   resp.setMeth(RESPONSE_TYPE::RPA);
   //resp.doSA();
   resp.setNSek(3);
-  resp.doFull();
+  //resp.doFull();
   resp.doResponse();
   finalizeCQ(); 
   return 0;

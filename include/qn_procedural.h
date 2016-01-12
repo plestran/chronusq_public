@@ -155,21 +155,29 @@ void QuasiNewton2<T>::fullProjection(const int NTrial){
   TMap RhoL    (this->RhoLMem_    , 0, 0);
   TMap XTRhoL  (this->XTRhoLMem_  , 0, 0);
 
+  if(this->matrixType_ == HERMETIAN_GEP){
+    new (&RhoR    ) TMap(this->RhoRMem_    , N     , NTrial);
+    new (&XTRhoR  ) TMap(this->XTRhoRMem_  , NTrial, NTrial);
+  }
+
   if(this->qnObj_->needsLeft()){
     new (&SigmaL  ) TMap(this->SigmaLMem_  , N     , NTrial);
     new (&XTSigmaL) TMap(this->XTSigmaLMem_, NTrial, NTrial);
     new (&TVecL   ) TMap(this->TLMem_      , N     , NTrial);
-    new (&RhoR    ) TMap(this->RhoRMem_    , N     , NTrial);
-    new (&XTRhoR  ) TMap(this->XTRhoRMem_  , NTrial, NTrial);
-    new (&RhoL    ) TMap(this->RhoLMem_    , N     , NTrial);
-    new (&XTRhoL  ) TMap(this->XTRhoLMem_  , NTrial, NTrial);
+    if(this->matrixType_ == HERMETIAN_GEP){
+      new (&RhoL    ) TMap(this->RhoLMem_    , N     , NTrial);
+      new (&XTRhoL  ) TMap(this->XTRhoLMem_  , NTrial, NTrial);
+    }
   }
 
   XTSigmaR = TVecR.adjoint() * SigmaR;
-  if(this->qnObj_->needsLeft()){
+  if(this->matrixType_ == HERMETIAN_GEP)
     XTRhoR   = TVecR.adjoint() * RhoR;
+
+  if(this->qnObj_->needsLeft()){
     XTSigmaL = TVecL.adjoint() * SigmaL;
-    XTRhoL   = TVecL.adjoint() * RhoL;
+    if(this->matrixType_ == HERMETIAN_GEP)
+      XTRhoL   = TVecL.adjoint() * RhoL;
   }
 }; // QuasiNewton2<T>::fullProjection
 
@@ -196,8 +204,16 @@ void QuasiNewton2<T>::reconstructSolution(const int NTrial){
   }
 
   UR = TVecR * XTSigmaR;
+  if(this->qnObj_->needsLeft()) UL = TVecL * XTSigmaL;
+
   (*this->qnObj_->solutionVecR()) = UR.block(0,0,N,this->qnObj_->nSek());
-  (*this->qnObj_->omega()) = ER.head(this->qnObj_->nSek());
+  (*this->qnObj_->omega())        = ER.head(this->qnObj_->nSek());
+
+  if(this->specialAlgorithm_ == SYMMETRIZED_TRIAL)
+    (*this->qnObj_->solutionVecR()) += UL.block(0,0,N,this->qnObj_->nSek());
+  else if(this->qnObj_->needsLeft())
+    (*this->qnObj_->solutionVecL()) = UL.block(0,0,N,this->qnObj_->nSek());
+  
 }; // QuasiNewton2<T>::reconstructSolution
 
 template<typename T>
@@ -223,18 +239,27 @@ void QuasiNewton2<T>::generateResiduals(const int NTrial){
   TMap UL      (this->ULMem_      , 0, 0);
   TMap ResL    (this->ResLMem_    , 0, 0);
 
+
+  if(this->matrixType_ == HERMETIAN_GEP)
+    new (&RhoR    ) TMap(this->RhoRMem_    , N     , NTrial);
+
   if(this->qnObj_->needsLeft()){
     new (&SigmaL  ) TMap(this->SigmaLMem_  , N     , NTrial);
     new (&XTSigmaL) TMap(this->XTSigmaLMem_, NTrial, NTrial);
     new (&TVecL   ) TMap(this->TLMem_      , N     , NTrial);
-    new (&RhoR    ) TMap(this->RhoRMem_    , N     , NTrial);
-    new (&RhoL    ) TMap(this->RhoLMem_    , N     , NTrial);
     new (&UL      ) TMap(this->ULMem_      , N     , NTrial);
     new (&ResL    ) TMap(this->ResLMem_    , N     , NTrial);
+
+    if(this->matrixType_ == HERMETIAN_GEP)
+      new (&RhoL    ) TMap(this->RhoLMem_    , N     , NTrial);
   }
 
   if(this->matrixType_ == QNMatrixType::HERMETIAN)
     ResR = SigmaR * XTSigmaR - UR * E.asDiagonal();
+  else if(this->specialAlgorithm_ == SYMMETRIZED_TRIAL){
+    ResR = SigmaR * XTSigmaR - RhoR * XTSigmaL * E.asDiagonal();
+    ResL = SigmaL * XTSigmaL - RhoL * XTSigmaR * E.asDiagonal();
+  }
 }; // QuasiNewton2<T>::generateResiduals
 
 template<typename T>
