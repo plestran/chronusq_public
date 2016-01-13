@@ -95,7 +95,9 @@ void RealTime<T>::doPropagation(){
     this->ssPropagator_->mpiBCastDensity();
     this->ssPropagator_->formFock();
     this->ssPropagator_->computeEnergy();
-    this->ssPropagator_->computeMultipole();
+    this->ssPropagator_->computeProperties();
+    if(this->printLevel_ > 3)
+      this->ssPropagator_->printProperties();
 
     if(getRank() == 0) {
       this->ssPropagator_->mullikenPop();

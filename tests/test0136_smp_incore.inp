@@ -1,4 +1,4 @@
-#  test0136 serial incore Real RKS B88 STO-3G
+#  test0136 smp incore Real RKS B88 STO-3G
 #
 #  Molecule Specification
 #
@@ -26,4 +26,4 @@ DFT_NRAD = 75
 #  Misc Settings
 #
 [Misc]
-nsmp = 6
+nsmp = 2

@@ -1,4 +1,4 @@
-#  test0137 smp direct Real UKS B88 STO-3G
+#  test0137 smp incore Real UKS B88 STO-3G
 #
 #  Molecule Specification
 #
@@ -16,7 +16,7 @@ geom:
 reference = UKS
 job       = SCF
 basis     = sto3g.gbs
-ints			= direct
+ints			= incore
 exchange  = B88
 corr      = NOCORR
 DFT_NRAD = 75

@@ -344,6 +344,15 @@ void AOIntegrals::computeAOTwoE(){
   }
   } // OMP Parallel
   this->haveAOTwoE = true;
+
+//this->fileio_->out << "Two-Electron Integrals (ERIs)" << endl;
+//for(auto i = 0; i < this->nBasis_; i++)
+//for(auto j = 0; j < this->nBasis_; j++)
+//for(auto k = 0; k < this->nBasis_; k++)
+//for(auto l = 0; l < this->nBasis_; l++){
+//  this->fileio_->out << "(" << i << "," << j << "|" << k << "," << l << ")  ";
+//  this->fileio_->out << (*this->aoERI_)(i,j,k,l) << endl;
+//};
 }
 
 

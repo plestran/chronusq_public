@@ -1,0 +1,25 @@
+#  test0141 serial direct Real UHF cc-pVQZ
+#
+#  Molecule Specification
+#
+[Molecule]
+charge = 0
+mult = 3
+geom:
+	O 0   0.000000    0.000000    0.608586
+	O 0   0.000000    0.000000    -0.608586
+  
+#
+#  Job Specification
+#
+[QM]
+reference = Real UHF
+job       = SCF
+basis     = cc-pvqz.gbs
+ints			= direct
+
+#
+#  Misc Settings
+#
+[Misc]
+nsmp = 1

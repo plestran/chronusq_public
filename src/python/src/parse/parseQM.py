@@ -165,7 +165,7 @@ def handleReference(workers,settings):
   elif 'RHF' in ref:
     # Force RHF
     if mult != 1:
-      mas = 'Non-singlet multiplicity is not suitable for RHF'
+      msg = 'Non-singlet multiplicity is not suitable for RHF'
       CErrMsg(workers['CQFileIO'],str(msg))
  
     workers["CQSingleSlater"].setRef(chronusQ.Reference.RHF)
@@ -441,7 +441,7 @@ def handleReference(workers,settings):
   elif 'RLSDA' in ref:
     # Force RKS
     if mult != 1:
-      mas = 'Non-singlet multiplicity is not suitable for RKS'
+      msg = 'Non-singlet multiplicity is not suitable for RKS'
       CErrMsg(workers['CQFileIO'],str(msg))
  
     workers["CQSingleSlater"].setRef(chronusQ.Reference.RHF)
@@ -476,7 +476,7 @@ def handleReference(workers,settings):
   elif 'ULSDA' in ref:
     # Force RKS
     if mult != 1:
-      mas = 'Non-singlet multiplicity is not suitable for RKS'
+      msg = 'Non-singlet multiplicity is not suitable for RKS'
       CErrMsg(workers['CQFileIO'],str(msg))
  
     workers["CQSingleSlater"].setRef(chronusQ.Reference.RHF)
