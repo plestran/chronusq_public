@@ -1,4 +1,4 @@
-#  test0001 serial incore Real RHF STO-3G
+#  test0139 serial incore Real RHF cc-pVQZ
 #
 #  Molecule Specification
 #
@@ -6,9 +6,9 @@
 charge = 0
 mult = 1
 geom:
- O  0.000000000  -0.07579184359  0.0
- H  0.866811829  0.6014357793  0.0
- H  -0.866811829  0.6014357793  0.0
+  O 0   0.000000000 -0.07579184359 0.0
+  H 0   0.866811829  0.6014357793  0.0
+  H 0  -0.866811829  0.6014357793  0.0
   
 #
 #  Job Specification
@@ -16,7 +16,7 @@ geom:
 [QM]
 reference = Real RHF
 job       = SCF
-basis     = sto3g.gbs
+basis     = cc-pvqz.gbs
 ints			= incore
 
 #
