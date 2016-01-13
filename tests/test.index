@@ -609,6 +609,26 @@ test0133_serial_direct.inp - Real UKS-SCF-SVWN5 - STO-3G  - Small Serial - Direc
 test0136_serial_incore.inp - Real RKS-SCF-GGA-B88 - STO-3G  - Small Serial - In-Core Integrals
 test0136_serial_direct.inp - Real RKS-SCF-GGA-B88 - STO-3G  - Small Serial - Direct  Integrals
 test0136_smp_incore.inp    - Real RKS-SCF-GGA-B88 - STO-3G  - Small OpenMP - In-Core Integrals
+#test0136_smp_direct.inp    - Real RKS-SCF-GGA-B88 - STO-3G  - Small OpenMP - Direct  Integrals
 test0137_serial_incore.inp - Real UKS-SCF-GGA-B88 - STO-3G  - Small Serial - In-Core Integrals
 test0137_serial_direct.inp - Real UKS-SCF-GGA-B88 - STO-3G  - Small Serial - Direct  Integrals
+#test0137_smp_incore.inp    - Real UKS-SCF-GGA-B88 - STO-3G  - Small OpenMP - In-Core Integrals
 test0137_smp_direct.inp    - Real UKS-SCF-GGA-B88 - STO-3G  - Small OpenMP - Direct  Integrals
+
+** test0138-0141 Test Larger Basis SCF code - H2O,O2 **
+test0138_serial_incore.inp - Real RHF-SCF -  cc-pVTZ - Large Serial - In-Core Integrals
+#test0138_serial_direct.inp - Real RHF-SCF -  cc-pVTZ - Large Serial - Direct  Integrals
+##test0138_smp_incore.inp    - Real RHF-SCF -  cc-pVTZ - Large OpenMP - In-Core Integrals
+#test0138_smp_direct.inp    - Real RHF-SCF -  cc-pVTZ - Large OpenMP - Direct  Integrals
+test0139_serial_incore.inp - Real RHF-SCF -  cc-pVQZ - Large Serial - In-Core Integrals
+#test0139_serial_direct.inp - Real RHF-SCF -  cc-pVQZ - Large Serial - Direct  Integrals
+##test0139_smp_incore.inp    - Real RHF-SCF -  cc-pVQZ - Large OpenMP - In-Core Integrals
+#test0139_smp_direct.inp    - Real RHF-SCF -  cc-pVQZ - Large OpenMP - Direct  Integrals
+test0140_serial_incore.inp - Real UHF-SCF -  cc-pVTZ - Large Serial - In-Core Integrals
+#test0140_serial_direct.inp - Real UHF-SCF -  cc-pVTZ - Large Serial - Direct  Integrals
+##test0140_smp_incore.inp    - Real UHF-SCF -  cc-pVTZ - Large OpenMP - In-Core Integrals
+#test0140_smp_direct.inp    - Real UHF-SCF -  cc-pVTZ - Large OpenMP - Direct  Integrals
+test0141_serial_incore.inp - Real UHF-SCF -  cc-pVQZ - Large Serial - In-Core Integrals
+#test0141_serial_direct.inp - Real UHF-SCF -  cc-pVQZ - Large Serial - Direct  Integrals
+##test0141_smp_incore.inp    - Real UHF-SCF -  cc-pVQZ - Large OpenMP - In-Core Integrals
+#test0141_smp_direct.inp    - Real UHF-SCF -  cc-pVQZ - Large OpenMP - Direct  Integrals

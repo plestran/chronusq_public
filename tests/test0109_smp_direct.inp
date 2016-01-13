@@ -25,4 +25,4 @@ corr      = NOCORR
 #  Misc Settings
 #
 [Misc]
-nsmp = 8
+nsmp = 2

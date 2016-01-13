@@ -25,4 +25,4 @@ DFT_NRAD = 75
 #  Misc Settings
 #
 [Misc]
-nsmp = 4
+nsmp = 2
