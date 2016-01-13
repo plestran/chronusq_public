@@ -558,7 +558,6 @@ test0121_serial_direct.inp - Real UKS-SCF-SLATER - STO-3G  - Small Serial - Dire
 #test0123_serial_direct.inp - Real UKS-SCF-SLATER - cc-pVDZ - Small Serial - Direct  Integrals (6D)
 #test0123_smp_incore.inp    - Real UKS-SCF-SLATER - cc-pVDZ - Small OpenMP - In-Core Integrals (6D)
 #test0123_smp_direct.inp    - Real UKS-SCF-SLATER - cc-pVDZ - Small OpenMP - Direct  Integrals (6D)
-#
 test0124_serial_incore.inp - Real UKS-SCF-LSDA - STO-3G  - Small Serial - In-Core Integrals
 test0124_serial_direct.inp - Real UKS-SCF-LSDA - STO-3G  - Small Serial - Direct  Integrals
 #test0124_smp_incore.inp    - Real UKS-SCF-LSDA - STO-3G  - Small OpenMP - In-Core Integrals
