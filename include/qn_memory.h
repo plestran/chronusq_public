@@ -67,8 +67,9 @@ void QuasiNewton2<T>::allocScr(){
   }
 
   if(this->specialAlgorithm_ == SYMMETRIZED_TRIAL){
-    this->ASuperMem_ = new T[4 * MSSMSS];
-    this->SSuperMem_ = new T[4 * MSSMSS];
+    this->ASuperMem_  = new T[4 * MSSMSS];
+    this->SSuperMem_  = new T[4 * MSSMSS];
+    this->NHrProdMem_ = new T[4 * MSSMSS];
   }
 
   this->allocScrSpecial();
@@ -108,6 +109,7 @@ void QuasiNewton2<T>::cleanupScr(){
   if(this->specialAlgorithm_ == SYMMETRIZED_TRIAL){
     delete [] this->ASuperMem_;
     delete [] this->SSuperMem_;
+    delete [] this->NHrProdMem_;
   }
 
   this->cleanupScrSpecial();

@@ -35,6 +35,10 @@ namespace ChronusQ {
     dims.push_back(this->maxSubSpace_);
     dims.push_back(N);
 
+    std::vector<hsize_t> dimsSmall;
+    dims.push_back(this->maxSubSpace_);
+    dims.push_back(this->maxSubSpace_);
+
     time_t t; time(&t); // Time flag for files to be written
 
     std::string TRName = "Trial Vectors (Right) "    + std::to_string(t);
@@ -42,6 +46,8 @@ namespace ChronusQ {
     std::string PRName = "Rho Vectors (Right) "      + std::to_string(t);
     std::string RRName = "Residual Vectors (Right) " + std::to_string(t);
     std::string URName = "Solution Vectors (Right) " + std::to_string(t);
+    std::string ASName = "A Super Matrix "           + std::to_string(t);
+    std::string SSName = "S Super Matrix "           + std::to_string(t);
 
     this->TRFile_     = this->genScrFile_(H5::PredType::NATIVE_DOUBLE,TRName,dims);
   //this->SigmaRFile_ = this->genScrFile_(H5::PredType::NATIVE_DOUBLE,SRName,dims);
@@ -51,6 +57,7 @@ namespace ChronusQ {
   //if(this->matrixType_ == HERMETIAN_GEP)
   //  this->RhoRFile_  = this->genScrFile_(H5::PredType::NATIVE_DOUBLE,PRName,dims);
 
+ 
 
     if(this->qnObj_->needsLeft()) {
       std::string TLName = "Trial Vectors (Left) "    + std::to_string(t);
@@ -66,6 +73,13 @@ namespace ChronusQ {
      
     //if(this->matrixType_ == HERMETIAN_GEP)
     //  this->RhoLFile_  = this->genScrFile_(H5::PredType::NATIVE_DOUBLE,PLName,dims);
+    }
+
+    if(this->specialAlgorithm_ == SYMMETRIZED_TRIAL) {
+      this->ASuperFile_ = this->genScrFile_(H5::PredType::NATIVE_DOUBLE,ASName,
+        dimsSmall);
+      this->SSuperFile_ = this->genScrFile_(H5::PredType::NATIVE_DOUBLE,SSName,
+        dimsSmall);
     }
   }; // QuasiNewton2<double>::iniScratchFiles
 

@@ -36,6 +36,7 @@ namespace ChronusQ {
 
     (*this->out_) << "Performing SVD on Trial Vectors in QuasiNewton" << endl;
     this->writeTrialVectors(NTrial);
+    CErr();
 
     /** RIGHT TRIAL VECTOR SVD **/
   //std::memcpy(this->URMem_,this->TRMem_,NTrial * N * sizeof(double));

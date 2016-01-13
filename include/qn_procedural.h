@@ -164,6 +164,9 @@ void QuasiNewton2<T>::fullProjection(const int NTrial){
     if(this->matrixType_ == HERMETIAN_GEP)
       XTRhoL   = TVecL.adjoint() * RhoL;
   }
+
+  if(this->specialAlgorithm_ == SYMMETRIZED_TRIAL)
+    this->buildSuperMatricies(NTrial);
 }; // QuasiNewton2<T>::fullProjection
 
 template<typename T>

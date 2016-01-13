@@ -41,5 +41,29 @@ void QuasiNewton2<T>::symmetrizeTrial(){
 
 template<typename T>
 void QuasiNewton2<T>::buildSuperMatricies(const int NTrial){
+  TMap XTSigmaR(this->XTSigmaRMem_,NTrial,  NTrial);
+  TMap XTRhoR  (this->XTRhoRMem_,  NTrial,  NTrial);
+  TMap XTSigmaL(this->XTSigmaLMem_,NTrial,  NTrial);
+  TMap XTRhoL  (this->XTRhoLMem_,  NTrial,  NTrial);
+  TMap ASuper  (this->ASuperMem_, 2*NTrial,2*NTrial);
+  TMap SSuper  (this->SSuperMem_, 2*NTrial,2*NTrial);
 
+  ASuper.setZero();
+  SSuper.setZero();
+  ASuper.block(0,     0,     NTrial,NTrial) = XTSigmaR;
+  ASuper.block(NTrial,NTrial,NTrial,NTrial) = XTSigmaL;
+  SSuper.block(0,     NTrial,NTrial,NTrial) = XTRhoR;
+  SSuper.block(NTrial,0,     NTrial,NTrial) = XTRhoL;
 }; // QuasiNewton2<T>::buildSuperMatricies
+
+template<typename T>
+void QuasiNewton2<T>::formNHrProd(const int NTrial) {
+  auto TwoNTrial = 2 * NTrial;
+  this->invertSuperMetric(NTrial);
+
+  TMap  SSuper(this->SSuperMem_, TwoNTrial,TwoNTrial);
+  TMap  ASuper(this->ASuperMem_, TwoNTrial,TwoNTrial);
+  TMap NHrProd(this->NHrProdMem_,TwoNTrial,TwoNTrial);
+
+  NHrProd = SSuper * ASuper;
+}; // QuasiNewton2<T>::formNHrProd

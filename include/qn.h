@@ -244,9 +244,9 @@ namespace ChronusQ {
     // Special Algorithm Memory
        
     // Symmetrized Trial Vectors
-    T* ASuperMem_; ///< Matrix in basis of gerade and ungerade vectors
-    T* SSuperMem_; ///< Metrix in basis of gerade and ungedade vectors
-      
+    T* ASuperMem_;    ///< Matrix in basis of gerade and ungerade vectors
+    T* SSuperMem_;    ///< Metric in basis of gerade and ungedade vectors
+    T* NHrProdMem_;   ///< Non-Hermetian product of the metric and matrix
       
     void allocScr();
     void allocScrSpecial();
@@ -280,6 +280,12 @@ namespace ChronusQ {
     // Reconstructed Solution Vectors (Disk)
     H5::DataSet * URFile_; ///< Reconstructed Right solution vectors
     H5::DataSet * ULFile_; ///< Reconstructed Left solution vectors
+
+    // Special Algorithm Memory
+       
+    // Symmetrized Trial Vectors
+    H5::DataSet * ASuperFile_; ///< Matrix in basis of gerade and ungerade vectors
+    H5::DataSet * SSuperFile_; ///< Metric in basis of gerade and ungerade vectors
 
     void iniScratchFiles();
     void writeTrialVectors(const int);
@@ -316,6 +322,7 @@ namespace ChronusQ {
     // Diagonalization Routines
     void stdHermetianDiag(const int);
     void stdNonHermetianDiag(const int);
+    void checkImaginary(const int);
 
     // Guess Generation Routines
     void davResidualGuess(    T,const TMap&,TMap&,const TMap&,TMap&);
@@ -325,6 +332,8 @@ namespace ChronusQ {
     // Special Algorithm Routines
     void symmetrizeTrial();
     void buildSuperMatricies(const int);
+    void invertSuperMetric(const int);
+    void formNHrProd(const int);
 
     #include <qn_constructors.h>
 
