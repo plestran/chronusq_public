@@ -1,4 +1,4 @@
-#  test0136 smp incore Real RKS B88 STO-3G
+#  test0136 smp direct Real RKS B88 STO-3G
 #
 #  Molecule Specification
 #
@@ -17,7 +17,7 @@ geom:
 reference = Real RKS
 job       = SCF
 basis     = sto3g.gbs
-ints			= incore 
+ints			= direct 
 exchange  = B88
 corr      = NOCORR
 DFT_GRID = EULERMACL 
