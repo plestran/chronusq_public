@@ -159,7 +159,7 @@ void SingleSlater<double>::computeSExpect(){
       this->Sx_  = 0.0;
       this->Sy_  = 0.0;
       this->Sz_  = 0.5*(this->nOccA_ - this->nOccB_);
-      this->Ssq_ = this->Sz_ * (this->Sz_ + 1) + this->nOccB_;
+      this->Ssq_ = this->Sz_ * (this->Sz_ + 1);
  
     } else if(this->Ref_ == TCS) {
       
