@@ -600,23 +600,30 @@ double SingleSlater<double>::der2LYP(int iop, double a, double b, double c, doub
   double delta = this->deltaLYP(0, c, d, rhoT);
   if (iop == 0 ) {
 // Eq A29 (del^2 LYP / (del rho_X del gammaXX))
-
+// note pass der1 as dLYP/dgammaAA 
+  del =   - (rhoA*rhoB/9.0) 
+             *(  ( 3.0 + rhoA/rhoT ) * deltaLYP(1, c, d, rhoT) + rhoB*(delta - 11.0)/(rhoT*rhoT)  ) 
+           + (rhoB/9.0)
+             *( 1.0 - 3.0*delta -rhoA*(delta - 11)/rhoT );
   } else if (iop == 1) {
 // Eq A30 (del^2 LYP / (del rho_X del gammaXY))
+// note pass der1 as dLYP/dgammaAB 
+//   to debug
+   del  =  - 8.0*rhoT/3.0;
+   del +=  - deltaLYP(1, c, d, rhoT)*(7.0*rhoA*rhoB/9.0);
+   del +=  rhoB*(47.0-7.0*delta)/9.0;
   } else if (iop == 2 ){
 // Eq A31 (del^2 LYP / (del rho_X del gammaYY)) (debugged alread)
-
-   del =   - (rhoA*rhoB/9.0) 
+// note pass der1 as dLYP/dgammaBB 
+  del =   - (rhoA*rhoB/9.0) 
              *(  ( 3.0 + rhoB/rhoT ) * deltaLYP(1, c, d, rhoT) - rhoB*(delta - 11.0)/(rhoT*rhoT)  ) 
            + (rhoB/9.0)
              *( 1.0 - 3.0*delta -rhoB*(delta - 11)/rhoT )
            - 2.0 * rhoA;
-
+   }
+// finishing (note just pass different der1 to get the right term)
    del *= -a * b * this->omegaLYP(0, c, d, rhoT);
    del += der1*this->omegaLYP(1, c, d, rhoT)/this->omegaLYP(0, c, d, rhoT);
-         
-    
-  }
    return del;
 };//End der2LYP
 
@@ -632,16 +639,53 @@ std::array<double,6> SingleSlater<double>::formVCLYP (double rhoA, double rhoB,
     double rhoB8over3 = std::pow(rhoB,(8.0/3.0));
     std::array<double,6> epsmu = {0.0,0.0,0.0,0.0,0.0,0.0};
 
-//  Eq. A22
+//  Eq. A23  dLYP/dgammaAA
     epsmu[3]  = this->derLYP(0, a, b, c, d, rhoA, rhoB);
-    epsmu[5]  = this->derLYP(0, a, b, c, d, rhoB, rhoA);
-    epsmu[6]  = this->derLYP(1, a, b, c, d, rhoA, rhoB);
+
+//  Eq. A23* dLYP/dgammaBB
+    epsmu[4]  = this->derLYP(0, a, b, c, d, rhoB, rhoA);
+
+//  Eq. A24  dLYP/dgammaAB
+    epsmu[5]  = this->derLYP(1, a, b, c, d, rhoA, rhoB);
+
+//  Eq. A28  dLYP/dRhoA
+    epsmu[1]   = - 4.0 * a * rhoA * rhoB / ( (rhoA+rhoB)*(1.0 + d / std::pow((rhoA+rhoB),(1.0/3.0)) ) );
+    epsmu[1]  *= ( (1.0/rhoA)
+                  -(1.0/(rhoA+rhoB)) 
+                  +((d/3.0) *(std::pow((rhoA+rhoB),(4.0/3.0)))/ (1.0 + std::pow((rhoA+rhoB),(4.0/3.0))))
+                 );
+    epsmu[1]  += - Cfact * a * b 
+                 *( 
+                   (this->omegaLYP(1, c, d, (rhoA+rhoB)) * rhoA * rhoB * (rhoA8over3 + rhoB8over3))
+                  +(this->omegaLYP(0, c, d, (rhoA+rhoB)) * rhoB * ( (11.0*rhoA8over3/3.0) + rhoB8over3))
+                 );
+    epsmu[1]  += gammaAA*der2LYP(0, a, b, c, d, rhoA, rhoB, epsmu[3] );
+    epsmu[1]  += gammaAB*der2LYP(1, a, b, c, d, rhoA, rhoB, epsmu[5] );
+    epsmu[1]  += gammaBB*der2LYP(2, a, b, c, d, rhoA, rhoB, epsmu[4] );
+//  Eq. A28* dLYP/dRhoB
+    epsmu[2]   = - 4.0 * a * rhoA * rhoB / ( (rhoA+rhoB)*(1.0 + d / std::pow((rhoA+rhoB),(1.0/3.0)) ) );
+    epsmu[2]  *= ( (1.0/rhoB)
+                  -(1.0/(rhoA+rhoB)) 
+                  +((d/3.0) *(std::pow((rhoA+rhoB),(4.0/3.0)))/ (1.0 + std::pow((rhoA+rhoB),(4.0/3.0))))
+                 );
+    epsmu[2]  += - Cfact * a * b  
+                 *( 
+                   (this->omegaLYP(1, c, d, (rhoA+rhoB)) * rhoA * rhoB * (rhoA8over3 + rhoB8over3))
+                  +(this->omegaLYP(0, c, d, (rhoA+rhoB)) * rhoA * ( (11.0*rhoB8over3/3.0) + rhoA8over3))
+                 );
+    epsmu[2]  += gammaBB*der2LYP(0, a, b, c, d, rhoB, rhoA, epsmu[4] );
+    epsmu[2]  += gammaAB*der2LYP(1, a, b, c, d, rhoB, rhoA, epsmu[5] );
+    epsmu[2]  += gammaAA*der2LYP(2, a, b, c, d, rhoB, rhoA, epsmu[3] );
+//  Eq. A22  LYP
     epsmu[0]  = - 4.0 * a * rhoA * rhoB / ( (rhoA+rhoB)*(1.0 + d / std::pow((rhoA+rhoB),(1.0/3.0)) ) );
     epsmu[0] += - Cfact * a * b * this->omegaLYP(0, c, d, (rhoA+rhoB)) 
                * rhoA * rhoB * (rhoA8over3 + rhoB8over3); 
     epsmu[0] += epsmu[3] * gammaAA;
-    epsmu[0] += epsmu[5] * gammaBB;
-    epsmu[0] += epsmu[6] * gammaAB;
+    epsmu[0] += epsmu[4] * gammaBB;
+    epsmu[0] += epsmu[5] * gammaAB;
+
+//Eq. A28 dLYP/drhoA
+//    espmu[1] =
 
 /*AP Debug 
     rhoA = 0.0;
@@ -1221,6 +1265,7 @@ void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX,
       if (this->isGGA) {
         rhorA    = STmp->frobInner(this->densityA()->conjugate()/2.0) ;
         rhor = 2.0*rhorA;
+        rhorB = rhorA;
       }else{ 
         rhorA    = STmp->frobInner(this->densityA()->conjugate()) ;
         rhor = rhorA;
@@ -1284,9 +1329,20 @@ void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX,
          epsMuCor = this->formVCGGA(rhorA,rhorB,gammaAA,gammaBB,gammaAB);
         (*VCA)  += ((*WeightsMap).coeff(ipts,0))*(*STmp)*epsMuCor[1];
         if (this->isGGA && this->CorrKernel_ == LYP) {
-          (*VCA)  += 2.0*drhoA[0]*((*WeightsMap).coeff(ipts,0))*(*dSTmpX)*epsMuCor[3];
-          (*VCA)  += 2.0*drhoA[1]*((*WeightsMap).coeff(ipts,0))*(*dSTmpY)*epsMuCor[3];
-          (*VCA)  += 2.0*drhoA[2]*((*WeightsMap).coeff(ipts,0))*(*dSTmpZ)*epsMuCor[3];
+//        Open Shell alpha LYP 
+          if(!this->isClosedShell && this->Ref_ != TCS) { 
+            (*VCA)  += 2.0*drhoA[0]*((*WeightsMap).coeff(ipts,0))*(*dSTmpX)*epsMuCor[3];
+            (*VCA)  +=     drhoB[0]*((*WeightsMap).coeff(ipts,0))*(*dSTmpX)*epsMuCor[5];
+            (*VCA)  += 2.0*drhoA[1]*((*WeightsMap).coeff(ipts,0))*(*dSTmpY)*epsMuCor[3];
+            (*VCA)  +=     drhoB[1]*((*WeightsMap).coeff(ipts,0))*(*dSTmpY)*epsMuCor[5];
+            (*VCA)  += 2.0*drhoA[2]*((*WeightsMap).coeff(ipts,0))*(*dSTmpZ)*epsMuCor[3];
+            (*VCA)  +=     drhoB[2]*((*WeightsMap).coeff(ipts,0))*(*dSTmpZ)*epsMuCor[5];
+          }else{
+//        Closed Shell
+            (*VCA)  += drhoA[0]*((*WeightsMap).coeff(ipts,0))*(*dSTmpX)*(2.0*epsMuCor[3]+epsMuCor[5]);
+            (*VCA)  += drhoA[1]*((*WeightsMap).coeff(ipts,0))*(*dSTmpY)*(2.0*epsMuCor[3]+epsMuCor[5]);
+            (*VCA)  += drhoA[2]*((*WeightsMap).coeff(ipts,0))*(*dSTmpZ)*(2.0*epsMuCor[3]+epsMuCor[5]);
+          }
           energyC += ((*WeightsMap).coeff(ipts,0))*epsMuCor[0];
         } else { 
           energyC += ((*WeightsMap).coeff(ipts,0))*rhor*epsMuCor[0];
@@ -1295,8 +1351,11 @@ void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX,
           (*VCB)  += ((*WeightsMap).coeff(ipts,0))*(*STmp)*epsMuCor[2];
           if (this->isGGA && this->CorrKernel_ == LYP) {
             (*VCB)  += 2.0*drhoB[0]*((*WeightsMap).coeff(ipts,0))*(*dSTmpX)*epsMuCor[4];
+            (*VCB)  +=     drhoA[0]*((*WeightsMap).coeff(ipts,0))*(*dSTmpX)*epsMuCor[5];
             (*VCB)  += 2.0*drhoB[1]*((*WeightsMap).coeff(ipts,0))*(*dSTmpY)*epsMuCor[4];
+            (*VCB)  +=     drhoA[1]*((*WeightsMap).coeff(ipts,0))*(*dSTmpY)*epsMuCor[5];
             (*VCB)  += 2.0*drhoB[2]*((*WeightsMap).coeff(ipts,0))*(*dSTmpZ)*epsMuCor[4];
+            (*VCB)  +=     drhoA[2]*((*WeightsMap).coeff(ipts,0))*(*dSTmpZ)*epsMuCor[5];
           }
         }
 //        energyC += ((*WeightsMap).coeff(ipts,0))*rhor*epsMuCor[0];
