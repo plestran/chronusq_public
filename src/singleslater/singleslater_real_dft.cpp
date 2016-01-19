@@ -600,7 +600,7 @@ double SingleSlater<double>::der2LYP(int iop, double a, double b, double c, doub
   double delta = this->deltaLYP(0, c, d, rhoT);
   if (iop == 0 ) {
 // Eq A29 (del^2 LYP / (del rho_X del gammaXX))
-// note pass der1 as dLYP/dgammaAA 
+// note pass der1 as dLYP/dgammaAA - debugged 
   del =   - (rhoA*rhoB/9.0) 
              *(  ( 3.0 + rhoA/rhoT ) * deltaLYP(1, c, d, rhoT) + rhoB*(delta - 11.0)/(rhoT*rhoT)  ) 
            + (rhoB/9.0)
@@ -608,13 +608,13 @@ double SingleSlater<double>::der2LYP(int iop, double a, double b, double c, doub
   } else if (iop == 1) {
 // Eq A30 (del^2 LYP / (del rho_X del gammaXY))
 // note pass der1 as dLYP/dgammaAB 
-//   to debug
+//   debugged
    del  =  - 8.0*rhoT/3.0;
    del +=  - deltaLYP(1, c, d, rhoT)*(7.0*rhoA*rhoB/9.0);
    del +=  rhoB*(47.0-7.0*delta)/9.0;
   } else if (iop == 2 ){
 // Eq A31 (del^2 LYP / (del rho_X del gammaYY)) (debugged alread)
-// note pass der1 as dLYP/dgammaBB 
+// note pass der1 as dLYP/dgammaBB - debugged 
   del =   - (rhoA*rhoB/9.0) 
              *(  ( 3.0 + rhoB/rhoT ) * deltaLYP(1, c, d, rhoT) - rhoB*(delta - 11.0)/(rhoT*rhoT)  ) 
            + (rhoB/9.0)
@@ -639,34 +639,34 @@ std::array<double,6> SingleSlater<double>::formVCLYP (double rhoA, double rhoB,
     double rhoB8over3 = std::pow(rhoB,(8.0/3.0));
     std::array<double,6> epsmu = {0.0,0.0,0.0,0.0,0.0,0.0};
 
-//  Eq. A23  dLYP/dgammaAA
+//  Eq. A23  dLYP/dgammaAA (debugged)
     epsmu[3]  = this->derLYP(0, a, b, c, d, rhoA, rhoB);
 
-//  Eq. A23* dLYP/dgammaBB
+//  Eq. A23* dLYP/dgammaBB (debugged)
     epsmu[4]  = this->derLYP(0, a, b, c, d, rhoB, rhoA);
 
-//  Eq. A24  dLYP/dgammaAB
+//  Eq. A24  dLYP/dgammaAB (debugged)
     epsmu[5]  = this->derLYP(1, a, b, c, d, rhoA, rhoB);
 
-//  Eq. A28  dLYP/dRhoA
+//  Eq. A28  dLYP/dRhoA (debugged)
     epsmu[1]   = - 4.0 * a * rhoA * rhoB / ( (rhoA+rhoB)*(1.0 + d / std::pow((rhoA+rhoB),(1.0/3.0)) ) );
     epsmu[1]  *= ( (1.0/rhoA)
                   -(1.0/(rhoA+rhoB)) 
-                  +((d/3.0) *(std::pow((rhoA+rhoB),(4.0/3.0)))/ (1.0 + std::pow((rhoA+rhoB),(4.0/3.0))))
+                  +((d/3.0) *(std::pow((rhoA+rhoB),(-4.0/3.0)))/ (1.0 + d* std::pow((rhoA+rhoB),(-1.0/3.0))))
                  );
     epsmu[1]  += - Cfact * a * b 
-                 *( 
-                   (this->omegaLYP(1, c, d, (rhoA+rhoB)) * rhoA * rhoB * (rhoA8over3 + rhoB8over3))
-                  +(this->omegaLYP(0, c, d, (rhoA+rhoB)) * rhoB * ( (11.0*rhoA8over3/3.0) + rhoB8over3))
-                 );
+             *( 
+              (this->omegaLYP(1, c, d, (rhoA+rhoB)) * rhoA * rhoB * (rhoA8over3 + rhoB8over3))
+              +(this->omegaLYP(0, c, d, (rhoA+rhoB)) * rhoB * ( (11.0*rhoA8over3/3.0) + rhoB8over3))
+             );
     epsmu[1]  += gammaAA*der2LYP(0, a, b, c, d, rhoA, rhoB, epsmu[3] );
     epsmu[1]  += gammaAB*der2LYP(1, a, b, c, d, rhoA, rhoB, epsmu[5] );
     epsmu[1]  += gammaBB*der2LYP(2, a, b, c, d, rhoA, rhoB, epsmu[4] );
-//  Eq. A28* dLYP/dRhoB
+//  Eq. A28* dLYP/dRhoB (debugged)
     epsmu[2]   = - 4.0 * a * rhoA * rhoB / ( (rhoA+rhoB)*(1.0 + d / std::pow((rhoA+rhoB),(1.0/3.0)) ) );
     epsmu[2]  *= ( (1.0/rhoB)
                   -(1.0/(rhoA+rhoB)) 
-                  +((d/3.0) *(std::pow((rhoA+rhoB),(4.0/3.0)))/ (1.0 + std::pow((rhoA+rhoB),(4.0/3.0))))
+                  +((d/3.0) *(std::pow((rhoA+rhoB),(-4.0/3.0)))/ (1.0 + d* std::pow((rhoA+rhoB),(-1.0/3.0))))
                  );
     epsmu[2]  += - Cfact * a * b  
                  *( 
@@ -676,7 +676,7 @@ std::array<double,6> SingleSlater<double>::formVCLYP (double rhoA, double rhoB,
     epsmu[2]  += gammaBB*der2LYP(0, a, b, c, d, rhoB, rhoA, epsmu[4] );
     epsmu[2]  += gammaAB*der2LYP(1, a, b, c, d, rhoB, rhoA, epsmu[5] );
     epsmu[2]  += gammaAA*der2LYP(2, a, b, c, d, rhoB, rhoA, epsmu[3] );
-//  Eq. A22  LYP
+//  Eq. A22  LYP  (debugged)
     epsmu[0]  = - 4.0 * a * rhoA * rhoB / ( (rhoA+rhoB)*(1.0 + d / std::pow((rhoA+rhoB),(1.0/3.0)) ) );
     epsmu[0] += - Cfact * a * b * this->omegaLYP(0, c, d, (rhoA+rhoB)) 
                * rhoA * rhoB * (rhoA8over3 + rhoB8over3); 
@@ -684,23 +684,22 @@ std::array<double,6> SingleSlater<double>::formVCLYP (double rhoA, double rhoB,
     epsmu[0] += epsmu[4] * gammaBB;
     epsmu[0] += epsmu[5] * gammaAB;
 
-//Eq. A28 dLYP/drhoA
-//    espmu[1] =
 
-/*AP Debug 
+//AP Debug 
+/*
     rhoA = 0.0;
     rhoB = 0.1;
-    double der1 = this->derLYP(0, a, b, c, d, rhoB, rhoA);
-    cout << rhoA << " " << this->der2LYP(2,0.04918,0.132,0.2533, 0.349, rhoA, rhoB,der1) << " " << this->der2LYP(2,0.04918,0.132,0.2533, 0.349, rhoB, rhoA,der1) <<  endl;
+    double der1 = this->derLYP(1, a, b, c, d, rhoA, rhoB);
+    cout << rhoA << " " << this->der2LYP(1,0.04918,0.132,0.2533, 0.349, rhoA, rhoB,der1) << " " << this->der2LYP(1,0.04918,0.132,0.2533, 0.349, rhoB, rhoA,der1) <<  endl;
     rhoA = 0.1;
-    der1 = this->derLYP(0, a, b, c, d, rhoB, rhoA);
-    cout << rhoA << " " << this->der2LYP(2,0.04918,0.132,0.2533, 0.349, rhoA, rhoB,der1) << " " << this->der2LYP(2,0.04918,0.132,0.2533, 0.349, rhoB, rhoA,der1) <<  endl;
+    der1 = this->derLYP(1, a, b, c, d, rhoA, rhoB);
+    cout << rhoA << " " << this->der2LYP(1,0.04918,0.132,0.2533, 0.349, rhoA, rhoB,der1) << " " << this->der2LYP(1,0.04918,0.132,0.2533, 0.349, rhoB, rhoA,der1) <<  endl;
     rhoA = 1.0;
-    der1 = this->derLYP(0, a, b, c, d, rhoB, rhoA);
-    cout << rhoA << " " << this->der2LYP(2,0.04918,0.132,0.2533, 0.349, rhoA, rhoB,der1) << " " << this->der2LYP(2,0.04918,0.132,0.2533, 0.349, rhoB, rhoA,der1)  << endl;
+    der1 = this->derLYP(1, a, b, c, d, rhoA, rhoB);
+    cout << rhoA << " " << this->der2LYP(1,0.04918,0.132,0.2533, 0.349, rhoA, rhoB,der1) << " " << this->der2LYP(1,0.04918,0.132,0.2533, 0.349, rhoB, rhoA,der1)  << endl;
     rhoA = 2.333;
-    der1 = this->derLYP(0, a, b, c, d, rhoB, rhoA);
-    cout << rhoA << " " << this->der2LYP(2,0.04918,0.132,0.2533, 0.349, rhoA, rhoB, der1) << " " << this->der2LYP(2,0.04918,0.132,0.2533, 0.349, rhoB, rhoA,der1) << endl;
+    der1 = this->derLYP(1, a, b, c, d, rhoA, rhoB);
+    cout << rhoA << " " << this->der2LYP(1,0.04918,0.132,0.2533, 0.349, rhoA, rhoB, der1) << " " << this->der2LYP(1,0.04918,0.132,0.2533, 0.349, rhoB, rhoA,der1) << endl;
     CErr();
 */
     return epsmu;
@@ -876,22 +875,28 @@ std::array<double,6> SingleSlater<double>::formVCGGA (double rhoA, double rhoB,
        corrEpsMu = this->formVCVWN((rhoA+rhoB),(this->spindens(rhoA,rhoB)));
     } else if (this->CorrKernel_ == LYP) {
        corrEpsMu = this->formVCLYP(rhoA, rhoB, gammaAA, gammaBB, gammaAB);
-/*DebAP
+/*AP
        rhoB = 0.11;
        gammaAA = 0.15;
        gammaBB = 0.25;
        gammaAB = 1.0;
        rhoA    = 1.0;
        corrEpsMu = this->formVCLYP(rhoA, rhoB, gammaAA, gammaBB, gammaAB);
-       cout << rhoA << " " << gammaAB << " " <<corrEpsMu[0] <<endl;
+       cout << "rhoA " << rhoA << " rhoB "<< rhoB <<endl;
+       cout << "gammaAA " << gammaAA << " gammaBB "<< gammaBB << " gammaAB "<< gammaAB <<endl; 
+       cout << "tot " <<corrEpsMu[2] <<endl;
        gammaAB = 0.10;
        rhoA    = 0.10;
        corrEpsMu = this->formVCLYP(rhoA, rhoB, gammaAA, gammaBB, gammaAB);
-       cout << rhoA << " " << gammaAB << " " <<corrEpsMu[0] <<endl;
+       cout << "rhoA " << rhoA << " rhoB "<< rhoB <<endl;
+       cout << "gammaAA " << gammaAA << " gammaBB "<< gammaBB << " gammaAB "<< gammaAB <<endl; 
+       cout << "tot " <<corrEpsMu[2] <<endl;
        gammaAB = 2.33;
        rhoA    = 2.33;
        corrEpsMu = this->formVCLYP(rhoA, rhoB, gammaAA, gammaBB, gammaAB);
-       cout << rhoA << " " << gammaAB << " " <<corrEpsMu[0] <<endl;
+       cout << "rhoA " << rhoA << " rhoB "<< rhoB <<endl;
+       cout << "gammaAA " << gammaAA << " gammaBB "<< gammaBB << " gammaAB "<< gammaAB <<endl; 
+       cout << "tot " <<corrEpsMu[2] <<endl;
        CErr();
 */
     }

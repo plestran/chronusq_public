@@ -1,4 +1,4 @@
-#  test0137 serial direct Real UKS B88 STO-3G
+#  test0139 serial direct Real UKS B88 STO-3G
 #
 #  Molecule Specification
 #
@@ -18,7 +18,7 @@ job       = SCF
 basis     = sto3g.gbs
 ints			= direct
 exchange  = B88
-corr      = NOCORR
+corr      = LYP
 DFT_NRAD = 75
 
 #

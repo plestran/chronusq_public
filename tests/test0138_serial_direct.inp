@@ -1,4 +1,4 @@
-#  test0136 serial incore Real RKS B88 STO-3G
+#  test0138 serial direct Real RKS B88/LYP STO-3G
 #
 #  Molecule Specification
 #
@@ -17,13 +17,13 @@ geom:
 reference = Real RKS
 job       = SCF
 basis     = sto3g.gbs
-ints			= incore 
+ints			= direct
 exchange  = B88
-corr      = NOCORR
+corr      = LYP
 DFT_GRID = EULERMACL 
 DFT_NRAD = 75
 #
 #  Misc Settings
 #
 [Misc]
-nsmp = 2
+nsmp = 1
