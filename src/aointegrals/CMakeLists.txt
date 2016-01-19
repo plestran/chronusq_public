@@ -1,7 +1,6 @@
 if(USE_LIBINT)
   set(AOINTS_SOURCE aointegrals.cpp aointegrals_builders.cpp 
-    aointegrals_complex_contract.cpp aointegrals_real_contract_uniquegen.cpp 
-    aointegrals_complex_contract_uniquegen.cpp 
+    aointegrals_real_contract_uniquegen.cpp aointegrals_complex_contract_uniquegen.cpp 
     aointegrals_real_contract_percontract.cpp aointegrals_real_contract_direct.cpp 
     aointegrals_complex_contract_percontract.cpp 
     aointegrals_complex_contract_direct.cpp aointegrals_real_contract_N4.cpp 

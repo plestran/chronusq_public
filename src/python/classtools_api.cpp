@@ -39,5 +39,21 @@ namespace ChronusQ {
     Controls &controls, BasisSet &dfBasis) {
     readInput(&fileio,&mol,&basis,&controls,&dfBasis);
   }
+
+  void Wrapper_initCQ(int argc, boost::python::list argv){
+    char ** argv_ = new char *[argc];
+    for(auto i = 0; i < argc; i++){
+      std::string str = boost::python::extract<std::string>(argv[i]);
+      auto len = str.length();
+      argv_[i] = new char[len+1];
+      strncpy(argv_[i],&str[0],len);
+      argv_[i][len] = '\0'; // Termination character
+    }
+    initCQ(argc,argv_);
+    for(auto i = 0; i < argc; i++){
+      delete [] argv_[i];
+    }
+    delete [] argv_;
+  };
 };
 

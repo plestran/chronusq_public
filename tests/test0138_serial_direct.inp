@@ -1,4 +1,4 @@
-#  test0138 serial direct Real RKS B88/LYP STO-3G
+#  test0138 serial direct Real RHF cc-pVTZ
 #
 #  Molecule Specification
 #
@@ -6,22 +6,19 @@
 charge = 0
 mult = 1
 geom:
- O  0.000000000  -0.07579184359  0.0
- H  0.866811829  0.6014357793  0.0
- H  -0.866811829  0.6014357793  0.0
+  O 0   0.000000000 -0.07579184359 0.0
+  H 0   0.866811829  0.6014357793  0.0
+  H 0  -0.866811829  0.6014357793  0.0
   
 #
 #  Job Specification
 #
 [QM]
-reference = Real RKS
+reference = Real RHF
 job       = SCF
-basis     = sto3g.gbs
+basis     = cc-pvtz.gbs
 ints			= direct
-exchange  = B88
-corr      = LYP
-DFT_GRID = EULERMACL 
-DFT_NRAD = 75
+
 #
 #  Misc Settings
 #

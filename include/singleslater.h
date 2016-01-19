@@ -703,8 +703,9 @@ public:
   /*************************/
   /* MPI Related Routines  */
   /*************************/
-  void mpiSend(int,int tag=tagSingleSlater);
-  void mpiRecv(int,int tag=tagSingleSlater);
+  void mpiSend(int,int tag);
+  void mpiRecv(int,int tag);
+  void mpiBCastDensity();
 };
 
 #include <singleslater_alloc.h>

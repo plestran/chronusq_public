@@ -1396,7 +1396,7 @@ void SingleSlater<double>::formVXC(){
     // Total Number of grid point for each center
     this->ngpts = this->nRadDFTGridPts_*this->nAngDFTGridPts_; 
 
-    int nPtsPerThread = this->ngpts / omp_get_max_threads();
+    int nPtsPerThread = this->ngpts / nthreads;
 
     //double weight  = 0.0;                            
     //double bweight = 0.0;
@@ -1558,26 +1558,31 @@ void SingleSlater<double>::formVXC(){
 ////T
 //    this->screenVxc  = false;
 
+#ifdef _OPENMP
+    int nthreads = omp_get_max_threads();
+#else
+    int nthreads = 1;
+#endif
     int nAtom   = this->molecule_->nAtoms();                    // Number of Atoms
     this->ngpts = this->nRadDFTGridPts_*this->nAngDFTGridPts_;  // Number of grid point for each center
-    int nPtsPerThread = this->ngpts / omp_get_max_threads();    //  Number of Threads
+    int nPtsPerThread = this->ngpts / nthreads;    //  Number of Threads
 //  Get the number of tread to dimension this last two
 //  std::array<double,1> tmpEnergyEx  = {0.0} ;
 //  std::array<double,1> tmpEnergyCor = {0.0} ;
-    std::vector<double> tmpEnergyEx(omp_get_max_threads())  ;
-    std::vector<double> tmpEnergyCor(omp_get_max_threads()) ;
-    std::vector<int> tmpnpts(omp_get_max_threads()) ;
+    std::vector<double> tmpEnergyEx(nthreads)  ;
+    std::vector<double> tmpEnergyCor(nthreads) ;
+    std::vector<int> tmpnpts(nthreads) ;
 
     int nRHF;
     if(this->isClosedShell || this->Ref_ == TCS) nRHF = 1;
     else    nRHF = 2;
     std::vector<std::vector<RealMatrix>> 
-      tmpVX(nRHF,std::vector<RealMatrix>(omp_get_max_threads(),
+      tmpVX(nRHF,std::vector<RealMatrix>(nthreads,
               RealMatrix::Zero(this->nBasis_,this->nBasis_)
       )
     );
     std::vector<std::vector<RealMatrix>> 
-      tmpVC(nRHF,std::vector<RealMatrix>(omp_get_max_threads(),
+      tmpVC(nRHF,std::vector<RealMatrix>(nthreads,
               RealMatrix::Zero(this->nBasis_,this->nBasis_)
       )
     );
@@ -1621,7 +1626,7 @@ void SingleSlater<double>::formVXC(){
     auto batch_dft = [&] (int thread_id,int iAtm, TwoDGrid &Raw3Dg) {
       auto loopSt = nPtsPerThread * thread_id;
       auto loopEn = nPtsPerThread * (thread_id + 1);
-      if (thread_id == (omp_get_max_threads() - 1))
+      if (thread_id == (nthreads - 1))
         loopEn = this->ngpts;
       for(int ipts = loopSt; ipts < loopEn; ipts++){
 //      printf("%d_%d_%d_%d\n", thread_id, ipts/nPtsPerThread,  ipts, iAtm);
@@ -1692,7 +1697,7 @@ void SingleSlater<double>::formVXC(){
      }
      batch_dft(0,iAtm,Raw3Dg);
    #endif
-      for(auto iThread = 0; iThread < omp_get_max_threads(); iThread++) {
+      for(auto iThread = 0; iThread < nthreads; iThread++) {
         (*this->vXA())   += tmpVX[0][iThread];
         (*this->vCorA()) += tmpVC[0][iThread];
         this->totalEx += tmpEnergyEx[iThread];
@@ -1748,29 +1753,32 @@ void SingleSlater<double>::formVXC(){
 
 template<>
 void SingleSlater<double>::formVXC_store(){
-   
+#ifdef _OPENMP
+    int nthreads = omp_get_max_threads();
+#else
+    int nthreads = 1;
+#endif
     int nAtom   = this->molecule_->nAtoms();                    // Number of Atoms
     this->ngpts = this->nRadDFTGridPts_*this->nAngDFTGridPts_;  // Number of grid point for each center
-    int nPtsPerThread = this->ngpts / omp_get_max_threads();    //  Number of Threads
-    std::vector<double> tmpEnergyEx(omp_get_max_threads())  ;
-    std::vector<double> tmpEnergyCor(omp_get_max_threads()) ;
-    std::vector<int> tmpnpts(omp_get_max_threads()) ;
+    int nPtsPerThread = this->ngpts / nthreads;    //  Number of Threads
+    std::vector<double> tmpEnergyEx(nthreads)  ;
+    std::vector<double> tmpEnergyCor(nthreads) ;
+    std::vector<int> tmpnpts(nthreads) ;
     int nRHF;
     int nDerMatrix = 0;                                       // Number of Matrix to be allocated for GGA
     if(this->isClosedShell || this->Ref_ == TCS) nRHF = 1;
     else    nRHF = 2;
     std::vector<std::vector<RealMatrix>> 
-      tmpVX(nRHF,std::vector<RealMatrix>(omp_get_max_threads(),
+      tmpVX(nRHF,std::vector<RealMatrix>(nthreads,
               RealMatrix::Zero(this->nBasis_,this->nBasis_)
       )
     );
     std::vector<std::vector<RealMatrix>> 
-      tmpVC(nRHF,std::vector<RealMatrix>(omp_get_max_threads(),
+      tmpVC(nRHF,std::vector<RealMatrix>(nthreads,
               RealMatrix::Zero(this->nBasis_,this->nBasis_)
       )
     );
-    std::vector<RealMatrix> overlapR_(omp_get_max_threads(),RealMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
-
+    std::vector<RealMatrix> overlapR_(nthreads,RealMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
 
     double CxVx  = -(3.0/4.0)*(std::pow((3.0/math.pi),(1.0/3.0)));  //TF LDA Prefactor (for Vx)  
     double val ;                                  // to take into account Ang Int
@@ -1780,6 +1788,7 @@ void SingleSlater<double>::formVXC_store(){
     } else {
       val = 4.0*math.pi*CxVx;                                  // to take into account Ang Int
     }
+//GGA
     std::vector<RealMatrix> dXOverlapR_(nDerMatrix,
          RealMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
     std::vector<RealMatrix> dYOverlapR_(nDerMatrix,
@@ -1801,7 +1810,7 @@ void SingleSlater<double>::formVXC_store(){
     auto batch_dft = [&] (int thread_id,int iAtm, TwoDGrid &Raw3Dg) {
       auto loopSt = nPtsPerThread * thread_id;
       auto loopEn = nPtsPerThread * (thread_id + 1);
-      if (thread_id == (omp_get_max_threads() - 1))
+      if (thread_id == (nthreads - 1))
         loopEn = this->ngpts;
       for(int ipts = loopSt; ipts < loopEn; ipts++){
 //      printf("%d_%d_%d_%d\n", thread_id, ipts/nPtsPerThread,  ipts, iAtm);
@@ -1861,7 +1870,7 @@ void SingleSlater<double>::formVXC_store(){
      }
      batch_dft(0,iAtm,Raw3Dg);
    #endif
-      for(auto iThread = 0; iThread < omp_get_max_threads(); iThread++) {
+      for(auto iThread = 0; iThread < nthreads; iThread++) {
         (*this->vXA())   += tmpVX[0][iThread];
         (*this->vCorA()) += tmpVC[0][iThread];
         this->totalEx += tmpEnergyEx[iThread];
@@ -1885,7 +1894,7 @@ void SingleSlater<double>::formVXC_store(){
 /// }; //loop atoms
 
     
-    std::vector<std::chrono::duration<double>> thread_timers(omp_get_max_threads());
+    std::vector<std::chrono::duration<double>> thread_timers(nthreads);
     auto batch_dft = [&] (int thread_id,int iAtm) {
       auto loopSt = nPtsPerThread * thread_id;
       auto loopEn = nPtsPerThread * (thread_id + 1);
@@ -1893,7 +1902,7 @@ void SingleSlater<double>::formVXC_store(){
 //      auto start = std::chrono::high_resolution_clock::now();
 //    for(int ipts = loopSt; ipts < loopEn; ipts++){
       for(auto ipts = 0; ipts < this->ngpts; ipts++) {
-        if(ipts % omp_get_max_threads() != thread_id) continue;
+        if(ipts % nthreads != thread_id) continue;
         if( this->screenVxc && ((*DoRhoMap).coeff(ipts,0) < 1) ) continue;
         this->evalVXC_store(iAtm,ipts,tmpEnergyEx[thread_id],tmpEnergyCor[thread_id],
               &tmpVX[0][thread_id],&tmpVX[1][thread_id],&tmpVC[0][thread_id],
@@ -1929,7 +1938,7 @@ void SingleSlater<double>::formVXC_store(){
       }
       batch_dft(0,iAtm);
     #endif
-      for(auto iThread = 0; iThread < omp_get_max_threads(); iThread++) {
+      for(auto iThread = 0; iThread < nthreads; iThread++) {
         (*this->vXA())   += tmpVX[0][iThread];
         (*this->vCorA()) += tmpVC[0][iThread];
         this->totalEx += tmpEnergyEx[iThread];

@@ -458,8 +458,11 @@ BOOST_PYTHON_MODULE(libpythonapi){
   def("getAtomicNumber", ChronusQ::getAtomicNumber      );
   def("CErr",            ChronusQ::Wrapper_CErr_Default );
   def("CErrMsg",         ChronusQ::Wrapper_CErr_Message );
-  def("initCQ",          ChronusQ::initCQ               );
+  def("initCQ",          ChronusQ::Wrapper_initCQ       );
   def("finalizeCQ",      ChronusQ::finalizeCQ           );
   def("CQSetNumThreads", ChronusQ::CQSetNumThreads      );
+  def("getRank",         ChronusQ::getRank              );
+  def("getSize",         ChronusQ::getSize              );
+  def("mpiBarrier",      ChronusQ::mpiBarrier           );
 };
 

@@ -74,33 +74,40 @@ void SingleSlater<T>::alloc(){
   this->checkMeta();
   this->allocOp();
   if(this->maxMultipole_ > 0) this->allocMultipole(); 
-
-  if (this->isDFT){
-//   Timing
-    std::chrono::high_resolution_clock::time_point start;
-    std::chrono::high_resolution_clock::time_point finish;
-    std::chrono::duration<double> duration_formMap;
-    if(this->printLevel_ >= 3) {
-      start = std::chrono::high_resolution_clock::now();
-    }
-    this->genSparseBasisMap();
-// Timing
-    if(this->printLevel_ >= 3) {
-      finish = std::chrono::high_resolution_clock::now();
-      duration_formMap = finish - start;
-      this->fileio_->out<<"\nCPU time for MapVXc:  "<< duration_formMap.count() <<" seconds."<<endl;
+ 
+  if(getRank() == 0) {
+    if (this->isDFT){
+//     Timing
+      std::chrono::high_resolution_clock::time_point start;
+      std::chrono::high_resolution_clock::time_point finish;
+      std::chrono::duration<double> duration_formMap;
+      if(this->printLevel_ >= 3) {
+        start = std::chrono::high_resolution_clock::now();
       }
-   }
-
-//if(this->isPrimary) this->fileio_->iniStdSCFFiles<double>(!this->isClosedShell && this->Ref_ != TCS,this->nTCS_*this->nBasis_);
-//if(this->isPrimary) this->fileio_->iniStdSCFFiles(!this->isClosedShell && this->Ref_ != TCS,this->nTCS_*this->nBasis_);
-  if(this->isPrimary) {
-
-    if(typeid(T).hash_code() == typeid(double).hash_code())
-      this->fileio_->iniStdSCFFilesDouble(!this->isClosedShell && this->Ref_ != TCS,this->nTCS_*this->nBasis_);
-    else if(typeid(T).hash_code() == typeid(dcomplex).hash_code())
-      this->fileio_->iniStdSCFFilesComplex(!this->isClosedShell && this->Ref_ != TCS,this->nTCS_*this->nBasis_);
+      this->genSparseBasisMap();
+//   Timing
+      if(this->printLevel_ >= 3) {
+        finish = std::chrono::high_resolution_clock::now();
+        duration_formMap = finish - start;
+        this->fileio_->out << endl << "CPU time for MapVXc:  "
+          << duration_formMap.count() << " seconds." << endl;
+      }
+    }
+ 
+    if(this->isPrimary) {
+      if(typeid(T).hash_code() == typeid(double).hash_code())
+        this->fileio_->iniStdSCFFilesDouble(
+          !this->isClosedShell && this->Ref_ != TCS,this->nTCS_*this->nBasis_
+        );
+      else if(typeid(T).hash_code() == typeid(dcomplex).hash_code())
+        this->fileio_->iniStdSCFFilesComplex(
+          !this->isClosedShell && this->Ref_ != TCS,this->nTCS_*this->nBasis_
+        );
+    }
   }
+#ifdef CQ_ENABLE_MPI
+  MPI_Barrier(MPI_COMM_WORLD);
+#endif
 /* Leaks memory
   int i,j,ij;
   this->R2Index_ = new int*[nBasis];
@@ -131,7 +138,7 @@ void SingleSlater<T>::allocAlphaOp(){
       CErr(std::current_exception(),"TCS Density Matrix Allocation"  ); 
     else CErr(std::current_exception(),"Alpha Density Matrix Allocation"); 
   }
-
+  if(getRank() != 0) return;
   // Alpha / TCS Fock Matrix
   try { 
     this->fockA_ = std::unique_ptr<TMatrix>(
@@ -208,6 +215,7 @@ void SingleSlater<T>::allocBetaOp(){
     CErr(std::current_exception(),"Beta Density Matrix Allocation"); 
   }
 
+  if(getRank() != 0) return;
   // Beta Fock Matrix
   try { 
     this->fockB_ = std::unique_ptr<TMatrix>(

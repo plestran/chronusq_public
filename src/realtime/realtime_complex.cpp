@@ -313,6 +313,7 @@ void RealTime<dcomplex>::formUTrans() {
 //    if(!this->isClosedShell_ && this->Ref_ != SingleSlater<dcomplex>::TCS) prettyPrint(this->fileio_->out,(*this->uTransB_),"uTransB");
 };
   
+/*
 template<>
 void RealTime<dcomplex>::doPropagation() {
   long int iStep;
@@ -465,5 +466,6 @@ void RealTime<dcomplex>::doPropagation() {
 
   if(this->tarCSVs) this->tarCSVFiles();
 };
+*/
 
 } // namespace ChronusQ

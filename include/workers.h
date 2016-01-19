@@ -41,8 +41,8 @@
 #include <classtools.h>
 
 namespace ChronusQ {
-int atlas(int, char**, GlobalMPI*);
-int worker(GlobalMPI*);
+int atlas(int, char**);
+int worker();
 } // namespace ChronusQ
 
 #endif

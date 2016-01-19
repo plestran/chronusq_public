@@ -109,7 +109,11 @@ def parseQM(workers,secDict):
     if ssSettings['JOB'] in ('RT'):
       parseRT(workers,secDict['RT']) 
     elif ssSettings['JOB'] in ('RPA','CIS','STAB','PPRPA','PPATDA','PPCTDA'):
-      parseSDR(workers,secDict)
+      if chronusQ.getSize() > 1:
+        msg = "Response cannot run with >1 MPI Processes"
+        CErrMsg(workers['CQFileIO'],msg)
+      else:
+        parseSDR(workers,secDict)
   else:
     msg = 'QM.Job ' + str(ssSettings['JOB']) + ' not recognized'
     CErrMsg(workers['CQFileIO'],str(msg))
@@ -161,7 +165,7 @@ def handleReference(workers,settings):
   elif 'RHF' in ref:
     # Force RHF
     if mult != 1:
-      mas = 'Non-singlet multiplicity is not suitable for RHF'
+      msg = 'Non-singlet multiplicity is not suitable for RHF'
       CErrMsg(workers['CQFileIO'],str(msg))
  
     workers["CQSingleSlater"].setRef(chronusQ.Reference.RHF)
@@ -236,7 +240,7 @@ def handleReference(workers,settings):
   elif 'RKS' in ref:
     # Force RKS
     if mult != 1:
-      mas = 'Non-singlet multiplicity is not suitable for RKS'
+      msg = 'Non-singlet multiplicity is not suitable for RKS'
       CErrMsg(workers['CQFileIO'],str(msg))
  
     workers["CQSingleSlater"].setRef(chronusQ.Reference.RHF)
@@ -437,7 +441,7 @@ def handleReference(workers,settings):
   elif 'RLSDA' in ref:
     # Force RKS
     if mult != 1:
-      mas = 'Non-singlet multiplicity is not suitable for RKS'
+      msg = 'Non-singlet multiplicity is not suitable for RKS'
       CErrMsg(workers['CQFileIO'],str(msg))
  
     workers["CQSingleSlater"].setRef(chronusQ.Reference.RHF)
@@ -472,7 +476,7 @@ def handleReference(workers,settings):
   elif 'ULSDA' in ref:
     # Force RKS
     if mult != 1:
-      mas = 'Non-singlet multiplicity is not suitable for RKS'
+      msg = 'Non-singlet multiplicity is not suitable for RKS'
       CErrMsg(workers['CQFileIO'],str(msg))
  
     workers["CQSingleSlater"].setRef(chronusQ.Reference.RHF)

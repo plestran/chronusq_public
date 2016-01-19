@@ -17,7 +17,7 @@ geom:
 reference = Real RKS
 job       = SCF
 basis     = sto3g.gbs
-ints			= direct
+ints			= direct 
 exchange  = B88
 corr      = NOCORR
 DFT_GRID = EULERMACL 

@@ -28,43 +28,33 @@
  ***********************/
 template<typename T>
 void SingleSlater<T>::formDensity(){
-  if(!this->haveMO)
-    CErr("No MO coefficients available to form one-particle density matrix!",
-         this->fileio_->out);
-
-  if(this->Ref_ == TCS){
-    auto nOcc = this->nOccA_ + this->nOccB_;
-    (*this->densityA_)= 
-      this->moA_->block(0,0,this->nTCS_*this->nBasis_,nOcc)*
-      this->moA_->block(0,0,this->nTCS_*this->nBasis_,nOcc).adjoint();
-/*
-    for(auto i = 0; i < this->nTCS_*this->nBasis_; i+=2)
-    for(auto j = 0; j < this->nTCS_*this->nBasis_; j+=2){
-      (*this->densityA_)(i,j)     = 0.0;
-      (*this->densityA_)(i+1,j+1) = 0.0;
-      (*this->densityA_)(i+1,j)   = 0.0;
-      (*this->densityA_)(i,j+1)   = 0.0;
-      for(auto k = 0; k < nOcc; k++){
-        (*this->densityA_)(i,j)     += (*this->moA_)(i,k)   * (*this->moA_)(j,k);
-        (*this->densityA_)(i+1,j+1) += (*this->moA_)(i+1,k) * (*this->moA_)(j+1,k);
-        (*this->densityA_)(i+1,j)   += (*this->moA_)(i+1,k) * (*this->moA_)(j,k);
-        (*this->densityA_)(i,j+1)   += (*this->moA_)(i,k)   * (*this->moA_)(j+1,k);
+  if(getRank() == 0) {
+    if(!this->haveMO)
+      CErr("No MO coefficients available to form one-particle density matrix!",
+           this->fileio_->out);
+ 
+    if(this->Ref_ == TCS){
+      auto nOcc = this->nOccA_ + this->nOccB_;
+      (*this->densityA_)= 
+        this->moA_->block(0,0,this->nTCS_*this->nBasis_,nOcc)*
+        this->moA_->block(0,0,this->nTCS_*this->nBasis_,nOcc).adjoint();
+    } else {
+      (*this->densityA_) = 
+        this->moA_->block(0,0,this->nBasis_,this->nOccA_)*
+        this->moA_->block(0,0,this->nBasis_,this->nOccA_).adjoint();
+      // D(a) is actually total D for RHF
+      if(this->isClosedShell) (*this->densityA_) *= math.two;
+      else {
+        (*this->densityB_) = 
+          this->moB_->block(0,0,this->nBasis_,this->nOccB_)*
+          this->moB_->block(0,0,this->nBasis_,this->nOccB_).adjoint();
       }
     }
-*/
-  } else {
-    (*this->densityA_) = 
-      this->moA_->block(0,0,this->nBasis_,this->nOccA_)*
-      this->moA_->block(0,0,this->nBasis_,this->nOccA_).adjoint();
-    if(this->isClosedShell) (*this->densityA_) *= math.two;// D(a) is actually total D for RHF
-    else {
-      (*this->densityB_) = 
-        this->moB_->block(0,0,this->nBasis_,this->nOccB_)*
-        this->moB_->block(0,0,this->nBasis_,this->nOccB_).adjoint();
-    }
+    if(this->printLevel_ >= 2) this->printDensity();
   }
-  if(this->printLevel_ >= 2) this->printDensity();
   this->haveDensity = true;
+  this->mpiBCastDensity();
+
 }
 
 template<typename T>
@@ -83,3 +73,21 @@ void SingleSlater<T>::mullikenPop() {
     this->mullPop_.push_back(charge); 
   } 
 }
+
+template<typename T>
+void SingleSlater<T>::mpiBCastDensity(){
+#ifdef CQ_ENABLE_MPI
+  auto dataType = MPI_DOUBLE;
+  if(typeid(T).hash_code() == typeid(dcomplex).hash_code())
+    dataType = MPI_C_DOUBLE_COMPLEX;
+
+  MPI_Bcast(this->densityA_->data(),
+    this->nTCS_*this->nTCS_*this->nBasis_*this->nBasis_,dataType,0,
+    MPI_COMM_WORLD);
+  if(!this->isClosedShell && this->Ref_ != TCS)
+    MPI_Bcast(this->densityB_->data(),
+      this->nTCS_*this->nTCS_*this->nBasis_*this->nBasis_,dataType,0,
+      MPI_COMM_WORLD);
+#endif
+  ;
+};

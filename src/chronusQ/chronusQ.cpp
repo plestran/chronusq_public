@@ -40,7 +40,6 @@ int main(int argc,char *argv[]) {
   cout.setf(ios::fixed,ios::floatfield);
 
   //Initialize MPI
-  GlobalMPI globalMPI;
 //  OOMPI_COMM_WORLD.Init(argc, argv);
 //  globalMPI.myid = OOMPI_COMM_WORLD.Rank();
 //  globalMPI.size = OOMPI_COMM_WORLD.Size();
@@ -48,7 +47,7 @@ int main(int argc,char *argv[]) {
 
 //  if(globalMPI.myid==0) {
     start = std::chrono::high_resolution_clock::now();
-    atlas(argc, argv, &globalMPI);
+    atlas(argc, argv);
 //  } else {
 //    worker(&globalMPI);
 //  };

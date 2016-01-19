@@ -35,12 +35,15 @@ void SingleSlater<T>::formPT(){
   bool doKS  = this->isDFT;
   if(!this->haveDensity) this->formDensity();
   if(this->aointegrals_->integralAlgorithm == AOIntegrals::DIRECT)
-    this->aointegrals_->twoEContractDirect(doRHF,doKS,true,false,doTCS,*this->densityA_,*this->PTA_,*this->densityB_,*this->PTB_);
+    this->aointegrals_->twoEContractDirect(doRHF,doKS,true,false,doTCS,
+    *this->densityA_,*this->PTA_,*this->densityB_,*this->PTB_);
   else if(this->aointegrals_->integralAlgorithm == AOIntegrals::DENFIT)
-    this->aointegrals_->twoEContractDF(doRHF,doKS,true,*this->densityA_,*this->PTA_,*this->densityB_,*this->PTB_);
+    this->aointegrals_->twoEContractDF(doRHF,doKS,true,*this->densityA_,
+    *this->PTA_,*this->densityB_,*this->PTB_);
   else if(this->aointegrals_->integralAlgorithm == AOIntegrals::INCORE)
-    this->aointegrals_->twoEContractN4(doRHF,doKS,true,false,doTCS,*this->densityA_,*this->PTA_,*this->densityB_,*this->PTB_);
-  if(this->printLevel_ >= 3) this->printPT();
+    this->aointegrals_->twoEContractN4(doRHF,doKS,true,false,doTCS,
+    *this->densityA_,*this->PTA_,*this->densityB_,*this->PTB_);
+  if(this->printLevel_ >= 3 && getRank() == 0) this->printPT();
 //if(doTCS)CErr();
 }
 #endif
@@ -50,90 +53,97 @@ void SingleSlater<T>::formPT(){
  ********************/
 template<typename T>
 void SingleSlater<T>::formFock(){
+#ifdef CQ_ENABLE_MPI
+  // Syncronize MPI processes before fock build
+  MPI_Barrier(MPI_COMM_WORLD);
+#endif
   
   if(!this->haveDensity) this->formDensity();
 #ifndef USE_LIBINT
-  if(!this->haveCoulomb) this->formCoulomb();
-  if(!this->haveExchange) this->formExchange();
+  if(getRank() == 0){
+    // Not even sure if these guys still work let alone are MPI
+    // capable
+    if(!this->haveCoulomb) this->formCoulomb();
+    if(!this->haveExchange) this->formExchange();
+  }
 #else
+  // All MPI processes go to FormPT
   this->formPT();
 #endif
-//if(this->Ref_ == TCS) this->basisset_->resetMapSh2Bf();
-  if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
-//if(this->Ref_ == TCS) {
-//  this->basisset_->resetMapSh2Bf(); 
-//  this->basisset_->makeMapSh2Bf(this->nTCS_);
-//}
-// Form Vxc for DFT
-  if (this->isDFT){
-//   Timing
-     std::chrono::high_resolution_clock::time_point start;
-     std::chrono::high_resolution_clock::time_point finish;
-     std::chrono::duration<double> duration_formVxc;
-     
-     if(this->printLevel_ >= 3) {
-       start = std::chrono::high_resolution_clock::now();
-       }
-//
-//     this->formVXC();
-     this->formVXC_store();
-// Timing
-    if(this->printLevel_ >= 3) {
-      finish = std::chrono::high_resolution_clock::now();
-      duration_formVxc = finish - start;
-      this->fileio_->out<<"\nCPU time for VXC integral:  "<< duration_formVxc.count() <<" seconds."<<endl;
-      }
-   }
-//
-  this->fockA_->setZero();
-/*
-  if(this->Ref_ != TCS) fockA_->real()+=(*this->aointegrals_->oneE_);
-  else {
-    for(auto I = 0, i = 0; i < this->nBasis_; I += 2, i++)
-    for(auto J = 0, j = 0; j < this->nBasis_; J += 2, j++){
-      this->fockA_->real()(I,J)     += (*this->aointegrals_->oneE_)(i,j);
-      this->fockA_->real()(I+1,J+1) += (*this->aointegrals_->oneE_)(i,j);
-    }
-  }
-*/
-  fockA_->real()+=(*this->aointegrals_->oneE_);
-#ifndef USE_LIBINT
-  fockA_->real()+=(*this->coulombA_);
-  fockA_->real()-=(*this->exchangeA_);
-#else
-  *(fockA_)+=(*this->PTA_);
-#endif
-  if(this->isDFT) (*fockA_) += (*this->vXA_);
-// VWN Corr
-  if(this->isDFT) (*fockA_) += (*this->vCorA_);
 
-  if(!this->isClosedShell && this->Ref_ != TCS){
-    this->fockB_->setZero();
-    fockB_->real()+=(*this->aointegrals_->oneE_);
-#ifndef USE_LIBINT
-    fockB_->real()+=(*this->coulombB_);
-    fockB_->real()-=(*this->exchangeB_);
-#else
-    *(fockB_)+=(*this->PTB_);
-#endif
-    if(this->isDFT) (*fockB_) += (*this->vXB_);
-    if(this->isDFT)   (*fockB_) += (*this->vCorB_);
-   }
-  // Add in the electric field component if they are non-zero
-  std::array<double,3> null{{0,0,0}};
-  if(this->elecField_ != null){
-    //this->fileio_->out << "Adding in Electric Field Contribution" << endl;
-    int NB = this->nTCS_*this->nBasis_;
-    int NBSq = NB*NB;
-    int iBuf = 0;
-    for(auto iXYZ = 0; iXYZ < 3; iXYZ++){
-      ConstRealMap mu(&this->aointegrals_->elecDipole_->storage()[iBuf],NB,NB);
-      fockA_->real() += this->elecField_[iXYZ] * mu;
-      if(!this->isClosedShell && this->Ref_ != TCS) 
-        fockB_->real() += this->elecField_[iXYZ] * mu;
-      iBuf += NBSq;
+  if(getRank() == 0) {
+    if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
+
+    if (this->isDFT){
+//    Timing
+      std::chrono::high_resolution_clock::time_point start;
+      std::chrono::high_resolution_clock::time_point finish;
+      std::chrono::duration<double> duration_formVxc;
+     
+      if(this->printLevel_ >= 3) {
+        start = std::chrono::high_resolution_clock::now();
+      }
+
+//    this->formVXC();
+      this->formVXC_store();
+     
+      if(this->printLevel_ >= 3) {
+        finish = std::chrono::high_resolution_clock::now();
+        duration_formVxc = finish - start;
+        this->fileio_->out << endl << "CPU time for VXC integral:  "
+                           << duration_formVxc.count() << " seconds." 
+                           << endl;
+      }
     }
+  
+    this->fockA_->setZero();
+    this->fockA_->real() += (*this->aointegrals_->oneE_);
+#ifndef USE_LIBINT
+    this->fockA_->real() += (*this->coulombA_);
+    this->fockA_->real() -= (*this->exchangeA_);
+#else
+    (*this->fockA_) += (*this->PTA_);
+#endif
+    if(this->isDFT){ 
+      (*this->fockA_) += (*this->vXA_);
+      (*this->fockA_) += (*this->vCorA_);
+    }
+
+    if(!this->isClosedShell && this->Ref_ != TCS){
+      this->fockB_->setZero();
+      fockB_->real()+=(*this->aointegrals_->oneE_);
+#ifndef USE_LIBINT
+      fockB_->real()+=(*this->coulombB_);
+      fockB_->real()-=(*this->exchangeB_);
+#else
+      *(fockB_) += (*this->PTB_);
+#endif
+      if(this->isDFT) {
+        (*fockB_) += (*this->vXB_);
+        (*fockB_) += (*this->vCorB_);
+      }
+    }
+    // Add in the electric field component if they are non-zero
+    std::array<double,3> null{{0,0,0}};
+    if(this->elecField_ != null){
+      //this->fileio_->out << "Adding in Electric Field Contribution" << endl;
+      int NB = this->nTCS_*this->nBasis_;
+      int NBSq = NB*NB;
+      int iBuf = 0;
+      for(auto iXYZ = 0; iXYZ < 3; iXYZ++){
+        ConstRealMap mu(&this->aointegrals_->elecDipole_->storage()[iBuf],
+          NB,NB);
+        fockA_->real() += this->elecField_[iXYZ] * mu;
+        if(!this->isClosedShell && this->Ref_ != TCS) 
+          fockB_->real() += this->elecField_[iXYZ] * mu;
+        iBuf += NBSq;
+      }
+    }
+    if(this->printLevel_ >= 2) this->printFock(); 
   }
-  if(this->printLevel_ >= 2) this->printFock(); 
+#ifdef CQ_ENABLE_MPI
+  // Syncronize MPI processes after fock build
+  MPI_Barrier(MPI_COMM_WORLD);
+#endif
 };
 

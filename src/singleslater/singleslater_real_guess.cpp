@@ -34,27 +34,14 @@ using ChronusQ::Molecule;
 using ChronusQ::HashNAOs;
 namespace ChronusQ {
 template<>
-void SingleSlater<double>::placeAtmDen(std::vector<int> atomIndex, SingleSlater<double> &hfA){
+void SingleSlater<double>::placeAtmDen(std::vector<int> atomIndex, 
+  SingleSlater<double> &hfA){
   // Place atomic SCF densities in the right place of the total density
   // ** Note: ALWAYS spin average, even for UHF **
   for(auto iAtm : atomIndex){
     auto iBfSt = this->basisset_->mapCen2Bf(iAtm)[0];
     auto iSize = this->basisset_->mapCen2Bf(iAtm)[1]; 
     if(this->Ref_ != TCS){
-/*
-      this->densityA_->block(iBfSt,iBfSt,iSize,iSize)= (*hfA.densityA_);
-      if(!this->isClosedShell){
-        if(hfA.isClosedShell)
-          this->densityB_->block(iBfSt,iBfSt,iSize,iSize)= 2*(*hfA.densityA_);
-        else
-          this->densityB_->block(iBfSt,iBfSt,iSize,iSize)= 
-            (*hfA.densityB_) + (*hfA.densityA_);
-      } else {
-        if(!hfA.isClosedShell){
-          this->densityA_->block(iBfSt,iBfSt,iSize,iSize) += (*hfA.densityB_);
-        }
-      }
-*/
       this->densityA_->block(iBfSt,iBfSt,iSize,iSize)= (*hfA.densityA_);
       if(this->isClosedShell){
         if(hfA.isClosedShell) 
@@ -74,8 +61,10 @@ void SingleSlater<double>::placeAtmDen(std::vector<int> atomIndex, SingleSlater<
     } else {
       for(auto I = iBfSt, i = 0; I < (iBfSt +iSize); I += 2, i++)
       for(auto J = iBfSt, j = 0; J < (iBfSt +iSize); J += 2, j++){
-        (*this->densityA_)(I,J)     = (*hfA.densityA_)(i,j) + (*hfA.densityB_)(i,j);
-        (*this->densityA_)(I+1,J+1) = (*hfA.densityA_)(i,j) + (*hfA.densityB_)(i,j);
+        (*this->densityA_)(I,J)     = 
+          (*hfA.densityA_)(i,j) + (*hfA.densityB_)(i,j);
+        (*this->densityA_)(I+1,J+1) = 
+          (*hfA.densityA_)(i,j) + (*hfA.densityB_)(i,j);
       }
     }
   } // loop iAtm
@@ -123,8 +112,10 @@ void SingleSlater<double>::SADGuess() {
   std::vector<RealMatrix> atomMO;
   std::vector<RealMatrix> atomMOB;
   int readNPGTO,L, nsize;
-  this->moA_->setZero();
-  if(!this->isClosedShell && this->Ref_ != TCS) this->moB_->setZero();
+  if(getRank() == 0){
+    this->moA_->setZero();
+    if(!this->isClosedShell && this->Ref_ != TCS) this->moB_->setZero();
+  }
 
   if(this->molecule_->nAtoms() > 1) {
     // Determining unique atoms
@@ -158,8 +149,13 @@ void SingleSlater<double>::SADGuess() {
       }
     }
  
-    this->fileio_->out << "Running " << uniqueElement.size() << 
-                          " atomic SCF calculations to form the initial guess" << endl;
+#ifdef CQ_ENABLE_MPI
+  MPI_Barrier(MPI_COMM_WORLD);
+#endif
+    if(getRank() == 0)
+      this->fileio_->out << "Running " << uniqueElement.size() << 
+                          " atomic SCF calculations to form the initial guess" 
+                         << endl;
  
     // Loop and perform CUHF on each atomic center
     for(auto iUn = 0; iUn < uniqueElement.size(); iUn++){
@@ -188,10 +184,6 @@ void SingleSlater<double>::SADGuess() {
       // Initialize the local integral and SS classes
       aointegralsAtom.isPrimary = false;
       hartreeFockAtom.isNotPrimary();
-    //aointegralsAtom.iniAOIntegrals(&uniqueAtom,&basisSetAtom,this->fileio_,&controlAtom,
-    //  &dfBasisSetAtom);
-    //hartreeFockAtom.iniSingleSlater(&uniqueAtom,&basisSetAtom,&aointegralsAtom,
-    //  this->fileio_,&controlAtom);
       
       // Replaces iniAOIntegrals
       aointegralsAtom.communicate(uniqueAtom,basisSetAtom,*this->fileio_,
@@ -231,8 +223,10 @@ void SingleSlater<double>::SADGuess() {
       if(this->printLevel_ < 4) hartreeFockAtom.setPrintLevel(0);
  
       // Zero out the MO coeff for local SS object
-      hartreeFockAtom.moA_->setZero();
-      if(!hartreeFockAtom.isClosedShell) hartreeFockAtom.moB_->setZero();
+      if(getRank() == 0){
+        hartreeFockAtom.moA_->setZero();
+        if(!hartreeFockAtom.isClosedShell) hartreeFockAtom.moB_->setZero();
+      }
       hartreeFockAtom.haveMO = true;
  
       // Prime and perform the atomic SCF
@@ -246,11 +240,17 @@ void SingleSlater<double>::SADGuess() {
     } // Loop iUn
  
     this->scaleDen();
+#ifdef CQ_ENABLE_MPI
+    MPI_Barrier(MPI_COMM_WORLD);
+#endif
   }
 
   // Set flags to use in the rest of code
   this->haveMO = true;
   if(this->molecule_->nAtoms() > 1) this->haveDensity = true;
+#ifdef CQ_ENABLE_MPI
+  MPI_Barrier(MPI_COMM_WORLD);
+#endif
 };
 //------------------------------------------//
 // form the initial guess of MOs from input //
@@ -356,16 +356,28 @@ void SingleSlater<double>::readGuessGauFChk(std::string &filename) {
 
 template<>
 void SingleSlater<double>::READGuess(){
-  this->fileio_->out << "Reading SCF Density from disk" << endl;
-  H5::DataSpace dataspace = this->fileio_->alphaSCFDen->getSpace();
-  this->fileio_->alphaSCFDen->read(this->densityA_->data(),H5::PredType::NATIVE_DOUBLE,dataspace,dataspace);
-  this->fileio_->alphaMO->read(this->moA_->data(),H5::PredType::NATIVE_DOUBLE,dataspace,dataspace);
-  if(!this->isClosedShell && this->Ref_ != TCS){
-    this->fileio_->betaSCFDen->read(this->densityB_->data(),H5::PredType::NATIVE_DOUBLE,dataspace,dataspace);
-    this->fileio_->betaMO->read(this->moB_->data(),H5::PredType::NATIVE_DOUBLE,dataspace,dataspace);
+  if(getRank() == 0) {
+    this->fileio_->out << "Reading SCF Density from disk" << endl;
+    H5::DataSpace dataspace = this->fileio_->alphaSCFDen->getSpace();
+    this->fileio_->alphaSCFDen->read(this->densityA_->data(),H5::PredType::NATIVE_DOUBLE,dataspace,dataspace);
+    this->fileio_->alphaMO->read(this->moA_->data(),H5::PredType::NATIVE_DOUBLE,dataspace,dataspace);
+    if(!this->isClosedShell && this->Ref_ != TCS){
+      this->fileio_->betaSCFDen->read(this->densityB_->data(),H5::PredType::NATIVE_DOUBLE,dataspace,dataspace);
+      this->fileio_->betaMO->read(this->moB_->data(),H5::PredType::NATIVE_DOUBLE,dataspace,dataspace);
+    }
   }
   this->haveMO = true;
   if(this->molecule_->nAtoms() > 1) this->haveDensity = true;
+#ifdef CQ_ENABLE_MPI
+  MPI_Bcast(this->densityA_->data(),
+    this->nTCS_*this->nTCS_*this->nBasis_*this->nBasis_,MPI_DOUBLE,0,
+    MPI_COMM_WORLD);
+  if(!this->isClosedShell && this->Ref_ != TCS)
+    MPI_Bcast(this->densityB_->data(),
+      this->nTCS_*this->nTCS_*this->nBasis_*this->nBasis_,MPI_DOUBLE,0,
+      MPI_COMM_WORLD);
+#endif
+  
 }
 }; //namespace ChronusQ
 #endif

@@ -18,7 +18,6 @@ reference = Real RHF
 job       = SCF
 basis     = sto3g.gbs
 ints			= incore
-print = 5
 
 #
 #  Misc Settings
