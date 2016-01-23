@@ -444,9 +444,9 @@ void SingleSlater<double>::formCor(double rho, double spindensity){
 */
 
 template<>
-std::array<double,5> SingleSlater<double>::formVExSlater (double rho, double spindensity){
+std::array<double,6> SingleSlater<double>::formVExSlater (double rho, double spindensity){
 //  epsmu ={energydens_c, potential_c_alpha, potential_c_beta}
-  std::array<double,5> epsmu = {0.0,0.0,0.0,0.0,0.0};
+  std::array<double,6> epsmu = {0.0,0.0,0.0,0.0,0.0,0.0};
   double d1over3    = 1.0/3.0;
   double d4over3  = 4.0/3.0;
   double eps0     = std::pow(rho,d1over3);      
@@ -495,11 +495,11 @@ double SingleSlater<double>::gB88 (int nDer, double x){
 };  //End Form g function for B88 Exchange
 
 template<>
-std::array<double,5> SingleSlater<double>::formVExB88 (double rhoA, double rhoB, 
+std::array<double,6> SingleSlater<double>::formVExB88 (double rhoA, double rhoB, 
 double gammaAA, double gammaBB){
 //  Becke Exchange : Eq 8 From Becke, Phys. Rev A., 3098 (1988)
 //  Becke Exchange : Implemented as Eq A3 From Pople, J. Chem. Phys. 5612, (1992)
-  std::array<double,5> epsmu = {0.0,0.0,0.0,0.0,0.0};
+  std::array<double,6> epsmu = {0.0,0.0,0.0,0.0,0.0,0.0};
   double rhoA1ov3 = std::pow(rhoA,(1.0/3.0));
   double rhoA4ov3 = std::pow(rhoA,(4.0/3.0));
   double rhoB1ov3 = std::pow(rhoB,(1.0/3.0));
@@ -540,15 +540,175 @@ double gammaAA, double gammaBB){
   return epsmu;
 };  //End Form B88 Exchange
 
+//LYP Correlation from Preuss et Al Chem. Phys. Lett. 157, 200 (1989) LYP1
+//                     Implemented as in Pople et Al, J. Chem. Phys.m 98, 5612 (1993) LYP2
 template<>
-std::array<double,3> SingleSlater<double>::formVCLYP (double rhoA, double rhoB, 
-double drhoA, double drhoB){
+double SingleSlater<double>::omegaLYP(int iop, double c, double d, double rho){ //function used in LYP Correlation (Eq. A26, A32 Ref.LYP2)
+  double omega;
+  double rho1over3 = std::pow(rho,(1.0/3.0));
+    omega  =  std::exp(-c / rho1over3);
+    omega /=  1.0 + (d / rho1over3);
+    omega *= std::pow(rho,(-11.0/3.0));
+    if (iop == 1) {
+    omega *= (11.0*rho1over3 -c - ( d / (1 + d/rho1over3) )  );
+    omega /= -3.0*rho*rho1over3 ;
+    }
+    return omega;
+};//End omegaLYP
+
+template<>
+double SingleSlater<double>::deltaLYP(int iop, double c, double d, double rho){ //function used in LYP Correlation (Eq. A27, A33 Ref.LYP2)
+  double delta;
+  double rho1over3 = std::pow(rho,(1.0/3.0));
+  delta  = d / rho1over3;
+  delta /= (1.0 + d / rho1over3);
+  delta += c / rho1over3;
+  if (iop == 1){
+//EqA33
+  delta   /= -3.0*rho;
+  delta   += (d *d / std::pow(rho,(5.0/3.0))) /( 3.0 * (1.0 + d / rho1over3) * (1.0 + d / rho1over3) );
+  }
+  return delta; 
+};//End deltaLYP
+
+template<>
+double SingleSlater<double>::derLYP(int iop, double a, double b, double c, double d, double rhoA, double rhoB){ //function used in LYP Correlation (A23, A24,A25 ref.LYP2)
+  double del;
+  double delta = this->deltaLYP(0, c, d, (rhoA+rhoB));
+  if (iop == 0 ){
+  // Eq A23(delLYP/delgammaAA) and eq A25(delLYP/delgammaBB) (remind for A25 call the function inverting rhoA with rhoB)
+     del  = 11.0 - delta;
+     del *= rhoA/(rhoA+rhoB);
+     del += 1.0 - 3.0*delta;
+     del *= rhoA*rhoB/9.0;
+     del -= rhoB*rhoB;
+     del *= -a * b * this->omegaLYP(0, c, d, (rhoA+rhoB));
+  } else if (iop ==1) {
+//  Eq A24 (delLYP/delgammaAB)
+     del  = 47.0 - 7.0 * delta;
+     del *= rhoA * rhoB / 9.0;
+     del -= 4.0 * (rhoA+rhoB) * (rhoA+rhoB) / 3.0;
+     del *= -a * b * this->omegaLYP(0, c, d, (rhoA+rhoB)); 
+  }
+   return del;
+};//End derLYP
+
+template<>
+double SingleSlater<double>::der2LYP(int iop, double a, double b, double c, double d, double rhoA, double rhoB, double der1){ //function second der used in LYP Correlation (A29, A30,A31 ref.LYP2)
+  double del;
+  double rhoT = rhoA+rhoB;
+  double delta = this->deltaLYP(0, c, d, rhoT);
+  if (iop == 0 ) {
+// Eq A29 (del^2 LYP / (del rho_X del gammaXX))
+// note pass der1 as dLYP/dgammaAA - debugged 
+  del =   - (rhoA*rhoB/9.0) 
+             *(  ( 3.0 + rhoA/rhoT ) * deltaLYP(1, c, d, rhoT) + rhoB*(delta - 11.0)/(rhoT*rhoT)  ) 
+           + (rhoB/9.0)
+             *( 1.0 - 3.0*delta -rhoA*(delta - 11)/rhoT );
+  } else if (iop == 1) {
+// Eq A30 (del^2 LYP / (del rho_X del gammaXY))
+// note pass der1 as dLYP/dgammaAB 
+//   debugged
+   del  =  - 8.0*rhoT/3.0;
+   del +=  - deltaLYP(1, c, d, rhoT)*(7.0*rhoA*rhoB/9.0);
+   del +=  rhoB*(47.0-7.0*delta)/9.0;
+  } else if (iop == 2 ){
+// Eq A31 (del^2 LYP / (del rho_X del gammaYY)) (debugged alread)
+// note pass der1 as dLYP/dgammaBB - debugged 
+  del =   - (rhoA*rhoB/9.0) 
+             *(  ( 3.0 + rhoB/rhoT ) * deltaLYP(1, c, d, rhoT) - rhoB*(delta - 11.0)/(rhoT*rhoT)  ) 
+           + (rhoB/9.0)
+             *( 1.0 - 3.0*delta -rhoB*(delta - 11)/rhoT )
+           - 2.0 * rhoA;
+   }
+// finishing (note just pass different der1 to get the right term)
+   del *= -a * b * this->omegaLYP(0, c, d, rhoT);
+   del += der1*this->omegaLYP(1, c, d, rhoT)/this->omegaLYP(0, c, d, rhoT);
+   return del;
+};//End der2LYP
+
+template<>
+std::array<double,6> SingleSlater<double>::formVCLYP (double rhoA, double rhoB, 
+     double gammaAA, double gammaBB, double gammaAB){
+    double Cfact = 36.4623989787648;  //-(2.0^(11.0/3.0))*(3.0/10.0)*((3.0*pi*pi)^(2.0/3.0))
+    double a = 0.04918;
+    double b = 0.132;
+    double c = 0.2533;
+    double d = 0.349;
+    double rhoA8over3 = std::pow(rhoA,(8.0/3.0));
+    double rhoB8over3 = std::pow(rhoB,(8.0/3.0));
+    std::array<double,6> epsmu = {0.0,0.0,0.0,0.0,0.0,0.0};
+
+//  Eq. A23  dLYP/dgammaAA (debugged)
+    epsmu[3]  = this->derLYP(0, a, b, c, d, rhoA, rhoB);
+
+//  Eq. A23* dLYP/dgammaBB (debugged)
+    epsmu[4]  = this->derLYP(0, a, b, c, d, rhoB, rhoA);
+
+//  Eq. A24  dLYP/dgammaAB (debugged)
+    epsmu[5]  = this->derLYP(1, a, b, c, d, rhoA, rhoB);
+
+//  Eq. A28  dLYP/dRhoA (debugged)
+    epsmu[1]   = - 4.0 * a * rhoA * rhoB / ( (rhoA+rhoB)*(1.0 + d / std::pow((rhoA+rhoB),(1.0/3.0)) ) );
+    epsmu[1]  *= ( (1.0/rhoA)
+                  -(1.0/(rhoA+rhoB)) 
+                  +((d/3.0) *(std::pow((rhoA+rhoB),(-4.0/3.0)))/ (1.0 + d* std::pow((rhoA+rhoB),(-1.0/3.0))))
+                 );
+    epsmu[1]  += - Cfact * a * b 
+             *( 
+              (this->omegaLYP(1, c, d, (rhoA+rhoB)) * rhoA * rhoB * (rhoA8over3 + rhoB8over3))
+              +(this->omegaLYP(0, c, d, (rhoA+rhoB)) * rhoB * ( (11.0*rhoA8over3/3.0) + rhoB8over3))
+             );
+    epsmu[1]  += gammaAA*der2LYP(0, a, b, c, d, rhoA, rhoB, epsmu[3] );
+    epsmu[1]  += gammaAB*der2LYP(1, a, b, c, d, rhoA, rhoB, epsmu[5] );
+    epsmu[1]  += gammaBB*der2LYP(2, a, b, c, d, rhoA, rhoB, epsmu[4] );
+//  Eq. A28* dLYP/dRhoB (debugged)
+    epsmu[2]   = - 4.0 * a * rhoA * rhoB / ( (rhoA+rhoB)*(1.0 + d / std::pow((rhoA+rhoB),(1.0/3.0)) ) );
+    epsmu[2]  *= ( (1.0/rhoB)
+                  -(1.0/(rhoA+rhoB)) 
+                  +((d/3.0) *(std::pow((rhoA+rhoB),(-4.0/3.0)))/ (1.0 + d* std::pow((rhoA+rhoB),(-1.0/3.0))))
+                 );
+    epsmu[2]  += - Cfact * a * b  
+                 *( 
+                   (this->omegaLYP(1, c, d, (rhoA+rhoB)) * rhoA * rhoB * (rhoA8over3 + rhoB8over3))
+                  +(this->omegaLYP(0, c, d, (rhoA+rhoB)) * rhoA * ( (11.0*rhoB8over3/3.0) + rhoA8over3))
+                 );
+    epsmu[2]  += gammaBB*der2LYP(0, a, b, c, d, rhoB, rhoA, epsmu[4] );
+    epsmu[2]  += gammaAB*der2LYP(1, a, b, c, d, rhoB, rhoA, epsmu[5] );
+    epsmu[2]  += gammaAA*der2LYP(2, a, b, c, d, rhoB, rhoA, epsmu[3] );
+//  Eq. A22  LYP  (debugged)
+    epsmu[0]  = - 4.0 * a * rhoA * rhoB / ( (rhoA+rhoB)*(1.0 + d / std::pow((rhoA+rhoB),(1.0/3.0)) ) );
+    epsmu[0] += - Cfact * a * b * this->omegaLYP(0, c, d, (rhoA+rhoB)) 
+               * rhoA * rhoB * (rhoA8over3 + rhoB8over3); 
+    epsmu[0] += epsmu[3] * gammaAA;
+    epsmu[0] += epsmu[4] * gammaBB;
+    epsmu[0] += epsmu[5] * gammaAB;
+
+
+//AP Debug 
+/*
+    rhoA = 0.0;
+    rhoB = 0.1;
+    double der1 = this->derLYP(1, a, b, c, d, rhoA, rhoB);
+    cout << rhoA << " " << this->der2LYP(1,0.04918,0.132,0.2533, 0.349, rhoA, rhoB,der1) << " " << this->der2LYP(1,0.04918,0.132,0.2533, 0.349, rhoB, rhoA,der1) <<  endl;
+    rhoA = 0.1;
+    der1 = this->derLYP(1, a, b, c, d, rhoA, rhoB);
+    cout << rhoA << " " << this->der2LYP(1,0.04918,0.132,0.2533, 0.349, rhoA, rhoB,der1) << " " << this->der2LYP(1,0.04918,0.132,0.2533, 0.349, rhoB, rhoA,der1) <<  endl;
+    rhoA = 1.0;
+    der1 = this->derLYP(1, a, b, c, d, rhoA, rhoB);
+    cout << rhoA << " " << this->der2LYP(1,0.04918,0.132,0.2533, 0.349, rhoA, rhoB,der1) << " " << this->der2LYP(1,0.04918,0.132,0.2533, 0.349, rhoB, rhoA,der1)  << endl;
+    rhoA = 2.333;
+    der1 = this->derLYP(1, a, b, c, d, rhoA, rhoB);
+    cout << rhoA << " " << this->der2LYP(1,0.04918,0.132,0.2533, 0.349, rhoA, rhoB, der1) << " " << this->der2LYP(1,0.04918,0.132,0.2533, 0.349, rhoB, rhoA,der1) << endl;
+    CErr();
+*/
+    return epsmu;
 };  //End Form LYP Correlation
 
 template<>
-std::array<double,3> SingleSlater<double>::formVCVWN (double rho, double spindensity){
+std::array<double,6> SingleSlater<double>::formVCVWN (double rho, double spindensity){
 //  epsmu ={energydens_c, potential_c_alpha, potential_c_beta}
-  std::array<double,3> epsmu = {0.0,0.0,0.0};
+  std::array<double,6> epsmu = {0.0,0.0,0.0,0.0,0.0,0.0};
 // Parameter for the fit (according Eq 4.4 Vosko Can. J. Phys. 1980
    double A1  = 0.0621814; // In the text page 1207 (A^P)
    double A_p   = A1/2.0; // to Hartree
@@ -707,43 +867,71 @@ std::array<double,3> SingleSlater<double>::formVCVWN (double rho, double spinden
 }; //END VWN
 
 template<>
-std::array<double,3> SingleSlater<double>::formVCGGA (double rhoA, double rhoB, 
-     double drhoA, double drhoB){
+std::array<double,6> SingleSlater<double>::formVCGGA (double rhoA, double rhoB, 
+     double gammaAA, double gammaBB, double gammaAB){
 
-    std::array<double,3> corrEpsMu;
-//    if (this->CorrKernel_ == VWN3 || this->CorrKernel_ == VWN5) {
-       corrEpsMu = this->formVCLYP(rhoA, rhoB, drhoA, drhoB);
+    std::array<double,6> corrEpsMu;
+    if (this->CorrKernel_ == VWN3 || this->CorrKernel_ == VWN5) {
+       corrEpsMu = this->formVCVWN((rhoA+rhoB),(this->spindens(rhoA,rhoB)));
+    } else if (this->CorrKernel_ == LYP) {
+       corrEpsMu = this->formVCLYP(rhoA, rhoB, gammaAA, gammaBB, gammaAB);
+/*AP
+       rhoB = 0.11;
+       gammaAA = 0.15;
+       gammaBB = 0.25;
+       gammaAB = 1.0;
+       rhoA    = 1.0;
+       corrEpsMu = this->formVCLYP(rhoA, rhoB, gammaAA, gammaBB, gammaAB);
+       cout << "rhoA " << rhoA << " rhoB "<< rhoB <<endl;
+       cout << "gammaAA " << gammaAA << " gammaBB "<< gammaBB << " gammaAB "<< gammaAB <<endl; 
+       cout << "tot " <<corrEpsMu[2] <<endl;
+       gammaAB = 0.10;
+       rhoA    = 0.10;
+       corrEpsMu = this->formVCLYP(rhoA, rhoB, gammaAA, gammaBB, gammaAB);
+       cout << "rhoA " << rhoA << " rhoB "<< rhoB <<endl;
+       cout << "gammaAA " << gammaAA << " gammaBB "<< gammaBB << " gammaAB "<< gammaAB <<endl; 
+       cout << "tot " <<corrEpsMu[2] <<endl;
+       gammaAB = 2.33;
+       rhoA    = 2.33;
+       corrEpsMu = this->formVCLYP(rhoA, rhoB, gammaAA, gammaBB, gammaAB);
+       cout << "rhoA " << rhoA << " rhoB "<< rhoB <<endl;
+       cout << "gammaAA " << gammaAA << " gammaBB "<< gammaBB << " gammaAB "<< gammaAB <<endl; 
+       cout << "tot " <<corrEpsMu[2] <<endl;
+       CErr();
+*/
+    }
     return corrEpsMu;
 }; //END GENERIC FORMCOR
 
 template<>
-std::array<double,3> SingleSlater<double>::formVC (double rho, double spindensity){
+std::array<double,6> SingleSlater<double>::formVC (double rho, double spindensity){
 
-    std::array<double,3> corrEpsMu;
+    std::array<double,6> corrEpsMu;
     if (this->CorrKernel_ == VWN3 || this->CorrKernel_ == VWN5) {
        corrEpsMu = this->formVCVWN(rho, spindensity);}
     return corrEpsMu;
 }; //END GENERIC FORMCOR
 
 template<>
-std::array<double,5> SingleSlater<double>::formVEx (double rho, double spindensity){
+std::array<double,6> SingleSlater<double>::formVEx (double rho, double spindensity){
 
-    std::array<double,5> exEpsMu;
+    std::array<double,6> exEpsMu;
 //  Put sime Slater definition
        exEpsMu = this->formVExSlater(rho, spindensity);
     return exEpsMu;
 }; //END GENERIC FORMVex
 
 template<>
-std::array<double,5> SingleSlater<double>::formVExGGA (double rhoA, double rhoB, 
+std::array<double,6> SingleSlater<double>::formVExGGA (double rhoA, double rhoB, 
     double drhoA, double drhoB){
    
-    std::array<double,5> exEpsMu;
-//    if (this->CorrKernel_ == VWN3 || this->CorrKernel_ == VWN5) {
+    std::array<double,6> exEpsMu;
     if (this->isGGA) {
+    if (this->ExchKernel_ == B88) {
       exEpsMu = this->formVExB88(rhoA, rhoB, drhoA, drhoB);
+      }
 //       cout << exEpsMu[3] << endl;
-    } else {
+    }else {
       exEpsMu = this->formVExSlater((rhoA+rhoB),(this->spindens(rhoA,rhoB)));
     }
     return exEpsMu;
@@ -920,8 +1108,8 @@ void SingleSlater<double>::evalVXC(cartGP gridPt, double weight, std::vector<boo
    double shMax;
    RealMatrix overlapR_(this->nBasis_,this->nBasis_);        ///< Overlap at grid point
    overlapR_.setZero();
-   std::array<double,3>  epsMuCor = {0.0,0.0,0.0}; ///< {energydens_corr, potential_corr_alpha, potential_corr_B}
-   std::array<double,5>  epsMuExc = {0.0,0.0,0.0,0.0,0.0}; ///< {energydend_exchange, potential_exchenge_alpha, potential_exchange_beta}
+   std::array<double,6>  epsMuCor = {0.0,0.0,0.0,0.0,0.0,0.0}; ///< {energydens_corr, potential_corr_alpha, potential_corr_B}
+   std::array<double,6>  epsMuExc = {0.0,0.0,0.0,0.0,0.0,0.0}; ///< {energydend_exchange, potential_exchenge_alpha, potential_exchange_beta}
 
 	// Loops over shells
    for(auto s1=0l, s12=0l; s1 < this->basisset_->nShell(); s1++){
@@ -1036,6 +1224,7 @@ void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX,
    double rhorB = 0.0;  // beta  density at point
    double gammaAA = 0.0;  // alpha  density at point der
    double gammaBB = 0.0;  // beta  density at point  der
+   double gammaAB = 0.0;  // beta  density at point  der
    std::array<double,3>  drhoA = {0.0,0.0,0.0}; ///< array pf density gradient components
    std::array<double,3>  drhoB = {0.0,0.0,0.0}; ///< array pf density gradient components
    int    nDer   = 0;    // Order of Der
@@ -1046,8 +1235,8 @@ void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX,
 // RealMatrix overlapR_(this->nBasis_,this->nBasis_);        ///< Overlap at grid point
 // overlapR_.setZero();
 // STmp->setZero();
-   std::array<double,3>  epsMuCor = {0.0,0.0,0.0}; ///< {energydens_corr, potential_corr_alpha, potential_corr_B}
-   std::array<double,5>  epsMuExc = {0.0,0.0,0.0,0.0,0.0}; ///< {energydend_exchange, potential_exchenge_alpha, potential_exchange_beta, potential_exch_alpha_gamma_GGA,potential_exch_beta_gamma_GGA}
+   std::array<double,6>  epsMuCor = {0.0,0.0,0.0,0.0,0.0,0.0}; ///< {energydens_corr, potential_corr_alpha, potential_corr_B, potential_exch_alpha_gamma_GGA, potential_exch_beta_gamma_GGA}
+   std::array<double,6>  epsMuExc = {0.0,0.0,0.0,0.0,0.0,0.0}; ///< {energydend_exchange, potential_exchenge_alpha, potential_exchange_beta, potential_exch_alpha_gamma_GGA,potential_exch_beta_gamma_GGA}
 
 //   Build Overlap
 //  overlapR_ = Map->col(ipts)*Map->col(ipts).transpose();
@@ -1074,12 +1263,14 @@ void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX,
         drhoB[1]   = 2.0*dSTmpY->frobInner(this->densityB()->conjugate());
         drhoB[2]   = 2.0*dSTmpZ->frobInner(this->densityB()->conjugate());
         gammaBB    = (drhoB[0]*drhoB[0] + drhoB[1]*drhoB[1] + drhoB[2]*drhoB[2]);
+        gammaAB    = (drhoA[0]*drhoB[0] + drhoA[1]*drhoB[1] + drhoA[2]*drhoB[2]);
       }
     } else {
 //      rhor    = STmp->frobInner(this->densityA()->conjugate()) ;
       if (this->isGGA) {
         rhorA    = STmp->frobInner(this->densityA()->conjugate()/2.0) ;
         rhor = 2.0*rhorA;
+        rhorB = rhorA;
       }else{ 
         rhorA    = STmp->frobInner(this->densityA()->conjugate()) ;
         rhor = rhorA;
@@ -1090,6 +1281,8 @@ void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX,
         drhoA[1]   = 2.0*(dSTmpY->frobInner(this->densityA()->conjugate()/2.0));
         drhoA[2]   = 2.0*(dSTmpZ->frobInner(this->densityA()->conjugate()/2.0));
         gammaAA    = (drhoA[0]*drhoA[0] + drhoA[1]*drhoA[1] + drhoA[2]*drhoA[2]);
+        gammaBB    = gammaAA;
+        gammaAB    = gammaAA;
       }
     }
 //    rhor = overlapR_.frobInner(this->densityA()->conjugate()) ;
@@ -1116,21 +1309,9 @@ void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX,
     if (rhor > 1.0e-20) {     
 //  Exchange
       if (this->ExchKernel_ != NOEXCH) {
-        if(!this->isClosedShell && this->Ref_ != TCS){
-          epsMuExc = this->formVExGGA(rhorA,rhorB,gammaAA,gammaBB);
-          (*VXB)  += ((*WeightsMap).coeff(ipts,0))*(*STmp)*epsMuExc[2];
-          if (this->isGGA) {
-            (*VXB)  += 2.0*drhoB[0]*((*WeightsMap).coeff(ipts,0))*(*dSTmpX)*epsMuExc[4];
-            (*VXB)  += 2.0*drhoB[1]*((*WeightsMap).coeff(ipts,0))*(*dSTmpY)*epsMuExc[4];
-            (*VXB)  += 2.0*drhoB[2]*((*WeightsMap).coeff(ipts,0))*(*dSTmpZ)*epsMuExc[4];
-          }
-//          (*VXB)  += ((*WeightsMap).coeff(ipts,0))*overlapR_*epsMuExc[2];
-        } else {
-            epsMuExc = this->formVExGGA(rhorA,0.0,gammaAA,0.0);
-        }
-//        (*VXA)  += ((*WeightsMap).coeff(ipts,0))*overlapR_*epsMuExc[1];
+        epsMuExc = this->formVExGGA(rhorA,rhorB,gammaAA,gammaBB);
         (*VXA)  +=   ((*WeightsMap).coeff(ipts,0))*(*STmp)*epsMuExc[1];
-        if (this->isGGA) {
+        if (this->isGGA && this->ExchKernel_ == B88) {
           (*VXA)  += 2.0*drhoA[0]*((*WeightsMap).coeff(ipts,0))*(*dSTmpX)*epsMuExc[3];
           (*VXA)  += 2.0*drhoA[1]*((*WeightsMap).coeff(ipts,0))*(*dSTmpY)*epsMuExc[3];
           (*VXA)  += 2.0*drhoA[2]*((*WeightsMap).coeff(ipts,0))*(*dSTmpZ)*epsMuExc[3];
@@ -1138,24 +1319,53 @@ void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX,
         } else { 
           energyX += ((*WeightsMap).coeff(ipts,0))*rhor*epsMuExc[0];
         }
-      } 
+        if(!this->isClosedShell && this->Ref_ != TCS){
+          (*VXB)  += ((*WeightsMap).coeff(ipts,0))*(*STmp)*epsMuExc[2];
+          if (this->isGGA && this->ExchKernel_ == B88) {
+            (*VXB)  += 2.0*drhoB[0]*((*WeightsMap).coeff(ipts,0))*(*dSTmpX)*epsMuExc[4];
+            (*VXB)  += 2.0*drhoB[1]*((*WeightsMap).coeff(ipts,0))*(*dSTmpY)*epsMuExc[4];
+            (*VXB)  += 2.0*drhoB[2]*((*WeightsMap).coeff(ipts,0))*(*dSTmpZ)*epsMuExc[4];
+          }
+        }
+      } //End Exch 
+
 //  Correlation
       if (this->CorrKernel_ != NOCORR) {
-        if(!this->isClosedShell && this->Ref_ != TCS){
-          epsMuCor = this->formVC(rhor,(this->spindens(rhorA,rhorB)));
-//        (*VCB)  += ((*WeightsMap).coeff(ipts,0))*overlapR_*epsMuCor[2];
-          (*VCB)  += ((*WeightsMap).coeff(ipts,0))*(*STmp)*epsMuCor[2];
-        } else{
-          epsMuCor = this->formVC(rhor,0.0);
-        }
-//      (*VCA)  += ((*WeightsMap).coeff(ipts,0))*overlapR_*epsMuCor[1];
+         epsMuCor = this->formVCGGA(rhorA,rhorB,gammaAA,gammaBB,gammaAB);
         (*VCA)  += ((*WeightsMap).coeff(ipts,0))*(*STmp)*epsMuCor[1];
-//Debug       (*VCA)  += ((*WeightsMap).coeff(ipts,0))*(dSTmpR);
-//Debug      this->nElectrons_ += ((*WeightsMap).coeff(ipts,0))*STmp->frobInner(this->densityA()->conjugate()) ;
-        energyC += ((*WeightsMap).coeff(ipts,0))*rhor*epsMuCor[0];
-      }
-
-    }
+        if (this->isGGA && this->CorrKernel_ == LYP) {
+//        Open Shell alpha LYP 
+          if(!this->isClosedShell && this->Ref_ != TCS) { 
+            (*VCA)  += 2.0*drhoA[0]*((*WeightsMap).coeff(ipts,0))*(*dSTmpX)*epsMuCor[3];
+            (*VCA)  +=     drhoB[0]*((*WeightsMap).coeff(ipts,0))*(*dSTmpX)*epsMuCor[5];
+            (*VCA)  += 2.0*drhoA[1]*((*WeightsMap).coeff(ipts,0))*(*dSTmpY)*epsMuCor[3];
+            (*VCA)  +=     drhoB[1]*((*WeightsMap).coeff(ipts,0))*(*dSTmpY)*epsMuCor[5];
+            (*VCA)  += 2.0*drhoA[2]*((*WeightsMap).coeff(ipts,0))*(*dSTmpZ)*epsMuCor[3];
+            (*VCA)  +=     drhoB[2]*((*WeightsMap).coeff(ipts,0))*(*dSTmpZ)*epsMuCor[5];
+          }else{
+//        Closed Shell
+            (*VCA)  += drhoA[0]*((*WeightsMap).coeff(ipts,0))*(*dSTmpX)*(2.0*epsMuCor[3]+epsMuCor[5]);
+            (*VCA)  += drhoA[1]*((*WeightsMap).coeff(ipts,0))*(*dSTmpY)*(2.0*epsMuCor[3]+epsMuCor[5]);
+            (*VCA)  += drhoA[2]*((*WeightsMap).coeff(ipts,0))*(*dSTmpZ)*(2.0*epsMuCor[3]+epsMuCor[5]);
+          }
+          energyC += ((*WeightsMap).coeff(ipts,0))*epsMuCor[0];
+        } else { 
+          energyC += ((*WeightsMap).coeff(ipts,0))*rhor*epsMuCor[0];
+        }
+        if(!this->isClosedShell && this->Ref_ != TCS) { 
+          (*VCB)  += ((*WeightsMap).coeff(ipts,0))*(*STmp)*epsMuCor[2];
+          if (this->isGGA && this->CorrKernel_ == LYP) {
+            (*VCB)  += 2.0*drhoB[0]*((*WeightsMap).coeff(ipts,0))*(*dSTmpX)*epsMuCor[4];
+            (*VCB)  +=     drhoA[0]*((*WeightsMap).coeff(ipts,0))*(*dSTmpX)*epsMuCor[5];
+            (*VCB)  += 2.0*drhoB[1]*((*WeightsMap).coeff(ipts,0))*(*dSTmpY)*epsMuCor[4];
+            (*VCB)  +=     drhoA[1]*((*WeightsMap).coeff(ipts,0))*(*dSTmpY)*epsMuCor[5];
+            (*VCB)  += 2.0*drhoB[2]*((*WeightsMap).coeff(ipts,0))*(*dSTmpZ)*epsMuCor[4];
+            (*VCB)  +=     drhoA[2]*((*WeightsMap).coeff(ipts,0))*(*dSTmpZ)*epsMuCor[5];
+          }
+        }
+//        energyC += ((*WeightsMap).coeff(ipts,0))*rhor*epsMuCor[0];
+      }  //End Corr
+    } //End VXC
 }; //END
 
 //----------------------------//
@@ -1555,6 +1765,7 @@ void SingleSlater<double>::formVXC_store(){
     std::vector<double> tmpEnergyCor(nthreads) ;
     std::vector<int> tmpnpts(nthreads) ;
     int nRHF;
+    int nDerMatrix = 0;                                       // Number of Matrix to be allocated for GGA
     if(this->isClosedShell || this->Ref_ == TCS) nRHF = 1;
     else    nRHF = 2;
     std::vector<std::vector<RealMatrix>> 
@@ -1569,23 +1780,22 @@ void SingleSlater<double>::formVXC_store(){
     );
     std::vector<RealMatrix> overlapR_(nthreads,RealMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
 
-//GGA
-    std::vector<RealMatrix> dXOverlapR_(nthreads,
-         RealMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
-    std::vector<RealMatrix> dYOverlapR_(nthreads,
-         RealMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
-    std::vector<RealMatrix> dZOverlapR_(nthreads,
-         RealMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
-
-
     double CxVx  = -(3.0/4.0)*(std::pow((3.0/math.pi),(1.0/3.0)));  //TF LDA Prefactor (for Vx)  
     double val ;                                  // to take into account Ang Int
     if (this->isGGA) {
       val = 4.0*math.pi;
-      
+      nDerMatrix = omp_get_max_threads();  
     } else {
       val = 4.0*math.pi*CxVx;                                  // to take into account Ang Int
     }
+//GGA
+    std::vector<RealMatrix> dXOverlapR_(nDerMatrix,
+         RealMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
+    std::vector<RealMatrix> dYOverlapR_(nDerMatrix,
+         RealMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
+    std::vector<RealMatrix> dZOverlapR_(nDerMatrix,
+         RealMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
+
     this->totalEx    = 0.0;   // Zero out Total Exchange Energy
     this->totalEcorr = 0.0;   // Zero out Total Correlation Energy
     this->vXA()->setZero();   // Set to zero every occurence of the SCF

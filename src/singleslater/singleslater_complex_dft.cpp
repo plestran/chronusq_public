@@ -72,42 +72,58 @@ void SingleSlater<dcomplex>::genSparseBasisMap(){
 };
 
 template<>
-std::array<double,5> SingleSlater<dcomplex>::formVExSlater (double rho, double spindensity){
+std::array<double,6> SingleSlater<dcomplex>::formVExSlater (double rho, double spindensity){
 
+}; 
+template<>
+double SingleSlater<dcomplex>::omegaLYP(int iop, double c, double d, double rho){  //function used in LYP Correlation (Eq. A26, A32 Ref.LYP2)
+};//End omegaLYP
+
+template<>
+double SingleSlater<dcomplex>::deltaLYP(int iop, double c, double d, double rho){  //function used in LYP Correlation (Eq. A27, A33 Ref.LYP2)
+};//End deltaLYP
+
+template<>
+double SingleSlater<dcomplex>::derLYP(int iop, double a, double b, double c, double d, double rhoA, double rhoB){  //function used in LYP Correlation (A28, A29,A30,A31 Ref.LYP2)
+};//End derLYP
+
+template<>
+double SingleSlater<dcomplex>::der2LYP(int iop, double a, double b, double c, double d, double rhoA, double rhoB, double der1){  
+};//End der2LYP
+
+
+template<>
+std::array<double,6> SingleSlater<dcomplex>::formVCLYP (double rhoA, double rhoB, 
+     double gammaAA, double gammaBB, double gammaAB){
 }; 
 
 template<>
-std::array<double,3> SingleSlater<dcomplex>::formVCLYP (double rhoA, double rhoB, 
+std::array<double,6> SingleSlater<dcomplex>::formVExB88 (double rhoA, double rhoB, 
      double drhoA, double drhoB){
 }; 
 
 template<>
-std::array<double,5> SingleSlater<dcomplex>::formVExB88 (double rhoA, double rhoB, 
+std::array<double,6> SingleSlater<dcomplex>::formVCVWN (double rho, double spindensity){
+
+}; 
+
+template<>
+std::array<double,6> SingleSlater<dcomplex>::formVC (double rho, double spindensity){
+
+}; 
+
+template<>
+std::array<double,6> SingleSlater<dcomplex>::formVCGGA (double rhoA, double rhoB,
+     double gammaAA, double gammaBB, double gammaAB){
+}; 
+
+template<>
+std::array<double,6> SingleSlater<dcomplex>::formVExGGA (double rhoA, double rhoB,
      double drhoA, double drhoB){
 }; 
 
 template<>
-std::array<double,3> SingleSlater<dcomplex>::formVCVWN (double rho, double spindensity){
-
-}; 
-
-template<>
-std::array<double,3> SingleSlater<dcomplex>::formVC (double rho, double spindensity){
-
-}; 
-
-template<>
-std::array<double,3> SingleSlater<dcomplex>::formVCGGA (double rhoA, double rhoB,
-     double drhoA, double drhoB){
-}; 
-
-template<>
-std::array<double,5> SingleSlater<dcomplex>::formVExGGA (double rhoA, double rhoB,
-     double drhoA, double drhoB){
-}; 
-
-template<>
-std::array<double,5> SingleSlater<dcomplex>::formVEx(double rho, double spindensity){
+std::array<double,6> SingleSlater<dcomplex>::formVEx(double rho, double spindensity){
 
 }; 
 
