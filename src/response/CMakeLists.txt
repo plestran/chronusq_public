@@ -1,9 +1,11 @@
 add_library(response SHARED response_double_full.cpp response_double_guess.cpp
 response_double_lineartrans.cpp response_double_transden.cpp)
+if(APPLE)
 target_link_libraries(response LINK_PUBLIC singleslater)
 target_link_libraries(response LINK_PUBLIC mointegrals)
 target_link_libraries(response LINK_PUBLIC aointegrals)
 target_link_libraries(response LINK_PUBLIC ${EXTERNAL_CQ_DEPS})
+endif()
 if(USE_LIBINT)
 if(BUILD_LIBINT)
  add_dependencies(response libint)
