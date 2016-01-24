@@ -1,5 +1,7 @@
 add_library(cerr SHARED cerr.cpp)
+if(APPLE)
 target_link_libraries(cerr LINK_PUBLIC ${EXTERNAL_CQ_DEPS})
+endif()
 
 if(USE_LIBINT)
 if(BUILD_LIBINT)

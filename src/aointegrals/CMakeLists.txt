@@ -12,9 +12,11 @@ else(USE_LIBINT)
 endif(USE_LIBINT)
 
 add_library(aointegrals SHARED ${AOINTS_SOURCE})
+if(APPLE)
 target_link_libraries(aointegrals LINK_PUBLIC basisset)
 target_link_libraries(aointegrals LINK_PUBLIC fileio)
 target_link_libraries(aointegrals LINK_PUBLIC ${EXTERNAL_CQ_DEPS})
+endif()
 
 if(USE_LIBINT)
 if(BUILD_LIBINT)

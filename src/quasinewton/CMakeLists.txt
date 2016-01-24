@@ -3,8 +3,10 @@ quasinewton_real_proc.cpp quasinewton_real_restart.cpp
 quasinewton_real_misc.cpp quasinewton_complex_diag.cpp quasinewton_complex_guess.cpp
  quasinewton_complex_proc.cpp quasinewton_complex_restart.cpp
 quasinewton_complex_misc.cpp)
+if(APPLE)
 target_link_libraries(quasinewton LINK_PUBLIC sdresponse)
 target_link_libraries(quasinewton LINK_PUBLIC ${EXTERNAL_CQ_DEPS})
+endif()
 
 
 if(USE_LIBINT)
