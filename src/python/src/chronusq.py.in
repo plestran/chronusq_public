@@ -109,7 +109,7 @@ def runCQ(ifname,ofname):
     out.write(header)
 
     authors = open(authorfname, 'r')
-    out.write("Author List:\n"+banner+authors.read())
+    out.write("Contributors List:\n"+banner+authors.read())
     authors.close()
     
     inputf = open(ifname, 'r')

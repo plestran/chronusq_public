@@ -1,25 +1,13 @@
-Name                   Institution                 Major Contributions
--------------------------------------------------------------------------------
-Feizhi Ding            University of Washington    Real-Time Quantum Dynamics
+Name                   Institution                
+--------------------------------------------------------
+David Williams-Young   University of Washington   
+Xiaosong Li            University of Washington   
+Edward Valeev          Virginia Tech (Libint/TiledArray)
 
-Joshua Goings          University of Washington    Real-Time Quantum Dynamics
-
-Patrick Lestrange      University of Washington    General Infrastructure
-
-Xiaosong Li            University of Washington    Principal Developer
-
-Hongbin Liu            University of Washington    General Infrastructure 
-																									 Post-SCF methods
-
-Alessio Petrone        University of Washington    Density Functional Theory
-
-Sajan Silwal           University of Washington    General infrastructure 
-																									 Self Consistent Field
-
-David Williams-Young   University of Washington    General Infrastructure 
-																									 Parallelism
-																									 Density Fitting
-																									 Post-SCF methods
-                                                   Real-Time Quantum Dynamics 
-																									 Response Theory
--------------------------------------------------------------------------------
+Feizhi Ding            University of Washington   
+Joshua Goings          University of Washington   
+Patrick Lestrange      University of Washington   
+Hongbin Liu            University of Washington   
+Alessio Petrone        University of Washington   
+Sajan Silwal           University of Washington   
+--------------------------------------------------------
