@@ -307,6 +307,11 @@ public:
   inline void doFull()                 { this->doFull_ = true;         };
   inline void doTDA()                  { this->doTDA_  = true;         };
   inline void doSA()                   { this->iPart_  = SPIN_ADAPTED; };
+
+  // Getters
+  inline std::vector<TMat> transDen(){return this->transDen_;};
+  inline std::vector<VectorXd> frequencies(){return this->frequencies_;};
+  inline std::vector<int> nMatDim(){return this->nMatDim_;};
   
   // IO Related
   void printInfo();
