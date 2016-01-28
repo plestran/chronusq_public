@@ -59,7 +59,7 @@ void QuasiNewton2<T>::buildSuperMatricies(const int NTrial){
 template<typename T>
 void QuasiNewton2<T>::formNHrProd(const int NTrial) {
   auto TwoNTrial = 2 * NTrial;
-  this->invertSuperMetric(NTrial);
+//this->invertSuperMetric(NTrial);
 
   TMap  SSuper(this->SSuperMem_, TwoNTrial,TwoNTrial);
   TMap  ASuper(this->ASuperMem_, TwoNTrial,TwoNTrial);
