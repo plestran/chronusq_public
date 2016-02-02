@@ -277,6 +277,7 @@ void Response<double>::fullPPRPA(){
   if(!this->doTDA_) this->mointegrals_->formIAJB(false);
   this->mointegrals_->formIJKL(false);
 
+  this->rMu_ = 0.0;
   for(auto iMat = 0; iMat != iMatIter_.size(); iMat++){
 
     this->currentMat_ = this->iMatIter_[iMat];
@@ -627,8 +628,8 @@ void Response<double>::fullPPRPA(){
       CErr(msg,this->fileio_->out);
     };
 
-    RealVecMap Eig(this->frequencies_[iMat].data(),this->nSingleDim_);
-    prettyPrint(this->fileio_->out,Eig,"Eig");
+  //RealVecMap Eig(this->frequencies_[iMat].data(),this->nSingleDim_);
+  //prettyPrint(this->fileio_->out,Eig,"Eig");
     // Cleanup LAPACK Memory
     delete[] WORK;
   }; // loop over iMat
