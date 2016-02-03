@@ -138,17 +138,8 @@ return (rho_A - rho_B)/ (rho_A + rho_B);
 
 template<>
 void SingleSlater<double>::genSparseBasisMap(){
+//Populate cutoff radii vector over shell
   this->basisset_->radcut(this->epsScreen, this->maxiter, this->epsConv);
-/*
-  RealMatrix overlapR(this->nBasis_,this->nBasis_);        ///< Overlap at grid point
-  overlapR.setZero();
-*/
-/*
-  this->nRadDFTGridPts_ = 50;
-  this->nAngDFTGridPts_ = 434;
-  this->screenVxc = false;
-*/
-//  this->epsScreen = 1.0e-16;
   this->ngpts = this->nRadDFTGridPts_*this->nAngDFTGridPts_;  // Number of grid point for each center
   OneDGrid * Rad ;                              // Pointer for Radial Grid
   LebedevGrid GridLeb(this->nAngDFTGridPts_);   // Angular Grid
@@ -158,7 +149,6 @@ void SingleSlater<double>::genSparseBasisMap(){
     Rad = new GaussChebyshev1stGridInf(this->nRadDFTGridPts_,0.0,1.0);   
   else if (this->dftGrid_ == EULERMACL) 
     Rad = new  EulerMaclaurinGrid(this->nRadDFTGridPts_,0.0,1.0);   
-
 //Generare Angular Grid
   GridLeb.genGrid();                            
   for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
@@ -1222,9 +1212,9 @@ void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX,
    double rhor  = 0.0;  // Total density at point
    double rhorA = 0.0;  // alpha density at point
    double rhorB = 0.0;  // beta  density at point
-   double gammaAA = 0.0;  // alpha  density at point der
-   double gammaBB = 0.0;  // beta  density at point  der
-   double gammaAB = 0.0;  // beta  density at point  der
+   double gammaAA = 0.0;  // Gradient Invariant: Del alpha dot Del alpha density at point (GGA)
+   double gammaBB = 0.0;  // Gradient Invariant: Del beta  dot Del beta  density at point (GGA)
+   double gammaAB = 0.0;  // Grdient  Invariant: Del alpha dot Del beta  density at point (GGA)
    std::array<double,3>  drhoA = {0.0,0.0,0.0}; ///< array pf density gradient components
    std::array<double,3>  drhoB = {0.0,0.0,0.0}; ///< array pf density gradient components
    int    nDer   = 0;    // Order of Der
@@ -1235,8 +1225,8 @@ void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX,
 // RealMatrix overlapR_(this->nBasis_,this->nBasis_);        ///< Overlap at grid point
 // overlapR_.setZero();
 // STmp->setZero();
-   std::array<double,6>  epsMuCor = {0.0,0.0,0.0,0.0,0.0,0.0}; ///< {energydens_corr, potential_corr_alpha, potential_corr_B, potential_exch_alpha_gamma_GGA, potential_exch_beta_gamma_GGA}
-   std::array<double,6>  epsMuExc = {0.0,0.0,0.0,0.0,0.0,0.0}; ///< {energydend_exchange, potential_exchenge_alpha, potential_exchange_beta, potential_exch_alpha_gamma_GGA,potential_exch_beta_gamma_GGA}
+   std::array<double,6>  epsMuCor = {0.0,0.0,0.0,0.0,0.0,0.0}; ///< {energydens_Cor, potential_Cor_A, potential_Cor_B, potential_Cor_gammaAA_GGA, potential_Cor_gammaBB_GGA, potential_Cor_gammaAB_GGA}
+   std::array<double,6>  epsMuExc = {0.0,0.0,0.0,0.0,0.0,0.0}; ///< {energydend_Exc, potential_Exc_A, potential_Exc_B, potential_Exc_gammaAA_GGA,potential_Exc_gammaBB_GGA,potential_Exc_gammaAB_GGA}
 
 //   Build Overlap
 //  overlapR_ = Map->col(ipts)*Map->col(ipts).transpose();
