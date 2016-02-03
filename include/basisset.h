@@ -325,6 +325,7 @@ public:
 
   inline void setBasisPath( std::string str){ this->basisPath_  = str;};
   inline void setPrintLevel(int i          ){ this->printLevel_ = i  ;};
+  inline void forceCart(){ this->forceCart_ = !this->forceCart_;};
 
 
   void printInfo();   ///< Print all info

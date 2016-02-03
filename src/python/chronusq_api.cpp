@@ -220,6 +220,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("renormShells" ,  &BasisSet::renormShells           )
     .def("printLevel"   ,  &BasisSet::printLevel             )
     .def("setPrintLevel",  &BasisSet::setPrintLevel          )
+    .def("forceCart"    ,  &BasisSet::forceCart              )
   ;
 
   class_<Controls,boost::noncopyable>("Controls",init<>())
