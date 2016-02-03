@@ -1774,7 +1774,7 @@ void SingleSlater<double>::formVXC_store(){
     double val ;                                  // to take into account Ang Int
     if (this->isGGA) {
       val = 4.0*math.pi;
-      nDerMatrix = omp_get_max_threads();  
+      nDerMatrix = nthreads; 
     } else {
       val = 4.0*math.pi*CxVx;                                  // to take into account Ang Int
     }

@@ -64,6 +64,11 @@ namespace ChronusQ{
      
       this->fileio_->out << "  nShellPair  =  " <<  this->nShellPair_ << endl; 
     }
+    this->fileio_->out << "  Using Cartesian Functions?: ";
+    if(this->forceCart_) this->fileio_->out << "Yes";
+    else                 this->fileio_->out << "No";
+    this->fileio_->out << endl;
+
     this->fileio_->out << bannerEnd<< endl << endl;
   } // BasisSet::printMeta
 
