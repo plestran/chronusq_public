@@ -65,7 +65,7 @@ int main(int argc, char*argv[]){
   singleSlater.setRef(SingleSlater<double>::RHF);
   singleSlater.isClosedShell = true;
 
-  basis.findBasisFile("cc-pVDZ");
+  basis.findBasisFile("cc-pVTZ");
   basis.communicate(fileio);
   basis.parseGlobal();
   basis.constructLocal(&molecule);
