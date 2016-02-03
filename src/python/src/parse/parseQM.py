@@ -88,7 +88,7 @@ def parseQM(workers,secDict):
 #
 # Try to set the basis for the QM Job
 #
-  parseBasis(workers,ssSettings['BASIS'])
+  parseBasis(workers,ssSettings)
 
 
 #

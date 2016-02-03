@@ -31,11 +31,19 @@ import libpythonapi as chronusQ
 #
 # ** Note that this allocates the CQ::BasisSet Object **
 #
-def parseBasis(workers,basis):
+def parseBasis(workers,ssSettings):
+  basis = ssSettings['BASIS']
+  
   nTCS = workers["CQSingleSlater"].nTCS()
 
   # Make CQ::BasisSet aware of CQ::FileIO
   workers["CQBasisSet"].communicate(workers["CQFileIO"])
+
+  # Check to see if we're forcing cartesian functions
+  forceCart = False
+  if 'FORCECART' in ssSettings:
+    if ssSettings['FORCECART']:
+      workers["CQBasisSet"].forceCart()
   
 #
 # 1) Try to find the basis set file in standard locations
