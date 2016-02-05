@@ -65,7 +65,7 @@ int main(int argc, char*argv[]){
   singleSlater.setRef(SingleSlater<double>::RHF);
   singleSlater.isClosedShell = true;
 
-  basis.findBasisFile("cc-pVTZ");
+  basis.findBasisFile("cc-pVDZ");
   basis.communicate(fileio);
   basis.parseGlobal();
   basis.constructLocal(&molecule);
@@ -100,9 +100,7 @@ int main(int argc, char*argv[]){
   resp.doFull();
   resp.doResponse();
 
-//cout << resp.frequencies()[0]*phys.eVPerHartree << endl;
-
-  VectorXd freq = resp.frequencies()[0]*phys.eVPerHartree;
+  VectorXd freq = resp.frequencies()[0];
   RealMatrix den = resp.transDen()[0];
 
   H5::H5File outfile(std::string(basename(inputXYZName)) + ".bin",H5F_ACC_TRUNC);
@@ -115,7 +113,6 @@ int main(int argc, char*argv[]){
 
   hsize_t dimDen[] = {8,den.rows()};
   H5::DataSpace spaceDen(2,dimDen,NULL);
-//cout << dimDen[0] << " " << dimDen[1] << endl;
 
   H5::DataSet dataSetDen = outfile.createDataSet("Den",H5::PredType::NATIVE_DOUBLE,spaceDen);
   dataSetDen.write(den.data(),H5::PredType::NATIVE_DOUBLE,spaceDen);
