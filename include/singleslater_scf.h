@@ -308,6 +308,7 @@ void SingleSlater<T>::SCF(){
     if(this->isConverged) break;
 
   }; // SCF Loop
+  prettyPrint(cout,(*this->aointegrals_->overlap_),"MOS");
 /*
   delete [] this->SCF_SCR;
   delete [] this->REAL_SCF_SCR;

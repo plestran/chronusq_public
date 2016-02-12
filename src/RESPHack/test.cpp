@@ -36,10 +36,16 @@ int main(int argc, char*argv[]){
 //cout << nAtoms << endl;
 
   molecule.setNAtoms(nAtoms);
-  // Cation
-  molecule.setCharge(1);
-  molecule.setNTotalE(16);
-  // Triple Cation
+  // Neutral LiH
+  molecule.setCharge(0);
+  molecule.setNTotalE(4);
+  // Neutral HF
+//molecule.setCharge(0);
+//molecule.setNTotalE(10);
+  // Cation immine
+//molecule.setCharge(1);
+//molecule.setNTotalE(16);
+  // Triple Cation immine
 //molecule.setCharge(3);
 //molecule.setNTotalE(14);
   
