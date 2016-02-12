@@ -13,7 +13,8 @@ int main(int argc, char*argv[]){
   MOIntegrals<double> moints;
   SingleSlater<double> singleSlater;
   Response<double> resp;
-  FileIO fileio("test.inp",std::string(basename(inputXYZName)) + ".out");
+  FileIO fileio("test.inp",std::string(basename(inputXYZName)) + ".out",
+    std::string(basename(inputXYZName)) + ".rst");
 
 
   initCQ(argc,argv);
@@ -35,8 +36,13 @@ int main(int argc, char*argv[]){
 //cout << nAtoms << endl;
 
   molecule.setNAtoms(nAtoms);
-  molecule.setCharge(3);
-  molecule.setNTotalE(14);
+  // Cation
+  molecule.setCharge(1);
+  molecule.setNTotalE(16);
+  // Triple Cation
+//molecule.setCharge(3);
+//molecule.setNTotalE(14);
+  
   molecule.setMultip(1);
   molecule.alloc(fileio.out); 
 
@@ -94,7 +100,8 @@ int main(int argc, char*argv[]){
   moints.communicate(molecule,basis,fileio,controls,aoints,singleSlater);
   moints.initMeta();
   resp.communicate(singleSlater,moints,fileio);  
-  resp.setMeth(RESPONSE_TYPE::PPTDA);
+//resp.setMeth(RESPONSE_TYPE::PPTDA);
+  resp.setMeth(RESPONSE_TYPE::CIS);
   resp.doSA();
   resp.setNSek(8);
   resp.doFull();
@@ -143,6 +150,8 @@ int main(int argc, char*argv[]){
   }
 */
   finalizeCQ(); 
+
+//std::remove(std::string(basename(inputXYZName)) + ".rst");
 
   return 0;
 };
