@@ -36,6 +36,8 @@
 namespace ChronusQ {
 template<typename T>
 class RealTime {
+  typedef Eigen::Matrix<T,Dynamic,Dynamic> TMat; 
+  typedef Eigen::Map<TMat> TMap;
   FileIO *        fileio_;
   Controls *      controls_;
   BasisSet *	  basisset_;
@@ -91,6 +93,7 @@ class RealTime {
   dcomplex * uTransAMem_; // Unitary Transformation Matrix [exp(-i*dt*F)] Alpha
   dcomplex * uTransBMem_; // Unitary Transformation Matrix [exp(-i*dt*F)] Beta
   dcomplex * scratchMem_; // NBas x NBas scratch Matrix
+  dcomplex * scratchMem2_; // NBas x NBas scratch Matrix
 
   double   * REAL_LAPACK_SCR;
   dcomplex * CMPLX_LAPACK_SCR;
@@ -110,6 +113,7 @@ class RealTime {
   int lenUTransA_;
   int lenUTransB_;
   int lenScratch_;
+  int lenScratch2_;
 
   int lenREAL_LAPACK_SCR;
   int lenCMPLX_LAPACK_SCR;
@@ -312,6 +316,7 @@ public:
   void printRT();
   void formUTrans();
   void doPropagation();
+  void doMcWeeny(ComplexMap &, int NE);
   void writeDipoleCSV(PropInfo & propInfo, long int & iStep);
   void writeAppliedFieldCSV(PropInfo & propInfo, long int & iStep);
   void writeMullikenCSV(PropInfo & propInfo, long int & iStep);
