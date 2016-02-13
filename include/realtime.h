@@ -72,6 +72,7 @@ class RealTime {
   double stepSize_;	// Input step size
   double deltaT_;	// Actual step size
   long double currentTime_;	// Current time
+  int iRstrt_; // Number of iterations after which to restart MMUT
 
   bool	frozenNuc_;     // Whether to freeze nuclei
   bool  isClosedShell_;
@@ -193,6 +194,7 @@ public:
     this->nTCS_        = 1;
     this->maxSteps_    = 10;
     this->stepSize_    = 0.05;
+    this->iRstrt_      = 50;
     this->typeOrtho_   = Lowdin;
     this->initDensity_ = 0;
     this->swapMOA_     = 0;

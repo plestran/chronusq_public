@@ -61,8 +61,7 @@ void RealTime<T>::doMcWeeny(ComplexMap& P, int NE){
 template<typename T>
 void RealTime<T>::doPropagation(){
   long int iStep;
-  // FIXME: Need iRstrt keyword for RT input
-  int  iRstrt = 50; // Number of iterations after which to restart MMUT
+  // FIXME: Need this->iRstrt_ keyword for RT input
   bool Start;  // Start the MMUT iterations
   bool FinMM;  // Wrap up the MMUT iterations
   bool checkFP = false; // check commutator [F,P]
@@ -113,9 +112,9 @@ void RealTime<T>::doPropagation(){
 
     if(getRank() == 0) {
 //    Logic for restart
-      if(iRstrt > 0) {
-        Start = (iStep == 0) || ((iStep % iRstrt) == 0);
-        FinMM = ((iStep+1) % iRstrt == 0);
+      if(this->iRstrt_ > 0) {
+        Start = (iStep == 0) || ((iStep % this->iRstrt_) == 0);
+        FinMM = ((iStep+1) % this->iRstrt_ == 0);
       } else {
         Start = (iStep == 0);
         FinMM = (iStep == this->maxSteps_);
