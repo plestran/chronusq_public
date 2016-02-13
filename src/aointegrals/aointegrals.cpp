@@ -461,6 +461,7 @@ void AOIntegrals::alloc(){
     this->quartetConstants_ = std::unique_ptr<QuartetConstants>(new QuartetConstants);
  
     if(this->isPrimary) this->fileio_->iniStdOpFiles(this->nTCS_*this->basisSet_->nBasis());
+    if(this->isPrimary && this->maxNumInt_ >=1) this->allocNumInt();
   }
 #ifdef CQ_ENABLE_MPI
   MPI_Barrier(MPI_COMM_WORLD);
@@ -574,6 +575,19 @@ void AOIntegrals::allocMultipole(){
 
   } catch(...) {
     CErr(std::current_exception(),"Multipole Tensor Allocation");
+  }
+}
+
+void AOIntegrals::allocNumInt(){
+  auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
+  try {
+
+      this->RcrossDel_ = std::unique_ptr<RealTensor3d>(
+        new RealTensor3d(NTCSxNBASIS,NTCSxNBASIS,3)
+      );
+
+  } catch(...) {
+    CErr(std::current_exception(),"R cross Del Tensor Allocation");
   }
 }
 

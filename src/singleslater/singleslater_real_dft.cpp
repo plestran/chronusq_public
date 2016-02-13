@@ -236,6 +236,141 @@ void SingleSlater<double>::genSparseBasisMap(){
 };// End genSparseBasisMap
 
 template<>
+void SingleSlater<double>::genSparseRcrosP(){
+//Populate cutoff radii vector over shell
+  this->screenVxc = false;
+  this->basisset_->radcut(this->epsScreen, this->maxiter, this->epsConv);
+  this->ngpts = this->nRadDFTGridPts_*this->nAngDFTGridPts_;  // Number of grid point for each center
+  OneDGrid * Rad ;                              // Pointer for Radial Grid
+  LebedevGrid GridLeb(this->nAngDFTGridPts_);   // Angular Grid
+  int nDer = 1 ; //Order of differenzation
+//  if (this->isGGA) nDer = 1;
+  if (this->dftGrid_ == GAUSSCHEB)  
+    Rad = new GaussChebyshev1stGridInf(this->nRadDFTGridPts_,0.0,1.0);   
+  else if (this->dftGrid_ == EULERMACL) 
+    Rad = new  EulerMaclaurinGrid(this->nRadDFTGridPts_,0.0,1.0);   
+//Generare Angular Grid
+  GridLeb.genGrid();                            
+  std::unique_ptr<RealMatrix>  rdotpX;        ///< r cross p - X at grid point
+  std::unique_ptr<RealMatrix>  rdotpY;        ///< r cross p - Y at grid point
+  std::unique_ptr<RealMatrix>  rdotpZ;        ///< r cross p - Z at grid point
+  rdotpX = std::unique_ptr<RealMatrix>(
+    new RealMatrix(this->nBasis_,this->nBasis_));
+  rdotpY = std::unique_ptr<RealMatrix>(
+    new RealMatrix(this->nBasis_,this->nBasis_));
+  rdotpZ = std::unique_ptr<RealMatrix>(
+    new RealMatrix(this->nBasis_,this->nBasis_));
+  rdotpX->setZero();
+  rdotpY->setZero();
+  rdotpZ->setZero();
+  for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
+    this->sparseMap_.push_back(RealSparseMatrix(this->nTCS_*this->nBasis_,this->ngpts));
+    this->sparseWeights_.push_back(RealSparseMatrix(this->ngpts,1));
+    this->sparseDoRho_.push_back(RealSparseMatrix(this->ngpts,1));
+//  Derivative
+    this->sparsedmudX_.push_back(RealSparseMatrix(this->nTCS_*this->nBasis_,this->ngpts));
+    this->sparsedmudY_.push_back(RealSparseMatrix(this->nTCS_*this->nBasis_,this->ngpts));
+    this->sparsedmudZ_.push_back(RealSparseMatrix(this->nTCS_*this->nBasis_,this->ngpts));
+//  dipole like
+    RealSparseMatrix *Map        = &this->sparseMap_[iAtm];
+    RealSparseMatrix *WeightsMap = &this->sparseWeights_[iAtm];
+    RealSparseMatrix *DoRhoMap   = &this->sparseDoRho_[iAtm];
+    RealSparseMatrix *MapdX      = &this->sparsedmudX_[iAtm];
+    RealSparseMatrix *MapdY      = &this->sparsedmudY_[iAtm];
+    RealSparseMatrix *MapdZ      = &this->sparsedmudZ_[iAtm];
+    double val;
+    double x;
+    double y;
+    double z;
+    // Generate grids
+    Rad->genGrid(); 
+    Rad->atomGrid((elements[this->molecule_->index(iAtm)].sradius)) ;  
+    TwoDGrid Raw3Dg(this->ngpts,Rad,&GridLeb);             
+    //Center the Grid at iAtom
+    Raw3Dg.centerGrid(
+      (*this->molecule_->cart())(0,iAtm),
+      (*this->molecule_->cart())(1,iAtm),
+      (*this->molecule_->cart())(2,iAtm)
+    );
+    for (auto ipts =0; ipts < this->ngpts; ipts++){
+      
+      cartGP pt = Raw3Dg.gridPtCart(ipts); 
+      auto mapRad_ = this->basisset_->MapGridBasis(pt);
+      // Evaluate each Becke fuzzy call weight, normalize it and muliply by 
+      //   the Raw grid weight at that point
+      auto bweight = (this->formBeckeW(pt,iAtm)) 
+                     / (this->normBeckeW(pt)) ;
+            x = bg::get<0>(pt) ;
+            y = bg::get<1>(pt) ;
+            z = bg::get<2>(pt) ;
+      if (this->screenVxc) {
+        if (mapRad_[0] || (bweight < this->epsScreen)) continue;
+        }
+         WeightsMap->insert(ipts,0) = Raw3Dg.getweightsGrid(ipts) * bweight;
+         //skyp all point
+         for (int s1=0; s1 < this->basisset_->nShell(); s1++){
+           if (this->screenVxc) {
+             if (!mapRad_[s1+1]) continue;
+             }
+           int bf1_s = this->basisset_->mapSh2Bf(s1);
+           auto shSize = this->basisset_->shells(s1).size(); 
+           libint2::Shell shTmp = this->basisset_->shells(s1);
+           double * s1Eval = this->basisset_->basisDEval(nDer,shTmp,&pt);
+           double * ds1EvalX = s1Eval + shSize;
+           double * ds1EvalY = ds1EvalX + shSize;
+           double * ds1EvalZ = ds1EvalY + shSize;
+           for (auto mu =0; mu < shSize; mu++){ 
+             val = s1Eval[mu];
+             if (std::abs(val) > this->epsScreen){
+               Map->insert(bf1_s+mu,ipts) = val;
+               }
+             if (nDer ==1) {
+               val = ds1EvalX[mu];
+               if (std::abs(val) > this->epsScreen){
+                 MapdX->insert(bf1_s+mu,ipts) = val;
+                 }
+               val = ds1EvalY[mu];
+               if (std::abs(val) > this->epsScreen){
+                 MapdY->insert(bf1_s+mu,ipts) = val;
+                 }
+               val = ds1EvalZ[mu];
+               if (std::abs(val) > this->epsScreen){
+                 MapdZ->insert(bf1_s+mu,ipts) = val;
+                 }
+// dipole like
+               }
+             } //loop over basis (within a given ishell)
+         } //loop over shells
+//AP
+//            (*rdotpX) += (*WeightsMap).coeff(ipts,0)*(*MapmudotX).col(ipts)*(*Map).col(ipts).transpose();
+            (*rdotpX) +=  (*WeightsMap).coeff(ipts,0)*(
+                          ( (*Map).col(ipts)*(*MapdZ).col(ipts).transpose()*y) -
+                          ( (*Map).col(ipts)*(*MapdY).col(ipts).transpose()*z) );
+
+            (*rdotpY) +=  (*WeightsMap).coeff(ipts,0)*(
+                          ( (*Map).col(ipts)*(*MapdX).col(ipts).transpose()*z) -
+                          ( (*Map).col(ipts)*(*MapdZ).col(ipts).transpose()*x) );
+
+            (*rdotpZ) +=  (*WeightsMap).coeff(ipts,0)*(
+                          ( (*Map).col(ipts)*(*MapdY).col(ipts).transpose()*x) -
+                          ( (*Map).col(ipts)*(*MapdX).col(ipts).transpose()*y) );
+//AP
+         if (this->screenVxc && Map->col(ipts).norm() > this->epsScreen){
+         DoRhoMap->insert(ipts,0) = 2;}
+    } //loop over pts
+//     cout << "non Zero " << this->sparseMap_[iAtm].nonZeros() << " " << this->ngpts <<endl; 
+  } // loop over atoms
+
+         (*rdotpX) *= 4.0*math.pi;
+         (*rdotpY) *= 4.0*math.pi;
+         (*rdotpZ) *= 4.0*math.pi;
+         prettyPrint(cout,(*rdotpX),"Numeric <dipole vel> - x comp");
+         prettyPrint(cout,(*rdotpY),"Numeric <dipole vel> - y comp");
+         prettyPrint(cout,(*rdotpZ),"Numeric <dipole vel> - z comp");
+
+};// End genSparseBasisMap
+
+template<>
 double SingleSlater<double>::EvepsVWN(int iop, double A_x, double b_x, double c_x, double x0_x, double rho){
 //    From Reference Vosko en Al., Can. J. Phys., 58, 1200 (1980). VWN3 and VWN5 interpolation formula   
 //    IOP 0 -> Eq 4.4 

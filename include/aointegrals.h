@@ -33,6 +33,7 @@
 #include <fileio.h>
 #include <controls.h>
 #include <tools.h>
+#include <grid.h>
 
 #define MaxFmTPt 3201
 #define MaxTotalL 18
@@ -143,6 +144,7 @@ class AOIntegrals{
   int       nTCS_;
   int       nTT_; ///< Reduced number of basis functions (lower triangle) \f$ N_b (N_b+1) / 2\f$
   int       maxMultipole_;
+  int       maxNumInt_;
   int       **R2Index_;
   double	**FmTTable_;
 
@@ -151,6 +153,7 @@ class AOIntegrals{
   Molecule *   	molecule_; ///< Pointer to molecule specification
   FileIO *      	fileio_; ///< Pointer to FileIO
   Controls *    	controls_; ///< Pointer to job control
+  TwoDGrid *            twodgrid_; ///< 3D grid (1Rad times 1 Ang) 
 
   std::unique_ptr<PairConstants>        pairConstants_; ///< Smart pointer to struct containing shell-pair meta-data
   std::unique_ptr<MolecularConstants>   molecularConstants_; ///< Smart pointer to struct containing molecular struture meta-data
@@ -202,6 +205,7 @@ public:
   std::unique_ptr<RealTensor3d>  elecQuadpole_;///< Electric quadrupole matrix \f$Q_{\mu\nu}^{ij}=\langle\mu\vert r_i r_j \vert\nu\rangle\f$
   std::unique_ptr<RealTensor3d>  elecOctpole_;///< Electric octupole matrix \f$O_{\mu\nu}^{ijk}=\langle\mu\vert r_i r_j r_k \vert\nu\rangle\f$
 
+  std::unique_ptr<RealTensor3d>  RcrossDel_; ///< R cross Del matrix \f$\vec{\mu}_{\nu\sigma}=\langle\nu\vert\vec{r} \Del \vert\sigma\rangle\f$
   bool		haveAOTwoE; ///< Whether or not the two-bodied molecular integrals have been evaluated (for in-core integrals)
   bool		haveAOOneE; ///< Whether or not the one-body molecular integrals have been evaluated
   bool          haveSchwartz; ///< Whether or not the Schwartz bound tensor has been evaluated for the primary basis set
@@ -263,6 +267,7 @@ public:
     this->elecDipole_   = nullptr;
     this->elecQuadpole_ = nullptr;
     this->elecOctpole_  = nullptr;
+    this->RcrossDel_   = nullptr;
 
     this->haveAOTwoE   = false;
     this->haveAOOneE   = false;
@@ -276,6 +281,7 @@ public:
     // Standard Values
     this->nTCS_             = 1;
     this->maxMultipole_     = 3;
+    this->maxNumInt_        = 3;
     this->integralAlgorithm = DIRECT;
     this->isPrimary         = true;
   };
@@ -304,6 +310,7 @@ public:
   void alloc();
   void allocOp();
   void allocMultipole();
+  void allocNumInt();
 
 
   // IO
@@ -312,10 +319,12 @@ public:
   // Getters
   inline int nTCS(){ return this->nTCS_;}
   inline int maxMultipole(){ return this->maxMultipole_;}
+  inline int maxNumInt(){ return this->maxNumInt_;}
 
   // Setters
   inline void setNTCS(int i)        { this->nTCS_         = i;}
   inline void setMaxMultipole(int i){ this->maxMultipole_ = i;}
+  inline void setMaxNumInt(int i){ this->maxNumInt_ = i;}
   inline void setAlgorithm(int i)   { this->integralAlgorithm = i;}
 
   inline double &twoEC(int i, int j, int k, int l){
@@ -343,6 +352,9 @@ public:
 //--------------------------------------------//
   void computeAOTwoE(); // build two-electron AO integral matrices
   void computeAOOneE(); // build one-electron AO integral matrices
+  void computeAORcrossDel(); // build R cross Del matrices
+  double formBeckeW(cartGP gridPt, int iAtm);    // Evaluate Becke Weights
+  double normBeckeW(cartGP gridPt);             // Normalize Becke Weights
   void DKH0(); // compute DKH0 relativistic correction to kinetic energy
   void printOneE();
 #ifdef USE_LIBINT
