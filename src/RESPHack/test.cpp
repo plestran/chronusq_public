@@ -82,7 +82,7 @@ int main(int argc, char*argv[]){
   basis.parseGlobal();
   basis.constructLocal(&molecule);
   basis.makeMaps(1,&molecule);
-  basis.renormShells();
+//basis.renormShells();
 
   aoints.communicate(molecule,basis,fileio,controls);
   singleSlater.communicate(molecule,basis,aoints,fileio,controls);
