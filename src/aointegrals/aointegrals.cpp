@@ -385,7 +385,9 @@ void AOIntegrals::printOneE(){
   if(this->maxMultipole_ >= 3)
     for(auto i = 0, IOff=0; i < 10; i++,IOff+=NBSq)
       mat.push_back(RealMap(&this->elecOctpole_->storage()[IOff],NB,NB));
-  
+  if(this->isPrimary && this->maxNumInt_ >=1) 
+    for(auto i = 0, IOff=0; i < 3; i++,IOff+=NBSq)
+      mat.push_back(RealMap(&this->RcrossDel_->storage()[IOff],NB,NB));
   
   if(this->nTCS_ == 2){
     prettyPrintTCS(this->fileio_->out,(mat[0]),"Overlap");
@@ -414,6 +416,13 @@ void AOIntegrals::printOneE(){
       prettyPrintTCS(this->fileio_->out,(mat[21]),"Electric Octupole (yzz)");
       prettyPrintTCS(this->fileio_->out,(mat[22]),"Electric Octupole (zzz)");
     }
+/*
+    if(this->isPrimary && this->maxNumInt_ >=1){
+      prettyPrintTCS(this->fileio_->out,(mat[23]),"R cross Del (x)");
+      prettyPrintTCS(this->fileio_->out,(mat[24]),"R cross Del (y)");
+      prettyPrintTCS(this->fileio_->out,(mat[25]),"R cross Del (z)");
+    }
+*/
     prettyPrintTCS(this->fileio_->out,(mat[1]),"Kinetic");
     prettyPrintTCS(this->fileio_->out,(mat[2]),"Potential");
     prettyPrintTCS(this->fileio_->out,(mat[3]),"Core Hamiltonian");
@@ -443,6 +452,11 @@ void AOIntegrals::printOneE(){
       prettyPrint(this->fileio_->out,(mat[20]),"Electric Octupole (yyz)");
       prettyPrint(this->fileio_->out,(mat[21]),"Electric Octupole (yzz)");
       prettyPrint(this->fileio_->out,(mat[22]),"Electric Octupole (zzz)");
+    }
+    if(this->isPrimary && this->maxNumInt_ >=1){
+      prettyPrint(this->fileio_->out,(mat[23]),"R cross Del (x)");
+      prettyPrint(this->fileio_->out,(mat[24]),"R cross Del (y)");
+      prettyPrint(this->fileio_->out,(mat[25]),"R cross Del (z)");
     }
     prettyPrint(this->fileio_->out,(mat[1]),"Kinetic");
     prettyPrint(this->fileio_->out,(mat[2]),"Potential");

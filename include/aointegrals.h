@@ -281,7 +281,7 @@ public:
     // Standard Values
     this->nTCS_             = 1;
     this->maxMultipole_     = 3;
-    this->maxNumInt_        = 0;
+    this->maxNumInt_        = 3;
     this->integralAlgorithm = DIRECT;
     this->isPrimary         = true;
   };

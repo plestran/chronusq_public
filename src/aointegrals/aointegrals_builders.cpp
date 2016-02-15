@@ -211,21 +211,14 @@ void AOIntegrals::computeAORcrossDel(){
   ngpts = nRadDFTGridPts_*nAngDFTGridPts_;  // Number of grid point for each center
   OneDGrid * Rad ;                              // Pointer for Radial Grid
   LebedevGrid GridLeb(nAngDFTGridPts_);   // Angular Grid
-  Rad = new GaussChebyshev1stGridInf(nRadDFTGridPts_,0.0,1.0);   
+  Rad = new  EulerMaclaurinGrid(nRadDFTGridPts_,0.0,1.0);   
   GridLeb.genGrid();                            
-// Figure where allocate those  (RcrossDel_ is already created)
-  std::unique_ptr<RealMatrix>  rdotpX;        ///< r cross p - X at grid point
-  std::unique_ptr<RealMatrix>  rdotpY;        ///< r cross p - Y at grid point
-  std::unique_ptr<RealMatrix>  rdotpZ;        ///< r cross p - Z at grid point
-  rdotpX = std::unique_ptr<RealMatrix>(
-    new RealMatrix(this->nBasis_,this->nBasis_));
-  rdotpY = std::unique_ptr<RealMatrix>(
-    new RealMatrix(this->nBasis_,this->nBasis_));
-  rdotpZ = std::unique_ptr<RealMatrix>(
-    new RealMatrix(this->nBasis_,this->nBasis_));
-  rdotpX->setZero();
-  rdotpY->setZero();
-  rdotpZ->setZero();
+  auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
+  auto NBSQ = NTCSxNBASIS*NTCSxNBASIS;
+  RealMap rdotpX(&this->RcrossDel_->storage()[0],NTCSxNBASIS,NTCSxNBASIS);
+  RealMap rdotpY(&this->RcrossDel_->storage()[NBSQ],NTCSxNBASIS,NTCSxNBASIS);
+  RealMap rdotpZ(&this->RcrossDel_->storage()[2*NBSQ],NTCSxNBASIS,NTCSxNBASIS);
+
   std::vector<RealSparseMatrix>  sparsedmudX_; ///< basis derivative (x) (NbasisxNbasis)
   std::vector<RealSparseMatrix>  sparsedmudY_; ///< basis derivative (y) (NbasisxNbasis)
   std::vector<RealSparseMatrix>  sparsedmudZ_; ///< basis derivative (z) (NbasisxNbasis) 
@@ -303,15 +296,15 @@ void AOIntegrals::computeAORcrossDel(){
          } //loop over shells
 //            (*rdotpX) += (*WeightsMap).coeff(ipts,0)*(*Map).col(ipts)*(*Map).col(ipts).transpose();
 //          Figure how populate RcrossDel_ tensor 
-            (*rdotpX) +=  (*WeightsMap).coeff(ipts,0)*(
+            rdotpX +=  (*WeightsMap).coeff(ipts,0)*(
                           ( (*Map).col(ipts)*(*MapdZ).col(ipts).transpose()*y) -
                           ( (*Map).col(ipts)*(*MapdY).col(ipts).transpose()*z) );
 
-            (*rdotpY) +=  (*WeightsMap).coeff(ipts,0)*(
+            rdotpY +=  (*WeightsMap).coeff(ipts,0)*(
                           ( (*Map).col(ipts)*(*MapdX).col(ipts).transpose()*z) -
                           ( (*Map).col(ipts)*(*MapdZ).col(ipts).transpose()*x) );
 
-            (*rdotpZ) +=  (*WeightsMap).coeff(ipts,0)*(
+            rdotpZ +=  (*WeightsMap).coeff(ipts,0)*(
                           ( (*Map).col(ipts)*(*MapdY).col(ipts).transpose()*x) -
                           ( (*Map).col(ipts)*(*MapdX).col(ipts).transpose()*y) );
          if (screenVxc && Map->col(ipts).norm() > epsScreen){
@@ -319,16 +312,16 @@ void AOIntegrals::computeAORcrossDel(){
        }//End ipts
     }//End iAtm
 //       Finishing the numerical integration (int * 4*pi)
-         (*rdotpX) *= 4.0*math.pi;
-         (*rdotpY) *= 4.0*math.pi;
-         (*rdotpZ) *= 4.0*math.pi;
+         rdotpX *= 4.0*math.pi;
+         rdotpY *= 4.0*math.pi;
+         rdotpZ *= 4.0*math.pi;
 //       printing
-         prettyPrint(cout,(*rdotpX),"Numeric <dipole vel> - x comp");
-         prettyPrint(cout,(*rdotpY),"Numeric <dipole vel> - y comp");
-         prettyPrint(cout,(*rdotpZ),"Numeric <dipole vel> - z comp");
+//         prettyPrint(cout,rdotpX,"Numeric <dipole vel> - x comp");
+//         prettyPrint(cout,rdotpY,"Numeric <dipole vel> - y comp");
+//         prettyPrint(cout,rdotpZ,"Numeric <dipole vel> - z comp");
 //end for now (comment later)
-  cout << "Call HERE " <<endl;
-  CErr();
+//  cout << "Call HERE " <<endl;
+//  CErr();
 } 
 
 void AOIntegrals::computeAOOneE(){
@@ -360,7 +353,6 @@ void AOIntegrals::computeAOOneE(){
   else OneEDriver(OneBodyEngine::overlap);
   auto OEnd = std::chrono::high_resolution_clock::now();
   if(this->isPrimary && this->maxNumInt_ >=1) computeAORcrossDel();
-
   // Compute and time kinetic integrals
   auto TStart = std::chrono::high_resolution_clock::now();
   OneEDriver(OneBodyEngine::kinetic);
