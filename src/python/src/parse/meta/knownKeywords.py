@@ -85,6 +85,7 @@ knownKeywords['QM'] = {
 knownKeywords['RT'] = {
   'MAXSTEP'  :CQKeyword('MAXSTEP'  ,'I'      ,False),    
   'TIMESTEP' :CQKeyword('TIMESTEP' ,'D'      ,False), 
+  "IRSTRT"   :CQKeyword('IRSRT'    ,'I'      ,False),
   'EDFIELD'  :CQKeyword('EDFIELD'  ,'D3'     ,False),
   'TIME_ON'  :CQKeyword('TIME_ON'  ,'D'      ,False),
   'TIME_OFF' :CQKeyword('TIME_OFF' ,'D'      ,False),

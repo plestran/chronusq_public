@@ -22,6 +22,7 @@ ints			= direct
 [RT]
 maxstep  = 20
 ortho    = cholesky
+irstrt   = 51
 
 #
 #  Misc Settings

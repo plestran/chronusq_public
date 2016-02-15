@@ -572,6 +572,7 @@ def parseRT(workers,settings):
     'ORTHO'    :workers['CQRealTime'].setOrthoTyp ,
     'INIDEN'   :workers['CQRealTime'].setInitDen  ,
     'UPROP'    :workers['CQRealTime'].setFormU    ,
+    'IRSTRT'   :workers['CQRealTime'].setIRstrt   ,
     'ELL_POL'  :workers['CQRealTime'].setEllPol     
   }
 

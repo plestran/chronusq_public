@@ -49,6 +49,9 @@ void RealTime<T>::printRT() {
     if (this->typeOrtho_ == Cholesky) this->fileio_->out << " Cholesky" << endl; 
     if (this->typeOrtho_ == Canonical) this->fileio_->out << " Canonical (NYI)" << endl; 
 
+    this->fileio_->out << std::setw(33) << std::right << " Restarting MMUT every "
+                       << std::setw(14) << this->iRstrt_ << " steps" << endl;
+
     this->fileio_->out << std::left << "\n * Integration Parameters:" << endl; 
     this->fileio_->out << std::right << std::setw(33) 
                        << " Electronic integration =" << std::setw(14) << std::right; 
