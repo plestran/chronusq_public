@@ -285,6 +285,7 @@ public:
   // Setters
   inline void setMaxSteps(int i){ this->maxSteps_  = i;};
   inline void setStepSize(double i){ this->stepSize_ = i;};
+  inline void setIRstrt(int i){ this->iRstrt_ = i;};
   inline void setOrthoTyp(int i){ this->typeOrtho_ = i;};
   inline void setInitDen(int i){ this->initDensity_ = i;};
   inline void setSwapMOA(int i){ this->swapMOA_     = i;};
