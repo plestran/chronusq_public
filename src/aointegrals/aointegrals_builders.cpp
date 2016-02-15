@@ -188,21 +188,32 @@ double AOIntegrals::normBeckeW(cartGP gridPt){
 
 void AOIntegrals::computeAORcrossDel(){
 // build R cross Del matrices (Numerical)
-  bool screenVxc = false;
-  double epsScreen     = 1.0e-10;
-  double epsConv       = 1.0e-7;
-  int maxiter       = 50;
-  int nRadDFTGridPts_ = 100;
-  int nAngDFTGridPts_ = 302;
-  int ngpts; 
-  int nDer = 1 ; //Order of differenzation
+// It also creates the grid and can perform also other
+// integrals (i.e. <mu/Del/nu> if required.
+
+//  Hard coded for now (we need to set the flag in aointegrals)
+//  I also hard coded the type of grid (GaussChebyshev1stGridInf).
+//  I hard coded the weight scheme in formBeckeW.
+  bool screenVxc = false;   //Screening logical
+  double epsScreen     = 1.0e-10; // screening constant
+  double epsConv       = 1.0e-7;  // average values used for screening a entire shell
+  int maxiter       = 50;         // Max number for figuring the cut off radius for a given shell (given an apsConv in radCut)
+  int nRadDFTGridPts_ = 100;     // Number of Radial grid points
+  int nAngDFTGridPts_ = 302;    // Number of Angular grid points
+  int ngpts;                   // Total Number of grid points
+  int nDer = 1 ; //Order of differenzation (In this case it will tell to compute also Del/mu
+  double val;  // tmp for loading mu(r) or Del mu(r)
+  double x;   // tmp r_x
+  double y;   // tmp r_y
+  double z;   // tmp r_z
+// End Parameters
   this->basisSet_->radcut(epsScreen, maxiter, epsConv);
   ngpts = nRadDFTGridPts_*nAngDFTGridPts_;  // Number of grid point for each center
   OneDGrid * Rad ;                              // Pointer for Radial Grid
   LebedevGrid GridLeb(nAngDFTGridPts_);   // Angular Grid
   Rad = new GaussChebyshev1stGridInf(nRadDFTGridPts_,0.0,1.0);   
   GridLeb.genGrid();                            
-// Figure where allocate those
+// Figure where allocate those  (RcrossDel_ is already created)
   std::unique_ptr<RealMatrix>  rdotpX;        ///< r cross p - X at grid point
   std::unique_ptr<RealMatrix>  rdotpY;        ///< r cross p - Y at grid point
   std::unique_ptr<RealMatrix>  rdotpZ;        ///< r cross p - Z at grid point
@@ -218,9 +229,6 @@ void AOIntegrals::computeAORcrossDel(){
   std::vector<RealSparseMatrix>  sparsedmudX_; ///< basis derivative (x) (NbasisxNbasis)
   std::vector<RealSparseMatrix>  sparsedmudY_; ///< basis derivative (y) (NbasisxNbasis)
   std::vector<RealSparseMatrix>  sparsedmudZ_; ///< basis derivative (z) (NbasisxNbasis) 
-  std::vector<RealSparseMatrix>  sparsemudotX_; ///< basis * (x) (NbasisxNbasis)
-  std::vector<RealSparseMatrix>  sparsemudotY_; ///< basis * (y) (NbasisxNbasis)
-  std::vector<RealSparseMatrix>  sparsemudotZ_; ///< basis * (z) (NbasisxNbasis) 
   std::vector<RealSparseMatrix> sparseMap_;     // BasisFunction Map 
   std::vector<RealSparseMatrix> sparseWeights_; // Weights Map
   std::vector<RealSparseMatrix> sparseDoRho_; // Evaluate density Map
@@ -232,17 +240,13 @@ void AOIntegrals::computeAORcrossDel(){
     sparsedmudX_.push_back(RealSparseMatrix(this->nTCS_*this->nBasis_,ngpts));
     sparsedmudY_.push_back(RealSparseMatrix(this->nTCS_*this->nBasis_,ngpts));
     sparsedmudZ_.push_back(RealSparseMatrix(this->nTCS_*this->nBasis_,ngpts));
-//  dipole like
+//  Mapping over iAtom
     RealSparseMatrix *Map        = &sparseMap_[iAtm];
     RealSparseMatrix *WeightsMap = &sparseWeights_[iAtm];
     RealSparseMatrix *DoRhoMap   = &sparseDoRho_[iAtm];
     RealSparseMatrix *MapdX      = &sparsedmudX_[iAtm];
     RealSparseMatrix *MapdY      = &sparsedmudY_[iAtm];
     RealSparseMatrix *MapdZ      = &sparsedmudZ_[iAtm];
-    double val;
-    double x;
-    double y;
-    double z;
     Rad->genGrid(); 
     Rad->atomGrid((elements[this->molecule_->index(iAtm)].sradius)) ;  
     TwoDGrid Raw3Dg(ngpts,Rad,&GridLeb);             
@@ -252,16 +256,15 @@ void AOIntegrals::computeAORcrossDel(){
       (*this->molecule_->cart())(2,iAtm)
     );
     for (auto ipts =0; ipts < ngpts; ipts++){
-      
       cartGP pt = Raw3Dg.gridPtCart(ipts); 
       auto mapRad_ = this->basisSet_->MapGridBasis(pt);
       // Evaluate each Becke fuzzy call weight, normalize it and muliply by 
       //   the Raw grid weight at that point
       auto bweight = (this->formBeckeW(pt,iAtm)) 
                      / (this->normBeckeW(pt)) ;
-            x = bg::get<0>(pt) ;
-            y = bg::get<1>(pt) ;
-            z = bg::get<2>(pt) ;
+      x = bg::get<0>(pt) ;
+      y = bg::get<1>(pt) ;
+      z = bg::get<2>(pt) ;
       if (screenVxc) {
         if (mapRad_[0] || (bweight < epsScreen)) continue;
         }
@@ -299,7 +302,7 @@ void AOIntegrals::computeAORcrossDel(){
              } //loop over basis (within a given ishell)
          } //loop over shells
 //            (*rdotpX) += (*WeightsMap).coeff(ipts,0)*(*Map).col(ipts)*(*Map).col(ipts).transpose();
-//          Figure how popupale RcrossDel_ tensor 
+//          Figure how populate RcrossDel_ tensor 
             (*rdotpX) +=  (*WeightsMap).coeff(ipts,0)*(
                           ( (*Map).col(ipts)*(*MapdZ).col(ipts).transpose()*y) -
                           ( (*Map).col(ipts)*(*MapdY).col(ipts).transpose()*z) );
@@ -315,18 +318,17 @@ void AOIntegrals::computeAORcrossDel(){
          DoRhoMap->insert(ipts,0) = 2;}
        }//End ipts
     }//End iAtm
-
+//       Finishing the numerical integration (int * 4*pi)
          (*rdotpX) *= 4.0*math.pi;
          (*rdotpY) *= 4.0*math.pi;
          (*rdotpZ) *= 4.0*math.pi;
+//       printing
          prettyPrint(cout,(*rdotpX),"Numeric <dipole vel> - x comp");
          prettyPrint(cout,(*rdotpY),"Numeric <dipole vel> - y comp");
          prettyPrint(cout,(*rdotpZ),"Numeric <dipole vel> - z comp");
-
-//end allocation
+//end for now (comment later)
   cout << "Call HERE " <<endl;
   CErr();
-
 } 
 
 void AOIntegrals::computeAOOneE(){
