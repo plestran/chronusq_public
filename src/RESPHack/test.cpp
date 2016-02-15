@@ -36,9 +36,12 @@ int main(int argc, char*argv[]){
 //cout << nAtoms << endl;
 
   molecule.setNAtoms(nAtoms);
-  // Neutral LiH
+  // Neutral Water
   molecule.setCharge(0);
-  molecule.setNTotalE(4);
+  molecule.setNTotalE(10);
+  // Neutral LiH
+//molecule.setCharge(0);
+//molecule.setNTotalE(4);
   // Neutral HF
 //molecule.setCharge(0);
 //molecule.setNTotalE(10);
