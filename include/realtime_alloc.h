@@ -44,7 +44,7 @@ void RealTime<T>::iniRealTime(FileIO *fileio, Controls *controls,
   this->Ez_             = this->controls_->rtField_[2];
   this->TOn_            = this->controls_->rtTOn_;
   this->TOff_           = this->controls_->rtTOff_;
-  this->Freq_          = this->controls_->rtFreq_;
+  this->Freq_           = this->controls_->rtFreq_;
   this->Phase_          = this->controls_->rtPhase_;
   this->Sigma_          = this->controls_->rtSigma_;
   this->printLevel_     = this->controls_->printLevel;
@@ -79,6 +79,7 @@ void RealTime<T>::initRTPtr(){
   this->uTransAMem_ = NULL;
   this->uTransBMem_ = NULL;
   this->scratchMem_ = NULL;
+  this->scratchMem2_ = NULL;
 
   this->REAL_LAPACK_SCR  = NULL;
   this->CMPLX_LAPACK_SCR = NULL;
@@ -101,6 +102,7 @@ void RealTime<T>::initMemLen(){
   this->lenUTransA_ = NTCSxNBASIS * NTCSxNBASIS;
   this->lenUTransB_ = NTCSxNBASIS * NTCSxNBASIS;
   this->lenScratch_ = NTCSxNBASIS * NTCSxNBASIS;
+  this->lenScratch2_ = NTCSxNBASIS * NTCSxNBASIS;
 
   this->lenScr_ = 0;
   
@@ -112,6 +114,7 @@ void RealTime<T>::initMemLen(){
   this->lenScr_ += this->lenInitMOA_; 
   this->lenScr_ += this->lenUTransA_; 
   this->lenScr_ += this->lenScratch_; 
+  this->lenScr_ += this->lenScratch2_; 
   if(!this->isClosedShell_ && this->Ref_ != SingleSlater<T>::TCS){
     this->lenScr_ += this->lenPOB_    ; 
     this->lenScr_ += this->lenPOBsav_ ; 
@@ -120,7 +123,7 @@ void RealTime<T>::initMemLen(){
     this->lenScr_ += this->lenUTransB_; 
   }
 
-  this->lWORK               =  NTCSxNBASIS * NTCSxNBASIS;
+  this->lWORK               =  NTCSxNBASIS*NTCSxNBASIS + 1;   // DSYEV/ZHEEV::LWORK 
   this->lenREAL_LAPACK_SCR  =  0;
   this->lenREAL_LAPACK_SCR  += NTCSxNBASIS * NTCSxNBASIS;   // DSYEV::A
   this->lenREAL_LAPACK_SCR  += NTCSxNBASIS;                 // DSYEV/ZHEEV::W
@@ -162,7 +165,8 @@ void RealTime<T>::initMem(){
   }
 
   this->scratchMem_      = LAST_OF_SECTION       + LEN_LAST_OF_SECTION;
-  this->CMPLX_LAPACK_SCR = this->scratchMem_     + this->lenScratch_;
+  this->scratchMem2_ = this->scratchMem_     + this->lenScratch_;
+  this->CMPLX_LAPACK_SCR = this->scratchMem2_     + this->lenScratch2_;
 
   this->REAL_LAPACK_SCR = new double[this->lenREAL_LAPACK_SCR];
 }

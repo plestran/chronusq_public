@@ -36,6 +36,8 @@
 namespace ChronusQ {
 template<typename T>
 class RealTime {
+  typedef Eigen::Matrix<T,Dynamic,Dynamic> TMat; 
+  typedef Eigen::Map<TMat> TMap;
   FileIO *        fileio_;
   Controls *      controls_;
   BasisSet *	  basisset_;
@@ -70,6 +72,7 @@ class RealTime {
   double stepSize_;	// Input step size
   double deltaT_;	// Actual step size
   long double currentTime_;	// Current time
+  int iRstrt_; // Number of iterations after which to restart MMUT
 
   bool	frozenNuc_;     // Whether to freeze nuclei
   bool  isClosedShell_;
@@ -91,6 +94,7 @@ class RealTime {
   dcomplex * uTransAMem_; // Unitary Transformation Matrix [exp(-i*dt*F)] Alpha
   dcomplex * uTransBMem_; // Unitary Transformation Matrix [exp(-i*dt*F)] Beta
   dcomplex * scratchMem_; // NBas x NBas scratch Matrix
+  dcomplex * scratchMem2_; // NBas x NBas scratch Matrix
 
   double   * REAL_LAPACK_SCR;
   dcomplex * CMPLX_LAPACK_SCR;
@@ -110,6 +114,7 @@ class RealTime {
   int lenUTransA_;
   int lenUTransB_;
   int lenScratch_;
+  int lenScratch2_;
 
   int lenREAL_LAPACK_SCR;
   int lenCMPLX_LAPACK_SCR;
@@ -189,6 +194,7 @@ public:
     this->nTCS_        = 1;
     this->maxSteps_    = 10;
     this->stepSize_    = 0.05;
+    this->iRstrt_      = 50;
     this->typeOrtho_   = Lowdin;
     this->initDensity_ = 0;
     this->swapMOA_     = 0;
@@ -279,6 +285,7 @@ public:
   // Setters
   inline void setMaxSteps(int i){ this->maxSteps_  = i;};
   inline void setStepSize(double i){ this->stepSize_ = i;};
+  inline void setIRstrt(int i){ this->iRstrt_ = i;};
   inline void setOrthoTyp(int i){ this->typeOrtho_ = i;};
   inline void setInitDen(int i){ this->initDensity_ = i;};
   inline void setSwapMOA(int i){ this->swapMOA_     = i;};
@@ -312,6 +319,7 @@ public:
   void printRT();
   void formUTrans();
   void doPropagation();
+  void doMcWeeny(ComplexMap &, int NE);
   void writeDipoleCSV(PropInfo & propInfo, long int & iStep);
   void writeAppliedFieldCSV(PropInfo & propInfo, long int & iStep);
   void writeMullikenCSV(PropInfo & propInfo, long int & iStep);
