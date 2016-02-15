@@ -24,9 +24,49 @@
  *  
  */
 template<typename T>
+void RealTime<T>::doMcWeeny(ComplexMap& P, int NE){
+  /*
+     Do several steps of McWeeny purification
+     P2 = P*P
+     P3 = P*P*P
+  */
+  auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
+  dcomplex scale = 0.0;  // scale factor so Tr(P) = number electrons
+  dcomplex RMS   = 0.0;  // RMS deviation from idempotency
+  double thresh = 1e-15; // Break if RMS idempotency below this value
+
+  ComplexMap P2(this->scratchMem_,NTCSxNBASIS,NTCSxNBASIS);
+  ComplexMap P3(this->scratchMem2_,NTCSxNBASIS,NTCSxNBASIS);
+
+  scale = dcomplex((double) NE,0)/P.trace(); // Trace(P) should equal number electrons
+  P     = scale * P;
+
+  // Do a couple purifications, McWeeny is quadraticly convergent
+  for (int i = 1; i < 5; i++) {  
+    P2 = P*P;
+    P3 = P2 - P;
+    // Do I need to scale RMS by number of basis functions? Currently is stronger criteria.
+    RMS = (std::sqrt(P3.frobInner(P3))); // RMS = sqrt( ( P2 - P )**2 ) 
+    if (std::abs(RMS) < thresh) break;
+    P3 = P*P2;
+    P = 3.0 * P2 - 2.0 * P3;
+  }
+
+  // Since Tr(P) = NE, but to be idempotent Tr(P) needs to be NAE for RHF
+  if (this->isClosedShell_) P = 2.0 * P;
+
+};
+
+
+template<typename T>
 void RealTime<T>::doPropagation(){
   long int iStep;
-  bool checkFP = false;
+  // FIXME: Need this->iRstrt_ keyword for RT input
+  bool Start;  // Start the MMUT iterations
+  bool FinMM;  // Wrap up the MMUT iterations
+  bool checkFP = false; // check commutator [F,P]
+  int NAE = this->ssPropagator_->nAE(); // number alpha electrons
+  int NBE = this->ssPropagator_->nBE(); // number beta eletrons
 
   currentTime_ = 0.0;
 
@@ -68,6 +108,41 @@ void RealTime<T>::doPropagation(){
   }
   for (iStep = 0; iStep <= this->maxSteps_; iStep++) {
 
+//  FIXME: Do we need to do MCWeeny before entering propagation?
+
+    if(getRank() == 0) {
+//    Logic for restart
+      if(this->iRstrt_ > 0) {
+        Start = (iStep == 0) || ((iStep % this->iRstrt_) == 0);
+        FinMM = ((iStep+1) % this->iRstrt_ == 0);
+      } else {
+        Start = (iStep == 0);
+        FinMM = (iStep == this->maxSteps_);
+      }
+
+//    Set up for initial entry into MMUT
+      if(Start) {
+        POAsav = POA;
+        if (!this->isClosedShell_ && this->Ref_ != SingleSlater<T>::TCS) {
+          POBsav  = POB;
+        }
+        deltaT_ = this->stepSize_;
+      } else { 
+//    Subsequent iterations of MMUT
+        scratch = POA;
+        POA     = POAsav;
+        POAsav  = scratch;
+        if (!this->isClosedShell_ && this->Ref_ != SingleSlater<T>::TCS) {
+          scratch = POB;
+          POB     = POBsav;
+          POBsav  = scratch;
+        }
+        deltaT_ = 2.0 * (this->stepSize_);
+        if(FinMM) deltaT_ = this->stepSize_; 
+      }
+    }
+/*
+//  This Logic is not correct for RT-TDSCF with MMUT
     if (iStep == 0) deltaT_ = this->stepSize_;
     else            deltaT_ = 2.0 * (this->stepSize_);
 
@@ -81,6 +156,7 @@ void RealTime<T>::doPropagation(){
         POBsav  = scratch;
       }
     }
+*/
 
 //  Form AO Fock matrix
     if(getRank() == 0) {
@@ -178,6 +254,22 @@ void RealTime<T>::doPropagation(){
       if (!this->isClosedShell_ && this->Ref_ != SingleSlater<T>::TCS) {
         scratch = POB;
         POB     = uTransB * scratch * uTransB.adjoint();
+      }
+
+//    FIXME: Do we need McWeeny at last MMUT iteration?
+//    Do McWeeny
+      if(FinMM) {
+        scratch = POA + POAsav;
+        POA = 0.5 * scratch;
+        if(this->Ref_ == SingleSlater<T>::TCS) NAE = this->ssPropagator_->molecule()->nTotalE(); 
+        this->doMcWeeny(POA,NAE);
+        POAsav = POA;
+        if (!this->isClosedShell_ && this->Ref_ != SingleSlater<T>::TCS) {
+          scratch = POB + POBsav;
+          POB = 0.5 * scratch;
+          this->doMcWeeny(POB,NBE);
+          POBsav = POB;
+        }
       }
      
 //    Transform density matrix from orthonormal to AO basis
