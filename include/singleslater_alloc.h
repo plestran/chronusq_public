@@ -85,6 +85,8 @@ void SingleSlater<T>::alloc(){
         start = std::chrono::high_resolution_clock::now();
       }
       this->genSparseBasisMap();
+//      this->genSparseRcrosP();
+//      CErr();
 //   Timing
       if(this->printLevel_ >= 3) {
         finish = std::chrono::high_resolution_clock::now();

@@ -385,7 +385,9 @@ void AOIntegrals::printOneE(){
   if(this->maxMultipole_ >= 3)
     for(auto i = 0, IOff=0; i < 10; i++,IOff+=NBSq)
       mat.push_back(RealMap(&this->elecOctpole_->storage()[IOff],NB,NB));
-  
+  if(this->isPrimary && this->maxNumInt_ >=1) 
+    for(auto i = 0, IOff=0; i < 3; i++,IOff+=NBSq)
+      mat.push_back(RealMap(&this->RcrossDel_->storage()[IOff],NB,NB));
   
   if(this->nTCS_ == 2){
     prettyPrintTCS(this->fileio_->out,(mat[0]),"Overlap");
@@ -414,6 +416,13 @@ void AOIntegrals::printOneE(){
       prettyPrintTCS(this->fileio_->out,(mat[21]),"Electric Octupole (yzz)");
       prettyPrintTCS(this->fileio_->out,(mat[22]),"Electric Octupole (zzz)");
     }
+/*
+    if(this->isPrimary && this->maxNumInt_ >=1){
+      prettyPrintTCS(this->fileio_->out,(mat[23]),"R cross Del (x)");
+      prettyPrintTCS(this->fileio_->out,(mat[24]),"R cross Del (y)");
+      prettyPrintTCS(this->fileio_->out,(mat[25]),"R cross Del (z)");
+    }
+*/
     prettyPrintTCS(this->fileio_->out,(mat[1]),"Kinetic");
     prettyPrintTCS(this->fileio_->out,(mat[2]),"Potential");
     prettyPrintTCS(this->fileio_->out,(mat[3]),"Core Hamiltonian");
@@ -444,6 +453,11 @@ void AOIntegrals::printOneE(){
       prettyPrint(this->fileio_->out,(mat[21]),"Electric Octupole (yzz)");
       prettyPrint(this->fileio_->out,(mat[22]),"Electric Octupole (zzz)");
     }
+    if(this->isPrimary && this->maxNumInt_ >=1){
+      prettyPrint(this->fileio_->out,(mat[23]),"R cross Del (x)");
+      prettyPrint(this->fileio_->out,(mat[24]),"R cross Del (y)");
+      prettyPrint(this->fileio_->out,(mat[25]),"R cross Del (z)");
+    }
     prettyPrint(this->fileio_->out,(mat[1]),"Kinetic");
     prettyPrint(this->fileio_->out,(mat[2]),"Potential");
     prettyPrint(this->fileio_->out,(mat[3]),"Core Hamiltonian");
@@ -461,6 +475,7 @@ void AOIntegrals::alloc(){
     this->quartetConstants_ = std::unique_ptr<QuartetConstants>(new QuartetConstants);
  
     if(this->isPrimary) this->fileio_->iniStdOpFiles(this->nTCS_*this->basisSet_->nBasis());
+    if(this->isPrimary && this->maxNumInt_ >=1) this->allocNumInt();
   }
 #ifdef CQ_ENABLE_MPI
   MPI_Barrier(MPI_COMM_WORLD);
@@ -574,6 +589,19 @@ void AOIntegrals::allocMultipole(){
 
   } catch(...) {
     CErr(std::current_exception(),"Multipole Tensor Allocation");
+  }
+}
+
+void AOIntegrals::allocNumInt(){
+  auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
+  try {
+
+      this->RcrossDel_ = std::unique_ptr<RealTensor3d>(
+        new RealTensor3d(NTCSxNBASIS,NTCSxNBASIS,3)
+      );
+
+  } catch(...) {
+    CErr(std::current_exception(),"R cross Del Tensor Allocation");
   }
 }
 
