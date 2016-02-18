@@ -270,4 +270,9 @@ void SingleSlater<dcomplex>::writeSCFFiles(){
     );
   }
 }
+
+template<>
+void SingleSlater<dcomplex>::fixPhase(){
+  // FIXME: Do nothing for now
+};
 } // Namespace ChronusQ
