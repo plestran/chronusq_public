@@ -5,6 +5,7 @@
 using namespace ChronusQ;
 
 int main(int argc, char*argv[]){
+  cout << "HERE" << endl;
   auto inputXYZName = argv[1];
   Molecule molecule;
   BasisSet basis;
@@ -36,9 +37,15 @@ int main(int argc, char*argv[]){
 //cout << nAtoms << endl;
 
   molecule.setNAtoms(nAtoms);
-  // Neutral Water
+  // Hydrogen
   molecule.setCharge(0);
-  molecule.setNTotalE(10);
+  molecule.setNTotalE(2);
+  // Neutral HCN
+//molecule.setCharge(0);
+//molecule.setNTotalE(14);
+  // Neutral Water
+//molecule.setCharge(0);
+//molecule.setNTotalE(10);
   // Neutral LiH
 //molecule.setCharge(0);
 //molecule.setNTotalE(4);
@@ -80,7 +87,8 @@ int main(int argc, char*argv[]){
   singleSlater.setRef(SingleSlater<double>::RHF);
   singleSlater.isClosedShell = true;
 
-  basis.findBasisFile("cc-pVDZ");
+//basis.findBasisFile("cc-pVDZ");
+  basis.findBasisFile("3-21G");
   basis.communicate(fileio);
   basis.parseGlobal();
   basis.constructLocal(&molecule);
@@ -112,7 +120,8 @@ int main(int argc, char*argv[]){
 //resp.setMeth(RESPONSE_TYPE::PPTDA);
   resp.setMeth(RESPONSE_TYPE::CIS);
   resp.doSA();
-  resp.setNSek(8);
+  int nFreq = 3;
+  resp.setNSek(nFreq);
   resp.doFull();
   resp.doResponse();
 
@@ -121,13 +130,13 @@ int main(int argc, char*argv[]){
 
   H5::H5File outfile(std::string(basename(inputXYZName)) + ".bin",H5F_ACC_TRUNC);
 
-  hsize_t dimFreq[] = {8,1};
+  hsize_t dimFreq[] = {nFreq,1};
   H5::DataSpace space(2,dimFreq,NULL);
 
   H5::DataSet dataSet = outfile.createDataSet("Freq",H5::PredType::NATIVE_DOUBLE,space); 
   dataSet.write(freq.data(),H5::PredType::NATIVE_DOUBLE,space);
 
-  hsize_t dimDen[] = {8,den.rows()};
+  hsize_t dimDen[] = {nFreq,den.rows()};
   H5::DataSpace spaceDen(2,dimDen,NULL);
 
   H5::DataSet dataSetDen = outfile.createDataSet("Den",H5::PredType::NATIVE_DOUBLE,spaceDen);
