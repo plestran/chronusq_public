@@ -313,7 +313,10 @@ void SingleSlater<T>::SCF(){
   delete [] this->SCF_SCR;
   delete [] this->REAL_SCF_SCR;
 */
-  if(getRank() == 0) this->cleanupSCFMem();
+  if(getRank() == 0){
+    this->cleanupSCFMem();
+    this->fixPhase();
+  }
 
   if(!this->isConverged && getRank() == 0)
     CErr("SCF Failed to converge within maximum number of iterations",this->fileio_->out);
