@@ -226,6 +226,7 @@ class SingleSlater {
   double eneTol_;
   int maxSCFIter_;
   int maxMultipole_;
+  bool  fixPhase_;
 
   int printLevel_;
 
@@ -439,6 +440,7 @@ public:
     this->doDIIS       = true;
     this->isHF         = true;
     this->isDFT         = false;
+    this->fixPhase_     = true;
     this->guess_       = SAD;
 
     this->weightScheme_ = BECKE;
@@ -640,6 +642,7 @@ public:
   void CpyFock(int);
   void GenDComm(int);
   void mullikenPop();
+  void fixPhase();
 
   void printEnergy(); 
   void printMultipole();

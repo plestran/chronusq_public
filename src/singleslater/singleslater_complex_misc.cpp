@@ -270,4 +270,10 @@ void SingleSlater<dcomplex>::writeSCFFiles(){
     );
   }
 }
+
+template<>
+void SingleSlater<dcomplex>::fixPhase(){
+   Eigen::VectorXd maxVals = 
+     this->moA_->cwiseAbs().colwise().maxCoeff();
+};
 } // Namespace ChronusQ
