@@ -6,13 +6,15 @@ using namespace ChronusQ;
 std::string genFName(double,double,int,int,std::string);
 Eigen::VectorXd checkPhase(double*,double*,int,int);
 RealMatrix genSpx(BasisSet&,BasisSet&);
+
 std::vector<Eigen::VectorXd> ES_GS_NACME(int,bool,int,int,double,
-  double,RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,
-  RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&);
+  double,RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,
+  RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,
+  RealMatrix&);
 std::vector<Eigen::VectorXd> GS_ES_NACME(int,bool,int,int,double,
-  double,RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,
-  RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,
-  RealMatrix&,RealMatrix&);
+  double,RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,
+  RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,
+  RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&);
 
 template<typename Derived>
 double diffNorm( const Derived &A, const Derived &B ){
@@ -29,7 +31,8 @@ double selfInner( const Derived &A){
 
 
 
-void twoDScan(std::vector<double>& scanX, std::vector<double>& scanY){
+void twoDScan(std::vector<double>& scanX, 
+              std::vector<double>& scanY){
 
   std::string PREFIX = "H20";
   std::string BINPREFIX = "BIN";
@@ -53,11 +56,16 @@ void twoDScan(std::vector<double>& scanX, std::vector<double>& scanY){
     cout << bannerTop << endl;
     cout << "Starting Numerical Differentiation for:" << endl;
     cout << "  IX = " << IX << "  JY = " << JY << endl;
-    FileIO fileio_00("test_00.inp",PREFIX+".out_00",PREFIX+".rst_00");
-    FileIO fileio_p0("test_p0.inp",PREFIX+".out_p0",PREFIX+".rst_p0");
-    FileIO fileio_m0("test_m0.inp",PREFIX+".out_m0",PREFIX+".rst_m0");
-    FileIO fileio_0p("test_0p.inp",PREFIX+".out_0p",PREFIX+".rst_0p");
-    FileIO fileio_0m("test_0m.inp",PREFIX+".out_0m",PREFIX+".rst_0m");
+    FileIO fileio_00("test_00.inp",PREFIX+".out_00",
+      PREFIX+".rst_00");
+    FileIO fileio_p0("test_p0.inp",PREFIX+".out_p0",
+      PREFIX+".rst_p0");
+    FileIO fileio_m0("test_m0.inp",PREFIX+".out_m0",
+      PREFIX+".rst_m0");
+    FileIO fileio_0p("test_0p.inp",PREFIX+".out_0p",
+      PREFIX+".rst_0p");
+    FileIO fileio_0m("test_0m.inp",PREFIX+".out_0m",
+      PREFIX+".rst_0m");
 
     fileio_00.iniH5Files();
     fileio_p0.iniH5Files();
@@ -388,11 +396,16 @@ void twoDScan(std::vector<double>& scanX, std::vector<double>& scanY){
     ss_0p.communicate(geom_0p,basis0p,aoints_0p,fileio_0p,controls);
     ss_0m.communicate(geom_0m,basis0m,aoints_0m,fileio_0m,controls);
 
-    moints_00.communicate(geom_00,basis00,fileio_00,controls,aoints_00, ss_00);
-    moints_p0.communicate(geom_p0,basisp0,fileio_p0,controls,aoints_p0, ss_p0);
-    moints_m0.communicate(geom_m0,basism0,fileio_m0,controls,aoints_m0, ss_m0);
-    moints_0p.communicate(geom_0p,basis0p,fileio_0p,controls,aoints_0p, ss_0p);
-    moints_0m.communicate(geom_0m,basis0m,fileio_0m,controls,aoints_0m, ss_0m);
+    moints_00.communicate(geom_00,basis00,fileio_00,controls,
+      aoints_00, ss_00);
+    moints_p0.communicate(geom_p0,basisp0,fileio_p0,controls,
+      aoints_p0, ss_p0);
+    moints_m0.communicate(geom_m0,basism0,fileio_m0,controls,
+      aoints_m0, ss_m0);
+    moints_0p.communicate(geom_0p,basis0p,fileio_0p,controls,
+      aoints_0p, ss_0p);
+    moints_0m.communicate(geom_0m,basis0m,fileio_0m,controls,
+      aoints_0m, ss_0m);
     
     aoints_00.initMeta();
     aoints_p0.initMeta();
@@ -494,10 +507,18 @@ void twoDScan(std::vector<double>& scanX, std::vector<double>& scanY){
       cout << endl;
       cout << "  Checking | C - C' | Before Phase Check:" << endl;
       
-      cout << "  | C(X,Y) - C(X+DX,Y) | = " << diffNorm((*ss_00.moA()),(*ss_p0.moA())) << endl;  
-      cout << "  | C(X,Y) - C(X-DX,Y) | = " << diffNorm((*ss_00.moA()),(*ss_m0.moA())) << endl;  
-      cout << "  | C(X,Y) - C(X,Y+DY) | = " << diffNorm((*ss_00.moA()),(*ss_0p.moA())) << endl;  
-      cout << "  | C(X,Y) - C(X,Y-DY) | = " << diffNorm((*ss_00.moA()),(*ss_0m.moA())) << endl;  
+      cout << "  | C(X,Y) - C(X+DX,Y) | = " 
+           << diffNorm((*ss_00.moA()),(*ss_p0.moA())) 
+           << endl;  
+      cout << "  | C(X,Y) - C(X-DX,Y) | = " 
+           << diffNorm((*ss_00.moA()),(*ss_m0.moA())) 
+           << endl;  
+      cout << "  | C(X,Y) - C(X,Y+DY) | = " 
+           << diffNorm((*ss_00.moA()),(*ss_0p.moA())) 
+           << endl;  
+      cout << "  | C(X,Y) - C(X,Y-DY) | = " 
+           << diffNorm((*ss_00.moA()),(*ss_0m.moA())) 
+           << endl;  
     }
 
 
@@ -541,10 +562,14 @@ void twoDScan(std::vector<double>& scanX, std::vector<double>& scanY){
     Eigen::VectorXd Trans_mo_0m;
     Eigen::VectorXd Trans_mo_p0;
     Eigen::VectorXd Trans_mo_m0;
-    Trans_mo_p0 = checkPhase(ss_00.moA()->data(),ss_p0.moA()->data(),basis00.nBasis(),basis00.nBasis());
-    Trans_mo_m0 = checkPhase(ss_00.moA()->data(),ss_m0.moA()->data(),basis00.nBasis(),basis00.nBasis());
-    Trans_mo_0p = checkPhase(ss_00.moA()->data(),ss_0p.moA()->data(),basis00.nBasis(),basis00.nBasis());
-    Trans_mo_0m = checkPhase(ss_00.moA()->data(),ss_0m.moA()->data(),basis00.nBasis(),basis00.nBasis());
+    Trans_mo_p0 = checkPhase(ss_00.moA()->data(),
+      ss_p0.moA()->data(),basis00.nBasis(),basis00.nBasis());
+    Trans_mo_m0 = checkPhase(ss_00.moA()->data(),
+      ss_m0.moA()->data(),basis00.nBasis(),basis00.nBasis());
+    Trans_mo_0p = checkPhase(ss_00.moA()->data(),
+      ss_0p.moA()->data(),basis00.nBasis(),basis00.nBasis());
+    Trans_mo_0m = checkPhase(ss_00.moA()->data(),
+      ss_0m.moA()->data(),basis00.nBasis(),basis00.nBasis());
 */
 
     RealMatrix O_00_p0(SMO_00_p0);
@@ -581,10 +606,18 @@ void twoDScan(std::vector<double>& scanX, std::vector<double>& scanY){
       cout << endl;
       cout << "  Checking | C - C' | After Phase Check:" << endl;
       
-      cout << "  | C(X,Y) - C(X+DX,Y) | = " << diffNorm((*ss_00.moA()),(*ss_p0.moA())) << endl;  
-      cout << "  | C(X,Y) - C(X-DX,Y) | = " << diffNorm((*ss_00.moA()),(*ss_m0.moA())) << endl;  
-      cout << "  | C(X,Y) - C(X,Y+DY) | = " << diffNorm((*ss_00.moA()),(*ss_0p.moA())) << endl;  
-      cout << "  | C(X,Y) - C(X,Y-DY) | = " << diffNorm((*ss_00.moA()),(*ss_0m.moA())) << endl;  
+      cout << "  | C(X,Y) - C(X+DX,Y) | = " 
+           << diffNorm((*ss_00.moA()),(*ss_p0.moA())) 
+           << endl;  
+      cout << "  | C(X,Y) - C(X-DX,Y) | = " 
+           << diffNorm((*ss_00.moA()),(*ss_m0.moA())) 
+           << endl;  
+      cout << "  | C(X,Y) - C(X,Y+DY) | = " 
+           << diffNorm((*ss_00.moA()),(*ss_0p.moA())) 
+           << endl;  
+      cout << "  | C(X,Y) - C(X,Y-DY) | = " 
+           << diffNorm((*ss_00.moA()),(*ss_0m.moA())) 
+           << endl;  
     }
 
     if(debug){
@@ -604,20 +637,39 @@ void twoDScan(std::vector<double>& scanX, std::vector<double>& scanY){
 
       // Quantify deviation from C**H * S * C = I
       cout << endl;
-      cout << "  Checking | C(X)**H * S(X,X') * C(X') - I |:" << endl;
+      cout << "  Checking | C(X)**H * S(X,X') * C(X') - I |:" 
+           << endl;
      
-      cout << "  < (X,Y) | (X,Y) >       = " << diffNormI(SMO_00_00) << endl;
-      cout << "  < (X+DX,Y) | (X+DX,Y) > = " << diffNormI(SMO_p0_p0) << endl;
-      cout << "  < (X-DX,Y) | (X-DX,Y) > = " << diffNormI(SMO_m0_m0) << endl;
-      cout << "  < (X,Y+DY) | (X,Y+DY) > = " << diffNormI(SMO_0p_0p) << endl;
-      cout << "  < (X,Y-DY) | (X,Y-DY) > = " << diffNormI(SMO_0m_0m) << endl;
+      cout << "  < (X,Y) | (X,Y) >       = " 
+           << diffNormI(SMO_00_00) 
+           << endl;
+      cout << "  < (X+DX,Y) | (X+DX,Y) > = " 
+           << diffNormI(SMO_p0_p0) 
+           << endl;
+      cout << "  < (X-DX,Y) | (X-DX,Y) > = " 
+           << diffNormI(SMO_m0_m0) 
+           << endl;
+      cout << "  < (X,Y+DY) | (X,Y+DY) > = " 
+           << diffNormI(SMO_0p_0p) 
+           << endl;
+      cout << "  < (X,Y-DY) | (X,Y-DY) > = " 
+           << diffNormI(SMO_0m_0m) 
+           << endl;
      
      
      
-      cout << "  < (X,Y) | (X+DX,Y) >    = " << diffNormI(SMO_00_p0) << endl;
-      cout << "  < (X,Y) | (X-DX,Y) >    = " << diffNormI(SMO_00_m0) << endl;
-      cout << "  < (X,Y) | (X,Y+DY) >    = " << diffNormI(SMO_00_0p) << endl;
-      cout << "  < (X,Y) | (X,Y-DY) >    = " << diffNormI(SMO_00_0m) << endl;
+      cout << "  < (X,Y) | (X+DX,Y) >    = " 
+           << diffNormI(SMO_00_p0) 
+           << endl;
+      cout << "  < (X,Y) | (X-DX,Y) >    = " 
+           << diffNormI(SMO_00_m0) 
+           << endl;
+      cout << "  < (X,Y) | (X,Y+DY) >    = " 
+           << diffNormI(SMO_00_0p) 
+           << endl;
+      cout << "  < (X,Y) | (X,Y-DY) >    = " 
+           << diffNormI(SMO_00_0m) 
+           << endl;
     }
 
     moints_00.initMeta();
@@ -708,16 +760,23 @@ void twoDScan(std::vector<double>& scanX, std::vector<double>& scanY){
       cout << endl << "  Excitation Frequencies:" << endl;
      
       for(auto iSt = 0; iSt < nFreq; iSt++){
-        cout << "  W(" << iSt << ") (X,Y):    " << std::setprecision(8) 
-             << freq_00[iSt] << " Eh" << endl;
-        cout << "  W(" << iSt << ") (X+DX,Y): " << std::setprecision(8) 
-             << freq_p0[iSt] << " Eh" << endl;
-        cout << "  W(" << iSt << ") (X-DX,Y): " << std::setprecision(8) 
-             << freq_m0[iSt] << " Eh" << endl;
-        cout << "  W(" << iSt << ") (X,Y+DY): " << std::setprecision(8) 
-             << freq_0p[iSt] << " Eh" << endl;
-        cout << "  W(" << iSt << ") (X,Y-DY): " << std::setprecision(8) 
-             << freq_0m[iSt] << " Eh" << endl;
+        cout << "  W(" << iSt << ") (X,Y):    " 
+             << std::setprecision(8) << freq_00[iSt] << " Eh" 
+             << endl;
+        cout << "  W(" << iSt << ") (X+DX,Y): " 
+             << std::setprecision(8) << freq_p0[iSt] << " Eh" 
+             << endl;
+        cout << "  W(" << iSt << ") (X-DX,Y): " 
+             << std::setprecision(8) << freq_m0[iSt] << " Eh" 
+             << endl;
+        cout << "  W(" << iSt << ") (X,Y+DY): " 
+             << std::setprecision(8) << freq_0p[iSt] << " Eh" 
+             << endl;
+        cout << "  W(" << iSt << ") (X,Y-DY): " 
+             << std::setprecision(8) << freq_0m[iSt] << " Eh" 
+             << endl;
+
+
         cout << endl;
       }
     }
@@ -726,11 +785,16 @@ void twoDScan(std::vector<double>& scanX, std::vector<double>& scanY){
 
 
 
-    RealMatrix T_00 = resp_00.transDen()[0].block(0,0,resp_00.nMatDim()[0],nFreq);
-    RealMatrix T_p0 = resp_p0.transDen()[0].block(0,0,resp_p0.nMatDim()[0],nFreq);
-    RealMatrix T_m0 = resp_m0.transDen()[0].block(0,0,resp_m0.nMatDim()[0],nFreq);
-    RealMatrix T_0p = resp_0p.transDen()[0].block(0,0,resp_0p.nMatDim()[0],nFreq);
-    RealMatrix T_0m = resp_0m.transDen()[0].block(0,0,resp_0m.nMatDim()[0],nFreq);
+    RealMatrix T_00 = resp_00.transDen()[0].block(0,0,
+      resp_00.nMatDim()[0],nFreq);
+    RealMatrix T_p0 = resp_p0.transDen()[0].block(0,0,
+      resp_p0.nMatDim()[0],nFreq);
+    RealMatrix T_m0 = resp_m0.transDen()[0].block(0,0,
+      resp_m0.nMatDim()[0],nFreq);
+    RealMatrix T_0p = resp_0p.transDen()[0].block(0,0,
+      resp_0p.nMatDim()[0],nFreq);
+    RealMatrix T_0m = resp_0m.transDen()[0].block(0,0,
+      resp_0m.nMatDim()[0],nFreq);
 
 
 
@@ -738,10 +802,14 @@ void twoDScan(std::vector<double>& scanX, std::vector<double>& scanY){
       cout << endl;
       cout << "  Checking | T - T' | Before Phase Check:" << endl;
       
-      cout << "  | T(X,Y) - T(X+DX,Y) | = " << diffNorm(T_00,T_p0) << endl;  
-      cout << "  | T(X,Y) - T(X-DX,Y) | = " << diffNorm(T_00,T_m0) << endl;  
-      cout << "  | T(X,Y) - T(X,Y+DY) | = " << diffNorm(T_00,T_0p) << endl;  
-      cout << "  | T(X,Y) - T(X,Y-DY) | = " << diffNorm(T_00,T_0m) << endl;  
+      cout << "  | T(X,Y) - T(X+DX,Y) | = " << diffNorm(T_00,T_p0) 
+           << endl;  
+      cout << "  | T(X,Y) - T(X-DX,Y) | = " << diffNorm(T_00,T_m0) 
+           << endl;  
+      cout << "  | T(X,Y) - T(X,Y+DY) | = " << diffNorm(T_00,T_0p) 
+           << endl;  
+      cout << "  | T(X,Y) - T(X,Y-DY) | = " << diffNorm(T_00,T_0m) 
+           << endl;  
     }
 
 
@@ -749,31 +817,49 @@ void twoDScan(std::vector<double>& scanX, std::vector<double>& scanY){
     Eigen::VectorXd Trans_t_0m;
     Eigen::VectorXd Trans_t_p0;
     Eigen::VectorXd Trans_t_m0;
-    Trans_t_p0 = checkPhase(T_00.data(),T_p0.data(),resp_p0.nMatDim()[0],nFreq);
-    Trans_t_m0 = checkPhase(T_00.data(),T_m0.data(),resp_m0.nMatDim()[0],nFreq);
-    Trans_t_0p = checkPhase(T_00.data(),T_0p.data(),resp_0p.nMatDim()[0],nFreq);
-    Trans_t_0m = checkPhase(T_00.data(),T_0m.data(),resp_0m.nMatDim()[0],nFreq);
+    Trans_t_p0 = checkPhase(T_00.data(),T_p0.data(),
+      resp_p0.nMatDim()[0],nFreq);
+    Trans_t_m0 = checkPhase(T_00.data(),T_m0.data(),
+      resp_m0.nMatDim()[0],nFreq);
+    Trans_t_0p = checkPhase(T_00.data(),T_0p.data(),
+      resp_0p.nMatDim()[0],nFreq);
+    Trans_t_0m = checkPhase(T_00.data(),T_0m.data(),
+      resp_0m.nMatDim()[0],nFreq);
 
 
     if(debug){
       cout << endl;
       cout << "  Checking | T - T' | After Phase Check:" << endl;
       
-      cout << "  | T(X,Y) - T(X+DX,Y) | = " << diffNorm(T_00,T_p0) << endl;  
-      cout << "  | T(X,Y) - T(X-DX,Y) | = " << diffNorm(T_00,T_m0) << endl;  
-      cout << "  | T(X,Y) - T(X,Y+DY) | = " << diffNorm(T_00,T_0p) << endl;  
-      cout << "  | T(X,Y) - T(X,Y-DY) | = " << diffNorm(T_00,T_0m) << endl;  
+      cout << "  | T(X,Y) - T(X+DX,Y) | = " << diffNorm(T_00,T_p0) 
+           << endl;  
+      cout << "  | T(X,Y) - T(X-DX,Y) | = " << diffNorm(T_00,T_m0) 
+           << endl;  
+      cout << "  | T(X,Y) - T(X,Y+DY) | = " << diffNorm(T_00,T_0p) 
+           << endl;  
+      cout << "  | T(X,Y) - T(X,Y-DY) | = " << diffNorm(T_00,T_0m) 
+           << endl;  
     }
 
     if(debug) {
       cout << endl << " Checking < T | T > = 1 " << endl;
       for(auto iSt = 0; iSt < nFreq; iSt++){
         cout << "   State " << iSt << ":" << endl;
-        cout << "    < T(X,Y) | T(X,Y) >       = " << selfInner(T_00.col(iSt)) << endl;
-        cout << "    < T(X+DX,Y) | T(X+DX,Y) > = " << selfInner(T_p0.col(iSt)) << endl;
-        cout << "    < T(X-DX,Y) | T(X-DX,Y) > = " << selfInner(T_m0.col(iSt)) << endl;
-        cout << "    < T(X,Y+DY) | T(X,Y+DY) > = " << selfInner(T_0p.col(iSt)) << endl;
-        cout << "    < T(X,Y-DY) | T(X,Y-DY) > = " << selfInner(T_0m.col(iSt)) << endl;
+        cout << "    < T(X,Y) | T(X,Y) >       = " 
+             << selfInner(T_00.col(iSt)) 
+             << endl;
+        cout << "    < T(X+DX,Y) | T(X+DX,Y) > = " 
+             << selfInner(T_p0.col(iSt)) 
+             << endl;
+        cout << "    < T(X-DX,Y) | T(X-DX,Y) > = " 
+             << selfInner(T_m0.col(iSt)) 
+             << endl;
+        cout << "    < T(X,Y+DY) | T(X,Y+DY) > = " 
+             << selfInner(T_0p.col(iSt)) 
+             << endl;
+        cout << "    < T(X,Y-DY) | T(X,Y-DY) > = " 
+             << selfInner(T_0m.col(iSt)) 
+             << endl;
       }
     }
 
@@ -1004,9 +1090,9 @@ RealMatrix genSpx(BasisSet &obs1, BasisSet &obs2){
 };
 std::vector<Eigen::VectorXd> ES_GS_NACME(int nFreq,bool renorm,
   int nocc, int nvir, double step1, double step2, RealMatrix &T_00, 
-  RealMatrix &MO_00, RealMatrix &MO_p0, RealMatrix &MO_m0, RealMatrix &MO_0p, 
-  RealMatrix &MO_0m, RealMatrix &S_00_p0, RealMatrix &S_00_m0,
-  RealMatrix &S_00_0p, RealMatrix &S_00_0m){
+  RealMatrix &MO_00, RealMatrix &MO_p0, RealMatrix &MO_m0, 
+  RealMatrix &MO_0p, RealMatrix &MO_0m, RealMatrix &S_00_p0, 
+  RealMatrix &S_00_m0, RealMatrix &S_00_0p, RealMatrix &S_00_0m){
 
   std::vector<Eigen::VectorXd> NACME(2,Eigen::VectorXd(nFreq));
 
@@ -1069,10 +1155,11 @@ std::vector<Eigen::VectorXd> ES_GS_NACME(int nFreq,bool renorm,
 
 std::vector<Eigen::VectorXd> GS_ES_NACME(int nFreq,bool renorm,
   int nocc, int nvir, double step1, double step2, RealMatrix &T_00, 
-  RealMatrix &T_p0, RealMatrix &T_m0, RealMatrix &T_0p, RealMatrix &T_0m,
-  RealMatrix &MO_00, RealMatrix &MO_p0, RealMatrix &MO_m0, RealMatrix &MO_0p, 
-  RealMatrix &MO_0m, RealMatrix &S_00_p0, RealMatrix &S_00_m0,
-  RealMatrix &S_00_0p, RealMatrix &S_00_0m){
+  RealMatrix &T_p0, RealMatrix &T_m0, RealMatrix &T_0p, 
+  RealMatrix &T_0m, RealMatrix &MO_00, RealMatrix &MO_p0, 
+  RealMatrix &MO_m0, RealMatrix &MO_0p, RealMatrix &MO_0m, 
+  RealMatrix &S_00_p0, RealMatrix &S_00_m0, RealMatrix &S_00_0p, 
+  RealMatrix &S_00_0m){
 
   std::vector<Eigen::VectorXd> NACME(2,Eigen::VectorXd(nFreq));
 
