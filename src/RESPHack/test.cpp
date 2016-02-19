@@ -38,14 +38,14 @@ int main(int argc, char*argv[]){
 
   molecule.setNAtoms(nAtoms);
   // Hydrogen
-  molecule.setCharge(0);
-  molecule.setNTotalE(2);
+//molecule.setCharge(0);
+//molecule.setNTotalE(2);
   // Neutral HCN
 //molecule.setCharge(0);
 //molecule.setNTotalE(14);
   // Neutral Water
-//molecule.setCharge(0);
-//molecule.setNTotalE(10);
+  molecule.setCharge(0);
+  molecule.setNTotalE(10);
   // Neutral LiH
 //molecule.setCharge(0);
 //molecule.setNTotalE(4);
@@ -87,8 +87,8 @@ int main(int argc, char*argv[]){
   singleSlater.setRef(SingleSlater<double>::RHF);
   singleSlater.isClosedShell = true;
 
-//basis.findBasisFile("cc-pVDZ");
-  basis.findBasisFile("3-21G");
+  basis.findBasisFile("cc-pVDZ");
+//basis.findBasisFile("3-21G");
   basis.communicate(fileio);
   basis.parseGlobal();
   basis.constructLocal(&molecule);
@@ -120,7 +120,7 @@ int main(int argc, char*argv[]){
 //resp.setMeth(RESPONSE_TYPE::PPTDA);
   resp.setMeth(RESPONSE_TYPE::CIS);
   resp.doSA();
-  int nFreq = 3;
+  int nFreq = 8;
   resp.setNSek(nFreq);
   resp.doFull();
   resp.doResponse();

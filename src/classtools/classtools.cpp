@@ -403,6 +403,24 @@ void initCQ(int argc, char** argv){
 #endif
 }
 
+void initCQ(){
+#ifdef USE_LIBINT
+  // Bootstrap Libint env
+  libint2::init(); 
+#endif
+#ifdef _OPENMP
+  // Set up Thread Pool (Default serial)
+  omp_set_num_threads(1);
+#endif
+#ifdef CQ_ENABLE_MPI
+  int flag;
+  MPI_Initialized(&flag);
+  if(flag) return;
+  MPI_Init(NULL,NULL);
+  MPI_Barrier(MPI_COMM_WORLD);
+#endif
+}
+
 void finalizeCQ(){
   // Cleanup Libint env
 #ifdef USE_LIBINT

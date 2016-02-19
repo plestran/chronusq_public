@@ -46,6 +46,7 @@ void printUnitInfo(Controls *, SingleSlater<double> *, SDResponse<double> *, Rea
 void printUnitInfo(Controls *, SingleSlater<dcomplex> *, SDResponse<double> *, RealTime<dcomplex> *);
 
 void initCQ(int argc, char **argv);
+void initCQ();
 void finalizeCQ();
 template<typename T> void writeJobMeta(SingleSlater<T>&,SDResponse<T>&,
   RealTime<T>&,Molecule&,AOIntegrals&,FileIO&);

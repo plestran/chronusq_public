@@ -265,13 +265,11 @@ void SingleSlater<double>::writeSCFFiles(){
 template<>
 void SingleSlater<double>::fixPhase(){
    RealMatrix::Index maxIndex;
-
    for(auto iCol = 0; iCol < this->moA_->cols(); iCol++){
      this->moA_->col(iCol).cwiseAbs().maxCoeff(&maxIndex);
      if(this->moA_->col(iCol)(maxIndex) < 0)
        this->moA_->col(iCol) *= -1;
    }
-  
 };
 
 } // Namespace ChronusQ
