@@ -131,6 +131,199 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
     mat[nMat] = mat[nMat].selfadjointView<Lower>();
 }
 
+double AOIntegrals::formBeckeW(cartGP gridPt, int iAtm){
+//     Generate Frisch (not-normalized yet) Weights (if frischW) according to the partition schems in
+//     (Chem. Phys. Let., 257, 213-223 (1996)) using Eq. 11 and 14
+//     Note these Weights have to be normailzed 
+//     Generate Becke not-normalized Weights (if becke) according to the partition schems in
+//     (J. Chem. Phys., 88 (4),2457 (1988)) using Voronoii Fuzzi Cells
+//     Note these Weights have to be normailzed (see normBeckeW) 
+       int nAtom = this->molecule_->nAtoms();
+       double WW = 1.0;
+       double tmp;
+       double muij;   ///< elliptical coordinate (ri -rj / Rij)
+       cartGP rj;     ///< Cartisian position of Atom j
+       cartGP ri;     ///< Cartisian position of Atom i
+       ri.set<0>((*this->molecule_->cart())(0,iAtm) );
+       ri.set<1>((*this->molecule_->cart())(1,iAtm) );
+       ri.set<2>((*this->molecule_->cart())(2,iAtm) );
+       for(auto jAtm = 0; jAtm < nAtom; jAtm++){
+         if(jAtm != iAtm){
+           muij = 0.0;
+//       Vector rj (Atoms (j.ne.i) position)
+           rj.set<0>((*this->molecule_->cart())(0,jAtm));
+           rj.set<1>((*this->molecule_->cart())(1,jAtm));
+           rj.set<2>((*this->molecule_->cart())(2,jAtm));
+//       Coordinate of the Grid point in elleptical (Eq. 11) 
+           muij = (boost::geometry::distance(gridPt,ri) - 
+                   boost::geometry::distance(gridPt,rj))/
+                   (*this->molecule_->rIJ())(iAtm,jAtm) ;
+//       Do the product over all atoms i .ne. j (Eq. 13 using definition Eq. 21 with k=3)
+////           if (weightScheme_ == FRISCH) 
+////             WW *= 0.5*(1.0-this->twodgrid_->frischpol(muij,0.64));
+////           else if (weightScheme_ == BECKE)  
+             WW *= 0.5 * 
+                   (1.0-this->twodgrid_->voronoii(
+                          this->twodgrid_->voronoii(
+                            this->twodgrid_->voronoii(muij))));
+           }
+         }
+       return WW;
+}; //End formBeckeW
+
+
+double AOIntegrals::normBeckeW(cartGP gridPt){
+//     Normalization of Becke/Frisch Weights
+//     (J. Chem. Phys., 88 (4),2457 (1988)) using Voronoii Fuzzi Cells
+//     Eq. 22
+       int   nAtom = this->molecule_->nAtoms();
+       double norm = 0.0;
+       for(auto iAtm = 0; iAtm < nAtom; iAtm++){
+         norm += this->formBeckeW(gridPt,iAtm);
+         }
+       return norm ;
+}; //End normBeckeW
+
+
+
+void AOIntegrals::computeAORcrossDel(){
+// build R cross Del matrices (Numerical)
+// It also creates the grid and can perform also other
+// integrals (i.e. <mu/Del/nu> if required.
+
+//  Hard coded for now (we need to set the flag in aointegrals)
+//  I also hard coded the type of grid (GaussChebyshev1stGridInf).
+//  I hard coded the weight scheme in formBeckeW.
+  bool screenVxc = false;   //Screening logical
+  double epsScreen     = 1.0e-10; // screening constant
+  double epsConv       = 1.0e-7;  // average values used for screening a entire shell
+  int maxiter       = 50;         // Max number for figuring the cut off radius for a given shell (given an apsConv in radCut)
+  int nRadDFTGridPts_ = 100;     // Number of Radial grid points
+  int nAngDFTGridPts_ = 302;    // Number of Angular grid points
+  int ngpts;                   // Total Number of grid points
+  int nDer = 1 ; //Order of differenzation (In this case it will tell to compute also Del/mu
+  double val;  // tmp for loading mu(r) or Del mu(r)
+  double x;   // tmp r_x
+  double y;   // tmp r_y
+  double z;   // tmp r_z
+// End Parameters
+  this->basisSet_->radcut(epsScreen, maxiter, epsConv);
+  ngpts = nRadDFTGridPts_*nAngDFTGridPts_;  // Number of grid point for each center
+  OneDGrid * Rad ;                              // Pointer for Radial Grid
+  LebedevGrid GridLeb(nAngDFTGridPts_);   // Angular Grid
+  Rad = new  EulerMaclaurinGrid(nRadDFTGridPts_,0.0,1.0);   
+  GridLeb.genGrid();                            
+  auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
+  auto NBSQ = NTCSxNBASIS*NTCSxNBASIS;
+  RealMap rdotpX(&this->RcrossDel_->storage()[0],NTCSxNBASIS,NTCSxNBASIS);
+  RealMap rdotpY(&this->RcrossDel_->storage()[NBSQ],NTCSxNBASIS,NTCSxNBASIS);
+  RealMap rdotpZ(&this->RcrossDel_->storage()[2*NBSQ],NTCSxNBASIS,NTCSxNBASIS);
+
+  std::vector<RealSparseMatrix>  sparsedmudX_; ///< basis derivative (x) (NbasisxNbasis)
+  std::vector<RealSparseMatrix>  sparsedmudY_; ///< basis derivative (y) (NbasisxNbasis)
+  std::vector<RealSparseMatrix>  sparsedmudZ_; ///< basis derivative (z) (NbasisxNbasis) 
+  std::vector<RealSparseMatrix> sparseMap_;     // BasisFunction Map 
+  std::vector<RealSparseMatrix> sparseWeights_; // Weights Map
+  std::vector<RealSparseMatrix> sparseDoRho_; // Evaluate density Map
+  for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
+    sparseMap_.push_back(RealSparseMatrix(this->nTCS_*this->nBasis_,ngpts));
+    sparseWeights_.push_back(RealSparseMatrix(ngpts,1));
+    sparseDoRho_.push_back(RealSparseMatrix(ngpts,1));
+//  Derivative
+    sparsedmudX_.push_back(RealSparseMatrix(this->nTCS_*this->nBasis_,ngpts));
+    sparsedmudY_.push_back(RealSparseMatrix(this->nTCS_*this->nBasis_,ngpts));
+    sparsedmudZ_.push_back(RealSparseMatrix(this->nTCS_*this->nBasis_,ngpts));
+//  Mapping over iAtom
+    RealSparseMatrix *Map        = &sparseMap_[iAtm];
+    RealSparseMatrix *WeightsMap = &sparseWeights_[iAtm];
+    RealSparseMatrix *DoRhoMap   = &sparseDoRho_[iAtm];
+    RealSparseMatrix *MapdX      = &sparsedmudX_[iAtm];
+    RealSparseMatrix *MapdY      = &sparsedmudY_[iAtm];
+    RealSparseMatrix *MapdZ      = &sparsedmudZ_[iAtm];
+    Rad->genGrid(); 
+    Rad->atomGrid((elements[this->molecule_->index(iAtm)].sradius)) ;  
+    TwoDGrid Raw3Dg(ngpts,Rad,&GridLeb);             
+    Raw3Dg.centerGrid(
+      (*this->molecule_->cart())(0,iAtm),
+      (*this->molecule_->cart())(1,iAtm),
+      (*this->molecule_->cart())(2,iAtm)
+    );
+    for (auto ipts =0; ipts < ngpts; ipts++){
+      cartGP pt = Raw3Dg.gridPtCart(ipts); 
+      auto mapRad_ = this->basisSet_->MapGridBasis(pt);
+      // Evaluate each Becke fuzzy call weight, normalize it and muliply by 
+      //   the Raw grid weight at that point
+      auto bweight = (this->formBeckeW(pt,iAtm)) 
+                     / (this->normBeckeW(pt)) ;
+      x = bg::get<0>(pt) ;
+      y = bg::get<1>(pt) ;
+      z = bg::get<2>(pt) ;
+      if (screenVxc) {
+        if (mapRad_[0] || (bweight < epsScreen)) continue;
+        }
+         WeightsMap->insert(ipts,0) = Raw3Dg.getweightsGrid(ipts) * bweight;
+         for (int s1=0; s1 < this->basisSet_->nShell(); s1++){
+           if (screenVxc) {
+             if (!mapRad_[s1+1]) continue;
+             }
+           int bf1_s = this->basisSet_->mapSh2Bf(s1);
+           auto shSize = this->basisSet_->shells(s1).size(); 
+           libint2::Shell shTmp = this->basisSet_->shells(s1);
+           double * s1Eval = this->basisSet_->basisDEval(nDer,shTmp,&pt);
+           double * ds1EvalX = s1Eval + shSize;
+           double * ds1EvalY = ds1EvalX + shSize;
+           double * ds1EvalZ = ds1EvalY + shSize;
+           for (auto mu =0; mu < shSize; mu++){ 
+             val = s1Eval[mu];
+             if (std::abs(val) > epsScreen){
+               Map->insert(bf1_s+mu,ipts) = val;
+               }
+             if (nDer ==1) {
+               val = ds1EvalX[mu];
+               if (std::abs(val) > epsScreen){
+                 MapdX->insert(bf1_s+mu,ipts) = val;
+                 }
+               val = ds1EvalY[mu];
+               if (std::abs(val) > epsScreen){
+                 MapdY->insert(bf1_s+mu,ipts) = val;
+                 }
+               val = ds1EvalZ[mu];
+               if (std::abs(val) > epsScreen){
+                 MapdZ->insert(bf1_s+mu,ipts) = val;
+                 }
+               }
+             } //loop over basis (within a given ishell)
+         } //loop over shells
+//            (*rdotpX) += (*WeightsMap).coeff(ipts,0)*(*Map).col(ipts)*(*Map).col(ipts).transpose();
+//          Figure how populate RcrossDel_ tensor 
+            rdotpX +=  (*WeightsMap).coeff(ipts,0)*(
+                          ( (*Map).col(ipts)*(*MapdZ).col(ipts).transpose()*y) -
+                          ( (*Map).col(ipts)*(*MapdY).col(ipts).transpose()*z) );
+
+            rdotpY +=  (*WeightsMap).coeff(ipts,0)*(
+                          ( (*Map).col(ipts)*(*MapdX).col(ipts).transpose()*z) -
+                          ( (*Map).col(ipts)*(*MapdZ).col(ipts).transpose()*x) );
+
+            rdotpZ +=  (*WeightsMap).coeff(ipts,0)*(
+                          ( (*Map).col(ipts)*(*MapdY).col(ipts).transpose()*x) -
+                          ( (*Map).col(ipts)*(*MapdX).col(ipts).transpose()*y) );
+         if (screenVxc && Map->col(ipts).norm() > epsScreen){
+         DoRhoMap->insert(ipts,0) = 2;}
+       }//End ipts
+    }//End iAtm
+//       Finishing the numerical integration (int * 4*pi)
+         rdotpX *= 4.0*math.pi;
+         rdotpY *= 4.0*math.pi;
+         rdotpZ *= 4.0*math.pi;
+//       printing
+//         prettyPrint(cout,rdotpX,"Numeric <dipole vel> - x comp");
+//         prettyPrint(cout,rdotpY,"Numeric <dipole vel> - y comp");
+//         prettyPrint(cout,rdotpZ,"Numeric <dipole vel> - z comp");
+//end for now (comment later)
+//  cout << "Call HERE " <<endl;
+//  CErr();
+} 
+
 void AOIntegrals::computeAOOneE(){
   // Collect Relevant data into a struct (odd, but convienient) 
   this->iniMolecularConstants();
@@ -159,7 +352,7 @@ void AOIntegrals::computeAOOneE(){
   else if(this->maxMultipole_ == 1) OneEDriver(OneBodyEngine::emultipole1);
   else OneEDriver(OneBodyEngine::overlap);
   auto OEnd = std::chrono::high_resolution_clock::now();
-
+  if(this->isPrimary && this->maxNumInt_ >=1) computeAORcrossDel();
   // Compute and time kinetic integrals
   auto TStart = std::chrono::high_resolution_clock::now();
   OneEDriver(OneBodyEngine::kinetic);

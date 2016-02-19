@@ -132,6 +132,10 @@ class SingleSlater {
   std::vector<RealSparseMatrix>  sparsedmudX_; ///< basis derivative (x) (NbasisxNbasis)
   std::vector<RealSparseMatrix>  sparsedmudY_; ///< basis derivative (y) (NbasisxNbasis)
   std::vector<RealSparseMatrix>  sparsedmudZ_; ///< basis derivative (z) (NbasisxNbasis) 
+// dipole lije
+  std::vector<RealSparseMatrix>  sparsemudotX_; ///< basis * (x) (NbasisxNbasis)
+  std::vector<RealSparseMatrix>  sparsemudotY_; ///< basis * (y) (NbasisxNbasis)
+  std::vector<RealSparseMatrix>  sparsemudotZ_; ///< basis * (z) (NbasisxNbasis) 
   std::vector<RealSparseMatrix> sparseMap_;     // BasisFunction Map 
   std::vector<RealSparseMatrix> sparseWeights_; // Weights Map
   std::vector<RealSparseMatrix> sparseDoRho_; // Evaluate density Map
@@ -222,6 +226,7 @@ class SingleSlater {
   double eneTol_;
   int maxSCFIter_;
   int maxMultipole_;
+  bool  fixPhase_;
 
   int printLevel_;
 
@@ -435,6 +440,7 @@ public:
     this->doDIIS       = true;
     this->isHF         = true;
     this->isDFT         = false;
+    this->fixPhase_     = true;
     this->guess_       = SAD;
 
     this->weightScheme_ = BECKE;
@@ -594,6 +600,7 @@ public:
   void formVXC();               // Form DFT VXC Term
   void formVXC_store();               // Form DFT VXC Term
   void genSparseBasisMap();     // Generate Basis Set Mapping
+  void genSparseRcrosP();      //  Generate R cros P int
   void evalVXC_store(int, int, double &, double &,RealMatrix *, RealMatrix *,
          RealMatrix *, RealMatrix *, RealMatrix *,RealMatrix *,RealMatrix *,RealMatrix *);
   void evalVXC(cartGP, double, std::vector<bool>, double &, double &,RealMatrix *, RealMatrix *,
@@ -635,6 +642,7 @@ public:
   void CpyFock(int);
   void GenDComm(int);
   void mullikenPop();
+  void fixPhase();
 
   void printEnergy(); 
   void printMultipole();

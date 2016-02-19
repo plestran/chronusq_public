@@ -68,6 +68,7 @@ knownKeywords['QM'] = {
   'REFERENCE'   :CQKeyword('REFERENCE'  ,'S',True ),
   'BASIS'       :CQKeyword('BASIS'      ,'S',True ),
   'FORCECART'   :CQKeyword('FORCECART'  ,'B',False),
+  'NUMINT'      :CQKeyword('NUMINT'     ,'B',False),
   'JOB'         :CQKeyword('JOB'        ,'S',True ),
   'INTS'        :CQKeyword('INTS'       ,'S',False),
   'EXCHANGE'    :CQKeyword('EXCHANGE'   ,'S',False),
@@ -85,6 +86,7 @@ knownKeywords['QM'] = {
 knownKeywords['RT'] = {
   'MAXSTEP'  :CQKeyword('MAXSTEP'  ,'I'      ,False),    
   'TIMESTEP' :CQKeyword('TIMESTEP' ,'D'      ,False), 
+  "IRSTRT"   :CQKeyword('IRSRT'    ,'I'      ,False),
   'EDFIELD'  :CQKeyword('EDFIELD'  ,'D3'     ,False),
   'TIME_ON'  :CQKeyword('TIME_ON'  ,'D'      ,False),
   'TIME_OFF' :CQKeyword('TIME_OFF' ,'D'      ,False),

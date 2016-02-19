@@ -72,6 +72,10 @@ void SingleSlater<dcomplex>::genSparseBasisMap(){
 };
 
 template<>
+void SingleSlater<dcomplex>::genSparseRcrosP(){
+};
+
+template<>
 std::array<double,6> SingleSlater<dcomplex>::formVExSlater (double rho, double spindensity){
 
 }; 

@@ -100,10 +100,19 @@ def parseQM(workers,secDict):
   except KeyError:
     pass
 
+#
+# Parse SCF Settings
+#
   try:
     parseSCF(workers,secDict['SCF'])
   except KeyError:
     pass
+
+#
+# Decide whether or not to compute numerical integrals
+#
+  if 'NUMINT' in ssSettings:
+    workers['CQAOIntegrals'].setMaxNumInt(1)
 
   if str(ssSettings['JOB']) in knownJobs:
     if ssSettings['JOB'] in ('RT'):
@@ -572,6 +581,7 @@ def parseRT(workers,settings):
     'ORTHO'    :workers['CQRealTime'].setOrthoTyp ,
     'INIDEN'   :workers['CQRealTime'].setInitDen  ,
     'UPROP'    :workers['CQRealTime'].setFormU    ,
+    'IRSTRT'   :workers['CQRealTime'].setIRstrt   ,
     'ELL_POL'  :workers['CQRealTime'].setEllPol     
   }
 

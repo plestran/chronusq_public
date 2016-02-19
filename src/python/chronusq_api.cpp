@@ -251,6 +251,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("nTCS"           , &AOIntegrals::nTCS                  )
     .def("setNTCS"        , &AOIntegrals::setNTCS               )
     .def("setMaxMultipole", &AOIntegrals::setMaxMultipole       )
+    .def("setMaxNumInt"   , &AOIntegrals::setMaxNumInt          )
     .def("setAlgorithm"   , &AOIntegrals::setAlgorithm          )
     
     .def_readonly("integralAlgorithm", &AOIntegrals::integralAlgorithm)
@@ -292,6 +293,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("lastEnergy"   , &RealTime<double>::lastEnergy   )
     .def("getTimeStep"  , &RealTime<double>::getTimeStep  )
     .def("doNotTarCSV"  , &RealTime<double>::doNotTarCSV  )
+    .def("setIRstrt"       , &RealTime<double>::setIRstrt       )
   ;
 
   class_<RealTime<dcomplex>,boost::noncopyable>("RealTime_complex",init<>())
@@ -322,6 +324,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("lastEnergy"   , &RealTime<dcomplex>::lastEnergy   )
     .def("getTimeStep"  , &RealTime<dcomplex>::getTimeStep  )
     .def("doNotTarCSV"  , &RealTime<dcomplex>::doNotTarCSV  )
+    .def("setIRstrt"       , &RealTime<dcomplex>::setIRstrt       )
   ;
 
 /*
