@@ -956,27 +956,27 @@ void twoDScan(std::vector<double>& scanX,
      cout << "  < (X,Y) | (X,Y+DY) >       = " << OvLp_00_0p << endl;
      cout << "  < (X,Y) | (X,Y-DY) >       = " << OvLp_00_0m << endl;
    }
-   auto NAC = ES_GS_NACME(nFreq,true,NOCC,NVIR,XP-X,YP-Y,
+   auto NAC_ES_GS = ES_GS_NACME(nFreq,true,NOCC,NVIR,XP-X,YP-Y,
      T_00,(*ss_00.moA()),(*ss_p0.moA()),(*ss_m0.moA()),
      (*ss_0p.moA()),(*ss_0m.moA()),S_00_p0,S_00_m0,S_00_0p,S_00_0m);
+   auto NAC_ES_ES = ES_ES_NACME(nFreq,true,NOCC,NVIR,XP-X,YP-Y,
+     T_00,T_p0,T_m0,T_0p,T_0m,(*ss_00.moA()),(*ss_p0.moA()),
+     (*ss_m0.moA()),(*ss_0p.moA()),(*ss_0m.moA()),S_00_p0,S_00_m0,
+     S_00_0p,S_00_0m);
 
    if(debug){
-     auto NAC2 = GS_ES_NACME(nFreq,true,NOCC,NVIR,XP-X,YP-Y,
+     auto NAC_GS_ES = GS_ES_NACME(nFreq,false,NOCC,NVIR,XP-X,YP-Y,
        T_00,T_p0,T_m0,T_0p,T_0m,(*ss_00.moA()),(*ss_p0.moA()),
        (*ss_m0.moA()),(*ss_0p.moA()),(*ss_0m.moA()),S_00_p0,S_00_m0,
        S_00_0p,S_00_0m);
-     auto NAC3 = ES_ES_NACME(nFreq,true,NOCC,NVIR,XP-X,YP-Y,
-       T_00,T_p0,T_m0,T_0p,T_0m,(*ss_00.moA()),(*ss_p0.moA()),
-       (*ss_m0.moA()),(*ss_0p.moA()),(*ss_0m.moA()),S_00_p0,S_00_m0,
-       S_00_0p,S_00_0m);
-     prettyPrint(cout,NAC[0]*0.529177,"ES->GS NACME DX");
-     prettyPrint(cout,NAC[1]*0.529177,"ES->GS NACME DY");
-     prettyPrint(cout,NAC2[0]*0.529177,"GS->ES NACME DX");
-     prettyPrint(cout,NAC2[1]*0.529177,"GS->ES NACME DY");
-     prettyPrint(cout,NAC[0] + NAC2[0],"DIFF DX");
-     prettyPrint(cout,NAC[1] + NAC2[1],"DIFF DY");
-     prettyPrint(cout,NAC3[0]*0.529177,"ES->ES DX");
-     prettyPrint(cout,NAC3[1]*0.529177,"ES->ES DY");
+     prettyPrint(cout,NAC_ES_GS[0]*0.529177,"ES->GS NACME DX");
+     prettyPrint(cout,NAC_ES_GS[1]*0.529177,"ES->GS NACME DY");
+     prettyPrint(cout,NAC_GS_ES[0]*0.529177,"GS->ES NACME DX");
+     prettyPrint(cout,NAC_GS_ES[1]*0.529177,"GS->ES NACME DY");
+     prettyPrint(cout,NAC_ES_GS[0] + NAC_GS_ES[0],"DIFF DX");
+     prettyPrint(cout,NAC_ES_GS[1] + NAC_GS_ES[1],"DIFF DY");
+     prettyPrint(cout,NAC_ES_ES[0]*0.529177,"ES->ES DX");
+     prettyPrint(cout,NAC_ES_ES[1]*0.529177,"ES->ES DY");
    }
 
   }
@@ -1280,12 +1280,12 @@ std::vector<RealMatrix> ES_ES_NACME(int nFreq,bool renorm,
 
   for(auto i = 0; i < NACME.size(); i++) NACME[i].setZero();
 
-//if(renorm) {
-//  T_p0 *= std::sqrt(0.5);
-//  T_m0 *= std::sqrt(0.5);
-//  T_0p *= std::sqrt(0.5);
-//  T_0m *= std::sqrt(0.5);
-//}
+  if(renorm) {
+    T_p0 *= std::sqrt(0.5);
+    T_m0 *= std::sqrt(0.5);
+    T_0p *= std::sqrt(0.5);
+    T_0m *= std::sqrt(0.5);
+  }
 
   RealMatrix SWAPPED_IA_00(MO_00);
   RealMatrix SWAPPED_JB_p0(MO_00);
