@@ -15,6 +15,10 @@ std::vector<Eigen::VectorXd> GS_ES_NACME(int,bool,int,int,double,
   double,RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,
   RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,
   RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&);
+std::vector<RealMatrix> ES_ES_NACME(int,bool,int,int,double,
+  double,RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,
+  RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,
+  RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&);
 
 template<typename Derived>
 double diffNorm( const Derived &A, const Derived &B ){
@@ -46,7 +50,7 @@ void twoDScan(std::vector<double>& scanX,
   std::string basisName = "cc-pVDZ";
   int charge = 0;
   int nFreq = 8;
-  bool debug = false;
+  bool debug = true;
 
 
 
@@ -955,12 +959,18 @@ void twoDScan(std::vector<double>& scanX,
        T_00,T_p0,T_m0,T_0p,T_0m,(*ss_00.moA()),(*ss_p0.moA()),
        (*ss_m0.moA()),(*ss_0p.moA()),(*ss_0m.moA()),S_00_p0,S_00_m0,
        S_00_0p,S_00_0m);
+     auto NAC3 = ES_ES_NACME(nFreq,true,NOCC,NVIR,XP-X,YP-Y,
+       T_00,T_p0,T_m0,T_0p,T_0m,(*ss_00.moA()),(*ss_p0.moA()),
+       (*ss_m0.moA()),(*ss_0p.moA()),(*ss_0m.moA()),S_00_p0,S_00_m0,
+       S_00_0p,S_00_0m);
      prettyPrint(cout,NAC[0]*0.529177,"ES->GS NACME DX");
      prettyPrint(cout,NAC[1]*0.529177,"ES->GS NACME DY");
      prettyPrint(cout,NAC2[0]*0.529177,"GS->ES NACME DX");
      prettyPrint(cout,NAC2[1]*0.529177,"GS->ES NACME DY");
      prettyPrint(cout,NAC[0] + NAC2[0],"DIFF DX");
      prettyPrint(cout,NAC[1] + NAC2[1],"DIFF DY");
+     prettyPrint(cout,NAC3[0],"ES->ES DX");
+     prettyPrint(cout,NAC3[1],"ES->ES DY");
    }
 
   }
@@ -1244,6 +1254,123 @@ std::vector<Eigen::VectorXd> GS_ES_NACME(int nFreq,bool renorm,
         T_0p(ia,iSt)*OvLp_IASwap_00_0p - 
         T_0m(ia,iSt)*OvLp_IASwap_00_0m
       ) / (2*step2);
+    } // loop ove ia
+  } // loop over states
+  NACME[0] *= 2;
+  NACME[1] *= 2;
+
+  return NACME;
+};
+
+std::vector<RealMatrix> ES_ES_NACME(int nFreq,bool renorm,
+  int nocc, int nvir, double step1, double step2, RealMatrix &T_00, 
+  RealMatrix &T_p0, RealMatrix &T_m0, RealMatrix &T_0p, 
+  RealMatrix &T_0m, RealMatrix &MO_00, RealMatrix &MO_p0, 
+  RealMatrix &MO_m0, RealMatrix &MO_0p, RealMatrix &MO_0m, 
+  RealMatrix &S_00_p0, RealMatrix &S_00_m0, RealMatrix &S_00_0p, 
+  RealMatrix &S_00_0m){
+
+  std::vector<RealMatrix> NACME(2,RealMatrix(nFreq,nFreq));
+
+  for(auto i = 0; i < NACME.size(); i++) NACME[i].setZero();
+
+//if(renorm) {
+//  T_p0 *= std::sqrt(0.5);
+//  T_m0 *= std::sqrt(0.5);
+//  T_0p *= std::sqrt(0.5);
+//  T_0m *= std::sqrt(0.5);
+//}
+
+  RealMatrix SWAPPED_IA_00(MO_00);
+  RealMatrix SWAPPED_JB_p0(MO_00);
+  RealMatrix SWAPPED_JB_m0(MO_00);
+  RealMatrix SWAPPED_JB_0p(MO_00);
+  RealMatrix SWAPPED_JB_0m(MO_00);
+
+  RealMatrix Prod_00_0p(MO_00);
+  RealMatrix Prod_00_0m(MO_00);
+  RealMatrix Prod_00_p0(MO_00);
+  RealMatrix Prod_00_m0(MO_00);
+
+  SWAPPED_IA_00.setZero();
+  SWAPPED_JB_p0.setZero();
+  SWAPPED_JB_m0.setZero();
+  SWAPPED_JB_0p.setZero();
+  SWAPPED_JB_0m.setZero();
+
+  Prod_00_0p.setZero();
+  Prod_00_0m.setZero();
+  Prod_00_p0.setZero();
+  Prod_00_m0.setZero();
+
+  for(auto iSt = 0; iSt < nFreq; iSt++)
+  for(auto jSt = 0; jSt < nFreq; jSt++){
+    for(auto i = 0, ia = 0; i < nocc; i++)
+    for(auto a = 0; a < nvir; a++, ia++){
+    //if(T_00(ia,iSt) < 1e-8) continue;   
+
+      SWAPPED_IA_00.setZero();
+      SWAPPED_IA_00 = MO_00;
+
+      SWAPPED_IA_00.col(i).swap(SWAPPED_IA_00.col(nocc+a)); 
+
+      for(auto j = 0, jb = 0; j < nocc; j++)
+      for(auto b = 0; b < nvir; b++, jb++){
+      //if(
+      //  (std::abs(T_p0(jb,iSt)) < 1e-8) &&
+      //  (std::abs(T_m0(jb,iSt)) < 1e-8) &&
+      //  (std::abs(T_0p(jb,iSt)) < 1e-8) &&
+      //  (std::abs(T_0m(jb,iSt)) < 1e-8)
+      //) continue;
+     
+        SWAPPED_JB_p0.setZero();
+        SWAPPED_JB_m0.setZero();
+        SWAPPED_JB_0p.setZero();
+        SWAPPED_JB_0m.setZero();
+     
+        Prod_00_0p.setZero();
+        Prod_00_0m.setZero();
+        Prod_00_p0.setZero();
+        Prod_00_m0.setZero();
+        
+        SWAPPED_JB_p0 = MO_p0;
+        SWAPPED_JB_m0 = MO_m0;
+        SWAPPED_JB_0p = MO_0p;
+        SWAPPED_JB_0m = MO_0m;
+     
+        SWAPPED_JB_p0.col(j).swap(SWAPPED_JB_p0.col(nocc+b)); 
+        SWAPPED_JB_m0.col(j).swap(SWAPPED_JB_m0.col(nocc+b)); 
+        SWAPPED_JB_0p.col(j).swap(SWAPPED_JB_0p.col(nocc+b)); 
+        SWAPPED_JB_0m.col(j).swap(SWAPPED_JB_0m.col(nocc+b)); 
+        
+        Prod_00_0p = 
+          SWAPPED_IA_00.transpose() * S_00_0p * SWAPPED_JB_0p;
+        Prod_00_0m = 
+          SWAPPED_IA_00.transpose() * S_00_0m * SWAPPED_JB_0m;
+        Prod_00_p0 = 
+          SWAPPED_IA_00.transpose() * S_00_p0 * SWAPPED_JB_p0;
+        Prod_00_m0 = 
+          SWAPPED_IA_00.transpose() * S_00_m0 * SWAPPED_JB_m0;
+     
+        
+        double OvLp_IASwap_00_0p =
+          Prod_00_0p.block(0,0,nocc,nocc).determinant();
+        double OvLp_IASwap_00_0m =
+          Prod_00_0m.block(0,0,nocc,nocc).determinant();
+        double OvLp_IASwap_00_p0 =
+          Prod_00_p0.block(0,0,nocc,nocc).determinant();
+        double OvLp_IASwap_00_m0 =
+          Prod_00_m0.block(0,0,nocc,nocc).determinant();
+     
+        NACME[0](iSt,jSt) += T_00(ia,iSt)*(
+          T_p0(jb,jSt)*OvLp_IASwap_00_p0 - 
+          T_m0(jb,jSt)*OvLp_IASwap_00_m0
+        ) / (2*step1);
+        NACME[1](iSt,jSt) += T_00(ia,iSt)*(
+          T_0p(jb,jSt)*OvLp_IASwap_00_0p - 
+          T_0m(jb,jSt)*OvLp_IASwap_00_0m
+        ) / (2*step2);
+      } // loop ove jb
     } // loop ove ia
   } // loop over states
   NACME[0] *= 2;
