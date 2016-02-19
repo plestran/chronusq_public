@@ -38,7 +38,7 @@ double selfInner( const Derived &A){
 void twoDScan(std::vector<double>& scanX, 
               std::vector<double>& scanY){
 
-  std::string PREFIX = "H20";
+  std::string PREFIX = "LiH";
   std::string BINPREFIX = "BIN";
   std::string XYZPREFIX = "XYZ";
 
@@ -49,7 +49,7 @@ void twoDScan(std::vector<double>& scanX,
 
   std::string basisName = "cc-pVDZ";
   int charge = 0;
-  int nFreq = 8;
+  int nFreq = 4;
   bool debug = true;
 
 
@@ -106,11 +106,11 @@ void twoDScan(std::vector<double>& scanX,
 
 
     // Generate file names baed on convention
-    std::string fBaseName00 = genFName(X ,Y ,3,3,PREFIX);
-    std::string fBaseNamep0 = genFName(XP,Y ,3,3,PREFIX);
-    std::string fBaseNamem0 = genFName(XM,Y ,3,3,PREFIX);
-    std::string fBaseName0p = genFName(X ,YP,3,3,PREFIX);
-    std::string fBaseName0m = genFName(X ,YM,3,3,PREFIX);
+    std::string fBaseName00 = genFName(X ,Y ,3,6,PREFIX);
+    std::string fBaseNamep0 = genFName(XP,Y ,3,6,PREFIX);
+    std::string fBaseNamem0 = genFName(XM,Y ,3,6,PREFIX);
+    std::string fBaseName0p = genFName(X ,YP,3,6,PREFIX);
+    std::string fBaseName0m = genFName(X ,YM,3,6,PREFIX);
 
     std::string fNameGeom_00 = XYZPREFIX+"/"+fBaseName00 + ".xyz";
     std::string fNameGeom_p0 = XYZPREFIX+"/"+fBaseNamep0 + ".xyz";
@@ -185,6 +185,12 @@ void twoDScan(std::vector<double>& scanX,
     std::ifstream XYZm0File(fNameGeom_m0);
     std::ifstream XYZ0pFile(fNameGeom_0p);
     std::ifstream XYZ0mFile(fNameGeom_0m);
+
+    if(!XYZ00File.good()) CErr("Cannot find XYZFile00");
+    if(!XYZp0File.good()) CErr("Cannot find XYZFilep0");
+    if(!XYZm0File.good()) CErr("Cannot find XYZFilem0");
+    if(!XYZ0pFile.good()) CErr("Cannot find XYZFile0p");
+    if(!XYZ0mFile.good()) CErr("Cannot find XYZFile0m");
 
     // Get number of atoms
     int nAtoms(0);
@@ -561,7 +567,6 @@ void twoDScan(std::vector<double>& scanX,
 
 
 
-/*
     Eigen::VectorXd Trans_mo_0p;
     Eigen::VectorXd Trans_mo_0m;
     Eigen::VectorXd Trans_mo_p0;
@@ -574,8 +579,8 @@ void twoDScan(std::vector<double>& scanX,
       ss_0p.moA()->data(),basis00.nBasis(),basis00.nBasis());
     Trans_mo_0m = checkPhase(ss_00.moA()->data(),
       ss_0m.moA()->data(),basis00.nBasis(),basis00.nBasis());
-*/
 
+/*
     RealMatrix O_00_p0(SMO_00_p0);
     RealMatrix O_00_m0(SMO_00_m0);
     RealMatrix O_00_0p(SMO_00_0p);
@@ -605,6 +610,7 @@ void twoDScan(std::vector<double>& scanX,
     (*ss_0p.moA()) = TMP;
     TMP = (*ss_0m.moA()) * O_00_0m; 
     (*ss_0m.moA()) = TMP;
+*/
 
     if(debug) {
       cout << endl;
@@ -969,8 +975,8 @@ void twoDScan(std::vector<double>& scanX,
      prettyPrint(cout,NAC2[1]*0.529177,"GS->ES NACME DY");
      prettyPrint(cout,NAC[0] + NAC2[0],"DIFF DX");
      prettyPrint(cout,NAC[1] + NAC2[1],"DIFF DY");
-     prettyPrint(cout,NAC3[0],"ES->ES DX");
-     prettyPrint(cout,NAC3[1],"ES->ES DY");
+     prettyPrint(cout,NAC3[0]*0.529177,"ES->ES DX");
+     prettyPrint(cout,NAC3[1]*0.529177,"ES->ES DY");
    }
 
   }
@@ -984,8 +990,8 @@ std::string genFName(double x, double y, int px, int py,
   std::string PREFIX) {
     std::stringstream ss1, ss2;
 
-    ss1 << std::fixed << std::setprecision(3) << x;
-    ss2 << std::fixed << std::setprecision(3) << y;
+    ss1 << std::fixed << std::setprecision(px) << x;
+    ss2 << std::fixed << std::setprecision(py) << y;
 
     std::string str1 = ss1.str();
     std::string str2 = ss2.str();

@@ -36,6 +36,8 @@ int main(int argc, char*argv[]){
 
   std::vector<double> scan1 = genScan(scan1Min,scan1Max,scan1Step);
   std::vector<double> scan2 = genScan(scan2Min,scan2Max,scan2Step);
+  for(auto i : scan1) cout << i <<endl;
+  for(auto i : scan2) cout << i <<endl;
   
   twoDScan(scan1,scan2);
 
