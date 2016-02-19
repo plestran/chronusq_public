@@ -11,9 +11,10 @@ std::vector<T> genScan(T min,T max,T step){
   return scan;
 };
 
-void twoDScan(std::vector<double>&,std::vector<double>&);
-
 using namespace ChronusQ;
+void twoDScan(std::vector<double>&,std::vector<double>&,std::string&,RESPONSE_TYPE,int,int,int,int,
+std::string&);
+
 
 int main(int argc, char*argv[]){
   
@@ -25,6 +26,14 @@ int main(int argc, char*argv[]){
   std::string scan2MaxStrx  = argv[5];
   std::string scan2StepStrx = argv[6];
 
+  std::string basisName   = argv[7];
+  std::string respTypeStr = argv[8];
+  std::string chargeStr   = argv[9];
+  std::string nFreqStr    = argv[10];
+  std::string pxStr       = argv[11];
+  std::string pyStr       = argv[12];
+
+  std::string PREFIX      = argv[13];
 
   // Parse inout parameters
   double scan1Min  = std::atof(scan1MinStrx.c_str()); 
@@ -34,12 +43,19 @@ int main(int argc, char*argv[]){
   double scan2Max  = std::atof(scan2MaxStrx.c_str()); 
   double scan2Step = std::atof(scan2StepStrx.c_str());
 
+  RESPONSE_TYPE respType;
+  if(!respTypeStr.compare("CIS")) respType = RESPONSE_TYPE::CIS;
+
+  int charge = std::atoi(chargeStr.c_str());
+  int nFreq  = std::atoi(nFreqStr.c_str());
+  int px     = std::atoi(pxStr.c_str());
+  int py     = std::atoi(pyStr.c_str()); 
+
   std::vector<double> scan1 = genScan(scan1Min,scan1Max,scan1Step);
   std::vector<double> scan2 = genScan(scan2Min,scan2Max,scan2Step);
-  for(auto i : scan1) cout << i <<endl;
-  for(auto i : scan2) cout << i <<endl;
   
-  twoDScan(scan1,scan2);
+  twoDScan(scan1,scan2,basisName,respType,charge,
+    nFreq,px,py,PREFIX);
 
   return 0;
 }

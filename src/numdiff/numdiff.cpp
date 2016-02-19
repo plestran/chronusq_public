@@ -36,9 +36,14 @@ double selfInner( const Derived &A){
 
 
 void twoDScan(std::vector<double>& scanX, 
-              std::vector<double>& scanY){
+              std::vector<double>& scanY,
+              std::string &basisName,
+              RESPONSE_TYPE respType,
+              int charge, int nFreq,
+              int px, int py,
+              std::string &PREFIX){
 
-  std::string PREFIX = "LiH";
+//std::string PREFIX = "LiH";
   std::string BINPREFIX = "BIN";
   std::string XYZPREFIX = "XYZ";
 
@@ -47,12 +52,12 @@ void twoDScan(std::vector<double>& scanX,
   CQSetNumThreads(1);
   controls.iniControls();
 
-  std::string basisName = "cc-pVDZ";
-  RESPONSE_TYPE respType = RESPONSE_TYPE::CIS;
-  int charge = 0;
-  int nFreq = 4;
-  int px = 3;
-  int py = 6;
+//std::string basisName = "cc-pVDZ";
+//RESPONSE_TYPE respType = RESPONSE_TYPE::CIS;
+//int charge = 0;
+//int nFreq = 4;
+//int px = 3;
+//int py = 6;
   bool debug = true;
 
 
