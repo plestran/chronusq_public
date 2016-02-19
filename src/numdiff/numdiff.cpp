@@ -7,15 +7,15 @@ std::string genFName(double,double,int,int,std::string);
 Eigen::VectorXd checkPhase(double*,double*,int,int);
 RealMatrix genSpx(BasisSet&,BasisSet&);
 
-std::vector<Eigen::VectorXd> ES_GS_NACME(int,bool,int,int,double,
+std::vector<Eigen::VectorXd> ES_GS_NACME_CIS(int,bool,int,int,double,
   double,RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,
   RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,
   RealMatrix&);
-std::vector<Eigen::VectorXd> GS_ES_NACME(int,bool,int,int,double,
+std::vector<Eigen::VectorXd> GS_ES_NACME_CIS(int,bool,int,int,double,
   double,RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,
   RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,
   RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&);
-std::vector<RealMatrix> ES_ES_NACME(int,bool,int,int,double,
+std::vector<RealMatrix> ES_ES_NACME_CIS(int,bool,int,int,double,
   double,RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,
   RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,
   RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&);
@@ -48,8 +48,11 @@ void twoDScan(std::vector<double>& scanX,
   controls.iniControls();
 
   std::string basisName = "cc-pVDZ";
+  RESPONSE_TYPE respType = RESPONSE_TYPE::CIS;
   int charge = 0;
   int nFreq = 4;
+  int px = 3;
+  int py = 6;
   bool debug = true;
 
 
@@ -106,11 +109,11 @@ void twoDScan(std::vector<double>& scanX,
 
 
     // Generate file names baed on convention
-    std::string fBaseName00 = genFName(X ,Y ,3,6,PREFIX);
-    std::string fBaseNamep0 = genFName(XP,Y ,3,6,PREFIX);
-    std::string fBaseNamem0 = genFName(XM,Y ,3,6,PREFIX);
-    std::string fBaseName0p = genFName(X ,YP,3,6,PREFIX);
-    std::string fBaseName0m = genFName(X ,YM,3,6,PREFIX);
+    std::string fBaseName00 = genFName(X ,Y ,px,py,PREFIX);
+    std::string fBaseNamep0 = genFName(XP,Y ,px,py,PREFIX);
+    std::string fBaseNamem0 = genFName(XM,Y ,px,py,PREFIX);
+    std::string fBaseName0p = genFName(X ,YP,px,py,PREFIX);
+    std::string fBaseName0m = genFName(X ,YM,px,py,PREFIX);
 
     std::string fNameGeom_00 = XYZPREFIX+"/"+fBaseName00 + ".xyz";
     std::string fNameGeom_p0 = XYZPREFIX+"/"+fBaseNamep0 + ".xyz";
@@ -694,11 +697,11 @@ void twoDScan(std::vector<double>& scanX,
     resp_0p.communicate(ss_0p,moints_0p,fileio_0p);
     resp_0m.communicate(ss_0m,moints_0m,fileio_0m);
 
-    resp_00.setMeth(RESPONSE_TYPE::CIS);
-    resp_p0.setMeth(RESPONSE_TYPE::CIS);
-    resp_m0.setMeth(RESPONSE_TYPE::CIS);
-    resp_0p.setMeth(RESPONSE_TYPE::CIS);
-    resp_0m.setMeth(RESPONSE_TYPE::CIS);
+    resp_00.setMeth(respType);
+    resp_p0.setMeth(respType);
+    resp_m0.setMeth(respType);
+    resp_0p.setMeth(respType);
+    resp_0m.setMeth(respType);
 
     resp_00.doSA();
     resp_p0.doSA();
@@ -903,11 +906,11 @@ void twoDScan(std::vector<double>& scanX,
       freqNorm(iFreq) = std::sqrt(freqNorm(iFreq));
 
     if(debug){
-    cout << endl << "  ES Gradients:" << endl;
-    for(auto iSt = 0; iSt < nFreq; iSt++){
-      cout << "   W(" << iSt << ")' = (" << freqDX(iSt) 
-           << "," << freqDY(iSt) << ")" << endl;
-    }
+      cout << endl << "  ES Gradients:" << endl;
+      for(auto iSt = 0; iSt < nFreq; iSt++){
+        cout << "   W(" << iSt << ")' = (" << freqDX(iSt) 
+             << "," << freqDY(iSt) << ")" << endl;
+      }
     }
 
 
@@ -956,25 +959,39 @@ void twoDScan(std::vector<double>& scanX,
      cout << "  < (X,Y) | (X,Y+DY) >       = " << OvLp_00_0p << endl;
      cout << "  < (X,Y) | (X,Y-DY) >       = " << OvLp_00_0m << endl;
    }
-   auto NAC_ES_GS = ES_GS_NACME(nFreq,true,NOCC,NVIR,XP-X,YP-Y,
-     T_00,(*ss_00.moA()),(*ss_p0.moA()),(*ss_m0.moA()),
-     (*ss_0p.moA()),(*ss_0m.moA()),S_00_p0,S_00_m0,S_00_0p,S_00_0m);
-   auto NAC_ES_ES = ES_ES_NACME(nFreq,true,NOCC,NVIR,XP-X,YP-Y,
-     T_00,T_p0,T_m0,T_0p,T_0m,(*ss_00.moA()),(*ss_p0.moA()),
-     (*ss_m0.moA()),(*ss_0p.moA()),(*ss_0m.moA()),S_00_p0,S_00_m0,
-     S_00_0p,S_00_0m);
 
-   if(debug){
-     auto NAC_GS_ES = GS_ES_NACME(nFreq,false,NOCC,NVIR,XP-X,YP-Y,
+
+   std::vector<Eigen::VectorXd> NAC_ES_GS;
+   std::vector<RealMatrix>      NAC_ES_ES;
+
+   if(respType == RESPONSE_TYPE::CIS){
+     NAC_ES_GS = ES_GS_NACME_CIS(nFreq,true,NOCC,NVIR,XP-X,YP-Y,
+       T_00,(*ss_00.moA()),(*ss_p0.moA()),(*ss_m0.moA()),
+       (*ss_0p.moA()),(*ss_0m.moA()),S_00_p0,S_00_m0,S_00_0p,
+       S_00_0m);
+     NAC_ES_ES = ES_ES_NACME_CIS(nFreq,true,NOCC,NVIR,XP-X,YP-Y,
        T_00,T_p0,T_m0,T_0p,T_0m,(*ss_00.moA()),(*ss_p0.moA()),
        (*ss_m0.moA()),(*ss_0p.moA()),(*ss_0m.moA()),S_00_p0,S_00_m0,
        S_00_0p,S_00_0m);
-     prettyPrint(cout,NAC_ES_GS[0]*0.529177,"ES->GS NACME DX");
-     prettyPrint(cout,NAC_ES_GS[1]*0.529177,"ES->GS NACME DY");
-     prettyPrint(cout,NAC_GS_ES[0]*0.529177,"GS->ES NACME DX");
-     prettyPrint(cout,NAC_GS_ES[1]*0.529177,"GS->ES NACME DY");
-     prettyPrint(cout,NAC_ES_GS[0] + NAC_GS_ES[0],"DIFF DX");
-     prettyPrint(cout,NAC_ES_GS[1] + NAC_GS_ES[1],"DIFF DY");
+   }
+
+   if(debug){
+     std::vector<Eigen::VectorXd> NAC_GS_ES;
+
+     if(respType == RESPONSE_TYPE::CIS) {
+       NAC_GS_ES = GS_ES_NACME_CIS(nFreq,false,NOCC,NVIR,XP-X,YP-Y,
+         T_00,T_p0,T_m0,T_0p,T_0m,(*ss_00.moA()),(*ss_p0.moA()),
+         (*ss_m0.moA()),(*ss_0p.moA()),(*ss_0m.moA()),S_00_p0,
+         S_00_m0,S_00_0p,S_00_0m);
+      
+       prettyPrint(cout,NAC_ES_GS[0]*0.529177,"ES->GS NACME DX");
+       prettyPrint(cout,NAC_ES_GS[1]*0.529177,"ES->GS NACME DY");
+       prettyPrint(cout,NAC_GS_ES[0]*0.529177,"GS->ES NACME DX");
+       prettyPrint(cout,NAC_GS_ES[1]*0.529177,"GS->ES NACME DY");
+       prettyPrint(cout,NAC_ES_GS[0] + NAC_GS_ES[0],"DIFF DX");
+       prettyPrint(cout,NAC_ES_GS[1] + NAC_GS_ES[1],"DIFF DY");
+     }
+
      prettyPrint(cout,NAC_ES_ES[0]*0.529177,"ES->ES DX");
      prettyPrint(cout,NAC_ES_ES[1]*0.529177,"ES->ES DY");
    }
@@ -1104,7 +1121,7 @@ RealMatrix genSpx(BasisSet &obs1, BasisSet &obs2){
 
   return S;
 };
-std::vector<Eigen::VectorXd> ES_GS_NACME(int nFreq,bool renorm,
+std::vector<Eigen::VectorXd> ES_GS_NACME_CIS(int nFreq,bool renorm,
   int nocc, int nvir, double step1, double step2, RealMatrix &T_00, 
   RealMatrix &MO_00, RealMatrix &MO_p0, RealMatrix &MO_m0, 
   RealMatrix &MO_0p, RealMatrix &MO_0m, RealMatrix &S_00_p0, 
@@ -1169,7 +1186,7 @@ std::vector<Eigen::VectorXd> ES_GS_NACME(int nFreq,bool renorm,
   return NACME;
 };
 
-std::vector<Eigen::VectorXd> GS_ES_NACME(int nFreq,bool renorm,
+std::vector<Eigen::VectorXd> GS_ES_NACME_CIS(int nFreq,bool renorm,
   int nocc, int nvir, double step1, double step2, RealMatrix &T_00, 
   RealMatrix &T_p0, RealMatrix &T_m0, RealMatrix &T_0p, 
   RealMatrix &T_0m, RealMatrix &MO_00, RealMatrix &MO_p0, 
@@ -1268,7 +1285,7 @@ std::vector<Eigen::VectorXd> GS_ES_NACME(int nFreq,bool renorm,
   return NACME;
 };
 
-std::vector<RealMatrix> ES_ES_NACME(int nFreq,bool renorm,
+std::vector<RealMatrix> ES_ES_NACME_CIS(int nFreq,bool renorm,
   int nocc, int nvir, double step1, double step2, RealMatrix &T_00, 
   RealMatrix &T_p0, RealMatrix &T_m0, RealMatrix &T_0p, 
   RealMatrix &T_0m, RealMatrix &MO_00, RealMatrix &MO_p0, 
