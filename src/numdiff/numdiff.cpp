@@ -60,7 +60,27 @@ void twoDScan(std::vector<double>& scanX,
 //int py = 6;
   bool debug = true;
 
+  std::string GS_ENERGY_FILE_NAME = PREFIX + "_gsEnergy.dat";
+  std::string ES_ENERGY_FILE_NAME = PREFIX + "_esEnergy.dat";
+  std::string GS_GRADIENT_DX_FILE_NAME = PREFIX + "_gsGrad_IX_1.dat";
+  std::string GS_GRADIENT_DY_FILE_NAME = PREFIX + "_gsGrad_IX_2.dat";
+  std::string ES_GRADIENT_DX_FILE_NAME = PREFIX + "_esGrad_IX_1.dat";
+  std::string ES_GRADIENT_DY_FILE_NAME = PREFIX + "_esGrad_IX_2.dat";
+  std::string ES_GS_NACME_DX_FILE_NAME = PREFIX + "_esgsNAC_IX_1.dat";
+  std::string ES_GS_NACME_DY_FILE_NAME = PREFIX + "_esgsNAC_IX_2.dat";
+  std::string ES_ES_NACME_DX_FILE_NAME = PREFIX + "_esesNAC_IX_1.dat";
+  std::string ES_ES_NACME_DY_FILE_NAME = PREFIX + "_esesNAC_IX_2.dat";
 
+  std::ofstream GS_ENERGY_FILE      (GS_ENERGY_FILE_NAME      ); 
+  std::ofstream ES_ENERGY_FILE      (ES_ENERGY_FILE_NAME      );
+  std::ofstream GS_GRADIENT_DX_FILE (GS_GRADIENT_DX_FILE_NAME );
+  std::ofstream GS_GRADIENT_DY_FILE (GS_GRADIENT_DY_FILE_NAME );
+  std::ofstream ES_GRADIENT_DX_FILE (ES_GRADIENT_DX_FILE_NAME );
+  std::ofstream ES_GRADIENT_DY_FILE (ES_GRADIENT_DY_FILE_NAME );
+  std::ofstream ES_GS_NACME_DX_FILE (ES_GS_NACME_DX_FILE_NAME );
+  std::ofstream ES_GS_NACME_DY_FILE (ES_GS_NACME_DY_FILE_NAME );
+  std::ofstream ES_ES_NACME_DX_FILE (ES_ES_NACME_DX_FILE_NAME );
+  std::ofstream ES_ES_NACME_DY_FILE (ES_ES_NACME_DY_FILE_NAME );
 
   for(auto IX = 1; IX < (scanX.size()-1); IX++)
   for(auto JY = 1; JY < (scanY.size()-1); JY++){
@@ -753,6 +773,8 @@ void twoDScan(std::vector<double>& scanX,
     double scf_0p = ss_0p.totalEnergy;
     double scf_0m = ss_0m.totalEnergy;
 
+    GS_ENERGY_FILE << X << "," << Y << "," << scf_00 << endl;
+
     if(debug) {
       cout << endl;
       cout << "  SCF ENERGIES:" << endl;
@@ -773,6 +795,14 @@ void twoDScan(std::vector<double>& scanX,
     Eigen::VectorXd freq_m0 = resp_m0.frequencies()[0].head(nFreq);
     Eigen::VectorXd freq_0p = resp_0p.frequencies()[0].head(nFreq);
     Eigen::VectorXd freq_0m = resp_0m.frequencies()[0].head(nFreq);
+
+
+    ES_ENERGY_FILE << X << "," << Y << ",";
+    for(auto iSt = 0; iSt < nFreq; iSt++){
+      ES_ENERGY_FILE << freq_00(iSt);
+      if(iSt != (nFreq-1)) ES_ENERGY_FILE << ",";
+    }
+    ES_ENERGY_FILE << endl;
 
     if(debug) {
       cout << endl << "  Excitation Frequencies:" << endl;
@@ -895,6 +925,8 @@ void twoDScan(std::vector<double>& scanX,
     double gsdy = (scf_0p - scf_0m) / (2*(YP-Y));
     double gsnormd = std::sqrt(gsdx*gsdx + gsdy*gsdy);
 
+    GS_GRADIENT_DX_FILE << X << "," << Y << "," << gsdx << endl;
+    GS_GRADIENT_DY_FILE << X << "," << Y << "," << gsdy << endl;
 
     if(debug)
       cout << endl << "  GS Gradient = (" << gsdx << "," << gsdy <<
@@ -909,6 +941,20 @@ void twoDScan(std::vector<double>& scanX,
 
     for(auto iFreq = 0; iFreq < nFreq; iFreq++)
       freqNorm(iFreq) = std::sqrt(freqNorm(iFreq));
+
+
+    ES_GRADIENT_DX_FILE << X << "," << Y << ",";
+    ES_GRADIENT_DY_FILE << X << "," << Y << ",";
+    for(auto iSt = 0; iSt < nFreq; iSt++){
+      ES_GRADIENT_DX_FILE << freqDX(iSt);
+      ES_GRADIENT_DY_FILE << freqDY(iSt);
+      if(iSt != (nFreq-1)) {
+        ES_GRADIENT_DX_FILE << ",";
+        ES_GRADIENT_DY_FILE << ",";
+      }
+    }
+    ES_GRADIENT_DX_FILE << endl;
+    ES_GRADIENT_DY_FILE << endl;
 
     if(debug){
       cout << endl << "  ES Gradients:" << endl;
@@ -978,7 +1024,34 @@ void twoDScan(std::vector<double>& scanX,
        T_00,T_p0,T_m0,T_0p,T_0m,(*ss_00.moA()),(*ss_p0.moA()),
        (*ss_m0.moA()),(*ss_0p.moA()),(*ss_0m.moA()),S_00_p0,S_00_m0,
        S_00_0p,S_00_0m);
+
+     ES_GS_NACME_DX_FILE << X << "," << Y << ",";
+     ES_GS_NACME_DY_FILE << X << "," << Y << ",";
+     for(auto iSt = 0; iSt < nFreq; iSt++){
+       ES_GS_NACME_DX_FILE << NAC_ES_GS[0](iSt);
+       ES_GS_NACME_DY_FILE << NAC_ES_GS[1](iSt);
+       if(iSt != (nFreq-1)) {
+         ES_GS_NACME_DX_FILE << ",";
+         ES_GS_NACME_DY_FILE << ",";
+       }
+     }
+     ES_GS_NACME_DX_FILE << endl;
+     ES_GS_NACME_DY_FILE << endl;
+
    }
+   ES_ES_NACME_DX_FILE << X << "," << Y << ",";
+   ES_ES_NACME_DY_FILE << X << "," << Y << ",";
+   for(auto iSt = 0; iSt < nFreq; iSt++)
+   for(auto jSt = 0; jSt < nFreq; jSt++){
+     ES_ES_NACME_DX_FILE << NAC_ES_ES[0](iSt,jSt);
+     ES_ES_NACME_DY_FILE << NAC_ES_ES[1](iSt,jSt);
+     if(iSt != (nFreq-1) || jSt != (nFreq-1)) {
+       ES_ES_NACME_DX_FILE << ",";
+       ES_ES_NACME_DY_FILE << ",";
+     }
+   }
+   ES_ES_NACME_DX_FILE << endl;
+   ES_ES_NACME_DY_FILE << endl;
 
    if(debug){
      std::vector<Eigen::VectorXd> NAC_GS_ES;
