@@ -82,6 +82,18 @@ void twoDScan(std::vector<double>& scanX,
   std::ofstream ES_ES_NACME_DX_FILE (ES_ES_NACME_DX_FILE_NAME );
   std::ofstream ES_ES_NACME_DY_FILE (ES_ES_NACME_DY_FILE_NAME );
 
+  GS_ENERGY_FILE << std::setprecision(8) << std::fixed;
+  ES_ENERGY_FILE << std::setprecision(8) << std::fixed;
+  GS_GRADIENT_DX_FILE  << std::setprecision(8)    << std::fixed;
+  GS_GRADIENT_DY_FILE  << std::setprecision(8)    << std::fixed;
+  ES_GRADIENT_DX_FILE  << std::setprecision(8)    << std::fixed;
+  ES_GRADIENT_DY_FILE  << std::setprecision(8)    << std::fixed;
+  ES_GS_NACME_DX_FILE  << std::setprecision(8)    << std::fixed;
+  ES_GS_NACME_DY_FILE  << std::setprecision(8)    << std::fixed;
+  ES_ES_NACME_DX_FILE  << std::setprecision(8)    << std::fixed;
+  ES_ES_NACME_DY_FILE  << std::setprecision(8)    << std::fixed;
+
+
   for(auto IX = 1; IX < (scanX.size()-1); IX++)
   for(auto JY = 1; JY < (scanY.size()-1); JY++){
     // Output header
