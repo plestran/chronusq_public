@@ -45,6 +45,7 @@ int main(int argc, char*argv[]){
 
   RESPONSE_TYPE respType;
   if(!respTypeStr.compare("CIS")) respType = RESPONSE_TYPE::CIS;
+  if(!respTypeStr.compare("PPTDA")) respType = RESPONSE_TYPE::PPTDA;
 
   int charge = std::atoi(chargeStr.c_str());
   int nFreq  = std::atoi(nFreqStr.c_str());

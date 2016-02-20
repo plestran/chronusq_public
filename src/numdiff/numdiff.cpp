@@ -19,6 +19,10 @@ std::vector<RealMatrix> ES_ES_NACME_CIS(int,bool,int,int,double,
   double,RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,
   RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,
   RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&);
+std::vector<RealMatrix> ES_ES_NACME_PPTDA(int,bool,int,int,double,
+  double,RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,
+  RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,
+  RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&);
 
 template<typename Derived>
 double diffNorm( const Derived &A, const Derived &B ){
@@ -759,6 +763,11 @@ void twoDScan(std::vector<double>& scanX,
     resp_0m.doFull();
 
     cout << endl;
+    cout << "  Performing Response Calculations (";
+    if(respType == RESPONSE_TYPE::CIS)       cout << "CIS" ;
+    else if(respType = RESPONSE_TYPE::PPTDA) cout << "PPTDA" ;
+    cout << ")" << endl;
+
     cout << "  Performing Response (X,Y)" << endl;
     resp_00.doResponse();
     cout << "  Performing Response (X+DX,Y)" << endl;
@@ -1050,7 +1059,15 @@ void twoDScan(std::vector<double>& scanX,
      ES_GS_NACME_DX_FILE << endl;
      ES_GS_NACME_DY_FILE << endl;
 
+
+   } else if(respType == RESPONSE_TYPE::PPTDA) {
+     NAC_ES_ES = ES_ES_NACME_PPTDA(nFreq,true,NOCC,NVIR,XP-X,YP-Y,
+       T_00,T_p0,T_m0,T_0p,T_0m,(*ss_00.moA()),(*ss_p0.moA()),
+       (*ss_m0.moA()),(*ss_0p.moA()),(*ss_0m.moA()),S_00_p0,S_00_m0,
+       S_00_0p,S_00_0m);
    }
+
+
    ES_ES_NACME_DX_FILE << X << "," << Y << ",";
    ES_ES_NACME_DY_FILE << X << "," << Y << ",";
    for(auto iSt = 0; iSt < nFreq; iSt++)
@@ -1080,10 +1097,13 @@ void twoDScan(std::vector<double>& scanX,
        prettyPrint(cout,NAC_GS_ES[1]*0.529177,"GS->ES NACME DY");
        prettyPrint(cout,NAC_ES_GS[0] + NAC_GS_ES[0],"DIFF DX");
        prettyPrint(cout,NAC_ES_GS[1] + NAC_GS_ES[1],"DIFF DY");
+
+
      }
 
      prettyPrint(cout,NAC_ES_ES[0]*0.529177,"ES->ES DX");
      prettyPrint(cout,NAC_ES_ES[1]*0.529177,"ES->ES DY");
+
    }
 
   }
@@ -1486,6 +1506,163 @@ std::vector<RealMatrix> ES_ES_NACME_CIS(int nFreq,bool renorm,
       } // loop ove jb
     } // loop ove ia
   } // loop over states
+  NACME[0] *= 2;
+  NACME[1] *= 2;
+
+  return NACME;
+};
+
+std::vector<RealMatrix> ES_ES_NACME_PPTDA(int nFreq,bool renorm,
+  int nocc, int nvir, double step1, double step2, RealMatrix &T_00, 
+  RealMatrix &T_p0, RealMatrix &T_m0, RealMatrix &T_0p, 
+  RealMatrix &T_0m, RealMatrix &MO_00, RealMatrix &MO_p0, 
+  RealMatrix &MO_m0, RealMatrix &MO_0p, RealMatrix &MO_0m, 
+  RealMatrix &S_00_p0, RealMatrix &S_00_m0, RealMatrix &S_00_0p, 
+  RealMatrix &S_00_0m){
+
+  std::vector<RealMatrix> NACME(2,RealMatrix(nFreq,nFreq));
+
+  for(auto i = 0; i < NACME.size(); i++) NACME[i].setZero();
+
+  if(renorm) {
+    T_00 *= std::sqrt(0.5);
+    T_p0 *= std::sqrt(0.5);
+    T_m0 *= std::sqrt(0.5);
+    T_0p *= std::sqrt(0.5);
+    T_0m *= std::sqrt(0.5);
+  }
+
+  RealMatrix SWAPPED_AB_00(MO_00);
+  RealMatrix SWAPPED_CD_p0(MO_00);
+  RealMatrix SWAPPED_CD_m0(MO_00);
+  RealMatrix SWAPPED_CD_0p(MO_00);
+  RealMatrix SWAPPED_CD_0m(MO_00);
+
+  RealMatrix Prod_00_0p(MO_00);
+  RealMatrix Prod_00_0m(MO_00);
+  RealMatrix Prod_00_p0(MO_00);
+  RealMatrix Prod_00_m0(MO_00);
+
+  SWAPPED_AB_00.setZero();
+  SWAPPED_CD_p0.setZero();
+  SWAPPED_CD_m0.setZero();
+  SWAPPED_CD_0p.setZero();
+  SWAPPED_CD_0m.setZero();
+
+  Prod_00_0p.setZero();
+  Prod_00_0m.setZero();
+  Prod_00_p0.setZero();
+  Prod_00_m0.setZero();
+
+  for(auto iSt = 0; iSt < nFreq; iSt++)
+  for(auto jSt = 0; jSt < nFreq; jSt++){
+    for(auto a = 0, ab = 0; a < nvir; a++      )
+    for(auto b = 0        ; b <= a ;  b++, ab++)
+    for(auto c = 0, cd = 0; c < nvir; c++      )
+    for(auto d = 0        ; d <= c ;  d++, cd++){
+      SWAPPED_AB_00.setZero();
+      SWAPPED_CD_p0.setZero();
+      SWAPPED_CD_m0.setZero();
+      SWAPPED_CD_0p.setZero();
+      SWAPPED_CD_0m.setZero();
+
+      Prod_00_0p.setZero();
+      Prod_00_0m.setZero();
+      Prod_00_p0.setZero();
+      Prod_00_m0.setZero();
+
+      SWAPPED_AB_00 = MO_00;
+      SWAPPED_CD_p0 = MO_p0;
+      SWAPPED_CD_m0 = MO_m0;
+      SWAPPED_CD_0p = MO_0p;
+      SWAPPED_CD_0m = MO_0m;
+
+      SWAPPED_AB_00.col(nocc).swap(SWAPPED_AB_00.col(nocc+a));
+      SWAPPED_CD_p0.col(nocc).swap(SWAPPED_CD_p0.col(nocc+c));
+      SWAPPED_CD_m0.col(nocc).swap(SWAPPED_CD_m0.col(nocc+c));
+      SWAPPED_CD_0p.col(nocc).swap(SWAPPED_CD_0p.col(nocc+c));
+      SWAPPED_CD_0m.col(nocc).swap(SWAPPED_CD_0m.col(nocc+c));
+
+
+      Prod_00_0p = 
+        SWAPPED_AB_00.transpose() * S_00_0p * SWAPPED_CD_0p;
+      Prod_00_0m = 
+        SWAPPED_AB_00.transpose() * S_00_0m * SWAPPED_CD_0m;
+      Prod_00_p0 = 
+        SWAPPED_AB_00.transpose() * S_00_p0 * SWAPPED_CD_p0;
+      Prod_00_m0 = 
+        SWAPPED_AB_00.transpose() * S_00_m0 * SWAPPED_CD_m0;
+     
+      
+      double OvLp_Swap_00_0p =
+        Prod_00_0p.block(0,0,nocc+1,nocc+1).determinant();
+      double OvLp_Swap_00_0m =
+        Prod_00_0m.block(0,0,nocc+1,nocc+1).determinant();
+      double OvLp_Swap_00_p0 =
+        Prod_00_p0.block(0,0,nocc+1,nocc+1).determinant();
+      double OvLp_Swap_00_m0 =
+        Prod_00_m0.block(0,0,nocc+1,nocc+1).determinant();
+
+
+      SWAPPED_AB_00.setZero();
+      SWAPPED_CD_p0.setZero();
+      SWAPPED_CD_m0.setZero();
+      SWAPPED_CD_0p.setZero();
+      SWAPPED_CD_0m.setZero();
+
+      Prod_00_0p.setZero();
+      Prod_00_0m.setZero();
+      Prod_00_p0.setZero();
+      Prod_00_m0.setZero();
+
+      SWAPPED_AB_00 = MO_00;
+      SWAPPED_CD_p0 = MO_p0;
+      SWAPPED_CD_m0 = MO_m0;
+      SWAPPED_CD_0p = MO_0p;
+      SWAPPED_CD_0m = MO_0m;
+
+      SWAPPED_AB_00.col(nocc).swap(SWAPPED_AB_00.col(nocc+b));
+      SWAPPED_CD_p0.col(nocc).swap(SWAPPED_CD_p0.col(nocc+d));
+      SWAPPED_CD_m0.col(nocc).swap(SWAPPED_CD_m0.col(nocc+d));
+      SWAPPED_CD_0p.col(nocc).swap(SWAPPED_CD_0p.col(nocc+d));
+      SWAPPED_CD_0m.col(nocc).swap(SWAPPED_CD_0m.col(nocc+d));
+
+
+      Prod_00_0p = 
+        SWAPPED_AB_00.transpose() * S_00_0p * SWAPPED_CD_0p;
+      Prod_00_0m = 
+        SWAPPED_AB_00.transpose() * S_00_0m * SWAPPED_CD_0m;
+      Prod_00_p0 = 
+        SWAPPED_AB_00.transpose() * S_00_p0 * SWAPPED_CD_p0;
+      Prod_00_m0 = 
+        SWAPPED_AB_00.transpose() * S_00_m0 * SWAPPED_CD_m0;
+     
+      
+      OvLp_Swap_00_0p +=
+        Prod_00_0p.block(0,0,nocc+1,nocc+1).determinant();
+      OvLp_Swap_00_0m +=
+        Prod_00_0m.block(0,0,nocc+1,nocc+1).determinant();
+      OvLp_Swap_00_p0 +=
+        Prod_00_p0.block(0,0,nocc+1,nocc+1).determinant();
+      OvLp_Swap_00_m0 +=
+        Prod_00_m0.block(0,0,nocc+1,nocc+1).determinant();
+
+
+      double fact = 1;
+      if( a == b ) fact *= std::sqrt(0.5);
+      if( c == d ) fact *= std::sqrt(0.5);
+
+      NACME[0](iSt,jSt) += fact*T_00(ab,iSt)*(
+        T_p0(cd,jSt)*OvLp_Swap_00_p0 - 
+        T_m0(cd,jSt)*OvLp_Swap_00_m0
+      ) / (2*step1);
+      NACME[1](iSt,jSt) += fact*T_00(ab,iSt)*(
+        T_0p(cd,jSt)*OvLp_Swap_00_0p - 
+        T_0m(cd,jSt)*OvLp_Swap_00_0m
+      ) / (2*step2);
+    }
+  }
+
   NACME[0] *= 2;
   NACME[1] *= 2;
 
