@@ -1037,6 +1037,7 @@ void twoDScan(std::vector<double>& scanX,
    std::vector<Eigen::VectorXd> NAC_ES_GS;
    std::vector<RealMatrix>      NAC_ES_ES;
 
+/*
    if(respType == RESPONSE_TYPE::CIS){
      NAC_ES_GS = ES_GS_NACME_CIS(nFreq,true,NOCC,NVIR,XP-X,YP-Y,
        T_00,(*ss_00.moA()),(*ss_p0.moA()),(*ss_m0.moA()),
@@ -1106,6 +1107,7 @@ void twoDScan(std::vector<double>& scanX,
      prettyPrint(cout,NAC_ES_ES[1]*0.529177,"ES->ES DY");
 
    }
+*/
 
   }
   finalizeCQ();

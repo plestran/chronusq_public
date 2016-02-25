@@ -14,34 +14,63 @@ std::vector<T> genScan(T min,T max,T step){
 using namespace ChronusQ;
 void twoDScan(std::vector<double>&,std::vector<double>&,std::string&,RESPONSE_TYPE,int,int,int,int,
 std::string&);
+void oneDScan(std::vector<double>&,std::string&,RESPONSE_TYPE,int,int,int,std::string&);
 
 
 int main(int argc, char*argv[]){
   
+  std::string scan1MinStrx,scan1MaxStrx,scan1StepStrx,scan2MinStrx,
+    scan2MaxStrx,scan2StepStrx,basisName,respTypeStr,chargeStr,
+    nFreqStr,pxStr,pyStr,PREFIX; 
+
+  bool do2D;
   // Input parameters
-  std::string scan1MinStrx  = argv[1];
-  std::string scan1MaxStrx  = argv[2];
-  std::string scan1StepStrx = argv[3];
-  std::string scan2MinStrx  = argv[4];
-  std::string scan2MaxStrx  = argv[5];
-  std::string scan2StepStrx = argv[6];
+  if(argc == 14) {
+    do2D = true;
+    scan1MinStrx  = argv[1];
+    scan1MaxStrx  = argv[2];
+    scan1StepStrx = argv[3];
+    scan2MinStrx  = argv[4];
+    scan2MaxStrx  = argv[5];
+    scan2StepStrx = argv[6];
 
-  std::string basisName   = argv[7];
-  std::string respTypeStr = argv[8];
-  std::string chargeStr   = argv[9];
-  std::string nFreqStr    = argv[10];
-  std::string pxStr       = argv[11];
-  std::string pyStr       = argv[12];
+    basisName   = argv[7];
+    respTypeStr = argv[8];
+    chargeStr   = argv[9];
+    nFreqStr    = argv[10];
+    pxStr       = argv[11];
+    pyStr       = argv[12];
 
-  std::string PREFIX      = argv[13];
+    PREFIX      = argv[13];
+  } else if(argc == 10) {
+    do2D = false;
+    scan1MinStrx  = argv[1];
+    scan1MaxStrx  = argv[2];
+    scan1StepStrx = argv[3];
+
+    basisName   = argv[4];
+    respTypeStr = argv[5];
+    chargeStr   = argv[6];
+    nFreqStr    = argv[7];
+    pxStr       = argv[8];
+
+    PREFIX      = argv[9];
+  } else {
+    cout << "Incorrect arguements" << endl;
+    exit(EXIT_FAILURE);
+  }
+
+  double scan1Min , scan1Max , scan1Step, scan2Min , scan2Max , scan2Step; 
 
   // Parse inout parameters
-  double scan1Min  = std::atof(scan1MinStrx.c_str()); 
-  double scan1Max  = std::atof(scan1MaxStrx.c_str()); 
-  double scan1Step = std::atof(scan1StepStrx.c_str());
-  double scan2Min  = std::atof(scan2MinStrx.c_str()); 
-  double scan2Max  = std::atof(scan2MaxStrx.c_str()); 
-  double scan2Step = std::atof(scan2StepStrx.c_str());
+  scan1Min  = std::atof(scan1MinStrx.c_str()); 
+  scan1Max  = std::atof(scan1MaxStrx.c_str()); 
+  scan1Step = std::atof(scan1StepStrx.c_str());
+  if(do2D){
+    scan2Min  = std::atof(scan2MinStrx.c_str()); 
+    scan2Max  = std::atof(scan2MaxStrx.c_str()); 
+    scan2Step = std::atof(scan2StepStrx.c_str());
+  }
 
   RESPONSE_TYPE respType;
   if(!respTypeStr.compare("CIS")) respType = RESPONSE_TYPE::CIS;
@@ -49,14 +78,23 @@ int main(int argc, char*argv[]){
 
   int charge = std::atoi(chargeStr.c_str());
   int nFreq  = std::atoi(nFreqStr.c_str());
-  int px     = std::atoi(pxStr.c_str());
-  int py     = std::atoi(pyStr.c_str()); 
 
-  std::vector<double> scan1 = genScan(scan1Min,scan1Max,scan1Step);
-  std::vector<double> scan2 = genScan(scan2Min,scan2Max,scan2Step);
+  int px,py;
+
+  px     = std::atoi(pxStr.c_str());
+  if(do2D)
+     py     = std::atoi(pyStr.c_str()); 
+
+  std::vector<double> scan1,scan2;
+  scan1 = genScan(scan1Min,scan1Max,scan1Step);
+  if(do2D)
+    scan2 = genScan(scan2Min,scan2Max,scan2Step);
   
-  twoDScan(scan1,scan2,basisName,respType,charge,
-    nFreq,px,py,PREFIX);
+  if(do2D)
+    twoDScan(scan1,scan2,basisName,respType,charge,
+      nFreq,px,py,PREFIX);
+  else
+    oneDScan(scan1,basisName,respType,charge,nFreq,px,PREFIX);
 
   return 0;
 }

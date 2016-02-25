@@ -1,4 +1,4 @@
-add_executable(numdiff test.cpp numdiff.cpp)
+add_executable(numdiff test.cpp numdiff_2d.cpp numdiff_1d.cpp)
 target_link_libraries(numdiff LINK_PUBLIC classtools)
 target_link_libraries(numdiff LINK_PUBLIC singleslater)
 target_link_libraries(numdiff LINK_PUBLIC grid)
