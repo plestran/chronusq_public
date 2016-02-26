@@ -387,29 +387,20 @@ void printUnitInfo(Controls * controls, SingleSlater<dcomplex> * singleSlater, S
 
 void initCQ(int argc, char** argv){
 #ifdef USE_LIBINT
-  cout << "Before Libint" << endl;
   // Bootstrap Libint env
   libint2::init(); 
 #endif
 #ifdef _OPENMP
   // Set up Thread Pool (Default serial)
-  cout << "After Libint with openMP 0" << endl;
   omp_set_num_threads(1);
-  cout << "After Libint and after openMP 1" << endl;  
 #endif
-  cout << "After Libint and after openMP 1.5" << endl;
 #ifdef CQ_ENABLE_MPI
-  cout << "After Libint and after openMP 2" << endl;
   int flag;
-  cout << "After Libint and after openMP 3" << endl;
   MPI_Initialized(&flag);
-  cout << "After Libint and after openMP 4" << endl;
   if(flag) return;
   MPI_Init(&argc,&argv);
   MPI_Barrier(MPI_COMM_WORLD);
-  cout << "After enabling MPI 3" << endl;
 #endif
-  cout << "End of initCQ" << endl;
 }
 
 void finalizeCQ(){
