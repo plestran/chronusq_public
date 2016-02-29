@@ -1,3 +1,4 @@
+#define EIGEN_DONT_PARALLELIZE
 #include <response.h>
 #include <workers.h>
 #include <pythonapi.h>

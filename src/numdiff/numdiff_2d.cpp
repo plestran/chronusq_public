@@ -1,3 +1,4 @@
+#define EIGEN_DONT_PARALLELIZE
 #include <response.h>
 #include <workers.h>
 #include <pythonapi.h>
@@ -47,21 +48,14 @@ void twoDScan(std::vector<double>& scanX,
               int px, int py,
               std::string &PREFIX){
 
-//std::string PREFIX = "LiH";
   std::string BINPREFIX = "BIN";
   std::string XYZPREFIX = "XYZ";
 
   initCQ();
   Controls controls;
-  CQSetNumThreads(1);
+  CQSetNumThreads(3);
   controls.iniControls();
 
-//std::string basisName = "cc-pVDZ";
-//RESPONSE_TYPE respType = RESPONSE_TYPE::CIS;
-//int charge = 0;
-//int nFreq = 4;
-//int px = 3;
-//int py = 6;
   bool debug = true;
 
   std::string GS_ENERGY_FILE_NAME = PREFIX + "_gsEnergy.dat";
@@ -104,16 +98,16 @@ void twoDScan(std::vector<double>& scanX,
     cout << bannerTop << endl;
     cout << "Starting Numerical Differentiation for:" << endl;
     cout << "  IX = " << IX << "  JY = " << JY << endl;
-    FileIO fileio_00("test_00.inp",PREFIX+".out_00",
-      PREFIX+".rst_00");
-    FileIO fileio_p0("test_p0.inp",PREFIX+".out_p0",
-      PREFIX+".rst_p0");
-    FileIO fileio_m0("test_m0.inp",PREFIX+".out_m0",
-      PREFIX+".rst_m0");
-    FileIO fileio_0p("test_0p.inp",PREFIX+".out_0p",
-      PREFIX+".rst_0p");
-    FileIO fileio_0m("test_0m.inp",PREFIX+".out_0m",
-      PREFIX+".rst_0m");
+    FileIO fileio_00(PREFIX+"_"+std::to_string(IX)+"_"+std::to_string(JY)+"_00.inp",PREFIX+"_"+std::to_string(IX)+"_"+std::to_string(JY)+".out_00",
+      PREFIX+"_"+std::to_string(IX)+"_"+std::to_string(JY)+".rst_00");
+    FileIO fileio_p0(PREFIX+"_"+std::to_string(IX)+"_"+std::to_string(JY)+"_p0.inp",PREFIX+"_"+std::to_string(IX)+"_"+std::to_string(JY)+".out_p0",
+      PREFIX+"_"+std::to_string(IX)+"_"+std::to_string(JY)+".rst_p0");
+    FileIO fileio_m0(PREFIX+"_"+std::to_string(IX)+"_"+std::to_string(JY)+"_m0.inp",PREFIX+"_"+std::to_string(IX)+"_"+std::to_string(JY)+".out_m0",
+      PREFIX+"_"+std::to_string(IX)+"_"+std::to_string(JY)+".rst_m0");
+    FileIO fileio_0p(PREFIX+"_"+std::to_string(IX)+"_"+std::to_string(JY)+"_0p.inp",PREFIX+"_"+std::to_string(IX)+"_"+std::to_string(JY)+".out_0p",
+      PREFIX+"_"+std::to_string(IX)+"_"+std::to_string(JY)+".rst_0p");
+    FileIO fileio_0m(PREFIX+"_"+std::to_string(IX)+"_"+std::to_string(JY)+"_0m.inp",PREFIX+"_"+std::to_string(IX)+"_"+std::to_string(JY)+".out_0m",
+      PREFIX+"_"+std::to_string(IX)+"_"+std::to_string(JY)+".rst_0m");
 
     fileio_00.iniH5Files();
     fileio_p0.iniH5Files();
@@ -630,6 +624,75 @@ void twoDScan(std::vector<double>& scanX,
     RealMatrix O_00_m0(SMO_00_m0);
     RealMatrix O_00_0p(SMO_00_0p);
     RealMatrix O_00_0m(SMO_00_0m);
+
+
+
+    cout << "  (X,Y) -> (X+DX,Y) MO Mapping" << endl;
+    for(auto iMO = 0; iMO < SMO_00_p0.cols(); iMO++){
+      RealMatrix::Index maxRow;
+      double maxVal = O_00_p0.cwiseAbs().col(iMO).maxCoeff(&maxRow);
+      std::stringstream mapStr, ovlpStr; 
+      mapStr  << "    " << iMO << " -> " << maxRow;
+      ovlpStr << "< " << iMO << "(X,Y) | " << maxRow << "(X+DX,Y) >"; 
+              
+
+      cout << std::left << std::setw(10) << mapStr.str();
+      cout << "\t";
+      cout << std::left << std::setw(25) << ovlpStr.str() << " = " << maxVal;
+      cout << endl;
+    }
+
+    cout << endl;
+    cout << "  (X,Y) -> (X-DX,Y) MO Mapping" << endl;
+    for(auto iMO = 0; iMO < SMO_00_m0.cols(); iMO++){
+      RealMatrix::Index maxRow;
+      double maxVal = O_00_m0.cwiseAbs().col(iMO).maxCoeff(&maxRow);
+      std::stringstream mapStr, ovlpStr; 
+      mapStr  << "    " << iMO << " -> " << maxRow;
+      ovlpStr << "< " << iMO << "(X,Y) | " << maxRow << "(X-DX,Y) >"; 
+              
+
+      cout << std::left << std::setw(10) << mapStr.str();
+      cout << "\t";
+      cout << std::left << std::setw(25) << ovlpStr.str() << " = " << maxVal;
+      cout << endl;
+    }
+
+    cout << endl;
+    cout << "  (X,Y) -> (X,Y+DY) MO Mapping" << endl;
+    for(auto iMO = 0; iMO < SMO_00_0p.cols(); iMO++){
+      RealMatrix::Index maxRow;
+      double maxVal = O_00_0p.cwiseAbs().col(iMO).maxCoeff(&maxRow);
+      std::stringstream mapStr, ovlpStr; 
+      mapStr  << "    " << iMO << " -> " << maxRow;
+      ovlpStr << "< " << iMO << "(X,Y) | " << maxRow << "(X,Y+DY) >"; 
+              
+
+      cout << std::left << std::setw(10) << mapStr.str();
+      cout << "\t";
+      cout << std::left << std::setw(25) << ovlpStr.str() << " = " << maxVal;
+      cout << endl;
+    }
+
+    cout << endl;
+    cout << "  (X,Y) -> (X,Y-DY) MO Mapping" << endl;
+    for(auto iMO = 0; iMO < SMO_00_0m.cols(); iMO++){
+      RealMatrix::Index maxRow;
+      double maxVal = O_00_0m.cwiseAbs().col(iMO).maxCoeff(&maxRow);
+      std::stringstream mapStr, ovlpStr; 
+      mapStr  << "    " << iMO << " -> " << maxRow;
+      ovlpStr << "< " << iMO << "(X,Y) | " << maxRow << "(X,Y-DY) >"; 
+              
+
+      cout << std::left << std::setw(10) << mapStr.str();
+      cout << "\t";
+      cout << std::left << std::setw(25) << ovlpStr.str() << " = " << maxVal;
+      cout << endl;
+    }
+
+    cout << endl;
+
+
     for(auto mu = 0; mu < SMO_00_p0.rows(); mu++)
     for(auto nu = 0; nu < SMO_00_p0.rows(); nu++){
       if(std::abs(O_00_p0(mu,nu)) < 1e-2) O_00_p0(mu,nu) = 0.0;
@@ -1037,7 +1100,6 @@ void twoDScan(std::vector<double>& scanX,
    std::vector<Eigen::VectorXd> NAC_ES_GS;
    std::vector<RealMatrix>      NAC_ES_ES;
 
-/*
    if(respType == RESPONSE_TYPE::CIS){
      NAC_ES_GS = ES_GS_NACME_CIS(nFreq,true,NOCC,NVIR,XP-X,YP-Y,
        T_00,(*ss_00.moA()),(*ss_p0.moA()),(*ss_m0.moA()),
@@ -1107,7 +1169,6 @@ void twoDScan(std::vector<double>& scanX,
      prettyPrint(cout,NAC_ES_ES[1]*0.529177,"ES->ES DY");
 
    }
-*/
 
   }
   finalizeCQ();
@@ -1248,52 +1309,65 @@ std::vector<Eigen::VectorXd> ES_GS_NACME_CIS(int nFreq,bool renorm,
 //T_00.transposeInPlace();
 //prettyPrint(cout,T_00,"T");
 
-  RealMatrix SWAPPED_00(MO_00);
-  RealMatrix Prod_00_0p(MO_00);
-  RealMatrix Prod_00_0m(MO_00);
-  RealMatrix Prod_00_p0(MO_00);
-  RealMatrix Prod_00_m0(MO_00);
-  SWAPPED_00.setZero();
-  Prod_00_0p.setZero();
-  Prod_00_0m.setZero();
-  Prod_00_p0.setZero();
-  Prod_00_m0.setZero();
+  int nThreads = omp_get_max_threads();
+
+  std::vector<RealMatrix> SWAPPED_00(nThreads,RealMatrix(MO_00));
+  std::vector<RealMatrix> Prod_00_0p(nThreads,RealMatrix(MO_00));
+  std::vector<RealMatrix> Prod_00_0m(nThreads,RealMatrix(MO_00));
+  std::vector<RealMatrix> Prod_00_p0(nThreads,RealMatrix(MO_00));
+  std::vector<RealMatrix> Prod_00_m0(nThreads,RealMatrix(MO_00));
+
+  auto NACMEStart = std::chrono::high_resolution_clock::now();
   for(auto iSt = 0; iSt < nFreq; iSt++){
-    for(auto i = 0, ia = 0; i < nocc; i++)
-    for(auto a = 0; a < nvir; a++, ia++){
-      if(std::abs(T_00(ia,iSt)) < 1e-8) continue;
-      SWAPPED_00.setZero();
-      Prod_00_0p.setZero();
-      Prod_00_0m.setZero();
-      Prod_00_p0.setZero();
-      Prod_00_m0.setZero();
-      
-      SWAPPED_00 = MO_00;
-      SWAPPED_00.col(i).swap(SWAPPED_00.col(nocc+a)); 
-      
-      Prod_00_0p = SWAPPED_00.transpose() * S_00_0p * MO_0p;
-      Prod_00_0m = SWAPPED_00.transpose() * S_00_0m * MO_0m;
-      Prod_00_p0 = SWAPPED_00.transpose() * S_00_p0 * MO_p0;
-      Prod_00_m0 = SWAPPED_00.transpose() * S_00_m0 * MO_m0;
+    cout << "Working on iSt = " << iSt << " ES->GS" << endl;
+    #pragma omp parallel
+    {
+      int thread_id = omp_get_thread_num();
+      for(auto i = 0, ia = 0; i < nocc; i++)
+      for(auto a = 0; a < nvir; a++, ia++){
+        if(ia % nThreads != thread_id) continue;
+        if(std::abs(T_00(ia,iSt)) < 1e-8) continue;
 
-      double OvLp_IASwap_00_0p =
-        Prod_00_0p.block(0,0,nocc,nocc).determinant();
-      double OvLp_IASwap_00_0m =
-        Prod_00_0m.block(0,0,nocc,nocc).determinant();
-      double OvLp_IASwap_00_p0 =
-        Prod_00_p0.block(0,0,nocc,nocc).determinant();
-      double OvLp_IASwap_00_m0 =
-        Prod_00_m0.block(0,0,nocc,nocc).determinant();
-
-      NACME[0](iSt) += T_00(ia,iSt) *
-        (OvLp_IASwap_00_p0 - OvLp_IASwap_00_m0) /
-        (2*step1);
-      NACME[1](iSt) += T_00(ia,iSt) *
-        (OvLp_IASwap_00_0p - OvLp_IASwap_00_0m) /
-        (2*step2);
-    } // loop ove ia
+        SWAPPED_00[thread_id].setZero();
+        Prod_00_0p[thread_id].setZero();
+        Prod_00_0m[thread_id].setZero();
+        Prod_00_p0[thread_id].setZero();
+        Prod_00_m0[thread_id].setZero();
+        
+        SWAPPED_00[thread_id] = MO_00;
+        SWAPPED_00[thread_id].col(i).swap(SWAPPED_00[thread_id].col(nocc+a)); 
+        
+        Prod_00_0p[thread_id] = SWAPPED_00[thread_id].transpose() * S_00_0p * MO_0p;
+        Prod_00_0m[thread_id] = SWAPPED_00[thread_id].transpose() * S_00_0m * MO_0m;
+        Prod_00_p0[thread_id] = SWAPPED_00[thread_id].transpose() * S_00_p0 * MO_p0;
+        Prod_00_m0[thread_id] = SWAPPED_00[thread_id].transpose() * S_00_m0 * MO_m0;
+     
+        double OvLp_IASwap_00_0p =
+          Prod_00_0p[thread_id].block(0,0,nocc,nocc).determinant();
+        double OvLp_IASwap_00_0m =
+          Prod_00_0m[thread_id].block(0,0,nocc,nocc).determinant();
+        double OvLp_IASwap_00_p0 =
+          Prod_00_p0[thread_id].block(0,0,nocc,nocc).determinant();
+        double OvLp_IASwap_00_m0 =
+          Prod_00_m0[thread_id].block(0,0,nocc,nocc).determinant();
+     
+        #pragma omp critical
+        {
+          NACME[0](iSt) += T_00(ia,iSt) *
+            (OvLp_IASwap_00_p0 - OvLp_IASwap_00_m0) /
+            (2*step1);
+          NACME[1](iSt) += T_00(ia,iSt) *
+            (OvLp_IASwap_00_0p - OvLp_IASwap_00_0m) /
+            (2*step2);
+        }
+      } // loop ove ia
+    }
   } // loop over states
 
+  auto NACMEEnd = std::chrono::high_resolution_clock::now();
+
+  std::chrono::duration<double> elapsed = NACMEEnd - NACMEStart;
+  cout << "ES -> GS NACME took " << elapsed.count() << " s" << endl;
   NACME[0] = 2*NACME[0];
   NACME[1] = 2*NACME[1];
   return NACME;
@@ -1419,16 +1493,18 @@ std::vector<RealMatrix> ES_ES_NACME_CIS(int nFreq,bool renorm,
     T_0m *= std::sqrt(0.5);
   }
 
-  RealMatrix SWAPPED_IA_00(MO_00);
-  RealMatrix SWAPPED_JB_p0(MO_00);
-  RealMatrix SWAPPED_JB_m0(MO_00);
-  RealMatrix SWAPPED_JB_0p(MO_00);
-  RealMatrix SWAPPED_JB_0m(MO_00);
+  int nThreads = omp_get_max_threads();
 
-  RealMatrix Prod_00_0p(MO_00);
-  RealMatrix Prod_00_0m(MO_00);
-  RealMatrix Prod_00_p0(MO_00);
-  RealMatrix Prod_00_m0(MO_00);
+  std::vector<RealMatrix> SWAPPED_IA_00(nThreads,RealMatrix(MO_00));
+  std::vector<RealMatrix> SWAPPED_JB_p0(nThreads,RealMatrix(MO_00));
+  std::vector<RealMatrix> SWAPPED_JB_m0(nThreads,RealMatrix(MO_00));
+  std::vector<RealMatrix> SWAPPED_JB_0p(nThreads,RealMatrix(MO_00));
+  std::vector<RealMatrix> SWAPPED_JB_0m(nThreads,RealMatrix(MO_00));
+
+  std::vector<RealMatrix> Prod_00_0p(nThreads,RealMatrix(MO_00));
+  std::vector<RealMatrix> Prod_00_0m(nThreads,RealMatrix(MO_00));
+  std::vector<RealMatrix> Prod_00_p0(nThreads,RealMatrix(MO_00));
+  std::vector<RealMatrix> Prod_00_m0(nThreads,RealMatrix(MO_00));
 
 // VALIDATION BEGIN **************
   RealMatrix T1Prod_00_0p(MO_00);
@@ -1441,16 +1517,6 @@ std::vector<RealMatrix> ES_ES_NACME_CIS(int nFreq,bool renorm,
   RealMatrix T2Prod_00_m0(MO_00);
 // VALIDATION END **************
 
-  SWAPPED_IA_00.setZero();
-  SWAPPED_JB_p0.setZero();
-  SWAPPED_JB_m0.setZero();
-  SWAPPED_JB_0p.setZero();
-  SWAPPED_JB_0m.setZero();
-
-  Prod_00_0p.setZero();
-  Prod_00_0m.setZero();
-  Prod_00_p0.setZero();
-  Prod_00_m0.setZero();
 
 
   if(doValidation) {
@@ -1466,150 +1532,164 @@ std::vector<RealMatrix> ES_ES_NACME_CIS(int nFreq,bool renorm,
 // VALIDATION END **************
   }
 
+  auto NACMEStart = std::chrono::high_resolution_clock::now();
   for(auto iSt = 0; iSt < nFreq; iSt++)
   for(auto jSt = 0; jSt < nFreq; jSt++){
-    for(auto i = 0, ia = 0; i < nocc; i++)
-    for(auto a = 0; a < nvir; a++, ia++){
-    //if(T_00(ia,iSt) < 1e-8) continue;   
-
-      SWAPPED_IA_00.setZero();
-      SWAPPED_IA_00 = MO_00;
-
-      SWAPPED_IA_00.col(i).swap(SWAPPED_IA_00.col(nocc+a)); 
-
-      for(auto j = 0, jb = 0; j < nocc; j++)
-      for(auto b = 0; b < nvir; b++, jb++){
-      //if(
-      //  (std::abs(T_p0(jb,iSt)) < 1e-8) &&
-      //  (std::abs(T_m0(jb,iSt)) < 1e-8) &&
-      //  (std::abs(T_0p(jb,iSt)) < 1e-8) &&
-      //  (std::abs(T_0m(jb,iSt)) < 1e-8)
-      //) continue;
+    cout << "Working on iSt = " << iSt <<" jSt = " << jSt << endl;
+    #pragma omp parallel
+    {
+      int thread_id = omp_get_thread_num();
+      for(auto i = 0, ia = 0, iajb = 0; i < nocc; i++)
+      for(auto a = 0; a < nvir; a++, ia++){
+      //if(T_00(ia,iSt) < 1e-8) continue;   
      
-        SWAPPED_JB_p0.setZero();
-        SWAPPED_JB_m0.setZero();
-        SWAPPED_JB_0p.setZero();
-        SWAPPED_JB_0m.setZero();
+        SWAPPED_IA_00[thread_id].setZero();
+        SWAPPED_IA_00[thread_id] = MO_00;
      
-        Prod_00_0p.setZero();
-        Prod_00_0m.setZero();
-        Prod_00_p0.setZero();
-        Prod_00_m0.setZero();
-        
-        SWAPPED_JB_p0 = MO_p0;
-        SWAPPED_JB_m0 = MO_m0;
-        SWAPPED_JB_0p = MO_0p;
-        SWAPPED_JB_0m = MO_0m;
+        SWAPPED_IA_00[thread_id].col(i).swap(SWAPPED_IA_00[thread_id].col(nocc+a)); 
      
-        SWAPPED_JB_p0.col(j).swap(SWAPPED_JB_p0.col(nocc+b)); 
-        SWAPPED_JB_m0.col(j).swap(SWAPPED_JB_m0.col(nocc+b)); 
-        SWAPPED_JB_0p.col(j).swap(SWAPPED_JB_0p.col(nocc+b)); 
-        SWAPPED_JB_0m.col(j).swap(SWAPPED_JB_0m.col(nocc+b)); 
-        
-        Prod_00_0p = 
-          SWAPPED_IA_00.transpose() * S_00_0p * SWAPPED_JB_0p;
-        Prod_00_0m = 
-          SWAPPED_IA_00.transpose() * S_00_0m * SWAPPED_JB_0m;
-        Prod_00_p0 = 
-          SWAPPED_IA_00.transpose() * S_00_p0 * SWAPPED_JB_p0;
-        Prod_00_m0 = 
-          SWAPPED_IA_00.transpose() * S_00_m0 * SWAPPED_JB_m0;
+        for(auto j = 0, jb = 0; j < nocc; j++)
+        for(auto b = 0; b < nvir; b++, jb++, iajb++){
+          if(iajb % nThreads != thread_id) continue;
+          if(
+            (std::abs(T_p0(jb,jSt)) < 1e-8) &&
+            (std::abs(T_m0(jb,jSt)) < 1e-8) &&
+            (std::abs(T_0p(jb,jSt)) < 1e-8) &&
+            (std::abs(T_0m(jb,jSt)) < 1e-8)
+          ) continue;
+       
+          SWAPPED_JB_p0[thread_id].setZero();
+          SWAPPED_JB_m0[thread_id].setZero();
+          SWAPPED_JB_0p[thread_id].setZero();
+          SWAPPED_JB_0m[thread_id].setZero();
+       
+          Prod_00_0p[thread_id].setZero();
+          Prod_00_0m[thread_id].setZero();
+          Prod_00_p0[thread_id].setZero();
+          Prod_00_m0[thread_id].setZero();
+          
+          SWAPPED_JB_p0[thread_id] = MO_p0;
+          SWAPPED_JB_m0[thread_id] = MO_m0;
+          SWAPPED_JB_0p[thread_id] = MO_0p;
+          SWAPPED_JB_0m[thread_id] = MO_0m;
+       
+          SWAPPED_JB_p0[thread_id].col(j).swap(SWAPPED_JB_p0[thread_id].col(nocc+b)); 
+          SWAPPED_JB_m0[thread_id].col(j).swap(SWAPPED_JB_m0[thread_id].col(nocc+b)); 
+          SWAPPED_JB_0p[thread_id].col(j).swap(SWAPPED_JB_0p[thread_id].col(nocc+b)); 
+          SWAPPED_JB_0m[thread_id].col(j).swap(SWAPPED_JB_0m[thread_id].col(nocc+b)); 
+          
+          Prod_00_0p[thread_id] = 
+            SWAPPED_IA_00[thread_id].transpose() * S_00_0p * SWAPPED_JB_0p[thread_id];
+          Prod_00_0m[thread_id] = 
+            SWAPPED_IA_00[thread_id].transpose() * S_00_0m * SWAPPED_JB_0m[thread_id];
+          Prod_00_p0[thread_id] = 
+            SWAPPED_IA_00[thread_id].transpose() * S_00_p0 * SWAPPED_JB_p0[thread_id];
+          Prod_00_m0[thread_id] = 
+            SWAPPED_IA_00[thread_id].transpose() * S_00_m0 * SWAPPED_JB_m0[thread_id];
+       
+         if(doValidation) {
+//  VVALIDATION BEGIN **************
+            T1Prod_00_0p.setZero();
+            T1Prod_00_0m.setZero();
+            T1Prod_00_p0.setZero();
+            T1Prod_00_m0.setZero();
+           
+            T1Prod_00_0p = 
+              MO_00.transpose() * S_00_0p * SWAPPED_JB_0p[thread_id];
+            T1Prod_00_0m = 
+              MO_00.transpose() * S_00_0m * SWAPPED_JB_0m[thread_id];
+            T1Prod_00_p0 = 
+              MO_00.transpose() * S_00_p0 * SWAPPED_JB_p0[thread_id];
+            T1Prod_00_m0 = 
+              MO_00.transpose() * S_00_m0 * SWAPPED_JB_m0[thread_id];
+           
+            T2Prod_00_0p.setZero();
+            T2Prod_00_0m.setZero();
+            T2Prod_00_p0.setZero();
+            T2Prod_00_m0.setZero();
+           
+            T2Prod_00_0p = 
+              SWAPPED_IA_00[thread_id].transpose() * S_00_0p * MO_0p;
+            T2Prod_00_0m = 
+              SWAPPED_IA_00[thread_id].transpose() * S_00_0m * MO_0m;
+            T2Prod_00_p0 = 
+              SWAPPED_IA_00[thread_id].transpose() * S_00_p0 * MO_p0;
+            T2Prod_00_m0 = 
+              SWAPPED_IA_00[thread_id].transpose() * S_00_m0 * MO_m0;
+          }
+//  VVALIDATION END **************
+          
+          double OvLp_IASwap_00_0p =
+            Prod_00_0p[thread_id].block(0,0,nocc,nocc).determinant();
+          double OvLp_IASwap_00_0m =
+            Prod_00_0m[thread_id].block(0,0,nocc,nocc).determinant();
+          double OvLp_IASwap_00_p0 =
+            Prod_00_p0[thread_id].block(0,0,nocc,nocc).determinant();
+          double OvLp_IASwap_00_m0 =
+            Prod_00_m0[thread_id].block(0,0,nocc,nocc).determinant();
      
-       if(doValidation) {
-// VALIDATION BEGIN **************
-          T1Prod_00_0p.setZero();
-          T1Prod_00_0m.setZero();
-          T1Prod_00_p0.setZero();
-          T1Prod_00_m0.setZero();
-         
-          T1Prod_00_0p = 
-            MO_00.transpose() * S_00_0p * SWAPPED_JB_0p;
-          T1Prod_00_0m = 
-            MO_00.transpose() * S_00_0m * SWAPPED_JB_0m;
-          T1Prod_00_p0 = 
-            MO_00.transpose() * S_00_p0 * SWAPPED_JB_p0;
-          T1Prod_00_m0 = 
-            MO_00.transpose() * S_00_m0 * SWAPPED_JB_m0;
-         
-          T2Prod_00_0p.setZero();
-          T2Prod_00_0m.setZero();
-          T2Prod_00_p0.setZero();
-          T2Prod_00_m0.setZero();
-         
-          T2Prod_00_0p = 
-            SWAPPED_IA_00.transpose() * S_00_0p * MO_0p;
-          T2Prod_00_0m = 
-            SWAPPED_IA_00.transpose() * S_00_0m * MO_0m;
-          T2Prod_00_p0 = 
-            SWAPPED_IA_00.transpose() * S_00_p0 * MO_p0;
-          T2Prod_00_m0 = 
-            SWAPPED_IA_00.transpose() * S_00_m0 * MO_m0;
-        }
-// VALIDATION END **************
-        
-        double OvLp_IASwap_00_0p =
-          Prod_00_0p.block(0,0,nocc,nocc).determinant();
-        double OvLp_IASwap_00_0m =
-          Prod_00_0m.block(0,0,nocc,nocc).determinant();
-        double OvLp_IASwap_00_p0 =
-          Prod_00_p0.block(0,0,nocc,nocc).determinant();
-        double OvLp_IASwap_00_m0 =
-          Prod_00_m0.block(0,0,nocc,nocc).determinant();
-
-// VALIDATION BEGIN **************
-        if(doValidation) {
-          double T1OvLp_IASwap_00_0p =
-            T1Prod_00_0p.block(0,0,nocc,nocc).determinant();
-          double T1OvLp_IASwap_00_0m =
-            T1Prod_00_0m.block(0,0,nocc,nocc).determinant();
-          double T1OvLp_IASwap_00_p0 =
-            T1Prod_00_p0.block(0,0,nocc,nocc).determinant();
-          double T1OvLp_IASwap_00_m0 =
-            T1Prod_00_m0.block(0,0,nocc,nocc).determinant();
-         
-          double T2OvLp_IASwap_00_0p =
-            T2Prod_00_0p.block(0,0,nocc,nocc).determinant();
-          double T2OvLp_IASwap_00_0m =
-            T2Prod_00_0m.block(0,0,nocc,nocc).determinant();
-          double T2OvLp_IASwap_00_p0 =
-            T2Prod_00_p0.block(0,0,nocc,nocc).determinant();
-          double T2OvLp_IASwap_00_m0 =
-            T2Prod_00_m0.block(0,0,nocc,nocc).determinant();
-         
-          cout << "******** " << iSt << "," << jSt << "," << ia << "," << jb << endl;
-          cout << OvLp_IASwap_00_0p  << endl;
-          cout << OvLp_IASwap_00_0m  << endl;
-          cout << OvLp_IASwap_00_p0  << endl;
-          cout << OvLp_IASwap_00_m0  << endl;
-          cout << endl;
-          cout << T1OvLp_IASwap_00_0p  << endl;
-          cout << T1OvLp_IASwap_00_0m  << endl;
-          cout << T1OvLp_IASwap_00_p0  << endl;
-          cout << T1OvLp_IASwap_00_m0  << endl;
-          cout << endl;
-          cout << T2OvLp_IASwap_00_0p  << endl;
-          cout << T2OvLp_IASwap_00_0m  << endl;
-          cout << T2OvLp_IASwap_00_p0  << endl;
-          cout << T2OvLp_IASwap_00_m0  << endl;
-          cout << endl;
-          cout << OvLp_IASwap_00_0p - T1OvLp_IASwap_00_0p*T2OvLp_IASwap_00_0p << endl;
-          cout << OvLp_IASwap_00_0m - T1OvLp_IASwap_00_0m*T2OvLp_IASwap_00_0m << endl;
-          cout << OvLp_IASwap_00_p0 - T1OvLp_IASwap_00_p0*T2OvLp_IASwap_00_p0 << endl;
-          cout << OvLp_IASwap_00_m0 - T1OvLp_IASwap_00_m0*T2OvLp_IASwap_00_m0 << endl;
-        }
-// VALIDATION END **************
-     
-        NACME[0](iSt,jSt) += T_00(ia,iSt)*(
-          T_p0(jb,jSt)*OvLp_IASwap_00_p0 - 
-          T_m0(jb,jSt)*OvLp_IASwap_00_m0
-        ) / (2*step1);
-        NACME[1](iSt,jSt) += T_00(ia,iSt)*(
-          T_0p(jb,jSt)*OvLp_IASwap_00_0p - 
-          T_0m(jb,jSt)*OvLp_IASwap_00_0m
-        ) / (2*step2);
-      } // loop ove jb
-    } // loop ove ia
+//  VVALIDATION BEGIN **************
+          if(doValidation) {
+            double T1OvLp_IASwap_00_0p =
+              T1Prod_00_0p.block(0,0,nocc,nocc).determinant();
+            double T1OvLp_IASwap_00_0m =
+              T1Prod_00_0m.block(0,0,nocc,nocc).determinant();
+            double T1OvLp_IASwap_00_p0 =
+              T1Prod_00_p0.block(0,0,nocc,nocc).determinant();
+            double T1OvLp_IASwap_00_m0 =
+              T1Prod_00_m0.block(0,0,nocc,nocc).determinant();
+           
+            double T2OvLp_IASwap_00_0p =
+              T2Prod_00_0p.block(0,0,nocc,nocc).determinant();
+            double T2OvLp_IASwap_00_0m =
+              T2Prod_00_0m.block(0,0,nocc,nocc).determinant();
+            double T2OvLp_IASwap_00_p0 =
+              T2Prod_00_p0.block(0,0,nocc,nocc).determinant();
+            double T2OvLp_IASwap_00_m0 =
+              T2Prod_00_m0.block(0,0,nocc,nocc).determinant();
+           
+            cout << "******** " << iSt << "," << jSt << "," << ia << "," << jb << endl;
+            cout << OvLp_IASwap_00_0p  << endl;
+            cout << OvLp_IASwap_00_0m  << endl;
+            cout << OvLp_IASwap_00_p0  << endl;
+            cout << OvLp_IASwap_00_m0  << endl;
+            cout << endl;
+            cout << T1OvLp_IASwap_00_0p  << endl;
+            cout << T1OvLp_IASwap_00_0m  << endl;
+            cout << T1OvLp_IASwap_00_p0  << endl;
+            cout << T1OvLp_IASwap_00_m0  << endl;
+            cout << endl;
+            cout << T2OvLp_IASwap_00_0p  << endl;
+            cout << T2OvLp_IASwap_00_0m  << endl;
+            cout << T2OvLp_IASwap_00_p0  << endl;
+            cout << T2OvLp_IASwap_00_m0  << endl;
+            cout << endl;
+            cout << OvLp_IASwap_00_0p - T1OvLp_IASwap_00_0p*T2OvLp_IASwap_00_0p << endl;
+            cout << OvLp_IASwap_00_0m - T1OvLp_IASwap_00_0m*T2OvLp_IASwap_00_0m << endl;
+            cout << OvLp_IASwap_00_p0 - T1OvLp_IASwap_00_p0*T2OvLp_IASwap_00_p0 << endl;
+            cout << OvLp_IASwap_00_m0 - T1OvLp_IASwap_00_m0*T2OvLp_IASwap_00_m0 << endl;
+          }
+//  VVALIDATION END **************
+       
+          #pragma omp critical
+          {
+            NACME[0](iSt,jSt) += T_00(ia,iSt)*(
+              T_p0(jb,jSt)*OvLp_IASwap_00_p0 - 
+              T_m0(jb,jSt)*OvLp_IASwap_00_m0
+            ) / (2*step1);
+            NACME[1](iSt,jSt) += T_00(ia,iSt)*(
+              T_0p(jb,jSt)*OvLp_IASwap_00_0p - 
+              T_0m(jb,jSt)*OvLp_IASwap_00_0m
+            ) / (2*step2);
+          }
+        } // loop ove jb
+      } // loop ove ia
+    }
   } // loop over states
+  auto NACMEEnd = std::chrono::high_resolution_clock::now();
+
+  std::chrono::duration<double> elapsed = NACMEEnd - NACMEStart;
+  cout << "ES -> ES NACME took " << elapsed.count() << " s" << endl;
   NACME[0] *= 2;
   NACME[1] *= 2;
 
@@ -1628,263 +1708,247 @@ std::vector<RealMatrix> ES_ES_NACME_PPTDA(int nFreq,bool renorm,
 
   for(auto i = 0; i < NACME.size(); i++) NACME[i].setZero();
 
-  if(renorm) {
-//  T_00 *= std::sqrt(0.5);
-//  T_p0 *= std::sqrt(0.5);
-//  T_m0 *= std::sqrt(0.5);
-//  T_0p *= std::sqrt(0.5);
-//  T_0m *= std::sqrt(0.5);
-  }
+  int nThreads = omp_get_max_threads();
 
-  RealMatrix SWAPPED_AB_00(MO_00);
-  RealMatrix SWAPPED_CD_p0(MO_00);
-  RealMatrix SWAPPED_CD_m0(MO_00);
-  RealMatrix SWAPPED_CD_0p(MO_00);
-  RealMatrix SWAPPED_CD_0m(MO_00);
+  std::vector<RealMatrix> SWAPPED_AB_00(nThreads,RealMatrix(MO_00));
+  std::vector<RealMatrix> SWAPPED_CD_p0(nThreads,RealMatrix(MO_00));
+  std::vector<RealMatrix> SWAPPED_CD_m0(nThreads,RealMatrix(MO_00));
+  std::vector<RealMatrix> SWAPPED_CD_0p(nThreads,RealMatrix(MO_00));
+  std::vector<RealMatrix> SWAPPED_CD_0m(nThreads,RealMatrix(MO_00));
 
-  RealMatrix Prod_00_0p(MO_00);
-  RealMatrix Prod_00_0m(MO_00);
-  RealMatrix Prod_00_p0(MO_00);
-  RealMatrix Prod_00_m0(MO_00);
+  std::vector<RealMatrix> Prod_00_0p(nThreads,RealMatrix(MO_00));
+  std::vector<RealMatrix> Prod_00_0m(nThreads,RealMatrix(MO_00));
+  std::vector<RealMatrix> Prod_00_p0(nThreads,RealMatrix(MO_00));
+  std::vector<RealMatrix> Prod_00_m0(nThreads,RealMatrix(MO_00));
 
-  SWAPPED_AB_00.setZero();
-  SWAPPED_CD_p0.setZero();
-  SWAPPED_CD_m0.setZero();
-  SWAPPED_CD_0p.setZero();
-  SWAPPED_CD_0m.setZero();
-
-  Prod_00_0p.setZero();
-  Prod_00_0m.setZero();
-  Prod_00_p0.setZero();
-  Prod_00_m0.setZero();
-
-  
-//for(auto iSt = 0; iSt < nFreq; iSt++)
-//for(auto a = 0, ab = 0; a < nvir; a++      )
-//for(auto b = 0        ; b <= a ;  b++, ab++){
-//  if(std::abs(T_00(ab,iSt)) < 1e-6) T_00(ab,iSt) = 0.0;
-//  if(std::abs(T_p0(ab,iSt)) < 1e-6) T_p0(ab,iSt) = 0.0;
-//  if(std::abs(T_m0(ab,iSt)) < 1e-6) T_m0(ab,iSt) = 0.0;
-//  if(std::abs(T_0p(ab,iSt)) < 1e-6) T_0p(ab,iSt) = 0.0;
-//  if(std::abs(T_0m(ab,iSt)) < 1e-6) T_0m(ab,iSt) = 0.0;
-//}
-//prettyPrint(cout,T_00,"00");
-//prettyPrint(cout,T_p0,"p0");
-//prettyPrint(cout,T_m0,"m0");
-//prettyPrint(cout,T_0p,"0p");
-//prettyPrint(cout,T_0m,"0m");
-//return 0;
+  auto NACMEStart = std::chrono::high_resolution_clock::now();
   for(auto iSt = 0; iSt < nFreq; iSt++)
   for(auto jSt = 0; jSt < nFreq; jSt++){
     cout << "Working on iSt = " << iSt <<" jSt = " << jSt << endl;
-    for(auto a = 0, ab = 0; a < nvir; a++      )
-    for(auto b = 0        ; b <= a ;  b++, ab++)
-    for(auto c = 0, cd = 0; c < nvir; c++      )
-    for(auto d = 0        ; d <= c ;  d++, cd++){
-
-
-
-      // AC OVerlap
-      SWAPPED_AB_00.setZero();
-      SWAPPED_CD_p0.setZero();
-      SWAPPED_CD_m0.setZero();
-      SWAPPED_CD_0p.setZero();
-      SWAPPED_CD_0m.setZero();
-
-      Prod_00_0p.setZero();
-      Prod_00_0m.setZero();
-      Prod_00_p0.setZero();
-      Prod_00_m0.setZero();
-
-      SWAPPED_AB_00 = MO_00;
-      SWAPPED_CD_p0 = MO_p0;
-      SWAPPED_CD_m0 = MO_m0;
-      SWAPPED_CD_0p = MO_0p;
-      SWAPPED_CD_0m = MO_0m;
-
-      SWAPPED_AB_00.col(nocc).swap(SWAPPED_AB_00.col(nocc+a));
-      SWAPPED_CD_p0.col(nocc).swap(SWAPPED_CD_p0.col(nocc+c));
-      SWAPPED_CD_m0.col(nocc).swap(SWAPPED_CD_m0.col(nocc+c));
-      SWAPPED_CD_0p.col(nocc).swap(SWAPPED_CD_0p.col(nocc+c));
-      SWAPPED_CD_0m.col(nocc).swap(SWAPPED_CD_0m.col(nocc+c));
-
-
-      Prod_00_0p = 
-        SWAPPED_AB_00.transpose() * S_00_0p * SWAPPED_CD_0p;
-      Prod_00_0m = 
-        SWAPPED_AB_00.transpose() * S_00_0m * SWAPPED_CD_0m;
-      Prod_00_p0 = 
-        SWAPPED_AB_00.transpose() * S_00_p0 * SWAPPED_CD_p0;
-      Prod_00_m0 = 
-        SWAPPED_AB_00.transpose() * S_00_m0 * SWAPPED_CD_m0;
+    #pragma omp parallel
+    {
+      int thread_id = omp_get_thread_num();
+      for(auto a = 0, ab = 0, abcd = 0; a < nvir; a++      )
+      for(auto b = 0        ; b <= a ;  b++, ab++)
+      for(auto c = 0, cd = 0; c < nvir; c++      )
+      for(auto d = 0        ; d <= c ;  d++, cd++, abcd++){
      
-      
-      double OvLp_AC_00_0p =
-        Prod_00_0p.block(0,0,nocc+1,nocc+1).determinant();
-      double OvLp_AC_00_0m =
-        Prod_00_0m.block(0,0,nocc+1,nocc+1).determinant();
-      double OvLp_AC_00_p0 =
-        Prod_00_p0.block(0,0,nocc+1,nocc+1).determinant();
-      double OvLp_AC_00_m0 =
-        Prod_00_m0.block(0,0,nocc+1,nocc+1).determinant();
-
-
-      // BD Overlap
-      SWAPPED_AB_00.setZero();
-      SWAPPED_CD_p0.setZero();
-      SWAPPED_CD_m0.setZero();
-      SWAPPED_CD_0p.setZero();
-      SWAPPED_CD_0m.setZero();
-
-      Prod_00_0p.setZero();
-      Prod_00_0m.setZero();
-      Prod_00_p0.setZero();
-      Prod_00_m0.setZero();
-
-      SWAPPED_AB_00 = MO_00;
-      SWAPPED_CD_p0 = MO_p0;
-      SWAPPED_CD_m0 = MO_m0;
-      SWAPPED_CD_0p = MO_0p;
-      SWAPPED_CD_0m = MO_0m;
-
-      SWAPPED_AB_00.col(nocc).swap(SWAPPED_AB_00.col(nocc+b));
-      SWAPPED_CD_p0.col(nocc).swap(SWAPPED_CD_p0.col(nocc+d));
-      SWAPPED_CD_m0.col(nocc).swap(SWAPPED_CD_m0.col(nocc+d));
-      SWAPPED_CD_0p.col(nocc).swap(SWAPPED_CD_0p.col(nocc+d));
-      SWAPPED_CD_0m.col(nocc).swap(SWAPPED_CD_0m.col(nocc+d));
-
-
-      Prod_00_0p = 
-        SWAPPED_AB_00.transpose() * S_00_0p * SWAPPED_CD_0p;
-      Prod_00_0m = 
-        SWAPPED_AB_00.transpose() * S_00_0m * SWAPPED_CD_0m;
-      Prod_00_p0 = 
-        SWAPPED_AB_00.transpose() * S_00_p0 * SWAPPED_CD_p0;
-      Prod_00_m0 = 
-        SWAPPED_AB_00.transpose() * S_00_m0 * SWAPPED_CD_m0;
+        if(abcd % nThreads != thread_id) continue; 
+        if(
+          (std::abs(T_p0(cd,jSt)) < 1e-8) &&
+          (std::abs(T_0p(cd,jSt)) < 1e-8) &&
+          (std::abs(T_m0(cd,jSt)) < 1e-8) &&
+          (std::abs(T_0m(cd,jSt)) < 1e-8)
+        ) continue;
      
-      
-      double OvLp_BD_00_0p =
-        Prod_00_0p.block(0,0,nocc+1,nocc+1).determinant();
-      double OvLp_BD_00_0m =
-        Prod_00_0m.block(0,0,nocc+1,nocc+1).determinant();
-      double OvLp_BD_00_p0 =
-        Prod_00_p0.block(0,0,nocc+1,nocc+1).determinant();
-      double OvLp_BD_00_m0 =
-        Prod_00_m0.block(0,0,nocc+1,nocc+1).determinant();
-
-      // AD Overlap
-      SWAPPED_AB_00.setZero();
-      SWAPPED_CD_p0.setZero();
-      SWAPPED_CD_m0.setZero();
-      SWAPPED_CD_0p.setZero();
-      SWAPPED_CD_0m.setZero();
-
-      Prod_00_0p.setZero();
-      Prod_00_0m.setZero();
-      Prod_00_p0.setZero();
-      Prod_00_m0.setZero();
-
-      SWAPPED_AB_00 = MO_00;
-      SWAPPED_CD_p0 = MO_p0;
-      SWAPPED_CD_m0 = MO_m0;
-      SWAPPED_CD_0p = MO_0p;
-      SWAPPED_CD_0m = MO_0m;
-
-      SWAPPED_AB_00.col(nocc).swap(SWAPPED_AB_00.col(nocc+a));
-      SWAPPED_CD_p0.col(nocc).swap(SWAPPED_CD_p0.col(nocc+d));
-      SWAPPED_CD_m0.col(nocc).swap(SWAPPED_CD_m0.col(nocc+d));
-      SWAPPED_CD_0p.col(nocc).swap(SWAPPED_CD_0p.col(nocc+d));
-      SWAPPED_CD_0m.col(nocc).swap(SWAPPED_CD_0m.col(nocc+d));
-
-
-      Prod_00_0p = 
-        SWAPPED_AB_00.transpose() * S_00_0p * SWAPPED_CD_0p;
-      Prod_00_0m = 
-        SWAPPED_AB_00.transpose() * S_00_0m * SWAPPED_CD_0m;
-      Prod_00_p0 = 
-        SWAPPED_AB_00.transpose() * S_00_p0 * SWAPPED_CD_p0;
-      Prod_00_m0 = 
-        SWAPPED_AB_00.transpose() * S_00_m0 * SWAPPED_CD_m0;
      
-      
-      double OvLp_AD_00_0p =
-        Prod_00_0p.block(0,0,nocc+1,nocc+1).determinant();
-      double OvLp_AD_00_0m =
-        Prod_00_0m.block(0,0,nocc+1,nocc+1).determinant();
-      double OvLp_AD_00_p0 =
-        Prod_00_p0.block(0,0,nocc+1,nocc+1).determinant();
-      double OvLp_AD_00_m0 =
-        Prod_00_m0.block(0,0,nocc+1,nocc+1).determinant();
-
-
-      // BC Overlap
-      SWAPPED_AB_00.setZero();
-      SWAPPED_CD_p0.setZero();
-      SWAPPED_CD_m0.setZero();
-      SWAPPED_CD_0p.setZero();
-      SWAPPED_CD_0m.setZero();
-
-      Prod_00_0p.setZero();
-      Prod_00_0m.setZero();
-      Prod_00_p0.setZero();
-      Prod_00_m0.setZero();
-
-      SWAPPED_AB_00 = MO_00;
-      SWAPPED_CD_p0 = MO_p0;
-      SWAPPED_CD_m0 = MO_m0;
-      SWAPPED_CD_0p = MO_0p;
-      SWAPPED_CD_0m = MO_0m;
-
-      SWAPPED_AB_00.col(nocc).swap(SWAPPED_AB_00.col(nocc+b));
-      SWAPPED_CD_p0.col(nocc).swap(SWAPPED_CD_p0.col(nocc+c));
-      SWAPPED_CD_m0.col(nocc).swap(SWAPPED_CD_m0.col(nocc+c));
-      SWAPPED_CD_0p.col(nocc).swap(SWAPPED_CD_0p.col(nocc+c));
-      SWAPPED_CD_0m.col(nocc).swap(SWAPPED_CD_0m.col(nocc+c));
-
-
-      Prod_00_0p = 
-        SWAPPED_AB_00.transpose() * S_00_0p * SWAPPED_CD_0p;
-      Prod_00_0m = 
-        SWAPPED_AB_00.transpose() * S_00_0m * SWAPPED_CD_0m;
-      Prod_00_p0 = 
-        SWAPPED_AB_00.transpose() * S_00_p0 * SWAPPED_CD_p0;
-      Prod_00_m0 = 
-        SWAPPED_AB_00.transpose() * S_00_m0 * SWAPPED_CD_m0;
+        // AC OVerlap
+        SWAPPED_AB_00[thread_id].setZero();
+        SWAPPED_CD_p0[thread_id].setZero();
+        SWAPPED_CD_m0[thread_id].setZero();
+        SWAPPED_CD_0p[thread_id].setZero();
+        SWAPPED_CD_0m[thread_id].setZero();
      
-      
-      double OvLp_BC_00_0p =
-        Prod_00_0p.block(0,0,nocc+1,nocc+1).determinant();
-      double OvLp_BC_00_0m =
-        Prod_00_0m.block(0,0,nocc+1,nocc+1).determinant();
-      double OvLp_BC_00_p0 =
-        Prod_00_p0.block(0,0,nocc+1,nocc+1).determinant();
-      double OvLp_BC_00_m0 =
-        Prod_00_m0.block(0,0,nocc+1,nocc+1).determinant();
-
-
-      double OvLp_Swap_00_p0 = OvLp_AC_00_p0*OvLp_BD_00_p0 + OvLp_AD_00_p0*OvLp_BC_00_p0;
-      double OvLp_Swap_00_m0 = OvLp_AC_00_m0*OvLp_BD_00_m0 + OvLp_AD_00_m0*OvLp_BC_00_m0;
-      double OvLp_Swap_00_0p = OvLp_AC_00_0p*OvLp_BD_00_0p + OvLp_AD_00_0p*OvLp_BC_00_0p;
-      double OvLp_Swap_00_0m = OvLp_AC_00_0m*OvLp_BD_00_0m + OvLp_AD_00_0m*OvLp_BC_00_0m;
-
-      double fact = 1;
-      if( a == b ) fact *= std::sqrt(0.5);
-      if( c == d ) fact *= std::sqrt(0.5);
-
-      NACME[0](iSt,jSt) += fact*T_00(ab,iSt)*(
-        T_p0(cd,jSt)*OvLp_Swap_00_p0 - 
-        T_m0(cd,jSt)*OvLp_Swap_00_m0
-      ) / (2*step1);
-      NACME[1](iSt,jSt) += fact*T_00(ab,iSt)*(
-        T_0p(cd,jSt)*OvLp_Swap_00_0p - 
-        T_0m(cd,jSt)*OvLp_Swap_00_0m
-      ) / (2*step2);
+        Prod_00_0p[thread_id].setZero();
+        Prod_00_0m[thread_id].setZero();
+        Prod_00_p0[thread_id].setZero();
+        Prod_00_m0[thread_id].setZero();
+     
+        SWAPPED_AB_00[thread_id] = MO_00;
+        SWAPPED_CD_p0[thread_id] = MO_p0;
+        SWAPPED_CD_m0[thread_id] = MO_m0;
+        SWAPPED_CD_0p[thread_id] = MO_0p;
+        SWAPPED_CD_0m[thread_id] = MO_0m;
+     
+        SWAPPED_AB_00[thread_id].col(nocc).swap(SWAPPED_AB_00[thread_id].col(nocc+a));
+        SWAPPED_CD_p0[thread_id].col(nocc).swap(SWAPPED_CD_p0[thread_id].col(nocc+c));
+        SWAPPED_CD_m0[thread_id].col(nocc).swap(SWAPPED_CD_m0[thread_id].col(nocc+c));
+        SWAPPED_CD_0p[thread_id].col(nocc).swap(SWAPPED_CD_0p[thread_id].col(nocc+c));
+        SWAPPED_CD_0m[thread_id].col(nocc).swap(SWAPPED_CD_0m[thread_id].col(nocc+c));
+     
+     
+        Prod_00_0p[thread_id] = 
+          SWAPPED_AB_00[thread_id].transpose() * S_00_0p * SWAPPED_CD_0p[thread_id];
+        Prod_00_0m[thread_id] = 
+          SWAPPED_AB_00[thread_id].transpose() * S_00_0m * SWAPPED_CD_0m[thread_id];
+        Prod_00_p0[thread_id] = 
+          SWAPPED_AB_00[thread_id].transpose() * S_00_p0 * SWAPPED_CD_p0[thread_id];
+        Prod_00_m0[thread_id] = 
+          SWAPPED_AB_00[thread_id].transpose() * S_00_m0 * SWAPPED_CD_m0[thread_id];
+       
+        
+        double OvLp_AC_00_0p =
+          Prod_00_0p[thread_id].block(0,0,nocc+1,nocc+1).determinant();
+        double OvLp_AC_00_0m =
+          Prod_00_0m[thread_id].block(0,0,nocc+1,nocc+1).determinant();
+        double OvLp_AC_00_p0 =
+          Prod_00_p0[thread_id].block(0,0,nocc+1,nocc+1).determinant();
+        double OvLp_AC_00_m0 =
+          Prod_00_m0[thread_id].block(0,0,nocc+1,nocc+1).determinant();
+     
+     
+        // BD Overlap
+        SWAPPED_AB_00[thread_id].setZero();
+        SWAPPED_CD_p0[thread_id].setZero();
+        SWAPPED_CD_m0[thread_id].setZero();
+        SWAPPED_CD_0p[thread_id].setZero();
+        SWAPPED_CD_0m[thread_id].setZero();
+     
+        Prod_00_0p[thread_id].setZero();
+        Prod_00_0m[thread_id].setZero();
+        Prod_00_p0[thread_id].setZero();
+        Prod_00_m0[thread_id].setZero();
+     
+        SWAPPED_AB_00[thread_id] = MO_00;
+        SWAPPED_CD_p0[thread_id] = MO_p0;
+        SWAPPED_CD_m0[thread_id] = MO_m0;
+        SWAPPED_CD_0p[thread_id] = MO_0p;
+        SWAPPED_CD_0m[thread_id] = MO_0m;
+     
+        SWAPPED_AB_00[thread_id].col(nocc).swap(SWAPPED_AB_00[thread_id].col(nocc+b));
+        SWAPPED_CD_p0[thread_id].col(nocc).swap(SWAPPED_CD_p0[thread_id].col(nocc+d));
+        SWAPPED_CD_m0[thread_id].col(nocc).swap(SWAPPED_CD_m0[thread_id].col(nocc+d));
+        SWAPPED_CD_0p[thread_id].col(nocc).swap(SWAPPED_CD_0p[thread_id].col(nocc+d));
+        SWAPPED_CD_0m[thread_id].col(nocc).swap(SWAPPED_CD_0m[thread_id].col(nocc+d));
+     
+     
+        Prod_00_0p[thread_id] = 
+          SWAPPED_AB_00[thread_id].transpose() * S_00_0p * SWAPPED_CD_0p[thread_id];
+        Prod_00_0m[thread_id] = 
+          SWAPPED_AB_00[thread_id].transpose() * S_00_0m * SWAPPED_CD_0m[thread_id];
+        Prod_00_p0[thread_id] = 
+          SWAPPED_AB_00[thread_id].transpose() * S_00_p0 * SWAPPED_CD_p0[thread_id];
+        Prod_00_m0[thread_id] = 
+          SWAPPED_AB_00[thread_id].transpose() * S_00_m0 * SWAPPED_CD_m0[thread_id];
+       
+        
+        double OvLp_BD_00_0p =
+          Prod_00_0p[thread_id].block(0,0,nocc+1,nocc+1).determinant();
+        double OvLp_BD_00_0m =
+          Prod_00_0m[thread_id].block(0,0,nocc+1,nocc+1).determinant();
+        double OvLp_BD_00_p0 =
+          Prod_00_p0[thread_id].block(0,0,nocc+1,nocc+1).determinant();
+        double OvLp_BD_00_m0 =
+          Prod_00_m0[thread_id].block(0,0,nocc+1,nocc+1).determinant();
+     
+        // AD Overlap
+        SWAPPED_AB_00[thread_id].setZero();
+        SWAPPED_CD_p0[thread_id].setZero();
+        SWAPPED_CD_m0[thread_id].setZero();
+        SWAPPED_CD_0p[thread_id].setZero();
+        SWAPPED_CD_0m[thread_id].setZero();
+     
+        Prod_00_0p[thread_id].setZero();
+        Prod_00_0m[thread_id].setZero();
+        Prod_00_p0[thread_id].setZero();
+        Prod_00_m0[thread_id].setZero();
+     
+        SWAPPED_AB_00[thread_id] = MO_00;
+        SWAPPED_CD_p0[thread_id] = MO_p0;
+        SWAPPED_CD_m0[thread_id] = MO_m0;
+        SWAPPED_CD_0p[thread_id] = MO_0p;
+        SWAPPED_CD_0m[thread_id] = MO_0m;
+     
+        SWAPPED_AB_00[thread_id].col(nocc).swap(SWAPPED_AB_00[thread_id].col(nocc+a));
+        SWAPPED_CD_p0[thread_id].col(nocc).swap(SWAPPED_CD_p0[thread_id].col(nocc+d));
+        SWAPPED_CD_m0[thread_id].col(nocc).swap(SWAPPED_CD_m0[thread_id].col(nocc+d));
+        SWAPPED_CD_0p[thread_id].col(nocc).swap(SWAPPED_CD_0p[thread_id].col(nocc+d));
+        SWAPPED_CD_0m[thread_id].col(nocc).swap(SWAPPED_CD_0m[thread_id].col(nocc+d));
+     
+     
+        Prod_00_0p[thread_id] = 
+          SWAPPED_AB_00[thread_id].transpose() * S_00_0p * SWAPPED_CD_0p[thread_id];
+        Prod_00_0m[thread_id] = 
+          SWAPPED_AB_00[thread_id].transpose() * S_00_0m * SWAPPED_CD_0m[thread_id];
+        Prod_00_p0[thread_id] = 
+          SWAPPED_AB_00[thread_id].transpose() * S_00_p0 * SWAPPED_CD_p0[thread_id];
+        Prod_00_m0[thread_id] = 
+          SWAPPED_AB_00[thread_id].transpose() * S_00_m0 * SWAPPED_CD_m0[thread_id];
+       
+        
+        double OvLp_AD_00_0p =
+          Prod_00_0p[thread_id].block(0,0,nocc+1,nocc+1).determinant();
+        double OvLp_AD_00_0m =
+          Prod_00_0m[thread_id].block(0,0,nocc+1,nocc+1).determinant();
+        double OvLp_AD_00_p0 =
+          Prod_00_p0[thread_id].block(0,0,nocc+1,nocc+1).determinant();
+        double OvLp_AD_00_m0 =
+          Prod_00_m0[thread_id].block(0,0,nocc+1,nocc+1).determinant();
+     
+     
+        // BC Overlap
+        SWAPPED_AB_00[thread_id].setZero();
+        SWAPPED_CD_p0[thread_id].setZero();
+        SWAPPED_CD_m0[thread_id].setZero();
+        SWAPPED_CD_0p[thread_id].setZero();
+        SWAPPED_CD_0m[thread_id].setZero();
+     
+        Prod_00_0p[thread_id].setZero();
+        Prod_00_0m[thread_id].setZero();
+        Prod_00_p0[thread_id].setZero();
+        Prod_00_m0[thread_id].setZero();
+     
+        SWAPPED_AB_00[thread_id] = MO_00;
+        SWAPPED_CD_p0[thread_id] = MO_p0;
+        SWAPPED_CD_m0[thread_id] = MO_m0;
+        SWAPPED_CD_0p[thread_id] = MO_0p;
+        SWAPPED_CD_0m[thread_id] = MO_0m;
+     
+        SWAPPED_AB_00[thread_id].col(nocc).swap(SWAPPED_AB_00[thread_id].col(nocc+b));
+        SWAPPED_CD_p0[thread_id].col(nocc).swap(SWAPPED_CD_p0[thread_id].col(nocc+c));
+        SWAPPED_CD_m0[thread_id].col(nocc).swap(SWAPPED_CD_m0[thread_id].col(nocc+c));
+        SWAPPED_CD_0p[thread_id].col(nocc).swap(SWAPPED_CD_0p[thread_id].col(nocc+c));
+        SWAPPED_CD_0m[thread_id].col(nocc).swap(SWAPPED_CD_0m[thread_id].col(nocc+c));
+     
+     
+        Prod_00_0p[thread_id] = 
+          SWAPPED_AB_00[thread_id].transpose() * S_00_0p * SWAPPED_CD_0p[thread_id];
+        Prod_00_0m[thread_id] = 
+          SWAPPED_AB_00[thread_id].transpose() * S_00_0m * SWAPPED_CD_0m[thread_id];
+        Prod_00_p0[thread_id] = 
+          SWAPPED_AB_00[thread_id].transpose() * S_00_p0 * SWAPPED_CD_p0[thread_id];
+        Prod_00_m0[thread_id] = 
+          SWAPPED_AB_00[thread_id].transpose() * S_00_m0 * SWAPPED_CD_m0[thread_id];
+       
+        
+        double OvLp_BC_00_0p =
+          Prod_00_0p[thread_id].block(0,0,nocc+1,nocc+1).determinant();
+        double OvLp_BC_00_0m =
+          Prod_00_0m[thread_id].block(0,0,nocc+1,nocc+1).determinant();
+        double OvLp_BC_00_p0 =
+          Prod_00_p0[thread_id].block(0,0,nocc+1,nocc+1).determinant();
+        double OvLp_BC_00_m0 =
+          Prod_00_m0[thread_id].block(0,0,nocc+1,nocc+1).determinant();
+     
+     
+        double OvLp_Swap_00_p0 = OvLp_AC_00_p0*OvLp_BD_00_p0 + OvLp_AD_00_p0*OvLp_BC_00_p0;
+        double OvLp_Swap_00_m0 = OvLp_AC_00_m0*OvLp_BD_00_m0 + OvLp_AD_00_m0*OvLp_BC_00_m0;
+        double OvLp_Swap_00_0p = OvLp_AC_00_0p*OvLp_BD_00_0p + OvLp_AD_00_0p*OvLp_BC_00_0p;
+        double OvLp_Swap_00_0m = OvLp_AC_00_0m*OvLp_BD_00_0m + OvLp_AD_00_0m*OvLp_BC_00_0m;
+     
+        double fact = 1;
+        if( a == b ) fact *= std::sqrt(0.5);
+        if( c == d ) fact *= std::sqrt(0.5);
+     
+        #pragma omp critical
+        {
+          NACME[0](iSt,jSt) += fact*T_00(ab,iSt)*(
+            T_p0(cd,jSt)*OvLp_Swap_00_p0 - 
+            T_m0(cd,jSt)*OvLp_Swap_00_m0
+          ) / (2*step1);
+          NACME[1](iSt,jSt) += fact*T_00(ab,iSt)*(
+            T_0p(cd,jSt)*OvLp_Swap_00_0p - 
+            T_0m(cd,jSt)*OvLp_Swap_00_0m
+          ) / (2*step2);
+        }
+      }
     }
   }
+  auto NACMEEnd = std::chrono::high_resolution_clock::now();
 
-//NACME[0] *= 2;
-//NACME[1] *= 2;
+  std::chrono::duration<double> elapsed = NACMEEnd - NACMEStart;
+  cout << "ES -> ES NACME took " << elapsed.count() << " s" << endl;
+
 
   return NACME;
 };
