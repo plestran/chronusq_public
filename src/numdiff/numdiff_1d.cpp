@@ -8,6 +8,13 @@ std::string genFName(double,int,std::string);
 Eigen::VectorXd checkPhase(double*,double*,int,int);
 RealMatrix genSpx(BasisSet&,BasisSet&);
 
+struct Derivatives {
+  double          GS_GRAD;
+  Eigen::VectorXd ES_GRAD;
+  Eigen::VectorXd ES_GS_NACME;
+  RealMatrix      ES_ES_NACME;
+};
+
 Eigen::VectorXd GS_ES_NACME_CIS(int,bool,int,int,double,
   RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&, 
   RealMatrix&,RealMatrix&);
@@ -288,8 +295,8 @@ void oneDScan(std::vector<double>& scanX,
     basism.findBasisFile(basisName);
 
     basis0.communicate(fileio_0);
-    basisp.communicate(fileio_0);
-    basism.communicate(fileio_0);
+    basisp.communicate(fileio_p);
+    basism.communicate(fileio_m);
 
     basis0.parseGlobal();
     basisp.parseGlobal();
@@ -1326,3 +1333,531 @@ RealMatrix ES_ES_NACME_PPTDA(int nFreq,bool renorm, int nocc, int nvir,
 
   return NACME;
 };
+
+Derivatives computeNAC2pt1D(Molecule &geom_0, Molecule &geom_p,
+  Molecule &geom_m, FileIO &fileio_0, FileIO &fileio_p, FileIO &fileio_m,
+  Controls &controls, std::string &basisName, RESPONSE_TYPE respType,
+  int nFreq, double step){
+
+  bool debug = true;
+ 
+  BasisSet basis0;
+  BasisSet basisp;
+  BasisSet basism;
+
+  AOIntegrals aoints_0;
+  AOIntegrals aoints_p;
+  AOIntegrals aoints_m;
+
+  SingleSlater<double> ss_0;
+  SingleSlater<double> ss_p;
+  SingleSlater<double> ss_m;
+
+  MOIntegrals<double> moints_0;
+  MOIntegrals<double> moints_p;
+  MOIntegrals<double> moints_m;
+
+  Response<double> resp_0;
+  Response<double> resp_p;
+  Response<double> resp_m;
+
+
+
+  basis0.findBasisFile(basisName);
+  basisp.findBasisFile(basisName);
+  basism.findBasisFile(basisName);
+
+  basis0.communicate(fileio_0);
+  basisp.communicate(fileio_p);
+  basism.communicate(fileio_m);
+
+  basis0.parseGlobal();
+  basisp.parseGlobal();
+  basism.parseGlobal();
+
+  basis0.constructLocal(&geom_0);
+  basisp.constructLocal(&geom_p);
+  basism.constructLocal(&geom_m);
+  
+  basis0.makeMaps(1,&geom_0);
+  basisp.makeMaps(1,&geom_p);
+  basism.makeMaps(1,&geom_m);
+
+
+  RealMatrix S_0_p = genSpx(basis0,basisp);
+  RealMatrix S_0_m = genSpx(basis0,basism);
+
+  RealMatrix S_0_0,S_p_p,S_m_m;
+
+  if(debug){
+    S_0_0 = genSpx(basis0,basis0);
+    S_p_p = genSpx(basisp,basisp);
+    S_m_m = genSpx(basism,basism);
+  }
+
+  aoints_0.communicate(geom_0,basis0,fileio_0,controls);
+  aoints_p.communicate(geom_p,basisp,fileio_p,controls);
+  aoints_m.communicate(geom_m,basism,fileio_m,controls);
+
+  ss_0.communicate(geom_0,basis0,aoints_0,fileio_0,controls);
+  ss_p.communicate(geom_p,basisp,aoints_p,fileio_p,controls);
+  ss_m.communicate(geom_m,basism,aoints_m,fileio_m,controls);
+
+  moints_0.communicate(geom_0,basis0,fileio_0,controls,
+    aoints_0, ss_0);
+  moints_p.communicate(geom_p,basisp,fileio_p,controls,
+    aoints_p, ss_p);
+  moints_m.communicate(geom_m,basism,fileio_m,controls,
+    aoints_m, ss_m);
+  
+  aoints_0.initMeta();
+  aoints_p.initMeta();
+  aoints_m.initMeta();
+
+  aoints_0.integralAlgorithm = AOIntegrals::INCORE;
+  aoints_p.integralAlgorithm = AOIntegrals::INCORE;
+  aoints_m.integralAlgorithm = AOIntegrals::INCORE;
+
+  ss_0.setRef(SingleSlater<double>::RHF);
+  ss_p.setRef(SingleSlater<double>::RHF);
+  ss_m.setRef(SingleSlater<double>::RHF);
+
+  ss_0.isClosedShell = true;
+  ss_p.isClosedShell = true;
+  ss_m.isClosedShell = true;
+
+  ss_0.initMeta();
+  ss_p.initMeta();
+  ss_m.initMeta();
+
+  ss_0.genMethString();
+  ss_p.genMethString();
+  ss_m.genMethString();
+
+
+
+  aoints_0.alloc();
+  aoints_p.alloc();
+  aoints_m.alloc();
+
+  ss_0.alloc();
+  ss_p.alloc();
+  ss_m.alloc();
+
+  // SCF (X,Y)
+  cout << "  Performing SCF (X,Y)" << endl;
+  ss_0.formGuess();
+  ss_0.formFock();
+  ss_0.computeEnergy();
+  ss_0.SCF();
+  ss_0.computeProperties();
+  ss_0.printProperties();
+
+  // SCF (X+DX,Y)
+  cout << "  Performing SCF (X+DX,Y)" << endl;
+  ss_p.formGuess();
+  ss_p.formFock();
+  ss_p.computeEnergy();
+  ss_p.SCF();
+  ss_p.computeProperties();
+  ss_p.printProperties();
+
+  // SCF (X-DX,Y)
+  cout << "  Performing SCF (X-DX,Y)" << endl;
+  ss_m.formGuess();
+  ss_m.formFock();
+  ss_m.computeEnergy();
+  ss_m.SCF();
+  ss_m.computeProperties();
+  ss_m.printProperties();
+
+  if(debug) {
+    cout << endl;
+    cout << "  Checking | C - C' | Before Phase Check:" << endl;
+    
+    cout << "  | C(X,Y) - C(X+DX,Y) | = " 
+         << diffNorm((*ss_0.moA()),(*ss_p.moA())) 
+         << endl;  
+    cout << "  | C(X,Y) - C(X-DX,Y) | = " 
+         << diffNorm((*ss_0.moA()),(*ss_m.moA())) 
+         << endl;  
+  }
+
+
+
+  cout << endl << "  Performing Phase Check on MOs" << endl;
+
+  RealMatrix SMO_0_0,SMO_p_p,SMO_m_m;
+
+  if(debug){
+  // < p (X,Y) | S[(X,Y),(X,Y)] | q(X,Y) >
+   SMO_0_0 = ss_0.moA()->transpose() * S_0_0 * (*ss_0.moA());
+  // < p (X+DX,Y) | S[(X+DX,Y),(X+DX,Y)] | q(X+DX,Y)(* >
+   SMO_p_p = ss_p.moA()->transpose() * S_p_p * (*ss_p.moA());
+  // < p (X-DX,Y) | S[(X-DX,Y),(X-DX,Y)] | q(X-DX,Y)(* >
+   SMO_m_m = ss_m.moA()->transpose() * S_m_m * (*ss_m.moA());
+  }
+
+  // < p (X,Y) | S[(X,Y),(X+DX,Y)] | q(X+DX,Y) >
+  RealMatrix SMO_0_p = 
+    ss_0.moA()->transpose() * S_0_p * (*ss_p.moA());
+  // < p (X,Y) | S[(X,Y),(X-DX,Y)] | q(X-DX,Y) >
+  RealMatrix SMO_0_m = 
+    ss_0.moA()->transpose() * S_0_m * (*ss_m.moA());
+
+
+
+/*
+  Eigen::VectorXd Trans_mo_p;
+  Eigen::VectorXd Trans_mo_m;
+  Trans_mo_p = checkPhase(ss_0.moA()->data(),
+    ss_p.moA()->data(),basis0.nBasis(),basis0.nBasis());
+  Trans_mo_m = checkPhase(ss_0.moA()->data(),
+    ss_m.moA()->data(),basis0.nBasis(),basis0.nBasis());
+*/
+
+  RealMatrix O_0_p(SMO_0_p);
+  RealMatrix O_0_m(SMO_0_m);
+
+  prettyPrint(cout,*ss_p.epsA(),"EPS A(X+DX)");
+  prettyPrint(cout,*ss_m.epsA(),"EPS A(X-DX)");
+  prettyPrint(cout,*ss_0.epsA(),"EPS A(X)");
+
+  cout << "  X -> X+DX MO Mapping" << endl;
+  for(auto iMO = 0; iMO < SMO_0_p.cols(); iMO++){
+    RealMatrix::Index maxRow;
+    double maxVal = O_0_p.cwiseAbs().col(iMO).maxCoeff(&maxRow);
+    std::stringstream mapStr, ovlpStr; 
+    mapStr  << "    " << iMO << " -> " << maxRow;
+    ovlpStr << "< " << iMO << "(X) | " << maxRow << "(X+DX) >"; 
+            
+
+    cout << std::left << std::setw(10) << mapStr.str();
+    cout << "\t";
+    cout << std::left << std::setw(25) << ovlpStr.str() << " = " << maxVal;
+    cout << endl;
+  }
+
+  cout << endl;
+  cout << "  X -> X-DX MO Mapping" << endl;
+  for(auto iMO = 0; iMO < SMO_0_m.cols(); iMO++){
+    RealMatrix::Index maxRow;
+    O_0_m.cwiseAbs().col(iMO).maxCoeff(&maxRow);
+    double maxVal = O_0_m(maxRow,iMO);
+    std::stringstream mapStr, ovlpStr; 
+    mapStr  << "    " << iMO << " -> " << maxRow;
+    ovlpStr << "< " << iMO << "(X) | " << maxRow << "(X-DX) >"; 
+            
+
+    cout << std::left << std::setw(10) << mapStr.str();
+    cout << "\t";
+    cout << std::left << std::setw(25) << ovlpStr.str() << " = " << maxVal;
+    cout << endl;
+  }
+  cout << endl;
+
+  for(auto mu = 0; mu < SMO_0_p.rows(); mu++)
+  for(auto nu = 0; nu < SMO_0_p.rows(); nu++){
+    if(std::abs(O_0_p(mu,nu)) < 1e-2) O_0_p(mu,nu) = 0.0;
+    else if(O_0_p(mu,nu) > 0.0)       O_0_p(mu,nu) = 1.0;
+    else                                  O_0_p(mu,nu) = -1.0;
+    if(std::abs(O_0_m(mu,nu)) < 1e-2) O_0_m(mu,nu) = 0.0;
+    else if(O_0_m(mu,nu) > 0.0)       O_0_m(mu,nu) = 1.0;
+    else                                  O_0_m(mu,nu) = -1.0;
+  }
+
+  RealMatrix TMP;
+  TMP = (*ss_p.moA()) * O_0_p; 
+  (*ss_p.moA()) = TMP;
+  TMP = (*ss_m.moA()) * O_0_m; 
+  (*ss_m.moA()) = TMP;
+  
+
+  if(debug) {
+    cout << endl;
+    cout << "  Checking | C - C' | After Phase Check:" << endl;
+    
+    cout << "  | C(X,Y) - C(X+DX,Y) | = " 
+         << diffNorm((*ss_0.moA()),(*ss_p.moA())) 
+         << endl;  
+    cout << "  | C(X,Y) - C(X-DX,Y) | = " 
+         << diffNorm((*ss_0.moA()),(*ss_m.moA())) 
+         << endl;  
+  }
+
+  if(debug){
+    // < p (X,Y) | S[(X,Y),(X+DX,Y)] | q(X+DX,Y) >
+    SMO_0_p = 
+      ss_0.moA()->transpose() * S_0_p * (*ss_p.moA());
+    // < p (X,Y) | S[(X,Y),(X-DX,Y)] | q(X-DX,Y) >
+    SMO_0_m = 
+      ss_0.moA()->transpose() * S_0_m * (*ss_m.moA());
+   
+    // Quantify deviation from C**H * S * C = I
+    cout << endl;
+    cout << "  Checking | C(X)**H * S(X,X') * C(X') - I |:" 
+         << endl;
+   
+    cout << "  < (X,Y) | (X,Y) >       = " 
+         << diffNormI(SMO_0_0) 
+         << endl;
+    cout << "  < (X+DX,Y) | (X+DX,Y) > = " 
+         << diffNormI(SMO_p_p) 
+         << endl;
+    cout << "  < (X-DX,Y) | (X-DX,Y) > = " 
+         << diffNormI(SMO_m_m) 
+         << endl;
+   
+   
+    cout << "  < (X,Y) | (X+DX,Y) >    = " 
+         << diffNormI(SMO_0_p) 
+         << endl;
+    cout << "  < (X,Y) | (X-DX,Y) >    = " 
+         << diffNormI(SMO_0_m) 
+         << endl;
+  }
+
+  moints_0.initMeta();
+  moints_p.initMeta();
+  moints_m.initMeta();
+
+  resp_0.communicate(ss_0,moints_0,fileio_0);
+  resp_p.communicate(ss_p,moints_p,fileio_p);
+  resp_m.communicate(ss_m,moints_m,fileio_m);
+
+  resp_0.setMeth(respType);
+  resp_p.setMeth(respType);
+  resp_m.setMeth(respType);
+
+  resp_0.doSA();
+  resp_p.doSA();
+  resp_m.doSA();
+
+  resp_0.setNSek(nFreq);
+  resp_p.setNSek(nFreq);
+  resp_m.setNSek(nFreq);
+
+  resp_0.doFull();
+  resp_p.doFull();
+  resp_m.doFull();
+
+  cout << endl;
+  cout << "  Performing Response Calculations (";
+  if(respType == RESPONSE_TYPE::CIS)       cout << "CIS" ;
+  else if(respType = RESPONSE_TYPE::PPTDA) cout << "PPTDA" ;
+  cout << ")" << endl;
+
+  cout << "  Performing Response (X,Y)" << endl;
+  resp_0.doResponse();
+  cout << "  Performing Response (X+DX,Y)" << endl;
+  resp_p.doResponse();
+  cout << "  Performing Response (X-DX,Y)" << endl;
+  resp_m.doResponse();
+
+
+
+
+
+  // Start Differentiation things
+  //
+
+
+  
+  double scf_0 = ss_0.totalEnergy;
+  double scf_p = ss_p.totalEnergy;
+  double scf_m = ss_m.totalEnergy;
+
+
+  if(debug) {
+    cout << endl;
+    cout << "  SCF ENERGIES:" << endl;
+    cout << "  SCF Energy (X,Y):    " << std::setprecision(8) 
+         << scf_0 << " Eh" << endl;
+    cout << "  SCF Energy (X+DX,Y): " << std::setprecision(8) 
+         << scf_p << " Eh" << endl;
+    cout << "  SCF Energy (X-DX,Y): " << std::setprecision(8) 
+         << scf_m << " Eh" << endl;
+  }
+  
+
+  Eigen::VectorXd freq_0 = resp_0.frequencies()[0].head(nFreq);
+  Eigen::VectorXd freq_p = resp_p.frequencies()[0].head(nFreq);
+  Eigen::VectorXd freq_m = resp_m.frequencies()[0].head(nFreq);
+
+  if(debug) {
+    cout << endl << "  Excitation Frequencies:" << endl;
+   
+    for(auto iSt = 0; iSt < nFreq; iSt++){
+      cout << "  W(" << iSt << ") (X,Y):    " 
+           << std::setprecision(8) << freq_0[iSt] << " Eh" 
+           << endl;
+      cout << "  W(" << iSt << ") (X+DX,Y): " 
+           << std::setprecision(8) << freq_p[iSt] << " Eh" 
+           << endl;
+      cout << "  W(" << iSt << ") (X-DX,Y): " 
+           << std::setprecision(8) << freq_m[iSt] << " Eh" 
+           << endl;
+      cout << endl;
+    }
+  }
+
+
+
+
+
+  RealMatrix T_0 = resp_0.transDen()[0].block(0,0,
+    resp_0.nMatDim()[0],nFreq);
+  RealMatrix T_p = resp_p.transDen()[0].block(0,0,
+    resp_p.nMatDim()[0],nFreq);
+  RealMatrix T_m = resp_m.transDen()[0].block(0,0,
+    resp_m.nMatDim()[0],nFreq);
+
+
+
+  if(debug){
+    cout << endl;
+    cout << "  Checking | T - T' | Before Phase Check:" << endl;
+    
+    cout << "  | T(X,Y) - T(X+DX,Y) | = " << diffNorm(T_0,T_p) 
+         << endl;  
+    cout << "  | T(X,Y) - T(X-DX,Y) | = " << diffNorm(T_0,T_m) 
+         << endl;  
+  }
+
+
+  Eigen::VectorXd Trans_t_p;
+  Eigen::VectorXd Trans_t_m;
+  Trans_t_p = checkPhase(T_0.data(),T_p.data(),
+    resp_p.nMatDim()[0],nFreq);
+  Trans_t_m = checkPhase(T_0.data(),T_m.data(),
+    resp_m.nMatDim()[0],nFreq);
+
+
+  if(debug){
+    cout << endl;
+    cout << "  Checking | T - T' | After Phase Check:" << endl;
+    
+    cout << "  | T(X,Y) - T(X+DX,Y) | = " << diffNorm(T_0,T_p) 
+         << endl;  
+    cout << "  | T(X,Y) - T(X-DX,Y) | = " << diffNorm(T_0,T_m) 
+         << endl;  
+  }
+
+  if(debug) {
+    cout << endl << " Checking < T | T > = 1 " << endl;
+    for(auto iSt = 0; iSt < nFreq; iSt++){
+      cout << "   State " << iSt << ":" << endl;
+      cout << "    < T(X,Y) | T(X,Y) >       = " 
+           << selfInner(T_0.col(iSt)) 
+           << endl;
+      cout << "    < T(X+DX,Y) | T(X+DX,Y) > = " 
+           << selfInner(T_p.col(iSt)) 
+           << endl;
+      cout << "    < T(X-DX,Y) | T(X-DX,Y) > = " 
+           << selfInner(T_m.col(iSt)) 
+           << endl;
+    }
+  }
+
+
+
+
+
+
+
+
+  // Calculate Derivatives
+    
+  // SCF energy gradient
+  double gsdx = (scf_p - scf_m) / (2*step);
+
+  if(debug)
+    cout << endl << "  GS Gradient = " << gsdx << endl;
+
+  // Excitation frequency gradient
+  Eigen::VectorXd freqDX = (freq_p - freq_m)/(2*step);
+
+  if(debug){
+    cout << endl << "  ES Gradients:" << endl;
+    for(auto iSt = 0; iSt < nFreq; iSt++){
+      cout << "   W(" << iSt << ")' = " << freqDX(iSt) << endl; 
+    }
+  }
+
+
+
+
+
+  // Assemble ground to excited state couplings
+  //
+  
+  int NOCC = ss_0.nOccA();
+  int NVIR = ss_0.nVirA();
+
+  if(debug){
+    // Compute Overlaps of wavefunctions at different geometries
+    double OvLp_0_0 = 
+      SMO_0_0.block(0,0,NOCC,NOCC).eigenvalues().prod().real();
+    double OvLp_p_p = 
+      SMO_p_p.block(0,0,NOCC,NOCC).eigenvalues().prod().real();
+    double OvLp_m_m = 
+      SMO_m_m.block(0,0,NOCC,NOCC).eigenvalues().prod().real();
+
+    double OvLp_0_p = 
+      SMO_0_p.block(0,0,NOCC,NOCC).eigenvalues().prod().real();
+    double OvLp_0_m = 
+      SMO_0_m.block(0,0,NOCC,NOCC).eigenvalues().prod().real();
+
+
+    cout << endl;
+    cout << "  Checking Wavefunction Overlaps < X | X' >:" << endl;
+    cout << "  < (X,Y) | (X,Y) >          = " << OvLp_0_0 << endl;
+    cout << "  < (X+DX,Y) | (X+DX,Y) >    = " << OvLp_p_p << endl;
+    cout << "  < (X-DX,Y) | (X-DX,Y) >    = " << OvLp_m_m << endl;
+
+    cout << "  < (X,Y) | (X+DX,Y) >       = " << OvLp_0_p << endl;
+    cout << "  < (X,Y) | (X-DX,Y) >       = " << OvLp_0_m << endl;
+  }
+  
+
+
+  Eigen::VectorXd NAC_ES_GS;
+  RealMatrix      NAC_ES_ES;
+
+  if(respType == RESPONSE_TYPE::CIS){
+    NAC_ES_GS = ES_GS_NACME_CIS(nFreq,true,NOCC,NVIR,step,
+      T_0,(*ss_0.moA()),(*ss_p.moA()),(*ss_m.moA()),
+      S_0_p,S_0_m);
+    NAC_ES_ES = ES_ES_NACME_CIS(nFreq,true,NOCC,NVIR,step,
+      T_0,T_p,T_m,(*ss_0.moA()),(*ss_p.moA()),
+      (*ss_m.moA()),S_0_p,S_0_m);
+
+  } else if(respType == RESPONSE_TYPE::PPTDA) {
+    NAC_ES_ES = ES_ES_NACME_PPTDA(nFreq,true,NOCC,NVIR,step,
+      T_0,T_p,T_m,(*ss_0.moA()),(*ss_p.moA()),
+      (*ss_m.moA()),S_0_p,S_0_m);
+  }
+  
+
+  if(debug){
+    Eigen::VectorXd NAC_GS_ES;
+
+    if(respType == RESPONSE_TYPE::CIS) {
+      NAC_GS_ES = GS_ES_NACME_CIS(nFreq,false,NOCC,NVIR,step,
+        T_0,T_p,T_m,(*ss_0.moA()),(*ss_p.moA()),
+        (*ss_m.moA()),S_0_p,S_0_m);
+     
+      prettyPrint(cout,NAC_ES_GS*0.529177,"ES->GS NACME DX");
+      prettyPrint(cout,NAC_GS_ES*0.529177,"GS->ES NACME DX");
+      prettyPrint(cout,NAC_ES_GS + NAC_GS_ES,"DIFF DX");
+
+
+    }
+  }
+
+  prettyPrint(cout,NAC_ES_ES*0.529177,"ES->ES DX");
+
+  Derivatives derv;
+  return derv;
+  
+}
