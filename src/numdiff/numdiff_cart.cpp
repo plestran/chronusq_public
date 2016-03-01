@@ -83,7 +83,7 @@ void cartDiff(std::string &XYZFName, std::string &basisName,
   geom_0.computeRij();
   geom_0.computeI();
 
-  double step = 0.001;
+  double step = 0.00001;
   std::vector<Derivatives> derv;
   for(auto iAtm = 0, IX = 0; iAtm < nAtoms; iAtm++)
   for(auto iXYZ = 0; iXYZ < 3     ; iXYZ++, IX++) {
@@ -132,4 +132,88 @@ void cartDiff(std::string &XYZFName, std::string &basisName,
     derv.push_back(computeNAC2pt1D(geom_0,geom_p,geom_m,fileio_0,fileio_p,
       fileio_m,controls,basisName,respType,nFreq,step));
   }
+
+  cout << "Summary" << endl;
+  cout << endl; 
+
+  cout << "GS Gradient" << endl;
+  cout << std::setw(15) << "Atom Number";
+  cout << std::setw(15) << "Atomic Type";
+  cout << std::setw(15) << "X";
+  cout << std::setw(15) << "Y";
+  cout << std::setw(15) << "Z";
+  cout << endl;
+  for(auto iAtm = 0, IX = 0; iAtm < nAtoms; iAtm++){
+    cout << std::setw(15) << iAtm;
+    cout << std::setw(15) << atom[geom_0.index(iAtm)].atomicNumber;
+    for(auto iXYZ = 0; iXYZ < 3     ; iXYZ++, IX++) {
+      cout << std::setw(15) << derv[IX].GS_GRAD;
+    }
+    cout << endl;
+  }
+
+
+  cout << endl << endl;
+  cout << "ES Gradients" << endl;
+  for(auto iSt = 0; iSt < nFreq; iSt++){
+    cout << "  Excited State " << iSt + 1<< endl;
+    cout << std::setw(15) << "Atom Number";
+    cout << std::setw(15) << "Atomic Type";
+    cout << std::setw(15) << "X";
+    cout << std::setw(15) << "Y";
+    cout << std::setw(15) << "Z";
+    cout << endl;
+    for(auto iAtm = 0, IX = 0; iAtm < nAtoms; iAtm++){
+      cout << std::setw(15) << iAtm;
+      cout << std::setw(15) << atom[geom_0.index(iAtm)].atomicNumber;
+      for(auto iXYZ = 0; iXYZ < 3     ; iXYZ++, IX++) {
+        cout << std::setw(15) << derv[IX].ES_GRAD(iSt) + derv[IX].GS_GRAD;
+      }
+      cout << endl;
+    }
+  }
+
+
+
+  cout << endl << endl;
+  cout << "ES -> GS Non Adiabatic Couplings" << endl;
+  for(auto iSt = 0; iSt < nFreq; iSt++){
+    cout << "  " << iSt + 1 << " - > 0" << endl;
+    cout << std::setw(15) << "Atom Number";
+    cout << std::setw(15) << "Atomic Type";
+    cout << std::setw(15) << "X";
+    cout << std::setw(15) << "Y";
+    cout << std::setw(15) << "Z";
+    cout << endl;
+    for(auto iAtm = 0, IX = 0; iAtm < nAtoms; iAtm++){
+      cout << std::setw(15) << iAtm;
+      cout << std::setw(15) << atom[geom_0.index(iAtm)].atomicNumber;
+      for(auto iXYZ = 0; iXYZ < 3     ; iXYZ++, IX++) {
+        cout << std::setw(15) << derv[IX].ES_GS_NACME(iSt);
+      }
+      cout << endl;
+    }
+  }
+
+  cout << endl << endl;
+  cout << "ES -> ES Non Adiabatic Couplings" << endl;
+  for(auto iSt = 0; iSt < nFreq; iSt++)
+  for(auto jSt = 0; jSt < nFreq; jSt++){
+    cout << "  " << iSt + 1 << " - > " << jSt + 1 << endl;
+    cout << std::setw(15) << "Atom Number";
+    cout << std::setw(15) << "Atomic Type";
+    cout << std::setw(15) << "X";
+    cout << std::setw(15) << "Y";
+    cout << std::setw(15) << "Z";
+    cout << endl;
+    for(auto iAtm = 0, IX = 0; iAtm < nAtoms; iAtm++){
+      cout << std::setw(15) << iAtm;
+      cout << std::setw(15) << atom[geom_0.index(iAtm)].atomicNumber;
+      for(auto iXYZ = 0; iXYZ < 3     ; iXYZ++, IX++) {
+        cout << std::setw(15) << derv[IX].ES_ES_NACME(iSt,jSt);
+      }
+      cout << endl;
+    }
+  }
+
 };
