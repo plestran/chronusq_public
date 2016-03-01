@@ -161,6 +161,9 @@ public:
     BetaMO
   };
 
+
+  bool haveStdOpFiles;
+  bool haveStdSCFFiles;
   void iniH5Paths();
   void iniH5Files();
   void iniCompType();

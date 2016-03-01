@@ -952,8 +952,6 @@ Derivatives computeNAC2pt1D(Molecule &geom_0, Molecule &geom_p,
   ss_p.genMethString();
   ss_m.genMethString();
 
-
-
   aoints_0.alloc();
   aoints_p.alloc();
   aoints_m.alloc();

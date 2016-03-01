@@ -132,5 +132,4 @@ void cartDiff(std::string &XYZFName, std::string &basisName,
     derv.push_back(computeNAC2pt1D(geom_0,geom_p,geom_m,fileio_0,fileio_p,
       fileio_m,controls,basisName,respType,nFreq,step));
   }
-
 };
