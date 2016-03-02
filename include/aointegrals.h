@@ -320,6 +320,7 @@ public:
   inline int nTCS(){ return this->nTCS_;}
   inline int maxMultipole(){ return this->maxMultipole_;}
   inline int maxNumInt(){ return this->maxNumInt_;}
+  inline Controls* controls(){ return this->controls_;};
 
   // Setters
   inline void setNTCS(int i)        { this->nTCS_         = i;}

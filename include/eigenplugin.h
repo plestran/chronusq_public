@@ -35,12 +35,17 @@ inline Scalar frobInner(const MatrixBase<OtherDerived>& other) const {
   return (derived().cwiseProduct(other.derived())).sum();
 }
 
-/*
-inline void normCol() const {
-  for(auto j = 0; j < cols(); j++) {
-    double colNorm = derived().col(j).norm();
-    this.col(j) = this.col(j)/colNorm;
-  }
+template<typename Dervd>
+inline double diffNorm( const Dervd &A, const Dervd &B ){
+  return (A-B).norm();
 }
-*/
 
+template<typename Dervd>
+inline double diffNormI( const Dervd &A ){
+  return (A - Dervd::Identity(A.rows(),A.cols())).norm();
+}
+
+template<typename Dervd>
+inline double selfInner( const Dervd &A){
+  return A.dot(A);
+}

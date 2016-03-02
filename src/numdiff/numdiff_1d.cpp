@@ -3,19 +3,24 @@
 #include <workers.h>
 #include <pythonapi.h>
 
+template<typename Dervd>
+inline double diffNorm( const Dervd &A, const Dervd &B ){
+  return (A-B).norm();
+}
+
+template<typename Dervd>
+inline double diffNormI( const Dervd &A ){
+  return (A - Dervd::Identity(A.rows(),A.cols())).norm();
+}
+
+template<typename Dervd>
+inline double selfInner( const Dervd &A){
+  return A.dot(A);
+}
 using namespace ChronusQ;
 std::string genFName(double,int,std::string);
 Eigen::VectorXd checkPhase(double*,double*,int,int);
 RealMatrix genSpx(BasisSet&,BasisSet&);
-
-struct Derivatives {
-  double          GS_ENERGY;
-  double          GS_GRAD;
-  Eigen::VectorXd ES_ENERGY;
-  Eigen::VectorXd ES_GRAD;
-  Eigen::VectorXd ES_GS_NACME;
-  RealMatrix      ES_ES_NACME;
-};
 
 Eigen::VectorXd GS_ES_NACME_CIS(int,bool,int,int,double,
   RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&, 
@@ -31,18 +36,6 @@ RealMatrix ES_ES_NACME_PPTDA(int,bool,int,int,double,
 Derivatives computeNAC2pt1D(Molecule&,Molecule&,Molecule&,FileIO&,FileIO&, 
   FileIO&,Controls&,std::string&,RESPONSE_TYPE,int,double);
 
-template<typename Derived>
-double diffNorm( const Derived &A, const Derived &B ){
-  return (A-B).norm();
-}
-template<typename Derived>
-double diffNormI( const Derived &A ){
-  return (A - Derived::Identity(A.rows(),A.cols())).norm();
-}
-template<typename Derived>
-double selfInner( const Derived &A){
-  return A.dot(A);
-}
 
 
 

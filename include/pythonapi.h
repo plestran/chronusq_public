@@ -1,6 +1,7 @@
 #include <workers.h>
 #include <global.h>
 #include <atoms.h>
+#include <numdiff.h>
 
 using namespace boost::python;
 using ChronusQ::SingleSlater;
@@ -14,6 +15,7 @@ using ChronusQ::MOIntegrals;
 using ChronusQ::RealTime;
 using ChronusQ::CErr;
 using ChronusQ::SDResponse;
+using ChronusQ::NumericalDifferentiation;
 
 namespace ChronusQ{
   void Wrapper_readInput(FileIO&,Molecule&,BasisSet&,Controls&,BasisSet&);

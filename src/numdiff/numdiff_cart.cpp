@@ -6,14 +6,6 @@
 
 using namespace ChronusQ;
 
-struct Derivatives {
-  double          GS_ENERGY;
-  double          GS_GRAD;
-  Eigen::VectorXd ES_ENERGY;
-  Eigen::VectorXd ES_GRAD;
-  Eigen::VectorXd ES_GS_NACME;
-  RealMatrix      ES_ES_NACME;
-};
 
 Derivatives computeNAC2pt1D(Molecule&,Molecule&,Molecule&,FileIO&,FileIO&, 
   FileIO&,Controls&,std::string&,RESPONSE_TYPE,int,double);

@@ -446,6 +446,11 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def_readonly("nIter"    ,&SDResponse<dcomplex>::nQNIter                   )
   ;
 
+  class_<NumericalDifferentiation<double>,boost::noncopyable>(
+    "NumericalDifferentiationDouble",init<>())
+    .def("differentiate",&NumericalDifferentiation<double>::differentiate)
+  ;
+
   enum_<SDResponse<double>::METHOD>("SDResponse_METHOD")
     .value("INVALID", SDResponse<double>::__invalid    )
     .value("CIS"    , SDResponse<double>::CIS          )
@@ -456,6 +461,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("STAB"   , SDResponse<double>::STAB         )
   ;
 
+  
 
   def("readInput",       ChronusQ::Wrapper_readInput    );
   def("HashAtom",        ChronusQ::HashAtom             );
@@ -468,5 +474,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
   def("getRank",         ChronusQ::getRank              );
   def("getSize",         ChronusQ::getSize              );
   def("mpiBarrier",      ChronusQ::mpiBarrier           );
+
+  
 };
 

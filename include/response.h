@@ -312,6 +312,7 @@ public:
   inline std::vector<TMat> transDen(){return this->transDen_;};
   inline std::vector<VectorXd> frequencies(){return this->frequencies_;};
   inline std::vector<int> nMatDim(){return this->nMatDim_;};
+  inline SingleSlater<T> * singleSlater(){return this->singleSlater_;};
   
   // IO Related
   void printInfo();
