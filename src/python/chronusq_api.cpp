@@ -466,6 +466,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
 
   def("readInput",       ChronusQ::Wrapper_readInput    );
   def("HashAtom",        ChronusQ::HashAtom             );
+  def("HashZ",           ChronusQ::HashZ                );
   def("getAtomicNumber", ChronusQ::getAtomicNumber      );
   def("CErr",            ChronusQ::Wrapper_CErr_Default );
   def("CErrMsg",         ChronusQ::Wrapper_CErr_Message );

@@ -62,6 +62,7 @@ std::string stringlower(std::string);
 std::string stringupper(std::string);
 // convert atomic symbol and mass to an index in the table of atom in atoms.h
 int HashAtom (std::string, int);
+int HashZ (int, int);
 
 // convert shell symbol or angular momentum to number of AOs in the shell
 int HashNAOs (int);

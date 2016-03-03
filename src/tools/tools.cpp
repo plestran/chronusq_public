@@ -134,20 +134,32 @@ int HashAtom(std::string element, int massNumber) {
   element = stringlower(element);
   std::string currentAtom;
   
-  for (auto i=0;i<atom.size();i++){
-    currentAtom=atom[i].symbol;
-    currentAtom=stringlower(currentAtom);
-    if (massNumber>0){
-      if (!element.compare(currentAtom)&&massNumber==atom[i].massNumber){
+  for (auto i=0; i < atom.size(); i++){
+    currentAtom = atom[i].symbol;
+    currentAtom = stringlower(currentAtom);
+    if (massNumber > 0){
+      if (!element.compare(currentAtom) && 
+          massNumber == atom[i].massNumber){
         return i;
         break;
       };
     };
     
-    if (!element.compare(currentAtom)&&!atom[i].stable.compare("Y")){
+    if (!element.compare(currentAtom) && !atom[i].stable.compare("Y")){
       return i;
       break;
     };
+  };
+  return -1; 
+}; 
+
+int HashZ(int Z, int massNumber) { 
+  
+  for (auto i = 0; i < atom.size(); i++){
+    int ZTmp = atom[i].atomicNumber;
+    bool stable = !atom[i].stable.compare("Y");
+    if(massNumber == 0 && ZTmp == Z && stable) return i;
+    else if(massNumber == atom[i].massNumber && ZTmp == Z) return i;
   };
   return -1; 
 }; 
