@@ -89,6 +89,13 @@ void NumericalDifferentiation<T>::cartesianDiff(){
     (*mol_p1.cart())(iXYZ,iAtm) += step;
     (*mol_m1.cart())(iXYZ,iAtm) -= step;
 
+    mol_p1.computeI();
+    mol_p1.computeRij();
+    mol_p1.computeNucRep();
+    mol_m1.computeI();
+    mol_m1.computeRij();
+    mol_m1.computeNucRep();
+
     basis_p1.resetAll(); basis_m1.resetAll();
 
     basis_p1.constructLocal(&mol_p1);
@@ -99,6 +106,8 @@ void NumericalDifferentiation<T>::cartesianDiff(){
     ss_p1.initMeta();
     ss_m1.initMeta();
 
+    ss_p1.moA()->setZero();
+    ss_p1.densityA()->setZero();
     ss_p1.formGuess();
     ss_p1.formFock();
     ss_p1.computeEnergy();
