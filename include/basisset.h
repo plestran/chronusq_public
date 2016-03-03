@@ -324,6 +324,12 @@ public:
   inline void resetMapCen2Bf(){this->mapCen2Bf_.clear();this->haveMapCen2Bf = false;};
   inline void resetLocalShells(){this->shells_.clear(); this->shellsCQ.clear();};
   inline void resetAll(){
+    this->nBasis_     = 0;
+    this->nPrimitive_ = 0;
+    this->nShell_     = 0;
+    this->nShellPair_ = 0;
+    this->maxPrim_    = 0;
+    this->maxL_       = 0;
     this->resetMapSh2Bf();
     this->resetMapSh2Cen();
     this->resetMapCen2Bf();

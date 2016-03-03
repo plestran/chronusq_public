@@ -31,10 +31,10 @@ void NumericalDifferentiation<T>::cartesianDiff(){
   }
 
   BasisSet basis_p1, basis_m1;
-  basis_p1.findBasisFile(this->singleSlater_undisplaced_->basisset()->basisPath());
-  basis_m1.findBasisFile(this->singleSlater_undisplaced_->basisset()->basisPath());
   basis_p1.communicate(fileioTmp);
   basis_m1.communicate(fileioTmp);
+  basis_p1.findBasisFile(this->singleSlater_undisplaced_->basisset()->basisPath());
+  basis_m1.findBasisFile(this->singleSlater_undisplaced_->basisset()->basisPath());
   basis_p1.parseGlobal();
   basis_m1.parseGlobal();
   // so AOIntegrals / SS know about nBasis
@@ -81,6 +81,7 @@ void NumericalDifferentiation<T>::cartesianDiff(){
 
   for(auto iAtm = 0, IX = 0; iAtm < nAtoms; iAtm++)
   for(auto iXYZ = 0; iXYZ < 3     ; iXYZ++, IX++) {
+    cout << "IX " << IX + 1 << endl;
 
     (*mol_p1.cart()) = (*this->molecule_undisplaced_->cart());
     (*mol_m1.cart()) = (*this->molecule_undisplaced_->cart());

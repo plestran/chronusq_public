@@ -93,6 +93,10 @@ def runSCF(workers,meta):
   if chronusQ.getRank() == 0:
     workers["CQSingleSlater"].printProperties()
 
+  ND = chronusQ.NumericalDifferentiationDouble()
+  ND.setSingleSlater(workers["CQSingleSlater"])
+  ND.differentiate()
+
   meta.E          = workers["CQSingleSlater"].totalEnergy
   meta.scfIters   = workers["CQSingleSlater"].nSCFIter
   meta.dipole     = workers["CQSingleSlater"].dipole()

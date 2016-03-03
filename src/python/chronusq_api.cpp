@@ -448,7 +448,8 @@ BOOST_PYTHON_MODULE(libpythonapi){
 
   class_<NumericalDifferentiation<double>,boost::noncopyable>(
     "NumericalDifferentiationDouble",init<>())
-    .def("differentiate",&NumericalDifferentiation<double>::differentiate)
+    .def("differentiate"  ,&NumericalDifferentiation<double>::differentiate)
+    .def("setSingleSlater",&NumericalDifferentiation<double>::setSingleSlater)
   ;
 
   enum_<SDResponse<double>::METHOD>("SDResponse_METHOD")

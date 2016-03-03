@@ -43,7 +43,16 @@ namespace ChronusQ {
     double step;
     
     // Setters
-    void setDiffType(DiffType diffType){this->diffType_ = diffType;}; 
+    inline void setDiffType(DiffType diffType){this->diffType_ = diffType;}; 
+    inline void setSingleSlater(SingleSlater<T> &ss){
+      this->setMolecule(*ss.molecule());
+      this->singleSlater_undisplaced_ = &ss;
+      this->computeGSGradient         = true;
+    };
+    inline void setMolecule(Molecule &mol){
+      this->molecule_undisplaced_ = &mol;
+    };
+
 
 
 

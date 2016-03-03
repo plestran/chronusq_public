@@ -126,6 +126,7 @@ void BasisSet::genUCvomLocal(BasisSet *genBasis){
  *  Compute BasisSet metadata
  */
 void BasisSet::computeMeta(){
+  this->nBasis_ = 0;
   this->nShell_     = this->shells_.size();
   this->nShellPair_ = this->nShell_ * (this->nShell_ + 1) / 2;
   
