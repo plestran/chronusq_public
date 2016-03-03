@@ -184,7 +184,7 @@ class AOIntegrals{
     this->checkWorkers();
     if(this->nBasis_ == 0)
       CErr(
-        "Fatal: SingleSlater Object Initialized with NBasis = 0 or NShell = 0",
+        "Fatal: AOIntegrals Object Initialized with NBasis = 0 or NShell = 0",
         this->fileio_->out);
   }
 
