@@ -83,11 +83,12 @@ void NumericalDifferentiation<T>::cartesianDiff(){
   
   
 
+  std::ofstream outf("geom_gdv.grad");
+//std::ofstream outf2("geom_gdv.energy");
+//outf2 << this->singleSlater_undisplaced_->totalEnergy << endl;
   for(auto iAtm = 0, IX = 0; iAtm < nAtoms; iAtm++)
   for(auto iXYZ = 0; iXYZ < 3     ; iXYZ++, IX++) {
     
-    cout << "IX " << IX + 1;
-
     (*mol_p1.cart()) = (*this->molecule_undisplaced_->cart());
     (*mol_m1.cart()) = (*this->molecule_undisplaced_->cart());
 
@@ -203,7 +204,8 @@ void NumericalDifferentiation<T>::cartesianDiff(){
     double scf_p1 = ss_p1.totalEnergy;
     double scf_m1 = ss_m1.totalEnergy;
     double gsdx = (scf_p1 - scf_m1) / (2*step);
-    cout << " " << gsdx << endl;
+    outf << std::setprecision(10) << gsdx << endl;
+    
   }
 
 };

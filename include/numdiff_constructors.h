@@ -1,5 +1,4 @@
 NumericalDifferentiation(){
-  cout << "HERE" << endl;
   this->computeGSGradient = false;
   this->computeESGradient = false;
   this->computeES2GSNACME = false;
