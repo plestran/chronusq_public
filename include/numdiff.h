@@ -25,12 +25,19 @@ namespace ChronusQ {
 
   template<typename T>
   class NumericalDifferentiation {
+    DiffType          diffType_;
     Molecule        * molecule_undisplaced_;
     SingleSlater<T> * singleSlater_undisplaced_;
     Response<T>     * response_undisplaced_;
 
-    DiffType diffType_;
-    std::vector<Derivatives> dervData_;
+    std::vector<     Derivatives > dervData_;
+    std::unique_ptr< Response<T> > generated_response_;
+
+    bool generateESObjs_;
+    RESPONSE_TYPE respType_;
+    int responseDiffRoot_;
+    int responseNRoots_;
+
   public:
     #include <numdiff_constructors.h>
 
@@ -43,6 +50,11 @@ namespace ChronusQ {
     double step;
     
     // Setters
+    inline void generateESObjs(){this->generateESObjs_ = true;};
+    inline void setRespNRoots(int n){this->responseNRoots_ = n;};
+    inline void setRespType(RESPONSE_TYPE type){this->respType_ = type;};
+    inline void setRespRoot(int n){this->responseDiffRoot_ = n;};
+
     inline void setDiffType(DiffType diffType){this->diffType_ = diffType;}; 
     inline void setSingleSlater(SingleSlater<T> &ss){
       this->setMolecule(*ss.molecule());
@@ -63,10 +75,11 @@ namespace ChronusQ {
     }
     
     void cartesianDiff();
-    void computeGS(BasisSet&,BasisSet&,SingleSlater<T>&,SingleSlater<T>&);
-    void computeES();
-    void GSGradient();
-    void ESGradient();
+    void generateDispGeom(Molecule &, Molecule &, int, int);
+    void computeGS(SingleSlater<T>&);
+    void computeES(Response<T>&);
+    double GSGradient(SingleSlater<T>&,SingleSlater<T>&);
+    Eigen::VectorXd ESGradient(Response<T>&,Response<T>&);
     void ES2GSNACME();
     void ES2ESNACME();
 

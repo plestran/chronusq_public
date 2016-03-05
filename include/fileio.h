@@ -179,6 +179,7 @@ public:
   void write(std::string);
 
   inline std::string fileName(){return this->name;};
+  inline std::string fileNameOut(){return this->name_out;};
 
 };
 } // namespace ChronusQ

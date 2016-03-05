@@ -4,6 +4,7 @@ NumericalDifferentiation(){
   this->computeES2GSNACME = false;
   this->computeES2ESNACME = false;
   this->doAllCartesianDOF = true;
+  this->generateESObjs_   = false;
 
   molecule_undisplaced_     = NULL;
   singleSlater_undisplaced_ = NULL;
@@ -11,6 +12,9 @@ NumericalDifferentiation(){
 
   this->step = 0.0001;
   this->diffType_ = DiffType::TwoPointSymmetric;
+  this->respType_ = RESPONSE_TYPE::NOMETHOD;
+  this->responseDiffRoot_ = -1;
+  this->responseNRoots_   = -1;
 };
 
 NumericalDifferentiation(Molecule *mol) :
@@ -34,3 +38,4 @@ NumericalDifferentiation() {
 
   this->computeESGradient = true;
 };
+

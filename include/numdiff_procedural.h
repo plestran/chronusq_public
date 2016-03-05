@@ -1,6 +1,9 @@
 template<typename T>
 void NumericalDifferentiation<T>::cartesianDiff(){
-  FileIO fileioTmp("NumDiffScr.inp","NumDiffScr.out","NumDiffScr.rst");
+  FileIO fileioTmp("NumDiffScr.inp",
+//   this->singleSlater_undisplaced_->fileio()->fileNameOut(),
+     "NumDiffScr.out","NumDiffScr.rst");
+
   fileioTmp.iniH5Files();
   fileioTmp.iniStdGroups();
 
@@ -30,6 +33,33 @@ void NumericalDifferentiation<T>::cartesianDiff(){
   for(auto iAtm = 0; iAtm < nAtoms; iAtm++){
     mol_p1.index(iAtm) = this->molecule_undisplaced_->index(iAtm);
     mol_m1.index(iAtm) = this->molecule_undisplaced_->index(iAtm);
+  }
+
+
+  if(this->generateESObjs_){
+    // Allocate Response object locally
+    this->generated_response_ = 
+      std::unique_ptr<Response<T>>(new Response<T>());
+
+    this->response_undisplaced_ = this->generated_response_.get();
+
+    // Temporary MOints for the undisplaced geometry
+    MOIntegrals<T> moints;
+    moints.communicate(*this->molecule_undisplaced_,
+      *this->singleSlater_undisplaced_->basisset(),fileioTmp,
+      *this->singleSlater_undisplaced_->aointegrals()->controls(),
+      *this->singleSlater_undisplaced_->aointegrals(),
+      *this->singleSlater_undisplaced_);
+
+    this->response_undisplaced_->communicate(*this->singleSlater_undisplaced_,
+      moints,fileioTmp); 
+
+
+    moints.initMeta();
+    this->singleSlater_undisplaced_->fileio()->out 
+      << "Performing Response Calculation at Undisplaced Geometry" << endl;
+
+    this->computeES(*this->response_undisplaced_);
   }
 
 /*
@@ -83,28 +113,24 @@ void NumericalDifferentiation<T>::cartesianDiff(){
   
   
 
-  std::ofstream outf("geom_gdv.grad");
-//std::ofstream outf2("geom_gdv.energy");
-//outf2 << this->singleSlater_undisplaced_->totalEnergy << endl;
+  cout << "HERE 1" << endl;
+  std::ofstream outGSGrad("geom_gdv.gsgrad");
+  std::ofstream outESGrad("geom_gdv.esgrad");
   for(auto iAtm = 0, IX = 0; iAtm < nAtoms; iAtm++)
   for(auto iXYZ = 0; iXYZ < 3     ; iXYZ++, IX++) {
-    
-    (*mol_p1.cart()) = (*this->molecule_undisplaced_->cart());
-    (*mol_m1.cart()) = (*this->molecule_undisplaced_->cart());
+    this->singleSlater_undisplaced_->fileio()->out <<
+      "Numerically Evaluating First Derivative IX = " << IX + 1 <<
+      " (IATM = " << iAtm + 1 << " , IXYZ = " << iXYZ + 1 <<
+      ")" << endl;
 
-    (*mol_p1.cart())(iXYZ,iAtm) += step;
-    (*mol_m1.cart())(iXYZ,iAtm) -= step;
+  cout << "HERE 2" << endl;
+    this->generateDispGeom(mol_p1,mol_m1,iXYZ,iAtm);
 
-    mol_p1.computeI();
-    mol_p1.computeRij();
-    mol_p1.computeNucRep();
-    mol_m1.computeI();
-    mol_m1.computeRij();
-    mol_m1.computeNucRep();
-
-    BasisSet basis_p1; BasisSet basis_m1;
-    AOIntegrals aoints_p1; AOIntegrals aoints_m1;
-    SingleSlater<double> ss_p1; SingleSlater<double> ss_m1;
+    BasisSet        basis_p1;  BasisSet        basis_m1;
+    AOIntegrals     aoints_p1; AOIntegrals     aoints_m1;
+    SingleSlater<T> ss_p1;     SingleSlater<T> ss_m1;
+    Response<T>     resp_p1;   Response<T>     resp_m1;
+    MOIntegrals<T>  moints_p1; MOIntegrals<T>  moints_m1;
 
     basis_p1.communicate(fileioTmp);
     basis_m1.communicate(fileioTmp);
@@ -133,9 +159,16 @@ void NumericalDifferentiation<T>::cartesianDiff(){
     ss_m1.communicate(mol_m1,basis_m1,aoints_m1,fileioTmp,
       *this->singleSlater_undisplaced_->aointegrals()->controls());
 
-    ss_p1.setRef(SingleSlater<double>::RHF);
-    ss_m1.setRef(SingleSlater<double>::RHF);
+    ss_p1.setRef(SingleSlater<T>::RHF);
+    ss_m1.setRef(SingleSlater<T>::RHF);
  
+    // For now, Response requires In-Core integrals ... FIXME
+    if(this->computeESGradient){
+      aoints_p1.integralAlgorithm = AOIntegrals::INTEGRAL_ALGORITHM::INCORE;
+      aoints_m1.integralAlgorithm = AOIntegrals::INTEGRAL_ALGORITHM::INCORE;
+    }
+  cout << "HERE 2" << endl;
+
     aoints_p1.initMeta();
     aoints_m1.initMeta();
 
@@ -154,14 +187,6 @@ void NumericalDifferentiation<T>::cartesianDiff(){
     ss_p1.alloc();
     ss_m1.alloc();
  
-/*
-    MOIntegrals<double> moints_p;
-    MOIntegrals<double> moints_m;
- 
-    Response<double> resp_p;
-    Response<double> resp_m;
-*/
-    
 /*
     basis_p1.resetAll(); basis_m1.resetAll();
 
@@ -183,29 +208,124 @@ void NumericalDifferentiation<T>::cartesianDiff(){
     aoints_p1.haveAOOneE = false;
     aoints_p1.haveAOTwoE = false;
 */
-    ss_p1.formGuess();
-    ss_p1.formFock();
-    ss_p1.computeEnergy();
-    ss_p1.SCF();
-    ss_p1.computeProperties();
-    ss_p1.printProperties();
-
 /*
     ss_m1.moA()->setZero();
     ss_m1.densityA()->setZero();
 */
-    ss_m1.formGuess();
-    ss_m1.formFock();
-    ss_m1.computeEnergy();
-    ss_m1.SCF();
-    ss_m1.computeProperties();
-    ss_m1.printProperties();
+  cout << "HERE 2" << endl;
+    this->computeGS(ss_p1);
+    this->computeGS(ss_m1);
+  cout << "HERE 2" << endl;
 
-    double scf_p1 = ss_p1.totalEnergy;
-    double scf_m1 = ss_m1.totalEnergy;
-    double gsdx = (scf_p1 - scf_m1) / (2*step);
-    outf << std::setprecision(10) << gsdx << endl;
+    if(this->computeESGradient) {
+      moints_p1.communicate(mol_p1,basis_p1,fileioTmp,
+        *this->singleSlater_undisplaced_->aointegrals()->controls(),
+        aoints_p1,ss_p1);
+      moints_m1.communicate(mol_m1,basis_m1,fileioTmp,
+        *this->singleSlater_undisplaced_->aointegrals()->controls(),
+        aoints_m1,ss_m1);
+
+      resp_p1.communicate(ss_p1,moints_p1,fileioTmp);
+      resp_m1.communicate(ss_m1,moints_m1,fileioTmp);
+
+      moints_p1.initMeta();
+      moints_m1.initMeta();
+
+      this->singleSlater_undisplaced_->fileio()->out 
+        << "Performing Response Calculation at + Displaced Geometry" << endl;
+      this->computeES(resp_p1);
+
+      this->singleSlater_undisplaced_->fileio()->out 
+        << "Performing Response Calculation at - Displaced Geometry" << endl;
+      this->computeES(resp_m1);
+
+    }
+  cout << "HERE 2" << endl;
+
+    Derivatives derv;
+    if(this->computeGSGradient) derv.GS_GRAD=this->GSGradient(ss_p1,ss_m1);
+    if(this->computeESGradient) derv.ES_GRAD=this->ESGradient(resp_p1,resp_m1);
     
+    outGSGrad << std::setprecision(10) << derv.GS_GRAD << endl;
+    if(this->computeESGradient){
+    outESGrad << std::setprecision(10) << derv.ES_GRAD[this->responseDiffRoot_] 
+             + derv.GS_GRAD << endl;
+    }
+
+    this->dervData_.push_back(derv);
   }
 
+};
+
+template<typename T>
+void NumericalDifferentiation<T>::generateDispGeom(
+  Molecule &mol_p1, Molecule &mol_m1, int iXYZ, int iAtm){
+
+  (*mol_p1.cart()) = (*this->molecule_undisplaced_->cart());
+  (*mol_m1.cart()) = (*this->molecule_undisplaced_->cart());
+
+  (*mol_p1.cart())(iXYZ,iAtm) += this->step;
+  (*mol_m1.cart())(iXYZ,iAtm) -= this->step;
+
+  mol_p1.computeI();
+  mol_p1.computeRij();
+  mol_p1.computeNucRep();
+
+  mol_m1.computeI();
+  mol_m1.computeRij();
+  mol_m1.computeNucRep();
+};
+
+template<typename T>
+void NumericalDifferentiation<T>::computeGS(SingleSlater<T> &ss){
+
+  ss.formGuess();
+  ss.formFock();
+  ss.computeEnergy();
+  ss.SCF();
+  ss.computeProperties();
+  ss.printProperties();
+
+};
+
+template<typename T>
+double NumericalDifferentiation<T>::GSGradient(
+  SingleSlater<T> &ss_p1, SingleSlater<T> &ss_m1){
+    double scf_p1 = ss_p1.totalEnergy;
+    double scf_m1 = ss_m1.totalEnergy;
+    double gsdx = (scf_p1 - scf_m1) / (2*this->step);
+    return gsdx;
+};
+
+template<typename T>
+void NumericalDifferentiation<T>::computeES(Response<T> &resp){
+  if(this->responseNRoots_ == -1) 
+    CErr(
+      "Must Set NRoots in NumericalDifferentiation if generating Objects",
+      this->singleSlater_undisplaced_->fileio()->out
+    );
+
+  if(this->respType_ == RESPONSE_TYPE::NOMETHOD)
+    CErr(
+      "Must Set RespType in NumericalDifferentiation if generating Objects",
+      this->singleSlater_undisplaced_->fileio()->out
+    );
+
+  resp.setMeth(this->respType_);
+  if(this->singleSlater_undisplaced_->isClosedShell) resp.doSA();
+  resp.setNSek(this->responseNRoots_);
+  resp.doFull();
+  resp.doResponse();
+
+};
+
+template <typename T>
+Eigen::VectorXd NumericalDifferentiation<T>::ESGradient(
+  Response<T> &resp_p1, Response<T> &resp_m1){
+  // This assumes strictly Singlets FIXME
+  Eigen::VectorXd freq_p1=resp_p1.frequencies()[0].head(this->responseNRoots_);
+  Eigen::VectorXd freq_m1=resp_m1.frequencies()[0].head(this->responseNRoots_);
+
+  Eigen::VectorXd freqDX = (freq_p1 - freq_m1)/(2*this->step);
+  return freqDX;
 };

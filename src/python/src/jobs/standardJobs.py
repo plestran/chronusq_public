@@ -95,6 +95,11 @@ def runSCF(workers,meta):
 
   ND = chronusQ.NumericalDifferentiationDouble()
   ND.setSingleSlater(workers["CQSingleSlater"])
+  ND.generateESObjs()
+  ND.setRespNRoots(3)
+  ND.setRespType(chronusQ.RESPONSE_TYPE.CIS)
+  ND.setRespRoot(0)
+  ND.computeESGradient = True
   ND.differentiate()
 
   meta.E          = workers["CQSingleSlater"].totalEnergy

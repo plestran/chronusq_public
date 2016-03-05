@@ -450,6 +450,19 @@ BOOST_PYTHON_MODULE(libpythonapi){
     "NumericalDifferentiationDouble",init<>())
     .def("differentiate"  ,&NumericalDifferentiation<double>::differentiate)
     .def("setSingleSlater",&NumericalDifferentiation<double>::setSingleSlater)
+    .def("generateESObjs"  ,&NumericalDifferentiation<double>::generateESObjs)
+    .def("setRespNRoots"  ,&NumericalDifferentiation<double>::setRespNRoots)
+    .def("setRespRoot"  ,&NumericalDifferentiation<double>::setRespRoot)
+    .def("setRespType"  ,&NumericalDifferentiation<double>::setRespType)
+
+    .def_readwrite("computeGSGradient", 
+                   &NumericalDifferentiation<double>::computeGSGradient)
+    .def_readwrite("computeESGradient", 
+                   &NumericalDifferentiation<double>::computeESGradient)
+    .def_readwrite("computeES2GSNACME", 
+                   &NumericalDifferentiation<double>::computeES2GSNACME)
+    .def_readwrite("computeES2ESNACME", 
+                   &NumericalDifferentiation<double>::computeES2ESNACME)
   ;
 
   enum_<SDResponse<double>::METHOD>("SDResponse_METHOD")
@@ -460,6 +473,15 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("PPATDA" , SDResponse<double>::PPATDA       )
     .value("PPCTDA" , SDResponse<double>::PPCTDA       )
     .value("STAB"   , SDResponse<double>::STAB         )
+  ;
+
+  enum_<RESPONSE_TYPE>("RESPONSE_TYPE")
+    .value("NOMETHOD", RESPONSE_TYPE::NOMETHOD    )
+    .value("CIS"    , RESPONSE_TYPE::CIS          )
+    .value("RPA"    , RESPONSE_TYPE::RPA          )
+    .value("PPRPA"  , RESPONSE_TYPE::PPRPA        )
+    .value("PPTDA" , RESPONSE_TYPE::PPTDA       )
+    .value("STAB"   , RESPONSE_TYPE::STAB         )
   ;
 
   
