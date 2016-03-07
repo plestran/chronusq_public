@@ -1,3 +1,18 @@
+
+template<typename Dervd>
+inline double diffNorm( const Dervd &A, const Dervd &B ){
+  return (A-B).norm();
+}
+
+template<typename Dervd>
+inline double diffNormI( const Dervd &A ){
+  return (A - Dervd::Identity(A.rows(),A.cols())).norm();
+}
+
+template<typename Dervd>
+inline double selfInner( const Dervd &A){
+  return A.dot(A);
+}
 template<typename T>
 void NumericalDifferentiation<T>::cartesianDiff(){
   FileIO fileioTmp("NumDiffScr.inp",
@@ -239,6 +254,67 @@ void NumericalDifferentiation<T>::cartesianDiff(){
       << "  Performing GS SCF Calculation at - Displaced Geometry" << endl;
     this->computeGS(ss_m1);
 
+
+    // If we're doing NACME, phase check the MO's so that the response
+    // is done properly
+      
+    RealMatrix SAO_0_p1, SAO_0_m1;
+    RealMatrix SMO_0_p1, SMO_0_m1;
+    if(this->computeES2GSNACME || this->computeES2ESNACME){
+      this->singleSlater_undisplaced_->fileio()->out << 
+        "  Performing Phase Check on Displaced MOs" << endl;
+
+      SAO_0_p1 = AOIntegrals::genSpx(
+        *this->singleSlater_undisplaced_->basisset(),basis_p1
+      );
+      SAO_0_m1 = AOIntegrals::genSpx(
+        *this->singleSlater_undisplaced_->basisset(),basis_m1
+      );
+
+      SMO_0_p1 =
+        this->singleSlater_undisplaced_->moA()->adjoint() *
+        SAO_0_p1 * (*ss_p1.moA());
+
+      SMO_0_m1 =
+        this->singleSlater_undisplaced_->moA()->adjoint() *
+        SAO_0_m1 * (*ss_m1.moA());
+
+/*
+      cout << endl;
+      cout << "  Checking | C - C' | Before Phase Check:" << endl;
+      
+      cout << "  | C(X,Y) - C(X+DX,Y) | = " 
+           << diffNorm((*this->singleSlater_undisplaced_->moA()),(*ss_p1.moA())) 
+           << endl;  
+      cout << "  | C(X,Y) - C(X-DX,Y) | = " 
+           << diffNorm((*this->singleSlater_undisplaced_->moA()),(*ss_m1.moA())) 
+           << endl;  
+*/
+      this->checkPhase((*this->singleSlater_undisplaced_),ss_p1,SMO_0_p1);
+      this->checkPhase((*this->singleSlater_undisplaced_),ss_m1,SMO_0_m1);
+
+/*
+      cout << endl;
+      cout << "  Checking | C - C' | After Phase Check:" << endl;
+      
+      cout << "  | C(X,Y) - C(X+DX,Y) | = " 
+           << diffNorm((*this->singleSlater_undisplaced_->moA()),(*ss_p1.moA())) 
+           << endl;  
+      cout << "  | C(X,Y) - C(X-DX,Y) | = " 
+           << diffNorm((*this->singleSlater_undisplaced_->moA()),(*ss_m1.moA())) 
+           << endl;  
+*/
+
+      // Recompute the MO Overlaps at phase corrected MOs
+      SMO_0_p1 =
+        this->singleSlater_undisplaced_->moA()->adjoint() *
+        SAO_0_p1 * (*ss_p1.moA());
+
+      SMO_0_m1 =
+        this->singleSlater_undisplaced_->moA()->adjoint() *
+        SAO_0_m1 * (*ss_m1.moA());
+    }
+
     if(this->computeESGradient) {
       moints_p1.communicate(mol_p1,basis_p1,fileioTmp,
         *this->singleSlater_undisplaced_->aointegrals()->controls(),
@@ -260,6 +336,13 @@ void NumericalDifferentiation<T>::cartesianDiff(){
       this->singleSlater_undisplaced_->fileio()->out 
         << "  Performing Response Calculation at - Displaced Geometry" << endl;
       this->computeES(resp_m1);
+
+
+      this->singleSlater_undisplaced_->fileio()->out << 
+        "  Performing Phase Check on Displaced Transition Vectors" << endl;
+
+      this->checkPhase((*this->response_undisplaced_),resp_p1);
+      this->checkPhase((*this->response_undisplaced_),resp_m1);
 
     }
 
@@ -298,6 +381,10 @@ void NumericalDifferentiation<T>::cartesianDiff(){
           << std::setprecision(10) << resp_p1.frequencies()[0](iRt) << endl
           << "      W(-," << iRt << ") = "
           << std::setprecision(10) << resp_m1.frequencies()[0](iRt) << endl;
+    }
+    if(this->computeES2GSNACME){
+      this->ES2GSNACME(ss_p1,ss_m1,resp_p1,resp_m1,SAO_0_p1,SAO_0_m1,
+        SMO_0_p1,SMO_0_m1);
     }
     
 
@@ -394,4 +481,74 @@ Eigen::VectorXd NumericalDifferentiation<T>::ESGradient(
 
   Eigen::VectorXd freqDX = (freq_p1 - freq_m1)/(2*this->step);
   return freqDX;
+};
+
+template <typename T>
+Eigen::VectorXd NumericalDifferentiation<T>::ES2GSNACME_CIS(
+  SingleSlater<T> &ss_p1, SingleSlater<T> &ss_m1, Response<T> &resp_p1,
+  Response<T> &resp_m1, TMatrix &SAO_0_p1, TMatrix &SAO_0_m1,
+  TMatrix &SMO_0_p1, TMatrix &SMO_0_m1){
+
+  Eigen::VectorXd NACME(this->responseNRoots_);
+
+  NACME.setZero();
+
+
+  int nThreads = omp_get_max_threads();
+  int nOcc     = this->singleSlater_undisplaced_->nOccA();
+  int nVir     = this->singleSlater_undisplaced_->nVirA();
+
+  std::vector<RealMatrix> SWAPPED_0(nThreads,
+    TMatrix((*this->singleSlater_undisplaced_->moA())));
+  std::vector<RealMatrix> Prod_0_p1(nThreads,
+    TMatrix((*this->singleSlater_undisplaced_->moA())));
+  std::vector<RealMatrix> Prod_0_m1(nThreads,
+    TMatrix((*this->singleSlater_undisplaced_->moA())));
+
+  RealMatrix T_0 = this->response_undisplaced_->transDen()[0].block(0,0,
+    this->response_undisplaced_->nMatDim()[0],this->responseNRoots_);
+
+  auto NACMEStart = std::chrono::high_resolution_clock::now();
+  for(auto iSt = 0; iSt < this->responseNRoots_; iSt++){
+    cout << "Working on iSt = " << iSt << " ES->GS" << endl;
+    #pragma omp parallel
+    {
+      int thread_id = omp_get_thread_num();
+      for(auto i = 0, ia = 0; i < nOcc; i++)
+      for(auto a = 0; a < nVir; a++, ia++){
+        if(ia % nThreads != thread_id) continue;
+        if(std::abs(T_0(ia,iSt)) < 1e-8) continue;
+  
+        Prod_0_p1[thread_id] = SMO_0_p1;
+        Prod_0_p1[thread_id].row(i).swap(Prod_0_p1[thread_id].row(nOcc+a)); 
+        Prod_0_m1[thread_id] = SMO_0_m1;
+        Prod_0_m1[thread_id].row(i).swap(Prod_0_m1[thread_id].row(nOcc+a)); 
+        
+        double OvLp_IASwap_0_p =
+          Prod_0_p1[thread_id].block(0,0,nOcc,nOcc).determinant();
+        double OvLp_IASwap_0_m =
+          Prod_0_m1[thread_id].block(0,0,nOcc,nOcc).determinant();
+     
+        #pragma omp critical
+        {
+          NACME(iSt) += T_0(ia,iSt) *
+            (OvLp_IASwap_0_p - OvLp_IASwap_0_m) /
+            (2 * this->step);
+        }
+      } // loop ove ia
+    }
+  } // loop over states
+
+  
+//for(auto iTh = 0; iTh < nThreads; iTh++) NACME += TMPNACME[iTh];
+  NACME = 2 * std::sqrt(0.5) * NACME;
+  auto NACMEEnd = std::chrono::high_resolution_clock::now();
+
+  std::chrono::duration<double> elapsed = NACMEEnd - NACMEStart;
+  cout << "GS -> ES NACME took " << elapsed.count() << " s" << endl;
+  cout << NACME;
+  cout << endl;
+  cout << endl;
+  return NACME;
+
 };

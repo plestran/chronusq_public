@@ -25,6 +25,8 @@ namespace ChronusQ {
 
   template<typename T>
   class NumericalDifferentiation {
+    typedef Eigen::Matrix<T,Dynamic,Dynamic,ColMajor> TMatrix;
+
     DiffType          diffType_;
     Molecule        * molecule_undisplaced_;
     SingleSlater<T> * singleSlater_undisplaced_;
@@ -37,6 +39,12 @@ namespace ChronusQ {
     RESPONSE_TYPE respType_;
     int responseDiffRoot_;
     int responseNRoots_;
+
+    void checkPhase(SingleSlater<T>&,SingleSlater<T>&,TMatrix&);
+    void checkPhase(SingleSlater<T>&,SingleSlater<T>&);
+    void checkPhase(Response<T>&,Response<T>&,TMatrix&);
+    void checkPhase(Response<T>&,Response<T>&);
+    void checkPhase(TMatrix&, TMatrix&);
 
   public:
     #include <numdiff_constructors.h>
@@ -65,10 +73,6 @@ namespace ChronusQ {
       this->molecule_undisplaced_ = &mol;
     };
 
-
-
-
-
     // Procedural functions
     inline void differentiate(){
       if(this->doAllCartesianDOF) this->cartesianDiff();
@@ -80,8 +84,29 @@ namespace ChronusQ {
     void computeES(Response<T>&);
     double GSGradient(SingleSlater<T>&,SingleSlater<T>&);
     Eigen::VectorXd ESGradient(Response<T>&,Response<T>&);
-    void ES2GSNACME();
-    void ES2ESNACME();
+
+
+    Eigen::VectorXd ES2GSNACME_CIS(SingleSlater<T>&,SingleSlater<T>&,
+      Response<T>&,Response<T>&,TMatrix&,TMatrix&,TMatrix&,TMatrix&);
+
+    inline Eigen::VectorXd ES2GSNACME(SingleSlater<T> &ss_p1, 
+      SingleSlater<T> &ss_m1, Response<T> &resp_p1, Response<T> &resp_m1, 
+      TMatrix &SAO_0_p1, TMatrix &SAO_0_m1, TMatrix &SMO_0_p1, 
+      TMatrix &SMO_0_m1){
+
+      if(this->respType_ == RESPONSE_TYPE::CIS)
+        return this->ES2GSNACME_CIS(ss_p1,ss_m1,resp_p1,resp_m1,SAO_0_p1,
+          SAO_0_m1,SMO_0_p1,SMO_0_m1);
+    }
+
+    RealMatrix ES2ESNACME_CIS();
+    RealMatrix ES2ESNACME_PPTDA(){;};
+    inline RealMatrix ES2ESNACME() {
+      if(this->respType_ == RESPONSE_TYPE::CIS)
+        return this->ES2ESNACME_CIS();
+      else if(this->respType_ == RESPONSE_TYPE::PPTDA)
+        return this->ES2ESNACME_PPTDA();
+    }
 
 
   }; // class NumericalDifferentiation

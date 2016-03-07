@@ -439,7 +439,12 @@ public:
 
   // Python API
   void Wrapper_iniAOIntegrals(Molecule&,BasisSet&,FileIO&,Controls&); 
+
+
+  // Misc Utility Functions that deal with AOIntegrals
+  static RealMatrix genSpx(BasisSet&, BasisSet&);
 };
+
 } // namespace ChronusQ
 
 #endif

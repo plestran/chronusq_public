@@ -25,18 +25,6 @@ std::vector<RealMatrix> ES_ES_NACME_PPTDA(int,bool,int,int,double,
   RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,
   RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&,RealMatrix&);
 
-template<typename Derived>
-double diffNorm( const Derived &A, const Derived &B ){
-  return (A-B).norm();
-}
-template<typename Derived>
-double diffNormI( const Derived &A ){
-  return (A - Derived::Identity(A.rows(),A.cols())).norm();
-}
-template<typename Derived>
-double selfInner( const Derived &A){
-  return A.dot(A);
-}
 
 
 

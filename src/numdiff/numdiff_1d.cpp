@@ -3,20 +3,6 @@
 #include <workers.h>
 #include <pythonapi.h>
 
-template<typename Dervd>
-inline double diffNorm( const Dervd &A, const Dervd &B ){
-  return (A-B).norm();
-}
-
-template<typename Dervd>
-inline double diffNormI( const Dervd &A ){
-  return (A - Dervd::Identity(A.rows(),A.cols())).norm();
-}
-
-template<typename Dervd>
-inline double selfInner( const Dervd &A){
-  return A.dot(A);
-}
 using namespace ChronusQ;
 std::string genFName(double,int,std::string);
 Eigen::VectorXd checkPhase(double*,double*,int,int);
