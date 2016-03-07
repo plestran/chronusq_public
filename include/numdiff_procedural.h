@@ -62,6 +62,29 @@ void NumericalDifferentiation<T>::cartesianDiff(){
     this->computeES(*this->response_undisplaced_);
   }
 
+
+  this->singleSlater_undisplaced_->fileio()->out
+    << "  Summary of Results for Undisplaced Geometry:" << endl; 
+  this->singleSlater_undisplaced_->fileio()->out
+    << "    SCF Energy:" << endl;
+
+  this->singleSlater_undisplaced_->fileio()->out
+    << "    E(0) = "
+    << std::setprecision(10) << this->singleSlater_undisplaced_->totalEnergy 
+    << endl;
+
+  if(this->computeESGradient){
+    this->singleSlater_undisplaced_->fileio()->out 
+      << "    ES Energies:" << endl;
+    for(auto iRt = 0; iRt < this->responseNRoots_; iRt++)
+      this->singleSlater_undisplaced_->fileio()->out 
+        << "      W(0," << iRt << ") = "
+        << std::setprecision(10) 
+        << this->response_undisplaced_->frequencies()[0](iRt) << endl;
+  }
+
+  this->singleSlater_undisplaced_->fileio()->out << endl;
+
 /*
   BasisSet basis_p1, basis_m1;
   basis_p1.communicate(fileioTmp);
@@ -113,7 +136,6 @@ void NumericalDifferentiation<T>::cartesianDiff(){
   
   
 
-  cout << "HERE 1" << endl;
   std::ofstream outGSGrad("geom_gdv.gsgrad");
   std::ofstream outESGrad("geom_gdv.esgrad");
   for(auto iAtm = 0, IX = 0; iAtm < nAtoms; iAtm++)
@@ -123,7 +145,6 @@ void NumericalDifferentiation<T>::cartesianDiff(){
       " (IATM = " << iAtm + 1 << " , IXYZ = " << iXYZ + 1 <<
       ")" << endl;
 
-  cout << "HERE 2" << endl;
     this->generateDispGeom(mol_p1,mol_m1,iXYZ,iAtm);
 
     BasisSet        basis_p1;  BasisSet        basis_m1;
@@ -167,7 +188,6 @@ void NumericalDifferentiation<T>::cartesianDiff(){
       aoints_p1.integralAlgorithm = AOIntegrals::INTEGRAL_ALGORITHM::INCORE;
       aoints_m1.integralAlgorithm = AOIntegrals::INTEGRAL_ALGORITHM::INCORE;
     }
-  cout << "HERE 2" << endl;
 
     aoints_p1.initMeta();
     aoints_m1.initMeta();
@@ -212,10 +232,12 @@ void NumericalDifferentiation<T>::cartesianDiff(){
     ss_m1.moA()->setZero();
     ss_m1.densityA()->setZero();
 */
-  cout << "HERE 2" << endl;
+    this->singleSlater_undisplaced_->fileio()->out 
+      << "  Performing GS SCF Calculation at + Displaced Geometry" << endl;
     this->computeGS(ss_p1);
+    this->singleSlater_undisplaced_->fileio()->out 
+      << "  Performing GS SCF Calculation at - Displaced Geometry" << endl;
     this->computeGS(ss_m1);
-  cout << "HERE 2" << endl;
 
     if(this->computeESGradient) {
       moints_p1.communicate(mol_p1,basis_p1,fileioTmp,
@@ -232,27 +254,71 @@ void NumericalDifferentiation<T>::cartesianDiff(){
       moints_m1.initMeta();
 
       this->singleSlater_undisplaced_->fileio()->out 
-        << "Performing Response Calculation at + Displaced Geometry" << endl;
+        << "  Performing Response Calculation at + Displaced Geometry" << endl;
       this->computeES(resp_p1);
 
       this->singleSlater_undisplaced_->fileio()->out 
-        << "Performing Response Calculation at - Displaced Geometry" << endl;
+        << "  Performing Response Calculation at - Displaced Geometry" << endl;
       this->computeES(resp_m1);
 
     }
-  cout << "HERE 2" << endl;
 
     Derivatives derv;
-    if(this->computeGSGradient) derv.GS_GRAD=this->GSGradient(ss_p1,ss_m1);
-    if(this->computeESGradient) derv.ES_GRAD=this->ESGradient(resp_p1,resp_m1);
+    if(this->computeGSGradient) 
+      derv.GS_GRAD = this->GSGradient(ss_p1,ss_m1);
+    if(this->computeESGradient) 
+      derv.ES_GRAD = this->ESGradient(resp_p1,resp_m1);
     
     outGSGrad << std::setprecision(10) << derv.GS_GRAD << endl;
     if(this->computeESGradient){
-    outESGrad << std::setprecision(10) << derv.ES_GRAD[this->responseDiffRoot_] 
-             + derv.GS_GRAD << endl;
+      outESGrad << std::setprecision(10) 
+                << derv.ES_GRAD[this->responseDiffRoot_] + derv.GS_GRAD 
+                << endl;
     }
 
     this->dervData_.push_back(derv);
+
+    this->singleSlater_undisplaced_->fileio()->out
+      << "  Summary of Results for IX = " << IX << ":" << endl; 
+
+    this->singleSlater_undisplaced_->fileio()->out
+      << "    SCF Energies:" << endl;
+
+    this->singleSlater_undisplaced_->fileio()->out
+      << "    E(+) = "
+      << std::setprecision(10) <<  ss_p1.totalEnergy << endl
+      << "    E(-) = "
+      << std::setprecision(10) <<  ss_m1.totalEnergy << endl;
+    if(this->computeESGradient){
+      this->singleSlater_undisplaced_->fileio()->out 
+        << "    ES Energies:" << endl;
+      for(auto iRt = 0; iRt < this->responseNRoots_; iRt++)
+        this->singleSlater_undisplaced_->fileio()->out 
+          << "      W(+," << iRt << ") = "
+          << std::setprecision(10) << resp_p1.frequencies()[0](iRt) << endl
+          << "      W(-," << iRt << ") = "
+          << std::setprecision(10) << resp_m1.frequencies()[0](iRt) << endl;
+    }
+    
+
+    if(this->computeGSGradient)
+      this->singleSlater_undisplaced_->fileio()->out 
+        << "    GS Gradient = "
+        << std::setprecision(10) << derv.GS_GRAD << endl;
+    if(this->computeESGradient){
+      this->singleSlater_undisplaced_->fileio()->out 
+        << "    ES Gradients:" << endl;
+      for(auto iRt = 0; iRt < this->responseNRoots_; iRt++)
+        this->singleSlater_undisplaced_->fileio()->out 
+          << "      W'(" << iRt << ") = "
+          << std::setprecision(10) << derv.ES_GRAD(iRt) << endl;
+    }
+
+    this->singleSlater_undisplaced_->fileio()->out << endl;
+    
+   
+
+    
   }
 
 };
