@@ -10,7 +10,7 @@ NumericalDifferentiation(){
   singleSlater_undisplaced_ = NULL;
   response_undisplaced_     = NULL;
 
-  this->step = 0.0001;
+  this->step = 0.001;
   this->diffType_ = DiffType::TwoPointSymmetric;
   this->respType_ = RESPONSE_TYPE::NOMETHOD;
   this->responseDiffRoot_ = -1;

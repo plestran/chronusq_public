@@ -97,7 +97,7 @@ def runSCF(workers,meta):
   ND.setSingleSlater(workers["CQSingleSlater"])
   ND.generateESObjs()
   ND.setRespNRoots(4)
-  ND.setRespType(chronusQ.RESPONSE_TYPE.CIS)
+  ND.setRespType(chronusQ.RESPONSE_TYPE.PPTDA)
   ND.setRespRoot(0)
   ND.computeESGradient = True
   ND.computeES2GSNACME = True

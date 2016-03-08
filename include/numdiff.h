@@ -109,16 +109,18 @@ namespace ChronusQ {
       if(this->respType_ == RESPONSE_TYPE::CIS)
         return this->ES2GSNACME_CIS(ss_p1,ss_m1,T_0,T_p1,T_m1,SAO_0_p1,
           SAO_0_m1,SMO_0_p1,SMO_0_m1);
+      else if(this->respType_ == RESPONSE_TYPE::PPTDA)
+        return Eigen::VectorXd::Zero(this->responseNRoots_);
     }
 
     RealMatrix ES2ESNACME_CIS(SingleSlater<T>&,SingleSlater<T>&,
       Response<T>&,Response<T>&,TMatrix&,TMatrix&,TMatrix&,TMatrix&);
-    RealMatrix ES2ESNACME_PPTDA(SingleSlater<T>&,SingleSlater<T>&,
-      Response<T>&,Response<T>&,TMatrix&,TMatrix&,TMatrix&,TMatrix&){;};
+//  RealMatrix ES2ESNACME_PPTDA(SingleSlater<T>&,SingleSlater<T>&,
+//    Response<T>&,Response<T>&,TMatrix&,TMatrix&,TMatrix&,TMatrix&){;};
     RealMatrix ES2ESNACME_CIS(SingleSlater<T>&,SingleSlater<T>&,
       TMatrix&,TMatrix&,TMatrix&,TMatrix&,TMatrix&,TMatrix&,TMatrix&);
     RealMatrix ES2ESNACME_PPTDA(SingleSlater<T>&,SingleSlater<T>&,
-      TMatrix&,TMatrix&,TMatrix&,TMatrix&,TMatrix&,TMatrix&,TMatrix&){;};
+      TMatrix&,TMatrix&,TMatrix&,TMatrix&,TMatrix&,TMatrix&,TMatrix&);
 
     inline RealMatrix ES2ESNACME(SingleSlater<T> &ss_p1, 
       SingleSlater<T> &ss_m1, Response<T> &resp_p1, Response<T> &resp_m1, 

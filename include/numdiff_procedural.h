@@ -303,10 +303,10 @@ void NumericalDifferentiation<T>::cartesianDiff(){
            << endl;  
 
 
-//    this->checkPhase((*this->singleSlater_undisplaced_),ss_p1,SMO_0_p1);
-//    this->checkPhase((*this->singleSlater_undisplaced_),ss_m1,SMO_0_m1);
-      this->checkPhase((*this->singleSlater_undisplaced_->moA()),(*ss_p1.moA()));
-      this->checkPhase((*this->singleSlater_undisplaced_->moA()),(*ss_m1.moA()));
+      this->checkPhase((*this->singleSlater_undisplaced_),ss_p1,SMO_0_p1);
+      this->checkPhase((*this->singleSlater_undisplaced_),ss_m1,SMO_0_m1);
+//    this->checkPhase((*this->singleSlater_undisplaced_->moA()),(*ss_p1.moA()));
+//    this->checkPhase((*this->singleSlater_undisplaced_->moA()),(*ss_m1.moA()));
 
       cout << endl;
       cout << "  Checking | C - C' | After Phase Check:" << endl;
@@ -363,8 +363,8 @@ void NumericalDifferentiation<T>::cartesianDiff(){
         "  Performing Phase Check on Displaced Transition Vectors" << endl;
 
 //    Phase Check broken as they don't keep phase checked T in this function...
-      this->checkPhase((*this->response_undisplaced_),resp_p1);
-      this->checkPhase((*this->response_undisplaced_),resp_m1);
+//    this->checkPhase((*this->response_undisplaced_),resp_p1);
+//    this->checkPhase((*this->response_undisplaced_),resp_m1);
 
       cout << endl;
       cout << "  **Checking | T - T' | Before Phase Check:" << endl;
