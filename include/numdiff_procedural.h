@@ -375,6 +375,8 @@ void NumericalDifferentiation<T>::cartesianDiff(){
       cout << "  | T(X,Y) - T(X-DX,Y) | = " 
            << diffNorm(T_0,T_m1) 
            << endl;  
+      prettyPrint(cout,T_0.transpose() * T_p1,"+B");
+      prettyPrint(cout,T_0.transpose() * T_m1,"-B");
       this->checkPhase(T_0,T_p1);
       this->checkPhase(T_0,T_m1);
       cout << "  **Checking | T - T' | After Phase Check:" << endl;
@@ -386,6 +388,9 @@ void NumericalDifferentiation<T>::cartesianDiff(){
            << diffNorm(T_0,T_m1) 
            << endl;  
       cout << endl;
+ 
+      prettyPrint(cout,T_0.transpose() * T_p1,"+A");
+      prettyPrint(cout,T_0.transpose() * T_m1,"-A");
     }
 
     Derivatives derv;
@@ -532,6 +537,17 @@ Eigen::VectorXd NumericalDifferentiation<T>::ESGradient(
 
   Eigen::VectorXd freqDX = (freq_p1 - freq_m1)/(2*this->step);
   return freqDX;
+};
+
+template <typename T>
+void NumericalDifferentiation<T>::checkDegeneracies(SingleSlater<T> &ss) {
+
+  prettyPrint(cout,*ss.epsA(),"EpsA");
+  for(auto iMO = 0; iMO < ss.epsA()->rows() - 1 ; iMO++){
+    if( std::abs((*ss.epsA())(iMO) - (*ss.epsA())(iMO+1)) < 1e-8 )
+      cout << "WARNING: DEGENERACY IN MOs: " << iMO << " and " << iMO + 1 <<
+           endl;
+  }
 };
 
 

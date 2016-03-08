@@ -322,9 +322,9 @@ RealMatrix NumericalDifferentiation<T>::ES2ESNACME_PPTDA(
   int nOcc     = this->singleSlater_undisplaced_->nOccA();
   int nVir     = this->singleSlater_undisplaced_->nVirA();
 
-//std::vector<RealMatrix> SWAPPED_AB_0(nThreads,RealMatrix(MO_0));
-//std::vector<RealMatrix> SWAPPED_CD_p(nThreads,RealMatrix(MO_0));
-//std::vector<RealMatrix> SWAPPED_CD_m(nThreads,RealMatrix(MO_0));
+  std::vector<RealMatrix> SWAPPED_AB_0(nThreads,RealMatrix((*this->singleSlater_undisplaced_->moA())));
+  std::vector<RealMatrix> SWAPPED_CD_p1(nThreads,RealMatrix((*this->singleSlater_undisplaced_->moA())));
+  std::vector<RealMatrix> SWAPPED_CD_m1(nThreads,RealMatrix((*this->singleSlater_undisplaced_->moA())));
 
   std::vector<TMatrix> Prod_0_p1(nThreads,
     TMatrix((*this->singleSlater_undisplaced_->moA()))

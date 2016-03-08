@@ -46,6 +46,8 @@ namespace ChronusQ {
     void checkPhase(Response<T>&,Response<T>&);
     void checkPhase(TMatrix&, TMatrix&);
 
+    void checkDegeneracies(SingleSlater<T>&);
+
   public:
     #include <numdiff_constructors.h>
 

@@ -29,6 +29,9 @@ namespace ChronusQ{
   void NumericalDifferentiation<double>::checkPhase(SingleSlater<double> &ss1,
     SingleSlater<double> &ss2, RealMatrix &SMO_1_2){
   
+    this->checkDegeneracies(ss1);
+    this->checkDegeneracies(ss2);
+
     double tol = 1e-1;
     RealMatrix O_1_2(SMO_1_2);
   
