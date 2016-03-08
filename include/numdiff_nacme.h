@@ -251,12 +251,6 @@ RealMatrix NumericalDifferentiation<T>::ES2ESNACME_CIS(
   int nOcc     = this->singleSlater_undisplaced_->nOccA();
   int nVir     = this->singleSlater_undisplaced_->nVirA();
 
-/*
-  this->checkPhase(resp_p1,resp_m1);
-  this->checkPhase((*this->response_undisplaced_),resp_p1);
-  this->checkPhase((*this->response_undisplaced_),resp_m1);
-*/
-
   std::vector<RealMatrix> SWAPPED_IA_0(nThreads,RealMatrix((*this->singleSlater_undisplaced_->moA())));
   std::vector<RealMatrix> SWAPPED_JB_p1(nThreads,RealMatrix((*this->singleSlater_undisplaced_->moA())));
   std::vector<RealMatrix> SWAPPED_JB_m1(nThreads,RealMatrix((*this->singleSlater_undisplaced_->moA())));

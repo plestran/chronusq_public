@@ -170,6 +170,9 @@ void NumericalDifferentiation<T>::cartesianDiff(){
 
     this->generateDispGeom(mol_p1,mol_m1,iXYZ,iAtm);
 
+    mol_p1.printInfo(this->singleSlater_undisplaced_->fileio()->out);
+    mol_m1.printInfo(this->singleSlater_undisplaced_->fileio()->out);
+
     BasisSet        basis_p1;  BasisSet        basis_m1;
     AOIntegrals     aoints_p1; AOIntegrals     aoints_m1;
     SingleSlater<T> ss_p1;     SingleSlater<T> ss_m1;
@@ -300,10 +303,10 @@ void NumericalDifferentiation<T>::cartesianDiff(){
            << endl;  
 
 
-      this->checkPhase((*this->singleSlater_undisplaced_),ss_p1,SMO_0_p1);
-      this->checkPhase((*this->singleSlater_undisplaced_),ss_m1,SMO_0_m1);
-//    this->checkPhase((*this->singleSlater_undisplaced_->moA()),(*ss_p1.moA()));
-//    this->checkPhase((*this->singleSlater_undisplaced_->moA()),(*ss_m1.moA()));
+//    this->checkPhase((*this->singleSlater_undisplaced_),ss_p1,SMO_0_p1);
+//    this->checkPhase((*this->singleSlater_undisplaced_),ss_m1,SMO_0_m1);
+      this->checkPhase((*this->singleSlater_undisplaced_->moA()),(*ss_p1.moA()));
+      this->checkPhase((*this->singleSlater_undisplaced_->moA()),(*ss_m1.moA()));
 
       cout << endl;
       cout << "  Checking | C - C' | After Phase Check:" << endl;
