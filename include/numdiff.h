@@ -88,6 +88,8 @@ namespace ChronusQ {
 
     Eigen::VectorXd ES2GSNACME_CIS(SingleSlater<T>&,SingleSlater<T>&,
       Response<T>&,Response<T>&,TMatrix&,TMatrix&,TMatrix&,TMatrix&);
+    Eigen::VectorXd ES2GSNACME_CIS(SingleSlater<T>&,SingleSlater<T>&,
+      TMatrix&,TMatrix&,TMatrix&,TMatrix&,TMatrix&,TMatrix&,TMatrix&);
 
     inline Eigen::VectorXd ES2GSNACME(SingleSlater<T> &ss_p1, 
       SingleSlater<T> &ss_m1, Response<T> &resp_p1, Response<T> &resp_m1, 
@@ -99,10 +101,24 @@ namespace ChronusQ {
           SAO_0_m1,SMO_0_p1,SMO_0_m1);
     }
 
+    inline Eigen::VectorXd ES2GSNACME(SingleSlater<T> &ss_p1, 
+      SingleSlater<T> &ss_m1, TMatrix &T_0, TMatrix &T_p1, TMatrix &T_m1, 
+      TMatrix &SAO_0_p1, TMatrix &SAO_0_m1, TMatrix &SMO_0_p1, 
+      TMatrix &SMO_0_m1){
+
+      if(this->respType_ == RESPONSE_TYPE::CIS)
+        return this->ES2GSNACME_CIS(ss_p1,ss_m1,T_0,T_p1,T_m1,SAO_0_p1,
+          SAO_0_m1,SMO_0_p1,SMO_0_m1);
+    }
+
     RealMatrix ES2ESNACME_CIS(SingleSlater<T>&,SingleSlater<T>&,
       Response<T>&,Response<T>&,TMatrix&,TMatrix&,TMatrix&,TMatrix&);
     RealMatrix ES2ESNACME_PPTDA(SingleSlater<T>&,SingleSlater<T>&,
       Response<T>&,Response<T>&,TMatrix&,TMatrix&,TMatrix&,TMatrix&){;};
+    RealMatrix ES2ESNACME_CIS(SingleSlater<T>&,SingleSlater<T>&,
+      TMatrix&,TMatrix&,TMatrix&,TMatrix&,TMatrix&,TMatrix&,TMatrix&);
+    RealMatrix ES2ESNACME_PPTDA(SingleSlater<T>&,SingleSlater<T>&,
+      TMatrix&,TMatrix&,TMatrix&,TMatrix&,TMatrix&,TMatrix&,TMatrix&){;};
 
     inline RealMatrix ES2ESNACME(SingleSlater<T> &ss_p1, 
       SingleSlater<T> &ss_m1, Response<T> &resp_p1, Response<T> &resp_m1, 
@@ -113,6 +129,18 @@ namespace ChronusQ {
           SAO_0_m1,SMO_0_p1,SMO_0_m1);
       else if(this->respType_ == RESPONSE_TYPE::PPTDA)
         return this->ES2ESNACME_CIS(ss_p1,ss_m1,resp_p1,resp_m1,SAO_0_p1,
+          SAO_0_m1,SMO_0_p1,SMO_0_m1);
+    }
+
+    inline RealMatrix ES2ESNACME(SingleSlater<T> &ss_p1, 
+      SingleSlater<T> &ss_m1, TMatrix &T_0, TMatrix &T_p1, TMatrix &T_m1, 
+      TMatrix &SAO_0_p1, TMatrix &SAO_0_m1, TMatrix &SMO_0_p1, 
+      TMatrix &SMO_0_m1){
+      if(this->respType_ == RESPONSE_TYPE::CIS)
+        return this->ES2ESNACME_CIS(ss_p1,ss_m1,T_0,T_p1,T_m1,SAO_0_p1,
+          SAO_0_m1,SMO_0_p1,SMO_0_m1);
+      else if(this->respType_ == RESPONSE_TYPE::PPTDA)
+        return this->ES2ESNACME_CIS(ss_p1,ss_m1,T_0,T_p1,T_m1,SAO_0_p1,
           SAO_0_m1,SMO_0_p1,SMO_0_m1);
     }
 
