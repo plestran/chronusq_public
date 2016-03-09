@@ -377,8 +377,15 @@ void NumericalDifferentiation<T>::cartesianDiff(){
            << endl;  
       prettyPrint(cout,T_0.transpose() * T_p1,"+B");
       prettyPrint(cout,T_0.transpose() * T_m1,"-B");
-      this->checkPhase(T_0,T_p1);
-      this->checkPhase(T_0,T_m1);
+
+//    this->checkPhase(T_0,T_p1);
+//    this->checkPhase(T_0,T_m1);
+      TMatrix Inner_0_p1 = T_0.transpose() * T_p1; 
+      TMatrix Inner_0_m1 = T_0.transpose() * T_m1; 
+
+      this->checkPhase(T_0,T_p1,Inner_0_p1);
+      this->checkPhase(T_0,T_m1,Inner_0_m1);
+
       cout << "  **Checking | T - T' | After Phase Check:" << endl;
       
       cout << "  | T(X,Y) - T(X+DX,Y) | = " 

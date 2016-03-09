@@ -45,6 +45,7 @@ namespace ChronusQ {
     void checkPhase(Response<T>&,Response<T>&,TMatrix&);
     void checkPhase(Response<T>&,Response<T>&);
     void checkPhase(TMatrix&, TMatrix&);
+    void checkPhase(TMatrix&, TMatrix&, TMatrix&);
 
     void checkDegeneracies(SingleSlater<T>&);
 
