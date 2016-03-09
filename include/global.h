@@ -34,6 +34,15 @@
 // CMake Compilation Configuration
 #include <config_chronusq.h>
 
+// Boost Headers
+#include <boost/python.hpp>
+#include <boost/geometry/geometry.hpp>
+#include <boost/math/constants/constants.hpp>
+#include <boost/math/special_functions/gamma.hpp>
+#include <boost/math/special_functions/asinh.hpp>
+#include <boost/algorithm/string.hpp>
+
+
 // IO
 #include <iostream>
 #include <fstream>
@@ -67,13 +76,6 @@
 //#include "oompi.h"
 //#include <pthread.h>
 
-// Boost Headers
-#include <boost/geometry/geometry.hpp>
-#include <boost/math/constants/constants.hpp>
-#include <boost/python.hpp>
-#include <boost/math/special_functions/gamma.hpp>
-#include <boost/math/special_functions/asinh.hpp>
-#include <boost/algorithm/string.hpp>
 
 // Misc
 #include <stdlib.h>
