@@ -428,8 +428,8 @@ public:
     this->CorrKernel_  = NOCORR;
     this->ExchKernel_  = NOEXCH;
     this->DFTKernel_   = NODFT;
-    this->denTol_      = 1e-10;
-    this->eneTol_      = 1e-12;
+    this->denTol_      = 5e-8;
+    this->eneTol_      = 1e-10;
     this->maxSCFIter_  = 256;
     //this->maxSCFIter_  = 128;
     this->nTCS_        = 1;
