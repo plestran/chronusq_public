@@ -58,6 +58,8 @@ endif()
 
 # Append flags for compilation
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated -Wno-deprecated-declarations -Wno-narrowing")
+
 if(CQ_ENABLE_MPI)
   # MPI Compile flags
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MPI_CXX_COMPILE_FLAGS}")
@@ -145,6 +147,7 @@ else()
   set(LA_LINK ${LAPACK_LINKER_FLAGS} ${LAPACK_LIBRARIES})
   set(LA_LINK ${LA_LINK} ${BLAS_LINKER_FLAGS} ${BLAS_LIBRARIES})
 endif()
+message(STATUS "Will using the following Link Line for Linear Algebra Libs: ${LA_LINK}")
 
 set(EXTERNAL_CQ_DEPS ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${LA_LINK} 
   ${LIBINT_LIB} m ${OpenMP_CXX_FLAGS} ${HDF5_CXX_LIBRARIES})
@@ -170,3 +173,6 @@ configure_file(
 # Recurse into src
 add_subdirectory(src)
 add_subdirectory(tests)
+
+
+message(STATUS "CXXFLAGS: ${CMAKE_CXX_FLAGS}")

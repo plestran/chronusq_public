@@ -41,7 +41,6 @@
 #include <classtools.h>
 
 namespace ChronusQ {
-int atlas(int, char**);
 int worker();
 } // namespace ChronusQ
 
