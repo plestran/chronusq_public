@@ -3,7 +3,7 @@
 # computational chemistry software with a strong emphasis on explicitly 
 # time-dependent and post-SCF quantum mechanical methods.
 # 
-# Copyright (C) 2014-2015 Li Research Group (University of Washington)
+# Copyright (C) 2014-2016 Li Research Group (University of Washington)
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -92,6 +92,17 @@ def runSCF(workers,meta):
   workers["CQSingleSlater"].computeProperties()
   if chronusQ.getRank() == 0:
     workers["CQSingleSlater"].printProperties()
+
+##ND = chronusQ.NumericalDifferentiationDouble()
+##ND.setSingleSlater(workers["CQSingleSlater"])
+##ND.generateESObjs()
+##ND.setRespNRoots(4)
+##ND.setRespType(chronusQ.RESPONSE_TYPE.PPTDA)
+##ND.setRespRoot(0)
+##ND.computeESGradient = True
+##ND.computeES2GSNACME = True
+##ND.computeES2ESNACME = True
+##ND.differentiate()
 
   meta.E          = workers["CQSingleSlater"].totalEnergy
   meta.scfIters   = workers["CQSingleSlater"].nSCFIter

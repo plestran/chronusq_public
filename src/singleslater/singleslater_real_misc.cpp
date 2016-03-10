@@ -3,7 +3,7 @@
  *  computational chemistry software with a strong emphasis on explicitly 
  *  time-dependent and post-SCF quantum mechanical methods.
  *  
- *  Copyright (C) 2014-2015 Li Research Group (University of Washington)
+ *  Copyright (C) 2014-2016 Li Research Group (University of Washington)
  *  
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -265,13 +265,11 @@ void SingleSlater<double>::writeSCFFiles(){
 template<>
 void SingleSlater<double>::fixPhase(){
    RealMatrix::Index maxIndex;
-
    for(auto iCol = 0; iCol < this->moA_->cols(); iCol++){
      this->moA_->col(iCol).cwiseAbs().maxCoeff(&maxIndex);
      if(this->moA_->col(iCol)(maxIndex) < 0)
        this->moA_->col(iCol) *= -1;
    }
-  
 };
 
 } // Namespace ChronusQ

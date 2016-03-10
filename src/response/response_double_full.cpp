@@ -3,7 +3,7 @@
  *  computational chemistry software with a strong emphasis on explicitly 
  *  time-dependent and post-SCF quantum mechanical methods.
  *  
- *  Copyright (C) 2014-2015 Li Research Group (University of Washington)
+ *  Copyright (C) 2014-2016 Li Research Group (University of Washington)
  *  
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -239,33 +239,33 @@ void Response<double>::fullFOPPA(){
       CErr(msg,this->fileio_->out);
     };
 
-    RealVecMap Eig(this->frequencies_[iMat].data(),this->nSingleDim_);
-    prettyPrint(this->fileio_->out,Eig*phys.eVPerHartree,"Eig");
+  //RealVecMap Eig(this->frequencies_[iMat].data(),this->nSingleDim_);
+  //prettyPrint(this->fileio_->out,Eig*phys.eVPerHartree,"Eig");
     // Cleanup LAPACK Memory
     delete[] WORK;
 
     this->nSek_ = this->nSingleDim_;
-    RealMap T(this->transDen_[iMat].data(),this->nSingleDim_,this->nSek_);
-    RealMatrix Sigma(this->nSingleDim_,2*this->nSek_);
-    RealMap SRVec(Sigma.data(),this->nSingleDim_,this->nSek_);
-    RealMap SLVec(Sigma.data()+this->nSek_*this->nSingleDim_,this->nSingleDim_,this->nSek_);
-    RealMatrix Rho(this->nSingleDim_,2*this->nSek_);
-    RealMap RRVec(Rho.data(),this->nSingleDim_,this->nSek_);
-    RealMap RLVec(Rho.data()+this->nSek_*this->nSingleDim_,this->nSingleDim_,this->nSek_);
+  //RealMap T(this->transDen_[iMat].data(),this->nSingleDim_,this->nSek_);
+  //RealMatrix Sigma(this->nSingleDim_,2*this->nSek_);
+  //RealMap SRVec(Sigma.data(),this->nSingleDim_,this->nSek_);
+  //RealMap SLVec(Sigma.data()+this->nSek_*this->nSingleDim_,this->nSingleDim_,this->nSek_);
+  //RealMatrix Rho(this->nSingleDim_,2*this->nSek_);
+  //RealMap RRVec(Rho.data(),this->nSingleDim_,this->nSek_);
+  //RealMap RLVec(Rho.data()+this->nSek_*this->nSingleDim_,this->nSingleDim_,this->nSek_);
 
-    prettyPrint(cout,T,"T");
-    this->linearTransFOPPA(T,T,SRVec,SLVec,RRVec,RLVec);
+  //prettyPrint(cout,T,"T");
+  //this->linearTransFOPPA(T,T,SRVec,SLVec,RRVec,RLVec);
 
-    CPY.block(this->nSingleDim_/2,0,this->nSingleDim_/2,this->nSingleDim_/2) *= -1;
-    CPY.block(this->nSingleDim_/2,this->nSingleDim_/2,this->nSingleDim_/2,this->nSingleDim_/2) *= -1;
-    prettyPrint(cout,CPY*T,"Correct");
-    prettyPrint(cout,SRVec,"Test S1");
-    prettyPrint(cout,SLVec,"Test S2");
-    prettyPrint(cout,RRVec,"Test R1");
-    prettyPrint(cout,RLVec,"Test R2");
-    prettyPrint(cout,CPY*T-SRVec,"DIFF 1");
-    prettyPrint(cout,CPY*T-SLVec,"DIFF 2");
-    prettyPrint(cout,RRVec - RLVec,"DIFF 3");
+  //CPY.block(this->nSingleDim_/2,0,this->nSingleDim_/2,this->nSingleDim_/2) *= -1;
+  //CPY.block(this->nSingleDim_/2,this->nSingleDim_/2,this->nSingleDim_/2,this->nSingleDim_/2) *= -1;
+  //prettyPrint(cout,CPY*T,"Correct");
+  //prettyPrint(cout,SRVec,"Test S1");
+  //prettyPrint(cout,SLVec,"Test S2");
+  //prettyPrint(cout,RRVec,"Test R1");
+  //prettyPrint(cout,RLVec,"Test R2");
+  //prettyPrint(cout,CPY*T-SRVec,"DIFF 1");
+  //prettyPrint(cout,CPY*T-SLVec,"DIFF 2");
+  //prettyPrint(cout,RRVec - RLVec,"DIFF 3");
 
   } // loop over iMat 
 }; // fullFOPPA (T = double)
@@ -277,6 +277,7 @@ void Response<double>::fullPPRPA(){
   if(!this->doTDA_) this->mointegrals_->formIAJB(false);
   this->mointegrals_->formIJKL(false);
 
+  this->rMu_ = 0.0;
   for(auto iMat = 0; iMat != iMatIter_.size(); iMat++){
 
     this->currentMat_ = this->iMatIter_[iMat];
@@ -627,8 +628,8 @@ void Response<double>::fullPPRPA(){
       CErr(msg,this->fileio_->out);
     };
 
-    RealVecMap Eig(this->frequencies_[iMat].data(),this->nSingleDim_);
-    prettyPrint(this->fileio_->out,Eig,"Eig");
+  //RealVecMap Eig(this->frequencies_[iMat].data(),this->nSingleDim_);
+  //prettyPrint(this->fileio_->out,Eig,"Eig");
     // Cleanup LAPACK Memory
     delete[] WORK;
   }; // loop over iMat

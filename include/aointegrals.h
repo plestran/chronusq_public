@@ -3,7 +3,7 @@
  *  computational chemistry software with a strong emphasis on explicitly 
  *  time-dependent and post-SCF quantum mechanical methods.
  *  
- *  Copyright (C) 2014-2015 Li Research Group (University of Washington)
+ *  Copyright (C) 2014-2016 Li Research Group (University of Washington)
  *  
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -184,7 +184,7 @@ class AOIntegrals{
     this->checkWorkers();
     if(this->nBasis_ == 0)
       CErr(
-        "Fatal: SingleSlater Object Initialized with NBasis = 0 or NShell = 0",
+        "Fatal: AOIntegrals Object Initialized with NBasis = 0 or NShell = 0",
         this->fileio_->out);
   }
 
@@ -320,6 +320,7 @@ public:
   inline int nTCS(){ return this->nTCS_;}
   inline int maxMultipole(){ return this->maxMultipole_;}
   inline int maxNumInt(){ return this->maxNumInt_;}
+  inline Controls* controls(){ return this->controls_;};
 
   // Setters
   inline void setNTCS(int i)        { this->nTCS_         = i;}
@@ -438,7 +439,12 @@ public:
 
   // Python API
   void Wrapper_iniAOIntegrals(Molecule&,BasisSet&,FileIO&,Controls&); 
+
+
+  // Misc Utility Functions that deal with AOIntegrals
+  static RealMatrix genSpx(BasisSet&, BasisSet&);
 };
+
 } // namespace ChronusQ
 
 #endif

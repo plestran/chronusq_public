@@ -3,7 +3,7 @@
  *  computational chemistry software with a strong emphasis on explicitly 
  *  time-dependent and post-SCF quantum mechanical methods.
  *  
- *  Copyright (C) 2014-2015 Li Research Group (University of Washington)
+ *  Copyright (C) 2014-2016 Li Research Group (University of Washington)
  *  
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,6 +32,8 @@ FileIO::FileIO(const std::string nm_input) {
     CErr("Fatal: Input File Required");
 
   this->doRestart = false;
+  this->haveStdOpFiles = false;
+  this->haveStdSCFFiles = false;
 
   this->name = nm_input;
   
@@ -69,6 +71,8 @@ FileIO::FileIO(const std::string inFile, const std::string outFile) {
   this->iniH5Paths();
   this->iniCompType();
   this->doRestart = false;
+  this->haveStdOpFiles = false;
+  this->haveStdSCFFiles = false;
 
 };
 
@@ -172,6 +176,7 @@ void FileIO::iniMetaFiles(){
 }
 
 void FileIO::iniStdOpFiles(int nBasis){
+  if(this->haveStdOpFiles) return;
   hsize_t NBSq[] = {static_cast<hsize_t>(nBasis),static_cast<hsize_t>(nBasis)};
   hsize_t dipoleDim[] = {3,
     static_cast<hsize_t>(nBasis),static_cast<hsize_t>(nBasis)};
@@ -272,6 +277,7 @@ void FileIO::iniStdOpFiles(int nBasis){
       )
     );
   }
+  this->haveStdOpFiles = true;
 }
 
 /*
@@ -280,6 +286,7 @@ void FileIO::iniStdSCFFiles<double>(bool allocBeta, int nBasis){
 */
 //void FileIO::iniStdSCFFiles(bool allocBeta, int nBasis){
 void FileIO::iniStdSCFFilesDouble(bool allocBeta, int nBasis){
+  if(this->haveStdSCFFiles) return;
   hsize_t NBSq[] = {static_cast<hsize_t>(nBasis),static_cast<hsize_t>(nBasis)};
   H5::DataSpace NBSqDataSpace(2,NBSq);
 
@@ -339,10 +346,12 @@ void FileIO::iniStdSCFFilesDouble(bool allocBeta, int nBasis){
     }
 
   }
+  this->haveStdSCFFiles = true;
 
 }
 
 void FileIO::iniStdSCFFilesComplex(bool allocBeta, int nBasis){
+  if(this->haveStdSCFFiles) return;
   hsize_t NBSq[] = {static_cast<hsize_t>(nBasis),static_cast<hsize_t>(nBasis)};
   H5::DataSpace NBSqDataSpace(2,NBSq);
 
@@ -403,6 +412,7 @@ void FileIO::iniStdSCFFilesComplex(bool allocBeta, int nBasis){
     }
 
   }
+  this->haveStdSCFFiles = true;
 }
 
 void FileIO::iniCompType(){

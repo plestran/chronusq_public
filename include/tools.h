@@ -3,7 +3,7 @@
  *  computational chemistry software with a strong emphasis on explicitly 
  *  time-dependent and post-SCF quantum mechanical methods.
  *  
- *  Copyright (C) 2014-2015 Li Research Group (University of Washington)
+ *  Copyright (C) 2014-2016 Li Research Group (University of Washington)
  *  
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -62,6 +62,7 @@ std::string stringlower(std::string);
 std::string stringupper(std::string);
 // convert atomic symbol and mass to an index in the table of atom in atoms.h
 int HashAtom (std::string, int);
+int HashZ (int, int);
 
 // convert shell symbol or angular momentum to number of AOs in the shell
 int HashNAOs (int);

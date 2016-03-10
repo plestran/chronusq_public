@@ -3,7 +3,7 @@
  *  computational chemistry software with a strong emphasis on explicitly 
  *  time-dependent and post-SCF quantum mechanical methods.
  *  
- *  Copyright (C) 2014-2015 Li Research Group (University of Washington)
+ *  Copyright (C) 2014-2016 Li Research Group (University of Washington)
  *  
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -307,6 +307,12 @@ public:
   inline void doFull()                 { this->doFull_ = true;         };
   inline void doTDA()                  { this->doTDA_  = true;         };
   inline void doSA()                   { this->iPart_  = SPIN_ADAPTED; };
+
+  // Getters
+  inline std::vector<TMat> transDen(){return this->transDen_;};
+  inline std::vector<VectorXd> frequencies(){return this->frequencies_;};
+  inline std::vector<int> nMatDim(){return this->nMatDim_;};
+  inline SingleSlater<T> * singleSlater(){return this->singleSlater_;};
   
   // IO Related
   void printInfo();

@@ -3,7 +3,7 @@
  *  computational chemistry software with a strong emphasis on explicitly 
  *  time-dependent and post-SCF quantum mechanical methods.
  *  
- *  Copyright (C) 2014-2015 Li Research Group (University of Washington)
+ *  Copyright (C) 2014-2016 Li Research Group (University of Washington)
  *  
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -161,6 +161,9 @@ public:
     BetaMO
   };
 
+
+  bool haveStdOpFiles;
+  bool haveStdSCFFiles;
   void iniH5Paths();
   void iniH5Files();
   void iniCompType();
@@ -176,6 +179,7 @@ public:
   void write(std::string);
 
   inline std::string fileName(){return this->name;};
+  inline std::string fileNameOut(){return this->name_out;};
 
 };
 } // namespace ChronusQ
