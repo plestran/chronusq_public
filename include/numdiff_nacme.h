@@ -355,33 +355,39 @@ RealMatrix NumericalDifferentiation<T>::ES2ESNACME_PPTDA(
         // AC OVerlap
 /*
         SWAPPED_AB_0[thread_id].setZero();
-        SWAPPED_CD_p[thread_id].setZero();
-        SWAPPED_CD_m[thread_id].setZero();
+        SWAPPED_CD_p1[thread_id].setZero();
+        SWAPPED_CD_m1[thread_id].setZero();
      
-        Prod_0_p[thread_id].setZero();
-        Prod_0_m[thread_id].setZero();
+        Prod_0_p1[thread_id].setZero();
+        Prod_0_m1[thread_id].setZero();
      
-        SWAPPED_AB_0[thread_id] = MO_0;
-        SWAPPED_CD_p[thread_id] = MO_p;
-        SWAPPED_CD_m[thread_id] = MO_m;
+        SWAPPED_AB_0[thread_id] = (*this->singleSlater_undisplaced_->moA());
+        SWAPPED_CD_p1[thread_id] = (*ss_p1.moA());
+        SWAPPED_CD_m1[thread_id] = (*ss_m1.moA());
      
         SWAPPED_AB_0[thread_id].col(nOcc).swap(SWAPPED_AB_0[thread_id].col(nOcc+a));
-        SWAPPED_CD_p[thread_id].col(nOcc).swap(SWAPPED_CD_p[thread_id].col(nOcc+c));
-        SWAPPED_CD_m[thread_id].col(nOcc).swap(SWAPPED_CD_m[thread_id].col(nOcc+c));
+        SWAPPED_CD_p1[thread_id].col(nOcc).swap(SWAPPED_CD_p1[thread_id].col(nOcc+c));
+        SWAPPED_CD_m1[thread_id].col(nOcc).swap(SWAPPED_CD_m1[thread_id].col(nOcc+c));
      
      
-        Prod_0_p[thread_id] = 
-          SWAPPED_AB_0[thread_id].transpose() * S_0_p * SWAPPED_CD_p[thread_id];
-        Prod_0_m[thread_id] = 
-          SWAPPED_AB_0[thread_id].transpose() * S_0_m * SWAPPED_CD_m[thread_id];
-*/
+        Prod_0_p1[thread_id] = 
+          SWAPPED_AB_0[thread_id].transpose() * SAO_0_p1 * SWAPPED_CD_p1[thread_id];
+        Prod_0_m1[thread_id] = 
+          SWAPPED_AB_0[thread_id].transpose() * SAO_0_m1 * SWAPPED_CD_m1[thread_id];
        
+	//RealMatrix TMP(SMO_0_p1);
+	//TMP.setZero();
+	//TMP = SMO_0_p1;
+        //TMP.row(nOcc).swap(TMP.row(nOcc+a)); 
+        //TMP.col(nOcc).swap(TMP.col(nOcc+c)); 
+	//prettyPrint(cout,TMP-Prod_0_p1[thread_id],"DIFF");
+*/
         Prod_0_p1[thread_id] = SMO_0_p1;
         Prod_0_p1[thread_id].row(nOcc).swap(Prod_0_p1[thread_id].row(nOcc+a)); 
-        Prod_0_p1[thread_id].col(nOcc).swap(Prod_0_p1[thread_id].col(nOcc+b)); 
+        Prod_0_p1[thread_id].col(nOcc).swap(Prod_0_p1[thread_id].col(nOcc+c)); 
         Prod_0_m1[thread_id] = SMO_0_m1;
         Prod_0_m1[thread_id].row(nOcc).swap(Prod_0_m1[thread_id].row(nOcc+a)); 
-        Prod_0_m1[thread_id].col(nOcc).swap(Prod_0_m1[thread_id].col(nOcc+b)); 
+        Prod_0_m1[thread_id].col(nOcc).swap(Prod_0_m1[thread_id].col(nOcc+c)); 
         
         double OvLp_AC_0_p1 =
           Prod_0_p1[thread_id].block(0,0,nOcc+1,nOcc+1).determinant();
@@ -392,26 +398,26 @@ RealMatrix NumericalDifferentiation<T>::ES2ESNACME_PPTDA(
         // BD Overlap
 /*
         SWAPPED_AB_0[thread_id].setZero();
-        SWAPPED_CD_p[thread_id].setZero();
-        SWAPPED_CD_m[thread_id].setZero();
+        SWAPPED_CD_p1[thread_id].setZero();
+        SWAPPED_CD_m1[thread_id].setZero();
      
-        Prod_0_p[thread_id].setZero();
-        Prod_0_m[thread_id].setZero();
+        Prod_0_p1[thread_id].setZero();
+        Prod_0_m1[thread_id].setZero();
      
-        SWAPPED_AB_0[thread_id] = MO_0;
-        SWAPPED_CD_p[thread_id] = MO_p;
-        SWAPPED_CD_m[thread_id] = MO_m;
+        SWAPPED_AB_0[thread_id] = (*this->singleSlater_undisplaced_->moA());
+        SWAPPED_CD_p1[thread_id] = (*ss_p1.moA());
+        SWAPPED_CD_m1[thread_id] = (*ss_m1.moA());
      
         SWAPPED_AB_0[thread_id].col(nOcc).swap(SWAPPED_AB_0[thread_id].col(nOcc+b));
-        SWAPPED_CD_p[thread_id].col(nOcc).swap(SWAPPED_CD_p[thread_id].col(nOcc+d));
-        SWAPPED_CD_m[thread_id].col(nOcc).swap(SWAPPED_CD_m[thread_id].col(nOcc+d));
+        SWAPPED_CD_p1[thread_id].col(nOcc).swap(SWAPPED_CD_p1[thread_id].col(nOcc+d));
+        SWAPPED_CD_m1[thread_id].col(nOcc).swap(SWAPPED_CD_m1[thread_id].col(nOcc+d));
      
-        Prod_0_p[thread_id] = 
-          SWAPPED_AB_0[thread_id].transpose() * S_0_p * SWAPPED_CD_p[thread_id];
-        Prod_0_m[thread_id] = 
-          SWAPPED_AB_0[thread_id].transpose() * S_0_m * SWAPPED_CD_m[thread_id];
-*/
+        Prod_0_p1[thread_id] = 
+          SWAPPED_AB_0[thread_id].transpose() * SAO_0_p1 * SWAPPED_CD_p1[thread_id];
+        Prod_0_m1[thread_id] = 
+          SWAPPED_AB_0[thread_id].transpose() * SAO_0_m1 * SWAPPED_CD_m1[thread_id];
        
+*/
         Prod_0_p1[thread_id] = SMO_0_p1;
         Prod_0_p1[thread_id].row(nOcc).swap(Prod_0_p1[thread_id].row(nOcc+b)); 
         Prod_0_p1[thread_id].col(nOcc).swap(Prod_0_p1[thread_id].col(nOcc+d)); 
@@ -427,27 +433,27 @@ RealMatrix NumericalDifferentiation<T>::ES2ESNACME_PPTDA(
         // AD Overlap
 /*
         SWAPPED_AB_0[thread_id].setZero();
-        SWAPPED_CD_p[thread_id].setZero();
-        SWAPPED_CD_m[thread_id].setZero();
+        SWAPPED_CD_p1[thread_id].setZero();
+        SWAPPED_CD_m1[thread_id].setZero();
      
-        Prod_0_p[thread_id].setZero();
-        Prod_0_m[thread_id].setZero();
+        Prod_0_p1[thread_id].setZero();
+        Prod_0_m1[thread_id].setZero();
      
-        SWAPPED_AB_0[thread_id] = MO_0;
-        SWAPPED_CD_p[thread_id] = MO_p;
-        SWAPPED_CD_m[thread_id] = MO_m;
+        SWAPPED_AB_0[thread_id] = (*this->singleSlater_undisplaced_->moA());
+        SWAPPED_CD_p1[thread_id] = (*ss_p1.moA());
+        SWAPPED_CD_m1[thread_id] = (*ss_m1.moA());
      
         SWAPPED_AB_0[thread_id].col(nOcc).swap(SWAPPED_AB_0[thread_id].col(nOcc+a));
-        SWAPPED_CD_p[thread_id].col(nOcc).swap(SWAPPED_CD_p[thread_id].col(nOcc+d));
-        SWAPPED_CD_m[thread_id].col(nOcc).swap(SWAPPED_CD_m[thread_id].col(nOcc+d));
+        SWAPPED_CD_p1[thread_id].col(nOcc).swap(SWAPPED_CD_p1[thread_id].col(nOcc+d));
+        SWAPPED_CD_m1[thread_id].col(nOcc).swap(SWAPPED_CD_m1[thread_id].col(nOcc+d));
      
      
-        Prod_0_p[thread_id] = 
-          SWAPPED_AB_0[thread_id].transpose() * S_0_p * SWAPPED_CD_p[thread_id];
-        Prod_0_m[thread_id] = 
-          SWAPPED_AB_0[thread_id].transpose() * S_0_m * SWAPPED_CD_m[thread_id];
-*/
+        Prod_0_p1[thread_id] = 
+          SWAPPED_AB_0[thread_id].transpose() * SAO_0_p1 * SWAPPED_CD_p1[thread_id];
+        Prod_0_m1[thread_id] = 
+          SWAPPED_AB_0[thread_id].transpose() * SAO_0_m1 * SWAPPED_CD_m1[thread_id];
        
+*/
         Prod_0_p1[thread_id] = SMO_0_p1;
         Prod_0_p1[thread_id].row(nOcc).swap(Prod_0_p1[thread_id].row(nOcc+a)); 
         Prod_0_p1[thread_id].col(nOcc).swap(Prod_0_p1[thread_id].col(nOcc+d)); 
@@ -464,25 +470,25 @@ RealMatrix NumericalDifferentiation<T>::ES2ESNACME_PPTDA(
         // BC Overlap
 /*
         SWAPPED_AB_0[thread_id].setZero();
-        SWAPPED_CD_p[thread_id].setZero();
-        SWAPPED_CD_m[thread_id].setZero();
+        SWAPPED_CD_p1[thread_id].setZero();
+        SWAPPED_CD_m1[thread_id].setZero();
      
-        Prod_0_p[thread_id].setZero();
-        Prod_0_m[thread_id].setZero();
+        Prod_0_p1[thread_id].setZero();
+        Prod_0_m1[thread_id].setZero();
      
-        SWAPPED_AB_0[thread_id] = MO_0;
-        SWAPPED_CD_p[thread_id] = MO_p;
-        SWAPPED_CD_m[thread_id] = MO_m;
+        SWAPPED_AB_0[thread_id] = (*this->singleSlater_undisplaced_->moA());
+        SWAPPED_CD_p1[thread_id] = (*ss_p1.moA());
+        SWAPPED_CD_m1[thread_id] = (*ss_m1.moA());
      
         SWAPPED_AB_0[thread_id].col(nOcc).swap(SWAPPED_AB_0[thread_id].col(nOcc+b));
-        SWAPPED_CD_p[thread_id].col(nOcc).swap(SWAPPED_CD_p[thread_id].col(nOcc+c));
-        SWAPPED_CD_m[thread_id].col(nOcc).swap(SWAPPED_CD_m[thread_id].col(nOcc+c));
+        SWAPPED_CD_p1[thread_id].col(nOcc).swap(SWAPPED_CD_p1[thread_id].col(nOcc+c));
+        SWAPPED_CD_m1[thread_id].col(nOcc).swap(SWAPPED_CD_m1[thread_id].col(nOcc+c));
      
      
-        Prod_0_p[thread_id] = 
-          SWAPPED_AB_0[thread_id].transpose() * S_0_p * SWAPPED_CD_p[thread_id];
-        Prod_0_m[thread_id] = 
-          SWAPPED_AB_0[thread_id].transpose() * S_0_m * SWAPPED_CD_m[thread_id];
+        Prod_0_p1[thread_id] = 
+          SWAPPED_AB_0[thread_id].transpose() * SAO_0_p1 * SWAPPED_CD_p1[thread_id];
+        Prod_0_m1[thread_id] = 
+          SWAPPED_AB_0[thread_id].transpose() * SAO_0_m1 * SWAPPED_CD_m1[thread_id];
 */
         Prod_0_p1[thread_id] = SMO_0_p1;
         Prod_0_p1[thread_id].row(nOcc).swap(Prod_0_p1[thread_id].row(nOcc+b)); 
@@ -521,5 +527,6 @@ RealMatrix NumericalDifferentiation<T>::ES2ESNACME_PPTDA(
   cout << "ES -> ES NACME took " << elapsed.count() << " s" << endl;
 
   prettyPrint(cout,NACME,"ES->ES");
+  prettyPrint(cout,NACME+NACME.transpose(),"SUM");
   return NACME;
 };

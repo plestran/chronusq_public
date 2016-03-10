@@ -26,12 +26,36 @@ namespace ChronusQ{
   };
 
   template<>
+  void NumericalDifferentiation<double>::checkPhase(RealMatrix &M1,
+     RealMatrix &M2, RealMatrix &Inner_1_2){
+  
+    double tol = 1e-1;
+    RealMatrix O_1_2(Inner_1_2);
+  
+    for(auto I = 0; I < Inner_1_2.rows(); I++)
+    for(auto J = 0; J < Inner_1_2.cols(); J++){
+      if(std::abs(O_1_2(I,J)) < tol) O_1_2(I,J) = 0.0;
+      else if(O_1_2(I,J) > 0.0)      O_1_2(I,J) = 1.0;
+      else                           O_1_2(I,J) = -1.0;
+    }
+
+    for(auto I = 0; I < Inner_1_2.rows(); I++)
+    for(auto J = 0; J < Inner_1_2.cols(); J++){
+      if(I != J && O_1_2(I,J) != 0.0) O_1_2(I,J) = 0.0;
+    }
+  
+    RealMatrix TMP = M2 * O_1_2;
+    M2 = TMP;
+  };
+
+  template<>
   void NumericalDifferentiation<double>::checkPhase(SingleSlater<double> &ss1,
     SingleSlater<double> &ss2, RealMatrix &SMO_1_2){
   
     this->checkDegeneracies(ss1);
     this->checkDegeneracies(ss2);
 
+/*
     double tol = 1e-1;
     RealMatrix O_1_2(SMO_1_2);
   
@@ -46,6 +70,8 @@ namespace ChronusQ{
 //  prettyPrint(cout,SMO_1_2,"SMO");
     RealMatrix TMP = (*ss2.moA()) * O_1_2;
     (*ss2.moA()) = TMP;
+*/
+    this->checkPhase((*ss1.moA()),(*ss2.moA()),SMO_1_2);
   };
 
   template<>
@@ -74,29 +100,6 @@ namespace ChronusQ{
     resp2.transDen()[0].block(0,0,resp2.nMatDim()[0],this->responseNRoots_) = 
       T2;
 
-  };
-
-  template<>
-  void NumericalDifferentiation<double>::checkPhase(RealMatrix &M1,
-     RealMatrix &M2, RealMatrix &Inner_1_2){
-  
-    double tol = 1e-1;
-    RealMatrix O_1_2(Inner_1_2);
-  
-    for(auto I = 0; I < Inner_1_2.rows(); I++)
-    for(auto J = 0; J < Inner_1_2.cols(); J++){
-      if(std::abs(O_1_2(I,J)) < tol) O_1_2(I,J) = 0.0;
-      else if(O_1_2(I,J) > 0.0)      O_1_2(I,J) = 1.0;
-      else                           O_1_2(I,J) = -1.0;
-    }
-
-    for(auto I = 0; I < Inner_1_2.rows(); I++)
-    for(auto J = 0; J < Inner_1_2.cols(); J++){
-      if(I != J && O_1_2(I,J) != 0.0) O_1_2(I,J) = 0.0;
-    }
-  
-    RealMatrix TMP = M2 * O_1_2;
-    M2 = TMP;
   };
 
 }

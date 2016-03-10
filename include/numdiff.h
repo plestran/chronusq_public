@@ -133,7 +133,7 @@ namespace ChronusQ {
         return this->ES2ESNACME_CIS(ss_p1,ss_m1,resp_p1,resp_m1,SAO_0_p1,
           SAO_0_m1,SMO_0_p1,SMO_0_m1);
       else if(this->respType_ == RESPONSE_TYPE::PPTDA)
-        return this->ES2ESNACME_CIS(ss_p1,ss_m1,resp_p1,resp_m1,SAO_0_p1,
+        return this->ES2ESNACME_PPTDA(ss_p1,ss_m1,resp_p1,resp_m1,SAO_0_p1,
           SAO_0_m1,SMO_0_p1,SMO_0_m1);
     }
 
@@ -145,7 +145,7 @@ namespace ChronusQ {
         return this->ES2ESNACME_CIS(ss_p1,ss_m1,T_0,T_p1,T_m1,SAO_0_p1,
           SAO_0_m1,SMO_0_p1,SMO_0_m1);
       else if(this->respType_ == RESPONSE_TYPE::PPTDA)
-        return this->ES2ESNACME_CIS(ss_p1,ss_m1,T_0,T_p1,T_m1,SAO_0_p1,
+        return this->ES2ESNACME_PPTDA(ss_p1,ss_m1,T_0,T_p1,T_m1,SAO_0_p1,
           SAO_0_m1,SMO_0_p1,SMO_0_m1);
     }
 
