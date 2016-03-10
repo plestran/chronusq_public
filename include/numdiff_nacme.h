@@ -351,6 +351,9 @@ RealMatrix NumericalDifferentiation<T>::ES2ESNACME_PPTDA(
           (std::abs(T_m1(cd,jSt)) < 1e-8)
         ) continue;
      
+	// Copy matricies
+        Prod_0_p1[thread_id] = SMO_0_p1;
+        Prod_0_m1[thread_id] = SMO_0_m1;
      
         // AC OVerlap
 /*
@@ -382,10 +385,11 @@ RealMatrix NumericalDifferentiation<T>::ES2ESNACME_PPTDA(
         //TMP.col(nOcc).swap(TMP.col(nOcc+c)); 
 	//prettyPrint(cout,TMP-Prod_0_p1[thread_id],"DIFF");
 */
-        Prod_0_p1[thread_id] = SMO_0_p1;
+
+//      Prod_0_p1[thread_id] = SMO_0_p1;
         Prod_0_p1[thread_id].row(nOcc).swap(Prod_0_p1[thread_id].row(nOcc+a)); 
         Prod_0_p1[thread_id].col(nOcc).swap(Prod_0_p1[thread_id].col(nOcc+c)); 
-        Prod_0_m1[thread_id] = SMO_0_m1;
+//      Prod_0_m1[thread_id] = SMO_0_m1;
         Prod_0_m1[thread_id].row(nOcc).swap(Prod_0_m1[thread_id].row(nOcc+a)); 
         Prod_0_m1[thread_id].col(nOcc).swap(Prod_0_m1[thread_id].col(nOcc+c)); 
         
@@ -393,6 +397,11 @@ RealMatrix NumericalDifferentiation<T>::ES2ESNACME_PPTDA(
           Prod_0_p1[thread_id].block(0,0,nOcc+1,nOcc+1).determinant();
         double OvLp_AC_0_m1 =
           Prod_0_m1[thread_id].block(0,0,nOcc+1,nOcc+1).determinant();
+
+        Prod_0_p1[thread_id].row(nOcc).swap(Prod_0_p1[thread_id].row(nOcc+a)); 
+        Prod_0_p1[thread_id].col(nOcc).swap(Prod_0_p1[thread_id].col(nOcc+c)); 
+        Prod_0_m1[thread_id].row(nOcc).swap(Prod_0_m1[thread_id].row(nOcc+a)); 
+        Prod_0_m1[thread_id].col(nOcc).swap(Prod_0_m1[thread_id].col(nOcc+c)); 
      
      
         // BD Overlap
@@ -418,10 +427,11 @@ RealMatrix NumericalDifferentiation<T>::ES2ESNACME_PPTDA(
           SWAPPED_AB_0[thread_id].transpose() * SAO_0_m1 * SWAPPED_CD_m1[thread_id];
        
 */
-        Prod_0_p1[thread_id] = SMO_0_p1;
+
+//      Prod_0_p1[thread_id] = SMO_0_p1;
         Prod_0_p1[thread_id].row(nOcc).swap(Prod_0_p1[thread_id].row(nOcc+b)); 
         Prod_0_p1[thread_id].col(nOcc).swap(Prod_0_p1[thread_id].col(nOcc+d)); 
-        Prod_0_m1[thread_id] = SMO_0_m1;
+//      Prod_0_m1[thread_id] = SMO_0_m1;
         Prod_0_m1[thread_id].row(nOcc).swap(Prod_0_m1[thread_id].row(nOcc+b)); 
         Prod_0_m1[thread_id].col(nOcc).swap(Prod_0_m1[thread_id].col(nOcc+d)); 
         
@@ -429,6 +439,11 @@ RealMatrix NumericalDifferentiation<T>::ES2ESNACME_PPTDA(
           Prod_0_p1[thread_id].block(0,0,nOcc+1,nOcc+1).determinant();
         double OvLp_BD_0_m1 =
           Prod_0_m1[thread_id].block(0,0,nOcc+1,nOcc+1).determinant();
+
+        Prod_0_p1[thread_id].row(nOcc).swap(Prod_0_p1[thread_id].row(nOcc+b)); 
+        Prod_0_p1[thread_id].col(nOcc).swap(Prod_0_p1[thread_id].col(nOcc+d)); 
+        Prod_0_m1[thread_id].row(nOcc).swap(Prod_0_m1[thread_id].row(nOcc+b)); 
+        Prod_0_m1[thread_id].col(nOcc).swap(Prod_0_m1[thread_id].col(nOcc+d)); 
      
         // AD Overlap
 /*
@@ -454,10 +469,11 @@ RealMatrix NumericalDifferentiation<T>::ES2ESNACME_PPTDA(
           SWAPPED_AB_0[thread_id].transpose() * SAO_0_m1 * SWAPPED_CD_m1[thread_id];
        
 */
-        Prod_0_p1[thread_id] = SMO_0_p1;
+
+//      Prod_0_p1[thread_id] = SMO_0_p1;
         Prod_0_p1[thread_id].row(nOcc).swap(Prod_0_p1[thread_id].row(nOcc+a)); 
         Prod_0_p1[thread_id].col(nOcc).swap(Prod_0_p1[thread_id].col(nOcc+d)); 
-        Prod_0_m1[thread_id] = SMO_0_m1;
+//      Prod_0_m1[thread_id] = SMO_0_m1;
         Prod_0_m1[thread_id].row(nOcc).swap(Prod_0_m1[thread_id].row(nOcc+a)); 
         Prod_0_m1[thread_id].col(nOcc).swap(Prod_0_m1[thread_id].col(nOcc+d)); 
         
@@ -465,6 +481,11 @@ RealMatrix NumericalDifferentiation<T>::ES2ESNACME_PPTDA(
           Prod_0_p1[thread_id].block(0,0,nOcc+1,nOcc+1).determinant();
         double OvLp_AD_0_m1 =
           Prod_0_m1[thread_id].block(0,0,nOcc+1,nOcc+1).determinant();
+
+        Prod_0_p1[thread_id].row(nOcc).swap(Prod_0_p1[thread_id].row(nOcc+a)); 
+        Prod_0_p1[thread_id].col(nOcc).swap(Prod_0_p1[thread_id].col(nOcc+d)); 
+        Prod_0_m1[thread_id].row(nOcc).swap(Prod_0_m1[thread_id].row(nOcc+a)); 
+        Prod_0_m1[thread_id].col(nOcc).swap(Prod_0_m1[thread_id].col(nOcc+d)); 
      
      
         // BC Overlap
@@ -490,10 +511,11 @@ RealMatrix NumericalDifferentiation<T>::ES2ESNACME_PPTDA(
         Prod_0_m1[thread_id] = 
           SWAPPED_AB_0[thread_id].transpose() * SAO_0_m1 * SWAPPED_CD_m1[thread_id];
 */
-        Prod_0_p1[thread_id] = SMO_0_p1;
+
+//      Prod_0_p1[thread_id] = SMO_0_p1;
         Prod_0_p1[thread_id].row(nOcc).swap(Prod_0_p1[thread_id].row(nOcc+b)); 
         Prod_0_p1[thread_id].col(nOcc).swap(Prod_0_p1[thread_id].col(nOcc+c)); 
-        Prod_0_m1[thread_id] = SMO_0_m1;
+//      Prod_0_m1[thread_id] = SMO_0_m1;
         Prod_0_m1[thread_id].row(nOcc).swap(Prod_0_m1[thread_id].row(nOcc+b)); 
         Prod_0_m1[thread_id].col(nOcc).swap(Prod_0_m1[thread_id].col(nOcc+c)); 
        
@@ -503,6 +525,10 @@ RealMatrix NumericalDifferentiation<T>::ES2ESNACME_PPTDA(
         double OvLp_BC_0_m1 =
           Prod_0_m1[thread_id].block(0,0,nOcc+1,nOcc+1).determinant();
      
+        Prod_0_p1[thread_id].row(nOcc).swap(Prod_0_p1[thread_id].row(nOcc+b)); 
+        Prod_0_p1[thread_id].col(nOcc).swap(Prod_0_p1[thread_id].col(nOcc+c)); 
+        Prod_0_m1[thread_id].row(nOcc).swap(Prod_0_m1[thread_id].row(nOcc+b)); 
+        Prod_0_m1[thread_id].col(nOcc).swap(Prod_0_m1[thread_id].col(nOcc+c)); 
      
         double OvLp_Swap_0_p1 = OvLp_AC_0_p1*OvLp_BD_0_p1 + OvLp_AD_0_p1*OvLp_BC_0_p1;
         double OvLp_Swap_0_m1 = OvLp_AC_0_m1*OvLp_BD_0_m1 + OvLp_AD_0_m1*OvLp_BC_0_m1;
