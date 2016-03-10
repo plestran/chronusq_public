@@ -33,5 +33,9 @@ void zgetrf_(int*,int*,dcomplex*,int*,int*,int*);
 void zgetri_(int*,dcomplex*,int*,int*,dcomplex*,int*,int*);
 void dpotrf_(char*,int*,double*,int*,int*); 
 void dpotri_(char*,int*,double*,int*,int*); 
+void dgecon_(char*,int*,double*,int*,double*,double*,double*,int*,int*);
+void dgels_(char*,int*,int*,int*,double*,int*,double*,int*,double*,int*,int*);
+void dgelss_(int*,int*,int*,double*,int*,double*,int*,double*,double*,int*,
+  double*,int*,int*);
 }
 
