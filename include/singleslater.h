@@ -102,6 +102,8 @@ class SingleSlater {
 
   int      nTCS_; ///< Integer to scale the dimension of matricies for TCS's
   int      guess_;
+  int      nDIISExtrap_;
+  int      iDIISStart_;
 
   // DFT Parameters
   int weightScheme_;
@@ -424,16 +426,18 @@ public:
 
 
     // Standard Values
-    this->Ref_         = _INVALID;
-    this->CorrKernel_  = NOCORR;
-    this->ExchKernel_  = NOEXCH;
-    this->DFTKernel_   = NODFT;
-    this->denTol_      = 5e-8;
-    this->eneTol_      = 1e-10;
-    this->maxSCFIter_  = 256;
-    //this->maxSCFIter_  = 128;
-    this->nTCS_        = 1;
+    this->Ref_          = _INVALID;
+    this->CorrKernel_   = NOCORR;
+    this->ExchKernel_   = NOEXCH;
+    this->DFTKernel_    = NODFT;
+    this->denTol_       = 1e-8;
+    this->eneTol_       = 1e-10;
+    this->maxSCFIter_   = 256;
+    this->nTCS_         = 1;
     this->maxMultipole_ = 3;
+    this->nDIISExtrap_  = 7;
+    this->iDIISStart_   = 2;
+
     this->elecField_   = {0.0,0.0,0.0};
     this->printLevel_  = 1;
     this->isPrimary    = true;

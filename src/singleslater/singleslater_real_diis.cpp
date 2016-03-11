@@ -81,8 +81,10 @@ void SingleSlater<double>::CDIIS(){
   double RCOND = -1.0;
   int Rank;
   double* S    = new double[N];
-  dgelss_(&N,&N,&NRHS,B.data(),&N,coef,&N,S,&RCOND,&Rank,this->WORK_,
-    &this->LWORK_,&INFO);
+//dgelss_(&N,&N,&NRHS,B.data(),&N,coef,&N,S,&RCOND,&Rank,this->WORK_,
+//  &this->LWORK_,&INFO);
+  dgelsd_(&N,&N,&NRHS,B.data(),&N,coef,&N,S,&RCOND,&Rank,this->WORK_,
+    &this->LWORK_,iPiv,&INFO);
   delete [] S;
   */
 
@@ -106,35 +108,36 @@ void SingleSlater<double>::CDIIS(){
 
 template<>
 void SingleSlater<double>::CpyFock(int iter){
-  std::memcpy(this->FADIIS_+(iter % (this->lenCoeff_-1)) * this->lenF_,this->fockA_->data(),
-              this->lenF_ * sizeof(double));
+  std::memcpy(this->FADIIS_+(iter % (this->nDIISExtrap_-1)) * this->lenF_,
+    this->fockA_->data(),this->lenF_ * sizeof(double));
+
   if(!this->isClosedShell && this->Ref_ != TCS)
-    std::memcpy(this->FBDIIS_ + (iter % (this->lenCoeff_-1)) * this->lenF_,
+    std::memcpy(this->FBDIIS_ + (iter % (this->nDIISExtrap_-1)) * this->lenF_,
                 this->fockB_->data(),this->lenF_ * sizeof(double));
 } // CpyFock
 
 template<>
 void SingleSlater<double>::GenDComm(int iter){
-  RealMap ErrA(this->ErrorAlphaMem_ + (iter % (this->lenCoeff_-1)) * this->lenF_,
-               this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
-/*
-  if(this->Ref_ == TCS){
-    RealMap GenOverlap(this->SMem_,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
-    ErrA = (*this->fockA_) * (*this->densityA_) * (GenOverlap);
-    ErrA -= (GenOverlap) * (*this->densityA_) * (*this->fockA_);
-  } else {
-    ErrA = (*this->fockA_) * (*this->densityA_) * (*this->aointegrals_->overlap_);
-    ErrA -= (*this->aointegrals_->overlap_) * (*this->densityA_) * (*this->fockA_);
-  }
-*/
-  ErrA = (*this->fockA_) * (*this->densityA_) * (*this->aointegrals_->overlap_);
-  ErrA -= (*this->aointegrals_->overlap_) * (*this->densityA_) * (*this->fockA_);
-  if(!this->isClosedShell && this->Ref_ != TCS){
-    RealMap ErrB(this->ErrorBetaMem_ + (iter % (this->lenCoeff_-1)) * this->lenF_,
-                 this->nBasis_,this->nBasis_);
+  RealMap ErrA(
+    this->ErrorAlphaMem_ + (iter % (this->nDIISExtrap_-1)) * this->lenF_,
+    this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_
+  );
 
-    ErrB = (*this->fockB_) * (*this->densityB_) * (*this->aointegrals_->overlap_);
-    ErrB -= (*this->aointegrals_->overlap_) * (*this->densityB_) * (*this->fockB_);
+  ErrA = 
+      (*this->fockA_) * (*this->densityA_) * (*this->aointegrals_->overlap_);
+  ErrA -= 
+    (*this->aointegrals_->overlap_) * (*this->densityA_) * (*this->fockA_);
+
+  if(!this->isClosedShell && this->Ref_ != TCS){
+    RealMap ErrB(
+      this->ErrorBetaMem_ + (iter % (this->nDIISExtrap_-1)) * this->lenF_,
+      this->nBasis_,this->nBasis_
+    );
+
+    ErrB = 
+      (*this->fockB_) * (*this->densityB_) * (*this->aointegrals_->overlap_);
+    ErrB -= 
+      (*this->aointegrals_->overlap_) * (*this->densityB_) * (*this->fockB_);
   }
 } // GenDComm
 

@@ -29,11 +29,12 @@ void SingleSlater<T>::initMemLen(){
   this->lenXp_     = this->nBasis_ * this->nBasis_ * this->nTCS_ * this->nTCS_;
   this->lenF_      = this->nBasis_ * this->nBasis_ * this->nTCS_ * this->nTCS_;
   this->lenP_      = this->nBasis_ * this->nBasis_ * this->nTCS_ * this->nTCS_;
-  this->lenCoeff_  = 7;
+  this->lenCoeff_  = this->nDIISExtrap_;
   this->lenB_      = this->lenCoeff_   * this->lenCoeff_;
-  this->LWORK_     = 5 * std::max(this->nBasis_ * this->nTCS_,this->lenCoeff_);
+  this->LWORK_     = 5 * std::max(this->nBasis_ * this->nTCS_,
+    this->nDIISExtrap_);
   this->LRWORK_    = 3 * 
-    std::max(this->nBasis_ * this->nTCS_,this->lenCoeff_) - 2;
+    std::max(this->nBasis_ * this->nTCS_,this->nDIISExtrap_) - 2;
   this->lenLambda_ = this->nBasis_ * this->nBasis_ * this->nTCS_ * this->nTCS_;
   this->lenDelF_   = this->nBasis_ * this->nBasis_ * this->nTCS_ * this->nTCS_;
   this->lenOccNum_ = this->nBasis_ * this->nTCS_   * this->nTCS_;
@@ -46,11 +47,11 @@ void SingleSlater<T>::initMemLen(){
   this->lenScr_ += this->lenP_;     // Storage for Alpha (Total) Density
   this->lenScr_ += this->lenCoeff_; // Storage for CDIIS Coefficients
   this->lenScr_ += this->lenB_;     // Storage for CDIIS Metric
-  this->lenScr_ += 2*(this->lenCoeff_ - 1) * this->lenF_; // CDIIS Commutator (A) array
+  this->lenScr_ += 2*(this->nDIISExtrap_ - 1) * this->lenF_; // CDIIS Commutator (A) array
   if(!this->isClosedShell && this->Ref_ != TCS) {
     this->lenScr_ += this->lenF_;     // Storage for Beta Fock
     this->lenScr_ += this->lenP_;     // Storage for Beta Density
-    this->lenScr_ += 2*(this->lenCoeff_ - 1) * this->lenF_; // CDIIS Commutator (B) array
+    this->lenScr_ += 2*(this->nDIISExtrap_ - 1) * this->lenF_; // CDIIS Commutator (B) array
   } 
   if(this->Ref_ == CUHF) {
     this->lenRealScr_ += this->lenOccNum_; // Storage for Occupation Numbers (NOs)
@@ -165,16 +166,16 @@ template<typename T>
 void SingleSlater<T>::allocAlphaScr(){
   this->FpAlphaMem_    = new T[this->lenF_];
   this->POldAlphaMem_  = new T[this->lenP_];
-  this->ErrorAlphaMem_ = new T[this->lenF_*(this->lenCoeff_ -1)];
-  this->FADIIS_        = new T[this->lenF_*(this->lenCoeff_ -1)];
+  this->ErrorAlphaMem_ = new T[this->lenF_*(this->nDIISExtrap_ -1)];
+  this->FADIIS_        = new T[this->lenF_*(this->nDIISExtrap_ -1)];
 }
 
 template<typename T>
 void SingleSlater<T>::allocBetaScr(){
   this->FpBetaMem_    = new T[this->lenF_];
   this->POldBetaMem_  = new T[this->lenP_];
-  this->ErrorBetaMem_ = new T[this->lenF_*(this->lenCoeff_ -1)];
-  this->FBDIIS_       = new T[this->lenF_*(this->lenCoeff_ -1)];
+  this->ErrorBetaMem_ = new T[this->lenF_*(this->nDIISExtrap_ -1)];
+  this->FBDIIS_       = new T[this->lenF_*(this->nDIISExtrap_ -1)];
 }
 
 template<typename T>
@@ -295,11 +296,17 @@ void SingleSlater<T>::SCF(){
    
 
     if(getRank() == 0) {
-      if(this->Ref_ != CUHF && this->doDIIS){ // DIIS NYI for CUHF
-        this->GenDComm(iter);
-        this->CpyFock(iter);   
-        if(iter % (this->lenCoeff_-1) == (this->lenCoeff_-2) && 
-           iter != 0) 
+      if(iter == this->iDIISStart_ && this->printLevel_ > 0)
+        this->fileio_->out << 
+	  std::setw(2) << " " <<
+	  std::setw(4) << " " <<
+	  "*** Starting DIIS ***" << endl;
+      // DIIS NYI for CUHF
+      if(this->Ref_ != CUHF && this->doDIIS && iter >= this->iDIISStart_){ 
+        this->GenDComm(iter - this->iDIISStart_);
+        this->CpyFock(iter - this->iDIISStart_);   
+        if((iter - this->iDIISStart_) % (this->nDIISExtrap_-1) == 
+	   (this->nDIISExtrap_-2) && iter != 0) 
           this->CDIIS();
       }
     }

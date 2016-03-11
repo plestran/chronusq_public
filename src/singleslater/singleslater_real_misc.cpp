@@ -264,6 +264,7 @@ void SingleSlater<double>::writeSCFFiles(){
 
 template<>
 void SingleSlater<double>::fixPhase(){
+  if(!this->fixPhase_) return;
    RealMatrix::Index maxIndex;
    for(auto iCol = 0; iCol < this->moA_->cols(); iCol++){
      this->moA_->col(iCol).cwiseAbs().maxCoeff(&maxIndex);
