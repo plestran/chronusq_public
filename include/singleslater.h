@@ -3,7 +3,7 @@
  *  computational chemistry software with a strong emphasis on explicitly 
  *  time-dependent and post-SCF quantum mechanical methods.
  *  
- *  Copyright (C) 2014-2015 Li Research Group (University of Washington)
+ *  Copyright (C) 2014-2016 Li Research Group (University of Washington)
  *  
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -428,8 +428,8 @@ public:
     this->CorrKernel_  = NOCORR;
     this->ExchKernel_  = NOEXCH;
     this->DFTKernel_   = NODFT;
-    this->denTol_      = 1e-10;
-    this->eneTol_      = 1e-12;
+    this->denTol_      = 5e-8;
+    this->eneTol_      = 1e-10;
     this->maxSCFIter_  = 256;
     //this->maxSCFIter_  = 128;
     this->nTCS_        = 1;

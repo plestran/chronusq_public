@@ -3,7 +3,7 @@
  *  computational chemistry software with a strong emphasis on explicitly 
  *  time-dependent and post-SCF quantum mechanical methods.
  *  
- *  Copyright (C) 2014-2015 Li Research Group (University of Washington)
+ *  Copyright (C) 2014-2016 Li Research Group (University of Washington)
  *  
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -399,6 +399,24 @@ void initCQ(int argc, char** argv){
   MPI_Initialized(&flag);
   if(flag) return;
   MPI_Init(&argc,&argv);
+  MPI_Barrier(MPI_COMM_WORLD);
+#endif
+}
+
+void initCQ(){
+#ifdef USE_LIBINT
+  // Bootstrap Libint env
+  libint2::init(); 
+#endif
+#ifdef _OPENMP
+  // Set up Thread Pool (Default serial)
+  omp_set_num_threads(1);
+#endif
+#ifdef CQ_ENABLE_MPI
+  int flag;
+  MPI_Initialized(&flag);
+  if(flag) return;
+  MPI_Init(NULL,NULL);
   MPI_Barrier(MPI_COMM_WORLD);
 #endif
 }

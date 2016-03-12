@@ -3,7 +3,7 @@
  *  computational chemistry software with a strong emphasis on explicitly 
  *  time-dependent and post-SCF quantum mechanical methods.
  *  
- *  Copyright (C) 2014-2015 Li Research Group (University of Washington)
+ *  Copyright (C) 2014-2016 Li Research Group (University of Washington)
  *  
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -31,8 +31,22 @@
 #define MAXCONTRACTION 10 ///< Define maximum contraction depth for gaussian basis functions
 #define MAXATOMS 1000 ///< Define maximum number of allowed nuclei
 
+// Maximum number of FileIO Sratch Partitions (can override)
+#ifndef CQ_MAX_SCRATCH_PARTITIONS
+  #define CQ_MAX_SCRATCH_PARTITIONS 1000
+#endif
+
 // CMake Compilation Configuration
 #include <config_chronusq.h>
+
+// Boost Headers
+#include <boost/python.hpp>
+#include <boost/geometry/geometry.hpp>
+#include <boost/math/constants/constants.hpp>
+#include <boost/math/special_functions/gamma.hpp>
+#include <boost/math/special_functions/asinh.hpp>
+#include <boost/algorithm/string.hpp>
+
 
 // IO
 #include <iostream>
@@ -67,13 +81,6 @@
 //#include "oompi.h"
 //#include <pthread.h>
 
-// Boost Headers
-#include <boost/geometry/geometry.hpp>
-#include <boost/math/constants/constants.hpp>
-#include <boost/python.hpp>
-#include <boost/math/special_functions/gamma.hpp>
-#include <boost/math/special_functions/asinh.hpp>
-#include <boost/algorithm/string.hpp>
 
 // Misc
 #include <stdlib.h>

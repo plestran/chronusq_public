@@ -3,7 +3,7 @@
  *  computational chemistry software with a strong emphasis on explicitly 
  *  time-dependent and post-SCF quantum mechanical methods.
  *  
- *  Copyright (C) 2014-2015 Li Research Group (University of Washington)
+ *  Copyright (C) 2014-2016 Li Research Group (University of Washington)
  *  
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -56,7 +56,7 @@ namespace ChronusQ {
     TMat        * solutionVecR_; ///< (right) solution vectors
     TMat        * solutionVecL_; ///< (left)  solution vectors
     VectorXd    * omega_;        ///< Frequencies for solution vectors
-    TMat        * diag_;         ///< Diagonal elements of problem
+    VectorXd    * diag_;         ///< Diagonal elements of problem
 
     // Disk storage
     H5::H5File  * scratchFile_; ///< Scratch file
@@ -122,11 +122,16 @@ namespace ChronusQ {
     inline int nGuess()     { return this->nGuess_    ; };
     inline int nSek()       { return this->nSek_      ; };
     inline int nSingleDim() { return this->nSingleDim_; };
+    
+    inline bool needsLeft() { return this->needsLeft_;  };
 
     inline VectorXd * omega()        { return this->omega_       ; };
     inline TMat     * solutionVecR() { return this->solutionVecR_; };
     inline TMat     * solutionVecL() { return this->solutionVecL_; };
+    inline VectorXd * diag()         { return this->diag_        ; };
 
+    inline H5::H5File  * scratchFile(){ return this->scratchFile_; };
+    inline H5::DataSet * guessFile()  { return this->guessFile_;   };  
 
     virtual void linearTrans(TMap &,TMap &,TMap &,TMap &,TMap &,TMap &) = 0;
     virtual void formGuess() = 0;
@@ -190,11 +195,152 @@ namespace ChronusQ {
     int  nTotalIter_;
     bool isConverged_;
 
+    // Output
+    std::ostream * out_;
+    
+    // Factory to create new files
+    std::function<
+      H5::DataSet*(const H5::PredType&,std::string&,std::vector<hsize_t>&)
+    > genScrFile_;
+
+
+    /** Scratch Partitions **/
+
+    // Constant data-type storage
+    int        LRWORK; ///< Length of RWORK
+    double   * RWORK_; ///< Real workspace for ZGEEV (Complex Only!)
+    double   * ERMem_; ///< Storage of Re[omega] for subspace (Real Only!)
+    double   * EIMem_; ///< Storage of Im[omega] for subspace (Real Only!)
+    dcomplex * ECMem_; ///< Storage of omega for subspace (Complex Only!)
+
+    // Trial vector storage
+    T* TRMem_; ///< Right trial vectors
+    T* TLMem_; ///< Left trial vectors
+
+    // Matrix/Metric-Vector Product storage
+    T* SigmaRMem_; ///< Matrix-Vector Product on Right trial vectors
+    T* SigmaLMem_; ///< Matrix-Vector Product on Left trial vectors
+    T* RhoRMem_;   ///< Metric-Vector Product on Right trial vectors
+    T* RhoLMem_;   ///< Metric-Vector Product on Left trial vectors
+
+    // Full projection storage
+    T* XTSigmaRMem_; ///< Full projection of Right Sigma onto subspace
+    T* XTSigmaLMem_; ///< Full projection of Left Sigma onto subspace
+    T* XTRhoRMem_;   ///< Full projection of Right Rho onto subspace
+    T* XTRhoLMem_;   ///< Full projection of Left Rho onto subspace
+
+    // Residuals
+    T* ResRMem_; ///< Right Residuals
+    T* ResLMem_; ///< Left Residuals
+
+    // Reconstructed Solution Vectors
+    T* URMem_; ///< Reconstructed Right solution vectors
+    T* ULMem_; ///< Reconstructed Left solution vectors
+
+    // LAPACK Scratch Space
+    T* WORK;   ///< LAPACK scratch space
+    int LWORK; ///< Length of WORK
+
+    // Special Algorithm Memory
+       
+    // Symmetrized Trial Vectors
+    T* ASuperMem_;    ///< Matrix in basis of gerade and ungerade vectors
+    T* SSuperMem_;    ///< Metric in basis of gerade and ungedade vectors
+    T* NHrProdMem_;   ///< Non-Hermetian product of the metric and matrix
+      
+    void allocScr();
+    void allocScrSpecial();
+    void cleanupScr();
+    void cleanupScrSpecial();
+
+
+    // Trial vector storage (Disk)
+    H5::DataSet * TRFile_; ///< Right trial vectors
+    H5::DataSet * TLFile_; ///< Left trial vectors
+
+    // Matrix/Metric-Vector Product storage (Disk)
+    H5::DataSet * SigmaRFile_; ///< Matrix-Vector Product on Right trial vectors
+    H5::DataSet * SigmaLFile_; ///< Matrix-Vector Product on Left trial vectors
+    H5::DataSet * RhoRFile_;   ///< Metric-Vector Product on Right trial vectors
+    H5::DataSet * RhoLFile_;   ///< Metric-Vector Product on Left trial vectors
+
+/*  Should always be able to store reduced dimension in Core
+    // Full projection storage (Disk)
+    H5::DataSet * XTSigmaRFile_; ///< Full projection of Right Sigma onto subspace
+    H5::DataSet * XTSigmaLFile_; ///< Full projection of Left Sigma onto subspace
+    H5::DataSet * XTRhoRFile_;   ///< Full projection of Right Rho onto subspace
+    H5::DataSet * XTRhoLFile_;   ///< Full projection of Left Rho onto subspace
+*/
+
+    // Residuals (Disk)
+    H5::DataSet * ResRFile_; ///< Right Residuals
+    H5::DataSet * ResLFile_; ///< Left Residuals
+
+
+    // Reconstructed Solution Vectors (Disk)
+    H5::DataSet * URFile_; ///< Reconstructed Right solution vectors
+    H5::DataSet * ULFile_; ///< Reconstructed Left solution vectors
+
+    // Special Algorithm Memory
+       
+    // Symmetrized Trial Vectors
+    H5::DataSet * ASuperFile_; ///< Matrix in basis of gerade and ungerade vectors
+    H5::DataSet * SSuperFile_; ///< Metric in basis of gerade and ungerade vectors
+
+    void iniScratchFiles();
+    void writeTrialVectors(const int);
+    void readTrialVectors(const int);
 
   public:
+    // Set private data
+    void setMatrixType(QNMatrixType      type){this->matrixType_       = type;};
+    void setProblemType(QNProblemType    type){this->problemType_      = type;};
+    void setGuessType(QNGuessType        type){this->guessType_        = type;};
+    void setAlgorithm(QNSpecialAlgorithm type){this->specialAlgorithm_ = type;};
+
+    // Run the QN Calculation
+    void run();
+    void runMicro();
+
+    // Procedural Functions
+    void readGuess();
+    void checkOrthogonality(int&);
+    void formLinearTrans(const int, const int);
+    void fullProjection(const int);
+    void reducedDimDiag(const int);
+    void reconstructSolution(const int);
+    void generateResiduals(const int);
+    std::vector<bool> checkConvergence(const int, int&); 
+    void formNewGuess(std::vector<bool>&, int&, int&, int&, int&);
+
+
+    // Orthogonality Check Routines
+    void checkLinearDependence(int &);
+    void orthogonalize(int);
+
+
+    // Diagonalization Routines
+    void stdHermetianDiag(const int);
+    void stdNonHermetianDiag(const int);
+    void checkImaginary(const int);
+
+    // Guess Generation Routines
+    void davResidualGuess(    T,const TMap&,TMap&,const TMap&,TMap&);
+    void davStdResidualGuess( T,const TMap&,TMap&);
+    void davSymmResidualGuess(T,const TMap&,TMap&,const TMap&,TMap&);
+
+    // Special Algorithm Routines
+    void symmetrizeTrial();
+    void buildSuperMatricies(const int);
+    void invertSuperMetric(const int);
+    void formNHrProd(const int);
+
     #include <qn_constructors.h>
 
   }; // class QuasiNewton2
+  #include <qn_memory.h>
+  #include <qn_procedural.h>
+  #include <qn_special.h>
 }; // namespace ChronusQ
 
 #endif

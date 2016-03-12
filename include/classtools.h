@@ -3,7 +3,7 @@
  *  computational chemistry software with a strong emphasis on explicitly 
  *  time-dependent and post-SCF quantum mechanical methods.
  *  
- *  Copyright (C) 2014-2015 Li Research Group (University of Washington)
+ *  Copyright (C) 2014-2016 Li Research Group (University of Washington)
  *  
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -46,6 +46,7 @@ void printUnitInfo(Controls *, SingleSlater<double> *, SDResponse<double> *, Rea
 void printUnitInfo(Controls *, SingleSlater<dcomplex> *, SDResponse<double> *, RealTime<dcomplex> *);
 
 void initCQ(int argc, char **argv);
+void initCQ();
 void finalizeCQ();
 template<typename T> void writeJobMeta(SingleSlater<T>&,SDResponse<T>&,
   RealTime<T>&,Molecule&,AOIntegrals&,FileIO&);

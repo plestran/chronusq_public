@@ -3,7 +3,7 @@
  *  computational chemistry software with a strong emphasis on explicitly 
  *  time-dependent and post-SCF quantum mechanical methods.
  *  
- *  Copyright (C) 2014-2015 Li Research Group (University of Washington)
+ *  Copyright (C) 2014-2016 Li Research Group (University of Washington)
  *  
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -124,6 +124,8 @@ class Response : public QNCallable<T> {
   std::vector<RESPONSE_PARTITION> iMatIter_; ///< Response Matrix Partition
   RESPONSE_MATRIX_PARTITIONING iPart_;///< Type of Response matrix Partitioning
   std::vector<H5::DataSet*> guessFiles_;
+
+  RESPONSE_PARTITION currentMat_;
 
   bool doSinglets_;      ///< (?) Find NSek Singlet Roots (depends on SA)
   bool doTriplets_;      ///< (?) Find NSek Triplet Roots (depends on SA)
@@ -305,6 +307,12 @@ public:
   inline void doFull()                 { this->doFull_ = true;         };
   inline void doTDA()                  { this->doTDA_  = true;         };
   inline void doSA()                   { this->iPart_  = SPIN_ADAPTED; };
+
+  // Getters
+  inline std::vector<TMat> transDen(){return this->transDen_;};
+  inline std::vector<VectorXd> frequencies(){return this->frequencies_;};
+  inline std::vector<int> nMatDim(){return this->nMatDim_;};
+  inline SingleSlater<T> * singleSlater(){return this->singleSlater_;};
   
   // IO Related
   void printInfo();
@@ -326,7 +334,7 @@ public:
   inline void full() {
     if(this->singleSlater_->aointegrals()->integralAlgorithm != 
        AOIntegrals::INCORE)
-      CErr("Full Response Problems Require InCore Integrals",
+      CErr("Full Response Problems Require In-Core Integrals",
         this->fileio_->out);
  
     if(this->iClass_ == FOPPA) this->fullFOPPA();
@@ -343,6 +351,32 @@ public:
   inline void IterativeResponse(){
     this->formDiag();
     this->formGuess();
+    this->nGuess_     = this->nSek_; // Quick Hack to get things working
+    if(this->iMeth_ == RESPONSE_TYPE::RPA){
+      this->needsLeft_ = true;
+    }
+
+    std::function<H5::DataSet*(const H5::PredType&,std::string&,
+      std::vector<hsize_t>&)> fileFactory = 
+        std::bind(&FileIO::createScratchPartition,this->fileio_,
+        std::placeholders::_1,std::placeholders::_2,std::placeholders::_3);
+
+    for(auto iMat = 0; iMat != iMatIter_.size(); iMat++){
+      this->currentMat_ = this->iMatIter_[iMat];
+      this->nSingleDim_ = this->nMatDim_[iMat];  
+      this->solutionVecR_ = &this->transDen_[iMat];
+      this->omega_        = &this->frequencies_[iMat];
+      this->guessFile_    = this->guessFiles_[iMat];
+      this->diag_         = &this->rmDiag_[iMat];
+
+      QuasiNewton2<T> qn(this,fileFactory);
+      if(this->iMeth_ == RESPONSE_TYPE::RPA){
+        qn.setMatrixType( QNMatrixType::HERMETIAN_GEP           );
+        qn.setAlgorithm(  QNSpecialAlgorithm::SYMMETRIZED_TRIAL );
+      }
+      qn.run();
+      cout << endl << endl;
+    }
   };
 
   // Required for QNCallable
@@ -385,8 +419,18 @@ public:
   void checkValidPPRPA(); ///< Checks specific to PPRPA
 
   // Transformations of Transition Densities
-  void formAOTransDen(TVecMap&, TMat&, TMat&);
-  void formMOTransDen(TVecMap &,TMat&,TMat&);
+  inline void formAOTransDen(TVecMap &TVec, TMat &TAOA, TMat &TAOB){
+    if(this->iClass_ == FOPPA) this->formAOTransDenFOPPA(TVec,TAOA,TAOB);
+    else if(this->iClass_ == PPPA) this->formAOTransDenPPRPA(TVec,TAOA,TAOB);
+  };
+  inline void formMOTransDen(TVecMap &TVec, TMat &TMOA, TMat &TMOB){
+    if(this->iClass_ == FOPPA) this->formMOTransDenFOPPA(TVec,TMOA,TMOB);
+    else if(this->iClass_ == PPPA) this->formMOTransDenPPRPA(TVec,TMOA,TMOB);
+  };
+  void formAOTransDenFOPPA(TVecMap&, TMat&, TMat&);
+  void formMOTransDenFOPPA(TVecMap&, TMat&,TMat&);
+  void formAOTransDenPPRPA(TVecMap&, TMat&, TMat&);
+  void formMOTransDenPPRPA(TVecMap&, TMat&,TMat&);
   void placeOccVir(TVecMap&, TMat&, TMat&);
   void placeVirOcc(TVecMap&, TMat&, TMat&);
   void placeOccOcc(TVecMap&, TMat&, TMat&);

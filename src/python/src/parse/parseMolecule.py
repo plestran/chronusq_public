@@ -3,7 +3,7 @@
 # computational chemistry software with a strong emphasis on explicitly 
 # time-dependent and post-SCF quantum mechanical methods.
 # 
-# Copyright (C) 2014-2015 Li Research Group (University of Washington)
+# Copyright (C) 2014-2016 Li Research Group (University of Washington)
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -128,9 +128,9 @@ def readGeom(workers,settings):
 #  isotope identifier (** not yet fully implemented **)
 #
 # This routine also populates:
-#   CQ::Molecule::index    -   a map from atom number to index in CQ::atoms array
-#   CQ::Molecule::nTotalE  -   total Number of electrons 
-#                                (modulated by CQ::Molecule::charge)
+#   CQ::Molecule::index    -  a map from atom number to index in CQ::atoms array
+#   CQ::Molecule::nTotalE  -  total Number of electrons 
+#                               (modulated by CQ::Molecule::charge)
 #
 #  nTotalE = 0
   nTotalE = - settings['CHARGE']
@@ -138,13 +138,19 @@ def readGeom(workers,settings):
     line = geomStr[i]
     lineSplit = line.split()
     indx = -1
-    if len(lineSplit) == 5:
-      indx = chronusQ.HashAtom(str(lineSplit[0]),int(lineSplit[1]))
-    elif len(lineSplit) == 4:
-      indx = chronusQ.HashAtom(str(lineSplit[0]),0)
-    else:
+    if len(lineSplit) != 5 and len(lineSplit) != 4:
       msg = 'Input Error: Invalid Geometry Specification'
       CErrMsg(workers['CQFileIO'],str(msg))
+    if any(char.isdigit() for char in lineSplit[0]):
+      if len(lineSplit) == 5:
+        indx = chronusQ.HashZ(int(lineSplit[0]),int(lineSplit[1]))
+      elif len(lineSplit) == 4:
+        indx = chronusQ.HashZ(int(lineSplit[0]),0)
+    else:
+      if len(lineSplit) == 5:
+        indx = chronusQ.HashAtom(str(lineSplit[0]),int(lineSplit[1]))
+      elif len(lineSplit) == 4:
+        indx = chronusQ.HashAtom(str(lineSplit[0]),0)
 
     if indx != -1:
       workers["CQMolecule"].setIndex(i,indx)

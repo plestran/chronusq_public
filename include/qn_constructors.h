@@ -3,7 +3,7 @@
  *  computational chemistry software with a strong emphasis on explicitly 
  *  time-dependent and post-SCF quantum mechanical methods.
  *  
- *  Copyright (C) 2014-2015 Li Research Group (University of Washington)
+ *  Copyright (C) 2014-2016 Li Research Group (University of Washington)
  *  
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -27,6 +27,10 @@
 QuasiNewton2(){
   this->maxSubSpace_ = 0;
   this->qnObj_       = NULL;
+  this->nMicroIter_  = 0;
+  this->nMacroIter_  = 0;
+  this->nTotalIter_  = 0;
+  this->isConverged_ = 0;
 
   // Default Values
   this->maxMicroIter_     = 128;
@@ -37,9 +41,24 @@ QuasiNewton2(){
   this->guessType_        = RESIDUAL_DAVIDSON;
   this->specialAlgorithm_ = NOT_SPECIAL;
 
+  this->out_              = &std::cout;
+
 };
 
 QuasiNewton2(QNCallable<T> * obj) : QuasiNewton2(){
   this->qnObj_ = obj;
-  this->maxSubSpace_ = std::min(250,obj->nSingleDim_/2);
+  this->maxSubSpace_ = std::min(250,obj->nSingleDim()/2);
+};
+
+QuasiNewton2(QNCallable<T> * obj, std::function<H5::DataSet*(const H5::PredType&,
+  std::string&, std::vector<hsize_t>&)> fileFactory) : QuasiNewton2(obj){
+  this->genScrFile_ = fileFactory;
+/*
+  std::vector<hsize_t> dims;
+  dims.push_back(1);
+  dims.push_back(1);
+
+  std::string name = "Test";
+  auto ptr = this->genScrFile_(H5::PredType::NATIVE_DOUBLE,name,dims);
+*/
 };

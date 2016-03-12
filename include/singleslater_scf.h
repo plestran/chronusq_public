@@ -3,7 +3,7 @@
  *  computational chemistry software with a strong emphasis on explicitly 
  *  time-dependent and post-SCF quantum mechanical methods.
  *  
- *  Copyright (C) 2014-2015 Li Research Group (University of Washington)
+ *  Copyright (C) 2014-2016 Li Research Group (University of Washington)
  *  
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -31,8 +31,9 @@ void SingleSlater<T>::initMemLen(){
   this->lenP_      = this->nBasis_ * this->nBasis_ * this->nTCS_ * this->nTCS_;
   this->lenCoeff_  = 7;
   this->lenB_      = this->lenCoeff_   * this->lenCoeff_;
-  this->LWORK_     = 4 * this->nBasis_ * this->nTCS_;
-  this->LRWORK_    = 3 * this->nBasis_ * this->nTCS_ - 2;
+  this->LWORK_     = 5 * std::max(this->nBasis_ * this->nTCS_,this->lenCoeff_);
+  this->LRWORK_    = 3 * 
+    std::max(this->nBasis_ * this->nTCS_,this->lenCoeff_) - 2;
   this->lenLambda_ = this->nBasis_ * this->nBasis_ * this->nTCS_ * this->nTCS_;
   this->lenDelF_   = this->nBasis_ * this->nBasis_ * this->nTCS_ * this->nTCS_;
   this->lenOccNum_ = this->nBasis_ * this->nTCS_   * this->nTCS_;
@@ -308,6 +309,7 @@ void SingleSlater<T>::SCF(){
     if(this->isConverged) break;
 
   }; // SCF Loop
+//prettyPrint(cout,(*this->aointegrals_->overlap_),"MOS");
 /*
   delete [] this->SCF_SCR;
   delete [] this->REAL_SCF_SCR;

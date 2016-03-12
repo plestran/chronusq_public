@@ -1,11 +1,14 @@
 if(USE_LIBINT)
   set(AOINTS_SOURCE aointegrals.cpp aointegrals_builders.cpp 
-    aointegrals_real_contract_uniquegen.cpp aointegrals_complex_contract_uniquegen.cpp 
-    aointegrals_real_contract_percontract.cpp aointegrals_real_contract_direct.cpp 
+    aointegrals_real_contract_uniquegen.cpp 
+    aointegrals_complex_contract_uniquegen.cpp 
+    aointegrals_real_contract_percontract.cpp 
+    aointegrals_real_contract_direct.cpp 
     aointegrals_complex_contract_percontract.cpp 
     aointegrals_complex_contract_direct.cpp aointegrals_real_contract_N4.cpp 
     aointegrals_real_contract_DF.cpp aointegrals_complex_contract_N4.cpp 
-    aointegrals_complex_contract_DF.cpp aointegrals_dkh.cpp aointegrals_denfit)
+    aointegrals_complex_contract_DF.cpp aointegrals_dkh.cpp 
+    aointegrals_denfit.cpp aointegrals_util.cpp)
 else(USE_LIBINT)
   set(AOINTS_SOURCE aointegrals.cpp aointegrals_builders_nolibint.cpp 
     aointegrals_onee.cpp aointegrals_twoe.cpp) 

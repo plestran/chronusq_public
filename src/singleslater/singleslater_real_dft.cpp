@@ -3,7 +3,7 @@
  *  computational chemistry software with a strong emphasis on explicitly 
  *  time-dependent and post-SCF quantum mechanical methods.
  *  
- *  Copyright (C) 2014-2015 Li Research Group (University of Washington)
+ *  Copyright (C) 2014-2016 Li Research Group (University of Washington)
  *  
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -873,7 +873,7 @@ std::array<double,6> SingleSlater<double>::formVCVWN (double rho, double spinden
 
 
 //   VWN5
-   if (this->CorrKernel_ == VWN5){
+   if(this->CorrKernel_ == VWN5) {
      b_f  =  7.06042;  // Caption Table 5
      c_f  = 18.0578;   // Caption Table 5
      x0_f = -0.32500;  // Caption Table 5
@@ -883,7 +883,7 @@ std::array<double,6> SingleSlater<double>::formVCVWN (double rho, double spinden
      b_a  =  1.13107;   // intext page 1209
      c_a  = 13.0045;    // intext page 1209
      x0_a = -0.00475840; // intext page 1209
-   }else if(this->CorrKernel_ == VWN3){
+   } else if(this->CorrKernel_ == VWN3) {
 //  VWN3
      b_p  =  13.0720;   // into text page 1207
      c_p  =  42.7198;   // into text page 1207
@@ -911,7 +911,7 @@ std::array<double,6> SingleSlater<double>::formVCVWN (double rho, double spinden
 //     epsmu[1]  = -over3*EvepsVWN(1,A_p,b_p,c_p,x0_p,rho);
      epsmu[1]  = -over3*rs*EvepsVWN(2,A_p,b_p,c_p,x0_p,rho);
      epsmu[1] += epsmu[0] ;
-   }else{
+   } else {
 //   Open Shell Case
      if(this->CorrKernel_ == VWN3){
 //     Used Linear Interpolation between parg and ferr 

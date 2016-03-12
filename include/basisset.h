@@ -3,7 +3,7 @@
  *  computational chemistry software with a strong emphasis on explicitly 
  *  time-dependent and post-SCF quantum mechanical methods.
  *  
- *  Copyright (C) 2014-2015 Li Research Group (University of Washington)
+ *  Copyright (C) 2014-2016 Li Research Group (University of Washington)
  *  
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -317,10 +317,30 @@ public:
   inline int               mapSh2Bf(int i) {return this->mapSh2Bf_[i];  };
   inline int               mapSh2Cen(int i) {return this->mapSh2Cen_[i];};
   inline std::array<int,2> mapCen2Bf(int i) {return this->mapCen2Bf_[i];};
+  inline std::string       basisPath(){return this->basisPath_;};
 
   inline void resetMapSh2Bf() {this->mapSh2Bf_.clear(); this->haveMapSh2Bf  = false;};
   inline void resetMapSh2Cen(){this->mapSh2Cen_.clear();this->haveMapSh2Cen = false;};
   inline void resetMapCen2Bf(){this->mapCen2Bf_.clear();this->haveMapCen2Bf = false;};
+  inline void resetLocalShells(){this->shells_.clear(); this->shellsCQ.clear();};
+  inline void resetAll(){
+    this->nBasis_     = 0;
+    this->nPrimitive_ = 0;
+    this->nShell_     = 0;
+    this->nShellPair_ = 0;
+    this->maxPrim_    = 0;
+    this->maxL_       = 0;
+    this->resetMapSh2Bf();
+    this->resetMapSh2Cen();
+    this->resetMapCen2Bf();
+    this->resetLocalShells();
+  }
+
+
+
+
+
+
   
 
   inline void setBasisPath( std::string str){ this->basisPath_  = str;};
