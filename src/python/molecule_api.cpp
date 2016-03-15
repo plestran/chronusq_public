@@ -39,4 +39,16 @@ namespace ChronusQ {
     this->printInfo(fileio.out);
   }
   void Molecule::Wrapper_alloc(FileIO& fileio){ this->alloc(fileio.out); }
+
+  boost::python::list Molecule::Wrapper_cart(){
+    boost::python::list result;
+    for(auto iAtm = 0; iAtm < this->nAtoms_; iAtm++) {
+      boost::python::list AtomCart;
+      for(auto iXYZ = 0; iXYZ < 3            ; iXYZ++) {
+        AtomCart.append((*this->cart_)(iXYZ,iAtm));
+      }
+      result.append(AtomCart);
+    }
+    return result;
+  }
 }
