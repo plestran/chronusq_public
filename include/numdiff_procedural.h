@@ -434,7 +434,8 @@ void NumericalDifferentiation<T>::cartesianDiff(){
     outGSGrad << std::setprecision(10) << derv.GS_GRAD << endl;
     if(this->computeESGradient){
       outESGrad << std::setprecision(10) 
-                << derv.ES_GRAD[this->responseDiffRoot_] + derv.GS_GRAD 
+//              << derv.ES_GRAD[this->responseDiffRoot_] + derv.GS_GRAD 
+                << derv.ES_GRAD[1] - derv.ES_GRAD[0]
                 << endl;
     }
 

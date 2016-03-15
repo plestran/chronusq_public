@@ -253,6 +253,7 @@ Eigen::VectorXd NumericalDifferentiation<T>::ES2GSNACME_CIS(
 
   std::chrono::duration<double> elapsed = NACMEEnd - NACMEStart;
   cout << "GS -> ES NACME took " << elapsed.count() << " s" << endl;
+  prettyPrint(cout,NACME,"GS->ES");
 
   return NACME;
 
