@@ -83,6 +83,14 @@ namespace ChronusQ {
     bool computeES2ESNACME;
     bool doAllCartesianDOF;
 
+    // Python API
+    double Wrapper_GSEnergy();
+    boost::python::list Wrapper_GSGrad();
+    boost::python::list Wrapper_ESEnergy();
+    boost::python::list Wrapper_ESGrad();
+    boost::python::list Wrapper_ESGSNACME();
+    boost::python::list Wrapper_ESESNACME();
+
     double step;
     
     // Setters

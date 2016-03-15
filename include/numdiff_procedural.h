@@ -439,7 +439,6 @@ void NumericalDifferentiation<T>::cartesianDiff(){
                 << endl;
     }
 
-    this->dervData_.push_back(derv);
 
     this->singleSlater_undisplaced_->fileio()->out
       << "  Summary of Results for IX = " << IX << ":" << endl; 
@@ -465,15 +464,15 @@ void NumericalDifferentiation<T>::cartesianDiff(){
     if(this->computeES2GSNACME){
 //    this->ES2GSNACME(ss_p1,ss_m1,resp_p1,resp_m1,SAO_0_p1,SAO_0_m1,
 //      SMO_0_p1,SMO_0_m1);
-      this->ES2GSNACME(ss_p1,ss_m1,T_0,T_p1,T_m1,SAO_0_p1,SAO_0_m1,
-        SMO_0_p1,SMO_0_m1);
+      derv.ES_GS_NACME = this->ES2GSNACME(ss_p1,ss_m1,T_0,T_p1,T_m1,SAO_0_p1,
+	SAO_0_m1,SMO_0_p1,SMO_0_m1);
     }
     if(this->computeES2ESNACME){
       // COPY T's
 //    this->ES2ESNACME(ss_p1,ss_m1,resp_p1,resp_m1,SAO_0_p1,SAO_0_m1,
 //      SMO_0_p1,SMO_0_m1);
-      this->ES2ESNACME(ss_p1,ss_m1,T_0,T_p1,T_m1,SAO_0_p1,SAO_0_m1,
-        SMO_0_p1,SMO_0_m1);
+      derv.ES_ES_NACME = this->ES2ESNACME(ss_p1,ss_m1,T_0,T_p1,T_m1,SAO_0_p1,
+	SAO_0_m1,SMO_0_p1,SMO_0_m1);
     }
     
 
@@ -494,6 +493,7 @@ void NumericalDifferentiation<T>::cartesianDiff(){
     
    
 
+    this->dervData_.push_back(derv);
     
   }
 

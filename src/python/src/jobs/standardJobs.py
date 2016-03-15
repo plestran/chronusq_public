@@ -104,6 +104,11 @@ def runSCF(workers,meta):
   ND.computeES2ESNACME = True
   ND.differentiate()
 
+  #print ND.GSGrad()
+  #print ND.ESGrad()
+  #print ND.ESGSNACME()
+  #print ND.ESESNACME()
+
   meta.E          = workers["CQSingleSlater"].totalEnergy
   meta.scfIters   = workers["CQSingleSlater"].nSCFIter
   meta.dipole     = workers["CQSingleSlater"].dipole()
