@@ -108,6 +108,11 @@ def runSCF(workers,meta):
   #print ND.ESGrad()
   #print ND.ESGSNACME()
   #print ND.ESESNACME()
+  meta.GSGrad    =  ND.GSGrad()
+  meta.ESGrad    =  ND.ESGrad()
+  meta.ESGSNACME =  ND.ESGSNACME()
+  meta.ESESNACME =  ND.ESESNACME()
+
 
   meta.E          = workers["CQSingleSlater"].totalEnergy
   meta.scfIters   = workers["CQSingleSlater"].nSCFIter
