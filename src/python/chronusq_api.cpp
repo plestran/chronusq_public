@@ -208,6 +208,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("computeNucRep", &Molecule::computeNucRep    )
     .def("computeI",      &Molecule::computeI         )
     .def("computeRij",    &Molecule::computeRij       )
+    .def("cart",          &Molecule::Wrapper_cart     )
   ;
 
   class_<BasisSet,boost::noncopyable>("BasisSet",init<>())
