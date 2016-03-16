@@ -14,6 +14,7 @@ molecular integrals over gaussian type functions. A preconfigured copy
 For more information about the contributors to ChronusQ, see AUTHORS
 For more information regarding installation of ChronusQ, see INSTALL
 For more information regarding the dependencies of ChronusQ, see DEPENDS
+For more information regarding how to cite ChronusQ, see CITE.txt
 
 [1] Edward F. Valeev; Libint: machine-generated library for efficient evaluation
       of molecular integrals over Gaussians, version 2.1.0;
