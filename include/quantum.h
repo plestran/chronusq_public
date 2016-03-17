@@ -47,14 +47,14 @@ namespace ChronusQ {
   template<typename T>
   class Quantum {
     // Useful typedefs
-    typename Eigen::Matrix<T,Dynamic,Dynamic,ColMajor> TMatrix;
+    typedef Eigen::Matrix<T,Dynamic,Dynamic,ColMajor> TMatrix;
 
+    protected:
     // Pointers to TMatrix quantities that will store the density of
     // the quantum system in a finite basis
     std::unique_ptr<TMatrix> densityA_;
     std::unique_ptr<TMatrix> densityB_;
 
-    bool iOpenShell_;
 
     template<typename Scalar, typename Left, typename Right>
     static Scalar OperatorContract(const Left& A, const Right& B) {
@@ -68,23 +68,23 @@ namespace ChronusQ {
     Scalar OperatorSpinCombine(const Op& op) {
       double zero = 0.0;
       if(DenTyp == DENSITY_TYPE::TOTAL)
-        if(this->iOpenShell_)
+        if(!this->isClosedShell)
           return this->computePropertyAlpha<Scalar>(op) + 
                  this->computePropertyBeta<Scalar>(op);
         else
           return this->computePropertyAlpha<Scalar>(op);
       else if(DenTyp == DENSITY_TYPE::ALPHA)
-        if(this->iOpenShell_)
+        if(!this->isClosedShell)
           return this->computePropertyAlpha<Scalar>(op);
         else
           return 0.5*this->computePropertyAlpha<Scalar>(op);
       else if(DenTyp == DENSITY_TYPE::BETA)
-        if(this->iOpenShell_)
+        if(!this->isClosedShell)
           return this->computePropertyBeta<Scalar>(op);
         else
           return 0.5*this->computePropertyAlpha<Scalar>(op);
       else if(DenTyp == DENSITY_TYPE::SPIN)
-        if(this->iOpenShell_)
+        if(!this->isClosedShell)
           return this->computePropertyAlpha<Scalar>(op) -
                  this->computePropertyBeta<Scalar>(op);
         else
@@ -101,13 +101,14 @@ namespace ChronusQ {
       return OperatorContract<Scalar>((*this->densityB_),op);
     }
       
-    };
     public:
   
+    bool isClosedShell;
+
     Quantum(){
       this->densityA_ = nullptr; 
       this->densityB_ = nullptr; 
-      this->iOpenShell_ = false;
+      this->isClosedShell = false;
     };
 
     Quantum(unsigned int N) : Quantum(){
@@ -117,7 +118,9 @@ namespace ChronusQ {
     virtual void formDensity() = 0;
     void allocDensity(unsigned int N) {
       this->densityA_ = std::unique_ptr<TMatrix>(new TMatrix(N,N));
-      this->densityB_ = std::unique_ptr<TMatrix>(new TMatrix(N,N));
+      if(!this->isClosedShell){
+        this->densityB_ = std::unique_ptr<TMatrix>(new TMatrix(N,N));
+      }
     };
 
 
@@ -125,6 +128,9 @@ namespace ChronusQ {
     Scalar computeProperty(const Op& op){
       return this->OperatorSpinCombine<Scalar,DenTyp>(op);
     }
+
+    inline TMatrix* densityA(){ return this->densityA_.get();};
+    inline TMatrix* densityB(){ return this->densityB_.get();};
   };
 
 }; // namespace ChronusQ

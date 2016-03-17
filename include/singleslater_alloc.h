@@ -124,6 +124,7 @@ void SingleSlater<T>::alloc(){
 
 template<typename T>
 void SingleSlater<T>::allocOp(){
+  this->allocDensity(this->nTCS_*this->nBasis_); // Allocate Den -> Quantum
   this->allocAlphaOp();
   if(!this->isClosedShell && this->Ref_ != TCS) 
     this->allocBetaOp();
@@ -132,14 +133,14 @@ void SingleSlater<T>::allocOp(){
 template<typename T>
 void SingleSlater<T>::allocAlphaOp(){
   // Alpha / TCS Density Matrix
-  try { 
-    this->densityA_  = std::unique_ptr<TMatrix>( 
-      new TMatrix(this->nTCS_*this->nBasis_, this->nTCS_*this->nBasis_));
-  } catch (...) { 
-    if(this->Ref_ == TCS) 
-      CErr(std::current_exception(),"TCS Density Matrix Allocation"  ); 
-    else CErr(std::current_exception(),"Alpha Density Matrix Allocation"); 
-  }
+//try { 
+//  this->densityA_  = std::unique_ptr<TMatrix>( 
+//    new TMatrix(this->nTCS_*this->nBasis_, this->nTCS_*this->nBasis_));
+//} catch (...) { 
+//  if(this->Ref_ == TCS) 
+//    CErr(std::current_exception(),"TCS Density Matrix Allocation"  ); 
+//  else CErr(std::current_exception(),"Alpha Density Matrix Allocation"); 
+//}
   if(getRank() != 0) return;
   // Alpha / TCS Fock Matrix
   try { 
@@ -210,12 +211,12 @@ void SingleSlater<T>::allocAlphaOp(){
 template<typename T>
 void SingleSlater<T>::allocBetaOp(){
   // Beta Density Matrix
-  try { 
-    this->densityB_ = std::unique_ptr<TMatrix>(
-      new TMatrix(this->nBasis_,this->nBasis_)); 
-  } catch (...) { 
-    CErr(std::current_exception(),"Beta Density Matrix Allocation"); 
-  }
+//try { 
+//  this->densityB_ = std::unique_ptr<TMatrix>(
+//    new TMatrix(this->nBasis_,this->nBasis_)); 
+//} catch (...) { 
+//  CErr(std::current_exception(),"Beta Density Matrix Allocation"); 
+//}
 
   if(getRank() != 0) return;
   // Beta Fock Matrix

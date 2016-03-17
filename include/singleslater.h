@@ -31,13 +31,14 @@
 #include <controls.h>
 #include <aointegrals.h>
 #include <grid.h>
+#include <quantum.h>
 /****************************/
 /* Error Messages 5000-5999 */
 /****************************/
 
 namespace ChronusQ {
 template<typename T>
-class SingleSlater {
+class SingleSlater: public Quantum<T> {
   typedef Eigen::Matrix<T,Dynamic,Dynamic,ColMajor> TMatrix;
 
 /*
@@ -57,7 +58,7 @@ class SingleSlater {
     int maxMultipole;///< Maximum multipole order (inherited from AOIntegrals)
     int printLevel;  ///< Print level (Verbosity)
 
-    bool isClosedShell; ///< Boolean to run through closed shell machinery
+//  bool isClosedShell; ///< Boolean to run through closed shell machinery
     bool isHF;          ///< Boolean of whether or not it's a HF reference
     bool isDFT;         ///< Boolean of whether or not it's a DFT reference
     bool isPrimary;
@@ -111,8 +112,8 @@ class SingleSlater {
   double nElectrons_;
 
   // Internal Storage
-  std::unique_ptr<TMatrix>  densityA_;   ///< Alpha or Full (TCS) Density Matrix
-  std::unique_ptr<TMatrix>  densityB_;   ///< Beta Density Matrix
+//std::unique_ptr<TMatrix>  densityA_;   ///< Alpha or Full (TCS) Density Matrix
+//std::unique_ptr<TMatrix>  densityB_;   ///< Beta Density Matrix
   std::unique_ptr<TMatrix>  fockA_;      ///< Alpha or Full (TCS) Fock Matrix
   std::unique_ptr<TMatrix>  fockB_;      ///< Beta Fock Matrix
   std::unique_ptr<TMatrix>  coulombA_;   ///< Alpha or Full (TCS) Coulomb Matrix
@@ -330,7 +331,7 @@ public:
   bool	haveExchange;///< Computed Exchange Matrix?
   bool	screenVxc   ;///< Do the screening for Vxc?
   bool  havePT;      ///< Computed Perturbation Tensor?
-  bool  isClosedShell;
+//bool  isClosedShell;
   bool  isConverged;
   bool  isHF;
   bool  isDFT;
@@ -366,7 +367,7 @@ public:
 
 
   // constructor & destructor
-  SingleSlater(){
+  SingleSlater() : Quantum<T>(){
     // Zero out integers to be set
     this->nBasis_  = 0;
     this->nShell_  = 0;
@@ -382,8 +383,8 @@ public:
     this->ngpts    = 0;
 
     // Initialize Smart Pointers
-    this->densityA_          = nullptr;   
-    this->densityB_          = nullptr;   
+//  this->densityA_          = nullptr;   
+//  this->densityB_          = nullptr;   
     this->fockA_             = nullptr;      
     this->fockB_             = nullptr;      
     this->coulombA_          = nullptr;   
@@ -420,7 +421,7 @@ public:
     this->haveDensity   = false;
     this->haveMO        = false;
     this->havePT        = false;
-    this->isClosedShell = false;
+//  this->isClosedShell = false;
 
 
     // Standard Values
@@ -551,8 +552,8 @@ public:
   inline int maxMultipole()              { return this->maxMultipole_;            };
   inline std::vector<double> mullPop()   { return this->mullPop_;                 };
   inline std::array<double,3> elecField(){ return this->elecField_;               };
-  inline TMatrix* densityA()             { return this->densityA_.get();          };
-  inline TMatrix* densityB()             { return this->densityB_.get();          };
+//inline TMatrix* densityA()             { return this->densityA_.get();          };
+//inline TMatrix* densityB()             { return this->densityB_.get();          };
   inline TMatrix* fockA()                { return this->fockA_.get();             };
   inline TMatrix* fockB()                { return this->fockB_.get();             };
   inline TMatrix* coulombA()             { return this->coulombA_.get();          };
