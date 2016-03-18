@@ -50,6 +50,8 @@ namespace ChronusQ {
     typedef Eigen::Matrix<T,Dynamic,Dynamic,ColMajor> TMatrix;
 
     protected:
+
+    int nTCS_;
     // Pointers to TMatrix quantities that will store the density of
     // the quantum system in a finite basis
     std::unique_ptr<TMatrix> densityA_;
@@ -129,11 +131,31 @@ namespace ChronusQ {
       return this->OperatorSpinCombine<Scalar,DenTyp>(op);
     }
 
+    inline int   nTCS(){ return this->nTCS_;};      
     inline TMatrix* densityA(){ return this->densityA_.get();};
     inline TMatrix* densityB(){ return this->densityB_.get();};
+    // MPI Routines
+    void mpiBCastDensity();
+  };
+
+  template<typename T>
+  void Quantum<T>::mpiBCastDensity(){
+  #ifdef CQ_ENABLE_MPI
+    auto dataType = MPI_DOUBLE;
+    if(typeid(T).hash_code() == typeid(dcomplex).hash_code())
+      dataType = MPI_C_DOUBLE_COMPLEX;
+  
+    MPI_Bcast(this->densityA_->data(),this->densityA_->size(),dataType,0,
+      MPI_COMM_WORLD);
+    if(!this->isClosedShell && this->nTCS_ != 2)
+      MPI_Bcast(this->densityB_->data(),this->densityB_->size(),dataType,0,
+        MPI_COMM_WORLD);
+  #endif
+    ;
   };
 
 }; // namespace ChronusQ
+
 
 
 #endif

@@ -53,7 +53,7 @@ class SingleSlater : public Quantum<T> {
     int nVirA;       ///< Number of virtual (unoccupied) alpha electrons
     int nVirB;       ///< Number of virtual (unoccupied) beta electrons
     int multip;      ///< Spin multiplicity (inherited from Molecule)
-    int nTCS;        ///< Integer to scale the dimension of matricies for TCS's
+//  int nTCS;        ///< Integer to scale the dimension of matricies for TCS's
     int maxSCFIter;  ///< Maximum number of SCF Cycles
     int maxMultipole;///< Maximum multipole order (inherited from AOIntegrals)
     int printLevel;  ///< Print level (Verbosity)
@@ -101,7 +101,7 @@ class SingleSlater : public Quantum<T> {
   int      multip_;
   int    **R2Index_;
 
-  int      nTCS_; ///< Integer to scale the dimension of matricies for TCS's
+//int      nTCS_; ///< Integer to scale the dimension of matricies for TCS's
   int      guess_;
 
   // DFT Parameters
@@ -532,7 +532,7 @@ public:
 
   // access to private data
   inline int nBasis()                    { return this->nBasis_;                  };
-  inline int nTCS()                      { return this->nTCS_;                    };      
+//inline int nTCS()                      { return this->nTCS_;                    };      
   inline int nTT()                       { return this->nTT_;                     };
   inline int nShell()                    { return this->nShell_;                  };
   inline int nAE()                       { return this->nAE_;                     };
@@ -714,7 +714,6 @@ public:
   /*************************/
   void mpiSend(int,int tag);
   void mpiRecv(int,int tag);
-  void mpiBCastDensity();
 };
 
 #include <singleslater_alloc.h>
@@ -723,6 +722,7 @@ public:
 #include <singleslater_fock.h>
 #include <singleslater_misc.h>
 #include <singleslater_scf.h>
+#include <singleslater_properties.h>
 //#include <singleslater_dft.h>
 
 

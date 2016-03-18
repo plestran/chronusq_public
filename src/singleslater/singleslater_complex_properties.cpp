@@ -28,6 +28,7 @@
  * Compute Multipole Moments (COMPLEX) *
  ***************************************/
 namespace ChronusQ {
+/*
 template<>
 void SingleSlater<dcomplex>::computeMultipole(){
   if(!this->haveDensity) this->formDensity();
@@ -194,5 +195,5 @@ void SingleSlater<dcomplex>::computeSExpect(){
   MPI_Bcast(&this->Ssq_,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 #endif
 };
-
+*/
 }; // namespace ChronusQ

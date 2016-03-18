@@ -23,14 +23,9 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
-#include <singleslater.h>
-/************************************
- * Compute Multipole Moments (REAL) *
- ************************************/
-namespace ChronusQ {
-  /*
-template<>
-void SingleSlater<double>::computeMultipole(){
+
+template<typename T>
+void SingleSlater<T>::computeMultipole(){
   if(!this->haveDensity) this->formDensity();
   if(!this->aointegrals_->haveAOOneE && getRank() == 0) 
     this->aointegrals_->computeAOOneE();
@@ -43,13 +38,16 @@ void SingleSlater<double>::computeMultipole(){
  
     if(this->maxMultipole_ >= 1) {
       for(auto ixyz = 0; ixyz < 3; ixyz++){
-        ConstRealMap 
-          mu(&this->aointegrals_->elecDipole_->storage()[iBuf],NB,NB);
-
-        (*dipole_)(ixyz,0) = -this->densityA_->frobInner(mu);
-
+        ConstRealMap mu(
+          &this->aointegrals_->elecDipole_->storage()[iBuf],NB,NB
+        );
+        /*
+        (*dipole_)(ixyz,0) = -this->densityA_->real().frobInner(mu);
         if(!this->isClosedShell && this->Ref_ != TCS) 
-          (*dipole_)(ixyz,0) += -this->densityB_->frobInner(mu);
+          (*dipole_)(ixyz,0) += -this->densityB_->real().frobInner(mu);
+          */
+        (*dipole_)(ixyz,0) = 
+          - this-> template computeProperty<double,DENSITY_TYPE::TOTAL>(mu);
         iBuf += NBSq;
       }
       for(int iA = 0; iA < this->molecule_->nAtoms(); iA++)
@@ -61,16 +59,19 @@ void SingleSlater<double>::computeMultipole(){
       iBuf = 0;
       for(auto jxyz = 0; jxyz < 3; jxyz++)
       for(auto ixyz = jxyz; ixyz < 3; ixyz++){
-        ConstRealMap 
-          mu(&this->aointegrals_->elecQuadpole_->storage()[iBuf],NB,NB);
-
-        (*quadpole_)(jxyz,ixyz) = -this->densityA_->frobInner(mu);
-
+        ConstRealMap mu(
+            &this->aointegrals_->elecQuadpole_->storage()[iBuf],NB,NB
+          );
+        /*
+        (*quadpole_)(jxyz,ixyz) = -this->densityA_->real().frobInner(mu);
         if(!this->isClosedShell && this->Ref_ != TCS) 
-          (*quadpole_)(jxyz,ixyz) += -this->densityB_->frobInner(mu);
+          (*quadpole_)(jxyz,ixyz) += -this->densityB_->real().frobInner(mu);
+          */
+        (*this->quadpole_)(jxyz,ixyz) = 
+          - this-> template computeProperty<double,DENSITY_TYPE::TOTAL>(mu);
         iBuf += NBSq;
       }
-      *this->quadpole_ = this->quadpole_->selfadjointView<Upper>();
+      (*this->quadpole_) = this->quadpole_->template selfadjointView<Upper>();
       for(int iA = 0; iA < this->molecule_->nAtoms(); iA++)
         *this->quadpole_ += elements[this->molecule_->index(iA)].atomicNumber *
               this->molecule_->cart()->col(iA) * 
@@ -85,14 +86,14 @@ void SingleSlater<double>::computeMultipole(){
       for(auto kxyz = 0;    kxyz < 3; kxyz++)
       for(auto jxyz = kxyz; jxyz < 3; jxyz++)
       for(auto ixyz = jxyz; ixyz < 3; ixyz++){
-        ConstRealMap 
-          mu(&this->aointegrals_->elecOctpole_->storage()[iBuf],NB,NB);
-
-        (*octpole_)(kxyz,jxyz,ixyz) = -this->densityA_->frobInner(mu);
-
+        ConstRealMap mu(&this->aointegrals_->elecOctpole_->storage()[iBuf],NB,NB);
+        /*
+        (*octpole_)(kxyz,jxyz,ixyz) = -this->densityA_->real().frobInner(mu);
         if(!this->isClosedShell && this->Ref_ != TCS) 
-          (*octpole_)(kxyz,jxyz,ixyz) += -this->densityB_->frobInner(mu);
-
+          (*octpole_)(kxyz,jxyz,ixyz) += -this->densityB_->real().frobInner(mu);
+          */
+        (*octpole_)(kxyz,jxyz,ixyz) = 
+          - this-> template computeProperty<double,DENSITY_TYPE::TOTAL>(mu);
         iBuf += NBSq;
       }
       for(auto kxyz = 0;    kxyz < 3; kxyz++)
@@ -126,8 +127,8 @@ void SingleSlater<double>::computeMultipole(){
 
 }
 
-template<>
-void SingleSlater<double>::computeSExpect(){
+template<typename T>
+void SingleSlater<T>::computeSExpect(){
   if(getRank() == 0){
     if(this->Ref_ == RHF){
  
@@ -146,12 +147,12 @@ void SingleSlater<double>::computeSExpect(){
       for(auto i = 0; i < this->nOccA_; i++)
       for(auto j = 0; j < this->nOccB_; j++){
  
-        auto Sij = 
+        dcomplex Sij = 
           this->moA_->col(i).dot(
             (*this->aointegrals_->overlap_) * this->moB_->col(j)
           );
- 
-        this->Ssq_ -= Sij*Sij;
+
+        this->Ssq_ -= std::real(Sij*std::conj(Sij));
  
       }
  
@@ -171,9 +172,9 @@ void SingleSlater<double>::computeSExpect(){
  
       for(auto i = 0; i < this->nOccA_+this->nOccB_; i++) 
       for(auto j = 0; j < this->nOccA_+this->nOccB_; j++) {
-        double SAA = 0.0;
-        double SAB = 0.0;
-        double SBB = 0.0;
+        dcomplex SAA = 0.0;
+        dcomplex SAB = 0.0;
+        dcomplex SBB = 0.0;
         for(auto mu = 0; mu < this->nTCS_*this->nBasis_; mu += 2)
         for(auto nu = 0; nu < this->nTCS_*this->nBasis_; nu += 2){
           SAA += (*this->moA_)(mu,i) * 
@@ -189,12 +190,12 @@ void SingleSlater<double>::computeSExpect(){
                  (*this->moA_)(nu+1,j);
         }
         if( i == j ) {
-          this->Sx_ += SAB;
-          //this->Sy_ += 0.0;
-          this->Sz_ += 0.5*(SAA - SBB);
+          this->Sx_ += std::real(SAB);
+          this->Sy_ -= std::imag(SAB);
+          this->Sz_ += 0.5*std::real(SAA - SBB);
         }
-        this->Ssq_ -= SAB*SAB;
-        this->Ssq_ -= 0.25*(SAA-SBB)*(SAA-SBB);
+        this->Ssq_ -= std::real(SAB*std::conj(SAB));
+        this->Ssq_ -= 0.25*std::real((SAA-SBB)*std::conj(SAA-SBB));
       }
       this->Ssq_ += 0.75 * (this->nOccA_+this->nOccB_);
       this->Ssq_ += this->Sx_*this->Sx_;
@@ -209,7 +210,4 @@ void SingleSlater<double>::computeSExpect(){
   MPI_Bcast(&this->Sz_,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
   MPI_Bcast(&this->Ssq_,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 #endif
-
 };
-*/
-}; // namespace ChronusQ

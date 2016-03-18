@@ -139,21 +139,3 @@ void SingleSlater<T>::mullikenPop() {
     this->mullPop_.push_back(charge); 
   } 
 }
-
-template<typename T>
-void SingleSlater<T>::mpiBCastDensity(){
-#ifdef CQ_ENABLE_MPI
-  auto dataType = MPI_DOUBLE;
-  if(typeid(T).hash_code() == typeid(dcomplex).hash_code())
-    dataType = MPI_C_DOUBLE_COMPLEX;
-
-  MPI_Bcast(this->densityA_->data(),
-    this->nTCS_*this->nTCS_*this->nBasis_*this->nBasis_,dataType,0,
-    MPI_COMM_WORLD);
-  if(!this->isClosedShell && this->Ref_ != TCS)
-    MPI_Bcast(this->densityB_->data(),
-      this->nTCS_*this->nTCS_*this->nBasis_*this->nBasis_,dataType,0,
-      MPI_COMM_WORLD);
-#endif
-  ;
-};
