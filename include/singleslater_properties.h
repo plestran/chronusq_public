@@ -25,6 +25,48 @@
  */
 
 template<typename T>
+void SingleSlater<T>::computeEnergy(){
+  if(getRank() == 0) {
+    this->energyOneE = 
+      this->template computeProperty<double,DENSITY_TYPE::TOTAL>(
+          *this->aointegrals_->oneE_);
+    if(!this->isClosedShell && this->Ref_ != TCS)
+      this->energyTwoE = 0.5 * (
+        this->template computeProperty<double,DENSITY_TYPE::ALPHA>(this->PTA_->conjugate()) 
+        +this->template computeProperty<double,DENSITY_TYPE::BETA>(this->PTB_->conjugate())
+      );
+    else
+      this->energyTwoE = 0.5 * (
+        this->template computeProperty<double,DENSITY_TYPE::TOTAL>(this->PTA_->conjugate()) 
+      ); 
+      
+    if(this->isDFT) this->energyTwoE += this->totalEx + this->totalEcorr;
+
+    // Add in the electric field component if they are non-zero
+    std::array<double,3> null{{0,0,0}};
+    if(this->elecField_ != null){
+      int NB = this->nTCS_*this->nBasis_;
+      int NBSq = NB*NB;
+      int iBuf = 0;
+      for(auto iXYZ = 0; iXYZ < 3; iXYZ++){
+        RealMap mu(&this->aointegrals_->elecDipole_->storage()[iBuf],NB,NB);
+        this->energyOneE += this->elecField_[iXYZ] *
+          this->template computeProperty<double,DENSITY_TYPE::TOTAL>(mu);
+        iBuf += NBSq;
+      }
+    }
+ 
+ 
+    this->totalEnergy= this->energyOneE + this->energyTwoE + this->energyNuclei;
+  }
+#ifdef CQ_ENABLE_MPI
+  MPI_Bcast(&this->totalEnergy,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
+  MPI_Bcast(&this->energyOneE,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
+  MPI_Bcast(&this->energyTwoE,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
+#endif
+//this->printEnergy();
+};
+template<typename T>
 void SingleSlater<T>::computeMultipole(){
   if(!this->haveDensity) this->formDensity();
   if(!this->aointegrals_->haveAOOneE && getRank() == 0) 
@@ -41,11 +83,7 @@ void SingleSlater<T>::computeMultipole(){
         ConstRealMap mu(
           &this->aointegrals_->elecDipole_->storage()[iBuf],NB,NB
         );
-        /*
-        (*dipole_)(ixyz,0) = -this->densityA_->real().frobInner(mu);
-        if(!this->isClosedShell && this->Ref_ != TCS) 
-          (*dipole_)(ixyz,0) += -this->densityB_->real().frobInner(mu);
-          */
+
         (*dipole_)(ixyz,0) = 
           - this-> template computeProperty<double,DENSITY_TYPE::TOTAL>(mu);
         iBuf += NBSq;
@@ -62,11 +100,7 @@ void SingleSlater<T>::computeMultipole(){
         ConstRealMap mu(
             &this->aointegrals_->elecQuadpole_->storage()[iBuf],NB,NB
           );
-        /*
-        (*quadpole_)(jxyz,ixyz) = -this->densityA_->real().frobInner(mu);
-        if(!this->isClosedShell && this->Ref_ != TCS) 
-          (*quadpole_)(jxyz,ixyz) += -this->densityB_->real().frobInner(mu);
-          */
+
         (*this->quadpole_)(jxyz,ixyz) = 
           - this-> template computeProperty<double,DENSITY_TYPE::TOTAL>(mu);
         iBuf += NBSq;
@@ -87,11 +121,6 @@ void SingleSlater<T>::computeMultipole(){
       for(auto jxyz = kxyz; jxyz < 3; jxyz++)
       for(auto ixyz = jxyz; ixyz < 3; ixyz++){
         ConstRealMap mu(&this->aointegrals_->elecOctpole_->storage()[iBuf],NB,NB);
-        /*
-        (*octpole_)(kxyz,jxyz,ixyz) = -this->densityA_->real().frobInner(mu);
-        if(!this->isClosedShell && this->Ref_ != TCS) 
-          (*octpole_)(kxyz,jxyz,ixyz) += -this->densityB_->real().frobInner(mu);
-          */
         (*octpole_)(kxyz,jxyz,ixyz) = 
           - this-> template computeProperty<double,DENSITY_TYPE::TOTAL>(mu);
         iBuf += NBSq;
@@ -211,3 +240,4 @@ void SingleSlater<T>::computeSExpect(){
   MPI_Bcast(&this->Ssq_,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 #endif
 };
+
