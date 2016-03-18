@@ -57,14 +57,14 @@ namespace ChronusQ {
 
 
     template<typename Scalar, typename Left, typename Right>
-    static Scalar OperatorContract(const Left& A, const Right& B) {
+    static Scalar OperatorTrace(const Left& A, const Right& B) {
       auto result = A.frobInner(B);
       return reinterpret_cast<Scalar(&)[2]>(result)[0];
     }
       
 
 
-    template<typename Scalar, typename Op, DENSITY_TYPE DenTyp>
+    template<typename Scalar, DENSITY_TYPE DenTyp, typename Op>
     Scalar OperatorSpinCombine(const Op& op) {
       double zero = 0.0;
       if(DenTyp == DENSITY_TYPE::TOTAL)
@@ -88,17 +88,17 @@ namespace ChronusQ {
           return this->computePropertyAlpha<Scalar>(op) -
                  this->computePropertyBeta<Scalar>(op);
         else
-        return reinterpret_cast<Scalar(&)[2]>(zero)[0];
+          return reinterpret_cast<Scalar(&)[2]>(zero)[0];
     }
 
 
     template<typename Scalar, typename Op> 
     Scalar computePropertyAlpha(const Op& op){
-      return OperatorContract<Scalar>((*this->densityA_),op);
+      return OperatorTrace<Scalar>((*this->densityA_),op);
     }
     template<typename Scalar, typename Op> 
     Scalar computePropertyBeta(const Op& op){
-      return OperatorContract<Scalar>((*this->densityB_),op);
+      return OperatorTrace<Scalar>((*this->densityB_),op);
     }
       
     public:

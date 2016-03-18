@@ -38,7 +38,7 @@
 
 namespace ChronusQ {
 template<typename T>
-class SingleSlater: public Quantum<T> {
+class SingleSlater : public Quantum<T> {
   typedef Eigen::Matrix<T,Dynamic,Dynamic,ColMajor> TMatrix;
 
 /*
