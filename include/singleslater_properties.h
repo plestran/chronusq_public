@@ -66,6 +66,7 @@ void SingleSlater<T>::computeEnergy(){
 #endif
 //this->printEnergy();
 };
+
 template<typename T>
 void SingleSlater<T>::computeMultipole(){
   if(!this->haveDensity) this->formDensity();
@@ -79,33 +80,27 @@ void SingleSlater<T>::computeMultipole(){
     int iBuf = 0;
  
     if(this->maxMultipole_ >= 1) {
-      for(auto ixyz = 0; ixyz < 3; ixyz++){
-        ConstRealMap mu(
-          &this->aointegrals_->elecDipole_->storage()[iBuf],NB,NB
-        );
+      auto exptdipole = this-> template computeProperty<double,
+           DENSITY_TYPE::TOTAL>(this->aointegrals_->elecDipoleSep_);
 
-        (*dipole_)(ixyz,0) = 
-          - this-> template computeProperty<double,DENSITY_TYPE::TOTAL>(mu);
-        iBuf += NBSq;
-      }
+      for(int iXYZ = 0; iXYZ < 3; iXYZ++)
+        (*this->dipole_)(iXYZ,0) = - exptdipole[iXYZ];
+
       for(int iA = 0; iA < this->molecule_->nAtoms(); iA++)
         *this->dipole_ += elements[this->molecule_->index(iA)].atomicNumber *
               this->molecule_->cart()->col(iA);
     }
     
     if(this->maxMultipole_ >= 2){
-      iBuf = 0;
-      for(auto jxyz = 0; jxyz < 3; jxyz++)
-      for(auto ixyz = jxyz; ixyz < 3; ixyz++){
-        ConstRealMap mu(
-            &this->aointegrals_->elecQuadpole_->storage()[iBuf],NB,NB
-          );
+      auto exptquadpole = this-> template computeProperty<double,
+           DENSITY_TYPE::TOTAL>(this->aointegrals_->elecQuadpoleSep_);
 
-        (*this->quadpole_)(jxyz,ixyz) = 
-          - this-> template computeProperty<double,DENSITY_TYPE::TOTAL>(mu);
-        iBuf += NBSq;
-      }
+      for(auto jxyz = 0, iX = 0; jxyz < 3; jxyz++)
+      for(auto ixyz = jxyz; ixyz < 3; ixyz++, iX++)
+        (*this->quadpole_)(jxyz,ixyz) = - exptquadpole[iX];
+
       (*this->quadpole_) = this->quadpole_->template selfadjointView<Upper>();
+
       for(int iA = 0; iA < this->molecule_->nAtoms(); iA++)
         *this->quadpole_ += elements[this->molecule_->index(iA)].atomicNumber *
               this->molecule_->cart()->col(iA) * 
@@ -116,15 +111,14 @@ void SingleSlater<T>::computeMultipole(){
     }
  
     if(this->maxMultipole_ >= 3){
-      iBuf = 0;
-      for(auto kxyz = 0;    kxyz < 3; kxyz++)
+      auto exptOctpole = this-> template computeProperty<double,
+           DENSITY_TYPE::TOTAL>(this->aointegrals_->elecOctpoleSep_);
+
+      for(auto kxyz = 0,iX = 0;    kxyz < 3; kxyz++)
       for(auto jxyz = kxyz; jxyz < 3; jxyz++)
-      for(auto ixyz = jxyz; ixyz < 3; ixyz++){
-        ConstRealMap mu(&this->aointegrals_->elecOctpole_->storage()[iBuf],NB,NB);
-        (*octpole_)(kxyz,jxyz,ixyz) = 
-          - this-> template computeProperty<double,DENSITY_TYPE::TOTAL>(mu);
-        iBuf += NBSq;
-      }
+      for(auto ixyz = jxyz; ixyz < 3; ixyz++, iX++)
+        (*this->octpole_)(kxyz,jxyz,ixyz) = - exptOctpole[iX]; 
+
       for(auto kxyz = 0;    kxyz < 3; kxyz++)
       for(auto jxyz = kxyz; jxyz < 3; jxyz++)
       for(auto ixyz = jxyz; ixyz < 3; ixyz++){
@@ -154,6 +148,23 @@ void SingleSlater<T>::computeMultipole(){
   MPI_Bcast(this->octpole_->data(),27,MPI_DOUBLE,0,MPI_COMM_WORLD);
 #endif
 
+}
+
+template<typename T>
+void SingleSlater<T>::mullikenPop() {
+  double charge;
+  this->mullPop_.clear();
+  RealMatrix PS = (*this->densityA_).real() * (*this->aointegrals_->overlap_); 
+  if(!this->isClosedShell && this->Ref_ != TCS){ 
+    PS += (*this->densityB_).real() * (*this->aointegrals_->overlap_);
+  }
+  for (auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++) {
+    auto iBfSt = this->basisset_->mapCen2Bf(iAtm)[0];
+    auto iSize = this->basisset_->mapCen2Bf(iAtm)[1];
+    charge  = elements[this->molecule_->index(iAtm)].atomicNumber;
+    charge -= PS.block(iBfSt,iBfSt,iSize,iSize).trace();
+    this->mullPop_.push_back(charge); 
+  } 
 }
 
 template<typename T>

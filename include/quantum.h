@@ -131,6 +131,16 @@ namespace ChronusQ {
       return this->OperatorSpinCombine<Scalar,DenTyp>(op);
     }
 
+    template<typename Scalar, DENSITY_TYPE DenTyp, typename Op> 
+    std::vector<Scalar> computeProperty(const std::vector<Op>& op){
+      std::vector<Scalar> results;
+      for(typename std::vector<Op>::const_iterator it = op.begin(); 
+          it != op.end(); ++it)
+        results.push_back(this->computeProperty<Scalar,DenTyp,Op>(*it));
+      return results;
+    }
+
+
     inline int   nTCS(){ return this->nTCS_;};      
     inline TMatrix* densityA(){ return this->densityA_.get();};
     inline TMatrix* densityB(){ return this->densityB_.get();};
