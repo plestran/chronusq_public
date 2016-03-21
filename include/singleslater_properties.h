@@ -45,16 +45,9 @@ void SingleSlater<T>::computeEnergy(){
     // Add in the electric field component if they are non-zero
     std::array<double,3> null{{0,0,0}};
     if(this->elecField_ != null){
-    //int NB = this->nTCS_*this->nBasis_;
-    //int NBSq = NB*NB;
-    //int iBuf = 0;
       auto exptdipole = this-> template computeProperty<double,
            DENSITY_TYPE::TOTAL>(this->aointegrals_->elecDipoleSep_);
       for(auto iXYZ = 0; iXYZ < 3; iXYZ++){
-      //RealMap mu(&this->aointegrals_->elecDipole_->storage()[iBuf],NB,NB);
-      //this->energyOneE += this->elecField_[iXYZ] *
-      //  this->template computeProperty<double,DENSITY_TYPE::TOTAL>(mu);
-      //iBuf += NBSq;
         this->energyOneE += this->elecField_[iXYZ] * exptdipole[iXYZ];
       }
     }
