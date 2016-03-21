@@ -198,6 +198,7 @@ SingleSlater<double>::SingleSlater(SingleSlater<double> * other){
 /************************
  * Compute Total Energy *
  ************************/
+/*
 template<>
 void SingleSlater<double>::computeEnergy(){
   if(getRank() == 0) {
@@ -245,6 +246,7 @@ void SingleSlater<double>::computeEnergy(){
 #endif
 //this->printEnergy();
 };
+*/
 
 template<>
 void SingleSlater<double>::getAlgebraicField(){ 

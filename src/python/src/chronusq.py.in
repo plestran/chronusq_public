@@ -51,6 +51,11 @@ class MetaData:
 #   RT Info
     self.lastEnergy = 0
     self.lastDipole = []
+#   Derivitive Info
+    self.GSGrad = []
+    self.ESGrad = []
+    self.ESGSNACME = []
+    self.ESESNACME = []
     
 
 def runCQ(ifname,ofname):
