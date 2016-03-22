@@ -24,6 +24,7 @@
  *  
  */
 #include <singleslater.h>
+#include<dft.h>
 namespace ChronusQ {
 
 template<>
@@ -1287,7 +1288,7 @@ void SingleSlater<double>::evalVXC(cartGP gridPt, double weight, std::vector<boo
 //  Handle numerical instability if screening on
     if (this->screenVxc ) {
       if(rhor    <= 0.0 ) {
-        if((std::abs(rhor)) <= 1.0e10) rhor = 0.0;
+        if((std::abs(rhor)) <= 1.0e-10) rhor = 0.0;
       }
     }
 //this if statement prevent numerical instability with zero guesses
