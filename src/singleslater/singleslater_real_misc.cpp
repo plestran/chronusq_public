@@ -25,11 +25,11 @@
  */
 #include <singleslater.h>
 namespace ChronusQ {
-template<>
+  /*
 template<>
 SingleSlater<double>::SingleSlater(SingleSlater<double> * other){
     this->nBasis_ = other->nBasis_;
-    this->nTCS_   = other->nTCS_;
+  //this->nTCS_   = other->nTCS_;
     this->nTT_    = other->nTT_;
     this->nShell_ = other->nShell_;
     this->nAE_    = other->nAE_;
@@ -44,9 +44,9 @@ SingleSlater<double>::SingleSlater(SingleSlater<double> * other){
     this->haveDensity = true;
     this->haveMO	    = true;
     this->havePT      = true;
-    this->isClosedShell = other->isClosedShell;
+  //this->isClosedShell = other->isClosedShell;
     this->printLevel_ = other->printLevel_;
-    this->maxMultipole_ = other->maxMultipole_;
+  //this->maxMultipole_ = other->maxMultipole_;
     this->doDIIS = other->doDIIS;
     this->isHF   = other->isHF;
     this->isDFT  = other->isDFT;
@@ -55,9 +55,9 @@ SingleSlater<double>::SingleSlater(SingleSlater<double> * other){
     auto NTCSxNBASIS = this->nBasis_*this->nTCS_;
 
     // Hardcoded for Libint route
-    this->densityA_           = std::unique_ptr<RealMatrix>(
-      new RealMatrix(*other->densityA_)
-    );
+  //this->densityA_           = std::unique_ptr<RealMatrix>(
+  //  new RealMatrix(*other->densityA_)
+  //);
     
     if(getRank() == 0) {
       this->fockA_              = std::unique_ptr<RealMatrix>(
@@ -71,9 +71,9 @@ SingleSlater<double>::SingleSlater(SingleSlater<double> * other){
       );
     }
     if(this->Ref_ != isClosedShell && this->Ref_ != TCS ){
-      this->densityB_           = std::unique_ptr<RealMatrix>(
-        new RealMatrix(*other->densityB_)
-      );
+    //this->densityB_           = std::unique_ptr<RealMatrix>(
+    //  new RealMatrix(*other->densityB_)
+    //);
 
       if(getRank() == 0) {
         this->fockB_              = std::unique_ptr<RealMatrix>(
@@ -87,18 +87,18 @@ SingleSlater<double>::SingleSlater(SingleSlater<double> * other){
         );
       }
     }
-    this->dipole_             = std::unique_ptr<RealMatrix>(
-      new RealMatrix(*other->dipole_)
-    );
-    this->quadpole_           = std::unique_ptr<RealMatrix>(
-      new RealMatrix(*other->quadpole_)
-    );
-    this->tracelessQuadpole_  = std::unique_ptr<RealMatrix>(
-      new RealMatrix(*other->tracelessQuadpole_)
-    );
-    this->octpole_            = std::unique_ptr<RealTensor3d>(
-      new RealTensor3d(*other->octpole_)
-    );
+  //this->dipole_             = std::unique_ptr<RealMatrix>(
+  //  new RealMatrix(*other->dipole_)
+  //);
+  //this->quadpole_           = std::unique_ptr<RealMatrix>(
+  //  new RealMatrix(*other->quadpole_)
+  //);
+  //this->tracelessQuadpole_  = std::unique_ptr<RealMatrix>(
+  //  new RealMatrix(*other->tracelessQuadpole_)
+  //);
+  //this->octpole_            = std::unique_ptr<RealTensor3d>(
+  //  new RealTensor3d(*other->octpole_)
+  //);
 
     this->elecField_   = other->elecField_;
     this->basisset_    = other->basisset_;    
@@ -107,6 +107,7 @@ SingleSlater<double>::SingleSlater(SingleSlater<double> * other){
     this->controls_    = other->controls_;
     this->aointegrals_ = other->aointegrals_;
 }
+*/
 
 //APS
 //  Function to read and match the Gaussian Guess from previous calculation

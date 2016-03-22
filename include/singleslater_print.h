@@ -57,18 +57,19 @@ void SingleSlater<T>::printMultipole(){
   double xSmall = 1e-10;
   if(this->maxMultipole_ >= 1) {
     for(auto i = 0; i < 3; i++){
-      if(std::abs((*this->dipole_)(i,0)) < xSmall)
-        (*this->dipole_)(i,0) = std::abs((*this->dipole_)(i,0));
+      if(std::abs(this->elecDipole_[i]) < xSmall)
+        this->elecDipole_[i] = std::abs(this->elecDipole_[i]);
       if(this->maxMultipole_ >= 2) {
         for(auto j = 0; j < 3; j++){
-          if(std::abs((*this->quadpole_)(i,j)) < xSmall){
-            (*this->quadpole_)(i,j) = std::abs((*this->quadpole_)(i,j));
-            (*this->tracelessQuadpole_)(i,j) = 
-              std::abs((*this->tracelessQuadpole_)(i,j));
+          if(std::abs(this->elecQuadpole_[i][j]) < xSmall){
+            this->elecQuadpole_[i][j] = std::abs(this->elecQuadpole_[i][j]);
+            this->elecTracelessQuadpole_[i][j] = 
+              std::abs(this->elecTracelessQuadpole_[i][j]);
           }
           for(auto k = 0; k < 3; k++){
-            if(std::abs((*this->octpole_)(i,j,k)) < xSmall){
-              (*this->octpole_)(i,j,k) = std::abs((*this->octpole_)(i,j,k));
+            if(std::abs(this->elecOctpole_[i][j][k]) < xSmall){
+              this->elecOctpole_[i][j][k] = 
+                std::abs(this->elecOctpole_[i][j][k]);
             }
           }
         }
@@ -83,18 +84,19 @@ void SingleSlater<T>::printMultipole(){
                           << "(Debye)" << endl;
     this->fileio_->out << std::left << std::setw(5) <<"X=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->dipole_)(0,0)/phys.debye;
+                       << this->elecDipole_[0]/phys.debye;
     this->fileio_->out << std::left << std::setw(5) <<" Y=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->dipole_)(1,0)/phys.debye;
+                       << this->elecDipole_[1]/phys.debye;
     this->fileio_->out << std::left << std::setw(5) <<" Z=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->dipole_)(2,0)/phys.debye << endl;
+                       << this->elecDipole_[2]/phys.debye << endl;
     this->fileio_->out << std::left << std::setw(5) <<"Tot=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << std::sqrt((*this->dipole_)(2,0)*(*this->dipole_)(2,0) + 
-                             (*this->dipole_)(1,0)*(*this->dipole_)(1,0) + 
-                             (*this->dipole_)(0,0)*(*this->dipole_)(0,0)  
+                       << std::sqrt(
+                             this->elecDipole_[2]*this->elecDipole_[2] + 
+                             this->elecDipole_[1]*this->elecDipole_[1] + 
+                             this->elecDipole_[0]*this->elecDipole_[0]  
                            )/phys.debye << endl;
    }
 
@@ -104,149 +106,193 @@ void SingleSlater<T>::printMultipole(){
                        <<  "(Debye-\u212B)" << endl;
     this->fileio_->out << std::left << std::setw(5) <<"XX=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->quadpole_)(0,0)*phys.bohr/phys.debye;
+                       << this->elecQuadpole_[0][0]*phys.bohr/phys.debye;
     this->fileio_->out << std::left << std::setw(5) <<" XY=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->quadpole_)(0,1)*phys.bohr/phys.debye;
+                       << this->elecQuadpole_[0][1]*phys.bohr/phys.debye;
     this->fileio_->out << std::left << std::setw(5) <<" XZ=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->quadpole_)(0,2)*phys.bohr/phys.debye << endl;
+                       << this->elecQuadpole_[0][2]*phys.bohr/phys.debye 
+                       << endl;
     this->fileio_->out << std::left << std::setw(5) <<"YX=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->quadpole_)(1,0)*phys.bohr/phys.debye;
+                       << this->elecQuadpole_[1][0]*phys.bohr/phys.debye;
     this->fileio_->out << std::left << std::setw(5) <<" YY=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->quadpole_)(1,1)*phys.bohr/phys.debye;
+                       << this->elecQuadpole_[1][1]*phys.bohr/phys.debye;
     this->fileio_->out << std::left << std::setw(5) <<" YZ=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->quadpole_)(1,2)*phys.bohr/phys.debye << endl;
+                       << this->elecQuadpole_[1][2]*phys.bohr/phys.debye 
+                       << endl;
     this->fileio_->out << std::left << std::setw(5) <<"ZX=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->quadpole_)(2,0)*phys.bohr/phys.debye;
+                       << this->elecQuadpole_[2][0]*phys.bohr/phys.debye;
     this->fileio_->out << std::left << std::setw(5) <<" ZY=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->quadpole_)(2,1)*phys.bohr/phys.debye;
+                       << this->elecQuadpole_[2][1]*phys.bohr/phys.debye;
     this->fileio_->out << std::left << std::setw(5) <<" ZZ=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->quadpole_)(2,2)*phys.bohr/phys.debye << endl;
+                       << this->elecQuadpole_[2][2]*phys.bohr/phys.debye 
+                       << endl;
     this->fileio_->out << bannerMid << endl;
     this->fileio_->out << std::setw(50) << std::left 
                        << "Electric Quadrupole Moment (Traceless)" <<  "(Debye-\u212B)" 
                        << endl;
     this->fileio_->out << std::left << std::setw(5) <<"XX=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->tracelessQuadpole_)(0,0)*phys.bohr/phys.debye;
+                       << this->elecTracelessQuadpole_[0][0] * 
+                         phys.bohr/phys.debye;
     this->fileio_->out << std::left << std::setw(5) <<" XY=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->tracelessQuadpole_)(0,1)*phys.bohr/phys.debye;
+                       << this->elecTracelessQuadpole_[0][1] * 
+                         phys.bohr/phys.debye;
     this->fileio_->out << std::left << std::setw(5) <<" XZ=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->tracelessQuadpole_)(0,2)*phys.bohr/phys.debye << endl;
+                       << this->elecTracelessQuadpole_[0][2] * 
+                         phys.bohr/phys.debye 
+                       << endl;
     this->fileio_->out << std::left << std::setw(5) <<"YX=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->tracelessQuadpole_)(1,0)*phys.bohr/phys.debye;
+                       << this->elecTracelessQuadpole_[1][0] * 
+                         phys.bohr/phys.debye;
     this->fileio_->out << std::left << std::setw(5) <<" YY=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->tracelessQuadpole_)(1,1)*phys.bohr/phys.debye;
+                       << this->elecTracelessQuadpole_[1][1] * 
+                         phys.bohr/phys.debye;
     this->fileio_->out << std::left << std::setw(5) <<" YZ=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->tracelessQuadpole_)(1,2)*phys.bohr/phys.debye << endl;
+                       << this->elecTracelessQuadpole_[1][2] * 
+                         phys.bohr/phys.debye 
+                       << endl;
     this->fileio_->out << std::left << std::setw(5) <<"ZX=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->tracelessQuadpole_)(2,0)*phys.bohr/phys.debye;
+                       << this->elecTracelessQuadpole_[2][0] * 
+                         phys.bohr/phys.debye;
     this->fileio_->out << std::left << std::setw(5) <<" ZY=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->tracelessQuadpole_)(2,1)*phys.bohr/phys.debye;
+                       << this->elecTracelessQuadpole_[2][1] * 
+                         phys.bohr/phys.debye;
     this->fileio_->out << std::left << std::setw(5) <<" ZZ=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->tracelessQuadpole_)(2,2)*phys.bohr/phys.debye << endl;
+                       << this->elecTracelessQuadpole_[2][2] * 
+                         phys.bohr/phys.debye 
+                       << endl;
   }
 
   if(this->maxMultipole_ >= 3) {
     this->fileio_->out << bannerMid << endl;
-    this->fileio_->out << std::setw(50) << std::left << "Electric Octupole Moment" 
+    this->fileio_->out << std::setw(50) << std::left 
+                       << "Electric Octupole Moment" 
                        << "(Debye-\u212B\u00B2)" << endl;
+
     this->fileio_->out << std::left << std::setw(5) <<"XXX=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->octpole_)(0,0,0)*phys.bohr*phys.bohr/phys.debye;
+                       << this->elecOctpole_[0][0][0] * 
+                         phys.bohr*phys.bohr/phys.debye;
     this->fileio_->out << std::left << std::setw(5) <<" XXY=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->octpole_)(0,0,1)*phys.bohr*phys.bohr/phys.debye;
+                       << this->elecOctpole_[0][0][1] * 
+                         phys.bohr*phys.bohr/phys.debye;
     this->fileio_->out << std::left << std::setw(5) <<" XXZ=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->octpole_)(0,0,2)*phys.bohr*phys.bohr/phys.debye << endl;
+                       << this->elecOctpole_[0][0][2] * 
+                         phys.bohr*phys.bohr/phys.debye << endl;
     this->fileio_->out << std::left << std::setw(5) <<"XYX=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->octpole_)(0,1,0)*phys.bohr*phys.bohr/phys.debye;
+                       << this->elecOctpole_[0][1][0] * 
+                         phys.bohr*phys.bohr/phys.debye;
     this->fileio_->out << std::left << std::setw(5) <<" XYY=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->octpole_)(0,1,1)*phys.bohr*phys.bohr/phys.debye;
+                       << this->elecOctpole_[0][1][1] * 
+                         phys.bohr*phys.bohr/phys.debye;
     this->fileio_->out << std::left << std::setw(5) <<" XYZ=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->octpole_)(0,1,2)*phys.bohr*phys.bohr/phys.debye << endl;
+                       << this->elecOctpole_[0][1][2] * 
+                         phys.bohr*phys.bohr/phys.debye << endl;
     this->fileio_->out << std::left << std::setw(5) <<"XZX=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->octpole_)(0,2,0)*phys.bohr*phys.bohr/phys.debye;
+                       << this->elecOctpole_[0][2][0] * 
+                         phys.bohr*phys.bohr/phys.debye;
     this->fileio_->out << std::left << std::setw(5) <<" XZY=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->octpole_)(0,2,1)*phys.bohr*phys.bohr/phys.debye;
+                       << this->elecOctpole_[0][2][1] * 
+                         phys.bohr*phys.bohr/phys.debye;
     this->fileio_->out << std::left << std::setw(5) <<" XZZ=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->octpole_)(0,2,2)*phys.bohr*phys.bohr/phys.debye << endl;
+                       << this->elecOctpole_[0][2][2] * 
+                         phys.bohr*phys.bohr/phys.debye << endl;
     this->fileio_->out << std::left << std::setw(5) <<"YXX=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->octpole_)(1,0,0)*phys.bohr*phys.bohr/phys.debye;
+                       << this->elecOctpole_[1][0][0] * 
+                         phys.bohr*phys.bohr/phys.debye;
     this->fileio_->out << std::left << std::setw(5) <<" YXY=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->octpole_)(1,0,1)*phys.bohr*phys.bohr/phys.debye;
+                       << this->elecOctpole_[1][0][1] * 
+                         phys.bohr*phys.bohr/phys.debye;
     this->fileio_->out << std::left << std::setw(5) <<" YXZ=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->octpole_)(1,0,2)*phys.bohr*phys.bohr/phys.debye << endl;
+                       << this->elecOctpole_[1][0][2] * 
+                         phys.bohr*phys.bohr/phys.debye << endl;
     this->fileio_->out << std::left << std::setw(5) <<"YYX=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->octpole_)(1,1,0)*phys.bohr*phys.bohr/phys.debye;
+                       << this->elecOctpole_[1][1][0] * 
+                         phys.bohr*phys.bohr/phys.debye;
     this->fileio_->out << std::left << std::setw(5) <<" YYY=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->octpole_)(1,1,1)*phys.bohr*phys.bohr/phys.debye;
+                       << this->elecOctpole_[1][1][1] * 
+                         phys.bohr*phys.bohr/phys.debye;
     this->fileio_->out << std::left << std::setw(5) <<" YYZ=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->octpole_)(1,1,2)*phys.bohr*phys.bohr/phys.debye << endl;
+                       << this->elecOctpole_[1][1][2] * 
+                         phys.bohr*phys.bohr/phys.debye << endl;
     this->fileio_->out << std::left << std::setw(5) <<"YZX=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->octpole_)(1,2,0)*phys.bohr*phys.bohr/phys.debye;
+                       << this->elecOctpole_[1][2][0] * 
+                         phys.bohr*phys.bohr/phys.debye;
     this->fileio_->out << std::left << std::setw(5) <<" YZY=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->octpole_)(1,2,1)*phys.bohr*phys.bohr/phys.debye;
+                       << this->elecOctpole_[1][2][1] * 
+                         phys.bohr*phys.bohr/phys.debye;
     this->fileio_->out << std::left << std::setw(5) <<" YZZ=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->octpole_)(1,2,2)*phys.bohr*phys.bohr/phys.debye << endl;
+                       << this->elecOctpole_[1][2][2] * 
+                         phys.bohr*phys.bohr/phys.debye << endl;
     this->fileio_->out << std::left << std::setw(5) <<"ZXX=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->octpole_)(2,0,0)*phys.bohr*phys.bohr/phys.debye;
+                       << this->elecOctpole_[2][0][0] * 
+                         phys.bohr*phys.bohr/phys.debye;
     this->fileio_->out << std::left << std::setw(5) <<" ZXY=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->octpole_)(2,0,1)*phys.bohr*phys.bohr/phys.debye;
+                       << this->elecOctpole_[2][0][1] *
+                         phys.bohr*phys.bohr/phys.debye;
     this->fileio_->out << std::left << std::setw(5) <<" ZXZ=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->octpole_)(2,0,2)*phys.bohr*phys.bohr/phys.debye << endl;
+                       << this->elecOctpole_[2][0][2] * 
+                         phys.bohr*phys.bohr/phys.debye << endl;
     this->fileio_->out << std::left << std::setw(5) <<"ZYX=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->octpole_)(2,1,0)*phys.bohr*phys.bohr/phys.debye;
+                       << this->elecOctpole_[2][1][0] * 
+                         phys.bohr*phys.bohr/phys.debye;
     this->fileio_->out << std::left << std::setw(5) <<" ZYY=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->octpole_)(2,1,1)*phys.bohr*phys.bohr/phys.debye;
+                       << this->elecOctpole_[2][1][1] * 
+                         phys.bohr*phys.bohr/phys.debye;
     this->fileio_->out << std::left << std::setw(5) <<" ZYZ=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->octpole_)(2,1,2)*phys.bohr*phys.bohr/phys.debye << endl;
+                       << this->elecOctpole_[2][1][2] * 
+                         phys.bohr*phys.bohr/phys.debye << endl;
     this->fileio_->out << std::left << std::setw(5) <<"ZZX=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->octpole_)(2,2,0)*phys.bohr*phys.bohr/phys.debye;
+                       << this->elecOctpole_[2][2][0] * 
+                         phys.bohr*phys.bohr/phys.debye;
     this->fileio_->out << std::left << std::setw(5) <<" ZZY=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->octpole_)(2,2,1)*phys.bohr*phys.bohr/phys.debye;
+                       << this->elecOctpole_[2][2][1] * 
+                         phys.bohr*phys.bohr/phys.debye;
     this->fileio_->out << std::left << std::setw(5) <<" ZZZ=" 
                        << std::fixed << std::right << std::setw(20) 
-                       << (*this->octpole_)(2,2,2)*phys.bohr*phys.bohr/phys.debye << endl;
+                       << this->elecOctpole_[2][2][2] * 
+                         phys.bohr*phys.bohr/phys.debye << endl;
   }
   this->fileio_->out << bannerEnd << endl << endl;
 }

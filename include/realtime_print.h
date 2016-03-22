@@ -25,9 +25,9 @@
  */
 template<typename T>
 void RealTime<T>::printRT() {
-  double EDx = (*this->ssPropagator_->dipole())(0)/phys.debye;
-  double EDy = (*this->ssPropagator_->dipole())(1)/phys.debye;
-  double EDz = (*this->ssPropagator_->dipole())(2)/phys.debye;
+  double EDx = this->ssPropagator_->elecDipole()[0]/phys.debye;
+  double EDy = this->ssPropagator_->elecDipole()[1]/phys.debye;
+  double EDz = this->ssPropagator_->elecDipole()[2]/phys.debye;
 
   // FIXME: fix print so that all of the fields are consistent
   // i.e. Electric Dipole Onl and Modified mid-point

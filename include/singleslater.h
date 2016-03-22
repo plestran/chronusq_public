@@ -141,10 +141,10 @@ class SingleSlater : public Quantum<T> {
   std::vector<RealSparseMatrix> sparseWeights_; // Weights Map
   std::vector<RealSparseMatrix> sparseDoRho_; // Evaluate density Map
 
-  std::unique_ptr<RealMatrix>  dipole_;  ///< Electric Dipole Moment
-  std::unique_ptr<RealMatrix>  quadpole_; ///< Electric Quadrupole Moment
-  std::unique_ptr<RealMatrix>  tracelessQuadpole_; ///< Traceless Electric Quadrupole Moment
-  std::unique_ptr<RealTensor3d>  octpole_; ///< Electric Octupole Moment
+//std::unique_ptr<RealMatrix>  dipole_;  ///< Electric Dipole Moment
+//std::unique_ptr<RealMatrix>  quadpole_; ///< Electric Quadrupole Moment
+//std::unique_ptr<RealMatrix>  tracelessQuadpole_; ///< Traceless Electric Quadrupole Moment
+//std::unique_ptr<RealTensor3d>  octpole_; ///< Electric Octupole Moment
   BasisSet *    basisset_;               ///< Basis Set
   Molecule *    molecule_;               ///< Molecular specificiations
   FileIO *      fileio_;                 ///< Access to output file
@@ -461,8 +461,91 @@ public:
   //if(this->SCF_SCR != NULL) delete [] this->SCF_SCR;
   };
 
+  SingleSlater(SingleSlater *other) : 
+    Quantum<T>(dynamic_cast<Quantum<T>&>(*other)){
+    this->nBasis_ = other->nBasis_;
+  //this->nTCS_   = other->nTCS_;
+    this->nTT_    = other->nTT_;
+    this->nShell_ = other->nShell_;
+    this->nAE_    = other->nAE_;
+    this->nBE_    = other->nBE_; 
+    this->Ref_    = other->Ref();
+    this->nOccA_  = other->nOccA_;
+    this->nOccB_  = other->nOccB_;
+    this->nVirA_  = other->nVirA_;
+    this->nVirB_  = other->nVirB_;
+    this->multip_   = other->multip_;
+    this->energyNuclei = other->energyNuclei;
+    this->haveDensity = true;
+    this->haveMO	    = true;
+    this->havePT      = true;
+  //this->isClosedShell = other->isClosedShell;
+    this->printLevel_ = other->printLevel_;
+  //this->maxMultipole_ = other->maxMultipole_;
+    this->doDIIS = other->doDIIS;
+    this->isHF   = other->isHF;
+    this->isDFT  = other->isDFT;
+    this->guess_ = other->guess_;
+
+    auto NTCSxNBASIS = this->nBasis_*this->nTCS_;
+
+    // Hardcoded for Libint route
+  //this->densityA_           = std::unique_ptr<RealMatrix>(
+  //  new RealMatrix(*other->densityA_)
+  //);
+    
+    if(getRank() == 0) {
+      this->fockA_              = std::unique_ptr<TMatrix>(
+        new TMatrix(*other->fockA_)
+      );
+      this->moA_                = std::unique_ptr<TMatrix>(
+        new TMatrix(*other->moA_)
+      );
+      this->PTA_                = std::unique_ptr<TMatrix>(
+        new TMatrix(*other->PTA_)
+      );
+    }
+    if(!this->isClosedShell && this->Ref_ != TCS ){
+    //this->densityB_           = std::unique_ptr<TMatrix>(
+    //  new TMatrix(*other->densityB_)
+    //);
+
+      if(getRank() == 0) {
+        this->fockB_              = std::unique_ptr<TMatrix>(
+          new TMatrix(*other->fockB_)
+        );
+        this->moB_                = std::unique_ptr<TMatrix>(
+          new TMatrix(*other->moB_)
+        );
+        this->PTB_                = std::unique_ptr<TMatrix>(
+          new TMatrix(*other->PTB_)
+        );
+      }
+    }
+  //this->dipole_             = std::unique_ptr<RealMatrix>(
+  //  new RealMatrix(*other->dipole_)
+  //);
+  //this->quadpole_           = std::unique_ptr<RealMatrix>(
+  //  new RealMatrix(*other->quadpole_)
+  //);
+  //this->tracelessQuadpole_  = std::unique_ptr<RealMatrix>(
+  //  new RealMatrix(*other->tracelessQuadpole_)
+  //);
+  //this->octpole_            = std::unique_ptr<RealTensor3d>(
+  //  new RealTensor3d(*other->octpole_)
+  //);
+
+    this->elecField_   = other->elecField_;
+    this->basisset_    = other->basisset_;    
+    this->molecule_    = other->molecule_;
+    this->fileio_      = other->fileio_;
+    this->controls_    = other->controls_;
+    this->aointegrals_ = other->aointegrals_;
+    
+  };
+
   template<typename U>
-  SingleSlater(SingleSlater<U> *); ///< Copy Constructor
+  SingleSlater(U *);
 
   // pseudo-constructor
   void iniSingleSlater(Molecule *,BasisSet *,AOIntegrals *,FileIO *,Controls *);
@@ -570,10 +653,10 @@ public:
   inline RealMatrix* epsB()              { return this->epsB_.get();              };
   inline TMatrix* PTA()                  { return this->PTA_.get();               };
   inline TMatrix* PTB()                  { return this->PTB_.get();               };
-  inline RealMatrix* dipole()            { return this->dipole_.get();            };
-  inline RealMatrix* quadpole()          { return this->quadpole_.get();          };
-  inline RealMatrix* tracelessQuadpole() { return this->tracelessQuadpole_.get(); };
-  inline RealTensor3d * octpole()        { return this->octpole_.get();           };
+//inline RealMatrix* dipole()            { return this->dipole_.get();            };
+//inline RealMatrix* quadpole()          { return this->quadpole_.get();          };
+//inline RealMatrix* tracelessQuadpole() { return this->tracelessQuadpole_.get(); };
+//inline RealTensor3d * octpole()        { return this->octpole_.get();           };
   inline BasisSet     * basisset()       { return this->basisset_;                };
   inline Molecule     * molecule()       { return this->molecule_;                };
   inline FileIO       * fileio()         { return this->fileio_;                  };

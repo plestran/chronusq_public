@@ -128,6 +128,27 @@ namespace ChronusQ {
       this->allocDensity(N);
     };
 
+    Quantum(const Quantum &other) :  // Copy Constructor
+      elecDipole_(other.elecDipole_),
+      elecQuadpole_(other.elecQuadpole_),
+      elecTracelessQuadpole_(other.elecTracelessQuadpole_),
+      elecOctpole_(other.elecOctpole_),
+      nTCS_(other.nTCS_),
+      isClosedShell(other.isClosedShell),
+      maxMultipole_(other.maxMultipole_) {
+
+      this->densityA_ = std::unique_ptr<TMatrix>(
+          new TMatrix(*other.densityA_)
+        );
+      if(!this->isClosedShell && this->nTCS_ != 2)
+        this->densityB_ = std::unique_ptr<TMatrix>(
+            new TMatrix(*other.densityB_)
+          );
+    }
+
+    template<typename U>
+    Quantum(const U&);
+
     virtual void formDensity() = 0;
     inline void allocDensity(unsigned int N) {
       this->densityA_ = std::unique_ptr<TMatrix>(new TMatrix(N,N));
@@ -168,10 +189,21 @@ namespace ChronusQ {
     inline void setMaxMultipole(int i){ this->maxMultipole_ = i;   };
     inline void setNTCS(int i){         this->nTCS_ = i;           };
 
-    inline int   nTCS(){ return this->nTCS_;};      
-    inline int maxMultipole(){ return this->maxMultipole_;};
-    inline TMatrix* densityA(){ return this->densityA_.get();};
-    inline TMatrix* densityB(){ return this->densityB_.get();};
+    inline int   nTCS(){ return nTCS_;};      
+    inline int maxMultipole(){ return maxMultipole_;};
+    inline TMatrix* densityA(){ return densityA_.get();};
+    inline TMatrix* densityB(){ return densityB_.get();};
+
+    inline std::array<double,3> elecDipole(){ return elecDipole_; };
+    inline std::array<std::array<double,3>,3> elecQuadpole(){ 
+      return elecQuadpole_; 
+    };
+    inline std::array<std::array<double,3>,3> elecTracelessQuadpole(){ 
+      return elecTracelessQuadpole_; 
+    };
+    inline std::array<std::array<std::array<double,3>,3>,3> elecOctpole(){ 
+      return elecOctpole_; 
+    };
     // MPI Routines
     void mpiBCastDensity();
   };

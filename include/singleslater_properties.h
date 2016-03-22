@@ -75,21 +75,24 @@ void SingleSlater<T>::computeMultipole(){
         this->aointegrals_->elecQuadpoleSep_,
         this->aointegrals_->elecOctpoleSep_);
     if(this->maxMultipole_ >= 1) {
-      for(int iXYZ = 0; iXYZ < 3; iXYZ++)
-        (*this->dipole_)(iXYZ,0) = this->elecDipole_[iXYZ];
+//    for(int iXYZ = 0; iXYZ < 3; iXYZ++)
+//      (*this->dipole_)(iXYZ,0) = this->elecDipole_[iXYZ];
 
+      RealVecMap Dipole(&this->elecDipole_[0],3);
       for(int iA = 0; iA < this->molecule_->nAtoms(); iA++)
-        *this->dipole_ += elements[this->molecule_->index(iA)].atomicNumber *
+        Dipole += elements[this->molecule_->index(iA)].atomicNumber *
               this->molecule_->cart()->col(iA);
     }
     
     if(this->maxMultipole_ >= 2){
+      RealMap QP(&this->elecQuadpole_[0][0],3,3);
+      RealMap TQP(&this->elecTracelessQuadpole_[0][0],3,3);
       for(int iA = 0; iA < this->molecule_->nAtoms(); iA++){
-        *this->quadpole_ += 
+        QP += 
           elements[this->molecule_->index(iA)].atomicNumber *
           this->molecule_->cart()->col(iA) * 
           this->molecule_->cart()->col(iA).transpose();
-        *this->tracelessQuadpole_ += 
+        TQP += 
           elements[this->molecule_->index(iA)].atomicNumber *
           this->molecule_->cart()->col(iA) * 
           this->molecule_->cart()->col(iA).transpose()
@@ -101,26 +104,26 @@ void SingleSlater<T>::computeMultipole(){
 
 
 
-      for(auto jxyz = 0; jxyz < 3; jxyz++)
-      for(auto ixyz = 0; ixyz < 3; ixyz++){
-        (*this->quadpole_)(ixyz,jxyz) += this->elecQuadpole_[ixyz][jxyz];
-        (*this->tracelessQuadpole_)(ixyz,jxyz) += 
-          this->elecTracelessQuadpole_[ixyz][jxyz];
-      }
+    //for(auto jxyz = 0; jxyz < 3; jxyz++)
+    //for(auto ixyz = 0; ixyz < 3; ixyz++){
+    //  (*this->quadpole_)(ixyz,jxyz) += this->elecQuadpole_[ixyz][jxyz];
+    //  (*this->tracelessQuadpole_)(ixyz,jxyz) += 
+    //    this->elecTracelessQuadpole_[ixyz][jxyz];
+    //}
     }
  
     if(this->maxMultipole_ >= 3){
-      for(auto ixyz = 0; ixyz < 3; ixyz++)
-      for(auto jxyz = 0; jxyz < 3; jxyz++)
-      for(auto kxyz = 0; kxyz < 3; kxyz++)
-        (*this->octpole_)(ixyz,jxyz,kxyz) = 
-          this->elecOctpole_[ixyz][jxyz][kxyz]; 
+    //for(auto ixyz = 0; ixyz < 3; ixyz++)
+    //for(auto jxyz = 0; jxyz < 3; jxyz++)
+    //for(auto kxyz = 0; kxyz < 3; kxyz++)
+    //  (*this->octpole_)(ixyz,jxyz,kxyz) = 
+    //    this->elecOctpole_[ixyz][jxyz][kxyz]; 
  
       for(auto iA = 0; iA < this->molecule_->nAtoms(); iA++)
       for(auto ixyz = 0; ixyz < 3; ixyz++)
       for(auto jxyz = 0; jxyz < 3; jxyz++)
       for(auto kxyz = 0; kxyz < 3; kxyz++)
-        (*this->octpole_)(ixyz,jxyz,kxyz) += 
+        this->elecOctpole_[ixyz][jxyz][kxyz] += 
               elements[this->molecule_->index(iA)].atomicNumber *
               (*this->molecule_->cart())(ixyz,iA)*
               (*this->molecule_->cart())(jxyz,iA)*
@@ -130,10 +133,10 @@ void SingleSlater<T>::computeMultipole(){
   }
 
 #ifdef CQ_ENABLE_MPI
-  MPI_Bcast(this->dipole_->data(),3,MPI_DOUBLE,0,MPI_COMM_WORLD);
-  MPI_Bcast(this->quadpole_->data(),9,MPI_DOUBLE,0,MPI_COMM_WORLD);
-  MPI_Bcast(this->tracelessQuadpole_->data(),9,MPI_DOUBLE,0,MPI_COMM_WORLD);
-  MPI_Bcast(this->octpole_->data(),27,MPI_DOUBLE,0,MPI_COMM_WORLD);
+  MPI_Bcast(&this->elecDipole_[0],3,MPI_DOUBLE,0,MPI_COMM_WORLD);
+  MPI_Bcast(&this->elecQuadpole_[0][0],9,MPI_DOUBLE,0,MPI_COMM_WORLD);
+  MPI_Bcast(&this->elecTracelessQuadpole_[0][0],9,MPI_DOUBLE,0,MPI_COMM_WORLD);
+  MPI_Bcast(&this->elecOctpole_[0][0][0],27,MPI_DOUBLE,0,MPI_COMM_WORLD);
 #endif
 
 }

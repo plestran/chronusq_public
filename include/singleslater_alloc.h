@@ -73,7 +73,7 @@ template<typename T>
 void SingleSlater<T>::alloc(){
   this->checkMeta();
   this->allocOp();
-  if(this->maxMultipole_ > 0) this->allocMultipole(); 
+//if(this->maxMultipole_ > 0) this->allocMultipole(); 
  
   if(getRank() == 0) {
     if (this->isDFT){
@@ -306,6 +306,7 @@ void SingleSlater<T>::allocBetaDFT(){
   }
 }
 
+/*
 template<typename T>
 void SingleSlater<T>::allocMultipole(){
   if(this->maxMultipole_ >= 1)
@@ -317,3 +318,4 @@ void SingleSlater<T>::allocMultipole(){
   if(this->maxMultipole_ >= 3)
     this->octpole_  = std::unique_ptr<RealTensor3d>(new RealTensor3d(3,3,3));
 }
+*/
