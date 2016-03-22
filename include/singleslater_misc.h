@@ -35,17 +35,17 @@ void SingleSlater<T>::formDensity(){
  
     if(this->Ref_ == TCS){
       auto nOcc = this->nOccA_ + this->nOccB_;
-      (*this->densityA_)= 
+      (*this->onePDMA_) = 
         this->moA_->block(0,0,this->nTCS_*this->nBasis_,nOcc)*
         this->moA_->block(0,0,this->nTCS_*this->nBasis_,nOcc).adjoint();
     } else {
-      (*this->densityA_) = 
+      (*this->onePDMA_) = 
         this->moA_->block(0,0,this->nBasis_,this->nOccA_)*
         this->moA_->block(0,0,this->nBasis_,this->nOccA_).adjoint();
       // D(a) is actually total D for RHF
-      if(this->isClosedShell) (*this->densityA_) *= math.two;
+      if(this->isClosedShell) (*this->onePDMA_) *= math.two;
       else {
-        (*this->densityB_) = 
+        (*this->onePDMB_) = 
           this->moB_->block(0,0,this->nBasis_,this->nOccB_)*
           this->moB_->block(0,0,this->nBasis_,this->nOccB_).adjoint();
       }

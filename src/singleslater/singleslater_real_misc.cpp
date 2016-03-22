@@ -141,12 +141,12 @@ void SingleSlater<double>::getAlgebraicField(){
 
 template<>
 void SingleSlater<double>::writeSCFFiles(){
-  this->fileio_->alphaSCFDen->write(this->densityA_->data(),
+  this->fileio_->alphaSCFDen->write(this->onePDMA_->data(),
       H5::PredType::NATIVE_DOUBLE);
   this->fileio_->alphaMO->write(this->moA_->data(),
       H5::PredType::NATIVE_DOUBLE);
   if(!this->isClosedShell && this->Ref_ != TCS){
-    this->fileio_->betaSCFDen->write(this->densityB_->data(),
+    this->fileio_->betaSCFDen->write(this->onePDMB_->data(),
         H5::PredType::NATIVE_DOUBLE);
     this->fileio_->betaMO->write(this->moB_->data(),
         H5::PredType::NATIVE_DOUBLE);

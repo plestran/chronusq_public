@@ -42,40 +42,40 @@ void SingleSlater<dcomplex>::placeAtmDen(std::vector<int> atomIndex, SingleSlate
     auto iSize = this->basisset_->mapCen2Bf(iAtm)[1]; 
     if(this->Ref_ != TCS){
 /*
-      this->densityA_->block(iBfSt,iBfSt,iSize,iSize)= (*hfA.densityA_);
+      this->onePDMA_->block(iBfSt,iBfSt,iSize,iSize)= (*hfA.onePDMA_);
       if(!this->isClosedShell){
         if(hfA.isClosedShell)
-          this->densityB_->block(iBfSt,iBfSt,iSize,iSize)= 2*(*hfA.densityA_);
+          this->onePDMB_->block(iBfSt,iBfSt,iSize,iSize)= 2*(*hfA.onePDMA_);
         else
-          this->densityB_->block(iBfSt,iBfSt,iSize,iSize)= 
-            (*hfA.densityB_) + (*hfA.densityA_);
+          this->onePDMB_->block(iBfSt,iBfSt,iSize,iSize)= 
+            (*hfA.onePDMB_) + (*hfA.onePDMA_);
       } else {
         if(!hfA.isClosedShell){
-          this->densityA_->block(iBfSt,iBfSt,iSize,iSize) += (*hfA.densityB_);
+          this->onePDMA_->block(iBfSt,iBfSt,iSize,iSize) += (*hfA.onePDMB_);
         }
       }
 */
-      this->densityA_->block(iBfSt,iBfSt,iSize,iSize).real()      = (*hfA.densityA());
+      this->onePDMA_->block(iBfSt,iBfSt,iSize,iSize).real()      = (*hfA.densityA());
       if(this->isClosedShell){
         if(hfA.isClosedShell) 
-          this->densityA_->block(iBfSt,iBfSt,iSize,iSize).real() += (*hfA.densityA());
+          this->onePDMA_->block(iBfSt,iBfSt,iSize,iSize).real() += (*hfA.densityA());
         else
-          this->densityA_->block(iBfSt,iBfSt,iSize,iSize).real() += (*hfA.densityB());
+          this->onePDMA_->block(iBfSt,iBfSt,iSize,iSize).real() += (*hfA.densityB());
       } else {
-        this->densityB_->block(iBfSt,iBfSt,iSize,iSize).real()    = (*hfA.densityA());
+        this->onePDMB_->block(iBfSt,iBfSt,iSize,iSize).real()    = (*hfA.densityA());
         if(hfA.isClosedShell){
-          this->densityA_->block(iBfSt,iBfSt,iSize,iSize).real() += (*hfA.densityA());
-          this->densityB_->block(iBfSt,iBfSt,iSize,iSize).real() += (*hfA.densityA());
+          this->onePDMA_->block(iBfSt,iBfSt,iSize,iSize).real() += (*hfA.densityA());
+          this->onePDMB_->block(iBfSt,iBfSt,iSize,iSize).real() += (*hfA.densityA());
         } else {
-          this->densityA_->block(iBfSt,iBfSt,iSize,iSize).real() += (*hfA.densityB());
-          this->densityB_->block(iBfSt,iBfSt,iSize,iSize).real() += (*hfA.densityB());
+          this->onePDMA_->block(iBfSt,iBfSt,iSize,iSize).real() += (*hfA.densityB());
+          this->onePDMB_->block(iBfSt,iBfSt,iSize,iSize).real() += (*hfA.densityB());
         }
       }
     } else {
       for(auto I = iBfSt, i = 0; I < (iBfSt +iSize); I += 2, i++)
       for(auto J = iBfSt, j = 0; J < (iBfSt +iSize); J += 2, j++){
-        (*this->densityA_)(I,J)     = dcomplex((*hfA.densityA())(i,j) + (*hfA.densityB())(i,j),0.0);
-        (*this->densityA_)(I+1,J+1) = dcomplex((*hfA.densityA())(i,j) + (*hfA.densityB())(i,j),0.0);
+        (*this->onePDMA_)(I,J)     = dcomplex((*hfA.densityA())(i,j) + (*hfA.densityB())(i,j),0.0);
+        (*this->onePDMA_)(I+1,J+1) = dcomplex((*hfA.densityA())(i,j) + (*hfA.densityB())(i,j),0.0);
       }
     }
   } // loop iAtm
@@ -85,14 +85,14 @@ void SingleSlater<dcomplex>::scaleDen(){
   // Scale UHF densities according to desired multiplicity
   if(!this->isClosedShell && this->Ref_ != TCS){
     int nE = this->molecule_->nTotalE();
-    (*this->densityA_) *= dcomplex((double)this->nAE_/(double)nE,0.0);
-    (*this->densityB_) *= dcomplex((double)this->nBE_/(double)nE,0.0);
+    (*this->onePDMA_) *= dcomplex((double)this->nAE_/(double)nE,0.0);
+    (*this->onePDMB_) *= dcomplex((double)this->nBE_/(double)nE,0.0);
   } else if(this->Ref_ == TCS) {
     int nE = this->molecule_->nTotalE();
     for(auto i = 0; i < this->nTCS_*this->nBasis_; i += 2)
     for(auto j = 0; j < this->nTCS_*this->nBasis_; j += 2){
-      (*this->densityA_)(i,j)      *= dcomplex((double)this->nAE_/(double)nE,0.0);
-      (*this->densityA_)(i+1,j+1)  *= dcomplex((double)this->nBE_/(double)nE,0.0);
+      (*this->onePDMA_)(i,j)      *= dcomplex((double)this->nAE_/(double)nE,0.0);
+      (*this->onePDMA_)(i+1,j+1)  *= dcomplex((double)this->nBE_/(double)nE,0.0);
     }
 /*
     double theta = math.pi / 8.0;
@@ -100,17 +100,17 @@ void SingleSlater<dcomplex>::scaleDen(){
     double s = std::sin(theta);
     for(auto i = 0; i < this->nTCS_*this->nBasis_; i += 2)
     for(auto j = 0; j < this->nTCS_*this->nBasis_; j += 2){
-      double Paa = (*this->densityA_)(i,j);
-      double Pbb = (*this->densityA_)(i+1,j+1);
-      (*this->densityA_)(i,j)     = c*c*Paa + s*s*Pbb;
-      (*this->densityA_)(i+1,j+1) = c*c*Pbb + s*s*Paa;
-      (*this->densityA_)(i+1,j)   = c*s*(Paa - Pbb);
-      (*this->densityA_)(i,j+1)   = c*s*(Paa - Pbb);
+      double Paa = (*this->onePDMA_)(i,j);
+      double Pbb = (*this->onePDMA_)(i+1,j+1);
+      (*this->onePDMA_)(i,j)     = c*c*Paa + s*s*Pbb;
+      (*this->onePDMA_)(i+1,j+1) = c*c*Pbb + s*s*Paa;
+      (*this->onePDMA_)(i+1,j)   = c*s*(Paa - Pbb);
+      (*this->onePDMA_)(i,j+1)   = c*s*(Paa - Pbb);
      
     }
 */
     
-//  (*this->densityA_) *= (double)(this->nAE_+this->nBE_)/(double)nE ;
+//  (*this->onePDMA_) *= (double)(this->nAE_+this->nBE_)/(double)nE ;
   }
 //CErr();
 }; // SingleSlater::scaleDen [T=dcomplex]
@@ -265,21 +265,21 @@ void SingleSlater<dcomplex>::READGuess(){
   if(getRank() == 0) {
     this->fileio_->out << "Reading SCF Density from disk" << endl;
     H5::DataSpace dataspace = this->fileio_->alphaSCFDen->getSpace();
-    this->fileio_->alphaSCFDen->read(this->densityA_->data(),*(this->fileio_->complexType),dataspace,dataspace);
+    this->fileio_->alphaSCFDen->read(this->onePDMA_->data(),*(this->fileio_->complexType),dataspace,dataspace);
     this->fileio_->alphaMO->read(this->moA_->data(),*(this->fileio_->complexType),dataspace,dataspace);
     if(!this->isClosedShell && this->Ref_ != TCS){
-      this->fileio_->betaSCFDen->read(this->densityB_->data(),*(this->fileio_->complexType),dataspace,dataspace);
+      this->fileio_->betaSCFDen->read(this->onePDMB_->data(),*(this->fileio_->complexType),dataspace,dataspace);
       this->fileio_->betaMO->read(this->moB_->data(),*(this->fileio_->complexType),dataspace,dataspace);
     }
   }
   this->haveMO = true;
   if(this->molecule_->nAtoms() > 1) this->haveDensity = true;
 #ifdef CQ_ENABLE_MPI
-  MPI_Bcast(this->densityA_->data(),
+  MPI_Bcast(this->onePDMA_->data(),
     this->nTCS_*this->nTCS_*this->nBasis_*this->nBasis_,MPI_C_DOUBLE_COMPLEX,0,
     MPI_COMM_WORLD);
   if(!this->isClosedShell && this->Ref_ != TCS)
-    MPI_Bcast(this->densityB_->data(),
+    MPI_Bcast(this->onePDMB_->data(),
       this->nTCS_*this->nTCS_*this->nBasis_*this->nBasis_,MPI_C_DOUBLE_COMPLEX,0,
       MPI_COMM_WORLD);
 #endif

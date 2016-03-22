@@ -32,12 +32,15 @@ void SingleSlater<T>::computeEnergy(){
           *this->aointegrals_->oneE_);
     if(!this->isClosedShell && this->Ref_ != TCS)
       this->energyTwoE = 0.5 * (
-        this->template computeProperty<double,DENSITY_TYPE::ALPHA>(this->PTA_->conjugate()) 
-        +this->template computeProperty<double,DENSITY_TYPE::BETA>(this->PTB_->conjugate())
+        this->template computeProperty<double,DENSITY_TYPE::ALPHA>(
+          this->PTA_->conjugate()) + 
+        this->template computeProperty<double,DENSITY_TYPE::BETA>(
+          this->PTB_->conjugate())
       );
     else
       this->energyTwoE = 0.5 * (
-        this->template computeProperty<double,DENSITY_TYPE::TOTAL>(this->PTA_->conjugate()) 
+        this->template computeProperty<double,DENSITY_TYPE::TOTAL>(
+          this->PTA_->conjugate()) 
       ); 
       
     if(this->isDFT) this->energyTwoE += this->totalEx + this->totalEcorr;
@@ -126,9 +129,9 @@ template<typename T>
 void SingleSlater<T>::mullikenPop() {
   double charge;
   this->mullPop_.clear();
-  RealMatrix PS = (*this->densityA_).real() * (*this->aointegrals_->overlap_); 
+  RealMatrix PS = (*this->onePDMA_).real() * (*this->aointegrals_->overlap_); 
   if(!this->isClosedShell && this->Ref_ != TCS){ 
-    PS += (*this->densityB_).real() * (*this->aointegrals_->overlap_);
+    PS += (*this->onePDMB_).real() * (*this->aointegrals_->overlap_);
   }
   for (auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++) {
     auto iBfSt = this->basisset_->mapCen2Bf(iAtm)[0];

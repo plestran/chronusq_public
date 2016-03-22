@@ -1122,7 +1122,7 @@ void SingleSlater<double>::evalVXC(cartGP gridPt, double weight, std::vector<boo
 //            bfun = 
 //              this->basisset_->basisEval(s2sh,&gridPt);
 //            RealMap fBuff(bfun,n2,1);
-//            fBuff += this->densityA()->block(bf1_s,bf2_s,n1,n2) * fBuff;
+//            fBuff += this->onePDMA()->block(bf1_s,bf2_s,n1,n2) * fBuff;
             auto pointProd = 
               this->basisset_->basisProdEval(
                 this->basisset_->shells(s1),
@@ -1154,7 +1154,7 @@ void SingleSlater<double>::evalVXC(cartGP gridPt, double weight, std::vector<boo
 ////T
      (*overlapR_) = overlapR_->selfadjointView<Lower>();;
    if(this->isClosedShell && this->Ref_ != TCS) {
-    rhor = overlapR_->frobInner(this->densityA()->conjugate());
+    rhor = overlapR_->frobInner(this->onePDMA()->conjugate());
 ////T
 //   auto finish_3 = std::chrono::high_resolution_clock::now();  
 //   this->duration_3 += finish_3 - start_3;
@@ -1182,8 +1182,8 @@ void SingleSlater<double>::evalVXC(cartGP gridPt, double weight, std::vector<boo
     }
    }
    if(!this->isClosedShell && this->Ref_ != TCS) {
-     rhor   = overlapR_->frobInner(this->densityA()->conjugate());
-     rhor_B = overlapR_->frobInner(this->densityB()->conjugate());
+     rhor   = overlapR_->frobInner(this->onePDMA()->conjugate());
+     rhor_B = overlapR_->frobInner(this->onePDMB()->conjugate());
 //   Avoid numerical noise 
      if (this->screenVxc ) {
        if(rhor    <= 0.0 ) {
@@ -1278,11 +1278,11 @@ void SingleSlater<double>::evalVXC(cartGP gridPt, double weight, std::vector<boo
 //    }
 //  Handle the total density at r for RKS or UKS
     if(!this->isClosedShell && this->Ref_ != TCS) {
-      rhorA = overlapR_.frobInner(this->densityA()->conjugate());
-      rhorB = overlapR_.frobInner(this->densityB()->conjugate());
+      rhorA = overlapR_.frobInner(this->onePDMA()->conjugate());
+      rhorB = overlapR_.frobInner(this->onePDMB()->conjugate());
       rhor = rhorA + rhorB;
     } else {
-      rhor = overlapR_.frobInner(this->densityA()->conjugate()) ;
+      rhor = overlapR_.frobInner(this->onePDMA()->conjugate()) ;
     }
 //  Handle numerical instability if screening on
     if (this->screenVxc ) {
@@ -1374,43 +1374,43 @@ void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX,
     }
 //  Handle the total density at r for RKS or UKS
     if(!this->isClosedShell && this->Ref_ != TCS) {
-//    rhorA = overlapR_.frobInner(this->densityA()->conjugate());
-//    rhorB = overlapR_.frobInner(this->densityB()->conjugate());
-      rhorA = STmp->frobInner(this->densityA()->conjugate());
-      rhorB = STmp->frobInner(this->densityB()->conjugate());
+//    rhorA = overlapR_.frobInner(this->onePDMA()->conjugate());
+//    rhorB = overlapR_.frobInner(this->onePDMB()->conjugate());
+      rhorA = STmp->frobInner(this->onePDMA()->conjugate());
+      rhorB = STmp->frobInner(this->onePDMB()->conjugate());
       rhor = rhorA + rhorB;
       if (nDer == 1 ){
-        drhoA[0]   = 2.0*dSTmpX->frobInner(this->densityA()->conjugate());
-        drhoA[1]   = 2.0*dSTmpY->frobInner(this->densityA()->conjugate());
-        drhoA[2]   = 2.0*dSTmpZ->frobInner(this->densityA()->conjugate());
+        drhoA[0]   = 2.0*dSTmpX->frobInner(this->onePDMA()->conjugate());
+        drhoA[1]   = 2.0*dSTmpY->frobInner(this->onePDMA()->conjugate());
+        drhoA[2]   = 2.0*dSTmpZ->frobInner(this->onePDMA()->conjugate());
         gammaAA    = (drhoA[0]*drhoA[0] + drhoA[1]*drhoA[1] + drhoA[2]*drhoA[2]);
-        drhoB[0]   = 2.0*dSTmpX->frobInner(this->densityB()->conjugate());
-        drhoB[1]   = 2.0*dSTmpY->frobInner(this->densityB()->conjugate());
-        drhoB[2]   = 2.0*dSTmpZ->frobInner(this->densityB()->conjugate());
+        drhoB[0]   = 2.0*dSTmpX->frobInner(this->onePDMB()->conjugate());
+        drhoB[1]   = 2.0*dSTmpY->frobInner(this->onePDMB()->conjugate());
+        drhoB[2]   = 2.0*dSTmpZ->frobInner(this->onePDMB()->conjugate());
         gammaBB    = (drhoB[0]*drhoB[0] + drhoB[1]*drhoB[1] + drhoB[2]*drhoB[2]);
         gammaAB    = (drhoA[0]*drhoB[0] + drhoA[1]*drhoB[1] + drhoA[2]*drhoB[2]);
       }
     } else {
-//      rhor    = STmp->frobInner(this->densityA()->conjugate()) ;
+//      rhor    = STmp->frobInner(this->onePDMA()->conjugate()) ;
       if (this->isGGA) {
-        rhorA    = STmp->frobInner(this->densityA()->conjugate()/2.0) ;
+        rhorA    = STmp->frobInner(this->onePDMA()->conjugate()/2.0) ;
         rhor = 2.0*rhorA;
         rhorB = rhorA;
       }else{ 
-        rhorA    = STmp->frobInner(this->densityA()->conjugate()) ;
+        rhorA    = STmp->frobInner(this->onePDMA()->conjugate()) ;
         rhor = rhorA;
       }
       if (nDer == 1 ){
-//        drhoA[0]   = 2.0*dSTmpX.frobInner(this->densityA()->conjugate());
-        drhoA[0]   = 2.0*(dSTmpX->frobInner(this->densityA()->conjugate()/2.0));
-        drhoA[1]   = 2.0*(dSTmpY->frobInner(this->densityA()->conjugate()/2.0));
-        drhoA[2]   = 2.0*(dSTmpZ->frobInner(this->densityA()->conjugate()/2.0));
+//        drhoA[0]   = 2.0*dSTmpX.frobInner(this->onePDMA()->conjugate());
+        drhoA[0]   = 2.0*(dSTmpX->frobInner(this->onePDMA()->conjugate()/2.0));
+        drhoA[1]   = 2.0*(dSTmpY->frobInner(this->onePDMA()->conjugate()/2.0));
+        drhoA[2]   = 2.0*(dSTmpZ->frobInner(this->onePDMA()->conjugate()/2.0));
         gammaAA    = (drhoA[0]*drhoA[0] + drhoA[1]*drhoA[1] + drhoA[2]*drhoA[2]);
         gammaBB    = gammaAA;
         gammaAB    = gammaAA;
       }
     }
-//    rhor = overlapR_.frobInner(this->densityA()->conjugate()) ;
+//    rhor = overlapR_.frobInner(this->onePDMA()->conjugate()) ;
     if (nDer ==  1 ){ 
       (*dSTmpX)   += MapdX->col(ipts)*Map->col(ipts).transpose();
       (*dSTmpY)   += MapdY->col(ipts)*Map->col(ipts).transpose();

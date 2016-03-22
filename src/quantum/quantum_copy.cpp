@@ -18,24 +18,24 @@ namespace ChronusQ {
       this->maxMultipole_          = 
         const_cast<Quantum<dcomplex>&>(other).maxMultipole(); 
 
-      this->densityA_ = std::unique_ptr<RealMatrix>(
+      this->onePDMA_ = std::unique_ptr<RealMatrix>(
           new RealMatrix(
-            const_cast<Quantum<dcomplex>&>(other).densityA()->rows(),
-            const_cast<Quantum<dcomplex>&>(other).densityA()->cols()
+            const_cast<Quantum<dcomplex>&>(other).onePDMA()->rows(),
+            const_cast<Quantum<dcomplex>&>(other).onePDMA()->cols()
           )
         );
-      (*this->densityA_) = 
-        const_cast<Quantum<dcomplex>&>(other).densityA()->real();
+      (*this->onePDMA_) = 
+        const_cast<Quantum<dcomplex>&>(other).onePDMA()->real();
 
       if(!this->isClosedShell && this->nTCS_ != 2){
-        this->densityB_ = std::unique_ptr<RealMatrix>(
+        this->onePDMB_ = std::unique_ptr<RealMatrix>(
             new RealMatrix(
-              const_cast<Quantum<dcomplex>&>(other).densityB()->rows(),
-              const_cast<Quantum<dcomplex>&>(other).densityB()->cols()
+              const_cast<Quantum<dcomplex>&>(other).onePDMB()->rows(),
+              const_cast<Quantum<dcomplex>&>(other).onePDMB()->cols()
             )
           );
-        (*this->densityB_) = 
-          const_cast<Quantum<dcomplex>&>(other).densityB()->real();
+        (*this->onePDMB_) = 
+          const_cast<Quantum<dcomplex>&>(other).onePDMB()->real();
       }
   };
   template<>
@@ -56,23 +56,24 @@ namespace ChronusQ {
       this->maxMultipole_          = 
         const_cast<Quantum<double>&>(other).maxMultipole(); 
 
-      this->densityA_ = std::unique_ptr<ComplexMatrix>(
+      this->onePDMA_ = std::unique_ptr<ComplexMatrix>(
           new ComplexMatrix(
-            const_cast<Quantum<double>&>(other).densityA()->rows(),
-            const_cast<Quantum<double>&>(other).densityA()->cols()
+            const_cast<Quantum<double>&>(other).onePDMA()->rows(),
+            const_cast<Quantum<double>&>(other).onePDMA()->cols()
           )
         );
-      this->densityA_->real() = 
-        (*const_cast<Quantum<double>&>(other).densityA());
+      this->onePDMA_->real() = 
+        (*const_cast<Quantum<double>&>(other).onePDMA());
 
       if(!this->isClosedShell && this->nTCS_ != 2){
-        this->densityB_ = std::unique_ptr<ComplexMatrix>(
+        this->onePDMB_ = std::unique_ptr<ComplexMatrix>(
             new ComplexMatrix(
-              const_cast<Quantum<double>&>(other).densityB()->rows(),
-              const_cast<Quantum<double>&>(other).densityB()->cols()
+              const_cast<Quantum<double>&>(other).onePDMB()->rows(),
+              const_cast<Quantum<double>&>(other).onePDMB()->cols()
             )
           );
-        this->densityB_->real() = (*const_cast<Quantum<double>&>(other).densityB());
+        this->onePDMB_->real() = 
+          (*const_cast<Quantum<double>&>(other).onePDMB());
       }
   };
 };

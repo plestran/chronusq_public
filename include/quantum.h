@@ -55,8 +55,8 @@ namespace ChronusQ {
     int maxMultipole_;
     // Pointers to TMatrix quantities that will store the density of
     // the quantum system in a finite basis
-    std::unique_ptr<TMatrix> densityA_;
-    std::unique_ptr<TMatrix> densityB_;
+    std::unique_ptr<TMatrix> onePDMA_;
+    std::unique_ptr<TMatrix> onePDMB_;
 
     std::array<double,3> elecDipole_;
     std::array<std::array<double,3>,3> elecQuadpole_;
@@ -102,11 +102,11 @@ namespace ChronusQ {
 
     template<typename Scalar, typename Op> 
     Scalar computePropertyAlpha(const Op& op){
-      return OperatorTrace<Scalar>((*this->densityA_),op);
+      return OperatorTrace<Scalar>((*this->onePDMA_),op);
     }
     template<typename Scalar, typename Op> 
     Scalar computePropertyBeta(const Op& op){
-      return OperatorTrace<Scalar>((*this->densityB_),op);
+      return OperatorTrace<Scalar>((*this->onePDMB_),op);
     }
       
     public:
@@ -114,8 +114,8 @@ namespace ChronusQ {
     bool isClosedShell;
 
     Quantum(){
-      this->densityA_ = nullptr; 
-      this->densityB_ = nullptr; 
+      this->onePDMA_ = nullptr; 
+      this->onePDMB_ = nullptr; 
       this->isClosedShell = false;
       this->nTCS_ = 1;
       this->maxMultipole_ = 3;
@@ -137,12 +137,12 @@ namespace ChronusQ {
       isClosedShell(other.isClosedShell),
       maxMultipole_(other.maxMultipole_) {
 
-      this->densityA_ = std::unique_ptr<TMatrix>(
-          new TMatrix(*other.densityA_)
+      this->onePDMA_ = std::unique_ptr<TMatrix>(
+          new TMatrix(*other.onePDMA_)
         );
       if(!this->isClosedShell && this->nTCS_ != 2)
-        this->densityB_ = std::unique_ptr<TMatrix>(
-            new TMatrix(*other.densityB_)
+        this->onePDMB_ = std::unique_ptr<TMatrix>(
+            new TMatrix(*other.onePDMB_)
           );
     }
 
@@ -151,9 +151,9 @@ namespace ChronusQ {
 
     virtual void formDensity() = 0;
     inline void allocDensity(unsigned int N) {
-      this->densityA_ = std::unique_ptr<TMatrix>(new TMatrix(N,N));
+      this->onePDMA_ = std::unique_ptr<TMatrix>(new TMatrix(N,N));
       if(!this->isClosedShell){
-        this->densityB_ = std::unique_ptr<TMatrix>(new TMatrix(N,N));
+        this->onePDMB_ = std::unique_ptr<TMatrix>(new TMatrix(N,N));
       }
     };
 
@@ -191,8 +191,10 @@ namespace ChronusQ {
 
     inline int   nTCS(){ return nTCS_;};      
     inline int maxMultipole(){ return maxMultipole_;};
-    inline TMatrix* densityA(){ return densityA_.get();};
-    inline TMatrix* densityB(){ return densityB_.get();};
+    inline TMatrix* onePDMA(){ return onePDMA_.get();};
+    inline TMatrix* onePDMB(){ return onePDMB_.get();};
+    inline TMatrix* densityA(){ return onePDMA_.get();};
+    inline TMatrix* densityB(){ return onePDMB_.get();};
 
     inline std::array<double,3> elecDipole(){ return elecDipole_; };
     inline std::array<std::array<double,3>,3> elecQuadpole(){ 
@@ -215,10 +217,10 @@ namespace ChronusQ {
     if(typeid(T).hash_code() == typeid(dcomplex).hash_code())
       dataType = MPI_C_DOUBLE_COMPLEX;
   
-    MPI_Bcast(this->densityA_->data(),this->densityA_->size(),dataType,0,
+    MPI_Bcast(this->onePDMA_->data(),this->onePDMA_->size(),dataType,0,
       MPI_COMM_WORLD);
     if(!this->isClosedShell && this->nTCS_ != 2)
-      MPI_Bcast(this->densityB_->data(),this->densityB_->size(),dataType,0,
+      MPI_Bcast(this->onePDMB_->data(),this->onePDMB_->size(),dataType,0,
         MPI_COMM_WORLD);
   #endif
     ;

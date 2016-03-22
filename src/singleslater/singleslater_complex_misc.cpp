@@ -107,14 +107,14 @@ void SingleSlater<dcomplex>::getAlgebraicField(){
 template<>
 void SingleSlater<dcomplex>::writeSCFFiles(){
 
-  this->fileio_->alphaSCFDen->write(this->densityA_->data(),
+  this->fileio_->alphaSCFDen->write(this->onePDMA_->data(),
     *(this->fileio_->complexType)
   );
   this->fileio_->alphaMO->write(this->moA_->data(),
     *(this->fileio_->complexType)
   );
   if(!this->isClosedShell && this->Ref_ != TCS){
-    this->fileio_->betaSCFDen->write(this->densityB_->data(),
+    this->fileio_->betaSCFDen->write(this->onePDMB_->data(),
       *(this->fileio_->complexType)
     );
     this->fileio_->betaMO->write(this->moB_->data(),
