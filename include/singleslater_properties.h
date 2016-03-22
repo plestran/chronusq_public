@@ -60,7 +60,6 @@ void SingleSlater<T>::computeEnergy(){
   MPI_Bcast(&this->energyOneE,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
   MPI_Bcast(&this->energyTwoE,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 #endif
-//this->printEnergy();
 };
 
 template<typename T>
@@ -75,9 +74,6 @@ void SingleSlater<T>::computeMultipole(){
         this->aointegrals_->elecQuadpoleSep_,
         this->aointegrals_->elecOctpoleSep_);
     if(this->maxMultipole_ >= 1) {
-//    for(int iXYZ = 0; iXYZ < 3; iXYZ++)
-//      (*this->dipole_)(iXYZ,0) = this->elecDipole_[iXYZ];
-
       RealVecMap Dipole(&this->elecDipole_[0],3);
       for(int iA = 0; iA < this->molecule_->nAtoms(); iA++)
         Dipole += elements[this->molecule_->index(iA)].atomicNumber *
@@ -101,24 +97,9 @@ void SingleSlater<T>::computeMultipole(){
           (this->molecule_->cart()->col(iA) * 
           this->molecule_->cart()->col(iA).transpose()).trace() /3;
       }
-
-
-
-    //for(auto jxyz = 0; jxyz < 3; jxyz++)
-    //for(auto ixyz = 0; ixyz < 3; ixyz++){
-    //  (*this->quadpole_)(ixyz,jxyz) += this->elecQuadpole_[ixyz][jxyz];
-    //  (*this->tracelessQuadpole_)(ixyz,jxyz) += 
-    //    this->elecTracelessQuadpole_[ixyz][jxyz];
-    //}
     }
  
     if(this->maxMultipole_ >= 3){
-    //for(auto ixyz = 0; ixyz < 3; ixyz++)
-    //for(auto jxyz = 0; jxyz < 3; jxyz++)
-    //for(auto kxyz = 0; kxyz < 3; kxyz++)
-    //  (*this->octpole_)(ixyz,jxyz,kxyz) = 
-    //    this->elecOctpole_[ixyz][jxyz][kxyz]; 
- 
       for(auto iA = 0; iA < this->molecule_->nAtoms(); iA++)
       for(auto ixyz = 0; ixyz < 3; ixyz++)
       for(auto jxyz = 0; jxyz < 3; jxyz++)

@@ -53,12 +53,9 @@ class SingleSlater : public Quantum<T> {
     int nVirA;       ///< Number of virtual (unoccupied) alpha electrons
     int nVirB;       ///< Number of virtual (unoccupied) beta electrons
     int multip;      ///< Spin multiplicity (inherited from Molecule)
-//  int nTCS;        ///< Integer to scale the dimension of matricies for TCS's
     int maxSCFIter;  ///< Maximum number of SCF Cycles
-    int maxMultipole;///< Maximum multipole order (inherited from AOIntegrals)
     int printLevel;  ///< Print level (Verbosity)
 
-//  bool isClosedShell; ///< Boolean to run through closed shell machinery
     bool isHF;          ///< Boolean of whether or not it's a HF reference
     bool isDFT;         ///< Boolean of whether or not it's a DFT reference
     bool isPrimary;
@@ -101,7 +98,6 @@ class SingleSlater : public Quantum<T> {
   int      multip_;
   int    **R2Index_;
 
-//int      nTCS_; ///< Integer to scale the dimension of matricies for TCS's
   int      guess_;
 
   // DFT Parameters
@@ -112,8 +108,6 @@ class SingleSlater : public Quantum<T> {
   double nElectrons_;
 
   // Internal Storage
-//std::unique_ptr<TMatrix>  densityA_;   ///< Alpha or Full (TCS) Density Matrix
-//std::unique_ptr<TMatrix>  densityB_;   ///< Beta Density Matrix
   std::unique_ptr<TMatrix>  fockA_;      ///< Alpha or Full (TCS) Fock Matrix
   std::unique_ptr<TMatrix>  fockB_;      ///< Beta Fock Matrix
   std::unique_ptr<TMatrix>  coulombA_;   ///< Alpha or Full (TCS) Coulomb Matrix
@@ -130,32 +124,27 @@ class SingleSlater : public Quantum<T> {
   std::unique_ptr<TMatrix>  vXB_;        ///< Beta VXC
   std::unique_ptr<TMatrix>  vCorA_;        ///< Alpha or Full Vcorr
   std::unique_ptr<TMatrix>  vCorB_;        ///< Beta Vcorr
-  std::vector<RealSparseMatrix>  sparsedmudX_; ///< basis derivative (x) (NbasisxNbasis)
-  std::vector<RealSparseMatrix>  sparsedmudY_; ///< basis derivative (y) (NbasisxNbasis)
-  std::vector<RealSparseMatrix>  sparsedmudZ_; ///< basis derivative (z) (NbasisxNbasis) 
-// dipole lije
-  std::vector<RealSparseMatrix>  sparsemudotX_; ///< basis * (x) (NbasisxNbasis)
-  std::vector<RealSparseMatrix>  sparsemudotY_; ///< basis * (y) (NbasisxNbasis)
-  std::vector<RealSparseMatrix>  sparsemudotZ_; ///< basis * (z) (NbasisxNbasis) 
+  std::vector<RealSparseMatrix>  sparsedmudX_; ///< basis derivative (x)
+  std::vector<RealSparseMatrix>  sparsedmudY_; ///< basis derivative (y)
+  std::vector<RealSparseMatrix>  sparsedmudZ_; ///< basis derivative (z)
+  std::vector<RealSparseMatrix>  sparsemudotX_; ///< basis * (x) 
+  std::vector<RealSparseMatrix>  sparsemudotY_; ///< basis * (y) 
+  std::vector<RealSparseMatrix>  sparsemudotZ_; ///< basis * (z) 
   std::vector<RealSparseMatrix> sparseMap_;     // BasisFunction Map 
   std::vector<RealSparseMatrix> sparseWeights_; // Weights Map
   std::vector<RealSparseMatrix> sparseDoRho_; // Evaluate density Map
 
-//std::unique_ptr<RealMatrix>  dipole_;  ///< Electric Dipole Moment
-//std::unique_ptr<RealMatrix>  quadpole_; ///< Electric Quadrupole Moment
-//std::unique_ptr<RealMatrix>  tracelessQuadpole_; ///< Traceless Electric Quadrupole Moment
-//std::unique_ptr<RealTensor3d>  octpole_; ///< Electric Octupole Moment
-  BasisSet *    basisset_;               ///< Basis Set
-  Molecule *    molecule_;               ///< Molecular specificiations
-  FileIO *      fileio_;                 ///< Access to output file
-  Controls *    controls_;               ///< General ChronusQ flow parameters
-  AOIntegrals * aointegrals_;            ///< Molecular Integrals over GTOs (AO basis)
-  TwoDGrid    * twodgrid_   ;            ///< 3D grid (1Rad times 1 Ang) 
+  BasisSet *    basisset_;         ///< Basis Set
+  Molecule *    molecule_;         ///< Molecular specificiations
+  FileIO *      fileio_;           ///< Access to output file
+  Controls *    controls_;         ///< General ChronusQ flow parameters
+  AOIntegrals * aointegrals_;      ///< Molecular Integrals over GTOs (AO basis)
+  TwoDGrid    * twodgrid_   ;      ///< 3D grid (1Rad times 1 Ang) 
 
-  std::string SCFType_;                  ///< String containing SCF Type (R/C) (R/U/G/CU)
-  std::string SCFTypeShort_;             ///< String containing SCF Type (R/C) (R/U/G/CU)
-  std::string algebraicField_;           ///< String Real/Complex/(Quaternion)
-  std::string algebraicFieldShort_;      ///< String Real/Complex/(Quaternion)
+  std::string SCFType_;      ///< String containing SCF Type (R/C) (R/U/G/CU)
+  std::string SCFTypeShort_; ///< String containing SCF Type (R/C) (R/U/G/CU)
+  std::string algebraicField_;     ///< String Real/Complex/(Quaternion)
+  std::string algebraicFieldShort_;///< String Real/Complex/(Quaternion)
   std::array<double,3> elecField_;
   std::vector<double> mullPop_; ///< mulliken partial charge
   double Sx_, Sy_, Sz_, Ssq_;
@@ -226,7 +215,6 @@ class SingleSlater : public Quantum<T> {
   double denTol_;
   double eneTol_;
   int maxSCFIter_;
-//int maxMultipole_;
   bool  fixPhase_;
 
   int printLevel_;
@@ -331,7 +319,6 @@ public:
   bool	haveExchange;///< Computed Exchange Matrix?
   bool	screenVxc   ;///< Do the screening for Vxc?
   bool  havePT;      ///< Computed Perturbation Tensor?
-//bool  isClosedShell;
   bool  isConverged;
   bool  isHF;
   bool  isDFT;
@@ -383,8 +370,6 @@ public:
     this->ngpts    = 0;
 
     // Initialize Smart Pointers
-//  this->densityA_          = nullptr;   
-//  this->densityB_          = nullptr;   
     this->fockA_             = nullptr;      
     this->fockB_             = nullptr;      
     this->coulombA_          = nullptr;   
@@ -401,10 +386,6 @@ public:
     this->vXB_              = nullptr;       
     this->vCorA_              = nullptr;       
     this->vCorB_              = nullptr;       
-  //this->dipole_            = nullptr;  
-  //this->quadpole_          = nullptr;
-  //this->tracelessQuadpole_ = nullptr; 
-  //this->octpole_           = nullptr;
 
     // Initialize Raw Pointers
     this->R2Index_     = NULL;
@@ -421,7 +402,6 @@ public:
     this->haveDensity   = false;
     this->haveMO        = false;
     this->havePT        = false;
-//  this->isClosedShell = false;
 
 
     // Standard Values
@@ -433,8 +413,6 @@ public:
     this->eneTol_      = 1e-10;
     this->maxSCFIter_  = 256;
     //this->maxSCFIter_  = 128;
-//  this->nTCS_        = 1;
-//  this->maxMultipole_ = 3;
     this->elecField_   = {0.0,0.0,0.0};
     this->printLevel_  = 1;
     this->isPrimary    = true;
@@ -457,83 +435,42 @@ public:
     this->maxiter       = 50;
 
   };
-  ~SingleSlater() {
-  //if(this->SCF_SCR != NULL) delete [] this->SCF_SCR;
-  };
+  ~SingleSlater() { ; };
 
   SingleSlater(SingleSlater *other) : 
     Quantum<T>(dynamic_cast<Quantum<T>&>(*other)){
-    this->nBasis_ = other->nBasis_;
-  //this->nTCS_   = other->nTCS_;
-    this->nTT_    = other->nTT_;
-    this->nShell_ = other->nShell_;
-    this->nAE_    = other->nAE_;
-    this->nBE_    = other->nBE_; 
-    this->Ref_    = other->Ref();
-    this->nOccA_  = other->nOccA_;
-    this->nOccB_  = other->nOccB_;
-    this->nVirA_  = other->nVirA_;
-    this->nVirB_  = other->nVirB_;
-    this->multip_   = other->multip_;
+
+    this->nBasis_      = other->nBasis_;
+    this->nTT_         = other->nTT_;
+    this->nShell_      = other->nShell_;
+    this->nAE_         = other->nAE_;
+    this->nBE_         = other->nBE_; 
+    this->Ref_         = other->Ref();
+    this->nOccA_       = other->nOccA_;
+    this->nOccB_       = other->nOccB_;
+    this->nVirA_       = other->nVirA_;
+    this->nVirB_       = other->nVirB_;
+    this->multip_      = other->multip_;
     this->energyNuclei = other->energyNuclei;
-    this->haveDensity = true;
-    this->haveMO	    = true;
-    this->havePT      = true;
-  //this->isClosedShell = other->isClosedShell;
-    this->printLevel_ = other->printLevel_;
-  //this->maxMultipole_ = other->maxMultipole_;
-    this->doDIIS = other->doDIIS;
-    this->isHF   = other->isHF;
-    this->isDFT  = other->isDFT;
-    this->guess_ = other->guess_;
+    this->haveDensity  = true;
+    this->haveMO       = true;
+    this->havePT       = true;
+    this->printLevel_  = other->printLevel_;
+    this->doDIIS       = other->doDIIS;
+    this->isHF         = other->isHF;
+    this->isDFT        = other->isDFT;
+    this->guess_       = other->guess_;
 
-    auto NTCSxNBASIS = this->nBasis_*this->nTCS_;
-
-    // Hardcoded for Libint route
-  //this->densityA_           = std::unique_ptr<RealMatrix>(
-  //  new RealMatrix(*other->densityA_)
-  //);
-    
     if(getRank() == 0) {
-      this->fockA_              = std::unique_ptr<TMatrix>(
-        new TMatrix(*other->fockA_)
-      );
-      this->moA_                = std::unique_ptr<TMatrix>(
-        new TMatrix(*other->moA_)
-      );
-      this->PTA_                = std::unique_ptr<TMatrix>(
-        new TMatrix(*other->PTA_)
-      );
-    }
-    if(!this->isClosedShell && this->Ref_ != TCS ){
-    //this->densityB_           = std::unique_ptr<TMatrix>(
-    //  new TMatrix(*other->densityB_)
-    //);
-
-      if(getRank() == 0) {
-        this->fockB_              = std::unique_ptr<TMatrix>(
-          new TMatrix(*other->fockB_)
-        );
-        this->moB_                = std::unique_ptr<TMatrix>(
-          new TMatrix(*other->moB_)
-        );
-        this->PTB_                = std::unique_ptr<TMatrix>(
-          new TMatrix(*other->PTB_)
-        );
+      this->fockA_ = std::unique_ptr<TMatrix>(new TMatrix(*other->fockA_));
+      this->moA_   = std::unique_ptr<TMatrix>(new TMatrix(*other->moA_));
+      this->PTA_   = std::unique_ptr<TMatrix>(new TMatrix(*other->PTA_));
+      if(!this->isClosedShell && this->Ref_ != TCS ){
+        this->fockB_ = std::unique_ptr<TMatrix>(new TMatrix(*other->fockB_));
+        this->moB_   = std::unique_ptr<TMatrix>(new TMatrix(*other->moB_));
+        this->PTB_   = std::unique_ptr<TMatrix>(new TMatrix(*other->PTB_));
       }
     }
-  //this->dipole_             = std::unique_ptr<RealMatrix>(
-  //  new RealMatrix(*other->dipole_)
-  //);
-  //this->quadpole_           = std::unique_ptr<RealMatrix>(
-  //  new RealMatrix(*other->quadpole_)
-  //);
-  //this->tracelessQuadpole_  = std::unique_ptr<RealMatrix>(
-  //  new RealMatrix(*other->tracelessQuadpole_)
-  //);
-  //this->octpole_            = std::unique_ptr<RealTensor3d>(
-  //  new RealTensor3d(*other->octpole_)
-  //);
 
     this->elecField_   = other->elecField_;
     this->basisset_    = other->basisset_;    
@@ -585,86 +522,81 @@ public:
   void alloc();
 
   //set private data
-  inline void setNBasis(int nBasis)                         { this->nBasis_ = nBasis;    };
-  inline void setNAE(int nAE)                               { this->nAE_ = nAE;          };
-  inline void setNBE(int nBE)                               { this->nBE_ = nBE;          };
-  inline void setRef(int Ref)                               { this->Ref_ = Ref;          };
-  inline void setField(std::array<double,3> field)          { this->elecField_ = field;  };
-  inline void Wrapper_setField(double x, double y, double z){ this->setField({{x,y,z}}); };
-//inline void setNTCS(int i)                                { this->nTCS_ = i;           };
-//inline void setMaxMultipole(int i)                        { this->maxMultipole_ = i;   };
-  inline void setPrintLevel(int i)                          { this->printLevel_ = i;     };
-  inline void setSCFDenTol(double x)                        { this->denTol_ = x;         };
-  inline void setSCFEneTol(double x)                        { this->eneTol_ = x;         };
-  inline void setSCFMaxIter(int i)                          { this->maxSCFIter_ = i;     };
-  inline void setGuess(int i)                               { this->guess_ = i;          };
-  inline void isNotPrimary()                                { this->isPrimary = false;   };
-  inline void setCorrKernel(int i)                          { this->CorrKernel_ = i;     };
-  inline void setExchKernel(int i)                          { this->ExchKernel_ = i;     };
-  inline void setDFTKernel( int i)                          { this->DFTKernel_  = i;     };
-  inline void setDFTWeightScheme(int i)                     { this->weightScheme_ = i;   };
-  inline void setDFTGrid(int i)                             { this->dftGrid_ = i;        };
-  inline void setDFTNGridPts(int i, int j)                  { this->nRadDFTGridPts_ = i;
-                                                              this->nAngDFTGridPts_ = j; };
-  inline void setDFTNRad(int i)                             { this->nRadDFTGridPts_ = i;};
-  inline void setDFTNAng(int i)                             { this->nAngDFTGridPts_ = i; };
-  inline void setDFTScreenTol(double x)                     { this->epsScreen = x;       };
+  inline void setNBasis(int nBasis)       { this->nBasis_ = nBasis;    };
+  inline void setNAE(int nAE)             { this->nAE_ = nAE;          };
+  inline void setNBE(int nBE)             { this->nBE_ = nBE;          };
+  inline void setRef(int Ref)             { this->Ref_ = Ref;          };
+  inline void setPrintLevel(int i)        { this->printLevel_ = i;     };
+  inline void setSCFDenTol(double x)      { this->denTol_ = x;         };
+  inline void setSCFEneTol(double x)      { this->eneTol_ = x;         };
+  inline void setSCFMaxIter(int i)        { this->maxSCFIter_ = i;     };
+  inline void setGuess(int i)             { this->guess_ = i;          };
+  inline void isNotPrimary()              { this->isPrimary = false;   };
+  inline void setCorrKernel(int i)        { this->CorrKernel_ = i;     };
+  inline void setExchKernel(int i)        { this->ExchKernel_ = i;     };
+  inline void setDFTKernel( int i)        { this->DFTKernel_  = i;     };
+  inline void setDFTWeightScheme(int i)   { this->weightScheme_ = i;   };
+  inline void setDFTGrid(int i)           { this->dftGrid_ = i;        };
+  inline void setDFTNGridPts(int i, int j){ this->nRadDFTGridPts_ = i;
+                                            this->nAngDFTGridPts_ = j; };
+  inline void setDFTNRad(int i)           { this->nRadDFTGridPts_ = i;};
+  inline void setDFTNAng(int i)           { this->nAngDFTGridPts_ = i; };
+  inline void setDFTScreenTol(double x)   { this->epsScreen = x;       };
+  inline void turnOffDFTScreening()       { this->screenVxc = false;   }; 
+
+  inline void setField(std::array<double,3> field){ 
+    this->elecField_ = field;  
+  };
+  inline void Wrapper_setField(double x, double y, double z){ 
+    this->setField({{x,y,z}}); 
+  };
   
 
-  inline void turnOffDFTScreening()                         { this->screenVxc = false;   }; 
 
   // access to private data
-  inline int nBasis()                    { return this->nBasis_;                  };
-//inline int nTCS()                      { return this->nTCS_;                    };      
-  inline int nTT()                       { return this->nTT_;                     };
-  inline int nShell()                    { return this->nShell_;                  };
-  inline int nAE()                       { return this->nAE_;                     };
-  inline int nBE()                       { return this->nBE_;                     };
-  inline int nOccA()                     { return this->nOccA_;                   };
-  inline int nOccB()                     { return this->nOccB_;                   };     
-  inline int nVirA()                     { return this->nVirA_;                   };
-  inline int nVirB()                     { return this->nVirB_;                   };
-  inline int Ref()                       { return this->Ref_;                     };      
-  inline int multip()                    { return this->multip_;                  };
-  inline int nOVA()                      { return nOccA_*nVirA_;                  };
-  inline int nOVB()                      { return nOccB_*nVirB_;                  };
-  inline int CorrKernel()                { return this->CorrKernel_;              };
-  inline int ExchKernel()                { return this->ExchKernel_;              };
-  inline int DFTKernel()                 { return this->DFTKernel_ ;              };
-  inline int printLevel()                { return this->printLevel_;              };
-//inline int maxMultipole()              { return this->maxMultipole_;            };
-  inline std::vector<double> mullPop()   { return this->mullPop_;                 };
-  inline std::array<double,3> elecField(){ return this->elecField_;               };
-//inline TMatrix* densityA()             { return this->densityA_.get();          };
-//inline TMatrix* densityB()             { return this->densityB_.get();          };
-  inline TMatrix* fockA()                { return this->fockA_.get();             };
-  inline TMatrix* fockB()                { return this->fockB_.get();             };
-  inline TMatrix* coulombA()             { return this->coulombA_.get();          };
-  inline TMatrix* coulombB()             { return this->coulombB_.get();          };
-  inline TMatrix* exchangeA()            { return this->exchangeA_.get();         };
-  inline TMatrix* exchangeB()            { return this->exchangeB_.get();         };
-  inline TMatrix* moA()                  { return this->moA_.get();               };
-  inline TMatrix* moB()                  { return this->moB_.get();               };
-  inline TMatrix* vXA()                  { return this->vXA_.get();               };
-  inline TMatrix* vXB()                  { return this->vXB_.get();               };
-  inline TMatrix* vCorA()                { return this->vCorA_.get();             };
-  inline TMatrix* vCorB()                { return this->vCorB_.get();             };
-  inline RealMatrix* epsA()              { return this->epsA_.get();              };
-  inline RealMatrix* epsB()              { return this->epsB_.get();              };
-  inline TMatrix* PTA()                  { return this->PTA_.get();               };
-  inline TMatrix* PTB()                  { return this->PTB_.get();               };
-//inline RealMatrix* dipole()            { return this->dipole_.get();            };
-//inline RealMatrix* quadpole()          { return this->quadpole_.get();          };
-//inline RealMatrix* tracelessQuadpole() { return this->tracelessQuadpole_.get(); };
-//inline RealTensor3d * octpole()        { return this->octpole_.get();           };
-  inline BasisSet     * basisset()       { return this->basisset_;                };
-  inline Molecule     * molecule()       { return this->molecule_;                };
-  inline FileIO       * fileio()         { return this->fileio_;                  };
-  inline Controls     * controls()       { return this->controls_;                };
-  inline AOIntegrals  * aointegrals()    { return this->aointegrals_;             };
-  inline TwoDGrid     * twodgrid()       { return this->twodgrid_;                };
-  inline std::string SCFType()           { return this->SCFType_;                 };
-  inline int         guess()             { return this->guess_;                   };
+  inline int nBasis()    { return this->nBasis_;                  };
+  inline int nTT()       { return this->nTT_;                     };
+  inline int nShell()    { return this->nShell_;                  };
+  inline int nAE()       { return this->nAE_;                     };
+  inline int nBE()       { return this->nBE_;                     };
+  inline int nOccA()     { return this->nOccA_;                   };
+  inline int nOccB()     { return this->nOccB_;                   };     
+  inline int nVirA()     { return this->nVirA_;                   };
+  inline int nVirB()     { return this->nVirB_;                   };
+  inline int Ref()       { return this->Ref_;                     };      
+  inline int multip()    { return this->multip_;                  };
+  inline int nOVA()      { return nOccA_*nVirA_;                  };
+  inline int nOVB()      { return nOccB_*nVirB_;                  };
+  inline int CorrKernel(){ return this->CorrKernel_;              };
+  inline int ExchKernel(){ return this->ExchKernel_;              };
+  inline int DFTKernel() { return this->DFTKernel_ ;              };
+  inline int printLevel(){ return this->printLevel_;              };
+  inline std::vector<double> mullPop()   { return this->mullPop_; };
+  inline std::array<double,3> elecField(){ return this->elecField_; };
+  inline TMatrix* fockA()                { return this->fockA_.get();    };
+  inline TMatrix* fockB()                { return this->fockB_.get();    };
+  inline TMatrix* coulombA()             { return this->coulombA_.get(); };
+  inline TMatrix* coulombB()             { return this->coulombB_.get(); };
+  inline TMatrix* exchangeA()            { return this->exchangeA_.get();};
+  inline TMatrix* exchangeB()            { return this->exchangeB_.get();};
+  inline TMatrix* moA()                  { return this->moA_.get();      };
+  inline TMatrix* moB()                  { return this->moB_.get();      };
+  inline TMatrix* vXA()                  { return this->vXA_.get();      };
+  inline TMatrix* vXB()                  { return this->vXB_.get();      };
+  inline TMatrix* vCorA()                { return this->vCorA_.get();    };
+  inline TMatrix* vCorB()                { return this->vCorB_.get();    };
+  inline RealMatrix* epsA()              { return this->epsA_.get();     };
+  inline RealMatrix* epsB()              { return this->epsB_.get();     };
+  inline TMatrix* PTA()                  { return this->PTA_.get();      };
+  inline TMatrix* PTB()                  { return this->PTB_.get();      };
+  inline BasisSet     * basisset()       { return this->basisset_;       };
+  inline Molecule     * molecule()       { return this->molecule_;       };
+  inline FileIO       * fileio()         { return this->fileio_;         };
+  inline Controls     * controls()       { return this->controls_;       };
+  inline AOIntegrals  * aointegrals()    { return this->aointegrals_;    };
+  inline TwoDGrid     * twodgrid()       { return this->twodgrid_;       };
+  inline std::string SCFType()           { return this->SCFType_;        };
+  inline int         guess()             { return this->guess_;          };
 
   inline void checkDFTType(){
     if(this->CorrKernel_ == LYP || this->ExchKernel_ == B88)
@@ -686,9 +618,10 @@ public:
   void genSparseBasisMap();     // Generate Basis Set Mapping
   void genSparseRcrosP();      //  Generate R cros P int
   void evalVXC_store(int, int, double &, double &,RealMatrix *, RealMatrix *,
-         RealMatrix *, RealMatrix *, RealMatrix *,RealMatrix *,RealMatrix *,RealMatrix *);
-  void evalVXC(cartGP, double, std::vector<bool>, double &, double &,RealMatrix *, RealMatrix *,
-                 RealMatrix *, RealMatrix*); // evaluate DFT VXC Matrix Term( at a given pts)
+         RealMatrix *, RealMatrix *, RealMatrix *,RealMatrix *,RealMatrix *,
+         RealMatrix *);
+  void evalVXC(cartGP, double, std::vector<bool>, double &, double &,
+      RealMatrix *, RealMatrix *, RealMatrix *, RealMatrix*); // evaluate DFT VXC Matrix Term( at a given pts)
   std::array<double,6 > formVC (double, double);    // Form DFT correlarion density,potential (A and B)
   std::array<double,6 > formVCGGA (double, double, double, double, double);    // Form DFT GGA correlarion density,potential (A and B)
   std::array<double,6 > formVCVWN (double, double); // Form DFT VWN correlation (VWN3 and VWN5)
@@ -697,7 +630,8 @@ public:
   std::array<double,6 > formVExGGA (double, double, double, double);    // Form DFT GGA Exchange density,potential (A and B)
   std::array<double,6 > formVExSlater (double, double); // Form DFT Slater exchange
   std::array<double,6 > formVExB88 (double, double, double, double); // Form DFT Becke88 exchange
-  double EvepsVWN(int iop,double a_x, double b_x, double c_x, double x0_x, double rho ); // Form DFT correlarion potential 
+  double EvepsVWN(int iop,double a_x, double b_x, double c_x, double x0_x, 
+      double rho ); // Form DFT correlarion potential 
   double gB88(int, double);                   //funtion used in B88 Exchange
   double omegaLYP(int, double, double, double);                    //function used in LYP Correlation 
   double derLYP(int, double, double, double, double, double, double);//function used in LYP Correlation 
