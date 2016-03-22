@@ -71,16 +71,12 @@ void SingleSlater<T>::computeMultipole(){
   if(this->maxMultipole_ < 1) return;
 
   if(getRank() == 0) {
-    int NB = this->nTCS_*this->nBasis_;
-    int NBSq = NB*NB;
-    int iBuf = 0;
- 
+    this->computeElecMultipoles(this->aointegrals_->elecDipoleSep_,
+        this->aointegrals_->elecQuadpoleSep_,
+        this->aointegrals_->elecOctpoleSep_);
     if(this->maxMultipole_ >= 1) {
-      auto exptdipole = this-> template computeProperty<double,
-           DENSITY_TYPE::TOTAL>(this->aointegrals_->elecDipoleSep_);
-
       for(int iXYZ = 0; iXYZ < 3; iXYZ++)
-        (*this->dipole_)(iXYZ,0) = - exptdipole[iXYZ];
+        (*this->dipole_)(iXYZ,0) = this->elecDipole_[iXYZ];
 
       for(int iA = 0; iA < this->molecule_->nAtoms(); iA++)
         *this->dipole_ += elements[this->molecule_->index(iA)].atomicNumber *
@@ -88,42 +84,37 @@ void SingleSlater<T>::computeMultipole(){
     }
     
     if(this->maxMultipole_ >= 2){
-      auto exptquadpole = this-> template computeProperty<double,
-           DENSITY_TYPE::TOTAL>(this->aointegrals_->elecQuadpoleSep_);
+      for(int iA = 0; iA < this->molecule_->nAtoms(); iA++){
+        *this->quadpole_ += 
+          elements[this->molecule_->index(iA)].atomicNumber *
+          this->molecule_->cart()->col(iA) * 
+          this->molecule_->cart()->col(iA).transpose();
+        *this->tracelessQuadpole_ += 
+          elements[this->molecule_->index(iA)].atomicNumber *
+          this->molecule_->cart()->col(iA) * 
+          this->molecule_->cart()->col(iA).transpose()
+          - elements[this->molecule_->index(iA)].atomicNumber *
+          RealMatrix::Identity(3,3) * 
+          (this->molecule_->cart()->col(iA) * 
+          this->molecule_->cart()->col(iA).transpose()).trace() /3;
+      }
 
-      for(auto jxyz = 0, iX = 0; jxyz < 3; jxyz++)
-      for(auto ixyz = jxyz; ixyz < 3; ixyz++, iX++)
-        (*this->quadpole_)(jxyz,ixyz) = - exptquadpole[iX];
 
-      (*this->quadpole_) = this->quadpole_->template selfadjointView<Upper>();
 
-      for(int iA = 0; iA < this->molecule_->nAtoms(); iA++)
-        *this->quadpole_ += elements[this->molecule_->index(iA)].atomicNumber *
-              this->molecule_->cart()->col(iA) * 
-              this->molecule_->cart()->col(iA).transpose();
- 
-      (*this->tracelessQuadpole_) = (*this->quadpole_) - 
-        RealMatrix::Identity(3,3)*this->quadpole_->trace()/3;
+      for(auto jxyz = 0; jxyz < 3; jxyz++)
+      for(auto ixyz = 0; ixyz < 3; ixyz++){
+        (*this->quadpole_)(ixyz,jxyz) += this->elecQuadpole_[ixyz][jxyz];
+        (*this->tracelessQuadpole_)(ixyz,jxyz) += 
+          this->elecTracelessQuadpole_[ixyz][jxyz];
+      }
     }
  
     if(this->maxMultipole_ >= 3){
-      auto exptOctpole = this-> template computeProperty<double,
-           DENSITY_TYPE::TOTAL>(this->aointegrals_->elecOctpoleSep_);
-
-      for(auto kxyz = 0,iX = 0;    kxyz < 3; kxyz++)
-      for(auto jxyz = kxyz; jxyz < 3; jxyz++)
-      for(auto ixyz = jxyz; ixyz < 3; ixyz++, iX++)
-        (*this->octpole_)(kxyz,jxyz,ixyz) = - exptOctpole[iX]; 
-
-      for(auto kxyz = 0;    kxyz < 3; kxyz++)
-      for(auto jxyz = kxyz; jxyz < 3; jxyz++)
-      for(auto ixyz = jxyz; ixyz < 3; ixyz++){
-        (*octpole_)(ixyz,jxyz,kxyz) = (*octpole_)(kxyz,jxyz,ixyz);
-        (*octpole_)(ixyz,kxyz,jxyz) = (*octpole_)(kxyz,jxyz,ixyz);
-        (*octpole_)(jxyz,ixyz,kxyz) = (*octpole_)(kxyz,jxyz,ixyz);
-        (*octpole_)(jxyz,kxyz,ixyz) = (*octpole_)(kxyz,jxyz,ixyz);
-        (*octpole_)(kxyz,ixyz,jxyz) = (*octpole_)(kxyz,jxyz,ixyz);
-      }
+      for(auto ixyz = 0; ixyz < 3; ixyz++)
+      for(auto jxyz = 0; jxyz < 3; jxyz++)
+      for(auto kxyz = 0; kxyz < 3; kxyz++)
+        (*this->octpole_)(ixyz,jxyz,kxyz) = 
+          this->elecOctpole_[ixyz][jxyz][kxyz]; 
  
       for(auto iA = 0; iA < this->molecule_->nAtoms(); iA++)
       for(auto ixyz = 0; ixyz < 3; ixyz++)
@@ -137,6 +128,7 @@ void SingleSlater<T>::computeMultipole(){
       
     }
   }
+
 #ifdef CQ_ENABLE_MPI
   MPI_Bcast(this->dipole_->data(),3,MPI_DOUBLE,0,MPI_COMM_WORLD);
   MPI_Bcast(this->quadpole_->data(),9,MPI_DOUBLE,0,MPI_COMM_WORLD);

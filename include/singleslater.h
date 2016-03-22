@@ -226,7 +226,7 @@ class SingleSlater : public Quantum<T> {
   double denTol_;
   double eneTol_;
   int maxSCFIter_;
-  int maxMultipole_;
+//int maxMultipole_;
   bool  fixPhase_;
 
   int printLevel_;
@@ -401,10 +401,10 @@ public:
     this->vXB_              = nullptr;       
     this->vCorA_              = nullptr;       
     this->vCorB_              = nullptr;       
-    this->dipole_            = nullptr;  
-    this->quadpole_          = nullptr;
-    this->tracelessQuadpole_ = nullptr; 
-    this->octpole_           = nullptr;
+  //this->dipole_            = nullptr;  
+  //this->quadpole_          = nullptr;
+  //this->tracelessQuadpole_ = nullptr; 
+  //this->octpole_           = nullptr;
 
     // Initialize Raw Pointers
     this->R2Index_     = NULL;
@@ -433,8 +433,8 @@ public:
     this->eneTol_      = 1e-10;
     this->maxSCFIter_  = 256;
     //this->maxSCFIter_  = 128;
-    this->nTCS_        = 1;
-    this->maxMultipole_ = 3;
+//  this->nTCS_        = 1;
+//  this->maxMultipole_ = 3;
     this->elecField_   = {0.0,0.0,0.0};
     this->printLevel_  = 1;
     this->isPrimary    = true;
@@ -508,8 +508,8 @@ public:
   inline void setRef(int Ref)                               { this->Ref_ = Ref;          };
   inline void setField(std::array<double,3> field)          { this->elecField_ = field;  };
   inline void Wrapper_setField(double x, double y, double z){ this->setField({{x,y,z}}); };
-  inline void setNTCS(int i)                                { this->nTCS_ = i;           };
-  inline void setMaxMultipole(int i)                        { this->maxMultipole_ = i;   };
+//inline void setNTCS(int i)                                { this->nTCS_ = i;           };
+//inline void setMaxMultipole(int i)                        { this->maxMultipole_ = i;   };
   inline void setPrintLevel(int i)                          { this->printLevel_ = i;     };
   inline void setSCFDenTol(double x)                        { this->denTol_ = x;         };
   inline void setSCFEneTol(double x)                        { this->eneTol_ = x;         };
@@ -549,7 +549,7 @@ public:
   inline int ExchKernel()                { return this->ExchKernel_;              };
   inline int DFTKernel()                 { return this->DFTKernel_ ;              };
   inline int printLevel()                { return this->printLevel_;              };
-  inline int maxMultipole()              { return this->maxMultipole_;            };
+//inline int maxMultipole()              { return this->maxMultipole_;            };
   inline std::vector<double> mullPop()   { return this->mullPop_;                 };
   inline std::array<double,3> elecField(){ return this->elecField_;               };
 //inline TMatrix* densityA()             { return this->densityA_.get();          };

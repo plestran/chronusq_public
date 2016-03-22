@@ -52,10 +52,16 @@ namespace ChronusQ {
     protected:
 
     int nTCS_;
+    int maxMultipole_;
     // Pointers to TMatrix quantities that will store the density of
     // the quantum system in a finite basis
     std::unique_ptr<TMatrix> densityA_;
     std::unique_ptr<TMatrix> densityB_;
+
+    std::array<double,3> elecDipole_;
+    std::array<std::array<double,3>,3> elecQuadpole_;
+    std::array<std::array<double,3>,3> elecTracelessQuadpole_;
+    std::array<std::array<std::array<double,3>,3>,3> elecOctpole_;
 
 
     template<typename Scalar, typename Left, typename Right>
@@ -111,6 +117,11 @@ namespace ChronusQ {
       this->densityA_ = nullptr; 
       this->densityB_ = nullptr; 
       this->isClosedShell = false;
+      this->nTCS_ = 1;
+      this->maxMultipole_ = 3;
+
+
+      this->clearElecMultipole();
     };
 
     Quantum(unsigned int N) : Quantum(){
@@ -118,10 +129,22 @@ namespace ChronusQ {
     };
 
     virtual void formDensity() = 0;
-    void allocDensity(unsigned int N) {
+    inline void allocDensity(unsigned int N) {
       this->densityA_ = std::unique_ptr<TMatrix>(new TMatrix(N,N));
       if(!this->isClosedShell){
         this->densityB_ = std::unique_ptr<TMatrix>(new TMatrix(N,N));
+      }
+    };
+
+    inline void clearElecMultipole(){
+      for(auto iXYZ = 0; iXYZ < 3; iXYZ++){
+        this->elecDipole_[iXYZ] = 0.0; 
+        for(auto jXYZ = 0; jXYZ < 3; jXYZ++){
+          this->elecQuadpole_[iXYZ][jXYZ] = 0.0; 
+          this->elecTracelessQuadpole_[iXYZ][jXYZ] = 0.0; 
+          for(auto kXYZ = 0; kXYZ < 3; kXYZ++)
+            this->elecOctpole_[iXYZ][jXYZ][kXYZ] = 0.0; 
+        }
       }
     };
 
@@ -139,9 +162,14 @@ namespace ChronusQ {
         results.push_back(this->computeProperty<Scalar,DenTyp,Op>(*it));
       return results;
     }
+    #include <quantum_stdproperties.h>
 
+
+    inline void setMaxMultipole(int i){ this->maxMultipole_ = i;   };
+    inline void setNTCS(int i){         this->nTCS_ = i;           };
 
     inline int   nTCS(){ return this->nTCS_;};      
+    inline int maxMultipole(){ return this->maxMultipole_;};
     inline TMatrix* densityA(){ return this->densityA_.get();};
     inline TMatrix* densityB(){ return this->densityB_.get();};
     // MPI Routines
