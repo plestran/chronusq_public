@@ -157,6 +157,10 @@ namespace ChronusQ {
       }
     };
 
+    inline void alloc(unsigned int N){
+      this->allocDensity(N);
+    };
+
     inline void clearElecMultipole(){
       for(auto iXYZ = 0; iXYZ < 3; iXYZ++){
         this->elecDipole_[iXYZ] = 0.0; 
