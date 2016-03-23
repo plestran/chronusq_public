@@ -50,7 +50,7 @@ namespace ChronusQ {
   boost::python::list SingleSlater<double>::Wrapper_dipole(){
     boost::python::list result;
     for(auto i = 0; i < 3; i++)
-      result.append((*this->dipole_)(i));
+      result.append(this->elecDipole_[i]);
     return result;
   }
 
@@ -60,7 +60,7 @@ namespace ChronusQ {
     for(auto i = 0; i < 3; i++) {
       boost::python::list oneDim;
       for(auto j = 0; j < 3; j++) 
-        oneDim.append((*this->quadpole_)(i,j));
+        oneDim.append(this->elecQuadpole_[i][j]);
       result.append(oneDim);
     }
     return result;
@@ -74,7 +74,7 @@ namespace ChronusQ {
       for(auto j = 0; j < 3; j++) {
         boost::python::list oneDim;
         for(auto k = 0; k < 3; k++)
-          oneDim.append((*this->octpole_)(i,j,k));
+          oneDim.append(this->elecOctpole_[i][j][k]);
         twoDim.append(oneDim);
       }
       result.append(twoDim);
@@ -86,7 +86,7 @@ namespace ChronusQ {
   boost::python::list SingleSlater<dcomplex>::Wrapper_dipole(){
     boost::python::list result;
     for(auto i = 0; i < 3; i++)
-      result.append((*this->dipole_)(i));
+      result.append(this->elecDipole_[i]);
     return result;
   }
 
@@ -96,7 +96,7 @@ namespace ChronusQ {
     for(auto i = 0; i < 3; i++) {
       boost::python::list oneDim;
       for(auto j = 0; j < 3; j++) 
-        oneDim.append((*this->quadpole_)(i,j));
+        oneDim.append(this->elecQuadpole_[i][j]);
       result.append(oneDim);
     }
     return result;
@@ -110,7 +110,7 @@ namespace ChronusQ {
       for(auto j = 0; j < 3; j++) {
         boost::python::list oneDim;
         for(auto k = 0; k < 3; k++)
-          oneDim.append((*this->octpole_)(i,j,k));
+          oneDim.append(this->elecOctpole_[i][j][k]);
         twoDim.append(oneDim);
       }
       result.append(twoDim);

@@ -29,11 +29,11 @@ namespace ChronusQ{
   template<>
   void SingleSlater<dcomplex>::printDensity(){
     if(this->Ref_ != TCS) {
-      prettyPrintComplex(this->fileio_->out,(*this->densityA_),"\u03B1-Density");
+      prettyPrintComplex(this->fileio_->out,(*this->onePDMA_),"\u03B1-Density");
       if(!this->isClosedShell) 
-        prettyPrintComplex(this->fileio_->out,(*this->densityB_),"\u03B2-Density");
+        prettyPrintComplex(this->fileio_->out,(*this->onePDMB_),"\u03B2-Density");
     } else
-      prettyPrintTCSComplex(this->fileio_->out,(*this->densityA_),"Density");
+      prettyPrintTCSComplex(this->fileio_->out,(*this->onePDMA_),"Density");
   };
   template<>
   void SingleSlater<dcomplex>::printFock(){

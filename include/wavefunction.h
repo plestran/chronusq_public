@@ -23,32 +23,32 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
-#include <workers.h>
-#include <global.h>
-
-using ChronusQ::SingleSlater;
-using ChronusQ::Molecule;
-using ChronusQ::Atoms;
-using ChronusQ::FileIO;
-using ChronusQ::BasisSet;
-using ChronusQ::Controls;
-using ChronusQ::AOIntegrals;
+#ifndef INCLUDED_WAVEFUNCTION
+#define INCLUDED_WAVEFUNCTION
+#include <quantum.h>
 
 namespace ChronusQ {
-  void Molecule::Wrapper_printInfo(FileIO& fileio){
-    this->printInfo(fileio.out);
-  }
-  void Molecule::Wrapper_alloc(FileIO& fileio){ this->alloc(fileio.out); }
+  template<typename T>
+  class Wavefunction : public Quantum<T> {
+    // Useful typedefs
+    typedef Eigen::Matrix<T,Dynamic,Dynamic,ColMajor> TMatrix;
 
-  boost::python::list Molecule::Wrapper_cart(){
-    boost::python::list result;
-    for(auto iAtm = 0; iAtm < this->nAtoms_; iAtm++) {
-      boost::python::list AtomCart;
-      for(auto iXYZ = 0; iXYZ < 3            ; iXYZ++) {
-        AtomCart.append((*this->cart_)(iXYZ,iAtm));
-      }
-      result.append(AtomCart);
-    }
-    return result;
-  }
-}
+    // Molecular Orbital Coefficients
+    std::unique_ptr<TMatrix> moA_;
+    std::unique_ptr<TMatrix> moB_;
+
+    public:
+    Wavefunction() : Quantum<T>() {
+      this->moA_ = nullptr;
+      this->moB_ = nullptr;
+    };
+
+    inline void alloc(unsigned int N){
+      Quantum<T>::alloc(N);
+      this->moA_ = std::unique_ptr<TMatrix>(new TMatrix(N,N));
+      if(!this->isClosedShell && this->nTCS_ != 2)
+        this->moB_ = std::unique_ptr<TMatrix>(new TMatrix(N,N));
+    };
+  };
+};
+#endif

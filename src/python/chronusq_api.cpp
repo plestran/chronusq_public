@@ -208,6 +208,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("computeNucRep", &Molecule::computeNucRep    )
     .def("computeI",      &Molecule::computeI         )
     .def("computeRij",    &Molecule::computeRij       )
+    .def("cart",          &Molecule::Wrapper_cart     )
   ;
 
   class_<BasisSet,boost::noncopyable>("BasisSet",init<>())
@@ -454,6 +455,12 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setRespNRoots"  ,&NumericalDifferentiation<double>::setRespNRoots)
     .def("setRespRoot"  ,&NumericalDifferentiation<double>::setRespRoot)
     .def("setRespType"  ,&NumericalDifferentiation<double>::setRespType)
+    .def("GSEnergy" , &NumericalDifferentiation<double>::Wrapper_GSEnergy )
+    .def("GSGrad"   , &NumericalDifferentiation<double>::Wrapper_GSGrad   ) 
+    .def("ESEnergy" , &NumericalDifferentiation<double>::Wrapper_ESEnergy )
+    .def("ESGrad"   , &NumericalDifferentiation<double>::Wrapper_ESGrad   )
+    .def("ESGSNACME", &NumericalDifferentiation<double>::Wrapper_ESGSNACME)
+    .def("ESESNACME", &NumericalDifferentiation<double>::Wrapper_ESESNACME)
 
     .def_readwrite("computeGSGradient", 
                    &NumericalDifferentiation<double>::computeGSGradient)
