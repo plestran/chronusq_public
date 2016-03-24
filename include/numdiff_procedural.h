@@ -107,10 +107,13 @@ void NumericalDifferentiation<T>::cartesianDiff(){
   TMatrix T_0;
   if(this->computeESGradient){
     if(this->respType_ == RESPONSE_TYPE::CIS) {
-      T_0 = this->response_undisplaced_->template transDen<SINGLETS>().block(0,0,
-        this->response_undisplaced_->template nMatDim<SINGLETS>(),this->responseNRoots_);
+      T_0 = this->response_undisplaced_->
+        template transDen<SINGLETS>().block(0,0,
+        this->response_undisplaced_->
+          template nMatDim<SINGLETS>(),this->responseNRoots_);
     } else if(this->respType_ == RESPONSE_TYPE::PPTDA) {
-      T_0 = this->response_undisplaced_->template transDen<A_PPTDA_SINGLETS>().block(0,0,
+      T_0 = this->response_undisplaced_->
+        template transDen<A_PPTDA_SINGLETS>().block(0,0,
         this->response_undisplaced_->template nMatDim<A_PPTDA_SINGLETS>(),
         this->responseNRoots_);
     }
@@ -141,7 +144,8 @@ void NumericalDifferentiation<T>::cartesianDiff(){
           << endl;
       } else if(this->respType_ == RESPONSE_TYPE::PPTDA){
         this->singleSlater_undisplaced_->fileio()->out 
-          << this->response_undisplaced_->template frequencies<A_PPTDA_SINGLETS>()(iRt) 
+          << this->response_undisplaced_->
+            template frequencies<A_PPTDA_SINGLETS>()(iRt) 
           << endl;
       }
     }
@@ -337,26 +341,32 @@ void NumericalDifferentiation<T>::cartesianDiff(){
       cout << "  Checking | C - C' | Before Phase Check:" << endl;
       
       cout << "  | C(X,Y) - C(X+DX,Y) | = " 
-           << diffNorm((*this->singleSlater_undisplaced_->moA()),(*ss_p1.moA())) 
+           << diffNorm((*this->singleSlater_undisplaced_->moA()),
+               (*ss_p1.moA())) 
            << endl;  
       cout << "  | C(X,Y) - C(X-DX,Y) | = " 
-           << diffNorm((*this->singleSlater_undisplaced_->moA()),(*ss_m1.moA())) 
+           << diffNorm((*this->singleSlater_undisplaced_->moA()),
+               (*ss_m1.moA())) 
            << endl;  
 
 
       this->checkPhase((*this->singleSlater_undisplaced_),ss_p1,SMO_0_p1);
       this->checkPhase((*this->singleSlater_undisplaced_),ss_m1,SMO_0_m1);
-//    this->checkPhase((*this->singleSlater_undisplaced_->moA()),(*ss_p1.moA()));
-//    this->checkPhase((*this->singleSlater_undisplaced_->moA()),(*ss_m1.moA()));
+//    this->checkPhase((*this->singleSlater_undisplaced_->moA()),
+//      (*ss_p1.moA()));
+//    this->checkPhase((*this->singleSlater_undisplaced_->moA()),
+//      (*ss_m1.moA()));
 
       cout << endl;
       cout << "  Checking | C - C' | After Phase Check:" << endl;
       
       cout << "  | C(X,Y) - C(X+DX,Y) | = " 
-           << diffNorm((*this->singleSlater_undisplaced_->moA()),(*ss_p1.moA())) 
+           << diffNorm((*this->singleSlater_undisplaced_->moA()),
+               (*ss_p1.moA())) 
            << endl;  
       cout << "  | C(X,Y) - C(X-DX,Y) | = " 
-           << diffNorm((*this->singleSlater_undisplaced_->moA()),(*ss_m1.moA())) 
+           << diffNorm((*this->singleSlater_undisplaced_->moA()),
+               (*ss_m1.moA())) 
            << endl;  
 
 
@@ -481,9 +491,11 @@ void NumericalDifferentiation<T>::cartesianDiff(){
         if(this->respType_ == RESPONSE_TYPE::CIS){
           this->singleSlater_undisplaced_->fileio()->out 
             << "      W(+," << iRt << ") = "
-            << std::setprecision(10) << resp_p1.template frequencies<SINGLETS>()(iRt) 
+            << std::setprecision(10) << resp_p1.
+              template frequencies<SINGLETS>()(iRt) 
             << endl << "      W(-," << iRt << ") = "
-            << std::setprecision(10) << resp_m1.template frequencies<SINGLETS>()(iRt) 
+            << std::setprecision(10) << resp_m1.
+              template frequencies<SINGLETS>()(iRt) 
             << endl;
         } else if(this->respType_ == RESPONSE_TYPE::PPTDA) {
           this->singleSlater_undisplaced_->fileio()->out 
@@ -603,8 +615,10 @@ Eigen::VectorXd NumericalDifferentiation<T>::ESGradient(
 
   VectorXd freq_p1, freq_m1;
   if(this->respType_ == RESPONSE_TYPE::CIS){
-    freq_p1 = resp_p1.template frequencies<SINGLETS>().head(this->responseNRoots_);
-    freq_m1 = resp_m1.template frequencies<SINGLETS>().head(this->responseNRoots_);
+    freq_p1 = resp_p1.
+      template frequencies<SINGLETS>().head(this->responseNRoots_);
+    freq_m1 = resp_m1.
+      template frequencies<SINGLETS>().head(this->responseNRoots_);
   }else if(this->respType_ == RESPONSE_TYPE::PPTDA){
     freq_p1 = resp_p1.template frequencies<A_PPTDA_SINGLETS>().head(
         this->responseNRoots_);
