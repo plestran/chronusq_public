@@ -36,13 +36,13 @@ void SingleSlater<T>::formPT(){
   if(!this->haveDensity) this->formDensity();
   if(this->aointegrals_->integralAlgorithm == AOIntegrals::DIRECT)
     this->aointegrals_->twoEContractDirect(doRHF,doKS,true,false,doTCS,
-    *this->densityA_,*this->PTA_,*this->densityB_,*this->PTB_);
+    *this->onePDMA_,*this->PTA_,*this->onePDMB_,*this->PTB_);
   else if(this->aointegrals_->integralAlgorithm == AOIntegrals::DENFIT)
-    this->aointegrals_->twoEContractDF(doRHF,doKS,true,*this->densityA_,
-    *this->PTA_,*this->densityB_,*this->PTB_);
+    this->aointegrals_->twoEContractDF(doRHF,doKS,true,*this->onePDMA_,
+    *this->PTA_,*this->onePDMB_,*this->PTB_);
   else if(this->aointegrals_->integralAlgorithm == AOIntegrals::INCORE)
     this->aointegrals_->twoEContractN4(doRHF,doKS,true,false,doTCS,
-    *this->densityA_,*this->PTA_,*this->densityB_,*this->PTB_);
+    *this->onePDMA_,*this->PTA_,*this->onePDMB_,*this->PTB_);
   if(this->printLevel_ >= 3 && getRank() == 0) this->printPT();
 //if(doTCS)CErr();
 }

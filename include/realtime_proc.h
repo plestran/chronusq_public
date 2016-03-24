@@ -212,9 +212,9 @@ void RealTime<T>::doPropagation(){
     PropInfo rec;
       rec.timeStep  = this->currentTime_;
       rec.energy    = this->ssPropagator_->totalEnergy;
-      rec.dipole[0] = (*this->ssPropagator_->dipole())(0)/phys.debye;
-      rec.dipole[1] = (*this->ssPropagator_->dipole())(1)/phys.debye;
-      rec.dipole[2] = (*this->ssPropagator_->dipole())(2)/phys.debye;
+      rec.dipole[0] = this->ssPropagator_->elecDipole()[0]/phys.debye;
+      rec.dipole[1] = this->ssPropagator_->elecDipole()[1]/phys.debye;
+      rec.dipole[2] = this->ssPropagator_->elecDipole()[2]/phys.debye;
       rec.dipole[3] = std::sqrt( std::pow(rec.dipole[0],2.0) +
                                  std::pow(rec.dipole[1],2.0) +
                                  std::pow(rec.dipole[2],2.0) );

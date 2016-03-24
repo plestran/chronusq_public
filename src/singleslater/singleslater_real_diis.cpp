@@ -123,21 +123,16 @@ void SingleSlater<double>::GenDComm(int iter){
     this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_
   );
 
-  ErrA = 
-      (*this->fockA_) * (*this->densityA_) * (*this->aointegrals_->overlap_);
-  ErrA -= 
-    (*this->aointegrals_->overlap_) * (*this->densityA_) * (*this->fockA_);
-
+  ErrA = (*this->fockA_) * (*this->onePDMA_) * (*this->aointegrals_->overlap_);
+  ErrA -= (*this->aointegrals_->overlap_) * (*this->onePDMA_) * (*this->fockA_);
   if(!this->isClosedShell && this->Ref_ != TCS){
     RealMap ErrB(
       this->ErrorBetaMem_ + (iter % (this->nDIISExtrap_-1)) * this->lenF_,
       this->nBasis_,this->nBasis_
     );
 
-    ErrB = 
-      (*this->fockB_) * (*this->densityB_) * (*this->aointegrals_->overlap_);
-    ErrB -= 
-      (*this->aointegrals_->overlap_) * (*this->densityB_) * (*this->fockB_);
+    ErrB = (*this->fockB_) * (*this->onePDMB_) * (*this->aointegrals_->overlap_);
+    ErrB -= (*this->aointegrals_->overlap_) * (*this->onePDMB_) * (*this->fockB_);
   }
 } // GenDComm
 
