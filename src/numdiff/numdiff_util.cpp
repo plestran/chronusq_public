@@ -103,10 +103,18 @@ namespace ChronusQ{
   void NumericalDifferentiation<double>::checkPhase(Response<double> &resp1,
     Response<double> &resp2){
   
-    RealMatrix T1 = resp1.transDen()[0].block(0,0,resp1.nMatDim()[0],
-      this->responseNRoots_);
-    RealMatrix T2 = resp2.transDen()[0].block(0,0,resp2.nMatDim()[0],
-      this->responseNRoots_);
+    RealMatrix T1,T2;
+    if(this->respType_ == RESPONSE_TYPE::CIS){
+      T1 = resp1.transDen<SINGLETS>().block(0,0,
+          resp1.nMatDim<SINGLETS>(),this->responseNRoots_);
+      T2 = resp2.transDen<SINGLETS>().block(0,0,
+          resp2.nMatDim<SINGLETS>(),this->responseNRoots_);
+    } else if(this->respType_ == RESPONSE_TYPE::PPTDA){
+      T1 = resp1.transDen<A_PPTDA_SINGLETS>().block(0,0,
+          resp1.nMatDim<A_PPTDA_SINGLETS>(),this->responseNRoots_);
+      T2 = resp2.transDen<A_PPTDA_SINGLETS>().block(0,0,
+          resp2.nMatDim<A_PPTDA_SINGLETS>(),this->responseNRoots_);
+    }
 
       cout << "  Checking | T - T' | Before Phase Check:" << endl;
       
@@ -120,10 +128,17 @@ namespace ChronusQ{
            << diffNorm(T1,T2) 
            << endl;  
 
-    resp1.transDen()[0].block(0,0,resp1.nMatDim()[0],this->responseNRoots_) = 
-      T1;
-    resp2.transDen()[0].block(0,0,resp2.nMatDim()[0],this->responseNRoots_) = 
-      T2;
+    if(this->respType_ == RESPONSE_TYPE::CIS){
+      resp1.transDen<SINGLETS>().block(0,0,
+        resp1.nMatDim<SINGLETS>(),this->responseNRoots_) = T1;
+      resp2.transDen<SINGLETS>().block(0,0,
+        resp2.nMatDim<SINGLETS>(),this->responseNRoots_) = T2;
+    } else if(this->respType_ == RESPONSE_TYPE::PPTDA){
+      resp1.transDen<A_PPTDA_SINGLETS>().block(0,0,
+        resp1.nMatDim<A_PPTDA_SINGLETS>(),this->responseNRoots_) = T1;
+      resp2.transDen<A_PPTDA_SINGLETS>().block(0,0,
+        resp2.nMatDim<A_PPTDA_SINGLETS>(),this->responseNRoots_) = T2;
+    }
 
   };
 

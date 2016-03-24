@@ -107,7 +107,6 @@ class Response : public QNCallable<T>, public Quantum<T> {
 
   /** Meta inherited from SingleSlater **/
   int nBasis_; ///< Number of Basis Functions
-//int nTCS_;   ///< Number of components
   int Ref_;    ///< Reference ID
 
   /** Job Control for response calcluation **/
@@ -126,6 +125,7 @@ class Response : public QNCallable<T>, public Quantum<T> {
   std::vector<H5::DataSet*> guessFiles_;
 
   RESPONSE_PARTITION currentMat_;
+  std::map<RESPONSE_PARTITION,size_t> partitionIndexMap_;
 
   bool doSinglets_;      ///< (?) Find NSek Singlet Roots (depends on SA)
   bool doTriplets_;      ///< (?) Find NSek Triplet Roots (depends on SA)
@@ -309,10 +309,39 @@ public:
   inline void doSA()                   { this->iPart_  = SPIN_ADAPTED; };
 
   // Getters
-  inline std::vector<TMat> transDen(){return this->transDen_;};
-  inline std::vector<VectorXd> frequencies(){return this->frequencies_;};
-  inline std::vector<int> nMatDim(){return this->nMatDim_;};
   inline SingleSlater<T> * singleSlater(){return this->singleSlater_;};
+  inline RESPONSE_TYPE     Meth(){return this->iMeth_;};
+
+//inline std::vector<TMat> transDen(){return this->transDen_;};
+//inline std::vector<VectorXd> frequencies(){return this->frequencies_;};
+//inline std::vector<int> nMatDim(){return this->nMatDim_;};
+  
+  template<RESPONSE_PARTITION U>
+  inline TMat& transDen(){
+    auto search = this->partitionIndexMap_.find(U);
+    if(search == this->partitionIndexMap_.end())
+      CErr("Requested Transition Density Not Available",
+          this->fileio_->out);
+    return this->transDen_[search->second];
+  };
+
+  template<RESPONSE_PARTITION U>
+  inline VectorXd& frequencies(){
+    auto search = this->partitionIndexMap_.find(U);
+    if(search == this->partitionIndexMap_.end())
+      CErr("Requested Freqencies Not Available",
+          this->fileio_->out);
+    return this->frequencies_[search->second];
+  };
+
+  template<RESPONSE_PARTITION U>
+  inline int nMatDim(){
+    auto search = this->partitionIndexMap_.find(U);
+    if(search == this->partitionIndexMap_.end())
+      CErr("Requested Transition Density Not Available",
+          this->fileio_->out);
+    return this->nMatDim_[search->second];
+  };
   
   // IO Related
   void printInfo();

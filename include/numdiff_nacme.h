@@ -43,8 +43,16 @@ Eigen::VectorXd NumericalDifferentiation<T>::ES2GSNACME_CIS(
   std::vector<RealMatrix> Prod_0_m1(nThreads,
     TMatrix((*this->singleSlater_undisplaced_->moA())));
 
-  RealMatrix T_0 = this->response_undisplaced_->transDen()[0].block(0,0,
-    this->response_undisplaced_->nMatDim()[0],this->responseNRoots_);
+  RealMatrix T_0; 
+    
+  if(this->respType_ == RESPONSE_TYPE::CIS){
+    T_0 = this->response_undisplaced_->template transden<SINGLETS>().block(0,0,
+      this->response_undisplaced_->template nMatDim<SINGLETS>(),this->responseNRoots_);
+  } else if(this->respType_ == RESPONSE_TYPE::PPTDA){
+    T_0 = this->response_undisplaced_->template transden<A_PPTDA_SINGLETS>().block(0,0,
+      this->response_undisplaced_->template nMatDim<A_PPTDA_SINGLETS>(),
+      this->responseNRoots_);
+  }
 
   auto NACMEStart = std::chrono::high_resolution_clock::now();
   for(auto iSt = 0; iSt < this->responseNRoots_; iSt++){
@@ -119,12 +127,24 @@ RealMatrix NumericalDifferentiation<T>::ES2ESNACME_CIS(
   std::vector<RealMatrix> Prod_0_p1(nThreads,RealMatrix((*this->singleSlater_undisplaced_->moA())));
   std::vector<RealMatrix> Prod_0_m1(nThreads,RealMatrix((*this->singleSlater_undisplaced_->moA())));
 
-  RealMatrix T_0 = this->response_undisplaced_->transDen()[0].block(0,0,
-    this->response_undisplaced_->nMatDim()[0],this->responseNRoots_);
-  RealMatrix T_p1 = resp_p1.transDen()[0].block(0,0,
-    resp_p1.nMatDim()[0],this->responseNRoots_);
-  RealMatrix T_m1 = resp_m1.transDen()[0].block(0,0,
-    resp_m1.nMatDim()[0],this->responseNRoots_);
+  RealMatrix T_0, T_p1, T_m1;
+
+  if(this->respType_ == RESPONSE_TYPE::CIS){
+    T_0 = this->response_undisplaced_->template transden<SINGLETS>().block(0,0,
+      this->response_undisplaced_->template nMatDim<SINGLETS>(),this->responseNRoots_);
+    T_p1 = resp_p1.template transden<SINGLETS>().block(0,0,
+      resp_p1.template nMatDim<SINGLETS>(),this->responseNRoots_);
+    T_m1 = resp_m1.template transden<SINGLETS>().block(0,0,
+      resp_m1.template nMatDim<SINGLETS>(),this->responseNRoots_);
+  } else if(this->respType_ == RESPONSE_TYPE::PPTDA){
+    T_0 = this->response_undisplaced_->template transden<A_PPTDA_SINGLETS>().block(0,0,
+      this->response_undisplaced_->template nMatDim<A_PPTDA_SINGLETS>(),
+      this->responseNRoots_);
+    T_p1 = resp_p1.template transden<A_PPTDA_SINGLETS>().block(0,0,
+      resp_p1.template nMatDim<A_PPTDA_SINGLETS>(),this->responseNRoots_);
+    T_m1 = resp_m1.template transden<A_PPTDA_SINGLETS>().block(0,0,
+      resp_m1.template nMatDim<A_PPTDA_SINGLETS>(),this->responseNRoots_);
+  }
 
 
   auto NACMEStart = std::chrono::high_resolution_clock::now();
