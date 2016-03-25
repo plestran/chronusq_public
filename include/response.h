@@ -167,7 +167,6 @@ public:
 
     // Zero out meta data to be initialized by SingleSlater
     this->nBasis_     = 0;
-//  this->nTCS_       = 0;
     this->Ref_        = 0;
 
     // Zero out Misc values
