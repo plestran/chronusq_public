@@ -85,6 +85,11 @@ enum RESPONSE_PARTITION {
   PPRPA_TRIPLETS
 };
 
+enum RESPONSE_DENSITY_TYPE {
+  DIFFERENCE,
+  TRANSITION
+};
+
 enum RESPONSE_JOB_TYPE {
   NOJOB,
   EIGEN,
@@ -122,11 +127,13 @@ class Response : public QNCallable<T>, public Quantum<T>, public PostSCF {
 
   std::vector<int> nMatDim_;///< Dimensions of the different Response Matricies
   std::vector<RESPONSE_PARTITION> iMatIter_; ///< Response Matrix Partition
+  std::map<RESPONSE_PARTITION,size_t> partitionIndexMap_;
   RESPONSE_MATRIX_PARTITIONING iPart_;///< Type of Response matrix Partitioning
   std::vector<H5::DataSet*> guessFiles_;
 
-  RESPONSE_PARTITION currentMat_;
-  std::map<RESPONSE_PARTITION,size_t> partitionIndexMap_;
+  RESPONSE_PARTITION currentMat_; ///< (iterator)
+  RESPONSE_DENSITY_TYPE iDen_; ///< Which density formDensity will form (iRt)
+  int iRt_; ///< Which root will be used in formDensity (iterator)
 
   bool doSinglets_;      ///< (?) Find NSek Singlet Roots (depends on SA)
   bool doTriplets_;      ///< (?) Find NSek Triplet Roots (depends on SA)
@@ -176,6 +183,8 @@ public:
     this->iMeth_         = NOMETHOD;
     this->iClass_        = NOCLASS;
     this->iJob_          = EIGEN;
+    this->iDen_          = TRANSITION;
+    this->iRt_           = 0;
     this->useIncoreInts_ = false;
     this->doFull_        = false;
     this->debugIter_     = false;
@@ -375,6 +384,7 @@ public:
   void checkValidPPRPA(); ///< Checks specific to PPRPA
 
   // Transformations of Transition Densities
+  // (Utilities for QN)
   inline void formAOTransDen(TVecMap &TVec, TMat &TAOA, TMat &TAOB){
     if(this->iClass_ == FOPPA) this->formAOTransDenFOPPA(TVec,TAOA,TAOB);
     else if(this->iClass_ == PPPA) this->formAOTransDenPPRPA(TVec,TAOA,TAOB);
@@ -387,7 +397,19 @@ public:
   void formMOTransDenFOPPA(TVecMap&, TMat&,TMat&);
   void formAOTransDenPPRPA(TVecMap&, TMat&, TMat&);
   void formMOTransDenPPRPA(TVecMap&, TMat&,TMat&);
-  void formDensity(){;};
+
+  // Density evaluations for converged results
+  void formDensity();
+  void formDensityFOPPA();
+  void formDensityPPRPA();
+  void formTransitionDensity();
+  void formTransitionDensityFOPPA();
+  void formTransitionDensityPPRPA();
+  void formDifferenceDensity();
+  void formDifferenceDensityFOPPA();
+  void formDifferenceDensityPPRPA();
+
+  // QN Utility functions to grab subblocks of transitions densities
   void placeOccVir(TVecMap&, TMat&, TMat&);
   void placeVirOcc(TVecMap&, TMat&, TMat&);
   void placeOccOcc(TVecMap&, TMat&, TMat&);
@@ -401,6 +423,7 @@ public:
 #include <response_alloc.h>
 #include <response_meta.h>
 #include <response_io.h>
+#include <response_density.h>
 }; // namespace ChronusQ
 
 #endif
