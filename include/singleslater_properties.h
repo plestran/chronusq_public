@@ -153,26 +153,6 @@ void SingleSlater<T>::computeSExpect(){
       this->Ssq_ = 0.0; 
  
     } else if(this->Ref_ == UHF) {
- 
-      this->Sx_  = 0.0;
-      this->Sy_  = 0.0;
-      /*
-      this->Sz_  = 0.5*(this->nOccA_ - this->nOccB_);
-      this->Ssq_ = this->Sz_ * (this->Sz_ + 1) + this->nOccB_;
- 
-      for(auto i = 0; i < this->nOccA_; i++)
-      for(auto j = 0; j < this->nOccB_; j++){
- 
-        dcomplex Sij = 
-          this->moA_->col(i).dot(
-            (*this->aointegrals_->overlap_) * this->moB_->col(j)
-          );
-
-        this->Ssq_ -= std::real(Sij*std::conj(Sij));
- 
-      }
-      */
-
       TMatrix MzXS = ((*this->onePDMA_) - (*this->onePDMB_)) *
         (*this->aointegrals_->overlap_);
       TMatrix NXS = ((*this->onePDMA_) + (*this->onePDMB_)) *
@@ -180,21 +160,12 @@ void SingleSlater<T>::computeSExpect(){
       T tmp = 0.5*MzXS.trace();
       T tmp2 = 0.25  * MzXS.trace() * MzXS.trace() +
         0.25*(MzXS*MzXS - NXS*NXS).trace() + 0.5*NXS.trace();
+ 
+      this->Sx_  = 0.0;
+      this->Sy_  = 0.0;
       this->Sz_  = reinterpret_cast<double(&)[2]>(tmp)[0]; 
       this->Ssq_ = reinterpret_cast<double(&)[2]>(tmp2)[0];
-      /*
-      this->Ssq_ = 0.0;
-      for(int mu = 0; mu < this->nBasis_; mu++)
-      for(int nu = 0; nu < this->nBasis_; nu++)
-      for(int lam = 0; lam < this->nBasis_; lam++)
-      for(int kap = 0; kap < this->nBasis_; kap++){
-        this->Ssq_  += (*this->aointegrals_->overlap_)(mu,nu) *
-          (*this->aointegrals_->overlap_)(lam,kap) *
-          ((this->onePDMA_->real())(mu,kap) - (this->onePDMB_->real())(mu,kap))*
-          ((this->onePDMA_->real())(nu,lam) - (this->onePDMB_->real())(nu,lam));
-      };
-      */
- 
+
     } else if(this->Ref_ == CUHF) {
  
       this->Sx_  = 0.0;
