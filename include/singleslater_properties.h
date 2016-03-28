@@ -157,15 +157,14 @@ void SingleSlater<T>::computeSExpect(){
         (*this->aointegrals_->overlap_);
       TMatrix NXS = ((*this->onePDMA_) + (*this->onePDMB_)) *
         (*this->aointegrals_->overlap_);
+      // Sz
       T tmp = 0.5*MzXS.trace();
-//    T tmp2 = 0.25  * MzXS.trace() * MzXS.trace() +
-//      0.25*(MzXS*MzXS - NXS*NXS).trace() + 0.5*NXS.trace();
- 
-      
+
+      // S^2
       T tmp2 =  MzXS.trace() * MzXS.trace() +
         (0.5*MzXS*MzXS - 1.5*NXS*NXS).trace() + 3.0*NXS.trace();
-
       tmp2 /= 4.0;
+
       this->Sx_  = 0.0;
       this->Sy_  = 0.0;
       this->Sz_  = reinterpret_cast<double(&)[2]>(tmp)[0]; 

@@ -105,7 +105,7 @@ int main(int argc, char **argv){
   for(auto b = 0        ; b < resp.nVB(); b++, ab++)
   for(auto c = 0, cd = 0; c < resp.nVA(); c++      )
   for(auto d = 0        ; d < resp.nVB(); d++, cd++){
-    TAO2(mu,nu) += T.col(0)(ab) * T.col(0)(cd) * ( 
+    TAO2(mu,nu) += T.col(5)(ab) * T.col(5)(cd) * ( 
        (*singleSlater.moA())(mu,resp.nOA() + a) * 
        (*singleSlater.moA())(nu,resp.nOA() + c) * delta(b,d)
       + 
@@ -122,7 +122,7 @@ int main(int argc, char **argv){
   for(auto e = 0, ef = 0; e < resp.nVA(); e++      )
   for(auto f = 0        ; f < resp.nVB(); f++, ef++){
     TMO(resp.nOA() + a, resp.nOB() + b) += 
-      T.col(0)(cd) * T.col(0)(ef) *
+      T.col(5)(cd) * T.col(5)(ef) *
       delta(b,f) * delta(c,e) * delta(d,a);
   }
 
@@ -132,7 +132,7 @@ int main(int argc, char **argv){
 //prettyPrint(cout,TMO,"TMO");
 //prettyPrint(cout,TAO,"TAO");
 //prettyPrint(cout,TAO2,"TAO2");
-  cout << T.col(0).dot(T.col(0)) << endl;
+  cout << T.col(5).dot(T.col(5)) << endl;
   cout << (TAO * (*aoints.overlap_)).trace() << endl;
   cout << (TAO2 * (*aoints.overlap_)).trace() << endl;
 
@@ -141,26 +141,26 @@ int main(int argc, char **argv){
   for(auto nu = 0; nu < singleSlater.nBasis(); nu++)
   for(auto a = 0, ab = 0; a < resp.nVA(); a++      )
   for(auto b = 0        ; b < resp.nVB(); b++, ab++){
-    XAO(mu,nu) += T.col(0)(ab) * 
+    XAO(mu,nu) += T.col(5)(ab) * 
       (*singleSlater.moA())(mu,resp.nOA() + a) *  
       (*singleSlater.moA())(nu,resp.nOA() + b); 
   }
 
-  prettyPrint(cout,T.col(0),"X");
+  prettyPrint(cout,T.col(5),"X");
   prettyPrint(cout,XAO,"XAO");
   double TPDM = (TAO2 * (*aoints.overlap_)).trace() *
-  ((*singleSlater.densityA()) * (*aoints.overlap_)).trace()
+  0.25*((*singleSlater.densityA()) * (*aoints.overlap_)).trace()
   + 
-  (TAO2 * (*aoints.overlap_) * (*singleSlater.densityA()) * (*aoints.overlap_))
+  0.25*(TAO2 * (*aoints.overlap_) * (*singleSlater.densityA()) * (*aoints.overlap_))
      .trace() 
   +
-  4*(XAO * (*aoints.overlap_) * XAO.adjoint() * (*aoints.overlap_)).trace()
-  -
-  4*(XAO * (*aoints.overlap_) * XAO * (*aoints.overlap_)).trace();
+  0.0*(XAO * (*aoints.overlap_) * XAO.adjoint() * (*aoints.overlap_)).trace();
 
   double OPDM = 2;
 
-  cout << 0.5*OPDM + 0.125*TPDM << endl;;
+  cout << 3.0*OPDM - 1.5*TPDM << endl;;
+  cout << OPDM << endl;;
+  cout << TPDM << endl;;
 
    
   finalizeCQ(); 
