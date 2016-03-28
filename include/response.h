@@ -403,11 +403,11 @@ public:
   void formDensityFOPPA();
   void formDensityPPRPA();
   void formTransitionDensity();
-  void formTransitionDensityFOPPA();
-  void formTransitionDensityPPRPA();
+  void formTransitionDensityFOPPA(){;};
+  void formTransitionDensityPPRPA(){;};
   void formDifferenceDensity();
-  void formDifferenceDensityFOPPA();
-  void formDifferenceDensityPPRPA();
+  void formDifferenceDensityFOPPA(){;};
+  void formDifferenceDensityPPRPA(){;};
 
   // QN Utility functions to grab subblocks of transitions densities
   void placeOccVir(TVecMap&, TMat&, TMat&);

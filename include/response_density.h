@@ -8,7 +8,7 @@ template<typename T>
 void Response<T>::formTransitionDensity(){
   if(this->iClass_ == RESPONSE_CLASS::FOPPA) 
     this->formTransitionDensityFOPPA();
-  else if(this->iClass_ == RESPONSE_CLASS::PPRPA)
+  else if(this->iClass_ == RESPONSE_CLASS::PPPA)
     this->formTransitionDensityPPRPA();
 };
 
@@ -16,6 +16,6 @@ template<typename T>
 void Response<T>::formDifferenceDensity(){
   if(this->iClass_ == RESPONSE_CLASS::FOPPA) 
     this->formDifferenceDensityFOPPA();
-  else if(this->iClass_ == RESPONSE_CLASS::PPRPA)
+  else if(this->iClass_ == RESPONSE_CLASS::PPPA)
     this->formDifferenceDensityPPRPA();
 };
