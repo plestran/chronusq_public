@@ -442,9 +442,9 @@ public:
   void retrieveVirVir(TVecMap&, TMat&, TMat&);
 
 }; // class Response
-#include <response_alloc.h>
-#include <response_meta.h>
-#include <response_io.h>
+#include <response/response_alloc.h>
+#include <response/response_meta.h>
+#include <response/response_io.h>
 }; // namespace ChronusQ
 
 #endif

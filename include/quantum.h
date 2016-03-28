@@ -187,7 +187,7 @@ namespace ChronusQ {
         results.push_back(this->computeProperty<Scalar,DenTyp,Op>(*it));
       return results;
     }
-    #include <quantum_stdproperties.h>
+    #include <quantum/quantum_stdproperties.h>
 
 
     inline void setMaxMultipole(int i){ this->maxMultipole_ = i;   };
