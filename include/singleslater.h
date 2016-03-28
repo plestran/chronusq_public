@@ -733,13 +733,13 @@ public:
   void mpiRecv(int,int tag);
 };
 
-#include <singleslater_alloc.h>
-#include <singleslater_guess.h>
-#include <singleslater_print.h>
-#include <singleslater_fock.h>
-#include <singleslater_misc.h>
-#include <singleslater_scf.h>
-#include <singleslater_properties.h>
+#include <singleslater/singleslater_alloc.h>
+#include <singleslater/singleslater_guess.h>
+#include <singleslater/singleslater_print.h>
+#include <singleslater/singleslater_fock.h>
+#include <singleslater/singleslater_misc.h>
+#include <singleslater/singleslater_scf.h>
+#include <singleslater/singleslater_properties.h>
 //#include <singleslater_dft.h>
 
 

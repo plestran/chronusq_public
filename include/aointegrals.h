@@ -213,8 +213,6 @@ public:
   bool          haveRIS; ///< Whether or not the DFI tensor has been evaluated for the density-fiting basis set
   bool          haveRII; ///< Whether or not the Metric overlap tensor has been evaluated for the density-fitting basis set
   bool          haveTRII;
-//bool          allocERI;
-//bool          doDF;
   bool          isPrimary;
 
 
@@ -276,8 +274,6 @@ public:
     this->haveRIS      = false;
     this->haveRII      = false;
     this->haveTRII     = false;
-//  this->allocERI     = false;
-//  this->doDF         = false;
 
     // Standard Values
     this->nTCS_             = 1;

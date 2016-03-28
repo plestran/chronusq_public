@@ -642,4 +642,4 @@ void NumericalDifferentiation<T>::checkDegeneracies(SingleSlater<T> &ss) {
 };
 
 
-#include <numdiff_nacme.h>
+#include <numdiff/numdiff_nacme.h>
