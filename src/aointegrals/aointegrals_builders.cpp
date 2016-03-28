@@ -379,6 +379,7 @@ void AOIntegrals::computeAOOneE(){
   this->TED = TEnd - TStart;
   this->VED = VEnd - VStart;
   this->haveAOOneE = true;
+  this->breakUpMultipole();
   if(this->isPrimary) this->writeOneE();
 }
 
@@ -549,4 +550,27 @@ void AOIntegrals::computeAOTwoE(){
 }
 
 
-
+void AOIntegrals::breakUpMultipole(){
+  int NB = this->nTCS_*this->nBasis_;
+  this->elecDipoleSep_.clear();
+  this->elecQuadpoleSep_.clear();
+  this->elecOctpoleSep_.clear();
+  if(this->maxMultipole_ >= 1)
+    for(int ixyz = 0, iBuf = 0; ixyz < 3; ++ixyz, iBuf += NB*NB)
+      this->elecDipoleSep_.emplace_back(
+        ConstRealMap(&this->elecDipole_->storage()[iBuf],NB,NB)
+      );
+  if(this->maxMultipole_ >= 2)
+    for(int jxyz = 0, iBuf = 0; jxyz < 3; ++jxyz               )
+    for(int ixyz = jxyz       ; ixyz < 3; ++ixyz, iBuf += NB*NB)
+      this->elecQuadpoleSep_.emplace_back(
+        ConstRealMap(&this->elecQuadpole_->storage()[iBuf],NB,NB)
+      );
+  if(this->maxMultipole_ >= 3)
+    for(int kxyz = 0, iBuf = 0; kxyz < 3; ++kxyz               )
+    for(int jxyz = kxyz       ; jxyz < 3; ++jxyz               )
+    for(int ixyz = jxyz       ; ixyz < 3; ++ixyz, iBuf += NB*NB)
+      this->elecOctpoleSep_.emplace_back(
+        ConstRealMap(&this->elecOctpole_->storage()[iBuf],NB,NB)
+      );
+};

@@ -159,12 +159,8 @@ class AOIntegrals{
   std::unique_ptr<MolecularConstants>   molecularConstants_; ///< Smart pointer to struct containing molecular struture meta-data
   std::unique_ptr<QuartetConstants>     quartetConstants_; ///< Smart pointer to struct containing shell-quartet meta-data
 
-//dbwys
-#ifdef USE_LIBINT
   void OneEDriver(libint2::OneBodyEngine::integral_type); ///< General wrapper for one-electron integrals using Libint integral engine
-#endif
-//dbwye
-
+  void breakUpMultipole();
 
   inline void checkWorkers(){
     if(this->fileio_  == NULL) 
@@ -206,6 +202,11 @@ public:
   std::unique_ptr<RealTensor3d>  elecOctpole_;///< Electric octupole matrix \f$O_{\mu\nu}^{ijk}=\langle\mu\vert r_i r_j r_k \vert\nu\rangle\f$
 
   std::unique_ptr<RealTensor3d>  RcrossDel_; ///< R cross Del matrix \f$\vec{\mu}_{\nu\sigma}=\langle\nu\vert\vec{r} \Del \vert\sigma\rangle\f$
+
+  std::vector<ConstRealMap> elecDipoleSep_;
+  std::vector<ConstRealMap> elecQuadpoleSep_;
+  std::vector<ConstRealMap> elecOctpoleSep_;
+
   bool		haveAOTwoE; ///< Whether or not the two-bodied molecular integrals have been evaluated (for in-core integrals)
   bool		haveAOOneE; ///< Whether or not the one-body molecular integrals have been evaluated
   bool          haveSchwartz; ///< Whether or not the Schwartz bound tensor has been evaluated for the primary basis set
