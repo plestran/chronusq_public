@@ -75,7 +75,7 @@ namespace ChronusQ {
     void checkDegeneracies(SingleSlater<T>&);
 
   public:
-    #include <numdiff_constructors.h>
+    #include <numdiff/numdiff_constructors.h>
 
     bool computeGSGradient;
     bool computeESGradient;
@@ -184,5 +184,5 @@ namespace ChronusQ {
 
 
   }; // class NumericalDifferentiation
-  #include <numdiff_procedural.h>
+  #include <numdiff/numdiff_procedural.h>
 }; // namespace ChronusQ

@@ -335,12 +335,12 @@ namespace ChronusQ {
     void invertSuperMetric(const int);
     void formNHrProd(const int);
 
-    #include <qn_constructors.h>
+    #include <qn/qn_constructors.h>
 
   }; // class QuasiNewton2
-  #include <qn_memory.h>
-  #include <qn_procedural.h>
-  #include <qn_special.h>
+  #include <qn/qn_memory.h>
+  #include <qn/qn_procedural.h>
+  #include <qn/qn_special.h>
 }; // namespace ChronusQ
 
 #endif
