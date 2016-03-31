@@ -92,7 +92,7 @@ test0019_serial_incore.inp - Real RHF-CIS-RESP - STO-3G  - Small Serial - In-Cor
 test0019_serial_direct.inp - Real RHF-CIS-RESP - STO-3G  - Small Serial - Direct  Integrals
 #test0019_smp_incore.inp    - Real RHF-CIS-RESP - STO-3G  - Small OpenMP - In-Core Integrals
 test0019_smp_direct.inp    - Real RHF-CIS-RESP - STO-3G  - Small OpenMP - Direct  Integrals
-test0020_serial_incore.inp - Real RHF-CIS-RESP - 6-31G   - Small Serial - In-Core Integrals
+#test0020_serial_incore.inp - Real RHF-CIS-RESP - 6-31G   - Small Serial - In-Core Integrals
 test0020_serial_direct.inp - Real RHF-CIS-RESP - 6-31G   - Small Serial - Direct  Integrals
 #test0020_smp_incore.inp    - Real RHF-CIS-RESP - 6-31G   - Small OpenMP - In-Core Integrals
 test0020_smp_direct.inp    - Real RHF-CIS-RESP - 6-31G   - Small OpenMP - Direct  Integrals
