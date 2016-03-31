@@ -34,7 +34,7 @@ def appendSummary(fname,errors,jobtype):
 # insert the new results
   if jobtype == 'SCF':
     string = '%-28s %.4E %6s %.4E %10s %.4E %8s %.4E' % (fname,errors[0],"",errors[1],"",errors[2],"",errors[3])
-    if errors[0] < 1E-10 and errors[1] < 1E-8 and errors[2] < 1E-8 and errors[3] < 1E-8: string = string+"  YES\n"
+    if errors[0] < 5E-10 and errors[1] < 5E-7 and errors[2] < 5E-7 and errors[3] < 5E-7: string = string+"  YES\n"
     else: string = string+"  ** NO **\n"
   elif jobtype == 'RESP':
     nstates = len(ref[fname[:8]].w)

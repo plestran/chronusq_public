@@ -3,7 +3,7 @@
  *  computational chemistry software with a strong emphasis on explicitly 
  *  time-dependent and post-SCF quantum mechanical methods.
  *  
- *  Copyright (C) 2014-2015 Li Research Group (University of Washington)
+ *  Copyright (C) 2014-2016 Li Research Group (University of Washington)
  *  
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,27 +26,27 @@
 #include <aointegrals.h>
 using ChronusQ::AOIntegrals;
 
-void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
+void AOIntegrals::OneEDriver(libint2::Operator iType) {
   std::vector<RealMap> mat;
   int NB = this->nTCS_*this->nBasis_;
   int NBSq = NB*NB;
-  if(iType == OneBodyEngine::overlap){
+  if(iType == libint2::Operator::overlap){
     mat.push_back(RealMap(this->overlap_->data(),NB,NB));
-  } else if(iType == OneBodyEngine::kinetic) {
+  } else if(iType == libint2::Operator::kinetic) {
     mat.push_back(RealMap(this->kinetic_->data(),NB,NB));
-  } else if(iType == OneBodyEngine::nuclear) {
+  } else if(iType == libint2::Operator::nuclear) {
     mat.push_back(RealMap(this->potential_->data(),NB,NB));
-  } else if(iType == OneBodyEngine::emultipole1) {
+  } else if(iType == libint2::Operator::emultipole1) {
     mat.push_back(RealMap(this->overlap_->data(),NB,NB));
     for(auto i = 0, IOff=0; i < 3; i++,IOff+=NBSq)
       mat.push_back(RealMap(&this->elecDipole_->storage()[IOff],NB,NB));
-  } else if(iType == OneBodyEngine::emultipole2) {
+  } else if(iType == libint2::Operator::emultipole2) {
     mat.push_back(RealMap(this->overlap_->data(),NB,NB));
     for(auto i = 0, IOff=0; i < 3; i++,IOff+=NBSq)
       mat.push_back(RealMap(&this->elecDipole_->storage()[IOff],NB,NB));
     for(auto i = 0, IOff=0; i < 6; i++,IOff+=NBSq)
       mat.push_back(RealMap(&this->elecQuadpole_->storage()[IOff],NB,NB));
-  } else if(iType == OneBodyEngine::emultipole3) {
+  } else if(iType == libint2::Operator::emultipole3) {
     mat.push_back(RealMap(this->overlap_->data(),NB,NB));
     for(auto i = 0, IOff=0; i < 3; i++,IOff+=NBSq)
       mat.push_back(RealMap(&this->elecDipole_->storage()[IOff],NB,NB));
@@ -55,8 +55,7 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
     for(auto i = 0, IOff=0; i < 10; i++,IOff+=NBSq)
       mat.push_back(RealMap(&this->elecOctpole_->storage()[IOff],NB,NB));
   } else {
-    cout << "OneBodyEngine type not recognized" << endl;
-    exit(EXIT_FAILURE);
+    CErr("libint2::Operator type not recognized",this->fileio_->out);
   }
  
 #ifdef _OPENMP
@@ -65,11 +64,12 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
   int nthreads = 1;
 #endif
   // Define integral Engine
-  std::vector<OneBodyEngine> engines(nthreads);
-  engines[0] = OneBodyEngine(iType,this->basisSet_->maxPrim(),this->basisSet_->maxL(),0);
+  std::vector<libint2::Engine> engines(nthreads);
+  engines[0] = libint2::Engine(iType,this->basisSet_->maxPrim(),this->basisSet_->maxL(),0);
+  engines[0].set_precision(0.0);
 
   // If engine is V, define nuclear charges
-  if(iType == OneBodyEngine::nuclear){
+  if(iType == libint2::Operator::nuclear){
     std::vector<std::pair<double,std::array<double,3>>> q;
     for(int i = 0; i < this->molecule_->nAtoms(); i++) {
       q.push_back(
@@ -85,7 +85,7 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
 	}
       );
     }
-    engines[0].set_q(q);
+    engines[0].set_params(q);
   }
   for(size_t i = 1; i < nthreads; i++) engines[i] = engines[0];
 
@@ -115,9 +115,11 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
         int IOff = 0;
         for(auto nMat = 0; nMat < mat.size(); nMat++) {
 //        ConstRealMap bufMat(&buff[IOff],n1,n2); // Read only map
-          Eigen::Map<const Eigen::Matrix<double,Dynamic,Dynamic,Eigen::RowMajor>>
+          Eigen::Map<
+            const Eigen::Matrix<double,Dynamic,Dynamic,Eigen::RowMajor>>
             bufMat(&buff[IOff],n1,n2);
-          for(auto i = 0, bf1 = bf1_s; i < n1; i++, bf1 += this->nTCS_)            
+
+          for(auto i = 0, bf1 = bf1_s; i < n1; i++, bf1 += this->nTCS_) 
           for(auto j = 0, bf2 = bf2_s; j < n2; j++, bf2 += this->nTCS_){            
             mat[nMat](bf1,bf2) = bufMat(i,j);
             if(this->nTCS_ == 2) mat[nMat](bf1+1,bf2+1) = bufMat(i,j);
@@ -132,11 +134,15 @@ void AOIntegrals::OneEDriver(OneBodyEngine::integral_type iType) {
 }
 
 double AOIntegrals::formBeckeW(cartGP gridPt, int iAtm){
-//     Generate Frisch (not-normalized yet) Weights (if frischW) according to the partition schems in
-//     (Chem. Phys. Let., 257, 213-223 (1996)) using Eq. 11 and 14
+//     Generate Frisch (not-normalized yet) Weights (if frischW) according to 
+//     the partition schems in (Chem. Phys. Let., 257, 213-223 (1996)) 
+//     using Eq. 11 and 14
+//
 //     Note these Weights have to be normailzed 
-//     Generate Becke not-normalized Weights (if becke) according to the partition schems in
-//     (J. Chem. Phys., 88 (4),2457 (1988)) using Voronoii Fuzzi Cells
+//     Generate Becke not-normalized Weights (if becke) according to the 
+//     partition schems in (J. Chem. Phys., 88 (4),2457 (1988)) using Voronoii 
+//     Fuzzi Cells
+//
 //     Note these Weights have to be normailzed (see normBeckeW) 
        int nAtom = this->molecule_->nAtoms();
        double WW = 1.0;
@@ -347,20 +353,20 @@ void AOIntegrals::computeAOOneE(){
 
   // Compute and time overlap integrals
   auto OStart = std::chrono::high_resolution_clock::now();
-  if(this->maxMultipole_ ==3) OneEDriver(OneBodyEngine::emultipole3);
-  else if(this->maxMultipole_ == 2) OneEDriver(OneBodyEngine::emultipole2);
-  else if(this->maxMultipole_ == 1) OneEDriver(OneBodyEngine::emultipole1);
-  else OneEDriver(OneBodyEngine::overlap);
+  if(this->maxMultipole_ ==3) OneEDriver(libint2::Operator::emultipole3);
+  else if(this->maxMultipole_ == 2) OneEDriver(libint2::Operator::emultipole2);
+  else if(this->maxMultipole_ == 1) OneEDriver(libint2::Operator::emultipole1);
+  else OneEDriver(libint2::Operator::overlap);
   auto OEnd = std::chrono::high_resolution_clock::now();
   if(this->isPrimary && this->maxNumInt_ >=1) computeAORcrossDel();
   // Compute and time kinetic integrals
   auto TStart = std::chrono::high_resolution_clock::now();
-  OneEDriver(OneBodyEngine::kinetic);
+  OneEDriver(libint2::Operator::kinetic);
   auto TEnd = std::chrono::high_resolution_clock::now();
 
   // Compute and time nuclear attraction integrals (negative sign is factored in)
   auto VStart = std::chrono::high_resolution_clock::now();
-  OneEDriver(OneBodyEngine::nuclear);
+  OneEDriver(libint2::Operator::nuclear);
   auto VEnd = std::chrono::high_resolution_clock::now();
 
 // add DKH correction to kinetic energy
@@ -371,7 +377,7 @@ void AOIntegrals::computeAOOneE(){
 
   // Get end time of one-electron integral evaluation
   auto oneEEnd = std::chrono::high_resolution_clock::now();
-  this->printOneE();
+  if(this->controls_->printLevel >= 2) this->printOneE();
 
   // Compute time differenes
   this->OneED = oneEEnd - oneEStart;
@@ -379,19 +385,20 @@ void AOIntegrals::computeAOOneE(){
   this->TED = TEnd - TStart;
   this->VED = VEnd - VStart;
   this->haveAOOneE = true;
+  this->breakUpMultipole();
   if(this->isPrimary) this->writeOneE();
 }
 
-using libint2::TwoBodyEngine;
 void AOIntegrals::computeSchwartz(){
   if(getRank() == 0) {
     RealMatrix *ShBlk; 
     this->schwartz_->setZero();
  
     // Define Integral Engine
-    TwoBodyEngine<libint2::Coulomb> engine = 
-      TwoBodyEngine<libint2::Coulomb>(this->basisSet_->maxPrim(),
-                                      this->basisSet_->maxL(),0);
+    libint2::Engine engine(
+        libint2::Operator::coulomb,this->basisSet_->maxPrim(),
+        this->basisSet_->maxL(),0);
+
     engine.set_precision(0.); // Don't screen primitives during schwartz
  
     auto start =  std::chrono::high_resolution_clock::now();
@@ -441,8 +448,9 @@ void AOIntegrals::computeAOTwoE(){
 #else
   int nthreads = 1;
 #endif
-  std::vector<coulombEngine> engines(nthreads);
-  engines[0] = coulombEngine(this->basisSet_->maxPrim(),this->basisSet_->maxL(),0);
+  std::vector<libint2::Engine> engines(nthreads);
+  engines[0] = libint2::Engine(libint2::Operator::coulomb,
+      this->basisSet_->maxPrim(),this->basisSet_->maxL(),0);
   engines[0].set_precision(std::numeric_limits<double>::epsilon());
 
   for(int i=1; i<nthreads; i++) engines[i] = engines[0];
@@ -549,4 +557,27 @@ void AOIntegrals::computeAOTwoE(){
 }
 
 
-
+void AOIntegrals::breakUpMultipole(){
+  int NB = this->nTCS_*this->nBasis_;
+  this->elecDipoleSep_.clear();
+  this->elecQuadpoleSep_.clear();
+  this->elecOctpoleSep_.clear();
+  if(this->maxMultipole_ >= 1)
+    for(int ixyz = 0, iBuf = 0; ixyz < 3; ++ixyz, iBuf += NB*NB)
+      this->elecDipoleSep_.emplace_back(
+        ConstRealMap(&this->elecDipole_->storage()[iBuf],NB,NB)
+      );
+  if(this->maxMultipole_ >= 2)
+    for(int jxyz = 0, iBuf = 0; jxyz < 3; ++jxyz               )
+    for(int ixyz = jxyz       ; ixyz < 3; ++ixyz, iBuf += NB*NB)
+      this->elecQuadpoleSep_.emplace_back(
+        ConstRealMap(&this->elecQuadpole_->storage()[iBuf],NB,NB)
+      );
+  if(this->maxMultipole_ >= 3)
+    for(int kxyz = 0, iBuf = 0; kxyz < 3; ++kxyz               )
+    for(int jxyz = kxyz       ; jxyz < 3; ++jxyz               )
+    for(int ixyz = jxyz       ; ixyz < 3; ++ixyz, iBuf += NB*NB)
+      this->elecOctpoleSep_.emplace_back(
+        ConstRealMap(&this->elecOctpole_->storage()[iBuf],NB,NB)
+      );
+};

@@ -3,7 +3,7 @@
  *  computational chemistry software with a strong emphasis on explicitly 
  *  time-dependent and post-SCF quantum mechanical methods.
  *  
- *  Copyright (C) 2014-2015 Li Research Group (University of Washington)
+ *  Copyright (C) 2014-2016 Li Research Group (University of Washington)
  *  
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -31,8 +31,22 @@
 #define MAXCONTRACTION 10 ///< Define maximum contraction depth for gaussian basis functions
 #define MAXATOMS 1000 ///< Define maximum number of allowed nuclei
 
+// Maximum number of FileIO Sratch Partitions (can override)
+#ifndef CQ_MAX_SCRATCH_PARTITIONS
+  #define CQ_MAX_SCRATCH_PARTITIONS 1000
+#endif
+
 // CMake Compilation Configuration
 #include <config_chronusq.h>
+
+// Boost Headers
+#include <boost/python.hpp>
+#include <boost/geometry/geometry.hpp>
+#include <boost/math/constants/constants.hpp>
+#include <boost/math/special_functions/gamma.hpp>
+#include <boost/math/special_functions/asinh.hpp>
+#include <boost/algorithm/string.hpp>
+
 
 // IO
 #include <iostream>
@@ -67,13 +81,6 @@
 //#include "oompi.h"
 //#include <pthread.h>
 
-// Boost Headers
-#include <boost/geometry/geometry.hpp>
-#include <boost/math/constants/constants.hpp>
-#include <boost/python.hpp>
-#include <boost/math/special_functions/gamma.hpp>
-#include <boost/math/special_functions/asinh.hpp>
-#include <boost/algorithm/string.hpp>
 
 // Misc
 #include <stdlib.h>
@@ -114,10 +121,6 @@ using Eigen::VectorXcd;
 /* Things from BTAS that we always need */
 using btas::Tensor;
 
-/* Things from Libint that we always need */
-using libint2::OneBodyEngine;
-using libint2::TwoBodyEngine;
-
 // Alias for Boost::Geometry
 namespace bg = boost::geometry;
 
@@ -138,7 +141,6 @@ typedef Eigen::Map<ComplexMatrix> ComplexMap; ///< Map double precision complex 
 typedef Eigen::Map<const ComplexMatrix> ConstComplexMap; ///< Map double precision complex array onto const ComplexMatrix object
 typedef Eigen::MatrixExponentialReturnValue<RealMatrix>    RealMatExp; ///< Driver for matrix exponentaial (RealMatrix)
 typedef Eigen::MatrixExponentialReturnValue<ComplexMatrix> ComplexMatExp; ///< Driver for matrix exponential (ComplexMatrix)
-typedef TwoBodyEngine<libint2::Coulomb> coulombEngine; ///< Two-body ERI engine for Libint
 typedef btas::RangeNd<CblasColMajor,std::array<long,4>> Range4d; ///< BTAS range specification for rank-4 tensors
 typedef btas::RangeNd<CblasColMajor,std::array<long,3>> Range3d; ///< BTAS range specification for rank-3 tensors
 typedef btas::RangeNd<CblasColMajor,std::array<long,2>> Range2d; ///< BTAS range specification for rank-2 tensors (isomorphic with matrix)

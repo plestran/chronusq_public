@@ -1,3 +1,28 @@
+/* 
+ *  The Chronus Quantum (ChronusQ) software package is high-performace 
+ *  computational chemistry software with a strong emphasis on explicitly 
+ *  time-dependent and post-SCF quantum mechanical methods.
+ *  
+ *  Copyright (C) 2014-2016 Li Research Group (University of Washington)
+ *  
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *  
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program; if not, write to the Free Software Foundation, Inc.,
+ *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *  
+ *  Contact the Developers:
+ *    E-Mail: xsli@uw.edu
+ *  
+ */
 #include <response.h>
 
 namespace ChronusQ {
@@ -28,10 +53,6 @@ void Response<double>::placeVirOcc(RealVecMap &T, RealMatrix &TMOA,
   if(doBeta)
     TMOB.block(iOffB,0,this->nVA_,this->nOA_) = TExpandedB;
 
-//prettyPrint(cout,T,"T");
-//prettyPrint(cout,TMOA,"TA");
-//prettyPrint(cout,TMOB,"TB");
-
 }; // placeVirOcc
 
 template<>
@@ -55,10 +76,6 @@ void Response<double>::placeOccVir(RealVecMap &T, RealMatrix &TMOA,
   TMOA.block(0,iOffA,this->nOA_,this->nVA_) = TExpandedA.adjoint();
   if(doBeta)
     TMOB.block(0,iOffB,this->nOA_,this->nVA_) = TExpandedB.adjoint();
-
-//prettyPrint(cout,T,"T");
-//prettyPrint(cout,TMOA,"TA");
-//prettyPrint(cout,TMOB,"TB");
 
 }; // placeVirOcc
 
@@ -119,7 +136,7 @@ void Response<double>::retrieveOccVir(RealVecMap &T, RealMatrix &TMOA,
 } // retrieveOccVir
 
 template<>
-void Response<double>::formAOTransDen(RealVecMap &T, RealMatrix &TAOA,
+void Response<double>::formAOTransDenFOPPA(RealVecMap &T, RealMatrix &TAOA,
   RealMatrix &TAOB) {
   RealMatrix TMOA,TMOB;
   bool doBeta = this->iPart_ != SPIN_ADAPTED && 
@@ -130,17 +147,14 @@ void Response<double>::formAOTransDen(RealVecMap &T, RealMatrix &TAOA,
   if(doBeta)
     TMOB = RealMatrix(this->nBasis_,this->nBasis_);
 
-  if(this->iClass_ == FOPPA)
-    this->placeVirOcc(T,TMOA,TMOB);
-    if(!this->doTDA_){
-      RealVecMap Y(
-        T.data()+this->nSingleDim_/2,this->nSingleDim_/2
-      );
+  this->placeVirOcc(T,TMOA,TMOB);
+  if(!this->doTDA_){
+    RealVecMap Y(
+      T.data()+this->nSingleDim_/2,this->nSingleDim_/2
+    );
 
-      this->placeOccVir(Y,TMOA,TMOB);
-    }
-  else
-    return;
+    this->placeOccVir(Y,TMOA,TMOB);
+  }
 
   TAOA = (*this->singleSlater_->moA()) * TMOA * 
          this->singleSlater_->moA()->adjoint();
@@ -152,10 +166,10 @@ void Response<double>::formAOTransDen(RealVecMap &T, RealMatrix &TAOA,
       TAOB = (*this->singleSlater_->moB()) * TMOB * 
              this->singleSlater_->moB()->adjoint();
   }
-}; //formAOTDen
+}; //formAOTDenFOPPA
 
 template<>
-void Response<double>::formMOTransDen(RealVecMap &T, RealMatrix &TAOA,
+void Response<double>::formMOTransDenFOPPA(RealVecMap &T, RealMatrix &TAOA,
   RealMatrix &TAOB) {
   RealMatrix TMOA,TMOB;
   bool doBeta = this->iPart_ != SPIN_ADAPTED && 
@@ -177,18 +191,48 @@ void Response<double>::formMOTransDen(RealVecMap &T, RealMatrix &TAOA,
              (*this->singleSlater_->moB());
   }
 
-  if(this->iClass_ == FOPPA)
-    this->retrieveVirOcc(T,TMOA,TMOB);
-    if(!this->doTDA_){
-      RealVecMap Y(
-        T.data()+this->nSingleDim_/2,this->nSingleDim_/2
-      );
+  this->retrieveVirOcc(T,TMOA,TMOB);
+  if(!this->doTDA_){
+    RealVecMap Y(
+      T.data()+this->nSingleDim_/2,this->nSingleDim_/2
+    );
 
-      this->retrieveOccVir(Y,TMOA,TMOB);
+    this->retrieveOccVir(Y,TMOA,TMOB);
+  }
+
+}; //formMOTDenFOPPA
+
+template<>
+void Response<double>::formAOTransDenPPRPA(RealVecMap &T, RealMatrix &TAOA,
+  RealMatrix &TAOB) {
+
+  for(auto mu = 0; mu < this->nTCS_*this->nBasis_; mu++)
+  for(auto nu = 0; nu < this->nTCS_*this->nBasis_; nu++){
+    if(this->currentMat_ == AA_PPRPA || this->currentMat_ == AAA_PPTDA ||
+       this->currentMat_ == PPRPA_TRIPLETS) {
+      for(auto a = 0, ab = 0; a < this->nVA_; a++      )
+      for(auto b = 0        ; b < a        ;  b++, ab++){
+        TAOA(mu,nu) += (*this->singleSlater_->moA())(mu,a) *
+                       (*this->singleSlater_->moA())(nu,b) *
+                       T(ab);
+      }
+    } 
+    // FIXME: Need to generalize for UHF
+    else if(this->currentMat_ == AB_PPRPA || this->currentMat_ == AAB_PPTDA){
+      for(auto a = 0, ab = 0; a < this->nVA_; a++      )
+      for(auto b = 0        ; b < this->nVB_; b++, ab++){
+        TAOA(mu,nu) += (*this->singleSlater_->moA())(mu,a) *
+                       (*this->singleSlater_->moA())(nu,b) *
+                       T(ab);
+      }
     }
-  else
-    return;
+  }
+}; //formAOTransDenPPRPA
 
-}; //formMOTDen
+template<>
+void Response<double>::formMOTransDenPPRPA(RealVecMap &T, RealMatrix &TMOA,
+  RealMatrix &TMOB) {
+
+}; //formMOTransDenPPRPA
 
 }; // namespace ChronusQ

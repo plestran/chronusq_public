@@ -3,7 +3,7 @@
  *  computational chemistry software with a strong emphasis on explicitly 
  *  time-dependent and post-SCF quantum mechanical methods.
  *  
- *  Copyright (C) 2014-2015 Li Research Group (University of Washington)
+ *  Copyright (C) 2014-2016 Li Research Group (University of Washington)
  *  
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -100,9 +100,11 @@ public:
     H5::DataSpace dataspace;
     std::string name;
 
-    ScratchPartition(std::string &nm, H5::DataSpace &space, H5::H5File &file){
+    ScratchPartition(std::string &nm, const H5::PredType &type, H5::DataSpace &space, 
+      H5::H5File &file){
+
       this->data = H5::DataSet(
-        file.createDataSet(nm,H5::PredType::NATIVE_DOUBLE,space)
+        file.createDataSet(nm,type,space)
       );
       this->name = nm;
       this->dataspace = space;
@@ -110,6 +112,8 @@ public:
   };
 
   std::vector<ScratchPartition> scratchPartitions;
+  H5::DataSet * createScratchPartition(const H5::PredType&, std::string &, 
+    std::vector<hsize_t>&);
 
   template<typename T> struct metaData {
     T val;
@@ -157,6 +161,9 @@ public:
     BetaMO
   };
 
+
+  bool haveStdOpFiles;
+  bool haveStdSCFFiles;
   void iniH5Paths();
   void iniH5Files();
   void iniCompType();
@@ -172,6 +179,7 @@ public:
   void write(std::string);
 
   inline std::string fileName(){return this->name;};
+  inline std::string fileNameOut(){return this->name_out;};
 
 };
 } // namespace ChronusQ

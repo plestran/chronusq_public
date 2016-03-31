@@ -3,7 +3,7 @@
  *  computational chemistry software with a strong emphasis on explicitly 
  *  time-dependent and post-SCF quantum mechanical methods.
  *  
- *  Copyright (C) 2014-2015 Li Research Group (University of Washington)
+ *  Copyright (C) 2014-2016 Li Research Group (University of Washington)
  *  
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -275,9 +275,9 @@ public:
   inline double      currentTime(){ return this->currentTime_;                             };
   inline double          maxTime(){ return (this->maxSteps_)*(this->stepSize_);            };
   inline double           Energy(){ return this->ssPropagator_->totalEnergy;               };
-  inline double              EDx(){ return (*this->ssPropagator_->dipole())(0)/phys.debye; };
-  inline double              EDy(){ return (*this->ssPropagator_->dipole())(1)/phys.debye; };
-  inline double              EDz(){ return (*this->ssPropagator_->dipole())(2)/phys.debye; };
+  inline double              EDx(){ return this->ssPropagator_->elecDipole()[0]/phys.debye; };
+  inline double              EDy(){ return this->ssPropagator_->elecDipole()[1]/phys.debye; };
+  inline double              EDz(){ return this->ssPropagator_->elecDipole()[2]/phys.debye; };
   inline double            EDtot(){ return std::sqrt( std::pow(EDx(),2.0) +
                                                       std::pow(EDy(),2.0) +
                                                       std::pow(EDz(),2.0));};
@@ -334,8 +334,8 @@ public:
   
 };
 
-#include <realtime_alloc.h>
-#include <realtime_print.h>
-#include <realtime_proc.h>
+#include <realtime/realtime_alloc.h>
+#include <realtime/realtime_print.h>
+#include <realtime/realtime_proc.h>
 } // namespace ChronusQ
 #endif

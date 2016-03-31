@@ -3,7 +3,7 @@
  *  computational chemistry software with a strong emphasis on explicitly 
  *  time-dependent and post-SCF quantum mechanical methods.
  *  
- *  Copyright (C) 2014-2015 Li Research Group (University of Washington)
+ *  Copyright (C) 2014-2016 Li Research Group (University of Washington)
  *  
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -94,21 +94,21 @@ void SingleSlater<dcomplex>::GenDComm(int iter){
 /*
   if(this->Ref_ == TCS){
     RealMap GenOverlap(this->SMem_,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
-    ErrA = (*this->fockA_) * (*this->densityA_) * (GenOverlap);
-    ErrA -= (GenOverlap) * (*this->densityA_) * (*this->fockA_);
+    ErrA = (*this->fockA_) * (*this->onePDMA_) * (GenOverlap);
+    ErrA -= (GenOverlap) * (*this->onePDMA_) * (*this->fockA_);
   } else {
-    ErrA = (*this->fockA_) * (*this->densityA_) * (*this->aointegrals_->overlap_);
-    ErrA -= (*this->aointegrals_->overlap_) * (*this->densityA_) * (*this->fockA_);
+    ErrA = (*this->fockA_) * (*this->onePDMA_) * (*this->aointegrals_->overlap_);
+    ErrA -= (*this->aointegrals_->overlap_) * (*this->onePDMA_) * (*this->fockA_);
   }
 */
-  ErrA = (*this->fockA_) * (*this->densityA_) * (*this->aointegrals_->overlap_);
-  ErrA -= (*this->aointegrals_->overlap_) * (*this->densityA_) * (*this->fockA_);
+  ErrA = (*this->fockA_) * (*this->onePDMA_) * (*this->aointegrals_->overlap_);
+  ErrA -= (*this->aointegrals_->overlap_) * (*this->onePDMA_) * (*this->fockA_);
   if(!this->isClosedShell && this->Ref_ != TCS){
     ComplexMap ErrB(this->ErrorBetaMem_ + (iter % (this->lenCoeff_-1)) * this->lenF_,
                  this->nBasis_,this->nBasis_);
 
-    ErrB = (*this->fockB_) * (*this->densityB_) * (*this->aointegrals_->overlap_);
-    ErrB -= (*this->aointegrals_->overlap_) * (*this->densityB_) * (*this->fockB_);
+    ErrB = (*this->fockB_) * (*this->onePDMB_) * (*this->aointegrals_->overlap_);
+    ErrB -= (*this->aointegrals_->overlap_) * (*this->onePDMB_) * (*this->fockB_);
   }
 } // GenDComm
 

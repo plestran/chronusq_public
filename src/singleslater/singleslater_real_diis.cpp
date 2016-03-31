@@ -3,7 +3,7 @@
  *  computational chemistry software with a strong emphasis on explicitly 
  *  time-dependent and post-SCF quantum mechanical methods.
  *  
- *  Copyright (C) 2014-2015 Li Research Group (University of Washington)
+ *  Copyright (C) 2014-2016 Li Research Group (University of Washington)
  *  
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -61,22 +61,44 @@ void SingleSlater<double>::CDIIS(){
   this->fileio_->out << "COEFF" << endl;
   for(auto k = 0; k < N;k++) this->fileio_->out << coef[k] << endl;
   this->fileio_->out << endl; 
-  dgesv_(&N,&NRHS,B.data(),&N,iPiv,coef,&N,&INFO);
 */
-  RealVecMap COEFF(coef,N);
-  VectorXd   RHS(COEFF);
-  COEFF = B.fullPivLu().solve(RHS);
-  
-  this->fockA_->setZero();
-  if(!this->isClosedShell && this->Ref_ != TCS) this->fockB_->setZero();
-  for(auto j = 0; j < N-1; j++) {
-    RealMap FA(this->FADIIS_ + (j%(N-1))*NBSq,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
-    *this->fockA_ += coef[j]*FA;
-    if(!this->isClosedShell && this->Ref_ != TCS) {
-      RealMap FB(this->FBDIIS_ + (j%(N-1))*NBSq,this->nBasis_,this->nBasis_);
-      *this->fockB_ += coef[j]*FB;
+
+//dgesv_(&N,&NRHS,B.data(),&N,iPiv,coef,&N,&INFO);
+  char NORM = 'O';
+  double ANORM = B.lpNorm<1>();
+//RealVecMap COEFF(coef,N);
+//VectorXd   RHS(COEFF);
+//COEFF = B.fullPivLu().solve(RHS);
+
+//dgetrf_(&N,&N,B.data(),&N,iPiv,&INFO);
+//std::vector<int> iWORK_(N);
+//dgecon_(&NORM,&N,B.data(),&N,&ANORM,&RCOND,this->WORK_,&iWORK_[0],&INFO);
+
+  char TRANS = 'N';
+  dgels_(&TRANS,&N,&N,&NRHS,B.data(),&N,coef,&N,this->WORK_,&this->LWORK_,&INFO);
+
+  /*
+  double RCOND = -1.0;
+  int Rank;
+  double* S    = new double[N];
+  dgelss_(&N,&N,&NRHS,B.data(),&N,coef,&N,S,&RCOND,&Rank,this->WORK_,
+    &this->LWORK_,&INFO);
+  delete [] S;
+  */
+
+
+//if(std::abs(RCOND) > 1e-10) {
+    this->fockA_->setZero();
+    if(!this->isClosedShell && this->Ref_ != TCS) this->fockB_->setZero();
+    for(auto j = 0; j < N-1; j++) {
+      RealMap FA(this->FADIIS_ + (j%(N-1))*NBSq,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
+      *this->fockA_ += coef[j]*FA;
+      if(!this->isClosedShell && this->Ref_ != TCS) {
+        RealMap FB(this->FBDIIS_ + (j%(N-1))*NBSq,this->nBasis_,this->nBasis_);
+        *this->fockB_ += coef[j]*FB;
+      }
     }
-  }
+//}
   delete [] coef;
   delete [] iPiv;
 
@@ -98,21 +120,21 @@ void SingleSlater<double>::GenDComm(int iter){
 /*
   if(this->Ref_ == TCS){
     RealMap GenOverlap(this->SMem_,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
-    ErrA = (*this->fockA_) * (*this->densityA_) * (GenOverlap);
-    ErrA -= (GenOverlap) * (*this->densityA_) * (*this->fockA_);
+    ErrA = (*this->fockA_) * (*this->onePDMA_) * (GenOverlap);
+    ErrA -= (GenOverlap) * (*this->onePDMA_) * (*this->fockA_);
   } else {
-    ErrA = (*this->fockA_) * (*this->densityA_) * (*this->aointegrals_->overlap_);
-    ErrA -= (*this->aointegrals_->overlap_) * (*this->densityA_) * (*this->fockA_);
+    ErrA = (*this->fockA_) * (*this->onePDMA_) * (*this->aointegrals_->overlap_);
+    ErrA -= (*this->aointegrals_->overlap_) * (*this->onePDMA_) * (*this->fockA_);
   }
 */
-  ErrA = (*this->fockA_) * (*this->densityA_) * (*this->aointegrals_->overlap_);
-  ErrA -= (*this->aointegrals_->overlap_) * (*this->densityA_) * (*this->fockA_);
+  ErrA = (*this->fockA_) * (*this->onePDMA_) * (*this->aointegrals_->overlap_);
+  ErrA -= (*this->aointegrals_->overlap_) * (*this->onePDMA_) * (*this->fockA_);
   if(!this->isClosedShell && this->Ref_ != TCS){
     RealMap ErrB(this->ErrorBetaMem_ + (iter % (this->lenCoeff_-1)) * this->lenF_,
                  this->nBasis_,this->nBasis_);
 
-    ErrB = (*this->fockB_) * (*this->densityB_) * (*this->aointegrals_->overlap_);
-    ErrB -= (*this->aointegrals_->overlap_) * (*this->densityB_) * (*this->fockB_);
+    ErrB = (*this->fockB_) * (*this->onePDMB_) * (*this->aointegrals_->overlap_);
+    ErrB -= (*this->aointegrals_->overlap_) * (*this->onePDMB_) * (*this->fockB_);
   }
 } // GenDComm
 

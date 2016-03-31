@@ -3,7 +3,7 @@
  *  computational chemistry software with a strong emphasis on explicitly 
  *  time-dependent and post-SCF quantum mechanical methods.
  *  
- *  Copyright (C) 2014-2015 Li Research Group (University of Washington)
+ *  Copyright (C) 2014-2016 Li Research Group (University of Washington)
  *  
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -41,15 +41,15 @@ void SingleSlater<double>::formCoulomb(){
   if(!this->aointegrals_->haveAOTwoE) this->aointegrals_->computeAOTwoE();
   this->coulombA_->setZero();
 
-  for(i=0;i<this->nBasis_;i++) (*densityA_)(i,i)*=math.half;
+  for(i=0;i<this->nBasis_;i++) (*onePDMA_)(i,i)*=math.half;
 
-  this->densityA_->vectorize();
+  this->onePDMA_->vectorize();
   this->coulombA_->vectorize();
-  (*this->coulombA_) = (*this->aointegrals_->twoEC_)*(*this->densityA_);
+  (*this->coulombA_) = (*this->aointegrals_->twoEC_)*(*this->onePDMA_);
   this->coulombA_->unvectorize();
-  this->densityA_->unvectorize();
+  this->onePDMA_->unvectorize();
 
-  for(i=0;i<this->nBasis_;i++) (*densityA_)(i,i)*=math.two;
+  for(i=0;i<this->nBasis_;i++) (*onePDMA_)(i,i)*=math.two;
 
   finish = std::chrono::high_resolution_clock::now();
   this->aointegrals_->CoulD = finish - start; 
@@ -74,16 +74,16 @@ void SingleSlater<double>::formExchange(){
   if(!this->aointegrals_->haveAOTwoE) this->aointegrals_->computeAOTwoE();
   this->exchangeA_->setZero();
 
-  for(i=0;i<this->nBasis_;i++) (*densityA_)(i,i)*=math.half;
+  for(i=0;i<this->nBasis_;i++) (*onePDMA_)(i,i)*=math.half;
 
-  this->densityA_->vectorize();
+  this->onePDMA_->vectorize();
   this->exchangeA_->vectorize();
-  (*this->exchangeA_)= (*this->aointegrals_->twoEX_)*(*this->densityA_);
+  (*this->exchangeA_)= (*this->aointegrals_->twoEX_)*(*this->onePDMA_);
   this->exchangeA_->scale(math.quarter);
   this->exchangeA_->unvectorize();
-  this->densityA_->unvectorize();
+  this->onePDMA_->unvectorize();
 
-  for(i=0;i<this->nBasis_;i++) (*densityA_)(i,i)*=math.two;
+  for(i=0;i<this->nBasis_;i++) (*onePDMA_)(i,i)*=math.two;
 
   finish = std::chrono::high_resolution_clock::now();
   this->aointegrals_->ExchD = finish - start; 

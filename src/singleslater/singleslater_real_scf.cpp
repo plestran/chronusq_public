@@ -3,7 +3,7 @@
  *  computational chemistry software with a strong emphasis on explicitly 
  *  time-dependent and post-SCF quantum mechanical methods.
  *  
- *  Copyright (C) 2014-2015 Li Research Group (University of Washington)
+ *  Copyright (C) 2014-2016 Li Research Group (University of Washington)
  *  
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -110,9 +110,9 @@ void SingleSlater<double>::formNO(){
   RealMap P(this->PNOMem_,this->nBasis_,this->nBasis_);
   RealMap Xp(this->XpMem_,this->nBasis_,this->nBasis_);
 
-  P = 0.5 * Xp * (*this->densityA_) * Xp;
+  P = 0.5 * Xp * (*this->onePDMA_) * Xp;
   if(!this->isClosedShell)
-    P += 0.5 * Xp * (*this->densityB_) * Xp;
+    P += 0.5 * Xp * (*this->onePDMB_) * Xp;
 
   dsyev_(&JOBZ,&UPLO,&this->nBasis_,this->PNOMem_,&this->nBasis_,this->occNumMem_,
          this->WORK_,&this->LWORK_,&INFO);
@@ -171,8 +171,8 @@ void SingleSlater<double>::diagFock(){
     if(!this->isClosedShell) (*this->fockB_) -= Lambda;
   }
 
-  POldAlpha = (*this->densityA_);
-  if(!this->isClosedShell && this->Ref_ != TCS) POldBeta = (*this->densityB_);
+  POldAlpha = (*this->onePDMA_);
+  if(!this->isClosedShell && this->Ref_ != TCS) POldBeta = (*this->onePDMB_);
 
   FpAlpha = X.transpose() * (*this->fockA_) * X;
   dsyev_(&JOBZ,&UPLO,&NTCSxNBASIS,this->FpAlphaMem_,&NTCSxNBASIS,this->epsA_->data(),
@@ -217,9 +217,9 @@ void SingleSlater<double>::evalConver(int iter){
   if(getRank() == 0) {
     EDelta = this->totalEnergy - EOld;
  
-    PAlphaRMS = ((*this->densityA_) - POldAlpha).norm();
+    PAlphaRMS = ((*this->onePDMA_) - POldAlpha).norm();
     if(!this->isClosedShell && this->Ref_ != TCS) 
-      PBetaRMS = ((*this->densityB_) - POldBeta).norm();
+      PBetaRMS = ((*this->onePDMB_) - POldBeta).norm();
  
     if(this->printLevel_ > 0) 
       this->printSCFIter(iter,EDelta,PAlphaRMS,PBetaRMS);

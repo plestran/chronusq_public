@@ -3,7 +3,7 @@
  *  computational chemistry software with a strong emphasis on explicitly 
  *  time-dependent and post-SCF quantum mechanical methods.
  *  
- *  Copyright (C) 2014-2015 Li Research Group (University of Washington)
+ *  Copyright (C) 2014-2016 Li Research Group (University of Washington)
  *  
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -126,6 +126,7 @@ void BasisSet::genUCvomLocal(BasisSet *genBasis){
  *  Compute BasisSet metadata
  */
 void BasisSet::computeMeta(){
+  this->nBasis_ = 0;
   this->nShell_     = this->shells_.size();
   this->nShellPair_ = this->nShell_ * (this->nShell_ + 1) / 2;
   

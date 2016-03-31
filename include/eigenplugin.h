@@ -3,7 +3,7 @@
  *  computational chemistry software with a strong emphasis on explicitly 
  *  time-dependent and post-SCF quantum mechanical methods.
  *  
- *  Copyright (C) 2014-2015 Li Research Group (University of Washington)
+ *  Copyright (C) 2014-2016 Li Research Group (University of Washington)
  *  
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,12 +35,17 @@ inline Scalar frobInner(const MatrixBase<OtherDerived>& other) const {
   return (derived().cwiseProduct(other.derived())).sum();
 }
 
-/*
-inline void normCol() const {
-  for(auto j = 0; j < cols(); j++) {
-    double colNorm = derived().col(j).norm();
-    this.col(j) = this.col(j)/colNorm;
-  }
+template<typename Dervd>
+inline double diffNorm( const Dervd &A, const Dervd &B ){
+  return (A-B).norm();
 }
-*/
 
+template<typename Dervd>
+inline double diffNormI( const Dervd &A ){
+  return (A - Dervd::Identity(A.rows(),A.cols())).norm();
+}
+
+template<typename Dervd>
+inline double selfInner( const Dervd &A){
+  return A.dot(A);
+}

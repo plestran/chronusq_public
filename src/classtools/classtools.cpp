@@ -3,7 +3,7 @@
  *  computational chemistry software with a strong emphasis on explicitly 
  *  time-dependent and post-SCF quantum mechanical methods.
  *  
- *  Copyright (C) 2014-2015 Li Research Group (University of Washington)
+ *  Copyright (C) 2014-2016 Li Research Group (University of Washington)
  *  
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -295,31 +295,31 @@ void printUnitInfo(Controls * controls, SingleSlater<double> * singleSlater, SDR
   if(controls->unitTest == Controls::UnitSCF)
     cout << std::setprecision(10) << singleSlater->totalEnergy << "/"
          << std::setprecision(4)
-         << (*singleSlater->dipole())(0)/phys.debye << "/"
-         << (*singleSlater->dipole())(1)/phys.debye << "/"
-         << (*singleSlater->dipole())(2)/phys.debye << "/"
-         << (*singleSlater->quadpole())(0,0)*phys.bohr/phys.debye << "/"
-         << (*singleSlater->quadpole())(1,1)*phys.bohr/phys.debye << "/"
-         << (*singleSlater->quadpole())(2,2)*phys.bohr/phys.debye << "/"
-         << (*singleSlater->quadpole())(0,1)*phys.bohr/phys.debye << "/"
-         << (*singleSlater->quadpole())(0,2)*phys.bohr/phys.debye << "/"
-         << (*singleSlater->quadpole())(1,2)*phys.bohr/phys.debye << "/"
-        << (*singleSlater->tracelessQuadpole())(0,0)*phys.bohr/phys.debye << "/"
-        << (*singleSlater->tracelessQuadpole())(1,1)*phys.bohr/phys.debye << "/"
-        << (*singleSlater->tracelessQuadpole())(2,2)*phys.bohr/phys.debye << "/"
-        << (*singleSlater->tracelessQuadpole())(0,1)*phys.bohr/phys.debye << "/"
-        << (*singleSlater->tracelessQuadpole())(0,2)*phys.bohr/phys.debye << "/"
-        << (*singleSlater->tracelessQuadpole())(1,2)*phys.bohr/phys.debye << "/"
-     << (*singleSlater->octpole())(0,0,0)*phys.bohr*phys.bohr/phys.debye << "/"
-     << (*singleSlater->octpole())(1,1,1)*phys.bohr*phys.bohr/phys.debye << "/"
-     << (*singleSlater->octpole())(2,2,2)*phys.bohr*phys.bohr/phys.debye << "/"
-     << (*singleSlater->octpole())(0,1,1)*phys.bohr*phys.bohr/phys.debye << "/"
-     << (*singleSlater->octpole())(0,0,1)*phys.bohr*phys.bohr/phys.debye << "/"
-     << (*singleSlater->octpole())(0,0,2)*phys.bohr*phys.bohr/phys.debye << "/"
-     << (*singleSlater->octpole())(0,2,2)*phys.bohr*phys.bohr/phys.debye << "/"
-     << (*singleSlater->octpole())(1,2,2)*phys.bohr*phys.bohr/phys.debye << "/"
-     << (*singleSlater->octpole())(1,1,2)*phys.bohr*phys.bohr/phys.debye << "/"
-    << (*singleSlater->octpole())(0,1,2)*phys.bohr*phys.bohr/phys.debye << endl;
+         << singleSlater->elecDipole()[0]/phys.debye << "/"
+         << singleSlater->elecDipole()[1]/phys.debye << "/"
+         << singleSlater->elecDipole()[2]/phys.debye << "/"
+         << singleSlater->elecQuadpole()[0][0]*phys.bohr/phys.debye << "/"
+         << singleSlater->elecQuadpole()[1][1]*phys.bohr/phys.debye << "/"
+         << singleSlater->elecQuadpole()[2][2]*phys.bohr/phys.debye << "/"
+         << singleSlater->elecQuadpole()[0][1]*phys.bohr/phys.debye << "/"
+         << singleSlater->elecQuadpole()[0][2]*phys.bohr/phys.debye << "/"
+         << singleSlater->elecQuadpole()[1][2]*phys.bohr/phys.debye << "/"
+        << singleSlater->elecTracelessQuadpole()[0][0]*phys.bohr/phys.debye << "/"
+        << singleSlater->elecTracelessQuadpole()[1][1]*phys.bohr/phys.debye << "/"
+        << singleSlater->elecTracelessQuadpole()[2][2]*phys.bohr/phys.debye << "/"
+        << singleSlater->elecTracelessQuadpole()[0][1]*phys.bohr/phys.debye << "/"
+        << singleSlater->elecTracelessQuadpole()[0][2]*phys.bohr/phys.debye << "/"
+        << singleSlater->elecTracelessQuadpole()[1][2]*phys.bohr/phys.debye << "/"
+     << singleSlater->elecOctpole()[0][0][0]*phys.bohr*phys.bohr/phys.debye << "/"
+     << singleSlater->elecOctpole()[1][1][1]*phys.bohr*phys.bohr/phys.debye << "/"
+     << singleSlater->elecOctpole()[2][2][2]*phys.bohr*phys.bohr/phys.debye << "/"
+     << singleSlater->elecOctpole()[0][1][1]*phys.bohr*phys.bohr/phys.debye << "/"
+     << singleSlater->elecOctpole()[0][0][1]*phys.bohr*phys.bohr/phys.debye << "/"
+     << singleSlater->elecOctpole()[0][0][2]*phys.bohr*phys.bohr/phys.debye << "/"
+     << singleSlater->elecOctpole()[0][2][2]*phys.bohr*phys.bohr/phys.debye << "/"
+     << singleSlater->elecOctpole()[1][2][2]*phys.bohr*phys.bohr/phys.debye << "/"
+     << singleSlater->elecOctpole()[1][1][2]*phys.bohr*phys.bohr/phys.debye << "/"
+    << singleSlater->elecOctpole()[0][1][2]*phys.bohr*phys.bohr/phys.debye << endl;
   else if(controls->unitTest == Controls::UnitResp){
     for(auto iSt = 0; iSt < sdResponse->nSek(); iSt++){
       cout << (*sdResponse->omega())(iSt)*phys.eVPerHartree << "," << (*sdResponse->oscStrength())(0,iSt+1);
@@ -342,31 +342,31 @@ void printUnitInfo(Controls * controls, SingleSlater<dcomplex> * singleSlater, S
   if(controls->unitTest == Controls::UnitSCF)
     cout << std::setprecision(10) << singleSlater->totalEnergy << "/"
          << std::setprecision(4)
-         << (*singleSlater->dipole())(0)/phys.debye << "/"
-         << (*singleSlater->dipole())(1)/phys.debye << "/"
-         << (*singleSlater->dipole())(2)/phys.debye << "/"
-         << (*singleSlater->quadpole())(0,0)*phys.bohr/phys.debye << "/"
-         << (*singleSlater->quadpole())(1,1)*phys.bohr/phys.debye << "/"
-         << (*singleSlater->quadpole())(2,2)*phys.bohr/phys.debye << "/"
-         << (*singleSlater->quadpole())(0,1)*phys.bohr/phys.debye << "/"
-         << (*singleSlater->quadpole())(0,2)*phys.bohr/phys.debye << "/"
-         << (*singleSlater->quadpole())(1,2)*phys.bohr/phys.debye << "/"
-        << (*singleSlater->tracelessQuadpole())(0,0)*phys.bohr/phys.debye << "/"
-        << (*singleSlater->tracelessQuadpole())(1,1)*phys.bohr/phys.debye << "/"
-        << (*singleSlater->tracelessQuadpole())(2,2)*phys.bohr/phys.debye << "/"
-        << (*singleSlater->tracelessQuadpole())(0,1)*phys.bohr/phys.debye << "/"
-        << (*singleSlater->tracelessQuadpole())(0,2)*phys.bohr/phys.debye << "/"
-        << (*singleSlater->tracelessQuadpole())(1,2)*phys.bohr/phys.debye << "/"
-     << (*singleSlater->octpole())(0,0,0)*phys.bohr*phys.bohr/phys.debye << "/"
-     << (*singleSlater->octpole())(1,1,1)*phys.bohr*phys.bohr/phys.debye << "/"
-     << (*singleSlater->octpole())(2,2,2)*phys.bohr*phys.bohr/phys.debye << "/"
-     << (*singleSlater->octpole())(0,1,1)*phys.bohr*phys.bohr/phys.debye << "/"
-     << (*singleSlater->octpole())(0,0,1)*phys.bohr*phys.bohr/phys.debye << "/"
-     << (*singleSlater->octpole())(0,0,2)*phys.bohr*phys.bohr/phys.debye << "/"
-     << (*singleSlater->octpole())(0,2,2)*phys.bohr*phys.bohr/phys.debye << "/"
-     << (*singleSlater->octpole())(1,2,2)*phys.bohr*phys.bohr/phys.debye << "/"
-     << (*singleSlater->octpole())(1,1,2)*phys.bohr*phys.bohr/phys.debye << "/"
-    << (*singleSlater->octpole())(0,1,2)*phys.bohr*phys.bohr/phys.debye << endl;
+         << singleSlater->elecDipole()[0]/phys.debye << "/"
+         << singleSlater->elecDipole()[1]/phys.debye << "/"
+         << singleSlater->elecDipole()[2]/phys.debye << "/"
+         << singleSlater->elecQuadpole()[0][0]*phys.bohr/phys.debye << "/"
+         << singleSlater->elecQuadpole()[1][1]*phys.bohr/phys.debye << "/"
+         << singleSlater->elecQuadpole()[2][2]*phys.bohr/phys.debye << "/"
+         << singleSlater->elecQuadpole()[0][1]*phys.bohr/phys.debye << "/"
+         << singleSlater->elecQuadpole()[0][2]*phys.bohr/phys.debye << "/"
+         << singleSlater->elecQuadpole()[1][2]*phys.bohr/phys.debye << "/"
+        << singleSlater->elecTracelessQuadpole()[0][0]*phys.bohr/phys.debye << "/"
+        << singleSlater->elecTracelessQuadpole()[1][1]*phys.bohr/phys.debye << "/"
+        << singleSlater->elecTracelessQuadpole()[2][2]*phys.bohr/phys.debye << "/"
+        << singleSlater->elecTracelessQuadpole()[0][1]*phys.bohr/phys.debye << "/"
+        << singleSlater->elecTracelessQuadpole()[0][2]*phys.bohr/phys.debye << "/"
+        << singleSlater->elecTracelessQuadpole()[1][2]*phys.bohr/phys.debye << "/"
+     << singleSlater->elecOctpole()[0][0][0]*phys.bohr*phys.bohr/phys.debye << "/"
+     << singleSlater->elecOctpole()[1][1][1]*phys.bohr*phys.bohr/phys.debye << "/"
+     << singleSlater->elecOctpole()[2][2][2]*phys.bohr*phys.bohr/phys.debye << "/"
+     << singleSlater->elecOctpole()[0][1][1]*phys.bohr*phys.bohr/phys.debye << "/"
+     << singleSlater->elecOctpole()[0][0][1]*phys.bohr*phys.bohr/phys.debye << "/"
+     << singleSlater->elecOctpole()[0][0][2]*phys.bohr*phys.bohr/phys.debye << "/"
+     << singleSlater->elecOctpole()[0][2][2]*phys.bohr*phys.bohr/phys.debye << "/"
+     << singleSlater->elecOctpole()[1][2][2]*phys.bohr*phys.bohr/phys.debye << "/"
+     << singleSlater->elecOctpole()[1][1][2]*phys.bohr*phys.bohr/phys.debye << "/"
+    << singleSlater->elecOctpole()[0][1][2]*phys.bohr*phys.bohr/phys.debye << endl;
   else if(controls->unitTest == Controls::UnitResp){
     for(auto iSt = 0; iSt < sdResponse->nSek(); iSt++){
       cout << (*sdResponse->omega())(iSt)*phys.eVPerHartree << "," << (*sdResponse->oscStrength())(0,iSt+1);
@@ -399,6 +399,24 @@ void initCQ(int argc, char** argv){
   MPI_Initialized(&flag);
   if(flag) return;
   MPI_Init(&argc,&argv);
+  MPI_Barrier(MPI_COMM_WORLD);
+#endif
+}
+
+void initCQ(){
+#ifdef USE_LIBINT
+  // Bootstrap Libint env
+  libint2::init(); 
+#endif
+#ifdef _OPENMP
+  // Set up Thread Pool (Default serial)
+  omp_set_num_threads(1);
+#endif
+#ifdef CQ_ENABLE_MPI
+  int flag;
+  MPI_Initialized(&flag);
+  if(flag) return;
+  MPI_Init(NULL,NULL);
   MPI_Barrier(MPI_COMM_WORLD);
 #endif
 }

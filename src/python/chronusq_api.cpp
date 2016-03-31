@@ -3,7 +3,7 @@
  *  computational chemistry software with a strong emphasis on explicitly 
  *  time-dependent and post-SCF quantum mechanical methods.
  *  
- *  Copyright (C) 2014-2015 Li Research Group (University of Washington)
+ *  Copyright (C) 2014-2016 Li Research Group (University of Washington)
  *  
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -208,6 +208,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("computeNucRep", &Molecule::computeNucRep    )
     .def("computeI",      &Molecule::computeI         )
     .def("computeRij",    &Molecule::computeRij       )
+    .def("cart",          &Molecule::Wrapper_cart     )
   ;
 
   class_<BasisSet,boost::noncopyable>("BasisSet",init<>())
@@ -446,6 +447,31 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def_readonly("nIter"    ,&SDResponse<dcomplex>::nQNIter                   )
   ;
 
+  class_<NumericalDifferentiation<double>,boost::noncopyable>(
+    "NumericalDifferentiationDouble",init<>())
+    .def("differentiate"  ,&NumericalDifferentiation<double>::differentiate)
+    .def("setSingleSlater",&NumericalDifferentiation<double>::setSingleSlater)
+    .def("generateESObjs"  ,&NumericalDifferentiation<double>::generateESObjs)
+    .def("setRespNRoots"  ,&NumericalDifferentiation<double>::setRespNRoots)
+    .def("setRespRoot"  ,&NumericalDifferentiation<double>::setRespRoot)
+    .def("setRespType"  ,&NumericalDifferentiation<double>::setRespType)
+    .def("GSEnergy" , &NumericalDifferentiation<double>::Wrapper_GSEnergy )
+    .def("GSGrad"   , &NumericalDifferentiation<double>::Wrapper_GSGrad   ) 
+    .def("ESEnergy" , &NumericalDifferentiation<double>::Wrapper_ESEnergy )
+    .def("ESGrad"   , &NumericalDifferentiation<double>::Wrapper_ESGrad   )
+    .def("ESGSNACME", &NumericalDifferentiation<double>::Wrapper_ESGSNACME)
+    .def("ESESNACME", &NumericalDifferentiation<double>::Wrapper_ESESNACME)
+
+    .def_readwrite("computeGSGradient", 
+                   &NumericalDifferentiation<double>::computeGSGradient)
+    .def_readwrite("computeESGradient", 
+                   &NumericalDifferentiation<double>::computeESGradient)
+    .def_readwrite("computeES2GSNACME", 
+                   &NumericalDifferentiation<double>::computeES2GSNACME)
+    .def_readwrite("computeES2ESNACME", 
+                   &NumericalDifferentiation<double>::computeES2ESNACME)
+  ;
+
   enum_<SDResponse<double>::METHOD>("SDResponse_METHOD")
     .value("INVALID", SDResponse<double>::__invalid    )
     .value("CIS"    , SDResponse<double>::CIS          )
@@ -456,9 +482,20 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("STAB"   , SDResponse<double>::STAB         )
   ;
 
+  enum_<RESPONSE_TYPE>("RESPONSE_TYPE")
+    .value("NOMETHOD", RESPONSE_TYPE::NOMETHOD    )
+    .value("CIS"    , RESPONSE_TYPE::CIS          )
+    .value("RPA"    , RESPONSE_TYPE::RPA          )
+    .value("PPRPA"  , RESPONSE_TYPE::PPRPA        )
+    .value("PPTDA" , RESPONSE_TYPE::PPTDA       )
+    .value("STAB"   , RESPONSE_TYPE::STAB         )
+  ;
+
+  
 
   def("readInput",       ChronusQ::Wrapper_readInput    );
   def("HashAtom",        ChronusQ::HashAtom             );
+  def("HashZ",           ChronusQ::HashZ                );
   def("getAtomicNumber", ChronusQ::getAtomicNumber      );
   def("CErr",            ChronusQ::Wrapper_CErr_Default );
   def("CErrMsg",         ChronusQ::Wrapper_CErr_Message );
@@ -468,5 +505,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
   def("getRank",         ChronusQ::getRank              );
   def("getSize",         ChronusQ::getSize              );
   def("mpiBarrier",      ChronusQ::mpiBarrier           );
+
+  
 };
 

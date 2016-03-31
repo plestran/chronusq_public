@@ -3,7 +3,7 @@
  *  computational chemistry software with a strong emphasis on explicitly 
  *  time-dependent and post-SCF quantum mechanical methods.
  *  
- *  Copyright (C) 2014-2015 Li Research Group (University of Washington)
+ *  Copyright (C) 2014-2016 Li Research Group (University of Washington)
  *  
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -262,14 +262,14 @@ public:
   boost::python::list Wrapper_excitationEnergies();
   boost::python::list Wrapper_oscStrengths();
 
-  #include <sdresponse_getset.h>
-  #include <sdresponse_qnrelated.h>
-  #include <sdresponse_io.h>
-  #include <sdresponse_misc.h>
-  #include <sdresponse_prop.h>
+  #include <sdresponse/sdresponse_getset.h>
+  #include <sdresponse/sdresponse_qnrelated.h>
+  #include <sdresponse/sdresponse_io.h>
+  #include <sdresponse/sdresponse_misc.h>
+  #include <sdresponse/sdresponse_prop.h>
 
 };
 
-#include <sdresponse_alloc.h>
+#include <sdresponse/sdresponse_alloc.h>
 } // namespace ChronusQ
 #endif

@@ -3,7 +3,7 @@
  *  computational chemistry software with a strong emphasis on explicitly 
  *  time-dependent and post-SCF quantum mechanical methods.
  *  
- *  Copyright (C) 2014-2015 Li Research Group (University of Washington)
+ *  Copyright (C) 2014-2016 Li Research Group (University of Washington)
  *  
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -159,12 +159,8 @@ class AOIntegrals{
   std::unique_ptr<MolecularConstants>   molecularConstants_; ///< Smart pointer to struct containing molecular struture meta-data
   std::unique_ptr<QuartetConstants>     quartetConstants_; ///< Smart pointer to struct containing shell-quartet meta-data
 
-//dbwys
-#ifdef USE_LIBINT
-  void OneEDriver(libint2::OneBodyEngine::integral_type); ///< General wrapper for one-electron integrals using Libint integral engine
-#endif
-//dbwye
-
+  void OneEDriver(libint2::Operator); ///< General wrapper for one-electron integrals using Libint integral engine
+  void breakUpMultipole();
 
   inline void checkWorkers(){
     if(this->fileio_  == NULL) 
@@ -184,7 +180,7 @@ class AOIntegrals{
     this->checkWorkers();
     if(this->nBasis_ == 0)
       CErr(
-        "Fatal: SingleSlater Object Initialized with NBasis = 0 or NShell = 0",
+        "Fatal: AOIntegrals Object Initialized with NBasis = 0 or NShell = 0",
         this->fileio_->out);
   }
 
@@ -206,14 +202,17 @@ public:
   std::unique_ptr<RealTensor3d>  elecOctpole_;///< Electric octupole matrix \f$O_{\mu\nu}^{ijk}=\langle\mu\vert r_i r_j r_k \vert\nu\rangle\f$
 
   std::unique_ptr<RealTensor3d>  RcrossDel_; ///< R cross Del matrix \f$\vec{\mu}_{\nu\sigma}=\langle\nu\vert\vec{r} \Del \vert\sigma\rangle\f$
+
+  std::vector<ConstRealMap> elecDipoleSep_;
+  std::vector<ConstRealMap> elecQuadpoleSep_;
+  std::vector<ConstRealMap> elecOctpoleSep_;
+
   bool		haveAOTwoE; ///< Whether or not the two-bodied molecular integrals have been evaluated (for in-core integrals)
   bool		haveAOOneE; ///< Whether or not the one-body molecular integrals have been evaluated
   bool          haveSchwartz; ///< Whether or not the Schwartz bound tensor has been evaluated for the primary basis set
   bool          haveRIS; ///< Whether or not the DFI tensor has been evaluated for the density-fiting basis set
   bool          haveRII; ///< Whether or not the Metric overlap tensor has been evaluated for the density-fitting basis set
   bool          haveTRII;
-//bool          allocERI;
-//bool          doDF;
   bool          isPrimary;
 
 
@@ -275,8 +274,6 @@ public:
     this->haveRIS      = false;
     this->haveRII      = false;
     this->haveTRII     = false;
-//  this->allocERI     = false;
-//  this->doDF         = false;
 
     // Standard Values
     this->nTCS_             = 1;
@@ -320,6 +317,7 @@ public:
   inline int nTCS(){ return this->nTCS_;}
   inline int maxMultipole(){ return this->maxMultipole_;}
   inline int maxNumInt(){ return this->maxNumInt_;}
+  inline Controls* controls(){ return this->controls_;};
 
   // Setters
   inline void setNTCS(int i)        { this->nTCS_         = i;}
@@ -438,7 +436,12 @@ public:
 
   // Python API
   void Wrapper_iniAOIntegrals(Molecule&,BasisSet&,FileIO&,Controls&); 
+
+
+  // Misc Utility Functions that deal with AOIntegrals
+  static RealMatrix genSpx(BasisSet&, BasisSet&);
 };
+
 } // namespace ChronusQ
 
 #endif

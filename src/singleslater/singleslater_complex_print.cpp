@@ -3,7 +3,7 @@
  *  computational chemistry software with a strong emphasis on explicitly 
  *  time-dependent and post-SCF quantum mechanical methods.
  *  
- *  Copyright (C) 2014-2015 Li Research Group (University of Washington)
+ *  Copyright (C) 2014-2016 Li Research Group (University of Washington)
  *  
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -29,11 +29,11 @@ namespace ChronusQ{
   template<>
   void SingleSlater<dcomplex>::printDensity(){
     if(this->Ref_ != TCS) {
-      prettyPrintComplex(this->fileio_->out,(*this->densityA_),"\u03B1-Density");
+      prettyPrintComplex(this->fileio_->out,(*this->onePDMA_),"\u03B1-Density");
       if(!this->isClosedShell) 
-        prettyPrintComplex(this->fileio_->out,(*this->densityB_),"\u03B2-Density");
+        prettyPrintComplex(this->fileio_->out,(*this->onePDMB_),"\u03B2-Density");
     } else
-      prettyPrintTCSComplex(this->fileio_->out,(*this->densityA_),"Density");
+      prettyPrintTCSComplex(this->fileio_->out,(*this->onePDMA_),"Density");
   };
   template<>
   void SingleSlater<dcomplex>::printFock(){

@@ -28,8 +28,8 @@ else()
 endif()
 
 # Check for dependencies
-find_package(PythonLibs 2.6 REQUIRED)
-find_package(PythonInterp 2.6 REQUIRED)
+find_package(PythonLibs 2.7 REQUIRED)
+find_package(PythonInterp 2.7 REQUIRED)
 #find_package(Boost REQUIRED python)
 find_package(Eigen3 REQUIRED)
 find_package(HDF5 REQUIRED CXX)
@@ -58,6 +58,8 @@ endif()
 
 # Append flags for compilation
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated -Wno-deprecated-declarations -Wno-narrowing -Wno-unused-local-typedefs -Wno-strict-aliasing")
+
 if(CQ_ENABLE_MPI)
   # MPI Compile flags
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MPI_CXX_COMPILE_FLAGS}")
@@ -74,7 +76,7 @@ ExternalProject_Add(boost
   URL "${PROJECT_SOURCE_DIR}/deps/src/boost_1_59_0.tar.gz"
   CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/deps/boost/src/boost/bootstrap.sh
   BUILD_COMMAND ${PROJECT_BINARY_DIR}/deps/boost/src/boost/b2
-  --prefix=${PROJECT_BINARY_DIR}/deps --with-python --ignore-site-config --cxxflags="-Wall" install
+  --prefix=${PROJECT_BINARY_DIR}/deps --with-python --ignore-site-config cxxflags=${CMAKE_CXX_FLAGS} install
   BUILD_IN_SOURCE 1
   INSTALL_COMMAND echo "Boost Build Sucess!"
 )
@@ -103,13 +105,13 @@ if(USE_LIBINT)
   if(BUILD_LIBINT)
     ExternalProject_Add(libint
       PREFIX ${PROJECT_BINARY_DIR}/deps/libint
-      URL "${PROJECT_SOURCE_DIR}/deps/src/libint-2.1.0-beta2.tgz"
-      CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/deps/libint/src/libint/configure --prefix=${PROJECT_BINARY_DIR}/deps CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${CMAKE_CXX_FLAGS}
+      URL "${PROJECT_SOURCE_DIR}/deps/src/libint-2.2.0-alpha.tgz"
+      CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/deps/libint/src/libint/configure --prefix=${PROJECT_BINARY_DIR}/deps CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${CMAKE_CXX_FLAGS} --enable-shared
       BUILD_COMMAND make -j2
       BUILD_IN_SOURCE 1
       INSTALL_COMMAND make install
     )  
-    set(LIBINT_LIB ${PROJECT_BINARY_DIR}/deps/lib/libint2.a)
+    set(LIBINT_LIB ${PROJECT_BINARY_DIR}/deps/lib/libint2.so)
     include_directories("${PROJECT_BINARY_DIR}/deps/include")
     include_directories("${PROJECT_BINARY_DIR}/deps/include/libint2")
   else()
@@ -145,6 +147,7 @@ else()
   set(LA_LINK ${LAPACK_LINKER_FLAGS} ${LAPACK_LIBRARIES})
   set(LA_LINK ${LA_LINK} ${BLAS_LINKER_FLAGS} ${BLAS_LIBRARIES})
 endif()
+message(STATUS "Will using the following Link Line for Linear Algebra Libs: ${LA_LINK}")
 
 set(EXTERNAL_CQ_DEPS ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${LA_LINK} 
   ${LIBINT_LIB} m ${OpenMP_CXX_FLAGS} ${HDF5_CXX_LIBRARIES})
@@ -170,3 +173,6 @@ configure_file(
 # Recurse into src
 add_subdirectory(src)
 add_subdirectory(tests)
+
+
+message(STATUS "CXXFLAGS: ${CMAKE_CXX_FLAGS}")

@@ -3,7 +3,7 @@
  *  computational chemistry software with a strong emphasis on explicitly 
  *  time-dependent and post-SCF quantum mechanical methods.
  *  
- *  Copyright (C) 2014-2015 Li Research Group (University of Washington)
+ *  Copyright (C) 2014-2016 Li Research Group (University of Washington)
  *  
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -231,7 +231,6 @@ void Response<double>::formDiagPPRPA(){
 
 template<>
 void Response<double>::formGuess(){
-  cout << "HERE" << endl;
 
   this->scratchFile_ = this->fileio_->scr.get();
   for(auto iMat = 0; iMat != iMatIter_.size(); iMat++){
@@ -259,7 +258,11 @@ void Response<double>::formGuess(){
 
     // Create a new scratch file to store guess vectors
     std::string name = "ResponseGuess"+std::to_string(iMat);
-    hsize_t dims[] = {this->nMatDim_[iMat],this->nSek_};
+//  hsize_t dims[] = {this->nMatDim_[iMat],this->nSek_};
+     
+/*
+//  HDF5 stores things in RowMajor...
+    hsize_t dims[] = {this->nSek_,this->nMatDim_[iMat]};
     H5::DataSpace dataspace(2,dims);
     this->fileio_->scratchPartitions.push_back(
       FileIO::ScratchPartition(name,dataspace,*this->scratchFile_)
@@ -267,6 +270,15 @@ void Response<double>::formGuess(){
 
     // Keep a pointer to the created files
     this->guessFiles_.push_back(&this->fileio_->scratchPartitions.back().data);
+*/
+
+    std::vector<hsize_t> dims; 
+    dims.push_back(this->nSek_);
+    dims.push_back(this->nMatDim_[iMat]);
+
+    H5::DataSet *gfPtr = 
+      this->fileio_->createScratchPartition(H5::PredType::NATIVE_DOUBLE,name,dims);
+    this->guessFiles_.push_back(gfPtr);
 
     // Initialize an index vector with increasing ints
     std::vector<int> indx(diagDim,0);
@@ -290,11 +302,15 @@ void Response<double>::formGuess(){
     }
 */
 
+    this->guessFiles_[iMat]->getSpace();
     // Write the guess vectors to disk
     for(auto iSek = 0; iSek < this->nSek_; iSek++) {
       double one = 1.0;
 
-      hsize_t offset[] = {indx[iSek],iSek};
+//    hsize_t offset[] = {indx[iSek],iSek};
+  
+//    HDF5 Stores things RowMajor...
+      hsize_t offset[] = {iSek,indx[iSek]};
       hsize_t count[]  = {1,1};
       hsize_t stride[] = {1,1};
       hsize_t block[]  = {1,1};

@@ -3,7 +3,7 @@
  *  computational chemistry software with a strong emphasis on explicitly 
  *  time-dependent and post-SCF quantum mechanical methods.
  *  
- *  Copyright (C) 2014-2015 Li Research Group (University of Washington)
+ *  Copyright (C) 2014-2016 Li Research Group (University of Washington)
  *  
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -68,15 +68,17 @@ namespace ChronusQ{
   
 #ifdef CQ_ENABLE_MPI
     // each MPI process gets its own engine
-    coulombEngine engine(this->basisSet_->maxPrim(),this->basisSet_->maxL(),0);
+    libint2::Engine engine(libint2::Operator::coulomb,
+        this->basisSet_->maxPrim(),this->basisSet_->maxL(),0);
     engine.set_precision(std::numeric_limits<double>::epsilon());
 #else
     // each thread gets its own engine
-    std::vector<coulombEngine> engines(nthreads);
+    std::vector<libint2::Engine> engines(nthreads);
 
     // contruct engine for thread 0
     engines[0] = 
-      coulombEngine(this->basisSet_->maxPrim(),this->basisSet_->maxL(),0);
+      libint2::Engine(libint2::Operator::coulomb,this->basisSet_->maxPrim(),
+          this->basisSet_->maxL(),0);
     engines[0].set_precision(std::numeric_limits<double>::epsilon());
   
     // copy thread 0 engine to all others
@@ -116,7 +118,7 @@ namespace ChronusQ{
   
     auto efficient_twoe = [&] (int thread_id) {
 #ifndef CQ_ENABLE_MPI
-      coulombEngine &engine = engines[thread_id];
+      libint2::Engine &engine = engines[thread_id];
 #endif
       for(int s1 = 0, s1234=0; s1 < this->basisSet_->nShell(); s1++) {
         int bf1_s = this->basisSet_->mapSh2Bf(s1);
@@ -298,8 +300,9 @@ namespace ChronusQ{
       }
     }
   
-    std::vector<coulombEngine> engines(nthreads);
-    engines[0] = coulombEngine(this->basisSet_->maxPrim(),this->basisSet_->maxL(),0);
+    std::vector<libint2::Engine> engines(nthreads);
+    engines[0] = libint2::Engine(libint2::Operator::coulomb,
+        this->basisSet_->maxPrim(),this->basisSet_->maxL(),0);
     engines[0].set_precision(std::numeric_limits<double>::epsilon());
   
     for(int i=1; i<nthreads; i++) engines[i] = engines[0];
@@ -319,7 +322,7 @@ namespace ChronusQ{
     start = std::chrono::high_resolution_clock::now();
   
     auto efficient_twoe = [&] (int thread_id) {
-      coulombEngine &engine = engines[thread_id];
+      libint2::Engine &engine = engines[thread_id];
       for(int s1 = 0, s1234=0; s1 < this->basisSet_->nShell(); s1++) {
         int bf1_s = this->basisSet_->mapSh2Bf(s1);
         int n1    = this->basisSet_->shells(s1).size();
