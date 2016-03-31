@@ -18,6 +18,7 @@ add_library(aointegrals SHARED ${AOINTS_SOURCE})
 if(APPLE)
 target_link_libraries(aointegrals LINK_PUBLIC basisset)
 target_link_libraries(aointegrals LINK_PUBLIC fileio)
+target_link_libraries(aointegrals LINK_PUBLIC grid)
 target_link_libraries(aointegrals LINK_PUBLIC ${EXTERNAL_CQ_DEPS})
 endif()
 
