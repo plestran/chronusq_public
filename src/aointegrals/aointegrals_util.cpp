@@ -35,7 +35,7 @@ RealMatrix AOIntegrals::genSpx(BasisSet &obs1, BasisSet &obs2){
   }
   RealMatrix S(obs1.nBasis(),obs2.nBasis());
 
-  libint2::OneBodyEngine engine(libint2::OneBodyEngine::overlap,
+  libint2::Engine engine(libint2::Operator::overlap,
     obs1.maxPrim(),obs1.maxL(),0);
 
   S.setZero();
