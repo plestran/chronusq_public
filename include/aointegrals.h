@@ -159,7 +159,7 @@ class AOIntegrals{
   std::unique_ptr<MolecularConstants>   molecularConstants_; ///< Smart pointer to struct containing molecular struture meta-data
   std::unique_ptr<QuartetConstants>     quartetConstants_; ///< Smart pointer to struct containing shell-quartet meta-data
 
-  void OneEDriver(libint2::OneBodyEngine::integral_type); ///< General wrapper for one-electron integrals using Libint integral engine
+  void OneEDriver(libint2::Operator); ///< General wrapper for one-electron integrals using Libint integral engine
   void breakUpMultipole();
 
   inline void checkWorkers(){

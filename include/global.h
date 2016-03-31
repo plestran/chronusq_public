@@ -121,10 +121,6 @@ using Eigen::VectorXcd;
 /* Things from BTAS that we always need */
 using btas::Tensor;
 
-/* Things from Libint that we always need */
-using libint2::OneBodyEngine;
-using libint2::TwoBodyEngine;
-
 // Alias for Boost::Geometry
 namespace bg = boost::geometry;
 
@@ -145,7 +141,6 @@ typedef Eigen::Map<ComplexMatrix> ComplexMap; ///< Map double precision complex 
 typedef Eigen::Map<const ComplexMatrix> ConstComplexMap; ///< Map double precision complex array onto const ComplexMatrix object
 typedef Eigen::MatrixExponentialReturnValue<RealMatrix>    RealMatExp; ///< Driver for matrix exponentaial (RealMatrix)
 typedef Eigen::MatrixExponentialReturnValue<ComplexMatrix> ComplexMatExp; ///< Driver for matrix exponential (ComplexMatrix)
-typedef TwoBodyEngine<libint2::Coulomb> coulombEngine; ///< Two-body ERI engine for Libint
 typedef btas::RangeNd<CblasColMajor,std::array<long,4>> Range4d; ///< BTAS range specification for rank-4 tensors
 typedef btas::RangeNd<CblasColMajor,std::array<long,3>> Range3d; ///< BTAS range specification for rank-3 tensors
 typedef btas::RangeNd<CblasColMajor,std::array<long,2>> Range2d; ///< BTAS range specification for rank-2 tensors (isomorphic with matrix)
