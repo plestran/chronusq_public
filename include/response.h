@@ -90,7 +90,7 @@ enum RESPONSE_JOB_TYPE {
   DYNAMIC
 };
 template<typename T>
-class Response : public QNCallable<T> {
+class Response : public QNCallable<T>, public Quantum<T> {
 
   /** Useful TypeDefs **/
   typedef Eigen::Matrix<T,Dynamic,Dynamic,ColMajor> TMat;
@@ -107,7 +107,7 @@ class Response : public QNCallable<T> {
 
   /** Meta inherited from SingleSlater **/
   int nBasis_; ///< Number of Basis Functions
-  int nTCS_;   ///< Number of components
+//int nTCS_;   ///< Number of components
   int Ref_;    ///< Reference ID
 
   /** Job Control for response calcluation **/
@@ -200,7 +200,7 @@ public:
    *  Default Constructor loads default values
    *  Inherits QNCallable default constructor
    */ 
-  Response() : QNCallable<T>(){
+  Response() : QNCallable<T>(), Quantum<T>(){
     // Intialize pointers to NULL
     this->fileio_       = NULL;
     this->mointegrals_  = NULL;
@@ -208,7 +208,7 @@ public:
 
     // Zero out meta data to be initialized by SingleSlater
     this->nBasis_     = 0;
-    this->nTCS_       = 0;
+//  this->nTCS_       = 0;
     this->Ref_        = 0;
 
     // Zero out PSCF dimensions to be built later
@@ -431,6 +431,7 @@ public:
   void formMOTransDenFOPPA(TVecMap&, TMat&,TMat&);
   void formAOTransDenPPRPA(TVecMap&, TMat&, TMat&);
   void formMOTransDenPPRPA(TVecMap&, TMat&,TMat&);
+  void formDensity(){;};
   void placeOccVir(TVecMap&, TMat&, TMat&);
   void placeVirOcc(TVecMap&, TMat&, TMat&);
   void placeOccOcc(TVecMap&, TMat&, TMat&);
@@ -441,9 +442,9 @@ public:
   void retrieveVirVir(TVecMap&, TMat&, TMat&);
 
 }; // class Response
-#include <response_alloc.h>
-#include <response_meta.h>
-#include <response_io.h>
+#include <response/response_alloc.h>
+#include <response/response_meta.h>
+#include <response/response_io.h>
 }; // namespace ChronusQ
 
 #endif

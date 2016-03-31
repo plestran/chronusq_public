@@ -2,9 +2,9 @@
 
 cd deps/src
 echo "Unpacking Libint"
-tar xf libint-2.1.0-beta2.tgz
-cd libint-2.1.0-beta2
-./configure --prefix=$PWD/../.. --with-cxx=$CXX CXXFLAGS='-w -O2' --enable-shared
+tar xf libint-2.2.0-alpha.tgz
+cd libint-2.2.0-alpha
+./configure --prefix=$PWD/../.. --with-cxx=$CXX CXXFLAGS='-w -O3' --enable-shared
 echo "Compiling Libint"
 make install -s -j$1
 echo "Libint Compiled!"

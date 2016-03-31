@@ -262,14 +262,14 @@ public:
   boost::python::list Wrapper_excitationEnergies();
   boost::python::list Wrapper_oscStrengths();
 
-  #include <sdresponse_getset.h>
-  #include <sdresponse_qnrelated.h>
-  #include <sdresponse_io.h>
-  #include <sdresponse_misc.h>
-  #include <sdresponse_prop.h>
+  #include <sdresponse/sdresponse_getset.h>
+  #include <sdresponse/sdresponse_qnrelated.h>
+  #include <sdresponse/sdresponse_io.h>
+  #include <sdresponse/sdresponse_misc.h>
+  #include <sdresponse/sdresponse_prop.h>
 
 };
 
-#include <sdresponse_alloc.h>
+#include <sdresponse/sdresponse_alloc.h>
 } // namespace ChronusQ
 #endif

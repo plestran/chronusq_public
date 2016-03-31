@@ -58,7 +58,7 @@ endif()
 
 # Append flags for compilation
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated -Wno-deprecated-declarations -Wno-narrowing")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated -Wno-deprecated-declarations -Wno-narrowing -Wno-unused-local-typedefs -Wno-strict-aliasing")
 
 if(CQ_ENABLE_MPI)
   # MPI Compile flags
@@ -76,7 +76,7 @@ ExternalProject_Add(boost
   URL "${PROJECT_SOURCE_DIR}/deps/src/boost_1_59_0.tar.gz"
   CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/deps/boost/src/boost/bootstrap.sh
   BUILD_COMMAND ${PROJECT_BINARY_DIR}/deps/boost/src/boost/b2
-  --prefix=${PROJECT_BINARY_DIR}/deps --with-python --ignore-site-config --cxxflags="-Wall" install
+  --prefix=${PROJECT_BINARY_DIR}/deps --with-python --ignore-site-config cxxflags=${CMAKE_CXX_FLAGS} install
   BUILD_IN_SOURCE 1
   INSTALL_COMMAND echo "Boost Build Sucess!"
 )
@@ -105,7 +105,7 @@ if(USE_LIBINT)
   if(BUILD_LIBINT)
     ExternalProject_Add(libint
       PREFIX ${PROJECT_BINARY_DIR}/deps/libint
-      URL "${PROJECT_SOURCE_DIR}/deps/src/libint-2.1.0-beta2.tgz"
+      URL "${PROJECT_SOURCE_DIR}/deps/src/libint-2.2.0-alpha.tgz"
       CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/deps/libint/src/libint/configure --prefix=${PROJECT_BINARY_DIR}/deps CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${CMAKE_CXX_FLAGS} --enable-shared
       BUILD_COMMAND make -j2
       BUILD_IN_SOURCE 1
