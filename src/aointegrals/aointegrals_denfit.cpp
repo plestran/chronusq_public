@@ -35,8 +35,8 @@ void AOIntegrals::computeAORII(){
   int nthreads = 1;
 #endif
 
-  std::vector<coulombEngine> engines(nthreads);
-  engines[0] = coulombEngine(
+  std::vector<libint2::Engine> engines(nthreads);
+  engines[0] = libint2::Engine(libint2::Operator::coulomb,
     std::max(this->basisSet_->maxPrim(),this->DFbasisSet_->maxPrim()),
     std::max(this->basisSet_->maxL(),this->DFbasisSet_->maxL()),0);
   engines[0].set_precision(std::numeric_limits<double>::epsilon());
@@ -95,9 +95,9 @@ void AOIntegrals::computeAORIS(){
   int nthreads = 1;
 #endif
   this->haveRIS= true;
-  std::vector<coulombEngine> engines(nthreads);
-  engines[0] = coulombEngine( this->DFbasisSet_->maxPrim(), 
-                              this->DFbasisSet_->maxL(),0);
+  std::vector<libint2::Engine> engines(nthreads);
+  engines[0] = libint2::Engine(libint2::Operator::coulomb,
+      this->DFbasisSet_->maxPrim(),this->DFbasisSet_->maxL(),0);
   engines[0].set_precision(std::numeric_limits<double>::epsilon());
 
   for(int i=1; i<nthreads; i++) engines[i] = engines[0];

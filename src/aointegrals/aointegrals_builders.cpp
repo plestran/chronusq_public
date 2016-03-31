@@ -389,16 +389,16 @@ void AOIntegrals::computeAOOneE(){
   if(this->isPrimary) this->writeOneE();
 }
 
-using libint2::TwoBodyEngine;
 void AOIntegrals::computeSchwartz(){
   if(getRank() == 0) {
     RealMatrix *ShBlk; 
     this->schwartz_->setZero();
  
     // Define Integral Engine
-    TwoBodyEngine<libint2::Coulomb> engine = 
-      TwoBodyEngine<libint2::Coulomb>(this->basisSet_->maxPrim(),
-                                      this->basisSet_->maxL(),0);
+    libint2::Engine engine(
+        libint2::Operator::coulomb,this->basisSet_->maxPrim(),
+        this->basisSet_->maxL(),0);
+
     engine.set_precision(0.); // Don't screen primitives during schwartz
  
     auto start =  std::chrono::high_resolution_clock::now();
@@ -448,8 +448,9 @@ void AOIntegrals::computeAOTwoE(){
 #else
   int nthreads = 1;
 #endif
-  std::vector<coulombEngine> engines(nthreads);
-  engines[0] = coulombEngine(this->basisSet_->maxPrim(),this->basisSet_->maxL(),0);
+  std::vector<libint2::Engine> engines(nthreads);
+  engines[0] = libint2::Engine(libint2::Operator::coulomb,
+      this->basisSet_->maxPrim(),this->basisSet_->maxL(),0);
   engines[0].set_precision(std::numeric_limits<double>::epsilon());
 
   for(int i=1; i<nthreads; i++) engines[i] = engines[0];
