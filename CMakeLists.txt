@@ -105,7 +105,7 @@ if(USE_LIBINT)
   if(BUILD_LIBINT)
     ExternalProject_Add(libint
       PREFIX ${PROJECT_BINARY_DIR}/deps/libint
-      URL "${PROJECT_SOURCE_DIR}/deps/src/libint-2.1.0-beta2.tgz"
+      URL "${PROJECT_SOURCE_DIR}/deps/src/libint-2.2.0-alpha.tgz"
       CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/deps/libint/src/libint/configure --prefix=${PROJECT_BINARY_DIR}/deps CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${CMAKE_CXX_FLAGS} --enable-shared
       BUILD_COMMAND make -j2
       BUILD_IN_SOURCE 1
