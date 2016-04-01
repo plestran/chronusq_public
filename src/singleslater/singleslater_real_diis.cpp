@@ -64,8 +64,8 @@ void SingleSlater<double>::CDIIS(){
 */
 
 //dgesv_(&N,&NRHS,B.data(),&N,iPiv,coef,&N,&INFO);
-  char NORM = 'O';
-  double ANORM = B.lpNorm<1>();
+//char NORM = 'O';
+//double ANORM = B.lpNorm<1>();
 //RealVecMap COEFF(coef,N);
 //VectorXd   RHS(COEFF);
 //COEFF = B.fullPivLu().solve(RHS);
@@ -74,8 +74,8 @@ void SingleSlater<double>::CDIIS(){
 //std::vector<int> iWORK_(N);
 //dgecon_(&NORM,&N,B.data(),&N,&ANORM,&RCOND,this->WORK_,&iWORK_[0],&INFO);
 
-  char TRANS = 'N';
-  dgels_(&TRANS,&N,&N,&NRHS,B.data(),&N,coef,&N,this->WORK_,&this->LWORK_,&INFO);
+//char TRANS = 'N';
+//dgels_(&TRANS,&N,&N,&NRHS,B.data(),&N,coef,&N,this->WORK_,&this->LWORK_,&INFO);
 
   /*
   double RCOND = -1.0;
@@ -85,9 +85,17 @@ void SingleSlater<double>::CDIIS(){
     &this->LWORK_,&INFO);
   delete [] S;
   */
+  char NORM = 'O';
+  double ANORM = B.lpNorm<1>();
+  double RCOND;
+  std::vector<int> iWORK_(N);
+  dgesv_(&N,&NRHS,B.data(),&N,iPiv,coef,&N,&INFO);
+  dgecon_(&NORM,&N,B.data(),&N,&ANORM,&RCOND,this->WORK_,&iWORK_[0],&INFO);
 
 
-//if(std::abs(RCOND) > 1e-10) {
+  cout << RCOND << endl;
+  cout << std::numeric_limits<double>::epsilon() << endl;
+  if(std::abs(RCOND) > std::numeric_limits<double>::epsilon()) {
     this->fockA_->setZero();
     if(!this->isClosedShell && this->Ref_ != TCS) this->fockB_->setZero();
     for(auto j = 0; j < N-1; j++) {
@@ -98,7 +106,7 @@ void SingleSlater<double>::CDIIS(){
         *this->fockB_ += coef[j]*FB;
       }
     }
-//}
+  }
   delete [] coef;
   delete [] iPiv;
 

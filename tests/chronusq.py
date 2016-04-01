@@ -1,1 +1,1 @@
-/Users/phdng/dev/chronusq/build/chronusq.py
+/Volumes/Gaussian/dbwy/Documents/devel/chronusq/build/chronusq.py
