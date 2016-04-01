@@ -166,7 +166,7 @@ int main(int argc, char **argv){
        + 2.0 * (XAO * (*aoints.overlap_) * XAO.adjoint() * (*aoints.overlap_)).trace();
        */
      double TPDM = -0.5* (TAO2 * (*aoints.overlap_) * (*singleSlater.densityA()) * (*aoints.overlap_)).trace() 
-       - 2.0 * (XAO * (*aoints.overlap_) * XAO.adjoint() * (*aoints.overlap_)).trace();
+       - 0.0 * (XAO * (*aoints.overlap_) * XAO.adjoint() * (*aoints.overlap_)).trace();
    
      double OPDM = 2;
    
