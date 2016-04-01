@@ -95,8 +95,6 @@ void SingleSlater<double>::CDIIS(){
   dgecon_(&NORM,&N,B.data(),&N,&ANORM,&RCOND,this->WORK_,&iWORK_[0],&INFO);
 
 
-  cout << RCOND << endl;
-  cout << std::numeric_limits<double>::epsilon() << endl;
   if(std::abs(RCOND) > std::numeric_limits<double>::epsilon()) {
     this->fockA_->setZero();
     if(!this->isClosedShell && this->Ref_ != TCS) this->fockB_->setZero();

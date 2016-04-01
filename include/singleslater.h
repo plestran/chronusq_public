@@ -415,7 +415,7 @@ public:
     this->eneTol_       = 1e-10;
     this->maxSCFIter_   = 256;
     this->nDIISExtrap_  = 7;
-    this->iDIISStart_   = 2;
+    this->iDIISStart_   = 4;
 
     this->elecField_   = {0.0,0.0,0.0};
     this->printLevel_  = 1;

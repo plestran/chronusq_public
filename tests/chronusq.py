@@ -1,1 +1,0 @@
-/Volumes/Gaussian/dbwy/Documents/devel/chronusq/build/chronusq.py
