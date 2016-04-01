@@ -26,6 +26,7 @@
 #include <response.h>
 #include <workers.h>
 #include <pythonapi.h>
+#include <fileio.h>
 
 using namespace ChronusQ;
 

@@ -842,7 +842,7 @@ void twoDScan(std::vector<double>& scanX,
     cout << endl;
     cout << "  Performing Response Calculations (";
     if(respType == RESPONSE_TYPE::CIS)       cout << "CIS" ;
-    else if(respType = RESPONSE_TYPE::PPTDA) cout << "PPTDA" ;
+    else if(respType == RESPONSE_TYPE::PPTDA) cout << "PPTDA" ;
     cout << ")" << endl;
 
     cout << "  Performing Response (X,Y)" << endl;

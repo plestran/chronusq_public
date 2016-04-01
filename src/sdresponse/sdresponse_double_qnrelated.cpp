@@ -296,9 +296,9 @@ void SDResponse<double>::formGuess(){
     else {
       if(this->iPPRPA_ == 0)
         nCPY = this->nVAVA_SLT_;
-      else if(this->iPPRPA_ = 1)
+      else if(this->iPPRPA_ == 1)
         nCPY = this->nVAVB_;
-      else if(this->iPPRPA_ = 2)
+      else if(this->iPPRPA_ == 2)
         nCPY = this->nVBVB_SLT_;
     }
   } else {

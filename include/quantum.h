@@ -75,28 +75,29 @@ namespace ChronusQ {
     template<typename Scalar, DENSITY_TYPE DenTyp, typename Op>
     Scalar OperatorSpinCombine(const Op& op) {
       double zero = 0.0;
-      if(DenTyp == DENSITY_TYPE::TOTAL)
+      if(DenTyp == DENSITY_TYPE::TOTAL){
         if(!this->isClosedShell)
           return this->computePropertyAlpha<Scalar>(op) + 
                  this->computePropertyBeta<Scalar>(op);
         else
           return this->computePropertyAlpha<Scalar>(op);
-      else if(DenTyp == DENSITY_TYPE::ALPHA)
+      } else if(DenTyp == DENSITY_TYPE::ALPHA) {
         if(!this->isClosedShell)
           return this->computePropertyAlpha<Scalar>(op);
         else
           return 0.5*this->computePropertyAlpha<Scalar>(op);
-      else if(DenTyp == DENSITY_TYPE::BETA)
+      } else if(DenTyp == DENSITY_TYPE::BETA) {
         if(!this->isClosedShell)
           return this->computePropertyBeta<Scalar>(op);
         else
           return 0.5*this->computePropertyAlpha<Scalar>(op);
-      else if(DenTyp == DENSITY_TYPE::SPIN)
+      } else if(DenTyp == DENSITY_TYPE::SPIN) {
         if(!this->isClosedShell)
           return this->computePropertyAlpha<Scalar>(op) -
                  this->computePropertyBeta<Scalar>(op);
         else
           return reinterpret_cast<Scalar(&)[2]>(zero)[0];
+      }
     }
 
 

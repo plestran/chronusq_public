@@ -58,7 +58,13 @@ endif()
 
 # Append flags for compilation
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated -Wno-deprecated-declarations -Wno-narrowing -Wno-unused-local-typedefs -Wno-strict-aliasing")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated -Wno-deprecated-declarations -Wno-narrowing -Wno-strict-aliasing")
+
+if(NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-local-typedefs")
+else()
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-return-type")
+endif()
 
 if(CQ_ENABLE_MPI)
   # MPI Compile flags
@@ -110,8 +116,12 @@ if(USE_LIBINT)
       BUILD_COMMAND make -j2
       BUILD_IN_SOURCE 1
       INSTALL_COMMAND make install
-    )  
-    set(LIBINT_LIB ${PROJECT_BINARY_DIR}/deps/lib/libint2.so)
+    )
+    if(APPLE)
+      set(LIBINT_LIB ${PROJECT_BINARY_DIR}/deps/lib/libint2.dylib)
+    else()
+      set(LIBINT_LIB ${PROJECT_BINARY_DIR}/deps/lib/libint2.so) 
+    endif()
     include_directories("${PROJECT_BINARY_DIR}/deps/include")
     include_directories("${PROJECT_BINARY_DIR}/deps/include/libint2")
   else()
