@@ -24,7 +24,7 @@
  *  
  */
 #ifndef INCLUDED_QUASINEWTON2 
-#define INCLUDED_QUATINEWTON2
+#define INCLUDED_QUASINEWTON2
 #include <global.h>
 #include <cerr.h>
 

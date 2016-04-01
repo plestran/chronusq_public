@@ -1164,7 +1164,7 @@ Derivatives computeNAC2pt1D(Molecule &geom_0, Molecule &geom_p,
   cout << endl;
   cout << "  Performing Response Calculations (";
   if(respType == RESPONSE_TYPE::CIS)       cout << "CIS" ;
-  else if(respType = RESPONSE_TYPE::PPTDA) cout << "PPTDA" ;
+  else if(respType == RESPONSE_TYPE::PPTDA) cout << "PPTDA" ;
   cout << ")" << endl;
 
   cout << "  Performing Response (X,Y)" << endl;
