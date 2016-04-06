@@ -38,6 +38,7 @@ enum GRID_TYPE {
 struct IntegrationPoint {
   cartGP pt;
   double weight;
+  IntegrationPoint(double pt_ = 0, double weight_ = 0) :pt(pt_), weight(weight_){ };
 };
 
 // Classes
@@ -47,7 +48,7 @@ protected:
 public:
     Grid2(size_t npts = 0) : nPts_(npts){ };
     virtual ~Grid2(){ };
-    virtual void   printGrid() = 0; ///<function to print the grid points
+  //virtual void   printGrid() = 0; ///<function to print the grid points
     virtual IntegrationPoint operator[](size_t) = 0;
     size_t npts(){return this->nPts_;};
 }; // class Grid2
@@ -55,27 +56,65 @@ public:
 class OneDGrid2 : public Grid2 {
   public:
     OneDGrid2(size_t npts = 0) : Grid2(npts){ };
+    virtual ~OneDGrid2(){ };
+    virtual IntegrationPoint operator[](size_t) = 0;
+};
+
+class GaussChebFst : public OneDGrid2 {
+  public:
+    GaussChebFst(size_t npts = 0) : OneDGrid2(npts){ };
+    ~GaussChebFst(){ };
+    IntegrationPoint operator[](size_t i){ 
+      double pt  = std::cos( (2.0*(i+1)-1.0) / (2*this->nPts_) * math.pi );
+      double wgt = (math.pi / this->nPts_);
+
+      wgt *= 2.0 * std::sqrt(1 - pt * pt) / ( (1 - pt) * (1 - pt) );
+      pt   = (1 + pt) / (1 - pt);
+
+      return IntegrationPoint(pt,wgt);
+
+    };
+};
+
+class GaussChebSnd : public OneDGrid2 {
+  public:
+    GaussChebSnd(size_t npts) : OneDGrid2(npts){ };
+    ~GaussChebSnd(){ };
+    IntegrationPoint operator[](size_t i){ return IntegrationPoint(0,0);};
+};
+
+class EulerMac : public OneDGrid2 {
+  public:
+    EulerMac(size_t npts) : OneDGrid2(npts){ };
+    ~EulerMac(){ };
+    IntegrationPoint operator[](size_t i){ return IntegrationPoint(0,0);};
+};
+
+class Lebedev : public OneDGrid2 {
+  public:
+    Lebedev(size_t npts) : OneDGrid2(npts){ };
+    ~Lebedev(){ };
+    IntegrationPoint operator[](size_t i){ return IntegrationPoint(0,0);};
 };
 
 class TwoDGrid2 : public Grid2 {
-  OneDGrid GRad;
-  OneDGrid GAng;
+  std::unique_ptr<OneDGrid2> GRad;
+  std::unique_ptr<OneDGrid2> GAng;
 
   public:
-    TwoDGrid() = delete;
-    TwoDGrid(size_t nPtsRad, size_t nPtsAng, GRID_TYPE GTypeRad, 
-        GRID_TYPE GTypeAng) : nPts_(nPtsRad*nPtsAng){
+    TwoDGrid2(size_t nPtsRad, size_t nPtsAng, GRID_TYPE GTypeRad, 
+        GRID_TYPE GTypeAng) : Grid2(nPtsRad*nPtsAng) {
 
       if(GTypeRad == GAUSSCHEBFST) {
-        GRad = new GaussChebFst(nPtsRad);
+        GRad = std::unique_ptr<OneDGrid2>(new GaussChebFst(nPtsRad));
       } else if(GTypeRad == GAUSSCHEBSND) {
-        GRad = new GaussChebSnd(nPtsRad);
+        GRad = std::unique_ptr<OneDGrid2>(new GaussChebSnd(nPtsRad));
       } else if(GTypeRad == EULERMAC) {
-        GRad = new EulerMac(nPtsRad);
+        GRad = std::unique_ptr<OneDGrid2>(new EulerMac(nPtsRad));
       };
 
       if(GTypeAng == LEBEDEV) {
-        GAng = new Lebedev(nPtsAng);
+        GAng = std::unique_ptr<OneDGrid2>(new Lebedev(nPtsAng));
       };
 
     };
@@ -85,10 +124,10 @@ class TwoDGrid2 : public Grid2 {
       // IJ = i
       // I = IJ % NAng (Angular Point)
       // J = IJ / NAng (Radial Point)
-      IntegrationPoint gpAng = GAng[i % GAng.npts()];
-      IntegrationPoint gpRad = GRad[i / GAng.npts()];
+      IntegrationPoint gpAng = (*GAng)[i % GAng->npts()];
+      IntegrationPoint gpRad = (*GRad)[i / GAng->npts()];
       
-      carGP totalPoint; 
+      cartGP totalPoint; 
       totalPoint.set<0>(bg::get<0>(gpRad.pt) * bg::get<0>(gpAng.pt));
       totalPoint.set<1>(bg::get<0>(gpRad.pt) * bg::get<1>(gpAng.pt));
       totalPoint.set<2>(bg::get<0>(gpRad.pt) * bg::get<2>(gpAng.pt));
@@ -105,3 +144,4 @@ class TwoDGrid2 : public Grid2 {
 };
 
 };
+#endif

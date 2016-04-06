@@ -387,12 +387,14 @@ void AOIntegrals::computeAOOneE(){
   this->haveAOOneE = true;
   this->breakUpMultipole();
   if(this->isPrimary) this->writeOneE();
+  /*
   if(this->isPrimary) {
     for(auto ix = 0, ioff = 0; ix < 3; ix++, ioff += this->nBasis_*this->nBasis_){
       RealMap A(&this->RcrossDel_->storage()[ioff],this->nBasis_,this->nBasis_);
       prettyPrint(cout,A,"R:"+std::to_string(ix));
     }
   }
+  */
 }
 
 void AOIntegrals::computeSchwartz(){
