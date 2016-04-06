@@ -28,7 +28,7 @@ void loadPresets<WATER>(Molecule &mol) {
 };
 
 int main(int argc, char **argv){
-  GaussChebFst G(10000);
+  EulerMac G(10000);
   double f = 0;
   for(auto i = 0; i < 10000; i++){
     IntegrationPoint pt = G[i];

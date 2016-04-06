@@ -87,7 +87,14 @@ class EulerMac : public OneDGrid2 {
   public:
     EulerMac(size_t npts) : OneDGrid2(npts){ };
     ~EulerMac(){ };
-    IntegrationPoint operator[](size_t i){ return IntegrationPoint(0,0);};
+    IntegrationPoint operator[](size_t i){ 
+      double pt  = (i + 1.0) * (i + 1.0) / 
+        ((this->nPts_ - i) * (this->nPts_ - i));
+      double wgt = 2.0 * (i + 1.0) * (this->nPts_ + 1.0) / 
+        ((this->nPts_ - i) * (this->nPts_ - i) * (this->nPts_ - i));
+
+      return IntegrationPoint(pt,wgt);
+    };
 };
 
 class Lebedev : public OneDGrid2 {
