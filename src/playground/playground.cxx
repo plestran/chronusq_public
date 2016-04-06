@@ -28,18 +28,33 @@ void loadPresets<WATER>(Molecule &mol) {
 };
 
 int main(int argc, char **argv){
-  EulerMac G(10000);
-  double f = 0;
-  for(auto i = 0; i < 10000; i++){
-    IntegrationPoint pt = G[i];
-    double r = bg::get<0>(pt.pt);
+  auto gaussian = [&](cartGP pt) -> double {
+    double r = bg::get<0>(pt);
+    return std::exp(-r*r);
+  };
+  auto sphGaussian = [&](cartGP pt) -> double {
+    double r = bg::get<0>(pt);
+    return r * r * std::exp(-r*r);
+  };
 
-    std::cout << r << '\t';
-    std::cout << pt.weight << std::endl;
-    f += pt.weight * std::exp(-r*r);
-  }
+  auto mat = [&](cartGP pt) -> RealMatrix {
+    RealMatrix A(2,2);
+    A(0,0) = gaussian(pt);
+    A(1,1) = sphGaussian(pt);
+    return A;
+  };
+
+  EulerMac G(10000);
+  double f = G.integrate<double>(gaussian);
+  double g = G.integrate<double>(sphGaussian);
+  auto X = G.integrate<RealMatrix>(mat);
+
+
   cout.precision(10);
   std::cout <<  f << endl;
+  std::cout <<  g << endl;
+  cout << endl;
+  std::cout <<  X << endl;
   return 0;
 };
 

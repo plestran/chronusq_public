@@ -38,7 +38,8 @@ enum GRID_TYPE {
 struct IntegrationPoint {
   cartGP pt;
   double weight;
-  IntegrationPoint(double pt_ = 0, double weight_ = 0) :pt(pt_), weight(weight_){ };
+  IntegrationPoint(double pt_ = 0, double weight_ = 0) : 
+    pt(pt_), weight(weight_){ };
 };
 
 // Classes
@@ -51,6 +52,18 @@ public:
   //virtual void   printGrid() = 0; ///<function to print the grid points
     virtual IntegrationPoint operator[](size_t) = 0;
     size_t npts(){return this->nPts_;};
+    template<typename T>
+    inline T integrate(std::function< T(cartGP) > func) {
+
+      T result = (*this)[0].weight * func((*this)[0].pt);
+
+      for(auto iPt = 1; iPt < this->nPts_; iPt++){
+        IntegrationPoint intPoint = (*this)[iPt];
+        cartGP gp = intPoint.pt;
+        result += intPoint.weight * func(gp);
+      }
+      return result;
+    };
 }; // class Grid2
 
 class OneDGrid2 : public Grid2 {
