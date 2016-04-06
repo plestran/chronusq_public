@@ -182,6 +182,7 @@ namespace ChronusQ {
           SAO_0_m1,SMO_0_p1,SMO_0_m1);
     }
 
+    void dumpSummary();
 
   }; // class NumericalDifferentiation
   #include <numdiff/numdiff_procedural.h>
