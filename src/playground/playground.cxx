@@ -44,11 +44,21 @@ int main(int argc, char **argv){
     return A;
   };
 
-  EulerMac G(10000);
+  EulerMac G(300000);
   double f = G.integrate<double>(gaussian);
   double g = G.integrate<double>(sphGaussian);
   auto X = G.integrate<RealMatrix>(mat);
 
+  Lebedev L(14);
+  cout << L.npts() << endl;;
+
+  for(auto i = 0; i < 14; i++){
+    cout << std::setw(22) << std::setprecision(10) << bg::get<0>(L[i].pt);
+    cout << std::setw(22) << std::setprecision(10) << bg::get<1>(L[i].pt);
+    cout << std::setw(22) << std::setprecision(10) << bg::get<2>(L[i].pt);
+    cout << std::setw(22) << std::setprecision(10) << L[i].weight;
+    cout << endl;
+  };
 
   cout.precision(10);
   std::cout <<  f << endl;
