@@ -46,7 +46,14 @@ namespace ChronusQ {
   boost::python::list NumericalDifferentiation<double>::Wrapper_ESEnergy(){
     boost::python::list result;
     for(auto ISt = 0; ISt < this->responseNRoots_; ISt++)
-      result.append(this->response_undisplaced_->frequencies()[0](ISt));
+    if(this->respType_ == RESPONSE_TYPE::CIS){
+      result.append(this->response_undisplaced_->
+          template frequencies<SINGLETS>()(ISt));
+    } else if(this->respType_ == RESPONSE_TYPE::PPTDA){
+      result.append( this->response_undisplaced_->
+          template frequencies<A_PPTDA_SINGLETS>()(ISt)
+      );
+    }
     return result;
   };
 

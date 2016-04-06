@@ -837,11 +837,22 @@ void twoDScan(std::vector<double>& scanX,
            << scf_0m << " Eh" << endl;
    }
 
-    Eigen::VectorXd freq_00 = resp_00.frequencies()[0].head(nFreq);
-    Eigen::VectorXd freq_p0 = resp_p0.frequencies()[0].head(nFreq);
-    Eigen::VectorXd freq_m0 = resp_m0.frequencies()[0].head(nFreq);
-    Eigen::VectorXd freq_0p = resp_0p.frequencies()[0].head(nFreq);
-    Eigen::VectorXd freq_0m = resp_0m.frequencies()[0].head(nFreq);
+    Eigen::VectorXd freq_00, freq_p0, freq_m0, freq_0p, freq_0m; 
+
+
+    if(resp.Meth() == RESPONSE_TYPE::CIS){
+      freq_00 = resp_00.frequencies<SINGLETS>().head(nFreq);
+      freq_p0 = resp_p0.frequencies<SINGLETS>().head(nFreq);
+      freq_m0 = resp_m0.frequencies<SINGLETS>().head(nFreq);
+      freq_0p = resp_0p.frequencies<SINGLETS>().head(nFreq);
+      freq_0m = resp_0m.frequencies<SINGLETS>().head(nFreq);
+    } else if(resp.Meth() == RESPONSE_TYPE::PPTDA){
+      freq_00 = resp_00.frequencies<A_PPTDA_SINGLETS>().head(nFreq);
+      freq_p0 = resp_p0.frequencies<A_PPTDA_SINGLETS>().head(nFreq);
+      freq_m0 = resp_m0.frequencies<A_PPTDA_SINGLETS>().head(nFreq);
+      freq_0p = resp_0p.frequencies<A_PPTDA_SINGLETS>().head(nFreq);
+      freq_0m = resp_0m.frequencies<A_PPTDA_SINGLETS>().head(nFreq);
+    }
 
 
     ES_ENERGY_FILE << X << "," << Y << ",";
@@ -879,17 +890,31 @@ void twoDScan(std::vector<double>& scanX,
 
 
 
+    RealMatrix T_00, T_p0, T_m0, T_0p, T_0m; 
 
-    RealMatrix T_00 = resp_00.transDen()[0].block(0,0,
-      resp_00.nMatDim()[0],nFreq);
-    RealMatrix T_p0 = resp_p0.transDen()[0].block(0,0,
-      resp_p0.nMatDim()[0],nFreq);
-    RealMatrix T_m0 = resp_m0.transDen()[0].block(0,0,
-      resp_m0.nMatDim()[0],nFreq);
-    RealMatrix T_0p = resp_0p.transDen()[0].block(0,0,
-      resp_0p.nMatDim()[0],nFreq);
-    RealMatrix T_0m = resp_0m.transDen()[0].block(0,0,
-      resp_0m.nMatDim()[0],nFreq);
+    if(resp.Meth() == RESPONSE_TYPE::CIS){
+      T_00 = resp_00.transDen<SINGLETS>().block(0,0,
+       resp_00.nMatDim<SINGLETS>(),nFreq);
+      T_p0 = resp_p0.transDen<SINGLETS>().block(0,0,
+       resp_p0.nMatDim<SINGLETS>(),nFreq);
+      T_m0 = resp_m0.transDen<SINGLETS>().block(0,0,
+       resp_m0.nMatDim<SINGLETS>(),nFreq);
+      T_0p = resp_0p.transDen<SINGLETS>().block(0,0,
+       resp_0p.nMatDim<SINGLETS>(),nFreq);
+      T_0m = resp_0m.transDen<SINGLETS>().block(0,0,
+       resp_0m.nMatDim<SINGLETS>(),nFreq);
+    } else if(resp.Meth() == RESPONSE_TYPE::PPTDA){
+      T_00 = resp_00.transDen<A_PPTDA_SINGLETS>().block(0,0,
+       resp_00.nMatDim<A_PPTDA_SINGLETS>(),nFreq);
+      T_p0 = resp_p0.transDen<A_PPTDA_SINGLETS>().block(0,0,
+       resp_p0.nMatDim<A_PPTDA_SINGLETS>(),nFreq);
+      T_m0 = resp_m0.transDen<A_PPTDA_SINGLETS>().block(0,0,
+       resp_m0.nMatDim<A_PPTDA_SINGLETS>(),nFreq);
+      T_0p = resp_0p.transDen<A_PPTDA_SINGLETS>().block(0,0,
+       resp_0p.nMatDim<A_PPTDA_SINGLETS>(),nFreq);
+      T_0m = resp_0m.transDen<A_PPTDA_SINGLETS>().block(0,0,
+       resp_0m.nMatDim<A_PPTDA_SINGLETS>(),nFreq);
+    }
 
 
 
@@ -912,14 +937,25 @@ void twoDScan(std::vector<double>& scanX,
     Eigen::VectorXd Trans_t_0m;
     Eigen::VectorXd Trans_t_p0;
     Eigen::VectorXd Trans_t_m0;
-    Trans_t_p0 = checkPhase(T_00.data(),T_p0.data(),
-      resp_p0.nMatDim()[0],nFreq);
-    Trans_t_m0 = checkPhase(T_00.data(),T_m0.data(),
-      resp_m0.nMatDim()[0],nFreq);
-    Trans_t_0p = checkPhase(T_00.data(),T_0p.data(),
-      resp_0p.nMatDim()[0],nFreq);
-    Trans_t_0m = checkPhase(T_00.data(),T_0m.data(),
-      resp_0m.nMatDim()[0],nFreq);
+    if(resp.Meth() == RESPONSE_TYPE::CIS){
+      Trans_t_p0 = checkPhase(T_00.data(),T_p0.data(),
+        resp_p0.nMatDim<SINGLETS>(),nFreq);
+      Trans_t_m0 = checkPhase(T_00.data(),T_m0.data(),
+        resp_m0.nMatDim<SINGLETS>(),nFreq);
+      Trans_t_0p = checkPhase(T_00.data(),T_0p.data(),
+        resp_0p.nMatDim<SINGLETS>(),nFreq);
+      Trans_t_0m = checkPhase(T_00.data(),T_0m.data(),
+        resp_0m.nMatDim<SINGLETS>(),nFreq);
+    } else if(resp.Meth() == RESPONSE_TYPE::PPTDA){
+      Trans_t_p0 = checkPhase(T_00.data(),T_p0.data(),
+        resp_p0.nMatDim<A_PPTDA_SINGLETS>(),nFreq);
+      Trans_t_m0 = checkPhase(T_00.data(),T_m0.data(),
+        resp_m0.nMatDim<A_PPTDA_SINGLETS>(),nFreq);
+      Trans_t_0p = checkPhase(T_00.data(),T_0p.data(),
+        resp_0p.nMatDim<A_PPTDA_SINGLETS>(),nFreq);
+      Trans_t_0m = checkPhase(T_00.data(),T_0m.data(),
+        resp_0m.nMatDim<A_PPTDA_SINGLETS>(),nFreq);
+    }
 
 
     if(debug){

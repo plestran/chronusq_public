@@ -19,9 +19,10 @@ add_subdirectory(quasinewton)
 add_subdirectory(tools)
 add_subdirectory(worker)
 add_subdirectory(python)
-
+add_subdirectory(numdiff)
 add_subdirectory(response)
 add_subdirectory(qn)
+
 #add_subdirectory(newQNTest)
 #add_subdirectory(RESPHack)
-add_subdirectory(numdiff)
+add_subdirectory(playground)
