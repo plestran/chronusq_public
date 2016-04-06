@@ -56,23 +56,17 @@ if(CQ_ENABLE_MPI)
 endif()
 
 
-# Append flags for compilation
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated -Wno-deprecated-declarations -Wno-narrowing -Wno-strict-aliasing")
-
-if(NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-local-typedefs")
-else()
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-return-type")
+if(NOT CMAKE_CXX_COMPILER_ID MATCHES "PGI")
+  # Append flags for compilation
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated -Wno-deprecated-declarations -Wno-narrowing -Wno-strict-aliasing")
+  
+  if(NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-local-typedefs")
+  else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-return-type")
+  endif()
 endif()
 
-if(CQ_ENABLE_MPI)
-  # MPI Compile flags
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MPI_CXX_COMPILE_FLAGS}")
-else()
-  # OpenMP flags
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-endif()
 
 include(ExternalProject)
 
@@ -86,6 +80,16 @@ ExternalProject_Add(boost
   BUILD_IN_SOURCE 1
   INSTALL_COMMAND echo "Boost Build Sucess!"
 )
+
+# More compile flags that Boost throws a fit about 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+if(CQ_ENABLE_MPI)
+  # MPI Compile flags
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MPI_CXX_COMPILE_FLAGS}")
+else()
+  # OpenMP flags
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+endif()
 
 if(APPLE)
   set(Boost_LIBRARIES ${PROJECT_BINARY_DIR}/deps/lib/libboost_python.dylib)
