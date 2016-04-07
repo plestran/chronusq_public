@@ -67,6 +67,23 @@ public:
       }
       return result;
     };
+
+    template <typename T>
+    inline void integrate(std::function< T(IntegrationPoint) > func,
+        T& result) {
+
+      result = func((*this)[0]);
+      for(auto iPt = 1; iPt < this->nPts_; iPt++)
+        result += func((*this)[iPt]);
+
+    };
+
+    template <typename T>
+    inline void integrate(std::function< void(IntegrationPoint,T&) > func,
+        T& result) {
+      for(auto iPt = 0; iPt < this->nPts_; iPt++)
+        func((*this)[iPt],result);
+    };
 }; // class Grid2
 
 class OneDGrid2 : public Grid2 {
