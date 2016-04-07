@@ -33,7 +33,10 @@ int main(int argc, char **argv){
     return std::exp(-r*r);
   };
   auto sphGaussian = [&](cartGP pt) -> double {
-    double r = bg::get<0>(pt);
+    double x = bg::get<0>(pt);
+    double y = bg::get<1>(pt);
+    double z = bg::get<2>(pt);
+    double r = std::sqrt(x*x + y*y + z*z);
     return r * r * std::exp(-r*r);
   };
 
@@ -68,11 +71,11 @@ int main(int argc, char **argv){
   double g = G.integrate<double>(sphGaussian);
   auto X = G.integrate<RealMatrix>(mat);
 
-  Lebedev L(14);
+  Lebedev L(302);
   cout << L.npts() << endl;;
 
   double one(0.0);
-  for(auto i = 0; i < 14; i++){
+  for(auto i = 0; i < 302; i++){
     cout << std::setw(22) << std::setprecision(10) << bg::get<0>(L[i].pt);
     cout << std::setw(22) << std::setprecision(10) << bg::get<1>(L[i].pt);
     cout << std::setw(22) << std::setprecision(10) << bg::get<2>(L[i].pt);
@@ -91,6 +94,10 @@ int main(int argc, char **argv){
   std::cout <<  g << endl;
   cout << endl;
   std::cout <<  X << endl;
+
+  TwoDGrid2 Sphere(75,302,EULERMAC,LEBEDEV);
+
+  cout << 4*math.pi*Sphere.integrate<double>(sphGaussian) << endl;
   return 0;
 };
 
