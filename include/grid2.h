@@ -250,6 +250,7 @@ class AtomicGrid : public TwoDGrid2 {
   std::array<double,3> center_;
   double scalingFactor_;
   ATOMIC_PARTITION partitionScheme_;
+  std::vector<std::array<double,3> > otherCenters_;
 
   public:
     AtomicGrid(size_t nPtsRad, size_t nPtsAng, 

@@ -140,6 +140,8 @@ int main(int argc, char **argv){
   Sphere.integrate<RealMatrix>(noallocMatIntegrate,resMat);
   Eigen::internal::set_is_malloc_allowed(true);
   cout << 4 * math.pi * resMat << endl;
+
+
   AtomicGrid SphereAtom(75,302);
   cout << 4 * math.pi * SphereAtom.integrate<double>(sphGaussian) << endl;
   return 0;
