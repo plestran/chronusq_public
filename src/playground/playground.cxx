@@ -1,3 +1,4 @@
+#define EIGEN_RUNTIME_NO_MALLOC
 #include <response.h>
 #include <workers.h>
 #include <pythonapi.h>
@@ -120,6 +121,25 @@ int main(int argc, char **argv){
   Sphere.integrate<double>(sphGaussian3,res2);
   cout << 4 * math.pi * res << endl;
   cout << 4 * math.pi * (res2 - 1.0) << endl;
+
+  RealMatrix scr(2,2);
+  auto noallocMatIntegrate = [&](IntegrationPoint pt, RealMatrix &result){
+    double x = bg::get<0>(pt.pt);
+    double y = bg::get<1>(pt.pt);
+    double z = bg::get<2>(pt.pt);
+    double r = std::sqrt(x*x + y*y + z*z);
+    scr.setZero();
+    scr(0,0) = pt.weight * r * r * std::exp(-r*r);
+    scr(1,1) = pt.weight * r * r * std::exp(-r*r);
+
+    result += scr;
+  };
+
+  RealMatrix resMat(2,2);
+  Eigen::internal::set_is_malloc_allowed(false);
+  Sphere.integrate<RealMatrix>(noallocMatIntegrate,resMat);
+  Eigen::internal::set_is_malloc_allowed(true);
+  cout << 4 * math.pi * resMat << endl;
   return 0;
 };
 
