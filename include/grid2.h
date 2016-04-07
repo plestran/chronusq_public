@@ -129,6 +129,8 @@ class Lebedev : public OneDGrid2 {
   std::vector<double> sphWeights_;
 
   void loadAlgebraicPoints();
+  template <LEBEDEV_ALGEBRAIC_ORDER ORDER> void loadLebedev();
+
   public:
     Lebedev(size_t N) : OneDGrid2(N){
       if(     N ==    6) this->algOrder_ = LEBEDEV_3;  

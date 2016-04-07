@@ -44,6 +44,25 @@ int main(int argc, char **argv){
     return A;
   };
 
+  auto sphere = [&](cartGP pt) -> double {
+    double x = bg::get<0>(pt);
+    double y = bg::get<1>(pt);
+    double z = bg::get<2>(pt);
+
+    return x*x + y*y + z*z;
+  };
+
+  auto sphHarmonic = [&](cartGP pt) -> double {
+    double x = bg::get<0>(pt);
+    double y = bg::get<1>(pt);
+    double z = bg::get<2>(pt);
+    double r = std::sqrt(x*x + y*y + z*z);
+    double ct = z / r;
+//    return (3.0 * z*z) / (4 * math.pi * r*r);
+//    cout << ct << endl;
+    return 3*ct*ct;
+  };
+
   EulerMac G(300000);
   double f = G.integrate<double>(gaussian);
   double g = G.integrate<double>(sphGaussian);
@@ -52,13 +71,20 @@ int main(int argc, char **argv){
   Lebedev L(14);
   cout << L.npts() << endl;;
 
+  double one(0.0);
   for(auto i = 0; i < 14; i++){
     cout << std::setw(22) << std::setprecision(10) << bg::get<0>(L[i].pt);
     cout << std::setw(22) << std::setprecision(10) << bg::get<1>(L[i].pt);
     cout << std::setw(22) << std::setprecision(10) << bg::get<2>(L[i].pt);
     cout << std::setw(22) << std::setprecision(10) << L[i].weight;
     cout << endl;
+    one += L[i].weight;
   };
+  cout << one << endl;
+
+
+  double h = L.integrate<double>(sphHarmonic);
+  cout << h << endl;
 
   cout.precision(10);
   std::cout <<  f << endl;
