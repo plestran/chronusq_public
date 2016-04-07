@@ -82,7 +82,9 @@ public:
     inline void integrate(std::function< void(IntegrationPoint,T&) > func,
         T& result) {
       for(auto iPt = 0; iPt < this->nPts_; iPt++)
-        func((*this)[iPt],result);
+        if((*this)[iPt].weight > 1e-6){
+          func((*this)[iPt],result);
+        }
     };
 }; // class Grid2
 
@@ -195,8 +197,9 @@ class Lebedev : public OneDGrid2 {
 };
 
 class TwoDGrid2 : public Grid2 {
-  std::unique_ptr<OneDGrid2> GRad;
-  std::unique_ptr<OneDGrid2> GAng;
+  protected:
+    std::unique_ptr<OneDGrid2> GRad;
+    std::unique_ptr<OneDGrid2> GAng;
 
   public:
     TwoDGrid2(size_t nPtsRad, size_t nPtsAng, GRID_TYPE GTypeRad, 
@@ -216,7 +219,7 @@ class TwoDGrid2 : public Grid2 {
 
     };
 
-    inline IntegrationPoint operator[](size_t i) {
+    virtual inline IntegrationPoint operator[](size_t i) {
       // Running Angular Grid as fastest running
       // IJ = i
       // I = IJ % NAng (Angular Point)
@@ -236,6 +239,49 @@ class TwoDGrid2 : public Grid2 {
       return totalIntPt;
     };
 
+};
+
+enum ATOMIC_PARTITION {
+  BECKE,
+  FRISCH
+};
+
+class AtomicGrid : public TwoDGrid2 {
+  std::array<double,3> center_;
+  double scalingFactor_;
+  ATOMIC_PARTITION partitionScheme_;
+
+  public:
+    AtomicGrid(size_t nPtsRad, size_t nPtsAng, 
+        GRID_TYPE GTypeRad = EULERMAC, 
+        GRID_TYPE GTypeAng = LEBEDEV, 
+        std::array<double,3> center = {0.0,0.0,0.0},
+        ATOMIC_PARTITION partitionScheme = BECKE, 
+        double scalingFactor = 1.0) : 
+      TwoDGrid2(nPtsRad,nPtsAng,GTypeRad,GTypeAng),
+      center_(center),
+      partitionScheme_(partitionScheme),
+      scalingFactor_(scalingFactor) { };
+
+    inline IntegrationPoint operator[](size_t i) {
+      IntegrationPoint rawPoint = TwoDGrid2::operator[](i);
+
+      // Re-center
+      rawPoint.pt.set<0>(bg::get<0>(rawPoint.pt) + center_[0]);
+      rawPoint.pt.set<1>(bg::get<1>(rawPoint.pt) + center_[1]);
+      rawPoint.pt.set<2>(bg::get<2>(rawPoint.pt) + center_[2]);
+      
+      // Rescale radius
+      rawPoint.pt.set<0>(bg::get<0>(rawPoint.pt) * scalingFactor_);
+      rawPoint.pt.set<1>(bg::get<1>(rawPoint.pt) * scalingFactor_);
+      rawPoint.pt.set<2>(bg::get<2>(rawPoint.pt) * scalingFactor_);
+
+      // Rescale weight (w/o Partition Weights)
+      rawPoint.weight *= scalingFactor_;
+
+      return rawPoint;
+
+    };
 };
 
 };
