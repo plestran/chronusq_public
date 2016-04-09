@@ -38,7 +38,7 @@ int main(int argc, char **argv){
     double y = bg::get<1>(pt);
     double z = bg::get<2>(pt);
     double r = std::sqrt(x*x + y*y + z*z);
-    return r * r * std::exp(-r*r);
+    return std::exp(-r*r);
   };
 
   auto mat = [&](cartGP pt) -> RealMatrix {
@@ -68,24 +68,12 @@ int main(int argc, char **argv){
   };
 
   EulerMac G(300000);
-  double f = G.integrate<double>(gaussian);
-  double g = G.integrate<double>(sphGaussian);
+  double f = G.integrate<double>(gaussian); // exp(-x^2)
+  double g = G.integrate<double>(sphGaussian); // exp(-r^2) * r^2 over r
   auto X = G.integrate<RealMatrix>(mat);
 
   Lebedev L(302);
   cout << L.npts() << endl;;
-
-  double one(0.0);
-  for(auto i = 0; i < 302; i++){
-    cout << std::setw(22) << std::setprecision(10) << bg::get<0>(L[i].pt);
-    cout << std::setw(22) << std::setprecision(10) << bg::get<1>(L[i].pt);
-    cout << std::setw(22) << std::setprecision(10) << bg::get<2>(L[i].pt);
-    cout << std::setw(22) << std::setprecision(10) << L[i].weight;
-    cout << endl;
-    one += L[i].weight;
-  };
-  cout << one << endl;
-
 
   double h = L.integrate<double>(sphHarmonic);
   cout << h << endl;
@@ -105,7 +93,7 @@ int main(int argc, char **argv){
     double y = bg::get<1>(pt.pt);
     double z = bg::get<2>(pt.pt);
     double r = std::sqrt(x*x + y*y + z*z);
-    return pt.weight * r * r * std::exp(-r*r);
+    return pt.weight *  std::exp(-r*r);
   };
 
   auto sphGaussian3 = [&](IntegrationPoint pt, double &result){
@@ -113,7 +101,7 @@ int main(int argc, char **argv){
     double y = bg::get<1>(pt.pt);
     double z = bg::get<2>(pt.pt);
     double r = std::sqrt(x*x + y*y + z*z);
-    result +=  pt.weight * r * r * std::exp(-r*r);
+    result +=  pt.weight *  std::exp(-r*r);
   };
 
   double res, res2(1.0);
@@ -141,9 +129,51 @@ int main(int argc, char **argv){
   Eigen::internal::set_is_malloc_allowed(true);
   cout << 4 * math.pi * resMat << endl;
 
+  std::vector<std::array<double,3>> empty;
 
-  AtomicGrid SphereAtom(75,302);
+  AtomicGrid SphereAtom(75,302,EULERMAC,LEBEDEV,{0.0,0.0,0.0},BECKE,
+      empty);
   cout << 4 * math.pi * SphereAtom.integrate<double>(sphGaussian) << endl;
+
+  AtomicGrid SphereAtom2(75,302,EULERMAC,LEBEDEV,{2.0,0.0,0.0},BECKE,
+      empty);
+
+  SphereAtom.printGrid(cout);
+  SphereAtom2.printGrid(cout);
+
+
+  // Test Molecular integration
+
+
+  std::array<double,3> center1 = {0.0,0.0,0.0};
+  std::array<double,3> center2 = {1.0,0.0,0.0};
+  std::array<double,3> center3 = {0.0,2.0,0.0};
+
+  std::vector<std::array<double,3>> other1;
+  std::vector<std::array<double,3>> other2;
+  std::vector<std::array<double,3>> other3;
+
+  other1.push_back(center2);
+  other1.push_back(center3);
+  other2.push_back(center1);
+  other2.push_back(center3);
+  other3.push_back(center1);
+  other3.push_back(center2);
+
+  AtomicGrid Center1(75,302,EULERMAC,LEBEDEV,{0.0,0.0,0.0},BECKE,
+      other1);
+  AtomicGrid Center2(75,302,EULERMAC,LEBEDEV,{1.0,0.0,0.0},BECKE,
+      other2);
+  AtomicGrid Center3(75,302,EULERMAC,LEBEDEV,{0.0,2.0,0.0},BECKE,
+      other3);
+
+  cout << "HERE" << endl;
+  cout << 4 * math.pi * Center1.integrate<double>(sphGaussian) << endl;
+  cout << 4 * math.pi * Center2.integrate<double>(sphGaussian) << endl;
+  cout << 4 * math.pi * Center3.integrate<double>(sphGaussian) << endl;
+  cout << 4 * math.pi * (Center1.integrate<double>(sphGaussian) +
+     Center2.integrate<double>(sphGaussian) +
+     Center3.integrate<double>(sphGaussian) ) << endl;
   return 0;
 };
 

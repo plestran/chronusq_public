@@ -52,12 +52,15 @@ protected:
 public:
     Grid2(size_t npts = 0) : nPts_(npts){ };
     virtual ~Grid2(){ };
-  //virtual void   printGrid() = 0; ///<function to print the grid points
+
     virtual IntegrationPoint operator[](size_t) = 0;
     size_t npts(){return this->nPts_;};
+
+    // Integrate Functions
     template<typename T>
     inline T integrate(std::function< T(cartGP) > func) {
 
+      cout << "Integrate 1" << endl;
       T result = (*this)[0].weight * func((*this)[0].pt);
 
       for(auto iPt = 1; iPt < this->nPts_; iPt++){
@@ -72,6 +75,7 @@ public:
     inline void integrate(std::function< T(IntegrationPoint) > func,
         T& result) {
 
+      cout << "Integrate 2" << endl;
       result = func((*this)[0]);
       for(auto iPt = 1; iPt < this->nPts_; iPt++)
         result += func((*this)[iPt]);
@@ -81,11 +85,16 @@ public:
     template <typename T>
     inline void integrate(std::function< void(IntegrationPoint,T&) > func,
         T& result) {
+      cout << "Integrate 3" << endl;
       for(auto iPt = 0; iPt < this->nPts_; iPt++)
         if((*this)[iPt].weight > 1e-6){
           func((*this)[iPt],result);
         }
     };
+
+
+    // Print function
+    void printGrid(std::ostream&);
 }; // class Grid2
 
 class OneDGrid2 : public Grid2 {
@@ -129,7 +138,7 @@ class GaussChebFst : public OneDGrid2 {
       //
       // w_i \rightarrow w_i(x_i) = \frac{2\sqrt{1-x^2}}{(1-x)^2}
       //
-      wgt *= 2.0 * std::sqrt(1 - pt * pt) / ( (1 - pt) * (1 - pt) );
+      wgt *= 2.0 * std::sqrt(1 - pt * pt) * pt * pt / ( (1 - pt) * (1 - pt) );
 
       // Perform the coordinate shift
       //
@@ -159,7 +168,7 @@ class GaussChebSnd : public OneDGrid2 {
     IntegrationPoint operator[](size_t i){ 
       // Generate points and weights for (-1,1)
       double pt = std::cos(math.pi * i / (this->nPts_ +1));
-      double sgt = math.pi / (this->nPts_ + 1) * 
+      double wgt = math.pi / (this->nPts_ + 1) * 
         std::pow(
             std::sin(math.pi * i / (this->nPts_ +1)),
             2.0
@@ -198,7 +207,7 @@ class EulerMac : public OneDGrid2 {
     IntegrationPoint operator[](size_t i){ 
       double pt  = (i + 1.0) * (i + 1.0) / 
         ((this->nPts_ - i) * (this->nPts_ - i));
-      double wgt = 2.0 * (i + 1.0) * (this->nPts_ + 1.0) / 
+      double wgt = 2.0 * (i + 1.0) * (this->nPts_ + 1.0) * pt * pt / 
         ((this->nPts_ - i) * (this->nPts_ - i) * (this->nPts_ - i));
 
       return IntegrationPoint(pt,wgt);
@@ -325,17 +334,31 @@ class AtomicGrid : public TwoDGrid2 {
   ATOMIC_PARTITION partitionScheme_;
   std::vector<std::array<double,3> > otherCenters_;
 
+  std::vector<double> partitionScratch_;
+
+  double evalPartitionWeight(cartGP&);
+
   public:
     AtomicGrid(size_t nPtsRad, size_t nPtsAng, 
-        GRID_TYPE GTypeRad = EULERMAC, 
-        GRID_TYPE GTypeAng = LEBEDEV, 
-        std::array<double,3> center = {0.0,0.0,0.0},
-        ATOMIC_PARTITION partitionScheme = BECKE, 
+        GRID_TYPE GTypeRad, GRID_TYPE GTypeAng, 
+        std::array<double,3> center,
+        ATOMIC_PARTITION partitionScheme, 
+        std::vector<std::array<double,3> >& otherCenters,
         double scalingFactor = 1.0) : 
       TwoDGrid2(nPtsRad,nPtsAng,GTypeRad,GTypeAng),
       center_(center),
       partitionScheme_(partitionScheme),
-      scalingFactor_(scalingFactor) { };
+      otherCenters_(std::move(otherCenters)),
+      scalingFactor_(scalingFactor) { 
+        this->partitionScratch_.resize(this->otherCenters_.size(),0.0);
+        if(this->otherCenters_.size() != 0) {
+          cout << this->otherCenters_.size() << endl;
+          cout << otherCenters.size() << endl;
+          cout << this->otherCenters_[0][0] << endl;
+          cout << this->otherCenters_[0][1] << endl;
+          cout << this->otherCenters_[0][2] << endl;
+        }
+      };
 
     inline IntegrationPoint operator[](size_t i) {
       IntegrationPoint rawPoint = TwoDGrid2::operator[](i);
@@ -352,6 +375,10 @@ class AtomicGrid : public TwoDGrid2 {
 
       // Rescale weight (w/o Partition Weights)
       rawPoint.weight *= scalingFactor_;
+
+      //cout <<evalPartitionWeight(rawPoint.pt)<<endl;
+//      if(rawPoint.weight > 1e-8)
+      rawPoint.weight *= evalPartitionWeight(rawPoint.pt);
 
       return rawPoint;
 

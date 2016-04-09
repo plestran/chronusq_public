@@ -1,4 +1,4 @@
-add_library(grid2 SHARED lebedev.cpp lebedev3.cpp lebedev5.cpp
+add_library(grid2 SHARED grid.cpp lebedev.cpp lebedev3.cpp lebedev5.cpp
   lebedev7.cpp lebedev9.cpp lebedev11.cpp lebedev13.cpp lebedev15.cpp
   lebedev17.cpp lebedev19.cpp lebedev21.cpp lebedev23.cpp lebedev25.cpp
   lebedev27.cpp lebedev29.cpp lebedev31.cpp lebedev35.cpp lebedev41.cpp
