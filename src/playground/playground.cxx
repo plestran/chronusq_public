@@ -191,6 +191,103 @@ int main(int argc, char **argv){
   cout << 4 * math.pi * (NCenter1.integrate<double>(sphGaussian) +
      NCenter2.integrate<double>(sphGaussian) +
      NCenter3.integrate<double>(sphGaussian) ) << endl;
+
+
+
+  Molecule molecule;
+  BasisSet basis;
+  Controls controls;
+  AOIntegrals aoints;
+  MOIntegrals<double> moints;
+  SingleSlater<double> singleSlater;
+  Response<double> resp;
+  FileIO fileio("test.inp","test.out");
+
+  initCQ(argc,argv);
+  controls.iniControls();
+  fileio.iniH5Files();
+  fileio.iniStdGroups();
+  CQSetNumThreads(1);
+  
+  loadPresets<WATER>(molecule);
+  molecule.convBohr();
+  molecule.computeNucRep();
+  molecule.computeRij();
+  molecule.computeI();
+
+  singleSlater.setRef(SingleSlater<double>::RHF);
+  singleSlater.isClosedShell = true;
+
+  basis.findBasisFile("sto3g");
+  basis.communicate(fileio);
+  basis.parseGlobal();
+  basis.constructLocal(&molecule);
+  basis.makeMaps(1,&molecule);
+  basis.renormShells();
+
+
+  aoints.communicate(molecule,basis,fileio,controls);
+  singleSlater.communicate(molecule,basis,aoints,fileio,controls);
+  moints.communicate(molecule,basis,fileio,controls,aoints,singleSlater);
+
+  aoints.initMeta();
+  aoints.integralAlgorithm = AOIntegrals::INCORE;
+  singleSlater.initMeta();
+  singleSlater.genMethString();
+
+  aoints.alloc();
+  singleSlater.alloc();
+
+  singleSlater.formGuess();
+  singleSlater.formFock();
+  singleSlater.computeEnergy();
+  singleSlater.SCF();
+  singleSlater.computeProperties();
+  singleSlater.printProperties();
+
+  RealMatrix SCRATCH2(singleSlater.nBasis(),singleSlater.nBasis());
+  VectorXd   SCRATCH1(singleSlater.nBasis());
+
+  auto density = [&](IntegrationPoint pt, double &result) {
+    // Evaluate the basis product in SCRATCH
+    for(auto iShell = 0; iShell < basis.nShell(); iShell++){
+      int b_s = basis.mapSh2Bf(iShell);
+      int size= basis.shells(iShell).size();
+
+      libint2::Shell shTmp = basis.shells(iShell);
+      double * buff = basis.basisDEval(0,shTmp,
+          &pt.pt);
+      RealVecMap bMap(buff,size,1);
+      SCRATCH1.segment(b_s,size) = bMap;
+
+      delete [] buff;
+    };
+
+    SCRATCH2 = SCRATCH1 * SCRATCH1.transpose();
+    prettyPrint(cout,SCRATCH2,"S");
+
+    result += pt.weight * SCRATCH2.frobInner(*singleSlater.densityA());
+  };
+
+  std::vector<std::array<double,3>> atomicCenters;
+  for(auto iAtm = 0; iAtm < molecule.nAtoms(); iAtm++){
+    atomicCenters.push_back(
+        {(*molecule.cart())(iAtm,0),
+         (*molecule.cart())(iAtm,1),
+         (*molecule.cart())(iAtm,2)}
+    );
+  };
+
+  double rho = 0;
+  for(auto iAtm = 0; iAtm < molecule.nAtoms(); iAtm++){
+    AtomicGrid2 AGrid(75,590,EULERMAC,LEBEDEV,BECKE,atomicCenters,iAtm,
+        elements[molecule.index(iAtm)].sradius);
+    AGrid.integrate<double>(density,rho);
+    cout << "RHO " << rho;
+  };
+
+
+  finalizeCQ();
   return 0;
 };
 
