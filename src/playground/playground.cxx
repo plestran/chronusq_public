@@ -160,11 +160,11 @@ int main(int argc, char **argv){
   other3.push_back(center1);
   other3.push_back(center2);
 
-  AtomicGrid Center1(75,302,EULERMAC,LEBEDEV,{0.0,0.0,0.0},BECKE,
+  AtomicGrid Center1(75,590,EULERMAC,LEBEDEV,{0.0,0.0,0.0},BECKE,
       other1);
-  AtomicGrid Center2(75,302,EULERMAC,LEBEDEV,{1.0,0.0,0.0},BECKE,
+  AtomicGrid Center2(75,590,EULERMAC,LEBEDEV,{1.0,0.0,0.0},BECKE,
       other2);
-  AtomicGrid Center3(75,302,EULERMAC,LEBEDEV,{0.0,2.0,0.0},BECKE,
+  AtomicGrid Center3(75,590,EULERMAC,LEBEDEV,{0.0,2.0,0.0},BECKE,
       other3);
 
   cout << "HERE" << endl;
@@ -174,6 +174,23 @@ int main(int argc, char **argv){
   cout << 4 * math.pi * (Center1.integrate<double>(sphGaussian) +
      Center2.integrate<double>(sphGaussian) +
      Center3.integrate<double>(sphGaussian) ) << endl;
+
+  std::vector<std::array<double,3>> centers;
+  centers.push_back(center1);
+  centers.push_back(center2);
+  centers.push_back(center3);
+
+  AtomicGrid2 NCenter1(75,590,EULERMAC,LEBEDEV,BECKE,centers,0);
+  AtomicGrid2 NCenter2(75,590,EULERMAC,LEBEDEV,BECKE,centers,1);
+  AtomicGrid2 NCenter3(75,590,EULERMAC,LEBEDEV,BECKE,centers,2);
+
+  cout << "HERE" << endl;
+  cout << 4 * math.pi * NCenter1.integrate<double>(sphGaussian) << endl;
+  cout << 4 * math.pi * NCenter2.integrate<double>(sphGaussian) << endl;
+  cout << 4 * math.pi * NCenter3.integrate<double>(sphGaussian) << endl;
+  cout << 4 * math.pi * (NCenter1.integrate<double>(sphGaussian) +
+     NCenter2.integrate<double>(sphGaussian) +
+     NCenter3.integrate<double>(sphGaussian) ) << endl;
   return 0;
 };
 

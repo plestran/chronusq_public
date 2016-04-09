@@ -385,5 +385,55 @@ class AtomicGrid : public TwoDGrid2 {
     };
 };
 
+class AtomicGrid2 : public TwoDGrid2 {
+  double scalingFactor_;
+  ATOMIC_PARTITION partitionScheme_;
+  std::vector<std::array<double,3> > centers_;
+  size_t centerIndx_;
+
+  std::vector<double> partitionScratch_;
+
+  double evalPartitionWeight(cartGP&);
+
+  public:
+    AtomicGrid2(size_t nPtsRad, size_t nPtsAng, 
+        GRID_TYPE GTypeRad, GRID_TYPE GTypeAng, 
+        ATOMIC_PARTITION partitionScheme, 
+        std::vector<std::array<double,3> > centers,
+        size_t centerIndx,
+        double scalingFactor = 1.0) : 
+      TwoDGrid2(nPtsRad,nPtsAng,GTypeRad,GTypeAng),
+      partitionScheme_(partitionScheme),
+      centers_(std::move(centers)),
+      centerIndx_(centerIndx),
+      scalingFactor_(scalingFactor) { 
+        this->partitionScratch_.resize(this->centers_.size(),0.0);
+      };
+
+    inline IntegrationPoint operator[](size_t i) {
+      IntegrationPoint rawPoint = TwoDGrid2::operator[](i);
+
+      // Re-center
+      rawPoint.pt.set<0>(bg::get<0>(rawPoint.pt) + centers_[centerIndx_][0]);
+      rawPoint.pt.set<1>(bg::get<1>(rawPoint.pt) + centers_[centerIndx_][1]);
+      rawPoint.pt.set<2>(bg::get<2>(rawPoint.pt) + centers_[centerIndx_][2]);
+      
+      // Rescale radius
+      rawPoint.pt.set<0>(bg::get<0>(rawPoint.pt) * scalingFactor_);
+      rawPoint.pt.set<1>(bg::get<1>(rawPoint.pt) * scalingFactor_);
+      rawPoint.pt.set<2>(bg::get<2>(rawPoint.pt) * scalingFactor_);
+
+      // Rescale weight (w/o Partition Weights)
+      rawPoint.weight *= scalingFactor_;
+
+      //cout <<evalPartitionWeight(rawPoint.pt)<<endl;
+//      if(rawPoint.weight > 1e-8)
+      rawPoint.weight *= evalPartitionWeight(rawPoint.pt);
+
+      return rawPoint;
+
+    };
+};
+
 };
 #endif
