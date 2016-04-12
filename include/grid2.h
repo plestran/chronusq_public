@@ -138,7 +138,7 @@ class GaussChebFst : public OneDGrid2 {
       //
       // w_i \rightarrow w_i(x_i) = \frac{2\sqrt{1-x^2}}{(1-x)^2}
       //
-      wgt *= 2.0 * std::sqrt(1 - pt * pt) * pt * pt / ( (1 - pt) * (1 - pt) );
+      wgt *= 2.0 * std::sqrt(1 - pt * pt) / ( (1 - pt) * (1 - pt) );
 
       // Perform the coordinate shift
       //
@@ -328,62 +328,6 @@ enum ATOMIC_PARTITION {
   FRISCH
 };
 
-class AtomicGrid : public TwoDGrid2 {
-  std::array<double,3> center_;
-  double scalingFactor_;
-  ATOMIC_PARTITION partitionScheme_;
-  std::vector<std::array<double,3> > otherCenters_;
-
-  std::vector<double> partitionScratch_;
-
-  double evalPartitionWeight(cartGP&);
-
-  public:
-    AtomicGrid(size_t nPtsRad, size_t nPtsAng, 
-        GRID_TYPE GTypeRad, GRID_TYPE GTypeAng, 
-        std::array<double,3> center,
-        ATOMIC_PARTITION partitionScheme, 
-        std::vector<std::array<double,3> >& otherCenters,
-        double scalingFactor = 1.0) : 
-      TwoDGrid2(nPtsRad,nPtsAng,GTypeRad,GTypeAng),
-      center_(center),
-      partitionScheme_(partitionScheme),
-      otherCenters_(std::move(otherCenters)),
-      scalingFactor_(scalingFactor) { 
-        this->partitionScratch_.resize(this->otherCenters_.size(),0.0);
-        if(this->otherCenters_.size() != 0) {
-          cout << this->otherCenters_.size() << endl;
-          cout << otherCenters.size() << endl;
-          cout << this->otherCenters_[0][0] << endl;
-          cout << this->otherCenters_[0][1] << endl;
-          cout << this->otherCenters_[0][2] << endl;
-        }
-      };
-
-    inline IntegrationPoint operator[](size_t i) {
-      IntegrationPoint rawPoint = TwoDGrid2::operator[](i);
-
-      // Re-center
-      rawPoint.pt.set<0>(bg::get<0>(rawPoint.pt) + center_[0]);
-      rawPoint.pt.set<1>(bg::get<1>(rawPoint.pt) + center_[1]);
-      rawPoint.pt.set<2>(bg::get<2>(rawPoint.pt) + center_[2]);
-      
-      // Rescale radius
-      rawPoint.pt.set<0>(bg::get<0>(rawPoint.pt) * scalingFactor_);
-      rawPoint.pt.set<1>(bg::get<1>(rawPoint.pt) * scalingFactor_);
-      rawPoint.pt.set<2>(bg::get<2>(rawPoint.pt) * scalingFactor_);
-
-      // Rescale weight (w/o Partition Weights)
-      rawPoint.weight *= scalingFactor_;
-
-      //cout <<evalPartitionWeight(rawPoint.pt)<<endl;
-//      if(rawPoint.weight > 1e-8)
-      rawPoint.weight *= evalPartitionWeight(rawPoint.pt);
-
-      return rawPoint;
-
-    };
-};
 
 class AtomicGrid2 : public TwoDGrid2 {
   double scalingFactor_;
@@ -413,15 +357,16 @@ class AtomicGrid2 : public TwoDGrid2 {
     inline IntegrationPoint operator[](size_t i) {
       IntegrationPoint rawPoint = TwoDGrid2::operator[](i);
 
+      // Rescale radius
+      rawPoint.pt.set<0>(bg::get<0>(rawPoint.pt) * scalingFactor_);
+      rawPoint.pt.set<1>(bg::get<1>(rawPoint.pt) * scalingFactor_);
+      rawPoint.pt.set<2>(bg::get<2>(rawPoint.pt) * scalingFactor_);
+
       // Re-center
       rawPoint.pt.set<0>(bg::get<0>(rawPoint.pt) + centers_[centerIndx_][0]);
       rawPoint.pt.set<1>(bg::get<1>(rawPoint.pt) + centers_[centerIndx_][1]);
       rawPoint.pt.set<2>(bg::get<2>(rawPoint.pt) + centers_[centerIndx_][2]);
       
-      // Rescale radius
-      rawPoint.pt.set<0>(bg::get<0>(rawPoint.pt) * scalingFactor_);
-      rawPoint.pt.set<1>(bg::get<1>(rawPoint.pt) * scalingFactor_);
-      rawPoint.pt.set<2>(bg::get<2>(rawPoint.pt) * scalingFactor_);
 
       // Rescale weight (w/o Partition Weights)
       rawPoint.weight *= scalingFactor_;
