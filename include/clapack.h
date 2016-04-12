@@ -62,5 +62,7 @@ void dgecon_(char*,int*,double*,int*,double*,double*,double*,int*,int*);
 void dgels_(char*,int*,int*,int*,double*,int*,double*,int*,double*,int*,int*);
 void dgelss_(int*,int*,int*,double*,int*,double*,int*,double*,double*,int*,
   double*,int*,int*);
+void dgelsd_(int*,int*,int*,double*,int*,double*,int*,double*,double*,int*,
+  double*,int*,int*,int*);
 }
 

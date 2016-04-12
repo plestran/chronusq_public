@@ -537,50 +537,50 @@ void BasisSet::radcut(double thr, int maxiter, double epsConv){
 double BasisSet::fRmax (int l, double alpha, double thr, double epsConv, int maxiter){
   double root ;
   double root1 ;
-       root =  fSpAv (2, l,alpha, thr);
+  root =  fSpAv (2, l,alpha, thr);
   for (auto i=0; i < maxiter; i++){
-       root1  =  - (this->fSpAv(0, l,alpha, root) - thr);
-       root1 /=  this->fSpAv (1, l,alpha, root);
-       root1 +=  root;
-       if(std::abs(root1-root) <= epsConv){
-//       cout << "l "<< l << " alpha " << alpha <<endl;
-//       cout << "root(n-1)= " << root  << " root(n)= "<<root1 <<" abs_err " << std::abs(root1-root)  << endl;
-//       cout << "Root found " << root1 << " It " << i << " froot " << this->fSpAv(0, l,alpha, root) << endl;
-         return root1;
-       }else{     
-           root = root1;
+    root1  =  - (this->fSpAv(0, l,alpha, root) - thr);
+    root1 /=  this->fSpAv (1, l,alpha, root);
+    root1 +=  root;
+    if(std::abs(root1-root) <= epsConv){
+//    cout << "l "<< l << " alpha " << alpha <<endl;
+//    cout << "root(n-1)= " << root  << " root(n)= "<<root1 <<" abs_err " << std::abs(root1-root)  << endl;
+//    cout << "Root found " << root1 << " It " << i << " froot " << this->fSpAv(0, l,alpha, root) << endl;
+      return root1;
+    } else {      
+      root = root1;
     }
-   }
-           this->fileio_->out << "Convergence Failure in fRmax, change maxiter or turn off screening " << endl;    
-           this->fileio_->out << "root(n-1)= " << root  << " root(n)= "<<root1 <<" abs_err " << std::abs(root1-root)  << endl;
-           CErr("Convergence Failure",this->fileio_->out);
+  }
+  this->fileio_->out << "Convergence Failure in fRmax, change maxiter or turn off screening " << endl;    
+  this->fileio_->out << "root(n-1)= " << root  << " root(n)= "<<root1 <<" abs_err " << std::abs(root1-root)  << endl;
+  CErr("Convergence Failure",this->fileio_->out);
 }   
 
 double BasisSet::fSpAv (int iop, int l, double alpha, double r){
-       double fAv = 0.0;
-       double two = 2.0;
-       double threeOv2 = 1.5;
-       double oneOv2 = 0.5;
-       fAv = std::pow((two*alpha),(l+threeOv2)) ;
-       fAv /= two*math.pi*boost::math::tgamma(l+threeOv2); 
-       fAv  = std::pow(fAv,(oneOv2)) ;
+  double fAv = 0.0;
+  double two = 2.0;
+  double threeOv2 = 1.5;
+  double oneOv2 = 0.5;
+  fAv = std::pow((two*alpha),(l+threeOv2)) ;
+  fAv /= two*math.pi*boost::math::tgamma(l+threeOv2); 
+  fAv  = std::pow(fAv,(oneOv2)) ;
 
-       if (iop == 0){
-       fAv *= std::exp(-alpha*r*r) ;
-       fAv *= std::pow(r,l) ;
-       }else if(iop ==1){
-       fAv *= std::exp(-alpha*r*r);
-       fAv *= std::pow(r,(l-1)) ;
-       fAv *= (l - two*alpha*r*r);
-       }else if(iop = 2){
-       fAv = -std::log(fAv);
-       fAv += std::log(r);
-       fAv /= -alpha;
-       fAv = std::pow(fAv,0.5);
-      }   
+  if (iop == 0)  {
+    fAv *= std::exp(-alpha*r*r) ;
+    fAv *= std::pow(r,l) ;
+  } else if(iop == 1) {
+    fAv *= std::exp(-alpha*r*r);
+    fAv *= std::pow(r,(l-1)) ;
+    fAv *= (l - two*alpha*r*r);
+  } else if(iop == 2) {
+    fAv = -std::log(fAv);
+    fAv += std::log(r);
+    fAv /= -alpha;
+    fAv = std::pow(fAv,0.5);
+  }   
 //       cout << "l "<< l << " alpha " << alpha << " fAv " << fAv <<endl;
-       return fAv;
-     }
+  return fAv;
+}
 
 double * BasisSet::basisonFlyProdEval(libint2::Shell s1, int s1size, libint2::Shell s2, int s2size, double rx, double ry, double rz){
           

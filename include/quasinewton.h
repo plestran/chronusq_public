@@ -24,7 +24,7 @@
  *  
  */
 #ifndef INCLUDED_QUASINEWTON
-#define INCLUDED_QUATINEWTON
+#define INCLUDED_QUASINEWTON
 #include <global.h>
 #include <cerr.h>
 #include <sdresponse.h>

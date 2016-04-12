@@ -420,7 +420,7 @@ public:
     }
   } 
 }; //template Class MOIntegrals
-#include <mointegrals_alloc.h>
+#include <mointegrals/mointegrals_alloc.h>
 } // namespace ChronusQ
 
 #endif

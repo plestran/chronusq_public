@@ -64,8 +64,8 @@ void SingleSlater<double>::CDIIS(){
 */
 
 //dgesv_(&N,&NRHS,B.data(),&N,iPiv,coef,&N,&INFO);
-  char NORM = 'O';
-  double ANORM = B.lpNorm<1>();
+//char NORM = 'O';
+//double ANORM = B.lpNorm<1>();
 //RealVecMap COEFF(coef,N);
 //VectorXd   RHS(COEFF);
 //COEFF = B.fullPivLu().solve(RHS);
@@ -74,20 +74,28 @@ void SingleSlater<double>::CDIIS(){
 //std::vector<int> iWORK_(N);
 //dgecon_(&NORM,&N,B.data(),&N,&ANORM,&RCOND,this->WORK_,&iWORK_[0],&INFO);
 
-  char TRANS = 'N';
-  dgels_(&TRANS,&N,&N,&NRHS,B.data(),&N,coef,&N,this->WORK_,&this->LWORK_,&INFO);
+//char TRANS = 'N';
+//dgels_(&TRANS,&N,&N,&NRHS,B.data(),&N,coef,&N,this->WORK_,&this->LWORK_,&INFO);
 
   /*
   double RCOND = -1.0;
   int Rank;
   double* S    = new double[N];
-  dgelss_(&N,&N,&NRHS,B.data(),&N,coef,&N,S,&RCOND,&Rank,this->WORK_,
-    &this->LWORK_,&INFO);
+//dgelss_(&N,&N,&NRHS,B.data(),&N,coef,&N,S,&RCOND,&Rank,this->WORK_,
+//  &this->LWORK_,&INFO);
+  dgelsd_(&N,&N,&NRHS,B.data(),&N,coef,&N,S,&RCOND,&Rank,this->WORK_,
+    &this->LWORK_,iPiv,&INFO);
   delete [] S;
   */
+  char NORM = 'O';
+  double ANORM = B.lpNorm<1>();
+  double RCOND;
+  std::vector<int> iWORK_(N);
+  dgesv_(&N,&NRHS,B.data(),&N,iPiv,coef,&N,&INFO);
+  dgecon_(&NORM,&N,B.data(),&N,&ANORM,&RCOND,this->WORK_,&iWORK_[0],&INFO);
 
 
-//if(std::abs(RCOND) > 1e-10) {
+  if(std::abs(RCOND) > std::numeric_limits<double>::epsilon()) {
     this->fockA_->setZero();
     if(!this->isClosedShell && this->Ref_ != TCS) this->fockB_->setZero();
     for(auto j = 0; j < N-1; j++) {
@@ -98,7 +106,7 @@ void SingleSlater<double>::CDIIS(){
         *this->fockB_ += coef[j]*FB;
       }
     }
-//}
+  }
   delete [] coef;
   delete [] iPiv;
 
@@ -106,32 +114,28 @@ void SingleSlater<double>::CDIIS(){
 
 template<>
 void SingleSlater<double>::CpyFock(int iter){
-  std::memcpy(this->FADIIS_+(iter % (this->lenCoeff_-1)) * this->lenF_,this->fockA_->data(),
-              this->lenF_ * sizeof(double));
+  std::memcpy(this->FADIIS_+(iter % (this->nDIISExtrap_-1)) * this->lenF_,
+    this->fockA_->data(),this->lenF_ * sizeof(double));
+
   if(!this->isClosedShell && this->Ref_ != TCS)
-    std::memcpy(this->FBDIIS_ + (iter % (this->lenCoeff_-1)) * this->lenF_,
+    std::memcpy(this->FBDIIS_ + (iter % (this->nDIISExtrap_-1)) * this->lenF_,
                 this->fockB_->data(),this->lenF_ * sizeof(double));
 } // CpyFock
 
 template<>
 void SingleSlater<double>::GenDComm(int iter){
-  RealMap ErrA(this->ErrorAlphaMem_ + (iter % (this->lenCoeff_-1)) * this->lenF_,
-               this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
-/*
-  if(this->Ref_ == TCS){
-    RealMap GenOverlap(this->SMem_,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
-    ErrA = (*this->fockA_) * (*this->onePDMA_) * (GenOverlap);
-    ErrA -= (GenOverlap) * (*this->onePDMA_) * (*this->fockA_);
-  } else {
-    ErrA = (*this->fockA_) * (*this->onePDMA_) * (*this->aointegrals_->overlap_);
-    ErrA -= (*this->aointegrals_->overlap_) * (*this->onePDMA_) * (*this->fockA_);
-  }
-*/
+  RealMap ErrA(
+    this->ErrorAlphaMem_ + (iter % (this->nDIISExtrap_-1)) * this->lenF_,
+    this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_
+  );
+
   ErrA = (*this->fockA_) * (*this->onePDMA_) * (*this->aointegrals_->overlap_);
   ErrA -= (*this->aointegrals_->overlap_) * (*this->onePDMA_) * (*this->fockA_);
   if(!this->isClosedShell && this->Ref_ != TCS){
-    RealMap ErrB(this->ErrorBetaMem_ + (iter % (this->lenCoeff_-1)) * this->lenF_,
-                 this->nBasis_,this->nBasis_);
+    RealMap ErrB(
+      this->ErrorBetaMem_ + (iter % (this->nDIISExtrap_-1)) * this->lenF_,
+      this->nBasis_,this->nBasis_
+    );
 
     ErrB = (*this->fockB_) * (*this->onePDMB_) * (*this->aointegrals_->overlap_);
     ErrB -= (*this->aointegrals_->overlap_) * (*this->onePDMB_) * (*this->fockB_);

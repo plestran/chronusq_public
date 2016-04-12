@@ -56,17 +56,17 @@ if(CQ_ENABLE_MPI)
 endif()
 
 
-# Append flags for compilation
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated -Wno-deprecated-declarations -Wno-narrowing")
-
-if(CQ_ENABLE_MPI)
-  # MPI Compile flags
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MPI_CXX_COMPILE_FLAGS}")
-else()
-  # OpenMP flags
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+if(NOT CMAKE_CXX_COMPILER_ID MATCHES "PGI")
+  # Append flags for compilation
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated -Wno-deprecated-declarations -Wno-narrowing -Wno-strict-aliasing")
+  
+  if(NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-local-typedefs")
+  else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-return-type")
+  endif()
 endif()
+
 
 include(ExternalProject)
 
@@ -76,10 +76,20 @@ ExternalProject_Add(boost
   URL "${PROJECT_SOURCE_DIR}/deps/src/boost_1_59_0.tar.gz"
   CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/deps/boost/src/boost/bootstrap.sh
   BUILD_COMMAND ${PROJECT_BINARY_DIR}/deps/boost/src/boost/b2
-  --prefix=${PROJECT_BINARY_DIR}/deps --with-python --ignore-site-config --cxxflags="-Wall" install
+  --prefix=${PROJECT_BINARY_DIR}/deps --with-python --ignore-site-config cxxflags=${CMAKE_CXX_FLAGS} install
   BUILD_IN_SOURCE 1
   INSTALL_COMMAND echo "Boost Build Sucess!"
 )
+
+# More compile flags that Boost throws a fit about 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+if(CQ_ENABLE_MPI)
+  # MPI Compile flags
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MPI_CXX_COMPILE_FLAGS}")
+else()
+  # OpenMP flags
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+endif()
 
 if(APPLE)
   set(Boost_LIBRARIES ${PROJECT_BINARY_DIR}/deps/lib/libboost_python.dylib)
@@ -105,13 +115,17 @@ if(USE_LIBINT)
   if(BUILD_LIBINT)
     ExternalProject_Add(libint
       PREFIX ${PROJECT_BINARY_DIR}/deps/libint
-      URL "${PROJECT_SOURCE_DIR}/deps/src/libint-2.1.0-beta2.tgz"
+      URL "${PROJECT_SOURCE_DIR}/deps/src/libint-2.2.0-alpha.tgz"
       CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/deps/libint/src/libint/configure --prefix=${PROJECT_BINARY_DIR}/deps CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${CMAKE_CXX_FLAGS} --enable-shared
       BUILD_COMMAND make -j2
       BUILD_IN_SOURCE 1
       INSTALL_COMMAND make install
-    )  
-    set(LIBINT_LIB ${PROJECT_BINARY_DIR}/deps/lib/libint2.so)
+    )
+    if(APPLE)
+      set(LIBINT_LIB ${PROJECT_BINARY_DIR}/deps/lib/libint2.dylib)
+    else()
+      set(LIBINT_LIB ${PROJECT_BINARY_DIR}/deps/lib/libint2.so) 
+    endif()
     include_directories("${PROJECT_BINARY_DIR}/deps/include")
     include_directories("${PROJECT_BINARY_DIR}/deps/include/libint2")
   else()

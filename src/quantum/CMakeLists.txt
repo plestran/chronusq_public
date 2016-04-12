@@ -1,7 +1,12 @@
+if(APPLE)
+add_library(quantum STATIC quantum_copy.cpp)
+else()
 add_library(quantum SHARED quantum_copy.cpp)
+endif()
 
 if(APPLE)
-target_link_libraries(singleslater LINK_PUBLIC ${EXTERNAL_CQ_DEPS})
+target_link_libraries(quantum LINK_PUBLIC singleslater)
+target_link_libraries(quantum LINK_PUBLIC ${EXTERNAL_CQ_DEPS})
 endif()
 
 if(USE_LIBINT)

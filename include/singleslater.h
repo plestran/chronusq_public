@@ -99,6 +99,8 @@ class SingleSlater : public Quantum<T> {
   int    **R2Index_;
 
   int      guess_;
+  int      nDIISExtrap_;
+  int      iDIISStart_;
 
   // DFT Parameters
   int weightScheme_;
@@ -405,14 +407,16 @@ public:
 
 
     // Standard Values
-    this->Ref_         = _INVALID;
-    this->CorrKernel_  = NOCORR;
-    this->ExchKernel_  = NOEXCH;
-    this->DFTKernel_   = NODFT;
-    this->denTol_      = 5e-8;
-    this->eneTol_      = 1e-10;
-    this->maxSCFIter_  = 256;
-    //this->maxSCFIter_  = 128;
+    this->Ref_          = _INVALID;
+    this->CorrKernel_   = NOCORR;
+    this->ExchKernel_   = NOEXCH;
+    this->DFTKernel_    = NODFT;
+    this->denTol_       = 1e-8;
+    this->eneTol_       = 1e-10;
+    this->maxSCFIter_   = 256;
+    this->nDIISExtrap_  = 7;
+    this->iDIISStart_   = 4;
+
     this->elecField_   = {0.0,0.0,0.0};
     this->printLevel_  = 1;
     this->isPrimary    = true;
@@ -733,13 +737,13 @@ public:
   void mpiRecv(int,int tag);
 };
 
-#include <singleslater_alloc.h>
-#include <singleslater_guess.h>
-#include <singleslater_print.h>
-#include <singleslater_fock.h>
-#include <singleslater_misc.h>
-#include <singleslater_scf.h>
-#include <singleslater_properties.h>
+#include <singleslater/singleslater_alloc.h>
+#include <singleslater/singleslater_guess.h>
+#include <singleslater/singleslater_print.h>
+#include <singleslater/singleslater_fock.h>
+#include <singleslater/singleslater_misc.h>
+#include <singleslater/singleslater_scf.h>
+#include <singleslater/singleslater_properties.h>
 //#include <singleslater_dft.h>
 
 

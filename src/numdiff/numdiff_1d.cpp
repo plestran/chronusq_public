@@ -1164,7 +1164,7 @@ Derivatives computeNAC2pt1D(Molecule &geom_0, Molecule &geom_p,
   cout << endl;
   cout << "  Performing Response Calculations (";
   if(respType == RESPONSE_TYPE::CIS)       cout << "CIS" ;
-  else if(respType = RESPONSE_TYPE::PPTDA) cout << "PPTDA" ;
+  else if(respType == RESPONSE_TYPE::PPTDA) cout << "PPTDA" ;
   cout << ")" << endl;
 
   cout << "  Performing Response (X,Y)" << endl;
@@ -1200,12 +1200,20 @@ Derivatives computeNAC2pt1D(Molecule &geom_0, Molecule &geom_p,
   }
   
 
-  Eigen::VectorXd freq_0 = resp_0.frequencies()[0].head(nFreq);
-  Eigen::VectorXd freq_p = resp_p.frequencies()[0].head(nFreq);
-  Eigen::VectorXd freq_m = resp_m.frequencies()[0].head(nFreq);
+  Eigen::VectorXd freq_0,freq_p,freq_m; 
+
+  if(this->respType_ == RESPONSE_TYPE::CIS){
+    freq_0 = resp_0.template frequencies<SINGLETS>().head(nFreq);
+    freq_p = resp_p.template frequencies<SINGLETS>().head(nFreq);
+    freq_m = resp_m.template frequencies<SINGLETS>().head(nFreq);
+  } else if(this->respType_ == RESPONSE_TYPE::PPTDA){
+    freq_0 = resp_0.template frequencies<A_PPTDA_SINGLETS>().head(nFreq);
+    freq_p = resp_p.template frequencies<A_PPTDA_SINGLETS>().head(nFreq);
+    freq_m = resp_m.template frequencies<A_PPTDA_SINGLETS>().head(nFreq);
+  }
 
   if(debug) {
-    cout << endl << "  Excitation Frequencies:" << endl;
+    cout << endl << "  Excitation template frequencies:" << endl;
    
     for(auto iSt = 0; iSt < nFreq; iSt++){
       cout << "  W(" << iSt << ") (X,Y):    " 
@@ -1225,12 +1233,23 @@ Derivatives computeNAC2pt1D(Molecule &geom_0, Molecule &geom_p,
 
 
 
-  RealMatrix T_0 = resp_0.transDen()[0].block(0,0,
-    resp_0.nMatDim()[0],nFreq);
-  RealMatrix T_p = resp_p.transDen()[0].block(0,0,
-    resp_p.nMatDim()[0],nFreq);
-  RealMatrix T_m = resp_m.transDen()[0].block(0,0,
-    resp_m.nMatDim()[0],nFreq);
+  RealMatrix T_0,T_p,T_m;
+
+  if(this->respType_ == RESPONSE_TYPE::CIS){
+    T_0 = resp_0.template transDen<SINGLETS>().block(0,0,
+     resp_0.template nMatDim<SINGLETS>(),nFreq);
+    T_p = resp_p.template transDen<SINGLETS>().block(0,0,
+     resp_p.template nMatDim<SINGLETS>(),nFreq);
+    T_m = resp_m.template transDen<SINGLETS>().block(0,0,
+     resp_m.template nMatDim<SINGLETS>(),nFreq);
+  } else if(this->respType_ == RESPONSE_TYPE::PPTDA){
+    T_0 = resp_0.template transDen<A_PPTDA_SINGLETS>().block(0,0,
+     resp_0.template nMatDim<A_PPTDA_SINGLETS>(),nFreq);
+    T_p = resp_p.template transDen<A_PPTDA_SINGLETS>().block(0,0,
+     resp_p.template nMatDim<A_PPTDA_SINGLETS>(),nFreq);
+    T_m = resp_m.template transDen<A_PPTDA_SINGLETS>().block(0,0,
+     resp_m.template nMatDim<A_PPTDA_SINGLETS>(),nFreq);
+  }
 
 
 
@@ -1247,10 +1266,17 @@ Derivatives computeNAC2pt1D(Molecule &geom_0, Molecule &geom_p,
 
   Eigen::VectorXd Trans_t_p;
   Eigen::VectorXd Trans_t_m;
-  Trans_t_p = checkPhase(T_0.data(),T_p.data(),
-    resp_p.nMatDim()[0],nFreq);
-  Trans_t_m = checkPhase(T_0.data(),T_m.data(),
-    resp_m.nMatDim()[0],nFreq);
+  if(this->respType_ == RESPONSE_TYPE::CIS){
+    Trans_t_p = checkPhase(T_0.data(),T_p.data(),
+      resp_p.template nMatDim<SINGLETS>(),nFreq);
+    Trans_t_m = checkPhase(T_0.data(),T_m.data(),
+      resp_m.template nMatDim<SINGLETS>(),nFreq);
+  } else if(this->respType_ == RESPONSE_TYPE::PPTDA){
+    Trans_t_p = checkPhase(T_0.data(),T_p.data(),
+      resp_p.template nMatDim<A_PPTDA_SINGLETS>(),nFreq);
+    Trans_t_m = checkPhase(T_0.data(),T_m.data(),
+      resp_m.template nMatDim<A_PPTDA_SINGLETS>(),nFreq);
+  }
 
 
   if(debug){

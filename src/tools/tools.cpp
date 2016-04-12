@@ -58,7 +58,7 @@ double doubleFact(int t){
 double powerInt(double base, int order){
   int i;
   double tmp=1.0;
-  if(abs(base)<math.small&&order!=0 )  return 0.0;
+  if((std::abs(base) < math.small) && (order != 0) )  return 0.0;
   if(order==0)  return 1.0;
   else{
     for(i=0;i<order;i++) tmp *= base;
@@ -257,6 +257,8 @@ int HashIAO(int L,int *l) {
       else return 4;
     } else return 5;
   };
+
+  return -1;
 };
 
 int getRank(){

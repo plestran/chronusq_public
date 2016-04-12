@@ -36,10 +36,11 @@ class Grid {
       Grid(int npts = 0){
         this->nPts_ = npts;
       };
-      virtual void                   genGrid() = 0; ///< virtual function to generate the grid points
-      virtual void                   printGrid() = 0; ///< virtual function to print the grid points
-      virtual void                   transformPts() = 0; ///< virtual function to transform the integral interval
-      virtual double                 integrate()    = 0; ///< virtual function to integrate
+      virtual ~Grid(){ };
+      virtual void   genGrid() = 0; ///<function to generate the grid points
+      virtual void   printGrid() = 0; ///<function to print the grid points
+      virtual void   transformPts() = 0; ///<function to transform the domain
+      virtual double integrate()    = 0; ///< virtual function to integrate
       int npts(){return this->nPts_;};
   }; // class Grid
 
@@ -61,13 +62,13 @@ class OneDGrid : public Grid {
           this->norm_ = (end-beg)/2.0;
       };
 // deconstructor
-      ~OneDGrid(){
-         if(intas2GPt_){
-         delete [] this->grid2GPts_;
-         }else{
-         delete [] this->gridPts_;
+     virtual ~OneDGrid(){
+         if(intas2GPt_) {
+           delete [] this->grid2GPts_;
+         } else {
+           delete [] this->gridPts_;
          }
-         delete [] this->weights_;
+           delete [] this->weights_;
 //       cout << "Deleting One Grid" <<endl;
        };
 // access to protected data

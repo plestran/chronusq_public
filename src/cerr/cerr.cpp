@@ -32,7 +32,7 @@ void ChronusQ::CErr(std::ostream & out){
     out << "\"Die Die Die\"" << endl;
     out << "Job terminated: "<<ctime(&currentTime)<<endl;
   }
-  libint2::cleanup();
+  libint2::finalize();
   exit(EXIT_FAILURE);
 }
 void ChronusQ::CErr(std::string msg,std::ostream & out){
@@ -42,7 +42,7 @@ void ChronusQ::CErr(std::string msg,std::ostream & out){
     out << msg << endl;
     out << "Job terminated: "<<ctime(&currentTime)<<endl;
   }
-  libint2::cleanup();
+  libint2::finalize();
   exit(EXIT_FAILURE);
 }
 void ChronusQ::CErr(std::exception_ptr eptr,std::ostream & out) {
@@ -55,7 +55,7 @@ void ChronusQ::CErr(std::exception_ptr eptr,std::ostream & out) {
       out << "Caught \"" << e.what() << "\"" << endl;
       out << "Job terminated: "<<ctime(&currentTime)<<endl;
     }
-    libint2::cleanup();
+    libint2::finalize();
     exit(EXIT_FAILURE);
   }
 }
@@ -69,7 +69,7 @@ void ChronusQ::CErr(std::exception_ptr eptr,std::string msg,std::ostream & out) 
       out << msg + " caught \"" << e.what() << "\"" << endl;
       out << "Job terminated: "<<ctime(&currentTime)<<endl;
     }
-    libint2::cleanup();
+    libint2::finalize();
     exit(EXIT_FAILURE);
   }
 }

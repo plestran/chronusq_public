@@ -224,9 +224,13 @@ void SingleSlater<double>::evalConver(int iter){
     if(this->printLevel_ > 0) 
       this->printSCFIter(iter,EDelta,PAlphaRMS,PBetaRMS);
     this->isConverged = (PAlphaRMS < this->denTol_) && 
-                        (std::pow(EDelta,2) < this->eneTol_);
+                        (std::abs(EDelta) < this->eneTol_);
     if(!this->isClosedShell)
       this->isConverged = this->isConverged && (PBetaRMS < this->denTol_);
+
+    this->isConverged = this->isConverged || 
+      (std::abs(EDelta) < this->eneTol_*5e-2);
+
     if(this->isPrimary) this->writeSCFFiles();
   }
 #ifdef CQ_ENABLE_MPI

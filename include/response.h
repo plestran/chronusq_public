@@ -31,6 +31,7 @@
 #include <qn.h>
 #include <singleslater.h>
 #include <mointegrals.h>
+#include <postscf.h>
 
 
 
@@ -84,13 +85,18 @@ enum RESPONSE_PARTITION {
   PPRPA_TRIPLETS
 };
 
+enum RESPONSE_DENSITY_TYPE {
+  DIFFERENCE,
+  TRANSITION
+};
+
 enum RESPONSE_JOB_TYPE {
   NOJOB,
   EIGEN,
   DYNAMIC
 };
 template<typename T>
-class Response : public QNCallable<T>, public Quantum<T> {
+class Response : public QNCallable<T>, public Quantum<T>, public PostSCF {
 
   /** Useful TypeDefs **/
   typedef Eigen::Matrix<T,Dynamic,Dynamic,ColMajor> TMat;
@@ -107,7 +113,6 @@ class Response : public QNCallable<T>, public Quantum<T> {
 
   /** Meta inherited from SingleSlater **/
   int nBasis_; ///< Number of Basis Functions
-//int nTCS_;   ///< Number of components
   int Ref_;    ///< Reference ID
 
   /** Job Control for response calcluation **/
@@ -122,10 +127,13 @@ class Response : public QNCallable<T>, public Quantum<T> {
 
   std::vector<int> nMatDim_;///< Dimensions of the different Response Matricies
   std::vector<RESPONSE_PARTITION> iMatIter_; ///< Response Matrix Partition
+  std::map<RESPONSE_PARTITION,size_t> partitionIndexMap_;
   RESPONSE_MATRIX_PARTITIONING iPart_;///< Type of Response matrix Partitioning
   std::vector<H5::DataSet*> guessFiles_;
 
-  RESPONSE_PARTITION currentMat_;
+  RESPONSE_PARTITION currentMat_; ///< (iterator)
+  RESPONSE_DENSITY_TYPE iDen_; ///< Which density formDensity will form (iRt)
+  int iRt_; ///< Which root will be used in formDensity (iterator)
 
   bool doSinglets_;      ///< (?) Find NSek Singlet Roots (depends on SA)
   bool doTriplets_;      ///< (?) Find NSek Triplet Roots (depends on SA)
@@ -136,48 +144,6 @@ class Response : public QNCallable<T>, public Quantum<T> {
   bool doMixedAB_;       ///< (?) Do Mixed Alpha-Beta Block ** PPRPA ONLY **
   bool doAllBeta_;       ///< (?) Do All Beta Block ** PPRPA ONLY **
   
-
-  /** Derived Dimensions Post-SCF **/
-  // Single Dimensions
-  int       nOA_; ///< Number of occupied orbitals (Alpha)
-  int       nVA_; ///< Number of virtual orbitals (Alpha)
-  int       nOB_; ///< Number of occupied orbitals (Beta)
-  int       nVB_; ///< Number of virtual orbitals (Beta)
-  int       nO_;  ///< Total number of occupied orbitals NOA + NOB
-  int       nV_;  ///< Total number of virtual orbitals NVA + NVB
-
-  // Quadratic Dimenstions
-    
-  // Occupied-Occupied
-  int       nOAOA_;      ///< NOA * NOA
-  int       nOBOB_;      ///< NOB * NOB
-  int       nOAOB_;      ///< NOA * NOB
-  int       nOO_;        ///< NO * NO
-  int       nOAOA_SLT_;  ///< NOA * (NOA - 1) / 2
-  int       nOBOB_SLT_;  ///< NOB * (NOB - 1) / 2
-  int       nOO_SLT_;    ///< NO * (NO - 1) / 2
-  int       nOAOA_LT_;   ///< NOA * (NOA + 1) / 2
-  int       nOO_LT_;     ///< NO * (NO + 1) / 2
-
-  // Occupied-Virtual
-  int       nOAVA_;      ///< NOA * NVA
-  int       nOBVB_;      ///< NOB * NVB
-  int       nOAVB_;      ///< NOA * NVB
-  int       nOBVA_;      ///< NOB * NVA
-  int       nOV_;        ///< NO * NV
-
-  // Virtual-Virtual
-  int       nVAVA_;      ///< NVA * NVA
-  int       nVBVB_;      ///< NVB * NVB
-  int       nVAVB_;      ///< NVA * NVB
-  int       nVV_;        ///< NV * NV
-  int       nVAVA_SLT_;  ///< NVA * (NVA - 1) / 2
-  int       nVBVB_SLT_;  ///< NVB * (NVB - 1) / 2
-  int       nVV_SLT_;    ///< NV * (NV - 1) / 2
-  int       nVAVA_LT_;   ///< NVA * (NVA + 1) / 2
-  int       nVV_LT_;     ///< NV * (NV + 1) / 2
-
-
   /** Misc values **/
   double rMu_; ///< Level shift, currently only used for PP-methods
 
@@ -200,7 +166,7 @@ public:
    *  Default Constructor loads default values
    *  Inherits QNCallable default constructor
    */ 
-  Response() : QNCallable<T>(), Quantum<T>(){
+  Response() : QNCallable<T>(), Quantum<T>(), PostSCF(){
     // Intialize pointers to NULL
     this->fileio_       = NULL;
     this->mointegrals_  = NULL;
@@ -208,39 +174,7 @@ public:
 
     // Zero out meta data to be initialized by SingleSlater
     this->nBasis_     = 0;
-//  this->nTCS_       = 0;
     this->Ref_        = 0;
-
-    // Zero out PSCF dimensions to be built later
-    this->nOA_        = 0;
-    this->nVA_        = 0;
-    this->nOB_        = 0;
-    this->nVB_        = 0;
-    this->nOAVA_      = 0;      
-    this->nOBVB_      = 0;      
-    this->nOAVB_      = 0;      
-    this->nOBVA_      = 0;      
-    this->nVAVA_SLT_  = 0;  
-    this->nVBVB_SLT_  = 0;  
-    this->nVAVA_LT_   = 0;   
-    this->nVAVA_      = 0;      
-    this->nVBVB_      = 0;      
-    this->nOAOA_SLT_  = 0;  
-    this->nOBOB_SLT_  = 0;  
-    this->nOAOA_LT_   = 0;   
-    this->nOAOA_      = 0;      
-    this->nOBOB_      = 0;      
-    this->nVAVB_      = 0;      
-    this->nOAOB_      = 0;      
-    this->nO_         = 0;         
-    this->nV_         = 0;         
-    this->nOV_        = 0;        
-    this->nVV_SLT_    = 0;    
-    this->nVV_LT_     = 0;     
-    this->nVV_        = 0;        
-    this->nOO_SLT_    = 0;    
-    this->nOO_LT_     = 0;     
-    this->nOO_        = 0;        
 
     // Zero out Misc values
     this->rMu_ = 0.0;
@@ -249,6 +183,8 @@ public:
     this->iMeth_         = NOMETHOD;
     this->iClass_        = NOCLASS;
     this->iJob_          = EIGEN;
+    this->iDen_          = TRANSITION;
+    this->iRt_           = 0;
     this->useIncoreInts_ = false;
     this->doFull_        = false;
     this->debugIter_     = false;
@@ -309,10 +245,39 @@ public:
   inline void doSA()                   { this->iPart_  = SPIN_ADAPTED; };
 
   // Getters
-  inline std::vector<TMat> transDen(){return this->transDen_;};
-  inline std::vector<VectorXd> frequencies(){return this->frequencies_;};
-  inline std::vector<int> nMatDim(){return this->nMatDim_;};
   inline SingleSlater<T> * singleSlater(){return this->singleSlater_;};
+  inline RESPONSE_TYPE     Meth(){return this->iMeth_;};
+
+//inline std::vector<TMat> transDen(){return this->transDen_;};
+//inline std::vector<VectorXd> frequencies(){return this->frequencies_;};
+//inline std::vector<int> nMatDim(){return this->nMatDim_;};
+  
+  template<RESPONSE_PARTITION U>
+  inline TMat& transDen(){
+    auto search = this->partitionIndexMap_.find(U);
+    if(search == this->partitionIndexMap_.end())
+      CErr("Requested Transition Density Not Available",
+          this->fileio_->out);
+    return this->transDen_[search->second];
+  };
+
+  template<RESPONSE_PARTITION U>
+  inline VectorXd& frequencies(){
+    auto search = this->partitionIndexMap_.find(U);
+    if(search == this->partitionIndexMap_.end())
+      CErr("Requested Freqencies Not Available",
+          this->fileio_->out);
+    return this->frequencies_[search->second];
+  };
+
+  template<RESPONSE_PARTITION U>
+  inline int nMatDim(){
+    auto search = this->partitionIndexMap_.find(U);
+    if(search == this->partitionIndexMap_.end())
+      CErr("Requested Transition Density Not Available",
+          this->fileio_->out);
+    return this->nMatDim_[search->second];
+  };
   
   // IO Related
   void printInfo();
@@ -419,6 +384,7 @@ public:
   void checkValidPPRPA(); ///< Checks specific to PPRPA
 
   // Transformations of Transition Densities
+  // (Utilities for QN)
   inline void formAOTransDen(TVecMap &TVec, TMat &TAOA, TMat &TAOB){
     if(this->iClass_ == FOPPA) this->formAOTransDenFOPPA(TVec,TAOA,TAOB);
     else if(this->iClass_ == PPPA) this->formAOTransDenPPRPA(TVec,TAOA,TAOB);
@@ -431,7 +397,19 @@ public:
   void formMOTransDenFOPPA(TVecMap&, TMat&,TMat&);
   void formAOTransDenPPRPA(TVecMap&, TMat&, TMat&);
   void formMOTransDenPPRPA(TVecMap&, TMat&,TMat&);
-  void formDensity(){;};
+
+  // Density evaluations for converged results
+  void formDensity();
+  void formDensityFOPPA();
+  void formDensityPPRPA();
+  void formTransitionDensity();
+  void formTransitionDensityFOPPA(){;};
+  void formTransitionDensityPPRPA(){;};
+  void formDifferenceDensity();
+  void formDifferenceDensityFOPPA(){;};
+  void formDifferenceDensityPPRPA(){;};
+
+  // QN Utility functions to grab subblocks of transitions densities
   void placeOccVir(TVecMap&, TMat&, TMat&);
   void placeVirOcc(TVecMap&, TMat&, TMat&);
   void placeOccOcc(TVecMap&, TMat&, TMat&);
@@ -442,9 +420,10 @@ public:
   void retrieveVirVir(TVecMap&, TMat&, TMat&);
 
 }; // class Response
-#include <response_alloc.h>
-#include <response_meta.h>
-#include <response_io.h>
+#include <response/response_alloc.h>
+#include <response/response_meta.h>
+#include <response/response_io.h>
+#include <response/response_density.h>
 }; // namespace ChronusQ
 
 #endif
