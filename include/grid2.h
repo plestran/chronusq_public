@@ -435,5 +435,43 @@ class AtomicGrid2 : public TwoDGrid2 {
     };
 };
 
+class Cube : public Grid2 {
+  std::tuple<double,double,size_t> xRange_;
+  std::tuple<double,double,size_t> yRange_;
+  std::tuple<double,double,size_t> zRange_;
+
+  public:
+    Cube(std::tuple<double,double,size_t> xRange,
+        std::tuple<double,double,size_t> yRange,
+        std::tuple<double,double,size_t> zRange) :
+        xRange_(xRange), yRange_(yRange), zRange_(zRange) { };
+
+    inline IntegrationPoint operator[](size_t i) {
+      // i -> (M,N,L)
+      // M (x) = i mod nXPts
+      // N (y) = (i div nXPts) mod nYPts
+      // L (z) = i div (nXPts * nYPts)
+      size_t zIndex = i % std::get<2>(this->zRange_);
+      size_t yIndex = (i / std::get<2>(this->zRange_)) % 
+        std::get<2>(this->yRange_);
+      size_t xIndex = i / 
+        (std::get<2>(this->zRange_) * std::get<2>(this->yRange_));
+
+      double xPt = std::get<0>(this->xRange_) + 
+        xIndex * (std::get<1>(this->xRange_) - std::get<0>(this->xRange_)) /
+        (std::get<2>(this->xRange_) - 1);
+      double yPt = std::get<0>(this->yRange_) + 
+        yIndex * (std::get<1>(this->yRange_) - std::get<0>(this->yRange_)) /
+        (std::get<2>(this->yRange_) - 1);
+      double zPt = std::get<0>(this->zRange_) + 
+        zIndex * (std::get<1>(this->zRange_) - std::get<0>(this->zRange_)) / 
+        (std::get<2>(this->zRange_) - 1);
+
+      cartGP pt(xPt,yPt,zPt);
+      return IntegrationPoint(pt,1.0);
+
+    };
+};
+
 };
 #endif

@@ -279,13 +279,24 @@ int main(int argc, char **argv){
   };
 
   double rho = 0;
-  for(auto iAtm = 0; iAtm < molecule.nAtoms(); iAtm++){
-    AtomicGrid2 AGrid(75,590,EULERMAC,LEBEDEV,BECKE,atomicCenters,iAtm,
-        elements[molecule.index(iAtm)].sradius);
-    AGrid.integrate<double>(density,rho);
-    cout << "RHO " << rho;
-  };
+//for(auto iAtm = 0; iAtm < molecule.nAtoms(); iAtm++){
+//  AtomicGrid2 AGrid(75,590,EULERMAC,LEBEDEV,BECKE,atomicCenters,iAtm,
+//      elements[molecule.index(iAtm)].sradius);
+//  AGrid.integrate<double>(density,rho);
+//  cout << "RHO " << rho;
+//};
 
+  Cube cube(std::make_tuple(-1.0,1.0,3), std::make_tuple(-1.0,1.0,3),
+      std::make_tuple(-1.0,1.0,3));
+
+  for(auto iX = 0, i= 0; iX < 3; iX++)
+  for(auto iY = 0; iY < 3; iY++)
+  for(auto iZ = 0; iZ < 3; iZ++, i++){
+    cout << bg::get<0>(cube[i].pt) << "\t";
+    cout << bg::get<1>(cube[i].pt) << "\t";
+    cout << bg::get<2>(cube[i].pt) << "\t";
+    cout << endl;
+  };
 
   finalizeCQ();
   return 0;
