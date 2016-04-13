@@ -421,6 +421,43 @@ class Cube : public Grid2 {
       return IntegrationPoint(pt,1.0);
 
     };
+
+    template<typename T>
+    inline void genCubeFile(T func, std::string cubeFileName,
+        std::vector<std::array<double,3>> centers) {
+      std::ofstream cubeFile(cubeFileName);
+      // Print Cube File Header
+      cubeFile << "ChronusQ CubeFile" << endl;
+      cubeFile << "OUTER LOOP: X, MIDDLE LOOP: Y, INNER LOOP: Z" << endl;
+      cubeFile << std::left << std::fixed;
+      cubeFile << std::setw(6) << centers.size();
+      cubeFile << std::setw(10) << 0.0;
+      cubeFile << std::setw(10) << 0.0;
+      cubeFile << std::setw(10) << 0.0;
+      cubeFile << endl;
+
+      cubeFile << std::setw(6) << std::get<2>(this->xRange_);
+      cubeFile << std::setw(10) << 
+        (std::get<1>(this->xRange_) - std::get<0>(this->xRange_))/(std::get<2>(this->xRange_) - 1);
+      cubeFile << std::setw(10) << 0.0;
+      cubeFile << std::setw(10) << 0.0;
+      cubeFile << endl;
+
+      cubeFile << std::setw(6) << std::get<2>(this->yRange_);
+      cubeFile << std::setw(10) << 0.0;
+      cubeFile << std::setw(10) << 
+        (std::get<1>(this->yRange_) - std::get<0>(this->yRange_))/(std::get<2>(this->yRange_) - 1);
+      cubeFile << std::setw(10) << 0.0;
+      cubeFile << endl;
+
+      cubeFile << std::setw(6) << std::get<2>(this->zRange_);
+      cubeFile << std::setw(10) << 0.0;
+      cubeFile << std::setw(10) << 0.0;
+      cubeFile << std::setw(10) << 
+        (std::get<1>(this->zRange_) - std::get<0>(this->zRange_))/(std::get<2>(this->zRange_) - 1);
+      cubeFile << endl;
+
+    };
 };
 
 };
