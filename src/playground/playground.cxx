@@ -292,7 +292,9 @@ int main(int argc, char **argv){
 //    double z = bg::get<2>(pt.pt);
 //    double r = std::sqrt(x*x + y*y + z*z);
 //    result += pt.weight * SCRATCH2.frobInner(*singleSlater.densityA()) *r * r;
-    result += pt.weight * SCRATCH2.frobInner(*singleSlater.densityA()) ;
+//  result += pt.weight * SCRATCH2.frobInner(*singleSlater.densityA()) ;
+   
+    result += pt.weight * singleSlater.computeProperty<double,TOTAL>(SCRATCH2); 
   };
 
   auto numOverlap = [&](IntegrationPoint pt, RealMatrix &result) {
