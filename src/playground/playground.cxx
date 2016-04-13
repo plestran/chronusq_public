@@ -359,6 +359,7 @@ int main(int argc, char **argv){
     cout << endl;
   };
 
+  cube.genCubeFile(density,"test.cube",atomicCenters);
   finalizeCQ();
   return 0;
 };
