@@ -103,6 +103,7 @@ public:
 
   // Reference Access
   inline int& index(int i) { return this->index_[i];};
+  inline int  atomicZ(int i) { return elements[index_[i]].atomicNumber;};
 
   // Getters
   inline int nAtoms() {return this->nAtoms_;};
@@ -115,6 +116,7 @@ public:
 
   inline RealMatrix* cart() {return this->cart_.get();}
   inline RealMatrix* rIJ() {return this->rIJ_.get();}
+  inline VectorXd*   COM() {return this->COM_.get();}
 
   // Setters
   inline void setCharge(int i) {this->charge_ = i; this->nTotalE_ -= i;};

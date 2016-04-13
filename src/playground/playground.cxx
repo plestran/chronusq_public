@@ -36,7 +36,7 @@ void loadPresets<HE>(Molecule &mol){
   mol.alloc();
   mol.setIndex(0,HashAtom("He",0));
 //  mol.setCart(0,0.000000000 ,-0.00000000000, 0.0);
-  mol.setCart(0,1999.000000000 ,-0.00000000000, 4.0);
+  mol.setCart(0,0.000000000 ,0.00000000000, 0.0);
 };
 
 int main(int argc, char **argv){
@@ -220,8 +220,8 @@ int main(int argc, char **argv){
   fileio.iniStdGroups();
   CQSetNumThreads(1);
   
-  //loadPresets<WATER>(molecule);
   loadPresets<WATER>(molecule);
+//loadPresets<HE>(molecule);
   cout << "HERE 1"<< endl;
   molecule.convBohr();
   molecule.computeNucRep();
@@ -343,21 +343,17 @@ int main(int argc, char **argv){
   NS.setZero();
   cout << "APE " << endl;
   for(auto iAtm = 0; iAtm < molecule.nAtoms(); iAtm++){
-
     AtomicGrid2 AGrid(100,590,GAUSSCHEBFST,LEBEDEV,BECKE,atomicCenters,iAtm,
-//    AtomicGrid2 AGrid(4,14,GAUSSCHEBFST,LEBEDEV,BECKE,atomicCenters,iAtm,
         0.5*elements[molecule.index(iAtm)].sradius/phys.bohr);
-//        1.0);
     AGrid.integrate<double>(density,rho);
-    cout << "ATOM " << iAtm <<endl;
     AGrid.integrate<RealMatrix>(numOverlap,NS);
-    cout << "RHO " << 4*math.pi*rho << endl;
   };
   prettyPrint(cout,4*math.pi*NS,"NS");
   prettyPrint(cout,*aoints.overlap_,"S");
+  cout << "RHO " << 4*math.pi*rho << endl;
 
-  Cube cube(std::make_tuple(-1.0,1.0,3), std::make_tuple(-1.0,1.0,3),
-      std::make_tuple(-1.0,1.0,3));
+  Cube cube(std::make_tuple(-5.0,5.0,80), std::make_tuple(-5.0,5.0,80),
+      std::make_tuple(-5.0,5.0,80));
 
   for(auto iX = 0, i= 0; iX < 3; iX++)
   for(auto iY = 0; iY < 3; iY++)
@@ -368,7 +364,26 @@ int main(int argc, char **argv){
     cout << endl;
   };
 
-  cube.genCubeFile(density,"test.cube",atomicCenters);
+  auto denEval = [&](IntegrationPoint pt) -> double {
+    // Evaluate the basis product in SCRATCH
+    for(auto iShell = 0; iShell < basis.nShell(); iShell++){
+      int b_s = basis.mapSh2Bf(iShell);
+      int size= basis.shells(iShell).size();
+
+      libint2::Shell shTmp = basis.shells(iShell);
+      double * buff = basis.basisDEval(0,shTmp,
+          &pt.pt);
+      RealMap bMap(buff,size,1);
+      SCRATCH1.block(b_s,0,size,1) = bMap;
+
+      delete [] buff;
+    };
+
+    SCRATCH2 = SCRATCH1 * SCRATCH1.transpose();
+    double result = SCRATCH2.frobInner(*singleSlater.densityA());
+    return result;
+  };
+  cube.genCubeFile(denEval,"test.cube",molecule);
   finalizeCQ();
   return 0;
 };
