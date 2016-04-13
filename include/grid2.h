@@ -87,9 +87,9 @@ public:
         T& result) {
       cout << "Integrate 3" << endl;
       for(auto iPt = 0; iPt < this->nPts_; iPt++)
-        if((*this)[iPt].weight > 1e-6){
+//        if((*this)[iPt].weight > 1e-6){
           func((*this)[iPt],result);
-        }
+//        }
     };
 
 
@@ -361,20 +361,25 @@ class AtomicGrid2 : public TwoDGrid2 {
       rawPoint.pt.set<0>(bg::get<0>(rawPoint.pt) * scalingFactor_);
       rawPoint.pt.set<1>(bg::get<1>(rawPoint.pt) * scalingFactor_);
       rawPoint.pt.set<2>(bg::get<2>(rawPoint.pt) * scalingFactor_);
-
+      double x = bg::get<0>(rawPoint.pt);
+      double y = bg::get<1>(rawPoint.pt);
+      double z = bg::get<2>(rawPoint.pt);
+      double r = std::sqrt(x*x + y*y + z*z);
       // Re-center
       rawPoint.pt.set<0>(bg::get<0>(rawPoint.pt) + centers_[centerIndx_][0]);
       rawPoint.pt.set<1>(bg::get<1>(rawPoint.pt) + centers_[centerIndx_][1]);
       rawPoint.pt.set<2>(bg::get<2>(rawPoint.pt) + centers_[centerIndx_][2]);
+
+
       
 
       // Rescale weight (w/o Partition Weights)
-      rawPoint.weight *= scalingFactor_;
+      rawPoint.weight *= scalingFactor_ * r*r;
 
       //cout <<evalPartitionWeight(rawPoint.pt)<<endl;
 //      if(rawPoint.weight > 1e-8)
       rawPoint.weight *= evalPartitionWeight(rawPoint.pt);
-
+//      cout << " Weight Becke Done on center " << this->centerIndx_ <<endl;    
       return rawPoint;
 
     };

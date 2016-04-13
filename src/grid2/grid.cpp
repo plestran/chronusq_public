@@ -33,7 +33,7 @@ namespace ChronusQ {
       for(auto jCenter = 0; jCenter < this->centers_.size(); jCenter++){
         if(iCenter == jCenter) continue;
 
-//        cout << "HERE1" << endl;
+//        cout << "HERE_PART i=" << iCenter << " j= "<< jCenter <<endl;
         rB(0) = bg::get<0>(pt) - this->centers_[jCenter][0];
         rB(1) = bg::get<1>(pt) - this->centers_[jCenter][1];
         rB(2) = bg::get<2>(pt) - this->centers_[jCenter][2];
@@ -51,6 +51,7 @@ namespace ChronusQ {
       sum += this->partitionScratch_[iCenter];
 
     //cout << "WEIGHT " << P / sum << endl;
+//    cout << "END Point " <<endl;
     return this->partitionScratch_[this->centerIndx_] / sum;
 
   };

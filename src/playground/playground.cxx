@@ -35,7 +35,8 @@ void loadPresets<HE>(Molecule &mol){
   mol.setMultip(1);
   mol.alloc();
   mol.setIndex(0,HashAtom("He",0));
-  mol.setCart(0,0.000000000 ,-0.00000000000, 0.0);
+//  mol.setCart(0,0.000000000 ,-0.00000000000, 0.0);
+  mol.setCart(0,1999.000000000 ,-0.00000000000, 4.0);
 };
 
 int main(int argc, char **argv){
@@ -231,7 +232,8 @@ int main(int argc, char **argv){
   singleSlater.setRef(SingleSlater<double>::RHF);
   singleSlater.isClosedShell = true;
 
-  basis.findBasisFile("sto3g");
+//  basis.findBasisFile("sto3g");
+  basis.findBasisFile("6-31g");
   cout << "HERE 1"<< endl;
   basis.communicate(fileio);
   basis.parseGlobal();
@@ -285,11 +287,12 @@ int main(int argc, char **argv){
     SCRATCH2 = SCRATCH1 * SCRATCH1.transpose();
     //prettyPrint(cout,SCRATCH2,"S");
 
-    double x = bg::get<0>(pt.pt);
-    double y = bg::get<1>(pt.pt);
-    double z = bg::get<2>(pt.pt);
-    double r = std::sqrt(x*x + y*y + z*z);
-    result += pt.weight * SCRATCH2.frobInner(*singleSlater.densityA()) *r * r;
+//    double x = bg::get<0>(pt.pt);
+//    double y = bg::get<1>(pt.pt);
+//    double z = bg::get<2>(pt.pt);
+//    double r = std::sqrt(x*x + y*y + z*z);
+//    result += pt.weight * SCRATCH2.frobInner(*singleSlater.densityA()) *r * r;
+    result += pt.weight * SCRATCH2.frobInner(*singleSlater.densityA()) ;
   };
 
   auto numOverlap = [&](IntegrationPoint pt, RealMatrix &result) {
@@ -308,13 +311,14 @@ int main(int argc, char **argv){
     };
 
     SCRATCH2 = SCRATCH1 * SCRATCH1.transpose();
-    //prettyPrint(cout,SCRATCH2,"S");
+//    prettyPrint(cout,SCRATCH2,"SOverlap");
 
-    double x = bg::get<0>(pt.pt);
-    double y = bg::get<1>(pt.pt);
-    double z = bg::get<2>(pt.pt);
-    double r = std::sqrt(x*x + y*y + z*z);
-    result += pt.weight * SCRATCH2 * r*r;
+//    double x = bg::get<0>(pt.pt);
+//    double y = bg::get<1>(pt.pt);
+//    double z = bg::get<2>(pt.pt);
+//    double r = std::sqrt(x*x + y*y + z*z);
+//    result += pt.weight * SCRATCH2 * r*r;
+    result += pt.weight * SCRATCH2 ;
   };
 
   std::vector<std::array<double,3>> atomicCenters;
@@ -337,10 +341,15 @@ int main(int argc, char **argv){
   double rho = 0;
   RealMatrix NS(singleSlater.nBasis(),singleSlater.nBasis());
   NS.setZero();
+  cout << "APE " << endl;
   for(auto iAtm = 0; iAtm < molecule.nAtoms(); iAtm++){
+
     AtomicGrid2 AGrid(100,590,GAUSSCHEBFST,LEBEDEV,BECKE,atomicCenters,iAtm,
+//    AtomicGrid2 AGrid(4,14,GAUSSCHEBFST,LEBEDEV,BECKE,atomicCenters,iAtm,
         0.5*elements[molecule.index(iAtm)].sradius/phys.bohr);
+//        1.0);
     AGrid.integrate<double>(density,rho);
+    cout << "ATOM " << iAtm <<endl;
     AGrid.integrate<RealMatrix>(numOverlap,NS);
     cout << "RHO " << 4*math.pi*rho << endl;
   };
