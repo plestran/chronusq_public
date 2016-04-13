@@ -1354,7 +1354,9 @@ void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX,
    std::array<double,3>  drhoA = {0.0,0.0,0.0}; ///< array pf density gradient components
    std::array<double,3>  drhoB = {0.0,0.0,0.0}; ///< array pf density gradient components
    int    nDer   = 0;    // Order of Der
-   if (this->isGGA) nDer = 1;
+   SlaterExchange * dftFun; 
+   DFTFunctional::DFTInfo epsDFT;
+  if (this->isGGA) nDer = 1;
 // cout << "nDer" << nDer << endl;
    bool   RHF  = this->Ref_ == RHF;
    bool   doTCS  = this->Ref_ == TCS;
@@ -1362,6 +1364,7 @@ void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX,
 // overlapR_.setZero();
 // STmp->setZero();
    std::array<double,6>  epsMuCor = {0.0,0.0,0.0,0.0,0.0,0.0}; ///< {energydens_Cor, potential_Cor_A, potential_Cor_B, potential_Cor_gammaAA_GGA, potential_Cor_gammaBB_GGA, potential_Cor_gammaAB_GGA}
+//    dftFun->DFTInfo  ;  ///< {energydens_Cor, potential_Cor_A, potential_Cor_B, potential_Cor_gammaAA_GGA, potential_Cor_gammaBB_GGA, potential_Cor_gammaAB_GGA}
    std::array<double,6>  epsMuExc = {0.0,0.0,0.0,0.0,0.0,0.0}; ///< {energydend_Exc, potential_Exc_A, potential_Exc_B, potential_Exc_gammaAA_GGA,potential_Exc_gammaBB_GGA,potential_Exc_gammaAB_GGA}
 
 //   Build Overlap
