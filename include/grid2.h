@@ -361,10 +361,11 @@ class AtomicGrid2 : public TwoDGrid2 {
       rawPoint.pt.set<0>(bg::get<0>(rawPoint.pt) * scalingFactor_);
       rawPoint.pt.set<1>(bg::get<1>(rawPoint.pt) * scalingFactor_);
       rawPoint.pt.set<2>(bg::get<2>(rawPoint.pt) * scalingFactor_);
-      double x = bg::get<0>(rawPoint.pt);
-      double y = bg::get<1>(rawPoint.pt);
-      double z = bg::get<2>(rawPoint.pt);
-      double r = std::sqrt(x*x + y*y + z*z);
+
+    //double x = bg::get<0>(rawPoint.pt);
+    //double y = bg::get<1>(rawPoint.pt);
+    //double z = bg::get<2>(rawPoint.pt);
+    //double r = std::sqrt(x*x + y*y + z*z);
       // Re-center
       rawPoint.pt.set<0>(bg::get<0>(rawPoint.pt) + centers_[centerIndx_][0]);
       rawPoint.pt.set<1>(bg::get<1>(rawPoint.pt) + centers_[centerIndx_][1]);
@@ -374,6 +375,8 @@ class AtomicGrid2 : public TwoDGrid2 {
       
 
       // Rescale weight (w/o Partition Weights)
+      double r = bg::get<0>(GRad->operator[](i / GAng->npts()).pt)
+        * scalingFactor_;
       rawPoint.weight *= scalingFactor_ * r*r;
 
       //cout <<evalPartitionWeight(rawPoint.pt)<<endl;
