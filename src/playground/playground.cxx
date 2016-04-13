@@ -269,8 +269,13 @@ int main(int argc, char **argv){
   RealMatrix SCRATCH2(singleSlater.nBasis(),singleSlater.nBasis());
   VectorXd   SCRATCH1(singleSlater.nBasis());
 
+
+  std::chrono::duration<double> T1; 
+  std::chrono::duration<double> T2; 
+  std::chrono::duration<double> T3; 
   auto density = [&](IntegrationPoint pt, double &result) {
     // Evaluate the basis product in SCRATCH
+    auto t1s = std::chrono::high_resolution_clock::now();
     for(auto iShell = 0; iShell < basis.nShell(); iShell++){
       int b_s = basis.mapSh2Bf(iShell);
       int size= basis.shells(iShell).size();
@@ -283,6 +288,7 @@ int main(int argc, char **argv){
 
       delete [] buff;
     };
+    auto t2s = std::chrono::high_resolution_clock::now();
 
     SCRATCH2 = SCRATCH1 * SCRATCH1.transpose();
     //prettyPrint(cout,SCRATCH2,"S");
@@ -294,8 +300,19 @@ int main(int argc, char **argv){
 //    result += pt.weight * SCRATCH2.frobInner(*singleSlater.densityA()) *r * r;
 //  result += pt.weight * SCRATCH2.frobInner(*singleSlater.densityA()) ;
    
+    auto t3s = std::chrono::high_resolution_clock::now();
     result += pt.weight * singleSlater.computeProperty<double,TOTAL>(SCRATCH2); 
+    auto t3f = std::chrono::high_resolution_clock::now();
+
+    T1 += t2s - t1s;
+    T2 += t3s - t2s;
+    T3 += t3f - t3s;
   };
+
+  cout << "T1" << T1.count() << endl;
+  cout << "T2" << T2.count() << endl;
+  cout << "T3" << T3.count() << endl;
+
 
   auto numOverlap = [&](IntegrationPoint pt, RealMatrix &result) {
     // Evaluate the basis product in SCRATCH
