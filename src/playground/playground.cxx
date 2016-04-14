@@ -336,7 +336,8 @@ int main(int argc, char **argv){
   cout << "APE " << endl;
 
   auto t4s = std::chrono::high_resolution_clock::now();
-  AtomicGrid AGrid(100,590,GAUSSCHEBFST,LEBEDEV,BECKE,atomicCenters,0,1.0,false);
+  AtomicGrid AGrid(100,590,GAUSSCHEBFST,LEBEDEV,BECKE,atomicCenters,0,1.0,
+      false);
 
   for(auto iAtm = 0; iAtm < molecule.nAtoms(); iAtm++){
     AGrid.center() = iAtm;
