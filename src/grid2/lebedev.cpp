@@ -2,8 +2,8 @@
 
 namespace ChronusQ { 
   void Lebedev::loadAlgebraicPoints() {
-    this->sphPoints_.reserve(this->nPts_);
-    this->sphWeights_.reserve(this->nPts_);
+    this->gPoints_.reserve(this->nPts_);
+    this->weights_.reserve(this->nPts_);
     if(this->algOrder_ == LEBEDEV_3)         this->loadLebedev<LEBEDEV_3  >();
     else if(this->algOrder_ == LEBEDEV_5)    this->loadLebedev<LEBEDEV_5  >();
     else if(this->algOrder_ == LEBEDEV_7)    this->loadLebedev<LEBEDEV_7  >();

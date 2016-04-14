@@ -2,4813 +2,4813 @@
 namespace ChronusQ {
   template<>
   void Lebedev::loadLebedev<LEBEDEV_59>(){
-    this->sphPoints_.push_back(
+    this->gPoints_.push_back(
         cartGP(1.000000000000000,0.000000000000000,0.000000000000000)
         );     
-    this->sphWeights_.push_back(0.000110518923327);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000110518923327);
+    this->gPoints_.push_back(
         cartGP(-1.000000000000000,0.000000000000000,0.000000000000000)
         );     
-    this->sphWeights_.push_back(0.000110518923327);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000110518923327);
+    this->gPoints_.push_back(
         cartGP(0.000000000000000,1.000000000000000,0.000000000000000)
         );     
-    this->sphWeights_.push_back(0.000110518923327);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000110518923327);
+    this->gPoints_.push_back(
         cartGP(0.000000000000000,-1.000000000000000,0.000000000000000)
         );     
-    this->sphWeights_.push_back(0.000110518923327);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000110518923327);
+    this->gPoints_.push_back(
         cartGP(0.000000000000000,0.000000000000000,1.000000000000000)
         );     
-    this->sphWeights_.push_back(0.000110518923327);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000110518923327);
+    this->gPoints_.push_back(
         cartGP(0.000000000000000,0.000000000000000,-1.000000000000000)
         );     
-    this->sphWeights_.push_back(0.000110518923327);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000110518923327);
+    this->gPoints_.push_back(
         cartGP(0.000000000000000,0.707106781186548,0.707106781186547)
         );     
-    this->sphWeights_.push_back(0.000920523273809);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000920523273809);
+    this->gPoints_.push_back(
         cartGP(0.000000000000000,0.707106781186548,-0.707106781186547)
         );     
-    this->sphWeights_.push_back(0.000920523273809);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000920523273809);
+    this->gPoints_.push_back(
         cartGP(0.000000000000000,-0.707106781186548,0.707106781186547)
         );     
-    this->sphWeights_.push_back(0.000920523273809);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000920523273809);
+    this->gPoints_.push_back(
         cartGP(0.000000000000000,-0.707106781186548,-0.707106781186547)
         );     
-    this->sphWeights_.push_back(0.000920523273809);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000920523273809);
+    this->gPoints_.push_back(
         cartGP(0.707106781186548,0.000000000000000,0.707106781186547)
         );     
-    this->sphWeights_.push_back(0.000920523273809);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000920523273809);
+    this->gPoints_.push_back(
         cartGP(0.707106781186548,0.000000000000000,-0.707106781186547)
         );     
-    this->sphWeights_.push_back(0.000920523273809);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000920523273809);
+    this->gPoints_.push_back(
         cartGP(-0.707106781186548,0.000000000000000,0.707106781186547)
         );     
-    this->sphWeights_.push_back(0.000920523273809);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000920523273809);
+    this->gPoints_.push_back(
         cartGP(-0.707106781186548,0.000000000000000,-0.707106781186547)
         );     
-    this->sphWeights_.push_back(0.000920523273809);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000920523273809);
+    this->gPoints_.push_back(
         cartGP(0.707106781186548,0.707106781186547,0.000000000000000)
         );     
-    this->sphWeights_.push_back(0.000920523273809);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000920523273809);
+    this->gPoints_.push_back(
         cartGP(0.707106781186548,-0.707106781186547,0.000000000000000)
         );     
-    this->sphWeights_.push_back(0.000920523273809);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000920523273809);
+    this->gPoints_.push_back(
         cartGP(-0.707106781186547,0.707106781186548,0.000000000000000)
         );     
-    this->sphWeights_.push_back(0.000920523273809);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000920523273809);
+    this->gPoints_.push_back(
         cartGP(-0.707106781186547,-0.707106781186548,0.000000000000000)
         );     
-    this->sphWeights_.push_back(0.000920523273809);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000920523273809);
+    this->gPoints_.push_back(
         cartGP(0.577350269189626,0.577350269189626,0.577350269189626)
         );     
-    this->sphWeights_.push_back(0.000913315978644);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913315978644);
+    this->gPoints_.push_back(
         cartGP(0.577350269189626,0.577350269189626,-0.577350269189626)
         );     
-    this->sphWeights_.push_back(0.000913315978644);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913315978644);
+    this->gPoints_.push_back(
         cartGP(0.577350269189626,-0.577350269189626,0.577350269189626)
         );     
-    this->sphWeights_.push_back(0.000913315978644);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913315978644);
+    this->gPoints_.push_back(
         cartGP(0.577350269189626,-0.577350269189626,-0.577350269189626)
         );     
-    this->sphWeights_.push_back(0.000913315978644);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913315978644);
+    this->gPoints_.push_back(
         cartGP(-0.577350269189626,0.577350269189626,0.577350269189626)
         );     
-    this->sphWeights_.push_back(0.000913315978644);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913315978644);
+    this->gPoints_.push_back(
         cartGP(-0.577350269189626,0.577350269189626,-0.577350269189626)
         );     
-    this->sphWeights_.push_back(0.000913315978644);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913315978644);
+    this->gPoints_.push_back(
         cartGP(-0.577350269189626,-0.577350269189626,0.577350269189626)
         );     
-    this->sphWeights_.push_back(0.000913315978644);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913315978644);
+    this->gPoints_.push_back(
         cartGP(-0.577350269189626,-0.577350269189626,-0.577350269189626)
         );     
-    this->sphWeights_.push_back(0.000913315978644);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913315978644);
+    this->gPoints_.push_back(
         cartGP(0.037126364496571,0.037126364496571,0.998620681799919)
         );     
-    this->sphWeights_.push_back(0.000369042189802);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000369042189802);
+    this->gPoints_.push_back(
         cartGP(0.037126364496570,0.037126364496570,-0.998620681799919)
         );     
-    this->sphWeights_.push_back(0.000369042189802);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000369042189802);
+    this->gPoints_.push_back(
         cartGP(0.037126364496571,-0.037126364496571,0.998620681799919)
         );     
-    this->sphWeights_.push_back(0.000369042189802);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000369042189802);
+    this->gPoints_.push_back(
         cartGP(0.037126364496570,-0.037126364496570,-0.998620681799919)
         );     
-    this->sphWeights_.push_back(0.000369042189802);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000369042189802);
+    this->gPoints_.push_back(
         cartGP(-0.037126364496571,0.037126364496571,0.998620681799919)
         );     
-    this->sphWeights_.push_back(0.000369042189802);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000369042189802);
+    this->gPoints_.push_back(
         cartGP(-0.037126364496570,0.037126364496570,-0.998620681799919)
         );     
-    this->sphWeights_.push_back(0.000369042189802);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000369042189802);
+    this->gPoints_.push_back(
         cartGP(-0.037126364496571,-0.037126364496571,0.998620681799919)
         );     
-    this->sphWeights_.push_back(0.000369042189802);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000369042189802);
+    this->gPoints_.push_back(
         cartGP(-0.037126364496570,-0.037126364496570,-0.998620681799919)
         );     
-    this->sphWeights_.push_back(0.000369042189802);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000369042189802);
+    this->gPoints_.push_back(
         cartGP(0.037126364496571,0.998620681799919,0.037126364496571)
         );     
-    this->sphWeights_.push_back(0.000369042189802);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000369042189802);
+    this->gPoints_.push_back(
         cartGP(0.037126364496571,-0.998620681799919,0.037126364496571)
         );     
-    this->sphWeights_.push_back(0.000369042189802);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000369042189802);
+    this->gPoints_.push_back(
         cartGP(0.037126364496571,0.998620681799919,-0.037126364496571)
         );     
-    this->sphWeights_.push_back(0.000369042189802);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000369042189802);
+    this->gPoints_.push_back(
         cartGP(0.037126364496571,-0.998620681799919,-0.037126364496571)
         );     
-    this->sphWeights_.push_back(0.000369042189802);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000369042189802);
+    this->gPoints_.push_back(
         cartGP(-0.037126364496571,0.998620681799919,0.037126364496571)
         );     
-    this->sphWeights_.push_back(0.000369042189802);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000369042189802);
+    this->gPoints_.push_back(
         cartGP(-0.037126364496571,-0.998620681799919,0.037126364496571)
         );     
-    this->sphWeights_.push_back(0.000369042189802);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000369042189802);
+    this->gPoints_.push_back(
         cartGP(-0.037126364496571,0.998620681799919,-0.037126364496571)
         );     
-    this->sphWeights_.push_back(0.000369042189802);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000369042189802);
+    this->gPoints_.push_back(
         cartGP(-0.037126364496571,-0.998620681799919,-0.037126364496571)
         );     
-    this->sphWeights_.push_back(0.000369042189802);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000369042189802);
+    this->gPoints_.push_back(
         cartGP(0.998620681799919,0.037126364496570,0.037126364496571)
         );     
-    this->sphWeights_.push_back(0.000369042189802);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000369042189802);
+    this->gPoints_.push_back(
         cartGP(-0.998620681799919,0.037126364496570,0.037126364496571)
         );     
-    this->sphWeights_.push_back(0.000369042189802);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000369042189802);
+    this->gPoints_.push_back(
         cartGP(0.998620681799919,0.037126364496570,-0.037126364496571)
         );     
-    this->sphWeights_.push_back(0.000369042189802);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000369042189802);
+    this->gPoints_.push_back(
         cartGP(-0.998620681799919,0.037126364496570,-0.037126364496571)
         );     
-    this->sphWeights_.push_back(0.000369042189802);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000369042189802);
+    this->gPoints_.push_back(
         cartGP(0.998620681799919,-0.037126364496570,0.037126364496571)
         );     
-    this->sphWeights_.push_back(0.000369042189802);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000369042189802);
+    this->gPoints_.push_back(
         cartGP(-0.998620681799919,-0.037126364496570,0.037126364496571)
         );     
-    this->sphWeights_.push_back(0.000369042189802);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000369042189802);
+    this->gPoints_.push_back(
         cartGP(0.998620681799919,-0.037126364496570,-0.037126364496571)
         );     
-    this->sphWeights_.push_back(0.000369042189802);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000369042189802);
+    this->gPoints_.push_back(
         cartGP(-0.998620681799919,-0.037126364496570,-0.037126364496571)
         );     
-    this->sphWeights_.push_back(0.000369042189802);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000369042189802);
+    this->gPoints_.push_back(
         cartGP(0.091400604122622,0.091400604122622,0.991610739722014)
         );     
-    this->sphWeights_.push_back(0.000560399092868);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000560399092868);
+    this->gPoints_.push_back(
         cartGP(0.091400604122622,0.091400604122622,-0.991610739722014)
         );     
-    this->sphWeights_.push_back(0.000560399092868);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000560399092868);
+    this->gPoints_.push_back(
         cartGP(0.091400604122622,-0.091400604122622,0.991610739722014)
         );     
-    this->sphWeights_.push_back(0.000560399092868);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000560399092868);
+    this->gPoints_.push_back(
         cartGP(0.091400604122622,-0.091400604122622,-0.991610739722014)
         );     
-    this->sphWeights_.push_back(0.000560399092868);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000560399092868);
+    this->gPoints_.push_back(
         cartGP(-0.091400604122622,0.091400604122622,0.991610739722014)
         );     
-    this->sphWeights_.push_back(0.000560399092868);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000560399092868);
+    this->gPoints_.push_back(
         cartGP(-0.091400604122622,0.091400604122622,-0.991610739722014)
         );     
-    this->sphWeights_.push_back(0.000560399092868);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000560399092868);
+    this->gPoints_.push_back(
         cartGP(-0.091400604122622,-0.091400604122622,0.991610739722014)
         );     
-    this->sphWeights_.push_back(0.000560399092868);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000560399092868);
+    this->gPoints_.push_back(
         cartGP(-0.091400604122622,-0.091400604122622,-0.991610739722014)
         );     
-    this->sphWeights_.push_back(0.000560399092868);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000560399092868);
+    this->gPoints_.push_back(
         cartGP(0.091400604122622,0.991610739722014,0.091400604122622)
         );     
-    this->sphWeights_.push_back(0.000560399092868);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000560399092868);
+    this->gPoints_.push_back(
         cartGP(0.091400604122622,-0.991610739722014,0.091400604122622)
         );     
-    this->sphWeights_.push_back(0.000560399092868);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000560399092868);
+    this->gPoints_.push_back(
         cartGP(0.091400604122622,0.991610739722014,-0.091400604122622)
         );     
-    this->sphWeights_.push_back(0.000560399092868);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000560399092868);
+    this->gPoints_.push_back(
         cartGP(0.091400604122622,-0.991610739722014,-0.091400604122622)
         );     
-    this->sphWeights_.push_back(0.000560399092868);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000560399092868);
+    this->gPoints_.push_back(
         cartGP(-0.091400604122622,0.991610739722014,0.091400604122622)
         );     
-    this->sphWeights_.push_back(0.000560399092868);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000560399092868);
+    this->gPoints_.push_back(
         cartGP(-0.091400604122622,-0.991610739722014,0.091400604122622)
         );     
-    this->sphWeights_.push_back(0.000560399092868);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000560399092868);
+    this->gPoints_.push_back(
         cartGP(-0.091400604122622,0.991610739722014,-0.091400604122622)
         );     
-    this->sphWeights_.push_back(0.000560399092868);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000560399092868);
+    this->gPoints_.push_back(
         cartGP(-0.091400604122622,-0.991610739722014,-0.091400604122622)
         );     
-    this->sphWeights_.push_back(0.000560399092868);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000560399092868);
+    this->gPoints_.push_back(
         cartGP(0.991610739722014,0.091400604122622,0.091400604122622)
         );     
-    this->sphWeights_.push_back(0.000560399092868);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000560399092868);
+    this->gPoints_.push_back(
         cartGP(-0.991610739722014,0.091400604122621,0.091400604122622)
         );     
-    this->sphWeights_.push_back(0.000560399092868);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000560399092868);
+    this->gPoints_.push_back(
         cartGP(0.991610739722014,0.091400604122622,-0.091400604122622)
         );     
-    this->sphWeights_.push_back(0.000560399092868);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000560399092868);
+    this->gPoints_.push_back(
         cartGP(-0.991610739722014,0.091400604122621,-0.091400604122622)
         );     
-    this->sphWeights_.push_back(0.000560399092868);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000560399092868);
+    this->gPoints_.push_back(
         cartGP(0.991610739722014,-0.091400604122622,0.091400604122622)
         );     
-    this->sphWeights_.push_back(0.000560399092868);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000560399092868);
+    this->gPoints_.push_back(
         cartGP(-0.991610739722014,-0.091400604122621,0.091400604122622)
         );     
-    this->sphWeights_.push_back(0.000560399092868);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000560399092868);
+    this->gPoints_.push_back(
         cartGP(0.991610739722014,-0.091400604122622,-0.091400604122622)
         );     
-    this->sphWeights_.push_back(0.000560399092868);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000560399092868);
+    this->gPoints_.push_back(
         cartGP(-0.991610739722014,-0.091400604122621,-0.091400604122622)
         );     
-    this->sphWeights_.push_back(0.000560399092868);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000560399092868);
+    this->gPoints_.push_back(
         cartGP(0.153107785246991,0.153107785246991,0.976276606394685)
         );     
-    this->sphWeights_.push_back(0.000686529762928);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000686529762928);
+    this->gPoints_.push_back(
         cartGP(0.153107785246990,0.153107785246990,-0.976276606394685)
         );     
-    this->sphWeights_.push_back(0.000686529762928);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000686529762928);
+    this->gPoints_.push_back(
         cartGP(0.153107785246991,-0.153107785246991,0.976276606394685)
         );     
-    this->sphWeights_.push_back(0.000686529762928);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000686529762928);
+    this->gPoints_.push_back(
         cartGP(0.153107785246990,-0.153107785246990,-0.976276606394685)
         );     
-    this->sphWeights_.push_back(0.000686529762928);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000686529762928);
+    this->gPoints_.push_back(
         cartGP(-0.153107785246991,0.153107785246991,0.976276606394685)
         );     
-    this->sphWeights_.push_back(0.000686529762928);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000686529762928);
+    this->gPoints_.push_back(
         cartGP(-0.153107785246990,0.153107785246990,-0.976276606394685)
         );     
-    this->sphWeights_.push_back(0.000686529762928);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000686529762928);
+    this->gPoints_.push_back(
         cartGP(-0.153107785246991,-0.153107785246991,0.976276606394685)
         );     
-    this->sphWeights_.push_back(0.000686529762928);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000686529762928);
+    this->gPoints_.push_back(
         cartGP(-0.153107785246990,-0.153107785246990,-0.976276606394685)
         );     
-    this->sphWeights_.push_back(0.000686529762928);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000686529762928);
+    this->gPoints_.push_back(
         cartGP(0.153107785246991,0.976276606394685,0.153107785246991)
         );     
-    this->sphWeights_.push_back(0.000686529762928);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000686529762928);
+    this->gPoints_.push_back(
         cartGP(0.153107785246991,-0.976276606394685,0.153107785246991)
         );     
-    this->sphWeights_.push_back(0.000686529762928);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000686529762928);
+    this->gPoints_.push_back(
         cartGP(0.153107785246991,0.976276606394685,-0.153107785246991)
         );     
-    this->sphWeights_.push_back(0.000686529762928);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000686529762928);
+    this->gPoints_.push_back(
         cartGP(0.153107785246991,-0.976276606394685,-0.153107785246991)
         );     
-    this->sphWeights_.push_back(0.000686529762928);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000686529762928);
+    this->gPoints_.push_back(
         cartGP(-0.153107785246991,0.976276606394685,0.153107785246991)
         );     
-    this->sphWeights_.push_back(0.000686529762928);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000686529762928);
+    this->gPoints_.push_back(
         cartGP(-0.153107785246991,-0.976276606394685,0.153107785246991)
         );     
-    this->sphWeights_.push_back(0.000686529762928);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000686529762928);
+    this->gPoints_.push_back(
         cartGP(-0.153107785246991,0.976276606394685,-0.153107785246991)
         );     
-    this->sphWeights_.push_back(0.000686529762928);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000686529762928);
+    this->gPoints_.push_back(
         cartGP(-0.153107785246991,-0.976276606394685,-0.153107785246991)
         );     
-    this->sphWeights_.push_back(0.000686529762928);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000686529762928);
+    this->gPoints_.push_back(
         cartGP(0.976276606394685,0.153107785246991,0.153107785246991)
         );     
-    this->sphWeights_.push_back(0.000686529762928);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000686529762928);
+    this->gPoints_.push_back(
         cartGP(-0.976276606394685,0.153107785246991,0.153107785246991)
         );     
-    this->sphWeights_.push_back(0.000686529762928);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000686529762928);
+    this->gPoints_.push_back(
         cartGP(0.976276606394685,0.153107785246991,-0.153107785246991)
         );     
-    this->sphWeights_.push_back(0.000686529762928);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000686529762928);
+    this->gPoints_.push_back(
         cartGP(-0.976276606394685,0.153107785246991,-0.153107785246991)
         );     
-    this->sphWeights_.push_back(0.000686529762928);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000686529762928);
+    this->gPoints_.push_back(
         cartGP(0.976276606394685,-0.153107785246991,0.153107785246991)
         );     
-    this->sphWeights_.push_back(0.000686529762928);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000686529762928);
+    this->gPoints_.push_back(
         cartGP(-0.976276606394685,-0.153107785246991,0.153107785246991)
         );     
-    this->sphWeights_.push_back(0.000686529762928);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000686529762928);
+    this->gPoints_.push_back(
         cartGP(0.976276606394685,-0.153107785246991,-0.153107785246991)
         );     
-    this->sphWeights_.push_back(0.000686529762928);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000686529762928);
+    this->gPoints_.push_back(
         cartGP(-0.976276606394685,-0.153107785246991,-0.153107785246991)
         );     
-    this->sphWeights_.push_back(0.000686529762928);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000686529762928);
+    this->gPoints_.push_back(
         cartGP(0.218092889166061,0.218092889166061,0.951247067480579)
         );     
-    this->sphWeights_.push_back(0.000772033855115);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000772033855115);
+    this->gPoints_.push_back(
         cartGP(0.218092889166061,0.218092889166061,-0.951247067480578)
         );     
-    this->sphWeights_.push_back(0.000772033855115);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000772033855115);
+    this->gPoints_.push_back(
         cartGP(0.218092889166061,-0.218092889166061,0.951247067480579)
         );     
-    this->sphWeights_.push_back(0.000772033855115);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000772033855115);
+    this->gPoints_.push_back(
         cartGP(0.218092889166061,-0.218092889166061,-0.951247067480578)
         );     
-    this->sphWeights_.push_back(0.000772033855115);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000772033855115);
+    this->gPoints_.push_back(
         cartGP(-0.218092889166061,0.218092889166061,0.951247067480579)
         );     
-    this->sphWeights_.push_back(0.000772033855115);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000772033855115);
+    this->gPoints_.push_back(
         cartGP(-0.218092889166061,0.218092889166061,-0.951247067480578)
         );     
-    this->sphWeights_.push_back(0.000772033855115);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000772033855115);
+    this->gPoints_.push_back(
         cartGP(-0.218092889166061,-0.218092889166061,0.951247067480579)
         );     
-    this->sphWeights_.push_back(0.000772033855115);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000772033855115);
+    this->gPoints_.push_back(
         cartGP(-0.218092889166061,-0.218092889166061,-0.951247067480578)
         );     
-    this->sphWeights_.push_back(0.000772033855115);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000772033855115);
+    this->gPoints_.push_back(
         cartGP(0.218092889166061,0.951247067480578,0.218092889166061)
         );     
-    this->sphWeights_.push_back(0.000772033855115);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000772033855115);
+    this->gPoints_.push_back(
         cartGP(0.218092889166061,-0.951247067480578,0.218092889166061)
         );     
-    this->sphWeights_.push_back(0.000772033855115);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000772033855115);
+    this->gPoints_.push_back(
         cartGP(0.218092889166061,0.951247067480578,-0.218092889166061)
         );     
-    this->sphWeights_.push_back(0.000772033855115);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000772033855115);
+    this->gPoints_.push_back(
         cartGP(0.218092889166061,-0.951247067480578,-0.218092889166061)
         );     
-    this->sphWeights_.push_back(0.000772033855115);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000772033855115);
+    this->gPoints_.push_back(
         cartGP(-0.218092889166061,0.951247067480578,0.218092889166061)
         );     
-    this->sphWeights_.push_back(0.000772033855115);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000772033855115);
+    this->gPoints_.push_back(
         cartGP(-0.218092889166061,-0.951247067480578,0.218092889166061)
         );     
-    this->sphWeights_.push_back(0.000772033855115);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000772033855115);
+    this->gPoints_.push_back(
         cartGP(-0.218092889166061,0.951247067480578,-0.218092889166061)
         );     
-    this->sphWeights_.push_back(0.000772033855115);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000772033855115);
+    this->gPoints_.push_back(
         cartGP(-0.218092889166061,-0.951247067480578,-0.218092889166061)
         );     
-    this->sphWeights_.push_back(0.000772033855115);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000772033855115);
+    this->gPoints_.push_back(
         cartGP(0.951247067480579,0.218092889166061,0.218092889166061)
         );     
-    this->sphWeights_.push_back(0.000772033855115);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000772033855115);
+    this->gPoints_.push_back(
         cartGP(-0.951247067480579,0.218092889166061,0.218092889166061)
         );     
-    this->sphWeights_.push_back(0.000772033855115);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000772033855115);
+    this->gPoints_.push_back(
         cartGP(0.951247067480579,0.218092889166061,-0.218092889166061)
         );     
-    this->sphWeights_.push_back(0.000772033855115);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000772033855115);
+    this->gPoints_.push_back(
         cartGP(-0.951247067480579,0.218092889166061,-0.218092889166061)
         );     
-    this->sphWeights_.push_back(0.000772033855115);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000772033855115);
+    this->gPoints_.push_back(
         cartGP(0.951247067480579,-0.218092889166061,0.218092889166061)
         );     
-    this->sphWeights_.push_back(0.000772033855115);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000772033855115);
+    this->gPoints_.push_back(
         cartGP(-0.951247067480579,-0.218092889166061,0.218092889166061)
         );     
-    this->sphWeights_.push_back(0.000772033855115);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000772033855115);
+    this->gPoints_.push_back(
         cartGP(0.951247067480579,-0.218092889166061,-0.218092889166061)
         );     
-    this->sphWeights_.push_back(0.000772033855115);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000772033855115);
+    this->gPoints_.push_back(
         cartGP(-0.951247067480579,-0.218092889166061,-0.218092889166061)
         );     
-    this->sphWeights_.push_back(0.000772033855115);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000772033855115);
+    this->gPoints_.push_back(
         cartGP(0.283987453220017,0.283987453220017,0.915806886208668)
         );     
-    this->sphWeights_.push_back(0.000830154595889);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000830154595889);
+    this->gPoints_.push_back(
         cartGP(0.283987453220018,0.283987453220018,-0.915806886208668)
         );     
-    this->sphWeights_.push_back(0.000830154595889);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000830154595889);
+    this->gPoints_.push_back(
         cartGP(0.283987453220017,-0.283987453220017,0.915806886208668)
         );     
-    this->sphWeights_.push_back(0.000830154595889);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000830154595889);
+    this->gPoints_.push_back(
         cartGP(0.283987453220018,-0.283987453220018,-0.915806886208668)
         );     
-    this->sphWeights_.push_back(0.000830154595889);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000830154595889);
+    this->gPoints_.push_back(
         cartGP(-0.283987453220017,0.283987453220017,0.915806886208668)
         );     
-    this->sphWeights_.push_back(0.000830154595889);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000830154595889);
+    this->gPoints_.push_back(
         cartGP(-0.283987453220018,0.283987453220018,-0.915806886208668)
         );     
-    this->sphWeights_.push_back(0.000830154595889);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000830154595889);
+    this->gPoints_.push_back(
         cartGP(-0.283987453220017,-0.283987453220017,0.915806886208668)
         );     
-    this->sphWeights_.push_back(0.000830154595889);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000830154595889);
+    this->gPoints_.push_back(
         cartGP(-0.283987453220018,-0.283987453220018,-0.915806886208668)
         );     
-    this->sphWeights_.push_back(0.000830154595889);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000830154595889);
+    this->gPoints_.push_back(
         cartGP(0.283987453220017,0.915806886208668,0.283987453220018)
         );     
-    this->sphWeights_.push_back(0.000830154595889);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000830154595889);
+    this->gPoints_.push_back(
         cartGP(0.283987453220017,-0.915806886208668,0.283987453220018)
         );     
-    this->sphWeights_.push_back(0.000830154595889);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000830154595889);
+    this->gPoints_.push_back(
         cartGP(0.283987453220017,0.915806886208668,-0.283987453220017)
         );     
-    this->sphWeights_.push_back(0.000830154595889);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000830154595889);
+    this->gPoints_.push_back(
         cartGP(0.283987453220017,-0.915806886208668,-0.283987453220017)
         );     
-    this->sphWeights_.push_back(0.000830154595889);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000830154595889);
+    this->gPoints_.push_back(
         cartGP(-0.283987453220017,0.915806886208668,0.283987453220018)
         );     
-    this->sphWeights_.push_back(0.000830154595889);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000830154595889);
+    this->gPoints_.push_back(
         cartGP(-0.283987453220017,-0.915806886208668,0.283987453220018)
         );     
-    this->sphWeights_.push_back(0.000830154595889);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000830154595889);
+    this->gPoints_.push_back(
         cartGP(-0.283987453220017,0.915806886208668,-0.283987453220017)
         );     
-    this->sphWeights_.push_back(0.000830154595889);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000830154595889);
+    this->gPoints_.push_back(
         cartGP(-0.283987453220017,-0.915806886208668,-0.283987453220017)
         );     
-    this->sphWeights_.push_back(0.000830154595889);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000830154595889);
+    this->gPoints_.push_back(
         cartGP(0.915806886208668,0.283987453220018,0.283987453220018)
         );     
-    this->sphWeights_.push_back(0.000830154595889);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000830154595889);
+    this->gPoints_.push_back(
         cartGP(-0.915806886208668,0.283987453220018,0.283987453220018)
         );     
-    this->sphWeights_.push_back(0.000830154595889);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000830154595889);
+    this->gPoints_.push_back(
         cartGP(0.915806886208668,0.283987453220018,-0.283987453220017)
         );     
-    this->sphWeights_.push_back(0.000830154595889);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000830154595889);
+    this->gPoints_.push_back(
         cartGP(-0.915806886208668,0.283987453220018,-0.283987453220017)
         );     
-    this->sphWeights_.push_back(0.000830154595889);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000830154595889);
+    this->gPoints_.push_back(
         cartGP(0.915806886208668,-0.283987453220018,0.283987453220018)
         );     
-    this->sphWeights_.push_back(0.000830154595889);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000830154595889);
+    this->gPoints_.push_back(
         cartGP(-0.915806886208668,-0.283987453220018,0.283987453220018)
         );     
-    this->sphWeights_.push_back(0.000830154595889);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000830154595889);
+    this->gPoints_.push_back(
         cartGP(0.915806886208668,-0.283987453220018,-0.283987453220017)
         );     
-    this->sphWeights_.push_back(0.000830154595889);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000830154595889);
+    this->gPoints_.push_back(
         cartGP(-0.915806886208668,-0.283987453220018,-0.283987453220017)
         );     
-    this->sphWeights_.push_back(0.000830154595889);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000830154595889);
+    this->gPoints_.push_back(
         cartGP(0.349117760096376,0.349117760096376,0.869616915181954)
         );     
-    this->sphWeights_.push_back(0.000868669255018);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000868669255018);
+    this->gPoints_.push_back(
         cartGP(0.349117760096376,0.349117760096376,-0.869616915181954)
         );     
-    this->sphWeights_.push_back(0.000868669255018);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000868669255018);
+    this->gPoints_.push_back(
         cartGP(0.349117760096376,-0.349117760096376,0.869616915181954)
         );     
-    this->sphWeights_.push_back(0.000868669255018);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000868669255018);
+    this->gPoints_.push_back(
         cartGP(0.349117760096376,-0.349117760096376,-0.869616915181954)
         );     
-    this->sphWeights_.push_back(0.000868669255018);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000868669255018);
+    this->gPoints_.push_back(
         cartGP(-0.349117760096376,0.349117760096376,0.869616915181954)
         );     
-    this->sphWeights_.push_back(0.000868669255018);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000868669255018);
+    this->gPoints_.push_back(
         cartGP(-0.349117760096376,0.349117760096376,-0.869616915181954)
         );     
-    this->sphWeights_.push_back(0.000868669255018);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000868669255018);
+    this->gPoints_.push_back(
         cartGP(-0.349117760096376,-0.349117760096376,0.869616915181954)
         );     
-    this->sphWeights_.push_back(0.000868669255018);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000868669255018);
+    this->gPoints_.push_back(
         cartGP(-0.349117760096376,-0.349117760096376,-0.869616915181954)
         );     
-    this->sphWeights_.push_back(0.000868669255018);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000868669255018);
+    this->gPoints_.push_back(
         cartGP(0.349117760096376,0.869616915181954,0.349117760096376)
         );     
-    this->sphWeights_.push_back(0.000868669255018);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000868669255018);
+    this->gPoints_.push_back(
         cartGP(0.349117760096376,-0.869616915181954,0.349117760096376)
         );     
-    this->sphWeights_.push_back(0.000868669255018);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000868669255018);
+    this->gPoints_.push_back(
         cartGP(0.349117760096376,0.869616915181954,-0.349117760096376)
         );     
-    this->sphWeights_.push_back(0.000868669255018);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000868669255018);
+    this->gPoints_.push_back(
         cartGP(0.349117760096376,-0.869616915181954,-0.349117760096376)
         );     
-    this->sphWeights_.push_back(0.000868669255018);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000868669255018);
+    this->gPoints_.push_back(
         cartGP(-0.349117760096376,0.869616915181954,0.349117760096376)
         );     
-    this->sphWeights_.push_back(0.000868669255018);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000868669255018);
+    this->gPoints_.push_back(
         cartGP(-0.349117760096376,-0.869616915181954,0.349117760096376)
         );     
-    this->sphWeights_.push_back(0.000868669255018);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000868669255018);
+    this->gPoints_.push_back(
         cartGP(-0.349117760096376,0.869616915181954,-0.349117760096376)
         );     
-    this->sphWeights_.push_back(0.000868669255018);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000868669255018);
+    this->gPoints_.push_back(
         cartGP(-0.349117760096376,-0.869616915181954,-0.349117760096376)
         );     
-    this->sphWeights_.push_back(0.000868669255018);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000868669255018);
+    this->gPoints_.push_back(
         cartGP(0.869616915181954,0.349117760096376,0.349117760096376)
         );     
-    this->sphWeights_.push_back(0.000868669255018);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000868669255018);
+    this->gPoints_.push_back(
         cartGP(-0.869616915181954,0.349117760096376,0.349117760096376)
         );     
-    this->sphWeights_.push_back(0.000868669255018);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000868669255018);
+    this->gPoints_.push_back(
         cartGP(0.869616915181954,0.349117760096376,-0.349117760096376)
         );     
-    this->sphWeights_.push_back(0.000868669255018);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000868669255018);
+    this->gPoints_.push_back(
         cartGP(-0.869616915181954,0.349117760096376,-0.349117760096376)
         );     
-    this->sphWeights_.push_back(0.000868669255018);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000868669255018);
+    this->gPoints_.push_back(
         cartGP(0.869616915181954,-0.349117760096376,0.349117760096376)
         );     
-    this->sphWeights_.push_back(0.000868669255018);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000868669255018);
+    this->gPoints_.push_back(
         cartGP(-0.869616915181954,-0.349117760096376,0.349117760096376)
         );     
-    this->sphWeights_.push_back(0.000868669255018);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000868669255018);
+    this->gPoints_.push_back(
         cartGP(0.869616915181954,-0.349117760096376,-0.349117760096376)
         );     
-    this->sphWeights_.push_back(0.000868669255018);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000868669255018);
+    this->gPoints_.push_back(
         cartGP(-0.869616915181954,-0.349117760096376,-0.349117760096376)
         );     
-    this->sphWeights_.push_back(0.000868669255018);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000868669255018);
+    this->gPoints_.push_back(
         cartGP(0.412143146144431,0.412143146144431,0.812573722299916)
         );     
-    this->sphWeights_.push_back(0.000892707628585);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000892707628585);
+    this->gPoints_.push_back(
         cartGP(0.412143146144431,0.412143146144431,-0.812573722299916)
         );     
-    this->sphWeights_.push_back(0.000892707628585);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000892707628585);
+    this->gPoints_.push_back(
         cartGP(0.412143146144431,-0.412143146144431,0.812573722299916)
         );     
-    this->sphWeights_.push_back(0.000892707628585);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000892707628585);
+    this->gPoints_.push_back(
         cartGP(0.412143146144431,-0.412143146144431,-0.812573722299916)
         );     
-    this->sphWeights_.push_back(0.000892707628585);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000892707628585);
+    this->gPoints_.push_back(
         cartGP(-0.412143146144431,0.412143146144431,0.812573722299916)
         );     
-    this->sphWeights_.push_back(0.000892707628585);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000892707628585);
+    this->gPoints_.push_back(
         cartGP(-0.412143146144431,0.412143146144431,-0.812573722299916)
         );     
-    this->sphWeights_.push_back(0.000892707628585);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000892707628585);
+    this->gPoints_.push_back(
         cartGP(-0.412143146144431,-0.412143146144431,0.812573722299916)
         );     
-    this->sphWeights_.push_back(0.000892707628585);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000892707628585);
+    this->gPoints_.push_back(
         cartGP(-0.412143146144431,-0.412143146144431,-0.812573722299916)
         );     
-    this->sphWeights_.push_back(0.000892707628585);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000892707628585);
+    this->gPoints_.push_back(
         cartGP(0.412143146144431,0.812573722299916,0.412143146144431)
         );     
-    this->sphWeights_.push_back(0.000892707628585);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000892707628585);
+    this->gPoints_.push_back(
         cartGP(0.412143146144431,-0.812573722299916,0.412143146144431)
         );     
-    this->sphWeights_.push_back(0.000892707628585);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000892707628585);
+    this->gPoints_.push_back(
         cartGP(0.412143146144431,0.812573722299915,-0.412143146144431)
         );     
-    this->sphWeights_.push_back(0.000892707628585);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000892707628585);
+    this->gPoints_.push_back(
         cartGP(0.412143146144431,-0.812573722299915,-0.412143146144431)
         );     
-    this->sphWeights_.push_back(0.000892707628585);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000892707628585);
+    this->gPoints_.push_back(
         cartGP(-0.412143146144431,0.812573722299916,0.412143146144431)
         );     
-    this->sphWeights_.push_back(0.000892707628585);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000892707628585);
+    this->gPoints_.push_back(
         cartGP(-0.412143146144431,-0.812573722299916,0.412143146144431)
         );     
-    this->sphWeights_.push_back(0.000892707628585);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000892707628585);
+    this->gPoints_.push_back(
         cartGP(-0.412143146144431,0.812573722299916,-0.412143146144431)
         );     
-    this->sphWeights_.push_back(0.000892707628585);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000892707628585);
+    this->gPoints_.push_back(
         cartGP(-0.412143146144431,-0.812573722299916,-0.412143146144431)
         );     
-    this->sphWeights_.push_back(0.000892707628585);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000892707628585);
+    this->gPoints_.push_back(
         cartGP(0.812573722299916,0.412143146144431,0.412143146144431)
         );     
-    this->sphWeights_.push_back(0.000892707628585);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000892707628585);
+    this->gPoints_.push_back(
         cartGP(-0.812573722299916,0.412143146144431,0.412143146144431)
         );     
-    this->sphWeights_.push_back(0.000892707628585);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000892707628585);
+    this->gPoints_.push_back(
         cartGP(0.812573722299915,0.412143146144431,-0.412143146144431)
         );     
-    this->sphWeights_.push_back(0.000892707628585);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000892707628585);
+    this->gPoints_.push_back(
         cartGP(-0.812573722299915,0.412143146144431,-0.412143146144431)
         );     
-    this->sphWeights_.push_back(0.000892707628585);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000892707628585);
+    this->gPoints_.push_back(
         cartGP(0.812573722299916,-0.412143146144431,0.412143146144431)
         );     
-    this->sphWeights_.push_back(0.000892707628585);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000892707628585);
+    this->gPoints_.push_back(
         cartGP(-0.812573722299916,-0.412143146144431,0.412143146144431)
         );     
-    this->sphWeights_.push_back(0.000892707628585);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000892707628585);
+    this->gPoints_.push_back(
         cartGP(0.812573722299915,-0.412143146144431,-0.412143146144431)
         );     
-    this->sphWeights_.push_back(0.000892707628585);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000892707628585);
+    this->gPoints_.push_back(
         cartGP(-0.812573722299915,-0.412143146144431,-0.412143146144431)
         );     
-    this->sphWeights_.push_back(0.000892707628585);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000892707628585);
+    this->gPoints_.push_back(
         cartGP(0.471899362714913,0.471899362714913,0.744729469632107)
         );     
-    this->sphWeights_.push_back(0.000906082023857);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000906082023857);
+    this->gPoints_.push_back(
         cartGP(0.471899362714913,0.471899362714913,-0.744729469632107)
         );     
-    this->sphWeights_.push_back(0.000906082023857);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000906082023857);
+    this->gPoints_.push_back(
         cartGP(0.471899362714913,-0.471899362714913,0.744729469632107)
         );     
-    this->sphWeights_.push_back(0.000906082023857);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000906082023857);
+    this->gPoints_.push_back(
         cartGP(0.471899362714913,-0.471899362714913,-0.744729469632107)
         );     
-    this->sphWeights_.push_back(0.000906082023857);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000906082023857);
+    this->gPoints_.push_back(
         cartGP(-0.471899362714913,0.471899362714913,0.744729469632107)
         );     
-    this->sphWeights_.push_back(0.000906082023857);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000906082023857);
+    this->gPoints_.push_back(
         cartGP(-0.471899362714913,0.471899362714913,-0.744729469632107)
         );     
-    this->sphWeights_.push_back(0.000906082023857);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000906082023857);
+    this->gPoints_.push_back(
         cartGP(-0.471899362714913,-0.471899362714913,0.744729469632107)
         );     
-    this->sphWeights_.push_back(0.000906082023857);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000906082023857);
+    this->gPoints_.push_back(
         cartGP(-0.471899362714913,-0.471899362714913,-0.744729469632107)
         );     
-    this->sphWeights_.push_back(0.000906082023857);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000906082023857);
+    this->gPoints_.push_back(
         cartGP(0.471899362714913,0.744729469632106,0.471899362714913)
         );     
-    this->sphWeights_.push_back(0.000906082023857);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000906082023857);
+    this->gPoints_.push_back(
         cartGP(0.471899362714913,-0.744729469632106,0.471899362714913)
         );     
-    this->sphWeights_.push_back(0.000906082023857);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000906082023857);
+    this->gPoints_.push_back(
         cartGP(0.471899362714913,0.744729469632106,-0.471899362714913)
         );     
-    this->sphWeights_.push_back(0.000906082023857);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000906082023857);
+    this->gPoints_.push_back(
         cartGP(0.471899362714913,-0.744729469632106,-0.471899362714913)
         );     
-    this->sphWeights_.push_back(0.000906082023857);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000906082023857);
+    this->gPoints_.push_back(
         cartGP(-0.471899362714913,0.744729469632106,0.471899362714913)
         );     
-    this->sphWeights_.push_back(0.000906082023857);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000906082023857);
+    this->gPoints_.push_back(
         cartGP(-0.471899362714913,-0.744729469632106,0.471899362714913)
         );     
-    this->sphWeights_.push_back(0.000906082023857);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000906082023857);
+    this->gPoints_.push_back(
         cartGP(-0.471899362714913,0.744729469632106,-0.471899362714913)
         );     
-    this->sphWeights_.push_back(0.000906082023857);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000906082023857);
+    this->gPoints_.push_back(
         cartGP(-0.471899362714913,-0.744729469632106,-0.471899362714913)
         );     
-    this->sphWeights_.push_back(0.000906082023857);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000906082023857);
+    this->gPoints_.push_back(
         cartGP(0.744729469632106,0.471899362714913,0.471899362714913)
         );     
-    this->sphWeights_.push_back(0.000906082023857);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000906082023857);
+    this->gPoints_.push_back(
         cartGP(-0.744729469632106,0.471899362714913,0.471899362714913)
         );     
-    this->sphWeights_.push_back(0.000906082023857);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000906082023857);
+    this->gPoints_.push_back(
         cartGP(0.744729469632106,0.471899362714913,-0.471899362714913)
         );     
-    this->sphWeights_.push_back(0.000906082023857);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000906082023857);
+    this->gPoints_.push_back(
         cartGP(-0.744729469632106,0.471899362714913,-0.471899362714913)
         );     
-    this->sphWeights_.push_back(0.000906082023857);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000906082023857);
+    this->gPoints_.push_back(
         cartGP(0.744729469632106,-0.471899362714913,0.471899362714913)
         );     
-    this->sphWeights_.push_back(0.000906082023857);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000906082023857);
+    this->gPoints_.push_back(
         cartGP(-0.744729469632106,-0.471899362714913,0.471899362714913)
         );     
-    this->sphWeights_.push_back(0.000906082023857);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000906082023857);
+    this->gPoints_.push_back(
         cartGP(0.744729469632106,-0.471899362714913,-0.471899362714913)
         );     
-    this->sphWeights_.push_back(0.000906082023857);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000906082023857);
+    this->gPoints_.push_back(
         cartGP(-0.744729469632106,-0.471899362714913,-0.471899362714913)
         );     
-    this->sphWeights_.push_back(0.000906082023857);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000906082023857);
+    this->gPoints_.push_back(
         cartGP(0.527314545284234,0.527314545284234,0.666242253736104)
         );     
-    this->sphWeights_.push_back(0.000911977725494);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000911977725494);
+    this->gPoints_.push_back(
         cartGP(0.527314545284234,0.527314545284234,-0.666242253736104)
         );     
-    this->sphWeights_.push_back(0.000911977725494);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000911977725494);
+    this->gPoints_.push_back(
         cartGP(0.527314545284234,-0.527314545284234,0.666242253736104)
         );     
-    this->sphWeights_.push_back(0.000911977725494);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000911977725494);
+    this->gPoints_.push_back(
         cartGP(0.527314545284234,-0.527314545284234,-0.666242253736104)
         );     
-    this->sphWeights_.push_back(0.000911977725494);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000911977725494);
+    this->gPoints_.push_back(
         cartGP(-0.527314545284234,0.527314545284234,0.666242253736104)
         );     
-    this->sphWeights_.push_back(0.000911977725494);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000911977725494);
+    this->gPoints_.push_back(
         cartGP(-0.527314545284234,0.527314545284234,-0.666242253736104)
         );     
-    this->sphWeights_.push_back(0.000911977725494);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000911977725494);
+    this->gPoints_.push_back(
         cartGP(-0.527314545284234,-0.527314545284234,0.666242253736104)
         );     
-    this->sphWeights_.push_back(0.000911977725494);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000911977725494);
+    this->gPoints_.push_back(
         cartGP(-0.527314545284234,-0.527314545284234,-0.666242253736104)
         );     
-    this->sphWeights_.push_back(0.000911977725494);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000911977725494);
+    this->gPoints_.push_back(
         cartGP(0.527314545284234,0.666242253736104,0.527314545284234)
         );     
-    this->sphWeights_.push_back(0.000911977725494);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000911977725494);
+    this->gPoints_.push_back(
         cartGP(0.527314545284234,-0.666242253736104,0.527314545284234)
         );     
-    this->sphWeights_.push_back(0.000911977725494);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000911977725494);
+    this->gPoints_.push_back(
         cartGP(0.527314545284234,0.666242253736104,-0.527314545284234)
         );     
-    this->sphWeights_.push_back(0.000911977725494);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000911977725494);
+    this->gPoints_.push_back(
         cartGP(0.527314545284234,-0.666242253736104,-0.527314545284234)
         );     
-    this->sphWeights_.push_back(0.000911977725494);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000911977725494);
+    this->gPoints_.push_back(
         cartGP(-0.527314545284234,0.666242253736104,0.527314545284234)
         );     
-    this->sphWeights_.push_back(0.000911977725494);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000911977725494);
+    this->gPoints_.push_back(
         cartGP(-0.527314545284234,-0.666242253736104,0.527314545284234)
         );     
-    this->sphWeights_.push_back(0.000911977725494);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000911977725494);
+    this->gPoints_.push_back(
         cartGP(-0.527314545284234,0.666242253736104,-0.527314545284234)
         );     
-    this->sphWeights_.push_back(0.000911977725494);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000911977725494);
+    this->gPoints_.push_back(
         cartGP(-0.527314545284234,-0.666242253736104,-0.527314545284234)
         );     
-    this->sphWeights_.push_back(0.000911977725494);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000911977725494);
+    this->gPoints_.push_back(
         cartGP(0.666242253736104,0.527314545284234,0.527314545284234)
         );     
-    this->sphWeights_.push_back(0.000911977725494);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000911977725494);
+    this->gPoints_.push_back(
         cartGP(-0.666242253736104,0.527314545284234,0.527314545284234)
         );     
-    this->sphWeights_.push_back(0.000911977725494);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000911977725494);
+    this->gPoints_.push_back(
         cartGP(0.666242253736104,0.527314545284234,-0.527314545284234)
         );     
-    this->sphWeights_.push_back(0.000911977725494);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000911977725494);
+    this->gPoints_.push_back(
         cartGP(-0.666242253736104,0.527314545284234,-0.527314545284234)
         );     
-    this->sphWeights_.push_back(0.000911977725494);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000911977725494);
+    this->gPoints_.push_back(
         cartGP(0.666242253736104,-0.527314545284234,0.527314545284234)
         );     
-    this->sphWeights_.push_back(0.000911977725494);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000911977725494);
+    this->gPoints_.push_back(
         cartGP(-0.666242253736104,-0.527314545284234,0.527314545284234)
         );     
-    this->sphWeights_.push_back(0.000911977725494);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000911977725494);
+    this->gPoints_.push_back(
         cartGP(0.666242253736104,-0.527314545284234,-0.527314545284234)
         );     
-    this->sphWeights_.push_back(0.000911977725494);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000911977725494);
+    this->gPoints_.push_back(
         cartGP(-0.666242253736104,-0.527314545284234,-0.527314545284234)
         );     
-    this->sphWeights_.push_back(0.000911977725494);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000911977725494);
+    this->gPoints_.push_back(
         cartGP(0.620947533244402,0.620947533244402,0.478380938076952)
         );     
-    this->sphWeights_.push_back(0.000912872013860);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000912872013860);
+    this->gPoints_.push_back(
         cartGP(0.620947533244402,0.620947533244402,-0.478380938076952)
         );     
-    this->sphWeights_.push_back(0.000912872013860);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000912872013860);
+    this->gPoints_.push_back(
         cartGP(0.620947533244402,-0.620947533244402,0.478380938076952)
         );     
-    this->sphWeights_.push_back(0.000912872013860);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000912872013860);
+    this->gPoints_.push_back(
         cartGP(0.620947533244402,-0.620947533244402,-0.478380938076952)
         );     
-    this->sphWeights_.push_back(0.000912872013860);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000912872013860);
+    this->gPoints_.push_back(
         cartGP(-0.620947533244402,0.620947533244402,0.478380938076952)
         );     
-    this->sphWeights_.push_back(0.000912872013860);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000912872013860);
+    this->gPoints_.push_back(
         cartGP(-0.620947533244402,0.620947533244402,-0.478380938076952)
         );     
-    this->sphWeights_.push_back(0.000912872013860);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000912872013860);
+    this->gPoints_.push_back(
         cartGP(-0.620947533244402,-0.620947533244402,0.478380938076952)
         );     
-    this->sphWeights_.push_back(0.000912872013860);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000912872013860);
+    this->gPoints_.push_back(
         cartGP(-0.620947533244402,-0.620947533244402,-0.478380938076952)
         );     
-    this->sphWeights_.push_back(0.000912872013860);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000912872013860);
+    this->gPoints_.push_back(
         cartGP(0.620947533244402,0.478380938076952,0.620947533244402)
         );     
-    this->sphWeights_.push_back(0.000912872013860);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000912872013860);
+    this->gPoints_.push_back(
         cartGP(0.620947533244402,-0.478380938076952,0.620947533244402)
         );     
-    this->sphWeights_.push_back(0.000912872013860);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000912872013860);
+    this->gPoints_.push_back(
         cartGP(0.620947533244402,0.478380938076952,-0.620947533244402)
         );     
-    this->sphWeights_.push_back(0.000912872013860);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000912872013860);
+    this->gPoints_.push_back(
         cartGP(0.620947533244402,-0.478380938076952,-0.620947533244402)
         );     
-    this->sphWeights_.push_back(0.000912872013860);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000912872013860);
+    this->gPoints_.push_back(
         cartGP(-0.620947533244402,0.478380938076952,0.620947533244402)
         );     
-    this->sphWeights_.push_back(0.000912872013860);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000912872013860);
+    this->gPoints_.push_back(
         cartGP(-0.620947533244402,-0.478380938076952,0.620947533244402)
         );     
-    this->sphWeights_.push_back(0.000912872013860);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000912872013860);
+    this->gPoints_.push_back(
         cartGP(-0.620947533244402,0.478380938076952,-0.620947533244402)
         );     
-    this->sphWeights_.push_back(0.000912872013860);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000912872013860);
+    this->gPoints_.push_back(
         cartGP(-0.620947533244402,-0.478380938076952,-0.620947533244402)
         );     
-    this->sphWeights_.push_back(0.000912872013860);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000912872013860);
+    this->gPoints_.push_back(
         cartGP(0.478380938076952,0.620947533244402,0.620947533244402)
         );     
-    this->sphWeights_.push_back(0.000912872013860);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000912872013860);
+    this->gPoints_.push_back(
         cartGP(-0.478380938076952,0.620947533244402,0.620947533244402)
         );     
-    this->sphWeights_.push_back(0.000912872013860);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000912872013860);
+    this->gPoints_.push_back(
         cartGP(0.478380938076952,0.620947533244402,-0.620947533244402)
         );     
-    this->sphWeights_.push_back(0.000912872013860);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000912872013860);
+    this->gPoints_.push_back(
         cartGP(-0.478380938076952,0.620947533244402,-0.620947533244402)
         );     
-    this->sphWeights_.push_back(0.000912872013860);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000912872013860);
+    this->gPoints_.push_back(
         cartGP(0.478380938076952,-0.620947533244402,0.620947533244402)
         );     
-    this->sphWeights_.push_back(0.000912872013860);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000912872013860);
+    this->gPoints_.push_back(
         cartGP(-0.478380938076952,-0.620947533244402,0.620947533244402)
         );     
-    this->sphWeights_.push_back(0.000912872013860);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000912872013860);
+    this->gPoints_.push_back(
         cartGP(0.478380938076952,-0.620947533244402,-0.620947533244402)
         );     
-    this->sphWeights_.push_back(0.000912872013860);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000912872013860);
+    this->gPoints_.push_back(
         cartGP(-0.478380938076952,-0.620947533244402,-0.620947533244402)
         );     
-    this->sphWeights_.push_back(0.000912872013860);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000912872013860);
+    this->gPoints_.push_back(
         cartGP(0.656972271185729,0.656972271185729,0.369830866459426)
         );     
-    this->sphWeights_.push_back(0.000913071493569);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913071493569);
+    this->gPoints_.push_back(
         cartGP(0.656972271185729,0.656972271185729,-0.369830866459426)
         );     
-    this->sphWeights_.push_back(0.000913071493569);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913071493569);
+    this->gPoints_.push_back(
         cartGP(0.656972271185729,-0.656972271185729,0.369830866459426)
         );     
-    this->sphWeights_.push_back(0.000913071493569);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913071493569);
+    this->gPoints_.push_back(
         cartGP(0.656972271185729,-0.656972271185729,-0.369830866459426)
         );     
-    this->sphWeights_.push_back(0.000913071493569);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913071493569);
+    this->gPoints_.push_back(
         cartGP(-0.656972271185729,0.656972271185729,0.369830866459426)
         );     
-    this->sphWeights_.push_back(0.000913071493569);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913071493569);
+    this->gPoints_.push_back(
         cartGP(-0.656972271185729,0.656972271185729,-0.369830866459426)
         );     
-    this->sphWeights_.push_back(0.000913071493569);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913071493569);
+    this->gPoints_.push_back(
         cartGP(-0.656972271185729,-0.656972271185729,0.369830866459426)
         );     
-    this->sphWeights_.push_back(0.000913071493569);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913071493569);
+    this->gPoints_.push_back(
         cartGP(-0.656972271185729,-0.656972271185729,-0.369830866459426)
         );     
-    this->sphWeights_.push_back(0.000913071493569);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913071493569);
+    this->gPoints_.push_back(
         cartGP(0.656972271185729,0.369830866459426,0.656972271185729)
         );     
-    this->sphWeights_.push_back(0.000913071493569);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913071493569);
+    this->gPoints_.push_back(
         cartGP(0.656972271185729,-0.369830866459426,0.656972271185729)
         );     
-    this->sphWeights_.push_back(0.000913071493569);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913071493569);
+    this->gPoints_.push_back(
         cartGP(0.656972271185729,0.369830866459426,-0.656972271185729)
         );     
-    this->sphWeights_.push_back(0.000913071493569);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913071493569);
+    this->gPoints_.push_back(
         cartGP(0.656972271185729,-0.369830866459426,-0.656972271185729)
         );     
-    this->sphWeights_.push_back(0.000913071493569);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913071493569);
+    this->gPoints_.push_back(
         cartGP(-0.656972271185729,0.369830866459426,0.656972271185729)
         );     
-    this->sphWeights_.push_back(0.000913071493569);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913071493569);
+    this->gPoints_.push_back(
         cartGP(-0.656972271185729,-0.369830866459426,0.656972271185729)
         );     
-    this->sphWeights_.push_back(0.000913071493569);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913071493569);
+    this->gPoints_.push_back(
         cartGP(-0.656972271185729,0.369830866459426,-0.656972271185729)
         );     
-    this->sphWeights_.push_back(0.000913071493569);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913071493569);
+    this->gPoints_.push_back(
         cartGP(-0.656972271185729,-0.369830866459426,-0.656972271185729)
         );     
-    this->sphWeights_.push_back(0.000913071493569);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913071493569);
+    this->gPoints_.push_back(
         cartGP(0.369830866459426,0.656972271185729,0.656972271185729)
         );     
-    this->sphWeights_.push_back(0.000913071493569);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913071493569);
+    this->gPoints_.push_back(
         cartGP(-0.369830866459426,0.656972271185729,0.656972271185729)
         );     
-    this->sphWeights_.push_back(0.000913071493569);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913071493569);
+    this->gPoints_.push_back(
         cartGP(0.369830866459426,0.656972271185729,-0.656972271185729)
         );     
-    this->sphWeights_.push_back(0.000913071493569);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913071493569);
+    this->gPoints_.push_back(
         cartGP(-0.369830866459426,0.656972271185729,-0.656972271185729)
         );     
-    this->sphWeights_.push_back(0.000913071493569);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913071493569);
+    this->gPoints_.push_back(
         cartGP(0.369830866459426,-0.656972271185729,0.656972271185729)
         );     
-    this->sphWeights_.push_back(0.000913071493569);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913071493569);
+    this->gPoints_.push_back(
         cartGP(-0.369830866459426,-0.656972271185729,0.656972271185729)
         );     
-    this->sphWeights_.push_back(0.000913071493569);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913071493569);
+    this->gPoints_.push_back(
         cartGP(0.369830866459426,-0.656972271185729,-0.656972271185729)
         );     
-    this->sphWeights_.push_back(0.000913071493569);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913071493569);
+    this->gPoints_.push_back(
         cartGP(-0.369830866459426,-0.656972271185729,-0.656972271185729)
         );     
-    this->sphWeights_.push_back(0.000913071493569);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913071493569);
+    this->gPoints_.push_back(
         cartGP(0.684178830907014,0.684178830907014,0.252583955700718)
         );     
-    this->sphWeights_.push_back(0.000915287378455);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915287378455);
+    this->gPoints_.push_back(
         cartGP(0.684178830907014,0.684178830907014,-0.252583955700718)
         );     
-    this->sphWeights_.push_back(0.000915287378455);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915287378455);
+    this->gPoints_.push_back(
         cartGP(0.684178830907014,-0.684178830907014,0.252583955700718)
         );     
-    this->sphWeights_.push_back(0.000915287378455);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915287378455);
+    this->gPoints_.push_back(
         cartGP(0.684178830907014,-0.684178830907014,-0.252583955700718)
         );     
-    this->sphWeights_.push_back(0.000915287378455);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915287378455);
+    this->gPoints_.push_back(
         cartGP(-0.684178830907014,0.684178830907014,0.252583955700718)
         );     
-    this->sphWeights_.push_back(0.000915287378455);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915287378455);
+    this->gPoints_.push_back(
         cartGP(-0.684178830907014,0.684178830907014,-0.252583955700718)
         );     
-    this->sphWeights_.push_back(0.000915287378455);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915287378455);
+    this->gPoints_.push_back(
         cartGP(-0.684178830907014,-0.684178830907014,0.252583955700718)
         );     
-    this->sphWeights_.push_back(0.000915287378455);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915287378455);
+    this->gPoints_.push_back(
         cartGP(-0.684178830907014,-0.684178830907014,-0.252583955700718)
         );     
-    this->sphWeights_.push_back(0.000915287378455);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915287378455);
+    this->gPoints_.push_back(
         cartGP(0.684178830907014,0.252583955700718,0.684178830907014)
         );     
-    this->sphWeights_.push_back(0.000915287378455);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915287378455);
+    this->gPoints_.push_back(
         cartGP(0.684178830907014,-0.252583955700718,0.684178830907014)
         );     
-    this->sphWeights_.push_back(0.000915287378455);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915287378455);
+    this->gPoints_.push_back(
         cartGP(0.684178830907014,0.252583955700718,-0.684178830907014)
         );     
-    this->sphWeights_.push_back(0.000915287378455);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915287378455);
+    this->gPoints_.push_back(
         cartGP(0.684178830907014,-0.252583955700718,-0.684178830907014)
         );     
-    this->sphWeights_.push_back(0.000915287378455);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915287378455);
+    this->gPoints_.push_back(
         cartGP(-0.684178830907014,0.252583955700718,0.684178830907014)
         );     
-    this->sphWeights_.push_back(0.000915287378455);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915287378455);
+    this->gPoints_.push_back(
         cartGP(-0.684178830907014,-0.252583955700718,0.684178830907014)
         );     
-    this->sphWeights_.push_back(0.000915287378455);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915287378455);
+    this->gPoints_.push_back(
         cartGP(-0.684178830907014,0.252583955700718,-0.684178830907014)
         );     
-    this->sphWeights_.push_back(0.000915287378455);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915287378455);
+    this->gPoints_.push_back(
         cartGP(-0.684178830907014,-0.252583955700718,-0.684178830907014)
         );     
-    this->sphWeights_.push_back(0.000915287378455);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915287378455);
+    this->gPoints_.push_back(
         cartGP(0.252583955700718,0.684178830907014,0.684178830907014)
         );     
-    this->sphWeights_.push_back(0.000915287378455);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915287378455);
+    this->gPoints_.push_back(
         cartGP(-0.252583955700718,0.684178830907014,0.684178830907014)
         );     
-    this->sphWeights_.push_back(0.000915287378455);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915287378455);
+    this->gPoints_.push_back(
         cartGP(0.252583955700718,0.684178830907014,-0.684178830907014)
         );     
-    this->sphWeights_.push_back(0.000915287378455);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915287378455);
+    this->gPoints_.push_back(
         cartGP(-0.252583955700718,0.684178830907014,-0.684178830907014)
         );     
-    this->sphWeights_.push_back(0.000915287378455);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915287378455);
+    this->gPoints_.push_back(
         cartGP(0.252583955700718,-0.684178830907014,0.684178830907014)
         );     
-    this->sphWeights_.push_back(0.000915287378455);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915287378455);
+    this->gPoints_.push_back(
         cartGP(-0.252583955700718,-0.684178830907014,0.684178830907014)
         );     
-    this->sphWeights_.push_back(0.000915287378455);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915287378455);
+    this->gPoints_.push_back(
         cartGP(0.252583955700718,-0.684178830907014,-0.684178830907014)
         );     
-    this->sphWeights_.push_back(0.000915287378455);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915287378455);
+    this->gPoints_.push_back(
         cartGP(-0.252583955700718,-0.684178830907014,-0.684178830907014)
         );     
-    this->sphWeights_.push_back(0.000915287378455);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915287378455);
+    this->gPoints_.push_back(
         cartGP(0.701260433012363,0.701260433012363,0.128326186659723)
         );     
-    this->sphWeights_.push_back(0.000918743627432);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000918743627432);
+    this->gPoints_.push_back(
         cartGP(0.701260433012363,0.701260433012363,-0.128326186659723)
         );     
-    this->sphWeights_.push_back(0.000918743627432);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000918743627432);
+    this->gPoints_.push_back(
         cartGP(0.701260433012363,-0.701260433012363,0.128326186659723)
         );     
-    this->sphWeights_.push_back(0.000918743627432);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000918743627432);
+    this->gPoints_.push_back(
         cartGP(0.701260433012363,-0.701260433012363,-0.128326186659723)
         );     
-    this->sphWeights_.push_back(0.000918743627432);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000918743627432);
+    this->gPoints_.push_back(
         cartGP(-0.701260433012363,0.701260433012363,0.128326186659723)
         );     
-    this->sphWeights_.push_back(0.000918743627432);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000918743627432);
+    this->gPoints_.push_back(
         cartGP(-0.701260433012363,0.701260433012363,-0.128326186659723)
         );     
-    this->sphWeights_.push_back(0.000918743627432);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000918743627432);
+    this->gPoints_.push_back(
         cartGP(-0.701260433012363,-0.701260433012363,0.128326186659723)
         );     
-    this->sphWeights_.push_back(0.000918743627432);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000918743627432);
+    this->gPoints_.push_back(
         cartGP(-0.701260433012363,-0.701260433012363,-0.128326186659723)
         );     
-    this->sphWeights_.push_back(0.000918743627432);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000918743627432);
+    this->gPoints_.push_back(
         cartGP(0.701260433012363,0.128326186659723,0.701260433012363)
         );     
-    this->sphWeights_.push_back(0.000918743627432);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000918743627432);
+    this->gPoints_.push_back(
         cartGP(0.701260433012363,-0.128326186659723,0.701260433012363)
         );     
-    this->sphWeights_.push_back(0.000918743627432);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000918743627432);
+    this->gPoints_.push_back(
         cartGP(0.701260433012363,0.128326186659723,-0.701260433012363)
         );     
-    this->sphWeights_.push_back(0.000918743627432);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000918743627432);
+    this->gPoints_.push_back(
         cartGP(0.701260433012363,-0.128326186659723,-0.701260433012363)
         );     
-    this->sphWeights_.push_back(0.000918743627432);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000918743627432);
+    this->gPoints_.push_back(
         cartGP(-0.701260433012363,0.128326186659723,0.701260433012363)
         );     
-    this->sphWeights_.push_back(0.000918743627432);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000918743627432);
+    this->gPoints_.push_back(
         cartGP(-0.701260433012363,-0.128326186659723,0.701260433012363)
         );     
-    this->sphWeights_.push_back(0.000918743627432);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000918743627432);
+    this->gPoints_.push_back(
         cartGP(-0.701260433012363,0.128326186659723,-0.701260433012363)
         );     
-    this->sphWeights_.push_back(0.000918743627432);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000918743627432);
+    this->gPoints_.push_back(
         cartGP(-0.701260433012363,-0.128326186659723,-0.701260433012363)
         );     
-    this->sphWeights_.push_back(0.000918743627432);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000918743627432);
+    this->gPoints_.push_back(
         cartGP(0.128326186659723,0.701260433012363,0.701260433012363)
         );     
-    this->sphWeights_.push_back(0.000918743627432);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000918743627432);
+    this->gPoints_.push_back(
         cartGP(-0.128326186659723,0.701260433012363,0.701260433012363)
         );     
-    this->sphWeights_.push_back(0.000918743627432);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000918743627432);
+    this->gPoints_.push_back(
         cartGP(0.128326186659723,0.701260433012363,-0.701260433012363)
         );     
-    this->sphWeights_.push_back(0.000918743627432);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000918743627432);
+    this->gPoints_.push_back(
         cartGP(-0.128326186659723,0.701260433012363,-0.701260433012363)
         );     
-    this->sphWeights_.push_back(0.000918743627432);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000918743627432);
+    this->gPoints_.push_back(
         cartGP(0.128326186659723,-0.701260433012363,0.701260433012363)
         );     
-    this->sphWeights_.push_back(0.000918743627432);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000918743627432);
+    this->gPoints_.push_back(
         cartGP(-0.128326186659723,-0.701260433012363,0.701260433012363)
         );     
-    this->sphWeights_.push_back(0.000918743627432);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000918743627432);
+    this->gPoints_.push_back(
         cartGP(0.128326186659723,-0.701260433012363,-0.701260433012363)
         );     
-    this->sphWeights_.push_back(0.000918743627432);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000918743627432);
+    this->gPoints_.push_back(
         cartGP(-0.128326186659723,-0.701260433012363,-0.701260433012363)
         );     
-    this->sphWeights_.push_back(0.000918743627432);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000918743627432);
+    this->gPoints_.push_back(
         cartGP(0.107238221547816,0.994233354821322,0.000000000000000)
         );     
-    this->sphWeights_.push_back(0.000517697731297);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000517697731297);
+    this->gPoints_.push_back(
         cartGP(0.107238221547816,-0.994233354821322,0.000000000000000)
         );     
-    this->sphWeights_.push_back(0.000517697731297);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000517697731297);
+    this->gPoints_.push_back(
         cartGP(-0.107238221547817,0.994233354821322,0.000000000000000)
         );     
-    this->sphWeights_.push_back(0.000517697731297);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000517697731297);
+    this->gPoints_.push_back(
         cartGP(-0.107238221547817,-0.994233354821322,0.000000000000000)
         );     
-    this->sphWeights_.push_back(0.000517697731297);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000517697731297);
+    this->gPoints_.push_back(
         cartGP(0.994233354821322,0.107238221547816,0.000000000000000)
         );     
-    this->sphWeights_.push_back(0.000517697731297);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000517697731297);
+    this->gPoints_.push_back(
         cartGP(0.994233354821322,-0.107238221547816,0.000000000000000)
         );     
-    this->sphWeights_.push_back(0.000517697731297);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000517697731297);
+    this->gPoints_.push_back(
         cartGP(-0.994233354821322,0.107238221547816,0.000000000000000)
         );     
-    this->sphWeights_.push_back(0.000517697731297);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000517697731297);
+    this->gPoints_.push_back(
         cartGP(-0.994233354821322,-0.107238221547816,0.000000000000000)
         );     
-    this->sphWeights_.push_back(0.000517697731297);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000517697731297);
+    this->gPoints_.push_back(
         cartGP(0.107238221547816,0.000000000000000,0.994233354821322)
         );     
-    this->sphWeights_.push_back(0.000517697731297);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000517697731297);
+    this->gPoints_.push_back(
         cartGP(0.107238221547816,0.000000000000000,-0.994233354821322)
         );     
-    this->sphWeights_.push_back(0.000517697731297);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000517697731297);
+    this->gPoints_.push_back(
         cartGP(-0.107238221547816,0.000000000000000,0.994233354821322)
         );     
-    this->sphWeights_.push_back(0.000517697731297);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000517697731297);
+    this->gPoints_.push_back(
         cartGP(-0.107238221547816,0.000000000000000,-0.994233354821322)
         );     
-    this->sphWeights_.push_back(0.000517697731297);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000517697731297);
+    this->gPoints_.push_back(
         cartGP(0.994233354821322,0.000000000000000,0.107238221547816)
         );     
-    this->sphWeights_.push_back(0.000517697731297);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000517697731297);
+    this->gPoints_.push_back(
         cartGP(0.994233354821322,0.000000000000000,-0.107238221547817)
         );     
-    this->sphWeights_.push_back(0.000517697731297);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000517697731297);
+    this->gPoints_.push_back(
         cartGP(-0.994233354821322,0.000000000000000,0.107238221547816)
         );     
-    this->sphWeights_.push_back(0.000517697731297);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000517697731297);
+    this->gPoints_.push_back(
         cartGP(-0.994233354821322,0.000000000000000,-0.107238221547817)
         );     
-    this->sphWeights_.push_back(0.000517697731297);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000517697731297);
+    this->gPoints_.push_back(
         cartGP(0.000000000000000,0.107238221547816,0.994233354821322)
         );     
-    this->sphWeights_.push_back(0.000517697731297);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000517697731297);
+    this->gPoints_.push_back(
         cartGP(0.000000000000000,0.107238221547816,-0.994233354821322)
         );     
-    this->sphWeights_.push_back(0.000517697731297);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000517697731297);
+    this->gPoints_.push_back(
         cartGP(0.000000000000000,-0.107238221547816,0.994233354821322)
         );     
-    this->sphWeights_.push_back(0.000517697731297);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000517697731297);
+    this->gPoints_.push_back(
         cartGP(0.000000000000000,-0.107238221547816,-0.994233354821322)
         );     
-    this->sphWeights_.push_back(0.000517697731297);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000517697731297);
+    this->gPoints_.push_back(
         cartGP(0.000000000000000,0.994233354821322,0.107238221547816)
         );     
-    this->sphWeights_.push_back(0.000517697731297);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000517697731297);
+    this->gPoints_.push_back(
         cartGP(0.000000000000000,0.994233354821322,-0.107238221547817)
         );     
-    this->sphWeights_.push_back(0.000517697731297);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000517697731297);
+    this->gPoints_.push_back(
         cartGP(0.000000000000000,-0.994233354821322,0.107238221547816)
         );     
-    this->sphWeights_.push_back(0.000517697731297);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000517697731297);
+    this->gPoints_.push_back(
         cartGP(0.000000000000000,-0.994233354821322,-0.107238221547817)
         );     
-    this->sphWeights_.push_back(0.000517697731297);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000517697731297);
+    this->gPoints_.push_back(
         cartGP(0.258206895949697,0.966089643296119,0.000000000000000)
         );     
-    this->sphWeights_.push_back(0.000733114368210);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000733114368210);
+    this->gPoints_.push_back(
         cartGP(0.258206895949697,-0.966089643296119,0.000000000000000)
         );     
-    this->sphWeights_.push_back(0.000733114368210);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000733114368210);
+    this->gPoints_.push_back(
         cartGP(-0.258206895949697,0.966089643296119,0.000000000000000)
         );     
-    this->sphWeights_.push_back(0.000733114368210);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000733114368210);
+    this->gPoints_.push_back(
         cartGP(-0.258206895949697,-0.966089643296119,0.000000000000000)
         );     
-    this->sphWeights_.push_back(0.000733114368210);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000733114368210);
+    this->gPoints_.push_back(
         cartGP(0.966089643296119,0.258206895949697,0.000000000000000)
         );     
-    this->sphWeights_.push_back(0.000733114368210);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000733114368210);
+    this->gPoints_.push_back(
         cartGP(0.966089643296119,-0.258206895949697,0.000000000000000)
         );     
-    this->sphWeights_.push_back(0.000733114368210);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000733114368210);
+    this->gPoints_.push_back(
         cartGP(-0.966089643296119,0.258206895949697,0.000000000000000)
         );     
-    this->sphWeights_.push_back(0.000733114368210);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000733114368210);
+    this->gPoints_.push_back(
         cartGP(-0.966089643296119,-0.258206895949697,0.000000000000000)
         );     
-    this->sphWeights_.push_back(0.000733114368210);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000733114368210);
+    this->gPoints_.push_back(
         cartGP(0.258206895949697,0.000000000000000,0.966089643296119)
         );     
-    this->sphWeights_.push_back(0.000733114368210);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000733114368210);
+    this->gPoints_.push_back(
         cartGP(0.258206895949697,0.000000000000000,-0.966089643296119)
         );     
-    this->sphWeights_.push_back(0.000733114368210);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000733114368210);
+    this->gPoints_.push_back(
         cartGP(-0.258206895949697,0.000000000000000,0.966089643296119)
         );     
-    this->sphWeights_.push_back(0.000733114368210);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000733114368210);
+    this->gPoints_.push_back(
         cartGP(-0.258206895949697,0.000000000000000,-0.966089643296119)
         );     
-    this->sphWeights_.push_back(0.000733114368210);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000733114368210);
+    this->gPoints_.push_back(
         cartGP(0.966089643296119,0.000000000000000,0.258206895949697)
         );     
-    this->sphWeights_.push_back(0.000733114368210);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000733114368210);
+    this->gPoints_.push_back(
         cartGP(0.966089643296119,0.000000000000000,-0.258206895949697)
         );     
-    this->sphWeights_.push_back(0.000733114368210);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000733114368210);
+    this->gPoints_.push_back(
         cartGP(-0.966089643296119,0.000000000000000,0.258206895949697)
         );     
-    this->sphWeights_.push_back(0.000733114368210);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000733114368210);
+    this->gPoints_.push_back(
         cartGP(-0.966089643296119,0.000000000000000,-0.258206895949697)
         );     
-    this->sphWeights_.push_back(0.000733114368210);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000733114368210);
+    this->gPoints_.push_back(
         cartGP(0.000000000000000,0.258206895949697,0.966089643296119)
         );     
-    this->sphWeights_.push_back(0.000733114368210);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000733114368210);
+    this->gPoints_.push_back(
         cartGP(0.000000000000000,0.258206895949697,-0.966089643296119)
         );     
-    this->sphWeights_.push_back(0.000733114368210);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000733114368210);
+    this->gPoints_.push_back(
         cartGP(0.000000000000000,-0.258206895949697,0.966089643296119)
         );     
-    this->sphWeights_.push_back(0.000733114368210);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000733114368210);
+    this->gPoints_.push_back(
         cartGP(0.000000000000000,-0.258206895949697,-0.966089643296119)
         );     
-    this->sphWeights_.push_back(0.000733114368210);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000733114368210);
+    this->gPoints_.push_back(
         cartGP(0.000000000000000,0.966089643296119,0.258206895949697)
         );     
-    this->sphWeights_.push_back(0.000733114368210);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000733114368210);
+    this->gPoints_.push_back(
         cartGP(0.000000000000000,0.966089643296119,-0.258206895949697)
         );     
-    this->sphWeights_.push_back(0.000733114368210);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000733114368210);
+    this->gPoints_.push_back(
         cartGP(0.000000000000000,-0.966089643296119,0.258206895949697)
         );     
-    this->sphWeights_.push_back(0.000733114368210);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000733114368210);
+    this->gPoints_.push_back(
         cartGP(0.000000000000000,-0.966089643296119,-0.258206895949697)
         );     
-    this->sphWeights_.push_back(0.000733114368210);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000733114368210);
+    this->gPoints_.push_back(
         cartGP(0.417275295530672,0.908780131681911,0.000000000000000)
         );     
-    this->sphWeights_.push_back(0.000846323283638);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000846323283638);
+    this->gPoints_.push_back(
         cartGP(0.417275295530672,-0.908780131681911,0.000000000000000)
         );     
-    this->sphWeights_.push_back(0.000846323283638);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000846323283638);
+    this->gPoints_.push_back(
         cartGP(-0.417275295530672,0.908780131681910,0.000000000000000)
         );     
-    this->sphWeights_.push_back(0.000846323283638);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000846323283638);
+    this->gPoints_.push_back(
         cartGP(-0.417275295530672,-0.908780131681910,0.000000000000000)
         );     
-    this->sphWeights_.push_back(0.000846323283638);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000846323283638);
+    this->gPoints_.push_back(
         cartGP(0.908780131681911,0.417275295530672,0.000000000000000)
         );     
-    this->sphWeights_.push_back(0.000846323283638);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000846323283638);
+    this->gPoints_.push_back(
         cartGP(0.908780131681911,-0.417275295530672,0.000000000000000)
         );     
-    this->sphWeights_.push_back(0.000846323283638);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000846323283638);
+    this->gPoints_.push_back(
         cartGP(-0.908780131681911,0.417275295530671,0.000000000000000)
         );     
-    this->sphWeights_.push_back(0.000846323283638);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000846323283638);
+    this->gPoints_.push_back(
         cartGP(-0.908780131681911,-0.417275295530671,0.000000000000000)
         );     
-    this->sphWeights_.push_back(0.000846323283638);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000846323283638);
+    this->gPoints_.push_back(
         cartGP(0.417275295530672,0.000000000000000,0.908780131681911)
         );     
-    this->sphWeights_.push_back(0.000846323283638);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000846323283638);
+    this->gPoints_.push_back(
         cartGP(0.417275295530671,0.000000000000000,-0.908780131681911)
         );     
-    this->sphWeights_.push_back(0.000846323283638);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000846323283638);
+    this->gPoints_.push_back(
         cartGP(-0.417275295530672,0.000000000000000,0.908780131681911)
         );     
-    this->sphWeights_.push_back(0.000846323283638);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000846323283638);
+    this->gPoints_.push_back(
         cartGP(-0.417275295530671,0.000000000000000,-0.908780131681911)
         );     
-    this->sphWeights_.push_back(0.000846323283638);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000846323283638);
+    this->gPoints_.push_back(
         cartGP(0.908780131681911,0.000000000000000,0.417275295530672)
         );     
-    this->sphWeights_.push_back(0.000846323283638);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000846323283638);
+    this->gPoints_.push_back(
         cartGP(0.908780131681910,0.000000000000000,-0.417275295530672)
         );     
-    this->sphWeights_.push_back(0.000846323283638);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000846323283638);
+    this->gPoints_.push_back(
         cartGP(-0.908780131681911,0.000000000000000,0.417275295530672)
         );     
-    this->sphWeights_.push_back(0.000846323283638);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000846323283638);
+    this->gPoints_.push_back(
         cartGP(-0.908780131681910,0.000000000000000,-0.417275295530672)
         );     
-    this->sphWeights_.push_back(0.000846323283638);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000846323283638);
+    this->gPoints_.push_back(
         cartGP(0.000000000000000,0.417275295530672,0.908780131681911)
         );     
-    this->sphWeights_.push_back(0.000846323283638);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000846323283638);
+    this->gPoints_.push_back(
         cartGP(0.000000000000000,0.417275295530671,-0.908780131681911)
         );     
-    this->sphWeights_.push_back(0.000846323283638);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000846323283638);
+    this->gPoints_.push_back(
         cartGP(0.000000000000000,-0.417275295530672,0.908780131681911)
         );     
-    this->sphWeights_.push_back(0.000846323283638);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000846323283638);
+    this->gPoints_.push_back(
         cartGP(0.000000000000000,-0.417275295530671,-0.908780131681911)
         );     
-    this->sphWeights_.push_back(0.000846323283638);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000846323283638);
+    this->gPoints_.push_back(
         cartGP(0.000000000000000,0.908780131681911,0.417275295530672)
         );     
-    this->sphWeights_.push_back(0.000846323283638);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000846323283638);
+    this->gPoints_.push_back(
         cartGP(0.000000000000000,0.908780131681910,-0.417275295530672)
         );     
-    this->sphWeights_.push_back(0.000846323283638);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000846323283638);
+    this->gPoints_.push_back(
         cartGP(0.000000000000000,-0.908780131681911,0.417275295530672)
         );     
-    this->sphWeights_.push_back(0.000846323283638);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000846323283638);
+    this->gPoints_.push_back(
         cartGP(0.000000000000000,-0.908780131681910,-0.417275295530672)
         );     
-    this->sphWeights_.push_back(0.000846323283638);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000846323283638);
+    this->gPoints_.push_back(
         cartGP(0.570036691179250,0.821619237061433,0.000000000000000)
         );     
-    this->sphWeights_.push_back(0.000903112269425);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000903112269425);
+    this->gPoints_.push_back(
         cartGP(0.570036691179250,-0.821619237061433,0.000000000000000)
         );     
-    this->sphWeights_.push_back(0.000903112269425);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000903112269425);
+    this->gPoints_.push_back(
         cartGP(-0.570036691179250,0.821619237061433,0.000000000000000)
         );     
-    this->sphWeights_.push_back(0.000903112269425);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000903112269425);
+    this->gPoints_.push_back(
         cartGP(-0.570036691179250,-0.821619237061433,0.000000000000000)
         );     
-    this->sphWeights_.push_back(0.000903112269425);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000903112269425);
+    this->gPoints_.push_back(
         cartGP(0.821619237061433,0.570036691179250,0.000000000000000)
         );     
-    this->sphWeights_.push_back(0.000903112269425);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000903112269425);
+    this->gPoints_.push_back(
         cartGP(0.821619237061433,-0.570036691179250,0.000000000000000)
         );     
-    this->sphWeights_.push_back(0.000903112269425);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000903112269425);
+    this->gPoints_.push_back(
         cartGP(-0.821619237061433,0.570036691179250,0.000000000000000)
         );     
-    this->sphWeights_.push_back(0.000903112269425);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000903112269425);
+    this->gPoints_.push_back(
         cartGP(-0.821619237061433,-0.570036691179250,0.000000000000000)
         );     
-    this->sphWeights_.push_back(0.000903112269425);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000903112269425);
+    this->gPoints_.push_back(
         cartGP(0.570036691179250,0.000000000000000,0.821619237061433)
         );     
-    this->sphWeights_.push_back(0.000903112269425);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000903112269425);
+    this->gPoints_.push_back(
         cartGP(0.570036691179250,0.000000000000000,-0.821619237061433)
         );     
-    this->sphWeights_.push_back(0.000903112269425);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000903112269425);
+    this->gPoints_.push_back(
         cartGP(-0.570036691179250,0.000000000000000,0.821619237061433)
         );     
-    this->sphWeights_.push_back(0.000903112269425);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000903112269425);
+    this->gPoints_.push_back(
         cartGP(-0.570036691179250,0.000000000000000,-0.821619237061433)
         );     
-    this->sphWeights_.push_back(0.000903112269425);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000903112269425);
+    this->gPoints_.push_back(
         cartGP(0.821619237061433,0.000000000000000,0.570036691179250)
         );     
-    this->sphWeights_.push_back(0.000903112269425);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000903112269425);
+    this->gPoints_.push_back(
         cartGP(0.821619237061433,0.000000000000000,-0.570036691179250)
         );     
-    this->sphWeights_.push_back(0.000903112269425);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000903112269425);
+    this->gPoints_.push_back(
         cartGP(-0.821619237061433,0.000000000000000,0.570036691179250)
         );     
-    this->sphWeights_.push_back(0.000903112269425);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000903112269425);
+    this->gPoints_.push_back(
         cartGP(-0.821619237061433,0.000000000000000,-0.570036691179250)
         );     
-    this->sphWeights_.push_back(0.000903112269425);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000903112269425);
+    this->gPoints_.push_back(
         cartGP(0.000000000000000,0.570036691179250,0.821619237061433)
         );     
-    this->sphWeights_.push_back(0.000903112269425);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000903112269425);
+    this->gPoints_.push_back(
         cartGP(0.000000000000000,0.570036691179250,-0.821619237061433)
         );     
-    this->sphWeights_.push_back(0.000903112269425);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000903112269425);
+    this->gPoints_.push_back(
         cartGP(0.000000000000000,-0.570036691179250,0.821619237061433)
         );     
-    this->sphWeights_.push_back(0.000903112269425);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000903112269425);
+    this->gPoints_.push_back(
         cartGP(0.000000000000000,-0.570036691179250,-0.821619237061433)
         );     
-    this->sphWeights_.push_back(0.000903112269425);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000903112269425);
+    this->gPoints_.push_back(
         cartGP(0.000000000000000,0.821619237061433,0.570036691179250)
         );     
-    this->sphWeights_.push_back(0.000903112269425);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000903112269425);
+    this->gPoints_.push_back(
         cartGP(0.000000000000000,0.821619237061433,-0.570036691179250)
         );     
-    this->sphWeights_.push_back(0.000903112269425);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000903112269425);
+    this->gPoints_.push_back(
         cartGP(0.000000000000000,-0.821619237061433,0.570036691179250)
         );     
-    this->sphWeights_.push_back(0.000903112269425);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000903112269425);
+    this->gPoints_.push_back(
         cartGP(0.000000000000000,-0.821619237061433,-0.570036691179250)
         );     
-    this->sphWeights_.push_back(0.000903112269425);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000903112269425);
+    this->gPoints_.push_back(
         cartGP(0.982798601826395,0.177177402261533,0.052106394770113)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(0.982798601826395,0.177177402261533,-0.052106394770113)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(0.982798601826395,-0.177177402261533,0.052106394770113)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(0.982798601826395,-0.177177402261533,-0.052106394770113)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(-0.982798601826395,0.177177402261533,0.052106394770113)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(-0.982798601826395,0.177177402261533,-0.052106394770113)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(-0.982798601826395,-0.177177402261533,0.052106394770113)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(-0.982798601826395,-0.177177402261533,-0.052106394770113)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(0.982798601826395,0.052106394770113,0.177177402261533)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(0.982798601826395,0.052106394770113,-0.177177402261532)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(0.982798601826395,-0.052106394770113,0.177177402261533)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(0.982798601826395,-0.052106394770113,-0.177177402261532)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(-0.982798601826395,0.052106394770113,0.177177402261533)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(-0.982798601826395,0.052106394770113,-0.177177402261532)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(-0.982798601826395,-0.052106394770113,0.177177402261533)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(-0.982798601826395,-0.052106394770113,-0.177177402261532)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(0.177177402261532,0.982798601826395,0.052106394770113)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(0.177177402261532,0.982798601826395,-0.052106394770113)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(0.177177402261532,-0.982798601826395,0.052106394770113)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(0.177177402261532,-0.982798601826395,-0.052106394770113)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(-0.177177402261533,0.982798601826395,0.052106394770113)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(-0.177177402261533,0.982798601826395,-0.052106394770113)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(-0.177177402261533,-0.982798601826395,0.052106394770113)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(-0.177177402261533,-0.982798601826395,-0.052106394770113)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(0.177177402261532,0.052106394770113,0.982798601826395)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(0.177177402261532,0.052106394770113,-0.982798601826395)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(0.177177402261532,-0.052106394770113,0.982798601826395)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(0.177177402261532,-0.052106394770113,-0.982798601826395)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(-0.177177402261532,0.052106394770113,0.982798601826395)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(-0.177177402261532,0.052106394770113,-0.982798601826395)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(-0.177177402261532,-0.052106394770113,0.982798601826395)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(-0.177177402261532,-0.052106394770113,-0.982798601826395)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(0.052106394770113,0.982798601826395,0.177177402261533)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(0.052106394770113,0.982798601826395,-0.177177402261532)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(0.052106394770113,-0.982798601826395,0.177177402261533)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(0.052106394770113,-0.982798601826395,-0.177177402261532)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(-0.052106394770113,0.982798601826395,0.177177402261533)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(-0.052106394770113,0.982798601826395,-0.177177402261532)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(-0.052106394770113,-0.982798601826395,0.177177402261533)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(-0.052106394770113,-0.982798601826395,-0.177177402261532)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(0.052106394770113,0.177177402261532,0.982798601826395)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(0.052106394770113,0.177177402261532,-0.982798601826395)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(0.052106394770113,-0.177177402261532,0.982798601826395)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(0.052106394770113,-0.177177402261532,-0.982798601826395)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(-0.052106394770113,0.177177402261532,0.982798601826395)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(-0.052106394770113,0.177177402261532,-0.982798601826395)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(-0.052106394770113,-0.177177402261532,0.982798601826395)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(-0.052106394770113,-0.177177402261532,-0.982798601826395)
         );     
-    this->sphWeights_.push_back(0.000648577845316);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000648577845316);
+    this->gPoints_.push_back(
         cartGP(0.962424923032623,0.247571646342629,0.111564095715648)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(0.962424923032623,0.247571646342629,-0.111564095715648)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(0.962424923032623,-0.247571646342629,0.111564095715648)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(0.962424923032623,-0.247571646342629,-0.111564095715648)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(-0.962424923032623,0.247571646342629,0.111564095715648)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(-0.962424923032623,0.247571646342629,-0.111564095715648)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(-0.962424923032623,-0.247571646342629,0.111564095715648)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(-0.962424923032623,-0.247571646342629,-0.111564095715648)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(0.962424923032623,0.111564095715647,0.247571646342629)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(0.962424923032623,0.111564095715647,-0.247571646342629)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(0.962424923032623,-0.111564095715647,0.247571646342629)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(0.962424923032623,-0.111564095715647,-0.247571646342629)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(-0.962424923032623,0.111564095715647,0.247571646342629)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(-0.962424923032623,0.111564095715647,-0.247571646342629)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(-0.962424923032623,-0.111564095715647,0.247571646342629)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(-0.962424923032623,-0.111564095715647,-0.247571646342629)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(0.247571646342629,0.962424923032623,0.111564095715648)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(0.247571646342629,0.962424923032623,-0.111564095715648)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(0.247571646342629,-0.962424923032623,0.111564095715648)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(0.247571646342629,-0.962424923032623,-0.111564095715648)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(-0.247571646342629,0.962424923032623,0.111564095715648)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(-0.247571646342629,0.962424923032623,-0.111564095715648)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(-0.247571646342629,-0.962424923032623,0.111564095715648)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(-0.247571646342629,-0.962424923032623,-0.111564095715648)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(0.247571646342629,0.111564095715648,0.962424923032623)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(0.247571646342629,0.111564095715648,-0.962424923032623)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(0.247571646342629,-0.111564095715648,0.962424923032623)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(0.247571646342629,-0.111564095715648,-0.962424923032623)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(-0.247571646342629,0.111564095715648,0.962424923032623)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(-0.247571646342629,0.111564095715648,-0.962424923032623)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(-0.247571646342629,-0.111564095715648,0.962424923032623)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(-0.247571646342629,-0.111564095715648,-0.962424923032623)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(0.111564095715648,0.962424923032623,0.247571646342629)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(0.111564095715648,0.962424923032623,-0.247571646342629)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(0.111564095715648,-0.962424923032623,0.247571646342629)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(0.111564095715648,-0.962424923032623,-0.247571646342629)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(-0.111564095715648,0.962424923032623,0.247571646342629)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(-0.111564095715648,0.962424923032623,-0.247571646342629)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(-0.111564095715648,-0.962424923032623,0.247571646342629)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(-0.111564095715648,-0.962424923032623,-0.247571646342629)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(0.111564095715648,0.247571646342629,0.962424923032623)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(0.111564095715648,0.247571646342629,-0.962424923032623)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(0.111564095715648,-0.247571646342629,0.962424923032623)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(0.111564095715648,-0.247571646342629,-0.962424923032623)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(-0.111564095715648,0.247571646342629,0.962424923032623)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(-0.111564095715648,0.247571646342629,-0.962424923032623)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(-0.111564095715648,-0.247571646342629,0.962424923032623)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(-0.111564095715648,-0.247571646342629,-0.962424923032623)
         );     
-    this->sphWeights_.push_back(0.000743503091098);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000743503091098);
+    this->gPoints_.push_back(
         cartGP(0.940200799412881,0.335461628906649,0.059058888532354)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(0.940200799412881,0.335461628906649,-0.059058888532354)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(0.940200799412881,-0.335461628906649,0.059058888532354)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(0.940200799412881,-0.335461628906649,-0.059058888532354)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(-0.940200799412881,0.335461628906649,0.059058888532354)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(-0.940200799412881,0.335461628906649,-0.059058888532354)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(-0.940200799412881,-0.335461628906649,0.059058888532354)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(-0.940200799412881,-0.335461628906649,-0.059058888532354)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(0.940200799412881,0.059058888532354,0.335461628906649)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(0.940200799412881,0.059058888532354,-0.335461628906649)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(0.940200799412881,-0.059058888532354,0.335461628906649)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(0.940200799412881,-0.059058888532354,-0.335461628906649)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(-0.940200799412881,0.059058888532354,0.335461628906649)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(-0.940200799412881,0.059058888532354,-0.335461628906649)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(-0.940200799412881,-0.059058888532354,0.335461628906649)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(-0.940200799412881,-0.059058888532354,-0.335461628906649)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(0.335461628906649,0.940200799412881,0.059058888532354)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(0.335461628906649,0.940200799412881,-0.059058888532354)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(0.335461628906649,-0.940200799412881,0.059058888532354)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(0.335461628906649,-0.940200799412881,-0.059058888532354)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(-0.335461628906649,0.940200799412881,0.059058888532354)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(-0.335461628906649,0.940200799412881,-0.059058888532354)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(-0.335461628906649,-0.940200799412881,0.059058888532354)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(-0.335461628906649,-0.940200799412881,-0.059058888532354)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(0.335461628906649,0.059058888532354,0.940200799412881)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(0.335461628906649,0.059058888532354,-0.940200799412881)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(0.335461628906649,-0.059058888532354,0.940200799412881)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(0.335461628906649,-0.059058888532354,-0.940200799412881)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(-0.335461628906649,0.059058888532354,0.940200799412881)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(-0.335461628906649,0.059058888532354,-0.940200799412881)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(-0.335461628906649,-0.059058888532354,0.940200799412881)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(-0.335461628906649,-0.059058888532354,-0.940200799412881)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(0.059058888532354,0.940200799412881,0.335461628906649)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(0.059058888532354,0.940200799412881,-0.335461628906649)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(0.059058888532354,-0.940200799412881,0.335461628906649)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(0.059058888532354,-0.940200799412881,-0.335461628906649)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(-0.059058888532354,0.940200799412881,0.335461628906649)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(-0.059058888532354,0.940200799412881,-0.335461628906649)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(-0.059058888532354,-0.940200799412881,0.335461628906649)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(-0.059058888532354,-0.940200799412881,-0.335461628906649)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(0.059058888532354,0.335461628906649,0.940200799412881)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(0.059058888532354,0.335461628906649,-0.940200799412881)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(0.059058888532354,-0.335461628906649,0.940200799412881)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(0.059058888532354,-0.335461628906649,-0.940200799412881)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(-0.059058888532354,0.335461628906649,0.940200799412881)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(-0.059058888532354,0.335461628906649,-0.940200799412881)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(-0.059058888532354,-0.335461628906649,0.940200799412881)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(-0.059058888532354,-0.335461628906649,-0.940200799412881)
         );     
-    this->sphWeights_.push_back(0.000799852789184);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000799852789184);
+    this->gPoints_.push_back(
         cartGP(0.932082204014320,0.317361524661198,0.174655167757863)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(0.932082204014320,0.317361524661198,-0.174655167757863)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(0.932082204014320,-0.317361524661198,0.174655167757863)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(0.932082204014320,-0.317361524661198,-0.174655167757863)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(-0.932082204014320,0.317361524661197,0.174655167757863)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(-0.932082204014320,0.317361524661197,-0.174655167757863)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(-0.932082204014320,-0.317361524661197,0.174655167757863)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(-0.932082204014320,-0.317361524661197,-0.174655167757863)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(0.932082204014320,0.174655167757862,0.317361524661198)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(0.932082204014320,0.174655167757862,-0.317361524661198)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(0.932082204014320,-0.174655167757862,0.317361524661198)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(0.932082204014320,-0.174655167757862,-0.317361524661198)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(-0.932082204014320,0.174655167757862,0.317361524661198)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(-0.932082204014320,0.174655167757862,-0.317361524661198)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(-0.932082204014320,-0.174655167757862,0.317361524661198)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(-0.932082204014320,-0.174655167757862,-0.317361524661198)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(0.317361524661198,0.932082204014320,0.174655167757863)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(0.317361524661198,0.932082204014320,-0.174655167757863)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(0.317361524661198,-0.932082204014320,0.174655167757863)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(0.317361524661198,-0.932082204014320,-0.174655167757863)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(-0.317361524661198,0.932082204014320,0.174655167757863)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(-0.317361524661198,0.932082204014320,-0.174655167757863)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(-0.317361524661198,-0.932082204014320,0.174655167757863)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(-0.317361524661198,-0.932082204014320,-0.174655167757863)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(0.317361524661198,0.174655167757863,0.932082204014320)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(0.317361524661197,0.174655167757863,-0.932082204014320)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(0.317361524661198,-0.174655167757863,0.932082204014320)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(0.317361524661197,-0.174655167757863,-0.932082204014320)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(-0.317361524661198,0.174655167757863,0.932082204014320)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(-0.317361524661197,0.174655167757863,-0.932082204014320)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(-0.317361524661198,-0.174655167757863,0.932082204014320)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(-0.317361524661197,-0.174655167757863,-0.932082204014320)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(0.174655167757863,0.932082204014320,0.317361524661198)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(0.174655167757863,0.932082204014320,-0.317361524661198)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(0.174655167757863,-0.932082204014320,0.317361524661198)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(0.174655167757863,-0.932082204014320,-0.317361524661198)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(-0.174655167757863,0.932082204014320,0.317361524661198)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(-0.174655167757863,0.932082204014320,-0.317361524661198)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(-0.174655167757863,-0.932082204014320,0.317361524661198)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(-0.174655167757863,-0.932082204014320,-0.317361524661198)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(0.174655167757863,0.317361524661198,0.932082204014320)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(0.174655167757863,0.317361524661197,-0.932082204014320)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(0.174655167757863,-0.317361524661198,0.932082204014320)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(0.174655167757863,-0.317361524661197,-0.932082204014320)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(-0.174655167757863,0.317361524661198,0.932082204014320)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(-0.174655167757863,0.317361524661197,-0.932082204014320)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(-0.174655167757863,-0.317361524661198,0.932082204014320)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(-0.174655167757863,-0.317361524661197,-0.932082204014320)
         );     
-    this->sphWeights_.push_back(0.000810173149747);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000810173149747);
+    this->gPoints_.push_back(
         cartGP(0.904367419939330,0.409026842708535,0.121723505109599)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(0.904367419939330,0.409026842708535,-0.121723505109599)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(0.904367419939330,-0.409026842708535,0.121723505109599)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(0.904367419939330,-0.409026842708535,-0.121723505109599)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(-0.904367419939330,0.409026842708536,0.121723505109599)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(-0.904367419939330,0.409026842708536,-0.121723505109599)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(-0.904367419939330,-0.409026842708536,0.121723505109599)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(-0.904367419939330,-0.409026842708536,-0.121723505109599)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(0.904367419939330,0.121723505109599,0.409026842708536)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(0.904367419939330,0.121723505109599,-0.409026842708536)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(0.904367419939330,-0.121723505109599,0.409026842708536)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(0.904367419939330,-0.121723505109599,-0.409026842708536)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(-0.904367419939330,0.121723505109599,0.409026842708536)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(-0.904367419939330,0.121723505109599,-0.409026842708536)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(-0.904367419939330,-0.121723505109599,0.409026842708536)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(-0.904367419939330,-0.121723505109599,-0.409026842708536)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(0.409026842708536,0.904367419939330,0.121723505109599)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(0.409026842708536,0.904367419939330,-0.121723505109599)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(0.409026842708536,-0.904367419939330,0.121723505109599)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(0.409026842708536,-0.904367419939330,-0.121723505109599)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(-0.409026842708536,0.904367419939330,0.121723505109599)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(-0.409026842708536,0.904367419939330,-0.121723505109599)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(-0.409026842708536,-0.904367419939330,0.121723505109599)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(-0.409026842708536,-0.904367419939330,-0.121723505109599)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(0.409026842708536,0.121723505109599,0.904367419939330)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(0.409026842708536,0.121723505109599,-0.904367419939330)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(0.409026842708536,-0.121723505109599,0.904367419939330)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(0.409026842708536,-0.121723505109599,-0.904367419939330)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(-0.409026842708536,0.121723505109599,0.904367419939330)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(-0.409026842708536,0.121723505109599,-0.904367419939330)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(-0.409026842708536,-0.121723505109599,0.904367419939330)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(-0.409026842708536,-0.121723505109599,-0.904367419939330)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(0.121723505109599,0.904367419939330,0.409026842708536)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(0.121723505109599,0.904367419939330,-0.409026842708536)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(0.121723505109599,-0.904367419939330,0.409026842708536)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(0.121723505109599,-0.904367419939330,-0.409026842708536)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(-0.121723505109599,0.904367419939330,0.409026842708536)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(-0.121723505109599,0.904367419939330,-0.409026842708536)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(-0.121723505109599,-0.904367419939330,0.409026842708536)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(-0.121723505109599,-0.904367419939330,-0.409026842708536)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(0.121723505109599,0.409026842708536,0.904367419939330)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(0.121723505109599,0.409026842708536,-0.904367419939330)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(0.121723505109599,-0.409026842708536,0.904367419939330)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(0.121723505109599,-0.409026842708536,-0.904367419939330)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(-0.121723505109599,0.409026842708536,0.904367419939330)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(-0.121723505109599,0.409026842708536,-0.904367419939330)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(-0.121723505109599,-0.409026842708536,0.904367419939330)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(-0.121723505109599,-0.409026842708536,-0.904367419939330)
         );     
-    this->sphWeights_.push_back(0.000848338957459);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000848338957459);
+    this->gPoints_.push_back(
         cartGP(0.891240756007475,0.385429115066922,0.239027847938172)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(0.891240756007475,0.385429115066922,-0.239027847938173)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(0.891240756007475,-0.385429115066922,0.239027847938172)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(0.891240756007475,-0.385429115066922,-0.239027847938173)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(-0.891240756007475,0.385429115066922,0.239027847938172)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(-0.891240756007475,0.385429115066922,-0.239027847938173)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(-0.891240756007475,-0.385429115066922,0.239027847938172)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(-0.891240756007475,-0.385429115066922,-0.239027847938173)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(0.891240756007475,0.239027847938172,0.385429115066922)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(0.891240756007475,0.239027847938172,-0.385429115066922)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(0.891240756007475,-0.239027847938172,0.385429115066922)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(0.891240756007475,-0.239027847938172,-0.385429115066922)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(-0.891240756007475,0.239027847938172,0.385429115066922)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(-0.891240756007475,0.239027847938172,-0.385429115066922)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(-0.891240756007475,-0.239027847938172,0.385429115066922)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(-0.891240756007475,-0.239027847938172,-0.385429115066922)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(0.385429115066922,0.891240756007475,0.239027847938172)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(0.385429115066922,0.891240756007475,-0.239027847938173)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(0.385429115066922,-0.891240756007475,0.239027847938172)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(0.385429115066922,-0.891240756007475,-0.239027847938173)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(-0.385429115066922,0.891240756007475,0.239027847938172)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(-0.385429115066922,0.891240756007475,-0.239027847938173)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(-0.385429115066922,-0.891240756007475,0.239027847938172)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(-0.385429115066922,-0.891240756007475,-0.239027847938173)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(0.385429115066922,0.239027847938173,0.891240756007475)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(0.385429115066922,0.239027847938173,-0.891240756007475)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(0.385429115066922,-0.239027847938173,0.891240756007475)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(0.385429115066922,-0.239027847938173,-0.891240756007475)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(-0.385429115066922,0.239027847938173,0.891240756007475)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(-0.385429115066922,0.239027847938173,-0.891240756007475)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(-0.385429115066922,-0.239027847938173,0.891240756007475)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(-0.385429115066922,-0.239027847938173,-0.891240756007475)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(0.239027847938172,0.891240756007475,0.385429115066922)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(0.239027847938172,0.891240756007475,-0.385429115066922)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(0.239027847938172,-0.891240756007475,0.385429115066922)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(0.239027847938172,-0.891240756007475,-0.385429115066922)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(-0.239027847938173,0.891240756007475,0.385429115066922)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(-0.239027847938173,0.891240756007475,-0.385429115066922)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(-0.239027847938173,-0.891240756007475,0.385429115066922)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(-0.239027847938173,-0.891240756007475,-0.385429115066922)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(0.239027847938172,0.385429115066922,0.891240756007475)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(0.239027847938172,0.385429115066922,-0.891240756007475)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(0.239027847938172,-0.385429115066922,0.891240756007475)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(0.239027847938172,-0.385429115066922,-0.891240756007475)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(-0.239027847938173,0.385429115066922,0.891240756007475)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(-0.239027847938173,0.385429115066922,-0.891240756007475)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(-0.239027847938173,-0.385429115066922,0.891240756007475)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(-0.239027847938173,-0.385429115066922,-0.891240756007475)
         );     
-    this->sphWeights_.push_back(0.000855629925731);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000855629925731);
+    this->gPoints_.push_back(
         cartGP(0.867643562846271,0.493222118485128,0.062662506241542)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(0.867643562846271,0.493222118485128,-0.062662506241542)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(0.867643562846271,-0.493222118485128,0.062662506241542)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(0.867643562846271,-0.493222118485128,-0.062662506241542)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(-0.867643562846271,0.493222118485128,0.062662506241542)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(-0.867643562846271,0.493222118485128,-0.062662506241542)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(-0.867643562846271,-0.493222118485128,0.062662506241542)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(-0.867643562846271,-0.493222118485128,-0.062662506241542)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(0.867643562846271,0.062662506241542,0.493222118485129)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(0.867643562846271,0.062662506241542,-0.493222118485129)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(0.867643562846271,-0.062662506241542,0.493222118485129)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(0.867643562846271,-0.062662506241542,-0.493222118485129)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(-0.867643562846271,0.062662506241542,0.493222118485129)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(-0.867643562846271,0.062662506241542,-0.493222118485129)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(-0.867643562846271,-0.062662506241542,0.493222118485129)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(-0.867643562846271,-0.062662506241542,-0.493222118485129)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(0.493222118485129,0.867643562846271,0.062662506241542)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(0.493222118485129,0.867643562846271,-0.062662506241542)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(0.493222118485129,-0.867643562846271,0.062662506241542)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(0.493222118485129,-0.867643562846271,-0.062662506241542)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(-0.493222118485129,0.867643562846271,0.062662506241542)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(-0.493222118485129,0.867643562846271,-0.062662506241542)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(-0.493222118485129,-0.867643562846271,0.062662506241542)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(-0.493222118485129,-0.867643562846271,-0.062662506241542)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(0.493222118485128,0.062662506241542,0.867643562846271)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(0.493222118485128,0.062662506241542,-0.867643562846271)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(0.493222118485128,-0.062662506241542,0.867643562846271)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(0.493222118485128,-0.062662506241542,-0.867643562846271)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(-0.493222118485128,0.062662506241542,0.867643562846271)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(-0.493222118485128,0.062662506241542,-0.867643562846271)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(-0.493222118485128,-0.062662506241542,0.867643562846271)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(-0.493222118485128,-0.062662506241542,-0.867643562846271)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(0.062662506241542,0.867643562846271,0.493222118485129)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(0.062662506241542,0.867643562846271,-0.493222118485129)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(0.062662506241542,-0.867643562846271,0.493222118485129)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(0.062662506241542,-0.867643562846271,-0.493222118485129)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(-0.062662506241542,0.867643562846271,0.493222118485129)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(-0.062662506241542,0.867643562846271,-0.493222118485129)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(-0.062662506241542,-0.867643562846271,0.493222118485129)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(-0.062662506241542,-0.867643562846271,-0.493222118485129)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(0.062662506241542,0.493222118485128,0.867643562846271)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(0.062662506241542,0.493222118485128,-0.867643562846271)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(0.062662506241542,-0.493222118485128,0.867643562846271)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(0.062662506241542,-0.493222118485128,-0.867643562846271)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(-0.062662506241542,0.493222118485128,0.867643562846271)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(-0.062662506241542,0.493222118485128,-0.867643562846271)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(-0.062662506241542,-0.493222118485128,0.867643562846271)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(-0.062662506241542,-0.493222118485128,-0.867643562846271)
         );     
-    this->sphWeights_.push_back(0.000880320867974);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000880320867974);
+    this->gPoints_.push_back(
         cartGP(0.858197998604162,0.478532067592244,0.185750519454734)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(0.858197998604162,0.478532067592244,-0.185750519454734)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(0.858197998604162,-0.478532067592244,0.185750519454734)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(0.858197998604162,-0.478532067592244,-0.185750519454734)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(-0.858197998604162,0.478532067592244,0.185750519454734)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(-0.858197998604162,0.478532067592244,-0.185750519454734)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(-0.858197998604162,-0.478532067592244,0.185750519454734)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(-0.858197998604162,-0.478532067592244,-0.185750519454734)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(0.858197998604162,0.185750519454734,0.478532067592243)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(0.858197998604162,0.185750519454734,-0.478532067592244)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(0.858197998604162,-0.185750519454734,0.478532067592243)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(0.858197998604162,-0.185750519454734,-0.478532067592244)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(-0.858197998604162,0.185750519454733,0.478532067592243)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(-0.858197998604162,0.185750519454733,-0.478532067592244)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(-0.858197998604162,-0.185750519454733,0.478532067592243)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(-0.858197998604162,-0.185750519454733,-0.478532067592244)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(0.478532067592243,0.858197998604162,0.185750519454734)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(0.478532067592243,0.858197998604162,-0.185750519454734)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(0.478532067592243,-0.858197998604162,0.185750519454734)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(0.478532067592243,-0.858197998604162,-0.185750519454734)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(-0.478532067592243,0.858197998604162,0.185750519454734)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(-0.478532067592243,0.858197998604162,-0.185750519454734)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(-0.478532067592243,-0.858197998604162,0.185750519454734)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(-0.478532067592243,-0.858197998604162,-0.185750519454734)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(0.478532067592243,0.185750519454734,0.858197998604162)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(0.478532067592243,0.185750519454734,-0.858197998604162)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(0.478532067592243,-0.185750519454734,0.858197998604162)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(0.478532067592243,-0.185750519454734,-0.858197998604162)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(-0.478532067592244,0.185750519454734,0.858197998604162)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(-0.478532067592243,0.185750519454734,-0.858197998604162)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(-0.478532067592244,-0.185750519454734,0.858197998604162)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(-0.478532067592243,-0.185750519454734,-0.858197998604162)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(0.185750519454734,0.858197998604162,0.478532067592243)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(0.185750519454734,0.858197998604162,-0.478532067592244)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(0.185750519454734,-0.858197998604162,0.478532067592243)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(0.185750519454734,-0.858197998604162,-0.478532067592244)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(-0.185750519454734,0.858197998604162,0.478532067592243)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(-0.185750519454734,0.858197998604162,-0.478532067592244)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(-0.185750519454734,-0.858197998604162,0.478532067592243)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(-0.185750519454734,-0.858197998604162,-0.478532067592244)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(0.185750519454734,0.478532067592244,0.858197998604162)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(0.185750519454734,0.478532067592243,-0.858197998604162)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(0.185750519454734,-0.478532067592244,0.858197998604162)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(0.185750519454734,-0.478532067592243,-0.858197998604162)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(-0.185750519454734,0.478532067592243,0.858197998604162)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(-0.185750519454734,0.478532067592243,-0.858197998604162)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(-0.185750519454734,-0.478532067592243,0.858197998604162)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(-0.185750519454734,-0.478532067592243,-0.858197998604162)
         );     
-    this->sphWeights_.push_back(0.000881104818243);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000881104818243);
+    this->gPoints_.push_back(
         cartGP(0.839675362404986,0.450742259315706,0.302946697352898)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(0.839675362404986,0.450742259315706,-0.302946697352898)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(0.839675362404986,-0.450742259315706,0.302946697352898)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(0.839675362404986,-0.450742259315706,-0.302946697352898)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(-0.839675362404986,0.450742259315706,0.302946697352898)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(-0.839675362404986,0.450742259315706,-0.302946697352898)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(-0.839675362404986,-0.450742259315706,0.302946697352898)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(-0.839675362404986,-0.450742259315706,-0.302946697352898)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(0.839675362404986,0.302946697352898,0.450742259315706)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(0.839675362404986,0.302946697352898,-0.450742259315706)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(0.839675362404986,-0.302946697352898,0.450742259315706)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(0.839675362404986,-0.302946697352898,-0.450742259315706)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(-0.839675362404986,0.302946697352898,0.450742259315706)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(-0.839675362404986,0.302946697352898,-0.450742259315706)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(-0.839675362404986,-0.302946697352898,0.450742259315706)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(-0.839675362404986,-0.302946697352898,-0.450742259315706)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(0.450742259315706,0.839675362404986,0.302946697352898)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(0.450742259315706,0.839675362404986,-0.302946697352898)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(0.450742259315706,-0.839675362404986,0.302946697352898)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(0.450742259315706,-0.839675362404986,-0.302946697352898)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(-0.450742259315706,0.839675362404986,0.302946697352898)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(-0.450742259315706,0.839675362404986,-0.302946697352898)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(-0.450742259315706,-0.839675362404986,0.302946697352898)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(-0.450742259315706,-0.839675362404986,-0.302946697352898)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(0.450742259315706,0.302946697352898,0.839675362404986)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(0.450742259315706,0.302946697352898,-0.839675362404986)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(0.450742259315706,-0.302946697352898,0.839675362404986)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(0.450742259315706,-0.302946697352898,-0.839675362404986)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(-0.450742259315706,0.302946697352898,0.839675362404986)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(-0.450742259315706,0.302946697352898,-0.839675362404986)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(-0.450742259315706,-0.302946697352898,0.839675362404986)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(-0.450742259315706,-0.302946697352898,-0.839675362404986)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(0.302946697352898,0.839675362404986,0.450742259315706)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(0.302946697352898,0.839675362404986,-0.450742259315706)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(0.302946697352898,-0.839675362404986,0.450742259315706)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(0.302946697352898,-0.839675362404986,-0.450742259315706)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(-0.302946697352898,0.839675362404986,0.450742259315706)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(-0.302946697352898,0.839675362404986,-0.450742259315706)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(-0.302946697352898,-0.839675362404986,0.450742259315706)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(-0.302946697352898,-0.839675362404986,-0.450742259315706)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(0.302946697352898,0.450742259315706,0.839675362404986)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(0.302946697352898,0.450742259315706,-0.839675362404986)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(0.302946697352898,-0.450742259315706,0.839675362404986)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(0.302946697352898,-0.450742259315706,-0.839675362404986)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(-0.302946697352898,0.450742259315706,0.839675362404986)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(-0.302946697352898,0.450742259315706,-0.839675362404986)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(-0.302946697352898,-0.450742259315706,0.839675362404986)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(-0.302946697352898,-0.450742259315706,-0.839675362404986)
         );     
-    this->sphWeights_.push_back(0.000885028234127);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000885028234127);
+    this->gPoints_.push_back(
         cartGP(0.816528856402219,0.563212302076210,0.126777480068428)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(0.816528856402219,0.563212302076210,-0.126777480068428)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(0.816528856402219,-0.563212302076210,0.126777480068428)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(0.816528856402219,-0.563212302076210,-0.126777480068428)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(-0.816528856402219,0.563212302076210,0.126777480068428)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(-0.816528856402219,0.563212302076210,-0.126777480068428)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(-0.816528856402219,-0.563212302076210,0.126777480068428)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(-0.816528856402219,-0.563212302076210,-0.126777480068428)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(0.816528856402219,0.126777480068429,0.563212302076210)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(0.816528856402219,0.126777480068429,-0.563212302076210)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(0.816528856402219,-0.126777480068429,0.563212302076210)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(0.816528856402219,-0.126777480068429,-0.563212302076210)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(-0.816528856402219,0.126777480068428,0.563212302076210)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(-0.816528856402219,0.126777480068428,-0.563212302076210)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(-0.816528856402219,-0.126777480068428,0.563212302076210)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(-0.816528856402219,-0.126777480068428,-0.563212302076210)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(0.563212302076210,0.816528856402219,0.126777480068428)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(0.563212302076210,0.816528856402219,-0.126777480068428)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(0.563212302076210,-0.816528856402219,0.126777480068428)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(0.563212302076210,-0.816528856402219,-0.126777480068428)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(-0.563212302076210,0.816528856402219,0.126777480068428)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(-0.563212302076210,0.816528856402219,-0.126777480068428)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(-0.563212302076210,-0.816528856402219,0.126777480068428)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(-0.563212302076210,-0.816528856402219,-0.126777480068428)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(0.563212302076210,0.126777480068428,0.816528856402219)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(0.563212302076210,0.126777480068428,-0.816528856402219)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(0.563212302076210,-0.126777480068428,0.816528856402219)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(0.563212302076210,-0.126777480068428,-0.816528856402219)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(-0.563212302076210,0.126777480068428,0.816528856402219)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(-0.563212302076210,0.126777480068428,-0.816528856402219)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(-0.563212302076210,-0.126777480068428,0.816528856402219)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(-0.563212302076210,-0.126777480068428,-0.816528856402219)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(0.126777480068428,0.816528856402219,0.563212302076210)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(0.126777480068428,0.816528856402219,-0.563212302076210)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(0.126777480068428,-0.816528856402219,0.563212302076210)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(0.126777480068428,-0.816528856402219,-0.563212302076210)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(-0.126777480068428,0.816528856402219,0.563212302076210)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(-0.126777480068428,0.816528856402219,-0.563212302076210)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(-0.126777480068428,-0.816528856402219,0.563212302076210)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(-0.126777480068428,-0.816528856402219,-0.563212302076210)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(0.126777480068428,0.563212302076210,0.816528856402219)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(0.126777480068428,0.563212302076210,-0.816528856402219)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(0.126777480068428,-0.563212302076210,0.816528856402219)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(0.126777480068428,-0.563212302076210,-0.816528856402219)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(-0.126777480068428,0.563212302076210,0.816528856402219)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(-0.126777480068428,0.563212302076210,-0.816528856402219)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(-0.126777480068428,-0.563212302076210,0.816528856402219)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(-0.126777480068428,-0.563212302076210,-0.816528856402219)
         );     
-    this->sphWeights_.push_back(0.000902134229904);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902134229904);
+    this->gPoints_.push_back(
         cartGP(0.801546937078353,0.543430356969390,0.249411216236224)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(0.801546937078353,0.543430356969390,-0.249411216236224)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(0.801546937078353,-0.543430356969390,0.249411216236224)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(0.801546937078353,-0.543430356969390,-0.249411216236224)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(-0.801546937078353,0.543430356969390,0.249411216236224)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(-0.801546937078353,0.543430356969390,-0.249411216236224)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(-0.801546937078353,-0.543430356969390,0.249411216236224)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(-0.801546937078353,-0.543430356969390,-0.249411216236224)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(0.801546937078353,0.249411216236223,0.543430356969390)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(0.801546937078353,0.249411216236224,-0.543430356969390)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(0.801546937078353,-0.249411216236223,0.543430356969390)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(0.801546937078353,-0.249411216236224,-0.543430356969390)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(-0.801546937078353,0.249411216236223,0.543430356969390)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(-0.801546937078353,0.249411216236223,-0.543430356969390)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(-0.801546937078353,-0.249411216236223,0.543430356969390)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(-0.801546937078353,-0.249411216236223,-0.543430356969390)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(0.543430356969390,0.801546937078353,0.249411216236224)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(0.543430356969390,0.801546937078353,-0.249411216236224)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(0.543430356969390,-0.801546937078353,0.249411216236224)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(0.543430356969390,-0.801546937078353,-0.249411216236224)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(-0.543430356969390,0.801546937078353,0.249411216236224)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(-0.543430356969390,0.801546937078353,-0.249411216236224)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(-0.543430356969390,-0.801546937078353,0.249411216236224)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(-0.543430356969390,-0.801546937078353,-0.249411216236224)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(0.543430356969390,0.249411216236224,0.801546937078353)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(0.543430356969390,0.249411216236224,-0.801546937078353)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(0.543430356969390,-0.249411216236224,0.801546937078353)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(0.543430356969390,-0.249411216236224,-0.801546937078353)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(-0.543430356969390,0.249411216236224,0.801546937078353)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(-0.543430356969390,0.249411216236224,-0.801546937078353)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(-0.543430356969390,-0.249411216236224,0.801546937078353)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(-0.543430356969390,-0.249411216236224,-0.801546937078353)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(0.249411216236224,0.801546937078353,0.543430356969390)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(0.249411216236224,0.801546937078353,-0.543430356969390)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(0.249411216236224,-0.801546937078353,0.543430356969390)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(0.249411216236224,-0.801546937078353,-0.543430356969390)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(-0.249411216236224,0.801546937078353,0.543430356969390)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(-0.249411216236224,0.801546937078353,-0.543430356969390)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(-0.249411216236224,-0.801546937078353,0.543430356969390)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(-0.249411216236224,-0.801546937078353,-0.543430356969390)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(0.249411216236224,0.543430356969390,0.801546937078353)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(0.249411216236224,0.543430356969390,-0.801546937078353)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(0.249411216236224,-0.543430356969390,0.801546937078353)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(0.249411216236224,-0.543430356969390,-0.801546937078353)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(-0.249411216236224,0.543430356969390,0.801546937078353)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(-0.249411216236224,0.543430356969390,-0.801546937078353)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(-0.249411216236224,-0.543430356969390,0.801546937078353)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(-0.249411216236224,-0.543430356969390,-0.801546937078353)
         );     
-    this->sphWeights_.push_back(0.000901009167711);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000901009167711);
+    this->gPoints_.push_back(
         cartGP(0.777356306907035,0.512351848641987,0.364983226059765)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(0.777356306907035,0.512351848641987,-0.364983226059765)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(0.777356306907035,-0.512351848641987,0.364983226059765)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(0.777356306907035,-0.512351848641987,-0.364983226059765)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(-0.777356306907035,0.512351848641987,0.364983226059765)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(-0.777356306907035,0.512351848641987,-0.364983226059765)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(-0.777356306907035,-0.512351848641987,0.364983226059765)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(-0.777356306907035,-0.512351848641987,-0.364983226059765)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(0.777356306907035,0.364983226059765,0.512351848641987)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(0.777356306907035,0.364983226059765,-0.512351848641987)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(0.777356306907035,-0.364983226059765,0.512351848641987)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(0.777356306907035,-0.364983226059765,-0.512351848641987)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(-0.777356306907035,0.364983226059765,0.512351848641987)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(-0.777356306907035,0.364983226059765,-0.512351848641987)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(-0.777356306907035,-0.364983226059765,0.512351848641987)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(-0.777356306907035,-0.364983226059765,-0.512351848641987)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(0.512351848641987,0.777356306907035,0.364983226059765)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(0.512351848641987,0.777356306907035,-0.364983226059765)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(0.512351848641987,-0.777356306907035,0.364983226059765)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(0.512351848641987,-0.777356306907035,-0.364983226059765)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(-0.512351848641987,0.777356306907035,0.364983226059765)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(-0.512351848641987,0.777356306907035,-0.364983226059765)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(-0.512351848641987,-0.777356306907035,0.364983226059765)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(-0.512351848641987,-0.777356306907035,-0.364983226059765)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(0.512351848641987,0.364983226059765,0.777356306907035)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(0.512351848641987,0.364983226059765,-0.777356306907035)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(0.512351848641987,-0.364983226059765,0.777356306907035)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(0.512351848641987,-0.364983226059765,-0.777356306907035)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(-0.512351848641987,0.364983226059766,0.777356306907035)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(-0.512351848641987,0.364983226059765,-0.777356306907035)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(-0.512351848641987,-0.364983226059766,0.777356306907035)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(-0.512351848641987,-0.364983226059765,-0.777356306907035)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(0.364983226059765,0.777356306907035,0.512351848641987)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(0.364983226059765,0.777356306907035,-0.512351848641987)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(0.364983226059765,-0.777356306907035,0.512351848641987)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(0.364983226059765,-0.777356306907035,-0.512351848641987)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(-0.364983226059765,0.777356306907035,0.512351848641987)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(-0.364983226059765,0.777356306907035,-0.512351848641987)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(-0.364983226059765,-0.777356306907035,0.512351848641987)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(-0.364983226059765,-0.777356306907035,-0.512351848641987)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(0.364983226059765,0.512351848641987,0.777356306907035)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(0.364983226059765,0.512351848641987,-0.777356306907035)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(0.364983226059765,-0.512351848641987,0.777356306907035)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(0.364983226059765,-0.512351848641987,-0.777356306907035)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(-0.364983226059765,0.512351848641987,0.777356306907035)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(-0.364983226059765,0.512351848641987,-0.777356306907035)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(-0.364983226059765,-0.512351848641987,0.777356306907035)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(-0.364983226059765,-0.512351848641987,-0.777356306907035)
         );     
-    this->sphWeights_.push_back(0.000902269293843);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000902269293843);
+    this->gPoints_.push_back(
         cartGP(0.766162121390039,0.639427963474910,0.064245492242208)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(0.766162121390039,0.639427963474910,-0.064245492242208)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(0.766162121390039,-0.639427963474910,0.064245492242208)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(0.766162121390039,-0.639427963474910,-0.064245492242208)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(-0.766162121390040,0.639427963474910,0.064245492242208)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(-0.766162121390040,0.639427963474910,-0.064245492242208)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(-0.766162121390040,-0.639427963474910,0.064245492242208)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(-0.766162121390040,-0.639427963474910,-0.064245492242208)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(0.766162121390039,0.064245492242208,0.639427963474910)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(0.766162121390039,0.064245492242208,-0.639427963474910)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(0.766162121390039,-0.064245492242208,0.639427963474910)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(0.766162121390039,-0.064245492242208,-0.639427963474910)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(-0.766162121390039,0.064245492242208,0.639427963474910)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(-0.766162121390039,0.064245492242208,-0.639427963474910)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(-0.766162121390039,-0.064245492242208,0.639427963474910)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(-0.766162121390039,-0.064245492242208,-0.639427963474910)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(0.639427963474910,0.766162121390039,0.064245492242208)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(0.639427963474910,0.766162121390039,-0.064245492242208)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(0.639427963474910,-0.766162121390039,0.064245492242208)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(0.639427963474910,-0.766162121390039,-0.064245492242208)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(-0.639427963474910,0.766162121390039,0.064245492242208)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(-0.639427963474910,0.766162121390039,-0.064245492242208)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(-0.639427963474910,-0.766162121390039,0.064245492242208)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(-0.639427963474910,-0.766162121390039,-0.064245492242208)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(0.639427963474910,0.064245492242207,0.766162121390039)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(0.639427963474910,0.064245492242207,-0.766162121390039)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(0.639427963474910,-0.064245492242207,0.766162121390039)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(0.639427963474910,-0.064245492242207,-0.766162121390039)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(-0.639427963474910,0.064245492242207,0.766162121390039)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(-0.639427963474910,0.064245492242207,-0.766162121390039)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(-0.639427963474910,-0.064245492242207,0.766162121390039)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(-0.639427963474910,-0.064245492242207,-0.766162121390039)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(0.064245492242207,0.766162121390039,0.639427963474910)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(0.064245492242207,0.766162121390039,-0.639427963474910)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(0.064245492242207,-0.766162121390039,0.639427963474910)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(0.064245492242207,-0.766162121390039,-0.639427963474910)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(-0.064245492242208,0.766162121390039,0.639427963474910)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(-0.064245492242208,0.766162121390039,-0.639427963474910)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(-0.064245492242208,-0.766162121390039,0.639427963474910)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(-0.064245492242208,-0.766162121390039,-0.639427963474910)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(0.064245492242208,0.639427963474910,0.766162121390039)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(0.064245492242208,0.639427963474910,-0.766162121390039)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(0.064245492242208,-0.639427963474910,0.766162121390039)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(0.064245492242208,-0.639427963474910,-0.766162121390039)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(-0.064245492242208,0.639427963474910,0.766162121390039)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(-0.064245492242208,0.639427963474910,-0.766162121390039)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(-0.064245492242208,-0.639427963474910,0.766162121390039)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(-0.064245492242208,-0.639427963474910,-0.766162121390039)
         );     
-    this->sphWeights_.push_back(0.000915801617469);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000915801617469);
+    this->gPoints_.push_back(
         cartGP(0.755358414353351,0.626980550902439,0.190601822277923)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(0.755358414353351,0.626980550902439,-0.190601822277924)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(0.755358414353351,-0.626980550902439,0.190601822277923)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(0.755358414353351,-0.626980550902439,-0.190601822277924)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(-0.755358414353351,0.626980550902439,0.190601822277923)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(-0.755358414353351,0.626980550902439,-0.190601822277924)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(-0.755358414353351,-0.626980550902439,0.190601822277923)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(-0.755358414353351,-0.626980550902439,-0.190601822277924)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(0.755358414353351,0.190601822277924,0.626980550902439)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(0.755358414353351,0.190601822277924,-0.626980550902439)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(0.755358414353351,-0.190601822277924,0.626980550902439)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(0.755358414353351,-0.190601822277924,-0.626980550902439)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(-0.755358414353351,0.190601822277924,0.626980550902439)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(-0.755358414353351,0.190601822277924,-0.626980550902439)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(-0.755358414353351,-0.190601822277924,0.626980550902439)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(-0.755358414353351,-0.190601822277924,-0.626980550902439)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(0.626980550902439,0.755358414353351,0.190601822277923)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(0.626980550902439,0.755358414353351,-0.190601822277924)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(0.626980550902439,-0.755358414353351,0.190601822277923)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(0.626980550902439,-0.755358414353351,-0.190601822277924)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(-0.626980550902439,0.755358414353351,0.190601822277923)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(-0.626980550902439,0.755358414353351,-0.190601822277924)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(-0.626980550902439,-0.755358414353351,0.190601822277923)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(-0.626980550902439,-0.755358414353351,-0.190601822277924)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(0.626980550902439,0.190601822277923,0.755358414353351)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(0.626980550902439,0.190601822277923,-0.755358414353351)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(0.626980550902439,-0.190601822277923,0.755358414353351)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(0.626980550902439,-0.190601822277923,-0.755358414353351)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(-0.626980550902439,0.190601822277923,0.755358414353351)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(-0.626980550902439,0.190601822277923,-0.755358414353351)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(-0.626980550902439,-0.190601822277923,0.755358414353351)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(-0.626980550902439,-0.190601822277923,-0.755358414353351)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(0.190601822277923,0.755358414353351,0.626980550902439)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(0.190601822277923,0.755358414353351,-0.626980550902439)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(0.190601822277923,-0.755358414353351,0.626980550902439)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(0.190601822277923,-0.755358414353351,-0.626980550902439)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(-0.190601822277923,0.755358414353351,0.626980550902439)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(-0.190601822277923,0.755358414353351,-0.626980550902439)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(-0.190601822277923,-0.755358414353351,0.626980550902439)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(-0.190601822277923,-0.755358414353351,-0.626980550902439)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(0.190601822277923,0.626980550902439,0.755358414353351)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(0.190601822277923,0.626980550902439,-0.755358414353351)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(0.190601822277923,-0.626980550902439,0.755358414353351)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(0.190601822277923,-0.626980550902439,-0.755358414353351)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(-0.190601822277923,0.626980550902439,0.755358414353351)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(-0.190601822277923,0.626980550902439,-0.755358414353351)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(-0.190601822277923,-0.626980550902439,0.755358414353351)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(-0.190601822277923,-0.626980550902439,-0.755358414353351)
         );     
-    this->sphWeights_.push_back(0.000913157800319);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000913157800319);
+    this->gPoints_.push_back(
         cartGP(0.734430575755950,0.603116169309631,0.311227594714961)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(0.734430575755950,0.603116169309631,-0.311227594714961)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(0.734430575755950,-0.603116169309631,0.311227594714961)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(0.734430575755950,-0.603116169309631,-0.311227594714961)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(-0.734430575755950,0.603116169309631,0.311227594714961)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(-0.734430575755950,0.603116169309631,-0.311227594714961)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(-0.734430575755950,-0.603116169309631,0.311227594714961)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(-0.734430575755950,-0.603116169309631,-0.311227594714961)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(0.734430575755950,0.311227594714961,0.603116169309631)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(0.734430575755951,0.311227594714961,-0.603116169309631)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(0.734430575755950,-0.311227594714961,0.603116169309631)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(0.734430575755951,-0.311227594714961,-0.603116169309631)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(-0.734430575755950,0.311227594714961,0.603116169309631)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(-0.734430575755951,0.311227594714961,-0.603116169309631)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(-0.734430575755950,-0.311227594714961,0.603116169309631)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(-0.734430575755951,-0.311227594714961,-0.603116169309631)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(0.603116169309631,0.734430575755950,0.311227594714961)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(0.603116169309631,0.734430575755950,-0.311227594714961)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(0.603116169309631,-0.734430575755950,0.311227594714961)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(0.603116169309631,-0.734430575755950,-0.311227594714961)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(-0.603116169309631,0.734430575755950,0.311227594714961)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(-0.603116169309631,0.734430575755950,-0.311227594714961)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(-0.603116169309631,-0.734430575755950,0.311227594714961)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(-0.603116169309631,-0.734430575755950,-0.311227594714961)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(0.603116169309631,0.311227594714961,0.734430575755950)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(0.603116169309631,0.311227594714961,-0.734430575755950)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(0.603116169309631,-0.311227594714961,0.734430575755950)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(0.603116169309631,-0.311227594714961,-0.734430575755950)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(-0.603116169309631,0.311227594714961,0.734430575755950)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(-0.603116169309631,0.311227594714961,-0.734430575755950)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(-0.603116169309631,-0.311227594714961,0.734430575755950)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(-0.603116169309631,-0.311227594714961,-0.734430575755950)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(0.311227594714961,0.734430575755950,0.603116169309631)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(0.311227594714961,0.734430575755950,-0.603116169309631)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(0.311227594714961,-0.734430575755950,0.603116169309631)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(0.311227594714961,-0.734430575755950,-0.603116169309631)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(-0.311227594714961,0.734430575755950,0.603116169309631)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(-0.311227594714961,0.734430575755950,-0.603116169309631)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(-0.311227594714961,-0.734430575755950,0.603116169309631)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(-0.311227594714961,-0.734430575755950,-0.603116169309631)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(0.311227594714961,0.603116169309631,0.734430575755950)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(0.311227594714961,0.603116169309631,-0.734430575755950)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(0.311227594714961,-0.603116169309631,0.734430575755950)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(0.311227594714961,-0.603116169309631,-0.734430575755950)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(-0.311227594714961,0.603116169309631,0.734430575755950)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(-0.311227594714961,0.603116169309631,-0.734430575755950)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(-0.311227594714961,-0.603116169309631,0.734430575755950)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(-0.311227594714961,-0.603116169309631,-0.734430575755950)
         );     
-    this->sphWeights_.push_back(0.000910781357948);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910781357948);
+    this->gPoints_.push_back(
         cartGP(0.704383718402176,0.569370249846844,0.423864478152234)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(0.704383718402177,0.569370249846844,-0.423864478152234)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(0.704383718402176,-0.569370249846844,0.423864478152234)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(0.704383718402177,-0.569370249846844,-0.423864478152234)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(-0.704383718402176,0.569370249846844,0.423864478152234)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(-0.704383718402176,0.569370249846844,-0.423864478152234)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(-0.704383718402176,-0.569370249846844,0.423864478152234)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(-0.704383718402176,-0.569370249846844,-0.423864478152234)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(0.704383718402177,0.423864478152234,0.569370249846844)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(0.704383718402176,0.423864478152234,-0.569370249846844)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(0.704383718402177,-0.423864478152234,0.569370249846844)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(0.704383718402176,-0.423864478152234,-0.569370249846844)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(-0.704383718402177,0.423864478152234,0.569370249846844)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(-0.704383718402177,0.423864478152234,-0.569370249846844)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(-0.704383718402177,-0.423864478152234,0.569370249846844)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(-0.704383718402177,-0.423864478152234,-0.569370249846844)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(0.569370249846844,0.704383718402176,0.423864478152234)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(0.569370249846844,0.704383718402177,-0.423864478152234)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(0.569370249846844,-0.704383718402176,0.423864478152234)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(0.569370249846844,-0.704383718402177,-0.423864478152234)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(-0.569370249846844,0.704383718402176,0.423864478152234)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(-0.569370249846844,0.704383718402176,-0.423864478152234)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(-0.569370249846844,-0.704383718402176,0.423864478152234)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(-0.569370249846844,-0.704383718402176,-0.423864478152234)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(0.569370249846844,0.423864478152234,0.704383718402176)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(0.569370249846844,0.423864478152234,-0.704383718402177)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(0.569370249846844,-0.423864478152234,0.704383718402176)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(0.569370249846844,-0.423864478152234,-0.704383718402177)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(-0.569370249846844,0.423864478152234,0.704383718402176)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(-0.569370249846844,0.423864478152234,-0.704383718402177)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(-0.569370249846844,-0.423864478152234,0.704383718402176)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(-0.569370249846844,-0.423864478152234,-0.704383718402177)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(0.423864478152234,0.704383718402177,0.569370249846844)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(0.423864478152234,0.704383718402176,-0.569370249846844)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(0.423864478152234,-0.704383718402177,0.569370249846844)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(0.423864478152234,-0.704383718402176,-0.569370249846844)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(-0.423864478152234,0.704383718402177,0.569370249846844)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(-0.423864478152234,0.704383718402176,-0.569370249846844)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(-0.423864478152234,-0.704383718402177,0.569370249846844)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(-0.423864478152234,-0.704383718402176,-0.569370249846844)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(0.423864478152234,0.569370249846844,0.704383718402176)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(0.423864478152234,0.569370249846844,-0.704383718402177)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(0.423864478152234,-0.569370249846844,0.704383718402176)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(0.423864478152234,-0.569370249846844,-0.704383718402177)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(-0.423864478152234,0.569370249846844,0.704383718402176)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(-0.423864478152234,0.569370249846844,-0.704383718402177)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(-0.423864478152234,-0.569370249846844,0.704383718402176)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
-    this->sphPoints_.push_back(
+    this->weights_.push_back(0.000910576025897);
+    this->gPoints_.push_back(
         cartGP(-0.423864478152234,-0.569370249846844,-0.704383718402177)
         );     
-    this->sphWeights_.push_back(0.000910576025897);
+    this->weights_.push_back(0.000910576025897);
   };
 };

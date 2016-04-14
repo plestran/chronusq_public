@@ -49,12 +49,33 @@ struct IntegrationPoint {
 class Grid2 {
 protected:
     size_t nPts_;  ///< number of grid points       
+    std::vector<cartGP> gPoints_;
+    std::vector<double> weights_;
+    bool onTheFly_;
+    bool haveGPs_;
 public:
-    Grid2(size_t npts = 0) : nPts_(npts){ };
+    Grid2(size_t npts = 0, bool onTheFly = true) : nPts_(npts),
+      onTheFly_(onTheFly), haveGPs_(false){ 
+      
+    };
+
     virtual ~Grid2(){ };
 
     virtual IntegrationPoint operator[](size_t) = 0;
     size_t npts(){return this->nPts_;};
+    virtual void generateGridPoints() {
+      this->gPoints_.reserve(this->nPts_);
+      this->weights_.reserve(this->nPts_);
+      //cout << "Generating Points" << endl;
+
+      for(auto iPt = 0; iPt < nPts_; iPt++) {
+        IntegrationPoint tmp = operator[](iPt);
+        this->gPoints_.push_back(tmp.pt);
+        this->weights_.push_back(tmp.weight);
+      }
+      //cout << "DONE" << endl;
+      this->haveGPs_ = true;
+    };
 
     // Integrate Functions
     template<typename T>
@@ -99,7 +120,7 @@ public:
 
 class OneDGrid2 : public Grid2 {
   public:
-    OneDGrid2(size_t npts = 0) : Grid2(npts){ };
+    OneDGrid2(size_t npts = 0, bool onTheFly = true) : Grid2(npts,onTheFly){ };
     virtual ~OneDGrid2(){ };
     virtual IntegrationPoint operator[](size_t) = 0;
 };
@@ -117,9 +138,19 @@ class OneDGrid2 : public Grid2 {
  */
 class GaussChebFst : public OneDGrid2 {
   public:
-    GaussChebFst(size_t npts = 0) : OneDGrid2(npts){ };
+    GaussChebFst(size_t npts = 0, bool onTheFly = true) : 
+      OneDGrid2(npts,onTheFly){
+        if(!onTheFly_) this->generateGridPoints();
+      };
+
     ~GaussChebFst(){ };
     IntegrationPoint operator[](size_t i){ 
+      if(!onTheFly_ && haveGPs_){ 
+        //cout << "Reading GPs" << endl;
+        return IntegrationPoint(gPoints_[i],weights_[i]);
+      }
+      //cout << "Generating GPs" << endl;
+
       // Generate points and weights for (-1,1)
       double pt  = std::cos( (2.0*(i+1)-1.0) / (2*this->nPts_) * math.pi );
       double wgt = (math.pi / this->nPts_);
@@ -163,9 +194,16 @@ class GaussChebFst : public OneDGrid2 {
  */
 class GaussChebSnd : public OneDGrid2 {
   public:
-    GaussChebSnd(size_t npts = 0) : OneDGrid2(npts){ };
+    GaussChebSnd(size_t npts = 0, bool onTheFly = true) : 
+      OneDGrid2(npts,onTheFly){
+        if(!onTheFly_) this->generateGridPoints();
+      };
+
     ~GaussChebSnd(){ };
     IntegrationPoint operator[](size_t i){ 
+      if(!onTheFly_ && haveGPs_) 
+        return IntegrationPoint(gPoints_[i],weights_[i]);
+
       // Generate points and weights for (-1,1)
       double pt = std::cos(math.pi * i / (this->nPts_ +1));
       double wgt = math.pi / (this->nPts_ + 1) * 
@@ -202,12 +240,17 @@ class GaussChebSnd : public OneDGrid2 {
 
 class EulerMac : public OneDGrid2 {
   public:
-    EulerMac(size_t npts) : OneDGrid2(npts){ };
+    EulerMac(size_t npts, bool onTheFly = true) : OneDGrid2(npts,onTheFly){
+        if(!onTheFly_) this->generateGridPoints();
+    };
     ~EulerMac(){ };
     IntegrationPoint operator[](size_t i){ 
+      if(!onTheFly_ && haveGPs_) 
+        return IntegrationPoint(gPoints_[i],weights_[i]);
+
       double pt  = (i + 1.0) * (i + 1.0) / 
         ((this->nPts_ - i) * (this->nPts_ - i));
-      double wgt = 2.0 * (i + 1.0) * (this->nPts_ + 1.0) * pt * pt / 
+      double wgt = 2.0 * (i + 1.0) * (this->nPts_ + 1.0) / 
         ((this->nPts_ - i) * (this->nPts_ - i) * (this->nPts_ - i));
 
       return IntegrationPoint(pt,wgt);
@@ -226,14 +269,11 @@ enum LEBEDEV_ALGEBRAIC_ORDER {
 
 class Lebedev : public OneDGrid2 {
   LEBEDEV_ALGEBRAIC_ORDER algOrder_;
-  std::vector<cartGP> sphPoints_;
-  std::vector<double> sphWeights_;
-
   void loadAlgebraicPoints();
   template <LEBEDEV_ALGEBRAIC_ORDER ORDER> void loadLebedev();
 
   public:
-    Lebedev(size_t N) : OneDGrid2(N){
+    Lebedev(size_t N) : OneDGrid2(N,false){
       if(     N ==    6) this->algOrder_ = LEBEDEV_3;  
       else if(N ==   14) this->algOrder_ = LEBEDEV_5;  
       else if(N ==   26) this->algOrder_ = LEBEDEV_7;  
@@ -270,11 +310,16 @@ class Lebedev : public OneDGrid2 {
         CErr("Invalid Lebedev Grid Specification");
 
       this->loadAlgebraicPoints();
+      this->haveGPs_ = true;
     };
 
     ~Lebedev(){ };
     IntegrationPoint operator[](size_t i){ 
-      return IntegrationPoint(this->sphPoints_[i],this->sphWeights_[i]);
+      return IntegrationPoint(this->gPoints_[i],this->weights_[i]);
+    };
+
+    void generateGridPoints() {
+      cout << "LEBEDEV" << endl;
     };
 };
 
@@ -285,14 +330,15 @@ class TwoDGrid2 : public Grid2 {
 
   public:
     TwoDGrid2(size_t nPtsRad, size_t nPtsAng, GRID_TYPE GTypeRad, 
-        GRID_TYPE GTypeAng) : Grid2(nPtsRad*nPtsAng) {
+        GRID_TYPE GTypeAng, bool onTheFly = true) : 
+      Grid2(nPtsRad*nPtsAng,true) {
 
       if(GTypeRad == GAUSSCHEBFST) {
-        GRad = std::unique_ptr<OneDGrid2>(new GaussChebFst(nPtsRad));
+        GRad = std::unique_ptr<OneDGrid2>(new GaussChebFst(nPtsRad,onTheFly));
       } else if(GTypeRad == GAUSSCHEBSND) {
-        GRad = std::unique_ptr<OneDGrid2>(new GaussChebSnd(nPtsRad));
+        GRad = std::unique_ptr<OneDGrid2>(new GaussChebSnd(nPtsRad,onTheFly));
       } else if(GTypeRad == EULERMAC) {
-        GRad = std::unique_ptr<OneDGrid2>(new EulerMac(nPtsRad));
+        GRad = std::unique_ptr<OneDGrid2>(new EulerMac(nPtsRad,onTheFly));
       };
 
       if(GTypeAng == LEBEDEV) {
@@ -321,6 +367,8 @@ class TwoDGrid2 : public Grid2 {
       return totalIntPt;
     };
 
+    inline void generateGridPoints() { };
+
 };
 
 enum ATOMIC_PARTITION {
@@ -345,8 +393,9 @@ class AtomicGrid2 : public TwoDGrid2 {
         ATOMIC_PARTITION partitionScheme, 
         std::vector<std::array<double,3> > centers,
         size_t centerIndx,
-        double scalingFactor = 1.0) : 
-      TwoDGrid2(nPtsRad,nPtsAng,GTypeRad,GTypeAng),
+        double scalingFactor = 1.0,
+        bool onTheFly = true) : 
+      TwoDGrid2(nPtsRad,nPtsAng,GTypeRad,GTypeAng,onTheFly),
       partitionScheme_(partitionScheme),
       centers_(std::move(centers)),
       centerIndx_(centerIndx),
@@ -373,12 +422,15 @@ class AtomicGrid2 : public TwoDGrid2 {
       rawPoint.weight *= scalingFactor_ * r*r;
 
       //cout <<evalPartitionWeight(rawPoint.pt)<<endl;
-//      if(rawPoint.weight > 1e-8)
-      rawPoint.weight *= evalPartitionWeight(rawPoint.pt);
+      if(rawPoint.weight > 1e-8)
+        rawPoint.weight *= evalPartitionWeight(rawPoint.pt);
 //      cout << " Weight Becke Done on center " << this->centerIndx_ <<endl;    
       return rawPoint;
 
     };
+
+    inline void setCenter(size_t i) { this->centerIndx_ = i; };
+    inline void setScalingFactor(double x) { this->scalingFactor_ = x; };
 };
 
 class Cube : public Grid2 {
@@ -393,7 +445,7 @@ class Cube : public Grid2 {
     Cube(std::tuple<double,double,size_t> xRange,
         std::tuple<double,double,size_t> yRange,
         std::tuple<double,double,size_t> zRange) :
-        xRange_(xRange), yRange_(yRange), zRange_(zRange) { 
+        xRange_(xRange), yRange_(yRange), zRange_(zRange), Grid2(0,false) { 
         
         xRes_ = (std::get<1>(this->xRange_) - std::get<0>(this->xRange_)) / 
           (std::get<2>(this->xRange_) - 1);
@@ -425,6 +477,7 @@ class Cube : public Grid2 {
       return IntegrationPoint(pt,1.0);
 
     };
+    inline void generateGridPoints() { };
 
     template<typename T, typename Mol>
     inline void genCubeFile(T func, std::string cubeFileName,
