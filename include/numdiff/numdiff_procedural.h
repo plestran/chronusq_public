@@ -544,6 +544,8 @@ void NumericalDifferentiation<T>::cartesianDiff(){
     
   }
 
+  this->dumpSummary();
+
 };
 
 template<typename T>
@@ -639,6 +641,121 @@ void NumericalDifferentiation<T>::checkDegeneracies(SingleSlater<T> &ss) {
       cout << "WARNING: DEGENERACY IN MOs: " << iMO << " and " << iMO + 1 <<
            endl;
   }
+};
+
+template <typename T>
+void NumericalDifferentiation<T>::dumpSummary(){
+  int nAtoms = this->molecule_undisplaced_->nAtoms(); 
+  this->singleSlater_undisplaced_->fileio()->out.precision(8);
+  this->singleSlater_undisplaced_->fileio()->out.fill(' ');
+  this->singleSlater_undisplaced_->fileio()->out.setf(ios::right,ios::adjustfield);
+  this->singleSlater_undisplaced_->fileio()->out.setf(ios::fixed,ios::floatfield);
+
+  this->singleSlater_undisplaced_->fileio()->out <<
+    "Summary of Differentiation Results" << endl << endl;
+
+  this->singleSlater_undisplaced_->fileio()->out <<
+    "GS Gradient" << endl;
+  this->singleSlater_undisplaced_->fileio()->out << bannerTop<< endl;
+  this->singleSlater_undisplaced_->fileio()->out << 
+    std::setw(18) << "Atom" << std::setw(21) << "X" << std::setw(15) << "Y" << 
+    std::setw(15) << "Z" << endl;
+  this->singleSlater_undisplaced_->fileio()->out << bannerMid << endl;
+  for(auto iAtm = 0, iX = 0; iAtm < nAtoms; iAtm++, iX += 3){
+    this->singleSlater_undisplaced_->fileio()->out << 
+        std::setw(8)  << iAtm+1 << std::setw(8) << " "
+        << std::setw(8)  << " " 
+        << std::setw(15) << this->dervData_[iX].GS_GRAD
+        << std::setw(15) << this->dervData_[iX+1].GS_GRAD
+        << std::setw(15) << this->dervData_[iX+2].GS_GRAD
+        << endl;
+  }
+  this->singleSlater_undisplaced_->fileio()->out << bannerMid << endl;
+  this->singleSlater_undisplaced_->fileio()->out << endl << endl;
+
+
+
+  this->singleSlater_undisplaced_->fileio()->out <<
+    "ES Gradient" << endl;
+  this->singleSlater_undisplaced_->fileio()->out << bannerTop<< endl;
+
+  for(auto iFreq = 0; iFreq < this->responseNRoots_; iFreq++){
+    this->singleSlater_undisplaced_->fileio()->out <<
+      "State " << iFreq + 1 << endl;
+    this->singleSlater_undisplaced_->fileio()->out << bannerTop<< endl;
+
+    this->singleSlater_undisplaced_->fileio()->out << 
+      std::setw(18) << "Atom" << std::setw(21) << "X" << std::setw(15) << "Y" << 
+      std::setw(15) << "Z" << endl;
+    this->singleSlater_undisplaced_->fileio()->out << bannerMid << endl;
+    for(auto iAtm = 0, iX = 0; iAtm < nAtoms; iAtm++, iX += 3){
+      this->singleSlater_undisplaced_->fileio()->out << 
+          std::setw(8)  << iAtm+1 << std::setw(8) << " "
+          << std::setw(8)  << " " 
+          << std::setw(15) << this->dervData_[iX].ES_GRAD(iFreq)
+          << std::setw(15) << this->dervData_[iX+1].ES_GRAD(iFreq)
+          << std::setw(15) << this->dervData_[iX+2].ES_GRAD(iFreq)
+          << endl;
+    }
+    this->singleSlater_undisplaced_->fileio()->out << bannerMid << endl;
+    this->singleSlater_undisplaced_->fileio()->out << endl;
+  }
+  this->singleSlater_undisplaced_->fileio()->out << endl << endl;
+
+  this->singleSlater_undisplaced_->fileio()->out <<
+    "ES -> GS NACT" << endl;
+  this->singleSlater_undisplaced_->fileio()->out << bannerTop<< endl;
+
+  for(auto iFreq = 0; iFreq < this->responseNRoots_; iFreq++){
+    this->singleSlater_undisplaced_->fileio()->out <<
+      "State " << iFreq + 1 << " -> 0" << endl;
+    this->singleSlater_undisplaced_->fileio()->out << bannerTop<< endl;
+
+    this->singleSlater_undisplaced_->fileio()->out << 
+      std::setw(18) << "Atom" << std::setw(21) << "X" << std::setw(15) << "Y" << 
+      std::setw(15) << "Z" << endl;
+    this->singleSlater_undisplaced_->fileio()->out << bannerMid << endl;
+    for(auto iAtm = 0, iX = 0; iAtm < nAtoms; iAtm++, iX += 3){
+      this->singleSlater_undisplaced_->fileio()->out << 
+          std::setw(8)  << iAtm+1 << std::setw(8) << " "
+          << std::setw(8)  << " " 
+          << std::setw(15) << this->dervData_[iX].ES_GS_NACME(iFreq)
+          << std::setw(15) << this->dervData_[iX+1].ES_GS_NACME(iFreq)
+          << std::setw(15) << this->dervData_[iX+2].ES_GS_NACME(iFreq)
+          << endl;
+    }
+    this->singleSlater_undisplaced_->fileio()->out << bannerMid << endl;
+    this->singleSlater_undisplaced_->fileio()->out << endl;
+  }
+  this->singleSlater_undisplaced_->fileio()->out << endl << endl;
+
+  this->singleSlater_undisplaced_->fileio()->out <<
+    "ES -> ES NACT" << endl;
+  this->singleSlater_undisplaced_->fileio()->out << bannerTop<< endl;
+
+  for(auto iFreq = 0; iFreq < this->responseNRoots_; iFreq++)
+  for(auto jFreq = 0; jFreq < this->responseNRoots_; jFreq++){
+    this->singleSlater_undisplaced_->fileio()->out <<
+      "State " << iFreq + 1 << " -> " << jFreq +1 << endl;
+    this->singleSlater_undisplaced_->fileio()->out << bannerTop<< endl;
+
+    this->singleSlater_undisplaced_->fileio()->out << 
+      std::setw(18) << "Atom" << std::setw(21) << "X" << std::setw(15) << "Y" << 
+      std::setw(15) << "Z" << endl;
+    this->singleSlater_undisplaced_->fileio()->out << bannerMid << endl;
+    for(auto iAtm = 0, iX = 0; iAtm < nAtoms; iAtm++, iX += 3){
+      this->singleSlater_undisplaced_->fileio()->out << 
+          std::setw(8)  << iAtm+1 << std::setw(8) << " "
+          << std::setw(8)  << " " 
+          << std::setw(15) << this->dervData_[iX].ES_ES_NACME(iFreq,jFreq)
+          << std::setw(15) << this->dervData_[iX+1].ES_ES_NACME(iFreq,jFreq)
+          << std::setw(15) << this->dervData_[iX+2].ES_ES_NACME(iFreq,jFreq)
+          << endl;
+    }
+    this->singleSlater_undisplaced_->fileio()->out << bannerMid << endl;
+    this->singleSlater_undisplaced_->fileio()->out << endl;
+  }
+  this->singleSlater_undisplaced_->fileio()->out << endl << endl;
 };
 
 
