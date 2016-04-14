@@ -15,7 +15,7 @@ namespace ChronusQ {
   };
 
 
-  double AtomicGrid2::evalPartitionWeight(cartGP& pt){
+  double AtomicGrid::evalPartitionWeight(cartGP& pt){
 
     // Evaluate current centers unnormalized partition weight
     VectorXd rA(3), rB(3), rAB(3);

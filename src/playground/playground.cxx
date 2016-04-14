@@ -191,9 +191,9 @@ int main(int argc, char **argv){
 //  centers.push_back(center2);
 //  centers.push_back(center3);
 //
-//  AtomicGrid2 NCenter1(75,590,EULERMAC,LEBEDEV,BECKE,centers,0);
-//  AtomicGrid2 NCenter2(75,590,EULERMAC,LEBEDEV,BECKE,centers,1);
-//  AtomicGrid2 NCenter3(75,590,EULERMAC,LEBEDEV,BECKE,centers,2);
+//  AtomicGrid NCenter1(75,590,EULERMAC,LEBEDEV,BECKE,centers,0);
+//  AtomicGrid NCenter2(75,590,EULERMAC,LEBEDEV,BECKE,centers,1);
+//  AtomicGrid NCenter3(75,590,EULERMAC,LEBEDEV,BECKE,centers,2);
 //
 //  cout << "HERE" << endl;
 //  cout << 4 * math.pi * NCenter1.integrate<double>(sphGaussian) << endl;
@@ -336,12 +336,11 @@ int main(int argc, char **argv){
   cout << "APE " << endl;
 
   auto t4s = std::chrono::high_resolution_clock::now();
-  AtomicGrid2 AGrid(100,590,GAUSSCHEBFST,LEBEDEV,BECKE,atomicCenters,0,1.0);
+  AtomicGrid AGrid(100,590,GAUSSCHEBFST,LEBEDEV,BECKE,atomicCenters,0,1.0,false);
 
   for(auto iAtm = 0; iAtm < molecule.nAtoms(); iAtm++){
-    AGrid.setCenter(iAtm);
-    AGrid.setScalingFactor(
-        0.5*elements[molecule.index(iAtm)].sradius/phys.bohr);
+    AGrid.center() = iAtm;
+    AGrid.scalingFactor()=0.5*elements[molecule.index(iAtm)].sradius/phys.bohr;
     AGrid.integrate<double>(density,rho);
   };
   auto t4f = std::chrono::high_resolution_clock::now();

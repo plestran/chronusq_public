@@ -66,14 +66,12 @@ public:
     virtual void generateGridPoints() {
       this->gPoints_.reserve(this->nPts_);
       this->weights_.reserve(this->nPts_);
-      //cout << "Generating Points" << endl;
 
       for(auto iPt = 0; iPt < nPts_; iPt++) {
         IntegrationPoint tmp = operator[](iPt);
         this->gPoints_.push_back(tmp.pt);
         this->weights_.push_back(tmp.weight);
       }
-      //cout << "DONE" << endl;
       this->haveGPs_ = true;
     };
 
@@ -145,11 +143,8 @@ class GaussChebFst : public OneDGrid2 {
 
     ~GaussChebFst(){ };
     IntegrationPoint operator[](size_t i){ 
-      if(!onTheFly_ && haveGPs_){ 
-        //cout << "Reading GPs" << endl;
+      if(!onTheFly_ && haveGPs_)
         return IntegrationPoint(gPoints_[i],weights_[i]);
-      }
-      //cout << "Generating GPs" << endl;
 
       // Generate points and weights for (-1,1)
       double pt  = std::cos( (2.0*(i+1)-1.0) / (2*this->nPts_) * math.pi );
@@ -317,10 +312,6 @@ class Lebedev : public OneDGrid2 {
     IntegrationPoint operator[](size_t i){ 
       return IntegrationPoint(this->gPoints_[i],this->weights_[i]);
     };
-
-    void generateGridPoints() {
-      cout << "LEBEDEV" << endl;
-    };
 };
 
 class TwoDGrid2 : public Grid2 {
@@ -377,7 +368,7 @@ enum ATOMIC_PARTITION {
 };
 
 
-class AtomicGrid2 : public TwoDGrid2 {
+class AtomicGrid : public TwoDGrid2 {
   double scalingFactor_;
   ATOMIC_PARTITION partitionScheme_;
   std::vector<std::array<double,3> > centers_;
@@ -388,7 +379,7 @@ class AtomicGrid2 : public TwoDGrid2 {
   double evalPartitionWeight(cartGP&);
 
   public:
-    AtomicGrid2(size_t nPtsRad, size_t nPtsAng, 
+    AtomicGrid(size_t nPtsRad, size_t nPtsAng, 
         GRID_TYPE GTypeRad, GRID_TYPE GTypeAng, 
         ATOMIC_PARTITION partitionScheme, 
         std::vector<std::array<double,3> > centers,
@@ -401,7 +392,7 @@ class AtomicGrid2 : public TwoDGrid2 {
       centerIndx_(centerIndx),
       scalingFactor_(scalingFactor) { 
         this->partitionScratch_.resize(this->centers_.size(),0.0);
-      };
+    };
 
     inline IntegrationPoint operator[](size_t i) {
       IntegrationPoint rawPoint = TwoDGrid2::operator[](i);
@@ -421,16 +412,17 @@ class AtomicGrid2 : public TwoDGrid2 {
         * scalingFactor_;
       rawPoint.weight *= scalingFactor_ * r*r;
 
-      //cout <<evalPartitionWeight(rawPoint.pt)<<endl;
       if(rawPoint.weight > 1e-8)
         rawPoint.weight *= evalPartitionWeight(rawPoint.pt);
-//      cout << " Weight Becke Done on center " << this->centerIndx_ <<endl;    
       return rawPoint;
 
     };
 
     inline void setCenter(size_t i) { this->centerIndx_ = i; };
     inline void setScalingFactor(double x) { this->scalingFactor_ = x; };
+
+    inline size_t& center(){ return this->centerIndx_; };
+    inline double& scalingFactor(){ return this->scalingFactor_; };
 };
 
 class Cube : public Grid2 {
