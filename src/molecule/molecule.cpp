@@ -171,7 +171,6 @@ void Molecule::computeNucRep(){
 }
 
 void Molecule::generateFiniteWidthNuclei(){
-  libint2::Engine engine(libint2::Operator::overlap,1,1,0);
   for(auto iAtm = 0; iAtm < this->nAtoms_; iAtm++){
     double varience = 
       0.836 * std::pow(elements[index_[iAtm]].massNumber,1.0/3.0)
@@ -193,7 +192,9 @@ void Molecule::generateFiniteWidthNuclei(){
            (*this->cart())(2,iAtm)}}
         }
       );
-    cout << finiteWidthNuclei_.back() << endl;
-    cout << "<>" << *engine.compute(finiteWidthNuclei_.back(),finiteWidthNuclei_.back()) << endl;
+
+    finiteWidthNuclei_.back().contr[0].coeff[0] = 
+      std::pow(zeta[0] / math.pi,1.5);
+
   };
 };

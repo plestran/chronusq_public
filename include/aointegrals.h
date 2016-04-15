@@ -214,6 +214,7 @@ public:
   bool          haveRII; ///< Whether or not the Metric overlap tensor has been evaluated for the density-fitting basis set
   bool          haveTRII;
   bool          isPrimary;
+  bool          useFiniteWidthNuclei;
 
 
   // Timing Stats
@@ -281,6 +282,7 @@ public:
     this->maxNumInt_        = 0;
     this->integralAlgorithm = DIRECT;
     this->isPrimary         = true;
+    this->useFiniteWidthNuclei = false;
   };
   ~AOIntegrals(){;};
   

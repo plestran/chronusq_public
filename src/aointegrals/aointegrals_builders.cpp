@@ -114,7 +114,6 @@ void AOIntegrals::OneEDriver(libint2::Operator iType) {
 
         int IOff = 0;
         for(auto nMat = 0; nMat < mat.size(); nMat++) {
-//        ConstRealMap bufMat(&buff[IOff],n1,n2); // Read only map
           Eigen::Map<
             const Eigen::Matrix<double,Dynamic,Dynamic,Eigen::RowMajor>>
             bufMat(&buff[IOff],n1,n2);
@@ -366,12 +365,11 @@ void AOIntegrals::computeAOOneE(){
 
   // Compute and time nuclear attraction integrals (negative sign is factored in)
   auto VStart = std::chrono::high_resolution_clock::now();
-  OneEDriver(libint2::Operator::nuclear);
-  if(this->isPrimary){
-    prettyPrint(cout,(*this->potential_),"VB");
+  this->useFiniteWidthNuclei = true;
+  if(this->isPrimary && this->useFiniteWidthNuclei) 
     this->finiteWidthPotential();
-    prettyPrint(cout,(*this->potential_),"VA");
-  }
+  else                
+    OneEDriver(libint2::Operator::nuclear);
 
   auto VEnd = std::chrono::high_resolution_clock::now();
 
@@ -602,7 +600,6 @@ void AOIntegrals::finiteWidthPotential() {
 #else
   int nthreads = 1;
 #endif
-  cout << "FINITE WIDTH!!!" << endl;
 
   this->molecule_->generateFiniteWidthNuclei();
   this->potential_->setZero();
@@ -644,15 +641,6 @@ void AOIntegrals::finiteWidthPotential() {
           Eigen::Map<
             const Eigen::Matrix<double,Dynamic,Dynamic,Eigen::RowMajor>>
             bufMat(buff,n1,n2);
-          cout << "---------" << endl;
-          cout << "S1 = " << s1 << endl;
-          cout << "S2 = " << s2 << endl;
-          cout << "iAtm = " << iAtm << endl;
-          cout << this->basisSet_->shells(s1) << endl;
-          cout << this->basisSet_->shells(s2) << endl;
-          cout << this->molecule_->nucShell(iAtm) << endl;
-          cout << endl << bufMat << endl << endl;
-
 
           for(auto i = 0, bf1 = bf1_s; i < n1; i++, bf1 += this->nTCS_) 
           for(auto j = 0, bf2 = bf2_s; j < n2; j++, bf2 += this->nTCS_){            
