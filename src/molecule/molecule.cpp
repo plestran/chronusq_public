@@ -169,3 +169,31 @@ void Molecule::computeNucRep(){
                            std::sqrt(sqrDistAB);
   }
 }
+
+void Molecule::generateFiniteWidthNuclei(){
+  libint2::Engine engine(libint2::Operator::overlap,1,1,0);
+  for(auto iAtm = 0; iAtm < this->nAtoms_; iAtm++){
+    double varience = 
+      0.836 * std::pow(elements[index_[iAtm]].massNumber,1.0/3.0)
+      + 0.570; // fm
+    varience *= 1e-5; // Ang
+    varience /= phys.bohr; // Bohr
+
+    varience *= varience;
+
+    std::vector<double> zeta;
+    zeta.push_back(3.0 / (2.0*varience));
+
+    std::vector<double> cont;
+    cont.push_back(elements[index_[iAtm]].atomicNumber);
+    this->finiteWidthNuclei_.push_back(
+        libint2::Shell{ zeta, {{0,false,cont}},
+        {{(*this->cart())(0,iAtm),
+           (*this->cart())(1,iAtm),
+           (*this->cart())(2,iAtm)}}
+        }
+      );
+    cout << finiteWidthNuclei_.back() << endl;
+    cout << "<>" << *engine.compute(finiteWidthNuclei_.back(),finiteWidthNuclei_.back()) << endl;
+  };
+};

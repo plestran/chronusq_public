@@ -367,6 +367,12 @@ void AOIntegrals::computeAOOneE(){
   // Compute and time nuclear attraction integrals (negative sign is factored in)
   auto VStart = std::chrono::high_resolution_clock::now();
   OneEDriver(libint2::Operator::nuclear);
+  if(this->isPrimary){
+    prettyPrint(cout,(*this->potential_),"VB");
+    this->finiteWidthPotential();
+    prettyPrint(cout,(*this->potential_),"VA");
+  }
+
   auto VEnd = std::chrono::high_resolution_clock::now();
 
 // add DKH correction to kinetic energy
@@ -588,4 +594,69 @@ void AOIntegrals::breakUpMultipole(){
       this->elecOctpoleSep_.emplace_back(
         ConstRealMap(&this->elecOctpole_->storage()[iBuf],NB,NB)
       );
+};
+
+void AOIntegrals::finiteWidthPotential() {
+#ifdef _OPENMP
+  int nthreads = omp_get_max_threads();
+#else
+  int nthreads = 1;
+#endif
+  cout << "FINITE WIDTH!!!" << endl;
+
+  this->molecule_->generateFiniteWidthNuclei();
+  this->potential_->setZero();
+
+  // Define integral Engine
+  std::vector<libint2::Engine> engines(nthreads);
+  engines[0] = libint2::Engine(libint2::Operator::coulomb,
+      this->basisSet_->maxPrim(), this->basisSet_->maxL(),0);
+  engines[0].set_precision(0.0);
+
+  for(size_t i = 1; i < nthreads; i++) engines[i] = engines[0];
+
+  if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(this->nTCS_); 
+#ifdef _OPENMP
+  #pragma omp parallel
+#endif
+  {
+#ifdef _OPENMP
+    int thread_id = omp_get_thread_num();
+#else
+    int thread_id = 0;
+#endif
+    for(auto s1=0l, s12=0l; s1 < this->basisSet_->nShell(); s1++){
+      int bf1_s = this->basisSet_->mapSh2Bf(s1);
+      int n1  = this->basisSet_->shells(s1).size();
+      for(int s2=0; s2 <= s1; s2++, s12++){
+        if(s12 % nthreads != thread_id) continue;
+        int bf2_s = this->basisSet_->mapSh2Bf(s2);
+        int n2  = this->basisSet_->shells(s2).size();
+  
+        for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
+          const double* buff = engines[thread_id].compute(
+            this->basisSet_->shells(s1),
+            this->basisSet_->shells(s2),
+            this->molecule_->nucShell(iAtm),
+            libint2::Shell::unit()
+          );
+
+          Eigen::Map<
+            const Eigen::Matrix<double,Dynamic,Dynamic,Eigen::RowMajor>>
+            bufMat(buff,n1,n2);
+
+          for(auto i = 0, bf1 = bf1_s; i < n1; i++, bf1 += this->nTCS_) 
+          for(auto j = 0, bf2 = bf2_s; j < n2; j++, bf2 += this->nTCS_){            
+            (*this->potential_)(bf1,bf2) -= 
+              elements[this->molecule_->index(iAtm)].atomicNumber * bufMat(i,j);
+            if(this->nTCS_ == 2) 
+              (*this->potential_)(bf1+1,bf2+1) -= bufMat(i,j);
+          }
+
+        }
+      }
+    }
+  } // end openmp parallel
+
+  (*this->potential_) = this->potential_->selfadjointView<Lower>();
 };

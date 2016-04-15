@@ -350,6 +350,7 @@ public:
 //--------------------------------------------//
   void computeAOTwoE(); // build two-electron AO integral matrices
   void computeAOOneE(); // build one-electron AO integral matrices
+  void finiteWidthPotential();
   void computeAORcrossDel(); // build R cross Del matrices
   double formBeckeW(cartGP gridPt, int iAtm);    // Evaluate Becke Weights
   double normBeckeW(cartGP gridPt);             // Normalize Becke Weights

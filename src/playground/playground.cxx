@@ -355,6 +355,61 @@ int main(int argc, char **argv){
   cout << "T3 " << T3.count() << endl;
   cout << "T4 " << T4.count() << endl;
 
+  VectorXd SCRATCHDX(singleSlater.nBasis());
+  VectorXd SCRATCHDY(singleSlater.nBasis());
+  VectorXd SCRATCHDZ(singleSlater.nBasis());
+  VectorXd SCRATCH2D(singleSlater.nBasis(),singleSlater.nBasis());
+
+  libint2::Engine engine(libint2::Operator::nuclear,1,0,0);
+  engine.set_precision(0.0);
+  std::vector<double> cont(1,1.0);
+  std::vector<double> exp(1,1.0);
+  libint2::Shell nucShell( exp,{{0,false,cont}}, {{0.0,0.0,0.0}} );
+
+  auto PVP = [&](IntegrationPoint pt, std::vector<RealMatrix> &result) {
+    // Evaluate the basis product in SCRATCH
+    for(auto iShell = 0; iShell < basis.nShell(); iShell++){
+      int b_s = basis.mapSh2Bf(iShell);
+      int size= basis.shells(iShell).size();
+
+      libint2::Shell shTmp = basis.shells(iShell);
+
+      double * buff = basis.basisDEval(1,shTmp,
+          &pt.pt);
+
+      RealMap bMap(buff,size,1);
+      RealMap dxMap(buff+size,size,1);
+      RealMap dyMap(buff+size,size,1);
+      RealMap dzMap(buff+size,size,1);
+
+      SCRATCH1.block(b_s,0,size,1) = bMap;
+      SCRATCHDX.block(b_s,0,size,1) = dxMap;
+      SCRATCHDY.block(b_s,0,size,1) = dyMap;
+      SCRATCHDZ.block(b_s,0,size,1) = dzMap;
+
+      delete [] buff;
+    };
+
+    std::vector<std::pair<double,std::array<double,3>>> q;
+    q.push_back(
+      {-1.0, {{bg::get<0>(pt.pt),bg::get<1>(pt.pt),bg::get<2>(pt.pt)}}});
+    engine.set_params(q);
+
+    auto *gamma = engine.compute(nucShell,libint2::Shell::unit());
+
+    result[0] += (*gamma) * SCRATCHDX * SCRATCHDX.transpose();
+    result[1] += (*gamma) * SCRATCHDX * SCRATCHDY.transpose();
+    result[2] += (*gamma) * SCRATCHDX * SCRATCHDZ.transpose();
+    result[3] += (*gamma) * SCRATCHDY * SCRATCHDX.transpose();
+    result[4] += (*gamma) * SCRATCHDY * SCRATCHDY.transpose();
+    result[5] += (*gamma) * SCRATCHDY * SCRATCHDZ.transpose();
+    result[6] += (*gamma) * SCRATCHDZ * SCRATCHDX.transpose();
+    result[7] += (*gamma) * SCRATCHDZ * SCRATCHDY.transpose();
+    result[8] += (*gamma) * SCRATCHDZ * SCRATCHDZ.transpose();
+
+  };
+
+
   finalizeCQ();
   return 0;
 };
