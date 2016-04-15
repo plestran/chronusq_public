@@ -230,8 +230,8 @@ int main(int argc, char **argv){
   singleSlater.setRef(SingleSlater<double>::RHF);
   singleSlater.isClosedShell = true;
 
-//  basis.findBasisFile("sto3g");
-  basis.findBasisFile("6-31g");
+  basis.findBasisFile("sto3g");
+//  basis.findBasisFile("6-31g");
   basis.communicate(fileio);
   basis.parseGlobal();
   basis.constructLocal(&molecule);
@@ -265,17 +265,20 @@ int main(int argc, char **argv){
   std::chrono::duration<double> T1; 
   std::chrono::duration<double> T2; 
   std::chrono::duration<double> T3; 
+  basis.radcut(1e-10,50,1e-7);
   auto density = [&](IntegrationPoint pt, double &result) {
     // Evaluate the basis product in SCRATCH
     auto t1s = std::chrono::high_resolution_clock::now();
+    cartGP GP = pt.pt;
+    auto shMap = basis.MapGridBasis(GP); 
+//    if(shMap[0]) return 0.0;
     for(auto iShell = 0; iShell < basis.nShell(); iShell++){
-//      if(basis.shCutOff(iShell,pt)) continue;
+      if(!shMap[iShell+1]) continue;
       int b_s = basis.mapSh2Bf(iShell);
       int size= basis.shells(iShell).size();
 
       libint2::Shell shTmp = basis.shells(iShell);
-      double * buff = basis.basisDEval(0,shTmp,
-          &pt.pt);
+      double * buff = basis.basisDEval(0,shTmp,&pt.pt);
       RealMap bMap(buff,size,1);
       SCRATCH1.block(b_s,0,size,1) = bMap;
 
@@ -324,9 +327,9 @@ int main(int argc, char **argv){
          (*molecule.cart())(1,iAtm),
          (*molecule.cart())(2,iAtm)}
     );
-    cout << atomicCenters[iAtm][0] << "\t";
-    cout << atomicCenters[iAtm][1] << "\t";
-    cout << atomicCenters[iAtm][2] << "\t";
+  //cout << atomicCenters[iAtm][0] << "\t";
+  //cout << atomicCenters[iAtm][1] << "\t";
+  //cout << atomicCenters[iAtm][2] << "\t";
   };
 
 

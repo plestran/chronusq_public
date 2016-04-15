@@ -484,7 +484,7 @@ double * BasisSet::basisProdEval(libint2::Shell s1, libint2::Shell s2, sph3GP *p
 }
 
 
-std::vector<bool> BasisSet::MapGridBasis(cartGP pt){
+std::vector<bool> BasisSet::MapGridBasis(cartGP& pt){
 //  Set map_[ishell] to be avaluated (true) or not (false)
 //  note: radCutSh_ has to be already populated by calling before radcut
 //bool * map_ = new bool[this->nShell()+1];
@@ -493,7 +493,8 @@ std::vector<bool> BasisSet::MapGridBasis(cartGP pt){
   double y ;
   double z ;
   double r ;
-  bool   nodens = true;  //becomes truee if at least one shell hs to evaluated and it is stored in map_[0]
+  bool   nodens = true;  // becomes truee if at least one shell hs to 
+                         // evaluated and it is stored in map_[0]
   for(auto s1=0l; s1 < this->nShell(); s1++){  //loop over shells
     auto center = shells(s1).O;
     x = bg::get<0>(pt) - center[0];
@@ -528,9 +529,12 @@ void BasisSet::radcut(double thr, int maxiter, double epsConv){
 //       this->fSpAv (2, shells(s1).contr[0].l, alphaMin, 1.0e-5);
 //       this->fSpAv (1, shells(s1).contr[0].l, alphaMin, 3);
 //     Populate a Vector storing all the cut off radius (Av_xi(r_cut)<thr)
-       radCutSh_[s1] = this->fRmax (shells(s1).contr[0].l, alphaMin, thr, epsConv, maxiter);
+       radCutSh_[s1] = this->fRmax (shells(s1).contr[0].l, alphaMin, thr, 
+           epsConv, maxiter);
+       cout << radCutSh_[s1] << endl;
 
   }
+  cout << endl;
   return ;
 }
 

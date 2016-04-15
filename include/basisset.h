@@ -307,7 +307,7 @@ public:
   template <typename T> double * basisDEval(int,libint2::Shell&,T*);
   template <typename T> double * basisProdEval(libint2::Shell,libint2::Shell,T*);
   double * basisonFlyProdEval(libint2::Shell s1, int s1size, libint2::Shell s2, int s2size,double rx, double ry, double rz);
-  std::vector<bool> MapGridBasis(cartGP pt);  ///< Create a Mapping of basis over grid points
+  std::vector<bool> MapGridBasis(cartGP& pt);  ///< Create a Mapping of basis over grid points
   void     radcut(double thr, int maxiter, double epsConv);   //Populate all shell cut off radius
   void     popExpPairSh();   // Populate expPairSh
   double   fSpAv (int iop,int l, double alpha, double r);   //Evaluate Spheric Average of a Shell

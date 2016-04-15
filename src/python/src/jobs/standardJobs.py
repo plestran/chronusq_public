@@ -93,16 +93,16 @@ def runSCF(workers,meta):
   if chronusQ.getRank() == 0:
     workers["CQSingleSlater"].printProperties()
 
-  ND = chronusQ.NumericalDifferentiationDouble()
-  ND.setSingleSlater(workers["CQSingleSlater"])
-  ND.generateESObjs()
-  ND.setRespNRoots(4)
-  ND.setRespType(chronusQ.RESPONSE_TYPE.CIS)
-  ND.setRespRoot(0)
-  ND.computeESGradient = True
-  ND.computeES2GSNACME = True
-  ND.computeES2ESNACME = True
-  ND.differentiate()
+  #ND = chronusQ.NumericalDifferentiationDouble()
+  #ND.setSingleSlater(workers["CQSingleSlater"])
+  #ND.generateESObjs()
+  #ND.setRespNRoots(4)
+  #ND.setRespType(chronusQ.RESPONSE_TYPE.CIS)
+  #ND.setRespRoot(0)
+  #ND.computeESGradient = True
+  #ND.computeES2GSNACME = True
+  #ND.computeES2ESNACME = True
+  #ND.differentiate()
 
  # #print ND.GSGrad()
  # #print ND.ESGrad()

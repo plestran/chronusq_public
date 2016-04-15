@@ -1771,7 +1771,8 @@ void SingleSlater<double>::formVXC(){
         // Build the Vxc for the ipts grid point 
         //  ** Vxc will be ready at the end of the two loop, to be finalized ** 
         if (this->screenVxc ) {
-          auto mapRad_ = this->basisset_->MapGridBasis(Raw3Dg.gridPtCart(ipts));
+          auto GP = Raw3Dg.gridPtCart(ipts);
+          auto mapRad_ = this->basisset_->MapGridBasis(GP);
           if (mapRad_[0] || (bweight < this->epsScreen)) 
             nodens = true;
           if(!nodens) 
