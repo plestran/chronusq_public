@@ -171,6 +171,14 @@ void Molecule::computeNucRep(){
 }
 
 void Molecule::generateFiniteWidthNuclei(){
+  //
+  // Generate libint2::Shell structs to hold a gaussian charge distribution
+  // for each of the nuclei. The scheme is taken from Dyall, et al.
+  //
+  // L. Visscher and K.G. Dyall; Atomic Data and Nuclear Data Tables; 67,
+  //   207-224 (1997)
+  //
+  //
   for(auto iAtm = 0; iAtm < this->nAtoms_; iAtm++){
     double varience = 
       0.836 * std::pow(elements[index_[iAtm]].massNumber,1.0/3.0)
@@ -193,8 +201,10 @@ void Molecule::generateFiniteWidthNuclei(){
         }
       );
 
+    // Handle the fact that libint likes to make things square normalized
+    // not normalized
     finiteWidthNuclei_.back().contr[0].coeff[0] = 
-      std::pow(zeta[0] / math.pi,1.5);
+      elements[index_[iAtm]].atomicNumber * std::pow(zeta[0] / math.pi,1.5);
 
   };
 };

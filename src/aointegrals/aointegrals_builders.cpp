@@ -644,8 +644,7 @@ void AOIntegrals::finiteWidthPotential() {
 
           for(auto i = 0, bf1 = bf1_s; i < n1; i++, bf1 += this->nTCS_) 
           for(auto j = 0, bf2 = bf2_s; j < n2; j++, bf2 += this->nTCS_){            
-            (*this->potential_)(bf1,bf2) -= 
-              elements[this->molecule_->index(iAtm)].atomicNumber * bufMat(i,j);
+            (*this->potential_)(bf1,bf2) -= bufMat(i,j);
             if(this->nTCS_ == 2) 
               (*this->potential_)(bf1+1,bf2+1) -= bufMat(i,j);
           }
