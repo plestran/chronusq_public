@@ -644,6 +644,15 @@ void AOIntegrals::finiteWidthPotential() {
           Eigen::Map<
             const Eigen::Matrix<double,Dynamic,Dynamic,Eigen::RowMajor>>
             bufMat(buff,n1,n2);
+          cout << "---------" << endl;
+          cout << "S1 = " << s1 << endl;
+          cout << "S2 = " << s2 << endl;
+          cout << "iAtm = " << iAtm << endl;
+          cout << this->basisSet_->shells(s1) << endl;
+          cout << this->basisSet_->shells(s2) << endl;
+          cout << this->molecule_->nucShell(iAtm) << endl;
+          cout << endl << bufMat << endl << endl;
+
 
           for(auto i = 0, bf1 = bf1_s; i < n1; i++, bf1 += this->nTCS_) 
           for(auto j = 0, bf2 = bf2_s; j < n2; j++, bf2 += this->nTCS_){            
