@@ -358,13 +358,9 @@ int main(int argc, char **argv){
   VectorXd SCRATCHDX(singleSlater.nBasis());
   VectorXd SCRATCHDY(singleSlater.nBasis());
   VectorXd SCRATCHDZ(singleSlater.nBasis());
-  VectorXd SCRATCH2D(singleSlater.nBasis(),singleSlater.nBasis());
 
   libint2::Engine engine(libint2::Operator::nuclear,1,0,0);
   engine.set_precision(0.0);
-  std::vector<double> cont(1,1.0);
-  std::vector<double> exp(1,1.0);
-  libint2::Shell nucShell( exp,{{0,false,cont}}, {{0.0,0.0,0.0}} );
 
   auto PVP = [&](IntegrationPoint pt, std::vector<RealMatrix> &result) {
     // Evaluate the basis product in SCRATCH
@@ -374,40 +370,58 @@ int main(int argc, char **argv){
 
       libint2::Shell shTmp = basis.shells(iShell);
 
-      double * buff = basis.basisDEval(1,shTmp,
-          &pt.pt);
+      //double * buff = basis.basisDEval(1,shTmp, &pt.pt);
+      double * buff = basis.basisDEval(0,shTmp, &pt.pt);
 
       RealMap bMap(buff,size,1);
-      RealMap dxMap(buff+size,size,1);
-      RealMap dyMap(buff+size,size,1);
-      RealMap dzMap(buff+size,size,1);
+//    RealMap dxMap(buff+size,size,1);
+//    RealMap dyMap(buff+size,size,1);
+//    RealMap dzMap(buff+size,size,1);
 
       SCRATCH1.block(b_s,0,size,1) = bMap;
-      SCRATCHDX.block(b_s,0,size,1) = dxMap;
-      SCRATCHDY.block(b_s,0,size,1) = dyMap;
-      SCRATCHDZ.block(b_s,0,size,1) = dzMap;
+//    SCRATCHDX.block(b_s,0,size,1) = dxMap;
+//    SCRATCHDY.block(b_s,0,size,1) = dyMap;
+//    SCRATCHDZ.block(b_s,0,size,1) = dzMap;
 
       delete [] buff;
     };
 
     std::vector<std::pair<double,std::array<double,3>>> q;
     q.push_back(
-      {-1.0, {{bg::get<0>(pt.pt),bg::get<1>(pt.pt),bg::get<2>(pt.pt)}}});
+      {1.0, {{bg::get<0>(pt.pt),bg::get<1>(pt.pt),bg::get<2>(pt.pt)}}});
     engine.set_params(q);
 
-    auto *gamma = engine.compute(nucShell,libint2::Shell::unit());
+    for(auto iAtm = 0; iAtm < molecule.nAtoms(); iAtm++){
 
-    result[0] += (*gamma) * SCRATCHDX * SCRATCHDX.transpose();
-    result[1] += (*gamma) * SCRATCHDX * SCRATCHDY.transpose();
-    result[2] += (*gamma) * SCRATCHDX * SCRATCHDZ.transpose();
-    result[3] += (*gamma) * SCRATCHDY * SCRATCHDX.transpose();
-    result[4] += (*gamma) * SCRATCHDY * SCRATCHDY.transpose();
-    result[5] += (*gamma) * SCRATCHDY * SCRATCHDZ.transpose();
-    result[6] += (*gamma) * SCRATCHDZ * SCRATCHDX.transpose();
-    result[7] += (*gamma) * SCRATCHDZ * SCRATCHDY.transpose();
-    result[8] += (*gamma) * SCRATCHDZ * SCRATCHDZ.transpose();
+      /*
+      std::array<double,3> C = molecule.nucShell(iAtm).O;
+      double XC = bg::get<0>(pt.pt) - C[0];
+      double YC = bg::get<1>(pt.pt) - C[1];
+      double ZC = bg::get<2>(pt.pt) - C[2];
+      double RC = std::sqrt(XC*XC + YC*YC + ZC*ZC);
+
+      double gamma = -elements[molecule.index(iAtm)].atomicNumber / RC;
+      result[0] += pt.weight * (gamma) * SCRATCH1 * SCRATCH1.transpose();
+      */
+
+      const double * gamma = engine.compute(molecule.nucShell(iAtm),
+          libint2::Shell::unit());
+      result[0] += pt.weight * (*gamma) * SCRATCH1 * SCRATCH1.transpose();
+    }
 
   };
+
+  std::vector<RealMatrix> numPot(1,RealMatrix::Zero(singleSlater.nBasis(),
+        singleSlater.nBasis()));
+
+  for(auto iAtm = 0; iAtm < molecule.nAtoms(); iAtm++){
+    AGrid.center() = iAtm;
+    AGrid.scalingFactor()=0.5*elements[molecule.index(iAtm)].sradius/phys.bohr;
+    AGrid.integrate<std::vector<RealMatrix>>(PVP,numPot);
+  };
+  prettyPrint(cout,(*aoints.potential_),"V");
+  prettyPrint(cout,4*math.pi*numPot[0],"VN");
+  prettyPrint(cout,4*math.pi*numPot[0].cwiseQuotient(*aoints.potential_),"VN");
 
 
   finalizeCQ();
