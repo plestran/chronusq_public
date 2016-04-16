@@ -370,18 +370,18 @@ int main(int argc, char **argv){
 
       libint2::Shell shTmp = basis.shells(iShell);
 
-      //double * buff = basis.basisDEval(1,shTmp, &pt.pt);
-      double * buff = basis.basisDEval(0,shTmp, &pt.pt);
+      double * buff = basis.basisDEval(1,shTmp, &pt.pt);
+      //double * buff = basis.basisDEval(0,shTmp, &pt.pt);
 
       RealMap bMap(buff,size,1);
-//    RealMap dxMap(buff+size,size,1);
-//    RealMap dyMap(buff+size,size,1);
-//    RealMap dzMap(buff+size,size,1);
+      RealMap dxMap(buff+size,size,1);
+      RealMap dyMap(buff+size,size,1);
+      RealMap dzMap(buff+size,size,1);
 
       SCRATCH1.block(b_s,0,size,1) = bMap;
-//    SCRATCHDX.block(b_s,0,size,1) = dxMap;
-//    SCRATCHDY.block(b_s,0,size,1) = dyMap;
-//    SCRATCHDZ.block(b_s,0,size,1) = dzMap;
+      SCRATCHDX.block(b_s,0,size,1) = dxMap;
+      SCRATCHDY.block(b_s,0,size,1) = dyMap;
+      SCRATCHDZ.block(b_s,0,size,1) = dzMap;
 
       delete [] buff;
     };
@@ -393,6 +393,7 @@ int main(int argc, char **argv){
 
     for(auto iAtm = 0; iAtm < molecule.nAtoms(); iAtm++){
 
+      // Delta Function Nuclei
       /*
       std::array<double,3> C = molecule.nucShell(iAtm).O;
       double XC = bg::get<0>(pt.pt) - C[0];
@@ -404,14 +405,24 @@ int main(int argc, char **argv){
       result[0] += pt.weight * (gamma) * SCRATCH1 * SCRATCH1.transpose();
       */
 
+      // Gaussian Nuclei
       const double * gamma = engine.compute(molecule.nucShell(iAtm),
           libint2::Shell::unit());
       result[0] += pt.weight * (*gamma) * SCRATCH1 * SCRATCH1.transpose();
+      result[1] += pt.weight * (*gamma) * SCRATCHX * SCRATCHX.transpose();
+      result[2] += pt.weight * (*gamma) * SCRATCHX * SCRATCHY.transpose();
+      result[3] += pt.weight * (*gamma) * SCRATCHX * SCRATCHZ.transpose();
+      result[4] += pt.weight * (*gamma) * SCRATCHY * SCRATCHX.transpose();
+      result[5] += pt.weight * (*gamma) * SCRATCHY * SCRATCHY.transpose();
+      result[6] += pt.weight * (*gamma) * SCRATCHY * SCRATCHZ.transpose();
+      result[7] += pt.weight * (*gamma) * SCRATCHZ * SCRATCHX.transpose();
+      result[8] += pt.weight * (*gamma) * SCRATCHZ * SCRATCHY.transpose();
+      result[9] += pt.weight * (*gamma) * SCRATCHZ * SCRATCHZ.transpose();
     }
 
   };
 
-  std::vector<RealMatrix> numPot(1,RealMatrix::Zero(singleSlater.nBasis(),
+  std::vector<RealMatrix> numPot(10,RealMatrix::Zero(singleSlater.nBasis(),
         singleSlater.nBasis()));
 
   for(auto iAtm = 0; iAtm < molecule.nAtoms(); iAtm++){
@@ -419,9 +430,11 @@ int main(int argc, char **argv){
     AGrid.scalingFactor()=0.5*elements[molecule.index(iAtm)].sradius/phys.bohr;
     AGrid.integrate<std::vector<RealMatrix>>(PVP,numPot);
   };
+
+  for(auto i = 0; i < 10; i++) numPot[i] *= 4 * math.pi;
+
   prettyPrint(cout,(*aoints.potential_),"V");
-  prettyPrint(cout,4*math.pi*numPot[0],"VN");
-  prettyPrint(cout,4*math.pi*numPot[0].cwiseQuotient(*aoints.potential_),"VN");
+  prettyPrint(cout,numPot[0],"VN");
 
 
   finalizeCQ();
