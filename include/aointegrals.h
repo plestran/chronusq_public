@@ -214,6 +214,7 @@ public:
   bool          haveRII; ///< Whether or not the Metric overlap tensor has been evaluated for the density-fitting basis set
   bool          haveTRII;
   bool          isPrimary;
+  bool          useFiniteWidthNuclei;
 
 
   // Timing Stats
@@ -281,6 +282,7 @@ public:
     this->maxNumInt_        = 0;
     this->integralAlgorithm = DIRECT;
     this->isPrimary         = true;
+    this->useFiniteWidthNuclei = false;
   };
   ~AOIntegrals(){;};
   
@@ -350,6 +352,7 @@ public:
 //--------------------------------------------//
   void computeAOTwoE(); // build two-electron AO integral matrices
   void computeAOOneE(); // build one-electron AO integral matrices
+  void finiteWidthPotential();
   void computeAORcrossDel(); // build R cross Del matrices
   double formBeckeW(cartGP gridPt, int iAtm);    // Evaluate Becke Weights
   double normBeckeW(cartGP gridPt);             // Normalize Becke Weights
