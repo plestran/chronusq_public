@@ -193,15 +193,9 @@ void SingleSlater<dcomplex>::SADGuess() {
       // Initialize the local integral and SS classes
       aointegralsAtom.isPrimary = false;
       hartreeFockAtom.isNotPrimary();
-/*
-      aointegralsAtom.iniAOIntegrals(&uniqueAtom,&basisSetAtom,this->fileio_,&controlAtom,
-        &dfBasisSetAtom);
-      hartreeFockAtom.iniSingleSlater(&uniqueAtom,&basisSetAtom,&aointegralsAtom,
-        this->fileio_,&controlAtom);
-*/
+
       // Replaces iniAOIntegrals
-      aointegralsAtom.communicate(uniqueAtom,basisSetAtom,*this->fileio_,
-        controlAtom);
+      aointegralsAtom.communicate(uniqueAtom,basisSetAtom,*this->fileio_);
       aointegralsAtom.initMeta();
       aointegralsAtom.integralAlgorithm = this->aointegrals_->integralAlgorithm;
       aointegralsAtom.alloc();

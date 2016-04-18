@@ -87,7 +87,7 @@ void NumericalDifferentiation<T>::cartesianDiff(){
     MOIntegrals<T> moints;
     moints.communicate(*this->molecule_undisplaced_,
       *this->singleSlater_undisplaced_->basisset(),fileioTmp,
-      *this->singleSlater_undisplaced_->aointegrals()->controls(),
+      *this->singleSlater_undisplaced_->controls(),
       *this->singleSlater_undisplaced_->aointegrals(),
       *this->singleSlater_undisplaced_);
 
@@ -243,15 +243,13 @@ void NumericalDifferentiation<T>::cartesianDiff(){
     basis_m1.renormShells();
 
 
-    aoints_p1.communicate(mol_p1,basis_p1,fileioTmp,
-      *this->singleSlater_undisplaced_->aointegrals()->controls());
-    aoints_m1.communicate(mol_m1,basis_m1,fileioTmp,
-      *this->singleSlater_undisplaced_->aointegrals()->controls());
+    aoints_p1.communicate(mol_p1,basis_p1,fileioTmp);
+    aoints_m1.communicate(mol_m1,basis_m1,fileioTmp);
 
     ss_p1.communicate(mol_p1,basis_p1,aoints_p1,fileioTmp,
-      *this->singleSlater_undisplaced_->aointegrals()->controls());
+      *this->singleSlater_undisplaced_->controls());
     ss_m1.communicate(mol_m1,basis_m1,aoints_m1,fileioTmp,
-      *this->singleSlater_undisplaced_->aointegrals()->controls());
+      *this->singleSlater_undisplaced_->controls());
 
     ss_p1.setRef(SingleSlater<T>::RHF);
     ss_m1.setRef(SingleSlater<T>::RHF);
@@ -384,10 +382,10 @@ void NumericalDifferentiation<T>::cartesianDiff(){
     TMatrix T_p1, T_m1;
     if(this->computeESGradient) {
       moints_p1.communicate(mol_p1,basis_p1,fileioTmp,
-        *this->singleSlater_undisplaced_->aointegrals()->controls(),
+        *this->singleSlater_undisplaced_->controls(),
         aoints_p1,ss_p1);
       moints_m1.communicate(mol_m1,basis_m1,fileioTmp,
-        *this->singleSlater_undisplaced_->aointegrals()->controls(),
+        *this->singleSlater_undisplaced_->controls(),
         aoints_m1,ss_m1);
 
       resp_p1.communicate(ss_p1,moints_p1,fileioTmp);

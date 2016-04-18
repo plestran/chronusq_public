@@ -67,7 +67,7 @@ void AOIntegrals::computeAORII(){
 
         // Schwartz and Density screening
         if((*this->schwartz_)(s1,s2) * (*this->aoRIS_)(dfs,dfs)
-            < this->controls_->thresholdSchawrtz ) continue;
+            < this->thresholdSchwartz_ ) continue;
  
         const double* buff = engines[thread_id].compute(
           this->basisSet_->shells(s1),

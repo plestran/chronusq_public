@@ -365,7 +365,7 @@ void AOIntegrals::computeAOOneE(){
 
   // Compute and time nuclear attraction integrals (negative sign is factored in)
   auto VStart = std::chrono::high_resolution_clock::now();
-  this->useFiniteWidthNuclei = true;
+//  this->useFiniteWidthNuclei = true;
   if(this->isPrimary && this->useFiniteWidthNuclei) 
     this->finiteWidthPotential();
   else                
@@ -381,7 +381,7 @@ void AOIntegrals::computeAOOneE(){
 
   // Get end time of one-electron integral evaluation
   auto oneEEnd = std::chrono::high_resolution_clock::now();
-  if(this->controls_->printLevel >= 2) this->printOneE();
+  if(this->printLevel_ >= 2) this->printOneE();
 
   // Compute time differenes
   this->OneED = oneEEnd - oneEStart;
@@ -498,7 +498,7 @@ void AOIntegrals::computeAOTwoE(){
     
           // Schwartz and Density screening
           if((*this->schwartz_)(s1,s2) * (*this->schwartz_)(s3,s4)
-              < this->controls_->thresholdSchawrtz ) continue;
+              < this->thresholdSchwartz_ ) continue;
  
           const double* buff = engines[thread_id].compute(
             this->basisSet_->shells(s1),

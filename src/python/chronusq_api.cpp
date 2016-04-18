@@ -244,7 +244,6 @@ BOOST_PYTHON_MODULE(libpythonapi){
 
   
   class_<AOIntegrals,boost::noncopyable>("AOIntegrals",init<>())
-    .def("iniAOIntegrals" , &AOIntegrals::Wrapper_iniAOIntegrals)
     .def("printTimings"   , &AOIntegrals::printTimings          )
     .def("communicate"    , &AOIntegrals::communicate           )
     .def("initMeta"       , &AOIntegrals::initMeta              )

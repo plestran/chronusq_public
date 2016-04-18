@@ -73,23 +73,6 @@ static double factTLarge[21] = {
 270312149116754000.0
 };
 
-//---------------------
-// initialize AOIntegrals
-//---------------------
-void AOIntegrals::iniAOIntegrals(Molecule * molecule, BasisSet * basisset, 
-                                 FileIO * fileio, Controls * controls,
-                                 BasisSet * DFbasisSet)
-{
-  this->communicate(*molecule,*basisset,*fileio,*controls);
-  this->initMeta();
-
-  if(controls->doTCS) this->nTCS_ = 2;
-  if(this->controls_->buildn4eri) this->integralAlgorithm = INCORE;
-  if(this->controls_->doDF     ) this->integralAlgorithm = DENFIT;
-  this->alloc();
-
-};
-
 void AOIntegrals::generateFmTTable() {
   double intervalFmT = 0.025;
   double T = 0.0;
@@ -178,7 +161,7 @@ void AOIntegrals::iniQuartetConstants(ShellPair *ijShellPair, ShellPair *klShell
   for(k = 0; k < nPGTOs[2]; k++) 
   for(l = 0; l < nPGTOs[3]; l++) {
     Upq = ijShellPair->UAB[i][j] * klShellPair->UAB[k][l];
-    if(std::abs(Upq) > this->controls_->thresholdS) {
+    if(std::abs(Upq) > this->thresholdS_) {
       expo1 = ijShellPair->zeta[i][j];
       expo2 = klShellPair->zeta[k][l];
       expoT = expo1 + expo2;
@@ -203,7 +186,7 @@ void AOIntegrals::iniQuartetConstants(ShellPair *ijShellPair, ShellPair *klShell
         sqrPQ += PQ*PQ;
       };
       Upq = Upq / sqrt(expoT);
-      if(sqrPQ > this->controls_->thresholdAB) {
+      if(sqrPQ > this->thresholdAB_) {
 
         T = sqrPQ / (ijShellPair->invzeta[i][j] + klShellPair->invzeta[k][l]);
         this->computeFmTTaylor(FmT,T,totalL,0);
@@ -228,7 +211,7 @@ void AOIntegrals::iniPairConstants(ShellPair *ijShellPair){
   int i,j,k;
   double expo[MAXCONTRACTION][2];
   double center[3][2];
-  this->pairConstants_->intSmall = controls_->thresholdS;
+  this->pairConstants_->intSmall = this->thresholdS_;
   // compute one-center info 
   int totalL = ijShellPair->LTotal;
   for(i = 0; i < 2; i++) {
@@ -529,8 +512,6 @@ void AOIntegrals::allocOp(){
       this->overlap_   = std::unique_ptr<RealMatrix>(new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); 
       // Kinetic
       this->kinetic_   = std::unique_ptr<RealMatrix>(new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); 
-      // Kinetic (p-space)
-      this->kineticP_  = std::unique_ptr<RealMatrix>(new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); 
       // Potential
       this->potential_ = std::unique_ptr<RealMatrix>(new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); 
  

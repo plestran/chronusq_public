@@ -161,7 +161,7 @@ namespace ChronusQ{
                         (*this->schwartz_)(s1,s2) * (*this->schwartz_)(s3,s4);
               }
   
-              if(shMax < this->controls_->thresholdSchawrtz ) continue;
+              if(shMax < this->thresholdSchwartz_ ) continue;
    
               const double* buff = engine.compute(
                 this->basisSet_->shells(s1),
@@ -359,7 +359,7 @@ namespace ChronusQ{
                 if(k == 0 || tmpMax > shMax) shMax = tmpMax;
               }
   
-              if(shMax < this->controls_->thresholdSchawrtz ) continue;
+              if(shMax < this->thresholdSchwartz_ ) continue;
    
               const double* buff = engine.compute(
                 this->basisSet_->shells(s1),

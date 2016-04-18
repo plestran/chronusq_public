@@ -251,7 +251,7 @@ int main(int argc, char **argv){
   basis.renormShells();
 
 
-  aoints.communicate(molecule,basis,fileio,controls);
+  aoints.communicate(molecule,basis,fileio);
   singleSlater.communicate(molecule,basis,aoints,fileio,controls);
   moints.communicate(molecule,basis,fileio,controls,aoints,singleSlater);
 

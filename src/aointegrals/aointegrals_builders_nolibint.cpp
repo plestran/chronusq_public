@@ -81,7 +81,7 @@ void AOIntegrals::computeAOTwoE(){
       j = (*ijShellPair).aoPairIndex[ij][1];
       k = (*ijShellPair).aoPairIndex[kl][0];
       l = (*ijShellPair).aoPairIndex[kl][1];
-      if(std::abs(this->twoEC(i,j,i,j)*this->twoEC(k,l,k,l))>this->controls_->thresholdSchawrtz) {
+      if(std::abs(this->twoEC(i,j,i,j)*this->twoEC(k,l,k,l))>this->thresholdSchwartz_) {
         nPGTOs[0] = ijShellPair->nPGTOs[0];
         nPGTOs[1] = ijShellPair->nPGTOs[1];
         nPGTOs[2] = ijShellPair->nPGTOs[0];
@@ -131,7 +131,7 @@ void AOIntegrals::computeAOTwoE(){
       j = (*ijShellPair).aoPairIndex[ij][1];
       k = (*klShellPair).aoPairIndex[kl][0];
       l = (*klShellPair).aoPairIndex[kl][1];
-      if(std::abs(this->twoEC(i,j,i,j)*this->twoEC(k,l,k,l))>this->controls_->thresholdSchawrtz) {
+      if(std::abs(this->twoEC(i,j,i,j)*this->twoEC(k,l,k,l))>this->thresholdSchwartz_) {
         if(totalL>=1&&iniFlag==0) {
           this->iniQuartetConstants(ijShellPair, klShellPair);
           iniFlag = 1;
@@ -185,7 +185,7 @@ void AOIntegrals::computeAOOneE(){
   int i,j,m,n,ij,ijShell,nPGTOs[2];
   ShellPair *ijShellPair;
   std::chrono::high_resolution_clock::time_point start,finish;
-  if(controls_->printLevel>=1) start = std::chrono::high_resolution_clock::now();
+  if(this->printLevel_>=1) start = std::chrono::high_resolution_clock::now();
   this->iniMolecularConstants();
   for(ijShell=0;ijShell<basisSet_->nShellPair();ijShell++) {
     ijShellPair = &(basisSet_->shellPairs[ijShell]);
@@ -217,13 +217,13 @@ void AOIntegrals::computeAOOneE(){
   (*this->oneE_) = (*this->kinetic_)-(*this->potential);
   finish = std::chrono::high_resolution_clock::now();
   this->OneED = finish - start;
-  if(controls_->printLevel>=2) {
+  if(this->printLevel_>=2) {
     prettyPrint(this->fileio_->out,(*this->overlap_),"Overlap");
     prettyPrint(this->fileio_->out,(*this->kinetic_),"Kinetic");
     prettyPrint(this->fileio_->out,(*this->potential_),"Potential");
     prettyPrint(this->fileio_->out,(*this->oneE_),"Core Hamiltonian");
   };
-  if(controls_->printLevel>=1) {
+  if(this->printLevel_>=1) {
 //    finish = clock();
     this->fileio_->out<<"\nCPU time for one-electron integral:  "<< this->OneED.count() <<" seconds."<<endl;
   };
@@ -236,7 +236,7 @@ void AOIntegrals::computeOverlapS(){
   int i,j,ijShell,iAOP;
   ShellPair_New *ijS;
   std::chrono::high_resolution_clock::time_point start,finish;
-  if(controls_->printLevel>=1) start = std::chrono::high_resolution_clock::now();
+  if(this->printLevel_>=1) start = std::chrono::high_resolution_clock::now();
   this->overlap_->setZero();
   this->createShellPairs();
   for(ijShell=0;ijShell<this->nShellPair_;ijShell++) {
@@ -249,7 +249,7 @@ void AOIntegrals::computeOverlapS(){
       (*this->overlap_)(i,j) = S;
     };
   };
-  if(controls_->printLevel>=1) {
+  if(this->printLevel_>=1) {
     prettyPrint(this->fileio_->out,(*this->overlap_),"Overlap");
     this->fileio_->out<<"\nCPU time for overlap integral:  "<< this->OneED.count() <<" seconds."<<endl;
   };
@@ -260,7 +260,7 @@ void AOIntegrals::computeKineticT(){
   int i,j,ijShell,iAOP;
   ShellPair_New *ijS;
   std::chrono::high_resolution_clock::time_point start,finish;
-  if(controls_->printLevel>=1) start = std::chrono::high_resolution_clock::now();
+  if(this->printLevel_>=1) start = std::chrono::high_resolution_clock::now();
   this->kinetic_->setZero();
   this->createShellPairs();
   for(ijShell=0;ijShell<this->nShellPair_;ijShell++) {
@@ -272,7 +272,7 @@ void AOIntegrals::computeKineticT(){
       (*this->kinetic_)(i,j) = T;
     };
   };
-  if(controls_->printLevel>=1) {
+  if(this->printLevel_>=1) {
     prettyPrint(this->fileio_->out,(*this->kinetic_),"Kinetic");
     this->fileio_->out<<"\nCPU time for kinetic energy integral:  "<< this->OneED.count() <<" seconds."<<endl;
   };

@@ -31,7 +31,6 @@
 #include <basisset.h>
 #include <molecule.h>
 #include <fileio.h>
-#include <controls.h>
 #include <tools.h>
 #include <grid.h>
 
@@ -145,16 +144,25 @@ class AOIntegrals{
   int       nTT_; ///< Reduced number of basis functions (lower triangle) \f$ N_b (N_b+1) / 2\f$
   int       maxMultipole_;
   int       maxNumInt_;
-  int       **R2Index_;
-  double	**FmTTable_;
+  int       printLevel_;
+
+  double thresholdSchwartz_;
+  double thresholdS_;
+  double thresholdAB_;
+
+
+
+
+
 
   BasisSet *    	basisSet_; ///< Pointer to primary basis set
   BasisSet *     DFbasisSet_; ///< Pointer to density fitting basis set
   Molecule *   	molecule_; ///< Pointer to molecule specification
   FileIO *      	fileio_; ///< Pointer to FileIO
-  Controls *    	controls_; ///< Pointer to job control
   TwoDGrid *            twodgrid_; ///< 3D grid (1Rad times 1 Ang) 
 
+  int       **R2Index_;
+  double	**FmTTable_;
   std::unique_ptr<PairConstants>        pairConstants_; ///< Smart pointer to struct containing shell-pair meta-data
   std::unique_ptr<MolecularConstants>   molecularConstants_; ///< Smart pointer to struct containing molecular struture meta-data
   std::unique_ptr<QuartetConstants>     quartetConstants_; ///< Smart pointer to struct containing shell-quartet meta-data
@@ -171,9 +179,6 @@ class AOIntegrals{
     if(this->molecule_ == NULL) 
       CErr("Fatal: Must initialize AOIntegrals with Molecule Object",
            this->fileio_->out);
-    if(this->controls_ == NULL) 
-      CErr("Fatal: Must initialize AOIntegrals with Controls Object",
-           this->fileio_->out);
   }
 
   inline void checkMeta(){
@@ -186,47 +191,61 @@ class AOIntegrals{
 
 public:
   // these should be protected
-  std::unique_ptr<RealMatrix>    twoEC_; ///< Two-body Coulomb integrals 
-  std::unique_ptr<RealMatrix>    twoEX_; ///< Two-body Exchange integrals
+
+  // Two-Body Integrals
+  std::unique_ptr<RealMatrix>    twoEC_; ///< Two-body Coulomb integrals  (deprecated)
+  std::unique_ptr<RealMatrix>    twoEX_; ///< Two-body Exchange integrals (deprecated)
+  std::unique_ptr<RealMatrix>    schwartz_; ///< Schwartz bounds for ERI screening
+  std::unique_ptr<RealTensor4d>  aoERI_; ///< Rank-4 ERI tensor over primary basis functions \f$ (\mu \nu \vert \lambda\delta )\f$
+
+  // One-Body Integrals
   std::unique_ptr<RealMatrix>    oneE_; ///< Core Hamiltonian \f$ h = T + V \f$
   std::unique_ptr<RealMatrix>    overlap_; ///< Overlap matrix \f$ S_{\mu\nu} = \langle \mu \vert \nu \rangle \f$
   std::unique_ptr<RealMatrix>    kinetic_; ///< Kinetic energy tensor \f$ T_{\mu\nu} = \langle \mu \vert \Delta \vert \nu \rangle \f$
-  std::unique_ptr<RealMatrix>    kineticP_; ///< Kinetic energy tensor in momentum space \f$ T_{\mu\nu} = \langle \mu \vert \Delta \vert \nu \rangle \f$
-  std::unique_ptr<RealMatrix>    potential_; ///< Potential (nuclear attraction) energy tensor \f$ V_{\mu\nu} = \sum_A \left\langle \mu \vert r_{1A}^{-1}\vert \nu\right\rangle\f$
-  std::unique_ptr<RealMatrix>    schwartz_; ///< Schwartz bounds for ERI screening
-  std::unique_ptr<RealTensor4d>  aoERI_; ///< Rank-4 ERI tensor over primary basis functions \f$ (\mu \nu \vert \lambda\delta )\f$
+  std::unique_ptr<RealMatrix>    potential_; ///< Potential energy tensor \f$ V_{\mu\nu} = \sum_A \left\langle \mu \vert r_{1A}^{-1}\vert \nu\right\rangle\f$
+
+  // Resolution of the Identity
   std::unique_ptr<RealTensor3d>  aoRII_; ///< Rank-3 DFI tensor over density-fitting basis functions \f$ ( \mu\nu \vert X ) \f$
   std::unique_ptr<RealTensor2d>  aoRIS_; ///< Rank-2 Metric overlap tensor over density-fitting basis functions \f$\left( X \vert r_{12}^{-1} \vert Y \right)\f$
+
+  // Multipole Integrals
   std::unique_ptr<RealTensor3d>  elecDipole_; ///< Electric dipole matrix \f$\vec{\mu}_{\nu\sigma}=\langle\nu\vert\vec{r}\vert\sigma\rangle\f$
   std::unique_ptr<RealTensor3d>  elecQuadpole_;///< Electric quadrupole matrix \f$Q_{\mu\nu}^{ij}=\langle\mu\vert r_i r_j \vert\nu\rangle\f$
   std::unique_ptr<RealTensor3d>  elecOctpole_;///< Electric octupole matrix \f$O_{\mu\nu}^{ijk}=\langle\mu\vert r_i r_j r_k \vert\nu\rangle\f$
 
-  std::unique_ptr<RealTensor3d>  RcrossDel_; ///< R cross Del matrix \f$\vec{\mu}_{\nu\sigma}=\langle\nu\vert\vec{r} \Del \vert\sigma\rangle\f$
+  // Numerical Integrals
+  std::unique_ptr<RealTensor3d>  RcrossDel_; ///< R cross Del matrix \f$\vec{\mu}_{\nu\sigma}=\langle\nu\vert\vec{r} \nabla \vert\sigma\rangle\f$
 
+  // Storage for separation of multipoles
   std::vector<ConstRealMap> elecDipoleSep_;
   std::vector<ConstRealMap> elecQuadpoleSep_;
   std::vector<ConstRealMap> elecOctpoleSep_;
+  std::vector<ConstRealMap> orbitalDipoleSep_; ///< r x del
 
-  bool		haveAOTwoE; ///< Whether or not the two-bodied molecular integrals have been evaluated (for in-core integrals)
-  bool		haveAOOneE; ///< Whether or not the one-body molecular integrals have been evaluated
-  bool          haveSchwartz; ///< Whether or not the Schwartz bound tensor has been evaluated for the primary basis set
-  bool          haveRIS; ///< Whether or not the DFI tensor has been evaluated for the density-fiting basis set
-  bool          haveRII; ///< Whether or not the Metric overlap tensor has been evaluated for the density-fitting basis set
-  bool          haveTRII;
-  bool          isPrimary;
-  bool          useFiniteWidthNuclei;
+
+  // Relativistic Integrals
+  std::unique_ptr<RealTensor4d>  PV1P_; ///< Del Transformed one electron potential (Numerical)
+
+  bool	haveAOTwoE; ///< Whether or not the two-bodied molecular integrals have been evaluated (for in-core integrals)
+  bool	haveAOOneE; ///< Whether or not the one-body molecular integrals have been evaluated
+  bool  haveSchwartz; ///< Whether or not the Schwartz bound tensor has been evaluated for the primary basis set
+  bool  haveRIS; ///< Whether or not the DFI tensor has been evaluated for the density-fiting basis set
+  bool  haveRII; ///< Whether or not the Metric overlap tensor has been evaluated for the density-fitting basis set
+  bool  haveTRII;
+  bool  isPrimary; ///< Whether or not this is the primary calculation (i.e. not guess)
+  bool  useFiniteWidthNuclei; ///< Whether or not to use finite width nuclei in the calculation of the one-body potential
 
 
   // Timing Stats
-  std::chrono::duration<double> OneED; ///< High-precision timing for core Hamiltonian assembly
-  std::chrono::duration<double> SED; ///< High-precision timing for overlap matrix evaluation
-  std::chrono::duration<double> TED; ///< High-precision timing for kinetic energy tensor evaluation
-  std::chrono::duration<double> VED; ///< High-precision timing for potential energy tensor evaluation
-  std::chrono::duration<double> CoulD; ///< High-precision timing for Coulomb tensor evaluation
-  std::chrono::duration<double> ExchD; ///< High-precision timing for Exchange tensor evaluation
-  std::chrono::duration<double> PTD; ///< High-precision timing for Perturbation tensor evaluation, \f$G[P]\f$
-  std::chrono::duration<double> SchwartzD; ///< High-precision timing for Schwartz bound evaluation
-  std::chrono::duration<double> DenShBlkD; ///< High-precision timing for Density shell-block norm evaluation
+  std::chrono::duration<double> OneED; ///< Timer for core Hamiltonian assembly
+  std::chrono::duration<double> SED; ///< Timer for overlap matrix evaluation
+  std::chrono::duration<double> TED; ///< Timer for kinetic energy tensor evaluation
+  std::chrono::duration<double> VED; ///< Timer for potential energy tensor evaluation
+  std::chrono::duration<double> CoulD; ///< Timer for Coulomb tensor evaluation
+  std::chrono::duration<double> ExchD; ///< Timer for Exchange tensor evaluation
+  std::chrono::duration<double> PTD; ///< Timer for Perturbation tensor evaluation, \f$G[P]\f$
+  std::chrono::duration<double> SchwartzD; ///< Timer for Schwartz bound evaluation
+  std::chrono::duration<double> DenShBlkD; ///< Timer for Density shell-block norm evaluation
 
   enum INTEGRAL_ALGORITHM {
     DIRECT,
@@ -246,7 +265,6 @@ public:
     this->molecule_   = NULL; 
     this->basisSet_   = NULL; 
     this->fileio_     = NULL; 
-    this->controls_   = NULL; 
     this->DFbasisSet_ = NULL;
 
     this->pairConstants_      = nullptr;
@@ -258,7 +276,6 @@ public:
     this->oneE_         = nullptr;
     this->overlap_      = nullptr;
     this->kinetic_      = nullptr;
-    this->kineticP_     = nullptr;
     this->potential_    = nullptr;
     this->schwartz_     = nullptr;
     this->aoERI_        = nullptr;
@@ -267,7 +284,8 @@ public:
     this->elecDipole_   = nullptr;
     this->elecQuadpole_ = nullptr;
     this->elecOctpole_  = nullptr;
-    this->RcrossDel_   = nullptr;
+    this->RcrossDel_    = nullptr;
+    this->PV1P_         = nullptr;
 
     this->haveAOTwoE   = false;
     this->haveAOOneE   = false;
@@ -283,19 +301,18 @@ public:
     this->integralAlgorithm = DIRECT;
     this->isPrimary         = true;
     this->useFiniteWidthNuclei = false;
+    this->printLevel_       = 1;
+    this->thresholdS_ =        1.0e-10;
+    this->thresholdAB_ =       1.0e-6;
+    this->thresholdSchwartz_ = 1.0e-14;
   };
   ~AOIntegrals(){;};
   
-  void iniAOIntegrals(Molecule *,BasisSet *,
-                      FileIO *,Controls *,
-                      BasisSet * DFbasisSet=NULL); ///< Initialization function
 
-  inline void communicate(Molecule &mol, BasisSet &basis, FileIO &fileio, 
-                          Controls &controls){
+  inline void communicate(Molecule &mol, BasisSet &basis, FileIO &fileio){
     this->molecule_   = &mol;
     this->basisSet_   = &basis;
     this->fileio_     = &fileio;
-    this->controls_   = &controls;
     this->DFbasisSet_ = NULL;
   }
 
@@ -319,7 +336,6 @@ public:
   inline int nTCS(){ return this->nTCS_;}
   inline int maxMultipole(){ return this->maxMultipole_;}
   inline int maxNumInt(){ return this->maxNumInt_;}
-  inline Controls* controls(){ return this->controls_;};
 
   // Setters
   inline void setNTCS(int i)        { this->nTCS_         = i;}
@@ -353,6 +369,8 @@ public:
   void computeAOTwoE(); // build two-electron AO integral matrices
   void computeAOOneE(); // build one-electron AO integral matrices
   void finiteWidthPotential();
+
+
   void computeAORcrossDel(); // build R cross Del matrices
   double formBeckeW(cartGP gridPt, int iAtm);    // Evaluate Becke Weights
   double normBeckeW(cartGP gridPt);             // Normalize Becke Weights
@@ -436,10 +454,6 @@ public:
   double twoevRRa0c0(ShellPair*,ShellPair*,int,int,int*,int,int*,int*,int*,int*,int*);
   double twoevRRa000(ShellPair*,ShellPair*,int,int,int*,int*,int*,int*,int*);
   double twoeSSSS0(int*,ShellPair*,ShellPair*);
-
-  // Python API
-  void Wrapper_iniAOIntegrals(Molecule&,BasisSet&,FileIO&,Controls&); 
-
 
   // Misc Utility Functions that deal with AOIntegrals
   static RealMatrix genSpx(BasisSet&, BasisSet&);

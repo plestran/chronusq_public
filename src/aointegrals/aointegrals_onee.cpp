@@ -114,7 +114,7 @@ double AOIntegrals::vRRTab(ShellPair *ijShellPair,int LA,int *lA,int LB,int *lB,
   lBm1[iWork]--;
   tmpVal = pairConstants_->TabPar2[*i][*j]*this->oneehRRTSab(ijShellPair,LA,lA,LB,lB,i,j);
   if(LB>2) {
-    if(abs(ijShellPair->deltaPB[iWork][*i][*j])>this->controls_->thresholdS) tmpVal += ijShellPair->deltaPB[iWork][*i][*j]*this->oneevRRTab(ijShellPair,LA,lA,LB-1,lBm1,i,j);
+    if(abs(ijShellPair->deltaPB[iWork][*i][*j])>this->thresholdS_) tmpVal += ijShellPair->deltaPB[iWork][*i][*j]*this->oneevRRTab(ijShellPair,LA,lA,LB-1,lBm1,i,j);
     if (lA[iWork]>0) {
       lAm1[iWork]--;
       tmpVal += (lAm1[iWork]+1)*pairConstants_->Sa0Par[*i][*j]*this->oneevRRTab(ijShellPair,LA-1,lAm1,LB-1,lBm1,i,j);
@@ -131,9 +131,9 @@ double AOIntegrals::vRRTab(ShellPair *ijShellPair,int LA,int *lA,int LB,int *lB,
     else if (lBm1[1]>0) iWork2=1;
     else if (lBm1[2]>0) iWork2=2;
     double tmpVal2 = 0.0;
-    if(abs(ijShellPair->deltaPB[iWork][*i][*j])>this->controls_->thresholdS) {
+    if(abs(ijShellPair->deltaPB[iWork][*i][*j])>this->thresholdS_) {
       tmpVal2 = pairConstants_->TabPar2[*i][*j]*this->oneehRRTSab(ijShellPair,LA,lA,LB-1,lBm1,i,j);
-      if(abs(ijShellPair->deltaPB[iWork2][*i][*j])>this->controls_->thresholdS) tmpVal2 += ijShellPair->deltaPB[iWork2][*i][*j]*this->oneevRRTa0(ijShellPair,LA,lA,i,j);
+      if(abs(ijShellPair->deltaPB[iWork2][*i][*j])>this->thresholdS_) tmpVal2 += ijShellPair->deltaPB[iWork2][*i][*j]*this->oneevRRTa0(ijShellPair,LA,lA,i,j);
       if(lA[iWork2]>0) {
 	lAm1[iWork2]--;
 	tmpVal2 += (lAm1[iWork2]+1)*pairConstants_->Sa0Par[*i][*j]*this->oneevRRTa0(ijShellPair,LA-1,lAm1,i,j);
@@ -144,7 +144,7 @@ double AOIntegrals::vRRTab(ShellPair *ijShellPair,int LA,int *lA,int LB,int *lB,
     if(lA[iWork]>0) {
       lAm1[iWork]--;
       tmpVal2 = pairConstants_->TabPar2[*i][*j]*this->oneehRRTSab(ijShellPair,LA-1,lAm1,LB-1,lBm1,i,j);
-      if(abs(ijShellPair->deltaPB[iWork2][*i][*j])>this->controls_->thresholdS) tmpVal2 += ijShellPair->deltaPB[iWork2][*i][*j]*this->oneevRRTa0(ijShellPair,LA-1,lAm1,i,j);
+      if(abs(ijShellPair->deltaPB[iWork2][*i][*j])>this->thresholdS_) tmpVal2 += ijShellPair->deltaPB[iWork2][*i][*j]*this->oneevRRTa0(ijShellPair,LA-1,lAm1,i,j);
       if(lAm1[iWork2]>0) {
 	lAm1[iWork2]--;
 	if(LA>2) tmpVal2 += (lAm1[iWork2]+1)*pairConstants_->Sa0Par[*i][*j]*this->oneevRRTa0(ijShellPair,LA-2,lAm1,i,j);
@@ -154,7 +154,7 @@ double AOIntegrals::vRRTab(ShellPair *ijShellPair,int LA,int *lA,int LB,int *lB,
     };
     if(iWork==iWork2) tmpVal += pairConstants_->Sa0Par[*i][*j]*this->oneevRRTa0(ijShellPair,LA,lA,i,j) - pairConstants_->TabPar3[*i][*j]*this->oneevRRSa0(ijShellPair,LA,lA,i,j);
   } else {
-    if(abs(ijShellPair->deltaPB[iWork][*i][*j])>this->controls_->thresholdS) tmpVal += ijShellPair->deltaPB[iWork][*i][*j]*this->oneevRRTa0(ijShellPair,LA,lA,i,j);
+    if(abs(ijShellPair->deltaPB[iWork][*i][*j])>this->thresholdS_) tmpVal += ijShellPair->deltaPB[iWork][*i][*j]*this->oneevRRTa0(ijShellPair,LA,lA,i,j);
     if (lA[iWork]>0) {
       lAm1[iWork]--;
       tmpVal += (lAm1[iWork]+1)*pairConstants_->Sa0Par[*i][*j]*this->oneevRRTa0(ijShellPair,LA-1,lAm1,i,j);
@@ -175,7 +175,7 @@ double AOIntegrals::vRRTa0(ShellPair *ijShellPair,int LA,int *lA,int *i,int *j) 
   lAm1[iWork]--;
   tmpVal = pairConstants_->TabPar2[*i][*j]*this->oneevRRSa0(ijShellPair,LA,lA,i,j);
   if(LA>2) {
-    if(abs(ijShellPair->deltaPA[iWork][*i][*j])>this->controls_->thresholdS) tmpVal += ijShellPair->deltaPA[iWork][*i][*j]*this->oneevRRTa0(ijShellPair,LA-1,lAm1,i,j);
+    if(abs(ijShellPair->deltaPA[iWork][*i][*j])>this->thresholdS_) tmpVal += ijShellPair->deltaPA[iWork][*i][*j]*this->oneevRRTa0(ijShellPair,LA-1,lAm1,i,j);
     if(LA==2&&lA[iWork]==2) {
       tmpVal += pairConstants_->Sa0Par[*i][*j]*pairConstants_->TabPar1[*i][*j];
       tmpVal -= pairConstants_->Ta0Par3[*i][*j];
@@ -191,16 +191,16 @@ double AOIntegrals::vRRTa0(ShellPair *ijShellPair,int LA,int *lA,int *i,int *j) 
     else if (lAm1[2]>0) iWork2=2;
     double tmpVal2 = 0.0;
     if(iWork!=iWork2) {
-      if(abs(ijShellPair->deltaPA[iWork][*i][*j])>this->controls_->thresholdS) {
-	if(abs(ijShellPair->deltaPA[iWork2][*i][*j])>this->controls_->thresholdS)
+      if(abs(ijShellPair->deltaPA[iWork][*i][*j])>this->thresholdS_) {
+	if(abs(ijShellPair->deltaPA[iWork2][*i][*j])>this->thresholdS_)
 	  tmpVal += ijShellPair->deltaPA[iWork][*i][*j]*(pairConstants_->TabPar2[*i][*j]*ijShellPair->deltaPA[iWork2][*i][*j] + ijShellPair->deltaPA[iWork2][*i][*j]*pairConstants_->TabPar1[*i][*j]);
       };
     } else {
       tmpVal += pairConstants_->Sa0Par[*i][*j]*pairConstants_->TabPar1[*i][*j] - pairConstants_->Ta0Par3[*i][*j];
-      if(abs(ijShellPair->deltaPA[iWork][*i][*j])>this->controls_->thresholdS) 
+      if(abs(ijShellPair->deltaPA[iWork][*i][*j])>this->thresholdS_) 
 	tmpVal += ijShellPair->deltaPA[iWork][*i][*j]*(ijShellPair->deltaPA[iWork][*i][*j]*pairConstants_->TabPar1[*i][*j] + pairConstants_->TabPar2[*i][*j]*ijShellPair->deltaPA[iWork][*i][*j]);
     };
-  } else if(abs(ijShellPair->deltaPA[iWork][*i][*j])>this->controls_->thresholdS) tmpVal += ijShellPair->deltaPA[iWork][*i][*j]*pairConstants_->TabPar1[*i][*j];
+  } else if(abs(ijShellPair->deltaPA[iWork][*i][*j])>this->thresholdS_) tmpVal += ijShellPair->deltaPA[iWork][*i][*j]*pairConstants_->TabPar1[*i][*j];
   return tmpVal;
 };
 */
