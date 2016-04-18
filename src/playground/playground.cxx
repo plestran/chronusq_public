@@ -373,12 +373,12 @@ int main(int argc, char **argv){
       double * buff = basis.basisDEval(1,shTmp, &pt.pt);
       //double * buff = basis.basisDEval(0,shTmp, &pt.pt);
 
-      RealMap bMap(buff,size,1);
-      RealMap dxMap(buff+size,size,1);
-      RealMap dyMap(buff+size,size,1);
-      RealMap dzMap(buff+size,size,1);
+      RealMap bMap( buff         ,size,1);
+      RealMap dxMap(buff + size  ,size,1);
+      RealMap dyMap(buff + 2*size,size,1);
+      RealMap dzMap(buff + 3*size,size,1);
 
-      SCRATCH1.block(b_s,0,size,1) = bMap;
+      SCRATCH1.block( b_s,0,size,1) = bMap;
       SCRATCHDX.block(b_s,0,size,1) = dxMap;
       SCRATCHDY.block(b_s,0,size,1) = dyMap;
       SCRATCHDZ.block(b_s,0,size,1) = dzMap;
@@ -409,15 +409,15 @@ int main(int argc, char **argv){
       const double * gamma = engine.compute(molecule.nucShell(iAtm),
           libint2::Shell::unit());
       result[0] += pt.weight * (*gamma) * SCRATCH1 * SCRATCH1.transpose();
-      result[1] += pt.weight * (*gamma) * SCRATCHX * SCRATCHX.transpose();
-      result[2] += pt.weight * (*gamma) * SCRATCHX * SCRATCHY.transpose();
-      result[3] += pt.weight * (*gamma) * SCRATCHX * SCRATCHZ.transpose();
-      result[4] += pt.weight * (*gamma) * SCRATCHY * SCRATCHX.transpose();
-      result[5] += pt.weight * (*gamma) * SCRATCHY * SCRATCHY.transpose();
-      result[6] += pt.weight * (*gamma) * SCRATCHY * SCRATCHZ.transpose();
-      result[7] += pt.weight * (*gamma) * SCRATCHZ * SCRATCHX.transpose();
-      result[8] += pt.weight * (*gamma) * SCRATCHZ * SCRATCHY.transpose();
-      result[9] += pt.weight * (*gamma) * SCRATCHZ * SCRATCHZ.transpose();
+      result[1] += pt.weight * (*gamma) * SCRATCHDX * SCRATCHDX.transpose();
+      result[2] += pt.weight * (*gamma) * SCRATCHDX * SCRATCHDY.transpose();
+      result[3] += pt.weight * (*gamma) * SCRATCHDX * SCRATCHDZ.transpose();
+      result[4] += pt.weight * (*gamma) * SCRATCHDY * SCRATCHDX.transpose();
+      result[5] += pt.weight * (*gamma) * SCRATCHDY * SCRATCHDY.transpose();
+      result[6] += pt.weight * (*gamma) * SCRATCHDY * SCRATCHDZ.transpose();
+      result[7] += pt.weight * (*gamma) * SCRATCHDZ * SCRATCHDX.transpose();
+      result[8] += pt.weight * (*gamma) * SCRATCHDZ * SCRATCHDY.transpose();
+      result[9] += pt.weight * (*gamma) * SCRATCHDZ * SCRATCHDZ.transpose();
     }
 
   };
@@ -435,6 +435,15 @@ int main(int argc, char **argv){
 
   prettyPrint(cout,(*aoints.potential_),"V");
   prettyPrint(cout,numPot[0],"VN");
+  prettyPrint(cout,numPot[1],"XX");
+  prettyPrint(cout,numPot[2],"XY");
+  prettyPrint(cout,numPot[3],"XZ");
+  prettyPrint(cout,numPot[4],"YX");
+  prettyPrint(cout,numPot[5],"YY");
+  prettyPrint(cout,numPot[6],"YZ");
+  prettyPrint(cout,numPot[7],"ZX");
+  prettyPrint(cout,numPot[8],"ZY");
+  prettyPrint(cout,numPot[9],"ZZ");
 
 
   finalizeCQ();
