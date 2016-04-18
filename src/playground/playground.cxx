@@ -408,16 +408,50 @@ int main(int argc, char **argv){
       // Gaussian Nuclei
       const double * gamma = engine.compute(molecule.nucShell(iAtm),
           libint2::Shell::unit());
-      result[0] += pt.weight * (*gamma) * SCRATCH1 * SCRATCH1.transpose();
-      result[1] += pt.weight * (*gamma) * SCRATCHDX * SCRATCHDX.transpose();
-      result[2] += pt.weight * (*gamma) * SCRATCHDX * SCRATCHDY.transpose();
-      result[3] += pt.weight * (*gamma) * SCRATCHDX * SCRATCHDZ.transpose();
-      result[4] += pt.weight * (*gamma) * SCRATCHDY * SCRATCHDX.transpose();
-      result[5] += pt.weight * (*gamma) * SCRATCHDY * SCRATCHDY.transpose();
-      result[6] += pt.weight * (*gamma) * SCRATCHDY * SCRATCHDZ.transpose();
-      result[7] += pt.weight * (*gamma) * SCRATCHDZ * SCRATCHDX.transpose();
-      result[8] += pt.weight * (*gamma) * SCRATCHDZ * SCRATCHDY.transpose();
-      result[9] += pt.weight * (*gamma) * SCRATCHDZ * SCRATCHDZ.transpose();
+      Eigen::internal::set_is_malloc_allowed(false);
+      SCRATCH2.noalias() = SCRATCH1 * SCRATCH1.transpose();
+      result[0].noalias() += (pt.weight * (*gamma)) * SCRATCH2;
+
+      SCRATCH2.noalias() = SCRATCHDX * SCRATCHDX.transpose();
+      result[1].noalias() += (pt.weight * (*gamma)) * SCRATCH2;
+
+      SCRATCH2.noalias() = SCRATCHDX * SCRATCHDY.transpose();
+      result[2].noalias() += (pt.weight * (*gamma)) * SCRATCH2;
+
+      SCRATCH2.noalias() = SCRATCHDX * SCRATCHDZ.transpose();
+      result[3].noalias() += (pt.weight * (*gamma)) * SCRATCH2;
+
+      SCRATCH2.noalias() = SCRATCHDY * SCRATCHDX.transpose();
+      result[4].noalias() += (pt.weight * (*gamma)) * SCRATCH2;
+
+      SCRATCH2.noalias() = SCRATCHDY * SCRATCHDY.transpose();
+      result[5].noalias() += (pt.weight * (*gamma)) * SCRATCH2;
+
+      SCRATCH2.noalias() = SCRATCHDY * SCRATCHDZ.transpose();
+      result[6].noalias() += (pt.weight * (*gamma)) * SCRATCH2;
+
+      SCRATCH2.noalias() = SCRATCHDZ * SCRATCHDX.transpose();
+      result[7].noalias() += (pt.weight * (*gamma)) * SCRATCH2;
+
+      SCRATCH2.noalias() = SCRATCHDZ * SCRATCHDY.transpose();
+      result[8].noalias() += (pt.weight * (*gamma)) * SCRATCH2;
+
+      SCRATCH2.noalias() = SCRATCHDZ * SCRATCHDZ.transpose();
+      result[9].noalias() += (pt.weight * (*gamma)) * SCRATCH2;
+
+
+    // This allocates temporary mem in Eigen
+    //result[0].noalias() += (pt.weight * (*gamma)) * SCRATCH1 * SCRATCH1.transpose();
+    //result[1].noalias() += (pt.weight * (*gamma)) * SCRATCHDX * SCRATCHDX.transpose();
+    //result[2].noalias() += (pt.weight * (*gamma)) * SCRATCHDX * SCRATCHDY.transpose();
+    //result[3].noalias() += (pt.weight * (*gamma)) * SCRATCHDX * SCRATCHDZ.transpose();
+    //result[4].noalias() += (pt.weight * (*gamma)) * SCRATCHDY * SCRATCHDX.transpose();
+    //result[5].noalias() += (pt.weight * (*gamma)) * SCRATCHDY * SCRATCHDY.transpose();
+    //result[6].noalias() += (pt.weight * (*gamma)) * SCRATCHDY * SCRATCHDZ.transpose();
+    //result[7].noalias() += (pt.weight * (*gamma)) * SCRATCHDZ * SCRATCHDX.transpose();
+    //result[8].noalias() += (pt.weight * (*gamma)) * SCRATCHDZ * SCRATCHDY.transpose();
+    //result[9].noalias() += (pt.weight * (*gamma)) * SCRATCHDZ * SCRATCHDZ.transpose();
+      Eigen::internal::set_is_malloc_allowed(true);
     }
 
   };
