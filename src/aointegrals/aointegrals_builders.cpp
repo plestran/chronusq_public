@@ -352,12 +352,15 @@ void AOIntegrals::computeAOOneE(){
 
   // Compute and time overlap integrals
   auto OStart = std::chrono::high_resolution_clock::now();
-  if(this->maxMultipole_ ==3) OneEDriver(libint2::Operator::emultipole3);
+  if(this->maxMultipole_ >= 3)      OneEDriver(libint2::Operator::emultipole3);
   else if(this->maxMultipole_ == 2) OneEDriver(libint2::Operator::emultipole2);
   else if(this->maxMultipole_ == 1) OneEDriver(libint2::Operator::emultipole1);
   else OneEDriver(libint2::Operator::overlap);
+  if(this->maxMultipole_ == 4) this->computeAORcrossDel();
   auto OEnd = std::chrono::high_resolution_clock::now();
-  if(this->isPrimary && this->maxNumInt_ >=1) computeAORcrossDel();
+
+
+
   // Compute and time kinetic integrals
   auto TStart = std::chrono::high_resolution_clock::now();
   OneEDriver(libint2::Operator::kinetic);
@@ -591,6 +594,11 @@ void AOIntegrals::breakUpMultipole(){
     for(int ixyz = jxyz       ; ixyz < 3; ++ixyz, iBuf += NB*NB)
       this->elecOctpoleSep_.emplace_back(
         ConstRealMap(&this->elecOctpole_->storage()[iBuf],NB,NB)
+      );
+  if(this->maxMultipole_ >= 4)
+    for(int ixyz = 0, iBuf = 0; ixyz < 3; ++ixyz, iBuf += NB*NB)
+      this->orbitalDipoleSep_.emplace_back(
+        ConstRealMap(&this->RcrossDel_->storage()[iBuf],NB,NB)
       );
 };
 

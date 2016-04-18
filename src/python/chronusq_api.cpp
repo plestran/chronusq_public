@@ -251,8 +251,8 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("nTCS"           , &AOIntegrals::nTCS                  )
     .def("setNTCS"        , &AOIntegrals::setNTCS               )
     .def("setMaxMultipole", &AOIntegrals::setMaxMultipole       )
-    .def("setMaxNumInt"   , &AOIntegrals::setMaxNumInt          )
     .def("setAlgorithm"   , &AOIntegrals::setAlgorithm          )
+    .def("setPrintLevel"   , &AOIntegrals::setPrintLevel        )
     
     .def_readonly("integralAlgorithm", &AOIntegrals::integralAlgorithm)
 //  .def_readwrite("allocERI", &AOIntegrals::allocERI           )

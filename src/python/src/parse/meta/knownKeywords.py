@@ -68,7 +68,6 @@ knownKeywords['QM'] = {
   'REFERENCE'   :CQKeyword('REFERENCE'  ,'S',True ),
   'BASIS'       :CQKeyword('BASIS'      ,'S',True ),
   'FORCECART'   :CQKeyword('FORCECART'  ,'B',False),
-  'NUMINT'      :CQKeyword('NUMINT'     ,'B',False),
   'JOB'         :CQKeyword('JOB'        ,'S',True ),
   'INTS'        :CQKeyword('INTS'       ,'S',False),
   'EXCHANGE'    :CQKeyword('EXCHANGE'   ,'S',False),

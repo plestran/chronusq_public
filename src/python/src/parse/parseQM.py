@@ -108,11 +108,6 @@ def parseQM(workers,secDict):
   except KeyError:
     pass
 
-#
-# Decide whether or not to compute numerical integrals
-#
-  if 'NUMINT' in ssSettings:
-    workers['CQAOIntegrals'].setMaxNumInt(1)
 
   if str(ssSettings['JOB']) in knownJobs:
     if ssSettings['JOB'] in ('RT'):
@@ -130,13 +125,12 @@ def parseQM(workers,secDict):
 #
 # Set global print level
 #
-  try:
+  if 'PRINT' in ssSettings:
     workers['CQMolecule'].setPrintLevel(ssSettings['PRINT'])
     workers['CQBasisSet'].setPrintLevel(ssSettings['PRINT'])
     workers['CQSingleSlater'].setPrintLevel(ssSettings['PRINT'])
     workers['CQRealTime'].setPrintLevel(ssSettings['PRINT'])
-  except KeyError:
-    pass
+    workers['CQAOIntegrals'].setPrintLevel(ssSettings['PRINT'])
 
   return str(ssSettings['JOB'])
 

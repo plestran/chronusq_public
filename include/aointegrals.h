@@ -143,7 +143,6 @@ class AOIntegrals{
   int       nTCS_;
   int       nTT_; ///< Reduced number of basis functions (lower triangle) \f$ N_b (N_b+1) / 2\f$
   int       maxMultipole_;
-  int       maxNumInt_;
   int       printLevel_;
 
   double thresholdSchwartz_;
@@ -297,7 +296,6 @@ public:
     // Standard Values
     this->nTCS_             = 1;
     this->maxMultipole_     = 3;
-    this->maxNumInt_        = 0;
     this->integralAlgorithm = DIRECT;
     this->isPrimary         = true;
     this->useFiniteWidthNuclei = false;
@@ -335,13 +333,12 @@ public:
   // Getters
   inline int nTCS(){ return this->nTCS_;}
   inline int maxMultipole(){ return this->maxMultipole_;}
-  inline int maxNumInt(){ return this->maxNumInt_;}
 
   // Setters
   inline void setNTCS(int i)        { this->nTCS_         = i;}
   inline void setMaxMultipole(int i){ this->maxMultipole_ = i;}
-  inline void setMaxNumInt(int i){ this->maxNumInt_ = i;}
   inline void setAlgorithm(int i)   { this->integralAlgorithm = i;}
+  inline void setPrintLevel(int i){ this->printLevel_ = i;}
 
   inline double &twoEC(int i, int j, int k, int l){
     return (*twoEC_)(this->R2Index_[i][j],this->R2Index_[k][l]);
