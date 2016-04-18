@@ -7,7 +7,7 @@
 using namespace ChronusQ;
 
 enum MOLECULE_PRESETS {
-  WATER, HE
+  WATER, HE,SO
 };
 
 template<MOLECULE_PRESETS T>
@@ -35,6 +35,17 @@ void loadPresets<HE>(Molecule &mol){
   mol.setMultip(1);
   mol.alloc();
   mol.setIndex(0,HashAtom("He",0));
+//  mol.setCart(0,0.000000000 ,-0.00000000000, 0.0);
+  mol.setCart(0,0.000000000 ,0.00000000000, 0.0);
+};
+template<>
+void loadPresets<SO>(Molecule &mol){
+  mol.setNAtoms(1);
+  mol.setCharge(0);
+  mol.setNTotalE(8);
+  mol.setMultip(1);
+  mol.alloc();
+  mol.setIndex(0,HashAtom("O",0));
 //  mol.setCart(0,0.000000000 ,-0.00000000000, 0.0);
   mol.setCart(0,0.000000000 ,0.00000000000, 0.0);
 };
@@ -220,8 +231,9 @@ int main(int argc, char **argv){
   fileio.iniStdGroups();
   CQSetNumThreads(1);
   
-  loadPresets<WATER>(molecule);
+//  loadPresets<WATER>(molecule);
 //loadPresets<HE>(molecule);
+  loadPresets<SO>(molecule);
   molecule.convBohr();
   molecule.computeNucRep();
   molecule.computeRij();
@@ -230,8 +242,8 @@ int main(int argc, char **argv){
   singleSlater.setRef(SingleSlater<double>::RHF);
   singleSlater.isClosedShell = true;
 
-//  basis.findBasisFile("sto3g");
-  basis.findBasisFile("6-31g");
+  basis.findBasisFile("sto3g");
+//  basis.findBasisFile("6-31g");
   basis.communicate(fileio);
   basis.parseGlobal();
   basis.constructLocal(&molecule);
@@ -362,8 +374,22 @@ int main(int argc, char **argv){
   libint2::Engine engine(libint2::Operator::nuclear,1,0,0);
   engine.set_precision(0.0);
 
+    cout << "HERE" << endl;
+  auto unContractedShells = basis.uncontractBasis();
+  int nUncontracted = 0;
+  for(auto i : unContractedShells) nUncontracted += i.size();
+
+    cout << "HERE" << endl;
+  VectorXd SCRATCH1UnContracted(nUncontracted);
+  RealMatrix SCRATCH2UnContracted(nUncontracted,nUncontracted);
+  VectorXd SCRATCHDXUnContracted(nUncontracted);
+  VectorXd SCRATCHDYUnContracted(nUncontracted);
+  VectorXd SCRATCHDZUnContracted(nUncontracted);
+    cout << "HERE" << endl;
+
   auto PVP = [&](IntegrationPoint pt, std::vector<RealMatrix> &result) {
     // Evaluate the basis product in SCRATCH
+    /*
     for(auto iShell = 0; iShell < basis.nShell(); iShell++){
       int b_s = basis.mapSh2Bf(iShell);
       int size= basis.shells(iShell).size();
@@ -385,6 +411,34 @@ int main(int argc, char **argv){
 
       delete [] buff;
     };
+    */
+
+    cout << "HERE 2" << endl;
+    for(auto iShell = 0, b_s = 0; iShell < unContractedShells.size();
+         b_s += unContractedShells[iShell].size(),++iShell) {
+      int size= unContractedShells[iShell].size();
+
+      cout << "HERE 3" << endl;
+      double * buff = basis.basisDEval(1,unContractedShells[iShell], &pt.pt);
+
+      RealMap bMap( buff         ,size,1);
+      RealMap dxMap(buff + size  ,size,1);
+      RealMap dyMap(buff + 2*size,size,1);
+      RealMap dzMap(buff + 3*size,size,1);
+
+      cout << "HERE 4" << endl;
+      cout << nUncontracted << " " << b_s << " " << size <<  endl;
+      SCRATCH1UnContracted.block( b_s,0,size,1) = bMap;
+      cout << "HERE 4" << endl;
+      SCRATCHDXUnContracted.block(b_s,0,size,1) = dxMap;
+      cout << "HERE 4" << endl;
+      SCRATCHDYUnContracted.block(b_s,0,size,1) = dyMap;
+      cout << "HERE 4" << endl;
+      SCRATCHDZUnContracted.block(b_s,0,size,1) = dzMap;
+
+      delete [] buff;
+    };
+    cout << "HERE 2" << endl;
 
     std::vector<std::pair<double,std::array<double,3>>> q;
     q.push_back(
@@ -409,35 +463,35 @@ int main(int argc, char **argv){
       const double * gamma = engine.compute(molecule.nucShell(iAtm),
           libint2::Shell::unit());
       Eigen::internal::set_is_malloc_allowed(false);
-      SCRATCH2.noalias() = SCRATCH1 * SCRATCH1.transpose();
-      result[0].noalias() += (pt.weight * (*gamma)) * SCRATCH2;
+      SCRATCH2UnContracted.noalias() = SCRATCH1UnContracted * SCRATCH1UnContracted.transpose();
+      result[0].noalias() += (pt.weight * (*gamma)) * SCRATCH2UnContracted;
 
-      SCRATCH2.noalias() = SCRATCHDX * SCRATCHDX.transpose();
-      result[1].noalias() += (pt.weight * (*gamma)) * SCRATCH2;
+      SCRATCH2UnContracted.noalias() = SCRATCHDXUnContracted * SCRATCHDXUnContracted.transpose();
+      result[1].noalias() += (pt.weight * (*gamma)) * SCRATCH2UnContracted;
 
-      SCRATCH2.noalias() = SCRATCHDX * SCRATCHDY.transpose();
-      result[2].noalias() += (pt.weight * (*gamma)) * SCRATCH2;
+      SCRATCH2UnContracted.noalias() = SCRATCHDXUnContracted * SCRATCHDYUnContracted.transpose();
+      result[2].noalias() += (pt.weight * (*gamma)) * SCRATCH2UnContracted;
 
-      SCRATCH2.noalias() = SCRATCHDX * SCRATCHDZ.transpose();
-      result[3].noalias() += (pt.weight * (*gamma)) * SCRATCH2;
+      SCRATCH2UnContracted.noalias() = SCRATCHDXUnContracted * SCRATCHDZUnContracted.transpose();
+      result[3].noalias() += (pt.weight * (*gamma)) * SCRATCH2UnContracted;
 
-      SCRATCH2.noalias() = SCRATCHDY * SCRATCHDX.transpose();
-      result[4].noalias() += (pt.weight * (*gamma)) * SCRATCH2;
+      SCRATCH2UnContracted.noalias() = SCRATCHDYUnContracted * SCRATCHDXUnContracted.transpose();
+      result[4].noalias() += (pt.weight * (*gamma)) * SCRATCH2UnContracted;
 
-      SCRATCH2.noalias() = SCRATCHDY * SCRATCHDY.transpose();
-      result[5].noalias() += (pt.weight * (*gamma)) * SCRATCH2;
+      SCRATCH2UnContracted.noalias() = SCRATCHDYUnContracted * SCRATCHDYUnContracted.transpose();
+      result[5].noalias() += (pt.weight * (*gamma)) * SCRATCH2UnContracted;
 
-      SCRATCH2.noalias() = SCRATCHDY * SCRATCHDZ.transpose();
-      result[6].noalias() += (pt.weight * (*gamma)) * SCRATCH2;
+      SCRATCH2UnContracted.noalias() = SCRATCHDYUnContracted * SCRATCHDZUnContracted.transpose();
+      result[6].noalias() += (pt.weight * (*gamma)) * SCRATCH2UnContracted;
 
-      SCRATCH2.noalias() = SCRATCHDZ * SCRATCHDX.transpose();
-      result[7].noalias() += (pt.weight * (*gamma)) * SCRATCH2;
+      SCRATCH2UnContracted.noalias() = SCRATCHDZUnContracted * SCRATCHDXUnContracted.transpose();
+      result[7].noalias() += (pt.weight * (*gamma)) * SCRATCH2UnContracted;
 
-      SCRATCH2.noalias() = SCRATCHDZ * SCRATCHDY.transpose();
-      result[8].noalias() += (pt.weight * (*gamma)) * SCRATCH2;
+      SCRATCH2UnContracted.noalias() = SCRATCHDZUnContracted * SCRATCHDYUnContracted.transpose();
+      result[8].noalias() += (pt.weight * (*gamma)) * SCRATCH2UnContracted;
 
-      SCRATCH2.noalias() = SCRATCHDZ * SCRATCHDZ.transpose();
-      result[9].noalias() += (pt.weight * (*gamma)) * SCRATCH2;
+      SCRATCH2UnContracted.noalias() = SCRATCHDZUnContracted * SCRATCHDZUnContracted.transpose();
+      result[9].noalias() += (pt.weight * (*gamma)) * SCRATCH2UnContracted;
 
 
     // This allocates temporary mem in Eigen
@@ -456,10 +510,13 @@ int main(int argc, char **argv){
 
   };
 
-  std::vector<RealMatrix> numPot(10,RealMatrix::Zero(singleSlater.nBasis(),
-        singleSlater.nBasis()));
+    cout << "HERE" << endl;
+  std::vector<RealMatrix> numPot(10,RealMatrix::Zero(nUncontracted,
+        nUncontracted));
 
+    cout << "HERE" << endl;
   for(auto iAtm = 0; iAtm < molecule.nAtoms(); iAtm++){
+    cout << "HERE" << endl;
     AGrid.center() = iAtm;
     AGrid.scalingFactor()=0.5*elements[molecule.index(iAtm)].sradius/phys.bohr;
     AGrid.integrate<std::vector<RealMatrix>>(PVP,numPot);
@@ -478,6 +535,8 @@ int main(int argc, char **argv){
   prettyPrint(cout,numPot[7],"ZX");
   prettyPrint(cout,numPot[8],"ZY");
   prettyPrint(cout,numPot[9],"ZZ");
+  cout << std::scientific << endl;
+  cout << numPot[1] + numPot[5] + numPot[9] << endl;
 
 
   finalizeCQ();
