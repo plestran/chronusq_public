@@ -374,18 +374,15 @@ int main(int argc, char **argv){
   libint2::Engine engine(libint2::Operator::nuclear,1,0,0);
   engine.set_precision(0.0);
 
-    cout << "HERE" << endl;
   auto unContractedShells = basis.uncontractBasis();
   int nUncontracted = 0;
   for(auto i : unContractedShells) nUncontracted += i.size();
 
-    cout << "HERE" << endl;
   VectorXd SCRATCH1UnContracted(nUncontracted);
   RealMatrix SCRATCH2UnContracted(nUncontracted,nUncontracted);
   VectorXd SCRATCHDXUnContracted(nUncontracted);
   VectorXd SCRATCHDYUnContracted(nUncontracted);
   VectorXd SCRATCHDZUnContracted(nUncontracted);
-    cout << "HERE" << endl;
 
   auto PVP = [&](IntegrationPoint pt, std::vector<RealMatrix> &result) {
     // Evaluate the basis product in SCRATCH
@@ -413,12 +410,10 @@ int main(int argc, char **argv){
     };
     */
 
-    cout << "HERE 2" << endl;
     for(auto iShell = 0, b_s = 0; iShell < unContractedShells.size();
          b_s += unContractedShells[iShell].size(),++iShell) {
       int size= unContractedShells[iShell].size();
 
-      cout << "HERE 3" << endl;
       double * buff = basis.basisDEval(1,unContractedShells[iShell], &pt.pt);
 
       RealMap bMap( buff         ,size,1);
@@ -426,19 +421,13 @@ int main(int argc, char **argv){
       RealMap dyMap(buff + 2*size,size,1);
       RealMap dzMap(buff + 3*size,size,1);
 
-      cout << "HERE 4" << endl;
-      cout << nUncontracted << " " << b_s << " " << size <<  endl;
       SCRATCH1UnContracted.block( b_s,0,size,1) = bMap;
-      cout << "HERE 4" << endl;
       SCRATCHDXUnContracted.block(b_s,0,size,1) = dxMap;
-      cout << "HERE 4" << endl;
       SCRATCHDYUnContracted.block(b_s,0,size,1) = dyMap;
-      cout << "HERE 4" << endl;
       SCRATCHDZUnContracted.block(b_s,0,size,1) = dzMap;
 
       delete [] buff;
     };
-    cout << "HERE 2" << endl;
 
     std::vector<std::pair<double,std::array<double,3>>> q;
     q.push_back(
@@ -510,13 +499,10 @@ int main(int argc, char **argv){
 
   };
 
-    cout << "HERE" << endl;
   std::vector<RealMatrix> numPot(10,RealMatrix::Zero(nUncontracted,
         nUncontracted));
 
-    cout << "HERE" << endl;
   for(auto iAtm = 0; iAtm < molecule.nAtoms(); iAtm++){
-    cout << "HERE" << endl;
     AGrid.center() = iAtm;
     AGrid.scalingFactor()=0.5*elements[molecule.index(iAtm)].sradius/phys.bohr;
     AGrid.integrate<std::vector<RealMatrix>>(PVP,numPot);
@@ -525,18 +511,18 @@ int main(int argc, char **argv){
   for(auto i = 0; i < 10; i++) numPot[i] *= 4 * math.pi;
 
   prettyPrint(cout,(*aoints.potential_),"V");
-  prettyPrint(cout,numPot[0],"VN");
-  prettyPrint(cout,numPot[1],"XX");
-  prettyPrint(cout,numPot[2],"XY");
-  prettyPrint(cout,numPot[3],"XZ");
-  prettyPrint(cout,numPot[4],"YX");
-  prettyPrint(cout,numPot[5],"YY");
-  prettyPrint(cout,numPot[6],"YZ");
-  prettyPrint(cout,numPot[7],"ZX");
-  prettyPrint(cout,numPot[8],"ZY");
-  prettyPrint(cout,numPot[9],"ZZ");
+  prettyPrint(cout,numPot[0],"VN",17);
+  prettyPrint(cout,numPot[1],"XX",17);
+  prettyPrint(cout,numPot[2],"XY",17);
+  prettyPrint(cout,numPot[3],"XZ",17);
+  prettyPrint(cout,numPot[4],"YX",17);
+  prettyPrint(cout,numPot[5],"YY",17);
+  prettyPrint(cout,numPot[6],"YZ",17);
+  prettyPrint(cout,numPot[7],"ZX",17);
+  prettyPrint(cout,numPot[8],"ZY",17);
+  prettyPrint(cout,numPot[9],"ZZ",17);
   cout << std::scientific << endl;
-  cout << numPot[1] + numPot[5] + numPot[9] << endl;
+  prettyPrint(cout,numPot[1] + numPot[5] + numPot[9],"SCALAR",17);
 
 
   finalizeCQ();
