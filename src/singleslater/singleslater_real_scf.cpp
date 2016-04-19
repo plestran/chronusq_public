@@ -130,6 +130,12 @@ void SingleSlater<double>::diagFock(){
   char JOBZ = 'V';
   char UPLO = 'U';
   auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
+  if(this->isPrimary){
+    cout << "Scatter" << endl;
+    this->scatterDensity();
+    cout << "Gather" << endl;
+    this->gatherDensity();
+  }
 
   RealMap X(this->XMem_,NTCSxNBASIS,NTCSxNBASIS);
   RealMap POldAlpha(this->POldAlphaMem_,NTCSxNBASIS,NTCSxNBASIS);

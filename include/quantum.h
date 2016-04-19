@@ -51,12 +51,24 @@ namespace ChronusQ {
 
     protected:
 
-    int nTCS_;
-    int maxMultipole_;
+    int  nTCS_;
+    int  maxMultipole_;
+    bool isScattered_;
+
+
     // Pointers to TMatrix quantities that will store the density of
     // the quantum system in a finite basis
+
+    // The Alpha and Beta Components of the Density matrix. In the case
+    // of spinors, onePDMA holds the entire density (AA,AB,BA,BB)
     std::unique_ptr<TMatrix> onePDMA_;
     std::unique_ptr<TMatrix> onePDMB_;
+
+    // The Density in the basis of the identity and the Pauli matricies 
+    std::unique_ptr<TMatrix> onePDMScalar_;
+    std::unique_ptr<TMatrix> onePDMMz_;
+    std::unique_ptr<TMatrix> onePDMMy_;
+    std::unique_ptr<TMatrix> onePDMMx_;
 
     std::array<double,3> elecDipole_;
     std::array<std::array<double,3>,3> elecQuadpole_;
@@ -120,6 +132,7 @@ namespace ChronusQ {
       this->isClosedShell = false;
       this->nTCS_ = 1;
       this->maxMultipole_ = 3;
+      this->isScattered_ = false;
 
 
       this->clearElecMultipole();
@@ -152,9 +165,25 @@ namespace ChronusQ {
 
     virtual void formDensity() = 0;
     inline void allocDensity(unsigned int N) {
-      this->onePDMA_ = std::unique_ptr<TMatrix>(new TMatrix(N,N));
-      if(!this->isClosedShell){
-        this->onePDMB_ = std::unique_ptr<TMatrix>(new TMatrix(N,N));
+      if(!this->isScattered_) {
+        this->onePDMA_ = 
+          std::unique_ptr<TMatrix>(
+              new TMatrix(this->nTCS_ * N,this->nTCS_ * N)
+          );
+        if(!this->isClosedShell){
+          this->onePDMB_ = 
+            std::unique_ptr<TMatrix>(
+                new TMatrix(this->nTCS_ * N,this->nTCS_ * N)
+            );
+        }
+      } else {
+        this->onePDMScalar_ = std::unique_ptr<TMatrix>(new TMatrix(N,N));
+        if((this->nTCS_ == 1 && !this->isClosedShell) || this->nTCS_ == 2)
+          this->onePDMMz_ = std::unique_ptr<TMatrix>(new TMatrix(N,N));
+        if(this->nTCS_ == 2) {
+          this->onePDMMx_ = std::unique_ptr<TMatrix>(new TMatrix(N,N));
+          this->onePDMMy_ = std::unique_ptr<TMatrix>(new TMatrix(N,N));
+        }
       }
     };
 
@@ -191,6 +220,11 @@ namespace ChronusQ {
     #include <quantum/quantum_stdproperties.h>
 
 
+    void scatterDensity();
+    void gatherDensity();
+    void complexMyScale();
+
+
     inline void setMaxMultipole(int i){ this->maxMultipole_ = i;   };
     inline void setNTCS(int i){         this->nTCS_ = i;           };
 
@@ -211,6 +245,8 @@ namespace ChronusQ {
     inline std::array<std::array<std::array<double,3>,3>,3> elecOctpole(){ 
       return elecOctpole_; 
     };
+
+
     // MPI Routines
     void mpiBCastDensity();
   };
@@ -230,6 +266,124 @@ namespace ChronusQ {
   #endif
     ;
   };
+
+  template<typename T>
+  void Quantum<T>::scatterDensity(){
+    if(this->isScattered_) return;
+
+    this->isScattered_ = true;
+    size_t currentDim = this->onePDMA_->cols();
+    // Allocate new scattered densities
+    this->allocDensity(currentDim / this->nTCS_);
+
+    if(this->nTCS_ == 1 && !this->isClosedShell) {
+
+      (*this->onePDMScalar_) = (*this->onePDMA_) + (*this->onePDMB_);
+      (*this->onePDMMz_)     = (*this->onePDMA_) - (*this->onePDMB_);
+
+      // Deallocate space
+      this->onePDMA_.reset();
+      this->onePDMB_.reset();
+
+    } else if(this->nTCS_ == 2) {
+
+      for(auto I = 0, i = 0; I < currentDim; I += this->nTCS_, i++)
+      for(auto J = 0, j = 0; J < currentDim; J += this->nTCS_, j++){
+
+        (*this->onePDMScalar_)(i,j) = 
+          (*this->onePDMA_)(I,J) + (*this->onePDMA_)(I+1,J+1);
+        (*this->onePDMMz_)(i,j) = 
+          (*this->onePDMA_)(I,J) - (*this->onePDMA_)(I+1,J+1);
+        (*this->onePDMMx_)(i,j) = 
+          (*this->onePDMA_)(I+1,J) + (*this->onePDMA_)(I,J+1);
+
+        // In the case of Real Orbitals, My is a pure imaginary
+        // Hermetian matrix stored as an anti-symmetric 
+        // real matrix
+        (*this->onePDMMy_)(i,j) = 
+          (*this->onePDMA_)(I+1,J) - (*this->onePDMA_)(I,J+1);
+
+      };
+      this->complexMyScale();
+
+      this->onePDMA_.reset();
+
+    };
+  };
+
+  template<typename T>
+  void Quantum<T>::gatherDensity(){
+    if(!this->isScattered_) return;
+
+    this->isScattered_ = false;
+    size_t currentDim = this->onePDMScalar_->cols();
+    // Allocate new scattered densities
+    this->allocDensity(currentDim);
+
+    if(this->nTCS_ == 1 && !this->isClosedShell) {
+
+      cout << "HERE" << endl;
+      this->onePDMA_->noalias() = (*this->onePDMScalar_) + (*this->onePDMMz_);
+      this->onePDMB_->noalias() = (*this->onePDMScalar_) - (*this->onePDMMz_);
+      cout << "HERE" << endl;
+
+      (*this->onePDMA_) *= 0.5;
+      (*this->onePDMB_) *= 0.5;
+      cout << "HERE" << endl;
+
+      // Deallocate space
+      this->onePDMScalar_.reset();
+      this->onePDMMz_.reset();
+      cout << "HERE" << endl;
+
+    } else if(this->nTCS_ == 2) {
+
+      // Since 
+      //   My = i(PBA - PAB)
+      //   PAB = Mx - i * My
+      //   PBA = Mx + i * My
+      // "My" is scaled by "i" before entering the reconstruction
+      //
+      // ** Note that this scaling is a dummy call for double 
+      // precision objects and the sign is accounted for implicitly
+      // through a flip in sign in the reconstruction **
+      this->complexMyScale();
+
+      for(auto I = 0, i = 0; i < currentDim; I += this->nTCS_, i++)
+      for(auto J = 0, j = 0; j < currentDim; J += this->nTCS_, j++){
+
+        (*this->onePDMA_)(I,J) = 
+          (*this->onePDMScalar_)(i,j) + (*this->onePDMMz_)(i,j);
+        (*this->onePDMA_)(I+1,J+1) = 
+          (*this->onePDMScalar_)(i,j) - (*this->onePDMMz_)(i,j);
+
+        if(typeid(T).hash_code() == typeid(dcomplex).hash_code()){
+          (*this->onePDMA_)(I,J+1) = 
+            (*this->onePDMMx_)(i,j) - (*this->onePDMMy_)(i,j); 
+          (*this->onePDMA_)(I+1,1) = 
+            (*this->onePDMMx_)(i,j) + (*this->onePDMMy_)(i,j); 
+        } else {
+          // Sign flip viz complex case because there is an implied
+          // "i" infront of the pure imaginary My
+          (*this->onePDMA_)(I,J+1) = 
+            (*this->onePDMMx_)(i,j) + (*this->onePDMMy_)(i,j); 
+          (*this->onePDMA_)(I+1,1) = 
+            (*this->onePDMMx_)(i,j) - (*this->onePDMMy_)(i,j); 
+        }
+      };
+
+      (*this->onePDMA_) *= 0.5;
+
+      // Deallocate Space
+      this->onePDMScalar_.reset();
+      this->onePDMMz_.reset();
+      this->onePDMMy_.reset();
+      this->onePDMMx_.reset();
+
+    };
+  };
+
+
 
 }; // namespace ChronusQ
 

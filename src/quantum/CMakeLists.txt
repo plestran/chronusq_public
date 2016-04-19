@@ -1,7 +1,7 @@
 if(APPLE)
-add_library(quantum STATIC quantum_copy.cpp)
+add_library(quantum STATIC quantum_copy.cpp quantum_density.cpp)
 else()
-add_library(quantum SHARED quantum_copy.cpp)
+add_library(quantum SHARED quantum_copy.cpp quantum_density.cpp)
 endif()
 
 if(APPLE)
