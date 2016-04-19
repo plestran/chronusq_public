@@ -222,9 +222,6 @@ public:
   std::vector<ConstRealMap> orbitalDipoleSep_; ///< r x del
 
 
-  // Relativistic Integrals
-  std::unique_ptr<RealTensor4d>  PV1P_; ///< Del Transformed one electron potential (Numerical)
-
   bool	haveAOTwoE; ///< Whether or not the two-bodied molecular integrals have been evaluated (for in-core integrals)
   bool	haveAOOneE; ///< Whether or not the one-body molecular integrals have been evaluated
   bool  haveSchwartz; ///< Whether or not the Schwartz bound tensor has been evaluated for the primary basis set
@@ -284,7 +281,6 @@ public:
     this->elecQuadpole_ = nullptr;
     this->elecOctpole_  = nullptr;
     this->RcrossDel_    = nullptr;
-    this->PV1P_         = nullptr;
 
     this->haveAOTwoE   = false;
     this->haveAOOneE   = false;
