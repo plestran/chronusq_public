@@ -287,6 +287,7 @@ namespace ChronusQ {
 
     } else if(this->nTCS_ == 2) {
 
+      /*
       for(auto I = 0, i = 0; I < currentDim; I += this->nTCS_, i++)
       for(auto J = 0, j = 0; J < currentDim; J += this->nTCS_, j++){
 
@@ -304,29 +305,28 @@ namespace ChronusQ {
           (*this->onePDMA_)(I,J+1) - (*this->onePDMA_)(I+1,J);
 
       };
-      /*
+      */
       Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> > 
         PAA(this->onePDMA_->data(),
             currentDim/this->nTCS_, currentDim/this->nTCS_,
-            Eigen::Stride<Dynamic,Dynamic>(2,2));
+            Eigen::Stride<Dynamic,Dynamic>(2*currentDim,2));
       Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> > 
         PBA(this->onePDMA_->data() + 1,
             currentDim/this->nTCS_, currentDim/this->nTCS_,
-            Eigen::Stride<Dynamic,Dynamic>(2,2));
+            Eigen::Stride<Dynamic,Dynamic>(2*currentDim,2));
       Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> > 
-        PAB(this->onePDMA_->data() + currentDim/this->nTCS_,
+        PAB(this->onePDMA_->data() + currentDim,
             currentDim/this->nTCS_, currentDim/this->nTCS_,
-            Eigen::Stride<Dynamic,Dynamic>(2,2));
+            Eigen::Stride<Dynamic,Dynamic>(2*currentDim,2));
       Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> > 
-        PBB(this->onePDMA_->data() + (currentDim/this->nTCS_) + 1,
+        PBB(this->onePDMA_->data() + currentDim + 1,
             currentDim/this->nTCS_, currentDim/this->nTCS_,
-            Eigen::Stride<Dynamic,Dynamic>(2,2));
+            Eigen::Stride<Dynamic,Dynamic>(2*currentDim,2));
 
       this->onePDMScalar_->noalias() = PAA + PBB;
       this->onePDMMz_->noalias()     = PAA - PBB;
-      this->onePDMMy_->noalias()     = PBA - PAB;
-      this->onePDMMx_->noalias()     = PBA + PAB;
-      */
+      this->onePDMMy_->noalias()     = PAB - PBA;
+      this->onePDMMx_->noalias()     = PAB + PBA;
 
       this->complexMyScale();
 
@@ -369,6 +369,7 @@ namespace ChronusQ {
       // through a flip in sign in the reconstruction **
       this->complexMyScale();
 
+      /*
       for(auto I = 0, i = 0; i < currentDim; I += this->nTCS_, i++)
       for(auto J = 0, j = 0; j < currentDim; J += this->nTCS_, j++){
 
@@ -391,7 +392,34 @@ namespace ChronusQ {
             (*this->onePDMMx_)(i,j) - (*this->onePDMMy_)(i,j); 
         }
       };
+      */
+      Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> > 
+        PAA(this->onePDMA_->data(), currentDim, currentDim,
+            Eigen::Stride<Dynamic,Dynamic>(2 * currentDim * this->nTCS_,2));
+      Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> > 
+        PBA(this->onePDMA_->data() + 1, currentDim, currentDim,
+            Eigen::Stride<Dynamic,Dynamic>(2 * currentDim * this->nTCS_,2));
+      Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> > 
+        PAB(this->onePDMA_->data() + currentDim * this->nTCS_,
+            currentDim, currentDim,
+            Eigen::Stride<Dynamic,Dynamic>(2 * currentDim * this->nTCS_,2));
+      Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> > 
+        PBB(this->onePDMA_->data() + (currentDim * this->nTCS_) + 1,
+            currentDim, currentDim,
+            Eigen::Stride<Dynamic,Dynamic>(2 * currentDim * this->nTCS_,2));
 
+      PAA.noalias() = (*this->onePDMScalar_) + (*this->onePDMMz_);
+      PBB.noalias() = (*this->onePDMScalar_) - (*this->onePDMMz_);
+
+      if(typeid(T).hash_code() == typeid(dcomplex).hash_code()) {
+        PAB.noalias() = (*this->onePDMMx_) - (*this->onePDMMy_);
+        PBA.noalias() = (*this->onePDMMx_) + (*this->onePDMMy_);
+      } else {
+        // Sign flip viz complex case because there is an implied
+        // "i" infront of the pure imaginary My
+        PAB.noalias() = (*this->onePDMMx_) + (*this->onePDMMy_);
+        PBA.noalias() = (*this->onePDMMx_) - (*this->onePDMMy_);
+      }
       (*this->onePDMA_) *= 0.5;
 
       // Deallocate Space
