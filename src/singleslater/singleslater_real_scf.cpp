@@ -135,9 +135,11 @@ void SingleSlater<double>::diagFock(){
     cout << "Scatter" << endl;
     this->scatterDensity();
     prettyPrint(cout,(*this->onePDMScalar_),"S");
-    prettyPrint(cout,(*this->onePDMMx_),"X");
-    prettyPrint(cout,(*this->onePDMMy_),"Y");
     prettyPrint(cout,(*this->onePDMMz_),"Z");
+    if(this->nTCS_ == 2) {
+      prettyPrint(cout,(*this->onePDMMx_),"X");
+      prettyPrint(cout,(*this->onePDMMy_),"Y");
+    }
     cout << "Gather" << endl;
     this->gatherDensity();
     prettyPrint(cout,DCPY,"BEFORE");

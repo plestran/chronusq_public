@@ -291,7 +291,7 @@ namespace ChronusQ {
     scattered.emplace_back(*this->onePDMScalar_);
     scattered.emplace_back(*this->onePDMMz_);
 
-    if(this->nTCS_ == 2)
+    if(this->nTCS_ == 2) {
       scattered.emplace_back(*this->onePDMMy_);
       scattered.emplace_back(*this->onePDMMx_);
       Quantum<T>::spinScatter(*this->onePDMA_,scattered);
@@ -309,13 +309,13 @@ namespace ChronusQ {
     this->isScattered_ = false;
 
     // Allocate new scattered densities
-    this->allocDensity(currentDim);
+    this->allocDensity(this->onePDMScalar_->cols());
 
     std::vector<std::reference_wrapper<TMatrix>> scattered;
     scattered.emplace_back(*this->onePDMScalar_);
     scattered.emplace_back(*this->onePDMMz_);
 
-    if(this->nTCS_ == 2)
+    if(this->nTCS_ == 2) { 
       scattered.emplace_back(*this->onePDMMy_);
       scattered.emplace_back(*this->onePDMMx_);
 
@@ -343,16 +343,16 @@ namespace ChronusQ {
 
   template<typename T>
   template<typename Op>
-  static void Quantum<T>::spinScatter(Op &op1, Op &op2, 
+  void Quantum<T>::spinScatter(Op &op1, Op &op2, 
       std::vector<std::reference_wrapper<Op>> &scattered ){
 
-    scattered[0] = op1 + op2;
-    scattered[1] = op1 - op2;
+    scattered[0].get() = op1 + op2;
+    scattered[1].get() = op1 - op2;
   }
 
   template<typename T>
   template<typename Op>
-  static void Quantum<T>::spinScatter(Op &op, 
+  void Quantum<T>::spinScatter(Op &op, 
       std::vector<std::reference_wrapper<Op>> &scattered ){
 
     size_t currentDim = op.cols();
@@ -370,28 +370,28 @@ namespace ChronusQ {
       PBB(op.data() + currentDim + 1, currentDim/2, currentDim/2,
           Eigen::Stride<Dynamic,Dynamic>(2*currentDim,2));
 
-    scattered[0] = PAA + PBB;
-    scattered[1] = PAA - PBB;
-    scattered[2] = PAB - PBA;
-    scattered[3] = PAB + PBA;
+    scattered[0].get() = PAA + PBB;
+    scattered[1].get() = PAA - PBB;
+    scattered[2].get() = PAB - PBA;
+    scattered[3].get() = PAB + PBA;
 
   };
 
   template<typename T>
   template<typename Op>
-  static void Quantum<T>::spinScatter(Op &op1, Op &op2, 
+  void Quantum<T>::spinGather(Op &op1, Op &op2, 
       std::vector<std::reference_wrapper<Op>> &scattered ){
 
-    op1.noalias() = 0.5 * (scattered[0] + scattered[1]);
-    op2.noalias() = 0.5 * (scattered[0] - scattered[1]);
+    op1.noalias() = 0.5 * (scattered[0].get() + scattered[1].get());
+    op2.noalias() = 0.5 * (scattered[0].get() - scattered[1].get());
     
   }
 
   template<typename T>
   template<typename Op>
-  static void Quantum<T>::spinGather(Op &op, 
+  void Quantum<T>::spinGather(Op &op, 
       std::vector<std::reference_wrapper<Op>> &scattered ){
-    size_t currentDim = scattered[0].cols();
+    size_t currentDim = scattered[0].get().cols();
 
     Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> > 
       PAA(op.data(), currentDim, currentDim,
@@ -408,17 +408,17 @@ namespace ChronusQ {
           currentDim, currentDim,
           Eigen::Stride<Dynamic,Dynamic>(2 * currentDim * 2,2));
 
-    PAA.noalias() = scattered[0] + scattered[1];
-    PBB.noalias() = scattered[0] - scattered[1];
+    PAA.noalias() = scattered[0].get() + scattered[1].get();
+    PBB.noalias() = scattered[0].get() - scattered[1].get();
 
     if(typeid(T).hash_code() == typeid(dcomplex).hash_code()) {
-      PAB.noalias() = scattered[3] - scattered[2];
-      PBA.noalias() = scattered[3] + scattered[2];
+      PAB.noalias() = scattered[3].get() - scattered[2].get();
+      PBA.noalias() = scattered[3].get() + scattered[2].get();
     } else {
       // Sign flip viz complex case because there is an implied
       // "i" infront of the pure imaginary y component
-      PAB.noalias() = scattered[3] + scattered[2];
-      PBA.noalias() = scattered[3] - scattered[2];
+      PAB.noalias() = scattered[3].get() + scattered[2].get();
+      PBA.noalias() = scattered[3].get() - scattered[2].get();
     }
     op *= 0.5;
   };

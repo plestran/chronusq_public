@@ -12,7 +12,7 @@ geom:
 #  Job Specification
 #
 [QM]
-reference = Real GHF
+reference = Real UHF
 job       = SCF
 basis     = sto3g.gbs
 ints			= incore
