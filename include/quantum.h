@@ -301,9 +301,33 @@ namespace ChronusQ {
         // Hermetian matrix stored as an anti-symmetric 
         // real matrix
         (*this->onePDMMy_)(i,j) = 
-          (*this->onePDMA_)(I+1,J) - (*this->onePDMA_)(I,J+1);
+          (*this->onePDMA_)(I,J+1) - (*this->onePDMA_)(I+1,J);
 
       };
+      /*
+      Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> > 
+        PAA(this->onePDMA_->data(),
+            currentDim/this->nTCS_, currentDim/this->nTCS_,
+            Eigen::Stride<Dynamic,Dynamic>(2,2));
+      Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> > 
+        PBA(this->onePDMA_->data() + 1,
+            currentDim/this->nTCS_, currentDim/this->nTCS_,
+            Eigen::Stride<Dynamic,Dynamic>(2,2));
+      Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> > 
+        PAB(this->onePDMA_->data() + currentDim/this->nTCS_,
+            currentDim/this->nTCS_, currentDim/this->nTCS_,
+            Eigen::Stride<Dynamic,Dynamic>(2,2));
+      Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> > 
+        PBB(this->onePDMA_->data() + (currentDim/this->nTCS_) + 1,
+            currentDim/this->nTCS_, currentDim/this->nTCS_,
+            Eigen::Stride<Dynamic,Dynamic>(2,2));
+
+      this->onePDMScalar_->noalias() = PAA + PBB;
+      this->onePDMMz_->noalias()     = PAA - PBB;
+      this->onePDMMy_->noalias()     = PBA - PAB;
+      this->onePDMMx_->noalias()     = PBA + PAB;
+      */
+
       this->complexMyScale();
 
       this->onePDMA_.reset();
@@ -322,19 +346,15 @@ namespace ChronusQ {
 
     if(this->nTCS_ == 1 && !this->isClosedShell) {
 
-      cout << "HERE" << endl;
       this->onePDMA_->noalias() = (*this->onePDMScalar_) + (*this->onePDMMz_);
       this->onePDMB_->noalias() = (*this->onePDMScalar_) - (*this->onePDMMz_);
-      cout << "HERE" << endl;
 
       (*this->onePDMA_) *= 0.5;
       (*this->onePDMB_) *= 0.5;
-      cout << "HERE" << endl;
 
       // Deallocate space
       this->onePDMScalar_.reset();
       this->onePDMMz_.reset();
-      cout << "HERE" << endl;
 
     } else if(this->nTCS_ == 2) {
 
@@ -360,14 +380,14 @@ namespace ChronusQ {
         if(typeid(T).hash_code() == typeid(dcomplex).hash_code()){
           (*this->onePDMA_)(I,J+1) = 
             (*this->onePDMMx_)(i,j) - (*this->onePDMMy_)(i,j); 
-          (*this->onePDMA_)(I+1,1) = 
+          (*this->onePDMA_)(I+1,J) = 
             (*this->onePDMMx_)(i,j) + (*this->onePDMMy_)(i,j); 
         } else {
           // Sign flip viz complex case because there is an implied
           // "i" infront of the pure imaginary My
           (*this->onePDMA_)(I,J+1) = 
             (*this->onePDMMx_)(i,j) + (*this->onePDMMy_)(i,j); 
-          (*this->onePDMA_)(I+1,1) = 
+          (*this->onePDMA_)(I+1,J) = 
             (*this->onePDMMx_)(i,j) - (*this->onePDMMy_)(i,j); 
         }
       };

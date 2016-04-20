@@ -131,10 +131,18 @@ void SingleSlater<double>::diagFock(){
   char UPLO = 'U';
   auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
   if(this->isPrimary){
+    RealMatrix DCPY(*this->onePDMA_);
     cout << "Scatter" << endl;
     this->scatterDensity();
+    prettyPrint(cout,(*this->onePDMScalar_),"S");
+    prettyPrint(cout,(*this->onePDMMx_),"X");
+    prettyPrint(cout,(*this->onePDMMy_),"Y");
+    prettyPrint(cout,(*this->onePDMMz_),"Z");
     cout << "Gather" << endl;
     this->gatherDensity();
+    prettyPrint(cout,DCPY,"BEFORE");
+    prettyPrint(cout,(*this->onePDMA_),"AFTER");
+    prettyPrint(cout,DCPY - (*this->onePDMA_),"DIFF");
   }
 
   RealMap X(this->XMem_,NTCSxNBASIS,NTCSxNBASIS);
