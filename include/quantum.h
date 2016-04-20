@@ -234,7 +234,9 @@ namespace ChronusQ {
 
     void scatterDensity();
     void gatherDensity();
-    void complexMyScale();
+
+    template<typename Op>
+    static void complexMyScale(Op &);
 
 
     inline void setMaxMultipole(int i){ this->maxMultipole_ = i;   };
@@ -279,6 +281,13 @@ namespace ChronusQ {
     ;
   };
 
+  template<>
+  template<typename Op>
+  void Quantum<double>::complexMyScale(Op &op){ };
+  template<>
+  template<typename Op>
+  void Quantum<dcomplex>::complexMyScale(Op &op){ op *= dcomplex(0.0,1.0); };
+
   template<typename T>
   void Quantum<T>::scatterDensity(){
     if(this->isScattered_) return;
@@ -295,7 +304,6 @@ namespace ChronusQ {
       scattered.emplace_back(*this->onePDMMy_);
       scattered.emplace_back(*this->onePDMMx_);
       Quantum<T>::spinScatter(*this->onePDMA_,scattered);
-      this->complexMyScale();
     } else if(!this->isClosedShell)
       Quantum<T>::spinScatter(*this->onePDMA_,*this->onePDMB_,scattered);
 
@@ -318,18 +326,6 @@ namespace ChronusQ {
     if(this->nTCS_ == 2) { 
       scattered.emplace_back(*this->onePDMMy_);
       scattered.emplace_back(*this->onePDMMx_);
-
-      // Since 
-      //   My = i(PBA - PAB)
-      //   PAB = Mx - i * My
-      //   PBA = Mx + i * My
-      // "My" is scaled by "i" before entering the reconstruction
-      //
-      // ** Note that this scaling is a dummy call for double 
-      // precision objects and the sign is accounted for implicitly
-      // through a flip in sign in the reconstruction **
-      this->complexMyScale();
-
       Quantum<T>::spinGather(*this->onePDMA_,scattered);
     } else if(!this->isClosedShell)
       Quantum<T>::spinGather(*this->onePDMA_,*this->onePDMB_,scattered);
@@ -375,6 +371,9 @@ namespace ChronusQ {
     scattered[2].get() = PAB - PBA;
     scattered[3].get() = PAB + PBA;
 
+    // Scale My by "i"
+    complexMyScale(scattered[2].get());
+
   };
 
   template<typename T>
@@ -392,6 +391,17 @@ namespace ChronusQ {
   void Quantum<T>::spinGather(Op &op, 
       std::vector<std::reference_wrapper<Op>> &scattered ){
     size_t currentDim = scattered[0].get().cols();
+
+    // Since 
+    //   My = i(PBA - PAB)
+    //   PAB = Mx - i * My
+    //   PBA = Mx + i * My
+    // "My" is scaled by "i" before entering the reconstruction
+    //
+    // ** Note that this scaling is a dummy call for double 
+    // precision objects and the sign is accounted for implicitly
+    // through a flip in sign in the reconstruction **
+    complexMyScale(scattered[2].get());
 
     Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> > 
       PAA(op.data(), currentDim, currentDim,
