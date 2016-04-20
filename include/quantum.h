@@ -220,6 +220,18 @@ namespace ChronusQ {
     #include <quantum/quantum_stdproperties.h>
 
 
+    template<typename Op> 
+    static void spinScatter( Op &, std::vector<std::reference_wrapper<Op>> &);
+    template<typename Op> 
+    static void spinScatter( Op &, Op &, 
+        std::vector<std::reference_wrapper<Op>> &);
+
+    template<typename Op> 
+    static void spinGather( Op & , std::vector<std::reference_wrapper<Op>> &);
+    template<typename Op> 
+    static void spinGather( Op & , Op &, 
+        std::vector<std::reference_wrapper<Op>> &);
+
     void scatterDensity();
     void gatherDensity();
     void complexMyScale();
@@ -270,93 +282,42 @@ namespace ChronusQ {
   template<typename T>
   void Quantum<T>::scatterDensity(){
     if(this->isScattered_) return;
-
     this->isScattered_ = true;
-    size_t currentDim = this->onePDMA_->cols();
+
     // Allocate new scattered densities
-    this->allocDensity(currentDim / this->nTCS_);
+    this->allocDensity(this->onePDMA_->cols() / this->nTCS_);
 
-    if(this->nTCS_ == 1 && !this->isClosedShell) {
+    std::vector<std::reference_wrapper<TMatrix>> scattered;
+    scattered.emplace_back(*this->onePDMScalar_);
+    scattered.emplace_back(*this->onePDMMz_);
 
-      (*this->onePDMScalar_) = (*this->onePDMA_) + (*this->onePDMB_);
-      (*this->onePDMMz_)     = (*this->onePDMA_) - (*this->onePDMB_);
-
-      // Deallocate space
-      this->onePDMA_.reset();
-      this->onePDMB_.reset();
-
-    } else if(this->nTCS_ == 2) {
-
-      /*
-      for(auto I = 0, i = 0; I < currentDim; I += this->nTCS_, i++)
-      for(auto J = 0, j = 0; J < currentDim; J += this->nTCS_, j++){
-
-        (*this->onePDMScalar_)(i,j) = 
-          (*this->onePDMA_)(I,J) + (*this->onePDMA_)(I+1,J+1);
-        (*this->onePDMMz_)(i,j) = 
-          (*this->onePDMA_)(I,J) - (*this->onePDMA_)(I+1,J+1);
-        (*this->onePDMMx_)(i,j) = 
-          (*this->onePDMA_)(I+1,J) + (*this->onePDMA_)(I,J+1);
-
-        // In the case of Real Orbitals, My is a pure imaginary
-        // Hermetian matrix stored as an anti-symmetric 
-        // real matrix
-        (*this->onePDMMy_)(i,j) = 
-          (*this->onePDMA_)(I,J+1) - (*this->onePDMA_)(I+1,J);
-
-      };
-      */
-      Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> > 
-        PAA(this->onePDMA_->data(),
-            currentDim/this->nTCS_, currentDim/this->nTCS_,
-            Eigen::Stride<Dynamic,Dynamic>(2*currentDim,2));
-      Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> > 
-        PBA(this->onePDMA_->data() + 1,
-            currentDim/this->nTCS_, currentDim/this->nTCS_,
-            Eigen::Stride<Dynamic,Dynamic>(2*currentDim,2));
-      Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> > 
-        PAB(this->onePDMA_->data() + currentDim,
-            currentDim/this->nTCS_, currentDim/this->nTCS_,
-            Eigen::Stride<Dynamic,Dynamic>(2*currentDim,2));
-      Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> > 
-        PBB(this->onePDMA_->data() + currentDim + 1,
-            currentDim/this->nTCS_, currentDim/this->nTCS_,
-            Eigen::Stride<Dynamic,Dynamic>(2*currentDim,2));
-
-      this->onePDMScalar_->noalias() = PAA + PBB;
-      this->onePDMMz_->noalias()     = PAA - PBB;
-      this->onePDMMy_->noalias()     = PAB - PBA;
-      this->onePDMMx_->noalias()     = PAB + PBA;
-
+    if(this->nTCS_ == 2)
+      scattered.emplace_back(*this->onePDMMy_);
+      scattered.emplace_back(*this->onePDMMx_);
+      Quantum<T>::spinScatter(*this->onePDMA_,scattered);
       this->complexMyScale();
+    } else if(!this->isClosedShell)
+      Quantum<T>::spinScatter(*this->onePDMA_,*this->onePDMB_,scattered);
 
-      this->onePDMA_.reset();
-
-    };
+    this->onePDMA_.reset();
+    this->onePDMB_.reset();
   };
 
   template<typename T>
   void Quantum<T>::gatherDensity(){
     if(!this->isScattered_) return;
-
     this->isScattered_ = false;
-    size_t currentDim = this->onePDMScalar_->cols();
+
     // Allocate new scattered densities
     this->allocDensity(currentDim);
 
-    if(this->nTCS_ == 1 && !this->isClosedShell) {
+    std::vector<std::reference_wrapper<TMatrix>> scattered;
+    scattered.emplace_back(*this->onePDMScalar_);
+    scattered.emplace_back(*this->onePDMMz_);
 
-      this->onePDMA_->noalias() = (*this->onePDMScalar_) + (*this->onePDMMz_);
-      this->onePDMB_->noalias() = (*this->onePDMScalar_) - (*this->onePDMMz_);
-
-      (*this->onePDMA_) *= 0.5;
-      (*this->onePDMB_) *= 0.5;
-
-      // Deallocate space
-      this->onePDMScalar_.reset();
-      this->onePDMMz_.reset();
-
-    } else if(this->nTCS_ == 2) {
+    if(this->nTCS_ == 2)
+      scattered.emplace_back(*this->onePDMMy_);
+      scattered.emplace_back(*this->onePDMMx_);
 
       // Since 
       //   My = i(PBA - PAB)
@@ -369,67 +330,99 @@ namespace ChronusQ {
       // through a flip in sign in the reconstruction **
       this->complexMyScale();
 
-      /*
-      for(auto I = 0, i = 0; i < currentDim; I += this->nTCS_, i++)
-      for(auto J = 0, j = 0; j < currentDim; J += this->nTCS_, j++){
+      Quantum<T>::spinGather(*this->onePDMA_,scattered);
+    } else if(!this->isClosedShell)
+      Quantum<T>::spinGather(*this->onePDMA_,*this->onePDMB_,scattered);
 
-        (*this->onePDMA_)(I,J) = 
-          (*this->onePDMScalar_)(i,j) + (*this->onePDMMz_)(i,j);
-        (*this->onePDMA_)(I+1,J+1) = 
-          (*this->onePDMScalar_)(i,j) - (*this->onePDMMz_)(i,j);
-
-        if(typeid(T).hash_code() == typeid(dcomplex).hash_code()){
-          (*this->onePDMA_)(I,J+1) = 
-            (*this->onePDMMx_)(i,j) - (*this->onePDMMy_)(i,j); 
-          (*this->onePDMA_)(I+1,J) = 
-            (*this->onePDMMx_)(i,j) + (*this->onePDMMy_)(i,j); 
-        } else {
-          // Sign flip viz complex case because there is an implied
-          // "i" infront of the pure imaginary My
-          (*this->onePDMA_)(I,J+1) = 
-            (*this->onePDMMx_)(i,j) + (*this->onePDMMy_)(i,j); 
-          (*this->onePDMA_)(I+1,J) = 
-            (*this->onePDMMx_)(i,j) - (*this->onePDMMy_)(i,j); 
-        }
-      };
-      */
-      Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> > 
-        PAA(this->onePDMA_->data(), currentDim, currentDim,
-            Eigen::Stride<Dynamic,Dynamic>(2 * currentDim * this->nTCS_,2));
-      Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> > 
-        PBA(this->onePDMA_->data() + 1, currentDim, currentDim,
-            Eigen::Stride<Dynamic,Dynamic>(2 * currentDim * this->nTCS_,2));
-      Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> > 
-        PAB(this->onePDMA_->data() + currentDim * this->nTCS_,
-            currentDim, currentDim,
-            Eigen::Stride<Dynamic,Dynamic>(2 * currentDim * this->nTCS_,2));
-      Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> > 
-        PBB(this->onePDMA_->data() + (currentDim * this->nTCS_) + 1,
-            currentDim, currentDim,
-            Eigen::Stride<Dynamic,Dynamic>(2 * currentDim * this->nTCS_,2));
-
-      PAA.noalias() = (*this->onePDMScalar_) + (*this->onePDMMz_);
-      PBB.noalias() = (*this->onePDMScalar_) - (*this->onePDMMz_);
-
-      if(typeid(T).hash_code() == typeid(dcomplex).hash_code()) {
-        PAB.noalias() = (*this->onePDMMx_) - (*this->onePDMMy_);
-        PBA.noalias() = (*this->onePDMMx_) + (*this->onePDMMy_);
-      } else {
-        // Sign flip viz complex case because there is an implied
-        // "i" infront of the pure imaginary My
-        PAB.noalias() = (*this->onePDMMx_) + (*this->onePDMMy_);
-        PBA.noalias() = (*this->onePDMMx_) - (*this->onePDMMy_);
-      }
-      (*this->onePDMA_) *= 0.5;
-
-      // Deallocate Space
-      this->onePDMScalar_.reset();
-      this->onePDMMz_.reset();
-      this->onePDMMy_.reset();
-      this->onePDMMx_.reset();
-
-    };
+    // Deallocate Space
+    this->onePDMScalar_.reset();
+    this->onePDMMz_.reset();
+    this->onePDMMy_.reset();
+    this->onePDMMx_.reset();
   };
+
+  template<typename T>
+  template<typename Op>
+  static void Quantum<T>::spinScatter(Op &op1, Op &op2, 
+      std::vector<std::reference_wrapper<Op>> &scattered ){
+
+    scattered[0] = op1 + op2;
+    scattered[1] = op1 - op2;
+  }
+
+  template<typename T>
+  template<typename Op>
+  static void Quantum<T>::spinScatter(Op &op, 
+      std::vector<std::reference_wrapper<Op>> &scattered ){
+
+    size_t currentDim = op.cols();
+
+    Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> > 
+      PAA(op.data(), currentDim/2, currentDim/2,
+          Eigen::Stride<Dynamic,Dynamic>(2*currentDim,2));
+    Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> > 
+      PBA(op.data() + 1, currentDim/2, currentDim/2,
+          Eigen::Stride<Dynamic,Dynamic>(2*currentDim,2));
+    Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> > 
+      PAB(op.data() + currentDim, currentDim/2, currentDim/2,
+          Eigen::Stride<Dynamic,Dynamic>(2*currentDim,2));
+    Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> > 
+      PBB(op.data() + currentDim + 1, currentDim/2, currentDim/2,
+          Eigen::Stride<Dynamic,Dynamic>(2*currentDim,2));
+
+    scattered[0] = PAA + PBB;
+    scattered[1] = PAA - PBB;
+    scattered[2] = PAB - PBA;
+    scattered[3] = PAB + PBA;
+
+  };
+
+  template<typename T>
+  template<typename Op>
+  static void Quantum<T>::spinScatter(Op &op1, Op &op2, 
+      std::vector<std::reference_wrapper<Op>> &scattered ){
+
+    op1.noalias() = 0.5 * (scattered[0] + scattered[1]);
+    op2.noalias() = 0.5 * (scattered[0] - scattered[1]);
+    
+  }
+
+  template<typename T>
+  template<typename Op>
+  static void Quantum<T>::spinGather(Op &op, 
+      std::vector<std::reference_wrapper<Op>> &scattered ){
+    size_t currentDim = scattered[0].cols();
+
+    Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> > 
+      PAA(op.data(), currentDim, currentDim,
+          Eigen::Stride<Dynamic,Dynamic>(2 * currentDim * 2,2));
+    Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> > 
+      PBA(op.data() + 1, currentDim, currentDim,
+          Eigen::Stride<Dynamic,Dynamic>(2 * currentDim * 2,2));
+    Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> > 
+      PAB(op.data() + currentDim * 2,
+          currentDim, currentDim,
+          Eigen::Stride<Dynamic,Dynamic>(2 * currentDim * 2,2));
+    Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> > 
+      PBB(op.data() + (currentDim * 2) + 1,
+          currentDim, currentDim,
+          Eigen::Stride<Dynamic,Dynamic>(2 * currentDim * 2,2));
+
+    PAA.noalias() = scattered[0] + scattered[1];
+    PBB.noalias() = scattered[0] - scattered[1];
+
+    if(typeid(T).hash_code() == typeid(dcomplex).hash_code()) {
+      PAB.noalias() = scattered[3] - scattered[2];
+      PBA.noalias() = scattered[3] + scattered[2];
+    } else {
+      // Sign flip viz complex case because there is an implied
+      // "i" infront of the pure imaginary y component
+      PAB.noalias() = scattered[3] + scattered[2];
+      PBA.noalias() = scattered[3] - scattered[2];
+    }
+    op *= 0.5;
+  };
+
 
 
 
