@@ -28,11 +28,12 @@ namespace ChronusQ{
 /**
  *  Generate shell index -> starting basis function map
  */
-void BasisSet::makeMapSh2Bf(int nTCS){
+void BasisSet::makeMapSh2Bf(){
+  this->mapSh2Bf_.clear();
   auto n = 0;
   for(auto shell : this->shells_){
      this->mapSh2Bf_.push_back(n);
-     n += nTCS*shell.size();
+     n += shell.size();
   } // loop shell
   this->haveMapSh2Bf = true;
 } // BasisSet::makeMapSh2Bf
@@ -41,6 +42,7 @@ void BasisSet::makeMapSh2Bf(int nTCS){
  *  Generate shell index -> atomic center map
  */
 void BasisSet::makeMapSh2Cen(Molecule *mol){
+  this->mapSh2Cen_.clear();
   for(auto shell : this->shells_){
     for(auto iAtom = 0; iAtom < mol->nAtoms(); iAtom++){
       std::array<double,3> center = {{ (*mol->cart())(0,iAtom),
@@ -58,14 +60,16 @@ void BasisSet::makeMapSh2Cen(Molecule *mol){
 /**
  *  Generate atomic center index -> starting basis function map
  */
-void BasisSet::makeMapCen2Bf(int nTCS, Molecule *mol){
-  if(!this->haveMapSh2Bf ) this->makeMapSh2Bf(nTCS);
+void BasisSet::makeMapCen2Bf(Molecule *mol){
+  if(!this->haveMapSh2Bf ) this->makeMapSh2Bf();
   if(!this->haveMapSh2Cen) this->makeMapSh2Cen(mol);
+  this->mapCen2Bf_.clear();
 
   for(auto iAtm = 0; iAtm < mol->nAtoms(); iAtm++){
     auto nSize = 0;
     for(auto iShell = 0; iShell < this->nShell_; iShell++){
-      if((iAtm+1) == this->mapSh2Cen_[iShell]) nSize += nTCS*this->shells_[iShell].size();
+      if((iAtm+1) == this->mapSh2Cen_[iShell]) 
+        nSize += this->shells_[iShell].size();
     } // loop iShell
     auto iSt = -1;
     for(auto iShell = 0; iShell < this->nShell_; iShell++){
@@ -74,7 +78,8 @@ void BasisSet::makeMapCen2Bf(int nTCS, Molecule *mol){
        break;
       }
     } // loop iShell
-    if(iSt == -1) CErr("Could not find Center in Basis definition",this->fileio_->out);
+    if(iSt == -1) 
+      CErr("Could not find Center in Basis definition",this->fileio_->out);
     this->mapCen2Bf_.push_back({{iSt,nSize}});
   } // loop iAtm
   this->haveMapCen2Bf = true;

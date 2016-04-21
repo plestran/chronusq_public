@@ -34,8 +34,6 @@ import libpythonapi as chronusQ
 def parseBasis(workers,ssSettings):
   basis = ssSettings['BASIS']
   
-  nTCS = workers["CQSingleSlater"].nTCS()
-
   # Make CQ::BasisSet aware of CQ::FileIO
   workers["CQBasisSet"].communicate(workers["CQFileIO"])
 
@@ -56,6 +54,6 @@ def parseBasis(workers,ssSettings):
   workers["CQBasisSet"].findBasisFile(str(basis).lower())     # 1
   workers["CQBasisSet"].parseGlobal()                         # 2
   workers["CQBasisSet"].constructLocal(workers["CQMolecule"]) # 3
-  workers["CQBasisSet"].makeMaps(nTCS,workers["CQMolecule"])  # 4
+  workers["CQBasisSet"].makeMaps(workers["CQMolecule"])  # 4
   workers["CQBasisSet"].renormShells()                        # 5
   

@@ -89,7 +89,7 @@ void AOIntegrals::OneEDriver(libint2::Operator iType) {
   }
   for(size_t i = 1; i < nthreads; i++) engines[i] = engines[0];
 
-  if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(this->nTCS_); 
+  if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(); 
 #ifdef _OPENMP
   #pragma omp parallel
 #endif
@@ -336,7 +336,7 @@ void AOIntegrals::computeAOOneE(){
   BasisSet newBasis;
   newBasis.communicate(*this->fileio_);
   this->basisSet_->genUCvomLocal(&newBasis);
-  newBasis.makeMaps(this->nTCS_,this->molecule_);
+  newBasis.makeMaps(this->molecule_);
   if(this->isPrimary) {
     cout << "Old Basis" << endl;
     for(auto i = 0 ; i < this->basisSet_->nShell(); i++)
@@ -469,7 +469,7 @@ void AOIntegrals::computeAOTwoE(){
   engines[0].set_precision(std::numeric_limits<double>::epsilon());
 
   for(int i=1; i<nthreads; i++) engines[i] = engines[0];
-  if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(this->nTCS_); 
+  if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(); 
 
   this->aoERI_->fill(0.0);
 
@@ -620,7 +620,7 @@ void AOIntegrals::finiteWidthPotential() {
 
   for(size_t i = 1; i < nthreads; i++) engines[i] = engines[0];
 
-  if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(this->nTCS_); 
+  if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(); 
 #ifdef _OPENMP
   #pragma omp parallel
 #endif

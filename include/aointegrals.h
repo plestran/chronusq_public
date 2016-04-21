@@ -411,6 +411,9 @@ public:
   template<typename TMat,typename T> void GenExchContractSpinor(TMat&,const TMat&,int,int,
                                                                 int,int,T,double);
 
+
+
+  template<typename Op,typename T> void newTwoEContractDirect();
   void compareRI();
 #endif
 //----------------------------------------//

@@ -42,7 +42,7 @@ int main(int argc, char **argv){
   basis.findBasisFile("sto3g");
   basis.parseGlobal();
   basis.constructLocal(&molecule);
-  basis.makeMaps(1,&molecule);
+  basis.makeMaps(&molecule);
   basis.renormShells();
 
   aoints.communicate(molecule,basis,fileio,controls);

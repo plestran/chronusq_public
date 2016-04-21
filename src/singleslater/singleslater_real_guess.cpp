@@ -174,8 +174,7 @@ void SingleSlater<double>::SADGuess() {
       // Construct atomic basis set from the reference
       this->basisset_->constructExtrn(&uniqueAtom,&basisSetAtom);
       // Generate basis maps
-      basisSetAtom.makeMapSh2Bf(1);
-      basisSetAtom.makeMapSh2Cen(&uniqueAtom);
+      basisSetAtom.makeMaps(&uniqueAtom);
       basisSetAtom.renormShells(); // Libint throws a hissy fit without this
  
       controlAtom.iniControls();

@@ -35,7 +35,7 @@ template<>
 void BasisSet::computeShBlkNorm(bool doBeta, int nTCS, const RealMatrix *DAlpha, 
                                    const RealMatrix *DBeta){
   // If map doesnt exist, make it
-  if(!this->haveMapSh2Bf) this->makeMapSh2Bf(nTCS);
+  if(!this->haveMapSh2Bf) this->makeMapSh2Bf();
 
   // Allocate Matricies
   this->shBlkNormAlpha = 
@@ -68,7 +68,7 @@ template<>
 void BasisSet::computeShBlkNorm(bool doBeta,int nTCS,const ComplexMatrix *DAlpha, 
                                    const ComplexMatrix *DBeta){
   // If map doesnt exist, make it
-  if(!this->haveMapSh2Bf) this->makeMapSh2Bf(nTCS);
+  if(!this->haveMapSh2Bf) this->makeMapSh2Bf();
 
   // Allocate Matricies
   this->shBlkNormAlpha = 

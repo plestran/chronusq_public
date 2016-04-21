@@ -130,22 +130,22 @@ void SingleSlater<double>::diagFock(){
   char JOBZ = 'V';
   char UPLO = 'U';
   auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
-  if(this->isPrimary){
-    RealMatrix DCPY(*this->onePDMA_);
-    cout << "Scatter" << endl;
-    this->scatterDensity();
-    prettyPrint(cout,(*this->onePDMScalar_),"S");
-    prettyPrint(cout,(*this->onePDMMz_),"Z");
-    if(this->nTCS_ == 2) {
-      prettyPrint(cout,(*this->onePDMMx_),"X");
-      prettyPrint(cout,(*this->onePDMMy_),"Y");
-    }
-    cout << "Gather" << endl;
-    this->gatherDensity();
-    prettyPrint(cout,DCPY,"BEFORE");
-    prettyPrint(cout,(*this->onePDMA_),"AFTER");
-    prettyPrint(cout,DCPY - (*this->onePDMA_),"DIFF");
-  }
+//if(this->isPrimary){
+//  RealMatrix DCPY(*this->onePDMA_);
+//  cout << "Scatter" << endl;
+//  this->scatterDensity();
+//  prettyPrint(cout,(*this->onePDMScalar_),"S");
+//  prettyPrint(cout,(*this->onePDMMz_),"Z");
+//  if(this->nTCS_ == 2) {
+//    prettyPrint(cout,(*this->onePDMMx_),"X");
+//    prettyPrint(cout,(*this->onePDMMy_),"Y");
+//  }
+//  cout << "Gather" << endl;
+//  this->gatherDensity();
+//  prettyPrint(cout,DCPY,"BEFORE");
+//  prettyPrint(cout,(*this->onePDMA_),"AFTER");
+//  prettyPrint(cout,DCPY - (*this->onePDMA_),"DIFF");
+//}
 
   RealMap X(this->XMem_,NTCSxNBASIS,NTCSxNBASIS);
   RealMap POldAlpha(this->POldAlphaMem_,NTCSxNBASIS,NTCSxNBASIS);

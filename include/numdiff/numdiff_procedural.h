@@ -237,8 +237,8 @@ void NumericalDifferentiation<T>::cartesianDiff(){
     basis_p1.constructLocal(&mol_p1);
     basis_m1.constructLocal(&mol_m1);
     
-    basis_p1.makeMaps(1,&mol_p1);
-    basis_m1.makeMaps(1,&mol_m1);
+    basis_p1.makeMaps(&mol_p1);
+    basis_m1.makeMaps(&mol_m1);
     basis_p1.renormShells();
     basis_m1.renormShells();
 
@@ -283,8 +283,8 @@ void NumericalDifferentiation<T>::cartesianDiff(){
 
     basis_p1.constructLocal(&mol_p1);
     basis_m1.constructLocal(&mol_m1);
-    basis_p1.makeMaps(1,&mol_p1);
-    basis_m1.makeMaps(1,&mol_m1);
+    basis_p1.makeMaps(&mol_p1);
+    basis_m1.makeMaps(&mol_m1);
 
     ss_p1.initMeta();
     ss_m1.initMeta();

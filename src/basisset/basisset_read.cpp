@@ -31,17 +31,13 @@ namespace ChronusQ{
 void BasisSet::basisSetRead(FileIO * fileio, Molecule * mol, Controls *controls){
 
   std::string readString;
-  int nTCS = 1;
-  if(controls->doTCS) nTCS = 2;
-  
-  //this->fileio_ = fileio;
   this->communicate(*fileio);
  
   this->fileio_->in >> readString; // read the name of the basis set file
   this->findBasisFile(readString); // Try to find the basis set file
   this->parseGlobal();
   this->constructLocal(mol);
-  this->makeMaps(nTCS,mol);
+  this->makeMaps(mol);
   this->printInfo();
   this->renormShells();
 

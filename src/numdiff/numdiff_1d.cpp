@@ -901,9 +901,9 @@ Derivatives computeNAC2pt1D(Molecule &geom_0, Molecule &geom_p,
   basisp.constructLocal(&geom_p);
   basism.constructLocal(&geom_m);
   
-  basis0.makeMaps(1,&geom_0);
-  basisp.makeMaps(1,&geom_p);
-  basism.makeMaps(1,&geom_m);
+  basis0.makeMaps(&geom_0);
+  basisp.makeMaps(&geom_p);
+  basism.makeMaps(&geom_m);
 
 
   RealMatrix S_0_p = genSpx(basis0,basisp);

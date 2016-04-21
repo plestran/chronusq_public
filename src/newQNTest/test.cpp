@@ -84,7 +84,7 @@ int main(int argc, char **argv){
   basis.communicate(fileio);
   basis.parseGlobal();
   basis.constructLocal(&molecule);
-  basis.makeMaps(1,&molecule);
+  basis.makeMaps(&molecule);
   basis.renormShells();
 
   aoints.communicate(molecule,basis,fileio,controls);

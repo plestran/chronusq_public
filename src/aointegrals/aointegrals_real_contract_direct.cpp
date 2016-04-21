@@ -42,7 +42,7 @@ namespace ChronusQ{
 
     if(!this->haveSchwartz) this->computeSchwartz();
 
-    if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(nTCS); 
+    if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(); 
 
     if(getRank() == 0){
       AXAlpha.setZero();
@@ -279,7 +279,7 @@ namespace ChronusQ{
     int nthreads = 1;
 #endif
     if(!this->haveSchwartz) this->computeSchwartz();
-    if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(nTCS); 
+    if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(); 
     for(auto i = 0; i < nVec; i++) AXAlpha[i].setZero();
     if(!RHF && !doTCS)
       for(auto i = 0; i < nVec; i++) AXBeta[i].setZero();

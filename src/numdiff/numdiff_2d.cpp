@@ -423,11 +423,11 @@ void twoDScan(std::vector<double>& scanX,
     basis0p.constructLocal(&geom_0p);
     basis0m.constructLocal(&geom_0m);
    
-    basis00.makeMaps(1,&geom_00);
-    basisp0.makeMaps(1,&geom_p0);
-    basism0.makeMaps(1,&geom_m0);
-    basis0p.makeMaps(1,&geom_0p);
-    basis0m.makeMaps(1,&geom_0m);
+    basis00.makeMaps(&geom_00);
+    basisp0.makeMaps(&geom_p0);
+    basism0.makeMaps(&geom_m0);
+    basis0p.makeMaps(&geom_0p);
+    basis0m.makeMaps(&geom_0m);
 
 
     RealMatrix S_00_p0 = genSpx(basis00,basisp0);

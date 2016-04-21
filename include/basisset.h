@@ -358,9 +358,9 @@ public:
   void parseGlobal();                      ///< Parse basis set file, generate reference
   void constructLocal(Molecule *);         ///< Construct local basis defintion
   void computeMeta();                      ///< Compute meta data (nBasis, etc)
-  void makeMapSh2Bf(int);                  ///< generate mapSh2Bf
+  void makeMapSh2Bf();                  ///< generate mapSh2Bf
   void makeMapSh2Cen(Molecule *);          ///< generate mapSh2Cen
-  void makeMapCen2Bf(int,Molecule *);          ///< generate mapCen2Bf
+  void makeMapCen2Bf(Molecule *);          ///< generate mapCen2Bf
   void makeBasisMap();  ///< Generate map from basis enum to pasis path
   void renormShells();                     ///< Renormalize Libint2::Shell set
   std::vector<libint2::Shell> uncontractBasis(); ///< Unconctract the basis
@@ -369,15 +369,15 @@ public:
   void constructExtrn(Molecule *, BasisSet *); ///< Generate new basis from refernce shells
   void genUCvomLocal(BasisSet *);
 
-  inline void makeMaps(int nTCS, Molecule* mol){
-    this->makeMapSh2Bf(nTCS);
+  inline void makeMaps(Molecule* mol){
+    this->makeMapSh2Bf();
     this->makeMapSh2Cen(mol);
-    this->makeMapCen2Bf(nTCS,mol);
+    this->makeMapCen2Bf(mol);
   }
 
   // Python API
   void Wrapper_constructLocal(Molecule&);
-  void Wrapper_makeMaps(int,Molecule&);
+  void Wrapper_makeMaps(Molecule&);
 
 }; // class BasisSet
 }; // namespace ChronusQ
