@@ -412,8 +412,20 @@ public:
                                                                 int,int,T,double);
 
 
+  enum ERI_CONTRACTION_TYPE {
+    COULOMB,
+    EXCHANGE,
+    PAIR
+  };
+  template<typename Op, typename T> 
+  void newTwoEContractDirect(
+      const std::vector<std::reference_wrapper<Op>>&,
+      std::vector<std::reference_wrapper<Op>>&,
+      std::vector<ERI_CONTRACTION_TYPE>&,
+      std::vector<T>&
+  );
 
-  template<typename Op,typename T> void newTwoEContractDirect();
+
   void compareRI();
 #endif
 //----------------------------------------//
@@ -454,6 +466,7 @@ public:
   // Misc Utility Functions that deal with AOIntegrals
   static RealMatrix genSpx(BasisSet&, BasisSet&);
 };
+#include <aointegrals/aointegrals_contract.h>
 
 } // namespace ChronusQ
 

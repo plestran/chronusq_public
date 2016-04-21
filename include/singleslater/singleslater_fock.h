@@ -34,6 +34,29 @@ void SingleSlater<T>::formPT(){
   bool doRHF = (this->isClosedShell && !doTCS);
   bool doKS  = this->isDFT;
   if(!this->haveDensity) this->formDensity();
+
+  if(this->isPrimary){
+    std::vector<std::reference_wrapper<TMatrix>> mats;
+    std::vector<std::reference_wrapper<TMatrix>> ax;
+    std::vector<AOIntegrals::ERI_CONTRACTION_TYPE> contList;
+    std::vector<double> scalingFactors;
+
+    mats.emplace_back(*this->onePDMA_);
+    mats.emplace_back(*this->onePDMA_);
+    ax.emplace_back(*this->PTA_);
+    ax.emplace_back(*this->PTA_);
+    contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::COULOMB);
+    contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::EXCHANGE);
+//  scalingFactors.push_back(1.0);
+//  scalingFactors.push_back(-0.25);
+    scalingFactors.push_back(2.0);
+    scalingFactors.push_back(-1.0);
+
+    this->aointegrals_->newTwoEContractDirect(mats,ax,contList,scalingFactors);
+    (*this->PTA_) *= 0.25;
+    this->printPT();
+  }
+
   if(this->aointegrals_->integralAlgorithm == AOIntegrals::DIRECT)
     this->aointegrals_->twoEContractDirect(doRHF,doKS,true,false,doTCS,
     *this->onePDMA_,*this->PTA_,*this->onePDMB_,*this->PTB_);
@@ -44,6 +67,7 @@ void SingleSlater<T>::formPT(){
     this->aointegrals_->twoEContractN4(doRHF,doKS,true,false,doTCS,
     *this->onePDMA_,*this->PTA_,*this->onePDMB_,*this->PTB_);
   if(this->printLevel_ >= 3 && getRank() == 0) this->printPT();
+  if(this->isPrimary) CErr();
 //if(doTCS)CErr();
 }
 #endif

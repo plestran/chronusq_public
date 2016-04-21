@@ -129,8 +129,9 @@ def parseQM(workers,secDict):
     workers['CQMolecule'].setPrintLevel(ssSettings['PRINT'])
     workers['CQBasisSet'].setPrintLevel(ssSettings['PRINT'])
     workers['CQSingleSlater'].setPrintLevel(ssSettings['PRINT'])
-    workers['CQRealTime'].setPrintLevel(ssSettings['PRINT'])
     workers['CQAOIntegrals'].setPrintLevel(ssSettings['PRINT'])
+    if 'CQRealTime' in workers:
+      workers['CQRealTime'].setPrintLevel(ssSettings['PRINT'])
 
   return str(ssSettings['JOB'])
 
