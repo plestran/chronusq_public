@@ -86,24 +86,29 @@ namespace ChronusQ{
 #endif
   
     std::chrono::high_resolution_clock::time_point start,finish;
+
+    this->basisSet_->shBlkNormAlpha = std::unique_ptr<RealMatrix>(
+      new RealMatrix(this->basisSet_->nShell(),this->basisSet_->nShell())
+    );
+    if(!RHF && !doTCS)
+      this->basisSet_->shBlkNormBeta = std::unique_ptr<RealMatrix>(
+        new RealMatrix(this->basisSet_->nShell(),this->basisSet_->nShell())
+      );
+
     if(getRank() == 0){
       start = std::chrono::high_resolution_clock::now();
-      this->basisSet_->computeShBlkNorm(!RHF && !doTCS,nTCS,&XAlpha,&XBeta);
+
+    //this->basisSet_->computeShBlkNorm(!RHF && !doTCS,nTCS,&XAlpha,&XBeta);
+      this->basisSet_->computeShBlkNorm(XAlpha,
+          *this->basisSet_->shBlkNormAlpha);
+      if(!RHF && !doTCS)
+        this->basisSet_->computeShBlkNorm(XBeta,
+            *this->basisSet_->shBlkNormBeta);
+
       finish = std::chrono::high_resolution_clock::now();
       if(doFock) this->DenShBlkD = finish - start;
     }
 #ifdef CQ_ENABLE_MPI
-    // Allocate the matricies if they aren't process 0
-    if(getRank() != 0){
-      this->basisSet_->shBlkNormAlpha = std::unique_ptr<RealMatrix>(
-        new RealMatrix(this->basisSet_->nShell(),this->basisSet_->nShell())
-      );
-      if(!RHF && !doTCS)
-        this->basisSet_->shBlkNormBeta = std::unique_ptr<RealMatrix>(
-          new RealMatrix(this->basisSet_->nShell(),this->basisSet_->nShell())
-        );
-    }
-
     MPI_Bcast(this->basisSet_->shBlkNormAlpha->data(),
       this->basisSet_->nShell()*this->basisSet_->nShell(),
       MPI_DOUBLE,0,MPI_COMM_WORLD);
@@ -310,11 +315,27 @@ namespace ChronusQ{
     std::vector<RealMatrix> alphaShBlk;
     std::vector<RealMatrix> betaShBlk;
     auto start = std::chrono::high_resolution_clock::now();
+
+    this->basisSet_->shBlkNormAlpha = std::unique_ptr<RealMatrix>(
+      new RealMatrix(this->basisSet_->nShell(),this->basisSet_->nShell())
+    );
+    if(!RHF && !doTCS)
+      this->basisSet_->shBlkNormBeta = std::unique_ptr<RealMatrix>(
+        new RealMatrix(this->basisSet_->nShell(),this->basisSet_->nShell())
+      );
+
     for(auto i = 0; i < nVec; i++){
-      this->basisSet_->computeShBlkNorm(!RHF && !doTCS,nTCS,&XAlpha[i],&XBeta[i]);
+//    this->basisSet_->computeShBlkNorm(!RHF && !doTCS,nTCS,
+//        &XAlpha[i],&XBeta[i]);
+      this->basisSet_->computeShBlkNorm(XAlpha[i],
+          *this->basisSet_->shBlkNormAlpha);
       alphaShBlk.push_back(*this->basisSet_->shBlkNormAlpha);
-      if(!RHF && !doTCS)
+
+      if(!RHF && !doTCS){
+        this->basisSet_->computeShBlkNorm(XBeta[i],
+            *this->basisSet_->shBlkNormBeta);
         betaShBlk.push_back(*this->basisSet_->shBlkNormBeta);
+      }
     }
     auto finish = std::chrono::high_resolution_clock::now();
     if(doFock) this->DenShBlkD = finish - start;

@@ -364,7 +364,7 @@ public:
   void makeBasisMap();  ///< Generate map from basis enum to pasis path
   void renormShells();                     ///< Renormalize Libint2::Shell set
   std::vector<libint2::Shell> uncontractBasis(); ///< Unconctract the basis
-  template<typename TMat> void computeShBlkNorm(bool,int,const TMat*, const TMat*);
+  template<typename TMat> void computeShBlkNorm(const TMat&, RealMatrix &);
 
   void constructExtrn(Molecule *, BasisSet *); ///< Generate new basis from refernce shells
   void genUCvomLocal(BasisSet *);
@@ -380,5 +380,21 @@ public:
   void Wrapper_makeMaps(Molecule&);
 
 }; // class BasisSet
+
+template<typename TMat>
+void BasisSet::computeShBlkNorm(const TMat &Alpha, RealMatrix &ShBlkNorm) {
+  if(!this->haveMapSh2Bf) this->makeMapSh2Bf(); 
+
+  for(auto s1 = 0; s1 < this->nShell_; s1++) {
+    int bf1 = this->mapSh2Bf_[s1];
+    int n1  = this->shells_[s1].size();
+    for(auto s2 = 0; s2 < this->nShell_; s2++) {
+      int bf2 = this->mapSh2Bf_[s2];
+      int n2  = this->shells_[s2].size();
+     
+      ShBlkNorm(s1,s2) = Alpha.block(bf1,bf2,n1,n2).template lpNorm<Infinity>();
+    }
+  }
+};
 }; // namespace ChronusQ
 #endif
