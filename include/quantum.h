@@ -291,6 +291,8 @@ namespace ChronusQ {
   template<typename T>
   void Quantum<T>::scatterDensity(){
     if(this->isScattered_) return;
+    if(this->nTCS_ == 1 && this->isClosedShell)
+      return;
     this->isScattered_ = true;
 
     // Allocate new scattered densities
@@ -314,6 +316,8 @@ namespace ChronusQ {
   template<typename T>
   void Quantum<T>::gatherDensity(){
     if(!this->isScattered_) return;
+    if(this->nTCS_ == 1 && this->isClosedShell)
+      return;
     this->isScattered_ = false;
 
     // Allocate new scattered densities

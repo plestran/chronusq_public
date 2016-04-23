@@ -35,68 +35,11 @@ void SingleSlater<T>::formPT(){
   bool doKS  = this->isDFT;
   if(!this->haveDensity) this->formDensity();
 
-  /*
-  if(this->isPrimary){
-    std::vector<std::reference_wrapper<TMatrix>> mats;
-    std::vector<std::reference_wrapper<TMatrix>> ax;
-    std::vector<AOIntegrals::ERI_CONTRACTION_TYPE> contList;
-    std::vector<double> scalingFactors;
-    TMatrix GPScalar(this->nBasis_,this->nBasis_);
-    TMatrix GPMz(this->nBasis_,this->nBasis_);
-
-    if(this->nTCS_ == 1 && this->isClosedShell) {
-      mats.emplace_back(*this->onePDMA_);
-      mats.emplace_back(*this->onePDMA_);
-      ax.emplace_back(*this->PTA_);
-      ax.emplace_back(*this->PTA_);
-      contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::COULOMB);
-      contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::EXCHANGE);
-//    scalingFactors.push_back(1.0);
-//    scalingFactors.push_back(-0.25);
-      scalingFactors.push_back(2.0);
-      scalingFactors.push_back(-1.0);
-    } else {
-      cout << "HERE" << endl;
-      this->scatterDensity();
-      prettyPrint(cout,*this->onePDMScalar_,"S");
-      prettyPrint(cout,*this->onePDMMz_,"Mz");
-
-      mats.emplace_back(*this->onePDMScalar_);
-      mats.emplace_back(*this->onePDMScalar_);
-      mats.emplace_back(*this->onePDMMz_);
-      ax.emplace_back(GPScalar);
-      ax.emplace_back(GPScalar);
-      ax.emplace_back(GPMz);
-      contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::COULOMB);
-      contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::EXCHANGE);
-      contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::EXCHANGE);
-      scalingFactors.push_back(2.0);
-      scalingFactors.push_back(-1.0);
-      scalingFactors.push_back(-1.0);
-    }
-
-    this->aointegrals_->newTwoEContractDirect(mats,ax,contList,scalingFactors);
-
-
-    if(this->nTCS_ == 1 && this->isClosedShell) 
-      (*this->PTA_) *= 0.25;
-    else {
-      prettyPrint(cout,ax[1].get(),"GPS");
-      prettyPrint(cout,ax[2].get(),"GPZ");
-      std::vector<std::reference_wrapper<TMatrix>> tmp(ax.begin()+1,ax.end());
-      Quantum<T>::spinGather(*this->PTA_,*this->PTB_,tmp);
-      this->gatherDensity();
-      this->printDensity();
-    };
-
-
-    this->printPT();
-  }
-  */
 
   if(this->aointegrals_->integralAlgorithm == AOIntegrals::DIRECT)
-    this->aointegrals_->twoEContractDirect(doRHF,doKS,true,false,doTCS,
-    *this->onePDMA_,*this->PTA_,*this->onePDMB_,*this->PTB_);
+  {; }
+//  this->aointegrals_->twoEContractDirect(doRHF,doKS,true,false,doTCS,
+//  *this->onePDMA_,*this->PTA_,*this->onePDMB_,*this->PTB_);
   else if(this->aointegrals_->integralAlgorithm == AOIntegrals::DENFIT)
     this->aointegrals_->twoEContractDF(doRHF,doKS,true,*this->onePDMA_,
     *this->PTA_,*this->onePDMB_,*this->PTB_);
@@ -104,19 +47,37 @@ void SingleSlater<T>::formPT(){
     this->aointegrals_->twoEContractN4(doRHF,doKS,true,false,doTCS,
     *this->onePDMA_,*this->PTA_,*this->onePDMB_,*this->PTB_);
   if(this->printLevel_ >= 3 && getRank() == 0) this->printPT();
-//  if(this->isPrimary) CErr();
-//if(doTCS)CErr();
-  if(this->isPrimary){ // Test out new direct contract
-    std::vector<std::reference_wrapper<TMatrix>> mats;
-    std::vector<std::reference_wrapper<TMatrix>> ax;
-    std::vector<AOIntegrals::ERI_CONTRACTION_TYPE> contList;
-    std::vector<double> scalingFactors;
+
+  std::vector<std::reference_wrapper<TMatrix>> mats;
+  std::vector<std::reference_wrapper<TMatrix>> ax;
+  std::vector<AOIntegrals::ERI_CONTRACTION_TYPE> contList;
+  std::vector<double> scalingFactors;
+  this->scatterDensity();
+
+  if(this->nTCS_ == 1 && this->isClosedShell) {
+    TMatrix GPScalar(this->nBasis_,this->nBasis_);
+
+    mats.emplace_back(*this->onePDMA_);
+    mats.emplace_back(*this->onePDMA_);
+    ax.emplace_back(GPScalar);
+    ax.emplace_back(GPScalar);
+    contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::COULOMB);
+    contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::EXCHANGE);
+
+    scalingFactors.push_back(1.0);
+    scalingFactors.push_back(-0.5);
+
+    if(this->aointegrals_->integralAlgorithm == AOIntegrals::DIRECT){
+      this->aointegrals_->newTwoEContractDirect(mats,ax,contList,
+          scalingFactors);
+    
+      (*this->PTA_) = GPScalar * 0.5;
+    }
+
+  } else {
     TMatrix GPScalar(this->nBasis_,this->nBasis_);
     TMatrix GPMz(this->nBasis_,this->nBasis_);
-    TMatrix GPA(this->nBasis_,this->nBasis_);
-    TMatrix GPB(this->nBasis_,this->nBasis_);
-
-    this->scatterDensity();
+   
     mats.emplace_back(*this->onePDMScalar_);
     mats.emplace_back(*this->onePDMScalar_);
     mats.emplace_back(*this->onePDMMz_);
@@ -126,42 +87,21 @@ void SingleSlater<T>::formPT(){
     contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::COULOMB);
     contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::EXCHANGE);
     contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::EXCHANGE);
+    scalingFactors.push_back(1.0);
+    scalingFactors.push_back(-0.5);
+    scalingFactors.push_back(-0.5);
 
-    std::vector<double> possibleFactors = {0.25, 0.5, 0.75, 1.0, 1.25, 1.5,
-      1.75, 2.0};
-
-    for(auto i = 0; i < possibleFactors.size(); i++)
-    for(auto j = 0; j < possibleFactors.size(); j++)
-    for(auto k = 0; k < possibleFactors.size(); k++){
-      GPScalar.setZero();
-      GPMz.setZero();
-      GPA.setZero();
-      GPB.setZero();
-      scalingFactors.clear();
-      scalingFactors.push_back(possibleFactors[i]);
-      scalingFactors.push_back(-possibleFactors[j]);
-      scalingFactors.push_back(-possibleFactors[k]);
+    if(this->aointegrals_->integralAlgorithm == AOIntegrals::DIRECT){
       this->aointegrals_->newTwoEContractDirect(mats,ax,contList,
           scalingFactors);
-
+    
       std::vector<std::reference_wrapper<TMatrix>> toGather;
       toGather.push_back(GPScalar);
       toGather.push_back(GPMz);
-      //GPScalar *= 0.5;
-      //GPMz *= 0.5;
-      Quantum<T>::spinGather(GPA,GPB,toGather);
-
-      cout << i << " " << j << " " << k << endl;
-      prettyPrint(cout,GPA.cwiseQuotient(*this->PTA_),"A Quotient");
-      prettyPrint(cout,GPB.cwiseQuotient(*this->PTB_),"B Quotient");
-      cout << endl << endl;
-
-    };
-
-    this->gatherDensity();
-
-
+      Quantum<T>::spinGather((*this->PTA_),(*this->PTB_),toGather);
+    }
   }
+  this->gatherDensity();
 }
 #endif
 
