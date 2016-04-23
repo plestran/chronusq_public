@@ -33,7 +33,9 @@ void SingleSlater<T>::formPT(){
   bool doTCS = (this->Ref_ == TCS);
   bool doRHF = (this->isClosedShell && !doTCS);
   bool doKS  = this->isDFT;
+  cout << "HERE 3" << endl;
   if(!this->haveDensity) this->formDensity();
+  cout << "HERE 3" << endl;
 
 
   if(this->aointegrals_->integralAlgorithm == AOIntegrals::DIRECT)
@@ -47,14 +49,19 @@ void SingleSlater<T>::formPT(){
     this->aointegrals_->twoEContractN4(doRHF,doKS,true,false,doTCS,
     *this->onePDMA_,*this->PTA_,*this->onePDMB_,*this->PTB_);
   if(this->printLevel_ >= 3 && getRank() == 0) this->printPT();
+  cout << "HERE 3" << endl;
 
   std::vector<std::reference_wrapper<TMatrix>> mats;
   std::vector<std::reference_wrapper<TMatrix>> ax;
   std::vector<AOIntegrals::ERI_CONTRACTION_TYPE> contList;
   std::vector<double> scalingFactors;
+  cout << "Scattered? " << this->isScattered_ << endl;
+  cout << "Attempting to Scatter" << endl;
   this->scatterDensity();
+  cout << "HERE 3" << endl;
   double exchFactor = -0.5;
   if(this->isDFT) exchFactor = 0.0;
+  cout << "HERE 3" << endl;
 
   if(this->nTCS_ == 1 && this->isClosedShell) {
     TMatrix GPScalar(this->nBasis_,this->nBasis_);
@@ -77,6 +84,7 @@ void SingleSlater<T>::formPT(){
     }
 
   } else {
+  cout << "HERE 3" << endl;
     TMatrix GPScalar(this->nBasis_,this->nBasis_);
     TMatrix GPMz(this->nBasis_,this->nBasis_);
    
@@ -92,6 +100,7 @@ void SingleSlater<T>::formPT(){
     scalingFactors.push_back(1.0);
     scalingFactors.push_back(exchFactor);
     scalingFactors.push_back(exchFactor);
+  cout << "HERE 3" << endl;
 
     if(this->aointegrals_->integralAlgorithm == AOIntegrals::DIRECT){
       this->aointegrals_->newTwoEContractDirect(mats,ax,contList,
@@ -103,7 +112,9 @@ void SingleSlater<T>::formPT(){
       Quantum<T>::spinGather((*this->PTA_),(*this->PTB_),toGather);
     }
   }
+  cout << "HERE 4" << endl;
   this->gatherDensity();
+  cout << "HERE 3" << endl;
 }
 #endif
 

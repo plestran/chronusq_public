@@ -149,15 +149,29 @@ namespace ChronusQ {
       elecOctpole_(other.elecOctpole_),
       nTCS_(other.nTCS_),
       isClosedShell(other.isClosedShell),
-      maxMultipole_(other.maxMultipole_) {
+      maxMultipole_(other.maxMultipole_),
+      isScattered_(other.isScattered_) {
 
-      this->onePDMA_ = std::unique_ptr<TMatrix>(
-          new TMatrix(*other.onePDMA_)
-        );
-      if(!this->isClosedShell && this->nTCS_ != 2)
-        this->onePDMB_ = std::unique_ptr<TMatrix>(
-            new TMatrix(*other.onePDMB_)
-          );
+      if(!this->isScattered_) {
+        this->onePDMA_ = std::unique_ptr<TMatrix>(
+            new TMatrix(*other.onePDMA_));
+        if(!this->isClosedShell && this->nTCS_ != 2)
+          this->onePDMB_ = std::unique_ptr<TMatrix>(
+              new TMatrix(*other.onePDMB_));
+      } else {
+        this->onePDMScalar_ = std::unique_ptr<TMatrix>(
+            new TMatrix(*other.onePDMScalar_));
+
+        if(!this->isClosedShell || this->nTCS_ == 2)
+          this->onePDMMz_ = std::unique_ptr<TMatrix>(
+              new TMatrix(*other.onePDMMz_));
+        if(this->nTCS_ == 2) {
+          this->onePDMMx_ = std::unique_ptr<TMatrix>(
+              new TMatrix(*other.onePDMMx_));
+          this->onePDMMy_ = std::unique_ptr<TMatrix>(
+              new TMatrix(*other.onePDMMy_));
+        }
+      }
     }
 
     template<typename U>
@@ -166,17 +180,20 @@ namespace ChronusQ {
     virtual void formDensity() = 0;
     inline void allocDensity(unsigned int N) {
       if(!this->isScattered_) {
+        cout << "Allocating Gathered" << endl;
         this->onePDMA_ = 
           std::unique_ptr<TMatrix>(
               new TMatrix(this->nTCS_ * N,this->nTCS_ * N)
           );
         if(!this->isClosedShell){
+          cout << "HERE 2" << endl;
           this->onePDMB_ = 
             std::unique_ptr<TMatrix>(
                 new TMatrix(this->nTCS_ * N,this->nTCS_ * N)
             );
         }
       } else {
+        cout << "Allocating Scattered" << endl;
         this->onePDMScalar_ = std::unique_ptr<TMatrix>(new TMatrix(N,N));
         if((this->nTCS_ == 1 && !this->isClosedShell) || this->nTCS_ == 2)
           this->onePDMMz_ = std::unique_ptr<TMatrix>(new TMatrix(N,N));
@@ -184,7 +201,9 @@ namespace ChronusQ {
           this->onePDMMx_ = std::unique_ptr<TMatrix>(new TMatrix(N,N));
           this->onePDMMy_ = std::unique_ptr<TMatrix>(new TMatrix(N,N));
         }
+        cout << "In Alloc " << this->onePDMScalar_->cols() << endl;
       }
+
     };
 
     inline void alloc(unsigned int N){
@@ -248,6 +267,11 @@ namespace ChronusQ {
     inline TMatrix* onePDMB(){ return onePDMB_.get();};
     inline TMatrix* densityA(){ return onePDMA_.get();};
     inline TMatrix* densityB(){ return onePDMB_.get();};
+    inline TMatrix* onePDMScalar(){ return onePDMScalar_.get();};
+    inline TMatrix* onePDMMx(){ return onePDMMx_.get();};
+    inline TMatrix* onePDMMy(){ return onePDMMy_.get();};
+    inline TMatrix* onePDMMz(){ return onePDMMz_.get();};
+    inline bool     isScattered(){ return isScattered_;};
 
     inline std::array<double,3> elecDipole(){ return elecDipole_; };
     inline std::array<std::array<double,3>,3> elecQuadpole(){ 
@@ -311,6 +335,7 @@ namespace ChronusQ {
 
     this->onePDMA_.reset();
     this->onePDMB_.reset();
+    cout << "In densityScatter " << this->onePDMScalar_->cols() << endl;
   };
 
   template<typename T>
@@ -319,13 +344,17 @@ namespace ChronusQ {
     if(this->nTCS_ == 1 && this->isClosedShell)
       return;
     this->isScattered_ = false;
+    cout << "HERE" << endl;
 
     // Allocate new scattered densities
+    cout <<this->onePDMScalar_->cols() << endl;
     this->allocDensity(this->onePDMScalar_->cols());
+    cout << "HERE" << endl;
 
     std::vector<std::reference_wrapper<TMatrix>> scattered;
     scattered.emplace_back(*this->onePDMScalar_);
     scattered.emplace_back(*this->onePDMMz_);
+    cout << "HERE" << endl;
 
     if(this->nTCS_ == 2) { 
       scattered.emplace_back(*this->onePDMMy_);
@@ -333,12 +362,14 @@ namespace ChronusQ {
       Quantum<T>::spinGather(*this->onePDMA_,scattered);
     } else if(!this->isClosedShell)
       Quantum<T>::spinGather(*this->onePDMA_,*this->onePDMB_,scattered);
+    cout << "HERE" << endl;
 
     // Deallocate Space
     this->onePDMScalar_.reset();
     this->onePDMMz_.reset();
     this->onePDMMy_.reset();
     this->onePDMMx_.reset();
+    cout << "HERE" << endl;
   };
 
   template<typename T>

@@ -98,10 +98,10 @@ void AOIntegrals::newTwoEContractDirect(
           double v = buff[ijkl] * s1234_deg;
 
           if(contractionList[iMat] == COULOMB) {
-            G[iMat][thread_id](bf1,bf2) += X[iMat].get()(bf4,bf3) * v;
-            G[iMat][thread_id](bf3,bf4) += X[iMat].get()(bf2,bf1) * v;
-            G[iMat][thread_id](bf2,bf1) += X[iMat].get()(bf3,bf4) * v;
-            G[iMat][thread_id](bf4,bf3) += X[iMat].get()(bf1,bf2) * v;
+            G[iMat][thread_id](bf1,bf2) += reinterpret_cast<double(&)[2]>(X[iMat].get()(bf4,bf3))[0] * v;
+            G[iMat][thread_id](bf3,bf4) += reinterpret_cast<double(&)[2]>(X[iMat].get()(bf2,bf1))[0] * v;
+            G[iMat][thread_id](bf2,bf1) += reinterpret_cast<double(&)[2]>(X[iMat].get()(bf3,bf4))[0] * v;
+            G[iMat][thread_id](bf4,bf3) += reinterpret_cast<double(&)[2]>(X[iMat].get()(bf1,bf2))[0] * v;
           } else if(contractionList[iMat] == EXCHANGE) {
             G[iMat][thread_id](bf1,bf3) += 0.5 * X[iMat].get()(bf2,bf4) * v;
             G[iMat][thread_id](bf2,bf4) += 0.5 * X[iMat].get()(bf1,bf3) * v;
