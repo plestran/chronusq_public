@@ -53,6 +53,8 @@ void SingleSlater<T>::formPT(){
   std::vector<AOIntegrals::ERI_CONTRACTION_TYPE> contList;
   std::vector<double> scalingFactors;
   this->scatterDensity();
+  double exchFactor = -0.5;
+  if(this->isDFT) exchFactor = 0.0;
 
   if(this->nTCS_ == 1 && this->isClosedShell) {
     TMatrix GPScalar(this->nBasis_,this->nBasis_);
@@ -65,7 +67,7 @@ void SingleSlater<T>::formPT(){
     contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::EXCHANGE);
 
     scalingFactors.push_back(1.0);
-    scalingFactors.push_back(-0.5);
+    scalingFactors.push_back(exchFactor);
 
     if(this->aointegrals_->integralAlgorithm == AOIntegrals::DIRECT){
       this->aointegrals_->newTwoEContractDirect(mats,ax,contList,
@@ -88,8 +90,8 @@ void SingleSlater<T>::formPT(){
     contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::EXCHANGE);
     contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::EXCHANGE);
     scalingFactors.push_back(1.0);
-    scalingFactors.push_back(-0.5);
-    scalingFactors.push_back(-0.5);
+    scalingFactors.push_back(exchFactor);
+    scalingFactors.push_back(exchFactor);
 
     if(this->aointegrals_->integralAlgorithm == AOIntegrals::DIRECT){
       this->aointegrals_->newTwoEContractDirect(mats,ax,contList,
