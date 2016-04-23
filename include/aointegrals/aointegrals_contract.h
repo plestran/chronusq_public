@@ -135,3 +135,45 @@ void AOIntegrals::newTwoEContractDirect(
   for(auto iTh  = 0; iTh  < nthreads; iTh++ )
     AX[iMat].get() += 0.5 * scalingFactors[iMat] * G[iMat][iTh];
 };
+
+
+template<typename Op, typename T> 
+void AOIntegrals::newTwoEContractIncore(
+    const std::vector<std::reference_wrapper<Op>> &X,
+    std::vector<std::reference_wrapper<Op>> &AX,
+    std::vector<ERI_CONTRACTION_TYPE> &contractionList,
+    std::vector<T>& scalingFactors){
+
+  assert(X.size() == AX.size());
+  assert(X.size() == contractionList.size());
+  assert(X.size() == scalingFactors.size());
+
+  size_t nMat = X.size();
+  if(!this->haveAOTwoE) this->computeAOTwoE();
+
+  RealTensor2d XTensor(X[0].get().cols(),X[0].get().rows());
+  RealTensor2d AXTensor(X[0].get().cols(),X[0].get().rows());
+  enum{i,j,k,l}; 
+
+  for(auto iMat = 0; iMat < nMat; iMat++) {
+    if(scalingFactors[iMat] == 0.0) continue;
+    XTensor.fill(0.0);
+    AXTensor.fill(0.0);
+
+    // Copy Matrix over
+    for(auto I = 0; I < X[iMat].size(); I++)
+      XTensor.storage()[I] = X[iMat].get().data()[I];
+
+    if(contractionList[iMat] == COULOMB) 
+      contract(scalingFactors[iMat],*this->aoERI_,
+        {i,j,k,l},XTensor,{l,k},0.0, AXTensor,{i,j});
+    else if(contractionList[iMat] == EXCHANGE) 
+      contract(scalingFactors[iMat],*this->aoERI_,
+        {i,l,k,j},XTensor,{l,k},0.0, AXTensor,{i,j});
+
+    // Copy Tensor over
+    for(auto I = 0; I < X[iMat].size(); I++)
+      AX[iMat].get().data()[I] = AXTensor.storage()[I];
+
+  };
+};

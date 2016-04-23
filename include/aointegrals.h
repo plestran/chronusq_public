@@ -417,6 +417,7 @@ public:
     EXCHANGE,
     PAIR
   };
+
   template<typename Op, typename T> 
   void newTwoEContractDirect(
       const std::vector<std::reference_wrapper<Op>>&,
@@ -424,6 +425,33 @@ public:
       std::vector<ERI_CONTRACTION_TYPE>&,
       std::vector<T>&
   );
+
+  template<typename Op, typename T>
+  void newTwoEContractIncore(
+      const std::vector<std::reference_wrapper<Op>>&,
+      std::vector<std::reference_wrapper<Op>>&,
+      std::vector<ERI_CONTRACTION_TYPE>&,
+      std::vector<T>&
+  );
+  
+  template<typename Op, typename T>
+  inline void newTwoEContract(
+      const std::vector<std::reference_wrapper<Op>> &X,
+      std::vector<std::reference_wrapper<Op>> &AX,
+      std::vector<ERI_CONTRACTION_TYPE> &contractionList,
+      std::vector<T> &scalingFactors
+  ) {
+    if(this->integralAlgorithm == DIRECT)
+      this->newTwoEContractDirect(X,AX,contractionList,scalingFactors);
+    else if(this->integralAlgorithm == INCORE)
+      this->newTwoEContractIncore(X,AX,contractionList,scalingFactors);
+    else
+      CErr("Only DIRECT and INCORE (N4) Integrals are avaliable",
+          this->fileio_->out);
+  };
+
+
+
 
 
   void compareRI();

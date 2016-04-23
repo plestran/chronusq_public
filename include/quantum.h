@@ -70,6 +70,7 @@ namespace ChronusQ {
     std::unique_ptr<TMatrix> onePDMMy_;
     std::unique_ptr<TMatrix> onePDMMx_;
 
+
     std::array<double,3> elecDipole_;
     std::array<std::array<double,3>,3> elecQuadpole_;
     std::array<std::array<double,3>,3> elecTracelessQuadpole_;
