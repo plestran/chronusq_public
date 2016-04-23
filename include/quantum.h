@@ -180,20 +180,17 @@ namespace ChronusQ {
     virtual void formDensity() = 0;
     inline void allocDensity(unsigned int N) {
       if(!this->isScattered_) {
-        cout << "Allocating Gathered" << endl;
         this->onePDMA_ = 
           std::unique_ptr<TMatrix>(
               new TMatrix(this->nTCS_ * N,this->nTCS_ * N)
           );
         if(!this->isClosedShell){
-          cout << "HERE 2" << endl;
           this->onePDMB_ = 
             std::unique_ptr<TMatrix>(
                 new TMatrix(this->nTCS_ * N,this->nTCS_ * N)
             );
         }
       } else {
-        cout << "Allocating Scattered" << endl;
         this->onePDMScalar_ = std::unique_ptr<TMatrix>(new TMatrix(N,N));
         if((this->nTCS_ == 1 && !this->isClosedShell) || this->nTCS_ == 2)
           this->onePDMMz_ = std::unique_ptr<TMatrix>(new TMatrix(N,N));
@@ -201,7 +198,6 @@ namespace ChronusQ {
           this->onePDMMx_ = std::unique_ptr<TMatrix>(new TMatrix(N,N));
           this->onePDMMy_ = std::unique_ptr<TMatrix>(new TMatrix(N,N));
         }
-        cout << "In Alloc " << this->onePDMScalar_->cols() << endl;
       }
 
     };
@@ -335,7 +331,6 @@ namespace ChronusQ {
 
     this->onePDMA_.reset();
     this->onePDMB_.reset();
-    cout << "In densityScatter " << this->onePDMScalar_->cols() << endl;
   };
 
   template<typename T>
@@ -344,17 +339,13 @@ namespace ChronusQ {
     if(this->nTCS_ == 1 && this->isClosedShell)
       return;
     this->isScattered_ = false;
-    cout << "HERE" << endl;
 
     // Allocate new scattered densities
-    cout <<this->onePDMScalar_->cols() << endl;
     this->allocDensity(this->onePDMScalar_->cols());
-    cout << "HERE" << endl;
 
     std::vector<std::reference_wrapper<TMatrix>> scattered;
     scattered.emplace_back(*this->onePDMScalar_);
     scattered.emplace_back(*this->onePDMMz_);
-    cout << "HERE" << endl;
 
     if(this->nTCS_ == 2) { 
       scattered.emplace_back(*this->onePDMMy_);
@@ -362,14 +353,12 @@ namespace ChronusQ {
       Quantum<T>::spinGather(*this->onePDMA_,scattered);
     } else if(!this->isClosedShell)
       Quantum<T>::spinGather(*this->onePDMA_,*this->onePDMB_,scattered);
-    cout << "HERE" << endl;
 
     // Deallocate Space
     this->onePDMScalar_.reset();
     this->onePDMMz_.reset();
     this->onePDMMy_.reset();
     this->onePDMMx_.reset();
-    cout << "HERE" << endl;
   };
 
   template<typename T>

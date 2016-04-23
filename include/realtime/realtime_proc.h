@@ -67,7 +67,6 @@ void RealTime<T>::doPropagation(){
   bool checkFP = false; // check commutator [F,P]
   int NAE = this->ssPropagator_->nAE(); // number alpha electrons
   int NBE = this->ssPropagator_->nBE(); // number beta eletrons
-  cout << "HERE 1" << endl;
 
   currentTime_ = 0.0;
 
@@ -108,7 +107,6 @@ void RealTime<T>::doPropagation(){
     this->initCSV();
   }
   for (iStep = 0; iStep <= this->maxSteps_; iStep++) {
-  cout << "HERE 1" << endl;
 
 //  FIXME: Do we need to do MCWeeny before entering propagation?
 
@@ -143,7 +141,6 @@ void RealTime<T>::doPropagation(){
         if(FinMM) deltaT_ = this->stepSize_; 
       }
     }
-  cout << "HERE 1" << endl;
 /*
 //  This Logic is not correct for RT-TDSCF with MMUT
     if (iStep == 0) deltaT_ = this->stepSize_;
@@ -166,23 +163,17 @@ void RealTime<T>::doPropagation(){
       this->formEDField();
       this->ssPropagator_->setField(this->EDField_);
     }
-  cout << "HERE 1" << endl;
 
 #ifdef CQ_ENABLE_MPI
     MPI_Bcast(&this->EDField_[0],3,MPI_DOUBLE,0,MPI_COMM_WORLD);
 #endif
 
     this->ssPropagator_->mpiBCastDensity();
-  cout << "HERE 2" << endl;
     this->ssPropagator_->formFock();
-  cout << "HERE 2" << endl;
     this->ssPropagator_->computeEnergy();
-  cout << "HERE 2" << endl;
     this->ssPropagator_->computeProperties();
-  cout << "HERE 2" << endl;
     if(this->printLevel_ > 3)
       this->ssPropagator_->printProperties();
-  cout << "HERE 2" << endl;
 
     if(getRank() == 0) {
       this->ssPropagator_->mullikenPop();
