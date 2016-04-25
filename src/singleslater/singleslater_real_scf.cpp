@@ -90,6 +90,7 @@ void SingleSlater<double>::formX(){
     S.col(i) /= std::sqrt(this->SEVlMem_[i]);
 
   X = S * V.transpose();
+//  prettyPrint(cout,X,"XO");
 
   if(this->Ref_ == CUHF){
     RealMap    Xp(this->XpMem_    ,NTCSxNBASIS,NTCSxNBASIS);

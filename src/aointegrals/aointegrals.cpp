@@ -460,6 +460,7 @@ void AOIntegrals::printOneE(){
 void AOIntegrals::alloc(){
   this->checkMeta();
   this->allocOp();
+  this->allocOrth();
   if(getRank() == 0) {
     if(this->maxMultipole_ >= 1) this->allocMultipole();
  
@@ -566,6 +567,13 @@ void AOIntegrals::allocOp(){
   } // End Serial Allocation
 #endif
 }
+
+void AOIntegrals::allocOrth() {
+  this->ortho1_ = std::unique_ptr<RealMatrix>(
+      new RealMatrix(this->nBasis_,this->nBasis_));
+  this->ortho2_ = std::unique_ptr<RealMatrix>(
+      new RealMatrix(this->nBasis_,this->nBasis_));
+};
 
 void AOIntegrals::allocMultipole(){
   try {

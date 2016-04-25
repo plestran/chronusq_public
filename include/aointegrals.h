@@ -201,6 +201,8 @@ public:
   std::unique_ptr<RealMatrix>    overlap_; ///< Overlap matrix \f$ S_{\mu\nu} = \langle \mu \vert \nu \rangle \f$
   std::unique_ptr<RealMatrix>    kinetic_; ///< Kinetic energy tensor \f$ T_{\mu\nu} = \langle \mu \vert \Delta \vert \nu \rangle \f$
   std::unique_ptr<RealMatrix>    potential_; ///< Potential energy tensor \f$ V_{\mu\nu} = \sum_A \left\langle \mu \vert r_{1A}^{-1}\vert \nu\right\rangle\f$
+  std::unique_ptr<RealMatrix>    ortho1_;
+  std::unique_ptr<RealMatrix>    ortho2_;
 
   // Resolution of the Identity
   std::unique_ptr<RealTensor3d>  aoRII_; ///< Rank-3 DFI tensor over density-fitting basis functions \f$ ( \mu\nu \vert X ) \f$
@@ -297,6 +299,7 @@ public:
     this->thresholdS_ =        1.0e-10;
     this->thresholdAB_ =       1.0e-6;
     this->thresholdSchwartz_ = 1.0e-14;
+    this->orthoType = LOWDIN;
   };
   ~AOIntegrals(){;};
   
@@ -317,7 +320,8 @@ public:
   void alloc();
   void allocOp();
   void allocMultipole();
-  void allocNumInt();
+  void allocOrth();
+
 
 
   // IO
@@ -351,12 +355,19 @@ public:
   void iniMolecularConstants();
 
   void printTimings();
-//--------------------------------------------//
-// member functions in integrals_builders.cpp //
-//--------------------------------------------//
   void computeAOTwoE(); // build two-electron AO integral matrices
   void computeAOOneE(); // build one-electron AO integral matrices
   void finiteWidthPotential();
+
+
+  enum ORTHOTYPE {
+    LOWDIN
+  };
+  ORTHOTYPE orthoType;
+  inline void computeOrtho(){
+    if(this->orthoType == LOWDIN) this->computeLowdin();
+  };
+  void computeLowdin();
 
 
   void computeAORcrossDel(); // build R cross Del matrices

@@ -384,6 +384,11 @@ void AOIntegrals::computeAOOneE(){
 
   // Get end time of one-electron integral evaluation
   auto oneEEnd = std::chrono::high_resolution_clock::now();
+
+  // Compute Orthonormal transformation matricies
+  this->computeOrtho();
+
+
   if(this->printLevel_ >= 2) this->printOneE();
 
   // Compute time differenes
@@ -668,4 +673,39 @@ void AOIntegrals::finiteWidthPotential() {
   } // end openmp parallel
 
   (*this->potential_) = this->potential_->selfadjointView<Lower>();
+};
+
+void AOIntegrals::computeLowdin() {
+  char JOBZ = 'V';
+  char UPLO = 'L';
+  int INFO;
+
+  int LWORK = 3 * this->nBasis_;
+  std::vector<double> ovlpEigValues(this->nBasis_);
+  std::vector<double> ovlpEigVectrs(this->nBasis_ * this->nBasis_);
+  std::vector<double> ovlpCpy(this->nBasis_ * this->nBasis_);
+  std::vector<double> WORK(LWORK);
+
+  std::memcpy(&ovlpEigVectrs[0],this->overlap_->data(),
+      this->nBasis_*this->nBasis_*sizeof(double));
+
+  dsyev_(&JOBZ,&UPLO,&this->nBasis_,&ovlpEigVectrs[0],&this->nBasis_,
+      &ovlpEigValues[0],&WORK[0],&LWORK,&INFO);
+
+  std::memcpy(&ovlpCpy[0],&ovlpEigVectrs[0],
+      this->nBasis_*this->nBasis_*sizeof(double));
+
+  RealMap S(&ovlpCpy[0],      this->nBasis_,this->nBasis_);
+  RealMap V(&ovlpEigVectrs[0],this->nBasis_,this->nBasis_);
+
+  for(auto i = 0; i < this->nBasis_; i++)
+    S.col(i) /= std::sqrt(ovlpEigValues[i]);
+
+  (*this->ortho1_) = S * V.transpose();
+
+  for(auto i = 0; i < this->nBasis_; i++)
+    S.col(i) *= ovlpEigValues[i];
+
+  (*this->ortho2_) = S * V.transpose();
+//prettyPrint(cout,(*this->ortho1_),"XN");
 };
