@@ -552,7 +552,6 @@ def handleReference(workers,settings):
   TCMethods = [chronusQ.Reference.TCS, chronusQ.Reference.GKS]
   if workers["CQSingleSlater"].Ref() in TCMethods:
     workers["CQSingleSlater"].setNTCS(2)
-    workers["CQAOIntegrals"].setNTCS(2)
 
 def parseRT(workers,settings):
 

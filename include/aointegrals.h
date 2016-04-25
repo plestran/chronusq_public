@@ -140,7 +140,6 @@ struct QuartetConstants{
  */
 class AOIntegrals{
   int       nBasis_; ///< Number of basis functions \f$N_{b}\f$
-  int       nTCS_;
   int       nTT_; ///< Reduced number of basis functions (lower triangle) \f$ N_b (N_b+1) / 2\f$
   int       maxMultipole_;
   int       printLevel_;
@@ -290,7 +289,6 @@ public:
     this->haveTRII     = false;
 
     // Standard Values
-    this->nTCS_             = 1;
     this->maxMultipole_     = 3;
     this->integralAlgorithm = DIRECT;
     this->isPrimary         = true;
@@ -313,8 +311,7 @@ public:
   inline void initMeta(){
     this->checkWorkers();
     this->nBasis_ = this->basisSet_->nBasis();
-    auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
-    this->nTT_    = NTCSxNBASIS * (NTCSxNBASIS+1) / 2;
+    this->nTT_    = this->nBasis_ * (this->nBasis_+1) / 2;
   }
 
   void alloc();
@@ -327,11 +324,9 @@ public:
   void writeOneE();
 
   // Getters
-  inline int nTCS(){ return this->nTCS_;}
   inline int maxMultipole(){ return this->maxMultipole_;}
 
   // Setters
-  inline void setNTCS(int i)        { this->nTCS_         = i;}
   inline void setMaxMultipole(int i){ this->maxMultipole_ = i;}
   inline void setAlgorithm(int i)   { this->integralAlgorithm = i;}
   inline void setPrintLevel(int i){ this->printLevel_ = i;}

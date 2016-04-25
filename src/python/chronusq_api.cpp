@@ -248,8 +248,6 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("communicate"    , &AOIntegrals::communicate           )
     .def("initMeta"       , &AOIntegrals::initMeta              )
     .def("alloc"          , &AOIntegrals::alloc                 )
-    .def("nTCS"           , &AOIntegrals::nTCS                  )
-    .def("setNTCS"        , &AOIntegrals::setNTCS               )
     .def("setMaxMultipole", &AOIntegrals::setMaxMultipole       )
     .def("setAlgorithm"   , &AOIntegrals::setAlgorithm          )
     .def("setPrintLevel"   , &AOIntegrals::setPrintLevel        )

@@ -28,8 +28,9 @@ using ChronusQ::AOIntegrals;
 
 void AOIntegrals::OneEDriver(libint2::Operator iType) {
   std::vector<RealMap> mat;
-  int NB = this->nTCS_*this->nBasis_;
+  int NB = this->nBasis_;
   int NBSq = NB*NB;
+
   if(iType == libint2::Operator::overlap){
     mat.push_back(RealMap(this->overlap_->data(),NB,NB));
   } else if(iType == libint2::Operator::kinetic) {
@@ -118,11 +119,11 @@ void AOIntegrals::OneEDriver(libint2::Operator iType) {
             const Eigen::Matrix<double,Dynamic,Dynamic,Eigen::RowMajor>>
             bufMat(&buff[IOff],n1,n2);
 
-          for(auto i = 0, bf1 = bf1_s; i < n1; i++, bf1 += this->nTCS_) 
-          for(auto j = 0, bf2 = bf2_s; j < n2; j++, bf2 += this->nTCS_){            
-            mat[nMat](bf1,bf2) = bufMat(i,j);
-            if(this->nTCS_ == 2) mat[nMat](bf1+1,bf2+1) = bufMat(i,j);
-          }
+          mat[nMat].block(bf1_s,bf2_s,n1,n2) = bufMat;
+//        for(auto i = 0, bf1 = bf1_s; i < n1; i++, bf1++) 
+//        for(auto j = 0, bf2 = bf2_s; j < n2; j++, bf2++){            
+//          mat[nMat](bf1,bf2) = bufMat(i,j);
+//        }
           IOff += n1*n2;
         }
       }
@@ -218,11 +219,10 @@ void AOIntegrals::computeAORcrossDel(){
   LebedevGrid GridLeb(nAngDFTGridPts_);   // Angular Grid
   Rad = new  EulerMaclaurinGrid(nRadDFTGridPts_,0.0,1.0);   
   GridLeb.genGrid();                            
-  auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
-  auto NBSQ = NTCSxNBASIS*NTCSxNBASIS;
-  RealMap rdotpX(&this->RcrossDel_->storage()[0],NTCSxNBASIS,NTCSxNBASIS);
-  RealMap rdotpY(&this->RcrossDel_->storage()[NBSQ],NTCSxNBASIS,NTCSxNBASIS);
-  RealMap rdotpZ(&this->RcrossDel_->storage()[2*NBSQ],NTCSxNBASIS,NTCSxNBASIS);
+  auto NBSQ = this->nBasis_*this->nBasis_;
+  RealMap rdotpX(&this->RcrossDel_->storage()[0],this->nBasis_,this->nBasis_);
+  RealMap rdotpY(&this->RcrossDel_->storage()[NBSQ],this->nBasis_,this->nBasis_);
+  RealMap rdotpZ(&this->RcrossDel_->storage()[2*NBSQ],this->nBasis_,this->nBasis_);
 
   std::vector<RealSparseMatrix>  sparsedmudX_; ///< basis derivative (x) (NbasisxNbasis)
   std::vector<RealSparseMatrix>  sparsedmudY_; ///< basis derivative (y) (NbasisxNbasis)
@@ -231,13 +231,13 @@ void AOIntegrals::computeAORcrossDel(){
   std::vector<RealSparseMatrix> sparseWeights_; // Weights Map
   std::vector<RealSparseMatrix> sparseDoRho_; // Evaluate density Map
   for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
-    sparseMap_.push_back(RealSparseMatrix(this->nTCS_*this->nBasis_,ngpts));
+    sparseMap_.push_back(RealSparseMatrix(this->nBasis_,ngpts));
     sparseWeights_.push_back(RealSparseMatrix(ngpts,1));
     sparseDoRho_.push_back(RealSparseMatrix(ngpts,1));
 //  Derivative
-    sparsedmudX_.push_back(RealSparseMatrix(this->nTCS_*this->nBasis_,ngpts));
-    sparsedmudY_.push_back(RealSparseMatrix(this->nTCS_*this->nBasis_,ngpts));
-    sparsedmudZ_.push_back(RealSparseMatrix(this->nTCS_*this->nBasis_,ngpts));
+    sparsedmudX_.push_back(RealSparseMatrix(this->nBasis_,ngpts));
+    sparsedmudY_.push_back(RealSparseMatrix(this->nBasis_,ngpts));
+    sparsedmudZ_.push_back(RealSparseMatrix(this->nBasis_,ngpts));
 //  Mapping over iAtom
     RealSparseMatrix *Map        = &sparseMap_[iAtm];
     RealSparseMatrix *WeightsMap = &sparseWeights_[iAtm];
@@ -512,10 +512,10 @@ void AOIntegrals::computeAOTwoE(){
 
           std::vector<std::array<int,4>> lower;
           std::vector<std::array<int,4>> upper;
-          for(int i = 0, bf1 = bf1_s, ijkl = 0 ; i < n1; ++i, bf1 += this->nTCS_) 
-          for(int j = 0, bf2 = bf2_s           ; j < n2; ++j, bf2 += this->nTCS_) 
-          for(int k = 0, bf3 = bf3_s           ; k < n3; ++k, bf3 += this->nTCS_) 
-          for(int l = 0, bf4 = bf4_s           ; l < n4; ++l, bf4 += this->nTCS_, ++ijkl) {
+          for(int i = 0, bf1 = bf1_s, ijkl = 0 ; i < n1; ++i, bf1++) 
+          for(int j = 0, bf2 = bf2_s           ; j < n2; ++j, bf2++) 
+          for(int k = 0, bf3 = bf3_s           ; k < n3; ++k, bf3++) 
+          for(int l = 0, bf4 = bf4_s           ; l < n4; ++l, bf4++, ++ijkl) {
             (*this->aoERI_)(bf1,bf2,bf3,bf4) = buff[ijkl];
             (*this->aoERI_)(bf1,bf2,bf4,bf3) = buff[ijkl];
             (*this->aoERI_)(bf2,bf1,bf3,bf4) = buff[ijkl];
@@ -524,6 +524,7 @@ void AOIntegrals::computeAOTwoE(){
             (*this->aoERI_)(bf4,bf3,bf1,bf2) = buff[ijkl];
             (*this->aoERI_)(bf3,bf4,bf2,bf1) = buff[ijkl];
             (*this->aoERI_)(bf4,bf3,bf2,bf1) = buff[ijkl];
+            /*
             if(this->nTCS_ == 2){
               (*this->aoERI_)(bf1+1,bf2+1,bf3+1,bf4+1) = buff[ijkl];
               (*this->aoERI_)(bf1+1,bf2+1,bf4+1,bf3+1) = buff[ijkl];
@@ -552,6 +553,7 @@ void AOIntegrals::computeAOTwoE(){
               (*this->aoERI_)(bf3,bf4,bf2+1,bf1+1)     = buff[ijkl];
               (*this->aoERI_)(bf4,bf3,bf2+1,bf1+1)     = buff[ijkl];
             }
+            */
 	  }
 
 	}
@@ -573,7 +575,7 @@ void AOIntegrals::computeAOTwoE(){
 
 
 void AOIntegrals::breakUpMultipole(){
-  int NB = this->nTCS_*this->nBasis_;
+  int NB = this->nBasis_;
   this->elecDipoleSep_.clear();
   this->elecQuadpoleSep_.clear();
   this->elecOctpoleSep_.clear();
@@ -650,12 +652,15 @@ void AOIntegrals::finiteWidthPotential() {
             const Eigen::Matrix<double,Dynamic,Dynamic,Eigen::RowMajor>>
             bufMat(buff,n1,n2);
 
+          this->potential_->block(bf1_s,bf2_s,n1,n2) = bufMat;
+          /*
           for(auto i = 0, bf1 = bf1_s; i < n1; i++, bf1 += this->nTCS_) 
           for(auto j = 0, bf2 = bf2_s; j < n2; j++, bf2 += this->nTCS_){            
             (*this->potential_)(bf1,bf2) -= bufMat(i,j);
             if(this->nTCS_ == 2) 
               (*this->potential_)(bf1+1,bf2+1) -= bufMat(i,j);
           }
+          */
 
         }
       }

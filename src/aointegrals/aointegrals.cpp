@@ -361,7 +361,7 @@ void AOIntegrals::printTimings() {
 
 void AOIntegrals::printOneE(){
   std::vector<RealMap> mat;
-  int NB = this->nTCS_*this->nBasis_;
+  int NB = this->nBasis_;
   int NBSq = NB*NB;
 
   mat.push_back(RealMap(this->overlap_->data(),NB,NB));
@@ -381,6 +381,7 @@ void AOIntegrals::printOneE(){
     for(auto i = 0, IOff=0; i < 3; i++,IOff+=NBSq)
       mat.push_back(RealMap(&this->RcrossDel_->storage()[IOff],NB,NB));
   
+  /*
   if(this->nTCS_ == 2){
     prettyPrintTCS(this->fileio_->out,(mat[0]),"Overlap");
     if(this->maxMultipole_ >= 1){
@@ -418,6 +419,7 @@ void AOIntegrals::printOneE(){
     prettyPrintTCS(this->fileio_->out,(mat[2]),"Potential");
     prettyPrintTCS(this->fileio_->out,(mat[3]),"Core Hamiltonian");
   } else {
+  */
     prettyPrint(this->fileio_->out,(mat[0]),"Overlap");
     if(this->maxMultipole_ >= 1){
       prettyPrint(this->fileio_->out,(mat[4]),"Electric Dipole (x)");
@@ -452,7 +454,7 @@ void AOIntegrals::printOneE(){
     prettyPrint(this->fileio_->out,(mat[1]),"Kinetic");
     prettyPrint(this->fileio_->out,(mat[2]),"Potential");
     prettyPrint(this->fileio_->out,(mat[3]),"Core Hamiltonian");
-  }
+//  }
 }
 
 void AOIntegrals::alloc(){
@@ -468,7 +470,7 @@ void AOIntegrals::alloc(){
       std::unique_ptr<QuartetConstants>(new QuartetConstants);
  
     if(this->isPrimary) 
-      this->fileio_->iniStdOpFiles(this->nTCS_*this->basisSet_->nBasis());
+      this->fileio_->iniStdOpFiles(this->basisSet_->nBasis());
   }
 #ifdef CQ_ENABLE_MPI
   MPI_Barrier(MPI_COMM_WORLD);
@@ -493,7 +495,6 @@ void AOIntegrals::alloc(){
 }
 
 void AOIntegrals::allocOp(){
-  auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
   if(getRank() == 0) {
 #ifndef USE_LIBINT
     try {
@@ -511,7 +512,7 @@ void AOIntegrals::allocOp(){
     try {
       if(this->integralAlgorithm == INCORE){ // Allocate R4 ERI Tensor
         this->aoERI_ = std::unique_ptr<RealTensor4d>(
-          new RealTensor4d(NTCSxNBASIS,NTCSxNBASIS,NTCSxNBASIS,NTCSxNBASIS)); 
+          new RealTensor4d(this->nBasis_,this->nBasis_,this->nBasis_,this->nBasis_)); 
       }
     } catch (...) {
       CErr(std::current_exception(),"N^4 ERI Tensor Allocation");
@@ -521,16 +522,16 @@ void AOIntegrals::allocOp(){
  
       // One Electron Integral
       this->oneE_      = std::unique_ptr<RealMatrix>(
-          new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); 
+          new RealMatrix(this->nBasis_,this->nBasis_)); 
       // Overlap
       this->overlap_   = std::unique_ptr<RealMatrix>(
-          new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); 
+          new RealMatrix(this->nBasis_,this->nBasis_)); 
       // Kinetic
       this->kinetic_   = std::unique_ptr<RealMatrix>(
-          new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); 
+          new RealMatrix(this->nBasis_,this->nBasis_)); 
       // Potential
       this->potential_ = std::unique_ptr<RealMatrix>(
-          new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); 
+          new RealMatrix(this->nBasis_,this->nBasis_)); 
  
     } catch(...) {
       CErr(std::current_exception(),"One Electron Integral Tensor Allocation");
@@ -550,11 +551,11 @@ void AOIntegrals::allocOp(){
  
       try { 
         this->aoRII_ = std::unique_ptr<RealTensor3d>(
-          new RealTensor3d(NTCSxNBASIS,NTCSxNBASIS,this->nTCS_*this->DFbasisSet_->nBasis())); 
+          new RealTensor3d(this->nBasis_,this->nBasis_,this->DFbasisSet_->nBasis())); 
  
         this->aoRIS_ = std::unique_ptr<RealTensor2d>(
           new RealTensor2d(
-            this->nTCS_*this->DFbasisSet_->nBasis(),this->nTCS_*this->DFbasisSet_->nBasis()
+            this->DFbasisSet_->nBasis(),this->DFbasisSet_->nBasis()
           )
         );
  
@@ -567,27 +568,26 @@ void AOIntegrals::allocOp(){
 }
 
 void AOIntegrals::allocMultipole(){
-  auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
   try {
 
     if(this->maxMultipole_ >= 1)
       this->elecDipole_ = std::unique_ptr<RealTensor3d>(
-        new RealTensor3d(NTCSxNBASIS,NTCSxNBASIS,3)
+        new RealTensor3d(this->nBasis_,this->nBasis_,3)
       );
 
     if(this->maxMultipole_ >= 2)
       this->elecQuadpole_ = std::unique_ptr<RealTensor3d>(
-        new RealTensor3d(NTCSxNBASIS,NTCSxNBASIS,6)
+        new RealTensor3d(this->nBasis_,this->nBasis_,6)
       );
 
     if(this->maxMultipole_ >= 3)
       this->elecOctpole_ = std::unique_ptr<RealTensor3d>(
-        new RealTensor3d(NTCSxNBASIS,NTCSxNBASIS,10)
+        new RealTensor3d(this->nBasis_,this->nBasis_,10)
       );
 
     if(this->maxMultipole_ >= 4)
       this->RcrossDel_ = std::unique_ptr<RealTensor3d>(
-        new RealTensor3d(NTCSxNBASIS,NTCSxNBASIS,3)
+        new RealTensor3d(this->nBasis_,this->nBasis_,3)
       );
 
   } catch(...) {
