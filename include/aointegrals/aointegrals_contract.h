@@ -75,7 +75,27 @@ void AOIntegrals::newTwoEContractDirect(
       size_t bf4_s = this->basisSet_->mapSh2Bf(s4);
       size_t n4    = this->basisSet_->shells(s4).size();
 
-      // Screening
+      // Screening (Schwartz and Shell Block Norms)
+      double shMax = 
+        std::max(shBlkNorms[0](s1,s4),
+        std::max(shBlkNorms[0](s2,s4),
+        std::max(shBlkNorms[0](s3,s4),
+        std::max(shBlkNorms[0](s1,s3),
+        std::max(shBlkNorms[0](s2,s3),
+                 shBlkNorms[0](s1,s2))))))
+          * (*this->schwartz_)(s1,s2) * (*this->schwartz_)(s3,s4);
+      for(auto iMat = 1ul; iMat < nMat; iMat++){
+        shMax = std::max(shMax,
+          std::max(shBlkNorms[iMat](s1,s4),
+          std::max(shBlkNorms[iMat](s2,s4),
+          std::max(shBlkNorms[iMat](s3,s4),
+          std::max(shBlkNorms[iMat](s1,s3),
+          std::max(shBlkNorms[iMat](s2,s3),
+                   shBlkNorms[iMat](s1,s2))))))
+            * (*this->schwartz_)(s1,s2) * (*this->schwartz_)(s3,s4));
+      };
+
+      if(shMax < this->thresholdSchwartz_ ) continue;
 
       double s12_deg = (s1 == s2) ? 1.0 : 2.0;
       double s34_deg = (s3 == s4) ? 1.0 : 2.0;
