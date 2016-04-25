@@ -152,8 +152,6 @@ class SingleSlater : public Quantum<T> {
   double Sx_, Sy_, Sz_, Ssq_;
 
   // Lengths of scratch partitions (NOT MEANT TO BE COPIED)
-  int lenX_;
-  int lenXp_;
   int lenF_;
   int lenP_;
   int lenB_;
@@ -170,13 +168,8 @@ class SingleSlater : public Quantum<T> {
   double *REAL_SCF_SCR;
   double *occNumMem_;
   double *RWORK_;
-  double *SCpyMem_;
-  double *SEVlMem_;
-  double *SEVcMem_;
-  double *LowdinWORK_;
 
   T *SCF_SCR;
-  T *XMem_;
   T *FpAlphaMem_;
   T *FpBetaMem_;
   T *POldAlphaMem_;
@@ -186,7 +179,6 @@ class SingleSlater : public Quantum<T> {
   T *FADIIS_;
   T *FBDIIS_;
   T *WORK_;
-  T *XpMem_;
   T *lambdaMem_;
   T *delFMem_;
   T *PNOMem_;
@@ -198,17 +190,14 @@ class SingleSlater : public Quantum<T> {
   void allocBetaScr();     ///< Allocate scratch for Beta related quantities
   void allocCUHFScr();     ///< Allocate scratch for CUHF realted quantities
   void allocLAPACKScr();   ///< Allocate LAPACK scratch space
-  void allocLowdin();      ///< Allocate space for Lowin intermediates
   void cleanupSCFMem();    ///< Cleanup scratch memoty for SCF
   void cleanupAlphaScr();  ///< Cleanup scratch for Alpha related quantities
   void cleanupBetaScr();   ///< Cleanup scratch for Beta related quantities
   void cleanupCUHFScr();   ///< Cleanup scratch for CUHF realted quantities
   void cleanupLAPACKScr(); ///< Cleanup LAPACK scratch space
-  void cleanupLowdin();    ///< Cleanup space for Lowin intermediates
   void complexMem();       ///< Add scratch space for Complex intermediates (?)
   void initMemLen();       ///< Populate lengths of scratch partitions
   void initSCFPtr();       ///< NULL-out pointers to scratch partitions
-  void formX();            ///< Form orthonormal basis transformation matrix
   void formNO();           ///< Form Natural Orbitals
   void diagFock();         ///< Diagonalize Fock Matrix
   void mixOrbitalsSCF();   ///< Mix the orbitals for Complex / TCS SCF

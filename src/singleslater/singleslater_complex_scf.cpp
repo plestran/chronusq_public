@@ -51,56 +51,56 @@ void SingleSlater<dcomplex>::printDensityInfo(double PAlphaRMS, double PBetaRMS,
   this->fileio_->out<<std::right<<std::setw(30)<<"RMS Beta Density = "<<std::setw(15)<<std::scientific<<PBetaRMS<<endl;
 };
 
-template<>
-void SingleSlater<dcomplex>::formX(){
-/*
-  ComplexMap X(this->XMem_,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
-  X.real() = (*this->aointegrals_->overlap_).pow(-0.5); // Make this more efficient... FIXME
-
-  if(this->Ref_ == CUHF){
-    ComplexMap Xp(this->XpMem_,this->nBasis_,this->nBasis_);
-    Xp.real() = (*this->aointegrals_->overlap_).pow(0.5); // Make this more efficient... FIXME
-  }
-*/
-  char JOBZ = 'V';
-  char UPLO = 'L';
-  int INFO;
-  auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
-
-  ComplexMap X(this->XMem_   ,NTCSxNBASIS,NTCSxNBASIS);
-  RealVecMap E(this->SEVlMem_,NTCSxNBASIS);
-  RealMap    V(this->SEVcMem_,NTCSxNBASIS,NTCSxNBASIS);
-  RealMap    S(this->SCpyMem_,NTCSxNBASIS,NTCSxNBASIS);
-
-  E.setZero();
-  V.setZero();
-  S.setZero();
-
-  std::memcpy(this->SEVcMem_,this->aointegrals_->overlap_->data(),
-    NTCSxNBASIS*NTCSxNBASIS*sizeof(double));
-
-  dsyev_(&JOBZ,&UPLO,&NTCSxNBASIS,this->SEVcMem_,&NTCSxNBASIS,this->SEVlMem_,
-    this->LowdinWORK_,&this->LWORK_,&INFO);
-  
-//V.transposeInPlace(); // b/c Row Major...
-  std::memcpy(this->SCpyMem_,this->SEVcMem_,NTCSxNBASIS * NTCSxNBASIS *
-    sizeof(double));
-
-  for(auto i = 0; i < NTCSxNBASIS; i++)
-    S.col(i) /= std::sqrt(this->SEVlMem_[i]);
-
-  X.real() = S * V.transpose();
-
-  if(this->Ref_ == CUHF){
-    ComplexMap    Xp(this->XpMem_    ,NTCSxNBASIS,NTCSxNBASIS);
-
-    for(auto i = 0; i < NTCSxNBASIS; i++)
-      S.col(i) *= this->SEVlMem_[i];
- 
-    Xp.real() = S * V.transpose();
-  }
-
-}
+//template<>
+//void SingleSlater<dcomplex>::formX(){
+///*
+//  ComplexMap X(this->XMem_,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
+//  X.real() = (*this->aointegrals_->overlap_).pow(-0.5); // Make this more efficient... FIXME
+//
+//  if(this->Ref_ == CUHF){
+//    ComplexMap Xp(this->XpMem_,this->nBasis_,this->nBasis_);
+//    Xp.real() = (*this->aointegrals_->overlap_).pow(0.5); // Make this more efficient... FIXME
+//  }
+//*/
+//  char JOBZ = 'V';
+//  char UPLO = 'L';
+//  int INFO;
+//  auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
+//
+//  ComplexMap X(this->XMem_   ,NTCSxNBASIS,NTCSxNBASIS);
+//  RealVecMap E(this->SEVlMem_,NTCSxNBASIS);
+//  RealMap    V(this->SEVcMem_,NTCSxNBASIS,NTCSxNBASIS);
+//  RealMap    S(this->SCpyMem_,NTCSxNBASIS,NTCSxNBASIS);
+//
+//  E.setZero();
+//  V.setZero();
+//  S.setZero();
+//
+//  std::memcpy(this->SEVcMem_,this->aointegrals_->overlap_->data(),
+//    NTCSxNBASIS*NTCSxNBASIS*sizeof(double));
+//
+//  dsyev_(&JOBZ,&UPLO,&NTCSxNBASIS,this->SEVcMem_,&NTCSxNBASIS,this->SEVlMem_,
+//    this->LowdinWORK_,&this->LWORK_,&INFO);
+//  
+////V.transposeInPlace(); // b/c Row Major...
+//  std::memcpy(this->SCpyMem_,this->SEVcMem_,NTCSxNBASIS * NTCSxNBASIS *
+//    sizeof(double));
+//
+//  for(auto i = 0; i < NTCSxNBASIS; i++)
+//    S.col(i) /= std::sqrt(this->SEVlMem_[i]);
+//
+//  X.real() = S * V.transpose();
+//
+//  if(this->Ref_ == CUHF){
+//    ComplexMap    Xp(this->XpMem_    ,NTCSxNBASIS,NTCSxNBASIS);
+//
+//    for(auto i = 0; i < NTCSxNBASIS; i++)
+//      S.col(i) *= this->SEVlMem_[i];
+// 
+//    Xp.real() = S * V.transpose();
+//  }
+//
+//}
 
 template<>
 void SingleSlater<dcomplex>::formNO(){
@@ -109,19 +109,28 @@ void SingleSlater<dcomplex>::formNO(){
   char UPLO = 'L';
 
   ComplexMap P(this->PNOMem_,this->nBasis_,this->nBasis_);
-  ComplexMap Xp(this->XpMem_,this->nBasis_,this->nBasis_);
 
-  P = 0.5 * Xp * (*this->onePDMA_) * Xp;
-  if(!this->isClosedShell)
-    P += 0.5 * Xp * (*this->onePDMB_) * Xp;
+  P.real() = 0.5 * (*this->aointegrals_->ortho2_) * this->onePDMA_->real() * 
+    (*this->aointegrals_->ortho2_);
+  P.imag() = 0.5 * (*this->aointegrals_->ortho2_) * this->onePDMA_->imag() * 
+    (*this->aointegrals_->ortho2_);
 
-  zheev_(&JOBZ,&UPLO,&this->nBasis_,this->PNOMem_,&this->nBasis_,this->occNumMem_,
-         this->WORK_,&this->LWORK_,this->RWORK_,&INFO);
+  if(!this->isClosedShell){
+    P.real() += 0.5 * (*this->aointegrals_->ortho2_) * this->onePDMB_->real() *
+      (*this->aointegrals_->ortho2_);
+    P.imag() += 0.5 * (*this->aointegrals_->ortho2_) * this->onePDMB_->imag() *
+      (*this->aointegrals_->ortho2_);
+  }
+
+  zheev_(&JOBZ,&UPLO,&this->nBasis_,this->PNOMem_,&this->nBasis_,
+      this->occNumMem_,this->WORK_,&this->LWORK_,this->RWORK_,&INFO);
+
   if(INFO != 0) CErr("ZHEEV Failed in FormNO",this->fileio_->out);
 //P.transposeInPlace(); //bc row major
 
   // Swap Ordering
-  for(auto i = 0; i < this->nBasis_/2; i++) P.col(i).swap(P.col(this->nBasis_ - i- 1));
+  for(auto i = 0; i < this->nBasis_/2; i++) 
+    P.col(i).swap(P.col(this->nBasis_ - i- 1));
 
 }
 
@@ -132,7 +141,6 @@ void SingleSlater<dcomplex>::diagFock(){
   char UPLO = 'U';
   auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
 
-  ComplexMap X(this->XMem_,NTCSxNBASIS,NTCSxNBASIS);
   ComplexMap POldAlpha(this->POldAlphaMem_,NTCSxNBASIS,NTCSxNBASIS);
   ComplexMap FpAlpha(this->FpAlphaMem_,NTCSxNBASIS,NTCSxNBASIS);
   ComplexMap POldBeta(this->POldBetaMem_,0,0);
@@ -145,7 +153,6 @@ void SingleSlater<dcomplex>::diagFock(){
 
   if(this->Ref_ == CUHF){
     ComplexMap P(this->PNOMem_,this->nBasis_,this->nBasis_);
-    ComplexMap Xp(this->XpMem_,this->nBasis_,this->nBasis_);
     ComplexMap DelF(this->delFMem_,this->nBasis_,this->nBasis_);
     ComplexMap Lambda(this->lambdaMem_,this->nBasis_,this->nBasis_);
 
@@ -153,9 +160,17 @@ void SingleSlater<dcomplex>::diagFock(){
     int coreSpace    = (this->molecule_->nTotalE() - activeSpace) / 2;
     int virtualSpace = this->nBasis_ - coreSpace - activeSpace;
 
-    DelF = 0.5 * X * (*this->fockA_) * X;
-    if(!this->isClosedShell)
-      DelF -= 0.5 * X * (*this->fockB_) * X;
+    DelF.real() = 0.5 * (*this->aointegrals_->ortho1_) * this->fockA_->real() * 
+      (*this->aointegrals_->ortho1_);
+    DelF.imag() = 0.5 * (*this->aointegrals_->ortho1_) * this->fockA_->imag() * 
+      (*this->aointegrals_->ortho1_);
+
+    if(!this->isClosedShell){
+      DelF.real() -= 0.5 * (*this->aointegrals_->ortho1_) * 
+        this->fockB_->real() * (*this->aointegrals_->ortho1_);
+      DelF.imag() -= 0.5 * (*this->aointegrals_->ortho1_) * 
+        this->fockB_->imag() * (*this->aointegrals_->ortho1_);
+    }
  
     DelF = P.transpose() * DelF * P;
  
@@ -165,8 +180,12 @@ void SingleSlater<dcomplex>::diagFock(){
       Lambda(i,j) = -DelF(i,j);
       Lambda(j,i) = -DelF(j,i);
     }
+
     Lambda = P  * Lambda * P.transpose();
-    Lambda = Xp * Lambda * Xp;  
+    Lambda.real() = (*this->aointegrals_->ortho2_) * Lambda.real() * 
+      (*this->aointegrals_->ortho2_);  
+    Lambda.imag() = (*this->aointegrals_->ortho2_) * Lambda.imag() * 
+      (*this->aointegrals_->ortho2_);  
  
     (*this->fockA_) += Lambda;
     if(!this->isClosedShell) (*this->fockB_) -= Lambda;
@@ -175,20 +194,32 @@ void SingleSlater<dcomplex>::diagFock(){
   POldAlpha = (*this->onePDMA_);
   if(!this->isClosedShell && this->Ref_ != TCS) POldBeta = (*this->onePDMB_);
 
-  FpAlpha = X.transpose() * (*this->fockA_) * X;
-  zheev_(&JOBZ,&UPLO,&NTCSxNBASIS,this->FpAlphaMem_,&NTCSxNBASIS,this->epsA_->data(),
-         this->WORK_,&this->LWORK_,this->RWORK_,&INFO);
+  FpAlpha.real() = (*this->aointegrals_->ortho1_).transpose() * 
+    this->fockA_->real() * (*this->aointegrals_->ortho1_);
+  FpAlpha.imag() = (*this->aointegrals_->ortho1_).transpose() * 
+    this->fockA_->imag() * (*this->aointegrals_->ortho1_);
+
+  zheev_(&JOBZ,&UPLO,&NTCSxNBASIS,this->FpAlphaMem_,&NTCSxNBASIS,
+      this->epsA_->data(),this->WORK_,&this->LWORK_,this->RWORK_,&INFO);
+
   if(INFO != 0) CErr("ZHEEV Failed Fock Alpha",this->fileio_->out);
 //FpAlpha.transposeInPlace(); // bc row major
-  (*this->moA_) = X * FpAlpha;
+  this->moA_->real() = (*this->aointegrals_->ortho1_) * FpAlpha.real();
+  this->moA_->imag() = (*this->aointegrals_->ortho1_) * FpAlpha.imag();
 
   if(!this->isClosedShell && this->Ref_ != TCS){
-    FpBeta = X.transpose() * (*this->fockB_) * X;
-    zheev_(&JOBZ,&UPLO,&this->nBasis_,this->FpBetaMem_,&this->nBasis_,this->epsB_->data(),
-           this->WORK_,&this->LWORK_,this->RWORK_,&INFO);
+    FpBeta.real() = (*this->aointegrals_->ortho1_).transpose() * 
+      this->fockB_->real() * (*this->aointegrals_->ortho1_);
+    FpBeta.imag() = (*this->aointegrals_->ortho1_).transpose() * 
+      this->fockB_->imag() * (*this->aointegrals_->ortho1_);
+
+    zheev_(&JOBZ,&UPLO,&this->nBasis_,this->FpBetaMem_,&this->nBasis_,
+        this->epsB_->data(),this->WORK_,&this->LWORK_,this->RWORK_,&INFO);
+
     if(INFO != 0) CErr("ZHEEV Failed Fock Beta",this->fileio_->out);
 //  FpBeta.transposeInPlace(); // bc row major
-    (*this->moB_) = X * FpBeta;
+    this->moB_->real() = (*this->aointegrals_->ortho1_) * FpBeta.real();
+    this->moB_->imag() = (*this->aointegrals_->ortho1_) * FpBeta.imag();
   }
 
   
@@ -306,28 +337,10 @@ void SingleSlater<dcomplex>::mixOrbitalsSCF(){
     return;
   }
   
-//CErr();
-//indxHOMOA = 2;
-//indxLUMOB = 5;
   HOMOA = this->moA_->col(indxHOMOA) ;
   LUMOB = this->moA_->col(indxLUMOB) ;
-//cout << HOMOA << endl << endl;
-//cout << LUMOB << endl << endl;
-//prettyPrintComplex(cout,*this->moA_,"MO");
   this->moA_->col(indxHOMOA) = std::sqrt(0.5) * (HOMOA + LUMOB);
   this->moA_->col(indxLUMOB) = std::sqrt(0.5) * (HOMOA - LUMOB);
-/*
-    Eigen::VectorXd HOMO = this->moA_->col(this->nAE_+this->nBE_-1);
-    Eigen::VectorXd LUMO = this->moA_->col(this->nTCS_*this->nBasis_-1);
-   cout << endl << endl <<  this->moA_->col(this->nAE_+this->nBE_-1) << endl; 
-   cout << endl << endl <<  this->moA_->col(this->nTCS_*this->nBasis_-1) << endl;
-    this->moA_->col(this->nAE_+this->nBE_-1) = std::sqrt(0.5) * (HOMO + LUMO);
-//  this->moA_->col(this->nAE_+this->nBE_) =   std::sqrt(0.5) * (HOMO - LUMO);
-    this->moA_->col(this->nTCS_*this->nBasis_-1) = std::sqrt(0.5) * (HOMO - LUMO);
-
-   cout << endl << endl <<  this->moA_->col(this->nAE_+this->nBE_-1) << endl; 
-   cout << endl << endl <<  this->moA_->col(this->nTCS_*this->nBasis_-1) << endl;
-*/
   }
   this->fileio_->out << "** Mixing HOMO and LUMO for Complex Guess **" << endl;
   if (this->Ref_==TCS) {

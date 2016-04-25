@@ -25,8 +25,6 @@
  */
 template<typename T>
 void SingleSlater<T>::initMemLen(){
-  this->lenX_      = this->nBasis_ * this->nBasis_ * this->nTCS_ * this->nTCS_;
-  this->lenXp_     = this->nBasis_ * this->nBasis_ * this->nTCS_ * this->nTCS_;
   this->lenF_      = this->nBasis_ * this->nBasis_ * this->nTCS_ * this->nTCS_;
   this->lenP_      = this->nBasis_ * this->nBasis_ * this->nTCS_ * this->nTCS_;
   this->lenCoeff_  = this->nDIISExtrap_;
@@ -42,7 +40,6 @@ void SingleSlater<T>::initMemLen(){
   this->lenScr_     = 0;
   this->lenRealScr_ = 0;
 
-  this->lenScr_ += this->lenX_;     // Storage for S^(-0.5)
   this->lenScr_ += this->lenF_;     // Storage for Alpha (Total) Fock
   this->lenScr_ += this->lenP_;     // Storage for Alpha (Total) Density
   this->lenScr_ += this->lenCoeff_; // Storage for CDIIS Coefficients
@@ -55,7 +52,6 @@ void SingleSlater<T>::initMemLen(){
   } 
   if(this->Ref_ == CUHF) {
     this->lenRealScr_ += this->lenOccNum_; // Storage for Occupation Numbers (NOs)
-    this->lenScr_     += this->lenXp_; // Storage for X^(0.5)
     this->lenScr_     += this->lenLambda_; // Storage for Lambda
     this->lenScr_     += this->lenDelF_;   // Stroage for DelF
     this->lenScr_     += this->lenP_;      // Storage for NOs
@@ -71,13 +67,8 @@ void SingleSlater<T>::initSCFPtr(){
   this->REAL_SCF_SCR   = NULL;
   this->occNumMem_     = NULL;
   this->RWORK_         = NULL;
-  this->SCpyMem_       = NULL;
-  this->SEVlMem_       = NULL;
-  this->SEVcMem_       = NULL;
-  this->LowdinWORK_    = NULL;
 
   this->SCF_SCR        = NULL;
-  this->XMem_          = NULL;
   this->FpAlphaMem_    = NULL;
   this->FpBetaMem_     = NULL;
   this->POldAlphaMem_  = NULL;
@@ -87,7 +78,6 @@ void SingleSlater<T>::initSCFPtr(){
   this->FADIIS_        = NULL;
   this->FBDIIS_        = NULL;
   this->WORK_          = NULL;
-  this->XpMem_         = NULL;
   this->lambdaMem_     = NULL;
   this->delFMem_       = NULL;
   this->PNOMem_        = NULL;
@@ -140,7 +130,7 @@ void SingleSlater<T>::initSCFMem(){
   
   this->WORK_  = LAST_FOR_SECTION + LEN_LAST_FOR_SECTION;
 */
-  this->allocLowdin();
+  //this->allocLowdin();
   this->allocAlphaScr();
   if(!this->isClosedShell && this->Ref_ != TCS) this->allocBetaScr();
   if(this->Ref_ == CUHF) this->allocCUHFScr();
@@ -149,6 +139,7 @@ void SingleSlater<T>::initSCFMem(){
   
 }; //initSCFMem
 
+/*
 template<typename T>
 void SingleSlater<T>::allocLowdin(){
   auto NTCSxNBASIS = this->nBasis_*this->nTCS_;
@@ -161,6 +152,7 @@ void SingleSlater<T>::allocLowdin(){
     this->LowdinWORK_ = new double[this->LWORK_];
   }
 }
+*/
 
 template<typename T>
 void SingleSlater<T>::allocAlphaScr(){
@@ -180,7 +172,6 @@ void SingleSlater<T>::allocBetaScr(){
 
 template<typename T>
 void SingleSlater<T>::allocCUHFScr(){
-  this->XpMem_     = new T[this->lenX_];
   this->delFMem_   = new T[this->lenDelF_];
   this->lambdaMem_ = new T[this->lenLambda_];
   this->PNOMem_    = new T[this->lenP_];
@@ -196,6 +187,7 @@ void SingleSlater<T>::allocLAPACKScr(){
   }
 }
 
+/*
 template<typename T>
 void SingleSlater<T>::cleanupLowdin(){
   delete [] this->XMem_;
@@ -204,10 +196,11 @@ void SingleSlater<T>::cleanupLowdin(){
   delete [] this->SEVlMem_;
   delete [] this->LowdinWORK_;
 }
+*/
 
 template<typename T>
 void SingleSlater<T>::cleanupSCFMem(){
-  this->cleanupLowdin();
+  //this->cleanupLowdin();
   this->cleanupAlphaScr();
   if(!this->isClosedShell && this->Ref_ != TCS) this->cleanupBetaScr();
   if(this->Ref_ == CUHF) this->cleanupCUHFScr();
@@ -232,7 +225,6 @@ void SingleSlater<T>::cleanupBetaScr(){
 
 template<typename T>
 void SingleSlater<T>::cleanupCUHFScr(){
-  delete [] this->XpMem_     ;
   delete [] this->delFMem_   ;
   delete [] this->lambdaMem_ ;
   delete [] this->PNOMem_    ;
@@ -280,7 +272,7 @@ void SingleSlater<T>::SCF(){
   }
   if(getRank() == 0) {
     this->initSCFMem();
-    this->formX();
+//    this->formX();
   }
   for (iter = 0; iter < this->maxSCFIter_; iter++){
 
