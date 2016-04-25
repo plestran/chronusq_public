@@ -88,49 +88,6 @@ void SingleSlater<T>::initSCFMem(){
   this->initSCFPtr();
   this->initMemLen();
 
-/*  This kind of allocation should be handled by a memory manager
-  T* LAST_FOR_SECTION;
-  int LEN_LAST_FOR_SECTION;
-
-  this->SCF_SCR      = new T[this->lenScr_];
-  this->REAL_SCF_SCR = new double[this->lenRealScr_];
-  std::memset(this->SCF_SCR,     0.0,this->lenScr_    *sizeof(T)     );
-  std::memset(this->REAL_SCF_SCR,0.0,this->lenRealScr_*sizeof(double));
-
-  this->XMem_          = this->SCF_SCR;
-  this->FpAlphaMem_    = this->XMem_          + this->lenX_;
-  this->POldAlphaMem_  = this->FpAlphaMem_    + this->lenF_;
-  this->ErrorAlphaMem_ = this->POldAlphaMem_  + this->lenP_;
-  this->FADIIS_        = this->ErrorAlphaMem_ + this->lenF_*(this->lenCoeff_ -1);
-  LAST_FOR_SECTION     = this->FADIIS_;
-  LEN_LAST_FOR_SECTION = this->lenF_*(this->lenCoeff_ -1);
-  if(!this->isClosedShell && this->Ref_ != TCS){
-    this->FpBetaMem_     = LAST_FOR_SECTION + LEN_LAST_FOR_SECTION;
-    this->POldBetaMem_   = this->FpBetaMem_    + this->lenF_;
-    this->ErrorBetaMem_  = this->POldBetaMem_  + this->lenP_;
-    this->FBDIIS_        = this->ErrorBetaMem_ + this->lenF_*(this->lenCoeff_ -1);
-    LAST_FOR_SECTION     = this->FBDIIS_;
-    LEN_LAST_FOR_SECTION = this->lenF_*(this->lenCoeff_ -1);
-  }
-  if(this->Ref_ == CUHF) {
-    this->XpMem_     = LAST_FOR_SECTION + LEN_LAST_FOR_SECTION;
-    this->delFMem_   = this->XpMem_     + this->lenX_;
-    this->lambdaMem_ = this->delFMem_   + this->lenDelF_;
-    this->PNOMem_    = this->lambdaMem_ + this->lenLambda_;
-  //this->occNumMem_ = this->PNOMem_    + this->lenP_;
-  //LAST_FOR_SECTION = this->occNumMem_;
-  //LEN_LAST_FOR_SECTION = this->lenOccNum_;
-    this->occNumMem_ = this->REAL_SCF_SCR;
-    this->RWORK_     = this->occNumMem_ + this->lenOccNum_;
-    LAST_FOR_SECTION = this->PNOMem_;
-    LEN_LAST_FOR_SECTION = this->lenP_; 
-  } else {
-    this->RWORK_     = this->REAL_SCF_SCR;
-  }
-  
-  this->WORK_  = LAST_FOR_SECTION + LEN_LAST_FOR_SECTION;
-*/
-  //this->allocLowdin();
   this->allocAlphaScr();
   if(!this->isClosedShell && this->Ref_ != TCS) this->allocBetaScr();
   if(this->Ref_ == CUHF) this->allocCUHFScr();
@@ -139,20 +96,6 @@ void SingleSlater<T>::initSCFMem(){
   
 }; //initSCFMem
 
-/*
-template<typename T>
-void SingleSlater<T>::allocLowdin(){
-  auto NTCSxNBASIS = this->nBasis_*this->nTCS_;
-  this->XMem_    = new T[this->lenX_];
-  this->SCpyMem_ = new double[this->lenX_];
-  this->SEVcMem_ = new double[this->lenX_];
-  this->SEVlMem_ = new double[NTCSxNBASIS];
-  if(typeid(T).hash_code() == typeid(dcomplex).hash_code()){
-//  this->fileio_->out << "Allocating Extra LAPACK WORK in SCF" << endl;
-    this->LowdinWORK_ = new double[this->LWORK_];
-  }
-}
-*/
 
 template<typename T>
 void SingleSlater<T>::allocAlphaScr(){
@@ -187,16 +130,6 @@ void SingleSlater<T>::allocLAPACKScr(){
   }
 }
 
-/*
-template<typename T>
-void SingleSlater<T>::cleanupLowdin(){
-  delete [] this->XMem_;
-  delete [] this->SCpyMem_;
-  delete [] this->SEVcMem_;
-  delete [] this->SEVlMem_;
-  delete [] this->LowdinWORK_;
-}
-*/
 
 template<typename T>
 void SingleSlater<T>::cleanupSCFMem(){

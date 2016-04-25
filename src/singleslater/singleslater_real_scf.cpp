@@ -50,57 +50,6 @@ void SingleSlater<double>::printDensityInfo(double PAlphaRMS, double PBetaRMS, d
   this->fileio_->out<<std::right<<std::setw(30)<<"RMS Beta Density = "<<std::setw(15)<<std::scientific<<PBetaRMS<<endl;
 };
 
-//template<>
-//void SingleSlater<double>::formX(){
-///*
-//  RealMap X(this->XMem_,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
-//  X = (*this->aointegrals_->overlap_).pow(-0.5); // Make this more efficient... FIXME
-//
-//  if(this->Ref_ == CUHF){
-//    RealMap Xp(this->XpMem_,this->nBasis_,this->nBasis_);
-//    Xp = (*this->aointegrals_->overlap_).pow(0.5); // Make this more efficient... FIXME
-//  }
-//*/
-//
-//  char JOBZ = 'V';
-//  char UPLO = 'L';
-//  int INFO;
-//  auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
-//
-//  RealVecMap E(this->SEVlMem_,NTCSxNBASIS);
-//  RealMap    X(this->XMem_   ,NTCSxNBASIS,NTCSxNBASIS);
-//  RealMap    V(this->SEVcMem_,NTCSxNBASIS,NTCSxNBASIS);
-//  RealMap    S(this->SCpyMem_,NTCSxNBASIS,NTCSxNBASIS);
-//
-//  E.setZero();
-//  V.setZero();
-//  S.setZero();
-//
-//  std::memcpy(this->SEVcMem_,this->aointegrals_->overlap_->data(),
-//    NTCSxNBASIS*NTCSxNBASIS*sizeof(double));
-//
-//  dsyev_(&JOBZ,&UPLO,&NTCSxNBASIS,this->SEVcMem_,&NTCSxNBASIS,this->SEVlMem_,
-//    this->WORK_,&this->LWORK_,&INFO);
-//  
-////V.transposeInPlace(); // b/c Row Major...
-//  std::memcpy(this->SCpyMem_,this->SEVcMem_,NTCSxNBASIS * NTCSxNBASIS *
-//    sizeof(double));
-//
-//  for(auto i = 0; i < NTCSxNBASIS; i++)
-//    S.col(i) /= std::sqrt(this->SEVlMem_[i]);
-//
-//  X = S * V.transpose();
-////  prettyPrint(cout,X,"XO");
-//
-//  if(this->Ref_ == CUHF){
-//    RealMap    Xp(this->XpMem_    ,NTCSxNBASIS,NTCSxNBASIS);
-//
-//    for(auto i = 0; i < NTCSxNBASIS; i++)
-//      S.col(i) *= this->SEVlMem_[i];
-// 
-//    Xp = S * V.transpose();
-//  }
-//}
 
 template<>
 void SingleSlater<double>::formNO(){
@@ -121,7 +70,6 @@ void SingleSlater<double>::formNO(){
       this->occNumMem_,this->WORK_,&this->LWORK_,&INFO);
 
   if(INFO != 0) CErr("DSYEV Failed in FormNO",this->fileio_->out);
-//P.transposeInPlace();
 
   // Swap Ordering
   for(auto i = 0; i < this->nBasis_/2; i++) 
@@ -135,24 +83,7 @@ void SingleSlater<double>::diagFock(){
   char JOBZ = 'V';
   char UPLO = 'U';
   auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
-//if(this->isPrimary){
-//  RealMatrix DCPY(*this->onePDMA_);
-//  cout << "Scatter" << endl;
-//  this->scatterDensity();
-//  prettyPrint(cout,(*this->onePDMScalar_),"S");
-//  prettyPrint(cout,(*this->onePDMMz_),"Z");
-//  if(this->nTCS_ == 2) {
-//    prettyPrint(cout,(*this->onePDMMx_),"X");
-//    prettyPrint(cout,(*this->onePDMMy_),"Y");
-//  }
-//  cout << "Gather" << endl;
-//  this->gatherDensity();
-//  prettyPrint(cout,DCPY,"BEFORE");
-//  prettyPrint(cout,(*this->onePDMA_),"AFTER");
-//  prettyPrint(cout,DCPY - (*this->onePDMA_),"DIFF");
-//}
 
-  //RealMap X(this->XMem_,NTCSxNBASIS,NTCSxNBASIS);
   RealMap POldAlpha(this->POldAlphaMem_,NTCSxNBASIS,NTCSxNBASIS);
   RealMap FpAlpha(this->FpAlphaMem_,NTCSxNBASIS,NTCSxNBASIS);
   RealMap POldBeta(this->POldBetaMem_,0,0);
@@ -165,7 +96,6 @@ void SingleSlater<double>::diagFock(){
 
   if(this->Ref_ == CUHF){
     RealMap P(this->PNOMem_,this->nBasis_,this->nBasis_);
-   // RealMap Xp(this->XpMem_,this->nBasis_,this->nBasis_);
     RealMap DelF(this->delFMem_,this->nBasis_,this->nBasis_);
     RealMap Lambda(this->lambdaMem_,this->nBasis_,this->nBasis_);
 

@@ -51,56 +51,6 @@ void SingleSlater<dcomplex>::printDensityInfo(double PAlphaRMS, double PBetaRMS,
   this->fileio_->out<<std::right<<std::setw(30)<<"RMS Beta Density = "<<std::setw(15)<<std::scientific<<PBetaRMS<<endl;
 };
 
-//template<>
-//void SingleSlater<dcomplex>::formX(){
-///*
-//  ComplexMap X(this->XMem_,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
-//  X.real() = (*this->aointegrals_->overlap_).pow(-0.5); // Make this more efficient... FIXME
-//
-//  if(this->Ref_ == CUHF){
-//    ComplexMap Xp(this->XpMem_,this->nBasis_,this->nBasis_);
-//    Xp.real() = (*this->aointegrals_->overlap_).pow(0.5); // Make this more efficient... FIXME
-//  }
-//*/
-//  char JOBZ = 'V';
-//  char UPLO = 'L';
-//  int INFO;
-//  auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
-//
-//  ComplexMap X(this->XMem_   ,NTCSxNBASIS,NTCSxNBASIS);
-//  RealVecMap E(this->SEVlMem_,NTCSxNBASIS);
-//  RealMap    V(this->SEVcMem_,NTCSxNBASIS,NTCSxNBASIS);
-//  RealMap    S(this->SCpyMem_,NTCSxNBASIS,NTCSxNBASIS);
-//
-//  E.setZero();
-//  V.setZero();
-//  S.setZero();
-//
-//  std::memcpy(this->SEVcMem_,this->aointegrals_->overlap_->data(),
-//    NTCSxNBASIS*NTCSxNBASIS*sizeof(double));
-//
-//  dsyev_(&JOBZ,&UPLO,&NTCSxNBASIS,this->SEVcMem_,&NTCSxNBASIS,this->SEVlMem_,
-//    this->LowdinWORK_,&this->LWORK_,&INFO);
-//  
-////V.transposeInPlace(); // b/c Row Major...
-//  std::memcpy(this->SCpyMem_,this->SEVcMem_,NTCSxNBASIS * NTCSxNBASIS *
-//    sizeof(double));
-//
-//  for(auto i = 0; i < NTCSxNBASIS; i++)
-//    S.col(i) /= std::sqrt(this->SEVlMem_[i]);
-//
-//  X.real() = S * V.transpose();
-//
-//  if(this->Ref_ == CUHF){
-//    ComplexMap    Xp(this->XpMem_    ,NTCSxNBASIS,NTCSxNBASIS);
-//
-//    for(auto i = 0; i < NTCSxNBASIS; i++)
-//      S.col(i) *= this->SEVlMem_[i];
-// 
-//    Xp.real() = S * V.transpose();
-//  }
-//
-//}
 
 template<>
 void SingleSlater<dcomplex>::formNO(){
