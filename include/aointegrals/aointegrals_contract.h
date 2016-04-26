@@ -157,10 +157,10 @@ void AOIntegrals::newTwoEContractDirect(
 };
 
 
-template<typename Op, typename T> 
+template<typename Field, typename T> 
 void AOIntegrals::newTwoEContractIncore(
-    const std::vector<std::reference_wrapper<Op>> &X,
-    std::vector<std::reference_wrapper<Op>> &AX,
+    const std::vector<std::reference_wrapper<Eigen::MatrixBase<Field>>> &X,
+    std::vector<std::reference_wrapper<Eigen::MatrixBase<Field>>> &AX,
     std::vector<ERI_CONTRACTION_TYPE> &contractionList,
     std::vector<T>& scalingFactors){
 
@@ -173,6 +173,11 @@ void AOIntegrals::newTwoEContractIncore(
 
   RealTensor2d XTensor(X[0].get().cols(),X[0].get().rows());
   RealTensor2d AXTensor(X[0].get().cols(),X[0].get().rows());
+  RealTensor2d IXTensor, IAXTensor;
+  if(typeid(Field).hash_code() == typeid(dcomplex).hash_code()){
+    IXTensor  = RealTensor2d(X[0].get().cols(),X[0].get().rows());
+    IAXTensor = RealTensor2d(X[0].get().cols(),X[0].get().rows());
+  }
   enum{i,j,k,l}; 
 
   for(auto iMat = 0; iMat < nMat; iMat++) {
@@ -181,19 +186,35 @@ void AOIntegrals::newTwoEContractIncore(
     AXTensor.fill(0.0);
 
     // Copy Matrix over
-    for(auto I = 0; I < X[iMat].size(); I++)
-      XTensor.storage()[I] = X[iMat].get().data()[I];
+    for(auto I = 0; I < X[iMat].get().size(); I++) {
+      XTensor.storage()[I] = 
+        reinterpret_cast<double(&)[2]>(X[iMat].get().data()[I])[0];
+      if(typeid(Field).hash_code() == typeid(dcomplex).hash_code())
+        IXTensor.storage()[I] = 
+          reinterpret_cast<double(&)[2]>(X[iMat].get().data()[I])[1];
+    }
 
     if(contractionList[iMat] == COULOMB) 
       contract(scalingFactors[iMat],*this->aoERI_,
-        {i,j,k,l},XTensor,{l,k},0.0, AXTensor,{i,j});
+        {i,j,k,l},XTensor,{l,k},0.0,AXTensor,{i,j});
     else if(contractionList[iMat] == EXCHANGE) 
       contract(scalingFactors[iMat],*this->aoERI_,
-        {i,l,k,j},XTensor,{l,k},0.0, AXTensor,{i,j});
+        {i,l,k,j},XTensor,{l,k},0.0,AXTensor,{i,j});
+
+    if(typeid(Field).hash_code() == typeid(dcomplex).hash_code()) {
+      if(contractionList[iMat] == EXCHANGE) 
+        contract(scalingFactors[iMat],*this->aoERI_,
+          {i,l,k,j},IXTensor,{l,k},0.0,IAXTensor,{i,j});
+    }
 
     // Copy Tensor over
-    for(auto I = 0; I < X[iMat].size(); I++)
-      AX[iMat].get().data()[I] = AXTensor.storage()[I];
+    for(auto I = 0; I < X[iMat].get().size(); I++){
+      reinterpret_cast<double(&)[2]>(AX[iMat].get().data()[I])[0] = 
+        AXTensor.storage()[I];
+      if(typeid(Field).hash_code() == typeid(dcomplex).hash_code())
+      reinterpret_cast<double(&)[2]>(AX[iMat].get().data()[I])[1] = 
+        IAXTensor.storage()[I];
+    }
 
   };
 };

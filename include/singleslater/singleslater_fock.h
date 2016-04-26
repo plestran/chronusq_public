@@ -34,8 +34,11 @@ void SingleSlater<T>::formPT(){
   bool doRHF = (this->isClosedShell && !doTCS);
   bool doKS  = this->isDFT;
   if(!this->haveDensity) this->formDensity();
+  this->sepReImOnePDM();
+//  this->comReImOnePDM();
 
 
+  /*
   if(this->aointegrals_->integralAlgorithm == AOIntegrals::DIRECT)
   {; }
 //  this->aointegrals_->twoEContractDirect(doRHF,doKS,true,false,doTCS,
@@ -47,6 +50,7 @@ void SingleSlater<T>::formPT(){
     this->aointegrals_->twoEContractN4(doRHF,doKS,true,false,doTCS,
     *this->onePDMA_,*this->PTA_,*this->onePDMB_,*this->PTB_);
   if(this->printLevel_ >= 3 && getRank() == 0) this->printPT();
+  */
 
   std::vector<std::reference_wrapper<TMatrix>> mats;
   std::vector<std::reference_wrapper<TMatrix>> ax;
@@ -56,6 +60,66 @@ void SingleSlater<T>::formPT(){
   double exchFactor = -0.5;
   if(this->isDFT) exchFactor = 0.0;
 
+  if(this->nTCS_ == 1 && this->isClosedShell) {
+
+    mats.emplace_back(*this->onePDMA_);
+    mats.emplace_back(*this->onePDMA_);
+    ax.emplace_back(*this->PTA_);
+    ax.emplace_back(*this->PTA_);
+    contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::COULOMB);
+    contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::EXCHANGE);
+    scalingFactors.push_back(1.0);
+    scalingFactors.push_back(exchFactor);
+
+    this->PTA_->setZero();
+
+  } else {
+    mats.emplace_back(*this->onePDMScalar_);
+    mats.emplace_back(*this->onePDMScalar_);
+    mats.emplace_back(*this->onePDMMz_);
+    ax.emplace_back(*this->PTScalar_);
+    ax.emplace_back(*this->PTScalar_);
+    ax.emplace_back(*this->PTMz_);
+    contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::COULOMB);
+    contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::EXCHANGE);
+    contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::EXCHANGE);
+    scalingFactors.push_back(1.0);
+    scalingFactors.push_back(exchFactor);
+    scalingFactors.push_back(exchFactor);
+    this->PTScalar_->setZero();
+    this->PTMz_->setZero();
+    if(this->nTCS_ == 2){
+      mats.emplace_back(*this->onePDMMx_);
+      mats.emplace_back(*this->onePDMMy_);
+      ax.emplace_back(*this->PTMy_);
+      ax.emplace_back(*this->PTMz_);
+      contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::EXCHANGE);
+      contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::EXCHANGE);
+      scalingFactors.push_back(exchFactor);
+      scalingFactors.push_back(exchFactor);
+      this->PTMy_->setZero();
+      this->PTMz_->setZero();
+    }
+  }
+
+  this->aointegrals_->newTwoEContract(mats,ax,contList,scalingFactors);
+
+  if(this->nTCS_ == 1 && this->isClosedShell) {
+    (*this->PTA_) *= 0.5; // This is effectively a gather operation
+  } else {
+    std::vector<std::reference_wrapper<TMatrix>> toGather;
+    toGather.push_back(*this->PTScalar_);
+    toGather.push_back(*this->PTMz_);
+    if(this->nTCS_ == 1)
+      Quantum<T>::spinGather((*this->PTA_),(*this->PTB_),toGather);
+    else {
+      toGather.push_back(*this->PTMz_);
+      toGather.push_back(*this->PTMz_);
+      Quantum<T>::spinGather((*this->PTA_),toGather);
+    }
+
+  }
+  /*
   if(this->nTCS_ == 1 && this->isClosedShell) {
     TMatrix GPScalar(this->nBasis_,this->nBasis_);
 
@@ -103,6 +167,7 @@ void SingleSlater<T>::formPT(){
       Quantum<T>::spinGather((*this->PTA_),(*this->PTB_),toGather);
     }
   }
+  */
   this->gatherDensity();
 }
 #endif
@@ -155,33 +220,43 @@ void SingleSlater<T>::formFock(){
       }
     }
   
-    this->fockA_->setZero();
-    this->fockA_->real() += (*this->aointegrals_->oneE_);
-#ifndef USE_LIBINT
-    this->fockA_->real() += (*this->coulombA_);
-    this->fockA_->real() -= (*this->exchangeA_);
-#else
-    (*this->fockA_) += (*this->PTA_);
-#endif
-    if(this->isDFT){ 
-      (*this->fockA_) += (*this->vXA_);
-      (*this->fockA_) += (*this->vCorA_);
-    }
+    if(this->nTCS_ == 1 && this->isClosedShell) {
+      this->fockA_->setZero();
+      this->fockA_->real() += (*this->aointegrals_->oneE_);
+      this->aointegrals_->addElecDipole(*this->fockA_,this->elecField_);
+      (*this->fockA_) += (*this->PTA_);
+      if(this->isDFT){ 
+        (*this->fockA_) += (*this->vXA_);
+        (*this->fockA_) += (*this->vCorA_);
+      }
+    } else {
+      this->fockScalar_->real() += (*this->aointegrals_->oneE_);
+      this->aointegrals_->addElecDipole(*this->fockScalar_,this->elecField_);
+      (*this->fockScalar_)      *= 0.5;
+      (*this->fockScalar_)      += (*this->PTScalar_);        
+      (*this->fockMz_)          += (*this->PTMz_);
 
-    if(!this->isClosedShell && this->Ref_ != TCS){
-      this->fockB_->setZero();
-      fockB_->real()+=(*this->aointegrals_->oneE_);
-#ifndef USE_LIBINT
-      fockB_->real()+=(*this->coulombB_);
-      fockB_->real()-=(*this->exchangeB_);
-#else
-      *(fockB_) += (*this->PTB_);
-#endif
-      if(this->isDFT) {
-        (*fockB_) += (*this->vXB_);
-        (*fockB_) += (*this->vCorB_);
+      std::vector<std::reference_wrapper<TMatrix>> toGather;
+      toGather.push_back(*this->fockScalar_);
+      toGather.push_back(*this->fockMz_);
+      if(this->nTCS_ == 1)
+        Quantum<T>::spinGather((*this->fockA_),(*this->fockB_),toGather);
+      else {
+        (*this->fockMx_)          += (*this->PTMx_);
+        (*this->fockMy_)          += (*this->PTMy_);
+        toGather.push_back(*this->fockMx_);
+        toGather.push_back(*this->fockMy_);
+        Quantum<T>::spinGather((*this->fockA_),toGather);
+      }
+
+      // Hack for UHF DFT for now FIXME
+      if(this->nTCS_ == 1 && this->isDFT){
+        (*this->fockB_) += (*this->vXB_);
+        (*this->fockB_) += (*this->vCorB_);
       }
     }
+
+    /*
     // Add in the electric field component if they are non-zero
     std::array<double,3> null{{0,0,0}};
     if(this->elecField_ != null){
@@ -198,6 +273,7 @@ void SingleSlater<T>::formFock(){
         iBuf += NBSq;
       }
     }
+    */
     if(this->printLevel_ >= 2) this->printFock(); 
   }
 #ifdef CQ_ENABLE_MPI

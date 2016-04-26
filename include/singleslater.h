@@ -110,18 +110,45 @@ class SingleSlater : public Quantum<T> {
   double nElectrons_;
 
   // Internal Storage
+  std::unique_ptr<TMatrix>  coulombA_;   ///< deprecated 
+  std::unique_ptr<TMatrix>  coulombB_;   ///< deprecated 
+  std::unique_ptr<TMatrix>  exchangeA_;  ///< deprecated 
+  std::unique_ptr<TMatrix>  exchangeB_;  ///< deprecated 
+
+  // Fock Matrix
   std::unique_ptr<TMatrix>  fockA_;      ///< Alpha or Full (TCS) Fock Matrix
   std::unique_ptr<TMatrix>  fockB_;      ///< Beta Fock Matrix
-  std::unique_ptr<TMatrix>  coulombA_;   ///< Alpha or Full (TCS) Coulomb Matrix
-  std::unique_ptr<TMatrix>  coulombB_;   ///< Beta Coulomb Matrix
-  std::unique_ptr<TMatrix>  exchangeA_;  ///< Alpha or Full (TCS) Exchange Matrix
-  std::unique_ptr<TMatrix>  exchangeB_;  ///< Beta Exchange Matrix
-  std::unique_ptr<TMatrix>  moA_;        ///< Alpha or Full (TCS) MO Coefficient Matrix
+  std::unique_ptr<TMatrix>  fockScalar_;
+  std::unique_ptr<TMatrix>  fockMx_;
+  std::unique_ptr<TMatrix>  fockMy_;
+  std::unique_ptr<TMatrix>  fockMz_;
+
+
+  // Fock Eigensystem
+  std::unique_ptr<TMatrix>  moA_;        ///< Alpha or Full MO Coefficients
   std::unique_ptr<TMatrix>  moB_;        ///< Beta MO Coefficient Matrix
-  std::unique_ptr<RealMatrix>  epsA_;       ///< Alpha or Full (TCS) Fock Eigenenergies
+  std::unique_ptr<RealMatrix>  epsA_;       ///< Alpha or Full Eigenenergies
   std::unique_ptr<RealMatrix>  epsB_;       ///< Beta Fock Eigenenergie
-  std::unique_ptr<TMatrix>  PTA_;        ///< Alpha or Full (TCS) Perturbation Tensor
+
+  std::unique_ptr<TMatrix>  PTA_;        ///< Alpha or Full Perturbation Tensor
   std::unique_ptr<TMatrix>  PTB_;        ///< Beta Perturbation Tensor
+  std::unique_ptr<TMatrix>  PTScalar_;
+  std::unique_ptr<TMatrix>  PTMx_;
+  std::unique_ptr<TMatrix>  PTMy_;
+  std::unique_ptr<TMatrix>  PTMz_;
+
+  // Breaks Up Scattered Perturbation Tensor into Re/Im parts for INCORE
+  // contraction
+  std::unique_ptr<RealMatrix> RePTScalar_;
+  std::unique_ptr<RealMatrix> ImPTScalar_;
+  std::unique_ptr<RealMatrix> RePTMx_;
+  std::unique_ptr<RealMatrix> ImPTMx_;
+  std::unique_ptr<RealMatrix> RePTMy_;
+  std::unique_ptr<RealMatrix> ImPTMy_;
+  std::unique_ptr<RealMatrix> RePTMz_;
+  std::unique_ptr<RealMatrix> ImPTMz_;
+
+
   std::unique_ptr<TMatrix>  vXA_;        ///< Alpha or Full (TCS) VX
   std::unique_ptr<TMatrix>  vXB_;        ///< Beta VXC
   std::unique_ptr<TMatrix>  vCorA_;        ///< Alpha or Full Vcorr

@@ -456,6 +456,14 @@ public:
           this->fileio_->out);
   };
 
+  template<typename Op>
+  inline void addElecDipole(Op &op, std::array<double,3> &field){
+    std::array<double,3> null{{0,0,0}};
+    if(field == null) return;
+    for(auto iXYZ = 0; iXYZ < 3; iXYZ++)
+      op.real() += field[iXYZ] * this->elecDipoleSep_[iXYZ];
+  };
+
 
 
 

@@ -69,6 +69,16 @@ namespace ChronusQ {
     std::unique_ptr<TMatrix> onePDMMz_;
     std::unique_ptr<TMatrix> onePDMMy_;
     std::unique_ptr<TMatrix> onePDMMx_;
+    
+    // Breaks Up Scattered Density into Re/Im parts
+    std::unique_ptr<RealMatrix> ReOnePDMScalar_;
+    std::unique_ptr<RealMatrix> ReOnePDMMx_;
+    std::unique_ptr<RealMatrix> ReOnePDMMy_;
+    std::unique_ptr<RealMatrix> ReOnePDMMz_;
+    std::unique_ptr<RealMatrix> ImOnePDMScalar_;
+    std::unique_ptr<RealMatrix> ImOnePDMMx_;
+    std::unique_ptr<RealMatrix> ImOnePDMMy_;
+    std::unique_ptr<RealMatrix> ImOnePDMMz_;
 
 
     std::array<double,3> elecDipole_;
@@ -200,6 +210,14 @@ namespace ChronusQ {
           this->onePDMMy_ = std::unique_ptr<TMatrix>(new TMatrix(N,N));
         }
       }
+      this->ReOnePDMScalar_ = std::unique_ptr<RealMatrix>(new RealMatrix(N,N));
+      this->ReOnePDMMx_ = std::unique_ptr<RealMatrix>(new RealMatrix(N,N));
+      this->ReOnePDMMy_ = std::unique_ptr<RealMatrix>(new RealMatrix(N,N));
+      this->ReOnePDMMz_ = std::unique_ptr<RealMatrix>(new RealMatrix(N,N));
+      this->ImOnePDMScalar_ = std::unique_ptr<RealMatrix>(new RealMatrix(N,N));
+      this->ImOnePDMMx_ = std::unique_ptr<RealMatrix>(new RealMatrix(N,N));
+      this->ImOnePDMMy_ = std::unique_ptr<RealMatrix>(new RealMatrix(N,N));
+      this->ImOnePDMMz_ = std::unique_ptr<RealMatrix>(new RealMatrix(N,N));
 
     };
 
@@ -282,6 +300,19 @@ namespace ChronusQ {
     };
 
 
+
+    template<typename OpIn, typename OpOut>
+    static void ReImSeparate(OpIn&, 
+        std::vector<std::reference_wrapper<OpOut>>&);
+
+    template<typename OpIn, typename OpOut>
+    static void ReImCombine(OpOut&, 
+        std::vector<std::reference_wrapper<OpIn>>&);
+
+    void sepReImOnePDM();
+    void comReImOnePDM();
+
+
     // MPI Routines
     void mpiBCastDensity();
   };
@@ -302,163 +333,113 @@ namespace ChronusQ {
     ;
   };
 
-  template<>
-  template<typename Op>
-  void Quantum<double>::complexMyScale(Op &op){ };
-  template<>
-  template<typename Op>
-  void Quantum<dcomplex>::complexMyScale(Op &op){ op *= dcomplex(0.0,1.0); };
+  #include <quantum/quantum_scattergather.h>
 
-  template<typename T>
-  void Quantum<T>::scatterDensity(){
-    if(this->isScattered_) return;
+
+  template<>
+  template<typename OpIn, typename OpOut>
+  void Quantum<dcomplex>::ReImSeparate(OpIn &op, 
+      std::vector<std::reference_wrapper<OpOut>> &sep){
+
+    sep[0].get() = op.real();
+    sep[1].get() = op.imag();
+  };
+
+  template<>
+  template<typename OpIn, typename OpOut>
+  void Quantum<double>::ReImSeparate(OpIn &op, 
+      std::vector<std::reference_wrapper<OpOut>> &sep){;};
+
+
+  template<>
+  template<typename OpIn, typename OpOut>
+  void Quantum<dcomplex>::ReImCombine(OpOut &op, 
+      std::vector<std::reference_wrapper<OpIn>> &sep) {
+  
+      op.real() = sep[0].get();
+      op.imag() = sep[1].get();
+  };
+
+  template<>
+  template<typename OpIn, typename OpOut>
+  void Quantum<double>::ReImCombine(OpOut &op, 
+      std::vector<std::reference_wrapper<OpIn>> &sep) {; };
+
+
+  template<>
+  inline void Quantum<double>::sepReImOnePDM() {};
+  template<>
+  inline void Quantum<double>::comReImOnePDM() {};
+
+  template<>
+  inline void Quantum<dcomplex>::sepReImOnePDM() {
+    this->scatterDensity();
+    std::vector<std::reference_wrapper<RealMatrix>> sep;
+
+    // Separate Scalar OnePDM
+    sep.emplace_back(*this->ReOnePDMScalar_);
+    sep.emplace_back(*this->ImOnePDMScalar_);
     if(this->nTCS_ == 1 && this->isClosedShell)
-      return;
-    this->isScattered_ = true;
+      ReImSeparate(*this->onePDMA_,sep);
+    else
+      ReImSeparate(*this->onePDMScalar_,sep);
 
-    // Allocate new scattered densities
-    this->allocDensity(this->onePDMA_->cols() / this->nTCS_);
+    sep.clear();
 
-    std::vector<std::reference_wrapper<TMatrix>> scattered;
-    scattered.emplace_back(*this->onePDMScalar_);
-    scattered.emplace_back(*this->onePDMMz_);
+    if(this->nTCS_ == 2 || !this->isClosedShell) {
+      sep.emplace_back(*this->ReOnePDMMz_);
+      sep.emplace_back(*this->ImOnePDMMz_);
+      ReImSeparate(*this->onePDMMz_,sep);
+      sep.clear();
+    }
 
     if(this->nTCS_ == 2) {
-      scattered.emplace_back(*this->onePDMMy_);
-      scattered.emplace_back(*this->onePDMMx_);
-      Quantum<T>::spinScatter(*this->onePDMA_,scattered);
-    } else if(!this->isClosedShell)
-      Quantum<T>::spinScatter(*this->onePDMA_,*this->onePDMB_,scattered);
+      sep.emplace_back(*this->ReOnePDMMx_);
+      sep.emplace_back(*this->ImOnePDMMx_);
+      ReImSeparate(*this->onePDMMx_,sep);
+      sep.clear();
 
-    this->onePDMA_.reset();
-    this->onePDMB_.reset();
+      sep.emplace_back(*this->ReOnePDMMy_);
+      sep.emplace_back(*this->ImOnePDMMy_);
+      ReImSeparate(*this->onePDMMy_,sep);
+      sep.clear();
+    };
   };
 
-  template<typename T>
-  void Quantum<T>::gatherDensity(){
-    if(!this->isScattered_) return;
+  template<>
+  inline void Quantum<dcomplex>::comReImOnePDM() {
+    this->scatterDensity();
+    std::vector<std::reference_wrapper<RealMatrix>> sep;
+
+    // Separate Scalar OnePDM
+    sep.emplace_back(*this->ReOnePDMScalar_);
+    sep.emplace_back(*this->ImOnePDMScalar_);
     if(this->nTCS_ == 1 && this->isClosedShell)
-      return;
-    this->isScattered_ = false;
+      ReImCombine(*this->onePDMA_,sep);
+    else
+      ReImCombine(*this->onePDMScalar_,sep);
 
-    // Allocate new scattered densities
-    this->allocDensity(this->onePDMScalar_->cols());
+    sep.clear();
 
-    std::vector<std::reference_wrapper<TMatrix>> scattered;
-    scattered.emplace_back(*this->onePDMScalar_);
-    scattered.emplace_back(*this->onePDMMz_);
-
-    if(this->nTCS_ == 2) { 
-      scattered.emplace_back(*this->onePDMMy_);
-      scattered.emplace_back(*this->onePDMMx_);
-      Quantum<T>::spinGather(*this->onePDMA_,scattered);
-    } else if(!this->isClosedShell)
-      Quantum<T>::spinGather(*this->onePDMA_,*this->onePDMB_,scattered);
-
-    // Deallocate Space
-    this->onePDMScalar_.reset();
-    this->onePDMMz_.reset();
-    this->onePDMMy_.reset();
-    this->onePDMMx_.reset();
-  };
-
-  template<typename T>
-  template<typename Op>
-  void Quantum<T>::spinScatter(Op &op1, Op &op2, 
-      std::vector<std::reference_wrapper<Op>> &scattered ){
-
-    scattered[0].get() = op1 + op2;
-    scattered[1].get() = op1 - op2;
-  }
-
-  template<typename T>
-  template<typename Op>
-  void Quantum<T>::spinScatter(Op &op, 
-      std::vector<std::reference_wrapper<Op>> &scattered ){
-
-    size_t currentDim = op.cols();
-
-    Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> > 
-      PAA(op.data(), currentDim/2, currentDim/2,
-          Eigen::Stride<Dynamic,Dynamic>(2*currentDim,2));
-    Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> > 
-      PBA(op.data() + 1, currentDim/2, currentDim/2,
-          Eigen::Stride<Dynamic,Dynamic>(2*currentDim,2));
-    Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> > 
-      PAB(op.data() + currentDim, currentDim/2, currentDim/2,
-          Eigen::Stride<Dynamic,Dynamic>(2*currentDim,2));
-    Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> > 
-      PBB(op.data() + currentDim + 1, currentDim/2, currentDim/2,
-          Eigen::Stride<Dynamic,Dynamic>(2*currentDim,2));
-
-    scattered[0].get() = PAA + PBB;
-    scattered[1].get() = PAA - PBB;
-    scattered[2].get() = PAB - PBA;
-    scattered[3].get() = PAB + PBA;
-
-    // Scale My by "i"
-    complexMyScale(scattered[2].get());
-
-  };
-
-  template<typename T>
-  template<typename Op>
-  void Quantum<T>::spinGather(Op &op1, Op &op2, 
-      std::vector<std::reference_wrapper<Op>> &scattered ){
-
-    op1.noalias() = 0.5 * (scattered[0].get() + scattered[1].get());
-    op2.noalias() = 0.5 * (scattered[0].get() - scattered[1].get());
-    
-  }
-
-  template<typename T>
-  template<typename Op>
-  void Quantum<T>::spinGather(Op &op, 
-      std::vector<std::reference_wrapper<Op>> &scattered ){
-    size_t currentDim = scattered[0].get().cols();
-
-    // Since 
-    //   My = i(PBA - PAB)
-    //   PAB = Mx - i * My
-    //   PBA = Mx + i * My
-    // "My" is scaled by "i" before entering the reconstruction
-    //
-    // ** Note that this scaling is a dummy call for double 
-    // precision objects and the sign is accounted for implicitly
-    // through a flip in sign in the reconstruction **
-    complexMyScale(scattered[2].get());
-
-    Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> > 
-      PAA(op.data(), currentDim, currentDim,
-          Eigen::Stride<Dynamic,Dynamic>(2 * currentDim * 2,2));
-    Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> > 
-      PBA(op.data() + 1, currentDim, currentDim,
-          Eigen::Stride<Dynamic,Dynamic>(2 * currentDim * 2,2));
-    Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> > 
-      PAB(op.data() + currentDim * 2,
-          currentDim, currentDim,
-          Eigen::Stride<Dynamic,Dynamic>(2 * currentDim * 2,2));
-    Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> > 
-      PBB(op.data() + (currentDim * 2) + 1,
-          currentDim, currentDim,
-          Eigen::Stride<Dynamic,Dynamic>(2 * currentDim * 2,2));
-
-    PAA.noalias() = scattered[0].get() + scattered[1].get();
-    PBB.noalias() = scattered[0].get() - scattered[1].get();
-
-    if(typeid(T).hash_code() == typeid(dcomplex).hash_code()) {
-      PAB.noalias() = scattered[3].get() - scattered[2].get();
-      PBA.noalias() = scattered[3].get() + scattered[2].get();
-    } else {
-      // Sign flip viz complex case because there is an implied
-      // "i" infront of the pure imaginary y component
-      PAB.noalias() = scattered[3].get() + scattered[2].get();
-      PBA.noalias() = scattered[3].get() - scattered[2].get();
+    if(this->nTCS_ == 2 || !this->isClosedShell) {
+      sep.emplace_back(*this->ReOnePDMMz_);
+      sep.emplace_back(*this->ImOnePDMMz_);
+      ReImCombine(*this->onePDMMz_,sep);
+      sep.clear();
     }
-    op *= 0.5;
+
+    if(this->nTCS_ == 2) {
+      sep.emplace_back(*this->ReOnePDMMx_);
+      sep.emplace_back(*this->ImOnePDMMx_);
+      ReImCombine(*this->onePDMMx_,sep);
+      sep.clear();
+
+      sep.emplace_back(*this->ReOnePDMMy_);
+      sep.emplace_back(*this->ImOnePDMMy_);
+      ReImCombine(*this->onePDMMy_,sep);
+      sep.clear();
+    };
   };
-
-
 
 
 }; // namespace ChronusQ
