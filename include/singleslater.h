@@ -32,6 +32,8 @@
 #include <aointegrals.h>
 #include <grid.h>
 #include <quantum.h>
+#include <dft.h>
+
 /****************************/
 /* Error Messages 5000-5999 */
 /****************************/
@@ -108,6 +110,8 @@ class SingleSlater : public Quantum<T> {
   int nRadDFTGridPts_;
   int nAngDFTGridPts_;
   double nElectrons_;
+
+  std::vector<std::unique_ptr<DFTFunctional>> dftFunctionals_;
 
   // Internal Storage
   std::unique_ptr<TMatrix>  fockA_;      ///< Alpha or Full (TCS) Fock Matrix
@@ -433,6 +437,8 @@ public:
     this->nRadDFTGridPts_ = 100;
     this->nAngDFTGridPts_ = 302;
     this->isGGA = false;
+
+    this->dftFunctionals_.emplace_back(new SlaterExchange());
 
     // FIXME: maybe hardcode these?
     this->epsConv       = 1.0e-7;
