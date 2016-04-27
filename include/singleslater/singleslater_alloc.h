@@ -146,6 +146,7 @@ void SingleSlater<T>::allocOp(){
   this->fockMz_ = 
     std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_));
 
+  /*
   this->RePTScalar_ = 
     std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nBasis_));
   this->ImPTScalar_ = 
@@ -162,6 +163,7 @@ void SingleSlater<T>::allocOp(){
     std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nBasis_));
   this->ImPTMz_ = 
     std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nBasis_));
+    */
 
 }
 

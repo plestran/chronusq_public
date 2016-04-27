@@ -34,23 +34,9 @@ void SingleSlater<T>::formPT(){
   bool doRHF = (this->isClosedShell && !doTCS);
   bool doKS  = this->isDFT;
   if(!this->haveDensity) this->formDensity();
-  this->sepReImOnePDM();
+//  this->sepReImOnePDM();
 //  this->comReImOnePDM();
 
-
-  /*
-  if(this->aointegrals_->integralAlgorithm == AOIntegrals::DIRECT)
-  {; }
-//  this->aointegrals_->twoEContractDirect(doRHF,doKS,true,false,doTCS,
-//  *this->onePDMA_,*this->PTA_,*this->onePDMB_,*this->PTB_);
-  else if(this->aointegrals_->integralAlgorithm == AOIntegrals::DENFIT)
-    this->aointegrals_->twoEContractDF(doRHF,doKS,true,*this->onePDMA_,
-    *this->PTA_,*this->onePDMB_,*this->PTB_);
-  else if(this->aointegrals_->integralAlgorithm == AOIntegrals::INCORE)
-    this->aointegrals_->twoEContractN4(doRHF,doKS,true,false,doTCS,
-    *this->onePDMA_,*this->PTA_,*this->onePDMB_,*this->PTB_);
-  if(this->printLevel_ >= 3 && getRank() == 0) this->printPT();
-  */
 
   std::vector<std::reference_wrapper<TMatrix>> mats;
   std::vector<std::reference_wrapper<TMatrix>> ax;
@@ -119,55 +105,7 @@ void SingleSlater<T>::formPT(){
     }
 
   }
-  /*
-  if(this->nTCS_ == 1 && this->isClosedShell) {
-    TMatrix GPScalar(this->nBasis_,this->nBasis_);
 
-    mats.emplace_back(*this->onePDMA_);
-    mats.emplace_back(*this->onePDMA_);
-    ax.emplace_back(GPScalar);
-    ax.emplace_back(GPScalar);
-    contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::COULOMB);
-    contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::EXCHANGE);
-
-    scalingFactors.push_back(1.0);
-    scalingFactors.push_back(exchFactor);
-
-    if(this->aointegrals_->integralAlgorithm == AOIntegrals::DIRECT){
-      this->aointegrals_->newTwoEContractDirect(mats,ax,contList,
-          scalingFactors);
-    
-      (*this->PTA_) = GPScalar * 0.5;
-    }
-
-  } else {
-    TMatrix GPScalar(this->nBasis_,this->nBasis_);
-    TMatrix GPMz(this->nBasis_,this->nBasis_);
-   
-    mats.emplace_back(*this->onePDMScalar_);
-    mats.emplace_back(*this->onePDMScalar_);
-    mats.emplace_back(*this->onePDMMz_);
-    ax.emplace_back(GPScalar);
-    ax.emplace_back(GPScalar);
-    ax.emplace_back(GPMz);
-    contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::COULOMB);
-    contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::EXCHANGE);
-    contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::EXCHANGE);
-    scalingFactors.push_back(1.0);
-    scalingFactors.push_back(exchFactor);
-    scalingFactors.push_back(exchFactor);
-
-    if(this->aointegrals_->integralAlgorithm == AOIntegrals::DIRECT){
-      this->aointegrals_->newTwoEContractDirect(mats,ax,contList,
-          scalingFactors);
-    
-      std::vector<std::reference_wrapper<TMatrix>> toGather;
-      toGather.push_back(GPScalar);
-      toGather.push_back(GPMz);
-      Quantum<T>::spinGather((*this->PTA_),(*this->PTB_),toGather);
-    }
-  }
-  */
   this->gatherDensity();
   if(this->printLevel_ >= 3 && getRank() == 0) this->printPT();
 }

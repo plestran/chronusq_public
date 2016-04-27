@@ -210,6 +210,7 @@ namespace ChronusQ {
           this->onePDMMy_ = std::unique_ptr<TMatrix>(new TMatrix(N,N));
         }
       }
+      /*
       this->ReOnePDMScalar_ = std::unique_ptr<RealMatrix>(new RealMatrix(N,N));
       this->ReOnePDMMx_ = std::unique_ptr<RealMatrix>(new RealMatrix(N,N));
       this->ReOnePDMMy_ = std::unique_ptr<RealMatrix>(new RealMatrix(N,N));
@@ -218,6 +219,7 @@ namespace ChronusQ {
       this->ImOnePDMMx_ = std::unique_ptr<RealMatrix>(new RealMatrix(N,N));
       this->ImOnePDMMy_ = std::unique_ptr<RealMatrix>(new RealMatrix(N,N));
       this->ImOnePDMMz_ = std::unique_ptr<RealMatrix>(new RealMatrix(N,N));
+      */
 
     };
 
