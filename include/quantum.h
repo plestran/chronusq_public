@@ -33,7 +33,8 @@ namespace ChronusQ {
     TOTAL,
     SPIN,
     ALPHA,
-    BETA
+    BETA,
+    MZ,MX,MY
   };
   /**
    *  Abstract Quantum Class. This class, in essence, takes all things from
@@ -95,6 +96,7 @@ namespace ChronusQ {
       
 
 
+    /*
     template<typename Scalar, DENSITY_TYPE DenTyp, typename Op>
     Scalar OperatorSpinCombine(const Op& op) {
       double zero = 0.0;
@@ -120,6 +122,34 @@ namespace ChronusQ {
                  this->computePropertyBeta<Scalar>(op);
         else
           return reinterpret_cast<Scalar(&)[2]>(zero)[0];
+      }
+    }
+    */
+    template<typename Scalar, DENSITY_TYPE DenTyp, typename Op>
+    Scalar OperatorSpinCombine(const Op& op) {
+      double zero = 0.0;
+      bool isReal = typeid(T).hash_code() == typeid(dcomplex).hash_code();
+
+      if(this->nTCS_ == 1 && this->isClosedShell){
+        if(DenTyp == DENSITY_TYPE::TOTAL)
+          return OperatorTrace<Scalar>((*this->onePDMA_),op);
+        else
+          return reinterpret_cast<Scalar(&)[2]>(zero)[0];
+      } else {
+        if(DenTyp == DENSITY_TYPE::TOTAL)
+          return OperatorTrace<Scalar>((*this->onePDMScalar_),op);
+        else if(DenTyp == DENSITY_TYPE::SPIN || DenTyp == DENSITY_TYPE::MZ)
+          return OperatorTrace<Scalar>((*this->onePDMMz_),op);
+        else if(this->nTCS_ == 1)
+          return reinterpret_cast<Scalar(&)[2]>(zero)[0];
+        else {
+          if(DenTyp == DENSITY_TYPE::MX)
+            return OperatorTrace<Scalar>((*this->onePDMMx_),op);
+          else if(isReal)
+            return reinterpret_cast<Scalar(&)[2]>(zero)[0];
+          else
+            return OperatorTrace<Scalar>((*this->onePDMMy_),op);
+        }
       }
     }
 

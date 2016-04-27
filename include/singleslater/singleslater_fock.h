@@ -200,6 +200,15 @@ void SingleSlater<T>::formFock(){
       toGather.emplace_back(*this->fockMz_);
       if(this->nTCS_ == 1)
         Quantum<T>::spinGather(*this->fockA_,*this->fockB_,toGather);
+      else {
+        this->fockMx_->setZero();
+        this->fockMy_->setZero();
+        (*this->fockMx_) += (*this->PTMx_);
+        (*this->fockMy_) += (*this->PTMy_);
+        toGather.emplace_back(*this->fockMx_);
+        toGather.emplace_back(*this->fockMy_);
+        Quantum<T>::spinGather(*this->fockA_,toGather);
+      };
 
       // Hack for UHF DFT for now FIXME
       if(this->nTCS_ == 1 && this->isDFT){

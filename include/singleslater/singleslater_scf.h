@@ -211,10 +211,13 @@ void SingleSlater<T>::SCF(){
 
     if(getRank() == 0) {
       if(this->Ref_ == CUHF) this->formNO();
+      cout << "Before diagFock" << endl;
       this->diagFock();
       if(iter == 0 && this->guess_ != READ) this->mixOrbitalsSCF();
     }
+    cout << "Before formDensity" << endl;
     this->formDensity();
+    cout << "Before formFock" << endl;
     this->formFock();
     if(PyErr_CheckSignals() == -1)
       CErr("Keyboard Interrupt in SCF!",this->fileio_->out);

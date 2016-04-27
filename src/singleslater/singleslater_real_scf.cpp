@@ -129,6 +129,7 @@ void SingleSlater<double>::diagFock(){
   POldAlpha = (*this->onePDMA_);
   if(!this->isClosedShell && this->Ref_ != TCS) POldBeta = (*this->onePDMB_);
 
+  cout << "HERE T" << endl;
   FpAlpha = (*this->aointegrals_->ortho1_).transpose() * (*this->fockA_) * 
     (*this->aointegrals_->ortho1_);
 

@@ -128,23 +128,29 @@ void SingleSlater<T>::allocOp(){
   if(!this->isClosedShell && this->Ref_ != TCS) 
     this->allocBetaOp();
 
-  this->PTScalar_ = 
-    std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_));
-  this->PTMx_ = 
-    std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_));
-  this->PTMy_ = 
-    std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_));
-  this->PTMz_ = 
-    std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_));
+  if(this->nTCS_ == 2 || !this->isClosedShell){
+    this->PTScalar_ = 
+      std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_));
+    this->PTMz_ = 
+      std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_));
+ 
+    this->fockScalar_ = 
+      std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_));
+    this->fockMz_ = 
+      std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_));
 
-  this->fockScalar_ = 
-    std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_));
-  this->fockMx_ = 
-    std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_));
-  this->fockMy_ = 
-    std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_));
-  this->fockMz_ = 
-    std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_));
+    if(this->nTCS_ == 2) {
+      this->PTMx_ = 
+        std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_));
+      this->PTMy_ = 
+        std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_));
+     
+      this->fockMx_ = 
+        std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_));
+      this->fockMy_ = 
+        std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_));
+    }
+  }
 
   /*
   this->RePTScalar_ = 

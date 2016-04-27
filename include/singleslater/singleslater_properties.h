@@ -26,10 +26,33 @@
 
 template<typename T>
 void SingleSlater<T>::computeEnergy(){
+  this->scatterDensity();
   if(getRank() == 0) {
     this->energyOneE = 
       this->template computeProperty<double,DENSITY_TYPE::TOTAL>(
           *this->aointegrals_->oneE_);
+    if(this->nTCS_ == 1 && this->isClosedShell)
+      this->energyTwoE = 
+        0.5 * this->template computeProperty<double,DENSITY_TYPE::TOTAL>(
+            this->PTA_->conjugate());
+    else {
+      this->energyTwoE = 
+        0.5 * this->template computeProperty<double,DENSITY_TYPE::TOTAL>(
+            this->PTScalar_->conjugate());
+      this->energyTwoE +=
+        0.5 * this->template computeProperty<double,DENSITY_TYPE::MZ>(
+            this->PTMz_->conjugate());
+      if(this->nTCS_ == 2) {
+        this->energyTwoE +=
+          0.5 * this->template computeProperty<double,DENSITY_TYPE::MX>(
+              this->PTMx_->conjugate());
+        this->energyTwoE +=
+          0.5 * this->template computeProperty<double,DENSITY_TYPE::MY>(
+              this->PTMy_->conjugate());
+      }
+      this->energyTwoE *= 0.5; // ??
+    }
+    /*
     if(!this->isClosedShell && this->Ref_ != TCS)
       this->energyTwoE = 0.5 * (
         this->template computeProperty<double,DENSITY_TYPE::ALPHA>(
@@ -42,6 +65,7 @@ void SingleSlater<T>::computeEnergy(){
         this->template computeProperty<double,DENSITY_TYPE::TOTAL>(
           this->PTA_->conjugate()) 
       ); 
+      */
       
     if(this->isDFT) this->energyTwoE += this->totalEx + this->totalEcorr;
 
@@ -57,12 +81,18 @@ void SingleSlater<T>::computeEnergy(){
  
  
     this->totalEnergy= this->energyOneE + this->energyTwoE + this->energyNuclei;
+//  std::vector<double> possible = {0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0};
+//  for(auto i : possible)
+//  for(auto j : possible)
+//  cout << i << " " << j << " " << i*this->energyOneE + j*this->energyTwoE + this->energyNuclei << endl;
   }
 #ifdef CQ_ENABLE_MPI
   MPI_Bcast(&this->totalEnergy,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
   MPI_Bcast(&this->energyOneE,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
   MPI_Bcast(&this->energyTwoE,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 #endif
+  this->gatherDensity();
+  cout << "HERE 4" << endl;
 };
 
 template<typename T>

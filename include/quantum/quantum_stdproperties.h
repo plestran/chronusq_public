@@ -72,11 +72,16 @@ void computeElecMultipoles(const std::vector<Op> &DipoleOps,
     const std::vector<Op> &QuadpoleOps,
     const std::vector<Op> &OctpoleOps){
 
+  bool needToScatter = !this->isScattered_;
+  this->scatterDensity();
+
   if(this->maxMultipole_ >= 1)
     this->template computeElecDipole(DipoleOps);
   if(this->maxMultipole_ >= 2)
     this->template computeElecQuadpole(QuadpoleOps);
   if(this->maxMultipole_ >= 3)
     this->template computeElecOctpole(OctpoleOps);
+
+  if(needToScatter) this->gatherDensity();
 
 }
