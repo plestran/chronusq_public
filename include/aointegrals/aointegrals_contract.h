@@ -150,6 +150,8 @@ void AOIntegrals::newTwoEContractDirect(
     efficient_twoe_contract(thread_id);
   }
 
+//  for(auto iMat = 0; iMat < nMat; iMat++) AX[iMat].get().setZero();
+
   // Reduce
   for(auto iMat = 0; iMat < nMat    ; iMat++)
   for(auto iTh  = 0; iTh  < nthreads; iTh++ )
@@ -157,12 +159,14 @@ void AOIntegrals::newTwoEContractDirect(
 };
 
 
-template<typename Field, typename T> 
+template<typename Op, typename T> 
 void AOIntegrals::newTwoEContractIncore(
-    const std::vector<std::reference_wrapper<Eigen::MatrixBase<Field>>> &X,
-    std::vector<std::reference_wrapper<Eigen::MatrixBase<Field>>> &AX,
+    const std::vector<std::reference_wrapper<Op>> &X,
+    std::vector<std::reference_wrapper<Op>> &AX,
     std::vector<ERI_CONTRACTION_TYPE> &contractionList,
     std::vector<T>& scalingFactors){
+
+  typedef typename Op::Scalar Field;
 
   assert(X.size() == AX.size());
   assert(X.size() == contractionList.size());
@@ -179,6 +183,9 @@ void AOIntegrals::newTwoEContractIncore(
     IAXTensor = RealTensor2d(X[0].get().cols(),X[0].get().rows());
   }
   enum{i,j,k,l}; 
+
+//for(auto iMat = 0; iMat < nMat; iMat++)
+//  AX[iMat].get().setZero();
 
   for(auto iMat = 0; iMat < nMat; iMat++) {
     if(scalingFactors[iMat] == 0.0) continue;
@@ -209,11 +216,11 @@ void AOIntegrals::newTwoEContractIncore(
 
     // Copy Tensor over
     for(auto I = 0; I < X[iMat].get().size(); I++){
-      reinterpret_cast<double(&)[2]>(AX[iMat].get().data()[I])[0] = 
-        AXTensor.storage()[I];
+      reinterpret_cast<double(&)[2]>(AX[iMat].get().data()[I])[0] += 
+        2.0 * AXTensor.storage()[I];
       if(typeid(Field).hash_code() == typeid(dcomplex).hash_code())
-      reinterpret_cast<double(&)[2]>(AX[iMat].get().data()[I])[1] = 
-        IAXTensor.storage()[I];
+        reinterpret_cast<double(&)[2]>(AX[iMat].get().data()[I])[1] += 
+          2.0 * IAXTensor.storage()[I];
     }
 
   };

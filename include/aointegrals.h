@@ -432,13 +432,12 @@ public:
       std::vector<T>&
   );
 
-  template<typename Op, typename T>
+  template<typename Op, typename T> 
   void newTwoEContractIncore(
       const std::vector<std::reference_wrapper<Op>>&,
       std::vector<std::reference_wrapper<Op>>&,
       std::vector<ERI_CONTRACTION_TYPE>&,
-      std::vector<T>&
-  );
+      std::vector<T>&);
   
   template<typename Op, typename T>
   inline void newTwoEContract(

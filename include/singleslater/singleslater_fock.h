@@ -108,13 +108,13 @@ void SingleSlater<T>::formPT(){
     (*this->PTA_) *= 0.5; // This is effectively a gather operation
   } else {
     std::vector<std::reference_wrapper<TMatrix>> toGather;
-    toGather.push_back(*this->PTScalar_);
-    toGather.push_back(*this->PTMz_);
+    toGather.emplace_back(*this->PTScalar_);
+    toGather.emplace_back(*this->PTMz_);
     if(this->nTCS_ == 1)
       Quantum<T>::spinGather((*this->PTA_),(*this->PTB_),toGather);
     else {
-      toGather.push_back(*this->PTMz_);
-      toGather.push_back(*this->PTMz_);
+      toGather.emplace_back(*this->PTMz_);
+      toGather.emplace_back(*this->PTMz_);
       Quantum<T>::spinGather((*this->PTA_),toGather);
     }
 
@@ -169,6 +169,7 @@ void SingleSlater<T>::formPT(){
   }
   */
   this->gatherDensity();
+  if(this->printLevel_ >= 3 && getRank() == 0) this->printPT();
 }
 #endif
 
@@ -230,30 +231,46 @@ void SingleSlater<T>::formFock(){
         (*this->fockA_) += (*this->vCorA_);
       }
     } else {
+
+    //this->fockA_->setZero();
+    //this->fockA_->real() += (*this->aointegrals_->oneE_);
+    //this->aointegrals_->addElecDipole(*this->fockA_,this->elecField_);
+    //(*this->fockA_) += (*this->PTA_);
+    //if(this->isDFT){ 
+    //  (*this->fockA_) += (*this->vXA_);
+    //  (*this->fockA_) += (*this->vCorA_);
+    //}
+    //this->fockB_->setZero();
+    //this->fockB_->real() += (*this->aointegrals_->oneE_);
+    //this->aointegrals_->addElecDipole(*this->fockB_,this->elecField_);
+    //(*this->fockB_) += (*this->PTB_);
+    //if(this->isDFT){ 
+    //  (*this->fockB_) += (*this->vXB_);
+    //  (*this->fockB_) += (*this->vCorB_);
+    //}
+
+      this->fockScalar_->setZero();
+      this->fockMz_->setZero();
       this->fockScalar_->real() += (*this->aointegrals_->oneE_);
       this->aointegrals_->addElecDipole(*this->fockScalar_,this->elecField_);
-      (*this->fockScalar_)      *= 0.5;
+      (*this->fockScalar_) *= 2.0;
       (*this->fockScalar_)      += (*this->PTScalar_);        
       (*this->fockMz_)          += (*this->PTMz_);
 
       std::vector<std::reference_wrapper<TMatrix>> toGather;
-      toGather.push_back(*this->fockScalar_);
-      toGather.push_back(*this->fockMz_);
+      toGather.emplace_back(*this->fockScalar_);
+      toGather.emplace_back(*this->fockMz_);
       if(this->nTCS_ == 1)
-        Quantum<T>::spinGather((*this->fockA_),(*this->fockB_),toGather);
-      else {
-        (*this->fockMx_)          += (*this->PTMx_);
-        (*this->fockMy_)          += (*this->PTMy_);
-        toGather.push_back(*this->fockMx_);
-        toGather.push_back(*this->fockMy_);
-        Quantum<T>::spinGather((*this->fockA_),toGather);
-      }
+        Quantum<T>::spinGather(*this->fockA_,*this->fockB_,toGather);
 
       // Hack for UHF DFT for now FIXME
       if(this->nTCS_ == 1 && this->isDFT){
+        (*this->fockA_) += (*this->vXA_);
+        (*this->fockA_) += (*this->vCorA_);
         (*this->fockB_) += (*this->vXB_);
         (*this->fockB_) += (*this->vCorB_);
       }
+
     }
 
     /*
