@@ -358,11 +358,14 @@ public:
   void computeAOTwoE(); // build two-electron AO integral matrices
   void computeAOOneE(); // build one-electron AO integral matrices
   void finiteWidthPotential();
+  void formP2Transformation();
+  void formPVP(std::vector<std::reference_wrapper<RealMatrix>>&);
 
 
   enum ORTHOTYPE {
     LOWDIN
   };
+
   ORTHOTYPE orthoType;
   inline void computeOrtho(){
     if(this->orthoType == LOWDIN) this->computeLowdin();
