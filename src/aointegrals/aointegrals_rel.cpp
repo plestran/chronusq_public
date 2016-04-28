@@ -106,31 +106,21 @@ void AOIntegrals::formP2Transformation(){
   std::vector<double> ovlpEigValues(nUncontracted);
   std::vector<double> WORK(LWORK);
 
-//  prettyPrint(cout,SUncontracted,"S");
   dgesvd_(&JOBU,&JOBVT,&nUncontracted,&nUncontracted,SUncontracted.data(),
       &nUncontracted,&ovlpEigValues[0],SUncontracted.data(),&nUncontracted,
       SUncontracted.data(),&nUncontracted,&WORK[0],&LWORK,&INFO);
-//  prettyPrint(cout,SUncontracted,"SVD");
 
 
   for(auto iS = 0; iS < nUncontracted; iS++){
     SUncontracted.col(iS) /= std::sqrt(ovlpEigValues[iS]);
   }
 
-//prettyPrint(cout,SUncontracted,"SVD Scaled");
 
   int nZero = 0;
   for(auto iS = 0; iS < nUncontracted; iS++)
     if(std::abs(ovlpEigValues[iS]) < 1e-6) nZero++;
 
-//cout << "S" << endl;
-//for(auto iS = 0; iS < nUncontracted; iS++)
-//  cout << ovlpEigValues[iS] << endl;
-
-//prettyPrint(cout,TUncontracted,"T");
   cout << "NZERO " << nZero << endl;
-//RealMatrix TMP = SUncontracted * TUncontracted;
-//TUncontracted = TMP * SUncontracted.transpose();
 
   RealMatrix TMP = SUncontracted.transpose() * TUncontracted;
   TUncontracted = TMP * SUncontracted;
@@ -254,19 +244,19 @@ void AOIntegrals::formP2Transformation(){
   TMP = UK.transpose() * PVPZ;
   PVPZ = TMP * UK;
 
-  prettyPrint(cout,P2_Potential,"V");
-  prettyPrint(cout,PVPS,"dot(P,VP)");
-  prettyPrint(cout,PVPX,"cross(P,VP) X");
-  prettyPrint(cout,PVPY,"cross(P,VP) Y");
-  prettyPrint(cout,PVPZ,"cross(P,VP) Z");
-  cout << "|V| = " << P2_Potential.squaredNorm() << endl;
-  cout << "|dot(P,VP)| = " << PVPS.squaredNorm() << endl;
-  cout << "|cross(P,VP) X| = " << PVPX.squaredNorm() << endl;
-  cout << "|cross(P,VP) Y| = " << PVPY.squaredNorm() << endl;
-  cout << "|cross(P,VP) Z| = " << PVPZ.squaredNorm() << endl;
+//prettyPrint(cout,P2_Potential,"V");
+//prettyPrint(cout,PVPS,"dot(P,VP)");
+//prettyPrint(cout,PVPX,"cross(P,VP) X");
+//prettyPrint(cout,PVPY,"cross(P,VP) Y");
+//prettyPrint(cout,PVPZ,"cross(P,VP) Z");
+//cout << "|V| = " << P2_Potential.squaredNorm() << endl;
+//cout << "|dot(P,VP)| = " << PVPS.squaredNorm() << endl;
+//cout << "|cross(P,VP) X| = " << PVPX.squaredNorm() << endl;
+//cout << "|cross(P,VP) Y| = " << PVPY.squaredNorm() << endl;
+//cout << "|cross(P,VP) Z| = " << PVPZ.squaredNorm() << endl;
 
   RealVecMap PMap(&ovlpEigValues[0],nUncontracted);
-  prettyPrint(cout,PMap,"P^2");
+//prettyPrint(cout,PMap,"P^2");
 
   PMap = 2*PMap;
   PMap = PMap.cwiseSqrt();
@@ -282,14 +272,14 @@ void AOIntegrals::formP2Transformation(){
   TMP = PMap.asDiagonal() * PVPZ;
   PVPZ = TMP * PMap.asDiagonal();
 
-  cout << "|dot(P,VP)| = " << PVPS.squaredNorm() << endl;
-  cout << "|cross(P,VP) X| = " << PVPX.squaredNorm() << endl;
-  cout << "|cross(P,VP) Y| = " << PVPY.squaredNorm() << endl;
-  cout << "|cross(P,VP) Z| = " << PVPZ.squaredNorm() << endl;
-  prettyPrint(cout,PVPS,"scaled dot(P,VP)");
-  prettyPrint(cout,PVPX,"scaled cross(P,VP) X");
-  prettyPrint(cout,PVPY,"scaled cross(P,VP) Y");
-  prettyPrint(cout,PVPZ,"scaled cross(P,VP) Z");
+//cout << "|dot(P,VP)| = " << PVPS.squaredNorm() << endl;
+//cout << "|cross(P,VP) X| = " << PVPX.squaredNorm() << endl;
+//cout << "|cross(P,VP) Y| = " << PVPY.squaredNorm() << endl;
+//cout << "|cross(P,VP) Z| = " << PVPZ.squaredNorm() << endl;
+//prettyPrint(cout,PVPS,"scaled dot(P,VP)");
+//prettyPrint(cout,PVPX,"scaled cross(P,VP) X");
+//prettyPrint(cout,PVPY,"scaled cross(P,VP) Y");
+//prettyPrint(cout,PVPZ,"scaled cross(P,VP) Z");
 
   ComplexMatrix W(2*nUncontracted,2*nUncontracted);
   W.block(0,0,nUncontracted,nUncontracted).real() = PVPS;
@@ -302,9 +292,10 @@ void AOIntegrals::formP2Transformation(){
   W.block(0,nUncontracted,nUncontracted,nUncontracted).imag() = PVPX;
   W.block(nUncontracted,0,nUncontracted,nUncontracted).real() = -PVPY;
   W.block(nUncontracted,0,nUncontracted,nUncontracted).imag() = PVPX;
+
 //W = -W;
 //P2_Potential = - P2_Potential;
-  W = W.conjugate();
+//W = W.conjugate();
 
   PMap = PMap.cwiseInverse();
   ComplexMatrix CORE_HAMILTONIAN(4*nUncontracted,4*nUncontracted);
@@ -335,15 +326,15 @@ void AOIntegrals::formP2Transformation(){
       0,2*nUncontracted,2*nUncontracted,2*nUncontracted);
 
 
-  prettyPrintComplex(cout,CORE_HAMILTONIAN,"H");
-  cout << "|H|" << CORE_HAMILTONIAN.squaredNorm();
+//prettyPrintComplex(cout,CORE_HAMILTONIAN,"H");
+//cout << "|H|" << CORE_HAMILTONIAN.squaredNorm();
 
   Eigen::SelfAdjointEigenSolver<ComplexMatrix> es;
   es.compute(CORE_HAMILTONIAN);
   RealMatrix HEV= es.eigenvalues();
   ComplexMatrix HEVx= es.eigenvectors();
-  prettyPrint(cout,HEV,"HEV");
-  prettyPrintComplex(cout,HEVx,"HEVc");
+//prettyPrint(cout,HEV,"HEV");
+//prettyPrintComplex(cout,HEVx,"HEVc");
 
   ComplexMatrix L = 
     HEVx.block(0,2*nUncontracted,2*nUncontracted,2*nUncontracted);
@@ -357,15 +348,15 @@ void AOIntegrals::formP2Transformation(){
   ComplexMatrix SVL = svd.matrixU();
 
   ComplexMatrix X = S * L.inverse();
-  prettyPrintComplex(cout,X,"X");
-  cout << X.squaredNorm() << endl;
+//prettyPrintComplex(cout,X,"X");
+//cout << X.squaredNorm() << endl;
 
   
   ComplexMatrix Y = 
     (ComplexMatrix::Identity(2*nUncontracted,2*nUncontracted) 
      + X.adjoint() * X).pow(-0.5);
-  prettyPrintComplex(cout,Y,"Y");
-  cout << Y.squaredNorm() << endl;
+//prettyPrintComplex(cout,Y,"Y");
+//cout << Y.squaredNorm() << endl;
 
 
 };

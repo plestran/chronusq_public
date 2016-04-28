@@ -92,7 +92,6 @@ void SingleSlater<T>::computeEnergy(){
   MPI_Bcast(&this->energyTwoE,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 #endif
   this->gatherDensity();
-  cout << "HERE 4" << endl;
 };
 
 template<typename T>
