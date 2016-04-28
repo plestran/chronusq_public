@@ -34,10 +34,6 @@ using ChronusQ::SingleSlater;
 //----------------------------------------//
 namespace ChronusQ {
 template<>
-void SingleSlater<dcomplex>::complexMem(){
-  this->lenRealScr_ += this->LRWORK_; // Extra space for RWORK for complex
-};
-template<>
 void SingleSlater<dcomplex>::printDensityInfo(double PAlphaRMS,double EDelta){
   this->fileio_->out<<"\nSCF Information:"<<endl;
   this->fileio_->out<<std::right<<std::setw(30)<<"    Delta-E = "<<std::setw(15)<<std::scientific<<EDelta<<std::setw(5)<<" Eh "<<endl;

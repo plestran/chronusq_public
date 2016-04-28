@@ -41,47 +41,6 @@ template<typename T>
 class SingleSlater : public Quantum<T> {
   typedef Eigen::Matrix<T,Dynamic,Dynamic,ColMajor> TMatrix;
 
-/*
-  struct MetaData_ {
-    int nBasis;      ///< Number of basis functions (inherited from BasisSet)
-    int nShell;      ///< Number of basis shells (inherited from BasisSet)
-    int nTT;         ///< LT NBasis dimenstion (N(N+1)/2)
-    int nAE;         ///< Total number of alpha electrons
-    int nBE;         ///< Total number of beta electrons
-    int nOccA;       ///< Number of occupied alpha electrons
-    int nOccB;       ///< Number of occupied beta electrons
-    int nVirA;       ///< Number of virtual (unoccupied) alpha electrons
-    int nVirB;       ///< Number of virtual (unoccupied) beta electrons
-    int multip;      ///< Spin multiplicity (inherited from Molecule)
-    int maxSCFIter;  ///< Maximum number of SCF Cycles
-    int printLevel;  ///< Print level (Verbosity)
-
-    bool isHF;          ///< Boolean of whether or not it's a HF reference
-    bool isDFT;         ///< Boolean of whether or not it's a DFT reference
-    bool isPrimary;
-
-    double denTol; ///< SCF tolerence on the density
-    double eneTol; ///< SCF tolerence on the energy
-
-    int Ref;         ///< Specifies the Reference via enum
-
-    std::string SCFType;      ///< String containing SCF Type (R/C) (R/U/G/CU)
-    std::string SCFTypeShort; ///< String containing SCF Type (R/C) (R/U/G/CU)
-    std::string algebraicField;      ///< String Real/Complex/(Quaternion)
-    std::string algebraicFieldShort; ///< String Real/Complex/(Quaternion)
-
-    std::array<double,3> elecField; ///< Static electric field
-
-
-    int        ** R2Index;     ///< Not sure? artifact of in-house integrals
-    BasisSet    * basisset;    ///< Basis Set
-    Molecule    * molecule;    ///< Molecular specificiations
-    FileIO      * fileio;      ///< Access to output file
-    Controls    * controls;    ///< General ChronusQ flow parameters
-    AOIntegrals * aointegrals; ///< Molecular Integrals over GTOs (AO basis)
-  };
-*/
-
   int      nBasis_;
   int      nShell_;
   int      nTT_;
@@ -137,18 +96,6 @@ class SingleSlater : public Quantum<T> {
   std::unique_ptr<TMatrix>  PTMy_;
   std::unique_ptr<TMatrix>  PTMz_;
 
-  // Breaks Up Scattered Perturbation Tensor into Re/Im parts for INCORE
-  // contraction
-  std::unique_ptr<RealMatrix> RePTScalar_;
-  std::unique_ptr<RealMatrix> ImPTScalar_;
-  std::unique_ptr<RealMatrix> RePTMx_;
-  std::unique_ptr<RealMatrix> ImPTMx_;
-  std::unique_ptr<RealMatrix> RePTMy_;
-  std::unique_ptr<RealMatrix> ImPTMy_;
-  std::unique_ptr<RealMatrix> RePTMz_;
-  std::unique_ptr<RealMatrix> ImPTMz_;
-
-
   std::unique_ptr<TMatrix>  vXA_;        ///< Alpha or Full (TCS) VX
   std::unique_ptr<TMatrix>  vXB_;        ///< Beta VXC
   std::unique_ptr<TMatrix>  vCorA_;        ///< Alpha or Full Vcorr
@@ -188,15 +135,11 @@ class SingleSlater : public Quantum<T> {
   int lenLambda_;
   int lenDelF_;
   int lenOccNum_;
-  int lenScr_;
-  int lenRealScr_;
 
   // Pointers of scratch partitions (NOT MEANT TO BE COPIED)
-  double *REAL_SCF_SCR;
   double *occNumMem_;
   double *RWORK_;
 
-  T *SCF_SCR;
   T *FpAlphaMem_;
   T *FpBetaMem_;
   T *POldAlphaMem_;
@@ -209,10 +152,23 @@ class SingleSlater : public Quantum<T> {
   T *lambdaMem_;
   T *delFMem_;
   T *PNOMem_;
+
+  T *NBSQScr1_;
+  T *NBSQScr2_;
+  T *ScalarScr1_;
+  T *ScalarScr2_;
+  T *MzScr1_;
+  T *MzScr2_;
+  T *MyScr1_;
+  T *MyScr2_;
+  T *MxScr1_;
+  T *MxScr2_;
+
   
 
   // Various functions the perform SCF and SCR allocation
   void initSCFMem();       ///< Initialize scratch memory for SCF
+  void initSCFMem2();       ///< Initialize scratch memory for SCF (2)
   void allocAlphaScr();    ///< Allocate scratch for Alpha related quantities
   void allocBetaScr();     ///< Allocate scratch for Beta related quantities
   void allocCUHFScr();     ///< Allocate scratch for CUHF realted quantities
@@ -222,7 +178,6 @@ class SingleSlater : public Quantum<T> {
   void cleanupBetaScr();   ///< Cleanup scratch for Beta related quantities
   void cleanupCUHFScr();   ///< Cleanup scratch for CUHF realted quantities
   void cleanupLAPACKScr(); ///< Cleanup LAPACK scratch space
-  void complexMem();       ///< Add scratch space for Complex intermediates (?)
   void initMemLen();       ///< Populate lengths of scratch partitions
   void initSCFPtr();       ///< NULL-out pointers to scratch partitions
   void formNO();           ///< Form Natural Orbitals
@@ -275,9 +230,6 @@ class SingleSlater : public Quantum<T> {
       CErr(std::string("Fatal: The specified multiplicity is impossible within")
            +std::string(" the number of electrons given"),this->fileio_->out);
 
-    // This is often called before the method is set
-//  if(this->Ref_ == _INVALID) 
-//    CErr("Fatal: SingleSlater reference not set!",this->fileio_->out);
   }
 
 
@@ -676,6 +628,7 @@ public:
     this->computeSExpect();
   };
   void SCF();  
+  void SCF2();
   void CDIIS();
   void CpyFock(int);
   void GenDComm(int);

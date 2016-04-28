@@ -33,8 +33,6 @@ using ChronusQ::SingleSlater;
 // Sajan                                  //
 //----------------------------------------//
 namespace ChronusQ {
-template<>
-void SingleSlater<double>::complexMem(){;};
 
 template<>
 void SingleSlater<double>::printDensityInfo(double PAlphaRMS,double EDelta){

@@ -91,16 +91,6 @@ template<>
 void SingleSlater<dcomplex>::GenDComm(int iter){
   ComplexMap ErrA(this->ErrorAlphaMem_ + (iter % (this->lenCoeff_-1)) * this->lenF_,
                this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
-/*
-  if(this->Ref_ == TCS){
-    RealMap GenOverlap(this->SMem_,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
-    ErrA = (*this->fockA_) * (*this->onePDMA_) * (GenOverlap);
-    ErrA -= (GenOverlap) * (*this->onePDMA_) * (*this->fockA_);
-  } else {
-    ErrA = (*this->fockA_) * (*this->onePDMA_) * (*this->aointegrals_->overlap_);
-    ErrA -= (*this->aointegrals_->overlap_) * (*this->onePDMA_) * (*this->fockA_);
-  }
-*/
   ErrA = (*this->fockA_) * (*this->onePDMA_) * (*this->aointegrals_->overlap_);
   ErrA -= (*this->aointegrals_->overlap_) * (*this->onePDMA_) * (*this->fockA_);
   if(!this->isClosedShell && this->Ref_ != TCS){

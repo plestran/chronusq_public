@@ -151,26 +151,6 @@ void SingleSlater<T>::allocOp(){
         std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_));
     }
   }
-
-  /*
-  this->RePTScalar_ = 
-    std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nBasis_));
-  this->ImPTScalar_ = 
-    std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nBasis_));
-  this->RePTMx_ = 
-    std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nBasis_));
-  this->ImPTMx_ = 
-    std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nBasis_));
-  this->RePTMy_ = 
-    std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nBasis_));
-  this->ImPTMy_ = 
-    std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nBasis_));
-  this->RePTMz_ = 
-    std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nBasis_));
-  this->ImPTMz_ = 
-    std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nBasis_));
-    */
-
 }
 
 template<typename T>

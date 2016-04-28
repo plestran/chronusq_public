@@ -36,39 +36,13 @@ void SingleSlater<T>::initMemLen(){
   this->lenLambda_ = this->nBasis_ * this->nBasis_ * this->nTCS_ * this->nTCS_;
   this->lenDelF_   = this->nBasis_ * this->nBasis_ * this->nTCS_ * this->nTCS_;
   this->lenOccNum_ = this->nBasis_ * this->nTCS_   * this->nTCS_;
-
-  this->lenScr_     = 0;
-  this->lenRealScr_ = 0;
-
-  this->lenScr_ += this->lenF_;     // Storage for Alpha (Total) Fock
-  this->lenScr_ += this->lenP_;     // Storage for Alpha (Total) Density
-  this->lenScr_ += this->lenCoeff_; // Storage for CDIIS Coefficients
-  this->lenScr_ += this->lenB_;     // Storage for CDIIS Metric
-  this->lenScr_ += 2*(this->nDIISExtrap_ - 1) * this->lenF_; // CDIIS Commutator (A) array
-  if(!this->isClosedShell && this->Ref_ != TCS) {
-    this->lenScr_ += this->lenF_;     // Storage for Beta Fock
-    this->lenScr_ += this->lenP_;     // Storage for Beta Density
-    this->lenScr_ += 2*(this->nDIISExtrap_ - 1) * this->lenF_; // CDIIS Commutator (B) array
-  } 
-  if(this->Ref_ == CUHF) {
-    this->lenRealScr_ += this->lenOccNum_; // Storage for Occupation Numbers (NOs)
-    this->lenScr_     += this->lenLambda_; // Storage for Lambda
-    this->lenScr_     += this->lenDelF_;   // Stroage for DelF
-    this->lenScr_     += this->lenP_;      // Storage for NOs
-  }
-
-  this->lenScr_ += this->LWORK_; // LAPACK Scratch space
-  this->complexMem();
-
 }; // initMemLen
 
 template <typename T>
 void SingleSlater<T>::initSCFPtr(){
-  this->REAL_SCF_SCR   = NULL;
   this->occNumMem_     = NULL;
   this->RWORK_         = NULL;
 
-  this->SCF_SCR        = NULL;
   this->FpAlphaMem_    = NULL;
   this->FpBetaMem_     = NULL;
   this->POldAlphaMem_  = NULL;
@@ -81,6 +55,17 @@ void SingleSlater<T>::initSCFPtr(){
   this->lambdaMem_     = NULL;
   this->delFMem_       = NULL;
   this->PNOMem_        = NULL;
+
+  this->NBSQScr1_ = NULL;
+  this->NBSQScr2_ = NULL;
+  this->ScalarScr1_ = NULL;
+  this->ScalarScr2_ = NULL;
+  this->MzScr1_ = NULL;
+  this->MzScr2_ = NULL;
+  this->MyScr1_ = NULL;
+  this->MyScr2_ = NULL;
+  this->MxScr1_ = NULL;
+  this->MxScr2_ = NULL;
 }; // initSCFPtr
 
 template <typename T>
@@ -125,7 +110,6 @@ template<typename T>
 void SingleSlater<T>::allocLAPACKScr(){
   this->WORK_  = new T[this->LWORK_];
   if(typeid(T).hash_code() == typeid(dcomplex).hash_code()){
-//  this->fileio_->out << "Allocating RWORK in SCF" << endl;
     this->RWORK_ = new double[this->LRWORK_];
   }
 }
@@ -241,3 +225,44 @@ void SingleSlater<T>::SCF(){
   }
 }
 
+
+template<typename T>
+void SingleSlater<T>::initSCFMem2(){
+  this->initSCFPtr();
+
+  /*
+  this->allocAlphaScr();
+  if(!this->isClosedShell && this->Ref_ != TCS) this->allocBetaScr();
+  if(this->Ref_ == CUHF) this->allocCUHFScr();
+  this->allocLAPACKScr();
+  */
+
+  auto NTCSxNBASIS = this->nTCS_ * this->nBasis_;
+
+  this->LWORK_     = 5 * std::max(NTCSxNBASIS,this->nDIISExtrap_);
+  this->LRWORK_    = 3 * std::max(NTCSxNBASIS,this->nDIISExtrap_);
+
+  this->FpAlphaMem_    = new T[NTCSxNBASIS*NTCSxNBASIS];
+  this->POldAlphaMem_  = new T[NTCSxNBASIS*NTCSxNBASIS];
+  this->ErrorAlphaMem_ = new T[NTCSxNBASIS*NTCSxNBASIS*(this->nDIISExtrap_ -1)];
+  this->FADIIS_        = new T[NTCSxNBASIS*NTCSxNBASIS*(this->nDIISExtrap_ -1)];
+  if(this->nTCS_ == 1 && !this->isClosedShell) {
+    this->FpBetaMem_    = new T[NTCSxNBASIS*NTCSxNBASIS];
+    this->POldBetaMem_  = new T[NTCSxNBASIS*NTCSxNBASIS];
+    this->ErrorBetaMem_ = new T[NTCSxNBASIS*NTCSxNBASIS*(this->nDIISExtrap_ -1)];
+    this->FBDIIS_       = new T[NTCSxNBASIS*NTCSxNBASIS*(this->nDIISExtrap_ -1)];
+  }
+
+  if(this->Ref_ == CUHF) {
+    this->delFMem_   = new T[NTCSxNBASIS*NTCSxNBASIS];
+    this->lambdaMem_ = new T[NTCSxNBASIS*NTCSxNBASIS];
+    this->PNOMem_    = new T[NTCSxNBASIS*NTCSxNBASIS];
+    this->occNumMem_ = new double[NTCSxNBASIS];
+  }
+
+  this->WORK_  = new T[this->LWORK_];
+  if(typeid(T).hash_code() == typeid(dcomplex).hash_code())
+    this->RWORK_ = new double[this->LRWORK_];
+  
+  
+}; //initSCFMem
