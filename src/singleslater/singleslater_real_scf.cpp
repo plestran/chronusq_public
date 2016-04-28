@@ -136,7 +136,6 @@ void SingleSlater<double>::diagFock(){
       this->epsA_->data(),this->WORK_,&this->LWORK_,&INFO);
 
   if(INFO != 0) CErr("DSYEV Failed Fock Alpha",this->fileio_->out);
-//FpAlpha.transposeInPlace(); // bc row major
   (*this->moA_) = (*this->aointegrals_->ortho1_) * FpAlpha;
 
   if(!this->isClosedShell && this->Ref_ != TCS){
@@ -147,7 +146,6 @@ void SingleSlater<double>::diagFock(){
         this->epsB_->data(),this->WORK_,&this->LWORK_,&INFO);
 
     if(INFO != 0) CErr("DSYEV Failed Fock Beta",this->fileio_->out);
-//  FpBeta.transposeInPlace(); // bc row major
     (*this->moB_) = (*this->aointegrals_->ortho1_) * FpBeta;
   }
 

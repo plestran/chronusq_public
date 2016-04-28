@@ -177,35 +177,10 @@ void SingleSlater<T>::SCF(){
     this->aointegrals_->computeAOOneE();
 
   int iter; 
-  if(this->printLevel_ > 0 && getRank() == 0) {
-    this->printSCFHeader(this->fileio_->out);
-
-    this->fileio_->out << std::setw(16) << "SCF Iteration";
-    this->fileio_->out << std::setw(18) << "Energy (Eh)";
-    this->fileio_->out << std::setw(18) << "\u0394E (Eh)";
-    if(this->Ref_ == TCS)
-      this->fileio_->out << std::setw(18) << "|\u0394P|";
-    else {
-      this->fileio_->out << std::setw(18) << "|\u0394P(\u03B1)|";
-      if(!this->isClosedShell)
-        this->fileio_->out << std::setw(18) << "|\u0394P(\u03B2)|";
-    }
-    this->fileio_->out << endl;
-    this->fileio_->out << std::setw(16) << "-------------";
-    this->fileio_->out << std::setw(18) << "-----------";
-    this->fileio_->out << std::setw(18) << "-------";
-    if(this->Ref_ == TCS)
-      this->fileio_->out << std::setw(18) << "----";
-    else {
-      this->fileio_->out << std::setw(18) << "-------";
-      if(!this->isClosedShell)
-        this->fileio_->out << std::setw(18) << "-------";
-    }
-    this->fileio_->out << endl;
-  }
   if(getRank() == 0) {
+    if(this->printLevel_ > 0)
+      this->printSCFHeader(this->fileio_->out);
     this->initSCFMem();
-//    this->formX();
   }
   for (iter = 0; iter < this->maxSCFIter_; iter++){
 

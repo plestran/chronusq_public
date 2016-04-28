@@ -82,28 +82,28 @@ void AOIntegrals::formP2Transformation(){
   std::vector<double> ovlpEigValues(nUncontracted);
   std::vector<double> WORK(LWORK);
 
-  prettyPrint(cout,SUncontracted,"S");
+//  prettyPrint(cout,SUncontracted,"S");
   dgesvd_(&JOBU,&JOBVT,&nUncontracted,&nUncontracted,SUncontracted.data(),
       &nUncontracted,&ovlpEigValues[0],SUncontracted.data(),&nUncontracted,
       SUncontracted.data(),&nUncontracted,&WORK[0],&LWORK,&INFO);
-  prettyPrint(cout,SUncontracted,"SVD");
+//  prettyPrint(cout,SUncontracted,"SVD");
 
 
   for(auto iS = 0; iS < nUncontracted; iS++){
     SUncontracted.col(iS) /= std::sqrt(ovlpEigValues[iS]);
   }
 
-  prettyPrint(cout,SUncontracted,"SVD Scaled");
+//prettyPrint(cout,SUncontracted,"SVD Scaled");
 
   int nZero = 0;
-  for(auto iS = nUncontracted - 1; iS >= 0; iS--)
+  for(auto iS = 0; iS < nUncontracted; iS++)
     if(std::abs(ovlpEigValues[iS]) < 1e-6) nZero++;
 
-  cout << "S" << endl;
-  for(auto iS = 0; iS < nUncontracted; iS++)
-    cout << ovlpEigValues[iS] << endl;
+//cout << "S" << endl;
+//for(auto iS = 0; iS < nUncontracted; iS++)
+//  cout << ovlpEigValues[iS] << endl;
 
-  prettyPrint(cout,TUncontracted,"T");
+//prettyPrint(cout,TUncontracted,"T");
   cout << "NZERO " << nZero << endl;
 //RealMatrix TMP = SUncontracted * TUncontracted;
 //TUncontracted = TMP * SUncontracted.transpose();
@@ -114,7 +114,10 @@ void AOIntegrals::formP2Transformation(){
   dgesvd_(&JOBU,&JOBVT,&nUncontracted,&nUncontracted,TUncontracted.data(),
       &nUncontracted,&ovlpEigValues[0],TUncontracted.data(),&nUncontracted,
       TUncontracted.data(),&nUncontracted,&WORK[0],&LWORK,&INFO);
-  cout << "T" << endl;
-  for(auto iT = 0; iT < nUncontracted; iT++)
-    cout << ovlpEigValues[iT] << endl;
+
+  RealMatrix UK = SUncontracted * TUncontracted;
+//  prettyPrint(cout,UK,"UK");
+//cout << "T" << endl;
+//for(auto iT = 0; iT < nUncontracted; iT++)
+//  cout << ovlpEigValues[iT] << endl;
 };

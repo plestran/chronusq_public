@@ -415,6 +415,28 @@ void SingleSlater<T>::printSCFHeader(ostream &output){
 
 
   output << endl << bannerMid << endl;
+  output << std::setw(16) << "SCF Iteration";
+  output << std::setw(18) << "Energy (Eh)";
+  output << std::setw(18) << "\u0394E (Eh)";
+  if(this->Ref_ == TCS)
+    output << std::setw(18) << "|\u0394P|";
+  else {
+    output << std::setw(18) << "|\u0394P(\u03B1)|";
+    if(!this->isClosedShell)
+      output << std::setw(18) << "|\u0394P(\u03B2)|";
+  }
+  output << endl;
+  output << std::setw(16) << "-------------";
+  output << std::setw(18) << "-----------";
+  output << std::setw(18) << "-------";
+  if(this->Ref_ == TCS)
+    output << std::setw(18) << "----";
+  else {
+    output << std::setw(18) << "-------";
+    if(!this->isClosedShell)
+      output << std::setw(18) << "-------";
+  }
+  output << endl;
 }
 
 template<typename T>
