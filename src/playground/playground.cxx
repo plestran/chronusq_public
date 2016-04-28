@@ -388,31 +388,6 @@ int main(int argc, char **argv){
   VectorXd SCRATCHDZUnContracted(nUncontracted);
 
   auto PVP = [&](IntegrationPoint pt, std::vector<RealMatrix> &result) {
-    // Evaluate the basis product in SCRATCH
-    /*
-    for(auto iShell = 0; iShell < basis.nShell(); iShell++){
-      int b_s = basis.mapSh2Bf(iShell);
-      int size= basis.shells(iShell).size();
-
-      libint2::Shell shTmp = basis.shells(iShell);
-
-      double * buff = basis.basisDEval(1,shTmp, &pt.pt);
-      //double * buff = basis.basisDEval(0,shTmp, &pt.pt);
-
-      RealMap bMap( buff         ,size,1);
-      RealMap dxMap(buff + size  ,size,1);
-      RealMap dyMap(buff + 2*size,size,1);
-      RealMap dzMap(buff + 3*size,size,1);
-
-      SCRATCH1.block( b_s,0,size,1) = bMap;
-      SCRATCHDX.block(b_s,0,size,1) = dxMap;
-      SCRATCHDY.block(b_s,0,size,1) = dyMap;
-      SCRATCHDZ.block(b_s,0,size,1) = dzMap;
-
-      delete [] buff;
-    };
-    */
-
     for(auto iShell = 0, b_s = 0; iShell < unContractedShells.size();
          b_s += unContractedShells[iShell].size(),++iShell) {
       int size= unContractedShells[iShell].size();
