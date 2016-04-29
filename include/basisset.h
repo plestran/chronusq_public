@@ -318,6 +318,7 @@ public:
   inline int               mapSh2Bf(int i) {return this->mapSh2Bf_[i];  };
   inline int               mapSh2Cen(int i) {return this->mapSh2Cen_[i];};
   inline std::array<int,2> mapCen2Bf(int i) {return this->mapCen2Bf_[i];};
+  inline RealMatrix *      mapPrim2Bf() {return this->mapPrim2Bf_.get();};
   inline std::string       basisPath(){return this->basisPath_;};
 
   inline void resetMapSh2Bf() {this->mapSh2Bf_.clear(); this->haveMapSh2Bf  = false;};

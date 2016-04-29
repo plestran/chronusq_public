@@ -359,5 +359,31 @@ void AOIntegrals::formP2Transformation(){
 //prettyPrintComplex(cout,Y,"Y");
 //cout << Y.squaredNorm() << endl;
 
+  RealMatrix CUK = UK * (*this->basisSet_->mapPrim2Bf());
 
+  ComplexMatrix YCUK(2*nUncontracted,this->nBasis_);
+  cout << "HERE" << endl;
+  cout << YCUK.rows() << " " << YCUK.cols() << endl;
+  cout << Y.rows() << " " << Y.cols() << endl;
+  cout << CUK.rows() << " " << CUK.cols() << endl;
+  cout << "HERE" << endl;
+
+  ComplexMatrix PMapC(2*nUncontracted,2*nUncontracted);
+  PMapC.block(0,0,nUncontracted,nUncontracted).real() = PMap.asDiagonal();
+  PMapC.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).real() = PMap.asDiagonal();
+  ComplexMatrix P2MapC = PMapC.cwiseProduct(PMapC);
+  ComplexMatrix P2_PotC(2*nUncontracted,2*nUncontracted);
+  P2_PotC.block(0,0,nUncontracted,nUncontracted).real() = P2_Potential;
+  P2_PotC.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).real() = P2_Potential;
+
+  cout << "HERE" << endl;
+  ComplexMatrix HCore = YCUK.inverse() * (
+    P2_PotC+
+    phys.SPEED_OF_LIGHT * PMapC * X +
+    phys.SPEED_OF_LIGHT * X.adjoint() * PMapC +
+    X.adjoint() * (W - 2*phys.SPEED_OF_LIGHT*phys.SPEED_OF_LIGHT * ComplexMatrix::Identity(2*nUncontracted,2*nUncontracted) ) * X -
+    phys.SPEED_OF_LIGHT * 
+      (phys.SPEED_OF_LIGHT*phys.SPEED_OF_LIGHT * ComplexMatrix::Identity(2*nUncontracted,2*nUncontracted) - P2MapC).pow(0.5)
+    ) * YCUK;
+  cout << "|HC|" << HCore.norm() << endl;
 };
