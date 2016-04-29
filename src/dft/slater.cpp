@@ -6,6 +6,7 @@ SlaterExchange::SlaterExchange(){
   this->small = 1.0e-12; 
   this-> d1over3  = 1.0/3.0;
   this-> d4over3  = 4.0/3.0;
+  cout << "Created Slater Object" << endl;
 };
 
 DFTFunctional::DFTInfo SlaterExchange::eval(double rhoA, double rhoB){
@@ -15,11 +16,13 @@ DFTFunctional::DFTInfo SlaterExchange::eval(double rhoA, double rhoB){
   info.eps        = std::pow(this->rhoT,this->d1over3);      
   if (this->spindensity > this->small){
 // Open Shell
-  info.ddrhoA     = this->d4over3*info.eps*std::pow((1.0+this->spindensity),this->d1over3);       
-  info.ddrhoB     = this->d4over3*info.eps*std::pow((1.0-this->spindensity),this->d1over3);   
-  } else{   
+    info.ddrhoA = 
+      this->d4over3*info.eps*std::pow((1.0+this->spindensity),this->d1over3); 
+    info.ddrhoB = 
+      this->d4over3*info.eps*std::pow((1.0-this->spindensity),this->d1over3);   
+  } else {   
 // Closed Shell
-  info.ddrhoA     = this->d4over3*info.eps;       
+    info.ddrhoA     = this->d4over3*info.eps;       
   }
   return info;
 };
