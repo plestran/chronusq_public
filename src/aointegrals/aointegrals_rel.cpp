@@ -29,6 +29,7 @@ using ChronusQ::AOIntegrals;
 
 void AOIntegrals::formP2Transformation(){
 
+  this->basisSet_->makeMapPrim2Bf();
   if(!this->isPrimary) return;
   auto unContractedShells = this->basisSet_->uncontractBasis();
   int nUncontracted = 0;

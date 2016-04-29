@@ -117,4 +117,23 @@ void BasisSet::makeBasisMap(){
   this->basisKey["DEF2-TZVP"]     = def2TZVP;
 }; // BasisSet::makeBasisMap
 
+void BasisSet::makeMapPrim2Bf(){
+  this->mapPrim2Bf_ = std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nPrimitive_));
+
+  for(auto iSh = 0, iBf = 0, iPrim = 0; 
+      iSh < this->nShell_; 
+      iBf += this->shells_[iSh].size(), 
+        iPrim += this->shells_[iSh].contr[0].coeff.size() * this->shells_[iSh].size(), 
+        iSh++){
+  
+    int nPrim = this->shells_[iSh].contr[0].coeff.size();
+    int nBf   = this->shells_[iSh].size();
+    RealMap PrimCoeff(&this->shells_[iSh].contr[0].coeff[0],1,nPrim);
+    for(auto jBf = iBf, jPrim = iPrim; jBf < iBf + nBf; jBf++, jPrim += nPrim){
+      this->mapPrim2Bf_->block(jBf,jPrim,1,nPrim) = PrimCoeff;
+    }
+  }
+  prettyPrint(cout,*this->mapPrim2Bf_,"MAP");
+};
+
 }; // namespace ChronusQ

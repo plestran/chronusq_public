@@ -136,7 +136,7 @@ void BasisSet::computeMeta(){
     auto shPrim = (*iShell).alpha.size();  
     if( L      > this->maxL_   ) this->maxL_    = L     ;
     if( shPrim > this->maxPrim_) this->maxPrim_ = shPrim;
-    this->nPrimitive_ += shPrim * (*iShell).size();
+    this->nPrimitive_ += shPrim * iShell->size();
   } // loop iShell
 
   this->nLShell_ = std::vector<int>(this->maxL_+1,0);

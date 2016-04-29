@@ -189,6 +189,7 @@ class BasisSet{
   std::vector<std::array<int,2>> mapCen2Bf_; ///< Maps atomic center to first basis function
   std::vector<ReferenceShell>    refShells_; ///< Set of reference shells for given basis
   std::vector<libint2::Shell>    shells_   ; ///< Local basis storage (in shells)
+  std::unique_ptr<RealMatrix>    mapPrim2Bf_;///< Matrix transformation Prim -> Bf
 
   std::string basisPath_; ///< Path to the basis file
 
@@ -361,6 +362,7 @@ public:
   void makeMapSh2Bf();                  ///< generate mapSh2Bf
   void makeMapSh2Cen(Molecule *);          ///< generate mapSh2Cen
   void makeMapCen2Bf(Molecule *);          ///< generate mapCen2Bf
+  void makeMapPrim2Bf();
   void makeBasisMap();  ///< Generate map from basis enum to pasis path
   void renormShells();                     ///< Renormalize Libint2::Shell set
   std::vector<libint2::Shell> uncontractBasis(); ///< Unconctract the basis
