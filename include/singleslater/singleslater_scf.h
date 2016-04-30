@@ -238,25 +238,26 @@ void SingleSlater<T>::initSCFMem2(){
   */
 
   auto NTCSxNBASIS = this->nTCS_ * this->nBasis_;
+  auto NSQ = NTCSxNBASIS  * NTCSxNBASIS;
 
   this->LWORK_     = 5 * std::max(NTCSxNBASIS,this->nDIISExtrap_);
   this->LRWORK_    = 3 * std::max(NTCSxNBASIS,this->nDIISExtrap_);
 
-  this->FpAlphaMem_    = new T[NTCSxNBASIS*NTCSxNBASIS];
-  this->POldAlphaMem_  = new T[NTCSxNBASIS*NTCSxNBASIS];
-  this->ErrorAlphaMem_ = new T[NTCSxNBASIS*NTCSxNBASIS*(this->nDIISExtrap_ -1)];
-  this->FADIIS_        = new T[NTCSxNBASIS*NTCSxNBASIS*(this->nDIISExtrap_ -1)];
+//  this->FpAlphaMem_    = new T[NSQ];
+  this->POldAlphaMem_  = new T[NSQ];
+  this->ErrorAlphaMem_ = new T[NSQ*(this->nDIISExtrap_ -1)];
+  this->FADIIS_        = new T[NSQ*(this->nDIISExtrap_ -1)];
   if(this->nTCS_ == 1 && !this->isClosedShell) {
-    this->FpBetaMem_    = new T[NTCSxNBASIS*NTCSxNBASIS];
-    this->POldBetaMem_  = new T[NTCSxNBASIS*NTCSxNBASIS];
-    this->ErrorBetaMem_ = new T[NTCSxNBASIS*NTCSxNBASIS*(this->nDIISExtrap_ -1)];
-    this->FBDIIS_       = new T[NTCSxNBASIS*NTCSxNBASIS*(this->nDIISExtrap_ -1)];
+//    this->FpBetaMem_    = new T[NSQ*NTCSxNBASIS];
+    this->POldBetaMem_  = new T[NSQ*NTCSxNBASIS];
+    this->ErrorBetaMem_ = new T[NSQ*NTCSxNBASIS*(this->nDIISExtrap_ -1)];
+    this->FBDIIS_       = new T[NSQ*NTCSxNBASIS*(this->nDIISExtrap_ -1)];
   }
 
   if(this->Ref_ == CUHF) {
-    this->delFMem_   = new T[NTCSxNBASIS*NTCSxNBASIS];
-    this->lambdaMem_ = new T[NTCSxNBASIS*NTCSxNBASIS];
-    this->PNOMem_    = new T[NTCSxNBASIS*NTCSxNBASIS];
+    this->delFMem_   = new T[NSQ];
+    this->lambdaMem_ = new T[NSQ];
+    this->PNOMem_    = new T[NSQ];
     this->occNumMem_ = new double[NTCSxNBASIS];
   }
 
@@ -266,3 +267,23 @@ void SingleSlater<T>::initSCFMem2(){
   
   
 }; //initSCFMem
+
+template<typename T>
+void SingleSlater<T>::SCF2(){
+  this->aointegrals_->computeAOOneE();
+  if(this->printLevel_ > 0)
+    this->printSCFHeader(this->fileio_->out);
+  this->initSCFMem2();
+
+  size_t iter;
+  for(iter = 0; iter < this->maxSCFIter_; iter++){
+    if(this->Ref_ == CUHF) {
+      this->formNO();
+      this->fockCUHF();
+    }
+    this->orthoFock();
+    this->diagFock2();
+    if(iter == 0 && this->guess_ != READ) this->mixOrbitalsSCF();
+  };
+
+};

@@ -72,6 +72,9 @@ class SingleSlater : public Quantum<T> {
 
   std::vector<std::unique_ptr<DFTFunctional>> dftFunctionals_;
 
+
+  std::unique_ptr<TMatrix>  NBSqScratch_;
+
   // Internal Storage
   std::unique_ptr<TMatrix>  coulombA_;   ///< deprecated 
   std::unique_ptr<TMatrix>  coulombB_;   ///< deprecated 
@@ -86,6 +89,14 @@ class SingleSlater : public Quantum<T> {
   std::unique_ptr<TMatrix>  fockMy_;
   std::unique_ptr<TMatrix>  fockMz_;
 
+  // Orthonormal Fock
+  std::unique_ptr<TMatrix>  fockOrthoA_;
+  std::unique_ptr<TMatrix>  fockOrthoB_;
+  std::unique_ptr<TMatrix>  fockOrthoScalar_;
+  std::unique_ptr<TMatrix>  fockOrthoMx_;
+  std::unique_ptr<TMatrix>  fockOrthoMy_;
+  std::unique_ptr<TMatrix>  fockOrthoMz_;
+
 
   // Fock Eigensystem
   std::unique_ptr<TMatrix>  moA_;        ///< Alpha or Full MO Coefficients
@@ -99,6 +110,14 @@ class SingleSlater : public Quantum<T> {
   std::unique_ptr<TMatrix>  PTMx_;
   std::unique_ptr<TMatrix>  PTMy_;
   std::unique_ptr<TMatrix>  PTMz_;
+
+  // Orthonormal Density
+  std::unique_ptr<TMatrix>  onePDMOrthoA_;        
+  std::unique_ptr<TMatrix>  onePDMOrthoB_;        
+  std::unique_ptr<TMatrix>  onePDMOrthoScalar_;
+  std::unique_ptr<TMatrix>  onePDMOrthoMx_;
+  std::unique_ptr<TMatrix>  onePDMOrthoMy_;
+  std::unique_ptr<TMatrix>  onePDMOrthoMz_;
 
   std::unique_ptr<TMatrix>  vXA_;        ///< Alpha or Full (TCS) VX
   std::unique_ptr<TMatrix>  vXB_;        ///< Beta VXC
@@ -172,7 +191,6 @@ class SingleSlater : public Quantum<T> {
 
   // Various functions the perform SCF and SCR allocation
   void initSCFMem();       ///< Initialize scratch memory for SCF
-  void initSCFMem2();       ///< Initialize scratch memory for SCF (2)
   void allocAlphaScr();    ///< Allocate scratch for Alpha related quantities
   void allocBetaScr();     ///< Allocate scratch for Beta related quantities
   void allocCUHFScr();     ///< Allocate scratch for CUHF realted quantities
@@ -188,6 +206,11 @@ class SingleSlater : public Quantum<T> {
   void diagFock();         ///< Diagonalize Fock Matrix
   void mixOrbitalsSCF();   ///< Mix the orbitals for Complex / TCS SCF
   void evalConver(int);    ///< Evaluate convergence criteria for SCF
+
+  void initSCFMem2();       ///< Initialize scratch memory for SCF (2)
+  void diagFock2();         ///< Diagonalize Fock Matrix
+  void orthoFock();
+  void fockCUHF();
 
   double denTol_;
   double eneTol_;
@@ -634,12 +657,14 @@ public:
     this->computeSExpect();
   };
   void SCF();  
-  void SCF2();
   void CDIIS();
   void CpyFock(int);
   void GenDComm(int);
   void mullikenPop();
   void fixPhase();
+
+  void SCF2();
+
 
   void printEnergy(); 
   void printMultipole();

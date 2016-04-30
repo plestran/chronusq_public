@@ -302,4 +302,138 @@ void SingleSlater<dcomplex>::mixOrbitalsSCF(){
   }
 }
 
+template<>
+void SingleSlater<dcomplex>::diagFock2(){
+  int INFO;
+  char JOBZ = 'V';
+  char UPLO = 'U';
+  auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
+
+  zheev_(&JOBZ,&UPLO,&NTCSxNBASIS,this->fockOrthoA_->data(),&NTCSxNBASIS,
+      this->epsA_->data(),this->WORK_,&this->LWORK_,this->RWORK_,&INFO);
+  if(INFO != 0) CErr("DSYEV Failed Fock Alpha",this->fileio_->out);
+
+  if(this->nTCS_ == 1 && !this->isClosedShell){
+    zheev_(&JOBZ,&UPLO,&NTCSxNBASIS,this->fockOrthoB_->data(),&NTCSxNBASIS,
+        this->epsB_->data(),this->WORK_,&this->LWORK_,this->RWORK_,&INFO);
+    if(INFO != 0) CErr("DSYEV Failed Fock Beta",this->fileio_->out);
+  }
+};
+
+template<>
+void SingleSlater<dcomplex>::orthoFock(){
+  if(this->nTCS_ == 1 && this->isClosedShell){
+    // F(A)' = X^\dagger * F(A) * X
+    this->NBSqScratch_->real() = 
+      this->aointegrals_->ortho1_->transpose() * this->fockA_->real();
+    this->NBSqScratch_->imag() = 
+      this->aointegrals_->ortho1_->transpose() * this->fockA_->imag();
+
+    this->fockOrthoA_->real() = 
+      this->NBSqScratch_->real() * (*this->aointegrals_->ortho1_);
+    this->fockOrthoA_->imag() = 
+      this->NBSqScratch_->imag() * (*this->aointegrals_->ortho1_);
+
+  } else {
+    // F(Scalar)' = X^\dagger * F(Scalar) * X
+    this->NBSqScratch_->real() = 
+      this->aointegrals_->ortho1_->transpose() * this->fockScalar_->real();
+    this->NBSqScratch_->imag() = 
+      this->aointegrals_->ortho1_->transpose() * this->fockScalar_->imag();
+
+    this->fockOrthoScalar_->real() = 
+      this->NBSqScratch_->real() * (*this->aointegrals_->ortho1_);
+    this->fockOrthoScalar_->imag() = 
+      this->NBSqScratch_->imag() * (*this->aointegrals_->ortho1_);
+
+    // F(Mz)' = X^\dagger * F(Mz) * X
+    this->NBSqScratch_->real() = 
+      this->aointegrals_->ortho1_->transpose() * this->fockMz_->real();
+    this->NBSqScratch_->imag() = 
+      this->aointegrals_->ortho1_->transpose() * this->fockMz_->imag();
+
+    this->fockOrthoMz_->real() = 
+      this->NBSqScratch_->real() * (*this->aointegrals_->ortho1_);
+    this->fockOrthoMz_->imag() = 
+      this->NBSqScratch_->imag() * (*this->aointegrals_->ortho1_);
+
+    std::vector<std::reference_wrapper<TMatrix>> toGather;
+    toGather.emplace_back(*this->fockOrthoScalar_);
+    toGather.emplace_back(*this->fockOrthoMz_);
+    if(this->nTCS_ == 1)
+      // {F(Scalar),F(Mz)} -> {F(A), F(B)}
+      Quantum<dcomplex>::spinGather(*this->fockOrthoA_,*this->fockOrthoB_,toGather);
+    else {
+      // F(Mx)' = X^\dagger * F(Mx) * X
+      this->NBSqScratch_->real() = 
+        this->aointegrals_->ortho1_->transpose() * this->fockMx_->real();
+      this->NBSqScratch_->imag() = 
+        this->aointegrals_->ortho1_->transpose() * this->fockMx_->imag();
+     
+      this->fockOrthoMx_->real() = 
+        this->NBSqScratch_->real() * (*this->aointegrals_->ortho1_);
+      this->fockOrthoMx_->imag() = 
+        this->NBSqScratch_->imag() * (*this->aointegrals_->ortho1_);
+
+      // F(My)' = X^\dagger * F(My) * X
+      this->NBSqScratch_->real() = 
+        this->aointegrals_->ortho1_->transpose() * this->fockMy_->real();
+      this->NBSqScratch_->imag() = 
+        this->aointegrals_->ortho1_->transpose() * this->fockMy_->imag();
+     
+      this->fockOrthoMy_->real() = 
+        this->NBSqScratch_->real() * (*this->aointegrals_->ortho1_);
+      this->fockOrthoMy_->imag() = 
+        this->NBSqScratch_->imag() * (*this->aointegrals_->ortho1_);
+
+      toGather.emplace_back(*this->fockOrthoMx_);
+      toGather.emplace_back(*this->fockOrthoMy_);
+
+      // {F(Scalar), F(Mz), F(Mx). F(My)} -> F
+      Quantum<dcomplex>::spinGather(*this->fockOrthoA_,toGather);
+    }
+  }
+};
+
+template<>
+void SingleSlater<dcomplex>::fockCUHF() {
+  ComplexMap P(this->PNOMem_,this->nBasis_,this->nBasis_);
+  ComplexMap DelF(this->delFMem_,this->nBasis_,this->nBasis_);
+  ComplexMap Lambda(this->lambdaMem_,this->nBasis_,this->nBasis_);
+
+  int activeSpace  = this->molecule_->multip() - 1;
+  int coreSpace    = (this->molecule_->nTotalE() - activeSpace) / 2;
+  int virtualSpace = this->nBasis_ - coreSpace - activeSpace;
+
+  // DelF = X * (F(A) - F(B)) * X
+  this->NBSqScratch_->real() = 0.5 * (*this->aointegrals_->ortho1_) *
+    this->fockMz_->real();
+  this->NBSqScratch_->imag() = 0.5 * (*this->aointegrals_->ortho1_) *
+    this->fockMz_->imag();
+  DelF.real() = this->NBSqScratch_->real() * (*this->aointegrals_->ortho1_);
+  DelF.imag() = this->NBSqScratch_->imag() * (*this->aointegrals_->ortho1_);
+
+  // DelF = C(NO)^\dagger * DelF * C(NO) (Natural Orbitals)
+  (*this->NBSqScratch_) = P.adjoint() * DelF;
+  DelF = (*this->NBSqScratch_) * P;
+
+  Lambda.setZero();
+  for(auto i = activeSpace + coreSpace; i < this->nBasis_; i++)
+  for(auto j = 0                      ; j < coreSpace    ; j++){
+    Lambda(i,j) = -DelF(i,j);
+    Lambda(j,i) = -DelF(j,i);
+  }
+
+  (*this->NBSqScratch_) = P * Lambda;
+  Lambda = (*this->NBSqScratch_) * P.transpose();
+
+  this->NBSqScratch_->real() = (*this->aointegrals_->ortho2_) * Lambda.real();
+  this->NBSqScratch_->imag() = (*this->aointegrals_->ortho2_) * Lambda.imag();
+  Lambda.real() = this->NBSqScratch_->real() * (*this->aointegrals_->ortho2_);
+  Lambda.imag() = this->NBSqScratch_->imag() * (*this->aointegrals_->ortho2_);
+
+  (*this->fockA_) += Lambda;
+  (*this->fockB_) -= Lambda;
+};
+
 } // namespace ChronusQ

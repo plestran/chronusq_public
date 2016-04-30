@@ -280,4 +280,109 @@ void SingleSlater<double>::mixOrbitalsSCF(){
   }
 }
 
+template<>
+void SingleSlater<double>::diagFock2(){
+  int INFO;
+  char JOBZ = 'V';
+  char UPLO = 'U';
+  auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
+
+  dsyev_(&JOBZ,&UPLO,&NTCSxNBASIS,this->fockOrthoA_->data(),&NTCSxNBASIS,
+      this->epsA_->data(),this->WORK_,&this->LWORK_,&INFO);
+  if(INFO != 0) CErr("DSYEV Failed Fock Alpha",this->fileio_->out);
+
+  if(this->nTCS_ == 1 && !this->isClosedShell){
+    dsyev_(&JOBZ,&UPLO,&NTCSxNBASIS,this->fockOrthoB_->data(),&NTCSxNBASIS,
+        this->epsB_->data(),this->WORK_,&this->LWORK_,&INFO);
+    if(INFO != 0) CErr("DSYEV Failed Fock Beta",this->fileio_->out);
+  }
+};
+
+template<>
+void SingleSlater<double>::orthoFock(){
+  if(this->nTCS_ == 1 && this->isClosedShell){
+    // F(A)' = X^\dagger * F(A) * X
+    (*this->NBSqScratch_) = 
+      this->aointegrals_->ortho1_->transpose() * (*this->fockA_);
+    (*this->fockOrthoA_) = 
+      (*this->NBSqScratch_) * (*this->aointegrals_->ortho1_);
+
+  } else {
+    // F(Scalar)' = X^\dagger * F(Scalar) * X
+    (*this->NBSqScratch_) = 
+      this->aointegrals_->ortho1_->transpose() * (*this->fockScalar_);
+    (*this->fockOrthoScalar_) = 
+      (*this->NBSqScratch_) * (*this->aointegrals_->ortho1_);
+
+    // F(Mz)' = X^\dagger * F(Mz) * X
+    (*this->NBSqScratch_) = 
+      this->aointegrals_->ortho1_->transpose() * (*this->fockMz_);
+    (*this->fockOrthoMz_) = 
+      (*this->NBSqScratch_) * (*this->aointegrals_->ortho1_);
+
+    std::vector<std::reference_wrapper<TMatrix>> toGather;
+    toGather.emplace_back(*this->fockOrthoScalar_);
+    toGather.emplace_back(*this->fockOrthoMz_);
+    if(this->nTCS_ == 1)
+      // {F(Scalar),F(Mz)} -> {F(A), F(B)}
+      Quantum<double>::spinGather(*this->fockOrthoA_,*this->fockOrthoB_,toGather);
+
+    else {
+      // F(Mx)' = X^\dagger * F(Mx) * X
+      (*this->NBSqScratch_) = 
+        this->aointegrals_->ortho1_->transpose() * (*this->fockMx_);
+      (*this->fockOrthoMx_) = 
+        (*this->NBSqScratch_) * (*this->aointegrals_->ortho1_);
+
+      // F(My)' = X^\dagger * F(My) * X
+      (*this->NBSqScratch_) = 
+        this->aointegrals_->ortho1_->transpose() * (*this->fockMy_);
+      (*this->fockOrthoMy_) = 
+        (*this->NBSqScratch_) * (*this->aointegrals_->ortho1_);
+
+      toGather.emplace_back(*this->fockOrthoMx_);
+      toGather.emplace_back(*this->fockOrthoMy_);
+
+      // {F(Scalar), F(Mz), F(Mx). F(My)} -> F
+      Quantum<double>::spinGather(*this->fockOrthoA_,toGather);
+    }
+  }
+};
+
+template<>
+void SingleSlater<double>::fockCUHF() {
+  RealMap P(this->PNOMem_,this->nBasis_,this->nBasis_);
+  RealMap DelF(this->delFMem_,this->nBasis_,this->nBasis_);
+  RealMap Lambda(this->lambdaMem_,this->nBasis_,this->nBasis_);
+
+  int activeSpace  = this->molecule_->multip() - 1;
+  int coreSpace    = (this->molecule_->nTotalE() - activeSpace) / 2;
+  int virtualSpace = this->nBasis_ - coreSpace - activeSpace;
+
+  // DelF = X * (F(A) - F(B)) * X
+  (*this->NBSqScratch_) = 0.5 * (*this->aointegrals_->ortho1_) *
+    (*this->fockMz_);
+  DelF = (*this->NBSqScratch_) * (*this->aointegrals_->ortho1_);
+
+  // DelF = C(NO)^\dagger * DelF * C(NO) (Natural Orbitals)
+  (*this->NBSqScratch_) = P.transpose() * DelF;
+  DelF = (*this->NBSqScratch_) * P;
+
+  Lambda.setZero();
+  for(auto i = activeSpace + coreSpace; i < this->nBasis_; i++)
+  for(auto j = 0                      ; j < coreSpace    ; j++){
+    Lambda(i,j) = -DelF(i,j);
+    Lambda(j,i) = -DelF(j,i);
+  }
+
+  (*this->NBSqScratch_) = P * Lambda;
+  Lambda = (*this->NBSqScratch_) * P.transpose();
+
+  (*this->NBSqScratch_) = (*this->aointegrals_->ortho2_) * Lambda;
+  Lambda = (*this->NBSqScratch_) * (*this->aointegrals_->ortho2_);
+
+  (*this->fockA_) += Lambda;
+  (*this->fockB_) -= Lambda;
+};
+
 } // namespace ChronusQ
