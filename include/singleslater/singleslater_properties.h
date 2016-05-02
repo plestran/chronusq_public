@@ -26,7 +26,7 @@
 
 template<typename T>
 void SingleSlater<T>::computeEnergy(){
-  this->scatterDensity();
+//  this->scatterDensity();
   if(getRank() == 0) {
     this->energyOneE = 
       this->template computeProperty<double,DENSITY_TYPE::TOTAL>(

@@ -455,6 +455,8 @@ void SingleSlater<double>::orthoDen(){
       Quantum<double>::spinGather(*this->onePDMA_,toGather);
     } else
       Quantum<double>::spinGather(*this->onePDMA_,*this->onePDMB_,toGather);
+    prettyPrint(cout,*this->onePDMA_,"PA");
+    prettyPrint(cout,*this->onePDMB_,"PB");
   }
 };
 

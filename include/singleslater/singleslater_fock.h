@@ -36,7 +36,7 @@ void SingleSlater<T>::formPT(){
   if(!this->haveDensity) this->formDensity();
 //  this->sepReImOnePDM();
 //  this->comReImOnePDM();
-  this->scatterDensity();
+//this->scatterDensity();
 
   std::vector<std::reference_wrapper<TMatrix>> mats;
   std::vector<std::reference_wrapper<TMatrix>> ax;
@@ -102,6 +102,10 @@ void SingleSlater<T>::formPT(){
       toGather.emplace_back(*this->PTMx_);
       Quantum<T>::spinGather((*this->PTA_),toGather);
     }
+    prettyPrint(cout,*this->PTScalar_,"PTS");
+    prettyPrint(cout,*this->PTMz_,"PTZ");
+    prettyPrint(cout,*this->PTA_,"PTA");
+    prettyPrint(cout,*this->PTB_,"PTB");
 
   }
 
@@ -211,6 +215,8 @@ void SingleSlater<T>::formFock(){
         toGather.emplace_back(*this->fockMx_);
         Quantum<T>::spinGather(*this->fockA_,toGather);
       };
+    prettyPrint(cout,*this->fockA_,"FA");
+    prettyPrint(cout,*this->fockB_,"FB");
 
       // Hack for UHF DFT for now FIXME
       if(this->nTCS_ == 1 && this->isDFT){
