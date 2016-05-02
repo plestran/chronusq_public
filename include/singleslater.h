@@ -211,6 +211,8 @@ class SingleSlater : public Quantum<T> {
   void diagFock2();         ///< Diagonalize Fock Matrix
   void orthoFock();
   void fockCUHF();
+  void orthoDen();
+  void cleanupSCFMem2();
 
   double denTol_;
   double eneTol_;

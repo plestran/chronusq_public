@@ -211,7 +211,8 @@ void SingleSlater<T>::SCF(){
   }
 
   if(!this->isConverged && getRank() == 0)
-    CErr("SCF Failed to converge within maximum number of iterations",this->fileio_->out);
+    CErr("SCF Failed to converge within maximum number of iterations",
+        this->fileio_->out);
 
   if(this->printLevel_ > 0 && getRank() == 0){
     if(this->isConverged){
@@ -230,12 +231,6 @@ template<typename T>
 void SingleSlater<T>::initSCFMem2(){
   this->initSCFPtr();
 
-  /*
-  this->allocAlphaScr();
-  if(!this->isClosedShell && this->Ref_ != TCS) this->allocBetaScr();
-  if(this->Ref_ == CUHF) this->allocCUHFScr();
-  this->allocLAPACKScr();
-  */
 
   auto NTCSxNBASIS = this->nTCS_ * this->nBasis_;
   auto NSQ = NTCSxNBASIS  * NTCSxNBASIS;
@@ -270,20 +265,85 @@ void SingleSlater<T>::initSCFMem2(){
 
 template<typename T>
 void SingleSlater<T>::SCF2(){
+  cout << "HERE" << endl;
   this->aointegrals_->computeAOOneE();
   if(this->printLevel_ > 0)
     this->printSCFHeader(this->fileio_->out);
   this->initSCFMem2();
+  cout << "HERE 3" << endl;
 
   size_t iter;
   for(iter = 0; iter < this->maxSCFIter_; iter++){
+    cout << "HERE 4" << endl;
     if(this->Ref_ == CUHF) {
       this->formNO();
+    cout << "HERE 4" << endl;
       this->fockCUHF();
     }
+    cout << "HERE 4" << endl;
     this->orthoFock();
+    cout << "HERE 4" << endl;
     this->diagFock2();
+    cout << "HERE 4" << endl;
     if(iter == 0 && this->guess_ != READ) this->mixOrbitalsSCF();
+
+    this->formDensity();
+    cout << "HERE 6" << endl;
+    this->orthoDen();
+    cout << "HERE 4" << endl;
+    this->formFock();
+    cout << "HERE 4" << endl;
+    if(PyErr_CheckSignals() == -1)
+      CErr("Keyboard Interrupt in SCF!",this->fileio_->out);
+
+    this->evalConver(iter);
+    cout << "HERE 4" << endl;
+    this->nSCFIter++;
+    if(this->isConverged) break;
+    cout << "HERE 4" << endl;
   };
 
+  this->cleanupSCFMem2();
+  if(!this->isConverged)
+    CErr("SCF Failed to converge within maximum number of iterations",
+        this->fileio_->out);
+
+  if(this->printLevel_ > 0 ){
+    if(this->isConverged){
+      this->fileio_->out << endl << "SCF Completed: E(" << this->SCFTypeShort_ 
+                         << ") = ";
+      this->fileio_->out << std::fixed << std::setprecision(10) 
+                         << this->totalEnergy << "  Eh after  " << iter + 1 
+                         << "  SCF Iterations" << endl;
+    }
+    this->fileio_->out << bannerEnd <<endl;
+  }
+
 };
+
+template<typename T>
+void SingleSlater<T>::cleanupSCFMem2(){
+//  delete[] this->FpAlphaMem_    
+  delete[] this->POldAlphaMem_;  
+  delete[] this->ErrorAlphaMem_; 
+  delete[] this->FADIIS_;        
+  if(this->nTCS_ == 2 && !this->isClosedShell) { 
+//    delete[] this->FpBetaMem_;    
+    delete[] this->POldBetaMem_;  
+    delete[] this->ErrorBetaMem_; 
+    delete[] this->FBDIIS_;       
+  }
+
+  if(this->Ref_ == CUHF){ 
+    delete[] this->delFMem_;   
+    delete[] this->lambdaMem_; 
+    delete[] this->PNOMem_;    
+    delete[] this->occNumMem_; 
+  }
+
+  delete[] this->WORK_;  
+  if(typeid(T).hash_code() == typeid(dcomplex).hash_code()) 
+    delete[] this->RWORK_; 
+  
+  
+}; //initSCFMem

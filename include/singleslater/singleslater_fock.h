@@ -36,13 +36,12 @@ void SingleSlater<T>::formPT(){
   if(!this->haveDensity) this->formDensity();
 //  this->sepReImOnePDM();
 //  this->comReImOnePDM();
-
+  this->scatterDensity();
 
   std::vector<std::reference_wrapper<TMatrix>> mats;
   std::vector<std::reference_wrapper<TMatrix>> ax;
   std::vector<AOIntegrals::ERI_CONTRACTION_TYPE> contList;
   std::vector<double> scalingFactors;
-  this->scatterDensity();
   double exchFactor = -0.5;
   if(this->isDFT) exchFactor = 0.0;
 
@@ -75,10 +74,10 @@ void SingleSlater<T>::formPT(){
     this->PTScalar_->setZero();
     this->PTMz_->setZero();
     if(this->nTCS_ == 2){
-      mats.emplace_back(*this->onePDMMx_);
       mats.emplace_back(*this->onePDMMy_);
+      mats.emplace_back(*this->onePDMMx_);
       ax.emplace_back(*this->PTMy_);
-      ax.emplace_back(*this->PTMz_);
+      ax.emplace_back(*this->PTMx_);
       contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::EXCHANGE);
       contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::EXCHANGE);
       scalingFactors.push_back(exchFactor);
@@ -99,14 +98,13 @@ void SingleSlater<T>::formPT(){
     if(this->nTCS_ == 1)
       Quantum<T>::spinGather((*this->PTA_),(*this->PTB_),toGather);
     else {
-      toGather.emplace_back(*this->PTMz_);
-      toGather.emplace_back(*this->PTMz_);
+      toGather.emplace_back(*this->PTMy_);
+      toGather.emplace_back(*this->PTMx_);
       Quantum<T>::spinGather((*this->PTA_),toGather);
     }
 
   }
 
-  this->gatherDensity();
   if(this->printLevel_ >= 3 && getRank() == 0) this->printPT();
 }
 #endif
@@ -121,6 +119,7 @@ void SingleSlater<T>::formFock(){
   MPI_Barrier(MPI_COMM_WORLD);
 #endif
   
+  cout << "HERE 2" << endl;
   if(!this->haveDensity) this->formDensity();
 #ifndef USE_LIBINT
   if(getRank() == 0){
@@ -131,10 +130,13 @@ void SingleSlater<T>::formFock(){
   }
 #else
   // All MPI processes go to FormPT
+  cout << "HERE 2" << endl;
   this->formPT();
+  cout << "HERE 2" << endl;
 #endif
 
   if(getRank() == 0) {
+  cout << "HERE 2" << endl;
     if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
 
     if (this->isDFT){
@@ -205,8 +207,8 @@ void SingleSlater<T>::formFock(){
         this->fockMy_->setZero();
         (*this->fockMx_) += (*this->PTMx_);
         (*this->fockMy_) += (*this->PTMy_);
-        toGather.emplace_back(*this->fockMx_);
         toGather.emplace_back(*this->fockMy_);
+        toGather.emplace_back(*this->fockMx_);
         Quantum<T>::spinGather(*this->fockA_,toGather);
       };
 

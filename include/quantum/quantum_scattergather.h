@@ -53,8 +53,8 @@ void Quantum<T>::scatterDensity(){
   } else if(!this->isClosedShell)
     Quantum<T>::spinScatter(*this->onePDMA_,*this->onePDMB_,scattered);
 
-  this->onePDMA_.reset();
-  this->onePDMB_.reset();
+//this->onePDMA_.reset();
+//this->onePDMB_.reset();
 };
 
 template<typename T>
@@ -79,10 +79,10 @@ void Quantum<T>::gatherDensity(){
     Quantum<T>::spinGather(*this->onePDMA_,*this->onePDMB_,scattered);
 
   // Deallocate Space
-  this->onePDMScalar_.reset();
-  this->onePDMMz_.reset();
-  this->onePDMMy_.reset();
-  this->onePDMMx_.reset();
+//this->onePDMScalar_.reset();
+//this->onePDMMz_.reset();
+//this->onePDMMy_.reset();
+//this->onePDMMx_.reset();
 };
 
 template<typename T>

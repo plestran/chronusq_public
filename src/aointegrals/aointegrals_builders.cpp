@@ -388,7 +388,7 @@ void AOIntegrals::computeAOOneE(){
   // Compute Orthonormal transformation matricies
   this->computeOrtho();
 
-  this->formP2Transformation();
+ // this->formP2Transformation();
 
   if(this->printLevel_ >= 2) this->printOneE();
 

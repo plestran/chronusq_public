@@ -128,18 +128,47 @@ void SingleSlater<T>::allocOp(){
   if(!this->isClosedShell && this->Ref_ != TCS) 
     this->allocBetaOp();
 
+  this->NBSqScratch_ = 
+    std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_));
+  this->fockOrthoA_ = 
+    std::unique_ptr<TMatrix>(
+        new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
+  this->onePDMOrthoA_ = 
+    std::unique_ptr<TMatrix>(
+        new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
+
   if(this->nTCS_ == 2 || !this->isClosedShell){
+
+    this->onePDMOrthoScalar_ = 
+      std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_));
+    this->onePDMOrthoMz_ = 
+      std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_));
+
     this->PTScalar_ = 
       std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_));
     this->PTMz_ = 
       std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_));
  
+    this->fockOrthoB_ = 
+      std::unique_ptr<TMatrix>(
+          new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
+
     this->fockScalar_ = 
       std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_));
     this->fockMz_ = 
       std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_));
 
+    this->fockOrthoScalar_ = 
+      std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_));
+    this->fockOrthoMz_ = 
+      std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_));
+
     if(this->nTCS_ == 2) {
+      this->onePDMOrthoMy_ = 
+        std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_));
+      this->onePDMOrthoMx_ = 
+        std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_));
+
       this->PTMx_ = 
         std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_));
       this->PTMy_ = 
@@ -148,6 +177,11 @@ void SingleSlater<T>::allocOp(){
       this->fockMx_ = 
         std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_));
       this->fockMy_ = 
+        std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_));
+
+      this->fockOrthoMx_ = 
+        std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_));
+      this->fockOrthoMy_ = 
         std::unique_ptr<TMatrix>(new TMatrix(this->nBasis_,this->nBasis_));
     }
   }

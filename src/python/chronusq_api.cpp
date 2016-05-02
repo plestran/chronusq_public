@@ -40,7 +40,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("computeProperties",&SingleSlater<double>::computeProperties      )
     .def("printMultipole"  , &SingleSlater<double>::printMultipole         )
     .def("printProperties" , &SingleSlater<double>::printProperties        )
-    .def("SCF"             , &SingleSlater<double>::SCF                    )
+    .def("SCF"             , &SingleSlater<double>::SCF2                   )
     .def("communicate"     , &SingleSlater<double>::communicate            )
     .def("initMeta"        , &SingleSlater<double>::initMeta               )
     .def("alloc"           , &SingleSlater<double>::alloc                  )

@@ -228,11 +228,15 @@ void SingleSlater<double>::SADGuess() {
         if(!hartreeFockAtom.isClosedShell) hartreeFockAtom.moB_->setZero();
       }
       hartreeFockAtom.haveMO = true;
+      cout << "HERE 1" << endl;
  
       // Prime and perform the atomic SCF
       hartreeFockAtom.formFock();
+      cout << "HERE 1" << endl;
       hartreeFockAtom.computeEnergy();
-      hartreeFockAtom.SCF();
+      cout << "HERE 1" << endl;
+      hartreeFockAtom.SCF2();
+      cout << "HERE 1" << endl;
       
       // Place Atomic Densities into Total Densities
       this->placeAtmDen(atomIndex[iUn],hartreeFockAtom);

@@ -436,4 +436,92 @@ void SingleSlater<dcomplex>::fockCUHF() {
   (*this->fockB_) -= Lambda;
 };
 
+template<>
+void SingleSlater<dcomplex>::orthoDen(){
+  if(this->nTCS_ == 1 && !this->isClosedShell) {
+    this->NBSqScratch_->real() = 
+      (*this->aointegrals_->ortho1_) * this->onePDMA_->real();
+    this->NBSqScratch_->imag() = 
+      (*this->aointegrals_->ortho1_) * this->onePDMA_->imag();
+
+    this->onePDMOrthoA_->real() = 
+      this->NBSqScratch_->real() * (*this->aointegrals_->ortho1_);
+    this->onePDMOrthoA_->imag() = 
+      this->NBSqScratch_->imag() * (*this->aointegrals_->ortho1_);
+
+    (*this->onePDMA_) = (*this->onePDMOrthoA_);
+
+  } else {
+    std::vector<std::reference_wrapper<ComplexMatrix>> scattered;
+    scattered.emplace_back(*this->onePDMOrthoScalar_);
+    scattered.emplace_back(*this->onePDMOrthoMz_);
+    if(this->nTCS_ == 1) {
+      Quantum<dcomplex>::spinScatter(*this->onePDMA_,*this->onePDMB_,scattered);
+    } else {
+      scattered.emplace_back(*this->onePDMOrthoMy_);
+      scattered.emplace_back(*this->onePDMOrthoMx_);
+      Quantum<dcomplex>::spinScatter(*this->onePDMA_,scattered);
+    }
+
+    this->NBSqScratch_->real() = 
+      (*this->aointegrals_->ortho1_) * this->onePDMScalar_->real();
+    this->NBSqScratch_->imag() = 
+      (*this->aointegrals_->ortho1_) * this->onePDMScalar_->imag();
+
+    this->onePDMOrthoScalar_->real() = 
+      this->NBSqScratch_->real() * (*this->aointegrals_->ortho1_);
+    this->onePDMOrthoScalar_->imag() = 
+      this->NBSqScratch_->imag() * (*this->aointegrals_->ortho1_);
+
+    (*this->onePDMScalar_) = (*this->onePDMOrthoScalar_);
+
+    this->NBSqScratch_->real() = 
+      (*this->aointegrals_->ortho1_) * this->onePDMMz_->real();
+    this->NBSqScratch_->imag() = 
+      (*this->aointegrals_->ortho1_) * this->onePDMMz_->imag();
+
+    this->onePDMOrthoMz_->real() = 
+      this->NBSqScratch_->real() * (*this->aointegrals_->ortho1_);
+    this->onePDMOrthoMz_->imag() = 
+      this->NBSqScratch_->imag() * (*this->aointegrals_->ortho1_);
+
+    (*this->onePDMMz_) = (*this->onePDMOrthoMz_);
+
+    std::vector<std::reference_wrapper<ComplexMatrix>> toGather;
+    toGather.emplace_back(*this->onePDMScalar_);
+    toGather.emplace_back(*this->onePDMMz_);
+
+    if(this->nTCS_ == 2) {
+      this->NBSqScratch_->real() = 
+        (*this->aointegrals_->ortho1_) * this->onePDMMx_->real();
+      this->NBSqScratch_->imag() = 
+        (*this->aointegrals_->ortho1_) * this->onePDMMx_->imag();
+     
+      this->onePDMOrthoMx_->real() = 
+        this->NBSqScratch_->real() * (*this->aointegrals_->ortho1_);
+      this->onePDMOrthoMx_->imag() = 
+        this->NBSqScratch_->imag() * (*this->aointegrals_->ortho1_);
+
+      (*this->onePDMMx_) = (*this->onePDMOrthoMx_);
+
+      this->NBSqScratch_->real() = 
+        (*this->aointegrals_->ortho1_) * this->onePDMMy_->real();
+      this->NBSqScratch_->imag() = 
+        (*this->aointegrals_->ortho1_) * this->onePDMMy_->imag();
+     
+      this->onePDMOrthoMy_->real() = 
+        this->NBSqScratch_->real() * (*this->aointegrals_->ortho1_);
+      this->onePDMOrthoMy_->imag() = 
+        this->NBSqScratch_->imag() * (*this->aointegrals_->ortho1_);
+
+      (*this->onePDMMy_) = (*this->onePDMOrthoMy_);
+
+      toGather.emplace_back(*this->onePDMMy_);
+      toGather.emplace_back(*this->onePDMMx_);
+      Quantum<dcomplex>::spinGather(*this->onePDMA_,toGather);
+    } else
+      Quantum<dcomplex>::spinGather(*this->onePDMA_,*this->onePDMB_,toGather);
+  }
+};
+
 } // namespace ChronusQ

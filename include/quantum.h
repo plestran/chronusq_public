@@ -220,37 +220,22 @@ namespace ChronusQ {
 
     virtual void formDensity() = 0;
     inline void allocDensity(unsigned int N) {
-      if(!this->isScattered_) {
-        this->onePDMA_ = 
+      this->onePDMA_ = 
+        std::unique_ptr<TMatrix>(
+            new TMatrix(this->nTCS_ * N,this->nTCS_ * N)
+        );
+      if(!this->isClosedShell)
+        this->onePDMB_ = 
           std::unique_ptr<TMatrix>(
               new TMatrix(this->nTCS_ * N,this->nTCS_ * N)
           );
-        if(!this->isClosedShell){
-          this->onePDMB_ = 
-            std::unique_ptr<TMatrix>(
-                new TMatrix(this->nTCS_ * N,this->nTCS_ * N)
-            );
-        }
-      } else {
-        this->onePDMScalar_ = std::unique_ptr<TMatrix>(new TMatrix(N,N));
-        if((this->nTCS_ == 1 && !this->isClosedShell) || this->nTCS_ == 2)
-          this->onePDMMz_ = std::unique_ptr<TMatrix>(new TMatrix(N,N));
-        if(this->nTCS_ == 2) {
-          this->onePDMMx_ = std::unique_ptr<TMatrix>(new TMatrix(N,N));
-          this->onePDMMy_ = std::unique_ptr<TMatrix>(new TMatrix(N,N));
-        }
+      this->onePDMScalar_ = std::unique_ptr<TMatrix>(new TMatrix(N,N));
+      if((this->nTCS_ == 1 && !this->isClosedShell) || this->nTCS_ == 2)
+        this->onePDMMz_ = std::unique_ptr<TMatrix>(new TMatrix(N,N));
+      if(this->nTCS_ == 2) {
+        this->onePDMMx_ = std::unique_ptr<TMatrix>(new TMatrix(N,N));
+        this->onePDMMy_ = std::unique_ptr<TMatrix>(new TMatrix(N,N));
       }
-      /*
-      this->ReOnePDMScalar_ = std::unique_ptr<RealMatrix>(new RealMatrix(N,N));
-      this->ReOnePDMMx_ = std::unique_ptr<RealMatrix>(new RealMatrix(N,N));
-      this->ReOnePDMMy_ = std::unique_ptr<RealMatrix>(new RealMatrix(N,N));
-      this->ReOnePDMMz_ = std::unique_ptr<RealMatrix>(new RealMatrix(N,N));
-      this->ImOnePDMScalar_ = std::unique_ptr<RealMatrix>(new RealMatrix(N,N));
-      this->ImOnePDMMx_ = std::unique_ptr<RealMatrix>(new RealMatrix(N,N));
-      this->ImOnePDMMy_ = std::unique_ptr<RealMatrix>(new RealMatrix(N,N));
-      this->ImOnePDMMz_ = std::unique_ptr<RealMatrix>(new RealMatrix(N,N));
-      */
-
     };
 
     inline void alloc(unsigned int N){
