@@ -42,6 +42,7 @@ namespace ChronusQ {
 template<typename T>
 class SingleSlater : public Quantum<T> {
   typedef Eigen::Matrix<T,Dynamic,Dynamic,ColMajor> TMatrix;
+  typedef Eigen::Map<TMatrix> TMap;
 
   int      nBasis_;
   int      nShell_;
@@ -213,6 +214,7 @@ class SingleSlater : public Quantum<T> {
   void fockCUHF();
   void orthoDen();
   void cleanupSCFMem2();
+  void copyDen();
 
   double denTol_;
   double eneTol_;

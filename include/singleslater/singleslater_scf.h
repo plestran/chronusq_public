@@ -287,6 +287,7 @@ void SingleSlater<T>::SCF2(){
     cout << "HERE 4" << endl;
     if(iter == 0 && this->guess_ != READ) this->mixOrbitalsSCF();
 
+    this->copyDen();
     this->formDensity();
     cout << "HERE 6" << endl;
     this->orthoDen();
@@ -346,4 +347,16 @@ void SingleSlater<T>::cleanupSCFMem2(){
     delete[] this->RWORK_; 
   
   
-}; //initSCFMem
+}; //cleanupSCFMem2
+
+template <typename T>
+void SingleSlater<T>::copyDen(){
+  auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
+  TMap POldAlpha(this->POldAlphaMem_,NTCSxNBASIS,NTCSxNBASIS);
+  POldAlpha = (*this->onePDMA_);
+
+  if(this->nTCS_ == 1 && !this->isClosedShell){
+    TMap POldBeta(this->POldBetaMem_,NTCSxNBASIS,NTCSxNBASIS);
+    POldBeta = (*this->onePDMB_);
+  };
+};
