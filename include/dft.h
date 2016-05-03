@@ -1,4 +1,6 @@
 #include<global.h>
+#ifndef INCLUDED_DFT
+#define INCLUDED_DFT
 class DFTFunctional{
 public:
   double scalingFactor;
@@ -123,4 +125,4 @@ public:
   void popVWNconst();
   void popVWNdens(double rhoA, double rhoB);
 };
-
+#endif
