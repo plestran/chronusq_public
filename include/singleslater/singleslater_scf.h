@@ -237,6 +237,7 @@ void SingleSlater<T>::initSCFMem2(){
 
   this->LWORK_     = 5 * std::max(NTCSxNBASIS,this->nDIISExtrap_);
   this->LRWORK_    = 3 * std::max(NTCSxNBASIS,this->nDIISExtrap_);
+  this->lenCoeff_  = this->nDIISExtrap_;
 
 //  this->FpAlphaMem_    = new T[NSQ];
   this->POldAlphaMem_  = new T[NSQ];
@@ -265,43 +266,57 @@ void SingleSlater<T>::initSCFMem2(){
 
 template<typename T>
 void SingleSlater<T>::SCF2(){
-  cout << "HERE" << endl;
   this->aointegrals_->computeAOOneE();
   if(this->printLevel_ > 0)
     this->printSCFHeader(this->fileio_->out);
   this->initSCFMem2();
-  cout << "HERE 3" << endl;
 
   size_t iter;
   for(iter = 0; iter < this->maxSCFIter_; iter++){
-    cout << "HERE 4" << endl;
     if(this->Ref_ == CUHF) {
       this->formNO();
-    cout << "HERE 4" << endl;
       this->fockCUHF();
     }
-    cout << "HERE 4" << endl;
+
+    cout << "HERE 7" << endl;
     this->orthoFock();
-    cout << "HERE 4" << endl;
+    cout << "HERE 7" << endl;
     this->diagFock2();
-    cout << "HERE 4" << endl;
     if(iter == 0 && this->guess_ != READ) this->mixOrbitalsSCF();
 
+    cout << "HERE 7" << endl;
     this->copyDen();
+    cout << "HERE 7" << endl;
     this->formDensity();
-    cout << "HERE 6" << endl;
+    cout << "HERE 7" << endl;
     this->orthoDen();
-    cout << "HERE 4" << endl;
+    cout << "HERE 7" << endl;
     this->formFock();
-    cout << "HERE 4" << endl;
+    cout << "HERE 7" << endl;
+
     if(PyErr_CheckSignals() == -1)
       CErr("Keyboard Interrupt in SCF!",this->fileio_->out);
+    if(iter == this->iDIISStart_ && this->printLevel_ > 0)
+      this->fileio_->out << 
+        std::setw(2) << " " <<
+        std::setw(4) << " " <<
+        "*** Starting DIIS ***" << endl;
+    // DIIS NYI for CUHF
+    if(this->Ref_ != CUHF && this->doDIIS && iter >= this->iDIISStart_){ 
+      this->genDComm2(iter - this->iDIISStart_);
+      this->CpyFock(iter - this->iDIISStart_);   
+      if((iter - this->iDIISStart_) % (this->nDIISExtrap_-1) == 
+         (this->nDIISExtrap_-2) && iter != 0) 
+        this->CDIIS();
+      cout << "After DIIS" << endl;
+    }
 
+    cout << "HERE 7" << endl;
     this->evalConver(iter);
-    cout << "HERE 4" << endl;
+    cout << "HERE 7" << endl;
     this->nSCFIter++;
+
     if(this->isConverged) break;
-    cout << "HERE 4" << endl;
   };
 
   this->cleanupSCFMem2();
@@ -311,11 +326,12 @@ void SingleSlater<T>::SCF2(){
 
   if(this->printLevel_ > 0 ){
     if(this->isConverged){
-      this->fileio_->out << endl << "SCF Completed: E(" << this->SCFTypeShort_ 
-                         << ") = ";
-      this->fileio_->out << std::fixed << std::setprecision(10) 
-                         << this->totalEnergy << "  Eh after  " << iter + 1 
-                         << "  SCF Iterations" << endl;
+      this->fileio_->out 
+        << endl << "SCF Completed: E(" << this->SCFTypeShort_ << ") = ";
+      this->fileio_->out 
+        << std::fixed << std::setprecision(10) 
+        << this->totalEnergy << "  Eh after  " << iter + 1 
+        << "  SCF Iterations" << endl;
     }
     this->fileio_->out << bannerEnd <<endl;
   }

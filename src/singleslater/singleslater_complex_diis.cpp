@@ -80,11 +80,13 @@ void SingleSlater<dcomplex>::CDIIS(){
 
 template<>
 void SingleSlater<dcomplex>::CpyFock(int iter){
-  std::memcpy(this->FADIIS_+(iter % (this->lenCoeff_-1)) * this->lenF_,this->fockA_->data(),
-              this->lenF_ * sizeof(dcomplex));
+  auto NTCSxNBASIS = this->nTCS_ * this->nBasis_;
+  auto NSQ = NTCSxNBASIS  * NTCSxNBASIS;
+  std::memcpy(this->FADIIS_+(iter % (this->lenCoeff_-1)) * NSQ,this->fockA_->data(),
+              NSQ * sizeof(dcomplex));
   if(!this->isClosedShell && this->Ref_ != TCS)
-    std::memcpy(this->FBDIIS_ + (iter % (this->lenCoeff_-1)) * this->lenF_,
-                this->fockB_->data(),this->lenF_ * sizeof(dcomplex));
+    std::memcpy(this->FBDIIS_ + (iter % (this->lenCoeff_-1)) * NSQ,
+                this->fockB_->data(),NSQ * sizeof(dcomplex));
 } // CpyFock
 
 template<>
@@ -101,5 +103,38 @@ void SingleSlater<dcomplex>::GenDComm(int iter){
     ErrB -= (*this->aointegrals_->overlap_) * (*this->onePDMB_) * (*this->fockB_);
   }
 } // GenDComm
+
+template<>
+void SingleSlater<dcomplex>::genDComm2(int iter) {
+  auto NTCSxNBASIS = this->nTCS_ * this->nBasis_;
+  auto NSQ = NTCSxNBASIS  * NTCSxNBASIS;
+  ComplexMap ErrA(
+    this->ErrorAlphaMem_ + (iter % (this->nDIISExtrap_-1)) * NSQ,
+    this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_
+  );
+
+  if(this->nTCS_ == 1 && this->isClosedShell) {
+    this->NBSqScratch_->real() = 
+      this->onePDMA_->real() * (*this->aointegrals_->overlap_);
+    this->NBSqScratch_->imag() = 
+      this->onePDMA_->imag() * (*this->aointegrals_->overlap_);
+
+    ErrA = (*this->fockA_) * (*this->NBSqScratch_);
+    ErrA -= this->NBSqScratch_->adjoint() * (*this->fockA_);
+  } else {
+    ComplexMap ErrB(
+      this->ErrorBetaMem_ + (iter % (this->nDIISExtrap_-1)) * NSQ,
+      this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_
+    );
+
+    this->NBSqScratch_->real() = 
+      this->onePDMB_->real() * (*this->aointegrals_->overlap_);
+    this->NBSqScratch_->imag() = 
+      this->onePDMB_->imag() * (*this->aointegrals_->overlap_);
+
+    ErrB = (*this->fockB_) * (*this->NBSqScratch_);
+    ErrB -= this->NBSqScratch_->adjoint() * (*this->fockB_);
+  };
+};
 
 }// Namespace ChronusQ

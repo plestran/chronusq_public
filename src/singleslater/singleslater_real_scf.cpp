@@ -304,10 +304,16 @@ template<>
 void SingleSlater<double>::orthoFock(){
   if(this->nTCS_ == 1 && this->isClosedShell){
     // F(A)' = X^\dagger * F(A) * X
-    (*this->NBSqScratch_) = 
+    cout << "HERE 8" << endl;
+    prettyPrint(cout,(*this->NBSqScratch_),"FA");
+    prettyPrint(cout,(*this->fockA_),"FA");
+    prettyPrint(cout,(*this->aointegrals_->ortho1_),"FA");
+    this->NBSqScratch_->noalias() = 
       this->aointegrals_->ortho1_->transpose() * (*this->fockA_);
-    (*this->fockOrthoA_) = 
+    cout << "HERE 8" << endl;
+    this->fockOrthoA_->noalias() = 
       (*this->NBSqScratch_) * (*this->aointegrals_->ortho1_);
+    cout << "HERE 8" << endl;
 
   } else {
     cout << "HERE 2" << endl;

@@ -215,6 +215,7 @@ class SingleSlater : public Quantum<T> {
   void orthoDen();
   void cleanupSCFMem2();
   void copyDen();
+  void genDComm2(int);
 
   double denTol_;
   double eneTol_;
