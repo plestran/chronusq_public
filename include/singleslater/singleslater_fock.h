@@ -102,10 +102,6 @@ void SingleSlater<T>::formPT(){
       toGather.emplace_back(*this->PTMx_);
       Quantum<T>::spinGather((*this->PTA_),toGather);
     }
-    prettyPrint(cout,*this->PTScalar_,"PTS");
-    prettyPrint(cout,*this->PTMz_,"PTZ");
-    prettyPrint(cout,*this->PTA_,"PTA");
-    prettyPrint(cout,*this->PTB_,"PTB");
 
   }
 
@@ -123,7 +119,6 @@ void SingleSlater<T>::formFock(){
   MPI_Barrier(MPI_COMM_WORLD);
 #endif
   
-  cout << "HERE 2" << endl;
   if(!this->haveDensity) this->formDensity();
 #ifndef USE_LIBINT
   if(getRank() == 0){
@@ -134,13 +129,10 @@ void SingleSlater<T>::formFock(){
   }
 #else
   // All MPI processes go to FormPT
-  cout << "HERE 2" << endl;
   this->formPT();
-  cout << "HERE 2" << endl;
 #endif
 
   if(getRank() == 0) {
-  cout << "HERE 2" << endl;
     if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
 
     if (this->isDFT){
@@ -215,8 +207,6 @@ void SingleSlater<T>::formFock(){
         toGather.emplace_back(*this->fockMx_);
         Quantum<T>::spinGather(*this->fockA_,toGather);
       };
-    prettyPrint(cout,*this->fockA_,"FA");
-    prettyPrint(cout,*this->fockB_,"FB");
 
       // Hack for UHF DFT for now FIXME
       if(this->nTCS_ == 1 && this->isDFT){

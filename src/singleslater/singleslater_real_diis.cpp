@@ -31,14 +31,12 @@ using ChronusQ::SingleSlater;
 namespace ChronusQ{
 template<>
 void SingleSlater<double>::CDIIS(){
-  cout << "HERE DIIS" << endl;
   int N = this->lenCoeff_;
   RealMatrix B(N,N);
   double *coef = new double[N];
   int    *iPiv = new int[N];
   int    NRHS = 1, INFO = -1;
   int NB = this->nBasis_ * this->nTCS_; 
-  cout << "HERE DIIS" << endl;
   int NBSq = NB*NB;
   for(auto j = 0; j < (N-1); j++)
   for(auto k = 0; k <= j          ; k++){
@@ -60,7 +58,6 @@ void SingleSlater<double>::CDIIS(){
   for(auto k = 0; k < N;k++) coef[k] = 0.0; 
   coef[N-1]=-1.0;
 
-  cout << "HERE DIIS" << endl;
   char NORM = 'O';
   double ANORM = B.lpNorm<1>();
   double RCOND;
@@ -68,7 +65,6 @@ void SingleSlater<double>::CDIIS(){
   dgesv_(&N,&NRHS,B.data(),&N,iPiv,coef,&N,&INFO);
   dgecon_(&NORM,&N,B.data(),&N,&ANORM,&RCOND,this->WORK_,&iWORK_[0],&INFO);
 
-  cout << "HERE DIIS" << endl;
 
   if(std::abs(RCOND) > std::numeric_limits<double>::epsilon()) {
     this->fockA_->setZero();
@@ -86,7 +82,6 @@ void SingleSlater<double>::CDIIS(){
   }
   delete [] coef;
   delete [] iPiv;
-  cout << "HERE DIIS" << endl;
 
 } // CDIIS
 
@@ -94,15 +89,12 @@ template<>
 void SingleSlater<double>::CpyFock(int iter){
   auto NTCSxNBASIS = this->nTCS_ * this->nBasis_;
   auto NSQ = NTCSxNBASIS  * NTCSxNBASIS;
-  cout << "CPY" << endl;
   std::memcpy(this->FADIIS_+(iter % (this->nDIISExtrap_-1)) * NSQ,
     this->fockA_->data(),NSQ * sizeof(double));
 
-  cout << "CPY" << endl;
   if(!this->isClosedShell && this->Ref_ != TCS)
     std::memcpy(this->FBDIIS_ + (iter % (this->nDIISExtrap_-1)) * NSQ,
                 this->fockB_->data(),NSQ * sizeof(double));
-  cout << "CPY" << endl;
 } // CpyFock
 
 template<>
@@ -127,7 +119,6 @@ void SingleSlater<double>::GenDComm(int iter){
 
 template<>
 void SingleSlater<double>::genDComm2(int iter) {
-  cout << "HERE" << endl;
   auto NTCSxNBASIS = this->nTCS_ * this->nBasis_;
   auto NSQ = NTCSxNBASIS  * NTCSxNBASIS;
   RealMap ErrA(
@@ -135,15 +126,11 @@ void SingleSlater<double>::genDComm2(int iter) {
     this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_
   );
 
-  cout << "HERE" << endl;
   if(this->nTCS_ == 1 && this->isClosedShell) {
-    cout << "HERE" << endl;
     (*this->NBSqScratch_) = (*this->onePDMA_) * (*this->aointegrals_->overlap_);
     ErrA = (*this->fockA_) * (*this->NBSqScratch_);
     ErrA -= this->NBSqScratch_->adjoint() * (*this->fockA_);
-    cout << "HERE" << endl;
   } else {
-  cout << "HERE" << endl;
     RealMap ErrB(
       this->ErrorBetaMem_ + (iter % (this->nDIISExtrap_-1)) * NSQ,
       this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_
@@ -151,9 +138,7 @@ void SingleSlater<double>::genDComm2(int iter) {
     (*this->NBSqScratch_) = (*this->onePDMB_) * (*this->aointegrals_->overlap_);
     ErrB = (*this->fockB_) * (*this->NBSqScratch_);
     ErrB -= this->NBSqScratch_->adjoint() * (*this->fockB_);
-  cout << "HERE" << endl;
   };
-  cout << "HERE" << endl;
 };
 
 }// Namespace ChronusQ

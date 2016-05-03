@@ -278,21 +278,14 @@ void SingleSlater<T>::SCF2(){
       this->fockCUHF();
     }
 
-    cout << "HERE 7" << endl;
     this->orthoFock();
-    cout << "HERE 7" << endl;
     this->diagFock2();
     if(iter == 0 && this->guess_ != READ) this->mixOrbitalsSCF();
 
-    cout << "HERE 7" << endl;
     this->copyDen();
-    cout << "HERE 7" << endl;
     this->formDensity();
-    cout << "HERE 7" << endl;
     this->orthoDen();
-    cout << "HERE 7" << endl;
     this->formFock();
-    cout << "HERE 7" << endl;
 
     if(PyErr_CheckSignals() == -1)
       CErr("Keyboard Interrupt in SCF!",this->fileio_->out);
@@ -308,12 +301,9 @@ void SingleSlater<T>::SCF2(){
       if((iter - this->iDIISStart_) % (this->nDIISExtrap_-1) == 
          (this->nDIISExtrap_-2) && iter != 0) 
         this->CDIIS();
-      cout << "After DIIS" << endl;
     }
 
-    cout << "HERE 7" << endl;
     this->evalConver(iter);
-    cout << "HERE 7" << endl;
     this->nSCFIter++;
 
     if(this->isConverged) break;

@@ -304,33 +304,23 @@ template<>
 void SingleSlater<double>::orthoFock(){
   if(this->nTCS_ == 1 && this->isClosedShell){
     // F(A)' = X^\dagger * F(A) * X
-    cout << "HERE 8" << endl;
-    prettyPrint(cout,(*this->NBSqScratch_),"FA");
-    prettyPrint(cout,(*this->fockA_),"FA");
-    prettyPrint(cout,(*this->aointegrals_->ortho1_),"FA");
     this->NBSqScratch_->noalias() = 
       this->aointegrals_->ortho1_->transpose() * (*this->fockA_);
-    cout << "HERE 8" << endl;
     this->fockOrthoA_->noalias() = 
       (*this->NBSqScratch_) * (*this->aointegrals_->ortho1_);
-    cout << "HERE 8" << endl;
 
   } else {
-    cout << "HERE 2" << endl;
-    prettyPrint(cout,*this->fockScalar_,"FS");
     // F(Scalar)' = X^\dagger * F(Scalar) * X
     (*this->NBSqScratch_) = 
       this->aointegrals_->ortho1_->transpose() * (*this->fockScalar_);
     (*this->fockOrthoScalar_) = 
       (*this->NBSqScratch_) * (*this->aointegrals_->ortho1_);
-    cout << "HERE 2" << endl;
 
     // F(Mz)' = X^\dagger * F(Mz) * X
     (*this->NBSqScratch_) = 
       this->aointegrals_->ortho1_->transpose() * (*this->fockMz_);
     (*this->fockOrthoMz_) = 
       (*this->NBSqScratch_) * (*this->aointegrals_->ortho1_);
-    cout << "HERE 2" << endl;
 
     std::vector<std::reference_wrapper<TMatrix>> toGather;
     toGather.emplace_back(*this->fockOrthoScalar_);
@@ -371,17 +361,14 @@ void SingleSlater<double>::fockCUHF() {
   int coreSpace    = (this->molecule_->nTotalE() - activeSpace) / 2;
   int virtualSpace = this->nBasis_ - coreSpace - activeSpace;
 
-  cout << "HERE" << endl;
   // DelF = X * (F(A) - F(B)) * X
   (*this->NBSqScratch_) = 0.5 * (*this->aointegrals_->ortho1_) *
     (*this->fockMz_);
   DelF = (*this->NBSqScratch_) * (*this->aointegrals_->ortho1_);
-  cout << "HERE" << endl;
 
   // DelF = C(NO)^\dagger * DelF * C(NO) (Natural Orbitals)
   (*this->NBSqScratch_) = P.transpose() * DelF;
   DelF = (*this->NBSqScratch_) * P;
-  cout << "HERE" << endl;
 
   Lambda.setZero();
   for(auto i = activeSpace + coreSpace; i < this->nBasis_; i++)
@@ -392,19 +379,16 @@ void SingleSlater<double>::fockCUHF() {
 
   (*this->NBSqScratch_) = P * Lambda;
   Lambda = (*this->NBSqScratch_) * P.transpose();
-  cout << "HERE" << endl;
 
   (*this->NBSqScratch_) = (*this->aointegrals_->ortho2_) * Lambda;
   Lambda = (*this->NBSqScratch_) * (*this->aointegrals_->ortho2_);
 
   (*this->fockA_) += Lambda;
   (*this->fockB_) -= Lambda;
-  cout << "HERE" << endl;
 };
 
 template<>
 void SingleSlater<double>::orthoDen(){
-  cout << "HERE 5" << endl;
   if(this->nTCS_ == 1 && this->isClosedShell) {
     (*this->NBSqScratch_) = 
       (*this->aointegrals_->ortho1_) * (*this->onePDMA_);
@@ -413,7 +397,6 @@ void SingleSlater<double>::orthoDen(){
     (*this->onePDMA_) = (*this->onePDMOrthoA_);
 
   } else {
-    cout << "HERE 5" << endl;
     std::vector<std::reference_wrapper<RealMatrix>> scattered;
     scattered.emplace_back(*this->onePDMOrthoScalar_);
     scattered.emplace_back(*this->onePDMOrthoMz_);
@@ -425,7 +408,6 @@ void SingleSlater<double>::orthoDen(){
       Quantum<double>::spinScatter(*this->onePDMA_,scattered);
     }
 
-    cout << "HERE 5" << endl;
     (*this->NBSqScratch_) = 
       (*this->aointegrals_->ortho1_) * (*this->onePDMOrthoScalar_);
     (*this->onePDMOrthoScalar_) = 
@@ -437,7 +419,6 @@ void SingleSlater<double>::orthoDen(){
     (*this->onePDMOrthoMz_) = 
       (*this->NBSqScratch_) * (*this->aointegrals_->ortho1_);
     (*this->onePDMMz_) = (*this->onePDMOrthoMz_);
-    cout << "HERE 5" << endl;
 
     std::vector<std::reference_wrapper<RealMatrix>> toGather;
     toGather.emplace_back(*this->onePDMScalar_);
@@ -461,8 +442,6 @@ void SingleSlater<double>::orthoDen(){
       Quantum<double>::spinGather(*this->onePDMA_,toGather);
     } else
       Quantum<double>::spinGather(*this->onePDMA_,*this->onePDMB_,toGather);
-    prettyPrint(cout,*this->onePDMA_,"PA");
-    prettyPrint(cout,*this->onePDMB_,"PB");
   }
 };
 

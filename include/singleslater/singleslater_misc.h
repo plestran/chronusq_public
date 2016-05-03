@@ -33,21 +33,18 @@ void SingleSlater<T>::formDensity(){
       CErr("No MO coefficients available to form one-particle density matrix!",
            this->fileio_->out);
  
-    cout << "HERE 9" << endl;
     if(this->Ref_ == TCS){
       auto nOcc = this->nOccA_ + this->nOccB_;
       (*this->onePDMA_) = 
         this->moA_->block(0,0,this->nTCS_*this->nBasis_,nOcc)*
         this->moA_->block(0,0,this->nTCS_*this->nBasis_,nOcc).adjoint();
     } else {
-    cout << "HERE 9" << endl;
       (*this->onePDMA_) = 
         this->moA_->block(0,0,this->nBasis_,this->nOccA_)*
         this->moA_->block(0,0,this->nBasis_,this->nOccA_).adjoint();
       // D(a) is actually total D for RHF
       if(this->isClosedShell) (*this->onePDMA_) *= math.two;
       else {
-    cout << "HERE 9" << endl;
         (*this->onePDMB_) = 
           this->moB_->block(0,0,this->nBasis_,this->nOccB_)*
           this->moB_->block(0,0,this->nBasis_,this->nOccB_).adjoint();
