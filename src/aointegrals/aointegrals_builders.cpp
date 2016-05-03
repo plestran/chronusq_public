@@ -365,7 +365,7 @@ void AOIntegrals::computeAOOneE(){
 
   // Compute and time nuclear attraction integrals (negative sign is factored in)
   auto VStart = std::chrono::high_resolution_clock::now();
-  this->useFiniteWidthNuclei = true;
+  //this->useFiniteWidthNuclei = true;
   if(this->isPrimary && this->useFiniteWidthNuclei) 
     this->finiteWidthPotential();
   else                
