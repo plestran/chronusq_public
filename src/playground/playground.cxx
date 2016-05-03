@@ -257,7 +257,7 @@ int main(int argc, char **argv){
   singleSlater.setPrintLevel(5);
 
 //  basis.findBasisFile("sto3g");
-  basis.findBasisFile("6-31g");
+  basis.findBasisFile("3-21g");
   basis.communicate(fileio);
   basis.parseGlobal();
   basis.constructLocal(&molecule);
