@@ -13,7 +13,7 @@ DFTFunctional::DFTInfo SlaterExchange::eval(double rhoA, double rhoB){
   DFTFunctional::DFTInfo info;
   this->rhoT            = rhoA + rhoB;
   this->spindensity     = (rhoA - rhoB) / this->rhoT;
-  info.eps        = std::pow(this->rhoT,this->d1over3);      
+  info.eps        = std::pow(this->rhoT,this->d1over3)*this->CxVx;      
   if (this->spindensity > this->small){
 // Open Shell
     info.ddrhoA = 

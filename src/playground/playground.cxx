@@ -256,8 +256,8 @@ int main(int argc, char **argv){
   singleSlater.setCorrKernel(SingleSlater<double>::CORR::NOCORR);
   singleSlater.setPrintLevel(5);
 
-//  basis.findBasisFile("sto3g");
-  basis.findBasisFile("3-21g");
+  basis.findBasisFile("sto3g");
+//  basis.findBasisFile("3-21g");
   basis.communicate(fileio);
   basis.parseGlobal();
   basis.constructLocal(&molecule);
@@ -403,7 +403,9 @@ int main(int argc, char **argv){
   NS.setZero();
 //  coeff = singleSlater.dftFunctionals_[0]->getCxVx();
   auto t4s = std::chrono::high_resolution_clock::now();
-  AtomicGrid AGrid(100,590,GAUSSCHEBFST,LEBEDEV,BECKE,atomicCenters,0,1.0,
+//  AtomicGrid AGrid(100,590,GAUSSCHEBFST,LEBEDEV,BECKE,atomicCenters,0,1.0,
+//      false);
+  AtomicGrid AGrid(100,302,GAUSSCHEBFST,LEBEDEV,BECKE,atomicCenters,0,1.0,
       false);
 
   for(auto iAtm = 0; iAtm < molecule.nAtoms(); iAtm++){
@@ -428,7 +430,7 @@ int main(int argc, char **argv){
     AGrid.scalingFactor()=0.5*elements[molecule.index(iAtm)].sradius/phys.bohr;
     AGrid.integrate<MyStruct>(valVxc,res);
   };
-
+//  double Cx = -(3.0/4.0)*(std::pow((3.0/math.pi),(1.0/3.0)));
   prettyPrint(cout,4*math.pi*res.VXCA,"A");
   prettyPrint(cout,4*math.pi*res.VXCB,"B");
   cout << "ENERGY " << 4*math.pi*res.Energy  << endl;
