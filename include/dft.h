@@ -41,6 +41,7 @@ class SlaterExchange : public DFTFunctional {
   double spindensity   ;
 public:
   SlaterExchange();
+  double getCxVx() {return this->CxVx;};
   DFTInfo eval(double rhoA, double rhoB);
   DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaAB);
   DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaAB, double gammaBB);

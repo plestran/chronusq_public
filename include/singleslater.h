@@ -111,7 +111,6 @@ class SingleSlater : public Quantum<T> {
   int nAngDFTGridPts_;
   double nElectrons_;
 
-  std::vector<std::unique_ptr<DFTFunctional>> dftFunctionals_;
 
   // Internal Storage
   std::unique_ptr<TMatrix>  fockA_;      ///< Alpha or Full (TCS) Fock Matrix
@@ -356,7 +355,8 @@ public:
 //  std::chrono::duration<double> duration_7;
 //  std::chrono::duration<double> duration_8;
   int      nSCFIter;
-
+//APE
+  std::vector<std::unique_ptr<DFTFunctional>> dftFunctionals_;
 
 
   // constructor & destructor

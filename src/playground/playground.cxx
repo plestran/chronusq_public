@@ -314,6 +314,42 @@ int main(int argc, char **argv){
   };
 
 
+  auto valVxc = [&](IntegrationPoint pt, RealMatrix &VXCA, RealMatrix &VXCB, double &Energy) {
+    // Evaluate the basis product in SCRATCH
+    SCRATCH1.setZero();
+    cartGP GP = pt.pt;
+    double rhoA;
+    double rhoB;
+    DFTFunctional::DFTInfo kernelXC;
+//    SlaterExchange * dftFun;
+//    auto shMap = basis.MapGridBasis(GP); 
+//    if(shMap[0]) { 
+//       cout << "Skip all pts " <<endl;
+//       return 0.0;}
+    for(auto iShell = 0; iShell < basis.nShell(); iShell++){
+//      if(!shMap[iShell+1]) {
+//       cout << basis.getradCutSh(iShell) << endl;
+//        continue;}
+      int b_s = basis.mapSh2Bf(iShell);
+      int size= basis.shells(iShell).size();
+
+      libint2::Shell shTmp = basis.shells(iShell);
+      double * buff = basis.basisDEval(0,shTmp,&pt.pt);
+      RealMap bMap(buff,size,1);
+      SCRATCH1.block(b_s,0,size,1) = bMap;
+
+      delete [] buff;
+    };
+
+    if(SCRATCH1.norm() < 1e-8) return 0.0;
+    SCRATCH2 = SCRATCH1 * SCRATCH1.transpose();
+    rhoA = singleSlater.computeProperty<double,ALPHA>(SCRATCH2);
+    rhoB = singleSlater.computeProperty<double,BETA>(SCRATCH2);
+    kernelXC = singleSlater.dftFunctionals_[0]->eval(rhoA, rhoB);
+    VXCA   += pt.weight * SCRATCH2 * kernelXC.ddrhoA; 
+    VXCB   += pt.weight * SCRATCH2 * kernelXC.ddrhoB; 
+    Energy += pt.weight * (rhoA+rhoB) * kernelXC.eps;
+  };
 
   auto numOverlap = [&](IntegrationPoint pt, RealMatrix &result) {
     // Evaluate the basis product in SCRATCH
@@ -351,8 +387,7 @@ int main(int argc, char **argv){
   double rho = 0;
   RealMatrix NS(singleSlater.nBasis(),singleSlater.nBasis());
   NS.setZero();
-  cout << "APE " << endl;
-
+//  coeff = singleSlater.dftFunctionals_[0]->getCxVx();
   auto t4s = std::chrono::high_resolution_clock::now();
   AtomicGrid AGrid(100,590,GAUSSCHEBFST,LEBEDEV,BECKE,atomicCenters,0,1.0,
       false);
