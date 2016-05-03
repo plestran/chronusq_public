@@ -230,8 +230,8 @@ int main(int argc, char **argv){
   singleSlater.setRef(SingleSlater<double>::RHF);
   singleSlater.isClosedShell = true;
 
-  basis.findBasisFile("sto3g");
-//  basis.findBasisFile("6-31g");
+//  basis.findBasisFile("sto3g");
+  basis.findBasisFile("6-31g");
   basis.communicate(fileio);
   basis.parseGlobal();
   basis.constructLocal(&molecule);
@@ -260,20 +260,23 @@ int main(int argc, char **argv){
 
   RealMatrix SCRATCH2(singleSlater.nBasis(),singleSlater.nBasis());
   VectorXd   SCRATCH1(singleSlater.nBasis());
-
-
   std::chrono::duration<double> T1; 
   std::chrono::duration<double> T2; 
   std::chrono::duration<double> T3; 
-  basis.radcut(1e-10,50,1e-7);
+//  basis.radcut(1e-10,50,1e-7);
   auto density = [&](IntegrationPoint pt, double &result) {
     // Evaluate the basis product in SCRATCH
+    SCRATCH1.setZero();
     auto t1s = std::chrono::high_resolution_clock::now();
     cartGP GP = pt.pt;
-    auto shMap = basis.MapGridBasis(GP); 
-//    if(shMap[0]) return 0.0;
+//    auto shMap = basis.MapGridBasis(GP); 
+//    if(shMap[0]) { 
+//       cout << "Skip all pts " <<endl;
+//       return 0.0;}
     for(auto iShell = 0; iShell < basis.nShell(); iShell++){
-      if(!shMap[iShell+1]) continue;
+//      if(!shMap[iShell+1]) {
+//       cout << basis.getradCutSh(iShell) << endl;
+//        continue;}
       int b_s = basis.mapSh2Bf(iShell);
       int size= basis.shells(iShell).size();
 
