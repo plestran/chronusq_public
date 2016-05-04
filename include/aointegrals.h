@@ -34,6 +34,7 @@
 #include <controls.h>
 #include <tools.h>
 #include <grid.h>
+#include <memory.h>
 
 #define MaxFmTPt 3201
 #define MaxTotalL 18
@@ -154,6 +155,7 @@ class AOIntegrals{
   FileIO *      	fileio_; ///< Pointer to FileIO
   Controls *    	controls_; ///< Pointer to job control
   TwoDGrid *            twodgrid_; ///< 3D grid (1Rad times 1 Ang) 
+  std::unique_ptr<CQMemManager> memManager_;
 
   std::unique_ptr<PairConstants>        pairConstants_; ///< Smart pointer to struct containing shell-pair meta-data
   std::unique_ptr<MolecularConstants>   molecularConstants_; ///< Smart pointer to struct containing molecular struture meta-data
@@ -188,12 +190,13 @@ public:
   // these should be protected
   std::unique_ptr<RealMatrix>    twoEC_; ///< Two-body Coulomb integrals 
   std::unique_ptr<RealMatrix>    twoEX_; ///< Two-body Exchange integrals
-  std::unique_ptr<RealMatrix>    oneE_; ///< Core Hamiltonian \f$ h = T + V \f$
-  std::unique_ptr<RealMatrix>    overlap_; ///< Overlap matrix \f$ S_{\mu\nu} = \langle \mu \vert \nu \rangle \f$
-  std::unique_ptr<RealMatrix>    kinetic_; ///< Kinetic energy tensor \f$ T_{\mu\nu} = \langle \mu \vert \Delta \vert \nu \rangle \f$
-  std::unique_ptr<RealMatrix>    kineticP_; ///< Kinetic energy tensor in momentum space \f$ T_{\mu\nu} = \langle \mu \vert \Delta \vert \nu \rangle \f$
-  std::unique_ptr<RealMatrix>    potential_; ///< Potential (nuclear attraction) energy tensor \f$ V_{\mu\nu} = \sum_A \left\langle \mu \vert r_{1A}^{-1}\vert \nu\right\rangle\f$
-  std::unique_ptr<RealMatrix>    schwartz_; ///< Schwartz bounds for ERI screening
+  std::unique_ptr<RealMap>    oneE_; ///< Core Hamiltonian \f$ h = T + V \f$
+  std::unique_ptr<RealMap>    overlap_; ///< Overlap matrix \f$ S_{\mu\nu} = \langle \mu \vert \nu \rangle \f$
+  std::unique_ptr<RealMap>    kinetic_; ///< Kinetic energy tensor \f$ T_{\mu\nu} = \langle \mu \vert \Delta \vert \nu \rangle \f$
+  std::unique_ptr<RealMap>    kineticP_; ///< Kinetic energy tensor in momentum space \f$ T_{\mu\nu} = \langle \mu \vert \Delta \vert \nu \rangle \f$
+  std::unique_ptr<RealMap>    potential_; ///< Potential energy tensor \f$ V_{\mu\nu} = \sum_A \left\langle \mu \vert r_{1A}^{-1}\vert \nu\right\rangle\f$
+  std::unique_ptr<RealMap>    schwartz_; ///< Schwartz bounds for ERI screening
+
   std::unique_ptr<RealTensor4d>  aoERI_; ///< Rank-4 ERI tensor over primary basis functions \f$ (\mu \nu \vert \lambda\delta )\f$
   std::unique_ptr<RealTensor3d>  aoRII_; ///< Rank-3 DFI tensor over density-fitting basis functions \f$ ( \mu\nu \vert X ) \f$
   std::unique_ptr<RealTensor2d>  aoRIS_; ///< Rank-2 Metric overlap tensor over density-fitting basis functions \f$\left( X \vert r_{12}^{-1} \vert Y \right)\f$

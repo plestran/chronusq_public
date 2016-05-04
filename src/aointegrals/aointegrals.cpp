@@ -465,8 +465,15 @@ void AOIntegrals::printOneE(){
 }
 
 void AOIntegrals::alloc(){
+  std::size_t MEM = 256e6; // 256 MB
+  this->memManager_ = 
+    std::unique_ptr<CQMemManager>(
+        new CQMemManager(MEM,this->nBasis_*this->nBasis_*sizeof(double))
+        );
+
   this->checkMeta();
   this->allocOp();
+  this->memManager_->printSummary(cout);
   if(getRank() == 0) {
     if(this->maxMultipole_ >= 1) this->allocMultipole();
  
@@ -524,15 +531,15 @@ void AOIntegrals::allocOp(){
     try {
  
       // One Electron Integral
-      this->oneE_      = std::unique_ptr<RealMatrix>(new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); 
+      this->oneE_      = std::unique_ptr<RealMap>(new RealMap(this->memManager_->malloc<double>(NTCSxNBASIS*NTCSxNBASIS),NTCSxNBASIS,NTCSxNBASIS)); 
       // Overlap
-      this->overlap_   = std::unique_ptr<RealMatrix>(new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); 
+      this->overlap_   = std::unique_ptr<RealMap>(new RealMap(this->memManager_->malloc<double>(NTCSxNBASIS*NTCSxNBASIS),NTCSxNBASIS,NTCSxNBASIS)); 
       // Kinetic
-      this->kinetic_   = std::unique_ptr<RealMatrix>(new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); 
+      this->kinetic_   = std::unique_ptr<RealMap>(new RealMap(this->memManager_->malloc<double>(NTCSxNBASIS*NTCSxNBASIS),NTCSxNBASIS,NTCSxNBASIS)); 
       // Kinetic (p-space)
-      this->kineticP_  = std::unique_ptr<RealMatrix>(new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); 
+      this->kineticP_  = std::unique_ptr<RealMap>(new RealMap(this->memManager_->malloc<double>(NTCSxNBASIS*NTCSxNBASIS),NTCSxNBASIS,NTCSxNBASIS)); 
       // Potential
-      this->potential_ = std::unique_ptr<RealMatrix>(new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); 
+      this->potential_ = std::unique_ptr<RealMap>(new RealMap(this->memManager_->malloc<double>(NTCSxNBASIS*NTCSxNBASIS),NTCSxNBASIS,NTCSxNBASIS)); 
  
     } catch(...) {
       CErr(std::current_exception(),"One Electron Integral Tensor Allocation");
@@ -541,8 +548,8 @@ void AOIntegrals::allocOp(){
 
 #ifdef USE_LIBINT
   try { 
-    this->schwartz_ = std::unique_ptr<RealMatrix>(
-      new RealMatrix(this->basisSet_->nShell(),this->basisSet_->nShell())); 
+    this->schwartz_ = std::unique_ptr<RealMap>(
+      new RealMap(this->memManager_->malloc<double>(this->basisSet_->nShell()*this->basisSet_->nShell()),this->basisSet_->nShell(),this->basisSet_->nShell())); 
   } catch(...) {
     CErr(std::current_exception(),"Schwartx Bound Tensor Allocation");
   } 
