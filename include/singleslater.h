@@ -40,6 +40,7 @@ namespace ChronusQ {
 template<typename T>
 class SingleSlater : public Quantum<T> {
   typedef Eigen::Matrix<T,Dynamic,Dynamic,ColMajor> TMatrix;
+  typedef Eigen::Map<TMatrix> TMap;
 
 /*
   struct MetaData_ {
@@ -110,22 +111,22 @@ class SingleSlater : public Quantum<T> {
   double nElectrons_;
 
   // Internal Storage
-  std::unique_ptr<TMatrix>  fockA_;      ///< Alpha or Full (TCS) Fock Matrix
-  std::unique_ptr<TMatrix>  fockB_;      ///< Beta Fock Matrix
-  std::unique_ptr<TMatrix>  coulombA_;   ///< Alpha or Full (TCS) Coulomb Matrix
-  std::unique_ptr<TMatrix>  coulombB_;   ///< Beta Coulomb Matrix
-  std::unique_ptr<TMatrix>  exchangeA_;  ///< Alpha or Full (TCS) Exchange Matrix
-  std::unique_ptr<TMatrix>  exchangeB_;  ///< Beta Exchange Matrix
-  std::unique_ptr<TMatrix>  moA_;        ///< Alpha or Full (TCS) MO Coefficient Matrix
-  std::unique_ptr<TMatrix>  moB_;        ///< Beta MO Coefficient Matrix
-  std::unique_ptr<RealMatrix>  epsA_;       ///< Alpha or Full (TCS) Fock Eigenenergies
-  std::unique_ptr<RealMatrix>  epsB_;       ///< Beta Fock Eigenenergie
-  std::unique_ptr<TMatrix>  PTA_;        ///< Alpha or Full (TCS) Perturbation Tensor
-  std::unique_ptr<TMatrix>  PTB_;        ///< Beta Perturbation Tensor
-  std::unique_ptr<TMatrix>  vXA_;        ///< Alpha or Full (TCS) VX
-  std::unique_ptr<TMatrix>  vXB_;        ///< Beta VXC
-  std::unique_ptr<TMatrix>  vCorA_;        ///< Alpha or Full Vcorr
-  std::unique_ptr<TMatrix>  vCorB_;        ///< Beta Vcorr
+  std::unique_ptr<TMap>  fockA_;      ///< Alpha or Full (TCS) Fock Matrix
+  std::unique_ptr<TMap>  fockB_;      ///< Beta Fock Matrix
+  std::unique_ptr<TMap>  coulombA_;   ///< Alpha or Full (TCS) Coulomb Matrix
+  std::unique_ptr<TMap>  coulombB_;   ///< Beta Coulomb Matrix
+  std::unique_ptr<TMap>  exchangeA_;  ///< Alpha or Full (TCS) Exchange Matrix
+  std::unique_ptr<TMap>  exchangeB_;  ///< Beta Exchange Matrix
+  std::unique_ptr<TMap>  moA_;        ///< Alpha or Full (TCS) MO Coefficient Matrix
+  std::unique_ptr<TMap>  moB_;        ///< Beta MO Coefficient Matrix
+  std::unique_ptr<RealMap>  epsA_;       ///< Alpha or Full (TCS) Fock Eigenenergies
+  std::unique_ptr<RealMap>  epsB_;       ///< Beta Fock Eigenenergie
+  std::unique_ptr<TMap>  PTA_;        ///< Alpha or Full (TCS) Perturbation Tensor
+  std::unique_ptr<TMap>  PTB_;        ///< Beta Perturbation Tensor
+  std::unique_ptr<TMap>  vXA_;        ///< Alpha or Full (TCS) VX
+  std::unique_ptr<TMap>  vXB_;        ///< Beta VXC
+  std::unique_ptr<TMap>  vCorA_;        ///< Alpha or Full Vcorr
+  std::unique_ptr<TMap>  vCorB_;        ///< Beta Vcorr
   std::vector<RealSparseMatrix>  sparsedmudX_; ///< basis derivative (x)
   std::vector<RealSparseMatrix>  sparsedmudY_; ///< basis derivative (y)
   std::vector<RealSparseMatrix>  sparsedmudZ_; ///< basis derivative (z)
@@ -142,6 +143,7 @@ class SingleSlater : public Quantum<T> {
   Controls *    controls_;         ///< General ChronusQ flow parameters
   AOIntegrals * aointegrals_;      ///< Molecular Integrals over GTOs (AO basis)
   TwoDGrid    * twodgrid_   ;      ///< 3D grid (1Rad times 1 Ang) 
+  CQMemManager * memManager_;
 
   std::string SCFType_;      ///< String containing SCF Type (R/C) (R/U/G/CU)
   std::string SCFTypeShort_; ///< String containing SCF Type (R/C) (R/U/G/CU)
@@ -465,14 +467,34 @@ public:
     this->isDFT        = other->isDFT;
     this->guess_       = other->guess_;
 
+    auto NB   = this->nTCS_ * this->nBasis_;
+    auto NBSq = NB * NB;
     if(getRank() == 0) {
-      this->fockA_ = std::unique_ptr<TMatrix>(new TMatrix(*other->fockA_));
-      this->moA_   = std::unique_ptr<TMatrix>(new TMatrix(*other->moA_));
-      this->PTA_   = std::unique_ptr<TMatrix>(new TMatrix(*other->PTA_));
+      this->fockA_ = 
+        std::unique_ptr<TMap>(
+            new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
+      this->moA_   = 
+        std::unique_ptr<TMap>(
+            new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
+      this->PTA_   = 
+        std::unique_ptr<TMap>(
+            new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
+
+      (*this->fockA_) = (*other.fockA_);
+      (*this->moA_)   = (*other.moA_);
+      (*this->PTA_)   = (*other.PTA_);
+
       if(!this->isClosedShell && this->Ref_ != TCS ){
-        this->fockB_ = std::unique_ptr<TMatrix>(new TMatrix(*other->fockB_));
-        this->moB_   = std::unique_ptr<TMatrix>(new TMatrix(*other->moB_));
-        this->PTB_   = std::unique_ptr<TMatrix>(new TMatrix(*other->PTB_));
+        this->fockB_ = std::unique_ptr<TMap>(
+            new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
+        this->moB_   = std::unique_ptr<TMap>(
+            new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
+        this->PTB_   = std::unique_ptr<TMap>(
+            new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
+
+        (*this->fockB_) = (*other.fockB_);
+        (*this->moB_)   = (*other.moB_);
+        (*this->PTB_)   = (*other.PTB_);
       }
     }
 
@@ -577,22 +599,24 @@ public:
   inline int printLevel(){ return this->printLevel_;              };
   inline std::vector<double> mullPop()   { return this->mullPop_; };
   inline std::array<double,3> elecField(){ return this->elecField_; };
-  inline TMatrix* fockA()                { return this->fockA_.get();    };
-  inline TMatrix* fockB()                { return this->fockB_.get();    };
-  inline TMatrix* coulombA()             { return this->coulombA_.get(); };
-  inline TMatrix* coulombB()             { return this->coulombB_.get(); };
-  inline TMatrix* exchangeA()            { return this->exchangeA_.get();};
-  inline TMatrix* exchangeB()            { return this->exchangeB_.get();};
-  inline TMatrix* moA()                  { return this->moA_.get();      };
-  inline TMatrix* moB()                  { return this->moB_.get();      };
-  inline TMatrix* vXA()                  { return this->vXA_.get();      };
-  inline TMatrix* vXB()                  { return this->vXB_.get();      };
-  inline TMatrix* vCorA()                { return this->vCorA_.get();    };
-  inline TMatrix* vCorB()                { return this->vCorB_.get();    };
-  inline RealMatrix* epsA()              { return this->epsA_.get();     };
-  inline RealMatrix* epsB()              { return this->epsB_.get();     };
-  inline TMatrix* PTA()                  { return this->PTA_.get();      };
-  inline TMatrix* PTB()                  { return this->PTB_.get();      };
+
+  inline TMap* fockA()                { return this->fockA_.get();    };
+  inline TMap* fockB()                { return this->fockB_.get();    };
+  inline TMap* coulombA()             { return this->coulombA_.get(); };
+  inline TMap* coulombB()             { return this->coulombB_.get(); };
+  inline TMap* exchangeA()            { return this->exchangeA_.get();};
+  inline TMap* exchangeB()            { return this->exchangeB_.get();};
+  inline TMap* moA()                  { return this->moA_.get();      };
+  inline TMap* moB()                  { return this->moB_.get();      };
+  inline TMap* vXA()                  { return this->vXA_.get();      };
+  inline TMap* vXB()                  { return this->vXB_.get();      };
+  inline TMap* vCorA()                { return this->vCorA_.get();    };
+  inline TMap* vCorB()                { return this->vCorB_.get();    };
+  inline RealMap* epsA()              { return this->epsA_.get();     };
+  inline RealMap* epsB()              { return this->epsB_.get();     };
+  inline TMap* PTA()                  { return this->PTA_.get();      };
+  inline TMap* PTB()                  { return this->PTB_.get();      };
+
   inline BasisSet     * basisset()       { return this->basisset_;       };
   inline Molecule     * molecule()       { return this->molecule_;       };
   inline FileIO       * fileio()         { return this->fileio_;         };
