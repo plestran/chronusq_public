@@ -29,7 +29,7 @@ import libpythonapi as chronusQ
 def communicate(workers):
   workers["CQAOIntegrals"].communicate(
     workers["CQMolecule"], workers["CQBasisSet"], workers["CQFileIO"], 
-    workers["CQControls"]
+    workers["CQMemManager"], workers["CQControls"]
   )
   workers["CQSingleSlater"].communicate(
     workers["CQMolecule"], workers["CQBasisSet"], workers["CQAOIntegrals"],

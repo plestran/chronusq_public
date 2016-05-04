@@ -37,7 +37,6 @@ using ChronusQ::AOIntegrals;
 namespace ChronusQ {
   void AOIntegrals::Wrapper_iniAOIntegrals(Molecule &mol, BasisSet &basis,
          FileIO &fileio, Controls &controls) {
-     this->iniAOIntegrals( &mol, &basis, &fileio, &controls); 
   }
 };
 

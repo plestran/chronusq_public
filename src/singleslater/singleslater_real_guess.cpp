@@ -187,7 +187,7 @@ void SingleSlater<double>::SADGuess() {
       
       // Replaces iniAOIntegrals
       aointegralsAtom.communicate(uniqueAtom,basisSetAtom,*this->fileio_,
-        controlAtom);
+        *this->aointegrals_->memManager(),controlAtom);
       aointegralsAtom.initMeta();
       aointegralsAtom.integralAlgorithm = this->aointegrals_->integralAlgorithm;
       aointegralsAtom.alloc();

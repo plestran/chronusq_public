@@ -155,7 +155,7 @@ class AOIntegrals{
   FileIO *      	fileio_; ///< Pointer to FileIO
   Controls *    	controls_; ///< Pointer to job control
   TwoDGrid *            twodgrid_; ///< 3D grid (1Rad times 1 Ang) 
-  std::unique_ptr<CQMemManager> memManager_;
+  CQMemManager *        memManager_;
 
   std::unique_ptr<PairConstants>        pairConstants_; ///< Smart pointer to struct containing shell-pair meta-data
   std::unique_ptr<MolecularConstants>   molecularConstants_; ///< Smart pointer to struct containing molecular struture meta-data
@@ -165,6 +165,8 @@ class AOIntegrals{
   void breakUpMultipole();
 
   inline void checkWorkers(){
+    if(this->memManager_  == NULL) 
+      CErr("Fatal: Must initialize AOIntegrals with CQMemManager Object");
     if(this->fileio_  == NULL) 
       CErr("Fatal: Must initialize AOIntegrals with FileIO Object");
     if(this->basisSet_ == NULL) 
@@ -250,6 +252,7 @@ public:
     this->fileio_     = NULL; 
     this->controls_   = NULL; 
     this->DFbasisSet_ = NULL;
+    this->memManager_ = NULL;
 
     this->pairConstants_      = nullptr;
     this->molecularConstants_ = nullptr;
@@ -286,17 +289,14 @@ public:
     this->isPrimary         = true;
   };
   ~AOIntegrals(){;};
-  
-  void iniAOIntegrals(Molecule *,BasisSet *,
-                      FileIO *,Controls *,
-                      BasisSet * DFbasisSet=NULL); ///< Initialization function
 
   inline void communicate(Molecule &mol, BasisSet &basis, FileIO &fileio, 
-                          Controls &controls){
+                          CQMemManager &memManager, Controls &controls){
     this->molecule_   = &mol;
     this->basisSet_   = &basis;
     this->fileio_     = &fileio;
     this->controls_   = &controls;
+    this->memManager_ = &memManager;
     this->DFbasisSet_ = NULL;
   }
 
@@ -321,6 +321,7 @@ public:
   inline int maxMultipole(){ return this->maxMultipole_;}
   inline int maxNumInt(){ return this->maxNumInt_;}
   inline Controls* controls(){ return this->controls_;};
+  inline CQMemManager* memManager(){ return this->memManager_;};
 
   // Setters
   inline void setNTCS(int i)        { this->nTCS_         = i;}

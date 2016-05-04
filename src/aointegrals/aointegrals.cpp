@@ -73,23 +73,6 @@ static double factTLarge[21] = {
 270312149116754000.0
 };
 
-//---------------------
-// initialize AOIntegrals
-//---------------------
-void AOIntegrals::iniAOIntegrals(Molecule * molecule, BasisSet * basisset, 
-                                 FileIO * fileio, Controls * controls,
-                                 BasisSet * DFbasisSet)
-{
-  this->communicate(*molecule,*basisset,*fileio,*controls);
-  this->initMeta();
-
-  if(controls->doTCS) this->nTCS_ = 2;
-  if(this->controls_->buildn4eri) this->integralAlgorithm = INCORE;
-  if(this->controls_->doDF     ) this->integralAlgorithm = DENFIT;
-  this->alloc();
-
-};
-
 void AOIntegrals::generateFmTTable() {
   double intervalFmT = 0.025;
   double T = 0.0;
@@ -465,11 +448,8 @@ void AOIntegrals::printOneE(){
 }
 
 void AOIntegrals::alloc(){
-  std::size_t MEM = 256e6; // 256 MB
-  this->memManager_ = 
-    std::unique_ptr<CQMemManager>(
-        new CQMemManager(MEM,this->nBasis_*this->nBasis_*sizeof(double))
-        );
+  this->memManager_->setBlockSize(this->nBasis_*this->nBasis_*sizeof(double)); 
+  this->memManager_->allocMem();
 
   this->checkMeta();
   this->allocOp();
