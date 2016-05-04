@@ -52,10 +52,10 @@ class CQMemManager : public boost::simple_segregated_storage<std::size_t> {
     };
 
     template<typename T>
-    void free( T *& ptr, std::size_t n){
-      this->NAlloc_ -= n;
+    void free( T * ptr, std::size_t n){
+      std::size_t nBlocks = ( (n-1) * sizeof(T) ) / this->NBlockSize_ + 1;
+      this->NAlloc_ -= nBlocks * this->NBlockSize_;
       boost::simple_segregated_storage<std::size_t>::free_n(ptr,1,n);
-      ptr = NULL;
     }
 
 

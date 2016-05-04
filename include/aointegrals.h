@@ -288,7 +288,22 @@ public:
     this->integralAlgorithm = DIRECT;
     this->isPrimary         = true;
   };
-  ~AOIntegrals(){;};
+
+  ~AOIntegrals(){
+    // Free up memory from memory manager
+    this->memManager_->free(this->oneE_->data(),
+      this->nTCS_*this->nBasis_*this->nTCS_*this->nBasis_);
+    this->memManager_->free(this->overlap_->data(),
+      this->nTCS_*this->nBasis_*this->nTCS_*this->nBasis_);
+    this->memManager_->free(this->kinetic_->data(),
+      this->nTCS_*this->nBasis_*this->nTCS_*this->nBasis_);
+    this->memManager_->free(this->kineticP_->data(),
+      this->nTCS_*this->nBasis_*this->nTCS_*this->nBasis_);
+    this->memManager_->free(this->potential_->data(),
+      this->nTCS_*this->nBasis_*this->nTCS_*this->nBasis_);
+    this->memManager_->free(this->schwartz_->data(),
+      this->nTCS_*this->nBasis_*this->nTCS_*this->nBasis_);
+  };
 
   inline void communicate(Molecule &mol, BasisSet &basis, FileIO &fileio, 
                           CQMemManager &memManager, Controls &controls){
