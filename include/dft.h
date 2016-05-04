@@ -3,9 +3,11 @@
 #define INCLUDED_DFT
 class DFTFunctional{
 public:
-  double scalingFactor;
+  double scalingFactor;    //< Hybrid Scaling
+  double epsScreen;        //< screening 
   DFTFunctional(double X = 1.0){
     this->scalingFactor = X;
+    this->epsScreen = 1.0e-10;
   };
 
   struct DFTInfo {

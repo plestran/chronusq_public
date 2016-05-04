@@ -330,20 +330,22 @@ int main(int argc, char **argv){
 
   auto valVxc = [&](IntegrationPoint pt, MyStruct &result) {
     // Evaluate the basis product in SCRATCH
+//    if (pt.weight < singleSlater.dftFunctionals_[0]->epsScreen){
+//    return 0.0; }
     SCRATCH1.setZero();
     cartGP GP = pt.pt;
     double rhoA;
     double rhoB;
     DFTFunctional::DFTInfo kernelXC;
 //    SlaterExchange * dftFun;
-//    auto shMap = basis.MapGridBasis(GP); 
-//    if(shMap[0]) { 
+    auto shMap = basis.MapGridBasis(GP); 
+    if(shMap[0]) { 
 //       cout << "Skip all pts " <<endl;
-//       return 0.0;}
+       return 0.0;}
     for(auto iShell = 0; iShell < basis.nShell(); iShell++){
-//      if(!shMap[iShell+1]) {
+      if(!shMap[iShell+1]) {
 //       cout << basis.getradCutSh(iShell) << endl;
-//        continue;}
+        continue;}
       int b_s = basis.mapSh2Bf(iShell);
       int size= basis.shells(iShell).size();
 
@@ -428,7 +430,13 @@ int main(int argc, char **argv){
   for(auto iAtm = 0; iAtm < molecule.nAtoms(); iAtm++){
     AGrid.center() = iAtm;
     AGrid.scalingFactor()=0.5*elements[molecule.index(iAtm)].sradius/phys.bohr;
+    basis.radcut(1.0e-10, 50, 1.0e-7);
+    std::chrono::duration<double> TVEX; 
+    auto t1s = std::chrono::high_resolution_clock::now();
     AGrid.integrate<MyStruct>(valVxc,res);
+    auto t1f = std::chrono::high_resolution_clock::now();
+    TVEX += t1f - t1s;
+    cout << "VEX time " << TVEX.count() << endl;
   };
 //  double Cx = -(3.0/4.0)*(std::pow((3.0/math.pi),(1.0/3.0)));
   prettyPrint(cout,4*math.pi*res.VXCA,"A");
