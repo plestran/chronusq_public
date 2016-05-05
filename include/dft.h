@@ -43,13 +43,12 @@ class SlaterExchange : public DFTFunctional {
   double spindensity   ;
 public:
   SlaterExchange();
-  double getCxVx() {return this->CxVx;};
   DFTInfo eval(double rhoA, double rhoB);
   DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaAB);
   DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaAB, double gammaBB);
 };
 
-class VWN3 : public DFTFunctional {
+class VWNIII : public DFTFunctional {
 // General Constant
   double small;    
   double over2;
@@ -118,7 +117,7 @@ class VWN3 : public DFTFunctional {
   double db_dr       ; 
   double delta_eps_etha ;
 public:
-  VWN3();
+  VWNIII();
   DFTInfo eval(double rhoA, double rhoB);
   DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaAB);
   DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaAB, double gammaBB);
@@ -128,4 +127,5 @@ public:
   void popVWNconst();
   void popVWNdens(double rhoA, double rhoB);
 };
+
 #endif
