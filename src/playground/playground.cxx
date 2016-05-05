@@ -252,7 +252,7 @@ int main(int argc, char **argv){
 
 
   aoints.communicate(molecule,basis,fileio,memManager);
-  singleSlater.communicate(molecule,basis,aoints,fileio);
+  singleSlater.communicate(molecule,basis,aoints,fileio,memManager);
   moints.communicate(molecule,basis,fileio,aoints,singleSlater);
 
   aoints.initMeta();

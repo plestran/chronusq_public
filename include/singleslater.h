@@ -243,6 +243,9 @@ class SingleSlater : public Quantum<T> {
     if(this->aointegrals_== NULL)
       CErr("Fatal: Must initialize SingleSlater with AOIntegrals Object",
            this->fileio_->out);
+    if(this->memManager_ == NULL)
+      CErr("Fatal: Must initialize SingleSlater with CQMemManager Object",
+           this->fileio_->out);
     
   }
 
@@ -504,17 +507,15 @@ public:
   template<typename U>
   SingleSlater(U *);
 
-  // pseudo-constructor
-  void iniSingleSlater(Molecule *,BasisSet *,AOIntegrals *,FileIO *);
-
   // Link up to all of the other worker classes
   inline void communicate(Molecule &mol, BasisSet&basis, AOIntegrals &aoints, 
-    FileIO &fileio){
+    FileIO &fileio, CQMemManager &memManager){
 
     this->molecule_    = &mol;
     this->basisset_    = &basis;
     this->fileio_      = &fileio;
     this->aointegrals_ = &aoints;
+    this->memManager_  = &memManager;
   }
 
   // Initialize Meta data from other worker classes
@@ -744,7 +745,6 @@ public:
   }
 
   // Python API
-  void Wrapper_iniSingleSlater(Molecule&,BasisSet&,AOIntegrals&,FileIO&); 
   boost::python::list Wrapper_dipole();
   boost::python::list Wrapper_quadrupole();
   boost::python::list Wrapper_octupole();

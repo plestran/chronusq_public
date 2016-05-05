@@ -464,7 +464,7 @@ void AOIntegrals::alloc(){
   this->checkMeta();
   this->allocOp();
   this->allocOrth();
-  this->memManager_->printSummary(cout);
+//  this->memManager_->printSummary(cout);
   if(getRank() == 0) {
     if(this->maxMultipole_ >= 1) this->allocMultipole();
  

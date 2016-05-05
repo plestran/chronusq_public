@@ -30,7 +30,6 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(printSettings_Overload,
 BOOST_PYTHON_MODULE(libpythonapi){
   class_<SingleSlater<double>,boost::noncopyable>("SingleSlater_double",
     init<>())
-    .def("iniSingleSlater" , &SingleSlater<double>::Wrapper_iniSingleSlater)
     .def("printInfo"       , &SingleSlater<double>::printInfo              )
     .def("printDensity"    , &SingleSlater<double>::printDensity           )
     .def("formGuess"       , &SingleSlater<double>::formGuess              )
@@ -87,7 +86,6 @@ BOOST_PYTHON_MODULE(libpythonapi){
 
   class_<SingleSlater<dcomplex>,boost::noncopyable>("SingleSlater_complex",
     init<>())
-    .def("iniSingleSlater" , &SingleSlater<dcomplex>::Wrapper_iniSingleSlater)
     .def("printInfo"       , &SingleSlater<dcomplex>::printInfo              )
     .def("printDensity"    , &SingleSlater<dcomplex>::printDensity           )
     .def("formGuess"       , &SingleSlater<dcomplex>::formGuess              )

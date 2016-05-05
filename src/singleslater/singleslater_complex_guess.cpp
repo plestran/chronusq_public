@@ -198,7 +198,7 @@ void SingleSlater<dcomplex>::SADGuess() {
 
       // Replaces iniSingleSlater
       hartreeFockAtom.communicate(uniqueAtom,basisSetAtom,aointegralsAtom,
-        *this->fileio_);
+        *this->fileio_,*this->memManager_);
       hartreeFockAtom.initMeta();
       hartreeFockAtom.setField(this->elecField_);
       hartreeFockAtom.isClosedShell = (hartreeFockAtom.multip() == 1); 

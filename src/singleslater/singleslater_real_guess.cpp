@@ -191,7 +191,7 @@ void SingleSlater<double>::SADGuess() {
 
       // Replaces iniSingleSlater
       hartreeFockAtom.communicate(uniqueAtom,basisSetAtom,aointegralsAtom,
-        *this->fileio_);
+        *this->fileio_,*this->memManager_);
 /*
       hartreeFockAtom.isDFT = this->isDFT;
       hartreeFockAtom.isHF = this->isHF;

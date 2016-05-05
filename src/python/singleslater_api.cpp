@@ -35,17 +35,6 @@ using ChronusQ::AOIntegrals;
 
 namespace ChronusQ {
   template<>
-  void SingleSlater<double>::Wrapper_iniSingleSlater(Molecule &mol, BasisSet &basis,
-         AOIntegrals &ints, FileIO &fileio) {
-     this->iniSingleSlater( &mol, &basis, &ints, &fileio); 
-  }
-  template<>
-  void SingleSlater<dcomplex>::Wrapper_iniSingleSlater(Molecule &mol, BasisSet &basis,
-         AOIntegrals &ints, FileIO &fileio) {
-     this->iniSingleSlater( &mol, &basis, &ints, &fileio); 
-  }
-
-  template<>
   boost::python::list SingleSlater<double>::Wrapper_dipole(){
     boost::python::list result;
     for(auto i = 0; i < 3; i++)

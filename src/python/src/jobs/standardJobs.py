@@ -28,12 +28,12 @@ import libpythonapi as chronusQ
 
 def communicate(workers):
   workers["CQAOIntegrals"].communicate(
-    workers["CQMolecule"], workers["CQBasisSet"], workers["CQFileIO"]
+    workers["CQMolecule"], workers["CQBasisSet"], workers["CQFileIO"],
     workers["CQMemManager"]
   )
   workers["CQSingleSlater"].communicate(
     workers["CQMolecule"], workers["CQBasisSet"], workers["CQAOIntegrals"],
-    workers["CQFileIO"], workers["CQControls"]
+    workers["CQFileIO"], workers["CQMemManager"]
   )
   try:
     workers["CQRealTime"].communicate(workers["CQFileIO"],workers["CQControls"],
@@ -50,7 +50,7 @@ def communicate(workers):
 
   try:
     workers["CQMOIntegrals"].communicate(workers["CQMolecule"],
-      workers["CQBasisSet"],workers["CQFileIO"],workers["CQControls"],
+      workers["CQBasisSet"],workers["CQFileIO"],
       workers["CQAOIntegrals"],workers["CQSingleSlater"])
   except KeyError:
     pass

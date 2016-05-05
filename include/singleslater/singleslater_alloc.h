@@ -27,28 +27,11 @@
  * Allocate Matricies *
  **********************/
 template<typename T>
-void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset, 
-                                   AOIntegrals * aointegrals, FileIO * fileio) {
-
-  this->communicate(*molecule,*basisset,*aointegrals,*fileio);
-  this->initMeta();
-
-  this->genMethString();
-
-
-  if(this->Ref_ == TCS) this->nTCS_ = 2;
-
-  // This is the only way via the C++ interface to set this flag (needed
-  // for allocDFT)
-  this->alloc();
-
-
-};
-
-template<typename T>
 void SingleSlater<T>::alloc(){
+  this->memManager_->printSummary(cout);
   this->checkMeta();
   this->allocOp();
+  this->memManager_->printSummary(cout);
  
   if(getRank() == 0) {
     if (this->isDFT){
