@@ -34,13 +34,9 @@ void Quantum<dcomplex>::complexMyScale(Op &op){ op *= dcomplex(0.0,1.0); };
 
 template<typename T>
 void Quantum<T>::scatterDensity(){
-  if(this->isScattered_) return;
   if(this->nTCS_ == 1 && this->isClosedShell)
     return;
   this->isScattered_ = true;
-
-  // Allocate new scattered densities
-  this->allocDensity(this->onePDMA_->cols() / this->nTCS_);
 
   std::vector<std::reference_wrapper<TMap>> scattered;
   scattered.emplace_back(*this->onePDMScalar_);
@@ -59,13 +55,10 @@ void Quantum<T>::scatterDensity(){
 
 template<typename T>
 void Quantum<T>::gatherDensity(){
-  if(!this->isScattered_) return;
   if(this->nTCS_ == 1 && this->isClosedShell)
     return;
   this->isScattered_ = false;
 
-  // Allocate new scattered densities
-  this->allocDensity(this->onePDMScalar_->cols());
 
   std::vector<std::reference_wrapper<TMap>> scattered;
   scattered.emplace_back(*this->onePDMScalar_);

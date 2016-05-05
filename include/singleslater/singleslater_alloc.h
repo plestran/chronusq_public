@@ -28,10 +28,8 @@
  **********************/
 template<typename T>
 void SingleSlater<T>::alloc(){
-  this->memManager_->printSummary(cout);
   this->checkMeta();
   this->allocOp();
-  this->memManager_->printSummary(cout);
  
   if(getRank() == 0) {
     if (this->isDFT){
@@ -105,6 +103,10 @@ void SingleSlater<T>::allocOp(){
           this->memManager_->template malloc<T>(NBTSq),
           this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
 
+  this->NBSqScratch_->setZero();
+  this->fockOrthoA_->setZero();
+  this->onePDMOrthoA_->setZero();
+
   if(this->nTCS_ == 2 || !this->isClosedShell){
 
     this->onePDMOrthoScalar_ = 
@@ -148,16 +150,17 @@ void SingleSlater<T>::allocOp(){
             this->memManager_->template malloc<T>(NBSq),
             this->nBasis_,this->nBasis_));
 
-    if(this->nTCS_ == 2) {
-      this->onePDMOrthoMy_ = 
-        std::unique_ptr<TMap>(new TMap(
-              this->memManager_->template malloc<T>(NBSq),
-              this->nBasis_,this->nBasis_));
-      this->onePDMOrthoMx_ = 
-        std::unique_ptr<TMap>(new TMap(
-              this->memManager_->template malloc<T>(NBSq),
-              this->nBasis_,this->nBasis_));
+    this->onePDMOrthoScalar_->setZero(); 
+    this->onePDMOrthoMz_->setZero(); 
+    this->PTScalar_->setZero(); 
+    this->PTMz_->setZero(); 
+    this->fockOrthoB_->setZero(); 
+    this->fockScalar_->setZero(); 
+    this->fockMz_->setZero(); 
+    this->fockOrthoScalar_->setZero(); 
+    this->fockOrthoMz_->setZero(); 
 
+    if(this->nTCS_ == 2) {
       this->PTMx_ = 
         std::unique_ptr<TMap>(new TMap(
               this->memManager_->template malloc<T>(NBSq),
@@ -184,6 +187,13 @@ void SingleSlater<T>::allocOp(){
         std::unique_ptr<TMap>(new TMap(
               this->memManager_->template malloc<T>(NBSq),
               this->nBasis_,this->nBasis_));
+
+      this->PTMx_->setZero(); 
+      this->PTMy_->setZero(); 
+      this->fockMx_->setZero(); 
+      this->fockMy_->setZero(); 
+      this->fockOrthoMx_->setZero(); 
+      this->fockOrthoMy_->setZero(); 
     }
   }
 }
@@ -223,6 +233,9 @@ void SingleSlater<T>::allocAlphaOp(){
       CErr(std::current_exception(),"TCS Eigenorbital Energies"); 
     else CErr(std::current_exception(),"Alpha Eigenorbital Energies"); 
   }
+  this->fockA_->setZero();
+  this->moA_->setZero();
+  this->epsA_->setZero();
 
 #ifndef USE_LIBINT
   // Alpha / TCS Coulomb Matrix
@@ -254,6 +267,7 @@ void SingleSlater<T>::allocAlphaOp(){
     if(this->Ref_ == TCS) CErr(std::current_exception(),"TCS G[P] Allocation"); 
     else CErr(std::current_exception(),"Alpha G[P] Allocation"); 
   }
+  this->PTA_->setZero();
 
 #endif
 
@@ -289,6 +303,10 @@ void SingleSlater<T>::allocBetaOp(){
   } catch (...) { 
     CErr(std::current_exception(),"Beta Eigenorbital Energies");
   }
+  this->fockB_->setZero();
+  this->moB_->setZero();
+  this->epsB_->setZero();
+
 #ifndef USE_LIBINT
   // Beta Coulomb Matrix
   try { 
@@ -313,6 +331,7 @@ void SingleSlater<T>::allocBetaOp(){
   } catch (...) { 
     CErr(std::current_exception(),"Beta G[P] Allocation"); 
   }
+  this->PTB_->setZero();
 #endif
 
   if(this->isDFT) this->allocBetaDFT();
@@ -340,6 +359,8 @@ void SingleSlater<T>::allocAlphaDFT(){
     if(this->Ref_ == TCS) CErr(std::current_exception(), "TCS VXC Allocation"); 
     else CErr(std::current_exception(),"Alpha VXC  Allocation"); 
   }
+  this->vXA_->setZero();
+  this->vCorA_->setZero();
 }
 
 template<typename T>
@@ -355,5 +376,7 @@ void SingleSlater<T>::allocBetaDFT(){
   } catch (...) { 
     CErr(std::current_exception(),"Beta VXC  Allocation"); 
   }
+  this->vXB_->setZero();
+  this->vCorB_->setZero();
 }
 

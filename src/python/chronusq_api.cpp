@@ -95,7 +95,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("computeProperties",&SingleSlater<dcomplex>::computeProperties      )
     .def("printMultipole"  , &SingleSlater<dcomplex>::printMultipole         )
     .def("printProperties" , &SingleSlater<dcomplex>::printProperties        )
-    .def("SCF"             , &SingleSlater<dcomplex>::SCF                    )
+    .def("SCF"             , &SingleSlater<dcomplex>::SCF2                   )
     .def("communicate"     , &SingleSlater<dcomplex>::communicate            )
     .def("initMeta"        , &SingleSlater<dcomplex>::initMeta               )
     .def("alloc"           , &SingleSlater<dcomplex>::alloc                  )

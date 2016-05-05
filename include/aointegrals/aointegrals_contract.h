@@ -35,8 +35,10 @@ void AOIntegrals::newTwoEContractDirect(
     G[iMat].emplace_back(
         this->memManager_->malloc<typename Op::Scalar>(this->nBasis_*this->nBasis_),
         this->nBasis_,this->nBasis_);
+    G[iMat].back().setZero();
   };
   };
+//  std::vector<std::vector<TMatrix>>(nMat,std::vector<TMatrix
 
   // each thread gets its own engine
   std::vector<libint2::Engine> engines(nthreads);

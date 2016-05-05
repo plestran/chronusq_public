@@ -202,28 +202,28 @@ namespace ChronusQ {
       auto NB = other.onePDMA_->cols(); 
       auto NBSq = NB*NB; 
 
-      if(!this->isScattered_) {
-        this->onePDMA_ = std::unique_ptr<TMap>(
-            new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
-        if(!this->isClosedShell && this->nTCS_ != 2)
-          this->onePDMB_ = std::unique_ptr<TMap>(
-            new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
-      } else {
-        NB = other.onePDMScalar_->cols(); 
-        NBSq = NB*NB; 
-        this->onePDMScalar_ = std::unique_ptr<TMap>(
-            new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
+      this->onePDMA_ = std::unique_ptr<TMap>(
+          new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
+      if(!this->isClosedShell && this->nTCS_ != 2)
+        this->onePDMB_ = std::unique_ptr<TMap>(
+          new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
+      NB = other.onePDMScalar_->cols(); 
+      NBSq = NB*NB; 
+      this->onePDMScalar_ = std::unique_ptr<TMap>(
+          new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
 
-        if(!this->isClosedShell || this->nTCS_ == 2)
-          this->onePDMMz_ = std::unique_ptr<TMap>(
-            new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
-        if(this->nTCS_ == 2) {
-          this->onePDMMx_ = std::unique_ptr<TMap>(
-            new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
-          this->onePDMMy_ = std::unique_ptr<TMap>(
-            new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
-        }
+      if(!this->isClosedShell || this->nTCS_ == 2)
+        this->onePDMMz_ = std::unique_ptr<TMap>(
+          new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
+      if(this->nTCS_ == 2) {
+        this->onePDMMx_ = std::unique_ptr<TMap>(
+          new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
+        this->onePDMMy_ = std::unique_ptr<TMap>(
+          new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
       }
+
+      this->onePDMA_->setZero();
+      this->onePDMScalar_->setZero();
     }
 
     template<typename U>

@@ -550,6 +550,10 @@ void AOIntegrals::allocOp(){
     } catch(...) {
       CErr(std::current_exception(),"One Electron Integral Tensor Allocation");
     }
+    this->oneE_->setZero();
+    this->overlap_->setZero();
+    this->kinetic_->setZero();
+    this->potential_->setZero();
   } // End serial allocation
 
 #ifdef USE_LIBINT
@@ -562,6 +566,7 @@ void AOIntegrals::allocOp(){
   } catch(...) {
     CErr(std::current_exception(),"Schwartx Bound Tensor Allocation");
   } 
+  this->schwartz_->setZero();
 
   if(getRank() == 0) {
     if(this->integralAlgorithm == DENFIT){
@@ -592,6 +597,8 @@ void AOIntegrals::allocOrth() {
   this->ortho2_ = std::unique_ptr<RealMap>(
       new RealMap(this->memManager_->malloc<double>(NBSq),
         this->nBasis_,this->nBasis_));
+  this->ortho1_->setZero();
+  this->ortho2_->setZero();
 };
 
 void AOIntegrals::allocMultipole(){
