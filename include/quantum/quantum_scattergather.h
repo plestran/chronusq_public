@@ -42,7 +42,7 @@ void Quantum<T>::scatterDensity(){
   // Allocate new scattered densities
   this->allocDensity(this->onePDMA_->cols() / this->nTCS_);
 
-  std::vector<std::reference_wrapper<TMatrix>> scattered;
+  std::vector<std::reference_wrapper<TMap>> scattered;
   scattered.emplace_back(*this->onePDMScalar_);
   scattered.emplace_back(*this->onePDMMz_);
 
@@ -67,7 +67,7 @@ void Quantum<T>::gatherDensity(){
   // Allocate new scattered densities
   this->allocDensity(this->onePDMScalar_->cols());
 
-  std::vector<std::reference_wrapper<TMatrix>> scattered;
+  std::vector<std::reference_wrapper<TMap>> scattered;
   scattered.emplace_back(*this->onePDMScalar_);
   scattered.emplace_back(*this->onePDMMz_);
 

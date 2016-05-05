@@ -242,6 +242,14 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def_readwrite("doRestart", &FileIO::doRestart   )
   ;
 
+  class_<CQMemManager,boost::noncopyable>("CQMemManager",init<>())
+    .def(init<std::size_t>())
+    .def(init<std::size_t,std::size_t>())
+    .def("allocMem",         &CQMemManager::allocMem    )
+    .def("setTotalMem",      &CQMemManager::setTotalMem )
+    .def("setBlockSize",     &CQMemManager::setBlockSize)
+    .def_readonly("isAllocated", &CQMemManager::isAllocated )
+  ;
   
   class_<AOIntegrals,boost::noncopyable>("AOIntegrals",init<>())
     .def("printTimings"   , &AOIntegrals::printTimings          )

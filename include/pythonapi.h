@@ -25,6 +25,7 @@
  */
 #include <workers.h>
 #include <global.h>
+#include <memory.h>
 #include <atoms.h>
 #include <numdiff.h>
 #include <response.h>
@@ -41,6 +42,7 @@ using ChronusQ::MOIntegrals;
 using ChronusQ::RealTime;
 using ChronusQ::CErr;
 using ChronusQ::SDResponse;
+using ChronusQ::CQMemManager;
 using ChronusQ::NumericalDifferentiation;
 using ChronusQ::RESPONSE_TYPE;
 

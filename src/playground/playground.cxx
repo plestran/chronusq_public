@@ -223,8 +223,10 @@ int main(int argc, char **argv){
   MOIntegrals<double> moints;
   SingleSlater<double> singleSlater;
   Response<double> resp;
+  CQMemManager memManager;
   FileIO fileio("test.inp","test.out");
 
+  memManager.setTotalMem(256e6);
   initCQ(argc,argv);
   controls.iniControls();
   fileio.iniH5Files();
@@ -251,7 +253,7 @@ int main(int argc, char **argv){
   basis.renormShells();
 
 
-  aoints.communicate(molecule,basis,fileio);
+  aoints.communicate(molecule,basis,fileio,memManager);
   singleSlater.communicate(molecule,basis,aoints,fileio,controls);
   moints.communicate(molecule,basis,fileio,controls,aoints,singleSlater);
 

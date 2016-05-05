@@ -194,7 +194,8 @@ void SingleSlater<dcomplex>::SADGuess() {
       hartreeFockAtom.isNotPrimary();
 
       // Replaces iniAOIntegrals
-      aointegralsAtom.communicate(uniqueAtom,basisSetAtom,*this->fileio_);
+      aointegralsAtom.communicate(uniqueAtom,basisSetAtom,*this->fileio_,
+        *this->aointegrals_->memManager());
       aointegralsAtom.initMeta();
       aointegralsAtom.integralAlgorithm = this->aointegrals_->integralAlgorithm;
       aointegralsAtom.alloc();

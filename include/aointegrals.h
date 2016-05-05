@@ -33,6 +33,7 @@
 #include <fileio.h>
 #include <tools.h>
 #include <grid.h>
+#include <memory.h>
 
 #define MaxFmTPt 3201
 #define MaxTotalL 18
@@ -158,6 +159,7 @@ class AOIntegrals{
   Molecule *   	molecule_; ///< Pointer to molecule specification
   FileIO *      	fileio_; ///< Pointer to FileIO
   TwoDGrid *            twodgrid_; ///< 3D grid (1Rad times 1 Ang) 
+  CQMemManager *        memManager_;
 
   int       **R2Index_;
   double	**FmTTable_;
@@ -169,6 +171,8 @@ class AOIntegrals{
   void breakUpMultipole();
 
   inline void checkWorkers(){
+    if(this->memManager_  == NULL) 
+      CErr("Fatal: Must initialize AOIntegrals with CQMemManager Object");
     if(this->fileio_  == NULL) 
       CErr("Fatal: Must initialize AOIntegrals with FileIO Object");
     if(this->basisSet_ == NULL) 
@@ -189,20 +193,19 @@ class AOIntegrals{
 
 public:
   // these should be protected
-
   // Two-Body Integrals
-  std::unique_ptr<RealMatrix>    twoEC_; ///< Two-body Coulomb integrals  (deprecated)
-  std::unique_ptr<RealMatrix>    twoEX_; ///< Two-body Exchange integrals (deprecated)
-  std::unique_ptr<RealMatrix>    schwartz_; ///< Schwartz bounds for ERI screening
+  std::unique_ptr<RealMap>    twoEC_; ///< Two-body Coulomb integrals  (deprecated)
+  std::unique_ptr<RealMap>    twoEX_; ///< Two-body Exchange integrals (deprecated)
+  std::unique_ptr<RealMap>    schwartz_; ///< Schwartz bounds for ERI screening
   std::unique_ptr<RealTensor4d>  aoERI_; ///< Rank-4 ERI tensor over primary basis functions \f$ (\mu \nu \vert \lambda\delta )\f$
 
   // One-Body Integrals
-  std::unique_ptr<RealMatrix>    oneE_; ///< Core Hamiltonian \f$ h = T + V \f$
-  std::unique_ptr<RealMatrix>    overlap_; ///< Overlap matrix \f$ S_{\mu\nu} = \langle \mu \vert \nu \rangle \f$
-  std::unique_ptr<RealMatrix>    kinetic_; ///< Kinetic energy tensor \f$ T_{\mu\nu} = \langle \mu \vert \Delta \vert \nu \rangle \f$
-  std::unique_ptr<RealMatrix>    potential_; ///< Potential energy tensor \f$ V_{\mu\nu} = \sum_A \left\langle \mu \vert r_{1A}^{-1}\vert \nu\right\rangle\f$
-  std::unique_ptr<RealMatrix>    ortho1_;
-  std::unique_ptr<RealMatrix>    ortho2_;
+  std::unique_ptr<RealMap>    oneE_; ///< Core Hamiltonian \f$ h = T + V \f$
+  std::unique_ptr<RealMap>    overlap_; ///< Overlap matrix \f$ S_{\mu\nu} = \langle \mu \vert \nu \rangle \f$
+  std::unique_ptr<RealMap>    kinetic_; ///< Kinetic energy tensor \f$ T_{\mu\nu} = \langle \mu \vert \Delta \vert \nu \rangle \f$
+  std::unique_ptr<RealMap>    potential_; ///< Potential energy tensor \f$ V_{\mu\nu} = \sum_A \left\langle \mu \vert r_{1A}^{-1}\vert \nu\right\rangle\f$
+  std::unique_ptr<RealMap>    ortho1_;
+  std::unique_ptr<RealMap>    ortho2_;
 
   // Resolution of the Identity
   std::unique_ptr<RealTensor3d>  aoRII_; ///< Rank-3 DFI tensor over density-fitting basis functions \f$ ( \mu\nu \vert X ) \f$
@@ -263,6 +266,7 @@ public:
     this->basisSet_   = NULL; 
     this->fileio_     = NULL; 
     this->DFbasisSet_ = NULL;
+    this->memManager_ = NULL;
 
     this->pairConstants_      = nullptr;
     this->molecularConstants_ = nullptr;
@@ -301,13 +305,30 @@ public:
     this->thresholdSchwartz_ = 1.0e-14;
     this->orthoType = LOWDIN;
   };
-  ~AOIntegrals(){;};
+
+  ~AOIntegrals(){
+    // Free up memory from memory manager
+    this->memManager_->free(this->oneE_->data(),
+      this->nBasis_*this->nBasis_);
+    this->memManager_->free(this->overlap_->data(),
+      this->nBasis_*this->nBasis_);
+    this->memManager_->free(this->kinetic_->data(),
+      this->nBasis_*this->nBasis_);
+    this->memManager_->free(this->potential_->data(),
+      this->nBasis_*this->nBasis_);
+    this->memManager_->free(this->schwartz_->data(),
+      this->nBasis_*this->nBasis_);
+    this->memManager_->free(this->ortho1_->data(),this->nBasis_*this->nBasis_);
+    this->memManager_->free(this->ortho2_->data(),this->nBasis_*this->nBasis_);
+  };
   
 
-  inline void communicate(Molecule &mol, BasisSet &basis, FileIO &fileio){
+  inline void communicate(Molecule &mol, BasisSet &basis, FileIO &fileio,
+      CQMemManager &memManager){
     this->molecule_   = &mol;
     this->basisSet_   = &basis;
     this->fileio_     = &fileio;
+    this->memManager_ = &memManager;
     this->DFbasisSet_ = NULL;
   }
 
@@ -329,6 +350,7 @@ public:
 
   // Getters
   inline int maxMultipole(){ return this->maxMultipole_;}
+  inline CQMemManager* memManager(){ return this->memManager_;};
 
   // Setters
   inline void setMaxMultipole(int i){ this->maxMultipole_ = i;}
@@ -359,7 +381,7 @@ public:
   void computeAOOneE(); // build one-electron AO integral matrices
   void finiteWidthPotential();
   void formP2Transformation();
-  void formPVP(std::vector<std::reference_wrapper<RealMatrix>>&);
+  void formPVP(std::vector<std::reference_wrapper<RealMap>>&);
 
 
   enum ORTHOTYPE {

@@ -357,7 +357,7 @@ void SingleSlater<dcomplex>::orthoFock(){
     this->fockOrthoMz_->imag() = 
       this->NBSqScratch_->imag() * (*this->aointegrals_->ortho1_);
 
-    std::vector<std::reference_wrapper<TMatrix>> toGather;
+    std::vector<std::reference_wrapper<TMap>> toGather;
     toGather.emplace_back(*this->fockOrthoScalar_);
     toGather.emplace_back(*this->fockOrthoMz_);
     if(this->nTCS_ == 1)
@@ -452,7 +452,7 @@ void SingleSlater<dcomplex>::orthoDen(){
     (*this->onePDMA_) = (*this->onePDMOrthoA_);
 
   } else {
-    std::vector<std::reference_wrapper<ComplexMatrix>> scattered;
+    std::vector<std::reference_wrapper<ComplexMap>> scattered;
     scattered.emplace_back(*this->onePDMOrthoScalar_);
     scattered.emplace_back(*this->onePDMOrthoMz_);
     if(this->nTCS_ == 1) {
@@ -487,7 +487,7 @@ void SingleSlater<dcomplex>::orthoDen(){
 
     (*this->onePDMMz_) = (*this->onePDMOrthoMz_);
 
-    std::vector<std::reference_wrapper<ComplexMatrix>> toGather;
+    std::vector<std::reference_wrapper<ComplexMap>> toGather;
     toGather.emplace_back(*this->onePDMScalar_);
     toGather.emplace_back(*this->onePDMMz_);
 

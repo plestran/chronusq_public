@@ -38,8 +38,8 @@ void SingleSlater<T>::formPT(){
 //  this->comReImOnePDM();
 //this->scatterDensity();
 
-  std::vector<std::reference_wrapper<TMatrix>> mats;
-  std::vector<std::reference_wrapper<TMatrix>> ax;
+  std::vector<std::reference_wrapper<TMap>> mats;
+  std::vector<std::reference_wrapper<TMap>> ax;
   std::vector<AOIntegrals::ERI_CONTRACTION_TYPE> contList;
   std::vector<double> scalingFactors;
   double exchFactor = -0.5;
@@ -92,7 +92,7 @@ void SingleSlater<T>::formPT(){
   if(this->nTCS_ == 1 && this->isClosedShell) {
     (*this->PTA_) *= 0.5; // This is effectively a gather operation
   } else {
-    std::vector<std::reference_wrapper<TMatrix>> toGather;
+    std::vector<std::reference_wrapper<TMap>> toGather;
     toGather.emplace_back(*this->PTScalar_);
     toGather.emplace_back(*this->PTMz_);
     if(this->nTCS_ == 1)
@@ -193,7 +193,7 @@ void SingleSlater<T>::formFock(){
       (*this->fockScalar_)      += (*this->PTScalar_);        
       (*this->fockMz_)          += (*this->PTMz_);
 
-      std::vector<std::reference_wrapper<TMatrix>> toGather;
+      std::vector<std::reference_wrapper<TMap>> toGather;
       toGather.emplace_back(*this->fockScalar_);
       toGather.emplace_back(*this->fockMz_);
       if(this->nTCS_ == 1)

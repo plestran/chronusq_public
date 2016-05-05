@@ -51,17 +51,18 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other) :
     this->isDFT  = other->isDFT;
     this->guess_ = other->guess();
 
-    auto NTCSxNBASIS = this->nBasis_*this->nTCS_;
+    auto NB = this->nBasis_*this->nTCS_;
+    auto NBSq = NB*NB;
 
     if(getRank() == 0) {
-      this->fockA_    = std::unique_ptr<ComplexMatrix>(
-        new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS)
+      this->fockA_    = std::unique_ptr<ComplexMap>(
+        new ComplexMap(this->memManager_->malloc<dcomplex>(NBSq),NB,NB)
       );
-      this->moA_      = std::unique_ptr<ComplexMatrix>(
-        new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS)
+      this->moA_      = std::unique_ptr<ComplexMap>(
+        new ComplexMap(this->memManager_->malloc<dcomplex>(NBSq),NB,NB)
       );
-      this->PTA_      = std::unique_ptr<ComplexMatrix>(
-        new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS)
+      this->PTA_      = std::unique_ptr<ComplexMap>(
+        new ComplexMap(this->memManager_->malloc<dcomplex>(NBSq),NB,NB)
       );
     }
 
@@ -72,14 +73,14 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other) :
     }
     if(this->Ref_ != isClosedShell && this->Ref_ != TCS ){
       if(getRank() == 0) {
-        this->fockB_  = std::unique_ptr<ComplexMatrix>(
-          new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS)
+        this->fockB_    = std::unique_ptr<ComplexMap>(
+          new ComplexMap(this->memManager_->malloc<dcomplex>(NBSq),NB,NB)
         );
-        this->moB_    = std::unique_ptr<ComplexMatrix>(
-          new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS)
+        this->moB_      = std::unique_ptr<ComplexMap>(
+          new ComplexMap(this->memManager_->malloc<dcomplex>(NBSq),NB,NB)
         );
-        this->PTB_    = std::unique_ptr<ComplexMatrix>(
-          new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS)
+        this->PTB_      = std::unique_ptr<ComplexMap>(
+          new ComplexMap(this->memManager_->malloc<dcomplex>(NBSq),NB,NB)
         );
       }
 

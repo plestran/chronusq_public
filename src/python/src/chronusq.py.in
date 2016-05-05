@@ -73,6 +73,7 @@ def runCQ(ifname,ofname):
   starttime= time.strftime("%c")
   
   
+  memManager = chronusQ.CQMemManager()
   mol        = chronusQ.Molecule()
   basisSet   = chronusQ.BasisSet()
   DFbasisSet = chronusQ.BasisSet()
@@ -92,6 +93,7 @@ def runCQ(ifname,ofname):
   out        = chronusQ.FileIO(ifname,ofname)
   
   workers = {
+    "CQMemManager"        :memManager,
     "CQMolecule"          :mol,
     "CQBasisSet"          :basisSet,
     "CQDFBasisSet"        :DFbasisSet,
@@ -107,6 +109,8 @@ def runCQ(ifname,ofname):
     "CQMOIntegralsComplex" :moints_complex,
     "CQFileIO"            :out
   }
+
+  memManager.setTotalMem(int(256e6))
   
   
   if chronusQ.getRank() == 0:

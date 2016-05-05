@@ -25,10 +25,18 @@ void AOIntegrals::newTwoEContractDirect(
   if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(); 
 
 
+  typedef Eigen::Matrix<typename Op::Scalar,Dynamic,Dynamic> TMatrix;
+  typedef Eigen::Map<TMatrix> TMap;
   // Allocate space to hold thread specific contribution to
-  std::vector<std::vector<Op>> G(nMat,
-      std::vector<Op>(nthreads,Op::Zero(this->nBasis_,this->nBasis_))
-  );
+  std::vector<std::vector<TMap>> G;
+  for(auto iMat = 0; iMat < nMat; iMat++){
+    G.emplace_back();
+  for(auto ithread = 0; ithread < nthreads; ithread++){
+    G[iMat].emplace_back(
+        this->memManager_->malloc<typename Op::Scalar>(this->nBasis_*this->nBasis_),
+        this->nBasis_,this->nBasis_);
+  };
+  };
 
   // each thread gets its own engine
   std::vector<libint2::Engine> engines(nthreads);
@@ -154,8 +162,10 @@ void AOIntegrals::newTwoEContractDirect(
 
   // Reduce
   for(auto iMat = 0; iMat < nMat    ; iMat++)
-  for(auto iTh  = 0; iTh  < nthreads; iTh++ )
+  for(auto iTh  = 0; iTh  < nthreads; iTh++ ){
     AX[iMat].get() += 0.5 * scalingFactors[iMat] * G[iMat][iTh];
+    this->memManager_->free(G[iMat][iTh].data(),G[iMat][iTh].size());
+  }
 };
 
 

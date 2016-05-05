@@ -458,9 +458,13 @@ void AOIntegrals::printOneE(){
 }
 
 void AOIntegrals::alloc(){
+  this->memManager_->setBlockSize(this->nBasis_*this->nBasis_*sizeof(double)); 
+  this->memManager_->allocMem();
+
   this->checkMeta();
   this->allocOp();
   this->allocOrth();
+  this->memManager_->printSummary(cout);
   if(getRank() == 0) {
     if(this->maxMultipole_ >= 1) this->allocMultipole();
  
@@ -522,17 +526,26 @@ void AOIntegrals::allocOp(){
     try {
  
       // One Electron Integral
-      this->oneE_      = std::unique_ptr<RealMatrix>(
-          new RealMatrix(this->nBasis_,this->nBasis_)); 
+      auto NBSq = this->nBasis_ * this->nBasis_;
+      this->oneE_      = 
+        std::unique_ptr<RealMap>(
+            new RealMap(this->memManager_->malloc<double>(NBSq),this->nBasis_,this->nBasis_)
+        ); 
       // Overlap
-      this->overlap_   = std::unique_ptr<RealMatrix>(
-          new RealMatrix(this->nBasis_,this->nBasis_)); 
+      this->overlap_   = 
+        std::unique_ptr<RealMap>(
+            new RealMap(this->memManager_->malloc<double>(NBSq),this->nBasis_,this->nBasis_)
+        ); 
       // Kinetic
-      this->kinetic_   = std::unique_ptr<RealMatrix>(
-          new RealMatrix(this->nBasis_,this->nBasis_)); 
+      this->kinetic_   = 
+        std::unique_ptr<RealMap>(
+            new RealMap(this->memManager_->malloc<double>(NBSq),this->nBasis_,this->nBasis_)
+        ); 
       // Potential
-      this->potential_ = std::unique_ptr<RealMatrix>(
-          new RealMatrix(this->nBasis_,this->nBasis_)); 
+      this->potential_ = 
+        std::unique_ptr<RealMap>(
+            new RealMap(this->memManager_->malloc<double>(NBSq),this->nBasis_,this->nBasis_)
+        ); 
  
     } catch(...) {
       CErr(std::current_exception(),"One Electron Integral Tensor Allocation");
@@ -541,8 +554,11 @@ void AOIntegrals::allocOp(){
 
 #ifdef USE_LIBINT
   try { 
-    this->schwartz_ = std::unique_ptr<RealMatrix>(
-      new RealMatrix(this->basisSet_->nShell(),this->basisSet_->nShell())); 
+    this->schwartz_ = std::unique_ptr<RealMap>(
+      new RealMap(this->memManager_->malloc<double>(
+          this->basisSet_->nShell()*this->basisSet_->nShell()),
+          this->basisSet_->nShell(),this->basisSet_->nShell())
+      ); 
   } catch(...) {
     CErr(std::current_exception(),"Schwartx Bound Tensor Allocation");
   } 
@@ -569,10 +585,13 @@ void AOIntegrals::allocOp(){
 }
 
 void AOIntegrals::allocOrth() {
-  this->ortho1_ = std::unique_ptr<RealMatrix>(
-      new RealMatrix(this->nBasis_,this->nBasis_));
-  this->ortho2_ = std::unique_ptr<RealMatrix>(
-      new RealMatrix(this->nBasis_,this->nBasis_));
+  auto NBSq = this->nBasis_ * this->nBasis_;
+  this->ortho1_ = std::unique_ptr<RealMap>(
+      new RealMap(this->memManager_->malloc<double>(NBSq),
+        this->nBasis_,this->nBasis_));
+  this->ortho2_ = std::unique_ptr<RealMap>(
+      new RealMap(this->memManager_->malloc<double>(NBSq),
+        this->nBasis_,this->nBasis_));
 };
 
 void AOIntegrals::allocMultipole(){

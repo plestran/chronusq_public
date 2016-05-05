@@ -243,8 +243,10 @@ void NumericalDifferentiation<T>::cartesianDiff(){
     basis_m1.renormShells();
 
 
-    aoints_p1.communicate(mol_p1,basis_p1,fileioTmp);
-    aoints_m1.communicate(mol_m1,basis_m1,fileioTmp);
+    aoints_p1.communicate(mol_p1,basis_p1,fileioTmp,
+      *this->singleSlater_undisplaced_->memManager());
+    aoints_m1.communicate(mol_m1,basis_m1,fileioTmp,
+      *this->singleSlater_undisplaced_->memManager());
 
     ss_p1.communicate(mol_p1,basis_p1,aoints_p1,fileioTmp,
       *this->singleSlater_undisplaced_->controls());

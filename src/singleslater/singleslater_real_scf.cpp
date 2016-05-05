@@ -322,7 +322,7 @@ void SingleSlater<double>::orthoFock(){
     (*this->fockOrthoMz_) = 
       (*this->NBSqScratch_) * (*this->aointegrals_->ortho1_);
 
-    std::vector<std::reference_wrapper<TMatrix>> toGather;
+    std::vector<std::reference_wrapper<TMap>> toGather;
     toGather.emplace_back(*this->fockOrthoScalar_);
     toGather.emplace_back(*this->fockOrthoMz_);
     if(this->nTCS_ == 1)
@@ -397,7 +397,7 @@ void SingleSlater<double>::orthoDen(){
     (*this->onePDMA_) = (*this->onePDMOrthoA_);
 
   } else {
-    std::vector<std::reference_wrapper<RealMatrix>> scattered;
+    std::vector<std::reference_wrapper<RealMap>> scattered;
     scattered.emplace_back(*this->onePDMOrthoScalar_);
     scattered.emplace_back(*this->onePDMOrthoMz_);
     if(this->nTCS_ == 1) {
@@ -420,7 +420,7 @@ void SingleSlater<double>::orthoDen(){
       (*this->NBSqScratch_) * (*this->aointegrals_->ortho1_);
     (*this->onePDMMz_) = (*this->onePDMOrthoMz_);
 
-    std::vector<std::reference_wrapper<RealMatrix>> toGather;
+    std::vector<std::reference_wrapper<RealMap>> toGather;
     toGather.emplace_back(*this->onePDMScalar_);
     toGather.emplace_back(*this->onePDMMz_);
 

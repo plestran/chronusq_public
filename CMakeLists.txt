@@ -58,7 +58,7 @@ endif()
 
 if(NOT CMAKE_CXX_COMPILER_ID MATCHES "PGI")
   # Append flags for compilation
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated -Wno-deprecated-declarations -Wno-narrowing -Wno-strict-aliasing")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated -Wno-deprecated-declarations -Wno-narrowing -Wno-strict-aliasing -Wno-unused-variable")
   
   if(NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-local-typedefs")
@@ -76,7 +76,7 @@ ExternalProject_Add(boost
   URL "${PROJECT_SOURCE_DIR}/deps/src/boost_1_59_0.tar.gz"
   CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/deps/boost/src/boost/bootstrap.sh
   BUILD_COMMAND ${PROJECT_BINARY_DIR}/deps/boost/src/boost/b2
-  --prefix=${PROJECT_BINARY_DIR}/deps --with-python --ignore-site-config cxxflags=${CMAKE_CXX_FLAGS} install
+  --prefix=${PROJECT_BINARY_DIR}/deps --with-python --with-system --ignore-site-config cxxflags=${CMAKE_CXX_FLAGS} install
   BUILD_IN_SOURCE 1
   INSTALL_COMMAND echo "Boost Build Sucess!"
 )
@@ -92,9 +92,9 @@ else()
 endif()
 
 if(APPLE)
-  set(Boost_LIBRARIES ${PROJECT_BINARY_DIR}/deps/lib/libboost_python.dylib)
+  set(Boost_LIBRARIES ${PROJECT_BINARY_DIR}/deps/lib/libboost_python.dylib ${PROJECT_BINARY_DIR}/deps/lib/libboost_system.dylib)
 else()
-  set(Boost_LIBRARIES ${PROJECT_BINARY_DIR}/deps/lib/libboost_python.so)
+  set(Boost_LIBRARIES ${PROJECT_BINARY_DIR}/deps/lib/libboost_python.so ${PROJECT_BINARY_DIR}/deps/lib/libboost_system.so)
 endif()
 
 ExternalProject_Add(btas
