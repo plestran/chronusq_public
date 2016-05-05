@@ -28,7 +28,6 @@
 #include <global.h>
 #include <cerr.h>
 #include <molecule.h>
-#include <controls.h>
 #include <aointegrals.h>
 #include <grid.h>
 #include <quantum.h>
@@ -138,7 +137,6 @@ class SingleSlater : public Quantum<T> {
   BasisSet *    basisset_;         ///< Basis Set
   Molecule *    molecule_;         ///< Molecular specificiations
   FileIO *      fileio_;           ///< Access to output file
-  Controls *    controls_;         ///< General ChronusQ flow parameters
   AOIntegrals * aointegrals_;      ///< Molecular Integrals over GTOs (AO basis)
   TwoDGrid    * twodgrid_   ;      ///< 3D grid (1Rad times 1 Ang) 
 
@@ -241,9 +239,6 @@ class SingleSlater : public Quantum<T> {
            this->fileio_->out);
     if(this->molecule_ == NULL) 
       CErr("Fatal: Must initialize SingleSlater with Molecule Object",
-           this->fileio_->out);
-    if(this->controls_ == NULL) 
-      CErr("Fatal: Must initialize SingleSlater with Controls Object",
            this->fileio_->out);
     if(this->aointegrals_== NULL)
       CErr("Fatal: Must initialize SingleSlater with AOIntegrals Object",
@@ -395,7 +390,6 @@ public:
     this->basisset_    = NULL;               
     this->molecule_    = NULL;               
     this->fileio_      = NULL;                 
-    this->controls_    = NULL;               
     this->aointegrals_ = NULL;            
 
     // Initialize Booleans
@@ -503,7 +497,6 @@ public:
     this->basisset_    = other->basisset_;    
     this->molecule_    = other->molecule_;
     this->fileio_      = other->fileio_;
-    this->controls_    = other->controls_;
     this->aointegrals_ = other->aointegrals_;
     
   };
@@ -512,16 +505,15 @@ public:
   SingleSlater(U *);
 
   // pseudo-constructor
-  void iniSingleSlater(Molecule *,BasisSet *,AOIntegrals *,FileIO *,Controls *);
+  void iniSingleSlater(Molecule *,BasisSet *,AOIntegrals *,FileIO *);
 
   // Link up to all of the other worker classes
   inline void communicate(Molecule &mol, BasisSet&basis, AOIntegrals &aoints, 
-    FileIO &fileio, Controls &controls){
+    FileIO &fileio){
 
     this->molecule_    = &mol;
     this->basisset_    = &basis;
     this->fileio_      = &fileio;
-    this->controls_    = &controls;
     this->aointegrals_ = &aoints;
   }
 
@@ -621,7 +613,6 @@ public:
   inline BasisSet     * basisset()       { return this->basisset_;       };
   inline Molecule     * molecule()       { return this->molecule_;       };
   inline FileIO       * fileio()         { return this->fileio_;         };
-  inline Controls     * controls()       { return this->controls_;       };
   inline AOIntegrals  * aointegrals()    { return this->aointegrals_;    };
   inline TwoDGrid     * twodgrid()       { return this->twodgrid_;       };
   inline CQMemManager * memManager()     { return this->memManager_;     };
@@ -753,8 +744,7 @@ public:
   }
 
   // Python API
-  void Wrapper_iniSingleSlater(Molecule&,BasisSet&,AOIntegrals&,FileIO&,
-    Controls&); 
+  void Wrapper_iniSingleSlater(Molecule&,BasisSet&,AOIntegrals&,FileIO&); 
   boost::python::list Wrapper_dipole();
   boost::python::list Wrapper_quadrupole();
   boost::python::list Wrapper_octupole();

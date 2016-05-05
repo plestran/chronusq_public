@@ -95,7 +95,6 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other) :
     this->basisset_    = other->basisset();    
     this->molecule_    = other->molecule();
     this->fileio_      = other->fileio();
-    this->controls_    = other->controls();
     this->aointegrals_ = other->aointegrals();
 }
 

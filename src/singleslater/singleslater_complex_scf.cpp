@@ -24,7 +24,6 @@
  *  
  */
 #include <singleslater.h>
-using ChronusQ::Controls;
 using ChronusQ::FileIO;
 using ChronusQ::SingleSlater;
 

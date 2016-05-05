@@ -16,7 +16,6 @@ endif()
 
 if(APPLE)
 target_link_libraries(singleslater LINK_PUBLIC basisset)
-target_link_libraries(singleslater LINK_PUBLIC controls)
 target_link_libraries(singleslater LINK_PUBLIC molecule)
 target_link_libraries(singleslater LINK_PUBLIC grid)
 target_link_libraries(singleslater LINK_PUBLIC quantum)

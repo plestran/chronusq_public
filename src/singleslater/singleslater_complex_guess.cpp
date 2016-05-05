@@ -29,7 +29,6 @@
 #include <workers.h>
 #ifdef USE_LIBINT
 using ChronusQ::BasisSet;
-using ChronusQ::Controls;
 using ChronusQ::Molecule;
 using ChronusQ::HashNAOs;
 namespace ChronusQ {
@@ -171,7 +170,6 @@ void SingleSlater<dcomplex>::SADGuess() {
       // Local objects to be constructed and destructed at every loop
       AOIntegrals aointegralsAtom;
       SingleSlater<double> hartreeFockAtom;
-      Controls controlAtom;
       BasisSet basisSetAtom;
       BasisSet dfBasisSetAtom;
       Molecule uniqueAtom(uniqueElement[iUn],this->fileio_->out);
@@ -186,8 +184,6 @@ void SingleSlater<dcomplex>::SADGuess() {
       basisSetAtom.makeMaps(&uniqueAtom);
       basisSetAtom.renormShells(); // Libint throws a hissy fit without this
  
-      controlAtom.iniControls();
-      controlAtom.doCUHF = true; // Can set to false too if UHF guess is desired
  
       // Initialize the local integral and SS classes
       aointegralsAtom.isPrimary = false;
@@ -202,7 +198,7 @@ void SingleSlater<dcomplex>::SADGuess() {
 
       // Replaces iniSingleSlater
       hartreeFockAtom.communicate(uniqueAtom,basisSetAtom,aointegralsAtom,
-        *this->fileio_,controlAtom);
+        *this->fileio_);
       hartreeFockAtom.initMeta();
       hartreeFockAtom.setField(this->elecField_);
       hartreeFockAtom.isClosedShell = (hartreeFockAtom.multip() == 1); 

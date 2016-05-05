@@ -28,33 +28,10 @@
  **********************/
 template<typename T>
 void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset, 
-                                   AOIntegrals * aointegrals, FileIO * fileio, 
-                                   Controls * controls) {
+                                   AOIntegrals * aointegrals, FileIO * fileio) {
 
-  this->communicate(*molecule,*basisset,*aointegrals,*fileio,*controls);
+  this->communicate(*molecule,*basisset,*aointegrals,*fileio);
   this->initMeta();
-
-  this->elecField_  = controls->field_;
-  this->printLevel_ = controls->printLevel;
-  this->guess_      = controls->guess;
-
-  this->isClosedShell = (this->multip_ == 1);
-  this->isDFT         = controls->DFT;
-  this->ExchKernel_   = SLATER;
-  this->CorrKernel_   = VWN5;
-  if(controls->HF){
-    if(this->isClosedShell && !controls->doCUHF
-       && !controls->doTCS)                        this->Ref_ = RHF ; // RHF
-    else if(!controls->doCUHF && !controls->doTCS) this->Ref_ = UHF ; // UHF
-    else if(controls->doCUHF)                      this->Ref_ = CUHF; // CUHF
-    else if(controls->doTCS)                       this->Ref_ = TCS ; // TCS
-  } else if(this->isDFT) {
-    if(this->isClosedShell && !controls->doCUHF
-       && !controls->doTCS)                        this->Ref_ = RKS ; // RKS
-    else if(!controls->doCUHF && !controls->doTCS) this->Ref_ = UKS ; // UKs
-    else if(controls->doCUHF)                      this->Ref_ = CUKS; // CUKS
-    else if(controls->doTCS)                       this->Ref_ = GKS ; // GKS
-  }
 
   this->genMethString();
 
@@ -63,7 +40,6 @@ void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset,
 
   // This is the only way via the C++ interface to set this flag (needed
   // for allocDFT)
-  this->isDFT = controls->DFT;
   this->alloc();
 
 

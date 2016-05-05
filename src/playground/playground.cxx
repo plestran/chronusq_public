@@ -218,7 +218,6 @@ int main(int argc, char **argv){
 
   Molecule molecule;
   BasisSet basis;
-  Controls controls;
   AOIntegrals aoints;
   MOIntegrals<double> moints;
   SingleSlater<double> singleSlater;
@@ -228,7 +227,6 @@ int main(int argc, char **argv){
 
   memManager.setTotalMem(256e6);
   initCQ(argc,argv);
-  controls.iniControls();
   fileio.iniH5Files();
   fileio.iniStdGroups();
   CQSetNumThreads(1);
@@ -254,8 +252,8 @@ int main(int argc, char **argv){
 
 
   aoints.communicate(molecule,basis,fileio,memManager);
-  singleSlater.communicate(molecule,basis,aoints,fileio,controls);
-  moints.communicate(molecule,basis,fileio,controls,aoints,singleSlater);
+  singleSlater.communicate(molecule,basis,aoints,fileio);
+  moints.communicate(molecule,basis,fileio,aoints,singleSlater);
 
   aoints.initMeta();
   aoints.integralAlgorithm = AOIntegrals::INCORE;
