@@ -240,6 +240,8 @@ void SingleSlater<double>::SADGuess() {
 #ifdef CQ_ENABLE_MPI
     MPI_Barrier(MPI_COMM_WORLD);
 #endif
+    prettyPrint(cout,*this->onePDMA_,"PA");
+    prettyPrint(cout,*this->onePDMB_,"PB");
   }
 
   // Set flags to use in the rest of code
