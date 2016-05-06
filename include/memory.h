@@ -33,17 +33,17 @@ class CQMemManager : public boost::simple_segregated_storage<std::size_t> {
       this->V_ = std::vector<char>(N_);
       this->add_block(&this->V_.front(),this->V_.size(),this->NBlockSize_);
       this->isAllocated = true;
-      cout << "Creating CQ Memory Partition of " << N_ << " Bytes " <<
-       " startring at "; 
-      cout << (int*) &this->V_[0] << endl;
+//    cout << "Creating CQ Memory Partition of " << N_ << " Bytes " <<
+//     " startring at "; 
+//    cout << (int*) &this->V_[0] << endl;
     } 
 
     template<typename T>
     T * malloc(std::size_t n){
-      cout << "Allocating " << n << " works of " << typeid(T).name()
-        << " data, which is ";
+//    cout << "Allocating " << n << " works of " << typeid(T).name()
+//      << " data, which is ";
       std::size_t nBlocks = ( (n-1) * sizeof(T) ) / this->NBlockSize_ + 1;
-      cout << nBlocks << " blocks of data" << endl;
+//    cout << nBlocks << " blocks of data" << endl;
       this->NAlloc_ += nBlocks * this->NBlockSize_;
 
       if(this->NAlloc_ > this->N_) {
@@ -54,8 +54,8 @@ class CQMemManager : public boost::simple_segregated_storage<std::size_t> {
       void * ptr = 
           boost::simple_segregated_storage<std::size_t>::malloc_n(
             nBlocks,this->NBlockSize_);
-      cout << ptr << endl;
-      cout << static_cast<T*>(ptr) << endl;
+//    cout << ptr << endl;
+//    cout << static_cast<T*>(ptr) << endl;
 
       return static_cast<T*>(ptr);
 //    return static_cast<T*>(
@@ -66,12 +66,13 @@ class CQMemManager : public boost::simple_segregated_storage<std::size_t> {
 
     template<typename T>
     void free( T * ptr, std::size_t n){
-      cout << "Freeing " << n << " works of " << typeid(T).name()
-        << " data, which is ";
+//    cout << "Freeing " << n << " works of " << typeid(T).name()
+//      << " data, which is ";
       std::size_t nBlocks = ( (n-1) * sizeof(T) ) / this->NBlockSize_ + 1;
-      cout << nBlocks << " blocks of data" << endl;
+//      cout << nBlocks << " blocks of data" << endl;
       this->NAlloc_ -= nBlocks * this->NBlockSize_;
-      boost::simple_segregated_storage<std::size_t>::free_n(ptr,nBlocks,this->NBlockSize_);
+      boost::simple_segregated_storage<std::size_t>::free_n(
+          ptr,nBlocks,this->NBlockSize_);
     }
 
 

@@ -336,8 +336,6 @@ void SingleSlater<dcomplex>::orthoFock(){
       this->NBSqScratch_->imag() * (*this->aointegrals_->ortho1_);
 
 
-    prettyPrintComplex(cout,*this->fockA_,"FA before transformation Complex");
-    prettyPrintComplex(cout,*this->fockOrthoA_,"FA after transformation Complex");
   } else {
     // F(Scalar)' = X^\dagger * F(Scalar) * X
     this->NBSqScratch_->real() = 
@@ -458,7 +456,6 @@ void SingleSlater<dcomplex>::orthoDen(){
       this->NBSqScratch_->imag() * (*this->aointegrals_->ortho1_);
 
     (*this->onePDMA_) = (*this->onePDMOrthoA_);
-    prettyPrintComplex(cout,*this->onePDMA_,"PA Complex");
 
   } else {
     std::vector<std::reference_wrapper<ComplexMap>> scattered;
