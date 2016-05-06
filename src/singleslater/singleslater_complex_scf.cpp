@@ -310,12 +310,12 @@ void SingleSlater<dcomplex>::diagFock2(){
 
   zheev_(&JOBZ,&UPLO,&NTCSxNBASIS,this->fockOrthoA_->data(),&NTCSxNBASIS,
       this->epsA_->data(),this->WORK_,&this->LWORK_,this->RWORK_,&INFO);
-  if(INFO != 0) CErr("DSYEV Failed Fock Alpha",this->fileio_->out);
+  if(INFO != 0) CErr("ZHEEV Failed Fock Alpha",this->fileio_->out);
 
   if(this->nTCS_ == 1 && !this->isClosedShell){
     zheev_(&JOBZ,&UPLO,&NTCSxNBASIS,this->fockOrthoB_->data(),&NTCSxNBASIS,
         this->epsB_->data(),this->WORK_,&this->LWORK_,this->RWORK_,&INFO);
-    if(INFO != 0) CErr("DSYEV Failed Fock Beta",this->fileio_->out);
+    if(INFO != 0) CErr("ZHEEV Failed Fock Beta",this->fileio_->out);
   }
 };
 
@@ -361,7 +361,8 @@ void SingleSlater<dcomplex>::orthoFock(){
     toGather.emplace_back(*this->fockOrthoMz_);
     if(this->nTCS_ == 1)
       // {F(Scalar),F(Mz)} -> {F(A), F(B)}
-      Quantum<dcomplex>::spinGather(*this->fockOrthoA_,*this->fockOrthoB_,toGather);
+      Quantum<dcomplex>::spinGather(*this->fockOrthoA_,*this->fockOrthoB_,
+          toGather);
     else {
       // F(Mx)' = X^\dagger * F(Mx) * X
       this->NBSqScratch_->real() = 
@@ -385,8 +386,8 @@ void SingleSlater<dcomplex>::orthoFock(){
       this->fockOrthoMy_->imag() = 
         this->NBSqScratch_->imag() * (*this->aointegrals_->ortho1_);
 
-      toGather.emplace_back(*this->fockOrthoMx_);
       toGather.emplace_back(*this->fockOrthoMy_);
+      toGather.emplace_back(*this->fockOrthoMx_);
 
       // {F(Scalar), F(Mz), F(Mx). F(My)} -> F
       Quantum<dcomplex>::spinGather(*this->fockOrthoA_,toGather);
@@ -433,11 +434,14 @@ void SingleSlater<dcomplex>::fockCUHF() {
 
   (*this->fockA_) += Lambda;
   (*this->fockB_) -= Lambda;
+
+  (*this->fockScalar_) = (*this->fockA_) + (*this->fockB_);
+  (*this->fockMz_)     = (*this->fockA_) - (*this->fockB_);
 };
 
 template<>
 void SingleSlater<dcomplex>::orthoDen(){
-  if(this->nTCS_ == 1 && !this->isClosedShell) {
+  if(this->nTCS_ == 1 && this->isClosedShell) {
     this->NBSqScratch_->real() = 
       (*this->aointegrals_->ortho1_) * this->onePDMA_->real();
     this->NBSqScratch_->imag() = 

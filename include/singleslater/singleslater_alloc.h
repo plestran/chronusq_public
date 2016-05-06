@@ -88,6 +88,11 @@ void SingleSlater<T>::allocOp(){
   auto NBSq = this->nBasis_*this->nBasis_;
   auto NBTSq = this->nTCS_ * this->nTCS_ * NBSq;
 
+//cout << "Testing Allocator" << endl;
+//this->memManager_->template malloc<T>(NBSq);
+//this->memManager_->template malloc<T>(NBSq);
+//this->memManager_->template malloc<T>(NBSq);
+
   this->NBSqScratch_ = 
     std::unique_ptr<TMap>(new TMap(
           this->memManager_->template malloc<T>(NBSq),
@@ -96,6 +101,7 @@ void SingleSlater<T>::allocOp(){
     std::unique_ptr<TMap>(
         new TMap(
           this->memManager_->template malloc<T>(NBTSq),
+//          new T[NBTSq],
           this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
   this->onePDMOrthoA_ = 
     std::unique_ptr<TMap>(
@@ -104,7 +110,16 @@ void SingleSlater<T>::allocOp(){
           this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
 
   this->NBSqScratch_->setZero();
+  this->memManager_->printSummary(cout);
+//cout << this->NBSqScratch_->data() << endl;
+//cout << this->fockOrthoA_->data() << endl;
+//cout << this->fockOrthoA_->size() << endl;
+//cout << NBTSq << endl;
+//prettyPrint(cout,*this->NBSqScratch_,"TEST");
+//prettyPrint(cout,*this->fockOrthoA_,"TEST");
+//cout << "HERE" << endl;
   this->fockOrthoA_->setZero();
+//cout << "HERE" << endl;
   this->onePDMOrthoA_->setZero();
 
   if(this->nTCS_ == 2 || !this->isClosedShell){
