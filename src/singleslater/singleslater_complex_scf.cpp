@@ -311,11 +311,13 @@ void SingleSlater<dcomplex>::diagFock2(){
   zheev_(&JOBZ,&UPLO,&NTCSxNBASIS,this->fockOrthoA_->data(),&NTCSxNBASIS,
       this->epsA_->data(),this->WORK_,&this->LWORK_,this->RWORK_,&INFO);
   if(INFO != 0) CErr("ZHEEV Failed Fock Alpha",this->fileio_->out);
+  (*this->moA_) = (*this->fockOrthoA_);
 
   if(this->nTCS_ == 1 && !this->isClosedShell){
     zheev_(&JOBZ,&UPLO,&NTCSxNBASIS,this->fockOrthoB_->data(),&NTCSxNBASIS,
         this->epsB_->data(),this->WORK_,&this->LWORK_,this->RWORK_,&INFO);
     if(INFO != 0) CErr("ZHEEV Failed Fock Beta",this->fileio_->out);
+    (*this->moB_) = (*this->fockOrthoB_);
   }
 };
 
@@ -333,6 +335,9 @@ void SingleSlater<dcomplex>::orthoFock(){
     this->fockOrthoA_->imag() = 
       this->NBSqScratch_->imag() * (*this->aointegrals_->ortho1_);
 
+
+    prettyPrintComplex(cout,*this->fockA_,"FA before transformation Complex");
+    prettyPrintComplex(cout,*this->fockOrthoA_,"FA after transformation Complex");
   } else {
     // F(Scalar)' = X^\dagger * F(Scalar) * X
     this->NBSqScratch_->real() = 
@@ -453,6 +458,7 @@ void SingleSlater<dcomplex>::orthoDen(){
       this->NBSqScratch_->imag() * (*this->aointegrals_->ortho1_);
 
     (*this->onePDMA_) = (*this->onePDMOrthoA_);
+    prettyPrintComplex(cout,*this->onePDMA_,"PA Complex");
 
   } else {
     std::vector<std::reference_wrapper<ComplexMap>> scattered;
