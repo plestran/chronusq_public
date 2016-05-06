@@ -193,6 +193,14 @@ void SingleSlater<T>::formFock(){
       (*this->fockScalar_)      += (*this->PTScalar_);        
       (*this->fockMz_)          += (*this->PTMz_);
 
+      // FIXME: Needs to ge generalized for the 2C case
+      if(this->nTCS_ == 1 && this->isDFT){
+        (*this->fockScalar_) += (*this->vXA_) + (*this->vCorA_);
+        (*this->fockScalar_) += (*this->vXB_) + (*this->vCorB_);
+        (*this->fockMz_)     += (*this->vXA_) + (*this->vCorA_);
+        (*this->fockMz_)     -= (*this->vXB_) + (*this->vCorB_);
+      }
+
       std::vector<std::reference_wrapper<TMap>> toGather;
       toGather.emplace_back(*this->fockScalar_);
       toGather.emplace_back(*this->fockMz_);
@@ -208,13 +216,6 @@ void SingleSlater<T>::formFock(){
         Quantum<T>::spinGather(*this->fockA_,toGather);
       };
 
-      // Hack for UHF DFT for now FIXME
-      if(this->nTCS_ == 1 && this->isDFT){
-        (*this->fockA_) += (*this->vXA_);
-        (*this->fockA_) += (*this->vCorA_);
-        (*this->fockB_) += (*this->vXB_);
-        (*this->fockB_) += (*this->vCorB_);
-      }
 
     }
 
