@@ -384,6 +384,9 @@ void SingleSlater<double>::fockCUHF() {
 
   (*this->fockA_) += Lambda;
   (*this->fockB_) -= Lambda;
+
+  (*this->fockScalar_) = (*this->fockA_) + (*this->fockB_);
+  (*this->fockMz_)     = (*this->fockA_) - (*this->fockB_);
 };
 
 template<>
