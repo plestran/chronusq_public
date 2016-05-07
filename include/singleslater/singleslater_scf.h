@@ -239,6 +239,7 @@ void SingleSlater<T>::initSCFMem2(){
   this->LRWORK_    = 3 * std::max(NTCSxNBASIS,this->nDIISExtrap_);
   this->lenCoeff_  = this->nDIISExtrap_;
 
+  /*
 //  this->FpAlphaMem_    = new T[NSQ];
   this->POldAlphaMem_  = new T[NSQ];
   this->ErrorAlphaMem_ = new T[NSQ*(this->nDIISExtrap_ -1)];
@@ -250,6 +251,7 @@ void SingleSlater<T>::initSCFMem2(){
     this->FBDIIS_       = new T[NSQ*NTCSxNBASIS*(this->nDIISExtrap_ -1)];
   }
 
+
   if(this->Ref_ == CUHF) {
     this->delFMem_   = new T[NSQ];
     this->lambdaMem_ = new T[NSQ];
@@ -260,7 +262,32 @@ void SingleSlater<T>::initSCFMem2(){
   this->WORK_  = new T[this->LWORK_];
   if(typeid(T).hash_code() == typeid(dcomplex).hash_code())
     this->RWORK_ = new double[this->LRWORK_];
+  */
   
+  this->POldAlphaMem_  = this->memManager_->template malloc<T>(NSQ);
+  this->ErrorAlphaMem_ = 
+    this->memManager_->template malloc<T>(NSQ*(this->nDIISExtrap_ -1));
+  this->FADIIS_        = 
+    this->memManager_->template malloc<T>(NSQ*(this->nDIISExtrap_ -1));
+  if(this->nTCS_ == 1 && !this->isClosedShell) {
+    this->POldBetaMem_  = this->memManager_->template malloc<T>(NSQ);
+    this->ErrorBetaMem_ = 
+      this->memManager_->template malloc<T>(NSQ*(this->nDIISExtrap_ -1));
+    this->FBDIIS_       = 
+      this->memManager_->template malloc<T>(NSQ*(this->nDIISExtrap_ -1));
+  }
+
+  if(this->Ref_ == CUHF) {
+    this->delFMem_   = this->memManager_->template malloc<T>(NSQ);
+    this->lambdaMem_ = this->memManager_->template malloc<T>(NSQ);
+    this->PNOMem_    = this->memManager_->template malloc<T>(NSQ);
+    this->occNumMem_ = this->memManager_->template malloc<double>(NTCSxNBASIS);
+  }
+
+  this->WORK_  = this->memManager_->template malloc<T>(this->LWORK_);
+  if(typeid(T).hash_code() == typeid(dcomplex).hash_code())
+    this->RWORK_ = this->memManager_->template malloc<double>(this->LRWORK_);
+  this->memManager_->printSummary(cout);
   
 }; //initSCFMem
 
@@ -330,6 +357,7 @@ void SingleSlater<T>::SCF2(){
 
 template<typename T>
 void SingleSlater<T>::cleanupSCFMem2(){
+  /*
 //  delete[] this->FpAlphaMem_    
   delete[] this->POldAlphaMem_;  
   delete[] this->ErrorAlphaMem_; 
@@ -351,6 +379,30 @@ void SingleSlater<T>::cleanupSCFMem2(){
   delete[] this->WORK_;  
   if(typeid(T).hash_code() == typeid(dcomplex).hash_code()) 
     delete[] this->RWORK_; 
+    */
+                                  
+  auto NTCSxNBASIS = this->nTCS_ * this->nBasis_;
+  auto NSQ = NTCSxNBASIS  * NTCSxNBASIS;
+
+  this->memManager_->free(this->POldAlphaMem_,NSQ);  
+  this->memManager_->free(this->ErrorAlphaMem_,(this->nDIISExtrap_-1)*NSQ); 
+  this->memManager_->free(this->FADIIS_,(this->nDIISExtrap_-1)*NSQ);        
+  if(this->nTCS_ == 2 && !this->isClosedShell) { 
+    this->memManager_->free(this->POldBetaMem_,NSQ);  
+    this->memManager_->free(this->ErrorBetaMem_,(this->nDIISExtrap_-1)*NSQ); 
+    this->memManager_->free(this->FBDIIS_,(this->nDIISExtrap_-1)*NSQ);       
+  }
+
+  if(this->Ref_ == CUHF){ 
+    this->memManager_->free(this->delFMem_,NSQ);   
+    this->memManager_->free(this->lambdaMem_,NSQ); 
+    this->memManager_->free(this->PNOMem_,NSQ);    
+    this->memManager_->free(this->occNumMem_,NTCSxNBASIS); 
+  }
+
+  this->memManager_->free(this->WORK_,this->LWORK_);  
+  if(typeid(T).hash_code() == typeid(dcomplex).hash_code()) 
+    this->memManager_->free(this->RWORK_,this->LRWORK_); 
   
   
 }; //cleanupSCFMem2

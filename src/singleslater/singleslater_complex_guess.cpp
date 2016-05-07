@@ -229,7 +229,7 @@ void SingleSlater<dcomplex>::SADGuess() {
       // Prime and perform the atomic SCF
       hartreeFockAtom.formFock();
       hartreeFockAtom.computeEnergy();
-      hartreeFockAtom.SCF();
+      hartreeFockAtom.SCF2();
       
       // Place Atomic Densities into Total Densities
       this->placeAtmDen(atomIndex[iUn],hartreeFockAtom);
