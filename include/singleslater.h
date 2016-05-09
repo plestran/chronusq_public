@@ -438,7 +438,7 @@ public:
     this->nAngDFTGridPts_ = 302;
     this->isGGA = false;
 
-//    this->dftFunctionals_.emplace_back(new SlaterExchange());
+    this->dftFunctionals_.emplace_back(new SlaterExchange());
     this->dftFunctionals_.emplace_back(new VWNIII());
 
     // FIXME: maybe hardcode these?

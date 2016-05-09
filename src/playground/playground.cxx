@@ -252,8 +252,8 @@ int main(int argc, char **argv){
   singleSlater.isClosedShell = true;
   singleSlater.isDFT = true;
   singleSlater.isHF = false;
- // singleSlater.setExchKernel(SingleSlater<double>::EXCH::SLATER);
-  singleSlater.setExchKernel(SingleSlater<double>::EXCH::NOEXCH);
+  singleSlater.setExchKernel(SingleSlater<double>::EXCH::SLATER);
+  //singleSlater.setExchKernel(SingleSlater<double>::EXCH::NOEXCH);
 //  singleSlater.setCorrKernel(SingleSlater<double>::CORR::NOCORR);
   singleSlater.setCorrKernel(SingleSlater<double>::CORR::VWN3);
   singleSlater.setPrintLevel(5);
@@ -291,44 +291,6 @@ int main(int argc, char **argv){
   std::chrono::duration<double> T1; 
   std::chrono::duration<double> T2; 
   std::chrono::duration<double> T3; 
-//  basis.radcut(1e-10,50,1e-7);
-  auto density = [&](IntegrationPoint pt, double &result) {
-    // Evaluate the basis product in SCRATCH
-    SCRATCH1.setZero();
-    auto t1s = std::chrono::high_resolution_clock::now();
-    cartGP GP = pt.pt;
-//    auto shMap = basis.MapGridBasis(GP); 
-//    if(shMap[0]) { 
-//       cout << "Skip all pts " <<endl;
-//       return 0.0;}
-    for(auto iShell = 0; iShell < basis.nShell(); iShell++){
-//      if(!shMap[iShell+1]) {
-//       cout << basis.getradCutSh(iShell) << endl;
-//        continue;}
-      int b_s = basis.mapSh2Bf(iShell);
-      int size= basis.shells(iShell).size();
-
-      libint2::Shell shTmp = basis.shells(iShell);
-      double * buff = basis.basisDEval(0,shTmp,&pt.pt);
-      RealMap bMap(buff,size,1);
-      SCRATCH1.block(b_s,0,size,1) = bMap;
-
-      delete [] buff;
-    };
-    auto t2s = std::chrono::high_resolution_clock::now();
-
-    if(SCRATCH1.norm() < 1e-8) return 0.0;
-    SCRATCH2 = SCRATCH1 * SCRATCH1.transpose();
-   
-    auto t3s = std::chrono::high_resolution_clock::now();
-    result += pt.weight * singleSlater.computeProperty<double,TOTAL>(SCRATCH2); 
-    auto t3f = std::chrono::high_resolution_clock::now();
-
-    T1 += t2s - t1s;
-    T2 += t3s - t2s;
-    T3 += t3f - t3s;
-  };
-
 
   auto valVxc = [&](IntegrationPoint pt, MyStruct &result) {
     // Evaluate the basis product in SCRATCH
@@ -338,7 +300,6 @@ int main(int argc, char **argv){
     cartGP GP = pt.pt;
     double rhoA;
     double rhoB;
-    DFTFunctional::DFTInfo kernelXC;
     auto shMap = basis.MapGridBasis(GP); 
     if(shMap[0]) { 
 //       cout << "Skip all pts " <<endl;
@@ -362,29 +323,13 @@ int main(int argc, char **argv){
     SCRATCH2 = SCRATCH1 * SCRATCH1.transpose();
     rhoA = singleSlater.computeProperty<double,ALPHA>(SCRATCH2);
     rhoB = singleSlater.computeProperty<double,BETA>(SCRATCH2);
-    kernelXC = singleSlater.dftFunctionals_[0]->eval(rhoA, rhoB);
-    result.VXCA   += pt.weight * SCRATCH2 * kernelXC.ddrhoA; 
-    result.VXCB   += pt.weight * SCRATCH2 * kernelXC.ddrhoB; 
-    result.Energy += pt.weight * (rhoA+rhoB) * kernelXC.eps;
-  };
-
-  auto numOverlap = [&](IntegrationPoint pt, RealMatrix &result) {
-    // Evaluate the basis product in SCRATCH
-    for(auto iShell = 0; iShell < basis.nShell(); iShell++){
-      int b_s = basis.mapSh2Bf(iShell);
-      int size= basis.shells(iShell).size();
-
-      libint2::Shell shTmp = basis.shells(iShell);
-      double * buff = basis.basisDEval(0,shTmp,
-          &pt.pt);
-      RealMap bMap(buff,size,1);
-      SCRATCH1.block(b_s,0,size,1) = bMap;
-
-      delete [] buff;
-    };
-
-    SCRATCH2 = SCRATCH1 * SCRATCH1.transpose();
-    result += pt.weight * SCRATCH2 ;
+    for(auto i = 0; i < singleSlater.dftFunctionals_.size(); i++){
+      DFTFunctional::DFTInfo kernelXC = 
+        singleSlater.dftFunctionals_[i]->eval(rhoA, rhoB);
+      result.VXCA   += pt.weight * SCRATCH2 * kernelXC.ddrhoA; 
+      result.VXCB   += pt.weight * SCRATCH2 * kernelXC.ddrhoB; 
+      result.Energy += pt.weight * (rhoA+rhoB) * kernelXC.eps;
+    }
   };
 
   std::vector<std::array<double,3>> atomicCenters;
@@ -395,43 +340,17 @@ int main(int argc, char **argv){
          (*molecule.cart())(1,iAtm),
          (*molecule.cart())(2,iAtm)}
     );
-  //cout << atomicCenters[iAtm][0] << "\t";
-  //cout << atomicCenters[iAtm][1] << "\t";
-  //cout << atomicCenters[iAtm][2] << "\t";
   };
 
 
-  double rho = 0;
-  RealMatrix NS(singleSlater.nBasis(),singleSlater.nBasis());
-  NS.setZero();
-//  coeff = singleSlater.dftFunctionals_[0]->getCxVx();
-  auto t4s = std::chrono::high_resolution_clock::now();
-//  AtomicGrid AGrid(100,590,GAUSSCHEBFST,LEBEDEV,BECKE,atomicCenters,0,1.0,
-//      false);
   AtomicGrid AGrid(100,302,GAUSSCHEBFST,LEBEDEV,BECKE,atomicCenters,0,1.0,
       false);
 
-  for(auto iAtm = 0; iAtm < molecule.nAtoms(); iAtm++){
-    AGrid.center() = iAtm;
-    AGrid.scalingFactor()=0.5*elements[molecule.index(iAtm)].sradius/phys.bohr;
-    AGrid.integrate<double>(density,rho);
-  };
-  auto t4f = std::chrono::high_resolution_clock::now();
-  std::chrono::duration<double> T4 = t4f - t4s;
-
-  //prettyPrint(cout,4*math.pi*NS,"NS");
-  //prettyPrint(cout,*aoints.overlap_,"S");
-  cout << "RHO " << 4*math.pi*rho << endl;
-  cout << "T1 " << T1.count() << endl;
-  cout << "T2 " << T2.count() << endl;
-  cout << "T3 " << T3.count() << endl;
-  cout << "T4 " << T4.count() << endl;
-
   MyStruct res(singleSlater.nBasis());
+  basis.radcut(1.0e-10, 50, 1.0e-7);
   for(auto iAtm = 0; iAtm < molecule.nAtoms(); iAtm++){
     AGrid.center() = iAtm;
     AGrid.scalingFactor()=0.5*elements[molecule.index(iAtm)].sradius/phys.bohr;
-    basis.radcut(1.0e-10, 50, 1.0e-7);
     std::chrono::duration<double> TVEX; 
     auto t1s = std::chrono::high_resolution_clock::now();
     AGrid.integrate<MyStruct>(valVxc,res);
