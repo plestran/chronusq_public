@@ -28,66 +28,6 @@ using ChronusQ::FileIO;
 using ChronusQ::SingleSlater;
 
 namespace ChronusQ{
-/*
-template<>
-void SingleSlater<dcomplex>::CDIIS(){
-  int N = this->lenCoeff_;
-  ComplexMatrix B(N,N);
-  dcomplex *coef = new dcomplex[N];
-  int    *iPiv = new int[N];
-  int    NRHS = 1, INFO = -1;
-  int NBSq = this->nBasis_*this->nBasis_*this->nTCS_*this->nTCS_;
-  for(auto j = 0; j < (N-1); j++)
-  for(auto k = 0; k <= j          ; k++){
-    ComplexMap EJA(this->ErrorAlphaMem_ + (j%(N-1))*NBSq,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
-    ComplexMap EKA(this->ErrorAlphaMem_ + (k%(N-1))*NBSq,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
-    B(j,k) = -EJA.frobInner(EKA);
-    if(!this->isClosedShell && this->Ref_ != TCS){
-      ComplexMap EJB(this->ErrorBetaMem_ + (j%(N-1))*NBSq,this->nBasis_,this->nBasis_);
-      ComplexMap EKB(this->ErrorBetaMem_ + (k%(N-1))*NBSq,this->nBasis_,this->nBasis_);
-      B(j,k) += -EJB.frobInner(EKB);
-    }
-    B(k,j) = B(j,k);
-  }
-  for (auto l=0;l<N-1;l++){
-     B(N-1,l)=-1.0;
-     B(l,N-1)=-1.0;
-  }
-  B(N-1,N-1)=0;
-  for(auto k = 0; k < N;k++) coef[k] = 0.0; 
-  coef[N-1]=-1.0;
-
-  ComplexVecMap COEFF(coef,N);
-  VectorXcd     RHS(COEFF);
-  COEFF = B.fullPivLu().solve(RHS);
-
-  this->fockA_->setZero();
-  if(!this->isClosedShell && this->Ref_ != TCS) this->fockB_->setZero();
-  for(auto j = 0; j < N-1; j++) {
-    ComplexMap FA(this->FADIIS_ + (j%(N-1))*NBSq,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
-    *this->fockA_ += coef[j]*FA;
-    if(!this->isClosedShell && this->Ref_ != TCS) {
-      ComplexMap FB(this->FBDIIS_ + (j%(N-1))*NBSq,this->nBasis_,this->nBasis_);
-      *this->fockB_ += coef[j]*FB;
-    }
-  }
-  delete [] coef;
-  delete [] iPiv;
-
-} // CDIIS
-*/
-
-template<>
-void SingleSlater<dcomplex>::CpyFock(int iter){
-  auto NTCSxNBASIS = this->nTCS_ * this->nBasis_;
-  auto NSQ = NTCSxNBASIS  * NTCSxNBASIS;
-  std::memcpy(this->FADIIS_+(iter % (this->lenCoeff_-1)) * NSQ,this->fockA_->data(),
-              NSQ * sizeof(dcomplex));
-  if(!this->isClosedShell && this->Ref_ != TCS)
-    std::memcpy(this->FBDIIS_ + (iter % (this->lenCoeff_-1)) * NSQ,
-                this->fockB_->data(),NSQ * sizeof(dcomplex));
-} // CpyFock
-
 template<>
 void SingleSlater<dcomplex>::GenDComm(int iter){
   ComplexMap ErrA(this->ErrorAlphaMem_ + (iter % (this->lenCoeff_-1)) * this->lenF_,

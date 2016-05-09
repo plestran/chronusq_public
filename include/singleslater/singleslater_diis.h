@@ -96,3 +96,15 @@ void SingleSlater<T>::CDIIS(){
   this->memManager_->free(iWORK_,N);
 
 } // CDIIS
+
+template<typename T>
+void SingleSlater<T>::CpyFock(int iter){
+  auto NTCSxNBASIS = this->nTCS_ * this->nBasis_;
+  auto NSQ = NTCSxNBASIS  * NTCSxNBASIS;
+  std::memcpy(this->FADIIS_+(iter % (this->nDIISExtrap_-1)) * NSQ,
+    this->fockA_->data(),NSQ * sizeof(T));
+
+  if(!this->isClosedShell && this->Ref_ != TCS)
+    std::memcpy(this->FBDIIS_ + (iter % (this->nDIISExtrap_-1)) * NSQ,
+                this->fockB_->data(),NSQ * sizeof(T));
+} // CpyFock
