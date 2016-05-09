@@ -3,9 +3,11 @@
 #define INCLUDED_DFT
 class DFTFunctional{
 public:
-  double scalingFactor;
+  double scalingFactor;    //< Hybrid Scaling
+  double epsScreen;        //< screening 
   DFTFunctional(double X = 1.0){
     this->scalingFactor = X;
+    this->epsScreen = 1.0e-10;
   };
 
   struct DFTInfo {
@@ -41,14 +43,14 @@ class SlaterExchange : public DFTFunctional {
   double spindensity   ;
 public:
   SlaterExchange();
-  double getCxVx() {return this->CxVx;};
   DFTInfo eval(double rhoA, double rhoB);
   DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaAB);
   DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaAB, double gammaBB);
 };
 
-class VWN3 : public DFTFunctional {
+class VWNIII : public DFTFunctional {
 // General Constant
+public:
   double small;    
   double over2;
   double over3;
@@ -115,8 +117,7 @@ class VWN3 : public DFTFunctional {
   double M1          ;
   double db_dr       ; 
   double delta_eps_etha ;
-public:
-  VWN3();
+  VWNIII();
   DFTInfo eval(double rhoA, double rhoB);
   DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaAB);
   DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaAB, double gammaBB);
@@ -126,4 +127,18 @@ public:
   void popVWNconst();
   void popVWNdens(double rhoA, double rhoB);
 };
+
+class VWNV : public VWNIII {
+public:
+  VWNV();
+  DFTInfo eval(double rhoA, double rhoB);
+  DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaAB);
+  DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaAB, double gammaBB);
+  double Eveps0VWN(double &A_x, double &b_x, double &Q, double &X, double &x0_x, double &X_x0);
+  double Eveps1VWN(double &A_x, double &b1, double &b2, double &b3);
+  double Eveps2VWN(double A_x, double &b_x, double &c_x, double &X, double &x0_x);
+  void popVWNconst();
+  void popVWNdens(double rhoA, double rhoB);
+};
+
 #endif

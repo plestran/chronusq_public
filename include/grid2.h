@@ -413,12 +413,15 @@ class AtomicGrid : public TwoDGrid2 {
         * scalingFactor_;
       rawPoint.weight *= scalingFactor_ * r*r;
       double partweight = 1;
-      if(rawPoint.weight > 1e-8)
+//Screening no off APE
+//      if(rawPoint.weight > 1e-8)
         partweight = evalPartitionWeight(rawPoint.pt);
         
+      if(partweight < 1e-10) rawPoint.evalpt = false;
  
       rawPoint.weight *= partweight;
-      if(partweight < 1e-6) rawPoint.evalpt = false;
+//Screening now off APE
+//      if(partweight < 1e-6) rawPoint.evalpt = false;
       return rawPoint;
 
     };
