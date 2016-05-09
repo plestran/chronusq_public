@@ -31,12 +31,27 @@ namespace ChronusQ{
 template<>
 void SingleSlater<double>::CDIIS(){
   int N = this->lenCoeff_;
+  int NRHS = 1;
+  int INFO = -1;
+  int NB = this->nBasis_ * this->nTCS_; 
+  int NBSq = NB*NB;
+  char NORM = 'O';
+  double RCOND;
+
+//cout << "BEFORE ALLOC" << endl;
+//this->memManager_->printSummary(cout);
+  /*
   RealMatrix B(N,N);
   double *coef = new double[N];
   int    *iPiv = new int[N];
-  int    NRHS = 1, INFO = -1;
-  int NB = this->nBasis_ * this->nTCS_; 
-  int NBSq = NB*NB;
+  */
+  RealMap B(this->memManager_->malloc<double>(N*N),N,N);
+  double * coef   = this->memManager_->malloc<double>(N);
+  int    * iPiv   = this->memManager_->malloc<int>(N);
+  int    * iWORK_ = this->memManager_->malloc<int>(N);
+//cout << "After ALLOC" << endl;
+//this->memManager_->printSummary(cout);
+
   for(auto j = 0; j < (N-1); j++)
   for(auto k = 0; k <= j          ; k++){
     RealMap EJA(this->ErrorAlphaMem_ + (j%(N-1))*NBSq,NB,NB);
@@ -49,20 +64,21 @@ void SingleSlater<double>::CDIIS(){
     }
     B(k,j) = B(j,k);
   }
+
   for (auto l=0;l<N-1;l++){
      B(N-1,l)=-1.0;
      B(l,N-1)=-1.0;
   }
+
   B(N-1,N-1)=0;
   for(auto k = 0; k < N;k++) coef[k] = 0.0; 
   coef[N-1]=-1.0;
 
-  char NORM = 'O';
   double ANORM = B.lpNorm<1>();
-  double RCOND;
-  std::vector<int> iWORK_(N);
+  //std::vector<int> iWORK_(N);
   dgesv_(&N,&NRHS,B.data(),&N,iPiv,coef,&N,&INFO);
-  dgecon_(&NORM,&N,B.data(),&N,&ANORM,&RCOND,this->WORK_,&iWORK_[0],&INFO);
+  //dgecon_(&NORM,&N,B.data(),&N,&ANORM,&RCOND,this->WORK_,&iWORK_[0],&INFO);
+  dgecon_(&NORM,&N,B.data(),&N,&ANORM,&RCOND,this->WORK_,iWORK_,&INFO);
 
 
   if(std::abs(RCOND) > std::numeric_limits<double>::epsilon()) {
@@ -79,8 +95,16 @@ void SingleSlater<double>::CDIIS(){
       }
     }
   }
+  /*
   delete [] coef;
   delete [] iPiv;
+  */
+  this->memManager_->free(B.data(),N*N);
+  this->memManager_->free(coef,N);
+  this->memManager_->free(iPiv,N);
+  this->memManager_->free(iWORK_,N);
+//cout << "After FREE" << endl;
+//this->memManager_->printSummary(cout);
 
 } // CDIIS
 
