@@ -28,6 +28,7 @@ using ChronusQ::FileIO;
 using ChronusQ::SingleSlater;
 
 namespace ChronusQ{
+/*
 template<>
 void SingleSlater<dcomplex>::CDIIS(){
   int N = this->lenCoeff_;
@@ -55,9 +56,7 @@ void SingleSlater<dcomplex>::CDIIS(){
   B(N-1,N-1)=0;
   for(auto k = 0; k < N;k++) coef[k] = 0.0; 
   coef[N-1]=-1.0;
-/*
-  zgesv_(&N,&NRHS,B.data(),&N,iPiv,coef,&N,&INFO);
-*/
+
   ComplexVecMap COEFF(coef,N);
   VectorXcd     RHS(COEFF);
   COEFF = B.fullPivLu().solve(RHS);
@@ -76,6 +75,7 @@ void SingleSlater<dcomplex>::CDIIS(){
   delete [] iPiv;
 
 } // CDIIS
+*/
 
 template<>
 void SingleSlater<dcomplex>::CpyFock(int iter){

@@ -28,6 +28,7 @@ using ChronusQ::FileIO;
 using ChronusQ::SingleSlater;
 
 namespace ChronusQ{
+/*
 template<>
 void SingleSlater<double>::CDIIS(){
   int N = this->lenCoeff_;
@@ -40,11 +41,6 @@ void SingleSlater<double>::CDIIS(){
 
 //cout << "BEFORE ALLOC" << endl;
 //this->memManager_->printSummary(cout);
-  /*
-  RealMatrix B(N,N);
-  double *coef = new double[N];
-  int    *iPiv = new int[N];
-  */
   RealMap B(this->memManager_->malloc<double>(N*N),N,N);
   double * coef   = this->memManager_->malloc<double>(N);
   int    * iPiv   = this->memManager_->malloc<int>(N);
@@ -95,10 +91,6 @@ void SingleSlater<double>::CDIIS(){
       }
     }
   }
-  /*
-  delete [] coef;
-  delete [] iPiv;
-  */
   this->memManager_->free(B.data(),N*N);
   this->memManager_->free(coef,N);
   this->memManager_->free(iPiv,N);
@@ -107,6 +99,7 @@ void SingleSlater<double>::CDIIS(){
 //this->memManager_->printSummary(cout);
 
 } // CDIIS
+*/
 
 template<>
 void SingleSlater<double>::CpyFock(int iter){
