@@ -30,6 +30,7 @@
 #include <molecule.h>
 #include <aointegrals.h>
 #include <grid.h>
+#include <grid2.h>
 #include <quantum.h>
 #include <dft.h>
 
@@ -70,7 +71,6 @@ class SingleSlater : public Quantum<T> {
   int nAngDFTGridPts_;
   double nElectrons_;
 
-  std::vector<std::unique_ptr<DFTFunctional>> dftFunctionals_;
 
 
   std::unique_ptr<TMap>  NBSqScratch_;
@@ -351,7 +351,8 @@ public:
 //  std::chrono::duration<double> duration_7;
 //  std::chrono::duration<double> duration_8;
   int      nSCFIter;
-
+//APE
+  std::vector<std::unique_ptr<DFTFunctional>> dftFunctionals_;
 
 
   // constructor & destructor
@@ -433,6 +434,7 @@ public:
     this->isGGA = false;
 
     this->dftFunctionals_.emplace_back(new SlaterExchange());
+//    this->dftFunctionals_.emplace_back(new VWNIII());
 
     // FIXME: maybe hardcode these?
     this->epsConv       = 1.0e-7;

@@ -2,6 +2,15 @@
 #include <response.h>
 #include <workers.h>
 #include <pythonapi.h>
+struct MyStruct {
+  RealMatrix VXCA;
+  RealMatrix VXCB;
+  double Energy;
+
+  MyStruct(size_t N) : VXCA(N,N), VXCB(N,N), Energy(0.0){ 
+    VXCA.setZero(); VXCB.setZero();
+  };
+};
 #include <grid2.h>
 
 using namespace ChronusQ;
@@ -16,8 +25,8 @@ void loadPresets(Molecule&);
 template<>
 void loadPresets<WATER>(Molecule &mol) {
   mol.setNAtoms(3);
-  mol.setCharge(2);
-  mol.setNTotalE(8);
+  mol.setCharge(0);
+  mol.setNTotalE(10);
   mol.setMultip(1);
   mol.alloc();
   mol.setIndex(0,HashAtom("O",0));
@@ -110,7 +119,7 @@ int main(int argc, char **argv){
 //
 //  cout << 4*math.pi*Sphere.integrate<double>(sphGaussian) << endl;
 //
-//  auto sphGaussian2 = [&](IntegrationPoint pt) -> double {
+//  auto sphGaussian2 = [&](ChronusQ::IntegrationPoint pt) -> double {
 //    double x = bg::get<0>(pt.pt);
 //    double y = bg::get<1>(pt.pt);
 //    double z = bg::get<2>(pt.pt);
@@ -118,7 +127,7 @@ int main(int argc, char **argv){
 //    return pt.weight *  std::exp(-r*r);
 //  };
 //
-//  auto sphGaussian3 = [&](IntegrationPoint pt, double &result){
+//  auto sphGaussian3 = [&](ChronusQ::IntegrationPoint pt, double &result){
 //    double x = bg::get<0>(pt.pt);
 //    double y = bg::get<1>(pt.pt);
 //    double z = bg::get<2>(pt.pt);
@@ -133,7 +142,7 @@ int main(int argc, char **argv){
 //  cout << 4 * math.pi * (res2 - 1.0) << endl;
 //
 //  RealMatrix scr(2,2);
-//  auto noallocMatIntegrate = [&](IntegrationPoint pt, RealMatrix &result){
+//  auto noallocMatIntegrate = [&](ChronusQ::IntegrationPoint pt, RealMatrix &result){
 //    double x = bg::get<0>(pt.pt);
 //    double y = bg::get<1>(pt.pt);
 //    double z = bg::get<2>(pt.pt);
@@ -153,11 +162,11 @@ int main(int argc, char **argv){
 //
 //  std::vector<std::array<double,3>> empty;
 //
-////AtomicGrid SphereAtom(75,302,EULERMAC,LEBEDEV,{0.0,0.0,0.0},BECKE,
+////ChronusQ::AtomicGrid SphereAtom(75,302,EULERMAC,LEBEDEV,{0.0,0.0,0.0},BECKE,
 ////    empty);
 ////cout << 4 * math.pi * SphereAtom.integrate<double>(sphGaussian) << endl;
 //
-////AtomicGrid SphereAtom2(75,302,EULERMAC,LEBEDEV,{2.0,0.0,0.0},BECKE,
+////ChronusQ::AtomicGrid SphereAtom2(75,302,EULERMAC,LEBEDEV,{2.0,0.0,0.0},BECKE,
 ////    empty);
 //
 ////SphereAtom.printGrid(cout);
@@ -182,11 +191,11 @@ int main(int argc, char **argv){
 //  other3.push_back(center1);
 //  other3.push_back(center2);
 //
-////AtomicGrid Center1(75,590,EULERMAC,LEBEDEV,{0.0,0.0,0.0},BECKE,
+////ChronusQ::AtomicGrid Center1(75,590,EULERMAC,LEBEDEV,{0.0,0.0,0.0},BECKE,
 ////    other1);
-////AtomicGrid Center2(75,590,EULERMAC,LEBEDEV,{1.0,0.0,0.0},BECKE,
+////ChronusQ::AtomicGrid Center2(75,590,EULERMAC,LEBEDEV,{1.0,0.0,0.0},BECKE,
 ////    other2);
-////AtomicGrid Center3(75,590,EULERMAC,LEBEDEV,{0.0,2.0,0.0},BECKE,
+////ChronusQ::AtomicGrid Center3(75,590,EULERMAC,LEBEDEV,{0.0,2.0,0.0},BECKE,
 ////    other3);
 //
 ////cout << "HERE" << endl;
@@ -202,9 +211,9 @@ int main(int argc, char **argv){
 //  centers.push_back(center2);
 //  centers.push_back(center3);
 //
-//  AtomicGrid NCenter1(75,590,EULERMAC,LEBEDEV,BECKE,centers,0);
-//  AtomicGrid NCenter2(75,590,EULERMAC,LEBEDEV,BECKE,centers,1);
-//  AtomicGrid NCenter3(75,590,EULERMAC,LEBEDEV,BECKE,centers,2);
+//  ChronusQ::AtomicGrid NCenter1(75,590,EULERMAC,LEBEDEV,BECKE,centers,0);
+//  ChronusQ::AtomicGrid NCenter2(75,590,EULERMAC,LEBEDEV,BECKE,centers,1);
+//  ChronusQ::AtomicGrid NCenter3(75,590,EULERMAC,LEBEDEV,BECKE,centers,2);
 //
 //  cout << "HERE" << endl;
 //  cout << 4 * math.pi * NCenter1.integrate<double>(sphGaussian) << endl;
@@ -231,9 +240,9 @@ int main(int argc, char **argv){
   fileio.iniStdGroups();
   CQSetNumThreads(1);
   
-//  loadPresets<WATER>(molecule);
+  loadPresets<WATER>(molecule);
 //loadPresets<HE>(molecule);
-  loadPresets<SO>(molecule);
+//  loadPresets<SO>(molecule);
   molecule.convBohr();
   molecule.computeNucRep();
   molecule.computeRij();
@@ -241,9 +250,16 @@ int main(int argc, char **argv){
 
   singleSlater.setRef(SingleSlater<double>::RHF);
   singleSlater.isClosedShell = true;
+  singleSlater.isDFT = true;
+  singleSlater.isHF = false;
+  singleSlater.setExchKernel(SingleSlater<double>::EXCH::SLATER);
+  //singleSlater.setExchKernel(SingleSlater<double>::EXCH::NOEXCH);
+//  singleSlater.setCorrKernel(SingleSlater<double>::CORR::NOCORR);
+  singleSlater.setCorrKernel(SingleSlater<double>::CORR::VWN3);
+  singleSlater.setPrintLevel(5);
 
   basis.findBasisFile("sto3g");
-//  basis.findBasisFile("6-31g");
+//  basis.findBasisFile("3-21g");
   basis.communicate(fileio);
   basis.parseGlobal();
   basis.constructLocal(&molecule);
@@ -272,20 +288,26 @@ int main(int argc, char **argv){
 
   RealMatrix SCRATCH2(singleSlater.nBasis(),singleSlater.nBasis());
   VectorXd   SCRATCH1(singleSlater.nBasis());
-
-
   std::chrono::duration<double> T1; 
   std::chrono::duration<double> T2; 
   std::chrono::duration<double> T3; 
-  basis.radcut(1e-10,50,1e-7);
-  auto density = [&](IntegrationPoint pt, double &result) {
+
+  auto valVxc = [&](ChronusQ::IntegrationPoint pt, MyStruct &result) {
     // Evaluate the basis product in SCRATCH
-    auto t1s = std::chrono::high_resolution_clock::now();
+//    if (pt.weight < singleSlater.dftFunctionals_[0]->epsScreen){
+//    return 0.0; }
+    SCRATCH1.setZero();
     cartGP GP = pt.pt;
+    double rhoA;
+    double rhoB;
     auto shMap = basis.MapGridBasis(GP); 
-//    if(shMap[0]) return 0.0;
+    if(shMap[0]) { 
+//       cout << "Skip all pts " <<endl;
+       return 0.0;}
     for(auto iShell = 0; iShell < basis.nShell(); iShell++){
-      if(!shMap[iShell+1]) continue;
+      if(!shMap[iShell+1]) {
+//       cout << basis.getradCutSh(iShell) << endl;
+        continue;}
       int b_s = basis.mapSh2Bf(iShell);
       int size= basis.shells(iShell).size();
 
@@ -296,39 +318,18 @@ int main(int argc, char **argv){
 
       delete [] buff;
     };
-    auto t2s = std::chrono::high_resolution_clock::now();
 
     if(SCRATCH1.norm() < 1e-8) return 0.0;
     SCRATCH2 = SCRATCH1 * SCRATCH1.transpose();
-   
-    auto t3s = std::chrono::high_resolution_clock::now();
-    result += pt.weight * singleSlater.computeProperty<double,TOTAL>(SCRATCH2); 
-    auto t3f = std::chrono::high_resolution_clock::now();
-
-    T1 += t2s - t1s;
-    T2 += t3s - t2s;
-    T3 += t3f - t3s;
-  };
-
-
-
-  auto numOverlap = [&](IntegrationPoint pt, RealMatrix &result) {
-    // Evaluate the basis product in SCRATCH
-    for(auto iShell = 0; iShell < basis.nShell(); iShell++){
-      int b_s = basis.mapSh2Bf(iShell);
-      int size= basis.shells(iShell).size();
-
-      libint2::Shell shTmp = basis.shells(iShell);
-      double * buff = basis.basisDEval(0,shTmp,
-          &pt.pt);
-      RealMap bMap(buff,size,1);
-      SCRATCH1.block(b_s,0,size,1) = bMap;
-
-      delete [] buff;
-    };
-
-    SCRATCH2 = SCRATCH1 * SCRATCH1.transpose();
-    result += pt.weight * SCRATCH2 ;
+    rhoA = singleSlater.computeProperty<double,ALPHA>(SCRATCH2);
+    rhoB = singleSlater.computeProperty<double,BETA>(SCRATCH2);
+    for(auto i = 0; i < singleSlater.dftFunctionals_.size(); i++){
+      DFTFunctional::DFTInfo kernelXC = 
+        singleSlater.dftFunctionals_[i]->eval(rhoA, rhoB);
+      result.VXCA   += pt.weight * SCRATCH2 * kernelXC.ddrhoA; 
+      result.VXCB   += pt.weight * SCRATCH2 * kernelXC.ddrhoB; 
+      result.Energy += pt.weight * (rhoA+rhoB) * kernelXC.eps;
+    }
   };
 
   std::vector<std::array<double,3>> atomicCenters;
@@ -339,168 +340,28 @@ int main(int argc, char **argv){
          (*molecule.cart())(1,iAtm),
          (*molecule.cart())(2,iAtm)}
     );
-  //cout << atomicCenters[iAtm][0] << "\t";
-  //cout << atomicCenters[iAtm][1] << "\t";
-  //cout << atomicCenters[iAtm][2] << "\t";
   };
 
 
-  double rho = 0;
-  RealMatrix NS(singleSlater.nBasis(),singleSlater.nBasis());
-  NS.setZero();
-  cout << "APE " << endl;
-
-  auto t4s = std::chrono::high_resolution_clock::now();
-  AtomicGrid AGrid(100,590,GAUSSCHEBFST,LEBEDEV,BECKE,atomicCenters,0,1.0,
+  ChronusQ::AtomicGrid AGrid(100,302,GAUSSCHEBFST,LEBEDEV,BECKE,atomicCenters,0,1.0,
       false);
 
+  MyStruct res(singleSlater.nBasis());
+  basis.radcut(1.0e-10, 50, 1.0e-7);
   for(auto iAtm = 0; iAtm < molecule.nAtoms(); iAtm++){
     AGrid.center() = iAtm;
     AGrid.scalingFactor()=0.5*elements[molecule.index(iAtm)].sradius/phys.bohr;
-    AGrid.integrate<double>(density,rho);
+    std::chrono::duration<double> TVEX; 
+    auto t1s = std::chrono::high_resolution_clock::now();
+    AGrid.integrate<MyStruct>(valVxc,res);
+    auto t1f = std::chrono::high_resolution_clock::now();
+    TVEX += t1f - t1s;
+    cout << "VEX time " << TVEX.count() << endl;
   };
-  auto t4f = std::chrono::high_resolution_clock::now();
-  std::chrono::duration<double> T4 = t4f - t4s;
-
-  //prettyPrint(cout,4*math.pi*NS,"NS");
-  //prettyPrint(cout,*aoints.overlap_,"S");
-  cout << "RHO " << 4*math.pi*rho << endl;
-  cout << "T1 " << T1.count() << endl;
-  cout << "T2 " << T2.count() << endl;
-  cout << "T3 " << T3.count() << endl;
-  cout << "T4 " << T4.count() << endl;
-
-  VectorXd SCRATCHDX(singleSlater.nBasis());
-  VectorXd SCRATCHDY(singleSlater.nBasis());
-  VectorXd SCRATCHDZ(singleSlater.nBasis());
-
-  libint2::Engine engine(libint2::Operator::nuclear,1,0,0);
-  engine.set_precision(0.0);
-
-  auto unContractedShells = basis.uncontractBasis();
-  int nUncontracted = 0;
-  for(auto i : unContractedShells) nUncontracted += i.size();
-
-  VectorXd SCRATCH1UnContracted(nUncontracted);
-  RealMatrix SCRATCH2UnContracted(nUncontracted,nUncontracted);
-  VectorXd SCRATCHDXUnContracted(nUncontracted);
-  VectorXd SCRATCHDYUnContracted(nUncontracted);
-  VectorXd SCRATCHDZUnContracted(nUncontracted);
-
-  auto PVP = [&](IntegrationPoint pt, std::vector<RealMatrix> &result) {
-    for(auto iShell = 0, b_s = 0; iShell < unContractedShells.size();
-         b_s += unContractedShells[iShell].size(),++iShell) {
-      int size= unContractedShells[iShell].size();
-
-      double * buff = basis.basisDEval(1,unContractedShells[iShell], &pt.pt);
-
-      RealMap bMap( buff         ,size,1);
-      RealMap dxMap(buff + size  ,size,1);
-      RealMap dyMap(buff + 2*size,size,1);
-      RealMap dzMap(buff + 3*size,size,1);
-
-      SCRATCH1UnContracted.block( b_s,0,size,1) = bMap;
-      SCRATCHDXUnContracted.block(b_s,0,size,1) = dxMap;
-      SCRATCHDYUnContracted.block(b_s,0,size,1) = dyMap;
-      SCRATCHDZUnContracted.block(b_s,0,size,1) = dzMap;
-
-      delete [] buff;
-    };
-
-    std::vector<std::pair<double,std::array<double,3>>> q;
-    q.push_back(
-      {1.0, {{bg::get<0>(pt.pt),bg::get<1>(pt.pt),bg::get<2>(pt.pt)}}});
-    engine.set_params(q);
-
-    for(auto iAtm = 0; iAtm < molecule.nAtoms(); iAtm++){
-
-      // Delta Function Nuclei
-      /*
-      std::array<double,3> C = molecule.nucShell(iAtm).O;
-      double XC = bg::get<0>(pt.pt) - C[0];
-      double YC = bg::get<1>(pt.pt) - C[1];
-      double ZC = bg::get<2>(pt.pt) - C[2];
-      double RC = std::sqrt(XC*XC + YC*YC + ZC*ZC);
-
-      double gamma = -elements[molecule.index(iAtm)].atomicNumber / RC;
-      result[0] += pt.weight * (gamma) * SCRATCH1 * SCRATCH1.transpose();
-      */
-
-      // Gaussian Nuclei
-      const double * gamma = engine.compute(molecule.nucShell(iAtm),
-          libint2::Shell::unit());
-      Eigen::internal::set_is_malloc_allowed(false);
-      SCRATCH2UnContracted.noalias() = SCRATCH1UnContracted * SCRATCH1UnContracted.transpose();
-      result[0].noalias() += (pt.weight * (*gamma)) * SCRATCH2UnContracted;
-
-      SCRATCH2UnContracted.noalias() = SCRATCHDXUnContracted * SCRATCHDXUnContracted.transpose();
-      result[1].noalias() += (pt.weight * (*gamma)) * SCRATCH2UnContracted;
-
-      SCRATCH2UnContracted.noalias() = SCRATCHDXUnContracted * SCRATCHDYUnContracted.transpose();
-      result[2].noalias() += (pt.weight * (*gamma)) * SCRATCH2UnContracted;
-
-      SCRATCH2UnContracted.noalias() = SCRATCHDXUnContracted * SCRATCHDZUnContracted.transpose();
-      result[3].noalias() += (pt.weight * (*gamma)) * SCRATCH2UnContracted;
-
-      SCRATCH2UnContracted.noalias() = SCRATCHDYUnContracted * SCRATCHDXUnContracted.transpose();
-      result[4].noalias() += (pt.weight * (*gamma)) * SCRATCH2UnContracted;
-
-      SCRATCH2UnContracted.noalias() = SCRATCHDYUnContracted * SCRATCHDYUnContracted.transpose();
-      result[5].noalias() += (pt.weight * (*gamma)) * SCRATCH2UnContracted;
-
-      SCRATCH2UnContracted.noalias() = SCRATCHDYUnContracted * SCRATCHDZUnContracted.transpose();
-      result[6].noalias() += (pt.weight * (*gamma)) * SCRATCH2UnContracted;
-
-      SCRATCH2UnContracted.noalias() = SCRATCHDZUnContracted * SCRATCHDXUnContracted.transpose();
-      result[7].noalias() += (pt.weight * (*gamma)) * SCRATCH2UnContracted;
-
-      SCRATCH2UnContracted.noalias() = SCRATCHDZUnContracted * SCRATCHDYUnContracted.transpose();
-      result[8].noalias() += (pt.weight * (*gamma)) * SCRATCH2UnContracted;
-
-      SCRATCH2UnContracted.noalias() = SCRATCHDZUnContracted * SCRATCHDZUnContracted.transpose();
-      result[9].noalias() += (pt.weight * (*gamma)) * SCRATCH2UnContracted;
-
-
-    // This allocates temporary mem in Eigen
-    //result[0].noalias() += (pt.weight * (*gamma)) * SCRATCH1 * SCRATCH1.transpose();
-    //result[1].noalias() += (pt.weight * (*gamma)) * SCRATCHDX * SCRATCHDX.transpose();
-    //result[2].noalias() += (pt.weight * (*gamma)) * SCRATCHDX * SCRATCHDY.transpose();
-    //result[3].noalias() += (pt.weight * (*gamma)) * SCRATCHDX * SCRATCHDZ.transpose();
-    //result[4].noalias() += (pt.weight * (*gamma)) * SCRATCHDY * SCRATCHDX.transpose();
-    //result[5].noalias() += (pt.weight * (*gamma)) * SCRATCHDY * SCRATCHDY.transpose();
-    //result[6].noalias() += (pt.weight * (*gamma)) * SCRATCHDY * SCRATCHDZ.transpose();
-    //result[7].noalias() += (pt.weight * (*gamma)) * SCRATCHDZ * SCRATCHDX.transpose();
-    //result[8].noalias() += (pt.weight * (*gamma)) * SCRATCHDZ * SCRATCHDY.transpose();
-    //result[9].noalias() += (pt.weight * (*gamma)) * SCRATCHDZ * SCRATCHDZ.transpose();
-      Eigen::internal::set_is_malloc_allowed(true);
-    }
-
-  };
-
-  std::vector<RealMatrix> numPot(10,RealMatrix::Zero(nUncontracted,
-        nUncontracted));
-
-  for(auto iAtm = 0; iAtm < molecule.nAtoms(); iAtm++){
-    AGrid.center() = iAtm;
-    AGrid.scalingFactor()=0.5*elements[molecule.index(iAtm)].sradius/phys.bohr;
-    AGrid.integrate<std::vector<RealMatrix>>(PVP,numPot);
-  };
-
-  for(auto i = 0; i < 10; i++) numPot[i] *= 4 * math.pi;
-
-  prettyPrint(cout,(*aoints.potential_),"V");
-  prettyPrint(cout,numPot[0],"VN",17);
-  prettyPrint(cout,numPot[1],"XX",17);
-  prettyPrint(cout,numPot[2],"XY",17);
-  prettyPrint(cout,numPot[3],"XZ",17);
-  prettyPrint(cout,numPot[4],"YX",17);
-  prettyPrint(cout,numPot[5],"YY",17);
-  prettyPrint(cout,numPot[6],"YZ",17);
-  prettyPrint(cout,numPot[7],"ZX",17);
-  prettyPrint(cout,numPot[8],"ZY",17);
-  prettyPrint(cout,numPot[9],"ZZ",17);
-  cout << std::scientific << endl;
-  prettyPrint(cout,numPot[1] + numPot[5] + numPot[9],"SCALAR",17);
+//  double Cx = -(3.0/4.0)*(std::pow((3.0/math.pi),(1.0/3.0)));
+  prettyPrint(cout,4*math.pi*res.VXCA,"A");
+  prettyPrint(cout,4*math.pi*res.VXCB,"B");
+  cout << "ENERGY " << 4*math.pi*res.Energy  << endl;
 
 
   finalizeCQ();

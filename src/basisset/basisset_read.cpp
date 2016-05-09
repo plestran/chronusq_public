@@ -502,13 +502,16 @@ std::vector<bool> BasisSet::MapGridBasis(cartGP& pt){
       map_[s1+1] = true;
       nodens = false;
       }
+//    cout << r << " cutoff "<< this->radCutSh_[s1] << " " << map_[s1+1] <<endl;
     } //End loop over shells
   map_[0] = nodens;
+//  cout << "End Map " << endl;
   return map_;
 }
 
 
 void BasisSet::radcut(double thr, int maxiter, double epsConv){
+  if(this->radCutSh_ != NULL) delete [] this->radCutSh_;
   this->radCutSh_ = new double[this->nShell()];
   double alphaMin;
 //  double *s1Eval = basisEval(s1,pt);

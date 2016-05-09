@@ -1,6 +1,6 @@
 #include<dft.h>
 
-VWNIII::VWNIII(){
+VWNV::VWNV(){
 // General Constants
   this->small = 1.0e-10; 
   this->over2 = 0.5;
@@ -13,19 +13,21 @@ VWNIII::VWNIII(){
   this->A_p   =  this->A1/2.0; // to Hartree
   this->A_f   =  this->A1/4.0; // to Hartree
   this->A_a   = -(1.0/(6.0*math.pi*math.pi)) ;// to hartree already
-  this->b_p   =  13.0720;   // into text page 1207
-  this->c_p   =  42.7198;   // into text page 1207
-  this->x0_p  =  -0.409286; // into text page 1207
-  this->b_f   =  20.1231;   // into text pagr 1207
-  this->c_f   = 101.578;   // into text pagr 1207
-  this->x0_f  =  -0.743294;  // into text pagr 1207
+// Updated
+  this->b_p   = 3.72744 ; // Caption Table 5
+  this->c_p   = 12.9352 ; // Caption Table 5
+  this->x0_p  = -0.10498 ; // Caption Table 5
+  this->b_f   = 7.06042 ; // Caption Table 5
+  this->c_f   = 18.0578;  // Caption Table 5
+  this->x0_f  = -0.32500 ; // Caption Table 5
+//
   this->b_a   =   1.13107;   // intext page 1209
   this->c_a   =  13.0045;    // intext page 1209
   this->x0_a  =  -0.00475840; // intext page 1209
   this->popVWNconst();
 };
 
-void VWNIII::popVWNconst(){
+void VWNV::popVWNconst(){
   this->b1p = (this->b_p*this->x0_p - this->c_p)/(this->c_p*this->x0_p); 
   this->b2p = (this->x0_p - this->b_p)/(this->c_p*this->x0_p); 
   this->b3p = (-1.0)/(this->c_p*this->x0_p); 
@@ -38,7 +40,7 @@ void VWNIII::popVWNconst(){
   this->X_x0f     = this->x0_f*this->x0_f + this->b_f*this->x0_f + this->c_f; 
 };
 
-void VWNIII::popVWNdens(double rhoA, double rhoB){
+void VWNV::popVWNdens(double rhoA, double rhoB){
   this->rhoT          = rhoA + rhoB;
   this->spindensity   = (rhoA - rhoB) / this->rhoT;
   this->spindensity_4 = std::pow(this->spindensity,4.0);
@@ -67,9 +69,9 @@ void VWNIII::popVWNdens(double rhoA, double rhoB){
 };
 
 
-double VWNIII::Eveps0VWN(double &A_x, double &b_x, double &Q, double &X, 
+double VWNV::Eveps0VWN(double &A_x, double &b_x, double &Q, double &X, 
   double &x0_x, double &X_x0){
-//    From Reference Vosko en Al., Can. J. Phys., 58, 1200 (1980). VWNIII and VWN5 interpolation formula   
+//    From Reference Vosko en Al., Can. J. Phys., 58, 1200 (1980). VWNV and VWN5 interpolation formula   
 //    IOP 0 -> Eq 4.4 
   double val      = 0.0;
    val = A_x *
@@ -84,8 +86,8 @@ double VWNIII::Eveps0VWN(double &A_x, double &b_x, double &Q, double &X,
 
 }
 
-double VWNIII::Eveps1VWN(double &A_x, double &b1, double &b2, double &b3){
-//    From Reference Vosko en Al., Can. J. Phys., 58, 1200 (1980). VWNIII and VWN5 interpolation formula   
+double VWNV::Eveps1VWN(double &A_x, double &b1, double &b2, double &b3){
+//    From Reference Vosko en Al., Can. J. Phys., 58, 1200 (1980). VWNV and VWN5 interpolation formula   
 //    IOP 1 Eq. 4.3 (finishing the derivate of eps , rs factor already included)
   double val      = 0.0;
   val = A_x* ( (1.0 + b1*this->r_s_sqrt)/(1.0 + b1*this->r_s_sqrt + b2*this->r_s + b3*this->r_s_32));
@@ -93,8 +95,8 @@ double VWNIII::Eveps1VWN(double &A_x, double &b1, double &b2, double &b3){
 
 }
 
-double VWNIII::Eveps2VWN(double A_x, double &b_x, double &c_x, double &X, double &x0_x){
-//    From Reference Vosko en Al., Can. J. Phys., 58, 1200 (1980). VWNIII and VWN5 interpolation formula   
+double VWNV::Eveps2VWN(double A_x, double &b_x, double &c_x, double &X, double &x0_x){
+//    From Reference Vosko en Al., Can. J. Phys., 58, 1200 (1980). VWNV and VWN5 interpolation formula   
 //    IOP 2 Analitic Derv of Eq 4.4 (note this one has to be moltiplied outside by rs to get the final needed term)
   double val      = 0.0;
   this->tmp1 = this->r_s_sqrt - x0_x;  //dxx0
@@ -105,13 +107,13 @@ double VWNIII::Eveps2VWN(double A_x, double &b_x, double &c_x, double &X, double
    return val;
 }
 
-DFTFunctional::DFTInfo VWNIII::eval(double rhoA, double rhoB){
+DFTFunctional::DFTInfo VWNV::eval(double rhoA, double rhoB){
   DFTFunctional::DFTInfo info;
    this->popVWNdens(rhoA, rhoB);
    if(std::abs(this->spindensity) > this->small) {
 //   Open Shell Case
 //   Used Linear Interpolation between parg and ferr 
-//   Eq 2.4 and its analytic derivative for VWNIII
+//   Eq 2.4 and its analytic derivative for VWNV
      this->eps_p =  Eveps0VWN(this->A_p,this->b_p,this->Qp,this->Xp,this->x0_p,this->X_x0p);  
      this->eps_f =  Eveps0VWN(this->A_f,this->b_f,this->Qf,this->Xf,this->x0_f,this->X_x0f); 
      this->delta_eps_1 = this->eps_f - (this->eps_p);
@@ -136,9 +138,9 @@ DFTFunctional::DFTInfo VWNIII::eval(double rhoA, double rhoB){
   return info;
 }
 
-DFTFunctional::DFTInfo VWNIII::eval(double rhoA, double rhoB, double gammaAA, double gammaAB){
+DFTFunctional::DFTInfo VWNV::eval(double rhoA, double rhoB, double gammaAA, double gammaAB){
 };
 
-DFTFunctional::DFTInfo VWNIII::eval(double rhoA, double rhoB, double gammaAA, double gammaAB, double gammaBB){
+DFTFunctional::DFTInfo VWNV::eval(double rhoA, double rhoB, double gammaAA, double gammaAB, double gammaBB){
 };
 

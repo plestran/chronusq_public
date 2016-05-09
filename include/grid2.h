@@ -39,10 +39,11 @@ enum GRID_TYPE {
 struct IntegrationPoint {
   cartGP pt;
   double weight;
+  bool evalpt;
   IntegrationPoint(double pt_ = 0, double weight_ = 0) : 
-    pt(pt_), weight(weight_){ };
+    pt(pt_), weight(weight_), evalpt(true){ };
   IntegrationPoint(cartGP pt_ = cartGP(0.0,0.0,0.0), double weight_ = 0) : 
-    pt(pt_), weight(weight_){ };
+    pt(pt_), weight(weight_), evalpt(true){ };
 };
 
 // Classes
@@ -106,9 +107,9 @@ public:
         T& result) {
       cout << "Integrate 3" << endl;
       for(auto iPt = 0; iPt < this->nPts_; iPt++)
-//        if((*this)[iPt].weight > 1e-6){
+        if((*this)[iPt].evalpt){
           func((*this)[iPt],result);
-//        }
+        }
     };
 
 
@@ -411,9 +412,16 @@ class AtomicGrid : public TwoDGrid2 {
       double r = bg::get<0>(GRad->operator[](i / GAng->npts()).pt)
         * scalingFactor_;
       rawPoint.weight *= scalingFactor_ * r*r;
-
-      if(rawPoint.weight > 1e-8)
-        rawPoint.weight *= evalPartitionWeight(rawPoint.pt);
+      double partweight = 1;
+//Screening no off APE
+//      if(rawPoint.weight > 1e-8)
+        partweight = evalPartitionWeight(rawPoint.pt);
+        
+      if(partweight < 1e-10) rawPoint.evalpt = false;
+ 
+      rawPoint.weight *= partweight;
+//Screening now off APE
+//      if(partweight < 1e-6) rawPoint.evalpt = false;
       return rawPoint;
 
     };

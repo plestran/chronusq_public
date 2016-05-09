@@ -23,6 +23,19 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
+template<typename T>
+class KernelIntegrand {
+  typedef Eigen::Matrix<T,Dynamic,Dynamic> TMatrix;
+  public:
+  TMatrix VXCA;
+  TMatrix VXCB;
+  double Energy;
+
+  KernelIntegrand(size_t N) : VXCA(N,N), Energy(0.0){ 
+    VXCA.setZero();
+  };
+};
+
 /********************************
  * Form Perturbation Tensor (G) *
  ********************************/
@@ -135,6 +148,7 @@ void SingleSlater<T>::formFock(){
   if(getRank() == 0) {
     if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
 
+    bool testNew = false;
     if (this->isDFT){
 //    Timing
       std::chrono::high_resolution_clock::time_point start;
@@ -146,14 +160,70 @@ void SingleSlater<T>::formFock(){
       }
 
 //    this->formVXC();
-      this->formVXC_store();
-     
-      if(this->printLevel_ >= 3) {
-        finish = std::chrono::high_resolution_clock::now();
-        duration_formVxc = finish - start;
-        this->fileio_->out << endl << "CPU time for VXC integral:  "
-                           << duration_formVxc.count() << " seconds." 
-                           << endl;
+      if(!testNew) this->formVXC_store();
+      else {
+        RealMatrix SCRATCH2(this->nBasis_,this->nBasis_);
+        VectorXd   SCRATCH1(this->nBasis_);
+
+        auto valVxc = [&](ChronusQ::IntegrationPoint pt, 
+            KernelIntegrand<T> &result) {
+
+          SCRATCH1.setZero();
+          cartGP GP = pt.pt;
+          double rhoA;
+          double rhoB;
+          auto shMap = this->basisset_->MapGridBasis(GP); 
+          if(shMap[0]) {return 0.0;}
+          for(auto iShell = 0; iShell < this->basisset_->nShell(); iShell++){
+            if(!shMap[iShell+1]) {continue;}
+
+            int b_s = this->basisset_->mapSh2Bf(iShell);
+            int size= this->basisset_->shells(iShell).size();
+
+            libint2::Shell shTmp = this->basisset_->shells(iShell);
+            double * buff = this->basisset_->basisDEval(0,shTmp,&pt.pt);
+            RealMap bMap(buff,size,1);
+            SCRATCH1.block(b_s,0,size,1) = bMap;
+
+            delete [] buff;
+          };
+
+          if(SCRATCH1.norm() < 1e-8) return 0.0;
+          SCRATCH2 = SCRATCH1 * SCRATCH1.transpose();
+          double rhoT = this->template computeProperty<double,TOTAL>(SCRATCH2);
+          double rhoS = this->template computeProperty<double,MZ>(SCRATCH2);
+          rhoA = 0.5 * (rhoT + rhoS);
+          rhoB = 0.5 * (rhoT - rhoS);
+
+          for(auto i = 0; i < this->dftFunctionals_.size(); i++){
+            DFTFunctional::DFTInfo kernelXC = 
+              this->dftFunctionals_[i]->eval(rhoA, rhoB);
+            result.VXCA.real()   += pt.weight * SCRATCH2 * kernelXC.ddrhoA; 
+            result.Energy += pt.weight * (rhoA+rhoB) * kernelXC.eps;
+          }
+        };
+
+        ChronusQ::AtomicGrid AGrid(100,302,ChronusQ::GRID_TYPE::GAUSSCHEBFST,
+            ChronusQ::GRID_TYPE::LEBEDEV,ChronusQ::ATOMIC_PARTITION::BECKE,
+            this->molecule_->cartArray(),0,1.0,false);
+       
+        KernelIntegrand<T> res(this->vXA_->cols());
+        this->basisset_->radcut(1.0e-10, 50, 1.0e-7);
+        for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
+          AGrid.center() = iAtm;
+          AGrid.scalingFactor()=0.5 *
+            elements[this->molecule_->index(iAtm)].sradius/phys.bohr;
+          AGrid.integrate<KernelIntegrand<T>>(valVxc,res);
+        };
+        (*this->vXA_) = 4*math.pi*res.VXCA;
+        this->totalEx = 4*math.pi*res.Energy;
+        if(this->printLevel_ >= 3) {
+          finish = std::chrono::high_resolution_clock::now();
+          duration_formVxc = finish - start;
+          this->fileio_->out << endl << "CPU time for VXC integral:  "
+                             << duration_formVxc.count() << " seconds." 
+                             << endl;
+        }
       }
     }
   
@@ -164,7 +234,7 @@ void SingleSlater<T>::formFock(){
       (*this->fockA_) += (*this->PTA_);
       if(this->isDFT){ 
         (*this->fockA_) += (*this->vXA_);
-        (*this->fockA_) += (*this->vCorA_);
+        if(!testNew) (*this->fockA_) += (*this->vCorA_);
       }
     } else {
 
