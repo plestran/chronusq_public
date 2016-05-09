@@ -285,12 +285,7 @@ void RealTime<T>::doPropagation(){
     MPI_Barrier(MPI_COMM_WORLD);
 #endif
   }
-  if(getRank() == 0) {
-    delete [] this->SCR;
-    delete [] this->REAL_LAPACK_SCR;
-
-    if(this->tarCSVs) this->tarCSVFiles();
-  }
+  if(getRank() == 0) this->cleanup(); 
 #ifdef CQ_ENABLE_MPI
   MPI_Barrier(MPI_COMM_WORLD);
 #endif

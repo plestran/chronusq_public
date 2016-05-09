@@ -43,6 +43,7 @@ class RealTime {
   BasisSet *	  basisset_;
   AOIntegrals *   aointegrals_;
   SingleSlater<T> *  groundState_;
+  CQMemManager *  memManager_;
 
   std::unique_ptr<SingleSlater<dcomplex>> ssPropagator_;
 
@@ -256,6 +257,7 @@ public:
     this->controls_    = &cont;
     this->aointegrals_ = &aoints;
     this->groundState_ = &groundState;
+    this->memManager_  = groundState.memManager();
   }
 
   inline void initMeta(){
@@ -270,6 +272,7 @@ public:
   }
 
   void alloc();
+  void cleanup();
 
   // Getters
   inline double      currentTime(){ return this->currentTime_;                             };
