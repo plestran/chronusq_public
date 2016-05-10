@@ -104,7 +104,7 @@ namespace ChronusQ {
     this->onePDMA_->setZero();
 
     this->onePDMA_->real() = (*const_cast<Quantum<double>&>(other).onePDMA());
-    prettyPrintComplex(cout,*this->onePDMA_,"PA");
+    prettyPrintComplex(cout,*this->onePDMA_,"PA In Copy");
 
     if(!this->isClosedShell || this->nTCS_ == 2){
       auto NB  = const_cast<Quantum<double>&>(other).onePDMScalar()->rows(); 

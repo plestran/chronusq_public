@@ -65,6 +65,9 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other) :
       this->PTA_      = std::unique_ptr<ComplexMap>(
         new ComplexMap(this->memManager_->malloc<dcomplex>(NBSq),NB,NB)
       );
+      this->fockA_->setZero();
+      this->moA_->setZero();
+      this->PTA_->setZero();
     }
 
     if(getRank() == 0) {
@@ -83,6 +86,9 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other) :
         this->PTB_      = std::unique_ptr<ComplexMap>(
           new ComplexMap(this->memManager_->malloc<dcomplex>(NBSq),NB,NB)
         );
+        this->fockB_->setZero();
+        this->moB_->setZero();
+        this->PTB_->setZero();
       }
 
       if(getRank() == 0) {
@@ -97,6 +103,7 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other) :
     this->molecule_    = other->molecule();
     this->fileio_      = other->fileio();
     this->aointegrals_ = other->aointegrals();
+    prettyPrintComplex(cout,*this->onePDMA_,"PA In Copy2");
 }
 
 template<>

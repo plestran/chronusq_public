@@ -67,6 +67,7 @@ void RealTime<T>::doPropagation(){
   bool checkFP = false; // check commutator [F,P]
   int NAE = this->ssPropagator_->nAE(); // number alpha electrons
   int NBE = this->ssPropagator_->nBE(); // number beta eletrons
+  prettyPrintComplex(this->fileio_->out,*this->ssPropagator_->onePDMA(),"PA inRT Proc1");
 
   currentTime_ = 0.0;
 
@@ -169,6 +170,7 @@ void RealTime<T>::doPropagation(){
 #endif
 
     this->ssPropagator_->mpiBCastDensity();
+    prettyPrintComplex(this->fileio_->out,*this->ssPropagator_->onePDMA(),"PA inRT Proc2");
     this->ssPropagator_->formFock();
     this->ssPropagator_->computeEnergy();
     this->ssPropagator_->computeProperties();

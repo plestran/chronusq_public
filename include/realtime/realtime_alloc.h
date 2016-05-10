@@ -61,7 +61,9 @@ void RealTime<T>::alloc(){
                             new SingleSlater<dcomplex>(
                               this->groundState_));
   this->ssPropagator_->isNotPrimary();
+  prettyPrintComplex(cout,*this->ssPropagator_->onePDMA(),"PA In RT Alloc1");
   if(getRank() == 0) this->initMem();
+  prettyPrintComplex(cout,*this->ssPropagator_->onePDMA(),"PA In RT Alloc2");
 }
 
 template<typename T>
