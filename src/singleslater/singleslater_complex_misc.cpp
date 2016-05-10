@@ -31,6 +31,7 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other) :
   Quantum<dcomplex>::Quantum<dcomplex>(dynamic_cast<Quantum<double>&>(*other)){
      
 
+    cout << "HERE 2" << endl;
     this->nBasis_ = other->nBasis();
     this->nTT_    = other->nTT();
     this->nAE_    = other->nAE();

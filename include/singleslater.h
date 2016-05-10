@@ -616,7 +616,6 @@ public:
   inline FileIO       * fileio()         { return this->fileio_;         };
   inline AOIntegrals  * aointegrals()    { return this->aointegrals_;    };
   inline TwoDGrid     * twodgrid()       { return this->twodgrid_;       };
-  inline CQMemManager * memManager()     { return this->memManager_;     };
   inline std::string SCFType()           { return this->SCFType_;        };
   inline int         guess()             { return this->guess_;          };
 

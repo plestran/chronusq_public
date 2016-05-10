@@ -323,6 +323,7 @@ namespace ChronusQ {
     inline TMap* onePDMMy(){ return onePDMMy_.get();};
     inline TMap* onePDMMz(){ return onePDMMz_.get();};
     inline bool     isScattered(){ return isScattered_;};
+    inline CQMemManager * memManager()     { return this->memManager_;     };
 
     inline std::array<double,3> elecDipole(){ return elecDipole_; };
     inline std::array<std::array<double,3>,3> elecQuadpole(){ 
