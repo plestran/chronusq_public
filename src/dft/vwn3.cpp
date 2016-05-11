@@ -112,25 +112,31 @@ DFTFunctional::DFTInfo VWNIII::eval(double rhoA, double rhoB){
 //   Open Shell Case
 //   Used Linear Interpolation between parg and ferr 
 //   Eq 2.4 and its analytic derivative for VWNIII
-     this->eps_p =  Eveps0VWN(this->A_p,this->b_p,this->Qp,this->Xp,this->x0_p,this->X_x0p);  
-     this->eps_f =  Eveps0VWN(this->A_f,this->b_f,this->Qf,this->Xf,this->x0_f,this->X_x0f); 
+     this->eps_p = 
+       this->Eveps0VWN(this->A_p,this->b_p,this->Qp,this->Xp,this->x0_p,this->X_x0p);  
+     this->eps_f = 
+       this->Eveps0VWN(this->A_f,this->b_f,this->Qf,this->Xf,this->x0_f,this->X_x0f); 
      this->delta_eps_1 = this->eps_f - (this->eps_p);
      info.eps  = this->eps_p + delta_eps_1*this->f0_spindensity;
-     this->S1 =  -(this->r_s)*this->over3*Eveps2VWN(this->A_p,this->b_p,this->c_p,this->Xp,this->x0_p);
+     this->S1 =  -(this->r_s)*this->over3*
+       this->Eveps2VWN(this->A_p,this->b_p,this->c_p,this->Xp,this->x0_p);
      this->S2 =  -(this->r_s)*this->over3*this->f0_spindensity*
-            (Eveps2VWN(this->A_p,this->b_p,this->c_p,this->Xp,this->x0_p) - 
-             Eveps2VWN(this->A_f,this->b_f,this->c_f,this->Xf,this->x0_f) 
-        );
+      (this->Eveps2VWN(this->A_f,this->b_f,this->c_f,this->Xf,this->x0_f) - 
+       this->Eveps2VWN(this->A_p,this->b_p,this->c_p,this->Xp,this->x0_p) 
+       );
      this->M3_A    =   1.0 - (this->spindensity); 
      this->M3_B    = -(1.0 + this->spindensity);
      info.ddrhoA   = this->S1 + this->S2 + info.eps;
      info.ddrhoB   = this->S1 + this->S2 + info.eps;     
-     info.ddrhoA  +=  this->delta_eps_1*this->M3_A*this->df_spindensity;
-     info.ddrhoB  += this-> delta_eps_1*this->M3_B*this->df_spindensity;
+     info.ddrhoA  += this->delta_eps_1*this->M3_A*this->df_spindensity;
+     info.ddrhoB  += this->delta_eps_1*this->M3_B*this->df_spindensity;
 // Closed Shell
    } else {
-     info.eps =  Eveps0VWN(this->A_p,this->b_p,this->Qp,this->Xp,this->x0_p,this->X_x0p);
-     info.ddrhoA  = -(this->over3)*this->r_s*Eveps2VWN(this->A_p,this->b_p,this->c_p,this->Xp,this->x0_p);
+     info.eps = 
+     this->Eveps0VWN(this->A_p,this->b_p,this->Qp,this->Xp,this->x0_p,this->X_x0p);
+     info.ddrhoA  = -(this->over3)*
+     this->r_s*
+     this->Eveps2VWN(this->A_p,this->b_p,this->c_p,this->Xp,this->x0_p);
      info.ddrhoA += info.eps ;
    }
   return info;

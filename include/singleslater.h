@@ -434,7 +434,7 @@ public:
     this->isGGA = false;
 
     this->dftFunctionals_.emplace_back(new SlaterExchange());
-//    this->dftFunctionals_.emplace_back(new VWNIII());
+    this->dftFunctionals_.emplace_back(new VWNV());
 
     // FIXME: maybe hardcode these?
     this->epsConv       = 1.0e-7;

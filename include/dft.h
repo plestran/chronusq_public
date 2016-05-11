@@ -131,6 +131,14 @@ public:
 class VWNV : public VWNIII {
 public:
   VWNV();
+  double alpha;
+  double Xa;
+  double Qa;
+  double X_x0a;
+  double beta;
+  double df2_spindensity =0.0;
+  double delta_eps_etha;
+  double db_dr;
   DFTInfo eval(double rhoA, double rhoB);
   DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaAB);
   DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaAB, double gammaBB);
