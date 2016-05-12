@@ -60,7 +60,8 @@ void VWNV::popVWNdens(double rhoA, double rhoB){
   if ((1.0+this->spindensity)   >= this->small) this->df_spindensity += std::pow((1.0+this->spindensity),this->over3); 
   if ((1.0-(this->spindensity)) >= this->small) this->df_spindensity -= std::pow((1.0-this->spindensity),this->over3); 
   this->df_spindensity *= this->fourover3;
-  this->df_spindensity /= (-2.0+std::pow((2.0),this->fourover3));  
+  this->df_spindensity /= (-2.0+std::pow((2.0),this->fourover3)); 
+  this->df2_spindensity = 0.0; 
   if ((1.0+this->spindensity) >= this->small) this->df2_spindensity +=  std::pow((1.0+this->spindensity),(-2.0/3.0)); 
   if ((1.0-this->spindensity) >= this->small) this->df2_spindensity +=  std::pow((1.0-this->spindensity),(-2.0/3.0)); 
   this->df2_spindensity *= (2.0/9.0);

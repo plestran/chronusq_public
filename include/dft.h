@@ -136,7 +136,7 @@ public:
   double Qa;
   double X_x0a;
   double beta;
-  double df2_spindensity =0.0;
+  double df2_spindensity;
   double delta_eps_etha;
   double db_dr;
   DFTInfo eval(double rhoA, double rhoB);

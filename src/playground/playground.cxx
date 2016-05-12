@@ -225,13 +225,13 @@ int main(int argc, char **argv){
 
 
 
+  CQMemManager memManager;
   Molecule molecule;
   BasisSet basis;
   AOIntegrals aoints;
   MOIntegrals<double> moints;
   SingleSlater<double> singleSlater;
   Response<double> resp;
-  CQMemManager memManager;
   FileIO fileio("test.inp","test.out");
 
   memManager.setTotalMem(256e6);
@@ -291,7 +291,7 @@ int main(int argc, char **argv){
   std::chrono::duration<double> T1; 
   std::chrono::duration<double> T2; 
   std::chrono::duration<double> T3; 
-
+/*
   auto valVxc = [&](ChronusQ::IntegrationPoint pt, MyStruct &result) {
     // Evaluate the basis product in SCRATCH
 //    if (pt.weight < singleSlater.dftFunctionals_[0]->epsScreen){
@@ -363,7 +363,7 @@ int main(int argc, char **argv){
   prettyPrint(cout,4*math.pi*res.VXCB,"B");
   cout << "ENERGY " << 4*math.pi*res.Energy  << endl;
 
-
+*/
   finalizeCQ();
   return 0;
 };
