@@ -56,14 +56,14 @@ template<typename T>
 void RealTime<T>::alloc(){
   this->checkMeta();
 
-  cout << "HERE" << endl;
+//cout << "HERE" << endl;
   this->ssPropagator_	= std::unique_ptr<SingleSlater<dcomplex>>(
                             new SingleSlater<dcomplex>(
                               this->groundState_));
   this->ssPropagator_->isNotPrimary();
-  prettyPrintComplex(cout,*this->ssPropagator_->onePDMA(),"PA In RT Alloc1");
+//prettyPrintComplex(cout,*this->ssPropagator_->onePDMA(),"PA In RT Alloc1");
   if(getRank() == 0) this->initMem();
-  prettyPrintComplex(cout,*this->ssPropagator_->onePDMA(),"PA In RT Alloc2");
+//prettyPrintComplex(cout,*this->ssPropagator_->onePDMA(),"PA In RT Alloc2");
 }
 
 template<typename T>
@@ -177,28 +177,20 @@ void RealTime<T>::initMem(){
 
   this->memManager_->printSummary(cout);
 
-  cout << "@1" << endl;
   this->oTrans1Mem_ = 
     this->memManager_->template malloc<dcomplex>(this->lenOTrans1_);
-  cout << "@2" << endl;
   this->oTrans2Mem_ = 
     this->memManager_->template malloc<dcomplex>(this->lenOTrans2_);
-  cout << "@3" << endl;
   this->POAMem_     = 
     this->memManager_->template malloc<dcomplex>(this->lenPOA_);
-  cout << "@4" << endl;
   this->POAsavMem_  = 
     this->memManager_->template malloc<dcomplex>(this->lenPOAsav_);
-  cout << "@5" << endl;
   this->FOAMem_     = 
     this->memManager_->template malloc<dcomplex>(this->lenFOA_);
-  cout << "@6" << endl;
   this->initMOAMem_  = 
     this->memManager_->template malloc<dcomplex>(this->lenInitMOA_);
-  cout << "@7" << endl;
   this->uTransAMem_ = 
     this->memManager_->template malloc<dcomplex>(this->lenUTransA_);
-  cout << "@8" << endl;
   if(this->nTCS_ == 1 && !this->isClosedShell_){
     this->POBMem_     = 
       this->memManager_->template malloc<dcomplex>(this->lenPOB_);
@@ -220,6 +212,42 @@ void RealTime<T>::initMem(){
     this->memManager_->template malloc<dcomplex>(this->lenCMPLX_LAPACK_SCR);
   this->REAL_LAPACK_SCR =
     this->memManager_->template malloc<double>(this->lenREAL_LAPACK_SCR);
+
+  std::fill(this->oTrans1Mem_, this->oTrans1Mem_ + this->lenOTrans1_,
+      dcomplex(0.0,0.0));
+  std::fill(this->oTrans2Mem_, this->oTrans2Mem_ + this->lenOTrans2_,
+      dcomplex(0.0,0.0));
+  std::fill(this->POAMem_    , this->POAMem_     + this->lenPOA_,
+      dcomplex(0.0,0.0));
+  std::fill(this->POAsavMem_ , this->POAsavMem_  + this->lenPOAsav_,
+      dcomplex(0.0,0.0));
+  std::fill(this->FOAMem_    , this->FOAMem_     + this->lenFOA_,
+      dcomplex(0.0,0.0));
+  std::fill(this->initMOAMem_, this->initMOAMem_ + this->lenInitMOA_,
+      dcomplex(0.0,0.0));
+  std::fill(this->uTransAMem_, this->uTransAMem_ + this->lenUTransA_,
+      dcomplex(0.0,0.0));
+  if(this->nTCS_ == 1 && !this->isClosedShell_){
+    std::fill(this->POBMem_    ,this->POBMem_     + this->lenPOB_,
+        dcomplex(0.0,0.0));
+    std::fill(this->POBsavMem_ ,this->POBsavMem_  + this->lenPOBsav_,
+        dcomplex(0.0,0.0));
+    std::fill(this->FOBMem_    ,this->FOBMem_     + this->lenFOB_,
+        dcomplex(0.0,0.0));
+    std::fill(this->initMOBMem_,this->initMOBMem_ + this->lenInitMOB_,
+        dcomplex(0.0,0.0));
+    std::fill(this->uTransBMem_,this->uTransBMem_ + this->lenUTransB_,
+        dcomplex(0.0,0.0));
+  }
+  std::fill(this->scratchMem_ , this->scratchMem_ + this->lenScratch_,
+      dcomplex(0.0,0.0));
+  std::fill(this->scratchMem2_, this->scratchMem2_+ this->lenScratch2_,
+      dcomplex(0.0,0.0));
+
+  std::fill(this->CMPLX_LAPACK_SCR, 
+      this->CMPLX_LAPACK_SCR + this->lenCMPLX_LAPACK_SCR,dcomplex(0.0,0.0));
+  std::fill(this->REAL_LAPACK_SCR , 
+      this->REAL_LAPACK_SCR + this->lenREAL_LAPACK_SCR,0.0);
 }
 
 template<typename T>

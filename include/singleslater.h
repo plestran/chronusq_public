@@ -444,63 +444,46 @@ public:
   SingleSlater(SingleSlater *other) : 
     Quantum<T>(dynamic_cast<Quantum<T>&>(*other)){
 
-    this->nBasis_      = other->nBasis_;
-    this->nTT_         = other->nTT_;
-    this->nShell_      = other->nShell_;
-    this->nAE_         = other->nAE_;
-    this->nBE_         = other->nBE_; 
-    this->Ref_         = other->Ref();
-    this->nOccA_       = other->nOccA_;
-    this->nOccB_       = other->nOccB_;
-    this->nVirA_       = other->nVirA_;
-    this->nVirB_       = other->nVirB_;
-    this->multip_      = other->multip_;
+    this->nBasis_ = other->nBasis();
+    this->nTT_    = other->nTT();
+    this->nAE_    = other->nAE();
+    this->nBE_    = other->nBE(); 
+    this->nOccA_  = other->nOccA();
+    this->nOccB_  = other->nOccB();
+    this->nVirA_  = other->nVirA();
+    this->nVirB_  = other->nVirB();
+    this->multip_   = other->multip();
     this->energyNuclei = other->energyNuclei;
-    this->haveDensity  = true;
-    this->haveMO       = true;
-    this->havePT       = true;
-    this->printLevel_  = other->printLevel_;
-    this->doDIIS       = other->doDIIS;
-    this->isHF         = other->isHF;
-    this->isDFT        = other->isDFT;
-    this->guess_       = other->guess_;
+    this->Ref_    = other->Ref();
+    this->haveDensity = true;
+    this->haveMO	    = true;
+    this->havePT      = true;
+    this->printLevel_ = other->printLevel();
+    this->doDIIS = other->doDIIS;
+    this->isHF   = other->isHF;
+    this->isDFT  = other->isDFT;
+    this->guess_ = other->guess();
+    this->elecField_   = (other->elecField());
+    this->basisset_    = other->basisset();    
+    this->molecule_    = other->molecule();
+    this->fileio_      = other->fileio();
+    this->aointegrals_ = other->aointegrals();
 
-    auto NB   = this->nTCS_ * this->nBasis_;
-    auto NBSq = NB * NB;
-    if(getRank() == 0) {
-      this->fockA_ = 
-        std::unique_ptr<TMap>(
-            new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
-      this->moA_   = 
-        std::unique_ptr<TMap>(
-            new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
-      this->PTA_   = 
-        std::unique_ptr<TMap>(
-            new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
+    cout << "@@1" << endl;
+    auto NB = this->nBasis_*this->nTCS_;
+    auto NBSq = NB*NB;
+    this->allocOp();
+    cout << "@@2" << endl;
 
-      (*this->fockA_) = (*other->fockA_);
-      (*this->moA_)   = (*other->moA_);
-      (*this->PTA_)   = (*other->PTA_);
+    (*this->fockA_) = *other->fockA();
+    (*this->moA_  ) = *other->moA();
+    (*this->PTA_  ) = *other->PTA();
 
-      if(!this->isClosedShell && this->Ref_ != TCS ){
-        this->fockB_ = std::unique_ptr<TMap>(
-            new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
-        this->moB_   = std::unique_ptr<TMap>(
-            new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
-        this->PTB_   = std::unique_ptr<TMap>(
-            new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
-
-        (*this->fockB_) = (*other->fockB_);
-        (*this->moB_)   = (*other->moB_);
-        (*this->PTB_)   = (*other->PTB_);
-      }
+    if(!this->isClosedShell || this->nTCS_ == 2){
+      (*this->fockB_) = *other->fockB();
+      (*this->moB_  ) = *other->moB();
+      (*this->PTB_  ) = *other->PTB();
     }
-
-    this->elecField_   = other->elecField_;
-    this->basisset_    = other->basisset_;    
-    this->molecule_    = other->molecule_;
-    this->fileio_      = other->fileio_;
-    this->aointegrals_ = other->aointegrals_;
     
   };
 

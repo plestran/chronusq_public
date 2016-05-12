@@ -95,34 +95,35 @@ namespace ChronusQ {
     this->isScattered_ = 
       const_cast<Quantum<double>&>(other).isScattered();
 
-    auto NBT = const_cast<Quantum<double>&>(other).onePDMA()->rows(); 
-    auto NBTSq = NBT*NBT;
 
-    this->onePDMA_ = std::unique_ptr<ComplexMap>(
-        new ComplexMap( this->memManager_->malloc<dcomplex>(NBTSq),NBT,NBT)
-      );
-    this->onePDMA_->setZero();
+    auto NBT = const_cast<Quantum<double>&>(other).onePDMA()->rows(); 
+    this->alloc(NBT/this->nTCS_);
+
+  //this->onePDMA_ = std::unique_ptr<ComplexMap>(
+  //    new ComplexMap( this->memManager_->malloc<dcomplex>(NBTSq),NBT,NBT)
+  //  );
+  //this->onePDMA_->setZero();
 
     this->onePDMA_->real() = (*const_cast<Quantum<double>&>(other).onePDMA());
-    prettyPrintComplex(cout,*this->onePDMA_,"PA In Copy");
+    //prettyPrintComplex(cout,*this->onePDMA_,"PA In Copy");
 
     if(!this->isClosedShell || this->nTCS_ == 2){
-      auto NB  = const_cast<Quantum<double>&>(other).onePDMScalar()->rows(); 
-      auto NBSq = NB*NB; 
+    //auto NB  = const_cast<Quantum<double>&>(other).onePDMScalar()->rows(); 
+    //auto NBSq = NB*NB; 
 
-      this->onePDMB_ = std::unique_ptr<ComplexMap>(
-          new ComplexMap( this->memManager_->malloc<dcomplex>(NBTSq),NBT,NBT)
-        );
-      this->onePDMScalar_ = std::unique_ptr<ComplexMap>(
-          new ComplexMap( this->memManager_->malloc<dcomplex>(NBSq),NB,NB)
-        );
-      this->onePDMMz_ = std::unique_ptr<ComplexMap>(
-          new ComplexMap( this->memManager_->malloc<dcomplex>(NBSq),NB,NB)
-        );
+    //this->onePDMB_ = std::unique_ptr<ComplexMap>(
+    //    new ComplexMap( this->memManager_->malloc<dcomplex>(NBTSq),NBT,NBT)
+    //  );
+    //this->onePDMScalar_ = std::unique_ptr<ComplexMap>(
+    //    new ComplexMap( this->memManager_->malloc<dcomplex>(NBSq),NB,NB)
+    //  );
+    //this->onePDMMz_ = std::unique_ptr<ComplexMap>(
+    //    new ComplexMap( this->memManager_->malloc<dcomplex>(NBSq),NB,NB)
+    //  );
 
-      this->onePDMB_->setZero();
-      this->onePDMScalar_->setZero();
-      this->onePDMMz_->setZero();
+    //this->onePDMB_->setZero();
+    //this->onePDMScalar_->setZero();
+    //this->onePDMMz_->setZero();
 
       this->onePDMScalar_->real() = 
         (*const_cast<Quantum<double>&>(other).onePDMScalar());
@@ -133,15 +134,15 @@ namespace ChronusQ {
         this->onePDMB_->real() = 
           (*const_cast<Quantum<double>&>(other).onePDMB());
       else {
-        this->onePDMMx_ = std::unique_ptr<ComplexMap>(
-            new ComplexMap( this->memManager_->malloc<dcomplex>(NBSq),NB,NB)
-          );
-        this->onePDMMy_ = std::unique_ptr<ComplexMap>(
-            new ComplexMap( this->memManager_->malloc<dcomplex>(NBSq),NB,NB)
-          );
+      //this->onePDMMx_ = std::unique_ptr<ComplexMap>(
+      //    new ComplexMap( this->memManager_->malloc<dcomplex>(NBSq),NB,NB)
+      //  );
+      //this->onePDMMy_ = std::unique_ptr<ComplexMap>(
+      //    new ComplexMap( this->memManager_->malloc<dcomplex>(NBSq),NB,NB)
+      //  );
 
-        this->onePDMMx_->setZero();
-        this->onePDMMy_->setZero();
+      //this->onePDMMx_->setZero();
+      //this->onePDMMy_->setZero();
 
         this->onePDMMx_->real() = 
           (*const_cast<Quantum<double>&>(other).onePDMMx());

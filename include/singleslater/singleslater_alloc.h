@@ -29,6 +29,7 @@
 template<typename T>
 void SingleSlater<T>::alloc(){
   this->checkMeta();
+  Quantum<T>::alloc(this->nBasis_); // Allocate Den -> Quantum
   this->allocOp();
  
   if(getRank() == 0) {
@@ -80,7 +81,6 @@ void SingleSlater<T>::alloc(){
 
 template<typename T>
 void SingleSlater<T>::allocOp(){
-  Quantum<T>::alloc(this->nBasis_); // Allocate Den -> Quantum
   this->allocAlphaOp();
   if(!this->isClosedShell && this->Ref_ != TCS) 
     this->allocBetaOp();
