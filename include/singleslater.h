@@ -469,11 +469,9 @@ public:
     this->fileio_      = other->fileio();
     this->aointegrals_ = other->aointegrals();
 
-    cout << "@@1" << endl;
     auto NB = this->nBasis_*this->nTCS_;
     auto NBSq = NB*NB;
     this->allocOp();
-    cout << "@@2" << endl;
 
     (*this->fockA_) = *other->fockA();
     (*this->moA_  ) = *other->moA();

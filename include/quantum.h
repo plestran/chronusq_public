@@ -200,63 +200,23 @@ namespace ChronusQ {
       isScattered_(other.isScattered_),
       memManager_(other.memManager_) {
 
-    cout << "@1" << endl;
-    auto NBT = other.onePDMA_->rows(); 
-    cout << "@2" << endl;
-    auto NBTSq = NBT*NBT;
-    this->alloc(NBT/this->nTCS_);
-    cout << "@2" << endl;
-
-  //this->onePDMA_ = std::unique_ptr<ComplexMap>(
-  //    new ComplexMap( this->memManager_->malloc<dcomplex>(NBTSq),NBT,NBT)
-  //  );
-  //this->onePDMA_->setZero();
-
-    (*this->onePDMA_) = (*other.onePDMA_);
-    //prettyPrintComplex(cout,*this->onePDMA_,"PA In Copy");
-
-    if(!this->isClosedShell || this->nTCS_ == 2){
-    //auto NB  = const_cast<Quantum<double>&>(other).onePDMScalar()->rows(); 
-    //auto NBSq = NB*NB; 
-
-    //this->onePDMB_ = std::unique_ptr<ComplexMap>(
-    //    new ComplexMap( this->memManager_->malloc<dcomplex>(NBTSq),NBT,NBT)
-    //  );
-    //this->onePDMScalar_ = std::unique_ptr<ComplexMap>(
-    //    new ComplexMap( this->memManager_->malloc<dcomplex>(NBSq),NB,NB)
-    //  );
-    //this->onePDMMz_ = std::unique_ptr<ComplexMap>(
-    //    new ComplexMap( this->memManager_->malloc<dcomplex>(NBSq),NB,NB)
-    //  );
-
-    //this->onePDMB_->setZero();
-    //this->onePDMScalar_->setZero();
-    //this->onePDMMz_->setZero();
-
-      (*this->onePDMScalar_) = (*other.onePDMScalar_);
-      (*this->onePDMMz_)     = (*other.onePDMMz_);
-
-      if(this->nTCS_ == 1)
-        (*this->onePDMB_) = (*other.onePDMB_);
-      else {
-      //this->onePDMMx_ = std::unique_ptr<ComplexMap>(
-      //    new ComplexMap( this->memManager_->malloc<dcomplex>(NBSq),NB,NB)
-      //  );
-      //this->onePDMMy_ = std::unique_ptr<ComplexMap>(
-      //    new ComplexMap( this->memManager_->malloc<dcomplex>(NBSq),NB,NB)
-      //  );
-
-      //this->onePDMMx_->setZero();
-      //this->onePDMMy_->setZero();
-
-        (*this->onePDMMx_) = (*other.onePDMMx_);
-        (*this->onePDMMy_) = (*other.onePDMMy_);
-
-      } // NTCS check
-    } // if not RHF/KS
-
-    //this->onePDMA_->setZero();
-    //this->onePDMScalar_->setZero();
+      auto NBT = other.onePDMA_->rows(); 
+      auto NBTSq = NBT*NBT;
+      this->alloc(NBT/this->nTCS_);
+     
+     
+      (*this->onePDMA_) = (*other.onePDMA_);
+     
+      if(!this->isClosedShell || this->nTCS_ == 2){
+        (*this->onePDMScalar_) = (*other.onePDMScalar_);
+        (*this->onePDMMz_)     = (*other.onePDMMz_);
+        if(this->nTCS_ == 1)
+          (*this->onePDMB_) = (*other.onePDMB_);
+        else {
+          (*this->onePDMMx_) = (*other.onePDMMx_);
+          (*this->onePDMMy_) = (*other.onePDMMy_);
+        } // NTCS check
+      } // if not RHF/KS
     }
 
     template<typename U>
@@ -268,12 +228,10 @@ namespace ChronusQ {
       auto NBSq = NB*NB;
       auto NSq = N*N;
 
-      cout << "@@@1" << endl;
       this->onePDMA_ = 
         std::unique_ptr<TMap>(
             new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB)
         );
-      cout << "@@@2" << endl;
       this->onePDMA_->setZero();
       if(!this->isClosedShell && this->nTCS_ == 1){
         this->onePDMB_ = 

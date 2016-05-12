@@ -74,7 +74,6 @@ namespace ChronusQ {
   template<>
   template<>
   Quantum<dcomplex>::Quantum(const Quantum<double> &other){
-    cout << "HERE 3" << endl;
     this->elecDipole_            = 
       const_cast<Quantum<double>&>(other).elecDipole();
     this->elecQuadpole_          = 
@@ -99,51 +98,17 @@ namespace ChronusQ {
     auto NBT = const_cast<Quantum<double>&>(other).onePDMA()->rows(); 
     this->alloc(NBT/this->nTCS_);
 
-  //this->onePDMA_ = std::unique_ptr<ComplexMap>(
-  //    new ComplexMap( this->memManager_->malloc<dcomplex>(NBTSq),NBT,NBT)
-  //  );
-  //this->onePDMA_->setZero();
-
     this->onePDMA_->real() = (*const_cast<Quantum<double>&>(other).onePDMA());
-    //prettyPrintComplex(cout,*this->onePDMA_,"PA In Copy");
 
     if(!this->isClosedShell || this->nTCS_ == 2){
-    //auto NB  = const_cast<Quantum<double>&>(other).onePDMScalar()->rows(); 
-    //auto NBSq = NB*NB; 
-
-    //this->onePDMB_ = std::unique_ptr<ComplexMap>(
-    //    new ComplexMap( this->memManager_->malloc<dcomplex>(NBTSq),NBT,NBT)
-    //  );
-    //this->onePDMScalar_ = std::unique_ptr<ComplexMap>(
-    //    new ComplexMap( this->memManager_->malloc<dcomplex>(NBSq),NB,NB)
-    //  );
-    //this->onePDMMz_ = std::unique_ptr<ComplexMap>(
-    //    new ComplexMap( this->memManager_->malloc<dcomplex>(NBSq),NB,NB)
-    //  );
-
-    //this->onePDMB_->setZero();
-    //this->onePDMScalar_->setZero();
-    //this->onePDMMz_->setZero();
-
       this->onePDMScalar_->real() = 
         (*const_cast<Quantum<double>&>(other).onePDMScalar());
       this->onePDMMz_->real() = 
         (*const_cast<Quantum<double>&>(other).onePDMMz());
-
       if(this->nTCS_ == 1)
         this->onePDMB_->real() = 
           (*const_cast<Quantum<double>&>(other).onePDMB());
       else {
-      //this->onePDMMx_ = std::unique_ptr<ComplexMap>(
-      //    new ComplexMap( this->memManager_->malloc<dcomplex>(NBSq),NB,NB)
-      //  );
-      //this->onePDMMy_ = std::unique_ptr<ComplexMap>(
-      //    new ComplexMap( this->memManager_->malloc<dcomplex>(NBSq),NB,NB)
-      //  );
-
-      //this->onePDMMx_->setZero();
-      //this->onePDMMy_->setZero();
-
         this->onePDMMx_->real() = 
           (*const_cast<Quantum<double>&>(other).onePDMMx());
         this->onePDMMy_->real() = 

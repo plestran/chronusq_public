@@ -287,7 +287,6 @@ void SingleSlater<T>::initSCFMem2(){
   this->WORK_  = this->memManager_->template malloc<T>(this->LWORK_);
   if(typeid(T).hash_code() == typeid(dcomplex).hash_code())
     this->RWORK_ = this->memManager_->template malloc<double>(this->LRWORK_);
-  this->memManager_->printSummary(cout);
   
 }; //initSCFMem
 
