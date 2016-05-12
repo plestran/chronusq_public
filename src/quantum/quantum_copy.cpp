@@ -88,57 +88,33 @@ namespace ChronusQ {
       const_cast<Quantum<double>&>(other).isClosedShell;
     this->maxMultipole_          = 
       const_cast<Quantum<double>&>(other).maxMultipole(); 
+    this->memManager_ =
+      const_cast<Quantum<double>&>(other).memManager();
 
     this->isScattered_ = 
       const_cast<Quantum<double>&>(other).isScattered();
 
+
     auto NBT = const_cast<Quantum<double>&>(other).onePDMA()->rows(); 
-    auto NB  = const_cast<Quantum<double>&>(other).onePDMScalar()->rows(); 
-    auto NBTSq = NBT*NBT;
-    auto NBSq = NB*NB; 
+    this->alloc(NBT/this->nTCS_);
 
-    this->onePDMA_ = std::unique_ptr<ComplexMap>(
-        new ComplexMap( this->memManager_->malloc<dcomplex>(NBTSq),NBT,NBT)
-      );
+    this->onePDMA_->real() = (*const_cast<Quantum<double>&>(other).onePDMA());
 
-    this->onePDMA_->real() = 
-      (*const_cast<Quantum<double>&>(other).onePDMA());
-
-    if(!this->isClosedShell && this->nTCS_ != 2){
-      this->onePDMB_ = std::unique_ptr<ComplexMap>(
-          new ComplexMap( this->memManager_->malloc<dcomplex>(NBTSq),NBT,NBT)
-        );
-      this->onePDMB_->real() = 
-        (*const_cast<Quantum<double>&>(other).onePDMB());
-    }
-    this->onePDMScalar_ = std::unique_ptr<ComplexMap>(
-        new ComplexMap( this->memManager_->malloc<dcomplex>(NBSq),NB,NB)
-      );
-    this->onePDMScalar_->real() = 
-      (*const_cast<Quantum<double>&>(other).onePDMScalar());
-
-    if(!this->isClosedShell || this->nTCS_ == 2) {
-      this->onePDMMz_ = std::unique_ptr<ComplexMap>(
-          new ComplexMap( this->memManager_->malloc<dcomplex>(NBSq),NB,NB)
-        );
+    if(!this->isClosedShell || this->nTCS_ == 2){
+      this->onePDMScalar_->real() = 
+        (*const_cast<Quantum<double>&>(other).onePDMScalar());
       this->onePDMMz_->real() = 
         (*const_cast<Quantum<double>&>(other).onePDMMz());
-    }
+      if(this->nTCS_ == 1)
+        this->onePDMB_->real() = 
+          (*const_cast<Quantum<double>&>(other).onePDMB());
+      else {
+        this->onePDMMx_->real() = 
+          (*const_cast<Quantum<double>&>(other).onePDMMx());
+        this->onePDMMy_->real() = 
+          (*const_cast<Quantum<double>&>(other).onePDMMy());
 
-    if(this->nTCS_ == 2) {
-      this->onePDMMx_ = std::unique_ptr<ComplexMap>(
-          new ComplexMap( this->memManager_->malloc<dcomplex>(NBSq),NB,NB)
-        );
-
-      this->onePDMMy_ = std::unique_ptr<ComplexMap>(
-          new ComplexMap( this->memManager_->malloc<dcomplex>(NBSq),NB,NB)
-        );
-
-
-      this->onePDMMx_->real() = 
-        (*const_cast<Quantum<double>&>(other).onePDMMx());
-      this->onePDMMy_->real() = 
-        (*const_cast<Quantum<double>&>(other).onePDMMy());
-    };
-  };
+      } // NTCS check
+    } // if not RHF/KS
+  }; // COPY
 };

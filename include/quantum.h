@@ -197,33 +197,26 @@ namespace ChronusQ {
       nTCS_(other.nTCS_),
       isClosedShell(other.isClosedShell),
       maxMultipole_(other.maxMultipole_),
-      isScattered_(other.isScattered_) {
+      isScattered_(other.isScattered_),
+      memManager_(other.memManager_) {
 
-      auto NB = other.onePDMA_->cols(); 
-      auto NBSq = NB*NB; 
-
-      this->onePDMA_ = std::unique_ptr<TMap>(
-          new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
-      if(!this->isClosedShell && this->nTCS_ != 2)
-        this->onePDMB_ = std::unique_ptr<TMap>(
-          new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
-      NB = other.onePDMScalar_->cols(); 
-      NBSq = NB*NB; 
-      this->onePDMScalar_ = std::unique_ptr<TMap>(
-          new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
-
-      if(!this->isClosedShell || this->nTCS_ == 2)
-        this->onePDMMz_ = std::unique_ptr<TMap>(
-          new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
-      if(this->nTCS_ == 2) {
-        this->onePDMMx_ = std::unique_ptr<TMap>(
-          new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
-        this->onePDMMy_ = std::unique_ptr<TMap>(
-          new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
-      }
-
-      this->onePDMA_->setZero();
-      this->onePDMScalar_->setZero();
+      auto NBT = other.onePDMA_->rows(); 
+      auto NBTSq = NBT*NBT;
+      this->alloc(NBT/this->nTCS_);
+     
+     
+      (*this->onePDMA_) = (*other.onePDMA_);
+     
+      if(!this->isClosedShell || this->nTCS_ == 2){
+        (*this->onePDMScalar_) = (*other.onePDMScalar_);
+        (*this->onePDMMz_)     = (*other.onePDMMz_);
+        if(this->nTCS_ == 1)
+          (*this->onePDMB_) = (*other.onePDMB_);
+        else {
+          (*this->onePDMMx_) = (*other.onePDMMx_);
+          (*this->onePDMMy_) = (*other.onePDMMy_);
+        } // NTCS check
+      } // if not RHF/KS
     }
 
     template<typename U>
@@ -239,21 +232,32 @@ namespace ChronusQ {
         std::unique_ptr<TMap>(
             new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB)
         );
-      if(!this->isClosedShell)
+      this->onePDMA_->setZero();
+      if(!this->isClosedShell && this->nTCS_ == 1){
         this->onePDMB_ = 
           std::unique_ptr<TMap>(
             new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB)
           );
+        this->onePDMB_->setZero();
+      }
+
       this->onePDMScalar_ = std::unique_ptr<TMap>(
           new TMap(this->memManager_->template malloc<T>(NSq),N,N));
-      if((this->nTCS_ == 1 && !this->isClosedShell) || this->nTCS_ == 2)
+      this->onePDMScalar_->setZero();
+
+      if((this->nTCS_ == 1 && !this->isClosedShell) || this->nTCS_ == 2){
         this->onePDMMz_ = std::unique_ptr<TMap>(
             new TMap(this->memManager_->template malloc<T>(NSq),N,N));
+        this->onePDMMz_->setZero();
+      }
       if(this->nTCS_ == 2) {
         this->onePDMMx_ = std::unique_ptr<TMap>(
             new TMap(this->memManager_->template malloc<T>(NSq),N,N));
         this->onePDMMy_ = std::unique_ptr<TMap>(
             new TMap(this->memManager_->template malloc<T>(NSq),N,N));
+
+        this->onePDMMy_->setZero();
+        this->onePDMMx_->setZero();
       }
     };
 
@@ -323,6 +327,7 @@ namespace ChronusQ {
     inline TMap* onePDMMy(){ return onePDMMy_.get();};
     inline TMap* onePDMMz(){ return onePDMMz_.get();};
     inline bool     isScattered(){ return isScattered_;};
+    inline CQMemManager * memManager()     { return this->memManager_;     };
 
     inline std::array<double,3> elecDipole(){ return elecDipole_; };
     inline std::array<std::array<double,3>,3> elecQuadpole(){ 

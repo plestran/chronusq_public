@@ -50,52 +50,26 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other) :
     this->isHF   = other->isHF;
     this->isDFT  = other->isDFT;
     this->guess_ = other->guess();
-
-    auto NB = this->nBasis_*this->nTCS_;
-    auto NBSq = NB*NB;
-
-    if(getRank() == 0) {
-      this->fockA_    = std::unique_ptr<ComplexMap>(
-        new ComplexMap(this->memManager_->malloc<dcomplex>(NBSq),NB,NB)
-      );
-      this->moA_      = std::unique_ptr<ComplexMap>(
-        new ComplexMap(this->memManager_->malloc<dcomplex>(NBSq),NB,NB)
-      );
-      this->PTA_      = std::unique_ptr<ComplexMap>(
-        new ComplexMap(this->memManager_->malloc<dcomplex>(NBSq),NB,NB)
-      );
-    }
-
-    if(getRank() == 0) {
-      this->fockA_->real()       = *other->fockA();
-      this->moA_->real()         = *other->moA();
-      this->PTA_->real()         = *other->PTA();
-    }
-    if(this->Ref_ != isClosedShell && this->Ref_ != TCS ){
-      if(getRank() == 0) {
-        this->fockB_    = std::unique_ptr<ComplexMap>(
-          new ComplexMap(this->memManager_->malloc<dcomplex>(NBSq),NB,NB)
-        );
-        this->moB_      = std::unique_ptr<ComplexMap>(
-          new ComplexMap(this->memManager_->malloc<dcomplex>(NBSq),NB,NB)
-        );
-        this->PTB_      = std::unique_ptr<ComplexMap>(
-          new ComplexMap(this->memManager_->malloc<dcomplex>(NBSq),NB,NB)
-        );
-      }
-
-      if(getRank() == 0) {
-        this->fockB_->real()       = *other->fockB();
-        this->moB_->real()         = *other->moB();
-        this->PTB_->real()         = *other->PTB();
-      }
-    }
-
     this->elecField_   = (other->elecField());
     this->basisset_    = other->basisset();    
     this->molecule_    = other->molecule();
     this->fileio_      = other->fileio();
     this->aointegrals_ = other->aointegrals();
+
+    auto NB = this->nBasis_*this->nTCS_;
+    auto NBSq = NB*NB;
+    this->allocOp();
+
+    this->fockA_->real()       = *other->fockA();
+    this->moA_->real()         = *other->moA();
+    this->PTA_->real()         = *other->PTA();
+
+    if(!this->isClosedShell || this->nTCS_ == 2){
+      this->fockB_->real()       = *other->fockB();
+      this->moB_->real()         = *other->moB();
+      this->PTB_->real()         = *other->PTB();
+    }
+
 }
 
 template<>
