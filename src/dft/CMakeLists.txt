@@ -1,4 +1,4 @@
-add_library(dft SHARED slater.cpp vwn3.cpp vwn5.cpp)
+add_library(dft SHARED slater.cpp vwn3.cpp vwn5.cpp b88.cpp)
 
 if(APPLE)
 target_link_libraries(singleslater LINK_PUBLIC ${EXTERNAL_CQ_DEPS})

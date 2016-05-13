@@ -149,6 +149,7 @@ void SingleSlater<T>::formFock(){
     if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
 
     bool testNew = true;
+    bool isGGA   = true;
     if (this->isDFT){
 //    Timing
       std::chrono::high_resolution_clock::time_point start;
@@ -164,40 +165,98 @@ void SingleSlater<T>::formFock(){
       else {
         RealMatrix SCRATCH2(this->nBasis_,this->nBasis_);
         VectorXd   SCRATCH1(this->nBasis_);
-
+        int NDer = 0;
         auto valVxc = [&](ChronusQ::IntegrationPoint pt, 
-            KernelIntegrand<T> &result) {
-
-          SCRATCH1.setZero();
+        KernelIntegrand<T> &result) {
+        SCRATCH1.setZero();
+        RealMatrix SCRATCH2X(this->nBasis_,this->nBasis_);
+        RealMatrix SCRATCH2Y(this->nBasis_,this->nBasis_);
+        RealMatrix SCRATCH2Z(this->nBasis_,this->nBasis_);
+        VectorXd   SCRATCH1X(this->nBasis_);
+        VectorXd   SCRATCH1Y(this->nBasis_);
+        VectorXd   SCRATCH1Z(this->nBasis_);
+        SCRATCH1X.setZero();
+        SCRATCH1Y.setZero();
+        SCRATCH1Z.setZero();
+        std::array<double,3>  drhoA = {0.0,0.0,0.0}; ///< array pf density gradient components
+        if (isGGA){
+          NDer = 1;
+          cout << "New GGA" <<endl;
+        }
           cartGP GP = pt.pt;
           double rhoA;
           double rhoB;
+          double gammaAA;
+          double gammaBB;
+          double gammaAB;
           auto shMap = this->basisset_->MapGridBasis(GP); 
           if(shMap[0]) {return 0.0;}
           for(auto iShell = 0; iShell < this->basisset_->nShell(); iShell++){
             if(!shMap[iShell+1]) {continue;}
 
             int b_s = this->basisset_->mapSh2Bf(iShell);
-            int size= this->basisset_->shells(iShell).size();
+            int shSize= this->basisset_->shells(iShell).size();
 
             libint2::Shell shTmp = this->basisset_->shells(iShell);
-            double * buff = this->basisset_->basisDEval(0,shTmp,&pt.pt);
-            RealMap bMap(buff,size,1);
-            SCRATCH1.block(b_s,0,size,1) = bMap;
+            double * buff = this->basisset_->basisDEval(NDer,shTmp,&pt.pt);
+            RealMap bMap(buff,shSize,1);
+            SCRATCH1.block(b_s,0,shSize,1) = bMap;
+            if(NDer>0){
+              double * ds1EvalX = buff + shSize;
+              double * ds1EvalY = ds1EvalX + shSize;
+              double * ds1EvalZ = ds1EvalY + shSize;
+              RealMap bMapX(ds1EvalX,shSize,1);
+              SCRATCH1X.block(b_s,0,shSize,1) = bMapX;
+              RealMap bMapY(ds1EvalY,shSize,1);
+              SCRATCH1Y.block(b_s,0,shSize,1) = bMapY;
+              RealMap bMapZ(ds1EvalX,shSize,1);
+              SCRATCH1Z.block(b_s,0,shSize,1) = bMapZ;
+              delete []  ds1EvalX;
+              delete []  ds1EvalY;
+              delete []  ds1EvalZ;
+            }
 
             delete [] buff;
           };
 
-          if(SCRATCH1.norm() < 1e-8) return 0.0;
+//          if(SCRATCH1.norm() < 1e-8) return 0.0;
           SCRATCH2 = SCRATCH1 * SCRATCH1.transpose();
+          if(NDer>0){
+            //Closed Shell
+            SCRATCH2X = SCRATCH1X * SCRATCH1X.transpose();
+            SCRATCH2Y = SCRATCH1Y * SCRATCH1Y.transpose();
+            SCRATCH2Z = SCRATCH1Z * SCRATCH1Z.transpose();
+//            drhoA[0] = 2.0*(SCRATCH2X.frobInner(this->onePDMA()->conjugate()
+///2.0));
+//            drhoA[1] = 2.0*(SCRATCH2Y.frobInner(this->onePDMA()->conjugate()
+//             /2.0));
+//            drhoA[2] = 2.0*(SCRATCH2Z.frobInner(this->onePDMA()->conjugate()
+//             /2.0));
+            gammaAA = (drhoA[0]*drhoA[0] + drhoA[1]*drhoA[1] + 
+              drhoA[2]*drhoA[2]);
+            gammaBB = gammaAA;
+            gammaAB = gammaAA;
+          }
           double rhoT = this->template computeProperty<double,TOTAL>(SCRATCH2);
           double rhoS = this->template computeProperty<double,MZ>(SCRATCH2);
           rhoA = 0.5 * (rhoT + rhoS);
           rhoB = 0.5 * (rhoT - rhoS);
 
           for(auto i = 0; i < this->dftFunctionals_.size(); i++){
-            DFTFunctional::DFTInfo kernelXC = 
+          DFTFunctional::DFTInfo kernelXC;
+          if (NDer>0){
+           kernelXC = 
+           this->dftFunctionals_[i]->eval(rhoA,rhoB,gammaAA,gammaBB);
+          result.VXCA.real() += 2.0*drhoA[0]* SCRATCH2X 
+            * kernelXC.ddgammaAA;
+          result.VXCA.real() += 2.0*drhoA[1]* SCRATCH2Y 
+            * kernelXC.ddgammaAA;
+          result.VXCA.real() += 2.0*drhoA[2]* SCRATCH2Z 
+            * kernelXC.ddgammaAA;
+          }else{
+           kernelXC = 
               this->dftFunctionals_[i]->eval(rhoA, rhoB);
+          }
             result.VXCA.real()   += pt.weight * SCRATCH2 * kernelXC.ddrhoA; 
             result.Energy += pt.weight * (rhoA+rhoB) * kernelXC.eps;
           }
