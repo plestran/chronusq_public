@@ -315,6 +315,7 @@ void SingleSlater<T>::SCF2(){
 
     if(PyErr_CheckSignals() == -1)
       CErr("Keyboard Interrupt in SCF!",this->fileio_->out);
+
     if(iter == this->iDIISStart_ && this->printLevel_ > 0)
       this->fileio_->out << 
         std::setw(2) << " " <<
@@ -334,8 +335,14 @@ void SingleSlater<T>::SCF2(){
 
     if(this->isConverged) break;
   };
+  // WARNING: MO Coefficients are not transformed to and from the
+  // orthonormal basis throughout the SCF and must be transformed
+  // back at the end for and post SCF to be functional
+  this->backTransformMOs();
 
   this->cleanupSCFMem2();
+  this->fixPhase();
+
   if(!this->isConverged)
     CErr("SCF Failed to converge within maximum number of iterations",
         this->fileio_->out);
@@ -356,29 +363,6 @@ void SingleSlater<T>::SCF2(){
 
 template<typename T>
 void SingleSlater<T>::cleanupSCFMem2(){
-  /*
-//  delete[] this->FpAlphaMem_    
-  delete[] this->POldAlphaMem_;  
-  delete[] this->ErrorAlphaMem_; 
-  delete[] this->FADIIS_;        
-  if(this->nTCS_ == 2 && !this->isClosedShell) { 
-//    delete[] this->FpBetaMem_;    
-    delete[] this->POldBetaMem_;  
-    delete[] this->ErrorBetaMem_; 
-    delete[] this->FBDIIS_;       
-  }
-
-  if(this->Ref_ == CUHF){ 
-    delete[] this->delFMem_;   
-    delete[] this->lambdaMem_; 
-    delete[] this->PNOMem_;    
-    delete[] this->occNumMem_; 
-  }
-
-  delete[] this->WORK_;  
-  if(typeid(T).hash_code() == typeid(dcomplex).hash_code()) 
-    delete[] this->RWORK_; 
-    */
                                   
   auto NTCSxNBASIS = this->nTCS_ * this->nBasis_;
   auto NSQ = NTCSxNBASIS  * NTCSxNBASIS;

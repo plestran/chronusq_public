@@ -74,6 +74,7 @@ class SingleSlater : public Quantum<T> {
 
 
   std::unique_ptr<TMap>  NBSqScratch_;
+  std::unique_ptr<TMap>  NBSqScratch2_;
 
   // Internal Storage
   std::unique_ptr<TMatrix>  coulombA_;   ///< deprecated 
@@ -215,6 +216,7 @@ class SingleSlater : public Quantum<T> {
   void cleanupSCFMem2();
   void copyDen();
   void genDComm2(int);
+  void backTransformMOs();
 
   double denTol_;
   double eneTol_;

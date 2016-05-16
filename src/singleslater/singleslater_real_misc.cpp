@@ -164,4 +164,37 @@ void SingleSlater<double>::fixPhase(){
    }
 };
 
+template<>
+void SingleSlater<double>::backTransformMOs(){
+  if(this->nTCS_ == 1) {
+    this->NBSqScratch_->noalias() = 
+      (*this->aointegrals_->ortho1_) * (*this->moA_);
+    (*this->moA_) = (*this->NBSqScratch_);
+
+    if(!this->isClosedShell){
+      this->NBSqScratch_->noalias() = 
+        (*this->aointegrals_->ortho1_) * (*this->moB_);
+      (*this->moB_) = (*this->NBSqScratch_);
+    }
+  } else {
+    Eigen::Map<RealMatrix,0,Eigen::Stride<Dynamic,Dynamic> >
+      MOA(this->moA_->data(),this->nBasis_,this->nTCS_*this->nBasis_,
+          Eigen::Stride<Dynamic,Dynamic>(this->nTCS_*this->nBasis_,2));
+    Eigen::Map<RealMatrix,0,Eigen::Stride<Dynamic,Dynamic> >
+      MOB(this->moA_->data()+1,this->nBasis_,this->nTCS_*this->nBasis_,
+          Eigen::Stride<Dynamic,Dynamic>(this->nTCS_*this->nBasis_,2));
+
+    (*this->NBSqScratch_) = MOA;
+    this->NBSqScratch2_->noalias() =
+      (*this->aointegrals_->ortho1_) * (*this->NBSqScratch_);
+    MOA = (*this->NBSqScratch2_);
+
+    (*this->NBSqScratch_) = MOB;
+    this->NBSqScratch2_->noalias() =
+      (*this->aointegrals_->ortho1_) * (*this->NBSqScratch_);
+    MOB = (*this->NBSqScratch2_);
+    
+  }
+};
+
 } // Namespace ChronusQ

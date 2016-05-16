@@ -93,6 +93,10 @@ void SingleSlater<T>::allocOp(){
     std::unique_ptr<TMap>(new TMap(
           this->memManager_->template malloc<T>(NBSq),
           this->nBasis_,this->nBasis_));
+  this->NBSqScratch2_ = 
+    std::unique_ptr<TMap>(new TMap(
+          this->memManager_->template malloc<T>(NBSq),
+          this->nBasis_,this->nBasis_));
   this->fockOrthoA_ = 
     std::unique_ptr<TMap>(
         new TMap(
