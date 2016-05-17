@@ -579,6 +579,10 @@ public:
 
   inline TMap* fockA()                { return this->fockA_.get();    };
   inline TMap* fockB()                { return this->fockB_.get();    };
+  inline TMap* fockScalar()           { return this->fockScalar_.get();};
+  inline TMap* fockMz()           { return this->fockMz_.get();};
+  inline TMap* fockMy()           { return this->fockMy_.get();};
+  inline TMap* fockMx()           { return this->fockMx_.get();};
   inline TMap* coulombA()             { return this->coulombA_.get(); };
   inline TMap* coulombB()             { return this->coulombB_.get(); };
   inline TMap* exchangeA()            { return this->exchangeA_.get();};

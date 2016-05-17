@@ -7,7 +7,7 @@
 using namespace ChronusQ;
 
 enum MOLECULE_PRESETS {
-  WATER, HE,SO
+  WATER, HE,SO,Li
 };
 
 template<MOLECULE_PRESETS T>
@@ -49,6 +49,18 @@ void loadPresets<SO>(Molecule &mol){
 //  mol.setCart(0,0.000000000 ,-0.00000000000, 0.0);
   mol.setCart(0,0.000000000 ,0.00000000000, 0.0);
 };
+
+template<>
+void loadPresets<Li>(Molecule &mol){
+  mol.setNAtoms(1);
+  mol.setCharge(0);
+  mol.setNTotalE(3);
+  mol.setMultip(2);
+  mol.alloc();
+  mol.setIndex(0,HashAtom("Li",0));
+  mol.setCart(0,0.000000000 ,0.00000000000, 0.0);
+};
+
 
 int main(int argc, char **argv){
   auto gaussian = [&](cartGP pt) -> double {
@@ -216,13 +228,13 @@ int main(int argc, char **argv){
 
 
 
+  CQMemManager memManager;
   Molecule molecule;
   BasisSet basis;
   AOIntegrals aoints;
   MOIntegrals<double> moints;
   SingleSlater<double> singleSlater;
   Response<double> resp;
-  CQMemManager memManager;
   FileIO fileio("test.inp","test.out");
 
   memManager.setTotalMem(256e6);
@@ -231,16 +243,14 @@ int main(int argc, char **argv){
   fileio.iniStdGroups();
   CQSetNumThreads(1);
   
-//  loadPresets<WATER>(molecule);
-//loadPresets<HE>(molecule);
-  loadPresets<SO>(molecule);
+  loadPresets<Li>(molecule);
   molecule.convBohr();
   molecule.computeNucRep();
   molecule.computeRij();
   molecule.computeI();
 
-  singleSlater.setRef(SingleSlater<double>::RHF);
-  singleSlater.isClosedShell = true;
+  singleSlater.setRef(SingleSlater<double>::UHF);
+  singleSlater.isClosedShell = false;
 
   basis.findBasisFile("sto3g");
 //  basis.findBasisFile("6-31g");
@@ -270,238 +280,118 @@ int main(int argc, char **argv){
   singleSlater.computeProperties();
   singleSlater.printProperties();
 
-  RealMatrix SCRATCH2(singleSlater.nBasis(),singleSlater.nBasis());
-  VectorXd   SCRATCH1(singleSlater.nBasis());
+  SingleSlater<double> newSS;
+  newSS.setRef(SingleSlater<double>::TCS);
+  newSS.isClosedShell = false;
+  newSS.setNTCS(2);
+  newSS.communicate(molecule,basis,aoints,fileio,memManager);
+  newSS.initMeta();
+  newSS.genMethString();
+  newSS.alloc();
 
+  (*newSS.onePDMScalar()) = (*singleSlater.onePDMScalar());
+  (*newSS.onePDMMz()) = (*singleSlater.onePDMMz());
+  newSS.gatherDensity();
+  prettyPrintTCS(cout,*newSS.onePDMA(),"PA");
+  prettyPrint(cout,*singleSlater.onePDMA(),"PA");
+  prettyPrint(cout,*singleSlater.onePDMB(),"PB");
 
-  std::chrono::duration<double> T1; 
-  std::chrono::duration<double> T2; 
-  std::chrono::duration<double> T3; 
-  basis.radcut(1e-10,50,1e-7);
-  auto density = [&](IntegrationPoint pt, double &result) {
-    // Evaluate the basis product in SCRATCH
-    auto t1s = std::chrono::high_resolution_clock::now();
-    cartGP GP = pt.pt;
-    auto shMap = basis.MapGridBasis(GP); 
-//    if(shMap[0]) return 0.0;
-    for(auto iShell = 0; iShell < basis.nShell(); iShell++){
-      if(!shMap[iShell+1]) continue;
-      int b_s = basis.mapSh2Bf(iShell);
-      int size= basis.shells(iShell).size();
+  newSS.haveMO = true;
+  newSS.haveDensity = true;
+  cout << "HERE" << endl;
+  newSS.formFock();
+  cout << "HERE" << endl;
+  prettyPrintTCS(cout,*newSS.fockA(),"FA");
+  prettyPrint(cout,*singleSlater.fockA(),"FA");
+  prettyPrint(cout,*singleSlater.fockB(),"FB");
 
-      libint2::Shell shTmp = basis.shells(iShell);
-      double * buff = basis.basisDEval(0,shTmp,&pt.pt);
-      RealMap bMap(buff,size,1);
-      SCRATCH1.block(b_s,0,size,1) = bMap;
+  RealMatrix TMPAA =  
+    (*singleSlater.fockA()) * (*aoints.overlap_) * (*singleSlater.onePDMA());
+  RealMatrix TMPBB =  
+    (*singleSlater.fockB()) * (*aoints.overlap_) * (*singleSlater.onePDMB());
 
-      delete [] buff;
-    };
-    auto t2s = std::chrono::high_resolution_clock::now();
+  RealMatrix TMPSS = 
+    (*newSS.fockScalar()) * (*aoints.overlap_) * (*newSS.onePDMScalar());
+  RealMatrix TMPZZ = 
+    (*newSS.fockMz()) * (*aoints.overlap_) * (*newSS.onePDMMz());
+  RealMatrix TMPYY = // Need -?
+    (*newSS.fockMy()) * (*aoints.overlap_) * (*newSS.onePDMMy());
+  RealMatrix TMPXX = 
+    (*newSS.fockMx()) * (*aoints.overlap_) * (*newSS.onePDMMx());
 
-    if(SCRATCH1.norm() < 1e-8) return 0.0;
-    SCRATCH2 = SCRATCH1 * SCRATCH1.transpose();
-   
-    auto t3s = std::chrono::high_resolution_clock::now();
-    result += pt.weight * singleSlater.computeProperty<double,TOTAL>(SCRATCH2); 
-    auto t3f = std::chrono::high_resolution_clock::now();
+  RealMatrix TMPSZ = 
+    (*newSS.fockScalar()) * (*aoints.overlap_) * (*newSS.onePDMMz());
+  RealMatrix TMPSY = 
+    (*newSS.fockScalar()) * (*aoints.overlap_) * (*newSS.onePDMMy());
+  RealMatrix TMPSX = 
+    (*newSS.fockScalar()) * (*aoints.overlap_) * (*newSS.onePDMMx());
 
-    T1 += t2s - t1s;
-    T2 += t3s - t2s;
-    T3 += t3f - t3s;
-  };
+  RealMatrix TMPZS = 
+    (*newSS.fockMz()) * (*aoints.overlap_) * (*newSS.onePDMScalar());
+  RealMatrix TMPYS = 
+    (*newSS.fockMy()) * (*aoints.overlap_) * (*newSS.onePDMScalar());
+  RealMatrix TMPXS = 
+    (*newSS.fockMx()) * (*aoints.overlap_) * (*newSS.onePDMScalar());
 
+  RealMatrix TMPXZ = 
+    (*newSS.fockMx()) * (*aoints.overlap_) * (*newSS.onePDMMz());
+  RealMatrix TMPZX = 
+    (*newSS.fockMz()) * (*aoints.overlap_) * (*newSS.onePDMMx());
 
+  RealMatrix TMPYZ = 
+    (*newSS.fockMy()) * (*aoints.overlap_) * (*newSS.onePDMMz());
+  RealMatrix TMPZY = 
+    (*newSS.fockMz()) * (*aoints.overlap_) * (*newSS.onePDMMy());
 
-  auto numOverlap = [&](IntegrationPoint pt, RealMatrix &result) {
-    // Evaluate the basis product in SCRATCH
-    for(auto iShell = 0; iShell < basis.nShell(); iShell++){
-      int b_s = basis.mapSh2Bf(iShell);
-      int size= basis.shells(iShell).size();
+  RealMatrix TMPXY = 
+    (*newSS.fockMx()) * (*aoints.overlap_) * (*newSS.onePDMMy());
+  RealMatrix TMPYX = 
+    (*newSS.fockMy()) * (*aoints.overlap_) * (*newSS.onePDMMx());
 
-      libint2::Shell shTmp = basis.shells(iShell);
-      double * buff = basis.basisDEval(0,shTmp,
-          &pt.pt);
-      RealMap bMap(buff,size,1);
-      SCRATCH1.block(b_s,0,size,1) = bMap;
+//RealMatrix CommI = TMPSS + TMPZZ + TMPXX + TMPYY;
+//RealMatrix CommZ = TMPSZ + TMPZS - TMPXY + TMPYX;
+//RealMatrix CommX = TMPSX + TMPXS - TMPYZ + TMPZY;
+//RealMatrix CommY = TMPSY + TMPYS + TMPZX - TMPXZ;
+  RealMatrix CommI = TMPSS + TMPZZ;
+  RealMatrix CommZ = TMPSZ + TMPZS;
+  RealMatrix CommX = TMPSX + TMPXS - TMPYZ + TMPZY;
+  RealMatrix CommY = TMPSY + TMPYS + TMPZX - TMPXZ;
 
-      delete [] buff;
-    };
+  cout << " TMPSS   " <<  TMPSS.norm() << endl; 
+  cout << " TMPZZ   " <<  TMPZZ.norm() << endl; 
+  cout << " TMPYY   " <<  TMPYY.norm() << endl; 
+  cout << " TMPXX   " <<  TMPXX.norm() << endl; 
+  cout << " TMPSZ   " <<  TMPSZ.norm() << endl; 
+  cout << " TMPSY   " <<  TMPSY.norm() << endl; 
+  cout << " TMPSX   " <<  TMPSX.norm() << endl; 
+  cout << " TMPZS   " <<  TMPZS.norm() << endl; 
+  cout << " TMPYS   " <<  TMPYS.norm() << endl; 
+  cout << " TMPXS   " <<  TMPXS.norm() << endl; 
+  cout << " TMPXZ   " <<  TMPXZ.norm() << endl; 
+  cout << " TMPZX   " <<  TMPZX.norm() << endl; 
+  cout << " TMPYZ   " <<  TMPYZ.norm() << endl; 
+  cout << " TMPZY   " <<  TMPZY.norm() << endl; 
+  cout << " TMPXY   " <<  TMPXY.norm() << endl; 
+  cout << " TMPYX   " <<  TMPYX.norm() << endl; 
 
-    SCRATCH2 = SCRATCH1 * SCRATCH1.transpose();
-    result += pt.weight * SCRATCH2 ;
-  };
+  RealMatrix CommTotal(*newSS.onePDMA());
+  CommTotal.setZero();
 
-  std::vector<std::array<double,3>> atomicCenters;
+  std::vector<std::reference_wrapper<RealMatrix>> comComp;
+  comComp.emplace_back(CommI);
+  comComp.emplace_back(CommZ);
+  comComp.emplace_back(CommY);
+  comComp.emplace_back(CommX);
 
-  for(auto iAtm = 0; iAtm < molecule.nAtoms(); iAtm++){
-    atomicCenters.push_back(
-        {(*molecule.cart())(0,iAtm),
-         (*molecule.cart())(1,iAtm),
-         (*molecule.cart())(2,iAtm)}
-    );
-  //cout << atomicCenters[iAtm][0] << "\t";
-  //cout << atomicCenters[iAtm][1] << "\t";
-  //cout << atomicCenters[iAtm][2] << "\t";
-  };
+  Quantum<double>::spinGather(CommTotal,comComp);
 
-
-  double rho = 0;
-  RealMatrix NS(singleSlater.nBasis(),singleSlater.nBasis());
-  NS.setZero();
-  cout << "APE " << endl;
-
-  auto t4s = std::chrono::high_resolution_clock::now();
-  AtomicGrid AGrid(100,590,GAUSSCHEBFST,LEBEDEV,BECKE,atomicCenters,0,1.0,
-      false);
-
-  for(auto iAtm = 0; iAtm < molecule.nAtoms(); iAtm++){
-    AGrid.center() = iAtm;
-    AGrid.scalingFactor()=0.5*elements[molecule.index(iAtm)].sradius/phys.bohr;
-    AGrid.integrate<double>(density,rho);
-  };
-  auto t4f = std::chrono::high_resolution_clock::now();
-  std::chrono::duration<double> T4 = t4f - t4s;
-
-  //prettyPrint(cout,4*math.pi*NS,"NS");
-  //prettyPrint(cout,*aoints.overlap_,"S");
-  cout << "RHO " << 4*math.pi*rho << endl;
-  cout << "T1 " << T1.count() << endl;
-  cout << "T2 " << T2.count() << endl;
-  cout << "T3 " << T3.count() << endl;
-  cout << "T4 " << T4.count() << endl;
-
-  VectorXd SCRATCHDX(singleSlater.nBasis());
-  VectorXd SCRATCHDY(singleSlater.nBasis());
-  VectorXd SCRATCHDZ(singleSlater.nBasis());
-
-  libint2::Engine engine(libint2::Operator::nuclear,1,0,0);
-  engine.set_precision(0.0);
-
-  auto unContractedShells = basis.uncontractBasis();
-  int nUncontracted = 0;
-  for(auto i : unContractedShells) nUncontracted += i.size();
-
-  VectorXd SCRATCH1UnContracted(nUncontracted);
-  RealMatrix SCRATCH2UnContracted(nUncontracted,nUncontracted);
-  VectorXd SCRATCHDXUnContracted(nUncontracted);
-  VectorXd SCRATCHDYUnContracted(nUncontracted);
-  VectorXd SCRATCHDZUnContracted(nUncontracted);
-
-  auto PVP = [&](IntegrationPoint pt, std::vector<RealMatrix> &result) {
-    for(auto iShell = 0, b_s = 0; iShell < unContractedShells.size();
-         b_s += unContractedShells[iShell].size(),++iShell) {
-      int size= unContractedShells[iShell].size();
-
-      double * buff = basis.basisDEval(1,unContractedShells[iShell], &pt.pt);
-
-      RealMap bMap( buff         ,size,1);
-      RealMap dxMap(buff + size  ,size,1);
-      RealMap dyMap(buff + 2*size,size,1);
-      RealMap dzMap(buff + 3*size,size,1);
-
-      SCRATCH1UnContracted.block( b_s,0,size,1) = bMap;
-      SCRATCHDXUnContracted.block(b_s,0,size,1) = dxMap;
-      SCRATCHDYUnContracted.block(b_s,0,size,1) = dyMap;
-      SCRATCHDZUnContracted.block(b_s,0,size,1) = dzMap;
-
-      delete [] buff;
-    };
-
-    std::vector<std::pair<double,std::array<double,3>>> q;
-    q.push_back(
-      {1.0, {{bg::get<0>(pt.pt),bg::get<1>(pt.pt),bg::get<2>(pt.pt)}}});
-    engine.set_params(q);
-
-    for(auto iAtm = 0; iAtm < molecule.nAtoms(); iAtm++){
-
-      // Delta Function Nuclei
-      /*
-      std::array<double,3> C = molecule.nucShell(iAtm).O;
-      double XC = bg::get<0>(pt.pt) - C[0];
-      double YC = bg::get<1>(pt.pt) - C[1];
-      double ZC = bg::get<2>(pt.pt) - C[2];
-      double RC = std::sqrt(XC*XC + YC*YC + ZC*ZC);
-
-      double gamma = -elements[molecule.index(iAtm)].atomicNumber / RC;
-      result[0] += pt.weight * (gamma) * SCRATCH1 * SCRATCH1.transpose();
-      */
-
-      // Gaussian Nuclei
-      const double * gamma = engine.compute(molecule.nucShell(iAtm),
-          libint2::Shell::unit());
-      Eigen::internal::set_is_malloc_allowed(false);
-      SCRATCH2UnContracted.noalias() = SCRATCH1UnContracted * SCRATCH1UnContracted.transpose();
-      result[0].noalias() += (pt.weight * (*gamma)) * SCRATCH2UnContracted;
-
-      SCRATCH2UnContracted.noalias() = SCRATCHDXUnContracted * SCRATCHDXUnContracted.transpose();
-      result[1].noalias() += (pt.weight * (*gamma)) * SCRATCH2UnContracted;
-
-      SCRATCH2UnContracted.noalias() = SCRATCHDXUnContracted * SCRATCHDYUnContracted.transpose();
-      result[2].noalias() += (pt.weight * (*gamma)) * SCRATCH2UnContracted;
-
-      SCRATCH2UnContracted.noalias() = SCRATCHDXUnContracted * SCRATCHDZUnContracted.transpose();
-      result[3].noalias() += (pt.weight * (*gamma)) * SCRATCH2UnContracted;
-
-      SCRATCH2UnContracted.noalias() = SCRATCHDYUnContracted * SCRATCHDXUnContracted.transpose();
-      result[4].noalias() += (pt.weight * (*gamma)) * SCRATCH2UnContracted;
-
-      SCRATCH2UnContracted.noalias() = SCRATCHDYUnContracted * SCRATCHDYUnContracted.transpose();
-      result[5].noalias() += (pt.weight * (*gamma)) * SCRATCH2UnContracted;
-
-      SCRATCH2UnContracted.noalias() = SCRATCHDYUnContracted * SCRATCHDZUnContracted.transpose();
-      result[6].noalias() += (pt.weight * (*gamma)) * SCRATCH2UnContracted;
-
-      SCRATCH2UnContracted.noalias() = SCRATCHDZUnContracted * SCRATCHDXUnContracted.transpose();
-      result[7].noalias() += (pt.weight * (*gamma)) * SCRATCH2UnContracted;
-
-      SCRATCH2UnContracted.noalias() = SCRATCHDZUnContracted * SCRATCHDYUnContracted.transpose();
-      result[8].noalias() += (pt.weight * (*gamma)) * SCRATCH2UnContracted;
-
-      SCRATCH2UnContracted.noalias() = SCRATCHDZUnContracted * SCRATCHDZUnContracted.transpose();
-      result[9].noalias() += (pt.weight * (*gamma)) * SCRATCH2UnContracted;
-
-
-    // This allocates temporary mem in Eigen
-    //result[0].noalias() += (pt.weight * (*gamma)) * SCRATCH1 * SCRATCH1.transpose();
-    //result[1].noalias() += (pt.weight * (*gamma)) * SCRATCHDX * SCRATCHDX.transpose();
-    //result[2].noalias() += (pt.weight * (*gamma)) * SCRATCHDX * SCRATCHDY.transpose();
-    //result[3].noalias() += (pt.weight * (*gamma)) * SCRATCHDX * SCRATCHDZ.transpose();
-    //result[4].noalias() += (pt.weight * (*gamma)) * SCRATCHDY * SCRATCHDX.transpose();
-    //result[5].noalias() += (pt.weight * (*gamma)) * SCRATCHDY * SCRATCHDY.transpose();
-    //result[6].noalias() += (pt.weight * (*gamma)) * SCRATCHDY * SCRATCHDZ.transpose();
-    //result[7].noalias() += (pt.weight * (*gamma)) * SCRATCHDZ * SCRATCHDX.transpose();
-    //result[8].noalias() += (pt.weight * (*gamma)) * SCRATCHDZ * SCRATCHDY.transpose();
-    //result[9].noalias() += (pt.weight * (*gamma)) * SCRATCHDZ * SCRATCHDZ.transpose();
-      Eigen::internal::set_is_malloc_allowed(true);
-    }
-
-  };
-
-  std::vector<RealMatrix> numPot(10,RealMatrix::Zero(nUncontracted,
-        nUncontracted));
-
-  for(auto iAtm = 0; iAtm < molecule.nAtoms(); iAtm++){
-    AGrid.center() = iAtm;
-    AGrid.scalingFactor()=0.5*elements[molecule.index(iAtm)].sradius/phys.bohr;
-    AGrid.integrate<std::vector<RealMatrix>>(PVP,numPot);
-  };
-
-  for(auto i = 0; i < 10; i++) numPot[i] *= 4 * math.pi;
-
-  prettyPrint(cout,(*aoints.potential_),"V");
-  prettyPrint(cout,numPot[0],"VN",17);
-  prettyPrint(cout,numPot[1],"XX",17);
-  prettyPrint(cout,numPot[2],"XY",17);
-  prettyPrint(cout,numPot[3],"XZ",17);
-  prettyPrint(cout,numPot[4],"YX",17);
-  prettyPrint(cout,numPot[5],"YY",17);
-  prettyPrint(cout,numPot[6],"YZ",17);
-  prettyPrint(cout,numPot[7],"ZX",17);
-  prettyPrint(cout,numPot[8],"ZY",17);
-  prettyPrint(cout,numPot[9],"ZZ",17);
-  cout << std::scientific << endl;
-  prettyPrint(cout,numPot[1] + numPot[5] + numPot[9],"SCALAR",17);
-
+  prettyPrint(cout,TMPAA,"COMMAA");
+  prettyPrint(cout,TMPBB,"COMMBB");
+  prettyPrintTCS(cout,0.5*CommTotal,"Comm");
+  prettyPrint(cout,CommI,"I");
+  prettyPrint(cout,CommX,"X");
+  prettyPrint(cout,CommY,"Y");
+  prettyPrint(cout,CommZ,"Z");
 
   finalizeCQ();
   return 0;
