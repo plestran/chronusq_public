@@ -289,21 +289,33 @@ int main(int argc, char **argv){
   newSS.genMethString();
   newSS.alloc();
 
+  Eigen::Map<RealMatrix,0,Eigen::Stride<Dynamic,Dynamic> >
+    CA(newSS.moA()->data(),basis.nBasis(),2*basis.nBasis(),
+        Eigen::Stride<Dynamic,Dynamic>(2*basis.nBasis(),2));
+  Eigen::Map<RealMatrix,0,Eigen::Stride<Dynamic,Dynamic> >
+    CB(newSS.moA()->data()+1,basis.nBasis(),2*basis.nBasis(),
+        Eigen::Stride<Dynamic,Dynamic>(2*basis.nBasis(),2));
+
   (*newSS.onePDMScalar()) = (*singleSlater.onePDMScalar());
   (*newSS.onePDMMz()) = (*singleSlater.onePDMMz());
+
+//(*newSS.onePDMMx()) = (*newSS.onePDMMz());
+//newSS.onePDMMz()->setZero();
+
   newSS.gatherDensity();
-  prettyPrintTCS(cout,*newSS.onePDMA(),"PA");
-  prettyPrint(cout,*singleSlater.onePDMA(),"PA");
-  prettyPrint(cout,*singleSlater.onePDMB(),"PB");
+//prettyPrintTCS(cout,*newSS.onePDMA(),"PA");
+//prettyPrint(cout,*singleSlater.onePDMA(),"PA");
+//prettyPrint(cout,*singleSlater.onePDMB(),"PB");
 
   newSS.haveMO = true;
   newSS.haveDensity = true;
-  cout << "HERE" << endl;
   newSS.formFock();
-  cout << "HERE" << endl;
-  prettyPrintTCS(cout,*newSS.fockA(),"FA");
-  prettyPrint(cout,*singleSlater.fockA(),"FA");
-  prettyPrint(cout,*singleSlater.fockB(),"FB");
+//prettyPrintTCS(cout,*newSS.fockA(),"FA");
+//prettyPrint(cout,*singleSlater.fockA(),"FA");
+//prettyPrint(cout,*singleSlater.fockB(),"FB");
+  
+  newSS.computeEnergy();
+  cout << "E = " << newSS.totalEnergy << endl;
 
   RealMatrix TMPAA =  
     (*singleSlater.fockA()) * (*aoints.overlap_) * (*singleSlater.onePDMA());
@@ -348,12 +360,8 @@ int main(int argc, char **argv){
   RealMatrix TMPYX = 
     (*newSS.fockMy()) * (*aoints.overlap_) * (*newSS.onePDMMx());
 
-//RealMatrix CommI = TMPSS + TMPZZ + TMPXX + TMPYY;
-//RealMatrix CommZ = TMPSZ + TMPZS - TMPXY + TMPYX;
-//RealMatrix CommX = TMPSX + TMPXS - TMPYZ + TMPZY;
-//RealMatrix CommY = TMPSY + TMPYS + TMPZX - TMPXZ;
-  RealMatrix CommI = TMPSS + TMPZZ;
-  RealMatrix CommZ = TMPSZ + TMPZS;
+  RealMatrix CommI = TMPSS + TMPZZ + TMPXX + TMPYY;
+  RealMatrix CommZ = TMPSZ + TMPZS - TMPXY + TMPYX;
   RealMatrix CommX = TMPSX + TMPXS - TMPYZ + TMPZY;
   RealMatrix CommY = TMPSY + TMPYS + TMPZX - TMPXZ;
 
@@ -377,6 +385,8 @@ int main(int argc, char **argv){
   RealMatrix CommTotal(*newSS.onePDMA());
   CommTotal.setZero();
 
+//CommZ = CommX;
+//CommX.setZero();
   std::vector<std::reference_wrapper<RealMatrix>> comComp;
   comComp.emplace_back(CommI);
   comComp.emplace_back(CommZ);
@@ -385,13 +395,13 @@ int main(int argc, char **argv){
 
   Quantum<double>::spinGather(CommTotal,comComp);
 
-  prettyPrint(cout,TMPAA,"COMMAA");
-  prettyPrint(cout,TMPBB,"COMMBB");
-  prettyPrintTCS(cout,0.5*CommTotal,"Comm");
-  prettyPrint(cout,CommI,"I");
-  prettyPrint(cout,CommX,"X");
-  prettyPrint(cout,CommY,"Y");
-  prettyPrint(cout,CommZ,"Z");
+//prettyPrint(cout,TMPAA,"COMMAA");
+//prettyPrint(cout,TMPBB,"COMMBB");
+//prettyPrintTCS(cout,0.5*CommTotal,"Comm");
+//prettyPrint(cout,CommI,"I");
+//prettyPrint(cout,CommX,"X");
+//prettyPrint(cout,CommY,"Y");
+//prettyPrint(cout,CommZ,"Z");
 
   finalizeCQ();
   return 0;

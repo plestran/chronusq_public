@@ -147,7 +147,7 @@ class SingleSlater : public Quantum<T> {
   std::string algebraicFieldShort_;///< String Real/Complex/(Quaternion)
   std::array<double,3> elecField_;
   std::vector<double> mullPop_; ///< mulliken partial charge
-  double Sx_, Sy_, Sz_, Ssq_;
+//  double Sx_, Sy_, Sz_, Ssq_;
 
   // Lengths of scratch partitions (NOT MEANT TO BE COPIED)
   int lenF_;
@@ -658,10 +658,11 @@ public:
   void readGuessGauFChk(std::string &);	// read the initial guess of MO's from the Gaussian formatted checkpoint file
   void computeEnergy();         // compute the total electronic energy
   void computeMultipole();      // compute multipole properties
-  void computeSExpect();        // compute <S> <S^2>
+//void computeSExpect();        // compute <S> <S^2>
+  void computeSSq();
   inline void computeProperties(){
     this->computeMultipole();
-    this->computeSExpect();
+    this->computeSExpect(*this->aointegrals_->overlap_);
   };
   void SCF();  
   void CDIIS();

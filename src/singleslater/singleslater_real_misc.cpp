@@ -184,15 +184,23 @@ void SingleSlater<double>::backTransformMOs(){
       MOB(this->moA_->data()+1,this->nBasis_,this->nTCS_*this->nBasis_,
           Eigen::Stride<Dynamic,Dynamic>(this->nTCS_*this->nBasis_,2));
 
-    (*this->NBSqScratch_) = MOA;
-    this->NBSqScratch2_->noalias() =
-      (*this->aointegrals_->ortho1_) * (*this->NBSqScratch_);
-    MOA = (*this->NBSqScratch2_);
+    RealMap SCRATCH1(this->memManager_->malloc<double>(this->nBasis_*
+          this->nBasis_*this->nTCS_),this->nBasis_,this->nTCS_*this->nBasis_);
+    RealMap SCRATCH2(this->memManager_->malloc<double>(this->nBasis_*
+          this->nBasis_*this->nTCS_),this->nBasis_,this->nTCS_*this->nBasis_);
 
-    (*this->NBSqScratch_) = MOB;
-    this->NBSqScratch2_->noalias() =
-      (*this->aointegrals_->ortho1_) * (*this->NBSqScratch_);
-    MOB = (*this->NBSqScratch2_);
+    SCRATCH1 = MOA;
+    SCRATCH2 = (*this->aointegrals_->ortho1_) * SCRATCH1;
+    MOA = SCRATCH2; 
+
+    SCRATCH1 = MOB;
+    SCRATCH2 = (*this->aointegrals_->ortho1_) * SCRATCH1;
+    MOB = SCRATCH2; 
+
+    this->memManager_->free(SCRATCH1.data(),
+        this->nBasis_*this->nBasis_*this->nTCS_);
+    this->memManager_->free(SCRATCH2.data(),
+        this->nBasis_*this->nBasis_*this->nTCS_);
     
   }
 };

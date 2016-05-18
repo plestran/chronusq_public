@@ -109,6 +109,7 @@ void SingleSlater<T>::allocOp(){
           this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
 
   this->NBSqScratch_->setZero();
+  this->NBSqScratch2_->setZero();
   this->fockOrthoA_->setZero();
   this->onePDMOrthoA_->setZero();
 

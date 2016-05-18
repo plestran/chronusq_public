@@ -306,7 +306,7 @@ void SingleSlater<T>::SCF2(){
 
     this->orthoFock();
     this->diagFock2();
-    if(iter == 0 && this->guess_ != READ) this->mixOrbitalsSCF();
+//  if(iter == 0 && this->guess_ != READ) this->mixOrbitalsSCF();
 
     this->copyDen();
     this->formDensity();
@@ -370,7 +370,7 @@ void SingleSlater<T>::cleanupSCFMem2(){
   this->memManager_->free(this->POldAlphaMem_,NSQ);  
   this->memManager_->free(this->ErrorAlphaMem_,(this->nDIISExtrap_-1)*NSQ); 
   this->memManager_->free(this->FADIIS_,(this->nDIISExtrap_-1)*NSQ);        
-  if(this->nTCS_ == 2 && !this->isClosedShell) { 
+  if(this->nTCS_ == 1 && !this->isClosedShell) { 
     this->memManager_->free(this->POldBetaMem_,NSQ);  
     this->memManager_->free(this->ErrorBetaMem_,(this->nDIISExtrap_-1)*NSQ); 
     this->memManager_->free(this->FBDIIS_,(this->nDIISExtrap_-1)*NSQ);       

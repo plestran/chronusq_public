@@ -170,10 +170,15 @@ void SingleSlater<T>::mullikenPop() {
     this->mullPop_.push_back(charge); 
   } 
 }
-
+/*
 template<typename T>
 void SingleSlater<T>::computeSExpect(){
   if(getRank() == 0){
+    this->Sx_  = 0.0;
+    this->Sy_  = 0.0;
+    this->Sz_  = 0.0;
+    this->Ssq_ = 0.0; 
+
     if(this->Ref_ == RHF){
  
       this->Sx_  = 0.0;
@@ -181,24 +186,6 @@ void SingleSlater<T>::computeSExpect(){
       this->Sz_  = 0.0;
       this->Ssq_ = 0.0; 
  
-    } else if(this->Ref_ == UHF) {
-      TMatrix MzXS = ((*this->onePDMA_) - (*this->onePDMB_)) *
-        (*this->aointegrals_->overlap_);
-      TMatrix NXS = ((*this->onePDMA_) + (*this->onePDMB_)) *
-        (*this->aointegrals_->overlap_);
-      // Sz
-      T tmp = 0.5*MzXS.trace();
-
-      // S^2
-      T tmp2 =  MzXS.trace() * MzXS.trace() +
-        (0.5*MzXS*MzXS - 1.5*NXS*NXS).trace() + 3.0*NXS.trace();
-      tmp2 /= 4.0;
-
-      this->Sx_  = 0.0;
-      this->Sy_  = 0.0;
-      this->Sz_  = reinterpret_cast<double(&)[2]>(tmp)[0]; 
-      this->Ssq_ = reinterpret_cast<double(&)[2]>(tmp2)[0];
-
     } else if(this->Ref_ == CUHF) {
  
       this->Sx_  = 0.0;
@@ -206,46 +193,80 @@ void SingleSlater<T>::computeSExpect(){
       this->Sz_  = 0.5*(this->nOccA_ - this->nOccB_);
       this->Ssq_ = this->Sz_ * (this->Sz_ + 1);
  
-    } else if(this->Ref_ == TCS) {
-      
-      this->Sx_  = 0.0;
-      this->Sy_  = 0.0;
-      this->Sz_  = 0.0;
-      this->Ssq_  = 0.0;
- 
-      for(auto i = 0; i < this->nOccA_+this->nOccB_; i++) 
-      for(auto j = 0; j < this->nOccA_+this->nOccB_; j++) {
-        dcomplex SAA = 0.0;
-        dcomplex SAB = 0.0;
-        dcomplex SBB = 0.0;
-        for(auto mu = 0; mu < this->nTCS_*this->nBasis_; mu += 2)
-        for(auto nu = 0; nu < this->nTCS_*this->nBasis_; nu += 2){
-          SAA += (*this->moA_)(mu,i) * 
-                 (*this->aointegrals_->overlap_)(mu,nu) * 
-                 (*this->moA_)(nu,j);
- 
-          SAB += (*this->moA_)(mu,i) * 
-                 (*this->aointegrals_->overlap_)(mu,nu) * 
-                 (*this->moA_)(nu+1,j);
- 
-          SBB += (*this->moA_)(mu+1,i) * 
-                 (*this->aointegrals_->overlap_)(mu,nu) * 
-                 (*this->moA_)(nu+1,j);
-        }
-        if( i == j ) {
-          this->Sx_ += std::real(SAB);
-          this->Sy_ -= std::imag(SAB);
-          this->Sz_ += 0.5*std::real(SAA - SBB);
-        }
-        this->Ssq_ -= std::real(SAB*std::conj(SAB));
-        this->Ssq_ -= 0.25*std::real((SAA-SBB)*std::conj(SAA-SBB));
+    } else {
+    //TMatrix MzXS = ((*this->onePDMA_) - (*this->onePDMB_)) *
+    //  (*this->aointegrals_->overlap_);
+    //TMatrix NXS = ((*this->onePDMA_) + (*this->onePDMB_)) *
+    //  (*this->aointegrals_->overlap_);
+    //// Sz
+    //T tmp = 0.5*MzXS.trace();
+
+    //// S^2
+    //T tmp2 =  MzXS.trace() * MzXS.trace() +
+    //  (0.5*MzXS*MzXS - 1.5*NXS*NXS).trace() + 3.0*NXS.trace();
+    //tmp2 /= 4.0;
+
+    //this->Sx_  = 0.0;
+    //this->Sy_  = 0.0;
+    //this->Sz_  = reinterpret_cast<double(&)[2]>(tmp)[0]; 
+    //this->Ssq_ = reinterpret_cast<double(&)[2]>(tmp2)[0];
+      (*this->NBSqScratch_)  = (*this->onePDMMz_) * (*this->aointegrals_->overlap_);
+      (*this->NBSqScratch2_) = (*this->NBSqScratch_) * (*this->NBSqScratch_);
+      this->Sz_  = this->NBSqScratch_->trace();
+      this->Ssq_ = this->Sz_ * this->Sz_ + 2 * this->NBSqScratch2_->trace();
+      if(this->nTCS_ == 2) {
+        (*this->NBSqScratch_)  = (*this->onePDMMx_) * (*this->aointegrals_->overlap_);
+        (*this->NBSqScratch2_) = (*this->NBSqScratch_) * (*this->NBSqScratch_);
+        this->Sx_  = this->NBSqScratch_->trace();
+        this->Ssq_ = this->Sz_ * this->Sz_ + 2 * this->NBSqScratch2_->trace();
       }
-      this->Ssq_ += 0.75 * (this->nOccA_+this->nOccB_);
-      this->Ssq_ += this->Sx_*this->Sx_;
-      this->Ssq_ += this->Sy_*this->Sy_;
-      this->Ssq_ += this->Sz_*this->Sz_;
+
+      this->Sz_  *= 0.5;
+      this->Sy_  *= 0.5;
+      this->Sz_  *= 0.5;
+      this->Ssq_ *= 0.25;
+
+//    } else if(this->Ref_ == TCS) {
+    } 
+      
+  //  this->Sx_  = 0.0;
+  //  this->Sy_  = 0.0;
+  //  this->Sz_  = 0.0;
+  //  this->Ssq_  = 0.0;
  
-    }
+  //  for(auto i = 0; i < this->nOccA_+this->nOccB_; i++) 
+  //  for(auto j = 0; j < this->nOccA_+this->nOccB_; j++) {
+  //    dcomplex SAA = 0.0;
+  //    dcomplex SAB = 0.0;
+  //    dcomplex SBB = 0.0;
+  //    for(auto mu = 0; mu < this->nTCS_*this->nBasis_; mu += 2)
+  //    for(auto nu = 0; nu < this->nTCS_*this->nBasis_; nu += 2){
+  //      SAA += (*this->moA_)(mu,i) * 
+  //             (*this->aointegrals_->overlap_)(mu,nu) * 
+  //             (*this->moA_)(nu,j);
+ 
+  //      SAB += (*this->moA_)(mu,i) * 
+  //             (*this->aointegrals_->overlap_)(mu,nu) * 
+  //             (*this->moA_)(nu+1,j);
+ 
+  //      SBB += (*this->moA_)(mu+1,i) * 
+  //             (*this->aointegrals_->overlap_)(mu,nu) * 
+  //             (*this->moA_)(nu+1,j);
+  //    }
+  //    if( i == j ) {
+  //      this->Sx_ += std::real(SAB);
+  //      this->Sy_ -= std::imag(SAB);
+  //      this->Sz_ += 0.5*std::real(SAA - SBB);
+  //    }
+  //    this->Ssq_ -= std::real(SAB*std::conj(SAB));
+  //    this->Ssq_ -= 0.25*std::real((SAA-SBB)*std::conj(SAA-SBB));
+  //  }
+  //  this->Ssq_ += 0.75 * (this->nOccA_+this->nOccB_);
+  //  this->Ssq_ += this->Sx_*this->Sx_;
+  //  this->Ssq_ += this->Sy_*this->Sy_;
+  //  this->Ssq_ += this->Sz_*this->Sz_;
+ 
+  //}
   }
 #ifdef CQ_ENABLE_MPI
   MPI_Bcast(&this->Sx_,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
@@ -254,4 +275,4 @@ void SingleSlater<T>::computeSExpect(){
   MPI_Bcast(&this->Ssq_,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 #endif
 };
-
+*/

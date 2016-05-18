@@ -85,3 +85,23 @@ void computeElecMultipoles(const std::vector<Op> &DipoleOps,
 //if(needToScatter) this->gatherDensity();
 
 }
+
+template<typename Op>
+void computeSExpect(const Op& op){
+  this->Sx_  = 0;
+  this->Sy_  = 0;
+  this->Sz_  = 0;
+  this->Ssq_ = 0;
+
+  if(!this->isClosedShell || this->nTCS_ == 2) {
+    this->Sz_ = 0.5 * this->template computeProperty<double,MZ>(op);
+    if(this->nTCS_ == 2) {
+      this->Sy_ = 0.5 * this->template computeProperty<double,MY>(op);
+      this->Sx_ = 0.5 * this->template computeProperty<double,MX>(op);
+    }
+    this->computeSSq();
+  }
+
+}
+
+virtual void computeSSq() = 0;
