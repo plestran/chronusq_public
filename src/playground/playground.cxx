@@ -252,10 +252,10 @@ int main(int argc, char **argv){
   singleSlater.isClosedShell = true;
   singleSlater.isDFT = true;
   singleSlater.isHF = false;
-  singleSlater.setExchKernel(SingleSlater<double>::EXCH::SLATER);
+  singleSlater.setExchKernel(SingleSlater<double>::EXCH::B88);
   //singleSlater.setExchKernel(SingleSlater<double>::EXCH::NOEXCH);
 //  singleSlater.setCorrKernel(SingleSlater<double>::CORR::NOCORR);
-  singleSlater.setCorrKernel(SingleSlater<double>::CORR::VWN5);
+//  singleSlater.setCorrKernel(SingleSlater<double>::CORR::VWN5);
   singleSlater.setPrintLevel(5);
 
   basis.findBasisFile("sto3g");

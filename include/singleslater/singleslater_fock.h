@@ -166,6 +166,10 @@ void SingleSlater<T>::formFock(){
         RealMatrix SCRATCH2(this->nBasis_,this->nBasis_);
         VectorXd   SCRATCH1(this->nBasis_);
         int NDer = 0;
+        if (isGGA){
+        NDer = 1;
+        cout << "New GGA Fock Time" <<endl;
+        }
         auto valVxc = [&](ChronusQ::IntegrationPoint pt, 
         KernelIntegrand<T> &result) {
         SCRATCH1.setZero();
@@ -178,11 +182,14 @@ void SingleSlater<T>::formFock(){
         SCRATCH1X.setZero();
         SCRATCH1Y.setZero();
         SCRATCH1Z.setZero();
-        std::array<double,3>  drhoA = {0.0,0.0,0.0}; ///< array pf density gradient components
-        if (isGGA){
-          NDer = 1;
-          cout << "New GGA" <<endl;
-        }
+        std::array<double,3>  drhoT = {0.0,0.0,0.0}; ///< array TOTAL density gradient components
+        std::array<double,3>  drhoS = {0.0,0.0,0.0}; ///< array SPIN  density gradient components
+        std::array<double,3>  drhoA = {0.0,0.0,0.0}; ///< array ALPHA  density gradient components
+        std::array<double,3>  drhoB = {0.0,0.0,0.0}; ///< array BETA  density gradient components
+        RealVecMap GradRhoT(&drhoT[0],3);
+        RealVecMap GradRhoS(&drhoS[0],3);
+        RealVecMap GradRhoA(&drhoA[0],3);
+        RealVecMap GradRhoB(&drhoB[0],3);
           cartGP GP = pt.pt;
           double rhoA;
           double rhoB;
@@ -209,11 +216,11 @@ void SingleSlater<T>::formFock(){
               SCRATCH1X.block(b_s,0,shSize,1) = bMapX;
               RealMap bMapY(ds1EvalY,shSize,1);
               SCRATCH1Y.block(b_s,0,shSize,1) = bMapY;
-              RealMap bMapZ(ds1EvalX,shSize,1);
+              RealMap bMapZ(ds1EvalZ,shSize,1);
               SCRATCH1Z.block(b_s,0,shSize,1) = bMapZ;
-              delete []  ds1EvalX;
-              delete []  ds1EvalY;
-              delete []  ds1EvalZ;
+//              delete []  ds1EvalX;
+//              delete []  ds1EvalY;
+//              delete []  ds1EvalZ;
             }
 
             delete [] buff;
@@ -221,64 +228,107 @@ void SingleSlater<T>::formFock(){
 
 //          if(SCRATCH1.norm() < 1e-8) return 0.0;
           SCRATCH2 = SCRATCH1 * SCRATCH1.transpose();
-          if(NDer>0){
-            //Closed Shell
-            SCRATCH2X = SCRATCH1X * SCRATCH1X.transpose();
-            SCRATCH2Y = SCRATCH1Y * SCRATCH1Y.transpose();
-            SCRATCH2Z = SCRATCH1Z * SCRATCH1Z.transpose();
-//            drhoA[0] = 2.0*(SCRATCH2X.frobInner(this->onePDMA()->conjugate()
-///2.0));
-//            drhoA[1] = 2.0*(SCRATCH2Y.frobInner(this->onePDMA()->conjugate()
-//             /2.0));
-//            drhoA[2] = 2.0*(SCRATCH2Z.frobInner(this->onePDMA()->conjugate()
-//             /2.0));
-            gammaAA = (drhoA[0]*drhoA[0] + drhoA[1]*drhoA[1] + 
-              drhoA[2]*drhoA[2]);
-            gammaBB = gammaAA;
-            gammaAB = gammaAA;
-          }
           double rhoT = this->template computeProperty<double,TOTAL>(SCRATCH2);
           double rhoS = this->template computeProperty<double,MZ>(SCRATCH2);
           rhoA = 0.5 * (rhoT + rhoS);
           rhoB = 0.5 * (rhoT - rhoS);
-
-          for(auto i = 0; i < this->dftFunctionals_.size(); i++){
-          DFTFunctional::DFTInfo kernelXC;
-          if (NDer>0){
-           kernelXC = 
-           this->dftFunctionals_[i]->eval(rhoA,rhoB,gammaAA,gammaBB);
-          result.VXCA.real() += 2.0*drhoA[0]* SCRATCH2X 
-            * kernelXC.ddgammaAA;
-          result.VXCA.real() += 2.0*drhoA[1]* SCRATCH2Y 
-            * kernelXC.ddgammaAA;
-          result.VXCA.real() += 2.0*drhoA[2]* SCRATCH2Z 
-            * kernelXC.ddgammaAA;
-          }else{
-           kernelXC = 
-              this->dftFunctionals_[i]->eval(rhoA, rhoB);
+/*
+//  Handle numerical instability if screening on
+          if (this->screenVxc ) {
+//    check if are noise
+      if(rhor    <= 0.0 ) {
+        if((std::abs(rhor)) <= 1.0e-10) {
+          return;
+        }else{ 
+          CErr("Numerical noise in the density");
+        }
+//    skyp points based on small density
+      }else if(rhor < this->epsScreen){
+        return;
+      }
+    }
+*/
+          if(NDer>0){
+            //Closed Shell GGA
+            SCRATCH2X = SCRATCH1 * SCRATCH1X.transpose();
+            SCRATCH2Y = SCRATCH1 * SCRATCH1Y.transpose();
+            SCRATCH2Z = SCRATCH1 * SCRATCH1Z.transpose();
+//            prettyPrint(this->fileio_->out, SCRATCH2X,"LDA GradX alpha");
+//            prettyPrint(this->fileio_->out, SCRATCH2Y,"LDA GradY alpha");
+//            prettyPrint(this->fileio_->out, SCRATCH2Z,"LDA GradZ alpha");
+            drhoT[0] = 2.0*this->template computeProperty<double,TOTAL>(SCRATCH2X); 
+            drhoT[1] = 2.0*this->template computeProperty<double,TOTAL>(SCRATCH2Y); 
+            drhoT[2] = 2.0*this->template computeProperty<double,TOTAL>(SCRATCH2Z); 
+            drhoS[0] = 2.0*this->template computeProperty<double,MZ>(SCRATCH2X); 
+            drhoS[1] = 2.0*this->template computeProperty<double,MZ>(SCRATCH2Y); 
+            drhoS[2] = 2.0*this->template computeProperty<double,MZ>(SCRATCH2Z); 
+            GradRhoA = 0.5 * (GradRhoT + GradRhoS);
+            GradRhoB = 0.5 * (GradRhoT - GradRhoS);
+//            cout << "GradRhoA X "<<GradRhoA[0] << endl; 
+//            cout << "GradRhoA Y "<<GradRhoA[1] << endl; 
+//            cout << "GradRhoA Z "<<GradRhoA[2] << endl; 
+//            cout << "GradRhoB X "<<GradRhoB[0] << endl; 
+//            cout << "GradRhoB Y "<<GradRhoB[1] << endl; 
+//            cout << "GradRhoB Z "<<GradRhoB[2] << endl; 
+            gammaAA = GradRhoA.dot(GradRhoA);           
+            gammaBB = gammaAA;
+            gammaAB = gammaAA;
+//            cout << "gammaAA "<<gammaAA << endl; 
+//            cout << "gammaBB "<<gammaBB << endl; 
+//            cout << "gammaAB "<<gammaAB << endl; 
           }
-            result.VXCA.real()   += pt.weight * SCRATCH2 * kernelXC.ddrhoA; 
+          for(auto i = 0; i < this->dftFunctionals_.size(); i++){
+            DFTFunctional::DFTInfo kernelXC;
+            if (NDer>0){
+              SCRATCH2X += SCRATCH1X * SCRATCH1.transpose();
+              SCRATCH2Y += SCRATCH1Y * SCRATCH1.transpose();
+              SCRATCH2Z += SCRATCH1Z * SCRATCH1.transpose();
+              kernelXC = 
+              this->dftFunctionals_[i]->eval(rhoA,rhoB,gammaAA,gammaBB);
+              result.VXCA.real() += 2.0 * pt.weight*GradRhoA[0]* SCRATCH2X * 
+                kernelXC.ddgammaAA;  
+              result.VXCA.real() += 2.0 * pt.weight*GradRhoA[1]* SCRATCH2Y * 
+                kernelXC.ddgammaAA;  
+              result.VXCA.real() += 2.0 * pt.weight*GradRhoA[2]* SCRATCH2Z * 
+                kernelXC.ddgammaAA;  
+              result.Energy += pt.weight * kernelXC.eps;
+              }else{
+              kernelXC = 
+               this->dftFunctionals_[i]->eval(rhoA, rhoB);
             result.Energy += pt.weight * (rhoA+rhoB) * kernelXC.eps;
+              }
+            result.VXCA.real()   += pt.weight * SCRATCH2 * kernelXC.ddrhoA; 
+//            prettyPrint(this->fileio_->out, SCRATCH2 ,"OverLap");
+//            prettyPrint(this->fileio_->out, SCRATCH2X ,"DxOverLap");
+//            prettyPrint(this->fileio_->out, SCRATCH2Y ,"DyOverLap");
+//            prettyPrint(this->fileio_->out, SCRATCH2Z ,"DzOverLap");
+//            if (kernelXC.ddgammaAA > 1e-2) CErr();
           }
         };
 
         ChronusQ::AtomicGrid AGrid(100,302,ChronusQ::GRID_TYPE::GAUSSCHEBFST,
             ChronusQ::GRID_TYPE::LEBEDEV,ChronusQ::ATOMIC_PARTITION::BECKE,
             this->molecule_->cartArray(),0,1.0,false);
-       
+         
         KernelIntegrand<T> res(this->vXA_->cols());
         this->basisset_->radcut(1.0e-10, 50, 1.0e-7);
+        this->totalEx    = 0.0;
+        this->vXA()->setZero();   // Set to zero every occurence of the SCF
         for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
+//          cout << "Integrate Atom n " << iAtm <<endl;
           AGrid.center() = iAtm;
           AGrid.scalingFactor()=0.5 *
             elements[this->molecule_->index(iAtm)].sradius/phys.bohr;
           AGrid.integrate<KernelIntegrand<T>>(valVxc,res);
         };
-        (*this->vXA_) = 4*math.pi*res.VXCA;
+//        (*this->vXA_) = 4*math.pi*res.VXCA;
+        (*this->vXA()) = 4*math.pi*res.VXCA;
         this->totalEx = 4*math.pi*res.Energy;
         if(this->printLevel_ >= 3) {
           finish = std::chrono::high_resolution_clock::now();
           duration_formVxc = finish - start;
+          prettyPrint(this->fileio_->out,(*this->vXA()),"LDA Vxc alpha");
+          this->fileio_->out << "VXC Energy= " <<  this->totalEx << endl, 
           this->fileio_->out << endl << "CPU time for VXC integral:  "
                              << duration_formVxc.count() << " seconds." 
                              << endl;
