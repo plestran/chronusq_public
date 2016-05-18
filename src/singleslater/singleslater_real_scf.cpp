@@ -196,34 +196,17 @@ void SingleSlater<double>::evalConver(int iter){
 
 template<>
 void SingleSlater<double>::mixOrbitalsSCF(){
-  if(this->Ref_ == TCS){
-  this->fileio_->out << "** Mixing Alpha-Beta Orbitals for 2C Guess **" << endl;
-  //CErr();
+  if(this->nTCS_ != 2) return;
+
+  this->fileio_->out << 
+    "** Mixing Alpha-Beta Orbitals for 2C Guess **" << endl;
+
   auto nO = this->nAE_ + this->nBE_;
-  VectorXd HOMOA,LUMOB;
   int indxHOMOA = -1, indxLUMOB = -1;
-/*
-  for(auto i = nO-1; i >= 0; i--){
-    auto aComp = this->moA_->col(i)(0);
-    auto bComp = this->moA_->col(i)(1);
-    if(std::abs(aComp) > 1e-10 && std::abs(bComp) < 1e-10){
-      HOMOA = this->moA_->col(i);
-      indxHOMOA = i;
-      break;
-    }
-  }
-  for(auto i = nO; i < this->nTCS_*this->nBasis_; i++){
-    auto aComp = this->moA_->col(i)(0);
-    auto bComp = this->moA_->col(i)(1);
-    if(std::abs(bComp) > 1e-10 && std::abs(aComp) < 1e-10){
-      LUMOB = this->moA_->col(i);
-      indxLUMOB = i;
-      break;
-    }
-  }
-*/
+
   auto nOrb = this->nBasis_;
   double maxPercentNonZeroAlpha = 0;
+
   for(auto i = nO-1; i >= 0; i--){
     auto nNonZeroAlpha = 0;
     for(auto j = 0; j < this->nTCS_*this->nBasis_; j+=2){
@@ -237,6 +220,7 @@ void SingleSlater<double>::mixOrbitalsSCF(){
       indxHOMOA = i;
     }
   }
+
   double maxPercentNonZeroBeta = 0;
   for(auto i = nO; i < this->nTCS_*this->nBasis_; i++){
     auto nNonZeroBeta = 0;
@@ -252,31 +236,20 @@ void SingleSlater<double>::mixOrbitalsSCF(){
     }
   }
 
-  if(indxHOMOA == -1 || indxLUMOB == -1)
-  //  CErr("TCS orbital swap failed to find suitable Alpha-Beta pair",this->fileio_->out);
-    return;
+  if(indxHOMOA == -1 || indxLUMOB == -1) return;
   
-//CErr();
+  RealVecMap HOMOA(this->memManager_->malloc<double>(
+        this->nTCS_*this->nBasis_),this->nTCS_*this->nBasis_);
+  RealVecMap LUMOB(this->memManager_->malloc<double>(
+        this->nTCS_*this->nBasis_),this->nTCS_*this->nBasis_);
+
   HOMOA = this->moA_->col(indxHOMOA) ;
   LUMOB = this->moA_->col(indxLUMOB) ;
-//cout << HOMOA << endl << endl;
-//cout << LUMOB << endl << endl;
-//prettyPrint(cout,*this->moA_,"MO");
   this->moA_->col(indxHOMOA) = std::sqrt(0.5) * (HOMOA + LUMOB);
   this->moA_->col(indxLUMOB) = std::sqrt(0.5) * (HOMOA - LUMOB);
-/*
-    Eigen::VectorXd HOMO = this->moA_->col(this->nAE_+this->nBE_-1);
-    Eigen::VectorXd LUMO = this->moA_->col(this->nTCS_*this->nBasis_-1);
-   cout << endl << endl <<  this->moA_->col(this->nAE_+this->nBE_-1) << endl; 
-   cout << endl << endl <<  this->moA_->col(this->nTCS_*this->nBasis_-1) << endl;
-    this->moA_->col(this->nAE_+this->nBE_-1) = std::sqrt(0.5) * (HOMO + LUMO);
-//  this->moA_->col(this->nAE_+this->nBE_) =   std::sqrt(0.5) * (HOMO - LUMO);
-    this->moA_->col(this->nTCS_*this->nBasis_-1) = std::sqrt(0.5) * (HOMO - LUMO);
 
-   cout << endl << endl <<  this->moA_->col(this->nAE_+this->nBE_-1) << endl; 
-   cout << endl << endl <<  this->moA_->col(this->nTCS_*this->nBasis_-1) << endl;
-*/
-  }
+  this->memManager_->free(HOMOA.data(),this->nTCS_*this->nBasis_);
+  this->memManager_->free(LUMOB.data(),this->nTCS_*this->nBasis_);
 }
 
 template<>

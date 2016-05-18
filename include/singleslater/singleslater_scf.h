@@ -239,36 +239,13 @@ void SingleSlater<T>::initSCFMem2(){
   this->LRWORK_    = 3 * std::max(NTCSxNBASIS,this->nDIISExtrap_);
   this->lenCoeff_  = this->nDIISExtrap_;
 
-  /*
-//  this->FpAlphaMem_    = new T[NSQ];
-  this->POldAlphaMem_  = new T[NSQ];
-  this->ErrorAlphaMem_ = new T[NSQ*(this->nDIISExtrap_ -1)];
-  this->FADIIS_        = new T[NSQ*(this->nDIISExtrap_ -1)];
-  if(this->nTCS_ == 1 && !this->isClosedShell) {
-//    this->FpBetaMem_    = new T[NSQ*NTCSxNBASIS];
-    this->POldBetaMem_  = new T[NSQ*NTCSxNBASIS];
-    this->ErrorBetaMem_ = new T[NSQ*NTCSxNBASIS*(this->nDIISExtrap_ -1)];
-    this->FBDIIS_       = new T[NSQ*NTCSxNBASIS*(this->nDIISExtrap_ -1)];
-  }
-
-
-  if(this->Ref_ == CUHF) {
-    this->delFMem_   = new T[NSQ];
-    this->lambdaMem_ = new T[NSQ];
-    this->PNOMem_    = new T[NSQ];
-    this->occNumMem_ = new double[NTCSxNBASIS];
-  }
-
-  this->WORK_  = new T[this->LWORK_];
-  if(typeid(T).hash_code() == typeid(dcomplex).hash_code())
-    this->RWORK_ = new double[this->LRWORK_];
-  */
   
   this->POldAlphaMem_  = this->memManager_->template malloc<T>(NSQ);
   this->ErrorAlphaMem_ = 
     this->memManager_->template malloc<T>(NSQ*(this->nDIISExtrap_ -1));
   this->FADIIS_        = 
     this->memManager_->template malloc<T>(NSQ*(this->nDIISExtrap_ -1));
+
   if(this->nTCS_ == 1 && !this->isClosedShell) {
     this->POldBetaMem_  = this->memManager_->template malloc<T>(NSQ);
     this->ErrorBetaMem_ = 
@@ -306,7 +283,7 @@ void SingleSlater<T>::SCF2(){
 
     this->orthoFock();
     this->diagFock2();
-//  if(iter == 0 && this->guess_ != READ) this->mixOrbitalsSCF();
+    if(iter == 0 && this->guess_ != READ) this->mixOrbitalsSCF();
 
     this->copyDen();
     this->formDensity();
@@ -316,13 +293,13 @@ void SingleSlater<T>::SCF2(){
     if(PyErr_CheckSignals() == -1)
       CErr("Keyboard Interrupt in SCF!",this->fileio_->out);
 
-    if(iter == this->iDIISStart_ && this->printLevel_ > 0)
-      this->fileio_->out << 
-        std::setw(2) << " " <<
-        std::setw(4) << " " <<
-        "*** Starting DIIS ***" << endl;
     // DIIS NYI for CUHF
     if(this->Ref_ != CUHF && this->doDIIS && iter >= this->iDIISStart_){ 
+      if(iter == this->iDIISStart_ && this->printLevel_ > 0)
+        this->fileio_->out << 
+          std::setw(2) << " " <<
+          std::setw(4) << " " <<
+          "*** Starting DIIS ***" << endl;
       this->genDComm2(iter - this->iDIISStart_);
       this->CpyFock(iter - this->iDIISStart_);   
       if((iter - this->iDIISStart_) % (this->nDIISExtrap_-1) == 
