@@ -168,7 +168,7 @@ void SingleSlater<T>::formFock(){
         int NDer = 0;
         if (isGGA){
         NDer = 1;
-        cout << "New GGA Fock Time" <<endl;
+//        cout << "New GGA Fock Time" <<endl;
         }
         auto valVxc = [&](ChronusQ::IntegrationPoint pt, 
         KernelIntegrand<T> &result) {
@@ -218,9 +218,6 @@ void SingleSlater<T>::formFock(){
               SCRATCH1Y.block(b_s,0,shSize,1) = bMapY;
               RealMap bMapZ(ds1EvalZ,shSize,1);
               SCRATCH1Z.block(b_s,0,shSize,1) = bMapZ;
-//              delete []  ds1EvalX;
-//              delete []  ds1EvalY;
-//              delete []  ds1EvalZ;
             }
 
             delete [] buff;
@@ -253,9 +250,6 @@ void SingleSlater<T>::formFock(){
             SCRATCH2X = SCRATCH1 * SCRATCH1X.transpose();
             SCRATCH2Y = SCRATCH1 * SCRATCH1Y.transpose();
             SCRATCH2Z = SCRATCH1 * SCRATCH1Z.transpose();
-//            prettyPrint(this->fileio_->out, SCRATCH2X,"LDA GradX alpha");
-//            prettyPrint(this->fileio_->out, SCRATCH2Y,"LDA GradY alpha");
-//            prettyPrint(this->fileio_->out, SCRATCH2Z,"LDA GradZ alpha");
             drhoT[0] = 2.0*this->template computeProperty<double,TOTAL>(SCRATCH2X); 
             drhoT[1] = 2.0*this->template computeProperty<double,TOTAL>(SCRATCH2Y); 
             drhoT[2] = 2.0*this->template computeProperty<double,TOTAL>(SCRATCH2Z); 
@@ -264,18 +258,9 @@ void SingleSlater<T>::formFock(){
             drhoS[2] = 2.0*this->template computeProperty<double,MZ>(SCRATCH2Z); 
             GradRhoA = 0.5 * (GradRhoT + GradRhoS);
             GradRhoB = 0.5 * (GradRhoT - GradRhoS);
-//            cout << "GradRhoA X "<<GradRhoA[0] << endl; 
-//            cout << "GradRhoA Y "<<GradRhoA[1] << endl; 
-//            cout << "GradRhoA Z "<<GradRhoA[2] << endl; 
-//            cout << "GradRhoB X "<<GradRhoB[0] << endl; 
-//            cout << "GradRhoB Y "<<GradRhoB[1] << endl; 
-//            cout << "GradRhoB Z "<<GradRhoB[2] << endl; 
             gammaAA = GradRhoA.dot(GradRhoA);           
-            gammaBB = gammaAA;
-            gammaAB = gammaAA;
-//            cout << "gammaAA "<<gammaAA << endl; 
-//            cout << "gammaBB "<<gammaBB << endl; 
-//            cout << "gammaAB "<<gammaAB << endl; 
+            gammaBB = GradRhoB.dot(GradRhoB);           
+            gammaAB = GradRhoA.dot(GradRhoB);           
           }
           for(auto i = 0; i < this->dftFunctionals_.size(); i++){
             DFTFunctional::DFTInfo kernelXC;
@@ -284,14 +269,19 @@ void SingleSlater<T>::formFock(){
               SCRATCH2Y += SCRATCH1Y * SCRATCH1.transpose();
               SCRATCH2Z += SCRATCH1Z * SCRATCH1.transpose();
               kernelXC = 
-              this->dftFunctionals_[i]->eval(rhoA,rhoB,gammaAA,gammaBB);
-              result.VXCA.real() += 2.0 * pt.weight*GradRhoA[0]* SCRATCH2X * 
-                kernelXC.ddgammaAA;  
-              result.VXCA.real() += 2.0 * pt.weight*GradRhoA[1]* SCRATCH2Y * 
-                kernelXC.ddgammaAA;  
-              result.VXCA.real() += 2.0 * pt.weight*GradRhoA[2]* SCRATCH2Z * 
-                kernelXC.ddgammaAA;  
+            this->dftFunctionals_[i]->eval(rhoA,rhoB,gammaAA,gammaAB,gammaBB);
+
+              result.VXCA.real() += pt.weight *SCRATCH2X  
+                * (  2.0 * GradRhoA[0]*kernelXC.ddgammaAA 
+                   + GradRhoB[0]* kernelXC.ddgammaAB);  
+              result.VXCA.real() += pt.weight *SCRATCH2Y  
+                * (  2.0 * GradRhoA[1]*kernelXC.ddgammaAA 
+                   + GradRhoB[1]* kernelXC.ddgammaAB);  
+              result.VXCA.real() += pt.weight *SCRATCH2Z  
+                * (  2.0 * GradRhoA[2]*kernelXC.ddgammaAA 
+                   + GradRhoB[2]* kernelXC.ddgammaAB);  
               result.Energy += pt.weight * kernelXC.eps;
+
               }else{
               kernelXC = 
                this->dftFunctionals_[i]->eval(rhoA, rhoB);

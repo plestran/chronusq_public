@@ -33,7 +33,7 @@ double BEightEight::g1B88 (double x){
 DFTFunctional::DFTInfo BEightEight::eval(double rhoA, double rhoB){
 };
 
-DFTFunctional::DFTInfo BEightEight::eval(double rhoA, double rhoB, double gammaAA, double gammaBB){
+DFTFunctional::DFTInfo BEightEight::eval(double rhoA, double rhoB, double gammaAA, double gammaAB, double gammaBB){
   DFTFunctional::DFTInfo info;
   this->rhoT          = rhoA + rhoB;
   this->spindensity   = (rhoA - rhoB) / this->rhoT;
@@ -67,9 +67,10 @@ DFTFunctional::DFTInfo BEightEight::eval(double rhoA, double rhoB, double gammaA
 //  cout <<  "ddrhoB " <<info.ddrhoB << endl ;
 //  cout <<  "ddgammaAA" <<info.ddgammaAA << endl ;
 //  cout <<  "ddgammaBB" <<info.ddgammaBB << endl ;
+  info.ddgammaAB  = 0.0;
   return info;
 };
 
-DFTFunctional::DFTInfo BEightEight::eval(double rhoA, double rhoB, double gammaAA, double gammaAB, double gammaBB){
+DFTFunctional::DFTInfo BEightEight::eval(double rhoA, double rhoB, double gammaAA, double gammaBB){
 };
 

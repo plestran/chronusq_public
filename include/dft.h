@@ -172,4 +172,34 @@ public:
   DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaAB, double gammaBB);
 };
 
+class lyp : public DFTFunctional {
+  double d1over3;
+  double Cfact;  //TF LDA Prefactor (for Vx)  
+  double small;    
+  double a     ;    
+  double b     ;    
+  double c     ;    
+  double d     ;    
+  double omega1     ;    
+  double omega0     ;    
+  double delta1     ;    
+  double delta0     ;    
+  double rhoT     ;    
+  double spindensity   ;
+  double rho1over3 ;
+  double rhoA8over3 ;
+  double rhoB8over3 ;
+  double dLYPdgAA   ;
+  double dLYPdgBB   ;
+  double dLYPdgAB   ;
+  double d2LYPdrhgAA   ;
+  double d2LYPdrhgAB   ;
+  double d2LYPdrhgBB   ;
+public:
+  lyp();
+  double popLYPdens(double rhoA, double rhoB);
+  DFTInfo eval(double rhoA, double rhoB);
+  DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaBB);
+  DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaAB, double gammaBB);
+};
 #endif
