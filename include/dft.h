@@ -197,7 +197,7 @@ class lyp : public DFTFunctional {
   double d2LYPdrhgBB   ;
 public:
   lyp();
-  double popLYPdens(double rhoA, double rhoB);
+  void popLYPdens(double rhoA, double rhoB);
   DFTInfo eval(double rhoA, double rhoB);
   DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaBB);
   DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaAB, double gammaBB);

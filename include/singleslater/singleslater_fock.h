@@ -229,18 +229,19 @@ void SingleSlater<T>::formFock(){
           double rhoS = this->template computeProperty<double,MZ>(SCRATCH2);
           rhoA = 0.5 * (rhoT + rhoS);
           rhoB = 0.5 * (rhoT - rhoS);
+
 /*
 //  Handle numerical instability if screening on
           if (this->screenVxc ) {
 //    check if are noise
-      if(rhor    <= 0.0 ) {
-        if((std::abs(rhor)) <= 1.0e-10) {
+      if(rhoT   <= 0.0 ) {
+        if((std::abs(rhoT)) <= 1.0e-10) {
           return;
         }else{ 
           CErr("Numerical noise in the density");
         }
 //    skyp points based on small density
-      }else if(rhor < this->epsScreen){
+      }else if(rhoT < 1.0e-12){
         return;
       }
     }
@@ -293,6 +294,10 @@ void SingleSlater<T>::formFock(){
 //            prettyPrint(this->fileio_->out, SCRATCH2Y ,"DyOverLap");
 //            prettyPrint(this->fileio_->out, SCRATCH2Z ,"DzOverLap");
 //            if (kernelXC.ddgammaAA > 1e-2) CErr();
+          prettyPrint(this->fileio_->out,result.VXCA.real(),
+            "Partial LDA Vxc alpha");
+          this->fileio_->out << "Partial VXC Energy= " 
+            <<  result.Energy << endl; 
           }
         };
 
