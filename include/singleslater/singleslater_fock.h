@@ -262,13 +262,14 @@ void SingleSlater<T>::formFock(){
             gammaAA = GradRhoA.dot(GradRhoA);           
             gammaBB = GradRhoB.dot(GradRhoB);           
             gammaAB = GradRhoA.dot(GradRhoB);           
+            SCRATCH2X += SCRATCH1X * SCRATCH1.transpose();
+            SCRATCH2Y += SCRATCH1Y * SCRATCH1.transpose();
+            SCRATCH2Z += SCRATCH1Z * SCRATCH1.transpose();
           }
           for(auto i = 0; i < this->dftFunctionals_.size(); i++){
             DFTFunctional::DFTInfo kernelXC;
+          if  (rhoT < 1.0e-10) continue;
             if (NDer>0){
-              SCRATCH2X += SCRATCH1X * SCRATCH1.transpose();
-              SCRATCH2Y += SCRATCH1Y * SCRATCH1.transpose();
-              SCRATCH2Z += SCRATCH1Z * SCRATCH1.transpose();
               kernelXC = 
             this->dftFunctionals_[i]->eval(rhoA,rhoB,gammaAA,gammaAB,gammaBB);
 
@@ -294,11 +295,43 @@ void SingleSlater<T>::formFock(){
 //            prettyPrint(this->fileio_->out, SCRATCH2Y ,"DyOverLap");
 //            prettyPrint(this->fileio_->out, SCRATCH2Z ,"DzOverLap");
 //            if (kernelXC.ddgammaAA > 1e-2) CErr();
-          prettyPrint(this->fileio_->out,result.VXCA.real(),
-            "Partial LDA Vxc alpha");
-          this->fileio_->out << "Partial VXC Energy= " 
-            <<  result.Energy << endl; 
+//          prettyPrint(this->fileio_->out,result.VXCA.real(),
+//            "Partial LDA Vxc alpha");
+//          this->fileio_->out << "Partial VXC Energy= " 
+//            <<  result.Energy << endl; 
           }
+
+/*
+            DFTFunctional::DFTInfo kernelXC;
+          for(auto i = 0; i < this->dftFunctionals_.size(); i++){
+           if (NDer>0) { 
+            kernelXC += this->dftFunctionals_[i]->
+              eval(rhoA,rhoB,gammaAA,gammaAB,gammaBB);
+            } else {
+            kernelXC += this->dftFunctionals_[i]->eval(rhoA, rhoB);
+            }
+          }
+           if (NDer>0){
+              SCRATCH2X += SCRATCH1X * SCRATCH1.transpose();
+              SCRATCH2Y += SCRATCH1Y * SCRATCH1.transpose();
+              SCRATCH2Z += SCRATCH1Z * SCRATCH1.transpose();
+
+              result.VXCA.real() += pt.weight *SCRATCH2X  
+                * (  2.0 * GradRhoA[0]*kernelXC.ddgammaAA 
+                   + GradRhoB[0]* kernelXC.ddgammaAB);  
+              result.VXCA.real() += pt.weight *SCRATCH2Y  
+                * (  2.0 * GradRhoA[1]*kernelXC.ddgammaAA 
+                   + GradRhoB[1]* kernelXC.ddgammaAB);  
+              result.VXCA.real() += pt.weight *SCRATCH2Z  
+                * (  2.0 * GradRhoA[2]*kernelXC.ddgammaAA 
+                   + GradRhoB[2]* kernelXC.ddgammaAB);  
+              result.Energy += pt.weight * kernelXC.eps;
+
+              }else{
+            result.Energy += pt.weight * (rhoA+rhoB) * kernelXC.eps;
+              }
+            result.VXCA.real()   += pt.weight * SCRATCH2 * kernelXC.ddrhoA; 
+*/
         };
 
         ChronusQ::AtomicGrid AGrid(100,302,ChronusQ::GRID_TYPE::GAUSSCHEBFST,

@@ -3,21 +3,20 @@
 lyp::lyp(){
 // Memo Factor to be added at the end for numerical stability
   this-> Cfact = 36.4623989787648;  //-(2.0^(11.0/3.0))*(3.0/10.0)*((3.0*pi*pi)^(2.0/3.0))
-  this-> small = 1.0e-12; 
+  this-> small = 1.0e-10; 
   this-> d1over3  = 1.0/3.0;
   this-> a = 0.04918;
   this-> b = 0.132;
   this-> c = 0.2533;
   this-> d = 0.349;
-  cout << "LYP object created " <<endl;
 };
 
 void lyp::popLYPdens(double rhoA, double rhoB){
   this->rhoT          = rhoA + rhoB;
   this->spindensity   = (rhoA - rhoB) / this->rhoT;
-  if( this->rhoT <  this-> small) {return ;}
-  cout << "rhoT " << this->rhoT <<endl;
-  cout << "rhoMz " << this->spindensity <<endl;
+//  if( this->rhoT <  this-> small) {return ;}
+//  cout << "rhoT " << this->rhoT <<endl;
+//  cout << "rhoMz " << this->spindensity <<endl;
   this->rho1over3 = std::pow(this->rhoT,this->d1over3);
   this->rhoA8over3 = std::pow(rhoA,(8.0/3.0));
   this->rhoB8over3 = std::pow(rhoB,(8.0/3.0));
@@ -90,9 +89,14 @@ DFTFunctional::DFTInfo lyp::eval(double rhoA, double rhoB, double gammaAA, doubl
 };
 
 DFTFunctional::DFTInfo lyp::eval(double rhoA, double rhoB, double gammaAA, double gammaAB, double gammaBB){
-  this->popLYPdens(rhoA, rhoB);
   DFTFunctional::DFTInfo info;
-  if( this->rhoT <  this-> small) {return info;}
+//  if( rhoA <  this-> small) {return info;}
+//  if( rhoB <  this-> small) {return info;}
+//  if( (rhoA+rhoB) <  this-> small) {return info;}
+  this->popLYPdens(rhoA, rhoB);
+//  if( gammaAA <  this-> small) {return info ;}
+//  if( gammaAB <  this-> small) {return info ;}
+//  if( gammaBB <  this-> small) {return info ;}
 //  Eq. A23  dLYP/dgammaAA (debugged)
   info.ddgammaAA  = this->dLYPdgAA ;
 //  Eq. A23* dLYP/dgammaBB (debugged)
@@ -120,6 +124,8 @@ DFTFunctional::DFTInfo lyp::eval(double rhoA, double rhoB, double gammaAA, doubl
     info.ddrhoA  += gammaAB* this->d2LYPdrhgAB;
     info.ddrhoA  += gammaBB* this->d2LYPdrhgBB;
 //  Eq. A28* dLYP/dRhoB (debugged)
+    info.ddrhoB   = - 4.0 *  this->a * rhoA * rhoB 
+      / ( ( this->rhoT)*(1.0 +  this->d/this->rho1over3 ) );
     info.ddrhoB  *= ( (1.0/rhoB)
                   -(1.0/this->rhoT) 
                   +((this->d/3.0) 
@@ -143,13 +149,14 @@ DFTFunctional::DFTInfo lyp::eval(double rhoA, double rhoB, double gammaAA, doubl
     info.eps += info.ddgammaAA * gammaAA;
     info.eps += info.ddgammaBB * gammaBB;
     info.eps += info.ddgammaAB * gammaAB;
+/*
     cout << "eps " << info.eps <<endl;
     cout << "ddrhoA " <<  info.ddrhoA <<endl;
     cout << "ddrhoB " <<  info.ddrhoB <<endl;
     cout << "ddgammaAA " <<  info.ddgammaAA <<endl;
     cout << "ddgammaAB " <<  info.ddgammaAB <<endl;
     cout << "ddgammaBB " <<  info.ddgammaBB <<endl;
-
+*/
     return info;
 };
 
