@@ -1851,6 +1851,7 @@ void SingleSlater<double>::formVXC(){
       prettyPrint(this->fileio_->out,(*this->vCorA()),"Vc Vc alpha");
       if(!this->isClosedShell && this->Ref_ != TCS) 
         prettyPrint(this->fileio_->out,(*this->vXB()),"LDA Vx beta");
+        prettyPrint(this->fileio_->out,(*this->vCorB()),"Vc Vc beta");
 
       this->fileio_->out << "Total LDA Ex ="    << this->totalEx 
                          << " Total VWN Corr= " << this->totalEcorr << endl;
@@ -2098,6 +2099,7 @@ void SingleSlater<double>::formVXC_store(){
       prettyPrint(this->fileio_->out,(*this->vCorA()),"Vc Vc alpha");
       if(!this->isClosedShell && this->Ref_ != TCS) 
         prettyPrint(this->fileio_->out,(*this->vXB()),"LDA Vx beta");
+        prettyPrint(this->fileio_->out,(*this->vCorB()),"Vc Vc beta");
 
       this->fileio_->out << "Total LDA Ex ="    << this->totalEx 
                          << " Total VWN Corr= " << this->totalEcorr << endl;

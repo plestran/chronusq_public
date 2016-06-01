@@ -61,9 +61,10 @@ void VWNV::popVWNdens(double rhoA, double rhoB){
   if ((1.0-(this->spindensity)) >= this->small) this->df_spindensity -= std::pow((1.0-this->spindensity),this->over3); 
   this->df_spindensity *= this->fourover3;
   this->df_spindensity /= (-2.0+std::pow((2.0),this->fourover3)); 
-  this->df2_spindensity = 0.0; 
-  if ((1.0+this->spindensity) >= this->small) this->df2_spindensity +=  std::pow((1.0+this->spindensity),(-2.0/3.0)); 
-  if ((1.0-this->spindensity) >= this->small) this->df2_spindensity +=  std::pow((1.0-this->spindensity),(-2.0/3.0)); 
+  this->df2_spindensity = 2.0; 
+//  this->df2_spindensity = 0.0; 
+//  if ((1.0+this->spindensity) >= this->small) this->df2_spindensity +=  std::pow((1.0+this->spindensity),(-2.0/3.0)); 
+//  if ((1.0-this->spindensity) >= this->small) this->df2_spindensity +=  std::pow((1.0-this->spindensity),(-2.0/3.0)); 
   this->df2_spindensity *= (2.0/9.0);
   this->df2_spindensity /= (-1.0+std::pow((2.0),(1.0/3.0)));
   this->r_s      = std::pow(((3.0)/(4.0*math.pi*this->rhoT)),this->over3);
@@ -149,7 +150,7 @@ DFTFunctional::DFTInfo VWNV::eval(double rhoA, double rhoB){
      this->S1 /= this->df2_spindensity;
 //   S2 = d eps_p/ dr
      this->S2  =
-     this->Eveps2VWN(this->A_p,this->b_p,this->c_p,this->Xp,this->x0_p);
+       this->Eveps2VWN(this->A_p,this->b_p,this->c_p,this->Xp,this->x0_p);
      this->S3  =  this->alpha;
      this->S3 *= (1.0 + this->beta*this->spindensity_4);
      this->S3 *= this->df_spindensity; 
@@ -164,7 +165,7 @@ DFTFunctional::DFTInfo VWNV::eval(double rhoA, double rhoB){
      this->S5  = 4.0 * this->beta * this->spindensity_3;
      this->M3_A    =   1.0 - (this->spindensity); 
      this->M3_B    = -(1.0 + this->spindensity);
-     info.ddrhoA   = this->r_s*this->over3*
+     info.ddrhoA   = -this->r_s*this->over3*
       (this->S1 + this->S2 + this->M1*this->S4);
 
      info.ddrhoB   =  info.ddrhoA;     
@@ -177,6 +178,7 @@ DFTFunctional::DFTInfo VWNV::eval(double rhoA, double rhoB){
      info.eps =  Eveps0VWN(this->A_p,this->b_p,this->Qp,this->Xp,this->x0_p,this->X_x0p);
      info.ddrhoA  = -(this->over3)*this->r_s*Eveps2VWN(this->A_p,this->b_p,this->c_p,this->Xp,this->x0_p);
      info.ddrhoA += info.eps ;
+     info.ddrhoB  = info.ddrhoA ;
    }
   return info;
 }

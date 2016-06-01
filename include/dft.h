@@ -41,6 +41,7 @@ class SlaterExchange : public DFTFunctional {
   double d4over3 ;
   double rhoT     ;    
   double spindensity   ;
+  double eps_spin   ;
 public:
   SlaterExchange();
   DFTInfo eval(double rhoA, double rhoB);

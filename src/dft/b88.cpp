@@ -62,7 +62,9 @@ DFTFunctional::DFTInfo BEightEight::eval(double rhoA, double rhoB, double gammaA
   }else{
   //Closed Shell
   info.eps *= 2.0;
-  }
+  info.ddrhoB     = info.ddrhoA;
+  info.ddgammaBB  = info.ddgammaAA;
+}
 //  cout <<  "eps " <<info.eps << endl ;
 //  cout <<  "ddrhoA " <<info.ddrhoA << endl ;
 //  cout <<  "ddrhoB " <<info.ddrhoB << endl ;

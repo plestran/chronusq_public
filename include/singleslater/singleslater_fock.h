@@ -31,8 +31,9 @@ class KernelIntegrand {
   TMatrix VXCB;
   double Energy;
 
-  KernelIntegrand(size_t N) : VXCA(N,N), Energy(0.0){ 
+  KernelIntegrand(size_t N) : VXCA(N,N), VXCB(N,N), Energy(0.0){ 
     VXCA.setZero();
+    VXCB.setZero();
   };
 };
 
@@ -149,7 +150,7 @@ void SingleSlater<T>::formFock(){
     if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
 
     bool testNew = true;
-    bool isGGA   = true;
+    bool isGGA   = false;
     if (this->isDFT){
 //    Timing
       std::chrono::high_resolution_clock::time_point start;
@@ -172,24 +173,24 @@ void SingleSlater<T>::formFock(){
         }
         auto valVxc = [&](ChronusQ::IntegrationPoint pt, 
         KernelIntegrand<T> &result) {
-        SCRATCH1.setZero();
-        RealMatrix SCRATCH2X(this->nBasis_,this->nBasis_);
-        RealMatrix SCRATCH2Y(this->nBasis_,this->nBasis_);
-        RealMatrix SCRATCH2Z(this->nBasis_,this->nBasis_);
-        VectorXd   SCRATCH1X(this->nBasis_);
-        VectorXd   SCRATCH1Y(this->nBasis_);
-        VectorXd   SCRATCH1Z(this->nBasis_);
-        SCRATCH1X.setZero();
-        SCRATCH1Y.setZero();
-        SCRATCH1Z.setZero();
-        std::array<double,3>  drhoT = {0.0,0.0,0.0}; ///< array TOTAL density gradient components
-        std::array<double,3>  drhoS = {0.0,0.0,0.0}; ///< array SPIN  density gradient components
-        std::array<double,3>  drhoA = {0.0,0.0,0.0}; ///< array ALPHA  density gradient components
-        std::array<double,3>  drhoB = {0.0,0.0,0.0}; ///< array BETA  density gradient components
-        RealVecMap GradRhoT(&drhoT[0],3);
-        RealVecMap GradRhoS(&drhoS[0],3);
-        RealVecMap GradRhoA(&drhoA[0],3);
-        RealVecMap GradRhoB(&drhoB[0],3);
+          SCRATCH1.setZero();
+          RealMatrix SCRATCH2X(this->nBasis_,this->nBasis_);
+          RealMatrix SCRATCH2Y(this->nBasis_,this->nBasis_);
+          RealMatrix SCRATCH2Z(this->nBasis_,this->nBasis_);
+          VectorXd   SCRATCH1X(this->nBasis_);
+          VectorXd   SCRATCH1Y(this->nBasis_);
+          VectorXd   SCRATCH1Z(this->nBasis_);
+          SCRATCH1X.setZero();
+          SCRATCH1Y.setZero();
+          SCRATCH1Z.setZero();
+          std::array<double,3>  drhoT = {0.0,0.0,0.0}; ///< array TOTAL density gradient components
+          std::array<double,3>  drhoS = {0.0,0.0,0.0}; ///< array SPIN  density gradient components
+          std::array<double,3>  drhoA = {0.0,0.0,0.0}; ///< array ALPHA  density gradient components
+          std::array<double,3>  drhoB = {0.0,0.0,0.0}; ///< array BETA  density gradient components
+          RealVecMap GradRhoT(&drhoT[0],3);
+          RealVecMap GradRhoS(&drhoS[0],3);
+          RealVecMap GradRhoA(&drhoA[0],3);
+          RealVecMap GradRhoB(&drhoB[0],3);
           cartGP GP = pt.pt;
           double rhoA;
           double rhoB;
@@ -283,55 +284,26 @@ void SingleSlater<T>::formFock(){
                 * (  2.0 * GradRhoA[2]*kernelXC.ddgammaAA 
                    + GradRhoB[2]* kernelXC.ddgammaAB);  
               result.Energy += pt.weight * kernelXC.eps;
-
+	      if(!this->isClosedShell && this->nTCS_ != 2) {
+                result.VXCB.real() += pt.weight *SCRATCH2X  
+                  * (  2.0 * GradRhoB[0]*kernelXC.ddgammaBB 
+                     + GradRhoA[0]* kernelXC.ddgammaAB);  
+                result.VXCB.real() += pt.weight *SCRATCH2Y  
+                  * (  2.0 * GradRhoB[1]*kernelXC.ddgammaBB 
+                     + GradRhoA[1]* kernelXC.ddgammaAB);  
+                result.VXCB.real() += pt.weight *SCRATCH2Z  
+                  * (  2.0 * GradRhoB[2]*kernelXC.ddgammaBB 
+                     + GradRhoA[2]* kernelXC.ddgammaAB);  
+	      }
               }else{
               kernelXC = 
                this->dftFunctionals_[i]->eval(rhoA, rhoB);
             result.Energy += pt.weight * (rhoA+rhoB) * kernelXC.eps;
               }
             result.VXCA.real()   += pt.weight * SCRATCH2 * kernelXC.ddrhoA; 
-//            prettyPrint(this->fileio_->out, SCRATCH2 ,"OverLap");
-//            prettyPrint(this->fileio_->out, SCRATCH2X ,"DxOverLap");
-//            prettyPrint(this->fileio_->out, SCRATCH2Y ,"DyOverLap");
-//            prettyPrint(this->fileio_->out, SCRATCH2Z ,"DzOverLap");
-//            if (kernelXC.ddgammaAA > 1e-2) CErr();
-//          prettyPrint(this->fileio_->out,result.VXCA.real(),
-//            "Partial LDA Vxc alpha");
-//          this->fileio_->out << "Partial VXC Energy= " 
-//            <<  result.Energy << endl; 
+	    if(!this->isClosedShell && this->nTCS_ != 2) 
+              result.VXCB.real()   += pt.weight * SCRATCH2 * kernelXC.ddrhoB; 
           }
-
-/*
-            DFTFunctional::DFTInfo kernelXC;
-          for(auto i = 0; i < this->dftFunctionals_.size(); i++){
-           if (NDer>0) { 
-            kernelXC += this->dftFunctionals_[i]->
-              eval(rhoA,rhoB,gammaAA,gammaAB,gammaBB);
-            } else {
-            kernelXC += this->dftFunctionals_[i]->eval(rhoA, rhoB);
-            }
-          }
-           if (NDer>0){
-              SCRATCH2X += SCRATCH1X * SCRATCH1.transpose();
-              SCRATCH2Y += SCRATCH1Y * SCRATCH1.transpose();
-              SCRATCH2Z += SCRATCH1Z * SCRATCH1.transpose();
-
-              result.VXCA.real() += pt.weight *SCRATCH2X  
-                * (  2.0 * GradRhoA[0]*kernelXC.ddgammaAA 
-                   + GradRhoB[0]* kernelXC.ddgammaAB);  
-              result.VXCA.real() += pt.weight *SCRATCH2Y  
-                * (  2.0 * GradRhoA[1]*kernelXC.ddgammaAA 
-                   + GradRhoB[1]* kernelXC.ddgammaAB);  
-              result.VXCA.real() += pt.weight *SCRATCH2Z  
-                * (  2.0 * GradRhoA[2]*kernelXC.ddgammaAA 
-                   + GradRhoB[2]* kernelXC.ddgammaAB);  
-              result.Energy += pt.weight * kernelXC.eps;
-
-              }else{
-            result.Energy += pt.weight * (rhoA+rhoB) * kernelXC.eps;
-              }
-            result.VXCA.real()   += pt.weight * SCRATCH2 * kernelXC.ddrhoA; 
-*/
         };
 
         ChronusQ::AtomicGrid AGrid(100,302,ChronusQ::GRID_TYPE::GAUSSCHEBFST,
@@ -343,19 +315,23 @@ void SingleSlater<T>::formFock(){
         this->totalEx    = 0.0;
         this->vXA()->setZero();   // Set to zero every occurence of the SCF
         for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
-//          cout << "Integrate Atom n " << iAtm <<endl;
           AGrid.center() = iAtm;
           AGrid.scalingFactor()=0.5 *
             elements[this->molecule_->index(iAtm)].sradius/phys.bohr;
           AGrid.integrate<KernelIntegrand<T>>(valVxc,res);
         };
-//        (*this->vXA_) = 4*math.pi*res.VXCA;
-        (*this->vXA()) = 4*math.pi*res.VXCA;
+        (*this->vXA_) = 4*math.pi*res.VXCA;
         this->totalEx = 4*math.pi*res.Energy;
+        if(!this->isClosedShell && this->nTCS_ != 2){
+          (*this->vXB_) = 4*math.pi*res.VXCB;
+	}
         if(this->printLevel_ >= 3) {
           finish = std::chrono::high_resolution_clock::now();
           duration_formVxc = finish - start;
           prettyPrint(this->fileio_->out,(*this->vXA()),"LDA Vxc alpha");
+          if(!this->isClosedShell && this->nTCS_ != 2){
+            prettyPrint(this->fileio_->out,(*this->vXB()),"LDA Vxc beta");
+          }
           this->fileio_->out << "VXC Energy= " <<  this->totalEx << endl, 
           this->fileio_->out << endl << "CPU time for VXC integral:  "
                              << duration_formVxc.count() << " seconds." 
@@ -402,10 +378,17 @@ void SingleSlater<T>::formFock(){
 
       // FIXME: Needs to ge generalized for the 2C case
       if(this->nTCS_ == 1 && this->isDFT){
-        (*this->fockScalar_) += (*this->vXA_) + (*this->vCorA_);
-        (*this->fockScalar_) += (*this->vXB_) + (*this->vCorB_);
-        (*this->fockMz_)     += (*this->vXA_) + (*this->vCorA_);
-        (*this->fockMz_)     -= (*this->vXB_) + (*this->vCorB_);
+        if(!testNew) {
+          (*this->fockScalar_) += (*this->vXA_) + (*this->vCorA_);
+          (*this->fockScalar_) += (*this->vXB_) + (*this->vCorB_);
+          (*this->fockMz_)     += (*this->vXA_) + (*this->vCorA_);
+          (*this->fockMz_)     -= (*this->vXB_) + (*this->vCorB_);
+	} else {
+          (*this->fockScalar_) += (*this->vXA_);
+          (*this->fockScalar_) += (*this->vXB_);
+          (*this->fockMz_)     += (*this->vXA_);
+          (*this->fockMz_)     -= (*this->vXB_);
+	}
       }
 
       std::vector<std::reference_wrapper<TMap>> toGather;

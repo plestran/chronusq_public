@@ -138,6 +138,7 @@ DFTFunctional::DFTInfo VWNIII::eval(double rhoA, double rhoB){
      this->r_s*
      this->Eveps2VWN(this->A_p,this->b_p,this->c_p,this->Xp,this->x0_p);
      info.ddrhoA += info.eps ;
+     info.ddrhoB  = info.ddrhoA ;
    }
   return info;
 }
