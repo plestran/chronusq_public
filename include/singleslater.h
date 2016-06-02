@@ -433,10 +433,10 @@ public:
     this->nAngDFTGridPts_ = 302;
     this->isGGA = false;
 
-    this->dftFunctionals_.emplace_back(new SlaterExchange());
-//    this->dftFunctionals_.emplace_back(new BEightEight());
-//    this->dftFunctionals_.emplace_back(new lyp());
-    this->dftFunctionals_.emplace_back(new VWNV());
+//    this->dftFunctionals_.emplace_back(new SlaterExchange());
+    this->dftFunctionals_.emplace_back(new BEightEight());
+    this->dftFunctionals_.emplace_back(new lyp());
+//    this->dftFunctionals_.emplace_back(new VWNV());
 
     // FIXME: maybe hardcode these?
     this->epsConv       = 1.0e-7;

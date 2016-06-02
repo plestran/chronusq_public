@@ -27,7 +27,7 @@ double BEightEight::g1B88 (double x){
  gx *= 6.0 * this->beta * this->beta * x * x;
  gx += -2.0*this->beta*x;
  gx /= (1.0 + 6.0 * this->beta * x * boost::math::asinh(x))
-  *(1.0 + 6.0 * x * this->beta* boost::math::asinh(x));
+  *(1.0 + 6.0 * x * this->beta * boost::math::asinh(x));
  return gx; 
 };  //End Form g function for B88 Exchange
 
