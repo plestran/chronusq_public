@@ -2097,10 +2097,10 @@ void SingleSlater<double>::formVXC_store(){
     if(this->printLevel_ >= 3) {
       prettyPrint(this->fileio_->out,(*this->vXA()),"LDA Vx alpha");
       prettyPrint(this->fileio_->out,(*this->vCorA()),"Vc Vc alpha");
-      if(!this->isClosedShell && this->Ref_ != TCS) 
+      if(!this->isClosedShell && this->Ref_ != TCS) { 
         prettyPrint(this->fileio_->out,(*this->vXB()),"LDA Vx beta");
         prettyPrint(this->fileio_->out,(*this->vCorB()),"Vc Vc beta");
-
+        }
       this->fileio_->out << "Total LDA Ex ="    << this->totalEx 
                          << " Total VWN Corr= " << this->totalEcorr << endl;
     }

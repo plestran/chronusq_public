@@ -13,7 +13,7 @@ lyp::lyp(){
 
 void lyp::popLYPdens(double rhoA, double rhoB){
   this->rhoT          = rhoA + rhoB;
-  this->spindensity   = (rhoA - rhoB) / this->rhoT;
+//  this->spindensity   = (rhoA - rhoB) / this->rhoT;
 //  if( this->rhoT <  this-> small) {return ;}
 //  cout << "rhoT " << this->rhoT <<endl;
 //  cout << "rhoMz " << this->spindensity <<endl;
