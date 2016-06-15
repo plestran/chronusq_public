@@ -396,6 +396,7 @@ class AtomicGrid : public TwoDGrid2 {
     };
 
     inline IntegrationPoint operator[](size_t i) {
+      // return the struc (Cart Pt, weight)
       IntegrationPoint rawPoint = TwoDGrid2::operator[](i);
 
       // Rescale radius
