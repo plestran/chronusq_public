@@ -388,6 +388,9 @@ void AOIntegrals::computeAOOneE(){
   // Compute Orthonormal transformation matricies
   this->computeOrtho();
 
+ // -------------------------------
+ // This is the X2C transformation!
+ // -------------------------------
  // this->formP2Transformation();
 
   if(this->printLevel_ >= 2) this->printOneE();

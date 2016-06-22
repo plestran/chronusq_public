@@ -53,6 +53,8 @@ void AOIntegrals::formP2Transformation(){
   engineV.set_precision(0.0);
   engineC.set_precision(0.0);
 
+  // Loop through and uncontract all basis functions
+  //
   for(auto s1 = 0l, s12 = 0l, bf1_s = 0l; s1 < unContractedShells.size();
       bf1_s += unContractedShells[s1].size(), ++s1){
     int n1 = unContractedShells[s1].size();
@@ -298,6 +300,13 @@ void AOIntegrals::formP2Transformation(){
 //P2_Potential = - P2_Potential;
 //W = W.conjugate();
 
+// -------------------------------------------------
+// Put all pieces of core Hamiltonian in block form:
+// [ V'      cp    ]
+// [	 	   ]
+// [ cp   W'-2mc^2 ]
+// -------------------------------------------------
+
   PMap = PMap.cwiseInverse();
   ComplexMatrix CORE_HAMILTONIAN(4*nUncontracted,4*nUncontracted);
 
@@ -326,6 +335,9 @@ void AOIntegrals::formP2Transformation(){
     = CORE_HAMILTONIAN.block(
       0,2*nUncontracted,2*nUncontracted,2*nUncontracted);
 
+// ------------------------------
+// Diagonalize 
+// ------------------------------
 
 //prettyPrintComplex(cout,CORE_HAMILTONIAN,"H");
 //cout << "|H|" << CORE_HAMILTONIAN.squaredNorm();
@@ -334,30 +346,44 @@ void AOIntegrals::formP2Transformation(){
   es.compute(CORE_HAMILTONIAN);
   RealMatrix HEV= es.eigenvalues();
   ComplexMatrix HEVx= es.eigenvectors();
-//prettyPrint(cout,HEV,"HEV");
-//prettyPrintComplex(cout,HEVx,"HEVc");
 
+// Print out the energies (eigenvalues) and eigenvectors
+  prettyPrint(cout,HEV,"HEV");
+  prettyPrintComplex(cout,HEVx,"HEVc");
+
+// Grab C_L (+) and C_S (+) - the large and small components
+// of the electronic (positive energy) solutions
+//
+//
+// NOT SURE IF THESE ARE CORRECT!!!! (seems to be wrong 'column')
   ComplexMatrix L = 
     HEVx.block(0,2*nUncontracted,2*nUncontracted,2*nUncontracted);
   ComplexMatrix S = 
     HEVx.block(2*nUncontracted,2*nUncontracted,2*nUncontracted,2*nUncontracted);
 
+// Do we even use this SVD in calculating L inverse?
   Eigen::JacobiSVD<ComplexMatrix> 
     svd(L,Eigen::ComputeThinU | Eigen::ComputeThinV);
 
   VectorXd SigmaL = svd.singularValues();
   ComplexMatrix SVL = svd.matrixU();
 
-  ComplexMatrix X = S * L.inverse();
-//prettyPrintComplex(cout,X,"X");
-//cout << X.squaredNorm() << endl;
+  ComplexMatrix X = S * L.inverse(); //See above!
+
+// Print out X and its squared norm
+  prettyPrintComplex(cout,X,"X");
+  cout << X.squaredNorm() << endl;
 
   
+// Calculate Y = sqrt(1 + X'X)
   ComplexMatrix Y = 
     (ComplexMatrix::Identity(2*nUncontracted,2*nUncontracted) 
      + X.adjoint() * X).pow(-0.5);
-//prettyPrintComplex(cout,Y,"Y");
-//cout << Y.squaredNorm() << endl;
+
+// Print out Y and its squared norm
+  prettyPrintComplex(cout,Y,"Y");
+  cout << Y.squaredNorm() << endl;
+
 
   RealMatrix CUK = UK * (*this->basisSet_->mapPrim2Bf());
 
