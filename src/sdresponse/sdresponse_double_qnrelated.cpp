@@ -262,7 +262,7 @@ void SDResponse<double>::reoptWF(){
    (*this->singleSlater_->moA()) *= ExpAReal;
    this->singleSlater_->formDensity();
    this->singleSlater_->formFock();
-   this->singleSlater_->SCF();
+   this->singleSlater_->SCF2();
    QuasiNewton<double> dav(this);
    dav.run(this->fileio_->out);
  //CErr();

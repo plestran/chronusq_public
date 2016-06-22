@@ -191,20 +191,8 @@ class SingleSlater : public Quantum<T> {
   
 
   // Various functions the perform SCF and SCR allocation
-  void initSCFMem();       ///< Initialize scratch memory for SCF
-  void allocAlphaScr();    ///< Allocate scratch for Alpha related quantities
-  void allocBetaScr();     ///< Allocate scratch for Beta related quantities
-  void allocCUHFScr();     ///< Allocate scratch for CUHF realted quantities
-  void allocLAPACKScr();   ///< Allocate LAPACK scratch space
-  void cleanupSCFMem();    ///< Cleanup scratch memoty for SCF
-  void cleanupAlphaScr();  ///< Cleanup scratch for Alpha related quantities
-  void cleanupBetaScr();   ///< Cleanup scratch for Beta related quantities
-  void cleanupCUHFScr();   ///< Cleanup scratch for CUHF realted quantities
-  void cleanupLAPACKScr(); ///< Cleanup LAPACK scratch space
-  void initMemLen();       ///< Populate lengths of scratch partitions
   void initSCFPtr();       ///< NULL-out pointers to scratch partitions
   void formNO();           ///< Form Natural Orbitals
-  void diagFock();         ///< Diagonalize Fock Matrix
   void mixOrbitalsSCF();   ///< Mix the orbitals for Complex / TCS SCF
   void evalConver(int);    ///< Evaluate convergence criteria for SCF
 
@@ -664,7 +652,6 @@ public:
     this->computeMultipole();
     this->computeSExpect(*this->aointegrals_->overlap_);
   };
-  void SCF();  
   void CDIIS();
   void CpyFock(int);
   void GenDComm(int);

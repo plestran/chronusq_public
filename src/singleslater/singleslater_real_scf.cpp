@@ -32,22 +32,6 @@ using ChronusQ::SingleSlater;
 // Sajan                                  //
 //----------------------------------------//
 namespace ChronusQ {
-
-template<>
-void SingleSlater<double>::printDensityInfo(double PAlphaRMS,double EDelta){
-  this->fileio_->out<<"\nSCF Information:"<<endl;
-  this->fileio_->out<<std::right<<std::setw(30)<<"    Delta-E = "<<std::setw(15)<<std::scientific<<EDelta<<std::setw(5)<<" Eh "<<endl;
-  this->fileio_->out<<std::right<<std::setw(30)<<"RMS Density = "<<std::setw(15)<<std::scientific<<PAlphaRMS<<endl;
-};
-template<>
-void SingleSlater<double>::printDensityInfo(double PAlphaRMS, double PBetaRMS, double EDelta){
-  this->fileio_->out<<"\nSCF Information:"<<endl;
-  this->fileio_->out<<std::right<<std::setw(30)<<"    Delta-E = "<<std::setw(15)<<std::scientific<<EDelta<<std::setw(5)<<" Eh "<<endl;
-  this->fileio_->out<<std::right<<std::setw(30)<<"RMS Alpha Density = "<<std::setw(15)<<std::scientific<<PAlphaRMS<<endl;
-  this->fileio_->out<<std::right<<std::setw(30)<<"RMS Beta Density = "<<std::setw(15)<<std::scientific<<PBetaRMS<<endl;
-};
-
-
 template<>
 void SingleSlater<double>::formNO(){
   int INFO;
@@ -71,82 +55,6 @@ void SingleSlater<double>::formNO(){
   // Swap Ordering
   for(auto i = 0; i < this->nBasis_/2; i++) 
     P.col(i).swap(P.col(this->nBasis_ - i - 1));
-
-}
-
-template<>
-void SingleSlater<double>::diagFock(){
-  int INFO;
-  char JOBZ = 'V';
-  char UPLO = 'U';
-  auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
-
-  RealMap POldAlpha(this->POldAlphaMem_,NTCSxNBASIS,NTCSxNBASIS);
-  RealMap FpAlpha(this->FpAlphaMem_,NTCSxNBASIS,NTCSxNBASIS);
-  RealMap POldBeta(this->POldBetaMem_,0,0);
-  RealMap FpBeta(this->FpBetaMem_,0,0);
-  if(!this->isClosedShell && this->Ref_ != TCS){
-    new (&POldBeta)  RealMap(this->POldBetaMem_, NTCSxNBASIS,NTCSxNBASIS);
-    new (&FpBeta)    RealMap(this->FpBetaMem_,NTCSxNBASIS,NTCSxNBASIS);
-  }
-
-
-  if(this->Ref_ == CUHF){
-    RealMap P(this->PNOMem_,this->nBasis_,this->nBasis_);
-    RealMap DelF(this->delFMem_,this->nBasis_,this->nBasis_);
-    RealMap Lambda(this->lambdaMem_,this->nBasis_,this->nBasis_);
-
-    int activeSpace  = this->molecule_->multip() - 1;
-    int coreSpace    = (this->molecule_->nTotalE() - activeSpace) / 2;
-    int virtualSpace = this->nBasis_ - coreSpace - activeSpace;
-
-    DelF = 0.5 * (*this->aointegrals_->ortho1_) * (*this->fockA_) * 
-      (*this->aointegrals_->ortho1_);
-
-    if(!this->isClosedShell)
-      DelF -= 0.5 * (*this->aointegrals_->ortho1_) * (*this->fockB_) * 
-        (*this->aointegrals_->ortho1_);
- 
-    DelF = P.transpose() * DelF * P;
- 
-    Lambda.setZero();
-    for(auto i = activeSpace + coreSpace; i < this->nBasis_; i++)
-    for(auto j = 0                      ; j < coreSpace    ; j++){
-      Lambda(i,j) = -DelF(i,j);
-      Lambda(j,i) = -DelF(j,i);
-    }
-    Lambda = P  * Lambda * P.transpose();
-    Lambda = (*this->aointegrals_->ortho2_) * Lambda * 
-      (*this->aointegrals_->ortho2_);  
- 
-    (*this->fockA_) += Lambda;
-    if(!this->isClosedShell) (*this->fockB_) -= Lambda;
-  }
-
-  POldAlpha = (*this->onePDMA_);
-  if(!this->isClosedShell && this->Ref_ != TCS) POldBeta = (*this->onePDMB_);
-
-  FpAlpha = (*this->aointegrals_->ortho1_).transpose() * (*this->fockA_) * 
-    (*this->aointegrals_->ortho1_);
-
-  dsyev_(&JOBZ,&UPLO,&NTCSxNBASIS,this->FpAlphaMem_,&NTCSxNBASIS,
-      this->epsA_->data(),this->WORK_,&this->LWORK_,&INFO);
-
-  if(INFO != 0) CErr("DSYEV Failed Fock Alpha",this->fileio_->out);
-  (*this->moA_) = (*this->aointegrals_->ortho1_) * FpAlpha;
-
-  if(!this->isClosedShell && this->Ref_ != TCS){
-    FpBeta = (*this->aointegrals_->ortho1_).transpose() * (*this->fockB_) * 
-      (*this->aointegrals_->ortho1_);
-
-    dsyev_(&JOBZ,&UPLO,&this->nBasis_,this->FpBetaMem_,&this->nBasis_,
-        this->epsB_->data(),this->WORK_,&this->LWORK_,&INFO);
-
-    if(INFO != 0) CErr("DSYEV Failed Fock Beta",this->fileio_->out);
-    (*this->moB_) = (*this->aointegrals_->ortho1_) * FpBeta;
-  }
-
-  
 
 }
 
@@ -361,6 +269,7 @@ void SingleSlater<double>::fockCUHF() {
   (*this->fockScalar_) = (*this->fockA_) + (*this->fockB_);
   (*this->fockMz_)     = (*this->fockA_) - (*this->fockB_);
 };
+
 
 template<>
 void SingleSlater<double>::orthoDen(){

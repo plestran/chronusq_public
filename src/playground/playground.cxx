@@ -276,7 +276,7 @@ int main(int argc, char **argv){
   singleSlater.formGuess();
   singleSlater.formFock();
   singleSlater.computeEnergy();
-  singleSlater.SCF();
+  singleSlater.SCF2();
   singleSlater.computeProperties();
   singleSlater.printProperties();
 
