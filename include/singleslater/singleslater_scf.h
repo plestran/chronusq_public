@@ -159,10 +159,12 @@ void SingleSlater<T>::SCF2(){
 
     if(this->isConverged) break;
   };
+  cout << "HERE" << endl;
   // WARNING: MO Coefficients are not transformed to and from the
   // orthonormal basis throughout the SCF and must be transformed
   // back at the end for and post SCF to be functional
   this->backTransformMOs();
+  cout << "HERE" << endl;
 
   this->cleanupSCFMem2();
   this->fixPhase();
