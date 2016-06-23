@@ -40,20 +40,6 @@ void SingleSlater<dcomplex>::placeAtmDen(std::vector<int> atomIndex, SingleSlate
     auto iBfSt = this->basisset_->mapCen2Bf(iAtm)[0];
     auto iSize = this->basisset_->mapCen2Bf(iAtm)[1]; 
     if(this->Ref_ != TCS){
-/*
-      this->onePDMA_->block(iBfSt,iBfSt,iSize,iSize)= (*hfA.onePDMA_);
-      if(!this->isClosedShell){
-        if(hfA.isClosedShell)
-          this->onePDMB_->block(iBfSt,iBfSt,iSize,iSize)= 2*(*hfA.onePDMA_);
-        else
-          this->onePDMB_->block(iBfSt,iBfSt,iSize,iSize)= 
-            (*hfA.onePDMB_) + (*hfA.onePDMA_);
-      } else {
-        if(!hfA.isClosedShell){
-          this->onePDMA_->block(iBfSt,iBfSt,iSize,iSize) += (*hfA.onePDMB_);
-        }
-      }
-*/
       this->onePDMA_->block(iBfSt,iBfSt,iSize,iSize).real()      = (*hfA.densityA());
       if(this->isClosedShell){
         if(hfA.isClosedShell) 
@@ -93,26 +79,9 @@ void SingleSlater<dcomplex>::scaleDen(){
       (*this->onePDMA_)(i,j)      *= dcomplex((double)this->nAE_/(double)nE,0.0);
       (*this->onePDMA_)(i+1,j+1)  *= dcomplex((double)this->nBE_/(double)nE,0.0);
     }
-/*
-    double theta = math.pi / 8.0;
-    double c = std::cos(theta);
-    double s = std::sin(theta);
-    for(auto i = 0; i < this->nTCS_*this->nBasis_; i += 2)
-    for(auto j = 0; j < this->nTCS_*this->nBasis_; j += 2){
-      double Paa = (*this->onePDMA_)(i,j);
-      double Pbb = (*this->onePDMA_)(i+1,j+1);
-      (*this->onePDMA_)(i,j)     = c*c*Paa + s*s*Pbb;
-      (*this->onePDMA_)(i+1,j+1) = c*c*Pbb + s*s*Paa;
-      (*this->onePDMA_)(i+1,j)   = c*s*(Paa - Pbb);
-      (*this->onePDMA_)(i,j+1)   = c*s*(Paa - Pbb);
-     
-    }
-*/
-    
-//  (*this->onePDMA_) *= (double)(this->nAE_+this->nBE_)/(double)nE ;
   }
-//CErr();
 }; // SingleSlater::scaleDen [T=dcomplex]
+
 //--------------------------------//
 // form the initial guess of MO's //
 //--------------------------------//

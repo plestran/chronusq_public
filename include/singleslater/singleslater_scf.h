@@ -111,6 +111,7 @@ void SingleSlater<T>::SCF2(){
 
     this->orthoFock();
     this->diagFock2();
+
     if(iter == 0 && this->guess_ != READ) this->mixOrbitalsSCF();
 
     this->copyDen();

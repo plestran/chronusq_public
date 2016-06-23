@@ -127,19 +127,29 @@ void SingleSlater<dcomplex>::backTransformMOs(){
       MOB(this->moA_->data()+1,this->nBasis_,this->nTCS_*this->nBasis_,
           Eigen::Stride<Dynamic,Dynamic>(this->nTCS_*this->nBasis_,2));
 
-    (*this->NBSqScratch_) = MOA;
-    this->NBSqScratch2_->real() =
-      (*this->aointegrals_->ortho1_) * this->NBSqScratch_->real();
-    this->NBSqScratch2_->imag() =
-      (*this->aointegrals_->ortho1_) * this->NBSqScratch_->imag();
-    MOA = (*this->NBSqScratch2_);
+    ComplexMap SCRATCH1(this->memManager_->malloc<dcomplex>(this->nBasis_*
+          this->nBasis_*this->nTCS_),this->nBasis_,this->nTCS_*this->nBasis_);
+    ComplexMap SCRATCH2(this->memManager_->malloc<dcomplex>(this->nBasis_*
+          this->nBasis_*this->nTCS_),this->nBasis_,this->nTCS_*this->nBasis_);
 
-    (*this->NBSqScratch_) = MOB;
-    this->NBSqScratch2_->real() =
-      (*this->aointegrals_->ortho1_) * this->NBSqScratch_->real();
-    this->NBSqScratch2_->imag() =
-      (*this->aointegrals_->ortho1_) * this->NBSqScratch_->imag();
-    MOB = (*this->NBSqScratch2_);
+    SCRATCH1 = MOA;
+    SCRATCH2.real() =
+      (*this->aointegrals_->ortho1_) * SCRATCH1.real();
+    SCRATCH2.imag() =
+      (*this->aointegrals_->ortho1_) * SCRATCH1.imag();
+    MOA = SCRATCH2;
+
+    SCRATCH1 = MOB;
+    SCRATCH2.real() =
+      (*this->aointegrals_->ortho1_) * SCRATCH1.real();
+    SCRATCH2.imag() =
+      (*this->aointegrals_->ortho1_) * SCRATCH1.imag();
+    MOB = SCRATCH2;
+
+    this->memManager_->free(SCRATCH1.data(),
+        this->nBasis_*this->nBasis_*this->nTCS_);
+    this->memManager_->free(SCRATCH2.data(),
+        this->nBasis_*this->nBasis_*this->nTCS_);
     
   }
 };

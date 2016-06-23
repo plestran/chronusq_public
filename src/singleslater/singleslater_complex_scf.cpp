@@ -114,7 +114,7 @@ void SingleSlater<dcomplex>::evalConver(int iter){
 
 template<>
 void SingleSlater<dcomplex>::mixOrbitalsSCF(){
-//  return;
+    return;
   auto nO = this->nAE_ + this->nBE_;
   if(this->Ref_ == TCS){
   //CErr();
@@ -347,9 +347,9 @@ void SingleSlater<dcomplex>::orthoDen(){
     }
 
     this->NBSqScratch_->real() = 
-      (*this->aointegrals_->ortho1_) * this->onePDMScalar_->real();
+      (*this->aointegrals_->ortho1_) * this->onePDMOrthoScalar_->real();
     this->NBSqScratch_->imag() = 
-      (*this->aointegrals_->ortho1_) * this->onePDMScalar_->imag();
+      (*this->aointegrals_->ortho1_) * this->onePDMOrthoScalar_->imag();
 
     this->onePDMOrthoScalar_->real() = 
       this->NBSqScratch_->real() * (*this->aointegrals_->ortho1_);
@@ -359,9 +359,9 @@ void SingleSlater<dcomplex>::orthoDen(){
     (*this->onePDMScalar_) = (*this->onePDMOrthoScalar_);
 
     this->NBSqScratch_->real() = 
-      (*this->aointegrals_->ortho1_) * this->onePDMMz_->real();
+      (*this->aointegrals_->ortho1_) * this->onePDMOrthoMz_->real();
     this->NBSqScratch_->imag() = 
-      (*this->aointegrals_->ortho1_) * this->onePDMMz_->imag();
+      (*this->aointegrals_->ortho1_) * this->onePDMOrthoMz_->imag();
 
     this->onePDMOrthoMz_->real() = 
       this->NBSqScratch_->real() * (*this->aointegrals_->ortho1_);
@@ -376,9 +376,9 @@ void SingleSlater<dcomplex>::orthoDen(){
 
     if(this->nTCS_ == 2) {
       this->NBSqScratch_->real() = 
-        (*this->aointegrals_->ortho1_) * this->onePDMMx_->real();
+        (*this->aointegrals_->ortho1_) * this->onePDMOrthoMx_->real();
       this->NBSqScratch_->imag() = 
-        (*this->aointegrals_->ortho1_) * this->onePDMMx_->imag();
+        (*this->aointegrals_->ortho1_) * this->onePDMOrthoMx_->imag();
      
       this->onePDMOrthoMx_->real() = 
         this->NBSqScratch_->real() * (*this->aointegrals_->ortho1_);
@@ -388,9 +388,9 @@ void SingleSlater<dcomplex>::orthoDen(){
       (*this->onePDMMx_) = (*this->onePDMOrthoMx_);
 
       this->NBSqScratch_->real() = 
-        (*this->aointegrals_->ortho1_) * this->onePDMMy_->real();
+        (*this->aointegrals_->ortho1_) * this->onePDMOrthoMy_->real();
       this->NBSqScratch_->imag() = 
-        (*this->aointegrals_->ortho1_) * this->onePDMMy_->imag();
+        (*this->aointegrals_->ortho1_) * this->onePDMOrthoMy_->imag();
      
       this->onePDMOrthoMy_->real() = 
         this->NBSqScratch_->real() * (*this->aointegrals_->ortho1_);

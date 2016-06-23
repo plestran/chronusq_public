@@ -341,6 +341,11 @@ void SingleSlater<T>::printSCFHeader(ostream &output){
   else if(this->guess_ == READ)
     output << "Read";
   output << endl;
+  output << std::setw(38) << std::left << "  DIIS Extrapolation Algorithm:";
+  if(this->doDIIS) output << "CDIIS";
+  else             output << "No DIIS Extrapolation";
+  output << endl;
+
 
   if(this->isDFT){
     output << std::setw(38) << std::left << "  Density Functional:";
