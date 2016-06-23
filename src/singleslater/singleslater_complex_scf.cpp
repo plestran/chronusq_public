@@ -321,6 +321,8 @@ void SingleSlater<dcomplex>::fockCUHF() {
 
 template<>
 void SingleSlater<dcomplex>::orthoDen(){
+  cout << " Overlap" << endl << (*this->aointegrals_->overlap_) << endl << endl;
+  cout << " Ortho Mat" << endl << (*this->aointegrals_->ortho1_) << endl << endl;
   if(this->nTCS_ == 1 && this->isClosedShell) {
     this->NBSqScratch_->real() = 
       (*this->aointegrals_->ortho1_) * this->onePDMA_->real();
@@ -345,11 +347,14 @@ void SingleSlater<dcomplex>::orthoDen(){
       scattered.emplace_back(*this->onePDMOrthoMx_);
       Quantum<dcomplex>::spinScatter(*this->onePDMA_,scattered);
     }
+    cout << "In Ortho" << endl;
+    cout << "Scalar" << endl << (*this->onePDMOrthoScalar_) << endl << endl;
+    cout << "Mz" << endl << (*this->onePDMOrthoMz_) << endl << endl;
 
     this->NBSqScratch_->real() = 
-      (*this->aointegrals_->ortho1_) * this->onePDMScalar_->real();
+      (*this->aointegrals_->ortho1_) * this->onePDMOrthoScalar_->real();
     this->NBSqScratch_->imag() = 
-      (*this->aointegrals_->ortho1_) * this->onePDMScalar_->imag();
+      (*this->aointegrals_->ortho1_) * this->onePDMOrthoScalar_->imag();
 
     this->onePDMOrthoScalar_->real() = 
       this->NBSqScratch_->real() * (*this->aointegrals_->ortho1_);
@@ -359,9 +364,9 @@ void SingleSlater<dcomplex>::orthoDen(){
     (*this->onePDMScalar_) = (*this->onePDMOrthoScalar_);
 
     this->NBSqScratch_->real() = 
-      (*this->aointegrals_->ortho1_) * this->onePDMMz_->real();
+      (*this->aointegrals_->ortho1_) * this->onePDMOrthoMz_->real();
     this->NBSqScratch_->imag() = 
-      (*this->aointegrals_->ortho1_) * this->onePDMMz_->imag();
+      (*this->aointegrals_->ortho1_) * this->onePDMOrthoMz_->imag();
 
     this->onePDMOrthoMz_->real() = 
       this->NBSqScratch_->real() * (*this->aointegrals_->ortho1_);
@@ -376,9 +381,9 @@ void SingleSlater<dcomplex>::orthoDen(){
 
     if(this->nTCS_ == 2) {
       this->NBSqScratch_->real() = 
-        (*this->aointegrals_->ortho1_) * this->onePDMMx_->real();
+        (*this->aointegrals_->ortho1_) * this->onePDMOrthoMx_->real();
       this->NBSqScratch_->imag() = 
-        (*this->aointegrals_->ortho1_) * this->onePDMMx_->imag();
+        (*this->aointegrals_->ortho1_) * this->onePDMOrthoMx_->imag();
      
       this->onePDMOrthoMx_->real() = 
         this->NBSqScratch_->real() * (*this->aointegrals_->ortho1_);
@@ -388,9 +393,9 @@ void SingleSlater<dcomplex>::orthoDen(){
       (*this->onePDMMx_) = (*this->onePDMOrthoMx_);
 
       this->NBSqScratch_->real() = 
-        (*this->aointegrals_->ortho1_) * this->onePDMMy_->real();
+        (*this->aointegrals_->ortho1_) * this->onePDMOrthoMy_->real();
       this->NBSqScratch_->imag() = 
-        (*this->aointegrals_->ortho1_) * this->onePDMMy_->imag();
+        (*this->aointegrals_->ortho1_) * this->onePDMOrthoMy_->imag();
      
       this->onePDMOrthoMy_->real() = 
         this->NBSqScratch_->real() * (*this->aointegrals_->ortho1_);

@@ -27,6 +27,9 @@
 template<typename T>
 void SingleSlater<T>::computeEnergy(){
 //  this->scatterDensity();
+  cout << "In compute energy" << endl;
+  cout << *this->onePDMScalar_ << endl << endl;
+  cout << *this->onePDMMz_ << endl << endl;
   if(getRank() == 0) {
     this->energyOneE = 
       this->template computeProperty<double,DENSITY_TYPE::TOTAL>(
