@@ -97,7 +97,7 @@ void SingleSlater<T>::formPT(){
       scalingFactors.push_back(exchFactor);
       scalingFactors.push_back(exchFactor);
       this->PTMy_->setZero();
-      this->PTMz_->setZero();
+      this->PTMx_->setZero();
     }
   }
 

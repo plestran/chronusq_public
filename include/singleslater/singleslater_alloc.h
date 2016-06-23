@@ -93,6 +93,10 @@ void SingleSlater<T>::allocOp(){
     std::unique_ptr<TMap>(new TMap(
           this->memManager_->template malloc<T>(NBSq),
           this->nBasis_,this->nBasis_));
+  this->NBSqScratch2_ = 
+    std::unique_ptr<TMap>(new TMap(
+          this->memManager_->template malloc<T>(NBSq),
+          this->nBasis_,this->nBasis_));
   this->fockOrthoA_ = 
     std::unique_ptr<TMap>(
         new TMap(
@@ -105,6 +109,7 @@ void SingleSlater<T>::allocOp(){
           this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
 
   this->NBSqScratch_->setZero();
+  this->NBSqScratch2_->setZero();
   this->fockOrthoA_->setZero();
   this->onePDMOrthoA_->setZero();
 
@@ -189,12 +194,23 @@ void SingleSlater<T>::allocOp(){
               this->memManager_->template malloc<T>(NBSq),
               this->nBasis_,this->nBasis_));
 
+      this->onePDMOrthoMy_ = 
+        std::unique_ptr<TMap>(new TMap(
+              this->memManager_->template malloc<T>(NBSq),
+              this->nBasis_,this->nBasis_));
+      this->onePDMOrthoMx_ = 
+        std::unique_ptr<TMap>(new TMap(
+              this->memManager_->template malloc<T>(NBSq),
+              this->nBasis_,this->nBasis_));
+
       this->PTMx_->setZero(); 
       this->PTMy_->setZero(); 
       this->fockMx_->setZero(); 
       this->fockMy_->setZero(); 
       this->fockOrthoMx_->setZero(); 
       this->fockOrthoMy_->setZero(); 
+      this->onePDMOrthoMx_->setZero(); 
+      this->onePDMOrthoMy_->setZero(); 
     }
   }
 }

@@ -16,7 +16,7 @@ struct MyStruct {
 using namespace ChronusQ;
 
 enum MOLECULE_PRESETS {
-  WATER, HE,SO
+  WATER, HE,SO,Li
 };
 
 template<MOLECULE_PRESETS T>
@@ -58,6 +58,18 @@ void loadPresets<SO>(Molecule &mol){
 //  mol.setCart(0,0.000000000 ,-0.00000000000, 0.0);
   mol.setCart(0,0.000000000 ,0.00000000000, 0.0);
 };
+
+template<>
+void loadPresets<Li>(Molecule &mol){
+  mol.setNAtoms(1);
+  mol.setCharge(0);
+  mol.setNTotalE(3);
+  mol.setMultip(2);
+  mol.alloc();
+  mol.setIndex(0,HashAtom("Li",0));
+  mol.setCart(0,0.000000000 ,0.00000000000, 0.0);
+};
+
 
 int main(int argc, char **argv){
   auto gaussian = [&](cartGP pt) -> double {
@@ -282,7 +294,7 @@ int main(int argc, char **argv){
   singleSlater.formGuess();
   singleSlater.formFock();
   singleSlater.computeEnergy();
-  singleSlater.SCF();
+  singleSlater.SCF2();
   singleSlater.computeProperties();
   singleSlater.printProperties();
 

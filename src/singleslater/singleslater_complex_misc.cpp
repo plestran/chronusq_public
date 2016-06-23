@@ -101,4 +101,46 @@ template<>
 void SingleSlater<dcomplex>::fixPhase(){
   // FIXME: Do nothing for now
 };
+
+template<>
+void SingleSlater<dcomplex>::backTransformMOs(){
+  if(this->nTCS_ == 1) {
+    this->NBSqScratch_->real() = 
+      (*this->aointegrals_->ortho1_) * this->moA_->real();
+    this->NBSqScratch_->imag() = 
+      (*this->aointegrals_->ortho1_) * this->moA_->imag();
+
+    (*this->moA_) = (*this->NBSqScratch_);
+
+    if(!this->isClosedShell){
+      this->NBSqScratch_->real() = 
+        (*this->aointegrals_->ortho1_) * this->moB_->real();
+      this->NBSqScratch_->imag() = 
+        (*this->aointegrals_->ortho1_) * this->moB_->imag();
+      (*this->moB_) = (*this->NBSqScratch_);
+    }
+  } else {
+    Eigen::Map<ComplexMatrix,0,Eigen::Stride<Dynamic,Dynamic> >
+      MOA(this->moA_->data(),this->nBasis_,this->nTCS_*this->nBasis_,
+          Eigen::Stride<Dynamic,Dynamic>(this->nTCS_*this->nBasis_,2));
+    Eigen::Map<ComplexMatrix,0,Eigen::Stride<Dynamic,Dynamic> >
+      MOB(this->moA_->data()+1,this->nBasis_,this->nTCS_*this->nBasis_,
+          Eigen::Stride<Dynamic,Dynamic>(this->nTCS_*this->nBasis_,2));
+
+    (*this->NBSqScratch_) = MOA;
+    this->NBSqScratch2_->real() =
+      (*this->aointegrals_->ortho1_) * this->NBSqScratch_->real();
+    this->NBSqScratch2_->imag() =
+      (*this->aointegrals_->ortho1_) * this->NBSqScratch_->imag();
+    MOA = (*this->NBSqScratch2_);
+
+    (*this->NBSqScratch_) = MOB;
+    this->NBSqScratch2_->real() =
+      (*this->aointegrals_->ortho1_) * this->NBSqScratch_->real();
+    this->NBSqScratch2_->imag() =
+      (*this->aointegrals_->ortho1_) * this->NBSqScratch_->imag();
+    MOB = (*this->NBSqScratch2_);
+    
+  }
+};
 } // Namespace ChronusQ

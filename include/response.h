@@ -408,6 +408,7 @@ public:
   void formDifferenceDensity();
   void formDifferenceDensityFOPPA(){;};
   void formDifferenceDensityPPRPA(){;};
+  void computeSSq(){ };
 
   // QN Utility functions to grab subblocks of transitions densities
   void placeOccVir(TVecMap&, TMat&, TMat&);

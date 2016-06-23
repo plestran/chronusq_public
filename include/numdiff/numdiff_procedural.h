@@ -568,7 +568,7 @@ void NumericalDifferentiation<T>::computeGS(SingleSlater<T> &ss){
   ss.formGuess();
   ss.formFock();
   ss.computeEnergy();
-  ss.SCF();
+  ss.SCF2();
   ss.computeProperties();
   ss.printProperties();
 

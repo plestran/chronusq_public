@@ -74,6 +74,7 @@ class SingleSlater : public Quantum<T> {
 
 
   std::unique_ptr<TMap>  NBSqScratch_;
+  std::unique_ptr<TMap>  NBSqScratch2_;
 
   // Internal Storage
   std::unique_ptr<TMatrix>  coulombA_;   ///< deprecated 
@@ -146,7 +147,7 @@ class SingleSlater : public Quantum<T> {
   std::string algebraicFieldShort_;///< String Real/Complex/(Quaternion)
   std::array<double,3> elecField_;
   std::vector<double> mullPop_; ///< mulliken partial charge
-  double Sx_, Sy_, Sz_, Ssq_;
+//  double Sx_, Sy_, Sz_, Ssq_;
 
   // Lengths of scratch partitions (NOT MEANT TO BE COPIED)
   int lenF_;
@@ -190,20 +191,8 @@ class SingleSlater : public Quantum<T> {
   
 
   // Various functions the perform SCF and SCR allocation
-  void initSCFMem();       ///< Initialize scratch memory for SCF
-  void allocAlphaScr();    ///< Allocate scratch for Alpha related quantities
-  void allocBetaScr();     ///< Allocate scratch for Beta related quantities
-  void allocCUHFScr();     ///< Allocate scratch for CUHF realted quantities
-  void allocLAPACKScr();   ///< Allocate LAPACK scratch space
-  void cleanupSCFMem();    ///< Cleanup scratch memoty for SCF
-  void cleanupAlphaScr();  ///< Cleanup scratch for Alpha related quantities
-  void cleanupBetaScr();   ///< Cleanup scratch for Beta related quantities
-  void cleanupCUHFScr();   ///< Cleanup scratch for CUHF realted quantities
-  void cleanupLAPACKScr(); ///< Cleanup LAPACK scratch space
-  void initMemLen();       ///< Populate lengths of scratch partitions
   void initSCFPtr();       ///< NULL-out pointers to scratch partitions
   void formNO();           ///< Form Natural Orbitals
-  void diagFock();         ///< Diagonalize Fock Matrix
   void mixOrbitalsSCF();   ///< Mix the orbitals for Complex / TCS SCF
   void evalConver(int);    ///< Evaluate convergence criteria for SCF
 
@@ -215,6 +204,7 @@ class SingleSlater : public Quantum<T> {
   void cleanupSCFMem2();
   void copyDen();
   void genDComm2(int);
+  void backTransformMOs();
 
   double denTol_;
   double eneTol_;
@@ -581,6 +571,10 @@ public:
 
   inline TMap* fockA()                { return this->fockA_.get();    };
   inline TMap* fockB()                { return this->fockB_.get();    };
+  inline TMap* fockScalar()           { return this->fockScalar_.get();};
+  inline TMap* fockMz()           { return this->fockMz_.get();};
+  inline TMap* fockMy()           { return this->fockMy_.get();};
+  inline TMap* fockMx()           { return this->fockMx_.get();};
   inline TMap* coulombA()             { return this->coulombA_.get(); };
   inline TMap* coulombB()             { return this->coulombB_.get(); };
   inline TMap* exchangeA()            { return this->exchangeA_.get();};
@@ -656,12 +650,12 @@ public:
   void readGuessGauFChk(std::string &);	// read the initial guess of MO's from the Gaussian formatted checkpoint file
   void computeEnergy();         // compute the total electronic energy
   void computeMultipole();      // compute multipole properties
-  void computeSExpect();        // compute <S> <S^2>
+//void computeSExpect();        // compute <S> <S^2>
+  void computeSSq();
   inline void computeProperties(){
     this->computeMultipole();
-    this->computeSExpect();
+    this->computeSExpect(*this->aointegrals_->overlap_);
   };
-  void SCF();  
   void CDIIS();
   void CpyFock(int);
   void GenDComm(int);

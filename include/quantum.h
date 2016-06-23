@@ -92,6 +92,7 @@ namespace ChronusQ {
     std::array<std::array<double,3>,3> elecQuadpole_;
     std::array<std::array<double,3>,3> elecTracelessQuadpole_;
     std::array<std::array<std::array<double,3>,3>,3> elecOctpole_;
+    double Sx_, Sy_, Sz_, Ssq_;
 
 
     template<typename Scalar, typename Left, typename Right>
