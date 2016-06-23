@@ -103,38 +103,20 @@ void SingleSlater<T>::SCF2(){
   this->initSCFMem2();
 
   size_t iter;
-  cout << "Before SCF" << endl;
-  cout << *this->onePDMA_ << endl << endl;
-//cout << *this->onePDMB_ << endl << endl;
   for(iter = 0; iter < this->maxSCFIter_; iter++){
     if(this->Ref_ == CUHF) {
       this->formNO();
       this->fockCUHF();
     }
-    cout << "Before Fock " << iter << endl;
-    cout << *this->onePDMA_ << endl << endl;
-  //cout << *this->onePDMB_ << endl << endl;
 
     this->orthoFock();
     this->diagFock2();
-    cout << "After Fock " << iter << endl;
-    cout << *this->onePDMA_ << endl << endl;
-  //cout << *this->onePDMB_ << endl << endl;
 
     if(iter == 0 && this->guess_ != READ) this->mixOrbitalsSCF();
-    cout << "After Swap " << iter << endl;
-    cout << *this->onePDMA_ << endl << endl;
-  //cout << *this->onePDMB_ << endl << endl;
 
     this->copyDen();
     this->formDensity();
-    cout << "After Form " << iter << endl;
-    cout << *this->onePDMA_ << endl << endl;
-  //cout << *this->onePDMB_ << endl << endl;
     this->orthoDen();
-    cout << "After Ortho " << iter << endl;
-    cout << *this->onePDMA_ << endl << endl;
-  //cout << *this->onePDMB_ << endl << endl;
     this->formFock();
 
     if(PyErr_CheckSignals() == -1)
@@ -159,12 +141,10 @@ void SingleSlater<T>::SCF2(){
 
     if(this->isConverged) break;
   };
-  cout << "HERE" << endl;
   // WARNING: MO Coefficients are not transformed to and from the
   // orthonormal basis throughout the SCF and must be transformed
   // back at the end for and post SCF to be functional
   this->backTransformMOs();
-  cout << "HERE" << endl;
 
   this->cleanupSCFMem2();
   this->fixPhase();
