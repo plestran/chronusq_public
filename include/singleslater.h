@@ -433,8 +433,8 @@ public:
     this->nAngDFTGridPts_ = 302;
     this->isGGA = false;
 
-    this->dftFunctionals_.emplace_back(new SlaterExchange());
-//  this->dftFunctionals_.emplace_back(new BEightEight());
+//  this->dftFunctionals_.emplace_back(new SlaterExchange());
+    this->dftFunctionals_.emplace_back(new BEightEight());
     this->dftFunctionals_.emplace_back(new lyp());
 //    this->dftFunctionals_.emplace_back(new VWNV());
 

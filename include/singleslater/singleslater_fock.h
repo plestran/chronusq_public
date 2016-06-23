@@ -149,7 +149,7 @@ void SingleSlater<T>::formFock(){
   if(getRank() == 0) {
     if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
 
-    bool testNew = false;
+    bool testNew = true;
     bool isGGA   = true;
     if (this->isDFT){
 //    Timing
@@ -166,23 +166,29 @@ void SingleSlater<T>::formFock(){
       else {
         RealMatrix SCRATCH2(this->nBasis_,this->nBasis_);
         VectorXd   SCRATCH1(this->nBasis_);
+        RealMatrix SCRATCH2X(this->nBasis_,this->nBasis_);
+        RealMatrix SCRATCH2Y(this->nBasis_,this->nBasis_);
+        RealMatrix SCRATCH2Z(this->nBasis_,this->nBasis_);
+        VectorXd   SCRATCH1X(this->nBasis_);
+        VectorXd   SCRATCH1Y(this->nBasis_);
+        VectorXd   SCRATCH1Z(this->nBasis_);
+        std::chrono::duration<double> T1(0.0);
+        std::chrono::duration<double> T2(0.0);
+        std::chrono::duration<double> T3(0.0);
+        std::chrono::duration<double> T4(0.0);
         int NDer = 0;
-        if (isGGA){
-        NDer = 1;
-//        cout << "New GGA Fock Time" <<endl;
-        }
+        if(isGGA) NDer = 1; 
         auto valVxc = [&](ChronusQ::IntegrationPoint pt, 
         KernelIntegrand<T> &result) {
+
+          auto Newstart = std::chrono::high_resolution_clock::now();
           SCRATCH1.setZero();
-          RealMatrix SCRATCH2X(this->nBasis_,this->nBasis_);
-          RealMatrix SCRATCH2Y(this->nBasis_,this->nBasis_);
-          RealMatrix SCRATCH2Z(this->nBasis_,this->nBasis_);
-          VectorXd   SCRATCH1X(this->nBasis_);
-          VectorXd   SCRATCH1Y(this->nBasis_);
-          VectorXd   SCRATCH1Z(this->nBasis_);
           SCRATCH1X.setZero();
           SCRATCH1Y.setZero();
           SCRATCH1Z.setZero();
+          auto Newend = std::chrono::high_resolution_clock::now();
+          T1 += Newend - Newstart;
+
           std::array<double,3>  drhoT = {0.0,0.0,0.0}; ///< array TOTAL density gradient components
           std::array<double,3>  drhoS = {0.0,0.0,0.0}; ///< array SPIN  density gradient components
           std::array<double,3>  drhoA = {0.0,0.0,0.0}; ///< array ALPHA  density gradient components
@@ -199,6 +205,7 @@ void SingleSlater<T>::formFock(){
           double gammaAB;
           auto shMap = this->basisset_->MapGridBasis(GP); 
           if(shMap[0]) {return 0.0;}
+          Newstart = std::chrono::high_resolution_clock::now();
           for(auto iShell = 0; iShell < this->basisset_->nShell(); iShell++){
             if(!shMap[iShell+1]) {continue;}
 
@@ -223,11 +230,17 @@ void SingleSlater<T>::formFock(){
 
             delete [] buff;
           };
+          Newend = std::chrono::high_resolution_clock::now();
+          T2 += Newend - Newstart;
 
 //          if(SCRATCH1.norm() < 1e-8) return 0.0;
+          Newstart = std::chrono::high_resolution_clock::now();
           SCRATCH2 = SCRATCH1 * SCRATCH1.transpose();
           double rhoT = this->template computeProperty<double,TOTAL>(SCRATCH2);
           double rhoS = this->template computeProperty<double,MZ>(SCRATCH2);
+          Newend = std::chrono::high_resolution_clock::now();
+          T3 += Newend - Newstart;
+
           rhoA = 0.5 * (rhoT + rhoS);
           rhoB = 0.5 * (rhoT - rhoS);
 
@@ -269,10 +282,13 @@ void SingleSlater<T>::formFock(){
           }
           for(auto i = 0; i < this->dftFunctionals_.size(); i++){
             DFTFunctional::DFTInfo kernelXC;
-          if  (rhoT < 1.0e-10) continue;
-            if (NDer>0){
-              kernelXC = 
-            this->dftFunctionals_[i]->eval(rhoA,rhoB,gammaAA,gammaAB,gammaBB);
+            if  (rhoT < 1.0e-10) continue;
+            if (NDer > 0) {
+              Newstart = std::chrono::high_resolution_clock::now();
+              kernelXC = this->dftFunctionals_[i]->eval(
+                  rhoA,rhoB,gammaAA,gammaAB,gammaBB);
+              Newend = std::chrono::high_resolution_clock::now();
+              T4 += Newend - Newstart;
 
               result.VXCA.real() += pt.weight *SCRATCH2X  
                 * (  2.0 * GradRhoA[0]*kernelXC.ddgammaAA 
@@ -295,8 +311,8 @@ void SingleSlater<T>::formFock(){
                   * (  2.0 * GradRhoB[2]*kernelXC.ddgammaBB 
                      + GradRhoA[2]* kernelXC.ddgammaAB);  
 	      }
-              }else{
-              kernelXC = 
+            } else {
+                kernelXC = 
                this->dftFunctionals_[i]->eval(rhoA, rhoB);
             result.Energy += pt.weight * (rhoA+rhoB) * kernelXC.eps;
               }
@@ -325,6 +341,10 @@ void SingleSlater<T>::formFock(){
         if(!this->isClosedShell && this->nTCS_ != 2){
           (*this->vXB_) = 4*math.pi*res.VXCB;
 	}
+        cout << "T1 = " << T1.count() << endl;
+        cout << "T2 = " << T2.count() << endl;
+        cout << "T3 = " << T3.count() << endl;
+        cout << "T4 = " << T4.count() << endl;
         if(this->printLevel_ >= 3) {
           finish = std::chrono::high_resolution_clock::now();
           duration_formVxc = finish - start;
