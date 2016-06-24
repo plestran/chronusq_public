@@ -27,7 +27,7 @@
 template <typename T>
 void SingleSlater<T>::initSCFPtr(){
   this->occNumMem_     = NULL;
-  this->RWORK_         = NULL;
+//this->RWORK_         = NULL;
 
   this->FpAlphaMem_    = NULL;
   this->FpBetaMem_     = NULL;
@@ -37,7 +37,7 @@ void SingleSlater<T>::initSCFPtr(){
   this->ErrorBetaMem_  = NULL;
   this->FADIIS_        = NULL;
   this->FBDIIS_        = NULL;
-  this->WORK_          = NULL;
+//this->WORK_          = NULL;
   this->lambdaMem_     = NULL;
   this->delFMem_       = NULL;
   this->PNOMem_        = NULL;
@@ -63,8 +63,8 @@ void SingleSlater<T>::initSCFMem2(){
   auto NTCSxNBASIS = this->nTCS_ * this->nBasis_;
   auto NSQ = NTCSxNBASIS  * NTCSxNBASIS;
 
-  this->LWORK_     = 5 * std::max(NTCSxNBASIS,this->nDIISExtrap_);
-  this->LRWORK_    = 3 * std::max(NTCSxNBASIS,this->nDIISExtrap_);
+//this->LWORK_     = 5 * std::max(NTCSxNBASIS,this->nDIISExtrap_);
+//this->LRWORK_    = 3 * std::max(NTCSxNBASIS,this->nDIISExtrap_);
   this->lenCoeff_  = this->nDIISExtrap_;
 
   
@@ -89,9 +89,9 @@ void SingleSlater<T>::initSCFMem2(){
     this->occNumMem_ = this->memManager_->template malloc<double>(NTCSxNBASIS);
   }
 
-  this->WORK_  = this->memManager_->template malloc<T>(this->LWORK_);
-  if(typeid(T).hash_code() == typeid(dcomplex).hash_code())
-    this->RWORK_ = this->memManager_->template malloc<double>(this->LRWORK_);
+//this->WORK_  = this->memManager_->template malloc<T>(this->LWORK_);
+//if(typeid(T).hash_code() == typeid(dcomplex).hash_code())
+//  this->RWORK_ = this->memManager_->template malloc<double>(this->LRWORK_);
   
 }; //initSCFMem
 
@@ -189,9 +189,9 @@ void SingleSlater<T>::cleanupSCFMem2(){
     this->memManager_->free(this->occNumMem_,NTCSxNBASIS); 
   }
 
-  this->memManager_->free(this->WORK_,this->LWORK_);  
-  if(typeid(T).hash_code() == typeid(dcomplex).hash_code()) 
-    this->memManager_->free(this->RWORK_,this->LRWORK_); 
+//this->memManager_->free(this->WORK_,this->LWORK_);  
+//if(typeid(T).hash_code() == typeid(dcomplex).hash_code()) 
+//  this->memManager_->free(this->RWORK_,this->LRWORK_); 
   
   
 }; //cleanupSCFMem2
