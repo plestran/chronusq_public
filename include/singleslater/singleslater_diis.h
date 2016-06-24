@@ -63,17 +63,24 @@ void SingleSlater<T>::CDIIS(){
 
   double ANORM = B.template lpNorm<1>();
 
+  int LWORK  = 5*this->nDIISExtrap_;
+  T   *WORK  = this->memManager_->template malloc<T>(LWORK);
+
   if(typeid(T).hash_code() == typeid(dcomplex).hash_code()){
+    int LRWORK = 3*this->nDIISExtrap_;
+    double   *RWORK = this->memManager_->template malloc<double>(LRWORK);
     zgesv_(&N,&NRHS,reinterpret_cast<dcomplex*>(B.data()),&N,iPiv,
         reinterpret_cast<dcomplex*>(coef),&N,&INFO);
     zgecon_(&NORM,&N,reinterpret_cast<dcomplex*>(B.data()),&N,&ANORM,&RCOND,
-        reinterpret_cast<dcomplex*>(this->WORK_),this->RWORK_,&INFO);
+        reinterpret_cast<dcomplex*>(WORK),RWORK,&INFO);
+    this->memManager_->free(RWORK,LRWORK);
   } else {
     dgesv_(&N,&NRHS,reinterpret_cast<double*>(B.data()),&N,iPiv,
         reinterpret_cast<double*>(coef),&N,&INFO);
     dgecon_(&NORM,&N,reinterpret_cast<double*>(B.data()),&N,&ANORM,&RCOND,
-        reinterpret_cast<double*>(this->WORK_),iWORK_,&INFO);
+        reinterpret_cast<double*>(WORK),iWORK_,&INFO);
   }
+  this->memManager_->template free(WORK,LWORK);
 
 
   if(std::abs(RCOND) > std::numeric_limits<double>::epsilon()) {

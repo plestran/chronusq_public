@@ -52,8 +52,16 @@ void SingleSlater<dcomplex>::formNO(){
       (*this->aointegrals_->ortho2_);
   }
 
+  int LWORK  = 5*this->nTCS_*this->nBasis_;
+  int LRWORK = 3*this->nTCS_*this->nBasis_;
+  dcomplex *WORK  = this->memManager_->malloc<dcomplex>(LWORK);
+  double   *RWORK = this->memManager_->malloc<double>(LRWORK);
+
   zheev_(&JOBZ,&UPLO,&this->nBasis_,this->PNOMem_,&this->nBasis_,
-      this->occNumMem_,this->WORK_,&this->LWORK_,this->RWORK_,&INFO);
+      this->occNumMem_,WORK,&LWORK,RWORK,&INFO);
+
+  this->memManager_->free(WORK,LWORK);
+  this->memManager_->free(RWORK,LRWORK);
 
   if(INFO != 0) CErr("ZHEEV Failed in FormNO",this->fileio_->out);
 //P.transposeInPlace(); //bc row major
@@ -114,7 +122,7 @@ void SingleSlater<dcomplex>::evalConver(int iter){
 
 template<>
 void SingleSlater<dcomplex>::mixOrbitalsSCF(){
-    return;
+//    return;
   auto nO = this->nAE_ + this->nBE_;
   if(this->Ref_ == TCS){
   //CErr();
@@ -184,18 +192,25 @@ void SingleSlater<dcomplex>::diagFock2(){
   char JOBZ = 'V';
   char UPLO = 'U';
   auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
+  
+  int LWORK  = 5*NTCSxNBASIS;
+  int LRWORK = 3*NTCSxNBASIS;
+  dcomplex *WORK  = this->memManager_->malloc<dcomplex>(LWORK);
+  double   *RWORK = this->memManager_->malloc<double>(LRWORK);
 
   zheev_(&JOBZ,&UPLO,&NTCSxNBASIS,this->fockOrthoA_->data(),&NTCSxNBASIS,
-      this->epsA_->data(),this->WORK_,&this->LWORK_,this->RWORK_,&INFO);
+      this->epsA_->data(),WORK,&LWORK,RWORK,&INFO);
   if(INFO != 0) CErr("ZHEEV Failed Fock Alpha",this->fileio_->out);
   (*this->moA_) = (*this->fockOrthoA_);
 
   if(this->nTCS_ == 1 && !this->isClosedShell){
     zheev_(&JOBZ,&UPLO,&NTCSxNBASIS,this->fockOrthoB_->data(),&NTCSxNBASIS,
-        this->epsB_->data(),this->WORK_,&this->LWORK_,this->RWORK_,&INFO);
+        this->epsB_->data(),WORK,&LWORK,RWORK,&INFO);
     if(INFO != 0) CErr("ZHEEV Failed Fock Beta",this->fileio_->out);
     (*this->moB_) = (*this->fockOrthoB_);
   }
+  this->memManager_->free(WORK,LWORK);
+  this->memManager_->free(RWORK,LRWORK);
 };
 
 template<>
