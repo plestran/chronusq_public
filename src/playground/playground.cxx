@@ -108,8 +108,9 @@ int main(int argc, char **argv){
   singleSlater.addLYP();
   singleSlater.setPrintLevel(5);
 
-  basis.findBasisFile("sto3g");
+//basis.findBasisFile("sto3g");
 //basis.findBasisFile("3-21g");
+  basis.findBasisFile("6-31G");
   basis.communicate(fileio);
   basis.parseGlobal();
   basis.constructLocal(&molecule);

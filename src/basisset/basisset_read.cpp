@@ -688,9 +688,10 @@ double * BasisSet::basisDEval(int iop, libint2::Shell &liShell, cartGP *pt){
     expFactor += 
       liShell.contr[0].coeff[k] *
       std::exp(-liShell.alpha[k]*rSq);
-      if (iop == 1) alpha += 
-      2.0*liShell.alpha[k]*liShell.contr[0].coeff[k] *
-      std::exp(-liShell.alpha[k]*rSq);
+      if (iop == 1) 
+        alpha += 
+          2.0*liShell.alpha[k]*liShell.contr[0].coeff[k] *
+          std::exp(-liShell.alpha[k]*rSq);
   }
  
   if(liShell.contr[0].l == 0){

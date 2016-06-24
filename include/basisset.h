@@ -313,7 +313,7 @@ public:
   void     popExpPairSh();   // Populate expPairSh
   double   fSpAv (int iop,int l, double alpha, double r);   //Evaluate Spheric Average of a Shell
   double   fRmax (int l, double alpha, double thr, double epsConv, int maxiter);   //Evaluate Spheric Average of a Shell
-  inline libint2::Shell      shells(int i) {return this->shells_[i];    };
+  inline libint2::Shell&     shells(int i) {return this->shells_[i];    };
   inline int                nLShell(int L) {return this->nLShell_[L];   };
   inline int               mapSh2Bf(int i) {return this->mapSh2Bf_[i];  };
   inline int               mapSh2Cen(int i) {return this->mapSh2Cen_[i];};

@@ -106,10 +106,12 @@ public:
     inline void integrate(std::function< void(IntegrationPoint,T&) > func,
         T& result) {
       cout << "Integrate 3" << endl;
+      std::size_t NSkip(0);
       for(auto iPt = 0; iPt < this->nPts_; iPt++)
         if((*this)[iPt].evalpt){
           func((*this)[iPt],result);
-        }
+        } else NSkip++;
+      cout << "NSkip : " << NSkip << endl;
     };
 
 
