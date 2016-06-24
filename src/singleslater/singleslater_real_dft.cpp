@@ -2180,9 +2180,9 @@ void SingleSlater<double>::formVXC_new(){
 
       Newstart = std::chrono::high_resolution_clock::now();
       int b_s = this->basisset_->mapSh2Bf(iShell);
+      Newend = std::chrono::high_resolution_clock::now();
       int shSize= this->basisset_->shells(iShell).size();
     //libint2::Shell shTmp = this->basisset_->shells(iShell);
-      Newend = std::chrono::high_resolution_clock::now();
       T6 += Newend - Newstart;
 
       Newstart = std::chrono::high_resolution_clock::now();
