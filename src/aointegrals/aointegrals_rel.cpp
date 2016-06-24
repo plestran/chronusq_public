@@ -109,33 +109,47 @@ void AOIntegrals::formP2Transformation(){
   std::vector<double> ovlpEigValues(nUncontracted);
   std::vector<double> WORK(LWORK);
 
+// Get eigenvalues for overlap matrix S (via SVD) 
+// Store the orthogonal transformation U back in S
+
   dgesvd_(&JOBU,&JOBVT,&nUncontracted,&nUncontracted,SUncontracted.data(),
       &nUncontracted,&ovlpEigValues[0],SUncontracted.data(),&nUncontracted,
       SUncontracted.data(),&nUncontracted,&WORK[0],&LWORK,&INFO);
 
-
+// What happens when we divide by zero?
   for(auto iS = 0; iS < nUncontracted; iS++){
     SUncontracted.col(iS) /= std::sqrt(ovlpEigValues[iS]);
   }
 
-
+// Count linear dependencies here?
   int nZero = 0;
   for(auto iS = 0; iS < nUncontracted; iS++)
     if(std::abs(ovlpEigValues[iS]) < 1e-6) nZero++;
 
   cout << "NZERO " << nZero << endl;
 
+// Put the kinetic energy in the orthonormal basis 
+
   RealMatrix TMP = SUncontracted.transpose() * TUncontracted;
   TUncontracted = TMP * SUncontracted;
 
+// Get rid of the linear dependencies?
+// Only save the nonzero vectors of T here. 
   dgesvd_(&JOBU,&JOBVT,&nUncontracted,&nUncontracted,TUncontracted.data(),
       &nUncontracted,&ovlpEigValues[0],TUncontracted.data(),&nUncontracted,
       TUncontracted.data(),&nUncontracted,&WORK[0],&LWORK,&INFO);
 
+// Form the K transformation matrix from both pieces
+// (diagonalizes S) and (diagonalizes T). See eq. 12 in Rieher's paper from 2013
   RealMatrix UK = SUncontracted * TUncontracted;
 
+// Now we transform V to V' 
   TMP = UK.transpose() * VUncontracted;;
   RealMatrix P2_Potential = TMP * UK;
+
+
+// Next we need to get W' (from pVp integrals)
+
 
   VectorXd SCRATCH1UnContracted(nUncontracted);
   RealMatrix SCRATCH2UnContracted(nUncontracted,nUncontracted);
@@ -143,6 +157,7 @@ void AOIntegrals::formP2Transformation(){
   VectorXd SCRATCHDYUnContracted(nUncontracted);
   VectorXd SCRATCHDZUnContracted(nUncontracted);
 
+// compute pVp numerically
   auto PVP = [&](IntegrationPoint pt, std::vector<RealMatrix> &result) {
     for(auto iShell = 0, b_s = 0; iShell < unContractedShells.size();
          b_s += unContractedShells[iShell].size(),++iShell) {
@@ -237,7 +252,7 @@ void AOIntegrals::formP2Transformation(){
   RealMatrix PVPY = numPot[7] - numPot[3];
   RealMatrix PVPZ = numPot[2] - numPot[4]; 
 
-
+// Apply the Uk unitary transformation ( Uk' * PVP * Uk)
   TMP = UK.transpose() * PVPS;
   PVPS = TMP * UK;
   TMP = UK.transpose() * PVPX;
@@ -376,6 +391,7 @@ void AOIntegrals::formP2Transformation(){
 
   
 // Calculate Y = sqrt(1 + X'X)
+// Also known as the 'renormalization matrix' R
   ComplexMatrix Y = 
     (ComplexMatrix::Identity(2*nUncontracted,2*nUncontracted) 
      + X.adjoint() * X).pow(-0.5);
