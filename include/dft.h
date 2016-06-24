@@ -26,6 +26,14 @@ public:
       this->ddgammaAB = 0;
       this->ddgammaBB = 0;
     };
+    inline void operator+=(DFTInfo other){
+      this->eps       += other.eps      ;
+      this->ddrhoA    += other.ddrhoA   ;
+      this->ddrhoB    += other.ddrhoB   ;
+      this->ddgammaAA += other.ddgammaAA;
+      this->ddgammaAB += other.ddgammaAB;
+      this->ddgammaBB += other.ddgammaBB;
+    }
 
   };
 

@@ -147,22 +147,18 @@ class SingleSlater : public Quantum<T> {
   std::string algebraicFieldShort_;///< String Real/Complex/(Quaternion)
   std::array<double,3> elecField_;
   std::vector<double> mullPop_; ///< mulliken partial charge
-//  double Sx_, Sy_, Sz_, Ssq_;
 
   // Lengths of scratch partitions (NOT MEANT TO BE COPIED)
   int lenF_;
   int lenP_;
   int lenB_;
   int lenCoeff_;
-//int LWORK_;
-//int LRWORK_;
   int lenLambda_;
   int lenDelF_;
   int lenOccNum_;
 
   // Pointers of scratch partitions (NOT MEANT TO BE COPIED)
   double *occNumMem_;
-//double *RWORK_;
 
   T *FpAlphaMem_;
   T *FpBetaMem_;
@@ -172,7 +168,6 @@ class SingleSlater : public Quantum<T> {
   T *ErrorBetaMem_;
   T *FADIIS_;
   T *FBDIIS_;
-//T *WORK_;
   T *lambdaMem_;
   T *delFMem_;
   T *PNOMem_;
@@ -423,10 +418,12 @@ public:
     this->nAngDFTGridPts_ = 302;
     this->isGGA = false;
 
+/*
 //  this->dftFunctionals_.emplace_back(new SlaterExchange());
     this->dftFunctionals_.emplace_back(new BEightEight());
     this->dftFunctionals_.emplace_back(new lyp());
 //    this->dftFunctionals_.emplace_back(new VWNV());
+*/
 
     // FIXME: maybe hardcode these?
     this->epsConv       = 1.0e-7;
@@ -615,6 +612,7 @@ public:
   void formPT();
   void formVXC();               // Form DFT VXC Term
   void formVXC_store();               // Form DFT VXC Term
+  void formVXC_new();               // Form DFT VXC Term
   void genSparseBasisMap();     // Generate Basis Set Mapping
   void genSparseRcrosP();      //  Generate R cros P int
   void evalVXC_store(int, int, double &, double &,RealMatrix *, RealMatrix *,
@@ -663,6 +661,23 @@ public:
   void fixPhase();
 
   void SCF2();
+
+  // DFT Setup Routines
+  inline void addSlater(){
+    this->dftFunctionals_.emplace_back(new SlaterExchange());
+  };
+  inline void addB88(){
+    this->dftFunctionals_.emplace_back(new BEightEight());
+  };
+  inline void addLYP(){
+    this->dftFunctionals_.emplace_back(new lyp()); 
+  };
+  inline void addVWN5(){
+    this->dftFunctionals_.emplace_back(new VWNV()); 
+  };
+  inline void addVWN3(){
+    this->dftFunctionals_.emplace_back(new VWNIII()); 
+  };
 
 
   void printEnergy(); 
