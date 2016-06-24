@@ -154,15 +154,15 @@ class SingleSlater : public Quantum<T> {
   int lenP_;
   int lenB_;
   int lenCoeff_;
-  int LWORK_;
-  int LRWORK_;
+//int LWORK_;
+//int LRWORK_;
   int lenLambda_;
   int lenDelF_;
   int lenOccNum_;
 
   // Pointers of scratch partitions (NOT MEANT TO BE COPIED)
   double *occNumMem_;
-  double *RWORK_;
+//double *RWORK_;
 
   T *FpAlphaMem_;
   T *FpBetaMem_;
@@ -172,7 +172,7 @@ class SingleSlater : public Quantum<T> {
   T *ErrorBetaMem_;
   T *FADIIS_;
   T *FBDIIS_;
-  T *WORK_;
+//T *WORK_;
   T *lambdaMem_;
   T *delFMem_;
   T *PNOMem_;
