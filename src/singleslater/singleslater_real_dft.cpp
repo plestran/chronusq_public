@@ -2123,13 +2123,23 @@ void SingleSlater<dcomplex>::formVXC_new(){;};
 template<>
 void SingleSlater<double>::formVXC_new(){
 //Timing
+/*
   std::chrono::high_resolution_clock::time_point start;
   std::chrono::high_resolution_clock::time_point finish;
   std::chrono::duration<double> duration_formVxc;
+  std::chrono::duration<double> T1(0.0);
+  std::chrono::duration<double> T2(0.0);
+  std::chrono::duration<double> T3(0.0);
+  std::chrono::duration<double> T4(0.0);
+  std::chrono::duration<double> T5(0.0);
+  std::chrono::duration<double> T6(0.0);
+*/
   
+/*
   if(this->printLevel_ >= 3) {
     start = std::chrono::high_resolution_clock::now();
   }
+*/
   bool isGGA   = true;
   RealMatrix SCRATCH2(this->nBasis_,this->nBasis_);
   VectorXd   SCRATCH1(this->nBasis_);
@@ -2139,24 +2149,18 @@ void SingleSlater<double>::formVXC_new(){
   VectorXd   SCRATCH1X(this->nBasis_);
   VectorXd   SCRATCH1Y(this->nBasis_);
   VectorXd   SCRATCH1Z(this->nBasis_);
-  std::chrono::duration<double> T1(0.0);
-  std::chrono::duration<double> T2(0.0);
-  std::chrono::duration<double> T3(0.0);
-  std::chrono::duration<double> T4(0.0);
-  std::chrono::duration<double> T5(0.0);
-  std::chrono::duration<double> T6(0.0);
   int NDer = 0;
   if(isGGA) NDer = 1; 
   auto valVxc = [&](ChronusQ::IntegrationPoint pt, 
   KernelIntegrand<double> &result) -> void {
 
-    auto Newstart = std::chrono::high_resolution_clock::now();
+//  auto Newstart = std::chrono::high_resolution_clock::now();
     SCRATCH1.setZero();
     SCRATCH1X.setZero();
     SCRATCH1Y.setZero();
     SCRATCH1Z.setZero();
-    auto Newend = std::chrono::high_resolution_clock::now();
-    T1 += Newend - Newstart;
+//  auto Newend = std::chrono::high_resolution_clock::now();
+//  T1 += Newend - Newstart;
 
     std::array<double,3>  drhoT = {0.0,0.0,0.0}; ///< array TOTAL density gradient components
     std::array<double,3>  drhoS = {0.0,0.0,0.0}; ///< array SPIN  density gradient components
@@ -2178,46 +2182,46 @@ void SingleSlater<double>::formVXC_new(){
       if(!shMap[iShell+1]) continue;
 
 
-      Newstart = std::chrono::high_resolution_clock::now();
-      int b_s = this->basisset_->mapSh2Bf(iShell);
-      Newend = std::chrono::high_resolution_clock::now();
+//    Newstart = std::chrono::high_resolution_clock::now();
+//    int b_s = this->basisset_->mapSh2Bf(iShell);
+//    Newend = std::chrono::high_resolution_clock::now();
       int shSize= this->basisset_->shells(iShell).size();
     //libint2::Shell shTmp = this->basisset_->shells(iShell);
-      T6 += Newend - Newstart;
+//    T6 += Newend - Newstart;
 
-      Newstart = std::chrono::high_resolution_clock::now();
+//    Newstart = std::chrono::high_resolution_clock::now();
     //double * buff = this->basisset_->basisDEval(NDer,shTmp,&pt.pt);
       double * buff = this->basisset_->basisDEval(NDer,this->basisset_->shells(iShell),&pt.pt);
-      Newend = std::chrono::high_resolution_clock::now();
-      T2 += Newend - Newstart;
+//    Newend = std::chrono::high_resolution_clock::now();
+//    T2 += Newend - Newstart;
 
       RealMap bMap(buff,shSize,1);
-      Newstart = std::chrono::high_resolution_clock::now();
-      SCRATCH1.block(b_s,0,shSize,1) = bMap;
+//    Newstart = std::chrono::high_resolution_clock::now();
+      SCRATCH1.block(this->basisset_->mapSh2Bf(iShell),0,shSize,1) = bMap;
       if(NDer>0){
         double * ds1EvalX = buff + shSize;
         double * ds1EvalY = ds1EvalX + shSize;
         double * ds1EvalZ = ds1EvalY + shSize;
         RealMap bMapX(ds1EvalX,shSize,1);
-        SCRATCH1X.block(b_s,0,shSize,1) = bMapX;
+        SCRATCH1X.block(this->basisset_->mapSh2Bf(iShell),0,shSize,1) = bMapX;
         RealMap bMapY(ds1EvalY,shSize,1);
-        SCRATCH1Y.block(b_s,0,shSize,1) = bMapY;
+        SCRATCH1Y.block(this->basisset_->mapSh2Bf(iShell),0,shSize,1) = bMapY;
         RealMap bMapZ(ds1EvalZ,shSize,1);
-        SCRATCH1Z.block(b_s,0,shSize,1) = bMapZ;
+        SCRATCH1Z.block(this->basisset_->mapSh2Bf(iShell),0,shSize,1) = bMapZ;
       }
-      Newend = std::chrono::high_resolution_clock::now();
-      T5 += Newend - Newstart;
+//    Newend = std::chrono::high_resolution_clock::now();
+//    T5 += Newend - Newstart;
 
       delete [] buff;
     };
 
     if(SCRATCH1.norm() < 1e-8) return;
-    Newstart = std::chrono::high_resolution_clock::now();
+//  Newstart = std::chrono::high_resolution_clock::now();
     SCRATCH2 = SCRATCH1 * SCRATCH1.transpose();
     double rhoT = this->template computeProperty<double,TOTAL>(SCRATCH2);
     double rhoS = this->template computeProperty<double,MZ>(SCRATCH2);
-    Newend = std::chrono::high_resolution_clock::now();
-    T3 += Newend - Newstart;
+//  Newend = std::chrono::high_resolution_clock::now();
+//  T3 += Newend - Newstart;
 
     rhoA = 0.5 * (rhoT + rhoS);
     rhoB = 0.5 * (rhoT - rhoS);
@@ -2243,15 +2247,16 @@ void SingleSlater<double>::formVXC_new(){
       SCRATCH2Z += SCRATCH1Z * SCRATCH1.transpose();
     }
     
-    if  (rhoT < 1.0e-10) return;
+//  if  (rhoT < 1.0e-10) return;
+    if  (rhoT < 1.0e-08) return;
     DFTFunctional::DFTInfo kernelXC;
     for(auto i = 0; i < this->dftFunctionals_.size(); i++){
       if (NDer > 0) {
-        Newstart = std::chrono::high_resolution_clock::now();
+//      Newstart = std::chrono::high_resolution_clock::now();
         kernelXC += this->dftFunctionals_[i]->eval(
             rhoA,rhoB,gammaAA,gammaAB,gammaBB);
-        Newend = std::chrono::high_resolution_clock::now();
-        T4 += Newend - Newstart;
+//      Newend = std::chrono::high_resolution_clock::now();
+//      T4 += Newend - Newstart;
 /*
         result.VXCA.real() += pt.weight *SCRATCH2X  
           * (  2.0 * GradRhoA[0]*kernelXC.ddgammaAA 
@@ -2313,14 +2318,15 @@ void SingleSlater<double>::formVXC_new(){
     result.VXCA.real()   += pt.weight * SCRATCH2 * kernelXC.ddrhoA; 
     if(!this->isClosedShell && this->nTCS_ != 2) 
       result.VXCB.real()   += pt.weight * SCRATCH2 * kernelXC.ddrhoB; 
+//  if(rhoT < 1e-5) cout << "****** " << rhoT << endl;
   };
 
-  ChronusQ::AtomicGrid AGrid(100,302,ChronusQ::GRID_TYPE::GAUSSCHEBFST,
+  ChronusQ::AtomicGrid AGrid(100,302,ChronusQ::GRID_TYPE::EULERMAC,
       ChronusQ::GRID_TYPE::LEBEDEV,ChronusQ::ATOMIC_PARTITION::BECKE,
       this->molecule_->cartArray(),0,1.0,false);
    
   KernelIntegrand<double> res(this->vXA_->cols());
-  this->basisset_->radcut(1.0e-10, 50, 1.0e-7);
+  this->basisset_->radcut(1.0e-08, 50, 1.0e-7);
   this->totalEx    = 0.0;
   this->vXA()->setZero();   // Set to zero every occurence of the SCF
   for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
@@ -2334,6 +2340,7 @@ void SingleSlater<double>::formVXC_new(){
   if(!this->isClosedShell && this->nTCS_ != 2){
     (*this->vXB_) = 4*math.pi*res.VXCB;
   }
+/*
   cout << "T1 = " << T1.count() << endl;
   cout << "T2 = " << T2.count() << endl;
   cout << "T3 = " << T3.count() << endl;
@@ -2352,6 +2359,7 @@ void SingleSlater<double>::formVXC_new(){
                        << duration_formVxc.count() << " seconds." 
                        << endl;
   }
+*/
 }
 
 } // Namespace ChronusQ

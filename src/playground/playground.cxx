@@ -106,7 +106,7 @@ int main(int argc, char **argv){
 //  singleSlater.setCorrKernel(SingleSlater<double>::CORR::VWN5);
   singleSlater.addB88();
   singleSlater.addLYP();
-  singleSlater.setPrintLevel(5);
+//singleSlater.setPrintLevel(5);
 
 //basis.findBasisFile("sto3g");
 //basis.findBasisFile("3-21g");
