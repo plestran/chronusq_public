@@ -47,8 +47,13 @@ void SingleSlater<double>::formNO(){
     P += 0.5 * (*this->aointegrals_->ortho2_) * (*this->onePDMB_) * 
       (*this->aointegrals_->ortho2_);
 
+  int LWORK  = 5*this->nBasis_;
+  double *WORK  = this->memManager_->malloc<double>(LWORK);
+
   dsyev_(&JOBZ,&UPLO,&this->nBasis_,this->PNOMem_,&this->nBasis_,
-      this->occNumMem_,this->WORK_,&this->LWORK_,&INFO);
+      this->occNumMem_,WORK,&LWORK,&INFO);
+
+  this->memManager_->free(WORK,LWORK);
 
   if(INFO != 0) CErr("DSYEV Failed in FormNO",this->fileio_->out);
 
@@ -167,17 +172,21 @@ void SingleSlater<double>::diagFock2(){
   char UPLO = 'U';
   auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
 
+  int LWORK  = 5*NTCSxNBASIS;
+  double *WORK  = this->memManager_->malloc<double>(LWORK);
+
   dsyev_(&JOBZ,&UPLO,&NTCSxNBASIS,this->fockOrthoA_->data(),&NTCSxNBASIS,
-      this->epsA_->data(),this->WORK_,&this->LWORK_,&INFO);
+      this->epsA_->data(),WORK,&LWORK,&INFO);
   if(INFO != 0) CErr("DSYEV Failed Fock Alpha",this->fileio_->out);
   (*this->moA_) = (*this->fockOrthoA_);
 
   if(this->nTCS_ == 1 && !this->isClosedShell){
     dsyev_(&JOBZ,&UPLO,&NTCSxNBASIS,this->fockOrthoB_->data(),&NTCSxNBASIS,
-        this->epsB_->data(),this->WORK_,&this->LWORK_,&INFO);
+        this->epsB_->data(),WORK,&LWORK,&INFO);
     if(INFO != 0) CErr("DSYEV Failed Fock Beta",this->fileio_->out);
     (*this->moB_) = (*this->fockOrthoB_);
   }
+  this->memManager_->free(WORK,LWORK);
 };
 
 template<>
