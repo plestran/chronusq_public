@@ -111,6 +111,7 @@ void BasisSet::renormShells(){
 std::vector<libint2::Shell> BasisSet::uncontractBasis(){
   std::vector<libint2::Shell> newShells;
 
+  cout << "uncontracting now" << endl;
   for(auto iShell = this->shells_.begin(); iShell != this->shells_.end(); ++iShell) {
 //  cout << " New Shell " << endl;
     for(auto i = 0; i < iShell->alpha.size(); ++i){

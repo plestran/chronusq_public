@@ -71,7 +71,6 @@ void AOIntegrals::formP2Transformation(){
         unContractedShells[s1],
         unContractedShells[s2]
     );
-
     Eigen::Map<
       const Eigen::Matrix<double,Dynamic,Dynamic,Eigen::RowMajor>>
       bufMatS(buffS,n1,n2);
@@ -81,7 +80,7 @@ void AOIntegrals::formP2Transformation(){
 
     SUncontracted.block(bf1_s,bf2_s,n1,n2) = bufMatS;
     TUncontracted.block(bf1_s,bf2_s,n1,n2) = bufMatT;
-
+    
     for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
       const double* buff = engineC.compute(
         unContractedShells[s1],
@@ -363,8 +362,8 @@ void AOIntegrals::formP2Transformation(){
   ComplexMatrix HEVx= es.eigenvectors();
 
 // Print out the energies (eigenvalues) and eigenvectors
-  prettyPrint(cout,HEV,"HEV");
-  prettyPrintComplex(cout,HEVx,"HEVc");
+//  prettyPrint(cout,HEV,"HEV");
+//  prettyPrintComplex(cout,HEVx,"HEVc");
 
 // Grab C_L (+) and C_S (+) - the large and small components
 // of the electronic (positive energy) solutions
@@ -386,7 +385,7 @@ void AOIntegrals::formP2Transformation(){
   ComplexMatrix X = S * L.inverse(); //See above!
 
 // Print out X and its squared norm
-  prettyPrintComplex(cout,X,"X");
+//  prettyPrintComplex(cout,X,"X");
   cout << X.squaredNorm() << endl;
 
   
@@ -397,9 +396,10 @@ void AOIntegrals::formP2Transformation(){
      + X.adjoint() * X).pow(-0.5);
 
 // Print out Y and its squared norm
-  prettyPrintComplex(cout,Y,"Y");
+//  prettyPrintComplex(cout,Y,"Y");
   cout << Y.squaredNorm() << endl;
 
+  CErr();
 
   RealMatrix CUK = UK * (*this->basisSet_->mapPrim2Bf());
 
