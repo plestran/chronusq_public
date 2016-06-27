@@ -158,7 +158,7 @@ void SingleSlater<double>::SADGuess() {
  
     // Loop and perform CUHF on each atomic center
     for(auto iUn = 0; iUn < uniqueElement.size(); iUn++){
-      // Local objects to be constructed and destructed at every loop
+	// Local objects to be constructed and destructed at every loop
       AOIntegrals aointegralsAtom;
       SingleSlater<double> hartreeFockAtom;
       BasisSet basisSetAtom;
@@ -235,7 +235,6 @@ void SingleSlater<double>::SADGuess() {
       this->placeAtmDen(atomIndex[iUn],hartreeFockAtom);
  
     } // Loop iUn
- 
     this->scaleDen();
 #ifdef CQ_ENABLE_MPI
     MPI_Barrier(MPI_COMM_WORLD);

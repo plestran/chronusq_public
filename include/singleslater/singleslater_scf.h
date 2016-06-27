@@ -97,7 +97,7 @@ void SingleSlater<T>::initSCFMem2(){
 
 template<typename T>
 void SingleSlater<T>::SCF2(){
-  this->aointegrals_->computeAOOneE();
+  if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
   if(this->printLevel_ > 0)
     this->printSCFHeader(this->fileio_->out);
   this->initSCFMem2();

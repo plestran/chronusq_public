@@ -391,8 +391,13 @@ void AOIntegrals::computeAOOneE(){
  // -------------------------------
  // This is the X2C transformation!
  // -------------------------------
- // this->formP2Transformation();
-
+  if (this->doX2C) {
+  //    printf("\n now going into X2C transformation \n");
+      this->formP2Transformation();
+	}
+  else {
+  //    printf("not doing X2C \n");
+	}
   if(this->printLevel_ >= 2) this->printOneE();
 
   // Compute time differenes

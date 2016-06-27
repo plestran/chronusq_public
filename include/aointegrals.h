@@ -234,6 +234,7 @@ public:
   bool  haveTRII;
   bool  isPrimary; ///< Whether or not this is the primary calculation (i.e. not guess)
   bool  useFiniteWidthNuclei; ///< Whether or not to use finite width nuclei in the calculation of the one-body potential
+  bool  doX2C; //Whether to do the X2C transformation
 
 
   // Timing Stats
@@ -258,6 +259,7 @@ public:
   AOIntegrals(){
     this->nBasis_ = 0;
     this->nTT_    = 0;
+
 
     this->R2Index_  = NULL;
     this->FmTTable_ = NULL;
@@ -293,6 +295,7 @@ public:
     this->haveRIS      = false;
     this->haveRII      = false;
     this->haveTRII     = false;
+    this->doX2C	       = false;
 
     // Standard Values
     this->maxMultipole_     = 3;
