@@ -177,10 +177,12 @@ void SingleSlater<double>::genSparseBasisMap(){
       (*this->molecule_->cart())(1,iAtm),
       (*this->molecule_->cart())(2,iAtm)
     );
+    std::vector<bool> mapRad_(this->basisset_->nShell()+1);
     for (auto ipts =0; ipts < this->ngpts; ipts++){
       
       cartGP pt = Raw3Dg.gridPtCart(ipts); 
-      auto mapRad_ = this->basisset_->MapGridBasis(pt);
+//    auto mapRad_ = this->basisset_->MapGridBasis(pt);
+      this->basisset_->MapGridBasis(mapRad_,pt);
       // Evaluate each Becke fuzzy call weight, normalize it and muliply by 
       //   the Raw grid weight at that point
       auto bweight = (this->formBeckeW(pt,iAtm)) 
@@ -293,10 +295,12 @@ void SingleSlater<double>::genSparseRcrosP(){
       (*this->molecule_->cart())(1,iAtm),
       (*this->molecule_->cart())(2,iAtm)
     );
+    std::vector<bool> mapRad_(this->basisset_->nShell()+1);
     for (auto ipts =0; ipts < this->ngpts; ipts++){
       
       cartGP pt = Raw3Dg.gridPtCart(ipts); 
-      auto mapRad_ = this->basisset_->MapGridBasis(pt);
+//    auto mapRad_ = this->basisset_->MapGridBasis(pt);
+      this->basisset_->MapGridBasis(mapRad_,pt);
       // Evaluate each Becke fuzzy call weight, normalize it and muliply by 
       //   the Raw grid weight at that point
       auto bweight = (this->formBeckeW(pt,iAtm)) 
@@ -1753,6 +1757,7 @@ void SingleSlater<double>::formVXC(){
       auto loopEn = nPtsPerThread * (thread_id + 1);
       if (thread_id == (nthreads - 1))
         loopEn = this->ngpts;
+      std::vector<bool> mapRad_(this->basisset_->nShell()+1);
       for(int ipts = loopSt; ipts < loopEn; ipts++){
 //      printf("%d_%d_%d_%d\n", thread_id, ipts/nPtsPerThread,  ipts, iAtm);
 //      if(ipts/nPtsPerThread != thread_id) continue;
@@ -1768,7 +1773,8 @@ void SingleSlater<double>::formVXC(){
         //  ** Vxc will be ready at the end of the two loop, to be finalized ** 
         if (this->screenVxc ) {
           auto GP = Raw3Dg.gridPtCart(ipts);
-          auto mapRad_ = this->basisset_->MapGridBasis(GP);
+//        auto mapRad_ = this->basisset_->MapGridBasis(GP);
+          this->basisset_->MapGridBasis(mapRad_,GP);
           if (mapRad_[0] || (bweight < this->epsScreen)) 
             nodens = true;
           if(!nodens) 
@@ -2153,7 +2159,6 @@ void SingleSlater<double>::formVXC_new(){
   int NDer = 0;
   if(isGGA) NDer = 1; 
 
-/*
   std::array<double,3>  drhoT = {0.0,0.0,0.0}; ///< array TOTAL density gradient components
   std::array<double,3>  drhoS = {0.0,0.0,0.0}; ///< array SPIN  density gradient components
   std::array<double,3>  drhoA = {0.0,0.0,0.0}; ///< array ALPHA  density gradient components
@@ -2162,7 +2167,13 @@ void SingleSlater<double>::formVXC_new(){
   RealVecMap GradRhoS(&drhoS[0],3);
   RealVecMap GradRhoA(&drhoA[0],3);
   RealVecMap GradRhoB(&drhoB[0],3);
-*/
+
+  double rhoA;
+  double rhoB;
+  double gammaAA;
+  double gammaBB;
+  double gammaAB;
+  std::vector<bool> shMap(this->basisset_->nShell()+1);
 
   auto valVxc = [&](ChronusQ::IntegrationPoint pt, 
   KernelIntegrand<double> &result) -> void {
@@ -2173,6 +2184,7 @@ void SingleSlater<double>::formVXC_new(){
     SCRATCH1Y.setZero();
     SCRATCH1Z.setZero();
 
+/*
     std::array<double,3>  drhoT = {0.0,0.0,0.0}; ///< array TOTAL density gradient components
     std::array<double,3>  drhoS = {0.0,0.0,0.0}; ///< array SPIN  density gradient components
     std::array<double,3>  drhoA = {0.0,0.0,0.0}; ///< array ALPHA  density gradient components
@@ -2181,13 +2193,17 @@ void SingleSlater<double>::formVXC_new(){
     RealVecMap GradRhoS(&drhoS[0],3);
     RealVecMap GradRhoA(&drhoA[0],3);
     RealVecMap GradRhoB(&drhoB[0],3);
-    cartGP GP = pt.pt;
+*/
+    cartGP &GP = pt.pt;
+/*
     double rhoA;
     double rhoB;
     double gammaAA;
     double gammaBB;
     double gammaAB;
-    auto shMap = this->basisset_->MapGridBasis(GP); 
+*/
+//  auto shMap = this->basisset_->MapGridBasis(GP); 
+    this->basisset_->MapGridBasis(shMap,GP); 
 
     auto Newend = std::chrono::high_resolution_clock::now();
     T1 += Newend - Newstart;

@@ -480,11 +480,11 @@ double * BasisSet::basisProdEval(libint2::Shell s1, libint2::Shell s2, sph3GP *p
 }
 
 
-std::vector<bool> BasisSet::MapGridBasis(cartGP& pt){
+void BasisSet::MapGridBasis(std::vector<bool> &map_,cartGP& pt){
 //  Set map_[ishell] to be avaluated (true) or not (false)
 //  note: radCutSh_ has to be already populated by calling before radcut
 //bool * map_ = new bool[this->nShell()+1];
-  std::vector<bool> map_(this->nShell()+1);
+//std::vector<bool> map_(this->nShell()+1);
   double x ;
   double y ;
   double z ;
@@ -511,7 +511,7 @@ std::vector<bool> BasisSet::MapGridBasis(cartGP& pt){
     } //End loop over shells
   map_[0] = nodens;
 //  cout << "End Map " << endl;
-  return map_;
+//return map_;
 }
 
 
@@ -672,10 +672,7 @@ double * BasisSet::basisDEval(int iop, libint2::Shell &liShell, cartGP *pt){
   if (iop >1) CErr("Derivative order NYI in basisDEval");
   auto shSize = liShell.size(); 
   auto contDepth = liShell.alpha.size(); 
-//auto center = liShell.O;
-//double * fEVal = new double[(3*iop + 1)*shSize];
   double * fEVal = &this->basisEvalScr_[0];
-//double * DfEval = new double[shSize];
   double * f = fEVal;
   double * DfEval = f + shSize;
 
