@@ -182,6 +182,7 @@ class BasisSet{
   bool forceCart_   ; ///< Whether or not to force cartesian basis functions 
   double      * radCutSh_ ; ///< CutOff Radius for each Shell
   double      * expPairSh_ ; ///< SS Exp for each Shel Pair
+  std::vector<double> basisEvalScr_;
 
   std::vector<int>               nLShell_  ; ///< Maps L value to # of shells of that L
   std::vector<int>               mapSh2Bf_ ; ///< Maps shell number to first basis funtion

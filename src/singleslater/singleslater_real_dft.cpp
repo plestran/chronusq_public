@@ -2153,6 +2153,7 @@ void SingleSlater<double>::formVXC_new(){
   int NDer = 0;
   if(isGGA) NDer = 1; 
 
+/*
   std::array<double,3>  drhoT = {0.0,0.0,0.0}; ///< array TOTAL density gradient components
   std::array<double,3>  drhoS = {0.0,0.0,0.0}; ///< array SPIN  density gradient components
   std::array<double,3>  drhoA = {0.0,0.0,0.0}; ///< array ALPHA  density gradient components
@@ -2161,17 +2162,17 @@ void SingleSlater<double>::formVXC_new(){
   RealVecMap GradRhoS(&drhoS[0],3);
   RealVecMap GradRhoA(&drhoA[0],3);
   RealVecMap GradRhoB(&drhoB[0],3);
+*/
 
   auto valVxc = [&](ChronusQ::IntegrationPoint pt, 
   KernelIntegrand<double> &result) -> void {
 
     auto Newstart = std::chrono::high_resolution_clock::now();
-  //SCRATCH1.setZero();
-  //SCRATCH1X.setZero();
-  //SCRATCH1Y.setZero();
-  //SCRATCH1Z.setZero();
+    SCRATCH1.setZero();
+    SCRATCH1X.setZero();
+    SCRATCH1Y.setZero();
+    SCRATCH1Z.setZero();
 
-/*
     std::array<double,3>  drhoT = {0.0,0.0,0.0}; ///< array TOTAL density gradient components
     std::array<double,3>  drhoS = {0.0,0.0,0.0}; ///< array SPIN  density gradient components
     std::array<double,3>  drhoA = {0.0,0.0,0.0}; ///< array ALPHA  density gradient components
@@ -2180,7 +2181,6 @@ void SingleSlater<double>::formVXC_new(){
     RealVecMap GradRhoS(&drhoS[0],3);
     RealVecMap GradRhoA(&drhoA[0],3);
     RealVecMap GradRhoB(&drhoB[0],3);
-*/
     cartGP GP = pt.pt;
     double rhoA;
     double rhoB;
@@ -2216,7 +2216,7 @@ void SingleSlater<double>::formVXC_new(){
         SCRATCH1Z.block(this->basisset_->mapSh2Bf(iShell),0,shSize,1) = bMapZ;
       }
 
-      delete [] buff;
+      //delete [] buff;
     };
     Newend = std::chrono::high_resolution_clock::now();
     T2 += Newend - Newstart;

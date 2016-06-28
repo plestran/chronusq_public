@@ -144,6 +144,9 @@ void BasisSet::computeMeta(){
     this->nLShell_[shell.contr[0].l]++;
   } // loop shell
 
+  // Always allocate scratch for basis eval and first derivatives
+  this->basisEvalScr_ = std::vector<double>(4*this->maxL_);
+
 } // BasisSet::computeMeta
 }; // namespace ChronusQ
 

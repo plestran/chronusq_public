@@ -672,8 +672,9 @@ double * BasisSet::basisDEval(int iop, libint2::Shell &liShell, cartGP *pt){
   if (iop >1) CErr("Derivative order NYI in basisDEval");
   auto shSize = liShell.size(); 
   auto contDepth = liShell.alpha.size(); 
-  auto center = liShell.O;
-  double * fEVal = new double[(3*iop + 1)*shSize];
+//auto center = liShell.O;
+//double * fEVal = new double[(3*iop + 1)*shSize];
+  double * fEVal = &this->basisEvalScr_[0];
 //double * DfEval = new double[shSize];
   double * f = fEVal;
   double * DfEval = f + shSize;
@@ -682,9 +683,9 @@ double * BasisSet::basisDEval(int iop, libint2::Shell &liShell, cartGP *pt){
   double * dy = dx + shSize;
   double * dz = dy + shSize;
 
-  double x = bg::get<0>(*pt) - center[0];
-  double y = bg::get<1>(*pt) - center[1];
-  double z = bg::get<2>(*pt) - center[2];
+  double x = bg::get<0>(*pt) - liShell.O[0];
+  double y = bg::get<1>(*pt) - liShell.O[1];
+  double z = bg::get<2>(*pt) - liShell.O[2];
   double rSq = x*x + y*y + z*z;
   double alpha = 0.0;
   double expFactor = 0.0;
