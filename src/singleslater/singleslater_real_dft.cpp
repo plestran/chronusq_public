@@ -2124,7 +2124,6 @@ template<>
 void SingleSlater<double>::formVXC_new(){
 //Timing
 
-/*
   std::chrono::high_resolution_clock::time_point start;
   std::chrono::high_resolution_clock::time_point finish;
   std::chrono::duration<double> duration_formVxc;
@@ -2134,8 +2133,9 @@ void SingleSlater<double>::formVXC_new(){
   std::chrono::duration<double> T4(0.0);
   std::chrono::duration<double> T5(0.0);
   std::chrono::duration<double> T6(0.0);
-*/
   
+  std::vector<std::chrono::duration<double>> 
+    TF(this->dftFunctionals_.size(),std::chrono::duration<double>(0.0));
 /*
   if(this->printLevel_ >= 3) {
     start = std::chrono::high_resolution_clock::now();
@@ -2152,15 +2152,26 @@ void SingleSlater<double>::formVXC_new(){
   VectorXd   SCRATCH1Z(this->nBasis_);
   int NDer = 0;
   if(isGGA) NDer = 1; 
+
+  std::array<double,3>  drhoT = {0.0,0.0,0.0}; ///< array TOTAL density gradient components
+  std::array<double,3>  drhoS = {0.0,0.0,0.0}; ///< array SPIN  density gradient components
+  std::array<double,3>  drhoA = {0.0,0.0,0.0}; ///< array ALPHA  density gradient components
+  std::array<double,3>  drhoB = {0.0,0.0,0.0}; ///< array BETA  density gradient components
+  RealVecMap GradRhoT(&drhoT[0],3);
+  RealVecMap GradRhoS(&drhoS[0],3);
+  RealVecMap GradRhoA(&drhoA[0],3);
+  RealVecMap GradRhoB(&drhoB[0],3);
+
   auto valVxc = [&](ChronusQ::IntegrationPoint pt, 
   KernelIntegrand<double> &result) -> void {
 
-//T  auto Newstart = std::chrono::high_resolution_clock::now();
-    SCRATCH1.setZero();
-    SCRATCH1X.setZero();
-    SCRATCH1Y.setZero();
-    SCRATCH1Z.setZero();
+    auto Newstart = std::chrono::high_resolution_clock::now();
+  //SCRATCH1.setZero();
+  //SCRATCH1X.setZero();
+  //SCRATCH1Y.setZero();
+  //SCRATCH1Z.setZero();
 
+/*
     std::array<double,3>  drhoT = {0.0,0.0,0.0}; ///< array TOTAL density gradient components
     std::array<double,3>  drhoS = {0.0,0.0,0.0}; ///< array SPIN  density gradient components
     std::array<double,3>  drhoA = {0.0,0.0,0.0}; ///< array ALPHA  density gradient components
@@ -2169,6 +2180,7 @@ void SingleSlater<double>::formVXC_new(){
     RealVecMap GradRhoS(&drhoS[0],3);
     RealVecMap GradRhoA(&drhoA[0],3);
     RealVecMap GradRhoB(&drhoB[0],3);
+*/
     cartGP GP = pt.pt;
     double rhoA;
     double rhoB;
@@ -2177,10 +2189,10 @@ void SingleSlater<double>::formVXC_new(){
     double gammaAB;
     auto shMap = this->basisset_->MapGridBasis(GP); 
 
-//T    auto Newend = std::chrono::high_resolution_clock::now();
-//T    T1 += Newend - Newstart;
+    auto Newend = std::chrono::high_resolution_clock::now();
+    T1 += Newend - Newstart;
     if(shMap[0]) {return;}
-//T    Newstart = std::chrono::high_resolution_clock::now();
+    Newstart = std::chrono::high_resolution_clock::now();
     for(auto iShell = 0; iShell < this->basisset_->nShell(); iShell++){
       if(!shMap[iShell+1]) continue;
 
@@ -2206,12 +2218,12 @@ void SingleSlater<double>::formVXC_new(){
 
       delete [] buff;
     };
-//T    Newend = std::chrono::high_resolution_clock::now();
-//T    T2 += Newend - Newstart;
+    Newend = std::chrono::high_resolution_clock::now();
+    T2 += Newend - Newstart;
 
     if(SCRATCH1.norm() < 1e-8) return;
-//T    Newstart = std::chrono::high_resolution_clock::now();
-    SCRATCH2 = SCRATCH1 * SCRATCH1.transpose();
+    Newstart = std::chrono::high_resolution_clock::now();
+    SCRATCH2.noalias() = SCRATCH1 * SCRATCH1.transpose();
     double rhoT = this->template computeProperty<double,TOTAL>(SCRATCH2);
     double rhoS = this->template computeProperty<double,MZ>(SCRATCH2);
     rhoA = 0.5 * (rhoT + rhoS);
@@ -2219,41 +2231,41 @@ void SingleSlater<double>::formVXC_new(){
 
     if(NDer>0){
       //Closed Shell GGA
-      SCRATCH2X = SCRATCH1 * SCRATCH1X.transpose();
-      SCRATCH2Y = SCRATCH1 * SCRATCH1Y.transpose();
-      SCRATCH2Z = SCRATCH1 * SCRATCH1Z.transpose();
+      SCRATCH2X.noalias() = SCRATCH1 * SCRATCH1X.transpose();
+      SCRATCH2Y.noalias() = SCRATCH1 * SCRATCH1Y.transpose();
+      SCRATCH2Z.noalias() = SCRATCH1 * SCRATCH1Z.transpose();
       drhoT[0] = 2.0*this->template computeProperty<double,TOTAL>(SCRATCH2X); 
       drhoT[1] = 2.0*this->template computeProperty<double,TOTAL>(SCRATCH2Y); 
       drhoT[2] = 2.0*this->template computeProperty<double,TOTAL>(SCRATCH2Z); 
       drhoS[0] = 2.0*this->template computeProperty<double,MZ>(SCRATCH2X); 
       drhoS[1] = 2.0*this->template computeProperty<double,MZ>(SCRATCH2Y); 
       drhoS[2] = 2.0*this->template computeProperty<double,MZ>(SCRATCH2Z); 
-      GradRhoA = 0.5 * (GradRhoT + GradRhoS);
-      GradRhoB = 0.5 * (GradRhoT - GradRhoS);
+      GradRhoA.noalias() = 0.5 * (GradRhoT + GradRhoS);
+      GradRhoB.noalias() = 0.5 * (GradRhoT - GradRhoS);
       gammaAA = GradRhoA.dot(GradRhoA);           
       gammaBB = GradRhoB.dot(GradRhoB);           
       gammaAB = GradRhoA.dot(GradRhoB);           
-      SCRATCH2X += SCRATCH1X * SCRATCH1.transpose();
-      SCRATCH2Y += SCRATCH1Y * SCRATCH1.transpose();
-      SCRATCH2Z += SCRATCH1Z * SCRATCH1.transpose();
+      SCRATCH2X.noalias() += SCRATCH1X * SCRATCH1.transpose();
+      SCRATCH2Y.noalias() += SCRATCH1Y * SCRATCH1.transpose();
+      SCRATCH2Z.noalias() += SCRATCH1Z * SCRATCH1.transpose();
     }
-//T    Newend = std::chrono::high_resolution_clock::now();
-//T    T3 += Newend - Newstart;
+    Newend = std::chrono::high_resolution_clock::now();
+    T3 += Newend - Newstart;
     
     if  (rhoT < 1.0e-08) return;
-//T    Newstart = std::chrono::high_resolution_clock::now();
     DFTFunctional::DFTInfo kernelXC;
     for(auto i = 0; i < this->dftFunctionals_.size(); i++){
+      Newstart = std::chrono::high_resolution_clock::now();
       if (NDer > 0) {
         kernelXC += this->dftFunctionals_[i]->eval(
             rhoA,rhoB,gammaAA,gammaAB,gammaBB);
       } else {
         kernelXC += this->dftFunctionals_[i]->eval(rhoA, rhoB);
       }
-//T      Newend = std::chrono::high_resolution_clock::now();
-//T      T4 += Newend - Newstart;
+      Newend = std::chrono::high_resolution_clock::now();
+      TF[i] += Newend - Newstart;
     } // loop over kernels
-//T    Newstart = std::chrono::high_resolution_clock::now();
+    Newstart = std::chrono::high_resolution_clock::now();
     if(NDer > 0) {
       result.VXCA.real() += pt.weight * SCRATCH2X  
         * (  2.0 * GradRhoA[0]*kernelXC.ddgammaAA 
@@ -2283,8 +2295,8 @@ void SingleSlater<double>::formVXC_new(){
     if(!this->isClosedShell && this->nTCS_ != 2) 
       result.VXCB.real()   += pt.weight * SCRATCH2 * kernelXC.ddrhoB; 
 //  if(rhoT < 1e-5) cout << "****** " << rhoT << endl;
-//T    Newend = std::chrono::high_resolution_clock::now();
-//T    T5 += Newend - Newstart;
+    Newend = std::chrono::high_resolution_clock::now();
+    T5 += Newend - Newstart;
   };
 
   ChronusQ::AtomicGrid AGrid(100,302,ChronusQ::GRID_TYPE::EULERMAC,
@@ -2306,13 +2318,13 @@ void SingleSlater<double>::formVXC_new(){
   if(!this->isClosedShell && this->nTCS_ != 2){
     (*this->vXB_) = 4*math.pi*res.VXCB;
   }
-/*
   cout << "T1 = " << T1.count() << endl;
   cout << "T2 = " << T2.count() << endl;
   cout << "T3 = " << T3.count() << endl;
   cout << "T4 = " << T4.count() << endl;
   cout << "T5 = " << T5.count() << endl;
   cout << "T6 = " << T6.count() << endl;
+  for(auto i : TF) cout << "TF " << i.count() << endl;
   if(this->printLevel_ >= 3) {
     finish = std::chrono::high_resolution_clock::now();
     duration_formVxc = finish - start;
@@ -2325,7 +2337,6 @@ void SingleSlater<double>::formVXC_new(){
                        << duration_formVxc.count() << " seconds." 
                        << endl;
   }
-*/
 }
 
 } // Namespace ChronusQ

@@ -492,11 +492,16 @@ std::vector<bool> BasisSet::MapGridBasis(cartGP& pt){
   bool   nodens = true;  // becomes truee if at least one shell hs to 
                          // evaluated and it is stored in map_[0]
   for(auto s1=0l; s1 < this->nShell(); s1++){  //loop over shells
+    /*
     auto center = shells(s1).O;
     x = bg::get<0>(pt) - center[0];
     y = bg::get<1>(pt) - center[1];
     z = bg::get<2>(pt) - center[2];
-    r = std::pow((x*x + y*y + z*z),(0.5));
+    */
+    x = bg::get<0>(pt) - shells_[s1].O[0];
+    y = bg::get<1>(pt) - shells_[s1].O[1];
+    z = bg::get<2>(pt) - shells_[s1].O[2];
+    r = std::sqrt(x*x + y*y + z*z);
     map_[s1+1] = false;        
     if (r < this->radCutSh_[s1]) {
       map_[s1+1] = true;
