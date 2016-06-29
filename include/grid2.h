@@ -376,13 +376,23 @@ class AtomicGrid : public TwoDGrid2 {
   ATOMIC_PARTITION partitionScheme_;
   std::vector<std::array<double,3> > centers_;
   size_t centerIndx_;
+  double nearestNeighbor_;
   RealMatrix *rIJ_;
 
   std::vector<double> partitionScratch_;
 
   double evalPartitionWeight(cartGP&);
+  double hBecke(double x);
+  double zFrisch(double x,double a);
+  double gBecke(double x);
+  double gFrisch(double x);
+  inline double g(double x){
+    if(     this->partitionScheme_ == BECKE)  return gBecke(x);
+    else if(this->partitionScheme_ == FRISCH) return gFrisch(x);
+  }
 
   public:
+    void findNearestNeighbor();
     AtomicGrid(size_t nPtsRad, size_t nPtsAng, 
         GRID_TYPE GTypeRad, GRID_TYPE GTypeAng, 
         ATOMIC_PARTITION partitionScheme, 
