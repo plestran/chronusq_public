@@ -149,7 +149,7 @@ void SingleSlater<T>::formFock(){
   if(getRank() == 0) {
     if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
 
-    bool testNew = false;
+    bool testNew = true;
     if (this->isDFT){
 
 //    this->formVXC();

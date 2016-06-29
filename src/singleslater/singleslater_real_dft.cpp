@@ -2147,7 +2147,7 @@ void SingleSlater<double>::formVXC_new(){
     start = std::chrono::high_resolution_clock::now();
   }
 */
-  bool isGGA   = true;
+  bool isGGA   = false;
   RealMatrix SCRATCH2(this->nBasis_,this->nBasis_);
   VectorXd   SCRATCH1(this->nBasis_);
   RealMatrix SCRATCH2X(this->nBasis_,this->nBasis_);
@@ -2237,7 +2237,7 @@ void SingleSlater<double>::formVXC_new(){
     Newend = std::chrono::high_resolution_clock::now();
     T2 += Newend - Newstart;
 
-    if(SCRATCH1.norm() < 1e-8) return;
+    if(SCRATCH1.norm() < 1e-10) return;
     Newstart = std::chrono::high_resolution_clock::now();
     SCRATCH2.noalias() = SCRATCH1 * SCRATCH1.transpose();
     double rhoT = this->template computeProperty<double,TOTAL>(SCRATCH2);
@@ -2268,7 +2268,7 @@ void SingleSlater<double>::formVXC_new(){
     Newend = std::chrono::high_resolution_clock::now();
     T3 += Newend - Newstart;
     
-    if  (rhoT < 1.0e-08) return;
+    if  (rhoT < 1.0e-10) return;
     DFTFunctional::DFTInfo kernelXC;
     for(auto i = 0; i < this->dftFunctionals_.size(); i++){
       Newstart = std::chrono::high_resolution_clock::now();
@@ -2318,9 +2318,12 @@ void SingleSlater<double>::formVXC_new(){
   ChronusQ::AtomicGrid AGrid(100,302,ChronusQ::GRID_TYPE::EULERMAC,
       ChronusQ::GRID_TYPE::LEBEDEV,ChronusQ::ATOMIC_PARTITION::BECKE,
       this->molecule_->cartArray(),0,1.0,false);
+  //ChronusQ::AtomicGrid AGrid(100,302,ChronusQ::GRID_TYPE::EULERMAC,
+  //    ChronusQ::GRID_TYPE::LEBEDEV,ChronusQ::ATOMIC_PARTITION::FRISCH,
+  //    this->molecule_->cartArray(),0,1.0,false);
    
   KernelIntegrand<double> res(this->vXA_->cols());
-  this->basisset_->radcut(1.0e-08, 50, 1.0e-7);
+  this->basisset_->radcut(1.0e-10, 50, 1.0e-7);
   this->totalEx    = 0.0;
   this->vXA()->setZero();   // Set to zero every occurence of the SCF
   for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){

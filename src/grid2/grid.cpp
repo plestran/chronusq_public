@@ -29,6 +29,37 @@ namespace ChronusQ {
       return 1.5 * x - 0.5 * x * x * x;
     };
 
+    auto gBecke = [&](double x) -> double {
+      return h(h(h(x)));
+    };
+
+    // Frisch Weights
+    double alpha = 0.64;
+    auto z = [&](double x) -> double {
+      double tmp,tmp2,tmp3;
+      tmp  = x / alpha;
+      tmp2 = tmp * tmp;
+
+      tmp3 =  35 * tmp;
+      tmp3 -= 35 * tmp * tmp2;
+      tmp3 += 21 * tmp * tmp2 * tmp2;
+      tmp3 -=  5 * tmp * tmp2 * tmp2 * tmp2;
+   
+      return tmp3 / 16.0; 
+    };
+
+    auto gFrisch = [&](double x) -> double {
+      if(       x <= -alpha ) return -1.0;
+      else if ( x >= alpha  ) return  1.0;
+      else                    return  z(x);
+    };
+
+
+    auto g = [&](double x) -> double {
+      if(     this->partitionScheme_ == BECKE)  return gBecke(x);
+      else if(this->partitionScheme_ == FRISCH) return gFrisch(x);
+    };
+
 
     for(auto iCenter = 0; iCenter < this->centers_.size(); iCenter++){
       this->partitionScratch_[iCenter] = 1.0;
@@ -44,7 +75,7 @@ namespace ChronusQ {
         rAB(1) = this->centers_[iCenter][1] - this->centers_[jCenter][1];
         rAB(2) = this->centers_[iCenter][2] - this->centers_[jCenter][2];
         double mu = (rA.norm() - rB.norm()) / rAB.norm();
-        this->partitionScratch_[iCenter] *= 0.5 * (1.0 - h(h(h(mu))));
+        this->partitionScratch_[iCenter] *= 0.5 * (1.0 - g(mu));
       }
     }
     // Normalization
