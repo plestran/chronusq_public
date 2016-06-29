@@ -383,7 +383,7 @@ public:
   void computeAOTwoE(); // build two-electron AO integral matrices
   void computeAOOneE(); // build one-electron AO integral matrices
   void finiteWidthPotential();
-  void doX2CTransformation();
+  void formP2Transformation();
   void formPVP(std::vector<std::reference_wrapper<RealMap>>&);
 
 

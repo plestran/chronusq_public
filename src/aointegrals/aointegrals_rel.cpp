@@ -27,7 +27,7 @@
 #include <grid2.h>
 using ChronusQ::AOIntegrals;
 
-void AOIntegrals::doX2CTransformation(){
+void AOIntegrals::formP2Transformation(){
   this->basisSet_->makeMapPrim2Bf();
   if(!this->isPrimary) return;
   auto unContractedShells = this->basisSet_->uncontractBasis();
@@ -133,7 +133,6 @@ void AOIntegrals::doX2CTransformation(){
   TUncontracted = TMP * SUncontracted;
 
 // Get rid of the linear dependencies?
-// Only save the nonzero vectors of T here. 
   dgesvd_(&JOBU,&JOBVT,&nUncontracted,&nUncontracted,TUncontracted.data(),
       &nUncontracted,&ovlpEigValues[0],TUncontracted.data(),&nUncontracted,
       TUncontracted.data(),&nUncontracted,&WORK[0],&LWORK,&INFO);
@@ -400,8 +399,78 @@ void AOIntegrals::doX2CTransformation(){
   cout << Y.squaredNorm() << endl;
 
 
-//  CErr();
+// Get P2_PotC == V'
+  ComplexMatrix PMapC(2*nUncontracted,2*nUncontracted);
+  PMapC.block(0,0,nUncontracted,nUncontracted).real() = PMap.asDiagonal();
+  PMapC.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).real() = PMap.asDiagonal();
+  ComplexMatrix P2MapC = PMapC.cwiseProduct(PMapC);
+  ComplexMatrix P2_PotC(2*nUncontracted,2*nUncontracted);
+  P2_PotC.block(0,0,nUncontracted,nUncontracted).real() = P2_Potential;
+  P2_PotC.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).real() = P2_Potential;
 
+// Calculate the 2-component core Hamiltonian in the uncontracted basis
+//  αα | αβ
+//  -------
+//  βα | ββ
+  
+  ComplexMatrix augUK(2*nUncontracted,2*nUncontracted);
+  augUK.block(0,0,nUncontracted,nUncontracted) = UK;
+  augUK.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted) = UK;
+  ComplexMatrix YUK = Y * augUK.inverse();
+
+  ComplexMatrix HCore(2*nUncontracted,2*nUncontracted);
+  HCore = P2_PotC;
+
+  ComplexMatrix TEMP(2*nUncontracted,2*nUncontracted);
+  TEMP.noalias() = phys.SPEED_OF_LIGHT * PMapC * X;
+  HCore.noalias() = HCore + TEMP;
+  TEMP.noalias() = phys.SPEED_OF_LIGHT * X.adjoint() * PMapC;
+  HCore.noalias() = HCore + TEMP;
+  TEMP.noalias() = 2 * phys.SPEED_OF_LIGHT * phys.SPEED_OF_LIGHT * 
+	ComplexMatrix::Identity(2*nUncontracted,2*nUncontracted);
+  TEMP.noalias() = W - TEMP;
+  TEMP.noalias() = X.adjoint() * TEMP;
+  TEMP.noalias() = TEMP * X;
+  HCore.noalias() = HCore + TEMP;
+  HCore.noalias() = HCore * YUK;
+  HCore.noalias() = YUK.adjoint() * HCore;
+ 
+
+// Now split these blocks into the scalar and magnetization parts
+// Hs =  αα + ββ
+// Hz =  αα - ββ
+// Hx =  αβ + βα
+// Hy = (βα - αβ)i
+  RealMatrix Hs(nUncontracted,nUncontracted);
+  RealMatrix Hz(nUncontracted,nUncontracted);
+  RealMatrix Hx(nUncontracted,nUncontracted);
+  RealMatrix Hy(nUncontracted,nUncontracted);
+  Hs = HCore.block(0,0,nUncontracted,nUncontracted).real()
+	+ HCore.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).real();
+  Hz = HCore.block(0,0,nUncontracted,nUncontracted).real()
+	- HCore.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).real();
+  Hx = HCore.block(0,nUncontracted,nUncontracted,nUncontracted).real()
+	+ HCore.block(nUncontracted,0,nUncontracted,nUncontracted).real();
+  Hy = HCore.block(nUncontracted,0,nUncontracted,nUncontracted).real()
+	- HCore.block(0,nUncontracted,nUncontracted,nUncontracted).real();
+
+
+
+//  ComplexMatrix Prim2Bf(*this->basisSet_->mapPrim2Bf()); 
+
+  CErr();
+
+/*
+  ComplexMatrix OrthoP2(2*nUncontracted,2*nUncontracted);
+  OrthoP2 = P2_PotC;
+
+
+  ComplexMatrix HCore(this->nBasis_,this->nBasis_);
+
+  HCore = ATrans.inverse() * OrthoP2 * ATrans;
+
+  (*this->oneE_) = HCore;
+*/
 
 /* THIS IS OLD AND DOESN'T WORK 
 //  This doesn't seem to work...  
