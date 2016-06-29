@@ -23,7 +23,8 @@ namespace ChronusQ {
     // Cells
     // Note these Weights have to be normailzed (see normBeckeW) 
 
-    VectorXd rA(3), rB(3), rAB(3);
+    //VectorXd rA(3), rB(3), rAB(3);
+    VectorXd rA(3), rB(3);
     auto h = [](double x) -> double{
     // Eq. 19
       return 1.5 * x - 0.5 * x * x * x;
@@ -71,10 +72,11 @@ namespace ChronusQ {
         rB(0) = bg::get<0>(pt) - this->centers_[jCenter][0];
         rB(1) = bg::get<1>(pt) - this->centers_[jCenter][1];
         rB(2) = bg::get<2>(pt) - this->centers_[jCenter][2];
-        rAB(0) = this->centers_[iCenter][0] - this->centers_[jCenter][0];
-        rAB(1) = this->centers_[iCenter][1] - this->centers_[jCenter][1];
-        rAB(2) = this->centers_[iCenter][2] - this->centers_[jCenter][2];
-        double mu = (rA.norm() - rB.norm()) / rAB.norm();
+      //rAB(0) = this->centers_[iCenter][0] - this->centers_[jCenter][0];
+      //rAB(1) = this->centers_[iCenter][1] - this->centers_[jCenter][1];
+      //rAB(2) = this->centers_[iCenter][2] - this->centers_[jCenter][2];
+      //double mu = (rA.norm() - rB.norm()) / rAB.norm();
+        double mu = (rA.norm() - rB.norm())/(*this->rIJ_)(iCenter,jCenter);
         this->partitionScratch_[iCenter] *= 0.5 * (1.0 - g(mu));
       }
     }

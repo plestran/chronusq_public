@@ -376,6 +376,7 @@ class AtomicGrid : public TwoDGrid2 {
   ATOMIC_PARTITION partitionScheme_;
   std::vector<std::array<double,3> > centers_;
   size_t centerIndx_;
+  RealMatrix *rIJ_;
 
   std::vector<double> partitionScratch_;
 
@@ -386,12 +387,14 @@ class AtomicGrid : public TwoDGrid2 {
         GRID_TYPE GTypeRad, GRID_TYPE GTypeAng, 
         ATOMIC_PARTITION partitionScheme, 
         std::vector<std::array<double,3> > centers,
+        RealMatrix *rIJ,
         size_t centerIndx,
         double scalingFactor = 1.0,
         bool onTheFly = true) : 
       TwoDGrid2(nPtsRad,nPtsAng,GTypeRad,GTypeAng,onTheFly),
       partitionScheme_(partitionScheme),
       centers_(std::move(centers)),
+      rIJ_(rIJ),
       centerIndx_(centerIndx),
       scalingFactor_(scalingFactor) { 
         this->partitionScratch_.resize(this->centers_.size(),0.0);
