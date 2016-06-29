@@ -27,8 +27,7 @@
 #include <grid2.h>
 using ChronusQ::AOIntegrals;
 
-void AOIntegrals::formP2Transformation(){
-  printf("in P2 Transformation");
+void AOIntegrals::doX2CTransformation(){
   this->basisSet_->makeMapPrim2Bf();
   if(!this->isPrimary) return;
   auto unContractedShells = this->basisSet_->uncontractBasis();
@@ -115,6 +114,7 @@ void AOIntegrals::formP2Transformation(){
       &nUncontracted,&ovlpEigValues[0],SUncontracted.data(),&nUncontracted,
       SUncontracted.data(),&nUncontracted,&WORK[0],&LWORK,&INFO);
 
+// normalize
 // What happens when we divide by zero?
   for(auto iS = 0; iS < nUncontracted; iS++){
     SUncontracted.col(iS) /= std::sqrt(ovlpEigValues[iS]);
@@ -399,11 +399,19 @@ void AOIntegrals::formP2Transformation(){
 //  prettyPrintComplex(cout,Y,"Y");
   cout << Y.squaredNorm() << endl;
 
-  CErr();
 
-  RealMatrix CUK = UK * (*this->basisSet_->mapPrim2Bf());
+//  CErr();
 
+
+/* THIS IS OLD AND DOESN'T WORK 
+//  This doesn't seem to work...  
+//  RealMatrix CUK = UK * (*this->basisSet_->mapPrim2Bf());
+
+//
+// What is the point of the matrix YCUK?
   ComplexMatrix YCUK(2*nUncontracted,this->nBasis_);
+//  YCUK = Y * CUK;
+
   cout << "HERE" << endl;
   cout << YCUK.rows() << " " << YCUK.cols() << endl;
   cout << Y.rows() << " " << Y.cols() << endl;
@@ -428,4 +436,8 @@ void AOIntegrals::formP2Transformation(){
       (phys.SPEED_OF_LIGHT*phys.SPEED_OF_LIGHT * ComplexMatrix::Identity(2*nUncontracted,2*nUncontracted) - P2MapC).pow(0.5)
     ) * YCUK;
   cout << "|HC|" << HCore.norm() << endl;
-};
+
+*/
+
+}
+
