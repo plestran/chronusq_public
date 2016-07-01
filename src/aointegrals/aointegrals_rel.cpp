@@ -140,9 +140,11 @@ void AOIntegrals::formP2Transformation(){
 // Form the K transformation matrix from both pieces
 // (diagonalizes S) and (diagonalizes T). See eq. 12 in Rieher's paper from 2013
   RealMatrix UK = SUncontracted * TUncontracted;
+ 
+  prettyPrint(this->fileio_->out,UK,"U (K) transformation");
 
 // Now we transform V to V' 
-  TMP = UK.transpose() * VUncontracted;;
+  TMP = UK.transpose() * VUncontracted;
   RealMatrix P2_Potential = TMP * UK;
 
 
@@ -320,7 +322,7 @@ void AOIntegrals::formP2Transformation(){
 // [ cp   W'-2mc^2 ]
 // -------------------------------------------------
 
-  PMap = PMap.cwiseInverse();
+  PMap = PMap.cwiseInverse(); //switch from p^-1 back to p
   ComplexMatrix CORE_HAMILTONIAN(4*nUncontracted,4*nUncontracted);
 
   CORE_HAMILTONIAN.block(0,0,nUncontracted,nUncontracted).real() = P2_Potential;
@@ -385,7 +387,7 @@ void AOIntegrals::formP2Transformation(){
 
 // Print out X and its squared norm
 //  prettyPrintComplex(cout,X,"X");
-  cout << X.squaredNorm() << endl;
+//  cout << X.squaredNorm() << endl;
 
   
 // Calculate Y = sqrt(1 + X'X)
@@ -396,81 +398,124 @@ void AOIntegrals::formP2Transformation(){
 
 // Print out Y and its squared norm
 //  prettyPrintComplex(cout,Y,"Y");
-  cout << Y.squaredNorm() << endl;
+//  cout << Y.squaredNorm() << endl;
 
 
-// Get P2_PotC == V'
+// Get PMapC = p (as 2n by 2n matrix)
   ComplexMatrix PMapC(2*nUncontracted,2*nUncontracted);
   PMapC.block(0,0,nUncontracted,nUncontracted).real() = PMap.asDiagonal();
   PMapC.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).real() = PMap.asDiagonal();
+
+
+// Compute p^2 and then the relativistic kinetic energy
+// Here we have       __________________
+//              K = \/m^2c^4 + c^2 * p^2  - mc^2
+//
+// Where m is the rest mass of the electron (1 in atomic units)             
+//
   ComplexMatrix P2MapC = PMapC.cwiseProduct(PMapC);
+  ComplexMatrix KinEn = P2MapC * phys.SPEED_OF_LIGHT * phys.SPEED_OF_LIGHT;
+  KinEn += ComplexMatrix::Identity(2*nUncontracted,2*nUncontracted)* phys.SPEED_OF_LIGHT *
+	phys.SPEED_OF_LIGHT * phys.SPEED_OF_LIGHT * phys.SPEED_OF_LIGHT; 
+  KinEn = KinEn.cwiseSqrt();
+  KinEn -= ComplexMatrix::Identity(2*nUncontracted,2*nUncontracted) * phys.SPEED_OF_LIGHT * phys.SPEED_OF_LIGHT;
+
+
+// Get P2_PotC == V'
   ComplexMatrix P2_PotC(2*nUncontracted,2*nUncontracted);
   P2_PotC.block(0,0,nUncontracted,nUncontracted).real() = P2_Potential;
   P2_PotC.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).real() = P2_Potential;
+
+  prettyPrint(this->fileio_->out,P2_PotC,"V prime");
 
 // Calculate the 2-component core Hamiltonian in the uncontracted basis
 //  αα | αβ
 //  -------
 //  βα | ββ
   
-  ComplexMatrix augUK(2*nUncontracted,2*nUncontracted);
-  augUK.block(0,0,nUncontracted,nUncontracted) = UK;
-  augUK.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted) = UK;
-  ComplexMatrix YUK = Y * augUK.inverse();
-
   ComplexMatrix HCore(2*nUncontracted,2*nUncontracted);
   HCore = P2_PotC;
 
   ComplexMatrix TEMP(2*nUncontracted,2*nUncontracted);
-  TEMP.noalias() = phys.SPEED_OF_LIGHT * PMapC * X;
-  HCore.noalias() = HCore + TEMP;
-  TEMP.noalias() = phys.SPEED_OF_LIGHT * X.adjoint() * PMapC;
-  HCore.noalias() = HCore + TEMP;
-  TEMP.noalias() = 2 * phys.SPEED_OF_LIGHT * phys.SPEED_OF_LIGHT * 
+
+  TEMP = phys.SPEED_OF_LIGHT * PMapC * X;
+  HCore = HCore + TEMP;
+  TEMP = phys.SPEED_OF_LIGHT * X.adjoint() * PMapC;
+  HCore = HCore + TEMP;
+  TEMP = 2 * phys.SPEED_OF_LIGHT * phys.SPEED_OF_LIGHT * 
 	ComplexMatrix::Identity(2*nUncontracted,2*nUncontracted);
-  TEMP.noalias() = W - TEMP;
-  TEMP.noalias() = X.adjoint() * TEMP;
-  TEMP.noalias() = TEMP * X;
-  HCore.noalias() = HCore + TEMP;
-  HCore.noalias() = HCore * YUK;
-  HCore.noalias() = YUK.adjoint() * HCore;
- 
+  TEMP = W - TEMP;
+  TEMP = X.adjoint() * TEMP;
+  TEMP = TEMP * X;
+  HCore = HCore + TEMP;
+  prettyPrint(this->fileio_->out,HCore,"HCore += TEMP");
+  HCore = HCore * Y;
+  HCore = Y * HCore;
+  prettyPrint(this->fileio_->out,HCore,"Y * HCore * Y");
+
+  cout << HCore.squaredNorm() << "HCore norm" << endl;
+  ComplexMatrix Veff(2*nUncontracted,2*nUncontracted);
+  Veff = HCore - KinEn;
+
+     
+  prettyPrint(this->fileio_->out,Veff,"Veff");
 
 // Now split these blocks into the scalar and magnetization parts
 // Hs =  αα + ββ
 // Hz =  αα - ββ
 // Hx =  αβ + βα
-// Hy = (βα - αβ)i
+// Hy = (αβ - βα)i
   RealMatrix Hs(nUncontracted,nUncontracted);
   RealMatrix Hz(nUncontracted,nUncontracted);
   RealMatrix Hx(nUncontracted,nUncontracted);
   RealMatrix Hy(nUncontracted,nUncontracted);
-  Hs = HCore.block(0,0,nUncontracted,nUncontracted).real()
-	+ HCore.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).real();
-  Hz = HCore.block(0,0,nUncontracted,nUncontracted).real()
-	- HCore.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).real();
-  Hx = HCore.block(0,nUncontracted,nUncontracted,nUncontracted).real()
-	+ HCore.block(nUncontracted,0,nUncontracted,nUncontracted).real();
-  Hy = HCore.block(nUncontracted,0,nUncontracted,nUncontracted).real()
-	- HCore.block(0,nUncontracted,nUncontracted,nUncontracted).real();
+  Hs = 0.5 * (HCore.block(0,0,nUncontracted,nUncontracted).real()
+	+ HCore.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).real());
+  Hz = 0.5 * (HCore.block(0,0,nUncontracted,nUncontracted).imag()
+	- HCore.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).imag());
+  Hx = 0.5 * (HCore.block(0,nUncontracted,nUncontracted,nUncontracted).imag()
+	+ HCore.block(nUncontracted,0,nUncontracted,nUncontracted).imag());
+  Hy = 0.5 * (HCore.block(0,nUncontracted,nUncontracted,nUncontracted).real()
+	- HCore.block(nUncontracted,0,nUncontracted,nUncontracted).real());
+
+  RealMatrix rTEMP(nUncontracted,nUncontracted);
+  rTEMP = UK * Hs;
+  Hs = rTEMP * UK.transpose();
+  rTEMP = UK * Hz;
+  Hz = rTEMP * UK.transpose();
+  rTEMP = UK * Hx;
+  Hx = rTEMP * UK.transpose();
+  rTEMP = UK * Hy;
+  Hy = rTEMP * UK.transpose();
+
+  prettyPrint(this->fileio_->out,Hs,"Hcore (scalar)");
+  prettyPrint(this->fileio_->out,Hz,"Hcore (mz)");
+  prettyPrint(this->fileio_->out,Hx,"Hcore (mx)");
+  prettyPrint(this->fileio_->out,Hy,"Hcore (my)");
 
 
 
-//  ComplexMatrix Prim2Bf(*this->basisSet_->mapPrim2Bf()); 
+
+// Recontract the basis
+  RealMatrix IPrim2Bf = (*this->basisSet_->mapPrim2Bf()).transpose();
+  
+  Hs = Hs * IPrim2Bf;
+  Hs = (*this->basisSet_->mapPrim2Bf()) * Hs;
+  Hz = Hz * IPrim2Bf;
+  Hz = (*this->basisSet_->mapPrim2Bf()) * Hz;
+  Hx = Hx * IPrim2Bf;
+  Hx = (*this->basisSet_->mapPrim2Bf()) * Hx;
+  Hy = Hy * IPrim2Bf;
+  Hy = (*this->basisSet_->mapPrim2Bf()) * Hy;
+
+  prettyPrint(this->fileio_->out,Hs,"Hs (scalar)");
+  prettyPrint(this->fileio_->out,Hz,"Hz (mz)");
+  prettyPrint(this->fileio_->out,Hx,"Hx (mx)");
+  prettyPrint(this->fileio_->out,Hy,"Hy (my)");
+
 
   CErr();
 
-/*
-  ComplexMatrix OrthoP2(2*nUncontracted,2*nUncontracted);
-  OrthoP2 = P2_PotC;
-
-
-  ComplexMatrix HCore(this->nBasis_,this->nBasis_);
-
-  HCore = ATrans.inverse() * OrthoP2 * ATrans;
-
-  (*this->oneE_) = HCore;
-*/
 
 /* THIS IS OLD AND DOESN'T WORK 
 //  This doesn't seem to work...  

@@ -201,6 +201,9 @@ public:
 
   // One-Body Integrals
   std::unique_ptr<RealMap>    oneE_; ///< Core Hamiltonian \f$ h = T + V \f$
+  std::unique_ptr<RealMap>    oneEmx_;
+  std::unique_ptr<RealMap>    oneEmy_;
+  std::unique_ptr<RealMap>    oneEmz_;
   std::unique_ptr<RealMap>    overlap_; ///< Overlap matrix \f$ S_{\mu\nu} = \langle \mu \vert \nu \rangle \f$
   std::unique_ptr<RealMap>    kinetic_; ///< Kinetic energy tensor \f$ T_{\mu\nu} = \langle \mu \vert \Delta \vert \nu \rangle \f$
   std::unique_ptr<RealMap>    potential_; ///< Potential energy tensor \f$ V_{\mu\nu} = \sum_A \left\langle \mu \vert r_{1A}^{-1}\vert \nu\right\rangle\f$
@@ -277,6 +280,9 @@ public:
     this->twoEC_        = nullptr;
     this->twoEX_        = nullptr;
     this->oneE_         = nullptr;
+    this->oneEmx_       = nullptr;
+    this->oneEmy_       = nullptr;
+    this->oneEmz_       = nullptr;
     this->overlap_      = nullptr;
     this->kinetic_      = nullptr;
     this->potential_    = nullptr;
@@ -312,6 +318,12 @@ public:
   ~AOIntegrals(){
     // Free up memory from memory manager
     this->memManager_->free(this->oneE_->data(),
+      this->nBasis_*this->nBasis_);
+    this->memManager_->free(this->oneEmx_->data(),
+      this->nBasis_*this->nBasis_);
+    this->memManager_->free(this->oneEmy_->data(),
+      this->nBasis_*this->nBasis_);
+    this->memManager_->free(this->oneEmz_->data(),
       this->nBasis_*this->nBasis_);
     this->memManager_->free(this->overlap_->data(),
       this->nBasis_*this->nBasis_);

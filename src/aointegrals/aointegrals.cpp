@@ -420,6 +420,7 @@ void AOIntegrals::printOneE(){
     prettyPrintTCS(this->fileio_->out,(mat[3]),"Core Hamiltonian");
   } else {
   */
+
     prettyPrint(this->fileio_->out,(mat[0]),"Overlap");
     if(this->maxMultipole_ >= 1){
       prettyPrint(this->fileio_->out,(mat[4]),"Electric Dipole (x)");
@@ -531,6 +532,18 @@ void AOIntegrals::allocOp(){
         std::unique_ptr<RealMap>(
             new RealMap(this->memManager_->malloc<double>(NBSq),this->nBasis_,this->nBasis_)
         ); 
+      this->oneEmx_      = 
+        std::unique_ptr<RealMap>(
+            new RealMap(this->memManager_->malloc<double>(NBSq),this->nBasis_,this->nBasis_)
+        ); 
+      this->oneEmy_      = 
+        std::unique_ptr<RealMap>(
+            new RealMap(this->memManager_->malloc<double>(NBSq),this->nBasis_,this->nBasis_)
+        ); 
+      this->oneEmz_      = 
+        std::unique_ptr<RealMap>(
+            new RealMap(this->memManager_->malloc<double>(NBSq),this->nBasis_,this->nBasis_)
+        ); 
       // Overlap
       this->overlap_   = 
         std::unique_ptr<RealMap>(
@@ -551,6 +564,9 @@ void AOIntegrals::allocOp(){
       CErr(std::current_exception(),"One Electron Integral Tensor Allocation");
     }
     this->oneE_->setZero();
+    this->oneEmx_->setZero();
+    this->oneEmy_->setZero();
+    this->oneEmz_->setZero();
     this->overlap_->setZero();
     this->kinetic_->setZero();
     this->potential_->setZero();

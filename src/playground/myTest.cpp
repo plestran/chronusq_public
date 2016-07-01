@@ -23,16 +23,18 @@ int main() {
     CQSetNumThreads(1); //Sets up open MP threads
 
     molecule.setCharge(0);
-    molecule.setNTotalE(16);
-    molecule.setMultip(3);
-    molecule.setNAtoms(2);
+    molecule.setNTotalE(10);
+    molecule.setMultip(1);
+    molecule.setNAtoms(3);
     molecule.alloc(); //allocates all memory for the class
 
     molecule.setIndex(0,HashAtom("O",0));
-    molecule.setIndex(1,HashAtom("O",0));
+    molecule.setIndex(1,HashAtom("H",0));
+    molecule.setIndex(2,HashAtom("H",0));
 
-    molecule.setCart(0,0.0,0.0,0.0); //In Angstroms!
-    molecule.setCart(1,1.21,0.0,0.0);
+    molecule.setCart(0,-0.464,0.177,0.0); //In Angstroms!
+    molecule.setCart(1,-0.464,1.137,0.0);
+    molecule.setCart(2,0.441,-0.143,0.0);
 
     molecule.convBohr();
     molecule.computeNucRep();
@@ -46,7 +48,7 @@ int main() {
     singleSlater.isClosedShell = false;
     singleSlater.doDIIS = false;
 
-    basis.findBasisFile("cc-pVDZ");
+    basis.findBasisFile("STO3G");
     basis.communicate(fileio);  // This function passes fileio reference 
     basis.parseGlobal(); //Reads entire basis set file into memory
     basis.constructLocal(&molecule);
