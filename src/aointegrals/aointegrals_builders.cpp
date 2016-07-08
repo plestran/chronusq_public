@@ -396,7 +396,7 @@ void AOIntegrals::computeAOOneE(){
  // -------------------------------
  // This is the X2C transformation!
  // -------------------------------
-  if (this->doX2C) {
+  if (this->doX2C && this->isPrimary) {
   //    printf("\n now going into X2C transformation \n");
       this->formP2Transformation();
 	}

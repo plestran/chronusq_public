@@ -172,6 +172,7 @@ void AOIntegrals::formP2Transformation(){
 // compute pVp numerically
   auto PVP = [&](IntegrationPoint pt, std::vector<RealMatrix> &result) {
     for(auto iShell = 0, b_s = 0; iShell < unContractedShells.size();
+
          b_s += unContractedShells[iShell].size(),++iShell) {
       int size= unContractedShells[iShell].size();
 
@@ -188,7 +189,7 @@ void AOIntegrals::formP2Transformation(){
       SCRATCHDYUnContracted.block(b_s,0,size,1) = dyMap;
       SCRATCHDZUnContracted.block(b_s,0,size,1) = dzMap;
 
-      delete [] buff;
+     // delete [] buff;
     };
 
     std::vector<std::pair<double,std::array<double,3>>> q;
@@ -245,7 +246,7 @@ void AOIntegrals::formP2Transformation(){
   };
 
   auto atomicCenters = this->molecule_->cartArray();
-  AtomicGrid AGrid(100,590,GAUSSCHEBFST,LEBEDEV,BECKE,atomicCenters,0,1.0,
+  AtomicGrid AGrid(100,590,GAUSSCHEBFST,LEBEDEV,BECKE,atomicCenters,this->molecule_->rIJ(),1.0,
       false);
   std::vector<RealMatrix> numPot(10,RealMatrix::Zero(nUncontracted,
         nUncontracted));
@@ -472,20 +473,19 @@ void AOIntegrals::formP2Transformation(){
   Veff = HCore - KinEn;
 
      
-  prettyPrint(this->fileio_->out,Veff,"Veff");
+  prettyPrint(this->fileio_->out,Veff,"Veff (p space)");
  
-  // All correct to here (up to a sign/permutation)
-  
-/*
-// Build large augUK
-  ComplexMatrix augUK(2*nUncontracted,2*nUncontracted);
-  augUK.block(0,0,nUncontracted,nUncontracted).real() = UK;
-  augUK.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).real() = UK;
-  
-  TEMP = augUK.inverse() * HCore;
-  HCore = TEMP * augUK;
-*/
+  ComplexMatrix SUK(2*nUncontracted,2*nUncontracted);
+  SUK.block(0,0,nUncontracted,nUncontracted) = SUn * UK;  
+  SUK.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted) = SUn * UK;
 
+  TEMP = SUK * Veff;
+  Veff = TEMP * SUK.adjoint();  
+   
+  prettyPrint(this->fileio_->out,Veff,"Veff (r space)");
+
+  // All correct to here (up to a sign/permutation)
+/*
   RealMatrix rTEMP(nUncontracted,nUncontracted);
   rTEMP = HCore.block(0,0,nUncontracted,nUncontracted).real() * UK.adjoint() * SUn;
   HCore.block(0,0,nUncontracted,nUncontracted).real() = SUn * UK * rTEMP; 
@@ -495,9 +495,15 @@ void AOIntegrals::formP2Transformation(){
   HCore.block(0,nUncontracted,nUncontracted,nUncontracted).real() = SUn * UK * rTEMP; 
   rTEMP = HCore.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).real() * UK.adjoint() * SUn;
   HCore.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).real() = SUn * UK * rTEMP; 
+*/
 
+  TEMP = SUK * HCore;
+  HCore = TEMP * SUK.adjoint();
 
   cout << HCore.squaredNorm() << " HCore norm" << endl;
+
+  prettyPrint(this->fileio_->out,HCore,"HCore (r space)");
+
 
   RealMatrix SpinCore(2*nUncontracted,2*nUncontracted);
   for (auto row = 0; row < nUncontracted; row++) {
@@ -534,12 +540,12 @@ void AOIntegrals::formP2Transformation(){
 
   Quantum<double>::spinScatter(SpinCore,mats);
 
-/*
+
   cout << Hs.squaredNorm() << " Hs norm" << endl;
   cout << Hz.squaredNorm() << " Hz norm" << endl;
   cout << Hx.squaredNorm() << " Hx norm" << endl;
   cout << Hy.squaredNorm() << " Hy norm" << endl;
-*/
+
 /*
   Hs = 0.5 * (HCore.block(0,0,nUncontracted,nUncontracted).real()
 	+ HCore.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).real());
