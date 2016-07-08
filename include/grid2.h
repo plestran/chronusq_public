@@ -44,6 +44,10 @@ struct IntegrationPoint {
     pt(pt_), weight(weight_), evalpt(true){ };
   IntegrationPoint(cartGP pt_ = cartGP(0.0,0.0,0.0), double weight_ = 0) : 
     pt(pt_), weight(weight_), evalpt(true){ };
+  IntegrationPoint(const IntegrationPoint &other):
+    pt(other.pt),
+    weight(other.weight),
+    evalpt(other.evalpt){ };
 };
 
 // Classes
@@ -105,12 +109,13 @@ public:
     template <typename T>
     inline void integrate(std::function< void(IntegrationPoint,T&) > func,
         T& result) {
-      cout << "Integrate 3" << endl;
       std::size_t NSkip(0);
-      for(auto iPt = 0; iPt < this->nPts_; iPt++)
-        if((*this)[iPt].evalpt){
-          func((*this)[iPt],result);
+      for(auto iPt = 0; iPt < this->nPts_; iPt++){
+        IntegrationPoint IP((*this)[iPt]);
+        if(IP.evalpt){
+          func(IP,result);
         } else NSkip++;
+      }
       cout << "NSkip : " << NSkip << endl;
     };
 
@@ -431,7 +436,10 @@ class AtomicGrid : public TwoDGrid2 {
       double partweight = 1;
 //Screening no off APE
 //      if(rawPoint.weight > 1e-8)
+      if(rawPoint.weight > 1e-10)
         partweight = evalPartitionWeight(rawPoint.pt);
+      else
+        partweight = 0.0;
         
       if(partweight < 1e-10) rawPoint.evalpt = false;
  

@@ -2174,6 +2174,8 @@ void SingleSlater<double>::formVXC_new(){
   double gammaBB;
   double gammaAB;
   std::vector<bool> shMap(this->basisset_->nShell()+1);
+  int NSkip2(0);
+  int NSkip3(0);
 
   auto valVxc = [&](ChronusQ::IntegrationPoint pt, 
   KernelIntegrand<double> &result) -> void {
@@ -2207,10 +2209,10 @@ void SingleSlater<double>::formVXC_new(){
 
     auto Newend = std::chrono::high_resolution_clock::now();
     T1 += Newend - Newstart;
-    if(shMap[0]) {return;}
+    if(shMap[0]) {return; NSkip2++;}
     Newstart = std::chrono::high_resolution_clock::now();
     for(auto iShell = 0; iShell < this->basisset_->nShell(); iShell++){
-      if(!shMap[iShell+1]) continue;
+      if(!shMap[iShell+1]) {continue; NSkip3++;}
 
 
       int shSize= this->basisset_->shells(iShell).size();
@@ -2344,6 +2346,8 @@ void SingleSlater<double>::formVXC_new(){
   cout << "T4 = " << T4.count() << endl;
   cout << "T5 = " << T5.count() << endl;
   cout << "T6 = " << T6.count() << endl;
+  cout << "NSkip2 = " << NSkip2 << endl;
+  cout << "NSkip3 = " << NSkip3 << endl;
   for(auto i : TF) cout << "TF " << i.count() << endl;
   if(this->printLevel_ >= 3) {
     finish = std::chrono::high_resolution_clock::now();
