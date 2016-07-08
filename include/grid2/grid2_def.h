@@ -34,9 +34,10 @@ protected:
     std::vector<double> weights_;
     bool onTheFly_;
     bool haveGPs_;
+    bool breakInt_;
 public:
     Grid2(size_t npts = 0, bool onTheFly = true) : nPts_(npts),
-      onTheFly_(onTheFly), haveGPs_(false){ 
+      onTheFly_(onTheFly), haveGPs_(false), breakInt_(false){ 
       
     };
 
@@ -83,10 +84,15 @@ public:
     };
 
     template <typename T>
-    inline void integrate(std::function< void(IntegrationPoint,T&) > func,
+    inline void integrate(std::function< void(IntegrationPoint&,T&) > func,
         T& result) {
       std::size_t NSkip(0);
+      this->breakInt_ = false;
       for(auto iPt = 0; iPt < this->nPts_; iPt++){
+        if(this->breakInt_) {
+          NSkip += this->nPts_ - iPt;
+          break;
+        }
         IntegrationPoint IP((*this)[iPt]);
         if(IP.evalpt){
           func(IP,result);
