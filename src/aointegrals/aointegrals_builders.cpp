@@ -253,9 +253,11 @@ void AOIntegrals::computeAORcrossDel(){
       (*this->molecule_->cart())(1,iAtm),
       (*this->molecule_->cart())(2,iAtm)
     );
+    std::vector<bool> mapRad_(this->basisSet_->nShell()+1);
     for (auto ipts =0; ipts < ngpts; ipts++){
       cartGP pt = Raw3Dg.gridPtCart(ipts); 
-      auto mapRad_ = this->basisSet_->MapGridBasis(pt);
+//    auto mapRad_ = this->basisSet_->MapGridBasis(pt);
+      this->basisSet_->MapGridBasis(mapRad_,pt);
       // Evaluate each Becke fuzzy call weight, normalize it and muliply by 
       //   the Raw grid weight at that point
       auto bweight = (this->formBeckeW(pt,iAtm)) 

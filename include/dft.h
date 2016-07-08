@@ -3,9 +3,11 @@
 #define INCLUDED_DFT
 class DFTFunctional{
 public:
-  double scalingFactor;
+  double scalingFactor;    //< Hybrid Scaling
+  double epsScreen;        //< screening 
   DFTFunctional(double X = 1.0){
     this->scalingFactor = X;
+    this->epsScreen = 1.0e-10;
   };
 
   struct DFTInfo {
@@ -24,6 +26,14 @@ public:
       this->ddgammaAB = 0;
       this->ddgammaBB = 0;
     };
+    inline void operator+=(DFTInfo other){
+      this->eps       += other.eps      ;
+      this->ddrhoA    += other.ddrhoA   ;
+      this->ddrhoB    += other.ddrhoB   ;
+      this->ddgammaAA += other.ddgammaAA;
+      this->ddgammaAB += other.ddgammaAB;
+      this->ddgammaBB += other.ddgammaBB;
+    }
 
   };
 
@@ -39,6 +49,7 @@ class SlaterExchange : public DFTFunctional {
   double d4over3 ;
   double rhoT     ;    
   double spindensity   ;
+  double eps_spin   ;
 public:
   SlaterExchange();
   DFTInfo eval(double rhoA, double rhoB);
@@ -46,8 +57,9 @@ public:
   DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaAB, double gammaBB);
 };
 
-class VWN3 : public DFTFunctional {
+class VWNIII : public DFTFunctional {
 // General Constant
+public:
   double small;    
   double over2;
   double over3;
@@ -114,8 +126,7 @@ class VWN3 : public DFTFunctional {
   double M1          ;
   double db_dr       ; 
   double delta_eps_etha ;
-public:
-  VWN3();
+  VWNIII();
   DFTInfo eval(double rhoA, double rhoB);
   DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaAB);
   DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaAB, double gammaBB);
@@ -124,5 +135,80 @@ public:
   double Eveps2VWN(double A_x, double &b_x, double &c_x, double &X, double &x0_x);
   void popVWNconst();
   void popVWNdens(double rhoA, double rhoB);
+};
+
+class VWNV : public VWNIII {
+public:
+  VWNV();
+  double alpha;
+  double Xa;
+  double Qa;
+  double X_x0a;
+  double beta;
+  double df2_spindensity;
+  double delta_eps_etha;
+  double db_dr;
+  DFTInfo eval(double rhoA, double rhoB);
+  DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaAB);
+  DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaAB, double gammaBB);
+  double Eveps0VWN(double &A_x, double &b_x, double &Q, double &X, double &x0_x, double &X_x0);
+  double Eveps1VWN(double &A_x, double &b1, double &b2, double &b3);
+  double Eveps2VWN(double A_x, double &b_x, double &c_x, double &X, double &x0_x);
+  void popVWNconst();
+  void popVWNdens(double rhoA, double rhoB);
+};
+
+class BEightEight : public DFTFunctional {
+  double  d1over3;
+  double  d4over3;
+  double CxVx;  //TF LDA Prefactor (for Vx)  
+  double beta;    
+  double rhoT     ;    
+  double spindensity   ;
+  double small;    
+  double xA;
+  double xB;
+  double rhoA1ov3 ;
+  double rhoA4ov3 ;
+  double rhoB1ov3 ;
+  double rhoB4ov3 ;
+public:
+  BEightEight();
+  double g0B88 (double x);
+  double g1B88 (double x);
+  DFTInfo eval(double rhoA, double rhoB);
+  DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaBB);
+  DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaAB, double gammaBB);
+};
+
+class lyp : public DFTFunctional {
+  double d1over3;
+  double Cfact;  //TF LDA Prefactor (for Vx)  
+  double small;    
+  double a     ;    
+  double b     ;    
+  double c     ;    
+  double d     ;    
+  double omega1     ;    
+  double omega0     ;    
+  double delta1     ;    
+  double delta0     ;    
+  double rhoT     ;    
+  double spindensity   ;
+  double rho1over3 ;
+  double rhoA8over3 ;
+  double rhoB8over3 ;
+  double dLYPdgAA   ;
+  double dLYPdgBB   ;
+  double dLYPdgAB   ;
+  double d2LYPdrhgAA   ;
+  double d2LYPdrhgAB   ;
+  double d2LYPdrhgBB   ;
+public:
+  lyp();
+  void popLYPdens(double rhoA, double rhoB);
+  DFTInfo eval(double rhoA, double rhoB);
+  DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaBB);
+  DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaAB, double gammaBB);
 };
 #endif

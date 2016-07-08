@@ -23,6 +23,20 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
+template<typename T>
+class KernelIntegrand {
+  typedef Eigen::Matrix<T,Dynamic,Dynamic> TMatrix;
+  public:
+  TMatrix VXCA;
+  TMatrix VXCB;
+  double Energy;
+
+  KernelIntegrand(size_t N) : VXCA(N,N), VXCB(N,N), Energy(0.0){ 
+    VXCA.setZero();
+    VXCB.setZero();
+  };
+};
+
 /********************************
  * Form Perturbation Tensor (G) *
  ********************************/
@@ -135,26 +149,12 @@ void SingleSlater<T>::formFock(){
   if(getRank() == 0) {
     if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
 
+    bool testNew = true;
     if (this->isDFT){
-//    Timing
-      std::chrono::high_resolution_clock::time_point start;
-      std::chrono::high_resolution_clock::time_point finish;
-      std::chrono::duration<double> duration_formVxc;
-     
-      if(this->printLevel_ >= 3) {
-        start = std::chrono::high_resolution_clock::now();
-      }
 
 //    this->formVXC();
-      this->formVXC_store();
-     
-      if(this->printLevel_ >= 3) {
-        finish = std::chrono::high_resolution_clock::now();
-        duration_formVxc = finish - start;
-        this->fileio_->out << endl << "CPU time for VXC integral:  "
-                           << duration_formVxc.count() << " seconds." 
-                           << endl;
-      }
+      if(!testNew) this->formVXC_store();
+      else         this->formVXC_new();
     }
   
     if(this->nTCS_ == 1 && this->isClosedShell) {
@@ -164,7 +164,7 @@ void SingleSlater<T>::formFock(){
       (*this->fockA_) += (*this->PTA_);
       if(this->isDFT){ 
         (*this->fockA_) += (*this->vXA_);
-        (*this->fockA_) += (*this->vCorA_);
+        if(!testNew) (*this->fockA_) += (*this->vCorA_);
       }
     } else {
 
@@ -195,10 +195,17 @@ void SingleSlater<T>::formFock(){
 
       // FIXME: Needs to ge generalized for the 2C case
       if(this->nTCS_ == 1 && this->isDFT){
-        (*this->fockScalar_) += (*this->vXA_) + (*this->vCorA_);
-        (*this->fockScalar_) += (*this->vXB_) + (*this->vCorB_);
-        (*this->fockMz_)     += (*this->vXA_) + (*this->vCorA_);
-        (*this->fockMz_)     -= (*this->vXB_) + (*this->vCorB_);
+        if(!testNew) {
+          (*this->fockScalar_) += (*this->vXA_) + (*this->vCorA_);
+          (*this->fockScalar_) += (*this->vXB_) + (*this->vCorB_);
+          (*this->fockMz_)     += (*this->vXA_) + (*this->vCorA_);
+          (*this->fockMz_)     -= (*this->vXB_) + (*this->vCorB_);
+	} else {
+          (*this->fockScalar_) += (*this->vXA_);
+          (*this->fockScalar_) += (*this->vXB_);
+          (*this->fockMz_)     += (*this->vXA_);
+          (*this->fockMz_)     -= (*this->vXB_);
+	}
       }
 
       std::vector<std::reference_wrapper<TMap>> toGather;

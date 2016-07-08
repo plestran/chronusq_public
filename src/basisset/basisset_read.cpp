@@ -480,11 +480,11 @@ double * BasisSet::basisProdEval(libint2::Shell s1, libint2::Shell s2, sph3GP *p
 }
 
 
-std::vector<bool> BasisSet::MapGridBasis(cartGP& pt){
+void BasisSet::MapGridBasis(std::vector<bool> &map_,cartGP& pt){
 //  Set map_[ishell] to be avaluated (true) or not (false)
 //  note: radCutSh_ has to be already populated by calling before radcut
 //bool * map_ = new bool[this->nShell()+1];
-  std::vector<bool> map_(this->nShell()+1);
+//std::vector<bool> map_(this->nShell()+1);
   double x ;
   double y ;
   double z ;
@@ -492,23 +492,31 @@ std::vector<bool> BasisSet::MapGridBasis(cartGP& pt){
   bool   nodens = true;  // becomes truee if at least one shell hs to 
                          // evaluated and it is stored in map_[0]
   for(auto s1=0l; s1 < this->nShell(); s1++){  //loop over shells
+    /*
     auto center = shells(s1).O;
     x = bg::get<0>(pt) - center[0];
     y = bg::get<1>(pt) - center[1];
     z = bg::get<2>(pt) - center[2];
-    r = std::pow((x*x + y*y + z*z),(0.5));
+    */
+    x = bg::get<0>(pt) - shells_[s1].O[0];
+    y = bg::get<1>(pt) - shells_[s1].O[1];
+    z = bg::get<2>(pt) - shells_[s1].O[2];
+    r = std::sqrt(x*x + y*y + z*z);
     map_[s1+1] = false;        
     if (r < this->radCutSh_[s1]) {
       map_[s1+1] = true;
       nodens = false;
       }
+//    cout << r << " cutoff "<< this->radCutSh_[s1] << " " << map_[s1+1] <<endl;
     } //End loop over shells
   map_[0] = nodens;
-  return map_;
+//  cout << "End Map " << endl;
+//return map_;
 }
 
 
 void BasisSet::radcut(double thr, int maxiter, double epsConv){
+  if(this->radCutSh_ != NULL) delete [] this->radCutSh_;
   this->radCutSh_ = new double[this->nShell()];
   double alphaMin;
 //  double *s1Eval = basisEval(s1,pt);
@@ -664,9 +672,7 @@ double * BasisSet::basisDEval(int iop, libint2::Shell &liShell, cartGP *pt){
   if (iop >1) CErr("Derivative order NYI in basisDEval");
   auto shSize = liShell.size(); 
   auto contDepth = liShell.alpha.size(); 
-  auto center = liShell.O;
-  double * fEVal = new double[(3*iop + 1)*shSize];
-//double * DfEval = new double[shSize];
+  double * fEVal = &this->basisEvalScr_[0];
   double * f = fEVal;
   double * DfEval = f + shSize;
 
@@ -674,9 +680,9 @@ double * BasisSet::basisDEval(int iop, libint2::Shell &liShell, cartGP *pt){
   double * dy = dx + shSize;
   double * dz = dy + shSize;
 
-  double x = bg::get<0>(*pt) - center[0];
-  double y = bg::get<1>(*pt) - center[1];
-  double z = bg::get<2>(*pt) - center[2];
+  double x = bg::get<0>(*pt) - liShell.O[0];
+  double y = bg::get<1>(*pt) - liShell.O[1];
+  double z = bg::get<2>(*pt) - liShell.O[2];
   double rSq = x*x + y*y + z*z;
   double alpha = 0.0;
   double expFactor = 0.0;
@@ -685,9 +691,10 @@ double * BasisSet::basisDEval(int iop, libint2::Shell &liShell, cartGP *pt){
     expFactor += 
       liShell.contr[0].coeff[k] *
       std::exp(-liShell.alpha[k]*rSq);
-      if (iop == 1) alpha += 
-      2.0*liShell.alpha[k]*liShell.contr[0].coeff[k] *
-      std::exp(-liShell.alpha[k]*rSq);
+      if (iop == 1) 
+        alpha += 
+          2.0*liShell.alpha[k]*liShell.contr[0].coeff[k] *
+          std::exp(-liShell.alpha[k]*rSq);
   }
  
   if(liShell.contr[0].l == 0){

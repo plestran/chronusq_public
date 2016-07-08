@@ -104,6 +104,7 @@ void SingleSlater<T>::SCF2(){
 
   size_t iter;
   for(iter = 0; iter < this->maxSCFIter_; iter++){
+    auto SCFStart = std::chrono::high_resolution_clock::now();
     if(this->Ref_ == CUHF) {
       this->formNO();
       this->fockCUHF();
@@ -139,6 +140,10 @@ void SingleSlater<T>::SCF2(){
     this->evalConver(iter);
     this->nSCFIter++;
 
+    auto SCFEnd = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> SCFD = SCFEnd - SCFStart;
+    cout << "SCF Time (" << iter << ") = " << SCFD.count() << endl; 
+    
     if(this->isConverged) break;
   };
   // WARNING: MO Coefficients are not transformed to and from the

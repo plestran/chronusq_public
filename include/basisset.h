@@ -182,6 +182,7 @@ class BasisSet{
   bool forceCart_   ; ///< Whether or not to force cartesian basis functions 
   double      * radCutSh_ ; ///< CutOff Radius for each Shell
   double      * expPairSh_ ; ///< SS Exp for each Shel Pair
+  std::vector<double> basisEvalScr_;
 
   std::vector<int>               nLShell_  ; ///< Maps L value to # of shells of that L
   std::vector<int>               mapSh2Bf_ ; ///< Maps shell number to first basis funtion
@@ -308,15 +309,16 @@ public:
   template <typename T> double * basisDEval(int,libint2::Shell&,T*);
   template <typename T> double * basisProdEval(libint2::Shell,libint2::Shell,T*);
   double * basisonFlyProdEval(libint2::Shell s1, int s1size, libint2::Shell s2, int s2size,double rx, double ry, double rz);
-  std::vector<bool> MapGridBasis(cartGP& pt);  ///< Create a Mapping of basis over grid points
+//std::vector<bool> MapGridBasis(cartGP& pt);  ///< Create a Mapping of basis over grid points
+  void MapGridBasis(std::vector<bool>&,cartGP& pt);  ///< Create a Mapping of basis over grid points
   void     radcut(double thr, int maxiter, double epsConv);   //Populate all shell cut off radius
   void     popExpPairSh();   // Populate expPairSh
   double   fSpAv (int iop,int l, double alpha, double r);   //Evaluate Spheric Average of a Shell
   double   fRmax (int l, double alpha, double thr, double epsConv, int maxiter);   //Evaluate Spheric Average of a Shell
-  inline libint2::Shell      shells(int i) {return this->shells_[i];    };
+  inline libint2::Shell&     shells(int i) {return this->shells_[i];    };
   inline int                nLShell(int L) {return this->nLShell_[L];   };
-  inline int               mapSh2Bf(int i) {return this->mapSh2Bf_[i];  };
-  inline int               mapSh2Cen(int i) {return this->mapSh2Cen_[i];};
+  inline int &             mapSh2Bf(int i) {return this->mapSh2Bf_[i];  };
+  inline int &             mapSh2Cen(int i) {return this->mapSh2Cen_[i];};
   inline std::array<int,2> mapCen2Bf(int i) {return this->mapCen2Bf_[i];};
   inline RealMatrix *      mapPrim2Bf() {return this->mapPrim2Bf_.get();};
   inline std::string       basisPath(){return this->basisPath_;};

@@ -23,6 +23,7 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
+#include <quantum.h>
 #include <aointegrals.h>
 #include <grid2.h>
 using ChronusQ::AOIntegrals;
@@ -101,6 +102,9 @@ void AOIntegrals::formP2Transformation(){
   SUncontracted = SUncontracted.selfadjointView<Lower>();
   TUncontracted = TUncontracted.selfadjointView<Lower>();
 
+  RealMatrix SUn(nUncontracted,nUncontracted);
+  SUn = SUncontracted.real(); // Save S for later
+
   char JOBU = 'O', JOBVT = 'N';
   int LWORK = 6*nUncontracted;
   int INFO;
@@ -127,6 +131,7 @@ void AOIntegrals::formP2Transformation(){
 
   cout << "NZERO " << nZero << endl;
 
+  prettyPrint(this->fileio_->out,SUncontracted.transpose()*SUncontracted, "S^{dagger} S");
 // Put the kinetic energy in the orthonormal basis 
 
   RealMatrix TMP = SUncontracted.transpose() * TUncontracted;
@@ -139,10 +144,17 @@ void AOIntegrals::formP2Transformation(){
 
 // Form the K transformation matrix from both pieces
 // (diagonalizes S) and (diagonalizes T). See eq. 12 in Rieher's paper from 2013
+  prettyPrint(this->fileio_->out,SUncontracted,"S transformation");
+  prettyPrint(this->fileio_->out,TUncontracted,"T transformation");
+  prettyPrint(this->fileio_->out,TUncontracted.transpose()*TUncontracted, "T^{dagger} T");
+
+
   RealMatrix UK = SUncontracted * TUncontracted;
  
   prettyPrint(this->fileio_->out,UK,"U (K) transformation");
 
+  prettyPrint(this->fileio_->out,UK.transpose()*UK, "U^{dagger} U");
+  
 // Now we transform V to V' 
   TMP = UK.transpose() * VUncontracted;
   RealMatrix P2_Potential = TMP * UK;
@@ -253,13 +265,13 @@ void AOIntegrals::formP2Transformation(){
   RealMatrix PVPZ = numPot[2] - numPot[4]; 
 
 // Apply the Uk unitary transformation ( Uk' * PVP * Uk)
-  TMP = UK.transpose() * PVPS;
+  TMP = UK.adjoint() * PVPS;
   PVPS = TMP * UK;
-  TMP = UK.transpose() * PVPX;
+  TMP = UK.adjoint() * PVPX;
   PVPX = TMP * UK;
-  TMP = UK.transpose() * PVPY;
+  TMP = UK.adjoint() * PVPY;
   PVPY = TMP * UK;
-  TMP = UK.transpose() * PVPZ;
+  TMP = UK.adjoint() * PVPZ;
   PVPZ = TMP * UK;
 
 //prettyPrint(cout,P2_Potential,"V");
@@ -409,7 +421,7 @@ void AOIntegrals::formP2Transformation(){
 
 // Compute p^2 and then the relativistic kinetic energy
 // Here we have       __________________
-//              K = \/m^2c^4 + c^2 * p^2  - mc^2
+//              T = \/m^2c^4 + c^2 * p^2  - mc^2
 //
 // Where m is the rest mass of the electron (1 in atomic units)             
 //
@@ -420,6 +432,8 @@ void AOIntegrals::formP2Transformation(){
   KinEn = KinEn.cwiseSqrt();
   KinEn -= ComplexMatrix::Identity(2*nUncontracted,2*nUncontracted) * phys.SPEED_OF_LIGHT * phys.SPEED_OF_LIGHT;
 
+  prettyPrint(this->fileio_->out,KinEn,"Relativistic Kinetic Energy");
+  cout << KinEn.squaredNorm() << " Kintetic energy norm" << endl;
 
 // Get P2_PotC == V'
   ComplexMatrix P2_PotC(2*nUncontracted,2*nUncontracted);
@@ -453,12 +467,50 @@ void AOIntegrals::formP2Transformation(){
   HCore = Y * HCore;
   prettyPrint(this->fileio_->out,HCore,"Y * HCore * Y");
 
-  cout << HCore.squaredNorm() << "HCore norm" << endl;
+  cout << HCore.squaredNorm() << " HCore norm" << endl;
   ComplexMatrix Veff(2*nUncontracted,2*nUncontracted);
   Veff = HCore - KinEn;
 
      
   prettyPrint(this->fileio_->out,Veff,"Veff");
+ 
+  // All correct to here (up to a sign/permutation)
+  
+/*
+// Build large augUK
+  ComplexMatrix augUK(2*nUncontracted,2*nUncontracted);
+  augUK.block(0,0,nUncontracted,nUncontracted).real() = UK;
+  augUK.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).real() = UK;
+  
+  TEMP = augUK.inverse() * HCore;
+  HCore = TEMP * augUK;
+*/
+
+  RealMatrix rTEMP(nUncontracted,nUncontracted);
+  rTEMP = HCore.block(0,0,nUncontracted,nUncontracted).real() * UK.adjoint() * SUn;
+  HCore.block(0,0,nUncontracted,nUncontracted).real() = SUn * UK * rTEMP; 
+  rTEMP = HCore.block(nUncontracted,0,nUncontracted,nUncontracted).real() * UK.adjoint() * SUn;
+  HCore.block(nUncontracted,0,nUncontracted,nUncontracted).real() = SUn * UK * rTEMP; 
+  rTEMP = HCore.block(0,nUncontracted,nUncontracted,nUncontracted).real() * UK.adjoint() * SUn;
+  HCore.block(0,nUncontracted,nUncontracted,nUncontracted).real() = SUn * UK * rTEMP; 
+  rTEMP = HCore.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).real() * UK.adjoint() * SUn;
+  HCore.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).real() = SUn * UK * rTEMP; 
+
+
+  cout << HCore.squaredNorm() << " HCore norm" << endl;
+
+  RealMatrix SpinCore(2*nUncontracted,2*nUncontracted);
+  for (auto row = 0; row < nUncontracted; row++) {
+	for (auto col = 0; col < nUncontracted; col++) {
+	    SpinCore(2*row,2*col) = HCore(row,col).real(); // αα
+	    SpinCore(2*row,2*col+1) = HCore(row,col+nUncontracted).real(); // αβ
+	    SpinCore(2*row+1,2*col) = HCore(row+nUncontracted,col).real(); // βα
+	    SpinCore(2*row+1,2*col+1) = HCore(row+nUncontracted,col+nUncontracted).real(); // ββ
+	    }
+	}
+
+  cout << SpinCore.squaredNorm() << " Spin-Core norm" << endl;
+
 
 // Now split these blocks into the scalar and magnetization parts
 // Hs =  αα + ββ
@@ -469,6 +521,26 @@ void AOIntegrals::formP2Transformation(){
   RealMatrix Hz(nUncontracted,nUncontracted);
   RealMatrix Hx(nUncontracted,nUncontracted);
   RealMatrix Hy(nUncontracted,nUncontracted);
+  
+  std::vector<std::reference_wrapper<RealMatrix>> mats;
+
+  // v.push_back(A) -> v.end() = A
+  // v.emplace_back(A) -> v[end](A)
+
+  mats.emplace_back(Hs);
+  mats.emplace_back(Hz);
+  mats.emplace_back(Hy);
+  mats.emplace_back(Hx);
+
+  Quantum<double>::spinScatter(SpinCore,mats);
+
+/*
+  cout << Hs.squaredNorm() << " Hs norm" << endl;
+  cout << Hz.squaredNorm() << " Hz norm" << endl;
+  cout << Hx.squaredNorm() << " Hx norm" << endl;
+  cout << Hy.squaredNorm() << " Hy norm" << endl;
+*/
+/*
   Hs = 0.5 * (HCore.block(0,0,nUncontracted,nUncontracted).real()
 	+ HCore.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).real());
   Hz = 0.5 * (HCore.block(0,0,nUncontracted,nUncontracted).imag()
@@ -477,7 +549,8 @@ void AOIntegrals::formP2Transformation(){
 	+ HCore.block(nUncontracted,0,nUncontracted,nUncontracted).imag());
   Hy = 0.5 * (HCore.block(0,nUncontracted,nUncontracted,nUncontracted).real()
 	- HCore.block(nUncontracted,0,nUncontracted,nUncontracted).real());
-
+*/
+/*
   RealMatrix rTEMP(nUncontracted,nUncontracted);
   rTEMP = UK * Hs;
   Hs = rTEMP * UK.transpose();
@@ -487,7 +560,7 @@ void AOIntegrals::formP2Transformation(){
   Hx = rTEMP * UK.transpose();
   rTEMP = UK * Hy;
   Hy = rTEMP * UK.transpose();
-
+*/
   prettyPrint(this->fileio_->out,Hs,"Hcore (scalar)");
   prettyPrint(this->fileio_->out,Hz,"Hcore (mz)");
   prettyPrint(this->fileio_->out,Hx,"Hcore (mx)");

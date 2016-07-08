@@ -39,10 +39,11 @@ enum GRID_TYPE {
 struct IntegrationPoint {
   cartGP pt;
   double weight;
+  bool evalpt;
   IntegrationPoint(double pt_ = 0, double weight_ = 0) : 
-    pt(pt_), weight(weight_){ };
+    pt(pt_), weight(weight_), evalpt(true){ };
   IntegrationPoint(cartGP pt_ = cartGP(0.0,0.0,0.0), double weight_ = 0) : 
-    pt(pt_), weight(weight_){ };
+    pt(pt_), weight(weight_), evalpt(true){ };
 };
 
 // Classes
@@ -105,10 +106,12 @@ public:
     inline void integrate(std::function< void(IntegrationPoint,T&) > func,
         T& result) {
       cout << "Integrate 3" << endl;
+      std::size_t NSkip(0);
       for(auto iPt = 0; iPt < this->nPts_; iPt++)
-//        if((*this)[iPt].weight > 1e-6){
+        if((*this)[iPt].evalpt){
           func((*this)[iPt],result);
-//        }
+        } else NSkip++;
+      cout << "NSkip : " << NSkip << endl;
     };
 
 
@@ -373,28 +376,42 @@ class AtomicGrid : public TwoDGrid2 {
   ATOMIC_PARTITION partitionScheme_;
   std::vector<std::array<double,3> > centers_;
   size_t centerIndx_;
+  double nearestNeighbor_;
+  RealMatrix *rIJ_;
 
   std::vector<double> partitionScratch_;
 
   double evalPartitionWeight(cartGP&);
+  double hBecke(double x);
+  double zFrisch(double x,double a);
+  double gBecke(double x);
+  double gFrisch(double x);
+  inline double g(double x){
+    if(     this->partitionScheme_ == BECKE)  return gBecke(x);
+    else if(this->partitionScheme_ == FRISCH) return gFrisch(x);
+  }
 
   public:
+    void findNearestNeighbor();
     AtomicGrid(size_t nPtsRad, size_t nPtsAng, 
         GRID_TYPE GTypeRad, GRID_TYPE GTypeAng, 
         ATOMIC_PARTITION partitionScheme, 
         std::vector<std::array<double,3> > centers,
+        RealMatrix *rIJ,
         size_t centerIndx,
         double scalingFactor = 1.0,
         bool onTheFly = true) : 
       TwoDGrid2(nPtsRad,nPtsAng,GTypeRad,GTypeAng,onTheFly),
       partitionScheme_(partitionScheme),
       centers_(std::move(centers)),
+      rIJ_(rIJ),
       centerIndx_(centerIndx),
       scalingFactor_(scalingFactor) { 
         this->partitionScratch_.resize(this->centers_.size(),0.0);
     };
 
     inline IntegrationPoint operator[](size_t i) {
+      // return the struc (Cart Pt, weight)
       IntegrationPoint rawPoint = TwoDGrid2::operator[](i);
 
       // Rescale radius
@@ -411,9 +428,16 @@ class AtomicGrid : public TwoDGrid2 {
       double r = bg::get<0>(GRad->operator[](i / GAng->npts()).pt)
         * scalingFactor_;
       rawPoint.weight *= scalingFactor_ * r*r;
-
-      if(rawPoint.weight > 1e-8)
-        rawPoint.weight *= evalPartitionWeight(rawPoint.pt);
+      double partweight = 1;
+//Screening no off APE
+//      if(rawPoint.weight > 1e-8)
+        partweight = evalPartitionWeight(rawPoint.pt);
+        
+      if(partweight < 1e-10) rawPoint.evalpt = false;
+ 
+      rawPoint.weight *= partweight;
+//Screening now off APE
+//      if(partweight < 1e-6) rawPoint.evalpt = false;
       return rawPoint;
 
     };
