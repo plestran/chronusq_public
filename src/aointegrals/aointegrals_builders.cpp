@@ -387,6 +387,9 @@ void AOIntegrals::computeAOOneE(){
 // Build Core Hamiltonian
   (*this->oneE_) = (*this->kinetic_) + (*this->potential_);
 
+  prettyPrint(this->fileio_->out,*this->kinetic_,"T");
+  prettyPrint(this->fileio_->out,*this->potential_,"V");
+
   // Get end time of one-electron integral evaluation
   auto oneEEnd = std::chrono::high_resolution_clock::now();
 

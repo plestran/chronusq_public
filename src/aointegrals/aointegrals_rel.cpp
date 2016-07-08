@@ -101,6 +101,7 @@ void AOIntegrals::formP2Transformation(){
 
   SUncontracted = SUncontracted.selfadjointView<Lower>();
   TUncontracted = TUncontracted.selfadjointView<Lower>();
+  
 
   RealMatrix SUn(nUncontracted,nUncontracted);
   SUn = SUncontracted.real(); // Save S for later
@@ -468,7 +469,51 @@ void AOIntegrals::formP2Transformation(){
   HCore = Y * HCore;
   prettyPrint(this->fileio_->out,HCore,"Y * HCore * Y");
 
-  cout << HCore.squaredNorm() << " HCore norm" << endl;
+
+  prettyPrint(this->fileio_->out,HCore.real(),"HCore Real");
+  prettyPrint(this->fileio_->out,HCore.imag(),"HCore Imag");
+
+  RealMatrix Hs(nUncontracted,nUncontracted);
+  RealMatrix Hz(nUncontracted,nUncontracted);
+  RealMatrix Hx(nUncontracted,nUncontracted);
+  RealMatrix Hy(nUncontracted,nUncontracted);
+
+  Hs = 0.5 * (HCore.block(0,0,nUncontracted,nUncontracted).real()
+	+ HCore.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).real());
+  Hz = 0.5 * (HCore.block(0,0,nUncontracted,nUncontracted).imag()
+	- HCore.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).imag());
+  Hx = 0.5 * (HCore.block(0,nUncontracted,nUncontracted,nUncontracted).imag()
+	+ HCore.block(nUncontracted,0,nUncontracted,nUncontracted).imag());
+  Hy = 0.5 * (HCore.block(0,nUncontracted,nUncontracted,nUncontracted).real()
+	- HCore.block(nUncontracted,0,nUncontracted,nUncontracted).real());
+
+  prettyPrint(this->fileio_->out,Hs,"Hs (p space)");
+  prettyPrint(this->fileio_->out,Hz,"Hz (p space)");
+  prettyPrint(this->fileio_->out,Hx,"Hx (p space)");
+  prettyPrint(this->fileio_->out,Hy,"Hz (p space)");
+
+  RealMatrix rTEMP(nUncontracted,nUncontracted);
+
+  rTEMP = Hs * UK.adjoint() * SUn;
+  Hs = SUn * UK * rTEMP; 
+  rTEMP = Hz * UK.adjoint() * SUn;
+  Hz = SUn * UK * rTEMP; 
+  rTEMP = Hx * UK.adjoint() * SUn;
+  Hx = SUn * UK * rTEMP; 
+  rTEMP = Hy * UK.adjoint() * SUn;
+  Hy = SUn * UK * rTEMP; 
+
+
+  prettyPrint(this->fileio_->out,Hs,"Hs (r space)");
+  prettyPrint(this->fileio_->out,Hz,"Hz (r space)");
+  prettyPrint(this->fileio_->out,Hx,"Hx (r space)");
+  prettyPrint(this->fileio_->out,Hy,"Hy (r space)");
+
+
+
+// -----------------------------
+// Get Veff and Trel in r space
+// -----------------------------
   ComplexMatrix Veff(2*nUncontracted,2*nUncontracted);
   Veff = HCore - KinEn;
 
@@ -484,108 +529,36 @@ void AOIntegrals::formP2Transformation(){
    
   prettyPrint(this->fileio_->out,Veff,"Veff (r space)");
 
-  // All correct to here (up to a sign/permutation)
-/*
-  RealMatrix rTEMP(nUncontracted,nUncontracted);
-  rTEMP = HCore.block(0,0,nUncontracted,nUncontracted).real() * UK.adjoint() * SUn;
-  HCore.block(0,0,nUncontracted,nUncontracted).real() = SUn * UK * rTEMP; 
-  rTEMP = HCore.block(nUncontracted,0,nUncontracted,nUncontracted).real() * UK.adjoint() * SUn;
-  HCore.block(nUncontracted,0,nUncontracted,nUncontracted).real() = SUn * UK * rTEMP; 
-  rTEMP = HCore.block(0,nUncontracted,nUncontracted,nUncontracted).real() * UK.adjoint() * SUn;
-  HCore.block(0,nUncontracted,nUncontracted,nUncontracted).real() = SUn * UK * rTEMP; 
-  rTEMP = HCore.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).real() * UK.adjoint() * SUn;
-  HCore.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).real() = SUn * UK * rTEMP; 
-*/
+  TEMP = SUK * KinEn;
+  KinEn = TEMP * SUK.adjoint();
 
-  TEMP = SUK * HCore;
-  HCore = TEMP * SUK.adjoint();
+  prettyPrint(this->fileio_->out,KinEn,"Trel (r space)");
+// --------------------------------------------------------
 
-  cout << HCore.squaredNorm() << " HCore norm" << endl;
+//  TEMP = SUK * HCore;
+//  HCore = TEMP * SUK.adjoint();
 
-  prettyPrint(this->fileio_->out,HCore,"HCore (r space)");
+//  cout << HCore.squaredNorm() << " HCore norm" << endl;
 
-
-  RealMatrix SpinCore(2*nUncontracted,2*nUncontracted);
-  for (auto row = 0; row < nUncontracted; row++) {
-	for (auto col = 0; col < nUncontracted; col++) {
-	    SpinCore(2*row,2*col) = HCore(row,col).real(); // αα
-	    SpinCore(2*row,2*col+1) = HCore(row,col+nUncontracted).real(); // αβ
-	    SpinCore(2*row+1,2*col) = HCore(row+nUncontracted,col).real(); // βα
-	    SpinCore(2*row+1,2*col+1) = HCore(row+nUncontracted,col+nUncontracted).real(); // ββ
-	    }
-	}
-
-  cout << SpinCore.squaredNorm() << " Spin-Core norm" << endl;
-
-
-// Now split these blocks into the scalar and magnetization parts
-// Hs =  αα + ββ
-// Hz =  αα - ββ
-// Hx =  αβ + βα
-// Hy = (αβ - βα)i
-  RealMatrix Hs(nUncontracted,nUncontracted);
-  RealMatrix Hz(nUncontracted,nUncontracted);
-  RealMatrix Hx(nUncontracted,nUncontracted);
-  RealMatrix Hy(nUncontracted,nUncontracted);
-  
-  std::vector<std::reference_wrapper<RealMatrix>> mats;
-
-  // v.push_back(A) -> v.end() = A
-  // v.emplace_back(A) -> v[end](A)
-
-  mats.emplace_back(Hs);
-  mats.emplace_back(Hz);
-  mats.emplace_back(Hy);
-  mats.emplace_back(Hx);
-
-  Quantum<double>::spinScatter(SpinCore,mats);
-
-
-  cout << Hs.squaredNorm() << " Hs norm" << endl;
-  cout << Hz.squaredNorm() << " Hz norm" << endl;
-  cout << Hx.squaredNorm() << " Hx norm" << endl;
-  cout << Hy.squaredNorm() << " Hy norm" << endl;
-
-/*
-  Hs = 0.5 * (HCore.block(0,0,nUncontracted,nUncontracted).real()
-	+ HCore.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).real());
-  Hz = 0.5 * (HCore.block(0,0,nUncontracted,nUncontracted).imag()
-	- HCore.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).imag());
-  Hx = 0.5 * (HCore.block(0,nUncontracted,nUncontracted,nUncontracted).imag()
-	+ HCore.block(nUncontracted,0,nUncontracted,nUncontracted).imag());
-  Hy = 0.5 * (HCore.block(0,nUncontracted,nUncontracted,nUncontracted).real()
-	- HCore.block(nUncontracted,0,nUncontracted,nUncontracted).real());
-*/
-/*
-  RealMatrix rTEMP(nUncontracted,nUncontracted);
-  rTEMP = UK * Hs;
-  Hs = rTEMP * UK.transpose();
-  rTEMP = UK * Hz;
-  Hz = rTEMP * UK.transpose();
-  rTEMP = UK * Hx;
-  Hx = rTEMP * UK.transpose();
-  rTEMP = UK * Hy;
-  Hy = rTEMP * UK.transpose();
-*/
-  prettyPrint(this->fileio_->out,Hs,"Hcore (scalar)");
-  prettyPrint(this->fileio_->out,Hz,"Hcore (mz)");
-  prettyPrint(this->fileio_->out,Hx,"Hcore (mx)");
-  prettyPrint(this->fileio_->out,Hy,"Hcore (my)");
+//  prettyPrint(this->fileio_->out,HCore,"HCore (r space)");
 
 
 
 
 // Recontract the basis
+  prettyPrint(this->fileio_->out,*this->basisSet_->mapPrim2Bf(),"primitive transformation matrix");
   RealMatrix IPrim2Bf = (*this->basisSet_->mapPrim2Bf()).transpose();
   
-  Hs = Hs * IPrim2Bf;
-  Hs = (*this->basisSet_->mapPrim2Bf()) * Hs;
-  Hz = Hz * IPrim2Bf;
-  Hz = (*this->basisSet_->mapPrim2Bf()) * Hz;
-  Hx = Hx * IPrim2Bf;
-  Hx = (*this->basisSet_->mapPrim2Bf()) * Hx;
-  Hy = Hy * IPrim2Bf;
-  Hy = (*this->basisSet_->mapPrim2Bf()) * Hy;
+
+ 
+  rTEMP = Hs * IPrim2Bf;
+  Hs = (*this->basisSet_->mapPrim2Bf()) * rTEMP;
+  rTEMP = Hz * IPrim2Bf;
+  Hz = (*this->basisSet_->mapPrim2Bf()) * rTEMP;
+  rTEMP = Hx * IPrim2Bf;
+  Hx = (*this->basisSet_->mapPrim2Bf()) * rTEMP;
+  rTEMP = Hy * IPrim2Bf;
+  Hy = (*this->basisSet_->mapPrim2Bf()) * rTEMP;
 
   prettyPrint(this->fileio_->out,Hs,"Hs (scalar)");
   prettyPrint(this->fileio_->out,Hz,"Hz (mz)");
@@ -594,43 +567,6 @@ void AOIntegrals::formP2Transformation(){
 
 
   CErr();
-
-
-/* THIS IS OLD AND DOESN'T WORK 
-//  This doesn't seem to work...  
-//  RealMatrix CUK = UK * (*this->basisSet_->mapPrim2Bf());
-
-//
-// What is the point of the matrix YCUK?
-  ComplexMatrix YCUK(2*nUncontracted,this->nBasis_);
-//  YCUK = Y * CUK;
-
-  cout << "HERE" << endl;
-  cout << YCUK.rows() << " " << YCUK.cols() << endl;
-  cout << Y.rows() << " " << Y.cols() << endl;
-  cout << CUK.rows() << " " << CUK.cols() << endl;
-  cout << "HERE" << endl;
-
-  ComplexMatrix PMapC(2*nUncontracted,2*nUncontracted);
-  PMapC.block(0,0,nUncontracted,nUncontracted).real() = PMap.asDiagonal();
-  PMapC.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).real() = PMap.asDiagonal();
-  ComplexMatrix P2MapC = PMapC.cwiseProduct(PMapC);
-  ComplexMatrix P2_PotC(2*nUncontracted,2*nUncontracted);
-  P2_PotC.block(0,0,nUncontracted,nUncontracted).real() = P2_Potential;
-  P2_PotC.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).real() = P2_Potential;
-
-  cout << "HERE" << endl;
-  ComplexMatrix HCore = YCUK.inverse() * (
-    P2_PotC+
-    phys.SPEED_OF_LIGHT * PMapC * X +
-    phys.SPEED_OF_LIGHT * X.adjoint() * PMapC +
-    X.adjoint() * (W - 2*phys.SPEED_OF_LIGHT*phys.SPEED_OF_LIGHT * ComplexMatrix::Identity(2*nUncontracted,2*nUncontracted) ) * X -
-    phys.SPEED_OF_LIGHT * 
-      (phys.SPEED_OF_LIGHT*phys.SPEED_OF_LIGHT * ComplexMatrix::Identity(2*nUncontracted,2*nUncontracted) - P2MapC).pow(0.5)
-    ) * YCUK;
-  cout << "|HC|" << HCore.norm() << endl;
-
-*/
 
 }
 
