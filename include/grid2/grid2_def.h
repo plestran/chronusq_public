@@ -14,6 +14,10 @@ enum GRID_TYPE {
 };
 
 struct IntegrationPoint {
+  std::size_t I;
+  std::size_t J;
+  std::size_t NI;
+  std::size_t NJ;
   cartGP pt;
   double weight;
   bool evalpt;

@@ -2182,7 +2182,10 @@ void SingleSlater<double>::formVXC_new(){
 
   auto Newstart = std::chrono::high_resolution_clock::now();
   auto Newend = std::chrono::high_resolution_clock::now();
-  auto valVxc = [&](ChronusQ::IntegrationPoint &pt, 
+
+  std::vector<std::size_t> closeShells;
+
+  auto valVxc = [&](std::size_t iAtm, ChronusQ::IntegrationPoint &pt, 
   KernelIntegrand<double> &result) -> void {
 
     if(doTimings) Newstart = std::chrono::high_resolution_clock::now();
@@ -2191,33 +2194,43 @@ void SingleSlater<double>::formVXC_new(){
     SCRATCH1Y.setZero();
     SCRATCH1Z.setZero();
 
-/*
-    std::array<double,3>  drhoT = {0.0,0.0,0.0}; ///< array TOTAL density gradient components
-    std::array<double,3>  drhoS = {0.0,0.0,0.0}; ///< array SPIN  density gradient components
-    std::array<double,3>  drhoA = {0.0,0.0,0.0}; ///< array ALPHA  density gradient components
-    std::array<double,3>  drhoB = {0.0,0.0,0.0}; ///< array BETA  density gradient components
-    RealVecMap GradRhoT(&drhoT[0],3);
-    RealVecMap GradRhoS(&drhoS[0],3);
-    RealVecMap GradRhoA(&drhoA[0],3);
-    RealVecMap GradRhoB(&drhoB[0],3);
-*/
     cartGP &GP = pt.pt;
-/*
-    double rhoA;
-    double rhoB;
-    double gammaAA;
-    double gammaBB;
-    double gammaAB;
-*/
-//  auto shMap = this->basisset_->MapGridBasis(GP); 
-    this->basisset_->MapGridBasis(shMap,GP); 
+ // this->basisset_->MapGridBasis(shMap,GP); 
 
     if(doTimings){ 
       Newend = std::chrono::high_resolution_clock::now();
       T1 += Newend - Newstart;
     }
+
+//  cout << pt.I << endl;
+//  cout << iAtm << endl;
+    if(pt.I == 0) {
+      closeShells.clear();
+      double DX = (*this->molecule_->cart())(0,iAtm) - bg::get<0>(GP);
+      double DY = (*this->molecule_->cart())(1,iAtm) - bg::get<1>(GP);
+      double DZ = (*this->molecule_->cart())(2,iAtm) - bg::get<2>(GP);
+
+      double R = DX*DX + DY*DY + DZ*DZ;
+      R = std::sqrt(R);
+
+      for(auto jAtm = 0; jAtm < this->molecule_->nAtoms(); jAtm++){
+        double RAB = (*this->molecule_->rIJ())(iAtm,jAtm);
+        double DIST = std::abs(RAB - R);
+//      cout << RAB << " " << DIST << endl;
+        for(auto iSh = 0; iSh < this->basisset_->nShell(); iSh++){
+          if(this->basisset_->mapSh2Cen(iSh)-1 != jAtm) continue;
+          if(this->basisset_->radCutSh()[iSh] > DIST)
+            closeShells.push_back(iSh);
+        }
+      }
+//    for(auto i : closeShells) cout << i << endl;
+    }
+
+
+/*
     if(shMap[0]) { NSkip2++;return;}
     if(doTimings) Newstart = std::chrono::high_resolution_clock::now();
+
     for(auto iShell = 0; iShell < this->basisset_->nShell(); iShell++){
       if(!shMap[iShell+1]) { NSkip3++;continue;}
 
@@ -2242,6 +2255,33 @@ void SingleSlater<double>::formVXC_new(){
       }
 
     };
+    if(doTimings){
+      Newend = std::chrono::high_resolution_clock::now();
+      T2 += Newend - Newstart;
+    }
+*/
+    if(doTimings) Newstart = std::chrono::high_resolution_clock::now();
+    for(auto iShell : closeShells) {
+    
+      int shSize= this->basisset_->shells(iShell).size();
+//    T6 += Newend - Newstart;
+      double * buff = this->basisset_->basisDEval(NDer,this->basisset_->shells(iShell),&pt.pt);
+
+      RealMap bMap(buff,shSize,1);
+//    Newstart = std::chrono::high_resolution_clock::now();
+      SCRATCH1.block(this->basisset_->mapSh2Bf(iShell),0,shSize,1) = bMap;
+      if(NDer>0){
+        double * ds1EvalX = buff + shSize;
+        double * ds1EvalY = ds1EvalX + shSize;
+        double * ds1EvalZ = ds1EvalY + shSize;
+        RealMap bMapX(ds1EvalX,shSize,1);
+        SCRATCH1X.block(this->basisset_->mapSh2Bf(iShell),0,shSize,1) = bMapX;
+        RealMap bMapY(ds1EvalY,shSize,1);
+        SCRATCH1Y.block(this->basisset_->mapSh2Bf(iShell),0,shSize,1) = bMapY;
+        RealMap bMapZ(ds1EvalZ,shSize,1);
+        SCRATCH1Z.block(this->basisset_->mapSh2Bf(iShell),0,shSize,1) = bMapZ;
+      }
+    }
     if(doTimings){
       Newend = std::chrono::high_resolution_clock::now();
       T2 += Newend - Newstart;
@@ -2379,7 +2419,12 @@ void SingleSlater<double>::formVXC_new(){
     AGrid.findNearestNeighbor();
     AGrid.scalingFactor()=0.5 *
       elements[this->molecule_->index(iAtm)].sradius/phys.bohr;
-    AGrid.integrate<KernelIntegrand<double>>(valVxc,res);
+
+    std::function<void(IntegrationPoint&,KernelIntegrand<double>&)>
+      wrapper = std::bind(valVxc,iAtm,std::placeholders::_1,
+                  std::placeholders::_2);
+
+    AGrid.integrate<KernelIntegrand<double>>(wrapper,res);
   };
   (*this->vXA_) = 4*math.pi*res.VXCA;
   this->totalEx = 4*math.pi*res.Energy;

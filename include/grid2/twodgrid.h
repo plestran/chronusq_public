@@ -38,10 +38,14 @@ class TwoDGrid2 : public Grid2 {
       // IJ = i
       // I = IJ % NAng (Angular Point)
       // J = IJ / NAng (Radial Point)
-      IntegrationPoint gpAng = (*GAng)[i % GAng->npts()];
-      IntegrationPoint gpRad = (*GRad)[i / GAng->npts()];
-      
+
       cartGP totalPoint; 
+      std::size_t I = i % GAng->npts();
+      std::size_t J = i / GAng->npts();
+
+      IntegrationPoint gpAng = (*GAng)[I];
+      IntegrationPoint gpRad = (*GRad)[J];
+      
       totalPoint.set<0>(bg::get<0>(gpRad.pt) * bg::get<0>(gpAng.pt));
       totalPoint.set<1>(bg::get<0>(gpRad.pt) * bg::get<1>(gpAng.pt));
       totalPoint.set<2>(bg::get<0>(gpRad.pt) * bg::get<2>(gpAng.pt));
@@ -49,6 +53,10 @@ class TwoDGrid2 : public Grid2 {
       double totalWeight = gpRad.weight * gpAng.weight;
 
       IntegrationPoint totalIntPt(totalPoint,totalWeight);
+      totalIntPt.I = I;
+      totalIntPt.J = J;
+      totalIntPt.NI = GAng->npts();
+      totalIntPt.NJ = GRad->npts();
 
       return totalIntPt;
     };
