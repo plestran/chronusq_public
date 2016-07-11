@@ -372,7 +372,7 @@ void AOIntegrals::computeAOOneE(){
   auto VStart = std::chrono::high_resolution_clock::now();
 
   // make this the default?
-  this->useFiniteWidthNuclei = true;
+  //this->useFiniteWidthNuclei = true;
 
   if(this->isPrimary && this->useFiniteWidthNuclei) 
     this->finiteWidthPotential();
