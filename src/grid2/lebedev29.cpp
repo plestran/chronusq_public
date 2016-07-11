@@ -1,4 +1,4 @@
-#include <grid2.h>
+#include <grid2/lebedev.h>
 namespace ChronusQ {
   template<>
   void Lebedev::loadLebedev<LEBEDEV_29>(){

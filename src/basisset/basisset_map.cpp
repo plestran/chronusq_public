@@ -133,7 +133,7 @@ void BasisSet::makeMapPrim2Bf(){
       this->mapPrim2Bf_->block(jBf,jPrim,1,nPrim) = PrimCoeff;
     }
   }
-//  prettyPrint(cout,*this->mapPrim2Bf_,"MAP");
+  //prettyPrint(cout,*this->mapPrim2Bf_,"MAP");
 };
 
 }; // namespace ChronusQ
