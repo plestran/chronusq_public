@@ -2190,6 +2190,7 @@ void SingleSlater<double>::formVXC_new(){
   double *SCRATCH1XDATA = SCRATCH1X.data();
   double *SCRATCH1YDATA = SCRATCH1Y.data();
   double *SCRATCH1ZDATA = SCRATCH1Z.data();
+  double *OmegaADATA = OmegaA.data();
 
   std::vector<std::size_t> shSizes;
   for(auto iSh = 0; iSh < this->basisset_->nShell(); iSh++)
@@ -2234,26 +2235,17 @@ void SingleSlater<double>::formVXC_new(){
     // Compute value of "close" basis functions at the given point
     for(auto iShell : closeShells) {
     
-//      int shSize= this->basisset_->shells(iShell).size();
       int shSize= shSizes[iShell];
       int iSt = this->basisset_->mapSh2Bf(iShell);
       double * buff = this->basisset_->basisDEval(NDer,this->basisset_->shells(iShell),&pt.pt);
 
-//      RealMap bMap(buff,shSize,1);
-//      SCRATCH1.block(iSt,0,shSize,1) = bMap;
       std::memcpy(SCRATCH1DATA + iSt,buff,shSize*sizeof(double));
       if(NDer>0){
         double * ds1EvalX = buff + shSize;
         double * ds1EvalY = ds1EvalX + shSize;
         double * ds1EvalZ = ds1EvalY + shSize;
-//        RealMap bMapX(ds1EvalX,shSize,1);
-//        SCRATCH1X.block(iSt,0,shSize,1) = bMapX;
         std::memcpy(SCRATCH1XDATA + iSt,ds1EvalX,shSize*sizeof(double));
-//        RealMap bMapY(ds1EvalY,shSize,1);
-//        SCRATCH1Y.block(iSt,0,shSize,1) = bMapY;
         std::memcpy(SCRATCH1YDATA + iSt,ds1EvalY,shSize*sizeof(double));
-//        RealMap bMapZ(ds1EvalZ,shSize,1);
-//        SCRATCH1Z.block(iSt,0,shSize,1) = bMapZ;
         std::memcpy(SCRATCH1ZDATA + iSt,ds1EvalZ,shSize*sizeof(double));
       }
     }
@@ -2291,19 +2283,18 @@ void SingleSlater<double>::formVXC_new(){
     double * DENT, *DENS;
     // Loop over close shells "I"
     for(auto iShell : closeShells) {
-//      int iSz = this->basisset_->shells(iShell).size();
       int iSz= shSizes[iShell];
       int iSt = this->basisset_->mapSh2Bf(iShell);
 
-      // Loop over close shells "J"
-      for(auto jShell : closeShells) {
-//        int jSz = this->basisset_->shells(jShell).size();
-        int jSz= shSizes[jShell];
-        int jSt = this->basisset_->mapSh2Bf(jShell);
+
+      for(auto iBf = iSt; iBf < (iSt + iSz); iBf++){
+        Tt = 0.0; Ts = 0.0;
+        // Loop over close shells "J"
+        for(auto jShell : closeShells) {
+          int jSz= shSizes[jShell];
+          int jSt = this->basisset_->mapSh2Bf(jShell);
 
         // Loop on iBf in iShell and jBf in jShell
-        for(auto iBf = iSt; iBf < (iSt + iSz); iBf++){
-          Tt = 0.0; Ts = 0.0;
           if(this->nTCS_ == 1 && this->isClosedShell){
             DENT = this->onePDMA_->data() + iBf*this->nBasis_;
           } else {
@@ -2318,18 +2309,18 @@ void SingleSlater<double>::formVXC_new(){
 //            Ts += Ps * SCRATCH1DATA[jBf];
             }
           } // jBf
-          rhoT += Tt * SCRATCH1DATA[iBf];
-//        rhoS += Ts * SCRATCH1DATA[iBf];
-          if(NDer > 0) {
-            drhoT[0] += Tt * SCRATCH1XDATA[iBf];
-            drhoT[1] += Tt * SCRATCH1YDATA[iBf];
-            drhoT[2] += Tt * SCRATCH1ZDATA[iBf];
-//          drhoS[0] += Ts * SCRATCH1XDATA[iBf];
-//          drhoS[1] += Ts * SCRATCH1YDATA[iBf];
-//          drhoS[2] += Ts * SCRATCH1ZDATA[iBf];
-          }
-        } // iBf
-      } // jShell      
+        } // jShell      
+        rhoT += Tt * SCRATCH1DATA[iBf];
+//      rhoS += Ts * SCRATCH1DATA[iBf];
+        if(NDer > 0) {
+          drhoT[0] += Tt * SCRATCH1XDATA[iBf];
+          drhoT[1] += Tt * SCRATCH1YDATA[iBf];
+          drhoT[2] += Tt * SCRATCH1ZDATA[iBf];
+//        drhoS[0] += Ts * SCRATCH1XDATA[iBf];
+//        drhoS[1] += Ts * SCRATCH1YDATA[iBf];
+//        drhoS[2] += Ts * SCRATCH1ZDATA[iBf];
+        }
+      } // iBf
     } // iShell
     if(doTimings){
       Newend = std::chrono::high_resolution_clock::now();
@@ -2387,9 +2378,9 @@ void SingleSlater<double>::formVXC_new(){
       int iSt = this->basisset_->mapSh2Bf(iShell);
 
       for(auto iBf = iSt; iBf < (iSt + iSz); iBf++){
-        OmegaA(iBf) += GradRhoA(0) * SCRATCH1X(iBf) +
-                       GradRhoA(1) * SCRATCH1Y(iBf) +
-                       GradRhoA(2) * SCRATCH1Z(iBf);
+        OmegaADATA[iBf] += GradRhoA(0) * SCRATCH1XDATA[iBf] +
+                           GradRhoA(1) * SCRATCH1YDATA[iBf] +
+                           GradRhoA(2) * SCRATCH1ZDATA[iBf];
 //      OmegaB(iBf) += GradRhoB(0) * SCRATCH1X(iBf) +
 //                     GradRhoB(1) * SCRATCH1Y(iBf) +
 //                     GradRhoB(2) * SCRATCH1Z(iBf);
@@ -2397,21 +2388,23 @@ void SingleSlater<double>::formVXC_new(){
     } // iShell
 
     result.Energy += pt.weight * kernelXC.eps;
+    kernelXC.ddrhoA *= pt.weight;
+    kernelXC.ddrhoB *= pt.weight;
 
     for(auto iShell : closeShells) {
-//      int iSz = this->basisset_->shells(iShell).size();
       int iSz= shSizes[iShell];
       int iSt = this->basisset_->mapSh2Bf(iShell);
 
       for(auto iBf = iSt; iBf < (iSt + iSz); iBf++){
-        double Ta = pt.weight*kernelXC.ddrhoA*SCRATCH1(iBf) + OmegaA(iBf);
-//      double Tb = pt.weight*kernelXC.ddrhoB*SCRATCH1(iBf) + OmegaB(iBf);
+        double Ta = kernelXC.ddrhoA*SCRATCH1DATA[iBf] + OmegaADATA[iBf];
+//      double Tb = kernelXC.ddrhoB*SCRATCH1(iBf) + OmegaB(iBf);
         for(auto jShell : closeShells) {
-//          int jSz = this->basisset_->shells(jShell).size();
           int jSz= shSizes[jShell];
           int jSt = this->basisset_->mapSh2Bf(jShell);
+          double *VXCDATA = result.VXCA.data() + iBf*this->nBasis_;
           for(auto jBf = jSt; jBf < (jSt + jSz); jBf++){
-            result.VXCA(iBf,jBf) += Ta*SCRATCH1(jBf) + SCRATCH1(iBf)*OmegaA(jBf); 
+            if(jBf < iBf) continue;
+            VXCDATA[jBf] += Ta*SCRATCH1DATA[jBf] + SCRATCH1DATA[iBf]*OmegaADATA[jBf]; 
           } // jBf
         } // jShell
       } // iBf
@@ -2459,9 +2452,11 @@ void SingleSlater<double>::formVXC_new(){
     AGrid.integrate<KernelIntegrand<double>>(wrapper,res);
   };
   (*this->vXA_) = 4*math.pi*res.VXCA;
+  (*this->vXA_) = this->vXA_->selfadjointView<Lower>();
   this->totalEx = 4*math.pi*res.Energy;
   if(!this->isClosedShell && this->nTCS_ != 2){
     (*this->vXB_) = 4*math.pi*res.VXCB;
+    (*this->vXB_) = this->vXB_->selfadjointView<Lower>();
   }
 
   if(doTimings) {
