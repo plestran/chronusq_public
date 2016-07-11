@@ -251,13 +251,26 @@ void AOIntegrals::formP2Transformation(){
   };
 
   auto atomicCenters = this->molecule_->cartArray();
-  AtomicGrid AGrid(100,590,GAUSSCHEBFST,LEBEDEV,BECKE,atomicCenters,this->molecule_->rIJ(),1.0,
-      false);
+  this->basisSet_->radcut(1.0e-10, 50, 1.0e-7);
+  std::vector<double> atomRadCutoff(this->molecule_->nAtoms(),0.0);
+  for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
+    for(auto iSh = 0; iSh < this->basisSet_->nShell(); iSh++){
+      if(this->basisSet_->mapSh2Cen(iSh)-1 != iAtm) continue;
+      if(this->basisSet_->radCutSh()[iSh] > atomRadCutoff[iAtm])
+        atomRadCutoff[iAtm] = this->basisSet_->radCutSh()[iSh];
+    }
+  } 
+
+  AtomicGrid AGrid(100,590,GAUSSCHEBFST,LEBEDEV,BECKE,atomicCenters,
+    this->molecule_->rIJ(),0,1.0,false);
+
   std::vector<RealMatrix> numPot(10,RealMatrix::Zero(nUncontracted,
         nUncontracted));
 
   for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
     AGrid.center() = iAtm;
+    AGrid.setRadCutOff(atomRadCutoff[iAtm]);
+    AGrid.findNearestNeighbor();
     AGrid.scalingFactor()=
       0.5*elements[this->molecule_->index(iAtm)].sradius/phys.bohr;
     AGrid.integrate<std::vector<RealMatrix>>(PVP,numPot);
