@@ -2295,10 +2295,10 @@ void SingleSlater<double>::formVXC_new(){
 //  cout << "NORM = " << SCRATCH1.norm() << endl;
     if(doTimings) Newstart = std::chrono::high_resolution_clock::now();
     SCRATCH2.noalias() = SCRATCH1 * SCRATCH1.transpose();
-    double rhoT = this->template computeProperty<double,TOTAL>(SCRATCH2);
-    double rhoS = this->template computeProperty<double,MZ>(SCRATCH2);
-    rhoA = 0.5 * (rhoT + rhoS);
-    rhoB = 0.5 * (rhoT - rhoS);
+//  double rhoT = this->template computeProperty<double,TOTAL>(SCRATCH2);
+//  double rhoS = this->template computeProperty<double,MZ>(SCRATCH2);
+//  rhoA = 0.5 * (rhoT + rhoS);
+//  rhoB = 0.5 * (rhoT - rhoS);
 
     if(NDer>0){
       //Closed Shell GGA
@@ -2336,6 +2336,48 @@ void SingleSlater<double>::formVXC_new(){
       Newend = std::chrono::high_resolution_clock::now();
       T3 += Newend - Newstart;
     }
+
+
+    double rhoT(0.0);
+    double rhoS(0.0);
+    double Tt(0.0), Ts(0.0);
+    double Pt(0.0), Ps(0.0);
+
+    // Loop over close shells "I"
+    for(auto iShell : closeShells) {
+      int iSz = this->basisset_->shells(iShell).size();
+      int iSt = this->basisset_->mapSh2Bf(iShell);
+
+      // Loop over close shells "J"
+      for(auto jShell : closeShells) {
+        int jSz = this->basisset_->shells(jShell).size();
+        int jSt = this->basisset_->mapSh2Bf(jShell);
+
+        // Loop on iBf in iShell and jBf in jShell
+        for(auto iBf = iSt; iBf < (iSt + iSz); iBf++){
+          Tt = 0.0; Ts = 0.0;
+          for(auto jBf = jSt; jBf < (jSt + jSz); jBf++){
+            if(this->nTCS_ == 1 && this->isClosedShell){
+              Pt = 2.0 * (*this->onePDMA_)(iBf,jBf);
+            } else {
+              Pt = 2.0 * (*this->onePDMScalar_)(iBf,jBf);
+              Ps = 2.0 * (*this->onePDMMz_)(iBf,jBf);
+            }
+
+            if(std::abs(Pt) > 1e-10 || std::abs(Ps) > 1e-10){
+              Tt += Pt * SCRATCH1(jBf);
+              Ts += Ps * SCRATCH1(jBf);
+            }
+          } // jBf
+          rhoT += Tt * SCRATCH1(iBf);
+          rhoS += Ts * SCRATCH1(iBf);
+        } // iBf
+      } // jShell      
+    } // iShell
+    rhoT *= 0.5;
+    rhoS *= 0.5;
+    rhoA = 0.5 * (rhoT + rhoS);
+    rhoB = 0.5 * (rhoT - rhoS);
     
     if  (rhoT < 1.0e-10) {NSkip5++; return;}
     DFTFunctional::DFTInfo kernelXC;
