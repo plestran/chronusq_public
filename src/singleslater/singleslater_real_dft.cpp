@@ -2185,28 +2185,25 @@ void SingleSlater<double>::formVXC_new(){
 
   std::vector<std::size_t> closeShells;
   VectorXd OmegaA(this->nBasis_), OmegaB(this->nBasis_);
+  VectorXd DENCOL(this->nBasis_);
+  double *SCRATCH1DATA = SCRATCH1.data();
+  double *SCRATCH1XDATA = SCRATCH1X.data();
+  double *SCRATCH1YDATA = SCRATCH1Y.data();
+  double *SCRATCH1ZDATA = SCRATCH1Z.data();
+
+  std::vector<std::size_t> shSizes;
+  for(auto iSh = 0; iSh < this->basisset_->nShell(); iSh++)
+    shSizes.push_back(this->basisset_->shells(iSh).size());
 
   auto valVxc = [&](std::size_t iAtm, ChronusQ::IntegrationPoint &pt, 
   KernelIntegrand<double> &result) -> void {
 
-    if(doTimings) Newstart = std::chrono::high_resolution_clock::now();
-/*  NO MATRIX
-    SCRATCH1.setZero();
-    SCRATCH1X.setZero();
-    SCRATCH1Y.setZero();
-    SCRATCH1Z.setZero();
-*/
 
     cartGP &GP = pt.pt;
- // this->basisset_->MapGridBasis(shMap,GP); 
 
-    if(doTimings){ 
-      Newend = std::chrono::high_resolution_clock::now();
-      T1 += Newend - Newstart;
-    }
 
-//  cout << pt.I << endl;
-//  cout << iAtm << endl;
+    if(doTimings) Newstart = std::chrono::high_resolution_clock::now();
+    // For each new sphere, determine list of close basis shells
     if(pt.I == 0) {
       closeShells.clear();
       double DX = (*this->molecule_->cart())(0,iAtm) - bg::get<0>(GP);
@@ -2219,70 +2216,45 @@ void SingleSlater<double>::formVXC_new(){
       for(auto jAtm = 0; jAtm < this->molecule_->nAtoms(); jAtm++){
         double RAB = (*this->molecule_->rIJ())(iAtm,jAtm);
         double DIST = std::abs(RAB - R);
-//      cout << RAB << " " << DIST << endl;
         for(auto iSh = 0; iSh < this->basisset_->nShell(); iSh++){
           if(this->basisset_->mapSh2Cen(iSh)-1 != jAtm) continue;
           if(this->basisset_->radCutSh()[iSh] > DIST)
             closeShells.push_back(iSh);
         }
       }
-//    for(auto i : closeShells) cout << i << endl;
     }
-
-
-/*
-    if(shMap[0]) { NSkip2++;return;}
-    if(doTimings) Newstart = std::chrono::high_resolution_clock::now();
-
-    for(auto iShell = 0; iShell < this->basisset_->nShell(); iShell++){
-      if(!shMap[iShell+1]) { NSkip3++;continue;}
-
-
-      int shSize= this->basisset_->shells(iShell).size();
-//    T6 += Newend - Newstart;
-      double * buff = this->basisset_->basisDEval(NDer,this->basisset_->shells(iShell),&pt.pt);
-
-      RealMap bMap(buff,shSize,1);
-//    Newstart = std::chrono::high_resolution_clock::now();
-      SCRATCH1.block(this->basisset_->mapSh2Bf(iShell),0,shSize,1) = bMap;
-      if(NDer>0){
-        double * ds1EvalX = buff + shSize;
-        double * ds1EvalY = ds1EvalX + shSize;
-        double * ds1EvalZ = ds1EvalY + shSize;
-        RealMap bMapX(ds1EvalX,shSize,1);
-        SCRATCH1X.block(this->basisset_->mapSh2Bf(iShell),0,shSize,1) = bMapX;
-        RealMap bMapY(ds1EvalY,shSize,1);
-        SCRATCH1Y.block(this->basisset_->mapSh2Bf(iShell),0,shSize,1) = bMapY;
-        RealMap bMapZ(ds1EvalZ,shSize,1);
-        SCRATCH1Z.block(this->basisset_->mapSh2Bf(iShell),0,shSize,1) = bMapZ;
-      }
-
-    };
-    if(doTimings){
+    if(doTimings){ 
       Newend = std::chrono::high_resolution_clock::now();
-      T2 += Newend - Newstart;
+      T1 += Newend - Newstart;
     }
-*/
+
+
     if(doTimings) Newstart = std::chrono::high_resolution_clock::now();
+
+    // Compute value of "close" basis functions at the given point
     for(auto iShell : closeShells) {
     
-      int shSize= this->basisset_->shells(iShell).size();
-//    T6 += Newend - Newstart;
+//      int shSize= this->basisset_->shells(iShell).size();
+      int shSize= shSizes[iShell];
+      int iSt = this->basisset_->mapSh2Bf(iShell);
       double * buff = this->basisset_->basisDEval(NDer,this->basisset_->shells(iShell),&pt.pt);
 
-      RealMap bMap(buff,shSize,1);
-//    Newstart = std::chrono::high_resolution_clock::now();
-      SCRATCH1.block(this->basisset_->mapSh2Bf(iShell),0,shSize,1) = bMap;
+//      RealMap bMap(buff,shSize,1);
+//      SCRATCH1.block(iSt,0,shSize,1) = bMap;
+      std::memcpy(SCRATCH1DATA + iSt,buff,shSize*sizeof(double));
       if(NDer>0){
         double * ds1EvalX = buff + shSize;
         double * ds1EvalY = ds1EvalX + shSize;
         double * ds1EvalZ = ds1EvalY + shSize;
-        RealMap bMapX(ds1EvalX,shSize,1);
-        SCRATCH1X.block(this->basisset_->mapSh2Bf(iShell),0,shSize,1) = bMapX;
-        RealMap bMapY(ds1EvalY,shSize,1);
-        SCRATCH1Y.block(this->basisset_->mapSh2Bf(iShell),0,shSize,1) = bMapY;
-        RealMap bMapZ(ds1EvalZ,shSize,1);
-        SCRATCH1Z.block(this->basisset_->mapSh2Bf(iShell),0,shSize,1) = bMapZ;
+//        RealMap bMapX(ds1EvalX,shSize,1);
+//        SCRATCH1X.block(iSt,0,shSize,1) = bMapX;
+        std::memcpy(SCRATCH1XDATA + iSt,ds1EvalX,shSize*sizeof(double));
+//        RealMap bMapY(ds1EvalY,shSize,1);
+//        SCRATCH1Y.block(iSt,0,shSize,1) = bMapY;
+        std::memcpy(SCRATCH1YDATA + iSt,ds1EvalY,shSize*sizeof(double));
+//        RealMap bMapZ(ds1EvalZ,shSize,1);
+//        SCRATCH1Z.block(iSt,0,shSize,1) = bMapZ;
+        std::memcpy(SCRATCH1ZDATA + iSt,ds1EvalZ,shSize*sizeof(double));
       }
     }
     if(doTimings){
@@ -2290,109 +2262,79 @@ void SingleSlater<double>::formVXC_new(){
       T2 += Newend - Newstart;
     }
 
+    if(doTimings) Newstart = std::chrono::high_resolution_clock::now();
+
+    // Determine if we computed Zeros
     double S1Norm = SCRATCH1.norm();
     double S1XNorm = SCRATCH1X.norm();
     double S1YNorm = SCRATCH1Y.norm();
     double S1ZNorm = SCRATCH1Z.norm();
-    if(S1Norm < 1e-9) {NSkip4++; return;}
-//  cout << "NORM = " << SCRATCH1.norm() << endl;
-/*
-    if(doTimings) Newstart = std::chrono::high_resolution_clock::now();
-    SCRATCH2.noalias() = SCRATCH1 * SCRATCH1.transpose();
-//  double rhoT = this->template computeProperty<double,TOTAL>(SCRATCH2);
-//  double rhoS = this->template computeProperty<double,MZ>(SCRATCH2);
-//  rhoA = 0.5 * (rhoT + rhoS);
-//  rhoB = 0.5 * (rhoT - rhoS);
 
-    if(NDer>0){
-      //Closed Shell GGA
-      GradRhoT.setZero();
-      GradRhoS.setZero();
-
-      if(S1XNorm > 1e-10) {
-        SCRATCH2X.noalias() = SCRATCH1 * SCRATCH1X.transpose();
-      //drhoT[0] = 2.0*this->template computeProperty<double,TOTAL>(SCRATCH2X); 
-      //drhoS[0] = 2.0*this->template computeProperty<double,MZ>(SCRATCH2X); 
-        SCRATCH2X.noalias() += SCRATCH1X * SCRATCH1.transpose();
-      } else SCRATCH2X.setZero();
-
-      if(S1YNorm > 1e-10) {
-        SCRATCH2Y.noalias() = SCRATCH1 * SCRATCH1Y.transpose();
-      //drhoT[1] = 2.0*this->template computeProperty<double,TOTAL>(SCRATCH2Y); 
-      //drhoS[1] = 2.0*this->template computeProperty<double,MZ>(SCRATCH2Y); 
-        SCRATCH2Y.noalias() += SCRATCH1Y * SCRATCH1.transpose();
-      } else SCRATCH2Y.setZero();
-
-      if(S1ZNorm > 1e-10) {
-        SCRATCH2Z.noalias() = SCRATCH1 * SCRATCH1Z.transpose();
-      //drhoT[2] = 2.0*this->template computeProperty<double,TOTAL>(SCRATCH2Z); 
-      //drhoS[2] = 2.0*this->template computeProperty<double,MZ>(SCRATCH2Z); 
-        SCRATCH2Z.noalias() += SCRATCH1Z * SCRATCH1.transpose();
-      } else SCRATCH2Z.setZero();
-
-    //GradRhoA.noalias() = 0.5 * (GradRhoT + GradRhoS);
-    //GradRhoB.noalias() = 0.5 * (GradRhoT - GradRhoS);
-    //gammaAA = GradRhoA.dot(GradRhoA);           
-    //gammaBB = GradRhoB.dot(GradRhoB);           
-    //gammaAB = GradRhoA.dot(GradRhoB);           
-    }
     if(doTimings){
       Newend = std::chrono::high_resolution_clock::now();
       T3 += Newend - Newstart;
     }
-*/
+
+    if(S1Norm < 1e-9) {NSkip4++; return;}
 
 
     double rhoT(0.0);
     double rhoS(0.0);
     double Tt(0.0), Ts(0.0);
     double Pt(0.0), Ps(0.0);
-  //std::array<double,3> drhoTtmp;
-  //std::array<double,3> drhoStmp;
-  //RealVecMap GradRhoTTmp(&drhoTtmp[0],3);
-  //RealVecMap GradRhoSTmp(&drhoStmp[0],3);
     GradRhoT.setZero();
     GradRhoS.setZero();
 
+    // Evaluate density and optionally density gradient at the given point
+      
+    if(doTimings) Newstart = std::chrono::high_resolution_clock::now();
+    double * DENT, *DENS;
     // Loop over close shells "I"
     for(auto iShell : closeShells) {
-      int iSz = this->basisset_->shells(iShell).size();
+//      int iSz = this->basisset_->shells(iShell).size();
+      int iSz= shSizes[iShell];
       int iSt = this->basisset_->mapSh2Bf(iShell);
 
       // Loop over close shells "J"
       for(auto jShell : closeShells) {
-        int jSz = this->basisset_->shells(jShell).size();
+//        int jSz = this->basisset_->shells(jShell).size();
+        int jSz= shSizes[jShell];
         int jSt = this->basisset_->mapSh2Bf(jShell);
 
         // Loop on iBf in iShell and jBf in jShell
         for(auto iBf = iSt; iBf < (iSt + iSz); iBf++){
           Tt = 0.0; Ts = 0.0;
+          if(this->nTCS_ == 1 && this->isClosedShell){
+            DENT = this->onePDMA_->data() + iBf*this->nBasis_;
+          } else {
+            DENT = this->onePDMScalar_->data() + iBf*this->nBasis_;
+            DENS = this->onePDMMx_->data() + iBf*this->nBasis_;
+          }
           for(auto jBf = jSt; jBf < (jSt + jSz); jBf++){
-            if(this->nTCS_ == 1 && this->isClosedShell){
-              Pt = 2.0 * (*this->onePDMA_)(iBf,jBf);
-            } else {
-              Pt = 2.0 * (*this->onePDMScalar_)(iBf,jBf);
-              Ps = 2.0 * (*this->onePDMMz_)(iBf,jBf);
-            }
+            Pt = 2.0 * DENT[jBf];
 
             if(std::abs(Pt) > 1e-10 || std::abs(Ps) > 1e-10){
-              Tt += Pt * SCRATCH1(jBf);
-              Ts += Ps * SCRATCH1(jBf);
+              Tt += Pt * SCRATCH1DATA[jBf];
+//            Ts += Ps * SCRATCH1DATA[jBf];
             }
           } // jBf
-          rhoT += Tt * SCRATCH1(iBf);
-          rhoS += Ts * SCRATCH1(iBf);
+          rhoT += Tt * SCRATCH1DATA[iBf];
+//        rhoS += Ts * SCRATCH1DATA[iBf];
           if(NDer > 0) {
-            drhoT[0] += Tt * SCRATCH1X(iBf);
-            drhoT[1] += Tt * SCRATCH1Y(iBf);
-            drhoT[2] += Tt * SCRATCH1Z(iBf);
-            drhoS[0] += Ts * SCRATCH1X(iBf);
-            drhoS[1] += Ts * SCRATCH1Y(iBf);
-            drhoS[2] += Ts * SCRATCH1Z(iBf);
+            drhoT[0] += Tt * SCRATCH1XDATA[iBf];
+            drhoT[1] += Tt * SCRATCH1YDATA[iBf];
+            drhoT[2] += Tt * SCRATCH1ZDATA[iBf];
+//          drhoS[0] += Ts * SCRATCH1XDATA[iBf];
+//          drhoS[1] += Ts * SCRATCH1YDATA[iBf];
+//          drhoS[2] += Ts * SCRATCH1ZDATA[iBf];
           }
         } // iBf
       } // jShell      
     } // iShell
+    if(doTimings){
+      Newend = std::chrono::high_resolution_clock::now();
+      T4 += Newend - Newstart;
+    }
 
     rhoT *= 0.5;
     rhoS *= 0.5;
@@ -2406,7 +2348,10 @@ void SingleSlater<double>::formVXC_new(){
       gammaAB = GradRhoA.dot(GradRhoB);           
     }
     
+    // Skip out if zero density
     if  (rhoT < 1.0e-10) {NSkip5++; return;}
+
+    // Evaluate density functional
     DFTFunctional::DFTInfo kernelXC;
     for(auto i = 0; i < this->dftFunctionals_.size(); i++){
       if(doTimings) 
@@ -2423,43 +2368,10 @@ void SingleSlater<double>::formVXC_new(){
       }
     } // loop over kernels
 
-    if(doTimings) Newstart = std::chrono::high_resolution_clock::now();
-/*
-    if(NDer > 0) {
-      result.VXCA.real() += pt.weight * SCRATCH2X  
-        * (  2.0 * GradRhoA[0]*kernelXC.ddgammaAA 
-           + GradRhoB[0]* kernelXC.ddgammaAB);  
-      result.VXCA.real() += pt.weight * SCRATCH2Y  
-        * (  2.0 * GradRhoA[1]*kernelXC.ddgammaAA 
-           + GradRhoB[1]* kernelXC.ddgammaAB);  
-      result.VXCA.real() += pt.weight * SCRATCH2Z  
-        * (  2.0 * GradRhoA[2]*kernelXC.ddgammaAA 
-           + GradRhoB[2]* kernelXC.ddgammaAB);  
-      result.Energy += pt.weight * kernelXC.eps;
-      if(!this->isClosedShell && this->nTCS_ != 2) {
-        result.VXCB.real() += pt.weight * SCRATCH2X  
-          * (  2.0 * GradRhoB[0]*kernelXC.ddgammaBB 
-             + GradRhoA[0]* kernelXC.ddgammaAB);  
-        result.VXCB.real() += pt.weight * SCRATCH2Y  
-          * (  2.0 * GradRhoB[1]*kernelXC.ddgammaBB 
-             + GradRhoA[1]* kernelXC.ddgammaAB);  
-        result.VXCB.real() += pt.weight * SCRATCH2Z  
-          * (  2.0 * GradRhoB[2]*kernelXC.ddgammaBB 
-             + GradRhoA[2]* kernelXC.ddgammaAB);  
-      }
-    } else {
-      result.Energy += pt.weight * (rhoA+rhoB) * kernelXC.eps;
-    }
-    result.VXCA.real()   += pt.weight * SCRATCH2 * kernelXC.ddrhoA; 
-    if(!this->isClosedShell && this->nTCS_ != 2) 
-      result.VXCB.real()   += pt.weight * SCRATCH2 * kernelXC.ddrhoB; 
-//  if(rhoT < 1e-5) cout << "****** " << rhoT << endl;
-*/
-    if(doTimings) {
-      Newend = std::chrono::high_resolution_clock::now();
-      T5 += Newend - Newstart;
-    }
 
+    // Evaluate Functional derivatives
+
+    if(doTimings) Newstart = std::chrono::high_resolution_clock::now();
     for(auto iXYZ = 0; iXYZ < 3; iXYZ++){
       double GA(GradRhoA(iXYZ)), GB(GradRhoB(iXYZ));
       GradRhoA(iXYZ) = pt.weight * 
@@ -2470,7 +2382,8 @@ void SingleSlater<double>::formVXC_new(){
 
     OmegaA.setZero(); 
     for(auto iShell : closeShells) {
-      int iSz = this->basisset_->shells(iShell).size();
+//      int iSz = this->basisset_->shells(iShell).size();
+      int iSz= shSizes[iShell];
       int iSt = this->basisset_->mapSh2Bf(iShell);
 
       for(auto iBf = iSt; iBf < (iSt + iSz); iBf++){
@@ -2486,14 +2399,16 @@ void SingleSlater<double>::formVXC_new(){
     result.Energy += pt.weight * kernelXC.eps;
 
     for(auto iShell : closeShells) {
-      int iSz = this->basisset_->shells(iShell).size();
+//      int iSz = this->basisset_->shells(iShell).size();
+      int iSz= shSizes[iShell];
       int iSt = this->basisset_->mapSh2Bf(iShell);
 
       for(auto iBf = iSt; iBf < (iSt + iSz); iBf++){
         double Ta = pt.weight*kernelXC.ddrhoA*SCRATCH1(iBf) + OmegaA(iBf);
 //      double Tb = pt.weight*kernelXC.ddrhoB*SCRATCH1(iBf) + OmegaB(iBf);
         for(auto jShell : closeShells) {
-          int jSz = this->basisset_->shells(jShell).size();
+//          int jSz = this->basisset_->shells(jShell).size();
+          int jSz= shSizes[jShell];
           int jSt = this->basisset_->mapSh2Bf(jShell);
           for(auto jBf = jSt; jBf < (jSt + jSz); jBf++){
             result.VXCA(iBf,jBf) += Ta*SCRATCH1(jBf) + SCRATCH1(iBf)*OmegaA(jBf); 
@@ -2501,6 +2416,11 @@ void SingleSlater<double>::formVXC_new(){
         } // jShell
       } // iBf
     } // iShell
+
+    if(doTimings){
+      Newend = std::chrono::high_resolution_clock::now();
+      T5 += Newend - Newstart;
+    }
 
   };
 
@@ -2520,14 +2440,11 @@ void SingleSlater<double>::formVXC_new(){
 
   for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
     for(auto iSh = 0; iSh < this->basisset_->nShell(); iSh++){
-      cout << iAtm << ":" << this->basisset_->radCutSh()[iSh] << endl;
-      cout << this->basisset_->mapSh2Cen(iSh) << endl;
       if(this->basisset_->mapSh2Cen(iSh)-1 != iAtm) continue;
       if(this->basisset_->radCutSh()[iSh] > atomRadCutoff[iAtm])
         atomRadCutoff[iAtm] = this->basisset_->radCutSh()[iSh];
     }
   } 
-  for(auto i : atomRadCutoff) cout << "ATM " << i << endl;
   for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
     AGrid.center() = iAtm;
     AGrid.setRadCutOff(atomRadCutoff[iAtm]);
