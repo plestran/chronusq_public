@@ -29,7 +29,7 @@ void SingleSlater<T>::computeEnergy(){
   if(getRank() == 0) {
     this->energyOneE = 
       this->template computeProperty<double,DENSITY_TYPE::TOTAL>(
-          *this->aointegrals_->oneE_);
+          *this->aointegrals_->coreH_);
     if(this->nTCS_ == 1 && this->isClosedShell)
       this->energyTwoE = 
         0.5 * this->template computeProperty<double,DENSITY_TYPE::TOTAL>(

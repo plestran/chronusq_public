@@ -172,6 +172,7 @@ class BasisSet{
     int atomicNumber;
     int index;
     std::vector<libint2::Shell> shells;
+    std::vector<std::vector<double>> unNormalizedCons;
   }; ///< struct to hold information about the basis reference
   int  nBasis_      ; ///< Number of (Gaußian) contracted basis functions
   int  nPrimitive_  ; ///< Number of uncontracted Gaußian primitives

@@ -200,7 +200,7 @@ public:
   std::unique_ptr<RealTensor4d>  aoERI_; ///< Rank-4 ERI tensor over primary basis functions \f$ (\mu \nu \vert \lambda\delta )\f$
 
   // One-Body Integrals
-  std::unique_ptr<RealMap>    oneE_; ///< Core Hamiltonian \f$ h = T + V \f$
+  std::unique_ptr<RealMap>    coreH_; ///< Core Hamiltonian \f$ h = T + V \f$
   std::unique_ptr<RealMap>    oneEmx_;
   std::unique_ptr<RealMap>    oneEmy_;
   std::unique_ptr<RealMap>    oneEmz_;
@@ -279,7 +279,7 @@ public:
 
     this->twoEC_        = nullptr;
     this->twoEX_        = nullptr;
-    this->oneE_         = nullptr;
+    this->coreH_        = nullptr;
     this->oneEmx_       = nullptr;
     this->oneEmy_       = nullptr;
     this->oneEmz_       = nullptr;
@@ -317,7 +317,7 @@ public:
 
   ~AOIntegrals(){
     // Free up memory from memory manager
-    this->memManager_->free(this->oneE_->data(),
+    this->memManager_->free(this->coreH_->data(),
       this->nBasis_*this->nBasis_);
     this->memManager_->free(this->oneEmx_->data(),
       this->nBasis_*this->nBasis_);

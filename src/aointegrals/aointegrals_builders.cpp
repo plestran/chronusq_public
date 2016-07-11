@@ -385,7 +385,7 @@ void AOIntegrals::computeAOOneE(){
 //  if (this->isPrimary) this->DKH0();
 
 // Build Core Hamiltonian
-  (*this->oneE_) = (*this->kinetic_) + (*this->potential_);
+  (*this->coreH_) = (*this->kinetic_) + (*this->potential_);
 
 //  prettyPrint(this->fileio_->out,*this->kinetic_,"T");
 //  prettyPrint(this->fileio_->out,*this->potential_,"V");

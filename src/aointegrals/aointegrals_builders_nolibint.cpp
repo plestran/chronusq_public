@@ -214,14 +214,14 @@ void AOIntegrals::computeAOOneE(){
       (*this->kinetic_)(i,j) = T;
     };
   };
-  (*this->oneE_) = (*this->kinetic_)-(*this->potential);
+  (*this->coreH_) = (*this->kinetic_)-(*this->potential);
   finish = std::chrono::high_resolution_clock::now();
   this->OneED = finish - start;
   if(this->printLevel_>=2) {
     prettyPrint(this->fileio_->out,(*this->overlap_),"Overlap");
     prettyPrint(this->fileio_->out,(*this->kinetic_),"Kinetic");
     prettyPrint(this->fileio_->out,(*this->potential_),"Potential");
-    prettyPrint(this->fileio_->out,(*this->oneE_),"Core Hamiltonian");
+    prettyPrint(this->fileio_->out,(*this->coreH_),"Core Hamiltonian");
   };
   if(this->printLevel_>=1) {
 //    finish = clock();

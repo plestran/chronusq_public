@@ -159,7 +159,7 @@ void SingleSlater<T>::formFock(){
   
     if(this->nTCS_ == 1 && this->isClosedShell) {
       this->fockA_->setZero();
-      this->fockA_->real() += (*this->aointegrals_->oneE_);
+      this->fockA_->real() += (*this->aointegrals_->coreH_);
       this->aointegrals_->addElecDipole(*this->fockA_,this->elecField_);
       (*this->fockA_) += (*this->PTA_);
       if(this->isDFT){ 
@@ -169,7 +169,7 @@ void SingleSlater<T>::formFock(){
     } else {
 
     //this->fockA_->setZero();
-    //this->fockA_->real() += (*this->aointegrals_->oneE_);
+    //this->fockA_->real() += (*this->aointegrals_->coreH_);
     //this->aointegrals_->addElecDipole(*this->fockA_,this->elecField_);
     //(*this->fockA_) += (*this->PTA_);
     //if(this->isDFT){ 
@@ -177,7 +177,7 @@ void SingleSlater<T>::formFock(){
     //  (*this->fockA_) += (*this->vCorA_);
     //}
     //this->fockB_->setZero();
-    //this->fockB_->real() += (*this->aointegrals_->oneE_);
+    //this->fockB_->real() += (*this->aointegrals_->coreH_);
     //this->aointegrals_->addElecDipole(*this->fockB_,this->elecField_);
     //(*this->fockB_) += (*this->PTB_);
     //if(this->isDFT){ 
@@ -187,7 +187,7 @@ void SingleSlater<T>::formFock(){
 
       this->fockScalar_->setZero();
       this->fockMz_->setZero();
-      this->fockScalar_->real() += (*this->aointegrals_->oneE_);
+      this->fockScalar_->real() += (*this->aointegrals_->coreH_);
       this->aointegrals_->addElecDipole(*this->fockScalar_,this->elecField_);
       (*this->fockScalar_) *= 2.0;
       (*this->fockScalar_)      += (*this->PTScalar_);        
