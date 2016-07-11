@@ -2307,30 +2307,30 @@ void SingleSlater<double>::formVXC_new(){
 
       if(S1XNorm > 1e-10) {
         SCRATCH2X.noalias() = SCRATCH1 * SCRATCH1X.transpose();
-        drhoT[0] = 2.0*this->template computeProperty<double,TOTAL>(SCRATCH2X); 
-        drhoS[0] = 2.0*this->template computeProperty<double,MZ>(SCRATCH2X); 
+      //drhoT[0] = 2.0*this->template computeProperty<double,TOTAL>(SCRATCH2X); 
+      //drhoS[0] = 2.0*this->template computeProperty<double,MZ>(SCRATCH2X); 
         SCRATCH2X.noalias() += SCRATCH1X * SCRATCH1.transpose();
       } else SCRATCH2X.setZero();
 
       if(S1YNorm > 1e-10) {
         SCRATCH2Y.noalias() = SCRATCH1 * SCRATCH1Y.transpose();
-        drhoT[1] = 2.0*this->template computeProperty<double,TOTAL>(SCRATCH2Y); 
-        drhoS[1] = 2.0*this->template computeProperty<double,MZ>(SCRATCH2Y); 
+      //drhoT[1] = 2.0*this->template computeProperty<double,TOTAL>(SCRATCH2Y); 
+      //drhoS[1] = 2.0*this->template computeProperty<double,MZ>(SCRATCH2Y); 
         SCRATCH2Y.noalias() += SCRATCH1Y * SCRATCH1.transpose();
       } else SCRATCH2Y.setZero();
 
       if(S1ZNorm > 1e-10) {
         SCRATCH2Z.noalias() = SCRATCH1 * SCRATCH1Z.transpose();
-        drhoT[2] = 2.0*this->template computeProperty<double,TOTAL>(SCRATCH2Z); 
-        drhoS[2] = 2.0*this->template computeProperty<double,MZ>(SCRATCH2Z); 
+      //drhoT[2] = 2.0*this->template computeProperty<double,TOTAL>(SCRATCH2Z); 
+      //drhoS[2] = 2.0*this->template computeProperty<double,MZ>(SCRATCH2Z); 
         SCRATCH2Z.noalias() += SCRATCH1Z * SCRATCH1.transpose();
       } else SCRATCH2Z.setZero();
 
-      GradRhoA.noalias() = 0.5 * (GradRhoT + GradRhoS);
-      GradRhoB.noalias() = 0.5 * (GradRhoT - GradRhoS);
-      gammaAA = GradRhoA.dot(GradRhoA);           
-      gammaBB = GradRhoB.dot(GradRhoB);           
-      gammaAB = GradRhoA.dot(GradRhoB);           
+    //GradRhoA.noalias() = 0.5 * (GradRhoT + GradRhoS);
+    //GradRhoB.noalias() = 0.5 * (GradRhoT - GradRhoS);
+    //gammaAA = GradRhoA.dot(GradRhoA);           
+    //gammaBB = GradRhoB.dot(GradRhoB);           
+    //gammaAB = GradRhoA.dot(GradRhoB);           
     }
     if(doTimings){
       Newend = std::chrono::high_resolution_clock::now();
@@ -2342,6 +2342,12 @@ void SingleSlater<double>::formVXC_new(){
     double rhoS(0.0);
     double Tt(0.0), Ts(0.0);
     double Pt(0.0), Ps(0.0);
+  //std::array<double,3> drhoTtmp;
+  //std::array<double,3> drhoStmp;
+  //RealVecMap GradRhoTTmp(&drhoTtmp[0],3);
+  //RealVecMap GradRhoSTmp(&drhoStmp[0],3);
+    GradRhoT.setZero();
+    GradRhoS.setZero();
 
     // Loop over close shells "I"
     for(auto iShell : closeShells) {
@@ -2371,13 +2377,29 @@ void SingleSlater<double>::formVXC_new(){
           } // jBf
           rhoT += Tt * SCRATCH1(iBf);
           rhoS += Ts * SCRATCH1(iBf);
+          if(NDer > 0) {
+            drhoT[0] += Tt * SCRATCH1X(iBf);
+            drhoT[1] += Tt * SCRATCH1Y(iBf);
+            drhoT[2] += Tt * SCRATCH1Z(iBf);
+            drhoS[0] += Ts * SCRATCH1X(iBf);
+            drhoS[1] += Ts * SCRATCH1Y(iBf);
+            drhoS[2] += Ts * SCRATCH1Z(iBf);
+          }
         } // iBf
       } // jShell      
     } // iShell
+
     rhoT *= 0.5;
     rhoS *= 0.5;
     rhoA = 0.5 * (rhoT + rhoS);
     rhoB = 0.5 * (rhoT - rhoS);
+    if( NDer > 0 ){
+      GradRhoA.noalias() = 0.5 * (GradRhoT + GradRhoS);
+      GradRhoB.noalias() = 0.5 * (GradRhoT - GradRhoS);
+      gammaAA = GradRhoA.dot(GradRhoA);           
+      gammaBB = GradRhoB.dot(GradRhoB);           
+      gammaAB = GradRhoA.dot(GradRhoB);           
+    }
     
     if  (rhoT < 1.0e-10) {NSkip5++; return;}
     DFTFunctional::DFTInfo kernelXC;
