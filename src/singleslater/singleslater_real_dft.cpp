@@ -2184,15 +2184,18 @@ void SingleSlater<double>::formVXC_new(){
   auto Newend = std::chrono::high_resolution_clock::now();
 
   std::vector<std::size_t> closeShells;
+  VectorXd OmegaA(this->nBasis_), OmegaB(this->nBasis_);
 
   auto valVxc = [&](std::size_t iAtm, ChronusQ::IntegrationPoint &pt, 
   KernelIntegrand<double> &result) -> void {
 
     if(doTimings) Newstart = std::chrono::high_resolution_clock::now();
+/*  NO MATRIX
     SCRATCH1.setZero();
     SCRATCH1X.setZero();
     SCRATCH1Y.setZero();
     SCRATCH1Z.setZero();
+*/
 
     cartGP &GP = pt.pt;
  // this->basisset_->MapGridBasis(shMap,GP); 
@@ -2293,6 +2296,7 @@ void SingleSlater<double>::formVXC_new(){
     double S1ZNorm = SCRATCH1Z.norm();
     if(S1Norm < 1e-9) {NSkip4++; return;}
 //  cout << "NORM = " << SCRATCH1.norm() << endl;
+/*
     if(doTimings) Newstart = std::chrono::high_resolution_clock::now();
     SCRATCH2.noalias() = SCRATCH1 * SCRATCH1.transpose();
 //  double rhoT = this->template computeProperty<double,TOTAL>(SCRATCH2);
@@ -2336,6 +2340,7 @@ void SingleSlater<double>::formVXC_new(){
       Newend = std::chrono::high_resolution_clock::now();
       T3 += Newend - Newstart;
     }
+*/
 
 
     double rhoT(0.0);
@@ -2417,7 +2422,9 @@ void SingleSlater<double>::formVXC_new(){
         TF[i] += Newend - Newstart;
       }
     } // loop over kernels
+
     if(doTimings) Newstart = std::chrono::high_resolution_clock::now();
+/*
     if(NDer > 0) {
       result.VXCA.real() += pt.weight * SCRATCH2X  
         * (  2.0 * GradRhoA[0]*kernelXC.ddgammaAA 
@@ -2447,10 +2454,54 @@ void SingleSlater<double>::formVXC_new(){
     if(!this->isClosedShell && this->nTCS_ != 2) 
       result.VXCB.real()   += pt.weight * SCRATCH2 * kernelXC.ddrhoB; 
 //  if(rhoT < 1e-5) cout << "****** " << rhoT << endl;
+*/
     if(doTimings) {
       Newend = std::chrono::high_resolution_clock::now();
       T5 += Newend - Newstart;
     }
+
+    for(auto iXYZ = 0; iXYZ < 3; iXYZ++){
+      double GA(GradRhoA(iXYZ)), GB(GradRhoB(iXYZ));
+      GradRhoA(iXYZ) = pt.weight * 
+        ( 2.0 * GA * kernelXC.ddgammaAA + GB * kernelXC.ddgammaAB);
+//    GradRhoB(iXYZ) = pt.weight * 
+//      ( 2.0 * GB * kernelXC.ddgammaBB + GA * kernelXC.ddgammaAB);
+    }
+
+    OmegaA.setZero(); 
+    for(auto iShell : closeShells) {
+      int iSz = this->basisset_->shells(iShell).size();
+      int iSt = this->basisset_->mapSh2Bf(iShell);
+
+      for(auto iBf = iSt; iBf < (iSt + iSz); iBf++){
+        OmegaA(iBf) += GradRhoA(0) * SCRATCH1X(iBf) +
+                       GradRhoA(1) * SCRATCH1Y(iBf) +
+                       GradRhoA(2) * SCRATCH1Z(iBf);
+//      OmegaB(iBf) += GradRhoB(0) * SCRATCH1X(iBf) +
+//                     GradRhoB(1) * SCRATCH1Y(iBf) +
+//                     GradRhoB(2) * SCRATCH1Z(iBf);
+      } // iBf
+    } // iShell
+
+    result.Energy += pt.weight * kernelXC.eps;
+
+    for(auto iShell : closeShells) {
+      int iSz = this->basisset_->shells(iShell).size();
+      int iSt = this->basisset_->mapSh2Bf(iShell);
+
+      for(auto iBf = iSt; iBf < (iSt + iSz); iBf++){
+        double Ta = pt.weight*kernelXC.ddrhoA*SCRATCH1(iBf) + OmegaA(iBf);
+//      double Tb = pt.weight*kernelXC.ddrhoB*SCRATCH1(iBf) + OmegaB(iBf);
+        for(auto jShell : closeShells) {
+          int jSz = this->basisset_->shells(jShell).size();
+          int jSt = this->basisset_->mapSh2Bf(jShell);
+          for(auto jBf = jSt; jBf < (jSt + jSz); jBf++){
+            result.VXCA(iBf,jBf) += Ta*SCRATCH1(jBf) + SCRATCH1(iBf)*OmegaA(jBf); 
+          } // jBf
+        } // jShell
+      } // iBf
+    } // iShell
+
   };
 
 //  ChronusQ::AtomicGrid AGrid(100,302,ChronusQ::GRID_TYPE::EULERMAC,
@@ -2495,6 +2546,7 @@ void SingleSlater<double>::formVXC_new(){
   if(!this->isClosedShell && this->nTCS_ != 2){
     (*this->vXB_) = 4*math.pi*res.VXCB;
   }
+
   if(doTimings) {
     cout << "T1 = " << T1.count() << endl;
     cout << "T2 = " << T2.count() << endl;
