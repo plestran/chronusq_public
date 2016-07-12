@@ -67,6 +67,7 @@ if(NOT CMAKE_CXX_COMPILER_ID MATCHES "PGI")
   endif()
 endif()
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ftree-vectorize -msse2 -ftree-vectorizer-verbose=5 -ffast-math")
 
 include(ExternalProject)
 

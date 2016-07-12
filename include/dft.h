@@ -5,9 +5,12 @@ class DFTFunctional{
 public:
   double scalingFactor;    //< Hybrid Scaling
   double epsScreen;        //< screening 
-  DFTFunctional(double X = 1.0){
+
+  std::string name;
+
+  DFTFunctional(double X = 1.0, double eps = 1e-10){
     this->scalingFactor = X;
-    this->epsScreen = 1.0e-10;
+    this->epsScreen = eps;
   };
 
   struct DFTInfo {
@@ -37,9 +40,9 @@ public:
 
   };
 
-  virtual DFTInfo eval(double rA,double rB) = 0;
-  virtual DFTInfo eval(double rA,double rB,double gammaAA, double gammaAB) = 0;
-  virtual DFTInfo eval(double rA,double rB,double gammaAA, double gammaAB, double gammaBB) = 0;
+  virtual DFTInfo eval(const double &rA,const double &rB) = 0;
+  virtual DFTInfo eval(const double &rA,const double &rB,const double &gammaAA, const double &gammaAB) = 0;
+  virtual DFTInfo eval(const double &rA,const double &rB,const double &gammaAA, const double &gammaAB, const double &gammaBB) = 0;
 };
 
 class SlaterExchange : public DFTFunctional {
@@ -51,10 +54,10 @@ class SlaterExchange : public DFTFunctional {
   double spindensity   ;
   double eps_spin   ;
 public:
-  SlaterExchange();
-  DFTInfo eval(double rhoA, double rhoB);
-  DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaAB);
-  DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaAB, double gammaBB);
+  SlaterExchange(double X = 1.0, double eps = 1e-10);
+  DFTInfo eval(const double &rhoA, const double &rhoB);
+  DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB);
+  DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB, const double &gammaBB);
 };
 
 class VWNIII : public DFTFunctional {
@@ -126,10 +129,10 @@ public:
   double M1          ;
   double db_dr       ; 
   double delta_eps_etha ;
-  VWNIII();
-  DFTInfo eval(double rhoA, double rhoB);
-  DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaAB);
-  DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaAB, double gammaBB);
+  VWNIII(double X = 1.0, double eps = 1e-10);
+  DFTInfo eval(const double &rhoA, const double &rhoB);
+  DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB);
+  DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB, const double &gammaBB);
   double Eveps0VWN(double &A_x, double &b_x, double &Q, double &X, double &x0_x, double &X_x0);
   double Eveps1VWN(double &A_x, double &b1, double &b2, double &b3);
   double Eveps2VWN(double A_x, double &b_x, double &c_x, double &X, double &x0_x);
@@ -139,7 +142,7 @@ public:
 
 class VWNV : public VWNIII {
 public:
-  VWNV();
+  VWNV(double X = 1.0, double eps = 1e-10);
   double alpha;
   double Xa;
   double Qa;
@@ -148,9 +151,9 @@ public:
   double df2_spindensity;
   double delta_eps_etha;
   double db_dr;
-  DFTInfo eval(double rhoA, double rhoB);
-  DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaAB);
-  DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaAB, double gammaBB);
+  DFTInfo eval(const double &rhoA, const double &rhoB);
+  DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB);
+  DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB, const double &gammaBB);
   double Eveps0VWN(double &A_x, double &b_x, double &Q, double &X, double &x0_x, double &X_x0);
   double Eveps1VWN(double &A_x, double &b1, double &b2, double &b3);
   double Eveps2VWN(double A_x, double &b_x, double &c_x, double &X, double &x0_x);
@@ -173,12 +176,12 @@ class BEightEight : public DFTFunctional {
   double rhoB1ov3 ;
   double rhoB4ov3 ;
 public:
-  BEightEight();
+  BEightEight(double X = 1.0, double eps = 1e-10);
   double g0B88 (double x);
   double g1B88 (double x);
-  DFTInfo eval(double rhoA, double rhoB);
-  DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaBB);
-  DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaAB, double gammaBB);
+  DFTInfo eval(const double &rhoA, const double &rhoB);
+  DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaBB);
+  DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB, const double &gammaBB);
 };
 
 class lyp : public DFTFunctional {
@@ -205,10 +208,10 @@ class lyp : public DFTFunctional {
   double d2LYPdrhgAB   ;
   double d2LYPdrhgBB   ;
 public:
-  lyp();
+  lyp(double X = 1.0, double eps = 1e-10);
   void popLYPdens(double rhoA, double rhoB);
-  DFTInfo eval(double rhoA, double rhoB);
-  DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaBB);
-  DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaAB, double gammaBB);
+  DFTInfo eval(const double &rhoA, const double &rhoB);
+  DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaBB);
+  DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB, const double &gammaBB);
 };
 #endif

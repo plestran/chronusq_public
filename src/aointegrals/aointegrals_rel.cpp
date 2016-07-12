@@ -104,13 +104,13 @@ void AOIntegrals::formP2Transformation(){
   SUncontracted = SUncontracted.selfadjointView<Lower>();
   TUncontracted = TUncontracted.selfadjointView<Lower>();
 
+/*
   prettyPrint(this->fileio_->out,TUncontracted,"T uncontracted");
 
   RealMatrix TnonRel = (*this->basisSet_->mapPrim2Bf()) * TUncontracted
 	* (*this->basisSet_->mapPrim2Bf()).transpose();  
   prettyPrint(this->fileio_->out,TnonRel,"T nonRel");
-
-  prettyPrint(this->fileio_->out,TnonRel - TCpy, "Diff");
+*/
 
   RealMatrix SUn(nUncontracted,nUncontracted);
   SUn = SUncontracted.real(); // Save S for later
@@ -465,7 +465,9 @@ void AOIntegrals::formP2Transformation(){
   P2_PotC.block(0,0,nUncontracted,nUncontracted).real() = P2_Potential;
   P2_PotC.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).real() = P2_Potential;
 
-//  prettyPrint(this->fileio_->out,P2_PotC,"V prime");
+if(this->printLevel_ >= 2){
+  prettyPrint(this->fileio_->out,P2_PotC,"V prime (p space)");
+}
 
 // Calculate the 2-component core Hamiltonian in the uncontracted basis
 //  αα | αβ
@@ -509,12 +511,14 @@ void AOIntegrals::formP2Transformation(){
 	+ HCore.block(nUncontracted,0,nUncontracted,nUncontracted).imag());
   Hy = 0.5 * (HCore.block(0,nUncontracted,nUncontracted,nUncontracted).real()
 	- HCore.block(nUncontracted,0,nUncontracted,nUncontracted).real());
-/*
+
+if(this->printLevel_ >= 2){
   prettyPrint(this->fileio_->out,Hs,"Hs (p space)");
   prettyPrint(this->fileio_->out,Hz,"Hz (p space)");
   prettyPrint(this->fileio_->out,Hx,"Hx (p space)");
   prettyPrint(this->fileio_->out,Hy,"Hz (p space)");
-*/
+}
+
   RealMatrix rTEMP(nUncontracted,nUncontracted);
 
   rTEMP = Hs * UK.adjoint() * SUn;
@@ -526,12 +530,12 @@ void AOIntegrals::formP2Transformation(){
   rTEMP = Hy * UK.adjoint() * SUn;
   Hy = SUn * UK * rTEMP; 
 
-
+if(this->printLevel_ >= 2){
   prettyPrint(this->fileio_->out,Hs,"Hs (r space)");
   prettyPrint(this->fileio_->out,Hz,"Hz (r space)");
   prettyPrint(this->fileio_->out,Hx,"Hx (r space)");
   prettyPrint(this->fileio_->out,Hy,"Hy (r space)");
-
+}
 
   ComplexMatrix Veff(2*nUncontracted,2*nUncontracted);
   Veff = HCore - KinEn;
@@ -581,19 +585,23 @@ void AOIntegrals::formP2Transformation(){
 
   TCon = (*this->basisSet_->mapPrim2Bf()) * TCon * IPrim2Bf;
   VCon = (*this->basisSet_->mapPrim2Bf()) * VCon * IPrim2Bf;
-//  prettyPrint(this->fileio_->out,TCon,"TCon");
-//  prettyPrint(this->fileio_->out,VCon,"VCon");
- 
+
+if(this->printLevel_ >= 2){
+  prettyPrint(this->fileio_->out,TCon,"TCon");
+  prettyPrint(this->fileio_->out,VCon,"VCon");
+ }
  
   RealMatrix CoreS = (*this->basisSet_->mapPrim2Bf()) * Hs * IPrim2Bf;
   RealMatrix CoreZ = (*this->basisSet_->mapPrim2Bf()) * Hz * IPrim2Bf;
   RealMatrix CoreX = (*this->basisSet_->mapPrim2Bf()) * Hx * IPrim2Bf;
   RealMatrix CoreY = (*this->basisSet_->mapPrim2Bf()) * Hy * IPrim2Bf;
 
+if(this->printLevel_ >= 2) {
   prettyPrint(this->fileio_->out,CoreS,"Core (scalar)");
   prettyPrint(this->fileio_->out,CoreZ,"Core (mz)");
   prettyPrint(this->fileio_->out,CoreX,"Core (mx)");
   prettyPrint(this->fileio_->out,CoreY,"Core (my)");
+}
 
   *this->coreH_ = CoreS;
   *this->oneEmx_ = CoreX;

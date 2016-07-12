@@ -1,6 +1,7 @@
 #include<dft.h>
 
-VWNIII::VWNIII(){
+VWNIII::VWNIII(double X, double eps):
+DFTFunctional(X,eps){
 // General Constants
   this->small = 1.0e-10; 
   this->over2 = 0.5;
@@ -23,6 +24,8 @@ VWNIII::VWNIII(){
   this->c_a   =  13.0045;    // intext page 1209
   this->x0_a  =  -0.00475840; // intext page 1209
   this->popVWNconst();
+
+  this->name = "VWN III";
 };
 
 void VWNIII::popVWNconst(){
@@ -105,7 +108,7 @@ double VWNIII::Eveps2VWN(double A_x, double &b_x, double &c_x, double &X, double
    return val;
 }
 
-DFTFunctional::DFTInfo VWNIII::eval(double rhoA, double rhoB){
+DFTFunctional::DFTInfo VWNIII::eval(const double &rhoA, const double &rhoB){
   DFTFunctional::DFTInfo info;
    this->popVWNdens(rhoA, rhoB);
    if(std::abs(this->spindensity) > this->small) {
@@ -143,9 +146,9 @@ DFTFunctional::DFTInfo VWNIII::eval(double rhoA, double rhoB){
   return info;
 }
 
-DFTFunctional::DFTInfo VWNIII::eval(double rhoA, double rhoB, double gammaAA, double gammaAB){
+DFTFunctional::DFTInfo VWNIII::eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB){
 };
 
-DFTFunctional::DFTInfo VWNIII::eval(double rhoA, double rhoB, double gammaAA, double gammaAB, double gammaBB){
+DFTFunctional::DFTInfo VWNIII::eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB, const double &gammaBB){
 };
 

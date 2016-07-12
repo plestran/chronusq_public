@@ -1,6 +1,7 @@
 #include<dft.h>
 
-lyp::lyp(){
+lyp::lyp(double X, double eps):
+DFTFunctional(X,eps){
 // Memo Factor to be added at the end for numerical stability
   this-> Cfact = 36.4623989787648;  //-(2.0^(11.0/3.0))*(3.0/10.0)*((3.0*pi*pi)^(2.0/3.0))
   this-> small = 1.0e-10; 
@@ -9,6 +10,8 @@ lyp::lyp(){
   this-> b = 0.132;
   this-> c = 0.2533;
   this-> d = 0.349;
+
+  this->name = "LYP";
 };
 
 void lyp::popLYPdens(double rhoA, double rhoB){
@@ -82,13 +85,13 @@ void lyp::popLYPdens(double rhoA, double rhoB){
 };  //End Form denisuty related  LYP Corr
 
 
-DFTFunctional::DFTInfo lyp::eval(double rhoA, double rhoB){
+DFTFunctional::DFTInfo lyp::eval(const double &rhoA, const double &rhoB){
 };
 
-DFTFunctional::DFTInfo lyp::eval(double rhoA, double rhoB, double gammaAA, double gammaBB){
+DFTFunctional::DFTInfo lyp::eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaBB){
 };
 
-DFTFunctional::DFTInfo lyp::eval(double rhoA, double rhoB, double gammaAA, double gammaAB, double gammaBB){
+DFTFunctional::DFTInfo lyp::eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB, const double &gammaBB){
   DFTFunctional::DFTInfo info;
 //  if( rhoA <  this-> small) {return info;}
 //  if( rhoB <  this-> small) {return info;}

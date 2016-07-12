@@ -54,8 +54,6 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setSCFMaxIter"   , &SingleSlater<double>::setSCFMaxIter          )
     .def("setField"        , &SingleSlater<double>::Wrapper_setField       )
     .def("setGuess"        , &SingleSlater<double>::setGuess               )
-    .def("setCorrKernel"   , &SingleSlater<double>::setCorrKernel          )
-    .def("setExchKernel"   , &SingleSlater<double>::setExchKernel          )
     .def("setDFTKernel"    , &SingleSlater<double>::setDFTKernel           )
     .def("setDFTWeightScheme", &SingleSlater<double>::setDFTWeightScheme)
     .def("setDFTGrid"      , &SingleSlater<double>::setDFTGrid             ) 
@@ -64,7 +62,11 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setDFTNAng"  , &SingleSlater<double>::setDFTNAng         )
     .def("setDFTScreenTol" , &SingleSlater<double>::setDFTScreenTol        )
 
-    .def("checkDFTType", &SingleSlater<double>::checkDFTType)
+    .def("addSlater", &SingleSlater<double>::addSlater )
+    .def("addB88", &SingleSlater<double>::addB88 )
+    .def("addLYP", &SingleSlater<double>::addLYP )
+    .def("addVWN5", &SingleSlater<double>::addVWN5 )
+    .def("addVWN3", &SingleSlater<double>::addVWN3 )
   
     .def("turnOffDFTScreening", &SingleSlater<double>::turnOffDFTScreening ) 
 
@@ -110,8 +112,6 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setSCFMaxIter"   , &SingleSlater<dcomplex>::setSCFMaxIter          )
     .def("setField"        , &SingleSlater<dcomplex>::Wrapper_setField       )
     .def("setGuess"        , &SingleSlater<dcomplex>::setGuess               )
-    .def("setCorrKernel"   , &SingleSlater<dcomplex>::setCorrKernel          )
-    .def("setExchKernel"   , &SingleSlater<dcomplex>::setExchKernel          )
     .def("setDFTKernel"    , &SingleSlater<dcomplex>::setDFTKernel           )
     .def("setDFTWeightScheme", &SingleSlater<dcomplex>::setDFTWeightScheme)
     .def("setDFTGrid"      , &SingleSlater<dcomplex>::setDFTGrid             ) 
@@ -120,7 +120,12 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setDFTNAng"  , &SingleSlater<dcomplex>::setDFTNAng         )
     .def("setDFTScreenTol" , &SingleSlater<dcomplex>::setDFTScreenTol        )
 
-    .def("checkDFTType", &SingleSlater<dcomplex>::checkDFTType)
+    .def("addSlater", &SingleSlater<dcomplex>::addSlater )
+    .def("addB88", &SingleSlater<dcomplex>::addB88 )
+    .def("addLYP", &SingleSlater<dcomplex>::addLYP )
+    .def("addVWN5", &SingleSlater<dcomplex>::addVWN5 )
+    .def("addVWN3", &SingleSlater<dcomplex>::addVWN3 )
+
   
     .def("turnOffDFTScreening", &SingleSlater<dcomplex>::turnOffDFTScreening ) 
 
@@ -146,10 +151,10 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("UHF"           , SingleSlater<double>::UHF                    )
     .value("CUHF"          , SingleSlater<double>::CUHF                   )
     .value("TCS"           , SingleSlater<double>::TCS                    )
-    .value("RKS"           , SingleSlater<double>::RKS                    )
-    .value("UKS"           , SingleSlater<double>::UKS                    )
-    .value("CUKS"          , SingleSlater<double>::CUKS                   )
-    .value("GKS"           , SingleSlater<double>::GKS                    )
+//  .value("RKS"           , SingleSlater<double>::RKS                    )
+//  .value("UKS"           , SingleSlater<double>::UKS                    )
+//  .value("CUKS"          , SingleSlater<double>::CUKS                   )
+//  .value("GKS"           , SingleSlater<double>::GKS                    )
   ;
 
   enum_<SingleSlater<double>::GUESS>("Guess")
@@ -158,6 +163,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("READ" , SingleSlater<double>::READ )
   ;
 
+/*
   enum_<SingleSlater<double>::EXCH>("EXCH")
     .value("NOEXCH"  , SingleSlater<double>::NOEXCH) 
     .value("EXACT"   , SingleSlater<double>::EXACT )
@@ -170,13 +176,14 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("VWN5"  , SingleSlater<double>::VWN5  )
     .value("LYP"   , SingleSlater<double>::LYP   )
   ;
+*/
   enum_<SingleSlater<double>::DFT>("DFT")
     .value("NODFT"      , SingleSlater<double>::NODFT      )
     .value("USERDEFINED", SingleSlater<double>::USERDEFINED)
     .value("LSDA"       , SingleSlater<double>::LSDA       )
   ;
 
-  enum_<SingleSlater<double>::DFT_GRID>("DFT_GRID")
+  enum_<SingleSlater<double>::DFT_RAD_GRID>("DFT_RAD_GRID")
     .value("EULERMACL", SingleSlater<double>::EULERMACL)
     .value("GAUSSCHEB", SingleSlater<double>::GAUSSCHEB)
   ;

@@ -119,7 +119,7 @@ std::vector<libint2::Shell> BasisSet::uncontractBasis(){
         { {iShell->contr[0].l,iShell->contr[0].pure,{1.0}  }},
         { {iShell->O[0],iShell->O[1],iShell->O[2]}}
       } );
-    cout << iShell->alpha[i] << " " << iShell->contr[0].l << endl;
+//   cout << iShell->alpha[i] << " " << iShell->contr[0].l << endl;
     }
   }
 
