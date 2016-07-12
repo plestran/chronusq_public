@@ -158,395 +158,473 @@ def handleReference(workers,settings):
   else:
     workers["CQSingleSlater"] = workers["CQSingleSlaterDouble"]
 
-  # Set SS Reference
-  if 'HF' in ref:
-    # Smartly figure out of reference is R/U
-    if mult == 1:
-      workers["CQSingleSlater"].setRef(chronusQ.Reference.RHF)
-      workers["CQSingleSlater"].isClosedShell = True
-    else:
-      workers["CQSingleSlater"].setRef(chronusQ.Reference.UHF)
-  elif 'RHF' in ref:
-    # Force RHF
-    if mult != 1:
-      msg = 'Non-singlet multiplicity is not suitable for RHF'
-      CErrMsg(workers['CQFileIO'],str(msg))
- 
+
+  HFStrs = ['HF']
+  DFTStrs = ['KS']
+
+  KnownFunctionals = ['LSDA','SVWN3','SVWN5','BLYP']
+
+  for StrList in [HFStrs, DFTStrs, KnownFunctionals]:
+    tmp = []
+    for SpinLabel in ['R','U','CU','G']:
+      for Str in StrList:
+        tmp.append(SpinLabel+Str)
+    StrList.extend(tmp)
+      
+  DFTStrs.extend(KnownFunctionals)
+
+  isHF  = False
+  isDFT = False
+  refStr = ''
+  if any(Str in ref for Str in HFStrs):
+    isHF = True
+  elif any(Str in ref for Str in DFTStrs):
+    isDFT = True
+
+
+  for Str in HFStrs:
+    if Str in ref:
+      refStr = Str
+  for Str in DFTStrs:
+    if Str in ref:
+      refStr = Str
+
+  print refStr
+  print isHF
+  print isDFT
+
+  workers["CQSingleSlater"].isDFT = isDFT
+  workers["CQSingleSlater"].isHF  = isHF
+
+  isRest = False
+  # R -> Restricted
+  if refStr[0] == 'R':
+    print "Is Restricted"
     workers["CQSingleSlater"].setRef(chronusQ.Reference.RHF)
     workers["CQSingleSlater"].isClosedShell = True
-  elif 'UHF' in ref:
-    # Forch UHF
+    isRest = True
+  # U -> Unrestricted
+  elif refStr[0] == 'U':
+    print "Is Unrestricted"
     workers["CQSingleSlater"].setRef(chronusQ.Reference.UHF)
     workers["CQSingleSlater"].isClosedShell = False
-  elif 'CUHF' in ref:
-    # Use Constrained UHF (not complex UHF) 
+  # CU -> Constrained Unrestricted (Scuseria)
+  elif refStr[0:1] == 'CU':
+    print "Is Constrained Unrestricted"
     workers["CQSingleSlater"].setRef(chronusQ.Reference.CUHF)
-  elif 'GHF' in ref:
-    # Do GHF
+    workers["CQSingleSlater"].isClosedShell = False
+  # G -> Generalized (2C)
+  elif refStr[0] == 'G':
+    print "Is Generalized"
     workers["CQSingleSlater"].setRef(chronusQ.Reference.TCS)
-  elif 'KS' in ref:
-    # Smartly figure out of reference is R/U
-    if mult == 1:
-      workers["CQSingleSlater"].setRef(chronusQ.Reference.RHF)
-      workers["CQSingleSlater"].isClosedShell = True
-    else:
-      workers["CQSingleSlater"].setRef(chronusQ.Reference.UHF)
-
-    workers["CQSingleSlater"].isDFT = True
-    workers["CQSingleSlater"].isHF  = False
-    workers["CQSingleSlater"].setDFTKernel(kernelMap['USERDEFINED'])
-  
-    corrKernel = 0
-    exchKernel = 0
-    try:
-      corrKernel = settings['CORR']
-      exchKernel = settings['EXCHANGE']
-    except KeyError:
-      msg = "Must specify both Correlation and Exchange Kernel\n"
-      msg = msg + " for user defined QM.KS reference"
-      CErrMsg(workers['CQFileIO'],str(msg))
-
-
-    if 'DFT_GRID' in settings:
-      workers["CQSingleSlater"].setDFTGrid(gridMap[settings['DFT_GRID']])
-    if 'DFT_WEIGHTS' in settings:
-      workers["CQSingleSlater"].setDFTWeightScheme(
-        dftWeightScheme[settings['DFT_WEIGHTS']])
-
-    if 'DFT_SCREEN' in settings:
-      if settings['DFT_SCREEN']:
-        pass
-      else:
-        workers["CQSingleSlater"].turnOffDFTScreening()
-
-    if 'DFT_SCRTOL' in settings:
-      workers["CQSingleSlater"].setDFTScreenTol(settings['DFT_SCRTOL'])
-
-    if 'DFT_NRAD' in settings:
-      workers["CQSingleSlater"].setDFTNRad(settings['DFT_NRAD'])
-
-    if 'DFT_NANG' in settings:
-      workers["CQSingleSlater"].setDFTNAng(settings['DFT_NANG'])
-
-    try:
-      workers["CQSingleSlater"].setCorrKernel(corrMap[corrKernel])
-    except KeyError:
-      msg = "Specified Correlation Kernel is not Defined"
-      CErrMsg(workers['CQFileIO'],str(msg))
-
-    try:
-      workers["CQSingleSlater"].setExchKernel(exchMap[exchKernel])
-    except KeyError:
-      msg = "Specified Exchange Kernel is not Defined"
-      CErrMsg(workers['CQFileIO'],str(msg))
-
-    workers["CQSingleSlater"].checkDFTType()
-  elif 'RKS' in ref:
-    # Force RKS
-    if mult != 1:
-      msg = 'Non-singlet multiplicity is not suitable for RKS'
-      CErrMsg(workers['CQFileIO'],str(msg))
- 
+    workers["CQSingleSlater"].isClosedShell = False
+  # If left to determine, unit multiplicity -> Restricted
+  elif mult == 1:
+    print "Is Restricted"
     workers["CQSingleSlater"].setRef(chronusQ.Reference.RHF)
     workers["CQSingleSlater"].isClosedShell = True
-
-    workers["CQSingleSlater"].isDFT = True
-    workers["CQSingleSlater"].isHF  = False
-    workers["CQSingleSlater"].setDFTKernel(kernelMap['USERDEFINED'])
-  
-    corrKernel = 0
-    exchKernel = 0
-    try:
-      corrKernel = settings['CORR']
-      exchKernel = settings['EXCHANGE']
-    except KeyError:
-      msg = "Must specify both Correlation and Exchange Kernel\n"
-      msg = msg + " for user defined QM.KS reference"
-      CErrMsg(workers['CQFileIO'],str(msg))
-
-
-    if 'DFT_GRID' in settings:
-      workers["CQSingleSlater"].setDFTGrid(gridMap[settings['DFT_GRID']])
-    if 'DFT_WEIGHTS' in settings:
-      workers["CQSingleSlater"].setDFTWeightScheme(
-        dftWeightScheme[settings['DFT_WEIGHTS']])
-
-    if 'DFT_SCREEN' in settings:
-      if settings['DFT_SCREEN']:
-        pass
-      else:
-        workers["CQSingleSlater"].turnOffDFTScreening()
-
-    if 'DFT_SCRTOL' in settings:
-      workers["CQSingleSlater"].setDFTScreenTol(settings['DFT_SCRTOL'])
-
-    if 'DFT_NRAD' in settings:
-      workers["CQSingleSlater"].setDFTNRad(settings['DFT_NRAD'])
-
-    if 'DFT_NANG' in settings:
-      workers["CQSingleSlater"].setDFTNAng(settings['DFT_NANG'])
-
-
-    try:
-      workers["CQSingleSlater"].setCorrKernel(corrMap[corrKernel])
-    except KeyError:
-      msg = "Specified Correlation Kernel is not Defined"
-      CErrMsg(workers['CQFileIO'],str(msg))
-
-    try:
-      workers["CQSingleSlater"].setExchKernel(exchMap[exchKernel])
-    except KeyError:
-      msg = "Specified Exchange Kernel is not Defined"
-      CErrMsg(workers['CQFileIO'],str(msg))
-
-    workers["CQSingleSlater"].checkDFTType()
-  elif 'UKS' in ref:
-    # forch uhf
+    isRest = True
+  # If left to determine, non-unit multiplicity -> Unrestricted
+  else:
+    print "Is Unrestricted"
     workers["CQSingleSlater"].setRef(chronusQ.Reference.UHF)
     workers["CQSingleSlater"].isClosedShell = False
 
-
-    workers["CQSingleSlater"].isDFT = True
-    workers["CQSingleSlater"].isHF  = False
-    workers["CQSingleSlater"].setDFTKernel(kernelMap['USERDEFINED'])
-  
-    corrKernel = 0
-    exchKernel = 0
-    try:
-      corrKernel = settings['CORR']
-      exchKernel = settings['EXCHANGE']
-    except KeyError:
-      msg = "Must specify both Correlation and Exchange Kernel\n"
-      msg = msg + " for user defined QM.KS reference"
-      CErrMsg(workers['CQFileIO'],str(msg))
-
-    if 'DFT_GRID' in settings:
-      workers["CQSingleSlater"].setDFTGrid(gridMap[settings['DFT_GRID']])
-    if 'DFT_WEIGHTS' in settings:
-      workers["CQSingleSlater"].setDFTWeightScheme(
-        dftWeightScheme[settings['DFT_WEIGHTS']])
-
-    if 'DFT_SCREEN' in settings:
-      if settings['DFT_SCREEN']:
-        pass
-      else:
-        workers["CQSingleSlater"].turnOffDFTScreening()
-
-    if 'DFT_SCRTOL' in settings:
-      workers["CQSingleSlater"].setDFTScreenTol(settings['DFT_SCRTOL'])
-
-    if 'DFT_NRAD' in settings:
-      workers["CQSingleSlater"].setDFTNRad(settings['DFT_NRAD'])
-
-    if 'DFT_NANG' in settings:
-      workers["CQSingleSlater"].setDFTNAng(settings['DFT_NANG'])
-
-    try:
-      workers["CQSingleSlater"].setCorrKernel(corrMap[corrKernel])
-    except KeyError:
-      msg = "Specified Correlation Kernel is not Defined"
-      CErrMsg(workers['CQFileIO'],str(msg))
-
-    try:
-      workers["CQSingleSlater"].setExchKernel(exchMap[exchKernel])
-    except KeyError:
-      msg = "Specified Exchange Kernel is not Defined"
-      CErrMsg(workers['CQFileIO'],str(msg))
-
-    workers["CQSingleSlater"].checkDFTType()
-  elif 'CUKS' in ref:
-    # Use Constrained UHF (not complex UHF) 
-    workers["CQSingleSlater"].setRef(chronusQ.Reference.CUHF)
-    workers["CQSingleSlater"].isClosedShell = False
-
-    workers["CQSingleSlater"].isDFT = True
-    workers["CQSingleSlater"].isHF  = False
-    workers["CQSingleSlater"].setDFTKernel(kernelMap['USERDEFINED'])
-  
-    corrKernel = 0
-    exchKernel = 0
-    try:
-      corrKernel = settings['CORR']
-      exchKernel = settings['EXCHANGE']
-    except KeyError:
-      msg = "Must specify both Correlation and Exchange Kernel\n"
-      msg = msg + " for user defined QM.KS reference"
-      CErrMsg(workers['CQFileIO'],str(msg))
-
-
-    if 'DFT_GRID' in settings:
-      workers["CQSingleSlater"].setDFTGrid(gridMap[settings['DFT_GRID']])
-    if 'DFT_WEIGHTS' in settings:
-      workers["CQSingleSlater"].setDFTWeightScheme(
-        dftWeightScheme[settings['DFT_WEIGHTS']])
-
-    if 'DFT_SCREEN' in settings:
-      if settings['DFT_SCREEN']:
-        pass
-      else:
-        workers["CQSingleSlater"].turnOffDFTScreening()
-
-    if 'DFT_SCRTOL' in settings:
-      workers["CQSingleSlater"].setDFTScreenTol(settings['DFT_SCRTOL'])
-
-    if 'DFT_NRAD' in settings:
-      workers["CQSingleSlater"].setDFTNRad(settings['DFT_NRAD'])
-
-    if 'DFT_NANG' in settings:
-      workers["CQSingleSlater"].setDFTNAng(settings['DFT_NANG'])
-
-    try:
-      workers["CQSingleSlater"].setCorrKernel(corrMap[corrKernel])
-    except KeyError:
-      msg = "Specified Correlation Kernel is not Defined"
-      CErrMsg(workers['CQFileIO'],str(msg))
-
-    try:
-      workers["CQSingleSlater"].setExchKernel(exchMap[exchKernel])
-    except KeyError:
-      msg = "Specified Exchange Kernel is not Defined"
-      CErrMsg(workers['CQFileIO'],str(msg))
-
-    workers["CQSingleSlater"].checkDFTType()
-  elif 'LSDA' in ref:
-    # Smartly figure out of reference is R/U
-    if mult == 1:
-      workers["CQSingleSlater"].setRef(chronusQ.Reference.RHF)
-      workers["CQSingleSlater"].isClosedShell = True
-    else:
-      workers["CQSingleSlater"].setRef(chronusQ.Reference.UHF)
-
-    workers["CQSingleSlater"].isDFT = True
-    workers["CQSingleSlater"].isHF  = False
-    workers["CQSingleSlater"].setDFTKernel(kernelMap['LSDA'])
-    workers["CQSingleSlater"].setCorrKernel(corrMap['VWN3'])
-    workers["CQSingleSlater"].setExchKernel(exchMap['SLATER'])
-
-    if 'DFT_GRID' in settings:
-      workers["CQSingleSlater"].setDFTGrid(gridMap[settings['DFT_GRID']])
-    if 'DFT_WEIGHTS' in settings:
-      workers["CQSingleSlater"].setDFTWeightScheme(
-        dftWeightScheme[settings['DFT_WEIGHTS']])
-
-    if 'DFT_SCREEN' in settings:
-      if settings['DFT_SCREEN']:
-        pass
-      else:
-        workers["CQSingleSlater"].turnOffDFTScreening()
-
-    if 'DFT_SCRTOL' in settings:
-      workers["CQSingleSlater"].setDFTScreenTol(settings['DFT_SCRTOL'])
-
-    if 'DFT_NRAD' in settings:
-      workers["CQSingleSlater"].setDFTNRad(settings['DFT_NRAD'])
-
-    if 'DFT_NANG' in settings:
-      workers["CQSingleSlater"].setDFTNAng(settings['DFT_NANG'])
-  elif 'RLSDA' in ref:
-    # Force RKS
-    if mult != 1:
-      msg = 'Non-singlet multiplicity is not suitable for RKS'
-      CErrMsg(workers['CQFileIO'],str(msg))
- 
-    workers["CQSingleSlater"].setRef(chronusQ.Reference.RHF)
-    workers["CQSingleSlater"].isClosedShell = True
-
-    workers["CQSingleSlater"].isDFT = True
-    workers["CQSingleSlater"].isHF  = False
-    workers["CQSingleSlater"].setDFTKernel(kernelMap['LSDA'])
-    workers["CQSingleSlater"].setCorrKernel(corrMap['VWN3'])
-    workers["CQSingleSlater"].setExchKernel(exchMap['SLATER'])
-
-    if 'DFT_GRID' in settings:
-      workers["CQSingleSlater"].setDFTGrid(gridMap[settings['DFT_GRID']])
-    if 'DFT_WEIGHTS' in settings:
-      workers["CQSingleSlater"].setDFTWeightScheme(
-        dftWeightScheme[settings['DFT_WEIGHTS']])
-
-    if 'DFT_SCREEN' in settings:
-      if settings['DFT_SCREEN']:
-        pass
-      else:
-        workers["CQSingleSlater"].turnOffDFTScreening()
-
-    if 'DFT_SCRTOL' in settings:
-      workers["CQSingleSlater"].setDFTScreenTol(settings['DFT_SCRTOL'])
-
-    if 'DFT_NRAD' in settings:
-      workers["CQSingleSlater"].setDFTNRad(settings['DFT_NRAD'])
-
-    if 'DFT_NANG' in settings:
-      workers["CQSingleSlater"].setDFTNAng(settings['DFT_NANG'])
-  elif 'ULSDA' in ref:
-    # Force RKS
-    if mult != 1:
-      msg = 'Non-singlet multiplicity is not suitable for RKS'
-      CErrMsg(workers['CQFileIO'],str(msg))
- 
-    workers["CQSingleSlater"].setRef(chronusQ.Reference.RHF)
-    workers["CQSingleSlater"].isClosedShell = True
-
-    workers["CQSingleSlater"].isDFT = True
-    workers["CQSingleSlater"].isHF  = False
-    workers["CQSingleSlater"].setDFTKernel(kernelMap['LSDA'])
-    workers["CQSingleSlater"].setCorrKernel(corrMap['VWN3'])
-    workers["CQSingleSlater"].setExchKernel(exchMap['SLATER'])
-
-    if 'DFT_GRID' in settings:
-      workers["CQSingleSlater"].setDFTGrid(gridMap[settings['DFT_GRID']])
-    if 'DFT_WEIGHTS' in settings:
-      workers["CQSingleSlater"].setDFTWeightScheme(
-        dftWeightScheme[settings['DFT_WEIGHTS']])
-
-    if 'DFT_SCREEN' in settings:
-      if settings['DFT_SCREEN']:
-        pass
-      else:
-        workers["CQSingleSlater"].turnOffDFTScreening()
-
-    if 'DFT_SCRTOL' in settings:
-      workers["CQSingleSlater"].setDFTScreenTol(settings['DFT_SCRTOL'])
-
-    if 'DFT_NRAD' in settings:
-      workers["CQSingleSlater"].setDFTNRad(settings['DFT_NRAD'])
-
-    if 'DFT_NANG' in settings:
-      workers["CQSingleSlater"].setDFTNAng(settings['DFT_NANG'])
-  elif 'CULSDA' in ref:
-    # Use Constrained UHF (not complex UHF) 
-    workers["CQSingleSlater"].setRef(chronusQ.Reference.CUHF)
-
-    workers["CQSingleSlater"].isDFT = True
-    workers["CQSingleSlater"].isHF  = False
-    workers["CQSingleSlater"].setDFTKernel(kernelMap['LSDA'])
-    workers["CQSingleSlater"].setCorrKernel(corrMap['VWN3'])
-    workers["CQSingleSlater"].setExchKernel(exchMap['SLATER'])
-
-    if 'DFT_GRID' in settings:
-      workers["CQSingleSlater"].setDFTGrid(gridMap[settings['DFT_GRID']])
-    if 'DFT_WEIGHTS' in settings:
-      workers["CQSingleSlater"].setDFTWeightScheme(
-        dftWeightScheme[settings['DFT_WEIGHTS']])
-
-    if 'DFT_SCREEN' in settings:
-      if settings['DFT_SCREEN']:
-        pass
-      else:
-        workers["CQSingleSlater"].turnOffDFTScreening()
-
-    if 'DFT_SCRTOL' in settings:
-      workers["CQSingleSlater"].setDFTScreenTol(settings['DFT_SCRTOL'])
-
-    if 'DFT_NRAD' in settings:
-      workers["CQSingleSlater"].setDFTNRad(settings['DFT_NRAD'])
-
-    if 'DFT_NANG' in settings:
-      workers["CQSingleSlater"].setDFTNAng(settings['DFT_NANG'])
-
-
-  else:
-    msg = 'Reference ' + str(sum(ref)) + ' not able to be parsed'
+  # Error if restricted and non-unit multiplicity
+  if isRest and mult != 1:
+    msg = 'Non-singlet multiplicity is not suitable for Restricted Reference'
     CErrMsg(workers['CQFileIO'],str(msg))
+
+  
+#  # Set SS Reference
+#  if 'HF' in ref:
+#    # Smartly figure out of reference is R/U
+#    if mult == 1:
+#      workers["CQSingleSlater"].setRef(chronusQ.Reference.RHF)
+#      workers["CQSingleSlater"].isClosedShell = True
+#    else:
+#      workers["CQSingleSlater"].setRef(chronusQ.Reference.UHF)
+#  elif 'RHF' in ref:
+#    # Force RHF
+#    if mult != 1:
+#      msg = 'Non-singlet multiplicity is not suitable for RHF'
+#      CErrMsg(workers['CQFileIO'],str(msg))
+# 
+#    workers["CQSingleSlater"].setRef(chronusQ.Reference.RHF)
+#    workers["CQSingleSlater"].isClosedShell = True
+#  elif 'UHF' in ref:
+#    # Forch UHF
+#    workers["CQSingleSlater"].setRef(chronusQ.Reference.UHF)
+#    workers["CQSingleSlater"].isClosedShell = False
+#  elif 'CUHF' in ref:
+#    # Use Constrained UHF (not complex UHF) 
+#    workers["CQSingleSlater"].setRef(chronusQ.Reference.CUHF)
+#  elif 'GHF' in ref:
+#    # Do GHF
+#    workers["CQSingleSlater"].setRef(chronusQ.Reference.TCS)
+#  elif 'KS' in ref:
+#    # Smartly figure out of reference is R/U
+#    if mult == 1:
+#      workers["CQSingleSlater"].setRef(chronusQ.Reference.RHF)
+#      workers["CQSingleSlater"].isClosedShell = True
+#    else:
+#      workers["CQSingleSlater"].setRef(chronusQ.Reference.UHF)
+#
+#    workers["CQSingleSlater"].isDFT = True
+#    workers["CQSingleSlater"].isHF  = False
+#    workers["CQSingleSlater"].setDFTKernel(kernelMap['USERDEFINED'])
+#  
+#    corrKernel = 0
+#    exchKernel = 0
+#    try:
+#      corrKernel = settings['CORR']
+#      exchKernel = settings['EXCHANGE']
+#    except KeyError:
+#      msg = "Must specify both Correlation and Exchange Kernel\n"
+#      msg = msg + " for user defined QM.KS reference"
+#      CErrMsg(workers['CQFileIO'],str(msg))
+#
+#
+#    if 'DFT_GRID' in settings:
+#      workers["CQSingleSlater"].setDFTGrid(gridMap[settings['DFT_GRID']])
+#    if 'DFT_WEIGHTS' in settings:
+#      workers["CQSingleSlater"].setDFTWeightScheme(
+#        dftWeightScheme[settings['DFT_WEIGHTS']])
+#
+#    if 'DFT_SCREEN' in settings:
+#      if settings['DFT_SCREEN']:
+#        pass
+#      else:
+#        workers["CQSingleSlater"].turnOffDFTScreening()
+#
+#    if 'DFT_SCRTOL' in settings:
+#      workers["CQSingleSlater"].setDFTScreenTol(settings['DFT_SCRTOL'])
+#
+#    if 'DFT_NRAD' in settings:
+#      workers["CQSingleSlater"].setDFTNRad(settings['DFT_NRAD'])
+#
+#    if 'DFT_NANG' in settings:
+#      workers["CQSingleSlater"].setDFTNAng(settings['DFT_NANG'])
+#
+#    try:
+#      workers["CQSingleSlater"].setCorrKernel(corrMap[corrKernel])
+#    except KeyError:
+#      msg = "Specified Correlation Kernel is not Defined"
+#      CErrMsg(workers['CQFileIO'],str(msg))
+#
+#    try:
+#      workers["CQSingleSlater"].setExchKernel(exchMap[exchKernel])
+#    except KeyError:
+#      msg = "Specified Exchange Kernel is not Defined"
+#      CErrMsg(workers['CQFileIO'],str(msg))
+#
+#    workers["CQSingleSlater"].checkDFTType()
+#  elif 'RKS' in ref:
+#    # Force RKS
+#    if mult != 1:
+#      msg = 'Non-singlet multiplicity is not suitable for RKS'
+#      CErrMsg(workers['CQFileIO'],str(msg))
+# 
+#    workers["CQSingleSlater"].setRef(chronusQ.Reference.RHF)
+#    workers["CQSingleSlater"].isClosedShell = True
+#
+#    workers["CQSingleSlater"].isDFT = True
+#    workers["CQSingleSlater"].isHF  = False
+#    workers["CQSingleSlater"].setDFTKernel(kernelMap['USERDEFINED'])
+#  
+#    corrKernel = 0
+#    exchKernel = 0
+#    try:
+#      corrKernel = settings['CORR']
+#      exchKernel = settings['EXCHANGE']
+#    except KeyError:
+#      msg = "Must specify both Correlation and Exchange Kernel\n"
+#      msg = msg + " for user defined QM.KS reference"
+#      CErrMsg(workers['CQFileIO'],str(msg))
+#
+#
+#    if 'DFT_GRID' in settings:
+#      workers["CQSingleSlater"].setDFTGrid(gridMap[settings['DFT_GRID']])
+#    if 'DFT_WEIGHTS' in settings:
+#      workers["CQSingleSlater"].setDFTWeightScheme(
+#        dftWeightScheme[settings['DFT_WEIGHTS']])
+#
+#    if 'DFT_SCREEN' in settings:
+#      if settings['DFT_SCREEN']:
+#        pass
+#      else:
+#        workers["CQSingleSlater"].turnOffDFTScreening()
+#
+#    if 'DFT_SCRTOL' in settings:
+#      workers["CQSingleSlater"].setDFTScreenTol(settings['DFT_SCRTOL'])
+#
+#    if 'DFT_NRAD' in settings:
+#      workers["CQSingleSlater"].setDFTNRad(settings['DFT_NRAD'])
+#
+#    if 'DFT_NANG' in settings:
+#      workers["CQSingleSlater"].setDFTNAng(settings['DFT_NANG'])
+#
+#
+#    try:
+#      workers["CQSingleSlater"].setCorrKernel(corrMap[corrKernel])
+#    except KeyError:
+#      msg = "Specified Correlation Kernel is not Defined"
+#      CErrMsg(workers['CQFileIO'],str(msg))
+#
+#    try:
+#      workers["CQSingleSlater"].setExchKernel(exchMap[exchKernel])
+#    except KeyError:
+#      msg = "Specified Exchange Kernel is not Defined"
+#      CErrMsg(workers['CQFileIO'],str(msg))
+#
+#    workers["CQSingleSlater"].checkDFTType()
+#  elif 'UKS' in ref:
+#    # forch uhf
+#    workers["CQSingleSlater"].setRef(chronusQ.Reference.UHF)
+#    workers["CQSingleSlater"].isClosedShell = False
+#
+#
+#    workers["CQSingleSlater"].isDFT = True
+#    workers["CQSingleSlater"].isHF  = False
+#    workers["CQSingleSlater"].setDFTKernel(kernelMap['USERDEFINED'])
+#  
+#    corrKernel = 0
+#    exchKernel = 0
+#    try:
+#      corrKernel = settings['CORR']
+#      exchKernel = settings['EXCHANGE']
+#    except KeyError:
+#      msg = "Must specify both Correlation and Exchange Kernel\n"
+#      msg = msg + " for user defined QM.KS reference"
+#      CErrMsg(workers['CQFileIO'],str(msg))
+#
+#    if 'DFT_GRID' in settings:
+#      workers["CQSingleSlater"].setDFTGrid(gridMap[settings['DFT_GRID']])
+#    if 'DFT_WEIGHTS' in settings:
+#      workers["CQSingleSlater"].setDFTWeightScheme(
+#        dftWeightScheme[settings['DFT_WEIGHTS']])
+#
+#    if 'DFT_SCREEN' in settings:
+#      if settings['DFT_SCREEN']:
+#        pass
+#      else:
+#        workers["CQSingleSlater"].turnOffDFTScreening()
+#
+#    if 'DFT_SCRTOL' in settings:
+#      workers["CQSingleSlater"].setDFTScreenTol(settings['DFT_SCRTOL'])
+#
+#    if 'DFT_NRAD' in settings:
+#      workers["CQSingleSlater"].setDFTNRad(settings['DFT_NRAD'])
+#
+#    if 'DFT_NANG' in settings:
+#      workers["CQSingleSlater"].setDFTNAng(settings['DFT_NANG'])
+#
+#    try:
+#      workers["CQSingleSlater"].setCorrKernel(corrMap[corrKernel])
+#    except KeyError:
+#      msg = "Specified Correlation Kernel is not Defined"
+#      CErrMsg(workers['CQFileIO'],str(msg))
+#
+#    try:
+#      workers["CQSingleSlater"].setExchKernel(exchMap[exchKernel])
+#    except KeyError:
+#      msg = "Specified Exchange Kernel is not Defined"
+#      CErrMsg(workers['CQFileIO'],str(msg))
+#
+#    workers["CQSingleSlater"].checkDFTType()
+#  elif 'CUKS' in ref:
+#    # Use Constrained UHF (not complex UHF) 
+#    workers["CQSingleSlater"].setRef(chronusQ.Reference.CUHF)
+#    workers["CQSingleSlater"].isClosedShell = False
+#
+#    workers["CQSingleSlater"].isDFT = True
+#    workers["CQSingleSlater"].isHF  = False
+#    workers["CQSingleSlater"].setDFTKernel(kernelMap['USERDEFINED'])
+#  
+#    corrKernel = 0
+#    exchKernel = 0
+#    try:
+#      corrKernel = settings['CORR']
+#      exchKernel = settings['EXCHANGE']
+#    except KeyError:
+#      msg = "Must specify both Correlation and Exchange Kernel\n"
+#      msg = msg + " for user defined QM.KS reference"
+#      CErrMsg(workers['CQFileIO'],str(msg))
+#
+#
+#    if 'DFT_GRID' in settings:
+#      workers["CQSingleSlater"].setDFTGrid(gridMap[settings['DFT_GRID']])
+#    if 'DFT_WEIGHTS' in settings:
+#      workers["CQSingleSlater"].setDFTWeightScheme(
+#        dftWeightScheme[settings['DFT_WEIGHTS']])
+#
+#    if 'DFT_SCREEN' in settings:
+#      if settings['DFT_SCREEN']:
+#        pass
+#      else:
+#        workers["CQSingleSlater"].turnOffDFTScreening()
+#
+#    if 'DFT_SCRTOL' in settings:
+#      workers["CQSingleSlater"].setDFTScreenTol(settings['DFT_SCRTOL'])
+#
+#    if 'DFT_NRAD' in settings:
+#      workers["CQSingleSlater"].setDFTNRad(settings['DFT_NRAD'])
+#
+#    if 'DFT_NANG' in settings:
+#      workers["CQSingleSlater"].setDFTNAng(settings['DFT_NANG'])
+#
+#    try:
+#      workers["CQSingleSlater"].setCorrKernel(corrMap[corrKernel])
+#    except KeyError:
+#      msg = "Specified Correlation Kernel is not Defined"
+#      CErrMsg(workers['CQFileIO'],str(msg))
+#
+#    try:
+#      workers["CQSingleSlater"].setExchKernel(exchMap[exchKernel])
+#    except KeyError:
+#      msg = "Specified Exchange Kernel is not Defined"
+#      CErrMsg(workers['CQFileIO'],str(msg))
+#
+#    workers["CQSingleSlater"].checkDFTType()
+#  elif 'LSDA' in ref:
+#    # Smartly figure out of reference is R/U
+#    if mult == 1:
+#      workers["CQSingleSlater"].setRef(chronusQ.Reference.RHF)
+#      workers["CQSingleSlater"].isClosedShell = True
+#    else:
+#      workers["CQSingleSlater"].setRef(chronusQ.Reference.UHF)
+#
+#    workers["CQSingleSlater"].isDFT = True
+#    workers["CQSingleSlater"].isHF  = False
+#    workers["CQSingleSlater"].setDFTKernel(kernelMap['LSDA'])
+#    workers["CQSingleSlater"].setCorrKernel(corrMap['VWN3'])
+#    workers["CQSingleSlater"].setExchKernel(exchMap['SLATER'])
+#
+#    if 'DFT_GRID' in settings:
+#      workers["CQSingleSlater"].setDFTGrid(gridMap[settings['DFT_GRID']])
+#    if 'DFT_WEIGHTS' in settings:
+#      workers["CQSingleSlater"].setDFTWeightScheme(
+#        dftWeightScheme[settings['DFT_WEIGHTS']])
+#
+#    if 'DFT_SCREEN' in settings:
+#      if settings['DFT_SCREEN']:
+#        pass
+#      else:
+#        workers["CQSingleSlater"].turnOffDFTScreening()
+#
+#    if 'DFT_SCRTOL' in settings:
+#      workers["CQSingleSlater"].setDFTScreenTol(settings['DFT_SCRTOL'])
+#
+#    if 'DFT_NRAD' in settings:
+#      workers["CQSingleSlater"].setDFTNRad(settings['DFT_NRAD'])
+#
+#    if 'DFT_NANG' in settings:
+#      workers["CQSingleSlater"].setDFTNAng(settings['DFT_NANG'])
+#  elif 'RLSDA' in ref:
+#    # Force RKS
+#    if mult != 1:
+#      msg = 'Non-singlet multiplicity is not suitable for RKS'
+#      CErrMsg(workers['CQFileIO'],str(msg))
+# 
+#    workers["CQSingleSlater"].setRef(chronusQ.Reference.RHF)
+#    workers["CQSingleSlater"].isClosedShell = True
+#
+#    workers["CQSingleSlater"].isDFT = True
+#    workers["CQSingleSlater"].isHF  = False
+#    workers["CQSingleSlater"].setDFTKernel(kernelMap['LSDA'])
+#    workers["CQSingleSlater"].setCorrKernel(corrMap['VWN3'])
+#    workers["CQSingleSlater"].setExchKernel(exchMap['SLATER'])
+#
+#    if 'DFT_GRID' in settings:
+#      workers["CQSingleSlater"].setDFTGrid(gridMap[settings['DFT_GRID']])
+#    if 'DFT_WEIGHTS' in settings:
+#      workers["CQSingleSlater"].setDFTWeightScheme(
+#        dftWeightScheme[settings['DFT_WEIGHTS']])
+#
+#    if 'DFT_SCREEN' in settings:
+#      if settings['DFT_SCREEN']:
+#        pass
+#      else:
+#        workers["CQSingleSlater"].turnOffDFTScreening()
+#
+#    if 'DFT_SCRTOL' in settings:
+#      workers["CQSingleSlater"].setDFTScreenTol(settings['DFT_SCRTOL'])
+#
+#    if 'DFT_NRAD' in settings:
+#      workers["CQSingleSlater"].setDFTNRad(settings['DFT_NRAD'])
+#
+#    if 'DFT_NANG' in settings:
+#      workers["CQSingleSlater"].setDFTNAng(settings['DFT_NANG'])
+#  elif 'ULSDA' in ref:
+#    # Force RKS
+#    if mult != 1:
+#      msg = 'Non-singlet multiplicity is not suitable for RKS'
+#      CErrMsg(workers['CQFileIO'],str(msg))
+# 
+#    workers["CQSingleSlater"].setRef(chronusQ.Reference.RHF)
+#    workers["CQSingleSlater"].isClosedShell = True
+#
+#    workers["CQSingleSlater"].isDFT = True
+#    workers["CQSingleSlater"].isHF  = False
+#    workers["CQSingleSlater"].setDFTKernel(kernelMap['LSDA'])
+#    workers["CQSingleSlater"].setCorrKernel(corrMap['VWN3'])
+#    workers["CQSingleSlater"].setExchKernel(exchMap['SLATER'])
+#
+#    if 'DFT_GRID' in settings:
+#      workers["CQSingleSlater"].setDFTGrid(gridMap[settings['DFT_GRID']])
+#    if 'DFT_WEIGHTS' in settings:
+#      workers["CQSingleSlater"].setDFTWeightScheme(
+#        dftWeightScheme[settings['DFT_WEIGHTS']])
+#
+#    if 'DFT_SCREEN' in settings:
+#      if settings['DFT_SCREEN']:
+#        pass
+#      else:
+#        workers["CQSingleSlater"].turnOffDFTScreening()
+#
+#    if 'DFT_SCRTOL' in settings:
+#      workers["CQSingleSlater"].setDFTScreenTol(settings['DFT_SCRTOL'])
+#
+#    if 'DFT_NRAD' in settings:
+#      workers["CQSingleSlater"].setDFTNRad(settings['DFT_NRAD'])
+#
+#    if 'DFT_NANG' in settings:
+#      workers["CQSingleSlater"].setDFTNAng(settings['DFT_NANG'])
+#  elif 'CULSDA' in ref:
+#    # Use Constrained UHF (not complex UHF) 
+#    workers["CQSingleSlater"].setRef(chronusQ.Reference.CUHF)
+#
+#    workers["CQSingleSlater"].isDFT = True
+#    workers["CQSingleSlater"].isHF  = False
+#    workers["CQSingleSlater"].setDFTKernel(kernelMap['LSDA'])
+#    workers["CQSingleSlater"].setCorrKernel(corrMap['VWN3'])
+#    workers["CQSingleSlater"].setExchKernel(exchMap['SLATER'])
+#
+#    if 'DFT_GRID' in settings:
+#      workers["CQSingleSlater"].setDFTGrid(gridMap[settings['DFT_GRID']])
+#    if 'DFT_WEIGHTS' in settings:
+#      workers["CQSingleSlater"].setDFTWeightScheme(
+#        dftWeightScheme[settings['DFT_WEIGHTS']])
+#
+#    if 'DFT_SCREEN' in settings:
+#      if settings['DFT_SCREEN']:
+#        pass
+#      else:
+#        workers["CQSingleSlater"].turnOffDFTScreening()
+#
+#    if 'DFT_SCRTOL' in settings:
+#      workers["CQSingleSlater"].setDFTScreenTol(settings['DFT_SCRTOL'])
+#
+#    if 'DFT_NRAD' in settings:
+#      workers["CQSingleSlater"].setDFTNRad(settings['DFT_NRAD'])
+#
+#    if 'DFT_NANG' in settings:
+#      workers["CQSingleSlater"].setDFTNAng(settings['DFT_NANG'])
+#
+#
+#  else:
+#    msg = 'Reference ' + str(sum(ref)) + ' not able to be parsed'
+#    CErrMsg(workers['CQFileIO'],str(msg))
 
   # Check if reference is 2-Component
   TCMethods = [chronusQ.Reference.TCS, chronusQ.Reference.GKS]
