@@ -175,8 +175,6 @@ void SingleSlater<dcomplex>::SADGuess() {
 /*
       hartreeFockAtom.isDFT = this->isDFT;
       hartreeFockAtom.isHF  = this->isHF;
-      hartreeFockAtom.setExchKernel(this->ExchKernel_);
-      hartreeFockAtom.setCorrKernel(this->CorrKernel_);
       hartreeFockAtom.setDFTKernel(this->DFTKernel_);
 */
       hartreeFockAtom.isDFT = false;

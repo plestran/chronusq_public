@@ -54,8 +54,6 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setSCFMaxIter"   , &SingleSlater<double>::setSCFMaxIter          )
     .def("setField"        , &SingleSlater<double>::Wrapper_setField       )
     .def("setGuess"        , &SingleSlater<double>::setGuess               )
-    .def("setCorrKernel"   , &SingleSlater<double>::setCorrKernel          )
-    .def("setExchKernel"   , &SingleSlater<double>::setExchKernel          )
     .def("setDFTKernel"    , &SingleSlater<double>::setDFTKernel           )
     .def("setDFTWeightScheme", &SingleSlater<double>::setDFTWeightScheme)
     .def("setDFTGrid"      , &SingleSlater<double>::setDFTGrid             ) 
@@ -69,8 +67,6 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("addLYP", &SingleSlater<double>::addLYP )
     .def("addVWN5", &SingleSlater<double>::addVWN5 )
     .def("addVWN3", &SingleSlater<double>::addVWN3 )
-
-    .def("checkDFTType", &SingleSlater<double>::checkDFTType)
   
     .def("turnOffDFTScreening", &SingleSlater<double>::turnOffDFTScreening ) 
 
@@ -116,8 +112,6 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setSCFMaxIter"   , &SingleSlater<dcomplex>::setSCFMaxIter          )
     .def("setField"        , &SingleSlater<dcomplex>::Wrapper_setField       )
     .def("setGuess"        , &SingleSlater<dcomplex>::setGuess               )
-    .def("setCorrKernel"   , &SingleSlater<dcomplex>::setCorrKernel          )
-    .def("setExchKernel"   , &SingleSlater<dcomplex>::setExchKernel          )
     .def("setDFTKernel"    , &SingleSlater<dcomplex>::setDFTKernel           )
     .def("setDFTWeightScheme", &SingleSlater<dcomplex>::setDFTWeightScheme)
     .def("setDFTGrid"      , &SingleSlater<dcomplex>::setDFTGrid             ) 
@@ -132,7 +126,6 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("addVWN5", &SingleSlater<dcomplex>::addVWN5 )
     .def("addVWN3", &SingleSlater<dcomplex>::addVWN3 )
 
-    .def("checkDFTType", &SingleSlater<dcomplex>::checkDFTType)
   
     .def("turnOffDFTScreening", &SingleSlater<dcomplex>::turnOffDFTScreening ) 
 

@@ -1,6 +1,7 @@
 #include<dft.h>
 
-BEightEight::BEightEight(){
+BEightEight::BEightEight(double X, double eps):
+DFTFunctional(X,eps){
 // Memo Factor to be added at the end for numerical stability
   this->CxVx  =  0.930525736349100;  // (3/2)*((3/(4*pi))^(1/3)) ;  
   this->small = 1.0e-12; 
@@ -8,6 +9,8 @@ BEightEight::BEightEight(){
   this-> d4over3  = 4.0/3.0;
   this-> beta =  0.0042;
 //  cout << "B88 object created " <<endl;
+
+  this->name = "B88";
 };
 
 double BEightEight::g0B88 (double x){

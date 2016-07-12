@@ -257,18 +257,24 @@ def handleReference(workers,settings):
 
       functionalMap[settings['CORR']]()
       functionalMap[settings['EXCHANGE']]()
+      workers["CQSingleSlater"].setDFTKernel(kernelMap['USERDEFINED'])
     elif 'LSDA' in refStr:
       for func in LSDAFunctional:
         functionalMap[func]()
+      workers["CQSingleSlater"].setDFTKernel(kernelMap['LSDA'])
     elif 'SVWN3' in refStr:
       for func in SVWN3Functional:
         functionalMap[func]()
+      workers["CQSingleSlater"].setDFTKernel(kernelMap['SVWN3'])
     elif 'SVWN5' in refStr:
       for func in SVWN5Functional:
         functionalMap[func]()
+      workers["CQSingleSlater"].setDFTKernel(kernelMap['SVWN5'])
     elif 'BLYP' in refStr:
       for func in BLYPFunctional:
         functionalMap[func]()
+      workers["CQSingleSlater"].setDFTKernel(kernelMap['BLYP'])
+
 
 #  # Set SS Reference
 #  if 'HF' in ref:

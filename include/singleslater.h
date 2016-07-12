@@ -50,8 +50,6 @@ class SingleSlater : public Quantum<T> {
   int      nAE_;
   int      nBE_;
   int      Ref_;
-  int      CorrKernel_;
-  int      ExchKernel_;
   int      DFTKernel_;
   int      nOccA_;
   int      nOccB_;
@@ -392,8 +390,6 @@ public:
 
     // Standard Values
     this->Ref_          = _INVALID;
-    this->CorrKernel_   = NOCORR;
-    this->ExchKernel_   = NOEXCH;
     this->DFTKernel_    = NODFT;
     this->denTol_       = 1e-8;
     this->eneTol_       = 1e-10;
@@ -418,12 +414,6 @@ public:
     this->nAngDFTGridPts_ = 302;
     this->isGGA = false;
 
-/*
-//  this->dftFunctionals_.emplace_back(new SlaterExchange());
-    this->dftFunctionals_.emplace_back(new BEightEight());
-    this->dftFunctionals_.emplace_back(new lyp());
-//    this->dftFunctionals_.emplace_back(new VWNV());
-*/
 
     // FIXME: maybe hardcode these?
     this->epsConv       = 1.0e-7;
@@ -524,8 +514,6 @@ public:
   inline void setSCFMaxIter(int i)        { this->maxSCFIter_ = i;     };
   inline void setGuess(int i)             { this->guess_ = i;          };
   inline void isNotPrimary()              { this->isPrimary = false;   };
-  inline void setCorrKernel(int i)        { this->CorrKernel_ = i;     };
-  inline void setExchKernel(int i)        { this->ExchKernel_ = i;     };
   inline void setDFTKernel( int i)        { this->DFTKernel_  = i;     };
   inline void setDFTWeightScheme(int i)   { this->weightScheme_ = i;   };
   inline void setDFTGrid(int i)           { this->dftGrid_ = i;        };
@@ -559,8 +547,6 @@ public:
   inline int multip()    { return this->multip_;                  };
   inline int nOVA()      { return nOccA_*nVirA_;                  };
   inline int nOVB()      { return nOccB_*nVirB_;                  };
-  inline int CorrKernel(){ return this->CorrKernel_;              };
-  inline int ExchKernel(){ return this->ExchKernel_;              };
   inline int DFTKernel() { return this->DFTKernel_ ;              };
   inline int printLevel(){ return this->printLevel_;              };
   inline std::vector<double> mullPop()   { return this->mullPop_; };
@@ -595,10 +581,6 @@ public:
   inline std::string SCFType()           { return this->SCFType_;        };
   inline int         guess()             { return this->guess_;          };
 
-  inline void checkDFTType(){
-    if(this->CorrKernel_ == LYP || this->ExchKernel_ == B88)
-      this->isGGA = true;
-  };
   void formGuess();	        // form the intial guess
   void SADGuess();
   void COREGuess();
@@ -668,9 +650,11 @@ public:
   };
   inline void addB88(){
     this->dftFunctionals_.emplace_back(new BEightEight());
+    this->isGGA = true;
   };
   inline void addLYP(){
     this->dftFunctionals_.emplace_back(new lyp()); 
+    this->isGGA = true;
   };
   inline void addVWN5(){
     this->dftFunctionals_.emplace_back(new VWNV()); 

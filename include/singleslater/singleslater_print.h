@@ -357,28 +357,16 @@ void SingleSlater<T>::printSCFHeader(ostream &output){
 
     output << endl;
 
+    
+    if(this->DFTKernel_ == USERDEFINED){
+      output << std::setw(38) << std::left << "    Exchange Kernel:";
+      output << this->dftFunctionals_[0]->name;
+      output << endl;
 
-    output << std::setw(38) << std::left << "    Exchange Kernel:";
-    if(this->ExchKernel_ == NOEXCH)
-      output << "No Exchange";
-    else if(this->ExchKernel_ == SLATER)
-      output << "Slater";
-    else if(this->ExchKernel_ == EXACT)
-      output << "Exact (Hartree-Fock)";
-    else if(this->ExchKernel_ == B88)
-      output << "B88";
-    output << endl;
-
-    output << std::setw(38) << std::left << "    Correlation Kernel:";
-    if(this->CorrKernel_ == NOCORR)
-      output << "No Correlation";
-    else if(this->CorrKernel_ == VWN3)
-      output << "VWN3";
-    else if(this->CorrKernel_ == VWN5)
-      output << "VWN5";
-    else if(this->CorrKernel_ == LYP)
-      output << "LYP";
-    output << endl;
+      output << std::setw(38) << std::left << "    Correlation Kernel:";
+      output << this->dftFunctionals_[1]->name;
+      output << endl;
+   }
 
    
     output << std::setw(38) << std::left << "    Radial Grid:";

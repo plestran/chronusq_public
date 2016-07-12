@@ -41,7 +41,7 @@ void SingleSlater<T>::alloc(){
       if(this->printLevel_ >= 3) {
         start = std::chrono::high_resolution_clock::now();
       }
-      this->genSparseBasisMap();
+//      this->genSparseBasisMap();
 //      this->genSparseRcrosP();
 //      CErr();
 //   Timing
