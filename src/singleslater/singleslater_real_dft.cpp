@@ -2470,10 +2470,10 @@ void SingleSlater<double>::formVXC_new(){
     cout << "T5 = " << T5.count() << endl;
     cout << "T6 = " << T6.count() << endl;
   }
-  cout << "NSkip2 = " << NSkip2 << endl;
-  cout << "NSkip3 = " << NSkip3 << endl;
-  cout << "NSkip4 = " << NSkip4 << endl;
-  cout << "NSkip5 = " << NSkip5 << endl;
+//cout << "NSkip2 = " << NSkip2 << endl;
+//cout << "NSkip3 = " << NSkip3 << endl;
+//cout << "NSkip4 = " << NSkip4 << endl;
+//cout << "NSkip5 = " << NSkip5 << endl;
   if(doTimings)
     for(auto i : TF) cout << "TF " << i.count() << endl;
 
