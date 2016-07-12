@@ -2178,7 +2178,7 @@ void SingleSlater<double>::formVXC_new(){
   int NSkip3(0);
   int NSkip4(0);
   int NSkip5(0);
-  bool doTimings(true);
+  bool doTimings(false);
 
   auto Newstart = std::chrono::high_resolution_clock::now();
   auto Newend = std::chrono::high_resolution_clock::now();
