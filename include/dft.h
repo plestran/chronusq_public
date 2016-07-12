@@ -37,9 +37,9 @@ public:
 
   };
 
-  virtual DFTInfo eval(double rA,double rB) = 0;
-  virtual DFTInfo eval(double rA,double rB,double gammaAA, double gammaAB) = 0;
-  virtual DFTInfo eval(double rA,double rB,double gammaAA, double gammaAB, double gammaBB) = 0;
+  virtual DFTInfo eval(const double &rA,const double &rB) = 0;
+  virtual DFTInfo eval(const double &rA,const double &rB,const double &gammaAA, const double &gammaAB) = 0;
+  virtual DFTInfo eval(const double &rA,const double &rB,const double &gammaAA, const double &gammaAB, const double &gammaBB) = 0;
 };
 
 class SlaterExchange : public DFTFunctional {
@@ -52,9 +52,9 @@ class SlaterExchange : public DFTFunctional {
   double eps_spin   ;
 public:
   SlaterExchange();
-  DFTInfo eval(double rhoA, double rhoB);
-  DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaAB);
-  DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaAB, double gammaBB);
+  DFTInfo eval(const double &rhoA, const double &rhoB);
+  DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB);
+  DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB, const double &gammaBB);
 };
 
 class VWNIII : public DFTFunctional {
@@ -127,9 +127,9 @@ public:
   double db_dr       ; 
   double delta_eps_etha ;
   VWNIII();
-  DFTInfo eval(double rhoA, double rhoB);
-  DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaAB);
-  DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaAB, double gammaBB);
+  DFTInfo eval(const double &rhoA, const double &rhoB);
+  DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB);
+  DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB, const double &gammaBB);
   double Eveps0VWN(double &A_x, double &b_x, double &Q, double &X, double &x0_x, double &X_x0);
   double Eveps1VWN(double &A_x, double &b1, double &b2, double &b3);
   double Eveps2VWN(double A_x, double &b_x, double &c_x, double &X, double &x0_x);
@@ -148,9 +148,9 @@ public:
   double df2_spindensity;
   double delta_eps_etha;
   double db_dr;
-  DFTInfo eval(double rhoA, double rhoB);
-  DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaAB);
-  DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaAB, double gammaBB);
+  DFTInfo eval(const double &rhoA, const double &rhoB);
+  DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB);
+  DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB, const double &gammaBB);
   double Eveps0VWN(double &A_x, double &b_x, double &Q, double &X, double &x0_x, double &X_x0);
   double Eveps1VWN(double &A_x, double &b1, double &b2, double &b3);
   double Eveps2VWN(double A_x, double &b_x, double &c_x, double &X, double &x0_x);
@@ -176,9 +176,9 @@ public:
   BEightEight();
   double g0B88 (double x);
   double g1B88 (double x);
-  DFTInfo eval(double rhoA, double rhoB);
-  DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaBB);
-  DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaAB, double gammaBB);
+  DFTInfo eval(const double &rhoA, const double &rhoB);
+  DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaBB);
+  DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB, const double &gammaBB);
 };
 
 class lyp : public DFTFunctional {
@@ -207,8 +207,8 @@ class lyp : public DFTFunctional {
 public:
   lyp();
   void popLYPdens(double rhoA, double rhoB);
-  DFTInfo eval(double rhoA, double rhoB);
-  DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaBB);
-  DFTInfo eval(double rhoA, double rhoB, double gammaAA, double gammaAB, double gammaBB);
+  DFTInfo eval(const double &rhoA, const double &rhoB);
+  DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaBB);
+  DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB, const double &gammaBB);
 };
 #endif

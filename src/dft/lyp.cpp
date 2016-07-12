@@ -82,13 +82,13 @@ void lyp::popLYPdens(double rhoA, double rhoB){
 };  //End Form denisuty related  LYP Corr
 
 
-DFTFunctional::DFTInfo lyp::eval(double rhoA, double rhoB){
+DFTFunctional::DFTInfo lyp::eval(const double &rhoA, const double &rhoB){
 };
 
-DFTFunctional::DFTInfo lyp::eval(double rhoA, double rhoB, double gammaAA, double gammaBB){
+DFTFunctional::DFTInfo lyp::eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaBB){
 };
 
-DFTFunctional::DFTInfo lyp::eval(double rhoA, double rhoB, double gammaAA, double gammaAB, double gammaBB){
+DFTFunctional::DFTInfo lyp::eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB, const double &gammaBB){
   DFTFunctional::DFTInfo info;
 //  if( rhoA <  this-> small) {return info;}
 //  if( rhoB <  this-> small) {return info;}

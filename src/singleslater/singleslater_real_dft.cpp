@@ -2285,24 +2285,27 @@ void SingleSlater<double>::formVXC_new(){
     for(auto iShell : closeShells) {
       int iSz= shSizes[iShell];
       int iSt = this->basisset_->mapSh2Bf(iShell);
-
-
       for(auto iBf = iSt; iBf < (iSt + iSz); iBf++){
         Tt = 0.0; Ts = 0.0;
+        if(this->nTCS_ == 1 && this->isClosedShell){
+          DENT = this->onePDMA_->data() + iBf*this->nBasis_;
+        } else {
+          DENT = this->onePDMScalar_->data() + iBf*this->nBasis_;
+          DENS = this->onePDMMx_->data() + iBf*this->nBasis_;
+        }
+
         // Loop over close shells "J"
         for(auto jShell : closeShells) {
           int jSz= shSizes[jShell];
           int jSt = this->basisset_->mapSh2Bf(jShell);
 
-        // Loop on iBf in iShell and jBf in jShell
-          if(this->nTCS_ == 1 && this->isClosedShell){
-            DENT = this->onePDMA_->data() + iBf*this->nBasis_;
-          } else {
-            DENT = this->onePDMScalar_->data() + iBf*this->nBasis_;
-            DENS = this->onePDMMx_->data() + iBf*this->nBasis_;
-          }
+          double fact = 2.0;
           for(auto jBf = jSt; jBf < (jSt + jSz); jBf++){
-            Pt = 2.0 * DENT[jBf];
+//            if(jBf < iBf) continue;
+//            else if (jBf != iBf) fact = 4.0;
+//            else fact = 2.0;
+            
+            Pt = fact * DENT[jBf];
 
             if(std::abs(Pt) > 1e-10 || std::abs(Ps) > 1e-10){
               Tt += Pt * SCRATCH1DATA[jBf];
