@@ -595,8 +595,10 @@ void AOIntegrals::formP2Transformation(){
   prettyPrint(this->fileio_->out,CoreX,"Core (mx)");
   prettyPrint(this->fileio_->out,CoreY,"Core (my)");
 
-
-  CErr();
+  *this->coreH_ = CoreS;
+  *this->oneEmx_ = CoreX;
+  *this->oneEmy_ = CoreY;
+  *this->oneEmz_ = CoreZ;
 
 }
 

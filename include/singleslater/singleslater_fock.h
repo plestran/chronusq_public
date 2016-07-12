@@ -166,7 +166,8 @@ void SingleSlater<T>::formFock(){
         (*this->fockA_) += (*this->vXA_);
         if(!testNew) (*this->fockA_) += (*this->vCorA_);
       }
-    } else {
+    } 
+    else {
 
     //this->fockA_->setZero();
     //this->fockA_->real() += (*this->aointegrals_->coreH_);
@@ -188,6 +189,13 @@ void SingleSlater<T>::formFock(){
       this->fockScalar_->setZero();
       this->fockMz_->setZero();
       this->fockScalar_->real() += (*this->aointegrals_->coreH_);
+      
+      if(this->nTCS_ == 2) {
+        (*this->fockMx_) += (*this->aointegrals_->oneEmx_);
+        (*this->fockMy_) += (*this->aointegrals_->oneEmy_);
+        (*this->fockMz_) += (*this->aointegrals_->oneEmz_);
+        }
+
       this->aointegrals_->addElecDipole(*this->fockScalar_,this->elecField_);
       (*this->fockScalar_) *= 2.0;
       (*this->fockScalar_)      += (*this->PTScalar_);        
@@ -200,12 +208,13 @@ void SingleSlater<T>::formFock(){
           (*this->fockScalar_) += (*this->vXB_) + (*this->vCorB_);
           (*this->fockMz_)     += (*this->vXA_) + (*this->vCorA_);
           (*this->fockMz_)     -= (*this->vXB_) + (*this->vCorB_);
-	} else {
+	        } 
+        else {
           (*this->fockScalar_) += (*this->vXA_);
           (*this->fockScalar_) += (*this->vXB_);
           (*this->fockMz_)     += (*this->vXA_);
           (*this->fockMz_)     -= (*this->vXB_);
-	}
+	    }
       }
 
       std::vector<std::reference_wrapper<TMap>> toGather;
@@ -221,8 +230,7 @@ void SingleSlater<T>::formFock(){
         toGather.emplace_back(*this->fockMy_);
         toGather.emplace_back(*this->fockMx_);
         Quantum<T>::spinGather(*this->fockA_,toGather);
-      };
-
+      }
 
     }
 

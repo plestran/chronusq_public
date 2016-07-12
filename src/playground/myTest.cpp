@@ -11,8 +11,8 @@ int main() {
     BasisSet basis;
     //Controls controls;
     AOIntegrals aoints;
-    MOIntegrals<double> moints;
-    SingleSlater<double> singleSlater;
+    MOIntegrals<dcomplex> moints;
+    SingleSlater<dcomplex> singleSlater;
     FileIO fileio("test.inp","test.out");
 
     memManager.setTotalMem(256e6);
@@ -22,9 +22,9 @@ int main() {
     fileio.iniStdGroups(); //Setting up and partitioning files
     CQSetNumThreads(1); //Sets up open MP threads
 
-    molecule.setCharge(0);
-    molecule.setNTotalE(10);
-    molecule.setMultip(1);
+    molecule.setCharge(1);
+    molecule.setNTotalE(9);
+    molecule.setMultip(6);
     molecule.setNAtoms(3);
     molecule.alloc(); //allocates all memory for the class
 
@@ -43,7 +43,7 @@ int main() {
     molecule.computeRij();
     molecule.computeI();
 
-    singleSlater.setRef(SingleSlater<double>::TCS); //TCS == GHF?
+    singleSlater.setRef(SingleSlater<dcomplex>::TCS); //TCS == GHF?
     singleSlater.setNTCS(2);
     singleSlater.isClosedShell = false;
     singleSlater.doDIIS = false;
