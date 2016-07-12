@@ -8,7 +8,7 @@ SlaterExchange::SlaterExchange(){
   this-> d4over3  = 4.0/3.0;
 };
 
-DFTFunctional::DFTInfo SlaterExchange::eval(double rhoA, double rhoB){
+DFTFunctional::DFTInfo SlaterExchange::eval(const double &rhoA, const double &rhoB){
   DFTFunctional::DFTInfo info;
 
   this->rhoT            = rhoA + rhoB;
@@ -33,9 +33,9 @@ DFTFunctional::DFTInfo SlaterExchange::eval(double rhoA, double rhoB){
   return info;
 };
 
-DFTFunctional::DFTInfo SlaterExchange::eval(double rhoA, double rhoB, double gammaAA, double gammaAB){
+DFTFunctional::DFTInfo SlaterExchange::eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB){
 };
 
-DFTFunctional::DFTInfo SlaterExchange::eval(double rhoA, double rhoB, double gammaAA, double gammaAB, double gammaBB){
+DFTFunctional::DFTInfo SlaterExchange::eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB, const double &gammaBB){
 };
 
