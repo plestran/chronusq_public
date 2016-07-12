@@ -50,8 +50,6 @@ class SingleSlater : public Quantum<T> {
   int      nAE_;
   int      nBE_;
   int      Ref_;
-  int      CorrKernel_;
-  int      ExchKernel_;
   int      DFTKernel_;
   int      nOccA_;
   int      nOccB_;
@@ -122,9 +120,10 @@ class SingleSlater : public Quantum<T> {
 
   std::unique_ptr<TMap>  vXA_;        ///< Alpha or Full (TCS) VX
   std::unique_ptr<TMap>  vXB_;        ///< Beta VXC
-  std::unique_ptr<TMap>  vCorA_;        ///< Alpha or Full Vcorr
-  std::unique_ptr<TMap>  vCorB_;        ///< Beta Vcorr
+//std::unique_ptr<TMap>  vCorA_;        ///< Alpha or Full Vcorr
+//std::unique_ptr<TMap>  vCorB_;        ///< Beta Vcorr
 
+/*
   std::vector<RealSparseMatrix>  sparsedmudX_; ///< basis derivative (x)
   std::vector<RealSparseMatrix>  sparsedmudY_; ///< basis derivative (y)
   std::vector<RealSparseMatrix>  sparsedmudZ_; ///< basis derivative (z)
@@ -134,12 +133,13 @@ class SingleSlater : public Quantum<T> {
   std::vector<RealSparseMatrix> sparseMap_;     // BasisFunction Map 
   std::vector<RealSparseMatrix> sparseWeights_; // Weights Map
   std::vector<RealSparseMatrix> sparseDoRho_; // Evaluate density Map
+*/
 
   BasisSet *    basisset_;         ///< Basis Set
   Molecule *    molecule_;         ///< Molecular specificiations
   FileIO *      fileio_;           ///< Access to output file
   AOIntegrals * aointegrals_;      ///< Molecular Integrals over GTOs (AO basis)
-  TwoDGrid    * twodgrid_   ;      ///< 3D grid (1Rad times 1 Ang) 
+//TwoDGrid    * twodgrid_   ;      ///< 3D grid (1Rad times 1 Ang) 
 
   std::string SCFType_;      ///< String containing SCF Type (R/C) (R/U/G/CU)
   std::string SCFTypeShort_; ///< String containing SCF Type (R/C) (R/U/G/CU)
@@ -256,11 +256,11 @@ public:
     RHF,
     UHF,
     CUHF,
-    TCS,
-    RKS,
-    UKS,
-    CUKS,
-    GKS
+    TCS
+//  RKS,
+//  UKS,
+//  CUKS,
+//  GKS
   }; ///< Supported references
 
   enum GUESS {
@@ -272,9 +272,13 @@ public:
   enum DFT {
     NODFT,
     USERDEFINED,
-    LSDA
+    LSDA,
+    SVWN3,
+    SVWN5,
+    BLYP
   };
 
+/*
   enum CORR {
     NOCORR,
     VWN3,
@@ -288,8 +292,9 @@ public:
     SLATER,
     B88
   };
+*/
 
-  enum DFT_GRID {
+  enum DFT_RAD_GRID {
     EULERMACL,
     GAUSSCHEB
   };
@@ -301,15 +306,16 @@ public:
  
   bool	haveMO;      ///< Have MO coefficients?
   bool	haveDensity; ///< Computed Density? (Not sure if this is used anymore)
-  bool	haveCoulomb; ///< Computed Coulomb Matrix?
-  bool	haveExchange;///< Computed Exchange Matrix?
-  bool	screenVxc   ;///< Do the screening for Vxc?
+//bool	haveCoulomb; ///< Computed Coulomb Matrix?
+//bool	haveExchange;///< Computed Exchange Matrix?
   bool  havePT;      ///< Computed Perturbation Tensor?
   bool  isConverged;
   bool  isHF;
   bool  isDFT;
   bool  isPrimary;
   bool  doDIIS;
+
+  bool	screenVxc   ;///< Do the screening for Vxc?
   bool  isGGA;
 
   double   energyOneE; ///< One-bodied operator tensors traced with Density
@@ -319,9 +325,9 @@ public:
 
   double   totalEx;     ///< LDA Exchange
   double   totalEcorr;  ///< Total VWN Energy
-  double   eps_corr;    ///< VWN Correlation Energy Density
-  double   mu_corr;     ///<  VWN Correlation Potential
-  double   mu_corr_B;   ///<  VWN Correlation Potential (beta)
+//double   eps_corr;    ///< VWN Correlation Energy Density
+//double   mu_corr;     ///<  VWN Correlation Potential
+//double   mu_corr_B;   ///<  VWN Correlation Potential (beta)
   double   epsScreen;   ///<  Screening value for both basis and Bweight
   double   epsConv;     ///<  Threshold value for converging cutoff radius given epsScreen
   int      maxiter;     ///<  Maximum number of iteration to find cutoff radius
@@ -371,8 +377,8 @@ public:
     this->PTB_               = nullptr;        
     this->vXA_              = nullptr;       
     this->vXB_              = nullptr;       
-    this->vCorA_              = nullptr;       
-    this->vCorB_              = nullptr;       
+//  this->vCorA_              = nullptr;       
+//  this->vCorB_              = nullptr;       
 
     // Initialize Raw Pointers
     this->R2Index_     = NULL;
@@ -383,8 +389,8 @@ public:
 
     // Initialize Booleans
     this->isConverged   = false;
-    this->haveCoulomb   = false;
-    this->haveExchange  = false;
+//  this->haveCoulomb   = false;
+//  this->haveExchange  = false;
     this->haveDensity   = false;
     this->haveMO        = false;
     this->havePT        = false;
@@ -392,8 +398,6 @@ public:
 
     // Standard Values
     this->Ref_          = _INVALID;
-    this->CorrKernel_   = NOCORR;
-    this->ExchKernel_   = NOEXCH;
     this->DFTKernel_    = NODFT;
     this->denTol_       = 1e-8;
     this->eneTol_       = 1e-10;
@@ -418,12 +422,6 @@ public:
     this->nAngDFTGridPts_ = 302;
     this->isGGA = false;
 
-/*
-//  this->dftFunctionals_.emplace_back(new SlaterExchange());
-    this->dftFunctionals_.emplace_back(new BEightEight());
-    this->dftFunctionals_.emplace_back(new lyp());
-//    this->dftFunctionals_.emplace_back(new VWNV());
-*/
 
     // FIXME: maybe hardcode these?
     this->epsConv       = 1.0e-7;
@@ -524,8 +522,6 @@ public:
   inline void setSCFMaxIter(int i)        { this->maxSCFIter_ = i;     };
   inline void setGuess(int i)             { this->guess_ = i;          };
   inline void isNotPrimary()              { this->isPrimary = false;   };
-  inline void setCorrKernel(int i)        { this->CorrKernel_ = i;     };
-  inline void setExchKernel(int i)        { this->ExchKernel_ = i;     };
   inline void setDFTKernel( int i)        { this->DFTKernel_  = i;     };
   inline void setDFTWeightScheme(int i)   { this->weightScheme_ = i;   };
   inline void setDFTGrid(int i)           { this->dftGrid_ = i;        };
@@ -559,8 +555,6 @@ public:
   inline int multip()    { return this->multip_;                  };
   inline int nOVA()      { return nOccA_*nVirA_;                  };
   inline int nOVB()      { return nOccB_*nVirB_;                  };
-  inline int CorrKernel(){ return this->CorrKernel_;              };
-  inline int ExchKernel(){ return this->ExchKernel_;              };
   inline int DFTKernel() { return this->DFTKernel_ ;              };
   inline int printLevel(){ return this->printLevel_;              };
   inline std::vector<double> mullPop()   { return this->mullPop_; };
@@ -595,10 +589,6 @@ public:
   inline std::string SCFType()           { return this->SCFType_;        };
   inline int         guess()             { return this->guess_;          };
 
-  inline void checkDFTType(){
-    if(this->CorrKernel_ == LYP || this->ExchKernel_ == B88)
-      this->isGGA = true;
-  };
   void formGuess();	        // form the intial guess
   void SADGuess();
   void COREGuess();
@@ -668,9 +658,11 @@ public:
   };
   inline void addB88(){
     this->dftFunctionals_.emplace_back(new BEightEight());
+    this->isGGA = true;
   };
   inline void addLYP(){
     this->dftFunctionals_.emplace_back(new lyp()); 
+    this->isGGA = true;
   };
   inline void addVWN5(){
     this->dftFunctionals_.emplace_back(new VWNV()); 

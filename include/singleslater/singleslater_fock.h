@@ -164,7 +164,7 @@ void SingleSlater<T>::formFock(){
       (*this->fockA_) += (*this->PTA_);
       if(this->isDFT){ 
         (*this->fockA_) += (*this->vXA_);
-        if(!testNew) (*this->fockA_) += (*this->vCorA_);
+//      if(!testNew) (*this->fockA_) += (*this->vCorA_);
       }
     } else {
 
@@ -195,17 +195,21 @@ void SingleSlater<T>::formFock(){
 
       // FIXME: Needs to ge generalized for the 2C case
       if(this->nTCS_ == 1 && this->isDFT){
+/*
         if(!testNew) {
           (*this->fockScalar_) += (*this->vXA_) + (*this->vCorA_);
           (*this->fockScalar_) += (*this->vXB_) + (*this->vCorB_);
           (*this->fockMz_)     += (*this->vXA_) + (*this->vCorA_);
           (*this->fockMz_)     -= (*this->vXB_) + (*this->vCorB_);
 	} else {
+*/
           (*this->fockScalar_) += (*this->vXA_);
           (*this->fockScalar_) += (*this->vXB_);
           (*this->fockMz_)     += (*this->vXA_);
           (*this->fockMz_)     -= (*this->vXB_);
+/*
 	}
+*/
       }
 
       std::vector<std::reference_wrapper<TMap>> toGather;

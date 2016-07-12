@@ -1,6 +1,8 @@
 #include<dft.h>
 
-VWNV::VWNV(){
+VWNV::VWNV(double X, double eps):
+VWNIII(X,eps){
+
 // General Constants
   this->small = 1.0e-10; 
   this->over2 = 0.5;
@@ -25,6 +27,8 @@ VWNV::VWNV(){
   this->c_a   =  13.0045;    // intext page 1209
   this->x0_a  =  -0.00475840; // intext page 1209
   this->popVWNconst();
+
+  this->name = "VWN V";
 };
 
 void VWNV::popVWNconst(){
