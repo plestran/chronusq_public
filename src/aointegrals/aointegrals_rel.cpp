@@ -39,6 +39,8 @@ void AOIntegrals::formP2Transformation(){
   RealMatrix TUncontracted(nUncontracted,nUncontracted);
   RealMatrix VUncontracted(nUncontracted,nUncontracted);
 
+  RealMatrix TCpy(*this->kinetic_);
+
   libint2::Engine engineS(
       libint2::Operator::overlap,1,this->basisSet_->maxL(),0);
   libint2::Engine engineT(
@@ -53,12 +55,11 @@ void AOIntegrals::formP2Transformation(){
   engineV.set_precision(0.0);
   engineC.set_precision(0.0);
 
-  // Loop through and uncontract all basis functions
+  // Loop through and uncontract S and T
   //
   for(auto s1 = 0l, s12 = 0l, bf1_s = 0l; s1 < unContractedShells.size();
       bf1_s += unContractedShells[s1].size(), ++s1){
     int n1 = unContractedShells[s1].size();
-    cout << unContractedShells[s1] << endl;
 
   for(auto s2 = 0l, bf2_s = 0l; s2 < unContractedShells.size();
       bf2_s += unContractedShells[s2].size(), ++s2, ++s12){
@@ -103,9 +104,13 @@ void AOIntegrals::formP2Transformation(){
   SUncontracted = SUncontracted.selfadjointView<Lower>();
   TUncontracted = TUncontracted.selfadjointView<Lower>();
 
+  prettyPrint(this->fileio_->out,TUncontracted,"T uncontracted");
+
   RealMatrix TnonRel = (*this->basisSet_->mapPrim2Bf()) * TUncontracted
 	* (*this->basisSet_->mapPrim2Bf()).transpose();  
-//  prettyPrint(this->fileio_->out,TnonRel,"T nonRel");
+  prettyPrint(this->fileio_->out,TnonRel,"T nonRel");
+
+  prettyPrint(this->fileio_->out,TnonRel - TCpy, "Diff");
 
   RealMatrix SUn(nUncontracted,nUncontracted);
   SUn = SUncontracted.real(); // Save S for later

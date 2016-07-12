@@ -62,6 +62,7 @@ int main() {
     aoints.initMeta();
     aoints.integralAlgorithm = AOIntegrals::INCORE;
     aoints.doX2C = true;
+    aoints.useFiniteWidthNuclei = true;
     
     singleSlater.initMeta();
     singleSlater.genMethString();

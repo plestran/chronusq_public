@@ -371,9 +371,6 @@ void AOIntegrals::computeAOOneE(){
   // Compute and time nuclear attraction integrals (negative sign is factored in)
   auto VStart = std::chrono::high_resolution_clock::now();
 
-  // make this the default?
-  this->useFiniteWidthNuclei = true;
-
   if(this->isPrimary && this->useFiniteWidthNuclei) 
     this->finiteWidthPotential();
   else                
@@ -387,8 +384,8 @@ void AOIntegrals::computeAOOneE(){
 // Build Core Hamiltonian
   (*this->coreH_) = (*this->kinetic_) + (*this->potential_);
 
-//  prettyPrint(this->fileio_->out,*this->kinetic_,"T");
-//  prettyPrint(this->fileio_->out,*this->potential_,"V");
+  prettyPrint(this->fileio_->out,*this->kinetic_,"T");
+  prettyPrint(this->fileio_->out,*this->potential_,"V");
 
   // Get end time of one-electron integral evaluation
   auto oneEEnd = std::chrono::high_resolution_clock::now();

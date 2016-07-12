@@ -191,7 +191,8 @@ class BasisSet{
   std::vector<std::array<int,2>> mapCen2Bf_; ///< Maps atomic center to first basis function
   std::vector<ReferenceShell>    refShells_; ///< Set of reference shells for given basis
   std::vector<libint2::Shell>    shells_   ; ///< Local basis storage (in shells)
-  std::unique_ptr<RealMatrix>    mapPrim2Bf_;///< Matrix transformation Prim -> Bf
+  std::vector<std::vector<double>> unNormCons_ ;
+std::unique_ptr<RealMatrix>    mapPrim2Bf_;///< Matrix transformation Prim -> Bf
 
   std::string basisPath_; ///< Path to the basis file
 
