@@ -64,6 +64,12 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setDFTNAng"  , &SingleSlater<double>::setDFTNAng         )
     .def("setDFTScreenTol" , &SingleSlater<double>::setDFTScreenTol        )
 
+    .def("addSlater", &SingleSlater<double>::addSlater )
+    .def("addB88", &SingleSlater<double>::addB88 )
+    .def("addLYP", &SingleSlater<double>::addLYP )
+    .def("addVWN5", &SingleSlater<double>::addVWN5 )
+    .def("addVWN3", &SingleSlater<double>::addVWN3 )
+
     .def("checkDFTType", &SingleSlater<double>::checkDFTType)
   
     .def("turnOffDFTScreening", &SingleSlater<double>::turnOffDFTScreening ) 
@@ -119,6 +125,12 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setDFTNRad"  , &SingleSlater<dcomplex>::setDFTNRad         )
     .def("setDFTNAng"  , &SingleSlater<dcomplex>::setDFTNAng         )
     .def("setDFTScreenTol" , &SingleSlater<dcomplex>::setDFTScreenTol        )
+
+    .def("addSlater", &SingleSlater<dcomplex>::addSlater )
+    .def("addB88", &SingleSlater<dcomplex>::addB88 )
+    .def("addLYP", &SingleSlater<dcomplex>::addLYP )
+    .def("addVWN5", &SingleSlater<dcomplex>::addVWN5 )
+    .def("addVWN3", &SingleSlater<dcomplex>::addVWN3 )
 
     .def("checkDFTType", &SingleSlater<dcomplex>::checkDFTType)
   

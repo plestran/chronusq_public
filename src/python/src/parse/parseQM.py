@@ -235,7 +235,41 @@ def handleReference(workers,settings):
     msg = 'Non-singlet multiplicity is not suitable for Restricted Reference'
     CErrMsg(workers['CQFileIO'],str(msg))
 
-  
+  functionalMap = {
+    'SLATER' : workers['CQSingleSlater'].addSlater,
+    'B88'    : workers['CQSingleSlater'].addB88,
+    'LYP'    : workers['CQSingleSlater'].addLYP,
+    'VWN5'   : workers['CQSingleSlater'].addVWN5,
+    'VWN3'   : workers['CQSingleSlater'].addVWN3
+  }
+
+  LSDAFunctional  = ['VWN3','SLATER']
+  SVWN5Functional = ['VWN5','SLATER']
+  SVWN3Functional = LSDAFunctional
+  BLYPFunctional  = ['B88','LYP']
+
+  if isDFT:
+    if 'KS' in refStr:  
+      if 'CORR' not in settings or 'EXCHANGE' not in settings:
+        msg = "Must specify both Correlation and Exchange Kernel\n"
+        msg = msg + " for user defined QM.KS reference"
+        CErrMsg(workers['CQFileIO'],str(msg))
+
+      functionalMap[settings['CORR']]()
+      functionalMap[settings['EXCHANGE']]()
+    elif 'LSDA' in refStr:
+      for func in LSDAFunctional:
+        functionalMap[func]()
+    elif 'SVWN3' in refStr:
+      for func in SVWN3Functional:
+        functionalMap[func]()
+    elif 'SVWN5' in refStr:
+      for func in SVWN5Functional:
+        functionalMap[func]()
+    elif 'BLYP' in refStr:
+      for func in BLYPFunctional:
+        functionalMap[func]()
+
 #  # Set SS Reference
 #  if 'HF' in ref:
 #    # Smartly figure out of reference is R/U
