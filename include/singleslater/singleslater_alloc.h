@@ -370,14 +370,14 @@ void SingleSlater<T>::allocAlphaDFT(){
   try { 
     this->vXA_  = std::unique_ptr<TMap>(
       new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB)); 
-    this->vCorA_  = std::unique_ptr<TMap>(
-      new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB)); 
+//  this->vCorA_  = std::unique_ptr<TMap>(
+//    new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB)); 
   } catch (...) { 
     if(this->Ref_ == TCS) CErr(std::current_exception(), "TCS VXC Allocation"); 
     else CErr(std::current_exception(),"Alpha VXC  Allocation"); 
   }
   this->vXA_->setZero();
-  this->vCorA_->setZero();
+//this->vCorA_->setZero();
 }
 
 template<typename T>
@@ -388,12 +388,12 @@ void SingleSlater<T>::allocBetaDFT(){
   try { 
     this->vXB_  = std::unique_ptr<TMap>(
       new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB)); 
-    this->vCorB_  = std::unique_ptr<TMap>(
-      new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB)); 
+//  this->vCorB_  = std::unique_ptr<TMap>(
+//    new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB)); 
   } catch (...) { 
     CErr(std::current_exception(),"Beta VXC  Allocation"); 
   }
   this->vXB_->setZero();
-  this->vCorB_->setZero();
+//this->vCorB_->setZero();
 }
 

@@ -151,10 +151,10 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("UHF"           , SingleSlater<double>::UHF                    )
     .value("CUHF"          , SingleSlater<double>::CUHF                   )
     .value("TCS"           , SingleSlater<double>::TCS                    )
-    .value("RKS"           , SingleSlater<double>::RKS                    )
-    .value("UKS"           , SingleSlater<double>::UKS                    )
-    .value("CUKS"          , SingleSlater<double>::CUKS                   )
-    .value("GKS"           , SingleSlater<double>::GKS                    )
+//  .value("RKS"           , SingleSlater<double>::RKS                    )
+//  .value("UKS"           , SingleSlater<double>::UKS                    )
+//  .value("CUKS"          , SingleSlater<double>::CUKS                   )
+//  .value("GKS"           , SingleSlater<double>::GKS                    )
   ;
 
   enum_<SingleSlater<double>::GUESS>("Guess")
@@ -163,6 +163,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("READ" , SingleSlater<double>::READ )
   ;
 
+/*
   enum_<SingleSlater<double>::EXCH>("EXCH")
     .value("NOEXCH"  , SingleSlater<double>::NOEXCH) 
     .value("EXACT"   , SingleSlater<double>::EXACT )
@@ -175,13 +176,14 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("VWN5"  , SingleSlater<double>::VWN5  )
     .value("LYP"   , SingleSlater<double>::LYP   )
   ;
+*/
   enum_<SingleSlater<double>::DFT>("DFT")
     .value("NODFT"      , SingleSlater<double>::NODFT      )
     .value("USERDEFINED", SingleSlater<double>::USERDEFINED)
     .value("LSDA"       , SingleSlater<double>::LSDA       )
   ;
 
-  enum_<SingleSlater<double>::DFT_GRID>("DFT_GRID")
+  enum_<SingleSlater<double>::DFT_RAD_GRID>("DFT_RAD_GRID")
     .value("EULERMACL", SingleSlater<double>::EULERMACL)
     .value("GAUSSCHEB", SingleSlater<double>::GAUSSCHEB)
   ;

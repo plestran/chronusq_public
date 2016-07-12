@@ -32,8 +32,8 @@ from meta.knownJobs import *
 from meta.enumMaps import sdrMethodMap
 from meta.enumMaps import aointAlg
 from meta.enumMaps import guessMap
-from meta.enumMaps import exchMap 
-from meta.enumMaps import corrMap 
+#from meta.enumMaps import exchMap 
+#from meta.enumMaps import corrMap 
 from meta.enumMaps import kernelMap 
 from meta.enumMaps import gridMap 
 from meta.enumMaps import dftWeightScheme 
@@ -667,7 +667,7 @@ def handleReference(workers,settings):
 #    CErrMsg(workers['CQFileIO'],str(msg))
 
   # Check if reference is 2-Component
-  TCMethods = [chronusQ.Reference.TCS, chronusQ.Reference.GKS]
+  TCMethods = [chronusQ.Reference.TCS]
   if workers["CQSingleSlater"].Ref() in TCMethods:
     workers["CQSingleSlater"].setNTCS(2)
 

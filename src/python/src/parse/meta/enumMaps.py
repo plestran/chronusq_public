@@ -91,19 +91,19 @@ guessMap = {
   "READ":chronusQ.Guess.READ  
 }
 
-exchMap = {
-  "NOEXCH":chronusQ.EXCH.NOEXCH,
-  "EXACT" :chronusQ.EXCH.EXACT ,
-  "SLATER":chronusQ.EXCH.SLATER,
-  "B88"   :chronusQ.EXCH.B88
-}
-
-corrMap = {
-  "NOCORR":chronusQ.CORR.NOCORR,
-  "VWN3"  :chronusQ.CORR.VWN3,
-  "VWN5"  :chronusQ.CORR.VWN5,
-  "LYP"   :chronusQ.CORR.LYP
-}
+#exchMap = {
+#  "NOEXCH":chronusQ.EXCH.NOEXCH,
+#  "EXACT" :chronusQ.EXCH.EXACT ,
+#  "SLATER":chronusQ.EXCH.SLATER,
+#  "B88"   :chronusQ.EXCH.B88
+#}
+#
+#corrMap = {
+#  "NOCORR":chronusQ.CORR.NOCORR,
+#  "VWN3"  :chronusQ.CORR.VWN3,
+#  "VWN5"  :chronusQ.CORR.VWN5,
+#  "LYP"   :chronusQ.CORR.LYP
+#}
 
 kernelMap = {
   "NODFT"      :chronusQ.DFT.NODFT,
@@ -112,8 +112,8 @@ kernelMap = {
 }
 
 gridMap = {
-  "EULERMACL" : chronusQ.DFT_GRID.EULERMACL,
-  "GAUSSCHEB" : chronusQ.DFT_GRID.GAUSSCHEB
+  "EULERMACL" : chronusQ.DFT_RAD_GRID.EULERMACL,
+  "GAUSSCHEB" : chronusQ.DFT_RAD_GRID.GAUSSCHEB
 }
 
 dftWeightScheme = {

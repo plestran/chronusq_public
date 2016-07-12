@@ -120,9 +120,10 @@ class SingleSlater : public Quantum<T> {
 
   std::unique_ptr<TMap>  vXA_;        ///< Alpha or Full (TCS) VX
   std::unique_ptr<TMap>  vXB_;        ///< Beta VXC
-  std::unique_ptr<TMap>  vCorA_;        ///< Alpha or Full Vcorr
-  std::unique_ptr<TMap>  vCorB_;        ///< Beta Vcorr
+//std::unique_ptr<TMap>  vCorA_;        ///< Alpha or Full Vcorr
+//std::unique_ptr<TMap>  vCorB_;        ///< Beta Vcorr
 
+/*
   std::vector<RealSparseMatrix>  sparsedmudX_; ///< basis derivative (x)
   std::vector<RealSparseMatrix>  sparsedmudY_; ///< basis derivative (y)
   std::vector<RealSparseMatrix>  sparsedmudZ_; ///< basis derivative (z)
@@ -132,12 +133,13 @@ class SingleSlater : public Quantum<T> {
   std::vector<RealSparseMatrix> sparseMap_;     // BasisFunction Map 
   std::vector<RealSparseMatrix> sparseWeights_; // Weights Map
   std::vector<RealSparseMatrix> sparseDoRho_; // Evaluate density Map
+*/
 
   BasisSet *    basisset_;         ///< Basis Set
   Molecule *    molecule_;         ///< Molecular specificiations
   FileIO *      fileio_;           ///< Access to output file
   AOIntegrals * aointegrals_;      ///< Molecular Integrals over GTOs (AO basis)
-  TwoDGrid    * twodgrid_   ;      ///< 3D grid (1Rad times 1 Ang) 
+//TwoDGrid    * twodgrid_   ;      ///< 3D grid (1Rad times 1 Ang) 
 
   std::string SCFType_;      ///< String containing SCF Type (R/C) (R/U/G/CU)
   std::string SCFTypeShort_; ///< String containing SCF Type (R/C) (R/U/G/CU)
@@ -254,11 +256,11 @@ public:
     RHF,
     UHF,
     CUHF,
-    TCS,
-    RKS,
-    UKS,
-    CUKS,
-    GKS
+    TCS
+//  RKS,
+//  UKS,
+//  CUKS,
+//  GKS
   }; ///< Supported references
 
   enum GUESS {
@@ -270,9 +272,13 @@ public:
   enum DFT {
     NODFT,
     USERDEFINED,
-    LSDA
+    LSDA,
+    SVWN3,
+    SVWN5,
+    BLYP
   };
 
+/*
   enum CORR {
     NOCORR,
     VWN3,
@@ -286,8 +292,9 @@ public:
     SLATER,
     B88
   };
+*/
 
-  enum DFT_GRID {
+  enum DFT_RAD_GRID {
     EULERMACL,
     GAUSSCHEB
   };
@@ -299,15 +306,16 @@ public:
  
   bool	haveMO;      ///< Have MO coefficients?
   bool	haveDensity; ///< Computed Density? (Not sure if this is used anymore)
-  bool	haveCoulomb; ///< Computed Coulomb Matrix?
-  bool	haveExchange;///< Computed Exchange Matrix?
-  bool	screenVxc   ;///< Do the screening for Vxc?
+//bool	haveCoulomb; ///< Computed Coulomb Matrix?
+//bool	haveExchange;///< Computed Exchange Matrix?
   bool  havePT;      ///< Computed Perturbation Tensor?
   bool  isConverged;
   bool  isHF;
   bool  isDFT;
   bool  isPrimary;
   bool  doDIIS;
+
+  bool	screenVxc   ;///< Do the screening for Vxc?
   bool  isGGA;
 
   double   energyOneE; ///< One-bodied operator tensors traced with Density
@@ -317,9 +325,9 @@ public:
 
   double   totalEx;     ///< LDA Exchange
   double   totalEcorr;  ///< Total VWN Energy
-  double   eps_corr;    ///< VWN Correlation Energy Density
-  double   mu_corr;     ///<  VWN Correlation Potential
-  double   mu_corr_B;   ///<  VWN Correlation Potential (beta)
+//double   eps_corr;    ///< VWN Correlation Energy Density
+//double   mu_corr;     ///<  VWN Correlation Potential
+//double   mu_corr_B;   ///<  VWN Correlation Potential (beta)
   double   epsScreen;   ///<  Screening value for both basis and Bweight
   double   epsConv;     ///<  Threshold value for converging cutoff radius given epsScreen
   int      maxiter;     ///<  Maximum number of iteration to find cutoff radius
@@ -369,8 +377,8 @@ public:
     this->PTB_               = nullptr;        
     this->vXA_              = nullptr;       
     this->vXB_              = nullptr;       
-    this->vCorA_              = nullptr;       
-    this->vCorB_              = nullptr;       
+//  this->vCorA_              = nullptr;       
+//  this->vCorB_              = nullptr;       
 
     // Initialize Raw Pointers
     this->R2Index_     = NULL;
@@ -381,8 +389,8 @@ public:
 
     // Initialize Booleans
     this->isConverged   = false;
-    this->haveCoulomb   = false;
-    this->haveExchange  = false;
+//  this->haveCoulomb   = false;
+//  this->haveExchange  = false;
     this->haveDensity   = false;
     this->haveMO        = false;
     this->havePT        = false;
