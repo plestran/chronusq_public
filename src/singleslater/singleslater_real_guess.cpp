@@ -202,8 +202,6 @@ void SingleSlater<double>::SADGuess() {
       hartreeFockAtom.nRadDFTGridPts_ = this->nRadDFTGridPts_ ;
       hartreeFockAtom.nAngDFTGridPts_ = this->nAngDFTGridPts_ ;
       hartreeFockAtom.isGGA =         this->isGGA ;
-      hartreeFockAtom.CorrKernel_  =  this->CorrKernel_  ;
-      hartreeFockAtom.ExchKernel_  =  this->ExchKernel_  ;
       hartreeFockAtom.DFTKernel_   =  this->DFTKernel_   ;
 */
    

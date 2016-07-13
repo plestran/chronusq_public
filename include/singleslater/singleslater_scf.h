@@ -142,7 +142,7 @@ void SingleSlater<T>::SCF2(){
 
     auto SCFEnd = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> SCFD = SCFEnd - SCFStart;
-    cout << "SCF Time (" << iter << ") = " << SCFD.count() << endl; 
+//  cout << "SCF Time (" << iter << ") = " << SCFD.count() << endl; 
     
     if(this->isConverged) break;
   };

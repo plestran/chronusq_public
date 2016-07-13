@@ -65,7 +65,6 @@ public:
     template<typename T>
     inline T integrate(std::function< T(cartGP) > func) {
 
-      cout << "Integrate 1" << endl;
       T result = (*this)[0].weight * func((*this)[0].pt);
 
       for(auto iPt = 1; iPt < this->nPts_; iPt++){
@@ -80,7 +79,6 @@ public:
     inline void integrate(std::function< T(IntegrationPoint) > func,
         T& result) {
 
-      cout << "Integrate 2" << endl;
       result = func((*this)[0]);
       for(auto iPt = 1; iPt < this->nPts_; iPt++)
         result += func((*this)[iPt]);
@@ -102,7 +100,6 @@ public:
           func(IP,result);
         } else NSkip++;
       }
-      cout << "NSkip : " << NSkip << endl;
     };
 
 

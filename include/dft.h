@@ -5,9 +5,12 @@ class DFTFunctional{
 public:
   double scalingFactor;    //< Hybrid Scaling
   double epsScreen;        //< screening 
-  DFTFunctional(double X = 1.0){
+
+  std::string name;
+
+  DFTFunctional(double X = 1.0, double eps = 1e-10){
     this->scalingFactor = X;
-    this->epsScreen = 1.0e-10;
+    this->epsScreen = eps;
   };
 
   struct DFTInfo {
@@ -51,7 +54,7 @@ class SlaterExchange : public DFTFunctional {
   double spindensity   ;
   double eps_spin   ;
 public:
-  SlaterExchange();
+  SlaterExchange(double X = 1.0, double eps = 1e-10);
   DFTInfo eval(const double &rhoA, const double &rhoB);
   DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB);
   DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB, const double &gammaBB);
@@ -126,7 +129,7 @@ public:
   double M1          ;
   double db_dr       ; 
   double delta_eps_etha ;
-  VWNIII();
+  VWNIII(double X = 1.0, double eps = 1e-10);
   DFTInfo eval(const double &rhoA, const double &rhoB);
   DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB);
   DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB, const double &gammaBB);
@@ -139,7 +142,7 @@ public:
 
 class VWNV : public VWNIII {
 public:
-  VWNV();
+  VWNV(double X = 1.0, double eps = 1e-10);
   double alpha;
   double Xa;
   double Qa;
@@ -173,7 +176,7 @@ class BEightEight : public DFTFunctional {
   double rhoB1ov3 ;
   double rhoB4ov3 ;
 public:
-  BEightEight();
+  BEightEight(double X = 1.0, double eps = 1e-10);
   double g0B88 (double x);
   double g1B88 (double x);
   DFTInfo eval(const double &rhoA, const double &rhoB);
@@ -205,7 +208,7 @@ class lyp : public DFTFunctional {
   double d2LYPdrhgAB   ;
   double d2LYPdrhgBB   ;
 public:
-  lyp();
+  lyp(double X = 1.0, double eps = 1e-10);
   std::vector<double> denspow(const double &rho);
   void popLYPdens(double rhoA, double rhoB);
   DFTInfo eval(const double &rhoA, const double &rhoB);

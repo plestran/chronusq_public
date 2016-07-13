@@ -1,6 +1,7 @@
 #include<dft.h>
 
-VWNIII::VWNIII(){
+VWNIII::VWNIII(double X, double eps):
+DFTFunctional(X,eps){
 // General Constants
   this->small = 1.0e-10; 
   this->over2 = 0.5;
@@ -23,6 +24,8 @@ VWNIII::VWNIII(){
   this->c_a   =  13.0045;    // intext page 1209
   this->x0_a  =  -0.00475840; // intext page 1209
   this->popVWNconst();
+
+  this->name = "VWN III";
 };
 
 void VWNIII::popVWNconst(){
