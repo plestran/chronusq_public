@@ -15,12 +15,15 @@ DFTFunctional(X,eps){
 };
 
 
-    void lyp::popDensPow(const double &rho, denspow &denquant)  {
-    double tmp = 1.0/3.0;
-    denquant.rho1over3   = std::pow(rho,this->d1over3);
-    denquant.rhom4over3  = 1.0/(denquant.rho1over3*rho);
-    denquant.rho2        = rho*rho;
-    denquant.rho5over3   = denquant.rho1over3*denquant.rho1over3*rho;
+    void lyp::popDensPow(const double &rhoA, const double &rhoB, denspow &denquant)  {
+    double tmp = 8.0/3.0;
+    denquant.rhoT        = rhoA + rhoB;
+    denquant.rho1over3   = std::pow(denquant.rhoT,this->d1over3);
+    denquant.rhoA8over3   = std::pow(rhoA,tmp);
+    denquant.rhoB8over3   = std::pow(rhoB,tmp);
+    denquant.rhom4over3  = 1.0/(denquant.rho1over3*denquant.rhoT);
+    denquant.rho2        = denquant.rhoT*denquant.rhoT;
+    denquant.rho5over3   = denquant.rho1over3*denquant.rho1over3*denquant.rhoT;
     denquant.rhom11over3 = 1.0/(denquant.rho5over3*denquant.rho2);
 //    cout << denquant.rho1over3 << endl ;
 //    cout << denquant.rho2 << endl ;
@@ -29,14 +32,14 @@ DFTFunctional(X,eps){
     return ;
     }; 
 
-void lyp::popLYPdens(double rhoA, double rhoB, denspow &RhoTQuant){
+void lyp::popLYPdens(const double &rhoA, const double &rhoB, denspow &RhoTQuant){
 //  this->spindensity   = (rhoA - rhoB) / this->rhoT;
 //  if( this->rhoT <  this-> small) {return ;}
 //  cout << "rhoT " << this->rhoT <<endl;
 //  cout << "rhoMz " << this->spindensity <<endl;
 //  this->rho1over3 = std::pow(this->rhoT,this->d1over3);
-  this->rhoA8over3 = std::pow(rhoA,(8.0/3.0));
-  this->rhoB8over3 = std::pow(rhoB,(8.0/3.0));
+//  RhoTQuant.rhoA8over3 = std::pow(rhoA,(8.0/3.0));
+//  RhoTQuant.rhoB8over3 = std::pow(rhoB,(8.0/3.0));
 //function used in LYP Correlation (Eq. A26, A32 Ref.LYP2)
   this->omega0  =  std::exp(-this->c / RhoTQuant.rho1over3);
   this->omega0 /=  1.0 + (this->d / RhoTQuant.rho1over3);
@@ -44,25 +47,25 @@ void lyp::popLYPdens(double rhoA, double rhoB, denspow &RhoTQuant){
   this->omega0 *= RhoTQuant.rhom11over3;
   this->omega1  = this->omega0*(11.0*RhoTQuant.rho1over3 -this->c - 
     (this->d / (1 +this->d/RhoTQuant.rho1over3) )  );
-  this->omega1 /= -3.0*this->rhoT*RhoTQuant.rho1over3 ;
+  this->omega1 /= -3.0*RhoTQuant.rhoT*RhoTQuant.rho1over3 ;
 //function used in LYP Correlation (Eq. A27, A33 Ref.LYP2)
   this->delta0  = this->d / RhoTQuant.rho1over3;
   this->delta0 /= (1.0 + this->d / RhoTQuant.rho1over3);
   this->delta0 += this->c / RhoTQuant.rho1over3;
-  this->delta1  =  this->delta0/(-3.0*this->rhoT);
-//  this->delta1 += (this->d *this->d / std::pow(this->rhoT,(5.0/3.0))) 
+  this->delta1  =  this->delta0/(-3.0*RhoTQuant.rhoT);
+//  this->delta1 += (this->d *this->d / std::pow(RhoTQuant.rhoT,(5.0/3.0))) 
   this->delta1 += (this->d *this->d / RhoTQuant.rho5over3 ) 
     /( 3.0 * (1.0 + this->d / RhoTQuant.rho1over3) 
     * (1.0 + this->d / RhoTQuant.rho1over3) );
   // Eq A23(delLYP/delgammaAA) and eq A25(delLYP/delgammaBB) (remind for A25 call the function inverting rhoA with rhoB)
      this->dLYPdgAA   = 11.0 - this->delta0;
-     this->dLYPdgAA  *= rhoA/this->rhoT;
+     this->dLYPdgAA  *= rhoA/RhoTQuant.rhoT;
      this->dLYPdgAA  += 1.0 - 3.0*this->delta0;
      this->dLYPdgAA  *= rhoA*rhoB/9.0;
      this->dLYPdgAA  -= rhoB*rhoB;
      this->dLYPdgAA  *= -this->a * this->b * this->omega0;
      this->dLYPdgBB   = 11.0 - this->delta0;
-     this->dLYPdgBB  *= rhoB/this->rhoT;
+     this->dLYPdgBB  *= rhoB/RhoTQuant.rhoT;
      this->dLYPdgBB  += 1.0 - 3.0*this->delta0;
      this->dLYPdgBB  *= rhoB*rhoA/9.0;
      this->dLYPdgBB  -= rhoA*rhoA;
@@ -74,27 +77,27 @@ void lyp::popLYPdens(double rhoA, double rhoB, denspow &RhoTQuant){
       this->dLYPdgAB *= - this->a *  this->b * this->omega0;
 //  Eq A29 (del^2 LYP / (del rho_X del gammaXX))
       this->d2LYPdrhgAA =   - (rhoA*rhoB/9.0) 
-             *(  ( 3.0 + rhoA/this->rhoT ) * 
+             *(  ( 3.0 + rhoA/RhoTQuant.rhoT ) * 
               this->delta1 + rhoB*( this->delta0 - 11.0)/
               (RhoTQuant.rho2)  ) 
            + (rhoB/9.0)
              *( 1.0 - 3.0*this->delta0 -rhoA*(this->delta0 - 11)/
-             this->rhoT );
+             RhoTQuant.rhoT );
     this->d2LYPdrhgAA *= -this->a *  this->b * this->omega0;
     this->d2LYPdrhgAA += this->dLYPdgAA*this->omega1/this->omega0;
 //  Eq A30 (del^2 LYP / (del rho_X del gammaXY))
-    this->d2LYPdrhgAB  =  - 8.0*this->rhoT/3.0;
+    this->d2LYPdrhgAB  =  - 8.0*RhoTQuant.rhoT/3.0;
     this->d2LYPdrhgAB +=  -  this->delta1*(7.0*rhoA*rhoB/9.0);
     this->d2LYPdrhgAB +=  rhoB*(47.0-7.0*this->delta0)/9.0;
     this->d2LYPdrhgAB *= -this->a *  this->b * this->omega0;
     this->d2LYPdrhgAB += this->dLYPdgAB*this->omega1/this->omega0;
 //  Eq A31 (del^2 LYP / (del rho_X del gammaYY)) (debugged alread)
     this->d2LYPdrhgBB =   - (rhoA*rhoB/9.0) 
-             *(  ( 3.0 + rhoB/ this->rhoT ) *  this->delta1 - rhoB*
+             *(  ( 3.0 + rhoB/ RhoTQuant.rhoT ) *  this->delta1 - rhoB*
            (this->delta0 - 11.0)/( RhoTQuant.rho2)  ) 
            + (rhoB/9.0)
            * ( 1.0 - 3.0* this->delta0 
-           - rhoB*(this->delta0 - 11)/ this->rhoT )
+           - rhoB*(this->delta0 - 11)/ RhoTQuant.rhoT )
            - 2.0 * rhoA;
     this->d2LYPdrhgBB *= -this->a *  this->b * this->omega0;
     this->d2LYPdrhgBB += this->dLYPdgBB*this->omega1/this->omega0;
@@ -112,9 +115,9 @@ DFTFunctional::DFTInfo lyp::eval(const double &rhoA, const double &rhoB, const d
 //  if( rhoA <  this-> small) {return info;}
 //  if( rhoB <  this-> small) {return info;}
 //  if( (rhoA+rhoB) <  this-> small) {return info;}
-  this->rhoT          = rhoA + rhoB;
+//  this->rhoT          = rhoA + rhoB;
   denspow RhoTQuant;
-  this->popDensPow(this->rhoT, RhoTQuant);
+  this->popDensPow(rhoA, rhoB, RhoTQuant);
   this->popLYPdens(rhoA, rhoB, RhoTQuant);
 //  if( gammaAA <  this-> small) {return info ;}
 //  if( gammaAB <  this-> small) {return info ;}
@@ -128,9 +131,9 @@ DFTFunctional::DFTInfo lyp::eval(const double &rhoA, const double &rhoB, const d
 //  Eq. A28  dLYP/dRhoA (debugged)
   info.ddrhoA = this->dLYPdgAA ;
     info.ddrhoA   = - 4.0 *  this->a * rhoA * rhoB 
-      / ( ( this->rhoT)*(1.0 +  this->d/RhoTQuant.rho1over3 ) );
+      / ( ( RhoTQuant.rhoT)*(1.0 +  this->d/RhoTQuant.rho1over3 ) );
     info.ddrhoA  *= ( (1.0/rhoA)
-                  -(1.0/this->rhoT) 
+                  -(1.0/RhoTQuant.rhoT) 
                   +((this->d/3.0) 
                   * RhoTQuant.rhom4over3 / (1.0 + this->d 
                   / RhoTQuant.rho1over3  ) )
@@ -138,18 +141,18 @@ DFTFunctional::DFTInfo lyp::eval(const double &rhoA, const double &rhoB, const d
     info.ddrhoA  += - this->Cfact * this->a * this->b 
              *( 
               (this->omega1 * rhoA * rhoB 
-               * (this->rhoA8over3 + this->rhoB8over3))
-              +(this->omega0 * rhoB * ( (11.0*this->rhoA8over3/3.0) 
-               + this->rhoB8over3))
+               * (RhoTQuant.rhoA8over3 + RhoTQuant.rhoB8over3))
+              +(this->omega0 * rhoB * ( (11.0*RhoTQuant.rhoA8over3/3.0) 
+               + RhoTQuant.rhoB8over3))
              );
     info.ddrhoA  += gammaAA* this->d2LYPdrhgAA;
     info.ddrhoA  += gammaAB* this->d2LYPdrhgAB;
     info.ddrhoA  += gammaBB* this->d2LYPdrhgBB;
 //  Eq. A28* dLYP/dRhoB (debugged)
     info.ddrhoB   = - 4.0 *  this->a * rhoA * rhoB 
-      / ( ( this->rhoT)*(1.0 +  this->d/RhoTQuant.rho1over3 ) );
+      / ( ( RhoTQuant.rhoT)*(1.0 +  this->d/RhoTQuant.rho1over3 ) );
     info.ddrhoB  *= ( (1.0/rhoB)
-                  -(1.0/this->rhoT) 
+                  -(1.0/RhoTQuant.rhoT) 
                   +((this->d/3.0) 
                   * RhoTQuant.rhom4over3 / (1.0 + this->d 
                   / RhoTQuant.rho1over3  ) )
@@ -157,17 +160,17 @@ DFTFunctional::DFTInfo lyp::eval(const double &rhoA, const double &rhoB, const d
     info.ddrhoB  += - this->Cfact * this->a * this->b 
              *( 
               (this->omega1 * rhoA * rhoB 
-               * (this->rhoA8over3 + this->rhoB8over3))
-              +(this->omega0 * rhoA * ( (11.0*this->rhoB8over3/3.0) 
-               + this->rhoA8over3))
+               * (RhoTQuant.rhoA8over3 + RhoTQuant.rhoB8over3))
+              +(this->omega0 * rhoA * ( (11.0*RhoTQuant.rhoB8over3/3.0) 
+               + RhoTQuant.rhoA8over3))
              );
     info.ddrhoB  += gammaBB* this->d2LYPdrhgAA;
     info.ddrhoB  += gammaAB* this->d2LYPdrhgAB;
     info.ddrhoB  += gammaAA* this->d2LYPdrhgBB;
     info.eps  = - 4.0 * this->a * rhoA * rhoB 
-      / ( this->rhoT*(1.0 + this->d / RhoTQuant.rho1over3 ) );
+      / ( RhoTQuant.rhoT*(1.0 + this->d / RhoTQuant.rho1over3 ) );
     info.eps += - this->Cfact * this->a * this->b 
-      * this->omega0 * rhoA * rhoB * (this->rhoA8over3 + this->rhoB8over3); 
+      * this->omega0 * rhoA * rhoB * (RhoTQuant.rhoA8over3 + RhoTQuant.rhoB8over3); 
     info.eps += info.ddgammaAA * gammaAA;
     info.eps += info.ddgammaBB * gammaBB;
     info.eps += info.ddgammaAB * gammaAB;

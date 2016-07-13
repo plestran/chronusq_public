@@ -196,11 +196,7 @@ class lyp : public DFTFunctional {
   double omega0     ;    
   double delta1     ;    
   double delta0     ;    
-  double rhoT     ;    
   double spindensity   ;
-  double rho1over3 ;
-  double rhoA8over3 ;
-  double rhoB8over3 ;
   double dLYPdgAA   ;
   double dLYPdgBB   ;
   double dLYPdgAB   ;
@@ -209,15 +205,18 @@ class lyp : public DFTFunctional {
   double d2LYPdrhgBB   ;
 public:
   struct denspow {
+    double rhoT;          // rhoA + rhoB 
     double rho2;          // ^(2) 
     double rho1over3;     // ^(1/3) 
     double rhom4over3;    // ^(-4/3) 
     double rho5over3;     // ^(5/3) 
     double rhom11over3;   // ^(-11/3)   
+    double rhoA8over3;   // ^(8/3) alpha  
+    double rhoB8over3;   // ^(8/3) beta   
     };
   lyp(double X = 1.0, double eps = 1e-10);
-  void popLYPdens(double rhoA, double rhoB, denspow &denquant);
-  void popDensPow(const double &rho, denspow &denquant);  
+  void popLYPdens(const double &rhoA, const double &rhoB, denspow &denquant);
+  void popDensPow(const double &rhoA, const double &rhoB, denspow &denquant);  
   DFTInfo eval(const double &rhoA, const double &rhoB);
   DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaBB);
   DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB, const double &gammaBB);
