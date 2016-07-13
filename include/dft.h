@@ -208,9 +208,15 @@ class lyp : public DFTFunctional {
   double d2LYPdrhgAB   ;
   double d2LYPdrhgBB   ;
 public:
+  struct denspow {
+    double rho2;         // ^(2) 
+    double rho1over3;    // ^(1/3) 
+    double rho5over3;    // ^(5/3) 
+    double rhom11over3;  // ^(-11/3)   
+    };
   lyp(double X = 1.0, double eps = 1e-10);
-  std::vector<double> denspow(const double &rho);
-  void popLYPdens(double rhoA, double rhoB);
+  void popLYPdens(double rhoA, double rhoB, denspow &denquant);
+  void popDensPow(const double &rho, denspow &denquant);  
   DFTInfo eval(const double &rhoA, const double &rhoB);
   DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaBB);
   DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB, const double &gammaBB);

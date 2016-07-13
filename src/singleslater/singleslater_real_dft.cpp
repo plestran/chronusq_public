@@ -82,7 +82,7 @@ void SingleSlater<double>::formVXC_new(){
   int NSkip3(0);
   int NSkip4(0);
   int NSkip5(0);
-  bool doTimings(false);
+  bool doTimings(true);
 
   auto Newstart = std::chrono::high_resolution_clock::now();
   auto Newend = std::chrono::high_resolution_clock::now();
@@ -272,10 +272,13 @@ void SingleSlater<double>::formVXC_new(){
     if(doTimings) Newstart = std::chrono::high_resolution_clock::now();
     for(auto iXYZ = 0; iXYZ < 3; iXYZ++){
       double GA(GradRhoA(iXYZ)), GB(GradRhoB(iXYZ));
-      GradRhoA(iXYZ) = pt.weight * 
-        ( 2.0 * GA * kernelXC.ddgammaAA + GB * kernelXC.ddgammaAB);
-//    GradRhoB(iXYZ) = pt.weight * 
-//      ( 2.0 * GB * kernelXC.ddgammaBB + GA * kernelXC.ddgammaAB);
+//      if(this->nTCS_ == 1 && this->isClosedShell){
+        GradRhoA(iXYZ) = pt.weight * 
+          ( 2.0 * GA * kernelXC.ddgammaAA + GB * kernelXC.ddgammaAB);
+//      }elseif(this->nTCS_ == 1 && this->!isClosedShell){
+        GradRhoB(iXYZ) = pt.weight * 
+          ( 2.0 * GB * kernelXC.ddgammaBB + GA * kernelXC.ddgammaAB);
+//      }
     }
 
     OmegaA.setZero(); 

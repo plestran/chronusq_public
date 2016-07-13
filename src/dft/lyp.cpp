@@ -13,35 +13,46 @@ DFTFunctional(X,eps){
 
   this->name = "LYP";
 };
-  std::vector<double> denspow(const double &rho)  {
-    std::vector<double> rhopow;
-    return rhopow;
+
+
+    void lyp::popDensPow(const double &rho, denspow &denquant)  {
+    double tmp = 1.0/3.0;
+    denquant.rho1over3   = std::pow(rho,this->d1over3);
+    denquant.rho2        = rho*rho;
+    denquant.rho5over3   = denquant.rho1over3*denquant.rho1over3*rho;
+    denquant.rhom11over3 = 1.0/(denquant.rho5over3*denquant.rho2);
+//    cout << denquant.rho1over3 << endl ;
+//    cout << denquant.rho2 << endl ;
+//    cout << denquant.rho5over3 << endl ;
+//    cout << denquant.rhom11over3 << endl ;
+    return ;
     }; 
 
-void lyp::popLYPdens(double rhoA, double rhoB){
-  this->rhoT          = rhoA + rhoB;
+void lyp::popLYPdens(double rhoA, double rhoB, denspow &RhoTQuant){
 //  this->spindensity   = (rhoA - rhoB) / this->rhoT;
 //  if( this->rhoT <  this-> small) {return ;}
 //  cout << "rhoT " << this->rhoT <<endl;
 //  cout << "rhoMz " << this->spindensity <<endl;
-  this->rho1over3 = std::pow(this->rhoT,this->d1over3);
+//  this->rho1over3 = std::pow(this->rhoT,this->d1over3);
   this->rhoA8over3 = std::pow(rhoA,(8.0/3.0));
   this->rhoB8over3 = std::pow(rhoB,(8.0/3.0));
 //function used in LYP Correlation (Eq. A26, A32 Ref.LYP2)
-  this->omega0  =  std::exp(-this->c / this->rho1over3);
-  this->omega0 /=  1.0 + (this->d / this->rho1over3);
-  this->omega0 *= std::pow(this->rhoT,(-11.0/3.0));
-  this->omega1  = this->omega0*(11.0*this->rho1over3 -this->c - 
-    (this->d / (1 +this->d/this->rho1over3) )  );
-  this->omega1 /= -3.0*this->rhoT*this->rho1over3 ;
+  this->omega0  =  std::exp(-this->c / RhoTQuant.rho1over3);
+  this->omega0 /=  1.0 + (this->d / RhoTQuant.rho1over3);
+//  this->omega0 *= std::pow(this->rhoT,(-11.0/3.0));
+  this->omega0 *= RhoTQuant.rhom11over3;
+  this->omega1  = this->omega0*(11.0*RhoTQuant.rho1over3 -this->c - 
+    (this->d / (1 +this->d/RhoTQuant.rho1over3) )  );
+  this->omega1 /= -3.0*this->rhoT*RhoTQuant.rho1over3 ;
 //function used in LYP Correlation (Eq. A27, A33 Ref.LYP2)
-  this->delta0  = this->d / this->rho1over3;
-  this->delta0 /= (1.0 + this->d / this->rho1over3);
-  this->delta0 += this->c / this->rho1over3;
+  this->delta0  = this->d / RhoTQuant.rho1over3;
+  this->delta0 /= (1.0 + this->d / RhoTQuant.rho1over3);
+  this->delta0 += this->c / RhoTQuant.rho1over3;
   this->delta1  =  this->delta0/(-3.0*this->rhoT);
-  this->delta1 += (this->d *this->d / std::pow(this->rhoT,(5.0/3.0))) 
-    /( 3.0 * (1.0 + this->d / this->rho1over3) 
-    * (1.0 + this->d / this->rho1over3) );
+//  this->delta1 += (this->d *this->d / std::pow(this->rhoT,(5.0/3.0))) 
+  this->delta1 += (this->d *this->d / RhoTQuant.rho5over3 ) 
+    /( 3.0 * (1.0 + this->d / RhoTQuant.rho1over3) 
+    * (1.0 + this->d / RhoTQuant.rho1over3) );
   // Eq A23(delLYP/delgammaAA) and eq A25(delLYP/delgammaBB) (remind for A25 call the function inverting rhoA with rhoB)
      this->dLYPdgAA   = 11.0 - this->delta0;
      this->dLYPdgAA  *= rhoA/this->rhoT;
@@ -58,13 +69,13 @@ void lyp::popLYPdens(double rhoA, double rhoB){
 //  Eq A24 (delLYP/delgammaAB)
       this->dLYPdgAB  = 47.0 - 7.0 *  this->delta0;
       this->dLYPdgAB *= rhoA * rhoB / 9.0;
-      this->dLYPdgAB -= 4.0 *  this->rhoT *  this->rhoT / 3.0;
+      this->dLYPdgAB -= 4.0 *  RhoTQuant.rho2/ 3.0;
       this->dLYPdgAB *= - this->a *  this->b * this->omega0;
 //  Eq A29 (del^2 LYP / (del rho_X del gammaXX))
       this->d2LYPdrhgAA =   - (rhoA*rhoB/9.0) 
              *(  ( 3.0 + rhoA/this->rhoT ) * 
               this->delta1 + rhoB*( this->delta0 - 11.0)/
-              (this->rhoT*this->rhoT)  ) 
+              (RhoTQuant.rho2)  ) 
            + (rhoB/9.0)
              *( 1.0 - 3.0*this->delta0 -rhoA*(this->delta0 - 11)/
              this->rhoT );
@@ -79,7 +90,7 @@ void lyp::popLYPdens(double rhoA, double rhoB){
 //  Eq A31 (del^2 LYP / (del rho_X del gammaYY)) (debugged alread)
     this->d2LYPdrhgBB =   - (rhoA*rhoB/9.0) 
              *(  ( 3.0 + rhoB/ this->rhoT ) *  this->delta1 - rhoB*
-           (this->delta0 - 11.0)/( this->rhoT* this->rhoT)  ) 
+           (this->delta0 - 11.0)/( RhoTQuant.rho2)  ) 
            + (rhoB/9.0)
            * ( 1.0 - 3.0* this->delta0 
            - rhoB*(this->delta0 - 11)/ this->rhoT )
@@ -100,7 +111,10 @@ DFTFunctional::DFTInfo lyp::eval(const double &rhoA, const double &rhoB, const d
 //  if( rhoA <  this-> small) {return info;}
 //  if( rhoB <  this-> small) {return info;}
 //  if( (rhoA+rhoB) <  this-> small) {return info;}
-  this->popLYPdens(rhoA, rhoB);
+  this->rhoT          = rhoA + rhoB;
+  denspow RhoTQuant;
+  this->popDensPow(this->rhoT, RhoTQuant);
+  this->popLYPdens(rhoA, rhoB, RhoTQuant);
 //  if( gammaAA <  this-> small) {return info ;}
 //  if( gammaAB <  this-> small) {return info ;}
 //  if( gammaBB <  this-> small) {return info ;}
@@ -113,7 +127,7 @@ DFTFunctional::DFTInfo lyp::eval(const double &rhoA, const double &rhoB, const d
 //  Eq. A28  dLYP/dRhoA (debugged)
   info.ddrhoA = this->dLYPdgAA ;
     info.ddrhoA   = - 4.0 *  this->a * rhoA * rhoB 
-      / ( ( this->rhoT)*(1.0 +  this->d/this->rho1over3 ) );
+      / ( ( this->rhoT)*(1.0 +  this->d/RhoTQuant.rho1over3 ) );
     info.ddrhoA  *= ( (1.0/rhoA)
                   -(1.0/this->rhoT) 
                   +((this->d/3.0) 
@@ -132,7 +146,7 @@ DFTFunctional::DFTInfo lyp::eval(const double &rhoA, const double &rhoB, const d
     info.ddrhoA  += gammaBB* this->d2LYPdrhgBB;
 //  Eq. A28* dLYP/dRhoB (debugged)
     info.ddrhoB   = - 4.0 *  this->a * rhoA * rhoB 
-      / ( ( this->rhoT)*(1.0 +  this->d/this->rho1over3 ) );
+      / ( ( this->rhoT)*(1.0 +  this->d/RhoTQuant.rho1over3 ) );
     info.ddrhoB  *= ( (1.0/rhoB)
                   -(1.0/this->rhoT) 
                   +((this->d/3.0) 
