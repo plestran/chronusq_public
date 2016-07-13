@@ -18,6 +18,7 @@ DFTFunctional(X,eps){
     void lyp::popDensPow(const double &rho, denspow &denquant)  {
     double tmp = 1.0/3.0;
     denquant.rho1over3   = std::pow(rho,this->d1over3);
+    denquant.rhom4over3  = 1.0/(denquant.rho1over3*rho);
     denquant.rho2        = rho*rho;
     denquant.rho5over3   = denquant.rho1over3*denquant.rho1over3*rho;
     denquant.rhom11over3 = 1.0/(denquant.rho5over3*denquant.rho2);
@@ -131,8 +132,8 @@ DFTFunctional::DFTInfo lyp::eval(const double &rhoA, const double &rhoB, const d
     info.ddrhoA  *= ( (1.0/rhoA)
                   -(1.0/this->rhoT) 
                   +((this->d/3.0) 
-                  * (std::pow((this->rhoT),(-4.0/3.0)))/ (1.0 + this->d 
-                  * std::pow(this->rhoT,(-1.0/3.0))))
+                  * RhoTQuant.rhom4over3 / (1.0 + this->d 
+                  / RhoTQuant.rho1over3  ) )
                  );
     info.ddrhoA  += - this->Cfact * this->a * this->b 
              *( 
@@ -150,8 +151,8 @@ DFTFunctional::DFTInfo lyp::eval(const double &rhoA, const double &rhoB, const d
     info.ddrhoB  *= ( (1.0/rhoB)
                   -(1.0/this->rhoT) 
                   +((this->d/3.0) 
-                  * (std::pow((this->rhoT),(-4.0/3.0)))/ (1.0 + this->d 
-                  * std::pow(this->rhoT,(-1.0/3.0))))
+                  * RhoTQuant.rhom4over3 / (1.0 + this->d 
+                  / RhoTQuant.rho1over3  ) )
                  );
     info.ddrhoB  += - this->Cfact * this->a * this->b 
              *( 
@@ -164,7 +165,7 @@ DFTFunctional::DFTInfo lyp::eval(const double &rhoA, const double &rhoB, const d
     info.ddrhoB  += gammaAB* this->d2LYPdrhgAB;
     info.ddrhoB  += gammaAA* this->d2LYPdrhgBB;
     info.eps  = - 4.0 * this->a * rhoA * rhoB 
-      / ( this->rhoT*(1.0 + this->d / std::pow(this->rhoT,this-> d1over3) ) );
+      / ( this->rhoT*(1.0 + this->d / RhoTQuant.rho1over3 ) );
     info.eps += - this->Cfact * this->a * this->b 
       * this->omega0 * rhoA * rhoB * (this->rhoA8over3 + this->rhoB8over3); 
     info.eps += info.ddgammaAA * gammaAA;

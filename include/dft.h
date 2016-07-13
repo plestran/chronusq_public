@@ -209,10 +209,11 @@ class lyp : public DFTFunctional {
   double d2LYPdrhgBB   ;
 public:
   struct denspow {
-    double rho2;         // ^(2) 
-    double rho1over3;    // ^(1/3) 
-    double rho5over3;    // ^(5/3) 
-    double rhom11over3;  // ^(-11/3)   
+    double rho2;          // ^(2) 
+    double rho1over3;     // ^(1/3) 
+    double rhom4over3;    // ^(-4/3) 
+    double rho5over3;     // ^(5/3) 
+    double rhom11over3;   // ^(-11/3)   
     };
   lyp(double X = 1.0, double eps = 1e-10);
   void popLYPdens(double rhoA, double rhoB, denspow &denquant);
