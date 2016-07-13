@@ -10,6 +10,10 @@ lyp::lyp(){
   this-> c = 0.2533;
   this-> d = 0.349;
 };
+  std::vector<double> denspow(const double &rho)  {
+    std::vector<double> rhopow;
+    return rhopow;
+    }; 
 
 void lyp::popLYPdens(double rhoA, double rhoB){
   this->rhoT          = rhoA + rhoB;

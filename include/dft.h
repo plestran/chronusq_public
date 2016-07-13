@@ -206,6 +206,7 @@ class lyp : public DFTFunctional {
   double d2LYPdrhgBB   ;
 public:
   lyp();
+  std::vector<double> denspow(const double &rho);
   void popLYPdens(double rhoA, double rhoB);
   DFTInfo eval(const double &rhoA, const double &rhoB);
   DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaBB);
