@@ -22,9 +22,27 @@ int main() {
     fileio.iniStdGroups(); //Setting up and partitioning files
     CQSetNumThreads(1); //Sets up open MP threads
 
-    molecule.setCharge(1);
+/*
+// Li3
+    molecule.setCharge(0);
     molecule.setNTotalE(9);
     molecule.setMultip(6);
+    molecule.setNAtoms(3);
+    molecule.alloc(); //allocates all memory for the class
+
+    molecule.setIndex(0,HashAtom("Li",0));
+    molecule.setIndex(1,HashAtom("Li",0));
+    molecule.setIndex(2,HashAtom("Li",0));
+
+    molecule.setCart(0,-1.05,0.0,0.0); //In Angstroms!
+    molecule.setCart(1,1.05,0.0,0.0);
+    molecule.setCart(2,0.0,1.81865,0.0);
+*/
+
+// WATER (H20 +)
+    molecule.setCharge(0);
+    molecule.setNTotalE(10);
+    molecule.setMultip(1);
     molecule.setNAtoms(3);
     molecule.alloc(); //allocates all memory for the class
 
@@ -35,6 +53,7 @@ int main() {
     molecule.setCart(0,-0.464,0.177,0.0); //In Angstroms!
     molecule.setCart(1,-0.464,1.137,0.0);
     molecule.setCart(2,0.441,-0.143,0.0);
+//
 
     molecule.convBohr();
     molecule.computeNucRep();
@@ -44,6 +63,7 @@ int main() {
     molecule.computeI();
 
     singleSlater.setRef(SingleSlater<dcomplex>::TCS); //TCS == GHF?
+    singleSlater.setSCFEneTol(1e-12);
     singleSlater.setNTCS(2);
     singleSlater.isClosedShell = false;
     singleSlater.doDIIS = false;
@@ -59,6 +79,7 @@ int main() {
     singleSlater.communicate(molecule,basis,aoints,fileio,memManager);
     moints.communicate(molecule,basis,fileio,aoints,singleSlater);
 
+    aoints.setPrintLevel(2);
     aoints.initMeta();
     aoints.integralAlgorithm = AOIntegrals::INCORE;
     aoints.doX2C = true;

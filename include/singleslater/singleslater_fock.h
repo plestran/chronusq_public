@@ -191,9 +191,12 @@ void SingleSlater<T>::formFock(){
       this->fockScalar_->real() += (*this->aointegrals_->coreH_);
       
       if(this->nTCS_ == 2) {
-        (*this->fockMx_) += (*this->aointegrals_->oneEmx_);
-        (*this->fockMy_) += (*this->aointegrals_->oneEmy_);
-        (*this->fockMz_) += (*this->aointegrals_->oneEmz_);
+//        cout << "nTCS == 2 ... buiding Fock" << endl;
+        this->fockMx_->setZero();
+        this->fockMy_->setZero();
+       // (*this->fockMx_) += -1*(*this->aointegrals_->oneEmx_);
+       // (*this->fockMy_) += (*this->aointegrals_->oneEmy_);
+       // (*this->fockMz_) += -1*(*this->aointegrals_->oneEmz_);
         }
 
       this->aointegrals_->addElecDipole(*this->fockScalar_,this->elecField_);

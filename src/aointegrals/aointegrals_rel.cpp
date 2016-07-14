@@ -39,7 +39,10 @@ void AOIntegrals::formP2Transformation(){
   RealMatrix TUncontracted(nUncontracted,nUncontracted);
   RealMatrix VUncontracted(nUncontracted,nUncontracted);
 
+if(this->printLevel_ >= 2){
   RealMatrix TCpy(*this->kinetic_);
+  prettyPrint(this->fileio_->out,TCpy,"T (non-rel)");
+}
 
   libint2::Engine engineS(
       libint2::Operator::overlap,1,this->basisSet_->maxL(),0);
@@ -104,13 +107,14 @@ void AOIntegrals::formP2Transformation(){
   SUncontracted = SUncontracted.selfadjointView<Lower>();
   TUncontracted = TUncontracted.selfadjointView<Lower>();
 
-/*
+
+if(this->printLevel_ >= 2){
   prettyPrint(this->fileio_->out,TUncontracted,"T uncontracted");
 
   RealMatrix TnonRel = (*this->basisSet_->mapPrim2Bf()) * TUncontracted
 	* (*this->basisSet_->mapPrim2Bf()).transpose();  
   prettyPrint(this->fileio_->out,TnonRel,"T nonRel");
-*/
+}
 
   RealMatrix SUn(nUncontracted,nUncontracted);
   SUn = SUncontracted.real(); // Save S for later
@@ -298,19 +302,21 @@ void AOIntegrals::formP2Transformation(){
   TMP = UK.adjoint() * PVPZ;
   PVPZ = TMP * UK;
 
-//prettyPrint(cout,P2_Potential,"V");
-//prettyPrint(cout,PVPS,"dot(P,VP)");
-//prettyPrint(cout,PVPX,"cross(P,VP) X");
-//prettyPrint(cout,PVPY,"cross(P,VP) Y");
-//prettyPrint(cout,PVPZ,"cross(P,VP) Z");
-//cout << "|V| = " << P2_Potential.squaredNorm() << endl;
-//cout << "|dot(P,VP)| = " << PVPS.squaredNorm() << endl;
-//cout << "|cross(P,VP) X| = " << PVPX.squaredNorm() << endl;
-//cout << "|cross(P,VP) Y| = " << PVPY.squaredNorm() << endl;
-//cout << "|cross(P,VP) Z| = " << PVPZ.squaredNorm() << endl;
+/*
+  prettyPrint(cout,P2_Potential,"V");
+  prettyPrint(cout,PVPS,"dot(P,VP)");
+  prettyPrint(cout,PVPX,"cross(P,VP) X");
+  prettyPrint(cout,PVPY,"cross(P,VP) Y");
+  prettyPrint(cout,PVPZ,"cross(P,VP) Z");
+  cout << "|V| = " << P2_Potential.squaredNorm() << endl;
+  cout << "|dot(P,VP)| = " << PVPS.squaredNorm() << endl;
+  cout << "|cross(P,VP) X| = " << PVPX.squaredNorm() << endl;
+  cout << "|cross(P,VP) Y| = " << PVPY.squaredNorm() << endl;
+  cout << "|cross(P,VP) Z| = " << PVPZ.squaredNorm() << endl;
+*/
 
   RealVecMap PMap(&ovlpEigValues[0],nUncontracted);
-//prettyPrint(cout,PMap,"P^2");
+  prettyPrint(cout,PMap,"P^2");
 
   PMap = 2*PMap;
   PMap = PMap.cwiseSqrt();
@@ -391,7 +397,7 @@ void AOIntegrals::formP2Transformation(){
 // ------------------------------
 
 //prettyPrintComplex(cout,CORE_HAMILTONIAN,"H");
-//cout << "|H|" << CORE_HAMILTONIAN.squaredNorm();
+cout << "|H|" << CORE_HAMILTONIAN.squaredNorm();
 
   Eigen::SelfAdjointEigenSolver<ComplexMatrix> es;
   es.compute(CORE_HAMILTONIAN);
@@ -399,7 +405,7 @@ void AOIntegrals::formP2Transformation(){
   ComplexMatrix HEVx= es.eigenvectors();
 
 // Print out the energies (eigenvalues) and eigenvectors
-//  prettyPrint(cout,HEV,"HEV");
+  prettyPrint(cout,HEV,"HEV");
 //  prettyPrintComplex(cout,HEVx,"HEVc");
 
 // Grab C_L (+) and C_S (+) - the large and small components
@@ -456,7 +462,7 @@ void AOIntegrals::formP2Transformation(){
   KinEn = KinEn.cwiseSqrt();
   KinEn -= ComplexMatrix::Identity(2*nUncontracted,2*nUncontracted) * phys.SPEED_OF_LIGHT * phys.SPEED_OF_LIGHT;
 
-//  prettyPrint(this->fileio_->out,KinEn,"Relativistic Kinetic Energy");
+  prettyPrint(this->fileio_->out,KinEn,"Relativistic Kinetic Energy");
 
 //  cout << KinEn.squaredNorm() << " Kintetic energy norm" << endl;
 
@@ -498,6 +504,10 @@ if(this->printLevel_ >= 2){
 //  prettyPrint(this->fileio_->out,HCore.real(),"HCore Real");
 //  prettyPrint(this->fileio_->out,HCore.imag(),"HCore Imag");
 
+
+  ComplexMatrix Veff(2*nUncontracted,2*nUncontracted);
+  Veff = HCore - KinEn;
+
   RealMatrix Hs(nUncontracted,nUncontracted);
   RealMatrix Hz(nUncontracted,nUncontracted);
   RealMatrix Hx(nUncontracted,nUncontracted);
@@ -537,9 +547,6 @@ if(this->printLevel_ >= 2){
   prettyPrint(this->fileio_->out,Hy,"Hy (r space)");
 }
 
-  ComplexMatrix Veff(2*nUncontracted,2*nUncontracted);
-  Veff = HCore - KinEn;
-
      
 //  prettyPrint(this->fileio_->out,Veff,"Veff (p space)");
 /* 
@@ -578,10 +585,18 @@ if(this->printLevel_ >= 2){
 	KinEn.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).real());
   RealMatrix VCon = 0.5 * (Veff.block(0,0,nUncontracted,nUncontracted).real() + 
 	Veff.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).real());
+if(this->printLevel_ >= 2){
+  prettyPrint(this->fileio_->out,TCon,"Trel (p space)");
+  prettyPrint(this->fileio_->out,VCon,"Vrel (p space)");
+ }
   rTEMP = TCon * UK.adjoint() * SUn;
   TCon = SUn * UK * rTEMP;
   rTEMP = VCon * UK.adjoint() * SUn;
   VCon = SUn * UK * rTEMP;
+if(this->printLevel_ >= 2){
+  prettyPrint(this->fileio_->out,TCon,"Trel (r space)");
+  prettyPrint(this->fileio_->out,VCon,"Vrel (r space)");
+ }
 
   TCon = (*this->basisSet_->mapPrim2Bf()) * TCon * IPrim2Bf;
   VCon = (*this->basisSet_->mapPrim2Bf()) * VCon * IPrim2Bf;
@@ -601,6 +616,39 @@ if(this->printLevel_ >= 2) {
   prettyPrint(this->fileio_->out,CoreZ,"Core (mz)");
   prettyPrint(this->fileio_->out,CoreX,"Core (mx)");
   prettyPrint(this->fileio_->out,CoreY,"Core (my)");
+
+
+  ComplexMatrix TCSham(2*nBasis_,2*nBasis_);;
+
+/*
+  std::vector<std::reference_wrapper<RealMatrix>> mats;
+  
+  mats.emplace_back(CoreS);
+  mats.emplace_back(CoreZ);
+  mats.emplace_back(CoreY);
+  mats.emplace_back(CoreX);
+
+  Quantum<double>::spinGather(TCSham,mats);
+*/
+  TCSham.block(0,0,nBasis_,nBasis_).real() = CoreS;
+  TCSham.block(nBasis_,nBasis_,nBasis_,nBasis_).real() = CoreS;
+  TCSham.block(0,0,nBasis_,nBasis_).imag() = CoreZ;
+  TCSham.block(nBasis_,nBasis_,nBasis_,nBasis_).imag() = -1*CoreZ;
+  TCSham.block(0,nBasis_,nBasis_,nBasis_).imag() = CoreX;
+  TCSham.block(nBasis_,0,nBasis_,nBasis_).imag() = CoreX;
+  TCSham.block(0,nBasis_,nBasis_,nBasis_).real() = CoreY;
+  TCSham.block(nBasis_,0,nBasis_,nBasis_).real() = -1*CoreY;
+  
+
+  prettyPrint(this->fileio_->out,TCSham.real(),"Two component Hamiltonian (real)");
+  prettyPrint(this->fileio_->out,TCSham.imag(),"Two component Hamiltonian (imag)");
+
+  es.compute(TCSham);
+  HEV= es.eigenvalues();
+//  HEVx= es.eigenvectors();
+
+  prettyPrint(cout,HEV,"HEV");
+//  prettyPrintComplex(cout,HEVx,"HEVc");
 }
 
   *this->coreH_ = CoreS;
