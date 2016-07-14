@@ -169,8 +169,8 @@ class BEightEight : public DFTFunctional {
   double small;    
 public:
   BEightEight(double X = 1.0, double eps = 1e-10);
-  double g0B88 (double x);
-  double g1B88 (double x);
+  double g0B88 (double x, double &sinhx, double &bx);
+  double g1B88 (double x, double &sinhx, double &bx);
   DFTInfo eval(const double &rhoA, const double &rhoB);
   DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaBB);
   DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB, const double &gammaBB);
