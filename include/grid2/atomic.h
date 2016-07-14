@@ -85,8 +85,10 @@ class AtomicGrid : public TwoDGrid2 {
 //    if(partweight < 1e-10) rawPoint.evalpt = false;
  
       rawPoint.weight *= partweight;
+
       if(std::abs(rawPoint.weight) < std::numeric_limits<double>::epsilon()) 
         rawPoint.evalpt = false;
+
 //Screening now off APE
 //      if(partweight < 1e-6) rawPoint.evalpt = false;
       return rawPoint;

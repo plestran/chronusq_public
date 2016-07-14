@@ -13,12 +13,10 @@ class TwoDGrid2 : public Grid2 {
   protected:
     std::unique_ptr<OneDGrid2> GRad;
     std::unique_ptr<OneDGrid2> GAng;
-
   public:
     TwoDGrid2(size_t nPtsRad, size_t nPtsAng, GRID_TYPE GTypeRad, 
         GRID_TYPE GTypeAng, bool onTheFly = true) : 
       Grid2(nPtsRad*nPtsAng,true) {
-
       if(GTypeRad == GAUSSCHEBFST) {
         GRad = std::unique_ptr<OneDGrid2>(new GaussChebFst(nPtsRad,onTheFly));
       } else if(GTypeRad == GAUSSCHEBSND) {
