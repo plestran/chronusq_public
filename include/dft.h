@@ -166,15 +166,7 @@ class BEightEight : public DFTFunctional {
   double  d4over3;
   double CxVx;  //TF LDA Prefactor (for Vx)  
   double beta;    
-  double rhoT     ;    
-  double spindensity   ;
   double small;    
-  double xA;
-  double xB;
-  double rhoA1ov3 ;
-  double rhoA4ov3 ;
-  double rhoB1ov3 ;
-  double rhoB4ov3 ;
 public:
   BEightEight(double X = 1.0, double eps = 1e-10);
   double g0B88 (double x);

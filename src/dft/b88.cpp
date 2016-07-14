@@ -51,11 +51,13 @@ DFTFunctional::DFTInfo BEightEight::eval(const double &rhoA, const double &rhoB)
 
 DFTFunctional::DFTInfo BEightEight::eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB, const double &gammaBB){
   DFTFunctional::DFTInfo info;
-  this->rhoT          = rhoA + rhoB;
-  this->spindensity   = (rhoA - rhoB) / this->rhoT;
-  rhoA1ov3 = std::pow(rhoA,this->d1over3);
+  double spindensity   = (rhoA - rhoB); 
+  spindensity         /= (rhoA + rhoB);
+  double rhoA1ov3 = std::pow(rhoA,this->d1over3);
+  double rhoB1ov3 ;
 //rhoA4ov3 = std::pow(rhoA,this->d4over3);
-  rhoA4ov3 = rhoA1ov3 * rhoA; 
+  double rhoA4ov3 = rhoA1ov3 * rhoA; 
+  double rhoB4ov3 ; 
   if(std::abs(spindensity) > this->small) {
     rhoB1ov3 = std::pow(rhoB,this->d1over3);
     rhoB4ov3 = rhoB1ov3 * rhoB; 
@@ -63,15 +65,16 @@ DFTFunctional::DFTInfo BEightEight::eval(const double &rhoA, const double &rhoB,
 // Note that in Eq A5 xA   = gammaAA / rhoA4ov3; 
 // but actually they meants xA = sqrt(gammaAA) /rhoA4ov3
 // and also eq A6 rho is rho^(1/3) instead of rho^(4/3)
-  this->xA   = std::sqrt(gammaAA) / rhoA4ov3; 
+  double xA   = std::sqrt(gammaAA) / rhoA4ov3; 
+  double xB ; 
   info.eps        = rhoA4ov3*this->g0B88(xA);
   info.ddrhoA     = this->g0B88(xA) - xA*this->g1B88(xA);
   info.ddrhoA    *= this->d4over3*rhoA1ov3;
   info.ddgammaAA  = 0.5*(this->g1B88(xA))/(std::sqrt(gammaAA));
-  if(std::abs(this->spindensity) > this->small) {
+  if(std::abs(spindensity) > this->small) {
     //Open Shell
   //Paper  xB   = gammaBB / rhoA4ov3; 
-    this->xB   = std::sqrt(gammaBB) / rhoB4ov3; 
+    xB   = std::sqrt(gammaBB) / rhoB4ov3; 
     info.eps       += rhoB4ov3*this->g0B88(xB);
     info.ddrhoB     = this->g0B88(xB) - xB*this->g1B88(xB);
     info.ddrhoB    *= this->d4over3*rhoB1ov3;
