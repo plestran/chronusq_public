@@ -322,9 +322,9 @@ void AOIntegrals::computeAORcrossDel(){
          rdotpY *= 4.0*math.pi;
          rdotpZ *= 4.0*math.pi;
 //       printing
-//         prettyPrint(cout,rdotpX,"Numeric <dipole vel> - x comp");
-//         prettyPrint(cout,rdotpY,"Numeric <dipole vel> - y comp");
-//         prettyPrint(cout,rdotpZ,"Numeric <dipole vel> - z comp");
+         prettyPrint(cout,rdotpX,"Numeric <dipole vel> - x comp");
+         prettyPrint(cout,rdotpY,"Numeric <dipole vel> - y comp");
+         prettyPrint(cout,rdotpZ,"Numeric <dipole vel> - z comp");
 //end for now (comment later)
 //  cout << "Call HERE " <<endl;
 //  CErr();
@@ -348,6 +348,30 @@ void AOIntegrals::computeAOOneE(){
   }
 */
 
+//xslis
+  this->createShellPairs();
+  this->generateFmTTable();
+  this->computeOverlapS();
+  RealMatrix sTemp(*this->overlap_);
+  this->computePotentialV();
+  RealMatrix vTemp(*this->potential_);
+  this->computeKineticT();
+  RealMatrix tTemp(*this->kinetic_);
+  this->computeAngularL();
+  this->computeSL();
+  this->computepVdotp();
+  
+/*
+  cout<<"xsli test S: "<<sTemp.norm()<<endl;
+  cout<<"xsli test V: "<<vTemp.norm()<<endl;
+  cout<<"xsli test T: "<<tTemp.norm()<<endl;
+*/
+  this->overlap_->setZero();
+  this->potential_->setZero();
+  this->kinetic_->setZero();
+//  this->angular_->setZero();
+//xslie
+
   // Start timer for one-electron integral evaluation
   auto oneEStart = std::chrono::high_resolution_clock::now();
 
@@ -369,6 +393,15 @@ void AOIntegrals::computeAOOneE(){
   OneEDriver(libint2::Operator::nuclear);
   auto VEnd = std::chrono::high_resolution_clock::now();
 
+//xslis
+/*
+  cout<<"Libint S: "<<(*this->overlap_).norm()<<endl;
+  cout<<"Libint V: "<<(*this->potential_).norm()<<endl;
+  cout<<"Libint T: "<<(*this->kinetic_).norm()<<endl;
+*/
+//xslie
+
+
 // add DKH correction to kinetic energy
 //  if (this->isPrimary) this->DKH0();
 
@@ -377,7 +410,7 @@ void AOIntegrals::computeAOOneE(){
 
   // Get end time of one-electron integral evaluation
   auto oneEEnd = std::chrono::high_resolution_clock::now();
-  if(this->controls_->printLevel >= 2) this->printOneE();
+  if(this->controls_->printLevel >= 0) this->printOneE();
 
   // Compute time differenes
   this->OneED = oneEEnd - oneEStart;

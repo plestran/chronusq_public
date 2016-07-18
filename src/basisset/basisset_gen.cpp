@@ -31,6 +31,7 @@ namespace ChronusQ{
  */
 void BasisSet::constructLocal(Molecule * mol){
   //cout << "Reference Shells" << endl;
+  int nShell = 0;
   for(auto iAtom = 0; iAtom < mol->nAtoms(); iAtom++){
     bool found = false;
     for(auto iRef = this->refShells_.begin(); iRef != this->refShells_.end(); ++iRef){
@@ -55,7 +56,8 @@ void BasisSet::constructLocal(Molecule * mol){
               (*mol->cart())(1,iAtom),
               (*mol->cart())(2,iAtom)};
 
-          this->shellsCQ.push_back(ChronusQ::ShellCQ{*iShell});
+          this->shellsCQ.push_back(ChronusQ::ShellCQ{this->shells_[nShell]});
+          nShell ++;
         };
         found = true;
       }
@@ -75,6 +77,7 @@ void BasisSet::constructLocal(Molecule * mol){
  *  Construct an external basis defintion using the local reference shells
  */
 void BasisSet::constructExtrn(Molecule * mol, BasisSet *genBasis){
+  int nShell = 0;
   genBasis->fileio_ = this->fileio_;
   for(auto iAtom = 0; iAtom < mol->nAtoms(); iAtom++){
     bool found = false;
@@ -98,6 +101,8 @@ void BasisSet::constructExtrn(Molecule * mol, BasisSet *genBasis){
             { (*mol->cart())(0,iAtom),
               (*mol->cart())(1,iAtom),
               (*mol->cart())(2,iAtom)};
+          genBasis->shellsCQ.push_back(ChronusQ::ShellCQ{genBasis->shells_[nShell]});
+          nShell++;
         }
         found = true;
       }

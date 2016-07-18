@@ -9,7 +9,7 @@ realtime_api.cpp numdiff_api.cpp)
 #target_include_directories(pythonapi PUBLIC ${PYTHON_INCLUDE_DIRS})
 
 target_link_libraries(pythonapi LINK_PUBLIC basisset classtools controls
-mointegrals molecule tools sdresponse realtime mollerplesset singleslater 
+molecule tools sdresponse mointegrals realtime mollerplesset singleslater 
 aointegrals worker quasinewton grid fileio cerr gauinterface tools response
 qn numdiff quantum
 ${EXTERNAL_CQ_DEPS})

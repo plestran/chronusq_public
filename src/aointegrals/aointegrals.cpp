@@ -533,6 +533,14 @@ void AOIntegrals::allocOp(){
       this->kineticP_  = std::unique_ptr<RealMatrix>(new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); 
       // Potential
       this->potential_ = std::unique_ptr<RealMatrix>(new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); 
+      // Angular momentum
+      this->angular_   = std::unique_ptr<RealTensor3d>(
+        new RealTensor3d(NTCSxNBASIS,NTCSxNBASIS,3));
+      this->SOCoupling_= std::unique_ptr<RealTensor3d>(
+        new RealTensor3d(NTCSxNBASIS,NTCSxNBASIS,3));
+      this->pVp_       = std::unique_ptr<RealMatrix>(new RealMatrix(NTCSxNBASIS,NTCSxNBASIS));
+      // pV dot p 
+
  
     } catch(...) {
       CErr(std::current_exception(),"One Electron Integral Tensor Allocation");
@@ -619,17 +627,19 @@ void AOIntegrals::writeOneE(){
   */
 }
 
-
+//xslis
 void AOIntegrals::createShellPairs() {
-  int i,j,k,l,m,n,nPP;
-  double squareAB,prodexp,sumexp,KAB;
+  int i,j,k,l,m,n,iPP,nPP,iAtom;
+  double squareAB,prodexp,sumexp,KAB,pairNorm;
   double sqrt2pi54 = 5.91496717279561; // sqrt(2)*pi^{5/4}
-  std::array<double,3> tmpP,tmpPA,tmpPB,tmpPZeta;
-  ShellCQ *iS,*jS;
-  ShellPair *ijS;
+  std::array<double,MaxTotalL> tmpFmT;
+  std::array<double,3> tmpP,tmpPA,tmpPB,tmpPZeta,tmpssL,AC,BC,ACxBC;
+  ChronusQ::ShellCQ *iS,*jS;
+  ChronusQ::ShellPair *ijS;
 
   int nShell = this->basisSet_->nShell();
   this->nShellPair_ = nShell*(nShell+1)/2;
+
 //this->shellPairs_ = new ShellPair[this->nShellPair_];
 // This does the same thing as a 'new' call when passed a dimension and
 // dones't require annoying memory managment
@@ -640,9 +650,13 @@ void AOIntegrals::createShellPairs() {
     if(this->basisSet_->shellsCQ[i].l>this->basisSet_->shellsCQ[j].l) {    
       ijS->iShell = &(this->basisSet_->shellsCQ[i]);
       ijS->jShell = &(this->basisSet_->shellsCQ[j]);
+      ijS->ibf_s = this->basisSet_->mapSh2Bf(i);
+      ijS->jbf_s = this->basisSet_->mapSh2Bf(j);
     } else {
       ijS->iShell = &(this->basisSet_->shellsCQ[j]);
       ijS->jShell = &(this->basisSet_->shellsCQ[i]);
+      ijS->ibf_s = this->basisSet_->mapSh2Bf(j);
+      ijS->jbf_s = this->basisSet_->mapSh2Bf(i);
     };
 
     iS = ijS->iShell;
@@ -652,40 +666,78 @@ void AOIntegrals::createShellPairs() {
 
     ijS->A = iS->O;
     ijS->B = jS->O;
-
     squareAB = math.zero;
     for(m=0;m<3;m++) {
       ijS->AB[m] = ijS->A[m]-ijS->B[m];
-      squareAB += ijS->AB[m]*ijS->AB[m];
+      AC[m]      = ijS->A[m];
+      BC[m]      = ijS->B[m];
+      squareAB  += ijS->AB[m]*ijS->AB[m];
     };
+    ACxBC[0]     = ijS->A[1]*ijS->B[2]-ijS->A[2]*ijS->B[1];  
+    ACxBC[1]     = ijS->A[2]*ijS->B[0]-ijS->A[0]*ijS->B[2];
+    ACxBC[2]     = ijS->A[0]*ijS->B[1]-ijS->A[1]*ijS->B[0];   
     
     nPP = 0;
-    for(k=0; k!=iS->coeff.size();k++) 
-    for(l=0; l!=jS->coeff.size();j++) {
+    for(k=0; k<iS->coeff.size();k++) 
+    for(l=0; l<jS->coeff.size();l++) {
       sumexp  = iS->alpha[k] + jS->alpha[l];
       prodexp = iS->alpha[k] * jS->alpha[l];
+      
       KAB = exp(-squareAB*prodexp/sumexp);
       ijS->KAB.push_back(KAB);
+      ijS->beta.push_back(jS->alpha[l]);
       ijS->UAB.push_back(sqrt2pi54*KAB/sumexp);
+      ijS->zetaa.push_back(iS->alpha[k]);
+      ijS->zetab.push_back(jS->alpha[l]);
+//      cout<<iS->alpha[k]<<";"<<ijS->zetaa[nPP]<<endl;
+//      cout<<jS->alpha[l]<<";"<<ijS->zetab[nPP]<<endl;
       ijS->Zeta.push_back(sumexp);    // zeta = alpha + beta
-      ijS->invZeta.push_back(math.half/sumexp);
+      ijS->Xi.push_back(prodexp/sumexp); // xi = alpha*beta/(alpha+beta)
+      ijS->invZeta.push_back(math.one/sumexp);
       ijS->halfInvZeta.push_back(math.half/sumexp);
-
-      ijS->ss.push_back(sqrt((math.pi/sumexp)*(math.pi/sumexp)*(math.pi/sumexp))*KAB);
+      pairNorm = iS->norm[k]*jS->norm[l];
+      ijS->norm.push_back(pairNorm);
+      ijS->ss.push_back(pairNorm*sqrt((math.pi/sumexp)*(math.pi/sumexp)*(math.pi/sumexp))*KAB);
       for (m=0;m<3;m++) {
         tmpP[m]     = (iS->alpha[k]*ijS->A[m]+jS->alpha[l]*ijS->B[m])/sumexp;// P=(alpha*A+beta*B)/zeta
         tmpPZeta[m] = tmpP[m] * sumexp;
         tmpPA[m]    = tmpP[m] - ijS->A[m]; // PA = P - A
         tmpPB[m]    = tmpP[m] - ijS->B[m]; // PB = P - B
+//        cout<<ijS->B[m]<<"t";
       };
+//      cout<<endl;
+
       ijS->P.push_back(tmpP);
       ijS->PA.push_back(tmpPA);
       ijS->PB.push_back(tmpPB);
       ijS->PZeta.push_back(tmpPZeta);
+
+      ijS->ssV.push_back(math.two*sqrt(ijS->Zeta[nPP]/math.pi)*ijS->ss[nPP]);
+      ijS->ssT.push_back((ijS->Xi[nPP])*(math.three-math.two*(ijS->Xi[nPP])*squareAB)*ijS->ss[nPP]);
+      for (m=0;m<3;m++) {
+        tmpssL[m]    = math.two*(ijS->Xi[nPP])*ACxBC[m]*ijS->ss[nPP]; 
+      }; 
+      ijS->ssL.push_back(tmpssL);
+
+//print ssL
+/*
+        std::string xyz[3];
+        xyz[0] = "x";
+        xyz[1] = "y";
+        xyz[2] = "z"; 
+      cout<<"ssL"<<"\t"<<i+1<<";"<<j+1<<";"<<"\t"<<nPP+1<<"\t";
+         
+      for (m=0;m<3;m++) {       
+        cout<<xyz[m]<<"\t"<<ijS->ssL[nPP][m]/pairNorm<<","<<"\t";
+      };
+      cout<<endl;
+*/
+
+
+      nPP++;
     };
-    nPP++;
     ijS->nPGTOPair = nPP;
     n++;
   };
 };
-
+//xslie
