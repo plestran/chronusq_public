@@ -64,7 +64,7 @@ double AOIntegrals::twoehRRabcd(  int *nPGTOs, ShellPair *ijShellPair, ShellPair
     else if (lB[1]>0) iWork=1;
     else if (lB[2]>0) iWork=2;
     lAp1[iWork]+=1;
-    if(std::abs(ijShellPair->deltaAB[iWork])>this->controls_->thresholdS) {
+    if(std::abs(ijShellPair->deltaAB[iWork])>this->thresholdS_) {
       if(LB>1) {
         lBm1[iWork]-=1;
         tmpVal =    this->twoehRRabcd(nPGTOs,ijShellPair,klShellPair,LA+1,lAp1,LB-1,lBm1,LC,lC,LD,lD) 
@@ -113,7 +113,7 @@ double AOIntegrals::twoehRRa0cd(  int *nPGTOs, ShellPair *ijShellPair, ShellPair
     for(i=0;i<nPGTOs[0];i++) for(j=0;j<nPGTOs[1];j++) for(k=0;k<nPGTOs[2];k++) for(l=0;l<nPGTOs[3];l++)
       tmpVal +=     this->twoevRRa0c0(ijShellPair,klShellPair,0,LA,lA,LC,lC,&i,&j,&k,&l);
   } else {
-    if(std::abs(klShellPair->deltaAB[iWork])>this->controls_->thresholdAB) {
+    if(std::abs(klShellPair->deltaAB[iWork])>this->thresholdAB_) {
       if(LD>1) { // (a0|cd)
         lDm1[iWork]-=1;
         tmpVal =    this->twoehRRa0cd(nPGTOs,ijShellPair,klShellPair,LA,lA,LC+1,lCp1,LD-1,lDm1) 
@@ -819,9 +819,9 @@ double AOIntegrals::twoevRRa0c0(  ShellPair *ijShellPair, ShellPair *klShellPair
   else if (lC[2]>0) iWork=2;
   if(LC>1) {
     lCm1[iWork]-=1;
-    if(std::abs(klShellPair->deltaPA[iWork][*k][*l])>this->controls_->thresholdS) 
+    if(std::abs(klShellPair->deltaPA[iWork][*k][*l])>this->thresholdS_) 
       tmpVal += klShellPair->deltaPA[iWork][*k][*l]*this->twoevRRa0c0(ijShellPair,klShellPair,m,LA,lA,LC-1,lCm1,i,j,k,l);
-    if(std::abs(this->quartetConstants_->deltaWQ[iWork][*i][*j][*k][*l])>this->controls_->thresholdS) 
+    if(std::abs(this->quartetConstants_->deltaWQ[iWork][*i][*j][*k][*l])>this->thresholdS_) 
       tmpVal=this->quartetConstants_->deltaWQ[iWork][*i][*j][*k][*l]*this->twoevRRa0c0(ijShellPair,klShellPair,m+1,LA,lA,LC-1,lCm1,i,j,k,l);
     if (lA[iWork]>0) {
       lAm1[iWork] -= 1;
@@ -836,9 +836,9 @@ double AOIntegrals::twoevRRa0c0(  ShellPair *ijShellPair, ShellPair *klShellPair
                -this->quartetConstants_->a0c0Par2[*i][*j][*k][*l]*this->twoevRRa0c0(ijShellPair,klShellPair,m+1,LA,lA,LC-2,lCm1,i,j,k,l));
     };
   } else {
-    if(std::abs(this->quartetConstants_->deltaWQ[iWork][*i][*j][*k][*l])>this->controls_->thresholdS) 
+    if(std::abs(this->quartetConstants_->deltaWQ[iWork][*i][*j][*k][*l])>this->thresholdS_) 
       tmpVal = this->quartetConstants_->deltaWQ[iWork][*i][*j][*k][*l]*this->twoevRRa000(ijShellPair,klShellPair,m+1,LA,lA,i,j,k,l);
-    if(std::abs(klShellPair->deltaPA[iWork][*k][*l])>this->controls_->thresholdS) 
+    if(std::abs(klShellPair->deltaPA[iWork][*k][*l])>this->thresholdS_) 
       tmpVal+= klShellPair->deltaPA[iWork][*k][*l]*this->twoevRRa000(ijShellPair,klShellPair,m,LA,lA,i,j,k,l);
     if (lA[iWork]>0) {
       lAm1[iWork]-=1;
@@ -865,9 +865,9 @@ double AOIntegrals::twoevRRa000(ShellPair *ijShellPair,ShellPair *klShellPair,in
   else if (lA[2]>0) iWork=2;
   if(LA>1) {
     lAm1[iWork]-=1;
-    if(std::abs(this->quartetConstants_->deltaWP[iWork][*i][*j][*k][*l])>this->controls_->thresholdS) 
+    if(std::abs(this->quartetConstants_->deltaWP[iWork][*i][*j][*k][*l])>this->thresholdS_) 
       tmpVal = this->quartetConstants_->deltaWP[iWork][*i][*j][*k][*l]*this->twoevRRa000(ijShellPair,klShellPair,m+1,LA-1,lAm1,i,j,k,l);
-    if(std::abs(ijShellPair->deltaPA[iWork][*i][*j])>this->controls_->thresholdS) 
+    if(std::abs(ijShellPair->deltaPA[iWork][*i][*j])>this->thresholdS_) 
       tmpVal+= ijShellPair->deltaPA[iWork][*i][*j]*this->twoevRRa000(ijShellPair,klShellPair,m,LA-1,lAm1,i,j,k,l);
     if(LA==2&&lA[iWork]==2) 
       tmpVal += ijShellPair->inversezeta[*i][*j]*(this->quartetConstants_->FmT[m][*i][*j][*k][*l] 
@@ -878,9 +878,9 @@ double AOIntegrals::twoevRRa000(ShellPair *ijShellPair,ShellPair *klShellPair,in
                -this->quartetConstants_->a000Par2[*i][*j][*k][*l]*this->twoevRRa000(ijShellPair,klShellPair,m+1,LA-2,lAm1,i,j,k,l));
     };
   } else {
-    if(std::abs(this->quartetConstants_->deltaWP[iWork][*i][*j][*k][*l])>this->controls_->thresholdS) 
+    if(std::abs(this->quartetConstants_->deltaWP[iWork][*i][*j][*k][*l])>this->thresholdS_) 
       tmpVal = this->quartetConstants_->deltaWP[iWork][*i][*j][*k][*l]*this->quartetConstants_->FmT[m+1][*i][*j][*k][*l];
-    if(std::abs(ijShellPair->deltaPA[iWork][*i][*j])>this->controls_->thresholdS) 
+    if(std::abs(ijShellPair->deltaPA[iWork][*i][*j])>this->thresholdS_) 
       tmpVal+= ijShellPair->deltaPA[iWork][*i][*j]*this->quartetConstants_->FmT[m][*i][*j][*k][*l];
   };
   return tmpVal;
@@ -893,14 +893,14 @@ double AOIntegrals::twoeSSSS0(int *nPGTOs, ShellPair *ijShellPair, ShellPair *kl
 
   for(i=0;i<nPGTOs[0];i++) for(j=0;j<nPGTOs[1];j++) for(k=0;k<nPGTOs[2];k++) for(l=0;l<nPGTOs[3];l++) {
     Upq = (ijShellPair->UAB[i][j])*(klShellPair->UAB[k][l]);
-    if(std::abs(Upq)>this->controls_->thresholdS) {
+    if(std::abs(Upq)>this->thresholdS_) {
       sqrPQ = math.zero;
       for(m=0;m<3;m++) {
         PQ = (ijShellPair->centerP[m][i][j]-klShellPair->centerP[m][k][l]);
         sqrPQ += PQ*PQ;
       };
       expoT = ijShellPair->zeta[i][j]+klShellPair->zeta[k][l];
-      if(sqrPQ>this->controls_->thresholdS) {
+      if(sqrPQ>this->thresholdS_) {
         T = sqrPQ/(ijShellPair->invzeta[i][j]+klShellPair->invzeta[k][l]);
         this->computeFmTTaylor(FmT,T,0,0);
         SSSS0 += Upq*FmT[0]/sqrt(expoT);

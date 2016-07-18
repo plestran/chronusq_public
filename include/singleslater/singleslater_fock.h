@@ -23,6 +23,20 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
+template<typename T>
+class KernelIntegrand {
+  typedef Eigen::Matrix<T,Dynamic,Dynamic> TMatrix;
+  public:
+  TMatrix VXCA;
+  TMatrix VXCB;
+  double Energy;
+
+  KernelIntegrand(size_t N) : VXCA(N,N), VXCB(N,N), Energy(0.0){ 
+    VXCA.setZero();
+    VXCB.setZero();
+  };
+};
+
 /********************************
  * Form Perturbation Tensor (G) *
  ********************************/
@@ -34,17 +48,78 @@ void SingleSlater<T>::formPT(){
   bool doRHF = (this->isClosedShell && !doTCS);
   bool doKS  = this->isDFT;
   if(!this->haveDensity) this->formDensity();
-  if(this->aointegrals_->integralAlgorithm == AOIntegrals::DIRECT)
-    this->aointegrals_->twoEContractDirect(doRHF,doKS,true,false,doTCS,
-    *this->onePDMA_,*this->PTA_,*this->onePDMB_,*this->PTB_);
-  else if(this->aointegrals_->integralAlgorithm == AOIntegrals::DENFIT)
-    this->aointegrals_->twoEContractDF(doRHF,doKS,true,*this->onePDMA_,
-    *this->PTA_,*this->onePDMB_,*this->PTB_);
-  else if(this->aointegrals_->integralAlgorithm == AOIntegrals::INCORE)
-    this->aointegrals_->twoEContractN4(doRHF,doKS,true,false,doTCS,
-    *this->onePDMA_,*this->PTA_,*this->onePDMB_,*this->PTB_);
+//  this->sepReImOnePDM();
+//  this->comReImOnePDM();
+  this->scatterDensity();
+
+  std::vector<std::reference_wrapper<TMap>> mats;
+  std::vector<std::reference_wrapper<TMap>> ax;
+  std::vector<AOIntegrals::ERI_CONTRACTION_TYPE> contList;
+  std::vector<double> scalingFactors;
+  double exchFactor = -0.5;
+  if(this->isDFT) exchFactor = 0.0;
+
+  if(this->nTCS_ == 1 && this->isClosedShell) {
+
+    mats.emplace_back(*this->onePDMA_);
+    mats.emplace_back(*this->onePDMA_);
+    ax.emplace_back(*this->PTA_);
+    ax.emplace_back(*this->PTA_);
+    contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::COULOMB);
+    contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::EXCHANGE);
+    scalingFactors.push_back(1.0);
+    scalingFactors.push_back(exchFactor);
+
+    this->PTA_->setZero();
+
+  } else {
+    mats.emplace_back(*this->onePDMScalar_);
+    mats.emplace_back(*this->onePDMScalar_);
+    mats.emplace_back(*this->onePDMMz_);
+    ax.emplace_back(*this->PTScalar_);
+    ax.emplace_back(*this->PTScalar_);
+    ax.emplace_back(*this->PTMz_);
+    contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::COULOMB);
+    contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::EXCHANGE);
+    contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::EXCHANGE);
+    scalingFactors.push_back(1.0);
+    scalingFactors.push_back(exchFactor);
+    scalingFactors.push_back(exchFactor);
+    this->PTScalar_->setZero();
+    this->PTMz_->setZero();
+    if(this->nTCS_ == 2){
+      mats.emplace_back(*this->onePDMMy_);
+      mats.emplace_back(*this->onePDMMx_);
+      ax.emplace_back(*this->PTMy_);
+      ax.emplace_back(*this->PTMx_);
+      contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::EXCHANGE);
+      contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::EXCHANGE);
+      scalingFactors.push_back(exchFactor);
+      scalingFactors.push_back(exchFactor);
+      this->PTMy_->setZero();
+      this->PTMx_->setZero();
+    }
+  }
+
+  this->aointegrals_->newTwoEContract(mats,ax,contList,scalingFactors);
+
+  if(this->nTCS_ == 1 && this->isClosedShell) {
+    (*this->PTA_) *= 0.5; // This is effectively a gather operation
+  } else {
+    std::vector<std::reference_wrapper<TMap>> toGather;
+    toGather.emplace_back(*this->PTScalar_);
+    toGather.emplace_back(*this->PTMz_);
+    if(this->nTCS_ == 1)
+      Quantum<T>::spinGather((*this->PTA_),(*this->PTB_),toGather);
+    else {
+      toGather.emplace_back(*this->PTMy_);
+      toGather.emplace_back(*this->PTMx_);
+      Quantum<T>::spinGather((*this->PTA_),toGather);
+    }
+
+  }
+
   if(this->printLevel_ >= 3 && getRank() == 0) this->printPT();
-//if(doTCS)CErr();
 }
 #endif
 
@@ -74,55 +149,89 @@ void SingleSlater<T>::formFock(){
   if(getRank() == 0) {
     if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
 
+    bool testNew = true;
     if (this->isDFT){
-//    Timing
-      std::chrono::high_resolution_clock::time_point start;
-      std::chrono::high_resolution_clock::time_point finish;
-      std::chrono::duration<double> duration_formVxc;
-     
-      if(this->printLevel_ >= 3) {
-        start = std::chrono::high_resolution_clock::now();
-      }
 
 //    this->formVXC();
-      this->formVXC_store();
-     
-      if(this->printLevel_ >= 3) {
-        finish = std::chrono::high_resolution_clock::now();
-        duration_formVxc = finish - start;
-        this->fileio_->out << endl << "CPU time for VXC integral:  "
-                           << duration_formVxc.count() << " seconds." 
-                           << endl;
-      }
+//    if(!testNew) this->formVXC_store();
+//    else         this->formVXC_new();
+      this->formVXC_new();
     }
   
-    this->fockA_->setZero();
-    this->fockA_->real() += (*this->aointegrals_->oneE_);
-#ifndef USE_LIBINT
-    this->fockA_->real() += (*this->coulombA_);
-    this->fockA_->real() -= (*this->exchangeA_);
-#else
-    (*this->fockA_) += (*this->PTA_);
-#endif
-    if(this->isDFT){ 
-      (*this->fockA_) += (*this->vXA_);
-      (*this->fockA_) += (*this->vCorA_);
+    if(this->nTCS_ == 1 && this->isClosedShell) {
+      this->fockA_->setZero();
+      this->fockA_->real() += (*this->aointegrals_->coreH_);
+      this->aointegrals_->addElecDipole(*this->fockA_,this->elecField_);
+      (*this->fockA_) += (*this->PTA_);
+      if(this->isDFT){ 
+        (*this->fockA_) += (*this->vXA_);
+//      if(!testNew) (*this->fockA_) += (*this->vCorA_);
+      }
+    } else {
+
+    //this->fockA_->setZero();
+    //this->fockA_->real() += (*this->aointegrals_->coreH_);
+    //this->aointegrals_->addElecDipole(*this->fockA_,this->elecField_);
+    //(*this->fockA_) += (*this->PTA_);
+    //if(this->isDFT){ 
+    //  (*this->fockA_) += (*this->vXA_);
+    //  (*this->fockA_) += (*this->vCorA_);
+    //}
+    //this->fockB_->setZero();
+    //this->fockB_->real() += (*this->aointegrals_->coreH_);
+    //this->aointegrals_->addElecDipole(*this->fockB_,this->elecField_);
+    //(*this->fockB_) += (*this->PTB_);
+    //if(this->isDFT){ 
+    //  (*this->fockB_) += (*this->vXB_);
+    //  (*this->fockB_) += (*this->vCorB_);
+    //}
+
+      this->fockScalar_->setZero();
+      this->fockMz_->setZero();
+      this->fockScalar_->real() += (*this->aointegrals_->coreH_);
+      this->aointegrals_->addElecDipole(*this->fockScalar_,this->elecField_);
+      (*this->fockScalar_) *= 2.0;
+      (*this->fockScalar_)      += (*this->PTScalar_);        
+      (*this->fockMz_)          += (*this->PTMz_);
+
+      // FIXME: Needs to ge generalized for the 2C case
+      if(this->nTCS_ == 1 && this->isDFT){
+/*
+        if(!testNew) {
+          (*this->fockScalar_) += (*this->vXA_) + (*this->vCorA_);
+          (*this->fockScalar_) += (*this->vXB_) + (*this->vCorB_);
+          (*this->fockMz_)     += (*this->vXA_) + (*this->vCorA_);
+          (*this->fockMz_)     -= (*this->vXB_) + (*this->vCorB_);
+	} else {
+*/
+          (*this->fockScalar_) += (*this->vXA_);
+          (*this->fockScalar_) += (*this->vXB_);
+          (*this->fockMz_)     += (*this->vXA_);
+          (*this->fockMz_)     -= (*this->vXB_);
+/*
+	}
+*/
+      }
+
+      std::vector<std::reference_wrapper<TMap>> toGather;
+      toGather.emplace_back(*this->fockScalar_);
+      toGather.emplace_back(*this->fockMz_);
+      if(this->nTCS_ == 1)
+        Quantum<T>::spinGather(*this->fockA_,*this->fockB_,toGather);
+      else {
+        this->fockMx_->setZero();
+        this->fockMy_->setZero();
+        (*this->fockMx_) += (*this->PTMx_);
+        (*this->fockMy_) += (*this->PTMy_);
+        toGather.emplace_back(*this->fockMy_);
+        toGather.emplace_back(*this->fockMx_);
+        Quantum<T>::spinGather(*this->fockA_,toGather);
+      };
+
+
     }
 
-    if(!this->isClosedShell && this->Ref_ != TCS){
-      this->fockB_->setZero();
-      fockB_->real()+=(*this->aointegrals_->oneE_);
-#ifndef USE_LIBINT
-      fockB_->real()+=(*this->coulombB_);
-      fockB_->real()-=(*this->exchangeB_);
-#else
-      *(fockB_) += (*this->PTB_);
-#endif
-      if(this->isDFT) {
-        (*fockB_) += (*this->vXB_);
-        (*fockB_) += (*this->vCorB_);
-      }
-    }
+    /*
     // Add in the electric field component if they are non-zero
     std::array<double,3> null{{0,0,0}};
     if(this->elecField_ != null){
@@ -139,6 +248,7 @@ void SingleSlater<T>::formFock(){
         iBuf += NBSq;
       }
     }
+    */
     if(this->printLevel_ >= 2) this->printFock(); 
   }
 #ifdef CQ_ENABLE_MPI

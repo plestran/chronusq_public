@@ -29,7 +29,6 @@
 #include <workers.h>
 #ifdef USE_LIBINT
 using ChronusQ::BasisSet;
-using ChronusQ::Controls;
 using ChronusQ::Molecule;
 using ChronusQ::HashNAOs;
 namespace ChronusQ {
@@ -41,20 +40,6 @@ void SingleSlater<dcomplex>::placeAtmDen(std::vector<int> atomIndex, SingleSlate
     auto iBfSt = this->basisset_->mapCen2Bf(iAtm)[0];
     auto iSize = this->basisset_->mapCen2Bf(iAtm)[1]; 
     if(this->Ref_ != TCS){
-/*
-      this->onePDMA_->block(iBfSt,iBfSt,iSize,iSize)= (*hfA.onePDMA_);
-      if(!this->isClosedShell){
-        if(hfA.isClosedShell)
-          this->onePDMB_->block(iBfSt,iBfSt,iSize,iSize)= 2*(*hfA.onePDMA_);
-        else
-          this->onePDMB_->block(iBfSt,iBfSt,iSize,iSize)= 
-            (*hfA.onePDMB_) + (*hfA.onePDMA_);
-      } else {
-        if(!hfA.isClosedShell){
-          this->onePDMA_->block(iBfSt,iBfSt,iSize,iSize) += (*hfA.onePDMB_);
-        }
-      }
-*/
       this->onePDMA_->block(iBfSt,iBfSt,iSize,iSize).real()      = (*hfA.densityA());
       if(this->isClosedShell){
         if(hfA.isClosedShell) 
@@ -94,26 +79,9 @@ void SingleSlater<dcomplex>::scaleDen(){
       (*this->onePDMA_)(i,j)      *= dcomplex((double)this->nAE_/(double)nE,0.0);
       (*this->onePDMA_)(i+1,j+1)  *= dcomplex((double)this->nBE_/(double)nE,0.0);
     }
-/*
-    double theta = math.pi / 8.0;
-    double c = std::cos(theta);
-    double s = std::sin(theta);
-    for(auto i = 0; i < this->nTCS_*this->nBasis_; i += 2)
-    for(auto j = 0; j < this->nTCS_*this->nBasis_; j += 2){
-      double Paa = (*this->onePDMA_)(i,j);
-      double Pbb = (*this->onePDMA_)(i+1,j+1);
-      (*this->onePDMA_)(i,j)     = c*c*Paa + s*s*Pbb;
-      (*this->onePDMA_)(i+1,j+1) = c*c*Pbb + s*s*Paa;
-      (*this->onePDMA_)(i+1,j)   = c*s*(Paa - Pbb);
-      (*this->onePDMA_)(i,j+1)   = c*s*(Paa - Pbb);
-     
-    }
-*/
-    
-//  (*this->onePDMA_) *= (double)(this->nAE_+this->nBE_)/(double)nE ;
   }
-//CErr();
 }; // SingleSlater::scaleDen [T=dcomplex]
+
 //--------------------------------//
 // form the initial guess of MO's //
 //--------------------------------//
@@ -171,7 +139,6 @@ void SingleSlater<dcomplex>::SADGuess() {
       // Local objects to be constructed and destructed at every loop
       AOIntegrals aointegralsAtom;
       SingleSlater<double> hartreeFockAtom;
-      Controls controlAtom;
       BasisSet basisSetAtom;
       BasisSet dfBasisSetAtom;
       Molecule uniqueAtom(uniqueElement[iUn],this->fileio_->out);
@@ -183,32 +150,24 @@ void SingleSlater<dcomplex>::SADGuess() {
       // Construct atomic basis set from the reference
       this->basisset_->constructExtrn(&uniqueAtom,&basisSetAtom);
       // Generate basis maps
-      basisSetAtom.makeMapSh2Bf(1);
-      basisSetAtom.makeMapSh2Cen(&uniqueAtom);
+      basisSetAtom.makeMaps(&uniqueAtom);
       basisSetAtom.renormShells(); // Libint throws a hissy fit without this
  
-      controlAtom.iniControls();
-      controlAtom.doCUHF = true; // Can set to false too if UHF guess is desired
  
       // Initialize the local integral and SS classes
       aointegralsAtom.isPrimary = false;
       hartreeFockAtom.isNotPrimary();
-/*
-      aointegralsAtom.iniAOIntegrals(&uniqueAtom,&basisSetAtom,this->fileio_,&controlAtom,
-        &dfBasisSetAtom);
-      hartreeFockAtom.iniSingleSlater(&uniqueAtom,&basisSetAtom,&aointegralsAtom,
-        this->fileio_,&controlAtom);
-*/
+
       // Replaces iniAOIntegrals
       aointegralsAtom.communicate(uniqueAtom,basisSetAtom,*this->fileio_,
-        controlAtom);
+        *this->aointegrals_->memManager());
       aointegralsAtom.initMeta();
       aointegralsAtom.integralAlgorithm = this->aointegrals_->integralAlgorithm;
       aointegralsAtom.alloc();
 
       // Replaces iniSingleSlater
       hartreeFockAtom.communicate(uniqueAtom,basisSetAtom,aointegralsAtom,
-        *this->fileio_,controlAtom);
+        *this->fileio_,*this->memManager_);
       hartreeFockAtom.initMeta();
       hartreeFockAtom.setField(this->elecField_);
       hartreeFockAtom.isClosedShell = (hartreeFockAtom.multip() == 1); 
@@ -216,8 +175,6 @@ void SingleSlater<dcomplex>::SADGuess() {
 /*
       hartreeFockAtom.isDFT = this->isDFT;
       hartreeFockAtom.isHF  = this->isHF;
-      hartreeFockAtom.setExchKernel(this->ExchKernel_);
-      hartreeFockAtom.setCorrKernel(this->CorrKernel_);
       hartreeFockAtom.setDFTKernel(this->DFTKernel_);
 */
       hartreeFockAtom.isDFT = false;
@@ -239,7 +196,7 @@ void SingleSlater<dcomplex>::SADGuess() {
       // Prime and perform the atomic SCF
       hartreeFockAtom.formFock();
       hartreeFockAtom.computeEnergy();
-      hartreeFockAtom.SCF();
+      hartreeFockAtom.SCF2();
       
       // Place Atomic Densities into Total Densities
       this->placeAtmDen(atomIndex[iUn],hartreeFockAtom);

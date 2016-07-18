@@ -31,7 +31,6 @@
 #include <basisset.h>
 #include <molecule.h>
 #include <fileio.h>
-#include <controls.h>
 #include <tools.h>
 #include <aointegrals.h>
 #include <singleslater.h>
@@ -47,7 +46,6 @@ class MOIntegrals{
   BasisSet *      basisSet_;
   Molecule *      molecule_;
   FileIO *        fileio_;
-  Controls *      controls_;
   AOIntegrals *   aointegrals_;
   SingleSlater<T> *  singleSlater_;
 
@@ -133,9 +131,6 @@ class MOIntegrals{
     if(this->aointegrals_ == NULL) 
       CErr("Fatal: Must initialize MOIntegrals with AOIntegrals Object",
            this->fileio_->out);
-    if(this->controls_ == NULL) 
-      CErr("Fatal: Must initialize MOIntegrals with Controls Object",
-           this->fileio_->out);
   }
 
 public:
@@ -152,7 +147,6 @@ public:
     this->molecule_     = NULL; 
     this->basisSet_     = NULL;
     this->fileio_       = NULL;
-    this->controls_     = NULL;
     this->aointegrals_  = NULL;
     this->singleSlater_ = NULL;
 
@@ -227,16 +221,14 @@ public:
   
   // initialization function
   void iniMOIntegrals(Molecule *,BasisSet *,
-                      FileIO *,Controls *,
-                      AOIntegrals *,SingleSlater<T> *);
+                      FileIO *,AOIntegrals *,SingleSlater<T> *);
 
   inline void communicate(Molecule &mol,BasisSet &basis, FileIO &fileio,
-    Controls &controls, AOIntegrals &aoints,SingleSlater<T> &ss){
+    AOIntegrals &aoints,SingleSlater<T> &ss){
 
     this->molecule_     = &mol;
     this->basisSet_     = &basis;
     this->fileio_       = &fileio;
-    this->controls_     = &controls;
     this->aointegrals_  = &aoints;
     this->singleSlater_ = &ss;
   }

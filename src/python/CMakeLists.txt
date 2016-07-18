@@ -11,7 +11,7 @@ realtime_api.cpp numdiff_api.cpp)
 target_link_libraries(pythonapi LINK_PUBLIC basisset classtools controls
 molecule tools sdresponse mointegrals realtime mollerplesset singleslater 
 aointegrals worker quasinewton grid fileio cerr gauinterface tools response
-qn numdiff quantum
+qn numdiff quantum grid2 dft
 ${EXTERNAL_CQ_DEPS})
 
 set(APIINST ${PROJECT_BINARY_DIR}/src/python)

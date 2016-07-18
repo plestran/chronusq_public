@@ -87,7 +87,6 @@ void NumericalDifferentiation<T>::cartesianDiff(){
     MOIntegrals<T> moints;
     moints.communicate(*this->molecule_undisplaced_,
       *this->singleSlater_undisplaced_->basisset(),fileioTmp,
-      *this->singleSlater_undisplaced_->aointegrals()->controls(),
       *this->singleSlater_undisplaced_->aointegrals(),
       *this->singleSlater_undisplaced_);
 
@@ -106,8 +105,17 @@ void NumericalDifferentiation<T>::cartesianDiff(){
   // Copy T
   TMatrix T_0;
   if(this->computeESGradient){
-    T_0 = this->response_undisplaced_->transDen()[0].block(0,0,
-      this->response_undisplaced_->nMatDim()[0],this->responseNRoots_);
+    if(this->respType_ == RESPONSE_TYPE::CIS) {
+      T_0 = this->response_undisplaced_->
+        template transDen<SINGLETS>().block(0,0,
+        this->response_undisplaced_->
+          template nMatDim<SINGLETS>(),this->responseNRoots_);
+    } else if(this->respType_ == RESPONSE_TYPE::PPTDA) {
+      T_0 = this->response_undisplaced_->
+        template transDen<A_PPTDA_SINGLETS>().block(0,0,
+        this->response_undisplaced_->template nMatDim<A_PPTDA_SINGLETS>(),
+        this->responseNRoots_);
+    }
   }
 
 
@@ -124,11 +132,22 @@ void NumericalDifferentiation<T>::cartesianDiff(){
   if(this->computeESGradient){
     this->singleSlater_undisplaced_->fileio()->out 
       << "    ES Energies:" << endl;
-    for(auto iRt = 0; iRt < this->responseNRoots_; iRt++)
+    for(auto iRt = 0; iRt < this->responseNRoots_; iRt++){
       this->singleSlater_undisplaced_->fileio()->out 
         << "      W(0," << iRt << ") = "
-        << std::setprecision(10) 
-        << this->response_undisplaced_->frequencies()[0](iRt) << endl;
+        << std::setprecision(10); 
+
+      if(this->respType_ == RESPONSE_TYPE::CIS){
+        this->singleSlater_undisplaced_->fileio()->out 
+          << this->response_undisplaced_->template frequencies<SINGLETS>()(iRt) 
+          << endl;
+      } else if(this->respType_ == RESPONSE_TYPE::PPTDA){
+        this->singleSlater_undisplaced_->fileio()->out 
+          << this->response_undisplaced_->
+            template frequencies<A_PPTDA_SINGLETS>()(iRt) 
+          << endl;
+      }
+    }
   }
 
   this->singleSlater_undisplaced_->fileio()->out << endl;
@@ -217,21 +236,21 @@ void NumericalDifferentiation<T>::cartesianDiff(){
     basis_p1.constructLocal(&mol_p1);
     basis_m1.constructLocal(&mol_m1);
     
-    basis_p1.makeMaps(1,&mol_p1);
-    basis_m1.makeMaps(1,&mol_m1);
+    basis_p1.makeMaps(&mol_p1);
+    basis_m1.makeMaps(&mol_m1);
     basis_p1.renormShells();
     basis_m1.renormShells();
 
 
     aoints_p1.communicate(mol_p1,basis_p1,fileioTmp,
-      *this->singleSlater_undisplaced_->aointegrals()->controls());
+      *this->singleSlater_undisplaced_->memManager());
     aoints_m1.communicate(mol_m1,basis_m1,fileioTmp,
-      *this->singleSlater_undisplaced_->aointegrals()->controls());
+      *this->singleSlater_undisplaced_->memManager());
 
-    ss_p1.communicate(mol_p1,basis_p1,aoints_p1,fileioTmp,
-      *this->singleSlater_undisplaced_->aointegrals()->controls());
+    ss_p1.communicate(mol_p1,basis_p1,aoints_p1,fileioTmp, 
+      *this->singleSlater_undisplaced_->memManager());
     ss_m1.communicate(mol_m1,basis_m1,aoints_m1,fileioTmp,
-      *this->singleSlater_undisplaced_->aointegrals()->controls());
+      *this->singleSlater_undisplaced_->memManager());
 
     ss_p1.setRef(SingleSlater<T>::RHF);
     ss_m1.setRef(SingleSlater<T>::RHF);
@@ -265,8 +284,8 @@ void NumericalDifferentiation<T>::cartesianDiff(){
 
     basis_p1.constructLocal(&mol_p1);
     basis_m1.constructLocal(&mol_m1);
-    basis_p1.makeMaps(1,&mol_p1);
-    basis_m1.makeMaps(1,&mol_m1);
+    basis_p1.makeMaps(&mol_p1);
+    basis_m1.makeMaps(&mol_m1);
 
     ss_p1.initMeta();
     ss_m1.initMeta();
@@ -321,26 +340,32 @@ void NumericalDifferentiation<T>::cartesianDiff(){
       cout << "  Checking | C - C' | Before Phase Check:" << endl;
       
       cout << "  | C(X,Y) - C(X+DX,Y) | = " 
-           << diffNorm((*this->singleSlater_undisplaced_->moA()),(*ss_p1.moA())) 
+           << diffNorm((*this->singleSlater_undisplaced_->moA()),
+               (*ss_p1.moA())) 
            << endl;  
       cout << "  | C(X,Y) - C(X-DX,Y) | = " 
-           << diffNorm((*this->singleSlater_undisplaced_->moA()),(*ss_m1.moA())) 
+           << diffNorm((*this->singleSlater_undisplaced_->moA()),
+               (*ss_m1.moA())) 
            << endl;  
 
 
       this->checkPhase((*this->singleSlater_undisplaced_),ss_p1,SMO_0_p1);
       this->checkPhase((*this->singleSlater_undisplaced_),ss_m1,SMO_0_m1);
-//    this->checkPhase((*this->singleSlater_undisplaced_->moA()),(*ss_p1.moA()));
-//    this->checkPhase((*this->singleSlater_undisplaced_->moA()),(*ss_m1.moA()));
+//    this->checkPhase((*this->singleSlater_undisplaced_->moA()),
+//      (*ss_p1.moA()));
+//    this->checkPhase((*this->singleSlater_undisplaced_->moA()),
+//      (*ss_m1.moA()));
 
       cout << endl;
       cout << "  Checking | C - C' | After Phase Check:" << endl;
       
       cout << "  | C(X,Y) - C(X+DX,Y) | = " 
-           << diffNorm((*this->singleSlater_undisplaced_->moA()),(*ss_p1.moA())) 
+           << diffNorm((*this->singleSlater_undisplaced_->moA()),
+               (*ss_p1.moA())) 
            << endl;  
       cout << "  | C(X,Y) - C(X-DX,Y) | = " 
-           << diffNorm((*this->singleSlater_undisplaced_->moA()),(*ss_m1.moA())) 
+           << diffNorm((*this->singleSlater_undisplaced_->moA()),
+               (*ss_m1.moA())) 
            << endl;  
 
 
@@ -357,12 +382,8 @@ void NumericalDifferentiation<T>::cartesianDiff(){
 
     TMatrix T_p1, T_m1;
     if(this->computeESGradient) {
-      moints_p1.communicate(mol_p1,basis_p1,fileioTmp,
-        *this->singleSlater_undisplaced_->aointegrals()->controls(),
-        aoints_p1,ss_p1);
-      moints_m1.communicate(mol_m1,basis_m1,fileioTmp,
-        *this->singleSlater_undisplaced_->aointegrals()->controls(),
-        aoints_m1,ss_m1);
+      moints_p1.communicate(mol_p1,basis_p1,fileioTmp,aoints_p1,ss_p1);
+      moints_m1.communicate(mol_m1,basis_m1,fileioTmp,aoints_m1,ss_m1);
 
       resp_p1.communicate(ss_p1,moints_p1,fileioTmp);
       resp_m1.communicate(ss_m1,moints_m1,fileioTmp);
@@ -379,10 +400,17 @@ void NumericalDifferentiation<T>::cartesianDiff(){
       this->computeES(resp_m1);
 
       // Copy T's
-      T_p1 = resp_p1.transDen()[0].block(0,0,resp_p1.nMatDim()[0],
-        this->responseNRoots_);
-      T_m1 = resp_m1.transDen()[0].block(0,0,resp_m1.nMatDim()[0],
-        this->responseNRoots_);
+      if(this->respType_ == RESPONSE_TYPE::CIS){
+        T_p1 = resp_p1.template transDen<SINGLETS>().block(0,0,
+            resp_p1.template nMatDim<SINGLETS>(),this->responseNRoots_);
+        T_m1 = resp_m1.template transDen<SINGLETS>().block(0,0,
+            resp_m1.template nMatDim<SINGLETS>(),this->responseNRoots_);
+      } else if(this->respType_ == RESPONSE_TYPE::PPTDA) {
+        T_p1 = resp_p1.template transDen<A_PPTDA_SINGLETS>().block(0,0,
+            resp_p1.template nMatDim<A_PPTDA_SINGLETS>(),this->responseNRoots_);
+        T_m1 = resp_m1.template transDen<A_PPTDA_SINGLETS>().block(0,0,
+            resp_m1.template nMatDim<A_PPTDA_SINGLETS>(),this->responseNRoots_);
+      }
 
       this->singleSlater_undisplaced_->fileio()->out << 
         "  Performing Phase Check on Displaced Transition Vectors" << endl;
@@ -454,12 +482,26 @@ void NumericalDifferentiation<T>::cartesianDiff(){
     if(this->computeESGradient){
       this->singleSlater_undisplaced_->fileio()->out 
         << "    ES Energies:" << endl;
-      for(auto iRt = 0; iRt < this->responseNRoots_; iRt++)
-        this->singleSlater_undisplaced_->fileio()->out 
-          << "      W(+," << iRt << ") = "
-          << std::setprecision(10) << resp_p1.frequencies()[0](iRt) << endl
-          << "      W(-," << iRt << ") = "
-          << std::setprecision(10) << resp_m1.frequencies()[0](iRt) << endl;
+      for(auto iRt = 0; iRt < this->responseNRoots_; iRt++){
+        if(this->respType_ == RESPONSE_TYPE::CIS){
+          this->singleSlater_undisplaced_->fileio()->out 
+            << "      W(+," << iRt << ") = "
+            << std::setprecision(10) << resp_p1.
+              template frequencies<SINGLETS>()(iRt) 
+            << endl << "      W(-," << iRt << ") = "
+            << std::setprecision(10) << resp_m1.
+              template frequencies<SINGLETS>()(iRt) 
+            << endl;
+        } else if(this->respType_ == RESPONSE_TYPE::PPTDA) {
+          this->singleSlater_undisplaced_->fileio()->out 
+            << "      W(+," << iRt << ") = "
+            << std::setprecision(10) 
+            << resp_p1.template frequencies<A_PPTDA_SINGLETS>()(iRt) << endl
+            << "      W(-," << iRt << ") = "
+            << std::setprecision(10) 
+            << resp_m1.template frequencies<A_PPTDA_SINGLETS>()(iRt) << endl;
+        }
+      }
     }
     if(this->computeES2GSNACME){
 //    this->ES2GSNACME(ss_p1,ss_m1,resp_p1,resp_m1,SAO_0_p1,SAO_0_m1,
@@ -497,6 +539,8 @@ void NumericalDifferentiation<T>::cartesianDiff(){
     
   }
 
+  this->dumpSummary();
+
 };
 
 template<typename T>
@@ -524,7 +568,7 @@ void NumericalDifferentiation<T>::computeGS(SingleSlater<T> &ss){
   ss.formGuess();
   ss.formFock();
   ss.computeEnergy();
-  ss.SCF();
+  ss.SCF2();
   ss.computeProperties();
   ss.printProperties();
 
@@ -565,8 +609,19 @@ template <typename T>
 Eigen::VectorXd NumericalDifferentiation<T>::ESGradient(
   Response<T> &resp_p1, Response<T> &resp_m1){
   // This assumes strictly Singlets FIXME
-  Eigen::VectorXd freq_p1=resp_p1.frequencies()[0].head(this->responseNRoots_);
-  Eigen::VectorXd freq_m1=resp_m1.frequencies()[0].head(this->responseNRoots_);
+
+  VectorXd freq_p1, freq_m1;
+  if(this->respType_ == RESPONSE_TYPE::CIS){
+    freq_p1 = resp_p1.
+      template frequencies<SINGLETS>().head(this->responseNRoots_);
+    freq_m1 = resp_m1.
+      template frequencies<SINGLETS>().head(this->responseNRoots_);
+  }else if(this->respType_ == RESPONSE_TYPE::PPTDA){
+    freq_p1 = resp_p1.template frequencies<A_PPTDA_SINGLETS>().head(
+        this->responseNRoots_);
+    freq_m1 = resp_m1.template frequencies<A_PPTDA_SINGLETS>().head(
+        this->responseNRoots_);
+  }
 
   Eigen::VectorXd freqDX = (freq_p1 - freq_m1)/(2*this->step);
   return freqDX;
@@ -581,6 +636,121 @@ void NumericalDifferentiation<T>::checkDegeneracies(SingleSlater<T> &ss) {
       cout << "WARNING: DEGENERACY IN MOs: " << iMO << " and " << iMO + 1 <<
            endl;
   }
+};
+
+template <typename T>
+void NumericalDifferentiation<T>::dumpSummary(){
+  int nAtoms = this->molecule_undisplaced_->nAtoms(); 
+  this->singleSlater_undisplaced_->fileio()->out.precision(8);
+  this->singleSlater_undisplaced_->fileio()->out.fill(' ');
+  this->singleSlater_undisplaced_->fileio()->out.setf(ios::right,ios::adjustfield);
+  this->singleSlater_undisplaced_->fileio()->out.setf(ios::fixed,ios::floatfield);
+
+  this->singleSlater_undisplaced_->fileio()->out <<
+    "Summary of Differentiation Results" << endl << endl;
+
+  this->singleSlater_undisplaced_->fileio()->out <<
+    "GS Gradient" << endl;
+  this->singleSlater_undisplaced_->fileio()->out << bannerTop<< endl;
+  this->singleSlater_undisplaced_->fileio()->out << 
+    std::setw(18) << "Atom" << std::setw(21) << "X" << std::setw(15) << "Y" << 
+    std::setw(15) << "Z" << endl;
+  this->singleSlater_undisplaced_->fileio()->out << bannerMid << endl;
+  for(auto iAtm = 0, iX = 0; iAtm < nAtoms; iAtm++, iX += 3){
+    this->singleSlater_undisplaced_->fileio()->out << 
+        std::setw(8)  << iAtm+1 << std::setw(8) << " "
+        << std::setw(8)  << " " 
+        << std::setw(15) << this->dervData_[iX].GS_GRAD
+        << std::setw(15) << this->dervData_[iX+1].GS_GRAD
+        << std::setw(15) << this->dervData_[iX+2].GS_GRAD
+        << endl;
+  }
+  this->singleSlater_undisplaced_->fileio()->out << bannerMid << endl;
+  this->singleSlater_undisplaced_->fileio()->out << endl << endl;
+
+
+
+  this->singleSlater_undisplaced_->fileio()->out <<
+    "ES Gradient" << endl;
+  this->singleSlater_undisplaced_->fileio()->out << bannerTop<< endl;
+
+  for(auto iFreq = 0; iFreq < this->responseNRoots_; iFreq++){
+    this->singleSlater_undisplaced_->fileio()->out <<
+      "State " << iFreq + 1 << endl;
+    this->singleSlater_undisplaced_->fileio()->out << bannerTop<< endl;
+
+    this->singleSlater_undisplaced_->fileio()->out << 
+      std::setw(18) << "Atom" << std::setw(21) << "X" << std::setw(15) << "Y" << 
+      std::setw(15) << "Z" << endl;
+    this->singleSlater_undisplaced_->fileio()->out << bannerMid << endl;
+    for(auto iAtm = 0, iX = 0; iAtm < nAtoms; iAtm++, iX += 3){
+      this->singleSlater_undisplaced_->fileio()->out << 
+          std::setw(8)  << iAtm+1 << std::setw(8) << " "
+          << std::setw(8)  << " " 
+          << std::setw(15) << this->dervData_[iX].ES_GRAD(iFreq)
+          << std::setw(15) << this->dervData_[iX+1].ES_GRAD(iFreq)
+          << std::setw(15) << this->dervData_[iX+2].ES_GRAD(iFreq)
+          << endl;
+    }
+    this->singleSlater_undisplaced_->fileio()->out << bannerMid << endl;
+    this->singleSlater_undisplaced_->fileio()->out << endl;
+  }
+  this->singleSlater_undisplaced_->fileio()->out << endl << endl;
+
+  this->singleSlater_undisplaced_->fileio()->out <<
+    "ES -> GS NACT" << endl;
+  this->singleSlater_undisplaced_->fileio()->out << bannerTop<< endl;
+
+  for(auto iFreq = 0; iFreq < this->responseNRoots_; iFreq++){
+    this->singleSlater_undisplaced_->fileio()->out <<
+      "State " << iFreq + 1 << " -> 0" << endl;
+    this->singleSlater_undisplaced_->fileio()->out << bannerTop<< endl;
+
+    this->singleSlater_undisplaced_->fileio()->out << 
+      std::setw(18) << "Atom" << std::setw(21) << "X" << std::setw(15) << "Y" << 
+      std::setw(15) << "Z" << endl;
+    this->singleSlater_undisplaced_->fileio()->out << bannerMid << endl;
+    for(auto iAtm = 0, iX = 0; iAtm < nAtoms; iAtm++, iX += 3){
+      this->singleSlater_undisplaced_->fileio()->out << 
+          std::setw(8)  << iAtm+1 << std::setw(8) << " "
+          << std::setw(8)  << " " 
+          << std::setw(15) << this->dervData_[iX].ES_GS_NACME(iFreq)
+          << std::setw(15) << this->dervData_[iX+1].ES_GS_NACME(iFreq)
+          << std::setw(15) << this->dervData_[iX+2].ES_GS_NACME(iFreq)
+          << endl;
+    }
+    this->singleSlater_undisplaced_->fileio()->out << bannerMid << endl;
+    this->singleSlater_undisplaced_->fileio()->out << endl;
+  }
+  this->singleSlater_undisplaced_->fileio()->out << endl << endl;
+
+  this->singleSlater_undisplaced_->fileio()->out <<
+    "ES -> ES NACT" << endl;
+  this->singleSlater_undisplaced_->fileio()->out << bannerTop<< endl;
+
+  for(auto iFreq = 0; iFreq < this->responseNRoots_; iFreq++)
+  for(auto jFreq = 0; jFreq < this->responseNRoots_; jFreq++){
+    this->singleSlater_undisplaced_->fileio()->out <<
+      "State " << iFreq + 1 << " -> " << jFreq +1 << endl;
+    this->singleSlater_undisplaced_->fileio()->out << bannerTop<< endl;
+
+    this->singleSlater_undisplaced_->fileio()->out << 
+      std::setw(18) << "Atom" << std::setw(21) << "X" << std::setw(15) << "Y" << 
+      std::setw(15) << "Z" << endl;
+    this->singleSlater_undisplaced_->fileio()->out << bannerMid << endl;
+    for(auto iAtm = 0, iX = 0; iAtm < nAtoms; iAtm++, iX += 3){
+      this->singleSlater_undisplaced_->fileio()->out << 
+          std::setw(8)  << iAtm+1 << std::setw(8) << " "
+          << std::setw(8)  << " " 
+          << std::setw(15) << this->dervData_[iX].ES_ES_NACME(iFreq,jFreq)
+          << std::setw(15) << this->dervData_[iX+1].ES_ES_NACME(iFreq,jFreq)
+          << std::setw(15) << this->dervData_[iX+2].ES_ES_NACME(iFreq,jFreq)
+          << endl;
+    }
+    this->singleSlater_undisplaced_->fileio()->out << bannerMid << endl;
+    this->singleSlater_undisplaced_->fileio()->out << endl;
+  }
+  this->singleSlater_undisplaced_->fileio()->out << endl << endl;
 };
 
 

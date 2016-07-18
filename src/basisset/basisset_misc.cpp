@@ -31,65 +31,65 @@ namespace ChronusQ{
  *
  *  Each element is the infinity norm of the shell pair block
  */
-template<>
-void BasisSet::computeShBlkNorm(bool doBeta, int nTCS, const RealMatrix *DAlpha, 
-                                   const RealMatrix *DBeta){
-  // If map doesnt exist, make it
-  if(!this->haveMapSh2Bf) this->makeMapSh2Bf(nTCS);
-
-  // Allocate Matricies
-  this->shBlkNormAlpha = 
-    std::unique_ptr<RealMatrix>(new RealMatrix(this->nShell_,this->nShell_));
-  if(doBeta)
-    this->shBlkNormBeta = 
-      std::unique_ptr<RealMatrix>(new RealMatrix(this->nShell_,this->nShell_));
-
-  for(int s1 = 0; s1 < this->nShell_; s1++) {
-    int bf1 = this->mapSh2Bf_[s1];
-    int n1  = this->shells_[s1].size();
-    for(int s2 = 0; s2 < this->nShell_; s2++) {
-      int bf2 = this->mapSh2Bf_[s2];
-      int n2  = this->shells_[s2].size();
-     
-      (*this->shBlkNormAlpha)(s1,s2) = DAlpha->block(bf1,bf2,n1,n2).lpNorm<Infinity>();
-      if(doBeta)
-        (*this->shBlkNormBeta)(s1,s2) = DBeta->block(bf1,bf2,n1,n2).lpNorm<Infinity>();
-    }
-  }
-} // BasisSet::computeShBlkNorm (TMat = RealMatrix)
-
-/**
- *  Compute the shell block norm matrix for some AO quantity to
- *  be contracted to AO ERIs w/ screening
- *
- *  Each element is the infinity norm of the shell pair block
- */
-template<>
-void BasisSet::computeShBlkNorm(bool doBeta,int nTCS,const ComplexMatrix *DAlpha, 
-                                   const ComplexMatrix *DBeta){
-  // If map doesnt exist, make it
-  if(!this->haveMapSh2Bf) this->makeMapSh2Bf(nTCS);
-
-  // Allocate Matricies
-  this->shBlkNormAlpha = 
-    std::unique_ptr<RealMatrix>(new RealMatrix(this->nShell_,this->nShell_));
-  if(doBeta)
-    this->shBlkNormBeta = 
-      std::unique_ptr<RealMatrix>(new RealMatrix(this->nShell_,this->nShell_));
-
-  for(int s1 = 0; s1 < this->nShell_; s1++) {
-    int bf1 = this->mapSh2Bf_[s1];
-    int n1  = this->shells_[s1].size();
-    for(int s2 = 0; s2 < this->nShell_; s2++) {
-      int bf2 = this->mapSh2Bf_[s2];
-      int n2  = this->shells_[s2].size();
-     
-      (*this->shBlkNormAlpha)(s1,s2) = DAlpha->block(bf1,bf2,n1,n2).lpNorm<Infinity>();
-      if(doBeta)
-        (*this->shBlkNormBeta)(s1,s2) = DBeta->block(bf1,bf2,n1,n2).lpNorm<Infinity>();
-    }
-  }
-} // BasisSet::computeShBlkNorm (TMat = ComplexMatrix)
+//template<>
+//void BasisSet::computeShBlkNorm(bool doBeta, int nTCS, const RealMatrix *DAlpha, 
+//                                   const RealMatrix *DBeta){
+//  // If map doesnt exist, make it
+//  if(!this->haveMapSh2Bf) this->makeMapSh2Bf();
+//
+//  // Allocate Matricies
+//  this->shBlkNormAlpha = 
+//    std::unique_ptr<RealMatrix>(new RealMatrix(this->nShell_,this->nShell_));
+//  if(doBeta)
+//    this->shBlkNormBeta = 
+//      std::unique_ptr<RealMatrix>(new RealMatrix(this->nShell_,this->nShell_));
+//
+//  for(int s1 = 0; s1 < this->nShell_; s1++) {
+//    int bf1 = this->mapSh2Bf_[s1];
+//    int n1  = this->shells_[s1].size();
+//    for(int s2 = 0; s2 < this->nShell_; s2++) {
+//      int bf2 = this->mapSh2Bf_[s2];
+//      int n2  = this->shells_[s2].size();
+//     
+//      (*this->shBlkNormAlpha)(s1,s2) = DAlpha->block(bf1,bf2,n1,n2).lpNorm<Infinity>();
+//      if(doBeta)
+//        (*this->shBlkNormBeta)(s1,s2) = DBeta->block(bf1,bf2,n1,n2).lpNorm<Infinity>();
+//    }
+//  }
+//} // BasisSet::computeShBlkNorm (TMat = RealMatrix)
+//
+///**
+// *  Compute the shell block norm matrix for some AO quantity to
+// *  be contracted to AO ERIs w/ screening
+// *
+// *  Each element is the infinity norm of the shell pair block
+// */
+//template<>
+//void BasisSet::computeShBlkNorm(bool doBeta,int nTCS,const ComplexMatrix *DAlpha, 
+//                                   const ComplexMatrix *DBeta){
+//  // If map doesnt exist, make it
+//  if(!this->haveMapSh2Bf) this->makeMapSh2Bf();
+//
+//  // Allocate Matricies
+//  this->shBlkNormAlpha = 
+//    std::unique_ptr<RealMatrix>(new RealMatrix(this->nShell_,this->nShell_));
+//  if(doBeta)
+//    this->shBlkNormBeta = 
+//      std::unique_ptr<RealMatrix>(new RealMatrix(this->nShell_,this->nShell_));
+//
+//  for(int s1 = 0; s1 < this->nShell_; s1++) {
+//    int bf1 = this->mapSh2Bf_[s1];
+//    int n1  = this->shells_[s1].size();
+//    for(int s2 = 0; s2 < this->nShell_; s2++) {
+//      int bf2 = this->mapSh2Bf_[s2];
+//      int n2  = this->shells_[s2].size();
+//     
+//      (*this->shBlkNormAlpha)(s1,s2) = DAlpha->block(bf1,bf2,n1,n2).lpNorm<Infinity>();
+//      if(doBeta)
+//        (*this->shBlkNormBeta)(s1,s2) = DBeta->block(bf1,bf2,n1,n2).lpNorm<Infinity>();
+//    }
+//  }
+//} // BasisSet::computeShBlkNorm (TMat = ComplexMatrix)
 
 /**
  *  Renormalize the libint2::Shell vector (this is important)
@@ -119,7 +119,7 @@ std::vector<libint2::Shell> BasisSet::uncontractBasis(){
         { {iShell->contr[0].l,iShell->contr[0].pure,{1.0}  }},
         { {iShell->O[0],iShell->O[1],iShell->O[2]}}
       } );
-//    cout << iShell->alpha[i] << " " << iShell->contr[0].l << endl;
+    cout << iShell->alpha[i] << " " << iShell->contr[0].l << endl;
     }
   }
 

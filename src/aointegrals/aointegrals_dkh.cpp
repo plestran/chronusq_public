@@ -33,8 +33,7 @@ void AOIntegrals::DKH0(){
 /*
     This whole routine is crap and needs to be restructured -- JJG
 */
-    auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
-    auto NSQ         = NTCSxNBASIS * NTCSxNBASIS;
+    auto NSQ         = this->nBasis_ * this->nBasis_;
     double C         = phys.SPEED_OF_LIGHT;
 
     char JOBZ = 'V';
@@ -42,37 +41,37 @@ void AOIntegrals::DKH0(){
     int INFO;
 
     double *A     = new double[NSQ]; 
-    double *W     = new double[NTCSxNBASIS];  
+    double *W     = new double[this->nBasis_];  
     double *WORK  = new double[NSQ];
     double *SCR   = new double[NSQ];
     double *OVLP1 = new double[NSQ];
     double *OVLP2 = new double[NSQ];
 
-    RealVecMap E(W,NTCSxNBASIS);
-    RealMap    V(A,NTCSxNBASIS,NTCSxNBASIS);
-    RealMap    S(WORK,NTCSxNBASIS,NTCSxNBASIS); // Requires WORK to be NBSq
-    RealMap    T(SCR,NTCSxNBASIS,NTCSxNBASIS); // Requires WORK to be NBSq
-    RealMap    X(OVLP1,NTCSxNBASIS,NTCSxNBASIS); // get us the overlap for lowdin decomp
-    RealMap    Xp(OVLP2,NTCSxNBASIS,NTCSxNBASIS); // get us the overlap for lowdin decomp
+    RealVecMap E(W,this->nBasis_);
+    RealMap    V(A,this->nBasis_,this->nBasis_);
+    RealMap    S(WORK,this->nBasis_,this->nBasis_); // Requires WORK to be NBSq
+    RealMap    T(SCR,this->nBasis_,this->nBasis_); // Requires WORK to be NBSq
+    RealMap    X(OVLP1,this->nBasis_,this->nBasis_); // get us the overlap for lowdin decomp
+    RealMap    Xp(OVLP2,this->nBasis_,this->nBasis_); // get us the overlap for lowdin decomp
 
     E.setZero();
     V.setZero();
     S.setZero();
 
     std::memcpy(SCR,this->kinetic_->data(),
-      NTCSxNBASIS*NTCSxNBASIS*sizeof(double));
+      this->nBasis_*this->nBasis_*sizeof(double));
 
     // put the kinetic energy in the orthonormal basis
     X = (*this->overlap_).pow(-0.5); // Make this more efficient... FIXME
     Xp = (*this->overlap_).pow(0.5); // Make this more efficient... FIXME
     V = X.transpose() * T * X;
 
-    dsyev_(&JOBZ,&UPLO,&NTCSxNBASIS,A,&NTCSxNBASIS,W,WORK,&NSQ,&INFO);
+    dsyev_(&JOBZ,&UPLO,&this->nBasis_,A,&this->nBasis_,W,WORK,&NSQ,&INFO);
 
 //    V.transposeInPlace(); // BC Col major
     S.setZero(); // S will become our new T matrix
   
-    for(auto i = 0; i < NTCSxNBASIS; i++) {
+    for(auto i = 0; i < this->nBasis_; i++) {
       cout << E(i) << endl;
       S(i,i) = std::sqrt(2.0*E(i)*C*C + C*C*C*C) - C*C;
     }
@@ -80,7 +79,7 @@ void AOIntegrals::DKH0(){
     T = Xp.transpose() * V * S * V.adjoint() * Xp; 
  
     std::memcpy(this->kinetic_->data(),SCR,
-      NTCSxNBASIS*NTCSxNBASIS*sizeof(double));
+      this->nBasis_*this->nBasis_*sizeof(double));
     prettyPrint(this->fileio_->out,T, "new kinetic");
 
     delete[] A;

@@ -43,8 +43,18 @@ Eigen::VectorXd NumericalDifferentiation<T>::ES2GSNACME_CIS(
   std::vector<RealMatrix> Prod_0_m1(nThreads,
     TMatrix((*this->singleSlater_undisplaced_->moA())));
 
-  RealMatrix T_0 = this->response_undisplaced_->transDen()[0].block(0,0,
-    this->response_undisplaced_->nMatDim()[0],this->responseNRoots_);
+  RealMatrix T_0; 
+    
+  if(this->respType_ == RESPONSE_TYPE::CIS){
+    T_0 = this->response_undisplaced_->template transden<SINGLETS>().block(0,0,
+      this->response_undisplaced_->template nMatDim<SINGLETS>(),
+      this->responseNRoots_);
+  } else if(this->respType_ == RESPONSE_TYPE::PPTDA){
+    T_0 = this->response_undisplaced_->
+      template transden<A_PPTDA_SINGLETS>().block(0,0,
+      this->response_undisplaced_->template nMatDim<A_PPTDA_SINGLETS>(),
+      this->responseNRoots_);
+  }
 
   auto NACMEStart = std::chrono::high_resolution_clock::now();
   for(auto iSt = 0; iSt < this->responseNRoots_; iSt++){
@@ -112,19 +122,48 @@ RealMatrix NumericalDifferentiation<T>::ES2ESNACME_CIS(
   this->checkPhase((*this->response_undisplaced_),resp_p1);
   this->checkPhase((*this->response_undisplaced_),resp_m1);
 
-  std::vector<RealMatrix> SWAPPED_IA_0(nThreads,RealMatrix((*this->singleSlater_undisplaced_->moA())));
-  std::vector<RealMatrix> SWAPPED_JB_p1(nThreads,RealMatrix((*this->singleSlater_undisplaced_->moA())));
-  std::vector<RealMatrix> SWAPPED_JB_m1(nThreads,RealMatrix((*this->singleSlater_undisplaced_->moA())));
+  std::vector<RealMatrix> 
+    SWAPPED_IA_0(nThreads,
+      RealMatrix((*this->singleSlater_undisplaced_->moA()))
+    );
+  std::vector<RealMatrix> 
+    SWAPPED_JB_p1(nThreads,
+      RealMatrix((*this->singleSlater_undisplaced_->moA()))
+    );
+  std::vector<RealMatrix> 
+    SWAPPED_JB_m1(nThreads,
+      RealMatrix((*this->singleSlater_undisplaced_->moA()))
+    );
 
-  std::vector<RealMatrix> Prod_0_p1(nThreads,RealMatrix((*this->singleSlater_undisplaced_->moA())));
-  std::vector<RealMatrix> Prod_0_m1(nThreads,RealMatrix((*this->singleSlater_undisplaced_->moA())));
+  std::vector<RealMatrix> 
+    Prod_0_p1(nThreads,
+      RealMatrix((*this->singleSlater_undisplaced_->moA()))
+    );
+  std::vector<RealMatrix> 
+    Prod_0_m1(nThreads,
+      RealMatrix((*this->singleSlater_undisplaced_->moA()))
+    );
 
-  RealMatrix T_0 = this->response_undisplaced_->transDen()[0].block(0,0,
-    this->response_undisplaced_->nMatDim()[0],this->responseNRoots_);
-  RealMatrix T_p1 = resp_p1.transDen()[0].block(0,0,
-    resp_p1.nMatDim()[0],this->responseNRoots_);
-  RealMatrix T_m1 = resp_m1.transDen()[0].block(0,0,
-    resp_m1.nMatDim()[0],this->responseNRoots_);
+  RealMatrix T_0, T_p1, T_m1;
+
+  if(this->respType_ == RESPONSE_TYPE::CIS){
+    T_0 = this->response_undisplaced_->template transden<SINGLETS>().block(0,0,
+      this->response_undisplaced_->template nMatDim<SINGLETS>(),
+      this->responseNRoots_);
+    T_p1 = resp_p1.template transden<SINGLETS>().block(0,0,
+      resp_p1.template nMatDim<SINGLETS>(),this->responseNRoots_);
+    T_m1 = resp_m1.template transden<SINGLETS>().block(0,0,
+      resp_m1.template nMatDim<SINGLETS>(),this->responseNRoots_);
+  } else if(this->respType_ == RESPONSE_TYPE::PPTDA){
+    T_0 = this->response_undisplaced_->
+      template transden<A_PPTDA_SINGLETS>().block(0,0,
+      this->response_undisplaced_->template nMatDim<A_PPTDA_SINGLETS>(),
+      this->responseNRoots_);
+    T_p1 = resp_p1.template transden<A_PPTDA_SINGLETS>().block(0,0,
+      resp_p1.template nMatDim<A_PPTDA_SINGLETS>(),this->responseNRoots_);
+    T_m1 = resp_m1.template transden<A_PPTDA_SINGLETS>().block(0,0,
+      resp_m1.template nMatDim<A_PPTDA_SINGLETS>(),this->responseNRoots_);
+  }
 
 
   auto NACMEStart = std::chrono::high_resolution_clock::now();
@@ -140,7 +179,9 @@ RealMatrix NumericalDifferentiation<T>::ES2ESNACME_CIS(
         SWAPPED_IA_0[thread_id].setZero();
         SWAPPED_IA_0[thread_id] = (*this->singleSlater_undisplaced_->moA());
      
-        SWAPPED_IA_0[thread_id].col(i).swap(SWAPPED_IA_0[thread_id].col(nOcc+a)); 
+        SWAPPED_IA_0[thread_id].col(i).swap(
+          SWAPPED_IA_0[thread_id].col(nOcc+a)
+        ); 
      
         for(auto j = 0, jb = 0; j < nOcc; j++)
         for(auto b = 0; b < nVir; b++, jb++, iajb++){
@@ -159,13 +200,19 @@ RealMatrix NumericalDifferentiation<T>::ES2ESNACME_CIS(
           SWAPPED_JB_p1[thread_id] = (*ss_p1.moA());
           SWAPPED_JB_m1[thread_id] = (*ss_m1.moA());
        
-          SWAPPED_JB_p1[thread_id].col(j).swap(SWAPPED_JB_p1[thread_id].col(nOcc+b)); 
-          SWAPPED_JB_m1[thread_id].col(j).swap(SWAPPED_JB_m1[thread_id].col(nOcc+b)); 
+          SWAPPED_JB_p1[thread_id].col(j).swap(
+            SWAPPED_JB_p1[thread_id].col(nOcc+b)
+          ); 
+          SWAPPED_JB_m1[thread_id].col(j).swap(
+            SWAPPED_JB_m1[thread_id].col(nOcc+b)
+          ); 
           
           Prod_0_p1[thread_id] = 
-            SWAPPED_IA_0[thread_id].transpose() * SAO_0_p1 * SWAPPED_JB_p1[thread_id];
+            SWAPPED_IA_0[thread_id].transpose() * SAO_0_p1 * 
+            SWAPPED_JB_p1[thread_id];
           Prod_0_m1[thread_id] = 
-            SWAPPED_IA_0[thread_id].transpose() * SAO_0_m1 * SWAPPED_JB_m1[thread_id];
+            SWAPPED_IA_0[thread_id].transpose() * SAO_0_m1 * 
+            SWAPPED_JB_m1[thread_id];
        
           
           double OvLp_IASwap_0_p1 =
@@ -446,15 +493,18 @@ RealMatrix NumericalDifferentiation<T>::ES2ESNACME_PPTDA(
         double OvLp_BC_0_m1 =
           Prod_0_m1[thread_id].block(0,0,nOcc+1,nOcc+1).determinant();
      
-	// Swap Back ** Dont actually need this one for now as it get overwritten by copy at
+	// Swap Back ** 
+        // Dont actually need this one for now as it get overwritten by copy at
 	// the next iteration **
       //Prod_0_p1[thread_id].row(nOcc).swap(Prod_0_p1[thread_id].row(nOcc+b)); 
       //Prod_0_p1[thread_id].col(nOcc).swap(Prod_0_p1[thread_id].col(nOcc+c)); 
       //Prod_0_m1[thread_id].row(nOcc).swap(Prod_0_m1[thread_id].row(nOcc+b)); 
       //Prod_0_m1[thread_id].col(nOcc).swap(Prod_0_m1[thread_id].col(nOcc+c)); 
      
-        double OvLp_Swap_0_p1 = OvLp_AC_0_p1*OvLp_BD_0_p1 + OvLp_AD_0_p1*OvLp_BC_0_p1;
-        double OvLp_Swap_0_m1 = OvLp_AC_0_m1*OvLp_BD_0_m1 + OvLp_AD_0_m1*OvLp_BC_0_m1;
+        double OvLp_Swap_0_p1 = 
+          OvLp_AC_0_p1*OvLp_BD_0_p1 + OvLp_AD_0_p1*OvLp_BC_0_p1;
+        double OvLp_Swap_0_m1 = 
+          OvLp_AC_0_m1*OvLp_BD_0_m1 + OvLp_AD_0_m1*OvLp_BC_0_m1;
      
         double fact = 1;
         if( a == b ) fact *= std::sqrt(0.5);

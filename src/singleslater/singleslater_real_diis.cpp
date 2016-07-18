@@ -24,104 +24,10 @@
  *  
  */
 #include <singleslater.h>
-using ChronusQ::Controls;
 using ChronusQ::FileIO;
 using ChronusQ::SingleSlater;
 
 namespace ChronusQ{
-template<>
-void SingleSlater<double>::CDIIS(){
-  int N = this->lenCoeff_;
-  RealMatrix B(N,N);
-  double *coef = new double[N];
-  int    *iPiv = new int[N];
-  int    NRHS = 1, INFO = -1;
-  int NBSq = this->nBasis_*this->nBasis_*this->nTCS_*this->nTCS_;
-  for(auto j = 0; j < (N-1); j++)
-  for(auto k = 0; k <= j          ; k++){
-    RealMap EJA(this->ErrorAlphaMem_ + (j%(N-1))*NBSq,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
-    RealMap EKA(this->ErrorAlphaMem_ + (k%(N-1))*NBSq,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
-    B(j,k) = -EJA.frobInner(EKA);
-    if(!this->isClosedShell && this->Ref_ != TCS){
-      RealMap EJB(this->ErrorBetaMem_ + (j%(N-1))*NBSq,this->nBasis_,this->nBasis_);
-      RealMap EKB(this->ErrorBetaMem_ + (k%(N-1))*NBSq,this->nBasis_,this->nBasis_);
-      B(j,k) += -EJB.frobInner(EKB);
-    }
-    B(k,j) = B(j,k);
-  }
-  for (auto l=0;l<N-1;l++){
-     B(N-1,l)=-1.0;
-     B(l,N-1)=-1.0;
-  }
-  B(N-1,N-1)=0;
-  for(auto k = 0; k < N;k++) coef[k] = 0.0; 
-  coef[N-1]=-1.0;
-/*
-  prettyPrint(this->fileio_->out,B,"B");
-  this->fileio_->out << "COEFF" << endl;
-  for(auto k = 0; k < N;k++) this->fileio_->out << coef[k] << endl;
-  this->fileio_->out << endl; 
-*/
-
-//dgesv_(&N,&NRHS,B.data(),&N,iPiv,coef,&N,&INFO);
-//char NORM = 'O';
-//double ANORM = B.lpNorm<1>();
-//RealVecMap COEFF(coef,N);
-//VectorXd   RHS(COEFF);
-//COEFF = B.fullPivLu().solve(RHS);
-
-//dgetrf_(&N,&N,B.data(),&N,iPiv,&INFO);
-//std::vector<int> iWORK_(N);
-//dgecon_(&NORM,&N,B.data(),&N,&ANORM,&RCOND,this->WORK_,&iWORK_[0],&INFO);
-
-//char TRANS = 'N';
-//dgels_(&TRANS,&N,&N,&NRHS,B.data(),&N,coef,&N,this->WORK_,&this->LWORK_,&INFO);
-
-  /*
-  double RCOND = -1.0;
-  int Rank;
-  double* S    = new double[N];
-//dgelss_(&N,&N,&NRHS,B.data(),&N,coef,&N,S,&RCOND,&Rank,this->WORK_,
-//  &this->LWORK_,&INFO);
-  dgelsd_(&N,&N,&NRHS,B.data(),&N,coef,&N,S,&RCOND,&Rank,this->WORK_,
-    &this->LWORK_,iPiv,&INFO);
-  delete [] S;
-  */
-  char NORM = 'O';
-  double ANORM = B.lpNorm<1>();
-  double RCOND;
-  std::vector<int> iWORK_(N);
-  dgesv_(&N,&NRHS,B.data(),&N,iPiv,coef,&N,&INFO);
-  dgecon_(&NORM,&N,B.data(),&N,&ANORM,&RCOND,this->WORK_,&iWORK_[0],&INFO);
-
-
-  if(std::abs(RCOND) > std::numeric_limits<double>::epsilon()) {
-    this->fockA_->setZero();
-    if(!this->isClosedShell && this->Ref_ != TCS) this->fockB_->setZero();
-    for(auto j = 0; j < N-1; j++) {
-      RealMap FA(this->FADIIS_ + (j%(N-1))*NBSq,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
-      *this->fockA_ += coef[j]*FA;
-      if(!this->isClosedShell && this->Ref_ != TCS) {
-        RealMap FB(this->FBDIIS_ + (j%(N-1))*NBSq,this->nBasis_,this->nBasis_);
-        *this->fockB_ += coef[j]*FB;
-      }
-    }
-  }
-  delete [] coef;
-  delete [] iPiv;
-
-} // CDIIS
-
-template<>
-void SingleSlater<double>::CpyFock(int iter){
-  std::memcpy(this->FADIIS_+(iter % (this->nDIISExtrap_-1)) * this->lenF_,
-    this->fockA_->data(),this->lenF_ * sizeof(double));
-
-  if(!this->isClosedShell && this->Ref_ != TCS)
-    std::memcpy(this->FBDIIS_ + (iter % (this->nDIISExtrap_-1)) * this->lenF_,
-                this->fockB_->data(),this->lenF_ * sizeof(double));
-} // CpyFock
-
 template<>
 void SingleSlater<double>::GenDComm(int iter){
   RealMap ErrA(
@@ -141,5 +47,29 @@ void SingleSlater<double>::GenDComm(int iter){
     ErrB -= (*this->aointegrals_->overlap_) * (*this->onePDMB_) * (*this->fockB_);
   }
 } // GenDComm
+
+template<>
+void SingleSlater<double>::genDComm2(int iter) {
+  auto NTCSxNBASIS = this->nTCS_ * this->nBasis_;
+  auto NSQ = NTCSxNBASIS  * NTCSxNBASIS;
+  RealMap ErrA(
+    this->ErrorAlphaMem_ + (iter % (this->nDIISExtrap_-1)) * NSQ,
+    this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_
+  );
+
+  if(this->nTCS_ == 1 && this->isClosedShell) {
+    (*this->NBSqScratch_) = (*this->onePDMA_) * (*this->aointegrals_->overlap_);
+    ErrA = (*this->fockA_) * (*this->NBSqScratch_);
+    ErrA -= this->NBSqScratch_->adjoint() * (*this->fockA_);
+  } else {
+    RealMap ErrB(
+      this->ErrorBetaMem_ + (iter % (this->nDIISExtrap_-1)) * NSQ,
+      this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_
+    );
+    (*this->NBSqScratch_) = (*this->onePDMB_) * (*this->aointegrals_->overlap_);
+    ErrB = (*this->fockB_) * (*this->NBSqScratch_);
+    ErrB -= this->NBSqScratch_->adjoint() * (*this->fockB_);
+  };
+};
 
 }// Namespace ChronusQ

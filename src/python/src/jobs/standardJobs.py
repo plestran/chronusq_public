@@ -28,12 +28,12 @@ import libpythonapi as chronusQ
 
 def communicate(workers):
   workers["CQAOIntegrals"].communicate(
-    workers["CQMolecule"], workers["CQBasisSet"], workers["CQFileIO"], 
-    workers["CQControls"]
+    workers["CQMolecule"], workers["CQBasisSet"], workers["CQFileIO"],
+    workers["CQMemManager"]
   )
   workers["CQSingleSlater"].communicate(
     workers["CQMolecule"], workers["CQBasisSet"], workers["CQAOIntegrals"],
-    workers["CQFileIO"], workers["CQControls"]
+    workers["CQFileIO"], workers["CQMemManager"]
   )
   try:
     workers["CQRealTime"].communicate(workers["CQFileIO"],workers["CQControls"],
@@ -50,7 +50,7 @@ def communicate(workers):
 
   try:
     workers["CQMOIntegrals"].communicate(workers["CQMolecule"],
-      workers["CQBasisSet"],workers["CQFileIO"],workers["CQControls"],
+      workers["CQBasisSet"],workers["CQFileIO"],
       workers["CQAOIntegrals"],workers["CQSingleSlater"])
   except KeyError:
     pass
@@ -93,16 +93,16 @@ def runSCF(workers,meta):
   if chronusQ.getRank() == 0:
     workers["CQSingleSlater"].printProperties()
 
- # ND = chronusQ.NumericalDifferentiationDouble()
- # ND.setSingleSlater(workers["CQSingleSlater"])
- # ND.generateESObjs()
- # ND.setRespNRoots(6)
- # ND.setRespType(chronusQ.RESPONSE_TYPE.CIS)
- # ND.setRespRoot(0)
- # ND.computeESGradient = True
- # ND.computeES2GSNACME = True
- # ND.computeES2ESNACME = True
- # ND.differentiate()
+  #ND = chronusQ.NumericalDifferentiationDouble()
+  #ND.setSingleSlater(workers["CQSingleSlater"])
+  #ND.generateESObjs()
+  #ND.setRespNRoots(4)
+  #ND.setRespType(chronusQ.RESPONSE_TYPE.CIS)
+  #ND.setRespRoot(0)
+  #ND.computeESGradient = True
+  #ND.computeES2GSNACME = True
+  #ND.computeES2ESNACME = True
+  #ND.differentiate()
 
  # #print ND.GSGrad()
  # #print ND.ESGrad()

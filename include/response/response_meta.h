@@ -48,6 +48,9 @@ void Response<T>::initMeta() {
   else if(this->iClass_ == RESPONSE_CLASS::PPPA)
     this->initMetaPPRPA();
 
+  for(int n = 0; n < this->iMatIter_.size(); ++n)
+    this->partitionIndexMap_[this->iMatIter_[n]] = static_cast<size_t>(n);
+
   this->initRMu();
 
 } // initMeta

@@ -23,61 +23,12 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
-template<typename T>
-void SingleSlater<T>::initMemLen(){
-  this->lenX_      = this->nBasis_ * this->nBasis_ * this->nTCS_ * this->nTCS_;
-  this->lenXp_     = this->nBasis_ * this->nBasis_ * this->nTCS_ * this->nTCS_;
-  this->lenF_      = this->nBasis_ * this->nBasis_ * this->nTCS_ * this->nTCS_;
-  this->lenP_      = this->nBasis_ * this->nBasis_ * this->nTCS_ * this->nTCS_;
-  this->lenCoeff_  = this->nDIISExtrap_;
-  this->lenB_      = this->lenCoeff_   * this->lenCoeff_;
-  this->LWORK_     = 5 * std::max(this->nBasis_ * this->nTCS_,
-    this->nDIISExtrap_);
-  this->LRWORK_    = 3 * 
-    std::max(this->nBasis_ * this->nTCS_,this->nDIISExtrap_) - 2;
-  this->lenLambda_ = this->nBasis_ * this->nBasis_ * this->nTCS_ * this->nTCS_;
-  this->lenDelF_   = this->nBasis_ * this->nBasis_ * this->nTCS_ * this->nTCS_;
-  this->lenOccNum_ = this->nBasis_ * this->nTCS_   * this->nTCS_;
-
-  this->lenScr_     = 0;
-  this->lenRealScr_ = 0;
-
-  this->lenScr_ += this->lenX_;     // Storage for S^(-0.5)
-  this->lenScr_ += this->lenF_;     // Storage for Alpha (Total) Fock
-  this->lenScr_ += this->lenP_;     // Storage for Alpha (Total) Density
-  this->lenScr_ += this->lenCoeff_; // Storage for CDIIS Coefficients
-  this->lenScr_ += this->lenB_;     // Storage for CDIIS Metric
-  this->lenScr_ += 2*(this->nDIISExtrap_ - 1) * this->lenF_; // CDIIS Commutator (A) array
-  if(!this->isClosedShell && this->Ref_ != TCS) {
-    this->lenScr_ += this->lenF_;     // Storage for Beta Fock
-    this->lenScr_ += this->lenP_;     // Storage for Beta Density
-    this->lenScr_ += 2*(this->nDIISExtrap_ - 1) * this->lenF_; // CDIIS Commutator (B) array
-  } 
-  if(this->Ref_ == CUHF) {
-    this->lenRealScr_ += this->lenOccNum_; // Storage for Occupation Numbers (NOs)
-    this->lenScr_     += this->lenXp_; // Storage for X^(0.5)
-    this->lenScr_     += this->lenLambda_; // Storage for Lambda
-    this->lenScr_     += this->lenDelF_;   // Stroage for DelF
-    this->lenScr_     += this->lenP_;      // Storage for NOs
-  }
-
-  this->lenScr_ += this->LWORK_; // LAPACK Scratch space
-  this->complexMem();
-
-}; // initMemLen
 
 template <typename T>
 void SingleSlater<T>::initSCFPtr(){
-  this->REAL_SCF_SCR   = NULL;
   this->occNumMem_     = NULL;
-  this->RWORK_         = NULL;
-  this->SCpyMem_       = NULL;
-  this->SEVlMem_       = NULL;
-  this->SEVcMem_       = NULL;
-  this->LowdinWORK_    = NULL;
+//this->RWORK_         = NULL;
 
-  this->SCF_SCR        = NULL;
-  this->XMem_          = NULL;
   this->FpAlphaMem_    = NULL;
   this->FpBetaMem_     = NULL;
   this->POldAlphaMem_  = NULL;
@@ -86,258 +37,178 @@ void SingleSlater<T>::initSCFPtr(){
   this->ErrorBetaMem_  = NULL;
   this->FADIIS_        = NULL;
   this->FBDIIS_        = NULL;
-  this->WORK_          = NULL;
-  this->XpMem_         = NULL;
+//this->WORK_          = NULL;
   this->lambdaMem_     = NULL;
   this->delFMem_       = NULL;
   this->PNOMem_        = NULL;
+
+  this->NBSQScr1_ = NULL;
+  this->NBSQScr2_ = NULL;
+  this->ScalarScr1_ = NULL;
+  this->ScalarScr2_ = NULL;
+  this->MzScr1_ = NULL;
+  this->MzScr2_ = NULL;
+  this->MyScr1_ = NULL;
+  this->MyScr2_ = NULL;
+  this->MxScr1_ = NULL;
+  this->MxScr2_ = NULL;
 }; // initSCFPtr
 
-template <typename T>
-void SingleSlater<T>::initSCFMem(){
+
+template<typename T>
+void SingleSlater<T>::initSCFMem2(){
   this->initSCFPtr();
-  this->initMemLen();
 
-/*  This kind of allocation should be handled by a memory manager
-  T* LAST_FOR_SECTION;
-  int LEN_LAST_FOR_SECTION;
 
-  this->SCF_SCR      = new T[this->lenScr_];
-  this->REAL_SCF_SCR = new double[this->lenRealScr_];
-  std::memset(this->SCF_SCR,     0.0,this->lenScr_    *sizeof(T)     );
-  std::memset(this->REAL_SCF_SCR,0.0,this->lenRealScr_*sizeof(double));
+  auto NTCSxNBASIS = this->nTCS_ * this->nBasis_;
+  auto NSQ = NTCSxNBASIS  * NTCSxNBASIS;
 
-  this->XMem_          = this->SCF_SCR;
-  this->FpAlphaMem_    = this->XMem_          + this->lenX_;
-  this->POldAlphaMem_  = this->FpAlphaMem_    + this->lenF_;
-  this->ErrorAlphaMem_ = this->POldAlphaMem_  + this->lenP_;
-  this->FADIIS_        = this->ErrorAlphaMem_ + this->lenF_*(this->lenCoeff_ -1);
-  LAST_FOR_SECTION     = this->FADIIS_;
-  LEN_LAST_FOR_SECTION = this->lenF_*(this->lenCoeff_ -1);
-  if(!this->isClosedShell && this->Ref_ != TCS){
-    this->FpBetaMem_     = LAST_FOR_SECTION + LEN_LAST_FOR_SECTION;
-    this->POldBetaMem_   = this->FpBetaMem_    + this->lenF_;
-    this->ErrorBetaMem_  = this->POldBetaMem_  + this->lenP_;
-    this->FBDIIS_        = this->ErrorBetaMem_ + this->lenF_*(this->lenCoeff_ -1);
-    LAST_FOR_SECTION     = this->FBDIIS_;
-    LEN_LAST_FOR_SECTION = this->lenF_*(this->lenCoeff_ -1);
-  }
-  if(this->Ref_ == CUHF) {
-    this->XpMem_     = LAST_FOR_SECTION + LEN_LAST_FOR_SECTION;
-    this->delFMem_   = this->XpMem_     + this->lenX_;
-    this->lambdaMem_ = this->delFMem_   + this->lenDelF_;
-    this->PNOMem_    = this->lambdaMem_ + this->lenLambda_;
-  //this->occNumMem_ = this->PNOMem_    + this->lenP_;
-  //LAST_FOR_SECTION = this->occNumMem_;
-  //LEN_LAST_FOR_SECTION = this->lenOccNum_;
-    this->occNumMem_ = this->REAL_SCF_SCR;
-    this->RWORK_     = this->occNumMem_ + this->lenOccNum_;
-    LAST_FOR_SECTION = this->PNOMem_;
-    LEN_LAST_FOR_SECTION = this->lenP_; 
-  } else {
-    this->RWORK_     = this->REAL_SCF_SCR;
-  }
+//this->LWORK_     = 5 * std::max(NTCSxNBASIS,this->nDIISExtrap_);
+//this->LRWORK_    = 3 * std::max(NTCSxNBASIS,this->nDIISExtrap_);
+  this->lenCoeff_  = this->nDIISExtrap_;
+
   
-  this->WORK_  = LAST_FOR_SECTION + LEN_LAST_FOR_SECTION;
-*/
-  this->allocLowdin();
-  this->allocAlphaScr();
-  if(!this->isClosedShell && this->Ref_ != TCS) this->allocBetaScr();
-  if(this->Ref_ == CUHF) this->allocCUHFScr();
-  this->allocLAPACKScr();
+  this->POldAlphaMem_  = this->memManager_->template malloc<T>(NSQ);
+  this->ErrorAlphaMem_ = 
+    this->memManager_->template malloc<T>(NSQ*(this->nDIISExtrap_ -1));
+  this->FADIIS_        = 
+    this->memManager_->template malloc<T>(NSQ*(this->nDIISExtrap_ -1));
 
+  if(this->nTCS_ == 1 && !this->isClosedShell) {
+    this->POldBetaMem_  = this->memManager_->template malloc<T>(NSQ);
+    this->ErrorBetaMem_ = 
+      this->memManager_->template malloc<T>(NSQ*(this->nDIISExtrap_ -1));
+    this->FBDIIS_       = 
+      this->memManager_->template malloc<T>(NSQ*(this->nDIISExtrap_ -1));
+  }
+
+  if(this->Ref_ == CUHF) {
+    this->delFMem_   = this->memManager_->template malloc<T>(NSQ);
+    this->lambdaMem_ = this->memManager_->template malloc<T>(NSQ);
+    this->PNOMem_    = this->memManager_->template malloc<T>(NSQ);
+    this->occNumMem_ = this->memManager_->template malloc<double>(NTCSxNBASIS);
+  }
+
+//this->WORK_  = this->memManager_->template malloc<T>(this->LWORK_);
+//if(typeid(T).hash_code() == typeid(dcomplex).hash_code())
+//  this->RWORK_ = this->memManager_->template malloc<double>(this->LRWORK_);
   
 }; //initSCFMem
 
 template<typename T>
-void SingleSlater<T>::allocLowdin(){
-  auto NTCSxNBASIS = this->nBasis_*this->nTCS_;
-  this->XMem_    = new T[this->lenX_];
-  this->SCpyMem_ = new double[this->lenX_];
-  this->SEVcMem_ = new double[this->lenX_];
-  this->SEVlMem_ = new double[NTCSxNBASIS];
-  if(typeid(T).hash_code() == typeid(dcomplex).hash_code()){
-//  this->fileio_->out << "Allocating Extra LAPACK WORK in SCF" << endl;
-    this->LowdinWORK_ = new double[this->LWORK_];
-  }
-}
-
-template<typename T>
-void SingleSlater<T>::allocAlphaScr(){
-  this->FpAlphaMem_    = new T[this->lenF_];
-  this->POldAlphaMem_  = new T[this->lenP_];
-  this->ErrorAlphaMem_ = new T[this->lenF_*(this->nDIISExtrap_ -1)];
-  this->FADIIS_        = new T[this->lenF_*(this->nDIISExtrap_ -1)];
-}
-
-template<typename T>
-void SingleSlater<T>::allocBetaScr(){
-  this->FpBetaMem_    = new T[this->lenF_];
-  this->POldBetaMem_  = new T[this->lenP_];
-  this->ErrorBetaMem_ = new T[this->lenF_*(this->nDIISExtrap_ -1)];
-  this->FBDIIS_       = new T[this->lenF_*(this->nDIISExtrap_ -1)];
-}
-
-template<typename T>
-void SingleSlater<T>::allocCUHFScr(){
-  this->XpMem_     = new T[this->lenX_];
-  this->delFMem_   = new T[this->lenDelF_];
-  this->lambdaMem_ = new T[this->lenLambda_];
-  this->PNOMem_    = new T[this->lenP_];
-  this->occNumMem_ = new double[this->lenOccNum_];
-}
-
-template<typename T>
-void SingleSlater<T>::allocLAPACKScr(){
-  this->WORK_  = new T[this->LWORK_];
-  if(typeid(T).hash_code() == typeid(dcomplex).hash_code()){
-//  this->fileio_->out << "Allocating RWORK in SCF" << endl;
-    this->RWORK_ = new double[this->LRWORK_];
-  }
-}
-
-template<typename T>
-void SingleSlater<T>::cleanupLowdin(){
-  delete [] this->XMem_;
-  delete [] this->SCpyMem_;
-  delete [] this->SEVcMem_;
-  delete [] this->SEVlMem_;
-  delete [] this->LowdinWORK_;
-}
-
-template<typename T>
-void SingleSlater<T>::cleanupSCFMem(){
-  this->cleanupLowdin();
-  this->cleanupAlphaScr();
-  if(!this->isClosedShell && this->Ref_ != TCS) this->cleanupBetaScr();
-  if(this->Ref_ == CUHF) this->cleanupCUHFScr();
-  this->cleanupLAPACKScr();
-}
-
-template<typename T>
-void SingleSlater<T>::cleanupAlphaScr(){
-  delete [] this->FpAlphaMem_    ;
-  delete [] this->POldAlphaMem_  ;
-  delete [] this->ErrorAlphaMem_ ;
-  delete [] this->FADIIS_        ;
-}
-
-template<typename T>
-void SingleSlater<T>::cleanupBetaScr(){
-  delete [] this->FpBetaMem_    ;
-  delete [] this->POldBetaMem_  ;
-  delete [] this->ErrorBetaMem_ ;
-  delete [] this->FBDIIS_       ;
-}
-
-template<typename T>
-void SingleSlater<T>::cleanupCUHFScr(){
-  delete [] this->XpMem_     ;
-  delete [] this->delFMem_   ;
-  delete [] this->lambdaMem_ ;
-  delete [] this->PNOMem_    ;
-  delete [] this->occNumMem_ ;
-}
-
-template<typename T>
-void SingleSlater<T>::cleanupLAPACKScr(){
-  delete [] this->WORK_  ;
-  delete [] this->RWORK_ ;
-}
-
-template<typename T>
-void SingleSlater<T>::SCF(){
-
-  if(!this->aointegrals_->haveAOOneE && getRank() == 0) 
-    this->aointegrals_->computeAOOneE();
-
-  int iter; 
-  if(this->printLevel_ > 0 && getRank() == 0) {
+void SingleSlater<T>::SCF2(){
+  if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
+  if(this->printLevel_ > 0)
     this->printSCFHeader(this->fileio_->out);
+  this->initSCFMem2();
 
-    this->fileio_->out << std::setw(16) << "SCF Iteration";
-    this->fileio_->out << std::setw(18) << "Energy (Eh)";
-    this->fileio_->out << std::setw(18) << "\u0394E (Eh)";
-    if(this->Ref_ == TCS)
-      this->fileio_->out << std::setw(18) << "|\u0394P|";
-    else {
-      this->fileio_->out << std::setw(18) << "|\u0394P(\u03B1)|";
-      if(!this->isClosedShell)
-        this->fileio_->out << std::setw(18) << "|\u0394P(\u03B2)|";
+  size_t iter;
+  for(iter = 0; iter < this->maxSCFIter_; iter++){
+    auto SCFStart = std::chrono::high_resolution_clock::now();
+    if(this->Ref_ == CUHF) {
+      this->formNO();
+      this->fockCUHF();
     }
-    this->fileio_->out << endl;
-    this->fileio_->out << std::setw(16) << "-------------";
-    this->fileio_->out << std::setw(18) << "-----------";
-    this->fileio_->out << std::setw(18) << "-------";
-    if(this->Ref_ == TCS)
-      this->fileio_->out << std::setw(18) << "----";
-    else {
-      this->fileio_->out << std::setw(18) << "-------";
-      if(!this->isClosedShell)
-        this->fileio_->out << std::setw(18) << "-------";
-    }
-    this->fileio_->out << endl;
-  }
-  if(getRank() == 0) {
-    this->initSCFMem();
-    this->formX();
-  }
-  for (iter = 0; iter < this->maxSCFIter_; iter++){
 
-    if(getRank() == 0) {
-      if(this->Ref_ == CUHF) this->formNO();
-      this->diagFock();
-      if(iter == 0 && this->guess_ != READ) this->mixOrbitalsSCF();
-    }
+    this->orthoFock();
+    this->diagFock2();
+
+    if(iter == 0 && this->guess_ != READ) this->mixOrbitalsSCF();
+
+    this->copyDen();
     this->formDensity();
+    this->orthoDen();
     this->formFock();
+
     if(PyErr_CheckSignals() == -1)
       CErr("Keyboard Interrupt in SCF!",this->fileio_->out);
-   
 
-    if(getRank() == 0) {
+    // DIIS NYI for CUHF
+    if(this->Ref_ != CUHF && this->doDIIS && iter >= this->iDIISStart_){ 
       if(iter == this->iDIISStart_ && this->printLevel_ > 0)
         this->fileio_->out << 
-	  std::setw(2) << " " <<
-	  std::setw(4) << " " <<
-	  "*** Starting DIIS ***" << endl;
-      // DIIS NYI for CUHF
-      if(this->Ref_ != CUHF && this->doDIIS && iter >= this->iDIISStart_){ 
-        this->GenDComm(iter - this->iDIISStart_);
-        this->CpyFock(iter - this->iDIISStart_);   
-        if((iter - this->iDIISStart_) % (this->nDIISExtrap_-1) == 
-	   (this->nDIISExtrap_-2) && iter != 0) 
-          this->CDIIS();
-      }
+          std::setw(2) << " " <<
+          std::setw(4) << " " <<
+          "*** Starting DIIS ***" << endl;
+      this->genDComm2(iter - this->iDIISStart_);
+      this->CpyFock(iter - this->iDIISStart_);   
+      if((iter - this->iDIISStart_) % (this->nDIISExtrap_-1) == 
+         (this->nDIISExtrap_-2) && iter != 0) 
+        this->CDIIS();
     }
 
     this->evalConver(iter);
     this->nSCFIter++;
+
+    auto SCFEnd = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> SCFD = SCFEnd - SCFStart;
+//  cout << "SCF Time (" << iter << ") = " << SCFD.count() << endl; 
+    
     if(this->isConverged) break;
+  };
+  // WARNING: MO Coefficients are not transformed to and from the
+  // orthonormal basis throughout the SCF and must be transformed
+  // back at the end for and post SCF to be functional
+  this->backTransformMOs();
 
-  }; // SCF Loop
-//prettyPrint(cout,(*this->aointegrals_->overlap_),"MOS");
-/*
-  delete [] this->SCF_SCR;
-  delete [] this->REAL_SCF_SCR;
-*/
-  if(getRank() == 0){
-    this->cleanupSCFMem();
-    this->fixPhase();
-  }
+  this->cleanupSCFMem2();
+  this->fixPhase();
 
-  if(!this->isConverged && getRank() == 0)
-    CErr("SCF Failed to converge within maximum number of iterations",this->fileio_->out);
+  if(!this->isConverged)
+    CErr("SCF Failed to converge within maximum number of iterations",
+        this->fileio_->out);
 
-  if(this->printLevel_ > 0 && getRank() == 0){
+  if(this->printLevel_ > 0 ){
     if(this->isConverged){
-      this->fileio_->out << endl << "SCF Completed: E(" << this->SCFTypeShort_ 
-                         << ") = ";
-      this->fileio_->out << std::fixed << std::setprecision(10) 
-                         << this->totalEnergy << "  Eh after  " << iter + 1 
-                         << "  SCF Iterations" << endl;
+      this->fileio_->out 
+        << endl << "SCF Completed: E(" << this->SCFTypeShort_ << ") = ";
+      this->fileio_->out 
+        << std::fixed << std::setprecision(10) 
+        << this->totalEnergy << "  Eh after  " << iter + 1 
+        << "  SCF Iterations" << endl;
     }
     this->fileio_->out << bannerEnd <<endl;
   }
-}
 
+};
+
+template<typename T>
+void SingleSlater<T>::cleanupSCFMem2(){
+                                  
+  auto NTCSxNBASIS = this->nTCS_ * this->nBasis_;
+  auto NSQ = NTCSxNBASIS  * NTCSxNBASIS;
+
+  this->memManager_->free(this->POldAlphaMem_,NSQ);  
+  this->memManager_->free(this->ErrorAlphaMem_,(this->nDIISExtrap_-1)*NSQ); 
+  this->memManager_->free(this->FADIIS_,(this->nDIISExtrap_-1)*NSQ);        
+  if(this->nTCS_ == 1 && !this->isClosedShell) { 
+    this->memManager_->free(this->POldBetaMem_,NSQ);  
+    this->memManager_->free(this->ErrorBetaMem_,(this->nDIISExtrap_-1)*NSQ); 
+    this->memManager_->free(this->FBDIIS_,(this->nDIISExtrap_-1)*NSQ);       
+  }
+
+  if(this->Ref_ == CUHF){ 
+    this->memManager_->free(this->delFMem_,NSQ);   
+    this->memManager_->free(this->lambdaMem_,NSQ); 
+    this->memManager_->free(this->PNOMem_,NSQ);    
+    this->memManager_->free(this->occNumMem_,NTCSxNBASIS); 
+  }
+
+//this->memManager_->free(this->WORK_,this->LWORK_);  
+//if(typeid(T).hash_code() == typeid(dcomplex).hash_code()) 
+//  this->memManager_->free(this->RWORK_,this->LRWORK_); 
+  
+  
+}; //cleanupSCFMem2
+
+template <typename T>
+void SingleSlater<T>::copyDen(){
+  auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
+  TMap POldAlpha(this->POldAlphaMem_,NTCSxNBASIS,NTCSxNBASIS);
+  POldAlpha = (*this->onePDMA_);
+
+  if(this->nTCS_ == 1 && !this->isClosedShell){
+    TMap POldBeta(this->POldBetaMem_,NTCSxNBASIS,NTCSxNBASIS);
+    POldBeta = (*this->onePDMB_);
+  };
+};

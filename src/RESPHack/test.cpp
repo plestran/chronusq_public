@@ -118,7 +118,7 @@ int main(int argc, char*argv[]){
   basis.communicate(fileio);
   basis.parseGlobal();
   basis.constructLocal(&molecule);
-  basis.makeMaps(1,&molecule);
+  basis.makeMaps(&molecule);
 //basis.renormShells();
 
   aoints.communicate(molecule,basis,fileio,controls);
@@ -151,8 +151,16 @@ int main(int argc, char*argv[]){
   resp.doFull();
   resp.doResponse();
 
-  VectorXd freq = resp.frequencies()[0];
-  RealMatrix den = resp.transDen()[0];
+  VectorXd freq; 
+  RealMatrix den;
+
+  if(resp.Meth() == RESPONSE_TYPE::CIS){
+    freq = resp.frequencies<RESPONSE_PARTITION::SINGLETS>();
+    den  = resp.transDen<RESPONSE_PARTITION::SINGLETS>();
+  } else if(resp.Meth() == RESPONSE_TYPE::PPTDA){
+    freq = resp.frequencies<RESPONSE_PARTITION::A_PPTDA_SINGLETS>();
+    den  = resp.transDen<RESPONSE_PARTITION::A_PPTDA_SINGLETS>();
+  }
 
   H5::H5File outfile(std::string(basename(inputXYZName)) + ".bin",H5F_ACC_TRUNC);
 

@@ -201,6 +201,7 @@ class BasisSet{
     int atomicNumber;
     int index;
     std::vector<libint2::Shell> shells;
+    std::vector<std::vector<double>> unNormalizedCons;
   }; ///< struct to hold information about the basis reference
   int  nBasis_      ; ///< Number of (Gaußian) contracted basis functions
   int  nPrimitive_  ; ///< Number of uncontracted Gaußian primitives
@@ -211,6 +212,7 @@ class BasisSet{
   bool forceCart_   ; ///< Whether or not to force cartesian basis functions 
   double      * radCutSh_ ; ///< CutOff Radius for each Shell
   double      * expPairSh_ ; ///< SS Exp for each Shel Pair
+  std::vector<double> basisEvalScr_;
 
   std::vector<int>               nLShell_  ; ///< Maps L value to # of shells of that L
   std::vector<int>               mapSh2Bf_ ; ///< Maps shell number to first basis funtion
@@ -218,6 +220,8 @@ class BasisSet{
   std::vector<std::array<int,2>> mapCen2Bf_; ///< Maps atomic center to first basis function
   std::vector<ReferenceShell>    refShells_; ///< Set of reference shells for given basis
   std::vector<libint2::Shell>    shells_   ; ///< Local basis storage (in shells)
+  std::vector<std::vector<double>> unNormCons_ ;
+std::unique_ptr<RealMatrix>    mapPrim2Bf_;///< Matrix transformation Prim -> Bf
 
   std::string basisPath_; ///< Path to the basis file
 
@@ -336,16 +340,18 @@ public:
   template <typename T> double * basisDEval(int,libint2::Shell&,T*);
   template <typename T> double * basisProdEval(libint2::Shell,libint2::Shell,T*);
   double * basisonFlyProdEval(libint2::Shell s1, int s1size, libint2::Shell s2, int s2size,double rx, double ry, double rz);
-  std::vector<bool> MapGridBasis(cartGP pt);  ///< Create a Mapping of basis over grid points
+//std::vector<bool> MapGridBasis(cartGP& pt);  ///< Create a Mapping of basis over grid points
+  void MapGridBasis(std::vector<bool>&,cartGP& pt);  ///< Create a Mapping of basis over grid points
   void     radcut(double thr, int maxiter, double epsConv);   //Populate all shell cut off radius
   void     popExpPairSh();   // Populate expPairSh
   double   fSpAv (int iop,int l, double alpha, double r);   //Evaluate Spheric Average of a Shell
   double   fRmax (int l, double alpha, double thr, double epsConv, int maxiter);   //Evaluate Spheric Average of a Shell
-  inline libint2::Shell      shells(int i) {return this->shells_[i];    };
+  inline libint2::Shell&     shells(int i) {return this->shells_[i];    };
   inline int                nLShell(int L) {return this->nLShell_[L];   };
-  inline int               mapSh2Bf(int i) {return this->mapSh2Bf_[i];  };
-  inline int               mapSh2Cen(int i) {return this->mapSh2Cen_[i];};
+  inline int &             mapSh2Bf(int i) {return this->mapSh2Bf_[i];  };
+  inline int &             mapSh2Cen(int i) {return this->mapSh2Cen_[i];};
   inline std::array<int,2> mapCen2Bf(int i) {return this->mapCen2Bf_[i];};
+  inline RealMatrix *      mapPrim2Bf() {return this->mapPrim2Bf_.get();};
   inline std::string       basisPath(){return this->basisPath_;};
 
   inline void resetMapSh2Bf() {this->mapSh2Bf_.clear(); this->haveMapSh2Bf  = false;};
@@ -387,27 +393,44 @@ public:
   void parseGlobal();                      ///< Parse basis set file, generate reference
   void constructLocal(Molecule *);         ///< Construct local basis defintion
   void computeMeta();                      ///< Compute meta data (nBasis, etc)
-  void makeMapSh2Bf(int);                  ///< generate mapSh2Bf
+  void makeMapSh2Bf();                  ///< generate mapSh2Bf
   void makeMapSh2Cen(Molecule *);          ///< generate mapSh2Cen
-  void makeMapCen2Bf(int,Molecule *);          ///< generate mapCen2Bf
+  void makeMapCen2Bf(Molecule *);          ///< generate mapCen2Bf
+  void makeMapPrim2Bf();
   void makeBasisMap();  ///< Generate map from basis enum to pasis path
   void renormShells();                     ///< Renormalize Libint2::Shell set
   std::vector<libint2::Shell> uncontractBasis(); ///< Unconctract the basis
-  template<typename TMat> void computeShBlkNorm(bool,int,const TMat*, const TMat*);
+  template<typename TMat> void computeShBlkNorm(const TMat&, RealMatrix &);
 
   void constructExtrn(Molecule *, BasisSet *); ///< Generate new basis from refernce shells
   void genUCvomLocal(BasisSet *);
 
-  inline void makeMaps(int nTCS, Molecule* mol){
-    this->makeMapSh2Bf(nTCS);
+  inline void makeMaps(Molecule* mol){
+    this->makeMapSh2Bf();
     this->makeMapSh2Cen(mol);
-    this->makeMapCen2Bf(nTCS,mol);
+    this->makeMapCen2Bf(mol);
   }
 
   // Python API
   void Wrapper_constructLocal(Molecule&);
-  void Wrapper_makeMaps(int,Molecule&);
+  void Wrapper_makeMaps(Molecule&);
 
 }; // class BasisSet
+
+template<typename TMat>
+void BasisSet::computeShBlkNorm(const TMat &Alpha, RealMatrix &ShBlkNorm) {
+  if(!this->haveMapSh2Bf) this->makeMapSh2Bf(); 
+
+  for(auto s1 = 0; s1 < this->nShell_; s1++) {
+    int bf1 = this->mapSh2Bf_[s1];
+    int n1  = this->shells_[s1].size();
+    for(auto s2 = 0; s2 < this->nShell_; s2++) {
+      int bf2 = this->mapSh2Bf_[s2];
+      int n2  = this->shells_[s2].size();
+     
+      ShBlkNorm(s1,s2) = Alpha.block(bf1,bf2,n1,n2).template lpNorm<Infinity>();
+    }
+  }
+};
 }; // namespace ChronusQ
 #endif

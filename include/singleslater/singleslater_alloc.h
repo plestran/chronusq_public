@@ -27,51 +27,9 @@
  * Allocate Matricies *
  **********************/
 template<typename T>
-void SingleSlater<T>::iniSingleSlater(Molecule * molecule, BasisSet * basisset, 
-                                   AOIntegrals * aointegrals, FileIO * fileio, 
-                                   Controls * controls) {
-
-  this->communicate(*molecule,*basisset,*aointegrals,*fileio,*controls);
-  this->initMeta();
-
-  this->elecField_  = controls->field_;
-  this->printLevel_ = controls->printLevel;
-  this->guess_      = controls->guess;
-
-  this->isClosedShell = (this->multip_ == 1);
-  this->isDFT         = controls->DFT;
-  this->ExchKernel_   = SLATER;
-  this->CorrKernel_   = VWN5;
-  if(controls->HF){
-    if(this->isClosedShell && !controls->doCUHF
-       && !controls->doTCS)                        this->Ref_ = RHF ; // RHF
-    else if(!controls->doCUHF && !controls->doTCS) this->Ref_ = UHF ; // UHF
-    else if(controls->doCUHF)                      this->Ref_ = CUHF; // CUHF
-    else if(controls->doTCS)                       this->Ref_ = TCS ; // TCS
-  } else if(this->isDFT) {
-    if(this->isClosedShell && !controls->doCUHF
-       && !controls->doTCS)                        this->Ref_ = RKS ; // RKS
-    else if(!controls->doCUHF && !controls->doTCS) this->Ref_ = UKS ; // UKs
-    else if(controls->doCUHF)                      this->Ref_ = CUKS; // CUKS
-    else if(controls->doTCS)                       this->Ref_ = GKS ; // GKS
-  }
-
-  this->genMethString();
-
-
-  if(this->Ref_ == TCS) this->nTCS_ = 2;
-
-  // This is the only way via the C++ interface to set this flag (needed
-  // for allocDFT)
-  this->isDFT = controls->DFT;
-  this->alloc();
-
-
-};
-
-template<typename T>
 void SingleSlater<T>::alloc(){
   this->checkMeta();
+  Quantum<T>::alloc(this->nBasis_); // Allocate Den -> Quantum
   this->allocOp();
  
   if(getRank() == 0) {
@@ -83,7 +41,7 @@ void SingleSlater<T>::alloc(){
       if(this->printLevel_ >= 3) {
         start = std::chrono::high_resolution_clock::now();
       }
-      this->genSparseBasisMap();
+//      this->genSparseBasisMap();
 //      this->genSparseRcrosP();
 //      CErr();
 //   Timing
@@ -123,19 +81,150 @@ void SingleSlater<T>::alloc(){
 
 template<typename T>
 void SingleSlater<T>::allocOp(){
-  Quantum<T>::alloc(this->nTCS_*this->nBasis_); // Allocate Den -> Quantum
   this->allocAlphaOp();
   if(!this->isClosedShell && this->Ref_ != TCS) 
     this->allocBetaOp();
+
+  auto NBSq = this->nBasis_*this->nBasis_;
+  auto NBTSq = this->nTCS_ * this->nTCS_ * NBSq;
+
+
+  this->NBSqScratch_ = 
+    std::unique_ptr<TMap>(new TMap(
+          this->memManager_->template malloc<T>(NBSq),
+          this->nBasis_,this->nBasis_));
+  this->NBSqScratch2_ = 
+    std::unique_ptr<TMap>(new TMap(
+          this->memManager_->template malloc<T>(NBSq),
+          this->nBasis_,this->nBasis_));
+  this->fockOrthoA_ = 
+    std::unique_ptr<TMap>(
+        new TMap(
+          this->memManager_->template malloc<T>(NBTSq),
+          this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
+  this->onePDMOrthoA_ = 
+    std::unique_ptr<TMap>(
+        new TMap(
+          this->memManager_->template malloc<T>(NBTSq),
+          this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
+
+  this->NBSqScratch_->setZero();
+  this->NBSqScratch2_->setZero();
+  this->fockOrthoA_->setZero();
+  this->onePDMOrthoA_->setZero();
+
+  if(this->nTCS_ == 2 || !this->isClosedShell){
+
+    this->onePDMOrthoScalar_ = 
+      std::unique_ptr<TMap>(new TMap(
+            this->memManager_->template malloc<T>(NBSq),
+            this->nBasis_,this->nBasis_));
+    this->onePDMOrthoMz_ = 
+      std::unique_ptr<TMap>(new TMap(
+            this->memManager_->template malloc<T>(NBSq),
+            this->nBasis_,this->nBasis_));
+
+    this->PTScalar_ = 
+      std::unique_ptr<TMap>(new TMap(
+            this->memManager_->template malloc<T>(NBSq),
+            this->nBasis_,this->nBasis_));
+    this->PTMz_ = 
+      std::unique_ptr<TMap>(new TMap(
+            this->memManager_->template malloc<T>(NBSq),
+            this->nBasis_,this->nBasis_));
+ 
+    this->fockOrthoB_ = 
+      std::unique_ptr<TMap>(new TMap(
+            this->memManager_->template malloc<T>(NBSq),
+            this->nBasis_,this->nBasis_));
+
+    this->fockScalar_ = 
+      std::unique_ptr<TMap>(new TMap(
+            this->memManager_->template malloc<T>(NBSq),
+            this->nBasis_,this->nBasis_));
+    this->fockMz_ = 
+      std::unique_ptr<TMap>(new TMap(
+            this->memManager_->template malloc<T>(NBSq),
+            this->nBasis_,this->nBasis_));
+
+    this->fockOrthoScalar_ = 
+      std::unique_ptr<TMap>(new TMap(
+            this->memManager_->template malloc<T>(NBSq),
+            this->nBasis_,this->nBasis_));
+    this->fockOrthoMz_ = 
+      std::unique_ptr<TMap>(new TMap(
+            this->memManager_->template malloc<T>(NBSq),
+            this->nBasis_,this->nBasis_));
+
+    this->onePDMOrthoScalar_->setZero(); 
+    this->onePDMOrthoMz_->setZero(); 
+    this->PTScalar_->setZero(); 
+    this->PTMz_->setZero(); 
+    this->fockOrthoB_->setZero(); 
+    this->fockScalar_->setZero(); 
+    this->fockMz_->setZero(); 
+    this->fockOrthoScalar_->setZero(); 
+    this->fockOrthoMz_->setZero(); 
+
+    if(this->nTCS_ == 2) {
+      this->PTMx_ = 
+        std::unique_ptr<TMap>(new TMap(
+              this->memManager_->template malloc<T>(NBSq),
+              this->nBasis_,this->nBasis_));
+      this->PTMy_ = 
+        std::unique_ptr<TMap>(new TMap(
+              this->memManager_->template malloc<T>(NBSq),
+              this->nBasis_,this->nBasis_));
+     
+      this->fockMx_ = 
+        std::unique_ptr<TMap>(new TMap(
+              this->memManager_->template malloc<T>(NBSq),
+              this->nBasis_,this->nBasis_));
+      this->fockMy_ = 
+        std::unique_ptr<TMap>(new TMap(
+              this->memManager_->template malloc<T>(NBSq),
+              this->nBasis_,this->nBasis_));
+
+      this->fockOrthoMx_ = 
+        std::unique_ptr<TMap>(new TMap(
+              this->memManager_->template malloc<T>(NBSq),
+              this->nBasis_,this->nBasis_));
+      this->fockOrthoMy_ = 
+        std::unique_ptr<TMap>(new TMap(
+              this->memManager_->template malloc<T>(NBSq),
+              this->nBasis_,this->nBasis_));
+
+      this->onePDMOrthoMy_ = 
+        std::unique_ptr<TMap>(new TMap(
+              this->memManager_->template malloc<T>(NBSq),
+              this->nBasis_,this->nBasis_));
+      this->onePDMOrthoMx_ = 
+        std::unique_ptr<TMap>(new TMap(
+              this->memManager_->template malloc<T>(NBSq),
+              this->nBasis_,this->nBasis_));
+
+      this->PTMx_->setZero(); 
+      this->PTMy_->setZero(); 
+      this->fockMx_->setZero(); 
+      this->fockMy_->setZero(); 
+      this->fockOrthoMx_->setZero(); 
+      this->fockOrthoMy_->setZero(); 
+      this->onePDMOrthoMx_->setZero(); 
+      this->onePDMOrthoMy_->setZero(); 
+    }
+  }
 }
 
 template<typename T>
 void SingleSlater<T>::allocAlphaOp(){
+  auto NB   = this->nTCS_ * this->nBasis_;
+  auto NBSq = NB * NB;
+
   if(getRank() != 0) return;
   // Alpha / TCS Fock Matrix
   try { 
-    this->fockA_ = std::unique_ptr<TMatrix>(
-      new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
+    this->fockA_ = std::unique_ptr<TMap>(
+      new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
   } catch (...) { 
     if(this->Ref_ == TCS) 
       CErr(std::current_exception(),"TCS Fock Matrix Allocation"); 
@@ -144,8 +233,8 @@ void SingleSlater<T>::allocAlphaOp(){
 
   // Alpha / TCS Molecular Orbital Coefficients
   try { 
-    this->moA_ = std::unique_ptr<TMatrix>(
-      new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_)); 
+    this->moA_ = std::unique_ptr<TMap>(
+      new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB)); 
   } catch (...) { 
     if(this->Ref_ == TCS) 
       CErr(std::current_exception(),"TCS MO Coefficients Allocation");
@@ -154,19 +243,22 @@ void SingleSlater<T>::allocAlphaOp(){
 
   // Alpha / TCS Eigenorbital Energies
   try { 
-    this->epsA_ = std::unique_ptr<RealMatrix>(
-      new RealMatrix(this->nTCS_*this->nBasis_,1)); 
+    this->epsA_ = std::unique_ptr<RealMap>(
+      new RealMap(this->memManager_->template malloc<double>(NB),NB,1)); 
   } catch (...) { 
     if(this->Ref_ == TCS) 
       CErr(std::current_exception(),"TCS Eigenorbital Energies"); 
     else CErr(std::current_exception(),"Alpha Eigenorbital Energies"); 
   }
+  this->fockA_->setZero();
+  this->moA_->setZero();
+  this->epsA_->setZero();
 
 #ifndef USE_LIBINT
   // Alpha / TCS Coulomb Matrix
   try { 
-    this->coulombA_  = std::unique_ptr<TMatrix>(
-      new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_)); 
+    this->coulombA_  = std::unique_ptr<TMap>(
+      new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB)); 
   } catch (...) { 
     if(this->Ref_ == TCS) 
       CErr(std::current_exception(),"TCS Coulomb Tensor Allocation"); 
@@ -175,8 +267,8 @@ void SingleSlater<T>::allocAlphaOp(){
 
   // Alpha / TCS Exchange Matrix
   try { 
-    this->exchangeA_ = std::unique_ptr<TMatrix>(
-      new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
+    this->exchangeA_ = std::unique_ptr<TMap>(
+      new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB)); 
   } catch (...) { 
     if(this->Ref_ == TCS) 
       CErr(std::current_exception(),"TCS Exchange Tensor Allocation"); 
@@ -186,12 +278,13 @@ void SingleSlater<T>::allocAlphaOp(){
 #else
   // Alpha / TCS Perturbation Tensor
   try { 
-    this->PTA_  = std::unique_ptr<TMatrix>(
-      new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
+    this->PTA_  = std::unique_ptr<TMap>(
+      new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB)); 
   } catch (...) { 
     if(this->Ref_ == TCS) CErr(std::current_exception(),"TCS G[P] Allocation"); 
     else CErr(std::current_exception(),"Alpha G[P] Allocation"); 
   }
+  this->PTA_->setZero();
 
 #endif
 
@@ -200,54 +293,62 @@ void SingleSlater<T>::allocAlphaOp(){
 
 template<typename T>
 void SingleSlater<T>::allocBetaOp(){
+  auto NB   = this->nTCS_ * this->nBasis_;
+  auto NBSq = NB * NB;
+
   if(getRank() != 0) return;
   // Beta Fock Matrix
   try { 
-    this->fockB_ = std::unique_ptr<TMatrix>(
-      new TMatrix(this->nBasis_,this->nBasis_)); 
+    this->fockB_ = std::unique_ptr<TMap>(
+      new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB)); 
   } catch (...) { 
     CErr(std::current_exception(),"Beta Fock Matrix Allocation");
   }
 
   // Beta Molecular Orbital Coefficients
   try { 
-    this->moB_ = std::unique_ptr<TMatrix>(
-      new TMatrix(this->nBasis_,this->nBasis_));
+    this->moB_ = std::unique_ptr<TMap>(
+      new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB)); 
   } catch (...) { 
     CErr(std::current_exception(),"Beta MO Coefficients Allocation"); 
   }
 
   // Beta Eigenorbital Energies
   try { 
-    this->epsB_ = std::unique_ptr<RealMatrix>(
-      new RealMatrix(this->nBasis_,1)); 
+    this->epsB_ = std::unique_ptr<RealMap>(
+      new RealMap(this->memManager_->template malloc<double>(NB),NB,1)); 
   } catch (...) { 
     CErr(std::current_exception(),"Beta Eigenorbital Energies");
   }
+  this->fockB_->setZero();
+  this->moB_->setZero();
+  this->epsB_->setZero();
+
 #ifndef USE_LIBINT
   // Beta Coulomb Matrix
   try { 
-    this->coulombB_  = std::unique_ptr<TMatrix>(
-      new TMatrix(this->nBasis_,this->nBasis_)); 
+    this->coulombB_  = std::unique_ptr<TMap>(
+      new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB)); 
   } catch (...) { 
     CErr(std::current_exception(),"Beta Coulomb Tensor Allocation"); 
   }
  
   // Beta Exchange Matrix
   try { 
-    this->exchangeB_ = std::unique_ptr<TMatrix>(
-      new TMatrix(this->nBasis_,this->nBasis_));
+    this->exchangeB_ = std::unique_ptr<TMap>(
+      new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB)); 
   } catch (...) { 
     CErr(std::current_exception(),"Beta Exchange Tensor Allocation"); 
   }
 #else
   // Beta Perturbation Tensor
   try { 
-    this->PTB_  = std::unique_ptr<TMatrix>(
-      new TMatrix(this->nBasis_,this->nBasis_));
+    this->PTB_  = std::unique_ptr<TMap>(
+      new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB)); 
   } catch (...) { 
     CErr(std::current_exception(),"Beta G[P] Allocation"); 
   }
+  this->PTB_->setZero();
 #endif
 
   if(this->isDFT) this->allocBetaDFT();
@@ -263,41 +364,36 @@ void SingleSlater<T>::allocDFT(){
 
 template<typename T>
 void SingleSlater<T>::allocAlphaDFT(){
+  auto NB   = this->nTCS_ * this->nBasis_;
+  auto NBSq = NB * NB;
   // Alpha / TCS VXC
   try { 
-    this->vXA_  = std::unique_ptr<TMatrix>(
-      new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
-    this->vCorA_  = std::unique_ptr<TMatrix>(
-      new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
+    this->vXA_  = std::unique_ptr<TMap>(
+      new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB)); 
+//  this->vCorA_  = std::unique_ptr<TMap>(
+//    new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB)); 
   } catch (...) { 
     if(this->Ref_ == TCS) CErr(std::current_exception(), "TCS VXC Allocation"); 
     else CErr(std::current_exception(),"Alpha VXC  Allocation"); 
   }
+  this->vXA_->setZero();
+//this->vCorA_->setZero();
 }
 
 template<typename T>
 void SingleSlater<T>::allocBetaDFT(){
+  auto NB   = this->nTCS_ * this->nBasis_;
+  auto NBSq = NB * NB;
   // Alpha / TCS VXC
   try { 
-    this->vXB_  = std::unique_ptr<TMatrix>(
-      new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
-    this->vCorB_  = std::unique_ptr<TMatrix>(
-      new TMatrix(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
+    this->vXB_  = std::unique_ptr<TMap>(
+      new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB)); 
+//  this->vCorB_  = std::unique_ptr<TMap>(
+//    new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB)); 
   } catch (...) { 
     CErr(std::current_exception(),"Beta VXC  Allocation"); 
   }
+  this->vXB_->setZero();
+//this->vCorB_->setZero();
 }
 
-/*
-template<typename T>
-void SingleSlater<T>::allocMultipole(){
-  if(this->maxMultipole_ >= 1)
-    this->dipole_ = std::unique_ptr<RealMatrix>(new RealMatrix(3,1));
-  if(this->maxMultipole_ >= 2){
-    this->quadpole_ = std::unique_ptr<RealMatrix>(new RealMatrix(3,3));
-    this->tracelessQuadpole_ = std::unique_ptr<RealMatrix>(new RealMatrix(3,3));
-  }
-  if(this->maxMultipole_ >= 3)
-    this->octpole_  = std::unique_ptr<RealTensor3d>(new RealTensor3d(3,3,3));
-}
-*/

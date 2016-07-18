@@ -164,4 +164,45 @@ void SingleSlater<double>::fixPhase(){
    }
 };
 
+template<>
+void SingleSlater<double>::backTransformMOs(){
+  if(this->nTCS_ == 1) {
+    this->NBSqScratch_->noalias() = 
+      (*this->aointegrals_->ortho1_) * (*this->moA_);
+    (*this->moA_) = (*this->NBSqScratch_);
+
+    if(!this->isClosedShell){
+      this->NBSqScratch_->noalias() = 
+        (*this->aointegrals_->ortho1_) * (*this->moB_);
+      (*this->moB_) = (*this->NBSqScratch_);
+    }
+  } else {
+    Eigen::Map<RealMatrix,0,Eigen::Stride<Dynamic,Dynamic> >
+      MOA(this->moA_->data(),this->nBasis_,this->nTCS_*this->nBasis_,
+          Eigen::Stride<Dynamic,Dynamic>(this->nTCS_*this->nBasis_,2));
+    Eigen::Map<RealMatrix,0,Eigen::Stride<Dynamic,Dynamic> >
+      MOB(this->moA_->data()+1,this->nBasis_,this->nTCS_*this->nBasis_,
+          Eigen::Stride<Dynamic,Dynamic>(this->nTCS_*this->nBasis_,2));
+
+    RealMap SCRATCH1(this->memManager_->malloc<double>(this->nBasis_*
+          this->nBasis_*this->nTCS_),this->nBasis_,this->nTCS_*this->nBasis_);
+    RealMap SCRATCH2(this->memManager_->malloc<double>(this->nBasis_*
+          this->nBasis_*this->nTCS_),this->nBasis_,this->nTCS_*this->nBasis_);
+
+    SCRATCH1 = MOA;
+    SCRATCH2 = (*this->aointegrals_->ortho1_) * SCRATCH1;
+    MOA = SCRATCH2; 
+
+    SCRATCH1 = MOB;
+    SCRATCH2 = (*this->aointegrals_->ortho1_) * SCRATCH1;
+    MOB = SCRATCH2; 
+
+    this->memManager_->free(SCRATCH1.data(),
+        this->nBasis_*this->nBasis_*this->nTCS_);
+    this->memManager_->free(SCRATCH2.data(),
+        this->nBasis_*this->nBasis_*this->nTCS_);
+    
+  }
+};
+
 } // Namespace ChronusQ

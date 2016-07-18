@@ -50,52 +50,26 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other) :
     this->isHF   = other->isHF;
     this->isDFT  = other->isDFT;
     this->guess_ = other->guess();
-
-    auto NTCSxNBASIS = this->nBasis_*this->nTCS_;
-
-    if(getRank() == 0) {
-      this->fockA_    = std::unique_ptr<ComplexMatrix>(
-        new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS)
-      );
-      this->moA_      = std::unique_ptr<ComplexMatrix>(
-        new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS)
-      );
-      this->PTA_      = std::unique_ptr<ComplexMatrix>(
-        new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS)
-      );
-    }
-
-    if(getRank() == 0) {
-      this->fockA_->real()       = *other->fockA();
-      this->moA_->real()         = *other->moA();
-      this->PTA_->real()         = *other->PTA();
-    }
-    if(this->Ref_ != isClosedShell && this->Ref_ != TCS ){
-      if(getRank() == 0) {
-        this->fockB_  = std::unique_ptr<ComplexMatrix>(
-          new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS)
-        );
-        this->moB_    = std::unique_ptr<ComplexMatrix>(
-          new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS)
-        );
-        this->PTB_    = std::unique_ptr<ComplexMatrix>(
-          new ComplexMatrix(NTCSxNBASIS,NTCSxNBASIS)
-        );
-      }
-
-      if(getRank() == 0) {
-        this->fockB_->real()       = *other->fockB();
-        this->moB_->real()         = *other->moB();
-        this->PTB_->real()         = *other->PTB();
-      }
-    }
-
     this->elecField_   = (other->elecField());
     this->basisset_    = other->basisset();    
     this->molecule_    = other->molecule();
     this->fileio_      = other->fileio();
-    this->controls_    = other->controls();
     this->aointegrals_ = other->aointegrals();
+
+    auto NB = this->nBasis_*this->nTCS_;
+    auto NBSq = NB*NB;
+    this->allocOp();
+
+    this->fockA_->real()       = *other->fockA();
+    this->moA_->real()         = *other->moA();
+    this->PTA_->real()         = *other->PTA();
+
+    if(!this->isClosedShell || this->nTCS_ == 2){
+      this->fockB_->real()       = *other->fockB();
+      this->moB_->real()         = *other->moB();
+      this->PTB_->real()         = *other->PTB();
+    }
+
 }
 
 template<>
@@ -126,5 +100,57 @@ void SingleSlater<dcomplex>::writeSCFFiles(){
 template<>
 void SingleSlater<dcomplex>::fixPhase(){
   // FIXME: Do nothing for now
+};
+
+template<>
+void SingleSlater<dcomplex>::backTransformMOs(){
+  if(this->nTCS_ == 1) {
+    this->NBSqScratch_->real() = 
+      (*this->aointegrals_->ortho1_) * this->moA_->real();
+    this->NBSqScratch_->imag() = 
+      (*this->aointegrals_->ortho1_) * this->moA_->imag();
+
+    (*this->moA_) = (*this->NBSqScratch_);
+
+    if(!this->isClosedShell){
+      this->NBSqScratch_->real() = 
+        (*this->aointegrals_->ortho1_) * this->moB_->real();
+      this->NBSqScratch_->imag() = 
+        (*this->aointegrals_->ortho1_) * this->moB_->imag();
+      (*this->moB_) = (*this->NBSqScratch_);
+    }
+  } else {
+    Eigen::Map<ComplexMatrix,0,Eigen::Stride<Dynamic,Dynamic> >
+      MOA(this->moA_->data(),this->nBasis_,this->nTCS_*this->nBasis_,
+          Eigen::Stride<Dynamic,Dynamic>(this->nTCS_*this->nBasis_,2));
+    Eigen::Map<ComplexMatrix,0,Eigen::Stride<Dynamic,Dynamic> >
+      MOB(this->moA_->data()+1,this->nBasis_,this->nTCS_*this->nBasis_,
+          Eigen::Stride<Dynamic,Dynamic>(this->nTCS_*this->nBasis_,2));
+
+    ComplexMap SCRATCH1(this->memManager_->malloc<dcomplex>(this->nBasis_*
+          this->nBasis_*this->nTCS_),this->nBasis_,this->nTCS_*this->nBasis_);
+    ComplexMap SCRATCH2(this->memManager_->malloc<dcomplex>(this->nBasis_*
+          this->nBasis_*this->nTCS_),this->nBasis_,this->nTCS_*this->nBasis_);
+
+    SCRATCH1 = MOA;
+    SCRATCH2.real() =
+      (*this->aointegrals_->ortho1_) * SCRATCH1.real();
+    SCRATCH2.imag() =
+      (*this->aointegrals_->ortho1_) * SCRATCH1.imag();
+    MOA = SCRATCH2;
+
+    SCRATCH1 = MOB;
+    SCRATCH2.real() =
+      (*this->aointegrals_->ortho1_) * SCRATCH1.real();
+    SCRATCH2.imag() =
+      (*this->aointegrals_->ortho1_) * SCRATCH1.imag();
+    MOB = SCRATCH2;
+
+    this->memManager_->free(SCRATCH1.data(),
+        this->nBasis_*this->nBasis_*this->nTCS_);
+    this->memManager_->free(SCRATCH2.data(),
+        this->nBasis_*this->nBasis_*this->nTCS_);
+    
+  }
 };
 } // Namespace ChronusQ

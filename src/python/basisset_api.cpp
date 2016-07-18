@@ -39,7 +39,7 @@ namespace ChronusQ{
   void BasisSet::Wrapper_constructLocal(Molecule &mol){
     this->constructLocal(&mol);
   }
-  void BasisSet::Wrapper_makeMaps(int nTCS, Molecule &mol){
-    this->makeMaps(nTCS,&mol);
+  void BasisSet::Wrapper_makeMaps(Molecule &mol){
+    this->makeMaps(&mol);
   }
 }

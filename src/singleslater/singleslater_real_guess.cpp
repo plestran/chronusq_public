@@ -29,7 +29,6 @@
 #include <workers.h>
 #ifdef USE_LIBINT
 using ChronusQ::BasisSet;
-using ChronusQ::Controls;
 using ChronusQ::Molecule;
 using ChronusQ::HashNAOs;
 namespace ChronusQ {
@@ -159,10 +158,9 @@ void SingleSlater<double>::SADGuess() {
  
     // Loop and perform CUHF on each atomic center
     for(auto iUn = 0; iUn < uniqueElement.size(); iUn++){
-      // Local objects to be constructed and destructed at every loop
+	// Local objects to be constructed and destructed at every loop
       AOIntegrals aointegralsAtom;
       SingleSlater<double> hartreeFockAtom;
-      Controls controlAtom;
       BasisSet basisSetAtom;
       BasisSet dfBasisSetAtom;
       Molecule uniqueAtom(uniqueElement[iUn],this->fileio_->out);
@@ -174,12 +172,9 @@ void SingleSlater<double>::SADGuess() {
       // Construct atomic basis set from the reference
       this->basisset_->constructExtrn(&uniqueAtom,&basisSetAtom);
       // Generate basis maps
-      basisSetAtom.makeMapSh2Bf(1);
-      basisSetAtom.makeMapSh2Cen(&uniqueAtom);
+      basisSetAtom.makeMaps(&uniqueAtom);
       basisSetAtom.renormShells(); // Libint throws a hissy fit without this
  
-      controlAtom.iniControls();
-      controlAtom.doCUHF = true; // Can set to false too if UHF guess is desired
  
       // Initialize the local integral and SS classes
       aointegralsAtom.isPrimary = false;
@@ -187,14 +182,16 @@ void SingleSlater<double>::SADGuess() {
       
       // Replaces iniAOIntegrals
       aointegralsAtom.communicate(uniqueAtom,basisSetAtom,*this->fileio_,
-        controlAtom);
+        *this->aointegrals_->memManager());
       aointegralsAtom.initMeta();
-      aointegralsAtom.integralAlgorithm = this->aointegrals_->integralAlgorithm;
+//      aointegralsAtom.integralAlgorithm = this->aointegrals_->integralAlgorithm;
+      aointegralsAtom.integralAlgorithm = 
+        AOIntegrals::INTEGRAL_ALGORITHM::DIRECT;
       aointegralsAtom.alloc();
 
       // Replaces iniSingleSlater
       hartreeFockAtom.communicate(uniqueAtom,basisSetAtom,aointegralsAtom,
-        *this->fileio_,controlAtom);
+        *this->fileio_,*this->memManager_);
 /*
       hartreeFockAtom.isDFT = this->isDFT;
       hartreeFockAtom.isHF = this->isHF;
@@ -205,8 +202,6 @@ void SingleSlater<double>::SADGuess() {
       hartreeFockAtom.nRadDFTGridPts_ = this->nRadDFTGridPts_ ;
       hartreeFockAtom.nAngDFTGridPts_ = this->nAngDFTGridPts_ ;
       hartreeFockAtom.isGGA =         this->isGGA ;
-      hartreeFockAtom.CorrKernel_  =  this->CorrKernel_  ;
-      hartreeFockAtom.ExchKernel_  =  this->ExchKernel_  ;
       hartreeFockAtom.DFTKernel_   =  this->DFTKernel_   ;
 */
    
@@ -232,13 +227,12 @@ void SingleSlater<double>::SADGuess() {
       // Prime and perform the atomic SCF
       hartreeFockAtom.formFock();
       hartreeFockAtom.computeEnergy();
-      hartreeFockAtom.SCF();
+      hartreeFockAtom.SCF2();
       
       // Place Atomic Densities into Total Densities
       this->placeAtmDen(atomIndex[iUn],hartreeFockAtom);
  
     } // Loop iUn
- 
     this->scaleDen();
 #ifdef CQ_ENABLE_MPI
     MPI_Barrier(MPI_COMM_WORLD);

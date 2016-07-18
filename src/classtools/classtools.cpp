@@ -388,7 +388,7 @@ void printUnitInfo(Controls * controls, SingleSlater<dcomplex> * singleSlater, S
 void initCQ(int argc, char** argv){
 #ifdef USE_LIBINT
   // Bootstrap Libint env
-  libint2::init(); 
+  libint2::initialize(); 
 #endif
 #ifdef _OPENMP
   // Set up Thread Pool (Default serial)
@@ -406,7 +406,7 @@ void initCQ(int argc, char** argv){
 void initCQ(){
 #ifdef USE_LIBINT
   // Bootstrap Libint env
-  libint2::init(); 
+  libint2::initialize(); 
 #endif
 #ifdef _OPENMP
   // Set up Thread Pool (Default serial)
@@ -424,7 +424,7 @@ void initCQ(){
 void finalizeCQ(){
   // Cleanup Libint env
 #ifdef USE_LIBINT
-  libint2::cleanup();
+  libint2::finalize();
 #endif
 
 #ifdef CQ_ENABLE_MPI

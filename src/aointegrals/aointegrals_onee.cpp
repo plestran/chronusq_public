@@ -7,7 +7,7 @@ void AOIntegrals::computeOverlapS(){
   int bf1,bf2;
   ChronusQ::ShellPair *ijS;
   std::chrono::high_resolution_clock::time_point start,finish;
-  if(controls_->printLevel>=1) start = std::chrono::high_resolution_clock::now();
+  if(this->printLevel_>=1) start = std::chrono::high_resolution_clock::now();
   this->overlap_->setZero();
   for(ijShell=0;ijShell<this->nShellPair_;ijShell++) {
     ijS = &(this->shellPairs_[ijShell]);
@@ -44,7 +44,7 @@ void AOIntegrals::computeKineticT(){
   int bf1,bf2;
   ChronusQ::ShellPair *ijS;
   std::chrono::high_resolution_clock::time_point start,finish;
-  if(controls_->printLevel>=1) start = std::chrono::high_resolution_clock::now();
+  if(this->printLevel_>=1) start = std::chrono::high_resolution_clock::now();
   this->potential_->setZero();
   for(ijShell=0;ijShell<this->nShellPair_;ijShell++) {
     ijS = &(this->shellPairs_[ijShell]);
@@ -126,7 +126,7 @@ void AOIntegrals::computePotentialV(){
   int bf1,bf2;
   ChronusQ::ShellPair *ijS;
   std::chrono::high_resolution_clock::time_point start,finish;
-  if(controls_->printLevel>=1) start = std::chrono::high_resolution_clock::now();
+  if(this->printLevel_>=1) start = std::chrono::high_resolution_clock::now();
   this->kinetic_->setZero();
   for(ijShell=0;ijShell<this->nShellPair_;ijShell++) {
 //    cout<<"ShellPairs"<<endl;
@@ -650,7 +650,6 @@ double AOIntegrals::vRRTab(ChronusQ::ShellPair *ijSP,
   else if (lB[1]>0) iWork=1;
   else if (lB[2]>0) iWork=2;
   lBm1[iWork]--;
-
   for(iPP=0; iPP<ijSP->nPGTOPair; iPP++)
     tmpVal += ijSP->PB[iPP][iWork]*this->vRRiPPTab(ijSP,LA,lA,LB-1,lBm1,iPP);
 

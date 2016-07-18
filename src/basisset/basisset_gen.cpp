@@ -31,7 +31,6 @@ namespace ChronusQ{
  */
 void BasisSet::constructLocal(Molecule * mol){
   //cout << "Reference Shells" << endl;
-  int nShell = 0;
   for(auto iAtom = 0; iAtom < mol->nAtoms(); iAtom++){
     bool found = false;
     for(auto iRef = this->refShells_.begin(); iRef != this->refShells_.end(); ++iRef){
@@ -56,9 +55,13 @@ void BasisSet::constructLocal(Molecule * mol){
               (*mol->cart())(1,iAtom),
               (*mol->cart())(2,iAtom)};
 
-          this->shellsCQ.push_back(ChronusQ::ShellCQ{this->shells_[nShell]});
-          nShell ++;
+          this->shellsCQ.push_back(this->shells_.back());
         };
+
+        for(auto iCons = (*iRef).unNormalizedCons.begin(); 
+            iCons != (*iRef).unNormalizedCons.end(); ++iCons){
+          this->unNormCons_.push_back(*iCons);
+        }
         found = true;
       }
     } // loop iRef
@@ -68,6 +71,7 @@ void BasisSet::constructLocal(Molecule * mol){
              " not found in current Basis Set",
            this->fileio_->out);
   } // loop iAtom
+
   this->computeMeta();
 //cout << "Construct Local Shells" << endl;
 //for(auto i = 0; i < this->shells_.size(); i++) cout << this->shells_[i] << endl;
@@ -141,13 +145,16 @@ void BasisSet::computeMeta(){
     auto shPrim = (*iShell).alpha.size();  
     if( L      > this->maxL_   ) this->maxL_    = L     ;
     if( shPrim > this->maxPrim_) this->maxPrim_ = shPrim;
-    this->nPrimitive_ += shPrim * (*iShell).size();
+    this->nPrimitive_ += shPrim * iShell->size();
   } // loop iShell
 
   this->nLShell_ = std::vector<int>(this->maxL_+1,0);
   for(auto shell : this->shells_){
     this->nLShell_[shell.contr[0].l]++;
   } // loop shell
+
+  // Always allocate scratch for basis eval and first derivatives
+  this->basisEvalScr_.resize(4*(2*this->maxL_+2));
 
 } // BasisSet::computeMeta
 }; // namespace ChronusQ

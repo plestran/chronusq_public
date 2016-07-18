@@ -28,10 +28,12 @@
 #include <global.h>
 #include <cerr.h>
 #include <molecule.h>
-#include <controls.h>
 #include <aointegrals.h>
 #include <grid.h>
+#include <grid2.h>
 #include <quantum.h>
+#include <dft.h>
+
 /****************************/
 /* Error Messages 5000-5999 */
 /****************************/
@@ -40,47 +42,7 @@ namespace ChronusQ {
 template<typename T>
 class SingleSlater : public Quantum<T> {
   typedef Eigen::Matrix<T,Dynamic,Dynamic,ColMajor> TMatrix;
-
-/*
-  struct MetaData_ {
-    int nBasis;      ///< Number of basis functions (inherited from BasisSet)
-    int nShell;      ///< Number of basis shells (inherited from BasisSet)
-    int nTT;         ///< LT NBasis dimenstion (N(N+1)/2)
-    int nAE;         ///< Total number of alpha electrons
-    int nBE;         ///< Total number of beta electrons
-    int nOccA;       ///< Number of occupied alpha electrons
-    int nOccB;       ///< Number of occupied beta electrons
-    int nVirA;       ///< Number of virtual (unoccupied) alpha electrons
-    int nVirB;       ///< Number of virtual (unoccupied) beta electrons
-    int multip;      ///< Spin multiplicity (inherited from Molecule)
-    int maxSCFIter;  ///< Maximum number of SCF Cycles
-    int printLevel;  ///< Print level (Verbosity)
-
-    bool isHF;          ///< Boolean of whether or not it's a HF reference
-    bool isDFT;         ///< Boolean of whether or not it's a DFT reference
-    bool isPrimary;
-
-    double denTol; ///< SCF tolerence on the density
-    double eneTol; ///< SCF tolerence on the energy
-
-    int Ref;         ///< Specifies the Reference via enum
-
-    std::string SCFType;      ///< String containing SCF Type (R/C) (R/U/G/CU)
-    std::string SCFTypeShort; ///< String containing SCF Type (R/C) (R/U/G/CU)
-    std::string algebraicField;      ///< String Real/Complex/(Quaternion)
-    std::string algebraicFieldShort; ///< String Real/Complex/(Quaternion)
-
-    std::array<double,3> elecField; ///< Static electric field
-
-
-    int        ** R2Index;     ///< Not sure? artifact of in-house integrals
-    BasisSet    * basisset;    ///< Basis Set
-    Molecule    * molecule;    ///< Molecular specificiations
-    FileIO      * fileio;      ///< Access to output file
-    Controls    * controls;    ///< General ChronusQ flow parameters
-    AOIntegrals * aointegrals; ///< Molecular Integrals over GTOs (AO basis)
-  };
-*/
+  typedef Eigen::Map<TMatrix> TMap;
 
   int      nBasis_;
   int      nShell_;
@@ -88,8 +50,6 @@ class SingleSlater : public Quantum<T> {
   int      nAE_;
   int      nBE_;
   int      Ref_;
-  int      CorrKernel_;
-  int      ExchKernel_;
   int      DFTKernel_;
   int      nOccA_;
   int      nOccB_;
@@ -109,23 +69,61 @@ class SingleSlater : public Quantum<T> {
   int nAngDFTGridPts_;
   double nElectrons_;
 
+
+
+  std::unique_ptr<TMap>  NBSqScratch_;
+  std::unique_ptr<TMap>  NBSqScratch2_;
+
   // Internal Storage
-  std::unique_ptr<TMatrix>  fockA_;      ///< Alpha or Full (TCS) Fock Matrix
-  std::unique_ptr<TMatrix>  fockB_;      ///< Beta Fock Matrix
-  std::unique_ptr<TMatrix>  coulombA_;   ///< Alpha or Full (TCS) Coulomb Matrix
-  std::unique_ptr<TMatrix>  coulombB_;   ///< Beta Coulomb Matrix
-  std::unique_ptr<TMatrix>  exchangeA_;  ///< Alpha or Full (TCS) Exchange Matrix
-  std::unique_ptr<TMatrix>  exchangeB_;  ///< Beta Exchange Matrix
-  std::unique_ptr<TMatrix>  moA_;        ///< Alpha or Full (TCS) MO Coefficient Matrix
-  std::unique_ptr<TMatrix>  moB_;        ///< Beta MO Coefficient Matrix
-  std::unique_ptr<RealMatrix>  epsA_;       ///< Alpha or Full (TCS) Fock Eigenenergies
-  std::unique_ptr<RealMatrix>  epsB_;       ///< Beta Fock Eigenenergie
-  std::unique_ptr<TMatrix>  PTA_;        ///< Alpha or Full (TCS) Perturbation Tensor
-  std::unique_ptr<TMatrix>  PTB_;        ///< Beta Perturbation Tensor
-  std::unique_ptr<TMatrix>  vXA_;        ///< Alpha or Full (TCS) VX
-  std::unique_ptr<TMatrix>  vXB_;        ///< Beta VXC
-  std::unique_ptr<TMatrix>  vCorA_;        ///< Alpha or Full Vcorr
-  std::unique_ptr<TMatrix>  vCorB_;        ///< Beta Vcorr
+  std::unique_ptr<TMatrix>  coulombA_;   ///< deprecated 
+  std::unique_ptr<TMatrix>  coulombB_;   ///< deprecated 
+  std::unique_ptr<TMatrix>  exchangeA_;  ///< deprecated 
+  std::unique_ptr<TMatrix>  exchangeB_;  ///< deprecated 
+
+  // Fock Matrix
+  std::unique_ptr<TMap>  fockA_;      ///< Alpha or Full (TCS) Fock Matrix
+  std::unique_ptr<TMap>  fockB_;      ///< Beta Fock Matrix
+  std::unique_ptr<TMap>  fockScalar_;
+  std::unique_ptr<TMap>  fockMx_;
+  std::unique_ptr<TMap>  fockMy_;
+  std::unique_ptr<TMap>  fockMz_;
+
+  // Orthonormal Fock
+  std::unique_ptr<TMap>  fockOrthoA_;
+  std::unique_ptr<TMap>  fockOrthoB_;
+  std::unique_ptr<TMap>  fockOrthoScalar_;
+  std::unique_ptr<TMap>  fockOrthoMx_;
+  std::unique_ptr<TMap>  fockOrthoMy_;
+  std::unique_ptr<TMap>  fockOrthoMz_;
+
+
+  // Fock Eigensystem
+  std::unique_ptr<TMap>  moA_;        ///< Alpha or Full MO Coefficients
+  std::unique_ptr<TMap>  moB_;        ///< Beta MO Coefficient Matrix
+  std::unique_ptr<RealMap>  epsA_;       ///< Alpha or Full Eigenenergies
+  std::unique_ptr<RealMap>  epsB_;       ///< Beta Fock Eigenenergie
+
+  std::unique_ptr<TMap>  PTA_;        ///< Alpha or Full Perturbation Tensor
+  std::unique_ptr<TMap>  PTB_;        ///< Beta Perturbation Tensor
+  std::unique_ptr<TMap>  PTScalar_;
+  std::unique_ptr<TMap>  PTMx_;
+  std::unique_ptr<TMap>  PTMy_;
+  std::unique_ptr<TMap>  PTMz_;
+
+  // Orthonormal Density
+  std::unique_ptr<TMap>  onePDMOrthoA_;        
+  std::unique_ptr<TMap>  onePDMOrthoB_;        
+  std::unique_ptr<TMap>  onePDMOrthoScalar_;
+  std::unique_ptr<TMap>  onePDMOrthoMx_;
+  std::unique_ptr<TMap>  onePDMOrthoMy_;
+  std::unique_ptr<TMap>  onePDMOrthoMz_;
+
+  std::unique_ptr<TMap>  vXA_;        ///< Alpha or Full (TCS) VX
+  std::unique_ptr<TMap>  vXB_;        ///< Beta VXC
+//std::unique_ptr<TMap>  vCorA_;        ///< Alpha or Full Vcorr
+//std::unique_ptr<TMap>  vCorB_;        ///< Beta Vcorr
+
+/*
   std::vector<RealSparseMatrix>  sparsedmudX_; ///< basis derivative (x)
   std::vector<RealSparseMatrix>  sparsedmudY_; ///< basis derivative (y)
   std::vector<RealSparseMatrix>  sparsedmudZ_; ///< basis derivative (z)
@@ -135,13 +133,13 @@ class SingleSlater : public Quantum<T> {
   std::vector<RealSparseMatrix> sparseMap_;     // BasisFunction Map 
   std::vector<RealSparseMatrix> sparseWeights_; // Weights Map
   std::vector<RealSparseMatrix> sparseDoRho_; // Evaluate density Map
+*/
 
   BasisSet *    basisset_;         ///< Basis Set
   Molecule *    molecule_;         ///< Molecular specificiations
   FileIO *      fileio_;           ///< Access to output file
-  Controls *    controls_;         ///< General ChronusQ flow parameters
   AOIntegrals * aointegrals_;      ///< Molecular Integrals over GTOs (AO basis)
-  TwoDGrid    * twodgrid_   ;      ///< 3D grid (1Rad times 1 Ang) 
+//TwoDGrid    * twodgrid_   ;      ///< 3D grid (1Rad times 1 Ang) 
 
   std::string SCFType_;      ///< String containing SCF Type (R/C) (R/U/G/CU)
   std::string SCFTypeShort_; ///< String containing SCF Type (R/C) (R/U/G/CU)
@@ -149,34 +147,19 @@ class SingleSlater : public Quantum<T> {
   std::string algebraicFieldShort_;///< String Real/Complex/(Quaternion)
   std::array<double,3> elecField_;
   std::vector<double> mullPop_; ///< mulliken partial charge
-  double Sx_, Sy_, Sz_, Ssq_;
 
   // Lengths of scratch partitions (NOT MEANT TO BE COPIED)
-  int lenX_;
-  int lenXp_;
   int lenF_;
   int lenP_;
   int lenB_;
   int lenCoeff_;
-  int LWORK_;
-  int LRWORK_;
   int lenLambda_;
   int lenDelF_;
   int lenOccNum_;
-  int lenScr_;
-  int lenRealScr_;
 
   // Pointers of scratch partitions (NOT MEANT TO BE COPIED)
-  double *REAL_SCF_SCR;
   double *occNumMem_;
-  double *RWORK_;
-  double *SCpyMem_;
-  double *SEVlMem_;
-  double *SEVcMem_;
-  double *LowdinWORK_;
 
-  T *SCF_SCR;
-  T *XMem_;
   T *FpAlphaMem_;
   T *FpBetaMem_;
   T *POldAlphaMem_;
@@ -185,34 +168,38 @@ class SingleSlater : public Quantum<T> {
   T *ErrorBetaMem_;
   T *FADIIS_;
   T *FBDIIS_;
-  T *WORK_;
-  T *XpMem_;
   T *lambdaMem_;
   T *delFMem_;
   T *PNOMem_;
+
+  T *NBSQScr1_;
+  T *NBSQScr2_;
+  T *ScalarScr1_;
+  T *ScalarScr2_;
+  T *MzScr1_;
+  T *MzScr2_;
+  T *MyScr1_;
+  T *MyScr2_;
+  T *MxScr1_;
+  T *MxScr2_;
+
   
 
   // Various functions the perform SCF and SCR allocation
-  void initSCFMem();       ///< Initialize scratch memory for SCF
-  void allocAlphaScr();    ///< Allocate scratch for Alpha related quantities
-  void allocBetaScr();     ///< Allocate scratch for Beta related quantities
-  void allocCUHFScr();     ///< Allocate scratch for CUHF realted quantities
-  void allocLAPACKScr();   ///< Allocate LAPACK scratch space
-  void allocLowdin();      ///< Allocate space for Lowin intermediates
-  void cleanupSCFMem();    ///< Cleanup scratch memoty for SCF
-  void cleanupAlphaScr();  ///< Cleanup scratch for Alpha related quantities
-  void cleanupBetaScr();   ///< Cleanup scratch for Beta related quantities
-  void cleanupCUHFScr();   ///< Cleanup scratch for CUHF realted quantities
-  void cleanupLAPACKScr(); ///< Cleanup LAPACK scratch space
-  void cleanupLowdin();    ///< Cleanup space for Lowin intermediates
-  void complexMem();       ///< Add scratch space for Complex intermediates (?)
-  void initMemLen();       ///< Populate lengths of scratch partitions
   void initSCFPtr();       ///< NULL-out pointers to scratch partitions
-  void formX();            ///< Form orthonormal basis transformation matrix
   void formNO();           ///< Form Natural Orbitals
-  void diagFock();         ///< Diagonalize Fock Matrix
   void mixOrbitalsSCF();   ///< Mix the orbitals for Complex / TCS SCF
   void evalConver(int);    ///< Evaluate convergence criteria for SCF
+
+  void initSCFMem2();       ///< Initialize scratch memory for SCF (2)
+  void diagFock2();         ///< Diagonalize Fock Matrix
+  void orthoFock();
+  void fockCUHF();
+  void orthoDen();
+  void cleanupSCFMem2();
+  void copyDen();
+  void genDComm2(int);
+  void backTransformMOs();
 
   double denTol_;
   double eneTol_;
@@ -238,11 +225,11 @@ class SingleSlater : public Quantum<T> {
     if(this->molecule_ == NULL) 
       CErr("Fatal: Must initialize SingleSlater with Molecule Object",
            this->fileio_->out);
-    if(this->controls_ == NULL) 
-      CErr("Fatal: Must initialize SingleSlater with Controls Object",
-           this->fileio_->out);
     if(this->aointegrals_== NULL)
       CErr("Fatal: Must initialize SingleSlater with AOIntegrals Object",
+           this->fileio_->out);
+    if(this->memManager_ == NULL)
+      CErr("Fatal: Must initialize SingleSlater with CQMemManager Object",
            this->fileio_->out);
     
   }
@@ -259,9 +246,6 @@ class SingleSlater : public Quantum<T> {
       CErr(std::string("Fatal: The specified multiplicity is impossible within")
            +std::string(" the number of electrons given"),this->fileio_->out);
 
-    // This is often called before the method is set
-//  if(this->Ref_ == _INVALID) 
-//    CErr("Fatal: SingleSlater reference not set!",this->fileio_->out);
   }
 
 
@@ -272,11 +256,11 @@ public:
     RHF,
     UHF,
     CUHF,
-    TCS,
-    RKS,
-    UKS,
-    CUKS,
-    GKS
+    TCS
+//  RKS,
+//  UKS,
+//  CUKS,
+//  GKS
   }; ///< Supported references
 
   enum GUESS {
@@ -288,9 +272,13 @@ public:
   enum DFT {
     NODFT,
     USERDEFINED,
-    LSDA
+    LSDA,
+    SVWN3,
+    SVWN5,
+    BLYP
   };
 
+/*
   enum CORR {
     NOCORR,
     VWN3,
@@ -304,8 +292,9 @@ public:
     SLATER,
     B88
   };
+*/
 
-  enum DFT_GRID {
+  enum DFT_RAD_GRID {
     EULERMACL,
     GAUSSCHEB
   };
@@ -317,15 +306,16 @@ public:
  
   bool	haveMO;      ///< Have MO coefficients?
   bool	haveDensity; ///< Computed Density? (Not sure if this is used anymore)
-  bool	haveCoulomb; ///< Computed Coulomb Matrix?
-  bool	haveExchange;///< Computed Exchange Matrix?
-  bool	screenVxc   ;///< Do the screening for Vxc?
+//bool	haveCoulomb; ///< Computed Coulomb Matrix?
+//bool	haveExchange;///< Computed Exchange Matrix?
   bool  havePT;      ///< Computed Perturbation Tensor?
   bool  isConverged;
   bool  isHF;
   bool  isDFT;
   bool  isPrimary;
   bool  doDIIS;
+
+  bool	screenVxc   ;///< Do the screening for Vxc?
   bool  isGGA;
 
   double   energyOneE; ///< One-bodied operator tensors traced with Density
@@ -335,9 +325,9 @@ public:
 
   double   totalEx;     ///< LDA Exchange
   double   totalEcorr;  ///< Total VWN Energy
-  double   eps_corr;    ///< VWN Correlation Energy Density
-  double   mu_corr;     ///<  VWN Correlation Potential
-  double   mu_corr_B;   ///<  VWN Correlation Potential (beta)
+//double   eps_corr;    ///< VWN Correlation Energy Density
+//double   mu_corr;     ///<  VWN Correlation Potential
+//double   mu_corr_B;   ///<  VWN Correlation Potential (beta)
   double   epsScreen;   ///<  Screening value for both basis and Bweight
   double   epsConv;     ///<  Threshold value for converging cutoff radius given epsScreen
   int      maxiter;     ///<  Maximum number of iteration to find cutoff radius
@@ -352,7 +342,8 @@ public:
 //  std::chrono::duration<double> duration_7;
 //  std::chrono::duration<double> duration_8;
   int      nSCFIter;
-
+//APE
+  std::vector<std::unique_ptr<DFTFunctional>> dftFunctionals_;
 
 
   // constructor & destructor
@@ -386,21 +377,20 @@ public:
     this->PTB_               = nullptr;        
     this->vXA_              = nullptr;       
     this->vXB_              = nullptr;       
-    this->vCorA_              = nullptr;       
-    this->vCorB_              = nullptr;       
+//  this->vCorA_              = nullptr;       
+//  this->vCorB_              = nullptr;       
 
     // Initialize Raw Pointers
     this->R2Index_     = NULL;
     this->basisset_    = NULL;               
     this->molecule_    = NULL;               
     this->fileio_      = NULL;                 
-    this->controls_    = NULL;               
     this->aointegrals_ = NULL;            
 
     // Initialize Booleans
     this->isConverged   = false;
-    this->haveCoulomb   = false;
-    this->haveExchange  = false;
+//  this->haveCoulomb   = false;
+//  this->haveExchange  = false;
     this->haveDensity   = false;
     this->haveMO        = false;
     this->havePT        = false;
@@ -408,8 +398,6 @@ public:
 
     // Standard Values
     this->Ref_          = _INVALID;
-    this->CorrKernel_   = NOCORR;
-    this->ExchKernel_   = NOEXCH;
     this->DFTKernel_    = NODFT;
     this->denTol_       = 1e-8;
     this->eneTol_       = 1e-10;
@@ -434,6 +422,7 @@ public:
     this->nAngDFTGridPts_ = 302;
     this->isGGA = false;
 
+
     // FIXME: maybe hardcode these?
     this->epsConv       = 1.0e-7;
     this->maxiter       = 50;
@@ -444,62 +433,59 @@ public:
   SingleSlater(SingleSlater *other) : 
     Quantum<T>(dynamic_cast<Quantum<T>&>(*other)){
 
-    this->nBasis_      = other->nBasis_;
-    this->nTT_         = other->nTT_;
-    this->nShell_      = other->nShell_;
-    this->nAE_         = other->nAE_;
-    this->nBE_         = other->nBE_; 
-    this->Ref_         = other->Ref();
-    this->nOccA_       = other->nOccA_;
-    this->nOccB_       = other->nOccB_;
-    this->nVirA_       = other->nVirA_;
-    this->nVirB_       = other->nVirB_;
-    this->multip_      = other->multip_;
+    this->nBasis_ = other->nBasis();
+    this->nTT_    = other->nTT();
+    this->nAE_    = other->nAE();
+    this->nBE_    = other->nBE(); 
+    this->nOccA_  = other->nOccA();
+    this->nOccB_  = other->nOccB();
+    this->nVirA_  = other->nVirA();
+    this->nVirB_  = other->nVirB();
+    this->multip_   = other->multip();
     this->energyNuclei = other->energyNuclei;
-    this->haveDensity  = true;
-    this->haveMO       = true;
-    this->havePT       = true;
-    this->printLevel_  = other->printLevel_;
-    this->doDIIS       = other->doDIIS;
-    this->isHF         = other->isHF;
-    this->isDFT        = other->isDFT;
-    this->guess_       = other->guess_;
+    this->Ref_    = other->Ref();
+    this->haveDensity = true;
+    this->haveMO	    = true;
+    this->havePT      = true;
+    this->printLevel_ = other->printLevel();
+    this->doDIIS = other->doDIIS;
+    this->isHF   = other->isHF;
+    this->isDFT  = other->isDFT;
+    this->guess_ = other->guess();
+    this->elecField_   = (other->elecField());
+    this->basisset_    = other->basisset();    
+    this->molecule_    = other->molecule();
+    this->fileio_      = other->fileio();
+    this->aointegrals_ = other->aointegrals();
 
-    if(getRank() == 0) {
-      this->fockA_ = std::unique_ptr<TMatrix>(new TMatrix(*other->fockA_));
-      this->moA_   = std::unique_ptr<TMatrix>(new TMatrix(*other->moA_));
-      this->PTA_   = std::unique_ptr<TMatrix>(new TMatrix(*other->PTA_));
-      if(!this->isClosedShell && this->Ref_ != TCS ){
-        this->fockB_ = std::unique_ptr<TMatrix>(new TMatrix(*other->fockB_));
-        this->moB_   = std::unique_ptr<TMatrix>(new TMatrix(*other->moB_));
-        this->PTB_   = std::unique_ptr<TMatrix>(new TMatrix(*other->PTB_));
-      }
+    auto NB = this->nBasis_*this->nTCS_;
+    auto NBSq = NB*NB;
+    this->allocOp();
+
+    (*this->fockA_) = *other->fockA();
+    (*this->moA_  ) = *other->moA();
+    (*this->PTA_  ) = *other->PTA();
+
+    if(!this->isClosedShell || this->nTCS_ == 2){
+      (*this->fockB_) = *other->fockB();
+      (*this->moB_  ) = *other->moB();
+      (*this->PTB_  ) = *other->PTB();
     }
-
-    this->elecField_   = other->elecField_;
-    this->basisset_    = other->basisset_;    
-    this->molecule_    = other->molecule_;
-    this->fileio_      = other->fileio_;
-    this->controls_    = other->controls_;
-    this->aointegrals_ = other->aointegrals_;
     
   };
 
   template<typename U>
   SingleSlater(U *);
 
-  // pseudo-constructor
-  void iniSingleSlater(Molecule *,BasisSet *,AOIntegrals *,FileIO *,Controls *);
-
   // Link up to all of the other worker classes
   inline void communicate(Molecule &mol, BasisSet&basis, AOIntegrals &aoints, 
-    FileIO &fileio, Controls &controls){
+    FileIO &fileio, CQMemManager &memManager){
 
     this->molecule_    = &mol;
     this->basisset_    = &basis;
     this->fileio_      = &fileio;
-    this->controls_    = &controls;
     this->aointegrals_ = &aoints;
+    this->memManager_  = &memManager;
   }
 
   // Initialize Meta data from other worker classes
@@ -536,8 +522,6 @@ public:
   inline void setSCFMaxIter(int i)        { this->maxSCFIter_ = i;     };
   inline void setGuess(int i)             { this->guess_ = i;          };
   inline void isNotPrimary()              { this->isPrimary = false;   };
-  inline void setCorrKernel(int i)        { this->CorrKernel_ = i;     };
-  inline void setExchKernel(int i)        { this->ExchKernel_ = i;     };
   inline void setDFTKernel( int i)        { this->DFTKernel_  = i;     };
   inline void setDFTWeightScheme(int i)   { this->weightScheme_ = i;   };
   inline void setDFTGrid(int i)           { this->dftGrid_ = i;        };
@@ -571,41 +555,40 @@ public:
   inline int multip()    { return this->multip_;                  };
   inline int nOVA()      { return nOccA_*nVirA_;                  };
   inline int nOVB()      { return nOccB_*nVirB_;                  };
-  inline int CorrKernel(){ return this->CorrKernel_;              };
-  inline int ExchKernel(){ return this->ExchKernel_;              };
   inline int DFTKernel() { return this->DFTKernel_ ;              };
   inline int printLevel(){ return this->printLevel_;              };
   inline std::vector<double> mullPop()   { return this->mullPop_; };
   inline std::array<double,3> elecField(){ return this->elecField_; };
-  inline TMatrix* fockA()                { return this->fockA_.get();    };
-  inline TMatrix* fockB()                { return this->fockB_.get();    };
-  inline TMatrix* coulombA()             { return this->coulombA_.get(); };
-  inline TMatrix* coulombB()             { return this->coulombB_.get(); };
-  inline TMatrix* exchangeA()            { return this->exchangeA_.get();};
-  inline TMatrix* exchangeB()            { return this->exchangeB_.get();};
-  inline TMatrix* moA()                  { return this->moA_.get();      };
-  inline TMatrix* moB()                  { return this->moB_.get();      };
-  inline TMatrix* vXA()                  { return this->vXA_.get();      };
-  inline TMatrix* vXB()                  { return this->vXB_.get();      };
-  inline TMatrix* vCorA()                { return this->vCorA_.get();    };
-  inline TMatrix* vCorB()                { return this->vCorB_.get();    };
-  inline RealMatrix* epsA()              { return this->epsA_.get();     };
-  inline RealMatrix* epsB()              { return this->epsB_.get();     };
-  inline TMatrix* PTA()                  { return this->PTA_.get();      };
-  inline TMatrix* PTB()                  { return this->PTB_.get();      };
+
+  inline TMap* fockA()                { return this->fockA_.get();    };
+  inline TMap* fockB()                { return this->fockB_.get();    };
+  inline TMap* fockScalar()           { return this->fockScalar_.get();};
+  inline TMap* fockMz()           { return this->fockMz_.get();};
+  inline TMap* fockMy()           { return this->fockMy_.get();};
+  inline TMap* fockMx()           { return this->fockMx_.get();};
+  inline TMap* coulombA()             { return this->coulombA_.get(); };
+  inline TMap* coulombB()             { return this->coulombB_.get(); };
+  inline TMap* exchangeA()            { return this->exchangeA_.get();};
+  inline TMap* exchangeB()            { return this->exchangeB_.get();};
+  inline TMap* moA()                  { return this->moA_.get();      };
+  inline TMap* moB()                  { return this->moB_.get();      };
+  inline TMap* vXA()                  { return this->vXA_.get();      };
+  inline TMap* vXB()                  { return this->vXB_.get();      };
+  inline TMap* vCorA()                { return this->vCorA_.get();    };
+  inline TMap* vCorB()                { return this->vCorB_.get();    };
+  inline RealMap* epsA()              { return this->epsA_.get();     };
+  inline RealMap* epsB()              { return this->epsB_.get();     };
+  inline TMap* PTA()                  { return this->PTA_.get();      };
+  inline TMap* PTB()                  { return this->PTB_.get();      };
+
   inline BasisSet     * basisset()       { return this->basisset_;       };
   inline Molecule     * molecule()       { return this->molecule_;       };
   inline FileIO       * fileio()         { return this->fileio_;         };
-  inline Controls     * controls()       { return this->controls_;       };
   inline AOIntegrals  * aointegrals()    { return this->aointegrals_;    };
   inline TwoDGrid     * twodgrid()       { return this->twodgrid_;       };
   inline std::string SCFType()           { return this->SCFType_;        };
   inline int         guess()             { return this->guess_;          };
 
-  inline void checkDFTType(){
-    if(this->CorrKernel_ == LYP || this->ExchKernel_ == B88)
-      this->isGGA = true;
-  };
   void formGuess();	        // form the intial guess
   void SADGuess();
   void COREGuess();
@@ -619,6 +602,7 @@ public:
   void formPT();
   void formVXC();               // Form DFT VXC Term
   void formVXC_store();               // Form DFT VXC Term
+  void formVXC_new();               // Form DFT VXC Term
   void genSparseBasisMap();     // Generate Basis Set Mapping
   void genSparseRcrosP();      //  Generate R cros P int
   void evalVXC_store(int, int, double &, double &,RealMatrix *, RealMatrix *,
@@ -654,17 +638,39 @@ public:
   void readGuessGauFChk(std::string &);	// read the initial guess of MO's from the Gaussian formatted checkpoint file
   void computeEnergy();         // compute the total electronic energy
   void computeMultipole();      // compute multipole properties
-  void computeSExpect();        // compute <S> <S^2>
+//void computeSExpect();        // compute <S> <S^2>
+  void computeSSq();
   inline void computeProperties(){
     this->computeMultipole();
-    this->computeSExpect();
+    this->computeSExpect(*this->aointegrals_->overlap_);
   };
-  void SCF();  
   void CDIIS();
   void CpyFock(int);
   void GenDComm(int);
   void mullikenPop();
   void fixPhase();
+
+  void SCF2();
+
+  // DFT Setup Routines
+  inline void addSlater(){
+    this->dftFunctionals_.emplace_back(new SlaterExchange());
+  };
+  inline void addB88(){
+    this->dftFunctionals_.emplace_back(new BEightEight());
+    this->isGGA = true;
+  };
+  inline void addLYP(){
+    this->dftFunctionals_.emplace_back(new lyp()); 
+    this->isGGA = true;
+  };
+  inline void addVWN5(){
+    this->dftFunctionals_.emplace_back(new VWNV()); 
+  };
+  inline void addVWN3(){
+    this->dftFunctionals_.emplace_back(new VWNIII()); 
+  };
+
 
   void printEnergy(); 
   void printMultipole();
@@ -724,8 +730,6 @@ public:
   }
 
   // Python API
-  void Wrapper_iniSingleSlater(Molecule&,BasisSet&,AOIntegrals&,FileIO&,
-    Controls&); 
   boost::python::list Wrapper_dipole();
   boost::python::list Wrapper_quadrupole();
   boost::python::list Wrapper_octupole();
@@ -743,6 +747,7 @@ public:
 #include <singleslater/singleslater_fock.h>
 #include <singleslater/singleslater_misc.h>
 #include <singleslater/singleslater_scf.h>
+#include <singleslater/singleslater_diis.h>
 #include <singleslater/singleslater_properties.h>
 //#include <singleslater_dft.h>
 

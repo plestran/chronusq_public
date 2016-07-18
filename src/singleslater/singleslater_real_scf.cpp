@@ -24,7 +24,6 @@
  *  
  */
 #include <singleslater.h>
-using ChronusQ::Controls;
 using ChronusQ::FileIO;
 using ChronusQ::SingleSlater;
 
@@ -34,163 +33,33 @@ using ChronusQ::SingleSlater;
 //----------------------------------------//
 namespace ChronusQ {
 template<>
-void SingleSlater<double>::complexMem(){;};
-
-template<>
-void SingleSlater<double>::printDensityInfo(double PAlphaRMS,double EDelta){
-  this->fileio_->out<<"\nSCF Information:"<<endl;
-  this->fileio_->out<<std::right<<std::setw(30)<<"    Delta-E = "<<std::setw(15)<<std::scientific<<EDelta<<std::setw(5)<<" Eh "<<endl;
-  this->fileio_->out<<std::right<<std::setw(30)<<"RMS Density = "<<std::setw(15)<<std::scientific<<PAlphaRMS<<endl;
-};
-template<>
-void SingleSlater<double>::printDensityInfo(double PAlphaRMS, double PBetaRMS, double EDelta){
-  this->fileio_->out<<"\nSCF Information:"<<endl;
-  this->fileio_->out<<std::right<<std::setw(30)<<"    Delta-E = "<<std::setw(15)<<std::scientific<<EDelta<<std::setw(5)<<" Eh "<<endl;
-  this->fileio_->out<<std::right<<std::setw(30)<<"RMS Alpha Density = "<<std::setw(15)<<std::scientific<<PAlphaRMS<<endl;
-  this->fileio_->out<<std::right<<std::setw(30)<<"RMS Beta Density = "<<std::setw(15)<<std::scientific<<PBetaRMS<<endl;
-};
-
-template<>
-void SingleSlater<double>::formX(){
-/*
-  RealMap X(this->XMem_,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
-  X = (*this->aointegrals_->overlap_).pow(-0.5); // Make this more efficient... FIXME
-
-  if(this->Ref_ == CUHF){
-    RealMap Xp(this->XpMem_,this->nBasis_,this->nBasis_);
-    Xp = (*this->aointegrals_->overlap_).pow(0.5); // Make this more efficient... FIXME
-  }
-*/
-
-  char JOBZ = 'V';
-  char UPLO = 'L';
-  int INFO;
-  auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
-
-  RealVecMap E(this->SEVlMem_,NTCSxNBASIS);
-  RealMap    X(this->XMem_   ,NTCSxNBASIS,NTCSxNBASIS);
-  RealMap    V(this->SEVcMem_,NTCSxNBASIS,NTCSxNBASIS);
-  RealMap    S(this->SCpyMem_,NTCSxNBASIS,NTCSxNBASIS);
-
-  E.setZero();
-  V.setZero();
-  S.setZero();
-
-  std::memcpy(this->SEVcMem_,this->aointegrals_->overlap_->data(),
-    NTCSxNBASIS*NTCSxNBASIS*sizeof(double));
-
-  dsyev_(&JOBZ,&UPLO,&NTCSxNBASIS,this->SEVcMem_,&NTCSxNBASIS,this->SEVlMem_,
-    this->WORK_,&this->LWORK_,&INFO);
-  
-//V.transposeInPlace(); // b/c Row Major...
-  std::memcpy(this->SCpyMem_,this->SEVcMem_,NTCSxNBASIS * NTCSxNBASIS *
-    sizeof(double));
-
-  for(auto i = 0; i < NTCSxNBASIS; i++)
-    S.col(i) /= std::sqrt(this->SEVlMem_[i]);
-
-  X = S * V.transpose();
-
-  if(this->Ref_ == CUHF){
-    RealMap    Xp(this->XpMem_    ,NTCSxNBASIS,NTCSxNBASIS);
-
-    for(auto i = 0; i < NTCSxNBASIS; i++)
-      S.col(i) *= this->SEVlMem_[i];
- 
-    Xp = S * V.transpose();
-  }
-}
-
-template<>
 void SingleSlater<double>::formNO(){
   int INFO;
   char JOBZ = 'V';
   char UPLO = 'L';
 
   RealMap P(this->PNOMem_,this->nBasis_,this->nBasis_);
-  RealMap Xp(this->XpMem_,this->nBasis_,this->nBasis_);
 
-  P = 0.5 * Xp * (*this->onePDMA_) * Xp;
+  P = 0.5 * (*this->aointegrals_->ortho2_) * (*this->onePDMA_) * 
+    (*this->aointegrals_->ortho2_);
+
   if(!this->isClosedShell)
-    P += 0.5 * Xp * (*this->onePDMB_) * Xp;
+    P += 0.5 * (*this->aointegrals_->ortho2_) * (*this->onePDMB_) * 
+      (*this->aointegrals_->ortho2_);
 
-  dsyev_(&JOBZ,&UPLO,&this->nBasis_,this->PNOMem_,&this->nBasis_,this->occNumMem_,
-         this->WORK_,&this->LWORK_,&INFO);
+  int LWORK  = 5*this->nBasis_;
+  double *WORK  = this->memManager_->malloc<double>(LWORK);
+
+  dsyev_(&JOBZ,&UPLO,&this->nBasis_,this->PNOMem_,&this->nBasis_,
+      this->occNumMem_,WORK,&LWORK,&INFO);
+
+  this->memManager_->free(WORK,LWORK);
+
   if(INFO != 0) CErr("DSYEV Failed in FormNO",this->fileio_->out);
-//P.transposeInPlace();
 
   // Swap Ordering
-  for(auto i = 0; i < this->nBasis_/2; i++) P.col(i).swap(P.col(this->nBasis_ - i- 1));
-
-}
-
-template<>
-void SingleSlater<double>::diagFock(){
-  int INFO;
-  char JOBZ = 'V';
-  char UPLO = 'U';
-  auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
-
-  RealMap X(this->XMem_,NTCSxNBASIS,NTCSxNBASIS);
-  RealMap POldAlpha(this->POldAlphaMem_,NTCSxNBASIS,NTCSxNBASIS);
-  RealMap FpAlpha(this->FpAlphaMem_,NTCSxNBASIS,NTCSxNBASIS);
-  RealMap POldBeta(this->POldBetaMem_,0,0);
-  RealMap FpBeta(this->FpBetaMem_,0,0);
-  if(!this->isClosedShell && this->Ref_ != TCS){
-    new (&POldBeta)  RealMap(this->POldBetaMem_, NTCSxNBASIS,NTCSxNBASIS);
-    new (&FpBeta)    RealMap(this->FpBetaMem_,NTCSxNBASIS,NTCSxNBASIS);
-  }
-
-
-  if(this->Ref_ == CUHF){
-    RealMap P(this->PNOMem_,this->nBasis_,this->nBasis_);
-    RealMap Xp(this->XpMem_,this->nBasis_,this->nBasis_);
-    RealMap DelF(this->delFMem_,this->nBasis_,this->nBasis_);
-    RealMap Lambda(this->lambdaMem_,this->nBasis_,this->nBasis_);
-
-    int activeSpace  = this->molecule_->multip() - 1;
-    int coreSpace    = (this->molecule_->nTotalE() - activeSpace) / 2;
-    int virtualSpace = this->nBasis_ - coreSpace - activeSpace;
-
-    DelF = 0.5 * X * (*this->fockA_) * X;
-    if(!this->isClosedShell)
-      DelF -= 0.5 * X * (*this->fockB_) * X;
- 
-    DelF = P.transpose() * DelF * P;
- 
-    Lambda.setZero();
-    for(auto i = activeSpace + coreSpace; i < this->nBasis_; i++)
-    for(auto j = 0                      ; j < coreSpace    ; j++){
-      Lambda(i,j) = -DelF(i,j);
-      Lambda(j,i) = -DelF(j,i);
-    }
-    Lambda = P  * Lambda * P.transpose();
-    Lambda = Xp * Lambda * Xp;  
- 
-    (*this->fockA_) += Lambda;
-    if(!this->isClosedShell) (*this->fockB_) -= Lambda;
-  }
-
-  POldAlpha = (*this->onePDMA_);
-  if(!this->isClosedShell && this->Ref_ != TCS) POldBeta = (*this->onePDMB_);
-
-  FpAlpha = X.transpose() * (*this->fockA_) * X;
-  dsyev_(&JOBZ,&UPLO,&NTCSxNBASIS,this->FpAlphaMem_,&NTCSxNBASIS,this->epsA_->data(),
-         this->WORK_,&this->LWORK_,&INFO);
-  if(INFO != 0) CErr("DSYEV Failed Fock Alpha",this->fileio_->out);
-//FpAlpha.transposeInPlace(); // bc row major
-  (*this->moA_) = X * FpAlpha;
-
-  if(!this->isClosedShell && this->Ref_ != TCS){
-    FpBeta = X.transpose() * (*this->fockB_) * X;
-    dsyev_(&JOBZ,&UPLO,&this->nBasis_,this->FpBetaMem_,&this->nBasis_,this->epsB_->data(),
-           this->WORK_,&this->LWORK_,&INFO);
-    if(INFO != 0) CErr("DSYEV Failed Fock Beta",this->fileio_->out);
-//  FpBeta.transposeInPlace(); // bc row major
-    (*this->moB_) = X * FpBeta;
-  }
-
-  
+  for(auto i = 0; i < this->nBasis_/2; i++) 
+    P.col(i).swap(P.col(this->nBasis_ - i - 1));
 
 }
 
@@ -240,34 +109,17 @@ void SingleSlater<double>::evalConver(int iter){
 
 template<>
 void SingleSlater<double>::mixOrbitalsSCF(){
-  if(this->Ref_ == TCS){
-  this->fileio_->out << "** Mixing Alpha-Beta Orbitals for 2C Guess **" << endl;
-  //CErr();
+  if(this->nTCS_ != 2) return;
+
+  this->fileio_->out << 
+    "** Mixing Alpha-Beta Orbitals for 2C Guess **" << endl;
+
   auto nO = this->nAE_ + this->nBE_;
-  VectorXd HOMOA,LUMOB;
   int indxHOMOA = -1, indxLUMOB = -1;
-/*
-  for(auto i = nO-1; i >= 0; i--){
-    auto aComp = this->moA_->col(i)(0);
-    auto bComp = this->moA_->col(i)(1);
-    if(std::abs(aComp) > 1e-10 && std::abs(bComp) < 1e-10){
-      HOMOA = this->moA_->col(i);
-      indxHOMOA = i;
-      break;
-    }
-  }
-  for(auto i = nO; i < this->nTCS_*this->nBasis_; i++){
-    auto aComp = this->moA_->col(i)(0);
-    auto bComp = this->moA_->col(i)(1);
-    if(std::abs(bComp) > 1e-10 && std::abs(aComp) < 1e-10){
-      LUMOB = this->moA_->col(i);
-      indxLUMOB = i;
-      break;
-    }
-  }
-*/
+
   auto nOrb = this->nBasis_;
   double maxPercentNonZeroAlpha = 0;
+
   for(auto i = nO-1; i >= 0; i--){
     auto nNonZeroAlpha = 0;
     for(auto j = 0; j < this->nTCS_*this->nBasis_; j+=2){
@@ -281,6 +133,7 @@ void SingleSlater<double>::mixOrbitalsSCF(){
       indxHOMOA = i;
     }
   }
+
   double maxPercentNonZeroBeta = 0;
   for(auto i = nO; i < this->nTCS_*this->nBasis_; i++){
     auto nNonZeroBeta = 0;
@@ -296,31 +149,193 @@ void SingleSlater<double>::mixOrbitalsSCF(){
     }
   }
 
-  if(indxHOMOA == -1 || indxLUMOB == -1)
-  //  CErr("TCS orbital swap failed to find suitable Alpha-Beta pair",this->fileio_->out);
-    return;
+  if(indxHOMOA == -1 || indxLUMOB == -1) return;
   
-//CErr();
+  RealVecMap HOMOA(this->memManager_->malloc<double>(
+        this->nTCS_*this->nBasis_),this->nTCS_*this->nBasis_);
+  RealVecMap LUMOB(this->memManager_->malloc<double>(
+        this->nTCS_*this->nBasis_),this->nTCS_*this->nBasis_);
+
   HOMOA = this->moA_->col(indxHOMOA) ;
   LUMOB = this->moA_->col(indxLUMOB) ;
-//cout << HOMOA << endl << endl;
-//cout << LUMOB << endl << endl;
-//prettyPrint(cout,*this->moA_,"MO");
   this->moA_->col(indxHOMOA) = std::sqrt(0.5) * (HOMOA + LUMOB);
   this->moA_->col(indxLUMOB) = std::sqrt(0.5) * (HOMOA - LUMOB);
-/*
-    Eigen::VectorXd HOMO = this->moA_->col(this->nAE_+this->nBE_-1);
-    Eigen::VectorXd LUMO = this->moA_->col(this->nTCS_*this->nBasis_-1);
-   cout << endl << endl <<  this->moA_->col(this->nAE_+this->nBE_-1) << endl; 
-   cout << endl << endl <<  this->moA_->col(this->nTCS_*this->nBasis_-1) << endl;
-    this->moA_->col(this->nAE_+this->nBE_-1) = std::sqrt(0.5) * (HOMO + LUMO);
-//  this->moA_->col(this->nAE_+this->nBE_) =   std::sqrt(0.5) * (HOMO - LUMO);
-    this->moA_->col(this->nTCS_*this->nBasis_-1) = std::sqrt(0.5) * (HOMO - LUMO);
 
-   cout << endl << endl <<  this->moA_->col(this->nAE_+this->nBE_-1) << endl; 
-   cout << endl << endl <<  this->moA_->col(this->nTCS_*this->nBasis_-1) << endl;
-*/
-  }
+  this->memManager_->free(HOMOA.data(),this->nTCS_*this->nBasis_);
+  this->memManager_->free(LUMOB.data(),this->nTCS_*this->nBasis_);
 }
+
+template<>
+void SingleSlater<double>::diagFock2(){
+  int INFO;
+  char JOBZ = 'V';
+  char UPLO = 'U';
+  auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
+
+  int LWORK  = 5*NTCSxNBASIS;
+  double *WORK  = this->memManager_->malloc<double>(LWORK);
+
+  dsyev_(&JOBZ,&UPLO,&NTCSxNBASIS,this->fockOrthoA_->data(),&NTCSxNBASIS,
+      this->epsA_->data(),WORK,&LWORK,&INFO);
+  if(INFO != 0) CErr("DSYEV Failed Fock Alpha",this->fileio_->out);
+  (*this->moA_) = (*this->fockOrthoA_);
+
+  if(this->nTCS_ == 1 && !this->isClosedShell){
+    dsyev_(&JOBZ,&UPLO,&NTCSxNBASIS,this->fockOrthoB_->data(),&NTCSxNBASIS,
+        this->epsB_->data(),WORK,&LWORK,&INFO);
+    if(INFO != 0) CErr("DSYEV Failed Fock Beta",this->fileio_->out);
+    (*this->moB_) = (*this->fockOrthoB_);
+  }
+  this->memManager_->free(WORK,LWORK);
+};
+
+template<>
+void SingleSlater<double>::orthoFock(){
+  if(this->nTCS_ == 1 && this->isClosedShell){
+    // F(A)' = X^\dagger * F(A) * X
+    this->NBSqScratch_->noalias() = 
+      this->aointegrals_->ortho1_->transpose() * (*this->fockA_);
+    this->fockOrthoA_->noalias() = 
+      (*this->NBSqScratch_) * (*this->aointegrals_->ortho1_);
+
+  } else {
+    // F(Scalar)' = X^\dagger * F(Scalar) * X
+    (*this->NBSqScratch_) = 
+      this->aointegrals_->ortho1_->transpose() * (*this->fockScalar_);
+    (*this->fockOrthoScalar_) = 
+      (*this->NBSqScratch_) * (*this->aointegrals_->ortho1_);
+
+    // F(Mz)' = X^\dagger * F(Mz) * X
+    (*this->NBSqScratch_) = 
+      this->aointegrals_->ortho1_->transpose() * (*this->fockMz_);
+    (*this->fockOrthoMz_) = 
+      (*this->NBSqScratch_) * (*this->aointegrals_->ortho1_);
+
+    std::vector<std::reference_wrapper<TMap>> toGather;
+    toGather.emplace_back(*this->fockOrthoScalar_);
+    toGather.emplace_back(*this->fockOrthoMz_);
+    if(this->nTCS_ == 1)
+      // {F(Scalar),F(Mz)} -> {F(A), F(B)}
+      Quantum<double>::spinGather(*this->fockOrthoA_,*this->fockOrthoB_,toGather);
+
+    else {
+      // F(Mx)' = X^\dagger * F(Mx) * X
+      (*this->NBSqScratch_) = 
+        this->aointegrals_->ortho1_->transpose() * (*this->fockMx_);
+      (*this->fockOrthoMx_) = 
+        (*this->NBSqScratch_) * (*this->aointegrals_->ortho1_);
+
+      // F(My)' = X^\dagger * F(My) * X
+      (*this->NBSqScratch_) = 
+        this->aointegrals_->ortho1_->transpose() * (*this->fockMy_);
+      (*this->fockOrthoMy_) = 
+        (*this->NBSqScratch_) * (*this->aointegrals_->ortho1_);
+
+      toGather.emplace_back(*this->fockOrthoMy_);
+      toGather.emplace_back(*this->fockOrthoMx_);
+
+      // {F(Scalar), F(Mz), F(Mx). F(My)} -> F
+      Quantum<double>::spinGather(*this->fockOrthoA_,toGather);
+    }
+  }
+};
+
+template<>
+void SingleSlater<double>::fockCUHF() {
+  RealMap P(this->PNOMem_,this->nBasis_,this->nBasis_);
+  RealMap DelF(this->delFMem_,this->nBasis_,this->nBasis_);
+  RealMap Lambda(this->lambdaMem_,this->nBasis_,this->nBasis_);
+
+  int activeSpace  = this->molecule_->multip() - 1;
+  int coreSpace    = (this->molecule_->nTotalE() - activeSpace) / 2;
+  int virtualSpace = this->nBasis_ - coreSpace - activeSpace;
+
+  // DelF = X * (F(A) - F(B)) * X
+  (*this->NBSqScratch_) = 0.5 * (*this->aointegrals_->ortho1_) *
+    (*this->fockMz_);
+  DelF = (*this->NBSqScratch_) * (*this->aointegrals_->ortho1_);
+
+  // DelF = C(NO)^\dagger * DelF * C(NO) (Natural Orbitals)
+  (*this->NBSqScratch_) = P.transpose() * DelF;
+  DelF = (*this->NBSqScratch_) * P;
+
+  Lambda.setZero();
+  for(auto i = activeSpace + coreSpace; i < this->nBasis_; i++)
+  for(auto j = 0                      ; j < coreSpace    ; j++){
+    Lambda(i,j) = -DelF(i,j);
+    Lambda(j,i) = -DelF(j,i);
+  }
+
+  (*this->NBSqScratch_) = P * Lambda;
+  Lambda = (*this->NBSqScratch_) * P.transpose();
+
+  (*this->NBSqScratch_) = (*this->aointegrals_->ortho2_) * Lambda;
+  Lambda = (*this->NBSqScratch_) * (*this->aointegrals_->ortho2_);
+
+  (*this->fockA_) += Lambda;
+  (*this->fockB_) -= Lambda;
+
+  (*this->fockScalar_) = (*this->fockA_) + (*this->fockB_);
+  (*this->fockMz_)     = (*this->fockA_) - (*this->fockB_);
+};
+
+
+template<>
+void SingleSlater<double>::orthoDen(){
+  if(this->nTCS_ == 1 && this->isClosedShell) {
+    (*this->NBSqScratch_) = 
+      (*this->aointegrals_->ortho1_) * (*this->onePDMA_);
+    (*this->onePDMOrthoA_) = 
+      (*this->NBSqScratch_) * (*this->aointegrals_->ortho1_);
+    (*this->onePDMA_) = (*this->onePDMOrthoA_);
+
+  } else {
+    std::vector<std::reference_wrapper<RealMap>> scattered;
+    scattered.emplace_back(*this->onePDMOrthoScalar_);
+    scattered.emplace_back(*this->onePDMOrthoMz_);
+    if(this->nTCS_ == 1) {
+      Quantum<double>::spinScatter(*this->onePDMA_,*this->onePDMB_,scattered);
+    } else {
+      scattered.emplace_back(*this->onePDMOrthoMy_);
+      scattered.emplace_back(*this->onePDMOrthoMx_);
+      Quantum<double>::spinScatter(*this->onePDMA_,scattered);
+    }
+
+    (*this->NBSqScratch_) = 
+      (*this->aointegrals_->ortho1_) * (*this->onePDMOrthoScalar_);
+    (*this->onePDMOrthoScalar_) = 
+      (*this->NBSqScratch_) * (*this->aointegrals_->ortho1_);
+    (*this->onePDMScalar_) = (*this->onePDMOrthoScalar_);
+
+    (*this->NBSqScratch_) = 
+      (*this->aointegrals_->ortho1_) * (*this->onePDMOrthoMz_);
+    (*this->onePDMOrthoMz_) = 
+      (*this->NBSqScratch_) * (*this->aointegrals_->ortho1_);
+    (*this->onePDMMz_) = (*this->onePDMOrthoMz_);
+
+    std::vector<std::reference_wrapper<RealMap>> toGather;
+    toGather.emplace_back(*this->onePDMScalar_);
+    toGather.emplace_back(*this->onePDMMz_);
+
+    if(this->nTCS_ == 2) {
+      (*this->NBSqScratch_) = 
+        (*this->aointegrals_->ortho1_) * (*this->onePDMOrthoMx_);
+      (*this->onePDMOrthoMx_) = 
+        (*this->NBSqScratch_) * (*this->aointegrals_->ortho1_);
+      (*this->onePDMMx_) = (*this->onePDMOrthoMx_);
+
+      (*this->NBSqScratch_) = 
+        (*this->aointegrals_->ortho1_) * (*this->onePDMOrthoMy_);
+      (*this->onePDMOrthoMy_) = 
+        (*this->NBSqScratch_) * (*this->aointegrals_->ortho1_);
+      (*this->onePDMMy_) = (*this->onePDMOrthoMy_);
+
+      toGather.emplace_back(*this->onePDMMy_);
+      toGather.emplace_back(*this->onePDMMx_);
+      Quantum<double>::spinGather(*this->onePDMA_,toGather);
+    } else
+      Quantum<double>::spinGather(*this->onePDMA_,*this->onePDMB_,toGather);
+  }
+};
 
 } // namespace ChronusQ

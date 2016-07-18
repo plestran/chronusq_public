@@ -30,7 +30,6 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(printSettings_Overload,
 BOOST_PYTHON_MODULE(libpythonapi){
   class_<SingleSlater<double>,boost::noncopyable>("SingleSlater_double",
     init<>())
-    .def("iniSingleSlater" , &SingleSlater<double>::Wrapper_iniSingleSlater)
     .def("printInfo"       , &SingleSlater<double>::printInfo              )
     .def("printDensity"    , &SingleSlater<double>::printDensity           )
     .def("formGuess"       , &SingleSlater<double>::formGuess              )
@@ -40,7 +39,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("computeProperties",&SingleSlater<double>::computeProperties      )
     .def("printMultipole"  , &SingleSlater<double>::printMultipole         )
     .def("printProperties" , &SingleSlater<double>::printProperties        )
-    .def("SCF"             , &SingleSlater<double>::SCF                    )
+    .def("SCF"             , &SingleSlater<double>::SCF2                   )
     .def("communicate"     , &SingleSlater<double>::communicate            )
     .def("initMeta"        , &SingleSlater<double>::initMeta               )
     .def("alloc"           , &SingleSlater<double>::alloc                  )
@@ -55,8 +54,6 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setSCFMaxIter"   , &SingleSlater<double>::setSCFMaxIter          )
     .def("setField"        , &SingleSlater<double>::Wrapper_setField       )
     .def("setGuess"        , &SingleSlater<double>::setGuess               )
-    .def("setCorrKernel"   , &SingleSlater<double>::setCorrKernel          )
-    .def("setExchKernel"   , &SingleSlater<double>::setExchKernel          )
     .def("setDFTKernel"    , &SingleSlater<double>::setDFTKernel           )
     .def("setDFTWeightScheme", &SingleSlater<double>::setDFTWeightScheme)
     .def("setDFTGrid"      , &SingleSlater<double>::setDFTGrid             ) 
@@ -65,7 +62,11 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setDFTNAng"  , &SingleSlater<double>::setDFTNAng         )
     .def("setDFTScreenTol" , &SingleSlater<double>::setDFTScreenTol        )
 
-    .def("checkDFTType", &SingleSlater<double>::checkDFTType)
+    .def("addSlater", &SingleSlater<double>::addSlater )
+    .def("addB88", &SingleSlater<double>::addB88 )
+    .def("addLYP", &SingleSlater<double>::addLYP )
+    .def("addVWN5", &SingleSlater<double>::addVWN5 )
+    .def("addVWN3", &SingleSlater<double>::addVWN3 )
   
     .def("turnOffDFTScreening", &SingleSlater<double>::turnOffDFTScreening ) 
 
@@ -87,7 +88,6 @@ BOOST_PYTHON_MODULE(libpythonapi){
 
   class_<SingleSlater<dcomplex>,boost::noncopyable>("SingleSlater_complex",
     init<>())
-    .def("iniSingleSlater" , &SingleSlater<dcomplex>::Wrapper_iniSingleSlater)
     .def("printInfo"       , &SingleSlater<dcomplex>::printInfo              )
     .def("printDensity"    , &SingleSlater<dcomplex>::printDensity           )
     .def("formGuess"       , &SingleSlater<dcomplex>::formGuess              )
@@ -97,7 +97,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("computeProperties",&SingleSlater<dcomplex>::computeProperties      )
     .def("printMultipole"  , &SingleSlater<dcomplex>::printMultipole         )
     .def("printProperties" , &SingleSlater<dcomplex>::printProperties        )
-    .def("SCF"             , &SingleSlater<dcomplex>::SCF                    )
+    .def("SCF"             , &SingleSlater<dcomplex>::SCF2                   )
     .def("communicate"     , &SingleSlater<dcomplex>::communicate            )
     .def("initMeta"        , &SingleSlater<dcomplex>::initMeta               )
     .def("alloc"           , &SingleSlater<dcomplex>::alloc                  )
@@ -112,8 +112,6 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setSCFMaxIter"   , &SingleSlater<dcomplex>::setSCFMaxIter          )
     .def("setField"        , &SingleSlater<dcomplex>::Wrapper_setField       )
     .def("setGuess"        , &SingleSlater<dcomplex>::setGuess               )
-    .def("setCorrKernel"   , &SingleSlater<dcomplex>::setCorrKernel          )
-    .def("setExchKernel"   , &SingleSlater<dcomplex>::setExchKernel          )
     .def("setDFTKernel"    , &SingleSlater<dcomplex>::setDFTKernel           )
     .def("setDFTWeightScheme", &SingleSlater<dcomplex>::setDFTWeightScheme)
     .def("setDFTGrid"      , &SingleSlater<dcomplex>::setDFTGrid             ) 
@@ -122,7 +120,12 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setDFTNAng"  , &SingleSlater<dcomplex>::setDFTNAng         )
     .def("setDFTScreenTol" , &SingleSlater<dcomplex>::setDFTScreenTol        )
 
-    .def("checkDFTType", &SingleSlater<dcomplex>::checkDFTType)
+    .def("addSlater", &SingleSlater<dcomplex>::addSlater )
+    .def("addB88", &SingleSlater<dcomplex>::addB88 )
+    .def("addLYP", &SingleSlater<dcomplex>::addLYP )
+    .def("addVWN5", &SingleSlater<dcomplex>::addVWN5 )
+    .def("addVWN3", &SingleSlater<dcomplex>::addVWN3 )
+
   
     .def("turnOffDFTScreening", &SingleSlater<dcomplex>::turnOffDFTScreening ) 
 
@@ -148,10 +151,10 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("UHF"           , SingleSlater<double>::UHF                    )
     .value("CUHF"          , SingleSlater<double>::CUHF                   )
     .value("TCS"           , SingleSlater<double>::TCS                    )
-    .value("RKS"           , SingleSlater<double>::RKS                    )
-    .value("UKS"           , SingleSlater<double>::UKS                    )
-    .value("CUKS"          , SingleSlater<double>::CUKS                   )
-    .value("GKS"           , SingleSlater<double>::GKS                    )
+//  .value("RKS"           , SingleSlater<double>::RKS                    )
+//  .value("UKS"           , SingleSlater<double>::UKS                    )
+//  .value("CUKS"          , SingleSlater<double>::CUKS                   )
+//  .value("GKS"           , SingleSlater<double>::GKS                    )
   ;
 
   enum_<SingleSlater<double>::GUESS>("Guess")
@@ -160,6 +163,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("READ" , SingleSlater<double>::READ )
   ;
 
+/*
   enum_<SingleSlater<double>::EXCH>("EXCH")
     .value("NOEXCH"  , SingleSlater<double>::NOEXCH) 
     .value("EXACT"   , SingleSlater<double>::EXACT )
@@ -172,13 +176,14 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("VWN5"  , SingleSlater<double>::VWN5  )
     .value("LYP"   , SingleSlater<double>::LYP   )
   ;
+*/
   enum_<SingleSlater<double>::DFT>("DFT")
     .value("NODFT"      , SingleSlater<double>::NODFT      )
     .value("USERDEFINED", SingleSlater<double>::USERDEFINED)
     .value("LSDA"       , SingleSlater<double>::LSDA       )
   ;
 
-  enum_<SingleSlater<double>::DFT_GRID>("DFT_GRID")
+  enum_<SingleSlater<double>::DFT_RAD_GRID>("DFT_RAD_GRID")
     .value("EULERMACL", SingleSlater<double>::EULERMACL)
     .value("GAUSSCHEB", SingleSlater<double>::GAUSSCHEB)
   ;
@@ -242,18 +247,23 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def_readwrite("doRestart", &FileIO::doRestart   )
   ;
 
+  class_<CQMemManager,boost::noncopyable>("CQMemManager",init<>())
+    .def(init<std::size_t>())
+    .def(init<std::size_t,std::size_t>())
+    .def("allocMem",         &CQMemManager::allocMem    )
+    .def("setTotalMem",      &CQMemManager::setTotalMem )
+    .def("setBlockSize",     &CQMemManager::setBlockSize)
+    .def_readonly("isAllocated", &CQMemManager::isAllocated )
+  ;
   
   class_<AOIntegrals,boost::noncopyable>("AOIntegrals",init<>())
-    .def("iniAOIntegrals" , &AOIntegrals::Wrapper_iniAOIntegrals)
     .def("printTimings"   , &AOIntegrals::printTimings          )
     .def("communicate"    , &AOIntegrals::communicate           )
     .def("initMeta"       , &AOIntegrals::initMeta              )
     .def("alloc"          , &AOIntegrals::alloc                 )
-    .def("nTCS"           , &AOIntegrals::nTCS                  )
-    .def("setNTCS"        , &AOIntegrals::setNTCS               )
     .def("setMaxMultipole", &AOIntegrals::setMaxMultipole       )
-    .def("setMaxNumInt"   , &AOIntegrals::setMaxNumInt          )
     .def("setAlgorithm"   , &AOIntegrals::setAlgorithm          )
+    .def("setPrintLevel"   , &AOIntegrals::setPrintLevel        )
     
     .def_readonly("integralAlgorithm", &AOIntegrals::integralAlgorithm)
 //  .def_readwrite("allocERI", &AOIntegrals::allocERI           )

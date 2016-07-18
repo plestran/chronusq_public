@@ -341,6 +341,11 @@ void SingleSlater<T>::printSCFHeader(ostream &output){
   else if(this->guess_ == READ)
     output << "Read";
   output << endl;
+  output << std::setw(38) << std::left << "  DIIS Extrapolation Algorithm:";
+  if(this->doDIIS) output << "CDIIS";
+  else             output << "No DIIS Extrapolation";
+  output << endl;
+
 
   if(this->isDFT){
     output << std::setw(38) << std::left << "  Density Functional:";
@@ -352,28 +357,16 @@ void SingleSlater<T>::printSCFHeader(ostream &output){
 
     output << endl;
 
+    
+    if(this->DFTKernel_ == USERDEFINED){
+      output << std::setw(38) << std::left << "    Exchange Kernel:";
+      output << this->dftFunctionals_[0]->name;
+      output << endl;
 
-    output << std::setw(38) << std::left << "    Exchange Kernel:";
-    if(this->ExchKernel_ == NOEXCH)
-      output << "No Exchange";
-    else if(this->ExchKernel_ == SLATER)
-      output << "Slater";
-    else if(this->ExchKernel_ == EXACT)
-      output << "Exact (Hartree-Fock)";
-    else if(this->ExchKernel_ == B88)
-      output << "B88";
-    output << endl;
-
-    output << std::setw(38) << std::left << "    Correlation Kernel:";
-    if(this->CorrKernel_ == NOCORR)
-      output << "No Correlation";
-    else if(this->CorrKernel_ == VWN3)
-      output << "VWN3";
-    else if(this->CorrKernel_ == VWN5)
-      output << "VWN5";
-    else if(this->CorrKernel_ == LYP)
-      output << "LYP";
-    output << endl;
+      output << std::setw(38) << std::left << "    Correlation Kernel:";
+      output << this->dftFunctionals_[1]->name;
+      output << endl;
+   }
 
    
     output << std::setw(38) << std::left << "    Radial Grid:";
@@ -415,6 +408,28 @@ void SingleSlater<T>::printSCFHeader(ostream &output){
 
 
   output << endl << bannerMid << endl;
+  output << std::setw(16) << "SCF Iteration";
+  output << std::setw(18) << "Energy (Eh)";
+  output << std::setw(18) << "\u0394E (Eh)";
+  if(this->Ref_ == TCS)
+    output << std::setw(18) << "|\u0394P|";
+  else {
+    output << std::setw(18) << "|\u0394P(\u03B1)|";
+    if(!this->isClosedShell)
+      output << std::setw(18) << "|\u0394P(\u03B2)|";
+  }
+  output << endl;
+  output << std::setw(16) << "-------------";
+  output << std::setw(18) << "-----------";
+  output << std::setw(18) << "-------";
+  if(this->Ref_ == TCS)
+    output << std::setw(18) << "----";
+  else {
+    output << std::setw(18) << "-------";
+    if(!this->isClosedShell)
+      output << std::setw(18) << "-------";
+  }
+  output << endl;
 }
 
 template<typename T>

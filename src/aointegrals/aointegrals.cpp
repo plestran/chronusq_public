@@ -73,23 +73,6 @@ static double factTLarge[21] = {
 270312149116754000.0
 };
 
-//---------------------
-// initialize AOIntegrals
-//---------------------
-void AOIntegrals::iniAOIntegrals(Molecule * molecule, BasisSet * basisset, 
-                                 FileIO * fileio, Controls * controls,
-                                 BasisSet * DFbasisSet)
-{
-  this->communicate(*molecule,*basisset,*fileio,*controls);
-  this->initMeta();
-
-  if(controls->doTCS) this->nTCS_ = 2;
-  if(this->controls_->buildn4eri) this->integralAlgorithm = INCORE;
-  if(this->controls_->doDF     ) this->integralAlgorithm = DENFIT;
-  this->alloc();
-
-};
-
 void AOIntegrals::generateFmTTable() {
   double intervalFmT = 0.025;
   double T = 0.0;
@@ -178,7 +161,7 @@ void AOIntegrals::iniQuartetConstants(ShellPair *ijShellPair, ShellPair *klShell
   for(k = 0; k < nPGTOs[2]; k++) 
   for(l = 0; l < nPGTOs[3]; l++) {
     Upq = ijShellPair->UAB[i][j] * klShellPair->UAB[k][l];
-    if(std::abs(Upq) > this->controls_->thresholdS) {
+    if(std::abs(Upq) > this->thresholdS_) {
       expo1 = ijShellPair->zeta[i][j];
       expo2 = klShellPair->zeta[k][l];
       expoT = expo1 + expo2;
@@ -203,7 +186,7 @@ void AOIntegrals::iniQuartetConstants(ShellPair *ijShellPair, ShellPair *klShell
         sqrPQ += PQ*PQ;
       };
       Upq = Upq / sqrt(expoT);
-      if(sqrPQ > this->controls_->thresholdAB) {
+      if(sqrPQ > this->thresholdAB_) {
 
         T = sqrPQ / (ijShellPair->invzeta[i][j] + klShellPair->invzeta[k][l]);
         this->computeFmTTaylor(FmT,T,totalL,0);
@@ -228,7 +211,7 @@ void AOIntegrals::iniPairConstants(ShellPair *ijShellPair){
   int i,j,k;
   double expo[MAXCONTRACTION][2];
   double center[3][2];
-  this->pairConstants_->intSmall = controls_->thresholdS;
+  this->pairConstants_->intSmall = this->thresholdS_;
   // compute one-center info 
   int totalL = ijShellPair->LTotal;
   for(i = 0; i < 2; i++) {
@@ -310,16 +293,20 @@ void AOIntegrals::iniMolecularConstants(){
 };
 
 void AOIntegrals::printTimings() {
-    this->fileio_->out << endl << "Timing Statistics: "<<endl << bannerTop << endl;
+    this->fileio_->out << endl << "Timing Statistics: "<<endl << bannerTop 
+      << endl;
     this->fileio_->out << endl << "One Electron Integral Timings" << endl 
                        << bannerMid << endl;
 
-    if(this->maxMultipole_ >= 3) {
+    if(this->maxMultipole_ >= 4) {
       this->fileio_->out << std::left << std::setw(60) 
-                         << "Wall time for Overlap + Dipole + Quadrupole + Octupole"; 
+            << "Wall time for Overlap + Dipole + Quadrupole + Octupole + RxP"; 
+    } else if(this->maxMultipole_ >= 3) {
+      this->fileio_->out << std::left << std::setw(60) 
+            << "Wall time for Overlap + Dipole + Quadrupole + Octupole"; 
     } else if(this->maxMultipole_ >= 2) {
       this->fileio_->out << std::left << std::setw(60) 
-                         << "Wall time for Overlap + Dipole + Quadrupole evaluation:"; 
+            << "Wall time for Overlap + Dipole + Quadrupole evaluation:"; 
     } else if(this->maxMultipole_ >= 1) {
       this->fileio_->out << std::left << std::setw(60) 
                          << "Wall time for Overlap + Dipole evaluation:"; 
@@ -327,55 +314,60 @@ void AOIntegrals::printTimings() {
       this->fileio_->out << std::left << std::setw(60) 
                          << "Wall time for Overlap evaluation:"; 
     }
-    this->fileio_->out << std::left << std::setw(15) << this->SED.count() << " sec" << endl;
+    this->fileio_->out << std::left << std::setw(15) 
+      << this->SED.count() << " sec" << endl;
 
-    if(this->maxMultipole_ >= 3) this->fileio_->out << std::left << "evaluation:" << endl;
-
-    this->fileio_->out << std::left << std::setw(60) << "Wall time for Kinetic evaluation:" 
-                       << std::left << std::setw(15) << this->TED.count() << " sec" << endl;
+    if(this->maxMultipole_ >= 3) this->fileio_->out << std::left 
+      << "evaluation:" << endl;
 
     this->fileio_->out << std::left << std::setw(60) 
-                       << "Wall time for Nuclear Attraction Potential evaluation:" 
-                       << std::left << std::setw(15) << this->VED.count() << " sec" << endl;
+      << "Wall time for Kinetic evaluation:" 
+      << std::left << std::setw(15) << this->TED.count() << " sec" << endl;
+
+    this->fileio_->out << std::left << std::setw(60) 
+      << "Wall time for Nuclear Attraction Potential evaluation:" 
+      << std::left << std::setw(15) << this->VED.count() << " sec" << endl;
 
     this->fileio_->out << std::left << std::setw(60) << " "
-                       << std::left << std::setw(15) << "---------------" << "----" << endl;
+      << std::left << std::setw(15) << "---------------" 
+      << "----" << endl;
 
     this->fileio_->out << std::left << std::setw(60) 
-                       << "Total wall time for one-electron integral evaluation:" 
-                       << std::left << std::setw(15) << this->OneED.count() << " sec" 
-                       << endl;
+      << "Total wall time for one-electron integral evaluation:" 
+      << std::left << std::setw(15) << this->OneED.count() << " sec" 
+      << endl;
     this->fileio_->out << endl << endl;
 
 
-    this->fileio_->out << "Two Electron Integral Timings" << endl << bannerMid << endl;
+    this->fileio_->out << "Two Electron Integral Timings" << endl << bannerMid 
+      << endl;
 
     this->fileio_->out << std::left << std::setw(60) 
-                       << "Wall time for Schwartz Bound evaluation:" 
-                       << std::left << std::setw(15) << this->SchwartzD.count() << " sec" 
-                       << endl;
+      << "Wall time for Schwartz Bound evaluation:" 
+      << std::left << std::setw(15) << this->SchwartzD.count() << " sec" 
+      << endl;
 
     this->fileio_->out << std::left << std::setw(60) 
-                       << "Wall time for Density Shell Block Norm evaluation:" 
-                       << std::left << std::setw(15) << this->DenShBlkD.count() << " sec" 
-                       << endl;
+      << "Wall time for Density Shell Block Norm evaluation:" 
+      << std::left << std::setw(15) << this->DenShBlkD.count() << " sec" 
+      << endl;
 
     this->fileio_->out << std::left << std::setw(60) 
-                       << "Wall time for Perturbation Tensor evaluation:" 
-                       << std::left << std::setw(15) << this->PTD.count() << " sec" << endl;
+      << "Wall time for Perturbation Tensor evaluation:" 
+      << std::left << std::setw(15) << this->PTD.count() << " sec" << endl;
       
     this->fileio_->out << bannerEnd << endl;
 }
 
 void AOIntegrals::printOneE(){
   std::vector<RealMap> mat;
-  int NB = this->nTCS_*this->nBasis_;
+  int NB = this->nBasis_;
   int NBSq = NB*NB;
 
   mat.push_back(RealMap(this->overlap_->data(),NB,NB));
   mat.push_back(RealMap(this->kinetic_->data(),NB,NB));
   mat.push_back(RealMap(this->potential_->data(),NB,NB));
-  mat.push_back(RealMap(this->oneE_->data(),NB,NB));
+  mat.push_back(RealMap(this->coreH_->data(),NB,NB));
   if(this->maxMultipole_ >= 1)
     for(auto i = 0, IOff=0; i < 3; i++,IOff+=NBSq)
       mat.push_back(RealMap(&this->elecDipole_->storage()[IOff],NB,NB));
@@ -385,10 +377,11 @@ void AOIntegrals::printOneE(){
   if(this->maxMultipole_ >= 3)
     for(auto i = 0, IOff=0; i < 10; i++,IOff+=NBSq)
       mat.push_back(RealMap(&this->elecOctpole_->storage()[IOff],NB,NB));
-  if(this->isPrimary && this->maxNumInt_ >=1) 
+  if(this->maxMultipole_ >= 4) 
     for(auto i = 0, IOff=0; i < 3; i++,IOff+=NBSq)
       mat.push_back(RealMap(&this->RcrossDel_->storage()[IOff],NB,NB));
   
+  /*
   if(this->nTCS_ == 2){
     prettyPrintTCS(this->fileio_->out,(mat[0]),"Overlap");
     if(this->maxMultipole_ >= 1){
@@ -416,17 +409,18 @@ void AOIntegrals::printOneE(){
       prettyPrintTCS(this->fileio_->out,(mat[21]),"Electric Octupole (yzz)");
       prettyPrintTCS(this->fileio_->out,(mat[22]),"Electric Octupole (zzz)");
     }
-/*
-    if(this->isPrimary && this->maxNumInt_ >=1){
+    if(this->maxMultipole_ >= 4){
       prettyPrintTCS(this->fileio_->out,(mat[23]),"R cross Del (x)");
       prettyPrintTCS(this->fileio_->out,(mat[24]),"R cross Del (y)");
       prettyPrintTCS(this->fileio_->out,(mat[25]),"R cross Del (z)");
     }
-*/
+
     prettyPrintTCS(this->fileio_->out,(mat[1]),"Kinetic");
     prettyPrintTCS(this->fileio_->out,(mat[2]),"Potential");
     prettyPrintTCS(this->fileio_->out,(mat[3]),"Core Hamiltonian");
   } else {
+  */
+
     prettyPrint(this->fileio_->out,(mat[0]),"Overlap");
     if(this->maxMultipole_ >= 1){
       prettyPrint(this->fileio_->out,(mat[4]),"Electric Dipole (x)");
@@ -453,7 +447,7 @@ void AOIntegrals::printOneE(){
       prettyPrint(this->fileio_->out,(mat[21]),"Electric Octupole (yzz)");
       prettyPrint(this->fileio_->out,(mat[22]),"Electric Octupole (zzz)");
     }
-    if(this->isPrimary && this->maxNumInt_ >=1){
+    if(this->maxMultipole_ >= 4){
       prettyPrint(this->fileio_->out,(mat[23]),"R cross Del (x)");
       prettyPrint(this->fileio_->out,(mat[24]),"R cross Del (y)");
       prettyPrint(this->fileio_->out,(mat[25]),"R cross Del (z)");
@@ -461,21 +455,28 @@ void AOIntegrals::printOneE(){
     prettyPrint(this->fileio_->out,(mat[1]),"Kinetic");
     prettyPrint(this->fileio_->out,(mat[2]),"Potential");
     prettyPrint(this->fileio_->out,(mat[3]),"Core Hamiltonian");
-  }
+//  }
 }
 
 void AOIntegrals::alloc(){
+  this->memManager_->setBlockSize(this->nBasis_*this->nBasis_*sizeof(double)); 
+  this->memManager_->allocMem();
+
   this->checkMeta();
   this->allocOp();
+  this->allocOrth();
+//  this->memManager_->printSummary(cout);
   if(getRank() == 0) {
     if(this->maxMultipole_ >= 1) this->allocMultipole();
  
     this->pairConstants_ = std::unique_ptr<PairConstants>(new PairConstants);
-    this->molecularConstants_ = std::unique_ptr<MolecularConstants>(new MolecularConstants);
-    this->quartetConstants_ = std::unique_ptr<QuartetConstants>(new QuartetConstants);
+    this->molecularConstants_ = 
+      std::unique_ptr<MolecularConstants>(new MolecularConstants);
+    this->quartetConstants_ = 
+      std::unique_ptr<QuartetConstants>(new QuartetConstants);
  
-    if(this->isPrimary) this->fileio_->iniStdOpFiles(this->nTCS_*this->basisSet_->nBasis());
-    if(this->isPrimary && this->maxNumInt_ >=1) this->allocNumInt();
+    if(this->isPrimary) 
+      this->fileio_->iniStdOpFiles(this->basisSet_->nBasis());
   }
 #ifdef CQ_ENABLE_MPI
   MPI_Barrier(MPI_COMM_WORLD);
@@ -500,22 +501,24 @@ void AOIntegrals::alloc(){
 }
 
 void AOIntegrals::allocOp(){
-  auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
   if(getRank() == 0) {
 #ifndef USE_LIBINT
     try {
       // Raffenetti Two Electron Coulomb AOIntegrals
-      this->twoEC_ = std::unique_ptr<RealMatrix>(new RealMatrix(this->nTT_,this->nTT_)); 
+      this->twoEC_ = std::unique_ptr<RealMatrix>(
+          new RealMatrix(this->nTT_,this->nTT_)); 
       // Raffenetti Two Electron Exchange AOIntegrals
-      this->twoEX_ = std::unique_ptr<RealMatrix>(new RealMatrix(this->nTT_,this->nTT_)); 
+      this->twoEX_ = std::unique_ptr<RealMatrix>(
+          new RealMatrix(this->nTT_,this->nTT_)); 
     } catch (...) {
-      CErr(std::current_exception(),"Coulomb and Exchange Tensor(R4) Allocation");
+      CErr(std::current_exception(),
+          "Coulomb and Exchange Tensor(R4) Allocation");
     }
 #else
     try {
       if(this->integralAlgorithm == INCORE){ // Allocate R4 ERI Tensor
         this->aoERI_ = std::unique_ptr<RealTensor4d>(
-          new RealTensor4d(NTCSxNBASIS,NTCSxNBASIS,NTCSxNBASIS,NTCSxNBASIS)); 
+          new RealTensor4d(this->nBasis_,this->nBasis_,this->nBasis_,this->nBasis_)); 
       }
     } catch (...) {
       CErr(std::current_exception(),"N^4 ERI Tensor Allocation");
@@ -524,47 +527,81 @@ void AOIntegrals::allocOp(){
     try {
  
       // One Electron Integral
-      this->oneE_      = std::unique_ptr<RealMatrix>(new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); 
+      auto NBSq = this->nBasis_ * this->nBasis_;
+      this->coreH_      = 
+        std::unique_ptr<RealMap>(
+            new RealMap(this->memManager_->malloc<double>(NBSq),this->nBasis_,this->nBasis_)
+        ); 
+      this->oneEmx_      = 
+        std::unique_ptr<RealMap>(
+            new RealMap(this->memManager_->malloc<double>(NBSq),this->nBasis_,this->nBasis_)
+        ); 
+      this->oneEmy_      = 
+        std::unique_ptr<RealMap>(
+            new RealMap(this->memManager_->malloc<double>(NBSq),this->nBasis_,this->nBasis_)
+        ); 
+      this->oneEmz_      = 
+        std::unique_ptr<RealMap>(
+            new RealMap(this->memManager_->malloc<double>(NBSq),this->nBasis_,this->nBasis_)
+        ); 
       // Overlap
-      this->overlap_   = std::unique_ptr<RealMatrix>(new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); 
+      this->overlap_   = 
+        std::unique_ptr<RealMap>(
+            new RealMap(this->memManager_->malloc<double>(NBSq),this->nBasis_,this->nBasis_)
+        ); 
       // Kinetic
-      this->kinetic_   = std::unique_ptr<RealMatrix>(new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); 
-      // Kinetic (p-space)
-      this->kineticP_  = std::unique_ptr<RealMatrix>(new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); 
+      this->kinetic_   = 
+        std::unique_ptr<RealMap>(
+            new RealMap(this->memManager_->malloc<double>(NBSq),this->nBasis_,this->nBasis_)
+        ); 
       // Potential
-      this->potential_ = std::unique_ptr<RealMatrix>(new RealMatrix(NTCSxNBASIS,NTCSxNBASIS)); 
+      this->potential_ = 
+        std::unique_ptr<RealMap>(
+            new RealMap(this->memManager_->malloc<double>(NBSq),this->nBasis_,this->nBasis_)
+        ); 
       // Angular momentum
       this->angular_   = std::unique_ptr<RealTensor3d>(
-        new RealTensor3d(NTCSxNBASIS,NTCSxNBASIS,3));
+        new RealTensor3d(this->nBasis_,this->nBasis_,3));
       this->SOCoupling_= std::unique_ptr<RealTensor3d>(
-        new RealTensor3d(NTCSxNBASIS,NTCSxNBASIS,3));
-      this->pVp_       = std::unique_ptr<RealMatrix>(new RealMatrix(NTCSxNBASIS,NTCSxNBASIS));
+        new RealTensor3d(this->nBasis_,this->nBasis_,3));
+      this->pVp_ = std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nBasis_));
       // pV dot p 
 
  
     } catch(...) {
       CErr(std::current_exception(),"One Electron Integral Tensor Allocation");
     }
+    this->coreH_->setZero();
+    this->oneEmx_->setZero();
+    this->oneEmy_->setZero();
+    this->oneEmz_->setZero();
+    this->overlap_->setZero();
+    this->kinetic_->setZero();
+    this->potential_->setZero();
   } // End serial allocation
 
 #ifdef USE_LIBINT
   try { 
-    this->schwartz_ = std::unique_ptr<RealMatrix>(
-      new RealMatrix(this->basisSet_->nShell(),this->basisSet_->nShell())); 
+    this->schwartz_ = std::unique_ptr<RealMap>(
+      new RealMap(this->memManager_->malloc<double>(
+          this->basisSet_->nShell()*this->basisSet_->nShell()),
+          this->basisSet_->nShell(),this->basisSet_->nShell())
+      ); 
   } catch(...) {
     CErr(std::current_exception(),"Schwartx Bound Tensor Allocation");
   } 
+  this->schwartz_->setZero();
 
   if(getRank() == 0) {
     if(this->integralAlgorithm == DENFIT){
  
       try { 
         this->aoRII_ = std::unique_ptr<RealTensor3d>(
-          new RealTensor3d(NTCSxNBASIS,NTCSxNBASIS,this->nTCS_*this->DFbasisSet_->nBasis())); 
+          new RealTensor3d(this->nBasis_,this->nBasis_,this->DFbasisSet_->nBasis())); 
  
         this->aoRIS_ = std::unique_ptr<RealTensor2d>(
           new RealTensor2d(
-            this->nTCS_*this->DFbasisSet_->nBasis(),this->nTCS_*this->DFbasisSet_->nBasis()
+            this->DFbasisSet_->nBasis(),this->DFbasisSet_->nBasis()
           )
         );
  
@@ -576,23 +613,39 @@ void AOIntegrals::allocOp(){
 #endif
 }
 
+void AOIntegrals::allocOrth() {
+  auto NBSq = this->nBasis_ * this->nBasis_;
+  this->ortho1_ = std::unique_ptr<RealMap>(
+      new RealMap(this->memManager_->malloc<double>(NBSq),
+        this->nBasis_,this->nBasis_));
+  this->ortho2_ = std::unique_ptr<RealMap>(
+      new RealMap(this->memManager_->malloc<double>(NBSq),
+        this->nBasis_,this->nBasis_));
+  this->ortho1_->setZero();
+  this->ortho2_->setZero();
+};
+
 void AOIntegrals::allocMultipole(){
-  auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
   try {
 
     if(this->maxMultipole_ >= 1)
       this->elecDipole_ = std::unique_ptr<RealTensor3d>(
-        new RealTensor3d(NTCSxNBASIS,NTCSxNBASIS,3)
+        new RealTensor3d(this->nBasis_,this->nBasis_,3)
       );
 
     if(this->maxMultipole_ >= 2)
       this->elecQuadpole_ = std::unique_ptr<RealTensor3d>(
-        new RealTensor3d(NTCSxNBASIS,NTCSxNBASIS,6)
+        new RealTensor3d(this->nBasis_,this->nBasis_,6)
       );
 
     if(this->maxMultipole_ >= 3)
       this->elecOctpole_ = std::unique_ptr<RealTensor3d>(
-        new RealTensor3d(NTCSxNBASIS,NTCSxNBASIS,10)
+        new RealTensor3d(this->nBasis_,this->nBasis_,10)
+      );
+
+    if(this->maxMultipole_ >= 4)
+      this->RcrossDel_ = std::unique_ptr<RealTensor3d>(
+        new RealTensor3d(this->nBasis_,this->nBasis_,3)
       );
 
   } catch(...) {
@@ -600,24 +653,11 @@ void AOIntegrals::allocMultipole(){
   }
 }
 
-void AOIntegrals::allocNumInt(){
-  auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
-  try {
-
-      this->RcrossDel_ = std::unique_ptr<RealTensor3d>(
-        new RealTensor3d(NTCSxNBASIS,NTCSxNBASIS,3)
-      );
-
-  } catch(...) {
-    CErr(std::current_exception(),"R cross Del Tensor Allocation");
-  }
-}
-
 void AOIntegrals::writeOneE(){
   this->fileio_->overlap->write(this->overlap_->data(),H5::PredType::NATIVE_DOUBLE);
   this->fileio_->kinetic->write(this->kinetic_->data(),H5::PredType::NATIVE_DOUBLE);
   this->fileio_->nucRepl->write(this->potential_->data(),H5::PredType::NATIVE_DOUBLE);
-  this->fileio_->coreHam->write(this->oneE_->data(),H5::PredType::NATIVE_DOUBLE);
+  this->fileio_->coreHam->write(this->coreH_->data(),H5::PredType::NATIVE_DOUBLE);
   // FIXME: This is buggy because we need to write to a slab of the data as opposed 
   // the the whole thing (hyperSlabs)
   /*

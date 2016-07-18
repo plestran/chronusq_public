@@ -56,11 +56,14 @@ template<typename T>
 void RealTime<T>::alloc(){
   this->checkMeta();
 
+//cout << "HERE" << endl;
   this->ssPropagator_	= std::unique_ptr<SingleSlater<dcomplex>>(
                             new SingleSlater<dcomplex>(
                               this->groundState_));
   this->ssPropagator_->isNotPrimary();
+//prettyPrintComplex(cout,*this->ssPropagator_->onePDMA(),"PA In RT Alloc1");
   if(getRank() == 0) this->initMem();
+//prettyPrintComplex(cout,*this->ssPropagator_->onePDMA(),"PA In RT Alloc2");
 }
 
 template<typename T>
@@ -139,36 +142,65 @@ void RealTime<T>::initMemLen(){
 
 template<typename T>
 void RealTime<T>::initMem(){
-  try{ this->SCR = new dcomplex[this->lenScr_]; } 
-  catch (...) { CErr(std::current_exception(),"RT Allocation"); }
-  dcomplex *LAST_OF_SECTION ;
-  int  LEN_LAST_OF_SECTION  ;
 
-  this->oTrans1Mem_ = this->SCR;
-  this->oTrans2Mem_ = this->oTrans1Mem_ + this->lenOTrans1_;
-  this->POAMem_     = this->oTrans2Mem_ + this->lenOTrans2_;
-  this->POAsavMem_  = this->POAMem_     + this->lenPOA_;
-  this->FOAMem_     = this->POAsavMem_  + this->lenPOAsav_;
-  this->initMOAMem_ = this->FOAMem_     + this->lenFOA_;
-  this->uTransAMem_ = this->initMOAMem_ + this->lenInitMOA_;
-  LAST_OF_SECTION      = this->uTransAMem_;
-  LEN_LAST_OF_SECTION  = this->lenUTransA_;
+  this->oTrans1Mem_ = 
+    this->memManager_->template malloc<dcomplex>(this->lenOTrans1_);
+  this->oTrans2Mem_ = 
+    this->memManager_->template malloc<dcomplex>(this->lenOTrans2_);
+  this->POAMem_     = 
+    this->memManager_->template malloc<dcomplex>(this->lenPOA_);
+  this->POAsavMem_  = 
+    this->memManager_->template malloc<dcomplex>(this->lenPOAsav_);
+  this->FOAMem_     = 
+    this->memManager_->template malloc<dcomplex>(this->lenFOA_);
+  this->initMOAMem_  = 
+    this->memManager_->template malloc<dcomplex>(this->lenInitMOA_);
+  this->uTransAMem_ = 
+    this->memManager_->template malloc<dcomplex>(this->lenUTransA_);
 
-  if(!this->isClosedShell_ && this->Ref_ != SingleSlater<T>::TCS){
-    this->POBMem_     = LAST_OF_SECTION   + LEN_LAST_OF_SECTION;
-    this->POBsavMem_  = this->POBMem_     + this->lenPOB_;
-    this->FOBMem_     = this->POBsavMem_  + this->lenPOBsav_;
-    this->initMOBMem_ = this->FOBMem_     + this->lenFOB_;
-    this->uTransBMem_ = this->initMOBMem_ + this->lenInitMOB_;
-    LAST_OF_SECTION      = this->uTransBMem_;
-    LEN_LAST_OF_SECTION  = this->lenUTransB_;
+  if(this->nTCS_ == 1 && !this->isClosedShell_){
+    this->POBMem_     = 
+      this->memManager_->template malloc<dcomplex>(this->lenPOB_);
+    this->POBsavMem_  = 
+      this->memManager_->template malloc<dcomplex>(this->lenPOBsav_);
+    this->FOBMem_     = 
+      this->memManager_->template malloc<dcomplex>(this->lenFOB_);
+    this->initMOBMem_  = 
+      this->memManager_->template malloc<dcomplex>(this->lenInitMOB_);
+    this->uTransBMem_ = 
+      this->memManager_->template malloc<dcomplex>(this->lenUTransB_);
   }
 
-  this->scratchMem_      = LAST_OF_SECTION       + LEN_LAST_OF_SECTION;
-  this->scratchMem2_ = this->scratchMem_     + this->lenScratch_;
-  this->CMPLX_LAPACK_SCR = this->scratchMem2_     + this->lenScratch2_;
+  this->scratchMem_  = 
+    this->memManager_->template malloc<dcomplex>(this->lenScratch_);
+  this->scratchMem2_ = 
+    this->memManager_->template malloc<dcomplex>(this->lenScratch2_);
 
-  this->REAL_LAPACK_SCR = new double[this->lenREAL_LAPACK_SCR];
+  this->CMPLX_LAPACK_SCR = 
+    this->memManager_->template malloc<dcomplex>(this->lenCMPLX_LAPACK_SCR);
+  this->REAL_LAPACK_SCR =
+    this->memManager_->template malloc<double>(this->lenREAL_LAPACK_SCR);
+
+  std::fill_n(this->oTrans1Mem_,this->lenOTrans1_, dcomplex(0.0,0.0));
+  std::fill_n(this->oTrans2Mem_,this->lenOTrans2_, dcomplex(0.0,0.0));
+  std::fill_n(this->POAMem_    ,this->lenPOA_,     dcomplex(0.0,0.0));
+  std::fill_n(this->POAsavMem_ ,this->lenPOAsav_,  dcomplex(0.0,0.0));
+  std::fill_n(this->FOAMem_    ,this->lenFOA_,     dcomplex(0.0,0.0));
+  std::fill_n(this->initMOAMem_,this->lenInitMOA_, dcomplex(0.0,0.0));
+  std::fill_n(this->uTransAMem_,this->lenUTransA_, dcomplex(0.0,0.0));
+  if(this->nTCS_ == 1 && !this->isClosedShell_){
+    std::fill_n(this->POBMem_    , this->lenPOB_,     dcomplex(0.0,0.0));
+    std::fill_n(this->POBsavMem_ , this->lenPOBsav_,  dcomplex(0.0,0.0));
+    std::fill_n(this->FOBMem_    , this->lenFOB_,     dcomplex(0.0,0.0));
+    std::fill_n(this->initMOBMem_, this->lenInitMOB_, dcomplex(0.0,0.0));
+    std::fill_n(this->uTransBMem_, this->lenUTransB_, dcomplex(0.0,0.0));
+  }
+  std::fill_n(this->scratchMem_ , this->lenScratch_,  dcomplex(0.0,0.0));
+  std::fill_n(this->scratchMem2_, this->lenScratch2_, dcomplex(0.0,0.0));
+
+  std::fill_n(this->CMPLX_LAPACK_SCR,this->lenCMPLX_LAPACK_SCR,
+      dcomplex(0.0,0.0));
+  std::fill_n(this->REAL_LAPACK_SCR ,this->lenREAL_LAPACK_SCR,0.0);
 }
 
 template<typename T>
@@ -206,3 +238,28 @@ void RealTime<T>::initCSV(){
       this->fileio_->fileName() + "_RealTime_OrbOcc_Beta.csv";
   }
 };
+
+template<typename T>
+void RealTime<T>::cleanup() {
+  this->memManager_->free(this->oTrans1Mem_ , this->lenOTrans1_);
+  this->memManager_->free(this->oTrans2Mem_ , this->lenOTrans2_);
+  this->memManager_->free(this->POAMem_     , this->lenPOA_);
+  this->memManager_->free(this->POAsavMem_  , this->lenPOAsav_);
+  this->memManager_->free(this->FOAMem_     , this->lenFOA_);
+  this->memManager_->free(this->initMOAMem_  , this->lenInitMOA_);
+  this->memManager_->free(this->uTransAMem_ , this->lenUTransA_);
+  if(this->nTCS_ == 1 && !this->isClosedShell_){
+    this->memManager_->free(this->POBMem_     , this->lenPOB_);
+    this->memManager_->free(this->POBsavMem_  , this->lenPOBsav_);
+    this->memManager_->free(this->FOBMem_     , this->lenFOB_);
+    this->memManager_->free(this->initMOBMem_  , this->lenInitMOB_);
+    this->memManager_->free(this->uTransBMem_ , this->lenUTransB_);
+  }
+  this->memManager_->free(this->scratchMem_  , this->lenScratch_);
+  this->memManager_->free(this->scratchMem2_ , this->lenScratch2_);
+
+  this->memManager_->free(this->CMPLX_LAPACK_SCR,this->lenCMPLX_LAPACK_SCR);
+  this->memManager_->free(this->REAL_LAPACK_SCR,this->lenREAL_LAPACK_SCR);
+
+  if(this->tarCSVs) this->tarCSVFiles();
+}

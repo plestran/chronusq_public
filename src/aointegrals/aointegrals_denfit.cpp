@@ -42,8 +42,8 @@ void AOIntegrals::computeAORII(){
   engines[0].set_precision(std::numeric_limits<double>::epsilon());
 
   for(int i=1; i<nthreads; i++) engines[i] = engines[0];
-  if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(1); 
-  if(!this->DFbasisSet_->haveMapSh2Bf) this->DFbasisSet_->makeMapSh2Bf(1); 
+  if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(); 
+  if(!this->DFbasisSet_->haveMapSh2Bf) this->DFbasisSet_->makeMapSh2Bf(); 
 
 #ifdef _OPENMP
   #pragma omp parallel
@@ -67,7 +67,7 @@ void AOIntegrals::computeAORII(){
 
         // Schwartz and Density screening
         if((*this->schwartz_)(s1,s2) * (*this->aoRIS_)(dfs,dfs)
-            < this->controls_->thresholdSchawrtz ) continue;
+            < this->thresholdSchwartz_ ) continue;
  
         const double* buff = engines[thread_id].compute(
           this->basisSet_->shells(s1),
@@ -101,7 +101,7 @@ void AOIntegrals::computeAORIS(){
   engines[0].set_precision(std::numeric_limits<double>::epsilon());
 
   for(int i=1; i<nthreads; i++) engines[i] = engines[0];
-  if(!this->DFbasisSet_->haveMapSh2Bf) this->DFbasisSet_->makeMapSh2Bf(1); 
+  if(!this->DFbasisSet_->haveMapSh2Bf) this->DFbasisSet_->makeMapSh2Bf(); 
 
   RealMap aoRISMap(&this->aoRIS_->storage()[0],
     this->DFbasisSet_->nBasis(),this->DFbasisSet_->nBasis());

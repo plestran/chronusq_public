@@ -47,6 +47,7 @@ class Molecule {
   std::unique_ptr<VectorXd>  COM_;         // center of mass coordinate or center of nuclear charges 
   std::unique_ptr<RealMatrix>  momentOfInertia_; // Moment of inertia
   std::unique_ptr<RealMatrix>  rIJ_;             // Interatomic distance matrix
+  std::vector<libint2::Shell>  finiteWidthNuclei_;
 
   // Misc options
   int                          printLevel_;  // Level of print
@@ -94,6 +95,7 @@ public:
   void computeRij();
   void computeNucRep();
   void printInfo(std::ostream & out=cout );
+  void generateFiniteWidthNuclei();
   inline void convBohr(){ (*this->cart_) /= phys.bohr; }
 
   // Python API
@@ -103,6 +105,7 @@ public:
 
   // Reference Access
   inline int& index(int i) { return this->index_[i];};
+  inline int  atomicZ(int i) { return elements[index_[i]].atomicNumber;};
 
   // Getters
   inline int nAtoms() {return this->nAtoms_;};
@@ -115,6 +118,22 @@ public:
 
   inline RealMatrix* cart() {return this->cart_.get();}
   inline RealMatrix* rIJ() {return this->rIJ_.get();}
+  inline VectorXd*   COM() {return this->COM_.get();}
+  inline std::vector<std::array<double,3>> cartArray() {
+    std::vector<std::array<double,3>> atomicCenters;
+ 
+    for(auto iAtm = 0; iAtm < this->nAtoms(); iAtm++){
+      atomicCenters.push_back(
+          {(*this->cart())(0,iAtm),
+           (*this->cart())(1,iAtm),
+           (*this->cart())(2,iAtm)}
+      );
+    };
+
+    return atomicCenters;
+  };
+
+  inline libint2::Shell& nucShell(int i){ return this->finiteWidthNuclei_[i];};
 
   // Setters
   inline void setCharge(int i) {this->charge_ = i; this->nTotalE_ -= i;};

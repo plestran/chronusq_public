@@ -51,6 +51,7 @@ namespace ChronusQ {
   template<typename T>
   class NumericalDifferentiation {
     typedef Eigen::Matrix<T,Dynamic,Dynamic,ColMajor> TMatrix;
+    typedef Eigen::Map<TMatrix> TMap;
 
     DiffType          diffType_;
     Molecule        * molecule_undisplaced_;
@@ -71,6 +72,13 @@ namespace ChronusQ {
     void checkPhase(Response<T>&,Response<T>&);
     void checkPhase(TMatrix&, TMatrix&);
     void checkPhase(TMatrix&, TMatrix&, TMatrix&);
+    void checkPhase(TMap&, TMap&, TMatrix&);
+    /*
+    template<typename Op1, typename Op2, typename Mat>
+    void checkPhase(Op1&,Op2&,Mat&);
+    template<typename Op1, typename Op2>
+    void checkPhase(Op1&,Op2&);
+    */
 
     void checkDegeneracies(SingleSlater<T>&);
 
@@ -182,7 +190,59 @@ namespace ChronusQ {
           SAO_0_m1,SMO_0_p1,SMO_0_m1);
     }
 
+    void dumpSummary();
 
   }; // class NumericalDifferentiation
   #include <numdiff/numdiff_procedural.h>
+
+  /*
+  template<>
+  template<typename Op1, typename Op2>
+  void NumericalDifferentiation<double>::checkPhase(Op1 &A, Op2 &B){
+
+    if(A.cols() != B.cols() || A.rows() != B.rows())
+      CErr("Phase Checking only works with matricies of the same dimension",
+      this->singleSlater_undisplaced_->fileio()->out);
+
+    for(auto j = 0; j < A.cols(); j++){
+      int sgn1(1), sgn2(1);
+      for(auto i = 0; i < A.rows(); i++){
+        if(std::abs(A(i,j)) > 1e-8) {
+          if(std::abs(B(i,j)) < 1e-8) continue;
+          else { // check B
+            sgn1 = A(i,j) / std::abs(A(i,j));
+            sgn2 = B(i,j) / std::abs(B(i,j));
+            break;
+          } // get signs
+        } // check A
+      } // loop i
+      if(sgn1 != sgn2) 
+        B.col(j) *= -1.0;
+    } // loop j
+  };
+
+  template<>
+  template<typename Op1, typename Op2, typename Mat>
+  void NumericalDifferentiation<double>::checkPhase(Op1 &M1,Op2 &M2, 
+      Mat &Inner_1_2){
+  
+    double tol = 1e-1;
+    RealMatrix O_1_2(Inner_1_2);
+  
+    for(auto I = 0; I < Inner_1_2.rows(); I++)
+    for(auto J = 0; J < Inner_1_2.cols(); J++){
+      if(std::abs(O_1_2(I,J)) < tol) O_1_2(I,J) = 0.0;
+      else if(O_1_2(I,J) > 0.0)      O_1_2(I,J) = 1.0;
+      else                           O_1_2(I,J) = -1.0;
+    }
+
+    for(auto I = 0; I < Inner_1_2.rows(); I++)
+    for(auto J = 0; J < Inner_1_2.cols(); J++){
+      if(I != J && O_1_2(I,J) != 0.0) O_1_2(I,J) = 0.0;
+    }
+  
+    RealMatrix TMP = M2 * O_1_2;
+    M2 = TMP;
+  };
+  */
 }; // namespace ChronusQ

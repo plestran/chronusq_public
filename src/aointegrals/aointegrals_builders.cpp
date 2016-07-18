@@ -28,8 +28,9 @@ using ChronusQ::AOIntegrals;
 
 void AOIntegrals::OneEDriver(libint2::Operator iType) {
   std::vector<RealMap> mat;
-  int NB = this->nTCS_*this->nBasis_;
+  int NB = this->nBasis_;
   int NBSq = NB*NB;
+
   if(iType == libint2::Operator::overlap){
     mat.push_back(RealMap(this->overlap_->data(),NB,NB));
   } else if(iType == libint2::Operator::kinetic) {
@@ -89,7 +90,7 @@ void AOIntegrals::OneEDriver(libint2::Operator iType) {
   }
   for(size_t i = 1; i < nthreads; i++) engines[i] = engines[0];
 
-  if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(this->nTCS_); 
+  if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(); 
 #ifdef _OPENMP
   #pragma omp parallel
 #endif
@@ -114,16 +115,15 @@ void AOIntegrals::OneEDriver(libint2::Operator iType) {
 
         int IOff = 0;
         for(auto nMat = 0; nMat < mat.size(); nMat++) {
-//        ConstRealMap bufMat(&buff[IOff],n1,n2); // Read only map
           Eigen::Map<
             const Eigen::Matrix<double,Dynamic,Dynamic,Eigen::RowMajor>>
             bufMat(&buff[IOff],n1,n2);
 
-          for(auto i = 0, bf1 = bf1_s; i < n1; i++, bf1 += this->nTCS_) 
-          for(auto j = 0, bf2 = bf2_s; j < n2; j++, bf2 += this->nTCS_){            
-            mat[nMat](bf1,bf2) = bufMat(i,j);
-            if(this->nTCS_ == 2) mat[nMat](bf1+1,bf2+1) = bufMat(i,j);
-          }
+          mat[nMat].block(bf1_s,bf2_s,n1,n2) = bufMat;
+//        for(auto i = 0, bf1 = bf1_s; i < n1; i++, bf1++) 
+//        for(auto j = 0, bf2 = bf2_s; j < n2; j++, bf2++){            
+//          mat[nMat](bf1,bf2) = bufMat(i,j);
+//        }
           IOff += n1*n2;
         }
       }
@@ -219,11 +219,10 @@ void AOIntegrals::computeAORcrossDel(){
   LebedevGrid GridLeb(nAngDFTGridPts_);   // Angular Grid
   Rad = new  EulerMaclaurinGrid(nRadDFTGridPts_,0.0,1.0);   
   GridLeb.genGrid();                            
-  auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
-  auto NBSQ = NTCSxNBASIS*NTCSxNBASIS;
-  RealMap rdotpX(&this->RcrossDel_->storage()[0],NTCSxNBASIS,NTCSxNBASIS);
-  RealMap rdotpY(&this->RcrossDel_->storage()[NBSQ],NTCSxNBASIS,NTCSxNBASIS);
-  RealMap rdotpZ(&this->RcrossDel_->storage()[2*NBSQ],NTCSxNBASIS,NTCSxNBASIS);
+  auto NBSQ = this->nBasis_*this->nBasis_;
+  RealMap rdotpX(&this->RcrossDel_->storage()[0],this->nBasis_,this->nBasis_);
+  RealMap rdotpY(&this->RcrossDel_->storage()[NBSQ],this->nBasis_,this->nBasis_);
+  RealMap rdotpZ(&this->RcrossDel_->storage()[2*NBSQ],this->nBasis_,this->nBasis_);
 
   std::vector<RealSparseMatrix>  sparsedmudX_; ///< basis derivative (x) (NbasisxNbasis)
   std::vector<RealSparseMatrix>  sparsedmudY_; ///< basis derivative (y) (NbasisxNbasis)
@@ -232,13 +231,13 @@ void AOIntegrals::computeAORcrossDel(){
   std::vector<RealSparseMatrix> sparseWeights_; // Weights Map
   std::vector<RealSparseMatrix> sparseDoRho_; // Evaluate density Map
   for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
-    sparseMap_.push_back(RealSparseMatrix(this->nTCS_*this->nBasis_,ngpts));
+    sparseMap_.push_back(RealSparseMatrix(this->nBasis_,ngpts));
     sparseWeights_.push_back(RealSparseMatrix(ngpts,1));
     sparseDoRho_.push_back(RealSparseMatrix(ngpts,1));
 //  Derivative
-    sparsedmudX_.push_back(RealSparseMatrix(this->nTCS_*this->nBasis_,ngpts));
-    sparsedmudY_.push_back(RealSparseMatrix(this->nTCS_*this->nBasis_,ngpts));
-    sparsedmudZ_.push_back(RealSparseMatrix(this->nTCS_*this->nBasis_,ngpts));
+    sparsedmudX_.push_back(RealSparseMatrix(this->nBasis_,ngpts));
+    sparsedmudY_.push_back(RealSparseMatrix(this->nBasis_,ngpts));
+    sparsedmudZ_.push_back(RealSparseMatrix(this->nBasis_,ngpts));
 //  Mapping over iAtom
     RealSparseMatrix *Map        = &sparseMap_[iAtm];
     RealSparseMatrix *WeightsMap = &sparseWeights_[iAtm];
@@ -254,9 +253,11 @@ void AOIntegrals::computeAORcrossDel(){
       (*this->molecule_->cart())(1,iAtm),
       (*this->molecule_->cart())(2,iAtm)
     );
+    std::vector<bool> mapRad_(this->basisSet_->nShell()+1);
     for (auto ipts =0; ipts < ngpts; ipts++){
       cartGP pt = Raw3Dg.gridPtCart(ipts); 
-      auto mapRad_ = this->basisSet_->MapGridBasis(pt);
+//    auto mapRad_ = this->basisSet_->MapGridBasis(pt);
+      this->basisSet_->MapGridBasis(mapRad_,pt);
       // Evaluate each Becke fuzzy call weight, normalize it and muliply by 
       //   the Raw grid weight at that point
       auto bweight = (this->formBeckeW(pt,iAtm)) 
@@ -337,7 +338,7 @@ void AOIntegrals::computeAOOneE(){
   BasisSet newBasis;
   newBasis.communicate(*this->fileio_);
   this->basisSet_->genUCvomLocal(&newBasis);
-  newBasis.makeMaps(this->nTCS_,this->molecule_);
+  newBasis.makeMaps(this->molecule_);
   if(this->isPrimary) {
     cout << "Old Basis" << endl;
     for(auto i = 0 ; i < this->basisSet_->nShell(); i++)
@@ -377,12 +378,15 @@ void AOIntegrals::computeAOOneE(){
 
   // Compute and time overlap integrals
   auto OStart = std::chrono::high_resolution_clock::now();
-  if(this->maxMultipole_ ==3) OneEDriver(libint2::Operator::emultipole3);
+  if(this->maxMultipole_ >= 3)      OneEDriver(libint2::Operator::emultipole3);
   else if(this->maxMultipole_ == 2) OneEDriver(libint2::Operator::emultipole2);
   else if(this->maxMultipole_ == 1) OneEDriver(libint2::Operator::emultipole1);
   else OneEDriver(libint2::Operator::overlap);
+  if(this->maxMultipole_ == 4) this->computeAORcrossDel();
   auto OEnd = std::chrono::high_resolution_clock::now();
-  if(this->isPrimary && this->maxNumInt_ >=1) computeAORcrossDel();
+
+
+
   // Compute and time kinetic integrals
   auto TStart = std::chrono::high_resolution_clock::now();
   OneEDriver(libint2::Operator::kinetic);
@@ -390,7 +394,12 @@ void AOIntegrals::computeAOOneE(){
 
   // Compute and time nuclear attraction integrals (negative sign is factored in)
   auto VStart = std::chrono::high_resolution_clock::now();
-  OneEDriver(libint2::Operator::nuclear);
+
+  if(this->isPrimary && this->useFiniteWidthNuclei) 
+    this->finiteWidthPotential();
+  else                
+    OneEDriver(libint2::Operator::nuclear);
+
   auto VEnd = std::chrono::high_resolution_clock::now();
 
 //xslis
@@ -406,11 +415,28 @@ void AOIntegrals::computeAOOneE(){
 //  if (this->isPrimary) this->DKH0();
 
 // Build Core Hamiltonian
-  (*this->oneE_) = (*this->kinetic_) + (*this->potential_);
+  (*this->coreH_) = (*this->kinetic_) + (*this->potential_);
+
+  prettyPrint(this->fileio_->out,*this->kinetic_,"T");
+  prettyPrint(this->fileio_->out,*this->potential_,"V");
 
   // Get end time of one-electron integral evaluation
   auto oneEEnd = std::chrono::high_resolution_clock::now();
-  if(this->controls_->printLevel >= 0) this->printOneE();
+
+  // Compute Orthonormal transformation matricies
+  this->computeOrtho();
+
+ // -------------------------------
+ // This is the X2C transformation!
+ // -------------------------------
+  if (this->doX2C && this->isPrimary) {
+  //    printf("\n now going into X2C transformation \n");
+      this->formP2Transformation();
+	}
+  else {
+  //    printf("not doing X2C \n");
+	}
+  if(this->printLevel_ >= 2) this->printOneE();
 
   // Compute time differenes
   this->OneED = oneEEnd - oneEStart;
@@ -420,6 +446,14 @@ void AOIntegrals::computeAOOneE(){
   this->haveAOOneE = true;
   this->breakUpMultipole();
   if(this->isPrimary) this->writeOneE();
+  /*
+  if(this->isPrimary) {
+    for(auto ix = 0, ioff = 0; ix < 3; ix++, ioff += this->nBasis_*this->nBasis_){
+      RealMap A(&this->RcrossDel_->storage()[ioff],this->nBasis_,this->nBasis_);
+      prettyPrint(cout,A,"R:"+std::to_string(ix));
+    }
+  }
+  */
 }
 
 void AOIntegrals::computeSchwartz(){
@@ -487,7 +521,7 @@ void AOIntegrals::computeAOTwoE(){
   engines[0].set_precision(std::numeric_limits<double>::epsilon());
 
   for(int i=1; i<nthreads; i++) engines[i] = engines[0];
-  if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(this->nTCS_); 
+  if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(); 
 
   this->aoERI_->fill(0.0);
 
@@ -519,7 +553,7 @@ void AOIntegrals::computeAOTwoE(){
     
           // Schwartz and Density screening
           if((*this->schwartz_)(s1,s2) * (*this->schwartz_)(s3,s4)
-              < this->controls_->thresholdSchawrtz ) continue;
+              < this->thresholdSchwartz_ ) continue;
  
           const double* buff = engines[thread_id].compute(
             this->basisSet_->shells(s1),
@@ -530,10 +564,10 @@ void AOIntegrals::computeAOTwoE(){
 
           std::vector<std::array<int,4>> lower;
           std::vector<std::array<int,4>> upper;
-          for(int i = 0, bf1 = bf1_s, ijkl = 0 ; i < n1; ++i, bf1 += this->nTCS_) 
-          for(int j = 0, bf2 = bf2_s           ; j < n2; ++j, bf2 += this->nTCS_) 
-          for(int k = 0, bf3 = bf3_s           ; k < n3; ++k, bf3 += this->nTCS_) 
-          for(int l = 0, bf4 = bf4_s           ; l < n4; ++l, bf4 += this->nTCS_, ++ijkl) {
+          for(int i = 0, bf1 = bf1_s, ijkl = 0 ; i < n1; ++i, bf1++) 
+          for(int j = 0, bf2 = bf2_s           ; j < n2; ++j, bf2++) 
+          for(int k = 0, bf3 = bf3_s           ; k < n3; ++k, bf3++) 
+          for(int l = 0, bf4 = bf4_s           ; l < n4; ++l, bf4++, ++ijkl) {
             (*this->aoERI_)(bf1,bf2,bf3,bf4) = buff[ijkl];
             (*this->aoERI_)(bf1,bf2,bf4,bf3) = buff[ijkl];
             (*this->aoERI_)(bf2,bf1,bf3,bf4) = buff[ijkl];
@@ -542,6 +576,7 @@ void AOIntegrals::computeAOTwoE(){
             (*this->aoERI_)(bf4,bf3,bf1,bf2) = buff[ijkl];
             (*this->aoERI_)(bf3,bf4,bf2,bf1) = buff[ijkl];
             (*this->aoERI_)(bf4,bf3,bf2,bf1) = buff[ijkl];
+            /*
             if(this->nTCS_ == 2){
               (*this->aoERI_)(bf1+1,bf2+1,bf3+1,bf4+1) = buff[ijkl];
               (*this->aoERI_)(bf1+1,bf2+1,bf4+1,bf3+1) = buff[ijkl];
@@ -570,6 +605,7 @@ void AOIntegrals::computeAOTwoE(){
               (*this->aoERI_)(bf3,bf4,bf2+1,bf1+1)     = buff[ijkl];
               (*this->aoERI_)(bf4,bf3,bf2+1,bf1+1)     = buff[ijkl];
             }
+            */
 	  }
 
 	}
@@ -591,7 +627,7 @@ void AOIntegrals::computeAOTwoE(){
 
 
 void AOIntegrals::breakUpMultipole(){
-  int NB = this->nTCS_*this->nBasis_;
+  int NB = this->nBasis_;
   this->elecDipoleSep_.clear();
   this->elecQuadpoleSep_.clear();
   this->elecOctpoleSep_.clear();
@@ -613,4 +649,110 @@ void AOIntegrals::breakUpMultipole(){
       this->elecOctpoleSep_.emplace_back(
         ConstRealMap(&this->elecOctpole_->storage()[iBuf],NB,NB)
       );
+  if(this->maxMultipole_ >= 4)
+    for(int ixyz = 0, iBuf = 0; ixyz < 3; ++ixyz, iBuf += NB*NB)
+      this->orbitalDipoleSep_.emplace_back(
+        ConstRealMap(&this->RcrossDel_->storage()[iBuf],NB,NB)
+      );
+};
+
+void AOIntegrals::finiteWidthPotential() {
+#ifdef _OPENMP
+  int nthreads = omp_get_max_threads();
+#else
+  int nthreads = 1;
+#endif
+
+  this->molecule_->generateFiniteWidthNuclei();
+  this->potential_->setZero();
+
+  // Define integral Engine
+  std::vector<libint2::Engine> engines(nthreads);
+  engines[0] = libint2::Engine(libint2::Operator::coulomb,
+      this->basisSet_->maxPrim(), this->basisSet_->maxL(),0);
+  engines[0].set_precision(0.0);
+
+  for(size_t i = 1; i < nthreads; i++) engines[i] = engines[0];
+
+  if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(); 
+#ifdef _OPENMP
+  #pragma omp parallel
+#endif
+  {
+#ifdef _OPENMP
+    int thread_id = omp_get_thread_num();
+#else
+    int thread_id = 0;
+#endif
+    for(auto s1=0l, s12=0l; s1 < this->basisSet_->nShell(); s1++){
+      int bf1_s = this->basisSet_->mapSh2Bf(s1);
+      int n1  = this->basisSet_->shells(s1).size();
+      for(int s2=0; s2 <= s1; s2++, s12++){
+        if(s12 % nthreads != thread_id) continue;
+        int bf2_s = this->basisSet_->mapSh2Bf(s2);
+        int n2  = this->basisSet_->shells(s2).size();
+  
+        for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
+          const double* buff = engines[thread_id].compute(
+            this->basisSet_->shells(s1),
+            this->basisSet_->shells(s2),
+            this->molecule_->nucShell(iAtm),
+            libint2::Shell::unit()
+          );
+
+          Eigen::Map<
+            const Eigen::Matrix<double,Dynamic,Dynamic,Eigen::RowMajor>>
+            bufMat(buff,n1,n2);
+
+          this->potential_->block(bf1_s,bf2_s,n1,n2) -= bufMat;
+          /*
+          for(auto i = 0, bf1 = bf1_s; i < n1; i++, bf1 += this->nTCS_) 
+          for(auto j = 0, bf2 = bf2_s; j < n2; j++, bf2 += this->nTCS_){            
+            (*this->potential_)(bf1,bf2) -= bufMat(i,j);
+            if(this->nTCS_ == 2) 
+              (*this->potential_)(bf1+1,bf2+1) -= bufMat(i,j);
+          }
+          */
+
+        }
+      }
+    }
+  } // end openmp parallel
+
+  (*this->potential_) = this->potential_->selfadjointView<Lower>();
+};
+
+void AOIntegrals::computeLowdin() {
+  char JOBZ = 'V';
+  char UPLO = 'L';
+  int INFO;
+
+  int LWORK = 3 * this->nBasis_;
+  std::vector<double> ovlpEigValues(this->nBasis_);
+  std::vector<double> ovlpEigVectrs(this->nBasis_ * this->nBasis_);
+  std::vector<double> ovlpCpy(this->nBasis_ * this->nBasis_);
+  std::vector<double> WORK(LWORK);
+
+  std::memcpy(&ovlpEigVectrs[0],this->overlap_->data(),
+      this->nBasis_*this->nBasis_*sizeof(double));
+
+  dsyev_(&JOBZ,&UPLO,&this->nBasis_,&ovlpEigVectrs[0],&this->nBasis_,
+      &ovlpEigValues[0],&WORK[0],&LWORK,&INFO);
+
+  std::memcpy(&ovlpCpy[0],&ovlpEigVectrs[0],
+      this->nBasis_*this->nBasis_*sizeof(double));
+
+  RealMap S(&ovlpCpy[0],      this->nBasis_,this->nBasis_);
+  RealMap V(&ovlpEigVectrs[0],this->nBasis_,this->nBasis_);
+
+  for(auto i = 0; i < this->nBasis_; i++)
+    S.col(i) /= std::sqrt(ovlpEigValues[i]);
+
+  (*this->ortho1_) = S * V.transpose();
+
+  for(auto i = 0; i < this->nBasis_; i++)
+    S.col(i) *= ovlpEigValues[i];
+
+  (*this->ortho2_) = S * V.transpose();
+//prettyPrint(cout,(*this->ortho1_),"XN");
 };

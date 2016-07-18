@@ -27,7 +27,6 @@
 using ChronusQ::AOIntegrals;
 using ChronusQ::Molecule;
 using ChronusQ::BasisSet;
-using ChronusQ::Controls;
 using ChronusQ::FileIO;
 using ChronusQ::MOIntegrals;
 namespace ChronusQ{
