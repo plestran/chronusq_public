@@ -42,6 +42,7 @@ void AOIntegrals::formP2Transformation(){
 if(this->printLevel_ >= 2){
   RealMatrix TCpy(*this->kinetic_);
   prettyPrint(this->fileio_->out,TCpy,"T (non-rel)");
+  prettyPrint(this->fileio_->out,*this->overlap_,"overlap (non-rel)");
 }
 
   libint2::Engine engineS(
@@ -472,7 +473,7 @@ cout << "|H|" << CORE_HAMILTONIAN.squaredNorm();
   P2_PotC.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).real() = P2_Potential;
 
 if(this->printLevel_ >= 2){
-  prettyPrint(this->fileio_->out,P2_PotC,"V prime (p space)");
+  prettyPrintComplex(this->fileio_->out,P2_PotC,"V prime (p space)");
 }
 
 // Calculate the 2-component core Hamiltonian in the uncontracted basis
@@ -618,7 +619,7 @@ if(this->printLevel_ >= 2) {
   prettyPrint(this->fileio_->out,CoreY,"Core (my)");
 
 
-  ComplexMatrix TCSham(2*nBasis_,2*nBasis_);;
+  ComplexMatrix TCSham(2*nBasis_,2*nBasis_);
 
 /*
   std::vector<std::reference_wrapper<RealMatrix>> mats;
@@ -638,10 +639,25 @@ if(this->printLevel_ >= 2) {
   TCSham.block(nBasis_,0,nBasis_,nBasis_).imag() = CoreX;
   TCSham.block(0,nBasis_,nBasis_,nBasis_).real() = CoreY;
   TCSham.block(nBasis_,0,nBasis_,nBasis_).real() = -1*CoreY;
-  
-
+ 
   prettyPrint(this->fileio_->out,TCSham.real(),"Two component Hamiltonian (real)");
   prettyPrint(this->fileio_->out,TCSham.imag(),"Two component Hamiltonian (imag)");
+
+
+  // put spin as fastest running index
+  ComplexMatrix SpinHam(2*nBasis_,2*nBasis_);
+
+  for (auto row = 0; row < nBasis_; row++){
+    for (auto col = 0; col < nBasis_; col++){
+        SpinHam(2*row,2*col) = TCSham(row,col);
+        SpinHam(2*row,2*col+1) = TCSham(row,col+nBasis_);
+        SpinHam(2*row+1,2*col) = TCSham(row+nBasis_,col);
+        SpinHam(2*row+1,2*col+1) = TCSham(row+nBasis_,col+nBasis_);
+        }
+    }
+  
+  prettyPrint(this->fileio_->out,SpinHam.real(),"Spin-Blocked 2c-Hamiltonian (real)");
+  prettyPrint(this->fileio_->out,SpinHam.imag(),"Spin-Blocked 2c-Hamiltonian (imag)");
 
   es.compute(TCSham);
   HEV= es.eigenvalues();
