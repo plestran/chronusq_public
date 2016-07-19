@@ -128,7 +128,7 @@ void BasisSet::makeMapPrim2Bf(){
       memAddress[(iP*nBf + iBf)*this->nBasis_ + iBf] = this->unNormCons_[iSh][iP];
       }
     memAddress += this->nBasis_ * (nPrim * nBf) + nBf;
-    prettyPrint(cout,*this->mapPrim2Bf_,"MAP");
+//    prettyPrint(cout,*this->mapPrim2Bf_,"MAP");
   }
 /*
 for(auto iSh = 0, iBf = 0, iPrim = 0;
@@ -146,7 +146,7 @@ for(auto iSh = 0, iBf = 0, iPrim = 0;
     }
   }
   */
-  prettyPrint(cout,*this->mapPrim2Bf_,"MAP");
+//  prettyPrint(cout,*this->mapPrim2Bf_,"MAP");
 };
 
 }; // namespace ChronusQ

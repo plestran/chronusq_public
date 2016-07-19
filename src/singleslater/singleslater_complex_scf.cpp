@@ -122,7 +122,7 @@ void SingleSlater<dcomplex>::evalConver(int iter){
 
 template<>
 void SingleSlater<dcomplex>::mixOrbitalsSCF(){
-//    return;
+    return;
   auto nO = this->nAE_ + this->nBE_;
   if(this->Ref_ == TCS){
   //CErr();
