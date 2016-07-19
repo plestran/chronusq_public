@@ -112,12 +112,14 @@ void SingleSlater<T>::SCF2(){
 
     this->orthoFock();
     this->diagFock2();
+    this->backTransformMOs();
+    this->levelShift();
 
     if(iter == 0 && this->guess_ != READ) this->mixOrbitalsSCF();
 
     this->copyDen();
     this->formDensity();
-    this->orthoDen();
+//  this->orthoDen();
     this->formFock();
 
     if(PyErr_CheckSignals() == -1)
@@ -211,4 +213,18 @@ void SingleSlater<T>::copyDen(){
     TMap POldBeta(this->POldBetaMem_,NTCSxNBASIS,NTCSxNBASIS);
     POldBeta = (*this->onePDMB_);
   };
+};
+
+template<typename T>
+void SingleSlater<T>::levelShift(){
+  double b = 0.42;
+  for(auto iOcc = 0; iOcc < this->nOccA_; iOcc++){
+    TMatrix FCi = (*this->fockA_)*this->moA_->col(iOcc);
+    for(auto iVir = this->nOccA_; iVir < this->nBasis_; iVir++){
+      T Fai = FCi.frobInner(this->moA_->col(iVir));
+      cout << "Fai(" << iVir << "," << iOcc << ") =" << Fai << endl; 
+      T fact = Fai / ((*this->epsA_)(iVir) - (*this->epsA_)(iOcc) + b);
+      this->moA_->col(iOcc) -= fact * this->moA_->col(iVir);
+    }
+  }
 };

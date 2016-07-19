@@ -43,6 +43,7 @@ template<typename T>
 class SingleSlater : public Quantum<T> {
   typedef Eigen::Matrix<T,Dynamic,Dynamic,ColMajor> TMatrix;
   typedef Eigen::Map<TMatrix> TMap;
+  typedef Eigen::Matrix<T,Dynamic,1,ColMajor> TVec;
 
   int      nBasis_;
   int      nShell_;
@@ -649,6 +650,10 @@ public:
   void GenDComm(int);
   void mullikenPop();
   void fixPhase();
+
+  // JRADLER
+  void levelShift();
+  // JRADLER
 
   void SCF2();
 
