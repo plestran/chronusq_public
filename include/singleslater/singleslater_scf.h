@@ -214,7 +214,7 @@ void SingleSlater<T>::copyDen(){
     POldBeta = (*this->onePDMB_);
   };
 };
-
+//DBWY and JJRADLER 
 template<typename T>
 void SingleSlater<T>::levelShift(){
   double b = 0.42;
@@ -228,3 +228,4 @@ void SingleSlater<T>::levelShift(){
     }
   }
 };
+//DBWY and JJRADLER
