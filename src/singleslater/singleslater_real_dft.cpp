@@ -51,7 +51,8 @@ void SingleSlater<double>::formVXC_new(){
     start = std::chrono::high_resolution_clock::now();
   }
 */
-  bool isGGA   = true;
+//  bool isGGA   = true;
+  bool isGGA   = false;
   RealMatrix SCRATCH2(this->nBasis_,this->nBasis_);
   VectorXd   SCRATCH1(this->nBasis_);
   RealMatrix SCRATCH2X(this->nBasis_,this->nBasis_);
@@ -74,9 +75,9 @@ void SingleSlater<double>::formVXC_new(){
 
   double rhoA;
   double rhoB;
-  double gammaAA;
-  double gammaBB;
-  double gammaAB;
+  double gammaAA = 0.0;
+  double gammaBB = 0.0;
+  double gammaAB = 0.0;
   std::vector<bool> shMap(this->basisset_->nShell()+1);
   int NSkip2(0);
   int NSkip3(0);
@@ -265,12 +266,12 @@ void SingleSlater<double>::formVXC_new(){
     for(auto i = 0; i < this->dftFunctionals_.size(); i++){
       if(doTimings) 
         Newstart = std::chrono::high_resolution_clock::now();
-      if (NDer > 0) {
-        kernelXC += this->dftFunctionals_[i]->eval(
-            rhoA,rhoB,gammaAA,gammaAB,gammaBB);
-      } else {
-        kernelXC += this->dftFunctionals_[i]->eval(rhoA, rhoB);
-      }
+//      if (NDer > 0) {
+      kernelXC += this->dftFunctionals_[i]->eval(
+          rhoA,rhoB,gammaAA,gammaAB,gammaBB);
+//      } else {
+//        kernelXC += this->dftFunctionals_[i]->eval(rhoA, rhoB);
+//      }
       if(doTimings){
         Newend = std::chrono::high_resolution_clock::now();
         TF[i] += Newend - Newstart;

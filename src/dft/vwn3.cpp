@@ -109,6 +109,12 @@ double VWNIII::Eveps2VWN(double A_x, double &b_x, double &c_x, double &X, double
 }
 
 DFTFunctional::DFTInfo VWNIII::eval(const double &rhoA, const double &rhoB){
+}
+
+DFTFunctional::DFTInfo VWNIII::eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB){
+};
+
+DFTFunctional::DFTInfo VWNIII::eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB, const double &gammaBB){
   DFTFunctional::DFTInfo info;
    this->popVWNdens(rhoA, rhoB);
    if(std::abs(this->spindensity) > this->small) {
@@ -143,12 +149,7 @@ DFTFunctional::DFTInfo VWNIII::eval(const double &rhoA, const double &rhoB){
      info.ddrhoA += info.eps ;
      info.ddrhoB  = info.ddrhoA ;
    }
+     info.eps *= (rhoA+rhoB);
   return info;
-}
-
-DFTFunctional::DFTInfo VWNIII::eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB){
-};
-
-DFTFunctional::DFTInfo VWNIII::eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB, const double &gammaBB){
 };
 
