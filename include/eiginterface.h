@@ -81,6 +81,7 @@ namespace Eigen {
   output << std::endl << "Re["<< str + "] : " << std::endl;
   output << bannerTop;
 
+  output << std::scientific << std::left << std::setprecision(8);
   for(i=0;i<m.cols();i+=list) {
     output << std::endl;
     end = list;
