@@ -90,11 +90,13 @@ void SingleSlater<double>::formVXC_new(){
   std::vector<std::size_t> closeShells;
   VectorXd OmegaA(this->nBasis_), OmegaB(this->nBasis_);
   VectorXd DENCOL(this->nBasis_);
+  double fact = 2.0;
   double *SCRATCH1DATA = SCRATCH1.data();
   double *SCRATCH1XDATA = SCRATCH1X.data();
   double *SCRATCH1YDATA = SCRATCH1Y.data();
   double *SCRATCH1ZDATA = SCRATCH1Z.data();
   double *OmegaADATA = OmegaA.data();
+  double *OmegaBDATA = OmegaB.data();
 
   std::vector<std::size_t> shSizes;
   for(auto iSh = 0; iSh < this->basisset_->nShell(); iSh++)
@@ -195,38 +197,47 @@ void SingleSlater<double>::formVXC_new(){
           DENT = this->onePDMA_->data() + iBf*this->nBasis_;
         } else {
           DENT = this->onePDMScalar_->data() + iBf*this->nBasis_;
-          DENS = this->onePDMMx_->data() + iBf*this->nBasis_;
+          DENS = this->onePDMMz_->data() + iBf*this->nBasis_;
         }
 
         // Loop over close shells "J"
         for(auto jShell : closeShells) {
           int jSz= shSizes[jShell];
           int jSt = this->basisset_->mapSh2Bf(jShell);
-
-          double fact = 2.0;
           for(auto jBf = jSt; jBf < (jSt + jSz); jBf++){
-//            if(jBf < iBf) continue;
-//            else if (jBf != iBf) fact = 4.0;
-//            else fact = 2.0;
-            
             Pt = fact * DENT[jBf];
-
-            if(std::abs(Pt) > 1e-10 || std::abs(Ps) > 1e-10){
+            if(std::abs(Pt) > 1e-10 ){
               Tt += Pt * SCRATCH1DATA[jBf];
-//            Ts += Ps * SCRATCH1DATA[jBf];
             }
           } // jBf
         } // jShell      
+
+        if(this->nTCS_ == 1 && !this->isClosedShell){
+          for(auto jShell : closeShells) {
+            int jSz= shSizes[jShell];
+            int jSt = this->basisset_->mapSh2Bf(jShell);
+            for(auto jBf = jSt; jBf < (jSt + jSz); jBf++){
+              Ps = fact * DENS[jBf];
+              if( std::abs(Ps) > 1e-10){
+              Ts += Ps * SCRATCH1DATA[jBf];
+              }
+            } // jBf
+          } // jShell      
+        } //UKS
         rhoT += Tt * SCRATCH1DATA[iBf];
-//      rhoS += Ts * SCRATCH1DATA[iBf];
+        if(this->nTCS_ == 1 && !this->isClosedShell){
+          rhoS += Ts * SCRATCH1DATA[iBf];
+        }  //UKS
         if(NDer > 0) {
           drhoT[0] += Tt * SCRATCH1XDATA[iBf];
           drhoT[1] += Tt * SCRATCH1YDATA[iBf];
           drhoT[2] += Tt * SCRATCH1ZDATA[iBf];
-//        drhoS[0] += Ts * SCRATCH1XDATA[iBf];
-//        drhoS[1] += Ts * SCRATCH1YDATA[iBf];
-//        drhoS[2] += Ts * SCRATCH1ZDATA[iBf];
-        }
+          if(this->nTCS_ == 1 && !this->isClosedShell){
+            drhoS[0] += Ts * SCRATCH1XDATA[iBf];
+            drhoS[1] += Ts * SCRATCH1YDATA[iBf];
+            drhoS[2] += Ts * SCRATCH1ZDATA[iBf];
+          } //UKS
+        } //GGA
       } // iBf
     } // iShell
     if(doTimings){
@@ -270,33 +281,38 @@ void SingleSlater<double>::formVXC_new(){
     // Evaluate Functional derivatives
 
     if(doTimings) Newstart = std::chrono::high_resolution_clock::now();
-    for(auto iXYZ = 0; iXYZ < 3; iXYZ++){
-      double GA(GradRhoA(iXYZ)), GB(GradRhoB(iXYZ));
-//      if(this->nTCS_ == 1 && this->isClosedShell){
-        GradRhoA(iXYZ) = pt.weight * 
-          ( 2.0 * GA * kernelXC.ddgammaAA + GB * kernelXC.ddgammaAB);
-//      }elseif(this->nTCS_ == 1 && this->!isClosedShell){
-        GradRhoB(iXYZ) = pt.weight * 
-          ( 2.0 * GB * kernelXC.ddgammaBB + GA * kernelXC.ddgammaAB);
-//      }
-    }
-
-    OmegaA.setZero(); 
-    for(auto iShell : closeShells) {
-//      int iSz = this->basisset_->shells(iShell).size();
-      int iSz= shSizes[iShell];
-      int iSt = this->basisset_->mapSh2Bf(iShell);
-
-      for(auto iBf = iSt; iBf < (iSt + iSz); iBf++){
-        OmegaADATA[iBf] += GradRhoA(0) * SCRATCH1XDATA[iBf] +
-                           GradRhoA(1) * SCRATCH1YDATA[iBf] +
-                           GradRhoA(2) * SCRATCH1ZDATA[iBf];
-//      OmegaB(iBf) += GradRhoB(0) * SCRATCH1X(iBf) +
-//                     GradRhoB(1) * SCRATCH1Y(iBf) +
-//                     GradRhoB(2) * SCRATCH1Z(iBf);
-      } // iBf
-    } // iShell
-
+      if(NDer > 0 ) {
+        for(auto iXYZ = 0; iXYZ < 3; iXYZ++){
+          double GA(GradRhoA(iXYZ)), GB(GradRhoB(iXYZ));
+            GradRhoA(iXYZ) = pt.weight * 
+              ( 2.0 * GA * kernelXC.ddgammaAA + GB * kernelXC.ddgammaAB);
+            GradRhoB(iXYZ) = pt.weight * 
+              ( 2.0 * GB * kernelXC.ddgammaBB + GA * kernelXC.ddgammaAB);
+        } // Grad
+        OmegaA.setZero(); 
+        for(auto iShell : closeShells) {
+          int iSz= shSizes[iShell];
+          int iSt = this->basisset_->mapSh2Bf(iShell);
+       
+          for(auto iBf = iSt; iBf < (iSt + iSz); iBf++){
+            OmegaADATA[iBf] += GradRhoA(0) * SCRATCH1XDATA[iBf] +
+                               GradRhoA(1) * SCRATCH1YDATA[iBf] +
+                               GradRhoA(2) * SCRATCH1ZDATA[iBf];
+          } // iBf
+        } // iShell
+        if(this->nTCS_ == 1 && !this->isClosedShell){
+          OmegaB.setZero(); 
+          for(auto iShell : closeShells) {
+             int iSz= shSizes[iShell];
+             int iSt = this->basisset_->mapSh2Bf(iShell);
+             for(auto iBf = iSt; iBf < (iSt + iSz); iBf++){
+                OmegaBDATA[iBf] += GradRhoB(0) * SCRATCH1X[iBf] +
+                                   GradRhoB(1) * SCRATCH1Y[iBf] +
+                                   GradRhoB(2) * SCRATCH1Z[iBf];
+             } // iBf
+          } // iShell
+        } //UKS
+      } //GGA
     result.Energy += pt.weight * kernelXC.eps;
     kernelXC.ddrhoA *= pt.weight;
     kernelXC.ddrhoB *= pt.weight;
@@ -307,7 +323,6 @@ void SingleSlater<double>::formVXC_new(){
 
       for(auto iBf = iSt; iBf < (iSt + iSz); iBf++){
         double Ta = kernelXC.ddrhoA*SCRATCH1DATA[iBf] + OmegaADATA[iBf];
-//      double Tb = kernelXC.ddrhoB*SCRATCH1(iBf) + OmegaB(iBf);
         for(auto jShell : closeShells) {
           int jSz= shSizes[jShell];
           int jSt = this->basisset_->mapSh2Bf(jShell);
@@ -319,6 +334,26 @@ void SingleSlater<double>::formVXC_new(){
         } // jShell
       } // iBf
     } // iShell
+
+    if(this->nTCS_ == 1 && !this->isClosedShell){
+      for(auto iShell : closeShells) {
+        int iSz= shSizes[iShell];
+        int iSt = this->basisset_->mapSh2Bf(iShell);
+  
+        for(auto iBf = iSt; iBf < (iSt + iSz); iBf++){
+          double Tb = kernelXC.ddrhoB*SCRATCH1DATA[iBf] + OmegaBDATA[iBf];
+          for(auto jShell : closeShells) {
+            int jSz= shSizes[jShell];
+            int jSt = this->basisset_->mapSh2Bf(jShell);
+            double *VXCDATB = result.VXCB.data() + iBf*this->nBasis_;
+            for(auto jBf = jSt; jBf < (jSt + jSz); jBf++){
+              if(jBf < iBf) continue;
+              VXCDATB[jBf] += Tb*SCRATCH1DATA[jBf] + SCRATCH1DATA[iBf]*OmegaBDATA[jBf]; 
+            } // jBf
+          } // jShell
+        } // iBf
+      } // iShell
+    } // UKS
 
     if(doTimings){
       Newend = std::chrono::high_resolution_clock::now();
@@ -367,6 +402,7 @@ void SingleSlater<double>::formVXC_new(){
   if(!this->isClosedShell && this->nTCS_ != 2){
     (*this->vXB_) = 4*math.pi*res.VXCB;
     (*this->vXB_) = this->vXB_->selfadjointView<Lower>();
+    cout << "UKS" <<endl;
   }
 
   if(doTimings) {

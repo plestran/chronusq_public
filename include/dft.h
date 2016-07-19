@@ -50,9 +50,6 @@ class SlaterExchange : public DFTFunctional {
   double small;    
   double d1over3 ;
   double d4over3 ;
-  double rhoT     ;    
-  double spindensity   ;
-  double eps_spin   ;
 public:
   SlaterExchange(double X = 1.0, double eps = 1e-10);
   DFTInfo eval(const double &rhoA, const double &rhoB);

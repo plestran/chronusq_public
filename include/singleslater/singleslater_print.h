@@ -363,9 +363,11 @@ void SingleSlater<T>::printSCFHeader(ostream &output){
       output << this->dftFunctionals_[0]->name;
       output << endl;
 
-      output << std::setw(38) << std::left << "    Correlation Kernel:";
-      output << this->dftFunctionals_[1]->name;
-      output << endl;
+      if(dftFunctionals_.size() > 1){
+        output << std::setw(38) << std::left << "    Correlation Kernel:";
+        output << this->dftFunctionals_[1]->name;
+        output << endl;
+      }
    }
 
    

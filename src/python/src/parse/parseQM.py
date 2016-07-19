@@ -250,13 +250,15 @@ def handleReference(workers,settings):
 
   if isDFT:
     if 'KS' in refStr:  
-      if 'CORR' not in settings or 'EXCHANGE' not in settings:
-        msg = "Must specify both Correlation and Exchange Kernel\n"
+      if 'CORR' not in settings and 'EXCHANGE' not in settings:
+        msg = "Must specify both Correlation or Exchange Kernel\n"
         msg = msg + " for user defined QM.KS reference"
         CErrMsg(workers['CQFileIO'],str(msg))
 
-      functionalMap[settings['CORR']]()
-      functionalMap[settings['EXCHANGE']]()
+      if 'CORR' in settings:
+        functionalMap[settings['CORR']]()
+      if 'EXCHANGE' in settings:
+        functionalMap[settings['EXCHANGE']]()
       workers["CQSingleSlater"].setDFTKernel(kernelMap['USERDEFINED'])
     elif 'LSDA' in refStr:
       for func in LSDAFunctional:
