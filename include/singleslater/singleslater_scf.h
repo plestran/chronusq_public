@@ -112,7 +112,7 @@ void SingleSlater<T>::SCF2(){
 
     this->orthoFock();
     this->diagFock2();
-    this->backTransformMOs();
+//    this->backTransformMOs();
     this->levelShift();
 
     if(iter == 0 && this->guess_ != READ) this->mixOrbitalsSCF();
@@ -214,7 +214,7 @@ void SingleSlater<T>::copyDen(){
     POldBeta = (*this->onePDMB_);
   };
 };
-//DBWY and JJRADLER 
+//DBWY and JJRADLER  -- Needs to be rewritten and have conditional for convergence added
 template<typename T>
 void SingleSlater<T>::levelShift(){
   double b = 0.42;
