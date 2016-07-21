@@ -3,7 +3,7 @@ using ChronusQ::AOIntegrals;
 
 void AOIntegrals::computeOverlapS(){
   double S;
-  int i,j,k,ijShell,lA[3],lB[3];
+  int i,j,k,mu,ijShell,lA[3],lB[3];
   int bf1,bf2;
   ChronusQ::ShellPair *ijS;
   std::chrono::high_resolution_clock::time_point start,finish;
@@ -11,13 +11,20 @@ void AOIntegrals::computeOverlapS(){
   this->overlap_->setZero();
   for(ijShell=0;ijShell<this->nShellPair_;ijShell++) {
     ijS = &(this->shellPairs_[ijShell]);
+
+      
     if(ijS->iShell==ijS->jShell) {
-      for(i=0,bf1=ijS->ibf_s  ; i<ijS->iShell->cartesian_l.size(); i++,bf1++) 
+      for(i=0,bf1=ijS->ibf_s  ; i<ijS->iShell->cartesian_l.size(); i++,bf1++)   
       for(j=i,bf2=ijS->ibf_s+i; j<ijS->jShell->cartesian_l.size(); j++,bf2++){
+//this->fileio_->out << "angular momentum";
         for(k=0;k<3;k++){
           lA[k]=ijS->iShell->cartesian_l[i][k];
+//this->fileio_->out << lA[k]<<"\t";
           lB[k]=ijS->jShell->cartesian_l[j][k];
         };
+
+//this->fileio_->out << endl;
+
         S = this->hRRSab(ijS,ijS->iShell->l,lA,ijS->jShell->l,lB);
         (*this->overlap_)(bf1,bf2) = S;
         (*this->overlap_)(bf2,bf1) = S;
@@ -340,7 +347,7 @@ void AOIntegrals::computeSL(){
   int i,j,k,ijShell,mu,nu,lA[3],lB[3],iPP,iAtom;
   int bf1,bf2;
   ChronusQ::ShellPair *ijS;
-
+//cout<<"Here we stop";
 // precalculate the tensor
   RealTensor3d OneiOnek(3,3,3); //(1i,1k,mu)
   OneiOnek(0,0,0) = math.zero; 
@@ -439,7 +446,7 @@ void AOIntegrals::computeSL(){
 
 //cout<<"OneixBC"<<endl;
 //cout<<"atomic number\t"<<this->molecularConstants_->atomZ[iAtom]<<endl;
- 
+//cout<<ijS->iShell->l<<"\t"<<ijS->jShell->l<<endl; 
               SlC += this->molecularConstants_->atomZ[iAtom]*this->Slabmu(ijS,&OneixAC,&OneixBC,&OneiOnek,C,ijS->iShell->l,lA,ijS->jShell->l,lB,mu,0,iPP);
 //cout<<"SlC:\t"<<SlC<<endl;
               };
@@ -515,6 +522,8 @@ void AOIntegrals::computepVdotp(){
   this->fileio_->out <<"fobinius inner product" << fobi << endl;
 
 };
+
+
 
 
 
@@ -864,7 +873,9 @@ double AOIntegrals::hRRiPPVab(ChronusQ::ShellPair *ijSP,int LA,int *lA,int LB,in
         PC[k] = ijSP->P[iPP][k] - C[k];
         squarePC += PC[k]*PC[k];
       };
+//cout<<"before FmT"<<endl;
       double *tmpFmT = new double[ijSP->lTotal+m+1];
+//cout<<"FmT"<<endl;
       this->computeFmTTaylor(tmpFmT,ijSP->Zeta[iPP]*squarePC,ijSP->lTotal+m,0);
       if(LA==0) {
         tmpVal = ijSP->ssV[iPP]*tmpFmT[m];
@@ -875,7 +886,7 @@ double AOIntegrals::hRRiPPVab(ChronusQ::ShellPair *ijSP,int LA,int *lA,int LB,in
 
       else {
 
-//        cout<<"(a|V|0)^(m)"<<endl;
+//cout<<"(a|V|0)^(m)"<<endl;
         tmpVal = ijSP->ssV[iPP]*this->vRRVa0(ijSP,tmpFmT,PC,m,LA,lA,iPP);
       }
 //cout<<"before delete the tmpFmT"<<endl;
@@ -1094,6 +1105,10 @@ if (tmpVal>0.001||tmpVal<-0.001) {
 
   }else if ((LA>0)&(LB==0)) cout<<"here"; 
    else if ((LB>0)&(LA>0)){
+
+//cout<<endl<<"Here we have LA,LB>0"<<endl;
+
+//cout<<lB[0]<<"\t"<<lB[1]<<"\t"<<lB[2]<<endl;
    int lBm1[3],lAm1k[3];
    for(iWork=0;iWork<3;iWork++) {
      lAm1[iWork]=lA[iWork];
@@ -1104,15 +1119,32 @@ if (tmpVal>0.001||tmpVal<-0.001) {
    else if (lB[1]>0) iWork=1;
    else if (lB[2]>0) iWork=2;
 
+//cout<<"iWork"<<iWork<<endl;
    lAm1[iWork]--;
    lBm1[iWork]--;
+//cout<<"Still working"<<endl;
+
+//cout<<"iWork"<<iWork<<endl;
    tmpVal  = ijSP->PB[iPP][iWork]*this->Slabmu(ijSP,OneixAC,OneixBC,OneiOnek,C,LA,lA,LB-1,lBm1,mu,m,iPP);
 
+//cout<<"still working 2"<<endl;
+//cout<<"iWork"<<iWork<<endl;
+//cout<<"LB-1="<<LB-1<<endl;
+//cout<<lBm1[0]<<"\t"<<lBm1[1]<<"\t"<<lBm1[2]<<endl;
    tmpVal -= PC[iWork]*this->Slabmu(ijSP,OneixAC,OneixBC,OneiOnek,C,LA,lA,LB-1,lBm1,mu,m+1,iPP);
    if (lAm1[iWork]>=0){
-    tmpVal += ijSP->halfInvZeta[iPP]*lA[iWork]*(this->Slabmu(ijSP,OneixAC,OneixBC,OneiOnek,C,LA-1,lAm1,LB-1,lBm1,mu,m,iPP) - this->Slabmu(ijSP,OneixAC,OneixBC,OneiOnek,C,LA-1,lAm1,LB,lBm1,mu,m+1,iPP));
+    tmpVal += ijSP->halfInvZeta[iPP]*lA[iWork]*(this->Slabmu(ijSP,OneixAC,OneixBC,OneiOnek,C,LA-1,lAm1,LB-1,lBm1,mu,m,iPP) - this->Slabmu(ijSP,OneixAC,OneixBC,OneiOnek,C,LA-1,lAm1,LB-1,lBm1,mu,m+1,iPP));
    };
+
+//cout<<"iWork"<<iWork<<endl;
+//cout<<"still working 3"<<endl;
+//cout<<lA[0]<<"\t"<<lA[1]<<"\t"<<lA[2]<<endl;
+//cout<<lBm1[0]<<"\t"<<lBm1[1]<<"\t"<<lBm1[2]<<endl;
+//cout<<"m+1="<<m<<endl;
+//cout<<"iWork="<<iWork<<"\t"<<"mu="<<mu<<endl;
+//cout<<"OneixAC"<<(*OneixAC)(iWork,mu)<<endl;
    tmpVal -= 2*ijSP->zetaa[iPP]*(*OneixAC)(iWork,mu)*this->hRRiPPVab(ijSP,LA,lA,LB-1,lBm1,C,m+1,iPP);
+//cout<<"still working 4"<<endl;
    for(k=0;k<3;k++) {
      if(lA[k]>0){
       lAm1k[k]--;

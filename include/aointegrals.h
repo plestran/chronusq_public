@@ -55,6 +55,8 @@ struct ShellPair{
   int     nPGTOPair;
   int     ibf_s;
   int     jbf_s;
+  int     isphbf_s;             //spherical basis function start
+  int     jsphbf_s;
   std::array<real_t,3> A;	// x,y,z coordinate of center A
   std::array<real_t,3> B;	// x,y,z coordinate of center B
   std::array<real_t,3> AB;	// x,y,z distance between centers xA-xB, yA-yB, zA-zB

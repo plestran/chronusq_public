@@ -685,6 +685,47 @@ void AOIntegrals::createShellPairs() {
 // dones't require annoying memory managment
   this->shellPairs_ = std::vector<ChronusQ::ShellPair>(this->nShellPair_);
   n = 0;
+
+
+  int spherical_lsize[nShell];
+  int mapSh2spBf[nShell];
+  int tempmapSh2spBf=0;
+  for ( i =0 ; i<nShell ; i++ ) {
+    mapSh2spBf[i] = tempmapSh2spBf;
+    if (this->basisSet_->shellsCQ[i].cartesian_l.size() == 6){
+       spherical_lsize[i]=5;
+    }
+    else {
+      spherical_lsize[i]=this->basisSet_->shellsCQ[i].cartesian_l.size();
+    }
+    tempmapSh2spBf += spherical_lsize[i];
+  }
+
+cout<<"total bumber of spherical function= "<<tempmapSh2spBf<<endl;
+  
+  for(i=0;i<nShell;i++) 
+    {      
+//  int ibf_s1 = this->basisSet_->mapSh2Bf(i);
+//  int n1 = this->basisSet_->shells(i).size();
+//  int n1 = this->basisSet_->shellsCQ[i].l;
+    
+    this->fileio_->out << "ShellIndex= " << i <<endl;
+    int n1 = this->basisSet_->shellsCQ[i].cartesian_l.size();
+    this->fileio_->out << "Size= "  <<n1 <<endl;
+    this->fileio_->out << "Size_of_spherical= " << spherical_lsize[i]<<endl;
+    this->fileio_->out << "start of shell function" << this->basisSet_->mapSh2Bf(i)<<endl;
+    this->fileio_->out << "start of shell for spherical function" << mapSh2spBf[i]<<endl;
+    for (int ii =0; ii < n1; ii++){
+    this->fileio_->out << "BasisSet ind " << ii <<endl;
+      for(k=0;k<3;k++){
+       auto  lxyz = this->basisSet_->shellsCQ[i].cartesian_l[ii][k];
+         this->fileio_->out << lxyz<<"\t";
+      } 
+     this->fileio_->out << endl;
+      
+    }
+  }
+
   for(i=0;i<nShell;i++) for(j=i;j<nShell;j++) {
     ijS = &(this->shellPairs_[n]);
     if(this->basisSet_->shellsCQ[i].l>this->basisSet_->shellsCQ[j].l) {    
@@ -692,12 +733,21 @@ void AOIntegrals::createShellPairs() {
       ijS->jShell = &(this->basisSet_->shellsCQ[j]);
       ijS->ibf_s = this->basisSet_->mapSh2Bf(i);
       ijS->jbf_s = this->basisSet_->mapSh2Bf(j);
+//start number for spherical gaussian       
+      ijS->isphbf_s = mapSh2spBf[i];
+      ijS->jsphbf_s = mapSh2spBf[j];
+
     } else {
       ijS->iShell = &(this->basisSet_->shellsCQ[j]);
       ijS->jShell = &(this->basisSet_->shellsCQ[i]);
       ijS->ibf_s = this->basisSet_->mapSh2Bf(j);
       ijS->jbf_s = this->basisSet_->mapSh2Bf(i);
-    };
+      ijS->isphbf_s = mapSh2spBf[j];
+      ijS->jsphbf_s = mapSh2spBf[i];
+
+   };
+//cout<<"isbf_s= "<<ijS->ibf_s<<"\t jbf_s= "<<ijS->jbf_s<<endl;
+//cout<<"isphbf_s= "<<ijS->isphbf_s<<"\t jsphbf_s= "<<ijS->jsphbf_s<<endl<<endl;
 
     iS = ijS->iShell;
     jS = ijS->jShell;
@@ -778,6 +828,9 @@ void AOIntegrals::createShellPairs() {
     };
     ijS->nPGTOPair = nPP;
     n++;
-  };
+  }
+
+       
+
 };
 //xslie
