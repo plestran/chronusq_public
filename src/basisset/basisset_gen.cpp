@@ -105,6 +105,10 @@ void BasisSet::constructExtrn(Molecule * mol, BasisSet *genBasis){
               (*mol->cart())(1,iAtom),
               (*mol->cart())(2,iAtom)};
         }
+        for(auto iCons = (*iRef).unNormalizedCons.begin(); 
+            iCons != (*iRef).unNormalizedCons.end(); ++iCons){
+          genBasis->unNormCons_.push_back(*iCons);
+        }
         found = true;
       }
     } // Loop iRef

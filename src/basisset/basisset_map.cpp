@@ -118,20 +118,21 @@ void BasisSet::makeBasisMap(){
 }; // BasisSet::makeBasisMap
 
 void BasisSet::makeMapPrim2Bf(){
-  this->mapPrim2Bf_ = std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nPrimitive_));
-
+  this->mapPrim2Bf_ = 
+   std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nPrimitive_));
   double * memAddress = this->mapPrim2Bf_->data();
   for (auto iSh = 0; iSh < this->nShell_; iSh++){
     int nPrim = this->shells_[iSh].contr[0].coeff.size();
     int nBf   = this->shells_[iSh].size();
-    for (auto iP = 0; iP < nPrim; iP++){
-      for (auto iBf = 0; iBf < nBf; iBf++){
-      memAddress[(iP*nBf + iBf)*this->nBasis_ + iBf] = (this->unNormCons_[iSh][iP]);
+    for (auto iP = 0; iP < nPrim; iP++)
+    for (auto iBf = 0; iBf < nBf; iBf++){
+      memAddress[(iP*nBf + iBf)*this->nBasis_ + iBf] = 
+        this->unNormCons_[iSh][iP];
       }
     }
     memAddress += this->nBasis_ * (nPrim * nBf) + nBf;
-    prettyPrint(cout,*this->mapPrim2Bf_,"MAP");
   }
+    prettyPrint(cout,*this->mapPrim2Bf_,"MAP");
 
 //
 /*
