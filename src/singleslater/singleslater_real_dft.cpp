@@ -52,7 +52,7 @@ void SingleSlater<double>::formVXC_new(){
   }
 */
 //  bool isGGA   = true;
-  bool isGGA   = false;
+//  bool isGGA   = false;
   RealMatrix SCRATCH2(this->nBasis_,this->nBasis_);
   VectorXd   SCRATCH1(this->nBasis_);
   RealMatrix SCRATCH2X(this->nBasis_,this->nBasis_);
@@ -62,7 +62,7 @@ void SingleSlater<double>::formVXC_new(){
   VectorXd   SCRATCH1Y(this->nBasis_);
   VectorXd   SCRATCH1Z(this->nBasis_);
   int NDer = 0;
-  if(isGGA) NDer = 1; 
+  if(this->isGGA) NDer = 1; 
 
   std::array<double,3>  drhoT = {0.0,0.0,0.0}; ///< array TOTAL density gradient components
   std::array<double,3>  drhoS = {0.0,0.0,0.0}; ///< array SPIN  density gradient components
@@ -141,7 +141,6 @@ void SingleSlater<double>::formVXC_new(){
 
     // Compute value of "close" basis functions at the given point
     for(auto iShell : closeShells) {
-    
       int shSize= shSizes[iShell];
       int iSt = this->basisset_->mapSh2Bf(iShell);
       double * buff = this->basisset_->basisDEval(NDer,this->basisset_->shells(iShell),&pt.pt);
@@ -258,9 +257,20 @@ void SingleSlater<double>::formVXC_new(){
       gammaAB = GradRhoA.dot(GradRhoB);           
     }
     
-    // Skip out if zero density
-    if  (rhoT < 1.0e-10) {NSkip5++; return;}
-
+//    check if are noise
+    if(rhoT    <= 0.0 ) {
+        if((std::abs(rhoT)) <= 1.0e-10) {
+          return;
+        }else{ 
+          CErr("Numerical noise in the density");
+        }
+//    skyp points based on small density
+//    skyp points based on small density
+      }else if(rhoT < this->epsScreen){
+        return;
+      }
+//this if statement prevent numerical instability with zero guesses
+    if  (rhoT < 1.0e-20 ) {NSkip5++; return;}
     // Evaluate density functional
     DFTFunctional::DFTInfo kernelXC;
     for(auto i = 0; i < this->dftFunctionals_.size(); i++){
@@ -366,12 +376,20 @@ void SingleSlater<double>::formVXC_new(){
 //  ChronusQ::AtomicGrid AGrid(100,302,ChronusQ::GRID_TYPE::EULERMAC,
 //      ChronusQ::GRID_TYPE::LEBEDEV,ChronusQ::ATOMIC_PARTITION::BECKE,
 //      this->molecule_->cartArray(),this->molecule_->rIJ(),0,1.0,false);
-  ChronusQ::AtomicGrid AGrid(100,302,ChronusQ::GRID_TYPE::EULERMAC,
-      ChronusQ::GRID_TYPE::LEBEDEV,ChronusQ::ATOMIC_PARTITION::FRISCH,
-      this->molecule_->cartArray(),this->molecule_->rIJ(),0,1.0,false);
+
+
+  if(this->isGGA) cout << "GGA ON " << this->isGGA <<endl ; 
+  if(!this->isGGA) cout << "GGA OFF " << this->isGGA <<endl ; 
+  ChronusQ::AtomicGrid AGrid(this->nRadDFTGridPts_,this->nAngDFTGridPts_,
+      ChronusQ::GRID_TYPE::EULERMAC,ChronusQ::GRID_TYPE::LEBEDEV,
+      ChronusQ::ATOMIC_PARTITION::FRISCH,this->molecule_->cartArray(),
+      this->molecule_->rIJ(),0,this->epsScreen,1e6,1.0,false);
    
   KernelIntegrand<double> res(this->vXA_->cols());
-  this->basisset_->radcut(1.0e-10, 50, 1.0e-7);
+  //Screaning based on cutoff
+//  the radCutoof vector is populated in singleSlater_real_guess.cpp
+//  this->basisset_->radcut(this->epsScreen,this->maxiter,this->epsConv);
+
   this->totalEx    = 0.0;
   this->vXA()->setZero();   // Set to zero every occurence of the SCF
 
@@ -386,6 +404,7 @@ void SingleSlater<double>::formVXC_new(){
   } 
   for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
     AGrid.center() = iAtm;
+    cout << "Cutoff Rad = " << atomRadCutoff[iAtm] << "for iAt= " << iAtm << endl;
     AGrid.setRadCutOff(atomRadCutoff[iAtm]);
     AGrid.findNearestNeighbor();
     AGrid.scalingFactor()=0.5 *

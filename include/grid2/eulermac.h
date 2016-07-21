@@ -6,7 +6,7 @@
 namespace ChronusQ {
 class EulerMac : public OneDGrid2 {
   public:
-    EulerMac(size_t npts, bool onTheFly = true) : OneDGrid2(npts,onTheFly){
+    EulerMac(size_t npts, double screenTol = 0.0, bool onTheFly = true) : OneDGrid2(npts,screenTol,onTheFly){
         if(!onTheFly_) this->generateGridPoints();
     };
     ~EulerMac(){ };

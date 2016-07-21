@@ -39,9 +39,10 @@ protected:
     bool onTheFly_;
     bool haveGPs_;
     bool breakInt_;
+    double screenTol_;
 public:
-    Grid2(size_t npts = 0, bool onTheFly = true) : nPts_(npts),
-      onTheFly_(onTheFly), haveGPs_(false), breakInt_(false){ 
+    Grid2(size_t npts = 0, double screenTol = 0.0, bool onTheFly = true) : nPts_(npts),
+      onTheFly_(onTheFly), haveGPs_(false), breakInt_(false), screenTol_(screenTol){ 
       
     };
 

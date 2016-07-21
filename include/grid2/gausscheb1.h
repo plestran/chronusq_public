@@ -17,8 +17,8 @@ namespace ChronusQ {
  */
 class GaussChebFst : public OneDGrid2 {
   public:
-    GaussChebFst(size_t npts = 0, bool onTheFly = true) : 
-      OneDGrid2(npts,onTheFly){
+    GaussChebFst(size_t npts = 0, double screenTol = 0., bool onTheFly = true) : 
+      OneDGrid2(npts,screenTol,onTheFly){
         if(!onTheFly_) this->generateGridPoints();
       };
 

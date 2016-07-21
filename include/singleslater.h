@@ -508,6 +508,12 @@ public:
     this->nVirA_ = this->nBasis_ - this->nOccA_;
     this->nAE_   = this->nOccA_;
     this->nBE_   = this->nOccB_;
+
+
+    if(this->isDFT){
+      this->epsScreen /= this->molecule_->nAtoms() * this->nRadDFTGridPts_ * this->nAngDFTGridPts_;
+      this->basisset_->radcut(this->epsScreen,this->maxiter,this->epsConv);
+    }
   }
   void alloc();
 

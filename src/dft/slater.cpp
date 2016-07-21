@@ -4,7 +4,7 @@ SlaterExchange::SlaterExchange(double X, double eps):
 DFTFunctional(X,eps){
 // Memo Factor to be added at the end for numerical stability
   this->CxVx  = -(3.0/4.0)*(std::pow((3.0/math.pi),(1.0/3.0)));  
-  this->small = 1.0e-12; 
+  this->small = 1.0e-16; 
   this-> d1over3  = 1.0/3.0;
   this-> d4over3  = 4.0/3.0;
 
@@ -27,7 +27,7 @@ DFTFunctional::DFTInfo SlaterExchange::eval(const double &rhoA, const double &rh
   double tmp1Sppow;
   double tmp2Sppow;
   info.eps        = std::pow(rhoT,this->d1over3)*this->CxVx;      
-  if (spindensity > this->small){
+  if (std::abs(spindensity) > this->small){
 // Open Shell
     tmp1Sppow  = std::pow((1.0+spindensity),this->d1over3);
     tmp2Sppow  = std::pow((1.0-spindensity),this->d1over3);
