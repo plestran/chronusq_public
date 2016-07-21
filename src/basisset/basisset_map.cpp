@@ -128,11 +128,11 @@ void BasisSet::makeMapPrim2Bf(){
       for (auto iBf = 0; iBf < nBf; iBf++){
       memAddress[(iP*nBf + iBf)*this->nBasis_ + iBf] = (this->unNormCons_[iSh][iP]);
       }
-    memAddress += this->nBasis_ * (nPrim * nBf) + nBf;
     }
+    memAddress += this->nBasis_ * (nPrim * nBf) + nBf;
+    prettyPrint(cout,*this->mapPrim2Bf_,"MAP");
   }
 
-    prettyPrint(cout,*this->mapPrim2Bf_,"MAP");
 //
 /*
 for(auto iSh = 0, iBf = 0, iPrim = 0;

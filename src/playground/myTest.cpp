@@ -162,7 +162,7 @@ int main() {
     singleSlater.isClosedShell = false;
     singleSlater.doDIIS = false;
 
-    basis.findBasisFile("3-21G");
+    basis.findBasisFile("CC-PVDZ");
     basis.communicate(fileio);  // This function passes fileio reference 
     basis.parseGlobal(); //Reads entire basis set file into memory
     basis.constructLocal(&molecule);
