@@ -107,6 +107,7 @@ void BasisSet::renormShells(){
 */
   for(auto iShell = 0; iShell < this->nShell_; iShell++){
     auto buff = engine.compute(shells_[iShell],shells_[iShell]);
+    cout << " Buff " << buff[0] << endl;
     for(auto k = 0; k < shells_[iShell].alpha.size(); k++) { 
       shells_[iShell].contr[0].coeff[k] /= std::sqrt(buff[0]);
       this->unNormCons_[iShell][k]       /= std::sqrt(buff[0]);

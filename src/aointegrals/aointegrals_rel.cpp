@@ -108,6 +108,21 @@ if(this->printLevel_ >= 2){
   SUncontracted = SUncontracted.selfadjointView<Lower>();
   TUncontracted = TUncontracted.selfadjointView<Lower>();
 
+  RealMatrix SnonRel = (*this->basisSet_->mapPrim2Bf()) * SUncontracted
+	* (*this->basisSet_->mapPrim2Bf()).transpose();
+  if(this->printLevel_ >= 3){
+  prettyPrint(this->fileio_->out,SnonRel,"S nonRel (take 1)");
+    }
+  for (auto row = 0; row < this->basisSet_->nBasis(); row++){
+      (*this->basisSet_->mapPrim2Bf()).block(row,0,1,nUncontracted) /=
+        std::sqrt(SnonRel(row,row)); //scale by appropraite factor
+    }
+
+if(this->printLevel_ >= 2){
+  SnonRel = (*this->basisSet_->mapPrim2Bf()) * SUncontracted
+    * (*this->basisSet_->mapPrim2Bf()).transpose();
+  prettyPrint(this->fileio_->out,SnonRel,"S nonRel");
+}
 
 if(this->printLevel_ >= 2){
   prettyPrint(this->fileio_->out,SUncontracted,"S uncontracted");
@@ -116,9 +131,6 @@ if(this->printLevel_ >= 2){
   RealMatrix TnonRel = (*this->basisSet_->mapPrim2Bf()) * TUncontracted
 	* (*this->basisSet_->mapPrim2Bf()).transpose();  
   prettyPrint(this->fileio_->out,TnonRel,"T nonRel");
-  RealMatrix SnonRel = (*this->basisSet_->mapPrim2Bf()) * SUncontracted
-	* (*this->basisSet_->mapPrim2Bf()).transpose();  
-  prettyPrint(this->fileio_->out,SnonRel,"S nonRel");
 }
 
   RealMatrix SUn(nUncontracted,nUncontracted);
