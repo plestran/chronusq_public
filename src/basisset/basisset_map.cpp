@@ -131,7 +131,7 @@ void BasisSet::makeMapPrim2Bf(){
       }
     memAddress += this->nBasis_ * (nPrim * nBf) + nBf;
   }
-    prettyPrint(cout,*this->mapPrim2Bf_,"MAP");
+  //  prettyPrint(cout,*this->mapPrim2Bf_,"MAP");
 
 //
 /*

@@ -193,9 +193,9 @@ void SingleSlater<T>::formFock(){
       if(this->nTCS_ == 2) {
         if(this->aointegrals_->doX2C){
     //        cout << "nTCS == 2 ... buiding Fock" << endl;
-            (*this->fockMx_) = (*this->aointegrals_->oneEmx_);
-            (*this->fockMy_) = (*this->aointegrals_->oneEmy_);
-            (*this->fockMz_) = (*this->aointegrals_->oneEmz_);
+            (*this->fockMx_) = 2*(*this->aointegrals_->oneEmx_);
+            (*this->fockMy_) = 2*(*this->aointegrals_->oneEmy_);
+            (*this->fockMz_) = 2*(*this->aointegrals_->oneEmz_);
             // -----------------------------------
             // SCALE SO parts by 'i'
             // -----------------------------------
@@ -242,7 +242,7 @@ void SingleSlater<T>::formFock(){
         toGather.emplace_back(*this->fockMx_);
         Quantum<T>::spinGather(*this->fockA_,toGather);
 
-        prettyPrint(this->fileio_->out,(*this->fockA_)," fockA_ ");
+      //  prettyPrint(this->fileio_->out,(*this->fockA_)," fockA_ ");
         }
 
 

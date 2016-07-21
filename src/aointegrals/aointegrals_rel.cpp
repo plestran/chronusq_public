@@ -689,12 +689,13 @@ if(this->printLevel_ >= 2) {
   prettyPrint(this->fileio_->out,SpinHam.real(),"Spin-Blocked 2c-Hamiltonian (real)");
   prettyPrint(this->fileio_->out,SpinHam.imag(),"Spin-Blocked 2c-Hamiltonian (imag)");
 
+/*
   es.compute(TCSham);
   HEV= es.eigenvalues();
 //  HEVx= es.eigenvectors();
 
   prettyPrint(cout,HEV,"HEV");
 //  prettyPrintComplex(cout,HEVx,"HEVc");
-
+*/
 }
 

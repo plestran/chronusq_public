@@ -22,6 +22,7 @@ int main() {
     fileio.iniStdGroups(); //Setting up and partitioning files
     CQSetNumThreads(1); //Sets up open MP threads
 
+/*
 // H Atom
     molecule.setCharge(0);
     molecule.setNTotalE(1);
@@ -31,7 +32,7 @@ int main() {
 
     molecule.setIndex(0,HashAtom("H",0));
     molecule.setCart(0,0.0,0.0,0.0);
-
+*/
 
 /*
 // H2
@@ -124,7 +125,7 @@ int main() {
 
 */
 
-/*
+
 // Methanol
     molecule.setCharge(0);
     molecule.setNTotalE(18);
@@ -146,7 +147,6 @@ int main() {
     molecule.setCart(4,-1.718167,1.099499,0.751562);
     molecule.setCart(5,-0.897365,1.389691,2.266534);
 
-*/
 
     molecule.convBohr();
     molecule.computeNucRep();
