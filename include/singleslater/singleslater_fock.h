@@ -191,12 +191,23 @@ void SingleSlater<T>::formFock(){
       this->fockScalar_->real() += (*this->aointegrals_->coreH_);
       
       if(this->nTCS_ == 2) {
-//        cout << "nTCS == 2 ... buiding Fock" << endl;
-        this->fockMx_->setZero();
-        this->fockMy_->setZero();
-       // (*this->fockMx_) += -1*(*this->aointegrals_->oneEmx_);
-       // (*this->fockMy_) += (*this->aointegrals_->oneEmy_);
-       // (*this->fockMz_) += -1*(*this->aointegrals_->oneEmz_);
+        if(this->aointegrals_->doX2C){
+    //        cout << "nTCS == 2 ... buiding Fock" << endl;
+            (*this->fockMx_) = (*this->aointegrals_->oneEmx_);
+            (*this->fockMy_) = (*this->aointegrals_->oneEmy_);
+            (*this->fockMz_) = (*this->aointegrals_->oneEmz_);
+            // -----------------------------------
+            // SCALE SO parts by 'i'
+            // -----------------------------------
+              Quantum<T>::complexMyScale(*this->fockMx_);
+              Quantum<T>::complexMyScale(*this->fockMy_);
+              Quantum<T>::complexMyScale(*this->fockMz_);
+            // -----------------------------------
+            }
+        else {
+            this->fockMx_->setZero();
+            this->fockMy_->setZero();
+            }
         }
 
       this->aointegrals_->addElecDipole(*this->fockScalar_,this->elecField_);
@@ -225,14 +236,15 @@ void SingleSlater<T>::formFock(){
       if(this->nTCS_ == 1)
         Quantum<T>::spinGather(*this->fockA_,*this->fockB_,toGather);
       else {
-        this->fockMx_->setZero();
-        this->fockMy_->setZero();
         (*this->fockMx_) += (*this->PTMx_);
         (*this->fockMy_) += (*this->PTMy_);
         toGather.emplace_back(*this->fockMy_);
         toGather.emplace_back(*this->fockMx_);
         Quantum<T>::spinGather(*this->fockA_,toGather);
-      }
+
+        prettyPrint(this->fileio_->out,(*this->fockA_)," fockA_ ");
+        }
+
 
     }
 

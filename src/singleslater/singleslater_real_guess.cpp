@@ -349,6 +349,16 @@ void SingleSlater<double>::readGuessGauFChk(std::string &filename) {
 };
 
 template<>
+void SingleSlater<double>::COREGuess(){
+ //   this->onePDMA_->setZero();
+ //   this->onePDMB_->setZero();
+ //   this->moA_->setZero();
+ //   this->moB_->setZero();
+    this->haveDensity = true;
+    this->haveMO = true;
+};
+
+template<>
 void SingleSlater<double>::READGuess(){
   if(getRank() == 0) {
     this->fileio_->out << "Reading SCF Density from disk" << endl;

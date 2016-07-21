@@ -218,6 +218,16 @@ void SingleSlater<dcomplex>::SADGuess() {
 };
 
 template<>
+void SingleSlater<dcomplex>::COREGuess(){
+ //   this->onePDMA_->setZero();
+ //   this->onePDMB_->setZero();
+ //   this->moA_->setZero();
+ //   this->moB_->setZero();
+    this->haveMO = true;
+    this->haveDensity = true;
+};
+
+template<>
 void SingleSlater<dcomplex>::READGuess(){
   if(getRank() == 0) {
     this->fileio_->out << "Reading SCF Density from disk" << endl;
