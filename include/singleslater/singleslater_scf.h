@@ -111,15 +111,18 @@ void SingleSlater<T>::SCF2(){
     }
 
     this->orthoFock();
+
+//JJRADLER
+    if(this->isConverged == false)	//Convergence criterion 
+      this->levelShift();	//Level-shift for AO basis
     this->diagFock2();
-//    this->backTransformMOs();
-    this->levelShift();
+//    this->backTransformMOs(); -- JJRADLER
 
     if(iter == 0 && this->guess_ != READ) this->mixOrbitalsSCF();
 
     this->copyDen();
     this->formDensity();
-//  this->orthoDen();
+    this->orthoDen();
     this->formFock();
 
     if(PyErr_CheckSignals() == -1)
@@ -215,6 +218,7 @@ void SingleSlater<T>::copyDen(){
   };
 };
 //DBWY and JJRADLER  -- Needs to be rewritten and have conditional for convergence added
+/*
 template<typename T>
 void SingleSlater<T>::levelShift(){
   double b = 0.42;
@@ -228,4 +232,26 @@ void SingleSlater<T>::levelShift(){
     }
   }
 };
-//DBWY and JJRADLER
+*/
+
+//JJRADLER - This function should be called within SCF loop until convergence criterion is met. 
+template<typename T>
+void singleSlater<T>::levelShift(){
+//Construction of Delta matrix
+  double b = 0.42;	//The meaning of the Universe.
+  const totalSize = this->nBasis_;
+  const virSize = totalSize - this->nOccA;
+  TMatrix delta(totalSize, totalSize) = TMatrix::Zero();
+  delta.bottomRightCorner(virSize, virSize) = TMatrix::Identity(virSize, virSize);
+  delta *= b;	//Sets the diagonal elements of the Vir-Vir block to b
+
+//Transformation of Delta matrix from MO to AO basis
+  //TMatrix tempC = (*this->moA_);
+  TMatrix adjC = (*this->moA_).adjoint();
+  TMatrix dagC = adjC.conj();
+  TMatrix deltaPrime = dagC * delta * (*this->moA_);	//Transformation of delta (MO) to deltaPrime (AO)
+  
+//Shift current Fock matrix
+   this->fockA_ += deltaPrime;
+} 
+// JJRADLER
