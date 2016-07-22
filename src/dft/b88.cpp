@@ -58,6 +58,7 @@ DFTFunctional::DFTInfo BEightEight::eval(const double &rhoA, const double &rhoB,
   double rhoA4ov3 = rhoA1ov3 * rhoA; 
   double rhoB4ov3 ; 
   if(std::abs(spindensity) > this->small) {
+//    cout << "B88 UKS ON 1" <<endl;
     rhoB1ov3 = std::pow(rhoB,this->d1over3);
     rhoB4ov3 = rhoB1ov3 * rhoB; 
   }
@@ -77,6 +78,7 @@ DFTFunctional::DFTInfo BEightEight::eval(const double &rhoA, const double &rhoB,
   if(std::abs(spindensity) > this->small) {
     //Open Shell
   //Paper  xB   = gammaBB / rhoA4ov3; 
+//    cout << "B88 UKS ON" <<endl;
     xB   = std::sqrt(gammaBB) / rhoB4ov3; 
     g0 = this->g0B88(xB,sinhx,bx);
     g1 = this->g1B88(xB,sinhx,bx);

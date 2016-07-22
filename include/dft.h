@@ -208,5 +208,6 @@ public:
   DFTInfo eval(const double &rhoA, const double &rhoB);
   DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaBB);
   DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB, const double &gammaBB);
+  DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB, const double &gammaBB, bool small);
 };
 #endif

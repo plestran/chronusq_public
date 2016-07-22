@@ -206,7 +206,7 @@ void SingleSlater<double>::formVXC_new(){
           int jSt = this->basisset_->mapSh2Bf(jShell);
           for(auto jBf = jSt; jBf < (jSt + jSz); jBf++){
             Pt = fact * DENT[jBf];
-            if(std::abs(Pt) > 1e-10 ){
+            if(std::abs(Pt) > this->epsScreen){
               Tt += Pt * SCRATCH1DATA[jBf];
             }
           } // jBf
@@ -218,7 +218,7 @@ void SingleSlater<double>::formVXC_new(){
             int jSt = this->basisset_->mapSh2Bf(jShell);
             for(auto jBf = jSt; jBf < (jSt + jSz); jBf++){
               Ps = fact * DENS[jBf];
-              if( std::abs(Ps) > 1e-10){
+              if( std::abs(Ps) > this->epsScreen){
               Ts += Ps * SCRATCH1DATA[jBf];
               }
             } // jBf
@@ -257,20 +257,25 @@ void SingleSlater<double>::formVXC_new(){
       gammaAB = GradRhoA.dot(GradRhoB);           
     }
     
-//    check if are noise
+//these if statements prevent numerical instability with zero guesses
     if(rhoT    <= 0.0 ) {
-        if((std::abs(rhoT)) <= 1.0e-10) {
+      if((std::abs(rhoT)) <= 1.0e-10) {
+        return;
+      }else{ 
+        CErr("Numerical noise in the density");
+      }
+    }else if(rhoT < this->epsScreen){
+     return;
+    }
+    if(NDer > 0 ) {
+      if(gammaAA    <= 0.0 || gammaBB    <= 0.0 || gammaAB    <= 0.0) {
+        if(std::abs(gammaAA)    <= 1.0e-10 || std::abs(gammaBB)    <= 1.0e-10 || std::abs(gammaAB)    <= 1.0e-10) {
           return;
         }else{ 
-          CErr("Numerical noise in the density");
+          CErr("Numerical noise in the density gradient");
         }
-//    skyp points based on small density
-//    skyp points based on small density
-      }else if(rhoT < this->epsScreen){
-        return;
       }
-//this if statement prevent numerical instability with zero guesses
-    if  (rhoT < 1.0e-20 ) {NSkip5++; return;}
+    }
     // Evaluate density functional
     DFTFunctional::DFTInfo kernelXC;
     for(auto i = 0; i < this->dftFunctionals_.size(); i++){
@@ -317,9 +322,9 @@ void SingleSlater<double>::formVXC_new(){
              int iSz= shSizes[iShell];
              int iSt = this->basisset_->mapSh2Bf(iShell);
              for(auto iBf = iSt; iBf < (iSt + iSz); iBf++){
-                OmegaBDATA[iBf] += GradRhoB(0) * SCRATCH1X[iBf] +
-                                   GradRhoB(1) * SCRATCH1Y[iBf] +
-                                   GradRhoB(2) * SCRATCH1Z[iBf];
+                OmegaBDATA[iBf] += GradRhoB(0) * SCRATCH1XDATA[iBf] + 
+                                   GradRhoB(1) * SCRATCH1YDATA[iBf] + 
+                                   GradRhoB(2) * SCRATCH1ZDATA[iBf];  
              } // iBf
           } // iShell
         } //UKS
@@ -380,6 +385,8 @@ void SingleSlater<double>::formVXC_new(){
 
   if(this->isGGA) cout << "GGA ON " << this->isGGA <<endl ; 
   if(!this->isGGA) cout << "GGA OFF " << this->isGGA <<endl ; 
+//  this->epsScreen = 1e-20;
+//  this->basisset_->radcut(this->epsScreen,this->maxiter,this->epsConv);
   ChronusQ::AtomicGrid AGrid(this->nRadDFTGridPts_,this->nAngDFTGridPts_,
       ChronusQ::GRID_TYPE::EULERMAC,ChronusQ::GRID_TYPE::LEBEDEV,
       ChronusQ::ATOMIC_PARTITION::FRISCH,this->molecule_->cartArray(),
@@ -388,7 +395,6 @@ void SingleSlater<double>::formVXC_new(){
   KernelIntegrand<double> res(this->vXA_->cols());
   //Screaning based on cutoff
 //  the radCutoof vector is populated in singleSlater_real_guess.cpp
-//  this->basisset_->radcut(this->epsScreen,this->maxiter,this->epsConv);
 
   this->totalEx    = 0.0;
   this->vXA()->setZero();   // Set to zero every occurence of the SCF
@@ -404,7 +410,7 @@ void SingleSlater<double>::formVXC_new(){
   } 
   for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
     AGrid.center() = iAtm;
-    cout << "Cutoff Rad = " << atomRadCutoff[iAtm] << "for iAt= " << iAtm << endl;
+//    cout << "Cutoff Rad = " << atomRadCutoff[iAtm] << "for iAt= " << iAtm << endl;
     AGrid.setRadCutOff(atomRadCutoff[iAtm]);
     AGrid.findNearestNeighbor();
     AGrid.scalingFactor()=0.5 *
