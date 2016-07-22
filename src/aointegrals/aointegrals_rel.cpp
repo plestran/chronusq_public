@@ -158,7 +158,7 @@ if(this->printLevel_ >= 2){
 // Count linear dependencies here?
   int nZero = 0;
   for(auto iS = 0; iS < nUncontracted; iS++)
-    if(std::abs(ovlpEigValues[iS]) < 1e-6) nZero++;
+    if(std::abs(ovlpEigValues[iS]) < 1e-12) nZero++;
 
   cout << "NZERO " << nZero << endl;
 

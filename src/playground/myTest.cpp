@@ -49,7 +49,7 @@ int main() {
     molecule.setCart(1,0.5,0.0,0.0);
 */
 
-/*
+
 // O2
     molecule.setCharge(0);
     molecule.setNTotalE(16);
@@ -62,7 +62,7 @@ int main() {
 
     molecule.setCart(0,-0.74,0.0,0.0); //In Angstroms!
     molecule.setCart(1,0.74,0.0,0.0);
-*/
+
 
 /*
 // Li3
@@ -125,7 +125,7 @@ int main() {
 
 */
 
-
+/*
 // Methanol
     molecule.setCharge(0);
     molecule.setNTotalE(18);
@@ -146,7 +146,7 @@ int main() {
     molecule.setCart(3,-1.168237,3.527873,2.039804);
     molecule.setCart(4,-1.718167,1.099499,0.751562);
     molecule.setCart(5,-0.897365,1.389691,2.266534);
-
+*/
 
     molecule.convBohr();
     molecule.computeNucRep();
