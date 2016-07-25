@@ -222,7 +222,7 @@ template<typename T>
 void SingleSlater<T>::levelShift(){
 //Construction of Delta matrix
 // cout << "In Level Shift" << endl;
-  double b = 1.42;	// 1 + .The meaning of the Universe.
+  double b = 2.42;	// 2 + .The meaning of the Universe.
   TMatrix deltaA = TMatrix::Zero(this->nBasis_, this->nBasis_);
   for(auto iVir = this->nOccA_; iVir < this->nBasis_; iVir++){
     deltaA(iVir, iVir) = b;
