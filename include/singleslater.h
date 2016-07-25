@@ -653,6 +653,7 @@ public:
 
   // JRADLER
   void levelShift();
+  void levelShift2();
   // JRADLER
 
   void SCF2();
