@@ -192,23 +192,22 @@ void SingleSlater<T>::formFock(){
       
       if(this->nTCS_ == 2) {
         if(this->aointegrals_->doX2C){
-    //        cout << "nTCS == 2 ... buiding Fock" << endl;
-            (*this->fockMx_) = 2*(*this->aointegrals_->oneEmx_);
-            (*this->fockMy_) = 2*(*this->aointegrals_->oneEmy_);
-            (*this->fockMz_) = 2*(*this->aointegrals_->oneEmz_);
-            // -----------------------------------
-            // SCALE SO parts by 'i'
-            // -----------------------------------
-              Quantum<T>::complexMyScale(*this->fockMx_);
-              Quantum<T>::complexMyScale(*this->fockMy_);
-              Quantum<T>::complexMyScale(*this->fockMz_);
-            // -----------------------------------
-            }
-        else {
-            this->fockMx_->setZero();
-            this->fockMy_->setZero();
-            }
+    //    cout << "nTCS == 2 ... buiding Fock" << endl;
+          this->fockMx_->real() = 2*(*this->aointegrals_->oneEmx_);
+          this->fockMy_->real() = 2*(*this->aointegrals_->oneEmy_);
+          this->fockMz_->real() = 2*(*this->aointegrals_->oneEmz_);
+          // -----------------------------------
+          // SCALE SO parts by 'i'
+          // -----------------------------------
+          Quantum<T>::complexMyScale(*this->fockMx_);
+          Quantum<T>::complexMyScale(*this->fockMy_);
+          Quantum<T>::complexMyScale(*this->fockMz_);
+          // -----------------------------------
+        } else {
+          this->fockMx_->setZero();
+          this->fockMy_->setZero();
         }
+      }
 
       this->aointegrals_->addElecDipole(*this->fockScalar_,this->elecField_);
       (*this->fockScalar_) *= 2.0;
