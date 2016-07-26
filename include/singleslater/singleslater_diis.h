@@ -60,7 +60,9 @@ void SingleSlater<T>::CDIIS(){
   B(N-1,N-1)=0;
   for(auto k = 0; k < N;k++) coef[k] = 0.0; 
   coef[N-1]=-1.0;
-
+// if(!this->isClosedShell && this->nTCS_ !=2){
+//   B.block(0,N-1,0,N-1) = 2.0 * B.block(0,N-1,0,N-1);
+// }
   double ANORM = B.template lpNorm<1>();
 
   int LWORK  = 5*this->nDIISExtrap_;
@@ -101,6 +103,11 @@ void SingleSlater<T>::CDIIS(){
   this->memManager_->free(coef,N);
   this->memManager_->free(iPiv,N);
   this->memManager_->free(iWORK_,N);
+
+  if(!this->isClosedShell && this->nTCS_ !=2){
+    (*this->fockScalar_) = 0.5 * ((*this->fockA_) + (*this->fockB_));
+    (*this->fockMz_) = 0.5 * ((*this->fockA_) - (*this->fockB_));
+  }
 
 } // CDIIS
 
