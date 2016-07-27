@@ -173,7 +173,7 @@ void SingleSlater<double>::formVXC_new(){
       T3 += Newend - Newstart;
     }
 
-    if(S1Norm < 1e-9) {NSkip4++; return;}
+    if(S1Norm < this->epsScreen) {NSkip4++; return;}
 
 
     double rhoT(0.0);
@@ -259,7 +259,7 @@ void SingleSlater<double>::formVXC_new(){
     
 //these if statements prevent numerical instability with zero guesses
     if(rhoT    <= 0.0 ) {
-      if((std::abs(rhoT)) <= 1.0e-10) {
+      if((std::abs(rhoT)) <= this->epsScreen) {
         return;
       }else{ 
         CErr("Numerical noise in the density");
@@ -267,15 +267,17 @@ void SingleSlater<double>::formVXC_new(){
     }else if(rhoT < this->epsScreen){
      return;
     }
-    if(NDer > 0 ) {
-      if(gammaAA    <= 0.0 || gammaBB    <= 0.0 || gammaAB    <= 0.0) {
-        if(std::abs(gammaAA)    <= 1.0e-10 || std::abs(gammaBB)    <= 1.0e-10 || std::abs(gammaAB)    <= 1.0e-10) {
-          return;
-        }else{ 
-          CErr("Numerical noise in the density gradient");
-        }
-      }
-    }
+//A    if(NDer > 0 ) {
+//      if(gammaAA    <= 0.0 || gammaBB    <= 0.0 || gammaAB    <= 0.0) {
+//A        if(std::abs(gammaAA)    <= this->epsScreen || std::abs(gammaBB)    <= this->epsScreen || std::abs(gammaAB)    <= this->epsScreen) {
+//A          cout << " HERE GGA " << endl;
+//        if(std::abs(gammaAA)    <= 1.0e-12 || std::abs(gammaBB)    <= 1.0e-12 || std::abs(gammaAB)    <= 1.0e-12) {
+//A          return;
+//        }else{ 
+//          CErr("Numerical noise in the density gradient");
+//        }
+//A      }
+//A    }
     // Evaluate density functional
     DFTFunctional::DFTInfo kernelXC;
     for(auto i = 0; i < this->dftFunctionals_.size(); i++){
@@ -385,11 +387,13 @@ void SingleSlater<double>::formVXC_new(){
 
   if(this->isGGA) cout << "GGA ON " << this->isGGA <<endl ; 
   if(!this->isGGA) cout << "GGA OFF " << this->isGGA <<endl ; 
-//  this->epsScreen = 1e-20;
-//  this->basisset_->radcut(this->epsScreen,this->maxiter,this->epsConv);
+//  ChronusQ::AtomicGrid AGrid(this->nRadDFTGridPts_,this->nAngDFTGridPts_,
+//      ChronusQ::GRID_TYPE::EULERMAC,ChronusQ::GRID_TYPE::LEBEDEV,
+//      ChronusQ::ATOMIC_PARTITION::FRISCH,this->molecule_->cartArray(),
+//      this->molecule_->rIJ(),0,this->epsScreen,1e6,1.0,false);
   ChronusQ::AtomicGrid AGrid(this->nRadDFTGridPts_,this->nAngDFTGridPts_,
       ChronusQ::GRID_TYPE::EULERMAC,ChronusQ::GRID_TYPE::LEBEDEV,
-      ChronusQ::ATOMIC_PARTITION::FRISCH,this->molecule_->cartArray(),
+      ChronusQ::ATOMIC_PARTITION::BECKE,this->molecule_->cartArray(),
       this->molecule_->rIJ(),0,this->epsScreen,1e6,1.0,false);
    
   KernelIntegrand<double> res(this->vXA_->cols());
