@@ -85,7 +85,7 @@ void SingleSlater<dcomplex>::evalConver(int iter){
     new (&POldAlpha) ComplexMap(
       this->POldAlphaMem_,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_
     );
-    if(!this->isClosedShell && this->Ref_ != TCS){
+    if(!this->isClosedShell && this->nTCS_ == 1){
       new (&POldBeta) ComplexMap(
         this->POldBetaMem_,this->nBasis_,this->nBasis_
       );
@@ -98,7 +98,7 @@ void SingleSlater<dcomplex>::evalConver(int iter){
     EDelta = this->totalEnergy - EOld;
  
     PAlphaRMS = ((*this->onePDMA_).cwiseAbs() - POldAlpha.cwiseAbs()).norm();
-    if(!this->isClosedShell && this->Ref_ != TCS) 
+    if(!this->isClosedShell && this->nTCS_ == 1) 
       PBetaRMS = ((*this->onePDMB_).cwiseAbs() - POldBeta.cwiseAbs()).norm();
  
     if(this->printLevel_ > 0) 
@@ -124,7 +124,7 @@ template<>
 void SingleSlater<dcomplex>::mixOrbitalsSCF(){
     return;
   auto nO = this->nAE_ + this->nBE_;
-  if(this->Ref_ == TCS){
+  if(this->nTCS_ == 2){
   //CErr();
   this->fileio_->out << "** Mixing Alpha-Beta Orbitals for 2C Guess **" << endl;
   Eigen::VectorXcd HOMOA,LUMOB;

@@ -40,7 +40,7 @@ void SingleSlater<double>::placeAtmDen(std::vector<int> atomIndex,
   for(auto iAtm : atomIndex){
     auto iBfSt = this->basisset_->mapCen2Bf(iAtm)[0];
     auto iSize = this->basisset_->mapCen2Bf(iAtm)[1]; 
-    if(this->Ref_ != TCS){
+    if(this->nTCS_ == 1){
       this->onePDMA_->block(iBfSt,iBfSt,iSize,iSize)= (*hfA.onePDMA_);
       if(this->isClosedShell){
         if(hfA.isClosedShell) 
@@ -71,11 +71,11 @@ void SingleSlater<double>::placeAtmDen(std::vector<int> atomIndex,
 template<>
 void SingleSlater<double>::scaleDen(){
   // Scale UHF densities according to desired multiplicity
-  if(!this->isClosedShell && this->Ref_ != TCS){
+  if(!this->isClosedShell && this->nTCS_ == 1){
     int nE = this->molecule_->nTotalE();
     (*this->onePDMA_) *= (double)this->nAE_/(double)nE ;
     (*this->onePDMB_) *= (double)this->nBE_/(double)nE ;
-  } else if(this->Ref_ == TCS) {
+  } else if(this->nTCS_ == 2) {
     int nE = this->molecule_->nTotalE();
     for(auto i = 0; i < this->nTCS_*this->nBasis_; i += 2)
     for(auto j = 0; j < this->nTCS_*this->nBasis_; j += 2){
@@ -113,7 +113,7 @@ void SingleSlater<double>::SADGuess() {
   int readNPGTO,L, nsize;
   if(getRank() == 0){
     this->moA_->setZero();
-    if(!this->isClosedShell && this->Ref_ != TCS) this->moB_->setZero();
+    if(!this->isClosedShell && this->nTCS_ == 1) this->moB_->setZero();
   }
 
   if(this->molecule_->nAtoms() > 1) {
@@ -367,7 +367,7 @@ void SingleSlater<double>::READGuess(){
     H5::DataSpace dataspace = this->fileio_->alphaSCFDen->getSpace();
     this->fileio_->alphaSCFDen->read(this->onePDMA_->data(),H5::PredType::NATIVE_DOUBLE,dataspace,dataspace);
     this->fileio_->alphaMO->read(this->moA_->data(),H5::PredType::NATIVE_DOUBLE,dataspace,dataspace);
-    if(!this->isClosedShell && this->Ref_ != TCS){
+    if(!this->isClosedShell && this->nTCS_ == 1){
       this->fileio_->betaSCFDen->read(this->onePDMB_->data(),H5::PredType::NATIVE_DOUBLE,dataspace,dataspace);
       this->fileio_->betaMO->read(this->moB_->data(),H5::PredType::NATIVE_DOUBLE,dataspace,dataspace);
     }
@@ -378,7 +378,7 @@ void SingleSlater<double>::READGuess(){
   MPI_Bcast(this->onePDMA_->data(),
     this->nTCS_*this->nTCS_*this->nBasis_*this->nBasis_,MPI_DOUBLE,0,
     MPI_COMM_WORLD);
-  if(!this->isClosedShell && this->Ref_ != TCS)
+  if(!this->isClosedShell && this->nTCS_ == 1)
     MPI_Bcast(this->onePDMB_->data(),
       this->nTCS_*this->nTCS_*this->nBasis_*this->nBasis_,MPI_DOUBLE,0,
       MPI_COMM_WORLD);

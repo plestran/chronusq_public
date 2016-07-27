@@ -151,6 +151,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("UHF"           , SingleSlater<double>::UHF                    )
     .value("CUHF"          , SingleSlater<double>::CUHF                   )
     .value("TCS"           , SingleSlater<double>::TCS                    )
+    .value("X2C"           , SingleSlater<double>::X2C                    )
 //  .value("RKS"           , SingleSlater<double>::RKS                    )
 //  .value("UKS"           , SingleSlater<double>::UKS                    )
 //  .value("CUKS"          , SingleSlater<double>::CUKS                   )
@@ -268,6 +269,8 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def_readonly("integralAlgorithm", &AOIntegrals::integralAlgorithm)
 //  .def_readwrite("allocERI", &AOIntegrals::allocERI           )
 //  .def_readwrite("doDF"    , &AOIntegrals::doDF               )
+    .def_readwrite("doX2C"   , &AOIntegrals::doX2C              )
+    .def_readwrite("useFiniteWidthNuclei", &AOIntegrals::useFiniteWidthNuclei)
   ;
 
   enum_<AOIntegrals::INTEGRAL_ALGORITHM>("AOIntegrals_INTEGRAL_ALGORITHM")

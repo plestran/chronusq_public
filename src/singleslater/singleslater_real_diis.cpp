@@ -37,7 +37,7 @@ void SingleSlater<double>::GenDComm(int iter){
 
   ErrA = (*this->fockA_) * (*this->onePDMA_) * (*this->aointegrals_->overlap_);
   ErrA -= (*this->aointegrals_->overlap_) * (*this->onePDMA_) * (*this->fockA_);
-  if(!this->isClosedShell && this->Ref_ != TCS){
+  if(!this->isClosedShell && this->nTCS_ == 1){
     RealMap ErrB(
       this->ErrorBetaMem_ + (iter % (this->nDIISExtrap_-1)) * this->lenF_,
       this->nBasis_,this->nBasis_

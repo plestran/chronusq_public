@@ -44,7 +44,7 @@ class KernelIntegrand {
 #ifdef USE_LIBINT
 template<typename T>
 void SingleSlater<T>::formPT(){
-  bool doTCS = (this->Ref_ == TCS);
+  bool doTCS = (this->nTCS_ == 2);
   bool doRHF = (this->isClosedShell && !doTCS);
   bool doKS  = this->isDFT;
   if(!this->haveDensity) this->formDensity();
@@ -258,7 +258,7 @@ void SingleSlater<T>::formFock(){
         ConstRealMap mu(&this->aointegrals_->elecDipole_->storage()[iBuf],
           NB,NB);
         fockA_->real() += this->elecField_[iXYZ] * mu;
-        if(!this->isClosedShell && this->Ref_ != TCS) 
+        if(!this->isClosedShell && this->nTCS_ == 1) 
           fockB_->real() += this->elecField_[iXYZ] * mu;
         iBuf += NBSq;
       }

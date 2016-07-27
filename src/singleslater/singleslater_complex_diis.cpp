@@ -34,7 +34,7 @@ void SingleSlater<dcomplex>::GenDComm(int iter){
                this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
   ErrA = (*this->fockA_) * (*this->onePDMA_) * (*this->aointegrals_->overlap_);
   ErrA -= (*this->aointegrals_->overlap_) * (*this->onePDMA_) * (*this->fockA_);
-  if(!this->isClosedShell && this->Ref_ != TCS){
+  if(!this->isClosedShell && this->nTCS_ == 1){
     ComplexMap ErrB(this->ErrorBetaMem_ + (iter % (this->lenCoeff_-1)) * this->lenF_,
                  this->nBasis_,this->nBasis_);
 

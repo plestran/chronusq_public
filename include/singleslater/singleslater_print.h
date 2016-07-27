@@ -411,7 +411,7 @@ void SingleSlater<T>::printSCFHeader(ostream &output){
   output << std::setw(16) << "SCF Iteration";
   output << std::setw(18) << "Energy (Eh)";
   output << std::setw(18) << "\u0394E (Eh)";
-  if(this->Ref_ == TCS)
+  if(this->nTCS_ == 2)
     output << std::setw(18) << "|\u0394P|";
   else {
     output << std::setw(18) << "|\u0394P(\u03B1)|";
@@ -422,7 +422,7 @@ void SingleSlater<T>::printSCFHeader(ostream &output){
   output << std::setw(16) << "-------------";
   output << std::setw(18) << "-----------";
   output << std::setw(18) << "-------";
-  if(this->Ref_ == TCS)
+  if(this->nTCS_ == 2)
     output << std::setw(18) << "----";
   else {
     output << std::setw(18) << "-------";
@@ -443,7 +443,7 @@ void SingleSlater<T>::printSCFIter(int iter, double EDel,double PARMS,double PBR
   this->fileio_->out << "   ";
   this->fileio_->out << std::setw(13) << std::scientific << std::right 
                      << std::setprecision(7) << PARMS;
-  if(!this->isClosedShell && this->Ref_ != TCS) {
+  if(!this->isClosedShell && this->nTCS_ == 1) {
     this->fileio_->out << "   ";
     this->fileio_->out << std::setw(13) << std::scientific << std::right 
                        << std::setprecision(7) << PBRMS;

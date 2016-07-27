@@ -28,7 +28,7 @@
 namespace ChronusQ{
   template<>
   void SingleSlater<dcomplex>::printDensity(){
-    if(this->Ref_ != TCS) {
+    if(this->nTCS_ == 1) {
       prettyPrintComplex(this->fileio_->out,(*this->onePDMA_),"\u03B1-Density");
       if(!this->isClosedShell) 
         prettyPrintComplex(this->fileio_->out,(*this->onePDMB_),"\u03B2-Density");
@@ -37,7 +37,7 @@ namespace ChronusQ{
   };
   template<>
   void SingleSlater<dcomplex>::printFock(){
-    if(this->Ref_ != TCS) {
+    if(this->nTCS_ == 1) {
       prettyPrintComplex(this->fileio_->out,(*this->fockA_),"\u03B1-Fock");
       if(!this->isClosedShell) 
         prettyPrintComplex(this->fileio_->out,(*this->fockB_),"\u03B2-Fock");
@@ -46,7 +46,7 @@ namespace ChronusQ{
   };
   template<>
   void SingleSlater<dcomplex>::printPT(){
-    if(this->Ref_ != TCS) {
+    if(this->nTCS_ == 1) {
       prettyPrintComplex(this->fileio_->out,(*this->PTA_),"\u03B1-Perturbation Tensor");
       if(!this->isClosedShell) 
         prettyPrintComplex(this->fileio_->out,(*this->PTB_),"\u03B2-Perturbation Tensor");

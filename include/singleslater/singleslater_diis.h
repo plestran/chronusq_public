@@ -44,7 +44,7 @@ void SingleSlater<T>::CDIIS(){
     TMap EJA(this->ErrorAlphaMem_ + (j%(N-1))*NBSq,NB,NB);
     TMap EKA(this->ErrorAlphaMem_ + (k%(N-1))*NBSq,NB,NB);
     B(j,k) = -EJA.frobInner(EKA);
-    if(!this->isClosedShell && this->Ref_ != TCS){
+    if(!this->isClosedShell && this->nTCS_ == 1){
       TMap EJB(this->ErrorBetaMem_ + (j%(N-1))*NBSq,NB,NB);
       TMap EKB(this->ErrorBetaMem_ + (k%(N-1))*NBSq,NB,NB);
       B(j,k) += -EJB.frobInner(EKB);
@@ -91,7 +91,7 @@ void SingleSlater<T>::CDIIS(){
     for(auto j = 0; j < N-1; j++) {
       TMap FA(this->FADIIS_ + (j%(N-1))*NBSq,NB,NB);
       (*this->fockA_) += coef[j]*FA;
-      if(!this->isClosedShell && this->Ref_ != TCS) {
+      if(!this->isClosedShell && this->nTCS_ == 1) {
         TMap FB(this->FBDIIS_ + (j%(N-1))*NBSq,NB,NB);
         (*this->fockB_) += coef[j]*FB;
       }
@@ -111,7 +111,7 @@ void SingleSlater<T>::CpyFock(int iter){
   std::memcpy(this->FADIIS_+(iter % (this->nDIISExtrap_-1)) * NSQ,
     this->fockA_->data(),NSQ * sizeof(T));
 
-  if(!this->isClosedShell && this->Ref_ != TCS)
+  if(!this->isClosedShell && this->nTCS_ == 1)
     std::memcpy(this->FBDIIS_ + (iter % (this->nDIISExtrap_-1)) * NSQ,
                 this->fockB_->data(),NSQ * sizeof(T));
 } // CpyFock

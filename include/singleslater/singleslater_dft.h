@@ -131,7 +131,7 @@ void SingleSlater<T>::buildVxc(cartGP gridPt, double weight, std::vector<bool> m
    auto start_3 = std::chrono::high_resolution_clock::now();  // Timing S contraction
 //T
      (*overlapR_) = overlapR_->selfadjointView<Lower>();;
-   if(this->isClosedShell && this->Ref_ != TCS) {
+   if(this->isClosedShell && this->nTCS_ == 1) {
     rhor = overlapR_->frobInner(this->densityA()->conjugate());
 //T
    auto finish_3 = std::chrono::high_resolution_clock::now();  
@@ -167,7 +167,7 @@ void SingleSlater<T>::buildVxc(cartGP gridPt, double weight, std::vector<bool> m
      }
     }
    }
-   if(!this->isClosedShell && this->Ref_ != TCS) {
+   if(!this->isClosedShell && this->nTCS_ == 1) {
      rhor   = overlapR_->frobInner(this->densityA()->conjugate());
      rhor_B = overlapR_->frobInner(this->densityB()->conjugate());
     if (this->ExchKernel_ != NOEXCH){

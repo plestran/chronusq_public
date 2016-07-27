@@ -39,7 +39,7 @@ void SingleSlater<dcomplex>::placeAtmDen(std::vector<int> atomIndex, SingleSlate
   for(auto iAtm : atomIndex){
     auto iBfSt = this->basisset_->mapCen2Bf(iAtm)[0];
     auto iSize = this->basisset_->mapCen2Bf(iAtm)[1]; 
-    if(this->Ref_ != TCS){
+    if(this->nTCS_ == 1){
       this->onePDMA_->block(iBfSt,iBfSt,iSize,iSize).real()      = (*hfA.densityA());
       if(this->isClosedShell){
         if(hfA.isClosedShell) 
@@ -68,11 +68,11 @@ void SingleSlater<dcomplex>::placeAtmDen(std::vector<int> atomIndex, SingleSlate
 template<>
 void SingleSlater<dcomplex>::scaleDen(){
   // Scale UHF densities according to desired multiplicity
-  if(!this->isClosedShell && this->Ref_ != TCS){
+  if(!this->isClosedShell && this->nTCS_ == 1){
     int nE = this->molecule_->nTotalE();
     (*this->onePDMA_) *= dcomplex((double)this->nAE_/(double)nE,0.0);
     (*this->onePDMB_) *= dcomplex((double)this->nBE_/(double)nE,0.0);
-  } else if(this->Ref_ == TCS) {
+  } else if(this->nTCS_ == 2) {
     int nE = this->molecule_->nTotalE();
     for(auto i = 0; i < this->nTCS_*this->nBasis_; i += 2)
     for(auto j = 0; j < this->nTCS_*this->nBasis_; j += 2){
@@ -91,7 +91,7 @@ void SingleSlater<dcomplex>::SADGuess() {
   int readNPGTO,L, nsize;
   if(getRank() == 0){
     this->moA_->setZero();
-    if(!this->isClosedShell && this->Ref_ != TCS) this->moB_->setZero();
+    if(!this->isClosedShell && this->nTCS_ == 1) this->moB_->setZero();
   }
 
   if(this->molecule_->nAtoms() > 1) {
@@ -248,7 +248,7 @@ void SingleSlater<dcomplex>::READGuess(){
     H5::DataSpace dataspace = this->fileio_->alphaSCFDen->getSpace();
     this->fileio_->alphaSCFDen->read(this->onePDMA_->data(),*(this->fileio_->complexType),dataspace,dataspace);
     this->fileio_->alphaMO->read(this->moA_->data(),*(this->fileio_->complexType),dataspace,dataspace);
-    if(!this->isClosedShell && this->Ref_ != TCS){
+    if(!this->isClosedShell && this->nTCS_ == 1){
       this->fileio_->betaSCFDen->read(this->onePDMB_->data(),*(this->fileio_->complexType),dataspace,dataspace);
       this->fileio_->betaMO->read(this->moB_->data(),*(this->fileio_->complexType),dataspace,dataspace);
     }
@@ -259,7 +259,7 @@ void SingleSlater<dcomplex>::READGuess(){
   MPI_Bcast(this->onePDMA_->data(),
     this->nTCS_*this->nTCS_*this->nBasis_*this->nBasis_,MPI_C_DOUBLE_COMPLEX,0,
     MPI_COMM_WORLD);
-  if(!this->isClosedShell && this->Ref_ != TCS)
+  if(!this->isClosedShell && this->nTCS_ == 1)
     MPI_Bcast(this->onePDMB_->data(),
       this->nTCS_*this->nTCS_*this->nBasis_*this->nBasis_,MPI_C_DOUBLE_COMPLEX,0,
       MPI_COMM_WORLD);

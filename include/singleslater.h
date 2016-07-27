@@ -257,7 +257,8 @@ public:
     RHF,
     UHF,
     CUHF,
-    TCS
+    TCS,
+    X2C
 //  RKS,
 //  UKS,
 //  CUKS,
@@ -729,9 +730,12 @@ public:
     } else if(this->Ref_ == CUHF) {
       this->SCFType_      += "Constrained Unrestricted " + generalReference; 
       this->SCFTypeShort_ += "CU" + generalRefShort;
-    } else if(this->Ref_ == TCS) {
+    } else if(this->nTCS_ == 2) {
       this->SCFType_      += "Generalized " + generalReference; 
       this->SCFTypeShort_ += "G" + generalRefShort;
+    } else if(this->Ref_ == X2C) {
+      this->SCFType_      += "Exact Two-Component " + generalReference; 
+      this->SCFTypeShort_ += "X2C-"+generalRefShort;
     }
   }
 

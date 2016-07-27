@@ -76,7 +76,7 @@ void SingleSlater<double>::evalConver(int iter){
     new (&POldAlpha) RealMap(
       this->POldAlphaMem_,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_
     );
-    if(!this->isClosedShell && this->Ref_ != TCS){
+    if(!this->isClosedShell && this->nTCS_ == 1){
       new (&POldBeta) RealMap(this->POldBetaMem_, this->nBasis_,this->nBasis_);
     }
  
@@ -87,7 +87,7 @@ void SingleSlater<double>::evalConver(int iter){
     EDelta = this->totalEnergy - EOld;
  
     PAlphaRMS = ((*this->onePDMA_) - POldAlpha).norm();
-    if(!this->isClosedShell && this->Ref_ != TCS) 
+    if(!this->isClosedShell && this->nTCS_ == 1) 
       PBetaRMS = ((*this->onePDMB_) - POldBeta).norm();
  
     if(this->printLevel_ > 0) 

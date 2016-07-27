@@ -140,7 +140,7 @@ void SingleSlater<T>::mullikenPop() {
   double charge;
   this->mullPop_.clear();
   RealMatrix PS = (*this->onePDMA_).real() * (*this->aointegrals_->overlap_); 
-  if(!this->isClosedShell && this->Ref_ != TCS){ 
+  if(!this->isClosedShell && this->nTCS_ == 1){ 
     PS += (*this->onePDMB_).real() * (*this->aointegrals_->overlap_);
   }
   for (auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++) {
