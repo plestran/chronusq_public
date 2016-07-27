@@ -30,3 +30,20 @@ void SingleSlater<T>::formGuess(){
   else if(this->guess_ == READ) this->READGuess();
   else CErr("Guess NYI",this->fileio_->out);
 }
+template<typename T>
+void SingleSlater<T>::COREGuess(){
+ 
+  this->onePDMA_->setZero();
+  this->moA_->setZero();
+  if(this->nTCS_ == 2 || !this->isClosedShell){
+    if(this->nTCS_ == 1) this->onePDMB_->setZero();
+    this->onePDMScalar_->setZero();
+    this->onePDMMz_->setZero();
+    if(this->nTCS_ == 2) {
+      this->onePDMMy_->setZero();
+      this->onePDMMx_->setZero();
+    }
+  }
+  this->haveMO = true;
+  this->haveDensity = true;
+};
