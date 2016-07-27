@@ -348,6 +348,7 @@ void SingleSlater<double>::readGuessGauFChk(std::string &filename) {
   this->haveMO = true;
 };
 
+/*
 template<>
 void SingleSlater<double>::COREGuess(){
  //   this->onePDMA_->setZero();
@@ -357,6 +358,7 @@ void SingleSlater<double>::COREGuess(){
     this->haveDensity = true;
     this->haveMO = true;
 };
+*/
 
 template<>
 void SingleSlater<double>::READGuess(){

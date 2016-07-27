@@ -217,15 +217,29 @@ void SingleSlater<dcomplex>::SADGuess() {
 #endif
 };
 
+/*
 template<>
 void SingleSlater<dcomplex>::COREGuess(){
  //   this->onePDMA_->setZero();
  //   this->onePDMB_->setZero();
  //   this->moA_->setZero();
  //   this->moB_->setZero();
-    this->haveMO = true;
-    this->haveDensity = true;
+ 
+  this->onePDMA_->setZero();
+  this->moA_->setZero();
+  if(this->nTCS_ == 2 || !this->isClosedShell){
+    if(this->nTCS_ == 1) this->onePDMB_->setZero();
+    this->onePDMScalar_->setZero();
+    this->onePDMMz_->setZero();
+    if(this->nTCS_ == 2) {
+      this->onePDMMy_->setZero();
+      this->onePDMMx_->setZero();
+    }
+  }
+  this->haveMO = true;
+  this->haveDensity = true;
 };
+*/
 
 template<>
 void SingleSlater<dcomplex>::READGuess(){
