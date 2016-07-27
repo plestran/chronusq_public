@@ -113,7 +113,7 @@ void SingleSlater<T>::SCF2(){
     this->orthoFock();
 
 //JJRADLER
-    this->levelShift();	//Level-shift for AO basis
+//  this->levelShift();	//Level-shift for AO basis
     this->diagFock2();
 
     if(iter == 0 && this->guess_ != READ) this->mixOrbitalsSCF();
