@@ -191,6 +191,8 @@ void SingleSlater<T>::formFock(){
       this->fockScalar_->real() += (*this->aointegrals_->coreH_);
       
       if(this->nTCS_ == 2) {
+          this->fockMx_->setZero();
+          this->fockMy_->setZero();
         if(this->aointegrals_->doX2C){
     //    cout << "nTCS == 2 ... buiding Fock" << endl;
           this->fockMx_->real() = 2*(*this->aointegrals_->oneEmx_);
@@ -203,9 +205,6 @@ void SingleSlater<T>::formFock(){
           Quantum<T>::complexMyScale(*this->fockMy_);
           Quantum<T>::complexMyScale(*this->fockMz_);
           // -----------------------------------
-        } else {
-          this->fockMx_->setZero();
-          this->fockMy_->setZero();
         }
       }
 
