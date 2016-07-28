@@ -249,6 +249,7 @@ def handleReference(workers,settings):
   BLYPFunctional  = ['B88','LYP']
 
   if isDFT:
+    # Check Functional
     if 'KS' in refStr:  
       if 'CORR' not in settings and 'EXCHANGE' not in settings:
         msg = "Must specify both Correlation or Exchange Kernel\n"
@@ -276,6 +277,26 @@ def handleReference(workers,settings):
       for func in BLYPFunctional:
         functionalMap[func]()
       workers["CQSingleSlater"].setDFTKernel(kernelMap['BLYP'])
+
+    # Optionally get the number of points
+    if 'DFT_NRAD' in settings:
+      workers["CQSingleSlater"].setDFTNRad(settings['DFT_NRAD'])
+    if 'DFT_NANG' in settings:
+      workers["CQSingleSlater"].setDFTNAng(settings['DFT_NANG'])
+
+    # Optionall set weights and grid
+    if 'DFT_GRID' in settings:
+      workers["CQSingleSlater"].setDFTGrid(gridMap[settings['DFT_GRID']])
+    if 'DFT_WEIGHTS' in settings:
+      workers["CQSingleSlater"].setDFTWeightScheme(
+        dftWeightScheme[settings['DFT_WEIGHTS']])
+
+    if 'DFT_SCREEN' in settings:
+      if not settings['DFT_SCREEN']:
+        workers["CQSingleSlater"].turnOffDFTScreening()
+
+    if 'DFT_SCRTOL' in settings:
+      workers["CQSingleSlater"].setDFTScreenTol(settings['DFT_SCRTOL'])
 
 
 #  # Set SS Reference

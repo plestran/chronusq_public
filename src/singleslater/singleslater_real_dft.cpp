@@ -387,13 +387,15 @@ void SingleSlater<double>::formVXC_new(){
 
   if(this->isGGA) cout << "GGA ON " << this->isGGA <<endl ; 
   if(!this->isGGA) cout << "GGA OFF " << this->isGGA <<endl ; 
-//  ChronusQ::AtomicGrid AGrid(this->nRadDFTGridPts_,this->nAngDFTGridPts_,
-//      ChronusQ::GRID_TYPE::EULERMAC,ChronusQ::GRID_TYPE::LEBEDEV,
-//      ChronusQ::ATOMIC_PARTITION::FRISCH,this->molecule_->cartArray(),
-//      this->molecule_->rIJ(),0,this->epsScreen,1e6,1.0,false);
+/*
   ChronusQ::AtomicGrid AGrid(this->nRadDFTGridPts_,this->nAngDFTGridPts_,
       ChronusQ::GRID_TYPE::EULERMAC,ChronusQ::GRID_TYPE::LEBEDEV,
       ChronusQ::ATOMIC_PARTITION::BECKE,this->molecule_->cartArray(),
+      this->molecule_->rIJ(),0,this->epsScreen,1e6,1.0,false);
+*/
+  ChronusQ::AtomicGrid AGrid(this->nRadDFTGridPts_,this->nAngDFTGridPts_,
+      static_cast<ChronusQ::GRID_TYPE>(this->dftGrid_),ChronusQ::GRID_TYPE::LEBEDEV,
+      static_cast<ChronusQ::ATOMIC_PARTITION>(this->weightScheme_),this->molecule_->cartArray(),
       this->molecule_->rIJ(),0,this->epsScreen,1e6,1.0,false);
    
   KernelIntegrand<double> res(this->vXA_->cols());

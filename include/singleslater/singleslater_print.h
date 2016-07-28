@@ -372,9 +372,9 @@ void SingleSlater<T>::printSCFHeader(ostream &output){
 
    
     output << std::setw(38) << std::left << "    Radial Grid:";
-    if(this->dftGrid_ == EULERMACL)
+    if(this->dftGrid_ == EULERMAC)
       output << "Euler-Maclaurin";
-    else if(this->dftGrid_ == GAUSSCHEB)
+    else if(this->dftGrid_ == GAUSSCHEBFST)
       output << "Gauss-Chebyshev (1st Kind)";
     output << "  (" << this->nRadDFTGridPts_ << ")";
     output << endl;
