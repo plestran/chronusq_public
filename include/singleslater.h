@@ -62,6 +62,9 @@ class SingleSlater : public Quantum<T> {
   int      guess_;
   int      nDIISExtrap_;
   int      iDIISStart_;
+  int      iStartLevelShift_;
+  int      nLevelShift_;
+  double   levelShiftParam_;
 
   // DFT Parameters
   int weightScheme_;
@@ -399,13 +402,16 @@ public:
 
 
     // Standard Values
-    this->Ref_          = _INVALID;
-    this->DFTKernel_    = NODFT;
-    this->denTol_       = 1e-8;
-    this->eneTol_       = 1e-10;
-    this->maxSCFIter_   = 256;
-    this->nDIISExtrap_  = 7;
-    this->iDIISStart_   = 4;
+    this->Ref_              = _INVALID;
+    this->DFTKernel_        = NODFT;
+    this->denTol_           = 1e-8;
+    this->eneTol_           = 1e-10;
+    this->maxSCFIter_       = 256;
+    this->nDIISExtrap_      = 7;
+    this->iDIISStart_       = 4;
+    this->iStartLevelShift_ = 0;
+    this->nLevelShift_      = 4;
+    this->levelShiftParam_  = 2.42;
 
     this->elecField_   = {0.0,0.0,0.0};
     this->printLevel_  = 1;
