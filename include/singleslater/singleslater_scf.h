@@ -102,6 +102,7 @@ void SingleSlater<T>::SCF2(){
     this->printSCFHeader(this->fileio_->out);
   this->initSCFMem2();
 
+  bool doLevelShift;
   size_t iter;
   for(iter = 0; iter < this->maxSCFIter_; iter++){
     auto SCFStart = std::chrono::high_resolution_clock::now();
@@ -113,7 +114,11 @@ void SingleSlater<T>::SCF2(){
     this->orthoFock();
 
 //JJRADLER
-    if(iter < 20)
+    doLevelShift = iter >= this->iStartLevelShift_ ;
+    doLevelShift = doLevelShift && 
+      (iter < this->iStartLevelShift_ + this->nLevelShift_);
+
+    if(doLevelShift)
       this->levelShift2();	//Level-shift for AO basis
     this->diagFock2();
 
@@ -259,7 +264,7 @@ void SingleSlater<T>::levelShift(){
 //And this one is even simpler -- JJR
 template<typename T>
 void SingleSlater<T>::levelShift2(){
-  double b = 2.42;	//2+.The meaning of The Universe
+//double b = 2.42;	//2+.The meaning of The Universe
 
   T* FockA, *FockB;
   T* MOAVir, *MOBVir;
@@ -276,14 +281,14 @@ void SingleSlater<T>::levelShift2(){
 
     for(auto mu = 0; mu < this->nBasis_; mu++){
 
-      MOAMu = MOAVir[mu];
+      MOAMu = this->levelShiftParam_ * MOAVir[mu];
       for(auto nu = 0; nu < this->nBasis_; nu++)
-        FockA[nu + mu*this->nBasis_] += b * MOAMu * MOAVir[nu];
+        FockA[nu + mu*this->nBasis_] += MOAMu * MOAVir[nu];
 
       if(this->nTCS_ == 1 && !this->isClosedShell){ 
-        MOBMu = MOAVir[mu];
+        MOBMu = this->levelShiftParam_ * MOBVir[mu];
         for(auto nu = 0; nu < this->nBasis_; nu++)
-          FockB[nu + mu*this->nBasis_] += b * MOBMu * MOBVir[nu];
+          FockB[nu + mu*this->nBasis_] += MOBMu * MOBVir[nu];
       }
     
     }
