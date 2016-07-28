@@ -19,7 +19,6 @@ job       = SCF
 basis     = sto3g.gbs
 ints			= incore 
 exchange  = Slater
-#corr      = NOCORR
 
 #
 #  Misc Settings
