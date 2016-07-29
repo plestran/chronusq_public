@@ -115,8 +115,8 @@ void SingleSlater<T>::SCF2(){
 //JJRADLER
 //    this->levelShift();	//Level-shift for AO basis
 
-//JJGS FIXME: Add keyword for ImagTimeProp, generalize to GHF
-    if(this->doITP && (this->nTCS_ == 1)) {
+//JJGS
+    if(this->doITP) {
       if(iter == 0) this->diagFock2(); // Need one diagonalization to init guess
       this->doImagTimeProp(this->dt);
     } else {

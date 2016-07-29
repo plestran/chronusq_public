@@ -346,21 +346,18 @@ void SingleSlater<double>::doImagTimeProp(double dt){
   this->formFock(); // Need orthonormal Fock to propagate
   this->orthoFock();
 
-  //float dt = 0.1; //FIXME: add keyword
-  if(this->nTCS_ == 1) {
-    RealMatrix propagator = ( -dt * (*this->fockOrthoA_) ).exp();
-    RealMatrix newMOs     = propagator * (*this->moA_);
-    *this->moA_           = newMOs; // New MO coefficients are not orthogonal
-    propagator            = (*this->moA_).householderQr().householderQ();
-    *this->moA_           = propagator;
-    if(!this->isClosedShell){
-      propagator  = ( -dt * (*this->fockOrthoB_) ).exp();
-      newMOs      = propagator * (*this->moB_);
-      *this->moB_ = newMOs; // New MO coefficients are not orthogonal
-      propagator  = (*this->moB_).householderQr().householderQ();
-      *this->moB_ = propagator;
+  RealMatrix propagator = ( -dt * (*this->fockOrthoA_) ).exp();
+  RealMatrix newMOs     = propagator * (*this->moA_);
+  *this->moA_           = newMOs; // New MO coefficients are not orthogonal
+  propagator            = (*this->moA_).householderQr().householderQ();
+  *this->moA_           = propagator;
+  if(!this->isClosedShell && this->nTCS_ == 1){
+    propagator  = ( -dt * (*this->fockOrthoB_) ).exp();
+    newMOs      = propagator * (*this->moB_);
+    *this->moB_ = newMOs; // New MO coefficients are not orthogonal
+    propagator  = (*this->moB_).householderQr().householderQ();
+    *this->moB_ = propagator;
     }
-  } 
 };
 
 
