@@ -339,7 +339,7 @@ void SingleSlater<double>::orthoDen(){
 };
 
 template<>
-void SingleSlater<double>::doImagTimeProp(float dt){
+void SingleSlater<double>::doImagTimeProp(double dt){
   /* Propagate MO coefficients in imaginary time as an alternative to SCF
    * C(new) = exp(-dt * F(current)) * C(current) 
    */

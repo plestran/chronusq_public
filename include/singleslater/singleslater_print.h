@@ -347,6 +347,10 @@ void SingleSlater<T>::printSCFHeader(ostream &output){
   if(this->doDIIS) output << "CDIIS";
   else             output << "No DIIS Extrapolation";
   output << endl;
+  output << std::setw(38) << std::left << "  Imaginary Time Propagation:";
+  if(this->doITP) output << "True, with dt = " << this->dt;
+  else            output << "False"; 
+  output << endl;
 
 
   if(this->isDFT){

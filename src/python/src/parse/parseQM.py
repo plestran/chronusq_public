@@ -824,6 +824,7 @@ def parseSCF(workers,scfSettings):
     'SCFDENTOL' :workers['CQSingleSlater'].setSCFDenTol,
     'SCFENETOL' :workers['CQSingleSlater'].setSCFEneTol,
     'SCFMAXITER':workers['CQSingleSlater'].setSCFMaxIter,
+    'DT'        :workers['CQSingleSlater'].setITPdt,
     'FIELD'     :workers['CQSingleSlater'].setField,
     'GUESS'     :workers['CQSingleSlater'].setGuess ,
     'PRINT'     :workers['CQSingleSlater'].setPrintLevel
@@ -852,6 +853,14 @@ def parseSCF(workers,scfSettings):
       workers['CQSingleSlater'].doDIIS = True
     else:
       workers['CQSingleSlater'].doDIIS = False
+  except KeyError:
+    pass
+
+  try:
+    if scfSettings['ITP']:
+      workers['CQSingleSlater'].doITP = True
+    else:
+      workers['CQSingleSlater'].doITP = False
   except KeyError:
     pass
 

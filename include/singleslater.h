@@ -202,7 +202,7 @@ class SingleSlater : public Quantum<T> {
   void genDComm2(int);
   void backTransformMOs();
 
-  void doImagTimeProp(float); ///< Propagate the wavefunction in imaginary time 
+  void doImagTimeProp(double); ///< Propagate the wavefunction in imaginary time 
 
   double denTol_;
   double eneTol_;
@@ -320,6 +320,9 @@ public:
   bool  isPrimary;
   bool  doDIIS;
 
+  bool  doITP; ///< Do Imaginary Time Propagation (ITP)?
+  float dt;    ///< Timestep for Imaginary Time Propagation
+
   bool	screenVxc   ;///< Do the screening for Vxc?
   bool  isGGA;
 
@@ -414,9 +417,11 @@ public:
     this->printLevel_  = 1;
     this->isPrimary    = true;
     this->doDIIS       = true;
+    this->doITP        = false;
+    this->dt           = 0.1;
     this->isHF         = true;
-    this->isDFT         = false;
-    this->fixPhase_     = true;
+    this->isDFT        = false;
+    this->fixPhase_    = true;
     this->guess_       = SAD;
 
     this->weightScheme_ = BECKE;
@@ -536,6 +541,8 @@ public:
   inline void setDFTNAng(int i)           { this->nAngDFTGridPts_ = i; };
   inline void setDFTScreenTol(double x)   { this->epsScreen = x;       };
   inline void turnOffDFTScreening()       { this->screenVxc = false;   }; 
+
+  inline void setITPdt(double x)          { this->dt = x;              }; 
 
   inline void setField(std::array<double,3> field){ 
     this->elecField_ = field;  

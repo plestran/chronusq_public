@@ -52,6 +52,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setSCFDenTol"    , &SingleSlater<double>::setSCFDenTol           )
     .def("setSCFEneTol"    , &SingleSlater<double>::setSCFEneTol           )
     .def("setSCFMaxIter"   , &SingleSlater<double>::setSCFMaxIter          )
+    .def("setITPdt"        , &SingleSlater<double>::setITPdt               )
     .def("setField"        , &SingleSlater<double>::Wrapper_setField       )
     .def("setGuess"        , &SingleSlater<double>::setGuess               )
     .def("setDFTKernel"    , &SingleSlater<double>::setDFTKernel           )
@@ -84,6 +85,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def_readwrite("isGGA"        , &SingleSlater<double>::isGGA           )
     .def_readwrite("isHF"         , &SingleSlater<double>::isHF            )
     .def_readwrite("doDIIS"       , &SingleSlater<double>::doDIIS          )
+    .def_readwrite("doITP"        , &SingleSlater<double>::doITP           )
   ;
 
   class_<SingleSlater<dcomplex>,boost::noncopyable>("SingleSlater_complex",
@@ -110,6 +112,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setSCFDenTol"    , &SingleSlater<dcomplex>::setSCFDenTol           )
     .def("setSCFEneTol"    , &SingleSlater<dcomplex>::setSCFEneTol           )
     .def("setSCFMaxIter"   , &SingleSlater<dcomplex>::setSCFMaxIter          )
+    .def("setITPdt"        , &SingleSlater<dcomplex>::setITPdt               )
     .def("setField"        , &SingleSlater<dcomplex>::Wrapper_setField       )
     .def("setGuess"        , &SingleSlater<dcomplex>::setGuess               )
     .def("setDFTKernel"    , &SingleSlater<dcomplex>::setDFTKernel           )
@@ -143,6 +146,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def_readwrite("isGGA"        , &SingleSlater<dcomplex>::isGGA           )
     .def_readwrite("isHF"         , &SingleSlater<dcomplex>::isHF            )
     .def_readwrite("doDIIS"       , &SingleSlater<dcomplex>::doDIIS          )
+    .def_readwrite("doITP"        , &SingleSlater<dcomplex>::doITP           )
   ;
 
   enum_<SingleSlater<double>::REFERENCE>("Reference")
