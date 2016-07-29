@@ -102,6 +102,7 @@ void SingleSlater<T>::SCF2(){
     this->printSCFHeader(this->fileio_->out);
   this->initSCFMem2();
 
+  bool doLevelShift;
   size_t iter;
   for(iter = 0; iter < this->maxSCFIter_; iter++){
     auto SCFStart = std::chrono::high_resolution_clock::now();
@@ -112,18 +113,20 @@ void SingleSlater<T>::SCF2(){
 
     this->orthoFock();
 
-//JJRADLER
-//    this->levelShift();	//Level-shift for AO basis
-
 //JJGS
     if(this->doITP) {
       if(iter == 0) this->diagFock2(); // Need one diagonalization to init guess
       this->doImagTimeProp(this->dt);
     } else {
+      doLevelShift = iter >= this->iStartLevelShift_ ;
+      doLevelShift = doLevelShift && 
+        (iter < this->iStartLevelShift_ + this->nLevelShift_);
+  
+      if(doLevelShift)
+        this->levelShift2();	//Level-shift for AO basis
       this->diagFock2();
     }
 //JJGE
-
 
     if(iter == 0 && this->guess_ != READ) this->mixOrbitalsSCF();
 
@@ -267,12 +270,33 @@ void SingleSlater<T>::levelShift(){
 //And this one is even simpler -- JJR
 template<typename T>
 void SingleSlater<T>::levelShift2(){
-  double b = 2.42;	//2+.The meaning of The Universe
+//double b = 2.42;	//2+.The meaning of The Universe
+
+  T* FockA, *FockB;
+  T* MOAVir, *MOBVir;
+  T MOAMu, MOBMu;
+//T* FockA = this->fockA_->data();
+  FockA = this->fockOrthoA_->data();
+  if(this->nTCS_ == 1 && !this->isClosedShell) 
+    FockB = this->fockOrthoB_->data();
+  
   for(auto iVir = this->nOccA_; iVir < this->nBasis_; iVir++){
+    MOAVir = this->moA_->data() + iVir * this->nBasis_;
+    if(this->nTCS_ == 1 && !this->isClosedShell) 
+      MOBVir = this->moB_->data() + iVir * this->nBasis_;
+
     for(auto mu = 0; mu < this->nBasis_; mu++){
-      for(auto nu = 0; nu < this->nBasis_; nu++){
-        (*this->fockA_)(mu, nu) += b * ((*this->moA_(mu, iVir))*(*this->moA_(nu, iVir)));
+
+      MOAMu = this->levelShiftParam_ * MOAVir[mu];
+      for(auto nu = 0; nu < this->nBasis_; nu++)
+        FockA[nu + mu*this->nBasis_] += MOAMu * MOAVir[nu];
+
+      if(this->nTCS_ == 1 && !this->isClosedShell){ 
+        MOBMu = this->levelShiftParam_ * MOBVir[mu];
+        for(auto nu = 0; nu < this->nBasis_; nu++)
+          FockB[nu + mu*this->nBasis_] += MOBMu * MOBVir[nu];
       }
+    
     }
   }
 }

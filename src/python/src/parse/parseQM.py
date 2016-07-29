@@ -678,7 +678,7 @@ def handleReference(workers,settings):
 
   # Check if reference is Relativistic
   RelMethods = [chronusQ.Reference.X2C]
-  if workers["CQSingleSlater"].Ref() in TCMethods:
+  if workers["CQSingleSlater"].Ref() in RelMethods:
     workers["CQAOIntegrals"].doX2C = True
     workers["CQAOIntegrals"].useFiniteWidthNuclei = True
 
