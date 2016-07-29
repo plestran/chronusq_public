@@ -113,8 +113,17 @@ void SingleSlater<T>::SCF2(){
     this->orthoFock();
 
 //JJRADLER
-//  this->levelShift();	//Level-shift for AO basis
-    this->diagFock2();
+//    this->levelShift();	//Level-shift for AO basis
+
+//JJGS FIXME: Add keyword for ImagTimeProp, generalize to GHF
+    if(true && (this->nTCS_ == 1)) {
+      if(iter == 0) this->diagFock2(); // Need one diagonalization to init guess
+      this->doImagTimeProp();
+    } else {
+      this->diagFock2();
+    }
+//JJGE
+
 
     if(iter == 0 && this->guess_ != READ) this->mixOrbitalsSCF();
 

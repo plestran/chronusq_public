@@ -102,6 +102,23 @@ void SingleSlater<double>::scaleDen(){
   }
 //CErr();
 }; // SingleSlater::scaleDen [T=double]
+
+template<>
+void SingleSlater<double>::RandomGuess() {
+//JJG make random guess
+  auto NTCSxNBASIS = this->nTCS_ * this->nBasis_;
+  this->haveMO = true;
+  if(this->molecule_->nAtoms() > 1) this->haveDensity = true;
+  // Need to init random number otherwise Eigen is not truly random
+  srand((unsigned int) time(0));
+  *this->onePDMA_ = RealMatrix::Random(NTCSxNBASIS,NTCSxNBASIS);
+  *this->onePDMA_ = this->onePDMA_->selfadjointView<Lower>();
+  if(!this->isClosedShell && this->nTCS_ == 1){
+    *this->onePDMB_ = RealMatrix::Random(NTCSxNBASIS,NTCSxNBASIS);
+    *this->onePDMB_ = this->onePDMB_->selfadjointView<Lower>();
+  }  
+};
+
 //--------------------------------//
 // form the initial guess of MO's //
 //--------------------------------//
@@ -246,6 +263,7 @@ void SingleSlater<double>::SADGuess() {
   MPI_Barrier(MPI_COMM_WORLD);
 #endif
 };
+
 //------------------------------------------//
 // form the initial guess of MOs from input //
 //------------------------------------------//

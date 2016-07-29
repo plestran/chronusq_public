@@ -202,6 +202,8 @@ class SingleSlater : public Quantum<T> {
   void genDComm2(int);
   void backTransformMOs();
 
+  void doImagTimeProp(); ///< Propagate the wavefunction in imaginary time 
+
   double denTol_;
   double eneTol_;
   int maxSCFIter_;
@@ -268,7 +270,8 @@ public:
   enum GUESS {
     SAD,
     CORE,
-    READ
+    READ,
+    RANDOM
   }; // Supported Guess Types
 
   enum DFT {
@@ -595,6 +598,7 @@ public:
   void SADGuess();
   void COREGuess();
   void READGuess();
+  void RandomGuess();
   void placeAtmDen(std::vector<int>, SingleSlater<double> &); // Place the atomic densities into total densities for guess
   void scaleDen();              // Scale the unrestricted densities for correct # electrons
   void formDensity();		// form the density matrix

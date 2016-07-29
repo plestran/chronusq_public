@@ -86,6 +86,21 @@ void SingleSlater<dcomplex>::scaleDen(){
 // form the initial guess of MO's //
 //--------------------------------//
 template<>
+void SingleSlater<dcomplex>::RandomGuess() {
+//JJG make random guess
+  auto NTCSxNBASIS = this->nTCS_ * this->nBasis_;
+  this->haveMO = true;
+  if(this->molecule_->nAtoms() > 1) this->haveDensity = true;
+  // Need to init random number otherwise Eigen is not truly random
+  srand((unsigned int) time(0));
+  *this->onePDMA_ = ComplexMatrix::Random(NTCSxNBASIS,NTCSxNBASIS);
+  *this->onePDMA_ = this->onePDMA_->selfadjointView<Lower>();
+  if(!this->isClosedShell && this->nTCS_ == 1){
+    *this->onePDMB_ = ComplexMatrix::Random(NTCSxNBASIS,NTCSxNBASIS);
+    *this->onePDMB_ = this->onePDMB_->selfadjointView<Lower>();
+  }  
+};
+template<>
 void SingleSlater<dcomplex>::SADGuess() {
   
   int readNPGTO,L, nsize;

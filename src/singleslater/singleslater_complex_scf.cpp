@@ -424,4 +424,29 @@ void SingleSlater<dcomplex>::orthoDen(){
   }
 };
 
+template<>
+void SingleSlater<dcomplex>::doImagTimeProp(){
+  /* Propagate MO coefficients in imaginary time as an alternative to SCF
+   * C(new) = exp(-dt * F(current)) * C(current) 
+   */
+  this->formFock(); // Need orthonormal Fock to propagate
+  this->orthoFock();
+
+  float dt = 0.1; //FIXME: add keyword
+  if(this->nTCS_ == 1) {
+    ComplexMatrix propagator = ( -dt * (*this->fockOrthoA_) ).exp();
+    ComplexMatrix newMOs     = propagator * (*this->moA_);
+    *this->moA_           = newMOs; // New MO coefficients are not orthogonal
+    propagator            = (*this->moA_).householderQr().householderQ();
+    *this->moA_           = propagator;
+    if(!this->isClosedShell){
+      propagator  = ( -dt * (*this->fockOrthoB_) ).exp();
+      newMOs      = propagator * (*this->moB_);
+      *this->moB_ = newMOs; // New MO coefficients are not orthogonal
+      propagator  = (*this->moB_).householderQr().householderQ();
+      *this->moB_ = propagator;
+    }
+  } 
+};
+
 } // namespace ChronusQ

@@ -448,6 +448,9 @@ void writeJobMeta(SingleSlater<double> &ss, SDResponse<double> &sdr,
     strcpy(metaData.guess,"READ");
   else if(ss.guess() == SingleSlater<double>::CORE)
     strcpy(metaData.guess,"CORE");
+  else if(ss.guess() == SingleSlater<double>::RANDOM)
+    strcpy(metaData.guess,"RANDOM");
+
 
   metaData.nBasis = ss.nBasis();
   metaData.charge = mol.charge();
@@ -472,6 +475,8 @@ void writeJobMeta(SingleSlater<dcomplex> &ss, SDResponse<dcomplex> &sdr,
     strcpy(metaData.guess,"READ");
   else if(ss.guess() == SingleSlater<dcomplex>::CORE)
     strcpy(metaData.guess,"CORE");
+  else if(ss.guess() == SingleSlater<dcomplex>::RANDOM)
+    strcpy(metaData.guess,"RANDOM");
 
   metaData.nBasis = ss.nBasis();
   metaData.charge = mol.charge();

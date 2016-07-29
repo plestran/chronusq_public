@@ -159,9 +159,10 @@ BOOST_PYTHON_MODULE(libpythonapi){
   ;
 
   enum_<SingleSlater<double>::GUESS>("Guess")
-    .value("SAD"  , SingleSlater<double>::SAD  )
-    .value("CORE" , SingleSlater<double>::CORE )
-    .value("READ" , SingleSlater<double>::READ )
+    .value("SAD"    , SingleSlater<double>::SAD    )
+    .value("CORE"   , SingleSlater<double>::CORE   )
+    .value("READ"   , SingleSlater<double>::READ   )
+    .value("RANDOM" , SingleSlater<double>::RANDOM )
   ;
 
 /*

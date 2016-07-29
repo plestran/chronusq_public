@@ -340,6 +340,8 @@ void SingleSlater<T>::printSCFHeader(ostream &output){
     output << "Core Hamiltonian";
   else if(this->guess_ == READ)
     output << "Read";
+  else if(this->guess_ == RANDOM)
+    output << "Random";
   output << endl;
   output << std::setw(38) << std::left << "  DIIS Extrapolation Algorithm:";
   if(this->doDIIS) output << "CDIIS";
