@@ -339,14 +339,14 @@ void SingleSlater<double>::orthoDen(){
 };
 
 template<>
-void SingleSlater<double>::doImagTimeProp(){
+void SingleSlater<double>::doImagTimeProp(float dt){
   /* Propagate MO coefficients in imaginary time as an alternative to SCF
    * C(new) = exp(-dt * F(current)) * C(current) 
    */
   this->formFock(); // Need orthonormal Fock to propagate
   this->orthoFock();
 
-  float dt = 0.1; //FIXME: add keyword
+  //float dt = 0.1; //FIXME: add keyword
   if(this->nTCS_ == 1) {
     RealMatrix propagator = ( -dt * (*this->fockOrthoA_) ).exp();
     RealMatrix newMOs     = propagator * (*this->moA_);

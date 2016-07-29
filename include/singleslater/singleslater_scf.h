@@ -116,9 +116,10 @@ void SingleSlater<T>::SCF2(){
 //    this->levelShift();	//Level-shift for AO basis
 
 //JJGS FIXME: Add keyword for ImagTimeProp, generalize to GHF
+    float dt = 0.1;
     if(true && (this->nTCS_ == 1)) {
       if(iter == 0) this->diagFock2(); // Need one diagonalization to init guess
-      this->doImagTimeProp();
+      this->doImagTimeProp(dt);
     } else {
       this->diagFock2();
     }

@@ -202,7 +202,7 @@ class SingleSlater : public Quantum<T> {
   void genDComm2(int);
   void backTransformMOs();
 
-  void doImagTimeProp(); ///< Propagate the wavefunction in imaginary time 
+  void doImagTimeProp(float); ///< Propagate the wavefunction in imaginary time 
 
   double denTol_;
   double eneTol_;
