@@ -115,6 +115,15 @@ void SingleSlater<T>::allocOp(){
 
   if(this->nTCS_ == 2 || !this->isClosedShell){
 
+  if(this->nTCS_ == 1){
+    this->onePDMOrthoB_ = 
+      std::unique_ptr<TMap>(
+          new TMap(
+            this->memManager_->template malloc<T>(NBTSq),
+            this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
+     this->onePDMOrthoB_->setZero();
+   }
+
     this->onePDMOrthoScalar_ = 
       std::unique_ptr<TMap>(new TMap(
             this->memManager_->template malloc<T>(NBSq),

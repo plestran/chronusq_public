@@ -360,5 +360,92 @@ void SingleSlater<double>::doImagTimeProp(double dt){
     }
 };
 
+template<>
+void SingleSlater<double>::unOrthoDen(){
+  if(this->nTCS_ == 1 && this->isClosedShell) {
+    (*this->NBSqScratch_) = 
+      (*this->aointegrals_->ortho1_) * (*this->onePDMOrthoA_);
+    (*this->onePDMA_) = 
+      (*this->NBSqScratch_) * (*this->aointegrals_->ortho1_);
+
+  } else {
+
+    (*this->NBSqScratch_) = 
+      (*this->aointegrals_->ortho1_) * (*this->onePDMOrthoScalar_);
+    (*this->onePDMScalar_) = 
+      (*this->NBSqScratch_) * (*this->aointegrals_->ortho1_);
+
+    (*this->NBSqScratch_) = 
+      (*this->aointegrals_->ortho1_) * (*this->onePDMOrthoMz_);
+    (*this->onePDMMz_) = 
+      (*this->NBSqScratch_) * (*this->aointegrals_->ortho1_);
+
+    std::vector<std::reference_wrapper<RealMap>> toGather;
+    toGather.emplace_back(*this->onePDMScalar_);
+    toGather.emplace_back(*this->onePDMMz_);
+
+    if(this->nTCS_ == 2) {
+      (*this->NBSqScratch_) = 
+        (*this->aointegrals_->ortho1_) * (*this->onePDMOrthoMx_);
+      (*this->onePDMMx_) = 
+        (*this->NBSqScratch_) * (*this->aointegrals_->ortho1_);
+
+      (*this->NBSqScratch_) = 
+        (*this->aointegrals_->ortho1_) * (*this->onePDMOrthoMy_);
+      (*this->onePDMMy_) = 
+        (*this->NBSqScratch_) * (*this->aointegrals_->ortho1_);
+
+      toGather.emplace_back(*this->onePDMMy_);
+      toGather.emplace_back(*this->onePDMMx_);
+      Quantum<double>::spinGather(*this->onePDMA_,toGather);
+    } else
+      Quantum<double>::spinGather(*this->onePDMA_,*this->onePDMB_,toGather);
+  }
+};
+
+template<>
+void SingleSlater<double>::orthoDen2(){
+  if(this->nTCS_ == 1 && this->isClosedShell) {
+    (*this->NBSqScratch_) = 
+      (*this->aointegrals_->ortho1_) * (*this->onePDMA_);
+    (*this->onePDMOrthoA_) = 
+      (*this->NBSqScratch_) * (*this->aointegrals_->ortho1_);
+
+  } else {
+
+    (*this->NBSqScratch_) = 
+      (*this->aointegrals_->ortho1_) * (*this->onePDMScalar_);
+    (*this->onePDMOrthoScalar_) = 
+      (*this->NBSqScratch_) * (*this->aointegrals_->ortho1_);
+
+    (*this->NBSqScratch_) = 
+      (*this->aointegrals_->ortho1_) * (*this->onePDMMz_);
+    (*this->onePDMOrthoMz_) = 
+      (*this->NBSqScratch_) * (*this->aointegrals_->ortho1_);
+
+    std::vector<std::reference_wrapper<RealMap>> toGather;
+    toGather.emplace_back(*this->onePDMOrthoScalar_);
+    toGather.emplace_back(*this->onePDMOrthoMz_);
+
+    if(this->nTCS_ == 2) {
+      (*this->NBSqScratch_) = 
+        (*this->aointegrals_->ortho1_) * (*this->onePDMMx_);
+      (*this->onePDMOrthoMx_) = 
+        (*this->NBSqScratch_) * (*this->aointegrals_->ortho1_);
+
+      (*this->NBSqScratch_) = 
+        (*this->aointegrals_->ortho1_) * (*this->onePDMMy_);
+      (*this->onePDMOrthoMy_) = 
+        (*this->NBSqScratch_) * (*this->aointegrals_->ortho1_);
+
+      toGather.emplace_back(*this->onePDMOrthoMy_);
+      toGather.emplace_back(*this->onePDMOrthoMx_);
+      Quantum<double>::spinGather(*this->onePDMOrthoA_,toGather);
+    } else
+      Quantum<double>::spinGather(*this->onePDMOrthoA_,*this->onePDMOrthoB_,
+        toGather);
+  }
+};
+
 
 } // namespace ChronusQ

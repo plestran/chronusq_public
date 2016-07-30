@@ -103,22 +103,22 @@ void SingleSlater<T>::initSCFMem2(){
 
   this->FScalarDIIS_ = 
     this->fileio_->createScratchPartition(H5PredType<T>(),
-      "Fock (Scalar) For DIIS Extrapoloation",dims);
+      "Fock (Ortho_Scalar) For DIIS Extrapoloation",dims);
   this->DScalarDIIS_ = 
     this->fileio_->createScratchPartition(H5PredType<T>(),
-      "Density (Scalar) For DIIS Extrapoloation",dims);
-  this->DScalarDIIS_ = 
+      "Density (Ortho_Scalar) For DIIS Extrapoloation",dims);
+  this->EScalarDIIS_ = 
     this->fileio_->createScratchPartition(H5PredType<T>(),
       "Error Metric [F,D] (Scalar) For DIIS Extrapoloation",dims);
 
   if(this->nTCS_ == 2 || !this->isClosedShell) {
     this->FMzDIIS_ = 
       this->fileio_->createScratchPartition(H5PredType<T>(),
-        "Fock (Mz) For DIIS Extrapoloation",dims);
+        "Fock (Ortho_Mz) For DIIS Extrapoloation",dims);
     this->DMzDIIS_ = 
       this->fileio_->createScratchPartition(H5PredType<T>(),
-        "Density (Mz) For DIIS Extrapoloation",dims);
-    this->DMzDIIS_ = 
+        "Density (Ortho_Mz) For DIIS Extrapoloation",dims);
+    this->EMzDIIS_ = 
       this->fileio_->createScratchPartition(H5PredType<T>(),
         "Error Metric [F,D] (Mz) For DIIS Extrapoloation",dims);
   }
@@ -126,21 +126,21 @@ void SingleSlater<T>::initSCFMem2(){
   if(this->nTCS_ == 2) {
     this->FMyDIIS_ = 
       this->fileio_->createScratchPartition(H5PredType<T>(),
-        "Fock (My) For DIIS Extrapoloation",dims);
+        "Fock (Ortho_My) For DIIS Extrapoloation",dims);
     this->DMyDIIS_ = 
       this->fileio_->createScratchPartition(H5PredType<T>(),
-        "Density (My) For DIIS Extrapoloation",dims);
-    this->DMyDIIS_ = 
+        "Density (Ortho_My) For DIIS Extrapoloation",dims);
+    this->EMyDIIS_ = 
       this->fileio_->createScratchPartition(H5PredType<T>(),
         "Error Metric [F,D] (My) For DIIS Extrapoloation",dims);
 
     this->FMxDIIS_ = 
       this->fileio_->createScratchPartition(H5PredType<T>(),
-        "Fock (Mx) For DIIS Extrapoloation",dims);
+        "Fock (Ortho_Mx) For DIIS Extrapoloation",dims);
     this->DMxDIIS_ = 
       this->fileio_->createScratchPartition(H5PredType<T>(),
-        "Density (Mx) For DIIS Extrapoloation",dims);
-    this->DMxDIIS_ = 
+        "Density (Ortho_Mx) For DIIS Extrapoloation",dims);
+    this->EMxDIIS_ = 
       this->fileio_->createScratchPartition(H5PredType<T>(),
         "Error Metric [F,D] (Mx) For DIIS Extrapoloation",dims);
   }
@@ -157,8 +157,14 @@ void SingleSlater<T>::SCF2(){
   // Allocate SCF Memory
   this->initSCFMem2();
 
-  bool doLevelShift; // dynamic boolean to decide when to turn off/on level shifting
+  bool doLevelShift; // dynamic boolean to decide when to toggle level shifting
   size_t iter;
+
+  // FIXME: DIIS for CUHF NYI
+  if(this->Ref_ == CUHF) this->doDIIS = false;
+  
+  // Populate Orthonormal densities
+  this->orthoDen2();
 
   // SCF Iterations
   for(iter = 0; iter < this->maxSCFIter_; iter++){
@@ -171,9 +177,16 @@ void SingleSlater<T>::SCF2(){
       this->fockCUHF();
     }
 
-    // Transform (all of) the Fock matri(x,cies) from the AO to the orthonormal basis
-    // using the transformation matrix stored in AOIntegrals
+    // Transform (all of) the Fock matri(x,cies) from the AO to the 
+    // orthonormal basis using the transformation matrix stored in AOIntegrals
     this->orthoFock();
+
+    // Copy the orthonormal Fock matrix to disk for DIIS
+    if(this->doDIIS && iter >= this->iDIISStart_){
+      this->cpyOrthoFock2(iter - this->iDIISStart_); 
+      this->cpyOrthoDen2(iter - this->iDIISStart_); 
+      this->genDIISCom(iter - this->iDIISStart_);
+    }
 
 //JJGS
     if(this->doITP) {
@@ -193,17 +206,18 @@ void SingleSlater<T>::SCF2(){
     // Optionally mix the orbitals (FIXME: This needs to be addressed)
     if(iter == 0 && this->guess_ != READ) this->mixOrbitalsSCF();
 
-    // Copy the density to allow evaluation of RMS (FIXME: this should just
-    // copy the densities into scratch space as with the Focks to later evaluate
-    // the DIIS criteria, this facilities EDIIS as well)
+    // Copy the density to allow evaluation of RMS 
     this->copyDen();
 
     // Form the density(s) in the orthonormal basis
     this->formDensity();
+  
+    // Copy the data from onePDM? -> onePDMOrtho? (calculated above)
+    this->cpyAOtoOrthoDen();
 
     // Transform the density(s) back into the AO basis
-    // FIXME: The name of this function needs to be changed, it is a misnomer.
-    this->orthoDen();
+    //this->orthoDen();
+    this->unOrthoDen();
 
     // Form the AO Fock matrix(s)
     this->formFock();
@@ -217,8 +231,7 @@ void SingleSlater<T>::SCF2(){
     //   for use with CDIIS as well as performing the extrapolation every nDIISExtrap
     //   steps
     //
-    // FIXME: DIIS for CUHF NYI
-    if(this->Ref_ != CUHF && this->doDIIS && iter >= this->iDIISStart_){ 
+    if(this->doDIIS && iter >= this->iDIISStart_){ 
 
       if(iter == this->iDIISStart_ && this->printLevel_ > 0)
         this->fileio_->out << 

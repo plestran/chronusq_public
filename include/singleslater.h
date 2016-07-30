@@ -219,6 +219,14 @@ class SingleSlater : public Quantum<T> {
   H5::DataSet *EMzDIIS_;
   H5::DataSet *EMyDIIS_;
   H5::DataSet *EMxDIIS_;
+ 
+  // New DIIS Functions
+  void cpyOrthoFock2(int);
+  void cpyAOtoOrthoDen();
+  void cpyOrthoDen2(int);
+  void genDIISCom(int);
+  void unOrthoDen();
+  void orthoDen2();
 
   // Various functions the perform SCF and SCR allocation
   void initSCFPtr();       ///< NULL-out pointers to scratch partitions
