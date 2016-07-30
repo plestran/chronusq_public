@@ -93,24 +93,86 @@ void SingleSlater<T>::initSCFMem2(){
 //if(typeid(T).hash_code() == typeid(dcomplex).hash_code())
 //  this->RWORK_ = this->memManager_->template malloc<double>(this->LRWORK_);
   
-}; //initSCFMem
+  // New DIIS Files
+  if(!this->doDIIS) return;
+
+  std::vector<hsize_t> dims;
+  dims.push_back(this->nDIISExtrap_ - 1);
+  dims.push_back(this->nBasis_);
+  dims.push_back(this->nBasis_);
+
+  this->FScalarDIIS_ = 
+    this->fileio_->createScratchPartition(H5PredType<T>(),
+      "Fock (Scalar) For DIIS Extrapoloation",dims);
+  this->DScalarDIIS_ = 
+    this->fileio_->createScratchPartition(H5PredType<T>(),
+      "Density (Scalar) For DIIS Extrapoloation",dims);
+  this->DScalarDIIS_ = 
+    this->fileio_->createScratchPartition(H5PredType<T>(),
+      "Error Metric [F,D] (Scalar) For DIIS Extrapoloation",dims);
+
+  if(this->nTCS_ == 2 || !this->isClosedShell) {
+    this->FMzDIIS_ = 
+      this->fileio_->createScratchPartition(H5PredType<T>(),
+        "Fock (Mz) For DIIS Extrapoloation",dims);
+    this->DMzDIIS_ = 
+      this->fileio_->createScratchPartition(H5PredType<T>(),
+        "Density (Mz) For DIIS Extrapoloation",dims);
+    this->DMzDIIS_ = 
+      this->fileio_->createScratchPartition(H5PredType<T>(),
+        "Error Metric [F,D] (Mz) For DIIS Extrapoloation",dims);
+  }
+
+  if(this->nTCS_ == 2) {
+    this->FMyDIIS_ = 
+      this->fileio_->createScratchPartition(H5PredType<T>(),
+        "Fock (My) For DIIS Extrapoloation",dims);
+    this->DMyDIIS_ = 
+      this->fileio_->createScratchPartition(H5PredType<T>(),
+        "Density (My) For DIIS Extrapoloation",dims);
+    this->DMyDIIS_ = 
+      this->fileio_->createScratchPartition(H5PredType<T>(),
+        "Error Metric [F,D] (My) For DIIS Extrapoloation",dims);
+
+    this->FMxDIIS_ = 
+      this->fileio_->createScratchPartition(H5PredType<T>(),
+        "Fock (Mx) For DIIS Extrapoloation",dims);
+    this->DMxDIIS_ = 
+      this->fileio_->createScratchPartition(H5PredType<T>(),
+        "Density (Mx) For DIIS Extrapoloation",dims);
+    this->DMxDIIS_ = 
+      this->fileio_->createScratchPartition(H5PredType<T>(),
+        "Error Metric [F,D] (Mx) For DIIS Extrapoloation",dims);
+  }
+
+}; //initSCFMem2
 
 template<typename T>
 void SingleSlater<T>::SCF2(){
+  // Compute the 1-Body Integrals if they haven't already been computed
   if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
   if(this->printLevel_ > 0)
     this->printSCFHeader(this->fileio_->out);
+
+  // Allocate SCF Memory
   this->initSCFMem2();
 
-  bool doLevelShift;
+  bool doLevelShift; // dynamic boolean to decide when to turn off/on level shifting
   size_t iter;
+
+  // SCF Iterations
   for(iter = 0; iter < this->maxSCFIter_; iter++){
     auto SCFStart = std::chrono::high_resolution_clock::now();
+
+    // If this is CUHF (Scuseria), form the NOs and retransform the Fock matrix
+    // accordingly
     if(this->Ref_ == CUHF) {
       this->formNO();
       this->fockCUHF();
     }
 
+    // Transform (all of) the Fock matri(x,cies) from the AO to the orthonormal basis
+    // using the transformation matrix stored in AOIntegrals
     this->orthoFock();
 
 //JJGS
@@ -128,30 +190,55 @@ void SingleSlater<T>::SCF2(){
     }
 //JJGE
 
+    // Optionally mix the orbitals (FIXME: This needs to be addressed)
     if(iter == 0 && this->guess_ != READ) this->mixOrbitalsSCF();
 
+    // Copy the density to allow evaluation of RMS (FIXME: this should just
+    // copy the densities into scratch space as with the Focks to later evaluate
+    // the DIIS criteria, this facilities EDIIS as well)
     this->copyDen();
+
+    // Form the density(s) in the orthonormal basis
     this->formDensity();
+
+    // Transform the density(s) back into the AO basis
+    // FIXME: The name of this function needs to be changed, it is a misnomer.
     this->orthoDen();
+
+    // Form the AO Fock matrix(s)
     this->formFock();
 
+    // Check if interrupt has been encountered from python API
     if(PyErr_CheckSignals() == -1)
       CErr("Keyboard Interrupt in SCF!",this->fileio_->out);
 
-    // DIIS NYI for CUHF
+    // Perform DIIS Extrapolation for iterations greater than iDiisStart_
+    //   This if-block both copies the Fock and error vectors  into scratch space
+    //   for use with CDIIS as well as performing the extrapolation every nDIISExtrap
+    //   steps
+    //
+    // FIXME: DIIS for CUHF NYI
     if(this->Ref_ != CUHF && this->doDIIS && iter >= this->iDIISStart_){ 
+
       if(iter == this->iDIISStart_ && this->printLevel_ > 0)
         this->fileio_->out << 
           std::setw(2) << " " <<
           std::setw(4) << " " <<
           "*** Starting DIIS ***" << endl;
+      // Compute the error metric [FDS,SPF]
       this->genDComm2(iter - this->iDIISStart_);
+      // Copy the Fock matrix(s) over for the extrapolation
+      //   FIXME: Is this correct?? 
+      //   Nakamo states that we should be extrapolating the Density not Fock
       this->CpyFock(iter - this->iDIISStart_);   
+
+      // Perform the DIIS extrapolation every nDIISExtrap steps
       if((iter - this->iDIISStart_) % (this->nDIISExtrap_-1) == 
          (this->nDIISExtrap_-2) && iter != 0) 
         this->CDIIS();
     }
 
+    // Evaluate convergence critera
     this->evalConver(iter);
     this->nSCFIter++;
 
@@ -159,6 +246,7 @@ void SingleSlater<T>::SCF2(){
     std::chrono::duration<double> SCFD = SCFEnd - SCFStart;
 //  cout << "SCF Time (" << iter << ") = " << SCFD.count() << endl; 
     
+    // Break if converged
     if(this->isConverged) break;
   };
   // WARNING: MO Coefficients are not transformed to and from the

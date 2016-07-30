@@ -87,8 +87,8 @@ FileIO::FileIO(const std::string inFile,  const std::string outFile,
 
 };
 
-H5::DataSet * FileIO::createScratchPartition(const H5::PredType &type, 
-  std::string &nm, std::vector<hsize_t> &dims) {
+H5::DataSet * FileIO::createScratchPartition(const H5::CompType &type, 
+  const std::string &nm, std::vector<hsize_t> &dims) {
 
   H5::DataSpace dataspace(dims.size(),&dims[0]);
   this->scratchPartitions.push_back(
@@ -472,6 +472,25 @@ void FileIO::iniCompType(){
     "GUESS",HOFFSET(jobMeta,guess),H5::StrType(H5::PredType::C_S1,45)
   );
 
+}
+template<> H5::CompType H5PredType<double>(){ 
+  return H5::CompType(H5::DataType(H5::PredType::NATIVE_DOUBLE).getId());
+}
+template<> H5::CompType H5PredType<dcomplex>(){ 
+  typedef struct {
+    double re;
+    double im;
+  } complex_t;
+
+  H5::CompType complexType(sizeof(complex_t));
+
+  complexType.insertMember(
+    "RE",HOFFSET(complex_t,re),H5::PredType::NATIVE_DOUBLE
+  );
+  complexType.insertMember(
+    "IM",HOFFSET(complex_t,im),H5::PredType::NATIVE_DOUBLE
+  );
+  return complexType;
 }
 
 }; // namespace ChronusQ

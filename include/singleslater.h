@@ -187,7 +187,38 @@ class SingleSlater : public Quantum<T> {
   T *MxScr1_;
   T *MxScr2_;
 
-  
+  // New DIIS Variables
+  /*
+  T *FScalarDIIS_;
+  T *FMzDIIS_;
+  T *FMyDIIS_;
+  T *FMxDIIS_;
+
+  T *DScalarDIIS_;
+  T *DMzDIIS_;
+  T *DMyDIIS_;
+  T *DMxDIIS_;
+
+  T *EScalarDIIS_;
+  T *EMzDIIS_;
+  T *EMyDIIS_;
+  T *EMxDIIS_;
+  */
+
+  H5::DataSet *FScalarDIIS_;
+  H5::DataSet *FMzDIIS_;
+  H5::DataSet *FMyDIIS_;
+  H5::DataSet *FMxDIIS_;
+
+  H5::DataSet *DScalarDIIS_;
+  H5::DataSet *DMzDIIS_;
+  H5::DataSet *DMyDIIS_;
+  H5::DataSet *DMxDIIS_;
+
+  H5::DataSet *EScalarDIIS_;
+  H5::DataSet *EMzDIIS_;
+  H5::DataSet *EMyDIIS_;
+  H5::DataSet *EMxDIIS_;
 
   // Various functions the perform SCF and SCR allocation
   void initSCFPtr();       ///< NULL-out pointers to scratch partitions
@@ -413,8 +444,8 @@ public:
     this->denTol_           = 1e-8;
     this->eneTol_           = 1e-10;
     this->maxSCFIter_       = 256;
-    this->nDIISExtrap_      = 7;
-    this->iDIISStart_       = 4;
+    this->nDIISExtrap_      = 4;
+    this->iDIISStart_       = 2;
     this->iStartLevelShift_ = 0;
     this->nLevelShift_      = 4;
     this->levelShiftParam_  = 2.42;

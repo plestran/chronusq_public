@@ -34,6 +34,9 @@ void SingleSlater<T>::CDIIS(){
   char NORM = 'O';
   double RCOND;
 
+  this->fileio_->out << std::setw(2) << " " <<
+    std::setw(4) << " " <<
+    "*** Performing CDIIS Extrapolation ***" << endl;
   TMap B(this->memManager_->template malloc<T>(N*N),N,N);
   T   * coef   = this->memManager_->template malloc<T>(N);
   int * iPiv   = this->memManager_->template malloc<int>(N);
@@ -43,11 +46,13 @@ void SingleSlater<T>::CDIIS(){
   for(auto k = 0; k <= j          ; k++){
     TMap EJA(this->ErrorAlphaMem_ + (j%(N-1))*NBSq,NB,NB);
     TMap EKA(this->ErrorAlphaMem_ + (k%(N-1))*NBSq,NB,NB);
-    B(j,k) = -EJA.frobInner(EKA);
+//    B(j,k) = -EJA.frobInner(EKA);
+    B(j,k) = EJA.frobInner(EKA);
     if(!this->isClosedShell && this->nTCS_ == 1){
       TMap EJB(this->ErrorBetaMem_ + (j%(N-1))*NBSq,NB,NB);
       TMap EKB(this->ErrorBetaMem_ + (k%(N-1))*NBSq,NB,NB);
-      B(j,k) += -EJB.frobInner(EKB);
+//      B(j,k) += -EJB.frobInner(EKB);
+      B(j,k) += EJB.frobInner(EKB);
     }
     B(k,j) = B(j,k);
   }
@@ -61,6 +66,10 @@ void SingleSlater<T>::CDIIS(){
   for(auto k = 0; k < N;k++) coef[k] = 0.0; 
   coef[N-1]=-1.0;
 
+  TMap COEFF(coef,N,1);
+  prettyPrint(this->fileio_->out,B,"CDIIS B Metric",20);
+  prettyPrint(this->fileio_->out,COEFF,"CDIIS RHS");
+  
   double ANORM = B.template lpNorm<1>();
 
   int LWORK  = 5*this->nDIISExtrap_;
@@ -96,6 +105,11 @@ void SingleSlater<T>::CDIIS(){
         (*this->fockB_) += coef[j]*FB;
       }
     }
+  } else {
+    this->fileio_->out << std::setw(2) << " " <<
+      std::setw(4) << " " <<
+      "*** CDIIS Extrapolation Failed (RCOND = " << std::abs(RCOND) << 
+      ") ***" << endl;
   }
   this->memManager_->free(B.data(),N*N);
   this->memManager_->free(coef,N);
