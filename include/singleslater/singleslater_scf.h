@@ -248,7 +248,8 @@ void SingleSlater<T>::SCF2(){
       // Perform the DIIS extrapolation every nDIISExtrap steps
       if((iter - this->iDIISStart_) % (this->nDIISExtrap_-1) == 
          (this->nDIISExtrap_-2) && iter != 0) 
-        this->CDIIS();
+//        this->CDIIS();
+        this->CDIIS2();
     }
 
     // Evaluate convergence critera

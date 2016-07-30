@@ -25,6 +25,143 @@
  */
 
 template<typename T>
+void SingleSlater<T>::CDIIS2(){
+  int N = this->lenCoeff_;
+  int NRHS = 1;
+  int INFO = -1;
+  int NB = this->nBasis_ * this->nTCS_; 
+  int NBSq = NB*NB;
+  char NORM = 'O';
+  double RCOND;
+
+  this->fileio_->out << std::setw(2) << " " <<
+    std::setw(4) << " " <<
+    "*** Performing CDIIS Extrapolation ***" << endl;
+  TMap B(this->memManager_->template malloc<T>(N*N),N,N);
+  T   * coef   = this->memManager_->template malloc<T>(N);
+  int * iPiv   = this->memManager_->template malloc<int>(N);
+  int * iWORK_ = this->memManager_->template malloc<int>(N);
+
+/*
+  for(auto j = 0; j < (N-1); j++)
+  for(auto k = 0; k <= j          ; k++){
+    TMap EJA(this->ErrorAlphaMem_ + (j%(N-1))*NBSq,NB,NB);
+    TMap EKA(this->ErrorAlphaMem_ + (k%(N-1))*NBSq,NB,NB);
+//    B(j,k) = -EJA.frobInner(EKA);
+    B(j,k) = EJA.frobInner(EKA);
+    if(!this->isClosedShell && this->nTCS_ == 1){
+      TMap EJB(this->ErrorBetaMem_ + (j%(N-1))*NBSq,NB,NB);
+      TMap EKB(this->ErrorBetaMem_ + (k%(N-1))*NBSq,NB,NB);
+//      B(j,k) += -EJB.frobInner(EKB);
+      B(j,k) += EJB.frobInner(EKB);
+    }
+    B(k,j) = B(j,k);
+  }
+*/
+
+  hsize_t stride[] = {1,1,1};
+  hsize_t block[]  = {1,1,1};
+ 
+  hsize_t subDim[] = {1,this->nBasis_,this->nBasis_};
+  hsize_t count[]  = {1,this->nBasis_,this->nBasis_};
+
+  H5::DataSpace EJ = this->EScalarDIIS_->getSpace();
+  H5::DataSpace EK = this->EScalarDIIS_->getSpace();
+  H5::DataSpace memSpace(3,subDim,NULL);
+
+  for(auto j = 0; j < (N-1); j++){
+
+    hsize_t offset_j[] = {j,0,0};
+    EJ.selectHyperslab(H5S_SELECT_SET,count,offset_j,stride,block);
+    this->EScalarDIIS_->read(this->NBSqScratch_->data(),H5PredType<T>(),
+      memSpace,EJ);
+
+    for(auto k = 0; k <= j; k++){
+      hsize_t offset_k[] = {k,0,0};
+      EK.selectHyperslab(H5S_SELECT_SET,count,offset_j,stride,block);
+      this->EScalarDIIS_->read(this->NBSqScratch2_->data(),H5PredType<T>(),
+        memSpace,EK);
+
+      B(j,k) = -this->NBSqScratch_->frobInner(*this->NBSqScratch2_);
+    
+    }
+
+  }
+
+  B = B.template selfadjointView<Lower>();
+
+  for (auto l=0;l<N-1;l++){
+     B(N-1,l)=-1.0;
+     B(l,N-1)=-1.0;
+  }
+
+  B(N-1,N-1)=0;
+  for(auto k = 0; k < N;k++) coef[k] = 0.0; 
+  coef[N-1]=-1.0;
+
+  TMap COEFF(coef,N,1);
+  prettyPrint(this->fileio_->out,B,"CDIIS B Metric",20);
+  prettyPrint(this->fileio_->out,COEFF,"CDIIS RHS");
+  
+  double ANORM = B.template lpNorm<1>();
+
+  int LWORK  = 5*this->nDIISExtrap_;
+  T   *WORK  = this->memManager_->template malloc<T>(LWORK);
+
+  if(typeid(T).hash_code() == typeid(dcomplex).hash_code()){
+    int LRWORK = 3*this->nDIISExtrap_;
+    double   *RWORK = this->memManager_->template malloc<double>(LRWORK);
+    zgesv_(&N,&NRHS,reinterpret_cast<dcomplex*>(B.data()),&N,iPiv,
+        reinterpret_cast<dcomplex*>(coef),&N,&INFO);
+    zgecon_(&NORM,&N,reinterpret_cast<dcomplex*>(B.data()),&N,&ANORM,&RCOND,
+        reinterpret_cast<dcomplex*>(WORK),RWORK,&INFO);
+    this->memManager_->free(RWORK,LRWORK);
+  } else {
+    dgesv_(&N,&NRHS,reinterpret_cast<double*>(B.data()),&N,iPiv,
+        reinterpret_cast<double*>(coef),&N,&INFO);
+    dgecon_(&NORM,&N,reinterpret_cast<double*>(B.data()),&N,&ANORM,&RCOND,
+        reinterpret_cast<double*>(WORK),iWORK_,&INFO);
+  }
+  this->memManager_->template free(WORK,LWORK);
+
+
+  if(std::abs(RCOND) > std::numeric_limits<double>::epsilon()) {
+    this->fockA_->setZero();
+    if(!this->isClosedShell && this->nTCS_ == 1) 
+      this->fockB_->setZero();
+
+/*
+    for(auto j = 0; j < N-1; j++) {
+      TMap FA(this->FADIIS_ + (j%(N-1))*NBSq,NB,NB);
+      (*this->fockA_) += coef[j]*FA;
+      if(!this->isClosedShell && this->nTCS_ == 1) {
+        TMap FB(this->FBDIIS_ + (j%(N-1))*NBSq,NB,NB);
+        (*this->fockB_) += coef[j]*FB;
+      }
+    }
+*/
+    for(auto j = 0; j < N-1; j++) {
+      hsize_t offset_j[] = {j,0,0};
+      EJ.selectHyperslab(H5S_SELECT_SET,count,offset_j,stride,block);
+      this->FScalarDIIS_->read(this->NBSqScratch_->data(),H5PredType<T>(),
+        memSpace,EJ);
+
+      this->fockA_->noalias() += coef[j] * (*this->NBSqScratch_);
+    }
+  } else {
+    this->fileio_->out << std::setw(2) << " " <<
+      std::setw(4) << " " <<
+      "*** CDIIS Extrapolation Failed (RCOND = " << std::abs(RCOND) << 
+      ") ***" << endl;
+  }
+  this->memManager_->free(B.data(),N*N);
+  this->memManager_->free(coef,N);
+  this->memManager_->free(iPiv,N);
+  this->memManager_->free(iWORK_,N);
+
+} // CDIIS
+
+template<typename T>
 void SingleSlater<T>::CDIIS(){
   int N = this->lenCoeff_;
   int NRHS = 1;
@@ -134,9 +271,11 @@ template<typename T>
 void SingleSlater<T>::cpyOrthoFock2(int iter){
   T* ScalarPtr;
   if(this->isClosedShell && this->nTCS_ == 1) 
-    ScalarPtr = this->fockOrthoA_->data();
+//  ScalarPtr = this->fockOrthoA_->data();
+    ScalarPtr = this->fockA_->data();
   else
-    ScalarPtr = this->fockOrthoScalar_->data();
+//  ScalarPtr = this->fockOrthoScalar_->data();
+    ScalarPtr = this->fockScalar_->data();
 
   hsize_t offset[] = {iter % (this->nDIISExtrap_-1),0,0};
   hsize_t stride[] = {1,1,1};
@@ -164,13 +303,17 @@ void SingleSlater<T>::cpyOrthoFock2(int iter){
 
   this->FScalarDIIS_->write(ScalarPtr,H5PredType<T>(),memSpace,FScalar); 
   if(this->nTCS_ == 2 || !this->isClosedShell)
-    this->FMzDIIS_->write(this->fockOrthoMz_->data(),H5PredType<T>(),
+//  this->FMzDIIS_->write(this->fockOrthoMz_->data(),H5PredType<T>(),
+//    memSpace,FMz); 
+    this->FMzDIIS_->write(this->fockMz_->data(),H5PredType<T>(),
       memSpace,FMz); 
   if(this->nTCS_ == 2) {
-    this->FMyDIIS_->write(this->fockOrthoMy_->data(),H5PredType<T>(),
-      memSpace,FMy); 
-    this->FMxDIIS_->write(this->fockOrthoMx_->data(),H5PredType<T>(),
-      memSpace,FMz); 
+  //this->FMyDIIS_->write(this->fockOrthoMy_->data(),H5PredType<T>(),
+  //  memSpace,FMy); 
+  //this->FMxDIIS_->write(this->fockOrthoMx_->data(),H5PredType<T>(),
+  //  memSpace,FMz); 
+    this->FMyDIIS_->write(this->fockMy_->data(),H5PredType<T>(),memSpace,FMy); 
+    this->FMxDIIS_->write(this->fockMx_->data(),H5PredType<T>(),memSpace,FMz); 
   }
 }
 
