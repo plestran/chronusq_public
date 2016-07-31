@@ -147,6 +147,7 @@ void SingleSlater<T>::initSCFMem2(){
 
 }; //initSCFMem2
 
+
 template<typename T>
 void SingleSlater<T>::SCF2(){
   // Compute the 1-Body Integrals if they haven't already been computed
@@ -163,12 +164,20 @@ void SingleSlater<T>::SCF2(){
   // FIXME: DIIS for CUHF NYI
   if(this->Ref_ == CUHF) this->doDIIS = false;
   
+/*
   // Populate Orthonormal densities
+  // Po(0)
   this->orthoDen2();
+*/
 
+  this->fileio_->out << "    *** INITIAL GUESS ENERGY = " << this->totalEnergy << " Eh ***" << endl;
   // SCF Iterations
   for(iter = 0; iter < this->maxSCFIter_; iter++){
     auto SCFStart = std::chrono::high_resolution_clock::now();
+
+    // Copy the density to allow evaluation of RMS 
+    // POLD = P(K)
+    this->copyDen();
 
     // If this is CUHF (Scuseria), form the NOs and retransform the Fock matrix
     // accordingly
@@ -179,13 +188,28 @@ void SingleSlater<T>::SCF2(){
 
     // Transform (all of) the Fock matri(x,cies) from the AO to the 
     // orthonormal basis using the transformation matrix stored in AOIntegrals
+    // Fo(K)
     this->orthoFock();
 
     // Copy the orthonormal Fock matrix to disk for DIIS
     if(this->doDIIS && iter >= this->iDIISStart_){
+      if(iter == this->iDIISStart_ && this->printLevel_ > 0)
+        this->fileio_->out << 
+          std::setw(2) << " " <<
+          std::setw(4) << " " <<
+          "*** Starting DIIS ***" << endl;
+      // Write Fo(K) to disk
       this->cpyOrthoFock2(iter - this->iDIISStart_); 
+      // Write Po(K) to disk
       this->cpyOrthoDen2(iter - this->iDIISStart_); 
+      // Write E(K) = [Fo(K),Po(K)] to disk
       this->genDIISCom(iter - this->iDIISStart_);
+/*
+      // Extrapolate Fo(K) -> C(I)Fo(I) using CDIIS
+      if((iter - this->iDIISStart_) % (this->nDIISExtrap_-1) == 
+         (this->nDIISExtrap_-2) && iter != 0) 
+        this->CDIIS2();
+*/
     }
 
 //JJGS
@@ -197,8 +221,9 @@ void SingleSlater<T>::SCF2(){
       doLevelShift = doLevelShift && 
         (iter < this->iStartLevelShift_ + this->nLevelShift_);
   
-      if(doLevelShift)
-        this->levelShift2();	//Level-shift for AO basis
+      // Fo(K) = Fo(K) + L
+      if(doLevelShift) this->levelShift2();  //Level-shift for AO basis
+      // Obtains Co(K+1)
       this->diagFock2();
     }
 //JJGE
@@ -206,26 +231,29 @@ void SingleSlater<T>::SCF2(){
     // Optionally mix the orbitals (FIXME: This needs to be addressed)
     if(iter == 0 && this->guess_ != READ) this->mixOrbitalsSCF();
 
-    // Copy the density to allow evaluation of RMS 
-    this->copyDen();
 
     // Form the density(s) in the orthonormal basis
+    // P(K+1) = Co(K+1)*Co(K+1)**H
     this->formDensity();
   
     // Copy the data from onePDM? -> onePDMOrtho? (calculated above)
+    // Po(K+1) = P(K+1)
     this->cpyAOtoOrthoDen();
 
     // Transform the density(s) back into the AO basis
     //this->orthoDen();
+    // Po(K+1) -> P(K+1)
     this->unOrthoDen();
 
     // Form the AO Fock matrix(s)
+    // F(K+1) = H + G[P(K+1)]
     this->formFock();
 
     // Check if interrupt has been encountered from python API
     if(PyErr_CheckSignals() == -1)
       CErr("Keyboard Interrupt in SCF!",this->fileio_->out);
 
+/*
     // Perform DIIS Extrapolation for iterations greater than iDiisStart_
     //   This if-block both copies the Fock and error vectors  into scratch space
     //   for use with CDIIS as well as performing the extrapolation every nDIISExtrap
@@ -233,11 +261,6 @@ void SingleSlater<T>::SCF2(){
     //
     if(this->doDIIS && iter >= this->iDIISStart_){ 
 
-      if(iter == this->iDIISStart_ && this->printLevel_ > 0)
-        this->fileio_->out << 
-          std::setw(2) << " " <<
-          std::setw(4) << " " <<
-          "*** Starting DIIS ***" << endl;
       // Compute the error metric [FDS,SPF]
       this->genDComm2(iter - this->iDIISStart_);
       // Copy the Fock matrix(s) over for the extrapolation
@@ -251,6 +274,7 @@ void SingleSlater<T>::SCF2(){
 //        this->CDIIS();
         this->CDIIS2();
     }
+*/
 
     // Evaluate convergence critera
     this->evalConver(iter);

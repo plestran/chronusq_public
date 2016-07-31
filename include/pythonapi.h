@@ -45,6 +45,9 @@ using ChronusQ::SDResponse;
 using ChronusQ::CQMemManager;
 using ChronusQ::NumericalDifferentiation;
 using ChronusQ::RESPONSE_TYPE;
+using ChronusQ::ATOMIC_PARTITION;
+using ChronusQ::GRID_TYPE;
+
 
 namespace ChronusQ{
   void Wrapper_readInput(FileIO&,Molecule&,BasisSet&,Controls&,BasisSet&);

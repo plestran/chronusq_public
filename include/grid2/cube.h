@@ -15,7 +15,7 @@ class Cube : public Grid2 {
     Cube(std::tuple<double,double,size_t> xRange,
         std::tuple<double,double,size_t> yRange,
         std::tuple<double,double,size_t> zRange) :
-        xRange_(xRange), yRange_(yRange), zRange_(zRange), Grid2(0,false) { 
+        xRange_(xRange), yRange_(yRange), zRange_(zRange), Grid2(0,0.0,false) { 
         
         xRes_ = (std::get<1>(this->xRange_) - std::get<0>(this->xRange_)) / 
           (std::get<2>(this->xRange_) - 1);

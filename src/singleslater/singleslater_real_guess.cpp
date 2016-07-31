@@ -250,6 +250,16 @@ void SingleSlater<double>::SADGuess() {
       this->placeAtmDen(atomIndex[iUn],hartreeFockAtom);
  
     } // Loop iUn
+/*
+  if (this->isDFT) {
+    cout << "HERE 0" <<endl;
+    this->epsScreen     = this->epsScreen / (this->nRadDFTGridPts_ * this->nAngDFTGridPts_);
+//    this->epsScreen     = 1.0e-20; 
+    cout << "epsScreen Scaled to = " <<this->epsScreen  <<endl;
+    this->basisset_->radcut(this->epsScreen,this->maxiter,this->epsConv);
+    cout << "HERE 1" <<endl;
+    }
+*/
     this->scaleDen();
 #ifdef CQ_ENABLE_MPI
     MPI_Barrier(MPI_COMM_WORLD);

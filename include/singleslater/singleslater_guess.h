@@ -33,18 +33,47 @@ void SingleSlater<T>::formGuess(){
 }
 template<typename T>
 void SingleSlater<T>::COREGuess(){
- 
-  this->onePDMA_->setZero();
-  this->moA_->setZero();
-  if(this->nTCS_ == 2 || !this->isClosedShell){
-    if(this->nTCS_ == 1) this->onePDMB_->setZero();
-    this->onePDMScalar_->setZero();
-    this->onePDMMz_->setZero();
-    if(this->nTCS_ == 2) {
-      this->onePDMMy_->setZero();
-      this->onePDMMx_->setZero();
-    }
+  this->aointegrals_->computeAOOneE(); 
+  if(this->nTCS_ == 1 && this->isClosedShell){
+    this->fockA_->real() = (*this->aointegrals_->coreH_);
+  } else {
+    this->fockScalar_->real() = 2*(*this->aointegrals_->coreH_);
+    this->fockMz_->setZero();
+
+    std::vector<std::reference_wrapper<TMap>> toGather;
+    toGather.emplace_back(*this->fockScalar_);
+    toGather.emplace_back(*this->fockMz_);
+
+    if(this->nTCS_ ==  2) {
+      this->fockMy_->setZero();
+      this->fockMx_->setZero();
+      toGather.emplace_back(*this->fockMy_);
+      toGather.emplace_back(*this->fockMx_);
+
+      Quantum<T>::spinGather(*this->fockA_,toGather);
+    } else 
+      Quantum<T>::spinGather(*this->fockA_,*this->fockB_,toGather);
   }
   this->haveMO = true;
   this->haveDensity = true;
+
+  this->orthoFock();
+  if(this->printLevel_ > 3){
+    prettyPrint(this->fileio_->out,*this->fockA_,"Initial FA");
+    prettyPrint(this->fileio_->out,*this->fockOrthoA_,"Initial FOrthoA");
+  }
+  this->diagFock2();
+  this->formDensity();
+  this->cpyAOtoOrthoDen();
+  this->unOrthoDen();
+  if(this->printLevel_ > 3){
+    prettyPrint(this->fileio_->out,*this->onePDMA_,"Initial PA");
+    prettyPrint(this->fileio_->out,*this->onePDMOrthoA_,"Initial POrthoA");
+  }
+  this->computeEnergy();
+  this->backTransformMOs();
+  if(this->printLevel_ > 3) {
+    prettyPrint(this->fileio_->out,*this->moA_,"Initial MOA");
+  }
+
 };

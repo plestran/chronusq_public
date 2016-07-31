@@ -189,6 +189,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("LSDA"       , SingleSlater<double>::LSDA       )
   ;
 
+/*
   enum_<SingleSlater<double>::DFT_RAD_GRID>("DFT_RAD_GRID")
     .value("EULERMACL", SingleSlater<double>::EULERMACL)
     .value("GAUSSCHEB", SingleSlater<double>::GAUSSCHEB)
@@ -196,6 +197,18 @@ BOOST_PYTHON_MODULE(libpythonapi){
   enum_<SingleSlater<double>::DFT_WEIGHT_SCHEME>("DFT_WEIGHT_SCHEME")
     .value("BECKE",  SingleSlater<double>::BECKE )
     .value("FRISCH", SingleSlater<double>::FRISCH)
+  ;
+*/
+
+  enum_<GRID_TYPE>("GRID_TYPE")
+    .value("GAUSSCHEBFST",  GRID_TYPE::GAUSSCHEBFST)
+    .value("GAUSSCHEBSND",  GRID_TYPE::GAUSSCHEBSND)
+    .value("EULERMAC",      GRID_TYPE::EULERMAC)
+    .value("LEBEDEV" ,      GRID_TYPE::LEBEDEV)
+  ;
+  enum_<ATOMIC_PARTITION>("ATOMIC_PARTITION")
+    .value("BECKE",  ATOMIC_PARTITION::BECKE )
+    .value("FRISCH", ATOMIC_PARTITION::FRISCH)
   ;
     
 

@@ -85,7 +85,7 @@ def runSCF(workers,meta):
   workers["CQSingleSlater"].formGuess()
 
   workers["CQSingleSlater"].formFock()
-  workers["CQSingleSlater"].computeEnergy()
+  #workers["CQSingleSlater"].computeEnergy()
 
   workers["CQSingleSlater"].SCF()
 

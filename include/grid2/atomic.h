@@ -39,10 +39,11 @@ class AtomicGrid : public TwoDGrid2 {
         std::vector<std::array<double,3> > centers,
         RealMatrix *rIJ,
         size_t centerIndx,
+        double screenTol = 0.0,
         double radCutOff = 1e6,
         double scalingFactor = 1.0,
         bool onTheFly = true) : 
-      TwoDGrid2(nPtsRad,nPtsAng,GTypeRad,GTypeAng,onTheFly),
+      TwoDGrid2(nPtsRad,nPtsAng,screenTol,GTypeRad,GTypeAng,onTheFly),
       partitionScheme_(partitionScheme),
       centers_(std::move(centers)),
       rIJ_(rIJ),
@@ -71,6 +72,7 @@ class AtomicGrid : public TwoDGrid2 {
         * scalingFactor_;
       if(r > this->radCutOff_) {
         rawPoint.evalpt = false;
+//        cout << "Skipped " <<"r " << r << "rCut " << this->radCutOff_ <<endl;
         return rawPoint;
       }
       rawPoint.weight *= scalingFactor_ * r*r;
@@ -85,8 +87,10 @@ class AtomicGrid : public TwoDGrid2 {
 //    if(partweight < 1e-10) rawPoint.evalpt = false;
  
       rawPoint.weight *= partweight;
-      if(std::abs(rawPoint.weight) < std::numeric_limits<double>::epsilon()) 
+
+      if(std::abs(rawPoint.weight) < screenTol_) 
         rawPoint.evalpt = false;
+
 //Screening now off APE
 //      if(partweight < 1e-6) rawPoint.evalpt = false;
       return rawPoint;

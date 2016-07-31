@@ -369,16 +369,18 @@ void SingleSlater<T>::printSCFHeader(ostream &output){
       output << this->dftFunctionals_[0]->name;
       output << endl;
 
-      output << std::setw(38) << std::left << "    Correlation Kernel:";
-      output << this->dftFunctionals_[1]->name;
-      output << endl;
+      if(dftFunctionals_.size() > 1){
+        output << std::setw(38) << std::left << "    Correlation Kernel:";
+        output << this->dftFunctionals_[1]->name;
+        output << endl;
+      }
    }
 
    
     output << std::setw(38) << std::left << "    Radial Grid:";
-    if(this->dftGrid_ == EULERMACL)
+    if(this->dftGrid_ == EULERMAC)
       output << "Euler-Maclaurin";
-    else if(this->dftGrid_ == GAUSSCHEB)
+    else if(this->dftGrid_ == GAUSSCHEBFST)
       output << "Gauss-Chebyshev (1st Kind)";
     output << "  (" << this->nRadDFTGridPts_ << ")";
     output << endl;

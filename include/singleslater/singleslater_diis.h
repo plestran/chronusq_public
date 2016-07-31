@@ -192,7 +192,8 @@ void SingleSlater<T>::CDIIS2(){
 
       if(this->nTCS_ == 1 && this->isClosedShell)
         // Scalar Part
-        this->fockA_->noalias() += coef[j] * (*this->NBSqScratch_);
+//      this->fockA_->noalias() += coef[j] * (*this->NBSqScratch_);
+        this->fockOrthoA_->noalias() += coef[j] * (*this->NBSqScratch_);
       else {
         // Scalar Part
         this->fockScalar_->noalias() += coef[j] * (*this->NBSqScratch_);
@@ -333,6 +334,11 @@ void SingleSlater<T>::CDIIS(){
   this->memManager_->free(iPiv,N);
   this->memManager_->free(iWORK_,N);
 
+  if(!this->isClosedShell && this->nTCS_ !=2){
+    (*this->fockScalar_) = 0.5 * ((*this->fockA_) + (*this->fockB_));
+    (*this->fockMz_) = 0.5 * ((*this->fockA_) - (*this->fockB_));
+  }
+
 } // CDIIS
 
 template<typename T>
@@ -351,11 +357,11 @@ template<typename T>
 void SingleSlater<T>::cpyOrthoFock2(int iter){
   T* ScalarPtr;
   if(this->isClosedShell && this->nTCS_ == 1) 
-//  ScalarPtr = this->fockOrthoA_->data();
-    ScalarPtr = this->fockA_->data();
+    ScalarPtr = this->fockOrthoA_->data();
+//  ScalarPtr = this->fockA_->data();
   else
-//  ScalarPtr = this->fockOrthoScalar_->data();
-    ScalarPtr = this->fockScalar_->data();
+    ScalarPtr = this->fockOrthoScalar_->data();
+//  ScalarPtr = this->fockScalar_->data();
 
   hsize_t offset[] = {iter % (this->nDIISExtrap_-1),0,0};
   hsize_t stride[] = {1,1,1};
@@ -383,17 +389,17 @@ void SingleSlater<T>::cpyOrthoFock2(int iter){
 
   this->FScalarDIIS_->write(ScalarPtr,H5PredType<T>(),memSpace,FScalar); 
   if(this->nTCS_ == 2 || !this->isClosedShell)
-//  this->FMzDIIS_->write(this->fockOrthoMz_->data(),H5PredType<T>(),
-//    memSpace,FMz); 
-    this->FMzDIIS_->write(this->fockMz_->data(),H5PredType<T>(),
+    this->FMzDIIS_->write(this->fockOrthoMz_->data(),H5PredType<T>(),
       memSpace,FMz); 
+//  this->FMzDIIS_->write(this->fockMz_->data(),H5PredType<T>(),
+//    memSpace,FMz); 
   if(this->nTCS_ == 2) {
-  //this->FMyDIIS_->write(this->fockOrthoMy_->data(),H5PredType<T>(),
-  //  memSpace,FMy); 
-  //this->FMxDIIS_->write(this->fockOrthoMx_->data(),H5PredType<T>(),
-  //  memSpace,FMz); 
-    this->FMyDIIS_->write(this->fockMy_->data(),H5PredType<T>(),memSpace,FMy); 
-    this->FMxDIIS_->write(this->fockMx_->data(),H5PredType<T>(),memSpace,FMz); 
+    this->FMyDIIS_->write(this->fockOrthoMy_->data(),H5PredType<T>(),
+      memSpace,FMy); 
+    this->FMxDIIS_->write(this->fockOrthoMx_->data(),H5PredType<T>(),
+      memSpace,FMz); 
+  //this->FMyDIIS_->write(this->fockMy_->data(),H5PredType<T>(),memSpace,FMy); 
+  //this->FMxDIIS_->write(this->fockMx_->data(),H5PredType<T>(),memSpace,FMz); 
   }
 }
 

@@ -50,9 +50,6 @@ class SlaterExchange : public DFTFunctional {
   double small;    
   double d1over3 ;
   double d4over3 ;
-  double rhoT     ;    
-  double spindensity   ;
-  double eps_spin   ;
 public:
   SlaterExchange(double X = 1.0, double eps = 1e-10);
   DFTInfo eval(const double &rhoA, const double &rhoB);
@@ -166,19 +163,11 @@ class BEightEight : public DFTFunctional {
   double  d4over3;
   double CxVx;  //TF LDA Prefactor (for Vx)  
   double beta;    
-  double rhoT     ;    
-  double spindensity   ;
   double small;    
-  double xA;
-  double xB;
-  double rhoA1ov3 ;
-  double rhoA4ov3 ;
-  double rhoB1ov3 ;
-  double rhoB4ov3 ;
 public:
   BEightEight(double X = 1.0, double eps = 1e-10);
-  double g0B88 (double x);
-  double g1B88 (double x);
+  double g0B88 (double x, double &sinhx, double &bx);
+  double g1B88 (double x, double &sinhx, double &bx);
   DFTInfo eval(const double &rhoA, const double &rhoB);
   DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaBB);
   DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB, const double &gammaBB);
@@ -192,26 +181,33 @@ class lyp : public DFTFunctional {
   double b     ;    
   double c     ;    
   double d     ;    
-  double omega1     ;    
-  double omega0     ;    
-  double delta1     ;    
-  double delta0     ;    
-  double rhoT     ;    
-  double spindensity   ;
-  double rho1over3 ;
-  double rhoA8over3 ;
-  double rhoB8over3 ;
-  double dLYPdgAA   ;
-  double dLYPdgBB   ;
-  double dLYPdgAB   ;
-  double d2LYPdrhgAA   ;
-  double d2LYPdrhgAB   ;
-  double d2LYPdrhgBB   ;
 public:
+  struct denspow {
+    double rhoT;          // rhoA + rhoB 
+    double spindensity;   // (rhoA - rhoB)/rhoT
+    double rho2;          // ^(2) 
+    double rho1over3;     // ^(1/3) 
+    double rho4over3;    // ^(4/3) 
+    double rhoA8over3;   // ^(8/3) alpha  
+    double rhoB8over3;   // ^(8/3) beta   
+    double zeta ;        // (1+ d / rho1over3)^(-1)   Aux variable
+    double delta0;        // (c + d*zeta)/ (rho1over3) (A27) /rearrenged
+    double delta1;        // ddelta0/d rho   (A33)
+    double omega0;        // Eq A26   
+    double omega1;        // domega/d rho (A32)   
+    double dLYPdgAA;       // Eq A23(delLYP/delgammaAA) ;
+    double dLYPdgBB   ;    // Eq A23(delLYP/delgammaBB) 
+    double dLYPdgAB   ;    // Eq A24(delLYP/delgammaAB) 
+    double d2LYPdrhgAA ;   // Eq A29(del2LYP/delgammaAA*delrhoA)
+    double d2LYPdrhgAB ;   // Eq A30(del2LYP/delgammaAB*delrhoA)
+    double d2LYPdrhgBB ;   // Eq A31(del2LYP/delgammaBB*delrhoA)
+    };
   lyp(double X = 1.0, double eps = 1e-10);
-  void popLYPdens(double rhoA, double rhoB);
+  void popLYPdens(const double &rhoA, const double &rhoB, denspow &denquant);
+  void popDensPow(const double &rhoA, const double &rhoB, denspow &denquant);  
   DFTInfo eval(const double &rhoA, const double &rhoB);
   DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaBB);
   DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB, const double &gammaBB);
+  DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB, const double &gammaBB, bool small);
 };
 #endif

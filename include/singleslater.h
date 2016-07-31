@@ -342,6 +342,7 @@ public:
   };
 */
 
+/*
   enum DFT_RAD_GRID {
     EULERMACL,
     GAUSSCHEB
@@ -351,6 +352,7 @@ public:
     BECKE,
     FRISCH
   };
+*/
  
   bool	haveMO;      ///< Have MO coefficients?
   bool	haveDensity; ///< Computed Density? (Not sure if this is used anymore)
@@ -470,8 +472,8 @@ public:
     this->fixPhase_    = true;
     this->guess_       = SAD;
 
-    this->weightScheme_ = BECKE;
-    this->dftGrid_      = GAUSSCHEB;
+    this->weightScheme_ = ATOMIC_PARTITION::BECKE;
+    this->dftGrid_      = GRID_TYPE::EULERMAC;
     this->screenVxc     = true;
     this->epsScreen     = 1.0e-10;
     this->nRadDFTGridPts_ = 100;
@@ -564,6 +566,12 @@ public:
     this->nVirA_ = this->nBasis_ - this->nOccA_;
     this->nAE_   = this->nOccA_;
     this->nBE_   = this->nOccB_;
+
+
+    if(this->isDFT){
+      this->epsScreen /= this->molecule_->nAtoms() * this->nRadDFTGridPts_ * this->nAngDFTGridPts_;
+      this->basisset_->radcut(this->epsScreen,this->maxiter,this->epsConv);
+    }
   }
   void alloc();
 

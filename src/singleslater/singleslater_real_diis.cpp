@@ -57,11 +57,10 @@ void SingleSlater<double>::genDComm2(int iter) {
     this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_
   );
 
-  if(this->nTCS_ == 1 && this->isClosedShell) {
-    (*this->NBSqScratch_) = (*this->onePDMA_) * (*this->aointegrals_->overlap_);
-    ErrA = (*this->fockA_) * (*this->NBSqScratch_);
-    ErrA -= this->NBSqScratch_->adjoint() * (*this->fockA_);
-  } else {
+  (*this->NBSqScratch_) = (*this->onePDMA_) * (*this->aointegrals_->overlap_);
+  ErrA = (*this->fockA_) * (*this->NBSqScratch_);
+  ErrA -= this->NBSqScratch_->adjoint() * (*this->fockA_);
+  if(this->nTCS_ == 1 && !this->isClosedShell) {
     RealMap ErrB(
       this->ErrorBetaMem_ + (iter % (this->nDIISExtrap_-1)) * NSQ,
       this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_

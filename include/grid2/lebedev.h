@@ -20,7 +20,7 @@ class Lebedev : public OneDGrid2 {
   template <LEBEDEV_ALGEBRAIC_ORDER ORDER> void loadLebedev();
 
   public:
-    Lebedev(size_t N) : OneDGrid2(N,false){
+    Lebedev(size_t N) : OneDGrid2(N,0.0,false){
       if(     N ==    6) this->algOrder_ = LEBEDEV_3;  
       else if(N ==   14) this->algOrder_ = LEBEDEV_5;  
       else if(N ==   26) this->algOrder_ = LEBEDEV_7;  
