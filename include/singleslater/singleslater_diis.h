@@ -70,9 +70,10 @@ void SingleSlater<T>::CDIIS2(){
   H5::DataSpace memSpace(3,subDim,NULL);
 
   for(auto j = 0; j < (N-1); j++){
-
     hsize_t offset_j[] = {j,0,0};
     EJ.selectHyperslab(H5S_SELECT_SET,count,offset_j,stride,block);
+
+    // Scalar Part
     this->EScalarDIIS_->read(this->NBSqScratch_->data(),H5PredType<T>(),
       memSpace,EJ);
 
@@ -83,12 +84,55 @@ void SingleSlater<T>::CDIIS2(){
         memSpace,EK);
 
       B(j,k) = -this->NBSqScratch_->frobInner(*this->NBSqScratch2_);
-    
     }
+
+    // Vector Part
+
+    if(this->nTCS_ == 2 || !this->isClosedShell) {
+      // Mz
+      this->EMzDIIS_->read(this->NBSqScratch_->data(),H5PredType<T>(),
+        memSpace,EJ);
+      for(auto k = 0; k <= j; k++){
+        hsize_t offset_k[] = {k,0,0};
+        EK.selectHyperslab(H5S_SELECT_SET,count,offset_j,stride,block);
+        this->EMzDIIS_->read(this->NBSqScratch2_->data(),H5PredType<T>(),
+          memSpace,EK);
+     
+        B(j,k) += -this->NBSqScratch_->frobInner(*this->NBSqScratch2_);
+      }
+
+      if(this->nTCS_ == 2){
+        // Mx
+        this->EMxDIIS_->read(this->NBSqScratch_->data(),H5PredType<T>(),
+          memSpace,EJ);
+        for(auto k = 0; k <= j; k++){
+          hsize_t offset_k[] = {k,0,0};
+          EK.selectHyperslab(H5S_SELECT_SET,count,offset_j,stride,block);
+          this->EMxDIIS_->read(this->NBSqScratch2_->data(),H5PredType<T>(),
+            memSpace,EK);
+     
+          B(j,k) += -this->NBSqScratch_->frobInner(*this->NBSqScratch2_);
+        }
+
+        // My
+        this->EMyDIIS_->read(this->NBSqScratch_->data(),H5PredType<T>(),
+          memSpace,EJ);
+        for(auto k = 0; k <= j; k++){
+          hsize_t offset_k[] = {k,0,0};
+          EK.selectHyperslab(H5S_SELECT_SET,count,offset_j,stride,block);
+          this->EMyDIIS_->read(this->NBSqScratch2_->data(),H5PredType<T>(),
+            memSpace,EK);
+     
+          B(j,k) += -this->NBSqScratch_->frobInner(*this->NBSqScratch2_);
+        }
+
+      } // ntcs = 2
+    } // has vector part
 
   }
 
   B = B.template selfadjointView<Lower>();
+  if(this->nTCS_ == 2 || !this->isClosedShell) B *= 0.25;
 
   for (auto l=0;l<N-1;l++){
      B(N-1,l)=-1.0;
@@ -146,14 +190,50 @@ void SingleSlater<T>::CDIIS2(){
       this->FScalarDIIS_->read(this->NBSqScratch_->data(),H5PredType<T>(),
         memSpace,EJ);
 
-      this->fockA_->noalias() += coef[j] * (*this->NBSqScratch_);
-    }
+      if(this->nTCS_ == 1 && this->isClosedShell)
+        // Scalar Part
+        this->fockA_->noalias() += coef[j] * (*this->NBSqScratch_);
+      else {
+        // Scalar Part
+        this->fockScalar_->noalias() += coef[j] * (*this->NBSqScratch_);
+
+        // Mz
+        this->FMzDIIS_->read(this->NBSqScratch_->data(),H5PredType<T>(),
+          memSpace,EJ);
+        this->fockMz_->noalias() += coef[j] * (*this->NBSqScratch_);
+
+        if(this->nTCS_ == 2){
+          // My
+          this->FMyDIIS_->read(this->NBSqScratch_->data(),H5PredType<T>(),
+            memSpace,EJ);
+          this->fockMy_->noalias() += coef[j] * (*this->NBSqScratch_);
+          // Mx
+          this->FMxDIIS_->read(this->NBSqScratch_->data(),H5PredType<T>(),
+            memSpace,EJ);
+          this->fockMx_->noalias() += coef[j] * (*this->NBSqScratch_);
+        } // ntcs = 2
+      } // both vector and scalar
+    } // loop
   } else {
     this->fileio_->out << std::setw(2) << " " <<
       std::setw(4) << " " <<
       "*** CDIIS Extrapolation Failed (RCOND = " << std::abs(RCOND) << 
       ") ***" << endl;
   }
+
+  // Gather matricies
+  if(this->nTCS_ == 2 || !this->isClosedShell){
+    std::vector<std::reference_wrapper<TMap>> toGather;
+    toGather.emplace_back(*this->fockScalar_);
+    toGather.emplace_back(*this->fockMz_);
+    if(this->nTCS_ == 2){
+      toGather.emplace_back(*this->fockMy_);
+      toGather.emplace_back(*this->fockMx_);
+      Quantum<T>::spinGather(*this->fockA_,toGather);
+    } else 
+      Quantum<T>::spinGather(*this->fockA_,*this->fockB_,toGather);
+  }
+
   this->memManager_->free(B.data(),N*N);
   this->memManager_->free(coef,N);
   this->memManager_->free(iPiv,N);
@@ -391,6 +471,12 @@ void SingleSlater<T>::cpyAOtoOrthoDen(){
   }
 };
 
+template<typename F> inline F DIISComplexScale();
+template<>
+inline double DIISComplexScale<double>(){return -1.; }
+template<>
+inline dcomplex DIISComplexScale<dcomplex>(){return dcomplex(0,1); }
+
 template<typename T>
 void SingleSlater<T>::genDIISCom(int iter){
   hsize_t offset[] = {iter % (this->nDIISExtrap_-1),0,0};
@@ -440,7 +526,7 @@ void SingleSlater<T>::genDIISCom(int iter){
     memSpace,E);
 
   // Magnetization part
-  // E(K) = [F(S),D(K)] + [F(K),D(S)] + 2i*[F(K+1),D(K+2)]
+  // E(K) = [F(S),D(K)] + [F(K),D(S)] + i*([F(K+1),D(K+2)] - [F(K+2),D(K+1)])
   //
   // K = 1 (X)
   // K = 2 (Y)
@@ -463,12 +549,83 @@ void SingleSlater<T>::genDIISCom(int iter){
     this->NBSqScratch_->noalias() -=
       (*this->onePDMOrthoScalar_) * (*this->fockOrthoMz_);
  
-    // FIXME: Need to handle the commutator of F(X) and D(Y)
+    if(this->nTCS_ == 2){
+      // [F(X),D(Y)]
+      this->NBSqScratch_->noalias() += DIISComplexScale<T>() *
+        (*this->fockOrthoMx_) * (*this->onePDMOrthoMy_);
+      this->NBSqScratch_->noalias() -= DIISComplexScale<T>() *
+        (*this->onePDMOrthoMy_) * (*this->fockOrthoMx_);
+     
+      // [F(Y),D(X)]
+      this->NBSqScratch_->noalias() -= DIISComplexScale<T>() *
+        (*this->fockOrthoMy_) * (*this->onePDMOrthoMx_);
+      this->NBSqScratch_->noalias() += DIISComplexScale<T>() *
+        (*this->onePDMOrthoMx_) * (*this->fockOrthoMy_);
+    }
+      
 
     this->EMzDIIS_->write(this->NBSqScratch_->data(),H5PredType<T>(),
       memSpace,E);
 
-    // FIXME: Need to handle the other spin components
+    if(this->nTCS_ == 2){
+      // Mx Part
+        
+      // [F(S),D(X)]
+      this->NBSqScratch_->noalias() = 
+        (*this->fockOrthoScalar_) * (*this->onePDMOrthoMx_);
+      this->NBSqScratch_->noalias() -=
+        (*this->onePDMOrthoMx_) * (*this->fockOrthoScalar_);
+
+      // [F(X),D(S)]
+      this->NBSqScratch_->noalias() += 
+        (*this->fockOrthoMx_) * (*this->onePDMOrthoScalar_);
+      this->NBSqScratch_->noalias() -=
+        (*this->onePDMOrthoScalar_) * (*this->fockOrthoMx_);
+
+      // [F(Y),D(Z)]
+      this->NBSqScratch_->noalias() += DIISComplexScale<T>() *
+        (*this->fockOrthoMy_) * (*this->onePDMOrthoMz_);
+      this->NBSqScratch_->noalias() -= DIISComplexScale<T>() *
+        (*this->onePDMOrthoMz_) * (*this->fockOrthoMy_);
+     
+      // [F(Z),D(Y)]
+      this->NBSqScratch_->noalias() -= DIISComplexScale<T>() *
+        (*this->fockOrthoMz_) * (*this->onePDMOrthoMy_);
+      this->NBSqScratch_->noalias() += DIISComplexScale<T>() *
+        (*this->onePDMOrthoMy_) * (*this->fockOrthoMz_);
+
+      this->EMxDIIS_->write(this->NBSqScratch_->data(),H5PredType<T>(),
+        memSpace,E);
+
+      // My Part
+        
+      // [F(S),D(Y)]
+      this->NBSqScratch_->noalias() = 
+        (*this->fockOrthoScalar_) * (*this->onePDMOrthoMy_);
+      this->NBSqScratch_->noalias() -=
+        (*this->onePDMOrthoMy_) * (*this->fockOrthoScalar_);
+
+      // [F(Y),D(S)]
+      this->NBSqScratch_->noalias() += 
+        (*this->fockOrthoMy_) * (*this->onePDMOrthoScalar_);
+      this->NBSqScratch_->noalias() -=
+        (*this->onePDMOrthoScalar_) * (*this->fockOrthoMy_);
+
+      // [F(Z),D(X)]
+      this->NBSqScratch_->noalias() += DIISComplexScale<T>() *
+        (*this->fockOrthoMz_) * (*this->onePDMOrthoMx_);
+      this->NBSqScratch_->noalias() -= DIISComplexScale<T>() *
+        (*this->onePDMOrthoMx_) * (*this->fockOrthoMz_);
+     
+      // [F(X),D(Z)]
+      this->NBSqScratch_->noalias() -= DIISComplexScale<T>() *
+        (*this->fockOrthoMx_) * (*this->onePDMOrthoMz_);
+      this->NBSqScratch_->noalias() += DIISComplexScale<T>() *
+        (*this->onePDMOrthoMz_) * (*this->fockOrthoMx_);
+
+      this->EMyDIIS_->write(this->NBSqScratch_->data(),H5PredType<T>(),
+        memSpace,E);
+    }
   }
 
 };
