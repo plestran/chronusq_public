@@ -446,36 +446,6 @@ void SingleSlater<T>::cpyOrthoDen2(int iter){
   }
 }
 
-template<typename T>
-void SingleSlater<T>::cpyAOtoOrthoDen(){
-  if(this->nTCS_ == 1 && this->isClosedShell) {
-    // Just copy for RHF
-    (*this->onePDMOrthoA_) = (*this->onePDMA_);
-  } else if(this->nTCS_ == 2 || !this->isClosedShell){
-    // Scatter 
-    std::vector<std::reference_wrapper<TMap>> scattered;
-    scattered.emplace_back(*this->onePDMOrthoScalar_);
-    scattered.emplace_back(*this->onePDMOrthoMz_);
-
-    if(this->nTCS_ == 1) {
-      Quantum<T>::spinScatter(*this->onePDMA_,*this->onePDMB_,scattered);
-    } else {
-      scattered.emplace_back(*this->onePDMOrthoMy_);
-      scattered.emplace_back(*this->onePDMOrthoMx_);
-      Quantum<T>::spinScatter(*this->onePDMA_,scattered);
-    }
-
-    /*
-    // Copy
-    (*this->onePDMOrthoScalar_) = (*this->onePDMScalar_);
-    (*this->onePDMOrthoMz_)     = (*this->onePDMMz_);
-    if(this->nTCS_ == 2) {
-      (*this->onePDMOrthoMy_)     = (*this->onePDMMy_);
-      (*this->onePDMOrthoMx_)     = (*this->onePDMMx_);
-    }
-    */
-  }
-};
 
 template<typename F> inline F DIISComplexScale();
 template<>
@@ -632,6 +602,59 @@ void SingleSlater<T>::genDIISCom(int iter){
       this->EMyDIIS_->write(this->NBSqScratch_->data(),H5PredType<T>(),
         memSpace,E);
     }
+  }
+
+};
+
+template<typename T>
+void SingleSlater<T>::initDIISFiles(){
+  std::vector<hsize_t> dims;
+  dims.push_back(this->nDIISExtrap_ - 1);
+  dims.push_back(this->nBasis_);
+  dims.push_back(this->nBasis_);
+
+  this->FScalarDIIS_ = 
+    this->fileio_->createScratchPartition(H5PredType<T>(),
+      "Fock (Ortho_Scalar) For DIIS Extrapoloation",dims);
+  this->DScalarDIIS_ = 
+    this->fileio_->createScratchPartition(H5PredType<T>(),
+      "Density (Ortho_Scalar) For DIIS Extrapoloation",dims);
+  this->EScalarDIIS_ = 
+    this->fileio_->createScratchPartition(H5PredType<T>(),
+      "Error Metric [F,D] (Scalar) For DIIS Extrapoloation",dims);
+
+  if(this->nTCS_ == 2 || !this->isClosedShell) {
+    this->FMzDIIS_ = 
+      this->fileio_->createScratchPartition(H5PredType<T>(),
+        "Fock (Ortho_Mz) For DIIS Extrapoloation",dims);
+    this->DMzDIIS_ = 
+      this->fileio_->createScratchPartition(H5PredType<T>(),
+        "Density (Ortho_Mz) For DIIS Extrapoloation",dims);
+    this->EMzDIIS_ = 
+      this->fileio_->createScratchPartition(H5PredType<T>(),
+        "Error Metric [F,D] (Mz) For DIIS Extrapoloation",dims);
+  }
+
+  if(this->nTCS_ == 2) {
+    this->FMyDIIS_ = 
+      this->fileio_->createScratchPartition(H5PredType<T>(),
+        "Fock (Ortho_My) For DIIS Extrapoloation",dims);
+    this->DMyDIIS_ = 
+      this->fileio_->createScratchPartition(H5PredType<T>(),
+        "Density (Ortho_My) For DIIS Extrapoloation",dims);
+    this->EMyDIIS_ = 
+      this->fileio_->createScratchPartition(H5PredType<T>(),
+        "Error Metric [F,D] (My) For DIIS Extrapoloation",dims);
+
+    this->FMxDIIS_ = 
+      this->fileio_->createScratchPartition(H5PredType<T>(),
+        "Fock (Ortho_Mx) For DIIS Extrapoloation",dims);
+    this->DMxDIIS_ = 
+      this->fileio_->createScratchPartition(H5PredType<T>(),
+        "Density (Ortho_Mx) For DIIS Extrapoloation",dims);
+    this->EMxDIIS_ = 
+      this->fileio_->createScratchPartition(H5PredType<T>(),
+        "Error Metric [F,D] (Mx) For DIIS Extrapoloation",dims);
   }
 
 };

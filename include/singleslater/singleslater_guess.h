@@ -57,7 +57,8 @@ void SingleSlater<T>::COREGuess(){
   this->haveMO = true;
   this->haveDensity = true;
 
-  this->orthoFock();
+  //this->orthoFock();
+  this->orthoFock3();
   if(this->printLevel_ > 3){
     prettyPrint(this->fileio_->out,*this->fockA_,"Initial FA");
     prettyPrint(this->fileio_->out,*this->fockOrthoA_,"Initial FOrthoA");

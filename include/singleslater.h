@@ -39,6 +39,13 @@
 /****************************/
 
 namespace ChronusQ {
+
+struct SCFConvergence {
+  double EDelta;
+  double PARMS;
+  double PBRMS;
+};
+
 template<typename T>
 class SingleSlater : public Quantum<T> {
   typedef Eigen::Matrix<T,Dynamic,Dynamic,ColMajor> TMatrix;
@@ -814,6 +821,22 @@ public:
   /*************************/
   void mpiSend(int,int tag);
   void mpiRecv(int,int tag);
+
+
+
+  void SCF3();
+  void initSCFMem3();
+  void initDIISFiles();
+  void orthoFock3();
+  void unOrthoDen3();
+  SCFConvergence evalConver3();
+  void backTransformMOs3();
+  void cleanupSCFMem3();
+
+  void gatherOrthoFock();
+  void gatherFock();
+  void gatherOrthoDen();
+  
 };
 
 #include <singleslater/singleslater_alloc.h>
