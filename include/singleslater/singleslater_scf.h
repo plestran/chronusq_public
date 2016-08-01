@@ -63,6 +63,20 @@ void SingleSlater<T>::SCF3(){
     this->copyDen();
     this->formFock();
     this->orthoFock3();
+    if(this->doDIIS){
+      auto IDIISIter = iter - this->iDIISStart_;
+      this->cpyFockDIIS(IDIISIter);
+      this->cpyDenDIIS(IDIISIter);
+      this->genDIISCom(IDIISIter); 
+//    if(IDIISIter == 3) CErr();
+      bool DIISExtrap(IDIISIter%(this->nDIISExtrap_)==(this->nDIISExtrap_-1));
+      DIISExtrap = DIISExtrap && IDIISIter != 0;
+      if(DIISExtrap){ 
+        this->CDIIS2();
+//      CErr();
+      }
+      
+    }
     this->diagFock2();
     this->formDensity();
     this->cpyAOtoOrthoDen();

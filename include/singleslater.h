@@ -462,8 +462,8 @@ public:
     this->denTol_           = 1e-8;
     this->eneTol_           = 1e-10;
     this->maxSCFIter_       = 256;
-    this->nDIISExtrap_      = 4;
-    this->iDIISStart_       = 2;
+    this->nDIISExtrap_      = 6;
+    this->iDIISStart_       = 0;
     this->iStartLevelShift_ = 0;
     this->nLevelShift_      = 4;
     this->levelShiftParam_  = 2.42;
@@ -832,6 +832,8 @@ public:
   SCFConvergence evalConver3();
   void backTransformMOs3();
   void cleanupSCFMem3();
+  void cpyDenDIIS(int);
+  void cpyFockDIIS(int);
 
   void gatherOrthoFock();
   void gatherFock();

@@ -491,7 +491,8 @@ void AOIntegrals::computeAOTwoE(){
   std::vector<libint2::Engine> engines(nthreads);
   engines[0] = libint2::Engine(libint2::Operator::coulomb,
       this->basisSet_->maxPrim(),this->basisSet_->maxL(),0);
-  engines[0].set_precision(std::numeric_limits<double>::epsilon());
+  //engines[0].set_precision(std::numeric_limits<double>::epsilon());
+  engines[0].set_precision(0.0);
 
   for(int i=1; i<nthreads; i++) engines[i] = engines[0];
   if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(); 
@@ -525,8 +526,8 @@ void AOIntegrals::computeAOTwoE(){
           int n4    = this->basisSet_->shells(s4).size();
     
           // Schwartz and Density screening
-          if((*this->schwartz_)(s1,s2) * (*this->schwartz_)(s3,s4)
-              < this->thresholdSchwartz_ ) continue;
+        //if((*this->schwartz_)(s1,s2) * (*this->schwartz_)(s3,s4)
+        //    < this->thresholdSchwartz_ ) continue;
  
           const double* buff = engines[thread_id].compute(
             this->basisSet_->shells(s1),
