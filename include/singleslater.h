@@ -235,6 +235,7 @@ class SingleSlater : public Quantum<T> {
   void unOrthoDen();
   void orthoDen2();
   void CDIIS2();
+  void CDIIS4(int);
 
   // Various functions the perform SCF and SCR allocation
   void initSCFPtr();       ///< NULL-out pointers to scratch partitions
