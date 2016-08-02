@@ -45,93 +45,27 @@ void SingleSlater<T>::CDIIS4(int NDIIS){
   int * iPiv   = this->memManager_->template malloc<int>(N);
   int * iWORK_ = this->memManager_->template malloc<int>(N);
 
-//hsize_t stride[] = {1,1,1};
-//hsize_t block[]  = {1,1,1};
- 
-//hsize_t subDim[] = {1,this->nBasis_,this->nBasis_};
-//hsize_t count[]  = {1,this->nBasis_,this->nBasis_};
-
-//H5::DataSpace EJ = this->EScalarDIIS_->getSpace();
-//H5::DataSpace EK = this->EScalarDIIS_->getSpace();
-//H5::DataSpace memSpace(3,subDim,NULL);
 
   for(auto j = 0; j < NDIIS; j++){
-//  hsize_t offset_j[] = {j,0,0};
-//  EJ.selectHyperslab(H5S_SELECT_SET,count,offset_j,stride,
-//    block);
-
-
-    // Scalar Part
-//  this->EScalarDIIS_->read(this->NBSqScratch_->data(),
-//    H5PredType<T>(),memSpace,EJ);
-  
+    // Scalar Part 
     this->readDIIS(this->EScalarDIIS_,j,this->NBSqScratch_->data());
-    prettyPrint(cout,*this->NBSqScratch_,"E IN DIIS" + std::to_string(j));
-
     for(auto k = 0; k <= j; k++){
-    //hsize_t offset_k[] = {k,0,0};
-    //EK.selectHyperslab(H5S_SELECT_SET,count,offset_k,stride,
-    //  block);
-    //this->EScalarDIIS_->read(this->NBSqScratch2_->data(),
-    //  H5PredType<T>(),memSpace,EK);
       this->readDIIS(this->EScalarDIIS_,k,this->NBSqScratch2_->data());
 
-      B(j,k) = this->NBSqScratch_->frobInner(
-        *this->NBSqScratch2_)*0.5;
+      B(j,k) = this->NBSqScratch_->frobInner(*this->NBSqScratch2_);
     }
 
-/*
     // Vector Part
-
     if(this->nTCS_ == 2 || !this->isClosedShell) {
       // Mz
-      this->EMzDIIS_->read(this->NBSqScratch_->data(),
-        H5PredType<T>(),memSpace,EJ);
+      this->readDIIS(this->EMzDIIS_,j,this->NBSqScratch_->data());
       for(auto k = 0; k <= j; k++){
-        hsize_t offset_k[] = {k,0,0};
-        EK.selectHyperslab(H5S_SELECT_SET,count,offset_j,
-          stride,block);
-        this->EMzDIIS_->read(this->NBSqScratch2_->data(),
-          H5PredType<T>(),memSpace,EK);
+        this->readDIIS(this->EMzDIIS_,k,this->NBSqScratch2_->data());
      
-        B(j,k) += -this->NBSqScratch_->frobInner(
-          *this->NBSqScratch2_);
+        B(j,k) += this->NBSqScratch_->frobInner(*this->NBSqScratch2_);
       }
-
-      if(this->nTCS_ == 2){
-        // Mx
-        this->EMxDIIS_->read(this->NBSqScratch_->data(),
-          H5PredType<T>(),memSpace,EJ);
-        for(auto k = 0; k <= j; k++){
-          hsize_t offset_k[] = {k,0,0};
-          EK.selectHyperslab(H5S_SELECT_SET,count,offset_j,
-            stride,block);
-          this->EMxDIIS_->read(this->NBSqScratch2_->data(),
-            H5PredType<T>(),memSpace,EK);
-     
-          B(j,k) += -this->NBSqScratch_->frobInner(
-            *this->NBSqScratch2_);
-        }
-
-        // My
-        this->EMyDIIS_->read(this->NBSqScratch_->data(),
-          H5PredType<T>(),memSpace,EJ);
-        for(auto k = 0; k <= j; k++){
-          hsize_t offset_k[] = {k,0,0};
-          EK.selectHyperslab(H5S_SELECT_SET,count,offset_j,
-            stride,block);
-          this->EMyDIIS_->read(this->NBSqScratch2_->data(),
-            H5PredType<T>(),memSpace,EK);
-     
-          B(j,k) += -this->NBSqScratch_->frobInner(
-            *this->NBSqScratch2_);
-        }
-
-      } // ntcs = 2
     } // has vector part
-*/
-
-  }
+  } // Loop over errors
 
   B = B.template selfadjointView<Lower>();
 
@@ -145,8 +79,8 @@ void SingleSlater<T>::CDIIS4(int NDIIS){
   coef[N-1]=-1.0;
 
   TMap COEFF(coef,N,1);
-  prettyPrint(this->fileio_->out,B,"CDIIS B Metric",20);
-  prettyPrint(this->fileio_->out,COEFF,"CDIIS RHS");
+  //prettyPrint(this->fileio_->out,B,"CDIIS B Metric",20);
+  //prettyPrint(this->fileio_->out,COEFF,"CDIIS RHS");
   
   double ANORM = B.template lpNorm<1>();
 
@@ -180,8 +114,8 @@ void SingleSlater<T>::CDIIS4(int NDIIS){
         &INFO);
   }
   this->memManager_->template free(WORK,LWORK);
-  prettyPrint(this->fileio_->out,COEFF,"CDIIS SOULTION");
-  prettyPrint(this->fileio_->out,Bp*COEFF,"SOLN");
+  //prettyPrint(this->fileio_->out,COEFF,"CDIIS SOULTION");
+  //prettyPrint(this->fileio_->out,Bp*COEFF,"SOLN");
 
   
 /*
@@ -214,43 +148,18 @@ void SingleSlater<T>::CDIIS4(int NDIIS){
       this->fockB_->setZero();
 
     for(auto j = 0; j < NDIIS; j++) {
-//    hsize_t offset_j[] = {j,0,0};
-//    EJ.selectHyperslab(H5S_SELECT_SET,count,offset_j,stride,
-//      block);
-//    this->FScalarDIIS_->read(this->NBSqScratch_->data(),
-//      H5PredType<T>(),memSpace,EJ);
       this->readDIIS(this->FScalarDIIS_,j,this->NBSqScratch_->data());
-
-      prettyPrint(cout,*this->NBSqScratch_,"F in DIIS " + std::to_string(j));
 
       if(this->nTCS_ == 1 && this->isClosedShell)
         // Scalar Part
         (*this->fockA_) += coef[j] * (*this->NBSqScratch_);
       else {
-/*
         // Scalar Part
-        this->fockScalar_->noalias() += 
-          coef[j] * (*this->NBSqScratch_);
+        this->fockScalar_->noalias() += coef[j] * (*this->NBSqScratch_);
 
         // Mz
-        this->FMzDIIS_->read(this->NBSqScratch_->data(),
-          H5PredType<T>(),memSpace,EJ);
-        this->fockMz_->noalias() += 
-          coef[j] * (*this->NBSqScratch_);
-
-        if(this->nTCS_ == 2){
-          // My
-          this->FMyDIIS_->read(this->NBSqScratch_->data(),
-            H5PredType<T>(),memSpace,EJ);
-          this->fockMy_->noalias() += 
-            coef[j] * (*this->NBSqScratch_);
-          // Mx
-          this->FMxDIIS_->read(this->NBSqScratch_->data(),
-            H5PredType<T>(),memSpace,EJ);
-          this->fockMx_->noalias() += 
-            coef[j] * (*this->NBSqScratch_);
-        } // ntcs = 2
-*/
+        this->readDIIS(this->FMzDIIS_,j,this->NBSqScratch_->data());
+        this->fockMz_->noalias() += coef[j] * (*this->NBSqScratch_);
       } // both vector and scalar
     } // Fock loop
 /*
@@ -261,8 +170,13 @@ void SingleSlater<T>::CDIIS4(int NDIIS){
       << std::abs(RCOND) << ") ***" << endl;
   }
 */
-  prettyPrint(cout,*this->fockA_,"Extrapolated Fock");
-  this->PTA_->real() = this->fockA_->real() - (*this->aointegrals_->coreH_);
+//prettyPrint(cout,*this->fockA_,"Extrapolated Fock");
+  if(this->nTCS_ == 1 && this->isClosedShell)
+    this->PTA_->real() = this->fockA_->real() - (*this->aointegrals_->coreH_);
+  else {
+    this->PTScalar_->real() = 
+      this->fockScalar_->real() - (*this->aointegrals_->coreH_);
+  }
 
 /*
   // Gather matricies
