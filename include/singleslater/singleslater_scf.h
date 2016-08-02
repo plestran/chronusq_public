@@ -91,6 +91,7 @@ void SingleSlater<T>::SCF3(){
     this->formDensity();
     this->cpyAOtoOrthoDen();
     this->unOrthoDen3();
+    prettyPrint(cout,*this->onePDMA_,"DENSITY BEFORE EXTRAP " + std::to_string(iter));
     SCFConvergence CONVER = this->evalConver3();
 
     this->printSCFIter(iter,CONVER.EDelta,CONVER.PARMS,

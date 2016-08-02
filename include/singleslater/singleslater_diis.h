@@ -27,223 +27,6 @@
 #include <singleslater/singleslater_olddiis.h>
 
 template<typename T>
-void SingleSlater<T>::CDIIS2(){
-  int N = this->nDIISExtrap_ + 1;
-  int NRHS = 1;
-  int INFO = -1;
-  int NB = this->nBasis_ * this->nTCS_; 
-  int NBSq = NB*NB;
-  char NORM = 'O';
-  double RCOND;
-
-  this->fileio_->out << std::setw(2) << " " <<
-    std::setw(4) << " " <<
-    "*** Performing CDIIS Extrapolation ***" << endl;
-  TMap B(this->memManager_->template malloc<T>(N*N),N,N);
-  T   * coef   = this->memManager_->template malloc<T>(N);
-  int * iPiv   = this->memManager_->template malloc<int>(N);
-  int * iWORK_ = this->memManager_->template malloc<int>(N);
-
-  hsize_t stride[] = {1,1,1};
-  hsize_t block[]  = {1,1,1};
- 
-  hsize_t subDim[] = {1,this->nBasis_,this->nBasis_};
-  hsize_t count[]  = {1,this->nBasis_,this->nBasis_};
-
-  H5::DataSpace EJ = this->EScalarDIIS_->getSpace();
-  H5::DataSpace EK = this->EScalarDIIS_->getSpace();
-  H5::DataSpace memSpace(3,subDim,NULL);
-
-  for(auto j = 0; j < N-1; j++){
-    cout << j << endl;
-    hsize_t offset_j[] = {j,0,0};
-    EJ.selectHyperslab(H5S_SELECT_SET,count,offset_j,stride,
-      block);
-
-    // Scalar Part
-    this->EScalarDIIS_->read(this->NBSqScratch_->data(),
-      H5PredType<T>(),memSpace,EJ);
-
-    for(auto k = 0; k <= j; k++){
-      cout << "  " << k << endl;
-      hsize_t offset_k[] = {k,0,0};
-      EK.selectHyperslab(H5S_SELECT_SET,count,offset_k,stride,
-        block);
-      this->EScalarDIIS_->read(this->NBSqScratch2_->data(),
-        H5PredType<T>(),memSpace,EK);
-
-      B(j,k) = -this->NBSqScratch_->frobInner(
-        *this->NBSqScratch2_);
-    }
-
-    // Vector Part
-
-    if(this->nTCS_ == 2 || !this->isClosedShell) {
-      // Mz
-      this->EMzDIIS_->read(this->NBSqScratch_->data(),
-        H5PredType<T>(),memSpace,EJ);
-      for(auto k = 0; k <= j; k++){
-        hsize_t offset_k[] = {k,0,0};
-        EK.selectHyperslab(H5S_SELECT_SET,count,offset_j,
-          stride,block);
-        this->EMzDIIS_->read(this->NBSqScratch2_->data(),
-          H5PredType<T>(),memSpace,EK);
-     
-        B(j,k) += -this->NBSqScratch_->frobInner(
-          *this->NBSqScratch2_);
-      }
-
-      if(this->nTCS_ == 2){
-        // Mx
-        this->EMxDIIS_->read(this->NBSqScratch_->data(),
-          H5PredType<T>(),memSpace,EJ);
-        for(auto k = 0; k <= j; k++){
-          hsize_t offset_k[] = {k,0,0};
-          EK.selectHyperslab(H5S_SELECT_SET,count,offset_j,
-            stride,block);
-          this->EMxDIIS_->read(this->NBSqScratch2_->data(),
-            H5PredType<T>(),memSpace,EK);
-     
-          B(j,k) += -this->NBSqScratch_->frobInner(
-            *this->NBSqScratch2_);
-        }
-
-        // My
-        this->EMyDIIS_->read(this->NBSqScratch_->data(),
-          H5PredType<T>(),memSpace,EJ);
-        for(auto k = 0; k <= j; k++){
-          hsize_t offset_k[] = {k,0,0};
-          EK.selectHyperslab(H5S_SELECT_SET,count,offset_j,
-            stride,block);
-          this->EMyDIIS_->read(this->NBSqScratch2_->data(),
-            H5PredType<T>(),memSpace,EK);
-     
-          B(j,k) += -this->NBSqScratch_->frobInner(
-            *this->NBSqScratch2_);
-        }
-
-      } // ntcs = 2
-    } // has vector part
-
-  }
-
-  B = B.template selfadjointView<Lower>();
-
-  for (auto l=0;l<N-1;l++){
-     B(N-1,l)=-1.0;
-     B(l,N-1)=-1.0;
-  }
-
-  B(N-1,N-1)=0;
-  for(auto k = 0; k < N;k++) coef[k] = 0.0; 
-  coef[N-1]=-1.0;
-
-  TMap COEFF(coef,N,1);
-//prettyPrint(this->fileio_->out,B,"CDIIS B Metric",20);
-//prettyPrint(this->fileio_->out,COEFF,"CDIIS RHS");
-  
-  double ANORM = B.template lpNorm<1>();
-
-  int LWORK  = 5*this->nDIISExtrap_;
-  T   *WORK  = this->memManager_->template malloc<T>(LWORK);
-
-  if(typeid(T).hash_code() == typeid(dcomplex).hash_code()){
-    int LRWORK = 3*this->nDIISExtrap_;
-    double   *RWORK = this->memManager_->
-      template malloc<double>(LRWORK);
-    zgesv_(&N,&NRHS,reinterpret_cast<dcomplex*>(B.data()),&N,
-        iPiv,reinterpret_cast<dcomplex*>(coef),&N,&INFO);
-    zgecon_(&NORM,&N,reinterpret_cast<dcomplex*>(B.data()),&N,
-        &ANORM,&RCOND,reinterpret_cast<dcomplex*>(WORK),RWORK,
-        &INFO);
-    this->memManager_->free(RWORK,LRWORK);
-  } else {
-    dgesv_(&N,&NRHS,reinterpret_cast<double*>(B.data()),&N,
-        iPiv,reinterpret_cast<double*>(coef),&N,&INFO);
-    dgecon_(&NORM,&N,reinterpret_cast<double*>(B.data()),&N,
-        &ANORM,&RCOND,reinterpret_cast<double*>(WORK),iWORK_,
-        &INFO);
-  }
-  this->memManager_->template free(WORK,LWORK);
-//prettyPrint(this->fileio_->out,COEFF,"CDIIS SOULTION");
-//T SUM(0); for(auto i = 0; i < this->nDIISExtrap_; i++) SUM += coef[i];
-//cout << "SUM " << SUM << endl;
-
-
-  if(std::abs(RCOND)>std::numeric_limits<double>::epsilon()) {
-    this->fockA_->setZero();
-    if(!this->isClosedShell && this->nTCS_ == 1) 
-      this->fockB_->setZero();
-
-    for(auto j = 0; j < N-1; j++) {
-      hsize_t offset_j[] = {j,0,0};
-      EJ.selectHyperslab(H5S_SELECT_SET,count,offset_j,stride,
-        block);
-      this->FScalarDIIS_->read(this->NBSqScratch_->data(),
-        H5PredType<T>(),memSpace,EJ);
-//prettyPrint(cout,*this->NBSqScratch2_,"F IN DIIS J=" + std::to_string(j));
-
-      if(this->nTCS_ == 1 && this->isClosedShell)
-        // Scalar Part
-        this->fockA_->noalias() += 
-          coef[j] * (*this->NBSqScratch_);
-      else {
-        // Scalar Part
-        this->fockScalar_->noalias() += 
-          coef[j] * (*this->NBSqScratch_);
-
-        // Mz
-        this->FMzDIIS_->read(this->NBSqScratch_->data(),
-          H5PredType<T>(),memSpace,EJ);
-        this->fockMz_->noalias() += 
-          coef[j] * (*this->NBSqScratch_);
-
-        if(this->nTCS_ == 2){
-          // My
-          this->FMyDIIS_->read(this->NBSqScratch_->data(),
-            H5PredType<T>(),memSpace,EJ);
-          this->fockMy_->noalias() += 
-            coef[j] * (*this->NBSqScratch_);
-          // Mx
-          this->FMxDIIS_->read(this->NBSqScratch_->data(),
-            H5PredType<T>(),memSpace,EJ);
-          this->fockMx_->noalias() += 
-            coef[j] * (*this->NBSqScratch_);
-        } // ntcs = 2
-      } // both vector and scalar
-    } // loop
-  } else {
-    this->fileio_->out << std::setw(2) << " " <<
-      std::setw(4) << " " <<
-      "*** CDIIS Extrapolation Failed (RCOND = " 
-      << std::abs(RCOND) << ") ***" << endl;
-  }
-
-/*
-  // Gather matricies
-  if(this->nTCS_ == 2 || !this->isClosedShell){
-    std::vector<std::reference_wrapper<TMap>> toGather;
-    toGather.emplace_back(*this->fockScalar_);
-    toGather.emplace_back(*this->fockMz_);
-    if(this->nTCS_ == 2){
-      toGather.emplace_back(*this->fockMy_);
-      toGather.emplace_back(*this->fockMx_);
-      Quantum<T>::spinGather(*this->fockA_,toGather);
-    } else 
-      Quantum<T>::spinGather(*this->fockA_,*this->fockB_,
-        toGather);
-  }
-*/
-  this->orthoFock3();
-
-  this->memManager_->free(B.data(),N*N);
-  this->memManager_->free(coef,N);
-  this->memManager_->free(iPiv,N);
-  this->memManager_->free(iWORK_,N);
-
-} // CDIIS2
-
-template<typename T>
 void SingleSlater<T>::CDIIS4(int NDIIS){
   int N = NDIIS + 1;
   int NRHS = 1;
@@ -262,36 +45,42 @@ void SingleSlater<T>::CDIIS4(int NDIIS){
   int * iPiv   = this->memManager_->template malloc<int>(N);
   int * iWORK_ = this->memManager_->template malloc<int>(N);
 
-  hsize_t stride[] = {1,1,1};
-  hsize_t block[]  = {1,1,1};
+//hsize_t stride[] = {1,1,1};
+//hsize_t block[]  = {1,1,1};
  
-  hsize_t subDim[] = {1,this->nBasis_,this->nBasis_};
-  hsize_t count[]  = {1,this->nBasis_,this->nBasis_};
+//hsize_t subDim[] = {1,this->nBasis_,this->nBasis_};
+//hsize_t count[]  = {1,this->nBasis_,this->nBasis_};
 
-  H5::DataSpace EJ = this->EScalarDIIS_->getSpace();
-  H5::DataSpace EK = this->EScalarDIIS_->getSpace();
-  H5::DataSpace memSpace(3,subDim,NULL);
+//H5::DataSpace EJ = this->EScalarDIIS_->getSpace();
+//H5::DataSpace EK = this->EScalarDIIS_->getSpace();
+//H5::DataSpace memSpace(3,subDim,NULL);
 
   for(auto j = 0; j < NDIIS; j++){
-    hsize_t offset_j[] = {j,0,0};
-    EJ.selectHyperslab(H5S_SELECT_SET,count,offset_j,stride,
-      block);
+//  hsize_t offset_j[] = {j,0,0};
+//  EJ.selectHyperslab(H5S_SELECT_SET,count,offset_j,stride,
+//    block);
+
 
     // Scalar Part
-    this->EScalarDIIS_->read(this->NBSqScratch_->data(),
-      H5PredType<T>(),memSpace,EJ);
+//  this->EScalarDIIS_->read(this->NBSqScratch_->data(),
+//    H5PredType<T>(),memSpace,EJ);
+  
+    this->readDIIS(this->EScalarDIIS_,j,this->NBSqScratch_->data());
+    prettyPrint(cout,*this->NBSqScratch_,"E IN DIIS" + std::to_string(j));
 
     for(auto k = 0; k <= j; k++){
-      hsize_t offset_k[] = {k,0,0};
-      EK.selectHyperslab(H5S_SELECT_SET,count,offset_k,stride,
-        block);
-      this->EScalarDIIS_->read(this->NBSqScratch2_->data(),
-        H5PredType<T>(),memSpace,EK);
+    //hsize_t offset_k[] = {k,0,0};
+    //EK.selectHyperslab(H5S_SELECT_SET,count,offset_k,stride,
+    //  block);
+    //this->EScalarDIIS_->read(this->NBSqScratch2_->data(),
+    //  H5PredType<T>(),memSpace,EK);
+      this->readDIIS(this->EScalarDIIS_,k,this->NBSqScratch2_->data());
 
-      B(j,k) = -this->NBSqScratch_->frobInner(
-        *this->NBSqScratch2_);
+      B(j,k) = this->NBSqScratch_->frobInner(
+        *this->NBSqScratch2_)*0.5;
     }
 
+/*
     // Vector Part
 
     if(this->nTCS_ == 2 || !this->isClosedShell) {
@@ -340,6 +129,7 @@ void SingleSlater<T>::CDIIS4(int NDIIS){
 
       } // ntcs = 2
     } // has vector part
+*/
 
   }
 
@@ -363,6 +153,7 @@ void SingleSlater<T>::CDIIS4(int NDIIS){
   int LWORK  = 5*N;
   T   *WORK  = this->memManager_->template malloc<T>(LWORK);
 
+  TMatrix Bp(B);
   if(typeid(T).hash_code() == typeid(dcomplex).hash_code()){
     int LRWORK = 3*N;
     double   *RWORK = this->memManager_->
@@ -390,25 +181,53 @@ void SingleSlater<T>::CDIIS4(int NDIIS){
   }
   this->memManager_->template free(WORK,LWORK);
   prettyPrint(this->fileio_->out,COEFF,"CDIIS SOULTION");
+  prettyPrint(this->fileio_->out,Bp*COEFF,"SOLN");
 
+  
+/*
+  int NUSE = N;
+  if(std::abs(RCOND)<std::numeric_limits<double>::epsilon()) {
+    this->fileio_->out << std::setw(2) << " " <<
+      std::setw(4) << " " <<
+      "*** XGESV Inversion Failed (RCOND = " 
+      << std::abs(RCOND) << ") ***" << endl;
 
-  if(std::abs(RCOND)>std::numeric_limits<double>::epsilon()) {
+    std::fill(coef,coef+N,T(0.0));
+    coef[N-1]=-1.0;
+    T* S = this->memManager_->template malloc<T>(N);
+    int RANK; 
+    RCOND = -1;
+    dgelss_(&N,&N,&NRHS,reinterpret_cast<double*>(Bp.data()),
+      &N,reinterpret_cast<double*>(coef),&N,
+      reinterpret_cast<double*>(S),&RCOND,&RANK,
+      reinterpret_cast<double*>(WORK),&LWORK,&INFO);
+      
+    this->memManager_->free(S,N);
+    cout << "NEW RANK" << RANK << endl;
+    prettyPrint(this->fileio_->out,COEFF,"New CDIIS SOULTION");
+  }
+*/
+
+//if(std::abs(RCOND)>std::numeric_limits<double>::epsilon()) {
     this->fockA_->setZero();
     if(!this->isClosedShell && this->nTCS_ == 1) 
       this->fockB_->setZero();
 
     for(auto j = 0; j < NDIIS; j++) {
-      hsize_t offset_j[] = {j,0,0};
-      EJ.selectHyperslab(H5S_SELECT_SET,count,offset_j,stride,
-        block);
-      this->FScalarDIIS_->read(this->NBSqScratch_->data(),
-        H5PredType<T>(),memSpace,EJ);
+//    hsize_t offset_j[] = {j,0,0};
+//    EJ.selectHyperslab(H5S_SELECT_SET,count,offset_j,stride,
+//      block);
+//    this->FScalarDIIS_->read(this->NBSqScratch_->data(),
+//      H5PredType<T>(),memSpace,EJ);
+      this->readDIIS(this->FScalarDIIS_,j,this->NBSqScratch_->data());
+
+      prettyPrint(cout,*this->NBSqScratch_,"F in DIIS " + std::to_string(j));
 
       if(this->nTCS_ == 1 && this->isClosedShell)
         // Scalar Part
-        this->fockA_->noalias() += 
-          coef[j] * (*this->NBSqScratch_);
+        (*this->fockA_) += coef[j] * (*this->NBSqScratch_);
       else {
+/*
         // Scalar Part
         this->fockScalar_->noalias() += 
           coef[j] * (*this->NBSqScratch_);
@@ -431,14 +250,19 @@ void SingleSlater<T>::CDIIS4(int NDIIS){
           this->fockMx_->noalias() += 
             coef[j] * (*this->NBSqScratch_);
         } // ntcs = 2
+*/
       } // both vector and scalar
-    } // loop
+    } // Fock loop
+/*
   } else {
     this->fileio_->out << std::setw(2) << " " <<
       std::setw(4) << " " <<
       "*** CDIIS Extrapolation Failed (RCOND = " 
       << std::abs(RCOND) << ") ***" << endl;
   }
+*/
+  prettyPrint(cout,*this->fockA_,"Extrapolated Fock");
+  this->PTA_->real() = this->fockA_->real() - (*this->aointegrals_->coreH_);
 
 /*
   // Gather matricies
@@ -582,10 +406,14 @@ void SingleSlater<T>::genDIISCom(int iter){
   // Scalar Part
   // E(S) = [F(S),D(S)] + [F(K),D(K)]
   if(this->nTCS_ == 1 && this->isClosedShell){
+//  this->NBSqScratch_->noalias() = 
+//    (*this->fockOrthoA_) * (*this->onePDMOrthoA_);
+//  this->NBSqScratch_->noalias() -=
+//    (*this->onePDMOrthoA_) * (*this->fockOrthoA_);
     this->NBSqScratch_->noalias() = 
-      (*this->fockOrthoA_) * (*this->onePDMOrthoA_);
+      (*this->fockA_) * (*this->onePDMA_) * (*this->aointegrals_->overlap_);
     this->NBSqScratch_->noalias() -=
-      (*this->onePDMOrthoA_) * (*this->fockOrthoA_);
+      (*this->aointegrals_->overlap_) * (*this->onePDMA_) * (*this->fockA_);
   } else {
     this->NBSqScratch_->noalias() = 
       (*this->fockOrthoScalar_) * (*this->onePDMOrthoScalar_);
@@ -611,6 +439,9 @@ void SingleSlater<T>::genDIISCom(int iter){
   }
 
   prettyPrint(cout,*this->NBSqScratch_,"E1 FOR DIIS " + std::to_string(iter));
+//this->aointegrals_->Ortho1Trans(*this->NBSqScratch_,*this->NBSqScratch2_);
+//this->EScalarDIIS_->write(this->NBSqScratch2_->data(),H5PredType<T>(),
+//  memSpace,E);
   this->EScalarDIIS_->write(this->NBSqScratch_->data(),H5PredType<T>(),
     memSpace,E);
 
@@ -858,4 +689,44 @@ void SingleSlater<T>::cpyDenDIIS(int iter){
     this->DMxDIIS_->write(this->onePDMMx_->data(),H5PredType<T>(),
       memSpace,DMx); 
   }
+}
+
+template <typename T>
+void SingleSlater<T>::readDIIS(H5::DataSet *DIISF, int IDIISIter, T *data){
+  hsize_t offset[] = {IDIISIter,0,0};
+  
+
+  hsize_t stride[] = {1,1,1};
+  hsize_t block[]  = {1,1,1};
+ 
+  hsize_t subDim[] = {1,this->nBasis_,this->nBasis_};
+  hsize_t count[]  = {1,this->nBasis_,this->nBasis_};
+
+  H5::DataSpace DATA = DIISF->getSpace();
+  H5::DataSpace memspace(3,subDim,NULL);
+
+  DATA.selectHyperslab(H5S_SELECT_SET,count,offset,stride,block);
+
+  DIISF->read(data,H5PredType<T>(),memspace,DATA);
+
+}
+
+template <typename T>
+void SingleSlater<T>::writeDIIS(H5::DataSet *DIISF, int IDIISIter, T *data){
+  hsize_t offset[] = {IDIISIter,0,0};
+  
+
+  hsize_t stride[] = {1,1,1};
+  hsize_t block[]  = {1,1,1};
+ 
+  hsize_t subDim[] = {1,this->nBasis_,this->nBasis_};
+  hsize_t count[]  = {1,this->nBasis_,this->nBasis_};
+
+  H5::DataSpace DATA = DIISF->getSpace();
+  H5::DataSpace memspace(3,subDim,NULL);
+
+  DATA.selectHyperslab(H5S_SELECT_SET,count,offset,stride,block);
+
+  DIISF->write(data,H5PredType<T>(),memspace,DATA);
+
 }

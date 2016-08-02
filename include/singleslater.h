@@ -835,6 +835,8 @@ public:
   void cleanupSCFMem3();
   void cpyDenDIIS(int);
   void cpyFockDIIS(int);
+  void readDIIS(H5::DataSet*,int,T*);
+  void writeDIIS(H5::DataSet*,int,T*);
 
   void gatherOrthoFock();
   void gatherFock();
