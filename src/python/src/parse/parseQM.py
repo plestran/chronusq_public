@@ -865,6 +865,9 @@ def parseSCF(workers,scfSettings):
     except KeyError:
       continue
 
+  if workers['CQMolecule'].nAtoms() == 1:
+    optMap['GUESS'](guessMap['CORE'])
+
   try:
     if scfSettings['GUESS'] == guessMap['READ']:
       workers['CQFileIO'].doRestart = True
