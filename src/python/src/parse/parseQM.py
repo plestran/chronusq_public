@@ -107,8 +107,6 @@ def parseQM(workers,secDict):
     parseSCF(workers,secDict['SCF'])
   except KeyError:
     pass
-  if workers['CQMolecule'].nAtoms() == 1:
-    workers['CQSingleSlater'].setGuess(guessMap['CORE'])
 
 
   if str(ssSettings['JOB']) in knownJobs:
