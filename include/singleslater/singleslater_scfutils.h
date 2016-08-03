@@ -127,11 +127,9 @@ void SingleSlater<T>::unOrthoDen3(){
   if(this->nTCS_ == 1 && this->isClosedShell){
     this->aointegrals_->Ortho1Trans(
       *this->onePDMOrthoA_,*this->onePDMA_);
-    prettyPrint(cout,*this->onePDMA_,"PScalar");
   } else {
     this->aointegrals_->Ortho1Trans(
       *this->onePDMOrthoScalar_,*this->onePDMScalar_);
-    prettyPrint(cout,*this->onePDMScalar_,"PScalar");
     this->aointegrals_->Ortho1Trans(
       *this->onePDMOrthoMz_,*this->onePDMMz_);
     if(this->nTCS_ == 2){
@@ -177,11 +175,6 @@ void SingleSlater<T>::cpyAOtoOrthoDen(){
 template<typename T>
 SCFConvergence SingleSlater<T>::evalConver3(){
 
-  if(this->nTCS_ == 1 && this->isClosedShell){
-    prettyPrint(cout,*this->onePDMA_,"PScalar in Eval");
-  } else {
-    prettyPrint(cout,*this->onePDMScalar_,"PScalar in Eval");
-  }
   // Energy Convergence
   double EOld = this->totalEnergy;
   this->formFock();
@@ -189,21 +182,6 @@ SCFConvergence SingleSlater<T>::evalConver3(){
   double EDelta = this->totalEnergy - EOld;
 
   double PARMS(0),PBRMS(0);
-
-/*
-  for(auto I = 0; I < this->onePDMA_->size(); I++){
-    T DIFF = this->onePDMA_->data()[I] - this->POldAlphaMem_[I];
-    DIFF = std::conj(DIFF)*DIFF;
-    PARMS += reinterpret_cast<double(&)[2]>(DIFF)[0];
-    if(this->nTCS_ == 1 && !this->isClosedShell) {
-      DIFF = this->onePDMB_->data()[I] - this->POldBetaMem_[I];
-      DIFF = std::conj(DIFF)*DIFF;
-      PBRMS += reinterpret_cast<double(&)[2]>(DIFF)[0];
-    }
-  }
-*/
-
-  
 
   DScalarOld_->read(this->NBSqScratch_->data(),H5PredType<T>());
   if(this->nTCS_ == 1 && this->isClosedShell) {

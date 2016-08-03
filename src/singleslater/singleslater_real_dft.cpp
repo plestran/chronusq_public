@@ -434,7 +434,6 @@ void SingleSlater<double>::formVXC_new(){
   if(!this->isClosedShell && this->nTCS_ != 2){
     (*this->vXB_) = 4*math.pi*res.VXCB;
     (*this->vXB_) = this->vXB_->selfadjointView<Lower>();
-    cout << "UKS" <<endl;
   }
 
   if(doTimings) {

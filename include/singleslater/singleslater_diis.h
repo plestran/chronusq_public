@@ -221,7 +221,6 @@ inline dcomplex DIISComplexScale<dcomplex>(){return dcomplex(0,1); }
 
 template<typename T>
 void SingleSlater<T>::genDIISCom(int iter){
-  cout << "HERE IN COMM" << endl;
 
   // Scalar Part
   // E(S) = [F(S),D(S)] + [F(K),D(K)]
@@ -470,7 +469,6 @@ void SingleSlater<T>::initDIISFiles(){
 
 template<typename T>
 void SingleSlater<T>::cpyDenDIIS(int iter){
-  cout << "HERE IN DEN" << endl;
   T* ScalarPtr;
   if(this->isClosedShell && this->nTCS_ == 1) 
     ScalarPtr = this->onePDMA_->data();
