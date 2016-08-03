@@ -31,7 +31,7 @@ namespace ChronusQ{
  */
 void BasisSet::constructLocal(Molecule * mol){
   //cout << "Reference Shells" << endl;
-  for(auto iAtom = 0; iAtom < mol->nAtoms(); iAtom++){
+for(auto iAtom = 0; iAtom < mol->nAtoms(); iAtom++){
     bool found = false;
     for(auto iRef = this->refShells_.begin(); iRef != this->refShells_.end(); ++iRef){
       if(mol->index(iAtom) == (*iRef).index){
@@ -57,6 +57,11 @@ void BasisSet::constructLocal(Molecule * mol){
 
           this->shellsCQ.push_back(ChronusQ::ShellCQ{*iShell});
         };
+
+        for(auto iCons = (*iRef).unNormalizedCons.begin(); 
+            iCons != (*iRef).unNormalizedCons.end(); ++iCons){
+          this->unNormCons_.push_back(*iCons);
+        }
         found = true;
       }
     } // loop iRef
@@ -66,6 +71,7 @@ void BasisSet::constructLocal(Molecule * mol){
              " not found in current Basis Set",
            this->fileio_->out);
   } // loop iAtom
+
   this->computeMeta();
 //cout << "Construct Local Shells" << endl;
 //for(auto i = 0; i < this->shells_.size(); i++) cout << this->shells_[i] << endl;
@@ -98,6 +104,10 @@ void BasisSet::constructExtrn(Molecule * mol, BasisSet *genBasis){
             { (*mol->cart())(0,iAtom),
               (*mol->cart())(1,iAtom),
               (*mol->cart())(2,iAtom)};
+        }
+        for(auto iCons = (*iRef).unNormalizedCons.begin(); 
+            iCons != (*iRef).unNormalizedCons.end(); ++iCons){
+          genBasis->unNormCons_.push_back(*iCons);
         }
         found = true;
       }

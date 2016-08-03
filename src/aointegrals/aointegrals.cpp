@@ -367,7 +367,7 @@ void AOIntegrals::printOneE(){
   mat.push_back(RealMap(this->overlap_->data(),NB,NB));
   mat.push_back(RealMap(this->kinetic_->data(),NB,NB));
   mat.push_back(RealMap(this->potential_->data(),NB,NB));
-  mat.push_back(RealMap(this->oneE_->data(),NB,NB));
+  mat.push_back(RealMap(this->coreH_->data(),NB,NB));
   if(this->maxMultipole_ >= 1)
     for(auto i = 0, IOff=0; i < 3; i++,IOff+=NBSq)
       mat.push_back(RealMap(&this->elecDipole_->storage()[IOff],NB,NB));
@@ -528,7 +528,7 @@ void AOIntegrals::allocOp(){
  
       // One Electron Integral
       auto NBSq = this->nBasis_ * this->nBasis_;
-      this->oneE_      = 
+      this->coreH_      = 
         std::unique_ptr<RealMap>(
             new RealMap(this->memManager_->malloc<double>(NBSq),this->nBasis_,this->nBasis_)
         ); 
@@ -563,7 +563,7 @@ void AOIntegrals::allocOp(){
     } catch(...) {
       CErr(std::current_exception(),"One Electron Integral Tensor Allocation");
     }
-    this->oneE_->setZero();
+    this->coreH_->setZero();
     this->oneEmx_->setZero();
     this->oneEmy_->setZero();
     this->oneEmz_->setZero();
@@ -649,7 +649,7 @@ void AOIntegrals::writeOneE(){
   this->fileio_->overlap->write(this->overlap_->data(),H5::PredType::NATIVE_DOUBLE);
   this->fileio_->kinetic->write(this->kinetic_->data(),H5::PredType::NATIVE_DOUBLE);
   this->fileio_->nucRepl->write(this->potential_->data(),H5::PredType::NATIVE_DOUBLE);
-  this->fileio_->coreHam->write(this->oneE_->data(),H5::PredType::NATIVE_DOUBLE);
+  this->fileio_->coreHam->write(this->coreH_->data(),H5::PredType::NATIVE_DOUBLE);
   // FIXME: This is buggy because we need to write to a slab of the data as opposed 
   // the the whole thing (hyperSlabs)
   /*

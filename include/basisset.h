@@ -172,6 +172,7 @@ class BasisSet{
     int atomicNumber;
     int index;
     std::vector<libint2::Shell> shells;
+    std::vector<std::vector<double>> unNormalizedCons;
   }; ///< struct to hold information about the basis reference
   int  nBasis_      ; ///< Number of (Gaußian) contracted basis functions
   int  nPrimitive_  ; ///< Number of uncontracted Gaußian primitives
@@ -190,6 +191,7 @@ class BasisSet{
   std::vector<std::array<int,2>> mapCen2Bf_; ///< Maps atomic center to first basis function
   std::vector<ReferenceShell>    refShells_; ///< Set of reference shells for given basis
   std::vector<libint2::Shell>    shells_   ; ///< Local basis storage (in shells)
+  std::vector<std::vector<double>> unNormCons_ ; // Unnormalized contraction coefficients
   std::unique_ptr<RealMatrix>    mapPrim2Bf_;///< Matrix transformation Prim -> Bf
 
   std::string basisPath_; ///< Path to the basis file

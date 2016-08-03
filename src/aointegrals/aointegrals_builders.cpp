@@ -371,9 +371,6 @@ void AOIntegrals::computeAOOneE(){
   // Compute and time nuclear attraction integrals (negative sign is factored in)
   auto VStart = std::chrono::high_resolution_clock::now();
 
-  // make this the default?
-  //this->useFiniteWidthNuclei = true;
-
   if(this->isPrimary && this->useFiniteWidthNuclei) 
     this->finiteWidthPotential();
   else                
@@ -385,7 +382,7 @@ void AOIntegrals::computeAOOneE(){
 //  if (this->isPrimary) this->DKH0();
 
 // Build Core Hamiltonian
-  (*this->oneE_) = (*this->kinetic_) + (*this->potential_);
+  (*this->coreH_) = (*this->kinetic_) + (*this->potential_);
 
 //  prettyPrint(this->fileio_->out,*this->kinetic_,"T");
 //  prettyPrint(this->fileio_->out,*this->potential_,"V");
@@ -400,12 +397,18 @@ void AOIntegrals::computeAOOneE(){
  // This is the X2C transformation!
  // -------------------------------
   if (this->doX2C && this->isPrimary) {
-  //    printf("\n now going into X2C transformation \n");
-      this->formP2Transformation();
+    if(this->printLevel_ >= 3){
+      cout << endl <<" Now going into X2C transformation " << endl;
+      }
+    this->formP2Transformation();
 	}
   else {
-  //    printf("not doing X2C \n");
-	}
+    if(this->printLevel_ >= 3){
+      cout << endl << " Bypassing Relativistic Transformation " << endl;
+	  }
+    }
+  //-----------------------------
+  
   if(this->printLevel_ >= 2) this->printOneE();
 
   // Compute time differenes
@@ -488,7 +491,8 @@ void AOIntegrals::computeAOTwoE(){
   std::vector<libint2::Engine> engines(nthreads);
   engines[0] = libint2::Engine(libint2::Operator::coulomb,
       this->basisSet_->maxPrim(),this->basisSet_->maxL(),0);
-  engines[0].set_precision(std::numeric_limits<double>::epsilon());
+  //engines[0].set_precision(std::numeric_limits<double>::epsilon());
+  engines[0].set_precision(0.0);
 
   for(int i=1; i<nthreads; i++) engines[i] = engines[0];
   if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(); 
@@ -522,8 +526,8 @@ void AOIntegrals::computeAOTwoE(){
           int n4    = this->basisSet_->shells(s4).size();
     
           // Schwartz and Density screening
-          if((*this->schwartz_)(s1,s2) * (*this->schwartz_)(s3,s4)
-              < this->thresholdSchwartz_ ) continue;
+        //if((*this->schwartz_)(s1,s2) * (*this->schwartz_)(s3,s4)
+        //    < this->thresholdSchwartz_ ) continue;
  
           const double* buff = engines[thread_id].compute(
             this->basisSet_->shells(s1),

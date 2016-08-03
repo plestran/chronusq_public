@@ -83,7 +83,7 @@ void SingleSlater<double>::formVXC_new(){
   int NSkip3(0);
   int NSkip4(0);
   int NSkip5(0);
-  bool doTimings(true);
+  bool doTimings(false);
 
   auto Newstart = std::chrono::high_resolution_clock::now();
   auto Newend = std::chrono::high_resolution_clock::now();
@@ -374,8 +374,8 @@ void SingleSlater<double>::formVXC_new(){
 //      this->molecule_->cartArray(),this->molecule_->rIJ(),0,1.0,false);
 
 
-  if(this->isGGA) cout << "GGA ON " << this->isGGA <<endl ; 
-  if(!this->isGGA) cout << "GGA OFF " << this->isGGA <<endl ; 
+//if(this->isGGA) cout << "GGA ON " << this->isGGA <<endl ; 
+//if(!this->isGGA) cout << "GGA OFF " << this->isGGA <<endl ; 
 /*
   ChronusQ::AtomicGrid AGrid(this->nRadDFTGridPts_,this->nAngDFTGridPts_,
       ChronusQ::GRID_TYPE::EULERMAC,ChronusQ::GRID_TYPE::LEBEDEV,
@@ -424,7 +424,6 @@ void SingleSlater<double>::formVXC_new(){
   if(!this->isClosedShell && this->nTCS_ != 2){
     (*this->vXB_) = 4*math.pi*res.VXCB;
     (*this->vXB_) = this->vXB_->selfadjointView<Lower>();
-    cout << "UKS" <<endl;
   }
 
   if(doTimings) {
@@ -439,8 +438,8 @@ void SingleSlater<double>::formVXC_new(){
 //cout << "NSkip3 = " << NSkip3 << endl;
 //cout << "NSkip4 = " << NSkip4 << endl;
 //cout << "NSkip5 = " << NSkip5 << endl;
-  if(doTimings)
-    for(auto i : TF) cout << "TF " << i.count() << endl;
+//if(doTimings)
+//  for(auto i : TF) cout << "TF " << i.count() << endl;
 
   if(this->printLevel_ >= 3) {
     finish = std::chrono::high_resolution_clock::now();

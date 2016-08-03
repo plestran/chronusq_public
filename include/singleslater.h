@@ -39,10 +39,18 @@
 /****************************/
 
 namespace ChronusQ {
+
+struct SCFConvergence {
+  double EDelta;
+  double PARMS;
+  double PBRMS;
+};
+
 template<typename T>
 class SingleSlater : public Quantum<T> {
   typedef Eigen::Matrix<T,Dynamic,Dynamic,ColMajor> TMatrix;
   typedef Eigen::Map<TMatrix> TMap;
+  typedef Eigen::Matrix<T,Dynamic,1,ColMajor> TVec;
 
   int      nBasis_;
   int      nShell_;
@@ -61,6 +69,9 @@ class SingleSlater : public Quantum<T> {
   int      guess_;
   int      nDIISExtrap_;
   int      iDIISStart_;
+  int      iStartLevelShift_;
+  int      nLevelShift_;
+  double   levelShiftParam_;
 
   // DFT Parameters
   int weightScheme_;
@@ -183,7 +194,58 @@ class SingleSlater : public Quantum<T> {
   T *MxScr1_;
   T *MxScr2_;
 
-  
+  // New DIIS Variables
+  /*
+  T *FScalarDIIS_;
+  T *FMzDIIS_;
+  T *FMyDIIS_;
+  T *FMxDIIS_;
+
+  T *DScalarDIIS_;
+  T *DMzDIIS_;
+  T *DMyDIIS_;
+  T *DMxDIIS_;
+
+  T *EScalarDIIS_;
+  T *EMzDIIS_;
+  T *EMyDIIS_;
+  T *EMxDIIS_;
+  */
+
+  H5::DataSet *FScalarDIIS_;
+  H5::DataSet *FMzDIIS_;
+  H5::DataSet *FMyDIIS_;
+  H5::DataSet *FMxDIIS_;
+
+  H5::DataSet *DScalarDIIS_;
+  H5::DataSet *DMzDIIS_;
+  H5::DataSet *DMyDIIS_;
+  H5::DataSet *DMxDIIS_;
+
+  H5::DataSet *EScalarDIIS_;
+  H5::DataSet *EMzDIIS_;
+  H5::DataSet *EMyDIIS_;
+  H5::DataSet *EMxDIIS_;
+
+  H5::DataSet *PTScalarDIIS_;
+  H5::DataSet *PTMzDIIS_;
+  H5::DataSet *PTMyDIIS_;
+  H5::DataSet *PTMxDIIS_;
+
+  H5::DataSet *DScalarOld_;
+  H5::DataSet *DMzOld_;
+  H5::DataSet *DMyOld_;
+  H5::DataSet *DMxOld_;
+ 
+  // New DIIS Functions
+  void cpyOrthoFock2(int);
+  void cpyAOtoOrthoDen();
+  void cpyOrthoDen2(int);
+  void genDIISCom(int);
+  void unOrthoDen();
+  void orthoDen2();
+  void CDIIS2();
+  void CDIIS4(int);
 
   // Various functions the perform SCF and SCR allocation
   void initSCFPtr();       ///< NULL-out pointers to scratch partitions
@@ -200,6 +262,8 @@ class SingleSlater : public Quantum<T> {
   void copyDen();
   void genDComm2(int);
   void backTransformMOs();
+
+  void doImagTimeProp(double); ///< Propagate the wavefunction in imaginary time 
 
   double denTol_;
   double eneTol_;
@@ -256,7 +320,8 @@ public:
     RHF,
     UHF,
     CUHF,
-    TCS
+    TCS,
+    X2C
 //  RKS,
 //  UKS,
 //  CUKS,
@@ -266,7 +331,8 @@ public:
   enum GUESS {
     SAD,
     CORE,
-    READ
+    READ,
+    RANDOM
   }; // Supported Guess Types
 
   enum DFT {
@@ -316,6 +382,9 @@ public:
   bool  isDFT;
   bool  isPrimary;
   bool  doDIIS;
+
+  bool  doITP; ///< Do Imaginary Time Propagation (ITP)?
+  float dt;    ///< Timestep for Imaginary Time Propagation
 
   bool	screenVxc   ;///< Do the screening for Vxc?
   bool  isGGA;
@@ -399,21 +468,26 @@ public:
 
 
     // Standard Values
-    this->Ref_          = _INVALID;
-    this->DFTKernel_    = NODFT;
-    this->denTol_       = 1e-8;
-    this->eneTol_       = 1e-10;
-    this->maxSCFIter_   = 256;
-    this->nDIISExtrap_  = 7;
-    this->iDIISStart_   = 4;
+    this->Ref_              = _INVALID;
+    this->DFTKernel_        = NODFT;
+    this->denTol_           = 1e-8;
+    this->eneTol_           = 1e-10;
+    this->maxSCFIter_       = 256;
+    this->nDIISExtrap_      = 6;
+    this->iDIISStart_       = 0;
+    this->iStartLevelShift_ = 0;
+    this->nLevelShift_      = 4;
+    this->levelShiftParam_  = 2.42;
 
     this->elecField_   = {0.0,0.0,0.0};
     this->printLevel_  = 1;
     this->isPrimary    = true;
     this->doDIIS       = true;
+    this->doITP        = false;
+    this->dt           = 0.1;
     this->isHF         = true;
-    this->isDFT         = false;
-    this->fixPhase_     = true;
+    this->isDFT        = false;
+    this->fixPhase_    = true;
     this->guess_       = SAD;
 
     this->weightScheme_ = ATOMIC_PARTITION::BECKE;
@@ -540,6 +614,8 @@ public:
   inline void setDFTScreenTol(double x)   { this->epsScreen = x;       };
   inline void turnOffDFTScreening()       { this->screenVxc = false;   }; 
 
+  inline void setITPdt(double x)          { this->dt = x;              }; 
+
   inline void setField(std::array<double,3> field){ 
     this->elecField_ = field;  
   };
@@ -601,6 +677,7 @@ public:
   void SADGuess();
   void COREGuess();
   void READGuess();
+  void RandomGuess();
   void placeAtmDen(std::vector<int>, SingleSlater<double> &); // Place the atomic densities into total densities for guess
   void scaleDen();              // Scale the unrestricted densities for correct # electrons
   void formDensity();		// form the density matrix
@@ -657,6 +734,11 @@ public:
   void GenDComm(int);
   void mullikenPop();
   void fixPhase();
+
+  // JRADLER
+  void levelShift();
+  void levelShift2();
+  // JRADLER
 
   void SCF2();
 
@@ -731,9 +813,12 @@ public:
     } else if(this->Ref_ == CUHF) {
       this->SCFType_      += "Constrained Unrestricted " + generalReference; 
       this->SCFTypeShort_ += "CU" + generalRefShort;
-    } else if(this->Ref_ == TCS) {
+    } else if(this->nTCS_ == 2) {
       this->SCFType_      += "Generalized " + generalReference; 
       this->SCFTypeShort_ += "G" + generalRefShort;
+    } else if(this->Ref_ == X2C) {
+      this->SCFType_      += "Exact Two-Component " + generalReference; 
+      this->SCFTypeShort_ += "X2C-"+generalRefShort;
     }
   }
 
@@ -747,6 +832,26 @@ public:
   /*************************/
   void mpiSend(int,int tag);
   void mpiRecv(int,int tag);
+
+
+
+  void SCF3();
+  void initSCFMem3();
+  void initDIISFiles();
+  void orthoFock3();
+  void unOrthoDen3();
+  SCFConvergence evalConver3();
+  void backTransformMOs3();
+  void cleanupSCFMem3();
+  void cpyDenDIIS(int);
+  void cpyFockDIIS(int);
+  void readDIIS(H5::DataSet*,int,T*);
+  void writeDIIS(H5::DataSet*,int,T*);
+
+  void gatherOrthoFock();
+  void gatherFock();
+  void gatherOrthoDen();
+  
 };
 
 #include <singleslater/singleslater_alloc.h>

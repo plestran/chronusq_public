@@ -791,7 +791,7 @@ octupole	include/gauinterface.h	/^    octupole,$/;"	e	enum:GauMatEl::__anon1
 omega	include/sdresponse_getset.h	/^  inline VectorXd*     omega(){      return this->omega_.get();          };$/;"	f
 omega_	include/sdresponse.h	/^  std::unique_ptr<VectorXd>        omega_;$/;"	m	class:ChronusQ::SDResponse
 one	include/global.h	/^  double zero, one, two, three, four, five, six, seven, eight, nine, ten, half, quarter;$/;"	m	struct:Math
-oneE_	include/aointegrals.h	/^  std::unique_ptr<RealMatrix>    oneE_; \/\/\/< Core Hamiltonian \\f$ h = T + V \\f\$$/;"	m	class:ChronusQ::AOIntegrals
+coreH_	include/aointegrals.h	/^  std::unique_ptr<RealMatrix>    coreH_; \/\/\/< Core Hamiltonian \\f$ h = T + V \\f\$$/;"	m	class:ChronusQ::AOIntegrals
 oneehRRSab	src/aointegrals/aointegrals_onee.cpp	/^double AOIntegrals::oneehRRSab(int LA,int *lA,int LB,int *lB) {$/;"	f	class:AOIntegrals
 oneehRRTSab	src/aointegrals/aointegrals_onee.cpp	/^double AOIntegrals::oneehRRTSab(int LA,int *lA,int LB,int *lB,int *i, int *j) {$/;"	f	class:AOIntegrals
 oneehRRVab	src/aointegrals/aointegrals_onee.cpp	/^double AOIntegrals::oneehRRVab(int LA,int *lA,int LB,int *lB){$/;"	f	class:AOIntegrals

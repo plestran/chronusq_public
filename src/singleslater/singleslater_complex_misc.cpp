@@ -87,7 +87,7 @@ void SingleSlater<dcomplex>::writeSCFFiles(){
   this->fileio_->alphaMO->write(this->moA_->data(),
     *(this->fileio_->complexType)
   );
-  if(!this->isClosedShell && this->Ref_ != TCS){
+  if(!this->isClosedShell && this->nTCS_ == 1){
     this->fileio_->betaSCFDen->write(this->onePDMB_->data(),
       *(this->fileio_->complexType)
     );

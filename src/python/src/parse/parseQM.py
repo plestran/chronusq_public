@@ -153,7 +153,7 @@ def handleReference(workers,settings):
   ref = settings['REFERENCE']
   ref = ref.split()
   # Decide if reference is complex or not (defaults to real if not specified
-  if 'COMPLEX' in ref:
+  if 'COMPLEX' in ref or 'X2C' in ref:
     workers["CQSingleSlater"] = workers["CQSingleSlaterComplex"]
   else:
     workers["CQSingleSlater"] = workers["CQSingleSlaterDouble"]
@@ -189,6 +189,7 @@ def handleReference(workers,settings):
     if Str in ref:
       refStr = Str
 
+  if refStr == '': refStr = ' '
   print refStr
   print isHF
   print isDFT
@@ -217,6 +218,10 @@ def handleReference(workers,settings):
   elif refStr[0] == 'G':
     print "Is Generalized"
     workers["CQSingleSlater"].setRef(chronusQ.Reference.TCS)
+    workers["CQSingleSlater"].isClosedShell = False
+  elif 'X2C' in ref:
+    print "Is X2C"
+    workers["CQSingleSlater"].setRef(chronusQ.Reference.X2C)
     workers["CQSingleSlater"].isClosedShell = False
   # If left to determine, unit multiplicity -> Restricted
   elif mult == 1:
@@ -690,9 +695,17 @@ def handleReference(workers,settings):
 #    CErrMsg(workers['CQFileIO'],str(msg))
 
   # Check if reference is 2-Component
-  TCMethods = [chronusQ.Reference.TCS]
+  TCMethods = [chronusQ.Reference.TCS, chronusQ.Reference.X2C]
   if workers["CQSingleSlater"].Ref() in TCMethods:
     workers["CQSingleSlater"].setNTCS(2)
+
+  # Check if reference is Relativistic
+  RelMethods = [chronusQ.Reference.X2C]
+  if workers["CQSingleSlater"].Ref() in RelMethods:
+    workers["CQAOIntegrals"].doX2C = True
+    workers["CQAOIntegrals"].useFiniteWidthNuclei = True
+
+  if workers["CQAOIntegrals"].doX2C: print 'IS DEFINITELY X2C'
 
 def parseRT(workers,settings):
 
@@ -834,6 +847,7 @@ def parseSCF(workers,scfSettings):
     'SCFDENTOL' :workers['CQSingleSlater'].setSCFDenTol,
     'SCFENETOL' :workers['CQSingleSlater'].setSCFEneTol,
     'SCFMAXITER':workers['CQSingleSlater'].setSCFMaxIter,
+    'DT'        :workers['CQSingleSlater'].setITPdt,
     'FIELD'     :workers['CQSingleSlater'].setField,
     'GUESS'     :workers['CQSingleSlater'].setGuess ,
     'PRINT'     :workers['CQSingleSlater'].setPrintLevel
@@ -862,6 +876,14 @@ def parseSCF(workers,scfSettings):
       workers['CQSingleSlater'].doDIIS = True
     else:
       workers['CQSingleSlater'].doDIIS = False
+  except KeyError:
+    pass
+
+  try:
+    if scfSettings['ITP']:
+      workers['CQSingleSlater'].doITP = True
+    else:
+      workers['CQSingleSlater'].doITP = False
   except KeyError:
     pass
 

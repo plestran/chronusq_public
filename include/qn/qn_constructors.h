@@ -50,7 +50,7 @@ QuasiNewton2(QNCallable<T> * obj) : QuasiNewton2(){
   this->maxSubSpace_ = std::min(250,obj->nSingleDim()/2);
 };
 
-QuasiNewton2(QNCallable<T> * obj, std::function<H5::DataSet*(const H5::PredType&,
+QuasiNewton2(QNCallable<T> * obj, std::function<H5::DataSet*(const H5::CompType&,
   std::string&, std::vector<hsize_t>&)> fileFactory) : QuasiNewton2(obj){
   this->genScrFile_ = fileFactory;
 /*

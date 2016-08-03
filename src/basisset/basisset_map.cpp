@@ -118,9 +118,24 @@ void BasisSet::makeBasisMap(){
 }; // BasisSet::makeBasisMap
 
 void BasisSet::makeMapPrim2Bf(){
-  this->mapPrim2Bf_ = std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nPrimitive_));
+  this->mapPrim2Bf_ = 
+   std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nPrimitive_));
+  double * memAddress = this->mapPrim2Bf_->data();
+  for (auto iSh = 0; iSh < this->nShell_; iSh++){
+    int nPrim = this->shells_[iSh].contr[0].coeff.size();
+    int nBf   = this->shells_[iSh].size();
+    for (auto iP = 0; iP < nPrim; iP++)
+    for (auto iBf = 0; iBf < nBf; iBf++){
+      memAddress[(iP*nBf + iBf)*this->nBasis_ + iBf] = 
+        this->unNormCons_[iSh][iP];
+      }
+    memAddress += this->nBasis_ * (nPrim * nBf) + nBf;
+  }
+  //  prettyPrint(cout,*this->mapPrim2Bf_,"MAP");
 
-  for(auto iSh = 0, iBf = 0, iPrim = 0; 
+//
+/*
+for(auto iSh = 0, iBf = 0, iPrim = 0;
       iSh < this->nShell_; 
       iBf += this->shells_[iSh].size(), 
         iPrim += this->shells_[iSh].contr[0].coeff.size() * this->shells_[iSh].size(), 
@@ -128,12 +143,14 @@ void BasisSet::makeMapPrim2Bf(){
   
     int nPrim = this->shells_[iSh].contr[0].coeff.size();
     int nBf   = this->shells_[iSh].size();
-    RealMap PrimCoeff(&this->shells_[iSh].contr[0].coeff[0],1,nPrim);
+    //RealMap PrimCoeff(&this->shells_[iSh].contr[0].coeff[0],1,nPrim);
+    RealMap PrimCoeff(&this->unNormCons_[iSh][0],1,nPrim);
     for(auto jBf = iBf, jPrim = iPrim; jBf < iBf + nBf; jBf++, jPrim += nPrim){
       this->mapPrim2Bf_->block(jBf,jPrim,1,nPrim) = PrimCoeff;
     }
   }
-  //prettyPrint(cout,*this->mapPrim2Bf_,"MAP");
+*/
+//  prettyPrint(cout,*this->mapPrim2Bf_,"MAP");
 };
 
 }; // namespace ChronusQ

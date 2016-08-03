@@ -637,3 +637,17 @@ test0150_smp_incore.inp    - Real RKS-SCF-GGA-B88LYP - STO-3G  - Small OpenMP - 
 test0151_serial_incore.inp - Real UKS-SCF-GGA-B88LYP - STO-3G  - Small Serial - In-Core Integrals
 test0151_serial_direct.inp - Real UKS-SCF-GGA-B88LYP - STO-3G  - Small Serial - Direct  Integrals
 test0151_smp_direct.inp    - Real UKS-SCF-GGA-B88LYP - STO-3G  - Small OpenMP - Direct  Integrals
+
+** test0152-0154 Test Small Molecule X2C SCF code - H2O **
+test0152_serial_incore.inp - Complex X2C-SCF -  STO-3G  - Small Serial - In-Core Integrals
+test0152_serial_direct.inp - Complex X2C-SCF -  STO-3G  - Small Serial - Direct  Integrals
+#test0152_smp_incore.inp    - Complex X2C-SCF -  STO-3G  - Small OpenMP - In-Core Integrals
+test0152_smp_direct.inp    - Complex X2C-SCF -  STO-3G  - Small OpenMP - Direct  Integrals
+test0153_serial_incore.inp - Complex X2C-SCF -  6-31G   - Small Serial - In-Core Integrals
+test0153_serial_direct.inp - Complex X2C-SCF -  6-31G   - Small Serial - Direct  Integrals
+#test0153_smp_incore.inp    - Complex X2C-SCF -  6-31G   - Small OpenMP - In-Core Integrals
+test0153_smp_direct.inp    - Complex X2C-SCF -  6-31G   - Small OpenMP - Direct  Integrals
+#test0154_serial_incore.inp - Complex X2C-SCF -  cc-pVDZ - Small Serial - In-Core Integrals 
+#test0154_serial_direct.inp - Complex X2C-SCF -  cc-pVDZ - Small Serial - Direct  Integrals
+##test0154_smp_incore.inp    - Complex X2C-SCF -  cc-pVDZ - Small OpenMP - In-Core Integrals
+#test0154_smp_direct.inp    - Complex X2C-SCF -  cc-pVDZ - Small OpenMP - Direct  Integrals

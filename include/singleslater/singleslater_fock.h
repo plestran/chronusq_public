@@ -44,13 +44,13 @@ class KernelIntegrand {
 #ifdef USE_LIBINT
 template<typename T>
 void SingleSlater<T>::formPT(){
-  bool doTCS = (this->Ref_ == TCS);
+  bool doTCS = (this->nTCS_ == 2);
   bool doRHF = (this->isClosedShell && !doTCS);
   bool doKS  = this->isDFT;
   if(!this->haveDensity) this->formDensity();
 //  this->sepReImOnePDM();
 //  this->comReImOnePDM();
-  this->scatterDensity();
+//this->scatterDensity();
 
   std::vector<std::reference_wrapper<TMap>> mats;
   std::vector<std::reference_wrapper<TMap>> ax;
@@ -159,17 +159,18 @@ void SingleSlater<T>::formFock(){
   
     if(this->nTCS_ == 1 && this->isClosedShell) {
       this->fockA_->setZero();
-      this->fockA_->real() += (*this->aointegrals_->oneE_);
+      this->fockA_->real() += (*this->aointegrals_->coreH_);
       this->aointegrals_->addElecDipole(*this->fockA_,this->elecField_);
       (*this->fockA_) += (*this->PTA_);
       if(this->isDFT){ 
         (*this->fockA_) += (*this->vXA_);
 //      if(!testNew) (*this->fockA_) += (*this->vCorA_);
       }
-    } else {
+    } 
+    else {
 
     //this->fockA_->setZero();
-    //this->fockA_->real() += (*this->aointegrals_->oneE_);
+    //this->fockA_->real() += (*this->aointegrals_->coreH_);
     //this->aointegrals_->addElecDipole(*this->fockA_,this->elecField_);
     //(*this->fockA_) += (*this->PTA_);
     //if(this->isDFT){ 
@@ -177,7 +178,7 @@ void SingleSlater<T>::formFock(){
     //  (*this->fockA_) += (*this->vCorA_);
     //}
     //this->fockB_->setZero();
-    //this->fockB_->real() += (*this->aointegrals_->oneE_);
+    //this->fockB_->real() += (*this->aointegrals_->coreH_);
     //this->aointegrals_->addElecDipole(*this->fockB_,this->elecField_);
     //(*this->fockB_) += (*this->PTB_);
     //if(this->isDFT){ 
@@ -187,7 +188,26 @@ void SingleSlater<T>::formFock(){
 
       this->fockScalar_->setZero();
       this->fockMz_->setZero();
-      this->fockScalar_->real() += (*this->aointegrals_->oneE_);
+      this->fockScalar_->real() += (*this->aointegrals_->coreH_);
+      
+      if(this->nTCS_ == 2) {
+          this->fockMx_->setZero();
+          this->fockMy_->setZero();
+        if(this->aointegrals_->doX2C){
+    //    cout << "nTCS == 2 ... buiding Fock" << endl;
+          this->fockMx_->real() = 2*(*this->aointegrals_->oneEmx_);
+          this->fockMy_->real() = 2*(*this->aointegrals_->oneEmy_);
+          this->fockMz_->real() = 2*(*this->aointegrals_->oneEmz_);
+          // -----------------------------------
+          // SCALE SO parts by 'i'
+          // -----------------------------------
+          Quantum<T>::complexMyScale(*this->fockMx_);
+          Quantum<T>::complexMyScale(*this->fockMy_);
+          Quantum<T>::complexMyScale(*this->fockMz_);
+          // -----------------------------------
+        }
+      }
+
       this->aointegrals_->addElecDipole(*this->fockScalar_,this->elecField_);
       (*this->fockScalar_) *= 2.0;
       (*this->fockScalar_)      += (*this->PTScalar_);        
@@ -201,15 +221,11 @@ void SingleSlater<T>::formFock(){
           (*this->fockScalar_) += (*this->vXB_) + (*this->vCorB_);
           (*this->fockMz_)     += (*this->vXA_) + (*this->vCorA_);
           (*this->fockMz_)     -= (*this->vXB_) + (*this->vCorB_);
-	} else {
 */
           (*this->fockScalar_) += (*this->vXA_);
           (*this->fockScalar_) += (*this->vXB_);
           (*this->fockMz_)     += (*this->vXA_);
           (*this->fockMz_)     -= (*this->vXB_);
-/*
-	}
-*/
       }
 
       std::vector<std::reference_wrapper<TMap>> toGather;
@@ -218,14 +234,14 @@ void SingleSlater<T>::formFock(){
       if(this->nTCS_ == 1)
         Quantum<T>::spinGather(*this->fockA_,*this->fockB_,toGather);
       else {
-        this->fockMx_->setZero();
-        this->fockMy_->setZero();
         (*this->fockMx_) += (*this->PTMx_);
         (*this->fockMy_) += (*this->PTMy_);
         toGather.emplace_back(*this->fockMy_);
         toGather.emplace_back(*this->fockMx_);
         Quantum<T>::spinGather(*this->fockA_,toGather);
-      };
+
+      //  prettyPrint(this->fileio_->out,(*this->fockA_)," fockA_ ");
+        }
 
 
     }
@@ -242,7 +258,7 @@ void SingleSlater<T>::formFock(){
         ConstRealMap mu(&this->aointegrals_->elecDipole_->storage()[iBuf],
           NB,NB);
         fockA_->real() += this->elecField_[iXYZ] * mu;
-        if(!this->isClosedShell && this->Ref_ != TCS) 
+        if(!this->isClosedShell && this->nTCS_ == 1) 
           fockB_->real() += this->elecField_[iXYZ] * mu;
         iBuf += NBSq;
       }

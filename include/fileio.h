@@ -34,6 +34,9 @@
 /* Error Messages 1000-1999 */
 /****************************/
 namespace ChronusQ {
+
+template<typename F> H5::CompType H5PredType();
+  
 class FileIO {
 
   std::string  name;                    // name of general file
@@ -65,6 +68,8 @@ class FileIO {
   std::string  alphaMOPath     ;
   std::string  betaMOPath      ;
 
+  std::string generateRandomTag(int);
+  std::random_device randDevice;
 
 public:
 
@@ -98,21 +103,19 @@ public:
   struct ScratchPartition {
     H5::DataSet data;
     H5::DataSpace dataspace;
-    std::string name;
+    const std::string name;
 
-    ScratchPartition(std::string &nm, const H5::PredType &type, H5::DataSpace &space, 
-      H5::H5File &file){
+    ScratchPartition(const std::string &nm, const H5::CompType &type, 
+      H5::DataSpace &space, H5::H5File &file): name(nm), dataspace(space){
 
       this->data = H5::DataSet(
         file.createDataSet(nm,type,space)
       );
-      this->name = nm;
-      this->dataspace = space;
     };
   };
 
   std::vector<ScratchPartition> scratchPartitions;
-  H5::DataSet * createScratchPartition(const H5::PredType&, std::string &, 
+  H5::DataSet * createScratchPartition(const H5::CompType&,const std::string &, 
     std::vector<hsize_t>&);
 
   template<typename T> struct metaData {

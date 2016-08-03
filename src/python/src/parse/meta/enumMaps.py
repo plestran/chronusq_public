@@ -86,9 +86,10 @@ aointAlg = {
 }
 
 guessMap = {
-  "SAD" :chronusQ.Guess.SAD  ,
-  "CORE":chronusQ.Guess.CORE ,
-  "READ":chronusQ.Guess.READ  
+  "SAD"   :chronusQ.Guess.SAD    ,
+  "CORE"  :chronusQ.Guess.CORE   ,
+  "READ"  :chronusQ.Guess.READ   , 
+  "RANDOM":chronusQ.Guess.RANDOM  
 }
 
 #exchMap = {

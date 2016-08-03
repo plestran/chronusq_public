@@ -76,7 +76,7 @@ void SingleSlater<double>::evalConver(int iter){
     new (&POldAlpha) RealMap(
       this->POldAlphaMem_,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_
     );
-    if(!this->isClosedShell && this->Ref_ != TCS){
+    if(!this->isClosedShell && this->nTCS_ == 1){
       new (&POldBeta) RealMap(this->POldBetaMem_, this->nBasis_,this->nBasis_);
     }
  
@@ -87,7 +87,7 @@ void SingleSlater<double>::evalConver(int iter){
     EDelta = this->totalEnergy - EOld;
  
     PAlphaRMS = ((*this->onePDMA_) - POldAlpha).norm();
-    if(!this->isClosedShell && this->Ref_ != TCS) 
+    if(!this->isClosedShell && this->nTCS_ == 1) 
       PBetaRMS = ((*this->onePDMB_) - POldBeta).norm();
  
     if(this->printLevel_ > 0) 
@@ -337,5 +337,115 @@ void SingleSlater<double>::orthoDen(){
       Quantum<double>::spinGather(*this->onePDMA_,*this->onePDMB_,toGather);
   }
 };
+
+template<>
+void SingleSlater<double>::doImagTimeProp(double dt){
+  /* Propagate MO coefficients in imaginary time as an alternative to SCF
+   * C(new) = exp(-dt * F(current)) * C(current) 
+   */
+  this->formFock(); // Need orthonormal Fock to propagate
+  this->orthoFock();
+
+  RealMatrix propagator = ( -dt * (*this->fockOrthoA_) ).exp();
+  RealMatrix newMOs     = propagator * (*this->moA_);
+  *this->moA_           = newMOs; // New MO coefficients are not orthogonal
+  propagator            = (*this->moA_).householderQr().householderQ();
+  *this->moA_           = propagator;
+  if(!this->isClosedShell && this->nTCS_ == 1){
+    propagator  = ( -dt * (*this->fockOrthoB_) ).exp();
+    newMOs      = propagator * (*this->moB_);
+    *this->moB_ = newMOs; // New MO coefficients are not orthogonal
+    propagator  = (*this->moB_).householderQr().householderQ();
+    *this->moB_ = propagator;
+    }
+};
+
+template<>
+void SingleSlater<double>::unOrthoDen(){
+  if(this->nTCS_ == 1 && this->isClosedShell) {
+    (*this->NBSqScratch_) = 
+      (*this->aointegrals_->ortho1_) * (*this->onePDMOrthoA_);
+    (*this->onePDMA_) = 
+      (*this->NBSqScratch_) * (*this->aointegrals_->ortho1_);
+
+  } else {
+
+    (*this->NBSqScratch_) = 
+      (*this->aointegrals_->ortho1_) * (*this->onePDMOrthoScalar_);
+    (*this->onePDMScalar_) = 
+      (*this->NBSqScratch_) * (*this->aointegrals_->ortho1_);
+
+    (*this->NBSqScratch_) = 
+      (*this->aointegrals_->ortho1_) * (*this->onePDMOrthoMz_);
+    (*this->onePDMMz_) = 
+      (*this->NBSqScratch_) * (*this->aointegrals_->ortho1_);
+
+    std::vector<std::reference_wrapper<RealMap>> toGather;
+    toGather.emplace_back(*this->onePDMScalar_);
+    toGather.emplace_back(*this->onePDMMz_);
+
+    if(this->nTCS_ == 2) {
+      (*this->NBSqScratch_) = 
+        (*this->aointegrals_->ortho1_) * (*this->onePDMOrthoMx_);
+      (*this->onePDMMx_) = 
+        (*this->NBSqScratch_) * (*this->aointegrals_->ortho1_);
+
+      (*this->NBSqScratch_) = 
+        (*this->aointegrals_->ortho1_) * (*this->onePDMOrthoMy_);
+      (*this->onePDMMy_) = 
+        (*this->NBSqScratch_) * (*this->aointegrals_->ortho1_);
+
+      toGather.emplace_back(*this->onePDMMy_);
+      toGather.emplace_back(*this->onePDMMx_);
+      Quantum<double>::spinGather(*this->onePDMA_,toGather);
+    } else
+      Quantum<double>::spinGather(*this->onePDMA_,*this->onePDMB_,toGather);
+  }
+};
+
+template<>
+void SingleSlater<double>::orthoDen2(){
+  if(this->nTCS_ == 1 && this->isClosedShell) {
+    (*this->NBSqScratch_) = 
+      (*this->aointegrals_->ortho1_) * (*this->onePDMA_);
+    (*this->onePDMOrthoA_) = 
+      (*this->NBSqScratch_) * (*this->aointegrals_->ortho1_);
+
+  } else {
+
+    (*this->NBSqScratch_) = 
+      (*this->aointegrals_->ortho1_) * (*this->onePDMScalar_);
+    (*this->onePDMOrthoScalar_) = 
+      (*this->NBSqScratch_) * (*this->aointegrals_->ortho1_);
+
+    (*this->NBSqScratch_) = 
+      (*this->aointegrals_->ortho1_) * (*this->onePDMMz_);
+    (*this->onePDMOrthoMz_) = 
+      (*this->NBSqScratch_) * (*this->aointegrals_->ortho1_);
+
+    std::vector<std::reference_wrapper<RealMap>> toGather;
+    toGather.emplace_back(*this->onePDMOrthoScalar_);
+    toGather.emplace_back(*this->onePDMOrthoMz_);
+
+    if(this->nTCS_ == 2) {
+      (*this->NBSqScratch_) = 
+        (*this->aointegrals_->ortho1_) * (*this->onePDMMx_);
+      (*this->onePDMOrthoMx_) = 
+        (*this->NBSqScratch_) * (*this->aointegrals_->ortho1_);
+
+      (*this->NBSqScratch_) = 
+        (*this->aointegrals_->ortho1_) * (*this->onePDMMy_);
+      (*this->onePDMOrthoMy_) = 
+        (*this->NBSqScratch_) * (*this->aointegrals_->ortho1_);
+
+      toGather.emplace_back(*this->onePDMOrthoMy_);
+      toGather.emplace_back(*this->onePDMOrthoMx_);
+      Quantum<double>::spinGather(*this->onePDMOrthoA_,toGather);
+    } else
+      Quantum<double>::spinGather(*this->onePDMOrthoA_,*this->onePDMOrthoB_,
+        toGather);
+  }
+};
+
 
 } // namespace ChronusQ

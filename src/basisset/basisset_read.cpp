@@ -89,6 +89,7 @@ void BasisSet::parseGlobal(){
   int atomicNumber;
   int indx;
   std::vector<libint2::Shell> tmpShell;
+  std::vector<std::vector<double>> tmpCons;
 
   bool readRec = false;
   bool newRec  = false;
@@ -115,13 +116,14 @@ void BasisSet::parseGlobal(){
         std::istream_iterator<std::string>{});
       if(newRec){
         if(!firstRec) {
-          this->refShells_.push_back(ReferenceShell{atomicNumber,indx,tmpShell});
+          this->refShells_.push_back(ReferenceShell{atomicNumber,indx,tmpShell,tmpCons});
         }
         indx = HashAtom(tokens[0],0);
         atomicNumber = elements[indx].atomicNumber;
         newRec = false;
         firstRec = false;
         tmpShell.clear();
+        tmpCons.clear();
       } else {
         contDepth = std::stoi(tokens[1]);
         shSymb    = tokens[0];
@@ -145,9 +147,11 @@ void BasisSet::parseGlobal(){
           tmpShell.push_back(
             libint2::Shell{ exp, {{0,false,contPrimary}}, {{0,0,0}} }
           );
+          tmpCons.push_back(contPrimary);
           tmpShell.push_back(
             libint2::Shell{ exp, {{1,false,contSecondary}}, {{0,0,0}} }
           );
+          tmpCons.push_back(contSecondary);
         } else {
           int L = HashL(shSymb);
           bool doSph = (L > 1);
@@ -156,13 +160,15 @@ void BasisSet::parseGlobal(){
           tmpShell.push_back(
             libint2::Shell{ exp, {{L,doSph,contPrimary}}, {{0,0,0}} }
           );
+          tmpCons.push_back(contPrimary);
         }
       }
     }
   }
   // Append the last Rec
-  this->refShells_.push_back(ReferenceShell{atomicNumber,indx,tmpShell}); 
-  //cout << "Reference Shells" << endl;
+  this->refShells_.push_back(ReferenceShell{atomicNumber,indx,tmpShell,tmpCons}); 
+
+//cout << "Reference Shells" << endl;
 //for(auto i = 0; i < this->refShells_.size(); i++) cout << this->refShells_[i].shells << endl;
   //cout << this->refShells_.size() << endl;
  

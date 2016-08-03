@@ -200,7 +200,7 @@ public:
   std::unique_ptr<RealTensor4d>  aoERI_; ///< Rank-4 ERI tensor over primary basis functions \f$ (\mu \nu \vert \lambda\delta )\f$
 
   // One-Body Integrals
-  std::unique_ptr<RealMap>    oneE_; ///< Core Hamiltonian \f$ h = T + V \f$
+  std::unique_ptr<RealMap>    coreH_; ///< Core Hamiltonian \f$ h = T + V \f$
   std::unique_ptr<RealMap>    oneEmx_;
   std::unique_ptr<RealMap>    oneEmy_;
   std::unique_ptr<RealMap>    oneEmz_;
@@ -279,7 +279,7 @@ public:
 
     this->twoEC_        = nullptr;
     this->twoEX_        = nullptr;
-    this->oneE_         = nullptr;
+    this->coreH_        = nullptr;
     this->oneEmx_       = nullptr;
     this->oneEmy_       = nullptr;
     this->oneEmz_       = nullptr;
@@ -317,7 +317,7 @@ public:
 
   ~AOIntegrals(){
     // Free up memory from memory manager
-    this->memManager_->free(this->oneE_->data(),
+    this->memManager_->free(this->coreH_->data(),
       this->nBasis_*this->nBasis_);
     this->memManager_->free(this->oneEmx_->data(),
       this->nBasis_*this->nBasis_);
@@ -546,8 +546,105 @@ public:
 
   // Misc Utility Functions that deal with AOIntegrals
   static RealMatrix genSpx(BasisSet&, BasisSet&);
+
+//template<typename Op>
+//void Ortho1Trans(Op&,Op&);
+//template<typename Op> Ortho1Trans<Op,double>(Op&,Op&);
+//template<typename Op> Ortho1Trans<Op,dcomplex>(Op&,Op&);
+
+  template<typename Op,
+    typename std::enable_if<
+      std::is_same<typename Op::Scalar,
+                   double>::value,int>::type = 0>
+  void Ortho1Trans(Op&,Op&);
+
+  template<typename Op,
+    typename std::enable_if<
+      std::is_same<typename Op::Scalar,
+                   dcomplex>::value,int>::type = 0>
+  void Ortho1Trans(Op&,Op&);
+
+  template<typename Op,
+    typename std::enable_if<
+      std::is_same<typename Op::Scalar,
+                   double>::value,int>::type = 0>
+  void Ortho2Trans(Op&,Op&);
+
+  template<typename Op,
+    typename std::enable_if<
+      std::is_same<typename Op::Scalar,
+                   dcomplex>::value,int>::type = 0>
+  void Ortho2Trans(Op&,Op&);
 };
 #include <aointegrals/aointegrals_contract.h>
+
+template<typename Op,
+  typename std::enable_if<
+    std::is_same<typename Op::Scalar,
+                 double>::value,int>::type>
+void AOIntegrals::Ortho1Trans(Op& op1, Op& op2){
+  double* Scratch = 
+    this->memManager_->malloc<double>(op1.size());
+  RealMap SCR(Scratch,op1.rows(),op1.rows());
+
+  SCR.noalias() = this->ortho1_->transpose() * op1;
+  op2.noalias() = SCR * (*this->ortho1_);
+  
+
+  this->memManager_->free(Scratch,op1.size());
+}
+
+template<typename Op,
+  typename std::enable_if<
+    std::is_same<typename Op::Scalar,
+                 dcomplex>::value,int>::type>
+void AOIntegrals::Ortho1Trans(Op& op1, Op& op2){
+  dcomplex* Scratch = 
+    this->memManager_->malloc<dcomplex>(op1.size());
+  ComplexMap SCR(Scratch,op1.rows(),op1.rows());
+
+  SCR.real() = this->ortho1_->transpose() * op1.real();
+  SCR.imag() = this->ortho1_->transpose() * op1.imag();
+  op2.real() = SCR.real() * (*this->ortho1_);
+  op2.imag() = SCR.imag() * (*this->ortho1_);
+  
+
+  this->memManager_->free(Scratch,op1.size());
+}
+
+template<typename Op,
+  typename std::enable_if<
+    std::is_same<typename Op::Scalar,
+                 double>::value,int>::type>
+void AOIntegrals::Ortho2Trans(Op& op1, Op& op2){
+  double* Scratch = 
+    this->memManager_->malloc<double>(op1.size());
+  RealMap SCR(Scratch,op1.rows(),op1.rows());
+
+  SCR.noalias() = (*this->ortho2_) * op1;
+  op2.noalias() = SCR * this->ortho2_->transpose();
+  
+
+  this->memManager_->free(Scratch,op1.size());
+}
+
+template<typename Op,
+  typename std::enable_if<
+    std::is_same<typename Op::Scalar,
+                 dcomplex>::value,int>::type>
+void AOIntegrals::Ortho2Trans(Op& op1, Op& op2){
+  dcomplex* Scratch = 
+    this->memManager_->malloc<dcomplex>(op1.size());
+  ComplexMap SCR(Scratch,op1.rows(),op1.rows());
+
+  SCR.real() = (*this->ortho2_) * op1.real();
+  SCR.imag() = (*this->ortho2_) * op1.imag();
+  op2.real() = SCR.real() * this->ortho2_->transpose();
+  op2.imag() = SCR.imag() * this->ortho2_->transpose();
+  
+
+  this->memManager_->free(Scratch,op1.size());
+}
 
 } // namespace ChronusQ
 

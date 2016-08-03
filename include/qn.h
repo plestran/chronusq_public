@@ -200,7 +200,7 @@ namespace ChronusQ {
     
     // Factory to create new files
     std::function<
-      H5::DataSet*(const H5::PredType&,std::string&,std::vector<hsize_t>&)
+      H5::DataSet*(const H5::CompType&,std::string&,std::vector<hsize_t>&)
     > genScrFile_;
 
 

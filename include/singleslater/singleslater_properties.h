@@ -29,7 +29,7 @@ void SingleSlater<T>::computeEnergy(){
   if(getRank() == 0) {
     this->energyOneE = 
       this->template computeProperty<double,DENSITY_TYPE::TOTAL>(
-          *this->aointegrals_->oneE_);
+          *this->aointegrals_->coreH_);
     if(this->nTCS_ == 1 && this->isClosedShell)
       this->energyTwoE = 
         0.5 * this->template computeProperty<double,DENSITY_TYPE::TOTAL>(
@@ -63,7 +63,6 @@ void SingleSlater<T>::computeEnergy(){
         this->energyOneE += this->elecField_[iXYZ] * exptdipole[iXYZ];
       }
     }
- 
  
     this->totalEnergy= this->energyOneE + this->energyTwoE + this->energyNuclei;
   }
@@ -140,7 +139,7 @@ void SingleSlater<T>::mullikenPop() {
   double charge;
   this->mullPop_.clear();
   RealMatrix PS = (*this->onePDMA_).real() * (*this->aointegrals_->overlap_); 
-  if(!this->isClosedShell && this->Ref_ != TCS){ 
+  if(!this->isClosedShell && this->nTCS_ == 1){ 
     PS += (*this->onePDMB_).real() * (*this->aointegrals_->overlap_);
   }
   for (auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++) {

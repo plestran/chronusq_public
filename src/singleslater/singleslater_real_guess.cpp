@@ -40,7 +40,7 @@ void SingleSlater<double>::placeAtmDen(std::vector<int> atomIndex,
   for(auto iAtm : atomIndex){
     auto iBfSt = this->basisset_->mapCen2Bf(iAtm)[0];
     auto iSize = this->basisset_->mapCen2Bf(iAtm)[1]; 
-    if(this->Ref_ != TCS){
+    if(this->nTCS_ == 1){
       this->onePDMA_->block(iBfSt,iBfSt,iSize,iSize)= (*hfA.onePDMA_);
       if(this->isClosedShell){
         if(hfA.isClosedShell) 
@@ -71,11 +71,11 @@ void SingleSlater<double>::placeAtmDen(std::vector<int> atomIndex,
 template<>
 void SingleSlater<double>::scaleDen(){
   // Scale UHF densities according to desired multiplicity
-  if(!this->isClosedShell && this->Ref_ != TCS){
+  if(!this->isClosedShell && this->nTCS_ == 1){
     int nE = this->molecule_->nTotalE();
     (*this->onePDMA_) *= (double)this->nAE_/(double)nE ;
     (*this->onePDMB_) *= (double)this->nBE_/(double)nE ;
-  } else if(this->Ref_ == TCS) {
+  } else if(this->nTCS_ == 2) {
     int nE = this->molecule_->nTotalE();
     for(auto i = 0; i < this->nTCS_*this->nBasis_; i += 2)
     for(auto j = 0; j < this->nTCS_*this->nBasis_; j += 2){
@@ -102,9 +102,27 @@ void SingleSlater<double>::scaleDen(){
   }
 //CErr();
 }; // SingleSlater::scaleDen [T=double]
+
+template<>
+void SingleSlater<double>::RandomGuess() {
+//JJG make random guess
+  auto NTCSxNBASIS = this->nTCS_ * this->nBasis_;
+  this->haveMO = true;
+  if(this->molecule_->nAtoms() > 1) this->haveDensity = true;
+  // Need to init random number otherwise Eigen is not truly random
+  srand((unsigned int) time(0));
+  *this->onePDMA_ = RealMatrix::Random(NTCSxNBASIS,NTCSxNBASIS);
+  *this->onePDMA_ = this->onePDMA_->selfadjointView<Lower>();
+  if(!this->isClosedShell && this->nTCS_ == 1){
+    *this->onePDMB_ = RealMatrix::Random(NTCSxNBASIS,NTCSxNBASIS);
+    *this->onePDMB_ = this->onePDMB_->selfadjointView<Lower>();
+  }  
+};
+
 //--------------------------------//
 // form the initial guess of MO's //
 //--------------------------------//
+/*
 template<>
 void SingleSlater<double>::SADGuess() {
   
@@ -113,7 +131,7 @@ void SingleSlater<double>::SADGuess() {
   int readNPGTO,L, nsize;
   if(getRank() == 0){
     this->moA_->setZero();
-    if(!this->isClosedShell && this->Ref_ != TCS) this->moB_->setZero();
+    if(!this->isClosedShell && this->nTCS_ == 1) this->moB_->setZero();
   }
 
   if(this->molecule_->nAtoms() > 1) {
@@ -192,26 +210,15 @@ void SingleSlater<double>::SADGuess() {
       // Replaces iniSingleSlater
       hartreeFockAtom.communicate(uniqueAtom,basisSetAtom,aointegralsAtom,
         *this->fileio_,*this->memManager_);
-/*
-      hartreeFockAtom.isDFT = this->isDFT;
-      hartreeFockAtom.isHF = this->isHF;
-      hartreeFockAtom.weightScheme_ = this->weightScheme_ ;
-      hartreeFockAtom.dftGrid_      = this->dftGrid_      ;
-      hartreeFockAtom.screenVxc     = this->screenVxc    ; 
-      hartreeFockAtom.epsScreen     = this->epsScreen     ;
-      hartreeFockAtom.nRadDFTGridPts_ = this->nRadDFTGridPts_ ;
-      hartreeFockAtom.nAngDFTGridPts_ = this->nAngDFTGridPts_ ;
-      hartreeFockAtom.isGGA =         this->isGGA ;
-      hartreeFockAtom.DFTKernel_   =  this->DFTKernel_   ;
-*/
    
+      hartreeFockAtom.guess_ = GUESS::CORE;
       hartreeFockAtom.initMeta();
       hartreeFockAtom.setField(this->elecField_);
       hartreeFockAtom.isClosedShell = (hartreeFockAtom.multip() == 1); 
       hartreeFockAtom.doDIIS = false;
       hartreeFockAtom.isDFT = false;
       hartreeFockAtom.isHF = true;
-      hartreeFockAtom.setRef(CUHF);
+      hartreeFockAtom.setRef(UHF);
       hartreeFockAtom.genMethString();
       hartreeFockAtom.alloc();
 
@@ -227,23 +234,14 @@ void SingleSlater<double>::SADGuess() {
       // Prime and perform the atomic SCF
       hartreeFockAtom.formFock();
       hartreeFockAtom.computeEnergy();
-      hartreeFockAtom.SCF2();
+      hartreeFockAtom.SCF3();
       
       // Place Atomic Densities into Total Densities
       this->placeAtmDen(atomIndex[iUn],hartreeFockAtom);
  
     } // Loop iUn
-/*
-  if (this->isDFT) {
-    cout << "HERE 0" <<endl;
-    this->epsScreen     = this->epsScreen / (this->nRadDFTGridPts_ * this->nAngDFTGridPts_);
-//    this->epsScreen     = 1.0e-20; 
-    cout << "epsScreen Scaled to = " <<this->epsScreen  <<endl;
-    this->basisset_->radcut(this->epsScreen,this->maxiter,this->epsConv);
-    cout << "HERE 1" <<endl;
-    }
-*/
     this->scaleDen();
+    this->scatterDensity();
 #ifdef CQ_ENABLE_MPI
     MPI_Barrier(MPI_COMM_WORLD);
 #endif
@@ -256,6 +254,8 @@ void SingleSlater<double>::SADGuess() {
   MPI_Barrier(MPI_COMM_WORLD);
 #endif
 };
+*/
+
 //------------------------------------------//
 // form the initial guess of MOs from input //
 //------------------------------------------//
@@ -358,6 +358,18 @@ void SingleSlater<double>::readGuessGauFChk(std::string &filename) {
   this->haveMO = true;
 };
 
+/*
+template<>
+void SingleSlater<double>::COREGuess(){
+ //   this->onePDMA_->setZero();
+ //   this->onePDMB_->setZero();
+ //   this->moA_->setZero();
+ //   this->moB_->setZero();
+    this->haveDensity = true;
+    this->haveMO = true;
+};
+*/
+
 template<>
 void SingleSlater<double>::READGuess(){
   if(getRank() == 0) {
@@ -365,7 +377,7 @@ void SingleSlater<double>::READGuess(){
     H5::DataSpace dataspace = this->fileio_->alphaSCFDen->getSpace();
     this->fileio_->alphaSCFDen->read(this->onePDMA_->data(),H5::PredType::NATIVE_DOUBLE,dataspace,dataspace);
     this->fileio_->alphaMO->read(this->moA_->data(),H5::PredType::NATIVE_DOUBLE,dataspace,dataspace);
-    if(!this->isClosedShell && this->Ref_ != TCS){
+    if(!this->isClosedShell && this->nTCS_ == 1){
       this->fileio_->betaSCFDen->read(this->onePDMB_->data(),H5::PredType::NATIVE_DOUBLE,dataspace,dataspace);
       this->fileio_->betaMO->read(this->moB_->data(),H5::PredType::NATIVE_DOUBLE,dataspace,dataspace);
     }
@@ -376,7 +388,7 @@ void SingleSlater<double>::READGuess(){
   MPI_Bcast(this->onePDMA_->data(),
     this->nTCS_*this->nTCS_*this->nBasis_*this->nBasis_,MPI_DOUBLE,0,
     MPI_COMM_WORLD);
-  if(!this->isClosedShell && this->Ref_ != TCS)
+  if(!this->isClosedShell && this->nTCS_ == 1)
     MPI_Bcast(this->onePDMB_->data(),
       this->nTCS_*this->nTCS_*this->nBasis_*this->nBasis_,MPI_DOUBLE,0,
       MPI_COMM_WORLD);
