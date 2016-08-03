@@ -37,9 +37,9 @@ void SingleSlater<T>::CDIIS4(int NDIIS){
   double RCOND;
 
 
-  this->fileio_->out << std::setw(2) << " " <<
-    std::setw(4) << " " <<
-    "*** Performing CDIIS Extrapolation ***" << endl;
+//this->fileio_->out << std::setw(2) << " " <<
+//  std::setw(4) << " " <<
+//  "*** Performing CDIIS Extrapolation ***" << endl;
   TMap B(this->memManager_->template malloc<T>(N*N),N,N);
   T   * coef   = this->memManager_->template malloc<T>(N);
   int * iPiv   = this->memManager_->template malloc<int>(N);
@@ -166,7 +166,6 @@ void SingleSlater<T>::CDIIS4(int NDIIS){
     this->PTA_->real() = this->fockA_->real() - (*this->aointegrals_->coreH_);
     if(this->isDFT)
       for(auto j = 0; j < NDIIS; j++){
-        cout << "VXC " << j << endl;
         this->readDIIS(this->VxcScalarDIIS_,j,this->NBSqScratch_->data());
         (*this->PTA_) -= coef[j] * (*this->NBSqScratch_);
       }
@@ -238,7 +237,7 @@ void SingleSlater<T>::genDIISCom(int iter){
     }
   }
 
-  prettyPrint(cout,*this->NBSqScratch_,"E1 FOR DIIS " + std::to_string(iter));
+//prettyPrint(cout,*this->NBSqScratch_,"E1 FOR DIIS " + std::to_string(iter));
 //this->aointegrals_->Ortho1Trans(*this->NBSqScratch_,*this->NBSqScratch2_);
 //this->EScalarDIIS_->write(this->NBSqScratch2_->data(),H5PredType<T>(),
 //  memSpace,E);
@@ -353,7 +352,6 @@ void SingleSlater<T>::genDIISCom(int iter){
 template<typename T>
 void SingleSlater<T>::initDIISFiles(){
   std::vector<hsize_t> dims;
-  cout << "NDIIS " << this->nDIISExtrap_ - 1 << endl;
   dims.push_back(this->nDIISExtrap_);
   dims.push_back(this->nBasis_);
   dims.push_back(this->nBasis_);
