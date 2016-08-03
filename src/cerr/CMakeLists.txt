@@ -4,8 +4,3 @@ target_link_libraries(cerr LINK_PUBLIC ${EXTERNAL_CQ_DEPS})
 target_link_libraries(cerr LINK_PUBLIC tools)
 endif()
 
-if(USE_LIBINT)
-if(BUILD_LIBINT)
- add_dependencies(cerr libint)
-endif()
-endif()

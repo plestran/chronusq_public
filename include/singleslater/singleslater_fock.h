@@ -153,8 +153,9 @@ void SingleSlater<T>::formFock(){
     if (this->isDFT){
 
 //    this->formVXC();
-      if(!testNew) this->formVXC_store();
-      else         this->formVXC_new();
+//    if(!testNew) this->formVXC_store();
+//    else         this->formVXC_new();
+      this->formVXC_new();
     }
   
     if(this->nTCS_ == 1 && this->isClosedShell) {

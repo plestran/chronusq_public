@@ -30,7 +30,6 @@ endif()
 # Check for dependencies
 find_package(PythonLibs 2.7 REQUIRED)
 find_package(PythonInterp 2.7 REQUIRED)
-#find_package(Boost REQUIRED python)
 find_package(Eigen3 REQUIRED)
 find_package(HDF5 REQUIRED CXX)
 find_program(RSYNC_EXECUTABLE rsync)
@@ -58,7 +57,11 @@ endif()
 
 if(NOT CMAKE_CXX_COMPILER_ID MATCHES "PGI")
   # Append flags for compilation
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated -Wno-deprecated-declarations -Wno-narrowing -Wno-strict-aliasing -Wno-unused-variable")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-narrowing ")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-strict-aliasing")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-variable")
   
   if(NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-local-typedefs")
@@ -67,7 +70,10 @@ if(NOT CMAKE_CXX_COMPILER_ID MATCHES "PGI")
   endif()
 endif()
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ftree-vectorize -msse2 -ftree-vectorizer-verbose=5 -ffast-math")
+# Vectorization
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ftree-vectorize")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse2")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffast-math")
 
 include(ExternalProject)
 
@@ -77,7 +83,11 @@ ExternalProject_Add(boost
   URL "${PROJECT_SOURCE_DIR}/deps/src/boost_1_59_0.tar.gz"
   CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/deps/boost/src/boost/bootstrap.sh
   BUILD_COMMAND ${PROJECT_BINARY_DIR}/deps/boost/src/boost/b2
-  --prefix=${PROJECT_BINARY_DIR}/deps --with-python --with-system --ignore-site-config cxxflags=${CMAKE_CXX_FLAGS} install
+    --prefix=${PROJECT_BINARY_DIR}/deps 
+    --with-python 
+    --with-system 
+    --ignore-site-config cxxflags=${CMAKE_CXX_FLAGS} 
+    install
   BUILD_IN_SOURCE 1
   INSTALL_COMMAND echo "Boost Build Sucess!"
 )
@@ -105,36 +115,56 @@ ExternalProject_Add(btas
   PATCH_COMMAND echo 'Skipping BTAS Patch'
   CONFIGURE_COMMAND echo 'Skipping BTAS Configure'
   BUILD_COMMAND echo 'Skipping BTAS Build'
-  INSTALL_COMMAND ${RSYNC_EXECUTABLE} -r ${PROJECT_BINARY_DIR}/deps/btas/src/btas/btas ${PROJECT_BINARY_DIR}/deps/include
+  INSTALL_COMMAND ${RSYNC_EXECUTABLE} -r 
+    ${PROJECT_BINARY_DIR}/deps/btas/src/btas/btas 
+    ${PROJECT_BINARY_DIR}/deps/include
 )
 
 include_directories("${PROJECT_BINARY_DIR}/deps/include")
 link_directories("${PROJECT_BINARY_DIR}/deps/lib")
 
 # Set up Libint environment
-if(USE_LIBINT)
-  if(BUILD_LIBINT)
-    ExternalProject_Add(libint
-      PREFIX ${PROJECT_BINARY_DIR}/deps/libint
-      URL "${PROJECT_SOURCE_DIR}/deps/src/libint-2.2.0-alpha.tgz"
-      CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/deps/libint/src/libint/configure --prefix=${PROJECT_BINARY_DIR}/deps CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${CMAKE_CXX_FLAGS} --enable-shared
-      BUILD_COMMAND make -j2
-      BUILD_IN_SOURCE 1
-      INSTALL_COMMAND make install
-    )
-    if(APPLE)
-      set(LIBINT_LIB ${PROJECT_BINARY_DIR}/deps/lib/libint2.dylib)
-    else()
-      set(LIBINT_LIB ${PROJECT_BINARY_DIR}/deps/lib/libint2.so) 
-    endif()
-    include_directories("${PROJECT_BINARY_DIR}/deps/include")
-    include_directories("${PROJECT_BINARY_DIR}/deps/include/libint2")
-  else()
-    find_library(LIBINT_LIB int2 ${PROJECT_SOURCE_DIR}/deps/lib)
-    include_directories("${PROJECT_SOURCE_DIR}/deps/include")
-    include_directories("${PROJECT_SOURCE_DIR}/deps/include/libint2")
-  endif(BUILD_LIBINT)
-endif(USE_LIBINT)
+#if(USE_LIBINT)
+#  if(BUILD_LIBINT)
+#    ExternalProject_Add(libint
+#      PREFIX ${PROJECT_BINARY_DIR}/deps/libint
+#      URL "${PROJECT_SOURCE_DIR}/deps/src/libint-2.2.0-alpha.tgz"
+#      CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/deps/libint/src/libint/configure 
+#        --prefix=${PROJECT_BINARY_DIR}/deps 
+#        CXX=${CMAKE_CXX_COMPILER} 
+#        CXXFLAGS=${CMAKE_CXX_FLAGS} 
+#        --enable-shared
+#      BUILD_COMMAND make -j2
+#      BUILD_IN_SOURCE 1
+#      INSTALL_COMMAND make install
+#    )
+#    if(APPLE)
+#      set(LIBINT_LIB ${PROJECT_BINARY_DIR}/deps/lib/libint2.dylib)
+#    else()
+#      set(LIBINT_LIB ${PROJECT_BINARY_DIR}/deps/lib/libint2.so) 
+#    endif()
+#    include_directories("${PROJECT_BINARY_DIR}/deps/include")
+#    include_directories("${PROJECT_BINARY_DIR}/deps/include/libint2")
+#  else()
+#    find_library(LIBINT_LIB int2 ${PROJECT_SOURCE_DIR}/deps/lib)
+#    include_directories("${PROJECT_SOURCE_DIR}/deps/include")
+#    include_directories("${PROJECT_SOURCE_DIR}/deps/include/libint2")
+#  endif(BUILD_LIBINT)
+#endif(USE_LIBINT)
+
+# To find Libint and LibXC
+set( ENV{PKG_CONFIG_PATH} "${PROJECT_SOURCE_DIR}/deps/lib/pkgconfig:$ENV{PKG_CONFIG_PATH}")
+
+find_package(PkgConfig)
+
+# Find Libint
+pkg_check_modules(LIBINT2 libint2)
+link_directories("${LIBINT2_LIBRARY_DIRS}")
+include_directories("${LIBINT2_INCLUDE_DIRS}")
+
+pkg_check_modules(LIBXC libxc)
+link_directories("${LIBXC_LIBRARY_DIRS}")
+
 
 # Optinally build BLAS and LAPACK
 
@@ -165,7 +195,9 @@ endif()
 message(STATUS "Will using the following Link Line for Linear Algebra Libs: ${LA_LINK}")
 
 set(EXTERNAL_CQ_DEPS ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${LA_LINK} 
-  ${LIBINT_LIB} m ${OpenMP_CXX_FLAGS} ${HDF5_CXX_LIBRARIES})
+  ${LIBINT2_LIBRARIES} ${LIBXC_LIBRARIES} m ${OpenMP_CXX_FLAGS} 
+  ${HDF5_CXX_LIBRARIES})
+
 if(CQ_ENABLE_MPI)
   set(EXTERNAL_CQ_DEPS ${EXTERNAL_CQ_DEPS} ${MPI_CXX_LIBRARIES})
 endif()
