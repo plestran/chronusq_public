@@ -71,6 +71,7 @@ void SingleSlater<T>::SCF3(){
   if(this->printLevel_ > 0)
     this->printSCFHeader(this->fileio_->out);
 
+  this->computeEnergy();
   this->isConverged = false;
   std::size_t iter;
   this->fileio_->out << "    *** INITIAL GUESS ENERGY = " 
@@ -107,6 +108,7 @@ void SingleSlater<T>::SCF3(){
   this->cleanupSCFMem3();
   this->backTransformMOs();
   this->fixPhase();
+
   if(!this->isConverged)
     CErr("SCF Failed to converge within MAXITER iterations",
         this->fileio_->out);

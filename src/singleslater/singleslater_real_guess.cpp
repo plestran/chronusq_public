@@ -122,6 +122,7 @@ void SingleSlater<double>::RandomGuess() {
 //--------------------------------//
 // form the initial guess of MO's //
 //--------------------------------//
+/*
 template<>
 void SingleSlater<double>::SADGuess() {
   
@@ -239,16 +240,6 @@ void SingleSlater<double>::SADGuess() {
       this->placeAtmDen(atomIndex[iUn],hartreeFockAtom);
  
     } // Loop iUn
-/*
-  if (this->isDFT) {
-    cout << "HERE 0" <<endl;
-    this->epsScreen     = this->epsScreen / (this->nRadDFTGridPts_ * this->nAngDFTGridPts_);
-//    this->epsScreen     = 1.0e-20; 
-    cout << "epsScreen Scaled to = " <<this->epsScreen  <<endl;
-    this->basisset_->radcut(this->epsScreen,this->maxiter,this->epsConv);
-    cout << "HERE 1" <<endl;
-    }
-*/
     this->scaleDen();
     this->scatterDensity();
 #ifdef CQ_ENABLE_MPI
@@ -263,6 +254,7 @@ void SingleSlater<double>::SADGuess() {
   MPI_Barrier(MPI_COMM_WORLD);
 #endif
 };
+*/
 
 //------------------------------------------//
 // form the initial guess of MOs from input //

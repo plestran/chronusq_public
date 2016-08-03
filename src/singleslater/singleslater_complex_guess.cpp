@@ -100,6 +100,7 @@ void SingleSlater<dcomplex>::RandomGuess() {
     *this->onePDMB_ = this->onePDMB_->selfadjointView<Lower>();
   }  
 };
+/*
 template<>
 void SingleSlater<dcomplex>::SADGuess() {
   
@@ -187,11 +188,6 @@ void SingleSlater<dcomplex>::SADGuess() {
       hartreeFockAtom.setField(this->elecField_);
       hartreeFockAtom.isClosedShell = (hartreeFockAtom.multip() == 1); 
       hartreeFockAtom.doDIIS = false;
-/*
-      hartreeFockAtom.isDFT = this->isDFT;
-      hartreeFockAtom.isHF  = this->isHF;
-      hartreeFockAtom.setDFTKernel(this->DFTKernel_);
-*/
       hartreeFockAtom.isDFT = false;
       hartreeFockAtom.isHF  = true;
 
@@ -231,6 +227,7 @@ void SingleSlater<dcomplex>::SADGuess() {
   MPI_Barrier(MPI_COMM_WORLD);
 #endif
 };
+*/
 
 /*
 template<>

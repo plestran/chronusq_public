@@ -203,8 +203,6 @@ void SingleSlater<dcomplex>::diagFock2(){
   if(INFO != 0) CErr("ZHEEV Failed Fock Alpha",this->fileio_->out);
   (*this->moA_) = (*this->fockOrthoA_);
 
-  prettyPrint(this->fileio_->out,*this->epsA_,"epsA_");
-
   if(this->nTCS_ == 1 && !this->isClosedShell){
     zheev_(&JOBZ,&UPLO,&NTCSxNBASIS,this->fockOrthoB_->data(),&NTCSxNBASIS,
         this->epsB_->data(),WORK,&LWORK,RWORK,&INFO);
