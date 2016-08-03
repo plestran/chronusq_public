@@ -209,26 +209,15 @@ void SingleSlater<double>::SADGuess() {
       // Replaces iniSingleSlater
       hartreeFockAtom.communicate(uniqueAtom,basisSetAtom,aointegralsAtom,
         *this->fileio_,*this->memManager_);
-/*
-      hartreeFockAtom.isDFT = this->isDFT;
-      hartreeFockAtom.isHF = this->isHF;
-      hartreeFockAtom.weightScheme_ = this->weightScheme_ ;
-      hartreeFockAtom.dftGrid_      = this->dftGrid_      ;
-      hartreeFockAtom.screenVxc     = this->screenVxc    ; 
-      hartreeFockAtom.epsScreen     = this->epsScreen     ;
-      hartreeFockAtom.nRadDFTGridPts_ = this->nRadDFTGridPts_ ;
-      hartreeFockAtom.nAngDFTGridPts_ = this->nAngDFTGridPts_ ;
-      hartreeFockAtom.isGGA =         this->isGGA ;
-      hartreeFockAtom.DFTKernel_   =  this->DFTKernel_   ;
-*/
    
+      hartreeFockAtom.guess_ = GUESS::CORE;
       hartreeFockAtom.initMeta();
       hartreeFockAtom.setField(this->elecField_);
       hartreeFockAtom.isClosedShell = (hartreeFockAtom.multip() == 1); 
       hartreeFockAtom.doDIIS = false;
       hartreeFockAtom.isDFT = false;
       hartreeFockAtom.isHF = true;
-      hartreeFockAtom.setRef(CUHF);
+      hartreeFockAtom.setRef(UHF);
       hartreeFockAtom.genMethString();
       hartreeFockAtom.alloc();
 
@@ -244,7 +233,7 @@ void SingleSlater<double>::SADGuess() {
       // Prime and perform the atomic SCF
       hartreeFockAtom.formFock();
       hartreeFockAtom.computeEnergy();
-      hartreeFockAtom.SCF2();
+      hartreeFockAtom.SCF3();
       
       // Place Atomic Densities into Total Densities
       this->placeAtmDen(atomIndex[iUn],hartreeFockAtom);
@@ -261,6 +250,7 @@ void SingleSlater<double>::SADGuess() {
     }
 */
     this->scaleDen();
+    this->scatterDensity();
 #ifdef CQ_ENABLE_MPI
     MPI_Barrier(MPI_COMM_WORLD);
 #endif

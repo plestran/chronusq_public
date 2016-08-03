@@ -87,12 +87,22 @@ FileIO::FileIO(const std::string inFile,  const std::string outFile,
 
 };
 
+std::string FileIO::generateRandomTag(int len){
+  std::default_random_engine e1(this->randDevice());
+  std::uniform_int_distribution<int> uniform_dist(1,len);
+  std::string TAG;
+  for(auto i = 0; i < len; i++)
+    TAG += std::to_string(static_cast<char>(uniform_dist(e1)));
+
+  return TAG;
+};
+
 H5::DataSet * FileIO::createScratchPartition(const H5::CompType &type, 
   const std::string &nm, std::vector<hsize_t> &dims) {
 
   H5::DataSpace dataspace(dims.size(),&dims[0]);
   this->scratchPartitions.push_back(
-    ScratchPartition(nm,type,dataspace,*this->scr)
+    ScratchPartition(nm+generateRandomTag(16),type,dataspace,*this->scr)
   );
 
   return &this->scratchPartitions.back().data;

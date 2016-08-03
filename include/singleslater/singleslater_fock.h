@@ -50,7 +50,7 @@ void SingleSlater<T>::formPT(){
   if(!this->haveDensity) this->formDensity();
 //  this->sepReImOnePDM();
 //  this->comReImOnePDM();
-  this->scatterDensity();
+//this->scatterDensity();
 
   std::vector<std::reference_wrapper<TMap>> mats;
   std::vector<std::reference_wrapper<TMap>> ax;

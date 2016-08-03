@@ -179,12 +179,14 @@ void SingleSlater<double>::diagFock2(){
       this->epsA_->data(),WORK,&LWORK,&INFO);
   if(INFO != 0) CErr("DSYEV Failed Fock Alpha",this->fileio_->out);
   (*this->moA_) = (*this->fockOrthoA_);
+  prettyPrint(cout,*this->moA_,"MOA");
 
   if(this->nTCS_ == 1 && !this->isClosedShell){
     dsyev_(&JOBZ,&UPLO,&NTCSxNBASIS,this->fockOrthoB_->data(),&NTCSxNBASIS,
         this->epsB_->data(),WORK,&LWORK,&INFO);
     if(INFO != 0) CErr("DSYEV Failed Fock Beta",this->fileio_->out);
     (*this->moB_) = (*this->fockOrthoB_);
+    prettyPrint(cout,*this->moB_,"MOB");
   }
   this->memManager_->free(WORK,LWORK);
 };

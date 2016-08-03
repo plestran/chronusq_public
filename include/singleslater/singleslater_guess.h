@@ -66,7 +66,7 @@ void SingleSlater<T>::COREGuess(){
   this->diagFock2();
   this->formDensity();
   this->cpyAOtoOrthoDen();
-  this->unOrthoDen();
+  this->unOrthoDen3();
   if(this->printLevel_ > 3){
     prettyPrint(this->fileio_->out,*this->onePDMA_,"Initial PA");
     prettyPrint(this->fileio_->out,*this->onePDMOrthoA_,"Initial POrthoA");

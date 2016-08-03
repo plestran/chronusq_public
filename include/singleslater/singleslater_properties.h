@@ -26,6 +26,14 @@
 
 template<typename T>
 void SingleSlater<T>::computeEnergy(){
+  if(this->nTCS_ == 1 && this->isClosedShell){
+    prettyPrint(cout,*this->onePDMA_,"PScalar in Energy");
+    prettyPrint(cout,*this->PTA_,"PTScalar in Energy");
+  } else {
+    prettyPrint(cout,*this->onePDMScalar_,"PScalar in Energy");
+    prettyPrint(cout,*this->PTScalar_,"PTScalar in Energy");
+  }
+  prettyPrint(cout,*this->aointegrals_->coreH_,"HCore in Energy)");
   if(getRank() == 0) {
     this->energyOneE = 
       this->template computeProperty<double,DENSITY_TYPE::TOTAL>(
@@ -64,7 +72,9 @@ void SingleSlater<T>::computeEnergy(){
       }
     }
  
- 
+    cout << "1E = " << this->energyOneE << endl; 
+    cout << "2E = " << this->energyTwoE << endl; 
+    cout << "NU = " << this->energyNuclei << endl;
     this->totalEnergy= this->energyOneE + this->energyTwoE + this->energyNuclei;
   }
 #ifdef CQ_ENABLE_MPI

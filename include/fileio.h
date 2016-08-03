@@ -68,6 +68,8 @@ class FileIO {
   std::string  alphaMOPath     ;
   std::string  betaMOPath      ;
 
+  std::string generateRandomTag(int);
+  std::random_device randDevice;
 
 public:
 
