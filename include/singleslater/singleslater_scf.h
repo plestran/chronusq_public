@@ -78,15 +78,23 @@ void SingleSlater<T>::SCF3(){
 
   this->formFock();
   for(iter = 0; iter < this->maxSCFIter_; iter++){
+    cout << "HERE 1" << endl;
     this->copyDen();
+    cout << "HERE 2" << endl;
     this->orthoFock3();
+    cout << "HERE 3" << endl;
     if(this->doDIIS){
       auto IDIISIter = iter - this->iDIISStart_;
+    cout << "HERE 4" << endl;
       this->cpyFockDIIS(IDIISIter);
+    cout << "HERE 5" << endl;
       this->cpyDenDIIS(IDIISIter);
+    cout << "HERE 6" << endl;
       this->genDIISCom(IDIISIter); 
+    cout << "HERE 7" << endl;
       if(IDIISIter > 0) 
         this->CDIIS4(std::min(IDIISIter+1,std::size_t(this->nDIISExtrap_)));
+    cout << "HERE 8" << endl;
     }
     this->diagFock2();
     this->formDensity();

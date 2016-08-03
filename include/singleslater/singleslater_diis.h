@@ -221,6 +221,7 @@ inline dcomplex DIISComplexScale<dcomplex>(){return dcomplex(0,1); }
 
 template<typename T>
 void SingleSlater<T>::genDIISCom(int iter){
+  cout << "HERE IN COMM" << endl;
 
   // Scalar Part
   // E(S) = [F(S),D(S)] + [F(K),D(K)]
@@ -469,6 +470,7 @@ void SingleSlater<T>::initDIISFiles(){
 
 template<typename T>
 void SingleSlater<T>::cpyDenDIIS(int iter){
+  cout << "HERE IN DEN" << endl;
   T* ScalarPtr;
   if(this->isClosedShell && this->nTCS_ == 1) 
     ScalarPtr = this->onePDMA_->data();
@@ -511,7 +513,7 @@ void SingleSlater<T>::cpyFockDIIS(int iter){
     this->writeDIIS(this->FMzDIIS_,iter % this->nDIISExtrap_,
       this->fockMz_->data());
 
-    this->writeDIIS(this->PTMzDIIS_,iter * this->nDIISExtrap_,
+    this->writeDIIS(this->PTMzDIIS_,iter % this->nDIISExtrap_,
       this->PTMz_->data());
 
     if(this->nTCS_ == 2){
@@ -520,9 +522,9 @@ void SingleSlater<T>::cpyFockDIIS(int iter){
       this->writeDIIS(this->FMxDIIS_,iter % this->nDIISExtrap_,
         this->fockMx_->data());
 
-      this->writeDIIS(this->PTMyDIIS_,iter * this->nDIISExtrap_,
+      this->writeDIIS(this->PTMyDIIS_,iter % this->nDIISExtrap_,
         this->PTMy_->data());
-      this->writeDIIS(this->PTMxDIIS_,iter * this->nDIISExtrap_,
+      this->writeDIIS(this->PTMxDIIS_,iter % this->nDIISExtrap_,
         this->PTMx_->data());
     }
   }
