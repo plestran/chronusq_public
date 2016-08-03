@@ -142,11 +142,23 @@ void SingleSlater<T>::CDIIS4(int NDIIS){
   }
 */
 
-//if(std::abs(RCOND)>std::numeric_limits<double>::epsilon()) {
-    this->fockA_->setZero();
-    if(!this->isClosedShell && this->nTCS_ == 1) 
-      this->fockB_->setZero();
+    if(this->nTCS_ == 1 && this->isClosedShell){
+      this->fockA_->setZero();
+      this->PTA_->setZero();
+    } else {
+      this->fockScalar_->setZero();
+      this->fockMz_->setZero();
+      this->PTScalar_->setZero();
+      this->PTMz_->setZero();
+      if(this->nTCS_ == 2) {
+        this->fockMy_->setZero();
+        this->fockMx_->setZero();
+        this->PTMy_->setZero();
+        this->PTMx_->setZero();
+      }
+    }
 
+    // Extrapolate full Fock matrix
     for(auto j = 0; j < NDIIS; j++) {
       this->readDIIS(this->FScalarDIIS_,j,this->NBSqScratch_->data());
 
@@ -162,6 +174,24 @@ void SingleSlater<T>::CDIIS4(int NDIIS){
         this->fockMz_->noalias() += coef[j] * (*this->NBSqScratch_);
       } // both vector and scalar
     } // Fock loop
+
+    // Extrapolate G[P] for energy evaluation
+    for(auto j = 0; j < NDIIS; j++) {
+      this->readDIIS(this->PTScalarDIIS_,j,this->NBSqScratch_->data());
+
+      if(this->nTCS_ == 1 && this->isClosedShell)
+        // Scalar Part
+        (*this->PTA_) += coef[j] * (*this->NBSqScratch_);
+      else {
+        // Scalar Part
+        this->PTScalar_->noalias() += coef[j] * (*this->NBSqScratch_);
+
+        // Mz
+        this->readDIIS(this->PTMzDIIS_,j,this->NBSqScratch_->data());
+        this->PTMz_->noalias() += coef[j] * (*this->NBSqScratch_);
+      } // both vector and scalar
+    } // PT loop
+/*
   if(this->nTCS_ == 1 && this->isClosedShell){
     this->PTA_->real() = this->fockA_->real() - (*this->aointegrals_->coreH_);
     if(this->isDFT)
@@ -173,6 +203,7 @@ void SingleSlater<T>::CDIIS4(int NDIIS){
     this->PTScalar_->real() = 
       this->fockScalar_->real() - (*this->aointegrals_->coreH_);
   }
+*/
 
   this->orthoFock3();
 
@@ -365,10 +396,9 @@ void SingleSlater<T>::initDIISFiles(){
   this->EScalarDIIS_ = 
     this->fileio_->createScratchPartition(H5PredType<T>(),
       "Error Metric [F,D] (Scalar) For DIIS Extrapoloation",dims);
-  if(this->isDFT)
-    this->VxcScalarDIIS_ = 
-      this->fileio_->createScratchPartition(H5PredType<T>(),
-        "Vxc (Scalar) For DIIS Extrapoloation",dims);
+  this->PTScalarDIIS_ = 
+    this->fileio_->createScratchPartition(H5PredType<T>(),
+      "PT (Scalar) For DIIS Extrapoloation",dims);
 
   if(this->nTCS_ == 2 || !this->isClosedShell) {
     this->FMzDIIS_ = 
@@ -380,10 +410,9 @@ void SingleSlater<T>::initDIISFiles(){
     this->EMzDIIS_ = 
       this->fileio_->createScratchPartition(H5PredType<T>(),
         "Error Metric [F,D] (Mz) For DIIS Extrapoloation",dims);
-    if(this->isDFT)
-      this->VxcMzDIIS_ = 
-        this->fileio_->createScratchPartition(H5PredType<T>(),
-          "Vxc (Mz) For DIIS Extrapoloation",dims);
+    this->PTMzDIIS_ = 
+      this->fileio_->createScratchPartition(H5PredType<T>(),
+        "PT (Mz) For DIIS Extrapoloation",dims);
   }
 
   if(this->nTCS_ == 2) {
@@ -396,10 +425,9 @@ void SingleSlater<T>::initDIISFiles(){
     this->EMyDIIS_ = 
       this->fileio_->createScratchPartition(H5PredType<T>(),
         "Error Metric [F,D] (My) For DIIS Extrapoloation",dims);
-    if(this->isDFT)
-      this->VxcMyDIIS_ = 
-        this->fileio_->createScratchPartition(H5PredType<T>(),
-          "Vxc (My) For DIIS Extrapoloation",dims);
+    this->PTMyDIIS_ = 
+      this->fileio_->createScratchPartition(H5PredType<T>(),
+        "PT (My) For DIIS Extrapoloation",dims);
 
     this->FMxDIIS_ = 
       this->fileio_->createScratchPartition(H5PredType<T>(),
@@ -410,102 +438,12 @@ void SingleSlater<T>::initDIISFiles(){
     this->EMxDIIS_ = 
       this->fileio_->createScratchPartition(H5PredType<T>(),
         "Error Metric [F,D] (Mx) For DIIS Extrapoloation",dims);
-    if(this->isDFT)
-      this->VxcMxDIIS_ = 
-        this->fileio_->createScratchPartition(H5PredType<T>(),
-          "Vxc (Mx) For DIIS Extrapoloation",dims);
+    this->PTMxDIIS_ = 
+      this->fileio_->createScratchPartition(H5PredType<T>(),
+        "PT (Mx) For DIIS Extrapoloation",dims);
   }
 
 };
-
-/*
-template<typename T>
-void SingleSlater<T>::cpyFockDIIS(int iter){
-  T* ScalarPtr;
-  if(this->isClosedShell && this->nTCS_ == 1) 
-    ScalarPtr = this->fockA_->data();
-  else
-    ScalarPtr = this->fockScalar_->data();
-
-  hsize_t offset[] = {iter % (this->nDIISExtrap_),0,0};
-  hsize_t stride[] = {1,1,1};
-  hsize_t block[]  = {1,1,1};
- 
-  hsize_t subDim[] = {1,this->nBasis_,this->nBasis_};
-  hsize_t count[]  = {1,this->nBasis_,this->nBasis_};
-
-  cout << "COPY FOCK " << iter << endl;
-  H5::DataSpace FScalar, FMz, FMy, FMx;
-  FScalar = this->FScalarDIIS_->getSpace();
-  FScalar.selectHyperslab(H5S_SELECT_SET,count,offset,stride,block);
-  if(this->nTCS_ == 2 || !this->isClosedShell){
-    FMz = this->FMzDIIS_->getSpace();
-    FMz.selectHyperslab(H5S_SELECT_SET,count,offset,stride,block);
-  }
-  if(this->nTCS_ == 2) {
-    FMy = this->FMyDIIS_->getSpace();
-    FMx = this->FMxDIIS_->getSpace();
-    FMy.selectHyperslab(H5S_SELECT_SET,count,offset,stride,block);
-    FMx.selectHyperslab(H5S_SELECT_SET,count,offset,stride,block);
-  }
-  
-  H5::DataSpace memSpace(3,subDim,NULL);
-  prettyPrint(cout,*this->fockA_,"FOCK FOR DIIS " + std::to_string(iter));
-
-  this->FScalarDIIS_->write(ScalarPtr,H5PredType<T>(),memSpace,FScalar); 
-  if(this->nTCS_ == 2 || !this->isClosedShell)
-    this->FMzDIIS_->write(this->fockMz_->data(),H5PredType<T>(),
-      memSpace,FMz); 
-  if(this->nTCS_ == 2) {
-    this->FMyDIIS_->write(this->fockMy_->data(),H5PredType<T>(),memSpace,FMy); 
-    this->FMxDIIS_->write(this->fockMx_->data(),H5PredType<T>(),memSpace,FMz); 
-  }
-}
-
-template<typename T>
-void SingleSlater<T>::cpyDenDIIS(int iter){
-  T* ScalarPtr;
-  if(this->isClosedShell && this->nTCS_ == 1) 
-    ScalarPtr = this->onePDMA_->data();
-  else
-    ScalarPtr = this->onePDMScalar_->data();
-
-  hsize_t offset[] = {iter % (this->nDIISExtrap_),0,0};
-  hsize_t stride[] = {1,1,1};
-  hsize_t block[]  = {1,1,1};
- 
-  hsize_t subDim[] = {1,this->nBasis_,this->nBasis_};
-  hsize_t count[]  = {1,this->nBasis_,this->nBasis_};
-
-  H5::DataSpace DScalar, DMz, DMy, DMx;
-  DScalar = this->DScalarDIIS_->getSpace();
-  DScalar.selectHyperslab(H5S_SELECT_SET,count,offset,stride,block);
-  if(this->nTCS_ == 2 || !this->isClosedShell){
-    DMz = this->DMzDIIS_->getSpace();
-    DMz.selectHyperslab(H5S_SELECT_SET,count,offset,stride,block);
-  }
-  if(this->nTCS_ == 2) {
-    DMy = this->DMyDIIS_->getSpace();
-    DMx = this->DMxDIIS_->getSpace();
-    DMy.selectHyperslab(H5S_SELECT_SET,count,offset,stride,block);
-    DMx.selectHyperslab(H5S_SELECT_SET,count,offset,stride,block);
-  }
-
-  H5::DataSpace memSpace(3,subDim,NULL);
-  prettyPrint(cout,*this->onePDMA_,"DENSITY FOR DIIS " + std::to_string(iter));
-  
-  this->DScalarDIIS_->write(ScalarPtr,H5PredType<T>(),memSpace,DScalar); 
-  if(this->nTCS_ == 2 || !this->isClosedShell)
-    this->DMzDIIS_->write(this->onePDMMz_->data(),H5PredType<T>(),
-      memSpace,DMz); 
-  if(this->nTCS_ == 2) {
-    this->DMyDIIS_->write(this->onePDMMy_->data(),H5PredType<T>(),
-      memSpace,DMy); 
-    this->DMxDIIS_->write(this->onePDMMx_->data(),H5PredType<T>(),
-      memSpace,DMx); 
-  }
-}
-*/
 
 template<typename T>
 void SingleSlater<T>::cpyDenDIIS(int iter){
@@ -537,9 +475,14 @@ void SingleSlater<T>::cpyFockDIIS(int iter){
     ScalarPtr = this->fockScalar_->data();
 
   this->writeDIIS(this->FScalarDIIS_,iter % this->nDIISExtrap_,ScalarPtr);
-  if(this->isDFT)
-    this->writeDIIS(this->VxcScalarDIIS_,iter % this->nDIISExtrap_,
-      this->vXA_->data());
+
+  if(this->isClosedShell && this->nTCS_ == 1) 
+    ScalarPtr = this->PTA_->data();
+  else
+    ScalarPtr = this->PTScalar_->data();
+
+  this->writeDIIS(this->PTScalarDIIS_,iter % this->nDIISExtrap_,
+    ScalarPtr);
 
   if(this->nTCS_ == 2 || !this->isClosedShell){
     this->writeDIIS(this->FMzDIIS_,iter % this->nDIISExtrap_,

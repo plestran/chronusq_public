@@ -227,10 +227,10 @@ class SingleSlater : public Quantum<T> {
   H5::DataSet *EMyDIIS_;
   H5::DataSet *EMxDIIS_;
 
-  H5::DataSet *VxcScalarDIIS_;
-  H5::DataSet *VxcMzDIIS_;
-  H5::DataSet *VxcMyDIIS_;
-  H5::DataSet *VxcMxDIIS_;
+  H5::DataSet *PTScalarDIIS_;
+  H5::DataSet *PTMzDIIS_;
+  H5::DataSet *PTMyDIIS_;
+  H5::DataSet *PTMxDIIS_;
  
   // New DIIS Functions
   void cpyOrthoFock2(int);
