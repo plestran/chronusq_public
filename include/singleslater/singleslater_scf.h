@@ -59,9 +59,9 @@ void SingleSlater<T>::SCF3(){
   this->fileio_->out << "    *** INITIAL GUESS ENERGY = " 
     << this->totalEnergy << " Eh ***" << endl;
 
+  this->formFock();
   for(iter = 0; iter < this->maxSCFIter_; iter++){
     this->copyDen();
-    this->formFock();
     this->orthoFock3();
     if(this->doDIIS){
       auto IDIISIter = iter - this->iDIISStart_;
@@ -70,12 +70,12 @@ void SingleSlater<T>::SCF3(){
       this->genDIISCom(IDIISIter); 
       if(IDIISIter > 0) 
         this->CDIIS4(std::min(IDIISIter+1,std::size_t(this->nDIISExtrap_)));
-      
     }
     this->diagFock2();
     this->formDensity();
     this->cpyAOtoOrthoDen();
     this->unOrthoDen3();
+    // Calls formFock
     SCFConvergence CONVER = this->evalConver3();
 
     this->printSCFIter(iter,CONVER.EDelta,CONVER.PARMS,
