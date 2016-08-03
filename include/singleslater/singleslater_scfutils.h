@@ -44,7 +44,26 @@ void SingleSlater<T>::initSCFMem3(){
     this->occNumMem_ = this->memManager_->template malloc<double>(NTCSxNBASIS);
   }
 
+   
   if(this->doDIIS) this->initDIISFiles();
+  std::vector<hsize_t> dims;
+  dims.push_back(this->nBasis_);
+  dims.push_back(this->nBasis_);
+
+  this->DScalarOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
+    "Most Recent Density Matrix (Scalar) for RMS",dims);
+
+  if(this->nTCS_ == 2 || !this->isClosedShell)
+    this->DMzOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
+      "Most Recent Density Matrix (Mz) for RMS",dims);
+  
+  if(this->nTCS_ == 2) {
+    this->DMyOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
+      "Most Recent Density Matrix (My) for RMS",dims);
+    this->DMxOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
+      "Most Recent Density Matrix (Mx) for RMS",dims);
+  }
+
 };
 
 template<typename T>
@@ -164,6 +183,7 @@ SCFConvergence SingleSlater<T>::evalConver3(){
 
   double PARMS(0),PBRMS(0);
 
+/*
   for(auto I = 0; I < this->onePDMA_->size(); I++){
     T DIFF = this->onePDMA_->data()[I] - this->POldAlphaMem_[I];
     DIFF = std::conj(DIFF)*DIFF;
@@ -174,6 +194,25 @@ SCFConvergence SingleSlater<T>::evalConver3(){
       PBRMS += reinterpret_cast<double(&)[2]>(DIFF)[0];
     }
   }
+*/
+
+  
+
+  DScalarOld_->read(this->NBSqScratch_->data(),H5PredType<T>());
+  if(this->nTCS_ == 1 && this->isClosedShell) {
+    for(auto I = 0; I < this->onePDMA_->size(); I++){
+      T DIFF = this->onePDMA_->data()[I] - this->NBSqScratch_->data()[I];
+      DIFF = std::conj(DIFF)*DIFF;
+      PARMS += reinterpret_cast<double(&)[2]>(DIFF)[0];
+    }
+  } else {
+    for(auto I = 0; I < this->onePDMScalar_->size(); I++){
+      T DIFF = this->onePDMA_->data()[I] - this->NBSqScratch_->data()[I];
+      DIFF = std::conj(DIFF)*DIFF;
+      PARMS += reinterpret_cast<double(&)[2]>(DIFF)[0];
+    }
+  }
+
 
   PARMS = std::sqrt(PARMS);
   if(this->nTCS_ == 1 && !this->isClosedShell)

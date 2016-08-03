@@ -221,21 +221,11 @@ inline dcomplex DIISComplexScale<dcomplex>(){return dcomplex(0,1); }
 
 template<typename T>
 void SingleSlater<T>::genDIISCom(int iter){
-  hsize_t offset[] = {iter % (this->nDIISExtrap_),0,0};
-  hsize_t stride[] = {1,1,1};
-  hsize_t block[]  = {1,1,1};
- 
-  hsize_t subDim[] = {1,this->nBasis_,this->nBasis_};
-  hsize_t count[]  = {1,this->nBasis_,this->nBasis_};
-
-  H5::DataSpace E = this->EScalarDIIS_->getSpace();
-  E.selectHyperslab(H5S_SELECT_SET,count,offset,stride,block);
-
-  H5::DataSpace memSpace(3,subDim,NULL);
 
   // Scalar Part
   // E(S) = [F(S),D(S)] + [F(K),D(K)]
   if(this->nTCS_ == 1 && this->isClosedShell){
+    // For RHF: E(S) = [F(S),D(S)]
 //  this->NBSqScratch_->noalias() = 
 //    (*this->fockOrthoA_) * (*this->onePDMOrthoA_);
 //  this->NBSqScratch_->noalias() -=
@@ -245,16 +235,31 @@ void SingleSlater<T>::genDIISCom(int iter){
     this->NBSqScratch_->noalias() -=
       (*this->aointegrals_->overlap_) * (*this->onePDMA_) * (*this->fockA_);
   } else {
+    // E(S) = [F(S),D(S)]
+  //this->NBSqScratch_->noalias() = 
+  //  (*this->fockOrthoScalar_) * (*this->onePDMOrthoScalar_);
+  //this->NBSqScratch_->noalias() -=
+  //  (*this->onePDMOrthoScalar_) * (*this->fockOrthoScalar_);
     this->NBSqScratch_->noalias() = 
-      (*this->fockOrthoScalar_) * (*this->onePDMOrthoScalar_);
+      (*this->fockScalar_) * (*this->onePDMScalar_) * 
+      (*this->aointegrals_->overlap_);
     this->NBSqScratch_->noalias() -=
-      (*this->onePDMOrthoScalar_) * (*this->fockOrthoScalar_);
+      (*this->aointegrals_->overlap_) * (*this->onePDMScalar_) * 
+      (*this->fockScalar_);
 
+    // E(S) += [F(Z),M(Z)]
+  //this->NBSqScratch_->noalias() += 
+  //  (*this->fockOrthoMz_) * (*this->onePDMOrthoMz_);
+  //this->NBSqScratch_->noalias() -=
+  //  (*this->onePDMOrthoMz_) * (*this->fockOrthoMz_);
     this->NBSqScratch_->noalias() += 
-      (*this->fockOrthoMz_) * (*this->onePDMOrthoMz_);
+      (*this->fockMz_) * (*this->onePDMMz_) * 
+      (*this->aointegrals_->overlap_);
     this->NBSqScratch_->noalias() -=
-      (*this->onePDMOrthoMz_) * (*this->fockOrthoMz_);
+      (*this->aointegrals_->overlap_) * (*this->onePDMMz_) * 
+      (*this->fockMz_);
 
+/*
     if(this->nTCS_ == 2){
       this->NBSqScratch_->noalias() += 
         (*this->fockOrthoMy_) * (*this->onePDMOrthoMy_);
@@ -266,17 +271,16 @@ void SingleSlater<T>::genDIISCom(int iter){
       this->NBSqScratch_->noalias() -=
         (*this->onePDMOrthoMx_) * (*this->fockOrthoMx_);
     }
+*/
   }
 
-//prettyPrint(cout,*this->NBSqScratch_,"E1 FOR DIIS " + std::to_string(iter));
-//this->aointegrals_->Ortho1Trans(*this->NBSqScratch_,*this->NBSqScratch2_);
-//this->EScalarDIIS_->write(this->NBSqScratch2_->data(),H5PredType<T>(),
+//this->EScalarDIIS_->write(this->NBSqScratch_->data(),H5PredType<T>(),
 //  memSpace,E);
-  this->EScalarDIIS_->write(this->NBSqScratch_->data(),H5PredType<T>(),
-    memSpace,E);
+  this->writeDIIS(this->EScalarDIIS_,iter % this->nDIISExtrap_,
+    this->NBSqScratch_->data());
 
   // Magnetization part
-  // E(K) = [F(S),D(K)] + [F(K),D(S)] + i*([F(K+1),D(K+2)] - [F(K+2),D(K+1)])
+  // E(K) = [F(S),D(K)] + [F(K),D(S)] + i*({F(K+1),D(K+2)} - {F(K+2),D(K+1)})
   //
   // K = 1 (X)
   // K = 2 (Y)
@@ -288,17 +292,30 @@ void SingleSlater<T>::genDIISCom(int iter){
     // Mz Part
       
     // [F(S),D(Z)]
+  //this->NBSqScratch_->noalias() = 
+  //  (*this->fockOrthoScalar_) * (*this->onePDMOrthoMz_);
+  //this->NBSqScratch_->noalias() -=
+  //  (*this->onePDMOrthoMz_) * (*this->fockOrthoScalar_);
     this->NBSqScratch_->noalias() = 
-      (*this->fockOrthoScalar_) * (*this->onePDMOrthoMz_);
+      (*this->fockScalar_) * (*this->onePDMMz_) *
+      (*this->aointegrals_->overlap_);
     this->NBSqScratch_->noalias() -=
-      (*this->onePDMOrthoMz_) * (*this->fockOrthoScalar_);
+      (*this->aointegrals_->overlap_) * (*this->onePDMMz_) * 
+      (*this->fockScalar_);
 
     // [F(Z),D(S)]
+  //this->NBSqScratch_->noalias() += 
+  //  (*this->fockOrthoMz_) * (*this->onePDMOrthoScalar_);
+  //this->NBSqScratch_->noalias() -=
+  //  (*this->onePDMOrthoScalar_) * (*this->fockOrthoMz_);
     this->NBSqScratch_->noalias() += 
-      (*this->fockOrthoMz_) * (*this->onePDMOrthoScalar_);
+      (*this->fockMz_) * (*this->onePDMScalar_) *
+      (*this->aointegrals_->overlap_);
     this->NBSqScratch_->noalias() -=
-      (*this->onePDMOrthoScalar_) * (*this->fockOrthoMz_);
+      (*this->aointegrals_->overlap_) * (*this->onePDMScalar_) * 
+      (*this->fockMz_);
  
+/*
     if(this->nTCS_ == 2){
       // [F(X),D(Y)]
       this->NBSqScratch_->noalias() += DIISComplexScale<T>() *
@@ -312,11 +329,15 @@ void SingleSlater<T>::genDIISCom(int iter){
       this->NBSqScratch_->noalias() += DIISComplexScale<T>() *
         (*this->onePDMOrthoMx_) * (*this->fockOrthoMy_);
     }
+*/
       
 
-    this->EMzDIIS_->write(this->NBSqScratch_->data(),H5PredType<T>(),
-      memSpace,E);
+  //this->EMzDIIS_->write(this->NBSqScratch_->data(),H5PredType<T>(),
+  //  memSpace,E);
+    this->writeDIIS(this->EMzDIIS_,iter % this->nDIISExtrap_,
+      this->NBSqScratch_->data());
 
+/*
     if(this->nTCS_ == 2){
       // Mx Part
         
@@ -376,7 +397,8 @@ void SingleSlater<T>::genDIISCom(int iter){
       this->EMyDIIS_->write(this->NBSqScratch_->data(),H5PredType<T>(),
         memSpace,E);
     }
-  }
+*/
+  } // Vector Part
 
 };
 
@@ -485,13 +507,23 @@ void SingleSlater<T>::cpyFockDIIS(int iter){
     ScalarPtr);
 
   if(this->nTCS_ == 2 || !this->isClosedShell){
+
     this->writeDIIS(this->FMzDIIS_,iter % this->nDIISExtrap_,
       this->fockMz_->data());
+
+    this->writeDIIS(this->PTMzDIIS_,iter * this->nDIISExtrap_,
+      this->PTMz_->data());
+
     if(this->nTCS_ == 2){
       this->writeDIIS(this->FMyDIIS_,iter % this->nDIISExtrap_,
         this->fockMy_->data());
       this->writeDIIS(this->FMxDIIS_,iter % this->nDIISExtrap_,
         this->fockMx_->data());
+
+      this->writeDIIS(this->PTMyDIIS_,iter * this->nDIISExtrap_,
+        this->PTMy_->data());
+      this->writeDIIS(this->PTMxDIIS_,iter * this->nDIISExtrap_,
+        this->PTMx_->data());
     }
   }
 }
