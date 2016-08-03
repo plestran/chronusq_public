@@ -6,8 +6,3 @@ target_link_libraries(realtime LINK_PUBLIC singleslater)
 target_link_libraries(realtime LINK_PUBLIC ${EXTERNAL_CQ_DEPS})
 endif()
 
-if(USE_LIBINT)
-if(BUILD_LIBINT)
- add_dependencies(realtime libint)
-endif()
-endif()
