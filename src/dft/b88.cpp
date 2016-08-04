@@ -11,6 +11,9 @@ DFTFunctional(X,eps){
 //  cout << "B88 object created " <<endl;
 
   this->name = "B88";
+#ifdef CQ_ENABLE_LIBXC
+  xc_func_init(&this->func,XC_GGA_X_B88,XC_POLARIZED);
+#endif
 };
 
 double BEightEight::g0B88 (double x, double &sinhx, double &bx){

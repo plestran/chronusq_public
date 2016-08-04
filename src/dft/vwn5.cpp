@@ -29,6 +29,9 @@ VWNIII(X,eps){
   this->popVWNconst();
 
   this->name = "VWN V";
+#ifdef CQ_ENABLE_LIBXC
+  xc_func_init(&this->func,XC_LDA_C_VWN,XC_POLARIZED);
+#endif
 };
 
 void VWNV::popVWNconst(){
