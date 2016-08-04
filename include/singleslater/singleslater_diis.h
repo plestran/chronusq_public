@@ -79,7 +79,7 @@ void SingleSlater<T>::CDIIS4(int NDIIS){
   coef[N-1]=-1.0;
 
   TMap COEFF(coef,N,1);
-  //prettyPrint(this->fileio_->out,B,"CDIIS B Metric",20);
+  //prettyPrint(this->fileio_->out,B,"CDIIS B Metric");
   //prettyPrint(this->fileio_->out,COEFF,"CDIIS RHS");
   
   double ANORM = B.template lpNorm<1>();
@@ -141,6 +141,13 @@ void SingleSlater<T>::CDIIS4(int NDIIS){
     prettyPrint(this->fileio_->out,COEFF,"New CDIIS SOULTION");
   }
 */
+    if(std::abs(RCOND) < std::numeric_limits<double>::epsilon()){
+      this->memManager_->free(B.data(),N*N);
+      this->memManager_->free(coef,N);
+      this->memManager_->free(iPiv,N);
+      this->memManager_->free(iWORK_,N);
+      return;
+    }
 
     if(this->nTCS_ == 1 && this->isClosedShell){
       this->fockA_->setZero();

@@ -14,6 +14,7 @@ option(BUILD_LA   "Build LAPACK and BLAS locally" OFF)
 option(BUILD_LIBINT "Build Libint via cmake" ON)
 option(CQ_ENABLE_ATLAS "Whether or not to search for ATLAS" OFF)
 option(CQ_ENABLE_MPI "Enable MPI Parallelism" OFF)
+option(CQ_ENABLE_LIBXC "Enable LibXC for DFT calculations" ON)
 
 # Check for C++11
 include(CheckCXXCompilerFlag)

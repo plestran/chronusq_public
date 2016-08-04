@@ -17,6 +17,9 @@ job       = SCF
 basis     = sto3g.gbs
 ints			= incore
 
+[SCF]
+guess=CORE
+
 #
 #  Misc Settings
 #
