@@ -18,8 +18,12 @@ basis     = sto3g.gbs
 ints			= direct
 exchange  = Slater
 
+[SCF]
+guess=CORE
+#DIIS = False
+
 #
 #  Misc Settings
 #
 [Misc]
-nsmp = 2
+nsmp = 7

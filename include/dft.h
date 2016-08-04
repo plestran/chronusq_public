@@ -1,4 +1,7 @@
-#include<global.h>
+#include <global.h>
+#ifdef CQ_ENABLE_LIBXC
+#include <xc.h>
+#endif
 #ifndef INCLUDED_DFT
 #define INCLUDED_DFT
 class DFTFunctional{
@@ -6,12 +9,25 @@ public:
   double scalingFactor;    //< Hybrid Scaling
   double epsScreen;        //< screening 
 
+#ifdef CQ_ENABLE_LIBXC
+  xc_func_type func;
+#endif
+
   std::string name;
 
   DFTFunctional(double X = 1.0, double eps = 1e-10){
+#ifdef CQ_ENABLE_LIBXC
+  xc_func_init(&this->func,XC_LDA_X,XC_POLARIZED);
+#endif
     this->scalingFactor = X;
     this->epsScreen = eps;
   };
+
+  ~DFTFunctional(){
+#ifdef CQ_ENABLE_LIBXC
+     xc_func_end(&func);
+#endif
+   };
 
   struct DFTInfo {
     double eps;
