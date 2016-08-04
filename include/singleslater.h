@@ -47,6 +47,20 @@ struct SCFConvergence {
 };
 
 template<typename T>
+class KernelIntegrand {
+  typedef Eigen::Matrix<T,Dynamic,Dynamic> TMatrix;
+  public:
+  TMatrix VXCA;
+  TMatrix VXCB;
+  double Energy;
+
+  KernelIntegrand(size_t N) : VXCA(N,N), VXCB(N,N), Energy(0.0){ 
+    VXCA.setZero();
+    VXCB.setZero();
+  };
+};
+
+template<typename T>
 class SingleSlater : public Quantum<T> {
   typedef Eigen::Matrix<T,Dynamic,Dynamic,ColMajor> TMatrix;
   typedef Eigen::Map<TMatrix> TMap;
@@ -86,10 +100,10 @@ class SingleSlater : public Quantum<T> {
   std::unique_ptr<TMap>  NBSqScratch2_;
 
   // Internal Storage
-  std::unique_ptr<TMatrix>  coulombA_;   ///< deprecated 
-  std::unique_ptr<TMatrix>  coulombB_;   ///< deprecated 
-  std::unique_ptr<TMatrix>  exchangeA_;  ///< deprecated 
-  std::unique_ptr<TMatrix>  exchangeB_;  ///< deprecated 
+  std::unique_ptr<TMap>  coulombA_;   ///< deprecated 
+  std::unique_ptr<TMap>  coulombB_;   ///< deprecated 
+  std::unique_ptr<TMap>  exchangeA_;  ///< deprecated 
+  std::unique_ptr<TMap>  exchangeB_;  ///< deprecated 
 
   // Fock Matrix
   std::unique_ptr<TMap>  fockA_;      ///< Alpha or Full (TCS) Fock Matrix
@@ -658,8 +672,8 @@ public:
   inline TMap* moB()                  { return this->moB_.get();      };
   inline TMap* vXA()                  { return this->vXA_.get();      };
   inline TMap* vXB()                  { return this->vXB_.get();      };
-  inline TMap* vCorA()                { return this->vCorA_.get();    };
-  inline TMap* vCorB()                { return this->vCorB_.get();    };
+//inline TMap* vCorA()                { return this->vCorA_.get();    };
+//inline TMap* vCorB()                { return this->vCorB_.get();    };
   inline RealMap* epsA()              { return this->epsA_.get();     };
   inline RealMap* epsB()              { return this->epsB_.get();     };
   inline TMap* PTA()                  { return this->PTA_.get();      };
@@ -669,7 +683,7 @@ public:
   inline Molecule     * molecule()       { return this->molecule_;       };
   inline FileIO       * fileio()         { return this->fileio_;         };
   inline AOIntegrals  * aointegrals()    { return this->aointegrals_;    };
-  inline TwoDGrid     * twodgrid()       { return this->twodgrid_;       };
+//inline TwoDGrid     * twodgrid()       { return this->twodgrid_;       };
   inline std::string SCFType()           { return this->SCFType_;        };
   inline int         guess()             { return this->guess_;          };
 
@@ -853,17 +867,6 @@ public:
   void gatherOrthoDen();
   
 };
-
-#include <singleslater/singleslater_alloc.h>
-#include <singleslater/singleslater_guess.h>
-#include <singleslater/singleslater_print.h>
-#include <singleslater/singleslater_fock.h>
-#include <singleslater/singleslater_misc.h>
-#include <singleslater/singleslater_scf.h>
-#include <singleslater/singleslater_diis.h>
-#include <singleslater/singleslater_properties.h>
-//#include <singleslater_dft.h>
-
 
 } // namespace ChronusQ
 #endif

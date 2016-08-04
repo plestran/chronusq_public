@@ -16,9 +16,6 @@ public:
   std::string name;
 
   DFTFunctional(double X = 1.0, double eps = 1e-10){
-#ifdef CQ_ENABLE_LIBXC
-  xc_func_init(&this->func,XC_LDA_X,XC_POLARIZED);
-#endif
     this->scalingFactor = X;
     this->epsScreen = eps;
   };

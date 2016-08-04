@@ -14,7 +14,7 @@ option(BUILD_LA   "Build LAPACK and BLAS locally" OFF)
 option(BUILD_LIBINT "Build Libint via cmake" ON)
 option(CQ_ENABLE_ATLAS "Whether or not to search for ATLAS" OFF)
 option(CQ_ENABLE_MPI "Enable MPI Parallelism" OFF)
-option(CQ_ENABLE_LIBXC "Enable LibXC for DFT calculations" ON)
+option(CQ_ENABLE_LIBXC "Enable LibXC for DFT calculations" OFF)
 
 # Check for C++11
 include(CheckCXXCompilerFlag)
@@ -163,8 +163,10 @@ pkg_check_modules(LIBINT2 libint2)
 link_directories("${LIBINT2_LIBRARY_DIRS}")
 include_directories("${LIBINT2_INCLUDE_DIRS}")
 
-pkg_check_modules(LIBXC libxc)
-link_directories("${LIBXC_LIBRARY_DIRS}")
+if(CQ_ENABLE_LIBXC)
+  pkg_check_modules(LIBXC libxc)
+  link_directories("${LIBXC_LIBRARY_DIRS}")
+endif()
 
 
 # Optinally build BLAS and LAPACK

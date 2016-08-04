@@ -23,19 +23,6 @@
  *    E-Mail: xsli@uw.edu
  *  
  */
-template<typename T>
-class KernelIntegrand {
-  typedef Eigen::Matrix<T,Dynamic,Dynamic> TMatrix;
-  public:
-  TMatrix VXCA;
-  TMatrix VXCB;
-  double Energy;
-
-  KernelIntegrand(size_t N) : VXCA(N,N), VXCB(N,N), Energy(0.0){ 
-    VXCA.setZero();
-    VXCB.setZero();
-  };
-};
 
 /********************************
  * Form Perturbation Tensor (G) *

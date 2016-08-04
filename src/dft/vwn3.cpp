@@ -26,6 +26,13 @@ DFTFunctional(X,eps){
   this->popVWNconst();
 
   this->name = "VWN III";
+#ifdef CQ_ENABLE_LIBXC
+  // This is a dummy initialization to VWN 5
+  // FIXME: LibXC claims to have a bunch of different
+  // VWN functionals, maybe check to see if one of them
+  // is what we call VWN 3?
+  xc_func_init(&this->func,XC_LDA_C_VWN,XC_POLARIZED);
+#endif
 };
 
 void VWNIII::popVWNconst(){

@@ -88,6 +88,7 @@ void SingleSlater<T>::CDIIS4(int NDIIS){
   T   *WORK  = this->memManager_->template malloc<T>(LWORK);
 
   TMatrix Bp(B);
+  bool InvFail(false);
   if(typeid(T).hash_code() == typeid(dcomplex).hash_code()){
     int LRWORK = 3*N;
     double   *RWORK = this->memManager_->
@@ -96,6 +97,8 @@ void SingleSlater<T>::CDIIS4(int NDIIS){
     // Linear Solve
     zgesv_(&N,&NRHS,reinterpret_cast<dcomplex*>(B.data()),&N,
         iPiv,reinterpret_cast<dcomplex*>(coef),&N,&INFO);
+
+    InvFail = (INFO != 0);
 
     // Obtain condition number from LU given from ZGESV
     zgecon_(&NORM,&N,reinterpret_cast<dcomplex*>(B.data()),&N,
@@ -107,6 +110,8 @@ void SingleSlater<T>::CDIIS4(int NDIIS){
     // Linear Solve
     dgesv_(&N,&NRHS,reinterpret_cast<double*>(B.data()),&N,
         iPiv,reinterpret_cast<double*>(coef),&N,&INFO);
+
+    InvFail = (INFO != 0);
 
     // Obtain condition number from LU given from DGESV
     dgecon_(&NORM,&N,reinterpret_cast<double*>(B.data()),&N,
@@ -141,7 +146,8 @@ void SingleSlater<T>::CDIIS4(int NDIIS){
     prettyPrint(this->fileio_->out,COEFF,"New CDIIS SOULTION");
   }
 */
-    if(std::abs(RCOND) < std::numeric_limits<double>::epsilon()){
+//  if(std::abs(RCOND) < std::numeric_limits<double>::epsilon()){
+    if(InvFail){
       this->memManager_->free(B.data(),N*N);
       this->memManager_->free(coef,N);
       this->memManager_->free(iPiv,N);

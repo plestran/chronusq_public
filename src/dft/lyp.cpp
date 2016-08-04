@@ -12,6 +12,9 @@ DFTFunctional(X,eps){
   this-> d = 0.349;
 
   this->name = "LYP";
+#ifdef CQ_ENABLE_LIBXC
+  xc_func_init(&this->func,XC_GGA_C_LYP,XC_POLARIZED);
+#endif
 };
 
 

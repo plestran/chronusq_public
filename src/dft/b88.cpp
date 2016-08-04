@@ -11,6 +11,9 @@ DFTFunctional(X,eps){
 //  cout << "B88 object created " <<endl;
 
   this->name = "B88";
+#ifdef CQ_ENABLE_LIBXC
+  xc_func_init(&this->func,XC_GGA_X_B88,XC_POLARIZED);
+#endif
 };
 
 double BEightEight::g0B88 (double x, double &sinhx, double &bx){
@@ -50,6 +53,7 @@ DFTFunctional::DFTInfo BEightEight::eval(const double &rhoA, const double &rhoB)
 
 DFTFunctional::DFTInfo BEightEight::eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB, const double &gammaBB){
   DFTFunctional::DFTInfo info;
+#ifndef CQ_ENABLE_LIBXC
   double spindensity   = (rhoA - rhoB); 
   spindensity         /= (rhoA + rhoB);
   double rhoA1ov3 = std::pow(rhoA,this->d1over3);
@@ -97,6 +101,22 @@ DFTFunctional::DFTInfo BEightEight::eval(const double &rhoA, const double &rhoB,
 //  cout <<  "ddgammaAA" <<info.ddgammaAA << endl ;
 //  cout <<  "ddgammaBB" <<info.ddgammaBB << endl ;
   info.ddgammaAB  = 0.0;
+#else
+  std::array<double,2> rho = {rhoA,rhoB};
+  std::array<double,3> sigma = {gammaAA,gammaAB,gammaBB};
+  std::array<double,2> vrho;
+  std::array<double,3> vsigma;
+  xc_gga_exc_vxc(&this->func,1,&rho[0],&sigma[0],&info.eps,&vrho[0],
+    &vsigma[0]);
+
+  info.ddrhoA = vrho[0];
+  info.ddrhoB = vrho[1];
+  info.ddgammaAA = vsigma[0];
+  info.ddgammaAB = vsigma[1];
+  info.ddgammaBB = vsigma[2];
+
+  info.eps *= (rhoA + rhoB); //?
+#endif
   return info;
 };
 
