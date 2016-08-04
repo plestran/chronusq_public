@@ -163,8 +163,10 @@ pkg_check_modules(LIBINT2 libint2)
 link_directories("${LIBINT2_LIBRARY_DIRS}")
 include_directories("${LIBINT2_INCLUDE_DIRS}")
 
-pkg_check_modules(LIBXC libxc)
-link_directories("${LIBXC_LIBRARY_DIRS}")
+if(CQ_ENABLE_LIBXC)
+  pkg_check_modules(LIBXC libxc)
+  link_directories("${LIBXC_LIBRARY_DIRS}")
+endif()
 
 
 # Optinally build BLAS and LAPACK
