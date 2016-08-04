@@ -228,3 +228,60 @@ SCFConvergence SingleSlater<T>::evalConver3(){
 
   return CONVER;
 };
+
+template<typename T>
+void SingleSlater<T>::mixOrbitalsSCF(){
+  this->mixOrbitals2C();
+  this->mixOrbitalsComplex();
+}
+
+template<typename T>
+void SingleSlater<T>::mixOrbitals2C(){
+  auto nO = this->nAE_ + this->nBE_;
+  if(this->nTCS_ != 2) return;
+  this->fileio_->out << "** Mixing Alpha-Beta Orbitals for 2C Guess **" << endl;
+  TVec HOMOA,LUMOB;
+  int indxHOMOA = -1, indxLUMOB = -1;
+  auto nOrb = this->nBasis_;
+  double maxPercentNonZeroAlpha = 0;
+
+  for(auto i = nO-1; i >= 0; i--){
+    auto nNonZeroAlpha = 0;
+    for(auto j = 0; j < this->nTCS_*this->nBasis_; j+=2){
+      auto aComp = (*this->moA_)(j,i);
+      auto bComp = (*this->moA_)(j+1,i);
+      if(std::norm(aComp) > 1e-12 && std::norm(bComp) < 1e-12) nNonZeroAlpha++;
+    }
+    double percentNonZeroAlpha = (double)nNonZeroAlpha/(double)nOrb;
+    if(percentNonZeroAlpha > maxPercentNonZeroAlpha){
+      maxPercentNonZeroAlpha = percentNonZeroAlpha;
+      indxHOMOA = i;
+    }
+  }
+
+  double maxPercentNonZeroBeta = 0;
+  for(auto i = nO; i < this->nTCS_*this->nBasis_; i++){
+    auto nNonZeroBeta = 0;
+    for(auto j = 1; j < this->nTCS_*this->nBasis_; j+=2){
+      auto aComp = (*this->moA_)(j-1,i);
+      auto bComp = (*this->moA_)(j,i);
+      if(std::norm(bComp) > 1e-12 && std::norm(aComp) < 1e-12) nNonZeroBeta++;
+    }
+    double percentNonZeroBeta = (double)nNonZeroBeta/(double)nOrb;
+    if(percentNonZeroBeta > maxPercentNonZeroBeta){
+      maxPercentNonZeroBeta = percentNonZeroBeta;
+      indxLUMOB = i;
+    }
+  }
+
+  if(indxHOMOA == -1 || indxLUMOB == -1){
+    this->fileio_->out 
+      << "TCS orbital swap failed to find suitable Alpha-Beta pair" << endl;
+    return;
+  }
+  
+  HOMOA = this->moA_->col(indxHOMOA) ;
+  LUMOB = this->moA_->col(indxLUMOB) ;
+  this->moA_->col(indxHOMOA) = std::sqrt(0.5) * (HOMOA + LUMOB);
+  this->moA_->col(indxLUMOB) = std::sqrt(0.5) * (HOMOA - LUMOB);
+}

@@ -27,10 +27,6 @@
 using ChronusQ::FileIO;
 using ChronusQ::SingleSlater;
 
-//----------------------------------------//
-// do the SCF                             //
-// Sajan                                  //
-//----------------------------------------//
 namespace ChronusQ {
 template<>
 void SingleSlater<double>::formNO(){
@@ -107,6 +103,7 @@ void SingleSlater<double>::evalConver(int iter){
 #endif
 }
 
+/*
 template<>
 void SingleSlater<double>::mixOrbitalsSCF(){
   if(this->nTCS_ != 2) return;
@@ -164,6 +161,10 @@ void SingleSlater<double>::mixOrbitalsSCF(){
   this->memManager_->free(HOMOA.data(),this->nTCS_*this->nBasis_);
   this->memManager_->free(LUMOB.data(),this->nTCS_*this->nBasis_);
 }
+*/
+
+template<>
+void SingleSlater<double>::mixOrbitalsComplex(){ };
 
 template<>
 void SingleSlater<double>::diagFock2(){
