@@ -267,17 +267,6 @@ void SingleSlater<double>::formVXC_new(){
     }else if(rhoT < this->epsScreen){
      return;
     }
-//A    if(NDer > 0 ) {
-//      if(gammaAA    <= 0.0 || gammaBB    <= 0.0 || gammaAB    <= 0.0) {
-//A        if(std::abs(gammaAA)    <= this->epsScreen || std::abs(gammaBB)    <= this->epsScreen || std::abs(gammaAB)    <= this->epsScreen) {
-//A          cout << " HERE GGA " << endl;
-//        if(std::abs(gammaAA)    <= 1.0e-12 || std::abs(gammaBB)    <= 1.0e-12 || std::abs(gammaAB)    <= 1.0e-12) {
-//A          return;
-//        }else{ 
-//          CErr("Numerical noise in the density gradient");
-//        }
-//A      }
-//A    }
     // Evaluate density functional
     DFTFunctional::DFTInfo kernelXC;
     for(auto i = 0; i < this->dftFunctionals_.size(); i++){
@@ -412,6 +401,7 @@ void SingleSlater<double>::formVXC_new(){
       if(this->basisset_->mapSh2Cen(iSh)-1 != iAtm) continue;
       if(this->basisset_->radCutSh()[iSh] > atomRadCutoff[iAtm])
         atomRadCutoff[iAtm] = this->basisset_->radCutSh()[iSh];
+//A        atomRadCutoff[iAtm] = 1.e100;
     }
   } 
   for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
