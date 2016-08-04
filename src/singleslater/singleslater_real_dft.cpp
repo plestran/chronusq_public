@@ -173,7 +173,7 @@ void SingleSlater<double>::formVXC_new(){
       T3 += Newend - Newstart;
     }
 
-    if(S1Norm < this->epsScreen) {NSkip4++; return;}
+    if(this->screenVxc && S1Norm < this->epsScreen) {NSkip4++; return;}
 
 
     double rhoT(0.0);
@@ -206,9 +206,14 @@ void SingleSlater<double>::formVXC_new(){
           int jSt = this->basisset_->mapSh2Bf(jShell);
           for(auto jBf = jSt; jBf < (jSt + jSz); jBf++){
             Pt = fact * DENT[jBf];
-            if(std::abs(Pt) > this->epsScreen){
-              Tt += Pt * SCRATCH1DATA[jBf];
-            }
+            if (this->screenVxc) {
+              if(std::abs(Pt) > this->epsScreen){
+                Tt += Pt * SCRATCH1DATA[jBf];
+              } 
+            } else {
+               cout << "SCREEN OFF 2" <<endl;
+               Tt += Pt * SCRATCH1DATA[jBf];
+            } //Screening
           } // jBf
         } // jShell      
 
@@ -218,9 +223,14 @@ void SingleSlater<double>::formVXC_new(){
             int jSt = this->basisset_->mapSh2Bf(jShell);
             for(auto jBf = jSt; jBf < (jSt + jSz); jBf++){
               Ps = fact * DENS[jBf];
-              if( std::abs(Ps) > this->epsScreen){
-              Ts += Ps * SCRATCH1DATA[jBf];
-              }
+              if (this->screenVxc) {
+                if( std::abs(Ps) > this->epsScreen){
+                  Ts += Ps * SCRATCH1DATA[jBf];
+                }
+              } else {
+                cout << "SCREEN OFF 3" <<endl;
+                Ts += Ps * SCRATCH1DATA[jBf];
+              }//Screening
             } // jBf
           } // jShell      
         } //UKS
@@ -259,14 +269,14 @@ void SingleSlater<double>::formVXC_new(){
     
 //these if statements prevent numerical instability with zero guesses
     if(rhoT    <= 0.0 ) {
-      if((std::abs(rhoT)) <= this->epsScreen) {
+      if((std::abs(rhoT)) <= std::numeric_limits<double>::epsilon()) {
         return;
       }else{ 
         CErr("Numerical noise in the density");
       }
-    }else if(rhoT < this->epsScreen){
+    }else if(this->screenVxc && rhoT < this->epsScreen){
      return;
-    }
+    } //HERE
     // Evaluate density functional
     DFTFunctional::DFTInfo kernelXC;
     for(auto i = 0; i < this->dftFunctionals_.size(); i++){

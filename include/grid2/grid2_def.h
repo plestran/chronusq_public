@@ -40,13 +40,17 @@ protected:
     bool haveGPs_;
     bool breakInt_;
     double screenTol_;
+    bool screenON_; // Turn ON/OFF Screen
 public:
     Grid2(size_t npts = 0, double screenTol = 0.0, bool onTheFly = true) : nPts_(npts),
-      onTheFly_(onTheFly), haveGPs_(false), breakInt_(false), screenTol_(screenTol){ 
+      onTheFly_(onTheFly), haveGPs_(false), breakInt_(false), screenTol_(screenTol),
+      screenON_(true){ 
       
     };
 
     virtual ~Grid2(){ };
+
+    inline void SwitchScreen(){this->screenON_ = !this->screenON_;}
 
     virtual IntegrationPoint operator[](size_t) = 0;
     size_t npts(){return this->nPts_;};
