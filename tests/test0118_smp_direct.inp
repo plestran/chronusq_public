@@ -18,8 +18,8 @@ basis     = sto3g.gbs
 ints			= direct
 exchange  = Slater
 
-[SCF]
-guess=CORE
+#[SCF]
+#guess=CORE
 #DIIS = False
 
 #
