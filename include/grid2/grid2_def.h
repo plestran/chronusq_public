@@ -50,7 +50,7 @@ public:
 
     virtual ~Grid2(){ };
 
-    inline void SwitchScreen(){this->screenON_ = !this->screenON_;}
+    inline void SwitchScreen(){this->screenON_ = false;}
 
     virtual IntegrationPoint operator[](size_t) = 0;
     size_t npts(){return this->nPts_;};

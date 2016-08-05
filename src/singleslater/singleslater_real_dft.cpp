@@ -112,24 +112,27 @@ void SingleSlater<double>::formVXC_new(){
 
     if(doTimings) Newstart = std::chrono::high_resolution_clock::now();
     // For each new sphere, determine list of close basis shells
-    if(pt.I == 0) {
-      closeShells.clear();
-      double DX = (*this->molecule_->cart())(0,iAtm) - bg::get<0>(GP);
-      double DY = (*this->molecule_->cart())(1,iAtm) - bg::get<1>(GP);
-      double DZ = (*this->molecule_->cart())(2,iAtm) - bg::get<2>(GP);
-
-      double R = DX*DX + DY*DY + DZ*DZ;
-      R = std::sqrt(R);
-
-      for(auto jAtm = 0; jAtm < this->molecule_->nAtoms(); jAtm++){
-        double RAB = (*this->molecule_->rIJ())(iAtm,jAtm);
-        double DIST = std::abs(RAB - R);
-        for(auto iSh = 0; iSh < this->basisset_->nShell(); iSh++){
-          if(this->basisset_->mapSh2Cen(iSh)-1 != jAtm) continue;
-          if(this->basisset_->radCutSh()[iSh] > DIST)
-            closeShells.push_back(iSh);
+    if(this->screenVxc){
+      if(pt.I == 0) {
+        closeShells.clear();
+        double DX = (*this->molecule_->cart())(0,iAtm) - bg::get<0>(GP);
+        double DY = (*this->molecule_->cart())(1,iAtm) - bg::get<1>(GP);
+        double DZ = (*this->molecule_->cart())(2,iAtm) - bg::get<2>(GP);
+  
+        double R = DX*DX + DY*DY + DZ*DZ;
+        R = std::sqrt(R);
+  
+        for(auto jAtm = 0; jAtm < this->molecule_->nAtoms(); jAtm++){
+          double RAB = (*this->molecule_->rIJ())(iAtm,jAtm);
+          double DIST = std::abs(RAB - R);
+          for(auto iSh = 0; iSh < this->basisset_->nShell(); iSh++){
+            if(this->basisset_->mapSh2Cen(iSh)-1 != jAtm) continue;
+            if(this->basisset_->radCutSh()[iSh] > DIST)
+              closeShells.push_back(iSh);
+          }
         }
       }
+    }else{
     }
     if(doTimings){ 
       Newend = std::chrono::high_resolution_clock::now();
@@ -406,19 +409,25 @@ void SingleSlater<double>::formVXC_new(){
 
   std::vector<double> atomRadCutoff(this->molecule_->nAtoms(),0.0);
 
-  for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
-    for(auto iSh = 0; iSh < this->basisset_->nShell(); iSh++){
-      if(this->basisset_->mapSh2Cen(iSh)-1 != iAtm) continue;
-      if(this->basisset_->radCutSh()[iSh] > atomRadCutoff[iAtm])
-        atomRadCutoff[iAtm] = this->basisset_->radCutSh()[iSh];
+  if (this->screenVxc) {
+    for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
+      for(auto iSh = 0; iSh < this->basisset_->nShell(); iSh++){
+        if(this->basisset_->mapSh2Cen(iSh)-1 != iAtm) continue;
+        if(this->basisset_->radCutSh()[iSh] > atomRadCutoff[iAtm])
+          atomRadCutoff[iAtm] = this->basisset_->radCutSh()[iSh];
 //A        atomRadCutoff[iAtm] = 1.e100;
-    }
-  } 
+      }
+    } 
+  }
   for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
     AGrid.center() = iAtm;
 //    cout << "Cutoff Rad = " << atomRadCutoff[iAtm] << "for iAt= " << iAtm << endl;
-    AGrid.setRadCutOff(atomRadCutoff[iAtm]);
-    AGrid.findNearestNeighbor();
+    if (this->screenVxc) {
+      AGrid.setRadCutOff(atomRadCutoff[iAtm]);
+      AGrid.findNearestNeighbor();
+    } else {
+      AGrid.SwitchScreen();
+    }
     AGrid.scalingFactor()=0.5 *
       elements[this->molecule_->index(iAtm)].sradius/phys.bohr;
 
