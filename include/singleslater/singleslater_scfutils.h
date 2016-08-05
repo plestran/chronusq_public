@@ -222,7 +222,7 @@ SCFConvergence SingleSlater<T>::evalConver3(){
   if(this->nTCS_ == 1 && !this->isClosedShell)
     this->isConverged = this->isConverged && PBRMS < this->denTol_;
 
-  this->isConverged = this->isConverged || EDelta < this->eneTol_*1e-3;
+//this->isConverged = this->isConverged || EDelta < this->eneTol_*1e-3;
   
   if(this->isPrimary) this->writeSCFFiles();
 
