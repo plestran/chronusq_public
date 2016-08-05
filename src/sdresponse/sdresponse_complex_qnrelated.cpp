@@ -251,7 +251,7 @@ void SDResponse<dcomplex>::reoptWF(){
    (*this->singleSlater_->moA()) *= ExpAComplex;
    this->singleSlater_->formDensity();
    this->singleSlater_->formFock();
-   this->singleSlater_->SCF2();
+   this->singleSlater_->SCF3();
    QuasiNewton<dcomplex> dav(this);
    dav.run(this->fileio_->out);
  //CErr();

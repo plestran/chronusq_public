@@ -135,7 +135,7 @@ basis.findBasisFile("6-31G");
   singleSlater.formGuess();
   singleSlater.formFock();
   singleSlater.computeEnergy();
-  singleSlater.SCF2();
+  singleSlater.SCF3();
   singleSlater.computeProperties();
   singleSlater.printProperties();
 

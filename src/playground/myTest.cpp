@@ -189,7 +189,7 @@ int main() {
     singleSlater.formGuess();
     singleSlater.formFock();
     singleSlater.computeEnergy();
-    singleSlater.SCF2();
+    singleSlater.SCF3();
     singleSlater.computeProperties();
     singleSlater.printProperties();
 

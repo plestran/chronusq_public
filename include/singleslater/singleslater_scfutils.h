@@ -159,16 +159,6 @@ void SingleSlater<T>::cpyAOtoOrthoDen(){
       scattered.emplace_back(*this->onePDMOrthoMx_);
       Quantum<T>::spinScatter(*this->onePDMA_,scattered);
     }
-
-    /*
-    // Copy
-    (*this->onePDMOrthoScalar_) = (*this->onePDMScalar_);
-    (*this->onePDMOrthoMz_)     = (*this->onePDMMz_);
-    if(this->nTCS_ == 2) {
-      (*this->onePDMOrthoMy_)     = (*this->onePDMMy_);
-      (*this->onePDMOrthoMx_)     = (*this->onePDMMx_);
-    }
-    */
   }
 };
 

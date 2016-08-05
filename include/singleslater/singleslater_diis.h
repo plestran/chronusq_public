@@ -320,11 +320,8 @@ void SingleSlater<T>::genDIISCom(int iter){
     }
   }
 
-//this->EScalarDIIS_->write(this->NBSqScratch_->data(),H5PredType<T>(),
-//  memSpace,E);
   this->writeDIIS(this->EScalarDIIS_,iter % this->nDIISExtrap_,
     this->NBSqScratch_->data());
-  cout << this->NBSqScratch_->norm() << endl;
 
   // Magnetization part
   // E(K) = [F(S),D(K)] + [F(K),D(S)] + i*({F(K+1),D(K+2)} - {F(K+2),D(K+1)})
