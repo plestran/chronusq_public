@@ -42,6 +42,8 @@ void SingleSlater<T>::initSCFMem3(){
     this->lambdaMem_ = this->memManager_->template malloc<T>(NSQ);
     this->PNOMem_    = this->memManager_->template malloc<T>(NSQ);
     this->occNumMem_ = this->memManager_->template malloc<double>(NTCSxNBASIS);
+    this->doDIIS = false;
+    cout << "IM HERE IN CUHF" << endl;
   }
 
    

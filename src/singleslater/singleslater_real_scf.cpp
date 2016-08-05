@@ -36,18 +36,24 @@ void SingleSlater<double>::formNO(){
 
   RealMap P(this->PNOMem_,this->nBasis_,this->nBasis_);
 
+/*
   P = 0.5 * (*this->aointegrals_->ortho2_) * (*this->onePDMA_) * 
     (*this->aointegrals_->ortho2_);
 
   if(!this->isClosedShell)
     P += 0.5 * (*this->aointegrals_->ortho2_) * (*this->onePDMB_) * 
       (*this->aointegrals_->ortho2_);
+*/
+  this->aointegrals_->Ortho2Trans(*this->onePDMScalar_,P);
+  P *= 0.5;
 
   int LWORK  = 5*this->nBasis_;
   double *WORK  = this->memManager_->malloc<double>(LWORK);
 
   dsyev_(&JOBZ,&UPLO,&this->nBasis_,this->PNOMem_,&this->nBasis_,
       this->occNumMem_,WORK,&LWORK,&INFO);
+  RealMap OCC(this->occNumMem_,this->nBasis_,1);
+  prettyPrint(cout,OCC,"OCC");
 
   this->memManager_->free(WORK,LWORK);
 
@@ -192,9 +198,14 @@ void SingleSlater<double>::fockCUHF() {
   int virtualSpace = this->nBasis_ - coreSpace - activeSpace;
 
   // DelF = X * (F(A) - F(B)) * X
+  /*
   (*this->NBSqScratch_) = 0.5 * (*this->aointegrals_->ortho1_) *
     (*this->fockMz_);
   DelF = (*this->NBSqScratch_) * (*this->aointegrals_->ortho1_);
+  */
+
+  this->aointegrals_->Ortho1Trans(*this->fockMz_,DelF);
+  (*this->fockMz_) *= 0.5;
 
   // DelF = C(NO)^\dagger * DelF * C(NO) (Natural Orbitals)
   (*this->NBSqScratch_) = P.transpose() * DelF;
@@ -210,14 +221,16 @@ void SingleSlater<double>::fockCUHF() {
   (*this->NBSqScratch_) = P * Lambda;
   Lambda = (*this->NBSqScratch_) * P.transpose();
 
+/*
   (*this->NBSqScratch_) = (*this->aointegrals_->ortho2_) * Lambda;
   Lambda = (*this->NBSqScratch_) * (*this->aointegrals_->ortho2_);
+*/
+  this->aointegrals_->Ortho2Trans(Lambda,Lambda);
 
-  (*this->fockA_) += Lambda;
-  (*this->fockB_) -= Lambda;
+//(*this->fockA_) += Lambda;
+//(*this->fockB_) -= Lambda;
 
-  (*this->fockScalar_) = (*this->fockA_) + (*this->fockB_);
-  (*this->fockMz_)     = (*this->fockA_) - (*this->fockB_);
+  (*this->fockMz_) += 2*Lambda;
 };
 
 

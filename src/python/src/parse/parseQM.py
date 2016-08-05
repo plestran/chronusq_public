@@ -207,11 +207,13 @@ def handleReference(workers,settings):
     isRest = True
   # U -> Unrestricted
   elif refStr[0] == 'U':
+    print 'HERE 1'
     print "Is Unrestricted"
     workers["CQSingleSlater"].setRef(chronusQ.Reference.UHF)
     workers["CQSingleSlater"].isClosedShell = False
   # CU -> Constrained Unrestricted (Scuseria)
-  elif refStr[0:1] == 'CU':
+  elif refStr[:2] == "CU":
+    print 'HERE'
     print "Is Constrained Unrestricted"
     workers["CQSingleSlater"].setRef(chronusQ.Reference.CUHF)
     workers["CQSingleSlater"].isClosedShell = False
@@ -232,6 +234,7 @@ def handleReference(workers,settings):
     isRest = True
   # If left to determine, non-unit multiplicity -> Unrestricted
   else:
+    print 'HERE 2'
     print "Is Unrestricted"
     workers["CQSingleSlater"].setRef(chronusQ.Reference.UHF)
     workers["CQSingleSlater"].isClosedShell = False
