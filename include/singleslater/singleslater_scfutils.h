@@ -127,17 +127,17 @@ void SingleSlater<T>::gatherOrthoFock(){
 template<typename T>
 void SingleSlater<T>::unOrthoDen3(){
   if(this->nTCS_ == 1 && this->isClosedShell){
-    this->aointegrals_->Ortho1Trans(
+    this->aointegrals_->Ortho1TransT(
       *this->onePDMOrthoA_,*this->onePDMA_);
   } else {
-    this->aointegrals_->Ortho1Trans(
+    this->aointegrals_->Ortho1TransT(
       *this->onePDMOrthoScalar_,*this->onePDMScalar_);
-    this->aointegrals_->Ortho1Trans(
+    this->aointegrals_->Ortho1TransT(
       *this->onePDMOrthoMz_,*this->onePDMMz_);
     if(this->nTCS_ == 2){
-      this->aointegrals_->Ortho1Trans(
+      this->aointegrals_->Ortho1TransT(
         *this->onePDMOrthoMy_,*this->onePDMMx_);
-      this->aointegrals_->Ortho1Trans(
+      this->aointegrals_->Ortho1TransT(
         *this->onePDMOrthoMy_,*this->onePDMMx_);
     }
   }
