@@ -27,10 +27,6 @@
 using ChronusQ::FileIO;
 using ChronusQ::SingleSlater;
 
-//----------------------------------------//
-// do the SCF                             //
-// Sajan                                  //
-//----------------------------------------//
 namespace ChronusQ {
 template<>
 void SingleSlater<double>::formNO(){
@@ -108,62 +104,7 @@ void SingleSlater<double>::evalConver(int iter){
 }
 
 template<>
-void SingleSlater<double>::mixOrbitalsSCF(){
-  if(this->nTCS_ != 2) return;
-
-  this->fileio_->out << 
-    "** Mixing Alpha-Beta Orbitals for 2C Guess **" << endl;
-
-  auto nO = this->nAE_ + this->nBE_;
-  int indxHOMOA = -1, indxLUMOB = -1;
-
-  auto nOrb = this->nBasis_;
-  double maxPercentNonZeroAlpha = 0;
-
-  for(auto i = nO-1; i >= 0; i--){
-    auto nNonZeroAlpha = 0;
-    for(auto j = 0; j < this->nTCS_*this->nBasis_; j+=2){
-      auto aComp = (*this->moA_)(j,i);
-      auto bComp = (*this->moA_)(j+1,i);
-      if(std::abs(aComp) > 1e-10 && std::abs(bComp) < 1e-10) nNonZeroAlpha++;
-    }
-    double percentNonZeroAlpha = (double)nNonZeroAlpha/(double)nOrb;
-    if(percentNonZeroAlpha > maxPercentNonZeroAlpha){
-      maxPercentNonZeroAlpha = percentNonZeroAlpha;
-      indxHOMOA = i;
-    }
-  }
-
-  double maxPercentNonZeroBeta = 0;
-  for(auto i = nO; i < this->nTCS_*this->nBasis_; i++){
-    auto nNonZeroBeta = 0;
-    for(auto j = 1; j < this->nTCS_*this->nBasis_; j+=2){
-      auto aComp = (*this->moA_)(j-1,i);
-      auto bComp = (*this->moA_)(j,i);
-      if(std::abs(bComp) > 1e-6 && std::abs(aComp) < 1e-6) nNonZeroBeta++;
-    }
-    double percentNonZeroBeta = (double)nNonZeroBeta/(double)nOrb;
-    if(percentNonZeroBeta > maxPercentNonZeroBeta){
-      maxPercentNonZeroBeta = percentNonZeroBeta;
-      indxLUMOB = i;
-    }
-  }
-
-  if(indxHOMOA == -1 || indxLUMOB == -1) return;
-  
-  RealVecMap HOMOA(this->memManager_->malloc<double>(
-        this->nTCS_*this->nBasis_),this->nTCS_*this->nBasis_);
-  RealVecMap LUMOB(this->memManager_->malloc<double>(
-        this->nTCS_*this->nBasis_),this->nTCS_*this->nBasis_);
-
-  HOMOA = this->moA_->col(indxHOMOA) ;
-  LUMOB = this->moA_->col(indxLUMOB) ;
-  this->moA_->col(indxHOMOA) = std::sqrt(0.5) * (HOMOA + LUMOB);
-  this->moA_->col(indxLUMOB) = std::sqrt(0.5) * (HOMOA - LUMOB);
-
-  this->memManager_->free(HOMOA.data(),this->nTCS_*this->nBasis_);
-  this->memManager_->free(LUMOB.data(),this->nTCS_*this->nBasis_);
-}
+void SingleSlater<double>::mixOrbitalsComplex(){ };
 
 template<>
 void SingleSlater<double>::diagFock2(){

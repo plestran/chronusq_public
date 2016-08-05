@@ -74,8 +74,10 @@ void SingleSlater<T>::SCF3(){
   this->computeEnergy();
   this->isConverged = false;
   std::size_t iter;
-  this->fileio_->out << "    *** INITIAL GUESS ENERGY = " 
-    << this->totalEnergy << " Eh ***" << endl;
+  if(this->printLevel_ > 0){
+    this->fileio_->out << "    *** INITIAL GUESS ENERGY = " 
+      << this->totalEnergy << " Eh ***" << endl;
+  }
 
   this->formFock();
   for(iter = 0; iter < this->maxSCFIter_; iter++){

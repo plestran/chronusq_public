@@ -136,14 +136,7 @@ void SingleSlater<T>::formFock(){
   if(getRank() == 0) {
     if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
 
-    bool testNew = true;
-    if (this->isDFT){
-
-//    this->formVXC();
-//    if(!testNew) this->formVXC_store();
-//    else         this->formVXC_new();
-      this->formVXC_new();
-    }
+    if (this->isDFT) this->formVXC_new();
   
     if(this->nTCS_ == 1 && this->isClosedShell) {
       this->fockA_->setZero();
@@ -152,28 +145,8 @@ void SingleSlater<T>::formFock(){
       (*this->fockA_) += (*this->PTA_);
       if(this->isDFT){ 
         (*this->fockA_) += (*this->vXA_);
-//      if(!testNew) (*this->fockA_) += (*this->vCorA_);
       }
-    } 
-    else {
-
-    //this->fockA_->setZero();
-    //this->fockA_->real() += (*this->aointegrals_->coreH_);
-    //this->aointegrals_->addElecDipole(*this->fockA_,this->elecField_);
-    //(*this->fockA_) += (*this->PTA_);
-    //if(this->isDFT){ 
-    //  (*this->fockA_) += (*this->vXA_);
-    //  (*this->fockA_) += (*this->vCorA_);
-    //}
-    //this->fockB_->setZero();
-    //this->fockB_->real() += (*this->aointegrals_->coreH_);
-    //this->aointegrals_->addElecDipole(*this->fockB_,this->elecField_);
-    //(*this->fockB_) += (*this->PTB_);
-    //if(this->isDFT){ 
-    //  (*this->fockB_) += (*this->vXB_);
-    //  (*this->fockB_) += (*this->vCorB_);
-    //}
-
+    } else {
       this->fockScalar_->setZero();
       this->fockMz_->setZero();
       this->fockScalar_->real() += (*this->aointegrals_->coreH_);
@@ -203,13 +176,6 @@ void SingleSlater<T>::formFock(){
 
       // FIXME: Needs to ge generalized for the 2C case
       if(this->nTCS_ == 1 && this->isDFT){
-/*
-        if(!testNew) {
-          (*this->fockScalar_) += (*this->vXA_) + (*this->vCorA_);
-          (*this->fockScalar_) += (*this->vXB_) + (*this->vCorB_);
-          (*this->fockMz_)     += (*this->vXA_) + (*this->vCorA_);
-          (*this->fockMz_)     -= (*this->vXB_) + (*this->vCorB_);
-*/
           (*this->fockScalar_) += (*this->vXA_);
           (*this->fockScalar_) += (*this->vXB_);
           (*this->fockMz_)     += (*this->vXA_);
@@ -229,29 +195,15 @@ void SingleSlater<T>::formFock(){
         Quantum<T>::spinGather(*this->fockA_,toGather);
 
       //  prettyPrint(this->fileio_->out,(*this->fockA_)," fockA_ ");
-        }
-
-
-    }
-
-    /*
-    // Add in the electric field component if they are non-zero
-    std::array<double,3> null{{0,0,0}};
-    if(this->elecField_ != null){
-      //this->fileio_->out << "Adding in Electric Field Contribution" << endl;
-      int NB = this->nTCS_*this->nBasis_;
-      int NBSq = NB*NB;
-      int iBuf = 0;
-      for(auto iXYZ = 0; iXYZ < 3; iXYZ++){
-        ConstRealMap mu(&this->aointegrals_->elecDipole_->storage()[iBuf],
-          NB,NB);
-        fockA_->real() += this->elecField_[iXYZ] * mu;
-        if(!this->isClosedShell && this->nTCS_ == 1) 
-          fockB_->real() += this->elecField_[iXYZ] * mu;
-        iBuf += NBSq;
       }
     }
-    */
+
+    // Transform the Fock for CUHF
+    if(this->Ref_ == CUHF) {
+      this->formNO();
+      this->fockCUHF();
+    }
+
     if(this->printLevel_ >= 2) this->printFock(); 
   }
 #ifdef CQ_ENABLE_MPI

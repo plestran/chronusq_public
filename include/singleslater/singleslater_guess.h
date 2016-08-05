@@ -65,6 +65,7 @@ void SingleSlater<T>::COREGuess(){
     prettyPrint(this->fileio_->out,*this->fockOrthoA_,"Initial FOrthoA");
   }
   this->diagFock2();
+  this->mixOrbitalsSCF();
   this->formDensity();
   this->cpyAOtoOrthoDen();
   this->unOrthoDen3();
@@ -194,6 +195,15 @@ void SingleSlater<T>::SADGuess() {
     this->placeAtmDen(atomIndex[iUn],hartreeFockAtom);
  
   } // Loop iUn
+
   this->scaleDen();
   this->scatterDensity();
+  this->formFock();
+  this->orthoFock3();
+  this->diagFock2();
+  this->mixOrbitalsSCF();
+  this->formDensity();
+  this->cpyAOtoOrthoDen();
+  this->unOrthoDen3();
+  this->backTransformMOs();
 };

@@ -865,6 +865,9 @@ public:
   void gatherOrthoFock();
   void gatherFock();
   void gatherOrthoDen();
+
+  void mixOrbitals2C();
+  void mixOrbitalsComplex();
   
 };
 
