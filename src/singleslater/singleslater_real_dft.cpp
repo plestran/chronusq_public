@@ -103,6 +103,8 @@ void SingleSlater<double>::formVXC_new(){
   for(auto iSh = 0; iSh < this->basisset_->nShell(); iSh++)
     shSizes.push_back(this->basisset_->shells(iSh).size());
 
+//  closeShells.resize(this->basisset_->nShell());
+//  std::iota(closeShells.begin(),closeShells.end(),0);
   auto valVxc = [&](std::size_t iAtm, ChronusQ::IntegrationPoint &pt, 
   KernelIntegrand<double> &result) -> void {
 
