@@ -74,6 +74,13 @@ struct RTSettings{
   bool useDefaultSettings;
 };
 
+struct SCFResults{
+  double Energy;
+  std::array<double,3> elecDipole;
+  std::array<double,6> elecQuadpole;
+  std::array<double,10> elecOctpole;
+};
+
 struct CQJob {
   Molecule *mol;
   int intAlg;
@@ -85,18 +92,23 @@ struct CQJob {
   std::size_t nProcShared;
   std::string basisSet;
 
-  CQJob(Molecule &mol_, std::string field_, std::string jobtype_,
-    std::string reference_, int intAlg_,
-    std::size_t nProcShared_, std::string basis_) :
-    mol(&mol_),field(std::move(field_)),jobType(std::move(jobtype_)),
-    reference(std::move(reference_)),nProcShared(nProcShared_),
-    basisSet(std::move(basis_)), scfSettings{true}, rtSettings{true},
-    intAlg(intAlg_){ }
+  std::string tag;
+
+  SCFResults scfResults;
 
   CQJob(Molecule &mol_, std::string field_, std::string jobtype_,
     std::string reference_, int intAlg_,
-    std::size_t nProcShared_, std::string basis_, SCFSettings scfset_) :
-    CQJob(mol_,field_,jobtype_,reference_,intAlg_,nProcShared_,basis_) 
+    std::size_t nProcShared_, std::string basis_, std::string tag_) :
+    mol(&mol_),field(std::move(field_)),jobType(std::move(jobtype_)),
+    reference(std::move(reference_)),nProcShared(nProcShared_),
+    basisSet(std::move(basis_)), scfSettings{true}, rtSettings{true},
+    intAlg(intAlg_),tag(std::move(tag_)){ }
+
+  CQJob(Molecule &mol_, std::string field_, std::string jobtype_,
+    std::string reference_, int intAlg_,
+    std::size_t nProcShared_, std::string basis_,std::string tag_, 
+    SCFSettings scfset_) :
+    CQJob(mol_,field_,jobtype_,reference_,intAlg_,nProcShared_,basis_,tag_) 
     { 
       scfSettings.useDefaultSettings = scfset_.useDefaultSettings;
       scfSettings.field = scfset_.field;
@@ -151,7 +163,23 @@ struct CQJob {
 
   };
 
+  template<typename T> 
+  void collectResults(SingleSlater<T> &ss){
+    scfResults.Energy     = ss.totalEnergy;
+    scfResults.elecDipole = ss.elecDipole();
+    for(auto iXYZ = 0, run = 0; iXYZ < 3; iXYZ++)
+    for(auto jXYZ = iXYZ; jXYZ < 3; jXYZ++, run++  ){
+      scfResults.elecQuadpole[run] = ss.elecQuadpole()[iXYZ][jXYZ];
+    }
+    for(auto iXYZ = 0, run = 0; iXYZ < 3; iXYZ++)
+    for(auto jXYZ = iXYZ; jXYZ < 3; jXYZ++) 
+    for(auto kXYZ = jXYZ; kXYZ < 3; kXYZ++, run++  ){
+      scfResults.elecOctpole[run] = ss.elecOctpole()[iXYZ][jXYZ][kXYZ];
+    }
+  };
+
   void runJob() {
+    CQSetNumThreads(nProcShared);
     CQMemManager memManager;
     BasisSet     basis;
     AOIntegrals  aoints;
@@ -181,6 +209,7 @@ struct CQJob {
         ss.setRef(SingleSlater<double>::UHF);
         ss.isClosedShell = false;
       }
+      if(mol->nAtoms() == 1) ss.setGuess(SingleSlater<double>::CORE);
       ss.communicate(*mol,basis,aoints,fileio,memManager);
       ss.initMeta();
       ss.genMethString();
@@ -188,6 +217,7 @@ struct CQJob {
       ss.formGuess();
       ss.SCF3();
       ss.computeProperties();
+      collectResults(ss);
     } else {
       SingleSlater<dcomplex> ss;
       if(!reference.compare("RHF")) {
@@ -197,6 +227,7 @@ struct CQJob {
         ss.setRef(SingleSlater<dcomplex>::UHF);
         ss.isClosedShell = false;
       }
+      if(mol->nAtoms() == 1) ss.setGuess(SingleSlater<dcomplex>::CORE);
       ss.communicate(*mol,basis,aoints,fileio,memManager);
       ss.initMeta();
       ss.genMethString();
@@ -204,6 +235,7 @@ struct CQJob {
       ss.formGuess();
       ss.SCF3();
       ss.computeProperties();
+      collectResults(ss);
     }
 
   };
@@ -212,6 +244,37 @@ struct CQJob {
 };
 
 std::ostream& operator<< (std::ostream &os, const CQJob& job) {
+  if(!job.field.compare("D"))
+    os << "Real";
+  else
+    os << "Complex";
+
+  os << " " << job.reference << "-" << job.jobType;
+  os << " - " << job.basisSet;
+  os << " - " << job.tag;
+  os << " ";
+  if(job.nProcShared == 1) os << "Serial";
+  else                 os << "OpenMP";
+
+  os << " - ";
+  if(job.intAlg == AOIntegrals::INCORE)
+    os << "In-Core";
+  else if(job.intAlg == AOIntegrals::DIRECT)
+    os << "Direct";
+
+  os << " Integrals";
+  return os;
+}
+
+std::ostream& operator<< (std::ostream &os, const SCFResults &res){
+  os << std::setprecision(10) << std::fixed;
+  os << res.Energy << "/";
+  for(auto I : res.elecDipole)
+    os << I << "/";
+  for(auto I : res.elecQuadpole)
+    os << I << "/";
+  for(auto I : res.elecOctpole)
+    os << I << "/";
   return os;
 }
 
@@ -219,7 +282,6 @@ int main() {
   std::vector<CQJob> jobs;
 
   initCQ(0,NULL);
-  CQSetNumThreads(1);
 
   Molecule water,li,o2,singo2;
   loadPresets<WATER>(water);
@@ -229,63 +291,113 @@ int main() {
 
 
   // Real RHF Serial INCORE
-  jobs.emplace_back(water,"D","SCF","RHF",AOIntegrals::INCORE,1,"STO-3G");
-  jobs.emplace_back(water,"D","SCF","RHF",AOIntegrals::INCORE,1,"6-31G");
-  jobs.emplace_back(water,"D","SCF","RHF",AOIntegrals::INCORE,1,"cc-pVDZ");
+  jobs.emplace_back(water,"D","SCF","RHF",AOIntegrals::INCORE,1,"STO-3G",
+    "Small");
+  jobs.emplace_back(water,"D","SCF","RHF",AOIntegrals::INCORE,1,"6-31G",
+    "Small");
+  jobs.emplace_back(water,"D","SCF","RHF",AOIntegrals::INCORE,1,"cc-pVDZ",
+    "Small");
 
   // Real RHF Serial DIRECT
-  jobs.emplace_back(water,"D","SCF","RHF",AOIntegrals::DIRECT,1,"STO-3G");
-  jobs.emplace_back(water,"D","SCF","RHF",AOIntegrals::DIRECT,1,"6-31G");
-  jobs.emplace_back(water,"D","SCF","RHF",AOIntegrals::DIRECT,1,"cc-pVDZ");
+  jobs.emplace_back(water,"D","SCF","RHF",AOIntegrals::DIRECT,1,"STO-3G",
+    "Small");
+  jobs.emplace_back(water,"D","SCF","RHF",AOIntegrals::DIRECT,1,"6-31G",
+    "Small");
+  jobs.emplace_back(water,"D","SCF","RHF",AOIntegrals::DIRECT,1,"cc-pVDZ",
+    "Small");
 
   // Real RHF SMP DIRECT
-  jobs.emplace_back(water,"D","SCF","RHF",AOIntegrals::DIRECT,2,"STO-3G");
-  jobs.emplace_back(water,"D","SCF","RHF",AOIntegrals::DIRECT,2,"6-31G");
-  jobs.emplace_back(water,"D","SCF","RHF",AOIntegrals::DIRECT,2,"cc-pVDZ");
+  jobs.emplace_back(water,"D","SCF","RHF",AOIntegrals::DIRECT,2,"STO-3G",
+    "Small");
+  jobs.emplace_back(water,"D","SCF","RHF",AOIntegrals::DIRECT,2,"6-31G",
+    "Small");
+  jobs.emplace_back(water,"D","SCF","RHF",AOIntegrals::DIRECT,2,"cc-pVDZ",
+    "Small");
 
 
   // Real UHF Serial INCORE
-  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::INCORE,1,"STO-3G");
-  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::INCORE,1,"6-31G");
-  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::INCORE,1,"cc-pVDZ");
-  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::INCORE,1,"STO-3G");
-  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::INCORE,1,"6-31G");
-  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::INCORE,1,"cc-pVDZ");
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::INCORE,1,"STO-3G",
+    "Small");
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::INCORE,1,"6-31G",
+    "Small");
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::INCORE,1,"cc-pVDZ",
+    "Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::INCORE,1,"STO-3G",
+    "Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::INCORE,1,"6-31G",
+    "Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::INCORE,1,"cc-pVDZ",
+    "Small");
 
   // Real UHF Serial DIRECT
-  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::DIRECT,1,"STO-3G");
-  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::DIRECT,1,"6-31G");
-  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::DIRECT,1,"cc-pVDZ");
-  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::DIRECT,1,"STO-3G");
-  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::DIRECT,1,"6-31G");
-  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::DIRECT,1,"cc-pVDZ");
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::DIRECT,1,"STO-3G",
+    "Small");
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::DIRECT,1,"6-31G",
+    "Small");
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::DIRECT,1,"cc-pVDZ",
+    "Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::DIRECT,1,"STO-3G",
+    "Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::DIRECT,1,"6-31G",
+    "Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::DIRECT,1,"cc-pVDZ",
+    "Small");
 
   // Real UHF SMP DIRECT
-  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::DIRECT,2,"STO-3G");
-  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::DIRECT,2,"6-31G");
-  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::DIRECT,2,"cc-pVDZ");
-  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::DIRECT,2,"STO-3G");
-  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::DIRECT,2,"6-31G");
-  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::DIRECT,2,"cc-pVDZ");
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::DIRECT,2,"STO-3G",
+    "Small");
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::DIRECT,2,"6-31G",
+    "Small");
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::DIRECT,2,"cc-pVDZ",
+    "Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::DIRECT,2,"STO-3G",
+    "Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::DIRECT,2,"6-31G",
+    "Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::DIRECT,2,"cc-pVDZ",
+    "Small");
 
   
   // Complex RHF Serial INCORE
-  jobs.emplace_back(singo2,"C","SCF","RHF",AOIntegrals::INCORE,1,"STO-3G");
-  jobs.emplace_back(singo2,"C","SCF","RHF",AOIntegrals::INCORE,1,"6-31G");
-  jobs.emplace_back(singo2,"C","SCF","RHF",AOIntegrals::INCORE,1,"cc-pVDZ");
+  jobs.emplace_back(singo2,"C","SCF","RHF",AOIntegrals::INCORE,1,"STO-3G",
+    "Small");
+  jobs.emplace_back(singo2,"C","SCF","RHF",AOIntegrals::INCORE,1,"6-31G",
+    "Small");
+  jobs.emplace_back(singo2,"C","SCF","RHF",AOIntegrals::INCORE,1,"cc-pVDZ",
+    "Small");
 
   // Complex RHF Serial DIRECT
-  jobs.emplace_back(singo2,"C","SCF","RHF",AOIntegrals::DIRECT,1,"STO-3G");
-  jobs.emplace_back(singo2,"C","SCF","RHF",AOIntegrals::DIRECT,1,"6-31G");
-  jobs.emplace_back(singo2,"C","SCF","RHF",AOIntegrals::DIRECT,1,"cc-pVDZ");
+  jobs.emplace_back(singo2,"C","SCF","RHF",AOIntegrals::DIRECT,1,"STO-3G",
+    "Small");
+  jobs.emplace_back(singo2,"C","SCF","RHF",AOIntegrals::DIRECT,1,"6-31G",
+    "Small");
+  jobs.emplace_back(singo2,"C","SCF","RHF",AOIntegrals::DIRECT,1,"cc-pVDZ",
+    "Small");
 
   // Complex RHF SMP DIRECT
-  jobs.emplace_back(singo2,"C","SCF","RHF",AOIntegrals::DIRECT,2,"STO-3G");
-  jobs.emplace_back(singo2,"C","SCF","RHF",AOIntegrals::DIRECT,2,"6-31G");
-  jobs.emplace_back(singo2,"C","SCF","RHF",AOIntegrals::DIRECT,2,"cc-pVDZ");
+  jobs.emplace_back(singo2,"C","SCF","RHF",AOIntegrals::DIRECT,2,"STO-3G",
+    "Small");
+  jobs.emplace_back(singo2,"C","SCF","RHF",AOIntegrals::DIRECT,2,"6-31G",
+    "Small");
+  jobs.emplace_back(singo2,"C","SCF","RHF",AOIntegrals::DIRECT,2,"cc-pVDZ",
+    "Small");
 
-  for(auto JOB : jobs){
-    JOB.writeInput(cout);
+  std::vector<std::string> fnames;
+  std::ofstream index("test.index");
+  for(auto iJob = 0; iJob < jobs.size(); iJob++){
+    std::stringstream fname;
+    cout << "Generating Job ";
+    fname << "test" << std::setw(4) << std::setfill('0') << iJob+1;
+    cout << fname.str() << " ";
+    cout << "\"";
+    cout << jobs[iJob];
+    cout << "\"" << endl;
+
+    fnames.emplace_back(fname.str() + ".inp");
+    std::ofstream file(fnames.back());
+    jobs[iJob].writeInput(file);
+
+    index << fnames.back() << " - " << jobs[iJob] << endl;
   };
 
   water.convBohr();
@@ -305,8 +417,15 @@ int main() {
   singo2.computeRij();
   singo2.computeI();
 
-  for(auto JOB : jobs){
-    JOB.runJob();
+  std::ofstream refs("chronus-ref.val");
+  for(auto iJob = 0; iJob < jobs.size(); iJob++){
+    cout << "Running Job ";
+    cout << fnames[iJob] << endl;
+
+    jobs[iJob].runJob();
+//  cout << JOB.scfResults << endl;
+    refs << fnames[iJob] << "/" << jobs[iJob].scfResults  << jobs[iJob].jobType 
+         << endl;
   };
 
   finalizeCQ();
