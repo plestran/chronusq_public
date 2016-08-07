@@ -28,7 +28,6 @@
 #include <global.h>
 #include <cerr.h>
 #include <molecule.h>
-#include <controls.h>
 #include <aointegrals.h>
 #include <singleslater.h>
 #include <basisset.h>
@@ -39,7 +38,6 @@ class RealTime {
   typedef Eigen::Matrix<T,Dynamic,Dynamic> TMat; 
   typedef Eigen::Map<TMat> TMap;
   FileIO *        fileio_;
-  Controls *      controls_;
   BasisSet *	  basisset_;
   AOIntegrals *   aointegrals_;
   SingleSlater<T> *  groundState_;
@@ -126,9 +124,6 @@ class RealTime {
   inline void checkWorkers(){
     if(this->fileio_  == NULL) 
       CErr("Fatal: Must initialize RealTime with FileIO Object");
-    if(this->controls_ == NULL) 
-      CErr("Fatal: Must initialize RealTime with Controls Object",
-           this->fileio_->out);
     if(this->aointegrals_== NULL)
       CErr("Fatal: Must initialize RealTime with AOIntegrals Object",
            this->fileio_->out);
@@ -182,7 +177,6 @@ public:
     this->currentTime_ = 0.0;
 
     this->fileio_      = NULL;
-    this->controls_    = NULL;
     this->aointegrals_ = NULL;
     this->groundState_ = NULL;
 
@@ -251,10 +245,9 @@ public:
     RYZ
   };
 
-  inline void communicate(FileIO &fileio, Controls &cont, AOIntegrals &aoints, 
+  inline void communicate(FileIO &fileio, AOIntegrals &aoints, 
                 SingleSlater<T> &groundState){
     this->fileio_      = &fileio;
-    this->controls_    = &cont;
     this->aointegrals_ = &aoints;
     this->groundState_ = &groundState;
     this->memManager_  = groundState.memManager();
@@ -315,7 +308,7 @@ public:
   inline void doNotTarCSV(){ this->tarCSVs = false;};
 
   // pseudo-constructor
-  void iniRealTime(FileIO *,Controls *,AOIntegrals *,SingleSlater<T> *);
+  void iniRealTime(FileIO *,AOIntegrals *,SingleSlater<T> *);
   void iniDensity(); // initialize density
 //  void formComplexFock();
   void formEDField();
@@ -329,9 +322,22 @@ public:
   void writeOrbitalCSV(PropInfo & propInfo, long int & iStep);
   void tarCSVFiles();
 
+  inline std::array<double,4>  lastDipole(){
+    return {{
+      this->propInfo[this->propInfo.size()-1].dipole[0], 
+      this->propInfo[this->propInfo.size()-1].dipole[1],
+      this->propInfo[this->propInfo.size()-1].dipole[2],
+      this->propInfo[this->propInfo.size()-1].dipole[3]
+    }};
+
+  };
+
+  inline double lastEnergy(){
+    return this->propInfo[this->propInfo.size()-1].energy;
+  }
+
   // Python API
-  boost::python::list lastDipole();
-  double              lastEnergy();
+  boost::python::list lastDipole_python();
   double              getTimeStep();
 
   

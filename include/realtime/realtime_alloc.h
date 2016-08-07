@@ -24,30 +24,13 @@
  *  
  */
 template<typename T>
-void RealTime<T>::iniRealTime(FileIO *fileio, Controls *controls, 
+void RealTime<T>::iniRealTime(FileIO *fileio, 
        AOIntegrals *aointegrals, SingleSlater<T> *groundState) {
-  this->communicate(*fileio,*controls,*aointegrals,*groundState);
+  this->communicate(*fileio,*aointegrals,*groundState);
   this->initMeta();
 
 
 // Keep around for C++ interface (for now)
-  this->maxSteps_	= this->controls_->rtMaxSteps;
-  this->stepSize_	= this->controls_->rtTimeStep;
-  this->typeOrtho_	= this->controls_->rtTypeOrtho; 
-  this->initDensity_	= this->controls_->rtInitDensity;
-  this->swapMOA_	= this->controls_->rtSwapMOA;
-  this->swapMOB_	= this->controls_->rtSwapMOB;
-  this->methFormU_	= this->controls_->rtMethFormU;
-  this->IEnvlp_         = this->controls_->rtEnvelope_;
-  this->Ex_             = this->controls_->rtField_[0];
-  this->Ey_             = this->controls_->rtField_[1];
-  this->Ez_             = this->controls_->rtField_[2];
-  this->TOn_            = this->controls_->rtTOn_;
-  this->TOff_           = this->controls_->rtTOff_;
-  this->Freq_           = this->controls_->rtFreq_;
-  this->Phase_          = this->controls_->rtPhase_;
-  this->Sigma_          = this->controls_->rtSigma_;
-  this->printLevel_     = this->controls_->printLevel;
 
   this->alloc();
 };

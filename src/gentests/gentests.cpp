@@ -68,10 +68,22 @@ struct SCFSettings{
   bool  useDefaultSettings;
   std::array<double,3> field;
 
+  SCFSettings(bool def=true, std::array<double,3> f = {{0,0,0}}):
+  useDefaultSettings(def), field(std::move(f)){ };
+  
+
 };
 
 struct RTSettings{
   bool useDefaultSettings;
+  int  maxStep;
+  int  orthoType;
+  int  irstrt;
+
+  RTSettings(bool def = true, int mxStp = 20, 
+    int orth = RealTime<double>::Lowdin, int iRstrt = 51):
+    useDefaultSettings(def), maxStep(mxStp), orthoType(orth),
+    irstrt(iRstrt){ };
 };
 
 struct SCFResults{
@@ -79,6 +91,11 @@ struct SCFResults{
   std::array<double,3> elecDipole;
   std::array<double,6> elecQuadpole;
   std::array<double,10> elecOctpole;
+};
+
+struct RTResults{
+  double LastEnergy;
+  std::array<double,4> LastDipole;
 };
 
 struct CQJob {
@@ -95,13 +112,14 @@ struct CQJob {
   std::string tag;
 
   SCFResults scfResults;
+  RTResults  rtResults;
 
   CQJob(Molecule &mol_, std::string field_, std::string jobtype_,
     std::string reference_, int intAlg_,
     std::size_t nProcShared_, std::string basis_, std::string tag_) :
     mol(&mol_),field(std::move(field_)),jobType(std::move(jobtype_)),
     reference(std::move(reference_)),nProcShared(nProcShared_),
-    basisSet(std::move(basis_)), scfSettings{true}, rtSettings{true},
+    basisSet(std::move(basis_)), 
     intAlg(intAlg_),tag(std::move(tag_)){ }
 
   CQJob(Molecule &mol_, std::string field_, std::string jobtype_,
@@ -152,6 +170,22 @@ struct CQJob {
     else if (intAlg == AOIntegrals::DIRECT)
       os << "direct";
 
+
+
+    os << endl;
+    os << endl;
+    if(!jobType.compare("RT")){
+      os << "[RT]" << endl;
+      os << "maxstep = " << rtSettings.maxStep << endl;
+      os << "ortho = ";
+      if(rtSettings.orthoType == RealTime<double>::Cholesky)
+        os << "Cholesky";
+      else if(rtSettings.orthoType == RealTime<double>::Lowdin)
+        os << "lowdin";
+      os << endl;
+      os << "IRSTRT = " << rtSettings.irstrt << endl;
+    
+    }
     os << endl;
     os << endl;
     os << "#"                     << endl;
@@ -176,6 +210,12 @@ struct CQJob {
     for(auto kXYZ = jXYZ; kXYZ < 3; kXYZ++, run++  ){
       scfResults.elecOctpole[run] = ss.elecOctpole()[iXYZ][jXYZ][kXYZ];
     }
+  };
+
+  template<typename T> 
+  void collectResults(RealTime<T> &rt){
+    rtResults.LastEnergy     = rt.lastEnergy();
+    rtResults.LastDipole     = rt.lastDipole();
   };
 
   void runJob() {
@@ -218,6 +258,15 @@ struct CQJob {
       ss.SCF3();
       ss.computeProperties();
       collectResults(ss);
+      if(!jobType.compare("RT")){
+        RealTime<double> rt;
+        rt.communicate(fileio,aoints,ss);
+        rt.initMeta();
+        rt.alloc();
+        rt.iniDensity();
+        rt.doPropagation();
+        collectResults(rt);
+      }
     } else {
       SingleSlater<dcomplex> ss;
       if(!reference.compare("RHF")) {
@@ -236,6 +285,15 @@ struct CQJob {
       ss.SCF3();
       ss.computeProperties();
       collectResults(ss);
+      if(!jobType.compare("RT")){
+        RealTime<dcomplex> rt;
+        rt.communicate(fileio,aoints,ss);
+        rt.initMeta();
+        rt.alloc();
+        rt.iniDensity();
+        rt.doPropagation();
+        collectResults(rt);
+      }
     }
 
   };
@@ -274,6 +332,14 @@ std::ostream& operator<< (std::ostream &os, const SCFResults &res){
   for(auto I : res.elecQuadpole)
     os << I << "/";
   for(auto I : res.elecOctpole)
+    os << I << "/";
+  return os;
+}
+
+std::ostream& operator<< (std::ostream &os, const RTResults &res){
+  os << std::setprecision(10) << std::fixed;
+  os << res.LastEnergy << "/";
+  for(auto I : res.LastDipole)
     os << I << "/";
   return os;
 }
@@ -382,6 +448,14 @@ int main() {
   jobs.emplace_back(singo2,"C","SCF","RHF",AOIntegrals::DIRECT,2,"cc-pVDZ",
     "Small");
 
+  // Real RHF Serial INCORE
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::INCORE,1,"STO-3G",
+    "Small");
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::INCORE,1,"6-31G",
+    "Small");
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::INCORE,1,"cc-pVDZ",
+    "Small");
+
   std::vector<std::string> fnames;
   std::ofstream index("test.index");
   for(auto iJob = 0; iJob < jobs.size(); iJob++){
@@ -424,8 +498,12 @@ int main() {
 
     jobs[iJob].runJob();
 //  cout << JOB.scfResults << endl;
-    refs << fnames[iJob] << "/" << jobs[iJob].scfResults  << jobs[iJob].jobType 
-         << endl;
+    if(!jobs[iJob].jobType.compare("SCF"))
+      refs << fnames[iJob] << "/" << jobs[iJob].scfResults  
+           << jobs[iJob].jobType << endl;
+    else if(!jobs[iJob].jobType.compare("RT"))
+      refs << fnames[iJob] << "/" << jobs[iJob].rtResults  
+           << jobs[iJob].jobType << endl;
   };
 
   finalizeCQ();
