@@ -577,12 +577,10 @@ void RSmRSLATER_SCF(std::vector<CQJob> &jobs) {
   // Small Molecule Real R-SLATER SCF SMP DIRECT
   jobs.emplace_back(water,"D","SCF","RHF",AOIntegrals::DIRECT,2,"STO-3G",
     std::vector<std::string>({"SLATER"}),"Small");
-/*
   jobs.emplace_back(water,"D","SCF","RHF",AOIntegrals::DIRECT,2,"6-31G",
     std::vector<std::string>({"SLATER"}),"Small");
   jobs.emplace_back(water,"D","SCF","RHF",AOIntegrals::DIRECT,2,"cc-pVDZ",
     std::vector<std::string>({"SLATER"}),"Small");
-*/
 }
 
 void RSmRLSDA_SCF(std::vector<CQJob> &jobs) {
@@ -923,13 +921,10 @@ int main() {
   loadPresets<SingO2>(singo2);
 
 
-/*
   RSmRHF_SCF(jobs);
   CSmRHF_SCF(jobs);
   RSmUHF_SCF(jobs);
-*/
   RSmRSLATER_SCF(jobs);
-/*
   RSmRLSDA_SCF(jobs);
   RSmRSVWN3_SCF(jobs);
   RSmRB88_SCF(jobs);
@@ -937,7 +932,6 @@ int main() {
   RSmRHF_RT_NOFIELD(jobs);
   RSmRHF_RT_PW(jobs);
   RSmRHF_RT_LIN(jobs);
-*/
 
 
   std::vector<std::string> fnames;

@@ -191,9 +191,9 @@ def handleReference(workers,settings):
       refStr = Str
 
   if refStr == '': refStr = ' '
-  print refStr
-  print isHF
-  print isDFT
+# print refStr
+# print isHF
+# print isDFT
 
   workers["CQSingleSlater"].isDFT = isDFT
   workers["CQSingleSlater"].isHF  = isHF
@@ -201,41 +201,41 @@ def handleReference(workers,settings):
   isRest = False
   # R -> Restricted
   if refStr[0] == 'R':
-    print "Is Restricted"
+#   print "Is Restricted"
     workers["CQSingleSlater"].setRef(chronusQ.Reference.RHF)
     workers["CQSingleSlater"].isClosedShell = True
     isRest = True
   # U -> Unrestricted
   elif refStr[0] == 'U':
-    print 'HERE 1'
-    print "Is Unrestricted"
+#   print 'HERE 1'
+#   print "Is Unrestricted"
     workers["CQSingleSlater"].setRef(chronusQ.Reference.UHF)
     workers["CQSingleSlater"].isClosedShell = False
   # CU -> Constrained Unrestricted (Scuseria)
   elif refStr[:2] == "CU":
-    print 'HERE'
-    print "Is Constrained Unrestricted"
+#   print 'HERE'
+#   print "Is Constrained Unrestricted"
     workers["CQSingleSlater"].setRef(chronusQ.Reference.CUHF)
     workers["CQSingleSlater"].isClosedShell = False
   # G -> Generalized (2C)
   elif refStr[0] == 'G':
-    print "Is Generalized"
+#   print "Is Generalized"
     workers["CQSingleSlater"].setRef(chronusQ.Reference.TCS)
     workers["CQSingleSlater"].isClosedShell = False
   elif 'X2C' in ref:
-    print "Is X2C"
+#   print "Is X2C"
     workers["CQSingleSlater"].setRef(chronusQ.Reference.X2C)
     workers["CQSingleSlater"].isClosedShell = False
   # If left to determine, unit multiplicity -> Restricted
   elif mult == 1:
-    print "Is Restricted"
+#   print "Is Restricted"
     workers["CQSingleSlater"].setRef(chronusQ.Reference.RHF)
     workers["CQSingleSlater"].isClosedShell = True
     isRest = True
   # If left to determine, non-unit multiplicity -> Unrestricted
   else:
-    print 'HERE 2'
-    print "Is Unrestricted"
+#   print 'HERE 2'
+#   print "Is Unrestricted"
     workers["CQSingleSlater"].setRef(chronusQ.Reference.UHF)
     workers["CQSingleSlater"].isClosedShell = False
 
@@ -709,7 +709,7 @@ def handleReference(workers,settings):
     workers["CQAOIntegrals"].doX2C = True
     workers["CQAOIntegrals"].useFiniteWidthNuclei = True
 
-  if workers["CQAOIntegrals"].doX2C: print 'IS DEFINITELY X2C'
+# if workers["CQAOIntegrals"].doX2C: print 'IS DEFINITELY X2C'
 
 def parseRT(workers,settings):
 
