@@ -52,9 +52,7 @@ void SingleSlater<T>::computeEnergy(){
       this->energyTwoE *= 0.5; // ??
     }
       
-    cout << "Before" << this->energyTwoE << endl;
     if(this->isDFT) this->energyTwoE += this->totalEx + this->totalEcorr;
-    cout << "After" << this->energyTwoE << " " << this->totalEx << " " << this->totalEcorr <<endl;
 
     // Add in the electric field component if they are non-zero
     std::array<double,3> null{{0,0,0}};

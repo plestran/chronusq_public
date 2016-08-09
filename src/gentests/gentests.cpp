@@ -321,7 +321,6 @@ struct CQJob {
     aoints.alloc();
     if(!field.compare("D")){
       SingleSlater<double> ss;
-      cout << reference << endl;
       if(!reference.compare("RHF")) {
         ss.setRef(SingleSlater<double>::RHF);
         ss.isClosedShell = true;
@@ -348,7 +347,6 @@ struct CQJob {
       ss.genMethString();
       ss.alloc();
       ss.formGuess();
-//    prettyPrint(cout,*ss.onePDMA(),"PA");
       ss.SCF3();
       ss.computeProperties();
       collectResults(ss);
