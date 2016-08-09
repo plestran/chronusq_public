@@ -101,8 +101,8 @@ void BasisSet::makeBasisMap(){
   this->basisMap[def2SVPD]      = std::string(BASIS_PATH) + "/def2-svpd.gbs";
   this->basisMap[def2TZVP]      = std::string(BASIS_PATH) + "/def2-tzvp.gbs";
 
-  this->basisKey["STO3G"]         = PopleSTO3G;
-  this->basisKey["STO6G"]         = PopleSTO6G;
+  this->basisKey["STO-3G"]         = PopleSTO3G;
+  this->basisKey["STO-6G"]         = PopleSTO6G;
   this->basisKey["3-21G"]         = Pople321G;
   this->basisKey["4-31G"]         = Pople431G;
   this->basisKey["6-31G"]         = Pople631G;

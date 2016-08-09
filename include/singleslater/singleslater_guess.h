@@ -69,10 +69,10 @@ void SingleSlater<T>::COREGuess(){
   this->formDensity();
   this->cpyAOtoOrthoDen();
   this->unOrthoDen3();
-  if(this->printLevel_ > 3){
+//if(this->printLevel_ > 3){
     prettyPrint(this->fileio_->out,*this->onePDMA_,"Initial PA");
     prettyPrint(this->fileio_->out,*this->onePDMOrthoA_,"Initial POrthoA");
-  }
+//}
 //this->computeEnergy();
   this->backTransformMOs();
   if(this->printLevel_ > 3) {
@@ -198,11 +198,13 @@ void SingleSlater<T>::SADGuess() {
 
   this->scaleDen();
   this->scatterDensity();
+  prettyPrint(cout,*this->onePDMA_,"PA");
   this->formFock();
   this->orthoFock3();
   this->diagFock2();
   this->mixOrbitalsSCF();
   this->formDensity();
+  prettyPrint(cout,*this->onePDMA_,"PA 2");
   this->cpyAOtoOrthoDen();
   this->unOrthoDen3();
   this->backTransformMOs();

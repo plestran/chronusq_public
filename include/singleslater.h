@@ -480,6 +480,13 @@ public:
     this->haveMO        = false;
     this->havePT        = false;
 
+     // Initialize Energies
+     this->energyOneE = 0.0;
+     this->energyTwoE = 0.0;
+     this->totalEx = 0.0;
+     this->totalEcorr = 0.0;
+     this->totalEnergy = 0.0;
+
 
     // Standard Values
     this->Ref_              = _INVALID;

@@ -722,11 +722,31 @@ void AOIntegrals::computeLowdin() {
   for(auto i = 0; i < this->nBasis_; i++)
     S.col(i) /= std::sqrt(ovlpEigValues[i]);
 
-  (*this->ortho1_) = S * V.transpose();
+  this->ortho1_->noalias() = S * V.transpose();
 
   for(auto i = 0; i < this->nBasis_; i++)
     S.col(i) *= ovlpEigValues[i];
 
-  (*this->ortho2_) = S * V.transpose();
+  this->ortho2_->noalias() = S * V.transpose();
 //prettyPrint(cout,(*this->ortho1_),"XN");
+};
+
+void AOIntegrals::computeCholesky(){
+  char UPLO = 'L';
+  int INFO;
+  
+  std::vector<double> SCpy(this->nBasis_*this->nBasis_);
+
+  std::copy(this->overlap_->data(),
+    this->overlap_->data() + this->nBasis_*this->nBasis_,
+    SCpy.data());
+
+  dpotrf_(&UPLO,&this->nBasis_,SCpy.data(),&this->nBasis_,&INFO);
+  RealMap V(SCpy.data(),this->nBasis_,this->nBasis_);
+  V = V.triangularView<Lower>();
+  this->ortho2_->noalias() = V;
+
+  dpotri_(&UPLO,&this->nBasis_,SCpy.data(),&this->nBasis_,&INFO);
+  this->ortho1_->noalias() = this->ortho2_->transpose() * V;
+  (*this->ortho1_) = this->ortho1_->triangularView<Lower>();
 };

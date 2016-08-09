@@ -182,6 +182,12 @@ void SingleSlater<T>::formFock(){
           (*this->fockMz_)     -= (*this->vXB_);
       }
 
+      // Transform the Fock for CUHF
+      if(this->Ref_ == CUHF) {
+        this->formNO();
+        this->fockCUHF();
+      }
+
       std::vector<std::reference_wrapper<TMap>> toGather;
       toGather.emplace_back(*this->fockScalar_);
       toGather.emplace_back(*this->fockMz_);
@@ -198,11 +204,6 @@ void SingleSlater<T>::formFock(){
       }
     }
 
-    // Transform the Fock for CUHF
-    if(this->Ref_ == CUHF) {
-      this->formNO();
-      this->fockCUHF();
-    }
 
     if(this->printLevel_ >= 2) this->printFock(); 
   }
