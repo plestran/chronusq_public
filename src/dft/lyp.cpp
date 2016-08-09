@@ -4,7 +4,7 @@ lyp::lyp(double X, double eps):
 DFTFunctional(X,eps){
 // Memo Factor to be added at the end for numerical stability
   this-> Cfact = 36.4623989787648;  //-(2.0^(11.0/3.0))*(3.0/10.0)*((3.0*pi*pi)^(2.0/3.0))
-  this-> small = 1.0e-18; 
+//  this-> small = 1.0e-18; 
   this-> d1over3  = 1.0/3.0;
   this-> a = 0.04918;
   this-> b = 0.132;

@@ -105,7 +105,7 @@ public:
           func(IP,result);
         } else NSkip++;
       }
-//    cout << " NSkip by partition = " << NSkip << endl;
+    cout << " NSkip by partition = " << NSkip << endl;
     };
 
 

@@ -4,7 +4,7 @@ VWNV::VWNV(double X, double eps):
 VWNIII(X,eps){
 
 // General Constants
-  this->small = 1.0e-16; 
+//  this->small = 1.0e-16; 
   this->over2 = 0.5;
   this->over3 = 1.0/3.0;
   this->over4 = 1.0/4.0;
@@ -133,6 +133,7 @@ DFTFunctional::DFTInfo VWNV::eval(const double &rhoA, const double &rhoB, const 
 
 DFTFunctional::DFTInfo VWNV::eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB, const double &gammaBB){
   DFTFunctional::DFTInfo info;
+   if ((rhoA + rhoB) < this->small) { return info;}
    this->popVWNdens(rhoA, rhoB);
    if(std::abs(this->spindensity) > this->small) {
 //   Open Shell Case

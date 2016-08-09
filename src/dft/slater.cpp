@@ -4,7 +4,7 @@ SlaterExchange::SlaterExchange(double X, double eps):
 DFTFunctional(X,eps){
 // Memo Factor to be added at the end for numerical stability
   this->CxVx  = -(3.0/4.0)*(std::pow((3.0/math.pi),(1.0/3.0)));  
-  this->small = 1.0e-16; 
+//  this->small = 1.0e-16; 
   this-> d1over3  = 1.0/3.0;
   this-> d4over3  = 4.0/3.0;
 

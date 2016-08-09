@@ -70,7 +70,8 @@ class AtomicGrid : public TwoDGrid2 {
       // Rescale weight (w/o Partition Weights)
       double r = bg::get<0>(GRad->operator[](i / GAng->npts()).pt)
         * scalingFactor_;
-      if(r > this->radCutOff_) {
+      if(r > this->radCutOff_ && this->screenON_) {
+//      if(r > this->radCutOff_) {
         rawPoint.evalpt = false;
 //        cout << "Skipped " <<"r " << r << "rCut " << this->radCutOff_ <<endl;
         return rawPoint;
@@ -88,7 +89,8 @@ class AtomicGrid : public TwoDGrid2 {
  
       rawPoint.weight *= partweight;
 
-      if(std::abs(rawPoint.weight) < screenTol_) 
+      if((std::abs(rawPoint.weight) < this->screenTol_) && this->screenON_) 
+//      if((std::abs(rawPoint.weight) < this->screenTol_) ) 
         rawPoint.evalpt = false;
 
 //Screening now off APE

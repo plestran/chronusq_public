@@ -33,6 +33,7 @@ void SingleSlater<dcomplex>::formVXC_new(){;};
 template<>
 void SingleSlater<double>::formVXC_new(){
 //Timing
+  this->screenVxc = false;
 
   std::chrono::high_resolution_clock::time_point start;
   std::chrono::high_resolution_clock::time_point finish;
@@ -103,8 +104,16 @@ void SingleSlater<double>::formVXC_new(){
   for(auto iSh = 0; iSh < this->basisset_->nShell(); iSh++)
     shSizes.push_back(this->basisset_->shells(iSh).size());
 
-//  closeShells.resize(this->basisset_->nShell());
-//  std::iota(closeShells.begin(),closeShells.end(),0);
+// If screen in not on loop over all shell for each atoms, no need to
+// figure which are the close shell to each point
+  if (!this->screenVxc){
+    closeShells.resize(this->basisset_->nShell());
+    std::iota(closeShells.begin(),closeShells.end(),0);
+    cout << "MAch. Prec " << std::numeric_limits<double>::epsilon() << endl;
+    for(auto iShell : closeShells) {
+       cout << "iShell " << iShell << " closeS[] " << closeShells[iShell] << endl; 
+    }
+  }
   auto valVxc = [&](std::size_t iAtm, ChronusQ::IntegrationPoint &pt, 
   KernelIntegrand<double> &result) -> void {
 
@@ -113,28 +122,25 @@ void SingleSlater<double>::formVXC_new(){
 
 
     if(doTimings) Newstart = std::chrono::high_resolution_clock::now();
-    // For each new sphere, determine list of close basis shells
-    if(this->screenVxc){
-      if(pt.I == 0) {
-        closeShells.clear();
-        double DX = (*this->molecule_->cart())(0,iAtm) - bg::get<0>(GP);
-        double DY = (*this->molecule_->cart())(1,iAtm) - bg::get<1>(GP);
-        double DZ = (*this->molecule_->cart())(2,iAtm) - bg::get<2>(GP);
-  
-        double R = DX*DX + DY*DY + DZ*DZ;
-        R = std::sqrt(R);
-  
-        for(auto jAtm = 0; jAtm < this->molecule_->nAtoms(); jAtm++){
-          double RAB = (*this->molecule_->rIJ())(iAtm,jAtm);
-          double DIST = std::abs(RAB - R);
-          for(auto iSh = 0; iSh < this->basisset_->nShell(); iSh++){
-            if(this->basisset_->mapSh2Cen(iSh)-1 != jAtm) continue;
-            if(this->basisset_->radCutSh()[iSh] > DIST)
-              closeShells.push_back(iSh);
-          }
+    // For each new sphere, determine list of close basis shells (if screen ON)
+    if(pt.I == 0 && this->screenVxc) {
+      closeShells.clear();
+      double DX = (*this->molecule_->cart())(0,iAtm) - bg::get<0>(GP);
+      double DY = (*this->molecule_->cart())(1,iAtm) - bg::get<1>(GP);
+      double DZ = (*this->molecule_->cart())(2,iAtm) - bg::get<2>(GP);
+
+      double R = DX*DX + DY*DY + DZ*DZ;
+      R = std::sqrt(R);
+
+      for(auto jAtm = 0; jAtm < this->molecule_->nAtoms(); jAtm++){
+        double RAB = (*this->molecule_->rIJ())(iAtm,jAtm);
+        double DIST = std::abs(RAB - R);
+        for(auto iSh = 0; iSh < this->basisset_->nShell(); iSh++){
+          if(this->basisset_->mapSh2Cen(iSh)-1 != jAtm) continue;
+          if(this->basisset_->radCutSh()[iSh] > DIST)
+            closeShells.push_back(iSh);
         }
       }
-    }else{
     }
     if(doTimings){ 
       Newend = std::chrono::high_resolution_clock::now();
@@ -179,6 +185,7 @@ void SingleSlater<double>::formVXC_new(){
     }
 
     if(this->screenVxc && S1Norm < this->epsScreen) {NSkip4++; return;}
+//A    else if(!this->screenVxc && S1Norm < this->epsScreen) {cout << "screenOFF 0" <<endl;}
 
 
     double rhoT(0.0);
@@ -216,7 +223,7 @@ void SingleSlater<double>::formVXC_new(){
                 Tt += Pt * SCRATCH1DATA[jBf];
               } 
             } else {
-               cout << "SCREEN OFF 2" <<endl;
+//               cout << "SCREEN OFF 2" <<endl;
                Tt += Pt * SCRATCH1DATA[jBf];
             } //Screening
           } // jBf
@@ -233,7 +240,7 @@ void SingleSlater<double>::formVXC_new(){
                   Ts += Ps * SCRATCH1DATA[jBf];
                 }
               } else {
-                cout << "SCREEN OFF 3" <<endl;
+//                cout << "SCREEN OFF 3" <<endl;
                 Ts += Ps * SCRATCH1DATA[jBf];
               }//Screening
             } // jBf
@@ -273,15 +280,10 @@ void SingleSlater<double>::formVXC_new(){
     }
     
 //these if statements prevent numerical instability with zero guesses
-    if(rhoT    <= 0.0 ) {
-      if((std::abs(rhoT)) <= std::numeric_limits<double>::epsilon()) {
-        return;
-      }else{ 
-        CErr("Numerical noise in the density");
-      }
-    }else if(this->screenVxc && rhoT < this->epsScreen){
-     return;
-    } //HERE
+    if ((std::abs(rhoT)) <= std::numeric_limits<double>::epsilon() ){return;}
+    if (rhoT    <= 0.0 ) {CErr("Numerical noise in the density");}
+    if(this->screenVxc && rhoT < this->epsScreen){return;} 
+
     // Evaluate density functional
     DFTFunctional::DFTInfo kernelXC;
     for(auto i = 0; i < this->dftFunctionals_.size(); i++){
@@ -391,17 +393,18 @@ void SingleSlater<double>::formVXC_new(){
 
 //if(this->isGGA) cout << "GGA ON " << this->isGGA <<endl ; 
 //if(!this->isGGA) cout << "GGA OFF " << this->isGGA <<endl ; 
+
 /*
   ChronusQ::AtomicGrid AGrid(this->nRadDFTGridPts_,this->nAngDFTGridPts_,
-      ChronusQ::GRID_TYPE::EULERMAC,ChronusQ::GRID_TYPE::LEBEDEV,
+      ChronusQ::GRID_TYPE::GAUSSCHEBFST,ChronusQ::GRID_TYPE::LEBEDEV,
       ChronusQ::ATOMIC_PARTITION::BECKE,this->molecule_->cartArray(),
       this->molecule_->rIJ(),0,this->epsScreen,1e6,1.0,false);
-*/
+
+*/   
   ChronusQ::AtomicGrid AGrid(this->nRadDFTGridPts_,this->nAngDFTGridPts_,
       static_cast<ChronusQ::GRID_TYPE>(this->dftGrid_),ChronusQ::GRID_TYPE::LEBEDEV,
       static_cast<ChronusQ::ATOMIC_PARTITION>(this->weightScheme_),this->molecule_->cartArray(),
       this->molecule_->rIJ(),0,this->epsScreen,1e6,1.0,false);
-   
   KernelIntegrand<double> res(this->vXA_->cols());
   //Screaning based on cutoff
 //  the radCutoof vector is populated in singleSlater_real_guess.cpp

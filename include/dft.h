@@ -8,7 +8,7 @@ class DFTFunctional{
 public:
   double scalingFactor;    //< Hybrid Scaling
   double epsScreen;        //< screening 
-
+  double small = std::numeric_limits<double>::epsilon(); //numerical accuracy
 #ifdef CQ_ENABLE_LIBXC
   xc_func_type func;
 #endif
@@ -60,7 +60,7 @@ public:
 
 class SlaterExchange : public DFTFunctional {
   double CxVx;  //TF LDA Prefactor (for Vx)  
-  double small;    
+//A  double small;    
   double d1over3 ;
   double d4over3 ;
 public:
@@ -73,7 +73,7 @@ public:
 class VWNIII : public DFTFunctional {
 // General Constant
 public:
-  double small;    
+//A  double small;    
   double over2;
   double over3;
   double over4;
@@ -176,7 +176,7 @@ class BEightEight : public DFTFunctional {
   double  d4over3;
   double CxVx;  //TF LDA Prefactor (for Vx)  
   double beta;    
-  double small;    
+//A  double small;    
 public:
   BEightEight(double X = 1.0, double eps = 1e-10);
   double g0B88 (double x, double &sinhx, double &bx);
@@ -189,7 +189,7 @@ public:
 class lyp : public DFTFunctional {
   double d1over3;
   double Cfact;  //TF LDA Prefactor (for Vx)  
-  double small;    
+//A  double small;    
   double a     ;    
   double b     ;    
   double c     ;    
