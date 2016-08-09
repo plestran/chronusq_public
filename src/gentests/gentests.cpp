@@ -827,86 +827,136 @@ void RSmRHF_RT_LIN(std::vector<CQJob> &jobs) {
   // Small Molecule Real RHF RT (LOWDIN) Serial INCORE
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::INCORE,1,"STO-3G",
     "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
-     RealTime<double>::LinRamp,9.6,
-    std::array<double,3>({0.01,0,0})));
+     RealTime<double>::LinRamp,9.6,std::array<double,3>({0.01,0,0})));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::INCORE,1,"6-31G",
     "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
-     RealTime<double>::LinRamp,9.6,
-    std::array<double,3>({0.01,0,0})));
+     RealTime<double>::LinRamp,9.6,std::array<double,3>({0.01,0,0})));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::INCORE,1,"cc-pVDZ",
     "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
-     RealTime<double>::LinRamp,9.6,
-    std::array<double,3>({0.01,0,0})));
+     RealTime<double>::LinRamp,9.6,std::array<double,3>({0.01,0,0})));
 
   // Small Molecule Real RHF RT (LOWDIN) Serial DIRECT
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,1,"STO-3G",
     "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
-     RealTime<double>::LinRamp,9.6,
-    std::array<double,3>({0.01,0,0})));
+     RealTime<double>::LinRamp,9.6,std::array<double,3>({0.01,0,0})));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,1,"6-31G",
     "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
-     RealTime<double>::LinRamp,9.6,
-    std::array<double,3>({0.01,0,0})));
+     RealTime<double>::LinRamp,9.6,std::array<double,3>({0.01,0,0})));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,1,"cc-pVDZ",
     "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
-     RealTime<double>::LinRamp,9.6,
-    std::array<double,3>({0.01,0,0})));
+     RealTime<double>::LinRamp,9.6,std::array<double,3>({0.01,0,0})));
 
   // Small Molecule Real RHF RT (LOWDIN) SMP DIRECT
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,2,"STO-3G",
     "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
-     RealTime<double>::LinRamp,9.6,
-    std::array<double,3>({0.01,0,0})));
+     RealTime<double>::LinRamp,9.6,std::array<double,3>({0.01,0,0})));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,2,"6-31G",
     "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
-     RealTime<double>::LinRamp,9.6,
-    std::array<double,3>({0.01,0,0})));
+     RealTime<double>::LinRamp,9.6,std::array<double,3>({0.01,0,0})));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,2,"cc-pVDZ",
     "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
-     RealTime<double>::LinRamp,9.6,
-    std::array<double,3>({0.01,0,0})));
+     RealTime<double>::LinRamp,9.6,std::array<double,3>({0.01,0,0})));
 
   // Small Molecule Real RHF RT (CHOLESKY) Serial INCORE
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::INCORE,1,"STO-3G",
     "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
-     RealTime<double>::LinRamp,9.6,
-    std::array<double,3>({0.01,0,0})));
+     RealTime<double>::LinRamp,9.6,std::array<double,3>({0.01,0,0})));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::INCORE,1,"6-31G",
     "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
-     RealTime<double>::LinRamp,9.6,
-    std::array<double,3>({0.01,0,0})));
+     RealTime<double>::LinRamp,9.6,std::array<double,3>({0.01,0,0})));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::INCORE,1,"cc-pVDZ",
     "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
-     RealTime<double>::LinRamp,9.6,
-    std::array<double,3>({0.01,0,0})));
+     RealTime<double>::LinRamp,9.6,std::array<double,3>({0.01,0,0})));
 
   // Small Molecule Real RHF RT (CHOLESKY) Serial DIRECT
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,1,"STO-3G",
     "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
-     RealTime<double>::LinRamp,9.6,
-    std::array<double,3>({0.01,0,0})));
+     RealTime<double>::LinRamp,9.6,std::array<double,3>({0.01,0,0})));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,1,"6-31G",
     "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
-     RealTime<double>::LinRamp,9.6,
-    std::array<double,3>({0.01,0,0})));
+     RealTime<double>::LinRamp,9.6,std::array<double,3>({0.01,0,0})));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,1,"cc-pVDZ",
     "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
-     RealTime<double>::LinRamp,9.6,
-    std::array<double,3>({0.01,0,0})));
+     RealTime<double>::LinRamp,9.6,std::array<double,3>({0.01,0,0})));
 
   // Small Molecule Real RHF RT (CHOLESKY) SMP DIRECT
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,2,"STO-3G",
     "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
-     RealTime<double>::LinRamp,9.6,
-    std::array<double,3>({0.01,0,0})));
+     RealTime<double>::LinRamp,9.6,std::array<double,3>({0.01,0,0})));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,2,"6-31G",
     "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
-     RealTime<double>::LinRamp,9.6,
-    std::array<double,3>({0.01,0,0})));
+     RealTime<double>::LinRamp,9.6,std::array<double,3>({0.01,0,0})));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,2,"cc-pVDZ",
     "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
-     RealTime<double>::LinRamp,9.6,
-    std::array<double,3>({0.01,0,0})));
+     RealTime<double>::LinRamp,9.6,std::array<double,3>({0.01,0,0})));
+}
+
+void RSmRHF_RT_GAU(std::vector<CQJob> &jobs) {
+  // Small Molecule Real RHF RT (LOWDIN) Serial INCORE
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::INCORE,1,"STO-3G",
+    "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
+     RealTime<double>::Gaussian,9.6,std::array<double,3>({0.01,0,0}),30.0));
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::INCORE,1,"6-31G",
+    "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
+     RealTime<double>::Gaussian,9.6,std::array<double,3>({0.01,0,0}),30.0));
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::INCORE,1,"cc-pVDZ",
+    "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
+     RealTime<double>::Gaussian,9.6,std::array<double,3>({0.01,0,0}),30.0));
+
+  // Small Molecule Real RHF RT (LOWDIN) Serial DIRECT
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,1,"STO-3G",
+    "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
+     RealTime<double>::Gaussian,9.6,std::array<double,3>({0.01,0,0}),30.0));
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,1,"6-31G",
+    "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
+     RealTime<double>::Gaussian,9.6,std::array<double,3>({0.01,0,0}),30.0));
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,1,"cc-pVDZ",
+    "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
+     RealTime<double>::Gaussian,9.6,std::array<double,3>({0.01,0,0}),30.0));
+
+  // Small Molecule Real RHF RT (LOWDIN) SMP DIRECT
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,2,"STO-3G",
+    "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
+     RealTime<double>::Gaussian,9.6,std::array<double,3>({0.01,0,0}),30.0));
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,2,"6-31G",
+    "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
+     RealTime<double>::Gaussian,9.6,std::array<double,3>({0.01,0,0}),30.0));
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,2,"cc-pVDZ",
+    "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
+     RealTime<double>::Gaussian,9.6,std::array<double,3>({0.01,0,0}),30.0));
+
+  // Small Molecule Real RHF RT (CHOLESKY) Serial INCORE
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::INCORE,1,"STO-3G",
+    "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
+     RealTime<double>::Gaussian,9.6,std::array<double,3>({0.01,0,0}),30.0));
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::INCORE,1,"6-31G",
+    "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
+     RealTime<double>::Gaussian,9.6,std::array<double,3>({0.01,0,0}),30.0));
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::INCORE,1,"cc-pVDZ",
+    "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
+     RealTime<double>::Gaussian,9.6,std::array<double,3>({0.01,0,0}),30.0));
+
+  // Small Molecule Real RHF RT (CHOLESKY) Serial DIRECT
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,1,"STO-3G",
+    "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
+     RealTime<double>::Gaussian,9.6,std::array<double,3>({0.01,0,0}),30.0));
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,1,"6-31G",
+    "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
+     RealTime<double>::Gaussian,9.6,std::array<double,3>({0.01,0,0}),30.0));
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,1,"cc-pVDZ",
+    "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
+     RealTime<double>::Gaussian,9.6,std::array<double,3>({0.01,0,0}),30.0));
+
+  // Small Molecule Real RHF RT (CHOLESKY) SMP DIRECT
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,2,"STO-3G",
+    "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
+     RealTime<double>::Gaussian,9.6,std::array<double,3>({0.01,0,0}),30.0));
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,2,"6-31G",
+    "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
+     RealTime<double>::Gaussian,9.6,std::array<double,3>({0.01,0,0}),30.0));
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,2,"cc-pVDZ",
+    "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
+     RealTime<double>::Gaussian,9.6,std::array<double,3>({0.01,0,0}),30.0));
 }
 
 
@@ -952,6 +1002,7 @@ int main() {
     index << fnames.back() << " - " << jobs[iJob] << endl;
   };
 
+/*
   water.convBohr();
   water.computeNucRep();
   water.computeRij();
@@ -984,6 +1035,7 @@ int main() {
            << jobs[iJob].jobType << endl;
   };
 
+*/
   finalizeCQ();
 
   return 0;
