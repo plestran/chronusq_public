@@ -187,6 +187,7 @@ DFTFunctional::DFTInfo lyp::eval(const double &rhoA, const double &rhoB, const d
 
 DFTFunctional::DFTInfo lyp::eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB, const double &gammaBB){
   DFTFunctional::DFTInfo info;
+#ifndef CQ_ENABLE_LIBXC
   denspow RhoTQuant;
   this->popDensPow(rhoA, rhoB, RhoTQuant);
   this->popLYPdens(rhoA, rhoB, RhoTQuant);
@@ -241,6 +242,22 @@ DFTFunctional::DFTInfo lyp::eval(const double &rhoA, const double &rhoB, const d
     info.eps += info.ddgammaBB * gammaBB;
     info.eps += info.ddgammaAB * gammaAB;
     }
+#else
+  std::array<double,2> rho = {rhoA,rhoB};
+  std::array<double,3> sigma = {gammaAA,gammaAB,gammaBB};
+  std::array<double,2> vrho;
+  std::array<double,3> vsigma;
+  xc_gga_exc_vxc(&this->func,1,&rho[0],&sigma[0],&info.eps,&vrho[0],
+    &vsigma[0]);
+
+  info.ddrhoA = vrho[0];
+  info.ddrhoB = vrho[1];
+  info.ddgammaAA = vsigma[0];
+  info.ddgammaAB = vsigma[1];
+  info.ddgammaBB = vsigma[2];
+
+  info.eps *= (rhoA + rhoB);
+#endif
     return info;
 };
 

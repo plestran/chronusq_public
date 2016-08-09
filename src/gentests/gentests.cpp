@@ -81,6 +81,7 @@ struct RTSettings{
   int  irstrt;
   int  iEnvlp;
   double freq;
+  double sigma;
 
   std::array<double,3> eField;
 
@@ -94,11 +95,10 @@ struct RTSettings{
   RTSettings(bool def = true, int mxStp = 20, 
     int orth = RealTime<double>::Lowdin, int iRstrt = 51,
     int iEnv = RealTime<double>::Constant, double freq_ = 0,
-    std::array<double,3> fld = {{0,0,0}}):
+    std::array<double,3> fld = {{0,0,0}}, double sig = 0):
     useDefaultSettings(def), maxStep(mxStp), orthoType(orth),
-    irstrt(iRstrt),iEnvlp(iEnv),freq(freq_),eField(fld){ 
-      cout << "F " << freq << endl;
-    };
+    irstrt(iRstrt),iEnvlp(iEnv),freq(freq_),eField(fld),
+    sigma(sig){ };
 };
 
 struct SCFResults{
@@ -243,6 +243,11 @@ struct CQJob {
         os << "envelope = ";
         if(rtSettings.iEnvlp == RealTime<double>::Constant)
           os << "PW";
+        else if(rtSettings.iEnvlp == RealTime<double>::LinRamp)
+          os << "LinRamp";
+        else if(rtSettings.iEnvlp == RealTime<double>::Gaussian)
+          os << "Gaussian";
+       
 
         os << endl;
         os << "edfield = ";
@@ -252,6 +257,10 @@ struct CQJob {
         os << endl;
 
         os << "frequency = " << rtSettings.freq << endl;
+
+        if(rtSettings.iEnvlp == RealTime<double>::Gaussian){
+          os << "sigma = " << rtSettings.sigma;
+        }
         
       }
     
@@ -312,6 +321,7 @@ struct CQJob {
     aoints.alloc();
     if(!field.compare("D")){
       SingleSlater<double> ss;
+      cout << reference << endl;
       if(!reference.compare("RHF")) {
         ss.setRef(SingleSlater<double>::RHF);
         ss.isClosedShell = true;
@@ -338,6 +348,7 @@ struct CQJob {
       ss.genMethString();
       ss.alloc();
       ss.formGuess();
+//    prettyPrint(cout,*ss.onePDMA(),"PA");
       ss.SCF3();
       ss.computeProperties();
       collectResults(ss);
@@ -351,6 +362,7 @@ struct CQJob {
           rt.setEnvelope(rtSettings.iEnvlp);
           rt.setFreq(rtSettings.freq);
           rt.setFieldAmp(rtSettings.eField);
+          rt.setSigma(rtSettings.sigma);
         }
         rt.initMeta();
         rt.alloc();
@@ -385,6 +397,7 @@ struct CQJob {
           rt.setEnvelope(rtSettings.iEnvlp);
           rt.setFreq(rtSettings.freq);
           rt.setFieldAmp(rtSettings.eField);
+          rt.setSigma(rtSettings.sigma);
         }
         rt.communicate(fileio,aoints,ss);
         rt.initMeta();
@@ -566,10 +579,12 @@ void RSmRSLATER_SCF(std::vector<CQJob> &jobs) {
   // Small Molecule Real R-SLATER SCF SMP DIRECT
   jobs.emplace_back(water,"D","SCF","RHF",AOIntegrals::DIRECT,2,"STO-3G",
     std::vector<std::string>({"SLATER"}),"Small");
+/*
   jobs.emplace_back(water,"D","SCF","RHF",AOIntegrals::DIRECT,2,"6-31G",
     std::vector<std::string>({"SLATER"}),"Small");
   jobs.emplace_back(water,"D","SCF","RHF",AOIntegrals::DIRECT,2,"cc-pVDZ",
     std::vector<std::string>({"SLATER"}),"Small");
+*/
 }
 
 void RSmRLSDA_SCF(std::vector<CQJob> &jobs) {
@@ -812,6 +827,92 @@ void RSmRHF_RT_PW(std::vector<CQJob> &jobs) {
     std::array<double,3>({0.01,0,0})));
 }
 
+void RSmRHF_RT_LIN(std::vector<CQJob> &jobs) {
+  // Small Molecule Real RHF RT (LOWDIN) Serial INCORE
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::INCORE,1,"STO-3G",
+    "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
+     RealTime<double>::LinRamp,9.6,
+    std::array<double,3>({0.01,0,0})));
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::INCORE,1,"6-31G",
+    "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
+     RealTime<double>::LinRamp,9.6,
+    std::array<double,3>({0.01,0,0})));
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::INCORE,1,"cc-pVDZ",
+    "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
+     RealTime<double>::LinRamp,9.6,
+    std::array<double,3>({0.01,0,0})));
+
+  // Small Molecule Real RHF RT (LOWDIN) Serial DIRECT
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,1,"STO-3G",
+    "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
+     RealTime<double>::LinRamp,9.6,
+    std::array<double,3>({0.01,0,0})));
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,1,"6-31G",
+    "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
+     RealTime<double>::LinRamp,9.6,
+    std::array<double,3>({0.01,0,0})));
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,1,"cc-pVDZ",
+    "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
+     RealTime<double>::LinRamp,9.6,
+    std::array<double,3>({0.01,0,0})));
+
+  // Small Molecule Real RHF RT (LOWDIN) SMP DIRECT
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,2,"STO-3G",
+    "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
+     RealTime<double>::LinRamp,9.6,
+    std::array<double,3>({0.01,0,0})));
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,2,"6-31G",
+    "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
+     RealTime<double>::LinRamp,9.6,
+    std::array<double,3>({0.01,0,0})));
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,2,"cc-pVDZ",
+    "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
+     RealTime<double>::LinRamp,9.6,
+    std::array<double,3>({0.01,0,0})));
+
+  // Small Molecule Real RHF RT (CHOLESKY) Serial INCORE
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::INCORE,1,"STO-3G",
+    "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
+     RealTime<double>::LinRamp,9.6,
+    std::array<double,3>({0.01,0,0})));
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::INCORE,1,"6-31G",
+    "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
+     RealTime<double>::LinRamp,9.6,
+    std::array<double,3>({0.01,0,0})));
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::INCORE,1,"cc-pVDZ",
+    "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
+     RealTime<double>::LinRamp,9.6,
+    std::array<double,3>({0.01,0,0})));
+
+  // Small Molecule Real RHF RT (CHOLESKY) Serial DIRECT
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,1,"STO-3G",
+    "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
+     RealTime<double>::LinRamp,9.6,
+    std::array<double,3>({0.01,0,0})));
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,1,"6-31G",
+    "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
+     RealTime<double>::LinRamp,9.6,
+    std::array<double,3>({0.01,0,0})));
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,1,"cc-pVDZ",
+    "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
+     RealTime<double>::LinRamp,9.6,
+    std::array<double,3>({0.01,0,0})));
+
+  // Small Molecule Real RHF RT (CHOLESKY) SMP DIRECT
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,2,"STO-3G",
+    "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
+     RealTime<double>::LinRamp,9.6,
+    std::array<double,3>({0.01,0,0})));
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,2,"6-31G",
+    "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
+     RealTime<double>::LinRamp,9.6,
+    std::array<double,3>({0.01,0,0})));
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,2,"cc-pVDZ",
+    "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
+     RealTime<double>::LinRamp,9.6,
+    std::array<double,3>({0.01,0,0})));
+}
+
 
 int main() {
   std::vector<CQJob> jobs;
@@ -824,16 +925,21 @@ int main() {
   loadPresets<SingO2>(singo2);
 
 
+/*
   RSmRHF_SCF(jobs);
   CSmRHF_SCF(jobs);
   RSmUHF_SCF(jobs);
+*/
   RSmRSLATER_SCF(jobs);
+/*
   RSmRLSDA_SCF(jobs);
   RSmRSVWN3_SCF(jobs);
   RSmRB88_SCF(jobs);
   RSmRBLYP_SCF(jobs);
   RSmRHF_RT_NOFIELD(jobs);
   RSmRHF_RT_PW(jobs);
+  RSmRHF_RT_LIN(jobs);
+*/
 
 
   std::vector<std::string> fnames;
