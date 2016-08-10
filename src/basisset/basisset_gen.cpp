@@ -118,6 +118,7 @@ void BasisSet::constructExtrn(Molecule * mol, BasisSet *genBasis){
            this->fileio_->out);
   } // loop IAtom
   genBasis->computeMeta();
+  genBasis->forceCart_ = this->forceCart_;
 
 } // BasisSet::constructExtrn
 

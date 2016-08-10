@@ -524,6 +524,19 @@ void AOIntegrals::allocOp(){
       CErr(std::current_exception(),"N^4 ERI Tensor Allocation");
     }
 #endif
+
+// number of spherical harmonic gaussian
+  int nSphBasis = 0;
+  int nCartBasis = 0;
+//cout<<"Here"<<endl;
+  for (auto mm = 0 ; mm < this->basisSet_->nShell() ; mm++ ) {
+     nSphBasis += 2*(this->basisSet_->shellsCQ[mm].l)+1;
+     nCartBasis += (this->basisSet_->shellsCQ[mm].l+1)*(this->basisSet_->shellsCQ[mm].l+2)/2;
+  }
+//cout<<"Here2"<<endl<<nCartBasis<<"\t"<<nSphBasis<<endl;
+  this->nSphBasis_ = nSphBasis;
+  this->nCartBasis_ = nCartBasis;
+//cout<<this->nCartBasis_<<endl;
     try {
  
       // One Electron Integral
@@ -547,7 +560,9 @@ void AOIntegrals::allocOp(){
       // Overlap
       this->overlap_   = 
         std::unique_ptr<RealMap>(
+//            new RealMap(this->memManager_->malloc<double>(NBSq),this->nBasis_,this->nBasis_)
             new RealMap(this->memManager_->malloc<double>(NBSq),this->nBasis_,this->nBasis_)
+             
         ); 
       // Kinetic
       this->kinetic_   = 
@@ -680,6 +695,11 @@ void AOIntegrals::createShellPairs() {
   int nShell = this->basisSet_->nShell();
   this->nShellPair_ = nShell*(nShell+1)/2;
 
+  if (this->useFiniteWidthNuclei == true) {
+    this->molecule_->generateFiniteWidthNuclei();
+  }         // generate finite width nuclei 
+//cout<<this->molecule_->nucShell(0)<<endl;
+
 //this->shellPairs_ = new ShellPair[this->nShellPair_];
 // This does the same thing as a 'new' call when passed a dimension and
 // dones't require annoying memory managment
@@ -687,22 +707,28 @@ void AOIntegrals::createShellPairs() {
   n = 0;
 
 
-  int spherical_lsize[nShell];
-  int mapSh2spBf[nShell];
-  int tempmapSh2spBf=0;
+  int spherical_lsize[nShell],cart_lsize[nShell];
+  int mapSh2spBf[nShell],mapSh2caBf[nShell];
+  int tempmapSh2spBf=0,tempmapSh2caBf=0;
   for ( i =0 ; i<nShell ; i++ ) {
     mapSh2spBf[i] = tempmapSh2spBf;
-    if (this->basisSet_->shellsCQ[i].cartesian_l.size() == 6){
+    mapSh2caBf[i] = tempmapSh2caBf;
+/*    if (this->basisSet_->shellsCQ[i].cartesian_l.size() == 6){
        spherical_lsize[i]=5;
     }
     else {
       spherical_lsize[i]=this->basisSet_->shellsCQ[i].cartesian_l.size();
     }
+*/
+    spherical_lsize[i]=2*(this->basisSet_->shellsCQ[i].l)+1;
+    cart_lsize[i] = (this->basisSet_->shellsCQ[i].l+1)*(this->basisSet_->shellsCQ[i].l+2)/2;
     tempmapSh2spBf += spherical_lsize[i];
+    tempmapSh2caBf += cart_lsize[i];
   }
 
 cout<<"total bumber of spherical function= "<<tempmapSh2spBf<<endl;
-  
+cout<<"total number of cartesian function= "<<tempmapSh2caBf<<endl;  
+
   for(i=0;i<nShell;i++) 
     {      
 //  int ibf_s1 = this->basisSet_->mapSh2Bf(i);
@@ -736,7 +762,13 @@ cout<<"total bumber of spherical function= "<<tempmapSh2spBf<<endl;
 //start number for spherical gaussian       
       ijS->isphbf_s = mapSh2spBf[i];
       ijS->jsphbf_s = mapSh2spBf[j];
-
+//start number for cartesian gaussian
+      ijS->icarbf_s = mapSh2caBf[i];
+      ijS->jcarbf_s = mapSh2caBf[j];
+//cout<< "iShell->l= "<<ijS->iShell->l<<endl;
+//cout<<ijS->ibf_s<<"\t"<<ijS->icarbf_s<<endl;
+//cout<<ijS->jbf_s<<"\t"<<ijS->jcarbf_s<<endl;
+     
     } else {
       ijS->iShell = &(this->basisSet_->shellsCQ[j]);
       ijS->jShell = &(this->basisSet_->shellsCQ[i]);
@@ -744,10 +776,18 @@ cout<<"total bumber of spherical function= "<<tempmapSh2spBf<<endl;
       ijS->jbf_s = this->basisSet_->mapSh2Bf(i);
       ijS->isphbf_s = mapSh2spBf[j];
       ijS->jsphbf_s = mapSh2spBf[i];
-
+      ijS->icarbf_s = mapSh2caBf[j];
+      ijS->jcarbf_s = mapSh2caBf[i];
+//cout<<ijS->ibf_s<<"\t"<<ijS->icarbf_s<<endl;
+//cout<<ijS->jbf_s<<"\t"<<ijS->jcarbf_s<<endl;
+ 
    };
 //cout<<"isbf_s= "<<ijS->ibf_s<<"\t jbf_s= "<<ijS->jbf_s<<endl;
 //cout<<"isphbf_s= "<<ijS->isphbf_s<<"\t jsphbf_s= "<<ijS->jsphbf_s<<endl<<endl;
+    ijS->isphsize = 2*(ijS->iShell->l)+1;
+    ijS->jsphsize = 2*(ijS->jShell->l)+1;
+    ijS->icarsize = (ijS->iShell->l+1)*(ijS->iShell->l+2)/2;
+    ijS->jcarsize = (ijS->jShell->l+1)*(ijS->jShell->l+2)/2;
 
     iS = ijS->iShell;
     jS = ijS->jShell;
@@ -802,7 +842,9 @@ cout<<"total bumber of spherical function= "<<tempmapSh2spBf<<endl;
       ijS->PB.push_back(tmpPB);
       ijS->PZeta.push_back(tmpPZeta);
 
-      ijS->ssV.push_back(math.two*sqrt(ijS->Zeta[nPP]/math.pi)*ijS->ss[nPP]);
+//      if ( this->useFiniteWidthNuclei == false ) {        
+        ijS->ssV.push_back(math.two*sqrt(ijS->Zeta[nPP]/math.pi)*ijS->ss[nPP]);
+//      }
       ijS->ssT.push_back((ijS->Xi[nPP])*(math.three-math.two*(ijS->Xi[nPP])*squareAB)*ijS->ss[nPP]);
       for (m=0;m<3;m++) {
         tmpssL[m]    = math.two*(ijS->Xi[nPP])*ACxBC[m]*ijS->ss[nPP]; 

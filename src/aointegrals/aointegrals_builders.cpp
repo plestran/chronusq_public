@@ -353,20 +353,25 @@ void AOIntegrals::computeAOOneE(){
   this->createShellPairs();
   this->generateFmTTable();
   this->computeOverlapS();
+//cout<<"oh yeah"<<endl;
   RealMatrix sTemp(*this->overlap_);
   this->computePotentialV();
+//cout<<"stopt1"<<endl;
   RealMatrix vTemp(*this->potential_);
+//cout<<"stop2"<<endl;
   this->computeKineticT();
+//cout<<"stop3"<<endl;
   RealMatrix tTemp(*this->kinetic_);
   this->computeAngularL();
   this->computeSL();
+
   this->computepVdotp();
-  
 /*
   cout<<"xsli test S: "<<sTemp.norm()<<endl;
   cout<<"xsli test V: "<<vTemp.norm()<<endl;
   cout<<"xsli test T: "<<tTemp.norm()<<endl;
 */
+
   this->overlap_->setZero();
   this->potential_->setZero();
   this->kinetic_->setZero();

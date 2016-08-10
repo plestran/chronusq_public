@@ -68,7 +68,7 @@ struct ShellCQ {
   size_t size() const { return pure ? (2 * l + 1) : cartesian_size(); }
 
   ShellCQ(libint2::Shell& other){
-    int i;
+    int i,j,k,x,y,z;
     real_t readNorm;
     real_t threePI = math.pi*math.pi*math.pi;
     this->alpha = other.alpha;
@@ -77,6 +77,7 @@ struct ShellCQ {
     this->pure = other.contr[0].pure;
     this->O = other.O;
     this->max_ln_coeff = other.max_ln_coeff;
+/*
     if(this->l==0){
       this->cartesian_l.push_back({0,0,0});
     } else if(this->l==1){
@@ -90,7 +91,26 @@ struct ShellCQ {
       this->cartesian_l.push_back({0,2,0});
       this->cartesian_l.push_back({0,1,1});
       this->cartesian_l.push_back({0,0,2});
+    } else if(this->l>2){
+      for( i=0 ; i<this->l+1 ; i++ ){
+        x = this->l - i;
+        for( j=0 ; j<i+1 ; j++ ){
+          y = i - j;
+          z = l - x - y;
+          this->cartesian_l.push_back({x,y,z});
+        }
+      }
     };
+*/
+      for( i=0 ; i<this->l+1 ; i++ ){
+        x = this->l - i;
+        for( j=0 ; j<i+1 ; j++ ){
+          y = i - j;
+          z = l - x - y;
+          this->cartesian_l.push_back({x,y,z});
+        }
+      }
+ 
     for(i=0;i<this->alpha.size();i++){
 //      if(this->l==0) readNorm = this->coeff[i]*sqrt(sqrt(8*this->alpha[i]*this->alpha[i]*this->alpha[i]/threePI));
 //      else if(this->l==1) readNorm = this->coeff[i]*sqrt(sqrt(128*this->alpha[i]*this->alpha[i]*this->alpha[i]*this->alpha[i]*this->alpha[i]/threePI));
@@ -381,6 +401,7 @@ public:
   inline void setBasisPath( std::string str){ this->basisPath_  = str;};
   inline void setPrintLevel(int i          ){ this->printLevel_ = i  ;};
   inline void forceCart(){ this->forceCart_ = !this->forceCart_;};
+  inline bool getforceCart(){ return this->forceCart_;};
 
 
   void printInfo();   ///< Print all info

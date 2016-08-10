@@ -57,6 +57,12 @@ struct ShellPair{
   int     jbf_s;
   int     isphbf_s;             //spherical basis function start
   int     jsphbf_s;
+  int     icarbf_s;
+  int     jcarbf_s;
+  int     isphsize;             // number of spherical gaussian
+  int     jsphsize;
+  int     icarsize;
+  int     jcarsize;
   std::array<real_t,3> A;	// x,y,z coordinate of center A
   std::array<real_t,3> B;	// x,y,z coordinate of center B
   std::array<real_t,3> AB;	// x,y,z distance between centers xA-xB, yA-yB, zA-zB
@@ -159,6 +165,8 @@ class AOIntegrals{
   int       maxMultipole_;
   int       maxNumInt_;
   int       printLevel_;
+  int       nSphBasis_;
+  int       nCartBasis_;
 
   double thresholdSchwartz_;
   double thresholdS_;
@@ -273,7 +281,8 @@ public:
   AOIntegrals(){
     this->nBasis_ = 0;
     this->nTT_    = 0;
-
+    this->nSphBasis_ = 0;
+    this->nCartBasis_ = 0;
 
     this->R2Index_  = NULL;
 
@@ -320,7 +329,7 @@ public:
     this->maxMultipole_     = 3;
     this->integralAlgorithm = DIRECT;
     this->isPrimary         = true;
-    this->useFiniteWidthNuclei = false;
+    this->useFiniteWidthNuclei = true;
     this->printLevel_       = 1;
     this->thresholdS_ =        1.0e-10;
     this->thresholdAB_ =       1.0e-6;
@@ -542,17 +551,20 @@ public:
   double hRRiPPSab(ChronusQ::ShellPair*,int,int*,int,int*,int);
   void computePotentialV();
   double hRRVab(ChronusQ::ShellPair*,MolecularConstants*,int,int*,int,int*);
-  double vRRVa0(ChronusQ::ShellPair*,double*,double*,int,int,int*,int);
+  double vRRVa0(ChronusQ::ShellPair*,double*,double*,int,int,int*,int,int);
 //xslie
 //SS
   void computeAngularL();
   double Labmu(ChronusQ::ShellPair*,RealMatrix*,RealMatrix*,RealTensor3d*,int,int*,int,int*,int,int);
   void computeSL();
-  double hRRiPPVab(ChronusQ::ShellPair*,int,int*,int,int*,double*,int,int);
-  double Slabmu(ChronusQ::ShellPair*,RealMatrix*,RealMatrix*,RealTensor3d*,double*,int,int*,int,int*,int,int,int); 
-  double vRRV0b(ChronusQ::ShellPair*,double*,double*,int,int,int*,int);
+  double hRRiPPVab(ChronusQ::ShellPair*,int,int*,int,int*,double*,int,int,int);
+  double Slabmu(ChronusQ::ShellPair*,RealMatrix*,RealMatrix*,RealTensor3d*,double*,int,int*,int,int*,int,int,int,int); 
+  double vRRV0b(ChronusQ::ShellPair*,double*,double*,int,int,int*,int,int);
   void computepVdotp();
-  double pVpab(ChronusQ::ShellPair*,double*,int,int*,int,int*,int,int); 
+  double pVpab(ChronusQ::ShellPair*,double*,int,int*,int,int*,int,int,int); 
+//  void cart2sphtrans(ChronusQ::ShellPair*, RealMatrix*, RealMatrix& , double);
+  std::vector<double> cart2SphTrans(ChronusQ::ShellPair*, double*);
+  std::complex <double> car2sphcoeff(int , int , int*);
 
 //SS
 //----------------------------------------//
