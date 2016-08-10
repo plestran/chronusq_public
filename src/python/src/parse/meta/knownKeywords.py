@@ -113,6 +113,8 @@ knownKeywords['SCF'] = {
   'FIELD'     :CQKeyword('FIELD'     ,'D3'   ,False),
   'GUESS'     :CQKeyword('GUESS'     ,'O-GS' ,False),
   'DIIS'      :CQKeyword('DIIS'      ,'B'    ,False),
+  'ITP'       :CQKeyword('ITP'       ,'B'    ,False),
+  'DT'        :CQKeyword('DT'        ,'D'    ,False),
   'PRINT'     :CQKeyword('PRINT'     ,'I'    ,False)
 }
 

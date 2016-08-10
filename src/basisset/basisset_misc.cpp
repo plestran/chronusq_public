@@ -97,11 +97,20 @@ namespace ChronusQ{
 void BasisSet::renormShells(){
   libint2::Engine engine(libint2::Operator::overlap,this->maxPrim_,this->maxL_,0);
 
+/*
   for(auto iShell = this->shells_.begin(); iShell != this->shells_.end(); ++iShell){
   //iShell->renorm();
     auto buff = engine.compute(*iShell,*iShell);
     for(auto k = 0; k < iShell->alpha.size(); k++)
       iShell->contr[0].coeff[k] /= std::sqrt(buff[0]);
+  }
+*/
+  for(auto iShell = 0; iShell < this->nShell_; iShell++){
+    auto buff = engine.compute(shells_[iShell],shells_[iShell]);
+    for(auto k = 0; k < shells_[iShell].alpha.size(); k++) { 
+      shells_[iShell].contr[0].coeff[k] /= std::sqrt(buff[0]);
+      this->unNormCons_[iShell][k]       /= std::sqrt(buff[0]);
+    }
   }
 } // BasisSet::renormShells
 

@@ -321,7 +321,7 @@ public:
       this->needsLeft_ = true;
     }
 
-    std::function<H5::DataSet*(const H5::PredType&,std::string&,
+    std::function<H5::DataSet*(const H5::CompType&,std::string&,
       std::vector<hsize_t>&)> fileFactory = 
         std::bind(&FileIO::createScratchPartition,this->fileio_,
         std::placeholders::_1,std::placeholders::_2,std::placeholders::_3);

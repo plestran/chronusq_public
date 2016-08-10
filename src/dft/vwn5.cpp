@@ -4,7 +4,7 @@ VWNV::VWNV(double X, double eps):
 VWNIII(X,eps){
 
 // General Constants
-  this->small = 1.0e-10; 
+  this->small = 1.0e-16; 
   this->over2 = 0.5;
   this->over3 = 1.0/3.0;
   this->over4 = 1.0/4.0;
@@ -29,6 +29,9 @@ VWNIII(X,eps){
   this->popVWNconst();
 
   this->name = "VWN V";
+#ifdef CQ_ENABLE_LIBXC
+  xc_func_init(&this->func,XC_LDA_C_VWN,XC_POLARIZED);
+#endif
 };
 
 void VWNV::popVWNconst(){
@@ -53,16 +56,20 @@ void VWNV::popVWNdens(double rhoA, double rhoB){
   this->spindensity_3 = std::pow(this->spindensity,3.0);
 
   this->f0_spindensity = 0.0;
-  if ((1.0+this->spindensity) >= this->small)   f0_spindensity += std::pow((1.0+this->spindensity),this->fourover3); 
-  if ((1.0-this->spindensity) >= this->small)   f0_spindensity += std::pow((1.0-(this->spindensity)),this->fourover3); 
+//  if ((1.0+this->spindensity) >= this->small)   f0_spindensity += std::pow((1.0+this->spindensity),this->fourover3); 
+  if (std::abs(this->spindensity) >= this->small)   f0_spindensity += std::pow((1.0+this->spindensity),this->fourover3); 
+//  if ((1.0-this->spindensity) >= this->small)   f0_spindensity += std::pow((1.0-(this->spindensity)),this->fourover3); 
+  if (std::abs(this->spindensity) >= this->small)   f0_spindensity += std::pow((1.0-(this->spindensity)),this->fourover3); 
   this->f0_spindensity += -2.0;
   this->f0_spindensity /= (-2.0+std::pow((2.0),this->fourover3)); 
   this->f1_spindensity  = std::pow((1.0+this->spindensity),this->fourover3); 
   this->f1_spindensity += std::pow((1.0-this->spindensity),this->fourover3); 
   this->f1_spindensity /= (2.0) ;
   this->df_spindensity = 0.0;
-  if ((1.0+this->spindensity)   >= this->small) this->df_spindensity += std::pow((1.0+this->spindensity),this->over3); 
-  if ((1.0-(this->spindensity)) >= this->small) this->df_spindensity -= std::pow((1.0-this->spindensity),this->over3); 
+//  if ((1.0+this->spindensity)   >= this->small) this->df_spindensity += std::pow((1.0+this->spindensity),this->over3); 
+  if (std::abs(this->spindensity)   >= this->small) this->df_spindensity += std::pow((1.0+this->spindensity),this->over3); 
+//  if ((1.0-(this->spindensity)) >= this->small) this->df_spindensity -= std::pow((1.0-this->spindensity),this->over3); 
+  if (std::abs(this->spindensity) >= this->small) this->df_spindensity -= std::pow((1.0-this->spindensity),this->over3); 
   this->df_spindensity *= this->fourover3;
   this->df_spindensity /= (-2.0+std::pow((2.0),this->fourover3)); 
   this->df2_spindensity = 2.0; 
@@ -119,6 +126,12 @@ double VWNV::Eveps2VWN(double A_x, double &b_x, double &c_x, double &X, double &
 }
 
 DFTFunctional::DFTInfo VWNV::eval(const double &rhoA, const double &rhoB){
+}
+
+DFTFunctional::DFTInfo VWNV::eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB){
+};
+
+DFTFunctional::DFTInfo VWNV::eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB, const double &gammaBB){
   DFTFunctional::DFTInfo info;
    this->popVWNdens(rhoA, rhoB);
    if(std::abs(this->spindensity) > this->small) {
@@ -184,12 +197,7 @@ DFTFunctional::DFTInfo VWNV::eval(const double &rhoA, const double &rhoB){
      info.ddrhoA += info.eps ;
      info.ddrhoB  = info.ddrhoA ;
    }
+     info.eps *= (rhoA+rhoB); 
   return info;
-}
-
-DFTFunctional::DFTInfo VWNV::eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB){
-};
-
-DFTFunctional::DFTInfo VWNV::eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB, const double &gammaBB){
 };
 

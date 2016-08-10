@@ -86,9 +86,10 @@ aointAlg = {
 }
 
 guessMap = {
-  "SAD" :chronusQ.Guess.SAD  ,
-  "CORE":chronusQ.Guess.CORE ,
-  "READ":chronusQ.Guess.READ  
+  "SAD"   :chronusQ.Guess.SAD    ,
+  "CORE"  :chronusQ.Guess.CORE   ,
+  "READ"  :chronusQ.Guess.READ   , 
+  "RANDOM":chronusQ.Guess.RANDOM  
 }
 
 #exchMap = {
@@ -112,11 +113,11 @@ kernelMap = {
 }
 
 gridMap = {
-  "EULERMACL" : chronusQ.DFT_RAD_GRID.EULERMACL,
-  "GAUSSCHEB" : chronusQ.DFT_RAD_GRID.GAUSSCHEB
+  "EULERMACL" : chronusQ.GRID_TYPE.EULERMAC,
+  "GAUSSCHEB" : chronusQ.GRID_TYPE.GAUSSCHEBFST
 }
 
 dftWeightScheme = {
- "BECKE"  : chronusQ.DFT_WEIGHT_SCHEME.BECKE,
- "FRISCH" : chronusQ.DFT_WEIGHT_SCHEME.FRISCH
+ "BECKE"  : chronusQ.ATOMIC_PARTITION.BECKE,
+ "FRISCH" : chronusQ.ATOMIC_PARTITION.FRISCH
 }

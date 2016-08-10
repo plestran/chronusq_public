@@ -23,8 +23,3 @@ target_link_libraries(aointegrals LINK_PUBLIC grid)
 target_link_libraries(aointegrals LINK_PUBLIC ${EXTERNAL_CQ_DEPS})
 endif()
 
-if(USE_LIBINT)
-if(BUILD_LIBINT)
- add_dependencies(aointegrals libint)
-endif()
-endif()

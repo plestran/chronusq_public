@@ -53,16 +53,11 @@ namespace ChronusQ {
 */
 
   template<>
-  boost::python::list RealTime<double>::lastDipole(){
+  boost::python::list RealTime<double>::lastDipole_python(){
     boost::python::list result;
     for(auto i = 0; i < 4; i++)
       result.append(this->propInfo[this->propInfo.size()-1].dipole[i]);
     return result;
-  }
-
-  template<>
-  double RealTime<double>::lastEnergy(){
-    return this->propInfo[this->propInfo.size()-1].energy;
   }
 
   template<>
@@ -70,16 +65,11 @@ namespace ChronusQ {
     return this->propInfo[this->propInfo.size()-1].timeStep;
   }
   template<>
-  boost::python::list RealTime<dcomplex>::lastDipole(){
+  boost::python::list RealTime<dcomplex>::lastDipole_python(){
     boost::python::list result;
     for(auto i = 0; i < 4; i++)
       result.append(this->propInfo[this->propInfo.size()-1].dipole[i]);
     return result;
-  }
-
-  template<>
-  double RealTime<dcomplex>::lastEnergy(){
-    return this->propInfo[this->propInfo.size()-1].energy;
   }
 
   template<>

@@ -23,6 +23,18 @@ int main() {
     CQSetNumThreads(1); //Sets up open MP threads
 
 /*
+// H Atom
+    molecule.setCharge(0);
+    molecule.setNTotalE(1);
+    molecule.setMultip(2);
+    molecule.setNAtoms(1);
+    molecule.alloc();
+
+    molecule.setIndex(0,HashAtom("H",0));
+    molecule.setCart(0,0.0,0.0,0.0);
+*/
+
+/*
 // H2
     molecule.setCharge(0);
     molecule.setNTotalE(2);
@@ -37,6 +49,7 @@ int main() {
     molecule.setCart(1,0.5,0.0,0.0);
 */
 
+/*
 // O2
     molecule.setCharge(0);
     molecule.setNTotalE(16);
@@ -49,7 +62,7 @@ int main() {
 
     molecule.setCart(0,-0.74,0.0,0.0); //In Angstroms!
     molecule.setCart(1,0.74,0.0,0.0);
-
+*/
 
 /*
 // Li3
@@ -68,7 +81,7 @@ int main() {
     molecule.setCart(2,0.0,1.81865,0.0);
 */
 
-/*
+
 // WATER (H2O)
     molecule.setCharge(0);
     molecule.setNTotalE(10);
@@ -83,7 +96,7 @@ int main() {
     molecule.setCart(0,0.0,0.110843,0.0);
     molecule.setCart(1,0.783809,-0.443452,0.0);
     molecule.setCart(2,-0.783809,-0.443452,0.0);
-*/
+
 
 /*
 // Two WATER (H20)
@@ -133,7 +146,6 @@ int main() {
     molecule.setCart(3,-1.168237,3.527873,2.039804);
     molecule.setCart(4,-1.718167,1.099499,0.751562);
     molecule.setCart(5,-0.897365,1.389691,2.266534);
-
 */
 
     molecule.convBohr();
@@ -144,12 +156,13 @@ int main() {
     molecule.computeI();
 
     singleSlater.setRef(SingleSlater<dcomplex>::TCS); //TCS == GHF?
+    singleSlater.setGuess(SingleSlater<dcomplex>::CORE);
     singleSlater.setSCFEneTol(1e-12);
     singleSlater.setNTCS(2);
     singleSlater.isClosedShell = false;
     singleSlater.doDIIS = false;
 
-    basis.findBasisFile("STO3G");
+    basis.findBasisFile("6-31G");
     basis.communicate(fileio);  // This function passes fileio reference 
     basis.parseGlobal(); //Reads entire basis set file into memory
     basis.constructLocal(&molecule);
@@ -160,7 +173,7 @@ int main() {
     singleSlater.communicate(molecule,basis,aoints,fileio,memManager);
     moints.communicate(molecule,basis,fileio,aoints,singleSlater);
 
-    aoints.setPrintLevel(2);
+    aoints.setPrintLevel(2); //Prints out matrices from X2C routine
     aoints.initMeta();
     aoints.integralAlgorithm = AOIntegrals::INCORE;
     aoints.doX2C = true;
@@ -168,20 +181,15 @@ int main() {
     
     singleSlater.initMeta();
     singleSlater.genMethString();
+    singleSlater.setPrintLevel(1);
 
-//    fileio.out << "Allocate memory for aoints and singleSlater" << endl;
     aoints.alloc();
     singleSlater.alloc();
 
-//    cout << "Form Guess" << endl;
     singleSlater.formGuess();
-//    cout << "Form Fock" << endl;
     singleSlater.formFock();
-//    fileio.out << "Compute Energy" << endl;
     singleSlater.computeEnergy();
-//    fileio.out << "Do SCF" << endl;
-    singleSlater.SCF2();
-//    fileio.out << "Compute Properties" << endl;
+    singleSlater.SCF3();
     singleSlater.computeProperties();
     singleSlater.printProperties();
 

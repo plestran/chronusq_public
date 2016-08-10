@@ -10,8 +10,3 @@ target_link_libraries(grid2 LINK_PUBLIC cerr)
 target_link_libraries(grid2 LINK_PUBLIC ${EXTERNAL_CQ_DEPS})
 endif()
 
-if(USE_LIBINT)
-if(BUILD_LIBINT)
- add_dependencies(grid2 libint)
-endif()
-endif()

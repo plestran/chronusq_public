@@ -101,8 +101,8 @@ void BasisSet::makeBasisMap(){
   this->basisMap[def2SVPD]      = std::string(BASIS_PATH) + "/def2-svpd.gbs";
   this->basisMap[def2TZVP]      = std::string(BASIS_PATH) + "/def2-tzvp.gbs";
 
-  this->basisKey["STO3G"]         = PopleSTO3G;
-  this->basisKey["STO6G"]         = PopleSTO6G;
+  this->basisKey["STO-3G"]         = PopleSTO3G;
+  this->basisKey["STO-6G"]         = PopleSTO6G;
   this->basisKey["3-21G"]         = Pople321G;
   this->basisKey["4-31G"]         = Pople431G;
   this->basisKey["6-31G"]         = Pople631G;
@@ -118,18 +118,22 @@ void BasisSet::makeBasisMap(){
 }; // BasisSet::makeBasisMap
 
 void BasisSet::makeMapPrim2Bf(){
-  this->mapPrim2Bf_ = std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nPrimitive_));
+  this->mapPrim2Bf_ = 
+   std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nPrimitive_));
   double * memAddress = this->mapPrim2Bf_->data();
   for (auto iSh = 0; iSh < this->nShell_; iSh++){
     int nPrim = this->shells_[iSh].contr[0].coeff.size();
     int nBf   = this->shells_[iSh].size();
     for (auto iP = 0; iP < nPrim; iP++)
     for (auto iBf = 0; iBf < nBf; iBf++){
-      memAddress[(iP*nBf + iBf)*this->nBasis_ + iBf] = this->unNormCons_[iSh][iP];
+      memAddress[(iP*nBf + iBf)*this->nBasis_ + iBf] = 
+        this->unNormCons_[iSh][iP];
       }
     memAddress += this->nBasis_ * (nPrim * nBf) + nBf;
-//    prettyPrint(cout,*this->mapPrim2Bf_,"MAP");
   }
+  //  prettyPrint(cout,*this->mapPrim2Bf_,"MAP");
+
+//
 /*
 for(auto iSh = 0, iBf = 0, iPrim = 0;
       iSh < this->nShell_; 
@@ -145,7 +149,7 @@ for(auto iSh = 0, iBf = 0, iPrim = 0;
       this->mapPrim2Bf_->block(jBf,jPrim,1,nPrim) = PrimCoeff;
     }
   }
-  */
+*/
 //  prettyPrint(cout,*this->mapPrim2Bf_,"MAP");
 };
 

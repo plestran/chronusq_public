@@ -9,8 +9,3 @@ target_link_libraries(sdresponse LINK_PUBLIC mointegrals)
 target_link_libraries(sdresponse LINK_PUBLIC ${EXTERNAL_CQ_DEPS})
 endif()
 
-if(USE_LIBINT)
-if(BUILD_LIBINT)
- add_dependencies(sdresponse libint)
-endif()
-endif()

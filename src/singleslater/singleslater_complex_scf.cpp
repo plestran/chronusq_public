@@ -85,7 +85,7 @@ void SingleSlater<dcomplex>::evalConver(int iter){
     new (&POldAlpha) ComplexMap(
       this->POldAlphaMem_,this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_
     );
-    if(!this->isClosedShell && this->Ref_ != TCS){
+    if(!this->isClosedShell && this->nTCS_ == 1){
       new (&POldBeta) ComplexMap(
         this->POldBetaMem_,this->nBasis_,this->nBasis_
       );
@@ -98,7 +98,7 @@ void SingleSlater<dcomplex>::evalConver(int iter){
     EDelta = this->totalEnergy - EOld;
  
     PAlphaRMS = ((*this->onePDMA_).cwiseAbs() - POldAlpha.cwiseAbs()).norm();
-    if(!this->isClosedShell && this->Ref_ != TCS) 
+    if(!this->isClosedShell && this->nTCS_ == 1) 
       PBetaRMS = ((*this->onePDMB_).cwiseAbs() - POldBeta.cwiseAbs()).norm();
  
     if(this->printLevel_ > 0) 
@@ -121,58 +121,9 @@ void SingleSlater<dcomplex>::evalConver(int iter){
 }
 
 template<>
-void SingleSlater<dcomplex>::mixOrbitalsSCF(){
-    return;
-  auto nO = this->nAE_ + this->nBE_;
-  if(this->Ref_ == TCS){
-  //CErr();
-  this->fileio_->out << "** Mixing Alpha-Beta Orbitals for 2C Guess **" << endl;
-  Eigen::VectorXcd HOMOA,LUMOB;
-  int indxHOMOA = -1, indxLUMOB = -1;
-  auto nOrb = this->nBasis_;
-  double maxPercentNonZeroAlpha = 0;
-
-  for(auto i = nO-1; i >= 0; i--){
-    auto nNonZeroAlpha = 0;
-    for(auto j = 0; j < this->nTCS_*this->nBasis_; j+=2){
-      auto aComp = (*this->moA_)(j,i);
-      auto bComp = (*this->moA_)(j+1,i);
-      if(std::norm(aComp) > 1e-12 && std::norm(bComp) < 1e-12) nNonZeroAlpha++;
-    }
-    double percentNonZeroAlpha = (double)nNonZeroAlpha/(double)nOrb;
-    if(percentNonZeroAlpha > maxPercentNonZeroAlpha){
-      maxPercentNonZeroAlpha = percentNonZeroAlpha;
-      indxHOMOA = i;
-    }
-  }
-
-  double maxPercentNonZeroBeta = 0;
-  for(auto i = nO; i < this->nTCS_*this->nBasis_; i++){
-    auto nNonZeroBeta = 0;
-    for(auto j = 1; j < this->nTCS_*this->nBasis_; j+=2){
-      auto aComp = (*this->moA_)(j-1,i);
-      auto bComp = (*this->moA_)(j,i);
-      if(std::norm(bComp) > 1e-12 && std::norm(aComp) < 1e-12) nNonZeroBeta++;
-    }
-    double percentNonZeroBeta = (double)nNonZeroBeta/(double)nOrb;
-    if(percentNonZeroBeta > maxPercentNonZeroBeta){
-      maxPercentNonZeroBeta = percentNonZeroBeta;
-      indxLUMOB = i;
-    }
-  }
-
-  if(indxHOMOA == -1 || indxLUMOB == -1){
-    this->fileio_->out 
-      << "TCS orbital swap failed to find suitable Alpha-Beta pair" << endl;
-    return;
-  }
-  
-  HOMOA = this->moA_->col(indxHOMOA) ;
-  LUMOB = this->moA_->col(indxLUMOB) ;
-  this->moA_->col(indxHOMOA) = std::sqrt(0.5) * (HOMOA + LUMOB);
-  this->moA_->col(indxLUMOB) = std::sqrt(0.5) * (HOMOA - LUMOB);
-  }
+void SingleSlater<dcomplex>::mixOrbitalsComplex(){
   this->fileio_->out << "** Mixing HOMO and LUMO for Complex Guess **" << endl;
+  auto nO = this->nAE_ + this->nBE_;
   if (this->Ref_==TCS) {
     auto HOMO = this->moA_->col(nO-1);
     auto LUMO = this->moA_->col(nO);
@@ -421,5 +372,173 @@ void SingleSlater<dcomplex>::orthoDen(){
       Quantum<dcomplex>::spinGather(*this->onePDMA_,*this->onePDMB_,toGather);
   }
 };
+
+template<>
+void SingleSlater<dcomplex>::doImagTimeProp(double dt){
+  /* Propagate MO coefficients in imaginary time as an alternative to SCF
+   * C(new) = exp(-dt * F(current)) * C(current) 
+   */
+  this->formFock(); // Need orthonormal Fock to propagate
+  this->orthoFock();
+
+  ComplexMatrix propagator = ( -dt * (*this->fockOrthoA_) ).exp();
+  ComplexMatrix newMOs     = propagator * (*this->moA_);
+  *this->moA_              = newMOs; // New MO coefficients are not orthogonal
+  propagator               = (*this->moA_).householderQr().householderQ();
+  *this->moA_              = propagator;
+  if(!this->isClosedShell && this->nTCS_ == 1){
+    propagator  = ( -dt * (*this->fockOrthoB_) ).exp();
+    newMOs      = propagator * (*this->moB_);
+    *this->moB_ = newMOs; // New MO coefficients are not orthogonal
+    propagator  = (*this->moB_).householderQr().householderQ();
+    *this->moB_ = propagator;
+  }
+};
+
+template<>
+void SingleSlater<dcomplex>::unOrthoDen(){
+  if(this->nTCS_ == 1 && this->isClosedShell) {
+    this->NBSqScratch_->real() = 
+      (*this->aointegrals_->ortho1_) * this->onePDMOrthoA_->real();
+    this->NBSqScratch_->imag() = 
+      (*this->aointegrals_->ortho1_) * this->onePDMOrthoA_->imag();
+
+    this->onePDMA_->real() = 
+      this->NBSqScratch_->real() * (*this->aointegrals_->ortho1_);
+    this->onePDMA_->imag() = 
+      this->NBSqScratch_->imag() * (*this->aointegrals_->ortho1_);
+
+
+  } else {
+    this->NBSqScratch_->real() = 
+      (*this->aointegrals_->ortho1_) * this->onePDMOrthoScalar_->real();
+    this->NBSqScratch_->imag() = 
+      (*this->aointegrals_->ortho1_) * this->onePDMOrthoScalar_->imag();
+
+    this->onePDMScalar_->real() = 
+      this->NBSqScratch_->real() * (*this->aointegrals_->ortho1_);
+    this->onePDMScalar_->imag() = 
+      this->NBSqScratch_->imag() * (*this->aointegrals_->ortho1_);
+
+
+    this->NBSqScratch_->real() = 
+      (*this->aointegrals_->ortho1_) * this->onePDMOrthoMz_->real();
+    this->NBSqScratch_->imag() = 
+      (*this->aointegrals_->ortho1_) * this->onePDMOrthoMz_->imag();
+
+    this->onePDMMz_->real() = 
+      this->NBSqScratch_->real() * (*this->aointegrals_->ortho1_);
+    this->onePDMMz_->imag() = 
+      this->NBSqScratch_->imag() * (*this->aointegrals_->ortho1_);
+
+
+    std::vector<std::reference_wrapper<ComplexMap>> toGather;
+    toGather.emplace_back(*this->onePDMScalar_);
+    toGather.emplace_back(*this->onePDMMz_);
+
+    if(this->nTCS_ == 2) {
+      this->NBSqScratch_->real() = 
+        (*this->aointegrals_->ortho1_) * this->onePDMOrthoMx_->real();
+      this->NBSqScratch_->imag() = 
+        (*this->aointegrals_->ortho1_) * this->onePDMOrthoMx_->imag();
+     
+      this->onePDMMx_->real() = 
+        this->NBSqScratch_->real() * (*this->aointegrals_->ortho1_);
+      this->onePDMMx_->imag() = 
+        this->NBSqScratch_->imag() * (*this->aointegrals_->ortho1_);
+
+
+      this->NBSqScratch_->real() = 
+        (*this->aointegrals_->ortho1_) * this->onePDMOrthoMy_->real();
+      this->NBSqScratch_->imag() = 
+        (*this->aointegrals_->ortho1_) * this->onePDMOrthoMy_->imag();
+     
+      this->onePDMMy_->real() = 
+        this->NBSqScratch_->real() * (*this->aointegrals_->ortho1_);
+      this->onePDMMy_->imag() = 
+        this->NBSqScratch_->imag() * (*this->aointegrals_->ortho1_);
+
+
+      toGather.emplace_back(*this->onePDMMy_);
+      toGather.emplace_back(*this->onePDMMx_);
+      Quantum<dcomplex>::spinGather(*this->onePDMA_,toGather);
+    } else
+      Quantum<dcomplex>::spinGather(*this->onePDMA_,*this->onePDMB_,toGather);
+  }
+};
+
+template<>
+void SingleSlater<dcomplex>::orthoDen2(){
+  if(this->nTCS_ == 1 && this->isClosedShell) {
+    this->NBSqScratch_->real() = 
+      (*this->aointegrals_->ortho1_) * this->onePDMA_->real();
+    this->NBSqScratch_->imag() = 
+      (*this->aointegrals_->ortho1_) * this->onePDMA_->imag();
+
+    this->onePDMOrthoA_->real() = 
+      this->NBSqScratch_->real() * (*this->aointegrals_->ortho1_);
+    this->onePDMOrthoA_->imag() = 
+      this->NBSqScratch_->imag() * (*this->aointegrals_->ortho1_);
+
+
+  } else {
+    this->NBSqScratch_->real() = 
+      (*this->aointegrals_->ortho1_) * this->onePDMScalar_->real();
+    this->NBSqScratch_->imag() = 
+      (*this->aointegrals_->ortho1_) * this->onePDMScalar_->imag();
+
+    this->onePDMOrthoScalar_->real() = 
+      this->NBSqScratch_->real() * (*this->aointegrals_->ortho1_);
+    this->onePDMOrthoScalar_->imag() = 
+      this->NBSqScratch_->imag() * (*this->aointegrals_->ortho1_);
+
+
+    this->NBSqScratch_->real() = 
+      (*this->aointegrals_->ortho1_) * this->onePDMMz_->real();
+    this->NBSqScratch_->imag() = 
+      (*this->aointegrals_->ortho1_) * this->onePDMMz_->imag();
+
+    this->onePDMOrthoMz_->real() = 
+      this->NBSqScratch_->real() * (*this->aointegrals_->ortho1_);
+    this->onePDMOrthoMz_->imag() = 
+      this->NBSqScratch_->imag() * (*this->aointegrals_->ortho1_);
+
+
+    std::vector<std::reference_wrapper<ComplexMap>> toGather;
+    toGather.emplace_back(*this->onePDMOrthoScalar_);
+    toGather.emplace_back(*this->onePDMOrthoMz_);
+
+    if(this->nTCS_ == 2) {
+      this->NBSqScratch_->real() = 
+        (*this->aointegrals_->ortho1_) * this->onePDMMx_->real();
+      this->NBSqScratch_->imag() = 
+        (*this->aointegrals_->ortho1_) * this->onePDMMx_->imag();
+     
+      this->onePDMOrthoMx_->real() = 
+        this->NBSqScratch_->real() * (*this->aointegrals_->ortho1_);
+      this->onePDMOrthoMx_->imag() = 
+        this->NBSqScratch_->imag() * (*this->aointegrals_->ortho1_);
+
+
+      this->NBSqScratch_->real() = 
+        (*this->aointegrals_->ortho1_) * this->onePDMMy_->real();
+      this->NBSqScratch_->imag() = 
+        (*this->aointegrals_->ortho1_) * this->onePDMMy_->imag();
+     
+      this->onePDMOrthoMy_->real() = 
+        this->NBSqScratch_->real() * (*this->aointegrals_->ortho1_);
+      this->onePDMOrthoMy_->imag() = 
+        this->NBSqScratch_->imag() * (*this->aointegrals_->ortho1_);
+
+
+      toGather.emplace_back(*this->onePDMOrthoMy_);
+      toGather.emplace_back(*this->onePDMOrthoMx_);
+      Quantum<dcomplex>::spinGather(*this->onePDMOrthoA_,toGather);
+    } else
+      Quantum<dcomplex>::spinGather(*this->onePDMOrthoA_,*this->onePDMOrthoB_,
+        toGather);
+  }
+};
+
 
 } // namespace ChronusQ

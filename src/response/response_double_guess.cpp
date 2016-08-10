@@ -277,7 +277,7 @@ void Response<double>::formGuess(){
     dims.push_back(this->nMatDim_[iMat]);
 
     H5::DataSet *gfPtr = 
-      this->fileio_->createScratchPartition(H5::PredType::NATIVE_DOUBLE,name,dims);
+      this->fileio_->createScratchPartition(H5PredType<double>(),name,dims);
     this->guessFiles_.push_back(gfPtr);
 
     // Initialize an index vector with increasing ints

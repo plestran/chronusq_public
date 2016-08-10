@@ -145,7 +145,7 @@ void SingleSlater<double>::writeSCFFiles(){
       H5::PredType::NATIVE_DOUBLE);
   this->fileio_->alphaMO->write(this->moA_->data(),
       H5::PredType::NATIVE_DOUBLE);
-  if(!this->isClosedShell && this->Ref_ != TCS){
+  if(!this->isClosedShell && this->nTCS_ == 1){
     this->fileio_->betaSCFDen->write(this->onePDMB_->data(),
         H5::PredType::NATIVE_DOUBLE);
     this->fileio_->betaMO->write(this->moB_->data(),

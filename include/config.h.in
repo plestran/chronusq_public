@@ -22,4 +22,6 @@
 // Libint Information
 #cmakedefine USE_LIBINT
 
+#cmakedefine CQ_ENABLE_LIBXC
+
 #cmakedefine UNIX

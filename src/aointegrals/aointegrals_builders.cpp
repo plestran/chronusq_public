@@ -435,12 +435,18 @@ void AOIntegrals::computeAOOneE(){
  // This is the X2C transformation!
  // -------------------------------
   if (this->doX2C && this->isPrimary) {
-  //    printf("\n now going into X2C transformation \n");
-      this->formP2Transformation();
+    if(this->printLevel_ >= 3){
+      cout << endl <<" Now going into X2C transformation " << endl;
+      }
+    this->formP2Transformation();
 	}
   else {
-  //    printf("not doing X2C \n");
-	}
+    if(this->printLevel_ >= 3){
+      cout << endl << " Bypassing Relativistic Transformation " << endl;
+	  }
+    }
+  //-----------------------------
+  
   if(this->printLevel_ >= 2) this->printOneE();
 
   // Compute time differenes
@@ -523,7 +529,8 @@ void AOIntegrals::computeAOTwoE(){
   std::vector<libint2::Engine> engines(nthreads);
   engines[0] = libint2::Engine(libint2::Operator::coulomb,
       this->basisSet_->maxPrim(),this->basisSet_->maxL(),0);
-  engines[0].set_precision(std::numeric_limits<double>::epsilon());
+  //engines[0].set_precision(std::numeric_limits<double>::epsilon());
+  engines[0].set_precision(0.0);
 
   for(int i=1; i<nthreads; i++) engines[i] = engines[0];
   if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(); 
@@ -557,8 +564,8 @@ void AOIntegrals::computeAOTwoE(){
           int n4    = this->basisSet_->shells(s4).size();
     
           // Schwartz and Density screening
-          if((*this->schwartz_)(s1,s2) * (*this->schwartz_)(s3,s4)
-              < this->thresholdSchwartz_ ) continue;
+        //if((*this->schwartz_)(s1,s2) * (*this->schwartz_)(s3,s4)
+        //    < this->thresholdSchwartz_ ) continue;
  
           const double* buff = engines[thread_id].compute(
             this->basisSet_->shells(s1),
@@ -753,11 +760,31 @@ void AOIntegrals::computeLowdin() {
   for(auto i = 0; i < this->nBasis_; i++)
     S.col(i) /= std::sqrt(ovlpEigValues[i]);
 
-  (*this->ortho1_) = S * V.transpose();
+  this->ortho1_->noalias() = S * V.transpose();
 
   for(auto i = 0; i < this->nBasis_; i++)
     S.col(i) *= ovlpEigValues[i];
 
-  (*this->ortho2_) = S * V.transpose();
+  this->ortho2_->noalias() = S * V.transpose();
 //prettyPrint(cout,(*this->ortho1_),"XN");
+};
+
+void AOIntegrals::computeCholesky(){
+  char UPLO = 'L';
+  int INFO;
+  
+  std::vector<double> SCpy(this->nBasis_*this->nBasis_);
+
+  std::copy(this->overlap_->data(),
+    this->overlap_->data() + this->nBasis_*this->nBasis_,
+    SCpy.data());
+
+  dpotrf_(&UPLO,&this->nBasis_,SCpy.data(),&this->nBasis_,&INFO);
+  RealMap V(SCpy.data(),this->nBasis_,this->nBasis_);
+  V = V.triangularView<Lower>();
+  this->ortho2_->noalias() = V;
+
+  dpotri_(&UPLO,&this->nBasis_,SCpy.data(),&this->nBasis_,&INFO);
+  this->ortho1_->noalias() = this->ortho2_->transpose() * V;
+  (*this->ortho1_) = this->ortho1_->triangularView<Lower>();
 };

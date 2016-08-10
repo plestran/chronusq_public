@@ -39,7 +39,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("computeProperties",&SingleSlater<double>::computeProperties      )
     .def("printMultipole"  , &SingleSlater<double>::printMultipole         )
     .def("printProperties" , &SingleSlater<double>::printProperties        )
-    .def("SCF"             , &SingleSlater<double>::SCF2                   )
+    .def("SCF"             , &SingleSlater<double>::SCF3                   )
     .def("communicate"     , &SingleSlater<double>::communicate            )
     .def("initMeta"        , &SingleSlater<double>::initMeta               )
     .def("alloc"           , &SingleSlater<double>::alloc                  )
@@ -52,6 +52,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setSCFDenTol"    , &SingleSlater<double>::setSCFDenTol           )
     .def("setSCFEneTol"    , &SingleSlater<double>::setSCFEneTol           )
     .def("setSCFMaxIter"   , &SingleSlater<double>::setSCFMaxIter          )
+    .def("setITPdt"        , &SingleSlater<double>::setITPdt               )
     .def("setField"        , &SingleSlater<double>::Wrapper_setField       )
     .def("setGuess"        , &SingleSlater<double>::setGuess               )
     .def("setDFTKernel"    , &SingleSlater<double>::setDFTKernel           )
@@ -84,6 +85,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def_readwrite("isGGA"        , &SingleSlater<double>::isGGA           )
     .def_readwrite("isHF"         , &SingleSlater<double>::isHF            )
     .def_readwrite("doDIIS"       , &SingleSlater<double>::doDIIS          )
+    .def_readwrite("doITP"        , &SingleSlater<double>::doITP           )
   ;
 
   class_<SingleSlater<dcomplex>,boost::noncopyable>("SingleSlater_complex",
@@ -97,7 +99,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("computeProperties",&SingleSlater<dcomplex>::computeProperties      )
     .def("printMultipole"  , &SingleSlater<dcomplex>::printMultipole         )
     .def("printProperties" , &SingleSlater<dcomplex>::printProperties        )
-    .def("SCF"             , &SingleSlater<dcomplex>::SCF2                   )
+    .def("SCF"             , &SingleSlater<dcomplex>::SCF3                   )
     .def("communicate"     , &SingleSlater<dcomplex>::communicate            )
     .def("initMeta"        , &SingleSlater<dcomplex>::initMeta               )
     .def("alloc"           , &SingleSlater<dcomplex>::alloc                  )
@@ -110,6 +112,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setSCFDenTol"    , &SingleSlater<dcomplex>::setSCFDenTol           )
     .def("setSCFEneTol"    , &SingleSlater<dcomplex>::setSCFEneTol           )
     .def("setSCFMaxIter"   , &SingleSlater<dcomplex>::setSCFMaxIter          )
+    .def("setITPdt"        , &SingleSlater<dcomplex>::setITPdt               )
     .def("setField"        , &SingleSlater<dcomplex>::Wrapper_setField       )
     .def("setGuess"        , &SingleSlater<dcomplex>::setGuess               )
     .def("setDFTKernel"    , &SingleSlater<dcomplex>::setDFTKernel           )
@@ -143,6 +146,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def_readwrite("isGGA"        , &SingleSlater<dcomplex>::isGGA           )
     .def_readwrite("isHF"         , &SingleSlater<dcomplex>::isHF            )
     .def_readwrite("doDIIS"       , &SingleSlater<dcomplex>::doDIIS          )
+    .def_readwrite("doITP"        , &SingleSlater<dcomplex>::doITP           )
   ;
 
   enum_<SingleSlater<double>::REFERENCE>("Reference")
@@ -151,6 +155,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("UHF"           , SingleSlater<double>::UHF                    )
     .value("CUHF"          , SingleSlater<double>::CUHF                   )
     .value("TCS"           , SingleSlater<double>::TCS                    )
+    .value("X2C"           , SingleSlater<double>::X2C                    )
 //  .value("RKS"           , SingleSlater<double>::RKS                    )
 //  .value("UKS"           , SingleSlater<double>::UKS                    )
 //  .value("CUKS"          , SingleSlater<double>::CUKS                   )
@@ -158,9 +163,10 @@ BOOST_PYTHON_MODULE(libpythonapi){
   ;
 
   enum_<SingleSlater<double>::GUESS>("Guess")
-    .value("SAD"  , SingleSlater<double>::SAD  )
-    .value("CORE" , SingleSlater<double>::CORE )
-    .value("READ" , SingleSlater<double>::READ )
+    .value("SAD"    , SingleSlater<double>::SAD    )
+    .value("CORE"   , SingleSlater<double>::CORE   )
+    .value("READ"   , SingleSlater<double>::READ   )
+    .value("RANDOM" , SingleSlater<double>::RANDOM )
   ;
 
 /*
@@ -183,6 +189,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("LSDA"       , SingleSlater<double>::LSDA       )
   ;
 
+/*
   enum_<SingleSlater<double>::DFT_RAD_GRID>("DFT_RAD_GRID")
     .value("EULERMACL", SingleSlater<double>::EULERMACL)
     .value("GAUSSCHEB", SingleSlater<double>::GAUSSCHEB)
@@ -190,6 +197,18 @@ BOOST_PYTHON_MODULE(libpythonapi){
   enum_<SingleSlater<double>::DFT_WEIGHT_SCHEME>("DFT_WEIGHT_SCHEME")
     .value("BECKE",  SingleSlater<double>::BECKE )
     .value("FRISCH", SingleSlater<double>::FRISCH)
+  ;
+*/
+
+  enum_<GRID_TYPE>("GRID_TYPE")
+    .value("GAUSSCHEBFST",  GRID_TYPE::GAUSSCHEBFST)
+    .value("GAUSSCHEBSND",  GRID_TYPE::GAUSSCHEBSND)
+    .value("EULERMAC",      GRID_TYPE::EULERMAC)
+    .value("LEBEDEV" ,      GRID_TYPE::LEBEDEV)
+  ;
+  enum_<ATOMIC_PARTITION>("ATOMIC_PARTITION")
+    .value("BECKE",  ATOMIC_PARTITION::BECKE )
+    .value("FRISCH", ATOMIC_PARTITION::FRISCH)
   ;
     
 
@@ -214,6 +233,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("computeI",      &Molecule::computeI         )
     .def("computeRij",    &Molecule::computeRij       )
     .def("cart",          &Molecule::Wrapper_cart     )
+    .def("nAtoms",        &Molecule::nAtoms           )
   ;
 
   class_<BasisSet,boost::noncopyable>("BasisSet",init<>())
@@ -268,6 +288,8 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def_readonly("integralAlgorithm", &AOIntegrals::integralAlgorithm)
 //  .def_readwrite("allocERI", &AOIntegrals::allocERI           )
 //  .def_readwrite("doDF"    , &AOIntegrals::doDF               )
+    .def_readwrite("doX2C"   , &AOIntegrals::doX2C              )
+    .def_readwrite("useFiniteWidthNuclei", &AOIntegrals::useFiniteWidthNuclei)
   ;
 
   enum_<AOIntegrals::INTEGRAL_ALGORITHM>("AOIntegrals_INTEGRAL_ALGORITHM")
@@ -300,7 +322,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setPrintLevel", &RealTime<double>::setPrintLevel)
     .def("printRT"      , &RealTime<double>::printRT      )
     //.def("recs"         , &RealTime<double>::Wrapper_recs )
-    .def("lastDipole"   , &RealTime<double>::lastDipole   )
+    .def("lastDipole"   , &RealTime<double>::lastDipole_python   )
     .def("lastEnergy"   , &RealTime<double>::lastEnergy   )
     .def("getTimeStep"  , &RealTime<double>::getTimeStep  )
     .def("doNotTarCSV"  , &RealTime<double>::doNotTarCSV  )
@@ -331,7 +353,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setPrintLevel", &RealTime<dcomplex>::setPrintLevel)
     .def("printRT"      , &RealTime<dcomplex>::printRT      )
 //    .def("recs"         , &RealTime<dcomplex>::Wrapper_recs )
-    .def("lastDipole"   , &RealTime<dcomplex>::lastDipole   )
+    .def("lastDipole"   , &RealTime<dcomplex>::lastDipole_python   )
     .def("lastEnergy"   , &RealTime<dcomplex>::lastEnergy   )
     .def("getTimeStep"  , &RealTime<dcomplex>::getTimeStep  )
     .def("doNotTarCSV"  , &RealTime<dcomplex>::doNotTarCSV  )

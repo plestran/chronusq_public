@@ -47,8 +47,3 @@ endif()
 #  DESTINATION "${PROJECT_BINARY_DIR}/src/python"
 #  FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
 #)
-if(USE_LIBINT)
-if(BUILD_LIBINT)
- add_dependencies(pythonapi libint)
-endif()
-endif()

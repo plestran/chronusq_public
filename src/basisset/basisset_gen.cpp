@@ -108,6 +108,10 @@ void BasisSet::constructExtrn(Molecule * mol, BasisSet *genBasis){
           genBasis->shellsCQ.push_back(ChronusQ::ShellCQ{genBasis->shells_[nShell]});
           nShell++;
         }
+        for(auto iCons = (*iRef).unNormalizedCons.begin(); 
+            iCons != (*iRef).unNormalizedCons.end(); ++iCons){
+          genBasis->unNormCons_.push_back(*iCons);
+        }
         found = true;
       }
     } // Loop iRef

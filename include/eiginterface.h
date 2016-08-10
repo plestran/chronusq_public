@@ -37,7 +37,7 @@ const auto PRINT_SMALL = 1e-10;
 namespace Eigen {
   template<typename Derived>
   void prettyPrint(std::ostream & output, const Derived& m, std::string str,
-     size_t printWidth = 15){
+     size_t printWidth = 16){
   int list = 5;
   int i,j,k,n,end,endLT;
   output.precision(10);

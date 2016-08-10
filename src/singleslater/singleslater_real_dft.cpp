@@ -51,7 +51,8 @@ void SingleSlater<double>::formVXC_new(){
     start = std::chrono::high_resolution_clock::now();
   }
 */
-  bool isGGA   = true;
+//  bool isGGA   = true;
+//  bool isGGA   = false;
   RealMatrix SCRATCH2(this->nBasis_,this->nBasis_);
   VectorXd   SCRATCH1(this->nBasis_);
   RealMatrix SCRATCH2X(this->nBasis_,this->nBasis_);
@@ -61,7 +62,7 @@ void SingleSlater<double>::formVXC_new(){
   VectorXd   SCRATCH1Y(this->nBasis_);
   VectorXd   SCRATCH1Z(this->nBasis_);
   int NDer = 0;
-  if(isGGA) NDer = 1; 
+  if(this->isGGA) NDer = 1; 
 
   std::array<double,3>  drhoT = {0.0,0.0,0.0}; ///< array TOTAL density gradient components
   std::array<double,3>  drhoS = {0.0,0.0,0.0}; ///< array SPIN  density gradient components
@@ -74,9 +75,9 @@ void SingleSlater<double>::formVXC_new(){
 
   double rhoA;
   double rhoB;
-  double gammaAA;
-  double gammaBB;
-  double gammaAB;
+  double gammaAA = 0.0;
+  double gammaBB = 0.0;
+  double gammaAB = 0.0;
   std::vector<bool> shMap(this->basisset_->nShell()+1);
   int NSkip2(0);
   int NSkip3(0);
@@ -90,16 +91,20 @@ void SingleSlater<double>::formVXC_new(){
   std::vector<std::size_t> closeShells;
   VectorXd OmegaA(this->nBasis_), OmegaB(this->nBasis_);
   VectorXd DENCOL(this->nBasis_);
+  double fact = 2.0;
   double *SCRATCH1DATA = SCRATCH1.data();
   double *SCRATCH1XDATA = SCRATCH1X.data();
   double *SCRATCH1YDATA = SCRATCH1Y.data();
   double *SCRATCH1ZDATA = SCRATCH1Z.data();
   double *OmegaADATA = OmegaA.data();
+  double *OmegaBDATA = OmegaB.data();
 
   std::vector<std::size_t> shSizes;
   for(auto iSh = 0; iSh < this->basisset_->nShell(); iSh++)
     shSizes.push_back(this->basisset_->shells(iSh).size());
 
+//  closeShells.resize(this->basisset_->nShell());
+//  std::iota(closeShells.begin(),closeShells.end(),0);
   auto valVxc = [&](std::size_t iAtm, ChronusQ::IntegrationPoint &pt, 
   KernelIntegrand<double> &result) -> void {
 
@@ -138,7 +143,6 @@ void SingleSlater<double>::formVXC_new(){
 
     // Compute value of "close" basis functions at the given point
     for(auto iShell : closeShells) {
-    
       int shSize= shSizes[iShell];
       int iSt = this->basisset_->mapSh2Bf(iShell);
       double * buff = this->basisset_->basisDEval(NDer,this->basisset_->shells(iShell),&pt.pt);
@@ -171,7 +175,7 @@ void SingleSlater<double>::formVXC_new(){
       T3 += Newend - Newstart;
     }
 
-    if(S1Norm < 1e-9) {NSkip4++; return;}
+    if(S1Norm < this->epsScreen) {NSkip4++; return;}
 
 
     double rhoT(0.0);
@@ -195,38 +199,47 @@ void SingleSlater<double>::formVXC_new(){
           DENT = this->onePDMA_->data() + iBf*this->nBasis_;
         } else {
           DENT = this->onePDMScalar_->data() + iBf*this->nBasis_;
-          DENS = this->onePDMMx_->data() + iBf*this->nBasis_;
+          DENS = this->onePDMMz_->data() + iBf*this->nBasis_;
         }
 
         // Loop over close shells "J"
         for(auto jShell : closeShells) {
           int jSz= shSizes[jShell];
           int jSt = this->basisset_->mapSh2Bf(jShell);
-
-          double fact = 2.0;
           for(auto jBf = jSt; jBf < (jSt + jSz); jBf++){
-//            if(jBf < iBf) continue;
-//            else if (jBf != iBf) fact = 4.0;
-//            else fact = 2.0;
-            
             Pt = fact * DENT[jBf];
-
-            if(std::abs(Pt) > 1e-10 || std::abs(Ps) > 1e-10){
+            if(std::abs(Pt) > this->epsScreen){
               Tt += Pt * SCRATCH1DATA[jBf];
-//            Ts += Ps * SCRATCH1DATA[jBf];
             }
           } // jBf
         } // jShell      
+
+        if(this->nTCS_ == 1 && !this->isClosedShell){
+          for(auto jShell : closeShells) {
+            int jSz= shSizes[jShell];
+            int jSt = this->basisset_->mapSh2Bf(jShell);
+            for(auto jBf = jSt; jBf < (jSt + jSz); jBf++){
+              Ps = fact * DENS[jBf];
+              if( std::abs(Ps) > this->epsScreen){
+              Ts += Ps * SCRATCH1DATA[jBf];
+              }
+            } // jBf
+          } // jShell      
+        } //UKS
         rhoT += Tt * SCRATCH1DATA[iBf];
-//      rhoS += Ts * SCRATCH1DATA[iBf];
+        if(this->nTCS_ == 1 && !this->isClosedShell){
+          rhoS += Ts * SCRATCH1DATA[iBf];
+        }  //UKS
         if(NDer > 0) {
           drhoT[0] += Tt * SCRATCH1XDATA[iBf];
           drhoT[1] += Tt * SCRATCH1YDATA[iBf];
           drhoT[2] += Tt * SCRATCH1ZDATA[iBf];
-//        drhoS[0] += Ts * SCRATCH1XDATA[iBf];
-//        drhoS[1] += Ts * SCRATCH1YDATA[iBf];
-//        drhoS[2] += Ts * SCRATCH1ZDATA[iBf];
-        }
+          if(this->nTCS_ == 1 && !this->isClosedShell){
+            drhoS[0] += Ts * SCRATCH1XDATA[iBf];
+            drhoS[1] += Ts * SCRATCH1YDATA[iBf];
+            drhoS[2] += Ts * SCRATCH1ZDATA[iBf];
+          } //UKS
+        } //GGA
       } // iBf
     } // iShell
     if(doTimings){
@@ -246,20 +259,27 @@ void SingleSlater<double>::formVXC_new(){
       gammaAB = GradRhoA.dot(GradRhoB);           
     }
     
-    // Skip out if zero density
-    if  (rhoT < 1.0e-10) {NSkip5++; return;}
-
+//these if statements prevent numerical instability with zero guesses
+    if(rhoT    <= 0.0 ) {
+      if((std::abs(rhoT)) <= this->epsScreen) {
+        return;
+      }else{ 
+        CErr("Numerical noise in the density");
+      }
+    }else if(rhoT < this->epsScreen){
+     return;
+    }
     // Evaluate density functional
     DFTFunctional::DFTInfo kernelXC;
     for(auto i = 0; i < this->dftFunctionals_.size(); i++){
       if(doTimings) 
         Newstart = std::chrono::high_resolution_clock::now();
-      if (NDer > 0) {
-        kernelXC += this->dftFunctionals_[i]->eval(
-            rhoA,rhoB,gammaAA,gammaAB,gammaBB);
-      } else {
-        kernelXC += this->dftFunctionals_[i]->eval(rhoA, rhoB);
-      }
+//      if (NDer > 0) {
+      kernelXC += this->dftFunctionals_[i]->eval(
+          rhoA,rhoB,gammaAA,gammaAB,gammaBB);
+//      } else {
+//        kernelXC += this->dftFunctionals_[i]->eval(rhoA, rhoB);
+//      }
       if(doTimings){
         Newend = std::chrono::high_resolution_clock::now();
         TF[i] += Newend - Newstart;
@@ -270,30 +290,38 @@ void SingleSlater<double>::formVXC_new(){
     // Evaluate Functional derivatives
 
     if(doTimings) Newstart = std::chrono::high_resolution_clock::now();
-    for(auto iXYZ = 0; iXYZ < 3; iXYZ++){
-      double GA(GradRhoA(iXYZ)), GB(GradRhoB(iXYZ));
-      GradRhoA(iXYZ) = pt.weight * 
-        ( 2.0 * GA * kernelXC.ddgammaAA + GB * kernelXC.ddgammaAB);
-//    GradRhoB(iXYZ) = pt.weight * 
-//      ( 2.0 * GB * kernelXC.ddgammaBB + GA * kernelXC.ddgammaAB);
-    }
-
-    OmegaA.setZero(); 
-    for(auto iShell : closeShells) {
-//      int iSz = this->basisset_->shells(iShell).size();
-      int iSz= shSizes[iShell];
-      int iSt = this->basisset_->mapSh2Bf(iShell);
-
-      for(auto iBf = iSt; iBf < (iSt + iSz); iBf++){
-        OmegaADATA[iBf] += GradRhoA(0) * SCRATCH1XDATA[iBf] +
-                           GradRhoA(1) * SCRATCH1YDATA[iBf] +
-                           GradRhoA(2) * SCRATCH1ZDATA[iBf];
-//      OmegaB(iBf) += GradRhoB(0) * SCRATCH1X(iBf) +
-//                     GradRhoB(1) * SCRATCH1Y(iBf) +
-//                     GradRhoB(2) * SCRATCH1Z(iBf);
-      } // iBf
-    } // iShell
-
+      if(NDer > 0 ) {
+        for(auto iXYZ = 0; iXYZ < 3; iXYZ++){
+          double GA(GradRhoA(iXYZ)), GB(GradRhoB(iXYZ));
+            GradRhoA(iXYZ) = pt.weight * 
+              ( 2.0 * GA * kernelXC.ddgammaAA + GB * kernelXC.ddgammaAB);
+            GradRhoB(iXYZ) = pt.weight * 
+              ( 2.0 * GB * kernelXC.ddgammaBB + GA * kernelXC.ddgammaAB);
+        } // Grad
+        OmegaA.setZero(); 
+        for(auto iShell : closeShells) {
+          int iSz= shSizes[iShell];
+          int iSt = this->basisset_->mapSh2Bf(iShell);
+       
+          for(auto iBf = iSt; iBf < (iSt + iSz); iBf++){
+            OmegaADATA[iBf] += GradRhoA(0) * SCRATCH1XDATA[iBf] +
+                               GradRhoA(1) * SCRATCH1YDATA[iBf] +
+                               GradRhoA(2) * SCRATCH1ZDATA[iBf];
+          } // iBf
+        } // iShell
+        if(this->nTCS_ == 1 && !this->isClosedShell){
+          OmegaB.setZero(); 
+          for(auto iShell : closeShells) {
+             int iSz= shSizes[iShell];
+             int iSt = this->basisset_->mapSh2Bf(iShell);
+             for(auto iBf = iSt; iBf < (iSt + iSz); iBf++){
+                OmegaBDATA[iBf] += GradRhoB(0) * SCRATCH1XDATA[iBf] + 
+                                   GradRhoB(1) * SCRATCH1YDATA[iBf] + 
+                                   GradRhoB(2) * SCRATCH1ZDATA[iBf];  
+             } // iBf
+          } // iShell
+        } //UKS
+      } //GGA
     result.Energy += pt.weight * kernelXC.eps;
     kernelXC.ddrhoA *= pt.weight;
     kernelXC.ddrhoB *= pt.weight;
@@ -304,7 +332,6 @@ void SingleSlater<double>::formVXC_new(){
 
       for(auto iBf = iSt; iBf < (iSt + iSz); iBf++){
         double Ta = kernelXC.ddrhoA*SCRATCH1DATA[iBf] + OmegaADATA[iBf];
-//      double Tb = kernelXC.ddrhoB*SCRATCH1(iBf) + OmegaB(iBf);
         for(auto jShell : closeShells) {
           int jSz= shSizes[jShell];
           int jSt = this->basisset_->mapSh2Bf(jShell);
@@ -317,6 +344,26 @@ void SingleSlater<double>::formVXC_new(){
       } // iBf
     } // iShell
 
+    if(this->nTCS_ == 1 && !this->isClosedShell){
+      for(auto iShell : closeShells) {
+        int iSz= shSizes[iShell];
+        int iSt = this->basisset_->mapSh2Bf(iShell);
+  
+        for(auto iBf = iSt; iBf < (iSt + iSz); iBf++){
+          double Tb = kernelXC.ddrhoB*SCRATCH1DATA[iBf] + OmegaBDATA[iBf];
+          for(auto jShell : closeShells) {
+            int jSz= shSizes[jShell];
+            int jSt = this->basisset_->mapSh2Bf(jShell);
+            double *VXCDATB = result.VXCB.data() + iBf*this->nBasis_;
+            for(auto jBf = jSt; jBf < (jSt + jSz); jBf++){
+              if(jBf < iBf) continue;
+              VXCDATB[jBf] += Tb*SCRATCH1DATA[jBf] + SCRATCH1DATA[iBf]*OmegaBDATA[jBf]; 
+            } // jBf
+          } // jShell
+        } // iBf
+      } // iShell
+    } // UKS
+
     if(doTimings){
       Newend = std::chrono::high_resolution_clock::now();
       T5 += Newend - Newstart;
@@ -327,12 +374,25 @@ void SingleSlater<double>::formVXC_new(){
 //  ChronusQ::AtomicGrid AGrid(100,302,ChronusQ::GRID_TYPE::EULERMAC,
 //      ChronusQ::GRID_TYPE::LEBEDEV,ChronusQ::ATOMIC_PARTITION::BECKE,
 //      this->molecule_->cartArray(),this->molecule_->rIJ(),0,1.0,false);
-  ChronusQ::AtomicGrid AGrid(100,302,ChronusQ::GRID_TYPE::EULERMAC,
-      ChronusQ::GRID_TYPE::LEBEDEV,ChronusQ::ATOMIC_PARTITION::FRISCH,
-      this->molecule_->cartArray(),this->molecule_->rIJ(),0,1.0,false);
+
+
+//if(this->isGGA) cout << "GGA ON " << this->isGGA <<endl ; 
+//if(!this->isGGA) cout << "GGA OFF " << this->isGGA <<endl ; 
+/*
+  ChronusQ::AtomicGrid AGrid(this->nRadDFTGridPts_,this->nAngDFTGridPts_,
+      ChronusQ::GRID_TYPE::EULERMAC,ChronusQ::GRID_TYPE::LEBEDEV,
+      ChronusQ::ATOMIC_PARTITION::BECKE,this->molecule_->cartArray(),
+      this->molecule_->rIJ(),0,this->epsScreen,1e6,1.0,false);
+*/
+  ChronusQ::AtomicGrid AGrid(this->nRadDFTGridPts_,this->nAngDFTGridPts_,
+      static_cast<ChronusQ::GRID_TYPE>(this->dftGrid_),ChronusQ::GRID_TYPE::LEBEDEV,
+      static_cast<ChronusQ::ATOMIC_PARTITION>(this->weightScheme_),this->molecule_->cartArray(),
+      this->molecule_->rIJ(),0,this->epsScreen,1e6,1.0,false);
    
   KernelIntegrand<double> res(this->vXA_->cols());
-  this->basisset_->radcut(1.0e-10, 50, 1.0e-7);
+  //Screaning based on cutoff
+//  the radCutoof vector is populated in singleSlater_real_guess.cpp
+
   this->totalEx    = 0.0;
   this->vXA()->setZero();   // Set to zero every occurence of the SCF
 
@@ -343,10 +403,12 @@ void SingleSlater<double>::formVXC_new(){
       if(this->basisset_->mapSh2Cen(iSh)-1 != iAtm) continue;
       if(this->basisset_->radCutSh()[iSh] > atomRadCutoff[iAtm])
         atomRadCutoff[iAtm] = this->basisset_->radCutSh()[iSh];
+//A        atomRadCutoff[iAtm] = 1.e100;
     }
   } 
   for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
     AGrid.center() = iAtm;
+//    cout << "Cutoff Rad = " << atomRadCutoff[iAtm] << "for iAt= " << iAtm << endl;
     AGrid.setRadCutOff(atomRadCutoff[iAtm]);
     AGrid.findNearestNeighbor();
     AGrid.scalingFactor()=0.5 *
@@ -378,8 +440,8 @@ void SingleSlater<double>::formVXC_new(){
 //cout << "NSkip3 = " << NSkip3 << endl;
 //cout << "NSkip4 = " << NSkip4 << endl;
 //cout << "NSkip5 = " << NSkip5 << endl;
-  if(doTimings)
-    for(auto i : TF) cout << "TF " << i.count() << endl;
+//if(doTimings)
+//  for(auto i : TF) cout << "TF " << i.count() << endl;
 
   if(this->printLevel_ >= 3) {
     finish = std::chrono::high_resolution_clock::now();

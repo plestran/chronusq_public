@@ -541,6 +541,7 @@ void BasisSet::radcut(double thr, int maxiter, double epsConv){
 //     Populate a Vector storing all the cut off radius (Av_xi(r_cut)<thr)
        radCutSh_[s1] = this->fRmax (shells(s1).contr[0].l, alphaMin, thr, 
            epsConv, maxiter);
+//       cout <<"CutRad= "<< radCutSh_[s1] <<endl;
   }
   return ;
 }

@@ -108,8 +108,24 @@ if(this->printLevel_ >= 2){
   SUncontracted = SUncontracted.selfadjointView<Lower>();
   TUncontracted = TUncontracted.selfadjointView<Lower>();
 
+  RealMatrix SnonRel = (*this->basisSet_->mapPrim2Bf()) * SUncontracted
+	* (*this->basisSet_->mapPrim2Bf()).transpose();
+  if(this->printLevel_ >= 3){
+  prettyPrint(this->fileio_->out,SnonRel,"S nonRel (take 1)");
+    }
+  for (auto row = 0; row < this->basisSet_->nBasis(); row++){
+      (*this->basisSet_->mapPrim2Bf()).block(row,0,1,nUncontracted) /=
+        std::sqrt(SnonRel(row,row)); //scale by appropraite factor
+    }
 
 if(this->printLevel_ >= 2){
+  SnonRel = (*this->basisSet_->mapPrim2Bf()) * SUncontracted
+    * (*this->basisSet_->mapPrim2Bf()).transpose();
+  prettyPrint(this->fileio_->out,SnonRel,"S nonRel");
+}
+
+if(this->printLevel_ >= 2){
+  prettyPrint(this->fileio_->out,SUncontracted,"S uncontracted");
   prettyPrint(this->fileio_->out,TUncontracted,"T uncontracted");
 
   RealMatrix TnonRel = (*this->basisSet_->mapPrim2Bf()) * TUncontracted
@@ -142,7 +158,7 @@ if(this->printLevel_ >= 2){
 // Count linear dependencies here?
   int nZero = 0;
   for(auto iS = 0; iS < nUncontracted; iS++)
-    if(std::abs(ovlpEigValues[iS]) < 1e-6) nZero++;
+    if(std::abs(ovlpEigValues[iS]) < 1e-12) nZero++;
 
   cout << "NZERO " << nZero << endl;
 
@@ -158,18 +174,19 @@ if(this->printLevel_ >= 2){
 
 // Form the K transformation matrix from both pieces
 // (diagonalizes S) and (diagonalizes T). See eq. 12 in Rieher's paper from 2013
-/*
+
+if(this->printLevel_ >= 3){
   prettyPrint(this->fileio_->out,SUncontracted,"S transformation");
   prettyPrint(this->fileio_->out,TUncontracted,"T transformation");
   prettyPrint(this->fileio_->out,TUncontracted.transpose()*TUncontracted, "T^{dagger} T");
-*/
+}
 
   RealMatrix UK = SUncontracted * TUncontracted;
-/* 
-  prettyPrint(this->fileio_->out,UK,"U (K) transformation");
 
-  prettyPrint(this->fileio_->out,UK.transpose()*UK, "U^{dagger} U");
-*/  
+if(this->printLevel_ >= 3){ 
+  prettyPrint(this->fileio_->out,UK,"U (K) transformation");
+}
+
 // Now we transform V to V' 
   TMP = UK.transpose() * VUncontracted;
   RealMatrix P2_Potential = TMP * UK;
@@ -305,7 +322,7 @@ prettyPrint(this->fileio_->out,PVPS,"pVpnum");
   TMP = UK.adjoint() * PVPZ;
   PVPZ = TMP * UK;
 
-/*
+if(this->printLevel_ >= 3){
   prettyPrint(cout,P2_Potential,"V");
   prettyPrint(cout,PVPS,"dot(P,VP)");
   prettyPrint(cout,PVPX,"cross(P,VP) X");
@@ -316,10 +333,13 @@ prettyPrint(this->fileio_->out,PVPS,"pVpnum");
   cout << "|cross(P,VP) X| = " << PVPX.squaredNorm() << endl;
   cout << "|cross(P,VP) Y| = " << PVPY.squaredNorm() << endl;
   cout << "|cross(P,VP) Z| = " << PVPZ.squaredNorm() << endl;
-*/
+}
 
   RealVecMap PMap(&ovlpEigValues[0],nUncontracted);
+
+if(this->printLevel_ >= 3){
   prettyPrint(cout,PMap,"P^2");
+}
 
   PMap = 2*PMap;
   PMap = PMap.cwiseSqrt();
@@ -335,14 +355,16 @@ prettyPrint(this->fileio_->out,PVPS,"pVpnum");
   TMP = PMap.asDiagonal() * PVPZ;
   PVPZ = TMP * PMap.asDiagonal();
 
-//cout << "|dot(P,VP)| = " << PVPS.squaredNorm() << endl;
-//cout << "|cross(P,VP) X| = " << PVPX.squaredNorm() << endl;
-//cout << "|cross(P,VP) Y| = " << PVPY.squaredNorm() << endl;
-//cout << "|cross(P,VP) Z| = " << PVPZ.squaredNorm() << endl;
-//prettyPrint(cout,PVPS,"scaled dot(P,VP)");
-//prettyPrint(cout,PVPX,"scaled cross(P,VP) X");
-//prettyPrint(cout,PVPY,"scaled cross(P,VP) Y");
-//prettyPrint(cout,PVPZ,"scaled cross(P,VP) Z");
+if(this->printLevel_ >= 3){
+  cout << "|dot(P,VP)| = " << PVPS.squaredNorm() << endl;
+  cout << "|cross(P,VP) X| = " << PVPX.squaredNorm() << endl;
+  cout << "|cross(P,VP) Y| = " << PVPY.squaredNorm() << endl;
+  cout << "|cross(P,VP) Z| = " << PVPZ.squaredNorm() << endl;
+  prettyPrint(cout,PVPS,"scaled dot(P,VP)");
+  prettyPrint(cout,PVPX,"scaled cross(P,VP) X");
+  prettyPrint(cout,PVPY,"scaled cross(P,VP) Y");
+  prettyPrint(cout,PVPZ,"scaled cross(P,VP) Z");
+}
 
   ComplexMatrix W(2*nUncontracted,2*nUncontracted);
   W.block(0,0,nUncontracted,nUncontracted).real() = PVPS;
@@ -399,8 +421,10 @@ prettyPrint(this->fileio_->out,PVPS,"pVpnum");
 // Diagonalize 
 // ------------------------------
 
-//prettyPrintComplex(cout,CORE_HAMILTONIAN,"H");
-cout << "|H|" << CORE_HAMILTONIAN.squaredNorm();
+if(this->printLevel_ >= 2){
+  prettyPrintComplex(this->fileio_->out,CORE_HAMILTONIAN,"H");
+  (this->fileio_->out) << "|H|" << CORE_HAMILTONIAN.squaredNorm() << endl;
+}
 
   Eigen::SelfAdjointEigenSolver<ComplexMatrix> es;
   es.compute(CORE_HAMILTONIAN);
@@ -408,12 +432,13 @@ cout << "|H|" << CORE_HAMILTONIAN.squaredNorm();
   ComplexMatrix HEVx= es.eigenvectors();
 
 // Print out the energies (eigenvalues) and eigenvectors
-  prettyPrint(cout,HEV,"HEV");
-//  prettyPrintComplex(cout,HEVx,"HEVc");
+if(this->printLevel_ >= 2){
+  prettyPrint(this->fileio_->out,HEV,"HEV");
+  prettyPrintComplex(this->fileio_->out,HEVx,"HEVc");
+}
 
 // Grab C_L (+) and C_S (+) - the large and small components
 // of the electronic (positive energy) solutions
-//
 //
 // NOT SURE IF THESE ARE CORRECT!!!! (seems to be wrong 'column')
   ComplexMatrix L = 
@@ -431,9 +456,10 @@ cout << "|H|" << CORE_HAMILTONIAN.squaredNorm();
   ComplexMatrix X = S * L.inverse(); //See above!
 
 // Print out X and its squared norm
-//  prettyPrintComplex(cout,X,"X");
-//  cout << X.squaredNorm() << endl;
-
+if(this->printLevel_ >= 2){
+  prettyPrintComplex(this->fileio_->out,X,"X");
+  (this->fileio_->out) << X.squaredNorm() << endl;
+}
   
 // Calculate Y = sqrt(1 + X'X)
 // Also known as the 'renormalization matrix' R
@@ -442,9 +468,10 @@ cout << "|H|" << CORE_HAMILTONIAN.squaredNorm();
      + X.adjoint() * X).pow(-0.5);
 
 // Print out Y and its squared norm
-//  prettyPrintComplex(cout,Y,"Y");
-//  cout << Y.squaredNorm() << endl;
-
+if(this->printLevel_ >= 2){
+  prettyPrintComplex(this->fileio_->out,Y,"Y");
+  (this->fileio_->out) << Y.squaredNorm() << endl;
+}
 
 // Get PMapC = p (as 2n by 2n matrix)
   ComplexMatrix PMapC(2*nUncontracted,2*nUncontracted);
@@ -465,9 +492,10 @@ cout << "|H|" << CORE_HAMILTONIAN.squaredNorm();
   KinEn = KinEn.cwiseSqrt();
   KinEn -= ComplexMatrix::Identity(2*nUncontracted,2*nUncontracted) * phys.SPEED_OF_LIGHT * phys.SPEED_OF_LIGHT;
 
+if(this->printLevel_ >= 2){
   prettyPrint(this->fileio_->out,KinEn,"Relativistic Kinetic Energy");
+}
 
-//  cout << KinEn.squaredNorm() << " Kintetic energy norm" << endl;
 
 // Get P2_PotC == V'
   ComplexMatrix P2_PotC(2*nUncontracted,2*nUncontracted);
@@ -498,15 +526,12 @@ if(this->printLevel_ >= 2){
   TEMP = X.adjoint() * TEMP;
   TEMP = TEMP * X;
   HCore = HCore + TEMP;
-//  prettyPrint(this->fileio_->out,HCore,"HCore += TEMP");
   HCore = HCore * Y;
   HCore = Y * HCore;
-//  prettyPrint(this->fileio_->out,HCore,"Y * HCore * Y");
 
-
-//  prettyPrint(this->fileio_->out,HCore.real(),"HCore Real");
-//  prettyPrint(this->fileio_->out,HCore.imag(),"HCore Imag");
-
+if(this->printLevel_ >= 3){
+  prettyPrintComplex(this->fileio_->out,HCore,"Transformed HCore (in p space) ");
+}
 
   ComplexMatrix Veff(2*nUncontracted,2*nUncontracted);
   Veff = HCore - KinEn;
@@ -619,7 +644,12 @@ if(this->printLevel_ >= 2) {
   prettyPrint(this->fileio_->out,CoreZ,"Core (mz)");
   prettyPrint(this->fileio_->out,CoreX,"Core (mx)");
   prettyPrint(this->fileio_->out,CoreY,"Core (my)");
+}
 
+  *this->coreH_ = CoreS;
+  *this->oneEmx_ = CoreX;
+  *this->oneEmy_ = CoreY;
+  *this->oneEmz_ = CoreZ;
 
   ComplexMatrix TCSham(2*nBasis_,2*nBasis_);
 
@@ -661,18 +691,13 @@ if(this->printLevel_ >= 2) {
   prettyPrint(this->fileio_->out,SpinHam.real(),"Spin-Blocked 2c-Hamiltonian (real)");
   prettyPrint(this->fileio_->out,SpinHam.imag(),"Spin-Blocked 2c-Hamiltonian (imag)");
 
+/*
   es.compute(TCSham);
   HEV= es.eigenvalues();
 //  HEVx= es.eigenvectors();
 
   prettyPrint(cout,HEV,"HEV");
 //  prettyPrintComplex(cout,HEVx,"HEVc");
-}
-
-  *this->coreH_ = CoreS;
-  *this->oneEmx_ = CoreX;
-  *this->oneEmy_ = CoreY;
-  *this->oneEmz_ = CoreZ;
-
+*/
 }
 

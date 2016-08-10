@@ -33,7 +33,7 @@ void SingleSlater<T>::formDensity(){
       CErr("No MO coefficients available to form one-particle density matrix!",
            this->fileio_->out);
  
-    if(this->Ref_ == TCS){
+    if(this->nTCS_ == 2){
       auto nOcc = this->nOccA_ + this->nOccB_;
       (*this->onePDMA_) = 
         this->moA_->block(0,0,this->nTCS_*this->nBasis_,nOcc)*

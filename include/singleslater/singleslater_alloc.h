@@ -56,11 +56,11 @@ void SingleSlater<T>::alloc(){
     if(this->isPrimary) {
       if(typeid(T).hash_code() == typeid(double).hash_code())
         this->fileio_->iniStdSCFFilesDouble(
-          !this->isClosedShell && this->Ref_ != TCS,this->nTCS_*this->nBasis_
+          !this->isClosedShell && this->nTCS_ == 1,this->nTCS_*this->nBasis_
         );
       else if(typeid(T).hash_code() == typeid(dcomplex).hash_code())
         this->fileio_->iniStdSCFFilesComplex(
-          !this->isClosedShell && this->Ref_ != TCS,this->nTCS_*this->nBasis_
+          !this->isClosedShell && this->nTCS_ == 1,this->nTCS_*this->nBasis_
         );
     }
   }
@@ -82,7 +82,7 @@ void SingleSlater<T>::alloc(){
 template<typename T>
 void SingleSlater<T>::allocOp(){
   this->allocAlphaOp();
-  if(!this->isClosedShell && this->Ref_ != TCS) 
+  if(!this->isClosedShell && this->nTCS_ == 1) 
     this->allocBetaOp();
 
   auto NBSq = this->nBasis_*this->nBasis_;
@@ -114,6 +114,15 @@ void SingleSlater<T>::allocOp(){
   this->onePDMOrthoA_->setZero();
 
   if(this->nTCS_ == 2 || !this->isClosedShell){
+
+  if(this->nTCS_ == 1){
+    this->onePDMOrthoB_ = 
+      std::unique_ptr<TMap>(
+          new TMap(
+            this->memManager_->template malloc<T>(NBTSq),
+            this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
+     this->onePDMOrthoB_->setZero();
+   }
 
     this->onePDMOrthoScalar_ = 
       std::unique_ptr<TMap>(new TMap(
@@ -226,7 +235,7 @@ void SingleSlater<T>::allocAlphaOp(){
     this->fockA_ = std::unique_ptr<TMap>(
       new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
   } catch (...) { 
-    if(this->Ref_ == TCS) 
+    if(this->nTCS_ == 2) 
       CErr(std::current_exception(),"TCS Fock Matrix Allocation"); 
     else CErr(std::current_exception(),"Alpha Fock Matrix Allocation"); 
   }
@@ -236,7 +245,7 @@ void SingleSlater<T>::allocAlphaOp(){
     this->moA_ = std::unique_ptr<TMap>(
       new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB)); 
   } catch (...) { 
-    if(this->Ref_ == TCS) 
+    if(this->nTCS_ == 2) 
       CErr(std::current_exception(),"TCS MO Coefficients Allocation");
     else CErr(std::current_exception(),"Alpha MO Coefficients Allocation"); 
   }
@@ -246,7 +255,7 @@ void SingleSlater<T>::allocAlphaOp(){
     this->epsA_ = std::unique_ptr<RealMap>(
       new RealMap(this->memManager_->template malloc<double>(NB),NB,1)); 
   } catch (...) { 
-    if(this->Ref_ == TCS) 
+    if(this->nTCS_ == 2) 
       CErr(std::current_exception(),"TCS Eigenorbital Energies"); 
     else CErr(std::current_exception(),"Alpha Eigenorbital Energies"); 
   }
@@ -260,7 +269,7 @@ void SingleSlater<T>::allocAlphaOp(){
     this->coulombA_  = std::unique_ptr<TMap>(
       new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB)); 
   } catch (...) { 
-    if(this->Ref_ == TCS) 
+    if(this->nTCS_ == 2) 
       CErr(std::current_exception(),"TCS Coulomb Tensor Allocation"); 
     else CErr(std::current_exception(),"Alpha Coulomb Tensor Allocation"); 
   }
@@ -270,7 +279,7 @@ void SingleSlater<T>::allocAlphaOp(){
     this->exchangeA_ = std::unique_ptr<TMap>(
       new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB)); 
   } catch (...) { 
-    if(this->Ref_ == TCS) 
+    if(this->nTCS_ == 2) 
       CErr(std::current_exception(),"TCS Exchange Tensor Allocation"); 
     else CErr(std::current_exception(),"Alpha Exchange Tensor Allocation"); 
   }
@@ -281,7 +290,7 @@ void SingleSlater<T>::allocAlphaOp(){
     this->PTA_  = std::unique_ptr<TMap>(
       new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB)); 
   } catch (...) { 
-    if(this->Ref_ == TCS) CErr(std::current_exception(),"TCS G[P] Allocation"); 
+    if(this->nTCS_ == 2) CErr(std::current_exception(),"TCS G[P] Allocation"); 
     else CErr(std::current_exception(),"Alpha G[P] Allocation"); 
   }
   this->PTA_->setZero();
@@ -358,7 +367,7 @@ void SingleSlater<T>::allocBetaOp(){
 template<typename T>
 void SingleSlater<T>::allocDFT(){
   this->allocAlphaDFT();
-  if(!this->isClosedShell && this->Ref_ != TCS) 
+  if(!this->isClosedShell && this->nTCS_ == 1) 
     this->allocBetaDFT();
 }
 
@@ -373,7 +382,7 @@ void SingleSlater<T>::allocAlphaDFT(){
 //  this->vCorA_  = std::unique_ptr<TMap>(
 //    new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB)); 
   } catch (...) { 
-    if(this->Ref_ == TCS) CErr(std::current_exception(), "TCS VXC Allocation"); 
+    if(this->nTCS_ == 2) CErr(std::current_exception(), "TCS VXC Allocation"); 
     else CErr(std::current_exception(),"Alpha VXC  Allocation"); 
   }
   this->vXA_->setZero();

@@ -481,7 +481,7 @@ void SingleSlater<double>::formCor(double rho, double spindensity){
      x0_a = -0.00475840; // intext page 1209
    }
 // Closed Shell
-   if(this->isClosedShell && this->Ref_ != TCS) {
+   if(this->isClosedShell && this->nTCS_ == 1) {
      this->eps_corr = 0.0;
      this->mu_corr  = 0.0;
      this->eps_corr =  EvepsVWN(0,A_p,b_p,c_p,x0_p,rho);
@@ -578,7 +578,7 @@ std::array<double,6> SingleSlater<double>::formVExSlater (double rho, double spi
   double d1over3    = 1.0/3.0;
   double d4over3  = 4.0/3.0;
   double eps0     = std::pow(rho,d1over3);      
-  if(!this->isClosedShell && this->Ref_ != TCS) {
+  if(!this->isClosedShell && this->nTCS_ == 1) {
     epsmu[0]  =  eps0 * this->f_spindens(1,spindensity); 
     epsmu[1]  =  d4over3*eps0*std::pow((1.0+spindensity),d1over3);
     epsmu[2]  =  d4over3*eps0*std::pow((1.0-spindensity),d1over3);
@@ -601,7 +601,7 @@ template<>
 double SingleSlater<double>::gB88 (int nDer, double x){
   double beta = 0.0042;
   double Cx   = 0.930525736349100;  // (3/2)*((3/(4*pi))^(1/3))
-//  if(!this->isClosedShell && this->Ref_ != TCS) Cx *= std::pow(2.0,(1.0/3.0));
+//  if(!this->isClosedShell && this->nTCS_ == 1) Cx *= std::pow(2.0,(1.0/3.0));
   
 //  double Cx  = (3.0/4.0)*(std::pow((3.0/math.pi),(1.0/3.0)));  //TF LDA Prefactor (for Vx)  
   double gx;
@@ -647,7 +647,7 @@ double gammaAA, double gammaBB){
 //  cout       << rhoA   << " " <<gammaAA << " "  << (gammaAA / rhoA4ov3) <<endl;
 //  cout       << rhoA4ov3 <<" " << xA << " "<<epsmu[3] <<endl;
 //  cout       << "-----------------------------" <<endl;
-  if(!this->isClosedShell && this->Ref_ != TCS) {
+  if(!this->isClosedShell && this->nTCS_ == 1) {
 //Paper  xB   = gammaBB / rhoA4ov3; 
   xB   = std::sqrt(gammaBB) / rhoB4ov3; 
   epsmu[0]   += rhoB4ov3*this->gB88(0,xB);
@@ -664,7 +664,7 @@ double gammaAA, double gammaBB){
   cout << "---" <<endl;
   }
 */
-  if (this->isClosedShell && this->Ref_ != TCS) epsmu[0]  *= 2.0; 
+  if (this->isClosedShell && this->nTCS_ == 1) epsmu[0]  *= 2.0; 
   return epsmu;
 };  //End Form B88 Exchange
 
@@ -909,7 +909,7 @@ std::array<double,6> SingleSlater<double>::formVCVWN (double rho, double spinden
     cout << "**********" <<endl;
 */
 // Closed Shell
-   if(this->isClosedShell && this->Ref_ != TCS) {
+   if(this->isClosedShell && this->nTCS_ == 1) {
      epsmu[0] =  EvepsVWN(0,A_p,b_p,c_p,x0_p,rho);
 //     epsmu[1]  = -over3*EvepsVWN(1,A_p,b_p,c_p,x0_p,rho);
      epsmu[1]  = -over3*rs*EvepsVWN(2,A_p,b_p,c_p,x0_p,rho);
@@ -1079,7 +1079,7 @@ void SingleSlater<double>::evalVXC(cartGP gridPt, double weight, std::vector<boo
    double rhor = 0.0;
    double rhor_B = 0.0;
    bool   RHF  = this->Ref_ == RHF;
-   bool   doTCS  = this->Ref_ == TCS;
+   bool   doTCS  = this->nTCS_ == 2;
 //   double shMax;
 
 ////T   
@@ -1156,7 +1156,7 @@ void SingleSlater<double>::evalVXC(cartGP gridPt, double weight, std::vector<boo
 //   auto start_3 = std::chrono::high_resolution_clock::now();  // Timing S contraction
 ////T
      (*overlapR_) = overlapR_->selfadjointView<Lower>();;
-   if(this->isClosedShell && this->Ref_ != TCS) {
+   if(this->isClosedShell && this->nTCS_ == 1) {
     rhor = overlapR_->frobInner(this->onePDMA()->conjugate());
 ////T
 //   auto finish_3 = std::chrono::high_resolution_clock::now();  
@@ -1184,7 +1184,7 @@ void SingleSlater<double>::evalVXC(cartGP gridPt, double weight, std::vector<boo
      }
     }
    }
-   if(!this->isClosedShell && this->Ref_ != TCS) {
+   if(!this->isClosedShell && this->nTCS_ == 1) {
      rhor   = overlapR_->frobInner(this->onePDMA()->conjugate());
      rhor_B = overlapR_->frobInner(this->onePDMB()->conjugate());
 //   Avoid numerical noise 
@@ -1232,7 +1232,7 @@ void SingleSlater<double>::evalVXC(cartGP gridPt, double weight, std::vector<boo
    double rhorA = 0.0;  // alpha density at point
    double rhorB = 0.0;  // beta  density at point
    bool   RHF  = this->Ref_ == RHF;
-   bool   doTCS  = this->Ref_ == TCS;
+   bool   doTCS  = this->nTCS_ == 2;
    double shMax;
    RealMatrix overlapR_(this->nBasis_,this->nBasis_);        ///< Overlap at grid point
    overlapR_.setZero();
@@ -1280,7 +1280,7 @@ void SingleSlater<double>::evalVXC(cartGP gridPt, double weight, std::vector<boo
 //    prettyPrint(cout,(overlapR_)," S(ri) Old");
 //    }
 //  Handle the total density at r for RKS or UKS
-    if(!this->isClosedShell && this->Ref_ != TCS) {
+    if(!this->isClosedShell && this->nTCS_ == 1) {
       rhorA = overlapR_.frobInner(this->onePDMA()->conjugate());
       rhorB = overlapR_.frobInner(this->onePDMB()->conjugate());
       rhor = rhorA + rhorB;
@@ -1297,7 +1297,7 @@ void SingleSlater<double>::evalVXC(cartGP gridPt, double weight, std::vector<boo
     if (rhor > 1.0e-20) {     
 //  Exchange
       if (this->ExchKernel_ != NOEXCH) {
-        if(!this->isClosedShell && this->Ref_ != TCS){
+        if(!this->isClosedShell && this->nTCS_ == 1){
             epsMuExc = this->formVEx(rhor,this->spindens(rhorA,rhorB));
             (*VXB)  += weight*overlapR_*epsMuExc[2];
         } else {
@@ -1308,7 +1308,7 @@ void SingleSlater<double>::evalVXC(cartGP gridPt, double weight, std::vector<boo
       }
 //  Correlation
       if (this->CorrKernel_ != NOCORR) {
-        if(!this->isClosedShell && this->Ref_ != TCS){
+        if(!this->isClosedShell && this->nTCS_ == 1){
           epsMuCor = this->formVC(rhor,(this->spindens(rhorA,rhorB)));
           (*VCB)  += weight*overlapR_*epsMuCor[2];
         } else{
@@ -1359,7 +1359,7 @@ void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX,
   if (this->isGGA) nDer = 1;
 // cout << "nDer" << nDer << endl;
    bool   RHF  = this->Ref_ == RHF;
-   bool   doTCS  = this->Ref_ == TCS;
+   bool   doTCS  = this->nTCS_ == 2;
 // RealMatrix overlapR_(this->nBasis_,this->nBasis_);        ///< Overlap at grid point
 // overlapR_.setZero();
 // STmp->setZero();
@@ -1375,7 +1375,7 @@ void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX,
       (*dSTmpZ)   = Map->col(ipts)*MapdZ->col(ipts).transpose();
     }
 //  Handle the total density at r for RKS or UKS
-    if(!this->isClosedShell && this->Ref_ != TCS) {
+    if(!this->isClosedShell && this->nTCS_ == 1) {
 //    rhorA = overlapR_.frobInner(this->onePDMA()->conjugate());
 //    rhorB = overlapR_.frobInner(this->onePDMB()->conjugate());
       rhorA = STmp->frobInner(this->onePDMA()->conjugate());
@@ -1446,7 +1446,7 @@ void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX,
         } else { 
           energyX += ((*WeightsMap).coeff(ipts,0))*rhor*epsMuExc[0];
         }
-        if(!this->isClosedShell && this->Ref_ != TCS){
+        if(!this->isClosedShell && this->nTCS_ == 1){
           (*VXB)  += ((*WeightsMap).coeff(ipts,0))*(*STmp)*epsMuExc[2];
           if (this->isGGA && this->ExchKernel_ == B88) {
             (*VXB)  += 2.0*drhoB[0]*((*WeightsMap).coeff(ipts,0))*(*dSTmpX)*epsMuExc[4];
@@ -1462,7 +1462,7 @@ void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX,
         (*VCA)  += ((*WeightsMap).coeff(ipts,0))*(*STmp)*epsMuCor[1];
         if (this->isGGA && this->CorrKernel_ == LYP) {
 //        Open Shell alpha LYP 
-          if(!this->isClosedShell && this->Ref_ != TCS) { 
+          if(!this->isClosedShell && this->nTCS_ == 1) { 
             (*VCA)  += 2.0*drhoA[0]*((*WeightsMap).coeff(ipts,0))*(*dSTmpX)*epsMuCor[3];
             (*VCA)  +=     drhoB[0]*((*WeightsMap).coeff(ipts,0))*(*dSTmpX)*epsMuCor[5];
             (*VCA)  += 2.0*drhoA[1]*((*WeightsMap).coeff(ipts,0))*(*dSTmpY)*epsMuCor[3];
@@ -1479,7 +1479,7 @@ void SingleSlater<double>::evalVXC_store(int iAtm, int ipts, double & energyX,
         } else { 
           energyC += ((*WeightsMap).coeff(ipts,0))*rhor*epsMuCor[0];
         }
-        if(!this->isClosedShell && this->Ref_ != TCS) { 
+        if(!this->isClosedShell && this->nTCS_ == 1) { 
           (*VCB)  += ((*WeightsMap).coeff(ipts,0))*(*STmp)*epsMuCor[2];
           if (this->isGGA && this->CorrKernel_ == LYP) {
             (*VCB)  += 2.0*drhoB[0]*((*WeightsMap).coeff(ipts,0))*(*dSTmpX)*epsMuCor[4];
@@ -1559,8 +1559,8 @@ void SingleSlater<double>::formVXC(){
     GridLeb.genGrid();                            // Generate Angular Grid
     this->vXA()->setZero();   // Set to zero every occurence of the SCF
     this->vCorA()->setZero(); // Set to zero every occurence of the SCF
-    if(!this->isClosedShell && this->Ref_ != TCS) this->vXB()->setZero();
-    if(!this->isClosedShell && this->Ref_ != TCS) this->vCorB()->setZero();
+    if(!this->isClosedShell && this->nTCS_ == 1) this->vXB()->setZero();
+    if(!this->isClosedShell && this->nTCS_ == 1) this->vCorB()->setZero();
     // Loop over atomic centers
     for(int iAtm = 0; iAtm < nAtom; iAtm++){
       Rad->genGrid(); 
@@ -1615,11 +1615,11 @@ void SingleSlater<double>::formVXC(){
     (*this->vXA())    =  val * (*this->vXA());
     this->totalEx     =  val * CxEn * (this->totalEx);
     (*this->vCorA())  =  4.0 * math.pi * (*this->vCorA());
-    if(!this->isClosedShell && this->Ref_ != TCS) 
+    if(!this->isClosedShell && this->nTCS_ == 1) 
       (*this->vCorB())  =  4.0 * math.pi * (*this->vCorB());
     this->totalEcorr  =  4.0 * math.pi * (this->totalEcorr);
     // For open shell averything has to be scaled by 2^(1/3)
-    if(!this->isClosedShell && this->Ref_ != TCS){
+    if(!this->isClosedShell && this->nTCS_ == 1){
       (*this->vXA()) *= std::pow(2.0,(1.0/3.0));  
       (*this->vXB()) *= std::pow(2.0,(1.0/3.0)) * val;
     }
@@ -1631,7 +1631,7 @@ void SingleSlater<double>::formVXC(){
     if(this->printLevel_ >= 3) {
       prettyPrint(this->fileio_->out,(*this->vXA()),"LDA Vx alpha");
       prettyPrint(this->fileio_->out,(*this->vCorA()),"Vc Vc alpha");
-      if(!this->isClosedShell && this->Ref_ != TCS) 
+      if(!this->isClosedShell && this->nTCS_ == 1) 
         prettyPrint(this->fileio_->out,(*this->vXB()),"LDA Vx beta");
 
       this->fileio_->out << "Total LDA Ex ="    << this->totalEx 
@@ -1701,7 +1701,7 @@ void SingleSlater<double>::formVXC(){
     std::vector<int> tmpnpts(nthreads) ;
 
     int nRHF;
-    if(this->isClosedShell || this->Ref_ == TCS) nRHF = 1;
+    if(this->isClosedShell || this->nTCS_ == 2) nRHF = 1;
     else    nRHF = 2;
     std::vector<std::vector<RealMatrix>> 
       tmpVX(nRHF,std::vector<RealMatrix>(nthreads,
@@ -1720,7 +1720,7 @@ void SingleSlater<double>::formVXC(){
     this->totalEcorr = 0.0; // Zero out Total Correlation Energy
     this->vXA()->setZero();   // Set to zero every occurence of the SCF
     this->vCorA()->setZero(); // Set to zero every occurence of the SCF
-    if(!this->isClosedShell && this->Ref_ != TCS) {
+    if(!this->isClosedShell && this->nTCS_ == 1) {
       this->vXB()->setZero();
       this->vCorB()->setZero();
     }
@@ -1812,7 +1812,7 @@ void SingleSlater<double>::formVXC(){
        int thread_id = omp_get_thread_num();
        tmpVX[0][thread_id].setZero();  
        tmpVC[0][thread_id].setZero();  
-       if(!this->isClosedShell && this->Ref_ != TCS) {
+       if(!this->isClosedShell && this->nTCS_ == 1) {
          tmpVX[1][thread_id].setZero();  
          tmpVC[1][thread_id].setZero();  
        }
@@ -1821,7 +1821,7 @@ void SingleSlater<double>::formVXC(){
    #else
      tmpVX[0][0].setZero();  
      tmpVC[0][0].setZero();  
-     if(!this->isClosedShell && this->Ref_ != TCS) {
+     if(!this->isClosedShell && this->nTCS_ == 1) {
        tmpVX[1][0].setZero();  
        tmpVC[1][0].setZero();  
      }
@@ -1832,7 +1832,7 @@ void SingleSlater<double>::formVXC(){
         (*this->vCorA()) += tmpVC[0][iThread];
         this->totalEx += tmpEnergyEx[iThread];
         this->totalEcorr += tmpEnergyCor[iThread];
-        if(!this->isClosedShell && this->Ref_ != TCS) {
+        if(!this->isClosedShell && this->nTCS_ == 1) {
           (*this->vXB())   += tmpVX[1][iThread];
           (*this->vCorB()) += tmpVC[1][iThread];
         }
@@ -1845,7 +1845,7 @@ void SingleSlater<double>::formVXC(){
     (*this->vCorA())    =  4.0 * math.pi * (*this->vCorA());
     this->totalEx       =  val * this->totalEx;
     this->totalEcorr    =  4.0 * math.pi * (this->totalEcorr);
-    if(!this->isClosedShell && this->Ref_ != TCS) {
+    if(!this->isClosedShell && this->nTCS_ == 1) {
         (*this->vCorB())  =  4.0 * math.pi * (*this->vCorB());
         (*this->vXB())    =  val * (*this->vXB());
       }
@@ -1853,7 +1853,7 @@ void SingleSlater<double>::formVXC(){
     if(this->printLevel_ >= 3) {
       prettyPrint(this->fileio_->out,(*this->vXA()),"LDA Vx alpha");
       prettyPrint(this->fileio_->out,(*this->vCorA()),"Vc Vc alpha");
-      if(!this->isClosedShell && this->Ref_ != TCS) 
+      if(!this->isClosedShell && this->nTCS_ == 1) 
         prettyPrint(this->fileio_->out,(*this->vXB()),"LDA Vx beta");
         prettyPrint(this->fileio_->out,(*this->vCorB()),"Vc Vc beta");
 
@@ -1897,7 +1897,7 @@ void SingleSlater<double>::formVXC_store(){
     std::vector<int> tmpnpts(nthreads) ;
     int nRHF;
     int nDerMatrix = 0;                                       // Number of Matrix to be allocated for GGA
-    if(this->isClosedShell || this->Ref_ == TCS) nRHF = 1;
+    if(this->isClosedShell || this->nTCS_ == 2) nRHF = 1;
     else    nRHF = 2;
     std::vector<std::vector<RealMatrix>> 
       tmpVX(nRHF,std::vector<RealMatrix>(nthreads,
@@ -1931,7 +1931,7 @@ void SingleSlater<double>::formVXC_store(){
     this->totalEcorr = 0.0;   // Zero out Total Correlation Energy
     this->vXA()->setZero();   // Set to zero every occurence of the SCF
     this->vCorA()->setZero(); // Set to zero every occurence of the SCF
-    if(!this->isClosedShell && this->Ref_ != TCS) {
+    if(!this->isClosedShell && this->nTCS_ == 1) {
       this->vXB()->setZero();
       this->vCorB()->setZero();
     }
@@ -1986,7 +1986,7 @@ void SingleSlater<double>::formVXC_store(){
        int thread_id = omp_get_thread_num();
        tmpVX[0][thread_id].setZero();  
        tmpVC[0][thread_id].setZero();  
-       if(!this->isClosedShell && this->Ref_ != TCS) {
+       if(!this->isClosedShell && this->nTCS_ == 1) {
          tmpVX[1][thread_id].setZero();  
          tmpVC[1][thread_id].setZero();  
        }
@@ -1995,7 +1995,7 @@ void SingleSlater<double>::formVXC_store(){
    #else
      tmpVX[0][0].setZero();  
      tmpVC[0][0].setZero();  
-     if(!this->isClosedShell && this->Ref_ != TCS) {
+     if(!this->isClosedShell && this->nTCS_ == 1) {
        tmpVX[1][0].setZero();  
        tmpVC[1][0].setZero();  
      }
@@ -2006,7 +2006,7 @@ void SingleSlater<double>::formVXC_store(){
         (*this->vCorA()) += tmpVC[0][iThread];
         this->totalEx += tmpEnergyEx[iThread];
         this->totalEcorr += tmpEnergyCor[iThread];
-        if(!this->isClosedShell && this->Ref_ != TCS) {
+        if(!this->isClosedShell && this->nTCS_ == 1) {
           (*this->vXB())   += tmpVX[1][iThread];
           (*this->vCorB()) += tmpVC[1][iThread];
         }
@@ -2054,7 +2054,7 @@ void SingleSlater<double>::formVXC_store(){
         int thread_id = omp_get_thread_num();
         tmpVX[0][thread_id].setZero();  
         tmpVC[0][thread_id].setZero();  
-        if(!this->isClosedShell && this->Ref_ != TCS) {
+        if(!this->isClosedShell && this->nTCS_ == 1) {
           tmpVX[1][thread_id].setZero();  
           tmpVC[1][thread_id].setZero();  
         }
@@ -2063,7 +2063,7 @@ void SingleSlater<double>::formVXC_store(){
     #else
       tmpVX[0][0].setZero();  
       tmpVC[0][0].setZero();  
-      if(!this->isClosedShell && this->Ref_ != TCS) {
+      if(!this->isClosedShell && this->nTCS_ == 1) {
         tmpVX[1][0].setZero();  
         tmpVC[1][0].setZero();  
       }
@@ -2074,7 +2074,7 @@ void SingleSlater<double>::formVXC_store(){
         (*this->vCorA()) += tmpVC[0][iThread];
         this->totalEx += tmpEnergyEx[iThread];
         this->totalEcorr += tmpEnergyCor[iThread];
-        if(!this->isClosedShell && this->Ref_ != TCS) {
+        if(!this->isClosedShell && this->nTCS_ == 1) {
           (*this->vXB())   += tmpVX[1][iThread];
           (*this->vCorB()) += tmpVC[1][iThread];
         }
@@ -2093,7 +2093,7 @@ void SingleSlater<double>::formVXC_store(){
     (*this->vCorA())    =  4.0 * math.pi * (*this->vCorA());
     this->totalEx       =  val * this->totalEx;
     this->totalEcorr    =  4.0 * math.pi * (this->totalEcorr);
-    if(!this->isClosedShell && this->Ref_ != TCS) {
+    if(!this->isClosedShell && this->nTCS_ == 1) {
         (*this->vCorB())  =  4.0 * math.pi * (*this->vCorB());
         (*this->vXB())    =  val * (*this->vXB());
       }
@@ -2101,7 +2101,7 @@ void SingleSlater<double>::formVXC_store(){
     if(this->printLevel_ >= 3) {
       prettyPrint(this->fileio_->out,(*this->vXA()),"LDA Vx alpha");
       prettyPrint(this->fileio_->out,(*this->vCorA()),"Vc Vc alpha");
-      if(!this->isClosedShell && this->Ref_ != TCS) { 
+      if(!this->isClosedShell && this->nTCS_ == 1) { 
         prettyPrint(this->fileio_->out,(*this->vXB()),"LDA Vx beta");
         prettyPrint(this->fileio_->out,(*this->vCorB()),"Vc Vc beta");
         }

@@ -18,7 +18,6 @@ job       = SCF
 basis     = sto3g.gbs
 ints			= direct
 exchange  = B88
-corr      = NOCORR
 DFT_NRAD = 75
 
 #

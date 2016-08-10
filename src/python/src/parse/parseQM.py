@@ -107,7 +107,8 @@ def parseQM(workers,secDict):
     parseSCF(workers,secDict['SCF'])
   except KeyError:
     pass
-
+  if workers['CQMolecule'].nAtoms() ==1:
+    workers['CQSingleSlater'].setGuess(guessMap['CORE'])
 
   if str(ssSettings['JOB']) in knownJobs:
     if ssSettings['JOB'] in ('RT'):
@@ -153,7 +154,7 @@ def handleReference(workers,settings):
   ref = settings['REFERENCE']
   ref = ref.split()
   # Decide if reference is complex or not (defaults to real if not specified
-  if 'COMPLEX' in ref:
+  if 'COMPLEX' in ref or 'X2C' in ref:
     workers["CQSingleSlater"] = workers["CQSingleSlaterComplex"]
   else:
     workers["CQSingleSlater"] = workers["CQSingleSlaterDouble"]
@@ -189,9 +190,10 @@ def handleReference(workers,settings):
     if Str in ref:
       refStr = Str
 
-  print refStr
-  print isHF
-  print isDFT
+  if refStr == '': refStr = ' '
+# print refStr
+# print isHF
+# print isDFT
 
   workers["CQSingleSlater"].isDFT = isDFT
   workers["CQSingleSlater"].isHF  = isHF
@@ -199,34 +201,41 @@ def handleReference(workers,settings):
   isRest = False
   # R -> Restricted
   if refStr[0] == 'R':
-    print "Is Restricted"
+#   print "Is Restricted"
     workers["CQSingleSlater"].setRef(chronusQ.Reference.RHF)
     workers["CQSingleSlater"].isClosedShell = True
     isRest = True
   # U -> Unrestricted
   elif refStr[0] == 'U':
-    print "Is Unrestricted"
+#   print 'HERE 1'
+#   print "Is Unrestricted"
     workers["CQSingleSlater"].setRef(chronusQ.Reference.UHF)
     workers["CQSingleSlater"].isClosedShell = False
   # CU -> Constrained Unrestricted (Scuseria)
-  elif refStr[0:1] == 'CU':
-    print "Is Constrained Unrestricted"
+  elif refStr[:2] == "CU":
+#   print 'HERE'
+#   print "Is Constrained Unrestricted"
     workers["CQSingleSlater"].setRef(chronusQ.Reference.CUHF)
     workers["CQSingleSlater"].isClosedShell = False
   # G -> Generalized (2C)
   elif refStr[0] == 'G':
-    print "Is Generalized"
+#   print "Is Generalized"
     workers["CQSingleSlater"].setRef(chronusQ.Reference.TCS)
+    workers["CQSingleSlater"].isClosedShell = False
+  elif 'X2C' in ref:
+#   print "Is X2C"
+    workers["CQSingleSlater"].setRef(chronusQ.Reference.X2C)
     workers["CQSingleSlater"].isClosedShell = False
   # If left to determine, unit multiplicity -> Restricted
   elif mult == 1:
-    print "Is Restricted"
+#   print "Is Restricted"
     workers["CQSingleSlater"].setRef(chronusQ.Reference.RHF)
     workers["CQSingleSlater"].isClosedShell = True
     isRest = True
   # If left to determine, non-unit multiplicity -> Unrestricted
   else:
-    print "Is Unrestricted"
+#   print 'HERE 2'
+#   print "Is Unrestricted"
     workers["CQSingleSlater"].setRef(chronusQ.Reference.UHF)
     workers["CQSingleSlater"].isClosedShell = False
 
@@ -249,14 +258,17 @@ def handleReference(workers,settings):
   BLYPFunctional  = ['B88','LYP']
 
   if isDFT:
+    # Check Functional
     if 'KS' in refStr:  
-      if 'CORR' not in settings or 'EXCHANGE' not in settings:
-        msg = "Must specify both Correlation and Exchange Kernel\n"
+      if 'CORR' not in settings and 'EXCHANGE' not in settings:
+        msg = "Must specify both Correlation or Exchange Kernel\n"
         msg = msg + " for user defined QM.KS reference"
         CErrMsg(workers['CQFileIO'],str(msg))
 
-      functionalMap[settings['CORR']]()
-      functionalMap[settings['EXCHANGE']]()
+      if 'CORR' in settings:
+        functionalMap[settings['CORR']]()
+      if 'EXCHANGE' in settings:
+        functionalMap[settings['EXCHANGE']]()
       workers["CQSingleSlater"].setDFTKernel(kernelMap['USERDEFINED'])
     elif 'LSDA' in refStr:
       for func in LSDAFunctional:
@@ -274,6 +286,26 @@ def handleReference(workers,settings):
       for func in BLYPFunctional:
         functionalMap[func]()
       workers["CQSingleSlater"].setDFTKernel(kernelMap['BLYP'])
+
+    # Optionally get the number of points
+    if 'DFT_NRAD' in settings:
+      workers["CQSingleSlater"].setDFTNRad(settings['DFT_NRAD'])
+    if 'DFT_NANG' in settings:
+      workers["CQSingleSlater"].setDFTNAng(settings['DFT_NANG'])
+
+    # Optionall set weights and grid
+    if 'DFT_GRID' in settings:
+      workers["CQSingleSlater"].setDFTGrid(gridMap[settings['DFT_GRID']])
+    if 'DFT_WEIGHTS' in settings:
+      workers["CQSingleSlater"].setDFTWeightScheme(
+        dftWeightScheme[settings['DFT_WEIGHTS']])
+
+    if 'DFT_SCREEN' in settings:
+      if not settings['DFT_SCREEN']:
+        workers["CQSingleSlater"].turnOffDFTScreening()
+
+    if 'DFT_SCRTOL' in settings:
+      workers["CQSingleSlater"].setDFTScreenTol(settings['DFT_SCRTOL'])
 
 
 #  # Set SS Reference
@@ -667,9 +699,17 @@ def handleReference(workers,settings):
 #    CErrMsg(workers['CQFileIO'],str(msg))
 
   # Check if reference is 2-Component
-  TCMethods = [chronusQ.Reference.TCS]
+  TCMethods = [chronusQ.Reference.TCS, chronusQ.Reference.X2C]
   if workers["CQSingleSlater"].Ref() in TCMethods:
     workers["CQSingleSlater"].setNTCS(2)
+
+  # Check if reference is Relativistic
+  RelMethods = [chronusQ.Reference.X2C]
+  if workers["CQSingleSlater"].Ref() in RelMethods:
+    workers["CQAOIntegrals"].doX2C = True
+    workers["CQAOIntegrals"].useFiniteWidthNuclei = True
+
+# if workers["CQAOIntegrals"].doX2C: print 'IS DEFINITELY X2C'
 
 def parseRT(workers,settings):
 
@@ -811,6 +851,7 @@ def parseSCF(workers,scfSettings):
     'SCFDENTOL' :workers['CQSingleSlater'].setSCFDenTol,
     'SCFENETOL' :workers['CQSingleSlater'].setSCFEneTol,
     'SCFMAXITER':workers['CQSingleSlater'].setSCFMaxIter,
+    'DT'        :workers['CQSingleSlater'].setITPdt,
     'FIELD'     :workers['CQSingleSlater'].setField,
     'GUESS'     :workers['CQSingleSlater'].setGuess ,
     'PRINT'     :workers['CQSingleSlater'].setPrintLevel
@@ -828,6 +869,9 @@ def parseSCF(workers,scfSettings):
     except KeyError:
       continue
 
+  if workers['CQMolecule'].nAtoms() == 1:
+    optMap['GUESS'](guessMap['CORE'])
+
   try:
     if scfSettings['GUESS'] == guessMap['READ']:
       workers['CQFileIO'].doRestart = True
@@ -839,6 +883,14 @@ def parseSCF(workers,scfSettings):
       workers['CQSingleSlater'].doDIIS = True
     else:
       workers['CQSingleSlater'].doDIIS = False
+  except KeyError:
+    pass
+
+  try:
+    if scfSettings['ITP']:
+      workers['CQSingleSlater'].doITP = True
+    else:
+      workers['CQSingleSlater'].doITP = False
   except KeyError:
     pass
 
