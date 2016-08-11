@@ -106,6 +106,12 @@ class SingleSlater : public Quantum<T> {
   int      nDIISExtrap_;
   int      iDIISStart_;
 
+  // DMS related parameters
+  int  nDMSExtrap_;
+
+  // General extrapolation parameters
+  int nKeep_;
+
   // Level Shifting Parameters
   int      iStartLevelShift_;
   int      nLevelShift_;
@@ -268,7 +274,7 @@ class SingleSlater : public Quantum<T> {
   void cpyAOtoOrthoDen();
 //void cpyOrthoDen2(int);
   void genDIISCom(int);
-  void unOrthoDen();
+//void unOrthoDen();
 //void orthoDen2();
 //void CDIIS2();
   void CDIIS4(int);
@@ -457,12 +463,12 @@ public:
     this->haveMO        = false;
     this->havePT        = false;
 
-     // Initialize Energies
-     this->energyOneE = 0.0;
-     this->energyTwoE = 0.0;
-     this->totalEx = 0.0;
-     this->totalEcorr = 0.0;
-     this->totalEnergy = 0.0;
+    // Initialize Energies
+    this->energyOneE = 0.0;
+    this->energyTwoE = 0.0;
+    this->totalEx = 0.0;
+    this->totalEcorr = 0.0;
+    this->totalEnergy = 0.0;
 
 
     // Standard Values
@@ -471,8 +477,6 @@ public:
     this->denTol_           = 1e-8;
     this->eneTol_           = 1e-10;
     this->maxSCFIter_       = 256;
-    this->nDIISExtrap_      = 6;
-    this->iDIISStart_       = 0;
     this->iStartLevelShift_ = 0;
     this->nLevelShift_      = 4;
     this->levelShiftParam_  = 2.42;
@@ -480,15 +484,22 @@ public:
     this->elecField_   = {0.0,0.0,0.0};
     this->printLevel_  = 1;
     this->isPrimary    = true;
-    this->doDIIS       = true;
     this->doITP        = false;
-    this->doDMS        = false;
     this->dt           = 0.1;
     this->isHF         = true;
     this->isDFT        = false;
     this->fixPhase_    = true;
     this->guess_       = SAD;
 
+    // Extrapolation
+    this->doDIIS       = true;
+    this->doDMS        = false;
+    this->nDIISExtrap_ = 6;
+    this->iDIISStart_  = 0;
+    this->nDMSExtrap_  = 6;
+    this->nKeep_       = 6;
+
+    // DFT
     this->weightScheme_ = ATOMIC_PARTITION::BECKE;
     this->dftGrid_      = GRID_TYPE::EULERMAC;
     this->screenVxc     = true;
@@ -859,7 +870,6 @@ public:
   void DMSExtrap(int);
   void initDMSFiles();
   bool doDMS;
-  int  nDMS_;
   
 };
 

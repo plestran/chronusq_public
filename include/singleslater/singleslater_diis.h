@@ -25,9 +25,11 @@
  */
 
 //#include <singleslater/singleslater_olddiis.h>
+#include <extrapolate.h>
 
 template<typename T>
 void SingleSlater<T>::CDIIS4(int NDIIS){
+/*
   int N = NDIIS + 1;
   int NRHS = 1;
   int INFO = -1;
@@ -138,29 +140,27 @@ void SingleSlater<T>::CDIIS4(int NDIIS){
   //prettyPrint(this->fileio_->out,Bp*COEFF,"SOLN");
 
   
-/*
-  int NUSE = N;
-  if(std::abs(RCOND)<std::numeric_limits<double>::epsilon()) {
-    this->fileio_->out << std::setw(2) << " " <<
-      std::setw(4) << " " <<
-      "*** XGESV Inversion Failed (RCOND = " 
-      << std::abs(RCOND) << ") ***" << endl;
-
-    std::fill(coef,coef+N,T(0.0));
-    coef[N-1]=-1.0;
-    T* S = this->memManager_->template malloc<T>(N);
-    int RANK; 
-    RCOND = -1;
-    dgelss_(&N,&N,&NRHS,reinterpret_cast<double*>(Bp.data()),
-      &N,reinterpret_cast<double*>(coef),&N,
-      reinterpret_cast<double*>(S),&RCOND,&RANK,
-      reinterpret_cast<double*>(WORK),&LWORK,&INFO);
-      
-    this->memManager_->free(S,N);
-    cout << "NEW RANK" << RANK << endl;
-    prettyPrint(this->fileio_->out,COEFF,"New CDIIS SOULTION");
-  }
-*/
+//  int NUSE = N;
+//  if(std::abs(RCOND)<std::numeric_limits<double>::epsilon()) {
+//    this->fileio_->out << std::setw(2) << " " <<
+//      std::setw(4) << " " <<
+//      "*** XGESV Inversion Failed (RCOND = " 
+//      << std::abs(RCOND) << ") ***" << endl;
+//
+//    std::fill(coef,coef+N,T(0.0));
+//    coef[N-1]=-1.0;
+//    T* S = this->memManager_->template malloc<T>(N);
+//    int RANK; 
+//    RCOND = -1;
+//    dgelss_(&N,&N,&NRHS,reinterpret_cast<double*>(Bp.data()),
+//      &N,reinterpret_cast<double*>(coef),&N,
+//      reinterpret_cast<double*>(S),&RCOND,&RANK,
+//      reinterpret_cast<double*>(WORK),&LWORK,&INFO);
+//      
+//    this->memManager_->free(S,N);
+//    cout << "NEW RANK" << RANK << endl;
+//    prettyPrint(this->fileio_->out,COEFF,"New CDIIS SOULTION");
+//  }
     if(InvFail){
       this->memManager_->free(B.data(),N*N);
       this->memManager_->free(coef,N);
@@ -168,6 +168,42 @@ void SingleSlater<T>::CDIIS4(int NDIIS){
       this->memManager_->free(iWORK_,N);
       return;
     }
+*/
+
+    std::vector<H5::DataSet*> eFiles;
+    eFiles.emplace_back(this->EScalarDIIS_);
+    if(this->nTCS_ == 2 or !this->isClosedShell)
+      eFiles.emplace_back(this->EMzDIIS_);
+    if(this->nTCS_ == 2) {
+      eFiles.emplace_back(this->EMyDIIS_);
+      eFiles.emplace_back(this->EMxDIIS_);
+    }
+
+    std::function<void(H5::DataSet*,std::size_t,T*)> F1 = 
+      std::bind(&SingleSlater<T>::readDIIS,this,
+        std::placeholders::_1,std::placeholders::_2,std::placeholders::_3);
+
+    std::function<T*(std::size_t)> F2 = 
+      std::bind(&CQMemManager::malloc<T>,this->memManager_,
+        std::placeholders::_1);
+
+    std::function<void(T*,std::size_t)> F3 = 
+      std::bind(&CQMemManager::free<T>,this->memManager_,
+        std::placeholders::_1,std::placeholders::_2);
+
+    DIIS<T> extrap(NDIIS,this->nBasis_*this->nBasis_,F1,F2,F3,
+      eFiles);
+
+    if(!extrap.extrapolate()) return;
+
+    T* coef = extrap.coeffs(); 
+
+    auto Extrap = [&](TMap *res, H5::DataSet *basis) {
+      for(auto j = 0; j < NDIIS; j++) {
+        this->readDIIS(basis,j,this->NBSqScratch_->data());
+        (*res) += coef[j] * (*this->NBSqScratch_); 
+      }
+    };
 
     if(this->nTCS_ == 1 && this->isClosedShell){
       this->fockA_->setZero();
@@ -184,6 +220,31 @@ void SingleSlater<T>::CDIIS4(int NDIIS){
         this->PTMx_->setZero();
       }
     }
+
+    // Extrapolate full Fock matrix
+    if(this->nTCS_ == 1 and this->isClosedShell)
+      Extrap(this->fockA_.get(),this->FScalarDIIS_);
+    else {
+      Extrap(this->fockScalar_.get(),this->FScalarDIIS_);
+      Extrap(this->fockMz_.get(),this->FMzDIIS_);
+      if(this->nTCS_ == 2) {
+        Extrap(this->fockMy_.get(),this->FMyDIIS_);
+        Extrap(this->fockMx_.get(),this->FMxDIIS_);
+      }
+    }
+
+    // Extrapolate G[P] for energy evaluation
+    if(this->nTCS_ == 1 and this->isClosedShell)
+      Extrap(this->PTA_.get(),this->PTScalarDIIS_);
+    else {
+      Extrap(this->PTScalar_.get(),this->FScalarDIIS_);
+      Extrap(this->PTMz_.get(),this->PTMzDIIS_);
+      if(this->nTCS_ == 2) {
+        Extrap(this->PTMy_.get(),this->PTMyDIIS_);
+        Extrap(this->PTMx_.get(),this->PTMxDIIS_);
+      }
+    }
+/*
 
     // Extrapolate full Fock matrix
     for(auto j = 0; j < NDIIS; j++) {
@@ -238,13 +299,16 @@ void SingleSlater<T>::CDIIS4(int NDIIS){
         }
       } // both vector and scalar
     } // PT loop
+*/
 
   this->orthoFock3();
 
+/*
   this->memManager_->free(B.data(),N*N);
   this->memManager_->free(coef,N);
   this->memManager_->free(iPiv,N);
   this->memManager_->free(iWORK_,N);
+*/
 }
 
 template<typename F> inline F DIISComplexScale();
