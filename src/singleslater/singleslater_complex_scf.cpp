@@ -72,6 +72,7 @@ void SingleSlater<dcomplex>::formNO(){
 
 }
 
+/*
 template<>
 void SingleSlater<dcomplex>::evalConver(int iter){
   double EOld;
@@ -119,6 +120,7 @@ void SingleSlater<dcomplex>::evalConver(int iter){
   MPI_Bcast(&this->isConverged,1,MPI_LOGICAL,0,MPI_COMM_WORLD);
 #endif
 }
+*/
 
 template<>
 void SingleSlater<dcomplex>::mixOrbitalsComplex(){
@@ -164,6 +166,7 @@ void SingleSlater<dcomplex>::diagFock2(){
   this->memManager_->free(RWORK,LRWORK);
 };
 
+/*
 template<>
 void SingleSlater<dcomplex>::orthoFock(){
   if(this->nTCS_ == 1 && this->isClosedShell){
@@ -240,6 +243,7 @@ void SingleSlater<dcomplex>::orthoFock(){
     }
   }
 };
+*/
 
 template<>
 void SingleSlater<dcomplex>::fockCUHF() {
@@ -285,6 +289,7 @@ void SingleSlater<dcomplex>::fockCUHF() {
   (*this->fockMz_)     = (*this->fockA_) - (*this->fockB_);
 };
 
+/*
 template<>
 void SingleSlater<dcomplex>::orthoDen(){
   if(this->nTCS_ == 1 && this->isClosedShell) {
@@ -372,6 +377,7 @@ void SingleSlater<dcomplex>::orthoDen(){
       Quantum<dcomplex>::spinGather(*this->onePDMA_,*this->onePDMB_,toGather);
   }
 };
+*/
 
 template<>
 void SingleSlater<dcomplex>::doImagTimeProp(double dt){
@@ -379,7 +385,7 @@ void SingleSlater<dcomplex>::doImagTimeProp(double dt){
    * C(new) = exp(-dt * F(current)) * C(current) 
    */
   this->formFock(); // Need orthonormal Fock to propagate
-  this->orthoFock();
+  this->orthoFock3();
 
   ComplexMatrix propagator = ( -dt * (*this->fockOrthoA_) ).exp();
   ComplexMatrix newMOs     = propagator * (*this->moA_);
@@ -395,6 +401,7 @@ void SingleSlater<dcomplex>::doImagTimeProp(double dt){
   }
 };
 
+/*
 template<>
 void SingleSlater<dcomplex>::unOrthoDen(){
   if(this->nTCS_ == 1 && this->isClosedShell) {
@@ -466,7 +473,9 @@ void SingleSlater<dcomplex>::unOrthoDen(){
       Quantum<dcomplex>::spinGather(*this->onePDMA_,*this->onePDMB_,toGather);
   }
 };
+*/
 
+/*
 template<>
 void SingleSlater<dcomplex>::orthoDen2(){
   if(this->nTCS_ == 1 && this->isClosedShell) {
@@ -539,6 +548,7 @@ void SingleSlater<dcomplex>::orthoDen2(){
         toGather);
   }
 };
+*/
 
 
 } // namespace ChronusQ

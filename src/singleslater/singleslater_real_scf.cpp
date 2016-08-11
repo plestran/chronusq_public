@@ -65,6 +65,7 @@ void SingleSlater<double>::formNO(){
 
 }
 
+/*
 template<>
 void SingleSlater<double>::evalConver(int iter){
   double EOld;
@@ -108,6 +109,7 @@ void SingleSlater<double>::evalConver(int iter){
   MPI_Bcast(&this->isConverged,1,MPI_LOGICAL,0,MPI_COMM_WORLD);
 #endif
 }
+*/
 
 template<>
 void SingleSlater<double>::mixOrbitalsComplex(){ };
@@ -136,6 +138,7 @@ void SingleSlater<double>::diagFock2(){
   this->memManager_->free(WORK,LWORK);
 };
 
+/*
 template<>
 void SingleSlater<double>::orthoFock(){
   if(this->nTCS_ == 1 && this->isClosedShell){
@@ -186,6 +189,7 @@ void SingleSlater<double>::orthoFock(){
     }
   }
 };
+*/
 
 template<>
 void SingleSlater<double>::fockCUHF() {
@@ -234,6 +238,7 @@ void SingleSlater<double>::fockCUHF() {
 };
 
 
+/*
 template<>
 void SingleSlater<double>::orthoDen(){
   if(this->nTCS_ == 1 && this->isClosedShell) {
@@ -291,6 +296,7 @@ void SingleSlater<double>::orthoDen(){
       Quantum<double>::spinGather(*this->onePDMA_,*this->onePDMB_,toGather);
   }
 };
+*/
 
 template<>
 void SingleSlater<double>::doImagTimeProp(double dt){
@@ -298,7 +304,7 @@ void SingleSlater<double>::doImagTimeProp(double dt){
    * C(new) = exp(-dt * F(current)) * C(current) 
    */
   this->formFock(); // Need orthonormal Fock to propagate
-  this->orthoFock();
+  this->orthoFock3();
 
   RealMatrix propagator = ( -dt * (*this->fockOrthoA_) ).exp();
   RealMatrix newMOs     = propagator * (*this->moA_);
@@ -314,6 +320,7 @@ void SingleSlater<double>::doImagTimeProp(double dt){
     }
 };
 
+/*
 template<>
 void SingleSlater<double>::unOrthoDen(){
   if(this->nTCS_ == 1 && this->isClosedShell) {
@@ -356,7 +363,9 @@ void SingleSlater<double>::unOrthoDen(){
       Quantum<double>::spinGather(*this->onePDMA_,*this->onePDMB_,toGather);
   }
 };
+*/
 
+/*
 template<>
 void SingleSlater<double>::orthoDen2(){
   if(this->nTCS_ == 1 && this->isClosedShell) {
@@ -400,6 +409,7 @@ void SingleSlater<double>::orthoDen2(){
         toGather);
   }
 };
+*/
 
 
 } // namespace ChronusQ

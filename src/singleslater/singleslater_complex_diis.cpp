@@ -28,6 +28,7 @@ using ChronusQ::FileIO;
 using ChronusQ::SingleSlater;
 
 namespace ChronusQ{
+/*
 template<>
 void SingleSlater<dcomplex>::GenDComm(int iter){
   ComplexMap ErrA(this->ErrorAlphaMem_ + (iter % (this->lenCoeff_-1)) * this->lenF_,
@@ -42,7 +43,9 @@ void SingleSlater<dcomplex>::GenDComm(int iter){
     ErrB -= (*this->aointegrals_->overlap_) * (*this->onePDMB_) * (*this->fockB_);
   }
 } // GenDComm
+*/
 
+/*
 template<>
 void SingleSlater<dcomplex>::genDComm2(int iter) {
   auto NTCSxNBASIS = this->nTCS_ * this->nBasis_;
@@ -75,5 +78,6 @@ void SingleSlater<dcomplex>::genDComm2(int iter) {
     ErrB -= this->NBSqScratch_->adjoint() * (*this->fockB_);
   };
 };
+*/
 
 }// Namespace ChronusQ

@@ -66,34 +66,65 @@ class SingleSlater : public Quantum<T> {
   typedef Eigen::Map<TMatrix> TMap;
   typedef Eigen::Matrix<T,Dynamic,1,ColMajor> TVec;
 
+  // SingleSlater class dependencies
+  BasisSet *    basisset_;         ///< Basis Set
+  Molecule *    molecule_;         ///< Molecular specificiations
+  FileIO *      fileio_;           ///< Access to output file
+  AOIntegrals * aointegrals_;      ///< Molecular Integrals over GTOs (AO basis)
+
+  // Misc Metadata
+  int printLevel_;
+
+  // Privite Metadata regarding basis dimensions
   int      nBasis_;
   int      nShell_;
   int      nTT_;
+
+  // Private Metadata regarding molecular specification
   int      nAE_;
   int      nBE_;
-  int      Ref_;
-  int      DFTKernel_;
   int      nOccA_;
   int      nOccB_;
   int      nVirA_;
   int      nVirB_;
   int      multip_;
-  int    **R2Index_;
 
-  int      guess_;
+  // Private Metadata regarding the reference
+  int      Ref_;
+  std::string SCFType_;      ///< String containing SCF Type (R/C) (R/U/G/CU)
+  std::string SCFTypeShort_; ///< String containing SCF Type (R/C) (R/U/G/CU)
+  std::string algebraicField_;     ///< String Real/Complex/(Quaternion)
+  std::string algebraicFieldShort_;///< String Real/Complex/(Quaternion)
+
+  // Private Metadata regarding SCF control
+  // SCF convergence parameters
+  double denTol_;
+  double eneTol_;
+  int maxSCFIter_;
+
+  // DIIS related parameters
   int      nDIISExtrap_;
   int      iDIISStart_;
+
+  // Level Shifting Parameters
   int      iStartLevelShift_;
   int      nLevelShift_;
   double   levelShiftParam_;
 
-  // DFT Parameters
+  // Misc SCF control
+  bool  fixPhase_;
+
+  int      guess_;
+
+  int    **R2Index_;
+
+  // Private metadata regarding DFT
+  int DFTKernel_;
   int weightScheme_;
   int dftGrid_;
   int nRadDFTGridPts_;
   int nAngDFTGridPts_;
   double nElectrons_;
-
 
 
   std::unique_ptr<TMap>  NBSqScratch_;
@@ -160,19 +191,11 @@ class SingleSlater : public Quantum<T> {
   std::vector<RealSparseMatrix> sparseDoRho_; // Evaluate density Map
 */
 
-  BasisSet *    basisset_;         ///< Basis Set
-  Molecule *    molecule_;         ///< Molecular specificiations
-  FileIO *      fileio_;           ///< Access to output file
-  AOIntegrals * aointegrals_;      ///< Molecular Integrals over GTOs (AO basis)
-//TwoDGrid    * twodgrid_   ;      ///< 3D grid (1Rad times 1 Ang) 
 
-  std::string SCFType_;      ///< String containing SCF Type (R/C) (R/U/G/CU)
-  std::string SCFTypeShort_; ///< String containing SCF Type (R/C) (R/U/G/CU)
-  std::string algebraicField_;     ///< String Real/Complex/(Quaternion)
-  std::string algebraicFieldShort_;///< String Real/Complex/(Quaternion)
   std::array<double,3> elecField_;
   std::vector<double> mullPop_; ///< mulliken partial charge
 
+/*
   // Lengths of scratch partitions (NOT MEANT TO BE COPIED)
   int lenF_;
   int lenP_;
@@ -181,10 +204,12 @@ class SingleSlater : public Quantum<T> {
   int lenLambda_;
   int lenDelF_;
   int lenOccNum_;
+*/
 
   // Pointers of scratch partitions (NOT MEANT TO BE COPIED)
   double *occNumMem_;
 
+/*
   T *FpAlphaMem_;
   T *FpBetaMem_;
   T *POldAlphaMem_;
@@ -193,10 +218,12 @@ class SingleSlater : public Quantum<T> {
   T *ErrorBetaMem_;
   T *FADIIS_;
   T *FBDIIS_;
+*/
   T *lambdaMem_;
   T *delFMem_;
   T *PNOMem_;
 
+/*
   T *NBSQScr1_;
   T *NBSQScr2_;
   T *ScalarScr1_;
@@ -207,25 +234,9 @@ class SingleSlater : public Quantum<T> {
   T *MyScr2_;
   T *MxScr1_;
   T *MxScr2_;
+*/
 
-  // New DIIS Variables
-  /*
-  T *FScalarDIIS_;
-  T *FMzDIIS_;
-  T *FMyDIIS_;
-  T *FMxDIIS_;
-
-  T *DScalarDIIS_;
-  T *DMzDIIS_;
-  T *DMyDIIS_;
-  T *DMxDIIS_;
-
-  T *EScalarDIIS_;
-  T *EMzDIIS_;
-  T *EMyDIIS_;
-  T *EMxDIIS_;
-  */
-
+  // Storage Files for Extrapolation
   H5::DataSet *FScalarDIIS_;
   H5::DataSet *FMzDIIS_;
   H5::DataSet *FMyDIIS_;
@@ -246,45 +257,40 @@ class SingleSlater : public Quantum<T> {
   H5::DataSet *PTMyDIIS_;
   H5::DataSet *PTMxDIIS_;
 
+  // Storage Files for most recent Density (for SCF comparison)
   H5::DataSet *DScalarOld_;
   H5::DataSet *DMzOld_;
   H5::DataSet *DMyOld_;
   H5::DataSet *DMxOld_;
  
   // New DIIS Functions
-  void cpyOrthoFock2(int);
+//void cpyOrthoFock2(int);
   void cpyAOtoOrthoDen();
-  void cpyOrthoDen2(int);
+//void cpyOrthoDen2(int);
   void genDIISCom(int);
   void unOrthoDen();
-  void orthoDen2();
-  void CDIIS2();
+//void orthoDen2();
+//void CDIIS2();
   void CDIIS4(int);
 
   // Various functions the perform SCF and SCR allocation
   void initSCFPtr();       ///< NULL-out pointers to scratch partitions
   void formNO();           ///< Form Natural Orbitals
   void mixOrbitalsSCF();   ///< Mix the orbitals for Complex / TCS SCF
-  void evalConver(int);    ///< Evaluate convergence criteria for SCF
+//void evalConver(int);    ///< Evaluate convergence criteria for SCF
 
-  void initSCFMem2();       ///< Initialize scratch memory for SCF (2)
+//void initSCFMem2();       ///< Initialize scratch memory for SCF (2)
   void diagFock2();         ///< Diagonalize Fock Matrix
-  void orthoFock();
+//void orthoFock();
   void fockCUHF();
-  void orthoDen();
-  void cleanupSCFMem2();
+//void orthoDen();
+//void cleanupSCFMem2();
   void copyDen();
-  void genDComm2(int);
+//void genDComm2(int);
   void backTransformMOs();
 
   void doImagTimeProp(double); ///< Propagate the wavefunction in imaginary time 
 
-  double denTol_;
-  double eneTol_;
-  int maxSCFIter_;
-  bool  fixPhase_;
-
-  int printLevel_;
 
   void allocOp();
   void allocAlphaOp();
@@ -358,33 +364,7 @@ public:
     BLYP
   };
 
-/*
-  enum CORR {
-    NOCORR,
-    VWN3,
-    VWN5,
-    LYP
-  };
 
-  enum EXCH {
-    NOEXCH,
-    EXACT,
-    SLATER,
-    B88
-  };
-*/
-
-/*
-  enum DFT_RAD_GRID {
-    EULERMACL,
-    GAUSSCHEB
-  };
-
-  enum DFT_WEIGHT_SCHEME{
-    BECKE,
-    FRISCH
-  };
-*/
  
   bool	haveMO;      ///< Have MO coefficients?
   bool	haveDensity; ///< Computed Density? (Not sure if this is used anymore)
@@ -410,9 +390,6 @@ public:
 
   double   totalEx;     ///< LDA Exchange
   double   totalEcorr;  ///< Total VWN Energy
-//double   eps_corr;    ///< VWN Correlation Energy Density
-//double   mu_corr;     ///<  VWN Correlation Potential
-//double   mu_corr_B;   ///<  VWN Correlation Potential (beta)
   double   epsScreen;   ///<  Screening value for both basis and Bweight
   double   epsConv;     ///<  Threshold value for converging cutoff radius given epsScreen
   int      maxiter;     ///<  Maximum number of iteration to find cutoff radius
@@ -427,7 +404,7 @@ public:
 //  std::chrono::duration<double> duration_7;
 //  std::chrono::duration<double> duration_8;
   int      nSCFIter;
-//APE
+
   std::vector<std::unique_ptr<DFTFunctional>> dftFunctionals_;
 
 
@@ -505,6 +482,7 @@ public:
     this->isPrimary    = true;
     this->doDIIS       = true;
     this->doITP        = false;
+    this->doDMS        = false;
     this->dt           = 0.1;
     this->isHF         = true;
     this->isDFT        = false;
@@ -875,6 +853,13 @@ public:
 
   void mixOrbitals2C();
   void mixOrbitalsComplex();
+
+  void formDMSGrad(int);
+  void formDMSHess(int);
+  void DMSExtrap(int);
+  void initDMSFiles();
+  bool doDMS;
+  int  nDMS_;
   
 };
 

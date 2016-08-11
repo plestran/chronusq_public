@@ -24,39 +24,11 @@
  *  
  */
 
-#include <singleslater/singleslater_oldscf.h>
+//#include <singleslater/singleslater_oldscf.h>
 #include <singleslater/singleslater_levelshift.h>
 #include <singleslater/singleslater_scfutils.h>
 
 
-template <typename T>
-void SingleSlater<T>::copyDen(){
-/*
-  auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
-  TMap POldAlpha(this->POldAlphaMem_,NTCSxNBASIS,NTCSxNBASIS);
-  POldAlpha = (*this->onePDMA_);
-
-  if(this->nTCS_ == 1 && !this->isClosedShell){
-    TMap POldBeta(this->POldBetaMem_,NTCSxNBASIS,NTCSxNBASIS);
-    POldBeta = (*this->onePDMB_);
-  };
-*/
-  
-  T* ScalarPtr;
-  if(this->isClosedShell && this->nTCS_ == 1) 
-    ScalarPtr = this->onePDMA_->data();
-  else
-    ScalarPtr = this->onePDMScalar_->data();
-
-  DScalarOld_->write(ScalarPtr,H5PredType<T>());
-  if(this->nTCS_ == 2 || !this->isClosedShell){
-    DMzOld_->write(this->onePDMMz_->data(),H5PredType<T>());
-  }
-  if(this->nTCS_ == 2){
-    DMyOld_->write(this->onePDMMy_->data(),H5PredType<T>());
-    DMxOld_->write(this->onePDMMx_->data(),H5PredType<T>());
-  }
-};
 
 template<typename T>
 void SingleSlater<T>::SCF3(){

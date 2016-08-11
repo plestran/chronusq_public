@@ -24,7 +24,7 @@
  *  
  */
 
-#include <singleslater/singleslater_olddiis.h>
+//#include <singleslater/singleslater_olddiis.h>
 
 template<typename T>
 void SingleSlater<T>::CDIIS4(int NDIIS){

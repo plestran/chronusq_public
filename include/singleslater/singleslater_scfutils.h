@@ -2,6 +2,7 @@ template <typename T>
 void SingleSlater<T>::initSCFPtr(){
   this->occNumMem_     = NULL;
 
+/*
   this->FpAlphaMem_    = NULL;
   this->FpBetaMem_     = NULL;
   this->POldAlphaMem_  = NULL;
@@ -10,10 +11,12 @@ void SingleSlater<T>::initSCFPtr(){
   this->ErrorBetaMem_  = NULL;
   this->FADIIS_        = NULL;
   this->FBDIIS_        = NULL;
+*/
   this->lambdaMem_     = NULL;
   this->delFMem_       = NULL;
   this->PNOMem_        = NULL;
 
+/*
   this->NBSQScr1_ = NULL;
   this->NBSQScr2_ = NULL;
   this->ScalarScr1_ = NULL;
@@ -24,6 +27,7 @@ void SingleSlater<T>::initSCFPtr(){
   this->MyScr2_ = NULL;
   this->MxScr1_ = NULL;
   this->MxScr2_ = NULL;
+*/
 }; // initSCFPtr
 
 template<typename T>
@@ -33,9 +37,11 @@ void SingleSlater<T>::initSCFMem3(){
   auto NTCSxNBASIS = this->nTCS_ * this->nBasis_;
   auto NSQ = NTCSxNBASIS  * NTCSxNBASIS;
 
+/*
   this->POldAlphaMem_  = this->memManager_->template malloc<T>(NSQ);
   if(this->nTCS_ == 1 && !this->isClosedShell) 
     this->POldBetaMem_  = this->memManager_->template malloc<T>(NSQ);
+*/
 
   if(this->Ref_ == CUHF) {
     this->delFMem_   = this->memManager_->template malloc<T>(NSQ);
@@ -73,9 +79,11 @@ void SingleSlater<T>::cleanupSCFMem3(){
 
   auto NTCSxNBASIS = this->nTCS_ * this->nBasis_;
   auto NSQ = NTCSxNBASIS  * NTCSxNBASIS;
+/*
   this->memManager_->free(this->POldAlphaMem_,NSQ);  
   if(this->nTCS_ == 1 && !this->isClosedShell) 
     this->memManager_->free(this->POldBetaMem_,NSQ);  
+*/
 
   if(this->Ref_ == CUHF){ 
     this->memManager_->free(this->delFMem_,NSQ);   
@@ -84,6 +92,35 @@ void SingleSlater<T>::cleanupSCFMem3(){
     this->memManager_->free(this->occNumMem_,NTCSxNBASIS); 
   }
 }
+
+template <typename T>
+void SingleSlater<T>::copyDen(){
+/*
+  auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
+  TMap POldAlpha(this->POldAlphaMem_,NTCSxNBASIS,NTCSxNBASIS);
+  POldAlpha = (*this->onePDMA_);
+
+  if(this->nTCS_ == 1 && !this->isClosedShell){
+    TMap POldBeta(this->POldBetaMem_,NTCSxNBASIS,NTCSxNBASIS);
+    POldBeta = (*this->onePDMB_);
+  };
+*/
+  
+  T* ScalarPtr;
+  if(this->isClosedShell && this->nTCS_ == 1) 
+    ScalarPtr = this->onePDMA_->data();
+  else
+    ScalarPtr = this->onePDMScalar_->data();
+
+  DScalarOld_->write(ScalarPtr,H5PredType<T>());
+  if(this->nTCS_ == 2 || !this->isClosedShell){
+    DMzOld_->write(this->onePDMMz_->data(),H5PredType<T>());
+  }
+  if(this->nTCS_ == 2){
+    DMyOld_->write(this->onePDMMy_->data(),H5PredType<T>());
+    DMxOld_->write(this->onePDMMx_->data(),H5PredType<T>());
+  }
+};
 
 template<typename T>
 void SingleSlater<T>::orthoFock3(){
