@@ -33,7 +33,7 @@ void SingleSlater<dcomplex>::formVXC_new(){;};
 template<>
 void SingleSlater<double>::formVXC_new(){
 //Timing
-  this->screenVxc = false;
+//  this->screenVxc = false;
 
   std::chrono::high_resolution_clock::time_point start;
   std::chrono::high_resolution_clock::time_point finish;

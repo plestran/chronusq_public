@@ -1002,7 +1002,6 @@ int main() {
     index << fnames.back() << " - " << jobs[iJob] << endl;
   };
 
-/*
   water.convBohr();
   water.computeNucRep();
   water.computeRij();
@@ -1035,7 +1034,6 @@ int main() {
            << jobs[iJob].jobType << endl;
   };
 
-*/
   finalizeCQ();
 
   return 0;
