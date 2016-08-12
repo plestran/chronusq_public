@@ -197,6 +197,7 @@ public:
     double delta1;        // ddelta0/d rho   (A33)
     double omega0;        // Eq A26   
     double omega1;        // domega/d rho (A32)   
+    double omegainf;      // omega1/omega0 (to avoid problem)   
     double dLYPdgAA;       // Eq A23(delLYP/delgammaAA) ;
     double dLYPdgBB   ;    // Eq A23(delLYP/delgammaBB) 
     double dLYPdgAB   ;    // Eq A24(delLYP/delgammaAB) 
@@ -210,6 +211,6 @@ public:
   DFTInfo eval(const double &rhoA, const double &rhoB);
   DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaBB);
   DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB, const double &gammaBB);
-  DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB, const double &gammaBB, bool small);
+  DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB, const double &gammaBB, bool small, DFTInfo &info);
 };
 #endif
