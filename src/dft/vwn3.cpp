@@ -3,7 +3,6 @@
 VWNIII::VWNIII(double X, double eps):
 DFTFunctional(X,eps){
 // General Constants
-//  this->small = 1.0e-16; 
   this->over2 = 0.5;
   this->over3 = 1.0/3.0;
   this->over4 = 1.0/4.0;
@@ -13,18 +12,13 @@ DFTFunctional(X,eps){
   this->A1    =   0.0621814; // In the text page 1207 (A^P)
   this->A_p   =  this->A1/2.0; // to Hartree
   this->A_f   =  this->A1/4.0; // to Hartree
-//  this->A_a   = -(1.0/(6.0*math.pi*math.pi)) ;// to hartree already
   this->b_p   =  13.0720;   // into text page 1207
   this->c_p   =  42.7198;   // into text page 1207
   this->x0_p  =  -0.409286; // into text page 1207
   this->b_f   =  20.1231;   // into text pagr 1207
   this->c_f   = 101.578;   // into text pagr 1207
   this->x0_f  =  -0.743294;  // into text pagr 1207
-//  this->b_a   =   1.13107;   // intext page 1209
-//  this->c_a   =  13.0045;    // intext page 1209
-//  this->x0_a  =  -0.00475840; // intext page 1209
   this->popVWNconst();
-
   this->name = "VWN III";
 #ifdef CQ_ENABLE_LIBXC
   // This is a dummy initialization to VWN 5
@@ -36,14 +30,8 @@ DFTFunctional(X,eps){
 };
 
 void VWNIII::popVWNconst(){
-//  this->b1p = (this->b_p*this->x0_p - this->c_p)/(this->c_p*this->x0_p); 
-//  this->b2p = (this->x0_p - this->b_p)/(this->c_p*this->x0_p); 
-//  this->b3p = (-1.0)/(this->c_p*this->x0_p); 
   this->Qp  = std::pow((4.0*this->c_p - this->b_p*this->b_p),over2); 
   this->X_x0p     = this->x0_p*this->x0_p + this->b_p*this->x0_p + this->c_p; 
-//  this->b1f = (this->b_f*this->x0_f - this->c_f)/(this->c_f*this->x0_f); 
-//  this->b2f = (this->x0_f - this->b_f)/(this->c_f*this->x0_f); 
-//  this->b3f = (-1.0)/(this->c_f*this->x0_f); 
   this->Qf  = std::pow((4.0*this->c_f - this->b_f*this->b_f),over2); 
   this->X_x0f     = this->x0_f*this->x0_f + this->b_f*this->x0_f + this->c_f; 
 };
@@ -51,8 +39,6 @@ void VWNIII::popVWNconst(){
 void VWNIII::popVWNdens(const double &rhoA,const double &rhoB, denspow &denquant){
   denquant.rhoT          = rhoA + rhoB;
   denquant.spindensity   = (rhoA - rhoB) / denquant.rhoT;
-//  denquant.spindensity_3 = denquant.spindensity*denquant.spindensity*denquant.spindensity;
-//  denquant.spindensity_4 = denquant.spindensity*denquant.spindensity_3;
 
   denquant.f0_spindensity = 0.0;
   if (std::abs(denquant.spindensity) >= this->small)   
@@ -61,9 +47,6 @@ void VWNIII::popVWNdens(const double &rhoA,const double &rhoB, denspow &denquant
      denquant.f0_spindensity += std::pow((1.0-(denquant.spindensity)),this->fourover3); 
   denquant.f0_spindensity += -2.0;
   denquant.f0_spindensity /= (-2.0+std::pow((2.0),this->fourover3)); 
-//  denquant.f1_spindensity  = std::pow((1.0+denquant.spindensity),this->fourover3); 
-//  denquant.f1_spindensity += std::pow((1.0-denquant.spindensity),this->fourover3); 
-//  denquant.f1_spindensity /= (2.0) ;
   denquant.df_spindensity = 0.0;
   if (std::abs(denquant.spindensity)   >= this->small) 
      denquant.df_spindensity += std::pow((1.0+denquant.spindensity),this->over3); 

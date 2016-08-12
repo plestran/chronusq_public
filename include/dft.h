@@ -113,8 +113,20 @@ public:
     double S2          ;
     double M3_A        ;
     double M3_B        ;
+    double spindensity_3;
+    double spindensity_4;
+    double df2_spindensity;
+//  VWN5 only
+    double Xa;
+    double alpha;
+    double beta;
+    double delta_eps_etha;
+    double db_dr;
+    double S3          ;
+    double M1          ;
+    double S4          ;
+    double S5          ;
     };
-//Interm Quantities
 
   VWNIII(double X = 1.0, double eps = 1e-10);
   DFTInfo eval(const double &rhoA, const double &rhoB);
@@ -131,60 +143,21 @@ class VWNV : public VWNIII {
 public:
   VWNV(double X = 1.0, double eps = 1e-10);
 //VWN5
-    double rhoT;          // rhoA + rhoB 
-    double spindensity;   // (rhoA - rhoB)/rhoT
-    double spindensity_4;
-    double spindensity_3;
-    double f0_spindensity ;
-    double f1_spindensity ;
-    double df_spindensity ;
-    double r_s      ;
-    double r_s_sqrt ;
-    double r_s_32   ;
-    double Xp       ; 
-    double Xf       ; 
-    double eps_p    ;
-    double eps_f    ;
-    double delta_eps_1 ;
-    double S1          ;
-    double S2          ;
-    double M3_A        ;
-    double M3_B        ;
+// Const
   double b1p      ; 
   double b2p      ; 
   double b3p      ; 
   double b1f      ; 
   double b2f      ; 
   double b3f      ; 
-  double tmp1 ;
-  double tmp2 ;
-  double tmp3 ;
-  double mu_p        ;
-  double mu_f        ;
-  double S3          ;
-  double S4          ;
-  double S5          ;
-  double M1          ;
-// From VwN3
   double A_a  ;
   double b_a  ;
   double c_a  ;
-  double alpha;
-  double Xa;
   double Qa;
   double X_x0a;
-  double beta;
-  double df2_spindensity;
-  double delta_eps_etha;
-  double db_dr;
-  DFTInfo eval(const double &rhoA, const double &rhoB);
-  DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB);
   DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB, const double &gammaBB);
-  double Eveps0VWN(double &A_x, double &b_x, double &Q, double &X, double &x0_x, double &X_x0);
-  double Eveps1VWN(double &A_x, double &b1, double &b2, double &b3);
-  double Eveps2VWN(double A_x, double &b_x, double &c_x, double &X, double &x0_x);
   void popVWNconst();
-  void popVWNdens(double rhoA, double rhoB);
+  void popVWNdens(const double &rhoA, const double &rhoB, denspow &denquant);
 };
 
 class BEightEight : public DFTFunctional {
