@@ -54,6 +54,8 @@ void SingleSlater<T>::initSCFMem3(){
 
    
   if(this->doDIIS) this->initDIISFiles();
+  if(this->doDMS)  this->initDMSFiles();
+
   std::vector<hsize_t> dims;
   dims.push_back(this->nBasis_);
   dims.push_back(this->nBasis_);

@@ -74,6 +74,8 @@ namespace ChronusQ {
     std::unique_ptr<TMap> onePDMMz_;
     std::unique_ptr<TMap> onePDMMy_;
     std::unique_ptr<TMap> onePDMMx_;
+
+    std::vector<TMap*> onePDM_;
     
     /*
     // Breaks Up Scattered Density into Re/Im parts
@@ -246,10 +248,18 @@ namespace ChronusQ {
           new TMap(this->memManager_->template malloc<T>(NSq),N,N));
       this->onePDMScalar_->setZero();
 
-      if((this->nTCS_ == 1 && !this->isClosedShell) || this->nTCS_ == 2){
+      if(this->nTCS_ == 1 and this->isClosedShell) {
+        this->onePDM_.emplace_back(this->onePDMA_.get());
+      } else {
+        this->onePDM_.emplace_back(this->onePDMScalar_.get());
+      }
+
+      if(!this->isClosedShell || this->nTCS_ == 2){
         this->onePDMMz_ = std::unique_ptr<TMap>(
             new TMap(this->memManager_->template malloc<T>(NSq),N,N));
         this->onePDMMz_->setZero();
+
+        this->onePDM_.emplace_back(this->onePDMMz_.get());
       }
       if(this->nTCS_ == 2) {
         this->onePDMMx_ = std::unique_ptr<TMap>(
@@ -259,6 +269,8 @@ namespace ChronusQ {
 
         this->onePDMMy_->setZero();
         this->onePDMMx_->setZero();
+        this->onePDM_.emplace_back(this->onePDMMy_.get());
+        this->onePDM_.emplace_back(this->onePDMMx_.get());
       }
     };
 

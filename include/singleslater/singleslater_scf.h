@@ -55,18 +55,37 @@ void SingleSlater<T>::SCF3(){
   for(iter = 0; iter < this->maxSCFIter_; iter++){
     this->copyDen();
     this->orthoFock3();
+    auto IDIISIter = iter - this->iDIISStart_;
     if(this->doDIIS){
-      auto IDIISIter = iter - this->iDIISStart_;
       this->cpyFockDIIS(IDIISIter);
       this->cpyDenDIIS(IDIISIter);
       this->genDIISCom(IDIISIter); 
-      if(IDIISIter > 0) 
-        this->CDIIS4(std::min(IDIISIter+1,std::size_t(this->nDIISExtrap_)));
     }
-    this->diagFock2();
-    this->formDensity();
+    if(this->doDMS){
+      this->formDMSErr(IDIISIter);
+    }
+
+    // DIIS Extrapolation of the Fock
+    if(this->doDIIS and IDIISIter > 0) 
+      this->CDIIS4(std::min(IDIISIter+1,std::size_t(this->nDIISExtrap_)));
+
+    if(this->doDMS and IDIISIter > 0){
+      // DIIS (DMS) Extrapolation of the Density
+      this->DMSExtrap(std::min(IDIISIter+1,std::size_t(this->nDIISExtrap_)));
+    } else {
+      this->diagFock2();
+
+      // This stupidly computes the orthonormal density and stores it in the
+      // AO storage
+      this->formDensity();
+
+    }
+    // This copy operation negates the problem above
     this->cpyAOtoOrthoDen();
+
+    // Transform D into the AO basis
     this->unOrthoDen3();
+
     // Calls formFock
     SCFConvergence CONVER = this->evalConver3();
 

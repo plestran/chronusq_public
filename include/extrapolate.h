@@ -13,6 +13,8 @@ class DIIS {
   const std::function<F*(std::size_t)> &allocF_;
   const std::function<void(F*,std::size_t)> &freeF_;
 
+  bool doNeg_;
+
 public:
 
   DIIS() = delete;
@@ -20,9 +22,10 @@ public:
     const std::function<void(H5::DataSet*,std::size_t,F*)> &read,
     const std::function<F*(std::size_t)> &allocF,
     const std::function<void(F*,std::size_t)> &freeF,
-    std::vector<H5::DataSet*> &eFiles):
+    std::vector<H5::DataSet*> &eFiles, bool doNeg = true):
     nExtrap_(nExtrap), eDim_(eDim), read_(read), 
-    eFiles_(std::move(eFiles)), allocF_(allocF),freeF_(freeF){
+    eFiles_(eFiles), allocF_(allocF),freeF_(freeF),
+    doNeg_(doNeg){
 
     coeffs_.resize(nExtrap_+1);
   }
@@ -67,14 +70,19 @@ bool DIIS<F>::extrapolate(){
 
   B = B.template selfadjointView<Lower>();
 
+  double fact = -1.0;
+  if(!doNeg_) fact = 1.0;
+
   for(auto l = 0; l < nExtrap_; l++){
-     B(nExtrap_,l) = -1.0;
-     B(l,nExtrap_) = -1.0;
+     B(nExtrap_,l) = fact;
+     B(l,nExtrap_) = fact;
   }
   B(nExtrap_,nExtrap_) = 0.0;
 
   std::fill(coeffs_.begin(),coeffs_.end(),0.0);
-  coeffs_[nExtrap_] = -1.0;
+  coeffs_[nExtrap_] = fact;
+
+  prettyPrint(cout,B,"B");
 
   double ANORM = B.template lpNorm<1>();
   std::vector<F> WORK(LWORK);

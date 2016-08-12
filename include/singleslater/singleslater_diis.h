@@ -30,15 +30,6 @@
 template<typename T>
 void SingleSlater<T>::CDIIS4(int NDIIS){
 
-    std::vector<H5::DataSet*> eFiles;
-    eFiles.emplace_back(this->EScalarDIIS_);
-    if(this->nTCS_ == 2 or !this->isClosedShell)
-      eFiles.emplace_back(this->EMzDIIS_);
-    if(this->nTCS_ == 2) {
-      eFiles.emplace_back(this->EMyDIIS_);
-      eFiles.emplace_back(this->EMxDIIS_);
-    }
-
     std::function<void(H5::DataSet*,std::size_t,T*)> F1 = 
       std::bind(&SingleSlater<T>::readDIIS,this,
         std::placeholders::_1,std::placeholders::_2,std::placeholders::_3);
@@ -51,13 +42,7 @@ void SingleSlater<T>::CDIIS4(int NDIIS){
       std::bind(&CQMemManager::free<T>,this->memManager_,
         std::placeholders::_1,std::placeholders::_2);
 
-    DIIS<T> extrap(NDIIS,this->nBasis_*this->nBasis_,F1,F2,F3,
-      eFiles);
-
-    if(!extrap.extrapolate()) return;
-
-    T* coef = extrap.coeffs(); 
-
+    T* coef;
     auto Extrap = [&](TMap *res, H5::DataSet *basis) {
       for(auto j = 0; j < NDIIS; j++) {
         this->readDIIS(basis,j,this->NBSqScratch_->data());
@@ -65,45 +50,40 @@ void SingleSlater<T>::CDIIS4(int NDIIS){
       }
     };
 
-    if(this->nTCS_ == 1 && this->isClosedShell){
-      this->fockA_->setZero();
-      this->PTA_->setZero();
-    } else {
-      this->fockScalar_->setZero();
-      this->fockMz_->setZero();
-      this->PTScalar_->setZero();
-      this->PTMz_->setZero();
-      if(this->nTCS_ == 2) {
-        this->fockMy_->setZero();
-        this->fockMx_->setZero();
-        this->PTMy_->setZero();
-        this->PTMx_->setZero();
-      }
-    }
+    DIIS<T> extrap(NDIIS,this->nBasis_*this->nBasis_,F1,F2,F3,
+      this->CommDIIS_);
 
-    // Extrapolate full Fock matrix
-    if(this->nTCS_ == 1 and this->isClosedShell)
-      Extrap(this->fockA_.get(),this->FScalarDIIS_);
-    else {
-      Extrap(this->fockScalar_.get(),this->FScalarDIIS_);
-      Extrap(this->fockMz_.get(),this->FMzDIIS_);
-      if(this->nTCS_ == 2) {
-        Extrap(this->fockMy_.get(),this->FMyDIIS_);
-        Extrap(this->fockMx_.get(),this->FMxDIIS_);
-      }
-    }
+    if(!extrap.extrapolate()) return;
 
-    // Extrapolate G[P] for energy evaluation
-    if(this->nTCS_ == 1 and this->isClosedShell)
-      Extrap(this->PTA_.get(),this->PTScalarDIIS_);
-    else {
-      Extrap(this->PTScalar_.get(),this->FScalarDIIS_);
-      Extrap(this->PTMz_.get(),this->PTMzDIIS_);
-      if(this->nTCS_ == 2) {
-        Extrap(this->PTMy_.get(),this->PTMyDIIS_);
-        Extrap(this->PTMx_.get(),this->PTMxDIIS_);
-      }
+    coef = extrap.coeffs(); 
+
+
+    for(auto FOCK : this->fock_) FOCK->setZero();
+    for(auto PT   : this->PT_)   PT->setZero();
+
+    for(auto I = 0; I < this->fock_.size(); I++){
+      Extrap(this->fock_[I],this->FDIIS_[I]);
+      Extrap(this->PT_[I],this->PTDIIS_[I]);
     }
+/*
+    for(auto I = 0; I < this->fock_.size(); I++){
+      std::vector<H5::DataSet*> eFiles;
+      eFiles.emplace_back(this->CommDIIS_[I]);
+
+      DIIS<T> extrap(NDIIS,this->nBasis_*this->nBasis_,F1,F2,F3,
+        eFiles);
+
+      if(!extrap.extrapolate()) continue;
+
+      coef = extrap.coeffs(); 
+      this->fock_[I]->setZero();
+      this->PT_[I]->setZero();
+
+      Extrap(this->fock_[I],this->FDIIS_[I]);
+      Extrap(this->PT_[I],this->PTDIIS_[I]);
+    }
+*/
+
 
   this->orthoFock3();
 
@@ -385,6 +365,11 @@ void SingleSlater<T>::initDIISFiles(){
     this->fileio_->createScratchPartition(H5PredType<T>(),
       "PT (Scalar) For DIIS Extrapoloation",dims);
 
+  this->FDIIS_.emplace_back(this->FScalarDIIS_);
+  this->DDIIS_.emplace_back(this->DScalarDIIS_);
+  this->CommDIIS_.emplace_back(this->EScalarDIIS_);
+  this->PTDIIS_.emplace_back(this->PTScalarDIIS_);
+
   if(this->nTCS_ == 2 || !this->isClosedShell) {
     this->FMzDIIS_ = 
       this->fileio_->createScratchPartition(H5PredType<T>(),
@@ -398,6 +383,11 @@ void SingleSlater<T>::initDIISFiles(){
     this->PTMzDIIS_ = 
       this->fileio_->createScratchPartition(H5PredType<T>(),
         "PT (Mz) For DIIS Extrapoloation",dims);
+
+    this->FDIIS_.emplace_back(this->FMzDIIS_);
+    this->DDIIS_.emplace_back(this->DMzDIIS_);
+    this->CommDIIS_.emplace_back(this->EMzDIIS_);
+    this->PTDIIS_.emplace_back(this->PTMzDIIS_);
   }
 
   if(this->nTCS_ == 2) {
@@ -414,6 +404,11 @@ void SingleSlater<T>::initDIISFiles(){
       this->fileio_->createScratchPartition(H5PredType<T>(),
         "PT (My) For DIIS Extrapoloation",dims);
 
+    this->FDIIS_.emplace_back(this->FMyDIIS_);
+    this->DDIIS_.emplace_back(this->DMyDIIS_);
+    this->CommDIIS_.emplace_back(this->EMyDIIS_);
+    this->PTDIIS_.emplace_back(this->PTMyDIIS_);
+
     this->FMxDIIS_ = 
       this->fileio_->createScratchPartition(H5PredType<T>(),
         "Fock (Mx) For DIIS Extrapoloation",dims);
@@ -426,10 +421,16 @@ void SingleSlater<T>::initDIISFiles(){
     this->PTMxDIIS_ = 
       this->fileio_->createScratchPartition(H5PredType<T>(),
         "PT (Mx) For DIIS Extrapoloation",dims);
+
+    this->FDIIS_.emplace_back(this->FMxDIIS_);
+    this->DDIIS_.emplace_back(this->DMxDIIS_);
+    this->CommDIIS_.emplace_back(this->EMxDIIS_);
+    this->PTDIIS_.emplace_back(this->PTMxDIIS_);
   }
 
 };
 
+/*
 template<typename T>
 void SingleSlater<T>::cpyDenDIIS(int iter){
   T* ScalarPtr;
@@ -450,7 +451,17 @@ void SingleSlater<T>::cpyDenDIIS(int iter){
     }
   }
 }
+*/
 
+template<typename T>
+void SingleSlater<T>::cpyDenDIIS(int iter){
+  int ITER = iter % this->nDIISExtrap_;
+  for(auto I = 0; I < this->onePDM_.size(); I++){
+    this->writeDIIS(this->DDIIS_[I],ITER,this->onePDMOrtho_[I]->data());
+  }
+};
+
+/*
 template<typename T>
 void SingleSlater<T>::cpyFockDIIS(int iter){
   T* ScalarPtr;
@@ -490,6 +501,16 @@ void SingleSlater<T>::cpyFockDIIS(int iter){
     }
   }
 }
+*/
+
+template<typename T>
+void SingleSlater<T>::cpyFockDIIS(int iter){
+  int ITER = iter % this->nDIISExtrap_;
+  for(auto I = 0; I < this->fock_.size(); I++){
+    this->writeDIIS(this->FDIIS_[I],ITER,this->fock_[I]->data());
+    this->writeDIIS(this->PTDIIS_[I],ITER,this->PT_[I]->data());
+  }
+};
 
 template <typename T>
 void SingleSlater<T>::readDIIS(H5::DataSet *DIISF, int IDIISIter, T *data){

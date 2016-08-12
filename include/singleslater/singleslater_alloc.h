@@ -31,6 +31,27 @@ void SingleSlater<T>::alloc(){
   this->checkMeta();
   Quantum<T>::alloc(this->nBasis_); // Allocate Den -> Quantum
   this->allocOp();
+
+  if(this->nTCS_ == 1 and this->isClosedShell){
+    fock_.emplace_back(this->fockA_.get());
+    PT_.emplace_back(this->PTA_.get());
+    onePDMOrtho_.emplace_back(this->onePDMOrthoA_.get());
+  } else {
+    fock_.emplace_back(this->fockScalar_.get());
+    fock_.emplace_back(this->fockMz_.get());
+    PT_.emplace_back(this->PTScalar_.get());
+    PT_.emplace_back(this->PTMz_.get());
+    onePDMOrtho_.emplace_back(this->onePDMOrthoScalar_.get());
+    onePDMOrtho_.emplace_back(this->onePDMOrthoMz_.get());
+    if(this->nTCS_ == 2) {
+      fock_.emplace_back(this->fockMy_.get());
+      fock_.emplace_back(this->fockMx_.get());
+      PT_.emplace_back(this->PTMy_.get());
+      PT_.emplace_back(this->PTMx_.get());
+      onePDMOrtho_.emplace_back(this->onePDMOrthoMy_.get());
+      onePDMOrtho_.emplace_back(this->onePDMOrthoMx_.get());
+    }
+  }
  
   if(getRank() == 0) {
     if (this->isDFT){

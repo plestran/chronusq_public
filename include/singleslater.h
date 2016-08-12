@@ -106,8 +106,6 @@ class SingleSlater : public Quantum<T> {
   int      nDIISExtrap_;
   int      iDIISStart_;
 
-  // DMS related parameters
-  int  nDMSExtrap_;
 
   // General extrapolation parameters
   int nKeep_;
@@ -149,6 +147,7 @@ class SingleSlater : public Quantum<T> {
   std::unique_ptr<TMap>  fockMx_;
   std::unique_ptr<TMap>  fockMy_;
   std::unique_ptr<TMap>  fockMz_;
+  std::vector<TMap*>     fock_;
 
   // Orthonormal Fock
   std::unique_ptr<TMap>  fockOrthoA_;
@@ -171,6 +170,7 @@ class SingleSlater : public Quantum<T> {
   std::unique_ptr<TMap>  PTMx_;
   std::unique_ptr<TMap>  PTMy_;
   std::unique_ptr<TMap>  PTMz_;
+  std::vector<TMap*>     PT_;
 
   // Orthonormal Density
   std::unique_ptr<TMap>  onePDMOrthoA_;        
@@ -179,6 +179,7 @@ class SingleSlater : public Quantum<T> {
   std::unique_ptr<TMap>  onePDMOrthoMx_;
   std::unique_ptr<TMap>  onePDMOrthoMy_;
   std::unique_ptr<TMap>  onePDMOrthoMz_;
+  std::vector<TMap*>     onePDMOrtho_;
 
   std::unique_ptr<TMap>  vXA_;        ///< Alpha or Full (TCS) VX
   std::unique_ptr<TMap>  vXB_;        ///< Beta VXC
@@ -247,21 +248,38 @@ class SingleSlater : public Quantum<T> {
   H5::DataSet *FMzDIIS_;
   H5::DataSet *FMyDIIS_;
   H5::DataSet *FMxDIIS_;
+  std::vector<H5::DataSet*> FDIIS_;
 
   H5::DataSet *DScalarDIIS_;
   H5::DataSet *DMzDIIS_;
   H5::DataSet *DMyDIIS_;
   H5::DataSet *DMxDIIS_;
+  std::vector<H5::DataSet*> DDIIS_;
 
   H5::DataSet *EScalarDIIS_;
   H5::DataSet *EMzDIIS_;
   H5::DataSet *EMyDIIS_;
   H5::DataSet *EMxDIIS_;
+  std::vector<H5::DataSet*> CommDIIS_;
 
   H5::DataSet *PTScalarDIIS_;
   H5::DataSet *PTMzDIIS_;
   H5::DataSet *PTMyDIIS_;
   H5::DataSet *PTMxDIIS_;
+  std::vector<H5::DataSet*> PTDIIS_;
+
+  H5::DataSet *ADMPGradScalar_;
+  H5::DataSet *ADMPGradMz_;
+  H5::DataSet *ADMPGradMy_;
+  H5::DataSet *ADMPGradMx_;
+  std::vector<H5::DataSet*> ADMPGrad_;
+
+  H5::DataSet *DMSErrScalar_;
+  H5::DataSet *DMSErrMz_;
+  H5::DataSet *DMSErrMy_;
+  H5::DataSet *DMSErrMx_;
+  std::vector<H5::DataSet*> DMSErr_;
+
 
   // Storage Files for most recent Density (for SCF comparison)
   H5::DataSet *DScalarOld_;
@@ -493,11 +511,9 @@ public:
 
     // Extrapolation
     this->doDIIS       = true;
-    this->doDMS        = false;
+    this->doDMS        = true;
     this->nDIISExtrap_ = 6;
     this->iDIISStart_  = 0;
-    this->nDMSExtrap_  = 6;
-    this->nKeep_       = 6;
 
     // DFT
     this->weightScheme_ = ATOMIC_PARTITION::BECKE;
@@ -865,10 +881,12 @@ public:
   void mixOrbitals2C();
   void mixOrbitalsComplex();
 
-  void formDMSGrad(int);
-  void formDMSHess(int);
+  void formADMPGrad(int);
+  void formDMSErr(int);
   void DMSExtrap(int);
   void initDMSFiles();
+  void initADMPFiles();
+  void McWeeny(int);
   bool doDMS;
   
 };

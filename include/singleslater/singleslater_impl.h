@@ -7,6 +7,7 @@ namespace ChronusQ{
 #include <singleslater/singleslater_misc.h>
 #include <singleslater/singleslater_scf.h>
 #include <singleslater/singleslater_diis.h>
+#include <singleslater/singleslater_dms.h>
 #include <singleslater/singleslater_properties.h>
 //#include <singleslater_dft.h>
 };
