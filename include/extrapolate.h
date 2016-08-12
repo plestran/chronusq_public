@@ -82,8 +82,6 @@ bool DIIS<F>::extrapolate(){
   std::fill(coeffs_.begin(),coeffs_.end(),0.0);
   coeffs_[nExtrap_] = fact;
 
-  prettyPrint(cout,B,"B");
-
   double ANORM = B.template lpNorm<1>();
   std::vector<F> WORK(LWORK);
 
