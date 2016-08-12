@@ -3,19 +3,20 @@ void SingleSlater<T>::formADMPGrad(int IDMSIter){
   prettyPrint(cout,(*this->fockOrthoA_),"FA"); 
   prettyPrint(cout,(*this->onePDMOrthoA_),"DA"); 
   this->NBSqScratch2_->noalias() =
-    (*this->fockOrthoA_) * (*this->onePDMOrthoA_);
+    0.5 * (*this->fockOrthoA_) * (*this->onePDMOrthoA_);
+ 
 
   // G = 3 * (FP + PF)
-  this->NBSqScratch_->noalias() = 
+  (*this->NBSqScratch_) = 
     3 * ((*this->NBSqScratch2_) + this->NBSqScratch2_->adjoint());
 
   // G -= 2 ( FPP + PFP + PPF )
-  this->NBSqScratch_->noalias() -= 
-    2 * (*this->NBSqScratch2_) * (*this->onePDMOrthoA_); 
-  this->NBSqScratch_->noalias() -= 
-    2 * (*this->onePDMOrthoA_) * (*this->NBSqScratch2_); 
-  this->NBSqScratch_->noalias() -= 
-    2 * (*this->onePDMOrthoA_) * this->NBSqScratch2_->adjoint(); 
+  (*this->NBSqScratch_) -= 
+    0.5 * 2 * (*this->NBSqScratch2_) * (*this->onePDMOrthoA_); 
+  (*this->NBSqScratch_) -= 
+    0.5 * 2 * (*this->onePDMOrthoA_) * (*this->NBSqScratch2_); 
+  (*this->NBSqScratch_) -= 
+    0.5 * 2 * (*this->onePDMOrthoA_) * this->NBSqScratch2_->adjoint(); 
 
   this->writeDIIS(this->ADMPGradScalar_,IDMSIter % this->nDIISExtrap_,
     this->NBSqScratch_->data());  
@@ -30,13 +31,13 @@ void SingleSlater<T>::formDMSErr(int IDMSIter){
   prettyPrint(cout,(*this->NBSqScratch_),"Grad");
 
   this->NBSqScratch2_->noalias() =
-    (*this->onePDMOrthoA_) * (*this->fockOrthoA_)  ;
+    0.5 * (*this->onePDMOrthoA_) * (*this->fockOrthoA_)  ;
 
   for(auto mu = 0; mu < this->nBasis_; mu++)
   for(auto nu = 0; nu < this->nBasis_; nu++) {
     (*this->NBSqScratch_)(mu,nu) /=
-      (3.0 + 2.0 * (*this->onePDMA_)(mu,mu)) * (*this->fockA_)(nu,nu) +
-      (3.0 + 2.0 * (*this->onePDMA_)(nu,nu)) * (*this->fockA_)(mu,mu) -
+      (3.0 + 0.5 * 2.0 * (*this->onePDMOrthoA_)(mu,mu)) * (*this->fockOrthoA_)(nu,nu) +
+      (3.0 + 0.5 * 2.0 * (*this->onePDMOrthoA_)(nu,nu)) * (*this->fockOrthoA_)(mu,mu) -
       4.0 * ((*this->NBSqScratch2_)(mu,mu) + (*this->NBSqScratch2_)(nu,nu));
   }
  
@@ -76,16 +77,28 @@ void SingleSlater<T>::DMSExtrap(int NDIIS) {
   
   if(!extrap.extrapolate()) {
     cout << "INVFailed" << endl;
-  CErr();
     return;
   }
   coef = extrap.coeffs();
   cout << "COEFFS" << endl;
   for(auto i = 0; i < NDIIS; i++) cout <<coef[i] <<endl;
-  if(NDIIS == this->nDIISExtrap_-3) CErr();
+//if(NDIIS == this->nDIISExtrap_-3) CErr();
 
   for(auto DEN : this->onePDM_) DEN->setZero();
 
+  for(auto I = 0; I < this->onePDM_.size(); I++){
+    for(auto J = 0; J < NDIIS; J++) {
+      this->readDIIS(this->DDIIS_[I],J,this->NBSqScratch_->data());
+      (*this->NBSqScratch_) *= 0.5;
+      (*this->NBSqScratch2_) = (*this->NBSqScratch_)*(*this->NBSqScratch_);
+      prettyPrint(cout,(*this->NBSqScratch_),"Den "
+         + std::to_string(I) + " " + std::to_string(J));
+      prettyPrint(cout,(*this->NBSqScratch2_) - (*this->NBSqScratch_),"Diff "
+         + std::to_string(I) + " " + std::to_string(J));
+    //(*this->onePDMA_) = 2*(*this->NBSqScratch_);
+    //McWeeny(10);
+    }
+  }
   for(auto I = 0; I < this->onePDM_.size(); I++){
     Extrap(this->onePDM_[I],this->DDIIS_[I]);
     Extrap(this->onePDM_[I],this->DMSErr_[I]);
@@ -93,31 +106,42 @@ void SingleSlater<T>::DMSExtrap(int NDIIS) {
   prettyPrint(cout,(*this->onePDMA_),"P After Exp");
 
   
+  cout << "FACT" << endl;
+  cout << static_cast<T>(this->molecule_->nTotalE())/this->onePDM_[0]->trace() << endl;
   for(auto I = 0; I < this->onePDM_.size(); I++){
     (*this->onePDM_[I]) *= 
-      static_cast<T>(2*this->molecule_->nTotalE())/this->onePDM_[0]->trace();
+      static_cast<T>(this->molecule_->nTotalE())/this->onePDM_[0]->trace();
   }
   prettyPrint(cout,(*this->onePDMA_),"P After Scale");
   
+  prettyPrint(cout,this->onePDMA_->eigenvalues(),"P Eigen");
   this->McWeeny(10);
   prettyPrint(cout,(*this->onePDMA_),"P After Pure");
-  CErr();
+  
 }
 
 template<typename T>
 void SingleSlater<T>::McWeeny(int MAX){
+  (*this->onePDMA_) /= 2.0;
   for(auto I = 0; I < MAX; I++){
     prettyPrint(cout,(*this->onePDMA_),"P in McWeeny " + std::to_string(I));
-    this->NBSqScratch_->noalias() = (*this->onePDMA_) * (*this->onePDMA_);
+    (*this->NBSqScratch_) = (*this->onePDMA_) * (*this->onePDMA_);
     prettyPrint(cout,(*this->NBSqScratch_),"P2 in McWeeny " + std::to_string(I));
     (*this->NBSqScratch2_) = (*this->onePDMA_) - (*this->NBSqScratch_);
     if(this->NBSqScratch2_->norm() < 1e-10) break;
+    (*this->NBSqScratch2_) = (*this->NBSqScratch_) *(*this->onePDMA_);
+    prettyPrint(cout,(*this->NBSqScratch2_),"P3 in McWeeny " + std::to_string(I));
+    (*this->onePDMA_) = 3* (*this->NBSqScratch_) - 2 * (*this->NBSqScratch2_);
+    prettyPrint(cout,(*this->onePDMA_),"Pure");
 
+/*
     (*this->NBSqScratch2_) = (*this->onePDMA_);
     this->onePDMA_->noalias() = 3 * (*this->NBSqScratch_);
     this->onePDMA_->noalias() -= 
       2 * (*this->NBSqScratch_) * (*this->NBSqScratch2_);
+*/
   }
+  (*this->onePDMA_) *= 2.0;
 };
 
 template<typename T>
