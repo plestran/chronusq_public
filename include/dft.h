@@ -201,13 +201,19 @@ public:
     double dLYPdgAA;       // Eq A23(delLYP/delgammaAA) ;
     double dLYPdgBB   ;    // Eq A23(delLYP/delgammaBB) 
     double dLYPdgAB   ;    // Eq A24(delLYP/delgammaAB) 
-    double d2LYPdrhgAA ;   // Eq A29(del2LYP/delgammaAA*delrhoA)
-    double d2LYPdrhgAB ;   // Eq A30(del2LYP/delgammaAB*delrhoA)
-    double d2LYPdrhgBB ;   // Eq A31(del2LYP/delgammaBB*delrhoA)
+    double d2LYPdrhoAdgAA ;   // Eq A29(del2LYP/delgammaAA*delrhoA)
+    double d2LYPdrhoAdgAB ;   // Eq A30(del2LYP/delgammaAB*delrhoA)
+    double d2LYPdrhoAdgBB ;   // Eq A31(del2LYP/delgammaBB*delrhoA)
+    double d2LYPdrhoBdgBB ;   // Eq A29(del2LYP/delgammaBB*delrhoA)
+    double d2LYPdrhoBdgAB ;   // Eq A30(del2LYP/delgammaAB*delrhoB)
+    double d2LYPdrhoBdgAA ;   // Eq A31(del2LYP/delgammaAA*delrhoB)
     };
   lyp(double X = 1.0, double eps = 1e-10);
   void popLYPdens(const double &rhoA, const double &rhoB, denspow &denquant);
-  void popDensPow(const double &rhoA, const double &rhoB, denspow &denquant);  
+  void popDensPow(const double &rhoA, const double &rhoB, denspow &denquant);
+  double d2LYPdrhoXdgXX(const double &rhoX, const double &rhoY,const double &dLYPdgXX, denspow &denquant);   
+  double d2LYPdrhoXdgXY(const double &rhoX, const double &rhoY,const double &dLYPdgXY, denspow &denquant);
+  double d2LYPdrhoXdgYY(const double &rhoX, const double &rhoY,const double &dLYPdgYY, denspow &denquant);
   DFTInfo eval(const double &rhoA, const double &rhoB);
   DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaBB);
   DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB, const double &gammaBB);
