@@ -213,7 +213,7 @@ cout<<"complex number"<<aaa<<endl;
 */
   };
   prettyPrint(this->fileio_->out,(*this->overlap_),"XSLI Overlap");
-//cout<<"overlap finished"<<endl;
+cout<<"overlap finished"<<endl;
 };
 
 
@@ -370,6 +370,7 @@ void AOIntegrals::computeKineticT(){
 */
   };
   prettyPrint(this->fileio_->out,(*this->kinetic_),"XSLI Kinetic");
+cout<<"kinetic finished"<<endl;
 };
 
 void AOIntegrals::computePotentialV(){
@@ -560,6 +561,7 @@ int i,j,k,ijShell,lA[3],lB[3],iPP,iAtom,nu;
 */
   };
   prettyPrint(this->fileio_->out,(*this->potential_),"XSLI Potential");
+cout<<"potential finished"<<endl;
 };
 
 
@@ -863,6 +865,7 @@ void AOIntegrals::computeAngularL(){
     prettyPrint(this->fileio_->out,TEMP,"Angular XYZ="+std::to_string(iXYZ));
   }
 //  prettyPrint(this->fileio_->out,(*this->kinetic_),"SS Angular");
+cout<<"angular finished"<<endl;
 };
 
 
@@ -1138,6 +1141,7 @@ void AOIntegrals::computeSL(){
        this->fileio_->out <<"fobinius inner product XYZ=\t"<< fobi << endl;
       prettyPrint(this->fileio_->out,TEMP,"SOCoupling XYZ="+std::to_string(iXYZ));
     }
+cout<<"spin orbit finished"<<endl;
   }
 
 
@@ -1348,6 +1352,7 @@ void AOIntegrals::computepVdotp(){
   fobi = this->pVp_->frobInner(*this->pVp_);
   this->fileio_->out <<"fobinius inner product" << std::setprecision(12) << std::scientific << fobi << endl;
 
+cout<<"pVp finished"<<endl;
 };
 
 
