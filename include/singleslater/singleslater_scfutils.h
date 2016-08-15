@@ -208,7 +208,7 @@ SCFConvergence SingleSlater<T>::evalConver3(){
 
   // Energy Convergence
   double EOld = this->totalEnergy;
-  this->formFock();
+//this->formFock();
   this->computeEnergy();
   double EDelta = this->totalEnergy - EOld;
 

@@ -511,7 +511,7 @@ public:
 
     // Extrapolation
     this->doDIIS       = true;
-    this->doDMS        = true;
+    this->doDMS        = false;
     this->nDIISExtrap_ = 6;
     this->iDIISStart_  = 0;
 

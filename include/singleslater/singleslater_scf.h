@@ -42,17 +42,28 @@ void SingleSlater<T>::SCF3(){
   // Print the SCF Header
   if(this->printLevel_ > 0)
     this->printSCFHeader(this->fileio_->out);
-
+  
   this->computeEnergy();
   this->isConverged = false;
   std::size_t iter;
+  bool doLevelShift;
   if(this->printLevel_ > 0){
     this->fileio_->out << "    *** INITIAL GUESS ENERGY = " 
       << this->totalEnergy << " Eh ***" << endl;
   }
 
-  this->formFock();
   for(iter = 0; iter < this->maxSCFIter_; iter++){
+    this->formFock();
+
+/*
+    doLevelShift = this->nLevelShift_ != 0;
+    doLevelShift = doLevelShift and iter >= this->iStartLevelShift_;
+    doLevelShift = 
+      doLevelShift and iter < this->iStartLevelShift_ + 15;
+
+    if(doLevelShift) this->levelShift2();
+*/
+
     this->copyDen();
     this->orthoFock3();
     auto IDIISIter = iter - this->iDIISStart_;
@@ -61,13 +72,14 @@ void SingleSlater<T>::SCF3(){
       this->cpyDenDIIS(IDIISIter);
       this->genDIISCom(IDIISIter); 
     }
-    if(this->doDMS){
-      this->formDMSErr(IDIISIter);
-    }
 
     // DIIS Extrapolation of the Fock
     if(this->doDIIS and IDIISIter > 0) 
       this->CDIIS4(std::min(IDIISIter+1,std::size_t(this->nDIISExtrap_)));
+
+    if(this->doDMS){
+      this->formDMSErr(IDIISIter);
+    }
 
     if(this->doDMS and IDIISIter > 0){
       // DIIS (DMS) Extrapolation of the Density
