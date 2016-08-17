@@ -62,16 +62,25 @@ void SingleSlater<T>::initSCFMem3(){
 
   this->DScalarOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
     "Most Recent Density Matrix (Scalar) for RMS",dims);
+  this->DeltaDScalar_ = this->fileio_->createScratchPartition(H5PredType<T>(),
+    "Change in Density Matrix (Scalar)",dims);
 
-  if(this->nTCS_ == 2 || !this->isClosedShell)
+  if(this->nTCS_ == 2 || !this->isClosedShell){
     this->DMzOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
       "Most Recent Density Matrix (Mz) for RMS",dims);
+    this->DeltaDMz_ = this->fileio_->createScratchPartition(H5PredType<T>(),
+      "Change in Density Matrix (Mz)",dims);
+  }
   
   if(this->nTCS_ == 2) {
     this->DMyOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
       "Most Recent Density Matrix (My) for RMS",dims);
     this->DMxOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
       "Most Recent Density Matrix (Mx) for RMS",dims);
+    this->DeltaDMy_ = this->fileio_->createScratchPartition(H5PredType<T>(),
+      "Change in Density Matrix (My)",dims);
+    this->DeltaDMx_ = this->fileio_->createScratchPartition(H5PredType<T>(),
+      "Change in Density Matrix (Mx)",dims);
   }
 
 };
@@ -97,17 +106,6 @@ void SingleSlater<T>::cleanupSCFMem3(){
 
 template <typename T>
 void SingleSlater<T>::copyDen(){
-/*
-  auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
-  TMap POldAlpha(this->POldAlphaMem_,NTCSxNBASIS,NTCSxNBASIS);
-  POldAlpha = (*this->onePDMA_);
-
-  if(this->nTCS_ == 1 && !this->isClosedShell){
-    TMap POldBeta(this->POldBetaMem_,NTCSxNBASIS,NTCSxNBASIS);
-    POldBeta = (*this->onePDMB_);
-  };
-*/
-  
   T* ScalarPtr;
   if(this->isClosedShell && this->nTCS_ == 1) 
     ScalarPtr = this->onePDMA_->data();
@@ -213,7 +211,9 @@ SCFConvergence SingleSlater<T>::evalConver3(){
   double EDelta = this->totalEnergy - EOld;
 
   double PARMS(0),PBRMS(0);
+  this->formDeltaD();
 
+/*
   DScalarOld_->read(this->NBSqScratch_->data(),H5PredType<T>());
   if(this->nTCS_ == 1 && this->isClosedShell) {
     for(auto I = 0; I < this->onePDMA_->size(); I++){
@@ -236,10 +236,26 @@ SCFConvergence SingleSlater<T>::evalConver3(){
     }
   }
 
-
   PARMS = std::sqrt(PARMS);
   if(this->nTCS_ == 1 && !this->isClosedShell)
     PBRMS = std::sqrt(PBRMS);
+*/
+
+  
+  DeltaDScalar_->read(this->NBSqScratch_->data(),H5PredType<T>());
+  PARMS = this->NBSqScratch_->norm();
+  if(this->nTCS_ == 2 or !this->isClosedShell){
+    DeltaDMz_->read(this->NBSqScratch_->data(),H5PredType<T>());
+    PBRMS = this->NBSqScratch_->squaredNorm();
+  }
+  if(this->nTCS_ == 2) {
+    DeltaDMy_->read(this->NBSqScratch_->data(),H5PredType<T>());
+    PBRMS += this->NBSqScratch_->squaredNorm();
+    DeltaDMx_->read(this->NBSqScratch_->data(),H5PredType<T>());
+    PBRMS += this->NBSqScratch_->squaredNorm();
+  }
+  PBRMS = std::sqrt(PBRMS);
+
   
   SCFConvergence CONVER;
   CONVER.EDelta = EDelta;
@@ -316,3 +332,32 @@ void SingleSlater<T>::mixOrbitals2C(){
   this->moA_->col(indxHOMOA) = std::sqrt(0.5) * (HOMOA + LUMOB);
   this->moA_->col(indxLUMOB) = std::sqrt(0.5) * (HOMOA - LUMOB);
 }
+
+template <typename T>
+void SingleSlater<T>::formDeltaD(){
+  DScalarOld_->read(this->NBSqScratch_->data(),H5PredType<T>());
+  if(this->nTCS_ == 1 && this->isClosedShell){
+    (*this->NBSqScratch2_) = (*this->onePDMA_) - (*this->NBSqScratch_);
+  } else {
+    (*this->NBSqScratch2_) = (*this->onePDMScalar_) - (*this->NBSqScratch_);
+  }
+
+  DeltaDScalar_->write(this->NBSqScratch2_->data(),H5PredType<T>());
+
+  if(this->nTCS_ == 2 or !this->isClosedShell){
+    DMzOld_->read(this->NBSqScratch_->data(),H5PredType<T>());
+    (*this->NBSqScratch2_) = (*this->onePDMMz_) - (*this->NBSqScratch_);
+    DeltaDMz_->write(this->NBSqScratch2_->data(),H5PredType<T>());
+  }
+
+  if(this->nTCS_ == 2) {
+    DMyOld_->read(this->NBSqScratch_->data(),H5PredType<T>());
+    (*this->NBSqScratch2_) = (*this->onePDMMy_) - (*this->NBSqScratch_);
+    DeltaDMy_->write(this->NBSqScratch2_->data(),H5PredType<T>());
+
+    DMxOld_->read(this->NBSqScratch_->data(),H5PredType<T>());
+    (*this->NBSqScratch2_) = (*this->onePDMMx_) - (*this->NBSqScratch_);
+    DeltaDMx_->write(this->NBSqScratch2_->data(),H5PredType<T>());
+  }
+
+};

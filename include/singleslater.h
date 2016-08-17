@@ -97,6 +97,10 @@ class SingleSlater : public Quantum<T> {
   std::string algebraicFieldShort_;///< String Real/Complex/(Quaternion)
 
   // Private Metadata regarding SCF control
+  // Fock Formation
+  bool doIncFock_;
+  int  nIncFock_;
+
   // SCF convergence parameters
   double denTol_;
   double eneTol_;
@@ -186,62 +190,19 @@ class SingleSlater : public Quantum<T> {
 //std::unique_ptr<TMap>  vCorA_;        ///< Alpha or Full Vcorr
 //std::unique_ptr<TMap>  vCorB_;        ///< Beta Vcorr
 
-/*
-  std::vector<RealSparseMatrix>  sparsedmudX_; ///< basis derivative (x)
-  std::vector<RealSparseMatrix>  sparsedmudY_; ///< basis derivative (y)
-  std::vector<RealSparseMatrix>  sparsedmudZ_; ///< basis derivative (z)
-  std::vector<RealSparseMatrix>  sparsemudotX_; ///< basis * (x) 
-  std::vector<RealSparseMatrix>  sparsemudotY_; ///< basis * (y) 
-  std::vector<RealSparseMatrix>  sparsemudotZ_; ///< basis * (z) 
-  std::vector<RealSparseMatrix> sparseMap_;     // BasisFunction Map 
-  std::vector<RealSparseMatrix> sparseWeights_; // Weights Map
-  std::vector<RealSparseMatrix> sparseDoRho_; // Evaluate density Map
-*/
 
 
   std::array<double,3> elecField_;
   std::vector<double> mullPop_; ///< mulliken partial charge
 
-/*
-  // Lengths of scratch partitions (NOT MEANT TO BE COPIED)
-  int lenF_;
-  int lenP_;
-  int lenB_;
-  int lenCoeff_;
-  int lenLambda_;
-  int lenDelF_;
-  int lenOccNum_;
-*/
 
   // Pointers of scratch partitions (NOT MEANT TO BE COPIED)
   double *occNumMem_;
 
-/*
-  T *FpAlphaMem_;
-  T *FpBetaMem_;
-  T *POldAlphaMem_;
-  T *POldBetaMem_;
-  T *ErrorAlphaMem_;
-  T *ErrorBetaMem_;
-  T *FADIIS_;
-  T *FBDIIS_;
-*/
   T *lambdaMem_;
   T *delFMem_;
   T *PNOMem_;
 
-/*
-  T *NBSQScr1_;
-  T *NBSQScr2_;
-  T *ScalarScr1_;
-  T *ScalarScr2_;
-  T *MzScr1_;
-  T *MzScr2_;
-  T *MyScr1_;
-  T *MyScr2_;
-  T *MxScr1_;
-  T *MxScr2_;
-*/
 
   // Storage Files for Extrapolation
   H5::DataSet *FScalarDIIS_;
@@ -286,6 +247,12 @@ class SingleSlater : public Quantum<T> {
   H5::DataSet *DMzOld_;
   H5::DataSet *DMyOld_;
   H5::DataSet *DMxOld_;
+
+  // Storage Files for DeltaD
+  H5::DataSet *DeltaDScalar_;
+  H5::DataSet *DeltaDMz_;
+  H5::DataSet *DeltaDMy_;
+  H5::DataSet *DeltaDMx_;
  
   // New DIIS Functions
 //void cpyOrthoFock2(int);
@@ -508,6 +475,10 @@ public:
     this->isDFT        = false;
     this->fixPhase_    = true;
     this->guess_       = SAD;
+
+    // SCF Fock Formation
+    this->doIncFock_   = false;
+    this->nIncFock_    = 20;
 
     // Extrapolation
     this->doDIIS       = true;
@@ -888,6 +859,8 @@ public:
   void initADMPFiles();
   void McWeeny(int);
   bool doDMS;
+
+  void formDeltaD();
   
 };
 
