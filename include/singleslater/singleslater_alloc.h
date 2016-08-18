@@ -54,6 +54,7 @@ void SingleSlater<T>::alloc(){
   }
  
   if(getRank() == 0) {
+/*
     if (this->isDFT){
 //     Timing
       std::chrono::high_resolution_clock::time_point start;
@@ -73,8 +74,10 @@ void SingleSlater<T>::alloc(){
           << duration_formMap.count() << " seconds." << endl;
       }
     }
+*/
  
     if(this->isPrimary) {
+      // Init FilIO Files (FIXME: This is stupid)
       if(typeid(T).hash_code() == typeid(double).hash_code())
         this->fileio_->iniStdSCFFilesDouble(
           !this->isClosedShell && this->nTCS_ == 1,this->nTCS_*this->nBasis_
@@ -83,6 +86,21 @@ void SingleSlater<T>::alloc(){
         this->fileio_->iniStdSCFFilesComplex(
           !this->isClosedShell && this->nTCS_ == 1,this->nTCS_*this->nBasis_
         );
+
+    }
+    std::vector<hsize_t> dims;
+    dims.push_back(this->nBasis_);
+    dims.push_back(this->nBasis_);
+    this->FPScalar_ = this->fileio_->createScratchPartition(H5PredType<T>(),
+      "FP in the Orthonormal Basis (Scalar)",dims);
+    if(this->nTCS_ == 2 or !this->isClosedShell)
+      this->FPMz_ = this->fileio_->createScratchPartition(H5PredType<T>(),
+        "FP in the Orthonormal Basis (Mz)",dims);
+    if(this->nTCS_ == 2){
+      this->FPMy_ = this->fileio_->createScratchPartition(H5PredType<T>(),
+        "FP in the Orthonormal Basis (My)",dims);
+      this->FPMx_ = this->fileio_->createScratchPartition(H5PredType<T>(),
+        "FP in the Orthonormal Basis (Mx)",dims);
     }
   }
 #ifdef CQ_ENABLE_MPI

@@ -53,31 +53,33 @@ void SingleSlater<T>::SCF3(){
   }
 
   this->doIncFock_ = this->isPrimary and !this->isDFT;
-//this->doIncFock_ = false;
+  this->doIncFock_ = false;
 
   for(iter = 0; iter < this->maxSCFIter_; iter++){
+/*
     DeltaDScalar_->read(this->NBSqScratch_->data(),H5PredType<T>());
     prettyPrint(cout,*this->onePDMA_,"Den at top " +std::to_string(iter));
     prettyPrint(cout,*this->fockA_,"Fock at top " +std::to_string(iter));
     prettyPrint(cout,*this->PTA_,"PT at top " +std::to_string(iter));
     prettyPrint(cout,*this->NBSqScratch_,"Delta at top "+std::to_string(iter));
+*/
     this->copyDen();
     this->copyPT();
     if(iter != 0 and this->doIncFock_)
       this->copyDeltaDtoD();
 
-    prettyPrint(cout,*this->onePDMA_,"Den before Fock " + std::to_string(iter));
+ // prettyPrint(cout,*this->onePDMA_,"Den before Fock " + std::to_string(iter));
     this->formFock(this->doIncFock_ && iter != 0);
 
     if(iter != 0 and this->doIncFock_){
-      prettyPrint(cout,*this->fockA_,"Fock Before at " + std::to_string(iter));
+ //   prettyPrint(cout,*this->fockA_,"Fock Before at " + std::to_string(iter));
       this->incPT();
-      prettyPrint(cout,*this->fockA_,"Fock After at " + std::to_string(iter));
+ //   prettyPrint(cout,*this->fockA_,"Fock After at " + std::to_string(iter));
       this->copyDOldtoD();
     } else {
-      prettyPrint(cout,*this->fockA_,"Fock at " + std::to_string(iter));
+ //   prettyPrint(cout,*this->fockA_,"Fock at " + std::to_string(iter));
     }
-    prettyPrint(cout,*this->onePDMA_,"Den at " + std::to_string(iter));
+ // prettyPrint(cout,*this->onePDMA_,"Den at " + std::to_string(iter));
    
 
 /*
@@ -90,6 +92,7 @@ void SingleSlater<T>::SCF3(){
 */
     this->orthoFock3();
     auto IDIISIter = iter - this->iDIISStart_;
+    this->formFP();
     if(this->doDIIS){
       this->cpyFockDIIS(IDIISIter);
       this->cpyDenDIIS(IDIISIter);

@@ -97,6 +97,49 @@ inline dcomplex DIISComplexScale<dcomplex>(){return dcomplex(0,1); }
 
 template<typename T>
 void SingleSlater<T>::genDIISCom(int iter){
+  int ITER = iter % this->nDIISExtrap_;
+
+  FPScalar_->read(this->NBSqScratch_->data(),H5PredType<T>());
+
+  this->NBSqScratch2_->noalias() = 
+    (*this->NBSqScratch_) - this->NBSqScratch_->adjoint();
+  this->aointegrals_->Ortho2Trans(*this->NBSqScratch2_,*this->NBSqScratch2_);
+
+  this->writeDIIS(this->EScalarDIIS_,ITER,this->NBSqScratch2_->data());
+
+  if(this->nTCS_ == 2 or !this->isClosedShell) {
+    FPMz_->read(this->NBSqScratch_->data(),H5PredType<T>());
+
+    this->NBSqScratch2_->noalias() = 
+      (*this->NBSqScratch_) - this->NBSqScratch_->adjoint();
+    this->aointegrals_->Ortho2Trans(*this->NBSqScratch2_,*this->NBSqScratch2_);
+
+    this->writeDIIS(this->EMzDIIS_,ITER,this->NBSqScratch2_->data());
+  }
+
+  if(this->nTCS_ == 2) {
+    FPMy_->read(this->NBSqScratch_->data(),H5PredType<T>());
+
+    this->NBSqScratch2_->noalias() = 
+      (*this->NBSqScratch_) - this->NBSqScratch_->adjoint();
+    this->aointegrals_->Ortho2Trans(*this->NBSqScratch2_,*this->NBSqScratch2_);
+
+    this->writeDIIS(this->EMyDIIS_,ITER,this->NBSqScratch2_->data());
+
+    FPMx_->read(this->NBSqScratch_->data(),H5PredType<T>());
+
+    this->NBSqScratch2_->noalias() = 
+      (*this->NBSqScratch_) - this->NBSqScratch_->adjoint();
+    this->aointegrals_->Ortho2Trans(*this->NBSqScratch2_,*this->NBSqScratch2_);
+
+    this->writeDIIS(this->EMxDIIS_,ITER,this->NBSqScratch2_->data());
+  }
+  
+}
+
+/*
+template<typename T>
+void SingleSlater<T>::genDIISCom(int iter){
 
   // Scalar Part
   // E(S) = [F(S),D(S)] + [F(K),D(K)]
@@ -344,6 +387,7 @@ void SingleSlater<T>::genDIISCom(int iter){
   } // Vector Part
 
 };
+*/
 
 template<typename T>
 void SingleSlater<T>::initDIISFiles(){

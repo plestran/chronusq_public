@@ -254,6 +254,12 @@ class SingleSlater : public Quantum<T> {
   H5::DataSet *PTMyOld_;
   H5::DataSet *PTMxOld_;
 
+  // Storage for FP
+  H5::DataSet *FPScalar_;
+  H5::DataSet *FPMz_;
+  H5::DataSet *FPMy_;
+  H5::DataSet *FPMx_;
+
   // Storage Files for DeltaD
   H5::DataSet *DeltaDScalar_;
   H5::DataSet *DeltaDMz_;
@@ -871,6 +877,8 @@ public:
   void copyDOldtoD();
   void copyPT();
   void incPT();
+
+  void formFP();
   
 };
 

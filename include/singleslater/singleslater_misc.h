@@ -55,3 +55,75 @@ void SingleSlater<T>::formDensity(){
   this->haveDensity = true;
   this->mpiBCastDensity();
 }
+
+template<typename T>
+void SingleSlater<T>::formFP(){
+  // FP(S) = F(S)P(S)
+  if(this->nTCS_ == 1 and this->isClosedShell) {
+    (*this->NBSqScratch_) = (*this->fockOrthoA_) * (*this->onePDMOrthoA_);
+  } else {
+    (*this->NBSqScratch_) = 
+      (*this->fockOrthoScalar_) * (*this->onePDMOrthoScalar_);
+  } 
+
+  // FP(S) += F(z)P(z)
+  if(this->nTCS_ == 2 or !this->isClosedShell)
+    (*this->NBSqScratch_) += (*this->fockOrthoMz_) * (*this->onePDMOrthoMz_);
+
+  // FP(S) += F(y)P(y) + F(x)P(x)
+  if(this->nTCS_ == 2) {
+    (*this->NBSqScratch_) += (*this->fockOrthoMy_) * (*this->onePDMOrthoMy_);
+    (*this->NBSqScratch_) += (*this->fockOrthoMx_) * (*this->onePDMOrthoMx_);
+  }
+
+  this->FPScalar_->write(this->NBSqScratch_->data(),H5PredType<T>());
+
+  
+  if(this->nTCS_ == 2 or !this->isClosedShell) {
+    // FP(z) = F(S)P(z) + F(z)P(S)
+    (*this->NBSqScratch_) = 
+      (*this->fockOrthoScalar_) * (*this->onePDMOrthoMz_);
+    (*this->NBSqScratch_) += 
+      (*this->fockOrthoMz_) * (*this->onePDMOrthoScalar_);
+
+    // FP(z) += i * (F(x)P(y) - F(y)P(x))
+    if(this->nTCS_ == 2) {
+      (*this->NBSqScratch_) += DIISComplexScale<T>() * 
+        (*this->fockOrthoMx_) * (*this->onePDMOrthoMy_);
+      (*this->NBSqScratch_) -= DIISComplexScale<T>() * 
+        (*this->fockOrthoMy_) * (*this->onePDMOrthoMx_);
+    }
+    this->FPMz_->write(this->NBSqScratch_->data(),H5PredType<T>());
+  }
+
+
+  if(this->nTCS_ == 2) {
+    // FP(y) = F(S)P(y) + F(y)P(S)
+    (*this->NBSqScratch_) = 
+      (*this->fockOrthoScalar_) * (*this->onePDMOrthoMy_);
+    (*this->NBSqScratch_) += 
+      (*this->fockOrthoMy_) * (*this->onePDMOrthoScalar_);
+
+    // FP(y) += i * (F(z)P(x) - F(x)P(z))
+    (*this->NBSqScratch_) += DIISComplexScale<T>() * 
+      (*this->fockOrthoMz_) * (*this->onePDMOrthoMx_);
+    (*this->NBSqScratch_) -= DIISComplexScale<T>() * 
+      (*this->fockOrthoMx_) * (*this->onePDMOrthoMz_);
+
+    this->FPMy_->write(this->NBSqScratch_->data(),H5PredType<T>());
+
+    // FP(x) = F(S)P(x) + F(x)P(S)
+    (*this->NBSqScratch_) = 
+      (*this->fockOrthoScalar_) * (*this->onePDMOrthoMx_);
+    (*this->NBSqScratch_) += 
+      (*this->fockOrthoMx_) * (*this->onePDMOrthoScalar_);
+
+    // FP(x) += i * (F(y)P(z) - F(z)P(y))
+    (*this->NBSqScratch_) += DIISComplexScale<T>() * 
+      (*this->fockOrthoMy_) * (*this->onePDMOrthoMz_);
+    (*this->NBSqScratch_) -= DIISComplexScale<T>() * 
+      (*this->fockOrthoMz_) * (*this->onePDMOrthoMy_);
+
+    this->FPMx_->write(this->NBSqScratch_->data(),H5PredType<T>());
+  }
+};
