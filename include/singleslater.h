@@ -248,6 +248,12 @@ class SingleSlater : public Quantum<T> {
   H5::DataSet *DMyOld_;
   H5::DataSet *DMxOld_;
 
+  // Storage Files for most recent Fock (for SCF comparison)
+  H5::DataSet *PTScalarOld_;
+  H5::DataSet *PTMzOld_;
+  H5::DataSet *PTMyOld_;
+  H5::DataSet *PTMxOld_;
+
   // Storage Files for DeltaD
   H5::DataSet *DeltaDScalar_;
   H5::DataSet *DeltaDMz_;
@@ -678,7 +684,7 @@ public:
   void placeAtmDen(std::vector<int>, SingleSlater<double> &); // Place the atomic densities into total densities for guess
   void scaleDen();              // Scale the unrestricted densities for correct # electrons
   void formDensity();		// form the density matrix
-  void formFock();	        // form the Fock matrix
+  void formFock(bool increment=false);	        // form the Fock matrix
   void formCoulomb();		// form the Coulomb matrix
   void formExchange();		// form the exchange matrix
   void formPT();
@@ -861,6 +867,10 @@ public:
   bool doDMS;
 
   void formDeltaD();
+  void copyDeltaDtoD();
+  void copyDOldtoD();
+  void copyPT();
+  void incPT();
   
 };
 

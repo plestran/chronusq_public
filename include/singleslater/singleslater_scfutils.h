@@ -62,12 +62,16 @@ void SingleSlater<T>::initSCFMem3(){
 
   this->DScalarOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
     "Most Recent Density Matrix (Scalar) for RMS",dims);
+  this->PTScalarOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
+    "Most Recent Perturbation Tensor (Scalar)",dims);
   this->DeltaDScalar_ = this->fileio_->createScratchPartition(H5PredType<T>(),
     "Change in Density Matrix (Scalar)",dims);
 
   if(this->nTCS_ == 2 || !this->isClosedShell){
     this->DMzOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
       "Most Recent Density Matrix (Mz) for RMS",dims);
+    this->PTMzOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
+      "Most Recent Perturbation Tensor (Mz)",dims);
     this->DeltaDMz_ = this->fileio_->createScratchPartition(H5PredType<T>(),
       "Change in Density Matrix (Mz)",dims);
   }
@@ -77,6 +81,10 @@ void SingleSlater<T>::initSCFMem3(){
       "Most Recent Density Matrix (My) for RMS",dims);
     this->DMxOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
       "Most Recent Density Matrix (Mx) for RMS",dims);
+    this->PTMyOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
+      "Most Recent Perturbation Tensor (My)",dims);
+    this->PTMxOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
+      "Most Recent Perturbation Tensor (Mx)",dims);
     this->DeltaDMy_ = this->fileio_->createScratchPartition(H5PredType<T>(),
       "Change in Density Matrix (My)",dims);
     this->DeltaDMx_ = this->fileio_->createScratchPartition(H5PredType<T>(),
@@ -361,3 +369,65 @@ void SingleSlater<T>::formDeltaD(){
   }
 
 };
+template<typename T>
+void SingleSlater<T>::copyDeltaDtoD(){
+  if(this->nTCS_ == 1 and this->isClosedShell){
+    DeltaDScalar_->read(this->onePDMA_->data(),H5PredType<T>());
+  } else {
+    DeltaDScalar_->read(this->onePDMScalar_->data(),H5PredType<T>());
+    DeltaDMz_->read(this->onePDMMz_->data(),H5PredType<T>());
+    if(this->nTCS_ == 2) {
+      DeltaDMy_->read(this->onePDMMy_->data(),H5PredType<T>());
+      DeltaDMx_->read(this->onePDMMx_->data(),H5PredType<T>());
+    }
+  }
+}
+template<typename T>
+void SingleSlater<T>::copyDOldtoD(){
+  if(this->nTCS_ == 1 and this->isClosedShell){
+    DScalarOld_->read(this->onePDMA_->data(),H5PredType<T>());
+  } else {
+    DScalarOld_->read(this->onePDMScalar_->data(),H5PredType<T>());
+    DMzOld_->read(this->onePDMMz_->data(),H5PredType<T>());
+    if(this->nTCS_ == 2) {
+      DMyOld_->read(this->onePDMMy_->data(),H5PredType<T>());
+      DMxOld_->read(this->onePDMMx_->data(),H5PredType<T>());
+    }
+  }
+}
+template <typename T>
+void SingleSlater<T>::copyPT(){
+  T* ScalarPtr;
+  if(this->isClosedShell && this->nTCS_ == 1) 
+    ScalarPtr = this->PTA_->data();
+  else
+    ScalarPtr = this->PTScalar_->data();
+
+  PTScalarOld_->write(ScalarPtr,H5PredType<T>());
+  if(this->nTCS_ == 2 || !this->isClosedShell){
+    PTMzOld_->write(this->PTMz_->data(),H5PredType<T>());
+  }
+  if(this->nTCS_ == 2){
+    PTMyOld_->write(this->PTMy_->data(),H5PredType<T>());
+    PTMxOld_->write(this->PTMx_->data(),H5PredType<T>());
+  }
+};
+
+template<typename T>
+void SingleSlater<T>::incPT(){
+  PTScalarOld_->read(this->NBSqScratch_->data(),H5PredType<T>());
+  if(this->nTCS_ == 1 and this->isClosedShell)
+    this->PTA_->noalias() += (*this->NBSqScratch_);
+  else {
+    this->PTScalar_->noalias() += (*this->NBSqScratch_);
+    PTMzOld_->read(this->NBSqScratch_->data(),H5PredType<T>());
+    this->PTMz_->noalias() += (*this->NBSqScratch_);
+  }
+
+  if(this->nTCS_ == 2) {
+    PTMxOld_->read(this->NBSqScratch_->data(),H5PredType<T>());
+    this->PTMx_->noalias() += (*this->NBSqScratch_);
+    PTMyOld_->read(this->NBSqScratch_->data(),H5PredType<T>());
+    this->PTMy_->noalias() += (*this->NBSqScratch_);
+  }
+}

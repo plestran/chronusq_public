@@ -34,7 +34,7 @@ void SingleSlater<T>::formPT(){
   bool doTCS = (this->nTCS_ == 2);
   bool doRHF = (this->isClosedShell && !doTCS);
   bool doKS  = this->isDFT;
-  if(!this->haveDensity) this->formDensity();
+//if(!this->haveDensity) this->formDensity();
 //  this->sepReImOnePDM();
 //  this->comReImOnePDM();
 //this->scatterDensity();
@@ -107,6 +107,8 @@ void SingleSlater<T>::formPT(){
   }
 
   if(this->printLevel_ >= 3 && getRank() == 0) this->printPT();
+  prettyPrint(cout,*this->onePDMA_,"P in PT");
+  prettyPrint(cout,*this->PTA_,"PT in PT");
 }
 #endif
 
@@ -114,7 +116,7 @@ void SingleSlater<T>::formPT(){
  * Form Fock Matrix *
  ********************/
 template<typename T>
-void SingleSlater<T>::formFock(){
+void SingleSlater<T>::formFock(bool increment){
 #ifdef CQ_ENABLE_MPI
   // Syncronize MPI processes before fock build
   MPI_Barrier(MPI_COMM_WORLD);
@@ -139,38 +141,42 @@ void SingleSlater<T>::formFock(){
     if (this->isDFT) this->formVXC_new();
   
     if(this->nTCS_ == 1 && this->isClosedShell) {
-      this->fockA_->setZero();
-      this->fockA_->real() += (*this->aointegrals_->coreH_);
-      this->aointegrals_->addElecDipole(*this->fockA_,this->elecField_);
+      if(!increment) {
+        cout << "Not Incrementing" << endl;
+        this->fockA_->setZero();
+        this->fockA_->real() += (*this->aointegrals_->coreH_);
+        this->aointegrals_->addElecDipole(*this->fockA_,this->elecField_);
+      }
       (*this->fockA_) += (*this->PTA_);
       if(this->isDFT){ 
         (*this->fockA_) += (*this->vXA_);
       }
     } else {
-      this->fockScalar_->setZero();
-      this->fockMz_->setZero();
-      this->fockScalar_->real() += (*this->aointegrals_->coreH_);
-      
-      if(this->nTCS_ == 2) {
-          this->fockMx_->setZero();
-          this->fockMy_->setZero();
-        if(this->aointegrals_->doX2C){
-    //    cout << "nTCS == 2 ... buiding Fock" << endl;
-          this->fockMx_->real() = 2*(*this->aointegrals_->oneEmx_);
-          this->fockMy_->real() = 2*(*this->aointegrals_->oneEmy_);
-          this->fockMz_->real() = 2*(*this->aointegrals_->oneEmz_);
-          // -----------------------------------
-          // SCALE SO parts by 'i'
-          // -----------------------------------
-          Quantum<T>::complexMyScale(*this->fockMx_);
-          Quantum<T>::complexMyScale(*this->fockMy_);
-          Quantum<T>::complexMyScale(*this->fockMz_);
-          // -----------------------------------
+      if(!increment) {
+        this->fockScalar_->setZero();
+        this->fockMz_->setZero();
+        this->fockScalar_->real() += (*this->aointegrals_->coreH_);
+        
+        if(this->nTCS_ == 2) {
+            this->fockMx_->setZero();
+            this->fockMy_->setZero();
+          if(this->aointegrals_->doX2C){
+            this->fockMx_->real() = 2*(*this->aointegrals_->oneEmx_);
+            this->fockMy_->real() = 2*(*this->aointegrals_->oneEmy_);
+            this->fockMz_->real() = 2*(*this->aointegrals_->oneEmz_);
+            // -----------------------------------
+            // SCALE SO parts by 'i'
+            // -----------------------------------
+            Quantum<T>::complexMyScale(*this->fockMx_);
+            Quantum<T>::complexMyScale(*this->fockMy_);
+            Quantum<T>::complexMyScale(*this->fockMz_);
+            // -----------------------------------
+          }
         }
-      }
 
-      this->aointegrals_->addElecDipole(*this->fockScalar_,this->elecField_);
-      (*this->fockScalar_) *= 2.0;
+        this->aointegrals_->addElecDipole(*this->fockScalar_,this->elecField_);
+        (*this->fockScalar_) *= 2.0;
+      }
       (*this->fockScalar_)      += (*this->PTScalar_);        
       (*this->fockMz_)          += (*this->PTMz_);
 
