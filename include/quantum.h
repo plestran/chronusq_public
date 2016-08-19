@@ -56,7 +56,7 @@ namespace ChronusQ {
 
     int  nTCS_;
     int  maxMultipole_;
-    bool isScattered_;
+//  bool isScattered_;
 
     CQMemManager * memManager_;
 
@@ -66,8 +66,8 @@ namespace ChronusQ {
 
     // The Alpha and Beta Components of the Density matrix. In the case
     // of spinors, onePDMA holds the entire density (AA,AB,BA,BB)
-    std::unique_ptr<TMap> onePDMA_;
-    std::unique_ptr<TMap> onePDMB_;
+//  std::unique_ptr<TMap> onePDMA_;
+//  std::unique_ptr<TMap> onePDMB_;
 
     // The Density in the basis of the identity and the Pauli matricies 
     std::unique_ptr<TMap> onePDMScalar_;
@@ -139,12 +139,14 @@ namespace ChronusQ {
       double zero = 0.0;
       bool isReal = typeid(T).hash_code() == typeid(dcomplex).hash_code();
 
+/*
       if(this->nTCS_ == 1 && this->isClosedShell){
         if(DenTyp == DENSITY_TYPE::TOTAL)
           return OperatorTrace<Scalar>((*this->onePDMA_),op);
         else
           return reinterpret_cast<Scalar(&)[2]>(zero)[0];
       } else {
+*/
         if(DenTyp == DENSITY_TYPE::TOTAL)
           return OperatorTrace<Scalar>((*this->onePDMScalar_),op);
         else if(DenTyp == DENSITY_TYPE::SPIN || DenTyp == DENSITY_TYPE::MZ)
@@ -159,10 +161,11 @@ namespace ChronusQ {
           else
             return OperatorTrace<Scalar>((*this->onePDMMy_),op);
         }
-      }
+//    }
     }
 
 
+/*
     template<typename Scalar, typename Op> 
     Scalar computePropertyAlpha(const Op& op){
       return OperatorTrace<Scalar>((*this->onePDMA_),op);
@@ -171,18 +174,19 @@ namespace ChronusQ {
     Scalar computePropertyBeta(const Op& op){
       return OperatorTrace<Scalar>((*this->onePDMB_),op);
     }
+*/
       
     public:
   
     bool isClosedShell;
 
     Quantum(){
-      this->onePDMA_ = nullptr; 
-      this->onePDMB_ = nullptr; 
+    //this->onePDMA_ = nullptr; 
+    //this->onePDMB_ = nullptr; 
       this->isClosedShell = false;
       this->nTCS_ = 1;
       this->maxMultipole_ = 3;
-      this->isScattered_ = false;
+//    this->isScattered_ = false;
 
 
       this->clearElecMultipole();
@@ -200,15 +204,18 @@ namespace ChronusQ {
       nTCS_(other.nTCS_),
       isClosedShell(other.isClosedShell),
       maxMultipole_(other.maxMultipole_),
-      isScattered_(other.isScattered_),
+//    isScattered_(other.isScattered_),
       memManager_(other.memManager_) {
 
-      auto NBT = other.onePDMA_->rows(); 
-      auto NBTSq = NBT*NBT;
-      this->alloc(NBT/this->nTCS_);
+      auto NB = other.onePDMScalar_->rows(); 
+//    auto NBT = other.onePDMScalar_->rows(); 
+//    auto NBTSq = NBT*NBT;
+//    this->alloc(NBT/this->nTCS_);
+      this->alloc(NB);
      
      
-      (*this->onePDMA_) = (*other.onePDMA_);
+/*
+//    (*this->onePDMA_) = (*other.onePDMA_);
      
       if(!this->isClosedShell || this->nTCS_ == 2){
         (*this->onePDMScalar_) = (*other.onePDMScalar_);
@@ -220,6 +227,9 @@ namespace ChronusQ {
           (*this->onePDMMy_) = (*other.onePDMMy_);
         } // NTCS check
       } // if not RHF/KS
+*/
+      for(auto IDen = 0; IDen < this->onePDM_.size(); IDen++)
+        *this->onePDM_[IDen] = *other.onePDM_[IDen];
     }
 
     template<typename U>
@@ -227,10 +237,9 @@ namespace ChronusQ {
 
     virtual void formDensity() = 0;
     inline void allocDensity(unsigned int N) {
-      auto NB = this->nTCS_ * N;
-      auto NBSq = NB*NB;
       auto NSq = N*N;
 
+/*
       this->onePDMA_ = 
         std::unique_ptr<TMap>(
             new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB)
@@ -243,22 +252,27 @@ namespace ChronusQ {
           );
         this->onePDMB_->setZero();
       }
+*/
 
       this->onePDMScalar_ = std::unique_ptr<TMap>(
           new TMap(this->memManager_->template malloc<T>(NSq),N,N));
-      this->onePDMScalar_->setZero();
 
+      this->onePDMScalar_->setZero();
+      this->onePDM_.emplace_back(this->onePDMScalar_.get());
+
+/*
       if(this->nTCS_ == 1 and this->isClosedShell) {
         this->onePDM_.emplace_back(this->onePDMA_.get());
       } else {
         this->onePDM_.emplace_back(this->onePDMScalar_.get());
       }
+*/
 
       if(!this->isClosedShell || this->nTCS_ == 2){
         this->onePDMMz_ = std::unique_ptr<TMap>(
             new TMap(this->memManager_->template malloc<T>(NSq),N,N));
-        this->onePDMMz_->setZero();
 
+        this->onePDMMz_->setZero();
         this->onePDM_.emplace_back(this->onePDMMz_.get());
       }
       if(this->nTCS_ == 2) {
@@ -319,8 +333,8 @@ namespace ChronusQ {
     static void spinGather( Op & , Op &, 
         std::vector<std::reference_wrapper<Op>> &);
 
-    void scatterDensity();
-    void gatherDensity();
+//  void scatterDensity();
+//  void gatherDensity();
 
     template<typename Op>
     static void complexMyScale(Op &);
@@ -331,15 +345,18 @@ namespace ChronusQ {
 
     inline int   nTCS(){ return nTCS_;};      
     inline int maxMultipole(){ return maxMultipole_;};
-    inline TMap* onePDMA(){ return onePDMA_.get();};
-    inline TMap* onePDMB(){ return onePDMB_.get();};
-    inline TMap* densityA(){ return onePDMA_.get();};
-    inline TMap* densityB(){ return onePDMB_.get();};
+//  inline TMap* onePDMA(){ return onePDMA_.get();};
+//  inline TMap* onePDMB(){ return onePDMB_.get();};
+//  inline TMap* densityA(){ return onePDMA_.get();};
+//  inline TMap* densityB(){ return onePDMB_.get();};
+  
+    inline std::vector<TMap*>& onePDM(){ return this->onePDM_;};
     inline TMap* onePDMScalar(){ return onePDMScalar_.get();};
     inline TMap* onePDMMx(){ return onePDMMx_.get();};
     inline TMap* onePDMMy(){ return onePDMMy_.get();};
     inline TMap* onePDMMz(){ return onePDMMz_.get();};
-    inline bool     isScattered(){ return isScattered_;};
+
+//  inline bool     isScattered(){ return isScattered_;};
     inline CQMemManager * memManager()     { return this->memManager_;     };
 
     inline std::array<double,3> elecDipole(){ return elecDipole_; };
@@ -355,6 +372,7 @@ namespace ChronusQ {
 
 
 
+/*
     template<typename OpIn, typename OpOut>
     static void ReImSeparate(OpIn&, 
         std::vector<std::reference_wrapper<OpOut>>&);
@@ -365,12 +383,14 @@ namespace ChronusQ {
 
     void sepReImOnePDM();
     void comReImOnePDM();
+*/
 
 
     // MPI Routines
-    void mpiBCastDensity();
+//  void mpiBCastDensity();
   };
 
+/*
   template<typename T>
   void Quantum<T>::mpiBCastDensity(){
   #ifdef CQ_ENABLE_MPI
@@ -386,10 +406,12 @@ namespace ChronusQ {
   #endif
     ;
   };
+*/
 
   #include <quantum/quantum_scattergather.h>
 
 
+/*
   template<>
   template<typename OpIn, typename OpOut>
   void Quantum<dcomplex>::ReImSeparate(OpIn &op, 
@@ -413,6 +435,7 @@ namespace ChronusQ {
       op.real() = sep[0].get();
       op.imag() = sep[1].get();
   };
+*/
 
   /*
   template<>

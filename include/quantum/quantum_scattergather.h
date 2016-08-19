@@ -32,6 +32,7 @@ template<>
 template<typename Op>
 void Quantum<dcomplex>::complexMyScale(Op &op){ op *= dcomplex(0.0,1.0); };
 
+/*
 template<typename T>
 void Quantum<T>::scatterDensity(){
   if(this->nTCS_ == 1 && this->isClosedShell)
@@ -77,6 +78,7 @@ void Quantum<T>::gatherDensity(){
 //this->onePDMMy_.reset();
 //this->onePDMMx_.reset();
 };
+*/
 
 template<typename T>
 template<typename Op>
