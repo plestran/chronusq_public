@@ -27,6 +27,12 @@
 //#include <singleslater/singleslater_olddiis.h>
 #include <extrapolate.h>
 
+template<typename F> inline F DIISComplexScale();
+template<>
+inline double DIISComplexScale<double>(){return -1.; }
+template<>
+inline dcomplex DIISComplexScale<dcomplex>(){return dcomplex(0,1); }
+
 template<typename T>
 void SingleSlater<T>::CDIIS4(int NDIIS){
 
@@ -89,11 +95,6 @@ void SingleSlater<T>::CDIIS4(int NDIIS){
 
 }
 
-template<typename F> inline F DIISComplexScale();
-template<>
-inline double DIISComplexScale<double>(){return -1.; }
-template<>
-inline dcomplex DIISComplexScale<dcomplex>(){return dcomplex(0,1); }
 
 template<typename T>
 void SingleSlater<T>::genDIISCom(int iter){

@@ -91,8 +91,9 @@ void SingleSlater<T>::SCF3(){
     if(doLevelShift) this->levelShift2();
 */
     this->orthoFock3();
-    auto IDIISIter = iter - this->iDIISStart_;
     this->formFP();
+
+    auto IDIISIter = iter - this->iDIISStart_;
     if(this->doDIIS){
       this->cpyFockDIIS(IDIISIter);
       this->cpyDenDIIS(IDIISIter);

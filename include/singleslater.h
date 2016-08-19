@@ -137,6 +137,8 @@ class SingleSlater : public Quantum<T> {
 
   std::unique_ptr<TMap>  NBSqScratch_;
   std::unique_ptr<TMap>  NBSqScratch2_;
+  std::unique_ptr<TMap>  NBSqScratch3_;
+  std::unique_ptr<TMap>  NBSqScratch4_;
 
   // Internal Storage
   std::unique_ptr<TMap>  coulombA_;   ///< deprecated 
@@ -601,6 +603,7 @@ public:
     }
   }
   void alloc();
+  void dealloc();
 
   //set private data
   inline void setNBasis(int nBasis)       { this->nBasis_ = nBasis;    };

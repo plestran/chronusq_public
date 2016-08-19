@@ -1,65 +1,49 @@
+/**
+ * \brief Initialize the pointers that only occur in the SCF to NULL
+ */
 template <typename T>
 void SingleSlater<T>::initSCFPtr(){
   this->occNumMem_     = NULL;
 
-/*
-  this->FpAlphaMem_    = NULL;
-  this->FpBetaMem_     = NULL;
-  this->POldAlphaMem_  = NULL;
-  this->POldBetaMem_   = NULL;
-  this->ErrorAlphaMem_ = NULL;
-  this->ErrorBetaMem_  = NULL;
-  this->FADIIS_        = NULL;
-  this->FBDIIS_        = NULL;
-*/
   this->lambdaMem_     = NULL;
   this->delFMem_       = NULL;
   this->PNOMem_        = NULL;
 
-/*
-  this->NBSQScr1_ = NULL;
-  this->NBSQScr2_ = NULL;
-  this->ScalarScr1_ = NULL;
-  this->ScalarScr2_ = NULL;
-  this->MzScr1_ = NULL;
-  this->MzScr2_ = NULL;
-  this->MyScr1_ = NULL;
-  this->MyScr2_ = NULL;
-  this->MxScr1_ = NULL;
-  this->MxScr2_ = NULL;
-*/
 }; // initSCFPtr
 
+/**
+ *  \brief Allocate RAM and Disc for the SCF Procedure
+ */
 template<typename T>
 void SingleSlater<T>::initSCFMem3(){
+  // Initialize the pointers to NULL
   this->initSCFPtr();
 
-  auto NTCSxNBASIS = this->nTCS_ * this->nBasis_;
-  auto NSQ = NTCSxNBASIS  * NTCSxNBASIS;
+  auto NSQ = this->nBasis_ * this->nBasis_; 
 
-/*
-  this->POldAlphaMem_  = this->memManager_->template malloc<T>(NSQ);
-  if(this->nTCS_ == 1 && !this->isClosedShell) 
-    this->POldBetaMem_  = this->memManager_->template malloc<T>(NSQ);
-*/
 
   if(this->Ref_ == CUHF) {
     this->delFMem_   = this->memManager_->template malloc<T>(NSQ);
     this->lambdaMem_ = this->memManager_->template malloc<T>(NSQ);
     this->PNOMem_    = this->memManager_->template malloc<T>(NSQ);
-    this->occNumMem_ = this->memManager_->template malloc<double>(NTCSxNBASIS);
+    this->occNumMem_ = 
+      this->memManager_->template malloc<double>(this->nBasis_);
+
+    // DIIS NYI for CUHF
     this->doDIIS = false;
     cout << "IM HERE IN CUHF" << endl;
   }
 
-   
+  // Initalize the files for DIIS and DMS 
   if(this->doDIIS) this->initDIISFiles();
   if(this->doDMS)  this->initDMSFiles();
 
+  // Allocate Files for SCF
   std::vector<hsize_t> dims;
   dims.push_back(this->nBasis_);
   dims.push_back(this->nBasis_);
 
+  // Scalar Files
   this->DScalarOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
     "Most Recent Density Matrix (Scalar) for RMS",dims);
   this->PTScalarOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
@@ -67,6 +51,7 @@ void SingleSlater<T>::initSCFMem3(){
   this->DeltaDScalar_ = this->fileio_->createScratchPartition(H5PredType<T>(),
     "Change in Density Matrix (Scalar)",dims);
 
+  // Mz Files
   if(this->nTCS_ == 2 || !this->isClosedShell){
     this->DMzOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
       "Most Recent Density Matrix (Mz) for RMS",dims);
@@ -76,6 +61,7 @@ void SingleSlater<T>::initSCFMem3(){
       "Change in Density Matrix (Mz)",dims);
   }
   
+  // Mx My Files
   if(this->nTCS_ == 2) {
     this->DMyOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
       "Most Recent Density Matrix (My) for RMS",dims);
@@ -93,74 +79,92 @@ void SingleSlater<T>::initSCFMem3(){
 
 };
 
+/**
+ * \brief Deallocate memory associated with SCF
+ */
 template<typename T>
 void SingleSlater<T>::cleanupSCFMem3(){
 
-  auto NTCSxNBASIS = this->nTCS_ * this->nBasis_;
-  auto NSQ = NTCSxNBASIS  * NTCSxNBASIS;
-/*
-  this->memManager_->free(this->POldAlphaMem_,NSQ);  
-  if(this->nTCS_ == 1 && !this->isClosedShell) 
-    this->memManager_->free(this->POldBetaMem_,NSQ);  
-*/
+  auto NSQ = this->nBasis_  * this->nBasis_;
 
   if(this->Ref_ == CUHF){ 
     this->memManager_->free(this->delFMem_,NSQ);   
     this->memManager_->free(this->lambdaMem_,NSQ); 
     this->memManager_->free(this->PNOMem_,NSQ);    
-    this->memManager_->free(this->occNumMem_,NTCSxNBASIS); 
+    this->memManager_->free(this->occNumMem_,this->nBasis_); 
   }
 }
 
+/**
+ * \brief Copy the current quaternion density matrix to disc
+ */
 template <typename T>
 void SingleSlater<T>::copyDen(){
+
+  // FIXME: RHF should just be scalar, need to remove onePDMA
   T* ScalarPtr;
   if(this->isClosedShell && this->nTCS_ == 1) 
     ScalarPtr = this->onePDMA_->data();
   else
     ScalarPtr = this->onePDMScalar_->data();
 
+  // Scalar
   DScalarOld_->write(ScalarPtr,H5PredType<T>());
+
+  // Mz
   if(this->nTCS_ == 2 || !this->isClosedShell){
     DMzOld_->write(this->onePDMMz_->data(),H5PredType<T>());
   }
+
+  // Mx My
   if(this->nTCS_ == 2){
     DMyOld_->write(this->onePDMMy_->data(),H5PredType<T>());
     DMxOld_->write(this->onePDMMx_->data(),H5PredType<T>());
   }
 };
 
+/**
+ *  \brief Orthogonalize the quaternion Fock matrix 
+ */
 template<typename T>
 void SingleSlater<T>::orthoFock3(){
+
   if(this->nTCS_ == 1 && this->isClosedShell){
-    this->aointegrals_->Ortho1Trans(
-      *this->fockA_,*this->fockOrthoA_);
+    // Scalar
+    this->aointegrals_->Ortho1Trans(*this->fockA_,*this->fockOrthoA_);
   } else {
-    this->aointegrals_->Ortho1Trans(
-      *this->fockScalar_,*this->fockOrthoScalar_);
-    this->aointegrals_->Ortho1Trans(
-      *this->fockMz_,*this->fockOrthoMz_);
+    // Scalar
+    this->aointegrals_->Ortho1Trans(*this->fockScalar_,*this->fockOrthoScalar_);
+
+    // Mz
+    this->aointegrals_->Ortho1Trans(*this->fockMz_,*this->fockOrthoMz_);
+
+     // Mx My
     if(this->nTCS_ == 2){
-      this->aointegrals_->Ortho1Trans(
-        *this->fockMy_,*this->fockOrthoMx_);
-      this->aointegrals_->Ortho1Trans(
-        *this->fockMy_,*this->fockOrthoMx_);
+      this->aointegrals_->Ortho1Trans(*this->fockMy_,*this->fockOrthoMx_);
+      this->aointegrals_->Ortho1Trans(*this->fockMy_,*this->fockOrthoMx_);
     }
   }
+
+  // Populate the gathered Fock matricies 
   this->gatherOrthoFock();
 
 }
 
+/**
+ *  \brief Transform the quaternion orthonormal Fock matricies to
+ *  their gathered form
+ */
 template<typename T>
 void SingleSlater<T>::gatherOrthoFock(){
+  // FIXME: This logic needs to be fixed for RHF when RHF is just scalar 
   if(this->nTCS_ == 1 && this->isClosedShell) return;
 
   std::vector<std::reference_wrapper<TMap>> toGather;
   toGather.emplace_back(*this->fockOrthoScalar_);
   toGather.emplace_back(*this->fockOrthoMz_);
   if(this->nTCS_ == 1)
-    Quantum<T>::spinGather(*this->fockOrthoA_,
-      *this->fockOrthoB_,toGather);
+    Quantum<T>::spinGather(*this->fockOrthoA_,*this->fockOrthoB_,toGather);
   else {
     toGather.emplace_back(*this->fockOrthoMy_);
     toGather.emplace_back(*this->fockOrthoMx_);
@@ -169,6 +173,9 @@ void SingleSlater<T>::gatherOrthoFock(){
 
 };
 
+/**
+ *  \brief Transform the orthonormal quaternion density to the AO basis
+ */
 template<typename T>
 void SingleSlater<T>::unOrthoDen3(){
   if(this->nTCS_ == 1 && this->isClosedShell){
@@ -188,6 +195,17 @@ void SingleSlater<T>::unOrthoDen3(){
   }
 }
 
+
+/**
+ *  \brief Copy the AO quaternion density matrix to the orthonormal
+ *  quaternion storage
+ *
+ *  This is a hack for the SCF as we build the density in the ortho
+ *  normal basis to avoid transforming the full 2C MO coeffients at
+ *  every SCF iteration. Because formDensity populates the AO 2C and
+ *  quaternion storage, it must be copied into it's correct place 
+ *  after the call in SCF
+ */
 template<typename T>
 void SingleSlater<T>::cpyAOtoOrthoDen(){
   if(this->nTCS_ == 1 && this->isClosedShell) {
@@ -209,62 +227,46 @@ void SingleSlater<T>::cpyAOtoOrthoDen(){
   }
 };
 
+/**
+ * \brief Evaluate the convergence criteria for the SCF procedure
+ */
 template<typename T>
 SCFConvergence SingleSlater<T>::evalConver3(){
 
   // Energy Convergence
   double EOld = this->totalEnergy;
-//this->formFock();
   this->computeEnergy();
   double EDelta = this->totalEnergy - EOld;
 
   double PARMS(0),PBRMS(0);
+  // Write D(M) - D(M-1) to disc
   this->formDeltaD();
 
-/*
-  DScalarOld_->read(this->NBSqScratch_->data(),H5PredType<T>());
-  if(this->nTCS_ == 1 && this->isClosedShell) {
-    for(auto I = 0; I < this->onePDMA_->size(); I++){
-      T DIFF = this->onePDMA_->data()[I] - this->NBSqScratch_->data()[I];
-      DIFF = std::conj(DIFF)*DIFF;
-      PARMS += reinterpret_cast<double(&)[2]>(DIFF)[0];
-    }
-  } else {
-    for(auto I = 0; I < this->onePDMScalar_->size(); I++){
-      T DIFF = this->onePDMScalar_->data()[I] - this->NBSqScratch_->data()[I];
-      DIFF = std::conj(DIFF)*DIFF;
-      PARMS += reinterpret_cast<double(&)[2]>(DIFF)[0];
-    }
-
-    DMzOld_->read(this->NBSqScratch_->data(),H5PredType<T>());
-    for(auto I = 0; I < this->onePDMMz_->size(); I++){
-      T DIFF = this->onePDMMz_->data()[I] - this->NBSqScratch_->data()[I];
-      DIFF = std::conj(DIFF)*DIFF;
-      PBRMS += reinterpret_cast<double(&)[2]>(DIFF)[0];
-    }
-  }
-
-  PARMS = std::sqrt(PARMS);
-  if(this->nTCS_ == 1 && !this->isClosedShell)
-    PBRMS = std::sqrt(PBRMS);
-*/
-
-  
+  // Scalar density RMS difference
   DeltaDScalar_->read(this->NBSqScratch_->data(),H5PredType<T>());
   PARMS = this->NBSqScratch_->norm();
+
+  // Magnetization density RMS
+     
+  // || Pz(M) - Pz(M-1) ||^2
   if(this->nTCS_ == 2 or !this->isClosedShell){
     DeltaDMz_->read(this->NBSqScratch_->data(),H5PredType<T>());
     PBRMS = this->NBSqScratch_->squaredNorm();
   }
+
+  // || Py(M) - Py(M-1) ||^2 + || Px(M) - Px(M-1) ||^2
   if(this->nTCS_ == 2) {
     DeltaDMy_->read(this->NBSqScratch_->data(),H5PredType<T>());
     PBRMS += this->NBSqScratch_->squaredNorm();
     DeltaDMx_->read(this->NBSqScratch_->data(),H5PredType<T>());
     PBRMS += this->NBSqScratch_->squaredNorm();
   }
+
+  // Sqrt of norm squared
   PBRMS = std::sqrt(PBRMS);
 
   
+  // Check if Density and Energy are properly converged
   SCFConvergence CONVER;
   CONVER.EDelta = EDelta;
   CONVER.PARMS  = PARMS;
@@ -279,17 +281,24 @@ SCFConvergence SingleSlater<T>::evalConver3(){
 
 //this->isConverged = this->isConverged || EDelta < this->eneTol_*1e-3;
   
+  // Copy the current SingleSlater moieties to disc (this is wrong for now)
   if(this->isPrimary) this->writeSCFFiles();
 
   return CONVER;
 };
 
+/**
+ * \brief Properly mix orbitals for Complex / 2C guess
+ */
 template<typename T>
 void SingleSlater<T>::mixOrbitalsSCF(){
   this->mixOrbitals2C();
   this->mixOrbitalsComplex();
 }
 
+/**
+ *  \brief Properly mix orbitals for 2C guess
+ */
 template<typename T>
 void SingleSlater<T>::mixOrbitals2C(){
   auto nO = this->nAE_ + this->nBE_;
@@ -341,6 +350,9 @@ void SingleSlater<T>::mixOrbitals2C(){
   this->moA_->col(indxLUMOB) = std::sqrt(0.5) * (HOMOA - LUMOB);
 }
 
+/**
+ * \brief Write the change in the quaternion density to Disc 
+ */
 template <typename T>
 void SingleSlater<T>::formDeltaD(){
   DScalarOld_->read(this->NBSqScratch_->data(),H5PredType<T>());
@@ -369,6 +381,15 @@ void SingleSlater<T>::formDeltaD(){
   }
 
 };
+
+/**
+ * \brief Copy the Most recent change in density to the quaternion density
+ * storage
+ *
+ * This is for use with the incremental Fock build to populate the quaternion
+ * density to be traced with the ERIs to compute the change of F at the current
+ * SCF iteration
+ */
 template<typename T>
 void SingleSlater<T>::copyDeltaDtoD(){
   if(this->nTCS_ == 1 and this->isClosedShell){
@@ -382,6 +403,14 @@ void SingleSlater<T>::copyDeltaDtoD(){
     }
   }
 }
+
+/**
+ * \brief Repopulate the quaternion density matrix with the most recent
+ * density written to disk
+ *
+ * This is for use with the incremental Fock build to repopulate the quaternion
+ * density after the change in F has been evaluated 
+ */
 template<typename T>
 void SingleSlater<T>::copyDOldtoD(){
   if(this->nTCS_ == 1 and this->isClosedShell){
@@ -395,6 +424,14 @@ void SingleSlater<T>::copyDOldtoD(){
     }
   }
 }
+
+/**
+ * \brief Write the most recent quaternion perturbation tensor to disk
+ *
+ * This is for use with the incremental Fock build to compute the total
+ * quaternion perturbation tensor after only the change in the perturbation
+ * tensor has been evalued in formFock
+ */
 template <typename T>
 void SingleSlater<T>::copyPT(){
   T* ScalarPtr;
@@ -413,6 +450,13 @@ void SingleSlater<T>::copyPT(){
   }
 };
 
+/**
+ *  \brief Increment the current quaternion perturbation tensor by the last
+ *  quaternion perturbation tensor written to disk
+ *
+ *  This is for use with the incremental Fock build to repopulate the full
+ *  quaternion perturbation tensor
+ */
 template<typename T>
 void SingleSlater<T>::incPT(){
   PTScalarOld_->read(this->NBSqScratch_->data(),H5PredType<T>());

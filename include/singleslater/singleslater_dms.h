@@ -95,6 +95,7 @@ void SingleSlater<T>::DMSExtrap(int NDIIS) {
 
 template<typename T>
 void SingleSlater<T>::McWeeny(int MAX){
+/*
   (*this->onePDMA_) /= 2.0;
   for(auto I = 0; I < MAX; I++){
     (*this->NBSqScratch_) = (*this->onePDMA_) * (*this->onePDMA_);
@@ -107,6 +108,8 @@ void SingleSlater<T>::McWeeny(int MAX){
 
   }
   (*this->onePDMA_) *= 2.0;
+*/
+  
 };
 
 template<typename T>
