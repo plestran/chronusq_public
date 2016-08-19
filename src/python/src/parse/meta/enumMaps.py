@@ -69,15 +69,15 @@ ellPolMap = {
 # Map from input paramater for PSCF.METHOD
 # to the SDResponse::METHOD enum
 #
-sdrMethodMap = {
-  "INVALID":chronusQ.SDResponse_METHOD.INVALID,  
-  "CIS"    :chronusQ.SDResponse_METHOD.CIS    ,
-  "RPA"    :chronusQ.SDResponse_METHOD.RPA    ,
-  "PPRPA"  :chronusQ.SDResponse_METHOD.PPRPA  ,
-  "PPATDA" :chronusQ.SDResponse_METHOD.PPATDA ,
-  "PPCTDA" :chronusQ.SDResponse_METHOD.PPCTDA ,
-  "STAB"   :chronusQ.SDResponse_METHOD.STAB     
-}
+#sdrMethodMap = {
+#  "INVALID":chronusQ.SDResponse_METHOD.INVALID,  
+#  "CIS"    :chronusQ.SDResponse_METHOD.CIS    ,
+#  "RPA"    :chronusQ.SDResponse_METHOD.RPA    ,
+#  "PPRPA"  :chronusQ.SDResponse_METHOD.PPRPA  ,
+#  "PPATDA" :chronusQ.SDResponse_METHOD.PPATDA ,
+#  "PPCTDA" :chronusQ.SDResponse_METHOD.PPCTDA ,
+#  "STAB"   :chronusQ.SDResponse_METHOD.STAB     
+#}
 
 aointAlg = {
   "DIRECT":chronusQ.AOIntegrals_INTEGRAL_ALGORITHM.DIRECT,

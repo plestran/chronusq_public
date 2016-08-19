@@ -413,9 +413,9 @@ public:
   void computeCholesky();
 
 
-  void computeAORcrossDel(); // build R cross Del matrices
-  double formBeckeW(cartGP gridPt, int iAtm);    // Evaluate Becke Weights
-  double normBeckeW(cartGP gridPt);             // Normalize Becke Weights
+//void computeAORcrossDel(); // build R cross Del matrices
+//double formBeckeW(cartGP gridPt, int iAtm);    // Evaluate Becke Weights
+//double normBeckeW(cartGP gridPt);             // Normalize Becke Weights
   void DKH0(); // compute DKH0 relativistic correction to kinetic energy
   void printOneE();
 #ifdef USE_LIBINT

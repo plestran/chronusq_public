@@ -29,7 +29,7 @@ from libpythonapi import CErrMsg
 from parseBasis import parseBasis
 from meta.knownKeywords import requiredKeywords
 from meta.knownJobs import *
-from meta.enumMaps import sdrMethodMap
+#from meta.enumMaps import sdrMethodMap
 from meta.enumMaps import aointAlg
 from meta.enumMaps import guessMap
 #from meta.enumMaps import exchMap 
@@ -117,8 +117,8 @@ def parseQM(workers,secDict):
       if chronusQ.getSize() > 1:
         msg = "Response cannot run with >1 MPI Processes"
         CErrMsg(workers['CQFileIO'],msg)
-      else:
-        parseSDR(workers,secDict)
+#     else:
+#       parseSDR(workers,secDict)
   else:
     msg = 'QM.Job ' + str(ssSettings['JOB']) + ' not recognized'
     CErrMsg(workers['CQFileIO'],str(msg))
@@ -803,48 +803,48 @@ def parseRT(workers,settings):
 
 
 
-def parseSDR(workers,secDict):
-  jobSettings = {}
-  JOB = secDict['QM']['JOB']
-  try:
-    jobSettings = secDict[JOB]
-  except KeyError:
-    if JOB in ('STAB'):
-      pass
-    else: 
-      msg = "Must specify an options sections for " + JOB
-      CErrMsg(workers['CQFileIO'],str(msg))
-
-   
-  # Set SDR object based on SS reference
-  if workers['CQSingleSlater'] == workers['CQSingleSlaterDouble']:
-    workers['CQSDResponse']  = workers['CQSDResponseDouble']
-    workers['CQMOIntegrals'] = workers['CQMOIntegralsDouble']
-  elif workers['CQSingleSlater'] == workers['CQSingleSlaterComplex']:
-    msg = "Wave Function Response using a Complex Reference is NYI"
-    CErrMsg(workers['CQFileIO'],str(msg))
-    workers['CQSDResponse']  = workers['CQSDResponseComplex']
-    workers['CQMOIntegrals'] = workers['CQMOIntegralsComplex']
-  else:
-    msg = "Error in Reference Recieved by SDResponse"
-    CErrMsg(workers['CQFileIO'],str(msg))
-
-  if workers['CQSingleSlater'].nTCS() == 2 and workers['CQAOIntegrals'].integralAlgorithm != aointAlg['INCORE']:
-    msg = "Wave Function Response using a Two-Component Reference is\n"
-    msg = msg + "Only Implemented using INCORE integrals (QM.ints = INCORE)"
-    CErrMsg(workers['CQFileIO'],str(msg))
-    
-
-  try:
-    workers['CQSDResponse'].setNSek(jobSettings['NSTATES'])
-  except KeyError:
-    if JOB in ('STAB'):
-      workers['CQSDResponse'].setNSek(3)
-    else: 
-      msg = "Must specify number of desired roots for " + JOB
-      CErrMsg(workers['CQFileIO'],str(msg))
-     
-  workers['CQSDResponse'].setMeth(sdrMethodMap[str(JOB)])
+#def parseSDR(workers,secDict):
+#  jobSettings = {}
+#  JOB = secDict['QM']['JOB']
+#  try:
+#    jobSettings = secDict[JOB]
+#  except KeyError:
+#    if JOB in ('STAB'):
+#      pass
+#    else: 
+#      msg = "Must specify an options sections for " + JOB
+#      CErrMsg(workers['CQFileIO'],str(msg))
+#
+#   
+#  # Set SDR object based on SS reference
+#  if workers['CQSingleSlater'] == workers['CQSingleSlaterDouble']:
+#    workers['CQSDResponse']  = workers['CQSDResponseDouble']
+#    workers['CQMOIntegrals'] = workers['CQMOIntegralsDouble']
+#  elif workers['CQSingleSlater'] == workers['CQSingleSlaterComplex']:
+#    msg = "Wave Function Response using a Complex Reference is NYI"
+#    CErrMsg(workers['CQFileIO'],str(msg))
+#    workers['CQSDResponse']  = workers['CQSDResponseComplex']
+#    workers['CQMOIntegrals'] = workers['CQMOIntegralsComplex']
+#  else:
+#    msg = "Error in Reference Recieved by SDResponse"
+#    CErrMsg(workers['CQFileIO'],str(msg))
+#
+#  if workers['CQSingleSlater'].nTCS() == 2 and workers['CQAOIntegrals'].integralAlgorithm != aointAlg['INCORE']:
+#    msg = "Wave Function Response using a Two-Component Reference is\n"
+#    msg = msg + "Only Implemented using INCORE integrals (QM.ints = INCORE)"
+#    CErrMsg(workers['CQFileIO'],str(msg))
+#    
+#
+#  try:
+#    workers['CQSDResponse'].setNSek(jobSettings['NSTATES'])
+#  except KeyError:
+#    if JOB in ('STAB'):
+#      workers['CQSDResponse'].setNSek(3)
+#    else: 
+#      msg = "Must specify number of desired roots for " + JOB
+#      CErrMsg(workers['CQFileIO'],str(msg))
+#     
+#  workers['CQSDResponse'].setMeth(sdrMethodMap[str(JOB)])
 
 def parseSCF(workers,scfSettings):
   optMap = {

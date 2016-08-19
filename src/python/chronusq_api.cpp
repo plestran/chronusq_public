@@ -249,12 +249,14 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("forceCart"    ,  &BasisSet::forceCart              )
   ;
 
+/*
   class_<Controls,boost::noncopyable>("Controls",init<>())
     .def("iniControls"  , &Controls::iniControls  )
     .def("printSettings", &Controls::printSettings,
       printSettings_Overload(args("x"),"printSettings docstring")
       )
   ;
+*/
 
   class_<FileIO,boost::noncopyable>("FileIO",init<std::string>())
     .def(init<std::string,std::string>())
@@ -438,6 +440,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("RYZ", RealTime<dcomplex>::RYZ)
   ;
 
+/*
   class_<MOIntegrals<double>,boost::noncopyable>("MOIntegrals_double",init<>())
     .def("communicate" , &MOIntegrals<double>::communicate)
     .def("initMeta"    , &MOIntegrals<double>::initMeta   )
@@ -446,7 +449,9 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("communicate" , &MOIntegrals<dcomplex>::communicate)
     .def("initMeta"    , &MOIntegrals<dcomplex>::initMeta   )
   ;
+*/
 
+/*
   class_<SDResponse<double>,boost::noncopyable>("SDResponse_double",init<>())
     .def("communicate"       , &SDResponse<double>::communicate               )
     .def("initMeta"          , &SDResponse<double>::initMeta                  )
@@ -478,7 +483,9 @@ BOOST_PYTHON_MODULE(libpythonapi){
     
     .def_readonly("nIter"    ,&SDResponse<dcomplex>::nQNIter                   )
   ;
+*/
 
+/*
   class_<NumericalDifferentiation<double>,boost::noncopyable>(
     "NumericalDifferentiationDouble",init<>())
     .def("differentiate"  ,&NumericalDifferentiation<double>::differentiate)
@@ -503,7 +510,9 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def_readwrite("computeES2ESNACME", 
                    &NumericalDifferentiation<double>::computeES2ESNACME)
   ;
+*/
 
+/*
   enum_<SDResponse<double>::METHOD>("SDResponse_METHOD")
     .value("INVALID", SDResponse<double>::__invalid    )
     .value("CIS"    , SDResponse<double>::CIS          )
@@ -513,7 +522,9 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("PPCTDA" , SDResponse<double>::PPCTDA       )
     .value("STAB"   , SDResponse<double>::STAB         )
   ;
+*/
 
+/*
   enum_<RESPONSE_TYPE>("RESPONSE_TYPE")
     .value("NOMETHOD", RESPONSE_TYPE::NOMETHOD    )
     .value("CIS"    , RESPONSE_TYPE::CIS          )
@@ -522,6 +533,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("PPTDA" , RESPONSE_TYPE::PPTDA       )
     .value("STAB"   , RESPONSE_TYPE::STAB         )
   ;
+*/
 
   
 
