@@ -197,7 +197,7 @@ void SingleSlater<T>::SADGuess() {
   } // Loop iUn
 
   this->scaleDen();
-  this->scatterDensity();
+//this->scatterDensity();
   this->formFock();
   this->orthoFock3();
   this->diagFock2();
@@ -207,3 +207,67 @@ void SingleSlater<T>::SADGuess() {
   this->unOrthoDen3();
   this->backTransformMOs();
 };
+
+template <typename T>
+void SingleSlater<T>::RandomGuess() {
+  (*this->onePDMScalar_) = TMatrix::Random(this->nBasis_,this->nBasis);
+  (*this->onePDMScalar_) = this->onePDMScalar_->selfadjointView<Lower>();
+  if(this->nTCS_ == 2 and !this->isClosedShell){
+    (*this->onePDMMz_) = TMatrix::Random(this->nBasis_,this->nBasis);
+    (*this->onePDMMz_) = this->onePDMMz_->selfadjointView<Lower>();
+  }
+}
+
+template<typename T>
+void SingleSlater<T>::placeAtmDen(std::vector<int> atomIndex, 
+  SingleSlater<double> &hfA){
+  // Place atomic SCF densities in the right place of the total density
+  // ** Note: ALWAYS spin average, even for UHF **
+  for(auto iAtm : atomIndex){
+    auto iBfSt = this->basisset_->mapCen2Bf(iAtm)[0];
+    auto iSize = this->basisset_->mapCen2Bf(iAtm)[1]; 
+/*
+    if(this->nTCS_ == 1){
+      this->onePDMA_->block(iBfSt,iBfSt,iSize,iSize)= (*hfA.onePDMA_);
+      if(this->isClosedShell){
+        if(hfA.isClosedShell) 
+          this->onePDMA_->block(iBfSt,iBfSt,iSize,iSize) += (*hfA.onePDMA_);
+        else
+          this->onePDMA_->block(iBfSt,iBfSt,iSize,iSize) += (*hfA.onePDMB_);
+      } else {
+        this->onePDMB_->block(iBfSt,iBfSt,iSize,iSize)= (*hfA.onePDMA_);
+        if(hfA.isClosedShell){
+          this->onePDMA_->block(iBfSt,iBfSt,iSize,iSize) += (*hfA.onePDMA_);
+          this->onePDMB_->block(iBfSt,iBfSt,iSize,iSize) += (*hfA.onePDMA_);
+        } else {
+          this->onePDMA_->block(iBfSt,iBfSt,iSize,iSize) += (*hfA.onePDMB_);
+          this->onePDMB_->block(iBfSt,iBfSt,iSize,iSize) += (*hfA.onePDMB_);
+        }
+      }
+    } else {
+      for(auto I = iBfSt, i = 0; I < (iBfSt +iSize); I += 2, i++)
+      for(auto J = iBfSt, j = 0; J < (iBfSt +iSize); J += 2, j++){
+        (*this->onePDMA_)(I,J)     = 
+          (*hfA.onePDMA_)(i,j) + (*hfA.onePDMB_)(i,j);
+        (*this->onePDMA_)(I+1,J+1) = 
+          (*hfA.onePDMA_)(i,j) + (*hfA.onePDMB_)(i,j);
+      }
+    }
+*/
+    this->onePDMScalar_->block(iBfSt,iBfSt,iSize,iSize) =
+      hfA->onePDMScalar()->cast<dcomplex>();
+    if(this->nTCS_ == 2 or !this->isClosedShell)
+      this->onePDMMz_->block(iBfSt,iBfSt,iSize,iSize) =
+        hfA->onePDMMz()->cast<dcomplex>();
+  } // loop iAtm
+}
+
+template<typename T>
+void SingleSlater<T>::scaleDen(){
+  (*this->onePDMScalar_) *= 
+    T(this->molecule_->nTotalE()) / this->onePDMScalar_->trace();
+
+  if(this->nTCS_ == 2 and !this->isClosedShell)
+    (*this->onePDMMz_) *= 
+      T(this->nAE_ - this->nBE_) / this->onePDMMz_->trace();
+}

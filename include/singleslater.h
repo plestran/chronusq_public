@@ -42,21 +42,23 @@ namespace ChronusQ {
 
 struct SCFConvergence {
   double EDelta;
-  double PARMS;
-  double PBRMS;
+  double PSRMS;
+  double PMRMS;
 };
 
 template<typename T>
 class KernelIntegrand {
   typedef Eigen::Matrix<T,Dynamic,Dynamic> TMatrix;
   public:
-  TMatrix VXCA;
-  TMatrix VXCB;
+  TMatrix VXCScalar;
+  TMatrix VXCMz;
+  TMatrix VXCMy;
+  TMatrix VXCMx;
   double Energy;
 
-  KernelIntegrand(size_t N) : VXCA(N,N), VXCB(N,N), Energy(0.0){ 
-    VXCA.setZero();
-    VXCB.setZero();
+  KernelIntegrand(size_t N) : VXCScalar(N,N), VXCMz(N,N), Energy(0.0){ 
+    VXCScalar.setZero();
+    VXCMz.setZero();
   };
 };
 
@@ -141,14 +143,14 @@ class SingleSlater : public Quantum<T> {
   std::unique_ptr<TMap>  NBSqScratch4_;
 
   // Internal Storage
-  std::unique_ptr<TMap>  coulombA_;   ///< deprecated 
-  std::unique_ptr<TMap>  coulombB_;   ///< deprecated 
-  std::unique_ptr<TMap>  exchangeA_;  ///< deprecated 
-  std::unique_ptr<TMap>  exchangeB_;  ///< deprecated 
+//std::unique_ptr<TMap>  coulombA_;   ///< deprecated 
+//std::unique_ptr<TMap>  coulombB_;   ///< deprecated 
+//std::unique_ptr<TMap>  exchangeA_;  ///< deprecated 
+//std::unique_ptr<TMap>  exchangeB_;  ///< deprecated 
 
   // Fock Matrix
-  std::unique_ptr<TMap>  fockA_;      ///< Alpha or Full (TCS) Fock Matrix
-  std::unique_ptr<TMap>  fockB_;      ///< Beta Fock Matrix
+//std::unique_ptr<TMap>  fockA_;      ///< Alpha or Full (TCS) Fock Matrix
+//std::unique_ptr<TMap>  fockB_;      ///< Beta Fock Matrix
   std::unique_ptr<TMap>  fockScalar_;
   std::unique_ptr<TMap>  fockMx_;
   std::unique_ptr<TMap>  fockMy_;
@@ -156,8 +158,8 @@ class SingleSlater : public Quantum<T> {
   std::vector<TMap*>     fock_;
 
   // Orthonormal Fock
-  std::unique_ptr<TMap>  fockOrthoA_;
-  std::unique_ptr<TMap>  fockOrthoB_;
+//std::unique_ptr<TMap>  fockOrthoA_;
+//std::unique_ptr<TMap>  fockOrthoB_;
   std::unique_ptr<TMap>  fockOrthoScalar_;
   std::unique_ptr<TMap>  fockOrthoMx_;
   std::unique_ptr<TMap>  fockOrthoMy_;
@@ -170,8 +172,8 @@ class SingleSlater : public Quantum<T> {
   std::unique_ptr<RealMap>  epsA_;       ///< Alpha or Full Eigenenergies
   std::unique_ptr<RealMap>  epsB_;       ///< Beta Fock Eigenenergie
 
-  std::unique_ptr<TMap>  PTA_;        ///< Alpha or Full Perturbation Tensor
-  std::unique_ptr<TMap>  PTB_;        ///< Beta Perturbation Tensor
+//std::unique_ptr<TMap>  PTA_;        ///< Alpha or Full Perturbation Tensor
+//std::unique_ptr<TMap>  PTB_;        ///< Beta Perturbation Tensor
   std::unique_ptr<TMap>  PTScalar_;
   std::unique_ptr<TMap>  PTMx_;
   std::unique_ptr<TMap>  PTMy_;
@@ -179,18 +181,22 @@ class SingleSlater : public Quantum<T> {
   std::vector<TMap*>     PT_;
 
   // Orthonormal Density
-  std::unique_ptr<TMap>  onePDMOrthoA_;        
-  std::unique_ptr<TMap>  onePDMOrthoB_;        
+//std::unique_ptr<TMap>  onePDMOrthoA_;        
+//std::unique_ptr<TMap>  onePDMOrthoB_;        
   std::unique_ptr<TMap>  onePDMOrthoScalar_;
   std::unique_ptr<TMap>  onePDMOrthoMx_;
   std::unique_ptr<TMap>  onePDMOrthoMy_;
   std::unique_ptr<TMap>  onePDMOrthoMz_;
   std::vector<TMap*>     onePDMOrtho_;
 
-  std::unique_ptr<TMap>  vXA_;        ///< Alpha or Full (TCS) VX
-  std::unique_ptr<TMap>  vXB_;        ///< Beta VXC
+//std::unique_ptr<TMap>  vXA_;        ///< Alpha or Full (TCS) VX
+//std::unique_ptr<TMap>  vXB_;        ///< Beta VXC
 //std::unique_ptr<TMap>  vCorA_;        ///< Alpha or Full Vcorr
 //std::unique_ptr<TMap>  vCorB_;        ///< Beta Vcorr
+  std::unique_ptr<TMap>  vXCScalar_;
+  std::unique_ptr<TMap>  vXCMz_;
+  std::unique_ptr<TMap>  vXCMy_;
+  std::unique_ptr<TMap>  vXCMx_;
 
 
 
@@ -269,40 +275,29 @@ class SingleSlater : public Quantum<T> {
   H5::DataSet *DeltaDMx_;
  
   // New DIIS Functions
-//void cpyOrthoFock2(int);
   void cpyAOtoOrthoDen();
-//void cpyOrthoDen2(int);
   void genDIISCom(int);
-//void unOrthoDen();
-//void orthoDen2();
-//void CDIIS2();
   void CDIIS4(int);
 
   // Various functions the perform SCF and SCR allocation
   void initSCFPtr();       ///< NULL-out pointers to scratch partitions
   void formNO();           ///< Form Natural Orbitals
   void mixOrbitalsSCF();   ///< Mix the orbitals for Complex / TCS SCF
-//void evalConver(int);    ///< Evaluate convergence criteria for SCF
 
-//void initSCFMem2();       ///< Initialize scratch memory for SCF (2)
   void diagFock2();         ///< Diagonalize Fock Matrix
-//void orthoFock();
   void fockCUHF();
-//void orthoDen();
-//void cleanupSCFMem2();
   void copyDen();
-//void genDComm2(int);
   void backTransformMOs();
 
   void doImagTimeProp(double); ///< Propagate the wavefunction in imaginary time 
 
 
   void allocOp();
-  void allocAlphaOp();
-  void allocBetaOp();
+//void allocAlphaOp();
+//void allocBetaOp();
   void allocDFT();
-  void allocAlphaDFT();
-  void allocBetaDFT();
+//void allocAlphaDFT();
+//void allocBetaDFT();
   void allocMultipole();
 
   inline void checkWorkers(){
@@ -371,11 +366,11 @@ public:
 
 
  
-  bool	haveMO;      ///< Have MO coefficients?
-  bool	haveDensity; ///< Computed Density? (Not sure if this is used anymore)
+//bool	haveMO;      ///< Have MO coefficients?
+//bool	haveDensity; ///< Computed Density? (Not sure if this is used anymore)
 //bool	haveCoulomb; ///< Computed Coulomb Matrix?
 //bool	haveExchange;///< Computed Exchange Matrix?
-  bool  havePT;      ///< Computed Perturbation Tensor?
+//bool  havePT;      ///< Computed Perturbation Tensor?
   bool  isConverged;
   bool  isHF;
   bool  isDFT;
@@ -386,15 +381,16 @@ public:
   float dt;    ///< Timestep for Imaginary Time Propagation
 
   bool	screenVxc   ;///< Do the screening for Vxc?
-  bool  isGGA;
+//bool  isGGA;
 
   double   energyOneE; ///< One-bodied operator tensors traced with Density
   double   energyTwoE; ///< Two-bodied operator tensors traced with Density
   double   energyNuclei; ///< N-N Repulsion Energy
+  double   energyExc;
   double   totalEnergy; ///< Sum of all energetic contributions
 
-  double   totalEx;     ///< LDA Exchange
-  double   totalEcorr;  ///< Total VWN Energy
+//double   totalEx;     ///< LDA Exchange
+//double   totalEcorr;  ///< Total VWN Energy
   double   epsScreen;   ///<  Screening value for both basis and Bweight
   double   epsConv;     ///<  Threshold value for converging cutoff radius given epsScreen
   int      maxiter;     ///<  Maximum number of iteration to find cutoff radius
@@ -414,60 +410,38 @@ public:
 
 
   // constructor & destructor
-  SingleSlater() : Quantum<T>(){
-    // Zero out integers to be set
-    this->nBasis_  = 0;
-    this->nShell_  = 0;
-    this->nTT_     = 0;
-    this->nAE_     = 0;
-    this->nBE_     = 0;
-    this->nOccA_   = 0;
-    this->nOccB_   = 0;
-    this->nVirA_   = 0;
-    this->nVirB_   = 0;
-    this->multip_  = 0;
-    this->nSCFIter = 0;
-    this->ngpts    = 0;
-
-    // Initialize Smart Pointers
-    this->fockA_             = nullptr;      
-    this->fockB_             = nullptr;      
-    this->coulombA_          = nullptr;   
-    this->coulombB_          = nullptr;   
-    this->exchangeA_         = nullptr;  
-    this->exchangeB_         = nullptr;  
-    this->moA_               = nullptr;        
-    this->moB_               = nullptr;        
-    this->epsA_              = nullptr;    
-    this->epsB_              = nullptr;    
-    this->PTA_               = nullptr;        
-    this->PTB_               = nullptr;        
-    this->vXA_              = nullptr;       
-    this->vXB_              = nullptr;       
-//  this->vCorA_              = nullptr;       
-//  this->vCorB_              = nullptr;       
-
-    // Initialize Raw Pointers
-    this->R2Index_     = NULL;
-    this->basisset_    = NULL;               
-    this->molecule_    = NULL;               
-    this->fileio_      = NULL;                 
-    this->aointegrals_ = NULL;            
-
-    // Initialize Booleans
-    this->isConverged   = false;
-//  this->haveCoulomb   = false;
-//  this->haveExchange  = false;
-    this->haveDensity   = false;
-    this->haveMO        = false;
-    this->havePT        = false;
-
-    // Initialize Energies
-    this->energyOneE = 0.0;
-    this->energyTwoE = 0.0;
-    this->totalEx = 0.0;
-    this->totalEcorr = 0.0;
-    this->totalEnergy = 0.0;
+  SingleSlater() : Quantum<T>(),
+    nBasis_ (0),
+    nShell_ (0),
+    nTT_    (0),
+    nAE_    (0),
+    nBE_    (0),
+    nOccA_  (0),
+    nOccB_  (0),
+    nVirA_  (0),
+    nVirB_  (0),
+    multip_ (0),
+    nSCFIter(0),
+    ngpts   (0),
+    moA_    (nullptr),        
+    moB_    (nullptr),        
+    epsA_   (nullptr),    
+    epsB_   (nullptr),    
+    vXCScalar_ (nullptr),       
+    vXCMz_ (nullptr),       
+    vXCMy_ (nullptr),       
+    vXCMx_ (nullptr),       
+    R2Index_     (NULL),
+    basisset_    (NULL),               
+    molecule_    (NULL),               
+    fileio_      (NULL),                 
+    aointegrals_ (NULL),            
+    isConverged  (false),
+    energyOneE   (0.0),
+    energyTwoE   (0.0),
+    energyNuclei (0.0),
+    energyExc    (0.0),
+    totalEnergy  (0.0){
 
 
     // Standard Values
@@ -507,7 +481,6 @@ public:
     this->epsScreen     = 1.0e-10;
     this->nRadDFTGridPts_ = 100;
     this->nAngDFTGridPts_ = 302;
-    this->isGGA = false;
 
 
     // FIXME: maybe hardcode these?
@@ -515,40 +488,37 @@ public:
     this->maxiter       = 50;
 
   };
+
   ~SingleSlater() { ; };
 
   SingleSlater(SingleSlater *other) : 
     Quantum<T>(dynamic_cast<Quantum<T>&>(*other)){
 
-    this->nBasis_ = other->nBasis();
-    this->nTT_    = other->nTT();
-    this->nAE_    = other->nAE();
-    this->nBE_    = other->nBE(); 
-    this->nOccA_  = other->nOccA();
-    this->nOccB_  = other->nOccB();
-    this->nVirA_  = other->nVirA();
-    this->nVirB_  = other->nVirB();
-    this->multip_   = other->multip();
-    this->energyNuclei = other->energyNuclei;
-    this->Ref_    = other->Ref();
-    this->haveDensity = true;
-    this->haveMO	    = true;
-    this->havePT      = true;
-    this->printLevel_ = other->printLevel();
-    this->doDIIS = other->doDIIS;
-    this->isHF   = other->isHF;
-    this->isDFT  = other->isDFT;
-    this->guess_ = other->guess();
-    this->elecField_   = (other->elecField());
-    this->basisset_    = other->basisset();    
-    this->molecule_    = other->molecule();
-    this->fileio_      = other->fileio();
-    this->aointegrals_ = other->aointegrals();
+    nBasis_ ( other->nBasis() ),
+    nTT_    ( other->nTT() ),
+    nAE_    ( other->nAE() ),
+    nBE_    ( other->nBE() ), 
+    nOccA_  ( other->nOccA() ),
+    nOccB_  ( other->nOccB() ),
+    nVirA_  ( other->nVirA() ),
+    nVirB_  ( other->nVirB() ),
+    multip_ ( other->multip() ),
+    energyNuclei ( other->energyNuclei ),
+    Ref_    ( other->Ref() ),
+    printLevel_  ( other->printLevel() ),
+    doDIIS  ( other->doDIIS ),
+    isHF    ( other->isHF ),
+    isDFT   ( other->isDFT ),
+    guess_  ( other->guess() ),
+    elecField_   ( other->elecField() ),
+    basisset_    ( other->basisset() ),    
+    molecule_    ( other->molecule() ),
+    fileio_      ( other->fileio() ),
+    aointegrals_ ( other->aointegrals() ),
 
-    auto NB = this->nBasis_*this->nTCS_;
-    auto NBSq = NB*NB;
     this->allocOp();
 
+/*
     (*this->fockA_) = *other->fockA();
     (*this->moA_  ) = *other->moA();
     (*this->PTA_  ) = *other->PTA();
@@ -558,6 +528,14 @@ public:
       (*this->moB_  ) = *other->moB();
       (*this->PTB_  ) = *other->PTB();
     }
+*/
+    for(auto iF = 0; iF < this->fock_.size(); iF++){
+      *this->fock_[iF] = *other->fock_[iF];
+      *this->PT_[iF]   = *other->PT_[iF];
+    }
+    *this->moA_ = *other->moA_;
+    if(this->nTCS_ == 2 and !this->isClosedShell)
+      *this->moB_ = *other->moB_;
     
   };
 
@@ -602,6 +580,7 @@ public:
       this->basisset_->radcut(this->epsScreen,this->maxiter,this->epsConv);
     }
   }
+
   void alloc();
   void dealloc();
 
@@ -656,26 +635,36 @@ public:
   inline std::vector<double> mullPop()   { return this->mullPop_; };
   inline std::array<double,3> elecField(){ return this->elecField_; };
 
-  inline TMap* fockA()                { return this->fockA_.get();    };
-  inline TMap* fockB()                { return this->fockB_.get();    };
+//inline TMap* fockA()                { return this->fockA_.get();    };
+//inline TMap* fockB()                { return this->fockB_.get();    };
   inline TMap* fockScalar()           { return this->fockScalar_.get();};
   inline TMap* fockMz()           { return this->fockMz_.get();};
   inline TMap* fockMy()           { return this->fockMy_.get();};
   inline TMap* fockMx()           { return this->fockMx_.get();};
-  inline TMap* coulombA()             { return this->coulombA_.get(); };
-  inline TMap* coulombB()             { return this->coulombB_.get(); };
-  inline TMap* exchangeA()            { return this->exchangeA_.get();};
-  inline TMap* exchangeB()            { return this->exchangeB_.get();};
+  inline std::vector<TMap*>& fock(){ return this->fock_;};
+//inline TMap* coulombA()             { return this->coulombA_.get(); };
+//inline TMap* coulombB()             { return this->coulombB_.get(); };
+//inline TMap* exchangeA()            { return this->exchangeA_.get();};
+//inline TMap* exchangeB()            { return this->exchangeB_.get();};
   inline TMap* moA()                  { return this->moA_.get();      };
   inline TMap* moB()                  { return this->moB_.get();      };
-  inline TMap* vXA()                  { return this->vXA_.get();      };
-  inline TMap* vXB()                  { return this->vXB_.get();      };
+//inline TMap* vXA()                  { return this->vXA_.get();      };
+//inline TMap* vXB()                  { return this->vXB_.get();      };
 //inline TMap* vCorA()                { return this->vCorA_.get();    };
 //inline TMap* vCorB()                { return this->vCorB_.get();    };
+  inline TMap* vXCScalar()            { return this->vXCScalar_.get();};
+  inline TMap* vXCMz()                { return this->vXCMz_.get();    };
+  inline TMap* vXCMy()                { return this->vXCMy_.get();    };
+  inline TMap* vXCMx()                { return this->vXCMx_.get();    };
   inline RealMap* epsA()              { return this->epsA_.get();     };
   inline RealMap* epsB()              { return this->epsB_.get();     };
-  inline TMap* PTA()                  { return this->PTA_.get();      };
-  inline TMap* PTB()                  { return this->PTB_.get();      };
+//inline TMap* PTA()                  { return this->PTA_.get();      };
+//inline TMap* PTB()                  { return this->PTB_.get();      };
+  inline TMap* PTScalar()           { return this->PTScalar_.get();};
+  inline TMap* PTMz()           { return this->PTMz_.get();};
+  inline TMap* PTMy()           { return this->PTMy_.get();};
+  inline TMap* PTMx()           { return this->PTMx_.get();};
+  inline std::vector<TMap*>& PT(){ return this->PT_;};
 
   inline BasisSet     * basisset()       { return this->basisset_;       };
   inline Molecule     * molecule()       { return this->molecule_;       };
@@ -697,37 +686,37 @@ public:
   void formCoulomb();		// form the Coulomb matrix
   void formExchange();		// form the exchange matrix
   void formPT();
-  void formVXC();               // Form DFT VXC Term
-  void formVXC_store();               // Form DFT VXC Term
+//void formVXC();               // Form DFT VXC Term
+//void formVXC_store();               // Form DFT VXC Term
   void formVXC_new();               // Form DFT VXC Term
-  void genSparseBasisMap();     // Generate Basis Set Mapping
-  void genSparseRcrosP();      //  Generate R cros P int
-  void evalVXC_store(int, int, double &, double &,RealMatrix *, RealMatrix *,
-         RealMatrix *, RealMatrix *, RealMatrix *,RealMatrix *,RealMatrix *,
-         RealMatrix *);
-  void evalVXC(cartGP, double, std::vector<bool>, double &, double &,
-      RealMatrix *, RealMatrix *, RealMatrix *, RealMatrix*); // evaluate DFT VXC Matrix Term( at a given pts)
-  std::array<double,6 > formVC (double, double);    // Form DFT correlarion density,potential (A and B)
-  std::array<double,6 > formVCGGA (double, double, double, double, double);    // Form DFT GGA correlarion density,potential (A and B)
-  std::array<double,6 > formVCVWN (double, double); // Form DFT VWN correlation (VWN3 and VWN5)
-  std::array<double,6 > formVCLYP (double, double, double, double, double); // Form DFT LYP correlation 
-  std::array<double,6 > formVEx (double, double); // Form DFT exchange density, potential (A and B)  
-  std::array<double,6 > formVExGGA (double, double, double, double);    // Form DFT GGA Exchange density,potential (A and B)
-  std::array<double,6 > formVExSlater (double, double); // Form DFT Slater exchange
-  std::array<double,6 > formVExB88 (double, double, double, double); // Form DFT Becke88 exchange
-  double EvepsVWN(int iop,double a_x, double b_x, double c_x, double x0_x, 
-      double rho ); // Form DFT correlarion potential 
-  double gB88(int, double);                   //funtion used in B88 Exchange
-  double omegaLYP(int, double, double, double);                    //function used in LYP Correlation 
-  double derLYP(int, double, double, double, double, double, double);//function used in LYP Correlation 
-  double der2LYP(int, double, double, double, double, double, double, double);//function used in LYP Correlation 
-  double deltaLYP(int, double, double, double);  //function used in LYP Correlation
-  double f_spindens(int iop, double spindens);  // define f(spindendity)
-  double df_spindens(double spindens);  // define df(spindendity)/dspindensity
-  double df2_spindens(double spindens);  // define df2(spindendity)/dspindensity2
-  double spindens(double rho_A, double rho_B);   // define spindendity
-  double formBeckeW(cartGP gridPt, int iAtm);    // Evaluate Becke Weights
-  double normBeckeW(cartGP gridPt);             // Normalize Becke Weights
+//void genSparseBasisMap();     // Generate Basis Set Mapping
+//void genSparseRcrosP();      //  Generate R cros P int
+//void evalVXC_store(int, int, double &, double &,RealMatrix *, RealMatrix *,
+//       RealMatrix *, RealMatrix *, RealMatrix *,RealMatrix *,RealMatrix *,
+//       RealMatrix *);
+//void evalVXC(cartGP, double, std::vector<bool>, double &, double &,
+//    RealMatrix *, RealMatrix *, RealMatrix *, RealMatrix*); // evaluate DFT VXC Matrix Term( at a given pts)
+//std::array<double,6 > formVC (double, double);    // Form DFT correlarion density,potential (A and B)
+//std::array<double,6 > formVCGGA (double, double, double, double, double);    // Form DFT GGA correlarion density,potential (A and B)
+//std::array<double,6 > formVCVWN (double, double); // Form DFT VWN correlation (VWN3 and VWN5)
+//std::array<double,6 > formVCLYP (double, double, double, double, double); // Form DFT LYP correlation 
+//std::array<double,6 > formVEx (double, double); // Form DFT exchange density, potential (A and B)  
+//std::array<double,6 > formVExGGA (double, double, double, double);    // Form DFT GGA Exchange density,potential (A and B)
+//std::array<double,6 > formVExSlater (double, double); // Form DFT Slater exchange
+//std::array<double,6 > formVExB88 (double, double, double, double); // Form DFT Becke88 exchange
+//double EvepsVWN(int iop,double a_x, double b_x, double c_x, double x0_x, 
+//    double rho ); // Form DFT correlarion potential 
+//double gB88(int, double);                   //funtion used in B88 Exchange
+//double omegaLYP(int, double, double, double);                    //function used in LYP Correlation 
+//double derLYP(int, double, double, double, double, double, double);//function used in LYP Correlation 
+//double der2LYP(int, double, double, double, double, double, double, double);//function used in LYP Correlation 
+//double deltaLYP(int, double, double, double);  //function used in LYP Correlation
+//double f_spindens(int iop, double spindens);  // define f(spindendity)
+//double df_spindens(double spindens);  // define df(spindendity)/dspindensity
+//double df2_spindens(double spindens);  // define df2(spindendity)/dspindensity2
+//double spindens(double rho_A, double rho_B);   // define spindendity
+//double formBeckeW(cartGP gridPt, int iAtm);    // Evaluate Becke Weights
+//double normBeckeW(cartGP gridPt);             // Normalize Becke Weights
 //  void   buildVxc(cartGP gridPt, double weight, std::vector<bool> mapRad_);            // function to build the Vxc therm
   void matchord();              // match Guassian order of guess
   void readGuessIO();       	// read the initial guess of MO's from the input stream
@@ -735,24 +724,19 @@ public:
   void readGuessGauFChk(std::string &);	// read the initial guess of MO's from the Gaussian formatted checkpoint file
   void computeEnergy();         // compute the total electronic energy
   void computeMultipole();      // compute multipole properties
-//void computeSExpect();        // compute <S> <S^2>
   void computeSSq();
   inline void computeProperties(){
     this->computeMultipole();
     this->computeSExpect(*this->aointegrals_->overlap_);
   };
-  void CDIIS();
   void CpyFock(int);
   void GenDComm(int);
   void mullikenPop();
   void fixPhase();
 
-  // JRADLER
   void levelShift();
   void levelShift2();
-  // JRADLER
 
-  void SCF2();
 
   // DFT Setup Routines
   inline void addSlater(){

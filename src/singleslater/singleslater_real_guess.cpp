@@ -32,6 +32,7 @@ using ChronusQ::BasisSet;
 using ChronusQ::Molecule;
 using ChronusQ::HashNAOs;
 namespace ChronusQ {
+/*
 template<>
 void SingleSlater<double>::placeAtmDen(std::vector<int> atomIndex, 
   SingleSlater<double> &hfA){
@@ -68,6 +69,8 @@ void SingleSlater<double>::placeAtmDen(std::vector<int> atomIndex,
     }
   } // loop iAtm
 }
+*/
+/*
 template<>
 void SingleSlater<double>::scaleDen(){
   // Scale UHF densities according to desired multiplicity
@@ -82,27 +85,14 @@ void SingleSlater<double>::scaleDen(){
       (*this->onePDMA_)(i,j)      *= (double)this->nAE_/(double)nE ;
       (*this->onePDMA_)(i+1,j+1)  *= (double)this->nBE_/(double)nE ;
     }
-/*
-    double theta = math.pi / 8.0;
-    double c = std::cos(theta);
-    double s = std::sin(theta);
-    for(auto i = 0; i < this->nTCS_*this->nBasis_; i += 2)
-    for(auto j = 0; j < this->nTCS_*this->nBasis_; j += 2){
-      double Paa = (*this->onePDMA_)(i,j);
-      double Pbb = (*this->onePDMA_)(i+1,j+1);
-      (*this->onePDMA_)(i,j)     = c*c*Paa + s*s*Pbb;
-      (*this->onePDMA_)(i+1,j+1) = c*c*Pbb + s*s*Paa;
-      (*this->onePDMA_)(i+1,j)   = c*s*(Paa - Pbb);
-      (*this->onePDMA_)(i,j+1)   = c*s*(Paa - Pbb);
-     
-    }
-*/
     
 //  (*this->onePDMA_) *= (double)(this->nAE_+this->nBE_)/(double)nE ;
   }
 //CErr();
 }; // SingleSlater::scaleDen [T=double]
+*/
 
+/*
 template<>
 void SingleSlater<double>::RandomGuess() {
 //JJG make random guess
@@ -118,8 +108,10 @@ void SingleSlater<double>::RandomGuess() {
     *this->onePDMB_ = this->onePDMB_->selfadjointView<Lower>();
   }  
 };
+*/
 
 
+/*
 //------------------------------------------//
 // form the initial guess of MOs from input //
 //------------------------------------------//
@@ -146,6 +138,9 @@ void SingleSlater<double>::readGuessIO() {
   };
   this->haveMO = true;
 };
+*/
+
+/*
 //-----------------------------------------------------------------------//
 // form the initial guess of MOs from Gaussian raw matrix element file   //
 //-----------------------------------------------------------------------//
@@ -172,9 +167,11 @@ void SingleSlater<double>::readGuessGauMatEl(GauMatEl& matEl){
   };
   this->haveMO = true;
 }
+*/
 //-----------------------------------------------------------------------//
 // form the initial guess of MOs from Gaussian formatted checkpoint file //
 //-----------------------------------------------------------------------//
+/*
 template<>
 void SingleSlater<double>::readGuessGauFChk(std::string &filename) {
   this->fileio_->out<<"Reading formatted checkpoint file "<<filename<<endl;
@@ -221,7 +218,9 @@ void SingleSlater<double>::readGuessGauFChk(std::string &filename) {
   };
   this->haveMO = true;
 };
+*/
 
+/*
 template<>
 void SingleSlater<double>::READGuess(){
   if(getRank() == 0) {
@@ -247,5 +246,6 @@ void SingleSlater<double>::READGuess(){
 #endif
   
 }
+*/
 }; //namespace ChronusQ
 #endif

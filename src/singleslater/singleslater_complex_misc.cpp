@@ -29,8 +29,6 @@ template<>
 template<>
 SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other) :
   Quantum<dcomplex>::Quantum<dcomplex>(dynamic_cast<Quantum<double>&>(*other)){
-     
-
     this->nBasis_ = other->nBasis();
     this->nTT_    = other->nTT();
     this->nAE_    = other->nAE();
@@ -42,9 +40,6 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other) :
     this->multip_   = other->multip();
     this->energyNuclei = other->energyNuclei;
     this->Ref_    = other->Ref();
-    this->haveDensity = true;
-    this->haveMO	    = true;
-    this->havePT      = true;
     this->printLevel_ = other->printLevel();
     this->doDIIS = other->doDIIS;
     this->isHF   = other->isHF;
@@ -56,10 +51,9 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other) :
     this->fileio_      = other->fileio();
     this->aointegrals_ = other->aointegrals();
 
-    auto NB = this->nBasis_*this->nTCS_;
-    auto NBSq = NB*NB;
     this->allocOp();
 
+/*
     this->fockA_->real()       = *other->fockA();
     this->moA_->real()         = *other->moA();
     this->PTA_->real()         = *other->PTA();
@@ -69,6 +63,14 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other) :
       this->moB_->real()         = *other->moB();
       this->PTB_->real()         = *other->PTB();
     }
+*/
+    for(auto iF = 0; iF < this->fock_.size(); iF++){
+      *this->fock_[iF] = *other->fock()[iF];
+      *this->PT_[iF]   = *other->PT()[iF];
+    }
+    *this->moA_ = *other->moA();
+    if(this->nTCS_ == 2 and !this->isClosedShell)
+      *this->moB_ = *other->moB();
 
 }
 
