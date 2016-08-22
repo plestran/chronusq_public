@@ -293,6 +293,7 @@ class SingleSlater : public Quantum<T> {
 
 
   void allocOp();
+  void allocScr();
 //void allocAlphaOp();
 //void allocBetaOp();
   void allocDFT();
@@ -517,7 +518,7 @@ public:
     fileio_      ( other->fileio() ),
     aointegrals_ ( other->aointegrals() ),
 
-    this->allocOp();
+    this->alloc();
 
 /*
     (*this->fockA_) = *other->fockA();

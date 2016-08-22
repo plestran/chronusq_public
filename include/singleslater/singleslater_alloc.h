@@ -31,6 +31,7 @@ void SingleSlater<T>::alloc(){
   this->checkMeta();
   Quantum<T>::alloc(this->nBasis_); // Allocate Den -> Quantum
   this->allocOp();
+  this->allocScr();
 
   if(this->nTCS_ == 1 and this->isClosedShell){
     fock_.emplace_back(this->fockA_.get());
@@ -53,55 +54,19 @@ void SingleSlater<T>::alloc(){
     }
   }
  
-  if(getRank() == 0) {
-/*
-    if (this->isDFT){
-//     Timing
-      std::chrono::high_resolution_clock::time_point start;
-      std::chrono::high_resolution_clock::time_point finish;
-      std::chrono::duration<double> duration_formMap;
-      if(this->printLevel_ >= 3) {
-        start = std::chrono::high_resolution_clock::now();
-      }
-//      this->genSparseBasisMap();
-//      this->genSparseRcrosP();
-//      CErr();
-//   Timing
-      if(this->printLevel_ >= 3) {
-        finish = std::chrono::high_resolution_clock::now();
-        duration_formMap = finish - start;
-        this->fileio_->out << endl << "CPU time for MapVXc:  "
-          << duration_formMap.count() << " seconds." << endl;
-      }
-    }
-*/
- 
-    if(this->isPrimary) {
-      // Init FilIO Files (FIXME: This is stupid)
-      if(typeid(T).hash_code() == typeid(double).hash_code())
-        this->fileio_->iniStdSCFFilesDouble(
-          !this->isClosedShell && this->nTCS_ == 1,this->nTCS_*this->nBasis_
-        );
-      else if(typeid(T).hash_code() == typeid(dcomplex).hash_code())
-        this->fileio_->iniStdSCFFilesComplex(
-          !this->isClosedShell && this->nTCS_ == 1,this->nTCS_*this->nBasis_
-        );
-
-    }
-    std::vector<hsize_t> dims;
-    dims.push_back(this->nBasis_);
-    dims.push_back(this->nBasis_);
-    this->FPScalar_ = this->fileio_->createScratchPartition(H5PredType<T>(),
-      "FP in the Orthonormal Basis (Scalar)",dims);
-    if(this->nTCS_ == 2 or !this->isClosedShell)
-      this->FPMz_ = this->fileio_->createScratchPartition(H5PredType<T>(),
-        "FP in the Orthonormal Basis (Mz)",dims);
-    if(this->nTCS_ == 2){
-      this->FPMy_ = this->fileio_->createScratchPartition(H5PredType<T>(),
-        "FP in the Orthonormal Basis (My)",dims);
-      this->FPMx_ = this->fileio_->createScratchPartition(H5PredType<T>(),
-        "FP in the Orthonormal Basis (Mx)",dims);
-    }
+  std::vector<hsize_t> dims;
+  dims.push_back(this->nBasis_);
+  dims.push_back(this->nBasis_);
+  this->FPScalar_ = this->fileio_->createScratchPartition(H5PredType<T>(),
+    "FP in the Orthonormal Basis (Scalar)",dims);
+  if(this->nTCS_ == 2 or !this->isClosedShell)
+    this->FPMz_ = this->fileio_->createScratchPartition(H5PredType<T>(),
+      "FP in the Orthonormal Basis (Mz)",dims);
+  if(this->nTCS_ == 2){
+    this->FPMy_ = this->fileio_->createScratchPartition(H5PredType<T>(),
+      "FP in the Orthonormal Basis (My)",dims);
+    this->FPMx_ = this->fileio_->createScratchPartition(H5PredType<T>(),
+      "FP in the Orthonormal Basis (Mx)",dims);
   }
 #ifdef CQ_ENABLE_MPI
   MPI_Barrier(MPI_COMM_WORLD);
@@ -119,14 +84,8 @@ void SingleSlater<T>::alloc(){
 }
 
 template<typename T>
-void SingleSlater<T>::allocOp(){
-  this->allocAlphaOp();
-  if(!this->isClosedShell && this->nTCS_ == 1) 
-    this->allocBetaOp();
-
+void SingleSlater<T>::allocScr(){
   auto NBSq = this->nBasis_*this->nBasis_;
-  auto NBTSq = this->nTCS_ * this->nTCS_ * NBSq;
-
 
   this->NBSqScratch_ = 
     std::unique_ptr<TMap>(new TMap(
@@ -145,6 +104,163 @@ void SingleSlater<T>::allocOp(){
           this->memManager_->template malloc<T>(NBSq),
           this->nBasis_,this->nBasis_));
 
+  this->NBSqScratch_->setZero();
+  this->NBSqScratch2_->setZero();
+  this->NBSqScratch3_->setZero();
+  this->NBSqScratch4_->setZero();
+};
+
+template<typename T>
+void SingleSlater<T>::allocOp(){
+/*
+  this->allocAlphaOp();
+  if(!this->isClosedShell && this->nTCS_ == 1) 
+    this->allocBetaOp();
+*/
+
+  auto NB = this->nBasis_;
+  auto NBT = this->nTCS_ * NB;
+  auto NBSq = NB*NB;
+  auto NBTSq = NBT*NBT;
+
+  // Orthonormal Density Matricies
+
+  // Scalar
+  this->onePDMOrthoScalar_ = std::unique_ptr<TMap>(
+    new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
+  this->onePDMOrthoScalar_->setZero();
+
+  // Mz
+  if(this->nTCS_ == 2 or !this->isClosedShell) {
+    this->onePDMOrthoMz_ = std::unique_ptr<TMap>(
+      new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
+    this->onePDMOrthoMz_->setZero();
+  }
+
+  // My / Mx
+  if(this->nTCS_ == 2) {
+    this->onePDMOrthoMx_ = std::unique_ptr<TMap>(
+      new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
+    this->onePDMOrthoMx_->setZero();
+
+    this->onePDMOrthoMy_ = std::unique_ptr<TMap>(
+      new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
+    this->onePDMOrthoMy_->setZero();
+  }
+
+  // Fock Matricies
+
+  // Scalar
+  this->fockScalar_ = std::unique_ptr<TMap>(
+    new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
+  this->fockScalar_->setZero();
+
+  this->fockOrthoScalar_ = std::unique_ptr<TMap>(
+    new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
+  this->fockOrthoScalar_->setZero();
+
+  // Mz
+  if(this->nTCS_ == 2 or !this->isClosedShell) {
+    this->fockMz_ = std::unique_ptr<TMap>(
+      new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
+    this->fockMz_->setZero();
+
+    this->fockOrthoMz_ = std::unique_ptr<TMap>(
+      new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
+    this->fockOrthoMz_->setZero();
+  }
+
+  // My / Mx
+  if(this->nTCS_ == 2) {
+    this->fockMx_ = std::unique_ptr<TMap>(
+      new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
+    this->fockMx_->setZero();
+
+    this->fockOrthoMx_ = std::unique_ptr<TMap>(
+      new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
+    this->fockOrthoMx_->setZero();
+
+    this->fockMy_ = std::unique_ptr<TMap>(
+      new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
+    this->fockMy_->setZero();
+
+    this->fockOrthoMy_ = std::unique_ptr<TMap>(
+      new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
+    this->fockOrthoMy_->setZero();
+  }
+
+  // PT Matricies
+
+  // Scalar
+  this->PTScalar_ = std::unique_ptr<TMap>(
+    new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
+  this->PTScalar_->setZero();
+
+  // Mz
+  if(this->nTCS_ == 2 or !this->isClosedShell) {
+    this->PTMz_ = std::unique_ptr<TMap>(
+      new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
+    this->PTMz_->setZero();
+  }
+
+  // My / Mx
+  if(this->nTCS_ == 2) {
+    this->PTMx_ = std::unique_ptr<TMap>(
+      new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
+    this->PTMx_->setZero();
+
+    this->PTMy_ = std::unique_ptr<TMap>(
+      new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
+    this->PTMy_->setZero();
+  }
+
+  // MO Coeffs
+  this->moA_ = std::unique_ptr<TMap>(
+    new TMap(this->memManager_->template malloc<T>(NBTSq),NBT,NBT)); 
+    this->moA_->setZero();
+  if(this->nTCS_ == 1 and !this->isClosedShell) {
+    this->moB_ = std::unique_ptr<TMap>(
+      new TMap(this->memManager_->template malloc<T>(NBTSq),NBT,NBT)); 
+
+    this->moB_->setZero();
+  }
+
+  // MO Eigenenergies
+  this->epsA_ = std::unique_ptr<TMap>(
+    new TMap(this->memManager_->template malloc<T>(NBTSq),NBT,NBT)); 
+    this->epsA_->setZero();
+  if(this->nTCS_ == 1 and !this->isClosedShell){
+    this->epsB_ = std::unique_ptr<TMap>(
+      new TMap(this->memManager_->template malloc<T>(NBTSq),NBT,NBT)); 
+    this->epsB_->setZero();
+  }
+
+
+  if(this->isDFT) {
+    // Scalar
+    this->VXCScalar_ = std::unique_ptr<TMap>(
+      new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
+    this->VXCScalar_->setZero();
+
+    // Mz
+    if(this->nTCS_ == 2 or !this->isClosedShell) {
+      this->VXCMz_ = std::unique_ptr<TMap>(
+        new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
+      this->VXCMz_->setZero();
+    }
+
+    // My / Mx
+    if(this->nTCS_ == 2) {
+      this->VXCMx_ = std::unique_ptr<TMap>(
+        new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
+      this->VXCMx_->setZero();
+
+      this->VXCMy_ = std::unique_ptr<TMap>(
+        new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
+      this->VXCMy_->setZero();
+    }
+  }
+/*
   this->fockOrthoA_ = 
     std::unique_ptr<TMap>(
         new TMap(
@@ -156,10 +272,6 @@ void SingleSlater<T>::allocOp(){
           this->memManager_->template malloc<T>(NBTSq),
           this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
 
-  this->NBSqScratch_->setZero();
-  this->NBSqScratch2_->setZero();
-  this->NBSqScratch3_->setZero();
-  this->NBSqScratch4_->setZero();
   this->fockOrthoA_->setZero();
   this->onePDMOrthoA_->setZero();
 
@@ -272,8 +384,10 @@ void SingleSlater<T>::allocOp(){
       this->onePDMOrthoMy_->setZero(); 
     }
   }
+*/
 }
 
+/*
 template<typename T>
 void SingleSlater<T>::allocAlphaOp(){
   auto NB   = this->nTCS_ * this->nBasis_;
@@ -455,4 +569,5 @@ void SingleSlater<T>::allocBetaDFT(){
   this->vXB_->setZero();
 //this->vCorB_->setZero();
 }
+*/
 
