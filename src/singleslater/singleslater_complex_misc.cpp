@@ -65,12 +65,12 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other) :
     }
 */
     for(auto iF = 0; iF < this->fock_.size(); iF++){
-      *this->fock_[iF] = *other->fock()[iF];
-      *this->PT_[iF]   = *other->PT()[iF];
+      this->fock_[iF]->real() = *other->fock()[iF];
+      this->PT_[iF]->real()   = *other->PT()[iF];
     }
-    *this->moA_ = *other->moA();
+    this->moA_->real() = *other->moA();
     if(this->nTCS_ == 2 and !this->isClosedShell)
-      *this->moB_ = *other->moB();
+      this->moB_->real() = *other->moB();
 
 }
 
@@ -80,6 +80,7 @@ void SingleSlater<dcomplex>::getAlgebraicField(){
   this->algebraicFieldShort_ = "\u2102";
 }
 
+/*
 template<>
 void SingleSlater<dcomplex>::writeSCFFiles(){
 
@@ -98,6 +99,7 @@ void SingleSlater<dcomplex>::writeSCFFiles(){
     );
   }
 }
+*/
 
 template<>
 void SingleSlater<dcomplex>::fixPhase(){

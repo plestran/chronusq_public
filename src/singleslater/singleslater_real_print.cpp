@@ -26,6 +26,7 @@
 #include <singleslater.h>
 
 namespace ChronusQ{
+/*
   template<>
   void SingleSlater<double>::printDensity(){
     if(this->nTCS_ == 1) {
@@ -53,5 +54,6 @@ namespace ChronusQ{
     } else
       prettyPrintTCS(this->fileio_->out,(*this->PTA_),"Perturbation Tensor");
   };
+*/
 
 }; // namespace ChronusQ

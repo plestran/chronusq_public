@@ -34,7 +34,24 @@ const std::string bannerEnd="---------------------------------------------------
 const auto PRINT_SMALL = 1e-10;
 
 
+
 namespace Eigen {
+  template<typename Derived, 
+           typename std::enable_if< std::is_same< typename Derived::Scalar,
+                                                  double >::value,
+                                    int>::type = 0>
+  void prettyPrintSmart(std::ostream &output, const Derived &m, std::string str,
+     std::size_t printWidth = 16) { prettyPrint(output,m,str,printWidth);};
+
+  template<typename Derived, 
+           typename std::enable_if< std::is_same< typename Derived::Scalar,
+                                                  dcomplex >::value,
+                                    int>::type = 0>
+  void prettyPrintSmart(std::ostream &output, const Derived &m, std::string str,
+     std::size_t printWidth = 16) { 
+     prettyPrintComplex(output,m,str,printWidth);
+  };
+
   template<typename Derived>
   void prettyPrint(std::ostream & output, const Derived& m, std::string str,
      size_t printWidth = 16){

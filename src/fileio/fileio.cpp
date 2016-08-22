@@ -32,8 +32,10 @@ FileIO::FileIO(const std::string nm_input) {
     CErr("Fatal: Input File Required");
 
   this->doRestart = false;
+/*
   this->haveStdOpFiles = false;
   this->haveStdSCFFiles = false;
+*/
 
   this->name = nm_input;
   
@@ -45,8 +47,10 @@ FileIO::FileIO(const std::string nm_input) {
   this->in.open(name_in,ios::in);
   this->out.open(name_out,ios::out);
 
+/*
   this->iniH5Paths();
   this->iniCompType();
+*/
 };
 
 FileIO::FileIO(const std::string inFile, const std::string outFile) {
@@ -68,11 +72,15 @@ FileIO::FileIO(const std::string inFile, const std::string outFile) {
   this->in.open(name_in,ios::in);
   this->out.open(name_out,ios::out);
 
+/*
   this->iniH5Paths();
   this->iniCompType();
+*/
   this->doRestart = false;
+/*
   this->haveStdOpFiles = false;
   this->haveStdSCFFiles = false;
+*/
 
 };
 
@@ -108,6 +116,7 @@ H5::DataSet * FileIO::createScratchPartition(const H5::CompType &type,
   return &this->scratchPartitions.back().data;
 }; // FileIO::createScratchPartition
 
+/*
 void FileIO::iniH5Paths() {
   this->operatorGroupPath = "/OPERATORS";
   this->SCFGroupPath      = "/SCF";
@@ -128,6 +137,7 @@ void FileIO::iniH5Paths() {
   this->alphaMOPath     = this->SCFGroupPath + "/ALPHA_MO";
   this->betaMOPath      = this->SCFGroupPath + "/BETA>MO";
 };
+*/
 
 void FileIO::iniH5Files(){
   this->scratchPartitions.reserve(CQ_MAX_SCRATCH_PARTITIONS);
@@ -148,6 +158,7 @@ void FileIO::iniH5Files(){
   }
 }
 
+/*
 void FileIO::iniStdGroups(){
   if(doRestart){
     this->Meta = std::unique_ptr<H5::Group>(
@@ -171,7 +182,9 @@ void FileIO::iniStdGroups(){
     );
   }
 }
+*/
 
+/*
 void FileIO::iniMetaFiles(){
   hsize_t dim = 1;
   H5::DataSpace dataspace(1,&dim);
@@ -184,7 +197,9 @@ void FileIO::iniMetaFiles(){
     )  
   );
 }
+*/
 
+/*
 void FileIO::iniStdOpFiles(int nBasis){
   if(this->haveStdOpFiles) return;
   hsize_t NBSq[] = {static_cast<hsize_t>(nBasis),static_cast<hsize_t>(nBasis)};
@@ -289,12 +304,14 @@ void FileIO::iniStdOpFiles(int nBasis){
   }
   this->haveStdOpFiles = true;
 }
+*/
 
 /*
 template<>
 void FileIO::iniStdSCFFiles<double>(bool allocBeta, int nBasis){
 */
 //void FileIO::iniStdSCFFiles(bool allocBeta, int nBasis){
+/*
 void FileIO::iniStdSCFFilesDouble(bool allocBeta, int nBasis){
   if(this->haveStdSCFFiles) return;
   hsize_t NBSq[] = {static_cast<hsize_t>(nBasis),static_cast<hsize_t>(nBasis)};
@@ -359,7 +376,9 @@ void FileIO::iniStdSCFFilesDouble(bool allocBeta, int nBasis){
   this->haveStdSCFFiles = true;
 
 }
+*/
 
+/*
 void FileIO::iniStdSCFFilesComplex(bool allocBeta, int nBasis){
   if(this->haveStdSCFFiles) return;
   hsize_t NBSq[] = {static_cast<hsize_t>(nBasis),static_cast<hsize_t>(nBasis)};
@@ -424,7 +443,9 @@ void FileIO::iniStdSCFFilesComplex(bool allocBeta, int nBasis){
   }
   this->haveStdSCFFiles = true;
 }
+*/
 
+/*
 void FileIO::iniCompType(){
   typedef struct {
     double re;
@@ -483,6 +504,8 @@ void FileIO::iniCompType(){
   );
 
 }
+*/
+
 template<> H5::CompType H5PredType<double>(){ 
   return H5::CompType(H5::DataType(H5::PredType::NATIVE_DOUBLE).getId());
 }

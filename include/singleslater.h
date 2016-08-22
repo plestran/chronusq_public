@@ -381,7 +381,7 @@ public:
   float dt;    ///< Timestep for Imaginary Time Propagation
 
   bool	screenVxc   ;///< Do the screening for Vxc?
-//bool  isGGA;
+  bool  isGGA;
 
   double   energyOneE; ///< One-bodied operator tensors traced with Density
   double   energyTwoE; ///< Two-bodied operator tensors traced with Density
@@ -437,6 +437,7 @@ public:
     fileio_      (NULL),                 
     aointegrals_ (NULL),            
     isConverged  (false),
+    isGGA        (false),
     energyOneE   (0.0),
     energyTwoE   (0.0),
     energyNuclei (0.0),

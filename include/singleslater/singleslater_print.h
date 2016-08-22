@@ -460,3 +460,48 @@ void SingleSlater<T>::printSCFIter(int iter, double EDel,double PARMS,double PBR
 
   this->fileio_->out << endl;
 }      
+
+template <typename T>
+void SingleSlater<T>::printDensity() {
+  prettyPrintSmart(this->fileio_->out,(*this->onePDMScalar_),
+    "Density (Scalar)");
+  if(this->nTCS_ == 2 or !this->isClosedShell)
+    prettyPrintSmart(this->fileio_->out,(*this->onePDMMz_),
+      "Density (Mz)");
+  if(this->nTCS_ == 2) {
+    prettyPrintSmart(this->fileio_->out,(*this->onePDMMx_),
+      "Density (Mx)");
+    prettyPrintSmart(this->fileio_->out,(*this->onePDMMy_),
+      "Density (My)");
+  }
+};
+
+template <typename T>
+void SingleSlater<T>::printFock() {
+  prettyPrintSmart(this->fileio_->out,(*this->fockScalar_),
+    "Fock (Scalar)");
+  if(this->nTCS_ == 2 or !this->isClosedShell)
+    prettyPrintSmart(this->fileio_->out,(*this->fockMz_),
+      "Fock (Mz)");
+  if(this->nTCS_ == 2) {
+    prettyPrintSmart(this->fileio_->out,(*this->fockMx_),
+      "Fock (Mx)");
+    prettyPrintSmart(this->fileio_->out,(*this->fockMy_),
+      "Fock (My)");
+  }
+};
+
+template <typename T>
+void SingleSlater<T>::printPT() {
+  prettyPrintSmart(this->fileio_->out,(*this->PTScalar_),
+    "PT (Scalar)");
+  if(this->nTCS_ == 2 or !this->isClosedShell)
+    prettyPrintSmart(this->fileio_->out,(*this->PTMz_),
+      "PT (Mz)");
+  if(this->nTCS_ == 2) {
+    prettyPrintSmart(this->fileio_->out,(*this->PTMx_),
+      "PT (Mx)");
+    prettyPrintSmart(this->fileio_->out,(*this->PTMy_),
+      "PT (My)");
+  }
+};
