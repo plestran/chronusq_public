@@ -127,3 +127,38 @@ void SingleSlater<T>::formFP(){
     this->FPMx_->write(this->NBSqScratch_->data(),H5PredType<T>());
   }
 };
+
+template<typename T>
+void SingleSlater<T>::fockCUHF() {
+  TMap P(this->PNOMem_,this->nBasis_,this->nBasis_);
+  TMap DelF(this->delFMem_,this->nBasis_,this->nBasis_);
+  TMap Lambda(this->lambdaMem_,this->nBasis_,this->nBasis_);
+
+  int activeSpace  = this->molecule_->multip() - 1;
+  int coreSpace    = (this->molecule_->nTotalE() - activeSpace) / 2;
+  int virtualSpace = this->nBasis_ - coreSpace - activeSpace;
+
+  // DelF = X * (F(A) - F(B)) * X
+
+  this->aointegrals_->Ortho1Trans(*this->fockMz_,DelF);
+  (*this->fockMz_) *= 0.5;
+
+  // DelF = C(NO)^\dagger * DelF * C(NO) (Natural Orbitals)
+  (*this->NBSqScratch_) = P.transpose() * DelF;
+  DelF = (*this->NBSqScratch_) * P;
+
+  Lambda.setZero();
+  for(auto i = activeSpace + coreSpace; i < this->nBasis_; i++)
+  for(auto j = 0                      ; j < coreSpace    ; j++){
+    Lambda(i,j) = -DelF(i,j);
+    Lambda(j,i) = -DelF(j,i);
+  }
+
+  (*this->NBSqScratch_) = P * Lambda;
+  Lambda = (*this->NBSqScratch_) * P.transpose();
+
+  this->aointegrals_->Ortho2Trans(Lambda,Lambda);
+
+  (*this->fockMz_) += 2*Lambda;
+};
+
