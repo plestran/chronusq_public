@@ -238,46 +238,46 @@ SCFConvergence SingleSlater<T>::evalConver3(){
   this->computeEnergy();
   double EDelta = this->totalEnergy - EOld;
 
-  double PARMS(0),PBRMS(0);
+  double PSRMS(0),PMRMS(0);
   // Write D(M) - D(M-1) to disc
   this->formDeltaD();
 
   // Scalar density RMS difference
   DeltaDScalar_->read(this->NBSqScratch_->data(),H5PredType<T>());
-  PARMS = this->NBSqScratch_->norm();
+  PSRMS = this->NBSqScratch_->norm();
 
   // Magnetization density RMS
      
   // || Pz(M) - Pz(M-1) ||^2
   if(this->nTCS_ == 2 or !this->isClosedShell){
     DeltaDMz_->read(this->NBSqScratch_->data(),H5PredType<T>());
-    PBRMS = this->NBSqScratch_->squaredNorm();
+    PMRMS = this->NBSqScratch_->squaredNorm();
   }
 
   // || Py(M) - Py(M-1) ||^2 + || Px(M) - Px(M-1) ||^2
   if(this->nTCS_ == 2) {
     DeltaDMy_->read(this->NBSqScratch_->data(),H5PredType<T>());
-    PBRMS += this->NBSqScratch_->squaredNorm();
+    PMRMS += this->NBSqScratch_->squaredNorm();
     DeltaDMx_->read(this->NBSqScratch_->data(),H5PredType<T>());
-    PBRMS += this->NBSqScratch_->squaredNorm();
+    PMRMS += this->NBSqScratch_->squaredNorm();
   }
 
   // Sqrt of norm squared
-  PBRMS = std::sqrt(PBRMS);
+  PMRMS = std::sqrt(PMRMS);
 
   
   // Check if Density and Energy are properly converged
   SCFConvergence CONVER;
   CONVER.EDelta = EDelta;
-  CONVER.PARMS  = PARMS;
+  CONVER.PSRMS  = PSRMS;
   if(this->nTCS_ == 1 && !this->isClosedShell)
-    CONVER.PBRMS = PBRMS;
+    CONVER.PMRMS = PMRMS;
   
   EDelta = std::abs(EDelta);
   this->isConverged = EDelta < this->eneTol_;
-  this->isConverged = this->isConverged && PARMS < this->denTol_;
+  this->isConverged = this->isConverged && PSRMS < this->denTol_;
   if(this->nTCS_ == 1 && !this->isClosedShell)
-    this->isConverged = this->isConverged && PBRMS < this->denTol_;
+    this->isConverged = this->isConverged && PMRMS < this->denTol_;
 
 //this->isConverged = this->isConverged || EDelta < this->eneTol_*1e-3;
   

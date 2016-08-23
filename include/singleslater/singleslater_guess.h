@@ -30,55 +30,69 @@ void SingleSlater<T>::formGuess(){
   else if(this->guess_ == READ) this->READGuess();
   else if(this->guess_ == RANDOM) this->RandomGuess();
   else CErr("Guess NYI",this->fileio_->out);
-}
 
-template<typename T>
-void SingleSlater<T>::COREGuess(){
-  this->aointegrals_->computeAOOneE(); 
-  if(this->nTCS_ == 1 && this->isClosedShell){
-    this->fockA_->real() = (*this->aointegrals_->coreH_);
-  } else {
-    this->fockScalar_->real() = 2*(*this->aointegrals_->coreH_);
-    this->fockMz_->setZero();
-
-    std::vector<std::reference_wrapper<TMap>> toGather;
-    toGather.emplace_back(*this->fockScalar_);
-    toGather.emplace_back(*this->fockMz_);
-
-    if(this->nTCS_ ==  2) {
-      this->fockMy_->setZero();
-      this->fockMx_->setZero();
-      toGather.emplace_back(*this->fockMy_);
-      toGather.emplace_back(*this->fockMx_);
-
-      Quantum<T>::spinGather(*this->fockA_,toGather);
-    } else 
-      Quantum<T>::spinGather(*this->fockA_,*this->fockB_,toGather);
-  }
-  this->haveMO = true;
-  this->haveDensity = true;
-
-  //this->orthoFock();
   this->orthoFock3();
-  if(this->printLevel_ > 3){
-    prettyPrint(this->fileio_->out,*this->fockA_,"Initial FA");
-    prettyPrint(this->fileio_->out,*this->fockOrthoA_,"Initial FOrthoA");
+  if(this->printLevel_ > 3) {
+    this->fileio_->out << "Initial Fock Matrix" << endl;
+    this->printFock();
   }
+
   this->diagFock2();
   this->mixOrbitalsSCF();
   this->formDensity();
   this->cpyAOtoOrthoDen();
   this->unOrthoDen3();
+
+  if(this->printLevel_ > 3) {
+    this->fileio_->out << "Initial Density Matrix" << endl;
+    this->printDensity();
+  }
+
+  this->backTransformMOs();
+}
+
+template<typename T>
+void SingleSlater<T>::COREGuess(){
+  this->aointegrals_->computeAOOneE(); 
+  this->fockScalar_->real() = 2*(*this->aointegrals_->coreH_);
+  if(this->nTCS_ == 2 or !this->isClosedShell) {
+    this->fockMz_->setZero();
+
+/*
+    std::vector<std::reference_wrapper<TMap>> toGather;
+    toGather.emplace_back(*this->fockScalar_);
+    toGather.emplace_back(*this->fockMz_);
+*/
+
+    if(this->nTCS_ ==  2) {
+      this->fockMy_->setZero();
+      this->fockMx_->setZero();
+/*
+      toGather.emplace_back(*this->fockMy_);
+      toGather.emplace_back(*this->fockMx_);
+
+      Quantum<T>::spinGather(*this->fockA_,toGather);
+*/
+    } 
+/*
+    else 
+      Quantum<T>::spinGather(*this->fockA_,*this->fockB_,toGather);
+*/
+  }
+
+/*
+  if(this->printLevel_ > 3){
+    prettyPrint(this->fileio_->out,*this->fockA_,"Initial FA");
+    prettyPrint(this->fileio_->out,*this->fockOrthoA_,"Initial FOrthoA");
+  }
+*/
+/*
 //if(this->printLevel_ > 3){
     prettyPrint(this->fileio_->out,*this->onePDMA_,"Initial PA");
     prettyPrint(this->fileio_->out,*this->onePDMOrthoA_,"Initial POrthoA");
 //}
+*/
 //this->computeEnergy();
-  this->backTransformMOs();
-  if(this->printLevel_ > 3) {
-    prettyPrint(this->fileio_->out,*this->moA_,"Initial MOA");
-  }
-
 };
 
 
@@ -90,9 +104,6 @@ void SingleSlater<T>::SADGuess() {
     this->moB_->setZero();
   
   // Set flags to use in the rest of code
-  this->haveMO = true;
-  if(this->molecule_->nAtoms() > 1) this->haveDensity = true;
-
   if(this->molecule_->nAtoms() <= 1) return;
 
   // Determining unique atoms
@@ -184,7 +195,6 @@ void SingleSlater<T>::SADGuess() {
       hartreeFockAtom.moA()->setZero();
       if(!hartreeFockAtom.isClosedShell) hartreeFockAtom.moB()->setZero();
     }
-    hartreeFockAtom.haveMO = true;
  
     // Prime and perform the atomic SCF
     hartreeFockAtom.formFock();
@@ -197,25 +207,20 @@ void SingleSlater<T>::SADGuess() {
   } // Loop iUn
 
   this->scaleDen();
-//this->scatterDensity();
   this->formFock();
-  this->orthoFock3();
-  this->diagFock2();
-  this->mixOrbitalsSCF();
-  this->formDensity();
-  this->cpyAOtoOrthoDen();
-  this->unOrthoDen3();
-  this->backTransformMOs();
 };
 
 template <typename T>
 void SingleSlater<T>::RandomGuess() {
   (*this->onePDMScalar_) = TMatrix::Random(this->nBasis_,this->nBasis);
-  (*this->onePDMScalar_) = this->onePDMScalar_->selfadjointView<Lower>();
+  (*this->onePDMScalar_) = 
+    this->onePDMScalar_->template selfadjointView<Lower>();
   if(this->nTCS_ == 2 and !this->isClosedShell){
     (*this->onePDMMz_) = TMatrix::Random(this->nBasis_,this->nBasis);
-    (*this->onePDMMz_) = this->onePDMMz_->selfadjointView<Lower>();
+    (*this->onePDMMz_) = this->onePDMMz_->template selfadjointView<Lower>();
   }
+  this->scaleDen();
+  this->formFock();
 }
 
 template<typename T>
@@ -255,10 +260,10 @@ void SingleSlater<T>::placeAtmDen(std::vector<int> atomIndex,
     }
 */
     this->onePDMScalar_->block(iBfSt,iBfSt,iSize,iSize) =
-      hfA->onePDMScalar()->cast<dcomplex>();
+      hfA.onePDMScalar()->template cast<T>();
     if(this->nTCS_ == 2 or !this->isClosedShell)
       this->onePDMMz_->block(iBfSt,iBfSt,iSize,iSize) =
-        hfA->onePDMMz()->cast<dcomplex>();
+        hfA.onePDMMz()->template cast<T>();
   } // loop iAtm
 }
 
