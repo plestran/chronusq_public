@@ -1,5 +1,6 @@
 template<typename T>
 void SingleSlater<T>::formADMPGrad(int IDMSIter){
+/*
   this->NBSqScratch2_->noalias() =
     0.5 * (*this->fockOrthoA_) * (*this->onePDMOrthoA_);
  
@@ -18,10 +19,12 @@ void SingleSlater<T>::formADMPGrad(int IDMSIter){
 
   this->writeDIIS(this->ADMPGradScalar_,IDMSIter % this->nDIISExtrap_,
     this->NBSqScratch_->data());  
+*/
 };
 
 template<typename T>
 void SingleSlater<T>::formDMSErr(int IDMSIter){
+/*
   this->formADMPGrad(IDMSIter);
 
   this->readDIIS(this->ADMPGradScalar_,IDMSIter % this->nDIISExtrap_,
@@ -42,6 +45,7 @@ void SingleSlater<T>::formDMSErr(int IDMSIter){
   this->writeDIIS(this->DMSErrScalar_,IDMSIter % this->nDIISExtrap_,
     this->NBSqScratch_->data());  
 
+*/
 };
 
 template<typename T>

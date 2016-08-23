@@ -103,7 +103,7 @@ void SingleSlater<T>::SCF3(){
     // DIIS Extrapolation of the Fock
     if(this->doDIIS and IDIISIter > 0) 
       this->CDIIS4(std::min(IDIISIter+1,std::size_t(this->nDIISExtrap_)));
-    prettyPrint(cout,*this->fockA_,"Fock After DIIS at " + std::to_string(iter));
+//  prettyPrint(cout,*this->fockA_,"Fock After DIIS at " + std::to_string(iter));
 
     if(this->doDMS){
       this->formDMSErr(IDIISIter);
