@@ -313,7 +313,7 @@ struct CQJob {
 
     memManager.setTotalMem(256e6);
     fileio.iniH5Files();
-    fileio.iniStdGroups();
+//  fileio.iniStdGroups();
 
     basis.findBasisFile(basisSet);
     basis.communicate(fileio);

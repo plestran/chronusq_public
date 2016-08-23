@@ -263,9 +263,9 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def(init<std::string,std::string,std::string>())
     .def("write"      , &FileIO::write         )
     .def("iniH5Files" , &FileIO::iniH5Files    )
-    .def("iniStdGroups", &FileIO::iniStdGroups )
-    .def("iniStdSCFFilesDouble", &FileIO::iniStdSCFFilesDouble)
-    .def("iniStdSCFFilesComplex", &FileIO::iniStdSCFFilesComplex)
+//  .def("iniStdGroups", &FileIO::iniStdGroups )
+//  .def("iniStdSCFFilesDouble", &FileIO::iniStdSCFFilesDouble)
+//  .def("iniStdSCFFilesComplex", &FileIO::iniStdSCFFilesComplex)
     .def_readwrite("doRestart", &FileIO::doRestart   )
   ;
 

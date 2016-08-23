@@ -432,6 +432,7 @@ void finalizeCQ(){
 #endif
 }
 
+/*
 template<> 
 void writeJobMeta(SingleSlater<double> &ss, SDResponse<double> &sdr, 
   RealTime<double> &rt, Molecule &mol, AOIntegrals &aoints, FileIO &fileio){
@@ -458,7 +459,9 @@ void writeJobMeta(SingleSlater<double> &ss, SDResponse<double> &sdr,
 
   fileio.jobMetaFile->write(&metaData,(*fileio.jobMetaType));
 }
+*/
 
+/*
 template<> 
 void writeJobMeta(SingleSlater<dcomplex> &ss, SDResponse<dcomplex> &sdr, 
   RealTime<dcomplex> &rt, Molecule &mol, AOIntegrals &aoints, FileIO &fileio){
@@ -484,5 +487,6 @@ void writeJobMeta(SingleSlater<dcomplex> &ss, SDResponse<dcomplex> &sdr,
 
   fileio.jobMetaFile->write(&metaData,(*fileio.jobMetaType));
 }
+*/
 
 } // namespace ChronusQ

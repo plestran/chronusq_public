@@ -12,7 +12,7 @@ tools_api.cpp
 basisset_api.cpp
 cerr_api.cpp
 #sdresponse_api.cpp
-realtime_api.cpp
+#realtime_api.cpp
 #numdiff_api.cpp
 )
 
@@ -22,11 +22,11 @@ target_link_libraries(pythonapi LINK_PUBLIC
 basisset 
 classtools
 controls
-mointegrals
+#mointegrals
 molecule
 tools
 #sdresponse
-realtime
+#realtime
 #mollerplesset
 singleslater
 aointegrals
