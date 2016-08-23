@@ -49,6 +49,17 @@ void SingleSlater<T>::alloc(){
       onePDMOrtho_.emplace_back(this->onePDMOrthoMx_.get());
     }
   }
+  
+  if(this->isDFT){
+    vXC_.emplace_back(this->vXCScalar_.get());
+    if(this->nTCS_ == 2 or !this->isClosedShell){
+      vXC_.emplace_back(this->vXCMz_.get());
+      if(this->nTCS_ == 2) {
+        vXC_.emplace_back(this->vXCMy_.get());
+        vXC_.emplace_back(this->vXCMx_.get());
+      }
+    }
+  }
  
   std::vector<hsize_t> dims;
   dims.push_back(this->nBasis_);

@@ -198,6 +198,7 @@ class SingleSlater : public Quantum<T> {
   std::unique_ptr<TMap>  vXCMz_;
   std::unique_ptr<TMap>  vXCMy_;
   std::unique_ptr<TMap>  vXCMx_;
+  std::vector<TMap*>     vXC_;
 
 
 
