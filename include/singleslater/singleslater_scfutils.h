@@ -101,15 +101,8 @@ void SingleSlater<T>::cleanupSCFMem3(){
 template <typename T>
 void SingleSlater<T>::copyDen(){
 
-  // FIXME: RHF should just be scalar, need to remove onePDMA
-  T* ScalarPtr;
-  if(this->isClosedShell && this->nTCS_ == 1) 
-    ScalarPtr = this->onePDMA_->data();
-  else
-    ScalarPtr = this->onePDMScalar_->data();
-
   // Scalar
-  DScalarOld_->write(ScalarPtr,H5PredType<T>());
+  DScalarOld_->write(this->onePDMScalar_->data(),H5PredType<T>());
 
   // Mz
   if(this->nTCS_ == 2 || !this->isClosedShell){
@@ -129,25 +122,23 @@ void SingleSlater<T>::copyDen(){
 template<typename T>
 void SingleSlater<T>::orthoFock3(){
 
-  if(this->nTCS_ == 1 && this->isClosedShell){
-    // Scalar
-    this->aointegrals_->Ortho1Trans(*this->fockA_,*this->fockOrthoA_);
-  } else {
-    // Scalar
-    this->aointegrals_->Ortho1Trans(*this->fockScalar_,*this->fockOrthoScalar_);
-
+  // Scalar
+  this->aointegrals_->Ortho1Trans(*this->fockScalar_,*this->fockOrthoScalar_);
+  
+  if(this->nTCS_ == 2 or !this->isClosedShell) {
     // Mz
     this->aointegrals_->Ortho1Trans(*this->fockMz_,*this->fockOrthoMz_);
 
-     // Mx My
-    if(this->nTCS_ == 2){
-      this->aointegrals_->Ortho1Trans(*this->fockMy_,*this->fockOrthoMx_);
-      this->aointegrals_->Ortho1Trans(*this->fockMy_,*this->fockOrthoMx_);
-    }
+  }
+
+  // Mx My
+  if(this->nTCS_ == 2){
+    this->aointegrals_->Ortho1Trans(*this->fockMy_,*this->fockOrthoMx_);
+    this->aointegrals_->Ortho1Trans(*this->fockMy_,*this->fockOrthoMx_);
   }
 
   // Populate the gathered Fock matricies 
-  this->gatherOrthoFock();
+//this->gatherOrthoFock();
 
 }
 
@@ -155,6 +146,7 @@ void SingleSlater<T>::orthoFock3(){
  *  \brief Transform the quaternion orthonormal Fock matricies to
  *  their gathered form
  */
+/*
 template<typename T>
 void SingleSlater<T>::gatherOrthoFock(){
   // FIXME: This logic needs to be fixed for RHF when RHF is just scalar 
@@ -172,26 +164,26 @@ void SingleSlater<T>::gatherOrthoFock(){
   }
 
 };
+*/
 
 /**
  *  \brief Transform the orthonormal quaternion density to the AO basis
  */
 template<typename T>
 void SingleSlater<T>::unOrthoDen3(){
-  if(this->nTCS_ == 1 && this->isClosedShell){
-    this->aointegrals_->Ortho1TransT(
-      *this->onePDMOrthoA_,*this->onePDMA_);
-  } else {
-    this->aointegrals_->Ortho1TransT(
-      *this->onePDMOrthoScalar_,*this->onePDMScalar_);
+  this->aointegrals_->Ortho1TransT(
+    *this->onePDMOrthoScalar_,*this->onePDMScalar_);
+
+  if(this->nTCS_ == 2 or !this->isClosedShell){
     this->aointegrals_->Ortho1TransT(
       *this->onePDMOrthoMz_,*this->onePDMMz_);
-    if(this->nTCS_ == 2){
-      this->aointegrals_->Ortho1TransT(
-        *this->onePDMOrthoMy_,*this->onePDMMx_);
-      this->aointegrals_->Ortho1TransT(
-        *this->onePDMOrthoMy_,*this->onePDMMx_);
-    }
+  }
+
+  if(this->nTCS_ == 2){
+    this->aointegrals_->Ortho1TransT(
+      *this->onePDMOrthoMy_,*this->onePDMMx_);
+    this->aointegrals_->Ortho1TransT(
+      *this->onePDMOrthoMy_,*this->onePDMMx_);
   }
 }
 
@@ -210,13 +202,14 @@ template<typename T>
 void SingleSlater<T>::cpyAOtoOrthoDen(){
   if(this->nTCS_ == 1 && this->isClosedShell) {
     // Just copy for RHF
-    (*this->onePDMOrthoA_) = (*this->onePDMA_);
+    (*this->onePDMOrthoScalar_) = (*this->onePDMScalar_);
   } else if(this->nTCS_ == 2 || !this->isClosedShell){
     // Scatter 
     std::vector<std::reference_wrapper<TMap>> scattered;
     scattered.emplace_back(*this->onePDMOrthoScalar_);
     scattered.emplace_back(*this->onePDMOrthoMz_);
 
+/*
     if(this->nTCS_ == 1) {
       Quantum<T>::spinScatter(*this->onePDMA_,*this->onePDMB_,scattered);
     } else {
@@ -224,6 +217,7 @@ void SingleSlater<T>::cpyAOtoOrthoDen(){
       scattered.emplace_back(*this->onePDMOrthoMx_);
       Quantum<T>::spinScatter(*this->onePDMA_,scattered);
     }
+*/
   }
 };
 
@@ -356,12 +350,7 @@ void SingleSlater<T>::mixOrbitals2C(){
 template <typename T>
 void SingleSlater<T>::formDeltaD(){
   DScalarOld_->read(this->NBSqScratch_->data(),H5PredType<T>());
-  if(this->nTCS_ == 1 && this->isClosedShell){
-    (*this->NBSqScratch2_) = (*this->onePDMA_) - (*this->NBSqScratch_);
-  } else {
-    (*this->NBSqScratch2_) = (*this->onePDMScalar_) - (*this->NBSqScratch_);
-  }
-
+  (*this->NBSqScratch2_) = (*this->onePDMScalar_) - (*this->NBSqScratch_);
   DeltaDScalar_->write(this->NBSqScratch2_->data(),H5PredType<T>());
 
   if(this->nTCS_ == 2 or !this->isClosedShell){
@@ -392,15 +381,13 @@ void SingleSlater<T>::formDeltaD(){
  */
 template<typename T>
 void SingleSlater<T>::copyDeltaDtoD(){
-  if(this->nTCS_ == 1 and this->isClosedShell){
-    DeltaDScalar_->read(this->onePDMA_->data(),H5PredType<T>());
-  } else {
-    DeltaDScalar_->read(this->onePDMScalar_->data(),H5PredType<T>());
+  DeltaDScalar_->read(this->onePDMScalar_->data(),H5PredType<T>());
+  if(this->nTCS_ == 2 or !this->isClosedShell){
     DeltaDMz_->read(this->onePDMMz_->data(),H5PredType<T>());
-    if(this->nTCS_ == 2) {
-      DeltaDMy_->read(this->onePDMMy_->data(),H5PredType<T>());
-      DeltaDMx_->read(this->onePDMMx_->data(),H5PredType<T>());
-    }
+  }
+  if(this->nTCS_ == 2) {
+    DeltaDMy_->read(this->onePDMMy_->data(),H5PredType<T>());
+    DeltaDMx_->read(this->onePDMMx_->data(),H5PredType<T>());
   }
 }
 
@@ -413,15 +400,13 @@ void SingleSlater<T>::copyDeltaDtoD(){
  */
 template<typename T>
 void SingleSlater<T>::copyDOldtoD(){
-  if(this->nTCS_ == 1 and this->isClosedShell){
-    DScalarOld_->read(this->onePDMA_->data(),H5PredType<T>());
-  } else {
-    DScalarOld_->read(this->onePDMScalar_->data(),H5PredType<T>());
+  DScalarOld_->read(this->onePDMScalar_->data(),H5PredType<T>());
+  if(this->nTCS_ == 2 or !this->isClosedShell){
     DMzOld_->read(this->onePDMMz_->data(),H5PredType<T>());
-    if(this->nTCS_ == 2) {
-      DMyOld_->read(this->onePDMMy_->data(),H5PredType<T>());
-      DMxOld_->read(this->onePDMMx_->data(),H5PredType<T>());
-    }
+  }
+  if(this->nTCS_ == 2) {
+    DMyOld_->read(this->onePDMMy_->data(),H5PredType<T>());
+    DMxOld_->read(this->onePDMMx_->data(),H5PredType<T>());
   }
 }
 
@@ -434,13 +419,8 @@ void SingleSlater<T>::copyDOldtoD(){
  */
 template <typename T>
 void SingleSlater<T>::copyPT(){
-  T* ScalarPtr;
-  if(this->isClosedShell && this->nTCS_ == 1) 
-    ScalarPtr = this->PTA_->data();
-  else
-    ScalarPtr = this->PTScalar_->data();
 
-  PTScalarOld_->write(ScalarPtr,H5PredType<T>());
+  PTScalarOld_->write(this->PTScalar_->data(),H5PredType<T>());
   if(this->nTCS_ == 2 || !this->isClosedShell){
     PTMzOld_->write(this->PTMz_->data(),H5PredType<T>());
   }
@@ -460,10 +440,9 @@ void SingleSlater<T>::copyPT(){
 template<typename T>
 void SingleSlater<T>::incPT(){
   PTScalarOld_->read(this->NBSqScratch_->data(),H5PredType<T>());
-  if(this->nTCS_ == 1 and this->isClosedShell)
-    this->PTA_->noalias() += (*this->NBSqScratch_);
-  else {
-    this->PTScalar_->noalias() += (*this->NBSqScratch_);
+  this->PTScalar_->noalias() += (*this->NBSqScratch_);
+
+  if(this->nTCS_ == 2 or !this->isClosedShell){
     PTMzOld_->read(this->NBSqScratch_->data(),H5PredType<T>());
     this->PTMz_->noalias() += (*this->NBSqScratch_);
   }

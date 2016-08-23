@@ -130,8 +130,8 @@ void SingleSlater<T>::SCF3(){
     SCFConvergence CONVER = this->evalConver3();
 
     if(this->printLevel_ > 0)
-      this->printSCFIter(iter,CONVER.EDelta,CONVER.PARMS,
-        CONVER.PBRMS);
+      this->printSCFIter(iter,CONVER.EDelta,CONVER.PSRMS,
+        CONVER.PMRMS);
 
     this->nSCFIter++;
 
