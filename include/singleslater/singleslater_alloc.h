@@ -33,16 +33,12 @@ void SingleSlater<T>::alloc(){
   this->allocOp();
   this->allocScr();
 
-  if(this->nTCS_ == 1 and this->isClosedShell){
-    fock_.emplace_back(this->fockA_.get());
-    PT_.emplace_back(this->PTA_.get());
-    onePDMOrtho_.emplace_back(this->onePDMOrthoA_.get());
-  } else {
-    fock_.emplace_back(this->fockScalar_.get());
+  fock_.emplace_back(this->fockScalar_.get());
+  PT_.emplace_back(this->PTScalar_.get());
+  onePDMOrtho_.emplace_back(this->onePDMOrthoScalar_.get());
+  if(this->nTCS_ == 2 or !this->isClosedShell){
     fock_.emplace_back(this->fockMz_.get());
-    PT_.emplace_back(this->PTScalar_.get());
     PT_.emplace_back(this->PTMz_.get());
-    onePDMOrtho_.emplace_back(this->onePDMOrthoScalar_.get());
     onePDMOrtho_.emplace_back(this->onePDMOrthoMz_.get());
     if(this->nTCS_ == 2) {
       fock_.emplace_back(this->fockMy_.get());
@@ -108,6 +104,14 @@ void SingleSlater<T>::allocScr(){
   this->NBSqScratch2_->setZero();
   this->NBSqScratch3_->setZero();
   this->NBSqScratch4_->setZero();
+
+  if(this->nTCS_ == 2){
+    this->NBTSqScratch_ = 
+      std::unique_ptr<TMap>(new TMap(
+            this->memManager_->template malloc<T>(NBSq*this->nTCS_*this->nTCS_),
+            this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_));
+    this->NBTSqScratch_->setZero();
+  }
 };
 
 template<typename T>
@@ -238,26 +242,26 @@ void SingleSlater<T>::allocOp(){
 
   if(this->isDFT) {
     // Scalar
-    this->VXCScalar_ = std::unique_ptr<TMap>(
+    this->vXCScalar_ = std::unique_ptr<TMap>(
       new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
-    this->VXCScalar_->setZero();
+    this->vXCScalar_->setZero();
 
     // Mz
     if(this->nTCS_ == 2 or !this->isClosedShell) {
-      this->VXCMz_ = std::unique_ptr<TMap>(
+      this->vXCMz_ = std::unique_ptr<TMap>(
         new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
-      this->VXCMz_->setZero();
+      this->vXCMz_->setZero();
     }
 
     // My / Mx
     if(this->nTCS_ == 2) {
-      this->VXCMx_ = std::unique_ptr<TMap>(
+      this->vXCMx_ = std::unique_ptr<TMap>(
         new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
-      this->VXCMx_->setZero();
+      this->vXCMx_->setZero();
 
-      this->VXCMy_ = std::unique_ptr<TMap>(
+      this->vXCMy_ = std::unique_ptr<TMap>(
         new TMap(this->memManager_->template malloc<T>(NBSq),NB,NB));
-      this->VXCMy_->setZero();
+      this->vXCMy_->setZero();
     }
   }
 /*

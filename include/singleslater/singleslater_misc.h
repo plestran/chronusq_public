@@ -28,10 +28,8 @@
  ***********************/
 template<typename T>
 void SingleSlater<T>::formDensity(){
+/*
   if(getRank() == 0) {
-    if(!this->haveMO)
-      CErr("No MO coefficients available to form one-particle density matrix!",
-           this->fileio_->out);
  
     if(this->nTCS_ == 2){
       auto nOcc = this->nOccA_ + this->nOccB_;
@@ -54,17 +52,41 @@ void SingleSlater<T>::formDensity(){
   }
   this->haveDensity = true;
   this->mpiBCastDensity();
+*/
+  if(this->nTCS_ == 1) {
+    // Store Pa in Ps
+    this->onePDMScalar_->noalias() = 
+      this->moA_->block(0,0,this->nBasis_,this->nOccA_)*
+      this->moA_->block(0,0,this->nBasis_,this->nOccA_).adjoint();
+    if(!this->isClosedShell) {
+      // Store Pb in Scratch
+      this->NBSqScratch_->noalias() = 
+        this->moB_->block(0,0,this->nBasis_,this->nOccB_)*
+        this->moB_->block(0,0,this->nBasis_,this->nOccB_).adjoint();
+      // Overwrite Pz with Pa - Pb
+      (*this->onePDMMz_) =     (*this->onePDMScalar_) - (*this->NBSqScratch_);
+      // Overwrite Ps with Pa + Pb
+      (*this->onePDMScalar_) = (*this->onePDMScalar_) + (*this->NBSqScratch_);
+    } else {
+      // Factor of 2 for scalar
+      (*this->onePDMScalar_) *= 2;
+    }
+  } else {
+    this->NBTSqScratch_->noalias() = 
+      this->moA_->block(0,0,this->nBasis_,this->nOccA_+this->nOccB_)*
+      this->moA_->block(0,0,this->nBasis_,this->nOccA_+this->nOccB_).adjoint();
+    std::vector<std::reference_wrapper<TMap>> scatter;
+    for(auto iD = 0; iD < this->onePDM_.size(); iD++)
+      scatter.emplace_back(*this->onePDM_[iD]);
+    this->spinScatter((*this->NBTSqScratch_),scatter); 
+  }
 }
 
 template<typename T>
 void SingleSlater<T>::formFP(){
   // FP(S) = F(S)P(S)
-  if(this->nTCS_ == 1 and this->isClosedShell) {
-    (*this->NBSqScratch_) = (*this->fockOrthoA_) * (*this->onePDMOrthoA_);
-  } else {
-    (*this->NBSqScratch_) = 
-      (*this->fockOrthoScalar_) * (*this->onePDMOrthoScalar_);
-  } 
+  (*this->NBSqScratch_) = 
+    (*this->fockOrthoScalar_) * (*this->onePDMOrthoScalar_);
 
   // FP(S) += F(z)P(z)
   if(this->nTCS_ == 2 or !this->isClosedShell)

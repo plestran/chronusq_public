@@ -141,6 +141,7 @@ class SingleSlater : public Quantum<T> {
   std::unique_ptr<TMap>  NBSqScratch2_;
   std::unique_ptr<TMap>  NBSqScratch3_;
   std::unique_ptr<TMap>  NBSqScratch4_;
+  std::unique_ptr<TMap>  NBTSqScratch_;
 
   // Internal Storage
 //std::unique_ptr<TMap>  coulombA_;   ///< deprecated 
@@ -494,7 +495,7 @@ public:
   ~SingleSlater() { ; };
 
   SingleSlater(SingleSlater *other) : 
-    Quantum<T>(dynamic_cast<Quantum<T>&>(*other)){
+    Quantum<T>(dynamic_cast<Quantum<T>&>(*other)),
 
     nBasis_ ( other->nBasis() ),
     nTT_    ( other->nTT() ),
@@ -516,7 +517,7 @@ public:
     basisset_    ( other->basisset() ),    
     molecule_    ( other->molecule() ),
     fileio_      ( other->fileio() ),
-    aointegrals_ ( other->aointegrals() ),
+    aointegrals_ ( other->aointegrals() ) {
 
     this->alloc();
 
