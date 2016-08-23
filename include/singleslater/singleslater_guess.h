@@ -27,7 +27,7 @@ template<typename T>
 void SingleSlater<T>::formGuess(){
   if(this->guess_ == SAD) this->SADGuess();
   else if(this->guess_ == CORE) this->COREGuess();
-  else if(this->guess_ == READ) this->READGuess();
+//  else if(this->guess_ == READ) this->READGuess();
   else if(this->guess_ == RANDOM) this->RandomGuess();
   else CErr("Guess NYI",this->fileio_->out);
 

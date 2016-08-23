@@ -81,12 +81,12 @@ def runCQ(ifname,ofname):
   aoints     = chronusQ.AOIntegrals()
   
   hf_double     = chronusQ.SingleSlater_double()
-  rt_double     = chronusQ.RealTime_double()
+#  rt_double     = chronusQ.RealTime_double()
 #  sdr_double    = chronusQ.SDResponse_double()
 #  moints_double = chronusQ.MOIntegrals_double()
   
   hf_complex     = chronusQ.SingleSlater_complex()
-  rt_complex     = chronusQ.RealTime_complex()
+#  rt_complex     = chronusQ.RealTime_complex()
 #  sdr_complex    = chronusQ.SDResponse_complex()
 #  moints_complex = chronusQ.MOIntegrals_complex()
   
@@ -100,11 +100,11 @@ def runCQ(ifname,ofname):
 #    "CQControls"          :controls,
     "CQAOIntegrals"       :aoints,
     "CQSingleSlaterDouble":hf_double,
-    "CQRealTimeDouble"    :rt_double,
+#    "CQRealTimeDouble"    :rt_double,
 #    "CQSDResponseDouble"  :sdr_double,
 #    "CQMOIntegralsDouble" :moints_double,
     "CQSingleSlaterComplex":hf_complex,
-    "CQRealTimeComplex"    :rt_complex,
+#    "CQRealTimeComplex"    :rt_complex,
 #    "CQSDResponseComplex"  :sdr_complex,
 #    "CQMOIntegralsComplex" :moints_complex,
     "CQFileIO"            :out
@@ -135,7 +135,7 @@ def runCQ(ifname,ofname):
   
   if chronusQ.getRank() == 0:
     out.iniH5Files()
-    out.iniStdGroups()
+#    out.iniStdGroups()
   
   chronusQ.mpiBarrier()
   jobMeta = MetaData()

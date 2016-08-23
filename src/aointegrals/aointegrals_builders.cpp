@@ -423,7 +423,7 @@ void AOIntegrals::computeAOOneE(){
   this->VED = VEnd - VStart;
   this->haveAOOneE = true;
   this->breakUpMultipole();
-  if(this->isPrimary) this->writeOneE();
+//if(this->isPrimary) this->writeOneE();
   /*
   if(this->isPrimary) {
     for(auto ix = 0, ioff = 0; ix < 3; ix++, ioff += this->nBasis_*this->nBasis_){

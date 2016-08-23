@@ -276,7 +276,7 @@ SCFConvergence SingleSlater<T>::evalConver3(){
 //this->isConverged = this->isConverged || EDelta < this->eneTol_*1e-3;
   
   // Copy the current SingleSlater moieties to disc (this is wrong for now)
-  if(this->isPrimary) this->writeSCFFiles();
+//if(this->isPrimary) this->writeSCFFiles();
 
   return CONVER;
 };

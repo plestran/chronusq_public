@@ -300,6 +300,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("DENFIT"   , AOIntegrals::DENFIT)
   ;
 
+/*
   class_<RealTime<double>,boost::noncopyable>("RealTime_double",init<>())
     .def("communicate"  , &RealTime<double>::communicate  )
     .def("initMeta"     , &RealTime<double>::initMeta     )
@@ -361,6 +362,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("doNotTarCSV"  , &RealTime<dcomplex>::doNotTarCSV  )
     .def("setIRstrt"       , &RealTime<dcomplex>::setIRstrt       )
   ;
+*/
 
 /*
   class_<RealTime<double>::Wrapper_PropInfo,boost::noncopyable>("RTD_PropInfo",init<>())
@@ -382,6 +384,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
   ;
 */
 
+/*
   enum_<RealTime<double>::ORTHO>("RealTime_ORTHO"   )
     .value("Lowdin"   , RealTime<double>::Lowdin    )
     .value("Cholesky" , RealTime<double>::Cholesky  )
@@ -439,6 +442,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("RXZ", RealTime<dcomplex>::RXZ)
     .value("RYZ", RealTime<dcomplex>::RYZ)
   ;
+*/
 
 /*
   class_<MOIntegrals<double>,boost::noncopyable>("MOIntegrals_double",init<>())

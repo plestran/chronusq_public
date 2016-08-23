@@ -37,7 +37,7 @@ from meta.enumMaps import guessMap
 from meta.enumMaps import kernelMap 
 from meta.enumMaps import gridMap 
 from meta.enumMaps import dftWeightScheme 
-from meta.enumMaps import envMap
+#from meta.enumMaps import envMap
 
 #
 #  Parse the QM section of the input file and populate
@@ -112,7 +112,8 @@ def parseQM(workers,secDict):
 
   if str(ssSettings['JOB']) in knownJobs:
     if ssSettings['JOB'] in ('RT'):
-      parseRT(workers,secDict['RT']) 
+      pass
+#      parseRT(workers,secDict['RT']) 
     elif ssSettings['JOB'] in ('RPA','CIS','STAB','PPRPA','PPATDA','PPCTDA'):
       if chronusQ.getSize() > 1:
         msg = "Response cannot run with >1 MPI Processes"
