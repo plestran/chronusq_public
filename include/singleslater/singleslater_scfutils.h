@@ -454,3 +454,18 @@ void SingleSlater<T>::incPT(){
     this->PTMy_->noalias() += (*this->NBSqScratch_);
   }
 }
+
+template<typename T>
+void SingleSlater<T>::populateMO4Diag(){
+  if(this->nTCS_ == 1 and this->isClosedShell)
+    (*this->moA_) = 0.5 * (*this->fockOrthoScalar_);
+  else if(this->nTCS_ == 1 and !this->isClosedShell) {
+    (*this->moA_) = 0.5 * ((*this->fockOrthoScalar_) + (*this->fockOrthoMz_));
+    (*this->moB_) = 0.5 * ((*this->fockOrthoScalar_) - (*this->fockOrthoMz_));
+  } else {
+    std::vector<std::reference_wrapper<TMap>> scattered;
+    for(auto iF = this->fock_.begin(); iF != this->fock_.end(); iF++)
+      scattered.emplace_back(*(*iF));
+    Quantum<T>::spinGather(*this->moA_,scattered);
+  }
+};

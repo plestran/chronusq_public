@@ -113,6 +113,10 @@ void SingleSlater<T>::SCF3(){
       // DIIS (DMS) Extrapolation of the Density
       this->DMSExtrap(std::min(IDIISIter+1,std::size_t(this->nDIISExtrap_)));
     } else {
+      // Copies over the ortho focks to the MO storage
+      this->populateMO4Diag();
+
+      // Diagonalizes the orthonormal fock matricies
       this->diagFock2();
 
       // This stupidly computes the orthonormal density and stores it in the

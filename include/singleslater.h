@@ -852,6 +852,8 @@ public:
   void gatherFock();
   void gatherOrthoDen();
 
+  void populateMO4Diag();
+
   void mixOrbitals2C();
   void mixOrbitalsComplex();
 

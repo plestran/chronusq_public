@@ -170,8 +170,7 @@ void SingleSlater<T>::SADGuess() {
     aointegralsAtom.communicate(uniqueAtom,basisSetAtom,*this->fileio_,
       *this->aointegrals_->memManager());
     aointegralsAtom.initMeta();
-    aointegralsAtom.integralAlgorithm = 
-      AOIntegrals::INTEGRAL_ALGORITHM::DIRECT;
+    aointegralsAtom.integralAlgorithm = AOIntegrals::INTEGRAL_ALGORITHM::DIRECT;
     aointegralsAtom.alloc();
 
     hartreeFockAtom.communicate(uniqueAtom,basisSetAtom,aointegralsAtom,

@@ -72,6 +72,7 @@ void SingleSlater<T>::computeEnergy(){
       0.5 * this->template computeProperty<double,DENSITY_TYPE::MX>(
           this->PTMx_->conjugate());
   }
+  this->energyTwoE *= 0.5;
 
       
     if(this->isDFT) this->energyTwoE += this->energyExc;
@@ -87,6 +88,9 @@ void SingleSlater<T>::computeEnergy(){
       }
     }
  
+    cout << "1E " << this->energyOneE << endl;
+    cout << "2E " << this->energyTwoE << endl;
+
     this->totalEnergy= this->energyOneE + this->energyTwoE + this->energyNuclei;
 #ifdef CQ_ENABLE_MPI
   MPI_Bcast(&this->totalEnergy,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
