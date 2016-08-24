@@ -31,15 +31,24 @@ void SingleSlater<T>::formGuess(){
   else if(this->guess_ == RANDOM) this->RandomGuess();
   else CErr("Guess NYI",this->fileio_->out);
 
-  this->orthoFock3();
   if(this->printLevel_ > 3) {
     this->fileio_->out << "Initial Fock Matrix" << endl;
     this->printFock();
   }
+  this->orthoFock3();
 
+  this->populateMO4Diag();
   this->diagFock2();
   this->mixOrbitalsSCF();
+  if(this->printLevel_ > 3) {
+    this->fileio_->out << "Initial Density Matrix Before" << endl;
+    this->printDensity();
+  }
   this->formDensity();
+  if(this->printLevel_ > 3) {
+    this->fileio_->out << "Initial Density Matrix Before" << endl;
+    this->printDensity();
+  }
   this->cpyAOtoOrthoDen();
   this->unOrthoDen3();
 
@@ -188,6 +197,7 @@ void SingleSlater<T>::SADGuess() {
     hartreeFockAtom.alloc();
 
     if(this->printLevel_ < 4) hartreeFockAtom.setPrintLevel(0);
+    else hartreeFockAtom.setPrintLevel(this->printLevel_);
  
     // Zero out the MO coeff for local SS object
     if(getRank() == 0){
@@ -196,6 +206,7 @@ void SingleSlater<T>::SADGuess() {
     }
  
     // Prime and perform the atomic SCF
+    hartreeFockAtom.formGuess();
     hartreeFockAtom.formFock();
     hartreeFockAtom.computeEnergy();
     hartreeFockAtom.SCF3();
@@ -205,8 +216,19 @@ void SingleSlater<T>::SADGuess() {
  
   } // Loop iUn
 
+  this->fileio_->out << "Before Scale" << endl;
+  this->printDensity();
+  this->printFock();
   this->scaleDen();
+  this->fileio_->out << "After Scale" << endl;
+  this->printDensity();
+  this->printFock();
+  this->fileio_->out << " Right before FF" << endl;
   this->formFock();
+  this->fileio_->out << "After FF" << endl;
+  this->printDensity();
+  this->printFock();
+  CErr();
 };
 
 template <typename T>

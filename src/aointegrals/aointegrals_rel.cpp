@@ -41,8 +41,8 @@ void AOIntegrals::formP2Transformation(){
 
 if(this->printLevel_ >= 2){
   RealMatrix TCpy(*this->kinetic_);
-  prettyPrint(this->fileio_->out,TCpy,"T (non-rel)");
-  prettyPrint(this->fileio_->out,*this->overlap_,"overlap (non-rel)");
+  prettyPrintSmart(this->fileio_->out,TCpy,"T (non-rel)");
+  prettyPrintSmart(this->fileio_->out,*this->overlap_,"overlap (non-rel)");
 }
 
   libint2::Engine engineS(
@@ -111,7 +111,7 @@ if(this->printLevel_ >= 2){
   RealMatrix SnonRel = (*this->basisSet_->mapPrim2Bf()) * SUncontracted
 	* (*this->basisSet_->mapPrim2Bf()).transpose();
   if(this->printLevel_ >= 3){
-  prettyPrint(this->fileio_->out,SnonRel,"S nonRel (take 1)");
+  prettyPrintSmart(this->fileio_->out,SnonRel,"S nonRel (take 1)");
     }
   for (auto row = 0; row < this->basisSet_->nBasis(); row++){
       (*this->basisSet_->mapPrim2Bf()).block(row,0,1,nUncontracted) /=
@@ -121,16 +121,16 @@ if(this->printLevel_ >= 2){
 if(this->printLevel_ >= 2){
   SnonRel = (*this->basisSet_->mapPrim2Bf()) * SUncontracted
     * (*this->basisSet_->mapPrim2Bf()).transpose();
-  prettyPrint(this->fileio_->out,SnonRel,"S nonRel");
+  prettyPrintSmart(this->fileio_->out,SnonRel,"S nonRel");
 }
 
 if(this->printLevel_ >= 2){
-  prettyPrint(this->fileio_->out,SUncontracted,"S uncontracted");
-  prettyPrint(this->fileio_->out,TUncontracted,"T uncontracted");
+  prettyPrintSmart(this->fileio_->out,SUncontracted,"S uncontracted");
+  prettyPrintSmart(this->fileio_->out,TUncontracted,"T uncontracted");
 
   RealMatrix TnonRel = (*this->basisSet_->mapPrim2Bf()) * TUncontracted
 	* (*this->basisSet_->mapPrim2Bf()).transpose();  
-  prettyPrint(this->fileio_->out,TnonRel,"T nonRel");
+  prettyPrintSmart(this->fileio_->out,TnonRel,"T nonRel");
 }
 
   RealMatrix SUn(nUncontracted,nUncontracted);
@@ -176,15 +176,15 @@ if(this->printLevel_ >= 2){
 // (diagonalizes S) and (diagonalizes T). See eq. 12 in Rieher's paper from 2013
 
 if(this->printLevel_ >= 3){
-  prettyPrint(this->fileio_->out,SUncontracted,"S transformation");
-  prettyPrint(this->fileio_->out,TUncontracted,"T transformation");
-  prettyPrint(this->fileio_->out,TUncontracted.transpose()*TUncontracted, "T^{dagger} T");
+  prettyPrintSmart(this->fileio_->out,SUncontracted,"S transformation");
+  prettyPrintSmart(this->fileio_->out,TUncontracted,"T transformation");
+  prettyPrintSmart(this->fileio_->out,TUncontracted.transpose()*TUncontracted, "T^{dagger} T");
 }
 
   RealMatrix UK = SUncontracted * TUncontracted;
 
 if(this->printLevel_ >= 3){ 
-  prettyPrint(this->fileio_->out,UK,"U (K) transformation");
+  prettyPrintSmart(this->fileio_->out,UK,"U (K) transformation");
 }
 
 // Now we transform V to V' 
@@ -321,11 +321,11 @@ if(this->printLevel_ >= 3){
   PVPZ = TMP * UK;
 
 if(this->printLevel_ >= 3){
-  prettyPrint(cout,P2_Potential,"V");
-  prettyPrint(cout,PVPS,"dot(P,VP)");
-  prettyPrint(cout,PVPX,"cross(P,VP) X");
-  prettyPrint(cout,PVPY,"cross(P,VP) Y");
-  prettyPrint(cout,PVPZ,"cross(P,VP) Z");
+  prettyPrintSmart(cout,P2_Potential,"V");
+  prettyPrintSmart(cout,PVPS,"dot(P,VP)");
+  prettyPrintSmart(cout,PVPX,"cross(P,VP) X");
+  prettyPrintSmart(cout,PVPY,"cross(P,VP) Y");
+  prettyPrintSmart(cout,PVPZ,"cross(P,VP) Z");
   cout << "|V| = " << P2_Potential.squaredNorm() << endl;
   cout << "|dot(P,VP)| = " << PVPS.squaredNorm() << endl;
   cout << "|cross(P,VP) X| = " << PVPX.squaredNorm() << endl;
@@ -336,7 +336,7 @@ if(this->printLevel_ >= 3){
   RealVecMap PMap(&ovlpEigValues[0],nUncontracted);
 
 if(this->printLevel_ >= 3){
-  prettyPrint(cout,PMap,"P^2");
+  prettyPrintSmart(cout,PMap,"P^2");
 }
 
   PMap = 2*PMap;
@@ -358,10 +358,10 @@ if(this->printLevel_ >= 3){
   cout << "|cross(P,VP) X| = " << PVPX.squaredNorm() << endl;
   cout << "|cross(P,VP) Y| = " << PVPY.squaredNorm() << endl;
   cout << "|cross(P,VP) Z| = " << PVPZ.squaredNorm() << endl;
-  prettyPrint(cout,PVPS,"scaled dot(P,VP)");
-  prettyPrint(cout,PVPX,"scaled cross(P,VP) X");
-  prettyPrint(cout,PVPY,"scaled cross(P,VP) Y");
-  prettyPrint(cout,PVPZ,"scaled cross(P,VP) Z");
+  prettyPrintSmart(cout,PVPS,"scaled dot(P,VP)");
+  prettyPrintSmart(cout,PVPX,"scaled cross(P,VP) X");
+  prettyPrintSmart(cout,PVPY,"scaled cross(P,VP) Y");
+  prettyPrintSmart(cout,PVPZ,"scaled cross(P,VP) Z");
 }
 
   ComplexMatrix W(2*nUncontracted,2*nUncontracted);
@@ -420,7 +420,7 @@ if(this->printLevel_ >= 3){
 // ------------------------------
 
 if(this->printLevel_ >= 2){
-  prettyPrintComplex(this->fileio_->out,CORE_HAMILTONIAN,"H");
+  prettyPrintSmart(this->fileio_->out,CORE_HAMILTONIAN,"H");
   (this->fileio_->out) << "|H|" << CORE_HAMILTONIAN.squaredNorm() << endl;
 }
 
@@ -431,8 +431,8 @@ if(this->printLevel_ >= 2){
 
 // Print out the energies (eigenvalues) and eigenvectors
 if(this->printLevel_ >= 2){
-  prettyPrint(this->fileio_->out,HEV,"HEV");
-  prettyPrintComplex(this->fileio_->out,HEVx,"HEVc");
+  prettyPrintSmart(this->fileio_->out,HEV,"HEV");
+  prettyPrintSmart(this->fileio_->out,HEVx,"HEVc");
 }
 
 // Grab C_L (+) and C_S (+) - the large and small components
@@ -455,7 +455,7 @@ if(this->printLevel_ >= 2){
 
 // Print out X and its squared norm
 if(this->printLevel_ >= 2){
-  prettyPrintComplex(this->fileio_->out,X,"X");
+  prettyPrintSmart(this->fileio_->out,X,"X");
   (this->fileio_->out) << X.squaredNorm() << endl;
 }
   
@@ -467,7 +467,7 @@ if(this->printLevel_ >= 2){
 
 // Print out Y and its squared norm
 if(this->printLevel_ >= 2){
-  prettyPrintComplex(this->fileio_->out,Y,"Y");
+  prettyPrintSmart(this->fileio_->out,Y,"Y");
   (this->fileio_->out) << Y.squaredNorm() << endl;
 }
 
@@ -491,7 +491,7 @@ if(this->printLevel_ >= 2){
   KinEn -= ComplexMatrix::Identity(2*nUncontracted,2*nUncontracted) * phys.SPEED_OF_LIGHT * phys.SPEED_OF_LIGHT;
 
 if(this->printLevel_ >= 2){
-  prettyPrint(this->fileio_->out,KinEn,"Relativistic Kinetic Energy");
+  prettyPrintSmart(this->fileio_->out,KinEn,"Relativistic Kinetic Energy");
 }
 
 
@@ -501,7 +501,7 @@ if(this->printLevel_ >= 2){
   P2_PotC.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).real() = P2_Potential;
 
 if(this->printLevel_ >= 2){
-  prettyPrintComplex(this->fileio_->out,P2_PotC,"V prime (p space)");
+  prettyPrintSmart(this->fileio_->out,P2_PotC,"V prime (p space)");
 }
 
 // Calculate the 2-component core Hamiltonian in the uncontracted basis
@@ -528,7 +528,7 @@ if(this->printLevel_ >= 2){
   HCore = Y * HCore;
 
 if(this->printLevel_ >= 3){
-  prettyPrintComplex(this->fileio_->out,HCore,"Transformed HCore (in p space) ");
+  prettyPrintSmart(this->fileio_->out,HCore,"Transformed HCore (in p space) ");
 }
 
   ComplexMatrix Veff(2*nUncontracted,2*nUncontracted);
@@ -549,10 +549,10 @@ if(this->printLevel_ >= 3){
 	- HCore.block(nUncontracted,0,nUncontracted,nUncontracted).real());
 
 if(this->printLevel_ >= 2){
-  prettyPrint(this->fileio_->out,Hs,"Hs (p space)");
-  prettyPrint(this->fileio_->out,Hz,"Hz (p space)");
-  prettyPrint(this->fileio_->out,Hx,"Hx (p space)");
-  prettyPrint(this->fileio_->out,Hy,"Hz (p space)");
+  prettyPrintSmart(this->fileio_->out,Hs,"Hs (p space)");
+  prettyPrintSmart(this->fileio_->out,Hz,"Hz (p space)");
+  prettyPrintSmart(this->fileio_->out,Hx,"Hx (p space)");
+  prettyPrintSmart(this->fileio_->out,Hy,"Hz (p space)");
 }
 
   RealMatrix rTEMP(nUncontracted,nUncontracted);
@@ -567,14 +567,14 @@ if(this->printLevel_ >= 2){
   Hy = SUn * UK * rTEMP; 
 
 if(this->printLevel_ >= 2){
-  prettyPrint(this->fileio_->out,Hs,"Hs (r space)");
-  prettyPrint(this->fileio_->out,Hz,"Hz (r space)");
-  prettyPrint(this->fileio_->out,Hx,"Hx (r space)");
-  prettyPrint(this->fileio_->out,Hy,"Hy (r space)");
+  prettyPrintSmart(this->fileio_->out,Hs,"Hs (r space)");
+  prettyPrintSmart(this->fileio_->out,Hz,"Hz (r space)");
+  prettyPrintSmart(this->fileio_->out,Hx,"Hx (r space)");
+  prettyPrintSmart(this->fileio_->out,Hy,"Hy (r space)");
 }
 
      
-//  prettyPrint(this->fileio_->out,Veff,"Veff (p space)");
+//  prettyPrintSmart(this->fileio_->out,Veff,"Veff (p space)");
 /* 
   ComplexMatrix SUK(2*nUncontracted,2*nUncontracted);
   SUK.block(0,0,nUncontracted,nUncontracted) = SUn * UK;  
@@ -583,12 +583,12 @@ if(this->printLevel_ >= 2){
   TEMP = SUK * Veff;
   Veff = TEMP * SUK.adjoint();  
    
-  prettyPrint(this->fileio_->out,Veff,"Veff (r space)");
+  prettyPrintSmart(this->fileio_->out,Veff,"Veff (r space)");
 
   TEMP = SUK * KinEn;
   KinEn = TEMP * SUK.adjoint();
 
-  prettyPrint(this->fileio_->out,KinEn,"Trel (r space)");
+  prettyPrintSmart(this->fileio_->out,KinEn,"Trel (r space)");
 */
 
 // --------------------------------------------------------
@@ -598,13 +598,13 @@ if(this->printLevel_ >= 2){
 
 //  cout << HCore.squaredNorm() << " HCore norm" << endl;
 
-//  prettyPrint(this->fileio_->out,HCore,"HCore (r space)");
+//  prettyPrintSmart(this->fileio_->out,HCore,"HCore (r space)");
 
 
 
 
 // Recontract the basis
-//  prettyPrint(this->fileio_->out,*this->basisSet_->mapPrim2Bf(),"primitive transformation matrix");
+//  prettyPrintSmart(this->fileio_->out,*this->basisSet_->mapPrim2Bf(),"primitive transformation matrix");
   RealMatrix IPrim2Bf = (*this->basisSet_->mapPrim2Bf()).transpose();
 
   RealMatrix TCon = 0.5 * (KinEn.block(0,0,nUncontracted,nUncontracted).real() + 
@@ -612,24 +612,24 @@ if(this->printLevel_ >= 2){
   RealMatrix VCon = 0.5 * (Veff.block(0,0,nUncontracted,nUncontracted).real() + 
 	Veff.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).real());
 if(this->printLevel_ >= 2){
-  prettyPrint(this->fileio_->out,TCon,"Trel (p space)");
-  prettyPrint(this->fileio_->out,VCon,"Vrel (p space)");
+  prettyPrintSmart(this->fileio_->out,TCon,"Trel (p space)");
+  prettyPrintSmart(this->fileio_->out,VCon,"Vrel (p space)");
  }
   rTEMP = TCon * UK.adjoint() * SUn;
   TCon = SUn * UK * rTEMP;
   rTEMP = VCon * UK.adjoint() * SUn;
   VCon = SUn * UK * rTEMP;
 if(this->printLevel_ >= 2){
-  prettyPrint(this->fileio_->out,TCon,"Trel (r space)");
-  prettyPrint(this->fileio_->out,VCon,"Vrel (r space)");
+  prettyPrintSmart(this->fileio_->out,TCon,"Trel (r space)");
+  prettyPrintSmart(this->fileio_->out,VCon,"Vrel (r space)");
  }
 
   TCon = (*this->basisSet_->mapPrim2Bf()) * TCon * IPrim2Bf;
   VCon = (*this->basisSet_->mapPrim2Bf()) * VCon * IPrim2Bf;
 
 if(this->printLevel_ >= 2){
-  prettyPrint(this->fileio_->out,TCon,"TCon");
-  prettyPrint(this->fileio_->out,VCon,"VCon");
+  prettyPrintSmart(this->fileio_->out,TCon,"TCon");
+  prettyPrintSmart(this->fileio_->out,VCon,"VCon");
  }
  
   RealMatrix CoreS = (*this->basisSet_->mapPrim2Bf()) * Hs * IPrim2Bf;
@@ -638,10 +638,10 @@ if(this->printLevel_ >= 2){
   RealMatrix CoreY = (*this->basisSet_->mapPrim2Bf()) * Hy * IPrim2Bf;
 
 if(this->printLevel_ >= 2) {
-  prettyPrint(this->fileio_->out,CoreS,"Core (scalar)");
-  prettyPrint(this->fileio_->out,CoreZ,"Core (mz)");
-  prettyPrint(this->fileio_->out,CoreX,"Core (mx)");
-  prettyPrint(this->fileio_->out,CoreY,"Core (my)");
+  prettyPrintSmart(this->fileio_->out,CoreS,"Core (scalar)");
+  prettyPrintSmart(this->fileio_->out,CoreZ,"Core (mz)");
+  prettyPrintSmart(this->fileio_->out,CoreX,"Core (mx)");
+  prettyPrintSmart(this->fileio_->out,CoreY,"Core (my)");
 }
 
   *this->coreH_ = CoreS;
@@ -670,8 +670,8 @@ if(this->printLevel_ >= 2) {
   TCSham.block(0,nBasis_,nBasis_,nBasis_).real() = CoreY;
   TCSham.block(nBasis_,0,nBasis_,nBasis_).real() = -1*CoreY;
  
-  prettyPrint(this->fileio_->out,TCSham.real(),"Two component Hamiltonian (real)");
-  prettyPrint(this->fileio_->out,TCSham.imag(),"Two component Hamiltonian (imag)");
+  prettyPrintSmart(this->fileio_->out,TCSham.real(),"Two component Hamiltonian (real)");
+  prettyPrintSmart(this->fileio_->out,TCSham.imag(),"Two component Hamiltonian (imag)");
 
 
   // put spin as fastest running index
@@ -686,16 +686,16 @@ if(this->printLevel_ >= 2) {
         }
     }
   
-  prettyPrint(this->fileio_->out,SpinHam.real(),"Spin-Blocked 2c-Hamiltonian (real)");
-  prettyPrint(this->fileio_->out,SpinHam.imag(),"Spin-Blocked 2c-Hamiltonian (imag)");
+  prettyPrintSmart(this->fileio_->out,SpinHam.real(),"Spin-Blocked 2c-Hamiltonian (real)");
+  prettyPrintSmart(this->fileio_->out,SpinHam.imag(),"Spin-Blocked 2c-Hamiltonian (imag)");
 
 /*
   es.compute(TCSham);
   HEV= es.eigenvalues();
 //  HEVx= es.eigenvectors();
 
-  prettyPrint(cout,HEV,"HEV");
-//  prettyPrintComplex(cout,HEVx,"HEVc");
+  prettyPrintSmart(cout,HEV,"HEV");
+//  prettyPrintSmart(cout,HEVx,"HEVc");
 */
 }
 

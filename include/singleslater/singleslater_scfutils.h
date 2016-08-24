@@ -200,6 +200,7 @@ void SingleSlater<T>::unOrthoDen3(){
  */
 template<typename T>
 void SingleSlater<T>::cpyAOtoOrthoDen(){
+/*
   if(this->nTCS_ == 1 && this->isClosedShell) {
     // Just copy for RHF
     (*this->onePDMOrthoScalar_) = (*this->onePDMScalar_);
@@ -208,8 +209,8 @@ void SingleSlater<T>::cpyAOtoOrthoDen(){
     std::vector<std::reference_wrapper<TMap>> scattered;
     scattered.emplace_back(*this->onePDMOrthoScalar_);
     scattered.emplace_back(*this->onePDMOrthoMz_);
+    
 
-/*
     if(this->nTCS_ == 1) {
       Quantum<T>::spinScatter(*this->onePDMA_,*this->onePDMB_,scattered);
     } else {
@@ -217,8 +218,16 @@ void SingleSlater<T>::cpyAOtoOrthoDen(){
       scattered.emplace_back(*this->onePDMOrthoMx_);
       Quantum<T>::spinScatter(*this->onePDMA_,scattered);
     }
-*/
   }
+*/
+  (*this->onePDMOrthoScalar_) = (*this->onePDMScalar_);
+  if(this->nTCS_ == 2 or !this->isClosedShell)
+    (*this->onePDMOrthoMz_) = (*this->onePDMMz_);
+  if(this->nTCS_ == 2) {
+    (*this->onePDMOrthoMy_) = (*this->onePDMMy_);
+    (*this->onePDMOrthoMx_) = (*this->onePDMMx_);
+  }
+
 };
 
 /**

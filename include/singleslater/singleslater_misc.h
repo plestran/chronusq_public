@@ -58,15 +58,19 @@ void SingleSlater<T>::formDensity(){
     this->onePDMScalar_->noalias() = 
       this->moA_->block(0,0,this->nBasis_,this->nOccA_)*
       this->moA_->block(0,0,this->nBasis_,this->nOccA_).adjoint();
+    prettyPrintSmart(cout,*this->onePDMScalar_,"PA");
     if(!this->isClosedShell) {
       // Store Pb in Scratch
       this->NBSqScratch_->noalias() = 
         this->moB_->block(0,0,this->nBasis_,this->nOccB_)*
         this->moB_->block(0,0,this->nBasis_,this->nOccB_).adjoint();
+      prettyPrintSmart(cout,*this->NBSqScratch_,"PB");
       // Overwrite Pz with Pa - Pb
       (*this->onePDMMz_) =     (*this->onePDMScalar_) - (*this->NBSqScratch_);
       // Overwrite Ps with Pa + Pb
       (*this->onePDMScalar_) = (*this->onePDMScalar_) + (*this->NBSqScratch_);
+      prettyPrintSmart(cout,*this->onePDMScalar_,"PS");
+      prettyPrintSmart(cout,*this->onePDMMz_,"PZ");
     } else {
       // Factor of 2 for scalar
       (*this->onePDMScalar_) *= 2;

@@ -75,6 +75,10 @@ namespace Eigen {
       for(n = i; n < i+end; n++) {
         if(std::abs(m(j,n)) > PRINT_SMALL)
           output << std::setw(printWidth) << std::right << m(j,n); 
+        else if(std::isnan(m(j,n)))
+          output << std::setw(printWidth) << std::right << "NAN";
+        else if(std::isinf(m(j,n)))
+          output << std::setw(printWidth) << std::right << "INF";
         else
           output << std::setw(printWidth) << std::right << 0.0; 
       }
@@ -106,6 +110,10 @@ namespace Eigen {
       for(n = i; n < i+end; n++) {
         if(std::abs(m(j,n)) > PRINT_SMALL)
           output << std::setw(printWidth) << std::right << m(j,n).real(); 
+        else if(std::isnan(m(j,n).real()))
+          output << std::setw(printWidth) << std::right << "NAN";
+        else if(std::isinf(m(j,n).real()))
+          output << std::setw(printWidth) << std::right << "INF";
         else
           output << std::setw(printWidth) << std::right << 0.0; 
       }
@@ -129,6 +137,10 @@ namespace Eigen {
       for(n = i; n < i+end; n++) {
         if(std::abs(m(j,n)) > PRINT_SMALL)
           output << std::setw(printWidth) << std::right << m(j,n).imag(); 
+        else if(std::isnan(m(j,n).imag()))
+          output << std::setw(printWidth) << std::right << "NAN";
+        else if(std::isinf(m(j,n).imag()))
+          output << std::setw(printWidth) << std::right << "INF";
         else
           output << std::setw(printWidth) << std::right << 0.0; 
       }

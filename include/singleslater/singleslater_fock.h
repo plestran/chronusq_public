@@ -227,11 +227,26 @@ void SingleSlater<T>::formFock(bool increment){
         *(*iF) *= 2;
     }
 
+/*
+      this->fileio_->out << "Before PT" << endl;
+      this->printFock();
+      for(auto i = 0; i < this->fockScalar_->size(); i++){
+        cout << this->fockScalar_->data()[i] << " + " << this->PTScalar_->data()[i] << " = " << this->fockScalar_->data()[i] + this->PTScalar_->data()[i] << endl;
+        this->fockScalar_->data()[i] += this->PTScalar_->data()[i];
+      }
+*/
     for(auto iF = 0; iF < fock_.size(); iF++) {
-      (*fock_[iF]) += (*PT_[iF]);
+      *(fock_[iF]) += *(PT_[iF]);
       if(this->isDFT)
         (*fock_[iF]) += (*vXC_[iF]);
     }
+/*
+    (*this->fockScalar_) += (*this->PTScalar_);
+*/
+/*
+      this->fileio_->out << "After PT" << endl;
+      this->printFock();
+*/
 
 
     if(this->printLevel_ >= 2) this->printFock(); 
