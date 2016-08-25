@@ -98,13 +98,13 @@ void SingleSlater<double>::diagFock2(){
   dsyev_(&JOBZ,&UPLO,&NTCSxNBASIS,this->moA_->data(),&NTCSxNBASIS,
       this->epsA_->data(),WORK,&LWORK,&INFO);
   if(INFO != 0) CErr("DSYEV Failed Fock Alpha",this->fileio_->out);
-  prettyPrintSmart(cout,*this->moA_,"MOA");
+//prettyPrintSmart(cout,*this->moA_,"MOA");
 
   if(this->nTCS_ == 1 && !this->isClosedShell){
     dsyev_(&JOBZ,&UPLO,&NTCSxNBASIS,this->moB_->data(),&NTCSxNBASIS,
         this->epsB_->data(),WORK,&LWORK,&INFO);
     if(INFO != 0) CErr("DSYEV Failed Fock Beta",this->fileio_->out);
-    prettyPrintSmart(cout,*this->moB_,"MOB");
+ // prettyPrintSmart(cout,*this->moB_,"MOB");
   }
   this->memManager_->free(WORK,LWORK);
 };

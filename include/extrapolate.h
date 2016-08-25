@@ -78,6 +78,7 @@ bool DIIS<F>::extrapolate(){
      B(l,nExtrap_) = fact;
   }
   B(nExtrap_,nExtrap_) = 0.0;
+  prettyPrintSmart(cout,B,"B");
 
   std::fill(coeffs_.begin(),coeffs_.end(),0.0);
   coeffs_[nExtrap_] = fact;

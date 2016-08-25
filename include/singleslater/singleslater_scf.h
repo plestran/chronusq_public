@@ -56,30 +56,21 @@ void SingleSlater<T>::SCF3(){
   this->doIncFock_ = false;
 
   for(iter = 0; iter < this->maxSCFIter_; iter++){
-/*
-    DeltaDScalar_->read(this->NBSqScratch_->data(),H5PredType<T>());
-    prettyPrint(cout,*this->onePDMA_,"Den at top " +std::to_string(iter));
-    prettyPrint(cout,*this->fockA_,"Fock at top " +std::to_string(iter));
-    prettyPrint(cout,*this->PTA_,"PT at top " +std::to_string(iter));
-    prettyPrint(cout,*this->NBSqScratch_,"Delta at top "+std::to_string(iter));
-*/
+//  prettyPrintSmart(cout,*this->fockScalar_,"Fock At Top " + std::to_string(iter));
+//  prettyPrintSmart(cout,*this->onePDMScalar_,"onePDM At Top " + std::to_string(iter));
     this->copyDen();
     this->copyPT();
     if(iter != 0 and this->doIncFock_)
       this->copyDeltaDtoD();
 
- // prettyPrint(cout,*this->onePDMA_,"Den before Fock " + std::to_string(iter));
     this->formFock(this->doIncFock_ && iter != 0);
+    cout << "ITER " << iter << endl;
+    prettyPrintSmart(cout,*this->fockScalar_,"Fock After FormFock " + std::to_string(iter));
 
     if(iter != 0 and this->doIncFock_){
- //   prettyPrint(cout,*this->fockA_,"Fock Before at " + std::to_string(iter));
       this->incPT();
- //   prettyPrint(cout,*this->fockA_,"Fock After at " + std::to_string(iter));
       this->copyDOldtoD();
-    } else {
- //   prettyPrint(cout,*this->fockA_,"Fock at " + std::to_string(iter));
-    }
- // prettyPrint(cout,*this->onePDMA_,"Den at " + std::to_string(iter));
+    } 
    
 
 /*
@@ -90,6 +81,7 @@ void SingleSlater<T>::SCF3(){
 
     if(doLevelShift) this->levelShift2();
 */
+
     this->orthoFock3();
     this->formFP();
 
@@ -103,7 +95,7 @@ void SingleSlater<T>::SCF3(){
     // DIIS Extrapolation of the Fock
     if(this->doDIIS and IDIISIter > 0) 
       this->CDIIS4(std::min(IDIISIter+1,std::size_t(this->nDIISExtrap_)));
-//  prettyPrint(cout,*this->fockA_,"Fock After DIIS at " + std::to_string(iter));
+    prettyPrintSmart(cout,*this->fockScalar_,"Fock After DIIS " + std::to_string(iter));
 
     if(this->doDMS){
       this->formDMSErr(IDIISIter);

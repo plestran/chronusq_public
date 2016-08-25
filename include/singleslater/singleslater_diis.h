@@ -50,10 +50,13 @@ void SingleSlater<T>::CDIIS4(int NDIIS){
 
     T* coef;
     auto Extrap = [&](TMap *res, H5::DataSet *basis) {
+      cout << "COEFFS" << endl;
       for(auto j = 0; j < NDIIS; j++) {
+        cout << coef[j] << endl;
         this->readDIIS(basis,j,this->NBSqScratch_->data());
         (*res) += coef[j] * (*this->NBSqScratch_); 
       }
+      cout << endl;
     };
 
     DIIS<T> extrap(NDIIS,this->nBasis_*this->nBasis_,F1,F2,F3,
@@ -104,8 +107,18 @@ void SingleSlater<T>::genDIISCom(int iter){
 
   this->NBSqScratch2_->noalias() = 
     (*this->NBSqScratch_) - this->NBSqScratch_->adjoint();
+  prettyPrintSmart(cout,*this->NBSqScratch2_,"COMM S Before");
   this->aointegrals_->Ortho2Trans(*this->NBSqScratch2_,*this->NBSqScratch2_);
 
+  prettyPrintSmart(cout,*this->NBSqScratch2_,"COMM S After");
+
+/*
+  (*this->NBSqScratch2_) = (*this->fockScalar_) * (*this->onePDMScalar_) * (*this->aointegrals_->overlap_);
+  (*this->NBSqScratch2_) += (*this->fockMz_) * (*this->onePDMMz_) * (*this->aointegrals_->overlap_);
+  (*this->NBSqScratch2_) -= (*this->aointegrals_->overlap_) * (*this->onePDMScalar_) *(*this->fockScalar_);
+  (*this->NBSqScratch2_) -= (*this->aointegrals_->overlap_) * (*this->onePDMMz_) *(*this->fockMz_);
+  prettyPrintSmart(cout,*this->NBSqScratch2_,"True COMM");
+*/
   this->writeDIIS(this->EScalarDIIS_,ITER,this->NBSqScratch2_->data());
 
   if(this->nTCS_ == 2 or !this->isClosedShell) {
@@ -113,7 +126,9 @@ void SingleSlater<T>::genDIISCom(int iter){
 
     this->NBSqScratch2_->noalias() = 
       (*this->NBSqScratch_) - this->NBSqScratch_->adjoint();
+    prettyPrintSmart(cout,*this->NBSqScratch2_,"COMM Z Before");
     this->aointegrals_->Ortho2Trans(*this->NBSqScratch2_,*this->NBSqScratch2_);
+    prettyPrintSmart(cout,*this->NBSqScratch2_,"COMM Z After");
 
     this->writeDIIS(this->EMzDIIS_,ITER,this->NBSqScratch2_->data());
   }

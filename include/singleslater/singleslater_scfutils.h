@@ -105,7 +105,7 @@ void SingleSlater<T>::copyDen(){
   DScalarOld_->write(this->onePDMScalar_->data(),H5PredType<T>());
 
   // Mz
-  if(this->nTCS_ == 2 || !this->isClosedShell){
+  if(this->nTCS_ == 2 or !this->isClosedShell){
     DMzOld_->write(this->onePDMMz_->data(),H5PredType<T>());
   }
 
@@ -238,6 +238,12 @@ SCFConvergence SingleSlater<T>::evalConver3(){
 
   // Energy Convergence
   double EOld = this->totalEnergy;
+  prettyPrintSmart(cout,*this->fockScalar_,"Fock S");
+  prettyPrintSmart(cout,*this->fockMz_,"Fock Z");
+  prettyPrintSmart(cout,*this->PTScalar_,"PT S");
+  prettyPrintSmart(cout,*this->PTMz_,"PT Z");
+  prettyPrintSmart(cout,*this->onePDMScalar_,"onePDM S");
+  prettyPrintSmart(cout,*this->onePDMMz_,"onePDM Z");
   this->computeEnergy();
   double EDelta = this->totalEnergy - EOld;
 
@@ -430,7 +436,7 @@ template <typename T>
 void SingleSlater<T>::copyPT(){
 
   PTScalarOld_->write(this->PTScalar_->data(),H5PredType<T>());
-  if(this->nTCS_ == 2 || !this->isClosedShell){
+  if(this->nTCS_ == 2 or !this->isClosedShell){
     PTMzOld_->write(this->PTMz_->data(),H5PredType<T>());
   }
   if(this->nTCS_ == 2){
