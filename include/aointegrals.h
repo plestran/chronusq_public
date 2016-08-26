@@ -316,25 +316,40 @@ public:
   };
 
   ~AOIntegrals(){
+/*
     // Free up memory from memory manager
+    cout << "HERE" << endl;
+    prettyPrintSmart(cout,*this->coreH_,"H");
     this->memManager_->free(this->coreH_->data(),
       this->nBasis_*this->nBasis_);
-    this->memManager_->free(this->oneEmx_->data(),
-      this->nBasis_*this->nBasis_);
-    this->memManager_->free(this->oneEmy_->data(),
-      this->nBasis_*this->nBasis_);
-    this->memManager_->free(this->oneEmz_->data(),
-      this->nBasis_*this->nBasis_);
+    cout << "HERE" << endl;
     this->memManager_->free(this->overlap_->data(),
       this->nBasis_*this->nBasis_);
+    cout << "HERE" << endl;
     this->memManager_->free(this->kinetic_->data(),
       this->nBasis_*this->nBasis_);
+    cout << "HERE" << endl;
     this->memManager_->free(this->potential_->data(),
       this->nBasis_*this->nBasis_);
+    cout << "HERE" << endl;
     this->memManager_->free(this->schwartz_->data(),
       this->nBasis_*this->nBasis_);
+    cout << "HERE" << endl;
     this->memManager_->free(this->ortho1_->data(),this->nBasis_*this->nBasis_);
+    cout << "HERE" << endl;
     this->memManager_->free(this->ortho2_->data(),this->nBasis_*this->nBasis_);
+    cout << "HERE" << endl;
+
+    if(this->doX2C) {
+      this->memManager_->free(this->oneEmx_->data(),
+        this->nBasis_*this->nBasis_);
+      this->memManager_->free(this->oneEmy_->data(),
+        this->nBasis_*this->nBasis_);
+      this->memManager_->free(this->oneEmz_->data(),
+        this->nBasis_*this->nBasis_);
+    }
+    cout << "HERE" << endl;
+*/
   };
   
 
