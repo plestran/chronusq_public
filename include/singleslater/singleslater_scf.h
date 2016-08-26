@@ -56,16 +56,12 @@ void SingleSlater<T>::SCF3(){
   this->doIncFock_ = false;
 
   for(iter = 0; iter < this->maxSCFIter_; iter++){
-//  prettyPrintSmart(cout,*this->fockScalar_,"Fock At Top " + std::to_string(iter));
-//  prettyPrintSmart(cout,*this->onePDMScalar_,"onePDM At Top " + std::to_string(iter));
     this->copyDen();
     this->copyPT();
     if(iter != 0 and this->doIncFock_)
       this->copyDeltaDtoD();
 
     this->formFock(this->doIncFock_ && iter != 0);
-    cout << "ITER " << iter << endl;
-    prettyPrintSmart(cout,*this->fockScalar_,"Fock After FormFock " + std::to_string(iter));
 
     if(iter != 0 and this->doIncFock_){
       this->incPT();
@@ -93,9 +89,10 @@ void SingleSlater<T>::SCF3(){
     }
 
     // DIIS Extrapolation of the Fock
-    if(this->doDIIS and IDIISIter > 0) 
-      this->CDIIS4(std::min(IDIISIter+1,std::size_t(this->nDIISExtrap_)));
-    prettyPrintSmart(cout,*this->fockScalar_,"Fock After DIIS " + std::to_string(iter));
+    if(this->doDIIS and IDIISIter > 0 and this->diisAlg_ != NO_DIIS) { 
+      if(this->diisAlg_ == CDIIS)
+        this->CDIIS4(std::min(IDIISIter+1,std::size_t(this->nDIISExtrap_)));
+    }
 
     if(this->doDMS){
       this->formDMSErr(IDIISIter);
@@ -122,6 +119,8 @@ void SingleSlater<T>::SCF3(){
     // Transform D into the AO basis
     this->unOrthoDen3();
 
+    if(this->isConverged)
+      this->fileio_->out << "   *** SCF Converged by [F,P] ***" << endl;
     // Calls formFock
     SCFConvergence CONVER = this->evalConver3();
 

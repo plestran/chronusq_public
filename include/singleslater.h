@@ -62,6 +62,14 @@ class KernelIntegrand {
   };
 };
 
+enum DIIS_ALGORITHM {
+  NO_DIIS_SET,
+  NO_DIIS,
+  CDIIS,
+  EDIIS,
+  CEDIIS
+};
+
 template<typename T>
 class SingleSlater : public Quantum<T> {
   typedef Eigen::Matrix<T,Dynamic,Dynamic,ColMajor> TMatrix;
@@ -109,8 +117,9 @@ class SingleSlater : public Quantum<T> {
   int maxSCFIter_;
 
   // DIIS related parameters
-  int      nDIISExtrap_;
-  int      iDIISStart_;
+  int            nDIISExtrap_;
+  int            iDIISStart_;
+  DIIS_ALGORITHM diisAlg_;
 
 
   // General extrapolation parameters
@@ -477,6 +486,7 @@ public:
     this->doDMS        = false;
     this->nDIISExtrap_ = 6;
     this->iDIISStart_  = 0;
+    this->diisAlg_     = DIIS_ALGORITHM::NO_DIIS_SET;
 
     // DFT
     this->weightScheme_ = ATOMIC_PARTITION::BECKE;
@@ -578,9 +588,12 @@ public:
     this->nAE_   = this->nOccA_;
     this->nBE_   = this->nOccB_;
 
+    if(this->doDIIS && this->diisAlg_ == DIIS_ALGORITHM::NO_DIIS_SET)
+      this->diisAlg_ = DIIS_ALGORITHM::CDIIS;
 
     if(this->isDFT){
-      this->epsScreen /= this->molecule_->nAtoms() * this->nRadDFTGridPts_ * this->nAngDFTGridPts_;
+      this->epsScreen /= this->molecule_->nAtoms() * 
+        this->nRadDFTGridPts_ * this->nAngDFTGridPts_;
       this->basisset_->radcut(this->epsScreen,this->maxiter,this->epsConv);
     }
   }

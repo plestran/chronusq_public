@@ -128,7 +128,6 @@ void SingleSlater<T>::orthoFock3(){
   if(this->nTCS_ == 2 or !this->isClosedShell) {
     // Mz
     this->aointegrals_->Ortho1Trans(*this->fockMz_,*this->fockOrthoMz_);
-
   }
 
   // Mx My
@@ -238,12 +237,6 @@ SCFConvergence SingleSlater<T>::evalConver3(){
 
   // Energy Convergence
   double EOld = this->totalEnergy;
-  prettyPrintSmart(cout,*this->fockScalar_,"Fock S");
-  prettyPrintSmart(cout,*this->fockMz_,"Fock Z");
-  prettyPrintSmart(cout,*this->PTScalar_,"PT S");
-  prettyPrintSmart(cout,*this->PTMz_,"PT Z");
-  prettyPrintSmart(cout,*this->onePDMScalar_,"onePDM S");
-  prettyPrintSmart(cout,*this->onePDMMz_,"onePDM Z");
   this->computeEnergy();
   double EDelta = this->totalEnergy - EOld;
 
@@ -282,11 +275,13 @@ SCFConvergence SingleSlater<T>::evalConver3(){
   if(this->nTCS_ == 1 && !this->isClosedShell)
     CONVER.PMRMS = PMRMS;
   
-  EDelta = std::abs(EDelta);
-  this->isConverged = EDelta < this->eneTol_;
-  this->isConverged = this->isConverged && PSRMS < this->denTol_;
-  if(this->nTCS_ == 1 && !this->isClosedShell)
-    this->isConverged = this->isConverged && PMRMS < this->denTol_;
+  if(!this->isConverged) { // [F,P] supercedes this check
+    EDelta = std::abs(EDelta);
+    this->isConverged = EDelta < this->eneTol_;
+    this->isConverged = this->isConverged && PSRMS < this->denTol_;
+    if(this->nTCS_ == 2 or !this->isClosedShell)
+      this->isConverged = this->isConverged && PMRMS < this->denTol_;
+  }
 
 //this->isConverged = this->isConverged || EDelta < this->eneTol_*1e-3;
   

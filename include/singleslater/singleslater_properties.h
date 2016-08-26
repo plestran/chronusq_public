@@ -76,7 +76,6 @@ void SingleSlater<T>::computeEnergy(){
 
       
     if(this->isDFT) this->energyTwoE += this->energyExc;
-//  cout << this->totalEx << " " << this->totalEx - this->template computeProperty<double,DENSITY_TYPE::TOTAL>(*this->vXA_) << endl;
 
     // Add in the electric field component if they are non-zero
     std::array<double,3> null{{0,0,0}};
@@ -88,8 +87,6 @@ void SingleSlater<T>::computeEnergy(){
       }
     }
  
-    cout << "1E " << this->energyOneE << endl;
-    cout << "2E " << this->energyTwoE << endl;
 
     this->totalEnergy= this->energyOneE + this->energyTwoE + this->energyNuclei;
 #ifdef CQ_ENABLE_MPI

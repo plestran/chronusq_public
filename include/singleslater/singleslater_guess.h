@@ -45,6 +45,7 @@ void SingleSlater<T>::formGuess(){
     this->printDensity();
   }
   this->formDensity();
+  this->scaleDen();
   if(this->printLevel_ > 3) {
     this->fileio_->out << "Initial Density Matrix Before" << endl;
     this->printDensity();
@@ -290,10 +291,42 @@ void SingleSlater<T>::placeAtmDen(std::vector<int> atomIndex,
 
 template<typename T>
 void SingleSlater<T>::scaleDen(){
+/*
   (*this->onePDMScalar_) *= 
     T(this->molecule_->nTotalE()) / this->onePDMScalar_->trace();
 
   if(this->nTCS_ == 2 and !this->isClosedShell)
     (*this->onePDMMz_) *= 
       T(this->nAE_ - this->nBE_) / this->onePDMMz_->trace();
+*/
+  if(this->nTCS_ == 1 and this->isClosedShell)
+    (*this->onePDMScalar_) *= 
+      T(this->molecule_->nTotalE()) / 
+      T(this->template computeProperty<double,DENSITY_TYPE::TOTAL>(
+        *this->aointegrals_->overlap_));
+  else {
+    // SCR  = PA
+    // SCR2 = PB
+    (*this->NBSqScratch_) = (*this->onePDMScalar_) + (*this->onePDMMz_);
+    (*this->NBSqScratch2_) = (*this->onePDMScalar_) - (*this->onePDMMz_);
+    (*this->NBSqScratch_) *= 0.5; 
+    (*this->NBSqScratch2_) *= 0.5; 
+
+    double TS = this->template computeProperty<double,DENSITY_TYPE::TOTAL>(
+      *this->aointegrals_->overlap_); 
+    double TZ = this->template computeProperty<double,DENSITY_TYPE::MZ>(
+      *this->aointegrals_->overlap_); 
+
+
+    double TA = 0.5 * (TS + TZ);
+    double TB = 0.5 * (TS - TZ);
+
+
+    (*this->NBSqScratch_) *= T(this->nOccA_) / T(TA);
+    (*this->NBSqScratch2_) *= T(this->nOccB_) / T(TB);
+
+    (*this->onePDMScalar_) = (*this->NBSqScratch_) + (*this->NBSqScratch2_);
+    (*this->onePDMMz_)     = (*this->NBSqScratch_) - (*this->NBSqScratch2_);
+
+  }
 }
