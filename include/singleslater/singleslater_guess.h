@@ -36,7 +36,6 @@ void SingleSlater<T>::formGuess(){
     this->printFock();
   }
   this->orthoFock3();
-  prettyPrintSmart(cout,*this->fockOrthoScalar_,"OFS in GUESS");
 
   this->populateMO4Diag();
   this->diagFock2();
@@ -46,7 +45,6 @@ void SingleSlater<T>::formGuess(){
     this->printDensity();
   }
   this->formDensity();
-  prettyPrintSmart(cout,*this->onePDMScalar_,"O1PDM in GUESS");
   this->scaleDen();
   if(this->printLevel_ > 3) {
     this->fileio_->out << "Initial Density Matrix Before" << endl;
@@ -105,7 +103,6 @@ void SingleSlater<T>::COREGuess(){
 //}
 */
 //this->computeEnergy();
-  prettyPrintSmart(cout,*this->fockScalar_,"FS in CORE");
 };
 
 

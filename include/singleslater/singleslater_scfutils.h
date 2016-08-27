@@ -478,5 +478,4 @@ void SingleSlater<T>::populateMO4Diag(){
       scattered.emplace_back(*(*iF));
     Quantum<T>::spinGather(*this->moA_,scattered);
   }
-  prettyPrintSmart(cout,*this->moA_,"MOA in POP");
 };
