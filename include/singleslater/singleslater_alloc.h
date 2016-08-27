@@ -34,15 +34,19 @@ void SingleSlater<T>::alloc(){
   this->allocScr();
 
   fock_.emplace_back(this->fockScalar_.get());
+  fockOrtho_.emplace_back(this->fockOrthoScalar_.get());
   PT_.emplace_back(this->PTScalar_.get());
   onePDMOrtho_.emplace_back(this->onePDMOrthoScalar_.get());
   if(this->nTCS_ == 2 or !this->isClosedShell){
     fock_.emplace_back(this->fockMz_.get());
+    fockOrtho_.emplace_back(this->fockOrthoMz_.get());
     PT_.emplace_back(this->PTMz_.get());
     onePDMOrtho_.emplace_back(this->onePDMOrthoMz_.get());
     if(this->nTCS_ == 2) {
       fock_.emplace_back(this->fockMy_.get());
       fock_.emplace_back(this->fockMx_.get());
+      fockOrtho_.emplace_back(this->fockOrthoMy_.get());
+      fockOrtho_.emplace_back(this->fockOrthoMx_.get());
       PT_.emplace_back(this->PTMy_.get());
       PT_.emplace_back(this->PTMx_.get());
       onePDMOrtho_.emplace_back(this->onePDMOrthoMy_.get());

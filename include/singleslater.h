@@ -174,6 +174,7 @@ class SingleSlater : public Quantum<T> {
   std::unique_ptr<TMap>  fockOrthoMx_;
   std::unique_ptr<TMap>  fockOrthoMy_;
   std::unique_ptr<TMap>  fockOrthoMz_;
+  std::vector<TMap*>     fockOrtho_;
 
 
   // Fock Eigensystem

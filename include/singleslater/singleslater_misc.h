@@ -72,9 +72,10 @@ void SingleSlater<T>::formDensity(){
       (*this->onePDMScalar_) *= 2;
     }
   } else {
+    auto NE = this->nOccA_ + this->nOccB_;
     this->NBTSqScratch_->noalias() = 
-      this->moA_->block(0,0,this->nBasis_,this->nOccA_+this->nOccB_)*
-      this->moA_->block(0,0,this->nBasis_,this->nOccA_+this->nOccB_).adjoint();
+      this->moA_->block(0,0,this->nTCS_*this->nBasis_,NE)*
+      this->moA_->block(0,0,this->nTCS_*this->nBasis_,NE).adjoint();
     std::vector<std::reference_wrapper<TMap>> scatter;
     for(auto iD = 0; iD < this->onePDM_.size(); iD++)
       scatter.emplace_back(*this->onePDM_[iD]);
