@@ -39,19 +39,19 @@ void SingleSlater<T>::formGuess(){
 
   this->populateMO4Diag();
   this->diagFock2();
-//this->mixOrbitalsSCF();
+  this->mixOrbitalsSCF();
   if(this->printLevel_ > 3) {
     this->fileio_->out << "Initial Density Matrix Before" << endl;
     this->printDensity();
   }
   this->formDensity();
-  this->scaleDen();
   if(this->printLevel_ > 3) {
     this->fileio_->out << "Initial Density Matrix Before" << endl;
     this->printDensity();
   }
   this->cpyAOtoOrthoDen();
   this->unOrthoDen3();
+//this->scaleDen();
 
   if(this->printLevel_ > 3) {
     this->fileio_->out << "Initial Density Matrix" << endl;
@@ -217,19 +217,8 @@ void SingleSlater<T>::SADGuess() {
  
   } // Loop iUn
 
-  this->fileio_->out << "Before Scale" << endl;
-  this->printDensity();
-  this->printFock();
   this->scaleDen();
-  this->fileio_->out << "After Scale" << endl;
-  this->printDensity();
-  this->printFock();
-  this->fileio_->out << " Right before FF" << endl;
   this->formFock();
-  this->fileio_->out << "After FF" << endl;
-  this->printDensity();
-  this->printFock();
-  CErr();
 };
 
 template <typename T>
@@ -253,34 +242,7 @@ void SingleSlater<T>::placeAtmDen(std::vector<int> atomIndex,
   for(auto iAtm : atomIndex){
     auto iBfSt = this->basisset_->mapCen2Bf(iAtm)[0];
     auto iSize = this->basisset_->mapCen2Bf(iAtm)[1]; 
-/*
-    if(this->nTCS_ == 1){
-      this->onePDMA_->block(iBfSt,iBfSt,iSize,iSize)= (*hfA.onePDMA_);
-      if(this->isClosedShell){
-        if(hfA.isClosedShell) 
-          this->onePDMA_->block(iBfSt,iBfSt,iSize,iSize) += (*hfA.onePDMA_);
-        else
-          this->onePDMA_->block(iBfSt,iBfSt,iSize,iSize) += (*hfA.onePDMB_);
-      } else {
-        this->onePDMB_->block(iBfSt,iBfSt,iSize,iSize)= (*hfA.onePDMA_);
-        if(hfA.isClosedShell){
-          this->onePDMA_->block(iBfSt,iBfSt,iSize,iSize) += (*hfA.onePDMA_);
-          this->onePDMB_->block(iBfSt,iBfSt,iSize,iSize) += (*hfA.onePDMA_);
-        } else {
-          this->onePDMA_->block(iBfSt,iBfSt,iSize,iSize) += (*hfA.onePDMB_);
-          this->onePDMB_->block(iBfSt,iBfSt,iSize,iSize) += (*hfA.onePDMB_);
-        }
-      }
-    } else {
-      for(auto I = iBfSt, i = 0; I < (iBfSt +iSize); I += 2, i++)
-      for(auto J = iBfSt, j = 0; J < (iBfSt +iSize); J += 2, j++){
-        (*this->onePDMA_)(I,J)     = 
-          (*hfA.onePDMA_)(i,j) + (*hfA.onePDMB_)(i,j);
-        (*this->onePDMA_)(I+1,J+1) = 
-          (*hfA.onePDMA_)(i,j) + (*hfA.onePDMB_)(i,j);
-      }
-    }
-*/
+
     this->onePDMScalar_->block(iBfSt,iBfSt,iSize,iSize) =
       hfA.onePDMScalar()->template cast<T>();
     if(this->nTCS_ == 2 or !this->isClosedShell)
@@ -291,14 +253,6 @@ void SingleSlater<T>::placeAtmDen(std::vector<int> atomIndex,
 
 template<typename T>
 void SingleSlater<T>::scaleDen(){
-/*
-  (*this->onePDMScalar_) *= 
-    T(this->molecule_->nTotalE()) / this->onePDMScalar_->trace();
-
-  if(this->nTCS_ == 2 and !this->isClosedShell)
-    (*this->onePDMMz_) *= 
-      T(this->nAE_ - this->nBE_) / this->onePDMMz_->trace();
-*/
   if(this->nTCS_ == 1 and this->isClosedShell)
     (*this->onePDMScalar_) *= 
       T(this->molecule_->nTotalE()) / 
@@ -316,7 +270,6 @@ void SingleSlater<T>::scaleDen(){
       *this->aointegrals_->overlap_); 
     double TZ = this->template computeProperty<double,DENSITY_TYPE::MZ>(
       *this->aointegrals_->overlap_); 
-
 
     double TA = 0.5 * (TS + TZ);
     double TB = 0.5 * (TS - TZ);
