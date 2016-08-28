@@ -25,6 +25,8 @@
  */
 template<typename T>
 void SingleSlater<T>::formGuess(){
+  if(not this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
+
   if(this->guess_ == SAD) this->SADGuess();
   else if(this->guess_ == CORE) this->COREGuess();
 //  else if(this->guess_ == READ) this->READGuess();
@@ -217,8 +219,11 @@ void SingleSlater<T>::SADGuess() {
  
   } // Loop iUn
 
+  prettyPrintSmart(cout,*this->onePDMScalar_,"PS");
   this->scaleDen();
+  prettyPrintSmart(cout,*this->onePDMScalar_,"PS");
   this->formFock();
+  prettyPrintSmart(cout,*this->fockScalar_,"FS");
 };
 
 template <typename T>
@@ -253,12 +258,14 @@ void SingleSlater<T>::placeAtmDen(std::vector<int> atomIndex,
 
 template<typename T>
 void SingleSlater<T>::scaleDen(){
-  if(this->nTCS_ == 1 and this->isClosedShell)
+  if(this->nTCS_ == 1 and this->isClosedShell) {
+    prettyPrint(cout,*this->aointegrals_->overlap_,"S");
+    cout <<this->template computeProperty<double,DENSITY_TYPE::TOTAL>(*this->aointegrals_->overlap_) << endl;
     (*this->onePDMScalar_) *= 
       T(this->molecule_->nTotalE()) / 
       T(this->template computeProperty<double,DENSITY_TYPE::TOTAL>(
         *this->aointegrals_->overlap_));
-  else {
+  } else {
     // SCR  = PA
     // SCR2 = PB
     (*this->NBSqScratch_) = (*this->onePDMScalar_) + (*this->onePDMMz_);
