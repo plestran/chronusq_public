@@ -228,6 +228,7 @@ void SingleSlater<T>::SADGuess() {
 
 template <typename T>
 void SingleSlater<T>::RandomGuess() {
+/*
   (*this->onePDMScalar_) = TMatrix::Random(this->nBasis_,this->nBasis_);
   (*this->onePDMScalar_) = 
     this->onePDMScalar_->template selfadjointView<Lower>();
@@ -235,6 +236,16 @@ void SingleSlater<T>::RandomGuess() {
     (*this->onePDMMz_) = TMatrix::Random(this->nBasis_,this->nBasis_);
     (*this->onePDMMz_) = this->onePDMMz_->template selfadjointView<Lower>();
   }
+*/
+  (*this->moA_) = 
+    TMatrix::Random(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
+  if(this->nTCS_ == 1 and !this->isClosedShell)
+    (*this->moB_) = TMatrix::Random(this->nBasis_,this->nBasis_);
+
+  this->diagFock2();
+  this->formDensity();
+  this->cpyAOtoOrthoDen();
+  this->unOrthoDen3();
   this->scaleDen();
   this->formFock();
 }
