@@ -219,11 +219,11 @@ void SingleSlater<T>::SADGuess() {
  
   } // Loop iUn
 
-  prettyPrintSmart(cout,*this->onePDMScalar_,"PS");
+//prettyPrintSmart(cout,*this->onePDMScalar_,"PS");
   this->scaleDen();
-  prettyPrintSmart(cout,*this->onePDMScalar_,"PS");
+//prettyPrintSmart(cout,*this->onePDMScalar_,"PS");
   this->formFock();
-  prettyPrintSmart(cout,*this->fockScalar_,"FS");
+//prettyPrintSmart(cout,*this->fockScalar_,"FS");
 };
 
 template <typename T>
@@ -270,8 +270,8 @@ void SingleSlater<T>::placeAtmDen(std::vector<int> atomIndex,
 template<typename T>
 void SingleSlater<T>::scaleDen(){
   if(this->nTCS_ == 1 and this->isClosedShell) {
-    prettyPrint(cout,*this->aointegrals_->overlap_,"S");
-    cout <<this->template computeProperty<double,DENSITY_TYPE::TOTAL>(*this->aointegrals_->overlap_) << endl;
+//  prettyPrint(cout,*this->aointegrals_->overlap_,"S");
+//  cout <<this->template computeProperty<double,DENSITY_TYPE::TOTAL>(*this->aointegrals_->overlap_) << endl;
     (*this->onePDMScalar_) *= 
       T(this->molecule_->nTotalE()) / 
       T(this->template computeProperty<double,DENSITY_TYPE::TOTAL>(
