@@ -305,7 +305,6 @@ void SingleSlater<T>::mixOrbitalsSCF(){
  */
 template<typename T>
 void SingleSlater<T>::mixOrbitals2C(){
-  auto nO = this->nAE_ + this->nBE_;
   if(this->nTCS_ != 2) return;
   this->fileio_->out << "** Mixing Alpha-Beta Orbitals for 2C Guess **" << endl;
   TVec HOMOA,LUMOB;
@@ -313,7 +312,7 @@ void SingleSlater<T>::mixOrbitals2C(){
   auto nOrb = this->nBasis_;
   double maxPercentNonZeroAlpha = 0;
 
-  for(auto i = nO-1; i >= 0; i--){
+  for(auto i = this->nO_ - 1; i >= 0; i--){
     auto nNonZeroAlpha = 0;
     for(auto j = 0; j < this->nTCS_*this->nBasis_; j+=2){
       auto aComp = (*this->moA_)(j,i);
@@ -328,7 +327,7 @@ void SingleSlater<T>::mixOrbitals2C(){
   }
 
   double maxPercentNonZeroBeta = 0;
-  for(auto i = nO; i < this->nTCS_*this->nBasis_; i++){
+  for(auto i = this->nO_; i < this->nTCS_*this->nBasis_; i++){
     auto nNonZeroBeta = 0;
     for(auto j = 1; j < this->nTCS_*this->nBasis_; j+=2){
       auto aComp = (*this->moA_)(j-1,i);

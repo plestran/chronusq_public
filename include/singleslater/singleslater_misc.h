@@ -56,13 +56,13 @@ void SingleSlater<T>::formDensity(){
   if(this->nTCS_ == 1) {
     // Store Pa in Ps
     this->onePDMScalar_->noalias() = 
-      this->moA_->block(0,0,this->nBasis_,this->nOccA_)*
-      this->moA_->block(0,0,this->nBasis_,this->nOccA_).adjoint();
+      this->moA_->block(0,0,this->nBasis_,this->nOA_)*
+      this->moA_->block(0,0,this->nBasis_,this->nOA_).adjoint();
     if(!this->isClosedShell) {
       // Store Pb in Scratch
       this->NBSqScratch_->noalias() = 
-        this->moB_->block(0,0,this->nBasis_,this->nOccB_)*
-        this->moB_->block(0,0,this->nBasis_,this->nOccB_).adjoint();
+        this->moB_->block(0,0,this->nBasis_,this->nOB_)*
+        this->moB_->block(0,0,this->nBasis_,this->nOB_).adjoint();
       // Overwrite Pz with Pa - Pb
       (*this->onePDMMz_) =     (*this->onePDMScalar_) - (*this->NBSqScratch_);
       // Overwrite Ps with Pa + Pb
@@ -72,10 +72,9 @@ void SingleSlater<T>::formDensity(){
       (*this->onePDMScalar_) *= 2;
     }
   } else {
-    auto NE = this->nOccA_ + this->nOccB_;
     this->NBTSqScratch_->noalias() = 
-      this->moA_->block(0,0,this->nTCS_*this->nBasis_,NE)*
-      this->moA_->block(0,0,this->nTCS_*this->nBasis_,NE).adjoint();
+      this->moA_->block(0,0,this->nTCS_*this->nBasis_,this->nO_)*
+      this->moA_->block(0,0,this->nTCS_*this->nBasis_,this->nO_).adjoint();
     std::vector<std::reference_wrapper<TMap>> scatter;
     for(auto iD = 0; iD < this->onePDM_.size(); iD++)
       scatter.emplace_back(*this->onePDM_[iD]);

@@ -26,12 +26,10 @@
 #ifndef INCLUDED_SINGLESLATER
 #define INCLUDED_SINGLESLATER
 #include <global.h>
-#include <cerr.h>
-#include <molecule.h>
-#include <aointegrals.h>
 #include <grid.h>
 #include <grid2.h>
-#include <quantum.h>
+//#include <quantum.h>
+#include <reference.h>
 #include <dft.h>
 
 /****************************/
@@ -71,20 +69,23 @@ enum DIIS_ALGORITHM {
 };
 
 template<typename T>
-class SingleSlater : public Quantum<T> {
+class SingleSlater : public Reference<T> {
   typedef Eigen::Matrix<T,Dynamic,Dynamic,ColMajor> TMatrix;
   typedef Eigen::Map<TMatrix> TMap;
   typedef Eigen::Matrix<T,Dynamic,1,ColMajor> TVec;
 
+/*
   // SingleSlater class dependencies
   BasisSet *    basisset_;         ///< Basis Set
   Molecule *    molecule_;         ///< Molecular specificiations
   FileIO *      fileio_;           ///< Access to output file
   AOIntegrals * aointegrals_;      ///< Molecular Integrals over GTOs (AO basis)
+*/
 
   // Misc Metadata
   int printLevel_;
 
+/*
   // Privite Metadata regarding basis dimensions
   int      nBasis_;
   int      nShell_;
@@ -98,6 +99,7 @@ class SingleSlater : public Quantum<T> {
   int      nVirA_;
   int      nVirB_;
   int      multip_;
+*/
 
   // Private Metadata regarding the reference
   int      Ref_;
@@ -178,8 +180,10 @@ class SingleSlater : public Quantum<T> {
 
 
   // Fock Eigensystem
+/*
   std::unique_ptr<TMap>  moA_;        ///< Alpha or Full MO Coefficients
   std::unique_ptr<TMap>  moB_;        ///< Beta MO Coefficient Matrix
+*/
   std::unique_ptr<RealMap>  epsA_;       ///< Alpha or Full Eigenenergies
   std::unique_ptr<RealMap>  epsB_;       ///< Beta Fock Eigenenergie
 
@@ -313,6 +317,7 @@ class SingleSlater : public Quantum<T> {
 //void allocBetaDFT();
   void allocMultipole();
 
+/*
   inline void checkWorkers(){
     if(this->fileio_  == NULL) 
       CErr("Fatal: Must initialize SingleSlater with FileIO Object");
@@ -344,6 +349,7 @@ class SingleSlater : public Quantum<T> {
            +std::string(" the number of electrons given"),this->fileio_->out);
 
   }
+*/
 
 
 public:
@@ -423,7 +429,8 @@ public:
 
 
   // constructor & destructor
-  SingleSlater() : Quantum<T>(),
+  SingleSlater() : Reference<T>(),
+/*
     nBasis_ (0),
     nShell_ (0),
     nTT_    (0),
@@ -434,10 +441,13 @@ public:
     nVirA_  (0),
     nVirB_  (0),
     multip_ (0),
+*/
     nSCFIter(0),
     ngpts   (0),
+/*
     moA_    (nullptr),        
     moB_    (nullptr),        
+*/
     epsA_   (nullptr),    
     epsB_   (nullptr),    
     vXCScalar_ (nullptr),       
@@ -445,10 +455,12 @@ public:
     vXCMy_ (nullptr),       
     vXCMx_ (nullptr),       
     R2Index_     (NULL),
+/*
     basisset_    (NULL),               
     molecule_    (NULL),               
     fileio_      (NULL),                 
     aointegrals_ (NULL),            
+*/
     isConverged  (false),
     isGGA        (false),
     energyOneE   (0.0),
@@ -507,8 +519,9 @@ public:
   ~SingleSlater() { ; };
 
   SingleSlater(SingleSlater *other) : 
-    Quantum<T>(dynamic_cast<Quantum<T>&>(*other)),
+    Reference<T>(dynamic_cast<Reference<T>&>(*other)),
 
+/*
     nBasis_ ( other->nBasis() ),
     nTT_    ( other->nTT() ),
     nAE_    ( other->nAE() ),
@@ -518,6 +531,7 @@ public:
     nVirA_  ( other->nVirA() ),
     nVirB_  ( other->nVirB() ),
     multip_ ( other->multip() ),
+*/
     energyNuclei ( other->energyNuclei ),
     Ref_    ( other->Ref() ),
     printLevel_  ( other->printLevel() ),
@@ -525,12 +539,14 @@ public:
     isHF    ( other->isHF ),
     isDFT   ( other->isDFT ),
     guess_  ( other->guess() ),
-    elecField_   ( other->elecField() ),
+    elecField_   ( other->elecField() )
+/*
     basisset_    ( other->basisset() ),    
     molecule_    ( other->molecule() ),
     fileio_      ( other->fileio() ),
     aointegrals_ ( other->aointegrals() ) {
-
+*/
+    {
     this->alloc();
 
 /*
@@ -548,15 +564,18 @@ public:
       *this->fock_[iF] = *other->fock_[iF];
       *this->PT_[iF]   = *other->PT_[iF];
     }
+/*
     *this->moA_ = *other->moA_;
     if(this->nTCS_ == 2 and !this->isClosedShell)
       *this->moB_ = *other->moB_;
+*/
     
   };
 
   template<typename U>
   SingleSlater(U *);
 
+/*
   // Link up to all of the other worker classes
   inline void communicate(Molecule &mol, BasisSet&basis, AOIntegrals &aoints, 
     FileIO &fileio, CQMemManager &memManager){
@@ -567,10 +586,12 @@ public:
     this->aointegrals_ = &aoints;
     this->memManager_  = &memManager;
   }
+*/
 
   // Initialize Meta data from other worker classes
   inline void initMeta(){
-    
+    Reference<T>::initMeta();
+/*
     this->checkWorkers();
 
     this->nBasis_      = this->basisset_->nBasis();
@@ -588,6 +609,7 @@ public:
     this->nVirA_ = this->nBasis_ - this->nOccA_;
     this->nAE_   = this->nOccA_;
     this->nBE_   = this->nOccB_;
+*/
 
     if(this->doDIIS && this->diisAlg_ == DIIS_ALGORITHM::NO_DIIS_SET)
       this->diisAlg_ = DIIS_ALGORITHM::CDIIS;
@@ -603,9 +625,11 @@ public:
   void dealloc();
 
   //set private data
+/*
   inline void setNBasis(int nBasis)       { this->nBasis_ = nBasis;    };
   inline void setNAE(int nAE)             { this->nAE_ = nAE;          };
   inline void setNBE(int nBE)             { this->nBE_ = nBE;          };
+*/
   inline void setRef(int Ref)             { this->Ref_ = Ref;          };
   inline void setPrintLevel(int i)        { this->printLevel_ = i;     };
   inline void setSCFDenTol(double x)      { this->denTol_ = x;         };
@@ -635,6 +659,7 @@ public:
 
 
   // access to private data
+/*
   inline int nBasis()    { return this->nBasis_;                  };
   inline int nTT()       { return this->nTT_;                     };
   inline int nShell()    { return this->nShell_;                  };
@@ -644,10 +669,13 @@ public:
   inline int nOccB()     { return this->nOccB_;                   };     
   inline int nVirA()     { return this->nVirA_;                   };
   inline int nVirB()     { return this->nVirB_;                   };
+*/
   inline int Ref()       { return this->Ref_;                     };      
-  inline int multip()    { return this->multip_;                  };
+//inline int multip()    { return this->multip_;                  };
+/*
   inline int nOVA()      { return nOccA_*nVirA_;                  };
   inline int nOVB()      { return nOccB_*nVirB_;                  };
+*/
   inline int DFTKernel() { return this->DFTKernel_ ;              };
   inline int printLevel(){ return this->printLevel_;              };
   inline std::vector<double> mullPop()   { return this->mullPop_; };
@@ -664,8 +692,10 @@ public:
 //inline TMap* coulombB()             { return this->coulombB_.get(); };
 //inline TMap* exchangeA()            { return this->exchangeA_.get();};
 //inline TMap* exchangeB()            { return this->exchangeB_.get();};
+/*
   inline TMap* moA()                  { return this->moA_.get();      };
   inline TMap* moB()                  { return this->moB_.get();      };
+*/
 //inline TMap* vXA()                  { return this->vXA_.get();      };
 //inline TMap* vXB()                  { return this->vXB_.get();      };
 //inline TMap* vCorA()                { return this->vCorA_.get();    };
@@ -684,10 +714,12 @@ public:
   inline TMap* PTMx()           { return this->PTMx_.get();};
   inline std::vector<TMap*>& PT(){ return this->PT_;};
 
+/*
   inline BasisSet     * basisset()       { return this->basisset_;       };
   inline Molecule     * molecule()       { return this->molecule_;       };
   inline FileIO       * fileio()         { return this->fileio_;         };
   inline AOIntegrals  * aointegrals()    { return this->aointegrals_;    };
+*/
 //inline TwoDGrid     * twodgrid()       { return this->twodgrid_;       };
   inline std::string SCFType()           { return this->SCFType_;        };
   inline int         guess()             { return this->guess_;          };

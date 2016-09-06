@@ -41,6 +41,7 @@ tools
 qn
 #numdiff
 quantum
+reference
 grid2
 dft
 ${EXTERNAL_CQ_DEPS})

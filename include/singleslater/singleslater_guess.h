@@ -293,8 +293,8 @@ void SingleSlater<T>::scaleDen(){
     double TB = 0.5 * (TS - TZ);
 
 
-    (*this->NBSqScratch_) *= T(this->nOccA_) / T(TA);
-    (*this->NBSqScratch2_) *= T(this->nOccB_) / T(TB);
+    (*this->NBSqScratch_) *= T(this->nOA_) / T(TA);
+    (*this->NBSqScratch2_) *= T(this->nOB_) / T(TB);
 
     (*this->onePDMScalar_) = (*this->NBSqScratch_) + (*this->NBSqScratch2_);
     (*this->onePDMMz_)     = (*this->NBSqScratch_) - (*this->NBSqScratch2_);

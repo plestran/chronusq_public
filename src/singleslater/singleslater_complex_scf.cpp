@@ -107,17 +107,17 @@ void SingleSlater<dcomplex>::formNO(){
 template<>
 void SingleSlater<dcomplex>::mixOrbitalsComplex(){
   this->fileio_->out << "** Mixing HOMO and LUMO for Complex Guess **" << endl;
-  auto nO = this->nAE_ + this->nBE_;
+//auto nO = this->nAE_ + this->nBE_;
   if (this->Ref_==TCS) {
-    auto HOMO = this->moA_->col(nO-1);
-    auto LUMO = this->moA_->col(nO);
-    this->moA_->col(nO-1) = std::sqrt(0.5) * (HOMO + math.ii*LUMO);
-    this->moA_->col(nO)   = std::sqrt(0.5) * (HOMO - math.ii*LUMO);
+    auto HOMO = this->moA_->col(this->nO_-1);
+    auto LUMO = this->moA_->col(this->nO_);
+    this->moA_->col(this->nO_-1) = std::sqrt(0.5) * (HOMO + math.ii*LUMO);
+    this->moA_->col(this->nO_)   = std::sqrt(0.5) * (HOMO - math.ii*LUMO);
   } else {
-    auto HOMO = this->moA_->col(this->nOccA_-1);
-    auto LUMO = this->moA_->col(this->nOccA_);
-    this->moA_->col(this->nOccA_-1) = std::sqrt(0.5) * (HOMO + math.ii*LUMO);
-    this->moA_->col(this->nOccA_)   = std::sqrt(0.5) * (HOMO - math.ii*LUMO);
+    auto HOMO = this->moA_->col(this->nOA_-1);
+    auto LUMO = this->moA_->col(this->nOA_);
+    this->moA_->col(this->nOA_-1) = std::sqrt(0.5) * (HOMO + math.ii*LUMO);
+    this->moA_->col(this->nOA_)   = std::sqrt(0.5) * (HOMO - math.ii*LUMO);
   }
 }
 

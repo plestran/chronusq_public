@@ -235,6 +235,11 @@ namespace ChronusQ {
     template<typename U>
     Quantum(const U&);
 
+    // Link up to all of the other worker classes
+    inline void communicate(CQMemManager &memManager){
+      this->memManager_ = &memManager;
+    }
+
     virtual void formDensity() = 0;
     inline void allocDensity(unsigned int N) {
       auto NSq = N*N;

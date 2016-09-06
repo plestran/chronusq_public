@@ -28,8 +28,9 @@
  **********************/
 template<typename T>
 void SingleSlater<T>::alloc(){
-  this->checkMeta();
-  Quantum<T>::alloc(this->nBasis_); // Allocate Den -> Quantum
+//this->checkMeta();
+//  Quantum<T>::alloc(this->nBasis_); // Allocate Den -> Quantum
+  Reference<T>::alloc(); // Allocate Den -> Reference
   this->allocOp();
   this->allocScr();
 
@@ -233,6 +234,7 @@ void SingleSlater<T>::allocOp(){
     this->PTMy_->setZero();
   }
 
+/*
   // MO Coeffs
   this->moA_ = std::unique_ptr<TMap>(
     new TMap(this->memManager_->template malloc<T>(NBTSq),NBT,NBT)); 
@@ -243,6 +245,7 @@ void SingleSlater<T>::allocOp(){
 
     this->moB_->setZero();
   }
+*/
 
   // MO Eigenenergies
   this->epsA_ = std::unique_ptr<RealMap>(

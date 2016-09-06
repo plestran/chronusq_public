@@ -28,7 +28,9 @@ namespace ChronusQ {
 template<>
 template<>
 SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other) :
-  Quantum<dcomplex>::Quantum<dcomplex>(dynamic_cast<Quantum<double>&>(*other)){
+  Reference<dcomplex>::Reference<dcomplex>(
+    dynamic_cast<Reference<double>&>(*other)){
+/*
     this->nBasis_ = other->nBasis();
     this->nTT_    = other->nTT();
     this->nAE_    = other->nAE();
@@ -38,6 +40,7 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other) :
     this->nVirA_  = other->nVirA();
     this->nVirB_  = other->nVirB();
     this->multip_   = other->multip();
+*/
     this->energyNuclei = other->energyNuclei;
     this->Ref_    = other->Ref();
     this->printLevel_ = other->printLevel();
@@ -46,12 +49,15 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other) :
     this->isDFT  = other->isDFT;
     this->guess_ = other->guess();
     this->elecField_   = (other->elecField());
+/*
     this->basisset_    = other->basisset();    
     this->molecule_    = other->molecule();
     this->fileio_      = other->fileio();
     this->aointegrals_ = other->aointegrals();
+*/
 
-    this->allocOp();
+//  this->allocOp();
+    this->alloc();
 
 /*
     this->fockA_->real()       = *other->fockA();
@@ -68,9 +74,11 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other) :
       this->fock_[iF]->real() = *other->fock()[iF];
       this->PT_[iF]->real()   = *other->PT()[iF];
     }
+/*
     this->moA_->real() = *other->moA();
     if(this->nTCS_ == 2 and !this->isClosedShell)
       this->moB_->real() = *other->moB();
+*/
 
 }
 

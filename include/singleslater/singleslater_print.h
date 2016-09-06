@@ -43,10 +43,14 @@ void SingleSlater<T>::printEnergy(){
  **********************************/
 template<typename T>
 void SingleSlater<T>::printInfo() {
-  this->fileio_->out<<"\nSingle Slater Determinent Wave Function Information:"<<endl;
-  this->fileio_->out<<std::setw(15)<<"nOccA ="<<std::setw(8)<<this->nOccA_<<std::setw(5)<<" "<<std::setw(20)<<"nVirA ="<<std::setw(8)<<this->nVirA_<<endl;
-  this->fileio_->out<<std::setw(15)<<"nOccB ="<<std::setw(8)<<this->nOccB_<<std::setw(5)<<" "<<std::setw(20)<<"nVirB ="<<std::setw(8)<<this->nVirB_<<endl;
-  this->fileio_->out<<std::setw(15)<<"Multiplicity ="<<std::setw(8)<<this->multip_<<endl;
+  this->fileio_->out << "\nSingle Slater Determinent Wave Function Information:" << endl;
+  this->fileio_->out << std::setw(15) << "nOA = " << std::setw(8) << this->nOA_
+                     << std::setw(5)  << " "      
+                     << std::setw(20) << "nVA = " << std::setw(8) << this->nVA_ << endl;
+  this->fileio_->out << std::setw(15) << "nOB = " << std::setw(8) << this->nOB_
+                     << std::setw(5)  << " "      
+                     << std::setw(20) << "nVB = " << std::setw(8) << this->nVB_ << endl;
+  this->fileio_->out << std::setw(15) << "Multiplicity = " << std::setw(8) << this->multip_ << endl;
 };
 /***********************************************
  * Print the Multipole Moments (Electric Only) *
