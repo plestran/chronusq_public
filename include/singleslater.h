@@ -29,7 +29,7 @@
 #include <grid.h>
 #include <grid2.h>
 //#include <quantum.h>
-#include <reference.h>
+#include <wavefunction.h>
 #include <dft.h>
 
 /****************************/
@@ -69,7 +69,7 @@ enum DIIS_ALGORITHM {
 };
 
 template<typename T>
-class SingleSlater : public Reference<T> {
+class SingleSlater : public WaveFunction<T> {
   typedef Eigen::Matrix<T,Dynamic,Dynamic,ColMajor> TMatrix;
   typedef Eigen::Map<TMatrix> TMap;
   typedef Eigen::Matrix<T,Dynamic,1,ColMajor> TVec;
@@ -429,7 +429,7 @@ public:
 
 
   // constructor & destructor
-  SingleSlater() : Reference<T>(),
+  SingleSlater() : WaveFunction<T>(),
 /*
     nBasis_ (0),
     nShell_ (0),
@@ -520,7 +520,7 @@ public:
   ~SingleSlater() { ; };
 
   SingleSlater(SingleSlater *other) : 
-    Reference<T>(dynamic_cast<Reference<T>&>(*other)),
+    WaveFunction<T>(dynamic_cast<WaveFunction<T>&>(*other)),
 
 /*
     nBasis_ ( other->nBasis() ),
@@ -591,7 +591,7 @@ public:
 
   // Initialize Meta data from other worker classes
   inline void initMeta(){
-    Reference<T>::initMeta();
+    WaveFunction<T>::initMeta();
   //this->checkWorkers();
 
 /*

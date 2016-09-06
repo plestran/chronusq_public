@@ -1,7 +1,8 @@
 #ifndef INCLUDED_PSCF
 #define INCLUDED_PSCF
 
-class PostSCF {
+template <typename T>
+class PostSCF : {
   // Single Particle Dims
   int nO_;
   int nV_;

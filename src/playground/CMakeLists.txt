@@ -16,7 +16,7 @@ target_link_libraries(playground LINK_PUBLIC basisset)
 target_link_libraries(playground LINK_PUBLIC qn)
 target_link_libraries(playground LINK_PUBLIC dft)
 target_link_libraries(playground LINK_PUBLIC quantum)
-target_link_libraries(playground LINK_PUBLIC reference)
+target_link_libraries(playground LINK_PUBLIC wavefunction)
 target_link_libraries(playground LINK_PUBLIC fileio)
 target_link_libraries(playground LINK_PUBLIC ${EXTERNAL_CQ_DEPS})
 

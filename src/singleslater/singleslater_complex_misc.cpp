@@ -28,8 +28,8 @@ namespace ChronusQ {
 template<>
 template<>
 SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other) :
-  Reference<dcomplex>::Reference<dcomplex>(
-    dynamic_cast<Reference<double>&>(*other)){
+  WaveFunction<dcomplex>::WaveFunction<dcomplex>(
+    dynamic_cast<WaveFunction<double>&>(*other)){
 /*
     this->nBasis_ = other->nBasis();
     this->nTT_    = other->nTT();

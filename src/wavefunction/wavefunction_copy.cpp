@@ -1,8 +1,8 @@
-#include <reference.h>
+#include <wavefunction.h>
 namespace ChronusQ {
 template<>
 template<>
-Reference<dcomplex>::Reference(const Reference<double> &other) :
+WaveFunction<dcomplex>::WaveFunction(const WaveFunction<double> &other) :
   Quantum<dcomplex>::Quantum<dcomplex>(
     dynamic_cast<const Quantum<double>&>(other)),
   basisset_     (other.basisset()   ),               

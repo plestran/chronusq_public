@@ -1,5 +1,5 @@
 template <typename T>
-void Reference<T>::alloc() {
+void WaveFunction<T>::alloc() {
   this->checkMeta();
   Quantum<T>::alloc(this->nBasis_);
 
