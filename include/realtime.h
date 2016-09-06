@@ -270,7 +270,7 @@ public:
   // Getters
   inline double currentTime(){ return this->currentTime_;};
   inline double maxTime(){ return (this->maxSteps_)*(this->stepSize_);};
-  inline double Energy(){ return this->ssPropagator_->totalEnergy;};
+  inline double Energy(){ return this->ssPropagator_->totalEnergy();};
   inline double EDx(){ return this->ssPropagator_->elecDipole()[0]/phys.debye;};
   inline double EDy(){ return this->ssPropagator_->elecDipole()[1]/phys.debye;};
   inline double EDz(){ return this->ssPropagator_->elecDipole()[2]/phys.debye;};

@@ -40,8 +40,8 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other) :
     this->nVirA_  = other->nVirA();
     this->nVirB_  = other->nVirB();
     this->multip_   = other->multip();
-*/
     this->energyNuclei = other->energyNuclei;
+*/
     this->Ref_    = other->Ref();
     this->printLevel_ = other->printLevel();
     this->doDIIS = other->doDIIS;

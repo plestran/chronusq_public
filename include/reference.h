@@ -34,6 +34,11 @@ protected:
   int nVB_;
   int multip_;
 
+  // Energies
+  double energyNuclei_; ///< N-N Repulsion Energy
+  double totalEnergy_;  ///< Sum of all energetic contributions
+
+  // Matricies
   std::unique_ptr<TMap>  moA_; ///< Alpha or Full MO Coefficients
   std::unique_ptr<TMap>  moB_; ///< Beta MO Coefficient Matrix
 
@@ -71,39 +76,43 @@ protected:
 public:
 
   Reference() : Quantum<T>(),
-    basisset_    (NULL),               
-    molecule_    (NULL),               
-    fileio_      (NULL),                 
-    aointegrals_ (NULL),            
-    nBasis_      (0),
-    nShell_      (0),
-    nTT_         (0),
-    nO_          (0),
-    nV_          (0),
-    nOA_         (0),
-    nOB_         (0),
-    nVA_         (0),
-    nVB_         (0),
-    multip_      (0),
-    moA_         (nullptr),        
-    moB_         (nullptr) { ; }; 
+    basisset_     (NULL),               
+    molecule_     (NULL),               
+    fileio_       (NULL),                 
+    aointegrals_  (NULL),            
+    nBasis_       (0),
+    nShell_       (0),
+    nTT_          (0),
+    nO_           (0),
+    nV_           (0),
+    nOA_          (0),
+    nOB_          (0),
+    nVA_          (0),
+    nVB_          (0),
+    multip_       (0),
+    energyNuclei_ (0.0),
+    totalEnergy_  (0.0),
+    moA_          (nullptr),        
+    moB_          (nullptr) { ; }; 
 
   Reference(Reference &other) :
     Quantum<T>(dynamic_cast<Quantum<T>&>(other)),
-    basisset_    (other.basisset_   ),               
-    molecule_    (other.molecule_   ),               
-    fileio_      (other.fileio_     ),                 
-    aointegrals_ (other.aointegrals_),            
-    nBasis_      (other.nBasis_     ),
-    nShell_      (other.nShell_     ),
-    nTT_         (other.nTT_        ),
-    nO_          (other.nO_         ),
-    nV_          (other.nV_         ),
-    nOA_         (other.nOA_        ),
-    nOB_         (other.nOB_        ),
-    nVA_         (other.nVA_        ),
-    nVB_         (other.nVB_        ),
-    multip_      (other.multip_     ) {
+    basisset_     (other.basisset_   ),               
+    molecule_     (other.molecule_   ),               
+    fileio_       (other.fileio_     ),                 
+    aointegrals_  (other.aointegrals_),            
+    nBasis_       (other.nBasis_     ),
+    nShell_       (other.nShell_     ),
+    nTT_          (other.nTT_        ),
+    nO_           (other.nO_         ),
+    nV_           (other.nV_         ),
+    nOA_          (other.nOA_        ),
+    nOB_          (other.nOB_        ),
+    nVA_          (other.nVA_        ),
+    nVB_          (other.nVB_        ),
+    multip_       (other.multip_     ),
+    energyNuclei_ (other.energyNuclei_),
+    totalEnergy_  (other.totalEnergy_){
 
     this->alloc();
     *this->moA_ = *other.moA_;
@@ -129,10 +138,11 @@ public:
   inline void initMeta(){
     this->checkWorkers();
 
-    this->nBasis_      = this->basisset_->nBasis();
-    this->nTT_         = this->nBasis_ * (this->nBasis_ + 1) / 2;
-    this->multip_      = this->molecule_->multip();
-    this->nShell_      = this->basisset_->nShell();
+    this->nBasis_       = this->basisset_->nBasis();
+    this->nTT_          = this->nBasis_ * (this->nBasis_ + 1) / 2;
+    this->multip_       = this->molecule_->multip();
+    this->nShell_       = this->basisset_->nShell();
+    this->energyNuclei_ = this->molecule_->energyNuclei();
 
     int nTotalE  = this->molecule_->nTotalE();
     int nSingleE = this->multip_ - 1;
@@ -146,6 +156,9 @@ public:
   }
 
   void alloc();
+
+  // Polymorphism...
+  virtual void computeEnergy() = 0;
     
   // Quantum dependencies
   virtual void formDensity() = 0;
@@ -162,6 +175,10 @@ public:
   inline int nO()      const  { return this->nO_;     };     
   inline int nV()      const  { return this->nV_;     };
   inline int multip()  const  { return this->multip_; };
+
+  inline double energyNuclei() const { return this->energyNuclei_; };
+  inline double totalEnergy()  const { return this->totalEnergy_;  };
+
   inline TMap* moA()   const  { return this->moA_.get(); };
   inline TMap* moB()   const  { return this->moB_.get(); };
   inline BasisSet     * basisset()    const   { return this->basisset_;    };

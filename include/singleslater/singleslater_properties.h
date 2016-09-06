@@ -88,9 +88,10 @@ void SingleSlater<T>::computeEnergy(){
     }
  
 
-    this->totalEnergy= this->energyOneE + this->energyTwoE + this->energyNuclei;
+    this->totalEnergy_= 
+      this->energyOneE + this->energyTwoE + this->energyNuclei_;
 #ifdef CQ_ENABLE_MPI
-  MPI_Bcast(&this->totalEnergy,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
+  MPI_Bcast(&this->totalEnergy_,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
   MPI_Bcast(&this->energyOneE,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
   MPI_Bcast(&this->energyTwoE,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 #endif

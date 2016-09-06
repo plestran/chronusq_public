@@ -31,8 +31,8 @@ void SingleSlater<T>::printEnergy(){
   this->fileio_->out<<"\nEnergy Information:"<<endl;
   this->fileio_->out<<std::right<<std::setw(30)<<std::fixed<<"E(one electron) = "<<std::setw(15)<<this->energyOneE<<std::setw(5)<<" Eh "<<endl;
   this->fileio_->out<<std::right<<std::setw(30)<<std::fixed<<"E(two electron) = "<<std::setw(15)<<this->energyTwoE<<std::setw(5)<<" Eh "<<endl;
-  this->fileio_->out<<std::right<<std::setw(30)<<std::fixed<<"E(nuclear repulsion) = "<<std::setw(15)<<this->energyNuclei<<std::setw(5)<<" Eh "<<endl;
-  this->fileio_->out<<std::right<<std::setw(30)<<std::fixed<<"E(total) = "<<std::setw(15)<<this->totalEnergy<<std::setw(5)<<" Eh "<<endl;
+  this->fileio_->out<<std::right<<std::setw(30)<<std::fixed<<"E(nuclear repulsion) = "<<std::setw(15)<<this->energyNuclei_<<std::setw(5)<<" Eh "<<endl;
+  this->fileio_->out<<std::right<<std::setw(30)<<std::fixed<<"E(total) = "<<std::setw(15)<<this->totalEnergy_<<std::setw(5)<<" Eh "<<endl;
 };
 /******************************
  * Print Energy Contributions *
@@ -449,7 +449,7 @@ void SingleSlater<T>::printSCFIter(int iter, double EDel,double PARMS,double PBR
   this->fileio_->out << std::setw(16) << std::left 
                      << "  SCFIt: " + std::to_string(iter+1);
   this->fileio_->out << std::setw(18) << std::fixed << std::setprecision(10)
-                     << std::left << this->totalEnergy;
+                     << std::left << this->totalEnergy_;
   this->fileio_->out << std::setw(14) << std::scientific << std::right 
                      << std::setprecision(7) << EDel;
   this->fileio_->out << "   ";

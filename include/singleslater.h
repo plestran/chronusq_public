@@ -404,9 +404,9 @@ public:
 
   double   energyOneE; ///< One-bodied operator tensors traced with Density
   double   energyTwoE; ///< Two-bodied operator tensors traced with Density
-  double   energyNuclei; ///< N-N Repulsion Energy
+//double   energyNuclei; ///< N-N Repulsion Energy
   double   energyExc;
-  double   totalEnergy; ///< Sum of all energetic contributions
+//double   totalEnergy; ///< Sum of all energetic contributions
 
 //double   totalEx;     ///< LDA Exchange
 //double   totalEcorr;  ///< Total VWN Energy
@@ -465,9 +465,10 @@ public:
     isGGA        (false),
     energyOneE   (0.0),
     energyTwoE   (0.0),
-    energyNuclei (0.0),
-    energyExc    (0.0),
-    totalEnergy  (0.0){
+//  energyNuclei (0.0),
+//  energyExc    (0.0),
+//  totalEnergy  (0.0){
+    energyExc    (0.0){
 
 
     // Standard Values
@@ -532,7 +533,7 @@ public:
     nVirB_  ( other->nVirB() ),
     multip_ ( other->multip() ),
 */
-    energyNuclei ( other->energyNuclei ),
+//  energyNuclei ( other->energyNuclei ),
     Ref_    ( other->Ref() ),
     printLevel_  ( other->printLevel() ),
     doDIIS  ( other->doDIIS ),
@@ -591,16 +592,18 @@ public:
   // Initialize Meta data from other worker classes
   inline void initMeta(){
     Reference<T>::initMeta();
-/*
-    this->checkWorkers();
+  //this->checkWorkers();
 
+/*
     this->nBasis_      = this->basisset_->nBasis();
     this->nTT_         = this->nBasis_ * (this->nBasis_ + 1) / 2;
     this->multip_      = this->molecule_->multip();
     this->nShell_      = this->basisset_->nShell();
+*/
     this->maxMultipole_= this->aointegrals_->maxMultipole();
-    this->energyNuclei = this->molecule_->energyNuclei();
+//  this->energyNuclei = this->molecule_->energyNuclei();
 
+/*
     int nTotalE  = this->molecule_->nTotalE();
     int nSingleE = this->multip_ - 1;
     this->nOccB_ = (nTotalE - nSingleE)/2;

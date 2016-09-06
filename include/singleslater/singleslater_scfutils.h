@@ -236,9 +236,9 @@ template<typename T>
 SCFConvergence SingleSlater<T>::evalConver3(){
 
   // Energy Convergence
-  double EOld = this->totalEnergy;
+  double EOld = this->totalEnergy_;
   this->computeEnergy();
-  double EDelta = this->totalEnergy - EOld;
+  double EDelta = this->totalEnergy_ - EOld;
 
   double PSRMS(0),PMRMS(0);
   // Write D(M) - D(M-1) to disc

@@ -49,7 +49,7 @@ void SingleSlater<T>::SCF3(){
   bool doLevelShift;
   if(this->printLevel_ > 0){
     this->fileio_->out << "    *** INITIAL GUESS ENERGY = " 
-      << this->totalEnergy << " Eh ***" << endl;
+      << this->totalEnergy_ << " Eh ***" << endl;
   }
 
   this->doIncFock_ = this->isPrimary and !this->isDFT;
@@ -146,7 +146,7 @@ void SingleSlater<T>::SCF3(){
       << this->SCFTypeShort_ << ") = ";
     this->fileio_->out 
       << std::fixed << std::setprecision(10) 
-      << this->totalEnergy << "  Eh after  " << iter + 1 
+      << this->totalEnergy_ << "  Eh after  " << iter + 1 
       << "  SCF Iterations" << endl;
     this->fileio_->out << bannerEnd <<endl;
   }
