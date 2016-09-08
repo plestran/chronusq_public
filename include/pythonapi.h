@@ -27,7 +27,7 @@
 #include <global.h>
 #include <memory.h>
 #include <atoms.h>
-#include <numdiff.h>
+//#include <numdiff.h>
 #include <response.h>
 
 using namespace boost::python;
@@ -43,8 +43,8 @@ using ChronusQ::RealTime;
 using ChronusQ::CErr;
 using ChronusQ::SDResponse;
 using ChronusQ::CQMemManager;
-using ChronusQ::NumericalDifferentiation;
-using ChronusQ::RESPONSE_TYPE;
+//using ChronusQ::NumericalDifferentiation;
+//using ChronusQ::RESPONSE_TYPE;
 using ChronusQ::ATOMIC_PARTITION;
 using ChronusQ::GRID_TYPE;
 

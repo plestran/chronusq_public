@@ -188,7 +188,7 @@ namespace ChronusQ {
       this->maxMultipole_ = 3;
 //    this->isScattered_ = false;
 
-
+      cout << "In Quantum Constructor" << endl;
       this->clearElecMultipole();
     };
 
@@ -237,6 +237,7 @@ namespace ChronusQ {
 
     // Link up to all of the other worker classes
     inline void communicate(CQMemManager &memManager){
+      cout << "In Quantum Communicate" << endl;
       this->memManager_ = &memManager;
     }
 

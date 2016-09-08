@@ -184,8 +184,10 @@ class SingleSlater : public WaveFunction<T> {
   std::unique_ptr<TMap>  moA_;        ///< Alpha or Full MO Coefficients
   std::unique_ptr<TMap>  moB_;        ///< Beta MO Coefficient Matrix
 */
+/*
   std::unique_ptr<RealMap>  epsA_;       ///< Alpha or Full Eigenenergies
   std::unique_ptr<RealMap>  epsB_;       ///< Beta Fock Eigenenergie
+*/
 
 //std::unique_ptr<TMap>  PTA_;        ///< Alpha or Full Perturbation Tensor
 //std::unique_ptr<TMap>  PTB_;        ///< Beta Perturbation Tensor
@@ -447,9 +449,9 @@ public:
 /*
     moA_    (nullptr),        
     moB_    (nullptr),        
-*/
     epsA_   (nullptr),    
     epsB_   (nullptr),    
+*/
     vXCScalar_ (nullptr),       
     vXCMz_ (nullptr),       
     vXCMy_ (nullptr),       
@@ -707,8 +709,10 @@ public:
   inline TMap* vXCMz()                { return this->vXCMz_.get();    };
   inline TMap* vXCMy()                { return this->vXCMy_.get();    };
   inline TMap* vXCMx()                { return this->vXCMx_.get();    };
+/*
   inline RealMap* epsA()              { return this->epsA_.get();     };
   inline RealMap* epsB()              { return this->epsB_.get();     };
+*/
 //inline TMap* PTA()                  { return this->PTA_.get();      };
 //inline TMap* PTB()                  { return this->PTB_.get();      };
   inline TMap* PTScalar()           { return this->PTScalar_.get();};

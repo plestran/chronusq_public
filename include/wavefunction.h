@@ -41,6 +41,8 @@ protected:
   // Matricies
   std::unique_ptr<TMap>  moA_; ///< Alpha or Full MO Coefficients
   std::unique_ptr<TMap>  moB_; ///< Beta MO Coefficient Matrix
+  std::unique_ptr<RealMap>  epsA_;       ///< Alpha or Full Eigenenergies
+  std::unique_ptr<RealMap>  epsB_;       ///< Beta Fock Eigenenergie
 
   inline void checkWorkers(){
     if(this->fileio_  == NULL) 
@@ -181,6 +183,8 @@ public:
 
   inline TMap* moA()   const  { return this->moA_.get(); };
   inline TMap* moB()   const  { return this->moB_.get(); };
+  inline RealMap* epsA()              { return this->epsA_.get();     };
+  inline RealMap* epsB()              { return this->epsB_.get();     };
   inline BasisSet     * basisset()    const   { return this->basisset_;    };
   inline Molecule     * molecule()    const   { return this->molecule_;    };
   inline FileIO       * fileio()      const   { return this->fileio_;      };

@@ -247,6 +247,7 @@ void SingleSlater<T>::allocOp(){
   }
 */
 
+/*
   // MO Eigenenergies
   this->epsA_ = std::unique_ptr<RealMap>(
     new RealMap(this->memManager_->template malloc<double>(NBTSq),NBT,NBT)); 
@@ -256,6 +257,7 @@ void SingleSlater<T>::allocOp(){
       new RealMap(this->memManager_->template malloc<double>(NBTSq),NBT,NBT)); 
     this->epsB_->setZero();
   }
+*/
 
 
   if(this->isDFT) {

@@ -3,8 +3,9 @@
 #include <quantum.h>
 #include <wavefunction.h>
 
+namespace ChronusQ {
 template <typename T>
-class PostSCF : public Quantum<T>{
+class PostSCF : public Quantum<T> {
   typedef Eigen::Matrix<T,Dynamic,Dynamic,ColMajor> TMatrix;
   typedef Eigen::Map<TMatrix> TMap;
   typedef Eigen::Matrix<T,Dynamic,1,ColMajor> TVec;
@@ -57,7 +58,8 @@ public:
   PostSCF() : Quantum<T>(),
     reference_   (NULL),
     aointegrals_ (NULL),
-    fileio_      (NULL){ ; };
+    fileio_      (NULL)
+    { cout << "In PostSCF Constructor" << endl; };
 
   PostSCF(PostSCF &other):
     Quantum<T>(dynamic_cast<Quantum<T>&>(other)),
@@ -67,14 +69,22 @@ public:
       this->initMeta(); 
   };
 
-  inline void communicate(WaveFunction &wfn) {
+  // Quantum compliant
+  virtual void formDensity() = 0;
+  virtual void computeSSq() = 0;
+
+  inline void communicate(WaveFunction<T> &wfn, CQMemManager &memManager) {
+    Quantum<T>::communicate(memManager);
+    cout << "In PostSCF Communicate" << endl;
     this->reference_ = &wfn;
   };
 
   inline void initMeta() {
+    cout << "In PostSCF initMeta" << endl;
     this->aointegrals_ = this->reference_->aointegrals();
     this->fileio_      = this->reference_->fileio();
 
+    // Grab info from WaveFunction
     this->nOA_ = this->reference_->nOA();
     this->nOB_ = this->reference_->nOB();
     this->nVA_ = this->reference_->nVA();
@@ -83,6 +93,12 @@ public:
     this->nV_  = this->reference_->nV();
 
     this->nBasis_ = this->reference_->nBasis();
+
+    // Grab info from Quantum
+    this->nTCS_         = this->reference_->nTCS();
+    this->maxMultipole_ = this->reference_->maxMultipole();
+    this->memManager_   = this->reference_->memManager();
+    this->isClosedShell = this->reference_->isClosedShell;
 
     this->nOO_   = this->nO_  * this->nO_;
     this->nOAOA_ = this->nOA_ * this->nOA_;
@@ -111,8 +127,60 @@ public:
     this->nVV_LT_   = this->nV_  * (this->nV_  - 1)/2;
     this->nVAVA_LT_ = this->nVA_ * (this->nVA_ - 1)/2;
     this->nVBVB_LT_ = this->nVB_ * (this->nVB_ - 1)/2;
+
+    cout << "PostSCF Meta" << endl;
+    cout << this->nOO_   << endl;
+    cout << this->nOAOA_ << endl;
+    cout << this->nOAOB_ << endl;
+    cout << this->nOBOB_ << endl;
+    cout << this->nVV_   << endl;
+    cout << this->nVAVA_ << endl;
+    cout << this->nVAVB_ << endl;
+    cout << this->nVBVB_ << endl;
+    cout << this->nOV_   << endl;
+    cout << this->nOAVA_ << endl;
+    cout << this->nOAVB_ << endl;
+    cout << this->nOBVA_ << endl;
+    cout << this->nOBVB_ << endl;
   };
 
-}
+  int nOO() const       { return this->nOO_; };       
+  int nOV() const       { return this->nOV_; };
+  int nVV() const       { return this->nVV_; };
+  int nOAOA() const     { return this->nOAOA_; };
+  int nOAOB() const     { return this->nOAOB_; };
+  int nOBOB() const     { return this->nOBOB_; };
+  int nOAVA() const     { return this->nOAVA_; };
+  int nOAVB() const     { return this->nOAVB_; };
+  int nOBVA() const     { return this->nOBVA_; };
+  int nOBVB() const     { return this->nOBVB_; };
+  int nVAVA() const     { return this->nVAVA_; };
+  int nVAVB() const     { return this->nVAVB_; };
+  int nVBVB() const     { return this->nVBVB_; };
+                                             
+  int nOO_SLT() const   { return this->nOO_SLT_; };
+  int nVV_SLT() const   { return this->nVV_SLT_; };
+  int nOAOA_SLT() const { return this->nOAOA_SLT_; };
+  int nOBOB_SLT() const { return this->nOBOB_SLT_; };
+  int nVAVA_SLT() const { return this->nVAVA_SLT_; };
+  int nVBVB_SLT() const { return this->nVBVB_SLT_; };
+                                             
+  int nOO_LT() const    { return this->nOO_LT_; };
+  int nVV_LT() const    { return this->nVV_LT_; };
+  int nOAOA_LT() const  { return this->nOAOA_LT_; };
+  int nOBOB_LT() const  { return this->nOBOB_LT_; };
+  int nVAVA_LT() const  { return this->nVAVA_LT_; };
+  int nVBVB_LT() const  { return this->nVBVB_LT_; };
 
+};
+
+template <typename T>
+class DummyPostSCF : public PostSCF<T> {
+
+public:
+  DummyPostSCF() : PostSCF<T>() { ; };
+  void formDensity(){ };
+  void computeSSq() { };
+};
+}
 #endif
