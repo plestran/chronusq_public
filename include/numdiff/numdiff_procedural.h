@@ -45,7 +45,7 @@ void NumericalDifferentiation<T>::cartesianDiff(){
      "NumDiffScr.out","NumDiffScr.rst");
 
   fileioTmp.iniH5Files();
-  fileioTmp.iniStdGroups();
+//fileioTmp.iniStdGroups();
 
   int nAtoms = this->molecule_undisplaced_->nAtoms(); 
   int multip = this->molecule_undisplaced_->multip(); 

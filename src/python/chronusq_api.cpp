@@ -249,21 +249,23 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("forceCart"    ,  &BasisSet::forceCart              )
   ;
 
+/*
   class_<Controls,boost::noncopyable>("Controls",init<>())
     .def("iniControls"  , &Controls::iniControls  )
     .def("printSettings", &Controls::printSettings,
       printSettings_Overload(args("x"),"printSettings docstring")
       )
   ;
+*/
 
   class_<FileIO,boost::noncopyable>("FileIO",init<std::string>())
     .def(init<std::string,std::string>())
     .def(init<std::string,std::string,std::string>())
     .def("write"      , &FileIO::write         )
     .def("iniH5Files" , &FileIO::iniH5Files    )
-    .def("iniStdGroups", &FileIO::iniStdGroups )
-    .def("iniStdSCFFilesDouble", &FileIO::iniStdSCFFilesDouble)
-    .def("iniStdSCFFilesComplex", &FileIO::iniStdSCFFilesComplex)
+//  .def("iniStdGroups", &FileIO::iniStdGroups )
+//  .def("iniStdSCFFilesDouble", &FileIO::iniStdSCFFilesDouble)
+//  .def("iniStdSCFFilesComplex", &FileIO::iniStdSCFFilesComplex)
     .def_readwrite("doRestart", &FileIO::doRestart   )
   ;
 
@@ -298,6 +300,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("DENFIT"   , AOIntegrals::DENFIT)
   ;
 
+/*
   class_<RealTime<double>,boost::noncopyable>("RealTime_double",init<>())
     .def("communicate"  , &RealTime<double>::communicate  )
     .def("initMeta"     , &RealTime<double>::initMeta     )
@@ -359,6 +362,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("doNotTarCSV"  , &RealTime<dcomplex>::doNotTarCSV  )
     .def("setIRstrt"       , &RealTime<dcomplex>::setIRstrt       )
   ;
+*/
 
 /*
   class_<RealTime<double>::Wrapper_PropInfo,boost::noncopyable>("RTD_PropInfo",init<>())
@@ -380,6 +384,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
   ;
 */
 
+/*
   enum_<RealTime<double>::ORTHO>("RealTime_ORTHO"   )
     .value("Lowdin"   , RealTime<double>::Lowdin    )
     .value("Cholesky" , RealTime<double>::Cholesky  )
@@ -437,7 +442,9 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("RXZ", RealTime<dcomplex>::RXZ)
     .value("RYZ", RealTime<dcomplex>::RYZ)
   ;
+*/
 
+/*
   class_<MOIntegrals<double>,boost::noncopyable>("MOIntegrals_double",init<>())
     .def("communicate" , &MOIntegrals<double>::communicate)
     .def("initMeta"    , &MOIntegrals<double>::initMeta   )
@@ -446,7 +453,9 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("communicate" , &MOIntegrals<dcomplex>::communicate)
     .def("initMeta"    , &MOIntegrals<dcomplex>::initMeta   )
   ;
+*/
 
+/*
   class_<SDResponse<double>,boost::noncopyable>("SDResponse_double",init<>())
     .def("communicate"       , &SDResponse<double>::communicate               )
     .def("initMeta"          , &SDResponse<double>::initMeta                  )
@@ -478,7 +487,9 @@ BOOST_PYTHON_MODULE(libpythonapi){
     
     .def_readonly("nIter"    ,&SDResponse<dcomplex>::nQNIter                   )
   ;
+*/
 
+/*
   class_<NumericalDifferentiation<double>,boost::noncopyable>(
     "NumericalDifferentiationDouble",init<>())
     .def("differentiate"  ,&NumericalDifferentiation<double>::differentiate)
@@ -503,7 +514,9 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def_readwrite("computeES2ESNACME", 
                    &NumericalDifferentiation<double>::computeES2ESNACME)
   ;
+*/
 
+/*
   enum_<SDResponse<double>::METHOD>("SDResponse_METHOD")
     .value("INVALID", SDResponse<double>::__invalid    )
     .value("CIS"    , SDResponse<double>::CIS          )
@@ -513,7 +526,9 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("PPCTDA" , SDResponse<double>::PPCTDA       )
     .value("STAB"   , SDResponse<double>::STAB         )
   ;
+*/
 
+/*
   enum_<RESPONSE_TYPE>("RESPONSE_TYPE")
     .value("NOMETHOD", RESPONSE_TYPE::NOMETHOD    )
     .value("CIS"    , RESPONSE_TYPE::CIS          )
@@ -522,6 +537,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("PPTDA" , RESPONSE_TYPE::PPTDA       )
     .value("STAB"   , RESPONSE_TYPE::STAB         )
   ;
+*/
 
   
 

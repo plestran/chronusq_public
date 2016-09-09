@@ -28,9 +28,9 @@ namespace ChronusQ {
 template<>
 template<>
 SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other) :
-  Quantum<dcomplex>::Quantum<dcomplex>(dynamic_cast<Quantum<double>&>(*other)){
-     
-
+  WaveFunction<dcomplex>::WaveFunction<dcomplex>(
+    dynamic_cast<WaveFunction<double>&>(*other)){
+/*
     this->nBasis_ = other->nBasis();
     this->nTT_    = other->nTT();
     this->nAE_    = other->nAE();
@@ -41,25 +41,25 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other) :
     this->nVirB_  = other->nVirB();
     this->multip_   = other->multip();
     this->energyNuclei = other->energyNuclei;
+*/
     this->Ref_    = other->Ref();
-    this->haveDensity = true;
-    this->haveMO	    = true;
-    this->havePT      = true;
     this->printLevel_ = other->printLevel();
     this->doDIIS = other->doDIIS;
     this->isHF   = other->isHF;
     this->isDFT  = other->isDFT;
     this->guess_ = other->guess();
     this->elecField_   = (other->elecField());
+/*
     this->basisset_    = other->basisset();    
     this->molecule_    = other->molecule();
     this->fileio_      = other->fileio();
     this->aointegrals_ = other->aointegrals();
+*/
 
-    auto NB = this->nBasis_*this->nTCS_;
-    auto NBSq = NB*NB;
-    this->allocOp();
+//  this->allocOp();
+    this->alloc();
 
+/*
     this->fockA_->real()       = *other->fockA();
     this->moA_->real()         = *other->moA();
     this->PTA_->real()         = *other->PTA();
@@ -69,6 +69,16 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other) :
       this->moB_->real()         = *other->moB();
       this->PTB_->real()         = *other->PTB();
     }
+*/
+    for(auto iF = 0; iF < this->fock_.size(); iF++){
+      this->fock_[iF]->real() = *other->fock()[iF];
+      this->PT_[iF]->real()   = *other->PT()[iF];
+    }
+/*
+    this->moA_->real() = *other->moA();
+    if(this->nTCS_ == 2 and !this->isClosedShell)
+      this->moB_->real() = *other->moB();
+*/
 
 }
 
@@ -78,6 +88,7 @@ void SingleSlater<dcomplex>::getAlgebraicField(){
   this->algebraicFieldShort_ = "\u2102";
 }
 
+/*
 template<>
 void SingleSlater<dcomplex>::writeSCFFiles(){
 
@@ -96,6 +107,7 @@ void SingleSlater<dcomplex>::writeSCFFiles(){
     );
   }
 }
+*/
 
 template<>
 void SingleSlater<dcomplex>::fixPhase(){

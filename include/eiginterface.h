@@ -34,7 +34,24 @@ const std::string bannerEnd="---------------------------------------------------
 const auto PRINT_SMALL = 1e-10;
 
 
+
 namespace Eigen {
+  template<typename Derived, 
+           typename std::enable_if< std::is_same< typename Derived::Scalar,
+                                                  double >::value,
+                                    int>::type = 0>
+  void prettyPrintSmart(std::ostream &output, const Derived &m, std::string str,
+     std::size_t printWidth = 16) { prettyPrint(output,m,str,printWidth);};
+
+  template<typename Derived, 
+           typename std::enable_if< std::is_same< typename Derived::Scalar,
+                                                  dcomplex >::value,
+                                    int>::type = 0>
+  void prettyPrintSmart(std::ostream &output, const Derived &m, std::string str,
+     std::size_t printWidth = 16) { 
+     prettyPrintComplex(output,m,str,printWidth);
+  };
+
   template<typename Derived>
   void prettyPrint(std::ostream & output, const Derived& m, std::string str,
      size_t printWidth = 16){
@@ -42,8 +59,6 @@ namespace Eigen {
   int i,j,k,n,end,endLT;
   output.precision(10);
   output.fill(' ');
-//output.setf(std::ios::right,std::ios::scientific);
-//output.setf(std::ios::fixed,std::ios::floatfield);
   output << std::endl << str + ": " << std::endl;
   output << bannerTop;
 
@@ -57,12 +72,15 @@ namespace Eigen {
     output << std::endl;
     for(j = 0;j < m.rows(); j++) {
       output << std::setw(5) << std::left << j+1;
-//    for(n=i;n<i+end;n++) output<<std::setw(printWidth)<<m.data()[j*m.rows()+n]; // n in the column index (dbwy)
       for(n = i; n < i+end; n++) {
         if(std::abs(m(j,n)) > PRINT_SMALL)
-          output << std::setw(printWidth) << std::right << m(j,n); // n in the column index (dbwy)
+          output << std::setw(printWidth) << std::right << m(j,n); 
+        else if(std::isnan(m(j,n)))
+          output << std::setw(printWidth) << std::right << "NAN";
+        else if(std::isinf(m(j,n)))
+          output << std::setw(printWidth) << std::right << "INF";
         else
-          output << std::setw(printWidth) << std::right << 0.0; // n in the column index (dbwy)
+          output << std::setw(printWidth) << std::right << 0.0; 
       }
       output << std::endl;
     };
@@ -71,55 +89,60 @@ namespace Eigen {
   }
 
   template<typename Derived>
-  void prettyPrintComplex(std::ostream & output, const Derived& m, std::string str){
+  void prettyPrintComplex(std::ostream & output, const Derived& m, std::string str, std::size_t printWidth = 16){
   int list = 5;
   int i,j,k,n,end,endLT;
   output.precision(10);
   output.fill(' ');
-  output.setf(std::ios::right,std::ios::scientific);
-  output.setf(std::ios::fixed,std::ios::floatfield);
-  output << std::endl << "Re["<< str + "] : " << std::endl;
+  output << std::endl << "Re[" << str + "]: " << std::endl;
   output << bannerTop;
 
   output << std::scientific << std::left << std::setprecision(8);
-  for(i=0;i<m.cols();i+=list) {
+  for(i = 0; i < m.cols(); i += list) {
     output << std::endl;
     end = list;
     output << std::setw(5) << " ";
     if((i + list) >= m.cols()) end = m.cols() - i;
-    for(k = i; k < i+end; k++) output << std::setw(15) << k+1;
+    for(k = i; k < i+end; k++) output << std::setw(printWidth) << k+1;
     output << std::endl;
     for(j = 0;j < m.rows(); j++) {
       output << std::setw(5) << std::left << j+1;
-//    for(n=i;n<i+end;n++) output<<std::setw(15)<<m.data()[j*m.rows()+n]; // n in the column index (dbwy)
       for(n = i; n < i+end; n++) {
-        if(std::abs(m(j,n).real()) > PRINT_SMALL)
-          output << std::setw(15) << std::right << m(j,n).real(); // n in the column index (dbwy)
+        if(std::abs(m(j,n)) > PRINT_SMALL)
+          output << std::setw(printWidth) << std::right << m(j,n).real(); 
+        else if(std::isnan(m(j,n).real()))
+          output << std::setw(printWidth) << std::right << "NAN";
+        else if(std::isinf(m(j,n).real()))
+          output << std::setw(printWidth) << std::right << "INF";
         else
-          output << std::setw(15) << std::right << std::abs(m(j,n).real()); // n in the column index (dbwy)
+          output << std::setw(printWidth) << std::right << 0.0; 
       }
       output << std::endl;
     };
   };
-  output << bannerMid << std::endl;;
-  output << std::endl << "Im["<< str + "] : " << std::endl;
+  output << bannerEnd << std::endl;
+  output << std::endl << "Im[" << str + "]: " << std::endl;
   output << bannerTop;
 
-  for(i=0;i<m.cols();i+=list) {
+  output << std::scientific << std::left << std::setprecision(8);
+  for(i = 0; i < m.cols(); i += list) {
     output << std::endl;
     end = list;
     output << std::setw(5) << " ";
     if((i + list) >= m.cols()) end = m.cols() - i;
-    for(k = i; k < i+end; k++) output << std::setw(15) << k+1;
+    for(k = i; k < i+end; k++) output << std::setw(printWidth) << k+1;
     output << std::endl;
     for(j = 0;j < m.rows(); j++) {
       output << std::setw(5) << std::left << j+1;
-//    for(n=i;n<i+end;n++) output<<std::setw(15)<<m.data()[j*m.rows()+n]; // n in the column index (dbwy)
       for(n = i; n < i+end; n++) {
-        if(std::abs(m(j,n).imag()) > PRINT_SMALL)
-          output << std::setw(15) << std::right << m(j,n).imag(); // n in the column index (dbwy)
+        if(std::abs(m(j,n)) > PRINT_SMALL)
+          output << std::setw(printWidth) << std::right << m(j,n).imag(); 
+        else if(std::isnan(m(j,n).imag()))
+          output << std::setw(printWidth) << std::right << "NAN";
+        else if(std::isinf(m(j,n).imag()))
+          output << std::setw(printWidth) << std::right << "INF";
         else
-          output << std::setw(15) << std::right << std::abs(m(j,n).imag()); // n in the column index (dbwy)
+          output << std::setw(printWidth) << std::right << 0.0; 
       }
       output << std::endl;
     };

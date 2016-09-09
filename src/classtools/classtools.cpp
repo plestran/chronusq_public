@@ -293,7 +293,7 @@ double traceSymm(RealMatrix* a, RealMatrix* b) {
 void printUnitInfo(Controls * controls, SingleSlater<double> * singleSlater, SDResponse<double> * sdResponse,
                    RealTime<double> * realTime){
   if(controls->unitTest == Controls::UnitSCF)
-    cout << std::setprecision(10) << singleSlater->totalEnergy << "/"
+    cout << std::setprecision(10) << singleSlater->totalEnergy() << "/"
          << std::setprecision(4)
          << singleSlater->elecDipole()[0]/phys.debye << "/"
          << singleSlater->elecDipole()[1]/phys.debye << "/"
@@ -340,7 +340,7 @@ void printUnitInfo(Controls * controls, SingleSlater<double> * singleSlater, SDR
 void printUnitInfo(Controls * controls, SingleSlater<dcomplex> * singleSlater, SDResponse<double> * sdResponse, 
                    RealTime<dcomplex> * realTime){
   if(controls->unitTest == Controls::UnitSCF)
-    cout << std::setprecision(10) << singleSlater->totalEnergy << "/"
+    cout << std::setprecision(10) << singleSlater->totalEnergy() << "/"
          << std::setprecision(4)
          << singleSlater->elecDipole()[0]/phys.debye << "/"
          << singleSlater->elecDipole()[1]/phys.debye << "/"
@@ -432,6 +432,7 @@ void finalizeCQ(){
 #endif
 }
 
+/*
 template<> 
 void writeJobMeta(SingleSlater<double> &ss, SDResponse<double> &sdr, 
   RealTime<double> &rt, Molecule &mol, AOIntegrals &aoints, FileIO &fileio){
@@ -458,7 +459,9 @@ void writeJobMeta(SingleSlater<double> &ss, SDResponse<double> &sdr,
 
   fileio.jobMetaFile->write(&metaData,(*fileio.jobMetaType));
 }
+*/
 
+/*
 template<> 
 void writeJobMeta(SingleSlater<dcomplex> &ss, SDResponse<dcomplex> &sdr, 
   RealTime<dcomplex> &rt, Molecule &mol, AOIntegrals &aoints, FileIO &fileio){
@@ -484,5 +487,6 @@ void writeJobMeta(SingleSlater<dcomplex> &ss, SDResponse<dcomplex> &sdr,
 
   fileio.jobMetaFile->write(&metaData,(*fileio.jobMetaType));
 }
+*/
 
 } // namespace ChronusQ

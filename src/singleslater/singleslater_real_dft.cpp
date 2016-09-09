@@ -205,12 +205,18 @@ void SingleSlater<double>::formVXC_new(){
       int iSt = this->basisset_->mapSh2Bf(iShell);
       for(auto iBf = iSt; iBf < (iSt + iSz); iBf++){
         Tt = 0.0; Ts = 0.0;
+/*
         if(this->nTCS_ == 1 && this->isClosedShell){
           DENT = this->onePDMA_->data() + iBf*this->nBasis_;
         } else {
           DENT = this->onePDMScalar_->data() + iBf*this->nBasis_;
           DENS = this->onePDMMz_->data() + iBf*this->nBasis_;
         }
+*/
+        DENT = this->onePDMScalar_->data() + iBf*this->nBasis_;
+        if(this->nTCS_ == 2 or !this->isClosedShell)
+          DENS = this->onePDMMz_->data() + iBf*this->nBasis_;
+        
 
         // Loop over close shells "J"
         for(auto jShell : closeShells) {
@@ -350,7 +356,7 @@ void SingleSlater<double>::formVXC_new(){
         for(auto jShell : closeShells) {
           int jSz= shSizes[jShell];
           int jSt = this->basisset_->mapSh2Bf(jShell);
-          double *VXCDATA = result.VXCA.data() + iBf*this->nBasis_;
+          double *VXCDATA = result.VXCScalar.data() + iBf*this->nBasis_;
           for(auto jBf = jSt; jBf < (jSt + jSz); jBf++){
             if(jBf < iBf) continue;
             VXCDATA[jBf] += Ta*SCRATCH1DATA[jBf] + SCRATCH1DATA[iBf]*OmegaADATA[jBf]; 
@@ -369,7 +375,7 @@ void SingleSlater<double>::formVXC_new(){
           for(auto jShell : closeShells) {
             int jSz= shSizes[jShell];
             int jSt = this->basisset_->mapSh2Bf(jShell);
-            double *VXCDATB = result.VXCB.data() + iBf*this->nBasis_;
+            double *VXCDATB = result.VXCMz.data() + iBf*this->nBasis_;
             for(auto jBf = jSt; jBf < (jSt + jSz); jBf++){
               if(jBf < iBf) continue;
               VXCDATB[jBf] += Tb*SCRATCH1DATA[jBf] + SCRATCH1DATA[iBf]*OmegaBDATA[jBf]; 
@@ -405,12 +411,13 @@ void SingleSlater<double>::formVXC_new(){
       static_cast<ChronusQ::GRID_TYPE>(this->dftGrid_),ChronusQ::GRID_TYPE::LEBEDEV,
       static_cast<ChronusQ::ATOMIC_PARTITION>(this->weightScheme_),this->molecule_->cartArray(),
       this->molecule_->rIJ(),0,this->epsScreen,1e6,1.0,false);
-  KernelIntegrand<double> res(this->vXA_->cols());
+//NOMAG  KernelIntegrand<double> res(this->vXA_->cols());
+  KernelIntegrand<double> res(this->vXCScalar_->cols());
   //Screaning based on cutoff
 //  the radCutoof vector is populated in singleSlater_real_guess.cpp
 
-  this->totalEx    = 0.0;
-  this->vXA()->setZero();   // Set to zero every occurence of the SCF
+  this->energyExc    = 0.0;
+  this->vXCScalar_->setZero();   // Set to zero every occurence of the SCF
 
   std::vector<double> atomRadCutoff(this->molecule_->nAtoms(),0.0);
 
@@ -442,12 +449,12 @@ void SingleSlater<double>::formVXC_new(){
 
     AGrid.integrate<KernelIntegrand<double>>(wrapper,res);
   };
-  (*this->vXA_) = 4*math.pi*res.VXCA;
-  (*this->vXA_) = this->vXA_->selfadjointView<Lower>();
-  this->totalEx = 4*math.pi*res.Energy;
+  (*this->vXCScalar_) = 4*math.pi*res.VXCScalar;
+  (*this->vXCScalar_) = this->vXCScalar_->selfadjointView<Lower>();
+  this->energyExc = 4*math.pi*res.Energy;
   if(!this->isClosedShell && this->nTCS_ != 2){
-    (*this->vXB_) = 4*math.pi*res.VXCB;
-    (*this->vXB_) = this->vXB_->selfadjointView<Lower>();
+    (*this->vXCMz_) = 4*math.pi*res.VXCMz;
+    (*this->vXCMz_) = this->vXCMz_->selfadjointView<Lower>();
   }
 
   if(doTimings) {
@@ -468,11 +475,11 @@ void SingleSlater<double>::formVXC_new(){
   if(this->printLevel_ >= 3) {
     finish = std::chrono::high_resolution_clock::now();
     duration_formVxc = finish - start;
-    prettyPrint(this->fileio_->out,(*this->vXA()),"LDA Vxc alpha");
+    prettyPrint(this->fileio_->out,(*this->vXCScalar()),"LDA Vxc alpha");
     if(!this->isClosedShell && this->nTCS_ != 2){
-      prettyPrint(this->fileio_->out,(*this->vXB()),"LDA Vxc beta");
+      prettyPrint(this->fileio_->out,(*this->vXCMz()),"LDA Vxc beta");
     }
-    this->fileio_->out << "VXC Energy= " <<  this->totalEx << endl, 
+    this->fileio_->out << "VXC Energy= " <<  this->energyExc << endl, 
     this->fileio_->out << endl << "CPU time for VXC integral:  "
                        << duration_formVxc.count() << " seconds." 
                        << endl;

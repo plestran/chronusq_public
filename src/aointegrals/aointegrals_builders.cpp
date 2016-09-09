@@ -133,6 +133,7 @@ void AOIntegrals::OneEDriver(libint2::Operator iType) {
     mat[nMat] = mat[nMat].selfadjointView<Lower>();
 }
 
+/*
 double AOIntegrals::formBeckeW(cartGP gridPt, int iAtm){
 //     Generate Frisch (not-normalized yet) Weights (if frischW) according to 
 //     the partition schems in (Chem. Phys. Let., 257, 213-223 (1996)) 
@@ -176,8 +177,9 @@ double AOIntegrals::formBeckeW(cartGP gridPt, int iAtm){
          }
        return WW;
 }; //End formBeckeW
+*/
 
-
+/*
 double AOIntegrals::normBeckeW(cartGP gridPt){
 //     Normalization of Becke/Frisch Weights
 //     (J. Chem. Phys., 88 (4),2457 (1988)) using Voronoii Fuzzi Cells
@@ -189,9 +191,11 @@ double AOIntegrals::normBeckeW(cartGP gridPt){
          }
        return norm ;
 }; //End normBeckeW
+*/
 
 
 
+/*
 void AOIntegrals::computeAORcrossDel(){
 // build R cross Del matrices (Numerical)
 // It also creates the grid and can perform also other
@@ -330,6 +334,7 @@ void AOIntegrals::computeAORcrossDel(){
 //  cout << "Call HERE " <<endl;
 //  CErr();
 } 
+*/
 
 void AOIntegrals::computeAOOneE(){
   // Collect Relevant data into a struct (odd, but convienient) 
@@ -358,7 +363,7 @@ void AOIntegrals::computeAOOneE(){
   else if(this->maxMultipole_ == 2) OneEDriver(libint2::Operator::emultipole2);
   else if(this->maxMultipole_ == 1) OneEDriver(libint2::Operator::emultipole1);
   else OneEDriver(libint2::Operator::overlap);
-  if(this->maxMultipole_ == 4) this->computeAORcrossDel();
+//if(this->maxMultipole_ == 4) this->computeAORcrossDel();
   auto OEnd = std::chrono::high_resolution_clock::now();
 
 
@@ -418,7 +423,7 @@ void AOIntegrals::computeAOOneE(){
   this->VED = VEnd - VStart;
   this->haveAOOneE = true;
   this->breakUpMultipole();
-  if(this->isPrimary) this->writeOneE();
+//if(this->isPrimary) this->writeOneE();
   /*
   if(this->isPrimary) {
     for(auto ix = 0, ioff = 0; ix < 3; ix++, ioff += this->nBasis_*this->nBasis_){

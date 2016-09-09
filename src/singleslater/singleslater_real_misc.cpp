@@ -139,6 +139,7 @@ void SingleSlater<double>::getAlgebraicField(){
   this->algebraicFieldShort_ = "\u211D";
 }
 
+/*
 template<>
 void SingleSlater<double>::writeSCFFiles(){
   this->fileio_->alphaSCFDen->write(this->onePDMA_->data(),
@@ -152,6 +153,7 @@ void SingleSlater<double>::writeSCFFiles(){
         H5::PredType::NATIVE_DOUBLE);
   }
 }
+*/
 
 template<>
 void SingleSlater<double>::fixPhase(){

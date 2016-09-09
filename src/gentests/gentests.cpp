@@ -82,6 +82,8 @@ struct RTSettings{
   int  iEnvlp;
   double freq;
   double sigma;
+  double tOn;
+  double tOff;
 
   std::array<double,3> eField;
 
@@ -95,10 +97,11 @@ struct RTSettings{
   RTSettings(bool def = true, int mxStp = 20, 
     int orth = RealTime<double>::Lowdin, int iRstrt = 51,
     int iEnv = RealTime<double>::Constant, double freq_ = 0,
-    std::array<double,3> fld = {{0,0,0}}, double sig = 0):
+    std::array<double,3> fld = {{0,0,0}}, double sig = 0,
+    double ton = -1, double toff = -1):
     useDefaultSettings(def), maxStep(mxStp), orthoType(orth),
     irstrt(iRstrt),iEnvlp(iEnv),freq(freq_),eField(fld),
-    sigma(sig){ };
+    sigma(sig),tOn(ton),tOff(toff){ };
 };
 
 struct SCFResults{
@@ -256,11 +259,15 @@ struct CQJob {
           os << std::setw(10) << I;
         os << endl;
 
-        os << "frequency = " << rtSettings.freq << endl;
+        if(rtSettings.freq != 0)
+          os << "frequency = " << rtSettings.freq << endl;
 
         if(rtSettings.iEnvlp == RealTime<double>::Gaussian){
-          os << "sigma = " << rtSettings.sigma;
+          os << "sigma = " << rtSettings.sigma << endl;
         }
+
+        if(rtSettings.tOn >= 0) os << "time_on = " << rtSettings.tOn << endl;
+        if(rtSettings.tOff >= 0) os << "time_off = " << rtSettings.tOff << endl;
         
       }
     
@@ -306,7 +313,7 @@ struct CQJob {
 
     memManager.setTotalMem(256e6);
     fileio.iniH5Files();
-    fileio.iniStdGroups();
+//  fileio.iniStdGroups();
 
     basis.findBasisFile(basisSet);
     basis.communicate(fileio);
@@ -361,6 +368,10 @@ struct CQJob {
           rt.setFreq(rtSettings.freq);
           rt.setFieldAmp(rtSettings.eField);
           rt.setSigma(rtSettings.sigma);
+          if(rtSettings.tOn >= 0) 
+            rt.setTOn(rtSettings.tOn);
+          if(rtSettings.tOff >= 0) 
+            rt.setTOff(rtSettings.tOff);
         }
         rt.initMeta();
         rt.alloc();
@@ -396,6 +407,10 @@ struct CQJob {
           rt.setFreq(rtSettings.freq);
           rt.setFieldAmp(rtSettings.eField);
           rt.setSigma(rtSettings.sigma);
+          if(rtSettings.tOn >= 0) 
+            rt.setTOn(rtSettings.tOn);
+          if(rtSettings.tOff >= 0) 
+            rt.setTOff(rtSettings.tOff);
         }
         rt.communicate(fileio,aoints,ss);
         rt.initMeta();
@@ -687,6 +702,226 @@ void RSmRBLYP_SCF(std::vector<CQJob> &jobs) {
     std::vector<std::string>({"B88","LYP"}),"Small");
 }
 
+void RSmUSLATER_SCF(std::vector<CQJob> &jobs) {
+  // Small Molecule Real U-SLATER SCF Serial INCORE
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::INCORE,1,"STO-3G",
+    std::vector<std::string>({"SLATER"}),"Small");
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::INCORE,1,"6-31G",
+    std::vector<std::string>({"SLATER"}),"Small");
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::INCORE,1,"cc-pVDZ",
+    std::vector<std::string>({"SLATER"}),"Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::INCORE,1,"STO-3G",
+    std::vector<std::string>({"SLATER"}),"Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::INCORE,1,"6-31G",
+    std::vector<std::string>({"SLATER"}),"Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::INCORE,1,"cc-pVDZ",
+    std::vector<std::string>({"SLATER"}),"Small");
+
+  // Small Molecule Real U-SLATER SCF Serial DIRECT
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::DIRECT,1,"STO-3G",
+    std::vector<std::string>({"SLATER"}),"Small");
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::DIRECT,1,"6-31G",
+    std::vector<std::string>({"SLATER"}),"Small");
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::DIRECT,1,"cc-pVDZ",
+    std::vector<std::string>({"SLATER"}),"Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::DIRECT,1,"STO-3G",
+    std::vector<std::string>({"SLATER"}),"Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::DIRECT,1,"6-31G",
+    std::vector<std::string>({"SLATER"}),"Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::DIRECT,1,"cc-pVDZ",
+    std::vector<std::string>({"SLATER"}),"Small");
+
+  // Small Molecule Real U-SLATER SCF SMP DIRECT
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::DIRECT,2,"STO-3G",
+    std::vector<std::string>({"SLATER"}),"Small");
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::DIRECT,2,"6-31G",
+    std::vector<std::string>({"SLATER"}),"Small");
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::DIRECT,2,"cc-pVDZ",
+    std::vector<std::string>({"SLATER"}),"Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::DIRECT,2,"STO-3G",
+    std::vector<std::string>({"SLATER"}),"Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::DIRECT,2,"6-31G",
+    std::vector<std::string>({"SLATER"}),"Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::DIRECT,2,"cc-pVDZ",
+    std::vector<std::string>({"SLATER"}),"Small");
+}
+
+void RSmULSDA_SCF(std::vector<CQJob> &jobs) {
+  // Small Molecule Real U-LSDA SCF Serial INCORE
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::INCORE,1,"STO-3G",
+    std::vector<std::string>({"SLATER","VWN5"}),"Small");
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::INCORE,1,"6-31G",
+    std::vector<std::string>({"SLATER","VWN5"}),"Small");
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::INCORE,1,"cc-pVDZ",
+    std::vector<std::string>({"SLATER","VWN5"}),"Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::INCORE,1,"STO-3G",
+    std::vector<std::string>({"SLATER","VWN5"}),"Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::INCORE,1,"6-31G",
+    std::vector<std::string>({"SLATER","VWN5"}),"Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::INCORE,1,"cc-pVDZ",
+    std::vector<std::string>({"SLATER","VWN5"}),"Small");
+
+  // Small Molecule Real U-LSDA SCF Serial DIRECT
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::DIRECT,1,"STO-3G",
+    std::vector<std::string>({"SLATER","VWN5"}),"Small");
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::DIRECT,1,"6-31G",
+    std::vector<std::string>({"SLATER","VWN5"}),"Small");
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::DIRECT,1,"cc-pVDZ",
+    std::vector<std::string>({"SLATER","VWN5"}),"Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::DIRECT,1,"STO-3G",
+    std::vector<std::string>({"SLATER","VWN5"}),"Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::DIRECT,1,"6-31G",
+    std::vector<std::string>({"SLATER","VWN5"}),"Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::DIRECT,1,"cc-pVDZ",
+    std::vector<std::string>({"SLATER","VWN5"}),"Small");
+
+  // Small Molecule Real U-LSDA SCF SMP DIRECT
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::DIRECT,2,"STO-3G",
+    std::vector<std::string>({"SLATER","VWN5"}),"Small");
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::DIRECT,2,"6-31G",
+    std::vector<std::string>({"SLATER","VWN5"}),"Small");
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::DIRECT,2,"cc-pVDZ",
+    std::vector<std::string>({"SLATER","VWN5"}),"Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::DIRECT,2,"STO-3G",
+    std::vector<std::string>({"SLATER","VWN5"}),"Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::DIRECT,2,"6-31G",
+    std::vector<std::string>({"SLATER","VWN5"}),"Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::DIRECT,2,"cc-pVDZ",
+    std::vector<std::string>({"SLATER","VWN5"}),"Small");
+}
+
+void RSmUSVWN3_SCF(std::vector<CQJob> &jobs) {
+  // Small Molecule Real U-SVWN3 SCF Serial INCORE
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::INCORE,1,"STO-3G",
+    std::vector<std::string>({"SLATER","VWN3"}),"Small");
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::INCORE,1,"6-31G",
+    std::vector<std::string>({"SLATER","VWN3"}),"Small");
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::INCORE,1,"cc-pVDZ",
+    std::vector<std::string>({"SLATER","VWN3"}),"Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::INCORE,1,"STO-3G",
+    std::vector<std::string>({"SLATER","VWN3"}),"Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::INCORE,1,"6-31G",
+    std::vector<std::string>({"SLATER","VWN3"}),"Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::INCORE,1,"cc-pVDZ",
+    std::vector<std::string>({"SLATER","VWN3"}),"Small");
+
+  // Small Molecule Real U-SVWN3 SCF Serial DIRECT
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::DIRECT,1,"STO-3G",
+    std::vector<std::string>({"SLATER","VWN3"}),"Small");
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::DIRECT,1,"6-31G",
+    std::vector<std::string>({"SLATER","VWN3"}),"Small");
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::DIRECT,1,"cc-pVDZ",
+    std::vector<std::string>({"SLATER","VWN3"}),"Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::DIRECT,1,"STO-3G",
+    std::vector<std::string>({"SLATER","VWN3"}),"Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::DIRECT,1,"6-31G",
+    std::vector<std::string>({"SLATER","VWN3"}),"Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::DIRECT,1,"cc-pVDZ",
+    std::vector<std::string>({"SLATER","VWN3"}),"Small");
+
+  // Small Molecule Real U-SVWN3 SCF SMP DIRECT
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::DIRECT,2,"STO-3G",
+    std::vector<std::string>({"SLATER","VWN3"}),"Small");
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::DIRECT,2,"6-31G",
+    std::vector<std::string>({"SLATER","VWN3"}),"Small");
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::DIRECT,2,"cc-pVDZ",
+    std::vector<std::string>({"SLATER","VWN3"}),"Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::DIRECT,2,"STO-3G",
+    std::vector<std::string>({"SLATER","VWN3"}),"Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::DIRECT,2,"6-31G",
+    std::vector<std::string>({"SLATER","VWN3"}),"Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::DIRECT,2,"cc-pVDZ",
+    std::vector<std::string>({"SLATER","VWN3"}),"Small");
+}
+
+void RSmUB88_SCF(std::vector<CQJob> &jobs) {
+  // Small Molecule Real U-B88 SCF Serial INCORE
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::INCORE,1,"STO-3G",
+    std::vector<std::string>({"B88"}),"Small");
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::INCORE,1,"6-31G",
+    std::vector<std::string>({"B88"}),"Small");
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::INCORE,1,"cc-pVDZ",
+    std::vector<std::string>({"B88"}),"Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::INCORE,1,"STO-3G",
+    std::vector<std::string>({"B88"}),"Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::INCORE,1,"6-31G",
+    std::vector<std::string>({"B88"}),"Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::INCORE,1,"cc-pVDZ",
+    std::vector<std::string>({"B88"}),"Small");
+
+  // Small Molecule Real U-B88 SCF Serial DIRECT
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::DIRECT,1,"STO-3G",
+    std::vector<std::string>({"B88"}),"Small");
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::DIRECT,1,"6-31G",
+    std::vector<std::string>({"B88"}),"Small");
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::DIRECT,1,"cc-pVDZ",
+    std::vector<std::string>({"B88"}),"Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::DIRECT,1,"STO-3G",
+    std::vector<std::string>({"B88"}),"Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::DIRECT,1,"6-31G",
+    std::vector<std::string>({"B88"}),"Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::DIRECT,1,"cc-pVDZ",
+    std::vector<std::string>({"B88"}),"Small");
+
+  // Small Molecule Real U-B88 SCF SMP DIRECT
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::DIRECT,2,"STO-3G",
+    std::vector<std::string>({"B88"}),"Small");
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::DIRECT,2,"6-31G",
+    std::vector<std::string>({"B88"}),"Small");
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::DIRECT,2,"cc-pVDZ",
+    std::vector<std::string>({"B88"}),"Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::DIRECT,2,"STO-3G",
+    std::vector<std::string>({"B88"}),"Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::DIRECT,2,"6-31G",
+    std::vector<std::string>({"B88"}),"Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::DIRECT,2,"cc-pVDZ",
+    std::vector<std::string>({"B88"}),"Small");
+}
+
+void RSmUBLYP_SCF(std::vector<CQJob> &jobs) {
+  // Small Molecule Real U-BLYP SCF Serial INCORE
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::INCORE,1,"STO-3G",
+    std::vector<std::string>({"B88","LYP"}),"Small");
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::INCORE,1,"6-31G",
+    std::vector<std::string>({"B88","LYP"}),"Small");
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::INCORE,1,"cc-pVDZ",
+    std::vector<std::string>({"B88","LYP"}),"Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::INCORE,1,"STO-3G",
+    std::vector<std::string>({"B88","LYP"}),"Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::INCORE,1,"6-31G",
+    std::vector<std::string>({"B88","LYP"}),"Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::INCORE,1,"cc-pVDZ",
+    std::vector<std::string>({"B88","LYP"}),"Small");
+
+  // Small Molecule Real U-BLYP SCF Serial DIRECT
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::DIRECT,1,"STO-3G",
+    std::vector<std::string>({"B88","LYP"}),"Small");
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::DIRECT,1,"6-31G",
+    std::vector<std::string>({"B88","LYP"}),"Small");
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::DIRECT,1,"cc-pVDZ",
+    std::vector<std::string>({"B88","LYP"}),"Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::DIRECT,1,"STO-3G",
+    std::vector<std::string>({"B88","LYP"}),"Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::DIRECT,1,"6-31G",
+    std::vector<std::string>({"B88","LYP"}),"Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::DIRECT,1,"cc-pVDZ",
+    std::vector<std::string>({"B88","LYP"}),"Small");
+
+  // Small Molecule Real U-BLYP SCF SMP DIRECT
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::DIRECT,2,"STO-3G",
+    std::vector<std::string>({"B88","LYP"}),"Small");
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::DIRECT,2,"6-31G",
+    std::vector<std::string>({"B88","LYP"}),"Small");
+  jobs.emplace_back(li,"D","SCF","UHF",AOIntegrals::DIRECT,2,"cc-pVDZ",
+    std::vector<std::string>({"B88","LYP"}),"Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::DIRECT,2,"STO-3G",
+    std::vector<std::string>({"B88","LYP"}),"Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::DIRECT,2,"6-31G",
+    std::vector<std::string>({"B88","LYP"}),"Small");
+  jobs.emplace_back(o2,"D","SCF","UHF",AOIntegrals::DIRECT,2,"cc-pVDZ",
+    std::vector<std::string>({"B88","LYP"}),"Small");
+}
+
 void RSmRHF_RT_NOFIELD(std::vector<CQJob> &jobs) {
   // Small Molecule Real RHF RT (LOWDIN) Serial INCORE
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::INCORE,1,"STO-3G",
@@ -741,222 +976,272 @@ void RSmRHF_RT_PW(std::vector<CQJob> &jobs) {
   // Small Molecule Real RHF RT (LOWDIN) Serial INCORE
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::INCORE,1,"STO-3G",
     "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
-     RealTime<double>::Constant,9.6,
-    std::array<double,3>({0.01,0,0})));
+     RealTime<double>::Constant,9.6,{0.01,0,0}));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::INCORE,1,"6-31G",
     "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
-     RealTime<double>::Constant,9.6,
-    std::array<double,3>({0.01,0,0})));
+     RealTime<double>::Constant,9.6,{0.01,0,0}));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::INCORE,1,"cc-pVDZ",
     "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
-     RealTime<double>::Constant,9.6,
-    std::array<double,3>({0.01,0,0})));
+     RealTime<double>::Constant,9.6,{0.01,0,0}));
 
   // Small Molecule Real RHF RT (LOWDIN) Serial DIRECT
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,1,"STO-3G",
     "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
-     RealTime<double>::Constant,9.6,
-    std::array<double,3>({0.01,0,0})));
+     RealTime<double>::Constant,9.6,{0.01,0,0}));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,1,"6-31G",
     "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
-     RealTime<double>::Constant,9.6,
-    std::array<double,3>({0.01,0,0})));
+     RealTime<double>::Constant,9.6,{0.01,0,0}));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,1,"cc-pVDZ",
     "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
-     RealTime<double>::Constant,9.6,
-    std::array<double,3>({0.01,0,0})));
+     RealTime<double>::Constant,9.6,{0.01,0,0}));
 
   // Small Molecule Real RHF RT (LOWDIN) SMP DIRECT
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,2,"STO-3G",
     "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
-     RealTime<double>::Constant,9.6,
-    std::array<double,3>({0.01,0,0})));
+     RealTime<double>::Constant,9.6,{0.01,0,0}));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,2,"6-31G",
     "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
-     RealTime<double>::Constant,9.6,
-    std::array<double,3>({0.01,0,0})));
+     RealTime<double>::Constant,9.6,{0.01,0,0}));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,2,"cc-pVDZ",
     "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
-     RealTime<double>::Constant,9.6,
-    std::array<double,3>({0.01,0,0})));
+     RealTime<double>::Constant,9.6,{0.01,0,0}));
 
   // Small Molecule Real RHF RT (CHOLESKY) Serial INCORE
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::INCORE,1,"STO-3G",
     "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
-     RealTime<double>::Constant,9.6,
-    std::array<double,3>({0.01,0,0})));
+     RealTime<double>::Constant,9.6,{0.01,0,0}));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::INCORE,1,"6-31G",
     "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
-     RealTime<double>::Constant,9.6,
-    std::array<double,3>({0.01,0,0})));
+     RealTime<double>::Constant,9.6,{0.01,0,0}));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::INCORE,1,"cc-pVDZ",
     "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
-     RealTime<double>::Constant,9.6,
-    std::array<double,3>({0.01,0,0})));
+     RealTime<double>::Constant,9.6,{0.01,0,0}));
 
   // Small Molecule Real RHF RT (CHOLESKY) Serial DIRECT
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,1,"STO-3G",
     "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
-     RealTime<double>::Constant,9.6,
-    std::array<double,3>({0.01,0,0})));
+     RealTime<double>::Constant,9.6,{0.01,0,0}));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,1,"6-31G",
     "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
-     RealTime<double>::Constant,9.6,
-    std::array<double,3>({0.01,0,0})));
+     RealTime<double>::Constant,9.6,{0.01,0,0}));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,1,"cc-pVDZ",
     "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
-     RealTime<double>::Constant,9.6,
-    std::array<double,3>({0.01,0,0})));
+     RealTime<double>::Constant,9.6,{0.01,0,0}));
 
   // Small Molecule Real RHF RT (CHOLESKY) SMP DIRECT
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,2,"STO-3G",
     "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
-     RealTime<double>::Constant,9.6,
-    std::array<double,3>({0.01,0,0})));
+     RealTime<double>::Constant,9.6,{0.01,0,0}));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,2,"6-31G",
     "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
-     RealTime<double>::Constant,9.6,
-    std::array<double,3>({0.01,0,0})));
+     RealTime<double>::Constant,9.6,{0.01,0,0}));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,2,"cc-pVDZ",
     "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
-     RealTime<double>::Constant,9.6,
-    std::array<double,3>({0.01,0,0})));
+     RealTime<double>::Constant,9.6,{0.01,0,0}));
 }
 
 void RSmRHF_RT_LIN(std::vector<CQJob> &jobs) {
   // Small Molecule Real RHF RT (LOWDIN) Serial INCORE
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::INCORE,1,"STO-3G",
     "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
-     RealTime<double>::LinRamp,9.6,std::array<double,3>({0.01,0,0})));
+     RealTime<double>::LinRamp,9.6,{0.01,0,0}));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::INCORE,1,"6-31G",
     "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
-     RealTime<double>::LinRamp,9.6,std::array<double,3>({0.01,0,0})));
+     RealTime<double>::LinRamp,9.6,{0.01,0,0}));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::INCORE,1,"cc-pVDZ",
     "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
-     RealTime<double>::LinRamp,9.6,std::array<double,3>({0.01,0,0})));
+     RealTime<double>::LinRamp,9.6,{0.01,0,0}));
 
   // Small Molecule Real RHF RT (LOWDIN) Serial DIRECT
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,1,"STO-3G",
     "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
-     RealTime<double>::LinRamp,9.6,std::array<double,3>({0.01,0,0})));
+     RealTime<double>::LinRamp,9.6,{0.01,0,0}));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,1,"6-31G",
     "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
-     RealTime<double>::LinRamp,9.6,std::array<double,3>({0.01,0,0})));
+     RealTime<double>::LinRamp,9.6,{0.01,0,0}));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,1,"cc-pVDZ",
     "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
-     RealTime<double>::LinRamp,9.6,std::array<double,3>({0.01,0,0})));
+     RealTime<double>::LinRamp,9.6,{0.01,0,0}));
 
   // Small Molecule Real RHF RT (LOWDIN) SMP DIRECT
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,2,"STO-3G",
     "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
-     RealTime<double>::LinRamp,9.6,std::array<double,3>({0.01,0,0})));
+     RealTime<double>::LinRamp,9.6,{0.01,0,0}));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,2,"6-31G",
     "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
-     RealTime<double>::LinRamp,9.6,std::array<double,3>({0.01,0,0})));
+     RealTime<double>::LinRamp,9.6,{0.01,0,0}));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,2,"cc-pVDZ",
     "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
-     RealTime<double>::LinRamp,9.6,std::array<double,3>({0.01,0,0})));
+     RealTime<double>::LinRamp,9.6,{0.01,0,0}));
 
   // Small Molecule Real RHF RT (CHOLESKY) Serial INCORE
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::INCORE,1,"STO-3G",
     "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
-     RealTime<double>::LinRamp,9.6,std::array<double,3>({0.01,0,0})));
+     RealTime<double>::LinRamp,9.6,{0.01,0,0}));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::INCORE,1,"6-31G",
     "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
-     RealTime<double>::LinRamp,9.6,std::array<double,3>({0.01,0,0})));
+     RealTime<double>::LinRamp,9.6,{0.01,0,0}));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::INCORE,1,"cc-pVDZ",
     "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
-     RealTime<double>::LinRamp,9.6,std::array<double,3>({0.01,0,0})));
+     RealTime<double>::LinRamp,9.6,{0.01,0,0}));
 
   // Small Molecule Real RHF RT (CHOLESKY) Serial DIRECT
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,1,"STO-3G",
     "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
-     RealTime<double>::LinRamp,9.6,std::array<double,3>({0.01,0,0})));
+     RealTime<double>::LinRamp,9.6,{0.01,0,0}));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,1,"6-31G",
     "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
-     RealTime<double>::LinRamp,9.6,std::array<double,3>({0.01,0,0})));
+     RealTime<double>::LinRamp,9.6,{0.01,0,0}));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,1,"cc-pVDZ",
     "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
-     RealTime<double>::LinRamp,9.6,std::array<double,3>({0.01,0,0})));
+     RealTime<double>::LinRamp,9.6,{0.01,0,0}));
 
   // Small Molecule Real RHF RT (CHOLESKY) SMP DIRECT
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,2,"STO-3G",
     "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
-     RealTime<double>::LinRamp,9.6,std::array<double,3>({0.01,0,0})));
+     RealTime<double>::LinRamp,9.6,{0.01,0,0}));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,2,"6-31G",
     "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
-     RealTime<double>::LinRamp,9.6,std::array<double,3>({0.01,0,0})));
+     RealTime<double>::LinRamp,9.6,{0.01,0,0}));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,2,"cc-pVDZ",
     "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
-     RealTime<double>::LinRamp,9.6,std::array<double,3>({0.01,0,0})));
+     RealTime<double>::LinRamp,9.6,{0.01,0,0}));
 }
 
 void RSmRHF_RT_GAU(std::vector<CQJob> &jobs) {
   // Small Molecule Real RHF RT (LOWDIN) Serial INCORE
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::INCORE,1,"STO-3G",
     "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
-     RealTime<double>::Gaussian,9.6,std::array<double,3>({0.01,0,0}),30.0));
+     RealTime<double>::Gaussian,9.6,{0.01,0,0},30.0));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::INCORE,1,"6-31G",
     "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
-     RealTime<double>::Gaussian,9.6,std::array<double,3>({0.01,0,0}),30.0));
+     RealTime<double>::Gaussian,9.6,{0.01,0,0},30.0));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::INCORE,1,"cc-pVDZ",
     "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
-     RealTime<double>::Gaussian,9.6,std::array<double,3>({0.01,0,0}),30.0));
+     RealTime<double>::Gaussian,9.6,{0.01,0,0},30.0));
 
   // Small Molecule Real RHF RT (LOWDIN) Serial DIRECT
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,1,"STO-3G",
     "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
-     RealTime<double>::Gaussian,9.6,std::array<double,3>({0.01,0,0}),30.0));
+     RealTime<double>::Gaussian,9.6,{0.01,0,0},30.0));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,1,"6-31G",
     "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
-     RealTime<double>::Gaussian,9.6,std::array<double,3>({0.01,0,0}),30.0));
+     RealTime<double>::Gaussian,9.6,{0.01,0,0},30.0));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,1,"cc-pVDZ",
     "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
-     RealTime<double>::Gaussian,9.6,std::array<double,3>({0.01,0,0}),30.0));
+     RealTime<double>::Gaussian,9.6,{0.01,0,0},30.0));
 
   // Small Molecule Real RHF RT (LOWDIN) SMP DIRECT
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,2,"STO-3G",
     "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
-     RealTime<double>::Gaussian,9.6,std::array<double,3>({0.01,0,0}),30.0));
+     RealTime<double>::Gaussian,9.6,{0.01,0,0},30.0));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,2,"6-31G",
     "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
-     RealTime<double>::Gaussian,9.6,std::array<double,3>({0.01,0,0}),30.0));
+     RealTime<double>::Gaussian,9.6,{0.01,0,0},30.0));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,2,"cc-pVDZ",
     "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
-     RealTime<double>::Gaussian,9.6,std::array<double,3>({0.01,0,0}),30.0));
+     RealTime<double>::Gaussian,9.6,{0.01,0,0},30.0));
 
   // Small Molecule Real RHF RT (CHOLESKY) Serial INCORE
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::INCORE,1,"STO-3G",
     "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
-     RealTime<double>::Gaussian,9.6,std::array<double,3>({0.01,0,0}),30.0));
+     RealTime<double>::Gaussian,9.6,{0.01,0,0},30.0));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::INCORE,1,"6-31G",
     "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
-     RealTime<double>::Gaussian,9.6,std::array<double,3>({0.01,0,0}),30.0));
+     RealTime<double>::Gaussian,9.6,{0.01,0,0},30.0));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::INCORE,1,"cc-pVDZ",
     "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
-     RealTime<double>::Gaussian,9.6,std::array<double,3>({0.01,0,0}),30.0));
+     RealTime<double>::Gaussian,9.6,{0.01,0,0},30.0));
 
   // Small Molecule Real RHF RT (CHOLESKY) Serial DIRECT
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,1,"STO-3G",
     "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
-     RealTime<double>::Gaussian,9.6,std::array<double,3>({0.01,0,0}),30.0));
+     RealTime<double>::Gaussian,9.6,{0.01,0,0},30.0));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,1,"6-31G",
     "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
-     RealTime<double>::Gaussian,9.6,std::array<double,3>({0.01,0,0}),30.0));
+     RealTime<double>::Gaussian,9.6,{0.01,0,0},30.0));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,1,"cc-pVDZ",
     "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
-     RealTime<double>::Gaussian,9.6,std::array<double,3>({0.01,0,0}),30.0));
+     RealTime<double>::Gaussian,9.6,{0.01,0,0},30.0));
 
   // Small Molecule Real RHF RT (CHOLESKY) SMP DIRECT
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,2,"STO-3G",
     "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
-     RealTime<double>::Gaussian,9.6,std::array<double,3>({0.01,0,0}),30.0));
+     RealTime<double>::Gaussian,9.6,{0.01,0,0},30.0));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,2,"6-31G",
     "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
-     RealTime<double>::Gaussian,9.6,std::array<double,3>({0.01,0,0}),30.0));
+     RealTime<double>::Gaussian,9.6,{0.01,0,0},30.0));
   jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,2,"cc-pVDZ",
     "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
-     RealTime<double>::Gaussian,9.6,std::array<double,3>({0.01,0,0}),30.0));
+     RealTime<double>::Gaussian,9.6,{0.01,0,0},30.0));
+}
+
+void RSmRHF_RT_STP(std::vector<CQJob> &jobs) {
+  // Small Molecule Real RHF RT (LOWDIN) Serial INCORE
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::INCORE,1,"STO-3G",
+    "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
+     RealTime<double>::Step,0.0,{0.01,0,0},0.0,0.0,0.002));
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::INCORE,1,"6-31G",
+    "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
+     RealTime<double>::Step,0.0,{0.01,0,0},0.0,0.0,0.002));
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::INCORE,1,"cc-pVDZ",
+    "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
+     RealTime<double>::Step,0.0,{0.01,0,0},0.0,0.0,0.002));
+
+  // Small Molecule Real RHF RT (LOWDIN) Serial DIRECT
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,1,"STO-3G",
+    "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
+     RealTime<double>::Step,0.0,{0.01,0,0},0.0,0.0,0.002));
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,1,"6-31G",
+    "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
+     RealTime<double>::Step,0.0,{0.01,0,0},0.0,0.0,0.002));
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,1,"cc-pVDZ",
+    "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
+     RealTime<double>::Step,0.0,{0.01,0,0},0.0,0.0,0.002));
+
+  // Small Molecule Real RHF RT (LOWDIN) SMP DIRECT
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,2,"STO-3G",
+    "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
+     RealTime<double>::Step,0.0,{0.01,0,0},0.0,0.0,0.002));
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,2,"6-31G",
+    "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
+     RealTime<double>::Step,0.0,{0.01,0,0},0.0,0.0,0.002));
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,2,"cc-pVDZ",
+    "Small",RTSettings(false,20,RealTime<double>::Lowdin,51,
+     RealTime<double>::Step,0.0,{0.01,0,0},0.0,0.0,0.002));
+
+  // Small Molecule Real RHF RT (CHOLESKY) Serial INCORE
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::INCORE,1,"STO-3G",
+    "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
+     RealTime<double>::Step,0.0,{0.01,0,0},0.0,0.0,0.002));
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::INCORE,1,"6-31G",
+    "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
+     RealTime<double>::Step,0.0,{0.01,0,0},0.0,0.0,0.002));
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::INCORE,1,"cc-pVDZ",
+    "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
+     RealTime<double>::Step,0.0,{0.01,0,0},0.0,0.0,0.002));
+
+  // Small Molecule Real RHF RT (CHOLESKY) Serial DIRECT
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,1,"STO-3G",
+    "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
+     RealTime<double>::Step,0.0,{0.01,0,0},0.0,0.0,0.002));
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,1,"6-31G",
+    "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
+     RealTime<double>::Step,0.0,{0.01,0,0},0.0,0.0,0.002));
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,1,"cc-pVDZ",
+    "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
+     RealTime<double>::Step,0.0,{0.01,0,0},0.0,0.0,0.002));
+
+  // Small Molecule Real RHF RT (CHOLESKY) SMP DIRECT
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,2,"STO-3G",
+    "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
+     RealTime<double>::Step,0.0,{0.01,0,0},0.0,0.0,0.002));
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,2,"6-31G",
+    "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
+     RealTime<double>::Step,0.0,{0.01,0,0},0.0,0.0,0.002));
+  jobs.emplace_back(water,"D","RT","RHF",AOIntegrals::DIRECT,2,"cc-pVDZ",
+    "Small",RTSettings(false,20,RealTime<double>::Cholesky,51,
+     RealTime<double>::Step,0.0,{0.01,0,0},0.0,0.0,0.002));
 }
 
 
@@ -979,9 +1264,16 @@ int main() {
   RSmRSVWN3_SCF(jobs);
   RSmRB88_SCF(jobs);
   RSmRBLYP_SCF(jobs);
+  RSmUSLATER_SCF(jobs);
+  RSmULSDA_SCF(jobs);
+  RSmUSVWN3_SCF(jobs);
+  RSmUB88_SCF(jobs);
+  RSmUBLYP_SCF(jobs);
   RSmRHF_RT_NOFIELD(jobs);
   RSmRHF_RT_PW(jobs);
   RSmRHF_RT_LIN(jobs);
+  RSmRHF_RT_GAU(jobs);
+  RSmRHF_RT_STP(jobs);
 
 
   std::vector<std::string> fnames;

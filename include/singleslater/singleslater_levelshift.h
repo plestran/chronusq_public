@@ -25,6 +25,7 @@
  */
 
 
+/*
 //DBWY and JJRADLER  -- Needs to be rewritten and have conditional for convergence added
 //JJRADLER - This function should be called within SCF loop until convergence criterion is met.
 //This algorithm follows Mehrotra
@@ -64,12 +65,13 @@ void SingleSlater<T>::levelShift(){
     }
   }
 }
+*/
 
-//And this one is even simpler -- JJR
 template<typename T>
 void SingleSlater<T>::levelShift2(){
-//double b = 2.42;	//2+.The meaning of The Universe
 
+/*
+  cout << "LEVEL Shifting" << endl;
   T* FockA, *FockB;
   T* MOAVir, *MOBVir;
   T MOAMu, MOBMu;
@@ -97,6 +99,7 @@ void SingleSlater<T>::levelShift2(){
     
     }
   }
+*/
 }
 // JJRADLER
 //

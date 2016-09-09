@@ -26,6 +26,7 @@
 
 template<typename T>
 void SingleSlater<T>::computeEnergy(){
+/*
   if(getRank() == 0) {
     this->energyOneE = 
       this->template computeProperty<double,DENSITY_TYPE::TOTAL>(
@@ -51,8 +52,30 @@ void SingleSlater<T>::computeEnergy(){
       }
       this->energyTwoE *= 0.5; // ??
     }
+*/
+  this->energyOneE = 
+    this->template computeProperty<double,DENSITY_TYPE::TOTAL>(
+        *this->aointegrals_->coreH_);
+  this->energyTwoE = 
+    0.5 * this->template computeProperty<double,DENSITY_TYPE::TOTAL>(
+        this->PTScalar_->conjugate());
+  if(this->nTCS_ == 2 or !this->isClosedShell) {
+    this->energyTwoE += 
+      0.5 * this->template computeProperty<double,DENSITY_TYPE::MZ>(
+          this->PTMz_->conjugate());
+  }
+  if(this->nTCS_ == 2) {
+    this->energyTwoE += 
+      0.5 * this->template computeProperty<double,DENSITY_TYPE::MY>(
+          this->PTMy_->conjugate());
+    this->energyTwoE += 
+      0.5 * this->template computeProperty<double,DENSITY_TYPE::MX>(
+          this->PTMx_->conjugate());
+  }
+  this->energyTwoE *= 0.5;
+
       
-    if(this->isDFT) this->energyTwoE += this->totalEx + this->totalEcorr;
+    if(this->isDFT) this->energyTwoE += this->energyExc;
 
     // Add in the electric field component if they are non-zero
     std::array<double,3> null{{0,0,0}};
@@ -64,10 +87,11 @@ void SingleSlater<T>::computeEnergy(){
       }
     }
  
-    this->totalEnergy= this->energyOneE + this->energyTwoE + this->energyNuclei;
-  }
+
+    this->totalEnergy_= 
+      this->energyOneE + this->energyTwoE + this->energyNuclei_;
 #ifdef CQ_ENABLE_MPI
-  MPI_Bcast(&this->totalEnergy,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
+  MPI_Bcast(&this->totalEnergy_,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
   MPI_Bcast(&this->energyOneE,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
   MPI_Bcast(&this->energyTwoE,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 #endif
@@ -76,7 +100,6 @@ void SingleSlater<T>::computeEnergy(){
 
 template<typename T>
 void SingleSlater<T>::computeMultipole(){
-  if(!this->haveDensity) this->formDensity();
   if(!this->aointegrals_->haveAOOneE && getRank() == 0) 
     this->aointegrals_->computeAOOneE();
   if(this->maxMultipole_ < 1) return;
@@ -136,6 +159,7 @@ void SingleSlater<T>::computeMultipole(){
 
 template<typename T>
 void SingleSlater<T>::mullikenPop() {
+/*
   double charge;
   this->mullPop_.clear();
   RealMatrix PS = (*this->onePDMA_).real() * (*this->aointegrals_->overlap_); 
@@ -149,4 +173,5 @@ void SingleSlater<T>::mullikenPop() {
     charge -= PS.block(iBfSt,iBfSt,iSize,iSize).trace();
     this->mullPop_.push_back(charge); 
   } 
+*/
 }

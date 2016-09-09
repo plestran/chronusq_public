@@ -25,60 +25,86 @@
  */
 template<typename T>
 void SingleSlater<T>::formGuess(){
+  if(not this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
+
   if(this->guess_ == SAD) this->SADGuess();
   else if(this->guess_ == CORE) this->COREGuess();
-  else if(this->guess_ == READ) this->READGuess();
+//  else if(this->guess_ == READ) this->READGuess();
   else if(this->guess_ == RANDOM) this->RandomGuess();
   else CErr("Guess NYI",this->fileio_->out);
+
+  if(this->printLevel_ > 3) {
+    this->fileio_->out << "Initial Fock Matrix" << endl;
+    this->printFock();
+  }
+  this->orthoFock3();
+
+  this->populateMO4Diag();
+  this->diagFock2();
+  this->mixOrbitalsSCF();
+  if(this->printLevel_ > 3) {
+    this->fileio_->out << "Initial Density Matrix Before" << endl;
+    this->printDensity();
+  }
+  this->formDensity();
+  if(this->printLevel_ > 3) {
+    this->fileio_->out << "Initial Density Matrix Before" << endl;
+    this->printDensity();
+  }
+  this->cpyAOtoOrthoDen();
+  this->unOrthoDen3();
+//this->scaleDen();
+
+  if(this->printLevel_ > 3) {
+    this->fileio_->out << "Initial Density Matrix" << endl;
+    this->printDensity();
+  }
+
+  this->backTransformMOs();
 }
 
 template<typename T>
 void SingleSlater<T>::COREGuess(){
   this->aointegrals_->computeAOOneE(); 
-  if(this->nTCS_ == 1 && this->isClosedShell){
-    this->fockA_->real() = (*this->aointegrals_->coreH_);
-  } else {
-    this->fockScalar_->real() = 2*(*this->aointegrals_->coreH_);
+  this->fockScalar_->real() = 2*(*this->aointegrals_->coreH_);
+  if(this->nTCS_ == 2 or !this->isClosedShell) {
     this->fockMz_->setZero();
 
+/*
     std::vector<std::reference_wrapper<TMap>> toGather;
     toGather.emplace_back(*this->fockScalar_);
     toGather.emplace_back(*this->fockMz_);
+*/
 
     if(this->nTCS_ ==  2) {
       this->fockMy_->setZero();
       this->fockMx_->setZero();
+/*
       toGather.emplace_back(*this->fockMy_);
       toGather.emplace_back(*this->fockMx_);
 
       Quantum<T>::spinGather(*this->fockA_,toGather);
-    } else 
+*/
+    } 
+/*
+    else 
       Quantum<T>::spinGather(*this->fockA_,*this->fockB_,toGather);
+*/
   }
-  this->haveMO = true;
-  this->haveDensity = true;
 
-  //this->orthoFock();
-  this->orthoFock3();
+/*
   if(this->printLevel_ > 3){
     prettyPrint(this->fileio_->out,*this->fockA_,"Initial FA");
     prettyPrint(this->fileio_->out,*this->fockOrthoA_,"Initial FOrthoA");
   }
-  this->diagFock2();
-  this->mixOrbitalsSCF();
-  this->formDensity();
-  this->cpyAOtoOrthoDen();
-  this->unOrthoDen3();
+*/
+/*
 //if(this->printLevel_ > 3){
     prettyPrint(this->fileio_->out,*this->onePDMA_,"Initial PA");
     prettyPrint(this->fileio_->out,*this->onePDMOrthoA_,"Initial POrthoA");
 //}
+*/
 //this->computeEnergy();
-  this->backTransformMOs();
-  if(this->printLevel_ > 3) {
-    prettyPrint(this->fileio_->out,*this->moA_,"Initial MOA");
-  }
-
 };
 
 
@@ -90,9 +116,6 @@ void SingleSlater<T>::SADGuess() {
     this->moB_->setZero();
   
   // Set flags to use in the rest of code
-  this->haveMO = true;
-  if(this->molecule_->nAtoms() > 1) this->haveDensity = true;
-
   if(this->molecule_->nAtoms() <= 1) return;
 
   // Determining unique atoms
@@ -159,8 +182,7 @@ void SingleSlater<T>::SADGuess() {
     aointegralsAtom.communicate(uniqueAtom,basisSetAtom,*this->fileio_,
       *this->aointegrals_->memManager());
     aointegralsAtom.initMeta();
-    aointegralsAtom.integralAlgorithm = 
-      AOIntegrals::INTEGRAL_ALGORITHM::DIRECT;
+    aointegralsAtom.integralAlgorithm = AOIntegrals::INTEGRAL_ALGORITHM::DIRECT;
     aointegralsAtom.alloc();
 
     hartreeFockAtom.communicate(uniqueAtom,basisSetAtom,aointegralsAtom,
@@ -178,15 +200,16 @@ void SingleSlater<T>::SADGuess() {
     hartreeFockAtom.alloc();
 
     if(this->printLevel_ < 4) hartreeFockAtom.setPrintLevel(0);
+    else hartreeFockAtom.setPrintLevel(this->printLevel_);
  
     // Zero out the MO coeff for local SS object
     if(getRank() == 0){
       hartreeFockAtom.moA()->setZero();
       if(!hartreeFockAtom.isClosedShell) hartreeFockAtom.moB()->setZero();
     }
-    hartreeFockAtom.haveMO = true;
  
     // Prime and perform the atomic SCF
+    hartreeFockAtom.formGuess();
     hartreeFockAtom.formFock();
     hartreeFockAtom.computeEnergy();
     hartreeFockAtom.SCF3();
@@ -196,14 +219,85 @@ void SingleSlater<T>::SADGuess() {
  
   } // Loop iUn
 
+//prettyPrintSmart(cout,*this->onePDMScalar_,"PS");
   this->scaleDen();
-  this->scatterDensity();
+//prettyPrintSmart(cout,*this->onePDMScalar_,"PS");
   this->formFock();
-  this->orthoFock3();
+//prettyPrintSmart(cout,*this->fockScalar_,"FS");
+};
+
+template <typename T>
+void SingleSlater<T>::RandomGuess() {
+/*
+  (*this->onePDMScalar_) = TMatrix::Random(this->nBasis_,this->nBasis_);
+  (*this->onePDMScalar_) = 
+    this->onePDMScalar_->template selfadjointView<Lower>();
+  if(this->nTCS_ == 2 and !this->isClosedShell){
+    (*this->onePDMMz_) = TMatrix::Random(this->nBasis_,this->nBasis_);
+    (*this->onePDMMz_) = this->onePDMMz_->template selfadjointView<Lower>();
+  }
+*/
+  (*this->moA_) = 
+    TMatrix::Random(this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_);
+  if(this->nTCS_ == 1 and !this->isClosedShell)
+    (*this->moB_) = TMatrix::Random(this->nBasis_,this->nBasis_);
+
   this->diagFock2();
-  this->mixOrbitalsSCF();
   this->formDensity();
   this->cpyAOtoOrthoDen();
   this->unOrthoDen3();
-  this->backTransformMOs();
-};
+  this->scaleDen();
+  this->formFock();
+}
+
+template<typename T>
+void SingleSlater<T>::placeAtmDen(std::vector<int> atomIndex, 
+  SingleSlater<double> &hfA){
+  // Place atomic SCF densities in the right place of the total density
+  // ** Note: ALWAYS spin average, even for UHF **
+  for(auto iAtm : atomIndex){
+    auto iBfSt = this->basisset_->mapCen2Bf(iAtm)[0];
+    auto iSize = this->basisset_->mapCen2Bf(iAtm)[1]; 
+
+    this->onePDMScalar_->block(iBfSt,iBfSt,iSize,iSize) =
+      hfA.onePDMScalar()->template cast<T>();
+    if(this->nTCS_ == 2 or !this->isClosedShell)
+      this->onePDMMz_->block(iBfSt,iBfSt,iSize,iSize) =
+        hfA.onePDMMz()->template cast<T>();
+  } // loop iAtm
+}
+
+template<typename T>
+void SingleSlater<T>::scaleDen(){
+  if(this->nTCS_ == 1 and this->isClosedShell) {
+//  prettyPrint(cout,*this->aointegrals_->overlap_,"S");
+//  cout <<this->template computeProperty<double,DENSITY_TYPE::TOTAL>(*this->aointegrals_->overlap_) << endl;
+    (*this->onePDMScalar_) *= 
+      T(this->molecule_->nTotalE()) / 
+      T(this->template computeProperty<double,DENSITY_TYPE::TOTAL>(
+        *this->aointegrals_->overlap_));
+  } else {
+    // SCR  = PA
+    // SCR2 = PB
+    (*this->NBSqScratch_) = (*this->onePDMScalar_) + (*this->onePDMMz_);
+    (*this->NBSqScratch2_) = (*this->onePDMScalar_) - (*this->onePDMMz_);
+    (*this->NBSqScratch_) *= 0.5; 
+    (*this->NBSqScratch2_) *= 0.5; 
+
+    double TS = this->template computeProperty<double,DENSITY_TYPE::TOTAL>(
+      *this->aointegrals_->overlap_); 
+    double TZ = this->template computeProperty<double,DENSITY_TYPE::MZ>(
+      *this->aointegrals_->overlap_); 
+
+    double TA = 0.5 * (TS + TZ);
+    double TB = 0.5 * (TS - TZ);
+
+
+    (*this->NBSqScratch_) *= T(this->nOA_) / T(TA);
+    (*this->NBSqScratch2_) *= T(this->nOB_) / T(TB);
+
+    (*this->onePDMScalar_) = (*this->NBSqScratch_) + (*this->NBSqScratch2_);
+    (*this->onePDMMz_)     = (*this->NBSqScratch_) - (*this->NBSqScratch2_);
+
+  }
+}

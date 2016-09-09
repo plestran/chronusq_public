@@ -28,6 +28,7 @@ using ChronusQ::FileIO;
 using ChronusQ::SingleSlater;
 
 namespace ChronusQ{
+/*
 template<>
 void SingleSlater<double>::GenDComm(int iter){
   RealMap ErrA(
@@ -47,7 +48,9 @@ void SingleSlater<double>::GenDComm(int iter){
     ErrB -= (*this->aointegrals_->overlap_) * (*this->onePDMB_) * (*this->fockB_);
   }
 } // GenDComm
+*/
 
+/*
 template<>
 void SingleSlater<double>::genDComm2(int iter) {
   auto NTCSxNBASIS = this->nTCS_ * this->nBasis_;
@@ -70,5 +73,6 @@ void SingleSlater<double>::genDComm2(int iter) {
     ErrB -= this->NBSqScratch_->adjoint() * (*this->fockB_);
   };
 };
+*/
 
 }// Namespace ChronusQ

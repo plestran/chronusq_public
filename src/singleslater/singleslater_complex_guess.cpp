@@ -32,6 +32,7 @@ using ChronusQ::BasisSet;
 using ChronusQ::Molecule;
 using ChronusQ::HashNAOs;
 namespace ChronusQ {
+/*
 template<>
 void SingleSlater<dcomplex>::placeAtmDen(std::vector<int> atomIndex, SingleSlater<double> &hfA){
   // Place atomic SCF densities in the right place of the total density
@@ -65,6 +66,8 @@ void SingleSlater<dcomplex>::placeAtmDen(std::vector<int> atomIndex, SingleSlate
     }
   } // loop iAtm
 }
+*/
+/*
 template<>
 void SingleSlater<dcomplex>::scaleDen(){
   // Scale UHF densities according to desired multiplicity
@@ -81,7 +84,9 @@ void SingleSlater<dcomplex>::scaleDen(){
     }
   }
 }; // SingleSlater::scaleDen [T=dcomplex]
+*/
 
+/*
 //--------------------------------//
 // form the initial guess of MO's //
 //--------------------------------//
@@ -100,7 +105,9 @@ void SingleSlater<dcomplex>::RandomGuess() {
     *this->onePDMB_ = this->onePDMB_->selfadjointView<Lower>();
   }  
 };
+*/
 
+/*
 template<>
 void SingleSlater<dcomplex>::READGuess(){
   if(getRank() == 0) {
@@ -126,5 +133,6 @@ void SingleSlater<dcomplex>::READGuess(){
 #endif
   
 }
+*/
 }; //namespace ChronusQ
 #endif

@@ -31,13 +31,6 @@
 #ifdef USE_LIBINT
 template<typename T>
 void SingleSlater<T>::formPT(){
-  bool doTCS = (this->nTCS_ == 2);
-  bool doRHF = (this->isClosedShell && !doTCS);
-  bool doKS  = this->isDFT;
-  if(!this->haveDensity) this->formDensity();
-//  this->sepReImOnePDM();
-//  this->comReImOnePDM();
-//this->scatterDensity();
 
   std::vector<std::reference_wrapper<TMap>> mats;
   std::vector<std::reference_wrapper<TMap>> ax;
@@ -46,50 +39,41 @@ void SingleSlater<T>::formPT(){
   double exchFactor = -0.5;
   if(this->isDFT) exchFactor = 0.0;
 
-  if(this->nTCS_ == 1 && this->isClosedShell) {
+  mats.emplace_back(*this->onePDMScalar_);
+  mats.emplace_back(*this->onePDMScalar_);
+  ax.emplace_back(*this->PTScalar_);
+  ax.emplace_back(*this->PTScalar_);
+  contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::COULOMB);
+  contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::EXCHANGE);
+  scalingFactors.push_back(1.0);
+  scalingFactors.push_back(exchFactor);
 
-    mats.emplace_back(*this->onePDMA_);
-    mats.emplace_back(*this->onePDMA_);
-    ax.emplace_back(*this->PTA_);
-    ax.emplace_back(*this->PTA_);
-    contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::COULOMB);
-    contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::EXCHANGE);
-    scalingFactors.push_back(1.0);
-    scalingFactors.push_back(exchFactor);
+  this->PTScalar_->setZero();
 
-    this->PTA_->setZero();
-
-  } else {
-    mats.emplace_back(*this->onePDMScalar_);
-    mats.emplace_back(*this->onePDMScalar_);
+  if(this->nTCS_ == 2 or !this->isClosedShell) {
     mats.emplace_back(*this->onePDMMz_);
-    ax.emplace_back(*this->PTScalar_);
-    ax.emplace_back(*this->PTScalar_);
     ax.emplace_back(*this->PTMz_);
-    contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::COULOMB);
     contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::EXCHANGE);
-    contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::EXCHANGE);
-    scalingFactors.push_back(1.0);
     scalingFactors.push_back(exchFactor);
-    scalingFactors.push_back(exchFactor);
-    this->PTScalar_->setZero();
     this->PTMz_->setZero();
-    if(this->nTCS_ == 2){
-      mats.emplace_back(*this->onePDMMy_);
-      mats.emplace_back(*this->onePDMMx_);
-      ax.emplace_back(*this->PTMy_);
-      ax.emplace_back(*this->PTMx_);
-      contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::EXCHANGE);
-      contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::EXCHANGE);
-      scalingFactors.push_back(exchFactor);
-      scalingFactors.push_back(exchFactor);
-      this->PTMy_->setZero();
-      this->PTMx_->setZero();
-    }
+  }
+
+  if(this->nTCS_ == 2){
+    mats.emplace_back(*this->onePDMMy_);
+    mats.emplace_back(*this->onePDMMx_);
+    ax.emplace_back(*this->PTMy_);
+    ax.emplace_back(*this->PTMx_);
+    contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::EXCHANGE);
+    contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::EXCHANGE);
+    scalingFactors.push_back(exchFactor);
+    scalingFactors.push_back(exchFactor);
+    this->PTMy_->setZero();
+    this->PTMx_->setZero();
   }
 
   this->aointegrals_->newTwoEContract(mats,ax,contList,scalingFactors);
 
+/*
   if(this->nTCS_ == 1 && this->isClosedShell) {
     (*this->PTA_) *= 0.5; // This is effectively a gather operation
   } else {
@@ -105,8 +89,11 @@ void SingleSlater<T>::formPT(){
     }
 
   }
+*/
 
   if(this->printLevel_ >= 3 && getRank() == 0) this->printPT();
+//prettyPrint(cout,*this->onePDMA_,"P in PT");
+//prettyPrint(cout,*this->PTA_,"PT in PT");
 }
 #endif
 
@@ -114,13 +101,13 @@ void SingleSlater<T>::formPT(){
  * Form Fock Matrix *
  ********************/
 template<typename T>
-void SingleSlater<T>::formFock(){
+void SingleSlater<T>::formFock(bool increment){
 #ifdef CQ_ENABLE_MPI
   // Syncronize MPI processes before fock build
   MPI_Barrier(MPI_COMM_WORLD);
 #endif
   
-  if(!this->haveDensity) this->formDensity();
+//if(!this->haveDensity) this->formDensity();
 #ifndef USE_LIBINT
   if(getRank() == 0){
     // Not even sure if these guys still work let alone are MPI
@@ -138,39 +125,44 @@ void SingleSlater<T>::formFock(){
 
     if (this->isDFT) this->formVXC_new();
   
+/*
     if(this->nTCS_ == 1 && this->isClosedShell) {
-      this->fockA_->setZero();
-      this->fockA_->real() += (*this->aointegrals_->coreH_);
-      this->aointegrals_->addElecDipole(*this->fockA_,this->elecField_);
+      if(!increment) {
+        cout << "Not Incrementing" << endl;
+        this->fockA_->setZero();
+        this->fockA_->real() += (*this->aointegrals_->coreH_);
+        this->aointegrals_->addElecDipole(*this->fockA_,this->elecField_);
+      }
       (*this->fockA_) += (*this->PTA_);
       if(this->isDFT){ 
         (*this->fockA_) += (*this->vXA_);
       }
     } else {
-      this->fockScalar_->setZero();
-      this->fockMz_->setZero();
-      this->fockScalar_->real() += (*this->aointegrals_->coreH_);
-      
-      if(this->nTCS_ == 2) {
-          this->fockMx_->setZero();
-          this->fockMy_->setZero();
-        if(this->aointegrals_->doX2C){
-    //    cout << "nTCS == 2 ... buiding Fock" << endl;
-          this->fockMx_->real() = 2*(*this->aointegrals_->oneEmx_);
-          this->fockMy_->real() = 2*(*this->aointegrals_->oneEmy_);
-          this->fockMz_->real() = 2*(*this->aointegrals_->oneEmz_);
-          // -----------------------------------
-          // SCALE SO parts by 'i'
-          // -----------------------------------
-          Quantum<T>::complexMyScale(*this->fockMx_);
-          Quantum<T>::complexMyScale(*this->fockMy_);
-          Quantum<T>::complexMyScale(*this->fockMz_);
-          // -----------------------------------
+      if(!increment) {
+        this->fockScalar_->setZero();
+        this->fockMz_->setZero();
+        this->fockScalar_->real() += (*this->aointegrals_->coreH_);
+        
+        if(this->nTCS_ == 2) {
+            this->fockMx_->setZero();
+            this->fockMy_->setZero();
+          if(this->aointegrals_->doX2C){
+            this->fockMx_->real() = 2*(*this->aointegrals_->oneEmx_);
+            this->fockMy_->real() = 2*(*this->aointegrals_->oneEmy_);
+            this->fockMz_->real() = 2*(*this->aointegrals_->oneEmz_);
+            // -----------------------------------
+            // SCALE SO parts by 'i'
+            // -----------------------------------
+            Quantum<T>::complexMyScale(*this->fockMx_);
+            Quantum<T>::complexMyScale(*this->fockMy_);
+            Quantum<T>::complexMyScale(*this->fockMz_);
+            // -----------------------------------
+          }
         }
-      }
 
-      this->aointegrals_->addElecDipole(*this->fockScalar_,this->elecField_);
-      (*this->fockScalar_) *= 2.0;
+        this->aointegrals_->addElecDipole(*this->fockScalar_,this->elecField_);
+        (*this->fockScalar_) *= 2.0;
+      }
       (*this->fockScalar_)      += (*this->PTScalar_);        
       (*this->fockMz_)          += (*this->PTMz_);
 
@@ -203,6 +195,58 @@ void SingleSlater<T>::formFock(){
       //  prettyPrint(this->fileio_->out,(*this->fockA_)," fockA_ ");
       }
     }
+*/
+
+    if(!increment) {
+      this->fockScalar_->setZero();
+
+      if(this->nTCS_ == 2 or !this->isClosedShell)
+        this->fockMz_->setZero();
+
+      if(this->nTCS_ == 2){
+        this->fockMy_->setZero();
+        this->fockMx_->setZero();
+      }
+
+      (*this->fockScalar_) = this->aointegrals_->coreH_->template cast<T>();
+      this->aointegrals_->addElecDipole(*this->fockScalar_,this->elecField_);
+
+      if(this->nTCS_ == 2 and this->aointegrals_->doX2C) {
+        (*this->fockMx_) = this->aointegrals_->oneEmx_->template cast<T>();
+        (*this->fockMy_) = this->aointegrals_->oneEmy_->template cast<T>();
+        (*this->fockMz_) = this->aointegrals_->oneEmz_->template cast<T>();
+        // -----------------------------------
+        // SCALE SO parts by 'i'
+        // -----------------------------------
+        Quantum<T>::complexMyScale(*this->fockMx_);
+        Quantum<T>::complexMyScale(*this->fockMy_);
+        Quantum<T>::complexMyScale(*this->fockMz_);
+        // -----------------------------------
+      }
+      for(auto iF = fock_.begin(); iF != fock_.end(); iF++)
+        *(*iF) *= 2;
+    }
+
+/*
+      this->fileio_->out << "Before PT" << endl;
+      this->printFock();
+      for(auto i = 0; i < this->fockScalar_->size(); i++){
+        cout << this->fockScalar_->data()[i] << " + " << this->PTScalar_->data()[i] << " = " << this->fockScalar_->data()[i] + this->PTScalar_->data()[i] << endl;
+        this->fockScalar_->data()[i] += this->PTScalar_->data()[i];
+      }
+*/
+    for(auto iF = 0; iF < fock_.size(); iF++) {
+      *(fock_[iF]) += *(PT_[iF]);
+      if(this->isDFT)
+        (*fock_[iF]) += (*vXC_[iF]);
+    }
+/*
+    (*this->fockScalar_) += (*this->PTScalar_);
+*/
+/*
+      this->fileio_->out << "After PT" << endl;
+      this->printFock();
+*/
 
 
     if(this->printLevel_ >= 2) this->printFock(); 

@@ -475,8 +475,10 @@ void AOIntegrals::alloc(){
     this->quartetConstants_ = 
       std::unique_ptr<QuartetConstants>(new QuartetConstants);
  
+/*
     if(this->isPrimary) 
       this->fileio_->iniStdOpFiles(this->basisSet_->nBasis());
+*/
   }
 #ifdef CQ_ENABLE_MPI
   MPI_Barrier(MPI_COMM_WORLD);
@@ -645,19 +647,14 @@ void AOIntegrals::allocMultipole(){
   }
 }
 
+/*
 void AOIntegrals::writeOneE(){
   this->fileio_->overlap->write(this->overlap_->data(),H5::PredType::NATIVE_DOUBLE);
   this->fileio_->kinetic->write(this->kinetic_->data(),H5::PredType::NATIVE_DOUBLE);
   this->fileio_->nucRepl->write(this->potential_->data(),H5::PredType::NATIVE_DOUBLE);
   this->fileio_->coreHam->write(this->coreH_->data(),H5::PredType::NATIVE_DOUBLE);
-  // FIXME: This is buggy because we need to write to a slab of the data as opposed 
-  // the the whole thing (hyperSlabs)
-  /*
-  this->fileio_->dipole->write(&this->elecDipole_->storage()[0],H5::PredType::NATIVE_DOUBLE);
-  this->fileio_->quadpole->write(&this->elecQuadpole_->storage()[0],H5::PredType::NATIVE_DOUBLE);
-  this->fileio_->octupole->write(&this->elecOctpole_->storage()[0],H5::PredType::NATIVE_DOUBLE);
-  */
 }
+*/
 
 
 void AOIntegrals::createShellPairs() {

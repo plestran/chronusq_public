@@ -24,39 +24,11 @@
  *  
  */
 
-#include <singleslater/singleslater_oldscf.h>
+//#include <singleslater/singleslater_oldscf.h>
 #include <singleslater/singleslater_levelshift.h>
 #include <singleslater/singleslater_scfutils.h>
 
 
-template <typename T>
-void SingleSlater<T>::copyDen(){
-/*
-  auto NTCSxNBASIS = this->nTCS_*this->nBasis_;
-  TMap POldAlpha(this->POldAlphaMem_,NTCSxNBASIS,NTCSxNBASIS);
-  POldAlpha = (*this->onePDMA_);
-
-  if(this->nTCS_ == 1 && !this->isClosedShell){
-    TMap POldBeta(this->POldBetaMem_,NTCSxNBASIS,NTCSxNBASIS);
-    POldBeta = (*this->onePDMB_);
-  };
-*/
-  
-  T* ScalarPtr;
-  if(this->isClosedShell && this->nTCS_ == 1) 
-    ScalarPtr = this->onePDMA_->data();
-  else
-    ScalarPtr = this->onePDMScalar_->data();
-
-  DScalarOld_->write(ScalarPtr,H5PredType<T>());
-  if(this->nTCS_ == 2 || !this->isClosedShell){
-    DMzOld_->write(this->onePDMMz_->data(),H5PredType<T>());
-  }
-  if(this->nTCS_ == 2){
-    DMyOld_->write(this->onePDMMy_->data(),H5PredType<T>());
-    DMxOld_->write(this->onePDMMx_->data(),H5PredType<T>());
-  }
-};
 
 template<typename T>
 void SingleSlater<T>::SCF3(){
@@ -70,37 +42,91 @@ void SingleSlater<T>::SCF3(){
   // Print the SCF Header
   if(this->printLevel_ > 0)
     this->printSCFHeader(this->fileio_->out);
-
+  
   this->computeEnergy();
   this->isConverged = false;
   std::size_t iter;
+  bool doLevelShift;
   if(this->printLevel_ > 0){
     this->fileio_->out << "    *** INITIAL GUESS ENERGY = " 
-      << this->totalEnergy << " Eh ***" << endl;
+      << this->totalEnergy_ << " Eh ***" << endl;
   }
 
-  this->formFock();
+  this->doIncFock_ = this->isPrimary and !this->isDFT;
+  this->doIncFock_ = false;
+
   for(iter = 0; iter < this->maxSCFIter_; iter++){
     this->copyDen();
+    this->copyPT();
+    if(iter != 0 and this->doIncFock_)
+      this->copyDeltaDtoD();
+
+    this->formFock(this->doIncFock_ && iter != 0);
+
+    if(iter != 0 and this->doIncFock_){
+      this->incPT();
+      this->copyDOldtoD();
+    } 
+   
+
+/*
+    doLevelShift = this->nLevelShift_ != 0;
+    doLevelShift = doLevelShift and iter >= this->iStartLevelShift_;
+    doLevelShift = 
+      doLevelShift and iter < this->iStartLevelShift_ + 15;
+
+    if(doLevelShift) this->levelShift2();
+*/
+
     this->orthoFock3();
+    this->formFP();
+
+    auto IDIISIter = iter - this->iDIISStart_;
     if(this->doDIIS){
-      auto IDIISIter = iter - this->iDIISStart_;
       this->cpyFockDIIS(IDIISIter);
       this->cpyDenDIIS(IDIISIter);
       this->genDIISCom(IDIISIter); 
-      if(IDIISIter > 0) 
+    }
+
+    // DIIS Extrapolation of the Fock
+    if(this->doDIIS and IDIISIter > 0 and this->diisAlg_ != NO_DIIS) { 
+      if(this->diisAlg_ == CDIIS)
         this->CDIIS4(std::min(IDIISIter+1,std::size_t(this->nDIISExtrap_)));
     }
-    this->diagFock2();
-    this->formDensity();
+
+    if(this->doDMS){
+      this->formDMSErr(IDIISIter);
+    }
+
+    if(this->doDMS and IDIISIter > 0){
+      // DIIS (DMS) Extrapolation of the Density
+      this->DMSExtrap(std::min(IDIISIter+1,std::size_t(this->nDIISExtrap_)));
+    } else {
+      // Copies over the ortho focks to the MO storage
+      this->populateMO4Diag();
+
+      // Diagonalizes the orthonormal fock matricies
+      this->diagFock2();
+
+      // This stupidly computes the orthonormal density and stores it in the
+      // AO storage
+      this->formDensity();
+
+    }
+    // This copy operation negates the problem above
     this->cpyAOtoOrthoDen();
+
+    // Transform D into the AO basis
     this->unOrthoDen3();
+
+    if(this->isConverged)
+      this->fileio_->out << "   *** SCF Converged by [F,P] ***" << endl;
     // Calls formFock
     SCFConvergence CONVER = this->evalConver3();
 
     if(this->printLevel_ > 0)
-      this->printSCFIter(iter,CONVER.EDelta,CONVER.PARMS,
-        CONVER.PBRMS);
+      this->printSCFIter(iter,CONVER.EDelta,CONVER.PSRMS,
+        CONVER.PMRMS);
 
     this->nSCFIter++;
 
@@ -120,7 +146,7 @@ void SingleSlater<T>::SCF3(){
       << this->SCFTypeShort_ << ") = ";
     this->fileio_->out 
       << std::fixed << std::setprecision(10) 
-      << this->totalEnergy << "  Eh after  " << iter + 1 
+      << this->totalEnergy_ << "  Eh after  " << iter + 1 
       << "  SCF Iterations" << endl;
     this->fileio_->out << bannerEnd <<endl;
   }

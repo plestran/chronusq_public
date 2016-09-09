@@ -1,7 +1,13 @@
-#define EIGEN_RUNTIME_NO_MALLOC
-#include <response.h>
-#include <workers.h>
+//#define EIGEN_RUNTIME_NO_MALLOC
+//#include <response.h>
+//#include <workers.h>
+//#include <pythonapi.h>
+#include <global.h>
 #include <pythonapi.h>
+#include <singleslater.h>
+#include <mointegrals.h>
+#include <response.h>
+
 struct MyStruct {
   RealMatrix VXCA;
   RealMatrix VXCB;
@@ -77,15 +83,14 @@ int main(int argc, char **argv){
   Molecule molecule;
   BasisSet basis;
   AOIntegrals aoints;
-  MOIntegrals<double> moints;
+//MOIntegrals<double> moints;
   SingleSlater<double> singleSlater;
-  Response<double> resp;
+//Response<double> resp;
   FileIO fileio("test.inp","test.out");
 
-  memManager.setTotalMem(256e3);
+  memManager.setTotalMem(256e6);
   initCQ(argc,argv);
   fileio.iniH5Files();
-  fileio.iniStdGroups();
   CQSetNumThreads(1);
   
   loadPresets<WATER>(molecule);
@@ -98,6 +103,7 @@ int main(int argc, char **argv){
 
   singleSlater.setRef(SingleSlater<double>::RHF);
   singleSlater.isClosedShell = true;
+/*
   singleSlater.isDFT = true;
   singleSlater.isHF = false;
 //singleSlater.setExchKernel(SingleSlater<double>::EXCH::B88);
@@ -106,13 +112,14 @@ int main(int argc, char **argv){
 //  singleSlater.setCorrKernel(SingleSlater<double>::CORR::VWN5);
   singleSlater.addB88();
   singleSlater.addLYP();
+*/
 //singleSlater.addSlater();
 //singleSlater.addVWN5();
 //singleSlater.setPrintLevel(5);
 
-//basis.findBasisFile("sto3g");
+  basis.findBasisFile("sto-3g");
 //basis.findBasisFile("3-21g");
-basis.findBasisFile("6-31G");
+//basis.findBasisFile("6-31G");
   basis.communicate(fileio);
   basis.parseGlobal();
   basis.constructLocal(&molecule);
@@ -122,7 +129,7 @@ basis.findBasisFile("6-31G");
 
   aoints.communicate(molecule,basis,fileio,memManager);
   singleSlater.communicate(molecule,basis,aoints,fileio,memManager);
-  moints.communicate(molecule,basis,fileio,aoints,singleSlater);
+//moints.communicate(molecule,basis,fileio,aoints,singleSlater);
 
   aoints.initMeta();
   aoints.integralAlgorithm = AOIntegrals::INCORE;
@@ -133,12 +140,21 @@ basis.findBasisFile("6-31G");
   singleSlater.alloc();
 
   singleSlater.formGuess();
-  singleSlater.formFock();
-  singleSlater.computeEnergy();
+//singleSlater.formFock();
+//singleSlater.computeEnergy();
   singleSlater.SCF3();
   singleSlater.computeProperties();
   singleSlater.printProperties();
 
+
+  cout << endl;
+  MOIntegrals<double> moints;
+  moints.communicate(singleSlater,memManager);
+  moints.initMeta();
+  moints.testMOInts();
+  FOPPA<double> resp;
+  resp.communicate(singleSlater,memManager);
+  resp.initMeta();
   finalizeCQ();
   return 0;
 };

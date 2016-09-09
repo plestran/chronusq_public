@@ -107,6 +107,14 @@ namespace ChronusQ {
       this->scratchFile_ = scr;
     }
 
+    QNCallable(size_t nSingleDim, size_t nSek, size_t nGuess) :
+      QNCallable()
+      { 
+        this->nSingleDim_ = nSingleDim;
+        this->nSek_       = nSek;
+        this->nGuess_     = nGuess;
+      }
+
     inline void initQN() {
       if(this->generateGuess_) this->generateGuess();
       if(this->allocSolution_) this->allocSolution();
