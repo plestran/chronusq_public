@@ -79,6 +79,19 @@ class MOIntegrals {
   T* VOOOAAAA_;
   T* OOOOAAAA_;
 
+  T* VVVVAABB_;
+  T* VVVOAABB_;
+  T* VVOOAABB_;
+  T* VOVOAABB_;
+  T* VOOOAABB_;
+  T* OOOOAABB_;
+
+  T* VVVVBBBB_;
+  T* VVVOBBBB_;
+  T* VVOOBBBB_;
+  T* VOVOBBBB_;
+  T* VOOOBBBB_;
+  T* OOOOBBBB_;
   // Private functions
   void getLocalMOs();
 

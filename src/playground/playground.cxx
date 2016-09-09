@@ -96,13 +96,19 @@ int main(int argc, char **argv){
   loadPresets<WATER>(molecule);
 //loadPresets<HE>(molecule);
 //loadPresets<SO>(molecule);
+//loadPresets<Li>(molecule);
   molecule.convBohr();
   molecule.computeNucRep();
   molecule.computeRij();
   molecule.computeI();
 
+/*
   singleSlater.setRef(SingleSlater<double>::RHF);
   singleSlater.isClosedShell = true;
+*/
+  singleSlater.setRef(SingleSlater<double>::UHF);
+  singleSlater.isClosedShell = false;
+
 /*
   singleSlater.isDFT = true;
   singleSlater.isHF = false;

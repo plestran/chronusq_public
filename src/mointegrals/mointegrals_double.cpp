@@ -74,85 +74,185 @@ void MOIntegrals<double>::formVOVO() {
   bool isOpenShell = !this->wfn_->isClosedShell;
   int NB           = this->wfn_->nBasis();
   int intDim       = this->pscf_.nOAVA() * this->pscf_.nOAVA();
-  int NO = this->wfn_->nOA();
-  int NV = this->wfn_->nVA();
+  int NOA = this->wfn_->nOA();
+  int NVA = this->wfn_->nVA();
+  int NOB = this->wfn_->nOB();
+  int NVB = this->wfn_->nVB();
 
 
-  VOVOAAAA_ = this->memManager_->malloc<double>(intDim);
-  std::fill_n(VOVOAAAA_,NV*NO*NO*NV,0.0);
+  VOVOAAAA_ = this->memManager_->malloc<double>(NOA*NVA*NOA*NVA);
+  std::fill_n(VOVOAAAA_,NVA*NOA*NOA*NVA,0.0);
 
-  double * I_mils_A   = this->memManager_->malloc<double>(NB*NB*NB*NO);
-  double * I_milj_AA  = this->memManager_->malloc<double>(NB*NB*NO*NO);
-  double * I_mibj_AAA = this->memManager_->malloc<double>(NB*NO*NO*NV);
+  double * I_mils_A   = this->memManager_->malloc<double>(NB*NB*NB*NOA);
+  double * I_milj_AA  = this->memManager_->malloc<double>(NB*NB*NOA*NOA);
+  double * I_mibj_AAA = this->memManager_->malloc<double>(NB*NOA*NOA*NVA);
 
-  std::fill_n(I_mils_A  ,NB*NB*NB*NO,0.0);
-  std::fill_n(I_milj_AA ,NB*NB*NO*NO,0.0);
-  std::fill_n(I_mibj_AAA,NB*NO*NO*NV,0.0);
+  std::fill_n(I_mils_A  ,NB*NB*NB*NOA,0.0);
+  std::fill_n(I_milj_AA ,NB*NB*NOA*NOA,0.0);
+  std::fill_n(I_mibj_AAA,NB*NOA*NOA*NVA,0.0);
 
   for(auto sg = 0; sg < NB; sg++)
   for(auto lm = 0; lm < NB; lm++)
-  for(auto i = 0; i < NO; i++)
+  for(auto i = 0; i < NOA; i++)
   for(auto nu = 0; nu < NB; nu++)  
   for(auto mu = 0; mu < NB; mu++) {
-    I_mils_A[mu + NB*i + NB*NO*lm + NB*NB*NO*sg] +=
+    I_mils_A[mu + NB*i + NB*NOA*lm + NB*NB*NOA*sg] +=
       (*this->wfn_->moA())(nu,i) *
       (*this->wfn_->aointegrals()->aoERI_)(mu,nu,lm,sg);
   }
 
-  for(auto j = 0; j < NO; j++)
+  for(auto j = 0; j < NOA; j++)
   for(auto sg = 0; sg < NB; sg++)
   for(auto lm = 0; lm < NB; lm++)
-  for(auto i = 0; i < NO; i++)
+  for(auto i = 0; i < NOA; i++)
   for(auto mu = 0; mu < NB; mu++) {
-    I_milj_AA[mu + NB*i + NB*NO*lm + NB*NB*NO*j] +=
+    I_milj_AA[mu + NB*i + NB*NOA*lm + NB*NB*NOA*j] +=
       (*this->wfn_->moA())(sg,j) *
-      I_mils_A[mu + NB*i + NB*NO*lm + NB*NB*NO*sg];
+      I_mils_A[mu + NB*i + NB*NOA*lm + NB*NB*NOA*sg];
   }
 
-  for(auto j = 0; j < NO; j++)
-  for(auto b = 0; b < NV; b++)
+  for(auto j = 0; j < NOA; j++)
+  for(auto b = 0; b < NVA; b++)
   for(auto lm = 0; lm < NB; lm++)
-  for(auto i = 0; i < NO; i++)
+  for(auto i = 0; i < NOA; i++)
   for(auto mu = 0; mu < NB; mu++) {
-    I_mibj_AAA[mu + NB*i + NB*NO*b + NB*NV*NO*j] +=
-      (*this->wfn_->moA())(lm,b+NO) *
-      I_milj_AA[mu + NB*i + NB*NO*lm + NB*NB*NO*j];
+    I_mibj_AAA[mu + NB*i + NB*NOA*b + NB*NVA*NOA*j] +=
+      (*this->wfn_->moA())(lm,b+NOA) *
+      I_milj_AA[mu + NB*i + NB*NOA*lm + NB*NB*NOA*j];
   }
 
-  for(auto j = 0; j < NO; j++)
-  for(auto b = 0; b < NV; b++)
-  for(auto i = 0; i < NO; i++)
-  for(auto a = 0; a < NV; a++)
+  for(auto j = 0; j < NOA; j++)
+  for(auto b = 0; b < NVA; b++)
+  for(auto i = 0; i < NOA; i++)
+  for(auto a = 0; a < NVA; a++)
   for(auto mu = 0; mu < NB; mu++) {
-    VOVOAAAA_[a + NV*i + NV*NO*b + NV*NV*NO*j] +=
-      (*this->wfn_->moA())(mu,a+NO) *
-      I_mibj_AAA[mu + NB*i + NB*NO*b + NB*NV*NO*j];
+    VOVOAAAA_[a + NVA*i + NVA*NOA*b + NVA*NVA*NOA*j] +=
+      (*this->wfn_->moA())(mu,a+NOA) *
+      I_mibj_AAA[mu + NB*i + NB*NOA*b + NB*NVA*NOA*j];
   }
 
-/*
-  // Stupid N^8 Algorithm
-  for(auto i = 0; i < NO; i++)
-  for(auto j = 0; j < NO; j++)
-  for(auto a = 0; a < NV; a++)
-  for(auto b = 0; b < NV; b++)
-  for(auto sg = 0; sg < NB; sg++)
-  for(auto lm = 0; lm < NB; lm++)
-  for(auto nu = 0; nu < NB; nu++)  
-  for(auto mu = 0; mu < NB; mu++) {
-    VOVOAAAA_[a + NV*i + NO*NV*b + NV*NO*NV*j] +=
-      (*this->wfn_->moA())(mu,NO+a) *
-      (*this->wfn_->moA())(nu,i) *
-      (*this->wfn_->moA())(lm,NO+b) *
-      (*this->wfn_->moA())(sg,j) *
-      (*this->wfn_->aointegrals()->aoERI_)(mu,nu,lm,sg);
+
+  // Deallocate the unused intermediates
+  this->memManager_->free(I_mibj_AAA,NB*NOA*NOA*NVA);
+  this->memManager_->free(I_milj_AA ,NB*NB*NOA*NOA);
+
+  if(isOpenShell) {
+    VOVOAABB_ = this->memManager_->malloc<double>(NOA*NVA*NOB*NVB);
+    std::fill_n(VOVOAABB_,NOA*NVA*NOB*NVB,0.0);
+
+    double * I_milj_AB  = this->memManager_->malloc<double>(NB*NB*NOA*NOB);
+    double * I_mibj_ABB = this->memManager_->malloc<double>(NB*NOA*NOB*NVB);
+
+    std::fill_n(I_milj_AB ,NB*NB*NOA*NOB,0.0);
+    std::fill_n(I_mibj_ABB,NB*NOA*NOB*NVB,0.0);
+
+    for(auto j = 0; j < NOB; j++)
+    for(auto sg = 0; sg < NB; sg++)
+    for(auto lm = 0; lm < NB; lm++)
+    for(auto i = 0; i < NOA; i++)
+    for(auto mu = 0; mu < NB; mu++) {
+      I_milj_AB[mu + NB*i + NB*NOA*lm + NB*NB*NOA*j] +=
+        (*this->wfn_->moB())(sg,j) *
+        I_mils_A[mu + NB*i + NB*NOA*lm + NB*NB*NOA*sg];
+    }
+ 
+    for(auto j = 0; j < NOB; j++)
+    for(auto b = 0; b < NVB; b++)
+    for(auto lm = 0; lm < NB; lm++)
+    for(auto i = 0; i < NOA; i++)
+    for(auto mu = 0; mu < NB; mu++) {
+      I_mibj_ABB[mu + NB*i + NB*NOA*b + NB*NVB*NOA*j] +=
+        (*this->wfn_->moB())(lm,b+NOB) *
+        I_milj_AB[mu + NB*i + NB*NOA*lm + NB*NB*NOA*j];
+    }
+
+    for(auto j = 0; j < NOB; j++)
+    for(auto b = 0; b < NVB; b++)
+    for(auto i = 0; i < NOA; i++)
+    for(auto a = 0; a < NVA; a++)
+    for(auto mu = 0; mu < NB; mu++) {
+      VOVOAABB_[a + NVA*i + NVA*NOA*b + NVA*NVB*NOA*j] +=
+        (*this->wfn_->moA())(mu,a+NOA) *
+        I_mibj_ABB[mu + NB*i + NB*NOA*b + NB*NVB*NOA*j];
+    }
+
+    // Deallocate the unused intermediates
+    this->memManager_->free(I_milj_AB ,NB*NB*NOA*NOB);
+    this->memManager_->free(I_mibj_ABB,NB*NOA*NOB*NVB);
   }
-*/
+
+  // Deallocate the unused intermediates
+  this->memManager_->free(I_mils_A  ,NB*NB*NB*NOA);
+
+  if(isOpenShell) {
+    VOVOBBBB_ = this->memManager_->malloc<double>(NOB*NVB*NOB*NVB);
+    std::fill_n(VOVOBBBB_,NVB*NOB*NOB*NVB,0.0);
+
+    double * I_mils_B   = this->memManager_->malloc<double>(NB*NB*NB*NOB);
+    double * I_milj_BB  = this->memManager_->malloc<double>(NB*NB*NOB*NOB);
+    double * I_mibj_BBB = this->memManager_->malloc<double>(NB*NOB*NOB*NVB);
+
+    std::fill_n(I_mils_B  ,NB*NB*NB*NOB,0.0);
+    std::fill_n(I_milj_BB ,NB*NB*NOB*NOB,0.0);
+    std::fill_n(I_mibj_BBB,NB*NOB*NOB*NVB,0.0);
+
+    for(auto sg = 0; sg < NB; sg++)
+    for(auto lm = 0; lm < NB; lm++)
+    for(auto i = 0; i < NOB; i++)
+    for(auto nu = 0; nu < NB; nu++)  
+    for(auto mu = 0; mu < NB; mu++) {
+      I_mils_B[mu + NB*i + NB*NOB*lm + NB*NB*NOB*sg] +=
+        (*this->wfn_->moB())(nu,i) *
+        (*this->wfn_->aointegrals()->aoERI_)(mu,nu,lm,sg);
+    }
+
+    for(auto j = 0; j < NOB; j++)
+    for(auto sg = 0; sg < NB; sg++)
+    for(auto lm = 0; lm < NB; lm++)
+    for(auto i = 0; i < NOB; i++)
+    for(auto mu = 0; mu < NB; mu++) {
+      I_milj_BB[mu + NB*i + NB*NOB*lm + NB*NB*NOB*j] +=
+        (*this->wfn_->moB())(sg,j) *
+        I_mils_B[mu + NB*i + NB*NOB*lm + NB*NB*NOB*sg];
+    }
+
+    for(auto j = 0; j < NOB; j++)
+    for(auto b = 0; b < NVB; b++)
+    for(auto lm = 0; lm < NB; lm++)
+    for(auto i = 0; i < NOB; i++)
+    for(auto mu = 0; mu < NB; mu++) {
+      I_mibj_BBB[mu + NB*i + NB*NOB*b + NB*NVB*NOB*j] +=
+        (*this->wfn_->moB())(lm,b+NOB) *
+        I_milj_BB[mu + NB*i + NB*NOB*lm + NB*NB*NOB*j];
+    }
+
+    for(auto j = 0; j < NOB; j++)
+    for(auto b = 0; b < NVB; b++)
+    for(auto i = 0; i < NOB; i++)
+    for(auto a = 0; a < NVB; a++)
+    for(auto mu = 0; mu < NB; mu++) {
+      VOVOBBBB_[a + NVB*i + NVB*NOB*b + NVB*NVB*NOB*j] +=
+        (*this->wfn_->moB())(mu,a+NOB) *
+        I_mibj_BBB[mu + NB*i + NB*NOB*b + NB*NVB*NOB*j];
+    }
 
 
-  this->memManager_->free(I_mils_A  ,NB*NB*NB*NO);
-  this->memManager_->free(I_milj_AA ,NB*NB*NO*NO);
-  this->memManager_->free(I_mibj_AAA,NB*NO*NO*NV);
+    // Deallocate the unused intermediates
+    this->memManager_->free(I_mibj_BBB,NB*NOB*NOB*NVB);
+    this->memManager_->free(I_milj_BB ,NB*NB*NOB*NOB);
+    this->memManager_->free(I_mils_B  ,NB*NB*NB*NOB);
+
+  }
+
+  // Realize that spin blocks are equivalent for RHF
+  if(!isOpenShell) {
+    VOVOAABB_ = VOVOAAAA_;
+    VOVOBBBB_ = VOVOAAAA_;
+  }
+
   this->haveMOVOVO_ = true;
+
+
 } // formVOVO
 
 template<>
@@ -371,6 +471,8 @@ void MOIntegrals<double>::formFullVOVO(){
   this->formVOVO();
   int NOA = this->wfn_->nOA();
   int NVA = this->wfn_->nVA();
+  int NOB = this->wfn_->nOB();
+  int NVB = this->wfn_->nVB();
   int NO = this->wfn_->nO();
   int NV = this->wfn_->nV();
 
@@ -389,14 +491,16 @@ void MOIntegrals<double>::formFullVOVO(){
       this->VOVOAAAA_[a + i*NVA + b*NOA*NVA + j*NOA*NVA*NVA];
 
     this->VOVO_[(A+1) + (I+1)*NV + B*NO*NV + J*NO*NV*NV] = 
-      this->VOVOAAAA_[a + i*NVA + b*NOA*NVA + j*NOA*NVA*NVA];
+      this->VOVOAABB_[a + i*NVA + b*NOA*NVA + j*NOA*NVB*NVA];
 
     this->VOVO_[A + I*NV + (B+1)*NO*NV + (J+1)*NO*NV*NV] = 
-      this->VOVOAAAA_[a + i*NVA + b*NOA*NVA + j*NOA*NVA*NVA];
+      this->VOVOAABB_[a + i*NVA + b*NOA*NVA + j*NOA*NVB*NVA];
+
 
     this->VOVO_[(A+1) + (I+1)*NV + (B+1)*NO*NV + (J+1)*NO*NV*NV] = 
-      this->VOVOAAAA_[a + i*NVA + b*NOA*NVA + j*NOA*NVA*NVA];
+      this->VOVOBBBB_[a + i*NVB + b*NOB*NVB + j*NOB*NVB*NVB];
   }
+
 }
 
 template<>
@@ -503,10 +607,15 @@ void MOIntegrals<double>::formFullOOOO(){
 template<>
 void MOIntegrals<double>::testMOInts(){
   double EMP2 = 0;
-  int NO = this->wfn_->nOA();
-  int NV = this->wfn_->nVA();
+  int NO = this->wfn_->nO();
+  int NV = this->wfn_->nV();
   int NOA = this->wfn_->nOA();
   int NVA = this->wfn_->nVA();
+  int NOB = this->wfn_->nOB();
+  int NVB = this->wfn_->nVB();
+
+  double * EPSA = this->wfn_->epsA()->data();
+  double * EPSB = this->wfn_->isClosedShell ? EPSA : this->wfn_->epsB()->data();
 
   this->formFullVOVO();
 
@@ -526,20 +635,28 @@ void MOIntegrals<double>::testMOInts(){
 */
 
   EMP2 = 0;
-  for(int j = 0; j < 2*NO; j++)
-  for(int i = 0; i < 2*NO; i++)
-  for(int b = 0; b < 2*NV; b++)
-  for(int a = 0; a < 2*NV; a++){
+  double eI, eJ, eA, eB;
+  for(int j = 0; j < NO; j++)
+  for(int i = 0; i < NO; i++)
+  for(int b = 0; b < NV; b++)
+  for(int a = 0; a < NV; a++){
     
+/*
     double eI = (*this->wfn_->epsA())(i/2);
     double eJ = (*this->wfn_->epsA())(j/2);
     double eA = (*this->wfn_->epsA())(a/2 + NOA);
     double eB = (*this->wfn_->epsA())(b/2 + NOA);
-   
+*/
+    eI = (i % 2 == 0) ? EPSA[i/2]       : EPSB[i/2];
+    eJ = (j % 2 == 0) ? EPSA[j/2]       : EPSB[j/2];
+    eA = (a % 2 == 0) ? EPSA[a/2 + NOA] : EPSB[a/2 + NOB];
+    eB = (b % 2 == 0) ? EPSA[b/2 + NOA] : EPSB[b/2 + NOB];
+
+
     // < IJ || AB > = (AI | BJ) - (BI | AJ)
     double DiracIJAB = 
-      VOVO_[a + i*2*NV + b*4*NO*NV + j*8*NO*NV*NV] -
-      VOVO_[b + i*2*NV + a*4*NO*NV + j*8*NO*NV*NV];
+      VOVO_[a + i*NV + b*NO*NV + j*NO*NV*NV] -
+      VOVO_[b + i*NV + a*NO*NV + j*NO*NV*NV];
 
     // dIJAB = e(I) + e(J) - e(A) - e(B)
     double deltaIJAB = eI + eJ - eA - eB;
@@ -553,6 +670,7 @@ void MOIntegrals<double>::testMOInts(){
   cout << "EMP2 = " << EMP2 << endl;
 
 
+/*
   this->formFullVVOO();
   this->formFullVVVV();
   this->formFullOOOO();
@@ -686,5 +804,6 @@ void MOIntegrals<double>::testMOInts(){
   double EMP3 = (0.125)*(EMP3_1 + EMP3_2) + EMP3_3;
 
   cout << "EMP3 = " << EMP3 << endl;
+*/
 };
 };
