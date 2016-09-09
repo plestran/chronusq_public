@@ -449,13 +449,18 @@ void SingleSlater<double>::formVXC_new(){
 
     AGrid.integrate<KernelIntegrand<double>>(wrapper,res);
   };
-  (*this->vXCScalar_) = 4*math.pi*res.VXCScalar;
-  (*this->vXCScalar_) = this->vXCScalar_->selfadjointView<Lower>();
-  this->energyExc = 4*math.pi*res.Energy;
-  if(!this->isClosedShell && this->nTCS_ != 2){
-    (*this->vXCMz_) = 4*math.pi*res.VXCMz;
+//MAG   (*this->vXCScalar_) = 4*math.pi*res.VXCScalar;
+  if(this->isClosedShell && this->nTCS_ != 2){
+    (*this->vXCScalar_) = 8.0*math.pi*res.VXCScalar;
+  }else if(!this->isClosedShell && this->nTCS_ != 2){
+//MAG    (*this->vXCMz_) = 4*math.pi*res.VXCMz;
+    (*this->vXCScalar_) = 4.0*math.pi*(res.VXCScalar+res.VXCMz);  //ALPHA LIKE
+//    (*this->vXCMz_) = 4.0*math.pi*res.VXCMz;
+    (*this->vXCMz_) = 4.0*math.pi*(res.VXCScalar-res.VXCMz);      //BETA LIKE
     (*this->vXCMz_) = this->vXCMz_->selfadjointView<Lower>();
   }
+  (*this->vXCScalar_) = this->vXCScalar_->selfadjointView<Lower>();
+  this->energyExc = 4*math.pi*res.Energy;
 
   if(doTimings) {
     cout << "T1 = " << T1.count() << endl;
@@ -475,9 +480,9 @@ void SingleSlater<double>::formVXC_new(){
   if(this->printLevel_ >= 3) {
     finish = std::chrono::high_resolution_clock::now();
     duration_formVxc = finish - start;
-    prettyPrint(this->fileio_->out,(*this->vXCScalar()),"LDA Vxc alpha");
+    prettyPrint(this->fileio_->out,(*this->vXCScalar()),"LDA Vxc Scalar");
     if(!this->isClosedShell && this->nTCS_ != 2){
-      prettyPrint(this->fileio_->out,(*this->vXCMz()),"LDA Vxc beta");
+      prettyPrint(this->fileio_->out,(*this->vXCMz()),"LDA Vxc Mz");
     }
     this->fileio_->out << "VXC Energy= " <<  this->energyExc << endl, 
     this->fileio_->out << endl << "CPU time for VXC integral:  "
