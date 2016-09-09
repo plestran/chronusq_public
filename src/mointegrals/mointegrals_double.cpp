@@ -479,6 +479,7 @@ void MOIntegrals<double>::formFullVOVO(){
   this->VOVO_ = this->memManager_->malloc<double>(NV*NO*NV*NO);
   std::fill_n(this->VOVO_,NO*NV*NO*NV,0.0);
 
+/*
   for(auto J = 0; J < NO; J+=2)
   for(auto B = 0; B < NV; B+=2)
   for(auto I = 0; I < NO; I+=2)
@@ -496,11 +497,90 @@ void MOIntegrals<double>::formFullVOVO(){
     this->VOVO_[A + I*NV + (B+1)*NO*NV + (J+1)*NO*NV*NV] = 
       this->VOVOAABB_[a + i*NVA + b*NOA*NVA + j*NOA*NVB*NVA];
 
-
     this->VOVO_[(A+1) + (I+1)*NV + (B+1)*NO*NV + (J+1)*NO*NV*NV] = 
       this->VOVOBBBB_[a + i*NVB + b*NOB*NVB + j*NOB*NVB*NVB];
   }
+*/
 
+  for(auto j = 0; j < NOA; j++)
+  for(auto b = 0; b < NVA; b++)
+  for(auto i = 0; i < NOA; i++)
+  for(auto a = 0; a < NVA; a++){
+    auto A = 2*a;
+    auto I = 2*i;
+    auto B = 2*b;
+    auto J = 2*j;
+
+    this->VOVO_[A + I*NV + B*NO*NV + J*NO*NV*NV] = 
+      this->VOVOAAAA_[a + i*NVA + b*NOA*NVA + j*NOA*NVA*NVA];
+  }
+
+  for(auto j = 0; j < NOB; j++)
+  for(auto b = 0; b < NVB; b++)
+  for(auto i = 0; i < NOA; i++)
+  for(auto a = 0; a < NVA; a++){
+    auto A = 2*a;
+    auto I = 2*i;
+    auto B = 2*b + 1;
+    auto J = 2*j + 1;
+
+    this->VOVO_[A + I*NV + B*NO*NV + J*NO*NV*NV] = 
+      this->VOVOAABB_[a + i*NVA + b*NOA*NVA + j*NOA*NVB*NVA];
+  }
+
+/*
+  for(auto j = 0; j < NOA; j++)
+  for(auto b = 0; b < NVA; b++)
+  for(auto i = 0; i < NOB; i++)
+  for(auto a = 0; a < NVB; a++){
+    auto A = 2*a + 1;
+    auto I = 2*i + 1;
+    auto B = 2*b;
+    auto J = 2*j;
+
+    this->VOVO_[A + I*NV + B*NO*NV + J*NO*NV*NV] = 
+      this->VOVOAABB_[b + j*NVA + a*NOA*NVA + i*NOA*NVB*NVA];
+  }
+*/
+/*
+  for(auto j = 0; j < NOB; j++)
+  for(auto b = 0; b < NVB; b++)
+  for(auto i = 0; i < NOA; i++)
+  for(auto a = 0; a < NVA; a++){
+    auto A = 2*a;
+    auto I = 2*i;
+    auto B = 2*b + 1;
+    auto J = 2*j + 1;
+
+    this->VOVO_[B + J*NV + A*NO*NV + I*NO*NV*NV] = 
+      this->VOVOAABB_[a + i*NVA + b*NOA*NVA + j*NOA*NVB*NVA];
+  }
+*/
+  for(auto j = 0; j < NOA; j++)
+  for(auto b = 0; b < NVA; b++)
+  for(auto i = 0; i < NOB; i++)
+  for(auto a = 0; a < NVB; a++){
+    auto A = 2*a + 1;
+    auto I = 2*i + 1;
+    auto B = 2*b;
+    auto J = 2*j;
+
+    this->VOVO_[A + I*NV + B*NO*NV + J*NO*NV*NV] =
+      this->VOVO_[B + J*NV + A*NO*NV + I*NO*NV*NV];
+  }
+
+  for(auto j = 0; j < NOB; j++)
+  for(auto b = 0; b < NVB; b++)
+  for(auto i = 0; i < NOB; i++)
+  for(auto a = 0; a < NVB; a++){
+    auto A = 2*a + 1;
+    auto I = 2*i + 1;
+    auto B = 2*b + 1;
+    auto J = 2*j + 1;
+
+    this->VOVO_[A + I*NV + B*NO*NV + J*NO*NV*NV] = 
+      this->VOVOBBBB_[a + i*NVB + b*NOB*NVB + j*NOB*NVB*NVB];
+  }
 }
 
 template<>
@@ -615,62 +695,194 @@ void MOIntegrals<double>::testMOInts(){
   int NVB = this->wfn_->nVB();
 
   double * EPSA = this->wfn_->epsA()->data();
-  double * EPSB = this->wfn_->isClosedShell ? EPSA : this->wfn_->epsB()->data();
-
-  this->formFullVOVO();
-
-/*
-  // Spacial orbital MP2 energy
-  for(auto j = 0; j < NO; j++)
-  for(auto i = 0; i < NO; i++)
-  for(auto b = 0; b < NV; b++)
-  for(auto a = 0; a < NV; a++){
-    EMP2 += VOVOAAAA_[a + NV*i + NV*NO*b + NV*NV*NO*j] *
-      ( 2*VOVOAAAA_[a + NV*i + NV*NO*b + NV*NV*NO*j]
-          - VOVOAAAA_[b + NV*i + NV*NO*a + NV*NV*NO*j]) /
-    ((*this->wfn_->epsA())(i) + (*this->wfn_->epsA())(j)
-    -(*this->wfn_->epsA())(a+NO) - (*this->wfn_->epsA())(b+NO));
-  }
-  cout << "EMP2 = " << EMP2 << endl;
-*/
-
-  EMP2 = 0;
+  double * EPSB = this->wfn_->isClosedShell 
+                    ? EPSA : this->wfn_->epsB()->data();
   double eI, eJ, eA, eB;
-  for(int j = 0; j < NO; j++)
-  for(int i = 0; i < NO; i++)
-  for(int b = 0; b < NV; b++)
-  for(int a = 0; a < NV; a++){
+
+  bool doMP2 = true;
+  bool doMP3 = true;
+  bool doSpacial = false;
+
+  bool isR = this->wfn_->isClosedShell and this->wfn_->nTCS() == 1;
+  bool isU = !isR and this->wfn_->nTCS() == 1;
+  bool isG = this->wfn_->nTCS() == 2;
+
+  if(!doMP2) return;
+
+  if(doSpacial)
+    this->formVOVO();
+
+  if(not doSpacial or doMP3)
+    this->formFullVOVO();
+
+  if(isR and doSpacial) {
+    cout << "Doing RHF Spacial MP2" << endl;
+    // RHF Spacial orbital MP2 energy
+    for(auto j = 0; j < NOA; j++)
+    for(auto i = 0; i < NOA; i++)
+    for(auto b = 0; b < NVA; b++)
+    for(auto a = 0; a < NVA; a++){
+      EMP2 += VOVOAAAA_[a + NVA*i + NVA*NOA*b + NVA*NVA*NOA*j] *
+        ( 2*VOVOAAAA_[a + NVA*i + NVA*NOA*b + NVA*NVA*NOA*j]
+            - VOVOAAAA_[b + NVA*i + NVA*NOA*a + NVA*NVA*NOA*j]) /
+      ((*this->wfn_->epsA())(i) + (*this->wfn_->epsA())(j)
+      -(*this->wfn_->epsA())(a+NOA) - (*this->wfn_->epsA())(b+NOA));
+    }
+  } else if(isU and doSpacial) {
+    cout << "Doing UHF Spacial MP2" << endl;
+    // UHF Spacial orbital MP2 Energy
+    // AAAA Coulomb
+    EMP2 = 0;
+    for(auto j = 0; j < NOA; j++)
+    for(auto b = 0; b < NVA; b++)
+    for(auto i = 0; i < NOA; i++)
+    for(auto a = 0; a < NVA; a++){
+      eI = EPSA[i]      ; 
+      eJ = EPSA[j]      ; 
+      eA = EPSA[a + NOA]; 
+      eB = EPSA[b + NOA]; 
+
+      // dIJAB = e(I) + e(J) - e(A) - e(B)
+      double deltaIJAB = eI + eJ - eA - eB;
+
+      double CoulIJAB = VOVOAAAA_[a + NVA*i + NVA*NOA*b + NVA*NVA*NOA*j];
+ 
+      EMP2 += CoulIJAB*CoulIJAB / deltaIJAB;
+
+    }
+
+    // AABB Coulomb
+    for(auto j = 0; j < NOB; j++)
+    for(auto b = 0; b < NVB; b++)
+    for(auto i = 0; i < NOA; i++)
+    for(auto a = 0; a < NVA; a++){
+      eI = EPSA[i]      ; 
+      eA = EPSA[a + NOA]; 
+      eJ = EPSB[j]      ; 
+      eB = EPSB[b + NOB]; 
+
+      // dIJAB = e(I) + e(J) - e(A) - e(B)
+      double deltaIJAB = eI + eJ - eA - eB;
+
+      double CoulIJAB = VOVOAABB_[a + NVA*i + NVA*NOA*b + NVA*NVB*NOA*j];
+ 
+      EMP2 += CoulIJAB*CoulIJAB / deltaIJAB;
+
+    }
+
+    // BBAA Coulomb
+    for(auto j = 0; j < NOB; j++)
+    for(auto b = 0; b < NVB; b++)
+    for(auto i = 0; i < NOA; i++)
+    for(auto a = 0; a < NVA; a++){
+      eI = EPSA[i]      ; 
+      eA = EPSA[a + NOA]; 
+      eJ = EPSB[j]      ; 
+      eB = EPSB[b + NOB]; 
+
+      // dIJAB = e(I) + e(J) - e(A) - e(B)
+      double deltaIJAB = eI + eJ - eA - eB;
+
+      double CoulIJAB = VOVOAABB_[a + NVA*i + NVA*NOA*b + NVA*NVB*NOA*j];
+ 
+      EMP2 += CoulIJAB*CoulIJAB / deltaIJAB;
+
+    }
+
+    // BBBB Coulomb
+    for(auto j = 0; j < NOB; j++)
+    for(auto b = 0; b < NVB; b++)
+    for(auto i = 0; i < NOB; i++)
+    for(auto a = 0; a < NVB; a++){
+      eI = EPSB[i]      ; 
+      eJ = EPSB[j]      ; 
+      eA = EPSB[a + NOB]; 
+      eB = EPSB[b + NOB]; 
+
+      // dIJAB = e(I) + e(J) - e(A) - e(B)
+      double deltaIJAB = eI + eJ - eA - eB;
+
+      double CoulIJAB = VOVOBBBB_[a + NVB*i + NVB*NOB*b + NVB*NVB*NOB*j];
+ 
+      EMP2 += CoulIJAB*CoulIJAB / deltaIJAB;
+
+    }
+
+    // AAAA Exchange
+    for(auto j = 0; j < NOA; j++)
+    for(auto b = 0; b < NVA; b++)
+    for(auto i = 0; i < NOA; i++)
+    for(auto a = 0; a < NVA; a++){
+      eI = EPSA[i]      ; 
+      eJ = EPSA[j]      ; 
+      eA = EPSA[a + NOA]; 
+      eB = EPSA[b + NOA]; 
+
+      // dIJAB = e(I) + e(J) - e(A) - e(B)
+      double deltaIJAB = eI + eJ - eA - eB;
+
+      double CoulIJAB = VOVOAAAA_[a + NVA*i + NVA*NOA*b + NVA*NVA*NOA*j];
+      double ExchIJAB = VOVOAAAA_[a + NVA*j + NVA*NOA*b + NVA*NVA*NOA*i];
+ 
+      EMP2 -= CoulIJAB*ExchIJAB / deltaIJAB;
+
+    }
+
+    // BBBB Exchange
+    for(auto j = 0; j < NOB; j++)
+    for(auto b = 0; b < NVB; b++)
+    for(auto i = 0; i < NOB; i++)
+    for(auto a = 0; a < NVB; a++){
+      eI = EPSB[i]      ; 
+      eJ = EPSB[j]      ; 
+      eA = EPSB[a + NOB]; 
+      eB = EPSB[b + NOB]; 
+
+      // dIJAB = e(I) + e(J) - e(A) - e(B)
+      double deltaIJAB = eI + eJ - eA - eB;
+
+      double CoulIJAB = VOVOBBBB_[a + NVB*i + NVB*NOB*b + NVB*NVB*NOB*j];
+      double ExchIJAB = VOVOBBBB_[a + NVB*j + NVB*NOB*b + NVB*NVB*NOB*i];
+ 
+      EMP2 -= CoulIJAB*ExchIJAB / deltaIJAB;
+
+    }
+
+    EMP2 *= 0.5;
+  } else {
+    cout << "Doing Spin-Orbital MP2" << endl;
+    // Spin-orbital MP2
+    for(int j = 0; j < NO; j++)
+    for(int i = 0; i < NO; i++)
+    for(int b = 0; b < NV; b++)
+    for(int a = 0; a < NV; a++){
+      
+      eI = (i % 2 == 0) ? EPSA[i/2]       : EPSB[i/2];
+      eJ = (j % 2 == 0) ? EPSA[j/2]       : EPSB[j/2];
+      eA = (a % 2 == 0) ? EPSA[a/2 + NOA] : EPSB[a/2 + NOB];
+      eB = (b % 2 == 0) ? EPSA[b/2 + NOA] : EPSB[b/2 + NOB];
+
+
+      // < IJ || AB > = (AI | BJ) - (BI | AJ)
+      double DiracIJAB = 
+        VOVO_[a + i*NV + b*NO*NV + j*NO*NV*NV] -
+        VOVO_[b + i*NV + a*NO*NV + j*NO*NV*NV];
+
+      // dIJAB = e(I) + e(J) - e(A) - e(B)
+      double deltaIJAB = eI + eJ - eA - eB;
+
+      // E(2) += |< IJ || AB >|^2 / dIJAB
+      EMP2 += DiracIJAB * DiracIJAB / deltaIJAB;
+    }
     
-/*
-    double eI = (*this->wfn_->epsA())(i/2);
-    double eJ = (*this->wfn_->epsA())(j/2);
-    double eA = (*this->wfn_->epsA())(a/2 + NOA);
-    double eB = (*this->wfn_->epsA())(b/2 + NOA);
-*/
-    eI = (i % 2 == 0) ? EPSA[i/2]       : EPSB[i/2];
-    eJ = (j % 2 == 0) ? EPSA[j/2]       : EPSB[j/2];
-    eA = (a % 2 == 0) ? EPSA[a/2 + NOA] : EPSB[a/2 + NOB];
-    eB = (b % 2 == 0) ? EPSA[b/2 + NOA] : EPSB[b/2 + NOB];
-
-
-    // < IJ || AB > = (AI | BJ) - (BI | AJ)
-    double DiracIJAB = 
-      VOVO_[a + i*NV + b*NO*NV + j*NO*NV*NV] -
-      VOVO_[b + i*NV + a*NO*NV + j*NO*NV*NV];
-
-    // dIJAB = e(I) + e(J) - e(A) - e(B)
-    double deltaIJAB = eI + eJ - eA - eB;
-
-    // E(2) += |< IJ || AB >|^2 / dIJAB
-    EMP2 += DiracIJAB * DiracIJAB / deltaIJAB;
+    // E(2) = E(2) / 4
+    EMP2 *= 0.25;
   }
-  
-  // E(2) = E(2) / 4
-  EMP2 *= 0.25;
   cout << "EMP2 = " << EMP2 << endl;
 
+  if(not doMP3) return;
+  cout << "Doing Spin-Orbital MP3" << endl;
 
-/*
   this->formFullVVOO();
   this->formFullVVVV();
   this->formFullOOOO();
@@ -679,12 +891,12 @@ void MOIntegrals<double>::testMOInts(){
   double EMP3_2 = 0;
   double EMP3_3 = 0;
 
-  for(auto i = 0; i < 2*NO; i++)
-  for(auto j = 0; j < 2*NO; j++)
-  for(auto k = 0; k < 2*NO; k++)
-  for(auto l = 0; l < 2*NO; l++)
-  for(auto a = 0; a < 2*NV; a++)
-  for(auto b = 0; b < 2*NV; b++){
+  for(auto i = 0; i < NO; i++)
+  for(auto j = 0; j < NO; j++)
+  for(auto k = 0; k < NO; k++)
+  for(auto l = 0; l < NO; l++)
+  for(auto a = 0; a < NV; a++)
+  for(auto b = 0; b < NV; b++){
 
     double eI = (*this->wfn_->epsA())(i/2);
     double eJ = (*this->wfn_->epsA())(j/2);
@@ -695,18 +907,18 @@ void MOIntegrals<double>::testMOInts(){
 
     // < IJ || AB > = (AI | BJ) - (BI | AJ)
     double DiracIJAB = 
-      VOVO_[a + i*2*NV + b*4*NO*NV + j*8*NV*NV*NO] - 
-      VOVO_[b + i*2*NV + a*4*NO*NV + j*8*NV*NV*NO]; 
+      VOVO_[a + i*NV + b*NO*NV + j*NV*NV*NO] - 
+      VOVO_[b + i*NV + a*NO*NV + j*NV*NV*NO]; 
 
     // < IJ || KL > = (IK | JL) - (IL | JK)
     double DiracIJKL = 
-      OOOO_[i + k*2*NO + j*4*NO*NO + l*8*NO*NO*NO] - 
-      OOOO_[i + l*2*NO + j*4*NO*NO + k*8*NO*NO*NO]; 
+      OOOO_[i + k*NO + j*NO*NO + l*NO*NO*NO] - 
+      OOOO_[i + l*NO + j*NO*NO + k*NO*NO*NO]; 
 
     // < KL || AB > = (AK | BL) - (BK | AL)
     double DiracKLAB = 
-      VOVO_[a + k*2*NV + b*4*NO*NV + l*8*NV*NV*NO] - 
-      VOVO_[b + k*2*NV + a*4*NO*NV + l*8*NV*NV*NO]; 
+      VOVO_[a + k*NV + b*NO*NV + l*NV*NV*NO] - 
+      VOVO_[b + k*NV + a*NO*NV + l*NV*NV*NO]; 
 
 
     // dIJAB = e(I) + e(J) - e(A) - e(B)
@@ -719,12 +931,12 @@ void MOIntegrals<double>::testMOInts(){
     EMP3_1 += DiracIJAB * DiracIJKL * DiracKLAB / deltaIJAB / deltaKLAB;
   }
 
-  for(auto i = 0; i < 2*NO; i++)
-  for(auto j = 0; j < 2*NO; j++)
-  for(auto a = 0; a < 2*NV; a++)
-  for(auto b = 0; b < 2*NV; b++) 
-  for(auto c = 0; c < 2*NV; c++)
-  for(auto d = 0; d < 2*NV; d++){
+  for(auto i = 0; i < NO; i++)
+  for(auto j = 0; j < NO; j++)
+  for(auto a = 0; a < NV; a++)
+  for(auto b = 0; b < NV; b++) 
+  for(auto c = 0; c < NV; c++)
+  for(auto d = 0; d < NV; d++){
 
     double eI = (*this->wfn_->epsA())(i/2);
     double eJ = (*this->wfn_->epsA())(j/2);
@@ -735,18 +947,18 @@ void MOIntegrals<double>::testMOInts(){
 
     // < IJ || AB > = (AI | BJ) - (BI | AJ)
     double DiracIJAB = 
-      VOVO_[a + i*2*NV + b*4*NO*NV + j*8*NV*NV*NO] - 
-      VOVO_[b + i*2*NV + a*4*NO*NV + j*8*NV*NV*NO]; 
+      VOVO_[a + i*NV + b*NO*NV + j*NV*NV*NO] - 
+      VOVO_[b + i*NV + a*NO*NV + j*NV*NV*NO]; 
 
     // < AB || CD > = (AC | BD) - (AD | BC)
     double DiracABCD = 
-      VVVV_[a + c*2*NV + b*4*NV*NV + d*8*NV*NV*NV] - 
-      VVVV_[a + d*2*NV + b*4*NV*NV + c*8*NV*NV*NV]; 
+      VVVV_[a + c*NV + b*NV*NV + d*NV*NV*NV] - 
+      VVVV_[a + d*NV + b*NV*NV + c*NV*NV*NV]; 
 
     // < IJ || CD > = (CI | DJ) - (DI | CJ)
     double DiracIJCD = 
-      VOVO_[c + i*2*NV + d*4*NO*NV + j*8*NV*NV*NO] - 
-      VOVO_[d + i*2*NV + c*4*NO*NV + j*8*NV*NV*NO]; 
+      VOVO_[c + i*NV + d*NO*NV + j*NV*NV*NO] - 
+      VOVO_[d + i*NV + c*NO*NV + j*NV*NV*NO]; 
 
 
     // dIJAB = e(I) + e(J) - e(A) - e(B)
@@ -760,12 +972,12 @@ void MOIntegrals<double>::testMOInts(){
     
   }
 
-  for(auto i = 0; i < 2*NO; i++)
-  for(auto j = 0; j < 2*NO; j++)
-  for(auto k = 0; k < 2*NO; k++)
-  for(auto a = 0; a < 2*NV; a++)
-  for(auto b = 0; b < 2*NV; b++) 
-  for(auto c = 0; c < 2*NV; c++){
+  for(auto i = 0; i < NO; i++)
+  for(auto j = 0; j < NO; j++)
+  for(auto k = 0; k < NO; k++)
+  for(auto a = 0; a < NV; a++)
+  for(auto b = 0; b < NV; b++) 
+  for(auto c = 0; c < NV; c++){
 
     double eI = (*this->wfn_->epsA())(i/2);
     double eJ = (*this->wfn_->epsA())(j/2);
@@ -776,18 +988,18 @@ void MOIntegrals<double>::testMOInts(){
 
     // < IJ || AB > = (AI | BJ) - (BI | AJ)
     double DiracIJAB = 
-      VOVO_[a + i*2*NV + b*4*NO*NV + j*8*NV*NV*NO] - 
-      VOVO_[b + i*2*NV + a*4*NO*NV + j*8*NV*NV*NO]; 
+      VOVO_[a + i*NV + b*NO*NV + j*NV*NV*NO] - 
+      VOVO_[b + i*NV + a*NO*NV + j*NV*NV*NO]; 
 
     // < BK || CJ > = (BC | KJ) - (BJ | CK)
     double DiracBKCJ = 
-      VVOO_[b + c*2*NV + k*4*NV*NV + j*8*NV*NV*NO] -
-      VOVO_[b + j*2*NV + c*4*NO*NV + k*8*NO*NV*NV];
+      VVOO_[b + c*NV + k*NV*NV + j*NV*NV*NO] -
+      VOVO_[b + j*NV + c*NO*NV + k*NO*NV*NV];
 
     // < IK || AC > = (AI | CK) - (CI | AK)
     double DiracIKAC = 
-      VOVO_[a + i*2*NV + c*4*NO*NV + k*8*NV*NV*NO] - 
-      VOVO_[c + i*2*NV + a*4*NO*NV + k*8*NV*NV*NO]; 
+      VOVO_[a + i*NV + c*NO*NV + k*NV*NV*NO] - 
+      VOVO_[c + i*NV + a*NO*NV + k*NV*NV*NO]; 
 
 
     // dIJAB = e(I) + e(J) - e(A) - e(B)
@@ -804,6 +1016,5 @@ void MOIntegrals<double>::testMOInts(){
   double EMP3 = (0.125)*(EMP3_1 + EMP3_2) + EMP3_3;
 
   cout << "EMP3 = " << EMP3 << endl;
-*/
 };
 };
