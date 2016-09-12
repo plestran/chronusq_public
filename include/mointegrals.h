@@ -86,6 +86,8 @@ class MOIntegrals {
   T* VOOOAABB_;
   T* OOOOAABB_;
 
+  T* VVOOBBAA_;
+
   T* VVVVBBBB_;
   T* VVVOBBBB_;
   T* VVOOBBBB_;
