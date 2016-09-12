@@ -269,6 +269,8 @@ void MOIntegrals<double>::testMOInts(){
   this->formFullVVVV();
   this->formFullOOOO();
 
+  prettyPrint(cout,*this->wfn_->moA(),"MOA");
+  prettyPrint(cout,*this->wfn_->moB(),"MOB");
   double EMP3_1 = 0;
   double EMP3_2 = 0;
   double EMP3_3 = 0;
@@ -309,8 +311,14 @@ void MOIntegrals<double>::testMOInts(){
     // dKLAB = e(K) + e(L) - e(A) - e(B)
     double deltaKLAB= eK + eL - eA - eB;
 
+//  cout << DiracIJAB << " " << DiracIJKL << " " << DiracKLAB << endl;
+
     // E(3,1) += < IJ || AB > * < IJ || KL > * < KL || AB > / dIJAB / dKLAB 
     EMP3_1 += DiracIJAB * DiracIJKL * DiracKLAB / deltaIJAB / deltaKLAB;
+//  cout << i << " " << j << " " << k << " " << l << " " << a << " " << b <<endl;
+//  cout << DiracIJAB << " " << DiracIJKL << " " << DiracKLAB << endl;
+//  cout << deltaIJAB << " " << deltaKLAB << endl;
+//  cout << EMP3_1 << endl;
   }
 
   for(auto i = 0; i < NO; i++)
@@ -397,6 +405,9 @@ void MOIntegrals<double>::testMOInts(){
   // E(3) = (1/8) * ( E(3,1) + E(3,2) ) + E(3,3)
   double EMP3 = (0.125)*(EMP3_1 + EMP3_2) + EMP3_3;
 
+  cout << "EMP3_1 = " << EMP3_1 << endl;
+  cout << "EMP3_2 = " << EMP3_2 << endl;
+  cout << "EMP3_3 = " << EMP3_3 << endl;
   cout << "EMP3 = " << EMP3 << endl;
 };
 };

@@ -147,5 +147,49 @@ public:
 
   void testMOInts();
 };
+
+template <typename T, typename U, typename V>
+void rank4w2Contract(int INDX, T* A, int LDA, 
+  U* B, int LDB1, int LDB2, int LDB3, int LDB4,
+  V* C, int LDX) {
+
+  if(INDX == 1) {
+    for(auto l = 0; l < LDB4; l++)
+    for(auto k = 0; k < LDB3; k++)  
+    for(auto j = 0; j < LDB2; j++)
+    for(auto x = 0; x < LDX ; x++)
+    for(auto i = 0; i < LDB1; i++)
+      C[x + j*LDX + k*LDX*LDB2 + l*LDX*LDB2*LDB3] +=
+        A[i + x*LDA] *
+        B[i + j*LDB1 + k*LDB1*LDB2 + l*LDB1*LDB2*LDB3];
+  } else if(INDX == 2) {
+    for(auto l = 0; l < LDB4; l++)
+    for(auto k = 0; k < LDB3; k++)  
+    for(auto x = 0; x < LDX ; x++)
+    for(auto j = 0; j < LDB2; j++)
+    for(auto i = 0; i < LDB1; i++)
+      C[i + x*LDB1 + k*LDX*LDB1 + l*LDX*LDB1*LDB3] +=
+        A[j + x*LDA] *
+        B[i + j*LDB1 + k*LDB1*LDB2 + l*LDB1*LDB2*LDB3];
+  } else if(INDX == 3) {
+    for(auto l = 0; l < LDB4; l++)
+    for(auto x = 0; x < LDX ; x++)
+    for(auto k = 0; k < LDB3; k++)  
+    for(auto j = 0; j < LDB2; j++)
+    for(auto i = 0; i < LDB1; i++)
+      C[i + j*LDB1 + x*LDB1*LDB2 + l*LDX*LDB1*LDB2] +=
+        A[k + x*LDA] *
+        B[i + j*LDB1 + k*LDB1*LDB2 + l*LDB1*LDB2*LDB3];
+  } else if(INDX == 4) {
+    for(auto x = 0; x < LDX ; x++)
+    for(auto l = 0; l < LDB4; l++)
+    for(auto k = 0; k < LDB3; k++)  
+    for(auto j = 0; j < LDB2; j++)
+    for(auto i = 0; i < LDB1; i++)
+      C[i + j*LDB1 + k*LDB1*LDB2 + x*LDB1*LDB2*LDB3] +=
+        A[l + x*LDA] *
+        B[i + j*LDB1 + k*LDB1*LDB2 + l*LDB1*LDB2*LDB3];
+  }
+};
 };
 #endif
