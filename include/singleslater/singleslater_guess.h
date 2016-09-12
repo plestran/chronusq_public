@@ -213,6 +213,9 @@ void SingleSlater<T>::SADGuess() {
     hartreeFockAtom.formFock();
     hartreeFockAtom.computeEnergy();
     hartreeFockAtom.SCF3();
+    hartreeFockAtom.computeProperties();
+    hartreeFockAtom.printProperties();
+    
     
     // Place Atomic Densities into Total Densities
     this->placeAtmDen(atomIndex[iUn],hartreeFockAtom);
@@ -224,6 +227,10 @@ void SingleSlater<T>::SADGuess() {
 //prettyPrintSmart(cout,*this->onePDMScalar_,"PS");
   this->formFock();
 //prettyPrintSmart(cout,*this->fockScalar_,"FS");
+
+//if(not this->isClosedShell)
+//  prettyPrintSmart(cout,*this->fockMz_,"FZ");
+
 };
 
 template <typename T>
@@ -279,6 +286,7 @@ void SingleSlater<T>::scaleDen(){
   } else {
     // SCR  = PA
     // SCR2 = PB
+    /*
     (*this->NBSqScratch_) = (*this->onePDMScalar_) + (*this->onePDMMz_);
     (*this->NBSqScratch2_) = (*this->onePDMScalar_) - (*this->onePDMMz_);
     (*this->NBSqScratch_) *= 0.5; 
@@ -291,6 +299,8 @@ void SingleSlater<T>::scaleDen(){
 
     double TA = 0.5 * (TS + TZ);
     double TB = 0.5 * (TS - TZ);
+    cout << "TA " << TA << endl;
+    cout << "TB " << TB << endl;
 
 
     (*this->NBSqScratch_) *= T(this->nOA_) / T(TA);
@@ -298,6 +308,14 @@ void SingleSlater<T>::scaleDen(){
 
     (*this->onePDMScalar_) = (*this->NBSqScratch_) + (*this->NBSqScratch2_);
     (*this->onePDMMz_)     = (*this->NBSqScratch_) - (*this->NBSqScratch2_);
+    */
+    
+    double TS = this->template computeProperty<double,DENSITY_TYPE::TOTAL>(
+      *this->aointegrals_->overlap_); 
+    double TZ = this->template computeProperty<double,DENSITY_TYPE::MZ>(
+      *this->aointegrals_->overlap_); 
 
+   (*this->onePDMScalar_) *= T(this->nOA_ + this->nOB_) / TS;
+   (*this->onePDMMz_)     *= T(this->nOA_ - this->nOB_) / TZ;
   }
 }
