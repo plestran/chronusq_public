@@ -15,7 +15,7 @@ void MOIntegrals<double>::formVVOO() {
   int NVB = this->wfn_->nVB();
 
 
-  /** Evaluate VVOO (AAAA) MO Integrals **/
+  /// Evaluate VVOO (AAAA) MO Integrals
 
   // Allocate and zero out VVOO (AAAA) storage
   VVOOAAAA_ = this->memManager_->malloc<double>(NVA*NOA*NOA*NVA);
@@ -274,6 +274,12 @@ void MOIntegrals<double>::formVVOO() {
     this->memManager_->free(I_mbij_ABB,NB*NOB*NOB*NVA);
   }
 
+  // Realize that spin blocks are equivalent for RHF
+  if(!isOpenShell) {
+    VVOOAABB_ = VVOOAAAA_;
+    VVOOBBAA_ = VVOOAAAA_;
+    VVOOBBBB_ = VVOOAAAA_;
+  }
 
   this->haveMOVVOO_ = true;
 } // formVVOO

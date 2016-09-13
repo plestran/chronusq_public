@@ -14,10 +14,20 @@ void MOIntegrals<double>::formVOVO() {
   int NVB = this->wfn_->nVB();
 
 
-  if(isOpenShell) *this->wfn_->moB() = *this->wfn_->moA();
+  if(isOpenShell) {
+  //*this->wfn_->moB() = *this->wfn_->moA();
+  //this->wfn_->moB()->col(1) *= -1;
+    prettyPrint(cout,*this->wfn_->moA(),"MOA");
+    prettyPrint(cout,*this->wfn_->moB(),"MOB");
+  }
+
+  /// Evaluate VOVO (AAAA) MO Integrals
+
+  // Allocate and zero out VOVO (AAAA) storage
   VOVOAAAA_ = this->memManager_->malloc<double>(NOA*NVA*NOA*NVA);
   std::fill_n(VOVOAAAA_,NVA*NOA*NOA*NVA,0.0);
 
+  // Allocate and zero out Itermediates
   double * I_mils_A   = this->memManager_->malloc<double>(NB*NB*NB*NOA);
   double * I_milj_AA  = this->memManager_->malloc<double>(NB*NB*NOA*NOA);
   double * I_mibj_AAA = this->memManager_->malloc<double>(NB*NOA*NOA*NVA);
@@ -26,18 +36,22 @@ void MOIntegrals<double>::formVOVO() {
   std::fill_n(I_milj_AA ,NB*NB*NOA*NOA,0.0);
   std::fill_n(I_mibj_AAA,NB*NOA*NOA*NVA,0.0);
 
+  // First Quarter (AAAA) transformation (mn|ls) -> (mi|ls) (A)
   rank4w2Contract(2,this->wfn_->moA()->data(),NB,
     &this->wfn_->aointegrals()->aoERI_->storage()[0],NB,NB,NB,NB,
     I_mils_A,NOA);
 
+  // Second Quarter (AAAA) transformation (mi|ls) (A) -> (mi|lj) (AA)
   rank4w2Contract(4,this->wfn_->moA()->data(),NB,
     I_mils_A,NB,NOA,NB,NB,
     I_milj_AA,NOA);
 
+  // Third Quarter (AAAA) transformation (mi|lj) (AA) -> (mi|bj) (AAA)
   rank4w2Contract(3,this->wfn_->moA()->data() + NB*NOA,NB,
     I_milj_AA,NB,NOA,NB,NOA,
     I_mibj_AAA,NVA);
 
+  // Fourth Quarter (AAAA) transformation (mi|bj) (AAA) -> (ai|bj) (AAAA)
   rank4w2Contract(1,this->wfn_->moA()->data() + NB*NOA,NB,
     I_mibj_AAA,NB,NOA,NVA,NOA,
     VOVOAAAA_,NVA);
@@ -48,26 +62,33 @@ void MOIntegrals<double>::formVOVO() {
   this->memManager_->free(I_milj_AA ,NB*NB*NOA*NOA);
 
   if(isOpenShell) {
+    /// Evaluate VOVO (AABB) MO Integrals
+
+    // Allocate and zero out VOVO (AABB) storage
     VOVOAABB_ = this->memManager_->malloc<double>(NOA*NVA*NOB*NVB);
     std::fill_n(VOVOAABB_,NOA*NVA*NOB*NVB,0.0);
 
+    // Allocate and zero out Itermediates
     double * I_milj_AB  = this->memManager_->malloc<double>(NB*NB*NOA*NOB);
     double * I_mibj_ABB = this->memManager_->malloc<double>(NB*NOA*NOB*NVB);
 
     std::fill_n(I_milj_AB ,NB*NB*NOA*NOB,0.0);
     std::fill_n(I_mibj_ABB,NB*NOA*NOB*NVB,0.0);
 
+    // Second Quarter (AABB) transformation (mi|ls) (A) -> (mi|lj) (AB)
     rank4w2Contract(4,this->wfn_->moB()->data(),NB,
       I_mils_A,NB,NOA,NB,NB,
       I_milj_AB,NOB);
  
+    // Third Quarter (AABB) transformation (mi|lj) (AB) -> (mi|bj) (ABB)
     rank4w2Contract(3,this->wfn_->moB()->data() + NB*NOB,NB,
       I_milj_AB,NB,NOA,NB,NOB,
       I_mibj_ABB,NVB);
 
-    rank4w2Contract(1,this->wfn_->moB()->data() + NB*NOB,NB,
+    // Fourth Quarter (AABB) transformation (mi|bj) (ABB) -> (ai|bj) (AABB)
+    rank4w2Contract(1,this->wfn_->moA()->data() + NB*NOA,NB,
       I_mibj_ABB,NB,NOA,NVB,NOB,
-      VOVOAABB_,NVB);
+      VOVOAABB_,NVA);
 
     // Deallocate the unused intermediates
     this->memManager_->free(I_milj_AB ,NB*NB*NOA*NOB);
@@ -78,6 +99,9 @@ void MOIntegrals<double>::formVOVO() {
   this->memManager_->free(I_mils_A  ,NB*NB*NB*NOA);
 
   if(isOpenShell) {
+    /// Evaluate VOVO (BBBB) MO Integrals
+
+    // Allocate and zero out VOVO (BBBB) storage
     VOVOBBBB_ = this->memManager_->malloc<double>(NOB*NVB*NOB*NVB);
     std::fill_n(VOVOBBBB_,NVB*NOB*NOB*NVB,0.0);
 
@@ -85,23 +109,28 @@ void MOIntegrals<double>::formVOVO() {
     double * I_milj_BB  = this->memManager_->malloc<double>(NB*NB*NOB*NOB);
     double * I_mibj_BBB = this->memManager_->malloc<double>(NB*NOB*NOB*NVB);
 
+    // Allocate and zero out Itermediates
     std::fill_n(I_mils_B  ,NB*NB*NB*NOB,0.0);
     std::fill_n(I_milj_BB ,NB*NB*NOB*NOB,0.0);
     std::fill_n(I_mibj_BBB,NB*NOB*NOB*NVB,0.0);
 
 
+    // First Quarter (BBBB) transformation (mn|ls) -> (mi|ls) (B)
     rank4w2Contract(2,this->wfn_->moB()->data(),NB,
       &this->wfn_->aointegrals()->aoERI_->storage()[0],NB,NB,NB,NB,
       I_mils_B,NOB);
 
+    // Second Quarter (BBBB) transformation (mi|ls) (B) -> (mi|lj) (BB)
     rank4w2Contract(4,this->wfn_->moB()->data(),NB,
       I_mils_B,NB,NOB,NB,NB,
       I_milj_BB,NOB);
 
+    // Third Quarter (BBBB) transformation (mi|lj) (BB) -> (mi|bj) (BBB)
     rank4w2Contract(3,this->wfn_->moB()->data() + NB*NOB,NB,
       I_milj_BB,NB,NOB,NB,NOB,
       I_mibj_BBB,NVB);
 
+    // Fourth Quarter (BBBB) transformation (mi|bj) (BBB) -> (ai|bj) (BBBB)
     rank4w2Contract(1,this->wfn_->moB()->data() + NB*NOB,NB,
       I_mibj_BBB,NB,NOB,NVB,NOB,
       VOVOBBBB_,NVB);
@@ -243,7 +272,6 @@ void MOIntegrals<double>::formFullVOVO(){
   }
 */
 
-/*
   for(auto j = 0; j < NO; j++)
   for(auto b = 0; b < NV; b++)
   for(auto i = 0; i < NO; i++)
@@ -251,7 +279,6 @@ void MOIntegrals<double>::formFullVOVO(){
     cout << a << " " << i << " " << b << " " << j << "   ";
     cout << VOVO_[a + i*NV + b*NO*NV + j*NO*NV*NV] << endl;
   }
-*/
 } // formFullVOVO
 
 };

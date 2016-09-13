@@ -96,6 +96,7 @@ void MOIntegrals<double>::testMOInts(){
 
   if(not doSpacial or doMP3)
     this->formFullVOVO();
+//return;
 
   if(isR and doSpacial) {
     cout << "Doing RHF Spacial MP2" << endl;
@@ -269,8 +270,6 @@ void MOIntegrals<double>::testMOInts(){
   this->formFullVVVV();
   this->formFullOOOO();
 
-  prettyPrint(cout,*this->wfn_->moA(),"MOA");
-  prettyPrint(cout,*this->wfn_->moB(),"MOB");
   double EMP3_1 = 0;
   double EMP3_2 = 0;
   double EMP3_3 = 0;
