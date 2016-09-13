@@ -14,12 +14,14 @@ void MOIntegrals<double>::formVOVO() {
   int NVB = this->wfn_->nVB();
 
 
+/*
   if(isOpenShell) {
   //*this->wfn_->moB() = *this->wfn_->moA();
   //this->wfn_->moB()->col(1) *= -1;
     prettyPrint(cout,*this->wfn_->moA(),"MOA");
     prettyPrint(cout,*this->wfn_->moB(),"MOB");
   }
+*/
 
   /// Evaluate VOVO (AAAA) MO Integrals
 
@@ -272,6 +274,7 @@ void MOIntegrals<double>::formFullVOVO(){
   }
 */
 
+/*
   for(auto j = 0; j < NO; j++)
   for(auto b = 0; b < NV; b++)
   for(auto i = 0; i < NO; i++)
@@ -279,6 +282,7 @@ void MOIntegrals<double>::formFullVOVO(){
     cout << a << " " << i << " " << b << " " << j << "   ";
     cout << VOVO_[a + i*NV + b*NO*NV + j*NO*NV*NV] << endl;
   }
+*/
 } // formFullVOVO
 
 };
