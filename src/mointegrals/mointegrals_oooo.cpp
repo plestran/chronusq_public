@@ -30,7 +30,7 @@ void MOIntegrals<double>::formOOOO() {
   std::fill_n(I_2_AA ,NB*NB*NOA*NOA,0.0);
   std::fill_n(I_3_AAA,NB*NOA*NOA*NOA,0.0);
 
-  // First Quarter (AAAA) transformation (mn|ls) -> (1n|ls) (A)
+  // First Quarter (AAAA) transformation (mn|ls) -> (in|ls) (A)
   rank4w2Contract(1,this->wfn_->moA()->data(),NB,
     &this->wfn_->aointegrals()->aoERI_->storage()[0],NB,NB,NB,NB,
     I_1_A,NOA);

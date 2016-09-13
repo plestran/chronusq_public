@@ -408,5 +408,8 @@ void MOIntegrals<double>::testMOInts(){
   cout << "EMP3_2 = " << EMP3_2 << endl;
   cout << "EMP3_3 = " << EMP3_3 << endl;
   cout << "EMP3 = " << EMP3 << endl;
+
+  this->formFullVOOO();
+  this->formFullVVVO();
 };
 };
