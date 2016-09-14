@@ -16,7 +16,7 @@ void MOIntegrals<double>::formVOVO() {
 
 /*
   if(isOpenShell) {
-  //*this->wfn_->moB() = *this->wfn_->moA();
+    *this->wfn_->moB() = *this->wfn_->moA();
   //this->wfn_->moB()->col(1) *= -1;
     prettyPrint(cout,*this->wfn_->moA(),"MOA");
     prettyPrint(cout,*this->wfn_->moB(),"MOB");

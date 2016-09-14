@@ -68,10 +68,11 @@ void FOPPropagator<T>::formFull() {
   moints.initMeta();
   moints.formVOVO();
   moints.formVVOO();
-/*
+  
   this->nSingleDim_ = this->pscf_->nOAVA() + this->pscf_->nOBVB();
   this->fullMatMem_ = 
     this->memManager_->template malloc<T>(this->nSingleDim_*this->nSingleDim_);
+  std::fill_n(this->fullMatMem_,this->nSingleDim_*this->nSingleDim_,0.0);
 
 
   for(auto J = 0; J < this->pscf_->nOA(); J++)
@@ -134,7 +135,7 @@ void FOPPropagator<T>::formFull() {
         (*this->pscf_->reference()->epsA())(I);
   }
 
-*/ 
+/*
   this->nSingleDim_ = this->pscf_->nOAVA();
   this->fullMatMem_ = 
     this->memManager_->template malloc<T>(this->nSingleDim_*this->nSingleDim_);
@@ -162,9 +163,10 @@ void FOPPropagator<T>::formFull() {
         (*this->pscf_->reference()->epsA())(A + this->pscf_->nOA()) -
         (*this->pscf_->reference()->epsA())(I);
   }
+*/
 
   TMap Full(this->fullMatMem_,this->nSingleDim_,this->nSingleDim_);
-  Full = Full.template selfadjointView<Lower>();
+  Full = Full.template selfadjointView<Upper>();
   prettyPrint(cout,Full,"Full");
   prettyPrint(cout,Full - Full.adjoint(),"Full");
 
