@@ -93,10 +93,10 @@ int main(int argc, char **argv){
   fileio.iniH5Files();
   CQSetNumThreads(1);
   
-  loadPresets<WATER>(molecule);
+//loadPresets<WATER>(molecule);
 //loadPresets<HE>(molecule);
 //loadPresets<SO>(molecule);
-//loadPresets<Li>(molecule);
+  loadPresets<Li>(molecule);
   molecule.convBohr();
   molecule.computeNucRep();
   molecule.computeRij();
@@ -121,9 +121,9 @@ int main(int argc, char **argv){
 //singleSlater.addVWN5();
 //singleSlater.setPrintLevel(5);
 
-  basis.findBasisFile("sto-3g");
+//basis.findBasisFile("sto-3g");
 //basis.findBasisFile("3-21g");
-//basis.findBasisFile("6-31G");
+  basis.findBasisFile("6-31G");
   basis.communicate(fileio);
   basis.parseGlobal();
   basis.constructLocal(&molecule);
@@ -156,7 +156,7 @@ int main(int argc, char **argv){
   MOIntegrals<double> moints;
   moints.communicate(singleSlater,memManager);
   moints.initMeta();
-  moints.testMOInts();
+//moints.testMOInts();
   FOPPA<double> resp;
   resp.communicate(singleSlater,memManager);
   resp.initMeta();

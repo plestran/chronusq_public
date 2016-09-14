@@ -129,10 +129,16 @@ void FOPPropagator<T>::formFull() {
     this->fullMatMem_[AIBJ] = moints.VOVOBBBB()[AIBJBBBB] - 
                               moints.VVOOBBBB()[ABIJBBBB];
 
-    if(AI == BJ)
-      this->fullMatMem_[AIBJ] += 
-        (*this->pscf_->reference()->epsA())(A + this->pscf_->nOB()) -
-        (*this->pscf_->reference()->epsA())(I);
+    if(AI == BJ){
+      if(this->pscf_->nTCS() == 1 and !this->pscf_->isClosedShell)
+        this->fullMatMem_[AIBJ] += 
+          (*this->pscf_->reference()->epsB())(A + this->pscf_->nOB()) -
+          (*this->pscf_->reference()->epsB())(I);
+      else
+        this->fullMatMem_[AIBJ] += 
+          (*this->pscf_->reference()->epsA())(A + this->pscf_->nOB()) -
+          (*this->pscf_->reference()->epsA())(I);
+    }
   }
 
 /*
