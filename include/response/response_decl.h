@@ -6,6 +6,23 @@
 
 namespace ChronusQ {
 
+enum RESPONSE_MATRIX_PARTITION {
+  FULL,
+  SPIN_SEPARATED,
+  SPIN_ADAPTED
+};
+
+struct ResponseSettings {
+  RESPONSE_MATRIX_PARTITION part;
+  bool doSinglets;
+  bool doTriplets;
+  bool doTDA;
+};
+
+inline ResponseSettings DefaultResponseSettings() {
+  return ResponseSettings{FULL,true,false,true};
+};
+
 template <typename T>
 class ResponseMatrix : public QNCallable<T> {
   // Useful Eigen Typedefs
@@ -20,15 +37,38 @@ protected:
 
 
   T * fullMatMem_;
+
+  ResponseSettings sett_;
+
 public:
-  ResponseMatrix() : QNCallable<T>(),
-    pscf_(NULL)
-    { ; };
-  ResponseMatrix(PostSCF<T> *pscf): QNCallable<T>(),
-    pscf_(pscf)
-    { this->memManager_ = pscf_->memManager(); };
+
+  ResponseMatrix(PostSCF<T> *pscf, ResponseSettings sett): QNCallable<T>(),
+    pscf_(pscf), sett_(sett) { 
+    this->memManager_ = pscf_->memManager(); 
+    this->checkMeta();
+  };
+
+  ResponseMatrix(PostSCF<T> *pscf): 
+    ResponseMatrix(pscf,DefaultResponseSettings()){ };
+
+  ResponseMatrix() : ResponseMatrix(NULL,DefaultResponseSettings()){ };
+
 
   virtual void formFull() = 0;
+
+  virtual void initMeta() = 0;
+  inline void checkMeta() {
+    if(this->pscf_->nTCS() == 2 and this->sett_.part != FULL){
+      cout << "Switching Matrix partitioning to FULL for 2C method" << endl;
+      this->sett_.part = FULL;
+    } else if(this->pscf_->nTCS() == 1 and 
+              !this->pscf_->isClosedShell and 
+              this->sett_.part == SPIN_ADAPTED) {
+      cout << "Switching Matrix partitioning to SPIN_SEPARATED for ";
+      cout << "Unresticted method" << endl;
+      this->sett_.part = SPIN_SEPARATED;
+    }
+  }
 };
 
 template <typename T>

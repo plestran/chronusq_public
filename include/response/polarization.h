@@ -12,10 +12,13 @@ class FOPPropagator : public ResponseMatrix<T> {
   typedef Eigen::Map<TMat> TMap;
   typedef Eigen::Map<TVec> TVecMap;
 
+  void initMeta();
 public:
 
   FOPPropagator() : ResponseMatrix<T>(){ };
   FOPPropagator(PostSCF<T> *pscf): ResponseMatrix<T>(pscf){ };
+  FOPPropagator(PostSCF<T> *pscf, ResponseSettings sett):
+    ResponseMatrix<T>(pscf,sett){ };
 
   // QNCallable compliant
   void linearTrans(TMap &,TMap &,TMap &,TMap &,TMap &,TMap &){ };
@@ -44,22 +47,35 @@ public:
   void formDensity(){ };
   void computeSSq(){ };
 
-/*
-  // QNCallable compliant
-  void linearTrans(TMap &,TMap &,TMap &,TMap &,TMap &,TMap &){ };
-  void formGuess(){ };
-  void formDiag() { };
-*/
-
   inline void initMeta() {
     Response<T>::initMeta();
     cout << "In FOPPA initMeta" << endl;
-    FOPPropagator<T> mat(this);
+    FOPPropagator<T> mat(this,ResponseSettings{SPIN_ADAPTED,true,false,true});
     this->iMat_.template push_back(dynamic_cast<ResponseMatrix<T>*>(&mat));
-    mat.formFull();
+    this->iMat_[0]->initMeta();
+    this->iMat_[0]->formFull();
   }
 };
 
+template <typename T>
+void FOPPropagator<T>::initMeta() {
+  if(this->sett_.part == FULL) {
+    cout << " IN FULL " << endl;
+    this->nSingleDim_ = this->pscf_->nOV();
+
+  } else if(this->sett_.part == SPIN_SEPARATED) {
+    cout << " IN Sep " << endl;
+
+    this->nSingleDim_ = this->pscf_->nOAVA() + this->pscf_->nOBVB();
+
+  } else if(this->sett_.part == SPIN_ADAPTED) {
+
+    this->nSingleDim_ = this->pscf_->nOAVA();
+
+  }
+  if(!this->sett_.doTDA) this->nSingleDim_ *= 2;
+  cout << "NSINGLEDIM " << this->nSingleDim_ << " " << this->pscf_->nOAVA() << endl;
+}
 
 template <typename T>
 void FOPPropagator<T>::formFull() {
@@ -69,107 +85,106 @@ void FOPPropagator<T>::formFull() {
   moints.formVOVO();
   moints.formVVOO();
   
-  this->nSingleDim_ = this->pscf_->nOAVA() + this->pscf_->nOBVB();
+//this->nSingleDim_ = this->pscf_->nOAVA() + this->pscf_->nOBVB();
   this->fullMatMem_ = 
     this->memManager_->template malloc<T>(this->nSingleDim_*this->nSingleDim_);
   std::fill_n(this->fullMatMem_,this->nSingleDim_*this->nSingleDim_,0.0);
 
 
-  for(auto J = 0; J < this->pscf_->nOA(); J++)
-  for(auto B = 0; B < this->pscf_->nVA(); B++)
-  for(auto I = 0; I < this->pscf_->nOA(); I++) 
-  for(auto A = 0; A < this->pscf_->nVA(); A++) {
-    auto AI = A + I*this->pscf_->nVA();
-    auto BJ = B + J*this->pscf_->nVA();
-    auto AIBJ = AI + BJ*this->nSingleDim_;
-    auto AIBJAAAA = 
-      A + I*this->pscf_->nVA() + B*this->pscf_->nOAVA() + 
-      J*this->pscf_->nVA()*this->pscf_->nOAVA();
-    auto ABIJAAAA = 
-      A + B*this->pscf_->nVA() + I*this->pscf_->nVAVA() + 
-      J*this->pscf_->nOA()*this->pscf_->nVAVA();
-
-    this->fullMatMem_[AIBJ] = moints.VOVOAAAA()[AIBJAAAA] - 
-                        moints.VVOOAAAA()[ABIJAAAA];
-
-    if(AI == BJ)
-      this->fullMatMem_[AIBJ] += 
-        (*this->pscf_->reference()->epsA())(A + this->pscf_->nOA()) -
-        (*this->pscf_->reference()->epsA())(I);
-  }
-
-  for(auto J = 0; J < this->pscf_->nOB(); J++)
-  for(auto B = 0; B < this->pscf_->nVB(); B++)
-  for(auto I = 0; I < this->pscf_->nOA(); I++) 
-  for(auto A = 0; A < this->pscf_->nVA(); A++) {
-    auto AI = A + I*this->pscf_->nVA();
-    auto BJ = B + J*this->pscf_->nVB() + this->pscf_->nOAVA();
-    auto AIBJ = AI + BJ*this->nSingleDim_;
-    auto AIBJAABB = 
-      A + I*this->pscf_->nVA() + B*this->pscf_->nOAVA() + 
-      J*this->pscf_->nVB()*this->pscf_->nOAVA();
-
-    this->fullMatMem_[AIBJ] = moints.VOVOAABB()[AIBJAABB]; 
-  }
-
-  for(auto J = 0; J < this->pscf_->nOB(); J++)
-  for(auto B = 0; B < this->pscf_->nVB(); B++)
-  for(auto I = 0; I < this->pscf_->nOB(); I++) 
-  for(auto A = 0; A < this->pscf_->nVB(); A++) {
-    auto AI = A + I*this->pscf_->nVB() + this->pscf_->nOAVA();
-    auto BJ = B + J*this->pscf_->nVB() + this->pscf_->nOAVA();
-    auto AIBJ = AI + BJ*this->nSingleDim_;
-    auto AIBJBBBB = 
-      A + I*this->pscf_->nVB() + B*this->pscf_->nOBVB() + 
-      J*this->pscf_->nVB()*this->pscf_->nOBVB();
-    auto ABIJBBBB = 
-      A + B*this->pscf_->nVB() + I*this->pscf_->nVBVB() + 
-      J*this->pscf_->nOB()*this->pscf_->nVBVB();
-
-    this->fullMatMem_[AIBJ] = moints.VOVOBBBB()[AIBJBBBB] - 
-                              moints.VVOOBBBB()[ABIJBBBB];
-
-    if(AI == BJ){
-      if(this->pscf_->nTCS() == 1 and !this->pscf_->isClosedShell)
+  if(this->sett_.part == SPIN_SEPARATED) {
+    for(auto J = 0; J < this->pscf_->nOA(); J++)
+    for(auto B = 0; B < this->pscf_->nVA(); B++)
+    for(auto I = 0; I < this->pscf_->nOA(); I++) 
+    for(auto A = 0; A < this->pscf_->nVA(); A++) {
+      auto AI = A + I*this->pscf_->nVA();
+      auto BJ = B + J*this->pscf_->nVA();
+      auto AIBJ = AI + BJ*this->nSingleDim_;
+      auto AIBJAAAA = 
+        A + I*this->pscf_->nVA() + B*this->pscf_->nOAVA() + 
+        J*this->pscf_->nVA()*this->pscf_->nOAVA();
+      auto ABIJAAAA = 
+        A + B*this->pscf_->nVA() + I*this->pscf_->nVAVA() + 
+        J*this->pscf_->nOA()*this->pscf_->nVAVA();
+ 
+      this->fullMatMem_[AIBJ] = moints.VOVOAAAA()[AIBJAAAA] - 
+                          moints.VVOOAAAA()[ABIJAAAA];
+ 
+      if(AI == BJ)
         this->fullMatMem_[AIBJ] += 
-          (*this->pscf_->reference()->epsB())(A + this->pscf_->nOB()) -
-          (*this->pscf_->reference()->epsB())(I);
-      else
+          (*this->pscf_->reference()->epsA())(A + this->pscf_->nOA()) -
+          (*this->pscf_->reference()->epsA())(I);
+    }
+ 
+    for(auto J = 0; J < this->pscf_->nOB(); J++)
+    for(auto B = 0; B < this->pscf_->nVB(); B++)
+    for(auto I = 0; I < this->pscf_->nOA(); I++) 
+    for(auto A = 0; A < this->pscf_->nVA(); A++) {
+      auto AI = A + I*this->pscf_->nVA();
+      auto BJ = B + J*this->pscf_->nVB() + this->pscf_->nOAVA();
+      auto AIBJ = AI + BJ*this->nSingleDim_;
+      auto AIBJAABB = 
+        A + I*this->pscf_->nVA() + B*this->pscf_->nOAVA() + 
+        J*this->pscf_->nVB()*this->pscf_->nOAVA();
+ 
+      this->fullMatMem_[AIBJ] = moints.VOVOAABB()[AIBJAABB]; 
+    }
+ 
+    for(auto J = 0; J < this->pscf_->nOB(); J++)
+    for(auto B = 0; B < this->pscf_->nVB(); B++)
+    for(auto I = 0; I < this->pscf_->nOB(); I++) 
+    for(auto A = 0; A < this->pscf_->nVB(); A++) {
+      auto AI = A + I*this->pscf_->nVB() + this->pscf_->nOAVA();
+      auto BJ = B + J*this->pscf_->nVB() + this->pscf_->nOAVA();
+      auto AIBJ = AI + BJ*this->nSingleDim_;
+      auto AIBJBBBB = 
+        A + I*this->pscf_->nVB() + B*this->pscf_->nOBVB() + 
+        J*this->pscf_->nVB()*this->pscf_->nOBVB();
+      auto ABIJBBBB = 
+        A + B*this->pscf_->nVB() + I*this->pscf_->nVBVB() + 
+        J*this->pscf_->nOB()*this->pscf_->nVBVB();
+ 
+      this->fullMatMem_[AIBJ] = moints.VOVOBBBB()[AIBJBBBB] - 
+                                moints.VVOOBBBB()[ABIJBBBB];
+ 
+      if(AI == BJ){
+        if(this->pscf_->nTCS() == 1 and !this->pscf_->isClosedShell)
+          this->fullMatMem_[AIBJ] += 
+            (*this->pscf_->reference()->epsB())(A + this->pscf_->nOB()) -
+            (*this->pscf_->reference()->epsB())(I);
+        else
+          this->fullMatMem_[AIBJ] += 
+            (*this->pscf_->reference()->epsA())(A + this->pscf_->nOB()) -
+            (*this->pscf_->reference()->epsA())(I);
+      }
+    }
+  } else if(this->sett_.part == SPIN_ADAPTED) {
+
+    for(auto J = 0; J < this->pscf_->nOA(); J++)
+    for(auto B = 0; B < this->pscf_->nVA(); B++)
+    for(auto I = 0; I < this->pscf_->nOA(); I++) 
+    for(auto A = 0; A < this->pscf_->nVA(); A++) {
+      auto AI = A + I*this->pscf_->nVA();
+      auto BJ = B + J*this->pscf_->nVA();
+      auto AIBJ = AI + BJ*this->nSingleDim_;
+      auto AIBJAAAA = 
+        A + I*this->pscf_->nVA() + B*this->pscf_->nOAVA() + 
+        J*this->pscf_->nVA()*this->pscf_->nOAVA();
+      auto ABIJAAAA = 
+        A + B*this->pscf_->nVA() + I*this->pscf_->nVAVA() + 
+        J*this->pscf_->nOA()*this->pscf_->nVAVA();
+
+      if(this->sett_.doSinglets)
+        this->fullMatMem_[AIBJ] = 2*moints.VOVOAAAA()[AIBJAAAA] - 
+                            moints.VVOOAAAA()[ABIJAAAA];
+      else if(this->sett_.doTriplets)
+        this->fullMatMem_[AIBJ] = - moints.VVOOAAAA()[ABIJAAAA];
+
+      if(AI == BJ)
         this->fullMatMem_[AIBJ] += 
-          (*this->pscf_->reference()->epsA())(A + this->pscf_->nOB()) -
+          (*this->pscf_->reference()->epsA())(A + this->pscf_->nOA()) -
           (*this->pscf_->reference()->epsA())(I);
     }
   }
-
-/*
-  this->nSingleDim_ = this->pscf_->nOAVA();
-  this->fullMatMem_ = 
-    this->memManager_->template malloc<T>(this->nSingleDim_*this->nSingleDim_);
-
-  for(auto J = 0; J < this->pscf_->nOA(); J++)
-  for(auto B = 0; B < this->pscf_->nVA(); B++)
-  for(auto I = 0; I < this->pscf_->nOA(); I++) 
-  for(auto A = 0; A < this->pscf_->nVA(); A++) {
-    auto AI = A + I*this->pscf_->nVA();
-    auto BJ = B + J*this->pscf_->nVA();
-    auto AIBJ = AI + BJ*this->nSingleDim_;
-    auto AIBJAAAA = 
-      A + I*this->pscf_->nVA() + B*this->pscf_->nOAVA() + 
-      J*this->pscf_->nVA()*this->pscf_->nOAVA();
-    auto ABIJAAAA = 
-      A + B*this->pscf_->nVA() + I*this->pscf_->nVAVA() + 
-      J*this->pscf_->nOA()*this->pscf_->nVAVA();
-
-//  this->fullMatMem_[AIBJ] = 2*moints.VOVOAAAA()[AIBJAAAA] - 
-//                      moints.VVOOAAAA()[ABIJAAAA];
-    this->fullMatMem_[AIBJ] = - moints.VVOOAAAA()[ABIJAAAA];
-
-    if(AI == BJ)
-      this->fullMatMem_[AIBJ] += 
-        (*this->pscf_->reference()->epsA())(A + this->pscf_->nOA()) -
-        (*this->pscf_->reference()->epsA())(I);
-  }
-*/
 
   TMap Full(this->fullMatMem_,this->nSingleDim_,this->nSingleDim_);
   Full = Full.template selfadjointView<Upper>();

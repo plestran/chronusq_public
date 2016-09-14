@@ -83,9 +83,7 @@ int main(int argc, char **argv){
   Molecule molecule;
   BasisSet basis;
   AOIntegrals aoints;
-//MOIntegrals<double> moints;
   SingleSlater<double> singleSlater;
-//Response<double> resp;
   FileIO fileio("test.inp","test.out");
 
   memManager.setTotalMem(256e6);
@@ -93,19 +91,19 @@ int main(int argc, char **argv){
   fileio.iniH5Files();
   CQSetNumThreads(1);
   
-//loadPresets<WATER>(molecule);
+  loadPresets<WATER>(molecule);
 //loadPresets<HE>(molecule);
 //loadPresets<SO>(molecule);
-  loadPresets<Li>(molecule);
+//loadPresets<Li>(molecule);
   molecule.convBohr();
   molecule.computeNucRep();
   molecule.computeRij();
   molecule.computeI();
 
-//singleSlater.setRef(SingleSlater<double>::RHF);
-//singleSlater.isClosedShell = true;
-  singleSlater.setRef(SingleSlater<double>::UHF);
-  singleSlater.isClosedShell = false;
+  singleSlater.setRef(SingleSlater<double>::RHF);
+  singleSlater.isClosedShell = true;
+//singleSlater.setRef(SingleSlater<double>::UHF);
+//singleSlater.isClosedShell = false;
 
 /*
   singleSlater.isDFT = true;
@@ -121,9 +119,9 @@ int main(int argc, char **argv){
 //singleSlater.addVWN5();
 //singleSlater.setPrintLevel(5);
 
-//basis.findBasisFile("sto-3g");
+  basis.findBasisFile("sto-3g");
 //basis.findBasisFile("3-21g");
-  basis.findBasisFile("6-31G");
+//basis.findBasisFile("6-31G");
   basis.communicate(fileio);
   basis.parseGlobal();
   basis.constructLocal(&molecule);
