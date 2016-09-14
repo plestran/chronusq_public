@@ -14,14 +14,21 @@ class ResponseMatrix : public QNCallable<T> {
   typedef Eigen::Map<TMat> TMap;
   typedef Eigen::Map<TVec> TVecMap;
 
-  PostSCF<T> *pscf_;
+protected:
+  CQMemManager *memManager_;
+  PostSCF<T>   *pscf_;
+
+
+  T * fullMatMem_;
 public:
   ResponseMatrix() : QNCallable<T>(),
     pscf_(NULL)
     { ; };
   ResponseMatrix(PostSCF<T> *pscf): QNCallable<T>(),
     pscf_(pscf)
-    { ; };
+    { this->memManager_ = pscf_->memManager(); };
+
+  virtual void formFull() = 0;
 };
 
 template <typename T>
@@ -42,7 +49,7 @@ protected:
 
   QNProblemType iJob_;   ///< Response Job Type
 
-  std::vector<ResponseMatrix<T>> iMat_;
+  std::vector<ResponseMatrix<T>*> iMat_;
 
 public:
   

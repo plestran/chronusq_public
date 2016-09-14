@@ -144,6 +144,13 @@ public:
     cout << this->nOBVB_ << endl;
   };
 
+  int nO() const        { return this->reference_->nO(); };
+  int nV() const        { return this->reference_->nV(); };
+  int nOA() const       { return this->reference_->nOA(); };
+  int nVA() const       { return this->reference_->nVA(); };
+  int nOB() const       { return this->reference_->nOB(); };
+  int nVB() const       { return this->reference_->nVB(); };
+
   int nOO() const       { return this->nOO_; };       
   int nOV() const       { return this->nOV_; };
   int nVV() const       { return this->nVV_; };
@@ -172,6 +179,7 @@ public:
   int nVAVA_LT() const  { return this->nVAVA_LT_; };
   int nVBVB_LT() const  { return this->nVBVB_LT_; };
 
+  WaveFunction<T> * reference() const { return this->reference_; };
 };
 
 template <typename T>

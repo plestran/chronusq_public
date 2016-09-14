@@ -148,6 +148,38 @@ public:
   void formFullOOOO();
 
   void testMOInts();
+
+  T* VVVV() const { return this->VVVV_; };
+  T* VVVO() const { return this->VVVO_; };
+  T* VVOO() const { return this->VVOO_; };
+  T* VOVO() const { return this->VOVO_; };
+  T* VOOO() const { return this->VOOO_; };
+  T* OOOO() const { return this->OOOO_; };
+
+  T* VVVVAAAA() const { return this->VVVVAAAA_; };
+  T* VVVOAAAA() const { return this->VVVOAAAA_; };
+  T* VVOOAAAA() const { return this->VVOOAAAA_; };
+  T* VOVOAAAA() const { return this->VOVOAAAA_; };
+  T* VOOOAAAA() const { return this->VOOOAAAA_; };
+  T* OOOOAAAA() const { return this->OOOOAAAA_; };
+                                             
+  T* VVVVAABB() const { return this->VVVVAABB_; };
+  T* VVVOAABB() const { return this->VVVOAABB_; };
+  T* VVOOAABB() const { return this->VVOOAABB_; };
+  T* VOVOAABB() const { return this->VOVOAABB_; };
+  T* VOOOAABB() const { return this->VOOOAABB_; };
+  T* OOOOAABB() const { return this->OOOOAABB_; };
+                                             
+  T* VVOOBBAA() const { return this->VVOOBBAA_; };
+  T* VOOOBBAA() const { return this->VOOOBBAA_; };
+  T* VVVOBBAA() const { return this->VVVOBBAA_; };
+                                             
+  T* VVVVBBBB() const { return this->VVVVBBBB_; };
+  T* VVVOBBBB() const { return this->VVVOBBBB_; };
+  T* VVOOBBBB() const { return this->VVOOBBBB_; };
+  T* VOVOBBBB() const { return this->VOVOBBBB_; };
+  T* VOOOBBBB() const { return this->VOOOBBBB_; };
+  T* OOOOBBBB() const { return this->OOOOBBBB_; };
 };
 
 template <typename T, typename U, typename V>
