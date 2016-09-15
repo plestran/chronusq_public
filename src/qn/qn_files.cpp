@@ -26,6 +26,7 @@
 #include <qn.h>
 
 namespace ChronusQ {
+/*
   template<>
   void QuasiNewton2<double>::iniScratchFiles(){
     (*this->out_) << "Initializing Files for QuasiNewton Calculation" << endl;
@@ -124,5 +125,6 @@ namespace ChronusQ {
         subDataSpace);
   
   }; // QuasiNewton2<double>::readTrialVectors
+*/
 
 }; // namespace ChronusQ

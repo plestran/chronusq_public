@@ -213,11 +213,12 @@ class QuasiNewton2 {
   /** Scratch Partitions **/
 
   // Constant data-type storage
-  int        LRWORK; ///< Length of RWORK
-  double   * RWORK_; ///< Real workspace for ZGEEV (Complex Only!)
-  double   * ERMem_; ///< Storage of Re[omega] for subspace (Real Only!)
-  double   * EIMem_; ///< Storage of Im[omega] for subspace (Real Only!)
-  dcomplex * ECMem_; ///< Storage of omega for subspace (Complex Only!)
+//int        LRWORK; ///< Length of RWORK
+//double   * RWORK_; ///< Real workspace for ZGEEV (Complex Only!)
+//double   * ERMem_; ///< Storage of Re[omega] for subspace (Real Only!)
+//double   * EIMem_; ///< Storage of Im[omega] for subspace (Real Only!)
+//dcomplex * ECMem_; ///< Storage of omega for subspace (Complex Only!)
+  double   * EPersist_;
 
   // Trial vector storage
   T* TRMem_; ///< Right trial vectors
@@ -244,8 +245,8 @@ class QuasiNewton2 {
   T* ULMem_; ///< Reconstructed Left solution vectors
 
   // LAPACK Scratch Space
-  T* WORK;   ///< LAPACK scratch space
-  int LWORK; ///< Length of WORK
+//T* WORK;   ///< LAPACK scratch space
+//int LWORK; ///< Length of WORK
 
   // Special Algorithm Memory
      
@@ -316,8 +317,8 @@ public:
 
   // Diagonalization Routines
   bool stdHermetianDiag(char,char,int,T*,double*);
-  void stdNonHermetianDiag(const int);
-  void checkImaginary(const int);
+  bool stdNonHermetianDiag(char,char,int,T*,T*,T*,T*);
+  void checkImaginary(const int, T*);
 
   // Guess Generation Routines
   void davResidualGuess(    T,const TMap&,TMap&,const TMap&,TMap&);
@@ -372,10 +373,10 @@ protected:
 
 public:
   QNCallable() {
-    this->problemType_  = DIAGONALIZATION;
-    this->matrixType_   = HERMETIAN;
+    this->problemType_      = DIAGONALIZATION;
+    this->matrixType_       = HERMETIAN;
     this->specialAlgorithm_ = NOT_SPECIAL;
-    this->guessType_    = RESIDUAL_DAVIDSON;
+    this->guessType_        = RESIDUAL_DAVIDSON;
 
     this->nSingleDim_   = 0;
     this->nSek_         = 0;
@@ -430,6 +431,7 @@ public:
   #include <qn/qn_special.h>
   #include <qn/qn_diag.h>
   #include <qn/qn_guess.h>
+  #include <qn/qn_files.h>
 }; // namespace ChronusQ
 
 #endif

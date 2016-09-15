@@ -117,7 +117,7 @@ public:
     nSek_         (3),
     nGuess_       (6){ };
 
-  Response() : Response(QNProblemType::DIAGONALIZATION,false){ };
+  Response() : Response(DIAGONALIZATION,FULL,false){ };
 
   Response(Response &other) :
     PostSCF<T>(dynamic_cast<PostSCF<T>&>(other))
@@ -158,7 +158,10 @@ public:
     for(auto MAT : this->iMat_) {
       MAT->initMeta();
       if(this->doFull_) MAT->setNSek(MAT->nSingleDim());
-      else              MAT->setNSek(this->nSek_);
+      else {             
+        MAT->setNSek(this->nSek_);
+        MAT->setNGuess(this->nGuess_);
+      }
       MAT->alloc();
     }
   }

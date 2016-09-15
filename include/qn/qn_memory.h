@@ -39,7 +39,7 @@ void QuasiNewton2<T>::allocScr(){
   this->ResRMem_     = new T[NMSS];
   this->URMem_       = new T[NMSS];
 
-  if(this->matrixType_ == HERMETIAN_GEP){
+  if(this->qnObj_->matrixType_ == HERMETIAN_GEP){
     this->RhoRMem_   = new T[NMSS];
     this->XTRhoRMem_ = new T[MSSMSS];
   }
@@ -51,14 +51,14 @@ void QuasiNewton2<T>::allocScr(){
     this->ResLMem_     = new T[NMSS];
     this->ULMem_       = new T[NMSS];
  
-    if(this->matrixType_ == HERMETIAN_GEP){
+    if(this->qnObj_->matrixType_ == HERMETIAN_GEP){
       this->RhoLMem_   = new T[NMSS];
       this->XTRhoLMem_ = new T[MSSMSS];
     }
   }
 
   if(this->problemType_ == DIAGONALIZATION){
-    if(this->matrixType_ == HERMETIAN)
+    if(this->qnObj_->matrixType_ == HERMETIAN)
       this->LWORK = 3 * N;
     else
       this->LWORK = 4 * N;
@@ -85,13 +85,16 @@ void QuasiNewton2<T>::allocIterScr() {
   auto NMSS   = N*this->maxSubSpace_;
   auto MSSMSS = this->maxSubSpace_*this->maxSubSpace_;
 
+  this->EPersist_    = 
+    this->memManager_->template malloc<double>(this->maxSubSpace_);
+
   this->TRMem_       = this->memManager_->template malloc<T>(NMSS);
   this->SigmaRMem_   = this->memManager_->template malloc<T>(NMSS); 
   this->XTSigmaRMem_ = this->memManager_->template malloc<T>(MSSMSS);
   this->ResRMem_     = this->memManager_->template malloc<T>(NMSS);
   this->URMem_       = this->memManager_->template malloc<T>(NMSS);
 
-  if(this->matrixType_ == HERMETIAN_GEP){
+  if(this->qnObj_->matrixType_ == HERMETIAN_GEP){
     this->RhoRMem_   = this->memManager_->template malloc<T>(NMSS);
     this->XTRhoRMem_ = this->memManager_->template malloc<T>(MSSMSS);
   }
@@ -103,13 +106,13 @@ void QuasiNewton2<T>::allocIterScr() {
     this->ResLMem_     = this->memManager_->template malloc<T>(NMSS);
     this->ULMem_       = this->memManager_->template malloc<T>(NMSS);
  
-    if(this->matrixType_ == HERMETIAN_GEP){
+    if(this->qnObj_->matrixType_ == HERMETIAN_GEP){
       this->RhoLMem_   = this->memManager_->template malloc<T>(NMSS);
       this->XTRhoLMem_ = this->memManager_->template malloc<T>(MSSMSS);
     }
   }
 
-  if(this->specialAlgorithm_ == SYMMETRIZED_TRIAL){
+  if(this->qnObj_->specialAlgorithm_ == SYMMETRIZED_TRIAL){
     this->ASuperMem_  = this->memManager_->template malloc<T>(4 * MSSMSS);
     this->SSuperMem_  = this->memManager_->template malloc<T>(4 * MSSMSS);
     this->NHrProdMem_ = this->memManager_->template malloc<T>(4 * MSSMSS);
@@ -128,7 +131,7 @@ void QuasiNewton2<T>::cleanupScr(){
   delete [] this->ResRMem_     ;
   delete [] this->URMem_       ;
 
-  if(this->matrixType_ == HERMETIAN_GEP){
+  if(this->qnObj_->matrixType_ == HERMETIAN_GEP){
     delete [] this->RhoRMem_  ; 
     delete [] this->XTRhoRMem_; 
   }
@@ -140,7 +143,7 @@ void QuasiNewton2<T>::cleanupScr(){
     delete [] this->ResLMem_    ; 
     delete [] this->ULMem_      ; 
  
-    if(this->matrixType_ == HERMETIAN_GEP){
+    if(this->qnObj_->matrixType_ == HERMETIAN_GEP){
       delete [] this->RhoLMem_  ; 
       delete [] this->XTRhoLMem_; 
     }
@@ -166,13 +169,15 @@ void QuasiNewton2<T>::cleanupIterScr(){
   auto NMSS   = N*this->maxSubSpace_;
   auto MSSMSS = this->maxSubSpace_*this->maxSubSpace_;
 
+  this->memManager_->free(this->EPersist_   ,this->maxSubSpace_);
+
   this->memManager_->free(this->TRMem_      ,NMSS);
   this->memManager_->free(this->SigmaRMem_  ,NMSS); 
   this->memManager_->free(this->XTSigmaRMem_,MSSMSS);
   this->memManager_->free(this->ResRMem_    ,NMSS);
   this->memManager_->free(this->URMem_      ,NMSS);
 
-  if(this->matrixType_ == HERMETIAN_GEP){
+  if(this->qnObj_->matrixType_ == HERMETIAN_GEP){
     this->memManager_->free(this->RhoRMem_  ,NMSS);
     this->memManager_->free(this->XTRhoRMem_,MSSMSS);
   }
@@ -184,13 +189,13 @@ void QuasiNewton2<T>::cleanupIterScr(){
     this->memManager_->free(this->ResLMem_    ,NMSS);
     this->memManager_->free(this->ULMem_      ,NMSS);
  
-    if(this->matrixType_ == HERMETIAN_GEP){
+    if(this->qnObj_->matrixType_ == HERMETIAN_GEP){
       this->memManager_->free(this->RhoLMem_  ,NMSS);
       this->memManager_->free(this->XTRhoLMem_,MSSMSS);
     }
   }
 
-  if(this->specialAlgorithm_ == SYMMETRIZED_TRIAL){
+  if(this->qnObj_->specialAlgorithm_ == SYMMETRIZED_TRIAL){
     this->memManager_->free(this->ASuperMem_ ,4 * MSSMSS);
     this->memManager_->free(this->SSuperMem_ ,4 * MSSMSS);
     this->memManager_->free(this->NHrProdMem_,4 * MSSMSS);
