@@ -167,7 +167,8 @@ namespace ChronusQ {
 
   enum QNSpecialAlgorithm {
     NOT_SPECIAL,
-    SYMMETRIZED_TRIAL
+    SYMMETRIZED_TRIAL,
+    FULL_SOLVE
   };
 
   template <typename T>

@@ -37,11 +37,10 @@ class FOPPA : public Response<T> {
   typedef Eigen::Map<TVec> TVecMap;
 
 public:
-  FOPPA() : Response<T>()
-    { cout << "In FOPPA Constructor" << endl; };
-  FOPPA(FOPPA &other) :
-    Response<T>(dynamic_cast<Response<T>&>(other))
-    { ; };
+  FOPPA(QNProblemType typ, RESPONSE_MATRIX_PARTITION part, bool doTDA) : 
+    Response<T>(typ,part,doTDA){ };
+  FOPPA() : Response<T>(){ };
+  FOPPA(FOPPA &other) : Response<T>(dynamic_cast<Response<T>&>(other)){ };
 
   // Quantum compliant
   void formDensity(){ };
@@ -50,11 +49,9 @@ public:
   inline void initMeta() {
     Response<T>::initMeta();
     cout << "In FOPPA initMeta" << endl;
-    FOPPropagator<T> mat(this,ResponseSettings{SPIN_ADAPTED,true,false,true});
-    this->iMat_.template push_back(dynamic_cast<ResponseMatrix<T>*>(&mat));
-    this->iMat_[0]->initMeta();
-    this->iMat_[0]->formFull();
   }
+
+  void runResponse();
 };
 
 template <typename T>
@@ -85,7 +82,6 @@ void FOPPropagator<T>::formFull() {
   moints.formVOVO();
   moints.formVVOO();
   
-//this->nSingleDim_ = this->pscf_->nOAVA() + this->pscf_->nOBVB();
   this->fullMatMem_ = 
     this->memManager_->template malloc<T>(this->nSingleDim_*this->nSingleDim_);
   std::fill_n(this->fullMatMem_,this->nSingleDim_*this->nSingleDim_,0.0);
@@ -188,15 +184,33 @@ void FOPPropagator<T>::formFull() {
 
   TMap Full(this->fullMatMem_,this->nSingleDim_,this->nSingleDim_);
   Full = Full.template selfadjointView<Upper>();
-  prettyPrint(cout,Full,"Full");
-  prettyPrint(cout,Full - Full.adjoint(),"Full");
+//prettyPrint(cout,Full,"Full");
+//prettyPrint(cout,Full - Full.adjoint(),"Full");
 
 
-  Eigen::SelfAdjointEigenSolver<TMat> es;
-  es.compute(Full);
-  VectorXd Eig = es.eigenvalues();
-  prettyPrintSmart(cout,Eig,"Eig");
-  prettyPrintSmart(cout,Eig*phys.eVPerHartree,"Eig");
+//Eigen::SelfAdjointEigenSolver<TMat> es;
+//es.compute(Full);
+//VectorXd Eig = es.eigenvalues();
+//prettyPrintSmart(cout,Eig,"Eig");
+//prettyPrintSmart(cout,Eig*phys.eVPerHartree,"Eig");
+}
+
+template <typename T>
+void FOPPA<T>::runResponse() {
+  FOPPropagator<T> mat(this,
+     ResponseSettings{this->part_,true,false,this->doTDA_});
+
+  this->iMat_.template push_back(dynamic_cast<ResponseMatrix<T>*>(&mat));
+  this->iMat_[0]->initMeta();
+  this->iMat_[0]->formFull();
+
+  std::function<H5::DataSet*(const H5::CompType&,std::string&,
+    std::vector<hsize_t>&)> fileFactory = 
+      std::bind(&FileIO::createScratchPartition,this->fileio_,
+      std::placeholders::_1,std::placeholders::_2,std::placeholders::_3);
+
+  QuasiNewton2<T> qn(this->iMat_[0],fileFactory);
+  qn.setAlgorithm(FULL_SOLVE);
 }
 
 };

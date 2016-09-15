@@ -155,9 +155,10 @@ int main(int argc, char **argv){
   moints.communicate(singleSlater,memManager);
   moints.initMeta();
 //moints.testMOInts();
-  FOPPA<double> resp;
+  FOPPA<double> resp(DIAGONALIZATION,SPIN_SEPARATED,true);
   resp.communicate(singleSlater,memManager);
   resp.initMeta();
+  resp.runResponse();
   finalizeCQ();
   return 0;
 };

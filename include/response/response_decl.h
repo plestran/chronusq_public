@@ -88,19 +88,20 @@ protected:
   bool doTDA_;           ///< Invoke TDA
 
   QNProblemType iJob_;   ///< Response Job Type
+  RESPONSE_MATRIX_PARTITION part_;
 
   std::vector<ResponseMatrix<T>*> iMat_;
 
 public:
   
-  Response() : 
+  Response(QNProblemType typ, RESPONSE_MATRIX_PARTITION part, bool doTDA): 
     PostSCF<T>(),
+    iJob_(typ), doTDA_(doTDA), part_(part),
     useIncoreInts_(false),
     doFull_       (false),
-    debugIter_    (false),
-    doTDA_        (false),
-    iJob_         (QNProblemType::DIAGONALIZATION)
-    { cout << "In Response Constructor" << endl; };
+    debugIter_    (false){ };
+
+  Response() : Response(QNProblemType::DIAGONALIZATION,false){ };
 
   Response(Response &other) :
     PostSCF<T>(dynamic_cast<PostSCF<T>&>(other))
@@ -110,12 +111,6 @@ public:
   virtual void formDensity() = 0;
   virtual void computeSSq() = 0;
 
-/*
-  // QNCallable compliant
-  virtual void linearTrans(TMap &,TMap &,TMap &,TMap &,TMap &,TMap &) = 0;
-  virtual void formGuess() = 0;
-  virtual void formDiag()  = 0;
-*/
 
   inline void communicate(WaveFunction<T> &wfn, CQMemManager &memManager) {
     PostSCF<T>::communicate(wfn,memManager);
@@ -126,6 +121,12 @@ public:
     PostSCF<T>::initMeta();
     cout << "In Response initMeta" << endl;
   }
+
+  virtual void runResponse() = 0;
+
+
+  void doTDA()  { this->doTDA_  = true; };
+  void doFull() { this->doFull_ = true; };
 };
 };
 
