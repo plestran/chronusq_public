@@ -24,6 +24,7 @@
  *  
  */
 
+/*
 template<typename T>
 void QuasiNewton2<T>::allocScr(){
   (*this->out_) << "Allocating Memory for QuasiNewton Calculation" << endl;
@@ -74,7 +75,49 @@ void QuasiNewton2<T>::allocScr(){
 
   this->allocScrSpecial();
 };
+*/
 
+template <typename T>
+void QuasiNewton2<T>::allocIterScr() {
+  cout << this->memManager_->NBlocksFree() << endl;
+  (*this->out_) << "Allocating Memory for QuasiNewton Calculation" << endl;
+  auto N      = this->qnObj_->nSingleDim();
+  auto NMSS   = N*this->maxSubSpace_;
+  auto MSSMSS = this->maxSubSpace_*this->maxSubSpace_;
+
+  this->TRMem_       = this->memManager_->template malloc<T>(NMSS);
+  this->SigmaRMem_   = this->memManager_->template malloc<T>(NMSS); 
+  this->XTSigmaRMem_ = this->memManager_->template malloc<T>(MSSMSS);
+  this->ResRMem_     = this->memManager_->template malloc<T>(NMSS);
+  this->URMem_       = this->memManager_->template malloc<T>(NMSS);
+
+  if(this->matrixType_ == HERMETIAN_GEP){
+    this->RhoRMem_   = this->memManager_->template malloc<T>(NMSS);
+    this->XTRhoRMem_ = this->memManager_->template malloc<T>(MSSMSS);
+  }
+
+  if(this->qnObj_->needsLeft()){
+    this->TLMem_       = this->memManager_->template malloc<T>(NMSS);
+    this->SigmaLMem_   = this->memManager_->template malloc<T>(NMSS); 
+    this->XTSigmaLMem_ = this->memManager_->template malloc<T>(MSSMSS);
+    this->ResLMem_     = this->memManager_->template malloc<T>(NMSS);
+    this->ULMem_       = this->memManager_->template malloc<T>(NMSS);
+ 
+    if(this->matrixType_ == HERMETIAN_GEP){
+      this->RhoLMem_   = this->memManager_->template malloc<T>(NMSS);
+      this->XTRhoLMem_ = this->memManager_->template malloc<T>(MSSMSS);
+    }
+  }
+
+  if(this->specialAlgorithm_ == SYMMETRIZED_TRIAL){
+    this->ASuperMem_  = this->memManager_->template malloc<T>(4 * MSSMSS);
+    this->SSuperMem_  = this->memManager_->template malloc<T>(4 * MSSMSS);
+    this->NHrProdMem_ = this->memManager_->template malloc<T>(4 * MSSMSS);
+  }
+  cout << this->memManager_->NBlocksFree() << endl;
+};
+
+/*
 template<typename T>
 void QuasiNewton2<T>::cleanupScr(){
   (*this->out_) << "Deallocating Memory for QuasiNewton Calculation" << endl;
@@ -114,3 +157,43 @@ void QuasiNewton2<T>::cleanupScr(){
 
   this->cleanupScrSpecial();
 };
+*/
+template<typename T>
+void QuasiNewton2<T>::cleanupIterScr(){
+  cout << this->memManager_->NBlocksFree() << endl;
+  (*this->out_) << "Deallocating Memory for QuasiNewton Calculation" << endl;
+  auto N      = this->qnObj_->nSingleDim();
+  auto NMSS   = N*this->maxSubSpace_;
+  auto MSSMSS = this->maxSubSpace_*this->maxSubSpace_;
+
+  this->memManager_->free(this->TRMem_      ,NMSS);
+  this->memManager_->free(this->SigmaRMem_  ,NMSS); 
+  this->memManager_->free(this->XTSigmaRMem_,MSSMSS);
+  this->memManager_->free(this->ResRMem_    ,NMSS);
+  this->memManager_->free(this->URMem_      ,NMSS);
+
+  if(this->matrixType_ == HERMETIAN_GEP){
+    this->memManager_->free(this->RhoRMem_  ,NMSS);
+    this->memManager_->free(this->XTRhoRMem_,MSSMSS);
+  }
+
+  if(this->qnObj_->needsLeft()){
+    this->memManager_->free(this->TLMem_      ,NMSS);
+    this->memManager_->free(this->SigmaLMem_  ,NMSS); 
+    this->memManager_->free(this->XTSigmaLMem_,MSSMSS);
+    this->memManager_->free(this->ResLMem_    ,NMSS);
+    this->memManager_->free(this->ULMem_      ,NMSS);
+ 
+    if(this->matrixType_ == HERMETIAN_GEP){
+      this->memManager_->free(this->RhoLMem_  ,NMSS);
+      this->memManager_->free(this->XTRhoLMem_,MSSMSS);
+    }
+  }
+
+  if(this->specialAlgorithm_ == SYMMETRIZED_TRIAL){
+    this->memManager_->free(this->ASuperMem_ ,4 * MSSMSS);
+    this->memManager_->free(this->SSuperMem_ ,4 * MSSMSS);
+    this->memManager_->free(this->NHrProdMem_,4 * MSSMSS);
+  }
+  cout << this->memManager_->NBlocksFree() << endl;
+}

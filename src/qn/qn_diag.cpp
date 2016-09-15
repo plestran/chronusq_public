@@ -27,49 +27,47 @@
 
 namespace ChronusQ {
 
-  template<>
-  void QuasiNewton2<double>::checkImaginary(const int N){
-    double xSmall = 1e-08;
-    for(auto i = 0; i < N; i++)
-      if(std::abs(this->EIMem_[i]) < xSmall)
-        CErr("Imaginary Eigenroot has been found in QuasiNewton",(*this->out_));
-  }; // QuasiNewton2<double>::checkImaginary
+template<>
+void QuasiNewton2<double>::checkImaginary(const int N){
+  double xSmall = 1e-08;
+  for(auto i = 0; i < N; i++)
+    if(std::abs(this->EIMem_[i]) < xSmall)
+      CErr("Imaginary Eigenroot has been found in QuasiNewton",(*this->out_));
+}; // QuasiNewton2<double>::checkImaginary
 
-  template<>
-  void QuasiNewton2<double>::reducedDimDiag(const int NTrial){
-    char JOBVR = 'V';
-    char JOBVL = 'N';
-    char UPLO  = 'L';
-    int INFO;
+template<>
+void QuasiNewton2<double>::reducedDimDiag(const int NTrial){
+  char JOBVR = 'V';
+  char JOBVL = 'N';
+  char UPLO  = 'L';
+  int INFO;
 
-    (*this->out_) << "Diagonalizing Projected Matrix in QuasiNewton" << endl;
-    int N = NTrial;
-    if(this->specialAlgorithm_ == QNSpecialAlgorithm::SYMMETRIZED_TRIAL)
-      N *= 2;
+  (*this->out_) << "Diagonalizing Projected Matrix in QuasiNewton" << endl;
+  int N = NTrial;
+  if(this->qnObj_->specialAlgorithm_ == SYMMETRIZED_TRIAL) N *= 2;
 
-    double *A  = this->XTSigmaRMem_;
-    double *VR = this->XTSigmaRMem_;
-    double *VL = this->XTSigmaRMem_;
+  double *A  = this->XTSigmaRMem_;
+  double *VR = this->XTSigmaRMem_;
+  double *VL = this->XTSigmaRMem_;
 
-    if(this->specialAlgorithm_ == QNSpecialAlgorithm::SYMMETRIZED_TRIAL) {
-      CErr();
-      this->formNHrProd(NTrial);
-      A = this->NHrProdMem_;
-      VR = this->SSuperMem_;
-      VL = this->SSuperMem_;
-      CErr();
-    }
-    
-    if(this->matrixType_ == QNMatrixType::HERMETIAN)
-      dsyev_(&JOBVR,&UPLO,&N,A,&N,this->ERMem_,this->WORK,&this->LWORK,&INFO);
-    else {
-      dgeev_(&JOBVR,&JOBVL,&N,A,&N,this->ERMem_,this->EIMem_,VL,&N,VR,&N,
-        this->WORK,&this->LWORK,&INFO);
-      this->checkImaginary(N);
-    };
+  if(this->qnObj_->specialAlgorithm_ == SYMMETRIZED_TRIAL) {
+    CErr();
+    this->formNHrProd(NTrial);
+    A = this->NHrProdMem_;
+    VR = this->SSuperMem_;
+    VL = this->SSuperMem_;
+    CErr();
+  }
+  
+  if(this->qnObj_->matrixType_ == HERMETIAN)
+    dsyev_(&JOBVR,&UPLO,&N,A,&N,this->ERMem_,this->WORK,&this->LWORK,&INFO);
+  else {
+    dgeev_(&JOBVR,&JOBVL,&N,A,&N,this->ERMem_,this->EIMem_,VL,&N,VR,&N,
+      this->WORK,&this->LWORK,&INFO);
+    this->checkImaginary(N);
+  };
 
-    if(INFO != 0) CErr("Diagonalization in Reduced Dimension Failed!",
-                    (*this->out_));
-  }; //QuasiNewton2<double>::reducedDimDiag
-
+  if(INFO != 0) CErr("Diagonalization in Reduced Dimension Failed!",
+                  (*this->out_));
+}; //QuasiNewton2<double>::reducedDimDiag
 }; // namespace ChronusQ

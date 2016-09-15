@@ -157,7 +157,9 @@ int main(int argc, char **argv){
 //moints.testMOInts();
   FOPPA<double> resp(DIAGONALIZATION,SPIN_SEPARATED,true);
   resp.communicate(singleSlater,memManager);
+  resp.doFull();
   resp.initMeta();
+  resp.alloc();
   resp.runResponse();
   finalizeCQ();
   return 0;

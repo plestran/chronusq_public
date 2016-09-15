@@ -128,20 +128,6 @@ public:
     this->nVAVA_LT_ = this->nVA_ * (this->nVA_ - 1)/2;
     this->nVBVB_LT_ = this->nVB_ * (this->nVB_ - 1)/2;
 
-    cout << "PostSCF Meta" << endl;
-    cout << this->nOO_   << endl;
-    cout << this->nOAOA_ << endl;
-    cout << this->nOAOB_ << endl;
-    cout << this->nOBOB_ << endl;
-    cout << this->nVV_   << endl;
-    cout << this->nVAVA_ << endl;
-    cout << this->nVAVB_ << endl;
-    cout << this->nVBVB_ << endl;
-    cout << this->nOV_   << endl;
-    cout << this->nOAVA_ << endl;
-    cout << this->nOAVB_ << endl;
-    cout << this->nOBVA_ << endl;
-    cout << this->nOBVB_ << endl;
   };
 
   int nO() const        { return this->reference_->nO(); };

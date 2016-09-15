@@ -12,7 +12,6 @@ class FOPPropagator : public ResponseMatrix<T> {
   typedef Eigen::Map<TMat> TMap;
   typedef Eigen::Map<TVec> TVecMap;
 
-  void initMeta();
 public:
 
   FOPPropagator() : ResponseMatrix<T>(){ };
@@ -25,7 +24,9 @@ public:
   void formGuess(){ };
   void formDiag() { };
 
+  // ResponseMatrix Compliant
   void formFull();
+  void initMeta();
 };
 
 template <typename T>
@@ -36,6 +37,9 @@ class FOPPA : public Response<T> {
   typedef Eigen::Map<TMat> TMap;
   typedef Eigen::Map<TVec> TVecMap;
 
+
+  std::vector<std::shared_ptr<FOPPropagator<T>>> respMats_;
+  
 public:
   FOPPA(QNProblemType typ, RESPONSE_MATRIX_PARTITION part, bool doTDA) : 
     Response<T>(typ,part,doTDA){ };
@@ -51,17 +55,19 @@ public:
     cout << "In FOPPA initMeta" << endl;
   }
 
-  void runResponse();
+  // Response compliant
+//void runResponse();
+
+  void alloc();
 };
 
 template <typename T>
 void FOPPropagator<T>::initMeta() {
+  cout << "In FOPPropagator initMeta" << endl;
   if(this->sett_.part == FULL) {
-    cout << " IN FULL " << endl;
     this->nSingleDim_ = this->pscf_->nOV();
 
   } else if(this->sett_.part == SPIN_SEPARATED) {
-    cout << " IN Sep " << endl;
 
     this->nSingleDim_ = this->pscf_->nOAVA() + this->pscf_->nOBVB();
 
@@ -71,7 +77,6 @@ void FOPPropagator<T>::initMeta() {
 
   }
   if(!this->sett_.doTDA) this->nSingleDim_ *= 2;
-  cout << "NSINGLEDIM " << this->nSingleDim_ << " " << this->pscf_->nOAVA() << endl;
 }
 
 template <typename T>
@@ -82,9 +87,9 @@ void FOPPropagator<T>::formFull() {
   moints.formVOVO();
   moints.formVVOO();
   
-  this->fullMatMem_ = 
+  this->fullMatrix_ = 
     this->memManager_->template malloc<T>(this->nSingleDim_*this->nSingleDim_);
-  std::fill_n(this->fullMatMem_,this->nSingleDim_*this->nSingleDim_,0.0);
+  std::fill_n(this->fullMatrix_,this->nSingleDim_*this->nSingleDim_,0.0);
 
 
   if(this->sett_.part == SPIN_SEPARATED) {
@@ -102,11 +107,11 @@ void FOPPropagator<T>::formFull() {
         A + B*this->pscf_->nVA() + I*this->pscf_->nVAVA() + 
         J*this->pscf_->nOA()*this->pscf_->nVAVA();
  
-      this->fullMatMem_[AIBJ] = moints.VOVOAAAA()[AIBJAAAA] - 
+      this->fullMatrix_[AIBJ] = moints.VOVOAAAA()[AIBJAAAA] - 
                           moints.VVOOAAAA()[ABIJAAAA];
  
       if(AI == BJ)
-        this->fullMatMem_[AIBJ] += 
+        this->fullMatrix_[AIBJ] += 
           (*this->pscf_->reference()->epsA())(A + this->pscf_->nOA()) -
           (*this->pscf_->reference()->epsA())(I);
     }
@@ -122,7 +127,7 @@ void FOPPropagator<T>::formFull() {
         A + I*this->pscf_->nVA() + B*this->pscf_->nOAVA() + 
         J*this->pscf_->nVB()*this->pscf_->nOAVA();
  
-      this->fullMatMem_[AIBJ] = moints.VOVOAABB()[AIBJAABB]; 
+      this->fullMatrix_[AIBJ] = moints.VOVOAABB()[AIBJAABB]; 
     }
  
     for(auto J = 0; J < this->pscf_->nOB(); J++)
@@ -139,16 +144,16 @@ void FOPPropagator<T>::formFull() {
         A + B*this->pscf_->nVB() + I*this->pscf_->nVBVB() + 
         J*this->pscf_->nOB()*this->pscf_->nVBVB();
  
-      this->fullMatMem_[AIBJ] = moints.VOVOBBBB()[AIBJBBBB] - 
+      this->fullMatrix_[AIBJ] = moints.VOVOBBBB()[AIBJBBBB] - 
                                 moints.VVOOBBBB()[ABIJBBBB];
  
       if(AI == BJ){
         if(this->pscf_->nTCS() == 1 and !this->pscf_->isClosedShell)
-          this->fullMatMem_[AIBJ] += 
+          this->fullMatrix_[AIBJ] += 
             (*this->pscf_->reference()->epsB())(A + this->pscf_->nOB()) -
             (*this->pscf_->reference()->epsB())(I);
         else
-          this->fullMatMem_[AIBJ] += 
+          this->fullMatrix_[AIBJ] += 
             (*this->pscf_->reference()->epsA())(A + this->pscf_->nOB()) -
             (*this->pscf_->reference()->epsA())(I);
       }
@@ -170,19 +175,19 @@ void FOPPropagator<T>::formFull() {
         J*this->pscf_->nOA()*this->pscf_->nVAVA();
 
       if(this->sett_.doSinglets)
-        this->fullMatMem_[AIBJ] = 2*moints.VOVOAAAA()[AIBJAAAA] - 
+        this->fullMatrix_[AIBJ] = 2*moints.VOVOAAAA()[AIBJAAAA] - 
                             moints.VVOOAAAA()[ABIJAAAA];
       else if(this->sett_.doTriplets)
-        this->fullMatMem_[AIBJ] = - moints.VVOOAAAA()[ABIJAAAA];
+        this->fullMatrix_[AIBJ] = - moints.VVOOAAAA()[ABIJAAAA];
 
       if(AI == BJ)
-        this->fullMatMem_[AIBJ] += 
+        this->fullMatrix_[AIBJ] += 
           (*this->pscf_->reference()->epsA())(A + this->pscf_->nOA()) -
           (*this->pscf_->reference()->epsA())(I);
     }
   }
 
-  TMap Full(this->fullMatMem_,this->nSingleDim_,this->nSingleDim_);
+  TMap Full(this->fullMatrix_,this->nSingleDim_,this->nSingleDim_);
   Full = Full.template selfadjointView<Upper>();
 //prettyPrint(cout,Full,"Full");
 //prettyPrint(cout,Full - Full.adjoint(),"Full");
@@ -195,6 +200,22 @@ void FOPPropagator<T>::formFull() {
 //prettyPrintSmart(cout,Eig*phys.eVPerHartree,"Eig");
 }
 
+
+template <typename T>
+void FOPPA<T>::alloc() {
+  cout << "In FOPPA alloc" << endl;
+  this->respMats_.emplace_back(std::make_shared<FOPPropagator<T>>(this,
+    ResponseSettings{this->part_,true,false,this->doTDA_}));
+
+  for(auto MAT : this->respMats_) {
+    this->iMat_.template 
+      push_back(dynamic_cast<ResponseMatrix<T>*>(MAT.get()));
+  }
+
+  Response<T>::alloc();
+};
+
+/*
 template <typename T>
 void FOPPA<T>::runResponse() {
   FOPPropagator<T> mat(this,
@@ -209,9 +230,11 @@ void FOPPA<T>::runResponse() {
       std::bind(&FileIO::createScratchPartition,this->fileio_,
       std::placeholders::_1,std::placeholders::_2,std::placeholders::_3);
 
-  QuasiNewton2<T> qn(this->iMat_[0],fileFactory);
+  QuasiNewton2<T> qn(this->iMat_[0],this->memManager_,fileFactory);
   qn.setAlgorithm(FULL_SOLVE);
+  qn.run();
 }
+*/
 
 };
 #endif

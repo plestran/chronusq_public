@@ -75,7 +75,7 @@ namespace ChronusQ {
     //  this->RhoLFile_  = this->genScrFile_(H5PredType<double>(),PLName,dims);
     }
 
-    if(this->specialAlgorithm_ == SYMMETRIZED_TRIAL) {
+    if(this->qnObj_->specialAlgorithm_ == SYMMETRIZED_TRIAL) {
       this->ASuperFile_ = this->genScrFile_(H5PredType<double>(),ASName,
         dimsSmall);
       this->SSuperFile_ = this->genScrFile_(H5PredType<double>(),SSName,

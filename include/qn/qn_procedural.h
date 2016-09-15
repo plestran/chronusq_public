@@ -33,25 +33,52 @@ void QuasiNewton2<T>::run(){
   (*this->out_) << "Quasi-Newton Calculation Started: " << 
                 ctime(&currentClockTime);
 
-  this->allocScr();
+  if(this->qnObj_->specialAlgorithm_ == FULL_SOLVE){
+    this->runFull();
+  }
+/*
   this->iniScratchFiles();
   auto start = std::chrono::high_resolution_clock::now();
-  for(auto iter = 0; iter < this->maxMacroIter_; iter++){
-    this->runMicro();
-    this->nMacroIter_++;
-    this->nTotalIter_ += this->nMicroIter_;
-    if(this->isConverged_) break;
-  };
   auto finish = std::chrono::high_resolution_clock::now();
-  this->cleanupScr();
 
   std::chrono::duration<double> elapsed = finish - start;
+*/
   time(&currentClockTime);
   (*this->out_) << "Quasi-Newton Calculation Completed: " << 
                 ctime(&currentClockTime);
 
 
 }; // QuasiNewton2<T>::run
+
+template <typename T>
+void QuasiNewton2<T>::runIter() {
+  this->allocIterScr();
+  for(auto iter = 0; iter < this->maxMacroIter_; iter++){
+    this->runMicro();
+    this->nMacroIter_++;
+    this->nTotalIter_ += this->nMicroIter_;
+    if(this->isConverged_) break;
+  };
+  this->cleanupIterScr();
+}
+
+template <typename T>
+void QuasiNewton2<T>::runFull() {
+  if(this->qnObj_->problemType_ == DIAGONALIZATION) {
+    cout << "Is Diagonalization" << endl;
+    if(this->qnObj_->matrixType_ == HERMETIAN) {
+       cout << "Is Hermetian" << endl;
+       std::copy_n(this->qnObj_->fullMatrix_,
+         this->qnObj_->nSingleDim_*this->qnObj_->nSingleDim_,
+         this->qnObj_->solutionVecR_);
+       this->stdHermetianDiag('V','L',this->qnObj_->nSingleDim_,
+         this->qnObj_->solutionVecR_,this->qnObj_->omega_);
+
+       RealMap E(this->qnObj_->omega_,this->qnObj_->nSingleDim_,1);
+       prettyPrintSmart(cout,phys.eVPerHartree*E,"E");
+    }
+  }
+};
 
 template<typename T>
 void QuasiNewton2<T>::runMicro(){
@@ -61,7 +88,8 @@ void QuasiNewton2<T>::runMicro(){
 
 
   this->readGuess();
-  if(this->specialAlgorithm_ == SYMMETRIZED_TRIAL && this->nMacroIter_ != 0) 
+  if(this->qnObj_->specialAlgorithm_ == SYMMETRIZED_TRIAL && 
+     this->nMacroIter_ != 0) 
     this->symmetrizeTrial(); 
 
   this->nMicroIter_ = 0;
@@ -84,7 +112,6 @@ void QuasiNewton2<T>::runMicro(){
     if(restart) CErr("Restart NYI",(*this->out_));
 
     this->formNewGuess(resConv,NTrial,NNotConv,NOld,NNew);
-  //CErr();
   };// for iter in [0, maxMicroIter)
 }; // QuasiNewton2<T>::runMicro
 
@@ -165,7 +192,7 @@ void QuasiNewton2<T>::fullProjection(const int NTrial){
       XTRhoL   = TVecL.adjoint() * RhoL;
   }
 
-  if(this->specialAlgorithm_ == SYMMETRIZED_TRIAL)
+  if(this->qnObj_->specialAlgorithm_ == SYMMETRIZED_TRIAL)
     this->buildSuperMatricies(NTrial);
 }; // QuasiNewton2<T>::fullProjection
 
@@ -197,7 +224,7 @@ void QuasiNewton2<T>::reconstructSolution(const int NTrial){
   (*this->qnObj_->solutionVecR()) = UR.block(0,0,N,this->qnObj_->nSek());
   (*this->qnObj_->omega())        = ER.head(this->qnObj_->nSek());
 
-  if(this->specialAlgorithm_ == SYMMETRIZED_TRIAL)
+  if(this->qnObj_->specialAlgorithm_ == SYMMETRIZED_TRIAL)
     (*this->qnObj_->solutionVecR()) += UL.block(0,0,N,this->qnObj_->nSek());
   else if(this->qnObj_->needsLeft())
     (*this->qnObj_->solutionVecL()) = UL.block(0,0,N,this->qnObj_->nSek());
@@ -244,7 +271,7 @@ void QuasiNewton2<T>::generateResiduals(const int NTrial){
 
   if(this->matrixType_ == QNMatrixType::HERMETIAN)
     ResR = SigmaR * XTSigmaR - UR * E.asDiagonal();
-  else if(this->specialAlgorithm_ == SYMMETRIZED_TRIAL){
+  else if(this->qnObj_->specialAlgorithm_ == SYMMETRIZED_TRIAL){
     ResR = SigmaR * XTSigmaR - RhoR * XTSigmaL * E.asDiagonal();
     ResL = SigmaL * XTSigmaL - RhoL * XTSigmaR * E.asDiagonal();
   }
@@ -372,9 +399,9 @@ void QuasiNewton2<T>::davResidualGuess(T Omega, const TMap &RR, TMap &QR,
 
   (*this->out_) << "Generating Davidson Residual Guess in QuasiNewton" << endl;
 
-  if(this->specialAlgorithm_ == NOT_SPECIAL)
+  if(this->qnObj_->specialAlgorithm_ == NOT_SPECIAL)
     this->davStdResidualGuess(Omega,RR,QR);
-  else if(this->specialAlgorithm_ == SYMMETRIZED_TRIAL)
+  else if(this->qnObj_->specialAlgorithm_ == SYMMETRIZED_TRIAL)
     this->davSymmResidualGuess(Omega,RR,QR,RL,QL);
 
 }; // QuasiNewton2<T>::davResidualGuess

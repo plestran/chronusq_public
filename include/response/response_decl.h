@@ -36,7 +36,11 @@ protected:
   PostSCF<T>   *pscf_;
 
 
+/*
   T * fullMatMem_;
+  T * solutionVecRMem_;
+  T * solutionVecLMem_;
+*/
 
   ResponseSettings sett_;
 
@@ -55,8 +59,15 @@ public:
 
 
   virtual void formFull() = 0;
-
   virtual void initMeta() = 0;
+
+  inline void alloc() {
+    cout << "In ResponseMatrix alloc" << endl;
+    this->solutionVecR_ = 
+      this->memManager_->template malloc<T>(this->nSek_*this->nSingleDim_);
+    this->omega_ = this->memManager_->template malloc<double>(this->nSek_);
+  }
+
   inline void checkMeta() {
     if(this->pscf_->nTCS() == 2 and this->sett_.part != FULL){
       cout << "Switching Matrix partitioning to FULL for 2C method" << endl;
@@ -87,6 +98,9 @@ protected:
   bool debugIter_;       ///< Diagonalize full incore matrix iteratively
   bool doTDA_;           ///< Invoke TDA
 
+  size_t nSek_;
+  size_t nGuess_;
+
   QNProblemType iJob_;   ///< Response Job Type
   RESPONSE_MATRIX_PARTITION part_;
 
@@ -99,7 +113,9 @@ public:
     iJob_(typ), doTDA_(doTDA), part_(part),
     useIncoreInts_(false),
     doFull_       (false),
-    debugIter_    (false){ };
+    debugIter_    (false),
+    nSek_         (3),
+    nGuess_       (6){ };
 
   Response() : Response(QNProblemType::DIAGONALIZATION,false){ };
 
@@ -122,11 +138,36 @@ public:
     cout << "In Response initMeta" << endl;
   }
 
-  virtual void runResponse() = 0;
+  inline void runResponse(){
+    std::function<H5::DataSet*(const H5::CompType&,std::string&,
+      std::vector<hsize_t>&)> fileFactory = 
+        std::bind(&FileIO::createScratchPartition,this->fileio_,
+        std::placeholders::_1,std::placeholders::_2,std::placeholders::_3);
+
+    for(auto MAT : this->iMat_) {
+      QuasiNewton2<T> qn(MAT,this->memManager_,fileFactory);
+      if(this->doFull_) {
+        MAT->formFull();
+        MAT->setAlgorithm(FULL_SOLVE);
+      }
+      qn.run();
+    }
+  };
+
+  inline void alloc() {
+    for(auto MAT : this->iMat_) {
+      MAT->initMeta();
+      if(this->doFull_) MAT->setNSek(MAT->nSingleDim());
+      else              MAT->setNSek(this->nSek_);
+      MAT->alloc();
+    }
+  }
 
 
   void doTDA()  { this->doTDA_  = true; };
   void doFull() { this->doFull_ = true; };
+  void setNSek(size_t N) { this->nSek_ = N; };
+  void setNGuess(size_t N) { this->nGuess_ = N; };
 };
 };
 
