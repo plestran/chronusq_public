@@ -166,6 +166,7 @@ public:
   int nVBVB_LT() const  { return this->nVBVB_LT_; };
 
   WaveFunction<T> * reference() const { return this->reference_; };
+  FileIO * fileio() const { return this->fileio_; };
 };
 
 template <typename T>

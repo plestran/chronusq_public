@@ -162,7 +162,8 @@ int main(int argc, char **argv){
   resp.setNGuess(6);
   resp.initMeta();
   resp.alloc();
-  resp.runResponse();
+  resp.formGuess();
+//resp.runResponse();
   finalizeCQ();
   return 0;
 };

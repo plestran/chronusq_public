@@ -66,6 +66,7 @@ public:
     this->solutionVecR_ = 
       this->memManager_->template malloc<T>(this->nSek_*this->nSingleDim_);
     this->omega_ = this->memManager_->template malloc<double>(this->nSek_);
+    this->diag_  = this->memManager_->template malloc<T>(this->nSingleDim_);
   }
 
   inline void checkMeta() {
@@ -167,10 +168,18 @@ public:
   }
 
 
+  inline void formGuess() {
+    for(auto MAT : this->iMat_) {
+      MAT->formDiag();
+      MAT->formGuess();
+    }
+  }
   void doTDA()  { this->doTDA_  = true; };
   void doFull() { this->doFull_ = true; };
   void setNSek(size_t N) { this->nSek_ = N; };
   void setNGuess(size_t N) { this->nGuess_ = N; };
+
+
 };
 };
 

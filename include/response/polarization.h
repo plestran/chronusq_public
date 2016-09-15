@@ -21,8 +21,8 @@ public:
 
   // QNCallable compliant
   void linearTrans(TMap &,TMap &,TMap &,TMap &,TMap &,TMap &){ };
-  void formGuess(){ };
-  void formDiag() { };
+  void formGuess();
+  void formDiag();
 
   // ResponseMatrix Compliant
   void formFull();
@@ -235,6 +235,90 @@ void FOPPA<T>::runResponse() {
   qn.run();
 }
 */
+
+template <typename T>
+void FOPPropagator<T>::formDiag() {
+  if(this->sett_.part == FULL) {
+    if(this->pscf_->nTCS() == 2){ 
+      for(auto I = 0, AI = 0; I < this->pscf_->nO(); I++      )
+      for(auto A = 0        ; A < this->pscf_->nV(); A++, AI++) 
+        this->diag_[AI] = 
+          (*this->pscf_->reference()->epsA())(A + this->pscf_->nO()) -
+          (*this->pscf_->reference()->epsA())(I);
+    } else {
+      CErr("Full FOPPA NOT IMPLEMENTED FOR NON 2C METHODS",
+         this->pscf_->fileio()->out);
+    }
+  } else {
+    for(auto I = 0, AI = 0; I < this->pscf_->nOA(); I++      )
+    for(auto A = 0        ; A < this->pscf_->nVA(); A++, AI++) 
+      this->diag_[AI] = 
+        (*this->pscf_->reference()->epsA())(A + this->pscf_->nOA()) -
+        (*this->pscf_->reference()->epsA())(I);
+
+    if(this->sett_.part == SPIN_SEPARATED) {
+      double * EPSB = this->pscf_->isClosedShell ?
+        this->pscf_->reference()->epsA()->data() :
+        this->pscf_->reference()->epsB()->data();
+     
+      for(auto I = 0, AI = this->pscf_->nOAVA(); I < this->pscf_->nOB(); I++)
+      for(auto A = 0                     ; A < this->pscf_->nVB(); A++, AI++) 
+        this->diag_[AI] = EPSB[A + this->pscf_->nOB()] - EPSB[I];
+    }
+  }
+}
+
+
+template <typename T>
+void FOPPropagator<T>::formGuess() {
+
+  std::vector<hsize_t> dims;
+  dims.push_back(this->nGuess_);
+  dims.push_back(this->nSingleDim_);
+
+  this->guessFile_ = 
+    this->pscf_->fileio()->createScratchPartition(H5PredType<T>(),
+      "FOPPA Response Guess",dims);
+
+  // Initialize an index vector with increasing ints
+  std::vector<int> indx(this->nSingleDim_,0);
+  std::iota(indx.begin(),indx.end(),0);
+
+  // Sort the index vector based on the diagonal of the RM
+  // (uses Lambda expression)
+  std::sort(indx.begin(),indx.end(),
+    [&](const int& a, const int& b){
+      return this->diag_[a] < this->diag_[b];
+    }
+  );
+
+  
+  for(auto iGuess = 0; iGuess < this->nGuess_; iGuess++) {
+    T one = T(1.0);
+
+  
+//  HDF5 Stores things RowMajor...
+    hsize_t offset[] = {iGuess,indx[iGuess]};
+    hsize_t count[]  = {1,1};
+    hsize_t stride[] = {1,1};
+    hsize_t block[]  = {1,1};
+    hsize_t subDim[] = {1,1};
+
+    H5::DataSpace memSpace(2,subDim,NULL);
+    H5::DataSpace subDataSpace = this->guessFile_->getSpace();
+    subDataSpace.selectHyperslab(H5S_SELECT_SET,count,offset,stride,block);
+    this->guessFile_->write(&one,H5PredType<T>(),memSpace,subDataSpace);
+    
+  }
+
+  this->guessFile_->read(this->solutionVecR_,H5PredType<T>(),this->guessFile_->getSpace(),this->guessFile_->getSpace());
+
+  
+  for(auto i = 0 ; i < this->nGuess_; i++) cout << indx[i] << endl;
+  cout << endl;
+  TMap VR(this->solutionVecR_,this->nSingleDim_,this->nGuess_);
+  prettyPrint(cout,VR,"Guess R");
+};
 
 };
 #endif
