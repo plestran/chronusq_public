@@ -12,12 +12,12 @@ class FOPPropagator : public ResponseMatrix<T> {
   typedef Eigen::Map<TMat> TMap;
   typedef Eigen::Map<TVec> TVecMap;
 
+  bool doStab_;
 public:
 
+  FOPPropagator(PostSCF<T> *pscf, ResponseSettings sett, bool doStab = false):
+    ResponseMatrix<T>(pscf,sett), doStab_(doStab){ };
   FOPPropagator() : ResponseMatrix<T>(){ };
-  FOPPropagator(PostSCF<T> *pscf): ResponseMatrix<T>(pscf){ };
-  FOPPropagator(PostSCF<T> *pscf, ResponseSettings sett):
-    ResponseMatrix<T>(pscf,sett){ };
 
   // QNCallable compliant
   void linearTrans(TMap &,TMap &,TMap &,TMap &,TMap &,TMap &);
@@ -39,11 +39,12 @@ class FOPPA : public Response<T> {
 
 
   std::vector<std::shared_ptr<FOPPropagator<T>>> respMats_;
+  bool doStab_;
   
 public:
-  FOPPA(QNProblemType typ, RESPONSE_MATRIX_PARTITION part, bool doTDA) : 
-    Response<T>(typ,part,doTDA){ };
-  FOPPA() : Response<T>(){ };
+  FOPPA(QNProblemType typ, RESPONSE_MATRIX_PARTITION part, bool doTDA, 
+    bool doStab = false) : 
+    Response<T>(typ,part,doTDA), doStab_(doStab){ };
   FOPPA(FOPPA &other) : Response<T>(dynamic_cast<Response<T>&>(other)){ };
 
   // Quantum compliant
@@ -288,7 +289,10 @@ void FOPPropagator<T>::formFull() {
   prettyPrint(cout,Full,"Full");
   prettyPrint(cout,Full - Full.adjoint(),"Full");
 
-  Full.block(this->nSingleDim_/2,0,this->nSingleDim_/2,this->nSingleDim_) *= -1;
+  if(not this->sett_.doTDA and not this->doStab_)
+    Full.block(this->nSingleDim_/2,0,this->nSingleDim_/2,this->nSingleDim_) 
+      *= -1;
+
   TVec Eig = phys.eVPerHartree*Full.eigenvalues().real();
   std::sort(Eig.data(),Eig.data()+Eig.size());
   prettyPrintSmart(cout,Eig,"E");
@@ -300,7 +304,7 @@ template <typename T>
 void FOPPA<T>::alloc() {
   cout << "In FOPPA alloc" << endl;
   this->respMats_.emplace_back(std::make_shared<FOPPropagator<T>>(this,
-    ResponseSettings{this->part_,true,false,this->doTDA_}));
+    ResponseSettings{this->part_,true,false,this->doTDA_},this->doStab_));
 
   for(auto MAT : this->respMats_) {
     this->iMat_.template 
