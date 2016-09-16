@@ -76,6 +76,9 @@ void QuasiNewton2<double>::reducedDimDiag(const int NTrial){
   //  this->WORK,&this->LWORK,&INFO);
     INFO = this->stdNonHermetianDiag(JOBVR,JOBVL,N,A,EMem,VR,VL);
     this->checkImaginary(N,EMem+N);
+    RealVecMap EMap(EMem,N);
+    RealMap    VRMap(VR,N,N);
+    this->eigSrt(VRMap,EMap);
   };
 
   std::copy_n(EMem,N,this->EPersist_);

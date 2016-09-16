@@ -331,6 +331,11 @@ public:
   void invertSuperMetric(const int);
   void formNHrProd(const int);
 
+
+  // Misc
+  void eigSrt(TMap &, RealVecMap &);
+  void metBiOrth(TMap &, const TMap &);
+
   #include <qn/qn_constructors.h>
 
 }; // class QuasiNewton2
@@ -432,6 +437,7 @@ public:
   #include <qn/qn_diag.h>
   #include <qn/qn_guess.h>
   #include <qn/qn_files.h>
+  #include <qn/qn_misc.h>
 }; // namespace ChronusQ
 
 #endif

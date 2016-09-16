@@ -70,15 +70,30 @@ void QuasiNewton2<T>::runFull() {
   if(this->qnObj_->problemType_ == DIAGONALIZATION) {
     cout << "Is Diagonalization" << endl;
     if(this->qnObj_->matrixType_ == HERMETIAN) {
-       cout << "Is Hermetian" << endl;
        std::copy_n(this->qnObj_->fullMatrix_,
          this->qnObj_->nSingleDim_*this->qnObj_->nSingleDim_,
          this->qnObj_->solutionVecR_);
        this->stdHermetianDiag('V','L',this->qnObj_->nSingleDim_,
          this->qnObj_->solutionVecR_,this->qnObj_->omega_);
+    } else {
+      T* E;
+      if(std::is_same<double,T>::value)
+        E = this->memManager_->template malloc<T>(2*this->qnObj_->nSingleDim_);
+      else
+        E = this->memManager_->template malloc<T>(this->qnObj_->nSingleDim_);
 
-       RealMap E(this->qnObj_->omega_,this->qnObj_->nSingleDim_,1);
-       prettyPrintSmart(cout,phys.eVPerHartree*E,"E");
+      this->stdNonHermetianDiag('V','N',this->qnObj_->nSingleDim_,
+        this->qnObj_->fullMatrix_,E,this->qnObj_->solutionVecR_,
+        this->qnObj_->solutionVecL_);
+
+      std::copy_n(reinterpret_cast<double*>(E),this->qnObj_->nSingleDim_,
+        this->qnObj_->omega_);
+
+      RealVecMap Eig(this->qnObj_->omega_,this->qnObj_->nSingleDim_);
+      TMap       VR(this->qnObj_->solutionVecR_,
+        this->qnObj_->nSingleDim_,this->qnObj_->nSingleDim_); 
+
+      this->eigSrt(VR,Eig);
     }
   }
 };

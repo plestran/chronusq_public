@@ -36,7 +36,7 @@ bool QuasiNewton2<T>::stdNonHermetianDiag(char JOBVR, char JOBVL, int N, T *A,
     double* ER = reinterpret_cast<double*>(E);
     double* EI = reinterpret_cast<double*>(E) + N;
 
-    dgeev_(&JOBVR,&JOBVL,&N,reinterpret_cast<double*>(A),&N,ER,EI,
+    dgeev_(&JOBVL,&JOBVR,&N,reinterpret_cast<double*>(A),&N,ER,EI,
       reinterpret_cast<double*>(VL),&N,reinterpret_cast<double*>(VR),&N,
       reinterpret_cast<double*>(WORK),&LWORK,&INFO);
 

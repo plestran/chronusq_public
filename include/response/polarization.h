@@ -77,7 +77,13 @@ void FOPPropagator<T>::initMeta() {
     this->nSingleDim_ = this->pscf_->nOAVA();
 
   }
-  if(!this->sett_.doTDA) this->nSingleDim_ *= 2;
+  if(!this->sett_.doTDA) {
+    this->nSingleDim_ *= 2;
+    if(!this->doStab_) {
+      this->matrixType_       = HERMETIAN_GEP;
+      this->specialAlgorithm_ = SYMMETRIZED_TRIAL;
+    }
+  }
 }
 
 template <typename T>
@@ -90,6 +96,7 @@ void FOPPropagator<T>::formFull() {
   
   this->fullMatrix_ = 
     this->memManager_->template malloc<T>(this->nSingleDim_*this->nSingleDim_);
+
   std::fill_n(this->fullMatrix_,this->nSingleDim_*this->nSingleDim_,0.0);
 
 
@@ -286,12 +293,14 @@ void FOPPropagator<T>::formFull() {
 
   TMap Full(this->fullMatrix_,this->nSingleDim_,this->nSingleDim_);
   Full = Full.template selfadjointView<Upper>();
-  prettyPrint(cout,Full,"Full");
-  prettyPrint(cout,Full - Full.adjoint(),"Full");
+//prettyPrint(cout,Full,"Full");
+//prettyPrint(cout,Full - Full.adjoint(),"Full");
 
-  if(not this->sett_.doTDA and not this->doStab_)
+  if(not this->sett_.doTDA and not this->doStab_){
     Full.block(this->nSingleDim_/2,0,this->nSingleDim_/2,this->nSingleDim_) 
       *= -1;
+    this->matrixType_ = NON_HERMETIAN;
+  }
 
 /*
   TVec Eig = phys.eVPerHartree*Full.eigenvalues().real();

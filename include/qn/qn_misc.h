@@ -24,7 +24,7 @@
  *  
  */
 template<typename T>
-void QuasiNewton<T>::metBiOrth(TMap &A, const TMap &Met){
+void QuasiNewton2<T>::metBiOrth(TMap &A, const TMap &Met){
   int N = A.cols();
   TMap AX(this->ASuperMem_,Met.rows(),N);
   AX = Met*A;
@@ -41,8 +41,8 @@ void QuasiNewton<T>::metBiOrth(TMap &A, const TMap &Met){
   }
 }
 
-template<>
-void QuasiNewton<double>::eigSrt(RealMap &V, RealVecMap &E){
+template <typename T>
+void QuasiNewton2<T>::eigSrt(TMap &V, RealVecMap &E){
   auto N = V.cols();
   while( N != 0){
     auto newn = 0;
