@@ -119,9 +119,9 @@ int main(int argc, char **argv){
 //singleSlater.addVWN5();
 //singleSlater.setPrintLevel(5);
 
-//basis.findBasisFile("sto-3g");
+  basis.findBasisFile("sto-3g");
 //basis.findBasisFile("3-21g");
-  basis.findBasisFile("6-31G");
+//basis.findBasisFile("6-31G");
   basis.communicate(fileio);
   basis.parseGlobal();
   basis.constructLocal(&molecule);
@@ -155,10 +155,10 @@ int main(int argc, char **argv){
   moints.communicate(singleSlater,memManager);
   moints.initMeta();
 //moints.testMOInts();
-  FOPPA<double> resp(DIAGONALIZATION,SPIN_ADAPTED,true);
+  FOPPA<double> resp(DIAGONALIZATION,SPIN_SEPARATED,false);
   resp.communicate(singleSlater,memManager);
-//resp.doFull();
-  resp.setNSek(2);
+  resp.doFull();
+  resp.setNSek(32);
   resp.setNGuess(8);
   resp.initMeta();
   resp.alloc();

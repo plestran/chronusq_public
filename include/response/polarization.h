@@ -93,6 +93,10 @@ void FOPPropagator<T>::formFull() {
 
 
   if(this->sett_.part == SPIN_SEPARATED) {
+    /// Builds Spin-Separated A Matrix (TOP LEFT for !TDA)
+      
+    // A(ai,bj) (AAAA) = 
+    //   d(ai,bj)(E(a) (A) - E(i) (A)) + (ai | bj) (AAAA) - (ab | ij) (AAAA)
     for(auto J = 0; J < this->pscf_->nOA(); J++)
     for(auto B = 0; B < this->pscf_->nVA(); B++)
     for(auto I = 0; I < this->pscf_->nOA(); I++) 
@@ -116,6 +120,7 @@ void FOPPropagator<T>::formFull() {
           (*this->pscf_->reference()->epsA())(I);
     }
  
+    // A(ai,bj) (AABB) = (ai | bj) (AABB) 
     for(auto J = 0; J < this->pscf_->nOB(); J++)
     for(auto B = 0; B < this->pscf_->nVB(); B++)
     for(auto I = 0; I < this->pscf_->nOA(); I++) 
@@ -129,7 +134,11 @@ void FOPPropagator<T>::formFull() {
  
       this->fullMatrix_[AIBJ] = moints.VOVOAABB()[AIBJAABB]; 
     }
+
+    // A(ai,bj) (BBAA) gets taken care of by symmetrization at end
  
+    // A(ai,bj) (BBBB) = 
+    //   d(ai,bj)(E(a) (B) - E(i) (B)) + (ai | bj) (BBBB) - (ab | ij) (BBBB)
     for(auto J = 0; J < this->pscf_->nOB(); J++)
     for(auto B = 0; B < this->pscf_->nVB(); B++)
     for(auto I = 0; I < this->pscf_->nOB(); I++) 
@@ -157,6 +166,76 @@ void FOPPropagator<T>::formFull() {
             (*this->pscf_->reference()->epsA())(A + this->pscf_->nOB()) -
             (*this->pscf_->reference()->epsA())(I);
       }
+    }
+
+    // Build Top Right B for RPA
+    if( not this->sett_.doTDA) {
+      // B(ai,bj) (AAAA) = (ai | bj) (AAAA) - (aj | bi) (AAAA)
+      for(auto J = 0; J < this->pscf_->nOA(); J++)
+      for(auto B = 0; B < this->pscf_->nVA(); B++)
+      for(auto I = 0; I < this->pscf_->nOA(); I++) 
+      for(auto A = 0; A < this->pscf_->nVA(); A++) {
+        auto AI = A + I*this->pscf_->nVA();
+        auto BJ = B + J*this->pscf_->nVA() + this->nSingleDim_/2;
+        auto AIBJ = AI + BJ*this->nSingleDim_;
+        auto AIBJAAAA = 
+          A + I*this->pscf_->nVA() + B*this->pscf_->nOAVA() + 
+          J*this->pscf_->nVA()*this->pscf_->nOAVA();
+        auto AJBIAAAA = 
+          A + J*this->pscf_->nVA() + B*this->pscf_->nOAVA() + 
+          I*this->pscf_->nVA()*this->pscf_->nOAVA();
+ 
+        this->fullMatrix_[AIBJ] = moints.VOVOAAAA()[AIBJAAAA] - 
+                            moints.VOVOAAAA()[AJBIAAAA];
+      }
+
+      // B(ai,bj) (AABB) = (ai | bj) (AABB) 
+      for(auto J = 0; J < this->pscf_->nOB(); J++)
+      for(auto B = 0; B < this->pscf_->nVB(); B++)
+      for(auto I = 0; I < this->pscf_->nOA(); I++) 
+      for(auto A = 0; A < this->pscf_->nVA(); A++) {
+        auto AI = A + I*this->pscf_->nVA();
+        auto BJ = B + J*this->pscf_->nVA() + this->pscf_->nOAVA() +
+          this->nSingleDim_/2;
+        auto AIBJ = AI + BJ*this->nSingleDim_;
+        auto AIBJAABB = 
+          A + I*this->pscf_->nVA() + B*this->pscf_->nOAVA() + 
+          J*this->pscf_->nVB()*this->pscf_->nOAVA();
+ 
+        this->fullMatrix_[AIBJ] = moints.VOVOAABB()[AIBJAABB];
+      }
+
+      // B(ai,bj) (BBAA) = B(bj,ai) (AABB)
+      for(auto AI = this->pscf_->nOAVA(); AI < this->nSingleDim_/2; AI++)
+      for(auto BJ = 0            ; BJ < this->pscf_->nOAVA()      ; BJ++) {
+        auto AIBJ = AI + BJ*this->nSingleDim_ 
+          + this->nSingleDim_*this->nSingleDim_/2;
+        auto BJAI = BJ + AI*this->nSingleDim_
+          + this->nSingleDim_*this->nSingleDim_/2;
+
+        this->fullMatrix_[AIBJ] = this->fullMatrix_[BJAI];
+      }
+
+      // B(ai,bj) (BBBB) = (ai | bj) (BBBB) - (aj | bi) (BBBB)
+      for(auto J = 0; J < this->pscf_->nOA(); J++)
+      for(auto B = 0; B < this->pscf_->nVA(); B++)
+      for(auto I = 0; I < this->pscf_->nOA(); I++) 
+      for(auto A = 0; A < this->pscf_->nVA(); A++) {
+        auto AI = A + I*this->pscf_->nVA() + this->pscf_->nOAVA();
+        auto BJ = B + J*this->pscf_->nVA() + this->pscf_->nOAVA() +
+          this->nSingleDim_/2;
+        auto AIBJ = AI + BJ*this->nSingleDim_;
+        auto AIBJBBBB = 
+          A + I*this->pscf_->nVB() + B*this->pscf_->nOBVB() + 
+          J*this->pscf_->nVB()*this->pscf_->nOBVB();
+        auto AJBIBBBB = 
+          A + J*this->pscf_->nVB() + B*this->pscf_->nOBVB() + 
+          I*this->pscf_->nVB()*this->pscf_->nOBVB();
+ 
+        this->fullMatrix_[AIBJ] = moints.VOVOBBBB()[AIBJBBBB] - 
+                            moints.VOVOBBBB()[AJBIBBBB];
+      }
+
     }
   } else if(this->sett_.part == SPIN_ADAPTED) {
 
@@ -187,10 +266,33 @@ void FOPPropagator<T>::formFull() {
     }
   }
 
+  // THESE ARE GENERAL TO ALL SPIN PARTITIONS
+  if(not this->sett_.doTDA){
+    // Copies A**H to bottom right for !TDA
+    for(auto AI = 0; AI < this->nSingleDim_/2; AI++)
+    for(auto BJ = 0; BJ < this->nSingleDim_/2; BJ++){
+      auto AIBJTL = AI + this->nSingleDim_ * BJ;
+      auto AIBJBR = (AI + this->nSingleDim_/2) + 
+        this->nSingleDim_ * (BJ + this->nSingleDim_/2);
+
+      this->fullMatrix_[AIBJBR] = std::conj(this->fullMatrix_[AIBJTL]);
+    }
+
+
+    // Bottom Left B gets taken care of my symmetrization
+
+  } // Not TDA
+
   TMap Full(this->fullMatrix_,this->nSingleDim_,this->nSingleDim_);
   Full = Full.template selfadjointView<Upper>();
-//prettyPrint(cout,Full,"Full");
-//prettyPrint(cout,Full - Full.adjoint(),"Full");
+  prettyPrint(cout,Full,"Full");
+  prettyPrint(cout,Full - Full.adjoint(),"Full");
+
+  Full.block(this->nSingleDim_/2,0,this->nSingleDim_/2,this->nSingleDim_) *= -1;
+  TVec Eig = phys.eVPerHartree*Full.eigenvalues().real();
+  std::sort(Eig.data(),Eig.data()+Eig.size());
+  prettyPrintSmart(cout,Eig,"E");
+  CErr();
 }
 
 
