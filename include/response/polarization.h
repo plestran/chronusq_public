@@ -191,13 +191,6 @@ void FOPPropagator<T>::formFull() {
   Full = Full.template selfadjointView<Upper>();
 //prettyPrint(cout,Full,"Full");
 //prettyPrint(cout,Full - Full.adjoint(),"Full");
-
-
-//Eigen::SelfAdjointEigenSolver<TMat> es;
-//es.compute(Full);
-//VectorXd Eig = es.eigenvalues();
-//prettyPrintSmart(cout,Eig,"Eig");
-//prettyPrintSmart(cout,Eig*phys.eVPerHartree,"Eig");
 }
 
 
@@ -215,29 +208,9 @@ void FOPPA<T>::alloc() {
   Response<T>::alloc();
 };
 
-/*
-template <typename T>
-void FOPPA<T>::runResponse() {
-  FOPPropagator<T> mat(this,
-     ResponseSettings{this->part_,true,false,this->doTDA_});
-
-  this->iMat_.template push_back(dynamic_cast<ResponseMatrix<T>*>(&mat));
-  this->iMat_[0]->initMeta();
-  this->iMat_[0]->formFull();
-
-  std::function<H5::DataSet*(const H5::CompType&,std::string&,
-    std::vector<hsize_t>&)> fileFactory = 
-      std::bind(&FileIO::createScratchPartition,this->fileio_,
-      std::placeholders::_1,std::placeholders::_2,std::placeholders::_3);
-
-  QuasiNewton2<T> qn(this->iMat_[0],this->memManager_,fileFactory);
-  qn.setAlgorithm(FULL_SOLVE);
-  qn.run();
-}
-*/
-
 template <typename T>
 void FOPPropagator<T>::formDiag() {
+  cout << "In formDiag FOPPA" << endl;
   if(this->sett_.part == FULL) {
     if(this->pscf_->nTCS() == 2){ 
       for(auto I = 0, AI = 0; I < this->pscf_->nO(); I++      )
@@ -284,6 +257,7 @@ void FOPPropagator<T>::formGuess() {
   std::vector<int> indx(this->nSingleDim_,0);
   std::iota(indx.begin(),indx.end(),0);
 
+
   // Sort the index vector based on the diagonal of the RM
   // (uses Lambda expression)
   std::sort(indx.begin(),indx.end(),
@@ -310,6 +284,15 @@ void FOPPropagator<T>::formGuess() {
     this->guessFile_->write(&one,H5PredType<T>(),memSpace,subDataSpace);
     
   }
+
+/*
+  T* GUESS = this->memManager_->template malloc<T>(this->nGuess_*this->nSingleDim_);
+
+  this->guessFile_->read(GUESS,H5PredType<T>(),this->guessFile_->getSpace(),
+    this->guessFile_->getSpace());
+  TMap G(GUESS,this->nSingleDim_,this->nGuess_);
+  prettyPrintSmart(cout,G,"Guess");
+*/
 
 };
 template <typename T>

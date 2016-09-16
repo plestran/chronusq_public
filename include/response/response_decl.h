@@ -145,6 +145,7 @@ public:
         std::bind(&FileIO::createScratchPartition,this->fileio_,
         std::placeholders::_1,std::placeholders::_2,std::placeholders::_3);
 
+    this->formGuess();
     for(auto MAT : this->iMat_) {
       QuasiNewton2<T> qn(MAT,this->memManager_,fileFactory);
       if(this->doFull_) {

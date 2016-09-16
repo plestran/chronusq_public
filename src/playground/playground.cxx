@@ -155,14 +155,13 @@ int main(int argc, char **argv){
   moints.communicate(singleSlater,memManager);
   moints.initMeta();
 //moints.testMOInts();
-  FOPPA<double> resp(DIAGONALIZATION,SPIN_SEPARATED,true);
+  FOPPA<double> resp(DIAGONALIZATION,SPIN_ADAPTED,true);
   resp.communicate(singleSlater,memManager);
 //resp.doFull();
-  resp.setNSek(6);
-  resp.setNGuess(12);
+  resp.setNSek(2);
+  resp.setNGuess(8);
   resp.initMeta();
   resp.alloc();
-  resp.formGuess();
   resp.runResponse();
   finalizeCQ();
   return 0;
