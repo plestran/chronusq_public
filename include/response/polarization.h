@@ -20,7 +20,7 @@ public:
     ResponseMatrix<T>(pscf,sett){ };
 
   // QNCallable compliant
-  void linearTrans(TMap &,TMap &,TMap &,TMap &,TMap &,TMap &){ };
+  void linearTrans(TMap &,TMap &,TMap &,TMap &,TMap &,TMap &);
   void formGuess();
   void formDiag();
 
@@ -319,6 +319,12 @@ void FOPPropagator<T>::formGuess() {
   TMap VR(this->solutionVecR_,this->nSingleDim_,this->nGuess_);
   prettyPrint(cout,VR,"Guess R");
 };
+template <typename T>
+void FOPPropagator<T>::linearTrans(TMap &TR,TMap &TL,TMap &SR,TMap &SL,
+   TMap &RR,TMap &RL) {
+  TMap Full(this->fullMatrix_,this->nSingleDim_,this->nSingleDim_);
+  SR = Full * TR;
+}
 
 };
 #endif

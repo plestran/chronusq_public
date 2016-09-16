@@ -119,9 +119,9 @@ int main(int argc, char **argv){
 //singleSlater.addVWN5();
 //singleSlater.setPrintLevel(5);
 
-  basis.findBasisFile("sto-3g");
+//basis.findBasisFile("sto-3g");
 //basis.findBasisFile("3-21g");
-//basis.findBasisFile("6-31G");
+  basis.findBasisFile("6-31G");
   basis.communicate(fileio);
   basis.parseGlobal();
   basis.constructLocal(&molecule);
@@ -163,7 +163,7 @@ int main(int argc, char **argv){
   resp.initMeta();
   resp.alloc();
   resp.formGuess();
-//resp.runResponse();
+  resp.runResponse();
   finalizeCQ();
   return 0;
 };

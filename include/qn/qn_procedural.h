@@ -55,6 +55,7 @@ void QuasiNewton2<T>::run(){
 template <typename T>
 void QuasiNewton2<T>::runIter() {
   this->allocIterScr();
+  this->iniScratchFiles();
   for(auto iter = 0; iter < this->maxMacroIter_; iter++){
     this->runMicro();
     this->nMacroIter_++;
@@ -119,7 +120,7 @@ void QuasiNewton2<T>::runMicro(){
 
 template<typename T>
 void QuasiNewton2<T>::checkOrthogonality(int &NTrial){
-  this->checkLinearDependence(NTrial);
+//this->checkLinearDependence(NTrial);
   this->orthogonalize(NTrial);
 }; // QuasiNewton2<T>::checkOrthogonality
 
@@ -147,6 +148,8 @@ void QuasiNewton2<T>::formLinearTrans(const int NOld, const int NNew){
       new (&NewRhoL) TMap(this->RhoLMem_   + (NOld*N),N,NNew);
   }
 
+//prettyPrint(cout,NewVecR,"TR");
+//prettyPrint(cout,NewSR,"SR");
   this->qnObj_->linearTrans(NewVecR,NewVecL,NewSR,NewSL,NewRhoR,NewRhoL);
 }; // QuasiNewston<T>::formLinearTrans
 

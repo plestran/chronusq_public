@@ -2,14 +2,15 @@ template <typename T>
 void QuasiNewton2<T>::iniScratchFiles(){
   (*this->out_) << "Initializing Files for QuasiNewton Calculation" << endl;
 
+  cout << "MAXSS " << this->maxSubSpace_ << endl;
   auto N      = this->qnObj_->nSingleDim();
   std::vector<hsize_t> dims;
   dims.push_back(this->maxSubSpace_);
   dims.push_back(N);
 
   std::vector<hsize_t> dimsSmall;
-  dims.push_back(this->maxSubSpace_);
-  dims.push_back(this->maxSubSpace_);
+  dimsSmall.push_back(this->maxSubSpace_);
+  dimsSmall.push_back(this->maxSubSpace_);
 
   time_t t; time(&t); // Time flag for files to be written
 
@@ -63,6 +64,7 @@ void QuasiNewton2<T>::writeTrialVectors(const int NTrial){
   hsize_t subDim[] = {NTrial,N};
   hsize_t count[]  = {NTrial,N};
 
+  cout << N << " " << NTrial << endl;
   H5::DataSpace memSpace(2,subDim,NULL);
   H5::DataSpace subDataSpace = this->TRFile_->getSpace();
   subDataSpace.selectHyperslab(H5S_SELECT_SET,count,offset,stride,block);

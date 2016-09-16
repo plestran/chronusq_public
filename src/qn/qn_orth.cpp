@@ -54,6 +54,7 @@ void QuasiNewton2<double>::checkLinearDependence(int &NTrial){
   dgesvd_(&JOBU,&JOBVT,&N,&NTrial,this->TRMem_,&N,S,this->URMem_,&N,
     this->URMem_,&N,WORK,&LWORK,&INFO);
 
+  cout << "Here" << endl;
   if(INFO != 0) 
     CErr("DGESVD Failed in QuasiNewton2::checkLinearDependence for RVcs",
       (*this->out_));
@@ -103,7 +104,8 @@ void QuasiNewton2<double>::orthogonalize(int NTrial){
   (*this->out_) 
     << "Performing QR Decomposition on Trial Vectors in QuasiNewton" << endl;
 
-  /** QR on Right Vectors **/
+/*
+  /// QR on Right Vectors
   dgeqrf_(&N,&NTrial,this->TRMem_,&N,S,WORK,&LWORK,&INFO);
 
   if(INFO != 0) 
@@ -111,13 +113,28 @@ void QuasiNewton2<double>::orthogonalize(int NTrial){
       (*this->out_));
 
   dorgqr_(&N,&NTrial,&NTrial,this->TRMem_,&N,S,WORK,&LWORK,&INFO);
+*/
+  
+  INFO = 0;
+  RealMap TR(this->TRMem_,N,NTrial);
+
+
+  TR.col(0) /= TR.col(0).norm();
+  for(auto i = 1; i < TR.cols(); i++){
+    for(auto j = 0; j < i; j++) {
+      TR.col(i) -= TR.col(i).dot(TR.col(j)) * TR.col(j);
+    }
+    TR.col(i) /= TR.col(i).norm();
+  }
+
+  prettyPrintSmart(cout,TR.adjoint()*TR,"TR After");
 
   if(INFO != 0) 
     CErr("DORGQR Failed in QuasiNewton2::orthogonalize for RVcs",
       (*this->out_));
 
   if(this->qnObj_->needsLeft()){
-    /** QR on Left Vectors **/
+    /// QR on Left Vectors
     dgeqrf_(&N,&NTrial,this->TLMem_,&N,S,WORK,&LWORK,&INFO);
    
     if(INFO != 0) 
@@ -133,6 +150,7 @@ void QuasiNewton2<double>::orthogonalize(int NTrial){
 
   this->memManager_->free(S,N);
   this->memManager_->free(WORK,LWORK);
+
   
 }; // QuasiNewton2<double>::orthogonalize
 

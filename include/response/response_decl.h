@@ -150,8 +150,13 @@ public:
       if(this->doFull_) {
         MAT->formFull();
         MAT->setAlgorithm(FULL_SOLVE);
-      }
+      } else 
+        MAT->formFull();
       qn.run();
+      TMap VR(MAT->solutionVecR(),MAT->nSingleDim(),this->nSek_);
+      prettyPrintSmart(cout,VR,"Solution R");
+      RealMap W(MAT->omega(),this->nSek_,1);
+      prettyPrintSmart(cout,phys.eVPerHartree*W,"E");
     }
   };
 
