@@ -158,8 +158,8 @@ int main(int argc, char **argv){
   FOPPA<double> resp(DIAGONALIZATION,SPIN_SEPARATED,true);
   resp.communicate(singleSlater,memManager);
 //resp.doFull();
-  resp.setNSek(3);
-  resp.setNGuess(6);
+  resp.setNSek(6);
+  resp.setNGuess(12);
   resp.initMeta();
   resp.alloc();
   resp.formGuess();

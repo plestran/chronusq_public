@@ -127,8 +127,6 @@ void QuasiNewton2<double>::orthogonalize(int NTrial){
     TR.col(i) /= TR.col(i).norm();
   }
 
-  prettyPrintSmart(cout,TR.adjoint()*TR,"TR After");
-
   if(INFO != 0) 
     CErr("DORGQR Failed in QuasiNewton2::orthogonalize for RVcs",
       (*this->out_));

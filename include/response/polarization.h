@@ -311,13 +311,6 @@ void FOPPropagator<T>::formGuess() {
     
   }
 
-  this->guessFile_->read(this->solutionVecR_,H5PredType<T>(),this->guessFile_->getSpace(),this->guessFile_->getSpace());
-
-  
-  for(auto i = 0 ; i < this->nGuess_; i++) cout << indx[i] << endl;
-  cout << endl;
-  TMap VR(this->solutionVecR_,this->nSingleDim_,this->nGuess_);
-  prettyPrint(cout,VR,"Guess R");
 };
 template <typename T>
 void FOPPropagator<T>::linearTrans(TMap &TR,TMap &TL,TMap &SR,TMap &SL,
