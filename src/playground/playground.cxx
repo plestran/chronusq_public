@@ -155,10 +155,10 @@ int main(int argc, char **argv){
   moints.communicate(singleSlater,memManager);
   moints.initMeta();
 //moints.testMOInts();
-  FOPPA<double> resp(DIAGONALIZATION,SPIN_SEPARATED,false,false);
+  FOPPA<double> resp(DIAGONALIZATION,SPIN_SEPARATED,false,true);
   resp.communicate(singleSlater,memManager);
-  resp.doFull();
-  resp.setNSek(32);
+//resp.doFull();
+  resp.setNSek(3);
   resp.setNGuess(8);
   resp.initMeta();
   resp.alloc();

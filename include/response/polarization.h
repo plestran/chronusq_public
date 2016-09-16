@@ -293,10 +293,12 @@ void FOPPropagator<T>::formFull() {
     Full.block(this->nSingleDim_/2,0,this->nSingleDim_/2,this->nSingleDim_) 
       *= -1;
 
+/*
   TVec Eig = phys.eVPerHartree*Full.eigenvalues().real();
   std::sort(Eig.data(),Eig.data()+Eig.size());
   prettyPrintSmart(cout,Eig,"E");
-  CErr();
+*/
+//CErr();
 }
 
 
@@ -345,6 +347,11 @@ void FOPPropagator<T>::formDiag() {
         this->diag_[AI] = EPSB[A + this->pscf_->nOB()] - EPSB[I];
     }
   }
+
+  // This is common to all spin partitions
+  if(not this->sett_.doTDA)
+    std::copy_n(this->diag_,this->nSingleDim_/2,
+      this->diag_ + this->nSingleDim_/2);
 }
 
 
