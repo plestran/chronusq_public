@@ -55,6 +55,23 @@ void QuasiNewton2<T>::buildSuperMatricies(const int NTrial){
   ASuper.block(NTrial,NTrial,NTrial,NTrial) = XTSigmaL;
   SSuper.block(0,     NTrial,NTrial,NTrial) = XTRhoR;
   SSuper.block(NTrial,0,     NTrial,NTrial) = XTRhoL;
+
+  hsize_t offset[] = {0,0};
+  hsize_t stride[] = {1,1};
+  hsize_t block[]  = {1,1};
+
+  hsize_t subDim[] = {2*NTrial,2*NTrial};
+  hsize_t count[]  = {2*NTrial,2*NTrial};
+ 
+  H5::DataSpace memSpace(2,subDim,NULL);
+  H5::DataSpace subDataSpace;
+  subDataSpace = this->ASuperFile_->getSpace();
+  subDataSpace.selectHyperslab(H5S_SELECT_SET,count,offset,stride,block);
+
+  this->ASuperFile_->write(this->ASuperMem_,H5PredType<T>(),memSpace,
+    subDataSpace);
+  this->SSuperFile_->write(this->SSuperMem_,H5PredType<T>(),memSpace,
+    subDataSpace);
 //prettyPrint(cout,SSuper*SSuper,"SS");
 //prettyPrint(cout,SSuper.inverse()*SSuper,"SinvS");
 }; // QuasiNewton2<T>::buildSuperMatricies
@@ -62,12 +79,13 @@ void QuasiNewton2<T>::buildSuperMatricies(const int NTrial){
 template<typename T>
 void QuasiNewton2<T>::formNHrProd(const int NTrial) {
   auto TwoNTrial = 2 * NTrial;
-//this->invertSuperMetric(NTrial);
+  this->invertSuperMetric(NTrial);
+
 
   TMap  SSuper(this->SSuperMem_, TwoNTrial,TwoNTrial);
   TMap  ASuper(this->ASuperMem_, TwoNTrial,TwoNTrial);
   TMap NHrProd(this->NHrProdMem_,TwoNTrial,TwoNTrial);
 
-//NHrProd = SSuper * ASuper;
-  NHrProd = SSuper.inverse() * ASuper;
+  NHrProd = SSuper * ASuper;
+//NHrProd = SSuper.inverse() * ASuper;
 }; // QuasiNewton2<T>::formNHrProd
