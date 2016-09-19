@@ -69,12 +69,12 @@ void QuasiNewton2<double>::reducedDimDiag(const int NTrial){
     VR = this->SSuperMem_;
     VL = this->SSuperMem_;
 
-    cout << "HERE" << endl;
+//  cout << "HERE" << endl;
     this->ASuperFile_->write(this->ASuperMem_,H5PredType<double>(),memSpace,
       subDataSpace);
     this->SSuperFile_->write(this->SSuperMem_,H5PredType<double>(),memSpace,
       subDataSpace);
-    cout << "HERE" << endl;
+//  cout << "HERE" << endl;
   }
 
 

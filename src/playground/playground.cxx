@@ -157,7 +157,7 @@ int main(int argc, char **argv){
 //moints.testMOInts();
   FOPPA<double> resp(DIAGONALIZATION,SPIN_SEPARATED,false,false);
   resp.communicate(singleSlater,memManager);
-  resp.doFull();
+//resp.doFull();
   resp.setNSek(3);
   resp.setNGuess(10);
   resp.initMeta();

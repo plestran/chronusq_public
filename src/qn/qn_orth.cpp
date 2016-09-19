@@ -124,16 +124,16 @@ void QuasiNewton2<double>::orthogonalize(int NTrial){
 
 //prettyPrint(cout,TR.adjoint()*TL,"INNER");
 
-  prettyPrint(cout,TR.adjoint() * TR, "TRI");
+//prettyPrint(cout,TR.adjoint() * TR, "TRI");
   TR.col(0) /= TR.col(0).norm();
   for(auto i = 1; i < TR.cols(); i++){
     for(auto j = 0; j < i; j++) {
       TR.col(i) -= TR.col(i).dot(TR.col(j)) * TR.col(j);
     }
-    cout << i << " " << TR.col(i).norm() << endl;
+//  cout << i << " " << TR.col(i).norm() << endl;
     TR.col(i) /= TR.col(i).norm();
   }
-  prettyPrint(cout,TR.adjoint()*TR,"INNER R");
+//prettyPrint(cout,TR.adjoint()*TR,"INNER R");
 
 
   if(this->qnObj_->needsLeft_ or this->qnObj_->specialAlgorithm_ == SYMMETRIZED_TRIAL){
@@ -154,16 +154,16 @@ void QuasiNewton2<double>::orthogonalize(int NTrial){
     RealMap TL(this->TLMem_,N,NTrial);
 
 
-    prettyPrint(cout,TL.adjoint() * TL, "TLI");
+//  prettyPrint(cout,TL.adjoint() * TL, "TLI");
     TL.col(0) /= TL.col(0).norm();
     for(auto i = 1; i < TL.cols(); i++){
       for(auto j = 0; j < i; j++) {
         TL.col(i) -= TL.col(i).dot(TL.col(j)) * TL.col(j);
       }
-      cout << i << " " << TL.col(i).norm() << endl;
+//    cout << i << " " << TL.col(i).norm() << endl;
       TL.col(i) /= TL.col(i).norm();
     }
-  prettyPrint(cout,TL.adjoint()*TL,"INNER L");
+//prettyPrint(cout,TL.adjoint()*TL,"INNER L");
   }
 
   this->memManager_->free(S,N);
