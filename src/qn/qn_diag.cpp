@@ -31,7 +31,7 @@ template<>
 void QuasiNewton2<double>::checkImaginary(const int N, double *EI){
   double xSmall = 1e-08;
   for(auto i = 0; i < N; i++)
-    if(std::abs(EI[i]) < xSmall)
+    if(std::abs(EI[i]) > xSmall)
       CErr("Imaginary Eigenroot has been found in QuasiNewton",(*this->out_));
 }; // QuasiNewton2<double>::checkImaginary
 
@@ -50,13 +50,29 @@ void QuasiNewton2<double>::reducedDimDiag(const int NTrial){
   double *VR = this->XTSigmaRMem_;
   double *VL = this->XTSigmaRMem_;
 
+  hsize_t offset[] = {0,0};
+  hsize_t stride[] = {1,1};
+  hsize_t block[]  = {1,1};
+
+  hsize_t subDim[] = {N,N};
+  hsize_t count[]  = {N,N};
+ 
+  H5::DataSpace memSpace(2,subDim,NULL);
+  H5::DataSpace subDataSpace;
+
   if(this->qnObj_->specialAlgorithm_ == SYMMETRIZED_TRIAL) {
-    CErr();
+    subDataSpace = this->ASuperFile_->getSpace();
+    subDataSpace.selectHyperslab(H5S_SELECT_SET,count,offset,stride,block);
+
     this->formNHrProd(NTrial);
     A = this->NHrProdMem_;
     VR = this->SSuperMem_;
     VL = this->SSuperMem_;
-    CErr();
+
+    this->ASuperFile_->write(this->ASuperMem_,H5PredType<double>(),memSpace,
+      subDataSpace);
+    this->SSuperFile_->write(this->SSuperMem_,H5PredType<double>(),memSpace,
+      subDataSpace);
   }
 
 
@@ -68,6 +84,9 @@ void QuasiNewton2<double>::reducedDimDiag(const int NTrial){
   else
     EMem = this->memManager_->malloc<double>(2*N);
   
+  RealVecMap EMap(EMem,N);
+  RealMap    VRMap(VR,N,N);
+
   if(this->qnObj_->matrixType_ == HERMETIAN)
   //dsyev_(&JOBVR,&UPLO,&N,A,&N,this->ERMem_,this->WORK,&this->LWORK,&INFO);
     INFO = this->stdHermetianDiag(JOBVR,UPLO,N,A,EMem);
@@ -76,18 +95,28 @@ void QuasiNewton2<double>::reducedDimDiag(const int NTrial){
   //  this->WORK,&this->LWORK,&INFO);
     INFO = this->stdNonHermetianDiag(JOBVR,JOBVL,N,A,EMem,VR,VL);
     this->checkImaginary(N,EMem+N);
-    RealVecMap EMap(EMem,N);
-    RealMap    VRMap(VR,N,N);
     this->eigSrt(VRMap,EMap);
+    prettyPrint(cout,EMap,"E");
   };
 
   std::copy_n(EMem,N,this->EPersist_);
+
+  
+  if(this->qnObj_->specialAlgorithm_ == SYMMETRIZED_TRIAL) {
+    this->SSuperFile_->read(this->NHrProdMem_,H5PredType<double>(),memSpace,
+      subDataSpace); 
+    TMap S(this->NHrProdMem_,N,N);
+    prettyPrint(cout,VRMap.adjoint() * S * VRMap,"Inner 1");
+    this->metBiOrth(VRMap,S);
+    prettyPrint(cout,VRMap.adjoint() * S * VRMap,"Inner 2");
+  }
 
   if(this->qnObj_->matrixType_ == HERMETIAN)
     this->memManager_->free(EMem,N);
   else
     this->memManager_->free(EMem,2*N);
 
+  CErr();
   if(!INFO) CErr("Diagonalization in Reduced Dimension Failed!",
                   (*this->out_));
 }; //QuasiNewton2<double>::reducedDimDiag

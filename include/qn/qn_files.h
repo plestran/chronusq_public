@@ -32,7 +32,7 @@ void QuasiNewton2<T>::iniScratchFiles(){
 
 
 
-  if(this->qnObj_->needsLeft()) {
+  if(this->qnObj_->needsLeft_ or this->qnObj_->specialAlgorithm_ == SYMMETRIZED_TRIAL){
     std::string TLName = "Trial Vectors (Left) "    + std::to_string(t);
     std::string SLName = "Sigma Vectors (Left) "    + std::to_string(t);
     std::string PLName = "Rho Vectors (Left) "      + std::to_string(t);
@@ -69,7 +69,7 @@ void QuasiNewton2<T>::writeTrialVectors(const int NTrial){
   H5::DataSpace subDataSpace = this->TRFile_->getSpace();
   subDataSpace.selectHyperslab(H5S_SELECT_SET,count,offset,stride,block);
   this->TRFile_->write(this->TRMem_,H5PredType<T>(),memSpace,subDataSpace);
-  if(this->qnObj_->needsLeft())
+  if(this->qnObj_->needsLeft_ or this->qnObj_->specialAlgorithm_ == SYMMETRIZED_TRIAL)
     this->TLFile_->write(this->TLMem_,H5PredType<T>(),memSpace,subDataSpace);
 
 }; // QuasiNewton2<T>::writeTrialVectors
@@ -89,7 +89,7 @@ void QuasiNewton2<T>::readTrialVectors(const int NTrial){
   subDataSpace.selectHyperslab(H5S_SELECT_SET,count,offset,stride,block);
   this->TRFile_->read(this->TRMem_,H5PredType<T>(),memSpace,
     subDataSpace);
-  if(this->qnObj_->needsLeft())
+  if(this->qnObj_->needsLeft_ or this->qnObj_->specialAlgorithm_ == SYMMETRIZED_TRIAL)
     this->TLFile_->read(this->TLMem_,H5PredType<T>(),memSpace,
       subDataSpace);
 

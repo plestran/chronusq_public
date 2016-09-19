@@ -107,7 +107,7 @@ void QuasiNewton2<T>::runMicro(){
 
   this->readGuess();
   if(this->qnObj_->specialAlgorithm_ == SYMMETRIZED_TRIAL && 
-     this->nMacroIter_ != 0) 
+     this->nMacroIter_ == 0) 
     this->symmetrizeTrial(); 
 
   this->nMicroIter_ = 0;
@@ -156,7 +156,7 @@ void QuasiNewton2<T>::formLinearTrans(const int NOld, const int NNew){
   if(this->qnObj_->matrixType_ == HERMETIAN_GEP)
     new (&NewRhoR) TMap(this->RhoRMem_   + (NOld*N),N,NNew);
 
-  if(this->qnObj_->needsLeft()){
+  if(this->qnObj_->needsLeft_ or this->qnObj_->specialAlgorithm_ == SYMMETRIZED_TRIAL){
     new (&NewSL  ) TMap(this->SigmaLMem_ + (NOld*N),N,NNew);
     new (&NewVecL) TMap(this->TLMem_     + (NOld*N),N,NNew);
     if(this->qnObj_->matrixType_ == HERMETIAN_GEP)
@@ -192,7 +192,7 @@ void QuasiNewton2<T>::fullProjection(const int NTrial){
     new (&XTRhoR  ) TMap(this->XTRhoRMem_  , NTrial, NTrial);
   }
 
-  if(this->qnObj_->needsLeft()){
+  if(this->qnObj_->needsLeft_ or this->qnObj_->specialAlgorithm_ == SYMMETRIZED_TRIAL){
     new (&SigmaL  ) TMap(this->SigmaLMem_  , N     , NTrial);
     new (&XTSigmaL) TMap(this->XTSigmaLMem_, NTrial, NTrial);
     new (&TVecL   ) TMap(this->TLMem_      , N     , NTrial);
@@ -206,7 +206,7 @@ void QuasiNewton2<T>::fullProjection(const int NTrial){
   if(this->qnObj_->matrixType_ == HERMETIAN_GEP)
     XTRhoR   = TVecR.adjoint() * RhoR;
 
-  if(this->qnObj_->needsLeft()){
+  if(this->qnObj_->needsLeft_ or this->qnObj_->specialAlgorithm_ == SYMMETRIZED_TRIAL){
     XTSigmaL = TVecL.adjoint() * SigmaL;
     if(this->qnObj_->matrixType_ == HERMETIAN_GEP)
       XTRhoL   = TVecL.adjoint() * RhoL;

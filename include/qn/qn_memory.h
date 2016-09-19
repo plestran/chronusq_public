@@ -67,7 +67,7 @@ void QuasiNewton2<T>::allocScr(){
     this->WORK   = new T[this->LWORK];
   }
 
-  if(this->specialAlgorithm_ == SYMMETRIZED_TRIAL){
+  if(this->qnObj_->specialAlgorithm_ == SYMMETRIZED_TRIAL){
     this->ASuperMem_  = new T[4 * MSSMSS];
     this->SSuperMem_  = new T[4 * MSSMSS];
     this->NHrProdMem_ = new T[4 * MSSMSS];
@@ -99,7 +99,7 @@ void QuasiNewton2<T>::allocIterScr() {
     this->XTRhoRMem_ = this->memManager_->template malloc<T>(MSSMSS);
   }
 
-  if(this->qnObj_->needsLeft()){
+  if(this->qnObj_->needsLeft() or this->qnObj_->specialAlgorithm_ == SYMMETRIZED_TRIAL){
     this->TLMem_       = this->memManager_->template malloc<T>(NMSS);
     this->SigmaLMem_   = this->memManager_->template malloc<T>(NMSS); 
     this->XTSigmaLMem_ = this->memManager_->template malloc<T>(MSSMSS);
@@ -152,7 +152,7 @@ void QuasiNewton2<T>::cleanupScr(){
   if(this->problemType_ == DIAGONALIZATION)
     delete [] this->WORK;
 
-  if(this->specialAlgorithm_ == SYMMETRIZED_TRIAL){
+  if(this->qnObj_->specialAlgorithm_ == SYMMETRIZED_TRIAL){
     delete [] this->ASuperMem_;
     delete [] this->SSuperMem_;
     delete [] this->NHrProdMem_;
@@ -182,7 +182,7 @@ void QuasiNewton2<T>::cleanupIterScr(){
     this->memManager_->free(this->XTRhoRMem_,MSSMSS);
   }
 
-  if(this->qnObj_->needsLeft()){
+  if(this->qnObj_->needsLeft() or this->qnObj_->specialAlgorithm_ == SYMMETRIZED_TRIAL){
     this->memManager_->free(this->TLMem_      ,NMSS);
     this->memManager_->free(this->SigmaLMem_  ,NMSS); 
     this->memManager_->free(this->XTSigmaLMem_,MSSMSS);
@@ -200,5 +200,6 @@ void QuasiNewton2<T>::cleanupIterScr(){
     this->memManager_->free(this->SSuperMem_ ,4 * MSSMSS);
     this->memManager_->free(this->NHrProdMem_,4 * MSSMSS);
   }
+
   cout << this->memManager_->NBlocksFree() << endl;
 }

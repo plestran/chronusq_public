@@ -8,7 +8,7 @@ void QuasiNewton2<T>::readGuess(){
   this->qnObj_->guessFile()->read(this->TRMem_,H5PredType<T>(),
     dataspace,dataspace);
 
-  if(this->qnObj_->needsLeft())
+  if(this->qnObj_->needsLeft_ or this->qnObj_->specialAlgorithm_ == SYMMETRIZED_TRIAL)
     this->qnObj_->guessFile()->read(this->TLMem_,H5PredType<T>(),
       dataspace,dataspace);
 };

@@ -113,6 +113,10 @@ void QuasiNewton2<double>::orthogonalize(int NTrial){
       (*this->out_));
 
   dorgqr_(&N,&NTrial,&NTrial,this->TRMem_,&N,S,WORK,&LWORK,&INFO);
+
+  if(INFO != 0) 
+    CErr("DORGQR Failed in QuasiNewton2::orthogonalize for RVcs",
+      (*this->out_));
 */
   
   INFO = 0;
@@ -127,11 +131,9 @@ void QuasiNewton2<double>::orthogonalize(int NTrial){
     TR.col(i) /= TR.col(i).norm();
   }
 
-  if(INFO != 0) 
-    CErr("DORGQR Failed in QuasiNewton2::orthogonalize for RVcs",
-      (*this->out_));
 
-  if(this->qnObj_->needsLeft()){
+  if(this->qnObj_->needsLeft_ or this->qnObj_->specialAlgorithm_ == SYMMETRIZED_TRIAL){
+/*
     /// QR on Left Vectors
     dgeqrf_(&N,&NTrial,this->TLMem_,&N,S,WORK,&LWORK,&INFO);
    
@@ -144,6 +146,17 @@ void QuasiNewton2<double>::orthogonalize(int NTrial){
     if(INFO != 0) 
       CErr("DORGQR Failed in QuasiNewton2::orthogonalize for LVcs",
         (*this->out_));
+*/
+    RealMap TL(this->TLMem_,N,NTrial);
+
+
+    TL.col(0) /= TL.col(0).norm();
+    for(auto i = 1; i < TL.cols(); i++){
+      for(auto j = 0; j < i; j++) {
+        TL.col(i) -= TL.col(i).dot(TL.col(j)) * TL.col(j);
+      }
+      TL.col(i) /= TL.col(i).norm();
+    }
   }
 
   this->memManager_->free(S,N);

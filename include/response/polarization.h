@@ -297,9 +297,9 @@ void FOPPropagator<T>::formFull() {
 //prettyPrint(cout,Full - Full.adjoint(),"Full");
 
   if(not this->sett_.doTDA and not this->doStab_){
-    Full.block(this->nSingleDim_/2,0,this->nSingleDim_/2,this->nSingleDim_) 
-      *= -1;
-    this->matrixType_ = NON_HERMETIAN;
+  //Full.block(this->nSingleDim_/2,0,this->nSingleDim_/2,this->nSingleDim_) 
+  //  *= -1;
+  //this->matrixType_ = NON_HERMETIAN;
   }
 
 /*
@@ -376,7 +376,7 @@ void FOPPropagator<T>::formGuess() {
       "FOPPA Response Guess",dims);
 
   // Initialize an index vector with increasing ints
-  std::vector<int> indx(this->nSingleDim_,0);
+  std::vector<int> indx(this->nSingleDim_/2,0);
   std::iota(indx.begin(),indx.end(),0);
 
 
@@ -422,6 +422,18 @@ void FOPPropagator<T>::linearTrans(TMap &TR,TMap &TL,TMap &SR,TMap &SL,
    TMap &RR,TMap &RL) {
   TMap Full(this->fullMatrix_,this->nSingleDim_,this->nSingleDim_);
   SR = Full * TR;
+  prettyPrintSmart(cout,SR,"Sigma R");
+
+  if(not this->sett_.doTDA and not this->doStab_) {
+    SL = Full * TL;
+    prettyPrintSmart(cout,SL,"Sigma L");
+    RR = TL;
+    RL = TR;
+    RR.block(this->nSingleDim_/2,0,this->nSingleDim_/2,RR.cols()) *= -1;
+    RL.block(this->nSingleDim_/2,0,this->nSingleDim_/2,RL.cols()) *= -1;
+    prettyPrintSmart(cout,RR,"Rho R");
+    prettyPrintSmart(cout,RL,"Rho L");
+  }
 }
 
 };

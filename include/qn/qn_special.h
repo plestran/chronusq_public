@@ -37,6 +37,10 @@ void QuasiNewton2<T>::symmetrizeTrial(){
   TVecR *= std::sqrt(0.5);
   TVecL *= std::sqrt(0.5);
 
+  prettyPrint(cout,TVecR,"TR Symm");
+  prettyPrint(cout,TVecL,"TL Symm");
+
+
 }; // QuasiNewton2<T>::symmetrizeTrial
 
 template<typename T>
@@ -65,5 +69,7 @@ void QuasiNewton2<T>::formNHrProd(const int NTrial) {
   TMap  ASuper(this->ASuperMem_, TwoNTrial,TwoNTrial);
   TMap NHrProd(this->NHrProdMem_,TwoNTrial,TwoNTrial);
 
+  prettyPrint(cout,SSuper,"S");
+  prettyPrint(cout,SSuper*SSuper,"SS");
   NHrProd = SSuper * ASuper;
 }; // QuasiNewton2<T>::formNHrProd
