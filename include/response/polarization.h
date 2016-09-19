@@ -27,6 +27,7 @@ public:
   // ResponseMatrix Compliant
   void formFull();
   void initMeta();
+  void postSolve();
 };
 
 template <typename T>
@@ -297,8 +298,8 @@ void FOPPropagator<T>::formFull() {
 //prettyPrint(cout,Full - Full.adjoint(),"Full");
 
   if(not this->sett_.doTDA and not this->doStab_){
-  //Full.block(this->nSingleDim_/2,0,this->nSingleDim_/2,this->nSingleDim_) 
-  //  *= -1;
+    Full.block(this->nSingleDim_/2,0,this->nSingleDim_/2,this->nSingleDim_) 
+      *= -1;
   //this->matrixType_ = NON_HERMETIAN;
   }
 
@@ -422,11 +423,20 @@ void FOPPropagator<T>::linearTrans(TMap &TR,TMap &TL,TMap &SR,TMap &SL,
    TMap &RR,TMap &RL) {
   TMap Full(this->fullMatrix_,this->nSingleDim_,this->nSingleDim_);
   SR = Full * TR;
+  cout << SR.cols() << SR.rows();
+  if(this->specialAlgorithm_ != FULL_SOLVE)
+    SR.block(this->nSingleDim_/2,0,this->nSingleDim_/2,SR.cols()) *= -1;
+  
   prettyPrintSmart(cout,SR,"Sigma R");
 
   if(not this->sett_.doTDA and not this->doStab_) {
     SL = Full * TL;
+    cout << SL.cols() << SL.rows();
+    if(this->specialAlgorithm_ != FULL_SOLVE)
+      SL.block(this->nSingleDim_/2,0,this->nSingleDim_/2,SL.cols()) *= -1;
+
     prettyPrintSmart(cout,SL,"Sigma L");
+
     RR = TL;
     RL = TR;
     RR.block(this->nSingleDim_/2,0,this->nSingleDim_/2,RR.cols()) *= -1;
@@ -435,6 +445,44 @@ void FOPPropagator<T>::linearTrans(TMap &TR,TMap &TL,TMap &SR,TMap &SL,
     prettyPrintSmart(cout,RL,"Rho L");
   }
 }
+
+template <typename T>
+void FOPPropagator<T>::postSolve() {
+  if(this->specialAlgorithm_ == FULL_SOLVE and !this->sett_.doTDA and 
+     !this->doStab_) {
+    // Copy the latter half of the eigenvectors to the front (positive) half
+    std::copy_n(this->solutionVecR_ + this->nSingleDim_ * this->nSingleDim_ /2,
+      this->nSingleDim_ * this->nSingleDim_ /2, this->solutionVecR_);
+
+    // Copy the latter half of the eigenvalues to the front (positive) half
+    std::copy_n(this->omega_ + this->nSingleDim_ / 2, this->nSingleDim_ / 2,
+      this->omega_);
+  }
+
+  TMap Vec(this->solutionVecR_,this->nSingleDim_,this->nSek_);
+  if(not this->sett_.doTDA and not this->doStab_) {
+    // Reorthogonalize the eigenvectors wrt the metric
+    for(auto iSt = 0; iSt < this->nSek_; iSt++) {
+      double innerMet = 
+        (Vec.col(iSt).head(this->nSingleDim_/2).dot(
+           Vec.col(iSt).head(this->nSingleDim_/2)) -
+         Vec.col(iSt).tail(this->nSingleDim_/2).dot(
+           Vec.col(iSt).tail(this->nSingleDim_/2)));
+
+      Vec.col(iSt) /= std::sqrt(innerMet);
+    }
+    
+  } else if(this->doStab_ ){
+    // Reorthogonalize the eigenvectors wrt the top half
+    for(auto iSt = 0; iSt < this->nSek_; iSt++) {
+      double innerMet = 
+        (Vec.col(iSt).head(this->nSingleDim_/2).dot(
+           Vec.col(iSt).head(this->nSingleDim_/2)));
+
+      Vec.col(iSt) /= std::sqrt(innerMet);
+    }
+  }
+};
 
 };
 #endif

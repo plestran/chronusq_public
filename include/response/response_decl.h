@@ -58,8 +58,9 @@ public:
   ResponseMatrix() : ResponseMatrix(NULL,DefaultResponseSettings()){ };
 
 
-  virtual void formFull() = 0;
-  virtual void initMeta() = 0;
+  virtual void formFull()  = 0;
+  virtual void initMeta()  = 0;
+  virtual void postSolve() = 0;
 
   inline void alloc() {
     cout << "In ResponseMatrix alloc" << endl;
@@ -154,6 +155,7 @@ public:
       } else 
         MAT->formFull();
       qn.run();
+      MAT->postSolve();
       TMap VR(MAT->solutionVecR(),MAT->nSingleDim(),this->nSek_);
       prettyPrintSmart(cout,VR,"Solution R");
       RealMap W(MAT->omega(),this->nSek_,1);
