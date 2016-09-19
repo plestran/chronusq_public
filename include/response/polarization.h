@@ -423,14 +423,12 @@ void FOPPropagator<T>::linearTrans(TMap &TR,TMap &TL,TMap &SR,TMap &SL,
    TMap &RR,TMap &RL) {
   TMap Full(this->fullMatrix_,this->nSingleDim_,this->nSingleDim_);
   SR = Full * TR;
-  cout << SR.cols() << SR.rows();
   if(this->specialAlgorithm_ != FULL_SOLVE)
     SR.block(this->nSingleDim_/2,0,this->nSingleDim_/2,SR.cols()) *= -1;
   
 
   if(not this->sett_.doTDA and not this->doStab_) {
     SL = Full * TL;
-    cout << SL.cols() << SL.rows();
     if(this->specialAlgorithm_ != FULL_SOLVE)
       SL.block(this->nSingleDim_/2,0,this->nSingleDim_/2,SL.cols()) *= -1;
 

@@ -55,6 +55,8 @@ void QuasiNewton2<T>::buildSuperMatricies(const int NTrial){
   ASuper.block(NTrial,NTrial,NTrial,NTrial) = XTSigmaL;
   SSuper.block(0,     NTrial,NTrial,NTrial) = XTRhoR;
   SSuper.block(NTrial,0,     NTrial,NTrial) = XTRhoL;
+  prettyPrint(cout,SSuper*SSuper,"SS");
+  prettyPrint(cout,SSuper.inverse()*SSuper,"SinvS");
 }; // QuasiNewton2<T>::buildSuperMatricies
 
 template<typename T>
@@ -66,5 +68,6 @@ void QuasiNewton2<T>::formNHrProd(const int NTrial) {
   TMap  ASuper(this->ASuperMem_, TwoNTrial,TwoNTrial);
   TMap NHrProd(this->NHrProdMem_,TwoNTrial,TwoNTrial);
 
-  NHrProd = SSuper * ASuper;
+//NHrProd = SSuper * ASuper;
+  NHrProd = SSuper.inverse() * ASuper;
 }; // QuasiNewton2<T>::formNHrProd

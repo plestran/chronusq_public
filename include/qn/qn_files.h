@@ -9,8 +9,8 @@ void QuasiNewton2<T>::iniScratchFiles(){
   dims.push_back(N);
 
   std::vector<hsize_t> dimsSmall;
-  dimsSmall.push_back(this->maxSubSpace_);
-  dimsSmall.push_back(this->maxSubSpace_);
+  dimsSmall.push_back(2*this->maxSubSpace_);
+  dimsSmall.push_back(2*this->maxSubSpace_);
 
   time_t t; time(&t); // Time flag for files to be written
 
