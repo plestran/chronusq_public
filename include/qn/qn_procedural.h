@@ -243,17 +243,12 @@ void QuasiNewton2<T>::reconstructSolution(const int NTrial){
     new (&VL      ) TMap(this->qnObj_->solutionVecL_, N, this->qnObj_->nSek_);
   }
 
-  prettyPrintSmart(cout,ER,"E in Reconstruct");
-  prettyPrintSmart(cout,XTSigmaR,"XTSR in Reconstruct");
-  prettyPrintSmart(cout,XTSigmaL,"XTSL in Reconstruct");
-//CErr();
 
   UR = TVecR * XTSigmaR;
   if(this->qnObj_->needsLeft() or this->qnObj_->specialAlgorithm_ == SYMMETRIZED_TRIAL) UL = TVecL * XTSigmaL;
 
   VR = UR.block(0,0,N,this->qnObj_->nSek());
   W  = ER.head(this->qnObj_->nSek());
-  prettyPrint(cout,W,"W in reconstruct");
 
   if(this->qnObj_->specialAlgorithm_ == SYMMETRIZED_TRIAL)
     VR += UL.block(0,0,N,this->qnObj_->nSek());

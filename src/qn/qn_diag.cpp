@@ -96,17 +96,13 @@ void QuasiNewton2<double>::reducedDimDiag(const int NTrial){
     INFO = this->stdNonHermetianDiag(JOBVR,JOBVL,N,A,EMem,VR,VL);
     this->checkImaginary(N,EMem+N);
     this->eigSrt(VRMap,EMap);
-    prettyPrint(cout,EMap,"E");
   };
 
   if(this->qnObj_->specialAlgorithm_ == SYMMETRIZED_TRIAL) {
     this->SSuperFile_->read(this->NHrProdMem_,H5PredType<double>(),memSpace,
       subDataSpace); 
     TMap S(this->NHrProdMem_,N,N);
-    prettyPrint(cout,VRMap.adjoint() * S * VRMap,"Inner 1");
     this->metBiOrth(VRMap,S);
-    prettyPrint(cout,VRMap.adjoint() * S * VRMap,"Inner 2");
-    prettyPrint(cout,VRMap,"V(R)");
   }
 
   if(this->qnObj_->specialAlgorithm_ == NOT_SPECIAL)

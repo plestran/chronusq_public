@@ -427,7 +427,6 @@ void FOPPropagator<T>::linearTrans(TMap &TR,TMap &TL,TMap &SR,TMap &SL,
   if(this->specialAlgorithm_ != FULL_SOLVE)
     SR.block(this->nSingleDim_/2,0,this->nSingleDim_/2,SR.cols()) *= -1;
   
-  prettyPrintSmart(cout,SR,"Sigma R");
 
   if(not this->sett_.doTDA and not this->doStab_) {
     SL = Full * TL;
@@ -435,14 +434,11 @@ void FOPPropagator<T>::linearTrans(TMap &TR,TMap &TL,TMap &SR,TMap &SL,
     if(this->specialAlgorithm_ != FULL_SOLVE)
       SL.block(this->nSingleDim_/2,0,this->nSingleDim_/2,SL.cols()) *= -1;
 
-    prettyPrintSmart(cout,SL,"Sigma L");
 
     RR = TL;
     RL = TR;
     RR.block(this->nSingleDim_/2,0,this->nSingleDim_/2,RR.cols()) *= -1;
     RL.block(this->nSingleDim_/2,0,this->nSingleDim_/2,RL.cols()) *= -1;
-    prettyPrintSmart(cout,RR,"Rho R");
-    prettyPrintSmart(cout,RL,"Rho L");
   }
 }
 
