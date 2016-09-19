@@ -236,18 +236,24 @@ void QuasiNewton2<T>::reconstructSolution(const int NTrial){
   TMap VL      (this->qnObj_->solutionVecL_,0, 0);
 
   RealVecMap ER(this->EPersist_,NTrial);
-  if(this->qnObj_->needsLeft()){
+  if(this->qnObj_->needsLeft() or this->qnObj_->specialAlgorithm_ == SYMMETRIZED_TRIAL){
     new (&XTSigmaL) TMap(this->XTSigmaLMem_, NTrial, NTrial);
     new (&TVecL   ) TMap(this->TLMem_      , N     , NTrial);
     new (&UL      ) TMap(this->ULMem_      , N     , NTrial);
     new (&VL      ) TMap(this->qnObj_->solutionVecL_, N, this->qnObj_->nSek_);
   }
 
+  prettyPrintSmart(cout,ER,"E in Reconstruct");
+  prettyPrintSmart(cout,XTSigmaR,"XTSR in Reconstruct");
+  prettyPrintSmart(cout,XTSigmaL,"XTSL in Reconstruct");
+//CErr();
+
   UR = TVecR * XTSigmaR;
-  if(this->qnObj_->needsLeft()) UL = TVecL * XTSigmaL;
+  if(this->qnObj_->needsLeft() or this->qnObj_->specialAlgorithm_ == SYMMETRIZED_TRIAL) UL = TVecL * XTSigmaL;
 
   VR = UR.block(0,0,N,this->qnObj_->nSek());
   W  = ER.head(this->qnObj_->nSek());
+  prettyPrint(cout,W,"W in reconstruct");
 
   if(this->qnObj_->specialAlgorithm_ == SYMMETRIZED_TRIAL)
     VR += UL.block(0,0,N,this->qnObj_->nSek());
@@ -283,7 +289,7 @@ void QuasiNewton2<T>::generateResiduals(const int NTrial){
   if(this->qnObj_->matrixType_ == HERMETIAN_GEP)
     new (&RhoR    ) TMap(this->RhoRMem_    , N     , NTrial);
 
-  if(this->qnObj_->needsLeft()){
+  if(this->qnObj_->needsLeft() or this->qnObj_->specialAlgorithm_ == SYMMETRIZED_TRIAL){
     new (&SigmaL  ) TMap(this->SigmaLMem_  , N     , NTrial);
     new (&XTSigmaL) TMap(this->XTSigmaLMem_, NTrial, NTrial);
     new (&TVecL   ) TMap(this->TLMem_      , N     , NTrial);
@@ -314,7 +320,7 @@ std::vector<bool> QuasiNewton2<T>::checkConvergence(const int NTrial,
   RealVecMap ER   (this->EPersist_      , NTrial        );
 
   TMap ResL    (this->ResLMem_    , 0, 0);
-  if(this->qnObj_->needsLeft()){
+  if(this->qnObj_->needsLeft() or this->qnObj_->specialAlgorithm_ == SYMMETRIZED_TRIAL){
     new (&ResL    ) TMap(this->ResLMem_    , N     , NTrial);
   }
 
@@ -338,7 +344,7 @@ std::vector<bool> QuasiNewton2<T>::checkConvergence(const int NTrial,
     
     // If we need the left vectors, decide converence based
     // on maximum of left and right residual norms
-    if(this->qnObj_->needsLeft())
+    if(this->qnObj_->needsLeft() or this->qnObj_->specialAlgorithm_ == SYMMETRIZED_TRIAL)
       NORM = std::max(NORM,ResL.col(k).norm());
 
     // Print current state of k-th root
@@ -378,7 +384,7 @@ void QuasiNewton2<T>::formNewGuess(std::vector<bool> &resConv, int &NTrial,
   TMap TVecL   (this->TLMem_  , 0, 0);
   TMap ResL    (this->ResLMem_, 0, 0);
 
-  if(this->qnObj_->needsLeft()){
+  if(this->qnObj_->needsLeft() or this->qnObj_->specialAlgorithm_ == SYMMETRIZED_TRIAL){
     new (&TVecL) TMap(this->TLMem_  , N, NTrial+NNotConv);
     new (&ResL ) TMap(this->ResLMem_, N, NTrial         );
   }
@@ -396,7 +402,7 @@ void QuasiNewton2<T>::formNewGuess(std::vector<bool> &resConv, int &NTrial,
       auto QRSt = this->TRMem_   + (NTrial+INDX)*N;
       new (&RR) RealMap(RRSt, N, 1);
       new (&QR) RealMap(QRSt, N, 1);
-      if(this->qnObj_->needsLeft()){
+      if(this->qnObj_->needsLeft() or this->qnObj_->specialAlgorithm_ == SYMMETRIZED_TRIAL){
         auto RLSt = this->ResLMem_ + k*N;
         auto QLSt = this->TLMem_   + (NTrial+INDX)*N;
         new (&RL) RealMap(RLSt, N, 1);

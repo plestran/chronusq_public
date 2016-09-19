@@ -99,9 +99,6 @@ void QuasiNewton2<double>::reducedDimDiag(const int NTrial){
     prettyPrint(cout,EMap,"E");
   };
 
-  std::copy_n(EMem,N,this->EPersist_);
-
-  
   if(this->qnObj_->specialAlgorithm_ == SYMMETRIZED_TRIAL) {
     this->SSuperFile_->read(this->NHrProdMem_,H5PredType<double>(),memSpace,
       subDataSpace); 
@@ -109,6 +106,17 @@ void QuasiNewton2<double>::reducedDimDiag(const int NTrial){
     prettyPrint(cout,VRMap.adjoint() * S * VRMap,"Inner 1");
     this->metBiOrth(VRMap,S);
     prettyPrint(cout,VRMap.adjoint() * S * VRMap,"Inner 2");
+    prettyPrint(cout,VRMap,"V(R)");
+  }
+
+  if(this->qnObj_->specialAlgorithm_ == NOT_SPECIAL)
+    std::copy_n(EMem,N,this->EPersist_);
+  else if(this->qnObj_->specialAlgorithm_ == SYMMETRIZED_TRIAL){
+    std::copy_n(EMem + NTrial,NTrial,this->EPersist_);
+    RealMap XTSR(this->XTSigmaRMem_,NTrial,NTrial);
+    RealMap XTSL(this->XTSigmaLMem_,NTrial,NTrial);
+    XTSR = VRMap.block(0,NTrial,NTrial,NTrial);
+    XTSL = VRMap.block(NTrial,NTrial,NTrial,NTrial);
   }
 
   if(this->qnObj_->matrixType_ == HERMETIAN)
@@ -116,7 +124,7 @@ void QuasiNewton2<double>::reducedDimDiag(const int NTrial){
   else
     this->memManager_->free(EMem,2*N);
 
-  CErr();
+//CErr();
   if(!INFO) CErr("Diagonalization in Reduced Dimension Failed!",
                   (*this->out_));
 }; //QuasiNewton2<double>::reducedDimDiag

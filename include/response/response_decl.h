@@ -156,7 +156,7 @@ public:
       qn.run();
       TMap VR(MAT->solutionVecR(),MAT->nSingleDim(),this->nSek_);
       prettyPrintSmart(cout,VR,"Solution R");
-      RealMap W(MAT->omega()+MAT->nSingleDim()/2,this->nSek_,1);
+      RealMap W(MAT->omega(),this->nSek_,1);
       prettyPrintSmart(cout,phys.eVPerHartree*W,"E");
     }
   };
