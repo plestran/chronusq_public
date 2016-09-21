@@ -290,6 +290,7 @@ double traceSymm(RealMatrix* a, RealMatrix* b) {
   return tmpVal;
  };
 
+/*
 void printUnitInfo(Controls * controls, SingleSlater<double> * singleSlater, SDResponse<double> * sdResponse,
                    RealTime<double> * realTime){
   if(controls->unitTest == Controls::UnitSCF)
@@ -336,7 +337,9 @@ void printUnitInfo(Controls * controls, SingleSlater<double> * singleSlater, SDR
                                   << (realTime->EDtot())       << endl;
     }
 }
+*/
 
+/*
 void printUnitInfo(Controls * controls, SingleSlater<dcomplex> * singleSlater, SDResponse<double> * sdResponse, 
                    RealTime<dcomplex> * realTime){
   if(controls->unitTest == Controls::UnitSCF)
@@ -384,6 +387,7 @@ void printUnitInfo(Controls * controls, SingleSlater<dcomplex> * singleSlater, S
          << endl;
     }
 }
+*/
 
 void initCQ(int argc, char** argv){
 #ifdef USE_LIBINT

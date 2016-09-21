@@ -302,7 +302,6 @@ class SingleSlater : public WaveFunction<T> {
   void formNO();           ///< Form Natural Orbitals
   void mixOrbitalsSCF();   ///< Mix the orbitals for Complex / TCS SCF
 
-  void diagFock2();         ///< Diagonalize Fock Matrix
   void fockCUHF();
   void copyDen();
   void backTransformMOs();
@@ -566,6 +565,9 @@ public:
     for(auto iF = 0; iF < this->fock_.size(); iF++){
       *this->fock_[iF] = *other->fock_[iF];
       *this->PT_[iF]   = *other->PT_[iF];
+
+      // Copy over the orthonormal density for RT calculations
+      *this->onePDMOrtho_[iF] = *other->onePDMOrtho_[iF];
     }
 /*
     *this->moA_ = *other->moA_;
@@ -693,6 +695,7 @@ public:
   inline TMap* fockMy()           { return this->fockMy_.get();};
   inline TMap* fockMx()           { return this->fockMx_.get();};
   inline std::vector<TMap*>& fock(){ return this->fock_;};
+  inline std::vector<TMap*>& fockOrtho(){ return this->fockOrtho_;};
 //inline TMap* coulombA()             { return this->coulombA_.get(); };
 //inline TMap* coulombB()             { return this->coulombB_.get(); };
 //inline TMap* exchangeA()            { return this->exchangeA_.get();};
@@ -721,6 +724,11 @@ public:
   inline TMap* PTMx()           { return this->PTMx_.get();};
   inline std::vector<TMap*>& PT(){ return this->PT_;};
 
+  inline TMap* onePDMOrthoScalar() { return this->onePDMOrthoScalar_.get();};
+  inline TMap* onePDMOrthoMz()     { return this->onePDMOrthoMz_.get();};
+  inline TMap* onePDMOrthoMy()     { return this->onePDMOrthoMy_.get();};
+  inline TMap* onePDMOrthoMx()     { return this->onePDMOrthoMx_.get();};
+  inline std::vector<TMap*>& onePDMOrtho(){ return this->onePDMOrtho_;};
 /*
   inline BasisSet     * basisset()       { return this->basisset_;       };
   inline Molecule     * molecule()       { return this->molecule_;       };
@@ -900,6 +908,7 @@ public:
   void cpyFockDIIS(int);
   void readDIIS(H5::DataSet*,int,T*);
   void writeDIIS(H5::DataSet*,int,T*);
+  void diagFock2();         ///< Diagonalize Fock Matrix
 
   void gatherOrthoFock();
   void gatherFock();

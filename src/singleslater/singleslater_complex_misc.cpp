@@ -73,6 +73,9 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other) :
     for(auto iF = 0; iF < this->fock_.size(); iF++){
       this->fock_[iF]->real() = *other->fock()[iF];
       this->PT_[iF]->real()   = *other->PT()[iF];
+
+      // Copy over the orthonormal density for RT calculations
+      *this->onePDMOrtho_[iF] = *other->onePDMOrtho()[iF];
     }
 /*
     this->moA_->real() = *other->moA();

@@ -57,6 +57,7 @@ namespace ChronusQ {
     int  nTCS_;
     int  maxMultipole_;
 //  bool isScattered_;
+    bool isAllocated_;
 
     CQMemManager * memManager_;
 
@@ -187,6 +188,7 @@ namespace ChronusQ {
       this->nTCS_ = 1;
       this->maxMultipole_ = 3;
 //    this->isScattered_ = false;
+      this->isAllocated_ = false;
 
       cout << "In Quantum Constructor" << endl;
       this->clearElecMultipole();
@@ -207,6 +209,7 @@ namespace ChronusQ {
 //    isScattered_(other.isScattered_),
       memManager_(other.memManager_) {
 
+      this->isAllocated_ = false;
       auto NB = other.onePDMScalar_->rows(); 
 //    auto NBT = other.onePDMScalar_->rows(); 
 //    auto NBTSq = NBT*NBT;
@@ -295,7 +298,9 @@ namespace ChronusQ {
     };
 
     inline void alloc(unsigned int N){
+      if(this->isAllocated_) return;
       this->allocDensity(N);
+      this->isAllocated_ = true;
     };
 
     inline void clearElecMultipole(){

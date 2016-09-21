@@ -18,11 +18,12 @@ namespace ChronusQ {
     this->maxMultipole_          = 
       const_cast<Quantum<dcomplex>&>(other).maxMultipole(); 
 
+    this->isAllocated_ = false;
     auto NB  = const_cast<Quantum<dcomplex>&>(other).onePDMScalar()->rows(); 
     this->alloc(NB);
 
     for(auto IDen = 0; IDen < this->onePDM().size(); IDen++)
-      *this->onePDM()[IDen] = 
+      *this->onePDM_[IDen] = 
         const_cast<Quantum<dcomplex>&>(other).onePDM()[IDen]->real();
 
 /*
@@ -104,12 +105,14 @@ namespace ChronusQ {
     this->memManager_ =
       const_cast<Quantum<double>&>(other).memManager();
 
+    this->isAllocated_ = false;
     auto NB  = const_cast<Quantum<double>&>(other).onePDMScalar()->rows(); 
     this->alloc(NB);
 
-    for(auto IDen = 0; IDen < this->onePDM().size(); IDen++)
-      this->onePDM()[IDen]->real() = 
+    for(auto IDen = 0; IDen < this->onePDM().size(); IDen++){
+      this->onePDM_[IDen]->real() = 
         *const_cast<Quantum<double>&>(other).onePDM()[IDen];
+    }
 
 /*
     this->isScattered_ = 

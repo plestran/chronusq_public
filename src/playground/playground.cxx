@@ -7,6 +7,7 @@
 #include <singleslater.h>
 #include <mointegrals.h>
 #include <response.h>
+#include <realtime.h>
 
 struct MyStruct {
   RealMatrix VXCA;
@@ -84,6 +85,7 @@ int main(int argc, char **argv){
   BasisSet basis;
   AOIntegrals aoints;
   SingleSlater<double> singleSlater;
+  RealTime<double> rt;
   FileIO fileio("test.inp","test.out");
 
   memManager.setTotalMem(256e6);
@@ -119,9 +121,9 @@ int main(int argc, char **argv){
 //singleSlater.addVWN5();
 //singleSlater.setPrintLevel(5);
 
-//basis.findBasisFile("sto-3g");
+  basis.findBasisFile("sto-3g");
 //basis.findBasisFile("3-21g");
-  basis.findBasisFile("6-31G");
+//basis.findBasisFile("6-31G");
   basis.communicate(fileio);
   basis.parseGlobal();
   basis.constructLocal(&molecule);
@@ -149,7 +151,10 @@ int main(int argc, char **argv){
   singleSlater.computeProperties();
   singleSlater.printProperties();
 
-
+  rt.communicate(singleSlater);
+  rt.alloc();
+  rt.doPropagation();
+/*
   cout << endl;
   MOIntegrals<double> moints;
   moints.communicate(singleSlater,memManager);
@@ -164,6 +169,7 @@ int main(int argc, char **argv){
   resp.alloc();
   resp.runResponse();
   finalizeCQ();
+*/
   return 0;
 };
 
