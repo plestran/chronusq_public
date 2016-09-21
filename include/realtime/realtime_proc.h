@@ -6,6 +6,8 @@ void RealTime<T>::doPropagation() {
 
   currentTime_ = 0.0;
 
+  initCSV();
+
   for(auto iStep = 0ul; iStep < maxSteps_; iStep++) {
 
     // Logic for MMUT restart
@@ -45,6 +47,12 @@ void RealTime<T>::doPropagation() {
     // Propagate the (orthonormal) Density Matrix
     propDen();
 
+    // Add a time point record onto the list
+    addRecord();
+
+    // Write CSV Files
+    writeCSVs();
+
     // Unorthonormalize the density ofr next Fock build
 //  ssPropagator_->cpyAOtoOrthoDen();
     ssPropagator_->unOrthoDen3();
@@ -52,4 +60,26 @@ void RealTime<T>::doPropagation() {
     // Increment the current time
     currentTime_ += stepSize_;
   }
+  if(tarCSVs)  tarCSVFiles();
 };
+
+template <typename T>
+void RealTime<T>::addRecord() {
+  PropInfo rec;
+  rec.timeStep  = currentTime_;
+  rec.energy    = ssPropagator_->totalEnergy();
+  rec.dipole[0] = ssPropagator_->elecDipole()[0]/phys.debye;
+  rec.dipole[1] = ssPropagator_->elecDipole()[1]/phys.debye;
+  rec.dipole[2] = ssPropagator_->elecDipole()[2]/phys.debye;
+  rec.dipole[3] = std::sqrt( std::pow(rec.dipole[0],2.0) +
+                             std::pow(rec.dipole[1],2.0) +
+                             std::pow(rec.dipole[2],2.0) );
+  rec.appliedfield[0] = EDField_[0];
+  rec.appliedfield[1] = EDField_[1];
+  rec.appliedfield[2] = EDField_[2];
+  rec.appliedfield[3] = std::sqrt( std::pow(rec.appliedfield[0],2.0) +
+                             std::pow(rec.appliedfield[1],2.0) +
+                             std::pow(rec.appliedfield[2],2.0) );
+
+  propInfo.push_back(rec);
+}

@@ -30,6 +30,16 @@ enum EllipticalPolarization {
   RYZ
 };
 
+struct PropInfo {
+  double timeStep;
+  double energy;
+  std::array<double,4> dipole;
+  std::array<double,4> appliedfield;
+  std::vector<double> mullPop;
+  std::vector<double> orbitalOccA;
+  std::vector<double> orbitalOccB;
+};
+
 template <typename T>
 class RealTime {
   typedef Eigen::Matrix<T,Dynamic,Dynamic> TMat; 
@@ -85,15 +95,6 @@ class RealTime {
   
 public:
   
-  struct PropInfo {
-    double timeStep;
-    double energy;
-    std::array<double,4> dipole;
-    std::array<double,4> appliedfield;
-    std::vector<double> mullPop;
-    std::vector<double> orbitalOccA;
-    std::vector<double> orbitalOccB;
-  };
   std::vector<PropInfo> propInfo;
 
   RealTime() : fileio_(NULL), groundState_(NULL), memManager_(NULL),
@@ -126,11 +127,28 @@ public:
   void formUTrans();
   void formField();
   void propDen();
+  void addRecord();
 
   // Print Functions
   void printRTStep();
   void printRTHeader();
 
+  // CSVs
+  void initCSV();
+  void writeDipoleCSV();
+  void writeAppliedFieldCSV();
+  void writeMullikenCSV();
+  void writeOrbitalCSV();
+  void tarCSVFiles();
+
+  inline void writeCSVs() {
+    this->writeDipoleCSV();
+    this->writeAppliedFieldCSV();
+//  this->writeMullikenCSV();
+//  this->writeOrbitalCSV();
+  }
+
+  // Setters
   void setMaxSteps(int x)  { this->maxSteps_ = x; };
   void setNSkip(int x)     { this->nSkip_    = x; };
   void setIRstrt(int x)    { this->iRstrt_   = x; };
@@ -154,6 +172,7 @@ public:
 #include <realtime/realtime_propagator.h>
 #include <realtime/realtime_print.h>
 #include <realtime/realtime_proc.h>
+#include <realtime/realtime_csvs.h>
 }; // namespace ChronusQ
 
 #endif

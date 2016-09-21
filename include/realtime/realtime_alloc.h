@@ -26,3 +26,4 @@ void RealTime<T>::alloc() {
     NBTSqScratch_ = NBSqScratch_;
   }
 }
+
