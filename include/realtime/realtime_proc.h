@@ -32,9 +32,9 @@ void RealTime<T>::doPropagation() {
     ssPropagator_->formFock();
     ssPropagator_->computeEnergy();
     ssPropagator_->computeProperties();
-//  prettyPrintSmart(cout,*ssPropagator_->onePDMScalar(),"PS");
+    prettyPrintSmart(cout,*ssPropagator_->onePDMScalar(),"PS");
 //  prettyPrintSmart(cout,*ssPropagator_->fockScalar(),"FS");
-    cout << ssPropagator_->totalEnergy() << endl;
+    cout << std::setprecision(13) << ssPropagator_->totalEnergy() << endl;
 
     // Orthonormalize the AO Fock
     ssPropagator_->orthoFock3();

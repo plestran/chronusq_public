@@ -18,12 +18,16 @@ void RealTime<T>::formUTrans() {
   }
 
   if( iMethFormU_ == EigenDecomp ) {
+//  prettyPrintSmart(cout,*this->ssPropagator_->fockOrtho()[0],"OFS");
+//  this->ssPropagator_->fockOrtho()[0]->printMATLAB(cout);
     ssPropagator_->populateMO4Diag();
     ssPropagator_->diagFock2();
     
     ComplexMap S(NBTSqScratch_,NBT,NBT);
 
     std::copy_n(ssPropagator_->moA()->data(),NBT*NBT,NBTSqScratch_);
+
+//  prettyPrintSmart(cout,(*ssPropagator_->epsA()),"EPSA");
 
     for(auto i = 0; i < NBT; i++) {
       double arg = deltaT_ * (*ssPropagator_->epsA())(i);
@@ -64,6 +68,10 @@ void RealTime<T>::formUTrans() {
         // UScalar = 2*UA for restricted
         UTransScalar *= 2;
       }
+//    cout << deltaT_ << endl;
+//    prettyPrintSmart(cout,UTransScalar,"UT");
+//    prettyPrintSmart(cout,UTransScalar.adjoint() * UTransScalar,"UUT");
+//    CErr();
     }
   }
 };
@@ -88,8 +96,13 @@ void RealTime<T>::propDen() {
   ComplexMap S(NBSqScratch_,NB,NB);
 
   // FIXME: This only works for RHF
+//prettyPrintSmart(cout,*ssPropagator_->onePDMOrthoScalar(),"OPS1");
   S.noalias() = UTransScalar * (*ssPropagator_->onePDMOrthoScalar());
   ssPropagator_->onePDMOrthoScalar()->noalias() = S * UTransScalar.adjoint();
-  (*ssPropagator_->onePDMOrthoScalar()) /= 8.0;
+//prettyPrintSmart(cout,*ssPropagator_->onePDMOrthoScalar(),"OPS2");
+  (*ssPropagator_->onePDMOrthoScalar()) /= 4.0;
+//prettyPrintSmart(cout,*ssPropagator_->onePDMOrthoScalar(),"OPS3");
+//CErr();
+  
 };
 

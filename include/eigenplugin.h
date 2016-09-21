@@ -49,3 +49,19 @@ template<typename Dervd>
 inline double selfInner( const Dervd &A){
   return A.dot(A);
 }
+
+inline void printMATLAB(std::ostream &out) const {
+  out << "[";
+  for(auto i = 0; i < derived().rows(); i++) {
+//  out << "[";
+    for(auto j = 0; j < derived().cols(); j++){
+      if(std::is_same<dcomplex,Scalar>::value)
+        out << "complex";
+      out << derived()(i,j);
+      if( j != derived().cols() - 1) out << " , ";
+    }
+    out << ";" << std::endl;
+//  out << "]";
+  }
+  out << "]";
+};
