@@ -121,15 +121,38 @@ public:
   };
 
 
+  // RT Propagation
   void doPropagation();
   void formUTrans();
   void formField();
   void propDen();
+
+  // Print Functions
+  void printRTStep();
+  void printRTHeader();
+
+  void setMaxSteps(int x)  { this->maxSteps_ = x; };
+  void setNSkip(int x)     { this->nSkip_    = x; };
+  void setIRstrt(int x)    { this->iRstrt_   = x; };
+             
+  void setTOn(double x)      { this->tOn_      = x; };
+  void setTOff(double x)     { this->tOff_     = x; };
+  void setStepSize(double x) { this->stepSize_ = x; };
+  void setDeltaT(double x)   { this->deltaT_   = x; };
+  void setFreq(double x)     { this->freq_     = x; };
+  void setPhase(double x)    { this->phase_    = x; };
+  void setSigma(double x)    { this->sigma_    = x; };
+
+  void setEDFieldAmp(std::array<double,3> x) { this->staticEDAmp_ = x; };
+  void setIMethFormU(PropagatorFormation x ) { this->iMethFormU_ = x;};
+  void setIEnvlp(Envelope x                ) { this->iEnvlp_     = x;};
+  void setIEllPol(EllipticalPolarization x ) { this->iEllPol_    = x;};
 };
 
 #include <realtime/realtime_alloc.h>
 #include <realtime/realtime_field.h>
 #include <realtime/realtime_propagator.h>
+#include <realtime/realtime_print.h>
 #include <realtime/realtime_proc.h>
 }; // namespace ChronusQ
 

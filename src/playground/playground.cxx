@@ -153,6 +153,11 @@ int main(int argc, char **argv){
 
   rt.communicate(singleSlater);
   rt.alloc();
+//rt.setMaxSteps(827000); // roughly 1 ps of dynamics
+  rt.setMaxSteps(1000); 
+  rt.setTOff(0.10);
+  rt.setEDFieldAmp({0.001,0.0,0.0});
+  rt.setIEnvlp(Step);
   rt.doPropagation();
 /*
   cout << endl;
