@@ -96,13 +96,9 @@ void RealTime<T>::propDen() {
   ComplexMap S(NBSqScratch_,NB,NB);
 
   // FIXME: This only works for RHF
-//prettyPrintSmart(cout,*ssPropagator_->onePDMOrthoScalar(),"OPS1");
   S.noalias() = UTransScalar * (*ssPropagator_->onePDMOrthoScalar());
   ssPropagator_->onePDMOrthoScalar()->noalias() = S * UTransScalar.adjoint();
-//prettyPrintSmart(cout,*ssPropagator_->onePDMOrthoScalar(),"OPS2");
   (*ssPropagator_->onePDMOrthoScalar()) /= 4.0;
-//prettyPrintSmart(cout,*ssPropagator_->onePDMOrthoScalar(),"OPS3");
-//CErr();
   
 };
 

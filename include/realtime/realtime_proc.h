@@ -19,11 +19,24 @@ void RealTime<T>::doPropagation() {
       FinMM = (iStep == maxSteps_);
     }
 
-    // Initial entry for MMUT
+    // Initial entry into MMUT
     if(Start) {
+      // Copy the orthonormal density from ssPropagator to POSav
+      // POSav(k) = PO(k)
+      for(auto iODen = 0; iODen < POSav_.size(); iODen++)
+        (*POSav_[iODen]) = (*ssPropagator_->onePDMOrtho()[iODen]);
+
       deltaT_ = stepSize_;
     // Subsequent MMUT iterations
     } else {
+      // Swap POSav densities with those from ssPropagator
+      // POSav(k) <-> PO(k)
+      //
+      // POSav(k) = PO(k)
+      // PO(k)    = PO(k-1)
+      for(auto iODen = 0; iODen < POSav_.size(); iODen++)
+        POSav_[iODen]->swap(*ssPropagator_->onePDMOrtho()[iODen]);
+
       deltaT_ = FinMM ? stepSize_ : 2*stepSize_;
     }
 
@@ -31,6 +44,7 @@ void RealTime<T>::doPropagation() {
     formField();
 
     // Form AO Fock Matrix and compute properties
+    // F(k) = H + G[P(k)]
     ssPropagator_->formFock();
     ssPropagator_->computeEnergy();
     ssPropagator_->computeProperties();
@@ -39,12 +53,16 @@ void RealTime<T>::doPropagation() {
     this->printRTStep();
 
     // Orthonormalize the AO Fock
+    // F(k) -> FO(k)
     ssPropagator_->orthoFock3();
 
     // Form the unitary propagation matrix
+    // U**H(k) = exp(-i * dt * F(k))
     formUTrans();
 
     // Propagate the (orthonormal) Density Matrix
+    // PO (in ssPropagator) now stores PO(k+1)
+    // PO(k+1) = U**H(k) * PO(k-1) * U(k)
     propDen();
 
     // Add a time point record onto the list
@@ -53,8 +71,26 @@ void RealTime<T>::doPropagation() {
     // Write CSV Files
     writeCSVs();
 
+    // Logic for MMUT restart setup
+    if(FinMM) {
+      // PO = 0.5 * (PO + POSav)
+      // PO(k+1) = 0.5 * (PO(k+1) + PO(k-1))
+      for(auto iODen = 0; iODen < POSav_.size(); iODen++){
+        (*ssPropagator_->onePDMOrtho()[iODen]) *= 0.5;
+        ssPropagator_->onePDMOrtho()[iODen]->noalias() += 
+          0.5 * (*POSav_[iODen]) ;
+      }
+        
+      // FIXME: Need to add McWeeny Purification
+
+      // POSav = PO
+      // POSav now stores the next step's PO
+      for(auto iODen = 0; iODen < POSav_.size(); iODen++)
+        (*POSav_[iODen]) = (*ssPropagator_->onePDMOrtho()[iODen]);
+    }
+
     // Unorthonormalize the density ofr next Fock build
-//  ssPropagator_->cpyAOtoOrthoDen();
+    // PO(k+1) -> P(k+1)
     ssPropagator_->unOrthoDen3();
 
     // Increment the current time

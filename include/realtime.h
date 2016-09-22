@@ -63,6 +63,12 @@ class RealTime {
   dcomplex * UTransMy_;
   dcomplex * UTransMx_;
 
+  std::unique_ptr<ComplexMap> POScalarSav_;
+  std::unique_ptr<ComplexMap> POMzSav_;
+  std::unique_ptr<ComplexMap> POMySav_;
+  std::unique_ptr<ComplexMap> POMxSav_;
+  std::vector<ComplexMap *> POSav_;
+
   // RT Simulation Control
   int maxSteps_;
   int nSkip_;

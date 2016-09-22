@@ -15,13 +15,30 @@ void RealTime<T>::alloc() {
 
   NBSqScratch_  = memManager_->template malloc<dcomplex>(NB*NB);
   UTransScalar_ = memManager_->template malloc<dcomplex>(NB*NB);
-  if(ssPropagator_->nTCS() == 2 or !ssPropagator_->isClosedShell)
+  POScalarSav_  = std::unique_ptr<ComplexMap>(
+    new ComplexMap(memManager_->template malloc<dcomplex>(NB*NB),NB,NB));
+
+  POSav_.emplace_back(POScalarSav_.get());
+
+  if(ssPropagator_->nTCS() == 2 or !ssPropagator_->isClosedShell){
     UTransMz_= memManager_->template malloc<dcomplex>(NB*NB);
+    POMzSav_  = std::unique_ptr<ComplexMap>(
+      new ComplexMap(memManager_->template malloc<dcomplex>(NB*NB),NB,NB));
+
+    POSav_.emplace_back(POMzSav_.get());
+  }
   if(ssPropagator_->nTCS() == 2){ 
     NBTSqScratch_  = memManager_->template malloc<dcomplex>(NBT*NBT);
     NBTSqScratch2_ = memManager_->template malloc<dcomplex>(NBT*NBT);
     UTransMx_= memManager_->template malloc<dcomplex>(NB*NB);
     UTransMy_= memManager_->template malloc<dcomplex>(NB*NB);
+    POMySav_  = std::unique_ptr<ComplexMap>(
+      new ComplexMap(memManager_->template malloc<dcomplex>(NB*NB),NB,NB));
+    POMxSav_  = std::unique_ptr<ComplexMap>(
+      new ComplexMap(memManager_->template malloc<dcomplex>(NB*NB),NB,NB));
+
+    POSav_.emplace_back(POMySav_.get());
+    POSav_.emplace_back(POMxSav_.get());
   } else {
     NBTSqScratch_ = NBSqScratch_;
   }
