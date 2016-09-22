@@ -102,10 +102,10 @@ int main(int argc, char **argv){
   molecule.computeRij();
   molecule.computeI();
 
-  singleSlater.setRef(SingleSlater<double>::RHF);
-  singleSlater.isClosedShell = true;
-//singleSlater.setRef(SingleSlater<double>::UHF);
-//singleSlater.isClosedShell = false;
+//singleSlater.setRef(SingleSlater<double>::RHF);
+//singleSlater.isClosedShell = true;
+  singleSlater.setRef(SingleSlater<double>::UHF);
+  singleSlater.isClosedShell = false;
 
 /*
   singleSlater.isDFT = true;

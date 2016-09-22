@@ -70,7 +70,7 @@ void RealTime<T>::formUTrans() {
       }
 //    cout << deltaT_ << endl;
 //    prettyPrintSmart(cout,UTransScalar,"UT");
-//    prettyPrintSmart(cout,UTransScalar.adjoint() * UTransScalar,"UUT");
+//    prettyPrintSmart(cout,UTransMz,"UT");
 //    CErr();
     }
   }
@@ -95,10 +95,51 @@ void RealTime<T>::propDen() {
 
   ComplexMap S(NBSqScratch_,NB,NB);
 
+/*
   // FIXME: This only works for RHF
   S.noalias() = UTransScalar * (*ssPropagator_->onePDMOrthoScalar());
   ssPropagator_->onePDMOrthoScalar()->noalias() = S * UTransScalar.adjoint();
   (*ssPropagator_->onePDMOrthoScalar()) /= 4.0;
+*/
+  
+  // S = U**H(S) * PO(S) + U**H(k) * PO(k)
+  S.noalias() = UTransScalar * (*ssPropagator_->onePDMOrthoScalar());
+  if(ssPropagator_->nTCS() == 2 or !ssPropagator_->isClosedShell)
+    S.noalias() += UTransMz * (*ssPropagator_->onePDMOrthoMz());
+  if(ssPropagator_->nTCS() == 2){
+    S.noalias() += UTransMy * (*ssPropagator_->onePDMOrthoMy());
+    S.noalias() += UTransMx * (*ssPropagator_->onePDMOrthoMx());
+  }
+
+  // P(S) = S * U(S)
+  // P(k) = S * U(k)
+  ssPropagator_->onePDMScalar()->noalias() = S * UTransScalar.adjoint();
+  if(ssPropagator_->nTCS() == 2 or !ssPropagator_->isClosedShell)
+    ssPropagator_->onePDMMz()->noalias() = S * UTransMz.adjoint();
+  if(ssPropagator_->nTCS() == 2){
+    ssPropagator_->onePDMMy()->noalias() = S * UTransMy.adjoint();
+    ssPropagator_->onePDMMx()->noalias() = S * UTransMx.adjoint();
+  }
+
+  // S = U**H(S) * PO(z) + U**H(z) * PO(S)
+  if(ssPropagator_->nTCS() == 2 or !ssPropagator_->isClosedShell) {
+    S.noalias() =  UTransScalar * (*ssPropagator_->onePDMOrthoMz());
+    S.noalias() += UTransMz     * (*ssPropagator_->onePDMOrthoScalar());
+    // FIXME: Need to add the i * Eps(z,i,j) U**H(i) * PO(j)
+
+    // P(S) += S * U(z)
+    // P(z) += S * U(S)
+    ssPropagator_->onePDMScalar()->noalias() += S * UTransMz.adjoint();
+    ssPropagator_->onePDMMz()->noalias() += S * UTransScalar.adjoint();
+  }
+
+  // Copy P -> PO
+  ssPropagator_->cpyAOtoOrthoDen(); 
+
+  // Correct factors of 2
+  for(auto iODen = 0; iODen < POSav_.size(); iODen++){
+    *ssPropagator_->onePDMOrtho()[iODen] *= 0.25;
+  }
   
 };
 

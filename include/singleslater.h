@@ -293,7 +293,6 @@ class SingleSlater : public WaveFunction<T> {
   H5::DataSet *DeltaDMx_;
  
   // New DIIS Functions
-  void cpyAOtoOrthoDen();
   void genDIISCom(int);
   void CDIIS4(int);
 
@@ -909,6 +908,7 @@ public:
   void readDIIS(H5::DataSet*,int,T*);
   void writeDIIS(H5::DataSet*,int,T*);
   void diagFock2();         ///< Diagonalize Fock Matrix
+  void cpyAOtoOrthoDen();
 
   void gatherOrthoFock();
   void gatherFock();
