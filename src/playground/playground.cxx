@@ -155,13 +155,11 @@ int main(int argc, char **argv){
 
 
   singleSlater.setGuess(SingleSlater<dcomplex>::ONLY);
-  singleSlater.onePDMMz()->swap(*singleSlater.onePDMMx());
-  singleSlater.PTMz()->swap(*singleSlater.PTMx());
-//singleSlater.computeProperties();
-//singleSlater.printProperties();
+  singleSlater.onePDMMz()->swap(*singleSlater.onePDMMy());
+  singleSlater.PTMz()->swap(*singleSlater.PTMy());
+  singleSlater.computeProperties();
+  singleSlater.printProperties();
 
-
-/*
   ComplexMatrix TMP(basis.nBasis()*singleSlater.nTCS(),basis.nBasis()*singleSlater.nTCS());
   TMP.setZero();
 
@@ -175,20 +173,21 @@ int main(int argc, char **argv){
 
 //for(auto OPDM : singleSlater.onePDM()) *OPDM *= 0.5;
   singleSlater.printDensity();
-//prettyPrintSmart(fileio.out,TMPMap,"Gathered");
+  prettyPrintSmart(fileio.out,TMPMap,"Gathered");
   Quantum<dcomplex>::spinScatter(TMPMap,scattered);
   singleSlater.printDensity();
-*/
 
 //singleSlater.printFock();
 //singleSlater.printPT();
 
+/*
 //singleSlater.setPrintLevel(4);
   singleSlater.doDIIS = false;
 //singleSlater.formGuess();
   singleSlater.SCF3();
   singleSlater.computeProperties();
   singleSlater.printProperties();
+*/
 
 /*
   rt.communicate(singleSlater);
