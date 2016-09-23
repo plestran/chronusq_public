@@ -476,11 +476,7 @@ void SingleSlater<T>::populateMO4Diag(){
     int I = 0;
     for(auto iF = this->fockOrtho_.begin(); iF != this->fockOrtho_.end(); iF++){
       scattered.emplace_back(*(*iF));
-      if(this->printLevel_ > 3)
-      prettyPrintSmart(this->fileio_->out,*(*iF),"F" + std::to_string(I++));
     }
     Quantum<T>::spinGather(*this->moA_,scattered);
-    if(this->printLevel_ > 3)
-    prettyPrintSmart(this->fileio_->out,*this->moA_,"Gathered");
   }
 };

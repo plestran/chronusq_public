@@ -112,8 +112,6 @@ void SingleSlater<T>::SCF3(){
       // This stupidly computes the orthonormal density and stores it in the
       // AO storage
       this->formDensity();
-//    if(this->printLevel_ > 3)
-//    this->printDensity();
 
     }
     // This copy operation negates the problem above

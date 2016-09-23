@@ -210,7 +210,7 @@ int main(int argc, char **argv){
 //singleSlater.printPT();
 
   prettyPrintSmart(cout,*singleSlater.moA(),"MO");
-//singleSlater.setPrintLevel(4);
+  singleSlater.setPrintLevel(4);
   singleSlater.doDIIS = false;
 //singleSlater.formGuess();
   singleSlater.SCF3();
