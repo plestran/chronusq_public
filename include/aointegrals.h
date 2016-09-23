@@ -428,9 +428,6 @@ public:
   void computeCholesky();
 
 
-//void computeAORcrossDel(); // build R cross Del matrices
-//double formBeckeW(cartGP gridPt, int iAtm);    // Evaluate Becke Weights
-//double normBeckeW(cartGP gridPt);             // Normalize Becke Weights
   void DKH0(); // compute DKH0 relativistic correction to kinetic energy
   void printOneE();
 #ifdef USE_LIBINT
@@ -438,42 +435,6 @@ public:
   void computeAORII();
   void computeAORIS();
   void transformAORII();
-  template<typename T> void twoEContractDirect(bool,bool,bool,bool,bool,const T&,T&,const T&,T&);
-  template<typename T> void twoEContractN4(bool,bool,bool,bool,bool,const T &,T &,const T &, T &);
-  template<typename T> void twoEContractDF(bool,bool,bool,const T &,T &,const T &, T &);
-  template<typename T>
-    void multTwoEContractDirect(int, bool,bool,bool,bool,bool,const std::vector<T> &,std::vector<T> &,
-                                const std::vector<T> &,std::vector<T> &);
-  template<typename T> 
-    void multTwoEContractN4(int, bool,bool,bool,const std::vector<T> &,std::vector<T> &,
-                            const std::vector<T> &,std::vector<T> &);
-  template<typename T> 
-    void multTwoEContractDF(int, bool,bool,bool,const std::vector<T> &,std::vector<T> &,
-                            const std::vector<T> &,std::vector<T> &);
-  template<typename TMat,typename T> 
-    void Restricted34Contract(bool,TMat&, const TMat &, int,int,int,int,int,int,int,int,
-                                 const T*,T);
-  template<typename TMat,typename T> 
-    void UnRestricted34Contract(bool,TMat&, const TMat &, TMat&, const TMat &, const TMat &, 
-                                   int,int,int,int,int,int,int,int,const T*,T);
-  template<typename TMat,typename T>
-    void Spinor34Contract(bool,TMat&,const TMat&,int,int,int,int,int,int,int,int,const T*,T);
-  template<typename TMat,typename T> 
-    void General24CouContract(TMat&, const TMat &, int,int,int,int,int,int,int,int,
-                              const T*,T);
-  template<typename TMat,typename T> 
-    void Spinor24CouContract(TMat&, const TMat &, int,int,int,int,int,int,int,int,
-                              const T*,T);
-  template<typename TMat,typename T> void Gen34Contract(TMat&,const TMat&,int,int,int,int,T);
-  template<typename TMat,typename T> void Gen23Contract(TMat&,const TMat&,int,int,int,int,T,
-                                                        double);
-  template<typename TMat,typename T> void Gen24Contract(TMat&,const TMat&,int,int,int,int,T);
-  template<typename TMat,typename T> 
-    void Spinor24Contract(TMat&,const TMat&,int,int,int,int,T);
-  template<typename TMat,typename T> void GenCouContractSpinor(TMat&,const TMat&,int,int,int,
-                                                               int,T);
-  template<typename TMat,typename T> void GenExchContractSpinor(TMat&,const TMat&,int,int,
-                                                                int,int,T,double);
 
 
   enum ERI_CONTRACTION_TYPE {
@@ -502,8 +463,7 @@ public:
       const std::vector<std::reference_wrapper<Op>> &X,
       std::vector<std::reference_wrapper<Op>> &AX,
       std::vector<ERI_CONTRACTION_TYPE> &contractionList,
-      std::vector<T> &scalingFactors
-  ) {
+      std::vector<T> &scalingFactors) {
     if(this->integralAlgorithm == DIRECT)
       this->newTwoEContractDirect(X,AX,contractionList,scalingFactors);
     else if(this->integralAlgorithm == INCORE)
