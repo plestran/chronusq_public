@@ -154,9 +154,10 @@ int main(int argc, char **argv){
   singleSlater.printProperties();
 
 
+/*
   singleSlater.setGuess(SingleSlater<dcomplex>::ONLY);
-  singleSlater.onePDMMz()->swap(*singleSlater.onePDMMy());
-  singleSlater.PTMz()->swap(*singleSlater.PTMy());
+  singleSlater.onePDMMz()->swap(*singleSlater.onePDMMx());
+  singleSlater.PTMz()->swap(*singleSlater.PTMx());
   singleSlater.computeProperties();
   singleSlater.printProperties();
 
@@ -170,24 +171,52 @@ int main(int argc, char **argv){
   scattered.emplace_back(*singleSlater.onePDMMy());
   scattered.emplace_back(*singleSlater.onePDMMx());
   Quantum<dcomplex>::spinGather(TMPMap,scattered);
+*/
 
+/*
 //for(auto OPDM : singleSlater.onePDM()) *OPDM *= 0.5;
   singleSlater.printDensity();
   prettyPrintSmart(fileio.out,TMPMap,"Gathered");
   Quantum<dcomplex>::spinScatter(TMPMap,scattered);
   singleSlater.printDensity();
+*/
+
+  prettyPrintSmart(cout,*singleSlater.moA(),"MO");
+  for(auto i = 0; i < 2*basis.nBasis(); i++) {
+  for(auto j = 0; j < 2*basis.nBasis(); j+=2) {
+    dcomplex a = (*singleSlater.moA())(j,i); 
+    dcomplex b = (*singleSlater.moA())(j+1,i); 
+    // Y Rotation ...
+/*
+    (*singleSlater.moA())(j,i) 
+       = std::cos(-math.pi / 4) * a  +  std::sin(-math.pi / 4) * b; 
+    (*singleSlater.moA())(j+1,i) 
+       = -std::sin(-math.pi / 4) * a  +  std::cos(-math.pi / 4) * b; 
+*/
+
+    // X Rotation ...
+    (*singleSlater.moA())(j,i) 
+       = std::cos(math.pi / 4) * a  +  math.ii * std::sin(math.pi / 4) * b; 
+    (*singleSlater.moA())(j+1,i) 
+       = math.ii * std::sin(math.pi / 4) * a  +  std::cos(math.pi / 4) * b; 
+  }
+  }
+  prettyPrintSmart(cout,*singleSlater.moA(),"MO");
+  singleSlater.formDensity();
+  singleSlater.computeProperties();
+  singleSlater.printProperties();
 
 //singleSlater.printFock();
 //singleSlater.printPT();
 
-/*
+  prettyPrintSmart(cout,*singleSlater.moA(),"MO");
 //singleSlater.setPrintLevel(4);
   singleSlater.doDIIS = false;
 //singleSlater.formGuess();
   singleSlater.SCF3();
   singleSlater.computeProperties();
   singleSlater.printProperties();
-*/
+  prettyPrintSmart(cout,*singleSlater.moA(),"MO");
 
 /*
   rt.communicate(singleSlater);
