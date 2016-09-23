@@ -23,7 +23,7 @@ struct MyStruct {
 using namespace ChronusQ;
 
 enum MOLECULE_PRESETS {
-  WATER, HE,SO,Li
+  WATER, HE,SO,OxMolecule,Li
 };
 
 template<MOLECULE_PRESETS T>
@@ -65,7 +65,18 @@ void loadPresets<SO>(Molecule &mol){
 //  mol.setCart(0,0.000000000 ,-0.00000000000, 0.0);
   mol.setCart(0,0.000000000 ,0.00000000000, 0.0);
 };
-
+template<>
+void loadPresets<OxMolecule>(Molecule &mol){
+  mol.setCharge(0);
+  mol.setNTotalE(16);
+  mol.setMultip(3);
+  mol.setNAtoms(2);
+  mol.alloc(); //allocates all memory for the class
+  mol.setIndex(0,HashAtom("O",0));
+  mol.setIndex(1,HashAtom("O",0));
+  mol.setCart(0,-0.608586,0.0,0.0); //In Angstroms!
+  mol.setCart(1,0.608586,0.0,0.0);
+};
 template<>
 void loadPresets<Li>(Molecule &mol){
   mol.setNAtoms(1);
@@ -84,8 +95,8 @@ int main(int argc, char **argv){
   Molecule molecule;
   BasisSet basis;
   AOIntegrals aoints;
-  SingleSlater<double> singleSlater;
-  RealTime<double> rt;
+  SingleSlater<dcomplex> singleSlater;
+  RealTime<dcomplex> rt;
   FileIO fileio("test.inp","test.out");
 
   memManager.setTotalMem(256e6);
@@ -93,7 +104,7 @@ int main(int argc, char **argv){
   fileio.iniH5Files();
   CQSetNumThreads(1);
   
-  loadPresets<WATER>(molecule);
+  loadPresets<OxMolecule>(molecule);
 //loadPresets<HE>(molecule);
 //loadPresets<SO>(molecule);
 //loadPresets<Li>(molecule);
@@ -104,9 +115,13 @@ int main(int argc, char **argv){
 
 //singleSlater.setRef(SingleSlater<double>::RHF);
 //singleSlater.isClosedShell = true;
-  singleSlater.setRef(SingleSlater<double>::UHF);
+  singleSlater.setRef(SingleSlater<dcomplex>::X2C);
   singleSlater.isClosedShell = false;
+  singleSlater.setNTCS(2);
+  singleSlater.setEneTol(1e-12);
+  singleSlater.doDIIS = false;
 
+  aoints.doX2C = true;
 /*
   singleSlater.isDFT = true;
   singleSlater.isHF = false;
@@ -121,9 +136,9 @@ int main(int argc, char **argv){
 //singleSlater.addVWN5();
 //singleSlater.setPrintLevel(5);
 
-  basis.findBasisFile("sto-3g");
+//basis.findBasisFile("sto-3g");
 //basis.findBasisFile("3-21g");
-//basis.findBasisFile("6-31G");
+  basis.findBasisFile("6-31G");
   basis.communicate(fileio);
   basis.parseGlobal();
   basis.constructLocal(&molecule);
