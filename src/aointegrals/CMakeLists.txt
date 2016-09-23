@@ -11,6 +11,7 @@ if(USE_LIBINT)
 #    aointegrals_real_contract_DF.cpp aointegrals_complex_contract_N4.cpp 
 #    aointegrals_complex_contract_DF.cpp aointegrals_dkh.cpp 
     aointegrals_denfit.cpp 
+    aointegrals_impl.cpp 
     aointegrals_util.cpp
     aointegrals_rel.cpp)
 else(USE_LIBINT)

@@ -566,7 +566,6 @@ public:
                    dcomplex>::value,int>::type = 0>
   void Ortho2Trans(Op&,Op&);
 };
-#include <aointegrals/aointegrals_contract.h>
 
 template<typename Op,
   typename std::enable_if<
