@@ -116,12 +116,13 @@ int main(int argc, char **argv){
 //singleSlater.setRef(SingleSlater<double>::RHF);
 //singleSlater.isClosedShell = true;
   singleSlater.setRef(SingleSlater<dcomplex>::X2C);
+  singleSlater.setGuess(SingleSlater<dcomplex::RANDOM);
   singleSlater.isClosedShell = false;
   singleSlater.setNTCS(2);
-  singleSlater.setEneTol(1e-12);
-  singleSlater.doDIIS = false;
+  singleSlater.setSCFEneTol(1e-12);
+  singleSlater.setSCFMaxIter(10000);
+  singleSlater.doDIIS = true;
 
-  aoints.doX2C = true;
 /*
   singleSlater.isDFT = true;
   singleSlater.isHF = false;
@@ -152,9 +153,11 @@ int main(int argc, char **argv){
 
   aoints.initMeta();
   aoints.integralAlgorithm = AOIntegrals::INCORE;
+  aoints.doX2C = true;
+  aoints.useFiniteWidthNuclei = true;
+  //aoints.setPrintLevel(3);
   singleSlater.initMeta();
   singleSlater.genMethString();
-  singleSlater.setSCFEneTol(1e-12);
 
   aoints.alloc();
   singleSlater.alloc();
@@ -162,6 +165,14 @@ int main(int argc, char **argv){
   singleSlater.formGuess();
 //singleSlater.formFock();
 //singleSlater.computeEnergy();
+  singleSlater.SCF3();
+  singleSlater.computeProperties();
+  singleSlater.printProperties();
+
+  singleSlater.onePDMMz()->swap(*singleSlater.onePDMMx());
+  singleSlater.computeProperties();
+  singleSlater.printProperties();
+  singleSlater.doDIIS = false; 
   singleSlater.SCF3();
   singleSlater.computeProperties();
   singleSlater.printProperties();
