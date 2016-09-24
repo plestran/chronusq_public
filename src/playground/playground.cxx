@@ -102,10 +102,10 @@ int main(int argc, char **argv){
   molecule.computeRij();
   molecule.computeI();
 
-//singleSlater.setRef(SingleSlater<double>::RHF);
+//singleSlater.setRef(RHF);
 //singleSlater.isClosedShell = true;
-//singleSlater.setRef(SingleSlater<double>::UHF);
-  singleSlater.setRef(SingleSlater<dcomplex>::TCS);
+//singleSlater.setRef(UHF);
+  singleSlater.setRef(TCS);
   singleSlater.setNTCS(2);
   singleSlater.isClosedShell = false;
 
@@ -209,7 +209,6 @@ int main(int argc, char **argv){
 //singleSlater.printFock();
 //singleSlater.printPT();
 
-  prettyPrintSmart(cout,*singleSlater.moA(),"MO");
   singleSlater.setPrintLevel(4);
   singleSlater.doDIIS = false;
 //singleSlater.formGuess();
