@@ -138,7 +138,7 @@ namespace ChronusQ {
     template<typename Scalar, DENSITY_TYPE DenTyp, typename Op>
     Scalar OperatorSpinCombine(const Op& op) {
       double zero = 0.0;
-      bool isReal = typeid(T).hash_code() == typeid(dcomplex).hash_code();
+      bool isReal = typeid(T).hash_code() == typeid(double).hash_code();
 
 /*
       if(this->nTCS_ == 1 && this->isClosedShell){

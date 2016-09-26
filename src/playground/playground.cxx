@@ -96,7 +96,7 @@ int main(int argc, char **argv){
   BasisSet basis;
   AOIntegrals aoints;
   SingleSlater<dcomplex> singleSlater;
-  RealTime<dcomplex> rt;
+//RealTime<double> rt;
   FileIO fileio("test.inp","test.out");
 
   memManager.setTotalMem(256e6);
@@ -105,6 +105,7 @@ int main(int argc, char **argv){
   CQSetNumThreads(1);
   
   loadPresets<OxMolecule>(molecule);
+//loadPresets<WATER>(molecule);
 //loadPresets<HE>(molecule);
 //loadPresets<SO>(molecule);
 //loadPresets<Li>(molecule);
@@ -116,7 +117,7 @@ int main(int argc, char **argv){
 //singleSlater.setRef(SingleSlater<double>::RHF);
 //singleSlater.isClosedShell = true;
   singleSlater.setRef(SingleSlater<dcomplex>::X2C);
-  singleSlater.setGuess(SingleSlater<dcomplex::RANDOM);
+  singleSlater.setGuess(SingleSlater<dcomplex>::RANDOM);
   singleSlater.isClosedShell = false;
   singleSlater.setNTCS(2);
   singleSlater.setSCFEneTol(1e-12);
@@ -163,6 +164,8 @@ int main(int argc, char **argv){
   singleSlater.alloc();
 
   singleSlater.formGuess();
+  singleSlater.computeProperties();
+  singleSlater.printProperties();
 //singleSlater.formFock();
 //singleSlater.computeEnergy();
   singleSlater.SCF3();
@@ -177,6 +180,71 @@ int main(int argc, char **argv){
   singleSlater.computeProperties();
   singleSlater.printProperties();
 
+/*
+  singleSlater.setGuess(SingleSlater<dcomplex>::ONLY);
+  singleSlater.onePDMMz()->swap(*singleSlater.onePDMMx());
+  singleSlater.PTMz()->swap(*singleSlater.PTMx());
+  singleSlater.computeProperties();
+  singleSlater.printProperties();
+
+  ComplexMatrix TMP(basis.nBasis()*singleSlater.nTCS(),basis.nBasis()*singleSlater.nTCS());
+  TMP.setZero();
+
+  ComplexMap TMPMap(TMP.data(),TMP.rows(),TMP.cols());
+  std::vector<std::reference_wrapper<ComplexMap>> scattered;
+  scattered.emplace_back(*singleSlater.onePDMScalar());
+  scattered.emplace_back(*singleSlater.onePDMMz());
+  scattered.emplace_back(*singleSlater.onePDMMy());
+  scattered.emplace_back(*singleSlater.onePDMMx());
+  Quantum<dcomplex>::spinGather(TMPMap,scattered);
+*/
+
+/*
+//for(auto OPDM : singleSlater.onePDM()) *OPDM *= 0.5;
+  singleSlater.printDensity();
+  prettyPrintSmart(fileio.out,TMPMap,"Gathered");
+  Quantum<dcomplex>::spinScatter(TMPMap,scattered);
+  singleSlater.printDensity();
+*/
+
+  prettyPrintSmart(cout,*singleSlater.moA(),"MO");
+  for(auto i = 0; i < 2*basis.nBasis(); i++) {
+  for(auto j = 0; j < 2*basis.nBasis(); j+=2) {
+    dcomplex a = (*singleSlater.moA())(j,i); 
+    dcomplex b = (*singleSlater.moA())(j+1,i); 
+    // Y Rotation ...
+/*
+    (*singleSlater.moA())(j,i) 
+       = std::cos(-math.pi / 4) * a  +  std::sin(-math.pi / 4) * b; 
+    (*singleSlater.moA())(j+1,i) 
+       = -std::sin(-math.pi / 4) * a  +  std::cos(-math.pi / 4) * b; 
+*/
+
+    // X Rotation ...
+    (*singleSlater.moA())(j,i) 
+       = std::cos(math.pi / 4) * a  +  math.ii * std::sin(math.pi / 4) * b; 
+    (*singleSlater.moA())(j+1,i) 
+       = math.ii * std::sin(math.pi / 4) * a  +  std::cos(math.pi / 4) * b; 
+  }
+  }
+  prettyPrintSmart(cout,*singleSlater.moA(),"MO");
+  singleSlater.formDensity();
+  singleSlater.computeProperties();
+  singleSlater.printProperties();
+
+//singleSlater.printFock();
+//singleSlater.printPT();
+
+  prettyPrintSmart(cout,*singleSlater.moA(),"MO");
+  singleSlater.setPrintLevel(4);
+  singleSlater.doDIIS = false;
+//singleSlater.formGuess();
+  singleSlater.SCF3();
+  singleSlater.computeProperties();
+  singleSlater.printProperties();
+  prettyPrintSmart(cout,*singleSlater.moA(),"MO");
+
+/*
   rt.communicate(singleSlater);
   rt.alloc();
 //rt.setMaxSteps(827000); // roughly 1 ps of dynamics
@@ -185,6 +253,7 @@ int main(int argc, char **argv){
   rt.setEDFieldAmp({0.001,0.0,0.0});
   rt.setIEnvlp(Step);
   rt.doPropagation();
+*/
 /*
   cout << endl;
   MOIntegrals<double> moints;

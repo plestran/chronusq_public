@@ -27,7 +27,12 @@ template<typename T>
 void SingleSlater<T>::formGuess(){
   if(not this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
 
-  if(this->guess_ == SAD) this->SADGuess();
+  if(this->guess_ == ONLY) {
+    this->unOrthoDen3();
+    cout << "HERE" << endl;
+    return;
+    cout << "HERE" << endl;
+  } else if(this->guess_ == SAD) this->SADGuess();
   else if(this->guess_ == CORE) this->COREGuess();
 //  else if(this->guess_ == READ) this->READGuess();
   else if(this->guess_ == RANDOM) this->RandomGuess();
@@ -41,7 +46,7 @@ void SingleSlater<T>::formGuess(){
 
   this->populateMO4Diag();
   this->diagFock2();
-  this->mixOrbitalsSCF();
+//this->mixOrbitalsSCF();
   if(this->printLevel_ > 3) {
     this->fileio_->out << "Initial Density Matrix Before" << endl;
     this->printDensity();

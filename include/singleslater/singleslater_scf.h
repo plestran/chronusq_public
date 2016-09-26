@@ -90,6 +90,7 @@ void SingleSlater<T>::SCF3(){
 
     // DIIS Extrapolation of the Fock
     if(this->doDIIS and IDIISIter > 0 and this->diisAlg_ != NO_DIIS) { 
+      cout << "HERE IN DIIS" << endl;
       if(this->diisAlg_ == CDIIS)
         this->CDIIS4(std::min(IDIISIter+1,std::size_t(this->nDIISExtrap_)));
     }
@@ -118,6 +119,7 @@ void SingleSlater<T>::SCF3(){
 
     // Transform D into the AO basis
     this->unOrthoDen3();
+    if(this->printLevel_ > 3) this->printDensity();
 
     if(this->isConverged)
       this->fileio_->out << "   *** SCF Converged by [F,P] ***" << endl;

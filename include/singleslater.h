@@ -368,6 +368,7 @@ public:
   }; ///< Supported references
 
   enum GUESS {
+    ONLY,
     SAD,
     CORE,
     READ,

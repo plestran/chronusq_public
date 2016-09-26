@@ -132,8 +132,8 @@ void SingleSlater<T>::orthoFock3(){
 
   // Mx My
   if(this->nTCS_ == 2){
-    this->aointegrals_->Ortho1Trans(*this->fockMy_,*this->fockOrthoMx_);
-    this->aointegrals_->Ortho1Trans(*this->fockMy_,*this->fockOrthoMx_);
+    this->aointegrals_->Ortho1Trans(*this->fockMy_,*this->fockOrthoMy_);
+    this->aointegrals_->Ortho1Trans(*this->fockMx_,*this->fockOrthoMx_);
   }
 
   // Populate the gathered Fock matricies 
@@ -180,9 +180,9 @@ void SingleSlater<T>::unOrthoDen3(){
 
   if(this->nTCS_ == 2){
     this->aointegrals_->Ortho1TransT(
-      *this->onePDMOrthoMy_,*this->onePDMMx_);
+      *this->onePDMOrthoMx_,*this->onePDMMx_);
     this->aointegrals_->Ortho1TransT(
-      *this->onePDMOrthoMy_,*this->onePDMMx_);
+      *this->onePDMOrthoMy_,*this->onePDMMy_);
   }
 }
 
@@ -473,8 +473,10 @@ void SingleSlater<T>::populateMO4Diag(){
     (*this->moB_) = 0.5 * ((*this->fockOrthoScalar_) - (*this->fockOrthoMz_));
   } else {
     std::vector<std::reference_wrapper<TMap>> scattered;
-    for(auto iF = this->fockOrtho_.begin(); iF != this->fockOrtho_.end(); iF++)
+    int I = 0;
+    for(auto iF = this->fockOrtho_.begin(); iF != this->fockOrtho_.end(); iF++){
       scattered.emplace_back(*(*iF));
+    }
     Quantum<T>::spinGather(*this->moA_,scattered);
   }
 };
