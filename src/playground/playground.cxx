@@ -181,7 +181,8 @@ int main(int argc, char **argv){
   singleSlater.printDensity();
 */
 
-  prettyPrintSmart(cout,*singleSlater.moA(),"MO");
+//prettyPrintSmart(cout,*singleSlater.moA(),"MO");
+//singleSlater.printDensity();
   for(auto i = 0; i < 2*basis.nBasis(); i++) {
   for(auto j = 0; j < 2*basis.nBasis(); j+=2) {
     dcomplex a = (*singleSlater.moA())(j,i); 
@@ -195,27 +196,52 @@ int main(int argc, char **argv){
 */
 
     // X Rotation ...
+/*
     (*singleSlater.moA())(j,i) 
        = std::cos(math.pi / 4) * a  +  math.ii * std::sin(math.pi / 4) * b; 
     (*singleSlater.moA())(j+1,i) 
        = math.ii * std::sin(math.pi / 4) * a  +  std::cos(math.pi / 4) * b; 
+*/
   }
   }
+/*
   prettyPrintSmart(cout,*singleSlater.moA(),"MO");
   singleSlater.formDensity();
   singleSlater.computeProperties();
   singleSlater.printProperties();
+  singleSlater.printDensity();
+*/
+
+  singleSlater.printDensity();
+  singleSlater.onePDMMz()->swap(*singleSlater.onePDMMy());
+  fileio.out << " AFTER SWAP" << endl;
+  singleSlater.printDensity();
+
+  ComplexMatrix TMP(basis.nBasis()*singleSlater.nTCS(),basis.nBasis()*singleSlater.nTCS());
+  TMP.setZero();
+  ComplexMap TMPMap(TMP.data(),TMP.rows(),TMP.cols());
+  std::vector<std::reference_wrapper<ComplexMap>> scattered;
+  scattered.emplace_back(*singleSlater.onePDMScalar());
+  scattered.emplace_back(*singleSlater.onePDMMz());
+  scattered.emplace_back(*singleSlater.onePDMMy());
+  scattered.emplace_back(*singleSlater.onePDMMx());
+  Quantum<dcomplex>::spinGather(TMPMap,scattered);
+  Quantum<dcomplex>::spinScatter(TMPMap,scattered);
+  fileio.out << " AFTER SCATTER" << endl;
+  singleSlater.printDensity();
 
 //singleSlater.printFock();
 //singleSlater.printPT();
 
-  singleSlater.setPrintLevel(4);
+/*
+//singleSlater.setPrintLevel(4);
   singleSlater.doDIIS = false;
 //singleSlater.formGuess();
   singleSlater.SCF3();
   singleSlater.computeProperties();
   singleSlater.printProperties();
-  prettyPrintSmart(cout,*singleSlater.moA(),"MO");
+//prettyPrintSmart(cout,*singleSlater.moA(),"MO");
+*/
 
 /*
   rt.communicate(singleSlater);
