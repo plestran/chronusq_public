@@ -126,7 +126,7 @@ int main(int argc, char **argv){
   molecule.computeI();
 
   singleSlater.setRef(X2C);
-  singleSlater.setGuess(SAD);
+  singleSlater.setGuess(RANDOM);
   singleSlater.isClosedShell = false;
   singleSlater.setNTCS(2);
   singleSlater.setSCFEneTol(1e-12);
