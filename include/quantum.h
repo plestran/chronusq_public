@@ -384,6 +384,7 @@ namespace ChronusQ {
     };
 
 
+    void rotateDensities(const std::array<double,3>&,double);
 
 /*
     template<typename OpIn, typename OpOut>
@@ -422,6 +423,7 @@ namespace ChronusQ {
 */
 
   #include <quantum/quantum_scattergather.h>
+  #include <quantum/quantum_misc.h>
 
 
 /*

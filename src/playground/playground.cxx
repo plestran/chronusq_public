@@ -157,8 +157,15 @@ int main(int argc, char **argv){
   singleSlater.onePDMOrtho()[1]->swap(*singleSlater.onePDMOrtho()[3]);
   singleSlater.fockOrtho()[1]->swap(*singleSlater.fockOrtho()[3]);
 */
+/*
   singleSlater.onePDMOrtho()[1]->swap(*singleSlater.onePDMOrtho()[2]);
   singleSlater.fockOrtho()[1]->swap(*singleSlater.fockOrtho()[2]);
+*/
+
+  // Rotate 90 deg around y (should yield x)
+  singleSlater.rotateDensities({1,0,0},math.pi/4);
+  singleSlater.computeProperties();
+  singleSlater.printProperties();
 
 /*
   singleSlater.PT()[1]->swap(*singleSlater.PT()[2]);  
