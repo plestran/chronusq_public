@@ -45,7 +45,7 @@ namespace Eigen {
 
   template<typename Derived, 
            typename std::enable_if< std::is_same< typename Derived::Scalar,
-                                                  dcomplex >::value,
+                                                  std::complex<double> >::value,
                                     int>::type = 0>
   void prettyPrintSmart(std::ostream &output, const Derived &m, std::string str,
      std::size_t printWidth = 16) { 
