@@ -23,7 +23,7 @@ struct MyStruct {
 using namespace ChronusQ;
 
 enum MOLECULE_PRESETS {
-  WATER, HE,SO,OxMolecule,Li
+  WATER,H,HE,SO,OxMolecule,Li
 };
 
 template<MOLECULE_PRESETS T>
@@ -42,6 +42,16 @@ void loadPresets<WATER>(Molecule &mol) {
   mol.setCart(0,0.000000000 ,-0.07579184359, 0.0);
   mol.setCart(1,0.866811829 ,0.6014357793  ,0.0);
   mol.setCart(2,-0.866811829, 0.6014357793 ,0.0);
+};
+template<>
+void loadPresets<H>(Molecule &mol){
+  mol.setNAtoms(1);
+  mol.setCharge(0);
+  mol.setNTotalE(1);
+  mol.setMultip(2);
+  mol.alloc();
+  mol.setIndex(0,HashAtom("H",0));
+  mol.setCart(0,0.000000000 ,0.00000000000, 0.0);
 };
 template<>
 void loadPresets<HE>(Molecule &mol){
@@ -104,7 +114,8 @@ int main(int argc, char **argv){
   fileio.iniH5Files();
   CQSetNumThreads(1);
   
-  loadPresets<OxMolecule>(molecule);
+  loadPresets<H>(molecule);
+//loadPresets<OxMolecule>(molecule);
 //loadPresets<WATER>(molecule);
 //loadPresets<HE>(molecule);
 //loadPresets<SO>(molecule);
@@ -114,10 +125,8 @@ int main(int argc, char **argv){
   molecule.computeRij();
   molecule.computeI();
 
-//singleSlater.setRef(SingleSlater<double>::RHF);
-//singleSlater.isClosedShell = true;
-  singleSlater.setRef(SingleSlater<dcomplex>::X2C);
-  singleSlater.setGuess(SingleSlater<dcomplex>::RANDOM);
+  singleSlater.setRef(TCS);
+  singleSlater.setGuess(RANDOM);
   singleSlater.isClosedShell = false;
   singleSlater.setNTCS(2);
   singleSlater.setSCFEneTol(1e-12);
@@ -140,7 +149,8 @@ int main(int argc, char **argv){
 
 //basis.findBasisFile("sto-3g");
 //basis.findBasisFile("3-21g");
-  basis.findBasisFile("6-31G");
+//basis.findBasisFile("6-31G");
+  basis.findBasisFile("cc-pV6Z");
   basis.communicate(fileio);
   basis.parseGlobal();
   basis.constructLocal(&molecule);
@@ -154,8 +164,8 @@ int main(int argc, char **argv){
 
   aoints.initMeta();
   aoints.integralAlgorithm = AOIntegrals::INCORE;
-  aoints.doX2C = true;
-  aoints.useFiniteWidthNuclei = true;
+  //aoints.doX2C = true;
+  //aoints.useFiniteWidthNuclei = true;
   //aoints.setPrintLevel(3);
   singleSlater.initMeta();
   singleSlater.genMethString();

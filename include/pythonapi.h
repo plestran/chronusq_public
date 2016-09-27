@@ -48,6 +48,10 @@ using ChronusQ::CQMemManager;
 using ChronusQ::ATOMIC_PARTITION;
 using ChronusQ::GRID_TYPE;
 
+using ChronusQ::REFERENCE;
+using ChronusQ::GUESS;
+using ChronusQ::DFT;
+
 
 namespace ChronusQ{
   void Wrapper_readInput(FileIO&,Molecule&,BasisSet&,Controls&,BasisSet&);

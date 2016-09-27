@@ -256,7 +256,7 @@ public:
   void formDBar();
 
   inline T IAJB(int i,int a,int j,int b,std::string spn="AAAA"){
-    if(this->Ref_ == SingleSlater<T>::TCS){
+    if(this->Ref_ == TCS){
       return (*this->iajb_)(i,a,j,b);
     } else {
       if(this->singleSlater_->isClosedShell){
@@ -278,7 +278,7 @@ public:
     }
   } 
   inline T IABC(int i,int a,int b,int c,std::string spn="AAAA"){
-    if(this->Ref_ == SingleSlater<T>::TCS){
+    if(this->Ref_ == TCS){
       return (*this->iabc_)(i,a,b,c);
     } else {
       if(this->singleSlater_->isClosedShell){
@@ -300,7 +300,7 @@ public:
     }
   } 
   inline T IJAB(int i,int j,int a,int b,std::string spn="AAAA"){
-    if(this->Ref_ == SingleSlater<T>::TCS){
+    if(this->Ref_ == TCS){
       return (*this->ijab_)(i,j,a,b);
     } else {
       if(this->singleSlater_->isClosedShell){
@@ -322,7 +322,7 @@ public:
     }
   } 
   inline T IABJ(int i,int a,int b,int j,std::string spn="AAAA"){
-    if(this->Ref_ == SingleSlater<T>::TCS){
+    if(this->Ref_ == TCS){
       return (*this->iajb_)(i,a,j,b);
     } else {
       if(this->singleSlater_->isClosedShell){
@@ -343,7 +343,7 @@ public:
     }
   } 
   inline T ABCD(int a,int b,int c,int d,std::string spn="AAAA"){
-    if(this->Ref_ == SingleSlater<T>::TCS){
+    if(this->Ref_ == TCS){
 //    cout << "DjM " << this->abcd_->size() << endl;
       return (*this->abcd_)(a,b,c,d);
     } else {
@@ -366,7 +366,7 @@ public:
     }
   } 
   inline T IJKL(int i,int j,int k,int l,std::string spn="AAAA"){
-    if(this->Ref_ == SingleSlater<T>::TCS){
+    if(this->Ref_ == TCS){
 //    cout << "DjM " << this->ijkl_->size() << endl;
       return (*this->ijkl_)(i,j,k,l);
     } else {
@@ -389,7 +389,7 @@ public:
     }
   } 
   inline T IJKA(int i,int j,int k,int a,std::string spn="AAAA"){
-    if(this->Ref_ == SingleSlater<T>::TCS){
+    if(this->Ref_ == TCS){
 //    cout << "DjM " << this->ijkl_->size() << endl;
       return (*this->ijka_)(i,j,k,a);
     } else {
