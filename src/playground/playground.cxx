@@ -114,9 +114,9 @@ int main(int argc, char **argv){
   fileio.iniH5Files();
   CQSetNumThreads(1);
   
-  loadPresets<H>(molecule);
+//loadPresets<H>(molecule);
 //loadPresets<OxMolecule>(molecule);
-//loadPresets<WATER>(molecule);
+  loadPresets<WATER>(molecule);
 //loadPresets<HE>(molecule);
 //loadPresets<SO>(molecule);
 //loadPresets<Li>(molecule);
@@ -125,8 +125,8 @@ int main(int argc, char **argv){
   molecule.computeRij();
   molecule.computeI();
 
-  singleSlater.setRef(TCS);
-  singleSlater.setGuess(RANDOM);
+  singleSlater.setRef(X2C);
+  singleSlater.setGuess(SAD);
   singleSlater.isClosedShell = false;
   singleSlater.setNTCS(2);
   singleSlater.setSCFEneTol(1e-12);
@@ -149,8 +149,8 @@ int main(int argc, char **argv){
 
 //basis.findBasisFile("sto-3g");
 //basis.findBasisFile("3-21g");
-//basis.findBasisFile("6-31G");
-  basis.findBasisFile("cc-pV6Z");
+  basis.findBasisFile("6-31G");
+//basis.findBasisFile("cc-pVTZ");
   basis.communicate(fileio);
   basis.parseGlobal();
   basis.constructLocal(&molecule);
@@ -164,8 +164,8 @@ int main(int argc, char **argv){
 
   aoints.initMeta();
   aoints.integralAlgorithm = AOIntegrals::INCORE;
-  //aoints.doX2C = true;
-  //aoints.useFiniteWidthNuclei = true;
+  aoints.doX2C = true;
+  aoints.useFiniteWidthNuclei = true;
   //aoints.setPrintLevel(3);
   singleSlater.initMeta();
   singleSlater.genMethString();

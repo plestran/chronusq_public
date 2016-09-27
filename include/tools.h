@@ -81,6 +81,7 @@ int getRank();
 int getSize();
 void mpiBarrier();
 
+template<typename F> F ComplexScale();
 
 } // namespace ChronusQ
 #endif

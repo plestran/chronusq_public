@@ -55,7 +55,7 @@ inline void printMATLAB(std::ostream &out) const {
   for(auto i = 0; i < derived().rows(); i++) {
 //  out << "[";
     for(auto j = 0; j < derived().cols(); j++){
-      if(std::is_same<dcomplex,Scalar>::value)
+      if(std::is_same<std::complex<double>,Scalar>::value)
         out << "complex";
       out << derived()(i,j);
       if( j != derived().cols() - 1) out << " , ";
