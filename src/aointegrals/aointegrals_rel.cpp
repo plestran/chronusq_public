@@ -364,6 +364,52 @@ if(this->printLevel_ >= 3){
   prettyPrintSmart(cout,PVPZ,"scaled cross(P,VP) Z");
 }
 
+
+
+// Apply Boettger Scaling Here?
+if(this->twoEFudgePVP == true){
+// Q(l) as an function:
+//    double QofL(double L) { return L*(L+1)*(2*L+1)/3; };
+
+// Loop over all shells
+    int idxRow = 0;
+    for (auto iShell = 0; iShell < this->basisSet_->nShell(); ++iShell) {
+        int nIPrims; //allocate space
+        int nJPrims;
+        int idxCol = 0;
+      for (auto jShell = 0; jShell < this->basisSet_->nShell(); ++jShell) {
+        auto iL = this->basisSet_->shells(iShell).contr[0].l;
+        auto jL = this->basisSet_->shells(jShell).contr[0].l;
+          
+        nIPrims = this->basisSet_->shells(iShell).size() *
+            this->basisSet_->shells(iShell).contr[0].coeff.size();
+        nJPrims = this->basisSet_->shells(jShell).size() *
+            this->basisSet_->shells(jShell).contr[0].coeff.size();
+        cout << "nIPrims: " << nIPrims  << " , nJPrims: " << nJPrims << endl;
+        if (iL > 0 and jL > 0) {
+          double fudgeFactor = (iL)*(iL+1)*(2*iL+1)/3;
+          fudgeFactor *= (jL)*(jL+1)*(2*jL+1)/3;
+
+          fudgeFactor /= this->molecule_->atomicZ(this->basisSet_->mapSh2Cen(iShell)-1); 
+          fudgeFactor /= this->molecule_->atomicZ(this->basisSet_->mapSh2Cen(jShell)-1); 
+          fudgeFactor = sqrt(fudgeFactor);
+          
+          PVPX.block(idxRow,idxCol,nIPrims,nJPrims) -= 
+            PVPX.block(idxRow,idxCol,nIPrims,nJPrims) * fudgeFactor;
+          
+          PVPY.block(idxRow,idxCol,nIPrims,nJPrims) -= 
+            PVPY.block(idxRow,idxCol,nIPrims,nJPrims) * fudgeFactor;
+          
+          PVPZ.block(idxRow,idxCol,nIPrims,nJPrims) -= 
+            PVPZ.block(idxRow,idxCol,nIPrims,nJPrims) * fudgeFactor;
+        }
+        idxCol += nJPrims;
+      } //loop jShells
+      idxRow += nIPrims;
+    }//loop iShells
+  }
+
+
   ComplexMatrix W(2*nUncontracted,2*nUncontracted);
   W.block(0,0,nUncontracted,nUncontracted).real() = PVPS;
   W.block(0,0,nUncontracted,nUncontracted).imag() = PVPZ;
@@ -643,6 +689,48 @@ if(this->printLevel_ >= 2) {
   prettyPrintSmart(this->fileio_->out,CoreX,"Core (mx)");
   prettyPrintSmart(this->fileio_->out,CoreY,"Core (my)");
 }
+
+if(this->twoEFudgePVP == false){
+// Q(l) as an function:
+//    double QofL(double L) { return L*(L+1)*(2*L+1)/3; };
+
+// Loop over all shells
+    int idxRow = 0;
+    for (auto iShell = 0; iShell < this->basisSet_->nShell(); ++iShell) {
+        int nIPrims; //allocate space
+        int nJPrims;
+        int idxCol = 0;
+      for (auto jShell = 0; jShell < this->basisSet_->nShell(); ++jShell) {
+        auto iL = this->basisSet_->shells(iShell).contr[0].l;
+        auto jL = this->basisSet_->shells(jShell).contr[0].l;
+          
+        nIPrims = this->basisSet_->shells(iShell).size() *
+            this->basisSet_->shells(iShell).contr[0].coeff.size();
+        nJPrims = this->basisSet_->shells(jShell).size() *
+            this->basisSet_->shells(jShell).contr[0].coeff.size();
+        cout << "nIPrims: " << nIPrims  << " , nJPrims: " << nJPrims << endl;
+        if (iL > 0 and jL > 0) {
+          double fudgeFactor = (iL)*(iL+1)*(2*iL+1)/3;
+          fudgeFactor *= (jL)*(jL+1)*(2*jL+1)/3;
+
+          fudgeFactor /= this->molecule_->atomicZ(this->basisSet_->mapSh2Cen(iShell)-1); 
+          fudgeFactor /= this->molecule_->atomicZ(this->basisSet_->mapSh2Cen(jShell)-1); 
+          fudgeFactor = sqrt(fudgeFactor);
+          
+          CoreX.block(idxRow,idxCol,nIPrims,nJPrims) -= 
+            CoreX.block(idxRow,idxCol,nIPrims,nJPrims) * fudgeFactor;
+          
+          CoreY.block(idxRow,idxCol,nIPrims,nJPrims) -= 
+            CoreY.block(idxRow,idxCol,nIPrims,nJPrims) * fudgeFactor;
+          
+          CoreZ.block(idxRow,idxCol,nIPrims,nJPrims) -= 
+            CoreZ.block(idxRow,idxCol,nIPrims,nJPrims) * fudgeFactor;
+        }
+        idxCol += nJPrims;
+      } //loop jShells
+      idxRow += nIPrims;
+    }//loop iShells
+  }
 
   *this->coreH_ = CoreS;
   *this->oneEmx_ = CoreX;
