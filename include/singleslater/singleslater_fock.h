@@ -218,9 +218,14 @@ void SingleSlater<T>::formFock(bool increment){
         // -----------------------------------
         // SCALE SO parts by 'i'
         // -----------------------------------
+        /*
         Quantum<T>::complexMyScale(*this->fockMx_);
         Quantum<T>::complexMyScale(*this->fockMy_);
         Quantum<T>::complexMyScale(*this->fockMz_);
+        */
+        (*this->fockMx_) *= ComplexScale<T>();
+        (*this->fockMy_) *= ComplexScale<T>();
+        (*this->fockMz_) *= ComplexScale<T>();
         // -----------------------------------
       }
       for(auto iF = fock_.begin(); iF != fock_.end(); iF++)

@@ -26,6 +26,7 @@
 #ifndef INCLUDED_QUANTUM
 #define INCLUDED_QUANTUM
 #include <global.h>
+#include <tools.h>
 #include <memory.h>
 
 namespace ChronusQ {
@@ -347,9 +348,10 @@ namespace ChronusQ {
 //  void scatterDensity();
 //  void gatherDensity();
 
-    template<typename Op>
-    static void complexMyScale(Op &);
+//  template<typename Op>
+//  static void complexMyScale(Op &);
 
+//  static T ComplexScale();
 
     inline void setMaxMultipole(int i){ this->maxMultipole_ = i;   };
     inline void setNTCS(int i){         this->nTCS_ = i;           };
