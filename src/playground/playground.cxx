@@ -166,7 +166,8 @@ int main(int argc, char **argv){
   aoints.integralAlgorithm = AOIntegrals::INCORE;
   aoints.doX2C = true;
   aoints.useFiniteWidthNuclei = true;
-  //aoints.setPrintLevel(3);
+  aoints.setPrintLevel(3);
+  aoints.twoEFudge = 1;
   singleSlater.initMeta();
   singleSlater.genMethString();
 

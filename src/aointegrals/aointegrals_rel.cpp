@@ -87,6 +87,8 @@ if(this->printLevel_ >= 2){
     SUncontracted.block(bf1_s,bf2_s,n1,n2) = bufMatS;
     TUncontracted.block(bf1_s,bf2_s,n1,n2) = bufMatT;
     
+    //Finite Width Nuclei
+    
     for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
       const double* buff = engineC.compute(
         unContractedShells[s1],
@@ -101,6 +103,19 @@ if(this->printLevel_ >= 2){
 
       VUncontracted.block(bf1_s,bf2_s,n1,n2) -= bufMatV;
     }
+    //Point Nuclei
+    /* 
+    const double * buffV = engineV.compute(
+        unContractedShells[s1],
+        unContractedShells[s2]
+    );
+
+    Eigen::Map<
+      const Eigen::Matrix<double,Dynamic,Dynamic,Eigen::RowMajor>>
+      bufMatV(buffV,n1,n2);
+
+    VUncontracted.block(bf1_s,bf2_s,n1,n2) = bufMatV;
+    */
 
   } // s2
   } // s1
@@ -289,7 +304,7 @@ if(this->printLevel_ >= 3){
   } 
 
   AtomicGrid AGrid(100,590,GAUSSCHEBFST,LEBEDEV,BECKE,atomicCenters,
-    this->molecule_->rIJ(),0,1.0,false);
+    this->molecule_->rIJ(),0,-1,1e6,1.0,false);
 
   std::vector<RealMatrix> numPot(10,RealMatrix::Zero(nUncontracted,
         nUncontracted));
@@ -367,7 +382,11 @@ if(this->printLevel_ >= 3){
 
 
 // Apply Boettger Scaling Here?
-if(this->twoEFudgePVP == true){
+if(this->twoEFudge == 2){
+
+  if(this->printLevel_ >= 2){
+    (this->fileio_->out) << "Applying 2e fudge factor to PVP integrals" << endl;
+  }
 // Q(l) as an function:
 //    double QofL(double L) { return L*(L+1)*(2*L+1)/3; };
 
@@ -690,8 +709,11 @@ if(this->printLevel_ >= 2) {
   prettyPrintSmart(this->fileio_->out,CoreY,"Core (my)");
 }
 
-if(this->twoEFudgePVP == false){
+if(this->twoEFudge == 1){
 
+    if (this->printLevel_ >= 2){
+        (this->fileio_->out) << "Applying 2e fudge factor to spin-orbit Hamiltonian" << endl;
+    }
 // Q(l) as an function:
 //    double QofL(double L) { return L*(L+1)*(2*L+1)/3; };
 
