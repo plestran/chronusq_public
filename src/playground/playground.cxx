@@ -85,7 +85,7 @@ int main(int argc, char **argv){
   BasisSet basis;
   AOIntegrals aoints;
   SingleSlater<dcomplex> singleSlater;
-//RealTime<double> rt;
+  RealTime<dcomplex> rt;
   FileIO fileio("test.inp","test.out");
 
   memManager.setTotalMem(256e6);
@@ -162,18 +162,12 @@ int main(int argc, char **argv){
   singleSlater.fockOrtho()[1]->swap(*singleSlater.fockOrtho()[2]);
 */
 
+/*
   // Rotate 90 deg around y (should yield x)
   singleSlater.rotateDensities({1,0,0},math.pi/4);
   singleSlater.computeProperties();
   singleSlater.printProperties();
 
-/*
-  singleSlater.PT()[1]->swap(*singleSlater.PT()[2]);  
-  singleSlater.fockMz()->setZero();
-  singleSlater.fockMy()->setZero();
-  *singleSlater.fockMy() = *singleSlater.PT()[2];
-  singleSlater.orthoFock3();
-*/
 
   ComplexMatrix P(2*singleSlater.onePDMMz()->rows(),2*singleSlater.onePDMMz()->rows());
   ComplexMatrix F(2*singleSlater.onePDMMz()->rows(),2*singleSlater.onePDMMz()->rows());
@@ -189,22 +183,7 @@ int main(int argc, char **argv){
 
   Quantum<dcomplex>::spinGather(FMap,scatteredFock_);  
   Quantum<dcomplex>::spinGather(PMap,scatteredDen_);  
-/*
-  prettyPrintSmart(cout,P,"P");
-  prettyPrintSmart(cout,F,"F");
-  prettyPrintSmart(cout,*singleSlater.onePDMOrtho()[0],"PS");
-  prettyPrintSmart(cout,*singleSlater.fockOrtho()[0],"FS");
-  prettyPrintSmart(cout,*singleSlater.onePDMOrtho()[2],"PY");
-  prettyPrintSmart(cout,*singleSlater.fockOrtho()[2],"FY");
-*/
 
-/*
-  ComplexMap Py = *singleSlater.onePDMOrtho()[2];
-  Quantum<dcomplex>::spinScatter(PMap,scatteredDen_);
-  prettyPrintSmart(cout,Py,"Before Scatter");
-  prettyPrintSmart(cout,*singleSlater.onePDMOrtho()[2],"After Scatter");
-  prettyPrintSmart(cout,Py - *singleSlater.onePDMOrtho()[2],"DIFF IN SCATTER");
-*/
 
   ComplexMatrix FP = F*P;
   ComplexMap    FPMap(FP.data(),FP.rows(),FP.cols());
@@ -226,13 +205,6 @@ int main(int argc, char **argv){
 
   Quantum<dcomplex>::spinScatter(FPMap,scatteredFP_);
 
-/*
-  ComplexMatrix FP1 = FP;
-  Quantum<dcomplex>::spinGather(FPMap,scatteredFP_);
-  prettyPrintSmart(cout,FP1,"FP1");
-  prettyPrintSmart(cout,FP,"FP after gather");
-  prettyPrintSmart(cout,FP1-FP,"FP Diff");
-*/
 
   ComplexMatrix FPScalar2(FPScalar);
   FPScalar2.setZero();
@@ -275,7 +247,7 @@ int main(int argc, char **argv){
   prettyPrintSmart(cout,FPMz - FPMz2,"Diff Mz");
   prettyPrintSmart(cout,FPMy - FPMy2,"Diff My");
   prettyPrintSmart(cout,FPMx - FPMx2,"Diff Mx");
-/*
+*/
   rt.communicate(singleSlater);
   rt.alloc();
 //rt.setMaxSteps(827000); // roughly 1 ps of dynamics
@@ -284,7 +256,6 @@ int main(int argc, char **argv){
   rt.setEDFieldAmp({0.001,0.0,0.0});
   rt.setIEnvlp(Step);
   rt.doPropagation();
-*/
 
 /*
   cout << endl;
