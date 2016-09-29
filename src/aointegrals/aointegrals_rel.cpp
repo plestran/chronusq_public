@@ -87,6 +87,8 @@ if(this->printLevel_ >= 2){
     SUncontracted.block(bf1_s,bf2_s,n1,n2) = bufMatS;
     TUncontracted.block(bf1_s,bf2_s,n1,n2) = bufMatT;
     
+    //Finite Width Nuclei
+    
     for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
       const double* buff = engineC.compute(
         unContractedShells[s1],
@@ -101,6 +103,19 @@ if(this->printLevel_ >= 2){
 
       VUncontracted.block(bf1_s,bf2_s,n1,n2) -= bufMatV;
     }
+    //Point Nuclei
+    /* 
+    const double * buffV = engineV.compute(
+        unContractedShells[s1],
+        unContractedShells[s2]
+    );
+
+    Eigen::Map<
+      const Eigen::Matrix<double,Dynamic,Dynamic,Eigen::RowMajor>>
+      bufMatV(buffV,n1,n2);
+
+    VUncontracted.block(bf1_s,bf2_s,n1,n2) = bufMatV;
+    */
 
   } // s2
   } // s1
@@ -288,8 +303,8 @@ if(this->printLevel_ >= 3){
     }
   } 
 
-  AtomicGrid AGrid(100,590,GAUSSCHEBFST,LEBEDEV,BECKE,atomicCenters,
-    this->molecule_->rIJ(),0,1.0,false);
+  AtomicGrid AGrid(200,770,GAUSSCHEBFST,LEBEDEV,BECKE,atomicCenters,
+    this->molecule_->rIJ(),0,-1,1e6,1.0,false);
 
   std::vector<RealMatrix> numPot(10,RealMatrix::Zero(nUncontracted,
         nUncontracted));
@@ -364,6 +379,56 @@ if(this->printLevel_ >= 3){
   prettyPrintSmart(cout,PVPZ,"scaled cross(P,VP) Z");
 }
 
+
+
+// Apply Boettger Scaling Here?
+if(this->twoEFudge == 2){
+
+  if(this->printLevel_ >= 2){
+    (this->fileio_->out) << "Applying 2e fudge factor to PVP integrals" << endl;
+  }
+// Q(l) as an function:
+//    double QofL(double L) { return L*(L+1)*(2*L+1)/3; };
+
+// Loop over all shells
+    int idxRow = 0;
+    for (auto iShell = 0; iShell < this->basisSet_->nShell(); ++iShell) {
+        int nIPrims; //allocate space
+        int nJPrims;
+        int idxCol = 0;
+      for (auto jShell = 0; jShell < this->basisSet_->nShell(); ++jShell) {
+        auto iL = this->basisSet_->shells(iShell).contr[0].l;
+        auto jL = this->basisSet_->shells(jShell).contr[0].l;
+          
+        nIPrims = this->basisSet_->shells(iShell).size() *
+            this->basisSet_->shells(iShell).contr[0].coeff.size();
+        nJPrims = this->basisSet_->shells(jShell).size() *
+            this->basisSet_->shells(jShell).contr[0].coeff.size();
+    //    cout << "nIPrims: " << nIPrims  << " , nJPrims: " << nJPrims << endl;
+        if (iL > 0 and jL > 0) {
+          double fudgeFactor = (iL)*(iL+1)*(2*iL+1)/3;
+          fudgeFactor *= (jL)*(jL+1)*(2*jL+1)/3;
+
+          fudgeFactor /= this->molecule_->atomicZ(this->basisSet_->mapSh2Cen(iShell)-1); 
+          fudgeFactor /= this->molecule_->atomicZ(this->basisSet_->mapSh2Cen(jShell)-1); 
+          fudgeFactor = sqrt(fudgeFactor);
+          
+          PVPX.block(idxRow,idxCol,nIPrims,nJPrims) -= 
+            PVPX.block(idxRow,idxCol,nIPrims,nJPrims) * fudgeFactor;
+          
+          PVPY.block(idxRow,idxCol,nIPrims,nJPrims) -= 
+            PVPY.block(idxRow,idxCol,nIPrims,nJPrims) * fudgeFactor;
+          
+          PVPZ.block(idxRow,idxCol,nIPrims,nJPrims) -= 
+            PVPZ.block(idxRow,idxCol,nIPrims,nJPrims) * fudgeFactor;
+        }
+        idxCol += nJPrims;
+      } //loop jShells
+      idxRow += nIPrims;
+    }//loop iShells
+  }
+
+
   ComplexMatrix W(2*nUncontracted,2*nUncontracted);
   W.block(0,0,nUncontracted,nUncontracted).real() = PVPS;
   W.block(0,0,nUncontracted,nUncontracted).imag() = PVPZ;
@@ -383,7 +448,7 @@ if(this->printLevel_ >= 3){
 // -------------------------------------------------
 // Put all pieces of core Hamiltonian in block form:
 // [ V'      cp    ]
-// [	 	   ]
+// [    	 	   ]
 // [ cp   W'-2mc^2 ]
 // -------------------------------------------------
 
@@ -643,6 +708,51 @@ if(this->printLevel_ >= 2) {
   prettyPrintSmart(this->fileio_->out,CoreX,"Core (mx)");
   prettyPrintSmart(this->fileio_->out,CoreY,"Core (my)");
 }
+
+if(this->twoEFudge == 1){
+
+    if (this->printLevel_ >= 2){
+        (this->fileio_->out) << "Applying 2e fudge factor to spin-orbit Hamiltonian" << endl;
+    }
+// Q(l) as an function:
+//    double QofL(double L) { return L*(L+1)*(2*L+1)/3; };
+
+// Loop over all shells
+    for (auto iShell = 0; iShell < this->basisSet_->nShell(); ++iShell) {
+    for (auto jShell = 0; jShell < this->basisSet_->nShell(); ++jShell) {
+
+        auto iL = this->basisSet_->shells(iShell).contr[0].l;
+        auto jL = this->basisSet_->shells(jShell).contr[0].l;
+        // Calculate Fudge Factor term by Term
+        double fudgeFactor = (iL)*(iL+1)*(2*iL+1)/3;
+        fudgeFactor *= (jL)*(jL+1)*(2*jL+1)/3;
+        fudgeFactor /= this->molecule_->atomicZ(this->basisSet_->mapSh2Cen(iShell)-1); 
+        fudgeFactor /= this->molecule_->atomicZ(this->basisSet_->mapSh2Cen(jShell)-1); 
+        fudgeFactor = sqrt(fudgeFactor);
+
+        CoreX.block(this->basisSet_->mapSh2Bf(iShell),
+        this->basisSet_->mapSh2Bf(jShell),this->basisSet_->shells(iShell).size(),
+        this->basisSet_->shells(jShell).size()) -=
+         (CoreX.block(this->basisSet_->mapSh2Bf(iShell),
+         this->basisSet_->mapSh2Bf(jShell),this->basisSet_->shells(iShell).size(),
+         this->basisSet_->shells(jShell).size()) * fudgeFactor);     
+       
+        CoreY.block(this->basisSet_->mapSh2Bf(iShell),
+        this->basisSet_->mapSh2Bf(jShell),this->basisSet_->shells(iShell).size(),
+        this->basisSet_->shells(jShell).size()) -=
+         (CoreY.block(this->basisSet_->mapSh2Bf(iShell),
+         this->basisSet_->mapSh2Bf(jShell),this->basisSet_->shells(iShell).size(),
+         this->basisSet_->shells(jShell).size()) * fudgeFactor);
+      
+        CoreZ.block(this->basisSet_->mapSh2Bf(iShell),
+        this->basisSet_->mapSh2Bf(jShell),this->basisSet_->shells(iShell).size(),
+        this->basisSet_->shells(jShell).size()) -=
+         (CoreZ.block(this->basisSet_->mapSh2Bf(iShell),
+         this->basisSet_->mapSh2Bf(jShell),this->basisSet_->shells(iShell).size(),
+         this->basisSet_->shells(jShell).size()) * fudgeFactor);
+      }
+    }//loop shells
+} //twoE Fudge
 
   *this->coreH_ = CoreS;
   *this->oneEmx_ = CoreX;

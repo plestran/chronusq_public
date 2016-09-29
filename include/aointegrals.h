@@ -238,6 +238,7 @@ public:
   bool  isPrimary; ///< Whether or not this is the primary calculation (i.e. not guess)
   bool  useFiniteWidthNuclei; ///< Whether or not to use finite width nuclei in the calculation of the one-body potential
   bool  doX2C; //Whether to do the X2C transformation
+  int   twoEFudge; // Apply fudge factor before to PVP integrals (2), or after to spin hamiltonian (1), or not at all (0).
 
 
   // Timing Stats
@@ -302,6 +303,7 @@ public:
     this->haveRII      = false;
     this->haveTRII     = false;
     this->doX2C	       = false;
+    this->twoEFudge    = 1;
 
     // Standard Values
     this->maxMultipole_     = 3;
