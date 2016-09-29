@@ -303,7 +303,7 @@ if(this->printLevel_ >= 3){
     }
   } 
 
-  AtomicGrid AGrid(100,590,GAUSSCHEBFST,LEBEDEV,BECKE,atomicCenters,
+  AtomicGrid AGrid(200,770,GAUSSCHEBFST,LEBEDEV,BECKE,atomicCenters,
     this->molecule_->rIJ(),0,-1,1e6,1.0,false);
 
   std::vector<RealMatrix> numPot(10,RealMatrix::Zero(nUncontracted,
@@ -404,7 +404,7 @@ if(this->twoEFudge == 2){
             this->basisSet_->shells(iShell).contr[0].coeff.size();
         nJPrims = this->basisSet_->shells(jShell).size() *
             this->basisSet_->shells(jShell).contr[0].coeff.size();
-        cout << "nIPrims: " << nIPrims  << " , nJPrims: " << nJPrims << endl;
+    //    cout << "nIPrims: " << nIPrims  << " , nJPrims: " << nJPrims << endl;
         if (iL > 0 and jL > 0) {
           double fudgeFactor = (iL)*(iL+1)*(2*iL+1)/3;
           fudgeFactor *= (jL)*(jL+1)*(2*jL+1)/3;
@@ -448,7 +448,7 @@ if(this->twoEFudge == 2){
 // -------------------------------------------------
 // Put all pieces of core Hamiltonian in block form:
 // [ V'      cp    ]
-// [	 	   ]
+// [    	 	   ]
 // [ cp   W'-2mc^2 ]
 // -------------------------------------------------
 

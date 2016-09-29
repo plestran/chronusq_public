@@ -23,7 +23,7 @@ struct MyStruct {
 using namespace ChronusQ;
 
 enum MOLECULE_PRESETS {
-  WATER,H,HE,SO,OxMolecule,Li
+  WATER,Methanol,H,HE,SO,OxMolecule,Li
 };
 
 template<MOLECULE_PRESETS T>
@@ -42,6 +42,28 @@ void loadPresets<WATER>(Molecule &mol) {
   mol.setCart(0,0.000000000 ,-0.07579184359, 0.0);
   mol.setCart(1,0.866811829 ,0.6014357793  ,0.0);
   mol.setCart(2,-0.866811829, 0.6014357793 ,0.0);
+};
+template<>
+void loadPresets<Methanol>(Molecule &mol) {
+  mol.setCharge(0);
+  mol.setNTotalE(18);
+  mol.setMultip(1);
+  mol.setNAtoms(6);
+  mol.alloc(); //allocates all memory for the class
+
+  mol.setIndex(0,HashAtom("C",0));
+  mol.setIndex(1,HashAtom("H",0));
+  mol.setIndex(2,HashAtom("O",0));
+  mol.setIndex(3,HashAtom("H",0));
+  mol.setIndex(4,HashAtom("H",0));
+  mol.setIndex(5,HashAtom("H",0));
+
+  mol.setCart(0,-1.013487,1.725956,1.257405);
+  mol.setCart(1,-0.069872,1.679306,0.755096);
+  mol.setCart(2,-1.488002,3.074931,1.256099);
+  mol.setCart(3,-1.168237,3.527873,2.039804);
+  mol.setCart(4,-1.718167,1.099499,0.751562);
+  mol.setCart(5,-0.897365,1.389691,2.266534);
 };
 template<>
 void loadPresets<H>(Molecule &mol){
@@ -115,8 +137,9 @@ int main(int argc, char **argv){
   CQSetNumThreads(1);
   
 //loadPresets<H>(molecule);
-//loadPresets<OxMolecule>(molecule);
-  loadPresets<WATER>(molecule);
+  loadPresets<OxMolecule>(molecule);
+//loadPresets<WATER>(molecule);
+//loadPresets<Methanol>(molecule);
 //loadPresets<HE>(molecule);
 //loadPresets<SO>(molecule);
 //loadPresets<Li>(molecule);
@@ -126,7 +149,7 @@ int main(int argc, char **argv){
   molecule.computeI();
 
   singleSlater.setRef(X2C);
-  singleSlater.setGuess(RANDOM);
+  singleSlater.setGuess(CORE);
   singleSlater.isClosedShell = false;
   singleSlater.setNTCS(2);
   singleSlater.setSCFEneTol(1e-12);
@@ -167,7 +190,7 @@ int main(int argc, char **argv){
   aoints.doX2C = true;
   aoints.useFiniteWidthNuclei = true;
   aoints.setPrintLevel(3);
-  aoints.twoEFudge = 1;
+  aoints.twoEFudge = 2; //default is 1
   singleSlater.initMeta();
   singleSlater.genMethString();
 
@@ -218,18 +241,19 @@ int main(int argc, char **argv){
   singleSlater.printDensity();
 */
 
+/*
   prettyPrintSmart(cout,*singleSlater.moA(),"MO");
   for(auto i = 0; i < 2*basis.nBasis(); i++) {
   for(auto j = 0; j < 2*basis.nBasis(); j+=2) {
     dcomplex a = (*singleSlater.moA())(j,i); 
     dcomplex b = (*singleSlater.moA())(j+1,i); 
     // Y Rotation ...
-/*
+
     (*singleSlater.moA())(j,i) 
        = std::cos(-math.pi / 4) * a  +  std::sin(-math.pi / 4) * b; 
     (*singleSlater.moA())(j+1,i) 
        = -std::sin(-math.pi / 4) * a  +  std::cos(-math.pi / 4) * b; 
-*/
+
 
     // X Rotation ...
     (*singleSlater.moA())(j,i) 
@@ -254,6 +278,7 @@ int main(int argc, char **argv){
   singleSlater.computeProperties();
   singleSlater.printProperties();
   prettyPrintSmart(cout,*singleSlater.moA(),"MO");
+*/
 
 /*
   rt.communicate(singleSlater);
