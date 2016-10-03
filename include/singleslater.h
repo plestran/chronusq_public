@@ -207,6 +207,7 @@ class SingleSlater : public WaveFunction<T> {
 
   std::array<double,3> elecField_;
   std::vector<double> mullPop_; ///< mulliken partial charge
+  std::vector<double> lowPop_; ///< loewdin partial charge
 
 
   // Pointers of scratch partitions (NOT MEANT TO BE COPIED)
@@ -552,6 +553,7 @@ public:
   void CpyFock(int);
   void GenDComm(int);
   void mullikenPop();
+  void loewdinPop();
   void fixPhase();
 
   void levelShift();

@@ -332,6 +332,5 @@ void SingleSlater<T>::READGuess(){
     SCFDensityMy_->read(this->onePDMMy_->data(),H5PredType<T>());
     SCFDensityMx_->read(this->onePDMMx_->data(),H5PredType<T>());
   }
-  this->printDensity();
   this->formFock();
 };

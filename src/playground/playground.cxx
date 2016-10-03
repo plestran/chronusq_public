@@ -136,8 +136,8 @@ int main(int argc, char **argv){
   CQSetNumThreads(1);
   
 //loadPresets<H>(molecule);
-  loadPresets<OxMolecule>(molecule);
-//loadPresets<WATER>(molecule);
+//loadPresets<OxMolecule>(molecule);
+  loadPresets<WATER>(molecule);
 //loadPresets<Methanol>(molecule);
 //loadPresets<HE>(molecule);
 //loadPresets<SO>(molecule);
@@ -209,7 +209,7 @@ int main(int argc, char **argv){
   singleSlater.computeProperties();
   singleSlater.printProperties();
 
-  singleSlater.printDensity();
+  singleSlater.mullikenPop();
 
 /*
   singleSlater.onePDMOrtho()[1]->swap(*singleSlater.onePDMOrtho()[3]);
