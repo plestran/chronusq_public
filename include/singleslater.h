@@ -216,6 +216,23 @@ class SingleSlater : public WaveFunction<T> {
   T *delFMem_;
   T *PNOMem_;
 
+  // Storage Files for Restart
+
+  std::unique_ptr<H5::Group> SCFGroup_;
+
+  std::unique_ptr<H5::DataSet> SCFDensityScalar_;
+  std::unique_ptr<H5::DataSet> SCFDensityMz_;
+  std::unique_ptr<H5::DataSet> SCFDensityMy_;
+  std::unique_ptr<H5::DataSet> SCFDensityMx_;
+  
+  std::unique_ptr<H5::DataSet> SCFFockScalar_;
+  std::unique_ptr<H5::DataSet> SCFFockMz_;
+  std::unique_ptr<H5::DataSet> SCFFockMy_;
+  std::unique_ptr<H5::DataSet> SCFFockMx_;
+
+  std::unique_ptr<H5::DataSet> SCFMOA_;
+  std::unique_ptr<H5::DataSet> SCFMOB_;
+
 
   // Storage Files for Extrapolation
   H5::DataSet *FScalarDIIS_;
@@ -668,6 +685,9 @@ public:
   void incPT();
 
   void formFP();
+
+
+  void initSCFFiles();
   
 };
 

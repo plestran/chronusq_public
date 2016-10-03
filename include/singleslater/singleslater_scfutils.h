@@ -480,3 +480,140 @@ void SingleSlater<T>::populateMO4Diag(){
     Quantum<T>::spinGather(*this->moA_,scattered);
   }
 };
+
+template <typename T>
+void SingleSlater<T>::initSCFFiles() {
+
+  if(!this->isPrimary) return;
+  std::vector<hsize_t> dims;
+  dims.push_back(this->basisset_->nBasis());
+  dims.push_back(this->basisset_->nBasis());
+
+  std::vector<hsize_t> bigDims;
+  bigDims.push_back(this->nTCS_*this->basisset_->nBasis());
+  bigDims.push_back(this->nTCS_*this->basisset_->nBasis());
+
+  H5::DataSpace dsp(2,&dims[0]);
+  H5::DataSpace bdsp(2,&bigDims[0]);
+
+  // Check if SCF group exists
+  try {
+    this->SCFGroup_ = std::unique_ptr<H5::Group>(new H5::Group(
+      this->fileio_->restart->openGroup("/SCF")));
+  } catch(...) {
+    this->SCFGroup_ = std::unique_ptr<H5::Group>(new H5::Group(
+      this->fileio_->restart->createGroup("/SCF")));
+  }
+
+
+  // Density Files
+
+  // Scalar
+  try {
+    this->SCFDensityScalar_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+      this->SCFGroup_->openDataSet("DensityScalar")));
+  } catch(...) {
+    this->SCFDensityScalar_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+      this->SCFGroup_->createDataSet("DensityScalar",H5PredType<T>(),dsp)));
+  }
+
+  // Mz
+  if(this->nTCS_ == 2 or !this->isClosedShell) {
+    try {
+      this->SCFDensityMz_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->openDataSet("DensityMz")));
+    } catch(...) {
+      this->SCFDensityMz_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->createDataSet("DensityMz",H5PredType<T>(),dsp)));
+    }
+  }
+
+  // Mx / My
+  if(this->nTCS_ == 2) {
+    // Mx
+    try {
+      this->SCFDensityMx_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->openDataSet("DensityMx")));
+    } catch(...) {
+      this->SCFDensityMx_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->createDataSet("DensityMx",H5PredType<T>(),dsp)));
+    }
+
+    // My
+    try {
+      this->SCFDensityMy_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->openDataSet("DensityMy")));
+    } catch(...) {
+      this->SCFDensityMy_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->createDataSet("DensityMy",H5PredType<T>(),dsp)));
+    }
+  }
+
+
+
+  // Fock Files
+
+  // Scalar
+  try {
+    this->SCFFockScalar_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+      this->SCFGroup_->openDataSet("FockScalar")));
+  } catch(...) {
+    this->SCFFockScalar_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+      this->SCFGroup_->createDataSet("FockScalar",H5PredType<T>(),dsp)));
+  }
+
+  // Mz
+  if(this->nTCS_ == 2 or !this->isClosedShell) {
+    try {
+      this->SCFFockMz_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->openDataSet("FockMz")));
+    } catch(...) {
+      this->SCFFockMz_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->createDataSet("FockMz",H5PredType<T>(),dsp)));
+    }
+  }
+
+  // Mx / My
+  if(this->nTCS_ == 2) {
+    // Mx
+    try {
+      this->SCFFockMx_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->openDataSet("FockMx")));
+    } catch(...) {
+      this->SCFFockMx_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->createDataSet("FockMx",H5PredType<T>(),dsp)));
+    }
+
+    // My
+    try {
+      this->SCFFockMy_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->openDataSet("FockMy")));
+    } catch(...) {
+      this->SCFFockMy_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->createDataSet("FockMy",H5PredType<T>(),dsp)));
+    }
+  }
+
+
+  // MO Files
+  
+  // MO (TCS) / MOA
+  try {
+    this->SCFMOA_ = std::unique_ptr<H5::DataSet>(new H5::DataSet(
+      this->SCFGroup_->openDataSet("MOA")));
+  } catch(...) {
+    this->SCFMOA_ = std::unique_ptr<H5::DataSet>(new H5::DataSet(
+      this->SCFGroup_->createDataSet("MOA",H5PredType<T>(),bdsp)));
+  }
+
+  // MOB
+  if(this->nTCS_ == 1 and !this->isClosedShell){
+    try {
+      this->SCFMOB_ = std::unique_ptr<H5::DataSet>(new H5::DataSet(
+        this->SCFGroup_->openDataSet("MOB")));
+    } catch(...) {
+      this->SCFMOB_ = std::unique_ptr<H5::DataSet>(new H5::DataSet(
+        this->SCFGroup_->createDataSet("MOB",H5PredType<T>(),bdsp)));
+    }
+  }
+};
