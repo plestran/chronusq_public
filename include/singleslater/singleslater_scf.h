@@ -59,7 +59,7 @@ void SingleSlater<T>::SCF3(){
     this->writeSCFFiles();
 
 //  this->copyDen();
-    this->copyPT();
+//  this->copyPT();
     if(iter != 0 and this->doIncFock_)
       this->copyDeltaDtoD();
 

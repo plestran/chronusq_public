@@ -230,6 +230,11 @@ class SingleSlater : public WaveFunction<T> {
   std::unique_ptr<H5::DataSet> SCFFockMy_;
   std::unique_ptr<H5::DataSet> SCFFockMx_;
 
+  std::unique_ptr<H5::DataSet> SCFPTScalar_;
+  std::unique_ptr<H5::DataSet> SCFPTMz_;
+  std::unique_ptr<H5::DataSet> SCFPTMy_;
+  std::unique_ptr<H5::DataSet> SCFPTMx_;
+
   std::unique_ptr<H5::DataSet> SCFMOA_;
   std::unique_ptr<H5::DataSet> SCFMOB_;
 
@@ -279,10 +284,10 @@ class SingleSlater : public WaveFunction<T> {
 //H5::DataSet *DMxOld_;
 
   // Storage Files for most recent Fock (for SCF comparison)
-  H5::DataSet *PTScalarOld_;
-  H5::DataSet *PTMzOld_;
-  H5::DataSet *PTMyOld_;
-  H5::DataSet *PTMxOld_;
+//H5::DataSet *PTScalarOld_;
+//H5::DataSet *PTMzOld_;
+//H5::DataSet *PTMyOld_;
+//H5::DataSet *PTMxOld_;
 
   // Storage for FP
   H5::DataSet *FPScalar_;
@@ -681,7 +686,7 @@ public:
   void formDeltaD();
   void copyDeltaDtoD();
   void copyDOldtoD();
-  void copyPT();
+//void copyPT();
   void incPT();
 
   void formFP();

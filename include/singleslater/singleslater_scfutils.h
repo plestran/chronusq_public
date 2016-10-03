@@ -46,8 +46,8 @@ void SingleSlater<T>::initSCFMem3(){
   // Scalar Files
 //this->SCFDensityScalar_ = this->fileio_->createScratchPartition(H5PredType<T>(),
 //  "Most Recent Density Matrix (Scalar) for RMS",dims);
-  this->PTScalarOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
-    "Most Recent Perturbation Tensor (Scalar)",dims);
+//this->PTScalarOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
+//  "Most Recent Perturbation Tensor (Scalar)",dims);
   this->DeltaDScalar_ = this->fileio_->createScratchPartition(H5PredType<T>(),
     "Change in Density Matrix (Scalar)",dims);
 
@@ -55,8 +55,8 @@ void SingleSlater<T>::initSCFMem3(){
   if(this->nTCS_ == 2 || !this->isClosedShell){
 //  this->SCFDensityMz_ = this->fileio_->createScratchPartition(H5PredType<T>(),
 //    "Most Recent Density Matrix (Mz) for RMS",dims);
-    this->PTMzOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
-      "Most Recent Perturbation Tensor (Mz)",dims);
+//  this->PTMzOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
+//    "Most Recent Perturbation Tensor (Mz)",dims);
     this->DeltaDMz_ = this->fileio_->createScratchPartition(H5PredType<T>(),
       "Change in Density Matrix (Mz)",dims);
   }
@@ -67,10 +67,10 @@ void SingleSlater<T>::initSCFMem3(){
 //    "Most Recent Density Matrix (My) for RMS",dims);
 //  this->SCFDensityMx_ = this->fileio_->createScratchPartition(H5PredType<T>(),
 //    "Most Recent Density Matrix (Mx) for RMS",dims);
-    this->PTMyOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
-      "Most Recent Perturbation Tensor (My)",dims);
-    this->PTMxOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
-      "Most Recent Perturbation Tensor (Mx)",dims);
+//  this->PTMyOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
+//    "Most Recent Perturbation Tensor (My)",dims);
+//  this->PTMxOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
+//    "Most Recent Perturbation Tensor (Mx)",dims);
     this->DeltaDMy_ = this->fileio_->createScratchPartition(H5PredType<T>(),
       "Change in Density Matrix (My)",dims);
     this->DeltaDMx_ = this->fileio_->createScratchPartition(H5PredType<T>(),
@@ -428,6 +428,7 @@ void SingleSlater<T>::copyDOldtoD(){
  * quaternion perturbation tensor after only the change in the perturbation
  * tensor has been evalued in formFock
  */
+/*
 template <typename T>
 void SingleSlater<T>::copyPT(){
 
@@ -440,6 +441,7 @@ void SingleSlater<T>::copyPT(){
     PTMxOld_->write(this->PTMx_->data(),H5PredType<T>());
   }
 };
+*/
 
 /**
  *  \brief Increment the current quaternion perturbation tensor by the last
@@ -450,18 +452,18 @@ void SingleSlater<T>::copyPT(){
  */
 template<typename T>
 void SingleSlater<T>::incPT(){
-  PTScalarOld_->read(this->NBSqScratch_->data(),H5PredType<T>());
+  SCFPTScalar_->read(this->NBSqScratch_->data(),H5PredType<T>());
   this->PTScalar_->noalias() += (*this->NBSqScratch_);
 
   if(this->nTCS_ == 2 or !this->isClosedShell){
-    PTMzOld_->read(this->NBSqScratch_->data(),H5PredType<T>());
+    SCFPTMz_->read(this->NBSqScratch_->data(),H5PredType<T>());
     this->PTMz_->noalias() += (*this->NBSqScratch_);
   }
 
   if(this->nTCS_ == 2) {
-    PTMxOld_->read(this->NBSqScratch_->data(),H5PredType<T>());
+    SCFPTMx_->read(this->NBSqScratch_->data(),H5PredType<T>());
     this->PTMx_->noalias() += (*this->NBSqScratch_);
-    PTMyOld_->read(this->NBSqScratch_->data(),H5PredType<T>());
+    SCFPTMy_->read(this->NBSqScratch_->data(),H5PredType<T>());
     this->PTMy_->noalias() += (*this->NBSqScratch_);
   }
 }
@@ -599,6 +601,48 @@ void SingleSlater<T>::initSCFFiles() {
     }
   }
 
+  // PT Files
+
+  // Scalar
+  try {
+    this->SCFPTScalar_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+      this->SCFGroup_->openDataSet("PTScalar")));
+  } catch(...) {
+    this->SCFPTScalar_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+      this->SCFGroup_->createDataSet("PTScalar",H5PredType<T>(),dsp)));
+  }
+
+  // Mz
+  if(this->nTCS_ == 2 or !this->isClosedShell) {
+    try {
+      this->SCFPTMz_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->openDataSet("PTMz")));
+    } catch(...) {
+      this->SCFPTMz_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->createDataSet("PTMz",H5PredType<T>(),dsp)));
+    }
+  }
+
+  // Mx / My
+  if(this->nTCS_ == 2) {
+    // Mx
+    try {
+      this->SCFPTMx_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->openDataSet("PTMx")));
+    } catch(...) {
+      this->SCFPTMx_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->createDataSet("PTMx",H5PredType<T>(),dsp)));
+    }
+
+    // My
+    try {
+      this->SCFPTMy_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->openDataSet("PTMy")));
+    } catch(...) {
+      this->SCFPTMy_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->createDataSet("PTMy",H5PredType<T>(),dsp)));
+    }
+  }
 
   // MO Files
   
@@ -627,11 +671,13 @@ template <typename T>
 void SingleSlater<T>::writeSCFFiles() {
   this->SCFDensityScalar_->write(this->onePDMScalar_->data(),H5PredType<T>());
   this->SCFFockScalar_->write(this->fockScalar_->data(),H5PredType<T>());
+  this->SCFPTScalar_->write(this->PTScalar_->data(),H5PredType<T>());
   this->SCFMOA_->write(this->moA_->data(),H5PredType<T>());
 
   if(this->nTCS_ == 2 or !this->isClosedShell) {
     this->SCFDensityMz_->write(this->onePDMMz_->data(),H5PredType<T>());
     this->SCFFockMz_->write(this->fockMz_->data(),H5PredType<T>());
+    this->SCFPTMz_->write(this->PTMz_->data(),H5PredType<T>());
   }
 
   if(this->nTCS_ == 1 and !this->isClosedShell)
@@ -640,7 +686,9 @@ void SingleSlater<T>::writeSCFFiles() {
   if(this->nTCS_ == 2) {
     this->SCFDensityMx_->write(this->onePDMMx_->data(),H5PredType<T>());
     this->SCFFockMx_->write(this->fockMx_->data(),H5PredType<T>());
+    this->SCFPTMx_->write(this->PTMx_->data(),H5PredType<T>());
     this->SCFDensityMy_->write(this->onePDMMy_->data(),H5PredType<T>());
     this->SCFFockMy_->write(this->fockMy_->data(),H5PredType<T>());
+    this->SCFPTMy_->write(this->PTMy_->data(),H5PredType<T>());
   }
 };
