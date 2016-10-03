@@ -137,19 +137,19 @@ int main(int argc, char **argv){
   CQSetNumThreads(1);
   
 //loadPresets<H>(molecule);
-  loadPresets<OxMolecule>(molecule);
+//loadPresets<OxMolecule>(molecule);
 //loadPresets<WATER>(molecule);
 //loadPresets<Methanol>(molecule);
 //loadPresets<HE>(molecule);
 //loadPresets<SO>(molecule);
-//loadPresets<Li>(molecule);
+  loadPresets<Li>(molecule);
   molecule.convBohr();
   molecule.computeNucRep();
   molecule.computeRij();
   molecule.computeI();
 
   singleSlater.setRef(X2C);
-  singleSlater.setGuess(CORE);
+  singleSlater.setGuess(RANDOM);
   singleSlater.isClosedShell = false;
   singleSlater.setNTCS(2);
   singleSlater.setSCFEneTol(1e-12);

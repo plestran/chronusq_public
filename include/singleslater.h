@@ -367,6 +367,7 @@ public:
     this->fixPhase_    = true;
     this->guess_       = SAD;
 
+
     // SCF Fock Formation
     this->doIncFock_   = false;
     this->nIncFock_    = 20;
