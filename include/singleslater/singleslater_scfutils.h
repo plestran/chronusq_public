@@ -44,8 +44,8 @@ void SingleSlater<T>::initSCFMem3(){
   dims.push_back(this->nBasis_);
 
   // Scalar Files
-  this->DScalarOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
-    "Most Recent Density Matrix (Scalar) for RMS",dims);
+//this->SCFDensityScalar_ = this->fileio_->createScratchPartition(H5PredType<T>(),
+//  "Most Recent Density Matrix (Scalar) for RMS",dims);
   this->PTScalarOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
     "Most Recent Perturbation Tensor (Scalar)",dims);
   this->DeltaDScalar_ = this->fileio_->createScratchPartition(H5PredType<T>(),
@@ -53,8 +53,8 @@ void SingleSlater<T>::initSCFMem3(){
 
   // Mz Files
   if(this->nTCS_ == 2 || !this->isClosedShell){
-    this->DMzOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
-      "Most Recent Density Matrix (Mz) for RMS",dims);
+//  this->SCFDensityMz_ = this->fileio_->createScratchPartition(H5PredType<T>(),
+//    "Most Recent Density Matrix (Mz) for RMS",dims);
     this->PTMzOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
       "Most Recent Perturbation Tensor (Mz)",dims);
     this->DeltaDMz_ = this->fileio_->createScratchPartition(H5PredType<T>(),
@@ -63,10 +63,10 @@ void SingleSlater<T>::initSCFMem3(){
   
   // Mx My Files
   if(this->nTCS_ == 2) {
-    this->DMyOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
-      "Most Recent Density Matrix (My) for RMS",dims);
-    this->DMxOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
-      "Most Recent Density Matrix (Mx) for RMS",dims);
+//  this->SCFDensityMy_ = this->fileio_->createScratchPartition(H5PredType<T>(),
+//    "Most Recent Density Matrix (My) for RMS",dims);
+//  this->SCFDensityMx_ = this->fileio_->createScratchPartition(H5PredType<T>(),
+//    "Most Recent Density Matrix (Mx) for RMS",dims);
     this->PTMyOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
       "Most Recent Perturbation Tensor (My)",dims);
     this->PTMxOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
@@ -98,23 +98,25 @@ void SingleSlater<T>::cleanupSCFMem3(){
 /**
  * \brief Copy the current quaternion density matrix to disc
  */
+/*
 template <typename T>
 void SingleSlater<T>::copyDen(){
 
   // Scalar
-  DScalarOld_->write(this->onePDMScalar_->data(),H5PredType<T>());
+  SCFDensityScalar_->write(this->onePDMScalar_->data(),H5PredType<T>());
 
   // Mz
   if(this->nTCS_ == 2 or !this->isClosedShell){
-    DMzOld_->write(this->onePDMMz_->data(),H5PredType<T>());
+    SCFDensityMz_->write(this->onePDMMz_->data(),H5PredType<T>());
   }
 
   // Mx My
   if(this->nTCS_ == 2){
-    DMyOld_->write(this->onePDMMy_->data(),H5PredType<T>());
-    DMxOld_->write(this->onePDMMx_->data(),H5PredType<T>());
+    SCFDensityMy_->write(this->onePDMMy_->data(),H5PredType<T>());
+    SCFDensityMx_->write(this->onePDMMx_->data(),H5PredType<T>());
   }
 };
+*/
 
 /**
  *  \brief Orthogonalize the quaternion Fock matrix 
@@ -358,22 +360,22 @@ void SingleSlater<T>::mixOrbitals2C(){
  */
 template <typename T>
 void SingleSlater<T>::formDeltaD(){
-  DScalarOld_->read(this->NBSqScratch_->data(),H5PredType<T>());
+  SCFDensityScalar_->read(this->NBSqScratch_->data(),H5PredType<T>());
   (*this->NBSqScratch2_) = (*this->onePDMScalar_) - (*this->NBSqScratch_);
   DeltaDScalar_->write(this->NBSqScratch2_->data(),H5PredType<T>());
 
   if(this->nTCS_ == 2 or !this->isClosedShell){
-    DMzOld_->read(this->NBSqScratch_->data(),H5PredType<T>());
+    SCFDensityMz_->read(this->NBSqScratch_->data(),H5PredType<T>());
     (*this->NBSqScratch2_) = (*this->onePDMMz_) - (*this->NBSqScratch_);
     DeltaDMz_->write(this->NBSqScratch2_->data(),H5PredType<T>());
   }
 
   if(this->nTCS_ == 2) {
-    DMyOld_->read(this->NBSqScratch_->data(),H5PredType<T>());
+    SCFDensityMy_->read(this->NBSqScratch_->data(),H5PredType<T>());
     (*this->NBSqScratch2_) = (*this->onePDMMy_) - (*this->NBSqScratch_);
     DeltaDMy_->write(this->NBSqScratch2_->data(),H5PredType<T>());
 
-    DMxOld_->read(this->NBSqScratch_->data(),H5PredType<T>());
+    SCFDensityMx_->read(this->NBSqScratch_->data(),H5PredType<T>());
     (*this->NBSqScratch2_) = (*this->onePDMMx_) - (*this->NBSqScratch_);
     DeltaDMx_->write(this->NBSqScratch2_->data(),H5PredType<T>());
   }
@@ -409,13 +411,13 @@ void SingleSlater<T>::copyDeltaDtoD(){
  */
 template<typename T>
 void SingleSlater<T>::copyDOldtoD(){
-  DScalarOld_->read(this->onePDMScalar_->data(),H5PredType<T>());
+  SCFDensityScalar_->read(this->onePDMScalar_->data(),H5PredType<T>());
   if(this->nTCS_ == 2 or !this->isClosedShell){
-    DMzOld_->read(this->onePDMMz_->data(),H5PredType<T>());
+    SCFDensityMz_->read(this->onePDMMz_->data(),H5PredType<T>());
   }
   if(this->nTCS_ == 2) {
-    DMyOld_->read(this->onePDMMy_->data(),H5PredType<T>());
-    DMxOld_->read(this->onePDMMx_->data(),H5PredType<T>());
+    SCFDensityMy_->read(this->onePDMMy_->data(),H5PredType<T>());
+    SCFDensityMx_->read(this->onePDMMx_->data(),H5PredType<T>());
   }
 }
 

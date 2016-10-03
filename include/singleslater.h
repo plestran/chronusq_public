@@ -273,10 +273,10 @@ class SingleSlater : public WaveFunction<T> {
 
 
   // Storage Files for most recent Density (for SCF comparison)
-  H5::DataSet *DScalarOld_;
-  H5::DataSet *DMzOld_;
-  H5::DataSet *DMyOld_;
-  H5::DataSet *DMxOld_;
+//H5::DataSet *DScalarOld_;
+//H5::DataSet *DMzOld_;
+//H5::DataSet *DMyOld_;
+//H5::DataSet *DMxOld_;
 
   // Storage Files for most recent Fock (for SCF comparison)
   H5::DataSet *PTScalarOld_;
@@ -306,7 +306,7 @@ class SingleSlater : public WaveFunction<T> {
   void mixOrbitalsSCF();   ///< Mix the orbitals for Complex / TCS SCF
 
   void fockCUHF();
-  void copyDen();
+//void copyDen();
   void backTransformMOs();
 
   void doImagTimeProp(double); ///< Propagate the wavefunction in imaginary time 

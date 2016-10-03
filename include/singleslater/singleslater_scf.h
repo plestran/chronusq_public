@@ -58,7 +58,7 @@ void SingleSlater<T>::SCF3(){
   for(iter = 0; iter < this->maxSCFIter_; iter++){
     this->writeSCFFiles();
 
-    this->copyDen();
+//  this->copyDen();
     this->copyPT();
     if(iter != 0 and this->doIncFock_)
       this->copyDeltaDtoD();
