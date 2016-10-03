@@ -207,6 +207,7 @@ class SingleSlater : public WaveFunction<T> {
 
   std::array<double,3> elecField_;
   std::vector<double> mullPop_; ///< mulliken partial charge
+  std::vector<double> lowPop_; ///< loewdin partial charge
 
 
   // Pointers of scratch partitions (NOT MEANT TO BE COPIED)
@@ -215,6 +216,28 @@ class SingleSlater : public WaveFunction<T> {
   T *lambdaMem_;
   T *delFMem_;
   T *PNOMem_;
+
+  // Storage Files for Restart
+
+  std::unique_ptr<H5::Group> SCFGroup_;
+
+  std::unique_ptr<H5::DataSet> SCFDensityScalar_;
+  std::unique_ptr<H5::DataSet> SCFDensityMz_;
+  std::unique_ptr<H5::DataSet> SCFDensityMy_;
+  std::unique_ptr<H5::DataSet> SCFDensityMx_;
+  
+  std::unique_ptr<H5::DataSet> SCFFockScalar_;
+  std::unique_ptr<H5::DataSet> SCFFockMz_;
+  std::unique_ptr<H5::DataSet> SCFFockMy_;
+  std::unique_ptr<H5::DataSet> SCFFockMx_;
+
+  std::unique_ptr<H5::DataSet> SCFPTScalar_;
+  std::unique_ptr<H5::DataSet> SCFPTMz_;
+  std::unique_ptr<H5::DataSet> SCFPTMy_;
+  std::unique_ptr<H5::DataSet> SCFPTMx_;
+
+  std::unique_ptr<H5::DataSet> SCFMOA_;
+  std::unique_ptr<H5::DataSet> SCFMOB_;
 
 
   // Storage Files for Extrapolation
@@ -256,16 +279,16 @@ class SingleSlater : public WaveFunction<T> {
 
 
   // Storage Files for most recent Density (for SCF comparison)
-  H5::DataSet *DScalarOld_;
-  H5::DataSet *DMzOld_;
-  H5::DataSet *DMyOld_;
-  H5::DataSet *DMxOld_;
+//H5::DataSet *DScalarOld_;
+//H5::DataSet *DMzOld_;
+//H5::DataSet *DMyOld_;
+//H5::DataSet *DMxOld_;
 
   // Storage Files for most recent Fock (for SCF comparison)
-  H5::DataSet *PTScalarOld_;
-  H5::DataSet *PTMzOld_;
-  H5::DataSet *PTMyOld_;
-  H5::DataSet *PTMxOld_;
+//H5::DataSet *PTScalarOld_;
+//H5::DataSet *PTMzOld_;
+//H5::DataSet *PTMyOld_;
+//H5::DataSet *PTMxOld_;
 
   // Storage for FP
   H5::DataSet *FPScalar_;
@@ -289,7 +312,7 @@ class SingleSlater : public WaveFunction<T> {
   void mixOrbitalsSCF();   ///< Mix the orbitals for Complex / TCS SCF
 
   void fockCUHF();
-  void copyDen();
+//void copyDen();
   void backTransformMOs();
 
   void doImagTimeProp(double); ///< Propagate the wavefunction in imaginary time 
@@ -531,6 +554,7 @@ public:
   void CpyFock(int);
   void GenDComm(int);
   void mullikenPop();
+  void loewdinPop();
   void fixPhase();
 
   void levelShift();
@@ -608,12 +632,12 @@ public:
     } else if(this->Ref_ == CUHF) {
       this->SCFType_      += "Constrained Unrestricted " + generalReference; 
       this->SCFTypeShort_ += "CU" + generalRefShort;
-    } else if(this->nTCS_ == 2) {
-      this->SCFType_      += "Generalized " + generalReference; 
-      this->SCFTypeShort_ += "G" + generalRefShort;
     } else if(this->Ref_ == X2C) {
       this->SCFType_      += "Exact Two-Component " + generalReference; 
       this->SCFTypeShort_ += "X2C-"+generalRefShort;
+    } else if(this->nTCS_ == 2) {
+      this->SCFType_      += "Generalized " + generalReference; 
+      this->SCFTypeShort_ += "G" + generalRefShort;
     }
   }
 
@@ -665,10 +689,13 @@ public:
   void formDeltaD();
   void copyDeltaDtoD();
   void copyDOldtoD();
-  void copyPT();
+//void copyPT();
   void incPT();
 
   void formFP();
+
+
+  void initSCFFiles();
   
 };
 

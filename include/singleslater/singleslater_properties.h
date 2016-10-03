@@ -174,19 +174,32 @@ void SingleSlater<T>::computeMultipole(){
 
 template<typename T>
 void SingleSlater<T>::mullikenPop() {
-/*
   double charge;
   this->mullPop_.clear();
-  RealMatrix PS = (*this->onePDMA_).real() * (*this->aointegrals_->overlap_); 
-  if(!this->isClosedShell && this->nTCS_ == 1){ 
-    PS += (*this->onePDMB_).real() * (*this->aointegrals_->overlap_);
-  }
+  (*this->NBSqScratch_) = 
+    (*this->onePDMScalar_) * this->aointegrals_->overlap_->template cast<T>(); 
+
   for (auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++) {
     auto iBfSt = this->basisset_->mapCen2Bf(iAtm)[0];
     auto iSize = this->basisset_->mapCen2Bf(iAtm)[1];
     charge  = elements[this->molecule_->index(iAtm)].atomicNumber;
-    charge -= PS.block(iBfSt,iBfSt,iSize,iSize).trace();
+    charge -= std::real(this->NBSqScratch_->
+      block(iBfSt,iBfSt,iSize,iSize).trace());
     this->mullPop_.push_back(charge); 
+    cout << charge << endl;
   } 
-*/
+}
+
+template<typename T>
+void SingleSlater<T>::loewdinPop() {
+  double charge;
+  this->lowPop_.clear();
+  for (auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++) {
+    auto iBfSt = this->basisset_->mapCen2Bf(iAtm)[0];
+    auto iSize = this->basisset_->mapCen2Bf(iAtm)[1];
+    charge  = elements[this->molecule_->index(iAtm)].atomicNumber;
+    charge -= std::real(this->onePDMOrthoScalar_->
+      block(iBfSt,iBfSt,iSize,iSize).trace());
+    this->lowPop_.push_back(charge); 
+  } 
 }

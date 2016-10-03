@@ -29,12 +29,10 @@ void SingleSlater<T>::formGuess(){
 
   if(this->guess_ == ONLY) {
     this->unOrthoDen3();
-    cout << "HERE" << endl;
     return;
-    cout << "HERE" << endl;
   } else if(this->guess_ == SAD) this->SADGuess();
   else if(this->guess_ == CORE) this->COREGuess();
-//  else if(this->guess_ == READ) this->READGuess();
+  else if(this->guess_ == READ) this->READGuess();
   else if(this->guess_ == RANDOM) this->RandomGuess();
   else CErr("Guess NYI",this->fileio_->out);
 
@@ -324,3 +322,15 @@ void SingleSlater<T>::scaleDen(){
    (*this->onePDMMz_)     *= T(this->nOA_ - this->nOB_) / TZ;
   }
 }
+
+template <typename T>
+void SingleSlater<T>::READGuess(){
+  SCFDensityScalar_->read(this->onePDMScalar_->data(),H5PredType<T>());
+  if(this->nTCS_ == 2 or !this->isClosedShell)
+    SCFDensityMz_->read(this->onePDMMz_->data(),H5PredType<T>());
+  if(this->nTCS_ == 2){
+    SCFDensityMy_->read(this->onePDMMy_->data(),H5PredType<T>());
+    SCFDensityMx_->read(this->onePDMMx_->data(),H5PredType<T>());
+  }
+  this->formFock();
+};

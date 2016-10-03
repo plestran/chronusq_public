@@ -44,33 +44,33 @@ void SingleSlater<T>::initSCFMem3(){
   dims.push_back(this->nBasis_);
 
   // Scalar Files
-  this->DScalarOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
-    "Most Recent Density Matrix (Scalar) for RMS",dims);
-  this->PTScalarOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
-    "Most Recent Perturbation Tensor (Scalar)",dims);
+//this->SCFDensityScalar_ = this->fileio_->createScratchPartition(H5PredType<T>(),
+//  "Most Recent Density Matrix (Scalar) for RMS",dims);
+//this->PTScalarOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
+//  "Most Recent Perturbation Tensor (Scalar)",dims);
   this->DeltaDScalar_ = this->fileio_->createScratchPartition(H5PredType<T>(),
     "Change in Density Matrix (Scalar)",dims);
 
   // Mz Files
   if(this->nTCS_ == 2 || !this->isClosedShell){
-    this->DMzOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
-      "Most Recent Density Matrix (Mz) for RMS",dims);
-    this->PTMzOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
-      "Most Recent Perturbation Tensor (Mz)",dims);
+//  this->SCFDensityMz_ = this->fileio_->createScratchPartition(H5PredType<T>(),
+//    "Most Recent Density Matrix (Mz) for RMS",dims);
+//  this->PTMzOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
+//    "Most Recent Perturbation Tensor (Mz)",dims);
     this->DeltaDMz_ = this->fileio_->createScratchPartition(H5PredType<T>(),
       "Change in Density Matrix (Mz)",dims);
   }
   
   // Mx My Files
   if(this->nTCS_ == 2) {
-    this->DMyOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
-      "Most Recent Density Matrix (My) for RMS",dims);
-    this->DMxOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
-      "Most Recent Density Matrix (Mx) for RMS",dims);
-    this->PTMyOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
-      "Most Recent Perturbation Tensor (My)",dims);
-    this->PTMxOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
-      "Most Recent Perturbation Tensor (Mx)",dims);
+//  this->SCFDensityMy_ = this->fileio_->createScratchPartition(H5PredType<T>(),
+//    "Most Recent Density Matrix (My) for RMS",dims);
+//  this->SCFDensityMx_ = this->fileio_->createScratchPartition(H5PredType<T>(),
+//    "Most Recent Density Matrix (Mx) for RMS",dims);
+//  this->PTMyOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
+//    "Most Recent Perturbation Tensor (My)",dims);
+//  this->PTMxOld_ = this->fileio_->createScratchPartition(H5PredType<T>(),
+//    "Most Recent Perturbation Tensor (Mx)",dims);
     this->DeltaDMy_ = this->fileio_->createScratchPartition(H5PredType<T>(),
       "Change in Density Matrix (My)",dims);
     this->DeltaDMx_ = this->fileio_->createScratchPartition(H5PredType<T>(),
@@ -98,23 +98,25 @@ void SingleSlater<T>::cleanupSCFMem3(){
 /**
  * \brief Copy the current quaternion density matrix to disc
  */
+/*
 template <typename T>
 void SingleSlater<T>::copyDen(){
 
   // Scalar
-  DScalarOld_->write(this->onePDMScalar_->data(),H5PredType<T>());
+  SCFDensityScalar_->write(this->onePDMScalar_->data(),H5PredType<T>());
 
   // Mz
   if(this->nTCS_ == 2 or !this->isClosedShell){
-    DMzOld_->write(this->onePDMMz_->data(),H5PredType<T>());
+    SCFDensityMz_->write(this->onePDMMz_->data(),H5PredType<T>());
   }
 
   // Mx My
   if(this->nTCS_ == 2){
-    DMyOld_->write(this->onePDMMy_->data(),H5PredType<T>());
-    DMxOld_->write(this->onePDMMx_->data(),H5PredType<T>());
+    SCFDensityMy_->write(this->onePDMMy_->data(),H5PredType<T>());
+    SCFDensityMx_->write(this->onePDMMx_->data(),H5PredType<T>());
   }
 };
+*/
 
 /**
  *  \brief Orthogonalize the quaternion Fock matrix 
@@ -358,22 +360,22 @@ void SingleSlater<T>::mixOrbitals2C(){
  */
 template <typename T>
 void SingleSlater<T>::formDeltaD(){
-  DScalarOld_->read(this->NBSqScratch_->data(),H5PredType<T>());
+  SCFDensityScalar_->read(this->NBSqScratch_->data(),H5PredType<T>());
   (*this->NBSqScratch2_) = (*this->onePDMScalar_) - (*this->NBSqScratch_);
   DeltaDScalar_->write(this->NBSqScratch2_->data(),H5PredType<T>());
 
   if(this->nTCS_ == 2 or !this->isClosedShell){
-    DMzOld_->read(this->NBSqScratch_->data(),H5PredType<T>());
+    SCFDensityMz_->read(this->NBSqScratch_->data(),H5PredType<T>());
     (*this->NBSqScratch2_) = (*this->onePDMMz_) - (*this->NBSqScratch_);
     DeltaDMz_->write(this->NBSqScratch2_->data(),H5PredType<T>());
   }
 
   if(this->nTCS_ == 2) {
-    DMyOld_->read(this->NBSqScratch_->data(),H5PredType<T>());
+    SCFDensityMy_->read(this->NBSqScratch_->data(),H5PredType<T>());
     (*this->NBSqScratch2_) = (*this->onePDMMy_) - (*this->NBSqScratch_);
     DeltaDMy_->write(this->NBSqScratch2_->data(),H5PredType<T>());
 
-    DMxOld_->read(this->NBSqScratch_->data(),H5PredType<T>());
+    SCFDensityMx_->read(this->NBSqScratch_->data(),H5PredType<T>());
     (*this->NBSqScratch2_) = (*this->onePDMMx_) - (*this->NBSqScratch_);
     DeltaDMx_->write(this->NBSqScratch2_->data(),H5PredType<T>());
   }
@@ -409,13 +411,13 @@ void SingleSlater<T>::copyDeltaDtoD(){
  */
 template<typename T>
 void SingleSlater<T>::copyDOldtoD(){
-  DScalarOld_->read(this->onePDMScalar_->data(),H5PredType<T>());
+  SCFDensityScalar_->read(this->onePDMScalar_->data(),H5PredType<T>());
   if(this->nTCS_ == 2 or !this->isClosedShell){
-    DMzOld_->read(this->onePDMMz_->data(),H5PredType<T>());
+    SCFDensityMz_->read(this->onePDMMz_->data(),H5PredType<T>());
   }
   if(this->nTCS_ == 2) {
-    DMyOld_->read(this->onePDMMy_->data(),H5PredType<T>());
-    DMxOld_->read(this->onePDMMx_->data(),H5PredType<T>());
+    SCFDensityMy_->read(this->onePDMMy_->data(),H5PredType<T>());
+    SCFDensityMx_->read(this->onePDMMx_->data(),H5PredType<T>());
   }
 }
 
@@ -426,6 +428,7 @@ void SingleSlater<T>::copyDOldtoD(){
  * quaternion perturbation tensor after only the change in the perturbation
  * tensor has been evalued in formFock
  */
+/*
 template <typename T>
 void SingleSlater<T>::copyPT(){
 
@@ -438,6 +441,7 @@ void SingleSlater<T>::copyPT(){
     PTMxOld_->write(this->PTMx_->data(),H5PredType<T>());
   }
 };
+*/
 
 /**
  *  \brief Increment the current quaternion perturbation tensor by the last
@@ -448,18 +452,18 @@ void SingleSlater<T>::copyPT(){
  */
 template<typename T>
 void SingleSlater<T>::incPT(){
-  PTScalarOld_->read(this->NBSqScratch_->data(),H5PredType<T>());
+  SCFPTScalar_->read(this->NBSqScratch_->data(),H5PredType<T>());
   this->PTScalar_->noalias() += (*this->NBSqScratch_);
 
   if(this->nTCS_ == 2 or !this->isClosedShell){
-    PTMzOld_->read(this->NBSqScratch_->data(),H5PredType<T>());
+    SCFPTMz_->read(this->NBSqScratch_->data(),H5PredType<T>());
     this->PTMz_->noalias() += (*this->NBSqScratch_);
   }
 
   if(this->nTCS_ == 2) {
-    PTMxOld_->read(this->NBSqScratch_->data(),H5PredType<T>());
+    SCFPTMx_->read(this->NBSqScratch_->data(),H5PredType<T>());
     this->PTMx_->noalias() += (*this->NBSqScratch_);
-    PTMyOld_->read(this->NBSqScratch_->data(),H5PredType<T>());
+    SCFPTMy_->read(this->NBSqScratch_->data(),H5PredType<T>());
     this->PTMy_->noalias() += (*this->NBSqScratch_);
   }
 }
@@ -478,5 +482,213 @@ void SingleSlater<T>::populateMO4Diag(){
       scattered.emplace_back(*(*iF));
     }
     Quantum<T>::spinGather(*this->moA_,scattered);
+  }
+};
+
+template <typename T>
+void SingleSlater<T>::initSCFFiles() {
+
+  if(!this->isPrimary) return;
+  std::vector<hsize_t> dims;
+  dims.push_back(this->basisset_->nBasis());
+  dims.push_back(this->basisset_->nBasis());
+
+  std::vector<hsize_t> bigDims;
+  bigDims.push_back(this->nTCS_*this->basisset_->nBasis());
+  bigDims.push_back(this->nTCS_*this->basisset_->nBasis());
+
+  H5::DataSpace dsp(2,&dims[0]);
+  H5::DataSpace bdsp(2,&bigDims[0]);
+
+  // Check if SCF group exists
+  try {
+    this->SCFGroup_ = std::unique_ptr<H5::Group>(new H5::Group(
+      this->fileio_->restart->openGroup("/SCF")));
+  } catch(...) {
+    this->SCFGroup_ = std::unique_ptr<H5::Group>(new H5::Group(
+      this->fileio_->restart->createGroup("/SCF")));
+  }
+
+
+  // Density Files
+
+  // Scalar
+  try {
+    this->SCFDensityScalar_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+      this->SCFGroup_->openDataSet("DensityScalar")));
+  } catch(...) {
+    if(this->guess_ == READ) 
+      CErr("FATAL: READ Guess cannot find DensityScalar",this->fileio_->out);
+
+    this->SCFDensityScalar_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+      this->SCFGroup_->createDataSet("DensityScalar",H5PredType<T>(),dsp)));
+  }
+
+  // Mz
+  if(this->nTCS_ == 2 or !this->isClosedShell) {
+    try {
+      this->SCFDensityMz_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->openDataSet("DensityMz")));
+    } catch(...) {
+      this->SCFDensityMz_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->createDataSet("DensityMz",H5PredType<T>(),dsp)));
+    }
+  }
+
+  // Mx / My
+  if(this->nTCS_ == 2) {
+    // Mx
+    try {
+      this->SCFDensityMx_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->openDataSet("DensityMx")));
+    } catch(...) {
+      this->SCFDensityMx_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->createDataSet("DensityMx",H5PredType<T>(),dsp)));
+    }
+
+    // My
+    try {
+      this->SCFDensityMy_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->openDataSet("DensityMy")));
+    } catch(...) {
+      this->SCFDensityMy_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->createDataSet("DensityMy",H5PredType<T>(),dsp)));
+    }
+  }
+
+
+
+  // Fock Files
+
+  // Scalar
+  try {
+    this->SCFFockScalar_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+      this->SCFGroup_->openDataSet("FockScalar")));
+  } catch(...) {
+    this->SCFFockScalar_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+      this->SCFGroup_->createDataSet("FockScalar",H5PredType<T>(),dsp)));
+  }
+
+  // Mz
+  if(this->nTCS_ == 2 or !this->isClosedShell) {
+    try {
+      this->SCFFockMz_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->openDataSet("FockMz")));
+    } catch(...) {
+      this->SCFFockMz_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->createDataSet("FockMz",H5PredType<T>(),dsp)));
+    }
+  }
+
+  // Mx / My
+  if(this->nTCS_ == 2) {
+    // Mx
+    try {
+      this->SCFFockMx_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->openDataSet("FockMx")));
+    } catch(...) {
+      this->SCFFockMx_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->createDataSet("FockMx",H5PredType<T>(),dsp)));
+    }
+
+    // My
+    try {
+      this->SCFFockMy_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->openDataSet("FockMy")));
+    } catch(...) {
+      this->SCFFockMy_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->createDataSet("FockMy",H5PredType<T>(),dsp)));
+    }
+  }
+
+  // PT Files
+
+  // Scalar
+  try {
+    this->SCFPTScalar_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+      this->SCFGroup_->openDataSet("PTScalar")));
+  } catch(...) {
+    this->SCFPTScalar_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+      this->SCFGroup_->createDataSet("PTScalar",H5PredType<T>(),dsp)));
+  }
+
+  // Mz
+  if(this->nTCS_ == 2 or !this->isClosedShell) {
+    try {
+      this->SCFPTMz_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->openDataSet("PTMz")));
+    } catch(...) {
+      this->SCFPTMz_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->createDataSet("PTMz",H5PredType<T>(),dsp)));
+    }
+  }
+
+  // Mx / My
+  if(this->nTCS_ == 2) {
+    // Mx
+    try {
+      this->SCFPTMx_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->openDataSet("PTMx")));
+    } catch(...) {
+      this->SCFPTMx_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->createDataSet("PTMx",H5PredType<T>(),dsp)));
+    }
+
+    // My
+    try {
+      this->SCFPTMy_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->openDataSet("PTMy")));
+    } catch(...) {
+      this->SCFPTMy_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->createDataSet("PTMy",H5PredType<T>(),dsp)));
+    }
+  }
+
+  // MO Files
+  
+  // MO (TCS) / MOA
+  try {
+    this->SCFMOA_ = std::unique_ptr<H5::DataSet>(new H5::DataSet(
+      this->SCFGroup_->openDataSet("MOA")));
+  } catch(...) {
+    this->SCFMOA_ = std::unique_ptr<H5::DataSet>(new H5::DataSet(
+      this->SCFGroup_->createDataSet("MOA",H5PredType<T>(),bdsp)));
+  }
+
+  // MOB
+  if(this->nTCS_ == 1 and !this->isClosedShell){
+    try {
+      this->SCFMOB_ = std::unique_ptr<H5::DataSet>(new H5::DataSet(
+        this->SCFGroup_->openDataSet("MOB")));
+    } catch(...) {
+      this->SCFMOB_ = std::unique_ptr<H5::DataSet>(new H5::DataSet(
+        this->SCFGroup_->createDataSet("MOB",H5PredType<T>(),bdsp)));
+    }
+  }
+};
+
+template <typename T>
+void SingleSlater<T>::writeSCFFiles() {
+  this->SCFDensityScalar_->write(this->onePDMScalar_->data(),H5PredType<T>());
+  this->SCFFockScalar_->write(this->fockScalar_->data(),H5PredType<T>());
+  this->SCFPTScalar_->write(this->PTScalar_->data(),H5PredType<T>());
+  this->SCFMOA_->write(this->moA_->data(),H5PredType<T>());
+
+  if(this->nTCS_ == 2 or !this->isClosedShell) {
+    this->SCFDensityMz_->write(this->onePDMMz_->data(),H5PredType<T>());
+    this->SCFFockMz_->write(this->fockMz_->data(),H5PredType<T>());
+    this->SCFPTMz_->write(this->PTMz_->data(),H5PredType<T>());
+  }
+
+  if(this->nTCS_ == 1 and !this->isClosedShell)
+    this->SCFMOB_->write(this->moB_->data(),H5PredType<T>());
+
+  if(this->nTCS_ == 2) {
+    this->SCFDensityMx_->write(this->onePDMMx_->data(),H5PredType<T>());
+    this->SCFFockMx_->write(this->fockMx_->data(),H5PredType<T>());
+    this->SCFPTMx_->write(this->PTMx_->data(),H5PredType<T>());
+    this->SCFDensityMy_->write(this->onePDMMy_->data(),H5PredType<T>());
+    this->SCFFockMy_->write(this->fockMy_->data(),H5PredType<T>());
+    this->SCFPTMy_->write(this->PTMy_->data(),H5PredType<T>());
   }
 };

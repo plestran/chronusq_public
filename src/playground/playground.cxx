@@ -128,12 +128,11 @@ int main(int argc, char **argv){
   BasisSet basis;
   AOIntegrals aoints;
   SingleSlater<dcomplex> singleSlater;
-//RealTime<double> rt;
+  RealTime<dcomplex> rt;
   FileIO fileio("test.inp","test.out");
 
   memManager.setTotalMem(256e6);
   initCQ(argc,argv);
-  fileio.iniH5Files();
   CQSetNumThreads(1);
   
 //loadPresets<H>(molecule);
@@ -156,6 +155,11 @@ int main(int argc, char **argv){
   singleSlater.setSCFMaxIter(10000);
   singleSlater.doDIIS = true;
 
+//singleSlater.setGuess(CORE);
+  singleSlater.setGuess(READ);
+  fileio.doRestart = true;
+
+  fileio.iniH5Files();
 /*
   singleSlater.isDFT = true;
   singleSlater.isHF = false;
@@ -206,42 +210,40 @@ int main(int argc, char **argv){
   singleSlater.computeProperties();
   singleSlater.printProperties();
 
-  singleSlater.onePDMMz()->swap(*singleSlater.onePDMMx());
-  singleSlater.computeProperties();
-  singleSlater.printProperties();
-  singleSlater.doDIIS = false; 
-  singleSlater.SCF3();
+  singleSlater.mullikenPop();
+
+/*
+  singleSlater.onePDMOrtho()[1]->swap(*singleSlater.onePDMOrtho()[3]);
+  singleSlater.fockOrtho()[1]->swap(*singleSlater.fockOrtho()[3]);
+*/
+/*
+  singleSlater.onePDMOrtho()[1]->swap(*singleSlater.onePDMOrtho()[2]);
+  singleSlater.fockOrtho()[1]->swap(*singleSlater.fockOrtho()[2]);
+*/
+
+/*
+  // Rotate 90 deg around y (should yield x)
+  singleSlater.rotateDensities({1,0,0},math.pi/4);
   singleSlater.computeProperties();
   singleSlater.printProperties();
 
-/*
-  singleSlater.setGuess(SingleSlater<dcomplex>::ONLY);
-  singleSlater.onePDMMz()->swap(*singleSlater.onePDMMx());
-  singleSlater.PTMz()->swap(*singleSlater.PTMx());
-  singleSlater.computeProperties();
-  singleSlater.printProperties();
+
+  ComplexMatrix P(2*singleSlater.onePDMMz()->rows(),2*singleSlater.onePDMMz()->rows());
+  ComplexMatrix F(2*singleSlater.onePDMMz()->rows(),2*singleSlater.onePDMMz()->rows());
+
+  std::vector<std::reference_wrapper<ComplexMap>> scatteredFock_;
+  std::vector<std::reference_wrapper<ComplexMap>> scatteredDen_;
+
+  ComplexMap PMap(P.data(),P.rows(),P.cols());
+  ComplexMap FMap(F.data(),F.rows(),F.cols());
 
   ComplexMatrix TMP(basis.nBasis()*singleSlater.nTCS(),basis.nBasis()*singleSlater.nTCS());
   TMP.setZero();
 
-  ComplexMap TMPMap(TMP.data(),TMP.rows(),TMP.cols());
-  std::vector<std::reference_wrapper<ComplexMap>> scattered;
-  scattered.emplace_back(*singleSlater.onePDMScalar());
-  scattered.emplace_back(*singleSlater.onePDMMz());
-  scattered.emplace_back(*singleSlater.onePDMMy());
-  scattered.emplace_back(*singleSlater.onePDMMx());
-  Quantum<dcomplex>::spinGather(TMPMap,scattered);
-*/
+  Quantum<dcomplex>::spinGather(FMap,scatteredFock_);  
+  Quantum<dcomplex>::spinGather(PMap,scatteredDen_);  
 
-/*
-//for(auto OPDM : singleSlater.onePDM()) *OPDM *= 0.5;
-  singleSlater.printDensity();
-  prettyPrintSmart(fileio.out,TMPMap,"Gathered");
-  Quantum<dcomplex>::spinScatter(TMPMap,scattered);
-  singleSlater.printDensity();
-*/
 
-/*
   prettyPrintSmart(cout,*singleSlater.moA(),"MO");
   for(auto i = 0; i < 2*basis.nBasis(); i++) {
   for(auto j = 0; j < 2*basis.nBasis(); j+=2) {
@@ -270,16 +272,49 @@ int main(int argc, char **argv){
 //singleSlater.printFock();
 //singleSlater.printPT();
 
-  prettyPrintSmart(cout,*singleSlater.moA(),"MO");
-  singleSlater.setPrintLevel(4);
-  singleSlater.doDIIS = false;
-//singleSlater.formGuess();
-  singleSlater.SCF3();
-  singleSlater.computeProperties();
-  singleSlater.printProperties();
-  prettyPrintSmart(cout,*singleSlater.moA(),"MO");
-*/
 
+  ComplexMatrix FPScalar2(FPScalar);
+  FPScalar2.setZero();
+  for(auto i = 0; i < singleSlater.fockOrtho().size(); i++) {
+    FPScalar2 += 
+      (*singleSlater.fockOrtho()[i]) * (*singleSlater.onePDMOrtho()[i]);
+  } 
+  FPScalar2 *= 0.5;
+
+  ComplexMatrix FPMz2(FPMz);
+  FPMz2  = (*singleSlater.fockOrtho()[0]) * (*singleSlater.onePDMOrtho()[1]);
+  FPMz2 += (*singleSlater.fockOrtho()[1]) * (*singleSlater.onePDMOrtho()[0]);
+  FPMz2 += math.ii * 
+    ((*singleSlater.fockOrtho()[3]) * (*singleSlater.onePDMOrtho()[2]));
+  FPMz2 -= math.ii * 
+    ((*singleSlater.fockOrtho()[2]) * (*singleSlater.onePDMOrtho()[3]));
+  FPMz2 *= 0.5;
+
+  ComplexMatrix FPMy2(FPMy);
+  FPMy2  = (*singleSlater.fockOrtho()[0]) * (*singleSlater.onePDMOrtho()[2]);
+  FPMy2 += (*singleSlater.fockOrtho()[2]) * (*singleSlater.onePDMOrtho()[0]);
+  FPMy2 += math.ii * 
+    ((*singleSlater.fockOrtho()[1]) * (*singleSlater.onePDMOrtho()[3]));
+  FPMy2 -= math.ii * 
+    ((*singleSlater.fockOrtho()[3]) * (*singleSlater.onePDMOrtho()[1]));
+  FPMy2 *= 0.5;
+
+  ComplexMatrix FPMx2(FPMx);
+  FPMx2  = (*singleSlater.fockOrtho()[0]) * (*singleSlater.onePDMOrtho()[3]);
+  FPMx2 += (*singleSlater.fockOrtho()[3]) * (*singleSlater.onePDMOrtho()[0]);
+  FPMx2 += math.ii * 
+    ((*singleSlater.fockOrtho()[2]) * (*singleSlater.onePDMOrtho()[1]));
+  FPMx2 -= math.ii * 
+    ((*singleSlater.fockOrtho()[1]) * (*singleSlater.onePDMOrtho()[2]));
+  FPMx2 *= 0.5;
+
+//prettyPrintSmart(cout,FPScalar,"Scalar1");
+//prettyPrintSmart(cout,FPScalar2,"Scalar2");
+  prettyPrintSmart(cout,FPScalar - FPScalar2,"Diff Scalar");
+  prettyPrintSmart(cout,FPMz - FPMz2,"Diff Mz");
+  prettyPrintSmart(cout,FPMy - FPMy2,"Diff My");
+  prettyPrintSmart(cout,FPMx - FPMx2,"Diff Mx");
+*/
 /*
   rt.communicate(singleSlater);
   rt.alloc();
@@ -304,8 +339,8 @@ int main(int argc, char **argv){
   resp.initMeta();
   resp.alloc();
   resp.runResponse();
-  finalizeCQ();
 */
+  finalizeCQ();
   return 0;
 };
 

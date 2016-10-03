@@ -405,6 +405,8 @@ void initCQ(int argc, char** argv){
   MPI_Init(&argc,&argv);
   MPI_Barrier(MPI_COMM_WORLD);
 #endif
+
+  H5::Exception::dontPrint();
 }
 
 void initCQ(){
@@ -423,6 +425,8 @@ void initCQ(){
   MPI_Init(NULL,NULL);
   MPI_Barrier(MPI_COMM_WORLD);
 #endif
+
+  H5::Exception::dontPrint();
 }
 
 void finalizeCQ(){
