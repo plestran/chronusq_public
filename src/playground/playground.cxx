@@ -133,7 +133,6 @@ int main(int argc, char **argv){
 
   memManager.setTotalMem(256e6);
   initCQ(argc,argv);
-  fileio.iniH5Files();
   CQSetNumThreads(1);
   
 //loadPresets<H>(molecule);
@@ -149,13 +148,17 @@ int main(int argc, char **argv){
   molecule.computeI();
 
   singleSlater.setRef(X2C);
-  singleSlater.setGuess(CORE);
   singleSlater.isClosedShell = false;
   singleSlater.setNTCS(2);
   singleSlater.setSCFEneTol(1e-12);
   singleSlater.setSCFMaxIter(10000);
   singleSlater.doDIIS = true;
 
+//singleSlater.setGuess(CORE);
+  singleSlater.setGuess(READ);
+  fileio.doRestart = true;
+
+  fileio.iniH5Files();
 /*
   singleSlater.isDFT = true;
   singleSlater.isHF = false;
@@ -205,6 +208,8 @@ int main(int argc, char **argv){
   singleSlater.SCF3();
   singleSlater.computeProperties();
   singleSlater.printProperties();
+
+  singleSlater.printDensity();
 
 /*
   singleSlater.onePDMOrtho()[1]->swap(*singleSlater.onePDMOrtho()[3]);
@@ -309,6 +314,7 @@ int main(int argc, char **argv){
   prettyPrintSmart(cout,FPMy - FPMy2,"Diff My");
   prettyPrintSmart(cout,FPMx - FPMx2,"Diff Mx");
 */
+/*
   rt.communicate(singleSlater);
   rt.alloc();
 //rt.setMaxSteps(827000); // roughly 1 ps of dynamics
@@ -317,6 +323,7 @@ int main(int argc, char **argv){
   rt.setEDFieldAmp({0.001,0.0,0.0});
   rt.setIEnvlp(Step);
   rt.doPropagation();
+*/
 /*
   cout << endl;
   MOIntegrals<double> moints;
