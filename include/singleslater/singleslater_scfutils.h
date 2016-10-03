@@ -513,6 +513,9 @@ void SingleSlater<T>::initSCFFiles() {
     this->SCFDensityScalar_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
       this->SCFGroup_->openDataSet("DensityScalar")));
   } catch(...) {
+    if(this->guess_ == READ) 
+      CErr("FATAL: READ Guess cannot find DensityScalar",this->fileio_->out);
+
     this->SCFDensityScalar_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
       this->SCFGroup_->createDataSet("DensityScalar",H5PredType<T>(),dsp)));
   }
@@ -615,5 +618,27 @@ void SingleSlater<T>::initSCFFiles() {
       this->SCFMOB_ = std::unique_ptr<H5::DataSet>(new H5::DataSet(
         this->SCFGroup_->createDataSet("MOB",H5PredType<T>(),bdsp)));
     }
+  }
+};
+
+template <typename T>
+void SingleSlater<T>::writeSCFFiles() {
+  this->SCFDensityScalar_->write(this->onePDMScalar_->data(),H5PredType<T>());
+  this->SCFFockScalar_->write(this->fockScalar_->data(),H5PredType<T>());
+  this->SCFMOA_->write(this->moA_->data(),H5PredType<T>());
+
+  if(this->nTCS_ == 2 or !this->isClosedShell) {
+    this->SCFDensityMz_->write(this->onePDMMz_->data(),H5PredType<T>());
+    this->SCFFockMz_->write(this->fockMz_->data(),H5PredType<T>());
+  }
+
+  if(this->nTCS_ == 1 and !this->isClosedShell)
+    this->SCFMOB_->write(this->moB_->data(),H5PredType<T>());
+
+  if(this->nTCS_ == 2) {
+    this->SCFDensityMx_->write(this->onePDMMx_->data(),H5PredType<T>());
+    this->SCFFockMx_->write(this->fockMx_->data(),H5PredType<T>());
+    this->SCFDensityMy_->write(this->onePDMMy_->data(),H5PredType<T>());
+    this->SCFFockMy_->write(this->fockMy_->data(),H5PredType<T>());
   }
 };
