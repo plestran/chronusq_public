@@ -96,6 +96,14 @@ void SingleSlater<T>::SCF3(){
         this->CDIIS4(std::min(IDIISIter+1,std::size_t(this->nDIISExtrap_)));
     }
 
+    // Damping
+    if(this->doDamp){
+        this->SCFFockScalar_->read(this->NBSqScratch_->data(),H5PredType<T>());
+        *this->fockScalar_  *= (1-dampParam);
+        *this->NBSqScratch_ *= dampParam;
+        *this->fockScalar_  += *this->NBSqScratch_;
+    }
+
     if(this->doDMS){
       this->formDMSErr(IDIISIter);
     }

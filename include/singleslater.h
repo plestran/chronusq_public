@@ -333,6 +333,8 @@ public:
   bool  isDFT;
   bool  isPrimary;
   bool  doDIIS;
+  bool  doDamp;
+  double dampParam;
 
   bool  doITP; ///< Do Imaginary Time Propagation (ITP)?
   float dt;    ///< Timestep for Imaginary Time Propagation
@@ -394,6 +396,9 @@ public:
     // SCF Fock Formation
     this->doIncFock_   = false;
     this->nIncFock_    = 20;
+
+    this->doDamp    = true;
+    this->dampParam = 0.1;
 
     // Extrapolation
     this->doDIIS       = true;
