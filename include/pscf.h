@@ -128,21 +128,14 @@ public:
     this->nVAVA_LT_ = this->nVA_ * (this->nVA_ - 1)/2;
     this->nVBVB_LT_ = this->nVB_ * (this->nVB_ - 1)/2;
 
-    cout << "PostSCF Meta" << endl;
-    cout << this->nOO_   << endl;
-    cout << this->nOAOA_ << endl;
-    cout << this->nOAOB_ << endl;
-    cout << this->nOBOB_ << endl;
-    cout << this->nVV_   << endl;
-    cout << this->nVAVA_ << endl;
-    cout << this->nVAVB_ << endl;
-    cout << this->nVBVB_ << endl;
-    cout << this->nOV_   << endl;
-    cout << this->nOAVA_ << endl;
-    cout << this->nOAVB_ << endl;
-    cout << this->nOBVA_ << endl;
-    cout << this->nOBVB_ << endl;
   };
+
+  int nO() const        { return this->reference_->nO(); };
+  int nV() const        { return this->reference_->nV(); };
+  int nOA() const       { return this->reference_->nOA(); };
+  int nVA() const       { return this->reference_->nVA(); };
+  int nOB() const       { return this->reference_->nOB(); };
+  int nVB() const       { return this->reference_->nVB(); };
 
   int nOO() const       { return this->nOO_; };       
   int nOV() const       { return this->nOV_; };
@@ -172,6 +165,8 @@ public:
   int nVAVA_LT() const  { return this->nVAVA_LT_; };
   int nVBVB_LT() const  { return this->nVBVB_LT_; };
 
+  WaveFunction<T> * reference() const { return this->reference_; };
+  FileIO * fileio() const { return this->fileio_; };
 };
 
 template <typename T>

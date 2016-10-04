@@ -56,6 +56,21 @@ void SingleSlater<T>::computeEnergy(){
   this->energyOneE = 
     this->template computeProperty<double,DENSITY_TYPE::TOTAL>(
         *this->aointegrals_->coreH_);
+  
+  dcomplex SOPart(0);
+  if(this->nTCS_ == 2 or !this->isClosedShell) {
+    SOPart +=  this->template computeProperty<dcomplex,DENSITY_TYPE::MZ>(
+          *this->aointegrals_->oneEmz_);
+  }
+  if(this->nTCS_ == 2){
+    SOPart +=  this->template computeProperty<dcomplex,DENSITY_TYPE::MX>(
+          *this->aointegrals_->oneEmx_);
+    SOPart +=  this->template computeProperty<dcomplex,DENSITY_TYPE::MY>(
+          *this->aointegrals_->oneEmy_);
+  }
+  SOPart *= math.ii;
+  this->energyOneE -= std::real(SOPart);
+
   this->energyTwoE = 
     0.5 * this->template computeProperty<double,DENSITY_TYPE::TOTAL>(
         this->PTScalar_->conjugate());
@@ -159,19 +174,32 @@ void SingleSlater<T>::computeMultipole(){
 
 template<typename T>
 void SingleSlater<T>::mullikenPop() {
-/*
   double charge;
   this->mullPop_.clear();
-  RealMatrix PS = (*this->onePDMA_).real() * (*this->aointegrals_->overlap_); 
-  if(!this->isClosedShell && this->nTCS_ == 1){ 
-    PS += (*this->onePDMB_).real() * (*this->aointegrals_->overlap_);
-  }
+  (*this->NBSqScratch_) = 
+    (*this->onePDMScalar_) * this->aointegrals_->overlap_->template cast<T>(); 
+
   for (auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++) {
     auto iBfSt = this->basisset_->mapCen2Bf(iAtm)[0];
     auto iSize = this->basisset_->mapCen2Bf(iAtm)[1];
     charge  = elements[this->molecule_->index(iAtm)].atomicNumber;
-    charge -= PS.block(iBfSt,iBfSt,iSize,iSize).trace();
+    charge -= std::real(this->NBSqScratch_->
+      block(iBfSt,iBfSt,iSize,iSize).trace());
     this->mullPop_.push_back(charge); 
+    cout << charge << endl;
   } 
-*/
+}
+
+template<typename T>
+void SingleSlater<T>::loewdinPop() {
+  double charge;
+  this->lowPop_.clear();
+  for (auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++) {
+    auto iBfSt = this->basisset_->mapCen2Bf(iAtm)[0];
+    auto iSize = this->basisset_->mapCen2Bf(iAtm)[1];
+    charge  = elements[this->molecule_->index(iAtm)].atomicNumber;
+    charge -= std::real(this->onePDMOrthoScalar_->
+      block(iBfSt,iBfSt,iSize,iSize).trace());
+    this->lowPop_.push_back(charge); 
+  } 
 }

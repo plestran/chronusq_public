@@ -283,4 +283,7 @@ void mpiBarrier(){
 #endif
 }; //mpiBarrier
 
+template<> double ComplexScale(){ return -1; };
+template<> dcomplex ComplexScale() { return math.ii; };
+
 } // namespace ChronusQ

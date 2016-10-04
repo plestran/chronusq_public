@@ -238,6 +238,7 @@ public:
   bool  isPrimary; ///< Whether or not this is the primary calculation (i.e. not guess)
   bool  useFiniteWidthNuclei; ///< Whether or not to use finite width nuclei in the calculation of the one-body potential
   bool  doX2C; //Whether to do the X2C transformation
+  int   twoEFudge; // Apply fudge factor before to PVP integrals (2), or after to spin hamiltonian (1), or not at all (0).
 
 
   // Timing Stats
@@ -302,6 +303,7 @@ public:
     this->haveRII      = false;
     this->haveTRII     = false;
     this->doX2C	       = false;
+    this->twoEFudge    = 1;
 
     // Standard Values
     this->maxMultipole_     = 3;
@@ -428,9 +430,6 @@ public:
   void computeCholesky();
 
 
-//void computeAORcrossDel(); // build R cross Del matrices
-//double formBeckeW(cartGP gridPt, int iAtm);    // Evaluate Becke Weights
-//double normBeckeW(cartGP gridPt);             // Normalize Becke Weights
   void DKH0(); // compute DKH0 relativistic correction to kinetic energy
   void printOneE();
 #ifdef USE_LIBINT
@@ -438,42 +437,6 @@ public:
   void computeAORII();
   void computeAORIS();
   void transformAORII();
-  template<typename T> void twoEContractDirect(bool,bool,bool,bool,bool,const T&,T&,const T&,T&);
-  template<typename T> void twoEContractN4(bool,bool,bool,bool,bool,const T &,T &,const T &, T &);
-  template<typename T> void twoEContractDF(bool,bool,bool,const T &,T &,const T &, T &);
-  template<typename T>
-    void multTwoEContractDirect(int, bool,bool,bool,bool,bool,const std::vector<T> &,std::vector<T> &,
-                                const std::vector<T> &,std::vector<T> &);
-  template<typename T> 
-    void multTwoEContractN4(int, bool,bool,bool,const std::vector<T> &,std::vector<T> &,
-                            const std::vector<T> &,std::vector<T> &);
-  template<typename T> 
-    void multTwoEContractDF(int, bool,bool,bool,const std::vector<T> &,std::vector<T> &,
-                            const std::vector<T> &,std::vector<T> &);
-  template<typename TMat,typename T> 
-    void Restricted34Contract(bool,TMat&, const TMat &, int,int,int,int,int,int,int,int,
-                                 const T*,T);
-  template<typename TMat,typename T> 
-    void UnRestricted34Contract(bool,TMat&, const TMat &, TMat&, const TMat &, const TMat &, 
-                                   int,int,int,int,int,int,int,int,const T*,T);
-  template<typename TMat,typename T>
-    void Spinor34Contract(bool,TMat&,const TMat&,int,int,int,int,int,int,int,int,const T*,T);
-  template<typename TMat,typename T> 
-    void General24CouContract(TMat&, const TMat &, int,int,int,int,int,int,int,int,
-                              const T*,T);
-  template<typename TMat,typename T> 
-    void Spinor24CouContract(TMat&, const TMat &, int,int,int,int,int,int,int,int,
-                              const T*,T);
-  template<typename TMat,typename T> void Gen34Contract(TMat&,const TMat&,int,int,int,int,T);
-  template<typename TMat,typename T> void Gen23Contract(TMat&,const TMat&,int,int,int,int,T,
-                                                        double);
-  template<typename TMat,typename T> void Gen24Contract(TMat&,const TMat&,int,int,int,int,T);
-  template<typename TMat,typename T> 
-    void Spinor24Contract(TMat&,const TMat&,int,int,int,int,T);
-  template<typename TMat,typename T> void GenCouContractSpinor(TMat&,const TMat&,int,int,int,
-                                                               int,T);
-  template<typename TMat,typename T> void GenExchContractSpinor(TMat&,const TMat&,int,int,
-                                                                int,int,T,double);
 
 
   enum ERI_CONTRACTION_TYPE {
@@ -502,8 +465,7 @@ public:
       const std::vector<std::reference_wrapper<Op>> &X,
       std::vector<std::reference_wrapper<Op>> &AX,
       std::vector<ERI_CONTRACTION_TYPE> &contractionList,
-      std::vector<T> &scalingFactors
-  ) {
+      std::vector<T> &scalingFactors) {
     if(this->integralAlgorithm == DIRECT)
       this->newTwoEContractDirect(X,AX,contractionList,scalingFactors);
     else if(this->integralAlgorithm == INCORE)
@@ -606,110 +568,7 @@ public:
                    dcomplex>::value,int>::type = 0>
   void Ortho2Trans(Op&,Op&);
 };
-#include <aointegrals/aointegrals_contract.h>
 
-template<typename Op,
-  typename std::enable_if<
-    std::is_same<typename Op::Scalar,
-                 double>::value,int>::type>
-void AOIntegrals::Ortho1Trans(Op& op1, Op& op2){
-  double* Scratch = 
-    this->memManager_->malloc<double>(op1.size());
-  RealMap SCR(Scratch,op1.rows(),op1.rows());
-
-  SCR.noalias() = (*this->ortho1_) * op1;
-  op2.noalias() = SCR * this->ortho1_->transpose();
-  
-
-  this->memManager_->free(Scratch,op1.size());
-}
-
-template<typename Op,
-  typename std::enable_if<
-    std::is_same<typename Op::Scalar,
-                 dcomplex>::value,int>::type>
-void AOIntegrals::Ortho1Trans(Op& op1, Op& op2){
-  dcomplex* Scratch = 
-    this->memManager_->malloc<dcomplex>(op1.size());
-  ComplexMap SCR(Scratch,op1.rows(),op1.rows());
-
-  SCR.real() = (*this->ortho1_) * op1.real();
-  SCR.imag() = (*this->ortho1_) * op1.imag();
-  op2.real() = SCR.real() * this->ortho1_->transpose();
-  op2.imag() = SCR.imag() * this->ortho1_->transpose();
-  
-
-  this->memManager_->free(Scratch,op1.size());
-}
-
-template<typename Op,
-  typename std::enable_if<
-    std::is_same<typename Op::Scalar,
-                 double>::value,int>::type>
-void AOIntegrals::Ortho1TransT(Op& op1, Op& op2){
-  double* Scratch = 
-    this->memManager_->malloc<double>(op1.size());
-  RealMap SCR(Scratch,op1.rows(),op1.rows());
-
-  SCR.noalias() = this->ortho1_->transpose() * op1;
-  op2.noalias() = SCR * (*this->ortho1_);
-  
-
-  this->memManager_->free(Scratch,op1.size());
-}
-
-template<typename Op,
-  typename std::enable_if<
-    std::is_same<typename Op::Scalar,
-                 dcomplex>::value,int>::type>
-void AOIntegrals::Ortho1TransT(Op& op1, Op& op2){
-  dcomplex* Scratch = 
-    this->memManager_->malloc<dcomplex>(op1.size());
-  ComplexMap SCR(Scratch,op1.rows(),op1.rows());
-
-  SCR.real() = this->ortho1_->transpose() * op1.real();
-  SCR.imag() = this->ortho1_->transpose() * op1.imag();
-  op2.real() = SCR.real() * (*this->ortho1_);
-  op2.imag() = SCR.imag() * (*this->ortho1_);
-  
-
-  this->memManager_->free(Scratch,op1.size());
-}
-
-
-template<typename Op,
-  typename std::enable_if<
-    std::is_same<typename Op::Scalar,
-                 double>::value,int>::type>
-void AOIntegrals::Ortho2Trans(Op& op1, Op& op2){
-  double* Scratch = 
-    this->memManager_->malloc<double>(op1.size());
-  RealMap SCR(Scratch,op1.rows(),op1.rows());
-
-  SCR.noalias() = this->ortho2_->transpose() * op1;
-  op2.noalias() = SCR * (*this->ortho2_);
-  
-
-  this->memManager_->free(Scratch,op1.size());
-}
-
-template<typename Op,
-  typename std::enable_if<
-    std::is_same<typename Op::Scalar,
-                 dcomplex>::value,int>::type>
-void AOIntegrals::Ortho2Trans(Op& op1, Op& op2){
-  dcomplex* Scratch = 
-    this->memManager_->malloc<dcomplex>(op1.size());
-  ComplexMap SCR(Scratch,op1.rows(),op1.rows());
-
-  SCR.real() = this->ortho2_->transpose() * op1.real();
-  SCR.imag() = this->ortho2_->transpose() * op1.imag();
-  op2.real() = SCR.real() * (*this->ortho2_);
-  op2.imag() = SCR.imag() * (*this->ortho2_);
-  
-
-  this->memManager_->free(Scratch,op1.size());
-}
 
 } // namespace ChronusQ
 

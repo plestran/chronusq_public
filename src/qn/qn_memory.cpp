@@ -27,6 +27,7 @@
 
 namespace ChronusQ{
 
+/*
 template<>
 void QuasiNewton2<double>::allocScrSpecial(){
   this->LRWORK = 0;
@@ -69,4 +70,5 @@ void QuasiNewton2<dcomplex>::cleanupScrSpecial(){
     delete [] this->RWORK_; 
   }
 }
+*/
 }; // namespace ChronusQ

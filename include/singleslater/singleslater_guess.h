@@ -27,9 +27,12 @@ template<typename T>
 void SingleSlater<T>::formGuess(){
   if(not this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
 
-  if(this->guess_ == SAD) this->SADGuess();
+  if(this->guess_ == ONLY) {
+    this->unOrthoDen3();
+    return;
+  } else if(this->guess_ == SAD) this->SADGuess();
   else if(this->guess_ == CORE) this->COREGuess();
-//  else if(this->guess_ == READ) this->READGuess();
+  else if(this->guess_ == READ) this->READGuess();
   else if(this->guess_ == RANDOM) this->RandomGuess();
   else CErr("Guess NYI",this->fileio_->out);
 
@@ -41,7 +44,7 @@ void SingleSlater<T>::formGuess(){
 
   this->populateMO4Diag();
   this->diagFock2();
-  this->mixOrbitalsSCF();
+//this->mixOrbitalsSCF();
   if(this->printLevel_ > 3) {
     this->fileio_->out << "Initial Density Matrix Before" << endl;
     this->printDensity();
@@ -65,7 +68,9 @@ void SingleSlater<T>::formGuess(){
 
 template<typename T>
 void SingleSlater<T>::COREGuess(){
-  this->aointegrals_->computeAOOneE(); 
+  if(not this->aointegrals_->haveAOOneE)
+    this->aointegrals_->computeAOOneE(); 
+
   this->fockScalar_->real() = 2*(*this->aointegrals_->coreH_);
   if(this->nTCS_ == 2 or !this->isClosedShell) {
     this->fockMz_->setZero();
@@ -213,6 +218,9 @@ void SingleSlater<T>::SADGuess() {
     hartreeFockAtom.formFock();
     hartreeFockAtom.computeEnergy();
     hartreeFockAtom.SCF3();
+    hartreeFockAtom.computeProperties();
+    hartreeFockAtom.printProperties();
+    
     
     // Place Atomic Densities into Total Densities
     this->placeAtmDen(atomIndex[iUn],hartreeFockAtom);
@@ -224,6 +232,10 @@ void SingleSlater<T>::SADGuess() {
 //prettyPrintSmart(cout,*this->onePDMScalar_,"PS");
   this->formFock();
 //prettyPrintSmart(cout,*this->fockScalar_,"FS");
+
+//if(not this->isClosedShell)
+//  prettyPrintSmart(cout,*this->fockMz_,"FZ");
+
 };
 
 template <typename T>
@@ -279,6 +291,7 @@ void SingleSlater<T>::scaleDen(){
   } else {
     // SCR  = PA
     // SCR2 = PB
+    /*
     (*this->NBSqScratch_) = (*this->onePDMScalar_) + (*this->onePDMMz_);
     (*this->NBSqScratch2_) = (*this->onePDMScalar_) - (*this->onePDMMz_);
     (*this->NBSqScratch_) *= 0.5; 
@@ -291,6 +304,8 @@ void SingleSlater<T>::scaleDen(){
 
     double TA = 0.5 * (TS + TZ);
     double TB = 0.5 * (TS - TZ);
+    cout << "TA " << TA << endl;
+    cout << "TB " << TB << endl;
 
 
     (*this->NBSqScratch_) *= T(this->nOA_) / T(TA);
@@ -298,6 +313,26 @@ void SingleSlater<T>::scaleDen(){
 
     (*this->onePDMScalar_) = (*this->NBSqScratch_) + (*this->NBSqScratch2_);
     (*this->onePDMMz_)     = (*this->NBSqScratch_) - (*this->NBSqScratch2_);
+    */
+    
+    double TS = this->template computeProperty<double,DENSITY_TYPE::TOTAL>(
+      *this->aointegrals_->overlap_); 
+    double TZ = this->template computeProperty<double,DENSITY_TYPE::MZ>(
+      *this->aointegrals_->overlap_); 
 
+   (*this->onePDMScalar_) *= T(this->nOA_ + this->nOB_) / TS;
+   (*this->onePDMMz_)     *= T(this->nOA_ - this->nOB_) / TZ;
   }
 }
+
+template <typename T>
+void SingleSlater<T>::READGuess(){
+  SCFDensityScalar_->read(this->onePDMScalar_->data(),H5PredType<T>());
+  if(this->nTCS_ == 2 or !this->isClosedShell)
+    SCFDensityMz_->read(this->onePDMMz_->data(),H5PredType<T>());
+  if(this->nTCS_ == 2){
+    SCFDensityMy_->read(this->onePDMMy_->data(),H5PredType<T>());
+    SCFDensityMx_->read(this->onePDMMx_->data(),H5PredType<T>());
+  }
+  this->formFock();
+};

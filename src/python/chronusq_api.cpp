@@ -149,44 +149,30 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def_readwrite("doITP"        , &SingleSlater<dcomplex>::doITP           )
   ;
 
-  enum_<SingleSlater<double>::REFERENCE>("Reference")
-    .value("_INVALID"      , SingleSlater<double>::_INVALID               )
-    .value("RHF"           , SingleSlater<double>::RHF                    )
-    .value("UHF"           , SingleSlater<double>::UHF                    )
-    .value("CUHF"          , SingleSlater<double>::CUHF                   )
-    .value("TCS"           , SingleSlater<double>::TCS                    )
-    .value("X2C"           , SingleSlater<double>::X2C                    )
-//  .value("RKS"           , SingleSlater<double>::RKS                    )
-//  .value("UKS"           , SingleSlater<double>::UKS                    )
-//  .value("CUKS"          , SingleSlater<double>::CUKS                   )
-//  .value("GKS"           , SingleSlater<double>::GKS                    )
+  enum_<REFERENCE>("Reference")
+    .value("_INVALID"      , REFERENCE::_INVALID               )
+    .value("RHF"           , REFERENCE::RHF                    )
+    .value("UHF"           , REFERENCE::UHF                    )
+    .value("CUHF"          , REFERENCE::CUHF                   )
+    .value("TCS"           , REFERENCE::TCS                    )
+    .value("X2C"           , REFERENCE::X2C                    )
+//  .value("RKS"           , REFERENCE::RKS                    )
+//  .value("UKS"           , REFERENCE::UKS                    )
+//  .value("CUKS"          , REFERENCE::CUKS                   )
+//  .value("GKS"           , REFERENCE::GKS                    )
   ;
 
-  enum_<SingleSlater<double>::GUESS>("Guess")
-    .value("SAD"    , SingleSlater<double>::SAD    )
-    .value("CORE"   , SingleSlater<double>::CORE   )
-    .value("READ"   , SingleSlater<double>::READ   )
-    .value("RANDOM" , SingleSlater<double>::RANDOM )
+  enum_<GUESS>("Guess")
+    .value("SAD"    , GUESS::SAD    )
+    .value("CORE"   , GUESS::CORE   )
+    .value("READ"   , GUESS::READ   )
+    .value("RANDOM" , GUESS::RANDOM )
   ;
 
-/*
-  enum_<SingleSlater<double>::EXCH>("EXCH")
-    .value("NOEXCH"  , SingleSlater<double>::NOEXCH) 
-    .value("EXACT"   , SingleSlater<double>::EXACT )
-    .value("SLATER"  , SingleSlater<double>::SLATER)
-    .value("B88"     , SingleSlater<double>::B88   )
-  ;
-  enum_<SingleSlater<double>::CORR>("CORR")
-    .value("NOCORR", SingleSlater<double>::NOCORR) 
-    .value("VWN3"  , SingleSlater<double>::VWN3  )
-    .value("VWN5"  , SingleSlater<double>::VWN5  )
-    .value("LYP"   , SingleSlater<double>::LYP   )
-  ;
-*/
-  enum_<SingleSlater<double>::DFT>("DFT")
-    .value("NODFT"      , SingleSlater<double>::NODFT      )
-    .value("USERDEFINED", SingleSlater<double>::USERDEFINED)
-    .value("LSDA"       , SingleSlater<double>::LSDA       )
+  enum_<DFT>("DFT")
+    .value("NODFT"      , DFT::NODFT      )
+    .value("USERDEFINED", DFT::USERDEFINED)
+    .value("LSDA"       , DFT::LSDA       )
   ;
 
 /*

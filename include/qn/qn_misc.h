@@ -24,7 +24,8 @@
  *  
  */
 template<typename T>
-void QuasiNewton<T>::metBiOrth(TMap &A, const TMap &Met){
+void QuasiNewton2<T>::metBiOrth(TMap &A, const TMap &Met){
+/*
   int N = A.cols();
   TMap AX(this->ASuperMem_,Met.rows(),N);
   AX = Met*A;
@@ -39,10 +40,54 @@ void QuasiNewton<T>::metBiOrth(TMap &A, const TMap &Met){
       A.col(j) -= A.col(i) * A.col(i).dot(AX.col(j));
     } 
   }
+*/
+
+/*
+  int N = A.cols();
+  TMap AX(this->ASuperMem_,Met.rows(),N);
+  AX = Met*A;
+  double inner = A.col(0).dot(AX.col(0));
+  int sgn = inner / std::abs(inner);
+  inner = sgn * std::sqrt(sgn*inner);
+  A.col(0) /= inner;
+
+  for(auto i = 1; i < N; i++){
+    for(auto j = 0; j < i; j++) {
+      inner
+    }
+  }
+*/
+
+  int N = A.cols();
+
+  auto metInner = [&] (int i, int j) -> double {
+    double inner = 0;
+    for(auto k = 0; k < N; k++)
+    for(auto l = 0; l < N; l++) {
+      inner += A(k,i) * Met(k,l) * A(l,j);
+    }
+    return inner;
+  };
+
+  auto metNorm = [&] (int i) -> double {
+    double inner = metInner(i,i);
+    int sgn = inner / std::abs(inner);
+    inner = sgn * std::sqrt(sgn*inner);
+    return inner;
+  };
+
+  A.col(0) /= metNorm(0);
+  for(auto i = 1; i < N; i++) {
+    for(auto j = 0; j < i; j++) {
+      A.col(i) -= metInner(i,j) * A.col(j);
+    }
+    A.col(i) /= metNorm(i);
+  }
+  
 }
 
-template<>
-void QuasiNewton<double>::eigSrt(RealMap &V, RealVecMap &E){
+template <typename T>
+void QuasiNewton2<T>::eigSrt(TMap &V, RealVecMap &E){
   auto N = V.cols();
   while( N != 0){
     auto newn = 0;

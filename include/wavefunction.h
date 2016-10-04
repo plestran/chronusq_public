@@ -118,7 +118,7 @@ public:
 
     this->alloc();
     *this->moA_ = *other.moA_;
-    if(this->nTCS_ == 2 and !this->isClosedShell)
+    if(this->nTCS_ == 1 and !this->isClosedShell)
       *this->moB_ = *other.moB_;
   };
 

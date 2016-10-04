@@ -52,6 +52,20 @@ void SingleSlater<dcomplex>::computeSSq(){
     M = this->computeProperty<double,MX>(*this->aointegrals_->overlap_);
     this->Ssq_ += M * M + 2 * 
       this->computeProperty<double,MX>(*this->NBSqScratch2_);
+
+    this->NBSqScratch_->real() = 
+      this->onePDMMy_->real() * (*this->aointegrals_->overlap_);
+    this->NBSqScratch_->imag() = 
+      this->onePDMMy_->imag() * (*this->aointegrals_->overlap_);
+ 
+    this->NBSqScratch2_->real() = 
+      (*this->aointegrals_->overlap_) * this->NBSqScratch_->real();
+    this->NBSqScratch2_->imag() = 
+      (*this->aointegrals_->overlap_) * this->NBSqScratch_->imag();
+
+    M = this->computeProperty<double,MY>(*this->aointegrals_->overlap_);
+    this->Ssq_ += M * M + 2 * 
+      this->computeProperty<double,MY>(*this->NBSqScratch2_);
   }
   this->Ssq_ *= 0.25;
 };

@@ -26,6 +26,7 @@
 #include <qn.h>
 
 namespace ChronusQ {
+/*
   template<>
   void QuasiNewton2<double>::iniScratchFiles(){
     (*this->out_) << "Initializing Files for QuasiNewton Calculation" << endl;
@@ -75,7 +76,7 @@ namespace ChronusQ {
     //  this->RhoLFile_  = this->genScrFile_(H5PredType<double>(),PLName,dims);
     }
 
-    if(this->specialAlgorithm_ == SYMMETRIZED_TRIAL) {
+    if(this->qnObj_->specialAlgorithm_ == SYMMETRIZED_TRIAL) {
       this->ASuperFile_ = this->genScrFile_(H5PredType<double>(),ASName,
         dimsSmall);
       this->SSuperFile_ = this->genScrFile_(H5PredType<double>(),SSName,
@@ -124,5 +125,6 @@ namespace ChronusQ {
         subDataSpace);
   
   }; // QuasiNewton2<double>::readTrialVectors
+*/
 
 }; // namespace ChronusQ

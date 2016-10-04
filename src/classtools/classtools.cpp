@@ -290,6 +290,7 @@ double traceSymm(RealMatrix* a, RealMatrix* b) {
   return tmpVal;
  };
 
+/*
 void printUnitInfo(Controls * controls, SingleSlater<double> * singleSlater, SDResponse<double> * sdResponse,
                    RealTime<double> * realTime){
   if(controls->unitTest == Controls::UnitSCF)
@@ -336,7 +337,9 @@ void printUnitInfo(Controls * controls, SingleSlater<double> * singleSlater, SDR
                                   << (realTime->EDtot())       << endl;
     }
 }
+*/
 
+/*
 void printUnitInfo(Controls * controls, SingleSlater<dcomplex> * singleSlater, SDResponse<double> * sdResponse, 
                    RealTime<dcomplex> * realTime){
   if(controls->unitTest == Controls::UnitSCF)
@@ -384,6 +387,7 @@ void printUnitInfo(Controls * controls, SingleSlater<dcomplex> * singleSlater, S
          << endl;
     }
 }
+*/
 
 void initCQ(int argc, char** argv){
 #ifdef USE_LIBINT
@@ -401,6 +405,8 @@ void initCQ(int argc, char** argv){
   MPI_Init(&argc,&argv);
   MPI_Barrier(MPI_COMM_WORLD);
 #endif
+
+  H5::Exception::dontPrint();
 }
 
 void initCQ(){
@@ -419,6 +425,8 @@ void initCQ(){
   MPI_Init(NULL,NULL);
   MPI_Barrier(MPI_COMM_WORLD);
 #endif
+
+  H5::Exception::dontPrint();
 }
 
 void finalizeCQ(){
