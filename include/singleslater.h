@@ -153,6 +153,7 @@ class SingleSlater : public WaveFunction<T> {
   int nRadDFTGridPts_;
   int nAngDFTGridPts_;
   double nElectrons_;
+  double xHF_;
 
 
   std::unique_ptr<TMap>  NBSqScratch_;
@@ -389,6 +390,7 @@ public:
     this->iStartLevelShift_ = 0;
     this->nLevelShift_      = 4;
     this->levelShiftParam_  = 2.42;
+    this->xHF_              = -0.5;    
 
     this->elecField_   = {0.0,0.0,0.0};
     this->printLevel_  = 1;
@@ -489,6 +491,7 @@ public:
   inline void setDFTNAng(int i)           { this->nAngDFTGridPts_ = i; };
   inline void setDFTScreenTol(double x)   { this->epsScreen = x;       };
   inline void turnOffDFTScreening()       { this->screenVxc = false;   }; 
+  inline void setxHF(double x)            { this->xHF_      = x;   }; 
 
   inline void setITPdt(double x)          { this->dt = x;              }; 
 
@@ -571,24 +574,30 @@ public:
 
 
   // DFT Setup Routines
-  inline void addSlater(){
-    this->dftFunctionals_.emplace_back(new SlaterExchange());
+  inline void addSlater(double x = 1.0){
+    this->dftFunctionals_.emplace_back(new SlaterExchange(x));
   };
-  inline void addB88(){
-    this->dftFunctionals_.emplace_back(new BEightEight());
+  inline void addB88(double x = 1.0){
+    this->dftFunctionals_.emplace_back(new BEightEight(x));
     this->isGGA = true;
   };
-  inline void addLYP(){
-    this->dftFunctionals_.emplace_back(new lyp()); 
+  inline void addLYP(double x = 1.0){
+    this->dftFunctionals_.emplace_back(new lyp(x)); 
     this->isGGA = true;
   };
-  inline void addVWN5(){
-    this->dftFunctionals_.emplace_back(new VWNV()); 
+  inline void addVWN5(double x = 1.0){
+    this->dftFunctionals_.emplace_back(new VWNV(x)); 
   };
-  inline void addVWN3(){
-    this->dftFunctionals_.emplace_back(new VWNIII()); 
+  inline void addVWN3(double x = 1.0){
+    this->dftFunctionals_.emplace_back(new VWNIII(x)); 
   };
-
+  inline void createB3LYP(){
+    addSlater(0.8);
+    addB88(0.72);
+    addLYP(0.81);
+    addVWN3(0.19);
+    this->xHF_ = 0.2;
+  };
 
   void printEnergy(); 
   void printMultipole();

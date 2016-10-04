@@ -36,8 +36,6 @@ void SingleSlater<T>::formPT(){
   std::vector<std::reference_wrapper<TMap>> ax;
   std::vector<AOIntegrals::ERI_CONTRACTION_TYPE> contList;
   std::vector<double> scalingFactors;
-  double exchFactor = -0.5;
-  if(this->isDFT) exchFactor = 0.0;
 
   mats.emplace_back(*this->onePDMScalar_);
   mats.emplace_back(*this->onePDMScalar_);
@@ -46,7 +44,7 @@ void SingleSlater<T>::formPT(){
   contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::COULOMB);
   contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::EXCHANGE);
   scalingFactors.push_back(1.0);
-  scalingFactors.push_back(exchFactor);
+  scalingFactors.push_back(this->xHF_);
 
   this->PTScalar_->setZero();
 
@@ -54,7 +52,7 @@ void SingleSlater<T>::formPT(){
     mats.emplace_back(*this->onePDMMz_);
     ax.emplace_back(*this->PTMz_);
     contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::EXCHANGE);
-    scalingFactors.push_back(exchFactor);
+    scalingFactors.push_back(this->xHF_);
     this->PTMz_->setZero();
   }
 
@@ -65,8 +63,8 @@ void SingleSlater<T>::formPT(){
     ax.emplace_back(*this->PTMx_);
     contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::EXCHANGE);
     contList.push_back(AOIntegrals::ERI_CONTRACTION_TYPE::EXCHANGE);
-    scalingFactors.push_back(exchFactor);
-    scalingFactors.push_back(exchFactor);
+    scalingFactors.push_back(this->xHF_);
+    scalingFactors.push_back(this->xHF_);
     this->PTMy_->setZero();
     this->PTMx_->setZero();
   }

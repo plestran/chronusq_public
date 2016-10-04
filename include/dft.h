@@ -50,7 +50,14 @@ public:
       this->ddgammaAB += other.ddgammaAB;
       this->ddgammaBB += other.ddgammaBB;
     }
-
+    inline void operator*=(double x){
+      this->eps       *= x;
+      this->ddrhoA    *= x;
+      this->ddrhoB    *= x;
+      this->ddgammaAA *= x;
+      this->ddgammaAB *= x;
+      this->ddgammaBB *= x;
+    }
   };
 
   virtual DFTInfo eval(const double &rA,const double &rB) = 0;

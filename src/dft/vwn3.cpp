@@ -144,6 +144,7 @@ DFTFunctional::DFTInfo VWNIII::eval(const double &rhoA, const double &rhoB, cons
      info.ddrhoB  = info.ddrhoA ;
    }
      info.eps *= (rhoA+rhoB);
+  info *= this->scalingFactor; 
   return info;
 };
 

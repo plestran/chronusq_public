@@ -57,6 +57,8 @@ DFTFunctional::DFTInfo SlaterExchange::eval(const double &rhoA, const double &rh
   info.ddrhoB = vxc[1];
 #endif
   info.eps  *= rhoT; 
+  info *= this->scalingFactor; 
+
   return info;
 };
 

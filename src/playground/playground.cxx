@@ -127,7 +127,7 @@ int main(int argc, char **argv){
   Molecule molecule;
   BasisSet basis;
   AOIntegrals aoints;
-  SingleSlater<dcomplex> singleSlater;
+  SingleSlater<double> singleSlater;
   RealTime<dcomplex> rt;
   FileIO fileio("test.inp","test.out");
 
@@ -147,28 +147,28 @@ int main(int argc, char **argv){
   molecule.computeRij();
   molecule.computeI();
 
-  singleSlater.setRef(X2C);
-  singleSlater.isClosedShell = false;
-  singleSlater.setNTCS(2);
+  singleSlater.setRef(RHF);
+  singleSlater.isDFT = true;
+  singleSlater.isHF  = false;
   singleSlater.setSCFEneTol(1e-12);
   singleSlater.setSCFMaxIter(10000);
   singleSlater.doDIIS = true;
 
-//singleSlater.setGuess(CORE);
-  singleSlater.setGuess(READ);
-  fileio.doRestart = true;
+  singleSlater.setGuess(CORE);
+//  singleSlater.setGuess(READ);
+//  fileio.doRestart = true;
 
   fileio.iniH5Files();
-/*
+
   singleSlater.isDFT = true;
   singleSlater.isHF = false;
 //singleSlater.setExchKernel(SingleSlater<double>::EXCH::B88);
   //singleSlater.setExchKernel(SingleSlater<double>::EXCH::NOEXCH);
 //  singleSlater.setCorrKernel(SingleSlater<double>::CORR::NOCORR);
 //  singleSlater.setCorrKernel(SingleSlater<double>::CORR::VWN5);
-  singleSlater.addB88();
-  singleSlater.addLYP();
-*/
+//  singleSlater.addB88();
+//  singleSlater.addLYP();
+    singleSlater.createB3LYP();
 //singleSlater.addSlater();
 //singleSlater.addVWN5();
 //singleSlater.setPrintLevel(5);
@@ -189,11 +189,6 @@ int main(int argc, char **argv){
 //moints.communicate(molecule,basis,fileio,aoints,singleSlater);
 
   aoints.initMeta();
-  aoints.integralAlgorithm = AOIntegrals::INCORE;
-  aoints.doX2C = true;
-  aoints.useFiniteWidthNuclei = true;
-//aoints.setPrintLevel(3);
-  aoints.twoEFudge = 2; //default is 1
   singleSlater.initMeta();
   singleSlater.genMethString();
 

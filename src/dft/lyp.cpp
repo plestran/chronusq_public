@@ -321,6 +321,7 @@ DFTFunctional::DFTInfo lyp::eval(const double &rhoA, const double &rhoB, const d
   info.eps *= (rhoA + rhoB);
 
 #endif
-    return info;
+  info *= this->scalingFactor; 
+  return info;
 };
 

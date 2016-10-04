@@ -117,6 +117,7 @@ DFTFunctional::DFTInfo BEightEight::eval(const double &rhoA, const double &rhoB,
 
   info.eps *= (rhoA + rhoB); //?
 #endif
+  info *= this->scalingFactor; 
   return info;
 };
 

@@ -150,6 +150,7 @@ DFTFunctional::DFTInfo VWNV::eval(const double &rhoA, const double &rhoB, const 
      info.ddrhoB  = info.ddrhoA ;
    }
      info.eps *= RhoTQuant.rhoT; 
+  info *= this->scalingFactor; 
   return info;
 };
 
