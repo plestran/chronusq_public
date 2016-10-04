@@ -556,6 +556,49 @@ void SingleSlater<T>::initSCFFiles() {
     }
   }
 
+  // Ortho Density Files
+
+  // Scalar
+  try {
+    this->SCFOrthoDScalar_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+      this->SCFGroup_->openDataSet("OrthoDScalar")));
+  } catch(...) {
+    this->SCFOrthoDScalar_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+      this->SCFGroup_->createDataSet("OrthoDScalar",H5PredType<T>(),dsp)));
+  }
+
+  // Mz
+  if(this->nTCS_ == 2 or !this->isClosedShell) {
+    try {
+      this->SCFOrthoDMz_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->openDataSet("OrthoDMz")));
+    } catch(...) {
+      this->SCFOrthoDMz_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->createDataSet("OrthoDMz",H5PredType<T>(),dsp)));
+    }
+  }
+
+  // Mx / My
+  if(this->nTCS_ == 2) {
+    // Mx
+    try {
+      this->SCFOrthoDMx_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->openDataSet("OrthoDMx")));
+    } catch(...) {
+      this->SCFOrthoDMx_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->createDataSet("OrthoDMx",H5PredType<T>(),dsp)));
+    }
+
+    // My
+    try {
+      this->SCFOrthoDMy_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->openDataSet("OrthoDMy")));
+    } catch(...) {
+      this->SCFOrthoDMy_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->createDataSet("OrthoDMy",H5PredType<T>(),dsp)));
+    }
+  }
+
 
 
   // Fock Files
@@ -598,6 +641,49 @@ void SingleSlater<T>::initSCFFiles() {
     } catch(...) {
       this->SCFFockMy_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
         this->SCFGroup_->createDataSet("FockMy",H5PredType<T>(),dsp)));
+    }
+  }
+
+  // Ortho Fock Files
+
+  // Scalar
+  try {
+    this->SCFOrthoFScalar_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+      this->SCFGroup_->openDataSet("OrthoFScalar")));
+  } catch(...) {
+    this->SCFOrthoFScalar_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+      this->SCFGroup_->createDataSet("OrthoFScalar",H5PredType<T>(),dsp)));
+  }
+
+  // Mz
+  if(this->nTCS_ == 2 or !this->isClosedShell) {
+    try {
+      this->SCFOrthoFMz_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->openDataSet("OrthoFMz")));
+    } catch(...) {
+      this->SCFOrthoFMz_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->createDataSet("OrthoFMz",H5PredType<T>(),dsp)));
+    }
+  }
+
+  // Mx / My
+  if(this->nTCS_ == 2) {
+    // Mx
+    try {
+      this->SCFOrthoFMx_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->openDataSet("OrthoFMx")));
+    } catch(...) {
+      this->SCFOrthoFMx_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->createDataSet("OrthoFMx",H5PredType<T>(),dsp)));
+    }
+
+    // My
+    try {
+      this->SCFOrthoFMy_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->openDataSet("OrthoFMy")));
+    } catch(...) {
+      this->SCFOrthoFMy_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
+        this->SCFGroup_->createDataSet("OrthoFMy",H5PredType<T>(),dsp)));
     }
   }
 
@@ -669,14 +755,25 @@ void SingleSlater<T>::initSCFFiles() {
 
 template <typename T>
 void SingleSlater<T>::writeSCFFiles() {
+  // Scalar
   this->SCFDensityScalar_->write(this->onePDMScalar_->data(),H5PredType<T>());
+  this->SCFOrthoDScalar_->write(
+    this->onePDMOrthoScalar_->data(),H5PredType<T>());
+
   this->SCFFockScalar_->write(this->fockScalar_->data(),H5PredType<T>());
+  this->SCFOrthoFScalar_->write(this->fockOrthoScalar_->data(),H5PredType<T>());
+
   this->SCFPTScalar_->write(this->PTScalar_->data(),H5PredType<T>());
   this->SCFMOA_->write(this->moA_->data(),H5PredType<T>());
 
   if(this->nTCS_ == 2 or !this->isClosedShell) {
+    // Mz
     this->SCFDensityMz_->write(this->onePDMMz_->data(),H5PredType<T>());
+    this->SCFOrthoDMz_->write(this->onePDMOrthoMz_->data(),H5PredType<T>());
+
     this->SCFFockMz_->write(this->fockMz_->data(),H5PredType<T>());
+    this->SCFOrthoFMz_->write(this->fockOrthoMz_->data(),H5PredType<T>());
+
     this->SCFPTMz_->write(this->PTMz_->data(),H5PredType<T>());
   }
 
@@ -684,11 +781,24 @@ void SingleSlater<T>::writeSCFFiles() {
     this->SCFMOB_->write(this->moB_->data(),H5PredType<T>());
 
   if(this->nTCS_ == 2) {
+    // Mx
     this->SCFDensityMx_->write(this->onePDMMx_->data(),H5PredType<T>());
+    this->SCFOrthoDMx_->write(this->onePDMOrthoMx_->data(),H5PredType<T>());
+
     this->SCFFockMx_->write(this->fockMx_->data(),H5PredType<T>());
+    this->SCFOrthoFMx_->write(this->fockOrthoMx_->data(),H5PredType<T>());
+
     this->SCFPTMx_->write(this->PTMx_->data(),H5PredType<T>());
+
+
+
+    // My
     this->SCFDensityMy_->write(this->onePDMMy_->data(),H5PredType<T>());
+    this->SCFOrthoDMy_->write(this->onePDMOrthoMy_->data(),H5PredType<T>());
+
     this->SCFFockMy_->write(this->fockMy_->data(),H5PredType<T>());
+    this->SCFOrthoFMy_->write(this->fockOrthoMy_->data(),H5PredType<T>());
+
     this->SCFPTMy_->write(this->PTMy_->data(),H5PredType<T>());
   }
 };

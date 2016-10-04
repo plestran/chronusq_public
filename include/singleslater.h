@@ -225,11 +225,21 @@ class SingleSlater : public WaveFunction<T> {
   std::unique_ptr<H5::DataSet> SCFDensityMz_;
   std::unique_ptr<H5::DataSet> SCFDensityMy_;
   std::unique_ptr<H5::DataSet> SCFDensityMx_;
+
+  std::unique_ptr<H5::DataSet> SCFOrthoDScalar_;
+  std::unique_ptr<H5::DataSet> SCFOrthoDMz_;
+  std::unique_ptr<H5::DataSet> SCFOrthoDMy_;
+  std::unique_ptr<H5::DataSet> SCFOrthoDMx_;
   
   std::unique_ptr<H5::DataSet> SCFFockScalar_;
   std::unique_ptr<H5::DataSet> SCFFockMz_;
   std::unique_ptr<H5::DataSet> SCFFockMy_;
   std::unique_ptr<H5::DataSet> SCFFockMx_;
+
+  std::unique_ptr<H5::DataSet> SCFOrthoFScalar_;
+  std::unique_ptr<H5::DataSet> SCFOrthoFMz_;
+  std::unique_ptr<H5::DataSet> SCFOrthoFMy_;
+  std::unique_ptr<H5::DataSet> SCFOrthoFMx_;
 
   std::unique_ptr<H5::DataSet> SCFPTScalar_;
   std::unique_ptr<H5::DataSet> SCFPTMz_;
