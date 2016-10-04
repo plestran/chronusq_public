@@ -56,20 +56,53 @@ void SingleSlater<T>::SCF3(){
   this->doIncFock_ = false;
 
   for(iter = 0; iter < this->maxSCFIter_; iter++){
+
+    // Write the current matricies to disk: 
+    //   F(k-1), D(k), C(k),
+    //   FO(k-1), DO(k)
     this->writeSCFFiles();
 
-//  this->copyDen();
-//  this->copyPT();
-    if(iter != 0 and this->doIncFock_)
-      this->copyDeltaDtoD();
+//  if(iter != 0 and this->doIncFock_)
+//    this->copyDeltaDtoD();
 
+    // Form the AO Fock Matrix: F(k)[D(k)]
     this->formFock(this->doIncFock_ && iter != 0);
 
-    if(iter != 0 and this->doIncFock_){
-      this->incPT();
-      this->copyDOldtoD();
-    } 
    
+//  if(iter != 0 and this->doIncFock_){
+//    this->incPT();
+//    this->copyDOldtoD();
+//  } 
+   
+
+    // Orthonormalize the Fock: F(k) -> FO(k)
+    this->orthoFock3();
+    // Form the orthonormal product of fock and density:
+    //   FPO = FO(k) * DO(k), FPO -> FP
+    this->formFP();
+
+    // Copy over the necessary moieties for DIIS Extrapolation:
+    //   FO(k), DO(k), FP - PF
+    auto IDIISIter = iter - this->iDIISStart_;
+    if(this->doDIIS){
+      this->cpyFockDIIS(IDIISIter);
+      this->cpyDenDIIS(IDIISIter);
+      this->genDIISCom(IDIISIter); 
+    }
+
+    // DIIS Extrapolation of the Fock
+    //   Extrapolates the AO Fock and then transforms into orthonormal
+    //   basis, i.e. both F(k) and FO(k) are now overwritten with the
+    //   DIIS extrapolated quantities.
+    if(this->doDIIS and IDIISIter > 0 and this->diisAlg_ != NO_DIIS) { 
+      if(this->diisAlg_ == CDIIS)
+        this->CDIIS4(std::min(IDIISIter+1,std::size_t(this->nDIISExtrap_)));
+    }
+
+    // Damping
+    if(this->doDamp){
+      this->fockDamping();
+    }
 
 /*
     doLevelShift = this->nLevelShift_ != 0;
@@ -80,30 +113,6 @@ void SingleSlater<T>::SCF3(){
     if(doLevelShift) this->levelShift2();
 */
 
-    this->orthoFock3();
-    this->formFP();
-
-    auto IDIISIter = iter - this->iDIISStart_;
-    if(this->doDIIS){
-      this->cpyFockDIIS(IDIISIter);
-      this->cpyDenDIIS(IDIISIter);
-      this->genDIISCom(IDIISIter); 
-    }
-
-    // DIIS Extrapolation of the Fock
-    if(this->doDIIS and IDIISIter > 0 and this->diisAlg_ != NO_DIIS) { 
-      if(this->diisAlg_ == CDIIS)
-        this->CDIIS4(std::min(IDIISIter+1,std::size_t(this->nDIISExtrap_)));
-    }
-
-    // Damping
-    if(this->doDamp){
-        this->SCFFockScalar_->read(this->NBSqScratch_->data(),H5PredType<T>());
-        *this->fockScalar_  *= (1-dampParam);
-        *this->NBSqScratch_ *= dampParam;
-        *this->fockScalar_  += *this->NBSqScratch_;
-    }
-
     if(this->doDMS){
       this->formDMSErr(IDIISIter);
     }
@@ -112,45 +121,74 @@ void SingleSlater<T>::SCF3(){
       // DIIS (DMS) Extrapolation of the Density
       this->DMSExtrap(std::min(IDIISIter+1,std::size_t(this->nDIISExtrap_)));
     } else {
+
       // Copies over the ortho focks to the MO storage
+      //   C(k) = FO(k)
       this->populateMO4Diag();
 
+      
       // Diagonalizes the orthonormal fock matricies
+      // FO(k) {stored in C} -> C(k+1) {in orthonormal basis}
       this->diagFock2();
 
       // This stupidly computes the orthonormal density and stores it in the
       // AO storage
+      //   DO(k+1) = C(k+1) * C(k+1)**H {stored in D storage}
       this->formDensity();
 
     }
-    // This copy operation negates the problem above
+
+    // This copy operation negates the mispopulation of AO storage
+    //   DO(k+1) = D(k+1)
     this->cpyAOtoOrthoDen();
 
     // Transform D into the AO basis
+    //   DO(k+1) -> D(k+1)
     this->unOrthoDen3();
     if(this->printLevel_ > 3) this->printDensity();
 
+    // The generation of the commutator for DIIS also checks for convergece
+    // i.e. if [F,P] is converged, this is a necessary and sufficient 
+    // condition for SCF convergence and will cause problems in the DIIS
+    // extrapolation if not accounted for (ill posed DIIS problem)
     if(this->isConverged)
       this->fileio_->out << "   *** SCF Converged by [F,P] ***" << endl;
-    // Calls formFock
+
+    // Evaluate standard convergence critera (RMS density diffence,
+    //   energy change, etc)
     SCFConvergence CONVER = this->evalConver3();
 
+    // Print line to output file regarding the SCF iteration
     if(this->printLevel_ > 0)
       this->printSCFIter(iter,CONVER.EDelta,CONVER.PSRMS,
         CONVER.PMRMS);
 
     this->nSCFIter++;
 
+    // If convergence is reached, break out of SCF loop
     if(this->isConverged) break;
   }
 
+  // Deallocate all of the SCF temporaries
   this->cleanupSCFMem3();
+
+  // Transform the MO coefficients into the AO basis as all of the
+  //   arithmetic was done in the orthonormal basis
+  //   C = X*C
   this->backTransformMOs();
+
+  // Force a certain phase critera on the MO coefficients (which
+  //   have gauge freedom), s.t. the "largest" element of each MO
+  //   coefficient will be real and positive. 
   this->fixPhase();
 
+  // Print out information regarding SCF not converging
   if(!this->isConverged)
     CErr("SCF Failed to converge within MAXITER iterations",
         this->fileio_->out);
+
+
+  // Print out SCF energy results...
   if(this->printLevel_ > 0 ){
     this->fileio_->out 
       << endl << "SCF Completed: E(" 

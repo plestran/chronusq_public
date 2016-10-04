@@ -68,7 +68,9 @@ void SingleSlater<T>::formGuess(){
 
 template<typename T>
 void SingleSlater<T>::COREGuess(){
-  this->aointegrals_->computeAOOneE(); 
+  if(not this->aointegrals_->haveAOOneE)
+    this->aointegrals_->computeAOOneE(); 
+
   this->fockScalar_->real() = 2*(*this->aointegrals_->coreH_);
   if(this->nTCS_ == 2 or !this->isClosedShell) {
     this->fockMz_->setZero();
