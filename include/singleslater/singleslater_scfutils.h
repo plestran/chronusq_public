@@ -243,7 +243,7 @@ SCFConvergence SingleSlater<T>::evalConver3(){
   double EDelta = this->totalEnergy_ - EOld;
 
   // Turn off damping when close to convergence
-  if(this->doDamp and (EDelta < 1e-6){
+  if(this->doDamp and (std::abs(EDelta) < 1e-6)){
     this->doDamp = false;
   }
 

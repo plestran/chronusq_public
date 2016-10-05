@@ -137,18 +137,18 @@ int main(int argc, char **argv){
   
 //loadPresets<H>(molecule);
 //loadPresets<OxMolecule>(molecule);
-//loadPresets<WATER>(molecule);
+  loadPresets<WATER>(molecule);
 //loadPresets<Methanol>(molecule);
 //loadPresets<HE>(molecule);
 //loadPresets<SO>(molecule);
-  loadPresets<Li>(molecule);
+//loadPresets<Li>(molecule);
   molecule.convBohr();
   molecule.computeNucRep();
   molecule.computeRij();
   molecule.computeI();
 
   singleSlater.setRef(X2C);
-  singleSlater.setGuess(SAD);
+  singleSlater.setGuess(CORE);
   singleSlater.isClosedShell = false;
   singleSlater.setNTCS(2);
   singleSlater.setSCFEneTol(1e-12);
@@ -156,7 +156,7 @@ int main(int argc, char **argv){
   singleSlater.doDIIS = true;
   singleSlater.doDamp = false;
 
-  fileio.doRestart = true;
+//  fileio.doRestart = true;
 
   fileio.iniH5Files();
 /*
@@ -193,7 +193,7 @@ int main(int argc, char **argv){
   aoints.doX2C = true;
   aoints.useFiniteWidthNuclei = true;
 //aoints.setPrintLevel(3);
-  aoints.twoEFudge = 2; //default is 1
+  aoints.twoEFudge = 1; //default is 1
   singleSlater.initMeta();
   singleSlater.genMethString();
 
