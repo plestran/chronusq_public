@@ -22,7 +22,8 @@ DFTFunctional::DFTInfo SlaterExchange::eval(const double &rhoA, const double &rh
 };
 
 DFTFunctional::DFTInfo SlaterExchange::eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB, const double &gammaBB){
-
+// alpha in A2 is 2/3
+// the final expression for the delE/DelphoSigma = - (2)^(1/3) * (3/pi)^(1/3) * rho_sigma
   DFTFunctional::DFTInfo info;
   double rhoT            = rhoA + rhoB;
 #ifndef CQ_ENABLE_LIBXC

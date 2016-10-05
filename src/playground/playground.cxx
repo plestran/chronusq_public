@@ -138,6 +138,7 @@ int main(int argc, char **argv){
 //loadPresets<H>(molecule);
 //loadPresets<OxMolecule>(molecule);
   loadPresets<WATER>(molecule);
+//  loadPresets<OxMolecule>(molecule);
 //loadPresets<Methanol>(molecule);
 //loadPresets<HE>(molecule);
 //loadPresets<SO>(molecule);
@@ -168,7 +169,9 @@ int main(int argc, char **argv){
 //  singleSlater.setCorrKernel(SingleSlater<double>::CORR::VWN5);
 //  singleSlater.addB88();
 //  singleSlater.addLYP();
+//    singleSlater.createBHandH();
     singleSlater.createB3LYP();
+//    singleSlater.createB88();
 //singleSlater.addSlater();
 //singleSlater.addVWN5();
 //singleSlater.setPrintLevel(5);

@@ -596,7 +596,18 @@ public:
     addB88(0.72);
     addLYP(0.81);
     addVWN3(0.19);
-    this->xHF_ = 0.2;
+    this->xHF_ *= 0.2;
+  };
+  inline void createB88(){
+//    addSlater();
+    addSlater();
+    addB88();
+    this->xHF_ = 0.;
+  };
+  inline void createBHandH(){
+    addSlater(0.5);
+    addLYP();
+    this->xHF_ *= 0.5;
   };
 
   void printEnergy(); 

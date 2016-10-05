@@ -3,7 +3,7 @@
 BEightEight::BEightEight(double X, double eps):
 DFTFunctional(X,eps){
 // Memo Factor to be added at the end for numerical stability
-  this->CxVx  =  0.930525736349100;  // (3/2)*((3/(4*pi))^(1/3)) ;  
+//  this->CxVx  =  0.930525736349100;  // (3/2)*((3/(4*pi))^(1/3)) ;  
 //  this->small = 1.0e-18; 
   this-> d1over3  = 1.0/3.0;
   this-> d4over3  = 4.0/3.0;
@@ -23,7 +23,7 @@ double BEightEight::g0B88 (double x, double &sinhx, double &bx){
  //  Eq A4 Pople, J. Chem. Phys. 5612, (1992) nder =0
  gx  = -bx*x;
  gx /= (1.0 + 6.0 *bx * sinhx) ;
- gx -= this->CxVx;
+// gx -= this->CxVx;
  return gx; 
 };  //End Form g function for B88 Exchange
 
