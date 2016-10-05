@@ -242,6 +242,11 @@ SCFConvergence SingleSlater<T>::evalConver3(){
   this->computeEnergy();
   double EDelta = this->totalEnergy_ - EOld;
 
+  // Turn off damping when close to convergence
+  if(this->doDamp and (std::abs(EDelta) < 1e-6)){
+    this->doDamp = false;
+  }
+
   double PSRMS(0),PMRMS(0);
   // Write D(M) - D(M-1) to disc
   this->formDeltaD();
@@ -752,6 +757,43 @@ void SingleSlater<T>::initSCFFiles() {
     }
   }
 };
+
+template <typename T>
+void SingleSlater<T>::fockDamping() {
+  // Scalar
+  //prettyPrintSmart(this->fileio_->out,*this->fockOrthoScalar_,"FockScalar predamp");
+  this->SCFOrthoFScalar_->read(this->NBSqScratch_->data(),H5PredType<T>());
+  *this->fockOrthoScalar_  *= (1-dampParam);
+  //prettyPrintSmart(this->fileio_->out,*this->fockOrthoScalar_,"FockScalar scaled");
+  *this->NBSqScratch_ *= dampParam;
+  *this->fockOrthoScalar_  += *this->NBSqScratch_;
+  //prettyPrintSmart(this->fileio_->out,*this->fockOrthoScalar_,"FockScalar damped");
+
+  // Mz
+  if(this->nTCS_ == 2 or !this->isClosedShell) {
+    this->SCFOrthoFMz_->read(this->NBSqScratch_->data(),H5PredType<T>());
+    *this->fockOrthoMz_  *= (1-dampParam);
+    *this->NBSqScratch_ *= dampParam;
+    *this->fockOrthoMz_  += *this->NBSqScratch_;
+
+  }
+  
+  if(this->nTCS_ == 2){
+    // My
+    this->SCFOrthoFMy_->read(this->NBSqScratch_->data(),H5PredType<T>());
+    *this->fockOrthoMy_  *= (1-dampParam);
+    *this->NBSqScratch_ *= dampParam;
+    *this->fockOrthoMy_  += *this->NBSqScratch_;
+
+    // Mx
+    this->SCFOrthoFMx_->read(this->NBSqScratch_->data(),H5PredType<T>());
+    *this->fockOrthoMx_  *= (1-dampParam);
+    *this->NBSqScratch_ *= dampParam;
+    *this->fockOrthoMx_  += *this->NBSqScratch_;
+
+  }
+
+}
 
 template <typename T>
 void SingleSlater<T>::writeSCFFiles() {

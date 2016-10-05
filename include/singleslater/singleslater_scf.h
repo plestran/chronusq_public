@@ -99,6 +99,11 @@ void SingleSlater<T>::SCF3(){
         this->CDIIS4(std::min(IDIISIter+1,std::size_t(this->nDIISExtrap_)));
     }
 
+    // Damping
+    if(this->doDamp){
+      this->fockDamping();
+    }
+
 /*
     doLevelShift = this->nLevelShift_ != 0;
     doLevelShift = doLevelShift and iter >= this->iStartLevelShift_;

@@ -71,45 +71,30 @@ void SingleSlater<T>::COREGuess(){
   if(not this->aointegrals_->haveAOOneE)
     this->aointegrals_->computeAOOneE(); 
 
-  this->fockScalar_->real() = 2*(*this->aointegrals_->coreH_);
+
+  for(auto fock : this->fock_) fock->setZero();
+
+  (*this->fockScalar_) = this->aointegrals_->coreH_->template cast<T>();
+  if(this->nTCS_ == 2 and this->aointegrals_->doX2C) {
+    (*this->fockMx_) = this->aointegrals_->oneEmx_->template cast<T>();
+    (*this->fockMy_) = this->aointegrals_->oneEmy_->template cast<T>();
+    (*this->fockMz_) = this->aointegrals_->oneEmz_->template cast<T>();
+    (*this->fockMx_) *= ComplexScale<T>();
+    (*this->fockMy_) *= ComplexScale<T>();
+    (*this->fockMz_) *= ComplexScale<T>();
+  }
+
+  for(auto iF = fock_.begin(); iF != fock_.end(); iF++)
+    *(*iF) *= 2;
+/*
   if(this->nTCS_ == 2 or !this->isClosedShell) {
     this->fockMz_->setZero();
-
-/*
-    std::vector<std::reference_wrapper<TMap>> toGather;
-    toGather.emplace_back(*this->fockScalar_);
-    toGather.emplace_back(*this->fockMz_);
-*/
-
     if(this->nTCS_ ==  2) {
       this->fockMy_->setZero();
       this->fockMx_->setZero();
-/*
-      toGather.emplace_back(*this->fockMy_);
-      toGather.emplace_back(*this->fockMx_);
-
-      Quantum<T>::spinGather(*this->fockA_,toGather);
-*/
     } 
-/*
-    else 
-      Quantum<T>::spinGather(*this->fockA_,*this->fockB_,toGather);
-*/
-  }
-
-/*
-  if(this->printLevel_ > 3){
-    prettyPrint(this->fileio_->out,*this->fockA_,"Initial FA");
-    prettyPrint(this->fileio_->out,*this->fockOrthoA_,"Initial FOrthoA");
   }
 */
-/*
-//if(this->printLevel_ > 3){
-    prettyPrint(this->fileio_->out,*this->onePDMA_,"Initial PA");
-    prettyPrint(this->fileio_->out,*this->onePDMOrthoA_,"Initial POrthoA");
-//}
-*/
-//this->computeEnergy();
 };
 
 

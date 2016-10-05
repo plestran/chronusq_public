@@ -344,6 +344,8 @@ public:
   bool  isDFT;
   bool  isPrimary;
   bool  doDIIS;
+  bool  doDamp;
+  double dampParam;
 
   bool  doITP; ///< Do Imaginary Time Propagation (ITP)?
   float dt;    ///< Timestep for Imaginary Time Propagation
@@ -402,9 +404,13 @@ public:
     this->fixPhase_    = true;
     this->guess_       = SAD;
 
+
     // SCF Fock Formation
     this->doIncFock_   = false;
     this->nIncFock_    = 20;
+
+    this->doDamp    = true;
+    this->dampParam = 0.1;
 
     // Extrapolation
     this->doDIIS       = true;
@@ -571,7 +577,7 @@ public:
 
   void levelShift();
   void levelShift2();
-
+  void fockDamping();
 
   // DFT Setup Routines
   inline void addSlater(double x = 1.0){
