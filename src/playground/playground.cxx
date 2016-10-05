@@ -148,15 +148,14 @@ int main(int argc, char **argv){
   molecule.computeI();
 
   singleSlater.setRef(X2C);
-  singleSlater.setGuess(RANDOM);
+  singleSlater.setGuess(SAD);
   singleSlater.isClosedShell = false;
   singleSlater.setNTCS(2);
   singleSlater.setSCFEneTol(1e-12);
   singleSlater.setSCFMaxIter(10000);
   singleSlater.doDIIS = true;
+  singleSlater.doDamp = false;
 
-//singleSlater.setGuess(CORE);
-  singleSlater.setGuess(READ);
   fileio.doRestart = true;
 
   fileio.iniH5Files();
