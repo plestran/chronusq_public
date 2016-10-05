@@ -41,6 +41,11 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other) :
   nRadDFTGridPts_( other->nRadGridPts() ),
   nAngDFTGridPts_( other->nAngGridPts() ),
   xHF_( other->xHF() ),
+  isGGA(other->isGGA),
+  screenVxc( other->screenVxc),
+  epsScreen( other->epsScreen),
+  epsConv( other->epsConv),
+  maxiter( other->maxiter),
   guess_  ( other->guess() ),
   elecField_   ( other->elecField() ) {
 /*
@@ -85,6 +90,8 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other) :
       this->PTB_->real()         = *other->PTB();
     }
 */
+    for(auto F : this->dftFunctionals_) cout << F->name << endl;
+    cout << this->xHF_ << endl;
     for(auto iF = 0; iF < this->fock_.size(); iF++){
       this->fock_[iF]->real() = *other->fock()[iF];
       this->PT_[iF]->real()   = *other->PT()[iF];

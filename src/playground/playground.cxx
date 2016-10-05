@@ -135,6 +135,7 @@ int main(int argc, char **argv){
   initCQ(argc,argv);
   CQSetNumThreads(1);
   
+//////////////////////////////////////////////////////
 //loadPresets<H>(molecule);
 //loadPresets<OxMolecule>(molecule);
   loadPresets<WATER>(molecule);
@@ -168,11 +169,13 @@ int main(int argc, char **argv){
 //  singleSlater.setCorrKernel(SingleSlater<double>::CORR::VWN5);
 //  singleSlater.addB88();
 //  singleSlater.addLYP();
+//  singleSlater.createB88();
     singleSlater.createB3LYP();
 //singleSlater.addSlater();
 //singleSlater.addVWN5();
 //singleSlater.setPrintLevel(5);
 
+//singleSlater.setxHF(0.0);
 //basis.findBasisFile("sto-3g");
 //basis.findBasisFile("3-21g");
   basis.findBasisFile("6-31G");
@@ -206,6 +209,8 @@ int main(int argc, char **argv){
 
   singleSlater.mullikenPop();
 
+  cout << "PASSED? " << bool((singleSlater.totalEnergy() - (-76.3671171302)) <= 1e-8) << endl;
+///////////////////////////////////////////////////////////////////////////
 /*
   singleSlater.onePDMOrtho()[1]->swap(*singleSlater.onePDMOrtho()[3]);
   singleSlater.fockOrtho()[1]->swap(*singleSlater.fockOrtho()[3]);
@@ -309,6 +314,7 @@ int main(int argc, char **argv){
   prettyPrintSmart(cout,FPMy - FPMy2,"Diff My");
   prettyPrintSmart(cout,FPMx - FPMx2,"Diff Mx");
 */
+/*
   rt.communicate(singleSlater);
   rt.alloc();
 //rt.setMaxSteps(827000); // roughly 1 ps of dynamics
@@ -317,6 +323,7 @@ int main(int argc, char **argv){
 //rt.setEDFieldAmp({0.001,0.0,0.0});
   rt.setIEnvlp(Step);
   rt.doPropagation();
+*/
 /*
   cout << endl;
   MOIntegrals<double> moints;
@@ -331,8 +338,8 @@ int main(int argc, char **argv){
   resp.initMeta();
   resp.alloc();
   resp.runResponse();
-  finalizeCQ();
 */
+  finalizeCQ();
   return 0;
 };
 
