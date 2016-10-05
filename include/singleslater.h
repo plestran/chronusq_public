@@ -364,7 +364,7 @@ public:
 
   int      nSCFIter;
 
-  std::vector<std::unique_ptr<DFTFunctional>> dftFunctionals_;
+  std::vector<std::shared_ptr<DFTFunctional>> dftFunctionals_;
 
 
   // constructor & destructor
@@ -443,6 +443,7 @@ public:
     doDIIS  ( other->doDIIS ),
     isHF    ( other->isHF ),
     isDFT   ( other->isDFT ),
+    dftFunctionals_( other->dftFunctionals_ ),
     guess_  ( other->guess() ),
     elecField_   ( other->elecField() ) {
 
@@ -517,6 +518,12 @@ public:
   inline std::vector<double> mullPop()   { return this->mullPop_; };
   inline std::array<double,3> elecField(){ return this->elecField_; };
 
+  inline double xHF(){return this->xHF_;};
+  inline int    weightScheme(){ return this->weightScheme_; };
+  inline int    dftGrid(){ return this->dftGrid_;};
+  inline int nRadGridPts(){ return this->nRadDFTGridPts_; };
+  inline int nAngGridPts(){ return this->nAngDFTGridPts_; };
+
   inline TMap* fockScalar()           { return this->fockScalar_.get();};
   inline TMap* fockMz()           { return this->fockMz_.get();};
   inline TMap* fockMy()           { return this->fockMy_.get();};
@@ -581,21 +588,21 @@ public:
 
   // DFT Setup Routines
   inline void addSlater(double x = 1.0){
-    this->dftFunctionals_.emplace_back(new SlaterExchange(x));
+    this->dftFunctionals_.emplace_back(std::make_shared<SlaterExchange>(x));
   };
   inline void addB88(double x = 1.0){
-    this->dftFunctionals_.emplace_back(new BEightEight(x));
+    this->dftFunctionals_.emplace_back(std::make_shared<BEightEight>(x));
     this->isGGA = true;
   };
   inline void addLYP(double x = 1.0){
-    this->dftFunctionals_.emplace_back(new lyp(x)); 
+    this->dftFunctionals_.emplace_back(std::make_shared<lyp>(x)); 
     this->isGGA = true;
   };
   inline void addVWN5(double x = 1.0){
-    this->dftFunctionals_.emplace_back(new VWNV(x)); 
+    this->dftFunctionals_.emplace_back(std::make_shared<VWNV>(x)); 
   };
   inline void addVWN3(double x = 1.0){
-    this->dftFunctionals_.emplace_back(new VWNIII(x)); 
+    this->dftFunctionals_.emplace_back(std::make_shared<VWNIII>(x)); 
   };
   inline void createB3LYP(){
     addSlater(0.8);

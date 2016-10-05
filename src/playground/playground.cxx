@@ -127,8 +127,8 @@ int main(int argc, char **argv){
   Molecule molecule;
   BasisSet basis;
   AOIntegrals aoints;
-  SingleSlater<dcomplex> singleSlater;
-  RealTime<dcomplex> rt;
+  SingleSlater<double> singleSlater;
+  RealTime<double> rt;
   FileIO fileio("test.inp","test.out");
 
   memManager.setTotalMem(256e6);
@@ -147,28 +147,28 @@ int main(int argc, char **argv){
   molecule.computeRij();
   molecule.computeI();
 
-  singleSlater.setRef(X2C);
-  singleSlater.setGuess(CORE);
-  singleSlater.isClosedShell = false;
-  singleSlater.setNTCS(2);
+  singleSlater.setRef(RHF);
+  singleSlater.isDFT = true;
+  singleSlater.isHF  = false;
   singleSlater.setSCFEneTol(1e-12);
   singleSlater.setSCFMaxIter(10000);
   singleSlater.doDIIS = true;
-  singleSlater.doDamp = true;
 
+  singleSlater.setGuess(CORE);
+//  singleSlater.setGuess(READ);
 //  fileio.doRestart = true;
 
   fileio.iniH5Files();
-/*
+
   singleSlater.isDFT = true;
   singleSlater.isHF = false;
 //singleSlater.setExchKernel(SingleSlater<double>::EXCH::B88);
   //singleSlater.setExchKernel(SingleSlater<double>::EXCH::NOEXCH);
 //  singleSlater.setCorrKernel(SingleSlater<double>::CORR::NOCORR);
 //  singleSlater.setCorrKernel(SingleSlater<double>::CORR::VWN5);
-  singleSlater.addB88();
-  singleSlater.addLYP();
-*/
+//  singleSlater.addB88();
+//  singleSlater.addLYP();
+    singleSlater.createB3LYP();
 //singleSlater.addSlater();
 //singleSlater.addVWN5();
 //singleSlater.setPrintLevel(5);
@@ -189,11 +189,6 @@ int main(int argc, char **argv){
 //moints.communicate(molecule,basis,fileio,aoints,singleSlater);
 
   aoints.initMeta();
-  aoints.integralAlgorithm = AOIntegrals::INCORE;
-  aoints.doX2C = true;
-  aoints.useFiniteWidthNuclei = true;
-//aoints.setPrintLevel(3);
-  aoints.twoEFudge = 1; //default is 1
   singleSlater.initMeta();
   singleSlater.genMethString();
 
@@ -314,16 +309,14 @@ int main(int argc, char **argv){
   prettyPrintSmart(cout,FPMy - FPMy2,"Diff My");
   prettyPrintSmart(cout,FPMx - FPMx2,"Diff Mx");
 */
-/*
   rt.communicate(singleSlater);
   rt.alloc();
 //rt.setMaxSteps(827000); // roughly 1 ps of dynamics
   rt.setMaxSteps(1000); 
-  rt.setTOff(0.10);
-  rt.setEDFieldAmp({0.001,0.0,0.0});
+//rt.setTOff(0.10);
+//rt.setEDFieldAmp({0.001,0.0,0.0});
   rt.setIEnvlp(Step);
   rt.doPropagation();
-*/
 /*
   cout << endl;
   MOIntegrals<double> moints;
@@ -338,8 +331,8 @@ int main(int argc, char **argv){
   resp.initMeta();
   resp.alloc();
   resp.runResponse();
-*/
   finalizeCQ();
+*/
   return 0;
 };
 

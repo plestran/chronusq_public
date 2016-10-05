@@ -29,7 +29,20 @@ template<>
 template<>
 SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other) :
   WaveFunction<dcomplex>::WaveFunction<dcomplex>(
-    dynamic_cast<WaveFunction<double>&>(*other)){
+    dynamic_cast<WaveFunction<double>&>(*other)),
+  Ref_    ( other->Ref() ),
+  printLevel_  ( other->printLevel() ),
+  doDIIS  ( other->doDIIS ),
+  isHF    ( other->isHF ),
+  isDFT   ( other->isDFT ),
+  dftFunctionals_( other->dftFunctionals_ ),
+  weightScheme_( other->weightScheme()),
+  dftGrid_( other->dftGrid()),
+  nRadDFTGridPts_( other->nRadGridPts() ),
+  nAngDFTGridPts_( other->nAngGridPts() ),
+  xHF_( other->xHF() ),
+  guess_  ( other->guess() ),
+  elecField_   ( other->elecField() ) {
 /*
     this->nBasis_ = other->nBasis();
     this->nTT_    = other->nTT();
@@ -42,6 +55,7 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other) :
     this->multip_   = other->multip();
     this->energyNuclei = other->energyNuclei;
 */
+/*
     this->Ref_    = other->Ref();
     this->printLevel_ = other->printLevel();
     this->doDIIS = other->doDIIS;
@@ -49,6 +63,7 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other) :
     this->isDFT  = other->isDFT;
     this->guess_ = other->guess();
     this->elecField_   = (other->elecField());
+*/
 /*
     this->basisset_    = other->basisset();    
     this->molecule_    = other->molecule();
