@@ -124,11 +124,30 @@ void loadPresets<Li>(Molecule &mol){
 int main(int argc, char **argv){
 
   CQMemManager memManager;
-  Molecule molecule;
-  BasisSet basis;
-  AOIntegrals aoints;
-  SingleSlater<double> singleSlater;
-  RealTime<double> rt;
+  Molecule moleculeLi;
+  Molecule moleculeOxy;
+  Molecule moleculeWat;
+  BasisSet basisOxy;
+  BasisSet basisLi;
+  BasisSet basisWat;
+  AOIntegrals aointsOxy;
+  AOIntegrals aointsLi;
+  AOIntegrals aointsWat;
+  SingleSlater<double> singleSlater109;
+  SingleSlater<double> singleSlater112;
+  SingleSlater<double> singleSlater115;
+  SingleSlater<double> singleSlater118;
+  SingleSlater<double> singleSlater121;
+  SingleSlater<double> singleSlater124;
+  SingleSlater<double> singleSlater127;
+  SingleSlater<double> singleSlater130;
+  SingleSlater<double> singleSlater133;
+  SingleSlater<double> singleSlater137;
+  SingleSlater<double> singleSlater136;
+  SingleSlater<double> singleSlater150;
+  SingleSlater<double> singleSlater151;
+  SingleSlater<double> singleSlater160;
+  SingleSlater<double> singleSlater161;
   FileIO fileio("test.inp","test.out");
 
   memManager.setTotalMem(256e6);
@@ -136,81 +155,775 @@ int main(int argc, char **argv){
   CQSetNumThreads(1);
   
 //////////////////////////////////////////////////////
-//loadPresets<H>(molecule);
-//loadPresets<OxMolecule>(molecule);
-  loadPresets<WATER>(molecule);
-//loadPresets<Methanol>(molecule);
-//loadPresets<HE>(molecule);
-//loadPresets<SO>(molecule);
-//loadPresets<Li>(molecule);
-  molecule.convBohr();
-  molecule.computeNucRep();
-  molecule.computeRij();
-  molecule.computeI();
+  loadPresets<OxMolecule>(moleculeOxy);
+  loadPresets<Li>(moleculeLi);
+  loadPresets<WATER>(moleculeWat);
+// Molecule
+  moleculeWat.convBohr();
+  moleculeWat.computeNucRep();
+  moleculeWat.computeRij();
+  moleculeWat.computeI();
+  cout << "Mol Wat " <<endl;
+  moleculeLi.convBohr();
+  moleculeLi.computeNucRep();
+  moleculeLi.computeRij();
+  moleculeLi.computeI();
+  cout << "Mol Li " <<endl;
 
-  singleSlater.setRef(RHF);
-  singleSlater.isDFT = true;
-  singleSlater.isHF  = false;
-  singleSlater.setSCFEneTol(1e-12);
-  singleSlater.setSCFMaxIter(10000);
-  singleSlater.doDIIS = true;
+  moleculeOxy.convBohr();
+  moleculeOxy.computeNucRep();
+  moleculeOxy.computeRij();
+  moleculeOxy.computeI();
 
-  singleSlater.setGuess(CORE);
-//  singleSlater.setGuess(READ);
-//  fileio.doRestart = true;
-
+  cout << "Mol Oxy " <<endl;
   fileio.iniH5Files();
 
-  singleSlater.isDFT = true;
-  singleSlater.isHF = false;
-//singleSlater.setExchKernel(SingleSlater<double>::EXCH::B88);
-  //singleSlater.setExchKernel(SingleSlater<double>::EXCH::NOEXCH);
-//  singleSlater.setCorrKernel(SingleSlater<double>::CORR::NOCORR);
-//  singleSlater.setCorrKernel(SingleSlater<double>::CORR::VWN5);
-//  singleSlater.addB88();
-//  singleSlater.addLYP();
-//  singleSlater.createB88();
-    singleSlater.createB3LYP();
-//singleSlater.addSlater();
-//singleSlater.addVWN5();
-//singleSlater.setPrintLevel(5);
+  basisWat.findBasisFile("STO-3G");
+  basisWat.communicate(fileio);
+  basisWat.parseGlobal();
+  basisWat.constructLocal(&moleculeWat);
+  basisWat.makeMaps(&moleculeWat);
+  basisWat.renormShells();
+  cout << "Bas Wat " <<endl;
+  aointsWat.communicate(moleculeWat,basisWat,fileio,memManager);
+  aointsWat.initMeta();
+  aointsWat.alloc();
+  cout << "AoInt Wat " <<endl;
 
-//singleSlater.setxHF(0.0);
-//basis.findBasisFile("sto-3g");
-//basis.findBasisFile("3-21g");
-  basis.findBasisFile("6-31G");
-//basis.findBasisFile("cc-pVTZ");
-  basis.communicate(fileio);
-  basis.parseGlobal();
-  basis.constructLocal(&molecule);
-  basis.makeMaps(&molecule);
-  basis.renormShells();
+  basisLi.findBasisFile("STO-3G");
+  basisLi.communicate(fileio);
+  basisLi.parseGlobal();
+  basisLi.constructLocal(&moleculeLi);
+  basisLi.makeMaps(&moleculeLi);
+  basisLi.renormShells();
+  cout << "Bas Li " <<endl;
+  aointsLi.communicate(moleculeLi,basisLi,fileio,memManager);
+  aointsLi.initMeta();
+  aointsLi.alloc();
+  cout << "AoInt Li " <<endl;
+
+  basisOxy.findBasisFile("STO-3G");
+  basisOxy.communicate(fileio);
+  basisOxy.parseGlobal();
+  basisOxy.constructLocal(&moleculeOxy);
+  basisOxy.makeMaps(&moleculeOxy);
+  basisOxy.renormShells();
+  cout << "Bas Oxy " <<endl;
+  aointsOxy.communicate(moleculeOxy,basisOxy,fileio,memManager);
+  aointsOxy.initMeta();
+  aointsOxy.alloc();
+  cout << "AoInt Oxy " <<endl;
+
+  singleSlater121.setRef(UHF);
+  singleSlater121.isDFT = true;
+  singleSlater121.isHF  = false;
+  singleSlater121.setSCFEneTol(1e-12);
+  singleSlater121.setSCFMaxIter(10000);
+  singleSlater121.doDIIS = true;
+  singleSlater121.setGuess(CORE);
+  singleSlater121.addSlater();
+  singleSlater121.setxHF(0.0);
+  singleSlater121.communicate(moleculeOxy,basisOxy,aointsOxy,fileio,memManager);
+  singleSlater121.initMeta();
+  singleSlater121.genMethString();
+  singleSlater121.alloc();
+  singleSlater121.formGuess();
+  singleSlater121.computeProperties();
+  singleSlater121.printProperties();
+  singleSlater121.SCF3();
+  singleSlater121.computeProperties();
+  singleSlater121.printProperties();
+  singleSlater121.mullikenPop();
+
+  cout << "Energy " << singleSlater121.totalEnergy() <<endl;
+  cout << "Energy " << std::abs(singleSlater121.totalEnergy() - (-146.0745567304)) <<endl;
+  cout << "PASSED 121 - Oxy Slater STO-3G? " << bool(std::abs(singleSlater121.totalEnergy() - (-146.0745567304)) <= 1e-8) << endl;
+///
+  singleSlater127.setRef(UHF);
+  singleSlater127.isDFT = true;
+  singleSlater127.isHF  = false;
+  singleSlater127.setSCFEneTol(1e-12);
+  singleSlater127.setSCFMaxIter(10000);
+  singleSlater127.doDIIS = true;
+  singleSlater127.setGuess(CORE);
+  singleSlater127.createLSDA();
+//  singleSlater127.setxHF(0.0);
+  singleSlater127.communicate(moleculeOxy,basisOxy,aointsOxy,fileio,memManager);
+  singleSlater127.initMeta();
+  singleSlater127.genMethString();
+  singleSlater127.alloc();
+  singleSlater127.formGuess();
+  singleSlater127.computeProperties();
+  singleSlater127.printProperties();
+  singleSlater127.SCF3();
+  singleSlater127.computeProperties();
+  singleSlater127.printProperties();
+  singleSlater127.mullikenPop();
+
+  cout << "Energy " << singleSlater127.totalEnergy() <<endl;
+  cout << "Energy " << std::abs(singleSlater127.totalEnergy() - (-147.5135588885)) <<endl;
+  cout << "PASSED 127 - Oxy LSDA STO-3G? " << bool(std::abs(singleSlater127.totalEnergy() - (-147.5135588885)) <= 1e-8) << endl;
+///
+  singleSlater133.setRef(UHF);
+  singleSlater133.isDFT = true;
+  singleSlater133.isHF  = false;
+  singleSlater133.setSCFEneTol(1e-12);
+  singleSlater133.setSCFMaxIter(10000);
+  singleSlater133.doDIIS = true;
+  singleSlater133.setGuess(CORE);
+  singleSlater133.addSlater();
+  singleSlater133.addVWN5();
+  singleSlater133.setxHF(0.0);
+  singleSlater133.communicate(moleculeOxy,basisOxy,aointsOxy,fileio,memManager);
+  singleSlater133.initMeta();
+  singleSlater133.genMethString();
+  singleSlater133.alloc();
+  singleSlater133.formGuess();
+  singleSlater133.computeProperties();
+  singleSlater133.printProperties();
+  singleSlater133.SCF3();
+  singleSlater133.computeProperties();
+  singleSlater133.printProperties();
+  singleSlater133.mullikenPop();
+
+  cout << "Energy " << singleSlater133.totalEnergy() <<endl;
+  cout << "Energy " << std::abs(singleSlater133.totalEnergy() - (-147.1965659202)) <<endl;
+  cout << "PASSED 133 - Oxy LSDA STO-3G? " << bool(std::abs(singleSlater133.totalEnergy() - (-147.1965659202)) <= 1e-8) << endl;
+///
+  singleSlater137.setRef(UHF);
+  singleSlater137.isDFT = true;
+  singleSlater137.isHF  = false;
+  singleSlater137.setSCFEneTol(1e-12);
+  singleSlater137.setSCFMaxIter(10000);
+  singleSlater137.doDIIS = true;
+  singleSlater137.setGuess(CORE);
+  singleSlater137.createB88();
+//  singleSlater137.setxHF(0.0);
+  singleSlater137.communicate(moleculeOxy,basisOxy,aointsOxy,fileio,memManager);
+  singleSlater137.initMeta();
+  singleSlater137.genMethString();
+  singleSlater137.alloc();
+  singleSlater137.formGuess();
+  singleSlater137.computeProperties();
+  singleSlater137.printProperties();
+  singleSlater137.SCF3();
+  singleSlater137.computeProperties();
+  singleSlater137.printProperties();
+  singleSlater137.mullikenPop();
+
+  cout << "Energy " << singleSlater137.totalEnergy() <<endl;
+  cout << "Energy " << std::abs(singleSlater137.totalEnergy() - (-147.6742271106)) <<endl;
+  cout << "PASSED 137 - Oxy B88 STO-3G? " << bool(std::abs(singleSlater137.totalEnergy() - (-147.6742271106)) <= 1e-8) << endl;
+
+  singleSlater151.setRef(UHF);
+  singleSlater151.isDFT = true;
+  singleSlater151.isHF  = false;
+  singleSlater151.setSCFEneTol(1e-12);
+  singleSlater151.setSCFMaxIter(10000);
+  singleSlater151.doDIIS = true;
+  singleSlater151.setGuess(CORE);
+  singleSlater151.addSlater();
+  singleSlater151.addB88();
+  singleSlater151.addLYP();
+  singleSlater151.setxHF(0.0);
+  singleSlater151.communicate(moleculeOxy,basisOxy,aointsOxy,fileio,memManager);
+  singleSlater151.initMeta();
+  singleSlater151.genMethString();
+  singleSlater151.alloc();
+  singleSlater151.formGuess();
+  singleSlater151.computeProperties();
+  singleSlater151.printProperties();
+  singleSlater151.SCF3();
+  singleSlater151.computeProperties();
+  singleSlater151.printProperties();
+  singleSlater151.mullikenPop();
+
+  cout << "Energy " << singleSlater151.totalEnergy() <<endl;
+  cout << "Energy " << std::abs(singleSlater151.totalEnergy() - (-148.2438136080)) <<endl;
+  cout << "PASSED 151 - Oxy BLYP STO-3G? " << bool(std::abs(singleSlater151.totalEnergy() - (-148.2438136080)) <= 1e-8) << endl;
+
+  singleSlater161.setRef(UHF);
+  singleSlater161.isDFT = true;
+  singleSlater161.isHF  = false;
+  singleSlater161.setSCFEneTol(1e-12);
+  singleSlater161.setSCFMaxIter(10000);
+  singleSlater161.doDIIS = true;
+  singleSlater161.setGuess(CORE);
+  singleSlater161.createB3LYP();
+//  singleSlater161.setxHF(0.0);
+  singleSlater161.communicate(moleculeOxy,basisOxy,aointsOxy,fileio,memManager);
+  singleSlater161.initMeta();
+  singleSlater161.genMethString();
+  singleSlater161.alloc();
+  singleSlater161.formGuess();
+  singleSlater161.computeProperties();
+  singleSlater161.printProperties();
+  singleSlater161.SCF3();
+  singleSlater161.computeProperties();
+  singleSlater161.printProperties();
+  singleSlater161.mullikenPop();
+
+  cout << "Energy " << singleSlater161.totalEnergy() <<endl;
+  cout << "Energy " << std::abs(singleSlater161.totalEnergy() - (-148.2725627255)) <<endl;
+  cout << "PASSED 161 - Oxy B3LYP STO-3G? " << bool(std::abs(singleSlater151.totalEnergy() - (-148.2725627255)) <= 1e-8) << endl;
+
+  singleSlater109.setRef(RHF);
+  singleSlater109.isDFT = true;
+  singleSlater109.isHF  = false;
+  singleSlater109.setSCFEneTol(1e-12);
+  singleSlater109.setSCFMaxIter(10000);
+  singleSlater109.doDIIS = true;
+  singleSlater109.setGuess(CORE);
+  singleSlater109.addSlater();
+  singleSlater109.setxHF(0.0);
+  singleSlater109.communicate(moleculeWat,basisWat,aointsWat,fileio,memManager);
+  singleSlater109.initMeta();
+  singleSlater109.genMethString();
+  singleSlater109.alloc();
+  singleSlater109.formGuess();
+  singleSlater109.computeProperties();
+  singleSlater109.printProperties();
+  singleSlater109.SCF3();
+  singleSlater109.computeProperties();
+  singleSlater109.printProperties();
+  singleSlater109.mullikenPop();
+
+  cout << "Energy " << singleSlater109.totalEnergy() <<endl;
+  cout << "PASSED 109? " << bool(std::abs(singleSlater109.totalEnergy() - (-74.0665552706)) <= 1e-8) << endl;
+// 112
+  singleSlater112.setRef(RHF);
+  singleSlater112.isDFT = true;
+  singleSlater112.isHF  = false;
+  singleSlater112.setSCFEneTol(1e-12);
+  singleSlater112.setSCFMaxIter(10000);
+  singleSlater112.doDIIS = true;
+  singleSlater112.setGuess(CORE);
+  singleSlater112.createLSDA();
+  singleSlater112.communicate(moleculeWat,basisWat,aointsWat,fileio,memManager);
+  singleSlater112.initMeta();
+  singleSlater112.genMethString();
+  singleSlater112.alloc();
+  singleSlater112.formGuess();
+  singleSlater112.computeProperties();
+  singleSlater112.printProperties();
+  singleSlater112.SCF3();
+  singleSlater112.computeProperties();
+  singleSlater112.printProperties();
+  singleSlater112.mullikenPop();
+
+  cout << "Energy " << singleSlater112.totalEnergy() <<endl;
+  cout << "PASSED 112? " << bool(std::abs(singleSlater112.totalEnergy() - (-74.9289919100)) <= 1e-8) << endl;
+// TEST 115
+  singleSlater115.setRef(RHF);
+  singleSlater115.isDFT = true;
+  singleSlater115.isHF  = false;
+  singleSlater115.setSCFEneTol(1e-12);
+  singleSlater115.setSCFMaxIter(10000);
+  singleSlater115.doDIIS = true;
+  singleSlater115.setGuess(CORE);
+  singleSlater115.addSlater();
+  singleSlater115.addVWN5();
+  singleSlater115.setxHF(0.0);
+  singleSlater115.communicate(moleculeWat,basisWat,aointsWat,fileio,memManager);
+  singleSlater115.initMeta();
+  singleSlater115.genMethString();
+  singleSlater115.alloc();
+  singleSlater115.formGuess();
+  singleSlater115.computeProperties();
+  singleSlater115.printProperties();
+  singleSlater115.SCF3();
+  singleSlater115.computeProperties();
+  singleSlater115.printProperties();
+  singleSlater115.mullikenPop();
+
+  cout << "Energy " << singleSlater115.totalEnergy() <<endl;
+  cout << "PASSED 115? " << bool(std::abs(singleSlater115.totalEnergy() - (-74.7332742682)) <= 1e-8) << endl;
+// TEST 136
+  singleSlater136.setRef(RHF);
+  singleSlater136.isDFT = true;
+  singleSlater136.isHF  = false;
+  singleSlater136.setSCFEneTol(1e-12);
+  singleSlater136.setSCFMaxIter(10000);
+  singleSlater136.doDIIS = true;
+  singleSlater136.setGuess(CORE);
+  singleSlater136.createB88();
+  singleSlater136.communicate(moleculeWat,basisWat,aointsWat,fileio,memManager);
+  singleSlater136.initMeta();
+  singleSlater136.genMethString();
+  singleSlater136.alloc();
+  singleSlater136.formGuess();
+  singleSlater136.computeProperties();
+  singleSlater136.printProperties();
+  singleSlater136.SCF3();
+  singleSlater136.computeProperties();
+  singleSlater136.printProperties();
+  singleSlater136.mullikenPop();
+
+  cout << "Energy " << singleSlater136.totalEnergy() <<endl;
+  cout << "Energy " << std::abs(singleSlater136.totalEnergy() - (-74.9512108608)) <<endl;
+  cout << "PASSED 136? " << bool(std::abs(singleSlater136.totalEnergy() - (-74.9512108608)) <= 1e-8) << endl;
+// TEST 150
+  singleSlater150.setRef(RHF);
+  singleSlater150.isDFT = true;
+  singleSlater150.isHF  = false;
+  singleSlater150.setSCFEneTol(1e-12);
+  singleSlater150.setSCFMaxIter(10000);
+  singleSlater150.doDIIS = true;
+  singleSlater150.setGuess(CORE);
+  singleSlater150.addSlater();
+  singleSlater150.addB88();
+  singleSlater150.addLYP();
+  singleSlater150.setxHF(0.0);
+  singleSlater150.communicate(moleculeWat,basisWat,aointsWat,fileio,memManager);
+  singleSlater150.initMeta();
+  singleSlater150.genMethString();
+  singleSlater150.alloc();
+  singleSlater150.formGuess();
+  singleSlater150.computeProperties();
+  singleSlater150.printProperties();
+  singleSlater150.SCF3();
+  singleSlater150.computeProperties();
+  singleSlater150.printProperties();
+  singleSlater150.mullikenPop();
+
+  cout << "Energy " << singleSlater150.totalEnergy() <<endl;
+  cout << "Energy " << std::abs(singleSlater150.totalEnergy() - (-75.2846829249)) <<endl;
+  cout << "PASSED 150? " << bool(std::abs(singleSlater150.totalEnergy() - (-75.2846829249)) <= 1e-8) << endl;
+// TEST B3LYP WATER 
+  singleSlater160.setRef(RHF);
+  singleSlater160.isDFT = true;
+  singleSlater160.isHF  = false;
+  singleSlater160.setSCFEneTol(1e-12);
+  singleSlater160.setSCFMaxIter(10000);
+  singleSlater160.doDIIS = true;
+  singleSlater160.setGuess(CORE);
+  singleSlater160.createB3LYP();
+  singleSlater160.communicate(moleculeWat,basisWat,aointsWat,fileio,memManager);
+  singleSlater160.initMeta();
+  singleSlater160.genMethString();
+  singleSlater160.alloc();
+  singleSlater160.formGuess();
+  singleSlater160.computeProperties();
+  singleSlater160.printProperties();
+  singleSlater160.SCF3();
+  singleSlater160.computeProperties();
+  singleSlater160.printProperties();
+  singleSlater160.mullikenPop();
+
+  cout << "Energy " << singleSlater160.totalEnergy() <<endl;
+  cout << "Energy " << std::abs(singleSlater160.totalEnergy() - (-75.3122931451)) <<endl;
+  cout << "PASSED 160 - WATER B3LYP STO3G? " << bool(std::abs(singleSlater160.totalEnergy() - (-75.3122931451)) <= 1e-8) << endl;
+
+//  Lit UKS
+  singleSlater118.setRef(UHF);
+  singleSlater118.isDFT = true;
+  singleSlater118.isHF  = false;
+  singleSlater118.setSCFEneTol(1e-12);
+  singleSlater118.setSCFMaxIter(10000);
+  singleSlater118.doDIIS = true;
+  singleSlater118.setGuess(CORE);
+  singleSlater118.addSlater();
+  singleSlater118.setxHF(0.0);
+  singleSlater118.communicate(moleculeLi,basisLi,aointsLi,fileio,memManager);
+  singleSlater118.initMeta();
+  singleSlater118.genMethString();
+  singleSlater118.alloc();
+  singleSlater118.formGuess();
+  singleSlater118.computeProperties();
+  singleSlater118.printProperties();
+  singleSlater118.SCF3();
+  singleSlater118.computeProperties();
+  singleSlater118.printProperties();
+  singleSlater118.mullikenPop();
+
+  cout << "Energy " << singleSlater118.totalEnergy() <<endl;
+  cout << "Energy " << std::abs(singleSlater118.totalEnergy() - (-7.0664115457)) <<endl;
+  cout << "PASSED 118 - Li Slater-STO-3G? " << bool(std::abs(singleSlater118.totalEnergy() - (-7.0664115457)) <= 1e-8) << endl;
+////
+  singleSlater124.setRef(UHF);
+  singleSlater124.isDFT = true;
+  singleSlater124.isHF  = false;
+  singleSlater124.setSCFEneTol(1e-12);
+  singleSlater124.setSCFMaxIter(10000);
+  singleSlater124.doDIIS = true;
+  singleSlater124.setGuess(CORE);
+  singleSlater124.createLSDA();
+  singleSlater124.communicate(moleculeLi,basisLi,aointsLi,fileio,memManager);
+  singleSlater124.initMeta();
+  singleSlater124.genMethString();
+  singleSlater124.alloc();
+  singleSlater124.formGuess();
+  singleSlater124.computeProperties();
+  singleSlater124.printProperties();
+  singleSlater124.SCF3();
+  singleSlater124.computeProperties();
+  singleSlater124.printProperties();
+  singleSlater124.mullikenPop();
+
+  cout << "Energy " << singleSlater124.totalEnergy() <<endl;
+  cout << "Energy " << std::abs(singleSlater124.totalEnergy() - (-7.2764020089)) <<endl;
+  cout << "PASSED 124 - Li LSDA-STO-3G? " << bool(std::abs(singleSlater124.totalEnergy() - (-7.2764020089)) <= 1e-8) << endl;
+////
+  singleSlater130.setRef(UHF);
+  singleSlater130.isDFT = true;
+  singleSlater130.isHF  = false;
+  singleSlater130.setSCFEneTol(1e-12);
+  singleSlater130.setSCFMaxIter(10000);
+  singleSlater130.doDIIS = true;
+  singleSlater130.setGuess(CORE);
+  singleSlater130.addSlater();
+  singleSlater130.addVWN5();
+  singleSlater130.setxHF(0.0);
+  singleSlater130.communicate(moleculeLi,basisLi,aointsLi,fileio,memManager);
+  singleSlater130.initMeta();
+  singleSlater130.genMethString();
+  singleSlater130.alloc();
+  singleSlater130.formGuess();
+  singleSlater130.computeProperties();
+  singleSlater130.printProperties();
+  singleSlater130.SCF3();
+  singleSlater130.computeProperties();
+  singleSlater130.printProperties();
+  singleSlater130.mullikenPop();
+
+  cout << "Energy " << singleSlater130.totalEnergy() <<endl;
+  cout << "Energy " << std::abs(singleSlater130.totalEnergy() - (-7.2213016498)) <<endl;
+  cout << "PASSED 130 - Li SVWN5-STO-3G? " << bool(std::abs(singleSlater130.totalEnergy() - (-7.2213016498)) <= 1e-8) << endl;
+// OXy
+//TES
+//T - 112 Real RKS-SCF-LSDA (SVWN3) - STO-3G
+/*
+  molecule2.convBohr();
+  molecule2.computeNucRep();
+  molecule2.computeRij();
+  molecule2.computeI();
+
+  singleSlater2.setRef(RHF);
+  singleSlater2.isDFT = true;
+  singleSlater2.isHF  = false;
+  singleSlater2.setSCFEneTol(1e-12);
+  singleSlater2.setSCFMaxIter(10000);
+  singleSlater2.doDIIS = true;
+
+  singleSlater2.setGuess(CORE);
+//  singleSlater2.setGuess(READ);
+//  fileio.doRestart = true;
 
 
-  aoints.communicate(molecule,basis,fileio,memManager);
-  singleSlater.communicate(molecule,basis,aoints,fileio,memManager);
-//moints.communicate(molecule,basis,fileio,aoints,singleSlater);
+  singleSlater2.isDFT = true;
+  singleSlater2.isHF = false;
+//singleSlater2.setExchKernel(SingleSlater<double>::EXCH::B88);
+  //singleSlater2.setExchKernel(SingleSlater<double>::EXCH::NOEXCH);
+//  singleSlater2.setCorrKernel(SingleSlater<double>::CORR::NOCORR);
+//  singleSlater2.setCorrKernel(SingleSlater<double>::CORR::VWN5);
+//  singleSlater2.addB88();
+//  singleSlater2.addLYP();
+//  singleSlater2.createB88();
+//    singleSlater2.createB3LYP();
+  singleSlater2.createLSDA();
+//singleSlater2.addVWN5();
+//singleSlater2.setPrintLevel(5);
 
-  aoints.initMeta();
-  singleSlater.initMeta();
-  singleSlater.genMethString();
+//singleSlater2.setxHF(0.0);
+//basis2.findBasisFile("sto-3g");
+//basis2.findBasisFile("3-21g");
+  basis2.findBasisFile("STO-3G");
+//basis2.findBasisFile("cc-pVTZ");
+  basis2.communicate(fileio);
+  basis2.parseGlobal();
+  basis2.constructLocal(&molecule2);
+  basis2.makeMaps(&molecule2);
+  basis2.renormShells();
 
-  aoints.alloc();
-  singleSlater.alloc();
 
-  singleSlater.formGuess();
-  singleSlater.computeProperties();
-  singleSlater.printProperties();
-//singleSlater.formFock();
-//singleSlater.computeEnergy();
-  singleSlater.SCF3();
-  singleSlater.computeProperties();
-  singleSlater.printProperties();
+  aoints2.communicate(molecule2,basis2,fileio,memManager);
+  singleSlater2.communicate(molecule2,basis2,aoints2,fileio,memManager);
+//moints.communicate(molecule2,basis2,fileio,aoints2,singleSlater2);
 
-  singleSlater.mullikenPop();
+  aoints2.initMeta();
+  singleSlater2.initMeta();
+  singleSlater2.genMethString();
 
-  cout << "PASSED? " << bool((singleSlater.totalEnergy() - (-76.3671171302)) <= 1e-8) << endl;
+  aoints2.alloc();
+  singleSlater2.alloc();
+
+  singleSlater2.formGuess();
+  singleSlater2.computeProperties();
+  singleSlater2.printProperties();
+//singleSlater2.formFock();
+//singleSlater2.computeEnergy();
+  singleSlater2.SCF3();
+  singleSlater2.computeProperties();
+  singleSlater2.printProperties();
+
+  singleSlater2.mullikenPop();
+
+  cout << "Energy " << singleSlater2.totalEnergy() <<endl;
+  cout << "PASSED 112? " << bool(std::abs(singleSlater2.totalEnergy() - (-74.9289919100)) <= 1e-8) << endl;
 ///////////////////////////////////////////////////////////////////////////
+//TEST - 115 Real RKS-SCF-SVWN5 - STO-3G
+//loadPresets<H>(molecule);
+//loadPresets<OxMolecule>(molecule);
+  Molecule molecule3;
+  BasisSet basis3;
+  AOIntegrals aoints3;
+  SingleSlater<double> singleSlater3;
+  loadPresets<WATER>(molecule3);
+//loadPresets<Methanol>(molecule3);
+//loadPresets<HE>(molecule3);
+//loadPresets<SO>(molecule3);
+//loadPresets<Li>(molecule3);
+  molecule3.convBohr();
+  molecule3.computeNucRep();
+  molecule3.computeRij();
+  molecule3.computeI();
+
+  singleSlater3.setRef(RHF);
+  singleSlater3.isDFT = true;
+  singleSlater3.isHF  = false;
+  singleSlater3.setSCFEneTol(1e-12);
+  singleSlater3.setSCFMaxIter(10000);
+  singleSlater3.doDIIS = true;
+
+  singleSlater3.setGuess(CORE);
+//  singleSlater3.setGuess(READ);
+//  fileio.doRestart = true;
+
+
+  singleSlater3.isDFT = true;
+  singleSlater3.isHF = false;
+//singleSlater3.setExchKernel(SingleSlater<double>::EXCH::B88);
+  //singleSlater3.setExchKernel(SingleSlater<double>::EXCH::NOEXCH);
+//  singleSlater3.setCorrKernel(SingleSlater<double>::CORR::NOCORR);
+//  singleSlater3.setCorrKernel(SingleSlater<double>::CORR::VWN5);
+  singleSlater3.addSlater();
+  singleSlater3.addVWN5();
+//  singleSlater3.addLYP();
+//  singleSlater3.createB88();
+//    singleSlater3.createB3LYP();
+//  singleSlater3.createLSDA();
+//singleSlater3.addVWN5();
+//singleSlater3.setPrintLevel(5);
+
+  singleSlater3.setxHF(0.0);
+//basis3.findBasisFile("sto-3g");
+//basis3.findBasisFile("3-21g");
+  basis3.findBasisFile("STO-3G");
+//basis3.findBasisFile("cc-pVTZ");
+  basis3.communicate(fileio);
+  basis3.parseGlobal();
+  basis3.constructLocal(&molecule3);
+  basis3.makeMaps(&molecule3);
+  basis3.renormShells();
+
+
+  aoints3.communicate(molecule3,basis3,fileio,memManager);
+  singleSlater3.communicate(molecule3,basis3,aoints3,fileio,memManager);
+//moints.communicate(molecule3,basis3,fileio,aoints3,singleSlater3);
+
+  aoints3.initMeta();
+  singleSlater3.initMeta();
+  singleSlater3.genMethString();
+
+  aoints3.alloc();
+  singleSlater3.alloc();
+
+  singleSlater3.formGuess();
+  singleSlater3.computeProperties();
+  singleSlater3.printProperties();
+//singleSlater3.formFock();
+//singleSlater3.computeEnergy();
+  singleSlater3.SCF3();
+  singleSlater3.computeProperties();
+  singleSlater3.printProperties();
+
+  singleSlater3.mullikenPop();
+  cout << "Energy " << singleSlater3.totalEnergy() <<endl;
+  cout << "PASSED 115? " << bool(std::abs(singleSlater3.totalEnergy() - (-74.7332742682)) <= 1e-8) << endl;
+//TEST - 118 Real UKS-SCF-SLATER - STO-3G
+
+  Molecule molecule4;
+  BasisSet basis4;
+  AOIntegrals aoints4;
+  SingleSlater<double> singleSlater4;
+  loadPresets<Li>(molecule4);
+  molecule4.convBohr();
+  molecule4.computeNucRep();
+  molecule4.computeRij();
+  molecule4.computeI();
+
+  singleSlater4.setRef(UHF);
+  singleSlater4.isDFT = true;
+  singleSlater4.isHF  = false;
+  singleSlater4.setSCFEneTol(1e-12);
+  singleSlater4.setSCFMaxIter(10000);
+  singleSlater4.doDIIS = true;
+
+  singleSlater4.setGuess(CORE);
+
+  singleSlater4.isDFT = true;
+  singleSlater4.isHF = false;
+  singleSlater4.addSlater();
+  singleSlater4.setxHF(0.0);
+  basis4.findBasisFile("STO-3G");
+  basis4.communicate(fileio);
+  basis4.parseGlobal();
+  basis4.constructLocal(&molecule4);
+  basis4.makeMaps(&molecule4);
+  basis4.renormShells();
+
+
+  aoints4.communicate(molecule4,basis4,fileio,memManager);
+  singleSlater4.communicate(molecule4,basis4,aoints4,fileio,memManager);
+
+  aoints4.initMeta();
+  singleSlater4.initMeta();
+  singleSlater4.genMethString();
+
+  aoints4.alloc();
+  singleSlater4.alloc();
+
+  singleSlater4.formGuess();
+  singleSlater4.computeProperties();
+  singleSlater4.printProperties();
+  singleSlater4.SCF3();
+  singleSlater4.computeProperties();
+  singleSlater4.printProperties();
+
+  singleSlater4.mullikenPop();
+  cout << "Energy " << singleSlater4.totalEnergy() <<endl;
+  cout << "PASSED 118? " << bool(std::abs(singleSlater4.totalEnergy() - (-7.0664115457)) <= 1e-8) << endl;
+
+//TEST - 121 Real UKS-SCF-SLATER - STO-3G
+  Molecule molecule5;
+  BasisSet basis5;
+  AOIntegrals aoints5;
+  SingleSlater<double> singleSlater5;
+  loadPresets<OxMolecule>(molecule5);
+  molecule5.computeNucRep();
+  molecule5.computeRij();
+  molecule5.computeI();
+
+  singleSlater5.setRef(UHF);
+  singleSlater5.isDFT = true;
+  singleSlater5.isHF  = false;
+  singleSlater5.setSCFEneTol(1e-12);
+  singleSlater5.setSCFMaxIter(10000);
+  singleSlater5.doDIIS = true;
+
+  singleSlater5.setGuess(CORE);
+
+  singleSlater5.isDFT = true;
+  singleSlater5.isHF = false;
+  singleSlater5.addSlater();
+  singleSlater5.setxHF(0.0);
+  basis5.findBasisFile("STO-3G");
+  basis5.communicate(fileio);
+  basis5.parseGlobal();
+  basis5.constructLocal(&molecule5);
+  basis5.makeMaps(&molecule5);
+  basis5.renormShells();
+
+
+  aoints5.communicate(molecule5,basis5,fileio,memManager);
+  singleSlater5.communicate(molecule5,basis5,aoints5,fileio,memManager);
+  aoints5.initMeta();
+  singleSlater5.initMeta();
+  singleSlater5.genMethString();
+
+  aoints5.alloc();
+  singleSlater5.alloc();
+
+  singleSlater5.formGuess();
+  singleSlater5.computeProperties();
+  singleSlater5.printProperties();
+  singleSlater5.SCF3();
+  singleSlater5.computeProperties();
+  singleSlater5.printProperties();
+
+  singleSlater5.mullikenPop();
+  cout << "Energy " << singleSlater5.totalEnergy() <<endl;
+  cout << "PASSED 121? " << bool(std::abs(singleSlater5.totalEnergy() - (-146.0745567304)) <= 1e-8) << endl;
+*/
+/*
+//TEST - 124 Real UKS-SCF-LSDA - STO-3G
+//loadPresets<H>(molecule);
+  Molecule molecule6;
+  BasisSet basis6;
+  AOIntegrals aoints6;
+  SingleSlater<double> singleSlater6;
+//loadPresets<Methanol>(molecule6);
+  loadPresets<Li>(molecule6);
+//loadPresets<SO>(molecule6);
+//  loadPresets<OxMolecule>(molecule);
+  molecule6.convBohr();
+  molecule6.computeNucRep();
+  molecule6.computeRij();
+  molecule6.computeI();
+
+  singleSlater6.setRef(UHF);
+  singleSlater6.isDFT = true;
+  singleSlater6.isHF  = false;
+  singleSlater6.setSCFEneTol(1e-12);
+  singleSlater6.setSCFMaxIter(10000);
+  singleSlater6.doDIIS = true;
+
+  singleSlater6.setGuess(CORE);
+//  singleSlater6.setGuess(READ);
+//  fileio.doRestart = true;
+
+
+  singleSlater6.isDFT = true;
+  singleSlater6.isHF = false;
+//singleSlater6.setExchKernel(SingleSlater<double>::EXCH::B88);
+  //singleSlater6.setExchKernel(SingleSlater<double>::EXCH::NOEXCH);
+//  singleSlater6.setCorrKernel(SingleSlater<double>::CORR::NOCORR);
+//  singleSlater6.setCorrKernel(SingleSlater<double>::CORR::VWN5);
+//  singleSlater6.addLYP();
+//  singleSlater6.createB88();
+//    singleSlater6.createB3LYP();
+  singleSlater6.createLSDA();
+//singleSlater6.addVWN5();
+//singleSlater6.setPrintLevel(5);
+
+//  singleSlater6.setxHF(0.0);
+//basis6.findBasisFile("sto-3g");
+//basis6.findBasisFile("3-21g");
+  basis6.findBasisFile("STO-3G");
+//basis6.findBasisFile("cc-pVTZ");
+  basis6.communicate(fileio);
+  basis6.parseGlobal();
+  basis6.constructLocal(&molecule6);
+  basis6.makeMaps(&molecule6);
+  basis6.renormShells();
+
+
+  aoints6.communicate(molecule6,basis6,fileio,memManager);
+  singleSlater6.communicate(molecule6,basis6,aoints6,fileio,memManager);
+//moints.communicate(molecule6,basis6,fileio,aoints6,singleSlater6);
+
+  aoints6.initMeta();
+  singleSlater6.initMeta();
+  singleSlater6.genMethString();
+
+  aoints6.alloc();
+  singleSlater6.alloc();
+
+  singleSlater6.formGuess();
+  singleSlater6.computeProperties();
+  singleSlater6.printProperties();
+//singleSlater6.formFock();
+//singleSlater6.computeEnergy();
+  singleSlater6.SCF3();
+  singleSlater6.computeProperties();
+  singleSlater6.printProperties();
+
+  singleSlater6.mullikenPop();
+  cout << "Energy " << singleSlater6.totalEnergy() <<endl;
+  cout << "PASSED 124? " << bool(std::abs(singleSlater6.totalEnergy() - (-7.2764020089)) <= 1e-8) << endl;
+*/
+
+
 /*
   singleSlater.onePDMOrtho()[1]->swap(*singleSlater.onePDMOrtho()[3]);
   singleSlater.fockOrtho()[1]->swap(*singleSlater.fockOrtho()[3]);

@@ -604,6 +604,11 @@ public:
   inline void addVWN3(double x = 1.0){
     this->dftFunctionals_.emplace_back(std::make_shared<VWNIII>(x)); 
   };
+  inline void createLSDA(){
+    addSlater();
+    addVWN3();
+    this->xHF_ = 0.0;
+  };
   inline void createB3LYP(){
     addSlater(0.8);
     addB88(0.72);
