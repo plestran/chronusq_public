@@ -46,27 +46,47 @@ namespace ChronusQ {
  */
 #define MAXNAOS 21
 
+//xslis
 struct ShellPair{
   typedef double real_t;
   ShellCQ  *iShell;
   ShellCQ  *jShell;
   int	  lTotal;		    // total angular momenta of the shell pair
   int     nPGTOPair;
+  int     ibf_s;
+  int     jbf_s;
+  int     isphbf_s;             //spherical basis function start
+  int     jsphbf_s;
+  int     icarbf_s;
+  int     jcarbf_s;
+  int     isphsize;             // number of spherical gaussian
+  int     jsphsize;
+  int     icarsize;
+  int     jcarsize;
   std::array<real_t,3> A;	// x,y,z coordinate of center A
   std::array<real_t,3> B;	// x,y,z coordinate of center B
   std::array<real_t,3> AB;	// x,y,z distance between centers xA-xB, yA-yB, zA-zB
   std::vector<real_t> KAB;
   std::vector<real_t> UAB;
+  std::vector<real_t> zetaa;
+  std::vector<real_t> zetab;
   std::vector<real_t> Zeta;	// the total of exponents (alpha+beta) 
+  std::vector<real_t> Xi;	// the alpha*beta/(alpha+beta) 
   std::vector<real_t> invZeta;	// the inverse of the total of exponents 1/(alpha+beta) 
   std::vector<real_t> halfInvZeta;	// the inverse of the total of exponents 0.5/(alpha+beta) 
   std::vector<real_t> ss;
   std::vector<real_t> norm;
+  std::vector<real_t> beta;
   std::vector<std::array<real_t,3>> P;
   std::vector<std::array<real_t,3>> PA;
   std::vector<std::array<real_t,3>> PB;
   std::vector<std::array<real_t,3>> PZeta;	// P*(alpha+beta)
+
+  std::vector<real_t> ssV;
+  std::vector<real_t> ssT;
+  std::vector<std::array<real_t,3>> ssL;
 };
+//xslie
 
 struct MolecularConstants{
   int nAtom; ///< number of nuclei
@@ -143,16 +163,14 @@ class AOIntegrals{
   int       nBasis_; ///< Number of basis functions \f$N_{b}\f$
   int       nTT_; ///< Reduced number of basis functions (lower triangle) \f$ N_b (N_b+1) / 2\f$
   int       maxMultipole_;
+  int       maxNumInt_;
   int       printLevel_;
+  int       nSphBasis_;
+  int       nCartBasis_;
 
   double thresholdSchwartz_;
   double thresholdS_;
   double thresholdAB_;
-
-
-
-
-
 
   BasisSet *    	basisSet_; ///< Pointer to primary basis set
   BasisSet *     DFbasisSet_; ///< Pointer to density fitting basis set
@@ -162,7 +180,6 @@ class AOIntegrals{
   CQMemManager *        memManager_;
 
   int       **R2Index_;
-  double	**FmTTable_;
   std::unique_ptr<PairConstants>        pairConstants_; ///< Smart pointer to struct containing shell-pair meta-data
   std::unique_ptr<MolecularConstants>   molecularConstants_; ///< Smart pointer to struct containing molecular struture meta-data
   std::unique_ptr<QuartetConstants>     quartetConstants_; ///< Smart pointer to struct containing shell-quartet meta-data
@@ -193,6 +210,7 @@ class AOIntegrals{
 
 public:
   // these should be protected
+  std::unique_ptr<RealMatrix>    pVp_; ///pVdotp integral
   // Two-Body Integrals
   std::unique_ptr<RealMap>    twoEC_; ///< Two-body Coulomb integrals  (deprecated)
   std::unique_ptr<RealMap>    twoEX_; ///< Two-body Exchange integrals (deprecated)
@@ -218,9 +236,10 @@ public:
   std::unique_ptr<RealTensor3d>  elecDipole_; ///< Electric dipole matrix \f$\vec{\mu}_{\nu\sigma}=\langle\nu\vert\vec{r}\vert\sigma\rangle\f$
   std::unique_ptr<RealTensor3d>  elecQuadpole_;///< Electric quadrupole matrix \f$Q_{\mu\nu}^{ij}=\langle\mu\vert r_i r_j \vert\nu\rangle\f$
   std::unique_ptr<RealTensor3d>  elecOctpole_;///< Electric octupole matrix \f$O_{\mu\nu}^{ijk}=\langle\mu\vert r_i r_j r_k \vert\nu\rangle\f$
+  std::unique_ptr<RealTensor3d>  angular_;///Angular momentum integral, also known as R cross P
+  std::unique_ptr<RealTensor3d>  RcrossDel_; ///< R cross Del matrix \f$\vec{\mu}_{\nu\sigma}=\langle\nu\vert\vec{r} \Del \vert\sigma\rangle\f$
+  std::unique_ptr<RealTensor3d>  SOCoupling_;///Spin orbital integral
 
-  // Numerical Integrals
-  std::unique_ptr<RealTensor3d>  RcrossDel_; ///< R cross Del matrix \f$\vec{\mu}_{\nu\sigma}=\langle\nu\vert\vec{r} \nabla \vert\sigma\rangle\f$
 
   // Storage for separation of multipoles
   std::vector<ConstRealMap> elecDipoleSep_;
@@ -263,10 +282,10 @@ public:
   AOIntegrals(){
     this->nBasis_ = 0;
     this->nTT_    = 0;
-
+    this->nSphBasis_ = 0;
+    this->nCartBasis_ = 0;
 
     this->R2Index_  = NULL;
-    this->FmTTable_ = NULL;
 
     this->molecule_   = NULL; 
     this->basisSet_   = NULL; 
@@ -287,6 +306,7 @@ public:
     this->overlap_      = nullptr;
     this->kinetic_      = nullptr;
     this->potential_    = nullptr;
+    this->angular_      = nullptr;
     this->schwartz_     = nullptr;
     this->aoERI_        = nullptr;
     this->aoRII_        = nullptr;
@@ -294,7 +314,9 @@ public:
     this->elecDipole_   = nullptr;
     this->elecQuadpole_ = nullptr;
     this->elecOctpole_  = nullptr;
-    this->RcrossDel_    = nullptr;
+    this->RcrossDel_   = nullptr;
+    this->SOCoupling_   = nullptr;
+    this->pVp_          = nullptr;
 
     this->haveAOTwoE   = false;
     this->haveAOOneE   = false;
@@ -309,7 +331,7 @@ public:
     this->maxMultipole_     = 3;
     this->integralAlgorithm = DIRECT;
     this->isPrimary         = true;
-    this->useFiniteWidthNuclei = false;
+    this->useFiniteWidthNuclei = true;
     this->printLevel_       = 1;
     this->thresholdS_ =        1.0e-10;
     this->thresholdAB_ =       1.0e-6;
@@ -492,26 +514,39 @@ public:
 //----------------------------------------//
 // member functions in integrals_onee.cpp //
 //----------------------------------------//
-//ShellPair         *shellPairs_;
-  std::vector<ShellPair> shellPairs_;
+//xslis
+  std::array<std::array<double,MaxTotalL+1>,MaxFmTPt> FmTTable_;
+  std::vector<ChronusQ::ShellPair> shellPairs_;
   int  nShellPair_;
   int  nShellQuartet_;
   void createShellPairs();
 
-  void computeOverlapS(); // Depreciated
-  double hRRSab(ShellPair*,int,int*,int,int*);
-  double vRRSa0(ShellPair*,int,int*,int);
-  void computeKineticT(); // Depreciated
-  double vRRTab(ShellPair*,int,int*,int,int*,int*,int*);
-  double vRRTa0(ShellPair*,int,int*,int*,int*);
-  void computePotentialV(); // Depreciated
-  double oneehRRTSab(ShellPair*,int,int*,int,int*,int*,int*);
-  double oneehRRSab(ShellPair*,int,int*,int,int*);
-  double oneehRRVab(ShellPair*,int,int*,int,int*);
-  double oneevRRSa0(ShellPair*,int,int*,int*,int*);
-  double oneevRRVa0(ShellPair*,int*,int,int,int*,int*,int*);
-  double oneevRRTab(ShellPair*,int,int*,int,int*,int*,int*);
-  double oneevRRTa0(ShellPair*,int,int*,int*,int*);
+  void computeOverlapS();
+  double hRRSab(ChronusQ::ShellPair*,int,int*,int,int*);
+  double vRRSa0(ChronusQ::ShellPair*,int,int*,int);
+  void computeKineticT();
+  double vRRTab(ChronusQ::ShellPair*,int,int*,int,int*);
+  double RRTab(ChronusQ::ShellPair*,int,int*,int,int*);
+  double vRRiPPTab(ChronusQ::ShellPair*,int,int*,int,int*,int);
+  double hRRiPPSab(ChronusQ::ShellPair*,int,int*,int,int*,int);
+  void computePotentialV();
+  double hRRVab(ChronusQ::ShellPair*,MolecularConstants*,int,int*,int,int*);
+  double vRRVa0(ChronusQ::ShellPair*,double*,double*,int,int,int*,int,int);
+//xslie
+//SS
+  void computeAngularL();
+  double Labmu(ChronusQ::ShellPair*,RealMatrix*,RealMatrix*,RealTensor3d*,int,int*,int,int*,int,int);
+  void computeSL();
+  double hRRiPPVab(ChronusQ::ShellPair*,int,int*,int,int*,double*,int,int,int);
+  double Slabmu(ChronusQ::ShellPair*,RealMatrix*,RealMatrix*,RealTensor3d*,double*,int,int*,int,int*,int,int,int,int); 
+  double vRRV0b(ChronusQ::ShellPair*,double*,double*,int,int,int*,int,int);
+  void computepVdotp();
+  double pVpab(ChronusQ::ShellPair*,double*,int,int*,int,int*,int,int,int); 
+//  void cart2sphtrans(ChronusQ::ShellPair*, RealMatrix*, RealMatrix& , double);
+  std::vector<double> cart2SphTrans(ChronusQ::ShellPair*, double*);
+  std::complex <double> car2sphcoeff(int , int , int*);
+
+//SS
 //----------------------------------------//
 // member functions in integrals_twoe.cpp //
 //----------------------------------------//

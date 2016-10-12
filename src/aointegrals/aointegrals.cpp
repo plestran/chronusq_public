@@ -526,6 +526,19 @@ void AOIntegrals::allocOp(){
       CErr(std::current_exception(),"N^4 ERI Tensor Allocation");
     }
 #endif
+
+// number of spherical harmonic gaussian
+  int nSphBasis = 0;
+  int nCartBasis = 0;
+//cout<<"Here"<<endl;
+  for (auto mm = 0 ; mm < this->basisSet_->nShell() ; mm++ ) {
+     nSphBasis += 2*(this->basisSet_->shellsCQ[mm].l)+1;
+     nCartBasis += (this->basisSet_->shellsCQ[mm].l+1)*(this->basisSet_->shellsCQ[mm].l+2)/2;
+  }
+//cout<<"Here2"<<endl<<nCartBasis<<"\t"<<nSphBasis<<endl;
+  this->nSphBasis_ = nSphBasis;
+  this->nCartBasis_ = nCartBasis;
+//cout<<this->nCartBasis_<<endl;
     try {
  
       // One Electron Integral
@@ -549,7 +562,9 @@ void AOIntegrals::allocOp(){
       // Overlap
       this->overlap_   = 
         std::unique_ptr<RealMap>(
+//            new RealMap(this->memManager_->malloc<double>(NBSq),this->nBasis_,this->nBasis_)
             new RealMap(this->memManager_->malloc<double>(NBSq),this->nBasis_,this->nBasis_)
+             
         ); 
       // Kinetic
       this->kinetic_   = 
@@ -561,6 +576,14 @@ void AOIntegrals::allocOp(){
         std::unique_ptr<RealMap>(
             new RealMap(this->memManager_->malloc<double>(NBSq),this->nBasis_,this->nBasis_)
         ); 
+      // Angular momentum
+      this->angular_   = std::unique_ptr<RealTensor3d>(
+        new RealTensor3d(this->nBasis_,this->nBasis_,3));
+      this->SOCoupling_= std::unique_ptr<RealTensor3d>(
+        new RealTensor3d(this->nBasis_,this->nBasis_,3));
+      this->pVp_ = std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nBasis_));
+      // pV dot p 
+
  
     } catch(...) {
       CErr(std::current_exception(),"One Electron Integral Tensor Allocation");
@@ -656,31 +679,112 @@ void AOIntegrals::writeOneE(){
 }
 */
 
-
+//xslis
 void AOIntegrals::createShellPairs() {
-  int i,j,k,l,m,n,nPP;
-  double squareAB,prodexp,sumexp,KAB;
+  int i,j,k,l,m,n,iPP,nPP,iAtom;
+  double squareAB,prodexp,sumexp,KAB,pairNorm;
   double sqrt2pi54 = 5.91496717279561; // sqrt(2)*pi^{5/4}
-  std::array<double,3> tmpP,tmpPA,tmpPB,tmpPZeta;
-  ShellCQ *iS,*jS;
-  ShellPair *ijS;
+  std::array<double,MaxTotalL> tmpFmT;
+  std::array<double,3> tmpP,tmpPA,tmpPB,tmpPZeta,tmpssL,AC,BC,ACxBC;
+  ChronusQ::ShellCQ *iS,*jS;
+  ChronusQ::ShellPair *ijS;
 
   int nShell = this->basisSet_->nShell();
   this->nShellPair_ = nShell*(nShell+1)/2;
+
+  if (this->useFiniteWidthNuclei == true) {
+    this->molecule_->generateFiniteWidthNuclei();
+  }         // generate finite width nuclei 
+//cout<<this->molecule_->nucShell(0)<<endl;
+
 //this->shellPairs_ = new ShellPair[this->nShellPair_];
 // This does the same thing as a 'new' call when passed a dimension and
 // dones't require annoying memory managment
   this->shellPairs_ = std::vector<ChronusQ::ShellPair>(this->nShellPair_);
   n = 0;
+
+
+  int spherical_lsize[nShell],cart_lsize[nShell];
+  int mapSh2spBf[nShell],mapSh2caBf[nShell];
+  int tempmapSh2spBf=0,tempmapSh2caBf=0;
+  for ( i =0 ; i<nShell ; i++ ) {
+    mapSh2spBf[i] = tempmapSh2spBf;
+    mapSh2caBf[i] = tempmapSh2caBf;
+/*    if (this->basisSet_->shellsCQ[i].cartesian_l.size() == 6){
+       spherical_lsize[i]=5;
+    }
+    else {
+      spherical_lsize[i]=this->basisSet_->shellsCQ[i].cartesian_l.size();
+    }
+*/
+    spherical_lsize[i]=2*(this->basisSet_->shellsCQ[i].l)+1;
+    cart_lsize[i] = (this->basisSet_->shellsCQ[i].l+1)*(this->basisSet_->shellsCQ[i].l+2)/2;
+    tempmapSh2spBf += spherical_lsize[i];
+    tempmapSh2caBf += cart_lsize[i];
+  }
+
+cout<<"total bumber of spherical function= "<<tempmapSh2spBf<<endl;
+cout<<"total number of cartesian function= "<<tempmapSh2caBf<<endl;  
+
+  for(i=0;i<nShell;i++) 
+    {      
+//  int ibf_s1 = this->basisSet_->mapSh2Bf(i);
+//  int n1 = this->basisSet_->shells(i).size();
+//  int n1 = this->basisSet_->shellsCQ[i].l;
+    
+    this->fileio_->out << "ShellIndex= " << i <<endl;
+    int n1 = this->basisSet_->shellsCQ[i].cartesian_l.size();
+    this->fileio_->out << "Size= "  <<n1 <<endl;
+    this->fileio_->out << "Size_of_spherical= " << spherical_lsize[i]<<endl;
+    this->fileio_->out << "start of shell function" << this->basisSet_->mapSh2Bf(i)<<endl;
+    this->fileio_->out << "start of shell for spherical function" << mapSh2spBf[i]<<endl;
+    for (int ii =0; ii < n1; ii++){
+    this->fileio_->out << "BasisSet ind " << ii <<endl;
+      for(k=0;k<3;k++){
+       auto  lxyz = this->basisSet_->shellsCQ[i].cartesian_l[ii][k];
+         this->fileio_->out << lxyz<<"\t";
+      } 
+     this->fileio_->out << endl;
+      
+    }
+  }
+
   for(i=0;i<nShell;i++) for(j=i;j<nShell;j++) {
     ijS = &(this->shellPairs_[n]);
     if(this->basisSet_->shellsCQ[i].l>this->basisSet_->shellsCQ[j].l) {    
       ijS->iShell = &(this->basisSet_->shellsCQ[i]);
       ijS->jShell = &(this->basisSet_->shellsCQ[j]);
+      ijS->ibf_s = this->basisSet_->mapSh2Bf(i);
+      ijS->jbf_s = this->basisSet_->mapSh2Bf(j);
+//start number for spherical gaussian       
+      ijS->isphbf_s = mapSh2spBf[i];
+      ijS->jsphbf_s = mapSh2spBf[j];
+//start number for cartesian gaussian
+      ijS->icarbf_s = mapSh2caBf[i];
+      ijS->jcarbf_s = mapSh2caBf[j];
+//cout<< "iShell->l= "<<ijS->iShell->l<<endl;
+//cout<<ijS->ibf_s<<"\t"<<ijS->icarbf_s<<endl;
+//cout<<ijS->jbf_s<<"\t"<<ijS->jcarbf_s<<endl;
+     
     } else {
       ijS->iShell = &(this->basisSet_->shellsCQ[j]);
       ijS->jShell = &(this->basisSet_->shellsCQ[i]);
-    };
+      ijS->ibf_s = this->basisSet_->mapSh2Bf(j);
+      ijS->jbf_s = this->basisSet_->mapSh2Bf(i);
+      ijS->isphbf_s = mapSh2spBf[j];
+      ijS->jsphbf_s = mapSh2spBf[i];
+      ijS->icarbf_s = mapSh2caBf[j];
+      ijS->jcarbf_s = mapSh2caBf[i];
+//cout<<ijS->ibf_s<<"\t"<<ijS->icarbf_s<<endl;
+//cout<<ijS->jbf_s<<"\t"<<ijS->jcarbf_s<<endl;
+ 
+   };
+//cout<<"isbf_s= "<<ijS->ibf_s<<"\t jbf_s= "<<ijS->jbf_s<<endl;
+//cout<<"isphbf_s= "<<ijS->isphbf_s<<"\t jsphbf_s= "<<ijS->jsphbf_s<<endl<<endl;
+    ijS->isphsize = 2*(ijS->iShell->l)+1;
+    ijS->jsphsize = 2*(ijS->jShell->l)+1;
+    ijS->icarsize = (ijS->iShell->l+1)*(ijS->iShell->l+2)/2;
+    ijS->jcarsize = (ijS->jShell->l+1)*(ijS->jShell->l+2)/2;
 
     iS = ijS->iShell;
     jS = ijS->jShell;
@@ -689,40 +793,83 @@ void AOIntegrals::createShellPairs() {
 
     ijS->A = iS->O;
     ijS->B = jS->O;
-
     squareAB = math.zero;
     for(m=0;m<3;m++) {
       ijS->AB[m] = ijS->A[m]-ijS->B[m];
-      squareAB += ijS->AB[m]*ijS->AB[m];
+      AC[m]      = ijS->A[m];
+      BC[m]      = ijS->B[m];
+      squareAB  += ijS->AB[m]*ijS->AB[m];
     };
+    ACxBC[0]     = ijS->A[1]*ijS->B[2]-ijS->A[2]*ijS->B[1];  
+    ACxBC[1]     = ijS->A[2]*ijS->B[0]-ijS->A[0]*ijS->B[2];
+    ACxBC[2]     = ijS->A[0]*ijS->B[1]-ijS->A[1]*ijS->B[0];   
     
     nPP = 0;
-    for(k=0; k!=iS->coeff.size();k++) 
-    for(l=0; l!=jS->coeff.size();j++) {
+    for(k=0; k<iS->coeff.size();k++) 
+    for(l=0; l<jS->coeff.size();l++) {
       sumexp  = iS->alpha[k] + jS->alpha[l];
       prodexp = iS->alpha[k] * jS->alpha[l];
+      
       KAB = exp(-squareAB*prodexp/sumexp);
       ijS->KAB.push_back(KAB);
+      ijS->beta.push_back(jS->alpha[l]);
       ijS->UAB.push_back(sqrt2pi54*KAB/sumexp);
+      ijS->zetaa.push_back(iS->alpha[k]);
+      ijS->zetab.push_back(jS->alpha[l]);
+//      cout<<iS->alpha[k]<<";"<<ijS->zetaa[nPP]<<endl;
+//      cout<<jS->alpha[l]<<";"<<ijS->zetab[nPP]<<endl;
       ijS->Zeta.push_back(sumexp);    // zeta = alpha + beta
-      ijS->invZeta.push_back(math.half/sumexp);
+      ijS->Xi.push_back(prodexp/sumexp); // xi = alpha*beta/(alpha+beta)
+      ijS->invZeta.push_back(math.one/sumexp);
       ijS->halfInvZeta.push_back(math.half/sumexp);
-
-      ijS->ss.push_back(sqrt((math.pi/sumexp)*(math.pi/sumexp)*(math.pi/sumexp))*KAB);
+      pairNorm = iS->norm[k]*jS->norm[l];
+      ijS->norm.push_back(pairNorm);
+      ijS->ss.push_back(pairNorm*sqrt((math.pi/sumexp)*(math.pi/sumexp)*(math.pi/sumexp))*KAB);
       for (m=0;m<3;m++) {
         tmpP[m]     = (iS->alpha[k]*ijS->A[m]+jS->alpha[l]*ijS->B[m])/sumexp;// P=(alpha*A+beta*B)/zeta
         tmpPZeta[m] = tmpP[m] * sumexp;
         tmpPA[m]    = tmpP[m] - ijS->A[m]; // PA = P - A
         tmpPB[m]    = tmpP[m] - ijS->B[m]; // PB = P - B
+//        cout<<ijS->B[m]<<"t";
       };
+//      cout<<endl;
+
       ijS->P.push_back(tmpP);
       ijS->PA.push_back(tmpPA);
       ijS->PB.push_back(tmpPB);
       ijS->PZeta.push_back(tmpPZeta);
+
+//      if ( this->useFiniteWidthNuclei == false ) {        
+        ijS->ssV.push_back(math.two*sqrt(ijS->Zeta[nPP]/math.pi)*ijS->ss[nPP]);
+//      }
+      ijS->ssT.push_back((ijS->Xi[nPP])*(math.three-math.two*(ijS->Xi[nPP])*squareAB)*ijS->ss[nPP]);
+      for (m=0;m<3;m++) {
+        tmpssL[m]    = math.two*(ijS->Xi[nPP])*ACxBC[m]*ijS->ss[nPP]; 
+      }; 
+      ijS->ssL.push_back(tmpssL);
+
+//print ssL
+/*
+        std::string xyz[3];
+        xyz[0] = "x";
+        xyz[1] = "y";
+        xyz[2] = "z"; 
+      cout<<"ssL"<<"\t"<<i+1<<";"<<j+1<<";"<<"\t"<<nPP+1<<"\t";
+         
+      for (m=0;m<3;m++) {       
+        cout<<xyz[m]<<"\t"<<ijS->ssL[nPP][m]/pairNorm<<","<<"\t";
+      };
+      cout<<endl;
+*/
+
+
+      nPP++;
     };
-    nPP++;
     ijS->nPGTOPair = nPP;
     n++;
-  };
-};
+  }
 
+       
+
+};
+//xslie

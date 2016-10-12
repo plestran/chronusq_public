@@ -326,6 +326,8 @@ if(this->printLevel_ >= 3){
   RealMatrix PVPZ = numPot[2] - numPot[4]; 
 
 // Apply the Uk unitary transformation ( Uk' * PVP * Uk)
+
+prettyPrint(this->fileio_->out,PVPS,"pVpnum");
   TMP = UK.adjoint() * PVPS;
   PVPS = TMP * UK;
   TMP = UK.adjoint() * PVPX;
