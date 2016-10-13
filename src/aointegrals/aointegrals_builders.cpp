@@ -354,6 +354,9 @@ void AOIntegrals::computeAOOneE(){
   }
 */
 
+
+//*********BEGIN SUNS********C******
+/*
 //xslis
   this->createShellPairs();
   this->generateFmTTable();
@@ -371,17 +374,14 @@ void AOIntegrals::computeAOOneE(){
   this->computeSL();
 
   this->computepVdotp();
-/*
-  cout<<"xsli test S: "<<sTemp.norm()<<endl;
-  cout<<"xsli test V: "<<vTemp.norm()<<endl;
-  cout<<"xsli test T: "<<tTemp.norm()<<endl;
-*/
 
   this->overlap_->setZero();
   this->potential_->setZero();
   this->kinetic_->setZero();
 //  this->angular_->setZero();
 //xslie
+*/
+//**********************************
 
   // Start timer for one-electron integral evaluation
   auto oneEStart = std::chrono::high_resolution_clock::now();
@@ -462,14 +462,6 @@ void AOIntegrals::computeAOOneE(){
   this->haveAOOneE = true;
   this->breakUpMultipole();
 //if(this->isPrimary) this->writeOneE();
-  /*
-  if(this->isPrimary) {
-    for(auto ix = 0, ioff = 0; ix < 3; ix++, ioff += this->nBasis_*this->nBasis_){
-      RealMap A(&this->RcrossDel_->storage()[ioff],this->nBasis_,this->nBasis_);
-      prettyPrint(cout,A,"R:"+std::to_string(ix));
-    }
-  }
-  */
 }
 
 void AOIntegrals::computeSchwartz(){

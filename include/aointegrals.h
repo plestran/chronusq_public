@@ -331,7 +331,7 @@ public:
     this->maxMultipole_     = 3;
     this->integralAlgorithm = DIRECT;
     this->isPrimary         = true;
-    this->useFiniteWidthNuclei = true;
+    this->useFiniteWidthNuclei = false;
     this->printLevel_       = 1;
     this->thresholdS_ =        1.0e-10;
     this->thresholdAB_ =       1.0e-6;

@@ -527,18 +527,17 @@ void AOIntegrals::allocOp(){
     }
 #endif
 
-// number of spherical harmonic gaussian
-  int nSphBasis = 0;
-  int nCartBasis = 0;
-//cout<<"Here"<<endl;
-  for (auto mm = 0 ; mm < this->basisSet_->nShell() ; mm++ ) {
-     nSphBasis += 2*(this->basisSet_->shellsCQ[mm].l)+1;
-     nCartBasis += (this->basisSet_->shellsCQ[mm].l+1)*(this->basisSet_->shellsCQ[mm].l+2)/2;
-  }
-//cout<<"Here2"<<endl<<nCartBasis<<"\t"<<nSphBasis<<endl;
-  this->nSphBasis_ = nSphBasis;
-  this->nCartBasis_ = nCartBasis;
-//cout<<this->nCartBasis_<<endl;
+//******** BEGIN SUNSC *************
+//   number of spherical harmonic gaussian
+    int nSphBasis = 0;
+    int nCartBasis = 0;
+    for (auto mm = 0 ; mm < this->basisSet_->nShell() ; mm++ ) {
+       nSphBasis += 2*(this->basisSet_->shellsCQ[mm].l)+1;
+       nCartBasis += (this->basisSet_->shellsCQ[mm].l+1)*(this->basisSet_->shellsCQ[mm].l+2)/2;
+    }
+    this->nSphBasis_ = nSphBasis;
+    this->nCartBasis_ = nCartBasis;
+//**********************************
     try {
  
       // One Electron Integral
@@ -562,9 +561,7 @@ void AOIntegrals::allocOp(){
       // Overlap
       this->overlap_   = 
         std::unique_ptr<RealMap>(
-//            new RealMap(this->memManager_->malloc<double>(NBSq),this->nBasis_,this->nBasis_)
             new RealMap(this->memManager_->malloc<double>(NBSq),this->nBasis_,this->nBasis_)
-             
         ); 
       // Kinetic
       this->kinetic_   = 
@@ -576,6 +573,8 @@ void AOIntegrals::allocOp(){
         std::unique_ptr<RealMap>(
             new RealMap(this->memManager_->malloc<double>(NBSq),this->nBasis_,this->nBasis_)
         ); 
+
+//******** BEGIN SUNSC *************
       // Angular momentum
       this->angular_   = std::unique_ptr<RealTensor3d>(
         new RealTensor3d(this->nBasis_,this->nBasis_,3));
@@ -583,6 +582,7 @@ void AOIntegrals::allocOp(){
         new RealTensor3d(this->nBasis_,this->nBasis_,3));
       this->pVp_ = std::unique_ptr<RealMatrix>(new RealMatrix(this->nBasis_,this->nBasis_));
       // pV dot p 
+//**********************************
 
  
     } catch(...) {
