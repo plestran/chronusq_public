@@ -534,7 +534,7 @@ public:
   double vRRVa0(ChronusQ::ShellPair*,double*,double*,int,int,int*,int,int);
 //xslie
 //SS
-  void computeAngularL();
+  void computeAngularL(std::vector<ChronusQ::ShellPair>&,RealTensor3d&);
   double Labmu(ChronusQ::ShellPair*,RealMatrix*,RealMatrix*,RealTensor3d*,int,int*,int,int*,int,int);
   void computeSL();
   double hRRiPPVab(ChronusQ::ShellPair*,int,int*,int,int*,double*,int,int,int);

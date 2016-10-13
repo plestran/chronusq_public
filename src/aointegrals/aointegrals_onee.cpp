@@ -567,15 +567,16 @@ cout<<"potential finished"<<endl;
 
 
 //SS
-void AOIntegrals::computeAngularL(){
+void AOIntegrals::computeAngularL(std::vector<ChronusQ::ShellPair> &shellPairs,
+  RealTensor3d &angular){
   double L[3];
-  int i,j,k,ijShell,mu,bf1,bf2,lA[3],lB[3],iPP;
+  int i,j,k,mu,bf1,bf2,lA[3],lB[3],iPP;
 //  RealTensor3d Angular(this->nCartBasis_,this->nCartBasis_,3);
   std::vector<double> tmpLx;
   std::vector<double> tmpLy;
   std::vector<double> tmpLz;
   ChronusQ::ShellPair *ijS;
-//  this->angular_->setZero();  //not sure if setZero work
+//  this->angular_->fill(0.);  
   RealTensor3d OneiOnek(3,3,3); //(1i,1k,mu)
   OneiOnek(0,0,0) = math.zero; 
   OneiOnek(0,0,1) = math.zero; 
@@ -657,8 +658,8 @@ void AOIntegrals::computeAngularL(){
   cout<<endl;   
 */ 
                                  
-  for(ijShell=0;ijShell<this->nShellPair_;ijShell++) {
-    ijS = &(this->shellPairs_[ijShell]);
+  for(auto ijShell = 0; ijShell < shellPairs.size(); ijShell++) {
+    ijS = &(shellPairs[ijShell]);
 /*    if(ijS->iShell==ijS->jShell) {
       for(i=0, bf1 = ijS->ibf_s  ; i < ijS->iShell->cartesian_l.size(); i++,bf1++)
       for(j=i, bf2 = ijS->ibf_s+i; j < ijS->jShell->cartesian_l.size(); j++,bf2++){
@@ -731,7 +732,8 @@ void AOIntegrals::computeAngularL(){
            L[mu] = 0;
 //           LL[mu] = 0;
            for(iPP=0; iPP<ijS->nPGTOPair; iPP++){
-             L[mu] += this->Labmu(ijS,&OneixAC,&OneixBC,&OneiOnek,ijS->iShell->l,lA,ijS->jShell->l,lB,mu,iPP);
+             L[mu] += this->Labmu(ijS,&OneixAC,&OneixBC,&OneiOnek,
+                      ijS->iShell->l,lA,ijS->jShell->l,lB,mu,iPP);
 //             LL[mu] += this->Labmu(ijS,&OneixBC,&OneixAC,&OneiOnek,ijS->jShell->l,lB,ijS->iShell->l,lA,mu,iPP);
            }
              
@@ -739,8 +741,8 @@ void AOIntegrals::computeAngularL(){
 //           Angular(bf2,bf1,mu) = -L[mu];
 
            if (this->basisSet_->getforceCart() == true) {
-             (*this->angular_)(bf1,bf2,mu)=L[mu];
-             (*this->angular_)(bf2,bf1,mu)=-L[mu];
+             angular(bf1,bf2,mu)=L[mu];
+             angular(bf2,bf1,mu)=-L[mu];
            }
          }
 
@@ -755,9 +757,9 @@ void AOIntegrals::computeAngularL(){
       std::vector<double> SPH = this->cart2SphTrans(ijS,tmpLx.data() );
       for ( i = 0, bf1= ijS->isphbf_s; i<ijS->isphsize ; i++,bf1++) {
         for ( j = 0, bf2 = ijS->jsphbf_s; j<ijS->jsphsize ; j++, bf2++  ) {
-          (*this->angular_)(bf1,bf2,0) = SPH[i*ijS->jsphsize+j];
+          angular(bf1,bf2,0) = SPH[i*ijS->jsphsize+j];
 //cout<<(*this->angular_)(bf1,bf2,0)<<endl;
-          (*this->angular_)(bf2,bf1,0) = -SPH[i*ijS->jsphsize+j];
+          angular(bf2,bf1,0) = -SPH[i*ijS->jsphsize+j];
         }
       }
       SPH.clear();
@@ -765,8 +767,8 @@ void AOIntegrals::computeAngularL(){
       SPH = this->cart2SphTrans(ijS,tmpLy.data() );
       for ( i = 0, bf1= ijS->isphbf_s; i<ijS->isphsize ; i++,bf1++) {
         for ( j = 0, bf2 = ijS->jsphbf_s; j<ijS->jsphsize ; j++, bf2++  ) {
-          (*this->angular_)(bf1,bf2,1) = SPH[i*ijS->jsphsize+j];
-          (*this->angular_)(bf2,bf1,1) = -SPH[i*ijS->jsphsize+j];
+          angular(bf1,bf2,1) = SPH[i*ijS->jsphsize+j];
+          angular(bf2,bf1,1) = -SPH[i*ijS->jsphsize+j];
         }
       }
       SPH.clear();
@@ -774,8 +776,8 @@ void AOIntegrals::computeAngularL(){
       SPH = this->cart2SphTrans(ijS,tmpLz.data() );
       for ( i = 0, bf1= ijS->isphbf_s; i<ijS->isphsize ; i++,bf1++) {
         for ( j = 0, bf2 = ijS->jsphbf_s; j<ijS->jsphsize ; j++, bf2++  ) {
-          (*this->angular_)(bf1,bf2,2) = SPH[i*ijS->jsphsize+j];
-          (*this->angular_)(bf2,bf1,2) = -SPH[i*ijS->jsphsize+j];
+          angular(bf1,bf2,2) = SPH[i*ijS->jsphsize+j];
+          angular(bf2,bf1,2) = -SPH[i*ijS->jsphsize+j];
         }
       }
       SPH.clear();
@@ -860,12 +862,14 @@ void AOIntegrals::computeAngularL(){
        }  
      }  */   // end of cartesian to spehrical transform
    }
+/*
   for(auto iXYZ = 0; iXYZ < 3; iXYZ++){
-    RealMap TEMP(&this->angular_->storage()[iXYZ*this->nBasis_*this->nBasis_],this->nBasis_,this->nBasis_);
+    RealMap TEMP(&angular.storage()[iXYZ*this->nBasis_*this->nBasis_],this->nBasis_,this->nBasis_);
     prettyPrint(this->fileio_->out,TEMP,"Angular XYZ="+std::to_string(iXYZ));
   }
+*/
 //  prettyPrint(this->fileio_->out,(*this->kinetic_),"SS Angular");
-cout<<"angular finished"<<endl;
+//cout<<"angular finished"<<endl;
 };
 
 
@@ -2518,7 +2522,7 @@ if (M==1) {
 std::complex <double> AOIntegrals::car2sphcoeff(int L,int m,int *l ) {
 
   int Ltotal;
-  std::complex <double> coeff(0.0);
+  dcomplex coeff(0.0);
   Ltotal = l[0]+l[1]+l[2];
   double tmp = 0.0;
   if (L!=Ltotal) {
@@ -2531,9 +2535,9 @@ std::complex <double> AOIntegrals::car2sphcoeff(int L,int m,int *l ) {
 //    coeff = 0.0;
     return coeff;
   }
-  std::complex<double> sumval(0.0);
-  std::complex<double> ttmmpp,sumsumval;
-  std::complex<double> pref,absmchooselxm2k,ichoosej;
+  dcomplex sumval(0.0);
+  dcomplex ttmmpp,sumsumval;
+  dcomplex pref,absmchooselxm2k,ichoosej;
   int i,k;
   if (Ltotal == L) {
   pref = sqrt(ChronusQ::factorial(l[0]*2)*ChronusQ::factorial(2*l[1])*ChronusQ::factorial(2*l[2])*ChronusQ::factorial(L)*ChronusQ::factorial(L-std::abs(m))
