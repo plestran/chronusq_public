@@ -3,4 +3,4 @@
 rm -fr deps/include
 rm -fr deps/lib
 rm -fr deps/share
-rm -fr deps/src/libint-2.1.0-beta2
+rm -fr deps/src/libint-2.2.0-alpha

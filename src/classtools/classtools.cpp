@@ -412,7 +412,8 @@ void initCQ(int argc, char** argv){
 void initCQ(){
 #ifdef USE_LIBINT
   // Bootstrap Libint env
-  libint2::initialize(); 
+
+  libint2::initialize();
 #endif
 #ifdef _OPENMP
   // Set up Thread Pool (Default serial)
