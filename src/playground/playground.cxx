@@ -153,7 +153,8 @@ int main(int argc, char **argv){
   singleSlater.isDFT = true;
   singleSlater.isHF  = false;
 */
-  singleSlater.setRef("RB3LYP");
+  singleSlater.setRef("GHF");
+  singleSlater.setField(std::array<double,3>({{0.0,0.006,0.0}}));
   singleSlater.setSCFEneTol(1e-12);
   singleSlater.setSCFMaxIter(10000);
   singleSlater.doDIIS = true;

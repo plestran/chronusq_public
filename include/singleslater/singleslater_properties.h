@@ -94,6 +94,8 @@ void SingleSlater<T>::computeEnergy(){
 
     // Add in the electric field component if they are non-zero
     std::array<double,3> null{{0,0,0}};
+    cout << this->energyOneE << " " << this->energyTwoE << endl;
+    cout << elecField_[0] << " " << elecField_[1] << " " << elecField_[2] << endl;
     if(this->elecField_ != null){
       auto exptdipole = this-> template computeProperty<double,
            DENSITY_TYPE::TOTAL>(this->aointegrals_->elecDipoleSep_);
@@ -101,6 +103,7 @@ void SingleSlater<T>::computeEnergy(){
         this->energyOneE += this->elecField_[iXYZ] * exptdipole[iXYZ];
       }
     }
+    cout << this->energyOneE << " " << this->energyTwoE << endl;
  
 
     this->totalEnergy_= 
