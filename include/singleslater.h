@@ -73,7 +73,7 @@ enum REFERENCE {
   RHF,
   UHF,
   CUHF,
-  TCS,
+  GHF,
   X2C,
   RKS,
   UKS,
@@ -95,7 +95,9 @@ enum DFT {
   LSDA,
   SVWN3,
   SVWN5,
-  BLYP
+  BLYP,
+  B3LYP,
+  BHandH
 };
 
 template<typename T>
@@ -147,7 +149,7 @@ class SingleSlater : public WaveFunction<T> {
   int    **R2Index_;
 
   // Private metadata regarding DFT
-  int DFTKernel_;
+  DFT DFTKernel_;
   int weightScheme_;
   int dftGrid_;
   int nRadDFTGridPts_;
@@ -183,8 +185,7 @@ class SingleSlater : public WaveFunction<T> {
   std::vector<TMap*>     fockOrtho_;
 
 
-  // Fock Eigensystem
-
+  // Perturbation Tensor
   std::unique_ptr<TMap>  PTScalar_;
   std::unique_ptr<TMap>  PTMx_;
   std::unique_ptr<TMap>  PTMy_;
@@ -288,19 +289,6 @@ class SingleSlater : public WaveFunction<T> {
   H5::DataSet *DMSErrMx_;
   std::vector<H5::DataSet*> DMSErr_;
 
-
-  // Storage Files for most recent Density (for SCF comparison)
-//H5::DataSet *DScalarOld_;
-//H5::DataSet *DMzOld_;
-//H5::DataSet *DMyOld_;
-//H5::DataSet *DMxOld_;
-
-  // Storage Files for most recent Fock (for SCF comparison)
-//H5::DataSet *PTScalarOld_;
-//H5::DataSet *PTMzOld_;
-//H5::DataSet *PTMyOld_;
-//H5::DataSet *PTMxOld_;
-
   // Storage for FP
   H5::DataSet *FPScalar_;
   H5::DataSet *FPMz_;
@@ -313,17 +301,71 @@ class SingleSlater : public WaveFunction<T> {
   H5::DataSet *DeltaDMy_;
   H5::DataSet *DeltaDMx_;
  
-  // New DIIS Functions
-  void genDIISCom(int);
-  void CDIIS4(int);
+
+
+  /*** Guess Functions ***/
+  void SADGuess();
+  void COREGuess();
+  void READGuess();
+  void RandomGuess();
+  void mixOrbitalsSCF();   ///< Mix the orbitals for Complex / TCS SCF
+  void placeAtmDen(std::vector<int>, SingleSlater<double> &); // Place the atomic densities into total densities for guess
+  void scaleDen(); // Scale the unrestricted densities for correct # electrons
+
+
+  /*** Private SCF Functions ***/
+
+  // DIIS
+  void genDIISCom(int);  ///< Generate the [F,P] for CDIIS
+  void CDIIS4(int);      ///< Perform CDIIS Extrapolation
+  void initDIISFiles();  ///< Initialize the DIIS Files
+  void cpyDenDIIS(int);  ///< Store Ortho Density for DIIS Extrap
+  void cpyFockDIIS(int); ///< Store AO Fock and PT for DIIS Extrap
+  void readDIIS(H5::DataSet*,int,T*); ///< Read a DIIS iter off disk
+  void writeDIIS(H5::DataSet*,int,T*);///< Write a DIIS iter to disk
+
+  // DMS
+  void formDMSErr(int); ///< Form DMS Error metric for extrapolation
+  void DMSExtrap(int);  ///< Perform DMS Density Extrapolation
+  void initDMSFiles();  ///< Initialize the files used for DMS
+
+  // ADMP
+  void formADMPGrad(int); ///< From the ADMP Density Gradient
+  void initADMPFiles();   ///< Initialize the files used for ADMP
+
 
   // Various functions the perform SCF and SCR allocation
   void initSCFPtr();       ///< NULL-out pointers to scratch partitions
+  void initSCFFiles();     ///< Initialized the files used for SCF
+  void initSCFMem3();      ///< Allocate SCF Memory
+  void cleanupSCFMem3();   ///< Deallocate SCF Memory
+
+
+  // SCF Procedural Functions
+  void formDeltaD();    ///< Compute change in density from previous SCF iter
+  void copyDeltaDtoD(); ///< Copy Delta D -> D
+  void copyDOldtoD();   ///< Copy D Old (disk) -> D
+  void incPT();         ///< Increment PT for incremental Fock build
+  void writeSCFFiles(); ///< Write current SCF matricies to disk
+
+  // SCF Print Functions
+  void printSCFHeader(ostream &output=cout);
+  void printSCFIter(int,double,double,double);
+
+/*
+  // Old Deprecated SCF Functions
+  void CpyFock(int);
+  void GenDComm(int);
+*/
+
+  /*** Misc SingleSlater functions ***/
+  void genMethString(); ///< Generate the method string to print at SCF
+  void setupRef();
+
+
   void formNO();           ///< Form Natural Orbitals
-  void mixOrbitalsSCF();   ///< Mix the orbitals for Complex / TCS SCF
 
   void fockCUHF();
-//void copyDen();
   void backTransformMOs();
 
   void doImagTimeProp(double); ///< Propagate the wavefunction in imaginary time 
@@ -477,19 +519,29 @@ public:
       this->basisset_->radcut(this->epsScreen,this->maxiter,this->epsConv);
     }
   }
+ 
+  inline void communicate(Molecule &mol, BasisSet&basis, AOIntegrals &aoints, 
+    FileIO &fileio, CQMemManager &memManager){
+   
+    WaveFunction<T>::communicate(mol,basis,aoints,fileio,memManager);
+    this->setupRef();
+
+  }
 
   void alloc();
   void dealloc();
 
+  void setRef(const std::string&);
+
   //set private data
-  inline void setRef(int Ref)             { this->Ref_ = Ref;          };
+//inline void setRef(int Ref)             { this->Ref_ = Ref;          };
   inline void setPrintLevel(int i)        { this->printLevel_ = i;     };
   inline void setSCFDenTol(double x)      { this->denTol_ = x;         };
   inline void setSCFEneTol(double x)      { this->eneTol_ = x;         };
   inline void setSCFMaxIter(int i)        { this->maxSCFIter_ = i;     };
   inline void setGuess(int i)             { this->guess_ = i;          };
   inline void isNotPrimary()              { this->isPrimary = false;   };
-  inline void setDFTKernel( int i)        { this->DFTKernel_  = i;     };
+  inline void setDFTKernel( DFT i)        { this->DFTKernel_  = i;     };
   inline void setDFTWeightScheme(int i)   { this->weightScheme_ = i;   };
   inline void setDFTGrid(int i)           { this->dftGrid_ = i;        };
   inline void setDFTNGridPts(int i, int j){ this->nRadDFTGridPts_ = i;
@@ -553,12 +605,6 @@ public:
   inline int         guess()             { return this->guess_;          };
 
   void formGuess();	        // form the intial guess
-  void SADGuess();
-  void COREGuess();
-  void READGuess();
-  void RandomGuess();
-  void placeAtmDen(std::vector<int>, SingleSlater<double> &); // Place the atomic densities into total densities for guess
-  void scaleDen();              // Scale the unrestricted densities for correct # electrons
   void formDensity();		// form the density matrix
   void formFock(bool increment=false);	        // form the Fock matrix
   void formCoulomb();		// form the Coulomb matrix
@@ -576,8 +622,6 @@ public:
     this->computeMultipole();
     this->computeSExpect(*this->aointegrals_->overlap_);
   };
-  void CpyFock(int);
-  void GenDComm(int);
   void mullikenPop();
   void loewdinPop();
   void fixPhase();
@@ -586,43 +630,18 @@ public:
   void levelShift2();
   void fockDamping();
 
-  // DFT Setup Routines
-  inline void addSlater(double x = 1.0){
-    this->dftFunctionals_.emplace_back(std::make_shared<SlaterExchange>(x));
-  };
-  inline void addB88(double x = 1.0){
-    this->dftFunctionals_.emplace_back(std::make_shared<BEightEight>(x));
-    this->isGGA = true;
-  };
-  inline void addLYP(double x = 1.0){
-    this->dftFunctionals_.emplace_back(std::make_shared<lyp>(x)); 
-    this->isGGA = true;
-  };
-  inline void addVWN5(double x = 1.0){
-    this->dftFunctionals_.emplace_back(std::make_shared<VWNV>(x)); 
-  };
-  inline void addVWN3(double x = 1.0){
-    this->dftFunctionals_.emplace_back(std::make_shared<VWNIII>(x)); 
-  };
-  inline void createB3LYP(){
-    addSlater(0.8);
-    addB88(0.72);
-    addLYP(0.81);
-    addVWN3(0.19);
-    this->xHF_ = -0.5*0.2;
-  };
-  inline void createB88(){
-//    addSlater();
-    addSlater();
-    addB88();
-    this->xHF_ = 0.;
-  };
-  inline void createBHandH(){
-    addSlater(0.5);
-    addLYP();
-    this->xHF_ = -0.5*0.5;
-  };
+  /*** DFT Setup Routines ***/
+  void addDFTFunctional(const std::string&, double x=1.0);///< Append functional
 
+  void createLSDA();   ///< Generate all parameters for LSDA
+  void createBLYP();   ///< Generate all parameters for BLYP
+  void createB88();    ///< Generate all parameters for B88
+  void createB3LYP();  ///< Generate all parameters for B3LYP
+  void createBHandH(); ///< Generate all parameters for BHandH
+
+  /*** Public Print Routines ***/
+
+  // Properties
   void printEnergy(); 
   void printMultipole();
   void printSExpect();
@@ -630,60 +649,20 @@ public:
     this->printSExpect();
     this->printMultipole();
   };
-  void printInfo();
-  void printDensityInfo(double,double,double);
-  void printDensityInfo(double,double);
-  void printSCFHeader(ostream &output=cout);
-  void printSCFIter(int,double,double,double);
+
+  // Operators
   void printDensity();
   void printPT();
   void printFock();
+
+  // Misc Print
+  void printInfo();
+
+  
   void getAlgebraicField();
-  void writeSCFFiles();
   void checkReadReference();
   
-  inline void genMethString(){
-    if(this->Ref_ == _INVALID) 
-      CErr("Fatal: SingleSlater reference not set!",this->fileio_->out);
-
-    this->getAlgebraicField(); 
-    this->SCFType_      = this->algebraicField_      + " ";
-    this->SCFTypeShort_ = this->algebraicFieldShort_ + "-";
-    
-    std::string generalReference;
-    std::string generalRefShort;
-    if(this->isHF){
-      generalReference = "Hartree-Fock";
-      generalRefShort  = "HF";
-    } else if(this->isDFT) {
-      generalReference = "Kohn-Sham";
-      if(this->DFTKernel_ == USERDEFINED)
-        generalRefShort  = "KS";
-      else if(this->DFTKernel_ == LSDA) {
-        generalReference += " (LSDA)";
-        generalRefShort  = "LSDA";
-      }
-    }
-
-    if(this->Ref_ == RHF) {
-      this->SCFType_      += "Restricted " + generalReference; 
-      this->SCFTypeShort_ += "R" + generalRefShort;
-    } else if(this->Ref_ == UHF) {
-      this->SCFType_      += "Unrestricted " + generalReference; 
-      this->SCFTypeShort_ += "U" + generalRefShort;
-    } else if(this->Ref_ == CUHF) {
-      this->SCFType_      += "Constrained Unrestricted " + generalReference; 
-      this->SCFTypeShort_ += "CU" + generalRefShort;
-    } else if(this->Ref_ == X2C) {
-      this->SCFType_      += "Exact Two-Component " + generalReference; 
-      this->SCFTypeShort_ += "X2C-"+generalRefShort;
-    } else if(this->nTCS_ == 2) {
-      this->SCFType_      += "Generalized " + generalReference; 
-      this->SCFTypeShort_ += "G" + generalRefShort;
-    }
-  }
-
-  // Python API
+  /*** Python API ***/
   boost::python::list Wrapper_dipole();
   boost::python::list Wrapper_quadrupole();
   boost::python::list Wrapper_octupole();
@@ -697,17 +676,10 @@ public:
 
 
   void SCF3();
-  void initSCFMem3();
-  void initDIISFiles();
   void orthoFock3();
   void unOrthoDen3();
   SCFConvergence evalConver3();
   void backTransformMOs3();
-  void cleanupSCFMem3();
-  void cpyDenDIIS(int);
-  void cpyFockDIIS(int);
-  void readDIIS(H5::DataSet*,int,T*);
-  void writeDIIS(H5::DataSet*,int,T*);
   void diagFock2();         ///< Diagonalize Fock Matrix
   void cpyAOtoOrthoDen();
 
@@ -720,24 +692,11 @@ public:
   void mixOrbitals2C();
   void mixOrbitalsComplex();
 
-  void formADMPGrad(int);
-  void formDMSErr(int);
-  void DMSExtrap(int);
-  void initDMSFiles();
-  void initADMPFiles();
   void McWeeny(int);
   bool doDMS;
 
-  void formDeltaD();
-  void copyDeltaDtoD();
-  void copyDOldtoD();
-//void copyPT();
-  void incPT();
 
   void formFP();
-
-
-  void initSCFFiles();
   
 };
 

@@ -148,9 +148,12 @@ int main(int argc, char **argv){
   molecule.computeRij();
   molecule.computeI();
 
+/*
   singleSlater.setRef(RHF);
   singleSlater.isDFT = true;
   singleSlater.isHF  = false;
+*/
+  singleSlater.setRef("RB3LYP");
   singleSlater.setSCFEneTol(1e-12);
   singleSlater.setSCFMaxIter(10000);
   singleSlater.doDIIS = true;
@@ -161,8 +164,8 @@ int main(int argc, char **argv){
 
   fileio.iniH5Files();
 
-  singleSlater.isDFT = true;
-  singleSlater.isHF = false;
+//singleSlater.isDFT = true;
+//singleSlater.isHF = false;
 //singleSlater.setExchKernel(SingleSlater<double>::EXCH::B88);
   //singleSlater.setExchKernel(SingleSlater<double>::EXCH::NOEXCH);
 //  singleSlater.setCorrKernel(SingleSlater<double>::CORR::NOCORR);
@@ -170,7 +173,7 @@ int main(int argc, char **argv){
 //  singleSlater.addB88();
 //  singleSlater.addLYP();
 //  singleSlater.createB88();
-    singleSlater.createB3LYP();
+//  singleSlater.createB3LYP();
 //singleSlater.addSlater();
 //singleSlater.addVWN5();
 //singleSlater.setPrintLevel(5);
@@ -193,7 +196,7 @@ int main(int argc, char **argv){
 
   aoints.initMeta();
   singleSlater.initMeta();
-  singleSlater.genMethString();
+//singleSlater.genMethString();
 
   aoints.alloc();
   singleSlater.alloc();

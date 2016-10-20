@@ -42,7 +42,7 @@
    * Get the Single Dimension for the A Matrix for TDA
    */ 
   inline void nSingleDimCIS(){
-    if(this->Ref_ == TCS)
+    if(this->Ref_ == GHF)
       this->nSingleDim_ = this->nOV_;
     else 
       this->nSingleDim_ = this->nOAVA_ + this->nOBVB_;
@@ -52,7 +52,7 @@
    * Get the dimension for the First Order Polarization Propagator (FOPP)
    */
   inline void nSingleDimFOPP(){
-    if(this->Ref_ == TCS)
+    if(this->Ref_ == GHF)
       this->nSingleDim_ = 2*this->nOV_;
     else 
       this->nSingleDim_ = 2*this->nOAVA_ + 2*this->nOBVB_;
@@ -67,7 +67,7 @@
    *     IPPRPA = 2 ... All Beta Block
    */ 
   inline void nSingleDimPPRPA(){
-    if(this->Ref_ == TCS)
+    if(this->Ref_ == GHF)
       this->nSingleDim_ = this->nVV_SLT_ + this->nOO_SLT_;
     else {
       if(this->iPPRPA_ == 0)      this->nSingleDim_ = this->nVAVA_SLT_ + this->nOAOA_SLT_;
@@ -87,7 +87,7 @@
    *     IPPRPA = 2 ... All Beta Block
    */
   inline void nSingleDimPPATDA(){
-    if(this->Ref_ == TCS)
+    if(this->Ref_ == GHF)
       this->nSingleDim_ = this->nVV_SLT_;
     else {
       if(this->iPPRPA_ == 0)      this->nSingleDim_ = this->nVAVA_SLT_;
@@ -107,7 +107,7 @@
    *     IPPRPA = 2 ... All Beta Block
    */
   inline void nSingleDimPPCTDA(){
-    if(this->Ref_ == TCS)
+    if(this->Ref_ == GHF)
       this->nSingleDim_ = this->nVV_SLT_;
     else {
       if(this->iPPRPA_ == 0)      this->nSingleDim_ = this->nOAOA_SLT_;
