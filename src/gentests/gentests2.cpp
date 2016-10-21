@@ -105,6 +105,13 @@ inline bool file_exists(const std::string& name) {
   return f.good();
 };
 
+inline bool copy_file(const std::string& from_name, const std::string& to_name){
+  std::ifstream src(from_name.c_str(),std::ios::binary);
+  std::ofstream dst(to_name.c_str()  ,std::ios::binary);
+
+  dst << src.rdbuf();
+}
+
 int main(int argc, char **argv){
 
   CQMemManager memManager;
@@ -112,6 +119,9 @@ int main(int argc, char **argv){
   initCQ(argc,argv);
   
   std::string refFileName("chronusq-ref.bin");
+  std::string cpyFileName("chronusq-ref-old.bin");
+
+  if(file_exists(refFileName)) copy_file(refFileName,cpyFileName);
 
   H5::H5File RefFile(refFileName,H5F_ACC_TRUNC);
 /*
@@ -144,6 +154,7 @@ int main(int argc, char **argv){
   // Which references to test
   std::vector<std::string> rRefs = {"RHF"};
   std::vector<std::string> uRefs = {"UHF"};
+//std::vector<std::string> gRefs = {"GHF"};
 
   // Add the DFT counterparts into the reference lists
   rRefs.insert(rRefs.end(),RKSL.begin(),RKSL.end());
@@ -154,6 +165,7 @@ int main(int argc, char **argv){
   auto it = refs.end();
   it = refs.insert(it,rRefs.begin(),rRefs.end());
   it = refs.insert(it,uRefs.begin(),uRefs.end());
+//it = refs.insert(it,gRefs.begin(),gRefs.end());
 
 
   // Which basis sets to test
