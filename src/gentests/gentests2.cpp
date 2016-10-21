@@ -171,6 +171,7 @@ int main(int argc, char **argv){
     std::string curBasis = curRef + "/" + basis;
     groups.emplace_back(RefFile.createGroup(curBasis));
 
+    /** Water Test **/
     std::string fName = curBasis + "/" + moleculeName<WATER>();
     groups.emplace_back(RefFile.createGroup(fName));
     
@@ -184,11 +185,28 @@ int main(int argc, char **argv){
       H5P_DEFAULT,H5P_DEFAULT);
     testNum++;
 
+    // Tests that only make sense using unrestricted references
     if(std::find(rRefs.begin(),rRefs.end(),ref) == rRefs.end()){
+      /** O2 Triplet Test **/
       fName = curBasis + "/" + moleculeName<O2>();
       groups.emplace_back(RefFile.createGroup(fName));
+
       cout << "Running Job " << fName << endl;
       runCQJob<double,O2>(groups.back(),fName,memManager,jbTyp,basis,ref,1,
+        CORE);
+      
+      linkName.str("");
+      linkName << "test" <<std::setfill('0') << std::setw(4) << testNum;
+      H5Lcreate_soft(fName.c_str(),RefFile.getId(),linkName.str().c_str(),
+        H5P_DEFAULT,H5P_DEFAULT);
+      testNum++;
+
+      /** Li Test **/
+      fName = curBasis + "/" + moleculeName<Li>();
+      groups.emplace_back(RefFile.createGroup(fName));
+
+      cout << "Running Job " << fName << endl;
+      runCQJob<double,Li>(groups.back(),fName,memManager,jbTyp,basis,ref,1,
         CORE);
       
       linkName.str("");
