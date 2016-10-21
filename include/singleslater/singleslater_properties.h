@@ -57,19 +57,21 @@ void SingleSlater<T>::computeEnergy(){
     this->template computeProperty<double,DENSITY_TYPE::TOTAL>(
         *this->aointegrals_->coreH_);
   
-  dcomplex SOPart(0);
-  if(this->nTCS_ == 2 or !this->isClosedShell) {
-    SOPart +=  this->template computeProperty<dcomplex,DENSITY_TYPE::MZ>(
-          *this->aointegrals_->oneEmz_);
+  if(this->aointegrals_->doX2C) {
+    dcomplex SOPart(0);
+    if(this->nTCS_ == 2 or !this->isClosedShell) {
+      SOPart +=  this->template computeProperty<dcomplex,DENSITY_TYPE::MZ>(
+            *this->aointegrals_->oneEmz_);
+    }
+    if(this->nTCS_ == 2){
+      SOPart +=  this->template computeProperty<dcomplex,DENSITY_TYPE::MX>(
+            *this->aointegrals_->oneEmx_);
+      SOPart +=  this->template computeProperty<dcomplex,DENSITY_TYPE::MY>(
+            *this->aointegrals_->oneEmy_);
+    }
+    SOPart *= math.ii;
+    this->energyOneE -= std::real(SOPart);
   }
-  if(this->nTCS_ == 2){
-    SOPart +=  this->template computeProperty<dcomplex,DENSITY_TYPE::MX>(
-          *this->aointegrals_->oneEmx_);
-    SOPart +=  this->template computeProperty<dcomplex,DENSITY_TYPE::MY>(
-          *this->aointegrals_->oneEmy_);
-  }
-  SOPart *= math.ii;
-  this->energyOneE -= std::real(SOPart);
 
   this->energyTwoE = 
     0.5 * this->template computeProperty<double,DENSITY_TYPE::TOTAL>(
@@ -107,7 +109,6 @@ void SingleSlater<T>::computeEnergy(){
 //  cout << this->energyOneE << " " << this->energyTwoE << endl;
  
 
-    cout << this->energyOneE << " " << this->energyTwoE << " " << this->energyNuclei_ << endl;
     this->totalEnergy_= 
       this->energyOneE + this->energyTwoE + this->energyNuclei_;
 #ifdef CQ_ENABLE_MPI
