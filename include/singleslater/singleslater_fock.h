@@ -207,7 +207,7 @@ void SingleSlater<T>::formFock(bool increment){
       }
 
       (*this->fockScalar_) = this->aointegrals_->coreH_->template cast<T>();
-      this->aointegrals_->addElecDipole(*this->fockScalar_,this->elecField_);
+      this->aointegrals_->subElecDipole(*this->fockScalar_,this->elecField_);
 
       if(this->nTCS_ == 2 and this->aointegrals_->doX2C) {
         (*this->fockMx_) = this->aointegrals_->oneEmx_->template cast<T>();
