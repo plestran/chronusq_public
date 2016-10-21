@@ -57,7 +57,7 @@ template <typename T> void writeSCFRecord(std::string name, H5::Group &gp,
 }
 
 template <typename T, MOLECULE_PRESETS M> 
-void runCQJob(H5::H5File &RF, CQMemManager &memManager, 
+void runCQJob(H5::Group &res, std::string &fName, CQMemManager &memManager, 
   const std::string &jbTyp, const std::string &basisSet, 
   const std::string &ref, int numThreads, GUESS guess) {
 
@@ -97,10 +97,6 @@ void runCQJob(H5::H5File &RF, CQMemManager &memManager,
   runSCF(singleSlater);
 
 
-  std::string fName = "/" + jbTyp + "/" + ref + "/" + basisSet + "/" 
-                        + moleculeName<M>();
-
-  H5::Group res(RF.createGroup(fName));
   if(!jbTyp.compare("SCF")) writeSCFRecord(fName,res,singleSlater);
 }
 
@@ -163,6 +159,7 @@ int main(int argc, char **argv){
   // Which basis sets to test
   std::vector<std::string> bases = {"STO-3G","6-31G"};
 
+  int testNum = 1;
   std::vector<H5::Group> groups;  
   for( auto jbTyp : jobs ){
     std::string curJbTyp = "/" + jbTyp;
@@ -174,28 +171,36 @@ int main(int argc, char **argv){
     std::string curBasis = curRef + "/" + basis;
     groups.emplace_back(RefFile.createGroup(curBasis));
 
-    cout << "Running Job " << curBasis << "/Water" << endl;
-    runCQJob<double,WATER>(RefFile,memManager,jbTyp,basis,ref,1,CORE);
+    std::string fName = curBasis + "/" + moleculeName<WATER>();
+    groups.emplace_back(RefFile.createGroup(fName));
+    
+    cout << "Running Job " << fName << endl;
+    runCQJob<double,WATER>(groups.back(),fName,memManager,jbTyp,basis,ref,1,
+      CORE);
+
+    std::stringstream linkName;
+    linkName << "test" <<std::setfill('0') << std::setw(4) << testNum;
+    H5Lcreate_soft(fName.c_str(),RefFile.getId(),linkName.str().c_str(),
+      H5P_DEFAULT,H5P_DEFAULT);
+    testNum++;
+
     if(std::find(rRefs.begin(),rRefs.end(),ref) == rRefs.end()){
-      cout << "Running Job " << curBasis << "/O2" << endl;
-      runCQJob<double,O2>(RefFile,memManager,jbTyp,basis,ref,1,CORE);
+      fName = curBasis + "/" + moleculeName<O2>();
+      groups.emplace_back(RefFile.createGroup(fName));
+      cout << "Running Job " << fName << endl;
+      runCQJob<double,O2>(groups.back(),fName,memManager,jbTyp,basis,ref,1,
+        CORE);
+      
+      linkName.str("");
+      linkName << "test" <<std::setfill('0') << std::setw(4) << testNum;
+      H5Lcreate_soft(fName.c_str(),RefFile.getId(),linkName.str().c_str(),
+        H5P_DEFAULT,H5P_DEFAULT);
+      testNum++;
     }
   }
   }
   }
   
-/*
-  // Water RHF
-  runCQJob<double,WATER>(RefFile,memManager,"SCF","STO-3G","RHF",1,CORE);
-  runCQJob<double,WATER>(RefFile,memManager,"SCF","6-31G","RHF",1,CORE);
-  runCQJob<double,WATER>(RefFile,memManager,"SCF","cc-pVDZ","RHF",1,CORE);
-
-  // Water Fake UHF
-  runCQJob<double,WATER>(RefFile,memManager,"SCF","STO-3G","UHF",1,CORE);
-  runCQJob<double,WATER>(RefFile,memManager,"SCF","6-31G","UHF",1,CORE);
-  runCQJob<double,WATER>(RefFile,memManager,"SCF","cc-pVDZ","UHF",1,CORE);
-*/
-
   finalizeCQ();
   return 0;
 }
