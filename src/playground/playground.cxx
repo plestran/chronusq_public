@@ -148,6 +148,8 @@ int main(int argc, char **argv){
   SingleSlater<double> singleSlater151;
   SingleSlater<double> singleSlater160;
   SingleSlater<double> singleSlater161;
+  SingleSlater<double> singleSlater162;
+  SingleSlater<double> singleSlater163;
   FileIO fileio("test.inp","test.out");
 
   memManager.setTotalMem(256e6);
@@ -178,7 +180,7 @@ int main(int argc, char **argv){
   cout << "Mol Oxy " <<endl;
   fileio.iniH5Files();
 
-  basisWat.findBasisFile("STO-3G");
+  basisWat.findBasisFile("6-31G");
   basisWat.communicate(fileio);
   basisWat.parseGlobal();
   basisWat.constructLocal(&moleculeWat);
@@ -190,7 +192,7 @@ int main(int argc, char **argv){
   aointsWat.alloc();
   cout << "AoInt Wat " <<endl;
 
-  basisLi.findBasisFile("STO-3G");
+  basisLi.findBasisFile("6-31G");
   basisLi.communicate(fileio);
   basisLi.parseGlobal();
   basisLi.constructLocal(&moleculeLi);
@@ -202,7 +204,7 @@ int main(int argc, char **argv){
   aointsLi.alloc();
   cout << "AoInt Li " <<endl;
 
-  basisOxy.findBasisFile("STO-3G");
+  basisOxy.findBasisFile("6-31G");
   basisOxy.communicate(fileio);
   basisOxy.parseGlobal();
   basisOxy.constructLocal(&moleculeOxy);
@@ -366,6 +368,31 @@ int main(int argc, char **argv){
   cout << "Energy " << singleSlater161.totalEnergy() <<endl;
   cout << "Energy " << std::abs(singleSlater161.totalEnergy() - (-148.2725627255)) <<endl;
   cout << "PASSED 161 - Oxy B3LYP STO-3G? " << bool(std::abs(singleSlater151.totalEnergy() - (-148.2725627255)) <= 1e-8) << endl;
+ 
+  singleSlater162.setRef(UHF);
+  singleSlater162.isDFT = true;
+  singleSlater162.isHF  = false;
+  singleSlater162.setSCFEneTol(1e-12);
+  singleSlater162.setSCFMaxIter(10000);
+  singleSlater162.doDIIS = true;
+  singleSlater162.setGuess(CORE);
+  singleSlater162.createBHandH();
+//  singleSlater162.setxHF(0.0);
+  singleSlater162.communicate(moleculeOxy,basisOxy,aointsOxy,fileio,memManager);
+  singleSlater162.initMeta();
+  singleSlater162.genMethString();
+  singleSlater162.alloc();
+  singleSlater162.formGuess();
+  singleSlater162.computeProperties();
+  singleSlater162.printProperties();
+  singleSlater162.SCF3();
+  singleSlater162.computeProperties();
+  singleSlater162.printProperties();
+  singleSlater162.mullikenPop();
+
+  cout << "Energy " << singleSlater162.totalEnergy() <<endl;
+  cout << "Energy " << std::abs(singleSlater162.totalEnergy() - (-148.2725627255)) <<endl;
+  cout << "PASSED 162 - Oxy BHandH STO-3G? " << bool(std::abs(singleSlater162.totalEnergy() - (-148.2725627255)) <= 1e-8) << endl;
 
   singleSlater109.setRef(RHF);
   singleSlater109.isDFT = true;
@@ -513,6 +540,31 @@ int main(int argc, char **argv){
   cout << "Energy " << singleSlater160.totalEnergy() <<endl;
   cout << "Energy " << std::abs(singleSlater160.totalEnergy() - (-75.3122931451)) <<endl;
   cout << "PASSED 160 - WATER B3LYP STO3G? " << bool(std::abs(singleSlater160.totalEnergy() - (-75.3122931451)) <= 1e-8) << endl;
+
+// TEST B3LYP WATER 
+  singleSlater163.setRef(RHF);
+  singleSlater163.isDFT = true;
+  singleSlater163.isHF  = false;
+  singleSlater163.setSCFEneTol(1e-12);
+  singleSlater163.setSCFMaxIter(10000);
+  singleSlater163.doDIIS = true;
+  singleSlater163.setGuess(CORE);
+  singleSlater163.createBHandH();
+  singleSlater163.communicate(moleculeWat,basisWat,aointsWat,fileio,memManager);
+  singleSlater163.initMeta();
+  singleSlater163.genMethString();
+  singleSlater163.alloc();
+  singleSlater163.formGuess();
+  singleSlater163.computeProperties();
+  singleSlater163.printProperties();
+  singleSlater163.SCF3();
+  singleSlater163.computeProperties();
+  singleSlater163.printProperties();
+  singleSlater163.mullikenPop();
+
+  cout << "Energy " << singleSlater163.totalEnergy() <<endl;
+  cout << "Energy " << std::abs(singleSlater163.totalEnergy() - (-75.3122931451)) <<endl;
+  cout << "PASSED 163 - WATER BHandH STO3G? " << bool(std::abs(singleSlater163.totalEnergy() - (-75.3122931451)) <= 1e-8) << endl;
 
 //  Lit UKS
   singleSlater118.setRef(UHF);
