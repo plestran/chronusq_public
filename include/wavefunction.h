@@ -178,8 +178,8 @@ public:
   inline int nV()      const  { return this->nV_;     };
   inline int multip()  const  { return this->multip_; };
 
-  inline double energyNuclei() const { return this->energyNuclei_; };
-  inline double totalEnergy()  const { return this->totalEnergy_;  };
+  inline const double &energyNuclei() const { return this->energyNuclei_; };
+  inline const double &totalEnergy()  const { return this->totalEnergy_;  };
 
   inline TMap* moA()   const  { return this->moA_.get(); };
   inline TMap* moB()   const  { return this->moB_.get(); };
