@@ -66,6 +66,23 @@ void SingleSlater<T>::addDFTFunctional(const std::string &func, double x){
   if(!func.compare("B88") or !func.compare("LYP")) this->isGGA = true;
 };
 
+
+// EXCHANGE ONLY
+template<typename T>
+void SingleSlater<T>::createSlater(){
+  addDFTFunctional("Slater");
+  this->xHF_ = 0.0;
+  this->DFTKernel_ = SLATER;
+};
+template<typename T>
+void SingleSlater<T>::createB88(){
+  addDFTFunctional("Slater");
+  addDFTFunctional("B88");
+  this->xHF_ = 0.0;
+  this->DFTKernel_ = B88;
+};
+  
+  
 // Pure Functionals
 template<typename T>
 void SingleSlater<T>::createLSDA(){
@@ -73,6 +90,13 @@ void SingleSlater<T>::createLSDA(){
   addDFTFunctional("VWN3");
   this->xHF_ = 0.0;
   this->DFTKernel_ = LSDA;
+};
+template<typename T>
+void SingleSlater<T>::createSVWN5(){
+  addDFTFunctional("Slater");
+  addDFTFunctional("VWN5");
+  this->xHF_ = 0.0;
+  this->DFTKernel_ = SVWN5;
 };
 
 template<typename T>
@@ -84,13 +108,6 @@ void SingleSlater<T>::createBLYP(){
   this->DFTKernel_ = BLYP;
 };
 
-template<typename T>
-void SingleSlater<T>::createB88(){
-  addDFTFunctional("Slater");
-  addDFTFunctional("B88");
-  this->xHF_ = 0.0;
-//this->DFTKernel_ = B88;
-};
 
 // Hybrid Functionals
 template<typename T>

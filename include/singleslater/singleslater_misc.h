@@ -166,7 +166,7 @@ void SingleSlater<T>::setRef(const std::string &methStr) {
 
   // Kohn-Sham lists
   std::vector<std::string> KS {
-    "LSDA","SVWN3","SVWN5","BLYP","B3LYP","BHandH"
+    "SLATER","B88","LSDA","SVWN5","BLYP","B3LYP","BHandH"
   };
 
   std::vector<std::string> RKSL,UKSL,GKSL,X2CKSL;
@@ -179,8 +179,10 @@ void SingleSlater<T>::setRef(const std::string &methStr) {
 
   std::map<std::string,std::function<void()>> createMaps {
     {"LSDA"  ,[&]() -> void {this->createLSDA();}},
+    {"SLATER",[&]() -> void {this->createSlater();}},
+    {"SVWN5" ,[&]() -> void {this->createSVWN5();}},
     {"BLYP"  ,[&]() -> void {this->createBLYP();}},
-//  {"B88"   ,[&]() -> void {this->createB88();}},
+    {"B88"   ,[&]() -> void {this->createB88();}},
     {"B3LYP" ,[&]() -> void {this->createB3LYP();}},
     {"BHandH",[&]() -> void {this->createBHandH();}}
   };
@@ -244,8 +246,10 @@ void SingleSlater<T>::genMethString(){
 
   std::map<DFT,std::string> funcMap {
     {LSDA  ,"LSDA"},
+    {SLATER  ,"SLATER"},
+    {SVWN5  ,"SVWN5"},
     {BLYP  ,"BLYP"},
-//  {B88   ,"B88"},
+    {B88   ,"B88"},
     {B3LYP ,"B3LYP"},
     {BHandH,"BHandH"},
   };

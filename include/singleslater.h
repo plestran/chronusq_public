@@ -92,8 +92,9 @@ enum GUESS {
 enum DFT {
   NODFT,
   USERDEFINED,
+  SLATER,
+  B88,
   LSDA,
-  SVWN3,
   SVWN5,
   BLYP,
   B3LYP,
@@ -634,6 +635,8 @@ public:
   void addDFTFunctional(const std::string&, double x=1.0);///< Append functional
 
   void createLSDA();   ///< Generate all parameters for LSDA
+  void createSlater(); ///< Generate all parameters for SLATER
+  void createSVWN5();  ///< Generate all parameters for SVWN5
   void createBLYP();   ///< Generate all parameters for BLYP
   void createB88();    ///< Generate all parameters for B88
   void createB3LYP();  ///< Generate all parameters for B3LYP

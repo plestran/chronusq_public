@@ -139,7 +139,7 @@ int main(int argc, char **argv){
 
   // DFT Functionals to test
   std::vector<std::string> KS {
-    "LSDA","BLYP","B3LYP","BHandH"
+    "SLATER","B88","LSDA","SVWN5","BLYP","B3LYP","BHandH"
   };
 
   // Generate all variants of DFT functionals

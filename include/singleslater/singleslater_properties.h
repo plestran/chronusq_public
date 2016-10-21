@@ -107,6 +107,7 @@ void SingleSlater<T>::computeEnergy(){
 //  cout << this->energyOneE << " " << this->energyTwoE << endl;
  
 
+    cout << this->energyOneE << " " << this->energyTwoE << " " << this->energyNuclei_ << endl;
     this->totalEnergy_= 
       this->energyOneE + this->energyTwoE + this->energyNuclei_;
 #ifdef CQ_ENABLE_MPI
