@@ -233,6 +233,7 @@ class BasisSet{
   double      * radCutSh_ ; ///< CutOff Radius for each Shell
   double      * expPairSh_ ; ///< SS Exp for each Shel Pair
   std::vector<double> basisEvalScr_;
+  std::vector<double> basisEvalScr2_;
 
   std::vector<int>               nLShell_  ; ///< Maps L value to # of shells of that L
   std::vector<int>               mapSh2Bf_ ; ///< Maps shell number to first basis funtion
@@ -355,9 +356,11 @@ public:
   inline double * expPairSh() {return this->expPairSh_;  }; ///< Return expPairSh
   inline  double getradCutSh(int iShell) {return this->radCutSh_[iShell];   }; ///< Return radCutSh
   
+  dcomplex car2sphcoeff(int L,int m,std::array<int,3> &l);
   template <typename T> double * basisEval(int,std::array<double,3>,T*);
   template <typename T> double * basisEval(libint2::Shell&,T*);
   template <typename T> double * basisDEval(int,libint2::Shell&,T*);
+  double * CarToSpDEval(int L, double *cart);
   template <typename T> double * basisProdEval(libint2::Shell,libint2::Shell,T*);
   double * basisonFlyProdEval(libint2::Shell s1, int s1size, libint2::Shell s2, int s2size,double rx, double ry, double rz);
 //std::vector<bool> MapGridBasis(cartGP& pt);  ///< Create a Mapping of basis over grid points

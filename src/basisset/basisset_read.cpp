@@ -677,9 +677,118 @@ double * BasisSet::basisDEval(int iop, libint2::Shell &liShell, cartGP *pt){
 // IOP Derivative
 
   if (iop >1) CErr("Derivative order NYI in basisDEval");
-  auto shSize = liShell.size(); 
+  auto L = liShell.contr[0].l;
+  if (L >2) CErr("L>2 basis NYI in basisDEval");
+  auto shSize = ((L+1)*(L+2))/2; 
+//  auto shSize = liShell.size(); 
   auto contDepth = liShell.alpha.size(); 
   double * fEVal = &this->basisEvalScr_[0];
+  double * f = fEVal;
+  double * DfEval = f + shSize;
+
+  double * dx = DfEval;
+  double * dy = dx + shSize;
+  double * dz = dy + shSize;
+
+  double x = bg::get<0>(*pt) - liShell.O[0];
+  double y = bg::get<1>(*pt) - liShell.O[1];
+  double z = bg::get<2>(*pt) - liShell.O[2];
+  double rSq = x*x + y*y + z*z;
+  double alpha = 0.0;
+  double expFactor = 0.0;
+
+  for(auto k = 0; k < contDepth; k++){
+    expFactor += 
+      liShell.contr[0].coeff[k] *
+      std::exp(-liShell.alpha[k]*rSq);
+      if (iop == 1) 
+        alpha += 
+          2.0*liShell.alpha[k]*liShell.contr[0].coeff[k] *
+          std::exp(-liShell.alpha[k]*rSq);
+  }
+ 
+  if(L == 0){
+    f[0] = expFactor;
+   if (iop == 1) {
+      dx[0] =  alpha*x;
+      dy[0] =  alpha*y;
+      dz[0] =  alpha*z;
+      }
+  }else if(L == 1){
+    f[0] = expFactor*x;
+    f[1] = expFactor*y;
+    f[2] = expFactor*z;
+    if (iop == 1) {
+//    dpx/dxi
+      dx[0] = alpha*x*x-expFactor;
+      dy[0] = alpha*x*y;
+      dz[0] = alpha*x*z;
+//    dpy/dxi
+      dx[1] = alpha*y*x;
+      dy[1] = alpha*y*y - expFactor;
+      dz[1] = alpha*y*z;
+//    dpz/dxi
+      dx[2] = alpha*z*x;
+      dy[2] = alpha*z*y;
+      dz[2] = alpha*z*z - expFactor;
+    }
+  } else if(L == 2){
+    f[0] = expFactor*x*x;
+    f[1] = expFactor*y*x;
+    f[2] = expFactor*z*x;
+    f[3] = expFactor*y*y;
+    f[4] = expFactor*y*z;
+    f[5] = expFactor*z*z;
+    if (iop == 1) {
+//    dDx^2/dxi
+      dx[0] = alpha*x*x*x-2.0*x*expFactor;
+      dy[0] = alpha*x*x*y;
+      dz[0] = alpha*x*x*z;
+//    dDyx/dxi
+      dx[1] = alpha*x*x*y-y*expFactor;
+      dy[1] = alpha*x*y*y-x*expFactor;
+      dz[1] = alpha*x*y*z;
+//    dDzx/dxi
+      dx[2] = alpha*x*x*z-z*expFactor;
+      dy[2] = alpha*x*y*z;
+      dz[2] = alpha*x*z*z-x*expFactor;
+//    dDy^2/dxi
+      dx[3] = alpha*y*y*x;
+      dy[3] = alpha*y*y*y-2.0*y*expFactor;
+      dz[3] = alpha*y*y*z;
+//    dDyz/dxi
+      dx[4] = alpha*x*y*z;
+      dy[4] = alpha*y*y*z-z*expFactor;
+      dz[4] = alpha*y*z*z-y*expFactor;
+//    dDz^2/dxi
+      dx[5] = alpha*z*z*x;
+      dy[5] = alpha*z*z*y;
+      dz[5] = alpha*z*z*z-2.0*z*expFactor;
+    }
+  }
+  return fEVal;
+}
+
+double * BasisSet::CarToSpDEval(int L, double *cart){
+// IOP Derivative
+
+//  auto shSize = liShell.size(); 
+  int shSizeCar = ((L+1)*(L+2))/2; 
+  int shSizeSp  = (2*L+1)/2; 
+  double * fCarEVal = &this->basisEvalScr_[0];
+  double * fSpEVal  = &this->basisEvalScr2_[0];
+  double * fCar = fCarEVal;
+  double * fSp  = fSpEVal;
+  double * DfCarEval = fCar + shSizeCar;
+  double * DfSpEval = fSp  + shSizeSp;
+  double * dxCar = DfCarEval;
+  double * dyCar = dxCar + shSizeCar;
+  double * dzCar = dyCar + shSizeCar;
+  double * dxSp = DfSpEval;
+  double * dySp = dxSp + shSizeSp;
+  double * dzSp = dySp + shSizeSp;
+/*
+  auto contDepth = liShell.alpha.size(); 
   double * f = fEVal;
   double * DfEval = f + shSize;
 
@@ -764,6 +873,7 @@ double * BasisSet::basisDEval(int iop, libint2::Shell &liShell, cartGP *pt){
     }
   }
   return fEVal;
+*/
 }
 
 

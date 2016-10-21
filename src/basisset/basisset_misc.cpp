@@ -136,4 +136,63 @@ std::vector<libint2::Shell> BasisSet::uncontractBasis(){
 } // BasisSet::uncontractBasis
 
 
+dcomplex BasisSet::car2sphcoeff(int L,int m,std::array<int,3> &l){
+  int Ltotal;
+  dcomplex coeff(0.0);
+  Ltotal = l[0]+l[1]+l[2];
+  double tmp = 0.0;
+  if (L!=Ltotal) {
+//    coeff = 0.0;
+    return  coeff;
+  }
+  double j;
+  j = (double(l[0]+l[1])-std::abs(double(m)))/2;
+  if (fmod(j,1)>0) {
+//    coeff = 0.0;
+    return coeff;
+  }
+  dcomplex sumval(0.0);
+  dcomplex ttmmpp,sumsumval;
+  dcomplex pref,absmchooselxm2k,ichoosej;
+  int i,k;
+  if (Ltotal == L) {
+  pref = sqrt(ChronusQ::factorial(l[0]*2)*ChronusQ::factorial(2*l[1])*ChronusQ::factorial(2*l[2])*ChronusQ::factorial(L)*ChronusQ::factorial(L-std::abs(m))
+     /(ChronusQ::factorial(2*L)*ChronusQ::factorial(l[0])*ChronusQ::factorial(l[1])*ChronusQ::factorial(l[2])*ChronusQ::factorial(L+std::abs(m))))
+     /(ChronusQ::factorial(L)*pow(2,L));
+  
+  i = 0;
+  
+  while (i<=double((L-std::abs(m))/2) ) {
+    sumsumval = 0.0;
+    for ( k = 0 ; k <= j ; k++ ) {
+      if (m>=0) {
+        ttmmpp = double(std::abs(m)-l[0]+2*k)/2;
+      }
+      else {
+        ttmmpp = -double(std::abs(m)-l[0]+2*k)/2;
+      }
+      
+      if ((std::abs(m)>=(l[0]-2*k))&&((l[0]-2*k)>=0)) {
+        absmchooselxm2k =ChronusQ::polyCoeff(std::abs(m),l[0]-2*k);
+      }
+      else {
+        absmchooselxm2k = 0.0;
+      }
+      sumsumval = sumsumval + ChronusQ::polyCoeff(j,k)*absmchooselxm2k*pow(-1.0,ttmmpp);
+    }
+    if (i<j||(j<0)) {
+       ichoosej = 0.0;
+    }
+    else {
+      ichoosej = ChronusQ::polyCoeff(i,j);
+    }
+    sumval = sumval + ChronusQ::polyCoeff(L,i)*ichoosej*pow(-1,i)*ChronusQ::factorial(2*L-2*i)/(ChronusQ::factorial(L-std::abs(m)-2*i))*sumsumval;
+    i = i + 1;
+  }
+  coeff = pref * sumval;
+  return coeff;
+  }
+
+};
+
 }; //namespace ChronusQ
