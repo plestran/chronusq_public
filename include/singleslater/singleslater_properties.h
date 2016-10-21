@@ -96,17 +96,12 @@ void SingleSlater<T>::computeEnergy(){
 
     // Add in the electric field component if they are non-zero
     std::array<double,3> null{{0,0,0}};
-/*
-    cout << this->energyOneE << " " << this->energyTwoE << endl;
-    cout << elecField_[0] << " " << elecField_[1] << " " << elecField_[2] << endl;
-*/
     if(this->elecField_ != null){
       this->computeMultipole();
       for(auto iXYZ = 0; iXYZ < 3; iXYZ++){
         this->energyOneE += this->elecField_[iXYZ] * this->elecDipole_[iXYZ];
       }
     }
-//  cout << this->energyOneE << " " << this->energyTwoE << endl;
  
 
     this->totalEnergy_= 
@@ -192,7 +187,6 @@ void SingleSlater<T>::mullikenPop() {
     charge -= std::real(this->NBSqScratch_->
       block(iBfSt,iBfSt,iSize,iSize).trace());
     this->mullPop_.push_back(charge); 
-    cout << charge << endl;
   } 
 }
 

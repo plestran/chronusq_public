@@ -154,7 +154,7 @@ int main(int argc, char **argv){
   // Which references to test
   std::vector<std::string> rRefs = {"RHF"};
   std::vector<std::string> uRefs = {"UHF"};
-//std::vector<std::string> gRefs = {"GHF"};
+  std::vector<std::string> gRefs = {"GHF"};
 
   // Add the DFT counterparts into the reference lists
   rRefs.insert(rRefs.end(),RKSL.begin(),RKSL.end());
@@ -165,7 +165,7 @@ int main(int argc, char **argv){
   auto it = refs.end();
   it = refs.insert(it,rRefs.begin(),rRefs.end());
   it = refs.insert(it,uRefs.begin(),uRefs.end());
-//it = refs.insert(it,gRefs.begin(),gRefs.end());
+  it = refs.insert(it,gRefs.begin(),gRefs.end());
 
 
   // Which basis sets to test
