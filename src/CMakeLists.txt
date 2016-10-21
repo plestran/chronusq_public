@@ -25,7 +25,7 @@ add_subdirectory(worker)
 #add_subdirectory(response)
 add_subdirectory(qn)
 
-#add_subdirectory(gentests)
+add_subdirectory(gentests)
 
 #add_subdirectory(newQNTest)
 #add_subdirectory(RESPHack)
