@@ -155,7 +155,8 @@ int main(int argc, char **argv){
   memManager.setTotalMem(256e6);
   initCQ(argc,argv);
   CQSetNumThreads(1);
-  
+ 
+ /* 
 //////////////////////////////////////////////////////
   loadPresets<OxMolecule>(moleculeOxy);
   loadPresets<Li>(moleculeLi);
@@ -898,85 +899,8 @@ int main(int argc, char **argv){
   cout << "PASSED 121? " << bool(std::abs(singleSlater5.totalEnergy() - (-146.0745567304)) <= 1e-8) << endl;
 */
 /*
-//TEST - 124 Real UKS-SCF-LSDA - STO-3G
-//loadPresets<H>(molecule);
-  Molecule molecule6;
-  BasisSet basis6;
-  AOIntegrals aoints6;
-  SingleSlater<double> singleSlater6;
-//loadPresets<Methanol>(molecule6);
-  loadPresets<Li>(molecule6);
-//loadPresets<SO>(molecule6);
-//  loadPresets<OxMolecule>(molecule);
-  molecule6.convBohr();
-  molecule6.computeNucRep();
-  molecule6.computeRij();
-  molecule6.computeI();
-
-  singleSlater6.setRef(UHF);
-  singleSlater6.isDFT = true;
-  singleSlater6.isHF  = false;
-  singleSlater6.setSCFEneTol(1e-12);
-  singleSlater6.setSCFMaxIter(10000);
-  singleSlater6.doDIIS = true;
-
-  singleSlater6.setGuess(CORE);
-//  singleSlater6.setGuess(READ);
-//  fileio.doRestart = true;
 
 
-  singleSlater6.isDFT = true;
-  singleSlater6.isHF = false;
-//singleSlater6.setExchKernel(SingleSlater<double>::EXCH::B88);
-  //singleSlater6.setExchKernel(SingleSlater<double>::EXCH::NOEXCH);
-//  singleSlater6.setCorrKernel(SingleSlater<double>::CORR::NOCORR);
-//  singleSlater6.setCorrKernel(SingleSlater<double>::CORR::VWN5);
-//  singleSlater6.addLYP();
-//  singleSlater6.createB88();
-//    singleSlater6.createB3LYP();
-  singleSlater6.createLSDA();
-//singleSlater6.addVWN5();
-//singleSlater6.setPrintLevel(5);
-
-//  singleSlater6.setxHF(0.0);
-//basis6.findBasisFile("sto-3g");
-//basis6.findBasisFile("3-21g");
-  basis6.findBasisFile("STO-3G");
-//basis6.findBasisFile("cc-pVTZ");
-  basis6.communicate(fileio);
-  basis6.parseGlobal();
-  basis6.constructLocal(&molecule6);
-  basis6.makeMaps(&molecule6);
-  basis6.renormShells();
-
-
-  aoints6.communicate(molecule6,basis6,fileio,memManager);
-  singleSlater6.communicate(molecule6,basis6,aoints6,fileio,memManager);
-//moints.communicate(molecule6,basis6,fileio,aoints6,singleSlater6);
-
-  aoints6.initMeta();
-  singleSlater6.initMeta();
-  singleSlater6.genMethString();
-
-  aoints6.alloc();
-  singleSlater6.alloc();
-
-  singleSlater6.formGuess();
-  singleSlater6.computeProperties();
-  singleSlater6.printProperties();
-//singleSlater6.formFock();
-//singleSlater6.computeEnergy();
-  singleSlater6.SCF3();
-  singleSlater6.computeProperties();
-  singleSlater6.printProperties();
-
-  singleSlater6.mullikenPop();
-  cout << "Energy " << singleSlater6.totalEnergy() <<endl;
-  cout << "PASSED 124? " << bool(std::abs(singleSlater6.totalEnergy() - (-7.2764020089)) <= 1e-8) << endl;
-*/
-
-
-/*
   singleSlater.onePDMOrtho()[1]->swap(*singleSlater.onePDMOrtho()[3]);
   singleSlater.fockOrtho()[1]->swap(*singleSlater.fockOrtho()[3]);
 */
