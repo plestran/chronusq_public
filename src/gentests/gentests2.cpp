@@ -171,6 +171,11 @@ int main(int argc, char **argv){
   // Which basis sets to test
   std::vector<std::string> bases = {"STO-3G","6-31G"};
 
+  // Field Types
+  std::vector<std::string> fieldtps = {"NOFIELD"};
+
+
+
   int testNum = 1;
   std::vector<H5::Group> groups;  
   for( auto jbTyp : jobs ){
@@ -182,9 +187,12 @@ int main(int argc, char **argv){
   for( auto basis : bases ) {
     std::string curBasis = curRef + "/" + basis;
     groups.emplace_back(RefFile.createGroup(curBasis));
+  for( auto fieldtyp : fieldtps ) {
+    std::string curField = curBasis + "/" + fieldtyp;
+    groups.emplace_back(RefFile.createGroup(curField));
 
     /** Water Test **/
-    std::string fName = curBasis + "/" + moleculeName<WATER>();
+    std::string fName = curField + "/" + moleculeName<WATER>();
     groups.emplace_back(RefFile.createGroup(fName));
     
     cout << "Running Job " << fName << endl;
@@ -200,7 +208,7 @@ int main(int argc, char **argv){
     // Tests that only make sense using unrestricted references
     if(std::find(rRefs.begin(),rRefs.end(),ref) == rRefs.end()){
       /** O2 Triplet Test **/
-      fName = curBasis + "/" + moleculeName<O2>();
+      fName = curField + "/" + moleculeName<O2>();
       groups.emplace_back(RefFile.createGroup(fName));
 
       cout << "Running Job " << fName << endl;
@@ -214,7 +222,7 @@ int main(int argc, char **argv){
       testNum++;
 
       /** Li Test **/
-      fName = curBasis + "/" + moleculeName<Li>();
+      fName = curField + "/" + moleculeName<Li>();
       groups.emplace_back(RefFile.createGroup(fName));
 
       cout << "Running Job " << fName << endl;
@@ -227,6 +235,7 @@ int main(int argc, char **argv){
         H5P_DEFAULT,H5P_DEFAULT);
       testNum++;
     }
+  }
   }
   }
   }
