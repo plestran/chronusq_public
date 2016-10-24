@@ -22,6 +22,14 @@ template<> std::string moleculeName<SingO2>() {
   return std::string("Singlet O2"); 
 }; 
 
+struct SCFSettings {
+  std::array<double,3> staticField;
+
+//SCFSettings() {
+//  staticField = {0.0,0.0,0.0};
+//};
+};
+
 template <typename T> void runSCF(SingleSlater<T> &ss) {
   ss.formGuess();
   ss.SCF3();
@@ -54,12 +62,25 @@ template <typename T> void writeSCFRecord(std::string name, H5::Group &gp,
   ElecTLessQuadrupole.write(&ss.elecTracelessQuadpole()[0],
     H5PredType<double>());
   ElecOctupole.write(&ss.elecOctpole()[0],H5PredType<double>());
+
+
+  std::ifstream outFile("test.out",ios::binary);
+  std::vector<char> buffer((std::istreambuf_iterator<char>(outFile)),
+    (std::istreambuf_iterator<char>()));
+
+  hsize_t fileLen(buffer.size());
+  H5::DataSpace FileLen(1,&fileLen);
+
+  H5::DataSet OutFile(gp.createDataSet(name + "/Output",
+    H5::PredType::NATIVE_CHAR,FileLen));
+
+  OutFile.write(&buffer[0],H5::PredType::NATIVE_CHAR);
 }
 
 template <typename T, MOLECULE_PRESETS M> 
 void runCQJob(H5::Group &res, std::string &fName, CQMemManager &memManager, 
   const std::string &jbTyp, const std::string &basisSet, 
-  const std::string &ref, int numThreads, GUESS guess) {
+  const std::string &ref, const SCFSettings scfSett, int numThreads, GUESS guess) {
 
   Molecule molecule;
   BasisSet basis;
@@ -77,6 +98,7 @@ void runCQJob(H5::Group &res, std::string &fName, CQMemManager &memManager,
 
   singleSlater.setRef(ref);
   singleSlater.setGuess(guess);
+  singleSlater.setField(scfSett.staticField);
 
 
   basis.findBasisFile(basisSet);
@@ -95,6 +117,8 @@ void runCQJob(H5::Group &res, std::string &fName, CQMemManager &memManager,
   singleSlater.alloc();
 
   runSCF(singleSlater);
+  
+  fileio.out.close();
 
 
   if(!jbTyp.compare("SCF")) writeSCFRecord(fName,res,singleSlater);
@@ -154,7 +178,7 @@ int main(int argc, char **argv){
   // Which references to test
   std::vector<std::string> rRefs = {"RHF"};
   std::vector<std::string> uRefs = {"UHF"};
-//std::vector<std::string> gRefs = {"GHF"};
+  std::vector<std::string> gRefs = {"GHF"};
 
   // Add the DFT counterparts into the reference lists
   rRefs.insert(rRefs.end(),RKSL.begin(),RKSL.end());
@@ -165,11 +189,22 @@ int main(int argc, char **argv){
   auto it = refs.end();
   it = refs.insert(it,rRefs.begin(),rRefs.end());
   it = refs.insert(it,uRefs.begin(),uRefs.end());
-//it = refs.insert(it,gRefs.begin(),gRefs.end());
+  it = refs.insert(it,gRefs.begin(),gRefs.end());
 
 
   // Which basis sets to test
   std::vector<std::string> bases = {"STO-3G","6-31G"};
+
+  // Field Types
+  std::vector<std::string> fieldtps = 
+    {"NOFIELD","WEAKXFIELD","WEAKYFIELD","WEAKZFIELD"};
+
+  // SCF Settings
+  SCFSettings defaultSCF{std::array<double,3>({0.0,0.0,0.0})};
+  SCFSettings weakXFieldSCF{std::array<double,3>({0.0006,0.0,0.0})};
+  SCFSettings weakYFieldSCF{std::array<double,3>({0.0,0.0006,0.0})};
+  SCFSettings weakZFieldSCF{std::array<double,3>({0.0,0.0,0.0006})};
+
 
   int testNum = 1;
   std::vector<H5::Group> groups;  
@@ -182,14 +217,23 @@ int main(int argc, char **argv){
   for( auto basis : bases ) {
     std::string curBasis = curRef + "/" + basis;
     groups.emplace_back(RefFile.createGroup(curBasis));
+  for( auto fieldtyp : fieldtps ) {
+    std::string curField = curBasis + "/" + fieldtyp;
+    groups.emplace_back(RefFile.createGroup(curField));
+
+    SCFSettings scfSett;
+    if(!fieldtyp.compare("NOFIELD")) scfSett = defaultSCF;
+    else if(!fieldtyp.compare("WEAKXFIELD")) scfSett = weakXFieldSCF;
+    else if(!fieldtyp.compare("WEAKYFIELD")) scfSett = weakYFieldSCF;
+    else if(!fieldtyp.compare("WEAKZFIELD")) scfSett = weakZFieldSCF;
 
     /** Water Test **/
-    std::string fName = curBasis + "/" + moleculeName<WATER>();
+    std::string fName = curField + "/" + moleculeName<WATER>();
     groups.emplace_back(RefFile.createGroup(fName));
     
     cout << "Running Job " << fName << endl;
-    runCQJob<double,WATER>(groups.back(),fName,memManager,jbTyp,basis,ref,1,
-      CORE);
+    runCQJob<double,WATER>(groups.back(),fName,memManager,jbTyp,basis,ref,
+      scfSett,1, CORE);
 
     std::stringstream linkName;
     linkName << "test" <<std::setfill('0') << std::setw(4) << testNum;
@@ -199,27 +243,30 @@ int main(int argc, char **argv){
 
     // Tests that only make sense using unrestricted references
     if(std::find(rRefs.begin(),rRefs.end(),ref) == rRefs.end()){
-      /** O2 Triplet Test **/
-      fName = curBasis + "/" + moleculeName<O2>();
-      groups.emplace_back(RefFile.createGroup(fName));
-
-      cout << "Running Job " << fName << endl;
-      runCQJob<double,O2>(groups.back(),fName,memManager,jbTyp,basis,ref,1,
-        CORE);
-      
-      linkName.str("");
-      linkName << "test" <<std::setfill('0') << std::setw(4) << testNum;
-      H5Lcreate_soft(fName.c_str(),RefFile.getId(),linkName.str().c_str(),
-        H5P_DEFAULT,H5P_DEFAULT);
-      testNum++;
+      // O2 Doesnt like to converge in the presence of a field
+      if(!fieldtyp.compare("NOFIELD")) {
+        /** O2 Triplet Test **/
+        fName = curField + "/" + moleculeName<O2>();
+        groups.emplace_back(RefFile.createGroup(fName));
+       
+        cout << "Running Job " << fName << endl;
+        runCQJob<double,O2>(groups.back(),fName,memManager,jbTyp,basis,ref,
+          scfSett,1,CORE);
+        
+        linkName.str("");
+        linkName << "test" <<std::setfill('0') << std::setw(4) << testNum;
+        H5Lcreate_soft(fName.c_str(),RefFile.getId(),linkName.str().c_str(),
+          H5P_DEFAULT,H5P_DEFAULT);
+        testNum++;
+      }
 
       /** Li Test **/
-      fName = curBasis + "/" + moleculeName<Li>();
+      fName = curField + "/" + moleculeName<Li>();
       groups.emplace_back(RefFile.createGroup(fName));
 
       cout << "Running Job " << fName << endl;
-      runCQJob<double,Li>(groups.back(),fName,memManager,jbTyp,basis,ref,1,
-        CORE);
+      runCQJob<double,Li>(groups.back(),fName,memManager,jbTyp,basis,ref,
+        scfSett,1,CORE);
       
       linkName.str("");
       linkName << "test" <<std::setfill('0') << std::setw(4) << testNum;
@@ -230,6 +277,16 @@ int main(int argc, char **argv){
   }
   }
   }
+  }
+  
+/*
+  H5::DataSet tmp(RefFile.openDataSet("test0001/Output"));
+  std::vector<char> buffer(tmp.getStorageSize());
+  
+  tmp.read(&buffer[0],H5::PredType::NATIVE_CHAR);
+
+  for(auto X : buffer) cout << X ;
+*/
   
   finalizeCQ();
   return 0;
