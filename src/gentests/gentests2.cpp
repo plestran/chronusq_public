@@ -62,6 +62,19 @@ template <typename T> void writeSCFRecord(std::string name, H5::Group &gp,
   ElecTLessQuadrupole.write(&ss.elecTracelessQuadpole()[0],
     H5PredType<double>());
   ElecOctupole.write(&ss.elecOctpole()[0],H5PredType<double>());
+
+
+  std::ifstream outFile("test.out",ios::binary);
+  std::vector<char> buffer((std::istreambuf_iterator<char>(outFile)),
+    (std::istreambuf_iterator<char>()));
+
+  hsize_t fileLen(buffer.size());
+  H5::DataSpace FileLen(1,&fileLen);
+
+  H5::DataSet OutFile(gp.createDataSet(name + "/Output",
+    H5::PredType::NATIVE_CHAR,FileLen));
+
+  OutFile.write(&buffer[0],H5::PredType::NATIVE_CHAR);
 }
 
 template <typename T, MOLECULE_PRESETS M> 
@@ -104,6 +117,8 @@ void runCQJob(H5::Group &res, std::string &fName, CQMemManager &memManager,
   singleSlater.alloc();
 
   runSCF(singleSlater);
+  
+  fileio.out.close();
 
 
   if(!jbTyp.compare("SCF")) writeSCFRecord(fName,res,singleSlater);
@@ -263,6 +278,15 @@ int main(int argc, char **argv){
   }
   }
   }
+  
+/*
+  H5::DataSet tmp(RefFile.openDataSet("test0001/Output"));
+  std::vector<char> buffer(tmp.getStorageSize());
+  
+  tmp.read(&buffer[0],H5::PredType::NATIVE_CHAR);
+
+  for(auto X : buffer) cout << X ;
+*/
   
   finalizeCQ();
   return 0;
