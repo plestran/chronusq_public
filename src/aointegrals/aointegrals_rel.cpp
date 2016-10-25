@@ -29,8 +29,8 @@
 using ChronusQ::AOIntegrals;
 
 void AOIntegrals::formP2Transformation(){
-  this->basisSet_->makeMapPrim2Bf();
   if(!this->isPrimary) return;
+  this->basisSet_->makeMapPrim2Bf();
   auto unContractedShells = this->basisSet_->uncontractBasis();
   int nUncontracted = 0;
   for(auto i : unContractedShells) nUncontracted += i.size();
@@ -38,12 +38,6 @@ void AOIntegrals::formP2Transformation(){
   RealMatrix SUncontracted(nUncontracted,nUncontracted);
   RealMatrix TUncontracted(nUncontracted,nUncontracted);
   RealMatrix VUncontracted(nUncontracted,nUncontracted);
-
-if(this->printLevel_ >= 2){
-  RealMatrix TCpy(*this->kinetic_);
-  prettyPrintSmart(this->fileio_->out,TCpy,"T (non-rel)");
-  prettyPrintSmart(this->fileio_->out,*this->overlap_,"overlap (non-rel)");
-}
 
   libint2::Engine engineS(
       libint2::Operator::overlap,1,this->basisSet_->maxL(),0);
@@ -87,6 +81,7 @@ if(this->printLevel_ >= 2){
     SUncontracted.block(bf1_s,bf2_s,n1,n2) = bufMatS;
     TUncontracted.block(bf1_s,bf2_s,n1,n2) = bufMatT;
     
+    //------------------------------------------------
     //Finite Width Nuclei
     
     for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
@@ -103,6 +98,8 @@ if(this->printLevel_ >= 2){
 
       VUncontracted.block(bf1_s,bf2_s,n1,n2) -= bufMatV;
     }
+    //------------------------------------------------
+
     //Point Nuclei
     /* 
     const double * buffV = engineV.compute(
@@ -116,6 +113,7 @@ if(this->printLevel_ >= 2){
 
     VUncontracted.block(bf1_s,bf2_s,n1,n2) = bufMatV;
     */
+    //------------------------------------------------
 
   } // s2
   } // s1
@@ -123,14 +121,12 @@ if(this->printLevel_ >= 2){
   SUncontracted = SUncontracted.selfadjointView<Lower>();
   TUncontracted = TUncontracted.selfadjointView<Lower>();
 
+  // This is necessary to get the correct mapping.
   RealMatrix SnonRel = (*this->basisSet_->mapPrim2Bf()) * SUncontracted
 	* (*this->basisSet_->mapPrim2Bf()).transpose();
-  if(this->printLevel_ >= 3){
-  prettyPrintSmart(this->fileio_->out,SnonRel,"S nonRel (take 1)");
-    }
   for (auto row = 0; row < this->basisSet_->nBasis(); row++){
       (*this->basisSet_->mapPrim2Bf()).block(row,0,1,nUncontracted) /=
-        std::sqrt(SnonRel(row,row)); //scale by appropraite factor
+        std::sqrt(SnonRel(row,row)); //scale by appropriate factor
     }
 
 if(this->printLevel_ >= 2){
@@ -139,15 +135,15 @@ if(this->printLevel_ >= 2){
   prettyPrintSmart(this->fileio_->out,SnonRel,"S nonRel");
 }
 
-if(this->printLevel_ >= 2){
+if(this->printLevel_ >= 3){
   prettyPrintSmart(this->fileio_->out,SUncontracted,"S uncontracted");
   prettyPrintSmart(this->fileio_->out,TUncontracted,"T uncontracted");
-
-  RealMatrix TnonRel = (*this->basisSet_->mapPrim2Bf()) * TUncontracted
-	* (*this->basisSet_->mapPrim2Bf()).transpose();  
-  prettyPrintSmart(this->fileio_->out,TnonRel,"T nonRel");
 }
 
+/*
+  RealMap SUn(this->memManager_->malloc<double>(nUncontracted*nUncontracted),
+    nUncontracted,nUncontracted);
+*/
   RealMatrix SUn(nUncontracted,nUncontracted);
   SUn = SUncontracted.real(); // Save S for later
 
@@ -303,7 +299,7 @@ if(this->printLevel_ >= 3){
     }
   } 
 
-  AtomicGrid AGrid(200,770,GAUSSCHEBFST,LEBEDEV,BECKE,atomicCenters,
+  AtomicGrid AGrid(100,590,GAUSSCHEBFST,LEBEDEV,BECKE,atomicCenters,
     this->molecule_->rIJ(),0,-1,1e6,1.0,false);
 
   std::vector<RealMatrix> numPot(10,RealMatrix::Zero(nUncontracted,
@@ -484,7 +480,7 @@ if(this->twoEFudge == 2){
 // Diagonalize 
 // ------------------------------
 
-if(this->printLevel_ >= 2){
+if(this->printLevel_ >= 4){
   prettyPrintSmart(this->fileio_->out,CORE_HAMILTONIAN,"H");
   (this->fileio_->out) << "|H|" << CORE_HAMILTONIAN.squaredNorm() << endl;
 }
@@ -503,7 +499,6 @@ if(this->printLevel_ >= 2){
 // Grab C_L (+) and C_S (+) - the large and small components
 // of the electronic (positive energy) solutions
 //
-// NOT SURE IF THESE ARE CORRECT!!!! (seems to be wrong 'column')
   ComplexMatrix L = 
     HEVx.block(0,2*nUncontracted,2*nUncontracted,2*nUncontracted);
   ComplexMatrix S = 
@@ -519,7 +514,7 @@ if(this->printLevel_ >= 2){
   ComplexMatrix X = S * L.inverse(); //See above!
 
 // Print out X and its squared norm
-if(this->printLevel_ >= 2){
+if(this->printLevel_ >= 3){
   prettyPrintSmart(this->fileio_->out,X,"X");
   (this->fileio_->out) << X.squaredNorm() << endl;
 }
@@ -531,7 +526,7 @@ if(this->printLevel_ >= 2){
      + X.adjoint() * X).pow(-0.5);
 
 // Print out Y and its squared norm
-if(this->printLevel_ >= 2){
+if(this->printLevel_ >= 3){
   prettyPrintSmart(this->fileio_->out,Y,"Y");
   (this->fileio_->out) << Y.squaredNorm() << endl;
 }
@@ -759,18 +754,17 @@ if(this->twoEFudge == 1){
   *this->oneEmy_ = CoreY;
   *this->oneEmz_ = CoreZ;
 
-  ComplexMatrix TCSham(2*nBasis_,2*nBasis_);
+/*
+  // Free memory here
+  this->memManager_->free(SUn->data(),
+    this->nBasis_ * this->nBasis_);
+*/
 
 /*
-  std::vector<std::reference_wrapper<RealMatrix>> mats;
+//ADDITIONAL DEBUG HERE
+if(this->printLevel_ >= 4){
+  ComplexMatrix TCSham(2*nBasis_,2*nBasis_);
   
-  mats.emplace_back(CoreS);
-  mats.emplace_back(CoreZ);
-  mats.emplace_back(CoreY);
-  mats.emplace_back(CoreX);
-
-  Quantum<double>::spinGather(TCSham,mats);
-*/
   TCSham.block(0,0,nBasis_,nBasis_).real() = CoreS;
   TCSham.block(nBasis_,nBasis_,nBasis_,nBasis_).real() = CoreS;
   TCSham.block(0,0,nBasis_,nBasis_).imag() = CoreZ;
@@ -783,7 +777,6 @@ if(this->twoEFudge == 1){
   prettyPrintSmart(this->fileio_->out,TCSham.real(),"Two component Hamiltonian (real)");
   prettyPrintSmart(this->fileio_->out,TCSham.imag(),"Two component Hamiltonian (imag)");
 
-
   // put spin as fastest running index
   ComplexMatrix SpinHam(2*nBasis_,2*nBasis_);
 
@@ -794,18 +787,11 @@ if(this->twoEFudge == 1){
         SpinHam(2*row+1,2*col) = TCSham(row+nBasis_,col);
         SpinHam(2*row+1,2*col+1) = TCSham(row+nBasis_,col+nBasis_);
         }
-    }
-  
+    }  
   prettyPrintSmart(this->fileio_->out,SpinHam.real(),"Spin-Blocked 2c-Hamiltonian (real)");
   prettyPrintSmart(this->fileio_->out,SpinHam.imag(),"Spin-Blocked 2c-Hamiltonian (imag)");
-
-/*
-  es.compute(TCSham);
-  HEV= es.eigenvalues();
-//  HEVx= es.eigenvectors();
-
-  prettyPrintSmart(cout,HEV,"HEV");
-//  prettyPrintSmart(cout,HEVx,"HEVc");
+  }
+//END OF DEBUG
 */
 }
 

@@ -23,7 +23,7 @@ struct MyStruct {
 using namespace ChronusQ;
 
 enum MOLECULE_PRESETS {
-  WATER,Methanol,H,HE,SO,OxMolecule,Li
+  WATER,Methanol,H,HE,SO,OxMolecule,Li,CoChlor,Cu
 };
 
 template<MOLECULE_PRESETS T>
@@ -119,6 +119,34 @@ void loadPresets<Li>(Molecule &mol){
   mol.setIndex(0,HashAtom("Li",0));
   mol.setCart(0,0.000000000 ,0.00000000000, 0.0);
 };
+template<>
+void loadPresets<CoChlor>(Molecule &mol){
+  mol.setNAtoms(5);
+  mol.setCharge(-2);
+  mol.setNTotalE(93);
+  mol.setMultip(4);
+  mol.alloc();
+  mol.setIndex(0,HashAtom("Co",2));
+  mol.setIndex(1,HashAtom("Cl",-1));
+  mol.setIndex(2,HashAtom("Cl",-1));
+  mol.setIndex(3,HashAtom("Cl",-1));
+  mol.setIndex(4,HashAtom("Cl",-1));
+  mol.setCart(0,-1.154734,0.479215,0.000000);
+  mol.setCart(1,-3.588528,0.479245,0.000000);
+  mol.setCart(2,-0.343456,1.626506,1.987184);
+  mol.setCart(3,-0.343456,1.626506,-1.987184);
+  mol.setCart(4,-0.343456,-1.815398,0.000000);
+};
+template<>
+void loadPresets<Cu>(Molecule &mol){
+  mol.setNAtoms(1);
+  mol.setCharge(0);
+  mol.setNTotalE(29);
+  mol.setMultip(2);
+  mol.alloc();
+  mol.setIndex(0,HashAtom("Cu",0));
+  mol.setCart(0,0.000000000 ,0.00000000000, 0.0);
+}
 
 
 int main(int argc, char **argv){
@@ -127,42 +155,47 @@ int main(int argc, char **argv){
   Molecule molecule;
   BasisSet basis;
   AOIntegrals aoints;
-  SingleSlater<double> singleSlater;
-  RealTime<double> rt;
+  SingleSlater<dcomplex> singleSlater;
+  //RealTime<double> rt;
   FileIO fileio("test.inp","test.out");
 
-  memManager.setTotalMem(256e6);
+  memManager.setTotalMem(256e7);
   initCQ(argc,argv);
   CQSetNumThreads(1);
   
 //////////////////////////////////////////////////////
 //loadPresets<H>(molecule);
 //loadPresets<OxMolecule>(molecule);
-  loadPresets<WATER>(molecule);
+//loadPresets<WATER>(molecule);
 //loadPresets<Methanol>(molecule);
-//loadPresets<HE>(molecule);
+  loadPresets<Cu>(molecule);
 //loadPresets<SO>(molecule);
 //loadPresets<Li>(molecule);
+//loadPresets<CoChlor>(molecule);
   molecule.convBohr();
   molecule.computeNucRep();
   molecule.computeRij();
   molecule.computeI();
 
-  singleSlater.setRef(RHF);
-  singleSlater.isDFT = true;
-  singleSlater.isHF  = false;
-  singleSlater.setSCFEneTol(1e-12);
+  basis.forceCart();
+
+  singleSlater.setRef(X2C);
+  singleSlater.isClosedShell = false;
+  singleSlater.setNTCS(2);
+
+  singleSlater.setSCFEneTol(1e-10);
   singleSlater.setSCFMaxIter(10000);
   singleSlater.doDIIS = true;
+  singleSlater.doDamp = true;
+  singleSlater.dampParam = 0.2;
 
   singleSlater.setGuess(CORE);
-//  singleSlater.setGuess(READ);
 //  fileio.doRestart = true;
 
   fileio.iniH5Files();
 
-  singleSlater.isDFT = true;
-  singleSlater.isHF = false;
+  singleSlater.isDFT = false;
+  singleSlater.isHF = true;
 //singleSlater.setExchKernel(SingleSlater<double>::EXCH::B88);
   //singleSlater.setExchKernel(SingleSlater<double>::EXCH::NOEXCH);
 //  singleSlater.setCorrKernel(SingleSlater<double>::CORR::NOCORR);
@@ -170,15 +203,15 @@ int main(int argc, char **argv){
 //  singleSlater.addB88();
 //  singleSlater.addLYP();
 //  singleSlater.createB88();
-    singleSlater.createB3LYP();
+//  singleSlater.createB3LYP();
 //singleSlater.addSlater();
 //singleSlater.addVWN5();
 //singleSlater.setPrintLevel(5);
 
 //singleSlater.setxHF(0.0);
-//basis.findBasisFile("sto-3g");
+  basis.findBasisFile("sto-3g");
 //basis.findBasisFile("3-21g");
-  basis.findBasisFile("6-31G");
+//basis.findBasisFile("6-31G");
 //basis.findBasisFile("cc-pVTZ");
   basis.communicate(fileio);
   basis.parseGlobal();
@@ -192,6 +225,10 @@ int main(int argc, char **argv){
 //moints.communicate(molecule,basis,fileio,aoints,singleSlater);
 
   aoints.initMeta();
+  aoints.integralAlgorithm = AOIntegrals::INCORE;
+  aoints.doX2C = true;
+  aoints.useFiniteWidthNuclei = true;
+  
   singleSlater.initMeta();
   singleSlater.genMethString();
 
@@ -207,9 +244,9 @@ int main(int argc, char **argv){
   singleSlater.computeProperties();
   singleSlater.printProperties();
 
-  singleSlater.mullikenPop();
+//singleSlater.mullikenPop();
 
-  cout << "PASSED? " << bool((singleSlater.totalEnergy() - (-76.3671171302)) <= 1e-8) << endl;
+//cout << "PASSED? " << bool((singleSlater.totalEnergy() - (-76.3671171302)) <= 1e-8) << endl;
 ///////////////////////////////////////////////////////////////////////////
 /*
   singleSlater.onePDMOrtho()[1]->swap(*singleSlater.onePDMOrtho()[3]);
