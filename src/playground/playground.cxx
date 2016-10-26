@@ -156,7 +156,6 @@ int main(int argc, char **argv){
   initCQ(argc,argv);
   CQSetNumThreads(1);
  
- /* 
 //////////////////////////////////////////////////////
   loadPresets<OxMolecule>(moleculeOxy);
   loadPresets<Li>(moleculeLi);
@@ -205,6 +204,7 @@ int main(int argc, char **argv){
   aointsLi.alloc();
   cout << "AoInt Li " <<endl;
 
+//  basisOxy.findBasisFile("cc-pvtz");
   basisOxy.findBasisFile("6-31G");
   basisOxy.communicate(fileio);
   basisOxy.parseGlobal();
@@ -217,18 +217,20 @@ int main(int argc, char **argv){
   aointsOxy.alloc();
   cout << "AoInt Oxy " <<endl;
 
-  singleSlater121.setRef(UHF);
-  singleSlater121.isDFT = true;
-  singleSlater121.isHF  = false;
+  singleSlater121.setRef("UBLYP");
+//  singleSlater121.setRef("USLATER");
+//  singleSlater121.setRef("6-31G");
+//  singleSlater121.isDFT = true;
+//  singleSlater121.isHF  = false;
   singleSlater121.setSCFEneTol(1e-12);
   singleSlater121.setSCFMaxIter(10000);
   singleSlater121.doDIIS = true;
   singleSlater121.setGuess(CORE);
-  singleSlater121.addSlater();
-  singleSlater121.setxHF(0.0);
+//  singleSlater121.addSlater();
+//  singleSlater121.setxHF(0.0);
   singleSlater121.communicate(moleculeOxy,basisOxy,aointsOxy,fileio,memManager);
   singleSlater121.initMeta();
-  singleSlater121.genMethString();
+//  singleSlater121.genMethString();
   singleSlater121.alloc();
   singleSlater121.formGuess();
   singleSlater121.computeProperties();
@@ -241,6 +243,7 @@ int main(int argc, char **argv){
   cout << "Energy " << singleSlater121.totalEnergy() <<endl;
   cout << "Energy " << std::abs(singleSlater121.totalEnergy() - (-146.0745567304)) <<endl;
   cout << "PASSED 121 - Oxy Slater STO-3G? " << bool(std::abs(singleSlater121.totalEnergy() - (-146.0745567304)) <= 1e-8) << endl;
+ /* 
 ///
   singleSlater127.setRef(UHF);
   singleSlater127.isDFT = true;

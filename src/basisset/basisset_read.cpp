@@ -675,10 +675,10 @@ void BasisSet::popExpPairSh(){
 template<>
 double * BasisSet::basisDEval(int iop, libint2::Shell &liShell, cartGP *pt){
 // IOP Derivative
-
+//  cout << "Enter Enter " <<endl;
   if (iop >1) CErr("Derivative order NYI in basisDEval");
   auto L = liShell.contr[0].l;
-  if (L >2) CErr("L>2 basis NYI in basisDEval");
+//  if (L >2) CErr("L>2 basis NYI in basisDEval");
   auto shSize = ((L+1)*(L+2))/2; 
 //  auto shSize = liShell.size(); 
   auto contDepth = liShell.alpha.size(); 
@@ -690,23 +690,142 @@ double * BasisSet::basisDEval(int iop, libint2::Shell &liShell, cartGP *pt){
   double * dy = dx + shSize;
   double * dz = dy + shSize;
 
+
   double x = bg::get<0>(*pt) - liShell.O[0];
   double y = bg::get<1>(*pt) - liShell.O[1];
   double z = bg::get<2>(*pt) - liShell.O[2];
-  double rSq = x*x + y*y + z*z;
+
+  std::array<double,3> r ({
+    bg::get<0>(*pt) - liShell.O[0],
+    bg::get<1>(*pt) - liShell.O[1],
+    bg::get<2>(*pt) - liShell.O[2] 
+  });
+
+  double rSq = r[0]*r[0] + r[1]*r[1] + r[2]*r[2]; 
   double alpha = 0.0;
   double expFactor = 0.0;
+  double expArg = 0;
 
+  double tmpcoef,tmpalpha;
   for(auto k = 0; k < contDepth; k++){
-    expFactor += 
-      liShell.contr[0].coeff[k] *
-      std::exp(-liShell.alpha[k]*rSq);
-      if (iop == 1) 
-        alpha += 
-          2.0*liShell.alpha[k]*liShell.contr[0].coeff[k] *
-          std::exp(-liShell.alpha[k]*rSq);
+    tmpcoef = liShell.contr[0].coeff[k];
+    tmpalpha = liShell.alpha[k];
+    expArg = std::exp(-tmpalpha*rSq);
+    expFactor += tmpcoef * expArg;
+      
+      if (iop == 1){ 
+        tmpcoef *= tmpalpha;
+        alpha += tmpcoef * expArg;
+      }
   }
- 
+
+  
+    if(iop ==1) { alpha *= 2;}
+//      cout << "Shell L "<< L << endl;
+  int lx,ly,lz, ixyz;
+  double tmpxyz;
+  double tmpdx;
+  double tmpdy;
+  double tmpdz;
+  for(auto i = 0u, I = 0u; i <= L; i++) {
+    lx = L - i;
+    for( auto j = 0u; j <= i; j++, I++) {
+      ly = i - j;
+      lz = L - lx - ly;
+//      f[I] = expFactor;
+      tmpxyz= 1.0;
+      tmpdx = 0.0;
+      tmpdy = 0.0;
+      tmpdz = 0.0;
+/*
+      for(ixyz = 0; ixyz < lx; ixyz++)
+        tmpxyz *= r[0];
+      for(ixyz = 0; ixyz < ly; ixyz++)
+        tmpxyz *= r[1];
+      for(ixyz = 0; ixyz < lz; ixyz++)
+        tmpxyz *= r[2];
+*/
+      for(ixyz = 0; ixyz < lx-1; ixyz++) tmpxyz *= r[0];
+      for(ixyz = 0; ixyz < ly-1; ixyz++) tmpxyz *= r[1];
+      for(ixyz = 0; ixyz < lz-1; ixyz++) tmpxyz *= r[2];
+      f[I]  =  tmpxyz;
+      if (iop == 1) {
+        if(lx> 0) {tmpdx = -expFactor * lx;}
+        if(ly> 0) {tmpdy = -expFactor * ly;}
+        if(lz> 0) {tmpdz = -expFactor * lz;}
+         
+        dx[I] = tmpxyz*tmpdx;
+        dy[I] = tmpxyz*tmpdy;
+        dz[I] = tmpxyz*tmpdz;
+
+//      finishing up        
+        if(lx> 0) {f[I]  *= r[0]; dy[I] *=r[0];dz[I] *=r[0];}
+        if(ly> 0) {f[I]  *= r[1]; dx[I] *=r[1];dz[I] *=r[1];}
+        if(lz> 0) {f[I]  *= r[2]; dx[I] *=r[2];dy[I] *=r[2];}
+
+        dx[I] += f[I] * r[0] * alpha;
+        dy[I] += f[I] * r[1] * alpha;
+        dz[I] += f[I] * r[2] * alpha;
+        f[I]  *= expFactor;
+
+      } else{
+        if(lx> 0) {f[I]  *= r[0];}
+        if(ly> 0) {f[I]  *= r[1];}
+        if(lz> 0) {f[I]  *= r[2];}
+        f[I]  *= expFactor;
+      }
+/*
+      if (iop == 1) {
+        alpha *= 2;
+        dx[I] = tmpxyz * r[0] * alpha;
+        if(lx> 0) dx[I] -= (tmpxyz / r[0]) * expFactor * lx;
+        dy[I] = tmpxyz * r[1] * alpha;
+        if(ly> 0) dy[I] -= (tmpxyz / r[1]) * expFactor * ly;
+        dz[I] = tmpxyz * r[2] * alpha;
+        if(lz> 0) dz[I] -= (tmpxyz / r[2]) * expFactor * lz;
+
+        }
+*/
+//      cout << "I "<< I << " XYZ " << lx <<" " <<ly <<" "<<lz<<endl;
+//      cout << "f New "<<f[I] << endl ;
+//      cout << "dx New "<<dz[I] << endl ;
+    }
+  }
+/*
+      cout << "Shell L "<< L << endl;
+  int lx,ly,lz, ixyz;
+  for(auto i = 0u, I = 0u; i <= L; i++) {
+    lx = L - i;
+    for( auto j = 0u; j <= i; j++, I++) {
+      ly = i - j;
+      lz = L - lx - ly;
+      f[I] = expFactor;
+      cout << "S part  " << endl;
+      for(ixyz = 0; ixyz < lx; ixyz++)
+        f[I] *= r[0];
+      for(ixyz = 0; ixyz < ly; ixyz++)
+        f[I] *= r[1];
+      for(ixyz = 0; ixyz < lz; ixyz++)
+        f[I] *= r[2];
+//      cout << "I "<< I << " XYZ " << lx <<" " <<ly <<" "<<lz<<endl;
+//      cout << "New "<<f[I] << endl ;
+    }
+  }
+*/
+
+/*
+   int Lprint = ((L+1)*(L+2)/2) ;
+   for (auto J =0u; J < Lprint; J++ ) {
+//      cout << "F "<< J <<  " NEW "<<f[J] << endl ;
+////      cout << "Dx "<< J <<  " NEW "<<dx[J] << endl ;
+//      cout << "Dy "<< J <<  " NEW "<<dy[J] << endl ;
+//      cout << "Dz "<< J <<  " NEW "<<dz[J] << endl ;
+      f[J] = 0.0; 
+      dx[J] = 0.0; 
+      dy[J] = 0.0; 
+      dz[J] = 0.0; 
+   }
+
   if(L == 0){
     f[0] = expFactor;
    if (iop == 1) {
@@ -766,6 +885,17 @@ double * BasisSet::basisDEval(int iop, libint2::Shell &liShell, cartGP *pt){
       dz[5] = alpha*z*z*z-2.0*z*expFactor;
     }
   }
+   for (auto J =0u; J < Lprint; J++ ) {
+//      cout << "F "<< J <<  " OLD "<<f[J] << endl ;
+      cout << "dx "<< J <<  " OLD "<<dz[J] << endl ;
+//      cout << "dy "<< J <<  " OLD "<<dy[J] << endl ;
+//      cout << "dz "<< J <<  " OLD "<<dz[J] << endl ;
+   }
+//  if(L == 3){
+//    CErr("Exit L= 3");
+//    };
+  cout << "Exit Exit " <<endl;
+*/
   return fEVal;
 }
 
