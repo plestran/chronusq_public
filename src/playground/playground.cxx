@@ -189,7 +189,7 @@ int main(int argc, char **argv){
   rt.communicate(singleSlater);
   rt.alloc();
 //rt.setMaxSteps(827000); // roughly 1 ps of dynamics
-  rt.setMaxSteps(10); 
+  rt.setMaxSteps(100000); 
   rt.setTOff(0.0000001);
   rt.setEDFieldAmp({0.0005,0.0,0.0});
   rt.setIEnvlp(Step);

@@ -71,7 +71,7 @@ class CQMemManager : public boost::simple_segregated_storage<std::size_t> {
       std::size_t nBlocks = ( (n-1) * sizeof(T) ) / this->NBlockSize_ + 1;
 //      cout << nBlocks << " blocks of data" << endl;
       this->NAlloc_ -= nBlocks * this->NBlockSize_;
-      boost::simple_segregated_storage<std::size_t>::free_n(
+      boost::simple_segregated_storage<std::size_t>::ordered_free_n(
           ptr,nBlocks,this->NBlockSize_);
     }
 
@@ -83,6 +83,10 @@ class CQMemManager : public boost::simple_segregated_storage<std::size_t> {
     inline std::size_t NBlocksFree(){ 
       return (this->N_ - this->NAlloc_) / this->NBlockSize_; 
     };
+    
+    inline const int* MemStart() const {return (int*) &this->V_[0];};
+    inline const int* MemEnd() const {return (int*) &this->V_.back();};
+
 
     void printSummary(std::ostream &out){
       out << "Memory Allocation Summary:" << std::endl;
