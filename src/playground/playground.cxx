@@ -137,8 +137,8 @@ int main(int argc, char **argv){
   
 //////////////////////////////////////////////////////
 //loadPresets<H>(molecule);
-//loadPresets<OxMolecule>(molecule);
-  loadPresets<WATER>(molecule);
+  loadPresets<OxMolecule>(molecule);
+//loadPresets<WATER>(molecule);
 //loadPresets<Methanol>(molecule);
 //loadPresets<HE>(molecule);
 //loadPresets<SO>(molecule);

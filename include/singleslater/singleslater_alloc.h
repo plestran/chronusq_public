@@ -28,8 +28,6 @@
  **********************/
 template<typename T>
 void SingleSlater<T>::alloc(){
-//this->checkMeta();
-//  Quantum<T>::alloc(this->nBasis_); // Allocate Den -> Quantum
   WaveFunction<T>::alloc(); // Allocate Den -> WaveFunction
   this->allocOp();
   this->allocScr();
