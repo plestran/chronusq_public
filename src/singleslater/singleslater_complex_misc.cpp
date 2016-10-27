@@ -25,6 +25,7 @@
  */
 #include <singleslater.h>
 namespace ChronusQ {
+/*
 template<>
 template<>
 SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other) :
@@ -48,48 +49,9 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other) :
   maxiter( other->maxiter),
   guess_  ( other->guess() ),
   elecField_   ( other->elecField() ) {
-/*
-    this->nBasis_ = other->nBasis();
-    this->nTT_    = other->nTT();
-    this->nAE_    = other->nAE();
-    this->nBE_    = other->nBE(); 
-    this->nOccA_  = other->nOccA();
-    this->nOccB_  = other->nOccB();
-    this->nVirA_  = other->nVirA();
-    this->nVirB_  = other->nVirB();
-    this->multip_   = other->multip();
-    this->energyNuclei = other->energyNuclei;
-*/
-/*
-    this->Ref_    = other->Ref();
-    this->printLevel_ = other->printLevel();
-    this->doDIIS = other->doDIIS;
-    this->isHF   = other->isHF;
-    this->isDFT  = other->isDFT;
-    this->guess_ = other->guess();
-    this->elecField_   = (other->elecField());
-*/
-/*
-    this->basisset_    = other->basisset();    
-    this->molecule_    = other->molecule();
-    this->fileio_      = other->fileio();
-    this->aointegrals_ = other->aointegrals();
-*/
 
-//  this->allocOp();
     this->alloc();
 
-/*
-    this->fockA_->real()       = *other->fockA();
-    this->moA_->real()         = *other->moA();
-    this->PTA_->real()         = *other->PTA();
-
-    if(!this->isClosedShell || this->nTCS_ == 2){
-      this->fockB_->real()       = *other->fockB();
-      this->moB_->real()         = *other->moB();
-      this->PTB_->real()         = *other->PTB();
-    }
-*/
     for(auto F : this->dftFunctionals_) cout << F->name << endl;
     cout << this->xHF_ << endl;
     for(auto iF = 0; iF < this->fock_.size(); iF++){
@@ -99,13 +61,10 @@ SingleSlater<dcomplex>::SingleSlater(SingleSlater<double> * other) :
       // Copy over the orthonormal density for RT calculations
       this->onePDMOrtho_[iF]->real() = *other->onePDMOrtho()[iF];
     }
-/*
-    this->moA_->real() = *other->moA();
-    if(this->nTCS_ == 2 and !this->isClosedShell)
-      this->moB_->real() = *other->moB();
-*/
+
 
 }
+*/
 
 template<>
 void SingleSlater<dcomplex>::getAlgebraicField(){ 

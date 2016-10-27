@@ -200,9 +200,9 @@ void SingleSlater<double>::backTransformMOs(){
     MOB = SCRATCH2; 
 
     this->memManager_->free(SCRATCH1.data(),
-        this->nBasis_*this->nBasis_*this->nTCS_);
+        this->nBasis_*this->nBasis_*this->nTCS_*this->nTCS_);
     this->memManager_->free(SCRATCH2.data(),
-        this->nBasis_*this->nBasis_*this->nTCS_);
+        this->nBasis_*this->nBasis_*this->nTCS_*this->nTCS_);
     
   }
 };

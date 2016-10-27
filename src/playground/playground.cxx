@@ -127,8 +127,8 @@ int main(int argc, char **argv){
   Molecule molecule;
   BasisSet basis;
   AOIntegrals aoints;
-  SingleSlater<dcomplex> singleSlater;
-  RealTime<dcomplex> rt;
+  SingleSlater<double> singleSlater;
+  RealTime<double> rt;
   FileIO fileio("test.inp","test.out");
 
   memManager.setTotalMem(256e6);
@@ -137,8 +137,8 @@ int main(int argc, char **argv){
   
 //////////////////////////////////////////////////////
 //loadPresets<H>(molecule);
-  loadPresets<OxMolecule>(molecule);
-//loadPresets<WATER>(molecule);
+//loadPresets<OxMolecule>(molecule);
+  loadPresets<WATER>(molecule);
 //loadPresets<Methanol>(molecule);
 //loadPresets<HE>(molecule);
 //loadPresets<SO>(molecule);
@@ -148,9 +148,9 @@ int main(int argc, char **argv){
   molecule.computeRij();
   molecule.computeI();
 
-  singleSlater.setRef("RSLATER");
-  singleSlater.setDFTNAng(590);
-  singleSlater.setDFTNRad(120);
+  singleSlater.setRef("RHF");
+//singleSlater.setDFTNAng(590);
+//singleSlater.setDFTNRad(120);
   
   singleSlater.setSCFEneTol(1e-12);
   singleSlater.setSCFMaxIter(10000);
@@ -161,9 +161,9 @@ int main(int argc, char **argv){
   fileio.iniH5Files();
 
 
-  basis.findBasisFile("sto-3g");
+//basis.findBasisFile("sto-3g");
 //basis.findBasisFile("3-21g");
-//basis.findBasisFile("6-31G");
+  basis.findBasisFile("6-31G");
 //basis.findBasisFile("cc-pVTZ");
   basis.communicate(fileio);
   basis.parseGlobal();
@@ -192,7 +192,7 @@ int main(int argc, char **argv){
   rt.communicate(singleSlater);
   rt.alloc();
 //rt.setMaxSteps(827000); // roughly 1 ps of dynamics
-  rt.setMaxSteps(20000); 
+  rt.setMaxSteps(10000); 
   rt.setStepSize(0.05);
 //rt.setIRstrt(-1);
 //rt.setTOff(0.0000001);

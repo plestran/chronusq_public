@@ -511,8 +511,40 @@ public:
     }
   };
 
+//template<typename U>
+//SingleSlater(U *);
   template<typename U>
-  SingleSlater(U *);
+  SingleSlater(SingleSlater<U> *other) : 
+    WaveFunction<T>(dynamic_cast<WaveFunction<U>&>(*other)),
+    Ref_    ( other->Ref() ),
+    printLevel_  ( other->printLevel() ),
+    doDIIS  ( other->doDIIS ),
+    isHF    ( other->isHF ),
+    isDFT   ( other->isDFT ),
+    dftFunctionals_( other->dftFunctionals_ ),
+    weightScheme_( other->weightScheme()),
+    dftGrid_( other->dftGrid()),
+    nRadDFTGridPts_( other->nRadGridPts() ),
+    nAngDFTGridPts_( other->nAngGridPts() ),
+    xHF_( other->xHF() ),
+    isGGA(other->isGGA),
+    screenVxc( other->screenVxc),
+    epsScreen( other->epsScreen),
+    epsConv( other->epsConv),
+    maxiter( other->maxiter),
+    guess_  ( other->guess() ),
+    elecField_   ( other->elecField() ) {
+
+    this->alloc();
+
+    for(auto iF = 0; iF < this->fock_.size(); iF++){
+      *this->fock_[iF] = other->fock()[iF]->template cast<T>();
+      *this->PT_[iF]   = other->PT()[iF]->template cast<T>();
+
+      // Copy over the orthonormal density for RT calculations
+      *this->onePDMOrtho_[iF] = other->onePDMOrtho()[iF]->template cast<T>();
+    }
+  };
 
 
   // Initialize Meta data from other worker classes
