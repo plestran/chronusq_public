@@ -120,8 +120,27 @@ class Quantum {
       *this->onePDM_[IDen] = *other.onePDM_[IDen];
   }
 
+ // template<typename U>
+ // Quantum(const U&);
   template<typename U>
-  Quantum(const U&);
+  Quantum(const Quantum<U> &other) :
+    elecDipole_(other.elecDipole()),
+    elecQuadpole_(other.elecQuadpole()),
+    elecTracelessQuadpole_(other.elecTracelessQuadpole()),
+    elecOctpole_(other.elecOctpole()),
+    nTCS_(other.nTCS()),
+    isClosedShell(other.isClosedShell),
+    maxMultipole_(other.maxMultipole()),
+    memManager_(other.memManager()) {
+
+    this->isAllocated_ = false;
+    auto NB = other.onePDMScalar()->rows(); 
+    this->alloc(NB);
+   
+    for(auto IDen = 0; IDen < this->onePDM().size(); IDen++)
+      *this->onePDM_[IDen] = 
+        const_cast<Quantum<U>&>(other).onePDM()[IDen]->template cast<T>();
+  }
 
   // Link up to all of the other worker classes
   inline void communicate(CQMemManager &memManager){
@@ -212,16 +231,16 @@ class Quantum {
   inline void setMaxMultipole(int i){ this->maxMultipole_ = i;   };
   inline void setNTCS(int i){         this->nTCS_ = i;           };
 
-  inline int   nTCS(){ return nTCS_;};      
-  inline int maxMultipole(){ return maxMultipole_;};
+  inline int   nTCS() const { return nTCS_;};      
+  inline int maxMultipole() const { return maxMultipole_;};
 
-  inline std::vector<TMap*>& onePDM(){ return this->onePDM_;};
-  inline TMap* onePDMScalar(){ return onePDMScalar_.get();};
-  inline TMap* onePDMMx(){ return onePDMMx_.get();};
-  inline TMap* onePDMMy(){ return onePDMMy_.get();};
-  inline TMap* onePDMMz(){ return onePDMMz_.get();};
+  inline std::vector<TMap*>& onePDM() { return this->onePDM_;};
+  inline TMap* onePDMScalar() const { return onePDMScalar_.get();};
+  inline TMap* onePDMMx() const { return onePDMMx_.get();};
+  inline TMap* onePDMMy() const { return onePDMMy_.get();};
+  inline TMap* onePDMMz() const { return onePDMMz_.get();};
 
-  inline CQMemManager * memManager()     { return this->memManager_;     };
+  inline CQMemManager * memManager() const { return this->memManager_;     };
 
   inline const std::array<double,3>& elecDipole() const { return elecDipole_; };
   inline const std::array<std::array<double,3>,3>& elecQuadpole() const { 

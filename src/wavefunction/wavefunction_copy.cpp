@@ -1,5 +1,6 @@
 #include <wavefunction.h>
 namespace ChronusQ {
+/*
 template<>
 template<>
 WaveFunction<dcomplex>::WaveFunction(const WaveFunction<double> &other) :
@@ -27,5 +28,6 @@ WaveFunction<dcomplex>::WaveFunction(const WaveFunction<double> &other) :
   if(this->nTCS_ == 2 and !this->isClosedShell)
     this->moB_->real() = *other.moB();
 }
+*/
 
 }
