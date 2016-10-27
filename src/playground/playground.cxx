@@ -127,8 +127,8 @@ int main(int argc, char **argv){
   Molecule molecule;
   BasisSet basis;
   AOIntegrals aoints;
-  SingleSlater<double> singleSlater;
-  RealTime<double> rt;
+  SingleSlater<dcomplex> singleSlater;
+  RealTime<dcomplex> rt;
   FileIO fileio("test.inp","test.out");
 
   memManager.setTotalMem(256e6);
@@ -148,7 +148,10 @@ int main(int argc, char **argv){
   molecule.computeRij();
   molecule.computeI();
 
-  singleSlater.setRef("RHF");
+  singleSlater.setRef("RSLATER");
+  singleSlater.setDFTNAng(590);
+  singleSlater.setDFTNRad(120);
+  
   singleSlater.setSCFEneTol(1e-12);
   singleSlater.setSCFMaxIter(10000);
   singleSlater.doDIIS = true;
@@ -158,9 +161,9 @@ int main(int argc, char **argv){
   fileio.iniH5Files();
 
 
-//basis.findBasisFile("sto-3g");
+  basis.findBasisFile("sto-3g");
 //basis.findBasisFile("3-21g");
-  basis.findBasisFile("6-31G");
+//basis.findBasisFile("6-31G");
 //basis.findBasisFile("cc-pVTZ");
   basis.communicate(fileio);
   basis.parseGlobal();
@@ -189,11 +192,19 @@ int main(int argc, char **argv){
   rt.communicate(singleSlater);
   rt.alloc();
 //rt.setMaxSteps(827000); // roughly 1 ps of dynamics
-  rt.setMaxSteps(100000); 
-  rt.setTOff(0.0000001);
-  rt.setEDFieldAmp({0.0005,0.0,0.0});
-  rt.setIEnvlp(Step);
+  rt.setMaxSteps(20000); 
+  rt.setStepSize(0.05);
+//rt.setIRstrt(-1);
+//rt.setTOff(0.0000001);
+//rt.setEDFieldAmp({0.0001,0.0,0.0});
+//rt.setIEnvlp(Step);
   rt.doPropagation();
+
+/*
+  rt.resetPropagation();
+  rt.setIRstrt(-1);
+  rt.doPropagation();
+*/
 /*
   cout << endl;
   MOIntegrals<double> moints;

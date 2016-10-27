@@ -20,7 +20,7 @@ void RealTime<T>::doPropagation() {
     }
 
     // Initial entry into MMUT
-    if(Start) {
+    if(Start or FinMM) {
       // Copy the orthonormal density from ssPropagator to POSav
       // POSav(k) = PO(k)
       for(auto iODen = 0; iODen < POSav_.size(); iODen++)
@@ -48,9 +48,9 @@ void RealTime<T>::doPropagation() {
     ssPropagator_->formFock();
     ssPropagator_->computeEnergy();
     ssPropagator_->computeProperties();
-//  prettyPrintSmart(cout,*ssPropagator_->onePDMScalar(),"PS");
-//  prettyPrintSmart(cout,*ssPropagator_->fockScalar(),"FS");
     this->printRTStep();
+//  cout << iStep << " " << Start << " " << FinMM << " " << deltaT_ << 
+//       " " << ssPropagator_->elecDipole()[0] << endl;
 
     // Orthonormalize the AO Fock
     // F(k) -> FO(k)
@@ -72,16 +72,27 @@ void RealTime<T>::doPropagation() {
     writeCSVs();
 
     // Logic for MMUT restart setup
-    if(FinMM) {
+    if(false) {
       // PO = 0.5 * (PO + POSav)
       // PO(k+1) = 0.5 * (PO(k+1) + PO(k-1))
       for(auto iODen = 0; iODen < POSav_.size(); iODen++){
+/*
         (*ssPropagator_->onePDMOrtho()[iODen]) *= 0.5;
-        ssPropagator_->onePDMOrtho()[iODen]->noalias() += 
+        ssPropagator_->onePDMOrtho()[iODen]->noalias() = 
+          (*ssPropagator_->onePDMOrtho()[iODen]) +
           0.5 * (*POSav_[iODen]) ;
+*/
+        (*ssPropagator_->onePDMOrtho()[iODen]) = 0.5 * (
+          (*ssPropagator_->onePDMOrtho()[iODen]) + (*POSav_[iODen])
+        );
       }
         
+      prettyPrintSmart(cout,(*ssPropagator_->onePDMOrtho()[0])
+      -0.5*(*ssPropagator_->onePDMOrtho()[0])*
+       (*ssPropagator_->onePDMOrtho()[0]),"DIFF");
+
       // FIXME: Need to add McWeeny Purification
+      ssPropagator_->McWeeny(ssPropagator_->onePDMOrtho(),10);
 
       // POSav = PO
       // POSav now stores the next step's PO
@@ -89,7 +100,7 @@ void RealTime<T>::doPropagation() {
         (*POSav_[iODen]) = (*ssPropagator_->onePDMOrtho()[iODen]);
     }
 
-    // Unorthonormalize the density ofr next Fock build
+    // Unorthonormalize the density for next Fock build
     // PO(k+1) -> P(k+1)
     ssPropagator_->unOrthoDen3();
 

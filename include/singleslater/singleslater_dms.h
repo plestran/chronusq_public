@@ -93,13 +93,13 @@ void SingleSlater<T>::DMSExtrap(int NDIIS) {
       static_cast<T>(this->molecule_->nTotalE())/this->onePDM_[0]->trace();
   }
   
-  this->McWeeny(10);
+//this->McWeeny(10);
   
 }
 
+/*
 template<typename T>
 void SingleSlater<T>::McWeeny(int MAX){
-/*
   (*this->onePDMA_) /= 2.0;
   for(auto I = 0; I < MAX; I++){
     (*this->NBSqScratch_) = (*this->onePDMA_) * (*this->onePDMA_);
@@ -112,9 +112,9 @@ void SingleSlater<T>::McWeeny(int MAX){
 
   }
   (*this->onePDMA_) *= 2.0;
-*/
   
 };
+*/
 
 template<typename T>
 void SingleSlater<T>::initDMSFiles(){

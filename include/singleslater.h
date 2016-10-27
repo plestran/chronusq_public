@@ -481,14 +481,24 @@ public:
 
   SingleSlater(SingleSlater *other) : 
     WaveFunction<T>(dynamic_cast<WaveFunction<T>&>(*other)),
-    Ref_    ( other->Ref() ),
-    printLevel_  ( other->printLevel() ),
+    Ref_    ( other->Ref_ ),
+    printLevel_  ( other->printLevel_ ),
     doDIIS  ( other->doDIIS ),
     isHF    ( other->isHF ),
     isDFT   ( other->isDFT ),
     dftFunctionals_( other->dftFunctionals_ ),
-    guess_  ( other->guess() ),
-    elecField_   ( other->elecField() ) {
+    weightScheme_( other->weightScheme_),
+    dftGrid_( other->dftGrid_),
+    nRadDFTGridPts_( other->nRadDFTGridPts_ ),
+    nAngDFTGridPts_( other->nAngDFTGridPts_ ),
+    xHF_( other->xHF_ ),
+    isGGA(other->isGGA),
+    screenVxc( other->screenVxc),
+    epsScreen( other->epsScreen),
+    epsConv( other->epsConv),
+    maxiter( other->maxiter),
+    guess_  ( other->guess_ ),
+    elecField_   ( other->elecField_ ) {
 
     this->alloc();
 
@@ -695,7 +705,8 @@ public:
   void mixOrbitals2C();
   void mixOrbitalsComplex();
 
-  void McWeeny(int);
+//void McWeeny(int);
+  void McWeeny(std::vector<TMap*>,int);
   bool doDMS;
 
 

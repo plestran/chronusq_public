@@ -107,7 +107,7 @@ public:
     ssPropagator_(nullptr),
     deltaT_(0.0), currentTime_(0.0), freq_(0.0), phase_(0.0), sigma_(0.0),
     nSkip_(0),
-    tOn_(0.0), tOff_(1.0e4), maxSteps_(10), stepSize_(0.05), iRstrt_(50),
+    tOn_(0.0), tOff_(1.0e4), maxSteps_(10), stepSize_(0.05), iRstrt_(-1),
     iMethFormU_(EigenDecomp), iEnvlp_(Constant), iEllPol_(LXZ),
     EDField_({0.0,0.0,0.0}),
     tarCSVs(true){ };
@@ -152,6 +152,16 @@ public:
     this->writeAppliedFieldCSV();
 //  this->writeMullikenCSV();
 //  this->writeOrbitalCSV();
+  }
+
+  inline void resetPropagation() {
+    for(auto iD = 0; iD < POSav_.size(); iD++){
+     (*ssPropagator_->onePDM()[iD]) = 
+       groundState_->onePDM()[iD]->template cast<dcomplex>();
+     (*ssPropagator_->onePDMOrtho()[iD]) = 
+       groundState_->onePDMOrtho()[iD]->template cast<dcomplex>();
+    }
+    propInfo.clear();
   }
 
   // Setters

@@ -295,3 +295,22 @@ void SingleSlater<T>::genMethString(){
     this->SCFTypeShort_ += "G" + generalRefShort;
   }
 }
+
+template <typename T>
+void SingleSlater<T>::McWeeny(std::vector<TMap*> OD, int MAX){
+//prettyPrintSmart(cout,*OD[0],"Before");
+  (*OD[0]) /= 2.0;
+  for(auto I = 0; I < MAX; I++){
+    (*NBSqScratch_) = (*OD[0]) * (*OD[0]);
+
+    (*NBSqScratch2_) = (*OD[0]) - (*NBSqScratch_);
+    if(NBSqScratch2_->norm() < 1e-10) break;
+
+    (*NBSqScratch2_) = (*NBSqScratch_) *(*OD[0]);
+    (*OD[0]) = 3* (*NBSqScratch_) - 2 * (*NBSqScratch2_);
+
+  }
+  (*OD[0]) *= 2.0;
+//prettyPrintSmart(cout,*OD[0],"After");
+  
+} 
