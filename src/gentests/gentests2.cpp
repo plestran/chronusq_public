@@ -197,7 +197,8 @@ int main(int argc, char **argv){
 
   // Field Types
   std::vector<std::string> fieldtps = 
-    {"NOFIELD","WEAKXFIELD","WEAKYFIELD","WEAKZFIELD"};
+//    {"NOFIELD","WEAKXFIELD","WEAKYFIELD","WEAKZFIELD"};
+    {"NOFIELD"};
 
   // SCF Settings
   SCFSettings defaultSCF{std::array<double,3>({0.0,0.0,0.0})};

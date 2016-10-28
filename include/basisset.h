@@ -234,6 +234,7 @@ class BasisSet{
   double      * expPairSh_ ; ///< SS Exp for each Shel Pair
   std::vector<double> basisEvalScr_;
   std::vector<double> basisEvalScr2_;
+  std::unique_ptr<RealMatrix>    Car2Sph_;///< Matrix transformation Cart -> Sph
 
   std::vector<int>               nLShell_  ; ///< Maps L value to # of shells of that L
   std::vector<int>               mapSh2Bf_ ; ///< Maps shell number to first basis funtion
@@ -421,6 +422,7 @@ public:
   void makeMapSh2Cen(Molecule *);          ///< generate mapSh2Cen
   void makeMapCen2Bf(Molecule *);          ///< generate mapCen2Bf
   void makeMapPrim2Bf();
+  void makeCar2Sph(int L);
   void makeBasisMap();  ///< Generate map from basis enum to pasis path
   void renormShells();                     ///< Renormalize Libint2::Shell set
   std::vector<libint2::Shell> uncontractBasis(); ///< Unconctract the basis
