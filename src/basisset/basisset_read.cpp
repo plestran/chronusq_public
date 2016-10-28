@@ -677,7 +677,13 @@ double * BasisSet::basisDEval(int iop, libint2::Shell &liShell, cartGP *pt){
 // IOP Derivative
 
   if (iop >1) CErr("Derivative order NYI in basisDEval");
-  auto shSize = liShell.size(); 
+/* OLD
+  double x = bg::get<0>(*pt) - liShell.O[0];
+  double y = bg::get<1>(*pt) - liShell.O[1];
+  double z = bg::get<2>(*pt) - liShell.O[2];
+*/
+  auto L = liShell.contr[0].l;
+  auto shSize = ((L+1)*(L+2))/2; 
   auto contDepth = liShell.alpha.size(); 
   double * fEVal = &this->basisEvalScr_[0];
   double * f = fEVal;
@@ -686,32 +692,94 @@ double * BasisSet::basisDEval(int iop, libint2::Shell &liShell, cartGP *pt){
   double * dx = DfEval;
   double * dy = dx + shSize;
   double * dz = dy + shSize;
-
-  double x = bg::get<0>(*pt) - liShell.O[0];
-  double y = bg::get<1>(*pt) - liShell.O[1];
-  double z = bg::get<2>(*pt) - liShell.O[2];
-  double rSq = x*x + y*y + z*z;
+  std::array<double,3> r ({
+    bg::get<0>(*pt) - liShell.O[0],
+    bg::get<1>(*pt) - liShell.O[1],
+    bg::get<2>(*pt) - liShell.O[2] 
+  });
+  double rSq = r[0]*r[0] + r[1]*r[1] + r[2]*r[2]; 
   double alpha = 0.0;
   double expFactor = 0.0;
+  double expArg = 0;
+  double tmpcoef,tmpalpha;
+  int lx,ly,lz, ixyz;
+  double tmpxyz;
+  double tmpdx;
+  double tmpdy;
+  double tmpdz;
 
+// Generating the expArgument, expFactotr and the
+// alpha (for derivatives later on) and store them
+// in temp variables
   for(auto k = 0; k < contDepth; k++){
-    expFactor += 
-      liShell.contr[0].coeff[k] *
-      std::exp(-liShell.alpha[k]*rSq);
-      if (iop == 1) 
-        alpha += 
-          2.0*liShell.alpha[k]*liShell.contr[0].coeff[k] *
-          std::exp(-liShell.alpha[k]*rSq);
+    tmpcoef = liShell.contr[0].coeff[k];
+    tmpalpha = liShell.alpha[k];
+    expArg = std::exp(-tmpalpha*rSq);
+    expFactor += tmpcoef * expArg;
+    if (iop == 1){ 
+//  quantities for derivatives
+      tmpcoef *= tmpalpha;
+      alpha += tmpcoef * expArg;
+    }
   }
- 
-  if(liShell.contr[0].l == 0){
+  
+  if(iop ==1) { alpha *= 2;}
+
+  for(auto i = 0u, I = 0u; i <= L; i++) {
+    lx = L - i;
+    for( auto j = 0u; j <= i; j++, I++) {
+      ly = i - j;
+      lz = L - lx - ly;
+      tmpxyz= 1.0;
+      tmpdx = 0.0;
+      tmpdy = 0.0;
+      tmpdz = 0.0;
+      for(ixyz = 0; ixyz < lx-1; ixyz++) tmpxyz *= r[0];
+      for(ixyz = 0; ixyz < ly-1; ixyz++) tmpxyz *= r[1];
+      for(ixyz = 0; ixyz < lz-1; ixyz++) tmpxyz *= r[2];
+      f[I]  =  tmpxyz;
+      if (iop == 1) {
+//    Derivatives
+        if(lx> 0) {tmpdx = -expFactor * lx;}
+        if(ly> 0) {tmpdy = -expFactor * ly;}
+        if(lz> 0) {tmpdz = -expFactor * lz;}
+         
+        dx[I] = tmpxyz*tmpdx;
+        dy[I] = tmpxyz*tmpdy;
+        dz[I] = tmpxyz*tmpdz;
+
+//      finishing up        
+        if(lx> 0) {f[I]  *= r[0]; dy[I] *=r[0];dz[I] *=r[0];}
+        if(ly> 0) {f[I]  *= r[1]; dx[I] *=r[1];dz[I] *=r[1];}
+        if(lz> 0) {f[I]  *= r[2]; dx[I] *=r[2];dy[I] *=r[2];}
+
+        dx[I] += f[I] * r[0] * alpha;
+        dy[I] += f[I] * r[1] * alpha;
+        dz[I] += f[I] * r[2] * alpha;
+        f[I]  *= expFactor;
+
+      } else{
+//    Only basis (not GGA)
+        if(lx> 0) {f[I]  *= r[0];}
+        if(ly> 0) {f[I]  *= r[1];}
+        if(lz> 0) {f[I]  *= r[2];}
+        f[I]  *= expFactor;
+      }
+//      cout << "I "<< I << " XYZ " << lx <<" " <<ly <<" "<<lz<<endl;
+//      cout << "f New "<<f[I] << endl ;
+//      cout << "dx New "<<dz[I] << endl ;
+    }
+  }
+
+/*  OLD
+  if(L == 0){
     f[0] = expFactor;
    if (iop == 1) {
       dx[0] =  alpha*x;
       dy[0] =  alpha*y;
       dz[0] =  alpha*z;
       }
-  }else if(liShell.contr[0].l == 1){
+  }else if(L == 1){
     f[0] = expFactor*x;
     f[1] = expFactor*y;
     f[2] = expFactor*z;
@@ -729,7 +797,7 @@ double * BasisSet::basisDEval(int iop, libint2::Shell &liShell, cartGP *pt){
       dy[2] = alpha*z*y;
       dz[2] = alpha*z*z - expFactor;
     }
-  } else if(liShell.contr[0].l == 2){
+  } else if(L == 2){
     f[0] = expFactor*x*x;
     f[1] = expFactor*y*x;
     f[2] = expFactor*z*x;
@@ -763,7 +831,41 @@ double * BasisSet::basisDEval(int iop, libint2::Shell &liShell, cartGP *pt){
       dz[5] = alpha*z*z*z-2.0*z*expFactor;
     }
   }
-  return fEVal;
+*/
+  return CarToSpDEval(L,fEVal);
+//  return fEVal;
+}
+
+void BasisSet::makeCar2Sph(int L){
+  int LCar = (L+1)*(L+2)/2;
+  int LSp  = (2*L+1);
+  this->Car2Sph_ = 
+   std::unique_ptr<RealMatrix>(new RealMatrix(LSp,LCar));
+};
+
+double * BasisSet::CarToSpDEval(int L, double *fCarEVal){
+
+  // No trasformation needed
+  if (L < 2){return fCarEVal;}
+  int shSizeCar = ((L+1)*(L+2))/2; 
+  int shSizeSp  = (2*L+1)/2; 
+  double * fSpEVal  = &this->basisEvalScr2_[0];
+  double * fCar = fCarEVal;
+  double * fSp  = fSpEVal;
+  double * DfCarEval = fCar + shSizeCar;
+  double * DfSpEval = fSp  + shSizeSp;
+  double * dxCar = DfCarEval;
+  double * dyCar = dxCar + shSizeCar;
+  double * dzCar = dyCar + shSizeCar;
+  double * dxSp = DfSpEval;
+  double * dySp = dxSp + shSizeSp;
+  double * dzSp = dySp + shSizeSp;
+
+  this->makeCar2Sph(L); 
+
+
+//  return fSpEVal;
+  return fCarEVal;
 }
 
 
