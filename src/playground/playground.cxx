@@ -23,7 +23,7 @@ struct MyStruct {
 using namespace ChronusQ;
 
 enum MOLECULE_PRESETS {
-  WATER,Methanol,H,HE,SO,OxMolecule,Li
+  WATER,Methanol,H,HE,SO,OxMolecule,Li,MnAcAc
 };
 
 template<MOLECULE_PRESETS T>
@@ -120,9 +120,51 @@ void loadPresets<Li>(Molecule &mol){
   mol.setCart(0,0.000000000 ,0.00000000000, 0.0);
 };
 
+template<>
+void loadPresets<MnAcAc>(Molecule &molecule){
+
+    molecule.setCharge(0);
+    molecule.setNTotalE(87);
+    molecule.setMultip(2);
+    molecule.setNAtoms(15);
+    molecule.alloc();
+
+    molecule.setIndex(0,HashAtom("C",0));
+    molecule.setIndex(1,HashAtom("O",0));
+    molecule.setIndex(2,HashAtom("H",0));
+    molecule.setIndex(3,HashAtom("C",0));
+    molecule.setIndex(4,HashAtom("O",0));
+    molecule.setIndex(5,HashAtom("H",0));
+    molecule.setIndex(6,HashAtom("H",0));
+    molecule.setIndex(7,HashAtom("C",0));
+    molecule.setIndex(8,HashAtom("O",0));
+    molecule.setIndex(9,HashAtom("H",0));
+    molecule.setIndex(10,HashAtom("C",0));
+    molecule.setIndex(11,HashAtom("O",0));
+    molecule.setIndex(12,HashAtom("H",0));
+    molecule.setIndex(13,HashAtom("H",0));
+    molecule.setIndex(14,HashAtom("Mn",0));
+
+    molecule.setCart(0,  0.000000,  1.230231, 1.676654);
+    molecule.setCart(1,  0.000000,  0.836540, 0.491685);
+    molecule.setCart(2,  0.000000,  2.268652, 1.888047);
+    molecule.setCart(3, -0.000000, -1.230231, 1.676654);
+    molecule.setCart(4, -0.000000, -0.836540, 0.491685);
+    molecule.setCart(5, -0.000000, -2.268652, 1.888047);
+    molecule.setCart(6,  0.000000,  0.000000, 2.514988);
+    molecule.setCart(7,  1.230231, -0.000000,-1.676654);
+    molecule.setCart(8,  0.836540, -0.000000,-0.491685);
+    molecule.setCart(9,  2.268652, -0.000000,-1.888047);
+    molecule.setCart(10,-1.230231,  0.000000,-1.676654);
+    molecule.setCart(11,-0.836540,  0.000000,-0.491685);
+    molecule.setCart(12,-2.268652,  0.000000,-1.888047);
+    molecule.setCart(13, 0.000000,  0.000000,-2.514988);
+    molecule.setCart(14, 0.000000,  0.000000, 0.000000);
+}
 
 int main(int argc, char **argv){
 
+/*
   CQMemManager memManager;
   Molecule moleculeLi;
   Molecule moleculeOxy;
@@ -154,73 +196,88 @@ int main(int argc, char **argv){
 
   memManager.setTotalMem(256e6);
   initCQ(argc,argv);
-  CQSetNumThreads(1);
- 
+  CQSetNumThreads(4);
+  
 //////////////////////////////////////////////////////
-  loadPresets<OxMolecule>(moleculeOxy);
-  loadPresets<Li>(moleculeLi);
-  loadPresets<WATER>(moleculeWat);
-// Molecule
-  moleculeWat.convBohr();
-  moleculeWat.computeNucRep();
-  moleculeWat.computeRij();
-  moleculeWat.computeI();
-  cout << "Mol Wat " <<endl;
-  moleculeLi.convBohr();
-  moleculeLi.computeNucRep();
-  moleculeLi.computeRij();
-  moleculeLi.computeI();
-  cout << "Mol Li " <<endl;
+//loadPresets<H>(molecule);
+//loadPresets<OxMolecule>(molecule);
+  loadPresets<WATER>(molecule);
+//loadPresets<Methanol>(molecule);
+//loadPresets<HE>(molecule);
+//loadPresets<SO>(molecule);
+//loadPresets<Li>(molecule);
+//loadPresets<MnAcAc>(molecule);
+  molecule.convBohr();
+  molecule.computeNucRep();
+  molecule.computeRij();
+  molecule.computeI();
 
-  moleculeOxy.convBohr();
-  moleculeOxy.computeNucRep();
-  moleculeOxy.computeRij();
-  moleculeOxy.computeI();
+  singleSlater.setRef("RSLATER");
+//singleSlater.setSCFEneTol(1e-12);
+  singleSlater.setSCFMaxIter(10000);
+  singleSlater.doDIIS = true;
+//singleSlater.dampParam = 0.2;
 
-  cout << "Mol Oxy " <<endl;
+  singleSlater.setGuess(CORE);
+
   fileio.iniH5Files();
 
-//  basisWat.findBasisFile("cc-pvtz");
-  basisWat.findBasisFile("sto-3g");
-  basisWat.communicate(fileio);
-//  basisWat.forceCart();
-  basisWat.parseGlobal();
-  basisWat.constructLocal(&moleculeWat);
-  basisWat.makeMaps(&moleculeWat);
-  basisWat.renormShells();
-  cout << "Bas Wat " <<endl;
-  aointsWat.communicate(moleculeWat,basisWat,fileio,memManager);
-  aointsWat.initMeta();
-  aointsWat.alloc();
-  cout << "AoInt Wat " <<endl;
 
-  basisLi.findBasisFile("sto-3g");
-  basisLi.communicate(fileio);
-//  basisLi.forceCart();
-  basisLi.parseGlobal();
-  basisLi.constructLocal(&moleculeLi);
-  basisLi.makeMaps(&moleculeLi);
-  basisLi.renormShells();
-  cout << "Bas Li " <<endl;
-  aointsLi.communicate(moleculeLi,basisLi,fileio,memManager);
-  aointsLi.initMeta();
-  aointsLi.alloc();
-  cout << "AoInt Li " <<endl;
+//basis.forceCart();
+//basis.findBasisFile("sto-3g");
+//basis.findBasisFile("3-21g");
+//basis.findBasisFile("6-31G");
+//basis.findBasisFile("cc-pVTZ");
+  basis.findBasisFile("cc-pVDZ");
+  basis.communicate(fileio);
+  basis.parseGlobal();
+  basis.constructLocal(&molecule);
+  basis.makeMaps(&molecule);
+//basis.renormShells();
 
-//  basisOxy.findBasisFile("cc-pvtz");
-  basisOxy.findBasisFile("sto-3g");
-  basisOxy.communicate(fileio);
-//  basisOxy.forceCart();
-  basisOxy.parseGlobal();
-  basisOxy.constructLocal(&moleculeOxy);
-  basisOxy.makeMaps(&moleculeOxy);
-  basisOxy.renormShells();
-  cout << "Bas Oxy " <<endl;
-  aointsOxy.communicate(moleculeOxy,basisOxy,fileio,memManager);
-  aointsOxy.initMeta();
-  aointsOxy.alloc();
-  cout << "AoInt Oxy " <<endl;
 
+  aoints.communicate(molecule,basis,fileio,memManager);
+  singleSlater.communicate(molecule,basis,aoints,fileio,memManager);
+//moints.communicate(molecule,basis,fileio,aoints,singleSlater);
+
+  aoints.initMeta();
+  singleSlater.initMeta();
+
+  aoints.alloc();
+  singleSlater.alloc();
+
+  singleSlater.formGuess();
+  singleSlater.SCF3();
+  singleSlater.computeProperties();
+  singleSlater.printProperties();
+
+*/
+
+/*
+  rt.communicate(singleSlater);
+  rt.alloc();
+//rt.setMaxSteps(827000); // roughly 1 ps of dynamics
+  rt.setMaxSteps(10); 
+  rt.setTOff(0.0000001);
+  rt.setEDFieldAmp({0.0005,0.0,0.0});
+  rt.setIEnvlp(Step);
+  rt.doPropagation();
+*/
+/*
+  cout << endl;
+  MOIntegrals<double> moints;
+  moints.communicate(singleSlater,memManager);
+  moints.initMeta();
+//moints.testMOInts();
+  FOPPA<double> resp(DIAGONALIZATION,SPIN_SEPARATED,false,false);
+  resp.communicate(singleSlater,memManager);
+//resp.doFull();
+  resp.setNSek(3);
+  resp.setNGuess(10);
+  resp.initMeta();
+  resp.alloc();
+  resp.runResponse();
+*/
   finalizeCQ();
   return 0;
 };

@@ -30,6 +30,22 @@ struct SCFSettings {
 //};
 };
 
+struct RTSettings {
+  std::array<double,3> fieldAmp;
+};
+
+struct CQJob {
+  CQMemManager *memManager;
+  std::string  jobTyp;
+  std::string  basisSet;
+  std::string  ref;
+  int          numThreads;
+  GUESS        guess;
+
+  SCFSettings scfSett;
+  RTSettings  rtSett;
+};
+
 template <typename T> void runSCF(SingleSlater<T> &ss) {
   ss.formGuess();
   ss.SCF3();
@@ -212,15 +228,17 @@ int main(int argc, char **argv){
   for( auto jbTyp : jobs ){
     std::string curJbTyp = "/" + jbTyp;
     groups.emplace_back(RefFile.createGroup(curJbTyp));
+  for( auto fieldtyp : fieldtps ) {
+    std::string curField = curJbTyp + "/" + fieldtyp;
+    groups.emplace_back(RefFile.createGroup(curField));
   for( auto ref : refs ) {
-    std::string curRef = curJbTyp + "/" + ref;
+    std::string curRef = curField + "/" + ref;
     groups.emplace_back(RefFile.createGroup(curRef));
   for( auto basis : bases ) {
     std::string curBasis = curRef + "/" + basis;
     groups.emplace_back(RefFile.createGroup(curBasis));
-  for( auto fieldtyp : fieldtps ) {
-    std::string curField = curBasis + "/" + fieldtyp;
-    groups.emplace_back(RefFile.createGroup(curField));
+
+    std::string lastStr = curBasis;
 
     SCFSettings scfSett;
     if(!fieldtyp.compare("NOFIELD")) scfSett = defaultSCF;
@@ -229,10 +247,10 @@ int main(int argc, char **argv){
     else if(!fieldtyp.compare("WEAKZFIELD")) scfSett = weakZFieldSCF;
 
     /** Water Test **/
-    std::string fName = curField + "/" + moleculeName<WATER>();
+    std::string fName = lastStr + "/" + moleculeName<WATER>();
     groups.emplace_back(RefFile.createGroup(fName));
     
-    cout << "Running Job " << fName << endl;
+    cout << "Running Job " << fName;
     runCQJob<double,WATER>(groups.back(),fName,memManager,jbTyp,basis,ref,
       scfSett,1, CORE);
 
@@ -241,16 +259,17 @@ int main(int argc, char **argv){
     H5Lcreate_soft(fName.c_str(),RefFile.getId(),linkName.str().c_str(),
       H5P_DEFAULT,H5P_DEFAULT);
     testNum++;
+    cout << " -> " << linkName.str() << endl;
 
     // Tests that only make sense using unrestricted references
     if(std::find(rRefs.begin(),rRefs.end(),ref) == rRefs.end()){
       // O2 Doesnt like to converge in the presence of a field
       if(!fieldtyp.compare("NOFIELD")) {
         /** O2 Triplet Test **/
-        fName = curField + "/" + moleculeName<O2>();
+        fName = lastStr + "/" + moleculeName<O2>();
         groups.emplace_back(RefFile.createGroup(fName));
        
-        cout << "Running Job " << fName << endl;
+        cout << "Running Job " << fName;
         runCQJob<double,O2>(groups.back(),fName,memManager,jbTyp,basis,ref,
           scfSett,1,CORE);
         
@@ -259,13 +278,14 @@ int main(int argc, char **argv){
         H5Lcreate_soft(fName.c_str(),RefFile.getId(),linkName.str().c_str(),
           H5P_DEFAULT,H5P_DEFAULT);
         testNum++;
+        cout << " -> " << linkName.str() << endl;
       }
 
       /** Li Test **/
-      fName = curField + "/" + moleculeName<Li>();
+      fName = lastStr + "/" + moleculeName<Li>();
       groups.emplace_back(RefFile.createGroup(fName));
 
-      cout << "Running Job " << fName << endl;
+      cout << "Running Job " << fName;
       runCQJob<double,Li>(groups.back(),fName,memManager,jbTyp,basis,ref,
         scfSett,1,CORE);
       
@@ -274,6 +294,7 @@ int main(int argc, char **argv){
       H5Lcreate_soft(fName.c_str(),RefFile.getId(),linkName.str().c_str(),
         H5P_DEFAULT,H5P_DEFAULT);
       testNum++;
+      cout << " -> " << linkName.str() << endl;
     }
   }
   }
