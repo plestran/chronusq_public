@@ -346,6 +346,8 @@ void SingleSlater<T>::formVXC_new(){
        cout << "iShell " << iShell << " closeS[] " << closeShells[iShell] << endl; 
     }
   }
+
+  RealMatrix TMPS(this->basisset_->nBasis(),this->basisset_->nBasis());
   auto valVxc = [&](std::size_t iAtm, ChronusQ::IntegrationPoint &pt, 
   KernelIntegrand<T> &result) -> void {
 
@@ -622,6 +624,7 @@ void SingleSlater<T>::formVXC_new(){
       T5 += Newend - Newstart;
     }
 
+    TMPS += 4 * math.pi * pt.weight * SCRATCH1 * SCRATCH1.adjoint();
   };
 
 //  ChronusQ::AtomicGrid AGrid(100,302,ChronusQ::GRID_TYPE::EULERMAC,
@@ -694,6 +697,9 @@ void SingleSlater<T>::formVXC_new(){
   (*this->vXCScalar_) = this->vXCScalar_->template selfadjointView<Lower>();
   this->energyExc = 4*math.pi*res.Energy;
 
+  prettyPrint(cout,TMPS,"SN");
+  prettyPrint(cout,*this->aointegrals_->overlap_,"S");
+  prettyPrint(cout,*this->aointegrals_->overlap_ - TMPS,"DIFF");
   if(doTimings) {
     cout << "T1 = " << T1.count() << endl;
     cout << "T2 = " << T2.count() << endl;

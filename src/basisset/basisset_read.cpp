@@ -768,8 +768,8 @@ double * BasisSet::basisDEval(int iop, libint2::Shell &liShell, cartGP *pt){
     }
   }
 
-  return CarToSpDEval(L,fEVal);
-//  return fEVal;
+  return CarToSpDEval(iop,L,fEVal);
+//return fEVal;
 }
 
 std::pair<double,double> BasisSet::cart2sphCoeff(unsigned l,unsigned m,
@@ -838,16 +838,18 @@ std::pair<double,double> BasisSet::cart2sphCoeff(unsigned l,unsigned m,
 
   if( j != 0 or m != 0) { Rp *= tmp2; Rm *= tmp4; };
 
-  unsigned L = x + y + z;
-  double fact = double_factorial<double>(L);
-  fact /= double_factorial<double>(x);
-  fact /= double_factorial<double>(y);
-  fact /= double_factorial<double>(z);
-
-  fact = std::sqrt(fact);
-
-  Rp *= fact; 
-  Rm *= fact;
+  if( m != 0) {
+    unsigned L = x + y + z;
+    double fact = double_factorial<double>(2*L - 1);
+    if(x > 0) fact /= double_factorial<double>(2*x - 1);
+    if(y > 0) fact /= double_factorial<double>(2*y - 1);
+    if(z > 0) fact /= double_factorial<double>(2*z - 1);
+ 
+    fact = std::sqrt(fact);
+ 
+    Rp *= fact; 
+    Rm *= fact;
+  }
 
   if( m == 0 ) return std::pair<double,double>(std::real(Rp),0.0);
   else
@@ -901,17 +903,17 @@ void BasisSet::makeCar2Sph(int L){
         }
       }
     }
-//  prettyPrintSmart(cout,this->Car2Sph_.back(),"L = " + std::to_string(l));
+    prettyPrintSmart(cout,this->Car2Sph_.back(),"L = " + std::to_string(l));
 //  prettyPrintSmart(cout,this->Car2Sph_.back().cwiseProduct(this->Car2Sph_.back()),"L = " + std::to_string(l));
   }
 };
 
-double * BasisSet::CarToSpDEval(int L, double *fCarEVal){
+double * BasisSet::CarToSpDEval(int iop, int L, double *fCarEVal){
 
   // No trasformation needed
-  if (L < 2){return fCarEVal;}
+  if (L < 2 or this->forceCart_){return fCarEVal;}
   int shSizeCar = ((L+1)*(L+2))/2; 
-  int shSizeSp  = (2*L+1)/2; 
+  int shSizeSp  = (2*L+1); 
   double * fSpEVal  = &this->basisEvalScr2_[0];
   double * fCar = fCarEVal;
   double * fSp  = fSpEVal;
@@ -924,10 +926,33 @@ double * BasisSet::CarToSpDEval(int L, double *fCarEVal){
   double * dySp = dxSp + shSizeSp;
   double * dzSp = dySp + shSizeSp;
 
+  // Function Transformation
+  RealMap fSpMap(fSp,shSizeSp,1);
+  RealMap fCarMap(fCar,shSizeCar,1);
 
+//cout << fSpMap.rows() << " " << fSpMap.cols() << endl;
+//cout << fCarMap.rows() << " " << fCarMap.cols() << endl;
+//cout << Car2Sph_[L].rows() << " " << Car2Sph_[L].cols() << endl;
+  fSpMap.noalias() = Car2Sph_[L] * fCarMap;
+  if(iop > 0) {
+    // DX Transformation
+    new (&fSpMap)  RealMap(dxSp, shSizeSp,1);
+    new (&fCarMap) RealMap(dxCar,shSizeCar,1);
+    fSpMap.noalias() = Car2Sph_[L] * fCarMap;
 
-//  return fSpEVal;
-  return fCarEVal;
+    // DY Transformation
+    new (&fSpMap)  RealMap(dySp, shSizeSp,1);
+    new (&fCarMap) RealMap(dyCar,shSizeCar,1);
+    fSpMap.noalias() = Car2Sph_[L] * fCarMap;
+
+    // DZ Transformation
+    new (&fSpMap)  RealMap(dzSp, shSizeSp,1);
+    new (&fCarMap) RealMap(dzCar,shSizeCar,1);
+    fSpMap.noalias() = Car2Sph_[L] * fCarMap;
+  }
+
+  return fSpEVal;
+//return fCarEVal;
 }
 
 
