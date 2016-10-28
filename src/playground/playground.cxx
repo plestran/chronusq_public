@@ -171,6 +171,7 @@ int main(int argc, char **argv){
   SingleSlater<dcomplex> singleSlater;
   RealTime<dcomplex> rt;
   FileIO fileio("test.inp","test.out");
+  return 0;
 
   memManager.setTotalMem(256e6);
   initCQ(argc,argv);

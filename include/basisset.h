@@ -185,7 +185,7 @@ class BasisSet{
   double      * expPairSh_ ; ///< SS Exp for each Shel Pair
   std::vector<double> basisEvalScr_;
   std::vector<double> basisEvalScr2_;
-  std::unique_ptr<RealMatrix>    Car2Sph_;///< Matrix transformation Cart -> Sph
+  std::vector<RealMatrix>    Car2Sph_;///< Matrix transformation Cart -> Sph
 
   std::vector<int>               nLShell_  ; ///< Maps L value to # of shells of that L
   std::vector<int>               mapSh2Bf_ ; ///< Maps shell number to first basis funtion
@@ -269,6 +269,9 @@ public:
     this->expPairSh_        = NULL   ; 
     this->printLevel_      = 1      ;
     this->makeBasisMap();
+
+
+    this->makeCar2Sph(LIBINT2_MAX_AM);
   };
 
   /**
@@ -380,6 +383,8 @@ public:
 
   void constructExtrn(Molecule *, BasisSet *); ///< Generate new basis from refernce shells
   void genUCvomLocal(BasisSet *);
+
+  std::pair<double,double> cart2sphCoeff(unsigned,unsigned,unsigned,unsigned,unsigned);
 
   inline void makeMaps(Molecule* mol){
     this->makeMapSh2Bf();
