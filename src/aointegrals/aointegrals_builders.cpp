@@ -366,7 +366,6 @@ void AOIntegrals::computeAOOneE(){
 //if(this->maxMultipole_ == 4) this->computeAORcrossDel();
   auto OEnd = std::chrono::high_resolution_clock::now();
 
-  prettyPrint(cout,*this->overlap_,"S In AOInts");
 
 
   // Compute and time kinetic integrals

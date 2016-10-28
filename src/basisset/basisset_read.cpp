@@ -903,7 +903,7 @@ void BasisSet::makeCar2Sph(int L){
         }
       }
     }
-    prettyPrintSmart(cout,this->Car2Sph_.back(),"L = " + std::to_string(l));
+//  prettyPrintSmart(cout,this->Car2Sph_.back(),"L = " + std::to_string(l));
 //  prettyPrintSmart(cout,this->Car2Sph_.back().cwiseProduct(this->Car2Sph_.back()),"L = " + std::to_string(l));
   }
 };
