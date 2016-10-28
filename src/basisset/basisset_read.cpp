@@ -677,7 +677,13 @@ double * BasisSet::basisDEval(int iop, libint2::Shell &liShell, cartGP *pt){
 // IOP Derivative
 
   if (iop >1) CErr("Derivative order NYI in basisDEval");
-  auto shSize = liShell.size(); 
+/* OLD
+  double x = bg::get<0>(*pt) - liShell.O[0];
+  double y = bg::get<1>(*pt) - liShell.O[1];
+  double z = bg::get<2>(*pt) - liShell.O[2];
+*/
+  auto L = liShell.contr[0].l;
+  auto shSize = ((L+1)*(L+2))/2; 
   auto contDepth = liShell.alpha.size(); 
   double * fEVal = &this->basisEvalScr_[0];
   double * f = fEVal;
@@ -686,84 +692,267 @@ double * BasisSet::basisDEval(int iop, libint2::Shell &liShell, cartGP *pt){
   double * dx = DfEval;
   double * dy = dx + shSize;
   double * dz = dy + shSize;
-
-  double x = bg::get<0>(*pt) - liShell.O[0];
-  double y = bg::get<1>(*pt) - liShell.O[1];
-  double z = bg::get<2>(*pt) - liShell.O[2];
-  double rSq = x*x + y*y + z*z;
+  std::array<double,3> r ({
+    bg::get<0>(*pt) - liShell.O[0],
+    bg::get<1>(*pt) - liShell.O[1],
+    bg::get<2>(*pt) - liShell.O[2] 
+  });
+  double rSq = r[0]*r[0] + r[1]*r[1] + r[2]*r[2]; 
   double alpha = 0.0;
   double expFactor = 0.0;
+  double expArg = 0;
+  double tmpcoef,tmpalpha;
+  int lx,ly,lz, ixyz;
+  double tmpxyz;
+  double tmpdx;
+  double tmpdy;
+  double tmpdz;
 
+// Generating the expArgument, expFactotr and the
+// alpha (for derivatives later on) and store them
+// in temp variables
   for(auto k = 0; k < contDepth; k++){
-    expFactor += 
-      liShell.contr[0].coeff[k] *
-      std::exp(-liShell.alpha[k]*rSq);
-      if (iop == 1) 
-        alpha += 
-          2.0*liShell.alpha[k]*liShell.contr[0].coeff[k] *
-          std::exp(-liShell.alpha[k]*rSq);
+    tmpcoef = liShell.contr[0].coeff[k];
+    tmpalpha = liShell.alpha[k];
+    expArg = std::exp(-tmpalpha*rSq);
+    expFactor += tmpcoef * expArg;
+    if (iop == 1){ 
+//  quantities for derivatives
+      tmpcoef *= tmpalpha;
+      alpha += tmpcoef * expArg;
+    }
   }
- 
-  if(liShell.contr[0].l == 0){
-    f[0] = expFactor;
-   if (iop == 1) {
-      dx[0] =  alpha*x;
-      dy[0] =  alpha*y;
-      dz[0] =  alpha*z;
+  
+  if(iop ==1) { alpha *= 2;}
+
+  for(auto i = 0u, I = 0u; i <= L; i++) {
+    lx = L - i;
+    for( auto j = 0u; j <= i; j++, I++) {
+      ly = i - j;
+      lz = L - lx - ly;
+      tmpxyz= 1.0;
+      tmpdx = 0.0;
+      tmpdy = 0.0;
+      tmpdz = 0.0;
+      for(ixyz = 0; ixyz < lx-1; ixyz++) tmpxyz *= r[0];
+      for(ixyz = 0; ixyz < ly-1; ixyz++) tmpxyz *= r[1];
+      for(ixyz = 0; ixyz < lz-1; ixyz++) tmpxyz *= r[2];
+      f[I]  =  tmpxyz;
+      if (iop == 1) {
+//    Derivatives
+        if(lx> 0) {tmpdx = -expFactor * lx;}
+        if(ly> 0) {tmpdy = -expFactor * ly;}
+        if(lz> 0) {tmpdz = -expFactor * lz;}
+         
+        dx[I] = tmpxyz*tmpdx;
+        dy[I] = tmpxyz*tmpdy;
+        dz[I] = tmpxyz*tmpdz;
+
+//      finishing up        
+        if(lx> 0) {f[I]  *= r[0]; dy[I] *=r[0];dz[I] *=r[0];}
+        if(ly> 0) {f[I]  *= r[1]; dx[I] *=r[1];dz[I] *=r[1];}
+        if(lz> 0) {f[I]  *= r[2]; dx[I] *=r[2];dy[I] *=r[2];}
+
+        dx[I] += f[I] * r[0] * alpha;
+        dy[I] += f[I] * r[1] * alpha;
+        dz[I] += f[I] * r[2] * alpha;
+        f[I]  *= expFactor;
+
+      } else{
+//    Only basis (not GGA)
+        if(lx> 0) {f[I]  *= r[0];}
+        if(ly> 0) {f[I]  *= r[1];}
+        if(lz> 0) {f[I]  *= r[2];}
+        f[I]  *= expFactor;
       }
-  }else if(liShell.contr[0].l == 1){
-    f[0] = expFactor*x;
-    f[1] = expFactor*y;
-    f[2] = expFactor*z;
-    if (iop == 1) {
-//    dpx/dxi
-      dx[0] = alpha*x*x-expFactor;
-      dy[0] = alpha*x*y;
-      dz[0] = alpha*x*z;
-//    dpy/dxi
-      dx[1] = alpha*y*x;
-      dy[1] = alpha*y*y - expFactor;
-      dz[1] = alpha*y*z;
-//    dpz/dxi
-      dx[2] = alpha*z*x;
-      dy[2] = alpha*z*y;
-      dz[2] = alpha*z*z - expFactor;
-    }
-  } else if(liShell.contr[0].l == 2){
-    f[0] = expFactor*x*x;
-    f[1] = expFactor*y*x;
-    f[2] = expFactor*z*x;
-    f[3] = expFactor*y*y;
-    f[4] = expFactor*y*z;
-    f[5] = expFactor*z*z;
-    if (iop == 1) {
-//    dDx^2/dxi
-      dx[0] = alpha*x*x*x-2.0*x*expFactor;
-      dy[0] = alpha*x*x*y;
-      dz[0] = alpha*x*x*z;
-//    dDyx/dxi
-      dx[1] = alpha*x*x*y-y*expFactor;
-      dy[1] = alpha*x*y*y-x*expFactor;
-      dz[1] = alpha*x*y*z;
-//    dDzx/dxi
-      dx[2] = alpha*x*x*z-z*expFactor;
-      dy[2] = alpha*x*y*z;
-      dz[2] = alpha*x*z*z-x*expFactor;
-//    dDy^2/dxi
-      dx[3] = alpha*y*y*x;
-      dy[3] = alpha*y*y*y-2.0*y*expFactor;
-      dz[3] = alpha*y*y*z;
-//    dDyz/dxi
-      dx[4] = alpha*x*y*z;
-      dy[4] = alpha*y*y*z-z*expFactor;
-      dz[4] = alpha*y*z*z-y*expFactor;
-//    dDz^2/dxi
-      dx[5] = alpha*z*z*x;
-      dy[5] = alpha*z*z*y;
-      dz[5] = alpha*z*z*z-2.0*z*expFactor;
     }
   }
-  return fEVal;
+
+  return CarToSpDEval(iop,L,fEVal);
+//return fEVal;
+}
+
+std::pair<double,double> BasisSet::cart2sphCoeff(unsigned l,unsigned m,
+  unsigned x,unsigned y,unsigned z) {
+
+  using boost::math::factorial;
+  using boost::math::double_factorial;
+
+  auto binomial = [](unsigned n, unsigned k) -> double {
+    if( n ==0 ) return 1.; else
+    return factorial<double>(n) / factorial<double>(k) / 
+      factorial<double>(n-k);
+  };
+
+  dcomplex tmp;
+
+  tmp = factorial<double>(2*x) * factorial<double>(2*y) * factorial<double>(2*z) * factorial<double>(l) *
+        factorial<double>(l - m);
+  tmp /= (factorial<double>(2*l) * factorial<double>(x) * factorial<double>(y) * factorial<double>(z) *
+        factorial<double>(l + m));
+
+  tmp = std::sqrt(tmp) / (l*l * factorial<double>(l));
+
+
+  int j = (x + y - m);
+
+  if(j % 2 != 0) {
+    return std::pair<double,double>(0,0);
+  }
+
+  j /= 2;
+
+  dcomplex tmp2(0,0);
+  for(auto i = 0; i <= (l - m) / 2; i++){
+    if( i > l or i < 0) continue;
+    if( j > i or j < 0) continue;
+
+    double tmp3 = binomial(l,i) * binomial(i,j);
+    tmp3 *= std::pow(-1,i) * factorial<double>(2*l - 2*i);
+    tmp3 /= factorial<double>(l - m - 2*i);
+    
+    tmp2 += tmp3;
+  } 
+
+  tmp *= tmp2;
+
+
+  dcomplex tmp4(0,0);
+  tmp2 = dcomplex(0,0);
+  for(auto k = 0; k <= j; k++) {
+    if( k > j or k < 0 or m < (x - 2*k) or (x - 2*k) <0)
+      continue;
+
+    dcomplex tmp3_p = binomial(j,k) * binomial(m,(x - 2*k));
+    dcomplex tmp3_m = tmp3_p;
+
+    tmp3_p *= std::pow(dcomplex(-1,0),  double( m - x + 2*k )/2);
+    tmp3_m *= std::pow(dcomplex(-1,0), -double( m - x + 2*k )/2);
+
+    tmp2 += tmp3_p;
+    tmp4 += tmp3_m;
+  }
+
+  dcomplex Rp = tmp;
+  dcomplex Rm = tmp;
+
+  if( j != 0 or m != 0) { Rp *= tmp2; Rm *= tmp4; };
+
+  if( m != 0) {
+    unsigned L = x + y + z;
+    double fact = double_factorial<double>(2*L - 1);
+    if(x > 0) fact /= double_factorial<double>(2*x - 1);
+    if(y > 0) fact /= double_factorial<double>(2*y - 1);
+    if(z > 0) fact /= double_factorial<double>(2*z - 1);
+ 
+    fact = std::sqrt(fact);
+ 
+    Rp *= fact; 
+    Rm *= fact;
+  }
+
+  if( m == 0 ) return std::pair<double,double>(std::real(Rp),0.0);
+  else
+    return std::pair<double,double>(
+      std::real(dcomplex(Rp + Rm) / std::sqrt(2)),
+      std::real(dcomplex(Rp - Rm) / std::sqrt(dcomplex(-2)))
+    );
+  
+}
+
+
+void BasisSet::makeCar2Sph(int L){
+//int LCar = (L+1)*(L+2)/2;
+//int LSp  = (2*L+1);
+
+  size_t lx,ly,lz;
+
+/*
+  std::pair<double,double> tst = cart2sphCoeff(2,0,2,0,0);
+//cout << tst.first << " " << tst.second << endl;
+//tst = cart2sphCoeff(2,0,0,2,0);
+//cout << tst.first << " " << tst.second << endl;
+//tst = cart2sphCoeff(2,0,0,0,2);
+//cout << tst.first << " " << tst.second << endl;
+  tst = cart2sphCoeff(2,2,1,1,0);
+  cout << tst.first << " " << tst.second << endl;
+  return;
+*/
+  for(auto l = 0; l <= L; l++) {
+    // Allocates space for Cart - > Sph matrix
+    // Note: L < 2 is not used, dummy matrix appended
+    if( l < 2 ) {
+      this->Car2Sph_.emplace_back(RealMatrix(1,1));
+      continue;
+    }
+    this->Car2Sph_.emplace_back(
+      RealMatrix(2*l+1,(l+1)*(l+2)/2)
+    );
+
+    for(auto i = 0u, I = 0u; i <= l; i++) {
+      lx = l - i;
+      for( auto j = 0u; j <= i; j++, I++) {
+        ly = i - j;
+        lz = l - lx - ly;
+
+        (this->Car2Sph_.back())(l,I) = cart2sphCoeff(l,0,lx,ly,lz).first;
+        for(auto m = 1; m <= l; m++) {
+          std::pair<double,double> tmp = cart2sphCoeff(l,m,lx,ly,lz);
+          (this->Car2Sph_.back())(l+m,I) = tmp.first;
+          (this->Car2Sph_.back())(l-m,I) = tmp.second;
+        }
+      }
+    }
+//  prettyPrintSmart(cout,this->Car2Sph_.back(),"L = " + std::to_string(l));
+//  prettyPrintSmart(cout,this->Car2Sph_.back().cwiseProduct(this->Car2Sph_.back()),"L = " + std::to_string(l));
+  }
+};
+
+double * BasisSet::CarToSpDEval(int iop, int L, double *fCarEVal){
+
+  // No trasformation needed
+  if (L < 2 or this->forceCart_){return fCarEVal;}
+  int shSizeCar = ((L+1)*(L+2))/2; 
+  int shSizeSp  = (2*L+1); 
+  double * fSpEVal  = &this->basisEvalScr2_[0];
+  double * fCar = fCarEVal;
+  double * fSp  = fSpEVal;
+  double * DfCarEval = fCar + shSizeCar;
+  double * DfSpEval = fSp  + shSizeSp;
+  double * dxCar = DfCarEval;
+  double * dyCar = dxCar + shSizeCar;
+  double * dzCar = dyCar + shSizeCar;
+  double * dxSp = DfSpEval;
+  double * dySp = dxSp + shSizeSp;
+  double * dzSp = dySp + shSizeSp;
+
+  // Function Transformation
+  RealMap fSpMap(fSp,shSizeSp,1);
+  RealMap fCarMap(fCar,shSizeCar,1);
+
+//cout << fSpMap.rows() << " " << fSpMap.cols() << endl;
+//cout << fCarMap.rows() << " " << fCarMap.cols() << endl;
+//cout << Car2Sph_[L].rows() << " " << Car2Sph_[L].cols() << endl;
+  fSpMap.noalias() = Car2Sph_[L] * fCarMap;
+  if(iop > 0) {
+    // DX Transformation
+    new (&fSpMap)  RealMap(dxSp, shSizeSp,1);
+    new (&fCarMap) RealMap(dxCar,shSizeCar,1);
+    fSpMap.noalias() = Car2Sph_[L] * fCarMap;
+
+    // DY Transformation
+    new (&fSpMap)  RealMap(dySp, shSizeSp,1);
+    new (&fCarMap) RealMap(dyCar,shSizeCar,1);
+    fSpMap.noalias() = Car2Sph_[L] * fCarMap;
+
+    // DZ Transformation
+    new (&fSpMap)  RealMap(dzSp, shSizeSp,1);
+    new (&fCarMap) RealMap(dzCar,shSizeCar,1);
+    fSpMap.noalias() = Car2Sph_[L] * fCarMap;
+  }
+
+  return fSpEVal;
+//return fCarEVal;
 }
 
 

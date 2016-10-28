@@ -30,6 +30,22 @@ struct SCFSettings {
 //};
 };
 
+struct RTSettings {
+  std::array<double,3> fieldAmp;
+};
+
+struct CQJob {
+  CQMemManager *memManager;
+  std::string  jobTyp;
+  std::string  basisSet;
+  std::string  ref;
+  int          numThreads;
+  GUESS        guess;
+
+  SCFSettings scfSett;
+  RTSettings  rtSett;
+};
+
 template <typename T> void runSCF(SingleSlater<T> &ss) {
   ss.formGuess();
   ss.SCF3();

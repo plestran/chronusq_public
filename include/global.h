@@ -45,6 +45,8 @@
 #include <boost/math/constants/constants.hpp>
 #include <boost/math/special_functions/gamma.hpp>
 #include <boost/math/special_functions/asinh.hpp>
+#include <boost/math/special_functions/factorials.hpp>
+#include <boost/math/special_functions/binomial.hpp>
 #include <boost/algorithm/string.hpp>
 
 

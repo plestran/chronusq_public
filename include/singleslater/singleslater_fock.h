@@ -346,6 +346,7 @@ void SingleSlater<T>::formVXC_new(){
        cout << "iShell " << iShell << " closeS[] " << closeShells[iShell] << endl; 
     }
   }
+
   auto valVxc = [&](std::size_t iAtm, ChronusQ::IntegrationPoint &pt, 
   KernelIntegrand<T> &result) -> void {
 
