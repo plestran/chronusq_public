@@ -23,7 +23,7 @@ struct MyStruct {
 using namespace ChronusQ;
 
 enum MOLECULE_PRESETS {
-  WATER,Methanol,H,HE,SO,OxMolecule,Li
+  WATER,Methanol,H,HE,SO,OxMolecule,Li,MnAcAc
 };
 
 template<MOLECULE_PRESETS T>
@@ -120,6 +120,47 @@ void loadPresets<Li>(Molecule &mol){
   mol.setCart(0,0.000000000 ,0.00000000000, 0.0);
 };
 
+template<>
+void loadPresets<MnAcAc>(Molecule &molecule){
+
+    molecule.setCharge(0);
+    molecule.setNTotalE(87);
+    molecule.setMultip(2);
+    molecule.setNAtoms(15);
+    molecule.alloc();
+
+    molecule.setIndex(0,HashAtom("C",0));
+    molecule.setIndex(1,HashAtom("O",0));
+    molecule.setIndex(2,HashAtom("H",0));
+    molecule.setIndex(3,HashAtom("C",0));
+    molecule.setIndex(4,HashAtom("O",0));
+    molecule.setIndex(5,HashAtom("H",0));
+    molecule.setIndex(6,HashAtom("H",0));
+    molecule.setIndex(7,HashAtom("C",0));
+    molecule.setIndex(8,HashAtom("O",0));
+    molecule.setIndex(9,HashAtom("H",0));
+    molecule.setIndex(10,HashAtom("C",0));
+    molecule.setIndex(11,HashAtom("O",0));
+    molecule.setIndex(12,HashAtom("H",0));
+    molecule.setIndex(13,HashAtom("H",0));
+    molecule.setIndex(14,HashAtom("Mn",0));
+
+    molecule.setCart(0,  0.000000,  1.230231, 1.676654);
+    molecule.setCart(1,  0.000000,  0.836540, 0.491685);
+    molecule.setCart(2,  0.000000,  2.268652, 1.888047);
+    molecule.setCart(3, -0.000000, -1.230231, 1.676654);
+    molecule.setCart(4, -0.000000, -0.836540, 0.491685);
+    molecule.setCart(5, -0.000000, -2.268652, 1.888047);
+    molecule.setCart(6,  0.000000,  0.000000, 2.514988);
+    molecule.setCart(7,  1.230231, -0.000000,-1.676654);
+    molecule.setCart(8,  0.836540, -0.000000,-0.491685);
+    molecule.setCart(9,  2.268652, -0.000000,-1.888047);
+    molecule.setCart(10,-1.230231,  0.000000,-1.676654);
+    molecule.setCart(11,-0.836540,  0.000000,-0.491685);
+    molecule.setCart(12,-2.268652,  0.000000,-1.888047);
+    molecule.setCart(13, 0.000000,  0.000000,-2.514988);
+    molecule.setCart(14, 0.000000,  0.000000, 0.000000);
+}
 
 int main(int argc, char **argv){
 
@@ -127,33 +168,35 @@ int main(int argc, char **argv){
   Molecule molecule;
   BasisSet basis;
   AOIntegrals aoints;
-  SingleSlater<double> singleSlater;
-  RealTime<double> rt;
+  SingleSlater<dcomplex> singleSlater;
+  RealTime<dcomplex> rt;
   FileIO fileio("test.inp","test.out");
 
   memManager.setTotalMem(256e6);
   initCQ(argc,argv);
-  CQSetNumThreads(1);
+  CQSetNumThreads(4);
   
 //////////////////////////////////////////////////////
 //loadPresets<H>(molecule);
-  loadPresets<OxMolecule>(molecule);
+//loadPresets<OxMolecule>(molecule);
 //loadPresets<WATER>(molecule);
 //loadPresets<Methanol>(molecule);
 //loadPresets<HE>(molecule);
 //loadPresets<SO>(molecule);
 //loadPresets<Li>(molecule);
+  loadPresets<MnAcAc>(molecule);
   molecule.convBohr();
   molecule.computeNucRep();
   molecule.computeRij();
   molecule.computeI();
 
-  singleSlater.setRef("RHF");
-  singleSlater.setSCFEneTol(1e-12);
+  singleSlater.setRef("UHF");
+//singleSlater.setSCFEneTol(1e-12);
   singleSlater.setSCFMaxIter(10000);
   singleSlater.doDIIS = true;
+  singleSlater.dampParam = 0.2;
 
-  singleSlater.setGuess(CORE);
+  singleSlater.setGuess(RANDOM);
 
   fileio.iniH5Files();
 
@@ -186,6 +229,7 @@ int main(int argc, char **argv){
 
 
 
+/*
   rt.communicate(singleSlater);
   rt.alloc();
 //rt.setMaxSteps(827000); // roughly 1 ps of dynamics
@@ -194,6 +238,7 @@ int main(int argc, char **argv){
   rt.setEDFieldAmp({0.0005,0.0,0.0});
   rt.setIEnvlp(Step);
   rt.doPropagation();
+*/
 /*
   cout << endl;
   MOIntegrals<double> moints;
