@@ -263,7 +263,7 @@ void FOPPropagator<T>::formFull() {
         J*this->pscf_->nOA()*this->pscf_->nVAVA();
 
       if(this->sett_.doSinglets)
-        this->fullMatrix_[AIBJ] = 2*moints.VOVOAAAA()[AIBJAAAA] - 
+        this->fullMatrix_[AIBJ] = 2.0*moints.VOVOAAAA()[AIBJAAAA] - 
                             moints.VVOOAAAA()[ABIJAAAA];
       else if(this->sett_.doTriplets)
         this->fullMatrix_[AIBJ] = - moints.VVOOAAAA()[ABIJAAAA];
@@ -457,7 +457,7 @@ void FOPPropagator<T>::postSolve() {
   if(not this->sett_.doTDA and not this->doStab_) {
     // Reorthogonalize the eigenvectors wrt the metric
     for(auto iSt = 0; iSt < this->nSek_; iSt++) {
-      double innerMet = 
+      double innerMet = std::real
         (Vec.col(iSt).head(this->nSingleDim_/2).dot(
            Vec.col(iSt).head(this->nSingleDim_/2)) -
          Vec.col(iSt).tail(this->nSingleDim_/2).dot(
@@ -469,7 +469,7 @@ void FOPPropagator<T>::postSolve() {
   } else if(this->doStab_ ){
     // Reorthogonalize the eigenvectors wrt the top half
     for(auto iSt = 0; iSt < this->nSek_; iSt++) {
-      double innerMet = 
+      double innerMet = std::real
         (Vec.col(iSt).head(this->nSingleDim_/2).dot(
            Vec.col(iSt).head(this->nSingleDim_/2)));
 

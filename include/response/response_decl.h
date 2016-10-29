@@ -67,7 +67,7 @@ public:
     this->solutionVecR_ = 
       this->memManager_->template malloc<T>(this->nSek_*this->nSingleDim_);
     this->omega_ = this->memManager_->template malloc<double>(this->nSek_);
-    this->diag_  = this->memManager_->template malloc<T>(this->nSingleDim_);
+    this->diag_  = this->memManager_->template malloc<double>(this->nSingleDim_);
   } 
 
   inline void checkMeta() {
