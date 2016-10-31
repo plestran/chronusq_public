@@ -57,19 +57,21 @@ void SingleSlater<T>::computeEnergy(){
     this->template computeProperty<double,DENSITY_TYPE::TOTAL>(
         *this->aointegrals_->coreH_);
   
-  dcomplex SOPart(0);
-  if(this->nTCS_ == 2 or !this->isClosedShell) {
-    SOPart +=  this->template computeProperty<dcomplex,DENSITY_TYPE::MZ>(
-          *this->aointegrals_->oneEmz_);
+  if(this->aointegrals_->doX2C) {
+    dcomplex SOPart(0);
+    if(this->nTCS_ == 2 or !this->isClosedShell) {
+      SOPart +=  this->template computeProperty<dcomplex,DENSITY_TYPE::MZ>(
+            *this->aointegrals_->oneEmz_);
+    }
+    if(this->nTCS_ == 2){
+      SOPart +=  this->template computeProperty<dcomplex,DENSITY_TYPE::MX>(
+            *this->aointegrals_->oneEmx_);
+      SOPart +=  this->template computeProperty<dcomplex,DENSITY_TYPE::MY>(
+            *this->aointegrals_->oneEmy_);
+    }
+    SOPart *= math.ii;
+    this->energyOneE -= std::real(SOPart);
   }
-  if(this->nTCS_ == 2){
-    SOPart +=  this->template computeProperty<dcomplex,DENSITY_TYPE::MX>(
-          *this->aointegrals_->oneEmx_);
-    SOPart +=  this->template computeProperty<dcomplex,DENSITY_TYPE::MY>(
-          *this->aointegrals_->oneEmy_);
-  }
-  SOPart *= math.ii;
-  this->energyOneE -= std::real(SOPart);
 
   this->energyTwoE = 
     0.5 * this->template computeProperty<double,DENSITY_TYPE::TOTAL>(
@@ -95,10 +97,9 @@ void SingleSlater<T>::computeEnergy(){
     // Add in the electric field component if they are non-zero
     std::array<double,3> null{{0,0,0}};
     if(this->elecField_ != null){
-      auto exptdipole = this-> template computeProperty<double,
-           DENSITY_TYPE::TOTAL>(this->aointegrals_->elecDipoleSep_);
+      this->computeMultipole();
       for(auto iXYZ = 0; iXYZ < 3; iXYZ++){
-        this->energyOneE += this->elecField_[iXYZ] * exptdipole[iXYZ];
+        this->energyOneE += this->elecField_[iXYZ] * this->elecDipole_[iXYZ];
       }
     }
  
@@ -186,7 +187,6 @@ void SingleSlater<T>::mullikenPop() {
     charge -= std::real(this->NBSqScratch_->
       block(iBfSt,iBfSt,iSize,iSize).trace());
     this->mullPop_.push_back(charge); 
-    cout << charge << endl;
   } 
 }
 

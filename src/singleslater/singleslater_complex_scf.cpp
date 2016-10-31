@@ -108,7 +108,7 @@ template<>
 void SingleSlater<dcomplex>::mixOrbitalsComplex(){
   this->fileio_->out << "** Mixing HOMO and LUMO for Complex Guess **" << endl;
 //auto nO = this->nAE_ + this->nBE_;
-  if (this->Ref_==TCS) {
+  if (this->nTCS_ == 2) {
     auto HOMO = this->moA_->col(this->nO_-1);
     auto LUMO = this->moA_->col(this->nO_);
     this->moA_->col(this->nO_-1) = std::sqrt(0.5) * (HOMO + math.ii*LUMO);

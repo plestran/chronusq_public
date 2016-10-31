@@ -94,7 +94,7 @@ class Quantum {
     this->maxMultipole_ = 3;
     this->isAllocated_ = false;
 
-    cout << "In Quantum Constructor" << endl;
+//  cout << "In Quantum Constructor" << endl;
     this->clearElecMultipole();
   };
 
@@ -125,7 +125,7 @@ class Quantum {
 
   // Link up to all of the other worker classes
   inline void communicate(CQMemManager &memManager){
-    cout << "In Quantum Communicate" << endl;
+//  cout << "In Quantum Communicate" << endl;
     this->memManager_ = &memManager;
   }
 
@@ -223,14 +223,16 @@ class Quantum {
 
   inline CQMemManager * memManager()     { return this->memManager_;     };
 
-  inline std::array<double,3> elecDipole(){ return elecDipole_; };
-  inline std::array<std::array<double,3>,3> elecQuadpole(){ 
+  inline const std::array<double,3>& elecDipole() const { return elecDipole_; };
+  inline const std::array<std::array<double,3>,3>& elecQuadpole() const { 
     return elecQuadpole_; 
   };
-  inline std::array<std::array<double,3>,3> elecTracelessQuadpole(){ 
+  inline const std::array<std::array<double,3>,3>& 
+     elecTracelessQuadpole() const { 
     return elecTracelessQuadpole_; 
   };
-  inline std::array<std::array<std::array<double,3>,3>,3> elecOctpole(){ 
+  inline const std::array<std::array<std::array<double,3>,3>,3>& 
+    elecOctpole() const{ 
     return elecOctpole_; 
   };
 

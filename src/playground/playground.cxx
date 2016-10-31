@@ -166,9 +166,9 @@ int main(int argc, char **argv){
 //////////////////////////////////////////////////////
 //loadPresets<H>(molecule);
 //loadPresets<OxMolecule>(molecule);
-//loadPresets<WATER>(molecule);
+  loadPresets<WATER>(molecule);
 //loadPresets<Methanol>(molecule);
-  loadPresets<Cu>(molecule);
+//loadPresets<Cu>(molecule);
 //loadPresets<SO>(molecule);
 //loadPresets<Li>(molecule);
 //loadPresets<CoChlor>(molecule);
@@ -177,19 +177,19 @@ int main(int argc, char **argv){
   molecule.computeRij();
   molecule.computeI();
 
-  basis.forceCart();
+  //basis.forceCart();
 
-  singleSlater.setRef(X2C);
+  singleSlater.setRef("X2C");
   singleSlater.isClosedShell = false;
-  singleSlater.setNTCS(2);
+ // singleSlater.setNTCS(2);
 
   singleSlater.setSCFEneTol(1e-10);
   singleSlater.setSCFMaxIter(10000);
   singleSlater.doDIIS = true;
   singleSlater.doDamp = true;
-  singleSlater.dampParam = 0.2;
+  singleSlater.dampParam = 0.8;
 
-  singleSlater.setGuess(CORE);
+  singleSlater.setGuess(SAD);
 //  fileio.doRestart = true;
 
   fileio.iniH5Files();
@@ -209,9 +209,10 @@ int main(int argc, char **argv){
 //singleSlater.setPrintLevel(5);
 
 //singleSlater.setxHF(0.0);
-  basis.findBasisFile("sto-3g");
+//basis.findBasisFile("sto-3g");
 //basis.findBasisFile("3-21g");
-//basis.findBasisFile("6-31G");
+  basis.findBasisFile("6-31G");
+//basis.findBasisFile("6-31++G*");
 //basis.findBasisFile("cc-pVTZ");
   basis.communicate(fileio);
   basis.parseGlobal();
@@ -226,11 +227,11 @@ int main(int argc, char **argv){
 
   aoints.initMeta();
   aoints.integralAlgorithm = AOIntegrals::INCORE;
-  aoints.doX2C = true;
-  aoints.useFiniteWidthNuclei = true;
+//  aoints.doX2C = true;
+//  aoints.useFiniteWidthNuclei = true;
   
   singleSlater.initMeta();
-  singleSlater.genMethString();
+//singleSlater.genMethString();
 
   aoints.alloc();
   singleSlater.alloc();

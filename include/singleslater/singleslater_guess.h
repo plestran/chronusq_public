@@ -163,6 +163,8 @@ void SingleSlater<T>::SADGuess() {
     basisSetAtom.makeMaps(&uniqueAtom);
     basisSetAtom.renormShells(); // Libint throws a hissy fit without this
  
+    // Set reference to UHF
+    hartreeFockAtom.setRef("UHF");
  
     // Initialize the local integral and SS classes
     aointegralsAtom.isPrimary = false;
@@ -173,20 +175,20 @@ void SingleSlater<T>::SADGuess() {
       *this->aointegrals_->memManager());
     aointegralsAtom.initMeta();
     aointegralsAtom.integralAlgorithm = AOIntegrals::INTEGRAL_ALGORITHM::DIRECT;
-    aointegralsAtom.alloc();
 
     hartreeFockAtom.communicate(uniqueAtom,basisSetAtom,aointegralsAtom,
       *this->fileio_,*this->memManager_);
   
-    hartreeFockAtom.setGuess(GUESS::CORE);
+    aointegralsAtom.alloc();
+    
+    hartreeFockAtom.setGuess(CORE);
     hartreeFockAtom.initMeta();
-    hartreeFockAtom.setField(this->elecField_);
-    hartreeFockAtom.isClosedShell = (hartreeFockAtom.multip() == 1); 
+//  hartreeFockAtom.setField(this->elecField_);
+//  hartreeFockAtom.isClosedShell = (hartreeFockAtom.multip() == 1); 
     hartreeFockAtom.doDIIS = false;
-    hartreeFockAtom.isDFT = false;
-    hartreeFockAtom.isHF = true;
-    hartreeFockAtom.setRef(UHF);
-    hartreeFockAtom.genMethString();
+//  hartreeFockAtom.isDFT = false;
+//  hartreeFockAtom.isHF = true;
+//  hartreeFockAtom.genMethString();
     hartreeFockAtom.alloc();
 
     if(this->printLevel_ < 4) hartreeFockAtom.setPrintLevel(0);

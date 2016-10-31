@@ -35,9 +35,20 @@ void AOIntegrals::formP2Transformation(){
   int nUncontracted = 0;
   for(auto i : unContractedShells) nUncontracted += i.size();
 
-  RealMatrix SUncontracted(nUncontracted,nUncontracted);
-  RealMatrix TUncontracted(nUncontracted,nUncontracted);
-  RealMatrix VUncontracted(nUncontracted,nUncontracted);
+  //RealMatrix SUncontracted(nUncontracted,nUncontracted);
+  //RealMatrix TUncontracted(nUncontracted,nUncontracted);
+  //RealMatrix VUncontracted(nUncontracted,nUncontracted);
+
+  RealMap SUncontracted(
+    this->memManager_->malloc<double>(nUncontracted*nUncontracted),
+    nUncontracted,nUncontracted);
+  RealMap TUncontracted(
+    this->memManager_->malloc<double>(nUncontracted*nUncontracted),
+    nUncontracted,nUncontracted);
+  RealMap VUncontracted(
+    this->memManager_->malloc<double>(nUncontracted*nUncontracted),
+    nUncontracted,nUncontracted);
+  
 
   libint2::Engine engineS(
       libint2::Operator::overlap,1,this->basisSet_->maxL(),0);
@@ -754,8 +765,14 @@ if(this->twoEFudge == 1){
   *this->oneEmy_ = CoreY;
   *this->oneEmz_ = CoreZ;
 
-/*
   // Free memory here
+  this->memManager_->free(SUncontracted.data(),
+    nUncontracted * nUncontracted);
+  this->memManager_->free(TUncontracted.data(),
+    nUncontracted * nUncontracted);
+  this->memManager_->free(VUncontracted.data(),
+    nUncontracted * nUncontracted);
+/*
   this->memManager_->free(SUn->data(),
     this->nBasis_ * this->nBasis_);
 */
