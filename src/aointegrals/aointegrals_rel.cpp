@@ -228,7 +228,6 @@ if(this->printLevel_ >= 3){
     tracker++;
 //  cout << tracker << endl;
     for(auto iShell = 0, b_s = 0; iShell < unContractedShells.size();
-
          b_s += unContractedShells[iShell].size(),++iShell) {
       int size= unContractedShells[iShell].size();
 
@@ -333,9 +332,13 @@ if(this->printLevel_ >= 3){
 
   for(auto i = 0; i < 10; i++) numPot[i] *= 4 * math.pi;
 
+  // Scalar = mu(x)nu(x) + mu(y)nu(y) +  mu(z)nu(z) 
   RealMatrix PVPS = numPot[1] + numPot[5] + numPot[9]; 
+  // X = mu(y)nu(z) - mu(z)nu(y)
   RealMatrix PVPX = numPot[6] - numPot[8];
+  // Y = mu(z)nu(x) - mu(x)nu(z)
   RealMatrix PVPY = numPot[7] - numPot[3];
+  // Z = mu(x)nu(y) - mu(y)nu(x)
   RealMatrix PVPZ = numPot[2] - numPot[4]; 
 
 // Apply the Uk unitary transformation ( Uk' * PVP * Uk)
