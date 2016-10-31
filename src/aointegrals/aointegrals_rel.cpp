@@ -35,20 +35,20 @@ void AOIntegrals::formP2Transformation(){
   int nUncontracted = 0;
   for(auto i : unContractedShells) nUncontracted += i.size();
 
-  //RealMatrix SUncontracted(nUncontracted,nUncontracted);
-  //RealMatrix TUncontracted(nUncontracted,nUncontracted);
-  //RealMatrix VUncontracted(nUncontracted,nUncontracted);
+  int nUnSq = nUncontracted * nUncontracted;
 
   RealMap SUncontracted(
-    this->memManager_->malloc<double>(nUncontracted*nUncontracted),
-    nUncontracted,nUncontracted);
+    this->memManager_->malloc<double>(nUnSq),nUncontracted,nUncontracted);
   RealMap TUncontracted(
-    this->memManager_->malloc<double>(nUncontracted*nUncontracted),
-    nUncontracted,nUncontracted);
+    this->memManager_->malloc<double>(nUnSq),nUncontracted,nUncontracted);
   RealMap VUncontracted(
-    this->memManager_->malloc<double>(nUncontracted*nUncontracted),
-    nUncontracted,nUncontracted);
+    this->memManager_->malloc<double>(nUnSq),nUncontracted,nUncontracted);
   
+  //General Scratch
+  RealMap nUnSqScratch(
+    this->memManager_->malloc<double>(nUnSq),nUncontracted,nUncontracted);
+  ComplexMap C4nUnSqScratch(
+    this->memManager_->malloc<dcomplex>(4*nUnSq),2*nUncontracted,2*nUncontracted);
 
   libint2::Engine engineS(
       libint2::Operator::overlap,1,this->basisSet_->maxL(),0);
@@ -132,6 +132,7 @@ void AOIntegrals::formP2Transformation(){
   SUncontracted = SUncontracted.selfadjointView<Lower>();
   TUncontracted = TUncontracted.selfadjointView<Lower>();
 
+  // FIXME Probably should move this to be in the function that makes the mapPrim2Bf. 
   // This is necessary to get the correct mapping.
   RealMatrix SnonRel = (*this->basisSet_->mapPrim2Bf()) * SUncontracted
 	* (*this->basisSet_->mapPrim2Bf()).transpose();
@@ -139,23 +140,15 @@ void AOIntegrals::formP2Transformation(){
       (*this->basisSet_->mapPrim2Bf()).block(row,0,1,nUncontracted) /=
         std::sqrt(SnonRel(row,row)); //scale by appropriate factor
     }
+  // -------------------------------------------------------------------
 
-if(this->printLevel_ >= 2){
-  SnonRel = (*this->basisSet_->mapPrim2Bf()) * SUncontracted
-    * (*this->basisSet_->mapPrim2Bf()).transpose();
-  prettyPrintSmart(this->fileio_->out,SnonRel,"S nonRel");
-}
+  if(this->printLevel_ >= 3){
+    prettyPrintSmart(this->fileio_->out,SUncontracted,"S uncontracted");
+    prettyPrintSmart(this->fileio_->out,TUncontracted,"T uncontracted");
+  }
 
-if(this->printLevel_ >= 3){
-  prettyPrintSmart(this->fileio_->out,SUncontracted,"S uncontracted");
-  prettyPrintSmart(this->fileio_->out,TUncontracted,"T uncontracted");
-}
-
-/*
-  RealMap SUn(this->memManager_->malloc<double>(nUncontracted*nUncontracted),
+  RealMap SUn(this->memManager_->malloc<double>(nUnSq),
     nUncontracted,nUncontracted);
-*/
-  RealMatrix SUn(nUncontracted,nUncontracted);
   SUn = SUncontracted.real(); // Save S for later
 
   char JOBU = 'O', JOBVT = 'N';
@@ -765,17 +758,15 @@ if(this->twoEFudge == 1){
   *this->oneEmy_ = CoreY;
   *this->oneEmz_ = CoreZ;
 
-  // Free memory here
-  this->memManager_->free(SUncontracted.data(),
-    nUncontracted * nUncontracted);
-  this->memManager_->free(TUncontracted.data(),
-    nUncontracted * nUncontracted);
-  this->memManager_->free(VUncontracted.data(),
-    nUncontracted * nUncontracted);
-/*
-  this->memManager_->free(SUn->data(),
-    this->nBasis_ * this->nBasis_);
-*/
+  // Free all memory before return
+  this->memManager_->free(SUncontracted.data(),nUnSq);
+  this->memManager_->free(TUncontracted.data(),nUnSq);
+  this->memManager_->free(VUncontracted.data(),nUnSq);
+  
+  this->memManager_->free(nUnSqScratch.data(),nUnSq);
+  this->memManager_->free(C4nUnSqScratch.data(),4*nUnSq);
+
+  this->memManager_->free(SUn.data(),nUnSq);
 
 /*
 //ADDITIONAL DEBUG HERE

@@ -204,7 +204,6 @@ int main(int argc, char **argv){
   initCQ(argc,argv);
   CQSetNumThreads(4);
   
-//////////////////////////////////////////////////////
 //loadPresets<H>(molecule);
 //loadPresets<OxMolecule>(molecule);
   loadPresets<WATER>(molecule);
@@ -218,8 +217,6 @@ int main(int argc, char **argv){
   molecule.computeNucRep();
   molecule.computeRij();
   molecule.computeI();
-
-  //basis.forceCart();
 
   singleSlater.setRef("X2C");
   singleSlater.isClosedShell = false;
@@ -235,28 +232,6 @@ int main(int argc, char **argv){
 //  fileio.doRestart = true;
 
   fileio.iniH5Files();
-
-//singleSlater.setExchKernel(SingleSlater<double>::EXCH::B88);
-  //singleSlater.setExchKernel(SingleSlater<double>::EXCH::NOEXCH);
-//  singleSlater.setCorrKernel(SingleSlater<double>::CORR::NOCORR);
-//  singleSlater.setCorrKernel(SingleSlater<double>::CORR::VWN5);
-//  singleSlater.addB88();
-//  singleSlater.addLYP();
-//  singleSlater.createB88();
-//  singleSlater.createB3LYP();
-//singleSlater.addSlater();
-//singleSlater.addVWN5();
-//singleSlater.setPrintLevel(5);
-//singleSlater.setRef("RSLATER");
-//singleSlater.setSCFEneTol(1e-12);
-  singleSlater.setSCFMaxIter(10000);
-  singleSlater.doDIIS = true;
-//singleSlater.dampParam = 0.2;
-
-  singleSlater.setGuess(CORE);
-
-  fileio.iniH5Files();
-
 
 //basis.forceCart();
 //basis.findBasisFile("sto-3g");
@@ -274,13 +249,9 @@ int main(int argc, char **argv){
 
   aoints.communicate(molecule,basis,fileio,memManager);
   singleSlater.communicate(molecule,basis,aoints,fileio,memManager);
-//moints.communicate(molecule,basis,fileio,aoints,singleSlater);
 
   aoints.initMeta();
   aoints.integralAlgorithm = AOIntegrals::INCORE;
-//  aoints.doX2C = true;
-//  aoints.useFiniteWidthNuclei = true;
-  
   singleSlater.initMeta();
 
   aoints.alloc();
