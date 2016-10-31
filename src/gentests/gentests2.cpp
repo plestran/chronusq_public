@@ -209,7 +209,7 @@ int main(int argc, char **argv){
 
 
   // Which basis sets to test
-  std::vector<std::string> bases = {"STO-3G","6-31G"};
+  std::vector<std::string> bases = {"STO-3G","6-31G","cc-pVDZ"};
 
   // Field Types
   std::vector<std::string> fieldtps = 
