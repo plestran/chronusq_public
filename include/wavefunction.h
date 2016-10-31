@@ -66,7 +66,7 @@ protected:
     this->checkWorkers();
     if(this->nBasis_ == 0 || this->nShell_ == 0)
       CErr(
-        "Fatal: SingleSlater Object Initialized with NBasis = 0 or NShell = 0",
+        "Fatal: WaveFunction Object Initialized with NBasis = 0 or NShell = 0",
         this->fileio_->out);
 
     if((this->molecule_->nTotalE() % 2 == 0 && this->multip_ % 2 == 0) ||
@@ -74,6 +74,9 @@ protected:
       CErr(std::string("Fatal: The specified multiplicity is impossible within")
            +std::string(" the number of electrons given"),this->fileio_->out);
 
+    if(this->multip_ != 1 and this->isClosedShell)
+      CErr("Closed Shell Reference and Spin-Multiplicity != 0 Incompatible",
+        this->fileio_->out);
   }
 public:
 

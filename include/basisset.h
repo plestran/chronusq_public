@@ -184,6 +184,8 @@ class BasisSet{
   double      * radCutSh_ ; ///< CutOff Radius for each Shell
   double      * expPairSh_ ; ///< SS Exp for each Shel Pair
   std::vector<double> basisEvalScr_;
+  std::vector<double> basisEvalScr2_;
+  std::vector<RealMatrix>    Car2Sph_;///< Matrix transformation Cart -> Sph
 
   std::vector<int>               nLShell_  ; ///< Maps L value to # of shells of that L
   std::vector<int>               mapSh2Bf_ ; ///< Maps shell number to first basis funtion
@@ -267,6 +269,9 @@ public:
     this->expPairSh_        = NULL   ; 
     this->printLevel_      = 1      ;
     this->makeBasisMap();
+
+
+    this->makeCar2Sph(LIBINT2_MAX_AM);
   };
 
   /**
@@ -309,6 +314,7 @@ public:
   template <typename T> double * basisEval(int,std::array<double,3>,T*);
   template <typename T> double * basisEval(libint2::Shell&,T*);
   template <typename T> double * basisDEval(int,libint2::Shell&,T*);
+  double * CarToSpDEval(int iop, int L, double *cart);
   template <typename T> double * basisProdEval(libint2::Shell,libint2::Shell,T*);
   double * basisonFlyProdEval(libint2::Shell s1, int s1size, libint2::Shell s2, int s2size,double rx, double ry, double rz);
 //std::vector<bool> MapGridBasis(cartGP& pt);  ///< Create a Mapping of basis over grid points
@@ -352,6 +358,7 @@ public:
   inline void setBasisPath( std::string str){ this->basisPath_  = str;};
   inline void setPrintLevel(int i          ){ this->printLevel_ = i  ;};
   inline void forceCart(){ this->forceCart_ = !this->forceCart_;};
+  inline bool getforceCart(){ return this->forceCart_;};
 
 
   void printInfo();   ///< Print all info
@@ -368,6 +375,7 @@ public:
   void makeMapSh2Cen(Molecule *);          ///< generate mapSh2Cen
   void makeMapCen2Bf(Molecule *);          ///< generate mapCen2Bf
   void makeMapPrim2Bf();
+  void makeCar2Sph(int L);
   void makeBasisMap();  ///< Generate map from basis enum to pasis path
   void renormShells();                     ///< Renormalize Libint2::Shell set
   std::vector<libint2::Shell> uncontractBasis(); ///< Unconctract the basis
@@ -375,6 +383,8 @@ public:
 
   void constructExtrn(Molecule *, BasisSet *); ///< Generate new basis from refernce shells
   void genUCvomLocal(BasisSet *);
+
+  std::pair<double,double> cart2sphCoeff(unsigned,unsigned,unsigned,unsigned,unsigned);
 
   inline void makeMaps(Molecule* mol){
     this->makeMapSh2Bf();

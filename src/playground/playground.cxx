@@ -23,7 +23,7 @@ struct MyStruct {
 using namespace ChronusQ;
 
 enum MOLECULE_PRESETS {
-  WATER,Methanol,H,HE,SO,OxMolecule,Li,CoChlor,Cu
+  WATER,Methanol,H,HE,SO,OxMolecule,Li,MnAcAc,CoChlor,Cu
 };
 
 template<MOLECULE_PRESETS T>
@@ -148,6 +148,47 @@ void loadPresets<Cu>(Molecule &mol){
   mol.setCart(0,0.000000000 ,0.00000000000, 0.0);
 }
 
+template<>
+void loadPresets<MnAcAc>(Molecule &molecule){
+
+    molecule.setCharge(0);
+    molecule.setNTotalE(87);
+    molecule.setMultip(2);
+    molecule.setNAtoms(15);
+    molecule.alloc();
+
+    molecule.setIndex(0,HashAtom("C",0));
+    molecule.setIndex(1,HashAtom("O",0));
+    molecule.setIndex(2,HashAtom("H",0));
+    molecule.setIndex(3,HashAtom("C",0));
+    molecule.setIndex(4,HashAtom("O",0));
+    molecule.setIndex(5,HashAtom("H",0));
+    molecule.setIndex(6,HashAtom("H",0));
+    molecule.setIndex(7,HashAtom("C",0));
+    molecule.setIndex(8,HashAtom("O",0));
+    molecule.setIndex(9,HashAtom("H",0));
+    molecule.setIndex(10,HashAtom("C",0));
+    molecule.setIndex(11,HashAtom("O",0));
+    molecule.setIndex(12,HashAtom("H",0));
+    molecule.setIndex(13,HashAtom("H",0));
+    molecule.setIndex(14,HashAtom("Mn",0));
+
+    molecule.setCart(0,  0.000000,  1.230231, 1.676654);
+    molecule.setCart(1,  0.000000,  0.836540, 0.491685);
+    molecule.setCart(2,  0.000000,  2.268652, 1.888047);
+    molecule.setCart(3, -0.000000, -1.230231, 1.676654);
+    molecule.setCart(4, -0.000000, -0.836540, 0.491685);
+    molecule.setCart(5, -0.000000, -2.268652, 1.888047);
+    molecule.setCart(6,  0.000000,  0.000000, 2.514988);
+    molecule.setCart(7,  1.230231, -0.000000,-1.676654);
+    molecule.setCart(8,  0.836540, -0.000000,-0.491685);
+    molecule.setCart(9,  2.268652, -0.000000,-1.888047);
+    molecule.setCart(10,-1.230231,  0.000000,-1.676654);
+    molecule.setCart(11,-0.836540,  0.000000,-0.491685);
+    molecule.setCart(12,-2.268652,  0.000000,-1.888047);
+    molecule.setCart(13, 0.000000,  0.000000,-2.514988);
+    molecule.setCart(14, 0.000000,  0.000000, 0.000000);
+}
 
 int main(int argc, char **argv){
 
@@ -161,7 +202,7 @@ int main(int argc, char **argv){
 
   memManager.setTotalMem(256e7);
   initCQ(argc,argv);
-  CQSetNumThreads(1);
+  CQSetNumThreads(4);
   
 //////////////////////////////////////////////////////
 //loadPresets<H>(molecule);
@@ -172,6 +213,7 @@ int main(int argc, char **argv){
 //loadPresets<SO>(molecule);
 //loadPresets<Li>(molecule);
 //loadPresets<CoChlor>(molecule);
+//loadPresets<MnAcAc>(molecule);
   molecule.convBohr();
   molecule.computeNucRep();
   molecule.computeRij();
@@ -187,15 +229,13 @@ int main(int argc, char **argv){
   singleSlater.setSCFMaxIter(10000);
   singleSlater.doDIIS = true;
   singleSlater.doDamp = true;
-  singleSlater.dampParam = 0.8;
+  singleSlater.dampParam = 0.2;
 
-  singleSlater.setGuess(SAD);
+  singleSlater.setGuess(CORE);
 //  fileio.doRestart = true;
 
   fileio.iniH5Files();
 
-  singleSlater.isDFT = false;
-  singleSlater.isHF = true;
 //singleSlater.setExchKernel(SingleSlater<double>::EXCH::B88);
   //singleSlater.setExchKernel(SingleSlater<double>::EXCH::NOEXCH);
 //  singleSlater.setCorrKernel(SingleSlater<double>::CORR::NOCORR);
@@ -207,18 +247,29 @@ int main(int argc, char **argv){
 //singleSlater.addSlater();
 //singleSlater.addVWN5();
 //singleSlater.setPrintLevel(5);
+//singleSlater.setRef("RSLATER");
+//singleSlater.setSCFEneTol(1e-12);
+  singleSlater.setSCFMaxIter(10000);
+  singleSlater.doDIIS = true;
+//singleSlater.dampParam = 0.2;
 
-//singleSlater.setxHF(0.0);
+  singleSlater.setGuess(CORE);
+
+  fileio.iniH5Files();
+
+
+//basis.forceCart();
 //basis.findBasisFile("sto-3g");
 //basis.findBasisFile("3-21g");
   basis.findBasisFile("6-31G");
 //basis.findBasisFile("6-31++G*");
+//basis.findBasisFile("6-31G");
 //basis.findBasisFile("cc-pVTZ");
   basis.communicate(fileio);
   basis.parseGlobal();
   basis.constructLocal(&molecule);
   basis.makeMaps(&molecule);
-  basis.renormShells();
+//basis.renormShells();
 
 
   aoints.communicate(molecule,basis,fileio,memManager);
@@ -231,7 +282,6 @@ int main(int argc, char **argv){
 //  aoints.useFiniteWidthNuclei = true;
   
   singleSlater.initMeta();
-//singleSlater.genMethString();
 
   aoints.alloc();
   singleSlater.alloc();
@@ -247,118 +297,13 @@ int main(int argc, char **argv){
 
 //singleSlater.mullikenPop();
 
-//cout << "PASSED? " << bool((singleSlater.totalEnergy() - (-76.3671171302)) <= 1e-8) << endl;
-///////////////////////////////////////////////////////////////////////////
-/*
-  singleSlater.onePDMOrtho()[1]->swap(*singleSlater.onePDMOrtho()[3]);
-  singleSlater.fockOrtho()[1]->swap(*singleSlater.fockOrtho()[3]);
-*/
-/*
-  singleSlater.onePDMOrtho()[1]->swap(*singleSlater.onePDMOrtho()[2]);
-  singleSlater.fockOrtho()[1]->swap(*singleSlater.fockOrtho()[2]);
-*/
-
-/*
-  // Rotate 90 deg around y (should yield x)
-  singleSlater.rotateDensities({1,0,0},math.pi/4);
-  singleSlater.computeProperties();
-  singleSlater.printProperties();
-
-
-  ComplexMatrix P(2*singleSlater.onePDMMz()->rows(),2*singleSlater.onePDMMz()->rows());
-  ComplexMatrix F(2*singleSlater.onePDMMz()->rows(),2*singleSlater.onePDMMz()->rows());
-
-  std::vector<std::reference_wrapper<ComplexMap>> scatteredFock_;
-  std::vector<std::reference_wrapper<ComplexMap>> scatteredDen_;
-
-  ComplexMap PMap(P.data(),P.rows(),P.cols());
-  ComplexMap FMap(F.data(),F.rows(),F.cols());
-
-  ComplexMatrix TMP(basis.nBasis()*singleSlater.nTCS(),basis.nBasis()*singleSlater.nTCS());
-  TMP.setZero();
-
-  Quantum<dcomplex>::spinGather(FMap,scatteredFock_);  
-  Quantum<dcomplex>::spinGather(PMap,scatteredDen_);  
-
-
-  prettyPrintSmart(cout,*singleSlater.moA(),"MO");
-  for(auto i = 0; i < 2*basis.nBasis(); i++) {
-  for(auto j = 0; j < 2*basis.nBasis(); j+=2) {
-    dcomplex a = (*singleSlater.moA())(j,i); 
-    dcomplex b = (*singleSlater.moA())(j+1,i); 
-    // Y Rotation ...
-
-    (*singleSlater.moA())(j,i) 
-       = std::cos(-math.pi / 4) * a  +  std::sin(-math.pi / 4) * b; 
-    (*singleSlater.moA())(j+1,i) 
-       = -std::sin(-math.pi / 4) * a  +  std::cos(-math.pi / 4) * b; 
-
-
-    // X Rotation ...
-    (*singleSlater.moA())(j,i) 
-       = std::cos(math.pi / 4) * a  +  math.ii * std::sin(math.pi / 4) * b; 
-    (*singleSlater.moA())(j+1,i) 
-       = math.ii * std::sin(math.pi / 4) * a  +  std::cos(math.pi / 4) * b; 
-  }
-  }
-  prettyPrintSmart(cout,*singleSlater.moA(),"MO");
-  singleSlater.formDensity();
-  singleSlater.computeProperties();
-  singleSlater.printProperties();
-
-//singleSlater.printFock();
-//singleSlater.printPT();
-
-
-  ComplexMatrix FPScalar2(FPScalar);
-  FPScalar2.setZero();
-  for(auto i = 0; i < singleSlater.fockOrtho().size(); i++) {
-    FPScalar2 += 
-      (*singleSlater.fockOrtho()[i]) * (*singleSlater.onePDMOrtho()[i]);
-  } 
-  FPScalar2 *= 0.5;
-
-  ComplexMatrix FPMz2(FPMz);
-  FPMz2  = (*singleSlater.fockOrtho()[0]) * (*singleSlater.onePDMOrtho()[1]);
-  FPMz2 += (*singleSlater.fockOrtho()[1]) * (*singleSlater.onePDMOrtho()[0]);
-  FPMz2 += math.ii * 
-    ((*singleSlater.fockOrtho()[3]) * (*singleSlater.onePDMOrtho()[2]));
-  FPMz2 -= math.ii * 
-    ((*singleSlater.fockOrtho()[2]) * (*singleSlater.onePDMOrtho()[3]));
-  FPMz2 *= 0.5;
-
-  ComplexMatrix FPMy2(FPMy);
-  FPMy2  = (*singleSlater.fockOrtho()[0]) * (*singleSlater.onePDMOrtho()[2]);
-  FPMy2 += (*singleSlater.fockOrtho()[2]) * (*singleSlater.onePDMOrtho()[0]);
-  FPMy2 += math.ii * 
-    ((*singleSlater.fockOrtho()[1]) * (*singleSlater.onePDMOrtho()[3]));
-  FPMy2 -= math.ii * 
-    ((*singleSlater.fockOrtho()[3]) * (*singleSlater.onePDMOrtho()[1]));
-  FPMy2 *= 0.5;
-
-  ComplexMatrix FPMx2(FPMx);
-  FPMx2  = (*singleSlater.fockOrtho()[0]) * (*singleSlater.onePDMOrtho()[3]);
-  FPMx2 += (*singleSlater.fockOrtho()[3]) * (*singleSlater.onePDMOrtho()[0]);
-  FPMx2 += math.ii * 
-    ((*singleSlater.fockOrtho()[2]) * (*singleSlater.onePDMOrtho()[1]));
-  FPMx2 -= math.ii * 
-    ((*singleSlater.fockOrtho()[1]) * (*singleSlater.onePDMOrtho()[2]));
-  FPMx2 *= 0.5;
-
-//prettyPrintSmart(cout,FPScalar,"Scalar1");
-//prettyPrintSmart(cout,FPScalar2,"Scalar2");
-  prettyPrintSmart(cout,FPScalar - FPScalar2,"Diff Scalar");
-  prettyPrintSmart(cout,FPMz - FPMz2,"Diff Mz");
-  prettyPrintSmart(cout,FPMy - FPMy2,"Diff My");
-  prettyPrintSmart(cout,FPMx - FPMx2,"Diff Mx");
-*/
 /*
   rt.communicate(singleSlater);
   rt.alloc();
 //rt.setMaxSteps(827000); // roughly 1 ps of dynamics
-  rt.setMaxSteps(1000); 
-//rt.setTOff(0.10);
-//rt.setEDFieldAmp({0.001,0.0,0.0});
+  rt.setMaxSteps(10); 
+  rt.setTOff(0.0000001);
+  rt.setEDFieldAmp({0.0005,0.0,0.0});
   rt.setIEnvlp(Step);
   rt.doPropagation();
 */
