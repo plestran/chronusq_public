@@ -148,8 +148,8 @@ void SingleSlater<T>::formFock(){
   if(getRank() == 0) {
     if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
 
-    bool testNew = true;
-    bool isGGA   = true;
+    bool testNew = false;
+    bool isGGA   = false;
     if (this->isDFT){
 //    Timing
       std::chrono::high_resolution_clock::time_point start;
