@@ -465,7 +465,9 @@ if(this->twoEFudge == 2){
 // -------------------------------------------------
 
   PMap = PMap.cwiseInverse(); //switch from p^-1 back to p
-  ComplexMatrix CORE_HAMILTONIAN(4*nUncontracted,4*nUncontracted);
+  
+  ComplexMap CORE_HAMILTONIAN(this->memManager_->malloc<dcomplex>(16*nUnSq),
+    4*nUncontracted,4*nUncontracted);
 
   CORE_HAMILTONIAN.block(0,0,nUncontracted,nUncontracted).real() = P2_Potential;
   CORE_HAMILTONIAN.block(
@@ -506,6 +508,9 @@ if(this->printLevel_ >= 4){
   RealMatrix HEV= es.eigenvalues();
   ComplexMatrix HEVx= es.eigenvectors();
 
+  // Now free CORE_HAMILTONIAN after diagonalization
+  this->memManager_->free(CORE_HAMILTONIAN.data(),16*nUnSq);
+
 // Print out the energies (eigenvalues) and eigenvectors
 if(this->printLevel_ >= 2){
   prettyPrintSmart(this->fileio_->out,HEV,"HEV");
@@ -515,10 +520,12 @@ if(this->printLevel_ >= 2){
 // Grab C_L (+) and C_S (+) - the large and small components
 // of the electronic (positive energy) solutions
 //
-  ComplexMatrix L = 
-    HEVx.block(0,2*nUncontracted,2*nUncontracted,2*nUncontracted);
-  ComplexMatrix S = 
-    HEVx.block(2*nUncontracted,2*nUncontracted,2*nUncontracted,2*nUncontracted);
+  ComplexMap L(this->memManager_->malloc<dcomplex>(4*nUnSq),
+    2*nUncontracted,2*nUncontracted);
+  ComplexMap S(this->memManager_->malloc<dcomplex>(4*nUnSq),
+    2*nUncontracted,2*nUncontracted);
+  L = HEVx.block(0,2*nUncontracted,2*nUncontracted,2*nUncontracted);
+  S = HEVx.block(2*nUncontracted,2*nUncontracted,2*nUncontracted,2*nUncontracted);
 
 // Do we even use this SVD in calculating L inverse?
   Eigen::JacobiSVD<ComplexMatrix> 
@@ -527,7 +534,12 @@ if(this->printLevel_ >= 2){
   VectorXd SigmaL = svd.singularValues();
   ComplexMatrix SVL = svd.matrixU();
 
-  ComplexMatrix X = S * L.inverse(); //See above!
+  ComplexMap X(this->memManager_->malloc<dcomplex>(4*nUnSq),
+    2*nUncontracted,2*nUncontracted);
+  X = S * L.inverse(); //See above!
+
+  this->memManager_->free(L.data(),4*nUnSq);
+  this->memManager_->free(S.data(),4*nUnSq);
 
 // Print out X and its squared norm
 if(this->printLevel_ >= 3){
@@ -537,8 +549,9 @@ if(this->printLevel_ >= 3){
   
 // Calculate Y = sqrt(1 + X'X)
 // Also known as the 'renormalization matrix' R
-  ComplexMatrix Y = 
-    (ComplexMatrix::Identity(2*nUncontracted,2*nUncontracted) 
+  ComplexMap Y(this->memManager_->malloc<dcomplex>(4*nUnSq),
+     2*nUncontracted,2*nUncontracted);
+  Y = (ComplexMatrix::Identity(2*nUncontracted,2*nUncontracted) 
      + X.adjoint() * X).pow(-0.5);
 
 // Print out Y and its squared norm
@@ -588,20 +601,22 @@ if(this->printLevel_ >= 2){
   ComplexMatrix HCore(2*nUncontracted,2*nUncontracted);
   HCore = P2_PotC;
 
-  ComplexMatrix TEMP(2*nUncontracted,2*nUncontracted);
 
-  TEMP = phys.SPEED_OF_LIGHT * PMapC * X;
-  HCore = HCore + TEMP;
-  TEMP = phys.SPEED_OF_LIGHT * X.adjoint() * PMapC;
-  HCore = HCore + TEMP;
-  TEMP = 2 * phys.SPEED_OF_LIGHT * phys.SPEED_OF_LIGHT * 
+  C4nUnSqScratch = phys.SPEED_OF_LIGHT * PMapC * X;
+  HCore = HCore + C4nUnSqScratch;
+  C4nUnSqScratch = phys.SPEED_OF_LIGHT * X.adjoint() * PMapC;
+  HCore = HCore + C4nUnSqScratch;
+  C4nUnSqScratch = 2 * phys.SPEED_OF_LIGHT * phys.SPEED_OF_LIGHT * 
 	ComplexMatrix::Identity(2*nUncontracted,2*nUncontracted);
-  TEMP = W - TEMP;
-  TEMP = X.adjoint() * TEMP;
-  TEMP = TEMP * X;
-  HCore = HCore + TEMP;
+  C4nUnSqScratch = W - C4nUnSqScratch;
+  C4nUnSqScratch = X.adjoint() * C4nUnSqScratch;
+  C4nUnSqScratch = C4nUnSqScratch * X;
+  HCore = HCore + C4nUnSqScratch;
   HCore = HCore * Y;
   HCore = Y * HCore;
+  
+  this->memManager_->free(X.data(),4*nUnSq);
+  this->memManager_->free(Y.data(),4*nUnSq);
 
 if(this->printLevel_ >= 3){
   prettyPrintSmart(this->fileio_->out,HCore,"Transformed HCore (in p space) ");
@@ -631,16 +646,14 @@ if(this->printLevel_ >= 2){
   prettyPrintSmart(this->fileio_->out,Hy,"Hz (p space)");
 }
 
-  RealMatrix rTEMP(nUncontracted,nUncontracted);
-
-  rTEMP = Hs * UK.adjoint() * SUn;
-  Hs = SUn * UK * rTEMP; 
-  rTEMP = Hz * UK.adjoint() * SUn;
-  Hz = SUn * UK * rTEMP; 
-  rTEMP = Hx * UK.adjoint() * SUn;
-  Hx = SUn * UK * rTEMP; 
-  rTEMP = Hy * UK.adjoint() * SUn;
-  Hy = SUn * UK * rTEMP; 
+  nUnSqScratch = Hs * UK.adjoint() * SUn;
+  Hs = SUn * UK * nUnSqScratch; 
+  nUnSqScratch = Hz * UK.adjoint() * SUn;
+  Hz = SUn * UK * nUnSqScratch; 
+  nUnSqScratch = Hx * UK.adjoint() * SUn;
+  Hx = SUn * UK * nUnSqScratch; 
+  nUnSqScratch = Hy * UK.adjoint() * SUn;
+  Hy = SUn * UK * nUnSqScratch; 
 
 if(this->printLevel_ >= 2){
   prettyPrintSmart(this->fileio_->out,Hs,"Hs (r space)");
@@ -651,32 +664,6 @@ if(this->printLevel_ >= 2){
 
      
 //  prettyPrintSmart(this->fileio_->out,Veff,"Veff (p space)");
-/* 
-  ComplexMatrix SUK(2*nUncontracted,2*nUncontracted);
-  SUK.block(0,0,nUncontracted,nUncontracted) = SUn * UK;  
-  SUK.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted) = SUn * UK;
-
-  TEMP = SUK * Veff;
-  Veff = TEMP * SUK.adjoint();  
-   
-  prettyPrintSmart(this->fileio_->out,Veff,"Veff (r space)");
-
-  TEMP = SUK * KinEn;
-  KinEn = TEMP * SUK.adjoint();
-
-  prettyPrintSmart(this->fileio_->out,KinEn,"Trel (r space)");
-*/
-
-// --------------------------------------------------------
-
-//  TEMP = SUK * HCore;
-//  HCore = TEMP * SUK.adjoint();
-
-//  cout << HCore.squaredNorm() << " HCore norm" << endl;
-
-//  prettyPrintSmart(this->fileio_->out,HCore,"HCore (r space)");
-
-
 
 
 // Recontract the basis
@@ -691,10 +678,11 @@ if(this->printLevel_ >= 2){
   prettyPrintSmart(this->fileio_->out,TCon,"Trel (p space)");
   prettyPrintSmart(this->fileio_->out,VCon,"Vrel (p space)");
  }
-  rTEMP = TCon * UK.adjoint() * SUn;
-  TCon = SUn * UK * rTEMP;
-  rTEMP = VCon * UK.adjoint() * SUn;
-  VCon = SUn * UK * rTEMP;
+  nUnSqScratch = TCon * UK.adjoint() * SUn;
+  TCon = SUn * UK * nUnSqScratch;
+  nUnSqScratch = VCon * UK.adjoint() * SUn;
+  VCon = SUn * UK * nUnSqScratch;
+
 if(this->printLevel_ >= 2){
   prettyPrintSmart(this->fileio_->out,TCon,"Trel (r space)");
   prettyPrintSmart(this->fileio_->out,VCon,"Vrel (r space)");
