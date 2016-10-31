@@ -164,34 +164,12 @@ void loadPresets<MnAcAc>(Molecule &molecule){
 
 int main(int argc, char **argv){
 
-/*
   CQMemManager memManager;
-  Molecule moleculeLi;
-  Molecule moleculeOxy;
-  Molecule moleculeWat;
-  BasisSet basisOxy;
-  BasisSet basisLi;
-  BasisSet basisWat;
-  AOIntegrals aointsOxy;
-  AOIntegrals aointsLi;
-  AOIntegrals aointsWat;
-  SingleSlater<double> singleSlater109;
-  SingleSlater<double> singleSlater112;
-  SingleSlater<double> singleSlater115;
-  SingleSlater<double> singleSlater118;
-  SingleSlater<double> singleSlater121;
-  SingleSlater<double> singleSlater124;
-  SingleSlater<double> singleSlater127;
-  SingleSlater<double> singleSlater130;
-  SingleSlater<double> singleSlater133;
-  SingleSlater<double> singleSlater137;
-  SingleSlater<double> singleSlater136;
-  SingleSlater<double> singleSlater150;
-  SingleSlater<double> singleSlater151;
-  SingleSlater<double> singleSlater160;
-  SingleSlater<double> singleSlater161;
-  SingleSlater<double> singleSlater162;
-  SingleSlater<double> singleSlater163;
+  Molecule molecule;
+  BasisSet basis;
+  AOIntegrals aoints;
+  SingleSlater<dcomplex> singleSlater;
+  RealTime<dcomplex> rt;
   FileIO fileio("test.inp","test.out");
 
   memManager.setTotalMem(256e6);
@@ -212,10 +190,11 @@ int main(int argc, char **argv){
   molecule.computeRij();
   molecule.computeI();
 
-  singleSlater.setRef("RSLATER");
+  singleSlater.setRef("GHF");
 //singleSlater.setSCFEneTol(1e-12);
   singleSlater.setSCFMaxIter(10000);
   singleSlater.doDIIS = true;
+  singleSlater.doDamp = false;
 //singleSlater.dampParam = 0.2;
 
   singleSlater.setGuess(CORE);
@@ -224,11 +203,11 @@ int main(int argc, char **argv){
 
 
 //basis.forceCart();
-//basis.findBasisFile("sto-3g");
+  basis.findBasisFile("sto-3g");
 //basis.findBasisFile("3-21g");
 //basis.findBasisFile("6-31G");
 //basis.findBasisFile("cc-pVTZ");
-  basis.findBasisFile("cc-pVDZ");
+//basis.findBasisFile("cc-pVDZ");
   basis.communicate(fileio);
   basis.parseGlobal();
   basis.constructLocal(&molecule);
@@ -236,6 +215,7 @@ int main(int argc, char **argv){
 //basis.renormShells();
 
 
+  aoints.setAlgorithm(AOIntegrals::INTEGRAL_ALGORITHM::INCORE);
   aoints.communicate(molecule,basis,fileio,memManager);
   singleSlater.communicate(molecule,basis,aoints,fileio,memManager);
 //moints.communicate(molecule,basis,fileio,aoints,singleSlater);
@@ -246,12 +226,21 @@ int main(int argc, char **argv){
   aoints.alloc();
   singleSlater.alloc();
 
+//singleSlater.setPrintLevel(4);
   singleSlater.formGuess();
+//singleSlater.printDensity();
   singleSlater.SCF3();
   singleSlater.computeProperties();
   singleSlater.printProperties();
 
+/*
+  singleSlater.rotateDensities({1.0,0.0,0.0},math.pi/2);
+  singleSlater.SCF3();
+  singleSlater.computeProperties();
+  singleSlater.printProperties();
 */
+
+//prettyPrintSmart(cout,*singleSlater.moA(),"MO");
 
 /*
   rt.communicate(singleSlater);
@@ -263,21 +252,20 @@ int main(int argc, char **argv){
   rt.setIEnvlp(Step);
   rt.doPropagation();
 */
-/*
-  cout << endl;
-  MOIntegrals<double> moints;
+  MOIntegrals<dcomplex> moints;
   moints.communicate(singleSlater,memManager);
   moints.initMeta();
 //moints.testMOInts();
-  FOPPA<double> resp(DIAGONALIZATION,SPIN_SEPARATED,false,false);
+
+  FOPPA<dcomplex> resp(DIAGONALIZATION,SPIN_SEPARATED,false,false);
   resp.communicate(singleSlater,memManager);
-//resp.doFull();
-  resp.setNSek(3);
-  resp.setNGuess(10);
+  resp.doFull();
+//resp.setNSek(3);
+//resp.setNGuess(10);
   resp.initMeta();
   resp.alloc();
   resp.runResponse();
-*/
+  
   finalizeCQ();
   return 0;
 };

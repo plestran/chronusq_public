@@ -270,7 +270,7 @@ void QuasiNewton2<T>::generateResiduals(const int NTrial){
   TMap UR      (this->URMem_      , N     , NTrial);
   TMap ResR    (this->ResRMem_    , N     , NTrial);
 
-  TVecMap E(this->EPersist_,NTrial);
+  RealVecMap E(this->EPersist_,NTrial);
 
   TMap SigmaL  (this->SigmaLMem_  , 0, 0);
   TMap XTSigmaL(this->XTSigmaLMem_, 0, 0);
@@ -374,7 +374,7 @@ void QuasiNewton2<T>::formNewGuess(std::vector<bool> &resConv, int &NTrial,
 
   TMap TVecR(this->TRMem_  , N, NTrial+NNotConv);
   TMap ResR (this->ResRMem_, N, NTrial         );
-  TVecMap E (this->EPersist_  , NTrial            );   
+  RealVecMap E (this->EPersist_  , NTrial            );   
 
   TMap TVecL   (this->TLMem_  , 0, 0);
   TMap ResL    (this->ResLMem_, 0, 0);
@@ -395,13 +395,13 @@ void QuasiNewton2<T>::formNewGuess(std::vector<bool> &resConv, int &NTrial,
     if(!resConv[k]) {
       auto RRSt = this->ResRMem_ + k*N;
       auto QRSt = this->TRMem_   + (NTrial+INDX)*N;
-      new (&RR) RealMap(RRSt, N, 1);
-      new (&QR) RealMap(QRSt, N, 1);
+      new (&RR) TMap(RRSt, N, 1);
+      new (&QR) TMap(QRSt, N, 1);
       if(this->qnObj_->needsLeft() or this->qnObj_->specialAlgorithm_ == SYMMETRIZED_TRIAL){
         auto RLSt = this->ResLMem_ + k*N;
         auto QLSt = this->TLMem_   + (NTrial+INDX)*N;
-        new (&RL) RealMap(RLSt, N, 1);
-        new (&QL) RealMap(QLSt, N, 1);
+        new (&RL) TMap(RLSt, N, 1);
+        new (&QL) TMap(QLSt, N, 1);
       }
 
       if(this->qnObj_->guessType_ == QNGuessType::RESIDUAL_DAVIDSON) 

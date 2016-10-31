@@ -67,7 +67,7 @@ public:
     this->solutionVecR_ = 
       this->memManager_->template malloc<T>(this->nSek_*this->nSingleDim_);
     this->omega_ = this->memManager_->template malloc<double>(this->nSek_);
-    this->diag_  = this->memManager_->template malloc<T>(this->nSingleDim_);
+    this->diag_  = this->memManager_->template malloc<double>(this->nSingleDim_);
   } 
 
   inline void checkMeta() {
@@ -153,13 +153,13 @@ public:
         MAT->formFull();
         MAT->setAlgorithm(FULL_SOLVE);
       } else 
-        MAT->formFull();
-      qn.run();
-      MAT->postSolve();
-      TMap VR(MAT->solutionVecR(),MAT->nSingleDim(),this->nSek_);
-      prettyPrintSmart(cout,VR,"Solution R");
-      RealMap W(MAT->omega(),this->nSek_,1);
-      prettyPrintSmart(cout,phys.eVPerHartree*W,"E");
+        MAT->formFull(); // This is for debugging...?
+    //qn.run();
+    //MAT->postSolve();
+    //TMap VR(MAT->solutionVecR(),MAT->nSingleDim(),this->nSek_);
+    //prettyPrintSmart(cout,VR,"Solution R");
+    //RealMap W(MAT->omega(),this->nSek_,1);
+    //prettyPrintSmart(cout,phys.eVPerHartree*W,"E");
     }
   };
 
