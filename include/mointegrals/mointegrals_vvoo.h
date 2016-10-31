@@ -227,6 +227,7 @@ void MOIntegrals<T>::form2CVVOO() {
   std::fill_n(VVOO_,NO*NV*NO*NV,0.);
 
 
+/*
   for(auto j = 0; j < NO; j++)
   for(auto i = 0; i < NO; i++)
   for(auto b = 0; b < NV; b++)
@@ -252,7 +253,57 @@ void MOIntegrals<T>::form2CVVOO() {
       std::conj((*wfn_->moA())(lm+1,i)) * (*wfn_->moA())(sg+1,j) 
       ) * (*wfn_->aointegrals()->aoERI_)(mu/2,nu/2,lm/2,sg/2);
   }
+*/
 
+  
+  T* tmp1 = this->memManager_->template malloc<T>(NV*NV*NB*NB);
+  std::fill_n(tmp1,NV*NV*NB*NB,0.);
+
+  for(auto sg = 0; sg < 2*NB; sg+=2)
+  for(auto lm = 0; lm < 2*NB; lm+=2)
+  for(auto b = 0; b < NV; b++)
+  for(auto a = 0; a < NV; a++ ) {
+  cout << "a = " << a << "/" << NV << " ";
+  cout << "b = " << b << "/" << NV << " ";
+  cout << "lm = " << lm/2 << "/" << NB << " ";
+  cout << "sg = " << sg/2 << "/" << NB << " ";
+  cout << endl;
+
+  for(auto nu = 0; nu < 2*NB; nu+=2)
+  for(auto mu = 0; mu < 2*NB; mu+=2){
+
+    tmp1[a + b*NV + (lm/2)*NV*NV + (sg/2)*NV*NV*NB] +=
+      (
+      std::conj((*wfn_->moA())(mu,a+NO)) * (*wfn_->moA())(nu,b+NO) +
+      std::conj((*wfn_->moA())(mu+1,a+NO)) * (*wfn_->moA())(nu+1,b+NO) 
+      ) * (*wfn_->aointegrals()->aoERI_)(mu/2,nu/2,lm/2,sg/2);
+  }
+  }
+
+  for(auto j = 0; j < NO; j++)
+  for(auto i = 0; i < NO; i++)
+  for(auto b = 0; b < NV; b++)
+  for(auto a = 0; a < NV; a++) {
+
+  cout << "a = " << a << "/" << NV << " ";
+  cout << "b = " << b << "/" << NV << " ";
+  cout << "i = " << i << "/" << NO << " ";
+  cout << "j = " << j << "/" << NO << " ";
+  cout << endl;
+
+  for(auto sg = 0; sg < 2*NB; sg+=2)
+  for(auto lm = 0; lm < 2*NB; lm+=2){
+
+    VVOO_[a + b*NV + i*NV*NV + j*NV*NO*NV] +=
+      (
+      std::conj((*wfn_->moA())(lm,i)) * (*wfn_->moA())(sg,j) +
+      std::conj((*wfn_->moA())(lm+1,i)) * (*wfn_->moA())(sg+1,j) 
+      ) *tmp1[a + b*NV + (lm/2)*NV*NV + (sg/2)*NV*NV*NB] ;
+  }
+  }
+
+
+  this->memManager_->template malloc<T>(NV*NV*NB*NB);
   this->haveMOVVOO_ = true;
 }; // form2CVVOO
 

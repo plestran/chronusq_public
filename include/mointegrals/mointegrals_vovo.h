@@ -197,6 +197,7 @@ void MOIntegrals<T>::form2CVOVO() {
   std::fill_n(VOVO_,NO*NV*NO*NV,0.);
 
 
+/*
   for(auto j = 0; j < NO; j++)
   for(auto b = 0; b < NV; b++)
   for(auto i = 0; i < NO; i++)
@@ -224,6 +225,58 @@ void MOIntegrals<T>::form2CVOVO() {
   }
 //cout << a << " " << i << " " << b << " " << j << " " << VOVO_[a + i*NV + b*NO*NV + j*NV*NO*NV] << endl;
   }
+*/
+
+  T* tmp1 = this->memManager_->template malloc<T>(NO*NV*NB*NB);
+  std::fill_n(tmp1,NO*NV*NB*NB,0.0);
+
+  for(auto sg = 0; sg < 2*NB; sg+=2)
+  for(auto lm = 0; lm < 2*NB; lm+=2)
+  for(auto i = 0; i < NO; i++)
+  for(auto a = 0; a < NV; a++) {
+  cout << "a  = " << a << "/" << NV << " ";
+  cout << "i  = " << i << "/" << NO << " ";
+  cout << "lm = " << lm/2 << "/" << NB << " ";
+  cout << "sg = " << sg/2 << "/" << NB << " ";
+  cout << endl;
+
+  for(auto nu = 0; nu < 2*NB; nu+=2)
+  for(auto mu = 0; mu < 2*NB; mu+=2){
+
+    tmp1[a + i*NV + (lm/2)*NO*NV + (sg/2)*NV*NO*NB] +=
+      (
+      std::conj((*wfn_->moA())(mu,a+NO)) * (*wfn_->moA())(nu,i) +
+      std::conj((*wfn_->moA())(mu+1,a+NO)) * (*wfn_->moA())(nu+1,i) 
+      ) * (*wfn_->aointegrals()->aoERI_)(mu/2,nu/2,lm/2,sg/2);
+  }
+//cout << a << " " << i << " " << b << " " << j << " " << VOVO_[a + i*NV + b*NO*NV + j*NV*NO*NV] << endl;
+  }
+
+
+  for(auto j = 0; j < NO; j++)
+  for(auto b = 0; b < NV; b++)
+  for(auto i = 0; i < NO; i++)
+  for(auto a = 0; a < NV; a++) {
+  cout << "a = " << a << "/" << NV << " ";
+  cout << "i = " << i << "/" << NO << " ";
+  cout << "b = " << b << "/" << NV << " ";
+  cout << "j = " << j << "/" << NO << " ";
+  cout << endl;
+
+  for(auto sg = 0; sg < 2*NB; sg+=2)
+  for(auto lm = 0; lm < 2*NB; lm+=2){
+
+    VOVO_[a + i*NV + b*NO*NV + j*NV*NO*NV] +=
+      (
+      std::conj((*wfn_->moA())(lm,b+NO)) * (*wfn_->moA())(sg,j) +
+      std::conj((*wfn_->moA())(lm+1,b+NO)) * (*wfn_->moA())(sg+1,j) 
+      ) * tmp1[a + i*NV + (lm/2)*NO*NV + (sg/2)*NV*NO*NB];
+  }
+//cout << a << " " << i << " " << b << " " << j << " " << VOVO_[a + i*NV + b*NO*NV + j*NV*NO*NV] << endl;
+  }
+
+
+  this->memManager_->free(tmp1,NO*NV*NB*NB);
 
   this->haveMOVOVO_ = true;
 }; // form2CVOVO

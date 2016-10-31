@@ -179,11 +179,11 @@ int main(int argc, char **argv){
 //////////////////////////////////////////////////////
 //loadPresets<H>(molecule);
 //loadPresets<OxMolecule>(molecule);
-//loadPresets<WATER>(molecule);
+  loadPresets<WATER>(molecule);
 //loadPresets<Methanol>(molecule);
 //loadPresets<HE>(molecule);
 //loadPresets<SO>(molecule);
-  loadPresets<Li>(molecule);
+//loadPresets<Li>(molecule);
 //loadPresets<MnAcAc>(molecule);
   molecule.convBohr();
   molecule.computeNucRep();
@@ -233,12 +233,14 @@ int main(int argc, char **argv){
   singleSlater.computeProperties();
   singleSlater.printProperties();
 
+/*
   singleSlater.rotateDensities({1.0,0.0,0.0},math.pi/2);
   singleSlater.SCF3();
   singleSlater.computeProperties();
   singleSlater.printProperties();
+*/
 
-  prettyPrintSmart(cout,*singleSlater.moA(),"MO");
+//prettyPrintSmart(cout,*singleSlater.moA(),"MO");
 
 /*
   rt.communicate(singleSlater);
@@ -253,7 +255,7 @@ int main(int argc, char **argv){
   MOIntegrals<dcomplex> moints;
   moints.communicate(singleSlater,memManager);
   moints.initMeta();
-  moints.testMOInts();
+//moints.testMOInts();
 
   FOPPA<dcomplex> resp(DIAGONALIZATION,SPIN_SEPARATED,false,false);
   resp.communicate(singleSlater,memManager);
@@ -262,7 +264,7 @@ int main(int argc, char **argv){
 //resp.setNGuess(10);
   resp.initMeta();
   resp.alloc();
-//resp.runResponse();
+  resp.runResponse();
   
   finalizeCQ();
   return 0;

@@ -153,13 +153,13 @@ public:
         MAT->formFull();
         MAT->setAlgorithm(FULL_SOLVE);
       } else 
-        MAT->formFull();
-      qn.run();
-      MAT->postSolve();
-      TMap VR(MAT->solutionVecR(),MAT->nSingleDim(),this->nSek_);
-      prettyPrintSmart(cout,VR,"Solution R");
-      RealMap W(MAT->omega(),this->nSek_,1);
-      prettyPrintSmart(cout,phys.eVPerHartree*W,"E");
+        MAT->formFull(); // This is for debugging...?
+    //qn.run();
+    //MAT->postSolve();
+    //TMap VR(MAT->solutionVecR(),MAT->nSingleDim(),this->nSek_);
+    //prettyPrintSmart(cout,VR,"Solution R");
+    //RealMap W(MAT->omega(),this->nSek_,1);
+    //prettyPrintSmart(cout,phys.eVPerHartree*W,"E");
     }
   };
 

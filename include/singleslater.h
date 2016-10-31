@@ -458,7 +458,7 @@ public:
     // Extrapolation
     this->doDIIS       = true;
     this->doDMS        = false;
-    this->nDIISExtrap_ = 6;
+    this->nDIISExtrap_ = 20;
     this->iDIISStart_  = 0;
     this->diisAlg_     = DIIS_ALGORITHM::NO_DIIS_SET;
 

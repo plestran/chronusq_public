@@ -101,7 +101,57 @@ void FOPPropagator<T>::formFull() {
   std::fill_n(this->fullMatrix_,this->nSingleDim_*this->nSingleDim_,0.0);
 
 
-  if(this->sett_.part == SPIN_SEPARATED) {
+  if(this->sett_.part == FULL) {
+
+    /// Builds Spin-Separated A Matrix (TOP LEFT for !TDA)
+      
+    // A(ai,bj) = d(ai,bj)(E(a) - E(i)) + (ai | bj) - (ab | ij)
+    for(auto J = 0; J < this->pscf_->nO(); J++)
+    for(auto B = 0; B < this->pscf_->nV(); B++)
+    for(auto I = 0; I < this->pscf_->nO(); I++) 
+    for(auto A = 0; A < this->pscf_->nV(); A++) {
+      auto AI = A + I*this->pscf_->nV();
+      auto BJ = B + J*this->pscf_->nV();
+      auto AIBJ = AI + BJ*this->nSingleDim_;
+      auto AIBJInt = 
+        A + I*this->pscf_->nV() + B*this->pscf_->nOV() + 
+        J*this->pscf_->nV()*this->pscf_->nOV();
+      auto ABIJInt = 
+        A + B*this->pscf_->nV() + I*this->pscf_->nVV() + 
+        J*this->pscf_->nO()*this->pscf_->nVV();
+ 
+      this->fullMatrix_[AIBJ] = moints.VOVO()[AIBJInt] - 
+                          moints.VVOO()[ABIJInt];
+ 
+      if(AI == BJ)
+        this->fullMatrix_[AIBJ] += 
+          (*this->pscf_->reference()->epsA())(A + this->pscf_->nO()) -
+          (*this->pscf_->reference()->epsA())(I);
+    }
+
+    // Build Top Right B for RPA
+    if( not this->sett_.doTDA) {
+      // B(ai,bj) = (ai | bj) - (aj | bi)
+      for(auto J = 0; J < this->pscf_->nO(); J++)
+      for(auto B = 0; B < this->pscf_->nV(); B++)
+      for(auto I = 0; I < this->pscf_->nO(); I++) 
+      for(auto A = 0; A < this->pscf_->nV(); A++) {
+        auto AI = A + I*this->pscf_->nV();
+        auto BJ = B + J*this->pscf_->nV() + this->nSingleDim_/2;
+        auto AIBJ = AI + BJ*this->nSingleDim_;
+        auto AIBJInt = 
+          A + I*this->pscf_->nV() + B*this->pscf_->nOV() + 
+          J*this->pscf_->nV()*this->pscf_->nOV();
+        auto AJBIInt = 
+          A + J*this->pscf_->nV() + B*this->pscf_->nOV() + 
+          I*this->pscf_->nV()*this->pscf_->nOV();
+ 
+        this->fullMatrix_[AIBJ] = moints.VOVO()[AIBJInt] - 
+                            moints.VOVO()[AJBIInt];
+      }
+    }
+
+  } else if(this->sett_.part == SPIN_SEPARATED) {
     /// Builds Spin-Separated A Matrix (TOP LEFT for !TDA)
       
     // A(ai,bj) (AAAA) = 
@@ -288,7 +338,7 @@ void FOPPropagator<T>::formFull() {
     }
 
 
-    // Bottom Left B gets taken care of my symmetrization
+    // Bottom Left B gets taken care of by symmetrization
 
   } // Not TDA
 
@@ -297,17 +347,22 @@ void FOPPropagator<T>::formFull() {
 //prettyPrint(cout,Full,"Full");
 //prettyPrint(cout,Full - Full.adjoint(),"Full");
 
+  std::vector<hsize_t> NSq = {this->nSingleDim_,this->nSingleDim_};
+  H5::DataSpace NSqDSp(2,&NSq[0]);
+  H5::H5File LBLFile("MnAcAc_FOPPA.bin",H5F_ACC_TRUNC);
+  H5::DataSet FullDSt(LBLFile.createDataSet("/FullMatrix",H5PredType<T>(),NSqDSp));
+  FullDSt.write(Full.data(),H5PredType<T>());
+  
   if(not this->sett_.doTDA and not this->doStab_){
     Full.block(this->nSingleDim_/2,0,this->nSingleDim_/2,this->nSingleDim_) 
       *= -1;
   //this->matrixType_ = NON_HERMETIAN;
   }
 
-/*
-  TVec Eig = phys.eVPerHartree*Full.eigenvalues().real();
+  VectorXd Eig = phys.eVPerHartree*Full.eigenvalues().real();
   std::sort(Eig.data(),Eig.data()+Eig.size());
   prettyPrintSmart(cout,Eig,"E");
-*/
+  
 //CErr();
 }
 
