@@ -179,33 +179,35 @@ void AOIntegrals::formP2Transformation(){
 
 // Put the kinetic energy in the orthonormal basis 
 
-  RealMatrix TMP = SUncontracted.transpose() * TUncontracted;
-  TUncontracted = TMP * SUncontracted;
+  nUnSqScratch = SUncontracted.transpose() * TUncontracted;
+  TUncontracted = nUnSqScratch * SUncontracted;
 
-// Get rid of the linear dependencies?
+  // Get rid of the linear dependencies?
   dgesvd_(&JOBU,&JOBVT,&nUncontracted,&nUncontracted,TUncontracted.data(),
       &nUncontracted,&ovlpEigValues[0],TUncontracted.data(),&nUncontracted,
       TUncontracted.data(),&nUncontracted,&WORK[0],&LWORK,&INFO);
 
-// Form the K transformation matrix from both pieces
-// (diagonalizes S) and (diagonalizes T). See eq. 12 in Rieher's paper from 2013
+  // Form the K transformation matrix from both pieces
+  // (diagonalizes S) and (diagonalizes T). See eq. 12 in Rieher's paper from 2013
 
-if(this->printLevel_ >= 3){
-  prettyPrintSmart(this->fileio_->out,SUncontracted,"S transformation");
-  prettyPrintSmart(this->fileio_->out,TUncontracted,"T transformation");
-  prettyPrintSmart(this->fileio_->out,TUncontracted.transpose()*TUncontracted, "T^{dagger} T");
-}
+  if(this->printLevel_ >= 3){
+    prettyPrintSmart(this->fileio_->out,SUncontracted,"S transformation");
+    prettyPrintSmart(this->fileio_->out,TUncontracted,"T transformation");
+    prettyPrintSmart(this->fileio_->out,TUncontracted.transpose()*TUncontracted, "T^{dagger} T");
+  }
 
-  RealMatrix UK = SUncontracted * TUncontracted;
+  RealMap UK(this->memManager_->malloc<double>(nUnSq),nUncontracted,nUncontracted);
+  UK = SUncontracted * TUncontracted;
 
 if(this->printLevel_ >= 3){ 
   prettyPrintSmart(this->fileio_->out,UK,"U (K) transformation");
 }
 
 // Now we transform V to V' 
-  TMP = UK.transpose() * VUncontracted;
-  RealMatrix P2_Potential = TMP * UK;
+  RealMap P2_Potential(this->memManager_->malloc<double>(nUnSq),nUncontracted,nUncontracted);
 
+  nUnSqScratch = UK.transpose() * VUncontracted;
+  P2_Potential = nUnSqScratch * UK;
 
 // Next we need to get W' (from pVp integrals)
 
@@ -320,20 +322,25 @@ if(this->printLevel_ >= 3){
 
   for(auto i = 0; i < 10; i++) numPot[i] *= 4 * math.pi;
 
-  RealMatrix PVPS = numPot[1] + numPot[5] + numPot[9]; 
-  RealMatrix PVPX = numPot[6] - numPot[8];
-  RealMatrix PVPY = numPot[7] - numPot[3];
-  RealMatrix PVPZ = numPot[2] - numPot[4]; 
+  RealMap PVPS(this->memManager_->malloc<double>(nUnSq),nUncontracted,nUncontracted);
+  RealMap PVPX(this->memManager_->malloc<double>(nUnSq),nUncontracted,nUncontracted);
+  RealMap PVPY(this->memManager_->malloc<double>(nUnSq),nUncontracted,nUncontracted);
+  RealMap PVPZ(this->memManager_->malloc<double>(nUnSq),nUncontracted,nUncontracted);
+  
+  PVPS = numPot[1] + numPot[5] + numPot[9]; 
+  PVPX = numPot[6] - numPot[8];
+  PVPY = numPot[7] - numPot[3];
+  PVPZ = numPot[2] - numPot[4]; 
 
 // Apply the Uk unitary transformation ( Uk' * PVP * Uk)
-  TMP = UK.adjoint() * PVPS;
-  PVPS = TMP * UK;
-  TMP = UK.adjoint() * PVPX;
-  PVPX = TMP * UK;
-  TMP = UK.adjoint() * PVPY;
-  PVPY = TMP * UK;
-  TMP = UK.adjoint() * PVPZ;
-  PVPZ = TMP * UK;
+  nUnSqScratch = UK.adjoint() * PVPS;
+  PVPS = nUnSqScratch * UK;
+  nUnSqScratch = UK.adjoint() * PVPX;
+  PVPX = nUnSqScratch * UK;
+  nUnSqScratch = UK.adjoint() * PVPY;
+  PVPY = nUnSqScratch * UK;
+  nUnSqScratch = UK.adjoint() * PVPZ;
+  PVPZ = nUnSqScratch * UK;
 
 if(this->printLevel_ >= 3){
   prettyPrintSmart(cout,P2_Potential,"V");
@@ -358,15 +365,14 @@ if(this->printLevel_ >= 3){
   PMap = PMap.cwiseSqrt();
   PMap = PMap.cwiseInverse();
 
-
-  TMP = PMap.asDiagonal() * PVPS;
-  PVPS = TMP * PMap.asDiagonal();
-  TMP = PMap.asDiagonal() * PVPX;
-  PVPX = TMP * PMap.asDiagonal();
-  TMP = PMap.asDiagonal() * PVPY;
-  PVPY = TMP * PMap.asDiagonal();
-  TMP = PMap.asDiagonal() * PVPZ;
-  PVPZ = TMP * PMap.asDiagonal();
+  nUnSqScratch = PMap.asDiagonal() * PVPS;
+  PVPS = nUnSqScratch * PMap.asDiagonal();
+  nUnSqScratch = PMap.asDiagonal() * PVPX;
+  PVPX = nUnSqScratch * PMap.asDiagonal();
+  nUnSqScratch = PMap.asDiagonal() * PVPY;
+  PVPY = nUnSqScratch * PMap.asDiagonal();
+  nUnSqScratch = PMap.asDiagonal() * PVPZ;
+  PVPZ = nUnSqScratch * PMap.asDiagonal();
 
 if(this->printLevel_ >= 3){
   cout << "|dot(P,VP)| = " << PVPS.squaredNorm() << endl;
@@ -429,7 +435,8 @@ if(this->twoEFudge == 2){
   }
 
 
-  ComplexMatrix W(2*nUncontracted,2*nUncontracted);
+  ComplexMap W(this->memManager_->malloc<dcomplex>(4*nUnSq),
+    2*nUncontracted,2*nUncontracted);
   W.block(0,0,nUncontracted,nUncontracted).real() = PVPS;
   W.block(0,0,nUncontracted,nUncontracted).imag() = PVPZ;
   W.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).real() = 
@@ -441,6 +448,11 @@ if(this->twoEFudge == 2){
   W.block(nUncontracted,0,nUncontracted,nUncontracted).real() = -PVPY;
   W.block(nUncontracted,0,nUncontracted,nUncontracted).imag() = PVPX;
 
+  // No longer need PVP integrals, so free memory here.
+  this->memManager_->free(PVPS.data(),nUnSq); 
+  this->memManager_->free(PVPX.data(),nUnSq); 
+  this->memManager_->free(PVPY.data(),nUnSq); 
+  this->memManager_->free(PVPZ.data(),nUnSq); 
 //W = -W;
 //P2_Potential = - P2_Potential;
 //W = W.conjugate();
@@ -767,6 +779,11 @@ if(this->twoEFudge == 1){
   this->memManager_->free(C4nUnSqScratch.data(),4*nUnSq);
 
   this->memManager_->free(SUn.data(),nUnSq);
+  this->memManager_->free(UK.data(),nUnSq);
+  
+  // Might be able to free these earlier
+  this->memManager_->free(P2_Potential.data(),nUnSq);
+  this->memManager_->free(W.data(),4*nUnSq);
 
 /*
 //ADDITIONAL DEBUG HERE
