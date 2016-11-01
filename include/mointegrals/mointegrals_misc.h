@@ -1,74 +1,6 @@
-#include <mointegrals.h>
-
-namespace ChronusQ {
-template<>
-void MOIntegrals<double>::getLocalMOs() {
-  if(this->haveLocMO_) return;
-  bool is2C        = this->wfn_->nTCS() == 2;
-  bool isOpenShell = !this->wfn_->isClosedShell;
-  int NB           = this->wfn_->nBasis();
-//int NBT          = this->wfn_->nTCS() * NB;
-
-
-/*
-  if(is2C) {
-    this->locMOAOcc_ = 
-      std::unique_ptr<RealTensor2d>(new RealTensor2d(NB,this->wfn_->nO()));
-    this->locMOBOcc_ = 
-      std::unique_ptr<RealTensor2d>(new RealTensor2d(NB,this->wfn_->nO()));
-    this->locMOAVir_ = 
-      std::unique_ptr<RealTensor2d>(new RealTensor2d(NB,this->wfn_->nV()));
-    this->locMOBVir_ = 
-      std::unique_ptr<RealTensor2d>(new RealTensor2d(NB,this->wfn_->nV()));
-
-    for(auto i  = 0; i  < this->wfn_->nO(); i++ )
-    for(auto mu = 0; mu < NB              ; mu++){
-      (*this->locMOAOcc_)(mu,i) = (*this->wfn_->moA())(2*mu    ,i);
-      (*this->locMOBOcc_)(mu,i) = (*this->wfn_->moA())(2*mu + 1,i);
-    }
-    for(auto a  = 0; a  < this->wfn_->nV(); a++ )
-    for(auto mu = 0; mu < NB              ; mu++){
-      int A = this->wfn_->nO() + a;       
-      (*this->locMOAVir_)(mu,a) = (*this->wfn_->moA())(2*mu    ,A);
-      (*this->locMOBVir_)(mu,a) = (*this->wfn_->moA())(2*mu + 1,A);
-    }
-  } else {
-    this->locMOAOcc_ = 
-      std::unique_ptr<RealTensor2d>(new RealTensor2d(NB,this->wfn_->nOA()));
-    this->locMOAVir_ = 
-      std::unique_ptr<RealTensor2d>(new RealTensor2d(NB,this->wfn_->nVA()));
-
-    std::copy(
-      this->wfn_->moA()->data(),
-      this->wfn_->moA()->data() + this->wfn_->nOA(),
-      &this->locMOAOcc_->storage()[0]);
-    std::copy(
-      this->wfn_->moA()->data() + this->wfn_->nOA(),
-      this->wfn_->moA()->data() + this->wfn_->moA()->size(),
-      &this->locMOAVir_->storage()[0]);
-
-    if(isOpenShell) {
-      this->locMOBOcc_ = 
-        std::unique_ptr<RealTensor2d>(new RealTensor2d(NB,this->wfn_->nOB()));
-      this->locMOBVir_ = 
-        std::unique_ptr<RealTensor2d>(new RealTensor2d(NB,this->wfn_->nVB()));
-      std::copy(
-        this->wfn_->moB()->data(),
-        this->wfn_->moB()->data() + this->wfn_->nOB(),
-        &this->locMOBOcc_->storage()[0]);
-      std::copy(
-        this->wfn_->moB()->data() + this->wfn_->nOB(),
-        this->wfn_->moB()->data() + this->wfn_->moB()->size(),
-        &this->locMOBVir_->storage()[0]);
-    }
-  }
-*/
-
-}; // getLocalMOs
-
-template<>
-void MOIntegrals<double>::testMOInts(){
-  double EMP2 = 0;
+template <typename T>
+void MOIntegrals<T>::testMOInts(){
+  T EMP2 = 0;
   int NO = this->wfn_->nO();
   int NV = this->wfn_->nV();
   int NOA = this->wfn_->nOA();
@@ -76,19 +8,20 @@ void MOIntegrals<double>::testMOInts(){
   int NOB = this->wfn_->nOB();
   int NVB = this->wfn_->nVB();
 
-  double * EPSA = this->wfn_->epsA()->data();
-  double * EPSB = this->wfn_->isClosedShell 
-                    ? EPSA : this->wfn_->epsB()->data();
   double eI, eJ, eA, eB;
 
   bool doMP2 = true;
-  bool doMP3 = false;
+  bool doMP3 = true;
   bool doSpacial = false;
 
   bool isR = this->wfn_->isClosedShell and this->wfn_->nTCS() == 1;
   bool isU = !isR and this->wfn_->nTCS() == 1;
   bool isG = this->wfn_->nTCS() == 2;
 
+  double * EPSA = this->wfn_->epsA()->data();
+  double * EPSB = isR or isG ? EPSA : this->wfn_->epsB()->data();
+
+/*
   if(!doMP2) return;
 
   if(doSpacial)
@@ -97,6 +30,9 @@ void MOIntegrals<double>::testMOInts(){
   if(not doSpacial or doMP3)
     this->formFullVOVO();
 //return;
+/
+*/
+  this->formFullVOVO();
 
   if(isR and doSpacial) {
     cout << "Doing RHF Spacial MP2" << endl;
@@ -106,7 +42,7 @@ void MOIntegrals<double>::testMOInts(){
     for(auto b = 0; b < NVA; b++)
     for(auto a = 0; a < NVA; a++){
       EMP2 += VOVOAAAA_[a + NVA*i + NVA*NOA*b + NVA*NVA*NOA*j] *
-        ( 2*VOVOAAAA_[a + NVA*i + NVA*NOA*b + NVA*NVA*NOA*j]
+        ( 2.0*VOVOAAAA_[a + NVA*i + NVA*NOA*b + NVA*NVA*NOA*j]
             - VOVOAAAA_[b + NVA*i + NVA*NOA*a + NVA*NVA*NOA*j]) /
       ((*this->wfn_->epsA())(i) + (*this->wfn_->epsA())(j)
       -(*this->wfn_->epsA())(a+NOA) - (*this->wfn_->epsA())(b+NOA));
@@ -128,7 +64,7 @@ void MOIntegrals<double>::testMOInts(){
       // dIJAB = e(I) + e(J) - e(A) - e(B)
       double deltaIJAB = eI + eJ - eA - eB;
 
-      double CoulIJAB = VOVOAAAA_[a + NVA*i + NVA*NOA*b + NVA*NVA*NOA*j];
+      T CoulIJAB = VOVOAAAA_[a + NVA*i + NVA*NOA*b + NVA*NVA*NOA*j];
  
       EMP2 += CoulIJAB*CoulIJAB / deltaIJAB;
 
@@ -147,7 +83,7 @@ void MOIntegrals<double>::testMOInts(){
       // dIJAB = e(I) + e(J) - e(A) - e(B)
       double deltaIJAB = eI + eJ - eA - eB;
 
-      double CoulIJAB = VOVOAABB_[a + NVA*i + NVA*NOA*b + NVA*NVB*NOA*j];
+      T CoulIJAB = VOVOAABB_[a + NVA*i + NVA*NOA*b + NVA*NVB*NOA*j];
  
       EMP2 += CoulIJAB*CoulIJAB / deltaIJAB;
 
@@ -166,7 +102,7 @@ void MOIntegrals<double>::testMOInts(){
       // dIJAB = e(I) + e(J) - e(A) - e(B)
       double deltaIJAB = eI + eJ - eA - eB;
 
-      double CoulIJAB = VOVOAABB_[a + NVA*i + NVA*NOA*b + NVA*NVB*NOA*j];
+      T CoulIJAB = VOVOAABB_[a + NVA*i + NVA*NOA*b + NVA*NVB*NOA*j];
  
       EMP2 += CoulIJAB*CoulIJAB / deltaIJAB;
 
@@ -185,7 +121,7 @@ void MOIntegrals<double>::testMOInts(){
       // dIJAB = e(I) + e(J) - e(A) - e(B)
       double deltaIJAB = eI + eJ - eA - eB;
 
-      double CoulIJAB = VOVOBBBB_[a + NVB*i + NVB*NOB*b + NVB*NVB*NOB*j];
+      T CoulIJAB = VOVOBBBB_[a + NVB*i + NVB*NOB*b + NVB*NVB*NOB*j];
  
       EMP2 += CoulIJAB*CoulIJAB / deltaIJAB;
 
@@ -204,8 +140,8 @@ void MOIntegrals<double>::testMOInts(){
       // dIJAB = e(I) + e(J) - e(A) - e(B)
       double deltaIJAB = eI + eJ - eA - eB;
 
-      double CoulIJAB = VOVOAAAA_[a + NVA*i + NVA*NOA*b + NVA*NVA*NOA*j];
-      double ExchIJAB = VOVOAAAA_[a + NVA*j + NVA*NOA*b + NVA*NVA*NOA*i];
+      T CoulIJAB = VOVOAAAA_[a + NVA*i + NVA*NOA*b + NVA*NVA*NOA*j];
+      T ExchIJAB = VOVOAAAA_[a + NVA*j + NVA*NOA*b + NVA*NVA*NOA*i];
  
       EMP2 -= CoulIJAB*ExchIJAB / deltaIJAB;
 
@@ -224,8 +160,8 @@ void MOIntegrals<double>::testMOInts(){
       // dIJAB = e(I) + e(J) - e(A) - e(B)
       double deltaIJAB = eI + eJ - eA - eB;
 
-      double CoulIJAB = VOVOBBBB_[a + NVB*i + NVB*NOB*b + NVB*NVB*NOB*j];
-      double ExchIJAB = VOVOBBBB_[a + NVB*j + NVB*NOB*b + NVB*NVB*NOB*i];
+      T CoulIJAB = VOVOBBBB_[a + NVB*i + NVB*NOB*b + NVB*NVB*NOB*j];
+      T ExchIJAB = VOVOBBBB_[a + NVB*j + NVB*NOB*b + NVB*NVB*NOB*i];
  
       EMP2 -= CoulIJAB*ExchIJAB / deltaIJAB;
 
@@ -240,14 +176,14 @@ void MOIntegrals<double>::testMOInts(){
     for(int b = 0; b < NV; b++)
     for(int a = 0; a < NV; a++){
       
-      eI = (i % 2 == 0) ? EPSA[i/2]       : EPSB[i/2];
-      eJ = (j % 2 == 0) ? EPSA[j/2]       : EPSB[j/2];
-      eA = (a % 2 == 0) ? EPSA[a/2 + NOA] : EPSB[a/2 + NOB];
-      eB = (b % 2 == 0) ? EPSA[b/2 + NOA] : EPSB[b/2 + NOB];
+      eI = isG ? EPSA[i] : (i % 2 == 0) ? EPSA[i/2]       : EPSB[i/2];
+      eJ = isG ? EPSA[j] : (j % 2 == 0) ? EPSA[j/2]       : EPSB[j/2];
+      eA = isG ? EPSA[a+NO] : (a % 2 == 0) ? EPSA[a/2 + NOA] : EPSB[a/2 + NOB];
+      eB = isG ? EPSA[b+NO] : (b % 2 == 0) ? EPSA[b/2 + NOA] : EPSB[b/2 + NOB];
 
 
       // < IJ || AB > = (AI | BJ) - (BI | AJ)
-      double DiracIJAB = 
+      T DiracIJAB = 
         VOVO_[a + i*NV + b*NO*NV + j*NO*NV*NV] -
         VOVO_[b + i*NV + a*NO*NV + j*NO*NV*NV];
 
@@ -255,7 +191,7 @@ void MOIntegrals<double>::testMOInts(){
       double deltaIJAB = eI + eJ - eA - eB;
 
       // E(2) += |< IJ || AB >|^2 / dIJAB
-      EMP2 += DiracIJAB * DiracIJAB / deltaIJAB;
+      EMP2 += DiracIJAB * std::conj(DiracIJAB) / deltaIJAB;
     }
     
     // E(2) = E(2) / 4
@@ -270,9 +206,9 @@ void MOIntegrals<double>::testMOInts(){
   this->formFullVVVV();
   this->formFullOOOO();
 
-  double EMP3_1 = 0;
-  double EMP3_2 = 0;
-  double EMP3_3 = 0;
+  T EMP3_1 = 0;
+  T EMP3_2 = 0;
+  T EMP3_3 = 0;
 
   for(auto i = 0; i < NO; i++)
   for(auto j = 0; j < NO; j++)
@@ -281,25 +217,25 @@ void MOIntegrals<double>::testMOInts(){
   for(auto a = 0; a < NV; a++)
   for(auto b = 0; b < NV; b++){
 
-    double eI = (*this->wfn_->epsA())(i/2);
-    double eJ = (*this->wfn_->epsA())(j/2);
-    double eK = (*this->wfn_->epsA())(k/2);
-    double eL = (*this->wfn_->epsA())(l/2);
-    double eA = (*this->wfn_->epsA())(a/2 + NOA);
-    double eB = (*this->wfn_->epsA())(b/2 + NOA);
+    double eI = isG ? (*this->wfn_->epsA())(i)      :  (*this->wfn_->epsA())(i/2);
+    double eJ = isG ? (*this->wfn_->epsA())(j)      :  (*this->wfn_->epsA())(j/2);
+    double eK = isG ? (*this->wfn_->epsA())(k)      :  (*this->wfn_->epsA())(k/2);
+    double eL = isG ? (*this->wfn_->epsA())(l)      :  (*this->wfn_->epsA())(l/2);
+    double eA = isG ? (*this->wfn_->epsA())(a + NO) : (*this->wfn_->epsA())(a/2 + NOA);
+    double eB = isG ? (*this->wfn_->epsA())(b + NO) : (*this->wfn_->epsA())(b/2 + NOA);
 
     // < IJ || AB > = (AI | BJ) - (BI | AJ)
-    double DiracIJAB = 
+    T DiracIJAB = 
       VOVO_[a + i*NV + b*NO*NV + j*NV*NV*NO] - 
       VOVO_[b + i*NV + a*NO*NV + j*NV*NV*NO]; 
 
     // < IJ || KL > = (IK | JL) - (IL | JK)
-    double DiracIJKL = 
+    T DiracIJKL = 
       OOOO_[i + k*NO + j*NO*NO + l*NO*NO*NO] - 
       OOOO_[i + l*NO + j*NO*NO + k*NO*NO*NO]; 
 
     // < KL || AB > = (AK | BL) - (BK | AL)
-    double DiracKLAB = 
+    T DiracKLAB = 
       VOVO_[a + k*NV + b*NO*NV + l*NV*NV*NO] - 
       VOVO_[b + k*NV + a*NO*NV + l*NV*NV*NO]; 
 
@@ -327,25 +263,25 @@ void MOIntegrals<double>::testMOInts(){
   for(auto c = 0; c < NV; c++)
   for(auto d = 0; d < NV; d++){
 
-    double eI = (*this->wfn_->epsA())(i/2);
-    double eJ = (*this->wfn_->epsA())(j/2);
-    double eA = (*this->wfn_->epsA())(a/2 + NOA);
-    double eB = (*this->wfn_->epsA())(b/2 + NOA);
-    double eC = (*this->wfn_->epsA())(c/2 + NOA);
-    double eD = (*this->wfn_->epsA())(d/2 + NOA);
+    double eI = isG ? (*this->wfn_->epsA())(i)      : (*this->wfn_->epsA())(i/2);
+    double eJ = isG ? (*this->wfn_->epsA())(j)      : (*this->wfn_->epsA())(j/2);
+    double eA = isG ? (*this->wfn_->epsA())(a + NO) : (*this->wfn_->epsA())(a/2 + NOA);
+    double eB = isG ? (*this->wfn_->epsA())(b + NO) : (*this->wfn_->epsA())(b/2 + NOA);
+    double eC = isG ? (*this->wfn_->epsA())(c + NO) : (*this->wfn_->epsA())(c/2 + NOA);
+    double eD = isG ? (*this->wfn_->epsA())(d + NO) : (*this->wfn_->epsA())(d/2 + NOA);
 
     // < IJ || AB > = (AI | BJ) - (BI | AJ)
-    double DiracIJAB = 
+    T DiracIJAB = 
       VOVO_[a + i*NV + b*NO*NV + j*NV*NV*NO] - 
       VOVO_[b + i*NV + a*NO*NV + j*NV*NV*NO]; 
 
     // < AB || CD > = (AC | BD) - (AD | BC)
-    double DiracABCD = 
+    T DiracABCD = 
       VVVV_[a + c*NV + b*NV*NV + d*NV*NV*NV] - 
       VVVV_[a + d*NV + b*NV*NV + c*NV*NV*NV]; 
 
     // < IJ || CD > = (CI | DJ) - (DI | CJ)
-    double DiracIJCD = 
+    T DiracIJCD = 
       VOVO_[c + i*NV + d*NO*NV + j*NV*NV*NO] - 
       VOVO_[d + i*NV + c*NO*NV + j*NV*NV*NO]; 
 
@@ -368,25 +304,25 @@ void MOIntegrals<double>::testMOInts(){
   for(auto b = 0; b < NV; b++) 
   for(auto c = 0; c < NV; c++){
 
-    double eI = (*this->wfn_->epsA())(i/2);
-    double eJ = (*this->wfn_->epsA())(j/2);
-    double eK = (*this->wfn_->epsA())(k/2);
-    double eA = (*this->wfn_->epsA())(a/2 + NOA);
-    double eB = (*this->wfn_->epsA())(b/2 + NOA);
-    double eC = (*this->wfn_->epsA())(c/2 + NOA);
+    double eI = isG ?(*this->wfn_->epsA())(i)     : (*this->wfn_->epsA())(i/2);       
+    double eJ = isG ?(*this->wfn_->epsA())(j)     : (*this->wfn_->epsA())(j/2);
+    double eK = isG ?(*this->wfn_->epsA())(k)     : (*this->wfn_->epsA())(k/2);
+    double eA = isG ?(*this->wfn_->epsA())(a + NO) : (*this->wfn_->epsA())(a/2 + NOA);
+    double eB = isG ?(*this->wfn_->epsA())(b + NO) : (*this->wfn_->epsA())(b/2 + NOA);
+    double eC = isG ?(*this->wfn_->epsA())(c + NO) : (*this->wfn_->epsA())(c/2 + NOA);
 
     // < IJ || AB > = (AI | BJ) - (BI | AJ)
-    double DiracIJAB = 
+    T DiracIJAB = 
       VOVO_[a + i*NV + b*NO*NV + j*NV*NV*NO] - 
       VOVO_[b + i*NV + a*NO*NV + j*NV*NV*NO]; 
 
     // < BK || CJ > = (BC | KJ) - (BJ | CK)
-    double DiracBKCJ = 
+    T DiracBKCJ = 
       VVOO_[b + c*NV + k*NV*NV + j*NV*NV*NO] -
       VOVO_[b + j*NV + c*NO*NV + k*NO*NV*NV];
 
     // < IK || AC > = (AI | CK) - (CI | AK)
-    double DiracIKAC = 
+    T DiracIKAC = 
       VOVO_[a + i*NV + c*NO*NV + k*NV*NV*NO] - 
       VOVO_[c + i*NV + a*NO*NV + k*NV*NV*NO]; 
 
@@ -402,14 +338,14 @@ void MOIntegrals<double>::testMOInts(){
   }
 
   // E(3) = (1/8) * ( E(3,1) + E(3,2) ) + E(3,3)
-  double EMP3 = (0.125)*(EMP3_1 + EMP3_2) + EMP3_3;
+  T EMP3 = (0.125)*(EMP3_1 + EMP3_2) + EMP3_3;
 
   cout << "EMP3_1 = " << EMP3_1 << endl;
   cout << "EMP3_2 = " << EMP3_2 << endl;
   cout << "EMP3_3 = " << EMP3_3 << endl;
   cout << "EMP3 = " << EMP3 << endl;
 
-  this->formFullVOOO();
-  this->formFullVVVO();
+//this->formFullVOOO();
+//this->formFullVVVO();
 };
-};
+

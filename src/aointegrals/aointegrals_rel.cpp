@@ -216,8 +216,11 @@ if(this->printLevel_ >= 3){
   VectorXd SCRATCHDYUnContracted(nUncontracted);
   VectorXd SCRATCHDZUnContracted(nUncontracted);
 
+  size_t tracker(0);
 // compute pVp numerically
   auto PVP = [&](IntegrationPoint pt, std::vector<RealMatrix> &result) {
+    tracker++;
+//  cout << tracker << endl;
     for(auto iShell = 0, b_s = 0; iShell < unContractedShells.size();
 
          b_s += unContractedShells[iShell].size(),++iShell) {
@@ -249,9 +252,9 @@ if(this->printLevel_ >= 3){
       const double * gamma = engineV.compute(this->molecule_->nucShell(iAtm),
           libint2::Shell::unit());
                                                     
-      SCRATCH2UnContracted.noalias() = 
-        SCRATCH1UnContracted * SCRATCH1UnContracted.transpose();
-      result[0].noalias() += (pt.weight * (*gamma)) * SCRATCH2UnContracted;
+    //SCRATCH2UnContracted.noalias() = 
+    //  SCRATCH1UnContracted * SCRATCH1UnContracted.transpose();
+    //result[0].noalias() += (pt.weight * (*gamma)) * SCRATCH2UnContracted;
 
       SCRATCH2UnContracted.noalias() = 
         SCRATCHDXUnContracted * SCRATCHDXUnContracted.transpose();
@@ -303,7 +306,7 @@ if(this->printLevel_ >= 3){
     }
   } 
 
-  AtomicGrid AGrid(200,770,GAUSSCHEBFST,LEBEDEV,BECKE,atomicCenters,
+  AtomicGrid AGrid(100,302,GAUSSCHEBFST,LEBEDEV,BECKE,atomicCenters,
     this->molecule_->rIJ(),0,-1,1e6,1.0,false);
 
   std::vector<RealMatrix> numPot(10,RealMatrix::Zero(nUncontracted,

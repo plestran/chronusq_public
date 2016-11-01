@@ -168,13 +168,13 @@ int main(int argc, char **argv){
   Molecule molecule;
   BasisSet basis;
   AOIntegrals aoints;
-  SingleSlater<double> singleSlater;
-  RealTime<double> rt;
+  SingleSlater<dcomplex> singleSlater;
+  RealTime<dcomplex> rt;
   FileIO fileio("test.inp","test.out");
 
-  memManager.setTotalMem(256e6);
+  memManager.setTotalMem(512e6);
   initCQ(argc,argv);
-  CQSetNumThreads(4);
+  CQSetNumThreads(8);
   
 //////////////////////////////////////////////////////
 //loadPresets<H>(molecule);
@@ -190,13 +190,14 @@ int main(int argc, char **argv){
   molecule.computeRij();
   molecule.computeI();
 
-  singleSlater.setRef("RHF");
+  singleSlater.setRef("GHF");
 //singleSlater.setDFTNAng(590);
 //singleSlater.setDFTNRad(120);
   
   singleSlater.setSCFEneTol(1e-12);
   singleSlater.setSCFMaxIter(10000);
   singleSlater.doDIIS = true;
+  singleSlater.doDamp = false;
 //singleSlater.dampParam = 0.2;
 
   singleSlater.setGuess(CORE);
@@ -217,6 +218,7 @@ int main(int argc, char **argv){
 //basis.renormShells();
 
 
+  aoints.setAlgorithm(AOIntegrals::INTEGRAL_ALGORITHM::INCORE);
   aoints.communicate(molecule,basis,fileio,memManager);
   singleSlater.communicate(molecule,basis,aoints,fileio,memManager);
 //moints.communicate(molecule,basis,fileio,aoints,singleSlater);
@@ -227,12 +229,22 @@ int main(int argc, char **argv){
   aoints.alloc();
   singleSlater.alloc();
 
+//singleSlater.setPrintLevel(4);
   singleSlater.formGuess();
+//singleSlater.printDensity();
   singleSlater.SCF3();
+  singleSlater.printSCFResults();
   singleSlater.computeProperties();
   singleSlater.printProperties();
 
+/*
+  singleSlater.rotateDensities({1.0,0.0,0.0},math.pi/2);
+  singleSlater.SCF3();
+  singleSlater.computeProperties();
+  singleSlater.printProperties();
+*/
 
+//prettyPrintSmart(cout,*singleSlater.moA(),"MO");
 
 /*
   rt.communicate(singleSlater);
@@ -252,21 +264,22 @@ int main(int argc, char **argv){
   rt.setIRstrt(-1);
   rt.doPropagation();
 */
-/*
-  cout << endl;
-  MOIntegrals<double> moints;
-  moints.communicate(singleSlater,memManager);
-  moints.initMeta();
+//MOIntegrals<dcomplex> moints;
+//moints.communicate(singleSlater,memManager);
+//moints.initMeta();
 //moints.testMOInts();
-  FOPPA<double> resp(DIAGONALIZATION,SPIN_SEPARATED,false,false);
+
+/*
+  FOPPA<dcomplex> resp(DIAGONALIZATION,SPIN_SEPARATED,false,false);
   resp.communicate(singleSlater,memManager);
-//resp.doFull();
-  resp.setNSek(3);
-  resp.setNGuess(10);
+  resp.doFull();
+//resp.setNSek(3);
+//resp.setNGuess(10);
   resp.initMeta();
   resp.alloc();
   resp.runResponse();
 */
+  
   finalizeCQ();
   return 0;
 };

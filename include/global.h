@@ -65,7 +65,7 @@
 #include <Eigen/SparseCore> // Eigen Sparse Linear Algebra
 #include <unsupported/Eigen/MatrixFunctions>
 //#ifdef CQ_ENABLE_MPI
-#  define EIGEN_DONT_PARALLELIZE
+//#  define EIGEN_DONT_PARALLELIZE
 //#endif
 #ifdef USE_LIBINT
 #  include <libint2.hpp> // Libint Gaussian Integrals library
