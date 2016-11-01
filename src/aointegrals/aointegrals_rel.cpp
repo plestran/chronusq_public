@@ -47,8 +47,17 @@ void AOIntegrals::formP2Transformation(){
   //General Scratch
   RealMap nUnSqScratch(
     this->memManager_->malloc<double>(nUnSq),nUncontracted,nUncontracted);
+  RealMap nUnSqScratch2(
+    this->memManager_->malloc<double>(nUnSq),nUncontracted,nUncontracted);
   ComplexMap C4nUnSqScratch(
     this->memManager_->malloc<dcomplex>(4*nUnSq),2*nUncontracted,2*nUncontracted);
+  ComplexMap C4nUnSqScratch2(
+    this->memManager_->malloc<dcomplex>(4*nUnSq),2*nUncontracted,2*nUncontracted);
+
+  double * SCRUnCon = this->memManager_->malloc<double>(nUncontracted*this->nBasis_);
+  RealMap SCRUnConMap(SCRUnCon,nUncontracted,this->nBasis_);
+  RealMap SCRConUnMap(SCRUnCon,this->nBasis_,nUncontracted);
+  
 
   libint2::Engine engineS(
       libint2::Operator::overlap,1,this->basisSet_->maxL(),0);
@@ -142,8 +151,12 @@ void AOIntegrals::formP2Transformation(){
   // This is necessary to get the correct mapping.
   RealMap SnonRel(this->memManager_->malloc<double>(this->nBasis_*this->nBasis_),
     this->nBasis_,this->nBasis_);
-  SnonRel = (*this->basisSet_->mapPrim2Bf()) * SUncontracted
-	* (*this->basisSet_->mapPrim2Bf()).transpose();
+
+//SnonRel = (*this->basisSet_->mapPrim2Bf()) * SUncontracted
+//  * (*this->basisSet_->mapPrim2Bf()).transpose();
+  SCRConUnMap.noalias() = (*this->basisSet_->mapPrim2Bf()) * SUncontracted;	
+  SnonRel.noalias() = SCRConUnMap * (*this->basisSet_->mapPrim2Bf()).transpose();
+
   for (auto row = 0; row < this->basisSet_->nBasis(); row++){
       (*this->basisSet_->mapPrim2Bf()).block(row,0,1,nUncontracted) /=
         std::sqrt(SnonRel(row,row)); //scale by appropriate factor
@@ -153,20 +166,23 @@ void AOIntegrals::formP2Transformation(){
 
   RealMap SUn(this->memManager_->malloc<double>(nUnSq),
     nUncontracted,nUncontracted);
-  SUn = SUncontracted.real(); // Save S for later
+  SUn = SUncontracted; // Save S for later
 
   char JOBU = 'O', JOBVT = 'N';
   int LWORK = 6*nUncontracted;
   int INFO;
-  std::vector<double> ovlpEigValues(nUncontracted);
-  std::vector<double> WORK(LWORK);
+//std::vector<double> ovlpEigValues(nUncontracted);
+//std::vector<double> WORK(LWORK);
+  double * ovlpEigValues = 
+    this->memManager_->malloc<double>(nUncontracted);
+  double * WORK = this->memManager_->malloc<double>(LWORK);
 
   // Get eigenvalues for overlap matrix S (via SVD) 
   // Store the orthogonal transformation U back in S
 
   dgesvd_(&JOBU,&JOBVT,&nUncontracted,&nUncontracted,SUncontracted.data(),
-      &nUncontracted,&ovlpEigValues[0],SUncontracted.data(),&nUncontracted,
-      SUncontracted.data(),&nUncontracted,&WORK[0],&LWORK,&INFO);
+      &nUncontracted,ovlpEigValues,SUncontracted.data(),&nUncontracted,
+      SUncontracted.data(),&nUncontracted,WORK,&LWORK,&INFO);
 
   // Count linear dependencies here
   int nZero = 0;
@@ -183,13 +199,17 @@ void AOIntegrals::formP2Transformation(){
 
   // Put the kinetic energy in the orthonormal basis 
 
-  nUnSqScratch = SUncontracted.transpose() * TUncontracted;
-  TUncontracted = nUnSqScratch * SUncontracted;
+  nUnSqScratch.noalias() = SUncontracted.transpose() * TUncontracted;
+  TUncontracted.noalias() = nUnSqScratch * SUncontracted;
 
   // Get rid of the linear dependencies?
   dgesvd_(&JOBU,&JOBVT,&nUncontracted,&nUncontracted,TUncontracted.data(),
-      &nUncontracted,&ovlpEigValues[0],TUncontracted.data(),&nUncontracted,
-      TUncontracted.data(),&nUncontracted,&WORK[0],&LWORK,&INFO);
+      &nUncontracted,ovlpEigValues,TUncontracted.data(),&nUncontracted,
+      TUncontracted.data(),&nUncontracted,WORK,&LWORK,&INFO);
+
+
+  // Deallocate workspace
+  this->memManager_->free(WORK,LWORK);
 
   // Form the K transformation matrix from both pieces
   // (diagonalizes S) and (diagonalizes T). See eq. 12 in Rieher's paper from 2013
@@ -201,7 +221,7 @@ void AOIntegrals::formP2Transformation(){
   }
 
   RealMap UK(this->memManager_->malloc<double>(nUnSq),nUncontracted,nUncontracted);
-  UK = SUncontracted * TUncontracted;
+  UK.noalias() = SUncontracted * TUncontracted;
 
   if(this->printLevel_ >= 3){ 
     prettyPrintSmart(this->fileio_->out,UK,"Uk transformation");
@@ -210,8 +230,8 @@ void AOIntegrals::formP2Transformation(){
   // Now we transform V to V' 
   RealMap P2_Potential(this->memManager_->malloc<double>(nUnSq),nUncontracted,nUncontracted);
 
-  nUnSqScratch = UK.transpose() * VUncontracted;
-  P2_Potential = nUnSqScratch * UK;
+  nUnSqScratch.noalias() = UK.transpose() * VUncontracted;
+  P2_Potential.noalias() = nUnSqScratch * UK;
 
   this->memManager_->free(SUncontracted.data(),nUnSq);
   this->memManager_->free(TUncontracted.data(),nUnSq);
@@ -225,7 +245,7 @@ void AOIntegrals::formP2Transformation(){
   RealVecMap SCRATCHDZUnContracted(this->memManager_->malloc<double>(nUncontracted),nUncontracted);
 
   // compute pVp numerically
-  auto PVP = [&](IntegrationPoint pt, std::vector<RealMatrix> &result) {
+  auto PVP = [&](IntegrationPoint pt, std::vector<RealMap> &result) {
     for(auto iShell = 0, b_s = 0; iShell < unContractedShells.size();
 
          b_s += unContractedShells[iShell].size(),++iShell) {
@@ -314,8 +334,14 @@ void AOIntegrals::formP2Transformation(){
   AtomicGrid AGrid(100,590,GAUSSCHEBFST,LEBEDEV,BECKE,atomicCenters,
     this->molecule_->rIJ(),0,-1,1e6,1.0,false);
 
-  std::vector<RealMatrix> numPot(10,RealMatrix::Zero(nUncontracted,
-        nUncontracted));
+//std::vector<RealMatrix> numPot(10,RealMatrix::Zero(nUncontracted,
+//      nUncontracted));
+  std::vector<RealMap> numPot;
+  for(auto i = 0; i < 10; i++) {
+    numPot.emplace_back(this->memManager_->malloc<double>(nUnSq),
+      nUncontracted,nUncontracted);
+    numPot.back().setZero();
+  }
 
   for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
     AGrid.center() = iAtm;
@@ -323,7 +349,7 @@ void AOIntegrals::formP2Transformation(){
     AGrid.findNearestNeighbor();
     AGrid.scalingFactor()=
       0.5*elements[this->molecule_->index(iAtm)].sradius/phys.bohr;
-    AGrid.integrate<std::vector<RealMatrix>>(PVP,numPot);
+    AGrid.integrate<std::vector<RealMap>>(PVP,numPot);
   };
 
   for(auto i = 0; i < 10; i++) numPot[i] *= 4 * math.pi;
@@ -345,14 +371,14 @@ void AOIntegrals::formP2Transformation(){
   PVPZ = numPot[2] - numPot[4]; 
 
   // Apply the Uk unitary transformation ( Uk' * PVP * Uk)
-  nUnSqScratch = UK.adjoint() * PVPS;
-  PVPS = nUnSqScratch * UK;
-  nUnSqScratch = UK.adjoint() * PVPX;
-  PVPX = nUnSqScratch * UK;
-  nUnSqScratch = UK.adjoint() * PVPY;
-  PVPY = nUnSqScratch * UK;
-  nUnSqScratch = UK.adjoint() * PVPZ;
-  PVPZ = nUnSqScratch * UK;
+  nUnSqScratch.noalias() = UK.adjoint() * PVPS;
+  PVPS.noalias() = nUnSqScratch * UK;
+  nUnSqScratch.noalias() = UK.adjoint() * PVPX;
+  PVPX.noalias() = nUnSqScratch * UK;
+  nUnSqScratch.noalias() = UK.adjoint() * PVPY;
+  PVPY.noalias() = nUnSqScratch * UK;
+  nUnSqScratch.noalias() = UK.adjoint() * PVPZ;
+  PVPZ.noalias() = nUnSqScratch * UK;
 
   if(this->printLevel_ >= 3){
     prettyPrintSmart(cout,P2_Potential,"V");
@@ -367,7 +393,7 @@ void AOIntegrals::formP2Transformation(){
     cout << "|cross(P,VP) Z| = " << PVPZ.squaredNorm() << endl;
   }
 
-  RealVecMap PMap(&ovlpEigValues[0],nUncontracted);
+  RealVecMap PMap(ovlpEigValues,nUncontracted);
 
   if(this->printLevel_ >= 3){
     prettyPrintSmart(cout,PMap,"P^2");
@@ -377,14 +403,14 @@ void AOIntegrals::formP2Transformation(){
   PMap = PMap.cwiseSqrt();
   PMap = PMap.cwiseInverse();
 
-  nUnSqScratch = PMap.asDiagonal() * PVPS;
-  PVPS = nUnSqScratch * PMap.asDiagonal();
-  nUnSqScratch = PMap.asDiagonal() * PVPX;
-  PVPX = nUnSqScratch * PMap.asDiagonal();
-  nUnSqScratch = PMap.asDiagonal() * PVPY;
-  PVPY = nUnSqScratch * PMap.asDiagonal();
-  nUnSqScratch = PMap.asDiagonal() * PVPZ;
-  PVPZ = nUnSqScratch * PMap.asDiagonal();
+  nUnSqScratch.noalias() = PMap.asDiagonal() * PVPS;
+  PVPS.noalias() = nUnSqScratch * PMap.asDiagonal();
+  nUnSqScratch.noalias() = PMap.asDiagonal() * PVPX;
+  PVPX.noalias() = nUnSqScratch * PMap.asDiagonal();
+  nUnSqScratch.noalias() = PMap.asDiagonal() * PVPY;
+  PVPY.noalias() = nUnSqScratch * PMap.asDiagonal();
+  nUnSqScratch.noalias() = PMap.asDiagonal() * PVPZ;
+  PVPZ.noalias() = nUnSqScratch * PMap.asDiagonal();
 
   if(this->printLevel_ >= 3){
     cout << "|dot(P,VP)| = " << PVPS.squaredNorm() << endl;
@@ -505,6 +531,7 @@ void AOIntegrals::formP2Transformation(){
   // Diagonalize 
   // ------------------------------
 
+  // FIXME: (DBWY) Use LAPACK call here!!
   Eigen::SelfAdjointEigenSolver<ComplexMatrix> es;
   es.compute(CORE_HAMILTONIAN);
   
@@ -547,7 +574,17 @@ void AOIntegrals::formP2Transformation(){
 
   ComplexMap X(this->memManager_->malloc<dcomplex>(4*nUnSq),
     2*nUncontracted,2*nUncontracted);
-  X = S * L.inverse();
+
+  // Replaces L with L^{-1}
+  int TwoUnCon = 2 * nUncontracted;
+  std::vector<int> iPiv(TwoUnCon);
+  dcomplex * CWORK = this->memManager_->malloc<dcomplex>(LWORK);
+  zgetrf_(&TwoUnCon,&TwoUnCon,L.data(),&TwoUnCon,&iPiv[0],&INFO);
+  zgetri_(&TwoUnCon,L.data(),&TwoUnCon,&iPiv[0],CWORK,&LWORK,&INFO);
+
+  this->memManager_->free(CWORK,LWORK);
+
+  X.noalias() = S * L;
 
   this->memManager_->free(L.data(),4*nUnSq);
   this->memManager_->free(S.data(),4*nUnSq);
@@ -562,6 +599,10 @@ void AOIntegrals::formP2Transformation(){
   // Also known as the 'renormalization matrix' R
   ComplexMap Y(this->memManager_->malloc<dcomplex>(4*nUnSq),
      2*nUncontracted,2*nUncontracted);
+
+  // FIXME: (DBWY) Need to compute the sqrt smartly here. I'm 90% sure that
+  // you can use an SVD here as it constitues the "symmetric / Lowdin" orthogonalization
+  // step here...
   Y = (ComplexMatrix::Identity(2*nUncontracted,2*nUncontracted) 
      + X.adjoint() * X).pow(-0.5);
 
@@ -615,18 +656,19 @@ void AOIntegrals::formP2Transformation(){
   //  -------
   //  βα | ββ  
 
-  C4nUnSqScratch = phys.SPEED_OF_LIGHT * PMapC * X;
-  HCore2C = HCore2C + C4nUnSqScratch;
-  C4nUnSqScratch = phys.SPEED_OF_LIGHT * X.adjoint() * PMapC;
-  HCore2C = HCore2C + C4nUnSqScratch;
-  C4nUnSqScratch = 2 * phys.SPEED_OF_LIGHT * phys.SPEED_OF_LIGHT * 
+  // FIXME: (DBWY) Can you put some docs here that explain the GEMM calls?
+  C4nUnSqScratch.noalias() = phys.SPEED_OF_LIGHT * PMapC * X;
+  HCore2C.noalias() += C4nUnSqScratch;
+  C4nUnSqScratch.noalias() = phys.SPEED_OF_LIGHT * X.adjoint() * PMapC;
+  HCore2C.noalias() += C4nUnSqScratch;
+  C4nUnSqScratch.noalias() = 2 * phys.SPEED_OF_LIGHT * phys.SPEED_OF_LIGHT * 
 	ComplexMatrix::Identity(2*nUncontracted,2*nUncontracted);
-  C4nUnSqScratch = W - C4nUnSqScratch;
-  C4nUnSqScratch = X.adjoint() * C4nUnSqScratch;
-  C4nUnSqScratch = C4nUnSqScratch * X;
-  HCore2C = HCore2C + C4nUnSqScratch;
-  HCore2C = HCore2C * Y;
-  HCore2C = Y * HCore2C;
+  C4nUnSqScratch2.noalias() = W - C4nUnSqScratch;
+  C4nUnSqScratch.noalias() = X.adjoint() * C4nUnSqScratch2;
+  C4nUnSqScratch2.noalias() = C4nUnSqScratch * X;
+  HCore2C.noalias() += C4nUnSqScratch2;
+  C4nUnSqScratch.noalias() = HCore2C * Y;
+  HCore2C.noalias() = Y * C4nUnSqScratch;
   
   this->memManager_->free(PMapC.data(),4*nUnSq);
   this->memManager_->free(X.data(),4*nUnSq);
@@ -651,13 +693,13 @@ void AOIntegrals::formP2Transformation(){
   RealMap Hy(this->memManager_->malloc<double>(nUnSq),nUncontracted,nUncontracted);
   RealMap Hz(this->memManager_->malloc<double>(nUnSq),nUncontracted,nUncontracted);
 
-  Hs = 0.5 * (HCore2C.block(0,0,nUncontracted,nUncontracted).real()
+  Hs.noalias() = 0.5 * (HCore2C.block(0,0,nUncontracted,nUncontracted).real()
 	+ HCore2C.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).real());
-  Hz = 0.5 * (HCore2C.block(0,0,nUncontracted,nUncontracted).imag()
+  Hz.noalias() = 0.5 * (HCore2C.block(0,0,nUncontracted,nUncontracted).imag()
 	- HCore2C.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).imag());
-  Hx = 0.5 * (HCore2C.block(0,nUncontracted,nUncontracted,nUncontracted).imag()
+  Hx.noalias() = 0.5 * (HCore2C.block(0,nUncontracted,nUncontracted,nUncontracted).imag()
 	+ HCore2C.block(nUncontracted,0,nUncontracted,nUncontracted).imag());
-  Hy = 0.5 * (HCore2C.block(0,nUncontracted,nUncontracted,nUncontracted).real()
+  Hy.noalias() = 0.5 * (HCore2C.block(0,nUncontracted,nUncontracted,nUncontracted).real()
 	- HCore2C.block(nUncontracted,0,nUncontracted,nUncontracted).real());
 
   this->memManager_->free(HCore2C.data(),4*nUnSq);
@@ -669,6 +711,7 @@ void AOIntegrals::formP2Transformation(){
     prettyPrintSmart(this->fileio_->out,Hy,"Hz (p space)");
   }
 
+/*
   nUnSqScratch = Hs * UK.adjoint() * SUn;
   Hs = SUn * UK * nUnSqScratch; 
   nUnSqScratch = Hz * UK.adjoint() * SUn;
@@ -677,6 +720,28 @@ void AOIntegrals::formP2Transformation(){
   Hx = SUn * UK * nUnSqScratch; 
   nUnSqScratch = Hy * UK.adjoint() * SUn;
   Hy = SUn * UK * nUnSqScratch; 
+*/
+
+  // FIXME?: (Possibly) we always compute SUn * UK, we could store it once
+  nUnSqScratch.noalias() = Hs * UK.adjoint();
+  nUnSqScratch2.noalias() = nUnSqScratch * SUn;
+  nUnSqScratch.noalias() = SUn * UK;
+  Hs.noalias() = nUnSqScratch * nUnSqScratch2; 
+
+  nUnSqScratch.noalias() = Hz * UK.adjoint();
+  nUnSqScratch2.noalias() = nUnSqScratch * SUn;
+  nUnSqScratch.noalias() = SUn * UK;
+  Hz.noalias() = nUnSqScratch * nUnSqScratch2; 
+
+  nUnSqScratch.noalias() = Hx * UK.adjoint();
+  nUnSqScratch2.noalias() = nUnSqScratch * SUn;
+  nUnSqScratch.noalias() = SUn * UK;
+  Hx.noalias() = nUnSqScratch * nUnSqScratch2; 
+
+  nUnSqScratch.noalias() = Hy * UK.adjoint();
+  nUnSqScratch2.noalias() = nUnSqScratch * SUn;
+  nUnSqScratch.noalias() = SUn * UK;
+  Hy.noalias() = nUnSqScratch * nUnSqScratch2; 
 
   if(this->printLevel_ >= 3){
     prettyPrintSmart(this->fileio_->out,Hs,"Hs (r space)");
@@ -724,10 +789,20 @@ void AOIntegrals::formP2Transformation(){
   RealMap CoreZ(this->memManager_->malloc<double>(this->nBasis_ * this->nBasis_),
     this->nBasis_,this->nBasis_);
 
+/*
   CoreS = (*this->basisSet_->mapPrim2Bf()) * Hs * (*this->basisSet_->mapPrim2Bf()).transpose();
   CoreZ = (*this->basisSet_->mapPrim2Bf()) * Hz * (*this->basisSet_->mapPrim2Bf()).transpose();
   CoreX = (*this->basisSet_->mapPrim2Bf()) * Hx * (*this->basisSet_->mapPrim2Bf()).transpose();
   CoreY = (*this->basisSet_->mapPrim2Bf()) * Hy * (*this->basisSet_->mapPrim2Bf()).transpose();
+*/
+  SCRConUnMap.noalias() = (*this->basisSet_->mapPrim2Bf()) * Hs;
+  CoreS.noalias() = SCRConUnMap * (*this->basisSet_->mapPrim2Bf()).transpose();
+  SCRConUnMap.noalias() = (*this->basisSet_->mapPrim2Bf()) * Hz;
+  CoreZ.noalias() = SCRConUnMap * (*this->basisSet_->mapPrim2Bf()).transpose();
+  SCRConUnMap.noalias() = (*this->basisSet_->mapPrim2Bf()) * Hx;
+  CoreX.noalias() = SCRConUnMap * (*this->basisSet_->mapPrim2Bf()).transpose();
+  SCRConUnMap.noalias() = (*this->basisSet_->mapPrim2Bf()) * Hy;
+  CoreY.noalias() = SCRConUnMap * (*this->basisSet_->mapPrim2Bf()).transpose();
 
   this->memManager_->free(Hs.data(),nUnSq);
   this->memManager_->free(Hx.data(),nUnSq);
@@ -797,7 +872,10 @@ void AOIntegrals::formP2Transformation(){
   this->memManager_->free(CoreZ.data(),this->nBasis_*this->nBasis_);
   
   this->memManager_->free(nUnSqScratch.data(),nUnSq);
+  this->memManager_->free(nUnSqScratch2.data(),nUnSq);
   this->memManager_->free(C4nUnSqScratch.data(),4*nUnSq);
+  this->memManager_->free(C4nUnSqScratch2.data(),4*nUnSq);
+  this->memManager_->free(SCRUnCon,nUncontracted*this->nBasis_);
 
   this->memManager_->free(SUn.data(),nUnSq);
   this->memManager_->free(UK.data(),nUnSq);
