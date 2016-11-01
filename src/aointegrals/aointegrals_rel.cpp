@@ -59,7 +59,6 @@ if(this->printLevel_ >= 2){
   engineV.set_precision(0.0);
   engineC.set_precision(0.0);
 
-  cout << "Calculating uncontracted Libint Ints...";
   // Loop through and uncontract S and T
   //
   for(auto s1 = 0l, s12 = 0l, bf1_s = 0l; s1 < unContractedShells.size();
@@ -120,7 +119,6 @@ if(this->printLevel_ >= 2){
 
   } // s2
   } // s1
-  cout << "done!" << endl;
 
   SUncontracted = SUncontracted.selfadjointView<Lower>();
   TUncontracted = TUncontracted.selfadjointView<Lower>();
@@ -162,11 +160,9 @@ if(this->printLevel_ >= 2){
 // Get eigenvalues for overlap matrix S (via SVD) 
 // Store the orthogonal transformation U back in S
 
-  cout << "Performing SVD on uncontracted overlap...";
   dgesvd_(&JOBU,&JOBVT,&nUncontracted,&nUncontracted,SUncontracted.data(),
       &nUncontracted,&ovlpEigValues[0],SUncontracted.data(),&nUncontracted,
       SUncontracted.data(),&nUncontracted,&WORK[0],&LWORK,&INFO);
-  cout << "done!" << endl;
 
 // normalize
 // What happens when we divide by zero?
@@ -186,13 +182,11 @@ if(this->printLevel_ >= 2){
   RealMatrix TMP = SUncontracted.transpose() * TUncontracted;
   TUncontracted = TMP * SUncontracted;
 
-  cout << "Performing SVD on uncontracted T...";
 // Get rid of the linear dependencies?
   dgesvd_(&JOBU,&JOBVT,&nUncontracted,&nUncontracted,TUncontracted.data(),
       &nUncontracted,&ovlpEigValues[0],TUncontracted.data(),&nUncontracted,
       TUncontracted.data(),&nUncontracted,&WORK[0],&LWORK,&INFO);
 
-  cout << "done!" << endl;
 // Form the K transformation matrix from both pieces
 // (diagonalizes S) and (diagonalizes T). See eq. 12 in Rieher's paper from 2013
 
@@ -318,10 +312,7 @@ if(this->printLevel_ >= 3){
   std::vector<RealMatrix> numPot(10,RealMatrix::Zero(nUncontracted,
         nUncontracted));
 
-  cout << "Performing numerical PVP integrals..." << endl;
   for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
-    tracker = 0;
-    cout << "IAtm = " << iAtm << endl;
     AGrid.center() = iAtm;
     AGrid.setRadCutOff(atomRadCutoff[iAtm]);
     AGrid.findNearestNeighbor();
@@ -329,7 +320,6 @@ if(this->printLevel_ >= 3){
       0.5*elements[this->molecule_->index(iAtm)].sradius/phys.bohr;
     AGrid.integrate<std::vector<RealMatrix>>(PVP,numPot);
   };
-  cout << "done!" << endl;
 
   for(auto i = 0; i < 10; i++) numPot[i] *= 4 * math.pi;
 
@@ -465,7 +455,6 @@ if(this->twoEFudge == 2){
 // [ cp   W'-2mc^2 ]
 // -------------------------------------------------
 
-  cout << "Forming 4C Core Hamiltonian...";
   PMap = PMap.cwiseInverse(); //switch from p^-1 back to p
   ComplexMatrix CORE_HAMILTONIAN(4*nUncontracted,4*nUncontracted);
 
@@ -494,7 +483,6 @@ if(this->twoEFudge == 2){
     = CORE_HAMILTONIAN.block(
       0,2*nUncontracted,2*nUncontracted,2*nUncontracted);
 
-   cout << "done!" << endl;
 // ------------------------------
 // Diagonalize 
 // ------------------------------
@@ -504,12 +492,10 @@ if(this->printLevel_ >= 2){
   (this->fileio_->out) << "|H|" << CORE_HAMILTONIAN.squaredNorm() << endl;
 }
 
-  cout << "Diagonalizing 4C Core Hamiltonian...";
   Eigen::SelfAdjointEigenSolver<ComplexMatrix> es;
   es.compute(CORE_HAMILTONIAN);
   RealMatrix HEV= es.eigenvalues();
   ComplexMatrix HEVx= es.eigenvectors();
-  cout << "done!" << endl;
 
 // Print out the energies (eigenvalues) and eigenvectors
 if(this->printLevel_ >= 2){
@@ -526,7 +512,6 @@ if(this->printLevel_ >= 2){
   ComplexMatrix S = 
     HEVx.block(2*nUncontracted,2*nUncontracted,2*nUncontracted,2*nUncontracted);
 
-  cout << "SVD of L...";
 // Do we even use this SVD in calculating L inverse?
   Eigen::JacobiSVD<ComplexMatrix> 
     svd(L,Eigen::ComputeThinU | Eigen::ComputeThinV);
@@ -535,7 +520,6 @@ if(this->printLevel_ >= 2){
   ComplexMatrix SVL = svd.matrixU();
 
   ComplexMatrix X = S * L.inverse(); //See above!
-  cout << "done!" << endl;
 
 // Print out X and its squared norm
 if(this->printLevel_ >= 2){
