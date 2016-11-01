@@ -257,6 +257,7 @@ int main(int argc, char **argv){
 //moints.initMeta();
 //moints.testMOInts();
 
+/*
   FOPPA<dcomplex> resp(DIAGONALIZATION,SPIN_SEPARATED,false,false);
   resp.communicate(singleSlater,memManager);
   resp.doFull();
@@ -265,6 +266,7 @@ int main(int argc, char **argv){
   resp.initMeta();
   resp.alloc();
   resp.runResponse();
+*/
   
   finalizeCQ();
   return 0;

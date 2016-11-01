@@ -95,17 +95,14 @@ void FOPPropagator<T>::formFull() {
   moints.formVOVO();
   moints.formVVOO();
   
-  cout << "Allocating matrix" << endl;
   this->fullMatrix_ = 
     this->memManager_->template malloc<T>(this->nSingleDim_*this->nSingleDim_);
 
-  cout << "Zeroing matrix" << endl;
   std::fill_n(this->fullMatrix_,this->nSingleDim_*this->nSingleDim_,0.0);
 
 
   if(this->sett_.part == FULL) {
 
-    cout << "Building A" << endl;
     /// Builds Spin-Separated A Matrix (TOP LEFT for !TDA)
       
     // A(ai,bj) = d(ai,bj)(E(a) - E(i)) + (ai | bj) - (ab | ij)
@@ -132,7 +129,6 @@ void FOPPropagator<T>::formFull() {
           (*this->pscf_->reference()->epsA())(I);
     }
 
-    cout << "Building B" << endl;
     // Build Top Right B for RPA
     if( not this->sett_.doTDA) {
       // B(ai,bj) = (ai | bj) - (aj | bi)
@@ -331,7 +327,6 @@ void FOPPropagator<T>::formFull() {
 
   // THESE ARE GENERAL TO ALL SPIN PARTITIONS
   if(not this->sett_.doTDA){
-    cout << "Placing other mats" << endl;
     // Copies A**H to bottom right for !TDA
     for(auto AI = 0; AI < this->nSingleDim_/2; AI++)
     for(auto BJ = 0; BJ < this->nSingleDim_/2; BJ++){
@@ -347,7 +342,6 @@ void FOPPropagator<T>::formFull() {
 
   } // Not TDA
 
-  cout << "Symmitrizing" << endl;
   TMap Full(this->fullMatrix_,this->nSingleDim_,this->nSingleDim_);
   Full = Full.template selfadjointView<Upper>();
 //prettyPrint(cout,Full,"Full");
