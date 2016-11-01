@@ -39,7 +39,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("computeProperties",&SingleSlater<double>::computeProperties      )
     .def("printMultipole"  , &SingleSlater<double>::printMultipole         )
     .def("printProperties" , &SingleSlater<double>::printProperties        )
-    .def("SCF"             , &SingleSlater<double>::SCF2                   )
+    .def("SCF"             , &SingleSlater<double>::SCF3                   )
     .def("communicate"     , &SingleSlater<double>::communicate            )
     .def("initMeta"        , &SingleSlater<double>::initMeta               )
     .def("alloc"           , &SingleSlater<double>::alloc                  )
@@ -52,10 +52,9 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setSCFDenTol"    , &SingleSlater<double>::setSCFDenTol           )
     .def("setSCFEneTol"    , &SingleSlater<double>::setSCFEneTol           )
     .def("setSCFMaxIter"   , &SingleSlater<double>::setSCFMaxIter          )
+    .def("setITPdt"        , &SingleSlater<double>::setITPdt               )
     .def("setField"        , &SingleSlater<double>::Wrapper_setField       )
     .def("setGuess"        , &SingleSlater<double>::setGuess               )
-    .def("setCorrKernel"   , &SingleSlater<double>::setCorrKernel          )
-    .def("setExchKernel"   , &SingleSlater<double>::setExchKernel          )
     .def("setDFTKernel"    , &SingleSlater<double>::setDFTKernel           )
     .def("setDFTWeightScheme", &SingleSlater<double>::setDFTWeightScheme)
     .def("setDFTGrid"      , &SingleSlater<double>::setDFTGrid             ) 
@@ -64,7 +63,11 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setDFTNAng"  , &SingleSlater<double>::setDFTNAng         )
     .def("setDFTScreenTol" , &SingleSlater<double>::setDFTScreenTol        )
 
-    .def("checkDFTType", &SingleSlater<double>::checkDFTType)
+    .def("addSlater", &SingleSlater<double>::addSlater )
+    .def("addB88", &SingleSlater<double>::addB88 )
+    .def("addLYP", &SingleSlater<double>::addLYP )
+    .def("addVWN5", &SingleSlater<double>::addVWN5 )
+    .def("addVWN3", &SingleSlater<double>::addVWN3 )
   
     .def("turnOffDFTScreening", &SingleSlater<double>::turnOffDFTScreening ) 
 
@@ -82,6 +85,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def_readwrite("isGGA"        , &SingleSlater<double>::isGGA           )
     .def_readwrite("isHF"         , &SingleSlater<double>::isHF            )
     .def_readwrite("doDIIS"       , &SingleSlater<double>::doDIIS          )
+    .def_readwrite("doITP"        , &SingleSlater<double>::doITP           )
   ;
 
   class_<SingleSlater<dcomplex>,boost::noncopyable>("SingleSlater_complex",
@@ -95,7 +99,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("computeProperties",&SingleSlater<dcomplex>::computeProperties      )
     .def("printMultipole"  , &SingleSlater<dcomplex>::printMultipole         )
     .def("printProperties" , &SingleSlater<dcomplex>::printProperties        )
-    .def("SCF"             , &SingleSlater<dcomplex>::SCF2                   )
+    .def("SCF"             , &SingleSlater<dcomplex>::SCF3                   )
     .def("communicate"     , &SingleSlater<dcomplex>::communicate            )
     .def("initMeta"        , &SingleSlater<dcomplex>::initMeta               )
     .def("alloc"           , &SingleSlater<dcomplex>::alloc                  )
@@ -108,10 +112,9 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setSCFDenTol"    , &SingleSlater<dcomplex>::setSCFDenTol           )
     .def("setSCFEneTol"    , &SingleSlater<dcomplex>::setSCFEneTol           )
     .def("setSCFMaxIter"   , &SingleSlater<dcomplex>::setSCFMaxIter          )
+    .def("setITPdt"        , &SingleSlater<dcomplex>::setITPdt               )
     .def("setField"        , &SingleSlater<dcomplex>::Wrapper_setField       )
     .def("setGuess"        , &SingleSlater<dcomplex>::setGuess               )
-    .def("setCorrKernel"   , &SingleSlater<dcomplex>::setCorrKernel          )
-    .def("setExchKernel"   , &SingleSlater<dcomplex>::setExchKernel          )
     .def("setDFTKernel"    , &SingleSlater<dcomplex>::setDFTKernel           )
     .def("setDFTWeightScheme", &SingleSlater<dcomplex>::setDFTWeightScheme)
     .def("setDFTGrid"      , &SingleSlater<dcomplex>::setDFTGrid             ) 
@@ -120,7 +123,12 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setDFTNAng"  , &SingleSlater<dcomplex>::setDFTNAng         )
     .def("setDFTScreenTol" , &SingleSlater<dcomplex>::setDFTScreenTol        )
 
-    .def("checkDFTType", &SingleSlater<dcomplex>::checkDFTType)
+    .def("addSlater", &SingleSlater<dcomplex>::addSlater )
+    .def("addB88", &SingleSlater<dcomplex>::addB88 )
+    .def("addLYP", &SingleSlater<dcomplex>::addLYP )
+    .def("addVWN5", &SingleSlater<dcomplex>::addVWN5 )
+    .def("addVWN3", &SingleSlater<dcomplex>::addVWN3 )
+
   
     .def("turnOffDFTScreening", &SingleSlater<dcomplex>::turnOffDFTScreening ) 
 
@@ -138,51 +146,55 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def_readwrite("isGGA"        , &SingleSlater<dcomplex>::isGGA           )
     .def_readwrite("isHF"         , &SingleSlater<dcomplex>::isHF            )
     .def_readwrite("doDIIS"       , &SingleSlater<dcomplex>::doDIIS          )
+    .def_readwrite("doITP"        , &SingleSlater<dcomplex>::doITP           )
   ;
 
-  enum_<SingleSlater<double>::REFERENCE>("Reference")
-    .value("_INVALID"      , SingleSlater<double>::_INVALID               )
-    .value("RHF"           , SingleSlater<double>::RHF                    )
-    .value("UHF"           , SingleSlater<double>::UHF                    )
-    .value("CUHF"          , SingleSlater<double>::CUHF                   )
-    .value("TCS"           , SingleSlater<double>::TCS                    )
-    .value("RKS"           , SingleSlater<double>::RKS                    )
-    .value("UKS"           , SingleSlater<double>::UKS                    )
-    .value("CUKS"          , SingleSlater<double>::CUKS                   )
-    .value("GKS"           , SingleSlater<double>::GKS                    )
+  enum_<REFERENCE>("Reference")
+    .value("_INVALID"      , REFERENCE::_INVALID               )
+    .value("RHF"           , REFERENCE::RHF                    )
+    .value("UHF"           , REFERENCE::UHF                    )
+    .value("CUHF"          , REFERENCE::CUHF                   )
+    .value("TCS"           , REFERENCE::TCS                    )
+    .value("X2C"           , REFERENCE::X2C                    )
+//  .value("RKS"           , REFERENCE::RKS                    )
+//  .value("UKS"           , REFERENCE::UKS                    )
+//  .value("CUKS"          , REFERENCE::CUKS                   )
+//  .value("GKS"           , REFERENCE::GKS                    )
   ;
 
-  enum_<SingleSlater<double>::GUESS>("Guess")
-    .value("SAD"  , SingleSlater<double>::SAD  )
-    .value("CORE" , SingleSlater<double>::CORE )
-    .value("READ" , SingleSlater<double>::READ )
+  enum_<GUESS>("Guess")
+    .value("SAD"    , GUESS::SAD    )
+    .value("CORE"   , GUESS::CORE   )
+    .value("READ"   , GUESS::READ   )
+    .value("RANDOM" , GUESS::RANDOM )
   ;
 
-  enum_<SingleSlater<double>::EXCH>("EXCH")
-    .value("NOEXCH"  , SingleSlater<double>::NOEXCH) 
-    .value("EXACT"   , SingleSlater<double>::EXACT )
-    .value("SLATER"  , SingleSlater<double>::SLATER)
-    .value("B88"     , SingleSlater<double>::B88   )
-  ;
-  enum_<SingleSlater<double>::CORR>("CORR")
-    .value("NOCORR", SingleSlater<double>::NOCORR) 
-    .value("VWN3"  , SingleSlater<double>::VWN3  )
-    .value("VWN5"  , SingleSlater<double>::VWN5  )
-    .value("LYP"   , SingleSlater<double>::LYP   )
-  ;
-  enum_<SingleSlater<double>::DFT>("DFT")
-    .value("NODFT"      , SingleSlater<double>::NODFT      )
-    .value("USERDEFINED", SingleSlater<double>::USERDEFINED)
-    .value("LSDA"       , SingleSlater<double>::LSDA       )
+  enum_<DFT>("DFT")
+    .value("NODFT"      , DFT::NODFT      )
+    .value("USERDEFINED", DFT::USERDEFINED)
+    .value("LSDA"       , DFT::LSDA       )
   ;
 
-  enum_<SingleSlater<double>::DFT_GRID>("DFT_GRID")
+/*
+  enum_<SingleSlater<double>::DFT_RAD_GRID>("DFT_RAD_GRID")
     .value("EULERMACL", SingleSlater<double>::EULERMACL)
     .value("GAUSSCHEB", SingleSlater<double>::GAUSSCHEB)
   ;
   enum_<SingleSlater<double>::DFT_WEIGHT_SCHEME>("DFT_WEIGHT_SCHEME")
     .value("BECKE",  SingleSlater<double>::BECKE )
     .value("FRISCH", SingleSlater<double>::FRISCH)
+  ;
+*/
+
+  enum_<GRID_TYPE>("GRID_TYPE")
+    .value("GAUSSCHEBFST",  GRID_TYPE::GAUSSCHEBFST)
+    .value("GAUSSCHEBSND",  GRID_TYPE::GAUSSCHEBSND)
+    .value("EULERMAC",      GRID_TYPE::EULERMAC)
+    .value("LEBEDEV" ,      GRID_TYPE::LEBEDEV)
+  ;
+  enum_<ATOMIC_PARTITION>("ATOMIC_PARTITION")
+    .value("BECKE",  ATOMIC_PARTITION::BECKE )
+    .value("FRISCH", ATOMIC_PARTITION::FRISCH)
   ;
     
 
@@ -207,6 +219,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("computeI",      &Molecule::computeI         )
     .def("computeRij",    &Molecule::computeRij       )
     .def("cart",          &Molecule::Wrapper_cart     )
+    .def("nAtoms",        &Molecule::nAtoms           )
   ;
 
   class_<BasisSet,boost::noncopyable>("BasisSet",init<>())
@@ -222,21 +235,23 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("forceCart"    ,  &BasisSet::forceCart              )
   ;
 
+/*
   class_<Controls,boost::noncopyable>("Controls",init<>())
     .def("iniControls"  , &Controls::iniControls  )
     .def("printSettings", &Controls::printSettings,
       printSettings_Overload(args("x"),"printSettings docstring")
       )
   ;
+*/
 
   class_<FileIO,boost::noncopyable>("FileIO",init<std::string>())
     .def(init<std::string,std::string>())
     .def(init<std::string,std::string,std::string>())
     .def("write"      , &FileIO::write         )
     .def("iniH5Files" , &FileIO::iniH5Files    )
-    .def("iniStdGroups", &FileIO::iniStdGroups )
-    .def("iniStdSCFFilesDouble", &FileIO::iniStdSCFFilesDouble)
-    .def("iniStdSCFFilesComplex", &FileIO::iniStdSCFFilesComplex)
+//  .def("iniStdGroups", &FileIO::iniStdGroups )
+//  .def("iniStdSCFFilesDouble", &FileIO::iniStdSCFFilesDouble)
+//  .def("iniStdSCFFilesComplex", &FileIO::iniStdSCFFilesComplex)
     .def_readwrite("doRestart", &FileIO::doRestart   )
   ;
 
@@ -261,6 +276,8 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def_readonly("integralAlgorithm", &AOIntegrals::integralAlgorithm)
 //  .def_readwrite("allocERI", &AOIntegrals::allocERI           )
 //  .def_readwrite("doDF"    , &AOIntegrals::doDF               )
+    .def_readwrite("doX2C"   , &AOIntegrals::doX2C              )
+    .def_readwrite("useFiniteWidthNuclei", &AOIntegrals::useFiniteWidthNuclei)
   ;
 
   enum_<AOIntegrals::INTEGRAL_ALGORITHM>("AOIntegrals_INTEGRAL_ALGORITHM")
@@ -269,6 +286,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("DENFIT"   , AOIntegrals::DENFIT)
   ;
 
+/*
   class_<RealTime<double>,boost::noncopyable>("RealTime_double",init<>())
     .def("communicate"  , &RealTime<double>::communicate  )
     .def("initMeta"     , &RealTime<double>::initMeta     )
@@ -293,7 +311,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setPrintLevel", &RealTime<double>::setPrintLevel)
     .def("printRT"      , &RealTime<double>::printRT      )
     //.def("recs"         , &RealTime<double>::Wrapper_recs )
-    .def("lastDipole"   , &RealTime<double>::lastDipole   )
+    .def("lastDipole"   , &RealTime<double>::lastDipole_python   )
     .def("lastEnergy"   , &RealTime<double>::lastEnergy   )
     .def("getTimeStep"  , &RealTime<double>::getTimeStep  )
     .def("doNotTarCSV"  , &RealTime<double>::doNotTarCSV  )
@@ -324,12 +342,13 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setPrintLevel", &RealTime<dcomplex>::setPrintLevel)
     .def("printRT"      , &RealTime<dcomplex>::printRT      )
 //    .def("recs"         , &RealTime<dcomplex>::Wrapper_recs )
-    .def("lastDipole"   , &RealTime<dcomplex>::lastDipole   )
+    .def("lastDipole"   , &RealTime<dcomplex>::lastDipole_python   )
     .def("lastEnergy"   , &RealTime<dcomplex>::lastEnergy   )
     .def("getTimeStep"  , &RealTime<dcomplex>::getTimeStep  )
     .def("doNotTarCSV"  , &RealTime<dcomplex>::doNotTarCSV  )
     .def("setIRstrt"       , &RealTime<dcomplex>::setIRstrt       )
   ;
+*/
 
 /*
   class_<RealTime<double>::Wrapper_PropInfo,boost::noncopyable>("RTD_PropInfo",init<>())
@@ -351,6 +370,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
   ;
 */
 
+/*
   enum_<RealTime<double>::ORTHO>("RealTime_ORTHO"   )
     .value("Lowdin"   , RealTime<double>::Lowdin    )
     .value("Cholesky" , RealTime<double>::Cholesky  )
@@ -408,7 +428,9 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("RXZ", RealTime<dcomplex>::RXZ)
     .value("RYZ", RealTime<dcomplex>::RYZ)
   ;
+*/
 
+/*
   class_<MOIntegrals<double>,boost::noncopyable>("MOIntegrals_double",init<>())
     .def("communicate" , &MOIntegrals<double>::communicate)
     .def("initMeta"    , &MOIntegrals<double>::initMeta   )
@@ -417,7 +439,9 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("communicate" , &MOIntegrals<dcomplex>::communicate)
     .def("initMeta"    , &MOIntegrals<dcomplex>::initMeta   )
   ;
+*/
 
+/*
   class_<SDResponse<double>,boost::noncopyable>("SDResponse_double",init<>())
     .def("communicate"       , &SDResponse<double>::communicate               )
     .def("initMeta"          , &SDResponse<double>::initMeta                  )
@@ -449,7 +473,9 @@ BOOST_PYTHON_MODULE(libpythonapi){
     
     .def_readonly("nIter"    ,&SDResponse<dcomplex>::nQNIter                   )
   ;
+*/
 
+/*
   class_<NumericalDifferentiation<double>,boost::noncopyable>(
     "NumericalDifferentiationDouble",init<>())
     .def("differentiate"  ,&NumericalDifferentiation<double>::differentiate)
@@ -474,7 +500,9 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def_readwrite("computeES2ESNACME", 
                    &NumericalDifferentiation<double>::computeES2ESNACME)
   ;
+*/
 
+/*
   enum_<SDResponse<double>::METHOD>("SDResponse_METHOD")
     .value("INVALID", SDResponse<double>::__invalid    )
     .value("CIS"    , SDResponse<double>::CIS          )
@@ -484,7 +512,9 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("PPCTDA" , SDResponse<double>::PPCTDA       )
     .value("STAB"   , SDResponse<double>::STAB         )
   ;
+*/
 
+/*
   enum_<RESPONSE_TYPE>("RESPONSE_TYPE")
     .value("NOMETHOD", RESPONSE_TYPE::NOMETHOD    )
     .value("CIS"    , RESPONSE_TYPE::CIS          )
@@ -493,6 +523,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("PPTDA" , RESPONSE_TYPE::PPTDA       )
     .value("STAB"   , RESPONSE_TYPE::STAB         )
   ;
+*/
 
   
 

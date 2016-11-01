@@ -290,10 +290,11 @@ double traceSymm(RealMatrix* a, RealMatrix* b) {
   return tmpVal;
  };
 
+/*
 void printUnitInfo(Controls * controls, SingleSlater<double> * singleSlater, SDResponse<double> * sdResponse,
                    RealTime<double> * realTime){
   if(controls->unitTest == Controls::UnitSCF)
-    cout << std::setprecision(10) << singleSlater->totalEnergy << "/"
+    cout << std::setprecision(10) << singleSlater->totalEnergy() << "/"
          << std::setprecision(4)
          << singleSlater->elecDipole()[0]/phys.debye << "/"
          << singleSlater->elecDipole()[1]/phys.debye << "/"
@@ -336,11 +337,13 @@ void printUnitInfo(Controls * controls, SingleSlater<double> * singleSlater, SDR
                                   << (realTime->EDtot())       << endl;
     }
 }
+*/
 
+/*
 void printUnitInfo(Controls * controls, SingleSlater<dcomplex> * singleSlater, SDResponse<double> * sdResponse, 
                    RealTime<dcomplex> * realTime){
   if(controls->unitTest == Controls::UnitSCF)
-    cout << std::setprecision(10) << singleSlater->totalEnergy << "/"
+    cout << std::setprecision(10) << singleSlater->totalEnergy() << "/"
          << std::setprecision(4)
          << singleSlater->elecDipole()[0]/phys.debye << "/"
          << singleSlater->elecDipole()[1]/phys.debye << "/"
@@ -384,6 +387,7 @@ void printUnitInfo(Controls * controls, SingleSlater<dcomplex> * singleSlater, S
          << endl;
     }
 }
+*/
 
 void initCQ(int argc, char** argv){
 #ifdef USE_LIBINT
@@ -401,12 +405,15 @@ void initCQ(int argc, char** argv){
   MPI_Init(&argc,&argv);
   MPI_Barrier(MPI_COMM_WORLD);
 #endif
+
+  H5::Exception::dontPrint();
 }
 
 void initCQ(){
 #ifdef USE_LIBINT
   // Bootstrap Libint env
-  libint2::initialize(); 
+
+  libint2::initialize();
 #endif
 #ifdef _OPENMP
   // Set up Thread Pool (Default serial)
@@ -419,6 +426,8 @@ void initCQ(){
   MPI_Init(NULL,NULL);
   MPI_Barrier(MPI_COMM_WORLD);
 #endif
+
+  H5::Exception::dontPrint();
 }
 
 void finalizeCQ(){
@@ -432,6 +441,7 @@ void finalizeCQ(){
 #endif
 }
 
+/*
 template<> 
 void writeJobMeta(SingleSlater<double> &ss, SDResponse<double> &sdr, 
   RealTime<double> &rt, Molecule &mol, AOIntegrals &aoints, FileIO &fileio){
@@ -448,6 +458,9 @@ void writeJobMeta(SingleSlater<double> &ss, SDResponse<double> &sdr,
     strcpy(metaData.guess,"READ");
   else if(ss.guess() == SingleSlater<double>::CORE)
     strcpy(metaData.guess,"CORE");
+  else if(ss.guess() == SingleSlater<double>::RANDOM)
+    strcpy(metaData.guess,"RANDOM");
+
 
   metaData.nBasis = ss.nBasis();
   metaData.charge = mol.charge();
@@ -455,7 +468,9 @@ void writeJobMeta(SingleSlater<double> &ss, SDResponse<double> &sdr,
 
   fileio.jobMetaFile->write(&metaData,(*fileio.jobMetaType));
 }
+*/
 
+/*
 template<> 
 void writeJobMeta(SingleSlater<dcomplex> &ss, SDResponse<dcomplex> &sdr, 
   RealTime<dcomplex> &rt, Molecule &mol, AOIntegrals &aoints, FileIO &fileio){
@@ -472,6 +487,8 @@ void writeJobMeta(SingleSlater<dcomplex> &ss, SDResponse<dcomplex> &sdr,
     strcpy(metaData.guess,"READ");
   else if(ss.guess() == SingleSlater<dcomplex>::CORE)
     strcpy(metaData.guess,"CORE");
+  else if(ss.guess() == SingleSlater<dcomplex>::RANDOM)
+    strcpy(metaData.guess,"RANDOM");
 
   metaData.nBasis = ss.nBasis();
   metaData.charge = mol.charge();
@@ -479,5 +496,6 @@ void writeJobMeta(SingleSlater<dcomplex> &ss, SDResponse<dcomplex> &sdr,
 
   fileio.jobMetaFile->write(&metaData,(*fileio.jobMetaType));
 }
+*/
 
 } // namespace ChronusQ

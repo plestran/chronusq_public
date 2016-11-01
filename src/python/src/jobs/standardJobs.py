@@ -36,7 +36,7 @@ def communicate(workers):
     workers["CQFileIO"], workers["CQMemManager"]
   )
   try:
-    workers["CQRealTime"].communicate(workers["CQFileIO"],workers["CQControls"],
+    workers["CQRealTime"].communicate(workers["CQFileIO"],
       workers["CQAOIntegrals"],workers["CQSingleSlater"])
   except KeyError:
     pass
@@ -84,8 +84,8 @@ def runSCF(workers,meta):
 
   workers["CQSingleSlater"].formGuess()
 
-  workers["CQSingleSlater"].formFock()
-  workers["CQSingleSlater"].computeEnergy()
+  #workers["CQSingleSlater"].formFock()
+  #workers["CQSingleSlater"].computeEnergy()
 
   workers["CQSingleSlater"].SCF()
 

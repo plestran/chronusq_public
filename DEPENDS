@@ -12,8 +12,8 @@ Molecular integrals over Gaussians:     Libint [1]
 Threaded and Vectorized Linear Algebra: Eigen  [2]
 Tensor Algebra:                         BTAS   [3]
 Binary File Management:                 HDF5   [4]
-Linear Algebra:													LAPACK [5]
-																				BLAS   [6,7,8]
+Linear Algebra:				LAPACK [5]
+				        BLAS   [6,7,8]
 General Infrastructure:                 Boost  [9]
 
 [1] Edward F. Valeev. Libint: machine-generated library for efficient evaluation

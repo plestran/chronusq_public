@@ -31,8 +31,8 @@ void SingleSlater<T>::printEnergy(){
   this->fileio_->out<<"\nEnergy Information:"<<endl;
   this->fileio_->out<<std::right<<std::setw(30)<<std::fixed<<"E(one electron) = "<<std::setw(15)<<this->energyOneE<<std::setw(5)<<" Eh "<<endl;
   this->fileio_->out<<std::right<<std::setw(30)<<std::fixed<<"E(two electron) = "<<std::setw(15)<<this->energyTwoE<<std::setw(5)<<" Eh "<<endl;
-  this->fileio_->out<<std::right<<std::setw(30)<<std::fixed<<"E(nuclear repulsion) = "<<std::setw(15)<<this->energyNuclei<<std::setw(5)<<" Eh "<<endl;
-  this->fileio_->out<<std::right<<std::setw(30)<<std::fixed<<"E(total) = "<<std::setw(15)<<this->totalEnergy<<std::setw(5)<<" Eh "<<endl;
+  this->fileio_->out<<std::right<<std::setw(30)<<std::fixed<<"E(nuclear repulsion) = "<<std::setw(15)<<this->energyNuclei_<<std::setw(5)<<" Eh "<<endl;
+  this->fileio_->out<<std::right<<std::setw(30)<<std::fixed<<"E(total) = "<<std::setw(15)<<this->totalEnergy_<<std::setw(5)<<" Eh "<<endl;
 };
 /******************************
  * Print Energy Contributions *
@@ -43,10 +43,14 @@ void SingleSlater<T>::printEnergy(){
  **********************************/
 template<typename T>
 void SingleSlater<T>::printInfo() {
-  this->fileio_->out<<"\nSingle Slater Determinent Wave Function Information:"<<endl;
-  this->fileio_->out<<std::setw(15)<<"nOccA ="<<std::setw(8)<<this->nOccA_<<std::setw(5)<<" "<<std::setw(20)<<"nVirA ="<<std::setw(8)<<this->nVirA_<<endl;
-  this->fileio_->out<<std::setw(15)<<"nOccB ="<<std::setw(8)<<this->nOccB_<<std::setw(5)<<" "<<std::setw(20)<<"nVirB ="<<std::setw(8)<<this->nVirB_<<endl;
-  this->fileio_->out<<std::setw(15)<<"Multiplicity ="<<std::setw(8)<<this->multip_<<endl;
+  this->fileio_->out << "\nSingle Slater Determinent Wave Function Information:" << endl;
+  this->fileio_->out << std::setw(15) << "nOA = " << std::setw(8) << this->nOA_
+                     << std::setw(5)  << " "      
+                     << std::setw(20) << "nVA = " << std::setw(8) << this->nVA_ << endl;
+  this->fileio_->out << std::setw(15) << "nOB = " << std::setw(8) << this->nOB_
+                     << std::setw(5)  << " "      
+                     << std::setw(20) << "nVB = " << std::setw(8) << this->nVB_ << endl;
+  this->fileio_->out << std::setw(15) << "Multiplicity = " << std::setw(8) << this->multip_ << endl;
 };
 /***********************************************
  * Print the Multipole Moments (Electric Only) *
@@ -340,7 +344,18 @@ void SingleSlater<T>::printSCFHeader(ostream &output){
     output << "Core Hamiltonian";
   else if(this->guess_ == READ)
     output << "Read";
+  else if(this->guess_ == RANDOM)
+    output << "Random";
   output << endl;
+  output << std::setw(38) << std::left << "  DIIS Extrapolation Algorithm:";
+  if(this->doDIIS) output << "CDIIS";
+  else             output << "No DIIS Extrapolation";
+  output << endl;
+  output << std::setw(38) << std::left << "  Imaginary Time Propagation:";
+  if(this->doITP) output << "True, with dt = " << this->dt;
+  else            output << "False"; 
+  output << endl;
+
 
   if(this->isDFT){
     output << std::setw(38) << std::left << "  Density Functional:";
@@ -352,34 +367,24 @@ void SingleSlater<T>::printSCFHeader(ostream &output){
 
     output << endl;
 
+    
+    if(this->DFTKernel_ == USERDEFINED){
+      output << std::setw(38) << std::left << "    Exchange Kernel:";
+      output << this->dftFunctionals_[0]->name;
+      output << endl;
 
-    output << std::setw(38) << std::left << "    Exchange Kernel:";
-    if(this->ExchKernel_ == NOEXCH)
-      output << "No Exchange";
-    else if(this->ExchKernel_ == SLATER)
-      output << "Slater";
-    else if(this->ExchKernel_ == EXACT)
-      output << "Exact (Hartree-Fock)";
-    else if(this->ExchKernel_ == B88)
-      output << "B88";
-    output << endl;
-
-    output << std::setw(38) << std::left << "    Correlation Kernel:";
-    if(this->CorrKernel_ == NOCORR)
-      output << "No Correlation";
-    else if(this->CorrKernel_ == VWN3)
-      output << "VWN3";
-    else if(this->CorrKernel_ == VWN5)
-      output << "VWN5";
-    else if(this->CorrKernel_ == LYP)
-      output << "LYP";
-    output << endl;
+      if(dftFunctionals_.size() > 1){
+        output << std::setw(38) << std::left << "    Correlation Kernel:";
+        output << this->dftFunctionals_[1]->name;
+        output << endl;
+      }
+   }
 
    
     output << std::setw(38) << std::left << "    Radial Grid:";
-    if(this->dftGrid_ == EULERMACL)
+    if(this->dftGrid_ == EULERMAC)
       output << "Euler-Maclaurin";
-    else if(this->dftGrid_ == GAUSSCHEB)
+    else if(this->dftGrid_ == GAUSSCHEBFST)
       output << "Gauss-Chebyshev (1st Kind)";
     output << "  (" << this->nRadDFTGridPts_ << ")";
     output << endl;
@@ -418,7 +423,7 @@ void SingleSlater<T>::printSCFHeader(ostream &output){
   output << std::setw(16) << "SCF Iteration";
   output << std::setw(18) << "Energy (Eh)";
   output << std::setw(18) << "\u0394E (Eh)";
-  if(this->Ref_ == TCS)
+  if(this->nTCS_ == 2)
     output << std::setw(18) << "|\u0394P|";
   else {
     output << std::setw(18) << "|\u0394P(\u03B1)|";
@@ -429,7 +434,7 @@ void SingleSlater<T>::printSCFHeader(ostream &output){
   output << std::setw(16) << "-------------";
   output << std::setw(18) << "-----------";
   output << std::setw(18) << "-------";
-  if(this->Ref_ == TCS)
+  if(this->nTCS_ == 2)
     output << std::setw(18) << "----";
   else {
     output << std::setw(18) << "-------";
@@ -444,13 +449,13 @@ void SingleSlater<T>::printSCFIter(int iter, double EDel,double PARMS,double PBR
   this->fileio_->out << std::setw(16) << std::left 
                      << "  SCFIt: " + std::to_string(iter+1);
   this->fileio_->out << std::setw(18) << std::fixed << std::setprecision(10)
-                     << std::left << this->totalEnergy;
+                     << std::left << this->totalEnergy_;
   this->fileio_->out << std::setw(14) << std::scientific << std::right 
                      << std::setprecision(7) << EDel;
   this->fileio_->out << "   ";
   this->fileio_->out << std::setw(13) << std::scientific << std::right 
                      << std::setprecision(7) << PARMS;
-  if(!this->isClosedShell && this->Ref_ != TCS) {
+  if(!this->isClosedShell && this->nTCS_ == 1) {
     this->fileio_->out << "   ";
     this->fileio_->out << std::setw(13) << std::scientific << std::right 
                        << std::setprecision(7) << PBRMS;
@@ -459,3 +464,48 @@ void SingleSlater<T>::printSCFIter(int iter, double EDel,double PARMS,double PBR
 
   this->fileio_->out << endl;
 }      
+
+template <typename T>
+void SingleSlater<T>::printDensity() {
+  prettyPrintSmart(this->fileio_->out,(*this->onePDMScalar_),
+    "Density (Scalar)");
+  if(this->nTCS_ == 2 or !this->isClosedShell)
+    prettyPrintSmart(this->fileio_->out,(*this->onePDMMz_),
+      "Density (Mz)");
+  if(this->nTCS_ == 2) {
+    prettyPrintSmart(this->fileio_->out,(*this->onePDMMx_),
+      "Density (Mx)");
+    prettyPrintSmart(this->fileio_->out,(*this->onePDMMy_),
+      "Density (My)");
+  }
+};
+
+template <typename T>
+void SingleSlater<T>::printFock() {
+  prettyPrintSmart(this->fileio_->out,(*this->fockScalar_),
+    "Fock (Scalar)");
+  if(this->nTCS_ == 2 or !this->isClosedShell)
+    prettyPrintSmart(this->fileio_->out,(*this->fockMz_),
+      "Fock (Mz)");
+  if(this->nTCS_ == 2) {
+    prettyPrintSmart(this->fileio_->out,(*this->fockMx_),
+      "Fock (Mx)");
+    prettyPrintSmart(this->fileio_->out,(*this->fockMy_),
+      "Fock (My)");
+  }
+};
+
+template <typename T>
+void SingleSlater<T>::printPT() {
+  prettyPrintSmart(this->fileio_->out,(*this->PTScalar_),
+    "PT (Scalar)");
+  if(this->nTCS_ == 2 or !this->isClosedShell)
+    prettyPrintSmart(this->fileio_->out,(*this->PTMz_),
+      "PT (Mz)");
+  if(this->nTCS_ == 2) {
+    prettyPrintSmart(this->fileio_->out,(*this->PTMx_),
+      "PT (Mx)");
+    prettyPrintSmart(this->fileio_->out,(*this->PTMy_),
+      "PT (My)");
+  }
+};

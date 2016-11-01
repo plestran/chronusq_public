@@ -26,6 +26,7 @@
 #include <qn.h>
 
 namespace ChronusQ {
+/*
   template<>
   void QuasiNewton2<double>::iniScratchFiles(){
     (*this->out_) << "Initializing Files for QuasiNewton Calculation" << endl;
@@ -49,13 +50,13 @@ namespace ChronusQ {
     std::string ASName = "A Super Matrix "           + std::to_string(t);
     std::string SSName = "S Super Matrix "           + std::to_string(t);
 
-    this->TRFile_     = this->genScrFile_(H5::PredType::NATIVE_DOUBLE,TRName,dims);
-  //this->SigmaRFile_ = this->genScrFile_(H5::PredType::NATIVE_DOUBLE,SRName,dims);
-  //this->ResRFile_   = this->genScrFile_(H5::PredType::NATIVE_DOUBLE,RRName,dims);
-  //this->URFile_     = this->genScrFile_(H5::PredType::NATIVE_DOUBLE,URName,dims);
+    this->TRFile_     = this->genScrFile_(H5PredType<double>(),TRName,dims);
+  //this->SigmaRFile_ = this->genScrFile_(H5PredType<double>(),SRName,dims);
+  //this->ResRFile_   = this->genScrFile_(H5PredType<double>(),RRName,dims);
+  //this->URFile_     = this->genScrFile_(H5PredType<double>(),URName,dims);
 
   //if(this->matrixType_ == HERMETIAN_GEP)
-  //  this->RhoRFile_  = this->genScrFile_(H5::PredType::NATIVE_DOUBLE,PRName,dims);
+  //  this->RhoRFile_  = this->genScrFile_(H5PredType<double>(),PRName,dims);
 
  
 
@@ -66,19 +67,19 @@ namespace ChronusQ {
       std::string RLName = "Residual Vectors (Left) " + std::to_string(t);
       std::string ULName = "Solution Vectors (Left) " + std::to_string(t);
      
-      this->TLFile_     = this->genScrFile_(H5::PredType::NATIVE_DOUBLE,TLName,dims);
-    //this->SigmaLFile_ = this->genScrFile_(H5::PredType::NATIVE_DOUBLE,SLName,dims);
-    //this->ResLFile_   = this->genScrFile_(H5::PredType::NATIVE_DOUBLE,RLName,dims);
-    //this->ULFile_     = this->genScrFile_(H5::PredType::NATIVE_DOUBLE,ULName,dims);
+      this->TLFile_     = this->genScrFile_(H5PredType<double>(),TLName,dims);
+    //this->SigmaLFile_ = this->genScrFile_(H5PredType<double>(),SLName,dims);
+    //this->ResLFile_   = this->genScrFile_(H5PredType<double>(),RLName,dims);
+    //this->ULFile_     = this->genScrFile_(H5PredType<double>(),ULName,dims);
      
     //if(this->matrixType_ == HERMETIAN_GEP)
-    //  this->RhoLFile_  = this->genScrFile_(H5::PredType::NATIVE_DOUBLE,PLName,dims);
+    //  this->RhoLFile_  = this->genScrFile_(H5PredType<double>(),PLName,dims);
     }
 
-    if(this->specialAlgorithm_ == SYMMETRIZED_TRIAL) {
-      this->ASuperFile_ = this->genScrFile_(H5::PredType::NATIVE_DOUBLE,ASName,
+    if(this->qnObj_->specialAlgorithm_ == SYMMETRIZED_TRIAL) {
+      this->ASuperFile_ = this->genScrFile_(H5PredType<double>(),ASName,
         dimsSmall);
-      this->SSuperFile_ = this->genScrFile_(H5::PredType::NATIVE_DOUBLE,SSName,
+      this->SSuperFile_ = this->genScrFile_(H5PredType<double>(),SSName,
         dimsSmall);
     }
   }; // QuasiNewton2<double>::iniScratchFiles
@@ -96,10 +97,10 @@ namespace ChronusQ {
     H5::DataSpace memSpace(2,subDim,NULL);
     H5::DataSpace subDataSpace = this->TRFile_->getSpace();
     subDataSpace.selectHyperslab(H5S_SELECT_SET,count,offset,stride,block);
-    this->TRFile_->write(this->TRMem_,H5::PredType::NATIVE_DOUBLE,memSpace,
+    this->TRFile_->write(this->TRMem_,H5PredType<double>(),memSpace,
       subDataSpace);
     if(this->qnObj_->needsLeft())
-      this->TLFile_->write(this->TLMem_,H5::PredType::NATIVE_DOUBLE,memSpace,
+      this->TLFile_->write(this->TLMem_,H5PredType<double>(),memSpace,
         subDataSpace);
   
   }; // QuasiNewton2<double>::writeTrialVectors
@@ -117,12 +118,13 @@ namespace ChronusQ {
     H5::DataSpace memSpace(2,subDim,NULL);
     H5::DataSpace subDataSpace = this->TRFile_->getSpace();
     subDataSpace.selectHyperslab(H5S_SELECT_SET,count,offset,stride,block);
-    this->TRFile_->read(this->TRMem_,H5::PredType::NATIVE_DOUBLE,memSpace,
+    this->TRFile_->read(this->TRMem_,H5PredType<double>(),memSpace,
       subDataSpace);
     if(this->qnObj_->needsLeft())
-      this->TLFile_->read(this->TLMem_,H5::PredType::NATIVE_DOUBLE,memSpace,
+      this->TLFile_->read(this->TLMem_,H5PredType<double>(),memSpace,
         subDataSpace);
   
   }; // QuasiNewton2<double>::readTrialVectors
+*/
 
 }; // namespace ChronusQ

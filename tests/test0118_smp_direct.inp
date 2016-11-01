@@ -17,10 +17,13 @@ job       = SCF
 basis     = sto3g.gbs
 ints			= direct
 exchange  = Slater
-corr      = NOCORR
+
+#[SCF]
+#guess=CORE
+#DIIS = False
 
 #
 #  Misc Settings
 #
 [Misc]
-nsmp = 2
+nsmp = 7

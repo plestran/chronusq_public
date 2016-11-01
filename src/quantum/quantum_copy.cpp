@@ -18,14 +18,27 @@ namespace ChronusQ {
     this->maxMultipole_          = 
       const_cast<Quantum<dcomplex>&>(other).maxMultipole(); 
 
+    this->isAllocated_ = false;
+    auto NB  = const_cast<Quantum<dcomplex>&>(other).onePDMScalar()->rows(); 
+    this->alloc(NB);
+
+    for(auto IDen = 0; IDen < this->onePDM().size(); IDen++)
+      *this->onePDM_[IDen] = 
+        const_cast<Quantum<dcomplex>&>(other).onePDM()[IDen]->real();
+
+/*
     this->isScattered_ = 
       const_cast<Quantum<dcomplex>&>(other).isScattered();
+*/
 
+/*
     auto NBT = const_cast<Quantum<dcomplex>&>(other).onePDMA()->rows(); 
     auto NB  = const_cast<Quantum<dcomplex>&>(other).onePDMScalar()->rows(); 
     auto NBTSq = NBT*NBT;
     auto NBSq = NB*NB; 
+*/
 
+/*
     this->onePDMA_ = std::unique_ptr<RealMap>(
         new RealMap( this->memManager_->malloc<double>(NBTSq),NBT,NBT)
       );
@@ -69,6 +82,7 @@ namespace ChronusQ {
       (*this->onePDMMy_) = 
         const_cast<Quantum<dcomplex>&>(other).onePDMMy()->real();
     };
+*/
   };
 
   template<>
@@ -91,6 +105,16 @@ namespace ChronusQ {
     this->memManager_ =
       const_cast<Quantum<double>&>(other).memManager();
 
+    this->isAllocated_ = false;
+    auto NB  = const_cast<Quantum<double>&>(other).onePDMScalar()->rows(); 
+    this->alloc(NB);
+
+    for(auto IDen = 0; IDen < this->onePDM().size(); IDen++){
+      this->onePDM_[IDen]->real() = 
+        *const_cast<Quantum<double>&>(other).onePDM()[IDen];
+    }
+
+/*
     this->isScattered_ = 
       const_cast<Quantum<double>&>(other).isScattered();
 
@@ -116,5 +140,6 @@ namespace ChronusQ {
 
       } // NTCS check
     } // if not RHF/KS
+*/
   }; // COPY
 };

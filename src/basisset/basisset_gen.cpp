@@ -55,8 +55,13 @@ void BasisSet::constructLocal(Molecule * mol){
               (*mol->cart())(1,iAtom),
               (*mol->cart())(2,iAtom)};
 
-          this->shellsCQ.push_back(ChronusQ::ShellCQ{*iShell});
+          this->shellsCQ.push_back(this->shells_.back());
         };
+
+        for(auto iCons = (*iRef).unNormalizedCons.begin(); 
+            iCons != (*iRef).unNormalizedCons.end(); ++iCons){
+          this->unNormCons_.push_back(*iCons);
+        }
         found = true;
       }
     } // loop iRef
@@ -66,6 +71,7 @@ void BasisSet::constructLocal(Molecule * mol){
              " not found in current Basis Set",
            this->fileio_->out);
   } // loop iAtom
+
   this->computeMeta();
 //cout << "Construct Local Shells" << endl;
 //for(auto i = 0; i < this->shells_.size(); i++) cout << this->shells_[i] << endl;
@@ -75,6 +81,7 @@ void BasisSet::constructLocal(Molecule * mol){
  *  Construct an external basis defintion using the local reference shells
  */
 void BasisSet::constructExtrn(Molecule * mol, BasisSet *genBasis){
+  int nShell = 0;
   genBasis->fileio_ = this->fileio_;
   for(auto iAtom = 0; iAtom < mol->nAtoms(); iAtom++){
     bool found = false;
@@ -98,6 +105,12 @@ void BasisSet::constructExtrn(Molecule * mol, BasisSet *genBasis){
             { (*mol->cart())(0,iAtom),
               (*mol->cart())(1,iAtom),
               (*mol->cart())(2,iAtom)};
+          genBasis->shellsCQ.push_back(ChronusQ::ShellCQ{genBasis->shells_[nShell]});
+          nShell++;
+        }
+        for(auto iCons = (*iRef).unNormalizedCons.begin(); 
+            iCons != (*iRef).unNormalizedCons.end(); ++iCons){
+          genBasis->unNormCons_.push_back(*iCons);
         }
         found = true;
       }
@@ -109,6 +122,7 @@ void BasisSet::constructExtrn(Molecule * mol, BasisSet *genBasis){
            this->fileio_->out);
   } // loop IAtom
   genBasis->computeMeta();
+  genBasis->forceCart_ = this->forceCart_;
 
 } // BasisSet::constructExtrn
 
@@ -143,6 +157,10 @@ void BasisSet::computeMeta(){
   for(auto shell : this->shells_){
     this->nLShell_[shell.contr[0].l]++;
   } // loop shell
+
+  // Always allocate scratch for basis eval and first derivatives
+  this->basisEvalScr_.resize(2*((this->maxL_+1)*(this->maxL_+2))); // (1 + 3(x,y,z)) Times (l+1)(l+2)/2 Cartesian
+  this->basisEvalScr2_.resize(4*((2*this->maxL_+1))); // (1 + 3(x,y,z)) Times (2l+1) Cartesian
 
 } // BasisSet::computeMeta
 }; // namespace ChronusQ

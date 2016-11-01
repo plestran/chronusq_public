@@ -45,7 +45,7 @@ void NumericalDifferentiation<T>::cartesianDiff(){
      "NumDiffScr.out","NumDiffScr.rst");
 
   fileioTmp.iniH5Files();
-  fileioTmp.iniStdGroups();
+//fileioTmp.iniStdGroups();
 
   int nAtoms = this->molecule_undisplaced_->nAtoms(); 
   int multip = this->molecule_undisplaced_->multip(); 
@@ -568,7 +568,7 @@ void NumericalDifferentiation<T>::computeGS(SingleSlater<T> &ss){
   ss.formGuess();
   ss.formFock();
   ss.computeEnergy();
-  ss.SCF();
+  ss.SCF3();
   ss.computeProperties();
   ss.printProperties();
 

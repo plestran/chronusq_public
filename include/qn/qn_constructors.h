@@ -27,6 +27,7 @@
 QuasiNewton2(){
   this->maxSubSpace_ = 0;
   this->qnObj_       = NULL;
+  this->memManager_  = NULL;
   this->nMicroIter_  = 0;
   this->nMacroIter_  = 0;
   this->nTotalIter_  = 0;
@@ -36,29 +37,26 @@ QuasiNewton2(){
   this->maxMicroIter_     = 128;
   this->maxMacroIter_     = 20;
   this->residualTol_      = 5.0e-6;
+/*
   this->problemType_      = DIAGONALIZATION;
   this->matrixType_       = HERMETIAN;
   this->guessType_        = RESIDUAL_DAVIDSON;
   this->specialAlgorithm_ = NOT_SPECIAL;
+*/
 
   this->out_              = &std::cout;
 
 };
 
-QuasiNewton2(QNCallable<T> * obj) : QuasiNewton2(){
-  this->qnObj_ = obj;
+QuasiNewton2(QNCallable<T> * obj, CQMemManager *mgr) : QuasiNewton2(){
+  this->qnObj_       = obj;
+  this->memManager_  = mgr;
   this->maxSubSpace_ = std::min(250,obj->nSingleDim()/2);
 };
 
-QuasiNewton2(QNCallable<T> * obj, std::function<H5::DataSet*(const H5::PredType&,
-  std::string&, std::vector<hsize_t>&)> fileFactory) : QuasiNewton2(obj){
+QuasiNewton2(QNCallable<T> * obj, CQMemManager *mgr, 
+  std::function<H5::DataSet*(const H5::CompType&, std::string&, 
+    std::vector<hsize_t>&)> fileFactory) : QuasiNewton2(obj,mgr){
   this->genScrFile_ = fileFactory;
-/*
-  std::vector<hsize_t> dims;
-  dims.push_back(1);
-  dims.push_back(1);
-
-  std::string name = "Test";
-  auto ptr = this->genScrFile_(H5::PredType::NATIVE_DOUBLE,name,dims);
-*/
 };
+

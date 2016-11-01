@@ -1,16 +1,7 @@
-if(APPLE)
-add_library(quantum STATIC quantum_copy.cpp )
-else()
-add_library(quantum SHARED quantum_copy.cpp )
-endif()
+add_library(quantum STATIC quantum_copy.cpp quantum_impl.cpp)
 
 if(APPLE)
 target_link_libraries(quantum LINK_PUBLIC singleslater)
 target_link_libraries(quantum LINK_PUBLIC ${EXTERNAL_CQ_DEPS})
 endif()
 
-if(USE_LIBINT)
-if(BUILD_LIBINT)
- add_dependencies(singleslater libint)
-endif()
-endif()

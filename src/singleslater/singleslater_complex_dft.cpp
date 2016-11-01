@@ -29,6 +29,7 @@ namespace ChronusQ {
 // form the Vxc matrix        //
 //----------------------------//
 
+/*
 template<>
 double SingleSlater<dcomplex>::formBeckeW(cartGP gridPt, int iAtm){
   return 0.0;
@@ -72,7 +73,9 @@ double SingleSlater<dcomplex>::gB88(int nDer, double x){
   return 0.0;
 
 };
+*/
 
+/*
 template<>
 void SingleSlater<dcomplex>::genSparseBasisMap(){
 };
@@ -80,7 +83,9 @@ void SingleSlater<dcomplex>::genSparseBasisMap(){
 template<>
 void SingleSlater<dcomplex>::genSparseRcrosP(){
 };
+*/
 
+/*
 template<>
 std::array<double,6> SingleSlater<dcomplex>::formVExSlater (double rho, double spindensity){
   return {0.0,0.0,0.0,0.0,0.0,0.0};
@@ -170,6 +175,7 @@ void SingleSlater<dcomplex>::evalVXC_store(int iAtm, int ipts, double & energyX,
        double & energyC, RealMatrix * VXA, RealMatrix * VXB, RealMatrix * VCA, 
        RealMatrix * VCB, RealMatrix *STmp, RealMatrix *dSTmpX, RealMatrix *dSTmpY, RealMatrix *dSTmpZ){
 };
+*/
 
 
 

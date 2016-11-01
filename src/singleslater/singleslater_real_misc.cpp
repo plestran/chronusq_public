@@ -139,19 +139,21 @@ void SingleSlater<double>::getAlgebraicField(){
   this->algebraicFieldShort_ = "\u211D";
 }
 
+/*
 template<>
 void SingleSlater<double>::writeSCFFiles(){
   this->fileio_->alphaSCFDen->write(this->onePDMA_->data(),
       H5::PredType::NATIVE_DOUBLE);
   this->fileio_->alphaMO->write(this->moA_->data(),
       H5::PredType::NATIVE_DOUBLE);
-  if(!this->isClosedShell && this->Ref_ != TCS){
+  if(!this->isClosedShell && this->nTCS_ == 1){
     this->fileio_->betaSCFDen->write(this->onePDMB_->data(),
         H5::PredType::NATIVE_DOUBLE);
     this->fileio_->betaMO->write(this->moB_->data(),
         H5::PredType::NATIVE_DOUBLE);
   }
 }
+*/
 
 template<>
 void SingleSlater<double>::fixPhase(){
@@ -162,6 +164,47 @@ void SingleSlater<double>::fixPhase(){
      if(this->moA_->col(iCol)(maxIndex) < 0)
        this->moA_->col(iCol) *= -1;
    }
+};
+
+template<>
+void SingleSlater<double>::backTransformMOs(){
+  if(this->nTCS_ == 1) {
+    this->NBSqScratch_->noalias() = 
+      (*this->aointegrals_->ortho1_) * (*this->moA_);
+    (*this->moA_) = (*this->NBSqScratch_);
+
+    if(!this->isClosedShell){
+      this->NBSqScratch_->noalias() = 
+        (*this->aointegrals_->ortho1_) * (*this->moB_);
+      (*this->moB_) = (*this->NBSqScratch_);
+    }
+  } else {
+    Eigen::Map<RealMatrix,0,Eigen::Stride<Dynamic,Dynamic> >
+      MOA(this->moA_->data(),this->nBasis_,this->nTCS_*this->nBasis_,
+          Eigen::Stride<Dynamic,Dynamic>(this->nTCS_*this->nBasis_,2));
+    Eigen::Map<RealMatrix,0,Eigen::Stride<Dynamic,Dynamic> >
+      MOB(this->moA_->data()+1,this->nBasis_,this->nTCS_*this->nBasis_,
+          Eigen::Stride<Dynamic,Dynamic>(this->nTCS_*this->nBasis_,2));
+
+    RealMap SCRATCH1(this->memManager_->malloc<double>(this->nBasis_*
+          this->nBasis_*this->nTCS_),this->nBasis_,this->nTCS_*this->nBasis_);
+    RealMap SCRATCH2(this->memManager_->malloc<double>(this->nBasis_*
+          this->nBasis_*this->nTCS_),this->nBasis_,this->nTCS_*this->nBasis_);
+
+    SCRATCH1 = MOA;
+    SCRATCH2 = (*this->aointegrals_->ortho1_) * SCRATCH1;
+    MOA = SCRATCH2; 
+
+    SCRATCH1 = MOB;
+    SCRATCH2 = (*this->aointegrals_->ortho1_) * SCRATCH1;
+    MOB = SCRATCH2; 
+
+    this->memManager_->free(SCRATCH1.data(),
+        this->nBasis_*this->nBasis_*this->nTCS_);
+    this->memManager_->free(SCRATCH2.data(),
+        this->nBasis_*this->nBasis_*this->nTCS_);
+    
+  }
 };
 
 } // Namespace ChronusQ

@@ -28,6 +28,7 @@ using ChronusQ::FileIO;
 using ChronusQ::SingleSlater;
 
 namespace ChronusQ{
+/*
 template<>
 void SingleSlater<double>::GenDComm(int iter){
   RealMap ErrA(
@@ -37,7 +38,7 @@ void SingleSlater<double>::GenDComm(int iter){
 
   ErrA = (*this->fockA_) * (*this->onePDMA_) * (*this->aointegrals_->overlap_);
   ErrA -= (*this->aointegrals_->overlap_) * (*this->onePDMA_) * (*this->fockA_);
-  if(!this->isClosedShell && this->Ref_ != TCS){
+  if(!this->isClosedShell && this->nTCS_ == 1){
     RealMap ErrB(
       this->ErrorBetaMem_ + (iter % (this->nDIISExtrap_-1)) * this->lenF_,
       this->nBasis_,this->nBasis_
@@ -47,7 +48,9 @@ void SingleSlater<double>::GenDComm(int iter){
     ErrB -= (*this->aointegrals_->overlap_) * (*this->onePDMB_) * (*this->fockB_);
   }
 } // GenDComm
+*/
 
+/*
 template<>
 void SingleSlater<double>::genDComm2(int iter) {
   auto NTCSxNBASIS = this->nTCS_ * this->nBasis_;
@@ -57,11 +60,10 @@ void SingleSlater<double>::genDComm2(int iter) {
     this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_
   );
 
-  if(this->nTCS_ == 1 && this->isClosedShell) {
-    (*this->NBSqScratch_) = (*this->onePDMA_) * (*this->aointegrals_->overlap_);
-    ErrA = (*this->fockA_) * (*this->NBSqScratch_);
-    ErrA -= this->NBSqScratch_->adjoint() * (*this->fockA_);
-  } else {
+  (*this->NBSqScratch_) = (*this->onePDMA_) * (*this->aointegrals_->overlap_);
+  ErrA = (*this->fockA_) * (*this->NBSqScratch_);
+  ErrA -= this->NBSqScratch_->adjoint() * (*this->fockA_);
+  if(this->nTCS_ == 1 && !this->isClosedShell) {
     RealMap ErrB(
       this->ErrorBetaMem_ + (iter % (this->nDIISExtrap_-1)) * NSQ,
       this->nTCS_*this->nBasis_,this->nTCS_*this->nBasis_
@@ -71,5 +73,6 @@ void SingleSlater<double>::genDComm2(int iter) {
     ErrB -= this->NBSqScratch_->adjoint() * (*this->fockB_);
   };
 };
+*/
 
 }// Namespace ChronusQ

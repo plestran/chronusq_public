@@ -10,8 +10,3 @@ target_link_libraries(classtools LINK_PUBLIC ${EXTERNAL_CQ_DEPS})
 endif()
 
 
-if(USE_LIBINT)
-if(BUILD_LIBINT)
- add_dependencies(classtools libint)
-endif()
-endif()

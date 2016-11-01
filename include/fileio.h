@@ -34,6 +34,9 @@
 /* Error Messages 1000-1999 */
 /****************************/
 namespace ChronusQ {
+
+template<typename F> H5::CompType H5PredType();
+  
 class FileIO {
 
   std::string  name;                    // name of general file
@@ -43,13 +46,16 @@ class FileIO {
   std::string  name_scr;                // name of the scratch file
   std::string  name_restart;            // name of the restart file
 
+/*
   std::string  metaDataGroupPath;
   std::string  operatorGroupPath;
   std::string  SCFGroupPath;
 
   std::string  jobMetaPath;
   std::string  scfMetaPath;
+*/
 
+/*
   // Operator Paths
   std::string  overlapPath  ;
   std::string  kineticPath  ;
@@ -64,7 +70,10 @@ class FileIO {
   std::string  betaSCFDenPath  ;
   std::string  alphaMOPath     ;
   std::string  betaMOPath      ;
+*/
 
+  std::string generateRandomTag(int);
+  std::random_device randDevice;
 
 public:
 
@@ -74,6 +83,7 @@ public:
   std::unique_ptr<H5::H5File> scr;
   std::unique_ptr<H5::H5File> restart;
   
+/*
   std::unique_ptr<H5::Group>  Meta;
   std::unique_ptr<H5::Group>  Operators;
   std::unique_ptr<H5::Group>  SCF;
@@ -94,27 +104,27 @@ public:
   std::unique_ptr<H5::DataSet> betaSCFDen;
   std::unique_ptr<H5::DataSet> alphaMO;
   std::unique_ptr<H5::DataSet> betaMO;
+*/
 
   struct ScratchPartition {
     H5::DataSet data;
     H5::DataSpace dataspace;
-    std::string name;
+    const std::string name;
 
-    ScratchPartition(std::string &nm, const H5::PredType &type, H5::DataSpace &space, 
-      H5::H5File &file){
+    ScratchPartition(const std::string &nm, const H5::CompType &type, 
+      H5::DataSpace &space, H5::H5File &file): name(nm), dataspace(space){
 
       this->data = H5::DataSet(
         file.createDataSet(nm,type,space)
       );
-      this->name = nm;
-      this->dataspace = space;
     };
   };
 
   std::vector<ScratchPartition> scratchPartitions;
-  H5::DataSet * createScratchPartition(const H5::PredType&, std::string &, 
+  H5::DataSet * createScratchPartition(const H5::CompType&,const std::string &, 
     std::vector<hsize_t>&);
 
+/*
   template<typename T> struct metaData {
     T val;
     char desc[45];
@@ -127,11 +137,14 @@ public:
     int  mult;
     char guess[45];
   };
+*/
 
+/*
   std::unique_ptr<H5::CompType> metaDataTypeDouble;
   std::unique_ptr<H5::CompType> metaDataTypeInt;
   std::unique_ptr<H5::CompType> jobMetaType;
   std::unique_ptr<H5::CompType> complexType;
+*/
 
   bool doRestart;
 
@@ -147,6 +160,7 @@ public:
     if(out.is_open()) out.close();
   }
 
+/*
   enum STDFILES {
     Overlap,
     Kinetic,
@@ -160,12 +174,16 @@ public:
     AlphaMO,
     BetaMO
   };
+*/
 
 
+/*
   bool haveStdOpFiles;
   bool haveStdSCFFiles;
   void iniH5Paths();
+*/
   void iniH5Files();
+/*
   void iniCompType();
   void iniStdGroups();
   void iniMetaFiles();
@@ -174,6 +192,7 @@ public:
 //void iniStdSCFFiles(bool,int);
   void iniStdSCFFilesDouble(bool,int);
   void iniStdSCFFilesComplex(bool,int);
+*/
 
   // Python API
   void write(std::string);

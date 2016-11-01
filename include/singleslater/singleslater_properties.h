@@ -26,11 +26,11 @@
 
 template<typename T>
 void SingleSlater<T>::computeEnergy(){
-//  this->scatterDensity();
+/*
   if(getRank() == 0) {
     this->energyOneE = 
       this->template computeProperty<double,DENSITY_TYPE::TOTAL>(
-          *this->aointegrals_->oneE_);
+          *this->aointegrals_->coreH_);
     if(this->nTCS_ == 1 && this->isClosedShell)
       this->energyTwoE = 
         0.5 * this->template computeProperty<double,DENSITY_TYPE::TOTAL>(
@@ -52,51 +52,70 @@ void SingleSlater<T>::computeEnergy(){
       }
       this->energyTwoE *= 0.5; // ??
     }
-    /*
-    if(!this->isClosedShell && this->Ref_ != TCS)
-      this->energyTwoE = 0.5 * (
-        this->template computeProperty<double,DENSITY_TYPE::ALPHA>(
-          this->PTA_->conjugate()) + 
-        this->template computeProperty<double,DENSITY_TYPE::BETA>(
-          this->PTB_->conjugate())
-      );
-    else
-      this->energyTwoE = 0.5 * (
-        this->template computeProperty<double,DENSITY_TYPE::TOTAL>(
-          this->PTA_->conjugate()) 
-      ); 
-      */
+*/
+  this->energyOneE = 
+    this->template computeProperty<double,DENSITY_TYPE::TOTAL>(
+        *this->aointegrals_->coreH_);
+  
+  if(this->aointegrals_->doX2C) {
+    dcomplex SOPart(0);
+    if(this->nTCS_ == 2 or !this->isClosedShell) {
+      SOPart +=  this->template computeProperty<dcomplex,DENSITY_TYPE::MZ>(
+            *this->aointegrals_->oneEmz_);
+    }
+    if(this->nTCS_ == 2){
+      SOPart +=  this->template computeProperty<dcomplex,DENSITY_TYPE::MX>(
+            *this->aointegrals_->oneEmx_);
+      SOPart +=  this->template computeProperty<dcomplex,DENSITY_TYPE::MY>(
+            *this->aointegrals_->oneEmy_);
+    }
+    SOPart *= math.ii;
+    this->energyOneE -= std::real(SOPart);
+  }
+
+  this->energyTwoE = 
+    0.5 * this->template computeProperty<double,DENSITY_TYPE::TOTAL>(
+        this->PTScalar_->conjugate());
+  if(this->nTCS_ == 2 or !this->isClosedShell) {
+    this->energyTwoE += 
+      0.5 * this->template computeProperty<double,DENSITY_TYPE::MZ>(
+          this->PTMz_->conjugate());
+  }
+  if(this->nTCS_ == 2) {
+    this->energyTwoE += 
+      0.5 * this->template computeProperty<double,DENSITY_TYPE::MY>(
+          this->PTMy_->conjugate());
+    this->energyTwoE += 
+      0.5 * this->template computeProperty<double,DENSITY_TYPE::MX>(
+          this->PTMx_->conjugate());
+  }
+  this->energyTwoE *= 0.5;
+
       
-    if(this->isDFT) this->energyTwoE += this->totalEx + this->totalEcorr;
+    if(this->isDFT) this->energyTwoE += this->energyExc;
 
     // Add in the electric field component if they are non-zero
     std::array<double,3> null{{0,0,0}};
     if(this->elecField_ != null){
-      auto exptdipole = this-> template computeProperty<double,
-           DENSITY_TYPE::TOTAL>(this->aointegrals_->elecDipoleSep_);
+      this->computeMultipole();
       for(auto iXYZ = 0; iXYZ < 3; iXYZ++){
-        this->energyOneE += this->elecField_[iXYZ] * exptdipole[iXYZ];
+        this->energyOneE += this->elecField_[iXYZ] * this->elecDipole_[iXYZ];
       }
     }
  
- 
-    this->totalEnergy= this->energyOneE + this->energyTwoE + this->energyNuclei;
-//  std::vector<double> possible = {0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0};
-//  for(auto i : possible)
-//  for(auto j : possible)
-//  cout << i << " " << j << " " << i*this->energyOneE + j*this->energyTwoE + this->energyNuclei << endl;
-  }
+
+    this->totalEnergy_= 
+      this->energyOneE + this->energyTwoE + this->energyNuclei_;
 #ifdef CQ_ENABLE_MPI
-  MPI_Bcast(&this->totalEnergy,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
+  MPI_Bcast(&this->totalEnergy_,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
   MPI_Bcast(&this->energyOneE,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
   MPI_Bcast(&this->energyTwoE,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 #endif
-  this->gatherDensity();
+//this->gatherDensity();
 };
 
 template<typename T>
 void SingleSlater<T>::computeMultipole(){
-  if(!this->haveDensity) this->formDensity();
   if(!this->aointegrals_->haveAOOneE && getRank() == 0) 
     this->aointegrals_->computeAOOneE();
   if(this->maxMultipole_ < 1) return;
@@ -158,100 +177,29 @@ template<typename T>
 void SingleSlater<T>::mullikenPop() {
   double charge;
   this->mullPop_.clear();
-  RealMatrix PS = (*this->onePDMA_).real() * (*this->aointegrals_->overlap_); 
-  if(!this->isClosedShell && this->Ref_ != TCS){ 
-    PS += (*this->onePDMB_).real() * (*this->aointegrals_->overlap_);
-  }
+  (*this->NBSqScratch_) = 
+    (*this->onePDMScalar_) * this->aointegrals_->overlap_->template cast<T>(); 
+
   for (auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++) {
     auto iBfSt = this->basisset_->mapCen2Bf(iAtm)[0];
     auto iSize = this->basisset_->mapCen2Bf(iAtm)[1];
     charge  = elements[this->molecule_->index(iAtm)].atomicNumber;
-    charge -= PS.block(iBfSt,iBfSt,iSize,iSize).trace();
+    charge -= std::real(this->NBSqScratch_->
+      block(iBfSt,iBfSt,iSize,iSize).trace());
     this->mullPop_.push_back(charge); 
   } 
 }
 
 template<typename T>
-void SingleSlater<T>::computeSExpect(){
-  if(getRank() == 0){
-    if(this->Ref_ == RHF){
- 
-      this->Sx_  = 0.0;
-      this->Sy_  = 0.0;
-      this->Sz_  = 0.0;
-      this->Ssq_ = 0.0; 
- 
-    } else if(this->Ref_ == UHF) {
-      TMatrix MzXS = ((*this->onePDMA_) - (*this->onePDMB_)) *
-        (*this->aointegrals_->overlap_);
-      TMatrix NXS = ((*this->onePDMA_) + (*this->onePDMB_)) *
-        (*this->aointegrals_->overlap_);
-      // Sz
-      T tmp = 0.5*MzXS.trace();
-
-      // S^2
-      T tmp2 =  MzXS.trace() * MzXS.trace() +
-        (0.5*MzXS*MzXS - 1.5*NXS*NXS).trace() + 3.0*NXS.trace();
-      tmp2 /= 4.0;
-
-      this->Sx_  = 0.0;
-      this->Sy_  = 0.0;
-      this->Sz_  = reinterpret_cast<double(&)[2]>(tmp)[0]; 
-      this->Ssq_ = reinterpret_cast<double(&)[2]>(tmp2)[0];
-
-    } else if(this->Ref_ == CUHF) {
- 
-      this->Sx_  = 0.0;
-      this->Sy_  = 0.0;
-      this->Sz_  = 0.5*(this->nOccA_ - this->nOccB_);
-      this->Ssq_ = this->Sz_ * (this->Sz_ + 1);
- 
-    } else if(this->Ref_ == TCS) {
-      
-      this->Sx_  = 0.0;
-      this->Sy_  = 0.0;
-      this->Sz_  = 0.0;
-      this->Ssq_  = 0.0;
- 
-      for(auto i = 0; i < this->nOccA_+this->nOccB_; i++) 
-      for(auto j = 0; j < this->nOccA_+this->nOccB_; j++) {
-        dcomplex SAA = 0.0;
-        dcomplex SAB = 0.0;
-        dcomplex SBB = 0.0;
-        for(auto mu = 0; mu < this->nTCS_*this->nBasis_; mu += 2)
-        for(auto nu = 0; nu < this->nTCS_*this->nBasis_; nu += 2){
-          SAA += (*this->moA_)(mu,i) * 
-                 (*this->aointegrals_->overlap_)(mu,nu) * 
-                 (*this->moA_)(nu,j);
- 
-          SAB += (*this->moA_)(mu,i) * 
-                 (*this->aointegrals_->overlap_)(mu,nu) * 
-                 (*this->moA_)(nu+1,j);
- 
-          SBB += (*this->moA_)(mu+1,i) * 
-                 (*this->aointegrals_->overlap_)(mu,nu) * 
-                 (*this->moA_)(nu+1,j);
-        }
-        if( i == j ) {
-          this->Sx_ += std::real(SAB);
-          this->Sy_ -= std::imag(SAB);
-          this->Sz_ += 0.5*std::real(SAA - SBB);
-        }
-        this->Ssq_ -= std::real(SAB*std::conj(SAB));
-        this->Ssq_ -= 0.25*std::real((SAA-SBB)*std::conj(SAA-SBB));
-      }
-      this->Ssq_ += 0.75 * (this->nOccA_+this->nOccB_);
-      this->Ssq_ += this->Sx_*this->Sx_;
-      this->Ssq_ += this->Sy_*this->Sy_;
-      this->Ssq_ += this->Sz_*this->Sz_;
- 
-    }
-  }
-#ifdef CQ_ENABLE_MPI
-  MPI_Bcast(&this->Sx_,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
-  MPI_Bcast(&this->Sy_,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
-  MPI_Bcast(&this->Sz_,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
-  MPI_Bcast(&this->Ssq_,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
-#endif
-};
-
+void SingleSlater<T>::loewdinPop() {
+  double charge;
+  this->lowPop_.clear();
+  for (auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++) {
+    auto iBfSt = this->basisset_->mapCen2Bf(iAtm)[0];
+    auto iSize = this->basisset_->mapCen2Bf(iAtm)[1];
+    charge  = elements[this->molecule_->index(iAtm)].atomicNumber;
+    charge -= std::real(this->onePDMOrthoScalar_->
+      block(iBfSt,iBfSt,iSize,iSize).trace());
+    this->lowPop_.push_back(charge); 
+  } 
+}

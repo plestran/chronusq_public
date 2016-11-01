@@ -32,6 +32,7 @@ using ChronusQ::BasisSet;
 using ChronusQ::Molecule;
 using ChronusQ::HashNAOs;
 namespace ChronusQ {
+/*
 template<>
 void SingleSlater<double>::placeAtmDen(std::vector<int> atomIndex, 
   SingleSlater<double> &hfA){
@@ -40,7 +41,7 @@ void SingleSlater<double>::placeAtmDen(std::vector<int> atomIndex,
   for(auto iAtm : atomIndex){
     auto iBfSt = this->basisset_->mapCen2Bf(iAtm)[0];
     auto iSize = this->basisset_->mapCen2Bf(iAtm)[1]; 
-    if(this->Ref_ != TCS){
+    if(this->nTCS_ == 1){
       this->onePDMA_->block(iBfSt,iBfSt,iSize,iSize)= (*hfA.onePDMA_);
       if(this->isClosedShell){
         if(hfA.isClosedShell) 
@@ -68,187 +69,49 @@ void SingleSlater<double>::placeAtmDen(std::vector<int> atomIndex,
     }
   } // loop iAtm
 }
+*/
+/*
 template<>
 void SingleSlater<double>::scaleDen(){
   // Scale UHF densities according to desired multiplicity
-  if(!this->isClosedShell && this->Ref_ != TCS){
+  if(!this->isClosedShell && this->nTCS_ == 1){
     int nE = this->molecule_->nTotalE();
     (*this->onePDMA_) *= (double)this->nAE_/(double)nE ;
     (*this->onePDMB_) *= (double)this->nBE_/(double)nE ;
-  } else if(this->Ref_ == TCS) {
+  } else if(this->nTCS_ == 2) {
     int nE = this->molecule_->nTotalE();
     for(auto i = 0; i < this->nTCS_*this->nBasis_; i += 2)
     for(auto j = 0; j < this->nTCS_*this->nBasis_; j += 2){
       (*this->onePDMA_)(i,j)      *= (double)this->nAE_/(double)nE ;
       (*this->onePDMA_)(i+1,j+1)  *= (double)this->nBE_/(double)nE ;
     }
-/*
-    double theta = math.pi / 8.0;
-    double c = std::cos(theta);
-    double s = std::sin(theta);
-    for(auto i = 0; i < this->nTCS_*this->nBasis_; i += 2)
-    for(auto j = 0; j < this->nTCS_*this->nBasis_; j += 2){
-      double Paa = (*this->onePDMA_)(i,j);
-      double Pbb = (*this->onePDMA_)(i+1,j+1);
-      (*this->onePDMA_)(i,j)     = c*c*Paa + s*s*Pbb;
-      (*this->onePDMA_)(i+1,j+1) = c*c*Pbb + s*s*Paa;
-      (*this->onePDMA_)(i+1,j)   = c*s*(Paa - Pbb);
-      (*this->onePDMA_)(i,j+1)   = c*s*(Paa - Pbb);
-     
-    }
-*/
     
 //  (*this->onePDMA_) *= (double)(this->nAE_+this->nBE_)/(double)nE ;
   }
 //CErr();
 }; // SingleSlater::scaleDen [T=double]
-//--------------------------------//
-// form the initial guess of MO's //
-//--------------------------------//
-template<>
-void SingleSlater<double>::SADGuess() {
-  
-  std::vector<RealMatrix> atomMO;
-  std::vector<RealMatrix> atomMOB;
-  int readNPGTO,L, nsize;
-  if(getRank() == 0){
-    this->moA_->setZero();
-    if(!this->isClosedShell && this->Ref_ != TCS) this->moB_->setZero();
-  }
-
-  if(this->molecule_->nAtoms() > 1) {
-    // Determining unique atoms
-    std::vector<Atoms> uniqueElement;
-    for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
-      if(iAtm == 0){ 
-        uniqueElement.push_back(elements[this->molecule_->index(iAtm)]);
-      }
-      bool uniq = true;
-      for(auto iUn = 0; iUn < uniqueElement.size(); iUn++){
-        if(uniqueElement[iUn].atomicNumber == 
-          elements[this->molecule_->index(iAtm)].atomicNumber){
-          uniq = false;
-          break;
-        }
-      }
-      if(uniq) {
-        uniqueElement.push_back(elements[this->molecule_->index(iAtm)]);
-      }
-    }
- 
-    // Generate a map of unique atoms to centers
-    std::vector<std::vector<int>> atomIndex(uniqueElement.size());
-    for(auto iUn = 0; iUn < uniqueElement.size(); iUn++){
-      for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
-        if(uniqueElement[iUn].atomicNumber == 
-          elements[this->molecule_->index(iAtm)].atomicNumber){
-          
-          atomIndex[iUn].push_back(iAtm);
-        }
-      }
-    }
- 
-#ifdef CQ_ENABLE_MPI
-  MPI_Barrier(MPI_COMM_WORLD);
-#endif
-    if(getRank() == 0)
-      this->fileio_->out << "Running " << uniqueElement.size() << 
-                          " atomic SCF calculations to form the initial guess" 
-                         << endl;
- 
-    // Loop and perform CUHF on each atomic center
-    for(auto iUn = 0; iUn < uniqueElement.size(); iUn++){
-      // Local objects to be constructed and destructed at every loop
-      AOIntegrals aointegralsAtom;
-      SingleSlater<double> hartreeFockAtom;
-      BasisSet basisSetAtom;
-      BasisSet dfBasisSetAtom;
-      Molecule uniqueAtom(uniqueElement[iUn],this->fileio_->out);
- 
-      // FIXME: This only makes sense for neutral molecules
-      uniqueAtom.setCharge(0);
-      uniqueAtom.setMultip(uniqueElement[iUn].defaultMult);
- 
-      // Construct atomic basis set from the reference
-      this->basisset_->constructExtrn(&uniqueAtom,&basisSetAtom);
-      // Generate basis maps
-      basisSetAtom.makeMaps(&uniqueAtom);
-      basisSetAtom.renormShells(); // Libint throws a hissy fit without this
- 
- 
-      // Initialize the local integral and SS classes
-      aointegralsAtom.isPrimary = false;
-      hartreeFockAtom.isNotPrimary();
-      
-      // Replaces iniAOIntegrals
-      aointegralsAtom.communicate(uniqueAtom,basisSetAtom,*this->fileio_,
-        *this->aointegrals_->memManager());
-      aointegralsAtom.initMeta();
-//      aointegralsAtom.integralAlgorithm = this->aointegrals_->integralAlgorithm;
-      aointegralsAtom.integralAlgorithm = 
-        AOIntegrals::INTEGRAL_ALGORITHM::DIRECT;
-      aointegralsAtom.alloc();
-
-      // Replaces iniSingleSlater
-      hartreeFockAtom.communicate(uniqueAtom,basisSetAtom,aointegralsAtom,
-        *this->fileio_,*this->memManager_);
-/*
-      hartreeFockAtom.isDFT = this->isDFT;
-      hartreeFockAtom.isHF = this->isHF;
-      hartreeFockAtom.weightScheme_ = this->weightScheme_ ;
-      hartreeFockAtom.dftGrid_      = this->dftGrid_      ;
-      hartreeFockAtom.screenVxc     = this->screenVxc    ; 
-      hartreeFockAtom.epsScreen     = this->epsScreen     ;
-      hartreeFockAtom.nRadDFTGridPts_ = this->nRadDFTGridPts_ ;
-      hartreeFockAtom.nAngDFTGridPts_ = this->nAngDFTGridPts_ ;
-      hartreeFockAtom.isGGA =         this->isGGA ;
-      hartreeFockAtom.CorrKernel_  =  this->CorrKernel_  ;
-      hartreeFockAtom.ExchKernel_  =  this->ExchKernel_  ;
-      hartreeFockAtom.DFTKernel_   =  this->DFTKernel_   ;
 */
-   
-      hartreeFockAtom.initMeta();
-      hartreeFockAtom.setField(this->elecField_);
-      hartreeFockAtom.isClosedShell = (hartreeFockAtom.multip() == 1); 
-      hartreeFockAtom.doDIIS = false;
-      hartreeFockAtom.isDFT = false;
-      hartreeFockAtom.isHF = true;
-      hartreeFockAtom.setRef(CUHF);
-      hartreeFockAtom.genMethString();
-      hartreeFockAtom.alloc();
 
-      if(this->printLevel_ < 4) hartreeFockAtom.setPrintLevel(0);
- 
-      // Zero out the MO coeff for local SS object
-      if(getRank() == 0){
-        hartreeFockAtom.moA_->setZero();
-        if(!hartreeFockAtom.isClosedShell) hartreeFockAtom.moB_->setZero();
-      }
-      hartreeFockAtom.haveMO = true;
- 
-      // Prime and perform the atomic SCF
-      hartreeFockAtom.formFock();
-      hartreeFockAtom.computeEnergy();
-      hartreeFockAtom.SCF2();
-      
-      // Place Atomic Densities into Total Densities
-      this->placeAtmDen(atomIndex[iUn],hartreeFockAtom);
- 
-    } // Loop iUn
- 
-    this->scaleDen();
-#ifdef CQ_ENABLE_MPI
-    MPI_Barrier(MPI_COMM_WORLD);
-#endif
-  }
-
-  // Set flags to use in the rest of code
+/*
+template<>
+void SingleSlater<double>::RandomGuess() {
+//JJG make random guess
+  auto NTCSxNBASIS = this->nTCS_ * this->nBasis_;
   this->haveMO = true;
   if(this->molecule_->nAtoms() > 1) this->haveDensity = true;
-#ifdef CQ_ENABLE_MPI
-  MPI_Barrier(MPI_COMM_WORLD);
-#endif
+  // Need to init random number otherwise Eigen is not truly random
+  srand((unsigned int) time(0));
+  *this->onePDMA_ = RealMatrix::Random(NTCSxNBASIS,NTCSxNBASIS);
+  *this->onePDMA_ = this->onePDMA_->selfadjointView<Lower>();
+  if(!this->isClosedShell && this->nTCS_ == 1){
+    *this->onePDMB_ = RealMatrix::Random(NTCSxNBASIS,NTCSxNBASIS);
+    *this->onePDMB_ = this->onePDMB_->selfadjointView<Lower>();
+  }  
 };
+*/
+
+
+/*
 //------------------------------------------//
 // form the initial guess of MOs from input //
 //------------------------------------------//
@@ -275,6 +138,9 @@ void SingleSlater<double>::readGuessIO() {
   };
   this->haveMO = true;
 };
+*/
+
+/*
 //-----------------------------------------------------------------------//
 // form the initial guess of MOs from Gaussian raw matrix element file   //
 //-----------------------------------------------------------------------//
@@ -301,9 +167,11 @@ void SingleSlater<double>::readGuessGauMatEl(GauMatEl& matEl){
   };
   this->haveMO = true;
 }
+*/
 //-----------------------------------------------------------------------//
 // form the initial guess of MOs from Gaussian formatted checkpoint file //
 //-----------------------------------------------------------------------//
+/*
 template<>
 void SingleSlater<double>::readGuessGauFChk(std::string &filename) {
   this->fileio_->out<<"Reading formatted checkpoint file "<<filename<<endl;
@@ -350,7 +218,9 @@ void SingleSlater<double>::readGuessGauFChk(std::string &filename) {
   };
   this->haveMO = true;
 };
+*/
 
+/*
 template<>
 void SingleSlater<double>::READGuess(){
   if(getRank() == 0) {
@@ -358,7 +228,7 @@ void SingleSlater<double>::READGuess(){
     H5::DataSpace dataspace = this->fileio_->alphaSCFDen->getSpace();
     this->fileio_->alphaSCFDen->read(this->onePDMA_->data(),H5::PredType::NATIVE_DOUBLE,dataspace,dataspace);
     this->fileio_->alphaMO->read(this->moA_->data(),H5::PredType::NATIVE_DOUBLE,dataspace,dataspace);
-    if(!this->isClosedShell && this->Ref_ != TCS){
+    if(!this->isClosedShell && this->nTCS_ == 1){
       this->fileio_->betaSCFDen->read(this->onePDMB_->data(),H5::PredType::NATIVE_DOUBLE,dataspace,dataspace);
       this->fileio_->betaMO->read(this->moB_->data(),H5::PredType::NATIVE_DOUBLE,dataspace,dataspace);
     }
@@ -369,12 +239,13 @@ void SingleSlater<double>::READGuess(){
   MPI_Bcast(this->onePDMA_->data(),
     this->nTCS_*this->nTCS_*this->nBasis_*this->nBasis_,MPI_DOUBLE,0,
     MPI_COMM_WORLD);
-  if(!this->isClosedShell && this->Ref_ != TCS)
+  if(!this->isClosedShell && this->nTCS_ == 1)
     MPI_Bcast(this->onePDMB_->data(),
       this->nTCS_*this->nTCS_*this->nBasis_*this->nBasis_,MPI_DOUBLE,0,
       MPI_COMM_WORLD);
 #endif
   
 }
+*/
 }; //namespace ChronusQ
 #endif

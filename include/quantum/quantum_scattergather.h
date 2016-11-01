@@ -24,6 +24,7 @@
  *  
  */
 
+/*
 template<>
 template<typename Op>
 void Quantum<double>::complexMyScale(Op &op){ };
@@ -31,7 +32,11 @@ void Quantum<double>::complexMyScale(Op &op){ };
 template<>
 template<typename Op>
 void Quantum<dcomplex>::complexMyScale(Op &op){ op *= dcomplex(0.0,1.0); };
+*/
+//template<> double Quantum<double>::ComplexScale(){return -1.;};
+//template<> dcomplex Quantum<dcomplex>::ComplexScale(){return dcomplex(0.,1.);};
 
+/*
 template<typename T>
 void Quantum<T>::scatterDensity(){
   if(this->nTCS_ == 1 && this->isClosedShell)
@@ -77,6 +82,7 @@ void Quantum<T>::gatherDensity(){
 //this->onePDMMy_.reset();
 //this->onePDMMx_.reset();
 };
+*/
 
 template<typename T>
 template<typename Op>
@@ -109,11 +115,13 @@ void Quantum<T>::spinScatter(Op &op,
 
   scattered[0].get() = PAA + PBB;
   scattered[1].get() = PAA - PBB;
-  scattered[2].get() = PAB - PBA;
+  scattered[2].get() = ComplexScale<T>() * (PAB - PBA);
   scattered[3].get() = PAB + PBA;
 
+/*
   // Scale My by "i"
   complexMyScale(scattered[2].get());
+*/
 
 };
 
@@ -133,16 +141,7 @@ void Quantum<T>::spinGather(Op &op,
     std::vector<std::reference_wrapper<Op>> &scattered ){
   size_t currentDim = scattered[0].get().cols();
 
-  // Since 
-  //   My = i(PBA - PAB)
-  //   PAB = Mx - i * My
-  //   PBA = Mx + i * My
-  // "My" is scaled by "i" before entering the reconstruction
-  //
-  // ** Note that this scaling is a dummy call for double 
-  // precision objects and the sign is accounted for implicitly
-  // through a flip in sign in the reconstruction **
-  complexMyScale(scattered[2].get());
+//complexMyScale(scattered[2].get());
 
   Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> > 
     PAA(op.data(), currentDim, currentDim,
@@ -163,8 +162,8 @@ void Quantum<T>::spinGather(Op &op,
   PBB.noalias() = scattered[0].get() - scattered[1].get();
 
   if(typeid(T).hash_code() == typeid(dcomplex).hash_code()) {
-    PAB.noalias() = scattered[3].get() - scattered[2].get();
-    PBA.noalias() = scattered[3].get() + scattered[2].get();
+    PAB.noalias() = scattered[3].get() - ComplexScale<T>()*scattered[2].get();
+    PBA.noalias() = scattered[3].get() + ComplexScale<T>()*scattered[2].get();
   } else {
     // Sign flip viz complex case because there is an implied
     // "i" infront of the pure imaginary y component

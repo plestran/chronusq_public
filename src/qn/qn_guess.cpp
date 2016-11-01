@@ -26,6 +26,7 @@
 #include <qn.h>
 
 namespace ChronusQ {
+/*
   template<>
   void QuasiNewton2<double>::readGuess(){
     (*this->out_) << "Reading the Guess in QuasiNetwon" << endl;
@@ -33,15 +34,12 @@ namespace ChronusQ {
     auto NVec = this->qnObj_->nGuess();
 
     H5::DataSpace dataspace = this->qnObj_->guessFile()->getSpace();
-    this->qnObj_->guessFile()->read(this->TRMem_,H5::PredType::NATIVE_DOUBLE,
+    this->qnObj_->guessFile()->read(this->TRMem_,H5PredType<double>(),
       dataspace,dataspace);
 
     if(this->qnObj_->needsLeft())
-      this->qnObj_->guessFile()->read(this->TLMem_,H5::PredType::NATIVE_DOUBLE,
+      this->qnObj_->guessFile()->read(this->TLMem_,H5PredType<double>(),
         dataspace,dataspace);
-  /*
-    RealMap GUESS(this->TRMem_,N,NVec);
-    prettyPrint(cout,GUESS,"GUESS");
-  */
   };
+*/
 }; // namespace ChronusQ

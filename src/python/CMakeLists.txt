@@ -1,17 +1,49 @@
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I ${PYTHON_INCLUDE_DIRS}")
 
 
-add_library(pythonapi SHARED singleslater_api.cpp molecule_api.cpp 
-aointegrals_api.cpp chronusq_api.cpp classtools_api.cpp fileio_api.cpp
-tools_api.cpp basisset_api.cpp cerr_api.cpp sdresponse_api.cpp
-realtime_api.cpp numdiff_api.cpp)
+add_library(pythonapi SHARED
+singleslater_api.cpp
+molecule_api.cpp
+aointegrals_api.cpp
+chronusq_api.cpp
+classtools_api.cpp
+fileio_api.cpp
+tools_api.cpp
+basisset_api.cpp
+cerr_api.cpp
+#sdresponse_api.cpp
+#realtime_api.cpp
+#numdiff_api.cpp
+)
 
 #target_include_directories(pythonapi PUBLIC ${PYTHON_INCLUDE_DIRS})
 
-target_link_libraries(pythonapi LINK_PUBLIC basisset classtools controls
-mointegrals molecule tools sdresponse realtime mollerplesset singleslater 
-aointegrals worker quasinewton grid fileio cerr gauinterface tools response
-qn numdiff quantum grid2 dft
+target_link_libraries(pythonapi LINK_PUBLIC 
+basisset 
+classtools
+controls
+#mointegrals
+molecule
+tools
+#sdresponse
+#realtime
+#mollerplesset
+singleslater
+aointegrals
+worker
+#quasinewton
+#grid
+fileio
+cerr
+gauinterface
+tools
+#response
+qn
+#numdiff
+quantum
+wavefunction
+grid2
+dft
 ${EXTERNAL_CQ_DEPS})
 
 set(APIINST ${PROJECT_BINARY_DIR}/src/python)
@@ -47,8 +79,3 @@ endif()
 #  DESTINATION "${PROJECT_BINARY_DIR}/src/python"
 #  FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
 #)
-if(USE_LIBINT)
-if(BUILD_LIBINT)
- add_dependencies(pythonapi libint)
-endif()
-endif()

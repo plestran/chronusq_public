@@ -1,10 +1,11 @@
-add_library(mointegrals SHARED mointegrals_double.cpp mointegrals_complex.cpp)
-if(APPLE)
-target_link_libraries(mointegrals LINK_PUBLIC ${EXTERNAL_CQ_DEPS})
-endif()
+add_library(mointegrals SHARED 
+#mointegrals_double.cpp
+#mointegrals_vovo.cpp
+#mointegrals_vvoo.cpp
+#mointegrals_vvvv.cpp
+#mointegrals_oooo.cpp
+#mointegrals_vooo.cpp
+#mointegrals_vvvo.cpp
+mointegrals_impl.cpp
+)
 
-if(USE_LIBINT)
-if(BUILD_LIBINT)
- add_dependencies(mointegrals libint)
-endif()
-endif()

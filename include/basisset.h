@@ -60,18 +60,67 @@ struct ShellCQ {
   std::vector<real_t> coeff;
   std::vector<real_t> alpha; //!< exponents
   std::array<real_t, 3> O;   //!< origin
+  std::vector<real_t> norm;  //normalization constants
   std::vector<real_t> max_ln_coeff; //!< maximum ln of (absolute) contraction coefficient for each primitive
+  std::vector<std::array<int,3>> cartesian_l;
 
   size_t cartesian_size() const { return (l + 1) * (l + 2) / 2; }
   size_t size() const { return pure ? (2 * l + 1) : cartesian_size(); }
 
   ShellCQ(libint2::Shell& other){
+    int i,j,k,x,y,z;
+    real_t readNorm;
+    real_t threePI = math.pi*math.pi*math.pi;
     this->alpha = other.alpha;
     this->l = other.contr[0].l;
     this->coeff = other.contr[0].coeff;
     this->pure = other.contr[0].pure;
     this->O = other.O;
     this->max_ln_coeff = other.max_ln_coeff;
+/*
+    if(this->l==0){
+      this->cartesian_l.push_back({0,0,0});
+    } else if(this->l==1){
+      this->cartesian_l.push_back({1,0,0});
+      this->cartesian_l.push_back({0,1,0});
+      this->cartesian_l.push_back({0,0,1});
+    } else if(this->l==2){
+      this->cartesian_l.push_back({2,0,0});
+      this->cartesian_l.push_back({1,1,0});
+      this->cartesian_l.push_back({1,0,1});
+      this->cartesian_l.push_back({0,2,0});
+      this->cartesian_l.push_back({0,1,1});
+      this->cartesian_l.push_back({0,0,2});
+    } else if(this->l>2){
+      for( i=0 ; i<this->l+1 ; i++ ){
+        x = this->l - i;
+        for( j=0 ; j<i+1 ; j++ ){
+          y = i - j;
+          z = l - x - y;
+          this->cartesian_l.push_back({x,y,z});
+        }
+      }
+    };
+*/
+      for( i=0 ; i<this->l+1 ; i++ ){
+        x = this->l - i;
+        for( j=0 ; j<i+1 ; j++ ){
+          y = i - j;
+          z = l - x - y;
+          this->cartesian_l.push_back({x,y,z});
+        }
+      }
+ 
+    for(i=0;i<this->alpha.size();i++){
+//      if(this->l==0) readNorm = this->coeff[i]*sqrt(sqrt(8*this->alpha[i]*this->alpha[i]*this->alpha[i]/threePI));
+//      else if(this->l==1) readNorm = this->coeff[i]*sqrt(sqrt(128*this->alpha[i]*this->alpha[i]*this->alpha[i]*this->alpha[i]*this->alpha[i]/threePI));
+//      else if(this->l==2) {
+//        readNorm = this->coeff[i]*sqrt(sqrt(2048*this->alpha[i]*this->alpha[i]*this->alpha[i]*this->alpha[i]*this->alpha[i]*this->alpha[i]*this->alpha[i]/threePI));
+//        if(i==0||i==3||i==5) readNorm = readNorm/sqrt(3);
+//      };
+      readNorm = this->coeff[i];
+      this->norm.push_back(readNorm);
+    };
   };
 
 
@@ -172,6 +221,7 @@ class BasisSet{
     int atomicNumber;
     int index;
     std::vector<libint2::Shell> shells;
+    std::vector<std::vector<double>> unNormalizedCons;
   }; ///< struct to hold information about the basis reference
   int  nBasis_      ; ///< Number of (Gaußian) contracted basis functions
   int  nPrimitive_  ; ///< Number of uncontracted Gaußian primitives
@@ -182,13 +232,16 @@ class BasisSet{
   bool forceCart_   ; ///< Whether or not to force cartesian basis functions 
   double      * radCutSh_ ; ///< CutOff Radius for each Shell
   double      * expPairSh_ ; ///< SS Exp for each Shel Pair
-
+  std::vector<double> basisEvalScr_;
+  std::vector<double> basisEvalScr2_;
+  std::vector<RealMatrix>    Car2Sph_;///< Matrix transformation Cart -> Sph
   std::vector<int>               nLShell_  ; ///< Maps L value to # of shells of that L
   std::vector<int>               mapSh2Bf_ ; ///< Maps shell number to first basis funtion
   std::vector<int>               mapSh2Cen_; ///< Maps shell number to atomic center
   std::vector<std::array<int,2>> mapCen2Bf_; ///< Maps atomic center to first basis function
   std::vector<ReferenceShell>    refShells_; ///< Set of reference shells for given basis
   std::vector<libint2::Shell>    shells_   ; ///< Local basis storage (in shells)
+  std::vector<std::vector<double>> unNormCons_ ; // Unnormalized contraction coefficients
   std::unique_ptr<RealMatrix>    mapPrim2Bf_;///< Matrix transformation Prim -> Bf
 
   std::string basisPath_; ///< Path to the basis file
@@ -264,6 +317,9 @@ public:
     this->expPairSh_        = NULL   ; 
     this->printLevel_      = 1      ;
     this->makeBasisMap();
+
+
+    this->makeCar2Sph(LIBINT2_MAX_AM);
   };
 
   /**
@@ -303,20 +359,23 @@ public:
   inline double * expPairSh() {return this->expPairSh_;  }; ///< Return expPairSh
   inline  double getradCutSh(int iShell) {return this->radCutSh_[iShell];   }; ///< Return radCutSh
   
+  dcomplex car2sphcoeff(int L,int m,std::array<int,3> &l);
   template <typename T> double * basisEval(int,std::array<double,3>,T*);
   template <typename T> double * basisEval(libint2::Shell&,T*);
   template <typename T> double * basisDEval(int,libint2::Shell&,T*);
+  double * CarToSpDEval(int iop, int L, double *cart);
   template <typename T> double * basisProdEval(libint2::Shell,libint2::Shell,T*);
   double * basisonFlyProdEval(libint2::Shell s1, int s1size, libint2::Shell s2, int s2size,double rx, double ry, double rz);
-  std::vector<bool> MapGridBasis(cartGP& pt);  ///< Create a Mapping of basis over grid points
+//std::vector<bool> MapGridBasis(cartGP& pt);  ///< Create a Mapping of basis over grid points
+  void MapGridBasis(std::vector<bool>&,cartGP& pt);  ///< Create a Mapping of basis over grid points
   void     radcut(double thr, int maxiter, double epsConv);   //Populate all shell cut off radius
   void     popExpPairSh();   // Populate expPairSh
   double   fSpAv (int iop,int l, double alpha, double r);   //Evaluate Spheric Average of a Shell
   double   fRmax (int l, double alpha, double thr, double epsConv, int maxiter);   //Evaluate Spheric Average of a Shell
-  inline libint2::Shell      shells(int i) {return this->shells_[i];    };
+  inline libint2::Shell&     shells(int i) {return this->shells_[i];    };
   inline int                nLShell(int L) {return this->nLShell_[L];   };
-  inline int               mapSh2Bf(int i) {return this->mapSh2Bf_[i];  };
-  inline int               mapSh2Cen(int i) {return this->mapSh2Cen_[i];};
+  inline int &             mapSh2Bf(int i) {return this->mapSh2Bf_[i];  };
+  inline int &             mapSh2Cen(int i) {return this->mapSh2Cen_[i];};
   inline std::array<int,2> mapCen2Bf(int i) {return this->mapCen2Bf_[i];};
   inline RealMatrix *      mapPrim2Bf() {return this->mapPrim2Bf_.get();};
   inline std::string       basisPath(){return this->basisPath_;};
@@ -348,6 +407,7 @@ public:
   inline void setBasisPath( std::string str){ this->basisPath_  = str;};
   inline void setPrintLevel(int i          ){ this->printLevel_ = i  ;};
   inline void forceCart(){ this->forceCart_ = !this->forceCart_;};
+  inline bool getforceCart(){ return this->forceCart_;};
 
 
   void printInfo();   ///< Print all info
@@ -364,6 +424,7 @@ public:
   void makeMapSh2Cen(Molecule *);          ///< generate mapSh2Cen
   void makeMapCen2Bf(Molecule *);          ///< generate mapCen2Bf
   void makeMapPrim2Bf();
+  void makeCar2Sph(int L);
   void makeBasisMap();  ///< Generate map from basis enum to pasis path
   void renormShells();                     ///< Renormalize Libint2::Shell set
   std::vector<libint2::Shell> uncontractBasis(); ///< Unconctract the basis
@@ -371,6 +432,8 @@ public:
 
   void constructExtrn(Molecule *, BasisSet *); ///< Generate new basis from refernce shells
   void genUCvomLocal(BasisSet *);
+
+  std::pair<double,double> cart2sphCoeff(unsigned,unsigned,unsigned,unsigned,unsigned);
 
   inline void makeMaps(Molecule* mol){
     this->makeMapSh2Bf();

@@ -133,6 +133,7 @@ void AOIntegrals::OneEDriver(libint2::Operator iType) {
     mat[nMat] = mat[nMat].selfadjointView<Lower>();
 }
 
+/*
 double AOIntegrals::formBeckeW(cartGP gridPt, int iAtm){
 //     Generate Frisch (not-normalized yet) Weights (if frischW) according to 
 //     the partition schems in (Chem. Phys. Let., 257, 213-223 (1996)) 
@@ -176,8 +177,9 @@ double AOIntegrals::formBeckeW(cartGP gridPt, int iAtm){
          }
        return WW;
 }; //End formBeckeW
+*/
 
-
+/*
 double AOIntegrals::normBeckeW(cartGP gridPt){
 //     Normalization of Becke/Frisch Weights
 //     (J. Chem. Phys., 88 (4),2457 (1988)) using Voronoii Fuzzi Cells
@@ -189,9 +191,11 @@ double AOIntegrals::normBeckeW(cartGP gridPt){
          }
        return norm ;
 }; //End normBeckeW
+*/
 
 
 
+/*
 void AOIntegrals::computeAORcrossDel(){
 // build R cross Del matrices (Numerical)
 // It also creates the grid and can perform also other
@@ -253,9 +257,11 @@ void AOIntegrals::computeAORcrossDel(){
       (*this->molecule_->cart())(1,iAtm),
       (*this->molecule_->cart())(2,iAtm)
     );
+    std::vector<bool> mapRad_(this->basisSet_->nShell()+1);
     for (auto ipts =0; ipts < ngpts; ipts++){
       cartGP pt = Raw3Dg.gridPtCart(ipts); 
-      auto mapRad_ = this->basisSet_->MapGridBasis(pt);
+//    auto mapRad_ = this->basisSet_->MapGridBasis(pt);
+      this->basisSet_->MapGridBasis(mapRad_,pt);
       // Evaluate each Becke fuzzy call weight, normalize it and muliply by 
       //   the Raw grid weight at that point
       auto bweight = (this->formBeckeW(pt,iAtm)) 
@@ -321,13 +327,14 @@ void AOIntegrals::computeAORcrossDel(){
          rdotpY *= 4.0*math.pi;
          rdotpZ *= 4.0*math.pi;
 //       printing
-//         prettyPrint(cout,rdotpX,"Numeric <dipole vel> - x comp");
-//         prettyPrint(cout,rdotpY,"Numeric <dipole vel> - y comp");
-//         prettyPrint(cout,rdotpZ,"Numeric <dipole vel> - z comp");
+         prettyPrint(cout,rdotpX,"Numeric <dipole vel> - x comp");
+         prettyPrint(cout,rdotpY,"Numeric <dipole vel> - y comp");
+         prettyPrint(cout,rdotpZ,"Numeric <dipole vel> - z comp");
 //end for now (comment later)
 //  cout << "Call HERE " <<endl;
 //  CErr();
 } 
+*/
 
 void AOIntegrals::computeAOOneE(){
   // Collect Relevant data into a struct (odd, but convienient) 
@@ -347,6 +354,35 @@ void AOIntegrals::computeAOOneE(){
   }
 */
 
+
+//*********BEGIN SUNS********C******
+/*
+//xslis
+  this->createShellPairs();
+  this->generateFmTTable();
+  this->computeOverlapS();
+//cout<<"oh yeah"<<endl;
+  RealMatrix sTemp(*this->overlap_);
+  this->computePotentialV();
+//cout<<"stopt1"<<endl;
+  RealMatrix vTemp(*this->potential_);
+//cout<<"stop2"<<endl;
+  this->computeKineticT();
+//cout<<"stop3"<<endl;
+  RealMatrix tTemp(*this->kinetic_);
+  this->computeAngularL();
+  this->computeSL();
+
+  this->computepVdotp();
+
+  this->overlap_->setZero();
+  this->potential_->setZero();
+  this->kinetic_->setZero();
+//  this->angular_->setZero();
+//xslie
+*/
+//**********************************
+
   // Start timer for one-electron integral evaluation
   auto oneEStart = std::chrono::high_resolution_clock::now();
 
@@ -356,7 +392,7 @@ void AOIntegrals::computeAOOneE(){
   else if(this->maxMultipole_ == 2) OneEDriver(libint2::Operator::emultipole2);
   else if(this->maxMultipole_ == 1) OneEDriver(libint2::Operator::emultipole1);
   else OneEDriver(libint2::Operator::overlap);
-  if(this->maxMultipole_ == 4) this->computeAORcrossDel();
+//if(this->maxMultipole_ == 4) this->computeAORcrossDel();
   auto OEnd = std::chrono::high_resolution_clock::now();
 
 
@@ -369,7 +405,6 @@ void AOIntegrals::computeAOOneE(){
   // Compute and time nuclear attraction integrals (negative sign is factored in)
   auto VStart = std::chrono::high_resolution_clock::now();
 
-// this->useFiniteWidthNuclei = true;
   if(this->isPrimary && this->useFiniteWidthNuclei) 
     this->finiteWidthPotential();
   else                
@@ -377,11 +412,23 @@ void AOIntegrals::computeAOOneE(){
 
   auto VEnd = std::chrono::high_resolution_clock::now();
 
+//xslis
+/*
+  cout<<"Libint S: "<<(*this->overlap_).norm()<<endl;
+  cout<<"Libint V: "<<(*this->potential_).norm()<<endl;
+  cout<<"Libint T: "<<(*this->kinetic_).norm()<<endl;
+*/
+//xslie
+
+
 // add DKH correction to kinetic energy
 //  if (this->isPrimary) this->DKH0();
 
 // Build Core Hamiltonian
-  (*this->oneE_) = (*this->kinetic_) + (*this->potential_);
+  (*this->coreH_) = (*this->kinetic_) + (*this->potential_);
+
+//  prettyPrint(this->fileio_->out,*this->kinetic_,"T");
+//  prettyPrint(this->fileio_->out,*this->potential_,"V");
 
   // Get end time of one-electron integral evaluation
   auto oneEEnd = std::chrono::high_resolution_clock::now();
@@ -389,8 +436,22 @@ void AOIntegrals::computeAOOneE(){
   // Compute Orthonormal transformation matricies
   this->computeOrtho();
 
- // this->formP2Transformation();
-
+ // -------------------------------
+ // This is the X2C transformation!
+ // -------------------------------
+  if (this->doX2C && this->isPrimary) {
+    if(this->printLevel_ >= 3){
+      cout << endl <<" Now going into X2C transformation " << endl;
+      }
+    this->formP2Transformation();
+	}
+  else {
+    if(this->printLevel_ >= 3){
+      cout << endl << " Bypassing Relativistic Transformation " << endl;
+	  }
+    }
+  //-----------------------------
+  
   if(this->printLevel_ >= 2) this->printOneE();
 
   // Compute time differenes
@@ -400,15 +461,7 @@ void AOIntegrals::computeAOOneE(){
   this->VED = VEnd - VStart;
   this->haveAOOneE = true;
   this->breakUpMultipole();
-  if(this->isPrimary) this->writeOneE();
-  /*
-  if(this->isPrimary) {
-    for(auto ix = 0, ioff = 0; ix < 3; ix++, ioff += this->nBasis_*this->nBasis_){
-      RealMap A(&this->RcrossDel_->storage()[ioff],this->nBasis_,this->nBasis_);
-      prettyPrint(cout,A,"R:"+std::to_string(ix));
-    }
-  }
-  */
+//if(this->isPrimary) this->writeOneE();
 }
 
 void AOIntegrals::computeSchwartz(){
@@ -473,7 +526,8 @@ void AOIntegrals::computeAOTwoE(){
   std::vector<libint2::Engine> engines(nthreads);
   engines[0] = libint2::Engine(libint2::Operator::coulomb,
       this->basisSet_->maxPrim(),this->basisSet_->maxL(),0);
-  engines[0].set_precision(std::numeric_limits<double>::epsilon());
+  //engines[0].set_precision(std::numeric_limits<double>::epsilon());
+  engines[0].set_precision(0.0);
 
   for(int i=1; i<nthreads; i++) engines[i] = engines[0];
   if(!this->basisSet_->haveMapSh2Bf) this->basisSet_->makeMapSh2Bf(); 
@@ -507,8 +561,8 @@ void AOIntegrals::computeAOTwoE(){
           int n4    = this->basisSet_->shells(s4).size();
     
           // Schwartz and Density screening
-          if((*this->schwartz_)(s1,s2) * (*this->schwartz_)(s3,s4)
-              < this->thresholdSchwartz_ ) continue;
+        //if((*this->schwartz_)(s1,s2) * (*this->schwartz_)(s3,s4)
+        //    < this->thresholdSchwartz_ ) continue;
  
           const double* buff = engines[thread_id].compute(
             this->basisSet_->shells(s1),
@@ -703,11 +757,31 @@ void AOIntegrals::computeLowdin() {
   for(auto i = 0; i < this->nBasis_; i++)
     S.col(i) /= std::sqrt(ovlpEigValues[i]);
 
-  (*this->ortho1_) = S * V.transpose();
+  this->ortho1_->noalias() = S * V.transpose();
 
   for(auto i = 0; i < this->nBasis_; i++)
     S.col(i) *= ovlpEigValues[i];
 
-  (*this->ortho2_) = S * V.transpose();
+  this->ortho2_->noalias() = S * V.transpose();
 //prettyPrint(cout,(*this->ortho1_),"XN");
+};
+
+void AOIntegrals::computeCholesky(){
+  char UPLO = 'L';
+  int INFO;
+  
+  std::vector<double> SCpy(this->nBasis_*this->nBasis_);
+
+  std::copy(this->overlap_->data(),
+    this->overlap_->data() + this->nBasis_*this->nBasis_,
+    SCpy.data());
+
+  dpotrf_(&UPLO,&this->nBasis_,SCpy.data(),&this->nBasis_,&INFO);
+  RealMap V(SCpy.data(),this->nBasis_,this->nBasis_);
+  V = V.triangularView<Lower>();
+  this->ortho2_->noalias() = V;
+
+  dpotri_(&UPLO,&this->nBasis_,SCpy.data(),&this->nBasis_,&INFO);
+  this->ortho1_->noalias() = this->ortho2_->transpose() * V;
+  (*this->ortho1_) = this->ortho1_->triangularView<Lower>();
 };
