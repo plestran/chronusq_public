@@ -197,7 +197,7 @@ void SingleSlater<T>::SCF3(){
       << std::fixed << std::setprecision(10) 
       << this->totalEnergy_ << "  Eh after  " << iter + 1 
       << "  SCF Iterations" << endl;
-    this->fileio_->out << bannerEnd <<endl;
+    this->fileio_->out << BannerEnd <<endl;
   }
 };
 

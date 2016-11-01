@@ -22,11 +22,11 @@ void WaveFunction<T>::alloc() {
 
   // MO Eigenenergies
   this->epsA_ = std::unique_ptr<RealMap>(
-    new RealMap(this->memManager_->template malloc<double>(NBTSq),NBT,NBT)); 
+    new RealMap(this->memManager_->template malloc<double>(NBTSq),NBT,1)); 
     this->epsA_->setZero();
   if(this->nTCS_ == 1 and !this->isClosedShell){
     this->epsB_ = std::unique_ptr<RealMap>(
-      new RealMap(this->memManager_->template malloc<double>(NBTSq),NBT,NBT)); 
+      new RealMap(this->memManager_->template malloc<double>(NBTSq),NBT,1)); 
     this->epsB_->setZero();
   }
 }

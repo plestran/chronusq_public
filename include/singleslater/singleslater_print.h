@@ -58,6 +58,7 @@ void SingleSlater<T>::printInfo() {
 template<typename T>
 void SingleSlater<T>::printMultipole(){
 
+  this->fileio_->out << std::left << std::setprecision(10);
   double xSmall = 1e-10;
   if(this->maxMultipole_ >= 1) {
     for(auto i = 0; i < 3; i++){
@@ -83,7 +84,7 @@ void SingleSlater<T>::printMultipole(){
 
   if(this->maxMultipole_ >= 1) {
     this->fileio_->out << "\nMultipole Information:" << endl;
-    this->fileio_->out << bannerTop << endl;
+    this->fileio_->out << bannerTop << endl << endl;;
     this->fileio_->out << std::setw(50) << std::left <<"Electric Dipole Moment"
                           << "(Debye)" << endl;
     this->fileio_->out << std::left << std::setw(5) <<"X=" 
@@ -105,7 +106,7 @@ void SingleSlater<T>::printMultipole(){
    }
 
   if(this->maxMultipole_ >= 2) {
-    this->fileio_->out << bannerMid << endl;
+    this->fileio_->out << endl << endl;
     this->fileio_->out << std::setw(50) << std::left << "Electric Quadrupole Moment" 
                        <<  "(Debye-\u212B)" << endl;
     this->fileio_->out << std::left << std::setw(5) <<"XX=" 
@@ -138,7 +139,7 @@ void SingleSlater<T>::printMultipole(){
                        << std::fixed << std::right << std::setw(20) 
                        << this->elecQuadpole_[2][2]*phys.bohr/phys.debye 
                        << endl;
-    this->fileio_->out << bannerMid << endl;
+    this->fileio_->out << endl << endl;
     this->fileio_->out << std::setw(50) << std::left 
                        << "Electric Quadrupole Moment (Traceless)" <<  "(Debye-\u212B)" 
                        << endl;
@@ -184,7 +185,7 @@ void SingleSlater<T>::printMultipole(){
   }
 
   if(this->maxMultipole_ >= 3) {
-    this->fileio_->out << bannerMid << endl;
+    this->fileio_->out << endl << endl;
     this->fileio_->out << std::setw(50) << std::left 
                        << "Electric Octupole Moment" 
                        << "(Debye-\u212B\u00B2)" << endl;
@@ -304,15 +305,21 @@ void SingleSlater<T>::printMultipole(){
 template<typename T>
 void SingleSlater<T>::printSExpect(){
   this->fileio_->out << "Spin Information:" << endl;
-  this->fileio_->out << "  <Sx> = " << this->Sx_ << endl;
-  this->fileio_->out << "  <Sy> = " << this->Sy_ << endl;
-  this->fileio_->out << "  <Sz> = " << this->Sz_ << endl;
-  this->fileio_->out << "  <S\u00B2> = " << this->Ssq_ << endl;
+  this->fileio_->out << bannerTop << endl << endl;
+  this->fileio_->out << std::setprecision(5) << std::fixed;
+  this->fileio_->out << "  <Sx> = " << std::setw(10) << std::right 
+                     << this->Sx_ << endl;
+  this->fileio_->out << "  <Sy> = " << std::setw(10) << std::right 
+                     << this->Sy_ << endl;
+  this->fileio_->out << "  <Sz> = " << std::setw(10) << std::right 
+                     << this->Sz_ << endl;
+  this->fileio_->out << "  <S\u00B2> = " << std::setw(10) << std::right 
+                     << this->Ssq_ << endl;
 };
 
 template<typename T>
 void SingleSlater<T>::printSCFHeader(ostream &output){
-  output << bannerTop << endl;
+  output << BannerTop << endl;
   output << "Self Consistent Field (SCF) Settings:" << endl << endl;
 //cout << std::setprecision(6);
 
@@ -509,3 +516,41 @@ void SingleSlater<T>::printPT() {
       "PT (My)");
   }
 };
+
+template <typename T>
+void SingleSlater<T>::printSCFResults(){
+  this->fileio_->out << endl << endl;
+  this->fileio_->out << "SCF Results:" << endl;
+  this->fileio_->out << BannerTop << endl << endl;;
+
+  this->fileio_->out << "Orbital Eigenvalues";
+  if(this->nTCS_ == 1)
+    this->fileio_->out << " (Alpha)";
+  this->fileio_->out << " / Eh :" << endl << bannerTop << endl;
+
+  int no = this->nTCS_ == 2 ? this->nO_ : this->nOA_;
+  for(auto e = 0 ; e !=  this->epsA_->size(); ++e){
+    if(e == 0) this->fileio_->out << "Occupied:" << endl;
+    else if(e == no) this->fileio_->out << endl << "Unoccupied:" << endl;
+    this->fileio_->out << std::setw(13) << std::scientific 
+                       << std::setprecision(4) <<
+                        (*this->epsA_)(e);
+    if(e != 0 and (e+1) % 5 == 0) this->fileio_->out << endl;
+  }
+  this->fileio_->out << endl;
+
+  if(this->nTCS_ == 1 and !this->isClosedShell) {
+    this->fileio_->out << endl;
+    this->fileio_->out << "Orbital Eigenvalues (Beta) / Eh :";
+    this->fileio_->out << endl << bannerTop << endl;
+
+    for(auto e = 0 ; e !=  this->epsB_->size(); ++e){
+      if(e == 0) this->fileio_->out << "Occupied:" << endl;
+      else if(e == no) this->fileio_->out << endl << "Unoccupied:" << endl;
+      this->fileio_->out << std::setw(13) << std::scientific 
+                         << std::setprecision(4) <<
+                          (*this->epsB_)(e);
+      if(e != 0 and (e+1) % 5 == 0) this->fileio_->out << endl;
+    }
+  }
+}

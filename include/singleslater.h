@@ -691,14 +691,21 @@ public:
   void printMultipole();
   void printSExpect();
   inline void printProperties() {
+    this->fileio_->out << endl << endl;
+    this->fileio_->out << "MOLECULAR PROPERTIES:" << endl;
+    this->fileio_->out << BannerTop << endl << endl;;
     this->printSExpect();
     this->printMultipole();
+    this->fileio_->out << BannerEnd << endl;
   };
 
   // Operators
   void printDensity();
   void printPT();
   void printFock();
+
+  // SCF Results
+  void printSCFResults();
 
   // Misc Print
   void printInfo();
