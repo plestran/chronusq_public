@@ -458,7 +458,7 @@ public:
     // Extrapolation
     this->doDIIS       = true;
     this->doDMS        = false;
-    this->nDIISExtrap_ = 20;
+    this->nDIISExtrap_ = 10;
     this->iDIISStart_  = 0;
     this->diisAlg_     = DIIS_ALGORITHM::NO_DIIS_SET;
 
@@ -554,6 +554,8 @@ public:
   inline void setxHF(double x)            { this->xHF_      = x;   }; 
 
   inline void setITPdt(double x)          { this->dt = x;              }; 
+
+  inline void setNDIISKeep(int x)         { this->nDIISExtrap_ = x;    };
 
   inline void setField(std::array<double,3> field){ 
     this->elecField_ = field;  

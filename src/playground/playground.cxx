@@ -190,12 +190,13 @@ int main(int argc, char **argv){
   molecule.computeRij();
   molecule.computeI();
 
-  singleSlater.setRef("GHF");
+  singleSlater.setRef("X2C");
 //singleSlater.setSCFEneTol(1e-12);
   singleSlater.setSCFMaxIter(10000);
   singleSlater.doDIIS = true;
-  singleSlater.doDamp = false;
-//singleSlater.dampParam = 0.2;
+//singleSlater.doDamp = false;
+  singleSlater.dampParam = 0.2;
+  singleSlater.setNDIISKeep(12);
 
   singleSlater.setGuess(CORE);
 
@@ -205,9 +206,9 @@ int main(int argc, char **argv){
 //basis.forceCart();
 //basis.findBasisFile("sto-3g");
 //basis.findBasisFile("3-21g");
-//basis.findBasisFile("6-31G");
+  basis.findBasisFile("6-31G");
 //basis.findBasisFile("cc-pVTZ");
-  basis.findBasisFile("cc-pVDZ");
+//basis.findBasisFile("cc-pVDZ");
   basis.communicate(fileio);
   basis.parseGlobal();
   basis.constructLocal(&molecule);
@@ -215,7 +216,7 @@ int main(int argc, char **argv){
 //basis.renormShells();
 
 
-  aoints.setAlgorithm(AOIntegrals::INTEGRAL_ALGORITHM::INCORE);
+//aoints.setAlgorithm(AOIntegrals::INTEGRAL_ALGORITHM::INCORE);
   aoints.communicate(molecule,basis,fileio,memManager);
   singleSlater.communicate(molecule,basis,aoints,fileio,memManager);
 //moints.communicate(molecule,basis,fileio,aoints,singleSlater);
