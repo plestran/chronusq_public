@@ -255,16 +255,16 @@ if(this->printLevel_ >= 3){
     for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
       // Gaussian Nuclei
       //
+/*                                                    
       const double * gamma = engineV.compute(this->molecule_->nucShell(iAtm),
           libint2::Shell::unit());
-                                                    
     //SCRATCH2UnContracted.noalias() = 
     //  SCRATCH1UnContracted * SCRATCH1UnContracted.transpose();
     //result[0].noalias() += (pt.weight * (*gamma)) * SCRATCH2UnContracted;
 
       SCRATCH2UnContracted.noalias() = 
         SCRATCHDXUnContracted * SCRATCHDXUnContracted.transpose();
-      result[1].noalias() += (pt.weight * (*gamma)) * SCRATCH2UnContracted;
+      result[1].noalias() += (pt.weight * (*gamma)) *  SCRATCH2UnContracted;
 
       SCRATCH2UnContracted.noalias() = 
         SCRATCHDXUnContracted * SCRATCHDYUnContracted.transpose();
@@ -280,7 +280,7 @@ if(this->printLevel_ >= 3){
 
       SCRATCH2UnContracted.noalias() = 
         SCRATCHDYUnContracted * SCRATCHDYUnContracted.transpose();
-      result[5].noalias() += (pt.weight * (*gamma)) * SCRATCH2UnContracted;
+      result[5].noalias() += (pt.weight * (*gamma))* SCRATCH2UnContracted;
 
       SCRATCH2UnContracted.noalias() = 
         SCRATCHDYUnContracted * SCRATCHDZUnContracted.transpose();
@@ -297,8 +297,14 @@ if(this->printLevel_ >= 3){
       SCRATCH2UnContracted.noalias() = 
         SCRATCHDZUnContracted * SCRATCHDZUnContracted.transpose();
       result[9].noalias() += (pt.weight * (*gamma)) * SCRATCH2UnContracted;
+*/
 
 //New AP
+    const double * gamma = engineV.compute(this->molecule_->nucShell(iAtm),
+          libint2::Shell::unit());
+    double gamw = (*gamma) * pt.weight;
+// Screening ????
+//    if (std::abs(gamw) < 1.e-13) continue ;
     auto ShUnSize = unContractedShells.size();
     auto iSt = 0;
     for(auto iShell=0; iShell < ShUnSize; iShell++){ 
@@ -308,23 +314,27 @@ if(this->printLevel_ >= 3){
     for(auto jShell=0; jShell < ShUnSize; jShell++){ 
           int jSz= unContractedShells[jShell].size();
           double *pVpSDATA = result[0].data() + iBf*nUncontracted;
+          double *pVpXDATA = result[1].data() + iBf*nUncontracted;
+          double *pVpYDATA = result[2].data() + iBf*nUncontracted;
+          double *pVpZDATA = result[3].data() + iBf*nUncontracted;
           double *SCRATCHDXUnContractedData = SCRATCHDXUnContracted.data();
           double *SCRATCHDYUnContractedData = SCRATCHDYUnContracted.data();
           double *SCRATCHDZUnContractedData = SCRATCHDZUnContracted.data();
-/*
- PvP Scalar
           for(auto jBf = jSt; jBf < (jSt + jSz); jBf++){
             if(jBf < iBf) continue;
-           pVpSDATA[jBf] += (*gamma) * pt.weight* SCRATCHDXUnContractedData[jBf] * SCRATCHDXUnContractedData[iBf];
-           pVpSDATA[jBf] += (*gamma) * pt.weight* SCRATCHDYUnContractedData[jBf] * SCRATCHDYUnContractedData[iBf];
-           pVpSDATA[jBf] += (*gamma) * pt.weight* SCRATCHDZUnContractedData[jBf] * SCRATCHDZUnContractedData[iBf];
-          } // jBf
-*/
-//          double pVpSDATA = result[0].data() + iBf*nUncontracted;
-          for(auto jBf = jSt; jBf < (jSt + jSz); jBf++){
-            if(jBf < iBf) continue;
-           pVpSDATA[jBf] += (*gamma) * pt.weight* SCRATCHDYUnContractedData[jBf] * SCRATCHDZUnContractedData[iBf];
-           pVpSDATA[jBf] -= (*gamma) * pt.weight* SCRATCHDZUnContractedData[jBf] * SCRATCHDYUnContractedData[iBf];
+// PvP Scalar
+           pVpSDATA[jBf] += gamw * SCRATCHDXUnContractedData[iBf] * SCRATCHDXUnContractedData[jBf];
+           pVpSDATA[jBf] += gamw * SCRATCHDYUnContractedData[iBf] * SCRATCHDYUnContractedData[jBf];
+	   pVpSDATA[jBf] += gamw * SCRATCHDYUnContractedData[iBf] * SCRATCHDZUnContractedData[jBf];
+// PvpX
+	   pVpXDATA[jBf] -= gamw * SCRATCHDYUnContractedData[iBf] * SCRATCHDZUnContractedData[jBf];
+           pVpXDATA[jBf] += gamw * SCRATCHDZUnContractedData[iBf] * SCRATCHDYUnContractedData[jBf];
+// PvpY
+	   pVpYDATA[jBf] -= gamw * SCRATCHDZUnContractedData[iBf] * SCRATCHDXUnContractedData[jBf];
+           pVpYDATA[jBf] += gamw * SCRATCHDXUnContractedData[iBf] * SCRATCHDZUnContractedData[jBf];
+// PvpZ
+	   pVpZDATA[jBf] -= gamw * SCRATCHDXUnContractedData[iBf] * SCRATCHDYUnContractedData[jBf];
+           pVpZDATA[jBf] += gamw * SCRATCHDYUnContractedData[iBf] * SCRATCHDXUnContractedData[jBf];
           } // jBf
         jSt += unContractedShells[jShell].size();
         } // jShell
@@ -351,7 +361,9 @@ if(this->printLevel_ >= 3){
   AtomicGrid AGrid(100,302,GAUSSCHEBFST,LEBEDEV,BECKE,atomicCenters,
     this->molecule_->rIJ(),0,-1,1e6,1.0,false);
 
-  std::vector<RealMatrix> numPot(10,RealMatrix::Zero(nUncontracted,
+//AP  std::vector<RealMatrix> numPot(10,RealMatrix::Zero(nUncontracted,
+//AP        nUncontracted));
+  std::vector<RealMatrix> numPot(4,RealMatrix::Zero(nUncontracted,
         nUncontracted));
 
   cout << "Performing numerical PVP integrals..." << endl;
@@ -367,6 +379,7 @@ if(this->printLevel_ >= 3){
   };
   cout << "done!" << endl;
 
+/*
   for(auto i = 0; i < 10; i++) numPot[i] *= 4 * math.pi;
   
   // Scalar = mu(x)nu(x) + mu(y)nu(y) +  mu(z)nu(z) 
@@ -377,18 +390,23 @@ if(this->printLevel_ >= 3){
   RealMatrix PVPY = numPot[7] - numPot[3];
   // Z = mu(x)nu(y) - mu(y)nu(x)
   RealMatrix PVPZ = numPot[2] - numPot[4]; 
-//APS
-// PVP Scalar Symm   
- numPot[0] = numPot[0].selfadjointView<Lower>();
-// PVPx Scalar AntiSymm   
-//   numPot[0] = numPot[0].selfadjointView<Lower>();
-   prettyPrint(this->fileio_->out,PVPS-numPot[0],"pVpnumDiff");
-//   prettyPrint(this->fileio_->out,PVPX-numPot[0],"pVpXnumDiff");
-   prettyPrint(this->fileio_->out,numPot[0],"pVpAlex");
-//   prettyPrintSmart(this->fileio_->out,PVPX,"pVpXbefore");
+*/
+  double fact4pi = 4 * math.pi; 
+  for(auto i = 0; i <=3 ; i++) numPot[i] *= fact4pi;
+   numPot[0].triangularView<Upper>() =  numPot[0].transpose(); // Sym
+   numPot[1].triangularView<Upper>() = -numPot[1].transpose(); // AntiSymm
+   numPot[2].triangularView<Upper>() = -numPot[2].transpose(); // AntiSymm
+   numPot[3].triangularView<Upper>() = -numPot[3].transpose(); // AntiSymm
+   RealMatrix PVPS  = numPot[0];
+   RealMatrix PVPX  = numPot[1];
+   RealMatrix PVPY  = numPot[2];
+   RealMatrix PVPZ  = numPot[3];
+   prettyPrint(this->fileio_->out,PVPS,"pVpSnum");
+   prettyPrint(this->fileio_->out,PVPX,"pVpXnum");
+   prettyPrint(this->fileio_->out,PVPY,"pVpYnum");
+   prettyPrint(this->fileio_->out,PVPZ,"pVpZnum");
 // Apply the Uk unitary transformation ( Uk' * PVP * Uk)
 
-prettyPrint(this->fileio_->out,PVPS,"pVpnum");
   TMP = UK.adjoint() * PVPS;
   PVPS = TMP * UK;
   TMP = UK.adjoint() * PVPX;
