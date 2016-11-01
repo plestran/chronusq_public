@@ -172,9 +172,9 @@ int main(int argc, char **argv){
   RealTime<dcomplex> rt;
   FileIO fileio("test.inp","test.out");
 
-  memManager.setTotalMem(256e6);
+  memManager.setTotalMem(512e6);
   initCQ(argc,argv);
-  CQSetNumThreads(4);
+  CQSetNumThreads(8);
   
 //////////////////////////////////////////////////////
 //loadPresets<H>(molecule);
@@ -203,11 +203,11 @@ int main(int argc, char **argv){
 
 
 //basis.forceCart();
-  basis.findBasisFile("sto-3g");
+//basis.findBasisFile("sto-3g");
 //basis.findBasisFile("3-21g");
 //basis.findBasisFile("6-31G");
 //basis.findBasisFile("cc-pVTZ");
-//basis.findBasisFile("cc-pVDZ");
+  basis.findBasisFile("cc-pVDZ");
   basis.communicate(fileio);
   basis.parseGlobal();
   basis.constructLocal(&molecule);
@@ -252,9 +252,9 @@ int main(int argc, char **argv){
   rt.setIEnvlp(Step);
   rt.doPropagation();
 */
-  MOIntegrals<dcomplex> moints;
-  moints.communicate(singleSlater,memManager);
-  moints.initMeta();
+//MOIntegrals<dcomplex> moints;
+//moints.communicate(singleSlater,memManager);
+//moints.initMeta();
 //moints.testMOInts();
 
   FOPPA<dcomplex> resp(DIAGONALIZATION,SPIN_SEPARATED,false,false);

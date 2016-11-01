@@ -226,6 +226,8 @@ void MOIntegrals<T>::form2CVVOO() {
   VVOO_ = this->memManager_->template malloc<T>(NO*NV*NO*NV);
   std::fill_n(VVOO_,NO*NV*NO*NV,0.);
 
+  T* tmp1 = this->memManager_->template malloc<T>(NO*NO*NB*NB);
+  std::fill_n(tmp1,NO*NO*NB*NB,0.);
 
 /*
   for(auto j = 0; j < NO; j++)
@@ -256,9 +258,8 @@ void MOIntegrals<T>::form2CVVOO() {
 */
 
   
-  T* tmp1 = this->memManager_->template malloc<T>(NV*NV*NB*NB);
-  std::fill_n(tmp1,NV*NV*NB*NB,0.);
 
+/*
   for(auto sg = 0; sg < 2*NB; sg+=2)
   for(auto lm = 0; lm < 2*NB; lm+=2)
   for(auto b = 0; b < NV; b++)
@@ -301,9 +302,65 @@ void MOIntegrals<T>::form2CVVOO() {
       ) *tmp1[a + b*NV + (lm/2)*NV*NV + (sg/2)*NV*NV*NB] ;
   }
   }
+*/
+
+  int nDo = 200;
+
+  this->memManager_->printSummary(cout);
+  TMap scr(this->memManager_->template malloc<T>(nDo*NB*NB),NB*NB,nDo);
+  TMap scr2(this->memManager_->template malloc<T>(4*NB*NB),2*NB,2*NB);
+  RealMap aoERI(&this->wfn_->aointegrals()->aoERI_->storage()[0],NB*NB,NB*NB);
+  Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> > 
+    SAA(scr2.data(),NB,NB,Eigen::Stride<Dynamic,Dynamic>(4*NB,2));
+  Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> > 
+    SBB(scr2.data()+2*NB+1,NB,NB,Eigen::Stride<Dynamic,Dynamic>(4*NB,2));
+
+  this->memManager_->printSummary(cout);
+  std::vector<TMap> scrMaps;
+  for(auto iDo = 0; iDo < nDo; iDo++) 
+    scrMaps.emplace_back(scr.data()+iDo*NB*NB,NB,NB);
+
+  for(auto ij = 0; ij < NO*NO; ij+=nDo) {
+    cout << "Starting H1 ABIJ [" << ij << "," << ij + nDo << "]" << endl;
+    auto NDo = std::min(nDo, NO*NO-ij);
+    for(auto iDo = 0, IJ = ij; iDo < NDo; iDo++, IJ++){ 
+      int i = IJ % NO;
+      int j = IJ / NO;
+      scr2.noalias() = 
+        wfn_->moA()->col(i).conjugate() * wfn_->moA()->col(j).transpose();
+      scrMaps[iDo].noalias() = SAA + SBB;
+    }
+
+    cout << " Starting  GEMM ... ";
+    TMap TMPMAP(tmp1+ij*NB*NB,NB*NB,NDo);
+    TMPMAP.noalias() = aoERI * scr.block(0,0,NB*NB,NDo);
+    cout << "done!" << endl;
+  }
+ 
+  TMap TMPMAP(tmp1,NB*NB,NO*NO);
+  TMap VVOOMAP(VVOO_,NV*NV,NO*NO);
+  for(auto ab = 0; ab < NV*NV; ab+=nDo) {
+    cout << "Starting ABIJ H2 [" << ab << "," << ab + nDo << "]" << endl;
+    auto NDo = std::min(nDo, NV*NV - ab);
+    for(auto iDo = 0, AB = ab; iDo < NDo; iDo++, AB++){ 
+      int a = AB % NV;
+      int b = AB / NV;
+      scr2.noalias() = 
+        wfn_->moA()->col(a+NO).conjugate() * wfn_->moA()->col(b+NO).transpose();
+      scrMaps[iDo].noalias() = SAA + SBB;
+    }
+
+    cout << " Starting  GEMM ... ";
+    VVOOMAP.block(ab,0,NDo,NO*NO).noalias() = 
+      scr.block(0,0,NB*NB,NDo).transpose() * TMPMAP;
+    cout << "done!" << endl;
+  }
 
 
-  this->memManager_->template malloc<T>(NV*NV*NB*NB);
+  this->memManager_->free(tmp1,NO*NO*NB*NB);
+  this->memManager_->free(scr.data(),nDo*NB*NB);
+  this->memManager_->free(scr2.data(),4*NB*NB);
+  this->memManager_->printSummary(cout);
   this->haveMOVVOO_ = true;
 }; // form2CVVOO
 
