@@ -3,11 +3,13 @@
 PBE::PBE(double X, double eps):
 DFTFunctional(X,eps){
 // Memo Factor to be added at the end for numerical stability
-//  this->CxVx  =  0.930525736349100;  // (3/2)*((3/(4*pi))^(1/3)) ;  
+  this->CxVx  =  0.930525736349100;  // (3/2)*((3/(4*pi))^(1/3)) ;  
 //  this->small = 1.0e-18; 
   this-> d1over3  = 1.0/3.0;
   this-> d4over3  = 4.0/3.0;
-  this-> beta =  0.0042;
+  this-> beta  =  std::pow((36*math.pi),(5.0/3.0));
+  this-> beta *=  5;
+  this-> b     =  0.0042;
 //  cout << "B88 object created " <<endl;
 
   this->name = "PBE";

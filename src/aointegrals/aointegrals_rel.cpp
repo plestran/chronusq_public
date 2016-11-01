@@ -255,7 +255,7 @@ if(this->printLevel_ >= 3){
     for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
       // Gaussian Nuclei
       //
-/*                                                    
+/*
       const double * gamma = engineV.compute(this->molecule_->nucShell(iAtm),
           libint2::Shell::unit());
     //SCRATCH2UnContracted.noalias() = 
@@ -298,7 +298,6 @@ if(this->printLevel_ >= 3){
         SCRATCHDZUnContracted * SCRATCHDZUnContracted.transpose();
       result[9].noalias() += (pt.weight * (*gamma)) * SCRATCH2UnContracted;
 */
-
 //New AP
     const double * gamma = engineV.compute(this->molecule_->nucShell(iAtm),
           libint2::Shell::unit());
@@ -325,7 +324,7 @@ if(this->printLevel_ >= 3){
 // PvP Scalar
            pVpSDATA[jBf] += gamw * SCRATCHDXUnContractedData[iBf] * SCRATCHDXUnContractedData[jBf];
            pVpSDATA[jBf] += gamw * SCRATCHDYUnContractedData[iBf] * SCRATCHDYUnContractedData[jBf];
-	   pVpSDATA[jBf] += gamw * SCRATCHDYUnContractedData[iBf] * SCRATCHDZUnContractedData[jBf];
+	   pVpSDATA[jBf] += gamw * SCRATCHDZUnContractedData[iBf] * SCRATCHDZUnContractedData[jBf];
 // PvpX
 	   pVpXDATA[jBf] -= gamw * SCRATCHDYUnContractedData[iBf] * SCRATCHDZUnContractedData[jBf];
            pVpXDATA[jBf] += gamw * SCRATCHDZUnContractedData[iBf] * SCRATCHDYUnContractedData[jBf];
@@ -358,11 +357,12 @@ if(this->printLevel_ >= 3){
     }
   } 
 
-  AtomicGrid AGrid(100,302,GAUSSCHEBFST,LEBEDEV,BECKE,atomicCenters,
+  AtomicGrid AGrid(100,590,GAUSSCHEBFST,LEBEDEV,BECKE,atomicCenters,
     this->molecule_->rIJ(),0,-1,1e6,1.0,false);
-
-//AP  std::vector<RealMatrix> numPot(10,RealMatrix::Zero(nUncontracted,
-//AP        nUncontracted));
+/*
+  std::vector<RealMatrix> numPot(10,RealMatrix::Zero(nUncontracted,
+        nUncontracted));
+*/
   std::vector<RealMatrix> numPot(4,RealMatrix::Zero(nUncontracted,
         nUncontracted));
 
@@ -379,9 +379,9 @@ if(this->printLevel_ >= 3){
   };
   cout << "done!" << endl;
 
+  
 /*
   for(auto i = 0; i < 10; i++) numPot[i] *= 4 * math.pi;
-  
   // Scalar = mu(x)nu(x) + mu(y)nu(y) +  mu(z)nu(z) 
   RealMatrix PVPS = numPot[1] + numPot[5] + numPot[9]; 
   // X = mu(y)nu(z) - mu(z)nu(y)
@@ -391,6 +391,7 @@ if(this->printLevel_ >= 3){
   // Z = mu(x)nu(y) - mu(y)nu(x)
   RealMatrix PVPZ = numPot[2] - numPot[4]; 
 */
+
   double fact4pi = 4 * math.pi; 
   for(auto i = 0; i <=3 ; i++) numPot[i] *= fact4pi;
    numPot[0].triangularView<Upper>() =  numPot[0].transpose(); // Sym

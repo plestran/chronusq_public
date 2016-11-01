@@ -187,6 +187,7 @@ class PBE : public DFTFunctional {
   double  d4over3;
   double CxVx;  //TF LDA Prefactor (for Vx)  
   double beta;    
+  double b;    
 //A  double small;    
 public:
   PBE(double X = 1.0, double eps = 1e-10);
