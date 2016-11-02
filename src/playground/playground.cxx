@@ -174,7 +174,7 @@ int main(int argc, char **argv){
 
   memManager.setTotalMem(256e4);
   initCQ(argc,argv);
-  CQSetNumThreads(1);
+  CQSetNumThreads(8);
   
 //////////////////////////////////////////////////////
 //loadPresets<H>(molecule);

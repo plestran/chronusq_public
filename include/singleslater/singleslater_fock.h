@@ -299,14 +299,16 @@ void SingleSlater<T>::formVXC_new(){
   VectorXd   SCRATCH1Z(this->nBasis_);
 */
   
+  int NDer = 0;
+  if(this->isGGA) NDer = 1; 
+/*
+   // Parallel w mem manager
   std::vector<RealVecMap> SCRATCH1;
   std::vector<RealVecMap> SCRATCH1X;
   std::vector<RealVecMap> SCRATCH1Y;
   std::vector<RealVecMap> SCRATCH1Z;
 
 
-  int NDer = 0;
-  if(this->isGGA) NDer = 1; 
   for(auto ithread = 0; ithread < nthreads; ithread++){
     SCRATCH1.emplace_back(
       this->memManager_->template malloc<double>(this->nBasis_),
@@ -323,6 +325,12 @@ void SingleSlater<T>::formVXC_new(){
         this->nBasis_);
     }
   }
+*/
+
+  std::vector<VectorXd> SCRATCH1(nthreads,VectorXd(this->nBasis_));
+  std::vector<VectorXd> SCRATCH1X(nthreads,VectorXd(this->nBasis_));
+  std::vector<VectorXd> SCRATCH1Y(nthreads,VectorXd(this->nBasis_));
+  std::vector<VectorXd> SCRATCH1Z(nthreads,VectorXd(this->nBasis_));
 
 /*
   std::array<double,3>  drhoT = {0.0,0.0,0.0}; ///< array TOTAL density gradient components
@@ -363,7 +371,7 @@ void SingleSlater<T>::formVXC_new(){
 //std::vector<double> gammaAB(nthreads,0.);
 
 
-  std::vector<bool> shMap(this->basisset_->nShell()+1);
+//std::vector<bool> shMap(this->basisset_->nShell()+1);
   int NSkip2(0);
   int NSkip3(0);
   int NSkip4(0);
@@ -375,6 +383,8 @@ void SingleSlater<T>::formVXC_new(){
 
 
 //VectorXd OmegaA(this->nBasis_), OmegaB(this->nBasis_);
+/*
+  // Parallel w mem manager
   std::vector<RealVecMap> OmegaA, OmegaB;
   for(auto ithread = 0; ithread < nthreads; ithread++){
     OmegaA.emplace_back(
@@ -384,6 +394,9 @@ void SingleSlater<T>::formVXC_new(){
       this->memManager_->template malloc<double>(this->nBasis_),
       this->nBasis_);
   }
+*/
+  std::vector<VectorXd> OmegaA(nthreads,VectorXd(this->nBasis_));
+  std::vector<VectorXd> OmegaB(nthreads,VectorXd(this->nBasis_));
 
 //  VectorXd DENCOL(this->nBasis_);
   double fact = 2.0;
@@ -408,6 +421,7 @@ void SingleSlater<T>::formVXC_new(){
 
     int thread_id = omp_get_thread_num();
 
+    SCRATCH1[thread_id].setZero();
     double *SCRATCH1DATA = SCRATCH1[thread_id].data();
     double *SCRATCH1XDATA,*SCRATCH1YDATA,*SCRATCH1ZDATA;
     if(this->isGGA) {
@@ -425,6 +439,7 @@ void SingleSlater<T>::formVXC_new(){
     // For each new sphere, determine list of close basis shells (if screen ON)
 //  if(pt.I == 0 && this->screenVxc) {
     if(pt.J != currentCol[thread_id] && this->screenVxc) {
+//    cout << pt.I << " " << pt.J <<endl;
       currentCol[thread_id] = pt.J;
       closeShells[thread_id].clear();
       double DX = (*this->molecule_->cart())(0,iAtm) - bg::get<0>(GP);
@@ -722,6 +737,13 @@ void SingleSlater<T>::formVXC_new(){
   std::vector<KernelIntegrand<T>> res(nthreads,
     KernelIntegrand<T>(this->vXCScalar_->cols()));
 
+  for(auto i = 0; i < nthreads; i++) {
+    res[i].VXCScalar.setZero();
+    res[i].Energy = 0;
+    if(!this->isClosedShell or this->nTCS_ == 2)
+      res[i].VXCMz.setZero();
+  }
+
   std::vector<double> atomRadCutoff(this->molecule_->nAtoms(),0.0);
 
   if (this->screenVxc) {
@@ -761,20 +783,22 @@ void SingleSlater<T>::formVXC_new(){
   if(!this->isClosedShell or this->nTCS_ == 2)
     this->vXCMz_->setZero();   // Set to zero every occurence of the SCF
 
+  this->energyExc = 0.;
   
   for(auto ithread = 0; ithread < nthreads; ithread++){
     if(this->isClosedShell && this->nTCS_ != 2){
-      (*this->vXCScalar_) = 8.0*math.pi*res[ithread].VXCScalar;
+      (*this->vXCScalar_) += 8.0*math.pi*res[ithread].VXCScalar;
     } else if(!this->isClosedShell or this->nTCS_ == 2){
-      (*this->vXCScalar_) = 4.0*math.pi*(res[ithread].VXCScalar+res[ithread].VXCMz);  //ALPHA LIKE
-      (*this->vXCMz_) = 4.0*math.pi*(res[ithread].VXCScalar-res[ithread].VXCMz);      //BETA LIKE
+      (*this->vXCScalar_) += 4.0*math.pi*(res[ithread].VXCScalar+res[ithread].VXCMz);  //ALPHA LIKE
+      (*this->vXCMz_) += 4.0*math.pi*(res[ithread].VXCScalar-res[ithread].VXCMz);      //BETA LIKE
     }
-    this->energyExc = 4*math.pi*res[ithread].Energy;
+    this->energyExc += 4*math.pi*res[ithread].Energy;
   }
   (*this->vXCScalar_) = this->vXCScalar_->template selfadjointView<Lower>();
   if(!this->isClosedShell or this->nTCS_ == 2)
     (*this->vXCMz_) = this->vXCMz_->template selfadjointView<Lower>();
 
+/*
   // Cleanup Scratch
   for(auto ithread = 0; ithread < nthreads; ithread++) {
     this->memManager_->free(SCRATCH1[ithread].data(),this->nBasis_);
@@ -787,6 +811,7 @@ void SingleSlater<T>::formVXC_new(){
     this->memManager_->free(OmegaA[ithread].data(),this->nBasis_);
     this->memManager_->free(OmegaB[ithread].data(),this->nBasis_);
   }
+*/
 
   if(doTimings) {
     cout << "T1 = " << T1.count() << endl;
