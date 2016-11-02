@@ -301,8 +301,8 @@ void SingleSlater<T>::formVXC_new(){
   
   int NDer = 0;
   if(this->isGGA) NDer = 1; 
-/*
-   // Parallel w mem manager
+
+  // Parallel w mem manager
   std::vector<RealVecMap> SCRATCH1;
   std::vector<RealVecMap> SCRATCH1X;
   std::vector<RealVecMap> SCRATCH1Y;
@@ -313,6 +313,8 @@ void SingleSlater<T>::formVXC_new(){
     SCRATCH1.emplace_back(
       this->memManager_->template malloc<double>(this->nBasis_),
       this->nBasis_);
+    SCRATCH1.back().setZero();
+
     if(this->isGGA) {
       SCRATCH1X.emplace_back(
         this->memManager_->template malloc<double>(this->nBasis_),
@@ -323,14 +325,19 @@ void SingleSlater<T>::formVXC_new(){
       SCRATCH1Z.emplace_back(
         this->memManager_->template malloc<double>(this->nBasis_),
         this->nBasis_);
+
+      SCRATCH1X.back().setZero();
+      SCRATCH1Y.back().setZero();
+      SCRATCH1Z.back().setZero();
     }
   }
-*/
 
+/*
   std::vector<VectorXd> SCRATCH1(nthreads,VectorXd(this->nBasis_));
   std::vector<VectorXd> SCRATCH1X(nthreads,VectorXd(this->nBasis_));
   std::vector<VectorXd> SCRATCH1Y(nthreads,VectorXd(this->nBasis_));
   std::vector<VectorXd> SCRATCH1Z(nthreads,VectorXd(this->nBasis_));
+*/
 
 /*
   std::array<double,3>  drhoT = {0.0,0.0,0.0}; ///< array TOTAL density gradient components
@@ -383,7 +390,6 @@ void SingleSlater<T>::formVXC_new(){
 
 
 //VectorXd OmegaA(this->nBasis_), OmegaB(this->nBasis_);
-/*
   // Parallel w mem manager
   std::vector<RealVecMap> OmegaA, OmegaB;
   for(auto ithread = 0; ithread < nthreads; ithread++){
@@ -393,10 +399,13 @@ void SingleSlater<T>::formVXC_new(){
     OmegaB.emplace_back(
       this->memManager_->template malloc<double>(this->nBasis_),
       this->nBasis_);
+    OmegaA.back().setZero();
+    OmegaB.back().setZero();
   }
-*/
+/*
   std::vector<VectorXd> OmegaA(nthreads,VectorXd(this->nBasis_));
   std::vector<VectorXd> OmegaB(nthreads,VectorXd(this->nBasis_));
+*/
 
 //  VectorXd DENCOL(this->nBasis_);
   double fact = 2.0;
@@ -421,7 +430,14 @@ void SingleSlater<T>::formVXC_new(){
 
     int thread_id = omp_get_thread_num();
 
+/*
     SCRATCH1[thread_id].setZero();
+    if(this->isGGA) {
+      SCRATCH1X[thread_id].setZero();
+      SCRATCH1Y[thread_id].setZero();
+      SCRATCH1Z[thread_id].setZero();
+    }
+*/
     double *SCRATCH1DATA = SCRATCH1[thread_id].data();
     double *SCRATCH1XDATA,*SCRATCH1YDATA,*SCRATCH1ZDATA;
     if(this->isGGA) {
@@ -629,38 +645,38 @@ void SingleSlater<T>::formVXC_new(){
     // Evaluate Functional derivatives
 
     if(doTimings) Newstart = std::chrono::high_resolution_clock::now();
-      if(NDer > 0 ) {
-        for(auto iXYZ = 0; iXYZ < 3; iXYZ++){
-          double GA(GradRhoA[thread_id](iXYZ)), GB(GradRhoB[thread_id](iXYZ));
-            GradRhoA[thread_id](iXYZ) = pt.weight * 
-              ( 2.0 * GA * kernelXC.ddgammaAA + GB * kernelXC.ddgammaAB);
-            GradRhoB[thread_id](iXYZ) = pt.weight * 
-              ( 2.0 * GB * kernelXC.ddgammaBB + GA * kernelXC.ddgammaAB);
-        } // Grad
-        OmegaA[thread_id].setZero(); 
+    if(NDer > 0 ) {
+      for(auto iXYZ = 0; iXYZ < 3; iXYZ++){
+        double GA(GradRhoA[thread_id](iXYZ)), GB(GradRhoB[thread_id](iXYZ));
+          GradRhoA[thread_id](iXYZ) = pt.weight * 
+            ( 2.0 * GA * kernelXC.ddgammaAA + GB * kernelXC.ddgammaAB);
+          GradRhoB[thread_id](iXYZ) = pt.weight * 
+            ( 2.0 * GB * kernelXC.ddgammaBB + GA * kernelXC.ddgammaAB);
+      } // Grad
+      OmegaA[thread_id].setZero(); 
+      for(auto iShell : closeShells[thread_id]) {
+        int iSz= shSizes[iShell];
+        int iSt = this->basisset_->mapSh2Bf(iShell);
+     
+        for(auto iBf = iSt; iBf < (iSt + iSz); iBf++){
+          OmegaADATA[iBf] += GradRhoA[thread_id](0) * SCRATCH1XDATA[iBf] +
+                             GradRhoA[thread_id](1) * SCRATCH1YDATA[iBf] +
+                             GradRhoA[thread_id](2) * SCRATCH1ZDATA[iBf];
+        } // iBf
+      } // iShell
+      if(this->nTCS_ == 1 && !this->isClosedShell){
+        OmegaB[thread_id].setZero(); 
         for(auto iShell : closeShells[thread_id]) {
-          int iSz= shSizes[iShell];
-          int iSt = this->basisset_->mapSh2Bf(iShell);
-       
-          for(auto iBf = iSt; iBf < (iSt + iSz); iBf++){
-            OmegaADATA[iBf] += GradRhoA[thread_id](0) * SCRATCH1XDATA[iBf] +
-                               GradRhoA[thread_id](1) * SCRATCH1YDATA[iBf] +
-                               GradRhoA[thread_id](2) * SCRATCH1ZDATA[iBf];
-          } // iBf
+           int iSz= shSizes[iShell];
+           int iSt = this->basisset_->mapSh2Bf(iShell);
+           for(auto iBf = iSt; iBf < (iSt + iSz); iBf++){
+              OmegaBDATA[iBf] += GradRhoB[thread_id](0) * SCRATCH1XDATA[iBf] + 
+                                 GradRhoB[thread_id](1) * SCRATCH1YDATA[iBf] + 
+                                 GradRhoB[thread_id](2) * SCRATCH1ZDATA[iBf];  
+           } // iBf
         } // iShell
-        if(this->nTCS_ == 1 && !this->isClosedShell){
-          OmegaB[thread_id].setZero(); 
-          for(auto iShell : closeShells[thread_id]) {
-             int iSz= shSizes[iShell];
-             int iSt = this->basisset_->mapSh2Bf(iShell);
-             for(auto iBf = iSt; iBf < (iSt + iSz); iBf++){
-                OmegaBDATA[iBf] += GradRhoB[thread_id](0) * SCRATCH1XDATA[iBf] + 
-                                   GradRhoB[thread_id](1) * SCRATCH1YDATA[iBf] + 
-                                   GradRhoB[thread_id](2) * SCRATCH1ZDATA[iBf];  
-             } // iBf
-          } // iShell
-        } //UKS
-      } //GGA
+      } //UKS
+    } //GGA
     result[thread_id].Energy += pt.weight * kernelXC.eps;
     kernelXC.ddrhoA *= pt.weight;
     kernelXC.ddrhoB *= pt.weight;
@@ -798,7 +814,6 @@ void SingleSlater<T>::formVXC_new(){
   if(!this->isClosedShell or this->nTCS_ == 2)
     (*this->vXCMz_) = this->vXCMz_->template selfadjointView<Lower>();
 
-/*
   // Cleanup Scratch
   for(auto ithread = 0; ithread < nthreads; ithread++) {
     this->memManager_->free(SCRATCH1[ithread].data(),this->nBasis_);
@@ -811,7 +826,6 @@ void SingleSlater<T>::formVXC_new(){
     this->memManager_->free(OmegaA[ithread].data(),this->nBasis_);
     this->memManager_->free(OmegaB[ithread].data(),this->nBasis_);
   }
-*/
 
   if(doTimings) {
     cout << "T1 = " << T1.count() << endl;
