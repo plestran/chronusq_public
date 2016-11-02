@@ -60,18 +60,67 @@ struct ShellCQ {
   std::vector<real_t> coeff;
   std::vector<real_t> alpha; //!< exponents
   std::array<real_t, 3> O;   //!< origin
+  std::vector<real_t> norm;  //normalization constants
   std::vector<real_t> max_ln_coeff; //!< maximum ln of (absolute) contraction coefficient for each primitive
+  std::vector<std::array<int,3>> cartesian_l;
 
   size_t cartesian_size() const { return (l + 1) * (l + 2) / 2; }
   size_t size() const { return pure ? (2 * l + 1) : cartesian_size(); }
 
   ShellCQ(libint2::Shell& other){
+    int i,j,k,x,y,z;
+    real_t readNorm;
+    real_t threePI = math.pi*math.pi*math.pi;
     this->alpha = other.alpha;
     this->l = other.contr[0].l;
     this->coeff = other.contr[0].coeff;
     this->pure = other.contr[0].pure;
     this->O = other.O;
     this->max_ln_coeff = other.max_ln_coeff;
+/*
+    if(this->l==0){
+      this->cartesian_l.push_back({0,0,0});
+    } else if(this->l==1){
+      this->cartesian_l.push_back({1,0,0});
+      this->cartesian_l.push_back({0,1,0});
+      this->cartesian_l.push_back({0,0,1});
+    } else if(this->l==2){
+      this->cartesian_l.push_back({2,0,0});
+      this->cartesian_l.push_back({1,1,0});
+      this->cartesian_l.push_back({1,0,1});
+      this->cartesian_l.push_back({0,2,0});
+      this->cartesian_l.push_back({0,1,1});
+      this->cartesian_l.push_back({0,0,2});
+    } else if(this->l>2){
+      for( i=0 ; i<this->l+1 ; i++ ){
+        x = this->l - i;
+        for( j=0 ; j<i+1 ; j++ ){
+          y = i - j;
+          z = l - x - y;
+          this->cartesian_l.push_back({x,y,z});
+        }
+      }
+    };
+*/
+      for( i=0 ; i<this->l+1 ; i++ ){
+        x = this->l - i;
+        for( j=0 ; j<i+1 ; j++ ){
+          y = i - j;
+          z = l - x - y;
+          this->cartesian_l.push_back({x,y,z});
+        }
+      }
+ 
+    for(i=0;i<this->alpha.size();i++){
+//      if(this->l==0) readNorm = this->coeff[i]*sqrt(sqrt(8*this->alpha[i]*this->alpha[i]*this->alpha[i]/threePI));
+//      else if(this->l==1) readNorm = this->coeff[i]*sqrt(sqrt(128*this->alpha[i]*this->alpha[i]*this->alpha[i]*this->alpha[i]*this->alpha[i]/threePI));
+//      else if(this->l==2) {
+//        readNorm = this->coeff[i]*sqrt(sqrt(2048*this->alpha[i]*this->alpha[i]*this->alpha[i]*this->alpha[i]*this->alpha[i]*this->alpha[i]*this->alpha[i]/threePI));
+//        if(i==0||i==3||i==5) readNorm = readNorm/sqrt(3);
+//      };
+      readNorm = this->coeff[i];
+      this->norm.push_back(readNorm);
+    };
   };
 
 
@@ -186,7 +235,6 @@ class BasisSet{
   std::vector<double> basisEvalScr_;
   std::vector<double> basisEvalScr2_;
   std::vector<RealMatrix>    Car2Sph_;///< Matrix transformation Cart -> Sph
-
   std::vector<int>               nLShell_  ; ///< Maps L value to # of shells of that L
   std::vector<int>               mapSh2Bf_ ; ///< Maps shell number to first basis funtion
   std::vector<int>               mapSh2Cen_; ///< Maps shell number to atomic center
@@ -311,6 +359,7 @@ public:
   inline double * expPairSh() {return this->expPairSh_;  }; ///< Return expPairSh
   inline  double getradCutSh(int iShell) {return this->radCutSh_[iShell];   }; ///< Return radCutSh
   
+  dcomplex car2sphcoeff(int L,int m,std::array<int,3> &l);
   template <typename T> double * basisEval(int,std::array<double,3>,T*);
   template <typename T> double * basisEval(libint2::Shell&,T*);
   template <typename T> double * basisDEval(int,libint2::Shell&,T*);

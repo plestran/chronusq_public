@@ -172,9 +172,9 @@ int main(int argc, char **argv){
   RealTime<dcomplex> rt;
   FileIO fileio("test.inp","test.out");
 
-  memManager.setTotalMem(512e6);
+  memManager.setTotalMem(512e5);
   initCQ(argc,argv);
-  CQSetNumThreads(8);
+  CQSetNumThreads(4);
   
 //////////////////////////////////////////////////////
 //loadPresets<H>(molecule);

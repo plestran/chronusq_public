@@ -323,7 +323,7 @@ void SingleSlater<T>::formVXC_new(){
 
   std::vector<std::size_t> closeShells;
   VectorXd OmegaA(this->nBasis_), OmegaB(this->nBasis_);
-  VectorXd DENCOL(this->nBasis_);
+//  VectorXd DENCOL(this->nBasis_);
   double fact = 2.0;
   double *SCRATCH1DATA = SCRATCH1.data();
   double *SCRATCH1XDATA = SCRATCH1X.data();

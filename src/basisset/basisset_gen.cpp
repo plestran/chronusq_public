@@ -31,7 +31,7 @@ namespace ChronusQ{
  */
 void BasisSet::constructLocal(Molecule * mol){
   //cout << "Reference Shells" << endl;
-for(auto iAtom = 0; iAtom < mol->nAtoms(); iAtom++){
+  for(auto iAtom = 0; iAtom < mol->nAtoms(); iAtom++){
     bool found = false;
     for(auto iRef = this->refShells_.begin(); iRef != this->refShells_.end(); ++iRef){
       if(mol->index(iAtom) == (*iRef).index){
@@ -55,7 +55,7 @@ for(auto iAtom = 0; iAtom < mol->nAtoms(); iAtom++){
               (*mol->cart())(1,iAtom),
               (*mol->cart())(2,iAtom)};
 
-          this->shellsCQ.push_back(ChronusQ::ShellCQ{*iShell});
+          this->shellsCQ.push_back(this->shells_.back());
         };
 
         for(auto iCons = (*iRef).unNormalizedCons.begin(); 
@@ -81,6 +81,7 @@ for(auto iAtom = 0; iAtom < mol->nAtoms(); iAtom++){
  *  Construct an external basis defintion using the local reference shells
  */
 void BasisSet::constructExtrn(Molecule * mol, BasisSet *genBasis){
+  int nShell = 0;
   genBasis->fileio_ = this->fileio_;
   for(auto iAtom = 0; iAtom < mol->nAtoms(); iAtom++){
     bool found = false;
@@ -104,6 +105,8 @@ void BasisSet::constructExtrn(Molecule * mol, BasisSet *genBasis){
             { (*mol->cart())(0,iAtom),
               (*mol->cart())(1,iAtom),
               (*mol->cart())(2,iAtom)};
+          genBasis->shellsCQ.push_back(ChronusQ::ShellCQ{genBasis->shells_[nShell]});
+          nShell++;
         }
         for(auto iCons = (*iRef).unNormalizedCons.begin(); 
             iCons != (*iRef).unNormalizedCons.end(); ++iCons){
@@ -119,6 +122,7 @@ void BasisSet::constructExtrn(Molecule * mol, BasisSet *genBasis){
            this->fileio_->out);
   } // loop IAtom
   genBasis->computeMeta();
+  genBasis->forceCart_ = this->forceCart_;
 
 } // BasisSet::constructExtrn
 
@@ -155,8 +159,9 @@ void BasisSet::computeMeta(){
   } // loop shell
 
   // Always allocate scratch for basis eval and first derivatives
-  this->basisEvalScr_.resize(2*((this->maxL_+1)*(this->maxL_+2))); // (1 + 3(x,y,z)) Times (l+1)(l+2)/2 Cartesian
-  this->basisEvalScr2_.resize(4*((2*this->maxL_+1))); // (1 + 3(x,y,z)) Times (2l+1) Cartesian
+  int nthreads = omp_get_max_threads();
+  this->basisEvalScr_.resize(2*nthreads*((this->maxL_+1)*(this->maxL_+2))); // (1 + 3(x,y,z)) Times (l+1)(l+2)/2 Cartesian
+  this->basisEvalScr2_.resize(4*nthreads*((2*this->maxL_+1))); // (1 + 3(x,y,z)) Times (2l+1) Cartesian
 
 } // BasisSet::computeMeta
 }; // namespace ChronusQ

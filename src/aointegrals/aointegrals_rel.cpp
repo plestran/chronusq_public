@@ -29,6 +29,7 @@
 using ChronusQ::AOIntegrals;
 
 void AOIntegrals::formP2Transformation(){
+  int nthreads = omp_get_max_threads();
   if(!this->isPrimary) return;
   this->basisSet_->makeMapPrim2Bf();
   auto unContractedShells = this->basisSet_->uncontractBasis();
@@ -63,15 +64,19 @@ void AOIntegrals::formP2Transformation(){
       libint2::Operator::overlap,1,this->basisSet_->maxL(),0);
   libint2::Engine engineT(
       libint2::Operator::kinetic,1,this->basisSet_->maxL(),0);
-  libint2::Engine engineV(
-      libint2::Operator::nuclear,1,this->basisSet_->maxL(),0);
   libint2::Engine engineC(
       libint2::Operator::coulomb,1,this->basisSet_->maxL(),0);
 
+
   engineS.set_precision(0.0);
   engineT.set_precision(0.0);
-  engineV.set_precision(0.0);
   engineC.set_precision(0.0);
+
+  std::vector<libint2::Engine> engineV(nthreads);
+  engineV[0] = libint2::Engine(libint2::Operator::nuclear,1,this->basisSet_->maxL(),0);
+  engineV[0].set_precision(0.0);
+
+  for(auto i = 1; i < nthreads; i++) engineV[i] = engineV[0];
 
   // Loop through and uncontract S and T
   //
@@ -189,7 +194,7 @@ void AOIntegrals::formP2Transformation(){
   for(auto iS = 0; iS < nUncontracted; iS++)
     if(std::abs(ovlpEigValues[iS]) < 1e-12) nZero++;
 
-  cout << "NZERO " << nZero << endl;
+//cout << "NZERO " << nZero << endl;
   
   // Normalize
   // What happens when we divide by zero?
@@ -238,16 +243,23 @@ void AOIntegrals::formP2Transformation(){
   this->memManager_->free(VUncontracted.data(),nUnSq);
   // Next we need to get W' (from pVp integrals)
 
-  RealVecMap SCRATCH1UnContracted(this->memManager_->malloc<double>(nUncontracted),nUncontracted);
-  RealMap SCRATCH2UnContracted(this->memManager_->malloc<double>(nUnSq),nUncontracted,nUncontracted);
-  RealVecMap SCRATCHDXUnContracted(this->memManager_->malloc<double>(nUncontracted),nUncontracted);
-  RealVecMap SCRATCHDYUnContracted(this->memManager_->malloc<double>(nUncontracted),nUncontracted);
-  RealVecMap SCRATCHDZUnContracted(this->memManager_->malloc<double>(nUncontracted),nUncontracted);
+  std::vector<RealVecMap> SCRATCHDXUnContracted;
+  std::vector<RealVecMap> SCRATCHDYUnContracted;
+  std::vector<RealVecMap> SCRATCHDZUnContracted;
 
+  for(auto i = 0; i < nthreads; i++) {
+    SCRATCHDXUnContracted.emplace_back(this->memManager_->malloc<double>(nUncontracted),nUncontracted);
+    SCRATCHDYUnContracted.emplace_back(this->memManager_->malloc<double>(nUncontracted),nUncontracted);
+    SCRATCHDZUnContracted.emplace_back(this->memManager_->malloc<double>(nUncontracted),nUncontracted);
+
+    SCRATCHDXUnContracted.back().setZero();
+    SCRATCHDYUnContracted.back().setZero();
+    SCRATCHDZUnContracted.back().setZero();
+  }
   // compute pVp numerically
-  auto PVP = [&](IntegrationPoint pt, std::vector<RealMap> &result) {
+  auto PVP = [&](IntegrationPoint pt, std::vector<std::vector<RealMap>> &result) {
+    int thread_id = omp_get_thread_num();
     for(auto iShell = 0, b_s = 0; iShell < unContractedShells.size();
-
          b_s += unContractedShells[iShell].size(),++iShell) {
       int size= unContractedShells[iShell].size();
 
@@ -259,10 +271,10 @@ void AOIntegrals::formP2Transformation(){
       RealMap dyMap(buff + 2*size,size,1);
       RealMap dzMap(buff + 3*size,size,1);
 
-      SCRATCH1UnContracted.block( b_s,0,size,1) = bMap;
-      SCRATCHDXUnContracted.block(b_s,0,size,1) = dxMap;
-      SCRATCHDYUnContracted.block(b_s,0,size,1) = dyMap;
-      SCRATCHDZUnContracted.block(b_s,0,size,1) = dzMap;
+//      SCRATCH1UnContracted[thread_id].block( b_s,0,size,1) = bMap;
+      SCRATCHDXUnContracted[thread_id].block(b_s,0,size,1) = dxMap;
+      SCRATCHDYUnContracted[thread_id].block(b_s,0,size,1) = dyMap;
+      SCRATCHDZUnContracted[thread_id].block(b_s,0,size,1) = dzMap;
 
      // delete [] buff;
     };
@@ -270,20 +282,21 @@ void AOIntegrals::formP2Transformation(){
     std::vector<std::pair<double,std::array<double,3>>> q;
     q.push_back(
       {1.0, {{bg::get<0>(pt.pt),bg::get<1>(pt.pt),bg::get<2>(pt.pt)}}});
-    engineV.set_params(q);
+    engineV[thread_id].set_params(q);
 
     for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
       // Gaussian Nuclei
+      //
+/*
       const double * gamma = engineV.compute(this->molecule_->nucShell(iAtm),
           libint2::Shell::unit());
-                                                    
     //SCRATCH2UnContracted.noalias() = 
     //  SCRATCH1UnContracted * SCRATCH1UnContracted.transpose();
     //result[0].noalias() += (pt.weight * (*gamma)) * SCRATCH2UnContracted;
 
       SCRATCH2UnContracted.noalias() = 
         SCRATCHDXUnContracted * SCRATCHDXUnContracted.transpose();
-      result[1].noalias() += (pt.weight * (*gamma)) * SCRATCH2UnContracted;
+      result[1].noalias() += (pt.weight * (*gamma)) *  SCRATCH2UnContracted;
 
       SCRATCH2UnContracted.noalias() = 
         SCRATCHDXUnContracted * SCRATCHDYUnContracted.transpose();
@@ -299,7 +312,7 @@ void AOIntegrals::formP2Transformation(){
 
       SCRATCH2UnContracted.noalias() = 
         SCRATCHDYUnContracted * SCRATCHDYUnContracted.transpose();
-      result[5].noalias() += (pt.weight * (*gamma)) * SCRATCH2UnContracted;
+      result[5].noalias() += (pt.weight * (*gamma))* SCRATCH2UnContracted;
 
       SCRATCH2UnContracted.noalias() = 
         SCRATCHDYUnContracted * SCRATCHDZUnContracted.transpose();
@@ -316,7 +329,52 @@ void AOIntegrals::formP2Transformation(){
       SCRATCH2UnContracted.noalias() = 
         SCRATCHDZUnContracted * SCRATCHDZUnContracted.transpose();
       result[9].noalias() += (pt.weight * (*gamma)) * SCRATCH2UnContracted;
+*/
+//New AP
+    const double * gamma = engineV[thread_id].compute(this->molecule_->nucShell(iAtm),
+          libint2::Shell::unit());
+    double gamw = (*gamma) * pt.weight;
+// Screening ????
+//    if (std::abs(gamw) < 1.e-13) continue ;
+    auto ShUnSize = unContractedShells.size();
+    auto iSt = 0;
+    for(auto iShell=0; iShell < ShUnSize; iShell++){ 
+      int iSz= unContractedShells[iShell].size();
+      for(auto iBf = iSt; iBf < (iSt + iSz); iBf++){
+    auto jSt = 0;
+    for(auto jShell=0; jShell < ShUnSize; jShell++){ 
+          int jSz= unContractedShells[jShell].size();
+          double *pVpSDATA = result[thread_id][0].data() + iBf*nUncontracted;
+          double *pVpXDATA = result[thread_id][1].data() + iBf*nUncontracted;
+          double *pVpYDATA = result[thread_id][2].data() + iBf*nUncontracted;
+          double *pVpZDATA = result[thread_id][3].data() + iBf*nUncontracted;
+          double *SCRATCHDXUnContractedData = SCRATCHDXUnContracted[thread_id].data();
+          double *SCRATCHDYUnContractedData = SCRATCHDYUnContracted[thread_id].data();
+          double *SCRATCHDZUnContractedData = SCRATCHDZUnContracted[thread_id].data();
+          for(auto jBf = jSt; jBf < (jSt + jSz); jBf++){
+            if(jBf < iBf) continue;
+// PvP Scalar
+           pVpSDATA[jBf] += gamw * SCRATCHDXUnContractedData[iBf] * SCRATCHDXUnContractedData[jBf];
+           pVpSDATA[jBf] += gamw * SCRATCHDYUnContractedData[iBf] * SCRATCHDYUnContractedData[jBf];
+	   pVpSDATA[jBf] += gamw * SCRATCHDZUnContractedData[iBf] * SCRATCHDZUnContractedData[jBf];
+// PvpX
+	   pVpXDATA[jBf] -= gamw * SCRATCHDYUnContractedData[iBf] * SCRATCHDZUnContractedData[jBf];
+           pVpXDATA[jBf] += gamw * SCRATCHDZUnContractedData[iBf] * SCRATCHDYUnContractedData[jBf];
+// PvpY
+	   pVpYDATA[jBf] -= gamw * SCRATCHDZUnContractedData[iBf] * SCRATCHDXUnContractedData[jBf];
+           pVpYDATA[jBf] += gamw * SCRATCHDXUnContractedData[iBf] * SCRATCHDZUnContractedData[jBf];
+// PvpZ
+	   pVpZDATA[jBf] -= gamw * SCRATCHDXUnContractedData[iBf] * SCRATCHDYUnContractedData[jBf];
+           pVpZDATA[jBf] += gamw * SCRATCHDYUnContractedData[iBf] * SCRATCHDXUnContractedData[jBf];
+          } // jBf
+        jSt += unContractedShells[jShell].size();
+        } // jShell
+      } // iBf
+     iSt += unContractedShells[iShell].size() ;
+    } // iShell
+
     }
+
 
   };
 
@@ -333,27 +391,39 @@ void AOIntegrals::formP2Transformation(){
 
   AtomicGrid AGrid(100,590,GAUSSCHEBFST,LEBEDEV,BECKE,atomicCenters,
     this->molecule_->rIJ(),0,-1,1e6,1.0,false);
-
-//std::vector<RealMatrix> numPot(10,RealMatrix::Zero(nUncontracted,
-//      nUncontracted));
-  std::vector<RealMap> numPot;
-  for(auto i = 0; i < 10; i++) {
-    numPot.emplace_back(this->memManager_->malloc<double>(nUnSq),
-      nUncontracted,nUncontracted);
-    numPot.back().setZero();
+/*
+  std::vector<RealMatrix> numPot(10,RealMatrix::Zero(nUncontracted,
+        nUncontracted));
+*/
+//  std::vector<RealMatrix> numPot(4,RealMatrix::Zero(nUncontracted,
+//        nUncontracted));
+  std::vector<std::vector<RealMap> > numPot(nthreads);
+  for(auto i = 0; i < nthreads; i++) {
+    for(auto j = 0; j < 4; j++) {
+      numPot[i].emplace_back(this->memManager_->malloc<double>(nUnSq),
+        nUncontracted,nUncontracted);
+      numPot[i].back().setZero();
+    }
   }
 
   for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
+    cout << iAtm << endl;
     AGrid.center() = iAtm;
     AGrid.setRadCutOff(atomRadCutoff[iAtm]);
     AGrid.findNearestNeighbor();
     AGrid.scalingFactor()=
       0.5*elements[this->molecule_->index(iAtm)].sradius/phys.bohr;
-    AGrid.integrate<std::vector<RealMap>>(PVP,numPot);
+    AGrid.integrate<std::vector<std::vector<RealMap>>>(PVP,numPot);
   };
 
+  for(auto i = 0; i < nthreads; i++) {
+    this->memManager_->free(SCRATCHDXUnContracted[i].data(),nUncontracted);
+    this->memManager_->free(SCRATCHDYUnContracted[i].data(),nUncontracted);
+    this->memManager_->free(SCRATCHDZUnContracted[i].data(),nUncontracted);
+  }
+  
+/*
   for(auto i = 0; i < 10; i++) numPot[i] *= 4 * math.pi;
-
   this->memManager_->free(SCRATCH1UnContracted.data(),nUncontracted);
   this->memManager_->free(SCRATCH2UnContracted.data(),nUnSq);
   this->memManager_->free(SCRATCHDXUnContracted.data(),nUncontracted);
@@ -369,6 +439,32 @@ void AOIntegrals::formP2Transformation(){
   PVPX = numPot[6] - numPot[8];
   PVPY = numPot[7] - numPot[3];
   PVPZ = numPot[2] - numPot[4]; 
+*/
+
+  RealMap PVPS(this->memManager_->malloc<double>(nUnSq),nUncontracted,nUncontracted);
+  RealMap PVPX(this->memManager_->malloc<double>(nUnSq),nUncontracted,nUncontracted);
+  RealMap PVPY(this->memManager_->malloc<double>(nUnSq),nUncontracted,nUncontracted);
+  RealMap PVPZ(this->memManager_->malloc<double>(nUnSq),nUncontracted,nUncontracted);
+  PVPS.setZero();
+  PVPX.setZero();
+  PVPY.setZero();
+  PVPZ.setZero();
+   for(auto i = 0; i < nthreads; i++) {
+     PVPS += numPot[i][0];
+     PVPX += numPot[i][1];
+     PVPY += numPot[i][2];
+     PVPZ += numPot[i][3];
+   }
+   double fact4pi = 4 * math.pi; 
+   PVPS.triangularView<Upper>() =  PVPS.transpose(); // Sym
+   PVPX.triangularView<Upper>() = -PVPX.transpose(); // AntiSymm
+   PVPY.triangularView<Upper>() = -PVPY.transpose(); // AntiSymm
+   PVPZ.triangularView<Upper>() = -PVPZ.transpose(); // AntiSymm
+   PVPS *= fact4pi;
+   PVPX *= fact4pi;
+   PVPY *= fact4pi;
+   PVPZ *= fact4pi;
+
 
   // Apply the Uk unitary transformation ( Uk' * PVP * Uk)
   nUnSqScratch.noalias() = UK.adjoint() * PVPS;
@@ -379,6 +475,7 @@ void AOIntegrals::formP2Transformation(){
   PVPY.noalias() = nUnSqScratch * UK;
   nUnSqScratch.noalias() = UK.adjoint() * PVPZ;
   PVPZ.noalias() = nUnSqScratch * UK;
+
 
   if(this->printLevel_ >= 3){
     prettyPrintSmart(cout,P2_Potential,"V");
