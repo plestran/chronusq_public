@@ -392,7 +392,7 @@ void SingleSlater<T>::formVXC_new(){
   for(auto iSh = 0; iSh < this->basisset_->nShell(); iSh++)
     shSizes.push_back(this->basisset_->shells(iSh).size());
 
-  std::vector<std::vector<std::size_t>> closeShells;
+  std::vector<std::vector<std::size_t>> closeShells(nthreads);
 // If screen in not on loop over all shell for each atoms, no need to
 // figure which are the close shell to each point
   if (!this->screenVxc){
@@ -402,15 +402,19 @@ void SingleSlater<T>::formVXC_new(){
     }
   }
 
+  std::vector<int> currentCol(nthreads,-1);
   auto valVxc = [&](std::size_t iAtm, ChronusQ::IntegrationPoint &pt, 
     std::vector<KernelIntegrand<T>> &result) -> void {
 
     int thread_id = omp_get_thread_num();
 
     double *SCRATCH1DATA = SCRATCH1[thread_id].data();
-    double *SCRATCH1XDATA = SCRATCH1X[thread_id].data();
-    double *SCRATCH1YDATA = SCRATCH1Y[thread_id].data();
-    double *SCRATCH1ZDATA = SCRATCH1Z[thread_id].data();
+    double *SCRATCH1XDATA,*SCRATCH1YDATA,*SCRATCH1ZDATA;
+    if(this->isGGA) {
+      SCRATCH1XDATA = SCRATCH1X[thread_id].data();
+      SCRATCH1YDATA = SCRATCH1Y[thread_id].data();
+      SCRATCH1ZDATA = SCRATCH1Z[thread_id].data();
+    }
     double *OmegaADATA = OmegaA[thread_id].data();
     double *OmegaBDATA = OmegaB[thread_id].data();
 
@@ -419,7 +423,9 @@ void SingleSlater<T>::formVXC_new(){
 
     if(doTimings) Newstart = std::chrono::high_resolution_clock::now();
     // For each new sphere, determine list of close basis shells (if screen ON)
-    if(pt.I == 0 && this->screenVxc) {
+//  if(pt.I == 0 && this->screenVxc) {
+    if(pt.J != currentCol[thread_id] && this->screenVxc) {
+      currentCol[thread_id] = pt.J;
       closeShells[thread_id].clear();
       double DX = (*this->molecule_->cart())(0,iAtm) - bg::get<0>(GP);
       double DY = (*this->molecule_->cart())(1,iAtm) - bg::get<1>(GP);
@@ -471,9 +477,9 @@ void SingleSlater<T>::formVXC_new(){
 
     // Determine if we computed Zeros
     double S1Norm = SCRATCH1[thread_id].norm();
-    double S1XNorm = SCRATCH1X[thread_id].norm();
-    double S1YNorm = SCRATCH1Y[thread_id].norm();
-    double S1ZNorm = SCRATCH1Z[thread_id].norm();
+  //double S1XNorm = SCRATCH1X[thread_id].norm();
+  //double S1YNorm = SCRATCH1Y[thread_id].norm();
+  //double S1ZNorm = SCRATCH1Z[thread_id].norm();
 
     if(doTimings){
       Newend = std::chrono::high_resolution_clock::now();
@@ -752,20 +758,22 @@ void SingleSlater<T>::formVXC_new(){
 
 
   this->vXCScalar_->setZero();   // Set to zero every occurence of the SCF
-  this->vXCMz_->setZero();   // Set to zero every occurence of the SCF
+  if(!this->isClosedShell or this->nTCS_ == 2)
+    this->vXCMz_->setZero();   // Set to zero every occurence of the SCF
 
   
   for(auto ithread = 0; ithread < nthreads; ithread++){
     if(this->isClosedShell && this->nTCS_ != 2){
       (*this->vXCScalar_) = 8.0*math.pi*res[ithread].VXCScalar;
-    } else if(!this->isClosedShell && this->nTCS_ != 2){
+    } else if(!this->isClosedShell or this->nTCS_ == 2){
       (*this->vXCScalar_) = 4.0*math.pi*(res[ithread].VXCScalar+res[ithread].VXCMz);  //ALPHA LIKE
       (*this->vXCMz_) = 4.0*math.pi*(res[ithread].VXCScalar-res[ithread].VXCMz);      //BETA LIKE
     }
     this->energyExc = 4*math.pi*res[ithread].Energy;
   }
   (*this->vXCScalar_) = this->vXCScalar_->template selfadjointView<Lower>();
-  (*this->vXCMz_) = this->vXCMz_->template selfadjointView<Lower>();
+  if(!this->isClosedShell or this->nTCS_ == 2)
+    (*this->vXCMz_) = this->vXCMz_->template selfadjointView<Lower>();
 
   // Cleanup Scratch
   for(auto ithread = 0; ithread < nthreads; ithread++) {
