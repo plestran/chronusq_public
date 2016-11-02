@@ -168,8 +168,8 @@ int main(int argc, char **argv){
   Molecule molecule;
   BasisSet basis;
   AOIntegrals aoints;
-  SingleSlater<double> singleSlater;
-  RealTime<double> rt;
+  SingleSlater<dcomplex> singleSlater;
+  RealTime<dcomplex> rt;
   FileIO fileio("test.inp","test.out");
 
   memManager.setTotalMem(256e4);
@@ -190,7 +190,7 @@ int main(int argc, char **argv){
   molecule.computeRij();
   molecule.computeI();
 
-  singleSlater.setRef("RB88");
+  singleSlater.setRef("X2C");
 //singleSlater.setSCFEneTol(1e-12);
   singleSlater.setSCFMaxIter(10000);
   singleSlater.doDIIS = true;

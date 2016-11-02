@@ -699,24 +699,24 @@ void AOIntegrals::formP2Transformation(){
   ComplexMap Y(this->memManager_->malloc<dcomplex>(4*nUnSq),
      2*nUncontracted,2*nUncontracted);
 
-  // FIXME: (DBWY) Need to compute the sqrt smartly here. I'm 90% sure that
-  // you can use an SVD here as it constitues the "symmetric / Lowdin" orthogonalization
-  // step here...
+/*
   Y = (ComplexMatrix::Identity(2*nUncontracted,2*nUncontracted) 
      + X.adjoint() * X).pow(-0.5);
+*/
 
-/*
   C4nUnSqScratch  = (ComplexMatrix::Identity(2*nUncontracted,2*nUncontracted) + X.adjoint() * X);
 
-  prettyPrintSmart(cout,C4nUnSqScratch.pow(-0.5),"True");
+//prettyPrintSmart(cout,C4nUnSqScratch.pow(-0.5),"True");
   double * SingVal = this->memManager_->malloc<double>(TwoUnCon);
-  JOBU = 'O';JOBVT = 'A';
-  zgesvd_(&JOBU,&JOBVT,&TwoUnCon,&TwoUnCon,C4nUnSqScratch.data(),&TwoUnCon,SingVal,C4nUnSqScratch.data(),&TwoUnCon,C4nUnSqScratch2.data(),&TwoUnCon,CWORK,&LWORK,RWORK,&INFO);
+  zheev_(&JOBZ,&UPLO,&TwoUnCon,C4nUnSqScratch.data(),&TwoUnCon,SingVal,CWORK,&LWORK,RWORK,&INFO);
 
-  Y = C4nUnSqScratch * C4nUnSqScratch2;
-  prettyPrintSmart(cout,Y,"Attempt");
-  CErr();
-*/
+  C4nUnSqScratch2 = C4nUnSqScratch;
+  for(auto i = 0; i < TwoUnCon; i++)
+    C4nUnSqScratch2.col(i) /= std::sqrt(SingVal[i]);
+
+  Y = C4nUnSqScratch2 * C4nUnSqScratch.adjoint();
+//prettyPrintSmart(cout,Y,"Attempt");
+//CErr();
 
   // Free up CWORK and RWORK
   this->memManager_->free(CWORK,LWORK);

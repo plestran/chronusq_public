@@ -658,6 +658,7 @@ void SingleSlater<T>::formVXC_new(){
         int iSz= shSizes[iShell];
         int iSt = this->basisset_->mapSh2Bf(iShell);
      
+        // FIXME: This can be vectorized
         for(auto iBf = iSt; iBf < (iSt + iSz); iBf++){
           OmegaADATA[iBf] += GradRhoA[thread_id](0) * SCRATCH1XDATA[iBf] +
                              GradRhoA[thread_id](1) * SCRATCH1YDATA[iBf] +
@@ -669,6 +670,8 @@ void SingleSlater<T>::formVXC_new(){
         for(auto iShell : closeShells[thread_id]) {
            int iSz= shSizes[iShell];
            int iSt = this->basisset_->mapSh2Bf(iShell);
+
+           // FIXME: This can be vectorized
            for(auto iBf = iSt; iBf < (iSt + iSz); iBf++){
               OmegaBDATA[iBf] += GradRhoB[thread_id](0) * SCRATCH1XDATA[iBf] + 
                                  GradRhoB[thread_id](1) * SCRATCH1YDATA[iBf] + 
