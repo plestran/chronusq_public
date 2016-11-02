@@ -106,11 +106,11 @@ guessMap = {
 #  "LYP"   :chronusQ.CORR.LYP
 #}
 
-kernelMap = {
-  "NODFT"      :chronusQ.DFT.NODFT,
-  "USERDEFINED":chronusQ.DFT.USERDEFINED,
-  "LSDA"       :chronusQ.DFT.LSDA
-}
+#kernelMap = {
+#  "NODFT"      :chronusQ.DFT.NODFT,
+#  "USERDEFINED":chronusQ.DFT.USERDEFINED,
+#  "LSDA"       :chronusQ.DFT.LSDA
+#}
 
 gridMap = {
   "EULERMACL" : chronusQ.GRID_TYPE.EULERMAC,

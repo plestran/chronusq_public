@@ -18,33 +18,56 @@ cerr_api.cpp
 
 #target_include_directories(pythonapi PUBLIC ${PYTHON_INCLUDE_DIRS})
 
-target_link_libraries(pythonapi LINK_PUBLIC 
-basisset 
-classtools
-controls
-#mointegrals
-molecule
-tools
-#sdresponse
-#realtime
-#mollerplesset
-singleslater
-aointegrals
-worker
-#quasinewton
-#grid
-fileio
-cerr
-gauinterface
-tools
-#response
-qn
-#numdiff
-quantum
-wavefunction
-grid2
-dft
-${EXTERNAL_CQ_DEPS})
+target_link_libraries(pythonapi LINK_PUBLIC classtools)
+target_link_libraries(pythonapi LINK_PUBLIC quantum)
+target_link_libraries(pythonapi LINK_PUBLIC wavefunction)
+target_link_libraries(pythonapi LINK_PUBLIC singleslater)
+target_link_libraries(pythonapi LINK_PUBLIC quantum)
+target_link_libraries(pythonapi LINK_PUBLIC grid2)
+target_link_libraries(pythonapi LINK_PUBLIC molecule)
+target_link_libraries(pythonapi LINK_PUBLIC tools)
+target_link_libraries(pythonapi LINK_PUBLIC cerr)
+target_link_libraries(pythonapi LINK_PUBLIC gauinterface)
+target_link_libraries(pythonapi LINK_PUBLIC controls)
+target_link_libraries(pythonapi LINK_PUBLIC quantum)
+target_link_libraries(pythonapi LINK_PUBLIC singleslater)
+target_link_libraries(pythonapi LINK_PUBLIC quantum)
+target_link_libraries(pythonapi LINK_PUBLIC aointegrals)
+target_link_libraries(pythonapi LINK_PUBLIC mointegrals)
+target_link_libraries(pythonapi LINK_PUBLIC basisset)
+target_link_libraries(pythonapi PUBLIC realtime)
+target_link_libraries(pythonapi LINK_PUBLIC qn)
+target_link_libraries(pythonapi LINK_PUBLIC dft)
+target_link_libraries(pythonapi LINK_PUBLIC fileio)
+target_link_libraries(pythonapi LINK_PUBLIC ${EXTERNAL_CQ_DEPS})
+
+#target_link_libraries(pythonapi LINK_PUBLIC 
+#basisset 
+#classtools
+#controls
+##mointegrals
+#molecule
+#tools
+##sdresponse
+##realtime
+##mollerplesset
+#singleslater
+#aointegrals
+#worker
+##quasinewton
+##grid
+#fileio
+#cerr
+#gauinterface
+#tools
+##response
+#qn
+##numdiff
+#quantum
+#wavefunction
+#grid2
+#dft
+#${EXTERNAL_CQ_DEPS})
 
 set(APIINST ${PROJECT_BINARY_DIR}/src/python)
 set(APIPY   ${APIINST}/chronusq.py)

@@ -534,13 +534,27 @@ public:
 
   void setRef(const std::string&);
 
+  inline void setGuess(const std::string &gs){
+    if(!gs.compare("CORE"))
+      this->guess_ = CORE;
+    else if (!gs.compare("SAD"))
+      this->guess_ = SAD;
+    else if (!gs.compare("RANDOM"))
+      this->guess_ = RANDOM;
+    else if (!gs.compare("READ"))
+      this->guess_ = READ;
+    else
+      CErr(std::string("Guess type: ") + gs + std::string(" not recognized"),this->fileio_->out);
+  }
+
+
   //set private data
 //inline void setRef(int Ref)             { this->Ref_ = Ref;          };
   inline void setPrintLevel(int i)        { this->printLevel_ = i;     };
   inline void setSCFDenTol(double x)      { this->denTol_ = x;         };
   inline void setSCFEneTol(double x)      { this->eneTol_ = x;         };
   inline void setSCFMaxIter(int i)        { this->maxSCFIter_ = i;     };
-  inline void setGuess(int i)             { this->guess_ = i;          };
+//inline void setGuess(int i)             { this->guess_ = i;          };
   inline void isNotPrimary()              { this->isPrimary = false;   };
   inline void setDFTKernel( DFT i)        { this->DFTKernel_  = i;     };
   inline void setDFTWeightScheme(int i)   { this->weightScheme_ = i;   };

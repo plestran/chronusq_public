@@ -41,23 +41,59 @@ def communicate(workers):
   except KeyError:
     pass
 
-  try:
-    workers["CQSDResponse"].communicate(workers["CQMolecule"],
-      workers["CQBasisSet"],workers["CQSingleSlater"],workers["CQMOIntegrals"],
-      workers["CQFileIO"],workers["CQControls"])
-  except KeyError:
-    pass
+#  try:
+#    workers["CQSDResponse"].communicate(workers["CQMolecule"],
+#      workers["CQBasisSet"],workers["CQSingleSlater"],workers["CQMOIntegrals"],
+#      workers["CQFileIO"],workers["CQControls"])
+#  except KeyError:
+#    pass
+#
+#  try:
+#    workers["CQMOIntegrals"].communicate(workers["CQMolecule"],
+#      workers["CQBasisSet"],workers["CQFileIO"],
+#      workers["CQAOIntegrals"],workers["CQSingleSlater"])
+#  except KeyError:
+#    pass
 
-  try:
-    workers["CQMOIntegrals"].communicate(workers["CQMolecule"],
-      workers["CQBasisSet"],workers["CQFileIO"],
-      workers["CQAOIntegrals"],workers["CQSingleSlater"])
-  except KeyError:
-    pass
+def runCQJob(job,workers):
+  workers["CQFileIO"].iniH5Files()
 
+  # Make the classes know about eachother
+  communicate(workers)
 
+  # Print some information pertaining to the job
+  workers["CQMolecule"].printInfo(workers["CQFileIO"])
+  workers["CQBasisSet"].printInfo();
 
-def runSCF(workers,meta):
+  print 'here'
+  # Set Up AOIntegrals Metadata
+  workers["CQAOIntegrals"].initMeta()
+
+  print 'here'
+  # Set up Wavefunction Metadata
+  workers["CQSingleSlater"].initMeta()
+
+  print 'here'
+  # Allocate Space for AO Integrals
+  workers["CQAOIntegrals"].alloc()
+ 
+  print 'here'
+  # Allocate Space for Wavefunction Information
+  workers["CQSingleSlater"].alloc()
+
+  print 'here'
+  # Always Form Guess
+  workers["CQSingleSlater"].formGuess()
+  print 'here'
+
+  if job == 'SCF':
+    workers["CQSingleSlater"].SCF() 
+
+  workers["CQSingleSlater"].computeProperties()
+  
+  workers["CQSingleSlater"].printProperties()
+
+def runSCF(workers):
   # Make the classes know about eachother
   communicate(workers)
 
@@ -93,56 +129,36 @@ def runSCF(workers,meta):
   if chronusQ.getRank() == 0:
     workers["CQSingleSlater"].printProperties()
 
-  #ND = chronusQ.NumericalDifferentiationDouble()
-  #ND.setSingleSlater(workers["CQSingleSlater"])
-  #ND.generateESObjs()
-  #ND.setRespNRoots(4)
-  #ND.setRespType(chronusQ.RESPONSE_TYPE.CIS)
-  #ND.setRespRoot(0)
-  #ND.computeESGradient = True
-  #ND.computeES2GSNACME = True
-  #ND.computeES2ESNACME = True
-  #ND.differentiate()
 
- # #print ND.GSGrad()
- # #print ND.ESGrad()
- # #print ND.ESGSNACME()
- # #print ND.ESESNACME()
- # meta.GSGrad    =  ND.GSGrad()
- # meta.ESGrad    =  ND.ESGrad()
- # meta.ESGSNACME =  ND.ESGSNACME()
- # meta.ESESNACME =  ND.ESESNACME()
+  #meta.E          = workers["CQSingleSlater"].totalEnergy
+  #meta.scfIters   = workers["CQSingleSlater"].nSCFIter
+  #meta.dipole     = workers["CQSingleSlater"].dipole()
+  #meta.quadrupole = workers["CQSingleSlater"].quadrupole()
+  #meta.octupole   = workers["CQSingleSlater"].octupole()
 
-
-  meta.E          = workers["CQSingleSlater"].totalEnergy
-  meta.scfIters   = workers["CQSingleSlater"].nSCFIter
-  meta.dipole     = workers["CQSingleSlater"].dipole()
-  meta.quadrupole = workers["CQSingleSlater"].quadrupole()
-  meta.octupole   = workers["CQSingleSlater"].octupole()
-
-def runRT(workers,meta):
-  runSCF(workers,meta)
-  workers["CQRealTime"].initMeta()
-
-  workers["CQRealTime"].alloc()
-  if chronusQ.getRank() == 0:
-    workers["CQRealTime"].iniDensity()
-  workers["CQRealTime"].doPropagation()
-
-  meta.lastDipole = workers['CQRealTime'].lastDipole()
-  meta.lastEnergy = workers['CQRealTime'].lastEnergy()
-
-def runSDR(workers,meta):
-
-  runSCF(workers,meta)
-  workers["CQMOIntegrals"].initMeta()
-  workers["CQSDResponse"].initMeta()
-  workers["CQSDResponse"].setPPRPA(1)
-  if chronusQ.getRank() == 0:
-    workers["CQSDResponse"].initMeth()
-    workers["CQSDResponse"].alloc()
-    workers["CQSDResponse"].IterativeRESP()
-
-  meta.davIters = workers["CQSDResponse"].nIter
-  meta.excEne   = workers["CQSDResponse"].excitationEnergies()
-  meta.oscStr   = workers["CQSDResponse"].oscStrengths()
+#def runRT(workers,meta):
+#  runSCF(workers,meta)
+#  workers["CQRealTime"].initMeta()
+#
+#  workers["CQRealTime"].alloc()
+#  if chronusQ.getRank() == 0:
+#    workers["CQRealTime"].iniDensity()
+#  workers["CQRealTime"].doPropagation()
+#
+#  meta.lastDipole = workers['CQRealTime'].lastDipole()
+#  meta.lastEnergy = workers['CQRealTime'].lastEnergy()
+#
+#def runSDR(workers,meta):
+#
+#  runSCF(workers,meta)
+#  workers["CQMOIntegrals"].initMeta()
+#  workers["CQSDResponse"].initMeta()
+#  workers["CQSDResponse"].setPPRPA(1)
+#  if chronusQ.getRank() == 0:
+#    workers["CQSDResponse"].initMeth()
+#    workers["CQSDResponse"].alloc()
+#    workers["CQSDResponse"].IterativeRESP()
+#
+#  meta.davIters = workers["CQSDResponse"].nIter
+#  meta.excEne   = workers["CQSDResponse"].excitationEnergies()
+#  meta.oscStr   = workers["CQSDResponse"].oscStrengths()

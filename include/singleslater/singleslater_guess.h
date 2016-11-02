@@ -174,14 +174,15 @@ void SingleSlater<T>::SADGuess() {
     aointegralsAtom.communicate(uniqueAtom,basisSetAtom,*this->fileio_,
       *this->aointegrals_->memManager());
     aointegralsAtom.initMeta();
-    aointegralsAtom.integralAlgorithm = AOIntegrals::INTEGRAL_ALGORITHM::DIRECT;
+  //aointegralsAtom.integralAlgorithm = AOIntegrals::INTEGRAL_ALGORITHM::DIRECT;
+    aointegralsAtom.setAlgorithm("DIRECT");
 
     hartreeFockAtom.communicate(uniqueAtom,basisSetAtom,aointegralsAtom,
       *this->fileio_,*this->memManager_);
   
     aointegralsAtom.alloc();
     
-    hartreeFockAtom.setGuess(CORE);
+    hartreeFockAtom.setGuess("CORE");
     hartreeFockAtom.initMeta();
 //  hartreeFockAtom.setField(this->elecField_);
 //  hartreeFockAtom.isClosedShell = (hartreeFockAtom.multip() == 1); 

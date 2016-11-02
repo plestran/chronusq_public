@@ -198,7 +198,7 @@ int main(int argc, char **argv){
 //singleSlater.dampParam = 0.2;
 //singleSlater.setNDIISKeep(12);
 
-  singleSlater.setGuess(CORE);
+  singleSlater.setGuess("CORE");
 
   fileio.iniH5Files();
 
@@ -216,6 +216,7 @@ int main(int argc, char **argv){
 //basis.renormShells();
 
 
+  aoints.setAlgorithm("DIRECT");
 //aoints.setAlgorithm(AOIntegrals::INTEGRAL_ALGORITHM::INCORE);
   aoints.communicate(molecule,basis,fileio,memManager);
   singleSlater.communicate(molecule,basis,aoints,fileio,memManager);

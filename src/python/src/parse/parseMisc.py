@@ -52,8 +52,3 @@ def parseMisc(workers,settings):
       optMap[i](settings[i])
     except KeyError:
       continue
-
-  if 'UNITTEST' in settings:
-    return settings['UNITTEST']
-  else:
-    return None
