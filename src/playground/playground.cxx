@@ -168,13 +168,15 @@ int main(int argc, char **argv){
   Molecule molecule;
   BasisSet basis;
   AOIntegrals aoints;
-  SingleSlater<dcomplex> singleSlater;
-  RealTime<dcomplex> rt;
+//  SingleSlater<dcomplex> singleSlater;
+//  RealTime<dcomplex> rt;
+  SingleSlater<double> singleSlater;
+  RealTime<double> rt;
   FileIO fileio("test.inp","test.out");
 
   memManager.setTotalMem(256e6);
   initCQ(argc,argv);
-  CQSetNumThreads(4);
+  CQSetNumThreads(1);
   
 //////////////////////////////////////////////////////
 //loadPresets<H>(molecule);
@@ -190,7 +192,8 @@ int main(int argc, char **argv){
   molecule.computeRij();
   molecule.computeI();
 
-  singleSlater.setRef("X2C");
+//  singleSlater.setRef("X2C");
+  singleSlater.setRef("RSLATER");
 //singleSlater.setSCFEneTol(1e-12);
   singleSlater.setSCFMaxIter(10000);
   singleSlater.doDIIS = true;
@@ -203,9 +206,9 @@ int main(int argc, char **argv){
 
 
 //basis.forceCart();
-//  basis.findBasisFile("sto-3g");
+  basis.findBasisFile("sto-3g");
 //basis.findBasisFile("3-21g");
-  basis.findBasisFile("6-31G");
+//  basis.findBasisFile("6-31G");
 //  basis.findBasisFile("cc-pVTZ");
 //basis.findBasisFile("cc-pVDZ");
   basis.communicate(fileio);

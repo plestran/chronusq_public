@@ -18,6 +18,25 @@ DFTFunctional(X,eps){
 #endif
 };
 
+double PBE::g0 (double x, double &sinhx, double &tenxd){
+  double gx;
+  double tmp;
+  sinhx = boost::math::asinh(x);
+  tenxd = std::pow(x,this->d);
+  tenxd *= 1.e-6;
+  gx = std::exp(-this->c*x*x);
+  gx *= x*x;
+  gx *= -(this->b - this->beta);
+  gx += this->b * x * x;
+  gx -= tenxd;
+  tmp  = -tenxd ;
+  tmp /= this->CxVx ;
+  tmp += 6.0 * b * x * sinhx + 1.0;
+  
+  gx  /= tmp;
+  
+ return gx; 
+};  //End Form g function for B88 Exchange
 
 DFTFunctional::DFTInfo PBE::eval(const double &rhoA, const double &rhoB){
 };

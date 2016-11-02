@@ -188,9 +188,12 @@ class PBE : public DFTFunctional {
   double CxVx;  //TF LDA Prefactor (for Vx)  
   double beta;    
   double b;    
+  double c;    
+  double d;    
 //A  double small;    
 public:
   PBE(double X = 1.0, double eps = 1e-10);
+  double g0 (double x, double &sinhx, double &tenxd);
   DFTInfo eval(const double &rhoA, const double &rhoB);
   DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaBB);
   DFTInfo eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaAB, const double &gammaBB);
