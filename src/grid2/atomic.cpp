@@ -45,6 +45,7 @@ namespace ChronusQ {
     // Cells
     // Note these Weights have to be normailzed (see normBeckeW) 
 
+    int thread_id = omp_get_thread_num();
     //VectorXd rA(3), rB(3), rAB(3);
     VectorXd rA(3), rB(3);
 /*
@@ -95,7 +96,7 @@ namespace ChronusQ {
     }
 
     for(auto iCenter = 0; iCenter < this->centers_.size(); iCenter++){
-      this->partitionScratch_[iCenter] = 1.0;
+      this->partitionScratch_[thread_id][iCenter] = 1.0;
       rA(0) = bg::get<0>(pt) - this->centers_[iCenter][0];
       rA(1) = bg::get<1>(pt) - this->centers_[iCenter][1];
       rA(2) = bg::get<2>(pt) - this->centers_[iCenter][2];
@@ -112,17 +113,17 @@ namespace ChronusQ {
         if(this->partitionScheme_ == FRISCH && mu < -0.64) 
           continue;
         else if(this->partitionScheme_ == FRISCH && mu > 0.64){
-          this->partitionScratch_[iCenter] = 0.0;
+          this->partitionScratch_[thread_id][iCenter] = 0.0;
           break;
         } else
-          this->partitionScratch_[iCenter] *= 0.5 * (1.0 - g(mu));
+          this->partitionScratch_[thread_id][iCenter] *= 0.5 * (1.0 - g(mu));
       }
     }
     // Normalization
     double sum = 0.0;
     for(auto iCenter = 0; iCenter < this->centers_.size(); iCenter++)
-      sum += this->partitionScratch_[iCenter];
-    return this->partitionScratch_[this->centerIndx_] / sum;
+      sum += this->partitionScratch_[thread_id][iCenter];
+    return this->partitionScratch_[thread_id][this->centerIndx_] / sum;
   };
 
 }

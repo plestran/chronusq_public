@@ -29,6 +29,7 @@
 using ChronusQ::AOIntegrals;
 
 void AOIntegrals::formP2Transformation(){
+  int nthreads = omp_get_max_threads();
   this->basisSet_->makeMapPrim2Bf();
   if(!this->isPrimary) return;
   auto unContractedShells = this->basisSet_->uncontractBasis();
@@ -49,15 +50,19 @@ if(this->printLevel_ >= 2){
       libint2::Operator::overlap,1,this->basisSet_->maxL(),0);
   libint2::Engine engineT(
       libint2::Operator::kinetic,1,this->basisSet_->maxL(),0);
-  libint2::Engine engineV(
-      libint2::Operator::nuclear,1,this->basisSet_->maxL(),0);
   libint2::Engine engineC(
       libint2::Operator::coulomb,1,this->basisSet_->maxL(),0);
 
+
   engineS.set_precision(0.0);
   engineT.set_precision(0.0);
-  engineV.set_precision(0.0);
   engineC.set_precision(0.0);
+
+  std::vector<libint2::Engine> engineV(nthreads);
+  engineV[0] = libint2::Engine(libint2::Operator::nuclear,1,this->basisSet_->maxL(),0);
+  engineV[0].set_precision(0.0);
+
+  for(auto i = 1; i < nthreads; i++) engineV[i] = engineV[0];
 
   cout << "Calculating uncontracted Libint Ints...";
   // Loop through and uncontract S and T
@@ -216,17 +221,18 @@ if(this->printLevel_ >= 3){
 // Next we need to get W' (from pVp integrals)
 
 
-  VectorXd SCRATCH1UnContracted(nUncontracted);
-  RealMatrix SCRATCH2UnContracted(nUncontracted,nUncontracted);
-  VectorXd SCRATCHDXUnContracted(nUncontracted);
-  VectorXd SCRATCHDYUnContracted(nUncontracted);
-  VectorXd SCRATCHDZUnContracted(nUncontracted);
+//  std::vector<VectorXd> SCRATCH1UnContracted(nthreads,VectorXd(nUncontracted));
+//  RealMatrix SCRATCH2UnContracted(nUncontracted,nUncontracted);
+  std::vector<VectorXd> SCRATCHDXUnContracted(nthreads,VectorXd(nUncontracted));
+  std::vector<VectorXd> SCRATCHDYUnContracted(nthreads,VectorXd(nUncontracted));
+  std::vector<VectorXd> SCRATCHDZUnContracted(nthreads,VectorXd(nUncontracted));
 
   size_t tracker(0);
 // compute pVp numerically
-  auto PVP = [&](IntegrationPoint pt, std::vector<RealMatrix> &result) {
+  auto PVP = [&](IntegrationPoint pt, std::vector<std::vector<RealMatrix>> &result) {
     tracker++;
 //  cout << tracker << endl;
+    int thread_id = omp_get_thread_num();
     for(auto iShell = 0, b_s = 0; iShell < unContractedShells.size();
          b_s += unContractedShells[iShell].size(),++iShell) {
       int size= unContractedShells[iShell].size();
@@ -239,10 +245,10 @@ if(this->printLevel_ >= 3){
       RealMap dyMap(buff + 2*size,size,1);
       RealMap dzMap(buff + 3*size,size,1);
 
-      SCRATCH1UnContracted.block( b_s,0,size,1) = bMap;
-      SCRATCHDXUnContracted.block(b_s,0,size,1) = dxMap;
-      SCRATCHDYUnContracted.block(b_s,0,size,1) = dyMap;
-      SCRATCHDZUnContracted.block(b_s,0,size,1) = dzMap;
+//      SCRATCH1UnContracted[thread_id].block( b_s,0,size,1) = bMap;
+      SCRATCHDXUnContracted[thread_id].block(b_s,0,size,1) = dxMap;
+      SCRATCHDYUnContracted[thread_id].block(b_s,0,size,1) = dyMap;
+      SCRATCHDZUnContracted[thread_id].block(b_s,0,size,1) = dzMap;
 
      // delete [] buff;
     };
@@ -250,7 +256,7 @@ if(this->printLevel_ >= 3){
     std::vector<std::pair<double,std::array<double,3>>> q;
     q.push_back(
       {1.0, {{bg::get<0>(pt.pt),bg::get<1>(pt.pt),bg::get<2>(pt.pt)}}});
-    engineV.set_params(q);
+    engineV[thread_id].set_params(q);
 
     for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
       // Gaussian Nuclei
@@ -299,7 +305,7 @@ if(this->printLevel_ >= 3){
       result[9].noalias() += (pt.weight * (*gamma)) * SCRATCH2UnContracted;
 */
 //New AP
-    const double * gamma = engineV.compute(this->molecule_->nucShell(iAtm),
+    const double * gamma = engineV[thread_id].compute(this->molecule_->nucShell(iAtm),
           libint2::Shell::unit());
     double gamw = (*gamma) * pt.weight;
 // Screening ????
@@ -312,13 +318,13 @@ if(this->printLevel_ >= 3){
     auto jSt = 0;
     for(auto jShell=0; jShell < ShUnSize; jShell++){ 
           int jSz= unContractedShells[jShell].size();
-          double *pVpSDATA = result[0].data() + iBf*nUncontracted;
-          double *pVpXDATA = result[1].data() + iBf*nUncontracted;
-          double *pVpYDATA = result[2].data() + iBf*nUncontracted;
-          double *pVpZDATA = result[3].data() + iBf*nUncontracted;
-          double *SCRATCHDXUnContractedData = SCRATCHDXUnContracted.data();
-          double *SCRATCHDYUnContractedData = SCRATCHDYUnContracted.data();
-          double *SCRATCHDZUnContractedData = SCRATCHDZUnContracted.data();
+          double *pVpSDATA = result[thread_id][0].data() + iBf*nUncontracted;
+          double *pVpXDATA = result[thread_id][1].data() + iBf*nUncontracted;
+          double *pVpYDATA = result[thread_id][2].data() + iBf*nUncontracted;
+          double *pVpZDATA = result[thread_id][3].data() + iBf*nUncontracted;
+          double *SCRATCHDXUnContractedData = SCRATCHDXUnContracted[thread_id].data();
+          double *SCRATCHDYUnContractedData = SCRATCHDYUnContracted[thread_id].data();
+          double *SCRATCHDZUnContractedData = SCRATCHDZUnContracted[thread_id].data();
           for(auto jBf = jSt; jBf < (jSt + jSz); jBf++){
             if(jBf < iBf) continue;
 // PvP Scalar
@@ -363,8 +369,10 @@ if(this->printLevel_ >= 3){
   std::vector<RealMatrix> numPot(10,RealMatrix::Zero(nUncontracted,
         nUncontracted));
 */
-  std::vector<RealMatrix> numPot(4,RealMatrix::Zero(nUncontracted,
-        nUncontracted));
+//  std::vector<RealMatrix> numPot(4,RealMatrix::Zero(nUncontracted,
+//        nUncontracted));
+  std::vector<std::vector<RealMatrix> > numPot(nthreads,std::vector<RealMatrix>(4,
+    RealMatrix::Zero(nUncontracted,nUncontracted)));
 
   cout << "Performing numerical PVP integrals..." << endl;
   for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
@@ -375,7 +383,7 @@ if(this->printLevel_ >= 3){
     AGrid.findNearestNeighbor();
     AGrid.scalingFactor()=
       0.5*elements[this->molecule_->index(iAtm)].sradius/phys.bohr;
-    AGrid.integrate<std::vector<RealMatrix>>(PVP,numPot);
+    AGrid.integrate<std::vector<std::vector<RealMatrix>>>(PVP,numPot);
   };
   cout << "done!" << endl;
 
@@ -392,6 +400,7 @@ if(this->printLevel_ >= 3){
   RealMatrix PVPZ = numPot[2] - numPot[4]; 
 */
 
+/*
   double fact4pi = 4 * math.pi; 
   for(auto i = 0; i <=3 ; i++) numPot[i] *= fact4pi;
    numPot[0].triangularView<Upper>() =  numPot[0].transpose(); // Sym
@@ -402,6 +411,31 @@ if(this->printLevel_ >= 3){
    RealMatrix PVPX  = numPot[1];
    RealMatrix PVPY  = numPot[2];
    RealMatrix PVPZ  = numPot[3];
+*/
+  RealMatrix PVPS(nUncontracted,nUncontracted);
+  RealMatrix PVPX(nUncontracted,nUncontracted);
+  RealMatrix PVPY(nUncontracted,nUncontracted);
+  RealMatrix PVPZ(nUncontracted,nUncontracted);
+  PVPS.setZero();
+  PVPX.setZero();
+  PVPY.setZero();
+  PVPZ.setZero();
+   for(auto i = 0; i < nthreads; i++) {
+     PVPS += numPot[i][0];
+     PVPX += numPot[i][1];
+     PVPY += numPot[i][2];
+     PVPZ += numPot[i][3];
+   }
+   double fact4pi = 4 * math.pi; 
+   PVPS.triangularView<Upper>() =  PVPS.transpose(); // Sym
+   PVPX.triangularView<Upper>() = -PVPX.transpose(); // AntiSymm
+   PVPY.triangularView<Upper>() = -PVPY.transpose(); // AntiSymm
+   PVPZ.triangularView<Upper>() = -PVPZ.transpose(); // AntiSymm
+   PVPS *= fact4pi;
+   PVPX *= fact4pi;
+   PVPY *= fact4pi;
+   PVPZ *= fact4pi;
+
    prettyPrint(this->fileio_->out,PVPS,"pVpSnum");
    prettyPrint(this->fileio_->out,PVPX,"pVpXnum");
    prettyPrint(this->fileio_->out,PVPY,"pVpYnum");

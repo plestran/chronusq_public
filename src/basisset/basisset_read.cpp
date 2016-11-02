@@ -679,7 +679,8 @@ double * BasisSet::basisDEval(int iop, libint2::Shell &liShell, cartGP *pt){
   auto L = liShell.contr[0].l;
   auto shSize = ((L+1)*(L+2))/2; 
   auto contDepth = liShell.alpha.size(); 
-  double * fEVal = &this->basisEvalScr_[0];
+  int thread_id = omp_get_thread_num();
+  double * fEVal = &this->basisEvalScr_[2*thread_id*((this->maxL_+1)*(this->maxL_+2))];
   double * f = fEVal;
   double * DfEval = f + shSize;
   double * dx = DfEval;
@@ -891,7 +892,8 @@ double * BasisSet::CarToSpDEval(int iop, int L, double *fCarEVal){
   if (L < 2 or this->forceCart_){return fCarEVal;}
   int shSizeCar = ((L+1)*(L+2))/2; 
   int shSizeSp  = (2*L+1); 
-  double * fSpEVal  = &this->basisEvalScr2_[0];
+  int thread_id = omp_get_thread_num();
+  double * fSpEVal  = &this->basisEvalScr2_[4*thread_id*((2*this->maxL_+1))];
   double * fCar = fCarEVal;
   double * fSp  = fSpEVal;
   double * DfCarEval = fCar + shSizeCar;
