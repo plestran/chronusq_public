@@ -13,6 +13,7 @@ if(USE_LIBINT)
     aointegrals_denfit.cpp 
     aointegrals_impl.cpp 
     aointegrals_util.cpp
+    aointegrals_onee.cpp
     aointegrals_rel.cpp)
 else(USE_LIBINT)
   set(AOINTS_SOURCE aointegrals.cpp aointegrals_builders_nolibint.cpp 

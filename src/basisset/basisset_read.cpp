@@ -675,20 +675,14 @@ void BasisSet::popExpPairSh(){
 template<>
 double * BasisSet::basisDEval(int iop, libint2::Shell &liShell, cartGP *pt){
 // IOP Derivative
-
   if (iop >1) CErr("Derivative order NYI in basisDEval");
-/* OLD
-  double x = bg::get<0>(*pt) - liShell.O[0];
-  double y = bg::get<1>(*pt) - liShell.O[1];
-  double z = bg::get<2>(*pt) - liShell.O[2];
-*/
   auto L = liShell.contr[0].l;
   auto shSize = ((L+1)*(L+2))/2; 
   auto contDepth = liShell.alpha.size(); 
-  double * fEVal = &this->basisEvalScr_[0];
+  int thread_id = omp_get_thread_num();
+  double * fEVal = &this->basisEvalScr_[2*thread_id*((this->maxL_+1)*(this->maxL_+2))];
   double * f = fEVal;
   double * DfEval = f + shSize;
-
   double * dx = DfEval;
   double * dy = dx + shSize;
   double * dz = dy + shSize;
@@ -769,7 +763,6 @@ double * BasisSet::basisDEval(int iop, libint2::Shell &liShell, cartGP *pt){
   }
 
   return CarToSpDEval(iop,L,fEVal);
-//return fEVal;
 }
 
 std::pair<double,double> BasisSet::cart2sphCoeff(unsigned l,unsigned m,
@@ -862,22 +855,7 @@ std::pair<double,double> BasisSet::cart2sphCoeff(unsigned l,unsigned m,
 
 
 void BasisSet::makeCar2Sph(int L){
-//int LCar = (L+1)*(L+2)/2;
-//int LSp  = (2*L+1);
-
   size_t lx,ly,lz;
-
-/*
-  std::pair<double,double> tst = cart2sphCoeff(2,0,2,0,0);
-//cout << tst.first << " " << tst.second << endl;
-//tst = cart2sphCoeff(2,0,0,2,0);
-//cout << tst.first << " " << tst.second << endl;
-//tst = cart2sphCoeff(2,0,0,0,2);
-//cout << tst.first << " " << tst.second << endl;
-  tst = cart2sphCoeff(2,2,1,1,0);
-  cout << tst.first << " " << tst.second << endl;
-  return;
-*/
   for(auto l = 0; l <= L; l++) {
     // Allocates space for Cart - > Sph matrix
     // Note: L < 2 is not used, dummy matrix appended
@@ -914,7 +892,8 @@ double * BasisSet::CarToSpDEval(int iop, int L, double *fCarEVal){
   if (L < 2 or this->forceCart_){return fCarEVal;}
   int shSizeCar = ((L+1)*(L+2))/2; 
   int shSizeSp  = (2*L+1); 
-  double * fSpEVal  = &this->basisEvalScr2_[0];
+  int thread_id = omp_get_thread_num();
+  double * fSpEVal  = &this->basisEvalScr2_[4*thread_id*((2*this->maxL_+1))];
   double * fCar = fCarEVal;
   double * fSp  = fSpEVal;
   double * DfCarEval = fCar + shSizeCar;
@@ -952,7 +931,6 @@ double * BasisSet::CarToSpDEval(int iop, int L, double *fCarEVal){
   }
 
   return fSpEVal;
-//return fCarEVal;
 }
 
 

@@ -56,6 +56,10 @@ void SingleSlater<T>::SCF3(){
   this->doIncFock_ = false;
 
   for(iter = 0; iter < this->maxSCFIter_; iter++){
+    /*
+    this->computeSExpect(*this->aointegrals_->overlap_);
+    this->printSExpect();
+    */
 
     // Write the current matricies to disk: 
     //   F(k-1), D(k), C(k),

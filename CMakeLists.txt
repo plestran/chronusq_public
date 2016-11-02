@@ -155,6 +155,8 @@ link_directories("${PROJECT_BINARY_DIR}/deps/lib")
 
 # To find Libint and LibXC
 set( ENV{PKG_CONFIG_PATH} "${PROJECT_SOURCE_DIR}/deps/lib/pkgconfig:$ENV{PKG_CONFIG_PATH}")
+message(STATUS ${PROJECT_SOURCE_DIR})
+message(STATUS $ENV{PKG_CONFIG_PATH})
 
 find_package(PkgConfig)
 
@@ -162,6 +164,8 @@ find_package(PkgConfig)
 pkg_check_modules(LIBINT2 libint2)
 link_directories("${LIBINT2_LIBRARY_DIRS}")
 include_directories("${LIBINT2_INCLUDE_DIRS}")
+message(STATUS "${LIBINT2_LIBRARY_DIRS}")
+message(STATUS "${LIBINT2_INCLUDE_DIRS}")
 
 if(CQ_ENABLE_LIBXC)
   pkg_check_modules(LIBXC libxc)
