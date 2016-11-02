@@ -169,7 +169,7 @@ void AOIntegrals::formP2Transformation(){
   SUn = SUncontracted; // Save S for later
 
   char JOBU = 'O', JOBVT = 'N';
-  int LWORK = 6*nUncontracted;
+  int LWORK = 10*nUncontracted;
   int INFO;
 //std::vector<double> ovlpEigValues(nUncontracted);
 //std::vector<double> WORK(LWORK);
@@ -531,16 +531,20 @@ void AOIntegrals::formP2Transformation(){
   // Diagonalize 
   // ------------------------------
 
-  // FIXME: (DBWY) Use LAPACK call here!!
-  Eigen::SelfAdjointEigenSolver<ComplexMatrix> es;
-  es.compute(CORE_HAMILTONIAN);
-  
   RealVecMap HEV(this->memManager_->malloc<double>(4*nUncontracted),4*nUncontracted);
   ComplexMap HEVx(this->memManager_->malloc<dcomplex>(16*nUnSq),
     4*nUncontracted,4*nUncontracted);
-  
-  HEV = es.eigenvalues();
-  HEVx = es.eigenvectors();
+
+  char JOBZ = 'V';
+  char UPLO = 'U';
+  int FourUnCon = 4*nUncontracted;
+  int LRWORK = 3*FourUnCon - 2;
+  dcomplex * CWORK = this->memManager_->malloc<dcomplex>(LWORK);
+  double   * RWORK = this->memManager_->malloc<double>(LRWORK);
+  zheev_(&JOBZ,&UPLO,&FourUnCon,CORE_HAMILTONIAN.data(),&FourUnCon,HEV.data(),CWORK,&LWORK,RWORK,&INFO);
+ 
+  // FIXME: This copy is not needed and HEVx is not needed as a result
+  HEVx = CORE_HAMILTONIAN;
 
   // Now free CORE_HAMILTONIAN after diagonalization
   this->memManager_->free(CORE_HAMILTONIAN.data(),16*nUnSq);
@@ -578,11 +582,9 @@ void AOIntegrals::formP2Transformation(){
   // Replaces L with L^{-1}
   int TwoUnCon = 2 * nUncontracted;
   std::vector<int> iPiv(TwoUnCon);
-  dcomplex * CWORK = this->memManager_->malloc<dcomplex>(LWORK);
   zgetrf_(&TwoUnCon,&TwoUnCon,L.data(),&TwoUnCon,&iPiv[0],&INFO);
   zgetri_(&TwoUnCon,L.data(),&TwoUnCon,&iPiv[0],CWORK,&LWORK,&INFO);
 
-  this->memManager_->free(CWORK,LWORK);
 
   X.noalias() = S * L;
 
@@ -605,6 +607,23 @@ void AOIntegrals::formP2Transformation(){
   // step here...
   Y = (ComplexMatrix::Identity(2*nUncontracted,2*nUncontracted) 
      + X.adjoint() * X).pow(-0.5);
+
+/*
+  C4nUnSqScratch  = (ComplexMatrix::Identity(2*nUncontracted,2*nUncontracted) + X.adjoint() * X);
+
+  prettyPrintSmart(cout,C4nUnSqScratch.pow(-0.5),"True");
+  double * SingVal = this->memManager_->malloc<double>(TwoUnCon);
+  JOBU = 'O';JOBVT = 'A';
+  zgesvd_(&JOBU,&JOBVT,&TwoUnCon,&TwoUnCon,C4nUnSqScratch.data(),&TwoUnCon,SingVal,C4nUnSqScratch.data(),&TwoUnCon,C4nUnSqScratch2.data(),&TwoUnCon,CWORK,&LWORK,RWORK,&INFO);
+
+  Y = C4nUnSqScratch * C4nUnSqScratch2;
+  prettyPrintSmart(cout,Y,"Attempt");
+  CErr();
+*/
+
+  // Free up CWORK and RWORK
+  this->memManager_->free(CWORK,LWORK);
+  this->memManager_->free(RWORK,LRWORK);
 
   // Print out Y and its squared norm
   if(this->printLevel_ >= 4){
