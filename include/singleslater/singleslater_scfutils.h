@@ -493,7 +493,6 @@ void SingleSlater<T>::populateMO4Diag(){
 template <typename T>
 void SingleSlater<T>::initSCFFiles() {
 
-  cout << "IN INIT SCF FILES" << endl;
   if(!this->isPrimary) return;
   std::vector<hsize_t> dims;
   dims.push_back(this->basisset_->nBasis());

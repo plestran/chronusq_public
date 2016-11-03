@@ -65,26 +65,20 @@ def runCQJob(job,workers):
   workers["CQMolecule"].printInfo(workers["CQFileIO"])
   workers["CQBasisSet"].printInfo();
 
-  print 'here'
   # Set Up AOIntegrals Metadata
   workers["CQAOIntegrals"].initMeta()
 
-  print 'here'
   # Set up Wavefunction Metadata
   workers["CQSingleSlater"].initMeta()
 
-  print 'here'
   # Allocate Space for AO Integrals
   workers["CQAOIntegrals"].alloc()
  
-  print 'here'
   # Allocate Space for Wavefunction Information
   workers["CQSingleSlater"].alloc()
 
-  print 'here'
   # Always Form Guess
   workers["CQSingleSlater"].formGuess()
-  print 'here'
 
   if job == 'SCF':
     workers["CQSingleSlater"].SCF() 

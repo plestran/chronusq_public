@@ -875,7 +875,7 @@ def parseSCF(workers,scfSettings):
     optMap['GUESS'](str('CORE'))
 
   if 'GUESS' in scfSettings:
-    if scfSettings['GUESS'] == 'CORE':
+    if scfSettings['GUESS'] == 'READ':
       workers['CQFileIO'].doRestart = True
 
   try:
