@@ -50,6 +50,11 @@ def parseMolecule(workers,settings):
       msg = 'Required keyword Molecule.' + str(i) + ' not found'
       CErrMsg(workers['CQFileIO'],str(msg))
 #
+# Construct Molecule object
+#
+  workers["CQMolecule"] = chronusQ.Molecule()
+
+#
 # Grab charge and multiplicity
 #
   charge = settings['CHARGE']
@@ -79,6 +84,8 @@ def parseMolecule(workers,settings):
     workers["CQMolecule"].setPrintLevel(settings['PRINT'])
   except KeyError:
     pass
+
+  workers["CQMolecule"].printInfo(workers["CQFileIO"])
 
 
 #
@@ -170,4 +177,5 @@ def readGeom(workers,settings):
       z = float(lineSplit[3])
 
     workers["CQMolecule"].setCart(i,x,y,z)
+
   workers["CQMolecule"].setNTotalE(nTotalE)

@@ -223,6 +223,10 @@ configure_file(
   "${PROJECT_SOURCE_DIR}/src/python/src/chronusq.py.in"
   "${PROJECT_BINARY_DIR}/src/python/chronusq.py"
 )
+configure_file(
+  "${PROJECT_SOURCE_DIR}/src/python/src/chronusq_new.py.in"
+  "${PROJECT_BINARY_DIR}/src/python/chronusq_new.py"
+)
 
 # Recurse into src
 add_subdirectory(src)

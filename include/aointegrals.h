@@ -407,8 +407,16 @@ public:
   inline CQMemManager* memManager(){ return this->memManager_;};
 
   // Setters
+
+  inline void setAlgorithm(const std::string &alg){
+    if(!alg.compare("DIRECT"))
+      this->integralAlgorithm = DIRECT;
+    else if(!alg.compare("INCORE"))
+      this->integralAlgorithm = INCORE;
+  }
+
   inline void setMaxMultipole(int i){ this->maxMultipole_ = i;}
-  inline void setAlgorithm(int i)   { this->integralAlgorithm = i;}
+//inline void setAlgorithm(int i)   { this->integralAlgorithm = i;}
   inline void setPrintLevel(int i){ this->printLevel_ = i;}
 
   inline double &twoEC(int i, int j, int k, int l){

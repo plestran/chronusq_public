@@ -59,7 +59,12 @@ void SingleSlater<T>::CDIIS4(int NDIIS){
     DIIS<T> extrap(NDIIS,this->nBasis_*this->nBasis_,F1,F2,F3,
       this->CommDIIS_);
 
-    if(!extrap.extrapolate()) return;
+    if(!extrap.extrapolate()) {
+      this->fileio_->out << 
+      "    *** DIIS Inversion failed: Defaulting to Conventional SCF Step ***" 
+        << endl;
+      return;
+    };
 
     coef = extrap.coeffs(); 
 

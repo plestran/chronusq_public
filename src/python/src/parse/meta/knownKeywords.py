@@ -39,14 +39,16 @@ knownSections  = [
   "MOLECULE", 
   "QM", 
   "MISC",
+  "BASIS",
+  "INTS",
   "SCF",
-  "RT",
-  "CIS",
-  "RPA",
-  "STAB",
-  "PPRPA",
-  "PPATDA",
-  "PPCTDA"
+  "RT"
+#  "CIS",
+#  "RPA",
+#  "STAB",
+#  "PPRPA",
+#  "PPATDA",
+#  "PPCTDA"
 ]
 
 #
@@ -66,14 +68,12 @@ knownKeywords['MOLECULE'] = {
 # Dictionary for known keywords in the QM input section
 knownKeywords['QM'] = {
   'REFERENCE'   :CQKeyword('REFERENCE'  ,'S',True ),
-  'BASIS'       :CQKeyword('BASIS'      ,'S',True ),
-  'FORCECART'   :CQKeyword('FORCECART'  ,'B',False),
   'JOB'         :CQKeyword('JOB'        ,'S',True ),
-  'INTS'        :CQKeyword('INTS'       ,'S',False),
+#  'INTS'        :CQKeyword('INTS'       ,'S',False),
   'EXCHANGE'    :CQKeyword('EXCHANGE'   ,'S',False),
   'CORR'        :CQKeyword('CORR'       ,'S',False),
-  'DFT_GRID'    :CQKeyword('DFT_GRID'   ,'S',False),
-  'DFT_WEIGHTS' :CQKeyword('DFT_WEIGHTS','S',False),
+#  'DFT_GRID'    :CQKeyword('DFT_GRID'   ,'S',False),
+#  'DFT_WEIGHTS' :CQKeyword('DFT_WEIGHTS','S',False),
   'DFT_NRAD'    :CQKeyword('DFT_NRAD'   ,'I',False),
   'DFT_NANG'    :CQKeyword('DFT_NANG'   ,'I',False),
   'DFT_SCREEN'  :CQKeyword('DFT_SCREEN' ,'B',False),
@@ -81,24 +81,34 @@ knownKeywords['QM'] = {
   'PRINT'       :CQKeyword('PRINT'      ,'I',False)
 }
 
+knownKeywords['INTS'] = {
+  'ALG' : CQKeyword("ALG",'S',False)
+}
+
+# Dictionary for known keywords in the BASIS section
+knownKeywords['BASIS'] = {
+  'BASIS'       :CQKeyword('BASIS'      ,'S',True ),
+  'FORCECART'   :CQKeyword('FORCECART'  ,'B',False)
+}
+
 # Dictionary for known keywords in the RT input section
 knownKeywords['RT'] = {
-  'MAXSTEP'  :CQKeyword('MAXSTEP'  ,'I'      ,False),    
-  'TIMESTEP' :CQKeyword('TIMESTEP' ,'D'      ,False), 
-  "IRSTRT"   :CQKeyword('IRSRT'    ,'I'      ,False),
-  'EDFIELD'  :CQKeyword('EDFIELD'  ,'D3'     ,False),
-  'TIME_ON'  :CQKeyword('TIME_ON'  ,'D'      ,False),
-  'TIME_OFF' :CQKeyword('TIME_OFF' ,'D'      ,False),
-  'FREQUENCY':CQKeyword('FREQUENCY','D'      ,False), 
-  'PHASE'    :CQKeyword('PHASE'    ,'D'      ,False),
-  'SIGMA'    :CQKeyword('SIGMA'    ,'D'      ,False),
-  'ENVELOPE' :CQKeyword('ENVELOPE' ,'O-ENV'  ,False),
-  'ORTHO'    :CQKeyword('ORTHO'    ,'O-ORTH' ,False), 
-  'ELL_POL'  :CQKeyword('ELL_POL'  ,'O-ELL'  ,False), 
-  'INIDEN'   :CQKeyword('INIDEN'   ,'I'      ,False),
-  'UPROP'    :CQKeyword('UPROP'    ,'O-FORMU',False),
-  'PRINT'    :CQKeyword('PRINT'    ,'I'      ,False),
-  'TARCSVS'  :CQKeyword('TARCSVS'  ,'B'      ,False)
+  'MAXSTEP'  :CQKeyword('MAXSTEP'  ,'I' ,False),    
+  'TIMESTEP' :CQKeyword('TIMESTEP' ,'D' ,False), 
+  "IRSTRT"   :CQKeyword('IRSRT'    ,'I' ,False),
+  'EDFIELD'  :CQKeyword('EDFIELD'  ,'D3',False),
+  'TIME_ON'  :CQKeyword('TIME_ON'  ,'D' ,False),
+  'TIME_OFF' :CQKeyword('TIME_OFF' ,'D' ,False),
+  'FREQUENCY':CQKeyword('FREQUENCY','D' ,False), 
+  'PHASE'    :CQKeyword('PHASE'    ,'D' ,False),
+  'SIGMA'    :CQKeyword('SIGMA'    ,'D' ,False),
+  'ENVELOPE' :CQKeyword('ENVELOPE' ,'S' ,False),
+  'ORTHO'    :CQKeyword('ORTHO'    ,'S' ,False), 
+  'ELL_POL'  :CQKeyword('ELL_POL'  ,'S' ,False), 
+  'INIDEN'   :CQKeyword('INIDEN'   ,'I' ,False),
+  'UPROP'    :CQKeyword('UPROP'    ,'S' ,False),
+  'PRINT'    :CQKeyword('PRINT'    ,'I' ,False),
+  'TARCSVS'  :CQKeyword('TARCSVS'  ,'B' ,False)
 }
 
 knownKeywords['MISC'] = {
@@ -107,38 +117,38 @@ knownKeywords['MISC'] = {
 }
 
 knownKeywords['SCF'] = {
-  'SCFDENTOL' :CQKeyword('SCFDENTOL' ,'D'    ,False),
-  'SCFENETOL' :CQKeyword('SCFENETOL' ,'D'    ,False),
-  'SCFMAXITER':CQKeyword('SCFMAXITER','I'    ,False),
+  'DENTOL' :CQKeyword('DENTOL' ,'D'    ,False),
+  'ENETOL' :CQKeyword('ENETOL' ,'D'    ,False),
+  'MAXITER':CQKeyword('MAXITER','I'    ,False),
   'FIELD'     :CQKeyword('FIELD'     ,'D3'   ,False),
-  'GUESS'     :CQKeyword('GUESS'     ,'O-GS' ,False),
+  'GUESS'     :CQKeyword('GUESS'     ,'S'    ,False),
   'DIIS'      :CQKeyword('DIIS'      ,'B'    ,False),
   'ITP'       :CQKeyword('ITP'       ,'B'    ,False),
   'DT'        :CQKeyword('DT'        ,'D'    ,False),
   'PRINT'     :CQKeyword('PRINT'     ,'I'    ,False)
 }
 
-knownKeywords['CIS'] = {
-  'NSTATES':CQKeyword("NSTATES",'I',True)
-}
-
-knownKeywords['RPA'] = {
-  'NSTATES':CQKeyword("NSTATES",'I',True)
-}
-
-knownKeywords['PPRPA'] = {
-  'NSTATES':CQKeyword("NSTATES",'I',True)
-}
-knownKeywords['PPATDA'] = {
-  'NSTATES':CQKeyword("NSTATES",'I',True)
-}
-knownKeywords['PPCTDA'] = {
-  'NSTATES':CQKeyword("NSTATES",'I',True)
-}
-
-knownKeywords['STAB'] = {
-  'NSTATES':CQKeyword("NSTATES",'I',False)
-}
+#knownKeywords['CIS'] = {
+#  'NSTATES':CQKeyword("NSTATES",'I',True)
+#}
+#
+#knownKeywords['RPA'] = {
+#  'NSTATES':CQKeyword("NSTATES",'I',True)
+#}
+#
+#knownKeywords['PPRPA'] = {
+#  'NSTATES':CQKeyword("NSTATES",'I',True)
+#}
+#knownKeywords['PPATDA'] = {
+#  'NSTATES':CQKeyword("NSTATES",'I',True)
+#}
+#knownKeywords['PPCTDA'] = {
+#  'NSTATES':CQKeyword("NSTATES",'I',True)
+#}
+#
+#knownKeywords['STAB'] = {
+#  'NSTATES':CQKeyword("NSTATES",'I',False)
+#}
 
 
 

@@ -50,6 +50,13 @@ void SingleSlater<T>::SCF3(){
   if(this->printLevel_ > 0){
     this->fileio_->out << "    *** INITIAL GUESS ENERGY = " 
       << this->totalEnergy_ << " Eh ***" << endl;
+    
+    double HOMO_LUMO_GAP = 
+      (*this->epsA_)(this->nO_) - (*this->epsA_)(this->nO_-1);
+
+    if(HOMO_LUMO_GAP < 1e-10)
+      this->fileio_->out << "    *** WARNING: DEGENERATE HOMO-LUMO GAP ***"
+                         << endl;
   }
 
   this->doIncFock_ = this->isPrimary and !this->isDFT;
@@ -107,6 +114,12 @@ void SingleSlater<T>::SCF3(){
     if(this->doDamp){
       this->fockDamping();
     }
+/*
+    // Level shifting
+    if(this->doLevelShift){
+      this->levelShift2();
+    }
+*/
 
 /*
     doLevelShift = this->nLevelShift_ != 0;

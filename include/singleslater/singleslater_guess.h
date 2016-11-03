@@ -174,14 +174,15 @@ void SingleSlater<T>::SADGuess() {
     aointegralsAtom.communicate(uniqueAtom,basisSetAtom,*this->fileio_,
       *this->aointegrals_->memManager());
     aointegralsAtom.initMeta();
-    aointegralsAtom.integralAlgorithm = AOIntegrals::INTEGRAL_ALGORITHM::DIRECT;
+  //aointegralsAtom.integralAlgorithm = AOIntegrals::INTEGRAL_ALGORITHM::DIRECT;
+    aointegralsAtom.setAlgorithm("DIRECT");
 
     hartreeFockAtom.communicate(uniqueAtom,basisSetAtom,aointegralsAtom,
       *this->fileio_,*this->memManager_);
   
     aointegralsAtom.alloc();
     
-    hartreeFockAtom.setGuess(CORE);
+    hartreeFockAtom.setGuess("CORE");
     hartreeFockAtom.initMeta();
 //  hartreeFockAtom.setField(this->elecField_);
 //  hartreeFockAtom.isClosedShell = (hartreeFockAtom.multip() == 1); 
@@ -206,17 +207,14 @@ void SingleSlater<T>::SADGuess() {
     hartreeFockAtom.computeEnergy();
     hartreeFockAtom.SCF3();
     hartreeFockAtom.computeProperties();
-    hartreeFockAtom.printProperties();
-    
+  //hartreeFockAtom.printProperties();
     
     // Place Atomic Densities into Total Densities
     this->placeAtmDen(atomIndex[iUn],hartreeFockAtom);
  
   } // Loop iUn
 
-//prettyPrintSmart(cout,*this->onePDMScalar_,"PS");
-  this->scaleDen();
-//prettyPrintSmart(cout,*this->onePDMScalar_,"PS");
+  this->spinAverage();
   this->formFock();
 //prettyPrintSmart(cout,*this->fockScalar_,"FS");
 
@@ -245,7 +243,7 @@ void SingleSlater<T>::RandomGuess() {
   this->formDensity();
   this->cpyAOtoOrthoDen();
   this->unOrthoDen3();
-  this->scaleDen();
+//this->scaleDen();
   this->formFock();
 }
 
@@ -310,6 +308,14 @@ void SingleSlater<T>::scaleDen(){
    (*this->onePDMScalar_) *= T(this->nOA_ + this->nOB_) / TS;
    (*this->onePDMMz_)     *= T(this->nOA_ - this->nOB_) / TZ;
   }
+}
+
+template <typename T>
+void SingleSlater<T>::spinAverage() {
+  if(this->nTCS_ == 1 and this->isClosedShell) return;
+  
+ (*this->onePDMMz_) = (this->nOA_ - this->nOB_) / this->nO_ *
+   (*this->onePDMScalar_);
 }
 
 template <typename T>

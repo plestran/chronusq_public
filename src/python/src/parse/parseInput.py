@@ -30,52 +30,53 @@ from libpythonapi import CErrMsg
 from libpythonapi import CErr
 from meta.knownKeywords import knownKeywords
 from meta.knownKeywords import knownSections
-import meta.enumMaps as enumMaps
+#import meta.enumMaps as enumMaps
 
+#### THIS IS OLD RT CODE, ADD BACK IF NEEDED IN FUTURE
+##
+## Convert string obtained from ConfigParser
+## for RT.ortho into RT.ORTHO enum
+##
+#def parserOrth(parser,section,opt):
+#  strX = parser.get(section,opt)
+#  strX = str(strX).upper()
+#  return enumMaps.orthoMap[strX]
 #
-# Convert string obtained from ConfigParser
-# for RT.ortho into RT.ORTHO enum
+##
+## Convert string obtained from ConfigParser
+## for RT.ell_pol into RT.ELL_POL enum
+##
+#def parserEllPol(parser,section,opt):
+#  strX = parser.get(section,opt)
+#  strX = str(strX).upper()
+#  return enumMaps.ellPolMap[strX]
 #
-def parserOrth(parser,section,opt):
-  strX = parser.get(section,opt)
-  strX = str(strX).upper()
-  return enumMaps.orthoMap[strX]
-
+##
+## Convert string obtained from ConfigParser
+## for RT.envelope into RT.ENVELOPE enum
+##
+#def parserEnv(parser,section,opt):
+#  strX = parser.get(section,opt)
+#  strX = str(strX).upper()
+#  return enumMaps.envMap[strX]
 #
-# Convert string obtained from ConfigParser
-# for RT.ell_pol into RT.ELL_POL enum
-#
-def parserEllPol(parser,section,opt):
-  strX = parser.get(section,opt)
-  strX = str(strX).upper()
-  return enumMaps.ellPolMap[strX]
-
-#
-# Convert string obtained from ConfigParser
-# for RT.envelope into RT.ENVELOPE enum
-#
-def parserEnv(parser,section,opt):
-  strX = parser.get(section,opt)
-  strX = str(strX).upper()
-  return enumMaps.envMap[strX]
-
-#
-# Convert string obtained from ConfigParser
-# for RT.uprop into RT.FORM_U enum
-#
-def parserFormU(parser,section,opt):
-  strX = parser.get(section,opt)
-  strX = str(strX).upper()
-  return enumMaps.formUMap[strX]
+##
+## Convert string obtained from ConfigParser
+## for RT.uprop into RT.FORM_U enum
+##
+#def parserFormU(parser,section,opt):
+#  strX = parser.get(section,opt)
+#  strX = str(strX).upper()
+#  return enumMaps.formUMap[strX]
 
 #
 # Convert string obtained from ConfigParser
 # for SCF.guess into Guess enum
 #
-def parserGuess(parser,section,opt):
-  strX = parser.get(section,opt)
-  strX = str(strX).upper()
-  return enumMaps.guessMap[strX]
+#def parserGuess(parser,section,opt):
+#  strX = parser.get(section,opt)
+#  strX = str(strX).upper()
+#  return enumMaps.guessMap[strX]
 
 #
 # Convert string obtained from ConfigParser
@@ -106,12 +107,12 @@ def genSecDict(workers,parser,section):
     'D'      :parser.getfloat,
     'B'      :parser.getboolean,
     'S'      :parser.get,
-    'O-ENV'  :parserEnv,
-    'O-ORTH' :parserOrth,
-    'O-FORMU':parserFormU,
-    'O-GS'   :parserGuess,
-    'D3'     :parserDoubleArray,
-    'O-ELL'  :parserEllPol
+#    'O-ENV'  :parserEnv,
+#    'O-ORTH' :parserOrth,
+#    'O-FORMU':parserFormU,
+#    'O-GS'   :parserGuess,
+    'D3'     :parserDoubleArray
+#    'O-ELL'  :parserEllPol
   }
 
   # Check if a dictionary exists for this section

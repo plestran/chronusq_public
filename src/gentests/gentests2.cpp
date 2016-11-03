@@ -96,7 +96,7 @@ template <typename T> void writeSCFRecord(std::string name, H5::Group &gp,
 template <typename T, MOLECULE_PRESETS M> 
 void runCQJob(H5::Group &res, std::string &fName, CQMemManager &memManager, 
   const std::string &jbTyp, const std::string &basisSet, 
-  const std::string &ref, const SCFSettings scfSett, int numThreads, GUESS guess) {
+  const std::string &ref, const SCFSettings scfSett, int numThreads, const std::string &guess) {
 
   Molecule molecule;
   BasisSet basis;
@@ -252,7 +252,7 @@ int main(int argc, char **argv){
     
     cout << "Running Job " << fName;
     runCQJob<double,WATER>(groups.back(),fName,memManager,jbTyp,basis,ref,
-      scfSett,1, CORE);
+      scfSett,1, "CORE");
 
     std::stringstream linkName;
     linkName << "test" <<std::setfill('0') << std::setw(4) << testNum;
@@ -271,7 +271,7 @@ int main(int argc, char **argv){
        
         cout << "Running Job " << fName;
         runCQJob<double,O2>(groups.back(),fName,memManager,jbTyp,basis,ref,
-          scfSett,1,CORE);
+          scfSett,1,"CORE");
         
         linkName.str("");
         linkName << "test" <<std::setfill('0') << std::setw(4) << testNum;
@@ -287,7 +287,7 @@ int main(int argc, char **argv){
 
       cout << "Running Job " << fName;
       runCQJob<double,Li>(groups.back(),fName,memManager,jbTyp,basis,ref,
-        scfSett,1,CORE);
+        scfSett,1,"CORE");
       
       linkName.str("");
       linkName << "test" <<std::setfill('0') << std::setw(4) << testNum;

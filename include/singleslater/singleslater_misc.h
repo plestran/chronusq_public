@@ -225,6 +225,10 @@ void SingleSlater<T>::setRef(const std::string &methStr) {
     for( auto f : KS ) 
       if(methStr.find(f) != std::string::npos) createMaps[f]();
   }
+
+
+  // If 2C, turn on level shifting
+//if(this->nTCS_ == 2) this->doLevelShift = true;
   
   // Generate the Method String
   this->genMethString();

@@ -43,9 +43,9 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("communicate"     , &SingleSlater<double>::communicate            )
     .def("initMeta"        , &SingleSlater<double>::initMeta               )
     .def("alloc"           , &SingleSlater<double>::alloc                  )
-    .def("genMethString"   , &SingleSlater<double>::genMethString          )
+//  .def("genMethString"   , &SingleSlater<double>::genMethString          )
     .def("setRef"          , &SingleSlater<double>::setRef                 )
-    .def("setNTCS"         , &SingleSlater<double>::setNTCS                )
+//  .def("setNTCS"         , &SingleSlater<double>::setNTCS                )
     .def("setMaxMultipole" , &SingleSlater<double>::setMaxMultipole        )
     .def("printLevel"      , &SingleSlater<double>::printLevel             )
     .def("setPrintLevel"   , &SingleSlater<double>::setPrintLevel          )
@@ -63,12 +63,6 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setDFTNAng"  , &SingleSlater<double>::setDFTNAng         )
     .def("setDFTScreenTol" , &SingleSlater<double>::setDFTScreenTol        )
 
-    .def("addSlater", &SingleSlater<double>::addSlater )
-    .def("addB88", &SingleSlater<double>::addB88 )
-    .def("addLYP", &SingleSlater<double>::addLYP )
-    .def("addVWN5", &SingleSlater<double>::addVWN5 )
-    .def("addVWN3", &SingleSlater<double>::addVWN3 )
-  
     .def("turnOffDFTScreening", &SingleSlater<double>::turnOffDFTScreening ) 
 
     .def("dipole"          , &SingleSlater<double>::Wrapper_dipole         )
@@ -77,13 +71,12 @@ BOOST_PYTHON_MODULE(libpythonapi){
 
     .def("Ref"             , &SingleSlater<double>::Ref                    )
     .def("nTCS"            , &SingleSlater<double>::nTCS                   ) 
-
     .def_readwrite("isClosedShell", &SingleSlater<double>::isClosedShell   )
-    .def_readonly("totalEnergy"   , &SingleSlater<double>::totalEnergy     )
+//  .def_readonly("totalEnergy"   , &SingleSlater<double>::totalEnergy     )
     .def_readonly("nSCFIter"      , &SingleSlater<double>::nSCFIter        )
-    .def_readwrite("isDFT"        , &SingleSlater<double>::isDFT           )
-    .def_readwrite("isGGA"        , &SingleSlater<double>::isGGA           )
-    .def_readwrite("isHF"         , &SingleSlater<double>::isHF            )
+//  .def_readwrite("isDFT"        , &SingleSlater<double>::isDFT           )
+//  .def_readwrite("isGGA"        , &SingleSlater<double>::isGGA           )
+//  .def_readwrite("isHF"         , &SingleSlater<double>::isHF            )
     .def_readwrite("doDIIS"       , &SingleSlater<double>::doDIIS          )
     .def_readwrite("doITP"        , &SingleSlater<double>::doITP           )
   ;
@@ -103,9 +96,9 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("communicate"     , &SingleSlater<dcomplex>::communicate            )
     .def("initMeta"        , &SingleSlater<dcomplex>::initMeta               )
     .def("alloc"           , &SingleSlater<dcomplex>::alloc                  )
-    .def("genMethString"   , &SingleSlater<dcomplex>::genMethString          )
+//  .def("genMethString"   , &SingleSlater<dcomplex>::genMethString          )
     .def("setRef"          , &SingleSlater<dcomplex>::setRef                 )
-    .def("setNTCS"         , &SingleSlater<dcomplex>::setNTCS                )
+//  .def("setNTCS"         , &SingleSlater<dcomplex>::setNTCS                )
     .def("setMaxMultipole" , &SingleSlater<dcomplex>::setMaxMultipole        )
     .def("printLevel"      , &SingleSlater<dcomplex>::printLevel             )
     .def("setPrintLevel"   , &SingleSlater<dcomplex>::setPrintLevel          )
@@ -122,13 +115,6 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setDFTNRad"  , &SingleSlater<dcomplex>::setDFTNRad         )
     .def("setDFTNAng"  , &SingleSlater<dcomplex>::setDFTNAng         )
     .def("setDFTScreenTol" , &SingleSlater<dcomplex>::setDFTScreenTol        )
-
-    .def("addSlater", &SingleSlater<dcomplex>::addSlater )
-    .def("addB88", &SingleSlater<dcomplex>::addB88 )
-    .def("addLYP", &SingleSlater<dcomplex>::addLYP )
-    .def("addVWN5", &SingleSlater<dcomplex>::addVWN5 )
-    .def("addVWN3", &SingleSlater<dcomplex>::addVWN3 )
-
   
     .def("turnOffDFTScreening", &SingleSlater<dcomplex>::turnOffDFTScreening ) 
 
@@ -140,15 +126,16 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("nTCS"            , &SingleSlater<dcomplex>::nTCS                   ) 
 
     .def_readwrite("isClosedShell", &SingleSlater<dcomplex>::isClosedShell   )
-    .def_readonly("totalEnergy"   , &SingleSlater<dcomplex>::totalEnergy     )
+//  .def_readonly("totalEnergy"   , &SingleSlater<dcomplex>::totalEnergy     )
     .def_readonly("nSCFIter"      , &SingleSlater<dcomplex>::nSCFIter        )
-    .def_readwrite("isDFT"        , &SingleSlater<dcomplex>::isDFT           )
-    .def_readwrite("isGGA"        , &SingleSlater<dcomplex>::isGGA           )
-    .def_readwrite("isHF"         , &SingleSlater<dcomplex>::isHF            )
+//  .def_readwrite("isDFT"        , &SingleSlater<dcomplex>::isDFT           )
+//  .def_readwrite("isGGA"        , &SingleSlater<dcomplex>::isGGA           )
+//  .def_readwrite("isHF"         , &SingleSlater<dcomplex>::isHF            )
     .def_readwrite("doDIIS"       , &SingleSlater<dcomplex>::doDIIS          )
     .def_readwrite("doITP"        , &SingleSlater<dcomplex>::doITP           )
   ;
 
+/*
   enum_<REFERENCE>("Reference")
     .value("_INVALID"      , REFERENCE::_INVALID               )
     .value("RHF"           , REFERENCE::RHF                    )
@@ -161,6 +148,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
 //  .value("CUKS"          , REFERENCE::CUKS                   )
 //  .value("GKS"           , REFERENCE::GKS                    )
   ;
+*/
 
   enum_<GUESS>("Guess")
     .value("SAD"    , GUESS::SAD    )
@@ -169,11 +157,13 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("RANDOM" , GUESS::RANDOM )
   ;
 
+/*
   enum_<DFT>("DFT")
     .value("NODFT"      , DFT::NODFT      )
     .value("USERDEFINED", DFT::USERDEFINED)
     .value("LSDA"       , DFT::LSDA       )
   ;
+*/
 
 /*
   enum_<SingleSlater<double>::DFT_RAD_GRID>("DFT_RAD_GRID")

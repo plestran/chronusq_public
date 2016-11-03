@@ -25,22 +25,34 @@
 #
 import os,sys
 import libpythonapi as chronusQ
+from meta.knownKeywords import requiredKeywords
+from libpythonapi import CErrMsg
 
 #
 # Parse Basis Set file
 #
 # ** Note that this allocates the CQ::BasisSet Object **
 #
-def parseBasis(workers,ssSettings):
-  basis = ssSettings['BASIS']
+def parseBasis(workers,basisSettings):
+#
+#  Check that all of the required keywords for Basis
+#  object are found
+#
+  for i in requiredKeywords['BASIS']:
+    if i not in basisSettings:
+      msg = 'Required keyword BasisSet.' + str(i) + ' not found'
+      CErrMsg(workers['CQFileIO'],msg)
   
+  workers["CQBasisSet"] = chronusQ.BasisSet()
+  basis =  basisSettings['BASIS']
+
   # Make CQ::BasisSet aware of CQ::FileIO
   workers["CQBasisSet"].communicate(workers["CQFileIO"])
 
   # Check to see if we're forcing cartesian functions
   forceCart = False
-  if 'FORCECART' in ssSettings:
-    if ssSettings['FORCECART']:
+  if 'FORCECART' in basisSettings:
+    if basisSettings['FORCECART']:
       workers["CQBasisSet"].forceCart()
   
 #
@@ -56,4 +68,6 @@ def parseBasis(workers,ssSettings):
   workers["CQBasisSet"].constructLocal(workers["CQMolecule"]) # 3
   workers["CQBasisSet"].makeMaps(workers["CQMolecule"])  # 4
   workers["CQBasisSet"].renormShells()                        # 5
+
+  workers["CQBasisSet"].printInfo()
   

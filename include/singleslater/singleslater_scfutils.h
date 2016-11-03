@@ -244,30 +244,62 @@ SCFConvergence SingleSlater<T>::evalConver3(){
 
   // Turn off damping when close to convergence
   if(this->doDamp and (std::abs(EDelta) < 1e-6)){
-    this->doDamp = false;
+    if(this->dampParam != 0.)
+      this->fileio_->out << 
+        "    *** Damping Disabled After 1e-6 Converged Met ***" << endl;
+    this->dampParam = 0.0;
+  } else if(this->doDamp and (std::abs(EDelta) > 1e-6) and 
+            this->dampParam <= 0.){
+    this->fileio_->out << 
+      "    *** Damping Enabled due to > 1e-6 Oscillation in Energy ***" << endl;
+    this->dampParam = 0.1;
+  }
+
+  // Turn off level shifting when close to convergence
+  if(this->doLevelShift and (std::abs(EDelta) < 1e-5)){
+    if(this->levelShiftParam != 0.)
+      this->fileio_->out << 
+        "    *** VShift Disabled After 1e-6 Converged Met ***" << endl;
+    this->levelShiftParam = 0.0;
+  } else if(this->doLevelShift and (std::abs(EDelta) > 1e-5) and 
+            this->levelShiftParam <= 0.){
+    this->fileio_->out << 
+      "    *** VShift Enabled due to > 1e-6 Oscillation in Energy ***" << endl;
+    this->levelShiftParam = 0.1;
   }
 
   double PSRMS(0),PMRMS(0);
   // Write D(M) - D(M-1) to disc
   this->formDeltaD();
 
+  hsize_t dims[2] = {this->nBasis_,this->nBasis_};
+  hsize_t offset[2] = {0,0};
+
+  H5::DataSpace memSpace(2,dims,NULL);
+  H5::DataSpace curSpace = this->SCFDensityScalar_->getSpace();
+  curSpace.selectHyperslab(H5S_SELECT_SET,dims,offset);
+
   // Scalar density RMS difference
-  DeltaDScalar_->read(this->NBSqScratch_->data(),H5PredType<T>());
+  DeltaDScalar_->read(this->NBSqScratch_->data(),H5PredType<T>(),memSpace,
+    curSpace);
   PSRMS = this->NBSqScratch_->norm();
 
   // Magnetization density RMS
      
   // || Pz(M) - Pz(M-1) ||^2
   if(this->nTCS_ == 2 or !this->isClosedShell){
-    DeltaDMz_->read(this->NBSqScratch_->data(),H5PredType<T>());
+    DeltaDMz_->read(this->NBSqScratch_->data(),H5PredType<T>(),memSpace,
+      curSpace);
     PMRMS = this->NBSqScratch_->squaredNorm();
   }
 
   // || Py(M) - Py(M-1) ||^2 + || Px(M) - Px(M-1) ||^2
   if(this->nTCS_ == 2) {
-    DeltaDMy_->read(this->NBSqScratch_->data(),H5PredType<T>());
+    DeltaDMy_->read(this->NBSqScratch_->data(),H5PredType<T>(),memSpace,
+      curSpace);
     PMRMS += this->NBSqScratch_->squaredNorm();
-    DeltaDMx_->read(this->NBSqScratch_->data(),H5PredType<T>());
+    DeltaDMx_->read(this->NBSqScratch_->data(),H5PredType<T>(),memSpace,
+      curSpace);
     PMRMS += this->NBSqScratch_->squaredNorm();
   }
 
@@ -365,24 +397,39 @@ void SingleSlater<T>::mixOrbitals2C(){
  */
 template <typename T>
 void SingleSlater<T>::formDeltaD(){
-  SCFDensityScalar_->read(this->NBSqScratch_->data(),H5PredType<T>());
+  hsize_t dims[2] = {this->nBasis_,this->nBasis_};
+  hsize_t offset[2] = {0,0};
+
+  H5::DataSpace memSpace(2,dims,NULL);
+  H5::DataSpace curSpace = this->SCFDensityScalar_->getSpace();
+  curSpace.selectHyperslab(H5S_SELECT_SET,dims,offset);
+
+  SCFDensityScalar_->read(this->NBSqScratch_->data(),H5PredType<T>(),
+    memSpace,curSpace);
   (*this->NBSqScratch2_) = (*this->onePDMScalar_) - (*this->NBSqScratch_);
-  DeltaDScalar_->write(this->NBSqScratch2_->data(),H5PredType<T>());
+  DeltaDScalar_->write(this->NBSqScratch2_->data(),H5PredType<T>(),
+    memSpace,curSpace);
 
   if(this->nTCS_ == 2 or !this->isClosedShell){
-    SCFDensityMz_->read(this->NBSqScratch_->data(),H5PredType<T>());
+    SCFDensityMz_->read(this->NBSqScratch_->data(),H5PredType<T>(),
+      memSpace,curSpace);
     (*this->NBSqScratch2_) = (*this->onePDMMz_) - (*this->NBSqScratch_);
-    DeltaDMz_->write(this->NBSqScratch2_->data(),H5PredType<T>());
+    DeltaDMz_->write(this->NBSqScratch2_->data(),H5PredType<T>(),
+      memSpace,curSpace);
   }
 
   if(this->nTCS_ == 2) {
-    SCFDensityMy_->read(this->NBSqScratch_->data(),H5PredType<T>());
+    SCFDensityMy_->read(this->NBSqScratch_->data(),H5PredType<T>(),
+      memSpace,curSpace);
     (*this->NBSqScratch2_) = (*this->onePDMMy_) - (*this->NBSqScratch_);
-    DeltaDMy_->write(this->NBSqScratch2_->data(),H5PredType<T>());
+    DeltaDMy_->write(this->NBSqScratch2_->data(),H5PredType<T>(),
+      memSpace,curSpace);
 
-    SCFDensityMx_->read(this->NBSqScratch_->data(),H5PredType<T>());
+    SCFDensityMx_->read(this->NBSqScratch_->data(),H5PredType<T>(),
+      memSpace,curSpace);
     (*this->NBSqScratch2_) = (*this->onePDMMx_) - (*this->NBSqScratch_);
-    DeltaDMx_->write(this->NBSqScratch2_->data(),H5PredType<T>());
+    DeltaDMx_->write(this->NBSqScratch2_->data(),H5PredType<T>(),
+      memSpace,curSpace);
   }
 
 };
@@ -397,13 +444,21 @@ void SingleSlater<T>::formDeltaD(){
  */
 template<typename T>
 void SingleSlater<T>::copyDeltaDtoD(){
-  DeltaDScalar_->read(this->onePDMScalar_->data(),H5PredType<T>());
+  hsize_t dims[2] = {this->nBasis_,this->nBasis_};
+  hsize_t offset[2] = {0,0};
+
+  H5::DataSpace memSpace(2,dims,NULL);
+  H5::DataSpace curSpace = this->SCFDensityScalar_->getSpace();
+  curSpace.selectHyperslab(H5S_SELECT_SET,dims,offset);
+
+  DeltaDScalar_->read(this->onePDMScalar_->data(),H5PredType<T>(),
+    memSpace,curSpace);
   if(this->nTCS_ == 2 or !this->isClosedShell){
-    DeltaDMz_->read(this->onePDMMz_->data(),H5PredType<T>());
+    DeltaDMz_->read(this->onePDMMz_->data(),H5PredType<T>(),memSpace,curSpace);
   }
   if(this->nTCS_ == 2) {
-    DeltaDMy_->read(this->onePDMMy_->data(),H5PredType<T>());
-    DeltaDMx_->read(this->onePDMMx_->data(),H5PredType<T>());
+    DeltaDMy_->read(this->onePDMMy_->data(),H5PredType<T>(),memSpace,curSpace);
+    DeltaDMx_->read(this->onePDMMx_->data(),H5PredType<T>(),memSpace,curSpace);
   }
 }
 
@@ -416,13 +471,24 @@ void SingleSlater<T>::copyDeltaDtoD(){
  */
 template<typename T>
 void SingleSlater<T>::copyDOldtoD(){
-  SCFDensityScalar_->read(this->onePDMScalar_->data(),H5PredType<T>());
+  hsize_t dims[2] = {this->nBasis_,this->nBasis_};
+  hsize_t offset[2] = {0,0};
+
+  H5::DataSpace memSpace(2,dims,NULL);
+  H5::DataSpace curSpace = this->SCFDensityScalar_->getSpace();
+  curSpace.selectHyperslab(H5S_SELECT_SET,dims,offset);
+
+  SCFDensityScalar_->read(this->onePDMScalar_->data(),H5PredType<T>(),
+    memSpace,curSpace);
   if(this->nTCS_ == 2 or !this->isClosedShell){
-    SCFDensityMz_->read(this->onePDMMz_->data(),H5PredType<T>());
+    SCFDensityMz_->read(this->onePDMMz_->data(),H5PredType<T>(),memSpace,
+      curSpace);
   }
   if(this->nTCS_ == 2) {
-    SCFDensityMy_->read(this->onePDMMy_->data(),H5PredType<T>());
-    SCFDensityMx_->read(this->onePDMMx_->data(),H5PredType<T>());
+    SCFDensityMy_->read(this->onePDMMy_->data(),H5PredType<T>(),memSpace,
+      curSpace);
+    SCFDensityMx_->read(this->onePDMMx_->data(),H5PredType<T>(),memSpace,
+      curSpace);
   }
 }
 
@@ -493,7 +559,7 @@ void SingleSlater<T>::populateMO4Diag(){
 template <typename T>
 void SingleSlater<T>::initSCFFiles() {
 
-  if(!this->isPrimary) return;
+//if(!this->isPrimary) return;
   std::vector<hsize_t> dims;
   dims.push_back(this->basisset_->nBasis());
   dims.push_back(this->basisset_->nBasis());
@@ -505,13 +571,28 @@ void SingleSlater<T>::initSCFFiles() {
   H5::DataSpace dsp(2,&dims[0]);
   H5::DataSpace bdsp(2,&bigDims[0]);
 
+  // Stuff for extendable files
+  hsize_t chunk_dims[2] = {2,2};
+  H5::DSetCreatPropList prop;
+  if(!this->isPrimary) prop.setChunk(2,chunk_dims);
+
   // Check if SCF group exists
-  try {
-    this->SCFGroup_ = std::unique_ptr<H5::Group>(new H5::Group(
-      this->fileio_->restart->openGroup("/SCF")));
-  } catch(...) {
-    this->SCFGroup_ = std::unique_ptr<H5::Group>(new H5::Group(
-      this->fileio_->restart->createGroup("/SCF")));
+  if(this->isPrimary) {
+    try {
+      this->SCFGroup_ = std::unique_ptr<H5::Group>(new H5::Group(
+        this->fileio_->restart->openGroup("/SCF")));
+    } catch(...) {
+      this->SCFGroup_ = std::unique_ptr<H5::Group>(new H5::Group(
+        this->fileio_->restart->createGroup("/SCF")));
+    }
+  } else {
+    try {
+      this->SCFGroup_ = std::unique_ptr<H5::Group>(new H5::Group(
+        this->fileio_->scr->openGroup("/NONPRIMARY_SCF")));
+    } catch(...) {
+      this->SCFGroup_ = std::unique_ptr<H5::Group>(new H5::Group(
+        this->fileio_->scr->createGroup("/NONPRIMARY_SCF")));
+    }
   }
 
 
@@ -521,12 +602,21 @@ void SingleSlater<T>::initSCFFiles() {
   try {
     this->SCFDensityScalar_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
       this->SCFGroup_->openDataSet("DensityScalar")));
+
+    // Check if resize needed
+    if(!this->isPrimary){
+      std::vector<hsize_t> prev_dims(2);
+
+      this->SCFDensityScalar_->getSpace().getSimpleExtentDims(&prev_dims[0]);
+      if(prev_dims[0] < dims[0])
+        this->SCFDensityScalar_->extend(&dims[0]);
+    }
   } catch(...) {
     if(this->guess_ == READ) 
       CErr("FATAL: READ Guess cannot find DensityScalar",this->fileio_->out);
 
     this->SCFDensityScalar_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
-      this->SCFGroup_->createDataSet("DensityScalar",H5PredType<T>(),dsp)));
+      this->SCFGroup_->createDataSet("DensityScalar",H5PredType<T>(),dsp,prop)));
   }
 
   // Mz
@@ -534,9 +624,18 @@ void SingleSlater<T>::initSCFFiles() {
     try {
       this->SCFDensityMz_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
         this->SCFGroup_->openDataSet("DensityMz")));
+
+      // Check if resize needed
+      if(!this->isPrimary){
+        std::vector<hsize_t> prev_dims(2);
+     
+        this->SCFDensityMz_->getSpace().getSimpleExtentDims(&prev_dims[0]);
+        if(prev_dims[0] < dims[0])
+          this->SCFDensityMz_->extend(&dims[0]);
+      }
     } catch(...) {
       this->SCFDensityMz_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
-        this->SCFGroup_->createDataSet("DensityMz",H5PredType<T>(),dsp)));
+        this->SCFGroup_->createDataSet("DensityMz",H5PredType<T>(),dsp,prop)));
     }
   }
 
@@ -546,18 +645,36 @@ void SingleSlater<T>::initSCFFiles() {
     try {
       this->SCFDensityMx_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
         this->SCFGroup_->openDataSet("DensityMx")));
+
+      // Check if resize needed
+      if(!this->isPrimary){
+        std::vector<hsize_t> prev_dims(2);
+     
+        this->SCFDensityMx_->getSpace().getSimpleExtentDims(&prev_dims[0]);
+        if(prev_dims[0] < dims[0])
+          this->SCFDensityMx_->extend(&dims[0]);
+      }
     } catch(...) {
       this->SCFDensityMx_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
-        this->SCFGroup_->createDataSet("DensityMx",H5PredType<T>(),dsp)));
+        this->SCFGroup_->createDataSet("DensityMx",H5PredType<T>(),dsp,prop)));
     }
 
     // My
     try {
       this->SCFDensityMy_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
         this->SCFGroup_->openDataSet("DensityMy")));
+
+      // Check if resize needed
+      if(!this->isPrimary){
+        std::vector<hsize_t> prev_dims(2);
+     
+        this->SCFDensityMy_->getSpace().getSimpleExtentDims(&prev_dims[0]);
+        if(prev_dims[0] < dims[0])
+          this->SCFDensityMy_->extend(&dims[0]);
+      }
     } catch(...) {
       this->SCFDensityMy_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
-        this->SCFGroup_->createDataSet("DensityMy",H5PredType<T>(),dsp)));
+        this->SCFGroup_->createDataSet("DensityMy",H5PredType<T>(),dsp,prop)));
     }
   }
 
@@ -567,9 +684,18 @@ void SingleSlater<T>::initSCFFiles() {
   try {
     this->SCFOrthoDScalar_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
       this->SCFGroup_->openDataSet("OrthoDScalar")));
+
+    // Check if resize needed
+    if(!this->isPrimary){
+      std::vector<hsize_t> prev_dims(2);
+    
+      this->SCFOrthoDScalar_->getSpace().getSimpleExtentDims(&prev_dims[0]);
+      if(prev_dims[0] < dims[0])
+        this->SCFOrthoDScalar_->extend(&dims[0]);
+    }
   } catch(...) {
     this->SCFOrthoDScalar_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
-      this->SCFGroup_->createDataSet("OrthoDScalar",H5PredType<T>(),dsp)));
+      this->SCFGroup_->createDataSet("OrthoDScalar",H5PredType<T>(),dsp,prop)));
   }
 
   // Mz
@@ -577,9 +703,18 @@ void SingleSlater<T>::initSCFFiles() {
     try {
       this->SCFOrthoDMz_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
         this->SCFGroup_->openDataSet("OrthoDMz")));
+
+      // Check if resize needed
+      if(!this->isPrimary){
+        std::vector<hsize_t> prev_dims(2);
+      
+        this->SCFOrthoDMz_->getSpace().getSimpleExtentDims(&prev_dims[0]);
+        if(prev_dims[0] < dims[0])
+          this->SCFOrthoDMz_->extend(&dims[0]);
+      }
     } catch(...) {
       this->SCFOrthoDMz_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
-        this->SCFGroup_->createDataSet("OrthoDMz",H5PredType<T>(),dsp)));
+        this->SCFGroup_->createDataSet("OrthoDMz",H5PredType<T>(),dsp,prop)));
     }
   }
 
@@ -589,18 +724,36 @@ void SingleSlater<T>::initSCFFiles() {
     try {
       this->SCFOrthoDMx_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
         this->SCFGroup_->openDataSet("OrthoDMx")));
+
+      // Check if resize needed
+      if(!this->isPrimary){
+        std::vector<hsize_t> prev_dims(2);
+      
+        this->SCFOrthoDMx_->getSpace().getSimpleExtentDims(&prev_dims[0]);
+        if(prev_dims[0] < dims[0])
+          this->SCFOrthoDMx_->extend(&dims[0]);
+      }
     } catch(...) {
       this->SCFOrthoDMx_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
-        this->SCFGroup_->createDataSet("OrthoDMx",H5PredType<T>(),dsp)));
+        this->SCFGroup_->createDataSet("OrthoDMx",H5PredType<T>(),dsp,prop)));
     }
 
     // My
     try {
       this->SCFOrthoDMy_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
         this->SCFGroup_->openDataSet("OrthoDMy")));
+
+      // Check if resize needed
+      if(!this->isPrimary){
+        std::vector<hsize_t> prev_dims(2);
+      
+        this->SCFOrthoDMy_->getSpace().getSimpleExtentDims(&prev_dims[0]);
+        if(prev_dims[0] < dims[0])
+          this->SCFOrthoDMy_->extend(&dims[0]);
+      }
     } catch(...) {
       this->SCFOrthoDMy_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
-        this->SCFGroup_->createDataSet("OrthoDMy",H5PredType<T>(),dsp)));
+        this->SCFGroup_->createDataSet("OrthoDMy",H5PredType<T>(),dsp,prop)));
     }
   }
 
@@ -612,9 +765,18 @@ void SingleSlater<T>::initSCFFiles() {
   try {
     this->SCFFockScalar_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
       this->SCFGroup_->openDataSet("FockScalar")));
+
+    // Check if resize needed
+    if(!this->isPrimary){
+      std::vector<hsize_t> prev_dims(2);
+
+      this->SCFFockScalar_->getSpace().getSimpleExtentDims(&prev_dims[0]);
+      if(prev_dims[0] < dims[0])
+        this->SCFFockScalar_->extend(&dims[0]);
+    }
   } catch(...) {
     this->SCFFockScalar_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
-      this->SCFGroup_->createDataSet("FockScalar",H5PredType<T>(),dsp)));
+      this->SCFGroup_->createDataSet("FockScalar",H5PredType<T>(),dsp,prop)));
   }
 
   // Mz
@@ -622,9 +784,18 @@ void SingleSlater<T>::initSCFFiles() {
     try {
       this->SCFFockMz_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
         this->SCFGroup_->openDataSet("FockMz")));
+
+      // Check if resize needed
+      if(!this->isPrimary){
+        std::vector<hsize_t> prev_dims(2);
+     
+        this->SCFFockMz_->getSpace().getSimpleExtentDims(&prev_dims[0]);
+        if(prev_dims[0] < dims[0])
+          this->SCFFockMz_->extend(&dims[0]);
+      }
     } catch(...) {
       this->SCFFockMz_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
-        this->SCFGroup_->createDataSet("FockMz",H5PredType<T>(),dsp)));
+        this->SCFGroup_->createDataSet("FockMz",H5PredType<T>(),dsp,prop)));
     }
   }
 
@@ -634,18 +805,36 @@ void SingleSlater<T>::initSCFFiles() {
     try {
       this->SCFFockMx_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
         this->SCFGroup_->openDataSet("FockMx")));
+
+      // Check if resize needed
+      if(!this->isPrimary){
+        std::vector<hsize_t> prev_dims(2);
+     
+        this->SCFFockMx_->getSpace().getSimpleExtentDims(&prev_dims[0]);
+        if(prev_dims[0] < dims[0])
+          this->SCFFockMx_->extend(&dims[0]);
+      }
     } catch(...) {
       this->SCFFockMx_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
-        this->SCFGroup_->createDataSet("FockMx",H5PredType<T>(),dsp)));
+        this->SCFGroup_->createDataSet("FockMx",H5PredType<T>(),dsp,prop)));
     }
 
     // My
     try {
       this->SCFFockMy_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
         this->SCFGroup_->openDataSet("FockMy")));
+
+      // Check if resize needed
+      if(!this->isPrimary){
+        std::vector<hsize_t> prev_dims(2);
+     
+        this->SCFFockMy_->getSpace().getSimpleExtentDims(&prev_dims[0]);
+        if(prev_dims[0] < dims[0])
+          this->SCFFockMy_->extend(&dims[0]);
+      }
     } catch(...) {
       this->SCFFockMy_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
-        this->SCFGroup_->createDataSet("FockMy",H5PredType<T>(),dsp)));
+        this->SCFGroup_->createDataSet("FockMy",H5PredType<T>(),dsp,prop)));
     }
   }
 
@@ -655,9 +844,18 @@ void SingleSlater<T>::initSCFFiles() {
   try {
     this->SCFOrthoFScalar_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
       this->SCFGroup_->openDataSet("OrthoFScalar")));
+
+    // Check if resize needed
+    if(!this->isPrimary){
+      std::vector<hsize_t> prev_dims(2);
+
+      this->SCFOrthoFScalar_->getSpace().getSimpleExtentDims(&prev_dims[0]);
+      if(prev_dims[0] < dims[0])
+        this->SCFOrthoFScalar_->extend(&dims[0]);
+    }
   } catch(...) {
     this->SCFOrthoFScalar_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
-      this->SCFGroup_->createDataSet("OrthoFScalar",H5PredType<T>(),dsp)));
+      this->SCFGroup_->createDataSet("OrthoFScalar",H5PredType<T>(),dsp,prop)));
   }
 
   // Mz
@@ -665,9 +863,18 @@ void SingleSlater<T>::initSCFFiles() {
     try {
       this->SCFOrthoFMz_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
         this->SCFGroup_->openDataSet("OrthoFMz")));
+
+      // Check if resize needed
+      if(!this->isPrimary){
+        std::vector<hsize_t> prev_dims(2);
+     
+        this->SCFOrthoFMz_->getSpace().getSimpleExtentDims(&prev_dims[0]);
+        if(prev_dims[0] < dims[0])
+          this->SCFOrthoFMz_->extend(&dims[0]);
+      }
     } catch(...) {
       this->SCFOrthoFMz_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
-        this->SCFGroup_->createDataSet("OrthoFMz",H5PredType<T>(),dsp)));
+        this->SCFGroup_->createDataSet("OrthoFMz",H5PredType<T>(),dsp,prop)));
     }
   }
 
@@ -677,18 +884,36 @@ void SingleSlater<T>::initSCFFiles() {
     try {
       this->SCFOrthoFMx_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
         this->SCFGroup_->openDataSet("OrthoFMx")));
+
+      // Check if resize needed
+      if(!this->isPrimary){
+        std::vector<hsize_t> prev_dims(2);
+     
+        this->SCFOrthoFMx_->getSpace().getSimpleExtentDims(&prev_dims[0]);
+        if(prev_dims[0] < dims[0])
+          this->SCFOrthoFMx_->extend(&dims[0]);
+      }
     } catch(...) {
       this->SCFOrthoFMx_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
-        this->SCFGroup_->createDataSet("OrthoFMx",H5PredType<T>(),dsp)));
+        this->SCFGroup_->createDataSet("OrthoFMx",H5PredType<T>(),dsp,prop)));
     }
 
     // My
     try {
       this->SCFOrthoFMy_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
         this->SCFGroup_->openDataSet("OrthoFMy")));
+
+      // Check if resize needed
+      if(!this->isPrimary){
+        std::vector<hsize_t> prev_dims(2);
+     
+        this->SCFOrthoFMy_->getSpace().getSimpleExtentDims(&prev_dims[0]);
+        if(prev_dims[0] < dims[0])
+          this->SCFOrthoFMy_->extend(&dims[0]);
+      }
     } catch(...) {
       this->SCFOrthoFMy_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
-        this->SCFGroup_->createDataSet("OrthoFMy",H5PredType<T>(),dsp)));
+        this->SCFGroup_->createDataSet("OrthoFMy",H5PredType<T>(),dsp,prop)));
     }
   }
 
@@ -698,9 +923,18 @@ void SingleSlater<T>::initSCFFiles() {
   try {
     this->SCFPTScalar_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
       this->SCFGroup_->openDataSet("PTScalar")));
+
+    // Check if resize needed
+    if(!this->isPrimary){
+      std::vector<hsize_t> prev_dims(2);
+
+      this->SCFPTScalar_->getSpace().getSimpleExtentDims(&prev_dims[0]);
+      if(prev_dims[0] < dims[0])
+        this->SCFPTScalar_->extend(&dims[0]);
+    }
   } catch(...) {
     this->SCFPTScalar_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
-      this->SCFGroup_->createDataSet("PTScalar",H5PredType<T>(),dsp)));
+      this->SCFGroup_->createDataSet("PTScalar",H5PredType<T>(),dsp,prop)));
   }
 
   // Mz
@@ -708,9 +942,18 @@ void SingleSlater<T>::initSCFFiles() {
     try {
       this->SCFPTMz_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
         this->SCFGroup_->openDataSet("PTMz")));
+
+      // Check if resize needed
+      if(!this->isPrimary){
+        std::vector<hsize_t> prev_dims(2);
+
+        this->SCFPTMz_->getSpace().getSimpleExtentDims(&prev_dims[0]);
+        if(prev_dims[0] < dims[0])
+          this->SCFPTMz_->extend(&dims[0]);
+      }
     } catch(...) {
       this->SCFPTMz_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
-        this->SCFGroup_->createDataSet("PTMz",H5PredType<T>(),dsp)));
+        this->SCFGroup_->createDataSet("PTMz",H5PredType<T>(),dsp,prop)));
     }
   }
 
@@ -720,18 +963,36 @@ void SingleSlater<T>::initSCFFiles() {
     try {
       this->SCFPTMx_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
         this->SCFGroup_->openDataSet("PTMx")));
+
+      // Check if resize needed
+      if(!this->isPrimary){
+        std::vector<hsize_t> prev_dims(2);
+
+        this->SCFPTMx_->getSpace().getSimpleExtentDims(&prev_dims[0]);
+        if(prev_dims[0] < dims[0])
+          this->SCFPTMx_->extend(&dims[0]);
+      }
     } catch(...) {
       this->SCFPTMx_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
-        this->SCFGroup_->createDataSet("PTMx",H5PredType<T>(),dsp)));
+        this->SCFGroup_->createDataSet("PTMx",H5PredType<T>(),dsp,prop)));
     }
 
     // My
     try {
       this->SCFPTMy_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
         this->SCFGroup_->openDataSet("PTMy")));
+
+      // Check if resize needed
+      if(!this->isPrimary){
+        std::vector<hsize_t> prev_dims(2);
+
+        this->SCFPTMy_->getSpace().getSimpleExtentDims(&prev_dims[0]);
+        if(prev_dims[0] < dims[0])
+          this->SCFPTMy_->extend(&dims[0]);
+      }
     } catch(...) {
       this->SCFPTMy_ = std::unique_ptr<H5::DataSet>( new H5::DataSet(
-        this->SCFGroup_->createDataSet("PTMy",H5PredType<T>(),dsp)));
+        this->SCFGroup_->createDataSet("PTMy",H5PredType<T>(),dsp,prop)));
     }
   }
 
@@ -741,9 +1002,18 @@ void SingleSlater<T>::initSCFFiles() {
   try {
     this->SCFMOA_ = std::unique_ptr<H5::DataSet>(new H5::DataSet(
       this->SCFGroup_->openDataSet("MOA")));
+
+    // Check if resize needed
+    if(!this->isPrimary){
+      std::vector<hsize_t> prev_dims(2);
+
+      this->SCFMOA_->getSpace().getSimpleExtentDims(&prev_dims[0]);
+      if(prev_dims[0] < bigDims[0])
+        this->SCFMOA_->extend(&bigDims[0]);
+    }
   } catch(...) {
     this->SCFMOA_ = std::unique_ptr<H5::DataSet>(new H5::DataSet(
-      this->SCFGroup_->createDataSet("MOA",H5PredType<T>(),bdsp)));
+      this->SCFGroup_->createDataSet("MOA",H5PredType<T>(),bdsp,prop)));
   }
 
   // MOB
@@ -751,18 +1021,36 @@ void SingleSlater<T>::initSCFFiles() {
     try {
       this->SCFMOB_ = std::unique_ptr<H5::DataSet>(new H5::DataSet(
         this->SCFGroup_->openDataSet("MOB")));
+
+      // Check if resize needed
+      if(!this->isPrimary){
+        std::vector<hsize_t> prev_dims(2);
+     
+        this->SCFMOB_->getSpace().getSimpleExtentDims(&prev_dims[0]);
+        if(prev_dims[0] < bigDims[0])
+          this->SCFMOB_->extend(&bigDims[0]);
+      }
     } catch(...) {
       this->SCFMOB_ = std::unique_ptr<H5::DataSet>(new H5::DataSet(
-        this->SCFGroup_->createDataSet("MOB",H5PredType<T>(),bdsp)));
+        this->SCFGroup_->createDataSet("MOB",H5PredType<T>(),bdsp,prop)));
     }
   }
 };
 
 template <typename T>
 void SingleSlater<T>::fockDamping() {
+  if(this->dampParam <= 0.) return;
+  hsize_t dims[2] = {this->nBasis_,this->nBasis_};
+  hsize_t offset[2] = {0,0};
+
+  H5::DataSpace memSpace(2,dims,NULL);
+  H5::DataSpace curSpace = this->SCFDensityScalar_->getSpace();
+  curSpace.selectHyperslab(H5S_SELECT_SET,dims,offset);
+
   // Scalar
   //prettyPrintSmart(this->fileio_->out,*this->fockOrthoScalar_,"FockScalar predamp");
-  this->SCFOrthoFScalar_->read(this->NBSqScratch_->data(),H5PredType<T>());
+  this->SCFOrthoFScalar_->read(this->NBSqScratch_->data(),H5PredType<T>(),
+    memSpace,curSpace);
   *this->fockOrthoScalar_  *= (1-dampParam);
   //prettyPrintSmart(this->fileio_->out,*this->fockOrthoScalar_,"FockScalar scaled");
   *this->NBSqScratch_ *= dampParam;
@@ -771,7 +1059,8 @@ void SingleSlater<T>::fockDamping() {
 
   // Mz
   if(this->nTCS_ == 2 or !this->isClosedShell) {
-    this->SCFOrthoFMz_->read(this->NBSqScratch_->data(),H5PredType<T>());
+    this->SCFOrthoFMz_->read(this->NBSqScratch_->data(),H5PredType<T>(),
+      memSpace,curSpace);
     *this->fockOrthoMz_  *= (1-dampParam);
     *this->NBSqScratch_ *= dampParam;
     *this->fockOrthoMz_  += *this->NBSqScratch_;
@@ -780,13 +1069,15 @@ void SingleSlater<T>::fockDamping() {
   
   if(this->nTCS_ == 2){
     // My
-    this->SCFOrthoFMy_->read(this->NBSqScratch_->data(),H5PredType<T>());
+    this->SCFOrthoFMy_->read(this->NBSqScratch_->data(),H5PredType<T>(),
+      memSpace,curSpace);
     *this->fockOrthoMy_  *= (1-dampParam);
     *this->NBSqScratch_ *= dampParam;
     *this->fockOrthoMy_  += *this->NBSqScratch_;
 
     // Mx
-    this->SCFOrthoFMx_->read(this->NBSqScratch_->data(),H5PredType<T>());
+    this->SCFOrthoFMx_->read(this->NBSqScratch_->data(),H5PredType<T>(),
+      memSpace,curSpace);
     *this->fockOrthoMx_  *= (1-dampParam);
     *this->NBSqScratch_ *= dampParam;
     *this->fockOrthoMx_  += *this->NBSqScratch_;
@@ -797,50 +1088,77 @@ void SingleSlater<T>::fockDamping() {
 
 template <typename T>
 void SingleSlater<T>::writeSCFFiles() {
+  hsize_t dims[2] = {this->nBasis_,this->nBasis_};
+  hsize_t offset[2] = {0,0};
+
+  H5::DataSpace memSpace(2,dims,NULL);
+  H5::DataSpace curSpace = this->SCFDensityScalar_->getSpace();
+  curSpace.selectHyperslab(H5S_SELECT_SET,dims,offset);
+
   // Scalar
-  this->SCFDensityScalar_->write(this->onePDMScalar_->data(),H5PredType<T>());
+  this->SCFDensityScalar_->write(this->onePDMScalar_->data(),H5PredType<T>(),
+    memSpace,curSpace);
   this->SCFOrthoDScalar_->write(
-    this->onePDMOrthoScalar_->data(),H5PredType<T>());
+    this->onePDMOrthoScalar_->data(),H5PredType<T>(),memSpace,curSpace);
 
-  this->SCFFockScalar_->write(this->fockScalar_->data(),H5PredType<T>());
-  this->SCFOrthoFScalar_->write(this->fockOrthoScalar_->data(),H5PredType<T>());
+  this->SCFFockScalar_->write(this->fockScalar_->data(),H5PredType<T>(),
+    memSpace,curSpace);
+  this->SCFOrthoFScalar_->write(this->fockOrthoScalar_->data(),H5PredType<T>(),
+    memSpace,curSpace);
 
-  this->SCFPTScalar_->write(this->PTScalar_->data(),H5PredType<T>());
-  this->SCFMOA_->write(this->moA_->data(),H5PredType<T>());
+  this->SCFPTScalar_->write(this->PTScalar_->data(),H5PredType<T>(),
+    memSpace,curSpace);
+  this->SCFMOA_->write(this->moA_->data(),H5PredType<T>(),memSpace,curSpace);
 
   if(this->nTCS_ == 2 or !this->isClosedShell) {
     // Mz
-    this->SCFDensityMz_->write(this->onePDMMz_->data(),H5PredType<T>());
-    this->SCFOrthoDMz_->write(this->onePDMOrthoMz_->data(),H5PredType<T>());
+    this->SCFDensityMz_->write(this->onePDMMz_->data(),H5PredType<T>(),
+      memSpace,curSpace);
+    this->SCFOrthoDMz_->write(this->onePDMOrthoMz_->data(),H5PredType<T>(),
+      memSpace,curSpace);
 
-    this->SCFFockMz_->write(this->fockMz_->data(),H5PredType<T>());
-    this->SCFOrthoFMz_->write(this->fockOrthoMz_->data(),H5PredType<T>());
+    this->SCFFockMz_->write(this->fockMz_->data(),H5PredType<T>(),
+      memSpace,curSpace);
+    this->SCFOrthoFMz_->write(this->fockOrthoMz_->data(),H5PredType<T>(),
+      memSpace,curSpace);
 
-    this->SCFPTMz_->write(this->PTMz_->data(),H5PredType<T>());
+    this->SCFPTMz_->write(this->PTMz_->data(),H5PredType<T>(),
+      memSpace,curSpace);
   }
 
   if(this->nTCS_ == 1 and !this->isClosedShell)
-    this->SCFMOB_->write(this->moB_->data(),H5PredType<T>());
+    this->SCFMOB_->write(this->moB_->data(),H5PredType<T>(),
+      memSpace,curSpace);
 
   if(this->nTCS_ == 2) {
     // Mx
-    this->SCFDensityMx_->write(this->onePDMMx_->data(),H5PredType<T>());
-    this->SCFOrthoDMx_->write(this->onePDMOrthoMx_->data(),H5PredType<T>());
+    this->SCFDensityMx_->write(this->onePDMMx_->data(),H5PredType<T>(),
+      memSpace,curSpace);
+    this->SCFOrthoDMx_->write(this->onePDMOrthoMx_->data(),H5PredType<T>(),
+      memSpace,curSpace);
 
-    this->SCFFockMx_->write(this->fockMx_->data(),H5PredType<T>());
-    this->SCFOrthoFMx_->write(this->fockOrthoMx_->data(),H5PredType<T>());
+    this->SCFFockMx_->write(this->fockMx_->data(),H5PredType<T>(),
+      memSpace,curSpace);
+    this->SCFOrthoFMx_->write(this->fockOrthoMx_->data(),H5PredType<T>(),
+      memSpace,curSpace);
 
-    this->SCFPTMx_->write(this->PTMx_->data(),H5PredType<T>());
+    this->SCFPTMx_->write(this->PTMx_->data(),H5PredType<T>(),
+      memSpace,curSpace);
 
 
 
     // My
-    this->SCFDensityMy_->write(this->onePDMMy_->data(),H5PredType<T>());
-    this->SCFOrthoDMy_->write(this->onePDMOrthoMy_->data(),H5PredType<T>());
+    this->SCFDensityMy_->write(this->onePDMMy_->data(),H5PredType<T>(),
+      memSpace,curSpace);
+    this->SCFOrthoDMy_->write(this->onePDMOrthoMy_->data(),H5PredType<T>(),
+      memSpace,curSpace);
 
-    this->SCFFockMy_->write(this->fockMy_->data(),H5PredType<T>());
-    this->SCFOrthoFMy_->write(this->fockOrthoMy_->data(),H5PredType<T>());
+    this->SCFFockMy_->write(this->fockMy_->data(),H5PredType<T>(),
+      memSpace,curSpace);
+    this->SCFOrthoFMy_->write(this->fockOrthoMy_->data(),H5PredType<T>(),
+      memSpace,curSpace);
 
-    this->SCFPTMy_->write(this->PTMy_->data(),H5PredType<T>());
+    this->SCFPTMy_->write(this->PTMy_->data(),H5PredType<T>(),
+      memSpace,curSpace);
   }
 };

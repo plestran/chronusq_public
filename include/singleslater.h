@@ -138,9 +138,8 @@ class SingleSlater : public WaveFunction<T> {
   int nKeep_;
 
   // Level Shifting Parameters
-  int      iStartLevelShift_;
-  int      nLevelShift_;
-  double   levelShiftParam_;
+//int      iStartLevelShift_;
+//int      nLevelShift_;
 
   // Misc SCF control
   bool  fixPhase_;
@@ -312,6 +311,7 @@ class SingleSlater : public WaveFunction<T> {
   void mixOrbitalsSCF();   ///< Mix the orbitals for Complex / TCS SCF
   void placeAtmDen(std::vector<int>, SingleSlater<double> &); // Place the atomic densities into total densities for guess
   void scaleDen(); // Scale the unrestricted densities for correct # electrons
+  void spinAverage();
 
 
   /*** Private SCF Functions ***/
@@ -389,6 +389,8 @@ public:
   bool  doDIIS;
   bool  doDamp;
   double dampParam;
+  bool doLevelShift;
+  double   levelShiftParam;
 
   bool  doITP; ///< Do Imaginary Time Propagation (ITP)?
   float dt;    ///< Timestep for Imaginary Time Propagation
@@ -432,9 +434,10 @@ public:
     this->denTol_           = 1e-8;
     this->eneTol_           = 1e-10;
     this->maxSCFIter_       = 256;
-    this->iStartLevelShift_ = 0;
-    this->nLevelShift_      = 4;
-    this->levelShiftParam_  = 2.42;
+//  this->iStartLevelShift_ = 0;
+//  this->nLevelShift_      = 4;
+    this->doLevelShift      = false;
+    this->levelShiftParam   = 0.2;
     this->xHF_              = -0.5;    
 
     this->elecField_   = {0.0,0.0,0.0};
@@ -576,13 +579,27 @@ public:
 
   void setRef(const std::string&);
 
+  inline void setGuess(const std::string &gs){
+    if(!gs.compare("CORE"))
+      this->guess_ = CORE;
+    else if (!gs.compare("SAD"))
+      this->guess_ = SAD;
+    else if (!gs.compare("RANDOM"))
+      this->guess_ = RANDOM;
+    else if (!gs.compare("READ"))
+      this->guess_ = READ;
+    else
+      CErr(std::string("Guess type: ") + gs + std::string(" not recognized"),this->fileio_->out);
+  }
+
+
   //set private data
 //inline void setRef(int Ref)             { this->Ref_ = Ref;          };
   inline void setPrintLevel(int i)        { this->printLevel_ = i;     };
   inline void setSCFDenTol(double x)      { this->denTol_ = x;         };
   inline void setSCFEneTol(double x)      { this->eneTol_ = x;         };
   inline void setSCFMaxIter(int i)        { this->maxSCFIter_ = i;     };
-  inline void setGuess(int i)             { this->guess_ = i;          };
+//inline void setGuess(int i)             { this->guess_ = i;          };
   inline void isNotPrimary()              { this->isPrimary = false;   };
   inline void setDFTKernel( DFT i)        { this->DFTKernel_  = i;     };
   inline void setDFTWeightScheme(int i)   { this->weightScheme_ = i;   };

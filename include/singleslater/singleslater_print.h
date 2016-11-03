@@ -358,11 +358,17 @@ void SingleSlater<T>::printSCFHeader(ostream &output){
   if(this->doDIIS) output << "CDIIS";
   else             output << "No DIIS Extrapolation";
   output << endl;
+/*
   output << std::setw(38) << std::left << "  Imaginary Time Propagation:";
   if(this->doITP) output << "True, with dt = " << this->dt;
   else            output << "False"; 
   output << endl;
-
+*/
+  if(this->doDamp) {
+    output << std::setw(38) << std::left << "  Damping Parameter:";
+    output << std::scientific << std::setprecision(4) << this->dampParam;
+    output << endl;
+  }
 
   if(this->isDFT){
     output << std::setw(38) << std::left << "  Density Functional:";

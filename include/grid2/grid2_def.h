@@ -110,7 +110,9 @@ public:
         IntegrationPoint IP((*this)[iPt]);
         if(IP.evalpt){
           func(IP,result);
-        } else NSkip++;
+        } else {
+//        cout << "Screened " << IP.I << " " << IP.J << endl;
+        };
       }
       }
 //  cout << " NSkip by partition = " << NSkip << endl;
