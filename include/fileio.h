@@ -72,7 +72,6 @@ class FileIO {
   std::string  betaMOPath      ;
 */
 
-  std::string generateRandomTag(int);
   std::random_device randDevice;
 
 public:
@@ -193,6 +192,9 @@ public:
   void iniStdSCFFilesDouble(bool,int);
   void iniStdSCFFilesComplex(bool,int);
 */
+
+  // Misc util
+  std::string generateRandomTag(int);
 
   // Python API
   void write(std::string);
