@@ -850,9 +850,9 @@ def parseRT(workers,settings):
 
 def parseSCF(workers,scfSettings):
   optMap = {
-    'SCFDENTOL' :workers['CQSingleSlater'].setSCFDenTol,
-    'SCFENETOL' :workers['CQSingleSlater'].setSCFEneTol,
-    'SCFMAXITER':workers['CQSingleSlater'].setSCFMaxIter,
+    'DENTOL' :workers['CQSingleSlater'].setSCFDenTol,
+    'ENETOL' :workers['CQSingleSlater'].setSCFEneTol,
+    'MAXITER':workers['CQSingleSlater'].setSCFMaxIter,
     'DT'        :workers['CQSingleSlater'].setITPdt,
     'FIELD'     :workers['CQSingleSlater'].setField,
     'GUESS'     :workers['CQSingleSlater'].setGuess ,
@@ -865,7 +865,10 @@ def parseSCF(workers,scfSettings):
   for i in optMap:
     try:
       if i not in ('FIELD'):
-        optMap[i](str(scfSettings[i]))
+        if i in ('GUESS'):
+          optMap[i](str(scfSettings[i]))
+        else:
+          optMap[i](scfSettings[i])
       else:
         optMap[i](scfSettings[i][0],scfSettings[i][1],scfSettings[i][2])
     except KeyError:
