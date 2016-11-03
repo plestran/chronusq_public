@@ -69,7 +69,7 @@ void SingleSlater<T>::levelShift(){
 
 template<typename T>
 void SingleSlater<T>::levelShift2(){
-
+  if(this->levelShiftParam <= 0.0) return;
 /*
   cout << "LEVEL Shifting" << endl;
   T* FockA, *FockB;
@@ -100,6 +100,68 @@ void SingleSlater<T>::levelShift2(){
     }
   }
 */
+  double HOMO_LUMO_GAP = 
+    (*this->epsA_)(this->nO_) - (*this->epsA_)(this->nO_-1);
+
+  if( HOMO_LUMO_GAP < 1e-6 ) {
+    this->levelShiftParam = 0.1;
+  } else {
+    this->levelShiftParam = HOMO_LUMO_GAP * 2;
+  }
+
+  T *MOAVir, *MOBVir;
+  T MOAMu, MOBMu;
+
+  T *FockScalar, *FockMz, *FockMy, *FockMx;
+  FockScalar = this->fockOrthoScalar_->data();
+  if(this->nTCS_ == 2 or !this->isClosedShell)
+    FockMz = this->fockOrthoMz_->data();
+  if(this->nTCS_ == 2){
+    FockMy = this->fockOrthoMy_->data();
+    FockMx = this->fockOrthoMx_->data();
+  }
+
+  int NO = this->nTCS_ == 2 ? this->nO_ : this->nOA_;
+  for(auto iVir = NO; iVir < this->nTCS_ * this->nBasis_; iVir++){
+    MOAVir = this->moA_->data() + iVir * this->nTCS_ * this->nBasis_;
+    if(this->nTCS_ == 1 && this->isClosedShell) 
+      MOBVir = this->moA_->data() + iVir * this->nBasis_;
+    else if(this->nTCS_ == 1)
+      MOBVir = this->moB_->data() + iVir * this->nBasis_;
+    else
+      MOBVir = this->moA_->data() + 1 + iVir * this->nTCS_ * this->nBasis_;
+
+    for(auto mu = 0; mu < this->nTCS_ * this->nBasis_; mu += this->nTCS_){
+      MOAMu = this->levelShiftParam * MOAVir[mu];
+      MOBMu = this->levelShiftParam * MOBVir[mu];
+
+      // Scalar
+      for(auto nu = 0; nu < this->nTCS_ * this->nBasis_; nu += this->nTCS_){
+        FockScalar[nu/this->nTCS_ + (mu/this->nTCS_) * this->nBasis_] +=
+          MOAMu * std::conj(MOAVir[nu]) + MOBMu * std::conj(MOBVir[nu]);
+      }
+      if(this->nTCS_ == 2 or !this->isClosedShell){
+        // Mz 
+        for(auto nu = 0; nu < this->nTCS_ * this->nBasis_; nu += this->nTCS_){
+          FockMz[nu/this->nTCS_ + (mu/this->nTCS_) * this->nBasis_] +=
+            MOAMu * std::conj(MOAVir[nu]) - MOBMu * std::conj(MOBVir[nu]);
+        }
+      }
+      if(this->nTCS_ == 2 ){
+        // Mx / My
+        for(auto nu = 0; nu < this->nTCS_ * this->nBasis_; nu += this->nTCS_){
+          FockMx[nu/this->nTCS_ + (mu/this->nTCS_) * this->nBasis_] +=
+            MOAMu * std::conj(MOBVir[nu]) + MOBMu * std::conj(MOAVir[nu]);
+          FockMy[nu/this->nTCS_ + (mu/this->nTCS_) * this->nBasis_] +=
+            ComplexScale<T>() * (
+            MOAMu * std::conj(MOBVir[nu]) - MOBMu * std::conj(MOAVir[nu])
+            );
+        }
+      }
+    }
+    
+  }
+  
 }
 // JJRADLER
 //

@@ -138,9 +138,8 @@ class SingleSlater : public WaveFunction<T> {
   int nKeep_;
 
   // Level Shifting Parameters
-  int      iStartLevelShift_;
-  int      nLevelShift_;
-  double   levelShiftParam_;
+//int      iStartLevelShift_;
+//int      nLevelShift_;
 
   // Misc SCF control
   bool  fixPhase_;
@@ -389,6 +388,8 @@ public:
   bool  doDIIS;
   bool  doDamp;
   double dampParam;
+  bool doLevelShift;
+  double   levelShiftParam;
 
   bool  doITP; ///< Do Imaginary Time Propagation (ITP)?
   float dt;    ///< Timestep for Imaginary Time Propagation
@@ -432,9 +433,10 @@ public:
     this->denTol_           = 1e-8;
     this->eneTol_           = 1e-10;
     this->maxSCFIter_       = 256;
-    this->iStartLevelShift_ = 0;
-    this->nLevelShift_      = 4;
-    this->levelShiftParam_  = 2.42;
+//  this->iStartLevelShift_ = 0;
+//  this->nLevelShift_      = 4;
+    this->doLevelShift      = false;
+    this->levelShiftParam   = 0.2;
     this->xHF_              = -0.5;    
 
     this->elecField_   = {0.0,0.0,0.0};

@@ -244,7 +244,28 @@ SCFConvergence SingleSlater<T>::evalConver3(){
 
   // Turn off damping when close to convergence
   if(this->doDamp and (std::abs(EDelta) < 1e-6)){
-    this->doDamp = false;
+    if(this->dampParam != 0.)
+      this->fileio_->out << 
+        "    *** Damping Disabled After 1e-6 Converged Met ***" << endl;
+    this->dampParam = 0.0;
+  } else if(this->doDamp and (std::abs(EDelta) > 1e-6) and 
+            this->dampParam <= 0.){
+    this->fileio_->out << 
+      "    *** Damping Enabled due to > 1e-6 Oscillation in Energy ***" << endl;
+    this->dampParam = 0.1;
+  }
+
+  // Turn off level shifting when close to convergence
+  if(this->doLevelShift and (std::abs(EDelta) < 1e-5)){
+    if(this->levelShiftParam != 0.)
+      this->fileio_->out << 
+        "    *** VShift Disabled After 1e-6 Converged Met ***" << endl;
+    this->levelShiftParam = 0.0;
+  } else if(this->doLevelShift and (std::abs(EDelta) > 1e-5) and 
+            this->levelShiftParam <= 0.){
+    this->fileio_->out << 
+      "    *** VShift Enabled due to > 1e-6 Oscillation in Energy ***" << endl;
+    this->levelShiftParam = 0.1;
   }
 
   double PSRMS(0),PMRMS(0);
@@ -760,6 +781,7 @@ void SingleSlater<T>::initSCFFiles() {
 
 template <typename T>
 void SingleSlater<T>::fockDamping() {
+  if(this->dampParam <= 0.) return;
   // Scalar
   //prettyPrintSmart(this->fileio_->out,*this->fockOrthoScalar_,"FockScalar predamp");
   this->SCFOrthoFScalar_->read(this->NBSqScratch_->data(),H5PredType<T>());

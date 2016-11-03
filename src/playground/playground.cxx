@@ -174,12 +174,12 @@ int main(int argc, char **argv){
 
   memManager.setTotalMem(256e4);
   initCQ(argc,argv);
-  CQSetNumThreads(8);
+  CQSetNumThreads(4);
   
 //////////////////////////////////////////////////////
 //loadPresets<H>(molecule);
-//loadPresets<OxMolecule>(molecule);
-  loadPresets<WATER>(molecule);
+  loadPresets<OxMolecule>(molecule);
+//loadPresets<WATER>(molecule);
 //loadPresets<Methanol>(molecule);
 //loadPresets<HE>(molecule);
 //loadPresets<SO>(molecule);
@@ -190,7 +190,7 @@ int main(int argc, char **argv){
   molecule.computeRij();
   molecule.computeI();
 
-  singleSlater.setRef("X2C");
+  singleSlater.setRef("GHF");
 //singleSlater.setSCFEneTol(1e-12);
   singleSlater.setSCFMaxIter(10000);
   singleSlater.doDIIS = true;
@@ -204,11 +204,11 @@ int main(int argc, char **argv){
 
 
 //basis.forceCart();
-  basis.findBasisFile("sto-3g");
+//basis.findBasisFile("sto-3g");
 //basis.findBasisFile("3-21g");
 //basis.findBasisFile("6-31G");
 //basis.findBasisFile("cc-pVTZ");
-//basis.findBasisFile("cc-pVDZ");
+  basis.findBasisFile("cc-pVDZ");
   basis.communicate(fileio);
   basis.parseGlobal();
   basis.constructLocal(&molecule);
