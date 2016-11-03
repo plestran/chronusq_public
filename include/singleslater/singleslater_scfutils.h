@@ -572,7 +572,7 @@ void SingleSlater<T>::initSCFFiles() {
   H5::DataSpace bdsp(2,&bigDims[0]);
 
   // Stuff for extendable files
-  hsize_t chunk_dims[2] = {10,10};
+  hsize_t chunk_dims[2] = {2,2};
   H5::DSetCreatPropList prop;
   if(!this->isPrimary) prop.setChunk(2,chunk_dims);
 

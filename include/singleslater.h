@@ -311,6 +311,7 @@ class SingleSlater : public WaveFunction<T> {
   void mixOrbitalsSCF();   ///< Mix the orbitals for Complex / TCS SCF
   void placeAtmDen(std::vector<int>, SingleSlater<double> &); // Place the atomic densities into total densities for guess
   void scaleDen(); // Scale the unrestricted densities for correct # electrons
+  void spinAverage();
 
 
   /*** Private SCF Functions ***/
