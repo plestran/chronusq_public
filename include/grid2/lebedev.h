@@ -21,6 +21,7 @@ class Lebedev : public OneDGrid2 {
 
   public:
     Lebedev(size_t N) : OneDGrid2(N,0.0,false){
+/*
       if(     N ==    6) this->algOrder_ = LEBEDEV_3;  
       else if(N ==   14) this->algOrder_ = LEBEDEV_5;  
       else if(N ==   26) this->algOrder_ = LEBEDEV_7;  
@@ -31,6 +32,8 @@ class Lebedev : public OneDGrid2 {
       else if(N ==  110) this->algOrder_ = LEBEDEV_17; 
       else if(N ==  146) this->algOrder_ = LEBEDEV_19; 
       else if(N ==  170) this->algOrder_ = LEBEDEV_21; 
+*/
+      if(N ==  170)      this->algOrder_ = LEBEDEV_21; 
       else if(N ==  194) this->algOrder_ = LEBEDEV_23; 
       else if(N ==  230) this->algOrder_ = LEBEDEV_25; 
       else if(N ==  266) this->algOrder_ = LEBEDEV_27; 
@@ -42,6 +45,7 @@ class Lebedev : public OneDGrid2 {
       else if(N ==  974) this->algOrder_ = LEBEDEV_53; 
       else if(N == 1202) this->algOrder_ = LEBEDEV_59; 
       else if(N == 1454) this->algOrder_ = LEBEDEV_65; 
+/*
       else if(N == 1730) this->algOrder_ = LEBEDEV_71; 
       else if(N == 2030) this->algOrder_ = LEBEDEV_77; 
       else if(N == 2354) this->algOrder_ = LEBEDEV_83; 
@@ -53,6 +57,7 @@ class Lebedev : public OneDGrid2 {
       else if(N == 4802) this->algOrder_ = LEBEDEV_119;
       else if(N == 5294) this->algOrder_ = LEBEDEV_125;
       else if(N == 5810) this->algOrder_ = LEBEDEV_131;
+*/
       else
         CErr("Invalid Lebedev Grid Specification");
 

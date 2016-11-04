@@ -4,6 +4,7 @@ namespace ChronusQ {
   void Lebedev::loadAlgebraicPoints() {
     this->gPoints_.reserve(this->nPts_);
     this->weights_.reserve(this->nPts_);
+/*
     if(this->algOrder_ == LEBEDEV_3)         this->loadLebedev<LEBEDEV_3  >();
     else if(this->algOrder_ == LEBEDEV_5)    this->loadLebedev<LEBEDEV_5  >();
     else if(this->algOrder_ == LEBEDEV_7)    this->loadLebedev<LEBEDEV_7  >();
@@ -14,6 +15,8 @@ namespace ChronusQ {
     else if(this->algOrder_ == LEBEDEV_17 )  this->loadLebedev<LEBEDEV_17 >();
     else if(this->algOrder_ == LEBEDEV_19 )  this->loadLebedev<LEBEDEV_19 >();
     else if(this->algOrder_ == LEBEDEV_21 )  this->loadLebedev<LEBEDEV_21 >();
+*/
+    if(this->algOrder_ == LEBEDEV_21 )  this->loadLebedev<LEBEDEV_21 >();
     else if(this->algOrder_ == LEBEDEV_23 )  this->loadLebedev<LEBEDEV_23 >();
     else if(this->algOrder_ == LEBEDEV_25 )  this->loadLebedev<LEBEDEV_25 >();
     else if(this->algOrder_ == LEBEDEV_27 )  this->loadLebedev<LEBEDEV_27 >();
@@ -25,7 +28,7 @@ namespace ChronusQ {
     else if(this->algOrder_ == LEBEDEV_53 )  this->loadLebedev<LEBEDEV_53 >();
     else if(this->algOrder_ == LEBEDEV_59 )  this->loadLebedev<LEBEDEV_59 >();
     else if(this->algOrder_ == LEBEDEV_65 )  this->loadLebedev<LEBEDEV_65 >();
-    else if(this->algOrder_ == LEBEDEV_71 )  this->loadLebedev<LEBEDEV_71 >();
+  //else if(this->algOrder_ == LEBEDEV_71 )  this->loadLebedev<LEBEDEV_71 >();
   //else if(this->algOrder_ == LEBEDEV_77 )  this->loadLebedev<LEBEDEV_77 >();
   //else if(this->algOrder_ == LEBEDEV_83 )  this->loadLebedev<LEBEDEV_83 >();
   //else if(this->algOrder_ == LEBEDEV_89 )  this->loadLebedev<LEBEDEV_89 >();
