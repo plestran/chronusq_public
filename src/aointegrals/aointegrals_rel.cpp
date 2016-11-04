@@ -30,21 +30,35 @@ using ChronusQ::AOIntegrals;
 
 void AOIntegrals::formP2Transformation(){
   int nthreads = omp_get_max_threads();
-  this->basisSet_->makeMapPrim2Bf();
   if(!this->isPrimary) return;
+  this->basisSet_->makeMapPrim2Bf();
   auto unContractedShells = this->basisSet_->uncontractBasis();
   int nUncontracted = 0;
   for(auto i : unContractedShells) nUncontracted += i.size();
 
-  RealMatrix SUncontracted(nUncontracted,nUncontracted);
-  RealMatrix TUncontracted(nUncontracted,nUncontracted);
-  RealMatrix VUncontracted(nUncontracted,nUncontracted);
+  int nUnSq = nUncontracted * nUncontracted;
 
-if(this->printLevel_ >= 2){
-  RealMatrix TCpy(*this->kinetic_);
-  prettyPrintSmart(this->fileio_->out,TCpy,"T (non-rel)");
-  prettyPrintSmart(this->fileio_->out,*this->overlap_,"overlap (non-rel)");
-}
+  RealMap SUncontracted(
+    this->memManager_->malloc<double>(nUnSq),nUncontracted,nUncontracted);
+  RealMap TUncontracted(
+    this->memManager_->malloc<double>(nUnSq),nUncontracted,nUncontracted);
+  RealMap VUncontracted(
+    this->memManager_->malloc<double>(nUnSq),nUncontracted,nUncontracted);
+  
+  //General Scratch
+  RealMap nUnSqScratch(
+    this->memManager_->malloc<double>(nUnSq),nUncontracted,nUncontracted);
+  RealMap nUnSqScratch2(
+    this->memManager_->malloc<double>(nUnSq),nUncontracted,nUncontracted);
+  ComplexMap C4nUnSqScratch(
+    this->memManager_->malloc<dcomplex>(4*nUnSq),2*nUncontracted,2*nUncontracted);
+  ComplexMap C4nUnSqScratch2(
+    this->memManager_->malloc<dcomplex>(4*nUnSq),2*nUncontracted,2*nUncontracted);
+
+  double * SCRUnCon = this->memManager_->malloc<double>(nUncontracted*this->nBasis_);
+  RealMap SCRUnConMap(SCRUnCon,nUncontracted,this->nBasis_);
+  RealMap SCRConUnMap(SCRUnCon,this->nBasis_,nUncontracted);
+  
 
   libint2::Engine engineS(
       libint2::Operator::overlap,1,this->basisSet_->maxL(),0);
@@ -64,7 +78,6 @@ if(this->printLevel_ >= 2){
 
   for(auto i = 1; i < nthreads; i++) engineV[i] = engineV[0];
 
-  cout << "Calculating uncontracted Libint Ints...";
   // Loop through and uncontract S and T
   //
   for(auto s1 = 0l, s12 = 0l, bf1_s = 0l; s1 < unContractedShells.size();
@@ -93,6 +106,7 @@ if(this->printLevel_ >= 2){
     SUncontracted.block(bf1_s,bf2_s,n1,n2) = bufMatS;
     TUncontracted.block(bf1_s,bf2_s,n1,n2) = bufMatT;
     
+    //------------------------------------------------
     //Finite Width Nuclei
     
     for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
@@ -109,6 +123,8 @@ if(this->printLevel_ >= 2){
 
       VUncontracted.block(bf1_s,bf2_s,n1,n2) -= bufMatV;
     }
+    //------------------------------------------------
+
     //Point Nuclei
     /* 
     const double * buffV = engineV.compute(
@@ -122,116 +138,126 @@ if(this->printLevel_ >= 2){
 
     VUncontracted.block(bf1_s,bf2_s,n1,n2) = bufMatV;
     */
+    //------------------------------------------------
 
   } // s2
   } // s1
-  cout << "done!" << endl;
 
   SUncontracted = SUncontracted.selfadjointView<Lower>();
   TUncontracted = TUncontracted.selfadjointView<Lower>();
-
-  RealMatrix SnonRel = (*this->basisSet_->mapPrim2Bf()) * SUncontracted
-	* (*this->basisSet_->mapPrim2Bf()).transpose();
+  
   if(this->printLevel_ >= 3){
-  prettyPrintSmart(this->fileio_->out,SnonRel,"S nonRel (take 1)");
-    }
-  for (auto row = 0; row < this->basisSet_->nBasis(); row++){
-      (*this->basisSet_->mapPrim2Bf()).block(row,0,1,nUncontracted) /=
-        std::sqrt(SnonRel(row,row)); //scale by appropraite factor
-    }
-
-if(this->printLevel_ >= 2){
-  SnonRel = (*this->basisSet_->mapPrim2Bf()) * SUncontracted
-    * (*this->basisSet_->mapPrim2Bf()).transpose();
-  prettyPrintSmart(this->fileio_->out,SnonRel,"S nonRel");
-}
-
-if(this->printLevel_ >= 2){
-  prettyPrintSmart(this->fileio_->out,SUncontracted,"S uncontracted");
-  prettyPrintSmart(this->fileio_->out,TUncontracted,"T uncontracted");
-
-  RealMatrix TnonRel = (*this->basisSet_->mapPrim2Bf()) * TUncontracted
-	* (*this->basisSet_->mapPrim2Bf()).transpose();  
-  prettyPrintSmart(this->fileio_->out,TnonRel,"T nonRel");
-}
-
-  RealMatrix SUn(nUncontracted,nUncontracted);
-  SUn = SUncontracted.real(); // Save S for later
-
-  char JOBU = 'O', JOBVT = 'N';
-  int LWORK = 6*nUncontracted;
-  int INFO;
-  std::vector<double> ovlpEigValues(nUncontracted);
-  std::vector<double> WORK(LWORK);
-
-// Get eigenvalues for overlap matrix S (via SVD) 
-// Store the orthogonal transformation U back in S
-
-  cout << "Performing SVD on uncontracted overlap...";
-  dgesvd_(&JOBU,&JOBVT,&nUncontracted,&nUncontracted,SUncontracted.data(),
-      &nUncontracted,&ovlpEigValues[0],SUncontracted.data(),&nUncontracted,
-      SUncontracted.data(),&nUncontracted,&WORK[0],&LWORK,&INFO);
-  cout << "done!" << endl;
-
-// normalize
-// What happens when we divide by zero?
-  for(auto iS = 0; iS < nUncontracted; iS++){
-    SUncontracted.col(iS) /= std::sqrt(ovlpEigValues[iS]);
+    prettyPrintSmart(this->fileio_->out,SUncontracted,"S uncontracted");
+    prettyPrintSmart(this->fileio_->out,TUncontracted,"T uncontracted");
   }
 
-// Count linear dependencies here?
+  // ------------------------------------------------------------------------
+  // Probably should move this to be in the function that makes the mapPrim2Bf. 
+  // This is necessary to get the correct mapping.
+  RealMap SnonRel(this->memManager_->malloc<double>(this->nBasis_*this->nBasis_),
+    this->nBasis_,this->nBasis_);
+
+//SnonRel = (*this->basisSet_->mapPrim2Bf()) * SUncontracted
+//  * (*this->basisSet_->mapPrim2Bf()).transpose();
+  SCRConUnMap.noalias() = (*this->basisSet_->mapPrim2Bf()) * SUncontracted;	
+  SnonRel.noalias() = SCRConUnMap * (*this->basisSet_->mapPrim2Bf()).transpose();
+
+  for (auto row = 0; row < this->basisSet_->nBasis(); row++){
+      (*this->basisSet_->mapPrim2Bf()).block(row,0,1,nUncontracted) /=
+        std::sqrt(SnonRel(row,row)); //scale by appropriate factor
+    }
+  this->memManager_->free(SnonRel.data(),this->nBasis_*this->nBasis_);
+  // -----------------------------------------------------------------------
+
+  RealMap SUn(this->memManager_->malloc<double>(nUnSq),
+    nUncontracted,nUncontracted);
+  SUn = SUncontracted; // Save S for later
+
+  char JOBU = 'O', JOBVT = 'N';
+  int LWORK = 10*nUncontracted;
+  int INFO;
+//std::vector<double> ovlpEigValues(nUncontracted);
+//std::vector<double> WORK(LWORK);
+  double * ovlpEigValues = 
+    this->memManager_->malloc<double>(nUncontracted);
+  double * WORK = this->memManager_->malloc<double>(LWORK);
+
+  // Get eigenvalues for overlap matrix S (via SVD) 
+  // Store the orthogonal transformation U back in S
+
+  dgesvd_(&JOBU,&JOBVT,&nUncontracted,&nUncontracted,SUncontracted.data(),
+      &nUncontracted,ovlpEigValues,SUncontracted.data(),&nUncontracted,
+      SUncontracted.data(),&nUncontracted,WORK,&LWORK,&INFO);
+
+  // Count linear dependencies here
   int nZero = 0;
   for(auto iS = 0; iS < nUncontracted; iS++)
     if(std::abs(ovlpEigValues[iS]) < 1e-12) nZero++;
 
-  cout << "NZERO " << nZero << endl;
+//cout << "NZERO " << nZero << endl;
+  
+  // Normalize
+  // What happens when we divide by zero?
+  for(auto iS = 0; iS < nUncontracted; iS++){
+    SUncontracted.col(iS) /= std::sqrt(ovlpEigValues[iS]);
+  }
 
-// Put the kinetic energy in the orthonormal basis 
+  // Put the kinetic energy in the orthonormal basis 
 
-  RealMatrix TMP = SUncontracted.transpose() * TUncontracted;
-  TUncontracted = TMP * SUncontracted;
+  nUnSqScratch.noalias() = SUncontracted.transpose() * TUncontracted;
+  TUncontracted.noalias() = nUnSqScratch * SUncontracted;
 
-  cout << "Performing SVD on uncontracted T...";
-// Get rid of the linear dependencies?
+  // Get rid of the linear dependencies?
   dgesvd_(&JOBU,&JOBVT,&nUncontracted,&nUncontracted,TUncontracted.data(),
-      &nUncontracted,&ovlpEigValues[0],TUncontracted.data(),&nUncontracted,
-      TUncontracted.data(),&nUncontracted,&WORK[0],&LWORK,&INFO);
-
-  cout << "done!" << endl;
-// Form the K transformation matrix from both pieces
-// (diagonalizes S) and (diagonalizes T). See eq. 12 in Rieher's paper from 2013
-
-if(this->printLevel_ >= 3){
-  prettyPrintSmart(this->fileio_->out,SUncontracted,"S transformation");
-  prettyPrintSmart(this->fileio_->out,TUncontracted,"T transformation");
-  prettyPrintSmart(this->fileio_->out,TUncontracted.transpose()*TUncontracted, "T^{dagger} T");
-}
-
-  RealMatrix UK = SUncontracted * TUncontracted;
-
-if(this->printLevel_ >= 3){ 
-  prettyPrintSmart(this->fileio_->out,UK,"U (K) transformation");
-}
-
-// Now we transform V to V' 
-  TMP = UK.transpose() * VUncontracted;
-  RealMatrix P2_Potential = TMP * UK;
+      &nUncontracted,ovlpEigValues,TUncontracted.data(),&nUncontracted,
+      TUncontracted.data(),&nUncontracted,WORK,&LWORK,&INFO);
 
 
-// Next we need to get W' (from pVp integrals)
+  // Deallocate workspace
+  this->memManager_->free(WORK,LWORK);
 
+  // Form the K transformation matrix from both pieces
+  // (diagonalizes S) and (diagonalizes T). See eq. 12 in Rieher's paper from 2013
 
-//  std::vector<VectorXd> SCRATCH1UnContracted(nthreads,VectorXd(nUncontracted));
-//  RealMatrix SCRATCH2UnContracted(nUncontracted,nUncontracted);
-  std::vector<VectorXd> SCRATCHDXUnContracted(nthreads,VectorXd(nUncontracted));
-  std::vector<VectorXd> SCRATCHDYUnContracted(nthreads,VectorXd(nUncontracted));
-  std::vector<VectorXd> SCRATCHDZUnContracted(nthreads,VectorXd(nUncontracted));
+  if(this->printLevel_ >= 3){
+    prettyPrintSmart(this->fileio_->out,SUncontracted,"S transformation");
+    prettyPrintSmart(this->fileio_->out,TUncontracted,"T transformation");
+    prettyPrintSmart(this->fileio_->out,TUncontracted.transpose()*TUncontracted, "T^{dagger} T");
+  }
 
-  size_t tracker(0);
-// compute pVp numerically
-  auto PVP = [&](IntegrationPoint pt, std::vector<std::vector<RealMatrix>> &result) {
-    tracker++;
-//  cout << tracker << endl;
+  RealMap UK(this->memManager_->malloc<double>(nUnSq),nUncontracted,nUncontracted);
+  UK.noalias() = SUncontracted * TUncontracted;
+
+  if(this->printLevel_ >= 3){ 
+    prettyPrintSmart(this->fileio_->out,UK,"Uk transformation");
+  }
+
+  // Now we transform V to V' 
+  RealMap P2_Potential(this->memManager_->malloc<double>(nUnSq),nUncontracted,nUncontracted);
+
+  nUnSqScratch.noalias() = UK.transpose() * VUncontracted;
+  P2_Potential.noalias() = nUnSqScratch * UK;
+
+  this->memManager_->free(SUncontracted.data(),nUnSq);
+  this->memManager_->free(TUncontracted.data(),nUnSq);
+  this->memManager_->free(VUncontracted.data(),nUnSq);
+  // Next we need to get W' (from pVp integrals)
+
+  std::vector<RealVecMap> SCRATCHDXUnContracted;
+  std::vector<RealVecMap> SCRATCHDYUnContracted;
+  std::vector<RealVecMap> SCRATCHDZUnContracted;
+
+  for(auto i = 0; i < nthreads; i++) {
+    SCRATCHDXUnContracted.emplace_back(this->memManager_->malloc<double>(nUncontracted),nUncontracted);
+    SCRATCHDYUnContracted.emplace_back(this->memManager_->malloc<double>(nUncontracted),nUncontracted);
+    SCRATCHDZUnContracted.emplace_back(this->memManager_->malloc<double>(nUncontracted),nUncontracted);
+
+    SCRATCHDXUnContracted.back().setZero();
+    SCRATCHDYUnContracted.back().setZero();
+    SCRATCHDZUnContracted.back().setZero();
+  }
+  // compute pVp numerically
+  auto PVP = [&](IntegrationPoint pt, std::vector<std::vector<RealMap>> &result) {
     int thread_id = omp_get_thread_num();
     for(auto iShell = 0, b_s = 0; iShell < unContractedShells.size();
          b_s += unContractedShells[iShell].size(),++iShell) {
@@ -371,51 +397,54 @@ if(this->printLevel_ >= 3){
 */
 //  std::vector<RealMatrix> numPot(4,RealMatrix::Zero(nUncontracted,
 //        nUncontracted));
-  std::vector<std::vector<RealMatrix> > numPot(nthreads,std::vector<RealMatrix>(4,
-    RealMatrix::Zero(nUncontracted,nUncontracted)));
+  std::vector<std::vector<RealMap> > numPot(nthreads);
+  for(auto i = 0; i < nthreads; i++) {
+    for(auto j = 0; j < 4; j++) {
+      numPot[i].emplace_back(this->memManager_->malloc<double>(nUnSq),
+        nUncontracted,nUncontracted);
+      numPot[i].back().setZero();
+    }
+  }
 
-  cout << "Performing numerical PVP integrals..." << endl;
   for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
-    tracker = 0;
-    cout << "IAtm = " << iAtm << endl;
+    cout << iAtm << endl;
     AGrid.center() = iAtm;
     AGrid.setRadCutOff(atomRadCutoff[iAtm]);
     AGrid.findNearestNeighbor();
     AGrid.scalingFactor()=
       0.5*elements[this->molecule_->index(iAtm)].sradius/phys.bohr;
-    AGrid.integrate<std::vector<std::vector<RealMatrix>>>(PVP,numPot);
+    AGrid.integrate<std::vector<std::vector<RealMap>>>(PVP,numPot);
   };
-  cout << "done!" << endl;
 
+  for(auto i = 0; i < nthreads; i++) {
+    this->memManager_->free(SCRATCHDXUnContracted[i].data(),nUncontracted);
+    this->memManager_->free(SCRATCHDYUnContracted[i].data(),nUncontracted);
+    this->memManager_->free(SCRATCHDZUnContracted[i].data(),nUncontracted);
+  }
   
 /*
   for(auto i = 0; i < 10; i++) numPot[i] *= 4 * math.pi;
-  // Scalar = mu(x)nu(x) + mu(y)nu(y) +  mu(z)nu(z) 
-  RealMatrix PVPS = numPot[1] + numPot[5] + numPot[9]; 
-  // X = mu(y)nu(z) - mu(z)nu(y)
-  RealMatrix PVPX = numPot[6] - numPot[8];
-  // Y = mu(z)nu(x) - mu(x)nu(z)
-  RealMatrix PVPY = numPot[7] - numPot[3];
-  // Z = mu(x)nu(y) - mu(y)nu(x)
-  RealMatrix PVPZ = numPot[2] - numPot[4]; 
+  this->memManager_->free(SCRATCH1UnContracted.data(),nUncontracted);
+  this->memManager_->free(SCRATCH2UnContracted.data(),nUnSq);
+  this->memManager_->free(SCRATCHDXUnContracted.data(),nUncontracted);
+  this->memManager_->free(SCRATCHDYUnContracted.data(),nUncontracted);
+  this->memManager_->free(SCRATCHDZUnContracted.data(),nUncontracted);
+  
+  RealMap PVPS(this->memManager_->malloc<double>(nUnSq),nUncontracted,nUncontracted);
+  RealMap PVPX(this->memManager_->malloc<double>(nUnSq),nUncontracted,nUncontracted);
+  RealMap PVPY(this->memManager_->malloc<double>(nUnSq),nUncontracted,nUncontracted);
+  RealMap PVPZ(this->memManager_->malloc<double>(nUnSq),nUncontracted,nUncontracted);
+  
+  PVPS = numPot[1] + numPot[5] + numPot[9]; 
+  PVPX = numPot[6] - numPot[8];
+  PVPY = numPot[7] - numPot[3];
+  PVPZ = numPot[2] - numPot[4]; 
 */
 
-/*
-  double fact4pi = 4 * math.pi; 
-  for(auto i = 0; i <=3 ; i++) numPot[i] *= fact4pi;
-   numPot[0].triangularView<Upper>() =  numPot[0].transpose(); // Sym
-   numPot[1].triangularView<Upper>() = -numPot[1].transpose(); // AntiSymm
-   numPot[2].triangularView<Upper>() = -numPot[2].transpose(); // AntiSymm
-   numPot[3].triangularView<Upper>() = -numPot[3].transpose(); // AntiSymm
-   RealMatrix PVPS  = numPot[0];
-   RealMatrix PVPX  = numPot[1];
-   RealMatrix PVPY  = numPot[2];
-   RealMatrix PVPZ  = numPot[3];
-*/
-  RealMatrix PVPS(nUncontracted,nUncontracted);
-  RealMatrix PVPX(nUncontracted,nUncontracted);
-  RealMatrix PVPY(nUncontracted,nUncontracted);
-  RealMatrix PVPZ(nUncontracted,nUncontracted);
+  RealMap PVPS(this->memManager_->malloc<double>(nUnSq),nUncontracted,nUncontracted);
+  RealMap PVPX(this->memManager_->malloc<double>(nUnSq),nUncontracted,nUncontracted);
+  RealMap PVPY(this->memManager_->malloc<double>(nUnSq),nUncontracted,nUncontracted);
+  RealMap PVPZ(this->memManager_->malloc<double>(nUnSq),nUncontracted,nUncontracted);
   PVPS.setZero();
   PVPX.setZero();
   PVPY.setZero();
@@ -436,77 +465,71 @@ if(this->printLevel_ >= 3){
    PVPY *= fact4pi;
    PVPZ *= fact4pi;
 
-   prettyPrint(this->fileio_->out,PVPS,"pVpSnum");
-   prettyPrint(this->fileio_->out,PVPX,"pVpXnum");
-   prettyPrint(this->fileio_->out,PVPY,"pVpYnum");
-   prettyPrint(this->fileio_->out,PVPZ,"pVpZnum");
-// Apply the Uk unitary transformation ( Uk' * PVP * Uk)
 
-  TMP = UK.adjoint() * PVPS;
-  PVPS = TMP * UK;
-  TMP = UK.adjoint() * PVPX;
-  PVPX = TMP * UK;
-  TMP = UK.adjoint() * PVPY;
-  PVPY = TMP * UK;
-  TMP = UK.adjoint() * PVPZ;
-  PVPZ = TMP * UK;
+  // Apply the Uk unitary transformation ( Uk' * PVP * Uk)
+  nUnSqScratch.noalias() = UK.adjoint() * PVPS;
+  PVPS.noalias() = nUnSqScratch * UK;
+  nUnSqScratch.noalias() = UK.adjoint() * PVPX;
+  PVPX.noalias() = nUnSqScratch * UK;
+  nUnSqScratch.noalias() = UK.adjoint() * PVPY;
+  PVPY.noalias() = nUnSqScratch * UK;
+  nUnSqScratch.noalias() = UK.adjoint() * PVPZ;
+  PVPZ.noalias() = nUnSqScratch * UK;
 
-if(this->printLevel_ >= 3){
-  prettyPrintSmart(cout,P2_Potential,"V");
-  prettyPrintSmart(cout,PVPS,"dot(P,VP)");
-  prettyPrintSmart(cout,PVPX,"cross(P,VP) X");
-  prettyPrintSmart(cout,PVPY,"cross(P,VP) Y");
-  prettyPrintSmart(cout,PVPZ,"cross(P,VP) Z");
-  cout << "|V| = " << P2_Potential.squaredNorm() << endl;
-  cout << "|dot(P,VP)| = " << PVPS.squaredNorm() << endl;
-  cout << "|cross(P,VP) X| = " << PVPX.squaredNorm() << endl;
-  cout << "|cross(P,VP) Y| = " << PVPY.squaredNorm() << endl;
-  cout << "|cross(P,VP) Z| = " << PVPZ.squaredNorm() << endl;
-}
 
-  RealVecMap PMap(&ovlpEigValues[0],nUncontracted);
+  if(this->printLevel_ >= 3){
+    prettyPrintSmart(cout,P2_Potential,"V");
+    prettyPrintSmart(cout,PVPS,"dot(P,VP)");
+    prettyPrintSmart(cout,PVPX,"cross(P,VP) X");
+    prettyPrintSmart(cout,PVPY,"cross(P,VP) Y");
+    prettyPrintSmart(cout,PVPZ,"cross(P,VP) Z");
+    cout << "|V| = " << P2_Potential.squaredNorm() << endl;
+    cout << "|dot(P,VP)| = " << PVPS.squaredNorm() << endl;
+    cout << "|cross(P,VP) X| = " << PVPX.squaredNorm() << endl;
+    cout << "|cross(P,VP) Y| = " << PVPY.squaredNorm() << endl;
+    cout << "|cross(P,VP) Z| = " << PVPZ.squaredNorm() << endl;
+  }
 
-if(this->printLevel_ >= 3){
-  prettyPrintSmart(cout,PMap,"P^2");
-}
+  RealVecMap PMap(ovlpEigValues,nUncontracted);
+
+  if(this->printLevel_ >= 3){
+    prettyPrintSmart(cout,PMap,"P^2");
+  }
 
   PMap = 2*PMap;
   PMap = PMap.cwiseSqrt();
   PMap = PMap.cwiseInverse();
 
+  nUnSqScratch.noalias() = PMap.asDiagonal() * PVPS;
+  PVPS.noalias() = nUnSqScratch * PMap.asDiagonal();
+  nUnSqScratch.noalias() = PMap.asDiagonal() * PVPX;
+  PVPX.noalias() = nUnSqScratch * PMap.asDiagonal();
+  nUnSqScratch.noalias() = PMap.asDiagonal() * PVPY;
+  PVPY.noalias() = nUnSqScratch * PMap.asDiagonal();
+  nUnSqScratch.noalias() = PMap.asDiagonal() * PVPZ;
+  PVPZ.noalias() = nUnSqScratch * PMap.asDiagonal();
 
-  TMP = PMap.asDiagonal() * PVPS;
-  PVPS = TMP * PMap.asDiagonal();
-  TMP = PMap.asDiagonal() * PVPX;
-  PVPX = TMP * PMap.asDiagonal();
-  TMP = PMap.asDiagonal() * PVPY;
-  PVPY = TMP * PMap.asDiagonal();
-  TMP = PMap.asDiagonal() * PVPZ;
-  PVPZ = TMP * PMap.asDiagonal();
-
-if(this->printLevel_ >= 3){
-  cout << "|dot(P,VP)| = " << PVPS.squaredNorm() << endl;
-  cout << "|cross(P,VP) X| = " << PVPX.squaredNorm() << endl;
-  cout << "|cross(P,VP) Y| = " << PVPY.squaredNorm() << endl;
-  cout << "|cross(P,VP) Z| = " << PVPZ.squaredNorm() << endl;
-  prettyPrintSmart(cout,PVPS,"scaled dot(P,VP)");
-  prettyPrintSmart(cout,PVPX,"scaled cross(P,VP) X");
-  prettyPrintSmart(cout,PVPY,"scaled cross(P,VP) Y");
-  prettyPrintSmart(cout,PVPZ,"scaled cross(P,VP) Z");
-}
-
-
-
-// Apply Boettger Scaling Here?
-if(this->twoEFudge == 2){
-
-  if(this->printLevel_ >= 2){
-    (this->fileio_->out) << "Applying 2e fudge factor to PVP integrals" << endl;
+  if(this->printLevel_ >= 3){
+    cout << "|dot(P,VP)| = " << PVPS.squaredNorm() << endl;
+    cout << "|cross(P,VP) X| = " << PVPX.squaredNorm() << endl;
+    cout << "|cross(P,VP) Y| = " << PVPY.squaredNorm() << endl;
+    cout << "|cross(P,VP) Z| = " << PVPZ.squaredNorm() << endl;
+    prettyPrintSmart(cout,PVPS,"scaled dot(P,VP)");
+    prettyPrintSmart(cout,PVPX,"scaled cross(P,VP) X");
+    prettyPrintSmart(cout,PVPY,"scaled cross(P,VP) Y");
+    prettyPrintSmart(cout,PVPZ,"scaled cross(P,VP) Z");
   }
-// Q(l) as an function:
-//    double QofL(double L) { return L*(L+1)*(2*L+1)/3; };
 
-// Loop over all shells
+  // Apply Boettger Scaling Here?
+  if(this->twoEFudge == 2){
+  
+    if(this->printLevel_ >= 2){
+      (this->fileio_->out) << "Applying 2e fudge factor to PVP integrals" << endl;
+    }
+  // Q(l) as an function:
+  //    double QofL(double L) { return L*(L+1)*(2*L+1)/3; };
+  
+  // Loop over all shells
     int idxRow = 0;
     for (auto iShell = 0; iShell < this->basisSet_->nShell(); ++iShell) {
         int nIPrims; //allocate space
@@ -545,7 +568,8 @@ if(this->twoEFudge == 2){
   }
 
 
-  ComplexMatrix W(2*nUncontracted,2*nUncontracted);
+  ComplexMap W(this->memManager_->malloc<dcomplex>(4*nUnSq),
+    2*nUncontracted,2*nUncontracted);
   W.block(0,0,nUncontracted,nUncontracted).real() = PVPS;
   W.block(0,0,nUncontracted,nUncontracted).imag() = PVPZ;
   W.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).real() = 
@@ -557,20 +581,23 @@ if(this->twoEFudge == 2){
   W.block(nUncontracted,0,nUncontracted,nUncontracted).real() = -PVPY;
   W.block(nUncontracted,0,nUncontracted,nUncontracted).imag() = PVPX;
 
-//W = -W;
-//P2_Potential = - P2_Potential;
-//W = W.conjugate();
+  // No longer need PVP integrals, so free memory here.
+  this->memManager_->free(PVPS.data(),nUnSq); 
+  this->memManager_->free(PVPX.data(),nUnSq); 
+  this->memManager_->free(PVPY.data(),nUnSq); 
+  this->memManager_->free(PVPZ.data(),nUnSq); 
+  
+  // -------------------------------------------------
+  // Put all pieces of core Hamiltonian in block form:
+  // [ V'      cp    ]
+  // [    	 	   ]
+  // [ cp   W'-2mc^2 ]
+  // -------------------------------------------------
 
-// -------------------------------------------------
-// Put all pieces of core Hamiltonian in block form:
-// [ V'      cp    ]
-// [    	 	   ]
-// [ cp   W'-2mc^2 ]
-// -------------------------------------------------
-
-  cout << "Forming 4C Core Hamiltonian...";
   PMap = PMap.cwiseInverse(); //switch from p^-1 back to p
-  ComplexMatrix CORE_HAMILTONIAN(4*nUncontracted,4*nUncontracted);
+  
+  ComplexMap CORE_HAMILTONIAN(this->memManager_->malloc<dcomplex>(16*nUnSq),
+    4*nUncontracted,4*nUncontracted);
 
   CORE_HAMILTONIAN.block(0,0,nUncontracted,nUncontracted).real() = P2_Potential;
   CORE_HAMILTONIAN.block(
@@ -597,302 +624,391 @@ if(this->twoEFudge == 2){
     = CORE_HAMILTONIAN.block(
       0,2*nUncontracted,2*nUncontracted,2*nUncontracted);
 
-   cout << "done!" << endl;
-// ------------------------------
-// Diagonalize 
-// ------------------------------
+  // ------------------------------
+  // Diagonalize 
+  // ------------------------------
 
-if(this->printLevel_ >= 2){
-  prettyPrintSmart(this->fileio_->out,CORE_HAMILTONIAN,"H");
-  (this->fileio_->out) << "|H|" << CORE_HAMILTONIAN.squaredNorm() << endl;
-}
+  RealVecMap HEV(this->memManager_->malloc<double>(4*nUncontracted),4*nUncontracted);
+  ComplexMap HEVx(this->memManager_->malloc<dcomplex>(16*nUnSq),
+    4*nUncontracted,4*nUncontracted);
 
-  cout << "Diagonalizing 4C Core Hamiltonian...";
-  Eigen::SelfAdjointEigenSolver<ComplexMatrix> es;
-  es.compute(CORE_HAMILTONIAN);
-  RealMatrix HEV= es.eigenvalues();
-  ComplexMatrix HEVx= es.eigenvectors();
-  cout << "done!" << endl;
+  char JOBZ = 'V';
+  char UPLO = 'U';
+  int FourUnCon = 4*nUncontracted;
+  int LRWORK = 3*FourUnCon - 2;
+  dcomplex * CWORK = this->memManager_->malloc<dcomplex>(LWORK);
+  double   * RWORK = this->memManager_->malloc<double>(LRWORK);
+  zheev_(&JOBZ,&UPLO,&FourUnCon,CORE_HAMILTONIAN.data(),&FourUnCon,HEV.data(),CWORK,&LWORK,RWORK,&INFO);
+ 
+  // FIXME: This copy is not needed and HEVx is not needed as a result
+  HEVx = CORE_HAMILTONIAN;
 
-// Print out the energies (eigenvalues) and eigenvectors
-if(this->printLevel_ >= 2){
-  prettyPrintSmart(this->fileio_->out,HEV,"HEV");
-  prettyPrintSmart(this->fileio_->out,HEVx,"HEVc");
-}
+  // Now free CORE_HAMILTONIAN after diagonalization
+  this->memManager_->free(CORE_HAMILTONIAN.data(),16*nUnSq);
 
-// Grab C_L (+) and C_S (+) - the large and small components
-// of the electronic (positive energy) solutions
-//
-// NOT SURE IF THESE ARE CORRECT!!!! (seems to be wrong 'column')
-  ComplexMatrix L = 
-    HEVx.block(0,2*nUncontracted,2*nUncontracted,2*nUncontracted);
-  ComplexMatrix S = 
-    HEVx.block(2*nUncontracted,2*nUncontracted,2*nUncontracted,2*nUncontracted);
+  // Print out the energies (eigenvalues) and eigenvectors
+  if(this->printLevel_ >= 2){
+    prettyPrintSmart(this->fileio_->out,HEV,"HEV");
+    prettyPrintSmart(this->fileio_->out,HEVx,"HEVc");
+  }
+  
+  // Grab C_L (+) and C_S (+) - the large and small components
+  // of the electronic (positive energy) solutions
+  //
+  ComplexMap L(this->memManager_->malloc<dcomplex>(4*nUnSq),
+    2*nUncontracted,2*nUncontracted);
+  ComplexMap S(this->memManager_->malloc<dcomplex>(4*nUnSq),
+    2*nUncontracted,2*nUncontracted);
+  L = HEVx.block(0,2*nUncontracted,2*nUncontracted,2*nUncontracted);
+  S = HEVx.block(2*nUncontracted,2*nUncontracted,2*nUncontracted,2*nUncontracted);
 
-  cout << "SVD of L...";
-// Do we even use this SVD in calculating L inverse?
+  this->memManager_->free(HEV.data(),4*nUncontracted);
+  this->memManager_->free(HEVx.data(),16*nUnSq);
+
+  /* Maybe get inverse from SVD?
   Eigen::JacobiSVD<ComplexMatrix> 
     svd(L,Eigen::ComputeThinU | Eigen::ComputeThinV);
 
   VectorXd SigmaL = svd.singularValues();
   ComplexMatrix SVL = svd.matrixU();
+  */
 
-  ComplexMatrix X = S * L.inverse(); //See above!
-  cout << "done!" << endl;
+  ComplexMap X(this->memManager_->malloc<dcomplex>(4*nUnSq),
+    2*nUncontracted,2*nUncontracted);
 
-// Print out X and its squared norm
-if(this->printLevel_ >= 2){
-  prettyPrintSmart(this->fileio_->out,X,"X");
-  (this->fileio_->out) << X.squaredNorm() << endl;
-}
+  // Replaces L with L^{-1}
+  int TwoUnCon = 2 * nUncontracted;
+  std::vector<int> iPiv(TwoUnCon);
+  zgetrf_(&TwoUnCon,&TwoUnCon,L.data(),&TwoUnCon,&iPiv[0],&INFO);
+  zgetri_(&TwoUnCon,L.data(),&TwoUnCon,&iPiv[0],CWORK,&LWORK,&INFO);
+
+
+  X.noalias() = S * L;
+
+  this->memManager_->free(L.data(),4*nUnSq);
+  this->memManager_->free(S.data(),4*nUnSq);
+
+  // Print out X and its squared norm
+  if(this->printLevel_ >= 4){
+    prettyPrintSmart(this->fileio_->out,X,"X");
+    (this->fileio_->out) << X.squaredNorm() << endl;
+  }
   
-// Calculate Y = sqrt(1 + X'X)
-// Also known as the 'renormalization matrix' R
-  ComplexMatrix Y = 
-    (ComplexMatrix::Identity(2*nUncontracted,2*nUncontracted) 
+  // Calculate Y = sqrt(1 + X'X)
+  // Also known as the 'renormalization matrix' R
+  ComplexMap Y(this->memManager_->malloc<dcomplex>(4*nUnSq),
+     2*nUncontracted,2*nUncontracted);
+
+/*
+  Y = (ComplexMatrix::Identity(2*nUncontracted,2*nUncontracted) 
      + X.adjoint() * X).pow(-0.5);
+*/
 
-// Print out Y and its squared norm
-if(this->printLevel_ >= 2){
-  prettyPrintSmart(this->fileio_->out,Y,"Y");
-  (this->fileio_->out) << Y.squaredNorm() << endl;
-}
+  C4nUnSqScratch  = (ComplexMatrix::Identity(2*nUncontracted,2*nUncontracted) + X.adjoint() * X);
 
-// Get PMapC = p (as 2n by 2n matrix)
-  ComplexMatrix PMapC(2*nUncontracted,2*nUncontracted);
+//prettyPrintSmart(cout,C4nUnSqScratch.pow(-0.5),"True");
+  double * SingVal = this->memManager_->malloc<double>(TwoUnCon);
+  zheev_(&JOBZ,&UPLO,&TwoUnCon,C4nUnSqScratch.data(),&TwoUnCon,SingVal,CWORK,&LWORK,RWORK,&INFO);
+
+  C4nUnSqScratch2 = C4nUnSqScratch;
+  for(auto i = 0; i < TwoUnCon; i++)
+    C4nUnSqScratch2.col(i) /= std::sqrt(SingVal[i]);
+
+  Y = C4nUnSqScratch2 * C4nUnSqScratch.adjoint();
+//prettyPrintSmart(cout,Y,"Attempt");
+//CErr();
+
+  // Free up CWORK and RWORK
+  this->memManager_->free(CWORK,LWORK);
+  this->memManager_->free(RWORK,LRWORK);
+
+  // Print out Y and its squared norm
+  if(this->printLevel_ >= 4){
+    prettyPrintSmart(this->fileio_->out,Y,"Y");
+    (this->fileio_->out) << Y.squaredNorm() << endl;
+  }
+
+  // Get the momentum p = PMapC (as 2n by 2n matrix)
+  ComplexMap PMapC(this->memManager_->malloc<dcomplex>(4*nUnSq),2*nUncontracted,2*nUncontracted);
+  PMapC.setZero(); //Important to zero out the matrix first!
+
   PMapC.block(0,0,nUncontracted,nUncontracted).real() = PMap.asDiagonal();
   PMapC.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).real() = PMap.asDiagonal();
 
+  /* ADDITIONAL DEBUG
+  // Compute p^2 and then the relativistic kinetic energy
+  // Here we have       __________________
+  //              T = \/m^2c^4 + c^2 * p^2  - mc^2
+  //
+  // Where m is the rest mass of the electron (1 in atomic units)             
+  //
+  ComplexMap KinEn(this->memManager_->malloc<dcomplex>(4*nUnSq),
+    2*nUncontracted,2*nUncontracted);
 
-// Compute p^2 and then the relativistic kinetic energy
-// Here we have       __________________
-//              T = \/m^2c^4 + c^2 * p^2  - mc^2
-//
-// Where m is the rest mass of the electron (1 in atomic units)             
-//
-  ComplexMatrix P2MapC = PMapC.cwiseProduct(PMapC);
-  ComplexMatrix KinEn = P2MapC * phys.SPEED_OF_LIGHT * phys.SPEED_OF_LIGHT;
+  C4nUnSqScratch = PMapC.cwiseProduct(PMapC);
+  KinEn = C4nUnSqScratch * phys.SPEED_OF_LIGHT * phys.SPEED_OF_LIGHT;
   KinEn += ComplexMatrix::Identity(2*nUncontracted,2*nUncontracted)* phys.SPEED_OF_LIGHT *
 	phys.SPEED_OF_LIGHT * phys.SPEED_OF_LIGHT * phys.SPEED_OF_LIGHT; 
   KinEn = KinEn.cwiseSqrt();
   KinEn -= ComplexMatrix::Identity(2*nUncontracted,2*nUncontracted) * phys.SPEED_OF_LIGHT * phys.SPEED_OF_LIGHT;
 
-if(this->printLevel_ >= 2){
-  prettyPrintSmart(this->fileio_->out,KinEn,"Relativistic Kinetic Energy");
-}
+  if(this->printLevel_ >= 2){
+    prettyPrintSmart(this->fileio_->out,KinEn,"Relativistic Kinetic Energy");
+  }
+  */
 
+  // Get V' (in p-space)
+  ComplexMap HCore2C(this->memManager_->malloc<dcomplex>(4*nUnSq),
+    2*nUncontracted,2*nUncontracted);
+  HCore2C.setZero();
+  HCore2C.block(0,0,nUncontracted,nUncontracted).real() = P2_Potential;
+  HCore2C.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).real() = P2_Potential;
 
-// Get P2_PotC == V'
-  ComplexMatrix P2_PotC(2*nUncontracted,2*nUncontracted);
-  P2_PotC.block(0,0,nUncontracted,nUncontracted).real() = P2_Potential;
-  P2_PotC.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).real() = P2_Potential;
+  if(this->printLevel_ >= 2){
+    prettyPrintSmart(this->fileio_->out,HCore2C,"V prime (p space)");
+  } 
+  // Calculate the 2-component core Hamiltonian in the uncontracted basis
+  //  αα | αβ
+  //  -------
+  //  βα | ββ  
 
-if(this->printLevel_ >= 2){
-  prettyPrintSmart(this->fileio_->out,P2_PotC,"V prime (p space)");
-}
-
-// Calculate the 2-component core Hamiltonian in the uncontracted basis
-//  αα | αβ
-//  -------
-//  βα | ββ
-  
-  ComplexMatrix HCore(2*nUncontracted,2*nUncontracted);
-  HCore = P2_PotC;
-
-  ComplexMatrix TEMP(2*nUncontracted,2*nUncontracted);
-
-  TEMP = phys.SPEED_OF_LIGHT * PMapC * X;
-  HCore = HCore + TEMP;
-  TEMP = phys.SPEED_OF_LIGHT * X.adjoint() * PMapC;
-  HCore = HCore + TEMP;
-  TEMP = 2 * phys.SPEED_OF_LIGHT * phys.SPEED_OF_LIGHT * 
+  // FIXME: (DBWY) Can you put some docs here that explain the GEMM calls?
+  C4nUnSqScratch.noalias() = phys.SPEED_OF_LIGHT * PMapC * X;
+  HCore2C.noalias() += C4nUnSqScratch;
+  C4nUnSqScratch.noalias() = phys.SPEED_OF_LIGHT * X.adjoint() * PMapC;
+  HCore2C.noalias() += C4nUnSqScratch;
+  C4nUnSqScratch.noalias() = 2 * phys.SPEED_OF_LIGHT * phys.SPEED_OF_LIGHT * 
 	ComplexMatrix::Identity(2*nUncontracted,2*nUncontracted);
-  TEMP = W - TEMP;
-  TEMP = X.adjoint() * TEMP;
-  TEMP = TEMP * X;
-  HCore = HCore + TEMP;
-  HCore = HCore * Y;
-  HCore = Y * HCore;
+  C4nUnSqScratch2.noalias() = W - C4nUnSqScratch;
+  C4nUnSqScratch.noalias() = X.adjoint() * C4nUnSqScratch2;
+  C4nUnSqScratch2.noalias() = C4nUnSqScratch * X;
+  HCore2C.noalias() += C4nUnSqScratch2;
+  C4nUnSqScratch.noalias() = HCore2C * Y;
+  HCore2C.noalias() = Y * C4nUnSqScratch;
+  
+  this->memManager_->free(PMapC.data(),4*nUnSq);
+  this->memManager_->free(X.data(),4*nUnSq);
+  this->memManager_->free(Y.data(),4*nUnSq);
 
-if(this->printLevel_ >= 3){
-  prettyPrintSmart(this->fileio_->out,HCore,"Transformed HCore (in p space) ");
-}
+  if(this->printLevel_ >= 3){
+    prettyPrintSmart(this->fileio_->out,HCore2C,"Transformed 2c-Hamilotnian (in p space) ");
+  }
 
-  ComplexMatrix Veff(2*nUncontracted,2*nUncontracted);
-  Veff = HCore - KinEn;
+  /*ADDITIONAL DEBUG
+  ComplexMap Veff(this->memManager_->malloc<dcomplex>(4*nUnSq),
+  2*nUncontracted,2*nUncontracted);
+  Veff = HCore2C - KinEn;
 
-  RealMatrix Hs(nUncontracted,nUncontracted);
-  RealMatrix Hz(nUncontracted,nUncontracted);
-  RealMatrix Hx(nUncontracted,nUncontracted);
-  RealMatrix Hy(nUncontracted,nUncontracted);
+  if(this->printLevel_ >= 3){
+    prettyPrintSmart(this->fileio_->out,Veff,"V effective (p space)");
+  }
+  */
 
-  Hs = 0.5 * (HCore.block(0,0,nUncontracted,nUncontracted).real()
-	+ HCore.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).real());
-  Hz = 0.5 * (HCore.block(0,0,nUncontracted,nUncontracted).imag()
-	- HCore.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).imag());
-  Hx = 0.5 * (HCore.block(0,nUncontracted,nUncontracted,nUncontracted).imag()
-	+ HCore.block(nUncontracted,0,nUncontracted,nUncontracted).imag());
-  Hy = 0.5 * (HCore.block(0,nUncontracted,nUncontracted,nUncontracted).real()
-	- HCore.block(nUncontracted,0,nUncontracted,nUncontracted).real());
+  RealMap Hs(this->memManager_->malloc<double>(nUnSq),nUncontracted,nUncontracted);
+  RealMap Hx(this->memManager_->malloc<double>(nUnSq),nUncontracted,nUncontracted);
+  RealMap Hy(this->memManager_->malloc<double>(nUnSq),nUncontracted,nUncontracted);
+  RealMap Hz(this->memManager_->malloc<double>(nUnSq),nUncontracted,nUncontracted);
 
-if(this->printLevel_ >= 2){
-  prettyPrintSmart(this->fileio_->out,Hs,"Hs (p space)");
-  prettyPrintSmart(this->fileio_->out,Hz,"Hz (p space)");
-  prettyPrintSmart(this->fileio_->out,Hx,"Hx (p space)");
-  prettyPrintSmart(this->fileio_->out,Hy,"Hz (p space)");
-}
+  Hs.noalias() = 0.5 * (HCore2C.block(0,0,nUncontracted,nUncontracted).real()
+	+ HCore2C.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).real());
+  Hz.noalias() = 0.5 * (HCore2C.block(0,0,nUncontracted,nUncontracted).imag()
+	- HCore2C.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).imag());
+  Hx.noalias() = 0.5 * (HCore2C.block(0,nUncontracted,nUncontracted,nUncontracted).imag()
+	+ HCore2C.block(nUncontracted,0,nUncontracted,nUncontracted).imag());
+  Hy.noalias() = 0.5 * (HCore2C.block(0,nUncontracted,nUncontracted,nUncontracted).real()
+	- HCore2C.block(nUncontracted,0,nUncontracted,nUncontracted).real());
 
-  RealMatrix rTEMP(nUncontracted,nUncontracted);
+  this->memManager_->free(HCore2C.data(),4*nUnSq);
 
-  rTEMP = Hs * UK.adjoint() * SUn;
-  Hs = SUn * UK * rTEMP; 
-  rTEMP = Hz * UK.adjoint() * SUn;
-  Hz = SUn * UK * rTEMP; 
-  rTEMP = Hx * UK.adjoint() * SUn;
-  Hx = SUn * UK * rTEMP; 
-  rTEMP = Hy * UK.adjoint() * SUn;
-  Hy = SUn * UK * rTEMP; 
+  if(this->printLevel_ >= 3){
+    prettyPrintSmart(this->fileio_->out,Hs,"Hs (p space)");
+    prettyPrintSmart(this->fileio_->out,Hz,"Hz (p space)");
+    prettyPrintSmart(this->fileio_->out,Hx,"Hx (p space)");
+    prettyPrintSmart(this->fileio_->out,Hy,"Hz (p space)");
+  }
 
-if(this->printLevel_ >= 2){
-  prettyPrintSmart(this->fileio_->out,Hs,"Hs (r space)");
-  prettyPrintSmart(this->fileio_->out,Hz,"Hz (r space)");
-  prettyPrintSmart(this->fileio_->out,Hx,"Hx (r space)");
-  prettyPrintSmart(this->fileio_->out,Hy,"Hy (r space)");
-}
-
-     
-//  prettyPrintSmart(this->fileio_->out,Veff,"Veff (p space)");
-/* 
-  ComplexMatrix SUK(2*nUncontracted,2*nUncontracted);
-  SUK.block(0,0,nUncontracted,nUncontracted) = SUn * UK;  
-  SUK.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted) = SUn * UK;
-
-  TEMP = SUK * Veff;
-  Veff = TEMP * SUK.adjoint();  
-   
-  prettyPrintSmart(this->fileio_->out,Veff,"Veff (r space)");
-
-  TEMP = SUK * KinEn;
-  KinEn = TEMP * SUK.adjoint();
-
-  prettyPrintSmart(this->fileio_->out,KinEn,"Trel (r space)");
+/*
+  nUnSqScratch = Hs * UK.adjoint() * SUn;
+  Hs = SUn * UK * nUnSqScratch; 
+  nUnSqScratch = Hz * UK.adjoint() * SUn;
+  Hz = SUn * UK * nUnSqScratch; 
+  nUnSqScratch = Hx * UK.adjoint() * SUn;
+  Hx = SUn * UK * nUnSqScratch; 
+  nUnSqScratch = Hy * UK.adjoint() * SUn;
+  Hy = SUn * UK * nUnSqScratch; 
 */
 
-// --------------------------------------------------------
+  // FIXME?: (Possibly) we always compute SUn * UK, we could store it once
+  nUnSqScratch.noalias() = Hs * UK.adjoint();
+  nUnSqScratch2.noalias() = nUnSqScratch * SUn;
+  nUnSqScratch.noalias() = SUn * UK;
+  Hs.noalias() = nUnSqScratch * nUnSqScratch2; 
 
-//  TEMP = SUK * HCore;
-//  HCore = TEMP * SUK.adjoint();
+  nUnSqScratch.noalias() = Hz * UK.adjoint();
+  nUnSqScratch2.noalias() = nUnSqScratch * SUn;
+  nUnSqScratch.noalias() = SUn * UK;
+  Hz.noalias() = nUnSqScratch * nUnSqScratch2; 
 
-//  cout << HCore.squaredNorm() << " HCore norm" << endl;
+  nUnSqScratch.noalias() = Hx * UK.adjoint();
+  nUnSqScratch2.noalias() = nUnSqScratch * SUn;
+  nUnSqScratch.noalias() = SUn * UK;
+  Hx.noalias() = nUnSqScratch * nUnSqScratch2; 
 
-//  prettyPrintSmart(this->fileio_->out,HCore,"HCore (r space)");
+  nUnSqScratch.noalias() = Hy * UK.adjoint();
+  nUnSqScratch2.noalias() = nUnSqScratch * SUn;
+  nUnSqScratch.noalias() = SUn * UK;
+  Hy.noalias() = nUnSqScratch * nUnSqScratch2; 
 
+  if(this->printLevel_ >= 3){
+    prettyPrintSmart(this->fileio_->out,Hs,"Hs (r space)");
+    prettyPrintSmart(this->fileio_->out,Hz,"Hz (r space)");
+    prettyPrintSmart(this->fileio_->out,Hx,"Hx (r space)");
+    prettyPrintSmart(this->fileio_->out,Hy,"Hy (r space)");
+  }
 
+  /*ADDITIONAL DEBUG HERE
+  if(this->printLevel_ >= 3){
+    RealMatrix TCon = 0.5 * (KinEn.block(0,0,nUncontracted,nUncontracted).real() + 
+      KinEn.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).real());
+    RealMatrix VCon = 0.5 * (Veff.block(0,0,nUncontracted,nUncontracted).real() + 
+      Veff.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).real());
 
+    prettyPrintSmart(this->fileio_->out,TCon,"T relativistic (p space)");
+    prettyPrintSmart(this->fileio_->out,VCon,"V relativistic (p space)");
+    
+    nUnSqScratch = TCon * UK.adjoint() * SUn;
+    TCon = SUn * UK * nUnSqScratch;
+    nUnSqScratch = VCon * UK.adjoint() * SUn;
+    VCon = SUn * UK * nUnSqScratch;
 
-// Recontract the basis
-//  prettyPrintSmart(this->fileio_->out,*this->basisSet_->mapPrim2Bf(),"primitive transformation matrix");
-  RealMatrix IPrim2Bf = (*this->basisSet_->mapPrim2Bf()).transpose();
+    prettyPrintSmart(this->fileio_->out,TCon,"T relativistic (r space)");
+    prettyPrintSmart(this->fileio_->out,VCon,"V relativistic (r space)");
 
-  RealMatrix TCon = 0.5 * (KinEn.block(0,0,nUncontracted,nUncontracted).real() + 
-	KinEn.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).real());
-  RealMatrix VCon = 0.5 * (Veff.block(0,0,nUncontracted,nUncontracted).real() + 
-	Veff.block(nUncontracted,nUncontracted,nUncontracted,nUncontracted).real());
-if(this->printLevel_ >= 2){
-  prettyPrintSmart(this->fileio_->out,TCon,"Trel (p space)");
-  prettyPrintSmart(this->fileio_->out,VCon,"Vrel (p space)");
- }
-  rTEMP = TCon * UK.adjoint() * SUn;
-  TCon = SUn * UK * rTEMP;
-  rTEMP = VCon * UK.adjoint() * SUn;
-  VCon = SUn * UK * rTEMP;
-if(this->printLevel_ >= 2){
-  prettyPrintSmart(this->fileio_->out,TCon,"Trel (r space)");
-  prettyPrintSmart(this->fileio_->out,VCon,"Vrel (r space)");
- }
+    TCon = (*this->basisSet_->mapPrim2Bf()) * TCon * (*this->basisSet_->mapPrim2Bf()).transpose();;
+    VCon = (*this->basisSet_->mapPrim2Bf()) * VCon * (*this->basisSet_->mapPrim2Bf()).transpose();;
 
-  TCon = (*this->basisSet_->mapPrim2Bf()) * TCon * IPrim2Bf;
-  VCon = (*this->basisSet_->mapPrim2Bf()) * VCon * IPrim2Bf;
+    prettyPrintSmart(this->fileio_->out,TCon,"T (contracted basis)");
+    prettyPrintSmart(this->fileio_->out,VCon,"V (contracted basis)");
+  }
+  
+  this->memManager_->free(Veff.data(),4*nUnSq);
+  */
 
-if(this->printLevel_ >= 2){
-  prettyPrintSmart(this->fileio_->out,TCon,"TCon");
-  prettyPrintSmart(this->fileio_->out,VCon,"VCon");
- }
- 
-  RealMatrix CoreS = (*this->basisSet_->mapPrim2Bf()) * Hs * IPrim2Bf;
-  RealMatrix CoreZ = (*this->basisSet_->mapPrim2Bf()) * Hz * IPrim2Bf;
-  RealMatrix CoreX = (*this->basisSet_->mapPrim2Bf()) * Hx * IPrim2Bf;
-  RealMatrix CoreY = (*this->basisSet_->mapPrim2Bf()) * Hy * IPrim2Bf;
+  // Recontract the basis
 
-if(this->printLevel_ >= 2) {
-  prettyPrintSmart(this->fileio_->out,CoreS,"Core (scalar)");
-  prettyPrintSmart(this->fileio_->out,CoreZ,"Core (mz)");
-  prettyPrintSmart(this->fileio_->out,CoreX,"Core (mx)");
-  prettyPrintSmart(this->fileio_->out,CoreY,"Core (my)");
-}
+  RealMap CoreS(this->memManager_->malloc<double>(this->nBasis_ * this->nBasis_),
+    this->nBasis_,this->nBasis_);
+  RealMap CoreX(this->memManager_->malloc<double>(this->nBasis_ * this->nBasis_),
+    this->nBasis_,this->nBasis_);
+  RealMap CoreY(this->memManager_->malloc<double>(this->nBasis_ * this->nBasis_),
+    this->nBasis_,this->nBasis_);
+  RealMap CoreZ(this->memManager_->malloc<double>(this->nBasis_ * this->nBasis_),
+    this->nBasis_,this->nBasis_);
 
-if(this->twoEFudge == 1){
+/*
+  CoreS = (*this->basisSet_->mapPrim2Bf()) * Hs * (*this->basisSet_->mapPrim2Bf()).transpose();
+  CoreZ = (*this->basisSet_->mapPrim2Bf()) * Hz * (*this->basisSet_->mapPrim2Bf()).transpose();
+  CoreX = (*this->basisSet_->mapPrim2Bf()) * Hx * (*this->basisSet_->mapPrim2Bf()).transpose();
+  CoreY = (*this->basisSet_->mapPrim2Bf()) * Hy * (*this->basisSet_->mapPrim2Bf()).transpose();
+*/
+  SCRConUnMap.noalias() = (*this->basisSet_->mapPrim2Bf()) * Hs;
+  CoreS.noalias() = SCRConUnMap * (*this->basisSet_->mapPrim2Bf()).transpose();
+  SCRConUnMap.noalias() = (*this->basisSet_->mapPrim2Bf()) * Hz;
+  CoreZ.noalias() = SCRConUnMap * (*this->basisSet_->mapPrim2Bf()).transpose();
+  SCRConUnMap.noalias() = (*this->basisSet_->mapPrim2Bf()) * Hx;
+  CoreX.noalias() = SCRConUnMap * (*this->basisSet_->mapPrim2Bf()).transpose();
+  SCRConUnMap.noalias() = (*this->basisSet_->mapPrim2Bf()) * Hy;
+  CoreY.noalias() = SCRConUnMap * (*this->basisSet_->mapPrim2Bf()).transpose();
 
+  this->memManager_->free(Hs.data(),nUnSq);
+  this->memManager_->free(Hx.data(),nUnSq);
+  this->memManager_->free(Hy.data(),nUnSq);
+  this->memManager_->free(Hz.data(),nUnSq);
+
+  if(this->twoEFudge == 1){
     if (this->printLevel_ >= 2){
         (this->fileio_->out) << "Applying 2e fudge factor to spin-orbit Hamiltonian" << endl;
     }
-// Q(l) as an function:
-//    double QofL(double L) { return L*(L+1)*(2*L+1)/3; };
-
-// Loop over all shells
+    // Q(l) as an function:
+    //    double QofL(double L) { return L*(L+1)*(2*L+1)/3; };
+    
+    // Loop over all shells
     for (auto iShell = 0; iShell < this->basisSet_->nShell(); ++iShell) {
     for (auto jShell = 0; jShell < this->basisSet_->nShell(); ++jShell) {
-
-        auto iL = this->basisSet_->shells(iShell).contr[0].l;
-        auto jL = this->basisSet_->shells(jShell).contr[0].l;
-        // Calculate Fudge Factor term by Term
-        double fudgeFactor = (iL)*(iL+1)*(2*iL+1)/3;
-        fudgeFactor *= (jL)*(jL+1)*(2*jL+1)/3;
-        fudgeFactor /= this->molecule_->atomicZ(this->basisSet_->mapSh2Cen(iShell)-1); 
-        fudgeFactor /= this->molecule_->atomicZ(this->basisSet_->mapSh2Cen(jShell)-1); 
-        fudgeFactor = sqrt(fudgeFactor);
-
-        CoreX.block(this->basisSet_->mapSh2Bf(iShell),
-        this->basisSet_->mapSh2Bf(jShell),this->basisSet_->shells(iShell).size(),
-        this->basisSet_->shells(jShell).size()) -=
-         (CoreX.block(this->basisSet_->mapSh2Bf(iShell),
-         this->basisSet_->mapSh2Bf(jShell),this->basisSet_->shells(iShell).size(),
-         this->basisSet_->shells(jShell).size()) * fudgeFactor);     
-       
-        CoreY.block(this->basisSet_->mapSh2Bf(iShell),
-        this->basisSet_->mapSh2Bf(jShell),this->basisSet_->shells(iShell).size(),
-        this->basisSet_->shells(jShell).size()) -=
-         (CoreY.block(this->basisSet_->mapSh2Bf(iShell),
-         this->basisSet_->mapSh2Bf(jShell),this->basisSet_->shells(iShell).size(),
-         this->basisSet_->shells(jShell).size()) * fudgeFactor);
-      
-        CoreZ.block(this->basisSet_->mapSh2Bf(iShell),
-        this->basisSet_->mapSh2Bf(jShell),this->basisSet_->shells(iShell).size(),
-        this->basisSet_->shells(jShell).size()) -=
-         (CoreZ.block(this->basisSet_->mapSh2Bf(iShell),
-         this->basisSet_->mapSh2Bf(jShell),this->basisSet_->shells(iShell).size(),
-         this->basisSet_->shells(jShell).size()) * fudgeFactor);
-      }
+  
+      auto iL = this->basisSet_->shells(iShell).contr[0].l;
+      auto jL = this->basisSet_->shells(jShell).contr[0].l;
+      // Calculate Fudge Factor term by Term
+      double fudgeFactor = (iL)*(iL+1)*(2*iL+1)/3;
+      fudgeFactor *= (jL)*(jL+1)*(2*jL+1)/3;
+      fudgeFactor /= this->molecule_->atomicZ(this->basisSet_->mapSh2Cen(iShell)-1); 
+      fudgeFactor /= this->molecule_->atomicZ(this->basisSet_->mapSh2Cen(jShell)-1); 
+      fudgeFactor = sqrt(fudgeFactor);
+  
+      CoreX.block(this->basisSet_->mapSh2Bf(iShell),
+      this->basisSet_->mapSh2Bf(jShell),this->basisSet_->shells(iShell).size(),
+      this->basisSet_->shells(jShell).size()) -=
+       (CoreX.block(this->basisSet_->mapSh2Bf(iShell),
+       this->basisSet_->mapSh2Bf(jShell),this->basisSet_->shells(iShell).size(),
+       this->basisSet_->shells(jShell).size()) * fudgeFactor);     
+     
+      CoreY.block(this->basisSet_->mapSh2Bf(iShell),
+      this->basisSet_->mapSh2Bf(jShell),this->basisSet_->shells(iShell).size(),
+      this->basisSet_->shells(jShell).size()) -=
+       (CoreY.block(this->basisSet_->mapSh2Bf(iShell),
+       this->basisSet_->mapSh2Bf(jShell),this->basisSet_->shells(iShell).size(),
+       this->basisSet_->shells(jShell).size()) * fudgeFactor);
+    
+      CoreZ.block(this->basisSet_->mapSh2Bf(iShell),
+      this->basisSet_->mapSh2Bf(jShell),this->basisSet_->shells(iShell).size(),
+      this->basisSet_->shells(jShell).size()) -=
+       (CoreZ.block(this->basisSet_->mapSh2Bf(iShell),
+       this->basisSet_->mapSh2Bf(jShell),this->basisSet_->shells(iShell).size(),
+       this->basisSet_->shells(jShell).size()) * fudgeFactor);
+    }
     }//loop shells
-} //twoE Fudge
+  } //twoE Fudge
+  
+  if(this->printLevel_ >= 2) {
+    prettyPrintSmart(this->fileio_->out,CoreS,"X2C core Hamiltonian (scalar)");
+    prettyPrintSmart(this->fileio_->out,CoreZ,"X2C core Hamiltonian (mz)");
+    prettyPrintSmart(this->fileio_->out,CoreX,"X2C core Hamiltonian (mx)");
+    prettyPrintSmart(this->fileio_->out,CoreY,"X2C core Hamiltonian (my)");
+  }
 
   *this->coreH_ = CoreS;
   *this->oneEmx_ = CoreX;
   *this->oneEmy_ = CoreY;
   *this->oneEmz_ = CoreZ;
 
-  ComplexMatrix TCSham(2*nBasis_,2*nBasis_);
+  // Free all memory before return
+  this->memManager_->free(CoreS.data(),this->nBasis_*this->nBasis_);
+  this->memManager_->free(CoreX.data(),this->nBasis_*this->nBasis_);
+  this->memManager_->free(CoreY.data(),this->nBasis_*this->nBasis_);
+  this->memManager_->free(CoreZ.data(),this->nBasis_*this->nBasis_);
+  
+  this->memManager_->free(nUnSqScratch.data(),nUnSq);
+  this->memManager_->free(nUnSqScratch2.data(),nUnSq);
+  this->memManager_->free(C4nUnSqScratch.data(),4*nUnSq);
+  this->memManager_->free(C4nUnSqScratch2.data(),4*nUnSq);
+  this->memManager_->free(SCRUnCon,nUncontracted*this->nBasis_);
+
+  this->memManager_->free(SUn.data(),nUnSq);
+  this->memManager_->free(UK.data(),nUnSq);
+  
+  // Might be able to free these earlier
+  this->memManager_->free(P2_Potential.data(),nUnSq);
+  this->memManager_->free(W.data(),4*nUnSq);
+
+  //NOT CURRENTLY USED
+  //this->memManager_->free(KinEn.data(),4*nUnSq);
+
 
 /*
-  std::vector<std::reference_wrapper<RealMatrix>> mats;
+//ADDITIONAL DEBUG HERE
+if(this->printLevel_ >= 4){
+  ComplexMatrix TCSham(2*nBasis_,2*nBasis_);
   
-  mats.emplace_back(CoreS);
-  mats.emplace_back(CoreZ);
-  mats.emplace_back(CoreY);
-  mats.emplace_back(CoreX);
-
-  Quantum<double>::spinGather(TCSham,mats);
-*/
   TCSham.block(0,0,nBasis_,nBasis_).real() = CoreS;
   TCSham.block(nBasis_,nBasis_,nBasis_,nBasis_).real() = CoreS;
   TCSham.block(0,0,nBasis_,nBasis_).imag() = CoreZ;
@@ -905,7 +1021,6 @@ if(this->twoEFudge == 1){
   prettyPrintSmart(this->fileio_->out,TCSham.real(),"Two component Hamiltonian (real)");
   prettyPrintSmart(this->fileio_->out,TCSham.imag(),"Two component Hamiltonian (imag)");
 
-
   // put spin as fastest running index
   ComplexMatrix SpinHam(2*nBasis_,2*nBasis_);
 
@@ -916,18 +1031,11 @@ if(this->twoEFudge == 1){
         SpinHam(2*row+1,2*col) = TCSham(row+nBasis_,col);
         SpinHam(2*row+1,2*col+1) = TCSham(row+nBasis_,col+nBasis_);
         }
-    }
-  
+    }  
   prettyPrintSmart(this->fileio_->out,SpinHam.real(),"Spin-Blocked 2c-Hamiltonian (real)");
   prettyPrintSmart(this->fileio_->out,SpinHam.imag(),"Spin-Blocked 2c-Hamiltonian (imag)");
-
-/*
-  es.compute(TCSham);
-  HEV= es.eigenvalues();
-//  HEVx= es.eigenvectors();
-
-  prettyPrintSmart(cout,HEV,"HEV");
-//  prettyPrintSmart(cout,HEVx,"HEVc");
+  }
+//END OF DEBUG
 */
 }
 

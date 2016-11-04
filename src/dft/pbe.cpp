@@ -7,9 +7,9 @@ DFTFunctional(X,eps){
 //  this->small = 1.0e-18; 
   this-> d1over3  = 1.0/3.0;
   this-> d4over3  = 4.0/3.0;
-  this-> beta  =  std::pow((36*math.pi),(5.0/3.0));
-  this-> beta *=  5;
-  this-> b     =  0.0042;
+  this-> mu      =  0.2195102405736;
+  this-> kappa    =  0.2195102405736;
+  this-> Ckf       =  std::pow((math.pi*math.pi*6.0),(this->d1over3));
 //  cout << "B88 object created " <<endl;
 
   this->name = "PBE";
@@ -18,24 +18,24 @@ DFTFunctional(X,eps){
 #endif
 };
 
-double PBE::g0 (double x, double &sinhx, double &tenxd){
+double PBE::g0 (double x,double &den){
   double gx;
-  double tmp;
-  sinhx = boost::math::asinh(x);
-  tenxd = std::pow(x,this->d);
-  tenxd *= 1.e-6;
-  gx = std::exp(-this->c*x*x);
-  gx *= x*x;
-  gx *= -(this->b - this->beta);
-  gx += this->b * x * x;
-  gx -= tenxd;
-  tmp  = -tenxd ;
-  tmp /= this->CxVx ;
-  tmp += 6.0 * b * x * sinhx + 1.0;
-  
-  gx  /= tmp;
-  
- return gx; 
+  den  = this->mu * x * x;
+  den /= this->kappa;
+  den += 1.0; 
+  gx = -this->kappa;
+  gx /= den;
+  gx += 1.0 + this->kappa;
+  return  this->CxVx*gx;
+};  //End Form g(x) or F9in Barone)
+
+double PBE::g1 (double x, double &den){
+  double gx;
+  gx = 2.0 * this->mu * x ;
+  gx /= den;
+  gx /= den;
+//  return this->CxVx*gx;
+  return gx;
 };  //End Form g function for B88 Exchange
 
 DFTFunctional::DFTInfo PBE::eval(const double &rhoA, const double &rhoB){
@@ -55,6 +55,46 @@ DFTFunctional::DFTInfo PBE::eval(const double &rhoA, const double &rhoB, const d
     rhoB1ov3 = std::pow(rhoB,this->d1over3);
     rhoB4ov3 = rhoB1ov3 * rhoB; 
   }
+  double xA   = std::sqrt(gammaAA) / (2.0 * this->Ckf*rhoA4ov3); 
+  double xB ;
+  double den;
+  double g0 = this->g0(xA,den);
+  double g1 = this->g1(xA,den);
+/*
+  cout << "Ax " <<this->CxVx << endl;
+  cout << "b "  <<this->b << endl;
+  cout << "c "  <<this->c << endl;
+  cout << "d "  <<this->d << endl;
+  cout << "beta "  <<this->beta << endl;
+  cout << "xA " <<xA << " g0 " << g0 << " g1 " << g1 <<endl;
+*/
+  info.eps        = rhoA4ov3*g0;
+  info.ddrhoA     = g0 - xA*g1;
+  info.ddrhoA    *= this->d4over3*rhoA1ov3;
+  info.ddgammaAA  = g1/(4.0*this->Ckf*std::sqrt(gammaAA));
+  if(std::abs(spindensity) > this->small) {
+    //Open Shell
+  //Paper  xB   = gammaBB / rhoA4ov3; 
+    xB   = std::sqrt(gammaBB) / (2.0 * this->Ckf*rhoB4ov3); 
+    g0 = this->g0(xB,den);
+    g1 = this->g1(xB,den);
+    info.eps       += rhoB4ov3*g0;
+    info.ddrhoB     = g0 - xB*g1;
+    info.ddrhoB    *= this->d4over3*rhoB1ov3;
+    info.ddgammaBB  = g1/(4.0*this->Ckf*std::sqrt(gammaBB));
+
+  } else {
+    //Closed Shell
+    info.eps *= 2.0;
+    info.ddrhoB     = info.ddrhoA;
+    info.ddgammaBB  = info.ddgammaAA;
+  }
+//  cout <<  "eps " <<info.eps << endl ;
+//  cout <<  "ddrhoA " <<info.ddrhoA << endl ;
+//  cout <<  "ddrhoB " <<info.ddrhoB << endl ;
+//  cout <<  "ddgammaAA" <<info.ddgammaAA << endl ;
+//  cout <<  "ddgammaBB" <<info.ddgammaBB << endl ;
+  info.ddgammaAB  = 0.0;
 // Note that in Eq A5 xA   = gammaAA / rhoA4ov3; 
 // but actually they meants xA = sqrt(gammaAA) /rhoA4ov3
 // and also eq A6 rho is rho^(1/3) instead of rho^(4/3)

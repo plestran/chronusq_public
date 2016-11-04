@@ -248,6 +248,7 @@ def handleReference(workers,settings):
   functionalMap = {
     'SLATER' : workers['CQSingleSlater'].addSlater,
     'B88'    : workers['CQSingleSlater'].addB88,
+    'PBE'    : workers['CQSingleSlater'].addPBE,
     'LYP'    : workers['CQSingleSlater'].addLYP,
     'VWN5'   : workers['CQSingleSlater'].addVWN5,
     'VWN3'   : workers['CQSingleSlater'].addVWN3

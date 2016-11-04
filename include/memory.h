@@ -51,12 +51,17 @@ class CQMemManager : public boost::simple_segregated_storage<std::size_t> {
         throw excp;
       };
 
+//    cout << "HERE" << endl;
       void * ptr = 
           boost::simple_segregated_storage<std::size_t>::malloc_n(
             nBlocks,this->NBlockSize_);
 //    cout << ptr << endl;
 //    cout << static_cast<T*>(ptr) << endl;
 
+      if(ptr == NULL) {
+        std::bad_alloc excp;
+        throw excp;
+      };
       return static_cast<T*>(ptr);
 //    return static_cast<T*>(
 //        boost::simple_segregated_storage<std::size_t>::malloc_n(

@@ -65,5 +65,6 @@ void dgelss_(int*,int*,int*,double*,int*,double*,int*,double*,double*,int*,
 void dgelsd_(int*,int*,int*,double*,int*,double*,int*,double*,double*,int*,
   double*,int*,int*,int*);
 void zgecon_(char*,int*,dcomplex*,int*,double*,double*,dcomplex*,double*,int*);
+void zgesvd_(char*,char*,int*,int*,dcomplex*,int*,double*,dcomplex*,int*,dcomplex*,int*,dcomplex*,int*,double*,int*);
 }
 

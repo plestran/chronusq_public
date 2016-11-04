@@ -56,6 +56,8 @@ void SingleSlater<T>::addDFTFunctional(const std::string &func, double x){
     this->dftFunctionals_.emplace_back(std::make_shared<SlaterExchange>(x));
   else if(!func.compare("B88"))
     this->dftFunctionals_.emplace_back(std::make_shared<BEightEight>(x));
+  else if(!func.compare("PBE"))
+    this->dftFunctionals_.emplace_back(std::make_shared<PBE>(x));
   else if(!func.compare("LYP"))
     this->dftFunctionals_.emplace_back(std::make_shared<lyp>(x));
   else if(!func.compare("VWN5"))
@@ -63,7 +65,7 @@ void SingleSlater<T>::addDFTFunctional(const std::string &func, double x){
   else if(!func.compare("VWN3"))
     this->dftFunctionals_.emplace_back(std::make_shared<VWNIII>(x));
 
-  if(!func.compare("B88") or !func.compare("LYP")) this->isGGA = true;
+  if(!func.compare("B88") or !func.compare("LYP") or !func.compare("PBE")) this->isGGA = true;
 };
 
 
@@ -80,6 +82,14 @@ void SingleSlater<T>::createB88(){
   addDFTFunctional("B88");
   this->xHF_ = 0.0;
   this->DFTKernel_ = B88;
+};
+
+template<typename T>
+void SingleSlater<T>::createPBE(){
+  addDFTFunctional("Slater");
+  addDFTFunctional("PBE");
+  this->xHF_ = 0.0;
+  this->DFTKernel_ = pbe;
 };
   
   
