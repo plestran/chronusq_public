@@ -78,7 +78,6 @@ def runCQ(ifname,ofname):
 
   # Setup Options
   parseMolecule(workers,secDict['MOLECULE'])
-  parseBasis(workers,secDict['BASIS'])
   job = parseQM(workers,secDict)
 
   # Parse Integral settings
@@ -93,6 +92,7 @@ def runCQ(ifname,ofname):
 
   if 'MISC' in secDict:
     parseMisc(workers,secDict['MISC'])
+  parseBasis(workers,secDict['BASIS'])
 
   if job == 'RT':
     parseRT(workers,secDict)

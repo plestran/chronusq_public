@@ -11,7 +11,7 @@ void RealTime<T>::doPropagation() {
 
   // Logic for Delta pulse
   if(this->tOff_ != 0 and (this->tOff_ - this->tOn_) < this->stepSize_){
-    this->tOff_ = 2*this->stepSize_; 
+    this->tOff_ = this->stepSize_; 
   }
 
   for(auto iStep = 0ul; iStep < maxSteps_; iStep++) {

@@ -424,6 +424,7 @@ void SingleSlater<T>::formVXC_new(){
     }
   }
 
+  int tracker(0);
   std::vector<int> currentCol(nthreads,-1);
   auto valVxc = [&](std::size_t iAtm, ChronusQ::IntegrationPoint &pt, 
     std::vector<KernelIntegrand<T>> &result) -> void {
@@ -726,7 +727,7 @@ void SingleSlater<T>::formVXC_new(){
       Newend = std::chrono::high_resolution_clock::now();
       T5 += Newend - Newstart;
     }
-
+    tracker++;
   };
 
 //  ChronusQ::AtomicGrid AGrid(100,302,ChronusQ::GRID_TYPE::EULERMAC,
@@ -795,7 +796,6 @@ void SingleSlater<T>::formVXC_new(){
 
     AGrid.integrate<std::vector<KernelIntegrand<T>>>(wrapper,res);
   };
-
 
 
   this->vXCScalar_->setZero();   // Set to zero every occurence of the SCF
