@@ -113,7 +113,8 @@ knownKeywords['RT'] = {
 
 knownKeywords['MISC'] = {
   'NSMP'     :CQKeyword('NSMP'    ,'I',False),
-  'UNITTEST' :CQKeyword('UNITTEST','S',False)
+#  'UNITTEST' :CQKeyword('UNITTEST','S',False),
+  'PRINT'    :CQKeyword('PRINT'   ,'I',False)
 }
 
 knownKeywords['SCF'] = {

@@ -77,12 +77,9 @@ def runCQ(ifname,ofname):
   secDict = parseInput(workers,ifname)
 
   # Setup Options
-  if 'MISC' in secDict:
-    parseMisc(workers,secDict['MISC'])
   parseMolecule(workers,secDict['MOLECULE'])
   parseBasis(workers,secDict['BASIS'])
   job = parseQM(workers,secDict)
-  # Need to set a global print level here
 
   if 'INTS' in secDict:
     parseInts(workers,secDict['INTS'])
@@ -93,6 +90,8 @@ def runCQ(ifname,ofname):
   if 'SCF' in secDict:
     parseSCF(workers,secDict['SCF'])
 
+  if 'MISC' in secDict:
+    parseMisc(workers,secDict['MISC'])
   runCQJob(job,workers)
 
 

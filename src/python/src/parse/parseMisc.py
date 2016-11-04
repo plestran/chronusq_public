@@ -52,3 +52,12 @@ def parseMisc(workers,settings):
       optMap[i](settings[i])
     except KeyError:
       continue
+
+  if 'PRINT' in settings:
+    workers['CQMolecule'].setPrintLevel(settings['PRINT'])
+    workers['CQBasisSet'].setPrintLevel(settings['PRINT'])
+    workers['CQSingleSlater'].setPrintLevel(settings['PRINT'])
+    workers['CQAOIntegrals'].setPrintLevel(settings['PRINT'])
+    if 'CQRealTime' in workers:
+      workers['CQRealTime'].setPrintLevel(settings['PRINT'])
+    
