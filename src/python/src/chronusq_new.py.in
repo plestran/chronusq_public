@@ -81,6 +81,7 @@ def runCQ(ifname,ofname):
   parseBasis(workers,secDict['BASIS'])
   job = parseQM(workers,secDict)
 
+  # Parse Integral settings
   if 'INTS' in secDict:
     parseInts(workers,secDict['INTS'])
   else:
@@ -92,6 +93,8 @@ def runCQ(ifname,ofname):
 
   if 'MISC' in secDict:
     parseMisc(workers,secDict['MISC'])
+
+  
   runCQJob(job,workers)
 
 

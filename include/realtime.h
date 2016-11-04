@@ -168,6 +168,7 @@ public:
   void setMaxSteps(int x)  { this->maxSteps_ = x; };
   void setNSkip(int x)     { this->nSkip_    = x; };
   void setIRstrt(int x)    { this->iRstrt_   = x; };
+  void setPrintLevel(int x){ this->printLevel_ = x;};
              
   void setTOn(double x)      { this->tOn_      = x; };
   void setTOff(double x)     { this->tOff_     = x; };
@@ -178,9 +179,46 @@ public:
   void setSigma(double x)    { this->sigma_    = x; };
 
   void setEDFieldAmp(std::array<double,3> x) { this->staticEDAmp_ = x; };
+
+  void doNotTarCSV() {this->tarCSVs = false;};
+
+/*
   void setIMethFormU(PropagatorFormation x ) { this->iMethFormU_ = x;};
   void setIEnvlp(Envelope x                ) { this->iEnvlp_     = x;};
   void setIEllPol(EllipticalPolarization x ) { this->iEllPol_    = x;};
+*/
+
+/*
+  // Place holder for when we implement more matrix exponentials
+  void setFormU(const std::string &x) {
+
+  }
+*/
+  inline void setEnvlp(const std::string &x) {
+    if(!x.compare("CONSTANT") or !x.compare("PLANE WAVE"))
+      this->iEnvlp_ = Constant;
+    else if(!x.compare("LINRAMP"))
+      this->iEnvlp_ = LinRamp;
+    else if(!x.compare("GAUSSIAN"))
+      this->iEnvlp_ = Gaussian;
+    else if(!x.compare("STEP"))
+      this->iEnvlp_ = Step;
+    else if(!x.compare("DELTA")) {
+      this->iEnvlp_ = Step;
+      this->tOn_ = 0.0; this->tOff_ = 1e-6;
+    } 
+    else if(!x.compare("SINSQ"))
+      this->iEnvlp_ = SinSq;
+    else
+      CErr(std::string("RT Envelope ") + x + std::string(" not Recognized"),
+        this->fileio_->out);
+  
+  }
+
+  // Python API
+  inline void Wrapper_setFieldAmp(double x, double y, double z){
+    this->setEDFieldAmp({{x,y,z}});
+  }
 };
 
 }; // namespace ChronusQ

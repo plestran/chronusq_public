@@ -150,12 +150,14 @@ BOOST_PYTHON_MODULE(libpythonapi){
   ;
 */
 
+/*
   enum_<GUESS>("Guess")
     .value("SAD"    , GUESS::SAD    )
     .value("CORE"   , GUESS::CORE   )
     .value("READ"   , GUESS::READ   )
     .value("RANDOM" , GUESS::RANDOM )
   ;
+*/
 
 /*
   enum_<DFT>("DFT")
@@ -176,6 +178,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
   ;
 */
 
+/*
   enum_<GRID_TYPE>("GRID_TYPE")
     .value("GAUSSCHEBFST",  GRID_TYPE::GAUSSCHEBFST)
     .value("GAUSSCHEBSND",  GRID_TYPE::GAUSSCHEBSND)
@@ -186,6 +189,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .value("BECKE",  ATOMIC_PARTITION::BECKE )
     .value("FRISCH", ATOMIC_PARTITION::FRISCH)
   ;
+*/
     
 
 
@@ -270,28 +274,29 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def_readwrite("useFiniteWidthNuclei", &AOIntegrals::useFiniteWidthNuclei)
   ;
 
+/*
   enum_<AOIntegrals::INTEGRAL_ALGORITHM>("AOIntegrals_INTEGRAL_ALGORITHM")
     .value("DIRECT"   , AOIntegrals::DIRECT)
     .value("INCORE"   , AOIntegrals::INCORE)
     .value("DENFIT"   , AOIntegrals::DENFIT)
   ;
+*/
 
-/*
   class_<RealTime<double>,boost::noncopyable>("RealTime_double",init<>())
     .def("communicate"  , &RealTime<double>::communicate  )
-    .def("initMeta"     , &RealTime<double>::initMeta     )
+  //.def("initMeta"     , &RealTime<double>::initMeta     )
     .def("alloc"        , &RealTime<double>::alloc        )
-    .def("iniDensity"   , &RealTime<double>::iniDensity   )
+  //.def("iniDensity"   , &RealTime<double>::iniDensity   )
     .def("doPropagation", &RealTime<double>::doPropagation)
     .def("setMaxSteps"  , &RealTime<double>::setMaxSteps  ) 
     .def("setStepSize"  , &RealTime<double>::setStepSize  )
-    .def("setOrthoTyp"  , &RealTime<double>::setOrthoTyp  )
-    .def("setInitDen"   , &RealTime<double>::setInitDen   )
-    .def("setSwapMOA"   , &RealTime<double>::setSwapMOA   )
-    .def("setSwapMOB"   , &RealTime<double>::setSwapMOB   )
-    .def("setFormU"     , &RealTime<double>::setFormU     )
-    .def("setEnvelope"  , &RealTime<double>::setEnvelope  )
-    .def("setEllPol"    , &RealTime<double>::setEllPol    )
+  //.def("setOrthoTyp"  , &RealTime<double>::setOrthoTyp  )
+  //.def("setInitDen"   , &RealTime<double>::setInitDen   )
+  //.def("setSwapMOA"   , &RealTime<double>::setSwapMOA   )
+  //.def("setSwapMOB"   , &RealTime<double>::setSwapMOB   )
+  //.def("setFormU"     , &RealTime<double>::setFormU     )
+    .def("setEnvlp"  , &RealTime<double>::setEnvlp  )
+  //.def("setEllPol"    , &RealTime<double>::setEllPol    )
     .def("setFieldAmp"  , &RealTime<double>::Wrapper_setFieldAmp  )
     .def("setTOn"       , &RealTime<double>::setTOn       )
     .def("setTOff"      , &RealTime<double>::setTOff      )
@@ -299,30 +304,30 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setPhase"     , &RealTime<double>::setPhase     )
     .def("setSigma"     , &RealTime<double>::setSigma     )
     .def("setPrintLevel", &RealTime<double>::setPrintLevel)
-    .def("printRT"      , &RealTime<double>::printRT      )
+  //.def("printRT"      , &RealTime<double>::printRT      )
     //.def("recs"         , &RealTime<double>::Wrapper_recs )
-    .def("lastDipole"   , &RealTime<double>::lastDipole_python   )
-    .def("lastEnergy"   , &RealTime<double>::lastEnergy   )
-    .def("getTimeStep"  , &RealTime<double>::getTimeStep  )
+  //.def("lastDipole"   , &RealTime<double>::lastDipole_python   )
+  //.def("lastEnergy"   , &RealTime<double>::lastEnergy   )
+  //.def("getTimeStep"  , &RealTime<double>::getTimeStep  )
     .def("doNotTarCSV"  , &RealTime<double>::doNotTarCSV  )
     .def("setIRstrt"       , &RealTime<double>::setIRstrt       )
   ;
 
   class_<RealTime<dcomplex>,boost::noncopyable>("RealTime_complex",init<>())
     .def("communicate"  , &RealTime<dcomplex>::communicate  )
-    .def("initMeta"     , &RealTime<dcomplex>::initMeta     )
+  //.def("initMeta"     , &RealTime<dcomplex>::initMeta     )
     .def("alloc"        , &RealTime<dcomplex>::alloc        )
-    .def("iniDensity"   , &RealTime<dcomplex>::iniDensity   )
+  //.def("iniDensity"   , &RealTime<dcomplex>::iniDensity   )
     .def("doPropagation", &RealTime<dcomplex>::doPropagation)
     .def("setMaxSteps"  , &RealTime<dcomplex>::setMaxSteps  ) 
     .def("setStepSize"  , &RealTime<dcomplex>::setStepSize  )
-    .def("setOrthoTyp"  , &RealTime<dcomplex>::setOrthoTyp  )
-    .def("setInitDen"   , &RealTime<dcomplex>::setInitDen   )
-    .def("setSwapMOA"   , &RealTime<dcomplex>::setSwapMOA   )
-    .def("setSwapMOB"   , &RealTime<dcomplex>::setSwapMOB   )
-    .def("setFormU"     , &RealTime<dcomplex>::setFormU     )
-    .def("setEnvelope"  , &RealTime<dcomplex>::setEnvelope  )
-    .def("setEllPol"    , &RealTime<dcomplex>::setEllPol    )
+  //.def("setOrthoTyp"  , &RealTime<dcomplex>::setOrthoTyp  )
+  //.def("setInitDen"   , &RealTime<dcomplex>::setInitDen   )
+  //.def("setSwapMOA"   , &RealTime<dcomplex>::setSwapMOA   )
+  //.def("setSwapMOB"   , &RealTime<dcomplex>::setSwapMOB   )
+  //.def("setFormU"     , &RealTime<dcomplex>::setFormU     )
+    .def("setEnvlp"  , &RealTime<dcomplex>::setEnvlp  )
+  //.def("setEllPol"    , &RealTime<dcomplex>::setEllPol    )
     .def("setFieldAmp"  , &RealTime<dcomplex>::Wrapper_setFieldAmp  )
     .def("setTOn"       , &RealTime<dcomplex>::setTOn       )
     .def("setTOff"      , &RealTime<dcomplex>::setTOff      )
@@ -330,15 +335,14 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setPhase"     , &RealTime<dcomplex>::setPhase     )
     .def("setSigma"     , &RealTime<dcomplex>::setSigma     )
     .def("setPrintLevel", &RealTime<dcomplex>::setPrintLevel)
-    .def("printRT"      , &RealTime<dcomplex>::printRT      )
-//    .def("recs"         , &RealTime<dcomplex>::Wrapper_recs )
-    .def("lastDipole"   , &RealTime<dcomplex>::lastDipole_python   )
-    .def("lastEnergy"   , &RealTime<dcomplex>::lastEnergy   )
-    .def("getTimeStep"  , &RealTime<dcomplex>::getTimeStep  )
+  //.def("printRT"      , &RealTime<dcomplex>::printRT      )
+    //.def("recs"         , &RealTime<dcomplex>::Wrapper_recs )
+  //.def("lastDipole"   , &RealTime<dcomplex>::lastDipole_python   )
+  //.def("lastEnergy"   , &RealTime<dcomplex>::lastEnergy   )
+  //.def("getTimeStep"  , &RealTime<dcomplex>::getTimeStep  )
     .def("doNotTarCSV"  , &RealTime<dcomplex>::doNotTarCSV  )
     .def("setIRstrt"       , &RealTime<dcomplex>::setIRstrt       )
   ;
-*/
 
 /*
   class_<RealTime<double>::Wrapper_PropInfo,boost::noncopyable>("RTD_PropInfo",init<>())
