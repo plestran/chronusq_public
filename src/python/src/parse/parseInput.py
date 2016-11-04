@@ -143,7 +143,7 @@ def genSecDict(workers,parser,section):
     if readTyp in ('I','D','B'):
       dict1[opt.upper()] = parseMap[readTyp](section,opt)
     elif readTyp in ('S'):
-      dict1[opt.upper()] = parseMap[readTyp](section,opt).upper()
+      dict1[opt.upper()] = str(parseMap[readTyp](section,opt).upper())
     elif readTyp in ('O-ORTH','O-ENV','O-FORMU','O-GS','D3','O-ELL'):
       dict1[opt.upper()] = parseMap[readTyp](parser,section,opt)
     else:

@@ -126,13 +126,18 @@ def handleReference(workers,settings):
     workers["CQSingleSlater"].setRef(str(ref[0]))
 
 
-def parseRT(workers,settings):
+def parseRT(workers,secDict):
+
+  ref = secDict['QM']['REFERENCE']
+  ref = ref.split()
+  
+  rtSettings = secDict['RT']
 
   # Set RT object based on SS reference
-  if workers['CQSingleSlater'] == workers['CQSingleSlaterDouble']:
-    workers['CQRealTime'] = workers['CQRealTimeDouble']
+  if len(ref) == 1 or ref[0] == 'REAL':
+    workers["CQRealTime"] = chronusQ.RealTime_double();
   else:
-    workers['CQRealTime'] = workers['CQRealTimeComplex']
+    workers["CQRealTime"] = chronusQ.RealTime_complex();
 
   # Define a map from keyword to function
   optMap = {
@@ -144,12 +149,12 @@ def parseRT(workers,settings):
     'FREQUENCY':workers['CQRealTime'].setFreq     ,
     'PHASE'    :workers['CQRealTime'].setPhase    ,
     'SIGMA'    :workers['CQRealTime'].setSigma    ,
-    'ENVELOPE' :workers['CQRealTime'].setEnvelope ,
-    'ORTHO'    :workers['CQRealTime'].setOrthoTyp ,
-    'INIDEN'   :workers['CQRealTime'].setInitDen  ,
-    'UPROP'    :workers['CQRealTime'].setFormU    ,
+    'ENVELOPE' :workers['CQRealTime'].setEnvlp    ,
+#    'ORTHO'    :workers['CQRealTime'].setOrthoTyp ,
+#    'INIDEN'   :workers['CQRealTime'].setInitDen  ,
+#    'UPROP'    :workers['CQRealTime'].setFormU    ,
     'IRSTRT'   :workers['CQRealTime'].setIRstrt   ,
-    'ELL_POL'  :workers['CQRealTime'].setEllPol     
+#    'ELL_POL'  :workers['CQRealTime'].setEllPol     
   }
 
 
@@ -166,55 +171,82 @@ def parseRT(workers,settings):
 #   except KeyError:
 #     continue
   for i in optMap:
-    if (i in settings) and (i not in ('EDFIELD')):
-      optMap[i](settings[i])
-    elif (i in settings) and (i in('EDFIELD')):
-      optMap[i](settings[i][0],settings[i][1],settings[i][2])
+    if (i in rtSettings) and (i not in ('EDFIELD')):
+      optMap[i](rtSettings[i])
+    elif (i in rtSettings) and (i in('EDFIELD')):
+      optMap[i](rtSettings[i][0],rtSettings[i][1],rtSettings[i][2])
 
 
-  #if 'EDFIELD' not in settings:
+  #if 'EDFIELD' not in rtSettings:
   #  optMap['EDFIELD'](0.0,0.0,0.0)
     
-  if 'TARCSVS' in settings:
-    if not settings['TARCSVS']:
+  if 'TARCSVS' in rtSettings:
+    if not rtSettings['TARCSVS']:
       workers['CQRealTime'].doNotTarCSV()
 
   # Idiot Checks
 
-  if 'ENVELOPE' in settings:
-    env = settings['ENVELOPE']
+  if 'ENVELOPE' in rtSettings:
+    env = rtSettings['ENVELOPE']
 
-    if (env == envMap['PW']) and ('EDFIELD' not in settings):
-      msg = "Must specify EDFIELD with PW envelope for RT"
+    needsEDField = ['PLANEWAVE','CONSTANT','GAUSSIAN','DELTA',"STEP"]
+    needsFreq    = ['LINRAMP','GAUSSIAN']
+    needsSigma   = ['GAUSSIAN']
+    needsTConst  = ['STEP']
+    NYI          = ['SINSQ']
+
+
+    if (env in needsEDField) and ('EDFIELD' not in rtSettings):
+      msg = "Must specify EDFIELD with " + env + " envelope for RT"
       CErrMsg(workers['CQFileIO'],str(msg))
+
+    if (env in needsFreq ) and ('FREQUENCY' not in rtSettings):
+      msg = "Must specify FREQUENCY with " + env + "envelope for RT"
+      CErrMsg(workers['CQFileIO'],str(msg))
+
+    if (env in needsSigma ) and ('SIGMA' not in rtSettings):
+      msg = "Must specify SIGMA with " + env + "envelope for RT"
+      CErrMsg(workers['CQFileIO'],str(msg))
+
+    if (env in needsTConst ) and ('TIME_ON' not in rtSettings or 'TIME_OFF' not in rtSettings):
+      msg = "Must specify both TIME_ON and TIME_OFF with " + env + "envelope for RT"
+      CErrMsg(workers['CQFileIO'],str(msg))
+
+    if (env in NYI):
+      msg = env + "NYI"
+      CErrMsg(workers['CQFileIO'],str(msg))
+
+#    if (env == envMap['PW']) and ('EDFIELD' not in rtSettings):
+#      msg = "Must specify EDFIELD with PW envelope for RT"
+#      CErrMsg(workers['CQFileIO'],str(msg))
+# 
+#    if (env == envMap['LINRAMP']) and ('EDFIELD' not in rtSettings):
+#      msg = "Must specify EDFIELD with LINRAMP envelope for RT"
+#      CErrMsg(workers['CQFileIO'],str(msg))
  
-    if (env == envMap['LINRAMP']) and ('EDFIELD' not in settings):
-      msg = "Must specify EDFIELD with LINRAMP envelope for RT"
-      CErrMsg(workers['CQFileIO'],str(msg))
- 
-    if (env == envMap['LINRAMP']) and ('FREQUENCY' not in settings):
-      msg = "Must specify FREQUENCY with LINRAMP envelope for RT"
-      CErrMsg(workers['CQFileIO'],str(msg))
+#    if (env == envMap['LINRAMP']) and ('FREQUENCY' not in rtSettings):
+#      msg = "Must specify FREQUENCY with LINRAMP envelope for RT"
+#      CErrMsg(workers['CQFileIO'],str(msg))
 
-    if (env == envMap['GAUSSIAN']) and ('EDFIELD' not in settings):
-      msg = "Must specify EDFIELD with GAUSSIAN envelope for RT"
-      CErrMsg(workers['CQFileIO'],str(msg))
+#    if (env == envMap['GAUSSIAN']) and ('EDFIELD' not in rtSettings):
+#      msg = "Must specify EDFIELD with GAUSSIAN envelope for RT"
+#      CErrMsg(workers['CQFileIO'],str(msg))
 
-    if (env == envMap['GAUSSIAN']) and ('SIGMA' not in settings):
-      msg = "Must specify SIGMA with GAUSSIAN envelope for RT"
-      CErrMsg(workers['CQFileIO'],str(msg))
+#    if (env == envMap['GAUSSIAN']) and ('SIGMA' not in rtSettings):
+#      msg = "Must specify SIGMA with GAUSSIAN envelope for RT"
+#      CErrMsg(workers['CQFileIO'],str(msg))
 
-    if (env == envMap['STEP']) and ('TIME_ON' not in settings):
-      msg = "Must specify TIME_ON with STEP envelope for RT"
-      CErrMsg(workers['CQFileIO'],str(msg))
-
-    if (env == envMap['STEP']) and ('TIME_OFF' not in settings):
-      msg = "Must specify TIME_OFF with STEP envelope for RT"
-      CErrMsg(workers['CQFileIO'],str(msg))
-
-    if (env == envMap['SINSQ']):
-      msg = "SINSQ envelope NYI"
-      CErrMsg(workers['CQFileIO'],str(msg))
+#    if (env == envMap['STEP']) and ('TIME_ON' not in rtSettings):
+#      msg = "Must specify TIME_ON with STEP envelope for RT"
+#      CErrMsg(workers['CQFileIO'],str(msg))
+#
+#    if (env == envMap['STEP']) and ('TIME_OFF' not in rtSettings):
+#      msg = "Must specify TIME_OFF with STEP envelope for RT"
+#      CErrMsg(workers['CQFileIO'],str(msg))
+#
+#    if (env == envMap['SINSQ']):
+#      msg = "SINSQ envelope NYI"
+#      CErrMsg(workers['CQFileIO'],str(msg))
 
 
 

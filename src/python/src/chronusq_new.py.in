@@ -33,7 +33,7 @@ import libpythonapi as chronusQ
 from jobs.standardJobs import runCQJob
 from parse.parseInput import parseInput
 from parse.parseMolecule import parseMolecule
-from parse.parseQM import parseQM, parseSCF
+from parse.parseQM import parseQM, parseSCF, parseRT
 from parse.parseMisc import parseMisc
 from parse.parseBasis import parseBasis
 from parse.parseInts import parseInts
@@ -94,7 +94,9 @@ def runCQ(ifname,ofname):
   if 'MISC' in secDict:
     parseMisc(workers,secDict['MISC'])
 
-  
+  if job == 'RT':
+    parseRT(workers,secDict)
+
   runCQJob(job,workers)
 
 

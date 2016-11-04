@@ -36,8 +36,7 @@ def communicate(workers):
     workers["CQFileIO"], workers["CQMemManager"]
   )
   try:
-    workers["CQRealTime"].communicate(workers["CQFileIO"],
-      workers["CQAOIntegrals"],workers["CQSingleSlater"])
+    workers["CQRealTime"].communicate(workers["CQSingleSlater"])
   except KeyError:
     pass
 
@@ -80,12 +79,16 @@ def runCQJob(job,workers):
   # Always Form Guess
   workers["CQSingleSlater"].formGuess()
 
-  if job == 'SCF':
-    workers["CQSingleSlater"].SCF() 
+#  if job == 'SCF':
+  workers["CQSingleSlater"].SCF() 
 
   workers["CQSingleSlater"].computeProperties()
   
   workers["CQSingleSlater"].printProperties()
+
+  if job == 'RT':
+    workers["CQRealTime"].alloc()
+    workers["CQRealTime"].doPropagation()
 
 def runSCF(workers):
   # Make the classes know about eachother
