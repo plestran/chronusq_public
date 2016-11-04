@@ -1,9 +1,15 @@
 template <typename T>
 void RealTime<T>::formField() {
+/*
   double TOn   = tOn_   / phys.AuToFs;
   double TOff  = tOff_  / phys.AuToFs;
   double Omega = freq_  / phys.eVPerHartree;
   double Sigma = sigma_ / phys.eVPerHartree;
+*/
+  double TOn   = tOn_  ; 
+  double TOff  = tOff_ ; 
+  double Omega = freq_ ; 
+  double Sigma = sigma_; 
 
   double omegaT = Omega * (currentTime_ - TOn) + phase_;
   omegaT = std::cos(omegaT);

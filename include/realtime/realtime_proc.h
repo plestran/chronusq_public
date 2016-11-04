@@ -9,6 +9,11 @@ void RealTime<T>::doPropagation() {
 
   initCSV();
 
+  // Logic for Delta pulse
+  if(this->tOff_ != 0 and (this->tOff_ - this->tOn_) < this->stepSize_){
+    this->tOff_ = 2*this->stepSize_; 
+  }
+
   for(auto iStep = 0ul; iStep < maxSteps_; iStep++) {
 
     // Logic for MMUT restart
@@ -19,6 +24,7 @@ void RealTime<T>::doPropagation() {
       Start = (iStep == 0);
       FinMM = (iStep == maxSteps_);
     }
+    if(Start) this->fileio_->out << "RESTARTING MMUT" << endl;
 
     // Initial entry into MMUT
     if(Start or FinMM) {
