@@ -32,7 +32,7 @@ void SingleSlater<T>::alloc(){
   this->allocOp();
   this->allocScr();
 
-  this->initSCFFiles();
+//this->initSCFFiles();
 
   fock_.emplace_back(this->fockScalar_.get());
   fockOrtho_.emplace_back(this->fockOrthoScalar_.get());

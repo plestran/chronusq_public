@@ -1,4 +1,21 @@
 template <typename T>
+void RealTime<T>::printRTHeader() {
+  std::ostream &output = this->fileio_->out;
+
+  output << BannerTop << endl;
+  output << "Real-Time Propagation Settings:" << endl << endl;
+
+  output << std::setw(38) << std::left << "  Number of Steps:" 
+                          << this->maxSteps_ << endl;
+  output << std::setw(38) << std::left << "  Step Size:" 
+                          << this->stepSize_ << " \u0127 / Eh" << endl;
+  output << std::setw(38) << std::left << " " 
+                          << this->stepSize_*phys.AuToFs << " fs" << endl;
+
+  output << BannerEnd << endl;
+}
+
+template <typename T>
 void RealTime<T>::printRTStep() {
   fileio_->out << std::setw(11) << std::right << std::setprecision(4) 
                << currentTime_  << std::setw(1)  << " ";

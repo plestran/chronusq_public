@@ -1,6 +1,7 @@
 template <typename T>
 void RealTime<T>::doPropagation() {
 
+  this->printRTHeader();
   bool Start; // Start the MMUT iterations
   bool FinMM; // Wrap up the MMUT iterations
 

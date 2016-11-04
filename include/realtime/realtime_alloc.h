@@ -1,5 +1,6 @@
 template <typename T>
 void RealTime<T>::alloc() {
+  cout << "HERE" << endl;
   ssPropagator_ = std::unique_ptr<SingleSlater<dcomplex>>(
     new SingleSlater<dcomplex>(groundState_));
   ssPropagator_->isNotPrimary();
@@ -12,6 +13,7 @@ void RealTime<T>::alloc() {
 //CErr();
   auto NB  = ssPropagator_->basisset()->nBasis();
   auto NBT = NB * ssPropagator_->nTCS();
+  cout << "HERE" << endl;
 
   NBSqScratch_  = memManager_->template malloc<dcomplex>(NB*NB);
   UTransScalar_ = memManager_->template malloc<dcomplex>(NB*NB);
@@ -27,6 +29,7 @@ void RealTime<T>::alloc() {
 
     POSav_.emplace_back(POMzSav_.get());
   }
+  cout << "HERE" << endl;
   if(ssPropagator_->nTCS() == 2){ 
     NBTSqScratch_  = memManager_->template malloc<dcomplex>(NBT*NBT);
     NBTSqScratch2_ = memManager_->template malloc<dcomplex>(NBT*NBT);

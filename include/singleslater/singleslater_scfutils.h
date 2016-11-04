@@ -18,6 +18,7 @@ template<typename T>
 void SingleSlater<T>::initSCFMem3(){
   // Initialize the pointers to NULL
   this->initSCFPtr();
+  this->initSCFFiles();
 
   auto NSQ = this->nBasis_ * this->nBasis_; 
 
