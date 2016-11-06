@@ -100,16 +100,34 @@
   % General Overview of ChronusQ
   \section{General Overview} \label{sec:GeneralOverView}
 
-  The aim of this guide is to help facilitate easy compilation and general use of
-  the Chronus Quantum Chemistry (ChronusQ) Software Package. Detailed descriptions
-  of the compilation procedure and anatomy of the input file will be discussed.
-  This is not meant to be a guide for developers (i.e. there will be no mention of
-  the actual structure of the ChronusQ code), but a ChronusQ Developer's guide is
-  also currently being written and will be made publicly available shortly.
+%  The aim of this guide is to help facilitate easy compilation and general use of
+%  the Chronus Quantum Chemistry (ChronusQ) Software Package. Detailed descriptions
+%  of the compilation procedure and anatomy of the input file will be discussed.
+%  This is not meant to be a guide for developers (i.e. there will be no mention of
+%  the actual structure of the ChronusQ code), but a ChronusQ Developer's guide is
+%  also currently being written and will be made publicly available shortly.
+%
+%  ChronusQ aims to provide an open-source avenue for the development of real-time
+%  quantum dynamical simulations and cutting-edge post self-consistent field (SCF)
+%  methods.  As ChronusQ is a ``free" (both in the financial and the GNU definitions)  
+%  software package, use and development by the scientific community as a whole is 
+%  strongly encouraged. Those interested in the development of ChronusQ should send 
+%  inquiries to \XiaosongContact.
+%
+%  Please see the Table of Contents at the beginning of this document to find
+%  the information you desire regarding the compilation or use of ChronusQ.
 
-  ChronusQ aims to provide an open-source avenue for the development of real-time
-  quantum dynamical simulations and cutting-edge post self-consistent field (SCF)
-  methods.  As ChronusQ is a ``free" (both in the financial and the GNU definitions)  
+  The purpose of this guide is to provide a step-by-step procedure to compile the
+  Chronus Quantum Chemistry (ChronusQ) software package as well as outline some
+  of the basic functionality currently provided. As such, detailed descriptions
+  of the compilation procedure and the anatomy of the input file will be discussed.
+  This guide is not meant to be a developer's reference, although a ChronusQ developer's
+  manual is currently in the works and will be made publically available in the near 
+  future.
+
+  At its core, ChronusQ provides an open-source platform for the development of explicitly
+  time-dependent electronic structure and cutting edge post self-consistent field
+  (SCF) methods. As ChronusQ is a ``free" (both in the financial and the GNU definitions)  
   software package, use and development by the scientific community as a whole is 
   strongly encouraged. Those interested in the development of ChronusQ should send 
   inquiries to \XiaosongContact.
@@ -126,7 +144,7 @@
     Group GitHub repository located at \ChronusQGitHubPUBLIC. Those interested in
     the development of ChronusQ may request access to the private development GitHub
     repository though \XiaosongContact. To obtain a copy of the source code (via 
-    command line), the \texttt{git} program must be installed and be in the shell 
+    command line), the \texttt{git} program must be installed and be in your shell's 
     working path. This can be confirmed via the following command:
 
     \begin{lstlisting}
@@ -197,12 +215,12 @@
 	\CMake~options to facilitate compilation of \Libint. As ChronusQ attempts
 	to use the latest version of \Libint, but we will only support compilation
 	and linking to the locally stored version of \Libint as the functionality
-	may be different between versions.
+	and interfaces may vary between versions.
 
       \subsubsection{\Eigen} \label{subsubsec:Eigen}
         ChronusQ currently utilizes \Eigen~\cite{eigen} as a high-level C++ API for
         various light-weight linear algebra tasks (i.e. storage, multiplication,
-	etc). \Eigen~is also made available through most (GNU/Linux) OS distributions
+	etc). \Eigen~is also made available through most GNU/Linux OS distributions
 	via a standard package manager. One may obtain a pre-packaged \Eigen~
 	installation (with root access / Fedora 22) via
 
@@ -218,7 +236,7 @@
 	\CMake~variables that need to be set for a non-standard installation 
 	of \Eigen~can be found
 	in Section \ref{subsec:ChronusQConfigCompile}.
-I
+
       \subsubsection{\BTAS} \label{subsubsec:BTAS}
         ChronusQ currently utilizes \BTAS~(\textbf{B}asic \textbf{T}ensor
         \textbf{A}lgebra \textbf{S}ubroutines) \cite{btas} as a C++11 API for multi-linear 
