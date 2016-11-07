@@ -32,6 +32,7 @@
 \usepackage{listings}
 \usepackage{color}
 \usepackage{pbox}
+\usepackage{titlesec}
 
 \definecolor{dkgreen}{rgb}{0,0.6,0}
 \definecolor{gray}{rgb}{0.5,0.5,0.5}
@@ -47,13 +48,45 @@
 \newcommand{\DBWYContact}{David Williams (\texttt{dbwy@u.washington.edu})}
 \newcommand{\CMake}{\texttt{CMake}}
 \newcommand{\Libint}{\texttt{Libint}}
-\newcommand{\Eigen}{\texttt{Eigen}}
+\newcommand{\Eigen}{\texttt{Eigen3}}
 \newcommand{\BTAS}{\texttt{BTAS}}
 \newcommand{\Boost}{\texttt{Boost}}
 \newcommand{\HDF}{\texttt{HDF5}}
 \newcommand{\LAPACK}{\texttt{LAPACK}}
 \newcommand{\BLAS}{\texttt{BLAS}}
 \newcommand{\Python}{\texttt{Python}}
+
+%Adding subsubsubsection
+\titleclass{\subsubsubsection}{straight}[\subsection]
+
+\newcounter{subsubsubsection}[subsubsection]
+\renewcommand\thesubsubsubsection{\thesubsubsection.\arabic{subsubsubsection}}
+\renewcommand\theparagraph{\thesubsubsubsection.\arabic{paragraph}} % optional; useful if paragraphs are to be numbered
+
+\titleformat{\subsubsubsection}
+  {\normalfont\normalsize\bfseries}{\thesubsubsubsection}{1em}{}
+\titlespacing*{\subsubsubsection}
+{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+
+\makeatletter
+\renewcommand\paragraph{\@startsection{paragraph}{5}{\z@}%
+  {3.25ex \@plus1ex \@minus.2ex}%
+  {-1em}%
+  {\normalfont\normalsize\bfseries}}
+\renewcommand\subparagraph{\@startsection{subparagraph}{6}{\parindent}%
+  {3.25ex \@plus1ex \@minus .2ex}%
+  {-1em}%
+  {\normalfont\normalsize\bfseries}}
+\def\toclevel@subsubsubsection{4}
+\def\toclevel@paragraph{5}
+\def\toclevel@paragraph{6}
+\def\l@subsubsubsection{\@dottedtocline{4}{7em}{4em}}
+\def\l@paragraph{\@dottedtocline{5}{10em}{5em}}
+\def\l@subparagraph{\@dottedtocline{6}{14em}{6em}}
+\makeatother
+
+\setcounter{secnumdepth}{4}
+\setcounter{tocdepth}{4}
 
 % Sets up environment for verbatium code typing
 \lstset{frame=tb,
@@ -176,7 +209,7 @@
     evaluation, etc). While ChronusQ strives to be a stand alone package, many
     of the incorporated functionality depend heavily on outside open source 
     software. Any problems regarding the installation of these dependencies should
-    be resolved via the website of that software. Any problems regarding the
+    be resolved via the documentation of that software. Any problems regarding the
     communication of these dependencies and ChronusQ can be directed to
     \DBWYContact.
     
@@ -212,9 +245,9 @@
 	preconfigured (uncompiled) library is shipped with ChronusQ (located in
 	the \texttt{/deps/src} directory). The configure/compile procedure
 	described in Section \ref{subsec:ChronusQConfigCompile} details the
-	\CMake~options to facilitate compilation of \Libint. As ChronusQ attempts
+	\CMake~options to facilitate compilation of \Libint. ChronusQ attempts
 	to use the latest version of \Libint, but we will only support compilation
-	and linking to the locally stored version of \Libint as the functionality
+	and linking to the locally stored version of \Libint~as the functionality
 	and interfaces may vary between versions.
 
       \subsubsection{\Eigen} \label{subsubsec:Eigen}
@@ -229,7 +262,7 @@
 	\end{lstlisting}
 
         \noindent If for some reason you are unable to obtain a pre-packaged 
-	version, installation of \Eigen~is quite easy as it is a header-only 
+	version, installation of \Eigen~is quite simple as it is a header-only 
 	library. One need simply download the source tar file from \\
 	\texttt{http://http://eigen.tuxfamily.org/} and place the contents 
 	somewhere that ChronusQ can find them. An explanation of the 
@@ -243,28 +276,10 @@
 	algebra. \BTAS~is obtained by ChronusQ automatically
 
       \subsubsection{\Boost} \label{subsubsec:boost} 
-%        Various parts of the code depend on the C++ \Boost~libraries \cite{boost} to
-%        varying degrees (namely the \Python API from which ChronusQ can be 
-%	executed). Given that \Boost~is not already installed on your system,
-%	one may compile and place boost in the usual (root) place by obtaining
-%	the latest \Boost~source from \texttt{http://www.boost.org} and following
-%
-%        \begin{lstlisting}
-%> cd /path/to/boost/download
-%> tar xvf boost_<boost_version>.tar.gz
-%> cd boost_<boost_version>
-%> ./bootstrap
-%> ./b2 install --prefix=/usr/local
-%        \end{lstlisting}
-%
-%	\noindent If you already have \Boost~installed on your machine (in a 
-%	non-standard location) or are unable to perform the above procedure (i.e. 
-%	no root access), instructions regarding the \CMake~variables that must be 
-%	set are described in Section \ref{subsec:ChronusQConfigCompile}.
-        Various parts of the code depend on the C++ \Boost~libraries \cite{boost} to
-	varying degrees (namely the \Python~API from which ChronusQ can be execuded).
-	Although the installation of \Boost~ is relatively easy, we've found that
-	the path of leasr resistance on the end user involves an automatic installation
+        Various parts of the code depend on the C++ \Boost~libraries \cite{boost},
+	namely the \Python~API.
+	Although the installation of \Boost~ is relatively simple, we've found that
+	the path of least resistance on the end user involves an automatic installation
 	of the needed modules of \Boost~via \CMake. The needed modules are compiled
 	and linked to by default and we do not currently support linking to a compiled
 	version on the user's development environment.
@@ -281,6 +296,7 @@
 > sudo dnf install python-devel libxml2-devel libxslt-devel
 	\end{lstlisting}
 
+        \subsubsubsection{\texttt{ConfigParser}} \label{subsubsubsec:CP}
         \noindent To parse the input file, ChrounusQ relies on the \Python~module 
 	\texttt{ConfigParser}. One may obtain \texttt{ConfigParser} through
 	the \Python~\texttt{pip} module via:
@@ -440,7 +456,7 @@ cmake \
     From the build directory, simply type
 
     \begin{lstlisting}
-> make -j <NCORES>
+> make boost && make btas && make -j <NCORES>
     \end{lstlisting}
 
     \noindent and compilation will begin. ChronusQ does not currently have a 
@@ -448,14 +464,8 @@ cmake \
     not suggested that the user performs a \texttt{make install} command, as we are 
     not sure if this will work on all machines. Note that this is being looked into 
     and will be handled before the first non-Beta release.
-    ~\\
-    ~\\
 
-    \noindent \textbf{Note on Boost Build}: The compilation of \Boost~via ChronusQ will
-    throw many warnings. These are not to be of concern.\\
-    \\
-    
-    \noindent Once ChronusQ has been successfully compiled, you should find a file
+    Once ChronusQ has been successfully compiled, you should find a file
     named ``chronusq.py" in the main build directory. This is the ChronusQ python
     script and it may be run in two ways. The first is directly through python:
 
@@ -570,7 +580,7 @@ test.index
    on the Chronus Quantum Issues page:  \newline \texttt{https://github.com/liresearchgroup/chronusq\_public/issues}. 
 
   \section{Input Files} \label{sec:InputFiles}
-  To use ChronusQ, it is necessary to specify the molecule and job type within an input file. The easiest way to understand the input for ChronusQ is to take a look at an example. Here is a sample input file for water, \texttt{h2o.inp}. As written, it performs an HF/STO-3G calculation on neutral, singlet water with a single processor.
+  To use ChronusQ, it is necessary to specify the molecule and job type within an input file. The easiest way to understand the input for ChronusQ is to take a look at an example. Here is a sample input file for water, \texttt{h2o.inp}. As written, it performs an RHF/STO-3G calculation on neutral, singlet water with a single processor.
 \begin{lstlisting}
 #
 #  Molecule Specification
@@ -587,9 +597,14 @@ geom:
 #  Job Specification
 #
 [QM]
-reference = HF
+reference = RHF
 job       = SCF 
-basis     = sto3g.gbs
+
+#
+#  Basis Specification
+#
+[BASIS]
+basis     = STO-3G 
 
 #
 #  Misc Settings
@@ -605,7 +620,7 @@ ChronusQ input files are divided into sections that specify the molecular geomet
     \item[\texttt{charge}] \hfill \\
     A signed integer that defines the overall electric charge of your molecule.
     \item[\texttt{mult}] \hfill \\
-    An integer that defines the multiplicity of the molecule. Singlets correspond to 1, doublets to 2, triplets to 3, and so on.
+    An integer that defines the spin multiplicity of the molecule. Singlets correspond to 1, doublets to 2, triplets to 3, and so on.
     \item[\texttt{geom}] \hfill \\
     Specifies the geometry of the molecule. The input is always Cartesian, and the default units are in Angstroms. Each line corresponds to one atom. Each line here follows the following format
           \begin{lstlisting}
@@ -614,58 +629,68 @@ ChronusQ input files are divided into sections that specify the molecular geomet
     \end{description}
     Please note that the $<sp>$ is a required space at the begining of the line. This is an artifact of the input file parser, and must be included. That's all there is to the \texttt{[Molecule]} specification!
 
-    \subsection{Defining the type of job with the \texttt{[QM]} section} \label{subsec:QMInput}
-    The \texttt{[QM]} section sets up the type of job you want to run, be it a single point Hartree-Fock energy calculation or a real-time propagation. It is also where you specify your basis set and many other options.
+    \subsection{Defining the job type with the \texttt{[QM]} section} \label{subsec:QMInput}
+    The \texttt{[QM]} section sets up the type of job you want to run, be it a single point Hartree-Fock energy calculation 
+    or a real-time propagation. It is also where you specify the single-determinent reference. The following sections are
+    recognized for the \texttt{QM} section: 
     \begin{description}
-    \item[\texttt{Basis}] \hfill \\
-    Defines your basis set. Available options can be found in the \texttt{basis} directory. Note that you will need to specify the filename, hence the \texttt{.gbs} extension.
+%    \item[\texttt{Basis}] \hfill \\
+%    Defines your basis set. Available options can be found in the \texttt{basis} directory. Note that you will need to specify the filename, hence the \texttt{.gbs} extension.
     \item[\texttt{Job}] \hfill \\
-    Defines what kind of job you want to do. Available options:
+    Defines job to be performed. Available options:
       \begin{description}
-      \item[\texttt{SCF}] Default. Perform self-consistent field energy optimization. Defaults to Hartree-Fock (DFT on its way!) 
+      \item[\texttt{SCF}] Default. Perform self-consistent field energy optimization. 
       \item[\texttt{RT}] Perform real-time propagation. ChronusQ will know to look for section \texttt{[RT]} (described later). 
-      \item[\texttt{CIS}] Perform Configuration Interaction Singles (CIS). 
-      \item[\texttt{RPA}] Perform Random Phase Approximation (RPA), also known as linear-response time-dependent Hartree-Fock (LR-TDHF).
+%      \item[\texttt{CIS}] Perform Configuration Interaction Singles (CIS). 
+%      \item[\texttt{RPA}] Perform Random Phase Approximation (RPA), also known as linear-response time-dependent Hartree-Fock (LR-TDHF).
       %\item[\texttt{STAB}] Perform wave function stability analysis.
       \end{description}
-    \item[\texttt{Ints}] \hfill \\
-    Defines the integral routine. Available options: 
-      \begin{description}
-      \item[\texttt{DIRECT}] Default. Direct integral evaluation.  
-      \item[\texttt{INCORE}] Integral evaluation and storage in memory.  
-      \end{description}
+%    \item[\texttt{Ints}] \hfill \\
+%    Defines the integral routine. Available options: 
+%      \begin{description}
+%      \item[\texttt{DIRECT}] Default. Direct integral evaluation.  
+%      \item[\texttt{INCORE}] Integral evaluation and storage in memory.  
+%      \end{description}
     \item[\texttt{Reference}] \hfill \\
     Defines your reference wave function. Available options:
       \begin{description}
-      \item[\texttt{REAL/COMPLEX RHF/UHF/CUHF/GHF}] Default is real, and RHF or UHF depending on multiplicity of the molecule.  
-      \begin{itemize}
-        \item NOTE: \texttt{CUHF} is constrained UHF, not complex UHF.
-      \end{itemize}
+        \item \texttt{[REAL/COMPLEX] RHF    } - Restricted Hartree--Fock reference
+        \item \texttt{[REAL/COMPLEX] UHF    } - Unrestricted Hartree--Fock reference
+        \item \texttt{[COMPLEX]      GHF    } - Generalized (Two--Component) Hartree--Fock reference
+        \item \texttt{[COMPLEX]      X2C    } - Exact--Two Component (Relativistic) Hartree--Fock reference
+        \item \texttt{[REAL/COMPLEX] R<FUNCTIONAL>} - Restricted  Kohn--Sham reference
+        \item \texttt{[REAL/COMPLEX] U<FUNCTIONAL>} - Unrestricted  Kohn--Sham reference
+        \item Implemented functionals: \texttt{SLATER,B88,LSDA,SVWN5,BLYP,B3LYP,BHandH}
       \end{description}
-    \item[\texttt{Print}] \hfill \\
-    An integer [1$\leq$\texttt{print}$\leq$4] that toggles how much information is printed to the output file.
+   % \item[\texttt{Print}] \hfill \\
+   % An integer [1$\leq$\texttt{print}$\leq$4] that toggles how much information is printed to the output file.
     \end{description}
+
+
+
     \subsection{Controlling the SCF optimization: the \texttt{[SCF]} section} \label{subsec:SCFInput}
     ChronusQ allows you to take finer control over the self-consistent field optimization through the \texttt{[SCF]} section. You can add an external electric field to the SCF here, as well as turn on and off DIIS acceleration and fiddle with the convergence tolerances. Here are the available options:
      \begin{description}
-       \item[\texttt{SCFDENTOL}] Floating point number that specifies the desired convergence of the density. \\
+       \item[\texttt{DENTOL}] Floating point number that specifies the desired convergence of the density. \\
         Default = \texttt{1e-10} 
-       \item[\texttt{SCFENETOL}] Floating point number that specifies the desired convergence of the energy. \\
+       \item[\texttt{ENETOL}] Floating point number that specifies the desired convergence of the energy. \\
         Default = \texttt{1e-12}
-       \item[\texttt{SCFMAXITER}] Integer that specifies the maximum number of SCF iterations. \\
+       \item[\texttt{MAXITER}] Integer that specifies the maximum number of SCF iterations. \\
         Default = \texttt{256}
        \item[\texttt{DIIS}] Boolean that specifies whether to do DIIS acceleration of SCF. \\
         Default = \texttt{true} \\
         Note the DIIS algorithm is Pulay's Commutator-based DIIS.
-       \item[\texttt{FIELD}] Three floats that specify the external static electric field to be applied. \\
+       \item[\texttt{FIELD}] Three floats that specify the external static electric field to be applied (in A.U.). \\
        Default is zero field, equivalent to: \texttt{FIELD = 0.0 0.0 0.0}
        \item[\texttt{GUESS}] Type of guess for the wave function. \\
        Available options: 
          \begin{description}
            \item[\texttt{SAD}] \textbf{S}uperposition of \textbf{A}tomic \textbf{D}ensities. Default.
-           \item[\texttt{READ}] Read density 
+           \item[\texttt{RANDOM}] Generate a random guess, at times very sucessfull for two--compoenent SCF calculations. 
+           \item[\texttt{CORE}] Diagonalize the core--hamiltonian as the guess.
+           \item[\texttt{READ}] Read density from restart (.bin) file.
          \end{description}
-       \item[\texttt{PRINT}] An integer [1$\leq$\texttt{print}$\leq$4] that toggles how much information is printed to the output file.
+%       \item[\texttt{PRINT}] An integer [1$\leq$\texttt{print}$\leq$4] that toggles how much information is printed to the output file.
          
      \end{description}
 
@@ -675,6 +700,7 @@ ChronusQ input files are divided into sections that specify the molecular geomet
      \begin{description}
      \item[\texttt{NSMP}] An integer number of processors to use. \\
      Default = \texttt{1}
+     \item[\texttt{PRINT}] An integer [1$\leq$\texttt{print}$\leq$4] that toggles how much information is printed to the output file.
      \end{description}
 
     \subsection{Real time time-dependent Hartree-Fock: the \texttt{[RT]} section} \label{subsec:RTInput}
@@ -734,20 +760,22 @@ ChronusQ input files are divided into sections that specify the molecular geomet
       \item[\texttt{SIGMA}] \hfill \\ 
          A floating point number, in eV, that defines the full-width half-max (FWHM) of the Gaussian envelope, $\sigma$. This keyword is necessary (and meaningful) only for the Gaussian envelope.  \\
          Default = \texttt{0.0} eV
-      \item[\texttt{ORTHO}] \hfill \\ 
-       Type of orthogonalization. Available options are \texttt{LOWDIN} and \texttt{CHOLESKY}. \\ 
-       Default = \texttt{LOWDIN}.
+
+     % \item[\texttt{ORTHO}] \hfill \\ 
+     %  Type of orthogonalization. Available options are \texttt{LOWDIN} and \texttt{CHOLESKY}. \\ 
+     %  Default = \texttt{LOWDIN}.
+
       % I don't think we need to worry about the following keywords for the time being.
       %\item[\texttt{INIDEN}] \hfill \\ 
       % Type of initial density. Available options
       %\item[\texttt{UPROP}] \hfill \\ 
     \end{description}
-    \subsection{Response theory: the \texttt{[CIS]} and \texttt{[RPA]} section} \label{subsec:ResponseInput}
-    In the \texttt{[QM]} section, if you set \texttt{Job} equal to \texttt{CIS} or \texttt{RPA}, you can set the number of roots to look for here. This  
-     \begin{description}
-       \item{\texttt{NSTATES}} an integer number of roots to find in either CIS or RPA. \\
-       There is no default, and the number of roots must be specified manually.
-     \end{description}
+   % \subsection{Response theory: the \texttt{[CIS]} and \texttt{[RPA]} section} \label{subsec:ResponseInput}
+   % In the \texttt{[QM]} section, if you set \texttt{Job} equal to \texttt{CIS} or \texttt{RPA}, you can set the number of roots to look for here. This  
+   %  \begin{description}
+   %    \item{\texttt{NSTATES}} an integer number of roots to find in either CIS or RPA. \\
+   %    There is no default, and the number of roots must be specified manually.
+   %  \end{description}
 
 	%bibliography    
     \bibliographystyle{unsrt}
