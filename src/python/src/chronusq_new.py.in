@@ -41,6 +41,8 @@ import time
 
 def runCQ(ifname,ofname):
   authorfname = '@AUTHOR_PATH@'
+  gitrev = '@CQ_GIT_VERSION@'
+  progrev = '@ChronusQ_VERSION_MAJOR@.@ChronusQ_VERSION_MINOR@'
   header = """
      ______ __                                      ____ 
     / ____// /_   _____ ____   ____   __  __ _____ / __ \ 
@@ -62,6 +64,9 @@ def runCQ(ifname,ofname):
   # Print front matter for output file
   out.write("Job Started: %s"  % starttime )
   out.write(header)
+  out.write("Release Version: " + progrev)
+  out.write("Git Revision: " + gitrev + "\n")
+
 
   authors = open(authorfname, 'r')
   out.write("Contributors List:\n"+banner+authors.read())

@@ -1,8 +1,24 @@
 # Configure Project ChronusQ
 cmake_minimum_required(VERSION 3.0)
 project(ChronusQ CXX C)
-set(ChronusQ_VERSION_MAJOR BETA)
+set(ChronusQ_VERSION_MAJOR BETA2)
 set(ChronusQ_VERSION_MINOR 0)
+
+# Get Git revision hash
+if(EXISTS ${PROJECT_SOURCE_DIR}/.git)
+  find_package(Git)
+  if(GIT_FOUND)
+    execute_process(
+      COMMAND ${GIT_EXECUTABLE} rev-parse HEAD
+      WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+      OUTPUT_VARIABLE "CQ_GIT_VERSION"
+      ERROR_QUIET
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+  else(GIT_FOUND)
+    set(CQ_GIT_VERSION 0)
+  endif(GIT_FOUND)
+endif()
 
 # Append local cmake directory to find CMAKE Modules
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
