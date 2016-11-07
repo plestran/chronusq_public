@@ -69,5 +69,3 @@ def parseBasis(workers,basisSettings):
   workers["CQBasisSet"].makeMaps(workers["CQMolecule"])  # 4
   workers["CQBasisSet"].renormShells()                        # 5
 
-  workers["CQBasisSet"].printInfo()
-  

@@ -74,7 +74,7 @@ void Molecule::printInfo(std::ostream &out) {
   out.setf(ios::fixed,ios::floatfield);
   if(this->printLevel_ > 0) {
     out << "Molecular Information:" << endl;
-    out << bannerTop<< endl;
+    out << BannerTop<< endl;
  
     out << std::setw(15) << "nAtoms =" << std::setw(8) << this->nAtoms_
     		<< std::setw(30) << "nElectrons   =" << std::setw(8) << this->nTotalE_
@@ -112,6 +112,7 @@ void Molecule::printInfo(std::ostream &out) {
  
     prettyPrint(out,*this->rIJ_,"Interatomic Distance Matrix (bohr)");
   }
+  out << BannerEnd << endl;
 };
 
 void Molecule::toCOM(int Iop){

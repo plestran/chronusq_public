@@ -85,9 +85,6 @@ def parseMolecule(workers,settings):
   except KeyError:
     pass
 
-  workers["CQMolecule"].printInfo(workers["CQFileIO"])
-
-
 #
 # Read the molecular geometry from input file
 #

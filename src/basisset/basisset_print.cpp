@@ -32,7 +32,7 @@ namespace ChronusQ{
    */ 
   void BasisSet::printHeader(){
     this->fileio_->out << endl << "Basis Set Information:" << endl;;
-    this->fileio_->out << bannerTop << endl;
+    this->fileio_->out << BannerTop << endl;
   } // BasisSet::printHeader
 
   /**
@@ -69,7 +69,7 @@ namespace ChronusQ{
     else                 this->fileio_->out << "No";
     this->fileio_->out << endl;
 
-    this->fileio_->out << bannerEnd<< endl << endl;
+    this->fileio_->out << BannerEnd<< endl << endl;
   } // BasisSet::printMeta
 
 

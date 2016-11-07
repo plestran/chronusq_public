@@ -631,7 +631,8 @@ void AOIntegrals::formP2Transformation(){
     = CORE_HAMILTONIAN.block(
       0,2*nUncontracted,2*nUncontracted,2*nUncontracted);
 
-  prettyPrintSmart(this->fileio_->out,CORE_HAMILTONIAN,"4C Hamiltoninan");
+  if(this->printLevel_ > 3) 
+    prettyPrintSmart(this->fileio_->out,CORE_HAMILTONIAN,"4C Hamiltoninan");
   // ------------------------------
   // Diagonalize 
   // ------------------------------
