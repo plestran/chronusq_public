@@ -28,26 +28,29 @@
 void ChronusQ::CErr(std::ostream & out){
   time_t currentTime;
   time(&currentTime); 
+  libint2::finalize();
   if(getRank() == 0) {
     out << "\"Die Die Die\"" << endl;
     out << "Job terminated: "<<ctime(&currentTime)<<endl;
   }
-  libint2::finalize();
-  exit(EXIT_FAILURE);
+//exit(EXIT_FAILURE);
+  throw std::runtime_error("FATAL");
 }
 void ChronusQ::CErr(std::string msg,std::ostream & out){
   time_t currentTime;
   time(&currentTime); 
+  libint2::finalize();
   if(getRank() == 0) {
     out << msg << endl;
     out << "Job terminated: "<<ctime(&currentTime)<<endl;
   }
-  libint2::finalize();
-  exit(EXIT_FAILURE);
+//exit(EXIT_FAILURE);
+  throw std::runtime_error("FATAL");
 }
 void ChronusQ::CErr(std::exception_ptr eptr,std::ostream & out) {
   time_t currentTime;
   time(&currentTime); 
+  libint2::finalize();
   try {
     if(eptr) std::rethrow_exception(eptr);
   } catch(const std::exception & e) {
@@ -55,13 +58,14 @@ void ChronusQ::CErr(std::exception_ptr eptr,std::ostream & out) {
       out << "Caught \"" << e.what() << "\"" << endl;
       out << "Job terminated: "<<ctime(&currentTime)<<endl;
     }
-    libint2::finalize();
-    exit(EXIT_FAILURE);
+  //exit(EXIT_FAILURE);
+    throw std::runtime_error("FATAL");
   }
 }
 void ChronusQ::CErr(std::exception_ptr eptr,std::string msg,std::ostream & out) {
   time_t currentTime;
   time(&currentTime); 
+  libint2::finalize();
   try {
     if(eptr) std::rethrow_exception(eptr);
   } catch(const std::exception & e) {
@@ -69,7 +73,7 @@ void ChronusQ::CErr(std::exception_ptr eptr,std::string msg,std::ostream & out) 
       out << msg + " caught \"" << e.what() << "\"" << endl;
       out << "Job terminated: "<<ctime(&currentTime)<<endl;
     }
-    libint2::finalize();
-    exit(EXIT_FAILURE);
+  //exit(EXIT_FAILURE);
+    throw std::runtime_error("FATAL");
   }
 }

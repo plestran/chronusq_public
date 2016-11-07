@@ -45,6 +45,10 @@ void AOIntegrals::formP2Transformation(){
   RealMap VUncontracted(
     this->memManager_->malloc<double>(nUnSq),nUncontracted,nUncontracted);
   
+  VUncontracted.setZero();
+  SUncontracted.setZero();
+  TUncontracted.setZero();
+
   //General Scratch
   RealMap nUnSqScratch(
     this->memManager_->malloc<double>(nUnSq),nUncontracted,nUncontracted);
@@ -149,6 +153,7 @@ void AOIntegrals::formP2Transformation(){
   if(this->printLevel_ >= 3){
     prettyPrintSmart(this->fileio_->out,SUncontracted,"S uncontracted");
     prettyPrintSmart(this->fileio_->out,TUncontracted,"T uncontracted");
+    prettyPrintSmart(this->fileio_->out,VUncontracted,"V uncontracted");
   }
 
   // ------------------------------------------------------------------------
@@ -195,6 +200,8 @@ void AOIntegrals::formP2Transformation(){
     if(std::abs(ovlpEigValues[iS]) < 1e-12) nZero++;
 
 //cout << "NZERO " << nZero << endl;
+  if(nZero > 0)
+    CErr("Linear dependencies found in X2C transformation", this->fileio_->out);
   
   // Normalize
   // What happens when we divide by zero?
@@ -407,7 +414,6 @@ void AOIntegrals::formP2Transformation(){
   }
 
   for(auto iAtm = 0; iAtm < this->molecule_->nAtoms(); iAtm++){
-    cout << iAtm << endl;
     AGrid.center() = iAtm;
     AGrid.setRadCutOff(atomRadCutoff[iAtm]);
     AGrid.findNearestNeighbor();
@@ -478,22 +484,22 @@ void AOIntegrals::formP2Transformation(){
 
 
   if(this->printLevel_ >= 3){
-    prettyPrintSmart(cout,P2_Potential,"V");
-    prettyPrintSmart(cout,PVPS,"dot(P,VP)");
-    prettyPrintSmart(cout,PVPX,"cross(P,VP) X");
-    prettyPrintSmart(cout,PVPY,"cross(P,VP) Y");
-    prettyPrintSmart(cout,PVPZ,"cross(P,VP) Z");
-    cout << "|V| = " << P2_Potential.squaredNorm() << endl;
-    cout << "|dot(P,VP)| = " << PVPS.squaredNorm() << endl;
-    cout << "|cross(P,VP) X| = " << PVPX.squaredNorm() << endl;
-    cout << "|cross(P,VP) Y| = " << PVPY.squaredNorm() << endl;
-    cout << "|cross(P,VP) Z| = " << PVPZ.squaredNorm() << endl;
+    prettyPrintSmart(this->fileio_->out,P2_Potential,"V");
+    prettyPrintSmart(this->fileio_->out,PVPS,"dot(P,VP)");
+    prettyPrintSmart(this->fileio_->out,PVPX,"cross(P,VP) X");
+    prettyPrintSmart(this->fileio_->out,PVPY,"cross(P,VP) Y");
+    prettyPrintSmart(this->fileio_->out,PVPZ,"cross(P,VP) Z");
+    this->fileio_->out << "|V| = " << P2_Potential.squaredNorm() << endl;
+    this->fileio_->out << "|dot(P,VP)| = " << PVPS.squaredNorm() << endl;
+    this->fileio_->out << "|cross(P,VP) X| = " << PVPX.squaredNorm() << endl;
+    this->fileio_->out << "|cross(P,VP) Y| = " << PVPY.squaredNorm() << endl;
+    this->fileio_->out << "|cross(P,VP) Z| = " << PVPZ.squaredNorm() << endl;
   }
 
   RealVecMap PMap(ovlpEigValues,nUncontracted);
 
   if(this->printLevel_ >= 3){
-    prettyPrintSmart(cout,PMap,"P^2");
+    prettyPrintSmart(this->fileio_->out,PMap,"P^2");
   }
 
   PMap = 2*PMap;
@@ -510,14 +516,14 @@ void AOIntegrals::formP2Transformation(){
   PVPZ.noalias() = nUnSqScratch * PMap.asDiagonal();
 
   if(this->printLevel_ >= 3){
-    cout << "|dot(P,VP)| = " << PVPS.squaredNorm() << endl;
-    cout << "|cross(P,VP) X| = " << PVPX.squaredNorm() << endl;
-    cout << "|cross(P,VP) Y| = " << PVPY.squaredNorm() << endl;
-    cout << "|cross(P,VP) Z| = " << PVPZ.squaredNorm() << endl;
-    prettyPrintSmart(cout,PVPS,"scaled dot(P,VP)");
-    prettyPrintSmart(cout,PVPX,"scaled cross(P,VP) X");
-    prettyPrintSmart(cout,PVPY,"scaled cross(P,VP) Y");
-    prettyPrintSmart(cout,PVPZ,"scaled cross(P,VP) Z");
+    this->fileio_->out << "|dot(P,VP)| = " << PVPS.squaredNorm() << endl;
+    this->fileio_->out << "|cross(P,VP) X| = " << PVPX.squaredNorm() << endl;
+    this->fileio_->out << "|cross(P,VP) Y| = " << PVPY.squaredNorm() << endl;
+    this->fileio_->out << "|cross(P,VP) Z| = " << PVPZ.squaredNorm() << endl;
+    prettyPrintSmart(this->fileio_->out,PVPS,"scaled dot(P,VP)");
+    prettyPrintSmart(this->fileio_->out,PVPX,"scaled cross(P,VP) X");
+    prettyPrintSmart(this->fileio_->out,PVPY,"scaled cross(P,VP) Y");
+    prettyPrintSmart(this->fileio_->out,PVPZ,"scaled cross(P,VP) Z");
   }
 
   // Apply Boettger Scaling Here?
@@ -598,6 +604,7 @@ void AOIntegrals::formP2Transformation(){
   
   ComplexMap CORE_HAMILTONIAN(this->memManager_->malloc<dcomplex>(16*nUnSq),
     4*nUncontracted,4*nUncontracted);
+  CORE_HAMILTONIAN.setZero();
 
   CORE_HAMILTONIAN.block(0,0,nUncontracted,nUncontracted).real() = P2_Potential;
   CORE_HAMILTONIAN.block(
@@ -624,6 +631,7 @@ void AOIntegrals::formP2Transformation(){
     = CORE_HAMILTONIAN.block(
       0,2*nUncontracted,2*nUncontracted,2*nUncontracted);
 
+  prettyPrintSmart(this->fileio_->out,CORE_HAMILTONIAN,"4C Hamiltoninan");
   // ------------------------------
   // Diagonalize 
   // ------------------------------

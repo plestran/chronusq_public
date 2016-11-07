@@ -441,15 +441,11 @@ void AOIntegrals::computeAOOneE(){
  // -------------------------------
   if (this->doX2C && this->isPrimary) {
     if(this->printLevel_ >= 3){
-      cout << endl <<" Now going into X2C transformation " << endl;
-      }
-    this->formP2Transformation();
-	}
-  else {
-    if(this->printLevel_ >= 3){
-      cout << endl << " Bypassing Relativistic Transformation " << endl;
-	  }
+      this->fileio_->out << endl 
+        <<" Now going into X2C transformation " << endl;
     }
+    this->formP2Transformation();
+  }
   //-----------------------------
   
   if(this->printLevel_ >= 2) this->printOneE();

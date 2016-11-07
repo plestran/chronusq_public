@@ -43,7 +43,7 @@ def parseBasis(workers,basisSettings):
       msg = 'Required keyword BasisSet.' + str(i) + ' not found'
       CErrMsg(workers['CQFileIO'],msg)
   
-  workers["CQBasisSet"] = chronusQ.BasisSet()
+#  workers["CQBasisSet"] = chronusQ.BasisSet()
   basis =  basisSettings['BASIS']
 
   # Make CQ::BasisSet aware of CQ::FileIO

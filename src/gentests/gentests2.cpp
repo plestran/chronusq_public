@@ -127,6 +127,8 @@ void runCQJob(H5::Group &res, std::string &fName, CQMemManager &memManager,
   aoints.communicate(molecule,basis,fileio,memManager);
   singleSlater.communicate(molecule,basis,aoints,fileio,memManager);
 
+  aoints.setPrintLevel(3);
+
   aoints.initMeta();
   singleSlater.initMeta();
   aoints.alloc();
@@ -156,6 +158,7 @@ int main(int argc, char **argv){
 
   CQMemManager memManager;
   memManager.setTotalMem(256e6);
+  memManager.allocMem();
   initCQ(argc,argv);
   
   std::string refFileName("chronusq-ref.bin");
@@ -194,26 +197,30 @@ int main(int argc, char **argv){
   // Which references to test
   std::vector<std::string> rRefs = {"RHF"};
   std::vector<std::string> uRefs = {"UHF"};
-  std::vector<std::string> gRefs = {"GHF"};
+//std::vector<std::string> gRefs = {"GHF", "X2C"};
+  std::vector<std::string> gRefs = { "X2C"};
 
   // Add the DFT counterparts into the reference lists
-  rRefs.insert(rRefs.end(),RKSL.begin(),RKSL.end());
-  uRefs.insert(uRefs.end(),UKSL.begin(),UKSL.end());
+//rRefs.insert(rRefs.end(),RKSL.begin(),RKSL.end());
+//uRefs.insert(uRefs.end(),UKSL.begin(),UKSL.end());
 
+/*
   // Concatinate all reference lists into one list
   std::vector<std::string> refs;
   auto it = refs.end();
   it = refs.insert(it,rRefs.begin(),rRefs.end());
   it = refs.insert(it,uRefs.begin(),uRefs.end());
   it = refs.insert(it,gRefs.begin(),gRefs.end());
+*/
 
 
   // Which basis sets to test
   std::vector<std::string> bases = {"STO-3G","6-31G","cc-pVDZ"};
+//std::vector<std::string> bases = {"6-31G"};
 
   // Field Types
   std::vector<std::string> fieldtps = 
-//    {"NOFIELD","WEAKXFIELD","WEAKYFIELD","WEAKZFIELD"};
+//  {"NOFIELD","WEAKXFIELD","WEAKYFIELD","WEAKZFIELD"};
     {"NOFIELD"};
 
   // SCF Settings
@@ -224,19 +231,116 @@ int main(int argc, char **argv){
 
 
   int testNum = 1;
-  std::vector<H5::Group> groups;  
-  for( auto jbTyp : jobs ){
-    std::string curJbTyp = "/" + jbTyp;
-    groups.emplace_back(RefFile.createGroup(curJbTyp));
+//std::vector<H5::Group> groups;  
+//for( auto jbTyp : jobs ){
+//  std::string curJbTyp = "/" + jbTyp;
+//  groups.emplace_back(RefFile.createGroup(curJbTyp));
+//for( auto fieldtyp : fieldtps ) {
+//  std::string curField = curJbTyp + "/" + fieldtyp;
+//  groups.emplace_back(RefFile.createGroup(curField));
+//for( auto ref : refs ) {
+//  std::string curRef = curField + "/" + ref;
+//  groups.emplace_back(RefFile.createGroup(curRef));
+//for( auto basis : bases ) {
+//  std::string curBasis = curRef + "/" + basis;
+//  groups.emplace_back(RefFile.createGroup(curBasis));
+
+//  std::string lastStr = curBasis;
+
+//  SCFSettings scfSett;
+//  if(!fieldtyp.compare("NOFIELD")) scfSett = defaultSCF;
+//  else if(!fieldtyp.compare("WEAKXFIELD")) scfSett = weakXFieldSCF;
+//  else if(!fieldtyp.compare("WEAKYFIELD")) scfSett = weakYFieldSCF;
+//  else if(!fieldtyp.compare("WEAKZFIELD")) scfSett = weakZFieldSCF;
+
+//  /** Water Test **/
+//  std::string fName = lastStr + "/" + moleculeName<WATER>();
+//  groups.emplace_back(RefFile.createGroup(fName));
+//  
+//  cout << "Running Job " << fName;
+//  runCQJob<double,WATER>(groups.back(),fName,memManager,jbTyp,basis,ref,
+//    scfSett,1, "CORE");
+
+//  std::stringstream linkName;
+//  linkName << "test" <<std::setfill('0') << std::setw(4) << testNum;
+//  H5Lcreate_soft(fName.c_str(),RefFile.getId(),linkName.str().c_str(),
+//    H5P_DEFAULT,H5P_DEFAULT);
+//  testNum++;
+//  cout << " -> " << linkName.str() << endl;
+
+//  // Tests that only make sense using unrestricted references
+//  if(std::find(rRefs.begin(),rRefs.end(),ref) == rRefs.end()){
+//    // O2 Doesnt like to converge in the presence of a field
+//    if(!fieldtyp.compare("NOFIELD")) {
+//      /** O2 Triplet Test **/
+//      fName = lastStr + "/" + moleculeName<O2>();
+//      groups.emplace_back(RefFile.createGroup(fName));
+//     
+//      cout << "Running Job " << fName;
+//      runCQJob<double,O2>(groups.back(),fName,memManager,jbTyp,basis,ref,
+//        scfSett,1,"CORE");
+//      
+//      linkName.str("");
+//      linkName << "test" <<std::setfill('0') << std::setw(4) << testNum;
+//      H5Lcreate_soft(fName.c_str(),RefFile.getId(),linkName.str().c_str(),
+//        H5P_DEFAULT,H5P_DEFAULT);
+//      testNum++;
+//      cout << " -> " << linkName.str() << endl;
+//    }
+
+//    /** Li Test **/
+//    fName = lastStr + "/" + moleculeName<Li>();
+//    groups.emplace_back(RefFile.createGroup(fName));
+
+//    cout << "Running Job " << fName;
+//    runCQJob<double,Li>(groups.back(),fName,memManager,jbTyp,basis,ref,
+//      scfSett,1,"CORE");
+//    
+//    linkName.str("");
+//    linkName << "test" <<std::setfill('0') << std::setw(4) << testNum;
+//    H5Lcreate_soft(fName.c_str(),RefFile.getId(),linkName.str().c_str(),
+//      H5P_DEFAULT,H5P_DEFAULT);
+//    testNum++;
+//    cout << " -> " << linkName.str() << endl;
+//  }
+//}
+//}
+//}
+//}
+  
+  // Define reference to test for real and complex
+  std::vector<std::string> realRefs,complexRefs;
+  // RHF, UHF, RKS, UKS for Real
+  auto it = realRefs.end();
+//it = realRefs.insert(it,rRefs.begin(),rRefs.end());
+//it = realRefs.insert(it,uRefs.begin(),uRefs.end());
+
+  // RHF, UHF, GHF, X2C, RKS, UKS for Complex
+  it = complexRefs.end();
+//it = complexRefs.insert(it,rRefs.begin(),rRefs.end());
+//it = complexRefs.insert(it,uRefs.begin(),uRefs.end());
+  it = complexRefs.insert(it,gRefs.begin(),gRefs.end());
+
+
+  H5::Group realTests(RefFile.createGroup("/REAL"));
+  H5::Group complexTests(RefFile.createGroup("/COMPLEX"));
+
+  // Water SCF Tests
+  for( auto fld : {std::string("REAL"),std::string("COMPLEX")} ){
+    std::string curJbTyp = "/" + fld + "/SCF";
+    H5::Group jbGroup(RefFile.createGroup(curJbTyp));
   for( auto fieldtyp : fieldtps ) {
     std::string curField = curJbTyp + "/" + fieldtyp;
-    groups.emplace_back(RefFile.createGroup(curField));
-  for( auto ref : refs ) {
+    H5::Group fldGroup(RefFile.createGroup(curField));
+    std::vector<std::string> curRefs;
+    if(!fld.compare("REAL")) curRefs = realRefs;
+    else curRefs = complexRefs;
+  for( auto ref : curRefs ) {
     std::string curRef = curField + "/" + ref;
-    groups.emplace_back(RefFile.createGroup(curRef));
+    H5::Group refGroup(RefFile.createGroup(curRef));
   for( auto basis : bases ) {
     std::string curBasis = curRef + "/" + basis;
-    groups.emplace_back(RefFile.createGroup(curBasis));
+    H5::Group basisGroup(RefFile.createGroup(curBasis));
 
     std::string lastStr = curBasis;
 
@@ -246,13 +350,16 @@ int main(int argc, char **argv){
     else if(!fieldtyp.compare("WEAKYFIELD")) scfSett = weakYFieldSCF;
     else if(!fieldtyp.compare("WEAKZFIELD")) scfSett = weakZFieldSCF;
 
-    /** Water Test **/
     std::string fName = lastStr + "/" + moleculeName<WATER>();
-    groups.emplace_back(RefFile.createGroup(fName));
+    H5::Group waterGroup(RefFile.createGroup(fName));
     
     cout << "Running Job " << fName;
-    runCQJob<double,WATER>(groups.back(),fName,memManager,jbTyp,basis,ref,
-      scfSett,1, "CORE");
+    if(!fld.compare("REAL"))
+      runCQJob<double,WATER>(waterGroup,fName,memManager,"SCF",basis,ref,
+        scfSett,1, "CORE");
+    else 
+      runCQJob<dcomplex,WATER>(waterGroup,fName,memManager,"SCF",basis,ref,
+        scfSett,1, "CORE");
 
     std::stringstream linkName;
     linkName << "test" <<std::setfill('0') << std::setw(4) << testNum;
@@ -260,47 +367,11 @@ int main(int argc, char **argv){
       H5P_DEFAULT,H5P_DEFAULT);
     testNum++;
     cout << " -> " << linkName.str() << endl;
+  }
+  }
+  }
+  }
 
-    // Tests that only make sense using unrestricted references
-    if(std::find(rRefs.begin(),rRefs.end(),ref) == rRefs.end()){
-      // O2 Doesnt like to converge in the presence of a field
-      if(!fieldtyp.compare("NOFIELD")) {
-        /** O2 Triplet Test **/
-        fName = lastStr + "/" + moleculeName<O2>();
-        groups.emplace_back(RefFile.createGroup(fName));
-       
-        cout << "Running Job " << fName;
-        runCQJob<double,O2>(groups.back(),fName,memManager,jbTyp,basis,ref,
-          scfSett,1,"CORE");
-        
-        linkName.str("");
-        linkName << "test" <<std::setfill('0') << std::setw(4) << testNum;
-        H5Lcreate_soft(fName.c_str(),RefFile.getId(),linkName.str().c_str(),
-          H5P_DEFAULT,H5P_DEFAULT);
-        testNum++;
-        cout << " -> " << linkName.str() << endl;
-      }
-
-      /** Li Test **/
-      fName = lastStr + "/" + moleculeName<Li>();
-      groups.emplace_back(RefFile.createGroup(fName));
-
-      cout << "Running Job " << fName;
-      runCQJob<double,Li>(groups.back(),fName,memManager,jbTyp,basis,ref,
-        scfSett,1,"CORE");
-      
-      linkName.str("");
-      linkName << "test" <<std::setfill('0') << std::setw(4) << testNum;
-      H5Lcreate_soft(fName.c_str(),RefFile.getId(),linkName.str().c_str(),
-        H5P_DEFAULT,H5P_DEFAULT);
-      testNum++;
-      cout << " -> " << linkName.str() << endl;
-    }
-  }
-  }
-  }
-  }
-  
 /*
   H5::DataSet tmp(RefFile.openDataSet("test0001/Output"));
   std::vector<char> buffer(tmp.getStorageSize());

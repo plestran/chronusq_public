@@ -90,6 +90,7 @@ def runCQ(ifname,ofname):
   if 'SCF' in secDict:
     parseSCF(workers,secDict['SCF'])
 
+  workers["CQBasisSet"] = chronusQ.BasisSet()
   if 'MISC' in secDict:
     parseMisc(workers,secDict['MISC'])
   parseBasis(workers,secDict['BASIS'])
