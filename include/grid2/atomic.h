@@ -19,7 +19,7 @@ class AtomicGrid : public TwoDGrid2 {
   double radCutOff_;
   RealMatrix *rIJ_;
 
-  std::vector<double> partitionScratch_;
+  std::vector<std::vector<double>> partitionScratch_;
 
   double evalPartitionWeight(cartGP&);
   double hBecke(double x);
@@ -50,7 +50,10 @@ class AtomicGrid : public TwoDGrid2 {
       centerIndx_(centerIndx),
       radCutOff_(radCutOff),
       scalingFactor_(scalingFactor) { 
-        this->partitionScratch_.resize(this->centers_.size(),0.0);
+        this->partitionScratch_.resize(omp_get_max_threads());
+        for(auto i = 0; i < omp_get_max_threads();i++)
+          this->partitionScratch_[i].resize(this->centers_.size());
+  
     };
 
     inline IntegrationPoint operator[](size_t i) {

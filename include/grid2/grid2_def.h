@@ -95,15 +95,25 @@ public:
         T& result) {
       std::size_t NSkip(0);
       this->breakInt_ = false;
+      int nthreads = omp_get_max_threads();
+      #pragma omp parallel
+      {
+      int thread_id = omp_get_thread_num();
       for(auto iPt = 0; iPt < this->nPts_; iPt++){
+/*
         if(this->breakInt_) {
           NSkip += this->nPts_ - iPt;
           break;
         }
+*/
+        if(iPt % nthreads != thread_id) continue;
         IntegrationPoint IP((*this)[iPt]);
         if(IP.evalpt){
           func(IP,result);
-        } else NSkip++;
+        } else {
+//        cout << "Screened " << IP.I << " " << IP.J << endl;
+        };
+      }
       }
 //  cout << " NSkip by partition = " << NSkip << endl;
     };

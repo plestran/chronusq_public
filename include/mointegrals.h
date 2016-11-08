@@ -11,6 +11,9 @@ template <typename T>
 class MOIntegrals {
   typedef Tensor<T,Range4d> TTensor4d; 
   typedef Tensor<T,Range2d> TTensor2d; 
+  typedef Eigen::Matrix<T,Dynamic,Dynamic,ColMajor> TMatrix;
+  typedef Eigen::Map<TMatrix> TMap;
+  typedef Eigen::Matrix<T,Dynamic,1,ColMajor> TVec;
 
   CQMemManager    *memManager_;
   WaveFunction<T> *wfn_; ///< WaveFunction object for MOs

@@ -94,6 +94,7 @@ enum DFT {
   USERDEFINED,
   SLATER,
   B88,
+  pbe,
   LSDA,
   SVWN5,
   BLYP,
@@ -458,7 +459,7 @@ public:
     // Extrapolation
     this->doDIIS       = true;
     this->doDMS        = false;
-    this->nDIISExtrap_ = 20;
+    this->nDIISExtrap_ = 10;
     this->iDIISStart_  = 0;
     this->diisAlg_     = DIIS_ALGORITHM::NO_DIIS_SET;
 
@@ -555,6 +556,8 @@ public:
 
   inline void setITPdt(double x)          { this->dt = x;              }; 
 
+  inline void setNDIISKeep(int x)         { this->nDIISExtrap_ = x;    };
+
   inline void setField(std::array<double,3> field){ 
     this->elecField_ = field;  
   };
@@ -639,6 +642,7 @@ public:
   void createSVWN5();  ///< Generate all parameters for SVWN5
   void createBLYP();   ///< Generate all parameters for BLYP
   void createB88();    ///< Generate all parameters for B88
+  void createPBE();    ///< Generate all parameters for PBE
   void createB3LYP();  ///< Generate all parameters for B3LYP
   void createBHandH(); ///< Generate all parameters for BHandH
 

@@ -359,9 +359,11 @@ void FOPPropagator<T>::formFull() {
   //this->matrixType_ = NON_HERMETIAN;
   }
 
+/*
   VectorXd Eig = phys.eVPerHartree*Full.eigenvalues().real();
   std::sort(Eig.data(),Eig.data()+Eig.size());
   prettyPrintSmart(cout,Eig,"E");
+*/
   
 //CErr();
 }

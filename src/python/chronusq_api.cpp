@@ -65,6 +65,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
 
     .def("addSlater", &SingleSlater<double>::addSlater )
     .def("addB88", &SingleSlater<double>::addB88 )
+    .def("addPBE", &SingleSlater<double>::addPBE )
     .def("addLYP", &SingleSlater<double>::addLYP )
     .def("addVWN5", &SingleSlater<double>::addVWN5 )
     .def("addVWN3", &SingleSlater<double>::addVWN3 )
@@ -125,6 +126,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
 
     .def("addSlater", &SingleSlater<dcomplex>::addSlater )
     .def("addB88", &SingleSlater<dcomplex>::addB88 )
+    .def("addPBE", &SingleSlater<dcomplex>::addPBE )
     .def("addLYP", &SingleSlater<dcomplex>::addLYP )
     .def("addVWN5", &SingleSlater<dcomplex>::addVWN5 )
     .def("addVWN3", &SingleSlater<dcomplex>::addVWN3 )

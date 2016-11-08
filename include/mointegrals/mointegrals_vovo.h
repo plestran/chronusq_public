@@ -196,8 +196,11 @@ void MOIntegrals<T>::form2CVOVO() {
   VOVO_ = this->memManager_->template malloc<T>(NO*NV*NO*NV);
   std::fill_n(VOVO_,NO*NV*NO*NV,0.);
 
+  T* tmp1 = this->memManager_->template malloc<T>(NO*NV*NB*NB);
+  std::fill_n(tmp1,NO*NV*NB*NB,0.0);
 
 /*
+  // N^8 Algorithm
   for(auto j = 0; j < NO; j++)
   for(auto b = 0; b < NV; b++)
   for(auto i = 0; i < NO; i++)
@@ -223,60 +226,63 @@ void MOIntegrals<T>::form2CVOVO() {
       std::conj((*wfn_->moA())(lm+1,b+NO)) * (*wfn_->moA())(sg+1,j) 
       ) * (*wfn_->aointegrals()->aoERI_)(mu/2,nu/2,lm/2,sg/2);
   }
-//cout << a << " " << i << " " << b << " " << j << " " << VOVO_[a + i*NV + b*NO*NV + j*NV*NO*NV] << endl;
   }
 */
 
-  T* tmp1 = this->memManager_->template malloc<T>(NO*NV*NB*NB);
-  std::fill_n(tmp1,NO*NV*NB*NB,0.0);
 
-  for(auto sg = 0; sg < 2*NB; sg+=2)
-  for(auto lm = 0; lm < 2*NB; lm+=2)
-  for(auto i = 0; i < NO; i++)
-  for(auto a = 0; a < NV; a++) {
-  cout << "a  = " << a << "/" << NV << " ";
-  cout << "i  = " << i << "/" << NO << " ";
-  cout << "lm = " << lm/2 << "/" << NB << " ";
-  cout << "sg = " << sg/2 << "/" << NB << " ";
-  cout << endl;
 
-  for(auto nu = 0; nu < 2*NB; nu+=2)
-  for(auto mu = 0; mu < 2*NB; mu+=2){
+  int nDo = 200;
+ 
+  TMap scr(this->memManager_->template malloc<T>(nDo*NB*NB),NB*NB,nDo);
+  TMap scr2(this->memManager_->template malloc<T>(4*NB*NB),2*NB,2*NB);
+  RealMap aoERI(&this->wfn_->aointegrals()->aoERI_->storage()[0],NB*NB,NB*NB);
+  Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> > 
+    SAA(scr2.data(),NB,NB,Eigen::Stride<Dynamic,Dynamic>(4*NB,2));
+  Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> > 
+    SBB(scr2.data()+2*NB+1,NB,NB,Eigen::Stride<Dynamic,Dynamic>(4*NB,2));
 
-    tmp1[a + i*NV + (lm/2)*NO*NV + (sg/2)*NV*NO*NB] +=
-      (
-      std::conj((*wfn_->moA())(mu,a+NO)) * (*wfn_->moA())(nu,i) +
-      std::conj((*wfn_->moA())(mu+1,a+NO)) * (*wfn_->moA())(nu+1,i) 
-      ) * (*wfn_->aointegrals()->aoERI_)(mu/2,nu/2,lm/2,sg/2);
+  std::vector<TMap> scrMaps;
+  for(auto iDo = 0; iDo < nDo; iDo++) 
+    scrMaps.emplace_back(scr.data()+iDo*NB*NB,NB,NB);
+
+  this->wfn_->fileio()->out << "Begining First Half Transformation AIBJ"
+    << endl;
+  for(auto bj = 0; bj < NV*NO; bj+=nDo) {
+    auto NDo = std::min(nDo, NO*NV-bj);
+    for(auto iDo = 0, BJ = bj; iDo < NDo; iDo++, BJ++){ 
+      int b = BJ % NV;
+      int j = BJ / NV;
+      scr2.noalias() = 
+        wfn_->moA()->col(b+NO).conjugate() * wfn_->moA()->col(j).transpose();
+      scrMaps[iDo].noalias() = SAA + SBB;
+    }
+
+    TMap TMPMAP(tmp1+bj*NB*NB,NB*NB,NDo);
+    TMPMAP.noalias() = aoERI * scr.block(0,0,NB*NB,NDo);
   }
-//cout << a << " " << i << " " << b << " " << j << " " << VOVO_[a + i*NV + b*NO*NV + j*NV*NO*NV] << endl;
-  }
+ 
+  this->wfn_->fileio()->out << "Begining Second Half Transformation AIBJ"
+    << endl;
+  TMap TMPMAP(tmp1,NB*NB,NO*NV);
+  TMap VOVOMAP(VOVO_,NO*NV,NO*NV);
+  for(auto ai = 0; ai < NV*NO; ai+=nDo) {
+    auto NDo = std::min(nDo, NO*NV - ai);
+    for(auto iDo = 0, AI = ai; iDo < NDo; iDo++, AI++){ 
+      int a = AI % NV;
+      int i = AI / NV;
+      scr2.noalias() = 
+        wfn_->moA()->col(a+NO).conjugate() * wfn_->moA()->col(i).transpose();
+      scrMaps[iDo].noalias() = SAA + SBB;
+    }
 
-
-  for(auto j = 0; j < NO; j++)
-  for(auto b = 0; b < NV; b++)
-  for(auto i = 0; i < NO; i++)
-  for(auto a = 0; a < NV; a++) {
-  cout << "a = " << a << "/" << NV << " ";
-  cout << "i = " << i << "/" << NO << " ";
-  cout << "b = " << b << "/" << NV << " ";
-  cout << "j = " << j << "/" << NO << " ";
-  cout << endl;
-
-  for(auto sg = 0; sg < 2*NB; sg+=2)
-  for(auto lm = 0; lm < 2*NB; lm+=2){
-
-    VOVO_[a + i*NV + b*NO*NV + j*NV*NO*NV] +=
-      (
-      std::conj((*wfn_->moA())(lm,b+NO)) * (*wfn_->moA())(sg,j) +
-      std::conj((*wfn_->moA())(lm+1,b+NO)) * (*wfn_->moA())(sg+1,j) 
-      ) * tmp1[a + i*NV + (lm/2)*NO*NV + (sg/2)*NV*NO*NB];
-  }
-//cout << a << " " << i << " " << b << " " << j << " " << VOVO_[a + i*NV + b*NO*NV + j*NV*NO*NV] << endl;
+    VOVOMAP.block(ai,0,NDo,NO*NV).noalias() = 
+      scr.block(0,0,NB*NB,NDo).transpose() * TMPMAP;
   }
 
 
   this->memManager_->free(tmp1,NO*NV*NB*NB);
+  this->memManager_->free(scr.data(),nDo*NB*NB);
+  this->memManager_->free(scr2.data(),4*NB*NB);
 
   this->haveMOVOVO_ = true;
 }; // form2CVOVO

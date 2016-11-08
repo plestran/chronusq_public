@@ -224,6 +224,7 @@ int main(int argc, char **argv){
 
 
   int testNum = 1;
+  int testNProcs = 7;
   std::vector<H5::Group> groups;  
   for( auto jbTyp : jobs ){
     std::string curJbTyp = "/" + jbTyp;
@@ -252,7 +253,7 @@ int main(int argc, char **argv){
     
     cout << "Running Job " << fName;
     runCQJob<double,WATER>(groups.back(),fName,memManager,jbTyp,basis,ref,
-      scfSett,1, CORE);
+      scfSett,testNProcs, CORE);
 
     std::stringstream linkName;
     linkName << "test" <<std::setfill('0') << std::setw(4) << testNum;
@@ -271,7 +272,7 @@ int main(int argc, char **argv){
        
         cout << "Running Job " << fName;
         runCQJob<double,O2>(groups.back(),fName,memManager,jbTyp,basis,ref,
-          scfSett,1,CORE);
+          scfSett,testNProcs,CORE);
         
         linkName.str("");
         linkName << "test" <<std::setfill('0') << std::setw(4) << testNum;
@@ -287,7 +288,7 @@ int main(int argc, char **argv){
 
       cout << "Running Job " << fName;
       runCQJob<double,Li>(groups.back(),fName,memManager,jbTyp,basis,ref,
-        scfSett,1,CORE);
+        scfSett,testNProcs,CORE);
       
       linkName.str("");
       linkName << "test" <<std::setfill('0') << std::setw(4) << testNum;
@@ -301,14 +302,12 @@ int main(int argc, char **argv){
   }
   }
   
-/*
-  H5::DataSet tmp(RefFile.openDataSet("test0001/Output"));
+  H5::DataSet tmp(RefFile.openDataSet("test0008/Output"));
   std::vector<char> buffer(tmp.getStorageSize());
   
   tmp.read(&buffer[0],H5::PredType::NATIVE_CHAR);
 
   for(auto X : buffer) cout << X ;
-*/
   
   finalizeCQ();
   return 0;

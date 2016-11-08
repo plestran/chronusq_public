@@ -159,8 +159,9 @@ void BasisSet::computeMeta(){
   } // loop shell
 
   // Always allocate scratch for basis eval and first derivatives
-  this->basisEvalScr_.resize(2*((this->maxL_+1)*(this->maxL_+2))); // (1 + 3(x,y,z)) Times (l+1)(l+2)/2 Cartesian
-  this->basisEvalScr2_.resize(4*((2*this->maxL_+1))); // (1 + 3(x,y,z)) Times (2l+1) Cartesian
+  int nthreads = omp_get_max_threads();
+  this->basisEvalScr_.resize(2*nthreads*((this->maxL_+1)*(this->maxL_+2))); // (1 + 3(x,y,z)) Times (l+1)(l+2)/2 Cartesian
+  this->basisEvalScr2_.resize(4*nthreads*((2*this->maxL_+1))); // (1 + 3(x,y,z)) Times (2l+1) Cartesian
 
 } // BasisSet::computeMeta
 }; // namespace ChronusQ
