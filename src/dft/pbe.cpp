@@ -14,7 +14,7 @@ DFTFunctional(X,eps){
 
   this->name = "PBE";
 #ifdef CQ_ENABLE_LIBXC
-  xc_func_init(&this->func,XC_GGA_X_B88,XC_POLARIZED);
+  xc_func_init(&this->func,XC_GGA_X_PBE,XC_POLARIZED);
 #endif
 };
 
