@@ -2,23 +2,22 @@
 
 PBE::PBE(double X, double eps):
 DFTFunctional(X,eps){
-// Memo Factor to be added at the end for numerical stability
-  this->CxVx      = -(3.0/2.0)*(std::pow((3.0/(4.0*math.pi)),(1.0/3.0)));  
+// Factor for not spinpolarized. Different from the one used in Slater for spin polarized. Eq2 from Barone J. Chem. Phys. 108, 664 (1998); 
+  this->CxVx      = -(3.0/2.0)*(std::pow((3.0/(4.0*math.pi)),(1.0/3.0))); 
   this-> d1over3  = 1.0/3.0;
   this-> d4over3  = 4.0/3.0;
-  this-> mu       =  0.2195102405736;
-  this-> kappa    =  0.8040004238;
-  this-> Ckf      =  std::pow((math.pi*math.pi*6.0),(this->d1over3));
-//  this-> Ckf       =  std::pow((math.pi*math.pi*3.0),(this->d1over3));
-//  cout << "B88 object created " <<endl;
-
-  this->name = "PBE";
+  this-> mu       =  0.2195102405736; // PRL 77, 18 pg 3865 kappa page 3867
+  this-> kappa    =  0.8040004238; // PRL 77, 18 pg 3865 kappa page 3867
+  this-> Ckf      =  std::pow((math.pi*math.pi*6.0),(this->d1over3)); // Precator of Fermi wave number but it has 6 instead of 3
+  this->name = "PBE_X";
 #ifdef CQ_ENABLE_LIBXC
   xc_func_init(&this->func,XC_GGA_X_PBE,XC_POLARIZED);
 #endif
 };
 
 double PBE::g0 (double x,double &den){
+// Eq 14 PRL 77, 18 pg 3865 kappa page 3866
+// Note,I factored in the LDA factor 
   double gx;
   den  = this->mu * x * x;
   den /= this->kappa;
@@ -30,6 +29,8 @@ double PBE::g0 (double x,double &den){
 };  //End Form g(x) or F9in Barone)
 
 double PBE::g1 (double x, double &den){
+// Derivative rispect to x( s in the paper)  of Eq 14 PRL 77, 18 pg 3865 kappa page 3866
+// Note.I factored in the LDA factor 
   double gx;
   gx = 2.0 * this->mu * x ;
   gx /= (den*den);
@@ -46,13 +47,15 @@ DFTFunctional::DFTInfo PBE::eval(const double &rhoA, const double &rhoB, const d
   spindensity         /= (rhoA + rhoB);
   double rhoA1ov3 = std::pow(rhoA,this->d1over3);
   double rhoB1ov3 ;
-//rhoA4ov3 = std::pow(rhoA,this->d4over3);
   double rhoA4ov3 = rhoA1ov3 * rhoA; 
   double rhoB4ov3 ; 
   if(std::abs(spindensity) > this->small) {
     rhoB1ov3 = std::pow(rhoB,this->d1over3);
     rhoB4ov3 = rhoB1ov3 * rhoB; 
   }
+// x = s of paper PRL 77, 18 pg 3865 kappa page 3866 
+// s = | MOD(GRAD(rho)) / 2 * Kf * rho
+// where Kf (Fermi wavenumber) = Ckf * rho^(1/3) 
   double xA   = std::sqrt(gammaAA) / (2.0 * this->Ckf*rhoA4ov3); 
   double xB ;
   double den;
