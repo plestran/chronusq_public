@@ -22,7 +22,8 @@ void RealTime<T>::formUTrans() {
 //  this->ssPropagator_->fockOrtho()[0]->printMATLAB(cout);
     ssPropagator_->populateMO4Diag();
     ssPropagator_->diagFock2();
-    
+//  ssPropagator_->printFock();
+//  prettyPrintSmart(this->fileio_->out,*ssPropagator_->moA(),"MO"); 
     ComplexMap S(NBTSqScratch_,NBT,NBT);
 
     std::copy_n(ssPropagator_->moA()->data(),NBT*NBT,NBTSqScratch_);
@@ -33,10 +34,12 @@ void RealTime<T>::formUTrans() {
       double arg = deltaT_ * (*ssPropagator_->epsA())(i);
       S.col(i) *= dcomplex(std::cos(arg),-std::sin(arg));
     }
+//  prettyPrintSmart(this->fileio_->out,S,"S after scale");
 
     if(this->ssPropagator_->nTCS() == 2) {
-      ComplexMap S2(NBTSqScratch_,NBT,NBT);
+      ComplexMap S2(NBTSqScratch2_,NBT,NBT);
       S2.noalias() = S * ssPropagator_->moA()->adjoint();
+//    prettyPrintSmart(this->fileio_->out,S2,"S2 after GEMM");
 
       std::vector<std::reference_wrapper<ComplexMap>> Us;
       Us.emplace_back(UTransScalar);
@@ -45,6 +48,7 @@ void RealTime<T>::formUTrans() {
       Us.emplace_back(UTransMx);
 
       Quantum<dcomplex>::spinScatter(S2,Us);
+//    prettyPrintSmart(this->fileio_->out,S2,"Full Prop");
     } else {
       // Temporarily store UA in UScalar
       UTransScalar.noalias() = S * ssPropagator_->moA()->adjoint();
