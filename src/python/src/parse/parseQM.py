@@ -125,6 +125,11 @@ def handleReference(workers,settings):
   else:
     workers["CQSingleSlater"].setRef(str(ref[0]))
 
+  if 'DFT_NRAD' in settings:
+    workers["CQSingleSlater"].setDFTNRad(settings['DFT_NRAD'])
+  if 'DFT_NANG' in settings:
+    workers["CQSingleSlater"].setDFTNAng(settings['DFT_NANG'])
+
 
 def parseRT(workers,secDict):
 

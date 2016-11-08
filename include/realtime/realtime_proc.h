@@ -1,22 +1,23 @@
 template <typename T>
 void RealTime<T>::doPropagation() {
 
-  this->printRTHeader();
-  bool Start; // Start the MMUT iterations
-  bool FinMM; // Wrap up the MMUT iterations
+  bool Start(false); // Start the MMUT iterations
+  bool FinMM(false); // Wrap up the MMUT iterations
 
   currentTime_ = 0.0;
 
   initCSV();
 
   // Logic for Delta pulse
-  if(this->tOff_ != 0 and (this->tOff_ - this->tOn_) < this->stepSize_){
-    this->tOff_ = this->stepSize_; 
-  }
+//if(this->tOff_ != 0 and (this->tOff_ - this->tOn_) < this->stepSize_){
+//  this->tOff_ = this->stepSize_; 
+//}
+  this->printRTHeader();
 
-  for(auto iStep = 0ul; iStep < maxSteps_; iStep++) {
+  for(auto iStep = 0ul; iStep <= maxSteps_; iStep++) {
 
     // Logic for MMUT restart
+    /*
     if(iRstrt_ > 0) {
       Start = (iStep == 0) or (iStep % iRstrt_) == 0;
       FinMM = (iStep + 1) % iRstrt_ == 0;
@@ -24,7 +25,18 @@ void RealTime<T>::doPropagation() {
       Start = (iStep == 0);
       FinMM = (iStep == maxSteps_);
     }
-    if(Start) this->fileio_->out << "RESTARTING MMUT" << endl;
+    */
+    Start = (iStep == 0);
+    Start = Start or FinMM;
+    if(iRstrt_ > 0) Start = Start or (iStep % iRstrt_) == 0;
+    
+    FinMM = (iStep == maxSteps_);
+    FinMM = FinMM or (tOff_ != 0.0 and currentTime_ > tOff_ and currentTime_ <= tOff_ + stepSize_);
+    if(iRstrt_ > 0) FinMM = FinMM or ( (iStep + 1) % iRstrt_ == 0 );
+
+
+    if(Start) this->fileio_->out << "  *** STARTING MMUT ***" << endl;
+    if(FinMM) this->fileio_->out << "  *** FINISHING MMUT ***" << endl;
 
     // Initial entry into MMUT
     if(Start or FinMM) {

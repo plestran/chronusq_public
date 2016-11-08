@@ -127,8 +127,6 @@ void runCQJob(H5::Group &res, std::string &fName, CQMemManager &memManager,
   aoints.communicate(molecule,basis,fileio,memManager);
   singleSlater.communicate(molecule,basis,aoints,fileio,memManager);
 
-  aoints.setPrintLevel(3);
-
   aoints.initMeta();
   singleSlater.initMeta();
   aoints.alloc();
@@ -197,12 +195,12 @@ int main(int argc, char **argv){
   // Which references to test
   std::vector<std::string> rRefs = {"RHF"};
   std::vector<std::string> uRefs = {"UHF"};
-//std::vector<std::string> gRefs = {"GHF", "X2C"};
-  std::vector<std::string> gRefs = { "X2C"};
+  std::vector<std::string> gRefs = {"GHF", "X2C"};
+//std::vector<std::string> gRefs = { "X2C"};
 
   // Add the DFT counterparts into the reference lists
-//rRefs.insert(rRefs.end(),RKSL.begin(),RKSL.end());
-//uRefs.insert(uRefs.end(),UKSL.begin(),UKSL.end());
+  rRefs.insert(rRefs.end(),RKSL.begin(),RKSL.end());
+  uRefs.insert(uRefs.end(),UKSL.begin(),UKSL.end());
 
 /*
   // Concatinate all reference lists into one list
@@ -220,8 +218,8 @@ int main(int argc, char **argv){
 
   // Field Types
   std::vector<std::string> fieldtps = 
-//  {"NOFIELD","WEAKXFIELD","WEAKYFIELD","WEAKZFIELD"};
-    {"NOFIELD"};
+    {"NOFIELD","WEAKXFIELD","WEAKYFIELD","WEAKZFIELD"};
+//  {"NOFIELD"};
 
   // SCF Settings
   SCFSettings defaultSCF{std::array<double,3>({0.0,0.0,0.0})};
@@ -312,13 +310,13 @@ int main(int argc, char **argv){
   std::vector<std::string> realRefs,complexRefs;
   // RHF, UHF, RKS, UKS for Real
   auto it = realRefs.end();
-//it = realRefs.insert(it,rRefs.begin(),rRefs.end());
-//it = realRefs.insert(it,uRefs.begin(),uRefs.end());
+  it = realRefs.insert(it,rRefs.begin(),rRefs.end());
+  it = realRefs.insert(it,uRefs.begin(),uRefs.end());
 
   // RHF, UHF, GHF, X2C, RKS, UKS for Complex
   it = complexRefs.end();
-//it = complexRefs.insert(it,rRefs.begin(),rRefs.end());
-//it = complexRefs.insert(it,uRefs.begin(),uRefs.end());
+  it = complexRefs.insert(it,rRefs.begin(),rRefs.end());
+  it = complexRefs.insert(it,uRefs.begin(),uRefs.end());
   it = complexRefs.insert(it,gRefs.begin(),gRefs.end());
 
 
@@ -329,8 +327,11 @@ int main(int argc, char **argv){
   for( auto fld : {std::string("REAL"),std::string("COMPLEX")} ){
     std::string curJbTyp = "/" + fld + "/SCF";
     H5::Group jbGroup(RefFile.createGroup(curJbTyp));
+  for( auto para : {std::string("SERIAL")}) {
+    std::string curPara = curJbTyp + "/" + para;
+    H5::Group paraGroup(RefFile.createGroup(curPara));
   for( auto fieldtyp : fieldtps ) {
-    std::string curField = curJbTyp + "/" + fieldtyp;
+    std::string curField = curPara + "/" + fieldtyp;
     H5::Group fldGroup(RefFile.createGroup(curField));
     std::vector<std::string> curRefs;
     if(!fld.compare("REAL")) curRefs = realRefs;
@@ -342,6 +343,9 @@ int main(int argc, char **argv){
     std::string curBasis = curRef + "/" + basis;
     H5::Group basisGroup(RefFile.createGroup(curBasis));
 
+    if(!basis.compare("cc-pVDZ") and !ref.compare("X2C"))
+      continue;
+
     std::string lastStr = curBasis;
 
     SCFSettings scfSett;
@@ -350,16 +354,19 @@ int main(int argc, char **argv){
     else if(!fieldtyp.compare("WEAKYFIELD")) scfSett = weakYFieldSCF;
     else if(!fieldtyp.compare("WEAKZFIELD")) scfSett = weakZFieldSCF;
 
+    int nCores = 1;
+    if(!para.compare("SMP")) nCores = 2;
+
     std::string fName = lastStr + "/" + moleculeName<WATER>();
     H5::Group waterGroup(RefFile.createGroup(fName));
     
     cout << "Running Job " << fName;
     if(!fld.compare("REAL"))
       runCQJob<double,WATER>(waterGroup,fName,memManager,"SCF",basis,ref,
-        scfSett,1, "CORE");
+        scfSett,nCores, "CORE");
     else 
       runCQJob<dcomplex,WATER>(waterGroup,fName,memManager,"SCF",basis,ref,
-        scfSett,1, "CORE");
+        scfSett,nCores, "CORE");
 
     std::stringstream linkName;
     linkName << "test" <<std::setfill('0') << std::setw(4) << testNum;
@@ -367,6 +374,7 @@ int main(int argc, char **argv){
       H5P_DEFAULT,H5P_DEFAULT);
     testNum++;
     cout << " -> " << linkName.str() << endl;
+  }
   }
   }
   }
