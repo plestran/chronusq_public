@@ -58,21 +58,12 @@ DFTFunctional::DFTInfo PBE::eval(const double &rhoA, const double &rhoB, const d
   double den;
   double g0 = this->g0(xA,den);
   double g1 = this->g1(xA,den);
-/*
-  cout << "Ax " <<this->CxVx << endl;
-  cout << "b "  <<this->b << endl;
-  cout << "c "  <<this->c << endl;
-  cout << "d "  <<this->d << endl;
-  cout << "beta "  <<this->beta << endl;
-  cout << "xA " <<xA << " g0 " << g0 << " g1 " << g1 <<endl;
-*/
   info.eps        = rhoA4ov3*g0;
   info.ddrhoA     = g0 - xA*g1;
   info.ddrhoA    *= this->d4over3*rhoA1ov3;
   info.ddgammaAA  = g1/(4.0*this->Ckf*std::sqrt(gammaAA));
   if(std::abs(spindensity) > this->small) {
     //Open Shell
-  //Paper  xB   = gammaBB / rhoA4ov3; 
     xB   = std::sqrt(gammaBB) / (2.0 * this->Ckf*rhoB4ov3); 
     g0 = this->g0(xB,den);
     g1 = this->g1(xB,den);
@@ -87,69 +78,8 @@ DFTFunctional::DFTInfo PBE::eval(const double &rhoA, const double &rhoB, const d
     info.ddrhoB     = info.ddrhoA;
     info.ddgammaBB  = info.ddgammaAA;
   }
-//  cout <<  "eps " <<info.eps << endl ;
-//  cout <<  "ddrhoA " <<info.ddrhoA << endl ;
-//  cout <<  "ddrhoB " <<info.ddrhoB << endl ;
-//  cout <<  "ddgammaAA" <<info.ddgammaAA << endl ;
-//  cout <<  "ddgammaBB" <<info.ddgammaBB << endl ;
   info.ddgammaAB  = 0.0;
-// Note that in Eq A5 xA   = gammaAA / rhoA4ov3; 
-// but actually they meants xA = sqrt(gammaAA) /rhoA4ov3
-// and also eq A6 rho is rho^(1/3) instead of rho^(4/3)
 #else
-  DFTFunctional::DFTInfo info2;
-
-  double spindensity   = (rhoA - rhoB); 
-  spindensity         /= (rhoA + rhoB);
-  double rhoA1ov3 = std::pow(rhoA,this->d1over3);
-  double rhoB1ov3 ;
-//rhoA4ov3 = std::pow(rhoA,this->d4over3);
-  double rhoA4ov3 = rhoA1ov3 * rhoA; 
-  double rhoB4ov3 ; 
-  if(std::abs(spindensity) > this->small) {
-    rhoB1ov3 = std::pow(rhoB,this->d1over3);
-    rhoB4ov3 = rhoB1ov3 * rhoB; 
-  }
-  double xA   = std::sqrt(gammaAA) / (2.0 * this->Ckf*rhoA4ov3); 
-  double xB ;
-  double den;
-  double g0 = this->g0(xA,den);
-  double g1 = this->g1(xA,den);
-  info2.eps        = rhoA4ov3*g0;
-  info2.ddrhoA     = g0 - xA*g1;
-  info2.ddrhoA    *= this->d4over3*rhoA1ov3;
-  info2.ddgammaAA  = g1/(4.0*this->Ckf*std::sqrt(gammaAA));
-  if(std::abs(spindensity) > this->small) {
-    //Open Shell
-    cout << "HERE " << endl;
-  //Paper  xB   = gammaBB / rhoA4ov3; 
-    xB   = std::sqrt(gammaBB) / (2.0 * this->Ckf*rhoB4ov3); 
-    g0 = this->g0(xB,den);
-    g1 = this->g1(xB,den);
-    info2.eps       += this->CxVx*rhoB4ov3*g0;
-    info2.ddrhoB     = g0 - xB*g1;
-    info2.ddrhoB    *= this->d4over3*rhoB1ov3;
-    info2.ddgammaBB  = g1/(4.0*this->Ckf*std::sqrt(gammaBB));
-
-  } else {
-    //Closed Shell
-    info2.eps *= 2.0;
-    info2.ddrhoB     = info2.ddrhoA;
-    info2.ddgammaBB  = info2.ddgammaAA;
-  }
-//  cout <<  "eps " <<info.eps << endl ;
-//  cout <<  "ddrhoA " <<info.ddrhoA << endl ;
-//  cout <<  "ddrhoB " <<info.ddrhoB << endl ;
-//  cout <<  "ddgammaAA" <<info.ddgammaAA << endl ;
-//  cout <<  "ddgammaBB" <<info.ddgammaBB << endl ;
-  info2.ddgammaAB  = 0.0;
-// Note that in Eq A5 xA   = gammaAA / rhoA4ov3; 
-// but actually they meants xA = sqrt(gammaAA) /rhoA4ov3
-// and also eq A6 rho is rho^(1/3) instead of rho^(4/3)
-
-
-
-
   std::array<double,2> rho = {rhoA,rhoB};
   std::array<double,3> sigma = {gammaAA,gammaAB,gammaBB};
   std::array<double,2> vrho;
@@ -166,8 +96,8 @@ DFTFunctional::DFTInfo PBE::eval(const double &rhoA, const double &rhoB, const d
   info.eps *= (rhoA + rhoB); //?
 
 #endif
-  info2 *= this->scalingFactor; 
-  return info2;
+  info *= this->scalingFactor; 
+  return info;
 };
 
 DFTFunctional::DFTInfo PBE::eval(const double &rhoA, const double &rhoB, const double &gammaAA, const double &gammaBB){
