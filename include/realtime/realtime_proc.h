@@ -90,35 +90,6 @@ void RealTime<T>::doPropagation() {
     // Write CSV Files
     writeCSVs();
 
-    // Logic for MMUT restart setup
-    if(false) {
-      // PO = 0.5 * (PO + POSav)
-      // PO(k+1) = 0.5 * (PO(k+1) + PO(k-1))
-      for(auto iODen = 0; iODen < POSav_.size(); iODen++){
-/*
-        (*ssPropagator_->onePDMOrtho()[iODen]) *= 0.5;
-        ssPropagator_->onePDMOrtho()[iODen]->noalias() = 
-          (*ssPropagator_->onePDMOrtho()[iODen]) +
-          0.5 * (*POSav_[iODen]) ;
-*/
-        (*ssPropagator_->onePDMOrtho()[iODen]) = 0.5 * (
-          (*ssPropagator_->onePDMOrtho()[iODen]) + (*POSav_[iODen])
-        );
-      }
-        
-      prettyPrintSmart(cout,(*ssPropagator_->onePDMOrtho()[0])
-      -0.5*(*ssPropagator_->onePDMOrtho()[0])*
-       (*ssPropagator_->onePDMOrtho()[0]),"DIFF");
-
-      // FIXME: Need to add McWeeny Purification
-      ssPropagator_->McWeeny(ssPropagator_->onePDMOrtho(),10);
-
-      // POSav = PO
-      // POSav now stores the next step's PO
-      for(auto iODen = 0; iODen < POSav_.size(); iODen++)
-        (*POSav_[iODen]) = (*ssPropagator_->onePDMOrtho()[iODen]);
-    }
-
     // Unorthonormalize the density for next Fock build
     // PO(k+1) -> P(k+1)
     ssPropagator_->unOrthoDen3();
