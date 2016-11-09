@@ -51,6 +51,10 @@ template <typename T> void runSCF(SingleSlater<T> &ss) {
   ss.SCF3();
   ss.computeProperties();
 };
+template <typename T> void runRT(RealTime<T> &rt) {
+  rt.alloc();
+  rt.doPropagation();
+};
 
 template <typename T> void writeSCFRecord(std::string name, H5::Group &gp, 
   SingleSlater<T> &ss) {
@@ -93,15 +97,78 @@ template <typename T> void writeSCFRecord(std::string name, H5::Group &gp,
   OutFile.write(&buffer[0],H5::PredType::NATIVE_CHAR);
 }
 
+template <typename T> void writeRTRecord(std::string name, H5::Group &gp, 
+  RealTime<T> &rt) {
+
+  typedef struct {
+    double timeStep;
+    double energy;
+    std::array<double,4> dipole;
+    std::array<double,4> appliedfield;
+  } timept_t;
+
+  typedef struct {
+    double x;
+    double y;
+    double z;
+    double t;
+  } fourvec_t;
+
+  H5::CompType FourVector(sizeof(fourvec_t));
+  FourVector.insertMember("X",HOFFSET(fourvec_t,x),H5::PredType::NATIVE_DOUBLE);
+  FourVector.insertMember("Y",HOFFSET(fourvec_t,y),H5::PredType::NATIVE_DOUBLE);
+  FourVector.insertMember("Z",HOFFSET(fourvec_t,z),H5::PredType::NATIVE_DOUBLE);
+  FourVector.insertMember("T",HOFFSET(fourvec_t,t),H5::PredType::NATIVE_DOUBLE);
+
+  H5::CompType timePt(sizeof(timept_t));
+
+  timePt.insertMember("Time",HOFFSET(timept_t,timeStep),
+    H5::PredType::NATIVE_DOUBLE);
+  timePt.insertMember("Energy",HOFFSET(timept_t,energy),
+    H5::PredType::NATIVE_DOUBLE);
+  timePt.insertMember("Dipole",HOFFSET(timept_t,dipole),FourVector);
+  timePt.insertMember("Field",HOFFSET(timept_t,appliedfield),FourVector);
+
+  int nPts = rt.propInfo.size();
+  hsize_t NPts(nPts);
+  H5::DataSpace PropSpace(1,&NPts);
+
+
+  H5::DataSet PropInfo(gp.createDataSet(name + "/TimePropagation",timePt,PropSpace));
+
+
+  std::vector<timept_t> tmp;
+  for(auto pt : rt.propInfo) {
+    tmp.push_back(timept_t{pt.timeStep,pt.energy,pt.dipole,pt.appliedfield});
+  }
+
+  PropInfo.write(&tmp[0],timePt);
+
+  std::ifstream outFile("test.out",ios::binary);
+  std::vector<char> buffer((std::istreambuf_iterator<char>(outFile)),
+    (std::istreambuf_iterator<char>()));
+
+  hsize_t fileLen(buffer.size());
+  H5::DataSpace FileLen(1,&fileLen);
+
+  H5::DataSet OutFile(gp.createDataSet(name + "/Output",
+    H5::PredType::NATIVE_CHAR,FileLen));
+
+  OutFile.write(&buffer[0],H5::PredType::NATIVE_CHAR);
+}
+
+
 template <typename T, MOLECULE_PRESETS M> 
 void runCQJob(H5::Group &res, std::string &fName, CQMemManager &memManager, 
   const std::string &jbTyp, const std::string &basisSet, 
-  const std::string &ref, const SCFSettings scfSett, int numThreads, const std::string &guess) {
+  const std::string &ref, const SCFSettings scfSett, const RTSettings rtSett,
+  int numThreads, const std::string &guess) {
 
   Molecule molecule;
   BasisSet basis;
   AOIntegrals aoints;
   SingleSlater<T> singleSlater;
+  RealTime<T> rt;
   FileIO fileio("test.inp","test.out");
 
   fileio.iniH5Files();
@@ -114,7 +181,8 @@ void runCQJob(H5::Group &res, std::string &fName, CQMemManager &memManager,
 
   singleSlater.setRef(ref);
   singleSlater.setGuess(guess);
-  singleSlater.setField(scfSett.staticField);
+  if(!jbTyp.compare("SCF"))
+    singleSlater.setField(scfSett.staticField);
 
 
   basis.findBasisFile(basisSet);
@@ -133,11 +201,16 @@ void runCQJob(H5::Group &res, std::string &fName, CQMemManager &memManager,
   singleSlater.alloc();
 
   runSCF(singleSlater);
+  if(!jbTyp.compare("RT")){
+    rt.communicate(singleSlater);
+    runRT(rt);
+  }
   
   fileio.out.close();
 
 
-  if(!jbTyp.compare("SCF")) writeSCFRecord(fName,res,singleSlater);
+  if(!jbTyp.compare("SCF"))     writeSCFRecord(fName,res,singleSlater);
+  else if(!jbTyp.compare("RT")) writeRTRecord(fName,res,rt);
 }
 
 inline bool file_exists(const std::string& name) {
@@ -176,7 +249,7 @@ int main(int argc, char **argv){
 
   
   // Which job types to test
-  std::vector<std::string> jobs = {"SCF"};
+  std::vector<std::string> jobs = {"SCF","RT"};
 
   // DFT Functionals to test
   std::vector<std::string> KS {
@@ -323,11 +396,12 @@ int main(int argc, char **argv){
   H5::Group realTests(RefFile.createGroup("/REAL"));
   H5::Group complexTests(RefFile.createGroup("/COMPLEX"));
 
-  // Water SCF Tests
-  for( auto fld : {std::string("REAL"),std::string("COMPLEX")} ){
-    std::string curJbTyp = "/" + fld + "/SCF";
+  // Create Groups
+  for( auto fld : {std::string("REAL"),std::string("COMPLEX")} )
+  for( auto jbTyp : jobs ){
+    std::string curJbTyp = "/" + fld + "/" + jbTyp;
     H5::Group jbGroup(RefFile.createGroup(curJbTyp));
-  for( auto para : {std::string("SERIAL")}) {
+  for( auto para : {std::string("SERIAL"),std::string("SMP")}) {
     std::string curPara = curJbTyp + "/" + para;
     H5::Group paraGroup(RefFile.createGroup(curPara));
   for( auto fieldtyp : fieldtps ) {
@@ -343,6 +417,7 @@ int main(int argc, char **argv){
     std::string curBasis = curRef + "/" + basis;
     H5::Group basisGroup(RefFile.createGroup(curBasis));
 
+/*
     if(!basis.compare("cc-pVDZ") and !ref.compare("X2C"))
       continue;
 
@@ -374,20 +449,156 @@ int main(int argc, char **argv){
       H5P_DEFAULT,H5P_DEFAULT);
     testNum++;
     cout << " -> " << linkName.str() << endl;
+*/
   }
   }
   }
   }
   }
 
-/*
+
+  // Water Tests
+  for( auto fld : {std::string("REAL"),std::string("COMPLEX")} )
+  for( auto jbTyp : {std::string("SCF"),std::string("RT")} )
+  for( auto para : {std::string("SERIAL"),std::string("SMP")}) 
+  for( auto fieldtyp : fieldtps ) 
+  for( auto ref : rRefs )
+  for( auto basis : bases ) {
+
+    int nCores = 1;
+    if(!para.compare("SMP")) nCores = 2;
+
+    std::string fName = "/" + fld + "/" + jbTyp + "/" + para + "/" + fieldtyp 
+                        + "/" + ref + "/" + basis + "/" + moleculeName<WATER>();
+    H5::Group waterGroup(RefFile.createGroup(fName));
+
+    if(!jbTyp.compare("RT") and fieldtyp.compare("NOFIELD")) continue;
+    if(!jbTyp.compare("RT") and 
+       (ref.compare("RHF") and ref.compare("RLSDA") and ref.compare("RBLYP")
+         and ref.compare("RB3LYP"))) continue;
+
+    SCFSettings scfSett;
+    if(!fieldtyp.compare("NOFIELD")) scfSett = defaultSCF;
+    else if(!fieldtyp.compare("WEAKXFIELD")) scfSett = weakXFieldSCF;
+    else if(!fieldtyp.compare("WEAKYFIELD")) scfSett = weakYFieldSCF;
+    else if(!fieldtyp.compare("WEAKZFIELD")) scfSett = weakZFieldSCF;
+
+    RTSettings rtSett;
+
+    cout << "Running Job " << fName;
+    if(!fld.compare("REAL"))
+      runCQJob<double,WATER>(waterGroup,fName,memManager,jbTyp,basis,ref,
+        scfSett,rtSett,nCores, "SAD");
+    else 
+      runCQJob<dcomplex,WATER>(waterGroup,fName,memManager,jbTyp,basis,ref,
+        scfSett,rtSett,nCores, "SAD");
+
+    std::stringstream linkName;
+    linkName << "test" <<std::setfill('0') << std::setw(4) << testNum;
+    H5Lcreate_soft(fName.c_str(),RefFile.getId(),linkName.str().c_str(),
+      H5P_DEFAULT,H5P_DEFAULT);
+    testNum++;
+    cout << " -> " << linkName.str() << endl;
+  }
+
+  // Li Tests
+  for( auto fld : {std::string("REAL"),std::string("COMPLEX")} )
+  for( auto jbTyp : {std::string("SCF"),std::string("RT")} )
+  for( auto para : {std::string("SERIAL"),std::string("SMP")}) 
+  for( auto fieldtyp : {std::string("NOFIELD"),std::string("WEAKZFIELD")}) 
+  for( auto ref : uRefs )
+  for( auto basis : bases ) {
+
+    int nCores = 1;
+    if(!para.compare("SMP")) nCores = 2;
+
+    std::string fName = "/" + fld + "/" + jbTyp + "/" + para + "/" + fieldtyp 
+                        + "/" + ref + "/" + basis + "/" + moleculeName<Li>();
+    H5::Group waterGroup(RefFile.createGroup(fName));
+
+    if(!jbTyp.compare("RT") and fieldtyp.compare("NOFIELD")) continue;
+    if(!jbTyp.compare("RT") and 
+       (ref.compare("UHF") and ref.compare("ULSDA") and ref.compare("UBLYP")
+         and ref.compare("UB3LYP"))) continue;
+
+    SCFSettings scfSett;
+    if(!fieldtyp.compare("NOFIELD")) scfSett = defaultSCF;
+    else if(!fieldtyp.compare("WEAKXFIELD")) scfSett = weakXFieldSCF;
+    else if(!fieldtyp.compare("WEAKYFIELD")) scfSett = weakYFieldSCF;
+    else if(!fieldtyp.compare("WEAKZFIELD")) scfSett = weakZFieldSCF;
+
+    RTSettings rtSett;
+
+    cout << "Running Job " << fName;
+    if(!fld.compare("REAL"))
+      runCQJob<double,Li>(waterGroup,fName,memManager,jbTyp,basis,ref,
+        scfSett,rtSett,nCores, "CORE");
+    else 
+      runCQJob<dcomplex,Li>(waterGroup,fName,memManager,jbTyp,basis,ref,
+        scfSett,rtSett,nCores, "CORE");
+
+    std::stringstream linkName;
+    linkName << "test" <<std::setfill('0') << std::setw(4) << testNum;
+    H5Lcreate_soft(fName.c_str(),RefFile.getId(),linkName.str().c_str(),
+      H5P_DEFAULT,H5P_DEFAULT);
+    testNum++;
+    cout << " -> " << linkName.str() << endl;
+  }
+
+  // O2 Tests
+  for( auto fld : {std::string("REAL"),std::string("COMPLEX")} )
+  for( auto jbTyp : {std::string("SCF"),std::string("RT")} )
+  for( auto para : {std::string("SERIAL"),std::string("SMP")}) 
+  for( auto fieldtyp : {std::string("NOFIELD"),std::string("WEAKXFIELD"),std::string("WEAKZFIELD")}) 
+  for( auto ref : uRefs )
+  for( auto basis : bases ) {
+
+    int nCores = 1;
+    if(!para.compare("SMP")) nCores = 2;
+
+    std::string fName = "/" + fld + "/" + jbTyp + "/" + para + "/" + fieldtyp 
+                        + "/" + ref + "/" + basis + "/" + moleculeName<O2>();
+    H5::Group waterGroup(RefFile.createGroup(fName));
+
+    if(!jbTyp.compare("RT") and fieldtyp.compare("NOFIELD")) continue;
+    if(!jbTyp.compare("RT") and 
+       (ref.compare("UHF") and ref.compare("ULSDA") and ref.compare("UBLYP")
+         and ref.compare("UB3LYP"))) continue;
+
+    SCFSettings scfSett;
+    if(!fieldtyp.compare("NOFIELD")) scfSett = defaultSCF;
+    else if(!fieldtyp.compare("WEAKXFIELD")) scfSett = weakXFieldSCF;
+    else if(!fieldtyp.compare("WEAKYFIELD")) scfSett = weakYFieldSCF;
+    else if(!fieldtyp.compare("WEAKZFIELD")) scfSett = weakZFieldSCF;
+
+    RTSettings rtSett;
+
+    cout << "Running Job " << fName;
+    try {
+    if(!fld.compare("REAL"))
+      runCQJob<double,O2>(waterGroup,fName,memManager,jbTyp,basis,ref,
+        scfSett,rtSett,nCores, "CORE");
+    else 
+      runCQJob<dcomplex,O2>(waterGroup,fName,memManager,jbTyp,basis,ref,
+        scfSett,rtSett,nCores, "CORE");
+
+    std::stringstream linkName;
+    linkName << "test" <<std::setfill('0') << std::setw(4) << testNum;
+    H5Lcreate_soft(fName.c_str(),RefFile.getId(),linkName.str().c_str(),
+      H5P_DEFAULT,H5P_DEFAULT);
+    testNum++;
+    cout << " -> " << linkName.str() << endl;
+    } catch(...) {
+      cout << " FAILED! " << endl;
+    }
+  }
+
   H5::DataSet tmp(RefFile.openDataSet("test0001/Output"));
   std::vector<char> buffer(tmp.getStorageSize());
   
   tmp.read(&buffer[0],H5::PredType::NATIVE_CHAR);
 
   for(auto X : buffer) cout << X ;
-*/
   
   finalizeCQ();
   return 0;
