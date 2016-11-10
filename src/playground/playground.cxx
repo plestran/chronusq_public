@@ -193,7 +193,7 @@ int main(int argc, char **argv){
   molecule.computeI();
 
 //  singleSlater.setRef("X2C");
-  singleSlater.setRef("UPBE");
+  singleSlater.setRef("RSLATER");
 //singleSlater.setSCFEneTol(1e-12);
   singleSlater.setSCFMaxIter(10000);
   singleSlater.doDIIS = true;
@@ -206,11 +206,11 @@ int main(int argc, char **argv){
   fileio.iniH5Files();
 
 
-//basis.forceCart();
-  basis.findBasisFile("sto-3g");
+//  basis.forceCart();
+//  basis.findBasisFile("sto-3g");
 //basis.findBasisFile("3-21g");
 //basis.findBasisFile("6-31G");
-//basis.findBasisFile("cc-pVDZ");
+  basis.findBasisFile("cc-pVTZ");
   basis.communicate(fileio);
   basis.parseGlobal();
   basis.constructLocal(&molecule);

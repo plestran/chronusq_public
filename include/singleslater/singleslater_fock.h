@@ -258,6 +258,15 @@ void SingleSlater<T>::formFock(bool increment){
   // Syncronize MPI processes after fock build
   MPI_Barrier(MPI_COMM_WORLD);
 #endif
+/*
+//AP Debug Numerical S
+  prettyPrint(cout,*this->aointegrals_->overlap_,"S");
+  prettyPrintSmart(cout,(*this->vXCScalar()),"S num");
+  RealMatrix Stmp(this->nBasis_,this->nBasis_);
+  prettyPrintSmart(cout,((*this->vXCScalar())-(*this->aointegrals_->overlap_)),"Diff");
+  cout <<" NormDiff " << ((*this->vXCScalar())-(*this->aointegrals_->overlap_)).norm() <<  endl;
+  CErr("DIE");
+*/
 };
 
 
@@ -697,6 +706,7 @@ void SingleSlater<T>::formVXC_new(){
 
       for(auto iBf = iSt; iBf < (iSt + iSz); iBf++){
         double Ta = kernelXC.ddrhoA*SCRATCH1DATA[iBf] + OmegaADATA[iBf];
+//AP debug Num S        double Ta = pt.weight*SCRATCH1DATA[iBf] ;
         for(auto jShell : closeShells[thread_id]) {
           int jSz= shSizes[jShell];
           int jSt = this->basisset_->mapSh2Bf(jShell);
@@ -704,6 +714,7 @@ void SingleSlater<T>::formVXC_new(){
           for(auto jBf = jSt; jBf < (jSt + jSz); jBf++){
             if(jBf < iBf) continue;
             VXCDATA[jBf] += Ta*SCRATCH1DATA[jBf] + SCRATCH1DATA[iBf]*OmegaADATA[jBf]; 
+//AP debug Num S            VXCDATA[jBf] += Ta*SCRATCH1DATA[jBf] ; 
           } // jBf
         } // jShell
       } // iBf
@@ -750,7 +761,7 @@ void SingleSlater<T>::formVXC_new(){
       ChronusQ::ATOMIC_PARTITION::BECKE,this->molecule_->cartArray(),
       this->molecule_->rIJ(),0,this->epsScreen,1e6,1.0,false);
 
-*/   
+*/
   ChronusQ::AtomicGrid AGrid(this->nRadDFTGridPts_,this->nAngDFTGridPts_,
       static_cast<ChronusQ::GRID_TYPE>(this->dftGrid_),ChronusQ::GRID_TYPE::LEBEDEV,
       static_cast<ChronusQ::ATOMIC_PARTITION>(this->weightScheme_),this->molecule_->cartArray(),
@@ -814,6 +825,7 @@ void SingleSlater<T>::formVXC_new(){
   for(auto ithread = 0; ithread < nthreads; ithread++){
     if(this->isClosedShell && this->nTCS_ != 2){
       (*this->vXCScalar_) += 8.0*math.pi*res[ithread].VXCScalar;
+//AP Debug Num Int      (*this->vXCScalar_) += 4.0*math.pi*res[ithread].VXCScalar;
     } else if(!this->isClosedShell or this->nTCS_ == 2){
       (*this->vXCScalar_) += 4.0*math.pi*(res[ithread].VXCScalar+res[ithread].VXCMz);  //ALPHA LIKE
       (*this->vXCMz_) += 4.0*math.pi*(res[ithread].VXCScalar-res[ithread].VXCMz);      //BETA LIKE
