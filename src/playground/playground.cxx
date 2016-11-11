@@ -193,7 +193,7 @@ int main(int argc, char **argv){
   molecule.computeI();
 
 //  singleSlater.setRef("X2C");
-  singleSlater.setRef("RSLATER");
+  singleSlater.setRef("RPBE");
 //singleSlater.setSCFEneTol(1e-12);
   singleSlater.setSCFMaxIter(10000);
   singleSlater.doDIIS = true;
