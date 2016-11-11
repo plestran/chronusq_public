@@ -222,16 +222,20 @@ void writeInput(const std::string &baseName, const std::string &jbTyp,
   input << endl;  
 
 
-  input << "[SCF]" << endl;
-  if(guess.compare("SAD")) {
-    input << "guess = " << guess << endl;
-  }
-  if(!jbTyp.compare("SCF") and scfSett.staticField != null){ 
-    input << "field = ";
-    for(auto x : scfSett.staticField)
-      input << std::setw(10) << std::setprecision(5) << x;
-    input << endl;
-    
+  if(!jbTyp.compare("SCF")) {
+    input << "[SCF]" << endl;
+    if(guess.compare("SAD")) {
+      input << "guess = " << guess << endl;
+    }
+    if(!jbTyp.compare("SCF") and scfSett.staticField != null){ 
+      input << "field = ";
+      for(auto x : scfSett.staticField)
+        input << std::setw(10) << std::setprecision(5) << x;
+      input << endl;
+      
+    }
+  } else if(!jbTyp.compare("RT")) {
+    input << "[RT]" << endl;
   }
   input << endl;
 
@@ -310,13 +314,22 @@ inline bool copy_file(const std::string& from_name, const std::string& to_name){
   dst << src.rdbuf();
 }
 
-int main(int argc, char **argv){
+int main(int argc, char *argv[]){
 
   CQMemManager memManager;
   memManager.setTotalMem(256e6);
   memManager.allocMem();
   initCQ(argc,argv);
   
+  bool runTests = true;
+  bool writeTests = true;
+
+  if(argc > 1) {
+    std::string inpt = argv[1];
+    std::transform(inpt.begin(),inpt.end(),inpt.begin(),toupper);
+    if(!inpt.compare("WRITEONLY"))
+      runTests = false;
+  }
   std::string refFileName("chronusq-ref.bin");
   std::string cpyFileName("chronusq-ref-old.bin");
 
@@ -570,25 +583,31 @@ int main(int argc, char **argv){
 
     RTSettings rtSett;
 
-    cout << "Running Job " << fName;
-    if(!fld.compare("REAL"))
-      runCQJob<double,WATER>(waterGroup,fName,memManager,jbTyp,basis,ref,
-        scfSett,rtSett,nCores, "SAD");
-    else 
-      runCQJob<dcomplex,WATER>(waterGroup,fName,memManager,jbTyp,basis,ref,
-        scfSett,rtSett,nCores, "SAD");
-
-
     std::stringstream linkName;
     linkName << "test" <<std::setfill('0') << std::setw(4) << testNum;
-    H5Lcreate_soft(fName.c_str(),RefFile.getId(),linkName.str().c_str(),
-      H5P_DEFAULT,H5P_DEFAULT);
-    testNum++;
-    cout << " -> " << linkName.str() << endl;
+
+    if(runTests) {
+      cout << "Running Job " << fName;
+      if(!fld.compare("REAL"))
+        runCQJob<double,WATER>(waterGroup,fName,memManager,jbTyp,basis,ref,
+          scfSett,rtSett,nCores, "SAD");
+      else 
+        runCQJob<dcomplex,WATER>(waterGroup,fName,memManager,jbTyp,basis,ref,
+          scfSett,rtSett,nCores, "SAD");
+     
+     
+      H5Lcreate_soft(fName.c_str(),RefFile.getId(),linkName.str().c_str(),
+        H5P_DEFAULT,H5P_DEFAULT);
+      cout << " -> " << linkName.str() << endl;
+    }
+
+    cout << "Writting " << linkName.str() << ".inp" << endl;
     if(!fld.compare("REAL"))
       writeInput<double,WATER>(linkName.str(),jbTyp,basis,ref,scfSett,rtSett,nCores,"SAD");
     else 
       writeInput<dcomplex,WATER>(linkName.str(),jbTyp,basis,ref,scfSett,rtSett,nCores,"SAD");
+
+    testNum++;
   }
 
   // Li Tests
@@ -619,24 +638,30 @@ int main(int argc, char **argv){
 
     RTSettings rtSett;
 
-    cout << "Running Job " << fName;
-    if(!fld.compare("REAL"))
-      runCQJob<double,Li>(waterGroup,fName,memManager,jbTyp,basis,ref,
-        scfSett,rtSett,nCores, "CORE");
-    else 
-      runCQJob<dcomplex,Li>(waterGroup,fName,memManager,jbTyp,basis,ref,
-        scfSett,rtSett,nCores, "CORE");
-
     std::stringstream linkName;
     linkName << "test" <<std::setfill('0') << std::setw(4) << testNum;
-    H5Lcreate_soft(fName.c_str(),RefFile.getId(),linkName.str().c_str(),
-      H5P_DEFAULT,H5P_DEFAULT);
-    testNum++;
-    cout << " -> " << linkName.str() << endl;
+
+    if(runTests) {
+      cout << "Running Job " << fName;
+      if(!fld.compare("REAL"))
+        runCQJob<double,Li>(waterGroup,fName,memManager,jbTyp,basis,ref,
+          scfSett,rtSett,nCores, "CORE");
+      else 
+        runCQJob<dcomplex,Li>(waterGroup,fName,memManager,jbTyp,basis,ref,
+          scfSett,rtSett,nCores, "CORE");
+     
+      H5Lcreate_soft(fName.c_str(),RefFile.getId(),linkName.str().c_str(),
+        H5P_DEFAULT,H5P_DEFAULT);
+      cout << " -> " << linkName.str() << endl;
+    }
+
+    cout << "Writting " << linkName.str() << ".inp" << endl;
     if(!fld.compare("REAL"))
       writeInput<double,Li>(linkName.str(),jbTyp,basis,ref,scfSett,rtSett,nCores,"CORE");
     else 
       writeInput<dcomplex,Li>(linkName.str(),jbTyp,basis,ref,scfSett,rtSett,nCores,"CORE");
+
+    testNum++;
   }
 
   // O2 Tests
@@ -667,30 +692,39 @@ int main(int argc, char **argv){
 
     RTSettings rtSett;
 
-    cout << "Running Job " << fName;
     std::stringstream linkName;
-    try {
-    if(!fld.compare("REAL"))
-      runCQJob<double,O2>(waterGroup,fName,memManager,jbTyp,basis,ref,
-        scfSett,rtSett,nCores, "SAD");
-    else 
-      runCQJob<dcomplex,O2>(waterGroup,fName,memManager,jbTyp,basis,ref,
-        scfSett,rtSett,nCores, "SAD");
-
     linkName << "test" <<std::setfill('0') << std::setw(4) << testNum;
-    H5Lcreate_soft(fName.c_str(),RefFile.getId(),linkName.str().c_str(),
-      H5P_DEFAULT,H5P_DEFAULT);
-    testNum++;
-    cout << " -> " << linkName.str() << endl;
-    } catch(...) {
-      cout << " FAILED! " << endl;
+
+    if(runTests) {
+      cout << "Running Job " << fName;
+      try {
+        if(!fld.compare("REAL"))
+          runCQJob<double,O2>(waterGroup,fName,memManager,jbTyp,basis,ref,
+            scfSett,rtSett,nCores, "SAD");
+        else 
+          runCQJob<dcomplex,O2>(waterGroup,fName,memManager,jbTyp,basis,ref,
+            scfSett,rtSett,nCores, "SAD");
+       
+        H5Lcreate_soft(fName.c_str(),RefFile.getId(),linkName.str().c_str(),
+          H5P_DEFAULT,H5P_DEFAULT);
+        cout << " -> " << linkName.str() << endl;
+      } catch(...) {
+        cout << " FAILED! " << endl;
+      }
     }
+
+    cout << "Writting " << linkName.str() << ".inp" << endl;
     if(!fld.compare("REAL"))
       writeInput<double,O2>(linkName.str(),jbTyp,basis,ref,scfSett,rtSett,nCores,"SAD");
     else 
       writeInput<dcomplex,O2>(linkName.str(),jbTyp,basis,ref,scfSett,rtSett,nCores,"SAD");
+
+    testNum++;
   }
 
+  RefFile.close();
+  // Account of overwrite without population it not running tests
+  if(!runTests) copy_file(cpyFileName,refFileName);
 /*
   H5::DataSet tmp(RefFile.openDataSet("test0001/Output"));
   std::vector<char> buffer(tmp.getStorageSize());

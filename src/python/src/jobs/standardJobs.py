@@ -97,8 +97,8 @@ def runCQJob(job,workers,meta):
     meta.quadrupole = workers["CQSingleSlater"].quadrupole()
     meta.octupole   = workers["CQSingleSlater"].octupole()
   elif job == 'RT':
-    pass
-    
+    meta.propEnergy = workers["CQRealTime"].propEnergy()
+    meta.propDipole = workers["CQRealTime"].propDipole()
 
 def runSCF(workers):
   # Make the classes know about eachother

@@ -182,8 +182,8 @@ def parseRT(workers,secDict):
       optMap[i](rtSettings[i][0],rtSettings[i][1],rtSettings[i][2])
 
 
-  #if 'EDFIELD' not in rtSettings:
-  #  optMap['EDFIELD'](0.0,0.0,0.0)
+  if 'EDFIELD' not in rtSettings:
+    optMap['EDFIELD'](0.0,0.0,0.0)
     
   if 'TARCSVS' in rtSettings:
     if not rtSettings['TARCSVS']:

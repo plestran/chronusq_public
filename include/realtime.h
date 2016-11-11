@@ -219,6 +219,9 @@ public:
   inline void Wrapper_setFieldAmp(double x, double y, double z){
     this->setEDFieldAmp({{x,y,z}});
   }
+
+  boost::python::list Python_propEnergy();
+  boost::python::list Python_propDipole();
 };
 
 }; // namespace ChronusQ
