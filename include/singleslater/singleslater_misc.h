@@ -166,7 +166,7 @@ void SingleSlater<T>::setRef(const std::string &methStr) {
 
   // Kohn-Sham lists
   std::vector<std::string> KS {
-    "SLATER","B88","LSDA","SVWN5","BLYP","B3LYP","BHandH"
+    "SLATER","B88","LSDA","SVWN5","BLYP","B3LYP","BHANDH"
   };
 
   std::vector<std::string> RKSL,UKSL,GKSL,X2CKSL;
@@ -184,7 +184,7 @@ void SingleSlater<T>::setRef(const std::string &methStr) {
     {"BLYP"  ,[&]() -> void {this->createBLYP();}},
     {"B88"   ,[&]() -> void {this->createB88();}},
     {"B3LYP" ,[&]() -> void {this->createB3LYP();}},
-    {"BHandH",[&]() -> void {this->createBHandH();}}
+    {"BHANDH",[&]() -> void {this->createBHandH();}}
   };
 
   // Populate Ref_

@@ -39,6 +39,27 @@ from parse.parseBasis import parseBasis
 from parse.parseInts import parseInts
 import time 
 
+class MetaData:
+  def init(self):
+#   SCF Info
+    self.scfIters = 0 
+    self.E      = 0 
+    self.dipole     = []
+    self.quadrupole = []
+    self.octupole   = []
+#   RESP Info
+#    self.excEne = []
+#    self.oscStr = []
+#    self.davIters = []
+#   RT Info
+    self.propEnergy = []
+    self.propDipole = []
+#   Derivitive Info
+#    self.GSGrad = []
+#    self.ESGrad = []
+#    self.ESGSNACME = []
+#    self.ESESNACME = []
+
 def runCQ(ifname,ofname):
   authorfname = '@AUTHOR_PATH@'
   gitrev = '@CQ_GIT_VERSION@'
@@ -103,8 +124,10 @@ def runCQ(ifname,ofname):
   if job == 'RT':
     parseRT(workers,secDict)
 
-  runCQJob(job,workers)
+  jobMeta = MetaData()
+  runCQJob(job,workers,jobMeta)
 
+  return jobMeta
 
 
 

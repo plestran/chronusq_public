@@ -14,6 +14,22 @@ enum MOLECULE_PRESETS {
 template<MOLECULE_PRESETS T> void loadPresets(Molecule&);
 
 template <MOLECULE_PRESETS T> std::string moleculeName();
+template <MOLECULE_PRESETS T> std::string moleculeGeom(){
+  Molecule mol; loadPresets<T>(mol);
+  std::stringstream tmp;
+
+  for(auto iAtm = 0; iAtm < mol.nAtoms(); iAtm++){
+     tmp << " " << elements[mol.index(iAtm)].symbol;
+     tmp << " " << std::setw(15) << std::setprecision(10) 
+                << (*mol.cart())(0,iAtm);
+     tmp << " " << std::setw(15) << std::setprecision(10) 
+                << (*mol.cart())(1,iAtm);
+     tmp << " " << std::setw(15) << std::setprecision(10) 
+                << (*mol.cart())(2,iAtm);
+     tmp << endl;
+  }
+  return tmp.str();
+};
 
 template<> std::string moleculeName<WATER>() { return std::string("Water"); }; 
 template<> std::string moleculeName<Li>() { return std::string("Li"); }; 
@@ -21,6 +37,7 @@ template<> std::string moleculeName<O2>() { return std::string("O2"); };
 template<> std::string moleculeName<SingO2>() { 
   return std::string("Singlet O2"); 
 }; 
+
 
 struct SCFSettings {
   std::array<double,3> staticField;
@@ -157,6 +174,67 @@ template <typename T> void writeRTRecord(std::string name, H5::Group &gp,
   OutFile.write(&buffer[0],H5::PredType::NATIVE_CHAR);
 }
 
+template<typename T,MOLECULE_PRESETS M>
+void writeInput(const std::string &baseName, const std::string &jbTyp,
+  const std::string &basisSet, const std::string &ref, const SCFSettings scfSett,
+  const RTSettings rtSett, int numThreads, const std::string &guess) {
+
+  std::ofstream input(baseName + ".inp");
+
+  std::array<double,3> null = {0,0,0};
+
+  input << "#" << endl;
+  input << "#  " << baseName << " - " << moleculeName<M>() << " " << ref;
+  input << "/" << basisSet << " : "<< jbTyp;
+  if(!jbTyp.compare("SCF") and scfSett.staticField != null) 
+    input << " in a field";
+  input << endl << "#  ";
+  if(numThreads == 0) input << "SERIAL";
+  else                input << "SMP";
+  input << endl;
+  input << "#" << endl;
+  input << "#  Molecule Specification " << endl;
+
+  input << "[Molecule]" << endl;
+  input << "charge = " << 0 << endl;
+  input << "mult = ";
+  if(M == WATER) input << 1;
+  if(M == O2) input << 3;
+  if(M == Li) input << 2;
+  input << endl;
+
+  input << "geom: " << endl << moleculeGeom<M>() << endl;
+  
+
+  input << "# \n#  Job Specification\n#" << endl;
+  input << "[QM]" << endl;
+  input << "reference = ";
+  if(std::is_same<double,T>::value) input << "Real";
+  else if(std::is_same<dcomplex,T>::value) input << "Complex";
+  input << " " << ref << endl;
+
+  input << "job = " << jbTyp << endl;
+  input << endl;
+
+
+  input << "[BASIS]" << endl;
+  input << "basis = " << basisSet << endl;
+  input << endl;  
+
+
+  if(guess.compare("SAD")) {
+    input << "[SCF]" << endl;
+    input << "guess = " << guess << endl;
+  }
+  input << endl;
+
+  if(numThreads != 0){
+     input << "[MISC]" << endl;
+     input << "nsmp = " << numThreads << endl;
+  }
+  input << endl;
+
+}
 
 template <typename T, MOLECULE_PRESETS M> 
 void runCQJob(H5::Group &res, std::string &fName, CQMemManager &memManager, 
@@ -493,12 +571,17 @@ int main(int argc, char **argv){
       runCQJob<dcomplex,WATER>(waterGroup,fName,memManager,jbTyp,basis,ref,
         scfSett,rtSett,nCores, "SAD");
 
+
     std::stringstream linkName;
     linkName << "test" <<std::setfill('0') << std::setw(4) << testNum;
     H5Lcreate_soft(fName.c_str(),RefFile.getId(),linkName.str().c_str(),
       H5P_DEFAULT,H5P_DEFAULT);
     testNum++;
     cout << " -> " << linkName.str() << endl;
+    if(!fld.compare("REAL"))
+      writeInput<double,WATER>(linkName.str(),jbTyp,basis,ref,scfSett,rtSett,nCores,"SAD");
+    else 
+      writeInput<dcomplex,WATER>(linkName.str(),jbTyp,basis,ref,scfSett,rtSett,nCores,"SAD");
   }
 
   // Li Tests
@@ -543,6 +626,10 @@ int main(int argc, char **argv){
       H5P_DEFAULT,H5P_DEFAULT);
     testNum++;
     cout << " -> " << linkName.str() << endl;
+    if(!fld.compare("REAL"))
+      writeInput<double,Li>(linkName.str(),jbTyp,basis,ref,scfSett,rtSett,nCores,"SAD");
+    else 
+      writeInput<dcomplex,Li>(linkName.str(),jbTyp,basis,ref,scfSett,rtSett,nCores,"SAD");
   }
 
   // O2 Tests
@@ -574,6 +661,7 @@ int main(int argc, char **argv){
     RTSettings rtSett;
 
     cout << "Running Job " << fName;
+    std::stringstream linkName;
     try {
     if(!fld.compare("REAL"))
       runCQJob<double,O2>(waterGroup,fName,memManager,jbTyp,basis,ref,
@@ -582,7 +670,6 @@ int main(int argc, char **argv){
       runCQJob<dcomplex,O2>(waterGroup,fName,memManager,jbTyp,basis,ref,
         scfSett,rtSett,nCores, "CORE");
 
-    std::stringstream linkName;
     linkName << "test" <<std::setfill('0') << std::setw(4) << testNum;
     H5Lcreate_soft(fName.c_str(),RefFile.getId(),linkName.str().c_str(),
       H5P_DEFAULT,H5P_DEFAULT);
@@ -591,14 +678,20 @@ int main(int argc, char **argv){
     } catch(...) {
       cout << " FAILED! " << endl;
     }
+    if(!fld.compare("REAL"))
+      writeInput<double,O2>(linkName.str(),jbTyp,basis,ref,scfSett,rtSett,nCores,"SAD");
+    else 
+      writeInput<dcomplex,O2>(linkName.str(),jbTyp,basis,ref,scfSett,rtSett,nCores,"SAD");
   }
 
+/*
   H5::DataSet tmp(RefFile.openDataSet("test0001/Output"));
   std::vector<char> buffer(tmp.getStorageSize());
   
   tmp.read(&buffer[0],H5::PredType::NATIVE_CHAR);
 
   for(auto X : buffer) cout << X ;
+*/
   
   finalizeCQ();
   return 0;

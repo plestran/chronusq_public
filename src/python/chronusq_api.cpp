@@ -68,11 +68,11 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("dipole"          , &SingleSlater<double>::Wrapper_dipole         )
     .def("quadrupole"      , &SingleSlater<double>::Wrapper_quadrupole     )
     .def("octupole"        , &SingleSlater<double>::Wrapper_octupole       )
+    .def("totalEnergy"   , &SingleSlater<double>::totalEnergy,return_value_policy<copy_const_reference>()     )
 
     .def("Ref"             , &SingleSlater<double>::Ref                    )
     .def("nTCS"            , &SingleSlater<double>::nTCS                   ) 
     .def_readwrite("isClosedShell", &SingleSlater<double>::isClosedShell   )
-//  .def_readonly("totalEnergy"   , &SingleSlater<double>::totalEnergy     )
     .def_readonly("nSCFIter"      , &SingleSlater<double>::nSCFIter        )
 //  .def_readwrite("isDFT"        , &SingleSlater<double>::isDFT           )
 //  .def_readwrite("isGGA"        , &SingleSlater<double>::isGGA           )
@@ -121,6 +121,7 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("dipole"          , &SingleSlater<dcomplex>::Wrapper_dipole         )
     .def("quadrupole"      , &SingleSlater<dcomplex>::Wrapper_quadrupole     )
     .def("octupole"        , &SingleSlater<dcomplex>::Wrapper_octupole       )
+    .def("totalEnergy"   , &SingleSlater<dcomplex>::totalEnergy,return_value_policy<copy_const_reference>()     )
 
     .def("Ref"             , &SingleSlater<dcomplex>::Ref                    )
     .def("nTCS"            , &SingleSlater<dcomplex>::nTCS                   ) 

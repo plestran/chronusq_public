@@ -54,7 +54,7 @@ def communicate(workers):
 #  except KeyError:
 #    pass
 
-def runCQJob(job,workers):
+def runCQJob(job,workers,meta):
   workers["CQFileIO"].iniH5Files()
 
   # Make the classes know about eachother
@@ -89,6 +89,16 @@ def runCQJob(job,workers):
   if job == 'RT':
     workers["CQRealTime"].alloc()
     workers["CQRealTime"].doPropagation()
+
+
+  if job == 'SCF':
+    meta.E          = workers["CQSingleSlater"].totalEnergy()
+    meta.dipole     = workers["CQSingleSlater"].dipole()
+    meta.quadrupole = workers["CQSingleSlater"].quadrupole()
+    meta.octupole   = workers["CQSingleSlater"].octupole()
+  elif job == 'RT':
+    pass
+    
 
 def runSCF(workers):
   # Make the classes know about eachother
