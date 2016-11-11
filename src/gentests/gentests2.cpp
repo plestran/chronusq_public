@@ -189,7 +189,7 @@ void writeInput(const std::string &baseName, const std::string &jbTyp,
   if(!jbTyp.compare("SCF") and scfSett.staticField != null) 
     input << " in a field";
   input << endl << "#  ";
-  if(numThreads == 0) input << "SERIAL";
+  if(numThreads == 1) input << "SERIAL";
   else                input << "SMP";
   input << endl;
   input << "#" << endl;
@@ -222,9 +222,16 @@ void writeInput(const std::string &baseName, const std::string &jbTyp,
   input << endl;  
 
 
+  input << "[SCF]" << endl;
   if(guess.compare("SAD")) {
-    input << "[SCF]" << endl;
     input << "guess = " << guess << endl;
+  }
+  if(!jbTyp.compare("SCF") and scfSett.staticField != null){ 
+    input << "field = ";
+    for(auto x : scfSett.staticField)
+      input << std::setw(10) << std::setprecision(5) << x;
+    input << endl;
+    
   }
   input << endl;
 
@@ -627,9 +634,9 @@ int main(int argc, char **argv){
     testNum++;
     cout << " -> " << linkName.str() << endl;
     if(!fld.compare("REAL"))
-      writeInput<double,Li>(linkName.str(),jbTyp,basis,ref,scfSett,rtSett,nCores,"SAD");
+      writeInput<double,Li>(linkName.str(),jbTyp,basis,ref,scfSett,rtSett,nCores,"CORE");
     else 
-      writeInput<dcomplex,Li>(linkName.str(),jbTyp,basis,ref,scfSett,rtSett,nCores,"SAD");
+      writeInput<dcomplex,Li>(linkName.str(),jbTyp,basis,ref,scfSett,rtSett,nCores,"CORE");
   }
 
   // O2 Tests
@@ -665,10 +672,10 @@ int main(int argc, char **argv){
     try {
     if(!fld.compare("REAL"))
       runCQJob<double,O2>(waterGroup,fName,memManager,jbTyp,basis,ref,
-        scfSett,rtSett,nCores, "CORE");
+        scfSett,rtSett,nCores, "SAD");
     else 
       runCQJob<dcomplex,O2>(waterGroup,fName,memManager,jbTyp,basis,ref,
-        scfSett,rtSett,nCores, "CORE");
+        scfSett,rtSett,nCores, "SAD");
 
     linkName << "test" <<std::setfill('0') << std::setw(4) << testNum;
     H5Lcreate_soft(fName.c_str(),RefFile.getId(),linkName.str().c_str(),
