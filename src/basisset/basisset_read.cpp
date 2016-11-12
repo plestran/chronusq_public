@@ -784,7 +784,8 @@ std::pair<double,double> BasisSet::cart2sphCoeff(unsigned l,unsigned m,
   tmp /= (factorial<double>(2*l) * factorial<double>(x) * factorial<double>(y) * factorial<double>(z) *
         factorial<double>(l + m));
 
-  tmp = std::sqrt(tmp) / (l*l * factorial<double>(l));
+//  tmp = std::sqrt(tmp) / (l*l * factorial<double>(l));
+  tmp = std::sqrt(tmp) / ( std::pow(2.0,l) * factorial<double>(l));
 
 
   int j = (x + y - m);
@@ -796,10 +797,9 @@ std::pair<double,double> BasisSet::cart2sphCoeff(unsigned l,unsigned m,
   j /= 2;
 
   dcomplex tmp2(0,0);
-  for(auto i = 0; i <= (l - m) / 2; i++){
+  for(auto i = 0; i <= ((l - m) / 2); i++){
     if( i > l or i < 0) continue;
     if( j > i or j < 0) continue;
-
     double tmp3 = binomial(l,i) * binomial(i,j);
     tmp3 *= std::pow(-1,i) * factorial<double>(2*l - 2*i);
     tmp3 /= factorial<double>(l - m - 2*i);
@@ -813,8 +813,8 @@ std::pair<double,double> BasisSet::cart2sphCoeff(unsigned l,unsigned m,
   dcomplex tmp4(0,0);
   tmp2 = dcomplex(0,0);
   for(auto k = 0; k <= j; k++) {
-    if( k > j or k < 0 or m < (x - 2*k) or (x - 2*k) <0)
-      continue;
+    if( k > j or k < 0 ) continue;
+    if( ((x - 2*k) > m) or ((x - 2*k) <0) ) continue;
 
     dcomplex tmp3_p = binomial(j,k) * binomial(m,(x - 2*k));
     dcomplex tmp3_m = tmp3_p;
@@ -831,7 +831,7 @@ std::pair<double,double> BasisSet::cart2sphCoeff(unsigned l,unsigned m,
 
   if( j != 0 or m != 0) { Rp *= tmp2; Rm *= tmp4; };
 
-  if( m != 0) {
+//  if( m != 0) {
     unsigned L = x + y + z;
     double fact = double_factorial<double>(2*L - 1);
     if(x > 0) fact /= double_factorial<double>(2*x - 1);
@@ -842,7 +842,7 @@ std::pair<double,double> BasisSet::cart2sphCoeff(unsigned l,unsigned m,
  
     Rp *= fact; 
     Rm *= fact;
-  }
+//  }
 
   if( m == 0 ) return std::pair<double,double>(std::real(Rp),0.0);
   else
