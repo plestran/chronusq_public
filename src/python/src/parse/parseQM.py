@@ -120,18 +120,34 @@ def handleReference(workers,settings):
   else:
     workers["CQSingleSlater"] = chronusQ.SingleSlater_double()
 
+  isDFT = False
+
   if len(ref) > 1:
     workers["CQSingleSlater"].setRef(str(ref[1]))
+    isDFT = 'HF' not in ref[1]
   else:
     workers["CQSingleSlater"].setRef(str(ref[0]))
+    isDFT = 'HF' not in ref[0]
 
-  if 'DFT_NRAD' in settings:
-    workers["CQSingleSlater"].setDFTNRad(settings['DFT_NRAD'])
-  if 'DFT_NANG' in settings:
-    workers["CQSingleSlater"].setDFTNAng(settings['DFT_NANG'])
+
+  if isDFT:
+    if 'DFT_NRAD' in settings:
+      workers["CQSingleSlater"].setDFTNRad(settings['DFT_NRAD'])
+    if 'DFT_NANG' in settings:
+      workers["CQSingleSlater"].setDFTNAng(settings['DFT_NANG'])
+
+    # No 2C DFT Yet
+    if isDFT and workers["CQSingleSlater"].nTCS() == 2:
+      msg = 'Two-Component Kohn-Sham NYI'
+      CErrMsg(workers['CQFileIO'],str(msg))
 
 
 def parseRT(workers,secDict):
+
+
+  if workers["CQSingleSlater"].nTCS() == 2:
+    msg = 'Two-Component Real-Time Simulations NYI'
+    CErrMsg(workers['CQFileIO'],str(msg))
 
   ref = secDict['QM']['REFERENCE']
   ref = ref.split()
@@ -192,7 +208,12 @@ def parseRT(workers,secDict):
   # Idiot Checks
 
   if 'ENVELOPE' in rtSettings:
+
     env = rtSettings['ENVELOPE']
+
+    if env != "DELTA":
+      msg = 'Non-Delta Field Envelopes NYI'
+      CErrMsg(workers['CQFileIO'],str(msg))
 
     needsEDField = ['PLANEWAVE','CONSTANT','GAUSSIAN','DELTA',"STEP"]
     needsFreq    = ['LINRAMP','GAUSSIAN']

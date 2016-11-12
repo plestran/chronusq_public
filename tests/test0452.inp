@@ -1,0 +1,27 @@
+#
+#  test0452 - Li UB3LYP/6-31G : SCF
+#  SERIAL
+#
+#  Molecule Specification 
+[Molecule]
+charge = 0
+mult = 2
+geom: 
+ Li               0               0               0
+
+# 
+#  Job Specification
+#
+[QM]
+reference = Real UB3LYP
+job = SCF
+
+[BASIS]
+basis = 6-31G
+
+[SCF]
+guess = CORE
+
+[MISC]
+nsmp = 1
+

@@ -1,0 +1,27 @@
+#
+#  test0825 - O2 UBLYP/cc-pVDZ : RT
+#  SERIAL
+#
+#  Molecule Specification 
+[Molecule]
+charge = 0
+mult = 3
+geom: 
+ O               0               0        0.608586
+ O               0               0       -0.608586
+
+# 
+#  Job Specification
+#
+[QM]
+reference = Real UBLYP
+job = RT
+
+[BASIS]
+basis = cc-pVDZ
+
+[RT]
+
+[MISC]
+nsmp = 1
+

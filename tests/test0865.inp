@@ -1,0 +1,28 @@
+#
+#  test0865 - O2 UHF/STO-3G : SCF in a field
+#  SERIAL
+#
+#  Molecule Specification 
+[Molecule]
+charge = 0
+mult = 3
+geom: 
+ O               0               0        0.608586
+ O               0               0       -0.608586
+
+# 
+#  Job Specification
+#
+[QM]
+reference = Complex UHF
+job = SCF
+
+[BASIS]
+basis = STO-3G
+
+[SCF]
+field =     0.0006         0         0
+
+[MISC]
+nsmp = 1
+

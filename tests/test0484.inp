@@ -1,0 +1,27 @@
+#
+#  test0484 - Li USLATER/STO-3G : SCF
+#  SMP
+#
+#  Molecule Specification 
+[Molecule]
+charge = 0
+mult = 2
+geom: 
+ Li               0               0               0
+
+# 
+#  Job Specification
+#
+[QM]
+reference = Real USLATER
+job = SCF
+
+[BASIS]
+basis = STO-3G
+
+[SCF]
+guess = CORE
+
+[MISC]
+nsmp = 2
+

@@ -1,0 +1,28 @@
+#
+#  test0876 - O2 ULSDA/cc-pVDZ : SCF in a field
+#  SERIAL
+#
+#  Molecule Specification 
+[Molecule]
+charge = 0
+mult = 3
+geom: 
+ O               0               0        0.608586
+ O               0               0       -0.608586
+
+# 
+#  Job Specification
+#
+[QM]
+reference = Complex ULSDA
+job = SCF
+
+[BASIS]
+basis = cc-pVDZ
+
+[SCF]
+field =     0.0006         0         0
+
+[MISC]
+nsmp = 1
+

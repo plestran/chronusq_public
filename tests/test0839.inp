@@ -1,0 +1,27 @@
+#
+#  test0839 - O2 UB3LYP/6-31G : RT
+#  SMP
+#
+#  Molecule Specification 
+[Molecule]
+charge = 0
+mult = 3
+geom: 
+ O               0               0        0.608586
+ O               0               0       -0.608586
+
+# 
+#  Job Specification
+#
+[QM]
+reference = Real UB3LYP
+job = RT
+
+[BASIS]
+basis = 6-31G
+
+[RT]
+
+[MISC]
+nsmp = 2
+

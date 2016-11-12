@@ -1,0 +1,26 @@
+#
+#  test0551 - Li UB3LYP/6-31G : RT
+#  SMP
+#
+#  Molecule Specification 
+[Molecule]
+charge = 0
+mult = 2
+geom: 
+ Li               0               0               0
+
+# 
+#  Job Specification
+#
+[QM]
+reference = Real UB3LYP
+job = RT
+
+[BASIS]
+basis = 6-31G
+
+[RT]
+
+[MISC]
+nsmp = 2
+

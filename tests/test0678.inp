@@ -1,0 +1,27 @@
+#
+#  test0678 - O2 USLATER/cc-pVDZ : SCF
+#  SERIAL
+#
+#  Molecule Specification 
+[Molecule]
+charge = 0
+mult = 3
+geom: 
+ O               0               0        0.608586
+ O               0               0       -0.608586
+
+# 
+#  Job Specification
+#
+[QM]
+reference = Real USLATER
+job = SCF
+
+[BASIS]
+basis = cc-pVDZ
+
+[SCF]
+
+[MISC]
+nsmp = 1
+

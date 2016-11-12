@@ -1,0 +1,28 @@
+#
+#  test0585 - Li UB88/cc-pVDZ : SCF in a field
+#  SERIAL
+#
+#  Molecule Specification 
+[Molecule]
+charge = 0
+mult = 2
+geom: 
+ Li               0               0               0
+
+# 
+#  Job Specification
+#
+[QM]
+reference = Complex UB88
+job = SCF
+
+[BASIS]
+basis = cc-pVDZ
+
+[SCF]
+guess = CORE
+field =          0         0    0.0006
+
+[MISC]
+nsmp = 1
+

@@ -1,7 +1,9 @@
 import sys,os
+import h5py
 import getopt
-from refval import *
+#from refval import *
 from chronusq import *
+import numpy as np
 
 ##############################
 #      Class Definitions     #
@@ -71,48 +73,86 @@ def findFile(name,path):
 #--------------------------------------------------------------------
 
 #--------------------------------------------------------------------
+#def genTable():
+## Reads test.index to see which tests to run
+#  start = False
+#  f = open("test.index",'r')
+#  table = []
+#  for line in f:
+#    strx = line.split()
+#    if ".inp" in line and '#' not in line:
+#
+##     check if the type falls within the set we want to run
+#      runTest = False
+#      for sub in subTests:
+#        if sub in line.lower():
+#          runTest = True
+#          continue
+#
+##     run all the tests not commented out
+#      if testType == 'all': runTest = True
+#
+##     checks for exclusive options
+#      if testSize == 'large' and "small" in line.lower(): runTest = False
+#      if testSize == 'small' and "large" in line.lower(): runTest = False
+#      if testPar  == 'off' and "openmp" in line.lower(): runTest = False
+#      if testPar  == 'on'  and "serial" in line.lower(): runTest = False
+##      if testInts == 'incore' and "direct" in line.lower(): runTest = False
+##      if testInts == 'direct' and "incore" in line.lower(): runTest = False
+#      if "dfield" in subTests and "dfield" not in line.lower(): runTest = False
+#      if testComp == 'no' and "complex" in line.lower(): runTest = False
+#      if testComp == 'yes'and "real"    in line.lower(): runTest = False
+#      if testBasis != 'all':
+#        for basis in subBasis:
+#          if basis not in line.lower(): 
+#            runTest = False
+#            continue
+#
+##     add the tests to the list
+#      if runTest:
+#        desc = ' '.join(strx[2:])
+#        entry = UnitTest(strx[0],strx[1],desc)
+#        table.append(entry)
+#
+#  f.close()
+#  return table
 def genTable():
-# Reads test.index to see which tests to run
   start = False
-  f = open("test.index",'r')
   table = []
-  for line in f:
-    strx = line.split()
-    if ".inp" in line and '#' not in line:
+  with h5py.File("chronusq-ref.bin",'r') as refFile:
+    for key in refFile.keys():
+      if 'test' not in key:
+        continue
+      testPath = refFile.get(key,getlink=True).path
 
-#     check if the type falls within the set we want to run
       runTest = False
       for sub in subTests:
-        if sub in line.lower():
+        if sub in testPath:
           runTest = True
           continue
 
-#     run all the tests not commented out
       if testType == 'all': runTest = True
 
-#     checks for exclusive options
-      if testSize == 'large' and "small" in line.lower(): runTest = False
-      if testSize == 'small' and "large" in line.lower(): runTest = False
-      if testPar  == 'off' and "openmp" in line.lower(): runTest = False
-      if testPar  == 'on'  and "serial" in line.lower(): runTest = False
-      if testInts == 'incore' and "direct" in line.lower(): runTest = False
-      if testInts == 'direct' and "incore" in line.lower(): runTest = False
-      if "dfield" in subTests and "dfield" not in line.lower(): runTest = False
-      if testComp == 'no' and "complex" in line.lower(): runTest = False
-      if testComp == 'yes'and "real"    in line.lower(): runTest = False
+#     Checks for exclusive options
+      if testPar  == 'off' and "SMP"    in testPath: runTest = False
+      if testPar  == 'on'  and "SERIAL" in testPath: runTest = False
+      if "dfield" in subTests and "WEAK" not in testPath: runTest = False
+      if testComp == 'no' and "COMPLEX" in testPath: runTest = False
+      if testComp == 'yes'and "REAL"    in testPath: runTest = False
+
       if testBasis != 'all':
         for basis in subBasis:
-          if basis not in line.lower(): 
+          if basis not in testPath.lower(): 
             runTest = False
             continue
 
 #     add the tests to the list
       if runTest:
-        desc = ' '.join(strx[2:])
-        entry = UnitTest(strx[0],strx[1],desc)
+#        desc = ' '.join(strx[2:])
+        strx = testPath.split('/')
+        entry = UnitTest(refFile.get(key).name.lstrip('/') + '.inp'\
+                  ,strx[2],' ')
         table.append(entry)
-
-  f.close()
   return table
 #--------------------------------------------------------------------
 
@@ -126,9 +166,10 @@ def initSummary():
   outf = open(summaryf,'w')
 
   SCFheader = "SCF Test Job                  |dEnergy|    max(|dDipole|)    max(|dQuadrupole|)    max(|dOctupole|)  Passed\n--------------------------  -----------  ----------------  --------------------  ------------------  --------\n\n"
-  RESPheader = "RESP Test Job                 max(|df|)    max(|domega|)    NStates  Passed\n--------------------------  -----------  ---------------  ---------  --------\n\n"
+#  RESPheader = "RESP Test Job                 max(|df|)    max(|domega|)    NStates  Passed\n--------------------------  -----------  ---------------  ---------  --------\n\n"
   RTheader = "RT Test Job                   |dLastEnergy|    max(|dLastDipole|)  Passed\n--------------------------  ---------------  --------------------  --------\n\n"
-  outf.write(SCFheader+RESPheader+RTheader)
+#  outf.write(SCFheader+RESPheader+RTheader)
+  outf.write(SCFheader+RTheader)
   outf.close()
 #--------------------------------------------------------------------
 
@@ -136,8 +177,8 @@ def initSummary():
 def runUnit(doPrint):
 # Runs the unit tests
   global errors
-  refvalues()
-  tests = [None for x in xrange(1000)] 
+#  refvalues()
+  tests = [None for x in xrange(10000)] 
   testtable = genTable()
 
   k = 0
@@ -147,21 +188,21 @@ def runUnit(doPrint):
 #
 #     run chronus
       if doPrint: print "running job: "+i.infile
-      tests[k] = runCQ(i.infile,'')
+      tests[k] = runCQ(str(i.infile),str(''))
 #
 #     test SCF values
-      if 'SCF' in ref[i.infile[:8]].typ:
-        testSCF(ref[i.infile[:8]],tests[k])
+      if 'SCF' in i.testClass:
+        testSCF(i.infile.rstrip('.inp'),tests[k])
         appendSummary(i.infile,errors,'SCF')
 #
 #     test RESP values
-      elif 'RESP' in ref[i.infile[:8]].typ:
-        testRESP(ref[i.infile[:8]],tests[k])
-        appendSummary(i.infile,errors,'RESP')
+#      elif 'RESP' in ref[i.infile[:8]].typ:
+#        testRESP(ref[i.infile[:8]],tests[k])
+#        appendSummary(i.infile,errors,'RESP')
 #
 #     test RT values 
-      elif 'RT' in ref[i.infile[:8]].typ:
-        testRT(ref[i.infile[:8]],tests[k])
+      elif 'RT' in i.testClass:
+        testRT(i.infile.rstrip('.inp'),tests[k])
         appendSummary(i.infile,errors,'RT')
 
       else:
@@ -193,62 +234,104 @@ def testRESP(ref,tests):
 #--------------------------------------------------------------------
 
 #--------------------------------------------------------------------
-def testRT(ref,tests):
+def testRT(name,vals):
   auToD   = 0.3934303070
   auToAng = 0.5291772083
 
-# test RT energy
-  abserr = abs(ref.eng - tests.lastEnergy)
-  errors.append(abserr)
+## test RT energy
+#  abserr = abs(ref.eng - tests.lastEnergy)
+#  errors.append(abserr)
+#
+## test time evolving molecular dipoles
+#  maxerr = 0.0
+#  for i in range(4):
+#    abserr = abs(abs(ref.dip[i]) - abs(tests.lastDipole[i]))
+#    if abserr > maxerr:
+#      maxerr = abserr
+#  errors.append(maxerr)
 
-# test time evolving molecular dipoles
-  maxerr = 0.0
-  for i in range(4):
-    abserr = abs(abs(ref.dip[i]) - abs(tests.lastDipole[i]))
-    if abserr > maxerr:
-      maxerr = abserr
-  errors.append(maxerr)
+  with h5py.File("chronusq-ref.bin",'r') as refFile:
+    refVals = refFile.get(name)
+    refEnergy = []
+    refDipole = []
+    for x in np.array(refVals['TimePropagation']):
+      refEnergy.append(x[1])
+      tmp = []
+      for y in x[2]:
+        tmp.append(y)
+      refDipole.append(tmp)
+    refEnergy = np.array(refEnergy)
+    refDipole = np.array(refDipole)
+
+    errors.append(np.max(abs(refEnergy - vals.propEnergy)))
+    errors.append(np.max(abs(refDipole - np.array(vals.propDipole))))
+    
+
 #--------------------------------------------------------------------
 
 #--------------------------------------------------------------------
-def testSCF(ref,tests):
+#def testSCF(ref,tests):
+#  auToD   = 0.3934303070
+#  auToAng = 0.5291772083
+#
+## test SCF energy
+#  abserr = abs(ref.eng - tests.E)
+#  errors.append(abserr)
+#
+## test molecular dipoles
+#  maxerr = 0.0
+#  for i in range(3):
+#    abserr = abs(ref.dip[i] - tests.dipole[i]/auToD)
+#    if abserr > maxerr:
+#      maxerr = abserr
+#  errors.append(maxerr)
+#
+## test molecular quadrupole
+#  k = 0
+#  maxerr = 0.0
+#  for i in range(3):
+#    for j in range(i,3):
+#      abserr = abs(ref.quad[k] - tests.quadrupole[i][j]*auToAng/auToD)
+#      if abserr > maxerr:
+#        maxerr = abserr
+#      k += 1
+#  errors.append(maxerr)
+#
+## test molecular octupole
+#  l = 0
+#  maxerr = 0.0
+#  for i in range(3):
+#    for j in range(i,3):
+#      for k in range(j,3):
+#        abserr = abs(ref.octu[l] - tests.octupole[i][j][k]*auToAng*auToAng/auToD)
+#        if abserr > maxerr:
+#          maxerr = abserr
+#        l += 1
+#  errors.append(maxerr)
+def testSCF(name,vals):
   auToD   = 0.3934303070
   auToAng = 0.5291772083
+  with h5py.File("chronusq-ref.bin",'r') as refFile:
+    refVals = refFile.get(name)
+#   test SCF energy
+    abserr = abs(np.array(refVals['TotalEnergy'])[0] - vals.E)
+    errors.append(abserr)
 
-# test SCF energy
-  abserr = abs(ref.eng - tests.E)
-  errors.append(abserr)
+#   test molecular dipoles
+    abserr = abs(np.array(refVals['ElecDipole']) - np.array(vals.dipole))
+    maxerr = np.max(abserr)
+    errors.append(maxerr)
 
-# test molecular dipoles
-  maxerr = 0.0
-  for i in range(3):
-    abserr = abs(ref.dip[i] - tests.dipole[i]/auToD)
-    if abserr > maxerr:
-      maxerr = abserr
-  errors.append(maxerr)
+#   test molecular quadrupoles
+    abserr = abs(np.array(refVals['ElecQuadrupole']).reshape(3,3) - np.array(vals.quadrupole))
+    maxerr = np.max(abserr)
+    errors.append(maxerr)
 
-# test molecular quadrupole
-  k = 0
-  maxerr = 0.0
-  for i in range(3):
-    for j in range(i,3):
-      abserr = abs(ref.quad[k] - tests.quadrupole[i][j]*auToAng/auToD)
-      if abserr > maxerr:
-        maxerr = abserr
-      k += 1
-  errors.append(maxerr)
+#   test molecular octupoles
+    abserr = abs(np.array(refVals['ElecOctupole']).reshape(3,3,3) - np.array(vals.octupole))
+    maxerr = np.max(abserr)
+    errors.append(maxerr)
 
-# test molecular octupole
-  l = 0
-  maxerr = 0.0
-  for i in range(3):
-    for j in range(i,3):
-      for k in range(j,3):
-        abserr = abs(ref.octu[l] - tests.octupole[i][j][k]*auToAng*auToAng/auToD)
-        if abserr > maxerr:
-          maxerr = abserr
-        l += 1
-  errors.append(maxerr)
 #--------------------------------------------------------------------
 
 ##############################
@@ -273,31 +356,28 @@ if __name__ in "__main__":
     -k, --kill        Stop testing if a job fails
     --type=           Determines types of tests to run. Multiple options
                       can be specified by separating with a comma.
-                      3 classes of tests  = [SCF,RESP,RT] 
-                      Specify References  = [RHF,UHF,CUHF,GHF]
-                                            [RKS,UKS,SLATER,LSDA,SVWN5]
-                      Reference and Type  = [(R|U|CU)HF-SCF,HF-CIS,HF-RPA]
-                                            [(R|U)KS-SCF,SCF-LSDA] 
+                      3 classes of tests  = [SCF,RT] 
+                      Specify References  = [RHF,UHF,GHF,X2C]
+                                            [RKS,UKS]
+                      Reference and Type  = [(R|U)HF-SCF]
+                                            [(R|U)KS-SCF] 
                       Dipole Field        = [DField]
-    --integrals=      Integral evaluation = [incore] or [direct]
     --parallel=       Whether to run parallel jobs = [on] or [off]
-    --size=           Size of jobs to run = [small] or [large] or [both]
-                      [small] is the default
     --complex=        Complex Jobs = [yes] or [no] or [both]
                       [both] is the default
     --basis=          Only run tests for this basis set
-                      [STO-3G,6-31G,cc-pVDZ,def2-SVPD]
+                      [STO-3G,6-31G,cc-pVDZ]
 """
   doPrint  = True
   doKill   = False
   testType = 'all'
-  testInts = ''
+#  testInts = ''
   testPar  = ''
   testSize = 'small'
   testComp = ''
   testBasis = 'all'
   try:
-    opts, args = getopt.getopt(sys.argv[1:],"hks",["help","silent","kill","type=","integrals=","parallel=","size=","complex=","basis="])
+    opts, args = getopt.getopt(sys.argv[1:],"hks",["help","silent","kill","type=","parallel=","size=","complex=","basis="])
   except getopt.GetoptError:
     print msg
     sys.exit(2)
@@ -310,9 +390,9 @@ if __name__ in "__main__":
     elif opt in ('-k',"--kill"):
       doKill = True
     elif opt in ("--type"):
-      testType = arg.lower()
-    elif opt in ("--integrals"):
-      testInts = arg.lower()
+      testType = arg.upper()
+#    elif opt in ("--integrals"):
+#      testInts = arg.lower()
     elif opt in ("--parallel"):
       testPar  = arg.lower()
     elif opt in ("--size"):
@@ -325,6 +405,7 @@ if __name__ in "__main__":
   subTests = testType.split(',')
   subBasis = testBasis.split(',')
 
+  print subTests
 # run unit tests
   initSummary()
   runUnit(doPrint)    

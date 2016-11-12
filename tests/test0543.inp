@@ -1,0 +1,26 @@
+#
+#  test0543 - Li UHF/cc-pVDZ : RT
+#  SMP
+#
+#  Molecule Specification 
+[Molecule]
+charge = 0
+mult = 2
+geom: 
+ Li               0               0               0
+
+# 
+#  Job Specification
+#
+[QM]
+reference = Real UHF
+job = RT
+
+[BASIS]
+basis = cc-pVDZ
+
+[RT]
+
+[MISC]
+nsmp = 2
+

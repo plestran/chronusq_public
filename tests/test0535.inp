@@ -1,0 +1,26 @@
+#
+#  test0535 - Li UBLYP/STO-3G : RT
+#  SERIAL
+#
+#  Molecule Specification 
+[Molecule]
+charge = 0
+mult = 2
+geom: 
+ Li               0               0               0
+
+# 
+#  Job Specification
+#
+[QM]
+reference = Real UBLYP
+job = RT
+
+[BASIS]
+basis = STO-3G
+
+[RT]
+
+[MISC]
+nsmp = 1
+

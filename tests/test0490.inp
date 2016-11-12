@@ -1,0 +1,27 @@
+#
+#  test0490 - Li ULSDA/STO-3G : SCF
+#  SMP
+#
+#  Molecule Specification 
+[Molecule]
+charge = 0
+mult = 2
+geom: 
+ Li               0               0               0
+
+# 
+#  Job Specification
+#
+[QM]
+reference = Real ULSDA
+job = SCF
+
+[BASIS]
+basis = STO-3G
+
+[SCF]
+guess = CORE
+
+[MISC]
+nsmp = 2
+

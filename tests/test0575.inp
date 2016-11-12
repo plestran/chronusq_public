@@ -1,0 +1,27 @@
+#
+#  test0575 - Li UBHANDH/6-31G : SCF
+#  SERIAL
+#
+#  Molecule Specification 
+[Molecule]
+charge = 0
+mult = 2
+geom: 
+ Li               0               0               0
+
+# 
+#  Job Specification
+#
+[QM]
+reference = Complex UBHANDH
+job = SCF
+
+[BASIS]
+basis = 6-31G
+
+[SCF]
+guess = CORE
+
+[MISC]
+nsmp = 1
+

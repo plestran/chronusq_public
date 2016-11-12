@@ -1,0 +1,28 @@
+#
+#  test0589 - Li USVWN5/STO-3G : SCF in a field
+#  SERIAL
+#
+#  Molecule Specification 
+[Molecule]
+charge = 0
+mult = 2
+geom: 
+ Li               0               0               0
+
+# 
+#  Job Specification
+#
+[QM]
+reference = Complex USVWN5
+job = SCF
+
+[BASIS]
+basis = STO-3G
+
+[SCF]
+guess = CORE
+field =          0         0    0.0006
+
+[MISC]
+nsmp = 1
+

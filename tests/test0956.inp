@@ -1,0 +1,28 @@
+#
+#  test0956 - O2 UB3LYP/6-31G : SCF in a field
+#  SMP
+#
+#  Molecule Specification 
+[Molecule]
+charge = 0
+mult = 3
+geom: 
+ O               0               0        0.608586
+ O               0               0       -0.608586
+
+# 
+#  Job Specification
+#
+[QM]
+reference = Complex UB3LYP
+job = SCF
+
+[BASIS]
+basis = 6-31G
+
+[SCF]
+field =     0.0006         0         0
+
+[MISC]
+nsmp = 2
+

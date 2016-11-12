@@ -1,0 +1,27 @@
+#
+#  test0922 - O2 ULSDA/STO-3G : SCF
+#  SMP
+#
+#  Molecule Specification 
+[Molecule]
+charge = 0
+mult = 3
+geom: 
+ O               0               0        0.608586
+ O               0               0       -0.608586
+
+# 
+#  Job Specification
+#
+[QM]
+reference = Complex ULSDA
+job = SCF
+
+[BASIS]
+basis = STO-3G
+
+[SCF]
+
+[MISC]
+nsmp = 2
+

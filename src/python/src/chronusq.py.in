@@ -29,11 +29,14 @@ import os,sys
 import getopt
 sys.path.append('@PYTHONAPI_PATH@')
 import libpythonapi as chronusQ
-from jobs.jobMap import *
+#from jobs.jobMap import *
+from jobs.standardJobs import runCQJob
 from parse.parseInput import parseInput
 from parse.parseMolecule import parseMolecule
-from parse.parseQM import parseQM
+from parse.parseQM import parseQM, parseSCF, parseRT
 from parse.parseMisc import parseMisc
+from parse.parseBasis import parseBasis
+from parse.parseInts import parseInts
 import time 
 
 class MetaData:
@@ -45,21 +48,22 @@ class MetaData:
     self.quadrupole = []
     self.octupole   = []
 #   RESP Info
-    self.excEne = []
-    self.oscStr = []
-    self.davIters = []
+#    self.excEne = []
+#    self.oscStr = []
+#    self.davIters = []
 #   RT Info
-    self.lastEnergy = 0
-    self.lastDipole = []
+    self.propEnergy = []
+    self.propDipole = []
 #   Derivitive Info
-    self.GSGrad = []
-    self.ESGrad = []
-    self.ESGSNACME = []
-    self.ESESNACME = []
-    
+#    self.GSGrad = []
+#    self.ESGrad = []
+#    self.ESGSNACME = []
+#    self.ESESNACME = []
 
 def runCQ(ifname,ofname):
   authorfname = '@AUTHOR_PATH@'
+  gitrev = '@CQ_GIT_VERSION@'
+  progrev = '@ChronusQ_VERSION_MAJOR@.@ChronusQ_VERSION_MINOR@'
   header = """
      ______ __                                      ____ 
     / ____// /_   _____ ____   ____   __  __ _____ / __ \ 
@@ -68,86 +72,65 @@ def runCQ(ifname,ofname):
   \____//_/ /_//_/    \____//_/ /_/ \__,_//____/ \___\_\ 
                                                          
   """
-  banner = "-------------------------------------------------------------------------------\n"
+  banner = "===============================================================================\n"
 
   starttime= time.strftime("%c")
   
   
   memManager = chronusQ.CQMemManager()
-  mol        = chronusQ.Molecule()
-  basisSet   = chronusQ.BasisSet()
-  DFbasisSet = chronusQ.BasisSet()
-#  controls   = chronusQ.Controls()
-  aoints     = chronusQ.AOIntegrals()
-  
-  hf_double     = chronusQ.SingleSlater_double()
-#  rt_double     = chronusQ.RealTime_double()
-#  sdr_double    = chronusQ.SDResponse_double()
-#  moints_double = chronusQ.MOIntegrals_double()
-  
-  hf_complex     = chronusQ.SingleSlater_complex()
-#  rt_complex     = chronusQ.RealTime_complex()
-#  sdr_complex    = chronusQ.SDResponse_complex()
-#  moints_complex = chronusQ.MOIntegrals_complex()
-  
   out        = chronusQ.FileIO(ifname,ofname)
+
+  workers = {"CQMemManager" : memManager, "CQFileIO" : out}
+
+  # Print front matter for output file
+  out.write("Job Started: %s"  % starttime )
+  out.write(header)
+  out.write("Release Version: " + progrev)
+  out.write("Git Revision: " + gitrev + "\n")
+
+
+  authors = open(authorfname, 'r')
+  out.write("Contributors List:\n"+banner+authors.read())
+  authors.close()
   
-  workers = {
-    "CQMemManager"        :memManager,
-    "CQMolecule"          :mol,
-    "CQBasisSet"          :basisSet,
-    "CQDFBasisSet"        :DFbasisSet,
-#    "CQControls"          :controls,
-    "CQAOIntegrals"       :aoints,
-    "CQSingleSlaterDouble":hf_double,
-#    "CQRealTimeDouble"    :rt_double,
-#    "CQSDResponseDouble"  :sdr_double,
-#    "CQMOIntegralsDouble" :moints_double,
-    "CQSingleSlaterComplex":hf_complex,
-#    "CQRealTimeComplex"    :rt_complex,
-#    "CQSDResponseComplex"  :sdr_complex,
-#    "CQMOIntegralsComplex" :moints_complex,
-    "CQFileIO"            :out
-  }
+  inputf = open(ifname, 'r')
+  out.write("Input File:\n"+banner+inputf.read()+banner)
+  inputf.close()
 
   memManager.setTotalMem(int(256e6))
-  
-  
-  if chronusQ.getRank() == 0:
-    out.write("Job Started: %s"  % starttime )
-    out.write(header)
 
-    authors = open(authorfname, 'r')
-    out.write("Contributors List:\n"+banner+authors.read())
-    authors.close()
-    
-    inputf = open(ifname, 'r')
-    out.write("Input File:\n"+banner+inputf.read()+banner)
-    inputf.close()
-  
-#  controls.iniControls()
-  
+  # Parse Input file
   secDict = parseInput(workers,ifname)
-  
-  unittest = parseMisc(workers,secDict["MISC"])
-  parseMolecule(workers,secDict["MOLECULE"])
-  jobStr = parseQM(workers,secDict)
-  
-  if chronusQ.getRank() == 0:
-    out.iniH5Files()
-#    out.iniStdGroups()
-  
-  chronusQ.mpiBarrier()
-  jobMeta = MetaData()
-  jobMap[jobStr](workers,jobMeta)
-  chronusQ.mpiBarrier()
 
-  
-  if chronusQ.getRank() == 0:
-    endtime= time.strftime("%c")
-    out.write("Job Completed: %s"  % endtime )
+  # Setup Options
+  parseMolecule(workers,secDict['MOLECULE'])
+  job = parseQM(workers,secDict)
+
+  # Parse Integral settings
+  if 'INTS' in secDict:
+    parseInts(workers,secDict['INTS'])
+  else:
+    workers["CQAOIntegrals"] = chronusQ.AOIntegrals()
+
+  # Parse SCF Settings
+  if 'SCF' in secDict:
+    parseSCF(workers,secDict['SCF'])
+
+  workers["CQBasisSet"] = chronusQ.BasisSet()
+  if 'MISC' in secDict:
+    parseMisc(workers,secDict['MISC'])
+  parseBasis(workers,secDict['BASIS'])
+
+  if job == 'RT':
+    parseRT(workers,secDict)
+
+  jobMeta = MetaData()
+  runCQJob(job,workers,jobMeta)
 
   return jobMeta
+
+
+
 
 
 if __name__ in '__main__':
@@ -169,7 +152,7 @@ if __name__ in '__main__':
     opts, args = getopt.getopt(
       sys.argv[1:],
       "hi:o:",
-      ["help","input=","output=","dump="]
+      ["help","input=","output="]
     )
   except getopt.GetoptError:
     if chronusQ.getRank() == 0:
@@ -179,9 +162,6 @@ if __name__ in '__main__':
   # Null out filenames by default
   ifname = ''
   ofname = ''
-
-  # No info dump at the end
-  dumpSCF = False
 
   # Default that if only one parameter, is input file
   if len(opts) == 0 and len(args) == 1:
@@ -208,45 +188,7 @@ if __name__ in '__main__':
     if opt in ('-o',"--output"):
       ofname = arg
 
-    # Info dump
-    if opt in ('--dump'):
-      if arg in ('SCF'): dumpSCF = True
-    
 
   # Run ChronusQ
-  chronusQ.mpiBarrier()
   jobMeta = runCQ(ifname,ofname)
-  chronusQ.mpiBarrier()
-
-
-  if chronusQ.getRank() == 0:
-    # Dump info (if set)
-    auToD   = 0.3934303070
-    auToAng = 0.5291772083
-    auToAng2 = auToAng*auToAng 
-    if dumpSCF:
-      strX = ''
-      strX = strX + "{0:.10f}/".format(jobMeta.E)
-      strX = strX + "{0:.10f}/".format(jobMeta.dipole[0]/auToD)
-      strX = strX + "{0:.10f}/".format(jobMeta.dipole[1]/auToD)
-      strX = strX + "{0:.10f}/".format(jobMeta.dipole[2]/auToD)
-      strX = strX + "{0:.10f}/".format(jobMeta.quadrupole[0][0]*auToAng/auToD)
-      strX = strX + "{0:.10f}/".format(jobMeta.quadrupole[0][1]*auToAng/auToD)
-      strX = strX + "{0:.10f}/".format(jobMeta.quadrupole[0][2]*auToAng/auToD)
-      strX = strX + "{0:.10f}/".format(jobMeta.quadrupole[1][1]*auToAng/auToD)
-      strX = strX + "{0:.10f}/".format(jobMeta.quadrupole[1][2]*auToAng/auToD)
-      strX = strX + "{0:.10f}/".format(jobMeta.quadrupole[2][2]*auToAng/auToD)
-      strX = strX + "{0:.10f}/".format(jobMeta.octupole[0][0][0]*auToAng2/auToD)
-      strX = strX + "{0:.10f}/".format(jobMeta.octupole[0][0][1]*auToAng2/auToD)
-      strX = strX + "{0:.10f}/".format(jobMeta.octupole[0][0][2]*auToAng2/auToD)
-      strX = strX + "{0:.10f}/".format(jobMeta.octupole[0][1][1]*auToAng2/auToD)
-      strX = strX + "{0:.10f}/".format(jobMeta.octupole[0][1][2]*auToAng2/auToD)
-      strX = strX + "{0:.10f}/".format(jobMeta.octupole[0][2][2]*auToAng2/auToD)
-      strX = strX + "{0:.10f}/".format(jobMeta.octupole[1][1][1]*auToAng2/auToD)
-      strX = strX + "{0:.10f}/".format(jobMeta.octupole[1][1][2]*auToAng2/auToD)
-      strX = strX + "{0:.10f}/".format(jobMeta.octupole[1][2][2]*auToAng2/auToD)
-      strX = strX + "{0:.10f}/".format(jobMeta.octupole[2][2][2]*auToAng2/auToD)
- 
-      strX = strX + "SCF"
-      print strX
   chronusQ.finalizeCQ()

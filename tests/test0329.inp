@@ -1,0 +1,28 @@
+#
+#  test0329 - Water RBLYP/6-31G : SCF
+#  SMP
+#
+#  Molecule Specification 
+[Molecule]
+charge = 0
+mult = 1
+geom: 
+ O               0  -0.07579184359               0
+ H     0.866811829    0.6014357793               0
+ H    -0.866811829    0.6014357793               0
+
+# 
+#  Job Specification
+#
+[QM]
+reference = Complex RBLYP
+job = SCF
+
+[BASIS]
+basis = 6-31G
+
+[SCF]
+
+[MISC]
+nsmp = 2
+

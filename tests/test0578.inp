@@ -1,0 +1,28 @@
+#
+#  test0578 - Li UHF/6-31G : SCF in a field
+#  SERIAL
+#
+#  Molecule Specification 
+[Molecule]
+charge = 0
+mult = 2
+geom: 
+ Li               0               0               0
+
+# 
+#  Job Specification
+#
+[QM]
+reference = Complex UHF
+job = SCF
+
+[BASIS]
+basis = 6-31G
+
+[SCF]
+guess = CORE
+field =          0         0    0.0006
+
+[MISC]
+nsmp = 1
+

@@ -1,0 +1,28 @@
+#
+#  test0645 - Li UB3LYP/cc-pVDZ : SCF in a field
+#  SMP
+#
+#  Molecule Specification 
+[Molecule]
+charge = 0
+mult = 2
+geom: 
+ Li               0               0               0
+
+# 
+#  Job Specification
+#
+[QM]
+reference = Complex UB3LYP
+job = SCF
+
+[BASIS]
+basis = cc-pVDZ
+
+[SCF]
+guess = CORE
+field =          0         0    0.0006
+
+[MISC]
+nsmp = 2
+

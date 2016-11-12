@@ -1,0 +1,26 @@
+#
+#  test0654 - Li ULSDA/cc-pVDZ : RT
+#  SERIAL
+#
+#  Molecule Specification 
+[Molecule]
+charge = 0
+mult = 2
+geom: 
+ Li               0               0               0
+
+# 
+#  Job Specification
+#
+[QM]
+reference = Complex ULSDA
+job = RT
+
+[BASIS]
+basis = cc-pVDZ
+
+[RT]
+
+[MISC]
+nsmp = 1
+

@@ -1,0 +1,28 @@
+#
+#  test0316 - Water RSLATER/STO-3G : SCF
+#  SMP
+#
+#  Molecule Specification 
+[Molecule]
+charge = 0
+mult = 1
+geom: 
+ O               0  -0.07579184359               0
+ H     0.866811829    0.6014357793               0
+ H    -0.866811829    0.6014357793               0
+
+# 
+#  Job Specification
+#
+[QM]
+reference = Complex RSLATER
+job = SCF
+
+[BASIS]
+basis = STO-3G
+
+[SCF]
+
+[MISC]
+nsmp = 2
+

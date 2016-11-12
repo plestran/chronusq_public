@@ -1,0 +1,27 @@
+#
+#  test0612 - Li ULSDA/cc-pVDZ : SCF
+#  SMP
+#
+#  Molecule Specification 
+[Molecule]
+charge = 0
+mult = 2
+geom: 
+ Li               0               0               0
+
+# 
+#  Job Specification
+#
+[QM]
+reference = Complex ULSDA
+job = SCF
+
+[BASIS]
+basis = cc-pVDZ
+
+[SCF]
+guess = CORE
+
+[MISC]
+nsmp = 2
+

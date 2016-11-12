@@ -1,0 +1,27 @@
+#
+#  test0485 - Li USLATER/6-31G : SCF
+#  SMP
+#
+#  Molecule Specification 
+[Molecule]
+charge = 0
+mult = 2
+geom: 
+ Li               0               0               0
+
+# 
+#  Job Specification
+#
+[QM]
+reference = Real USLATER
+job = SCF
+
+[BASIS]
+basis = 6-31G
+
+[SCF]
+guess = CORE
+
+[MISC]
+nsmp = 2
+
