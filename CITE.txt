@@ -1,10 +1,10 @@
 In any publication that involves calculations performed by the Chronus Quantum (ChronusQ)
 software package, please use the following BibTeX entry
 
-@misc{chronusq_beta,
-  author = {Xiaosong Li and Edward F. Valeev and David Williams-Young and Feizhi Ding
-    and Hongbin Liu and Joshua Goings and Alessio Petrone and Patrick Lestrange},
-  title = {Chronus Quantum, Beta Version},
+@misc{chronusq_beta2,
+  author = {Xiaosong Li and Edward F. Valeev and David Williams-Young and Alessio Petrone 
+    and Joshua Goings Joesph Kasper and Feizhi Ding and Hongbin Liu and  Patrick Lestrange},
+  title = {Chronus Quantum, Beta2 Version},
   note = {\url{http://www.chronusquantum.org}},
-  year = {2014-2016}
+  year = {2016}
 }

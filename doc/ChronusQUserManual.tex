@@ -122,7 +122,7 @@
       \large Joshua J. Goings\\
       \large Patrick J. Lestrange\\
       \large Xiaosong Li \\[1.5cm]
-      \large Last Revised: October 29, 2015
+      \large Last Revised: \today 
     \end{center}
     \vspace*{\fill}
   \end{titlepage}
@@ -284,6 +284,22 @@
 	and linked to by default and we do not currently support linking to a compiled
 	version on the user's development environment.
 
+      \subsubsection{\HDF} \label{subsubsec:HDF5} 
+        ChronusQ utilizes \HDF~\cite{hdf5} for binary file IO for use with 
+        checkpointing and scratch file generation. \HDF~is made available
+	though the standard (GNU/Linux) OS distribution package manager via
+	(Fedora 22 / root access):
+
+	\begin{lstlisting}
+> sudo dnf install hdf5-devel
+	\end{lstlisting}
+
+	\noindent If for some reason \HDF~cannot be installed in this manner (i.e. 
+	no root access), it may be compiled from source from the tar files on
+	\texttt{https://www.hdfgroup.org/}. Instructions on how one may set
+	the \CMake~and shell environment variables to work with ChronusQ
+	can be found in Section \ref{subsec:ChronusQConfigCompile}.
+
       \subsubsection{\Python} \label{subsubsec:Python} 
         ChronusQ utilizes \Python~as a high level API for input
         file digestion and the actual running of the ChronusQ software. One
@@ -305,21 +321,15 @@
 > pip install configparser
 	\end{lstlisting}
 
-      \subsubsection{\HDF} \label{subsubsec:HDF5} 
-        ChronusQ utilizes \HDF~\cite{hdf5} for binary file IO for use with 
-        checkpointing and scratch file generation. \HDF~is made available
-	though the standard (GNU/Linux) OS distribution package manager via
-	(Fedora 22 / root access):
+        \subsubsubsection{\texttt{h5py}} \label{subsubsubsec:H5Py}
+        \noindent To parse the reference value file for the unit tests,
+        ChronusQ utilizes the \Python~wrapper for \HDF, \texttt{h5py}. This module
+        may be obtained through the \Python~\texttt{pip} module via:
 
 	\begin{lstlisting}
-> sudo dnf install hdf5-devel
+> pip install h5py
 	\end{lstlisting}
 
-	\noindent If for some reason \HDF~cannot be installed in this manner (i.e. 
-	no root access), it may be compiled from source from the tar files on
-	\texttt{https://www.hdfgroup.org/}. Instructions on how one may set
-	the \CMake~and shell environment variables to work with ChronusQ
-	can be found in Section \ref{subsec:ChronusQConfigCompile}.
 
       \subsubsection{\LAPACK~and \BLAS} \label{subsubsec:LA} 
         ChronusQ utilizes \LAPACK~\cite{lapack} and \BLAS~\cite{blas1,blas2,blas3,atlas} to perform
@@ -497,18 +507,16 @@ cmake \
     directory you will find:
     
     \begin{lstlisting}
-buglist.txt
 chronusq.py -> <build directory>/chronusq.py
-chronus-ref.val
-refval.py
+chronus-ref.bin
 rununit.py
 testXXXX*.inp <many input files>
-test.index
     \end{lstlisting}
 
-    \noindent The \texttt{rununit.py} utility will run all the tests specified in \texttt{text.index} 
-    and compare against reference values that are stored in \texttt{chronus-ref.val}. Upon 
-    completion, the results of each test will be printed in \texttt{summary.txt}. 
+    \noindent The \texttt{rununit.py} utility will run all or some of the unit tests 
+    and compare against reference values that are stored in \texttt{chronus-ref.bin}.
+    which is an \HDF5 file Upon completion, the results of each test will be printed 
+    in \texttt{summary.txt}. 
     
     For typical users, we recommend that you simply run the unit tests with no options, so that the 
     full program can be tested. If you are a developer, there are some options that will give you the 
@@ -526,20 +534,17 @@ test.index
     -k, --kill        Stop testing if a job fails
     --type=           Determines types of tests to run. Multiple options
                       can be specified by separating with a comma.
-                      3 classes of tests  = [SCF,RESP,RT]
-                      Specify References  = [RHF,UHF,CUHF,GHF]
-                                             [RKS,UKS,SLATER,LSDA,SVWN5]
-                      Reference and Type  = [(R|U|CU)HF-SCF,HF-CIS,HF-RPA]
-                                             [(R|U)KS-SCF,SCF-LSDA]
-                      Dipole Field         = [DField]
-    --integrals=      Integral evaluation = [incore] or [direct]
+                      3 classes of tests  = [SCF,RT] 
+                      Specify References  = [RHF,UHF,GHF,X2C]
+                                            [RKS,UKS]
+                      Reference and Type  = [(R|U)HF-SCF]
+                                            [(R|U)KS-SCF] 
+                      Dipole Field        = [DField]
     --parallel=       Whether to run parallel jobs = [on] or [off]
-    --size=           Size of jobs to run = [small] or [large] or [both]
-                      [small] is the default
     --complex=        Complex Jobs = [yes] or [no] or [both]
                       [both] is the default
     --basis=          Only run tests for this basis set
-                      [STO-3G,6-31G,cc-pVDZ,def2-SVPD]
+                      [STO-3G,6-31G,cc-pVDZ]
     \end{lstlisting}
    
    The \texttt{--type} options says to only run jobs that contain the specified string in their 
@@ -547,40 +552,27 @@ test.index
   \begin{lstlisting}
 > python rununit.py --type=SCF
    \end{lstlisting}
-    \noindent then you will run all SCF test jobs regardless of the reference, but none of the response (RESP)
-    or real-time electronic dynamics (RT) test jobs. The \texttt{--type} option is an inclusive option and will run
+    \noindent then you will run all SCF test jobs regardless of the reference, but none of the 
+    real-time electronic dynamics (RT) test jobs. The \texttt{--type} option is an inclusive option and will run
     any job that contains one the strings that you specify. 
-    \begin{lstlisting}
-> python rununit.py --type=RESP,RT
-   \end{lstlisting}
-    \noindent will run all the response and RT test jobs and 
-   \begin{lstlisting}
-> python rununit.py --type=RHF-SCF,UKS-SCF
-   \end{lstlisting}
-    \noindent will run all real and complex SCF jobs with either a restricted Hartree-Fock or unrestricted Kohn-Sham
-    reference using all available density functionals. You can look through \texttt{test.index} to determine other possible options
-    that will run the test jobs you're interested in. 
         
     The other options are exclusive and allow the user to eliminate specific types of jobs from their test set. 
     For example, this command will only run the test jobs with the STO-3G basis set where the wave function 
-    is constrained to be real and the integral contractions are done in core. 
+    is constrained to be real. 
     \begin{lstlisting}
-> python rununit.py --integrals=incore --complex=no --basis=sto-3g
+> python rununit.py --complex=no --basis=sto-3g
    \end{lstlisting}
     \noindent Note that the exclusive options do not take more than one argument. 
     
-     You can also change which tests are run by commenting out tests in \texttt{test.index}. This is 
-    not recommended since you should be able to turn tests on and off simply by using the command line
-    options. However, there are currently a number of commented out tests in \texttt{test.index}. These are
-    tests with known issues that we are currently working to address. You can find details about known issues
-    in \texttt{buglist.txt}. Many of these are not true bugs and simply require more robust optimization schemes, 
-    but they are left as things that need to be addressed in the future. 
-    
-   If you identify an issue that is not mentioned in \texttt{buglist.txt}, please add this to the issues section
+   If you identify an issue please add this to the issues section
    on the Chronus Quantum Issues page:  \newline \texttt{https://github.com/liresearchgroup/chronusq\_public/issues}. 
 
   \section{Input Files} \label{sec:InputFiles}
-  To use ChronusQ, it is necessary to specify the molecule and job type within an input file. The easiest way to understand the input for ChronusQ is to take a look at an example. Here is a sample input file for water, \texttt{h2o.inp}. As written, it performs an RHF/STO-3G calculation on neutral, singlet water with a single processor.
+  To use ChronusQ, it is necessary to specify the molecule and job type within
+  an input file. The easiest way to understand the input for ChronusQ is to take
+  a look at an example. Here is a sample input file for water, \texttt{h2o.inp}.
+  As written, it performs an RHF/STO-3G calculation on neutral, singlet water
+  using 4 OpenMP threads.
 \begin{lstlisting}
 #
 #  Molecule Specification
@@ -610,7 +602,7 @@ basis     = STO-3G
 #  Misc Settings
 #
 [Misc]
-nsmp = 1
+nsmp = 4
 \end{lstlisting}
 ChronusQ input files are divided into sections that specify the molecular geometry, the type of job, and other miscellaneous options. Lines beginning with \texttt{\#} are ignored. Inputs are not case-sensitive. Sections are defined by the square bracket, e.g. \texttt{[Molecule]} specifies the molecular geometry, charge, etc. When ChronusQ encounters a section, it then searches the following lines for the appropriate commands and keywords. We will look at these sections each in turn. 
    
@@ -628,6 +620,20 @@ ChronusQ input files are divided into sections that specify the molecular geomet
           \end{lstlisting} 
     \end{description}
     Please note that the $<sp>$ is a required space at the begining of the line. This is an artifact of the input file parser, and must be included. That's all there is to the \texttt{[Molecule]} specification!
+
+    \subsection{Setting up a gaussian basis set with the \texttt{[BASIS]} section} \label{subsec:BasisInput}
+    The \texttt{[BASIS]} section contains options to setup the gaussian basis set for the ChronusQ calculation. Only a small
+    subset of basis sets come included with the ChronusQ repository, which can be found in the \texttt{basis} subdirectory of
+    the main repository. Any gaussian basis set may be included by placing its definition in the \texttt{basis} directory as
+    long as it is specificed using the ``Gaussian94" format (see the EMSL basis set database for more details. The following
+    sections are recognized for the \texttt{[BASIS]} section:
+    \begin{description}
+      \item[\texttt{BASIS}] String. Specifies the gaussian basis set. e.g. \texttt{STO-3G}, \texttt{cc-pVTZ}, etc.
+      \item[\texttt{FORCECART}] Boolean. ``ON" enforces all basis functions with $L>2$ be described using their 
+        cartesian function definitions. This will increase the basis set size and may lead to linear dependencies,
+        especially in the Dunning basis sets. This option should only be realistically used as a debuging option when
+        comparing to codes that cannot utilize solid harmonic gaussians.
+    \end{description}
 
     \subsection{Defining the job type with the \texttt{[QM]} section} \label{subsec:QMInput}
     The \texttt{[QM]} section sets up the type of job you want to run, be it a single point Hartree-Fock energy calculation 
@@ -713,41 +719,41 @@ ChronusQ input files are divided into sections that specify the molecular geomet
         A floating point number that defines how large your time step is (in au).  \\
         Default = \texttt{0.05} au.
       \item[\texttt{EDFIELD}] \hfill \\ 
-        Three floats that indicate the magnitude of the x, y, and z dipole components of the electric field. \\
+        Three floats that indicate the magnitude of the x, y, and z dipole components of the electric field (in au) \\
           Default is zero field, equivalent to: \texttt{EDFIELD = 0.0 0.0 0.0}
       \item[\texttt{TIME\_ON}] \hfill \\ 
-        A floating point time, $t_{on}$, (in fs) we want the external field turned on. \\
-        Default = \texttt{0.0} fs.
+        A floating point time, $t_{on}$, (in au) we want the external field turned on. \\
+        Default = \texttt{0.0} au.
       \item[\texttt{TIME\_OFF}] \hfill \\ 
-        A floating point time, $t_{off}$, (in fs) we want the external field turned off. \\
-        Default = \texttt{1000.0} fs.
-      \item[\texttt{FREQUENCY}] \hfill \\ 
-        A floating point number that sets the frequency, $\omega$, (in eV) of the applied field. \\
-        Default = \texttt{0.0} eV.
-      \item[\texttt{PHASE}] \hfill \\ 
-        A floating point number that defines the phase offset, $\phi$, (in radians) of the applied field. \\
-        Default = \texttt{0.0} rad.
+        A floating point time, $t_{off}$, (in au) we want the external field turned off. \\
+        Default = \texttt{1000.0} au.
+%      \item[\texttt{FREQUENCY}] \hfill \\ 
+%        A floating point number that sets the frequency, $\omega$, (in eV) of the applied field. \\
+%        Default = \texttt{0.0} eV.
+%      \item[\texttt{PHASE}] \hfill \\ 
+%        A floating point number that defines the phase offset, $\phi$, (in radians) of the applied field. \\
+%        Default = \texttt{0.0} rad.
       \item[\texttt{ENVELOPE}] \hfill \\ 
         Envelope function that describes the shape of the external field. Possible options:
         \begin{description}
-          \item[\texttt{PW}] Plane-wave, $E(t) = E \cdot \cos(\omega (t - t_{on}) + \phi)$ \\
-            Note that setting frequency to zero gives the static field.
-          \item[\texttt{LINRAMP}] Linear ramping up to the maximum in the first cycle, then constant envelope afterwards until we linearly ramp off to zero. \\
-            For $t_{on} \leq t \leq t_{off}$: \\
-            \begin{equation*}
-            E(t) = \begin{cases}
-              E \cdot (\omega(t - t_{on})/2\pi) \cos(\omega (t - t_{on}) + \phi)  & t\leq t_{on} + 2\pi/\omega\\
-              E \cdot \cos(\omega (t - t_{on}) + \phi)  & t_{on} + 2\pi/\omega < t < t_{off} - 2\pi/\omega\\
-              E \cdot (\omega(t_{off} - t)/2\pi) \cos(\omega (t - t_{on}) + \phi)  & t \geq t_{off} - 2\pi/\omega  
-            \end{cases}
-            \end{equation*}
- 
-          \item[\texttt{GAUSSIAN}] Gaussian envelope, $E(t) = E \cdot \exp{(-(\sigma ( t - t_{m}))^{2})} \sin(\omega (t - t_{on}) + \phi)$ \hfill \\
-           $\sigma$  = the range of frequency (FWHM) \\
-           $t_m$ = the time when the amplitude reaches maximum \\
-                  The default for $t_m = \sqrt{(\ln(1000))}/\sigma$ 
-                  (at $t_{on}$, the amplitude is 1/1000 times maximum. This ensures a smooth turning-on of the field) \\
-           Note that this requires you to define $\sigma$ through the \texttt{SIGMA} keyword, explained below.
+%          \item[\texttt{PW}] Plane-wave, $E(t) = E \cdot \cos(\omega (t - t_{on}) + \phi)$ \\
+%            Note that setting frequency to zero gives the static field.
+%          \item[\texttt{LINRAMP}] Linear ramping up to the maximum in the first cycle, then constant envelope afterwards until we linearly ramp off to zero. \\
+%            For $t_{on} \leq t \leq t_{off}$: \\
+%            \begin{equation*}
+%            E(t) = \begin{cases}
+%              E \cdot (\omega(t - t_{on})/2\pi) \cos(\omega (t - t_{on}) + \phi)  & t\leq t_{on} + 2\pi/\omega\\
+%              E \cdot \cos(\omega (t - t_{on}) + \phi)  & t_{on} + 2\pi/\omega < t < t_{off} - 2\pi/\omega\\
+%              E \cdot (\omega(t_{off} - t)/2\pi) \cos(\omega (t - t_{on}) + \phi)  & t \geq t_{off} - 2\pi/\omega  
+%            \end{cases}
+%            \end{equation*}
+% 
+%          \item[\texttt{GAUSSIAN}] Gaussian envelope, $E(t) = E \cdot \exp{(-(\sigma ( t - t_{m}))^{2})} \sin(\omega (t - t_{on}) + \phi)$ \hfill \\
+%           $\sigma$  = the range of frequency (FWHM) \\
+%           $t_m$ = the time when the amplitude reaches maximum \\
+%                  The default for $t_m = \sqrt{(\ln(1000))}/\sigma$ 
+%                  (at $t_{on}$, the amplitude is 1/1000 times maximum. This ensures a smooth turning-on of the field) \\
+%           Note that this requires you to define $\sigma$ through the \texttt{SIGMA} keyword, explained below.
           \item[\texttt{STEP}] Step function,
             \begin{equation*}
             E(t) = \begin{cases}
@@ -755,11 +761,15 @@ ChronusQ input files are divided into sections that specify the molecular geomet
               0  & else 
             \end{cases}
             \end{equation*}
+          \item[\texttt{DELTA}] Delta function,
+            \begin{equation*}
+            E(t) = E \delta(t - t_{on})
+            \end{equation*}
         \end{description}
 
-      \item[\texttt{SIGMA}] \hfill \\ 
-         A floating point number, in eV, that defines the full-width half-max (FWHM) of the Gaussian envelope, $\sigma$. This keyword is necessary (and meaningful) only for the Gaussian envelope.  \\
-         Default = \texttt{0.0} eV
+%      \item[\texttt{SIGMA}] \hfill \\ 
+%         A floating point number, in eV, that defines the full-width half-max (FWHM) of the Gaussian envelope, $\sigma$. This keyword is necessary (and meaningful) only for the Gaussian envelope.  \\
+%         Default = \texttt{0.0} eV
 
      % \item[\texttt{ORTHO}] \hfill \\ 
      %  Type of orthogonalization. Available options are \texttt{LOWDIN} and \texttt{CHOLESKY}. \\ 
