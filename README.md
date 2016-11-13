@@ -1,8 +1,8 @@
-The Chronus Quantum (ChronusQ) Software Package [v. Beta] - A high-performance
+The Chronus Quantum (ChronusQ) Software Package [v. Beta2] - A high-performance
 computational chemistry software package with a strong emphasis on explicitly
 time-dependent and post-SCF quantum mechanical methods.
 
-Copyright (C) 2014-2015 Li Research Group (University of Washington)
+Copyright (C) 2014-2016 Li Research Group (University of Washington)
 
 Please see doc/ChronusQUserManual.pdf for instructions on Installation
 and Validation of the ChronusQ Software Package
