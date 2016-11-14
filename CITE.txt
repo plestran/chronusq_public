@@ -3,7 +3,8 @@ software package, please use the following BibTeX entry
 
 @misc{chronusq_beta2,
   author = {Xiaosong Li and Edward F. Valeev and David Williams-Young and Alessio Petrone 
-    and Joshua Goings Joesph Kasper and Feizhi Ding and Hongbin Liu and  Patrick Lestrange},
+    and Joshua Goings and Joesph Kasper and Feizhi Ding and Hongbin Liu and  
+    Shichao Sun and Patrick Lestrange},
   title = {Chronus Quantum, Beta2 Version},
   note = {\url{http://www.chronusquantum.org}},
   year = {2016}
