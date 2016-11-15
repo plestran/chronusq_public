@@ -53,6 +53,19 @@ enum EllipticalPolarization {
   RYZ
 };
 
+enum PropagationStep {
+  ForwardEuler,
+  ModifiedMidpoint,
+  ExplicitMagnus2,
+  ExplicitMagnus4
+};
+
+
+enum IntegrationScheme {
+  MMUT,
+  ExpMagnus2
+};
+
 struct PropInfo {
   double timeStep;
   double energy;
@@ -107,6 +120,8 @@ class RealTime {
 
   long double currentTime_;
 
+  IntegrationScheme      iScheme_;
+  PropagationStep        iRstScheme_;
   PropagatorFormation    iMethFormU_;
   Envelope               iEnvlp_;
   EllipticalPolarization iEllPol_;
@@ -130,7 +145,8 @@ public:
     ssPropagator_(nullptr),
     deltaT_(0.0), currentTime_(0.0), freq_(0.0), phase_(0.0), sigma_(0.0),
     nSkip_(0),
-    tOn_(0.0), tOff_(1.0e4), maxSteps_(10), stepSize_(0.05), iRstrt_(-1),
+    tOn_(0.0), tOff_(1.0e4), maxSteps_(10), stepSize_(0.05), iRstrt_(50),
+    iScheme_(MMUT), iRstScheme_(ForwardEuler),
     iMethFormU_(EigenDecomp), iEnvlp_(Constant), iEllPol_(LXZ),
     EDField_({0.0,0.0,0.0}),
     tarCSVs(true){ };

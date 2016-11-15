@@ -28,6 +28,7 @@ void RealTime<T>::doPropagation() {
   bool FinMM(false); // Wrap up the MMUT iterations
 
   currentTime_ = 0.0;
+  PropagationStep currentStep;
 
   initCSV();
 
@@ -39,16 +40,7 @@ void RealTime<T>::doPropagation() {
 
   for(auto iStep = 0ul; iStep <= maxSteps_; iStep++) {
 
-    // Logic for MMUT restart
-    /*
-    if(iRstrt_ > 0) {
-      Start = (iStep == 0) or (iStep % iRstrt_) == 0;
-      FinMM = (iStep + 1) % iRstrt_ == 0;
-    } else {
-      Start = (iStep == 0);
-      FinMM = (iStep == maxSteps_);
-    }
-    */
+/*
     Start = (iStep == 0);
     Start = Start or FinMM;
     if(iRstrt_ > 0) Start = Start or (iStep % iRstrt_) == 0;
@@ -78,8 +70,54 @@ void RealTime<T>::doPropagation() {
       // PO(k)    = PO(k-1)
       for(auto iODen = 0; iODen < POSav_.size(); iODen++)
         POSav_[iODen]->swap(*ssPropagator_->onePDMOrtho()[iODen]);
+    }
+*/
 
-      deltaT_ = FinMM ? stepSize_ : 2*stepSize_;
+    if(this->iScheme_ == MMUT) {
+      Start = (iStep == 0);
+      Start = Start or FinMM;
+      if(iRstrt_ > 0) Start = Start or (iStep % iRstrt_) == 0;
+      
+      FinMM = (iStep == maxSteps_);
+      FinMM = FinMM or (tOff_ != 0.0 and currentTime_ > tOff_ and 
+                        currentTime_ <= tOff_ + stepSize_);
+
+      if(iRstrt_ > 0) FinMM = FinMM or ( (iStep + 1) % iRstrt_ == 0 );
+
+      if(Start or FinMM) currentStep = this->iRstScheme_;
+      else               currentStep = ModifiedMidpoint;
+
+      if(Start or FinMM) 
+        this->fileio_->out << "  *** Performing MMUT Restart ***" << endl;
+    } else if(this->iScheme_ == ExpMagnus2) {
+      currentStep = ExplicitMagnus2;
+    }
+
+
+    if(currentStep == ModifiedMidpoint) {
+
+      // Swap POSav densities with those from ssPropagator
+      // for leapfrog step
+      //
+      // POSav(k) <-> PO(k)
+      //
+      // POSav(k) = PO(k)
+      // PO(k)    = PO(k-1)
+      for(auto iODen = 0; iODen < POSav_.size(); iODen++)
+        POSav_[iODen]->swap(*ssPropagator_->onePDMOrtho()[iODen]);
+      
+      // Double the step size for MMUT Step
+      deltaT_ = 2*stepSize_;
+
+    } else {
+
+      // Copy the orthonormal density from ssPropagator to POSav
+      // POSav(k) = PO(k)
+      for(auto iODen = 0; iODen < POSav_.size(); iODen++)
+        (*POSav_[iODen]) = (*ssPropagator_->onePDMOrtho()[iODen]);
+
+      deltaT_ = stepSize_;
+
     }
 
     // Obtain field value for current time point
@@ -91,8 +129,6 @@ void RealTime<T>::doPropagation() {
     ssPropagator_->computeEnergy();
     ssPropagator_->computeProperties();
     this->printRTStep();
-//  cout << iStep << " " << Start << " " << FinMM << " " << deltaT_ << 
-//       " " << ssPropagator_->elecDipole()[0] << endl;
 
     // Orthonormalize the AO Fock
     // F(k) -> FO(k)

@@ -38,18 +38,31 @@ void RealTime<T>::printRTHeader() {
   output << std::setw(38) << std::left << " " 
                           << std::setprecision(5) 
                           << this->stepSize_*phys.AuToFs << " fs" << endl;
-  if(this->iRstrt_ > 0) {
-    output << std::setw(38) << std::left << "  Restarting MMUT every:" 
-                            << this->iRstrt_ << " steps" << endl;
-  }
 
   output << endl;
   output << std::setw(38) << std::left << "  * Integration Parameters:" 
          << endl; 
 
-  output << std::setw(38) << std::left << "  Electronic Integration:" 
-                          << "Modified Midpoint Unitary Transformation (MMUT)" 
-                          << endl;
+  output << std::setw(38) << std::left << "  Electronic Integration:";
+
+  if(this->iScheme_ == MMUT) {
+    output << "Modified Midpoint Unitary Transformation (MMUT)"; 
+  } else if(this->iScheme_ == ExpMagnus2) {
+    output << "Explicit 2nd Order Magnus"; 
+  }
+
+  output << endl;
+  if(this->iScheme_ == MMUT and this->iRstrt_ > 0) {
+    output << std::setw(38) << std::left << "  Restarting MMUT every:" 
+                            << this->iRstrt_ << " steps with a "; 
+   if(this->iRstScheme_ == ForwardEuler)
+     output << "Forward Euler";
+   else if(this->iRstScheme_ == ExplicitMagnus2)
+     output << "Explicit 2nd Order Magnus";
+   
+   output << " step" << endl;
+
+  }
 
   output << endl;
   output << std::setw(38) << std::left << "  * External Field Parameters:" 
