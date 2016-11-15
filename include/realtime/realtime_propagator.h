@@ -40,29 +40,23 @@ void RealTime<T>::formUTrans() {
     new (&UTransMx) ComplexMap(UTransMx_,NB,NB);
   }
 
+  ssPropagator_->populateMO4Diag();
+
+  ComplexMap S(NBTSqScratch_,NBT,NBT);
+  ComplexMap S2(NBTSqScratch2_,NBT,NBT);
+
   if( iMethFormU_ == EigenDecomp ) {
-//  prettyPrintSmart(cout,*this->ssPropagator_->fockOrtho()[0],"OFS");
-//  this->ssPropagator_->fockOrtho()[0]->printMATLAB(cout);
-    ssPropagator_->populateMO4Diag();
     ssPropagator_->diagFock2();
-//  ssPropagator_->printFock();
-//  prettyPrintSmart(this->fileio_->out,*ssPropagator_->moA(),"MO"); 
-    ComplexMap S(NBTSqScratch_,NBT,NBT);
 
     std::copy_n(ssPropagator_->moA()->data(),NBT*NBT,NBTSqScratch_);
-
-//  prettyPrintSmart(cout,(*ssPropagator_->epsA()),"EPSA");
 
     for(auto i = 0; i < NBT; i++) {
       double arg = deltaT_ * (*ssPropagator_->epsA())(i);
       S.col(i) *= dcomplex(std::cos(arg),-std::sin(arg));
     }
-//  prettyPrintSmart(this->fileio_->out,S,"S after scale");
 
     if(this->ssPropagator_->nTCS() == 2) {
-      ComplexMap S2(NBTSqScratch2_,NBT,NBT);
       S2.noalias() = S * ssPropagator_->moA()->adjoint();
-//    prettyPrintSmart(this->fileio_->out,S2,"S2 after GEMM");
 
       std::vector<std::reference_wrapper<ComplexMap>> Us;
       Us.emplace_back(UTransScalar);
@@ -71,7 +65,6 @@ void RealTime<T>::formUTrans() {
       Us.emplace_back(UTransMx);
 
       Quantum<dcomplex>::spinScatter(S2,Us);
-//    prettyPrintSmart(this->fileio_->out,S2,"Full Prop");
     } else {
       // Temporarily store UA in UScalar
       UTransScalar.noalias() = S * ssPropagator_->moA()->adjoint();
@@ -95,12 +88,27 @@ void RealTime<T>::formUTrans() {
         // UScalar = 2*UA for restricted
         UTransScalar *= 2;
       }
-//    cout << deltaT_ << endl;
-//    prettyPrintSmart(cout,UTransScalar,"UT");
-//    prettyPrintSmart(cout,UTransMz,"UT");
-//    CErr();
     }
+  } else if( iMethFormU_ == Taylor ) {
   }
+
+  using boost::math::factorial;
+  ComplexMatrix TEMP(NBT,NBT);
+  TEMP.setZero();
+
+  int NTaylor = 40;
+  S2 = ComplexMatrix::Identity(NBT,NBT);
+  S  = S2;
+  for(auto iT = 1; iT <= NTaylor; iT++) {
+    S2.noalias() = S * (*ssPropagator_->fockOrtho()[0]);
+    S = S2;
+    TEMP.noalias() += (std::pow(dcomplex(0,-deltaT_),iT) / 
+      factorial<double>(iT)) * S2;
+  }
+
+  prettyPrintSmart(this->fileio_->out,UTransScalar,"True");
+  prettyPrintSmart(this->fileio_->out,TEMP,"Taylor");
+  prettyPrintSmart(this->fileio_->out,UTransScalar - TEMP,"DIFF");
 };
 
 template <typename T>

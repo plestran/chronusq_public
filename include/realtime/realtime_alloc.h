@@ -40,6 +40,11 @@ void RealTime<T>::alloc() {
                     iScheme_    == ExpMagnus2;
 
   NBSqScratch_  = memManager_->template malloc<dcomplex>(NB*NB);
+  NBTSqScratch_  = memManager_->template malloc<dcomplex>(NBT*NBT);
+  NBTSqScratch2_ = memManager_->template malloc<dcomplex>(NBT*NBT);
+
+
+
   UTransScalar_ = memManager_->template malloc<dcomplex>(NB*NB);
   POScalarSav_  = std::unique_ptr<ComplexMap>(
     new ComplexMap(memManager_->template malloc<dcomplex>(NB*NB),NB,NB));
@@ -68,8 +73,6 @@ void RealTime<T>::alloc() {
     }
   }
   if(ssPropagator_->nTCS() == 2){ 
-    NBTSqScratch_  = memManager_->template malloc<dcomplex>(NBT*NBT);
-    NBTSqScratch2_ = memManager_->template malloc<dcomplex>(NBT*NBT);
     UTransMx_= memManager_->template malloc<dcomplex>(NB*NB);
     UTransMy_= memManager_->template malloc<dcomplex>(NB*NB);
     POMySav_  = std::unique_ptr<ComplexMap>(
@@ -89,8 +92,6 @@ void RealTime<T>::alloc() {
       FOSav_.emplace_back(FOMySav_.get());
       FOSav_.emplace_back(FOMxSav_.get());
     }
-  } else {
-    NBTSqScratch_ = NBSqScratch_;
   }
 }
 
