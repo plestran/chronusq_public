@@ -54,7 +54,7 @@ void RealTime<T>::printRTHeader() {
   output << endl;
   if(this->iScheme_ == MMUT and this->iRstrt_ > 0) {
     output << std::setw(38) << std::left << "  Restarting MMUT every:" 
-                            << this->iRstrt_ << " steps with a "; 
+                            << this->iRstrt_ << " steps with a(n) "; 
    if(this->iRstScheme_ == ForwardEuler)
      output << "Forward Euler";
    else if(this->iRstScheme_ == ExplicitMagnus2)

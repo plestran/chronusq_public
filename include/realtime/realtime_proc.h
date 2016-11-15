@@ -139,8 +139,9 @@ void RealTime<T>::doPropagation() {
     if(currentStep == ExplicitMagnus2) {
       // Copy the orthonormal fock from ssPropagator to FOSav
       // FOSav(k) = FO(k)
-      for(auto iOFock = 0; iOFock < FOSav_.size(); iOFock++)
+      for(auto iOFock = 0; iOFock < FOSav_.size(); iOFock++){
         (*FOSav_[iOFock]) = (*ssPropagator_->fockOrtho()[iOFock]);
+      }
     }
 
     // Form the unitary propagation matrix
@@ -172,7 +173,7 @@ void RealTime<T>::doPropagation() {
       // FO = 0.5 * (FO + FOSav)
       for(auto iOFock = 0; iOFock < FOSav_.size(); iOFock++) {
         ssPropagator_->fockOrtho()[iOFock]->noalias() += (*FOSav_[iOFock]);
-        ssPropagator_->fockOrtho()[iOFock]->noalias() *= dcomplex(0.5);
+        (*ssPropagator_->fockOrtho()[iOFock]) *= dcomplex(0.5);
       }
 
       // Copy POSav to PO
@@ -182,6 +183,7 @@ void RealTime<T>::doPropagation() {
       // Propagate using new "averaged" fock
       formUTrans();
       propDen();
+      ssPropagator_->unOrthoDen3();
     }
 
     // Increment the current time

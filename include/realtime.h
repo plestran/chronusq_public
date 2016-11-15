@@ -154,7 +154,7 @@ public:
     freq_(0.0), phase_(0.0), sigma_(0.0),
     nSkip_(0),
     tOn_(0.0), tOff_(1.0e4), maxSteps_(10), stepSize_(0.05), iRstrt_(50),
-    iScheme_(MMUT), iRstScheme_(ForwardEuler),
+    iScheme_(MMUT), iRstScheme_(ExplicitMagnus2),
     iMethFormU_(EigenDecomp), iEnvlp_(Constant), iEllPol_(LXZ),
     EDField_({0.0,0.0,0.0}),
     tarCSVs(true){ };
