@@ -174,6 +174,8 @@ def parseRT(workers,secDict):
 #    'UPROP'    :workers['CQRealTime'].setFormU    ,
     'IRSTRT'   :workers['CQRealTime'].setIRstrt   ,
 #    'ELL_POL'  :workers['CQRealTime'].setEllPol     
+    'INTSCHEME':workers['CQRealTime'].setIntScheme,
+    'MMUTSCHEME':workers['CQRealTime'].setMMUTRstScheme,
   }
 
 

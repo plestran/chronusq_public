@@ -36,7 +36,7 @@ void RealTime<T>::doPropagation() {
 //if(this->tOff_ != 0 and (this->tOff_ - this->tOn_) < this->stepSize_){
 //  this->tOff_ = this->stepSize_; 
 //}
-  this->printRTHeader();
+  printRTHeader();
 
   for(auto iStep = 0ul; iStep <= maxSteps_; iStep++) {
 
@@ -73,7 +73,7 @@ void RealTime<T>::doPropagation() {
     }
 */
 
-    if(this->iScheme_ == MMUT) {
+    if(iScheme_ == MMUT) {
       Start = (iStep == 0);
       Start = Start or FinMM;
       if(iRstrt_ > 0) Start = Start or (iStep % iRstrt_) == 0;
@@ -84,12 +84,12 @@ void RealTime<T>::doPropagation() {
 
       if(iRstrt_ > 0) FinMM = FinMM or ( (iStep + 1) % iRstrt_ == 0 );
 
-      if(Start or FinMM) currentStep = this->iRstScheme_;
+      if(Start or FinMM) currentStep = iRstScheme_;
       else               currentStep = ModifiedMidpoint;
 
       if(Start or FinMM) 
-        this->fileio_->out << "  *** Performing MMUT Restart ***" << endl;
-    } else if(this->iScheme_ == ExpMagnus2) {
+        fileio_->out << "  *** Performing MMUT Restart ***" << endl;
+    } else if(iScheme_ == ExpMagnus2) {
       currentStep = ExplicitMagnus2;
     }
 

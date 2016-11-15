@@ -310,6 +310,8 @@ BOOST_PYTHON_MODULE(libpythonapi){
   //.def("getTimeStep"  , &RealTime<double>::getTimeStep  )
     .def("doNotTarCSV"  , &RealTime<double>::doNotTarCSV  )
     .def("setIRstrt"       , &RealTime<double>::setIRstrt       )
+    .def("setIntScheme" , &RealTime<double>::setIntScheme)
+    .def("setMMUTRstScheme" , &RealTime<double>::setMMUTRstScheme)
 
     .def("propEnergy", &RealTime<double>::Python_propEnergy)
     .def("propDipole", &RealTime<double>::Python_propDipole)
@@ -344,6 +346,8 @@ BOOST_PYTHON_MODULE(libpythonapi){
   //.def("getTimeStep"  , &RealTime<dcomplex>::getTimeStep  )
     .def("doNotTarCSV"  , &RealTime<dcomplex>::doNotTarCSV  )
     .def("setIRstrt"       , &RealTime<dcomplex>::setIRstrt       )
+    .def("setIntScheme" , &RealTime<dcomplex>::setIntScheme)
+    .def("setMMUTRstScheme" , &RealTime<dcomplex>::setMMUTRstScheme)
 
     .def("propEnergy", &RealTime<dcomplex>::Python_propEnergy)
     .def("propDipole", &RealTime<dcomplex>::Python_propDipole)

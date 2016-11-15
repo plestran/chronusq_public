@@ -91,22 +91,24 @@ knownKeywords['BASIS'] = {
 
 # Dictionary for known keywords in the RT input section
 knownKeywords['RT'] = {
-  'MAXSTEP'  :CQKeyword('MAXSTEP'  ,'I' ,False),    
-  'TIMESTEP' :CQKeyword('TIMESTEP' ,'D' ,False), 
-  "IRSTRT"   :CQKeyword('IRSRT'    ,'I' ,False),
-  'EDFIELD'  :CQKeyword('EDFIELD'  ,'D3',False),
-  'TIME_ON'  :CQKeyword('TIME_ON'  ,'D' ,False),
-  'TIME_OFF' :CQKeyword('TIME_OFF' ,'D' ,False),
-  'FREQUENCY':CQKeyword('FREQUENCY','D' ,False), 
-  'PHASE'    :CQKeyword('PHASE'    ,'D' ,False),
-  'SIGMA'    :CQKeyword('SIGMA'    ,'D' ,False),
-  'ENVELOPE' :CQKeyword('ENVELOPE' ,'S' ,False),
-  'ORTHO'    :CQKeyword('ORTHO'    ,'S' ,False), 
-  'ELL_POL'  :CQKeyword('ELL_POL'  ,'S' ,False), 
-  'INIDEN'   :CQKeyword('INIDEN'   ,'I' ,False),
-  'UPROP'    :CQKeyword('UPROP'    ,'S' ,False),
-  'PRINT'    :CQKeyword('PRINT'    ,'I' ,False),
-  'TARCSVS'  :CQKeyword('TARCSVS'  ,'B' ,False)
+  'MAXSTEP'   :CQKeyword('MAXSTEP'   ,'I' ,False),    
+  'TIMESTEP'  :CQKeyword('TIMESTEP'  ,'D' ,False), 
+  "IRSTRT"    :CQKeyword('IRSRT'     ,'I' ,False),
+  'EDFIELD'   :CQKeyword('EDFIELD'   ,'D3',False),
+  'TIME_ON'   :CQKeyword('TIME_ON'   ,'D' ,False),
+  'TIME_OFF'  :CQKeyword('TIME_OFF'  ,'D' ,False),
+  'FREQUENCY' :CQKeyword('FREQUENCY' ,'D' ,False), 
+  'PHASE'     :CQKeyword('PHASE'     ,'D' ,False),
+  'SIGMA'     :CQKeyword('SIGMA'     ,'D' ,False),
+  'ENVELOPE'  :CQKeyword('ENVELOPE'  ,'S' ,False),
+#  'ORTHO'     :CQKeyword('ORTHO'     ,'S' ,False), 
+  'ELL_POL'   :CQKeyword('ELL_POL'   ,'S' ,False), 
+  'INIDEN'    :CQKeyword('INIDEN'    ,'I' ,False),
+  'UPROP'     :CQKeyword('UPROP'     ,'S' ,False),
+  'PRINT'     :CQKeyword('PRINT'     ,'I' ,False),
+  'TARCSVS'   :CQKeyword('TARCSVS'   ,'B' ,False),
+  'INTSCHEME' :CQKeyword('INTSCHEME' ,'S' ,False),
+  'MMUTSCHEME':CQKeyword('MMUTSCHEME','S' ,False),
 }
 
 knownKeywords['MISC'] = {

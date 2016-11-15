@@ -28,6 +28,7 @@ namespace ChronusQ{
 #include <realtime/realtime_propagator.h>
 #include <realtime/realtime_print.h>
 #include <realtime/realtime_proc.h>
+#include <realtime/realtime_misc.h>
 #include <realtime/realtime_csvs.h>
 #include <realtime/realtime_python.h>
 };

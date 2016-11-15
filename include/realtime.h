@@ -212,22 +212,27 @@ public:
   }
 
   // Setters
-  void setMaxSteps(int x)  { this->maxSteps_ = x; };
-  void setNSkip(int x)     { this->nSkip_    = x; };
-  void setIRstrt(int x)    { this->iRstrt_   = x; };
-  void setPrintLevel(int x){ this->printLevel_ = x;};
+    
+  void setIntScheme(const std::string&); 
+  void setMMUTRstScheme(const std::string&); 
+  void setEnvlp(const std::string&);
+    
+  inline void setMaxSteps(int x)  { maxSteps_ = x; };
+  inline void setNSkip(int x)     { nSkip_    = x; };
+  inline void setIRstrt(int x)    { iRstrt_   = x; };
+  inline void setPrintLevel(int x){ printLevel_ = x;};
              
-  void setTOn(double x)      { this->tOn_      = x; };
-  void setTOff(double x)     { this->tOff_     = x; };
-  void setStepSize(double x) { this->stepSize_ = x; };
-  void setDeltaT(double x)   { this->deltaT_   = x; };
-  void setFreq(double x)     { this->freq_     = x; };
-  void setPhase(double x)    { this->phase_    = x; };
-  void setSigma(double x)    { this->sigma_    = x; };
+  inline void setTOn(double x)      { tOn_      = x; };
+  inline void setTOff(double x)     { tOff_     = x; };
+  inline void setStepSize(double x) { stepSize_ = x; };
+  inline void setDeltaT(double x)   { deltaT_   = x; };
+  inline void setFreq(double x)     { freq_     = x; };
+  inline void setPhase(double x)    { phase_    = x; };
+  inline void setSigma(double x)    { sigma_    = x; };
 
-  void setEDFieldAmp(std::array<double,3> x) { this->staticEDAmp_ = x; };
+  inline void setEDFieldAmp(std::array<double,3> x) { staticEDAmp_ = x; };
 
-  void doNotTarCSV() {this->tarCSVs = false;};
+  inline void doNotTarCSV() { tarCSVs = false;};
 
 /*
   void setIMethFormU(PropagatorFormation x ) { this->iMethFormU_ = x;};
@@ -241,26 +246,6 @@ public:
 
   }
 */
-  inline void setEnvlp(const std::string &x) {
-    if(!x.compare("CONSTANT") or !x.compare("PLANE WAVE"))
-      this->iEnvlp_ = Constant;
-    else if(!x.compare("LINRAMP"))
-      this->iEnvlp_ = LinRamp;
-    else if(!x.compare("GAUSSIAN"))
-      this->iEnvlp_ = Gaussian;
-    else if(!x.compare("STEP"))
-      this->iEnvlp_ = Step;
-    else if(!x.compare("DELTA")) {
-      this->iEnvlp_ = Step;
-      this->tOn_ = 0.0; this->tOff_ = 1e-6;
-    } 
-    else if(!x.compare("SINSQ"))
-      this->iEnvlp_ = SinSq;
-    else
-      CErr(std::string("RT Envelope ") + x + std::string(" not Recognized"),
-        this->fileio_->out);
-  
-  }
 
   // Python API
   inline void Wrapper_setFieldAmp(double x, double y, double z){
