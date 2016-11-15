@@ -22,7 +22,7 @@
  *  
  */
 template <typename T>
-void RealTime<T>::formField() {
+void RealTime<T>::formField(const long double currentTime) {
 /*
   double TOn   = tOn_   / phys.AuToFs;
   double TOff  = tOff_  / phys.AuToFs;
@@ -34,12 +34,12 @@ void RealTime<T>::formField() {
   double Omega = freq_ ; 
   double Sigma = sigma_; 
 
-  double omegaT = Omega * (currentTime_ - TOn) + phase_;
+  double omegaT = Omega * (currentTime - TOn) + phase_;
   omegaT = std::cos(omegaT);
 
   // Constant Envelope (Plane Wave)
   if( iEnvlp_ == Constant ) {
-    if( currentTime_ >= TOn and currentTime_ <= TOff ) {
+    if( currentTime >= TOn and currentTime <= TOff ) {
       EDField_ = {{ staticEDAmp_[0] * omegaT ,
                     staticEDAmp_[1] * omegaT ,
                     staticEDAmp_[2] * omegaT }};
@@ -48,36 +48,36 @@ void RealTime<T>::formField() {
     }
   } else if( iEnvlp_ == LinRamp ) {
     double TMax = 2.0 * math.pi / Omega;
-    if( currentTime_ <= (TOn + TMax) ) {
-      EDField_ = {{ staticEDAmp_[0] * ((currentTime_-TOn)/TMax) * omegaT ,
-                   staticEDAmp_[1] * ((currentTime_-TOn)/TMax) * omegaT ,
-                   staticEDAmp_[2] * ((currentTime_-TOn)/TMax) * omegaT }};
-    } else if( currentTime_ > (TOn + TMax) and currentTime_ < (TOff - TMax) ) {
+    if( currentTime <= (TOn + TMax) ) {
+      EDField_ = {{ staticEDAmp_[0] * ((currentTime-TOn)/TMax) * omegaT ,
+                    staticEDAmp_[1] * ((currentTime-TOn)/TMax) * omegaT ,
+                    staticEDAmp_[2] * ((currentTime-TOn)/TMax) * omegaT }};
+    } else if( currentTime > (TOn + TMax) and currentTime < (TOff - TMax) ) {
       EDField_ = {{ staticEDAmp_[0] * omegaT ,
-                   staticEDAmp_[1] * omegaT ,
-                   staticEDAmp_[2] * omegaT }};
-    } else if( currentTime_ > (TOff - TMax)) {
-      EDField_ = {{ staticEDAmp_[0] * ((TOff-currentTime_)/TMax) * omegaT ,
-                   staticEDAmp_[1] * ((TOff-currentTime_)/TMax) * omegaT ,
-                   staticEDAmp_[2] * ((TOff-currentTime_)/TMax) * omegaT }};
+                    staticEDAmp_[1] * omegaT ,
+                    staticEDAmp_[2] * omegaT }};
+    } else if( currentTime > (TOff - TMax)) {
+      EDField_ = {{ staticEDAmp_[0] * ((TOff-currentTime)/TMax) * omegaT ,
+                    staticEDAmp_[1] * ((TOff-currentTime)/TMax) * omegaT ,
+                    staticEDAmp_[2] * ((TOff-currentTime)/TMax) * omegaT }};
     } else {
       EDField_ = {{0.0,0.0,0.0}};
     } 
   } else if( iEnvlp_ == Gaussian ) {
-    if( currentTime_ >= TOn and currentTime_ <= TOff ) {
+    if( currentTime >= TOn and currentTime <= TOff ) {
       double tCntr  = std::sqrt(std::log(1.0e3)) / Sigma;
-      double gauFac = std::exp(-std::pow(Sigma * (currentTime_ - tCntr),2.0));
+      double gauFac = std::exp(-std::pow(Sigma * (currentTime - tCntr),2.0));
       EDField_ = {{ staticEDAmp_[0] * omegaT * gauFac,
-                   staticEDAmp_[1] * omegaT * gauFac,
-                   staticEDAmp_[2] * omegaT * gauFac}};
+                    staticEDAmp_[1] * omegaT * gauFac,
+                    staticEDAmp_[2] * omegaT * gauFac}};
     } else {
       EDField_ = {{0.0,0.0,0.0}};
     }
   } else if( iEnvlp_ == Step ) {
-    if( currentTime_ >= TOn and currentTime_ <= TOff ) {
+    if( currentTime >= TOn and currentTime <= TOff ) {
       EDField_ = {{ staticEDAmp_[0] ,
-                   staticEDAmp_[1] ,
-                   staticEDAmp_[2] }};
+                    staticEDAmp_[1] ,
+                    staticEDAmp_[2] }};
     } else {
       EDField_ = {{0.0,0.0,0.0}};
     }
@@ -87,7 +87,7 @@ void RealTime<T>::formField() {
     double cosOT = std::cos(omegaT);
     double sinOT = std::sin(omegaT);
 
-    if( currentTime_ >= TOn and currentTime_ <= TOff ) {
+    if( currentTime >= TOn and currentTime <= TOff ) {
       if( iEllPol_ == RXY ) {
         EDField_[0] = staticEDAmp_[0] * cosOT;
         EDField_[1] = staticEDAmp_[1] * sinOT;

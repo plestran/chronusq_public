@@ -118,7 +118,7 @@ class RealTime {
   double phase_;
   double sigma_;
 
-  long double currentTime_;
+//  long double currentTime_;
 
   IntegrationScheme      iScheme_;
   PropagationStep        iRstScheme_;
@@ -143,7 +143,9 @@ public:
 
   RealTime() : fileio_(NULL), groundState_(NULL), memManager_(NULL),
     ssPropagator_(nullptr),
-    deltaT_(0.0), currentTime_(0.0), freq_(0.0), phase_(0.0), sigma_(0.0),
+    deltaT_(0.0), 
+//  currentTime_(0.0), 
+    freq_(0.0), phase_(0.0), sigma_(0.0),
     nSkip_(0),
     tOn_(0.0), tOff_(1.0e4), maxSteps_(10), stepSize_(0.05), iRstrt_(50),
     iScheme_(MMUT), iRstScheme_(ForwardEuler),
@@ -170,12 +172,12 @@ public:
   // RT Propagation
   void doPropagation();
   void formUTrans();
-  void formField();
+  void formField(const long double);
   void propDen();
-  void addRecord();
+  void addRecord(const long double);
 
   // Print Functions
-  void printRTStep();
+  void printRTStep(const long double);
   void printRTHeader();
 
   // CSVs

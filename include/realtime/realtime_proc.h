@@ -27,7 +27,7 @@ void RealTime<T>::doPropagation() {
   bool Start(false); // Start the MMUT iterations
   bool FinMM(false); // Wrap up the MMUT iterations
 
-  currentTime_ = 0.0;
+  long double currentTime(0.);
   PropagationStep currentStep;
 
   initCSV();
@@ -79,8 +79,8 @@ void RealTime<T>::doPropagation() {
       if(iRstrt_ > 0) Start = Start or (iStep % iRstrt_) == 0;
       
       FinMM = (iStep == maxSteps_);
-      FinMM = FinMM or (tOff_ != 0.0 and currentTime_ > tOff_ and 
-                        currentTime_ <= tOff_ + stepSize_);
+      FinMM = FinMM or (tOff_ != 0.0 and currentTime > tOff_ and 
+                        currentTime <= tOff_ + stepSize_);
 
       if(iRstrt_ > 0) FinMM = FinMM or ( (iStep + 1) % iRstrt_ == 0 );
 
@@ -121,14 +121,16 @@ void RealTime<T>::doPropagation() {
     }
 
     // Obtain field value for current time point
-    formField();
+    formField(currentTime);
 
     // Form AO Fock Matrix and compute properties
     // F(k) = H + G[P(k)]
     ssPropagator_->formFock();
     ssPropagator_->computeEnergy();
     ssPropagator_->computeProperties();
-    this->printRTStep();
+
+    // Print line in output file
+    printRTStep(currentTime);
 
     // Orthonormalize the AO Fock
     // F(k) -> FO(k)
@@ -144,7 +146,7 @@ void RealTime<T>::doPropagation() {
     propDen();
 
     // Add a time point record onto the list
-    addRecord();
+    addRecord(currentTime);
 
     // Write CSV Files
     writeCSVs();
@@ -154,15 +156,15 @@ void RealTime<T>::doPropagation() {
     ssPropagator_->unOrthoDen3();
 
     // Increment the current time
-    currentTime_ += stepSize_;
+    currentTime += stepSize_;
   }
   if(tarCSVs)  tarCSVFiles();
 };
 
 template <typename T>
-void RealTime<T>::addRecord() {
+void RealTime<T>::addRecord(const long double currentTime) {
   PropInfo rec;
-  rec.timeStep  = currentTime_;
+  rec.timeStep  = currentTime;
   rec.energy    = ssPropagator_->totalEnergy();
   rec.dipole[0] = ssPropagator_->elecDipole()[0]/phys.debye;
   rec.dipole[1] = ssPropagator_->elecDipole()[1]/phys.debye;

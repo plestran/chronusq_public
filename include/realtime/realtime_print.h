@@ -113,9 +113,9 @@ void RealTime<T>::printRTHeader() {
 }
 
 template <typename T>
-void RealTime<T>::printRTStep() {
+void RealTime<T>::printRTStep(const long double currentTime) {
   fileio_->out << std::setw(11) << std::right << std::setprecision(4) 
-               << currentTime_  << std::setw(1)  << " ";
+               << currentTime  << std::setw(1)  << " ";
 
   fileio_->out << std::setw(16) << std::right << std::setprecision(10) 
                << this->ssPropagator_->totalEnergy() << std::setw(1)  << " ";
