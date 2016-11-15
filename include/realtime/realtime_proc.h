@@ -136,6 +136,13 @@ void RealTime<T>::doPropagation() {
     // F(k) -> FO(k)
     ssPropagator_->orthoFock3();
 
+    if(currentStep == ExplicitMagnus2) {
+      // Copy the orthonormal fock from ssPropagator to FOSav
+      // FOSav(k) = FO(k)
+      for(auto iOFock = 0; iOFock < FOSav_.size(); iOFock++)
+        (*FOSav_[iOFock]) = (*ssPropagator_->fockOrtho()[iOFock]);
+    }
+
     // Form the unitary propagation matrix
     // U**H(k) = exp(-i * dt * F(k))
     formUTrans();
@@ -154,6 +161,28 @@ void RealTime<T>::doPropagation() {
     // Unorthonormalize the density for next Fock build
     // PO(k+1) -> P(k+1)
     ssPropagator_->unOrthoDen3();
+
+    // Further propagate using Explicit Magnus 2
+    if(currentStep == ExplicitMagnus2) {
+      // Form and orthonormalize Fock at t + dt using FE density
+      formField(currentTime + stepSize_);
+      ssPropagator_->formFock();
+      ssPropagator_->orthoFock3();
+
+      // FO = 0.5 * (FO + FOSav)
+      for(auto iOFock = 0; iOFock < FOSav_.size(); iOFock++) {
+        ssPropagator_->fockOrtho()[iOFock]->noalias() += (*FOSav_[iOFock]);
+        ssPropagator_->fockOrtho()[iOFock]->noalias() *= dcomplex(0.5);
+      }
+
+      // Copy POSav to PO
+      for(auto iODen = 0; iODen < POSav_.size(); iODen++)
+        (*ssPropagator_->onePDMOrtho()[iODen]) = (*POSav_[iODen]); 
+
+      // Propagate using new "averaged" fock
+      formUTrans();
+      propDen();
+    }
 
     // Increment the current time
     currentTime += stepSize_;

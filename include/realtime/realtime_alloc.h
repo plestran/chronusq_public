@@ -36,6 +36,9 @@ void RealTime<T>::alloc() {
   auto NB  = ssPropagator_->basisset()->nBasis();
   auto NBT = NB * ssPropagator_->nTCS();
 
+  bool needsFOSav = iRstScheme_ == ExplicitMagnus2 or 
+                    iScheme_    == ExpMagnus2;
+
   NBSqScratch_  = memManager_->template malloc<dcomplex>(NB*NB);
   UTransScalar_ = memManager_->template malloc<dcomplex>(NB*NB);
   POScalarSav_  = std::unique_ptr<ComplexMap>(
@@ -43,12 +46,26 @@ void RealTime<T>::alloc() {
 
   POSav_.emplace_back(POScalarSav_.get());
 
+  if(needsFOSav) {
+    FOScalarSav_  = std::unique_ptr<ComplexMap>(
+      new ComplexMap(memManager_->template malloc<dcomplex>(NB*NB),NB,NB));
+
+    FOSav_.emplace_back(FOScalarSav_.get());
+  }
+
   if(ssPropagator_->nTCS() == 2 or !ssPropagator_->isClosedShell){
     UTransMz_= memManager_->template malloc<dcomplex>(NB*NB);
     POMzSav_  = std::unique_ptr<ComplexMap>(
       new ComplexMap(memManager_->template malloc<dcomplex>(NB*NB),NB,NB));
 
     POSav_.emplace_back(POMzSav_.get());
+
+    if(needsFOSav) {
+      FOMzSav_  = std::unique_ptr<ComplexMap>(
+        new ComplexMap(memManager_->template malloc<dcomplex>(NB*NB),NB,NB));
+
+      FOSav_.emplace_back(FOMzSav_.get());
+    }
   }
   if(ssPropagator_->nTCS() == 2){ 
     NBTSqScratch_  = memManager_->template malloc<dcomplex>(NBT*NBT);
@@ -62,6 +79,16 @@ void RealTime<T>::alloc() {
 
     POSav_.emplace_back(POMySav_.get());
     POSav_.emplace_back(POMxSav_.get());
+
+    if(needsFOSav) {
+      FOMySav_  = std::unique_ptr<ComplexMap>(
+        new ComplexMap(memManager_->template malloc<dcomplex>(NB*NB),NB,NB));
+      FOMxSav_  = std::unique_ptr<ComplexMap>(
+        new ComplexMap(memManager_->template malloc<dcomplex>(NB*NB),NB,NB));
+
+      FOSav_.emplace_back(FOMySav_.get());
+      FOSav_.emplace_back(FOMxSav_.get());
+    }
   } else {
     NBTSqScratch_ = NBSqScratch_;
   }
