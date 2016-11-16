@@ -46,8 +46,15 @@ void RealTime<T>::formUTrans() {
 
   // Scaling Parameters for Polynomial Expansion
   double gamma = (*groundState_->epsA())(NBT-1) - (*groundState_->epsA())(0);
-  gamma *= 3. / 2;
   double EMin = (*groundState_->epsA())(0);
+
+  if(ssPropagator_->nTCS() == 1 and !ssPropagator_->isClosedShell){
+    gamma = std::max(gamma,
+      (*groundState_->epsB())(NBT-1) - (*groundState_->epsB())(0));
+    EMin = std::min(EMin,(*groundState_->epsB())(0));
+  }
+
+  gamma *= 3. / 2;
 
   double alpha = gamma * deltaT_ / 2;
 
@@ -139,18 +146,20 @@ void RealTime<T>::formUTrans() {
     for(auto x : CK) { nPolyKeep++; if(x < polyEps_) break; }
     if(nPolyKeep % 2 != 0) nPolyKeep++;
 
+/*
     // to Alpha
-    (*ssPropagator_->fockOrtho()[0]) *= 0.5;
+    (*ssPropagator_->moA()) *= 0.5;
+*/
  
     // Scale matrix for eigenvalues
-    (*ssPropagator_->fockOrtho()[0]).noalias() -= 
+    (*ssPropagator_->moA()).noalias() -= 
       (gamma/2 + EMin)*ComplexMatrix::Identity(NBT,NBT);
  
-    (*ssPropagator_->fockOrtho()[0]) *= 2 / gamma;
+    (*ssPropagator_->moA()) *= 2 / gamma;
 
     // Zeroth and setup for first term
     UTransScalar.noalias() = CK[0] * ComplexMatrix::Identity(NBT,NBT);
-    S3.noalias()   = -dcomplex(0,1) * (*ssPropagator_->fockOrtho()[0]);
+    S3.noalias()   = -dcomplex(0,1) * (*ssPropagator_->moA());
  
     // First term
     UTransScalar.noalias() += CK[1] * S3;
@@ -159,11 +168,11 @@ void RealTime<T>::formUTrans() {
     // Loop over half the kept points
     for(auto iT = 2; iT <= (nPolyKeep/2); iT++) {
       if(iT % 2 == 0) {
-        S2.noalias() = dcomplex(0,-1) * (*ssPropagator_->fockOrtho()[0]) * S3;
+        S2.noalias() = dcomplex(0,-1) * (*ssPropagator_->moA()) * S3;
         UTransScalar.noalias() += CK[iT] * S2;
         S.noalias()    += CK[iT + nPolyKeep/2] * S2;
       } else {
-        S3.noalias() = dcomplex(0,-1) * (*ssPropagator_->fockOrtho()[0]) * S2;
+        S3.noalias() = dcomplex(0,-1) * (*ssPropagator_->moA()) * S2;
         UTransScalar.noalias() += CK[iT] * S3;
         S.noalias()    += CK[iT + nPolyKeep/2] * S3;
       }
@@ -173,30 +182,49 @@ void RealTime<T>::formUTrans() {
     else                         UTransScalar.noalias() += S3 * S;
  
     UTransScalar *= std::exp(-dcomplex(0,gamma/2 + EMin)*deltaT_ );
+
+    if(ssPropagator_->nTCS() == 1 and !ssPropagator_->isClosedShell) {
+      // Scale matrix for eigenvalues
+      (*ssPropagator_->moB()).noalias() -= 
+        (gamma/2 + EMin)*ComplexMatrix::Identity(NBT,NBT);
  
-    // Back to Scalar
-    UTransScalar *= 2;
+      (*ssPropagator_->moB()) *= 2 / gamma;
+
+      // Zeroth and setup for first term
+      UTransMz.noalias() = CK[0] * ComplexMatrix::Identity(NBT,NBT);
+      S3.noalias()   = -dcomplex(0,1) * (*ssPropagator_->moB());
+ 
+      // First term
+      UTransMz.noalias() += CK[1] * S3;
+      S.noalias()    =  CK[nPolyKeep/2 + 1] * S3;
+ 
+      // Loop over half the kept points
+      for(auto iT = 2; iT <= (nPolyKeep/2); iT++) {
+        if(iT % 2 == 0) {
+          S2.noalias() = dcomplex(0,-1) * (*ssPropagator_->moB()) * S3;
+          UTransMz.noalias() += CK[iT] * S2;
+          S.noalias()    += CK[iT + nPolyKeep/2] * S2;
+        } else {
+          S3.noalias() = dcomplex(0,-1) * (*ssPropagator_->moB()) * S2;
+          UTransMz.noalias() += CK[iT] * S3;
+          S.noalias()    += CK[iT + nPolyKeep/2] * S3;
+        }
+      }
+    }
+ 
+    if(ssPropagator_->nTCS() == 2) {
+      // NYI
+    } else if(!ssPropagator_->isClosedShell) {
+      // Reconstruct UTransScalar and UMz from UA and UB
+      S = UTransScalar;
+      UTransScalar.noalias() = S + UTransMz;
+      UTransMz.noalias()     = S - UTransMz; 
+    } else {
+      UTransScalar *= 2;
+    }
   }
 
-/*
-  TEMP = ComplexMatrix::Identity(NBT,NBT);
-  S2 = ComplexMatrix::Identity(NBT,NBT);
-  S = S2;
 
-  (*ssPropagator_->fockOrtho()[0]) *= -dcomplex(0,1);
-  for(auto iT = 1; iT <= NTaylor; iT++) {
-//  double alpha = (std::pow(gamma * deltaT_ / 2,iT) / factorial<double>(iT));
-    if(CK[iT] < 1e-15) {break;}
-    S2.noalias() = S * (*ssPropagator_->fockOrtho()[0]);
-    S = S2;
-    TEMP.noalias() +=  CK[iT] * S2;
-  }
-*/
-
-//prettyPrintSmart(this->fileio_->out,UTransScalar,"True");
-//prettyPrintSmart(this->fileio_->out,TEMP,"Taylor");
-//prettyPrintSmart(cout,UTransScalar - TEMP,"DIFF");
-//prettyPrintSmart(cout,UTransScalar.cwiseQuotient(TEMP).cwiseAbs(),"Q");
 };
 
 template <typename T>
