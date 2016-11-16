@@ -96,19 +96,45 @@ void RealTime<T>::formUTrans() {
   ComplexMatrix TEMP(NBT,NBT);
   TEMP.setZero();
 
-  int NTaylor = 40;
+  int NTaylor = 100;
+
+/*
+  double gamma = (*groundState_->epsA())(NBT-1) - (*groundState_->epsA())(0);
+  gamma *= 3.0 / 2;
+
+  (*ssPropagator_->fockOrtho()[0]).noalias() -= (gamma/2 + (*groundState_->epsA())(0))*ComplexMatrix::Identity(NBT,NBT);
+  (*ssPropagator_->fockOrtho()[0]) *= 2 / gamma;
+  (*ssPropagator_->fockOrtho()[0]) *= -dcomplex(0,1);
+  
   S2 = ComplexMatrix::Identity(NBT,NBT);
   S  = S2;
+  TEMP = S2;
   for(auto iT = 1; iT <= NTaylor; iT++) {
-    S2.noalias() = S * (*ssPropagator_->fockOrtho()[0]);
+    cout << iT << " " << (std::pow(dcomplex(0,-gamma*deltaT_/2),iT) /  factorial<double>(iT)) << endl;
+    S2.noalias() = gamma * deltaT_ / 2. * S * (*ssPropagator_->fockOrtho()[0]);
     S = S2;
-    TEMP.noalias() += (std::pow(dcomplex(0,-deltaT_),iT) / 
-      factorial<double>(iT)) * S2;
+    TEMP.noalias() += (1.0 / factorial<double>(iT)) * S2;
   }
 
-  prettyPrintSmart(this->fileio_->out,UTransScalar,"True");
-  prettyPrintSmart(this->fileio_->out,TEMP,"Taylor");
-  prettyPrintSmart(this->fileio_->out,UTransScalar - TEMP,"DIFF");
+  TEMP *= std::exp(dcomplex(0,-(gamma/2 +(*groundState_->epsA())(0))));
+*/
+  
+//prettyPrintSmart(cout,*ssPropagator_->fockOrtho()[0],"FO After");
+  TEMP = ComplexMatrix::Identity(NBT,NBT);
+  for(auto iT = 1; iT <= NTaylor; iT++) {
+    S2 = ComplexMatrix::Identity(NBT,NBT);
+    for(auto jT = 1; jT <= iT; jT++) {
+      S = S2 * dcomplex(0,-1) * 0.5 * deltaT_ * (*ssPropagator_->fockOrtho()[0]);
+      S2 = S;
+    }
+    TEMP = TEMP + (1.0 / factorial<double>(iT)) * S2;
+  }
+
+  TEMP *= 2;
+//prettyPrintSmart(this->fileio_->out,UTransScalar,"True");
+//prettyPrintSmart(this->fileio_->out,TEMP,"Taylor");
+  prettyPrintSmart(cout,UTransScalar - TEMP,"DIFF");
+//prettyPrintSmart(cout,UTransScalar.cwiseQuotient(TEMP),"Q");
 };
 
 template <typename T>
