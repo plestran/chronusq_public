@@ -91,9 +91,9 @@ class RealTime {
   std::unique_ptr<SingleSlater<dcomplex>> ssPropagator_;
 
 
-  dcomplex * NBSqScratch_;
   dcomplex * NBTSqScratch_;
   dcomplex * NBTSqScratch2_;
+  dcomplex * NBTSqScratch3_;
   dcomplex * UTransScalar_;
   dcomplex * UTransMz_;
   dcomplex * UTransMy_;

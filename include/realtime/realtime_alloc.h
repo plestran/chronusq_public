@@ -39,9 +39,9 @@ void RealTime<T>::alloc() {
   bool needsFOSav = iRstScheme_ == ExplicitMagnus2 or 
                     iScheme_    == ExpMagnus2;
 
-  NBSqScratch_  = memManager_->template malloc<dcomplex>(NB*NB);
   NBTSqScratch_  = memManager_->template malloc<dcomplex>(NBT*NBT);
   NBTSqScratch2_ = memManager_->template malloc<dcomplex>(NBT*NBT);
+  NBTSqScratch3_ = memManager_->template malloc<dcomplex>(NBT*NBT);
 
 
 

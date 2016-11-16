@@ -44,6 +44,7 @@ void RealTime<T>::formUTrans() {
 
   ComplexMap S(NBTSqScratch_,NBT,NBT);
   ComplexMap S2(NBTSqScratch2_,NBT,NBT);
+  ComplexMap S3(NBTSqScratch3_,NBT,NBT);
 
   if( iMethFormU_ == EigenDecomp ) {
     ssPropagator_->diagFock2();
@@ -97,56 +98,75 @@ void RealTime<T>::formUTrans() {
   TEMP.setZero();
 
   int NTaylor = 100;
-
-/*
-  double gamma = (*groundState_->epsA())(NBT-1) - (*groundState_->epsA())(0);
-  gamma *= 3.0 / 2;
-
-  (*ssPropagator_->fockOrtho()[0]).noalias() -= (gamma/2 + (*groundState_->epsA())(0))*ComplexMatrix::Identity(NBT,NBT);
-  (*ssPropagator_->fockOrtho()[0]) *= 2 / gamma;
-  (*ssPropagator_->fockOrtho()[0]) *= -dcomplex(0,1);
-  
-  S2 = ComplexMatrix::Identity(NBT,NBT);
-  S  = S2;
-  TEMP = S2;
-  for(auto iT = 1; iT <= NTaylor; iT++) {
-    cout << iT << " " << (std::pow(dcomplex(0,-gamma*deltaT_/2),iT) /  factorial<double>(iT)) << endl;
-    S2.noalias() = gamma * deltaT_ / 2. * S * (*ssPropagator_->fockOrtho()[0]);
-    S = S2;
-    TEMP.noalias() += (1.0 / factorial<double>(iT)) * S2;
-  }
-
-  TEMP *= std::exp(dcomplex(0,-(gamma/2 +(*groundState_->epsA())(0))));
-*/
   
 //prettyPrintSmart(cout,*ssPropagator_->fockOrtho()[0],"FO After");
+
+  double gamma = (*groundState_->epsA())(NBT-1) - (*groundState_->epsA())(0);
+  gamma *= 2.5 / 2;
+  double EMin = (*groundState_->epsA())(0);
+
+
+  std::vector<double> CK(NTaylor);
+  for(auto i = 0; i < NTaylor; i++)
+    CK[i] = (std::pow(gamma * deltaT_ / 2,i) / factorial<double>(i));
+
+
+  NTaylor = 0;
+  for(auto x : CK) { NTaylor++; if(x < 1e-15) break; }
+  if(NTaylor % 2 != 0) NTaylor++;
+  cout << "Keeping " << NTaylor << " terms" << endl;
+
+  // to Alpha
+  (*ssPropagator_->fockOrtho()[0]) *= 0.5;
+
+  // Scale matrix for eigenvalues
+  (*ssPropagator_->fockOrtho()[0]).noalias() -= 
+    (gamma/2 + EMin)*ComplexMatrix::Identity(NBT,NBT);
+
+  (*ssPropagator_->fockOrtho()[0]) *= 2 / gamma;
+
+/*
   TEMP = ComplexMatrix::Identity(NBT,NBT);
   S2 = ComplexMatrix::Identity(NBT,NBT);
   S = S2;
 
-  double gamma = (*groundState_->epsA())(NBT-1) - (*groundState_->epsA())(0);
-  gamma *= 2.5 / 2;
-
-  (*ssPropagator_->fockOrtho()[0]) *= 0.5;
-
-  (*ssPropagator_->fockOrtho()[0]).noalias() -= (gamma/2 + (*groundState_->epsA())(0))*ComplexMatrix::Identity(NBT,NBT);
-  (*ssPropagator_->fockOrtho()[0]) *= 2 / gamma;
   (*ssPropagator_->fockOrtho()[0]) *= -dcomplex(0,1);
-
   for(auto iT = 1; iT <= NTaylor; iT++) {
-    double alpha = (std::pow(gamma * deltaT_ / 2,iT) / factorial<double>(iT));
-    if(alpha < 1e-15) {break;}
+//  double alpha = (std::pow(gamma * deltaT_ / 2,iT) / factorial<double>(iT));
+    if(CK[iT] < 1e-15) {break;}
     S2.noalias() = S * (*ssPropagator_->fockOrtho()[0]);
     S = S2;
-    TEMP.noalias() +=  alpha * S2;
+    TEMP.noalias() +=  CK[iT] * S2;
+  }
+*/
+
+  TEMP.noalias() = CK[0] * ComplexMatrix::Identity(NBT,NBT);
+  S3.noalias()   = -dcomplex(0,1) * (*ssPropagator_->fockOrtho()[0]);
+
+  TEMP.noalias() += CK[1] * S3;
+  S.noalias()    =  CK[NTaylor/2 + 1] * S3;
+
+  for(auto iT = 2; iT <= (NTaylor/2); iT++) {
+    if(iT % 2 == 0) {
+      S2.noalias() = dcomplex(0,-1) * (*ssPropagator_->fockOrtho()[0]) * S3;
+      TEMP.noalias() += CK[iT] * S2;
+      S.noalias()    += CK[iT + NTaylor/2] * S2;
+    } else {
+      S3.noalias() = dcomplex(0,-1) * (*ssPropagator_->fockOrtho()[0]) * S2;
+      TEMP.noalias() += CK[iT] * S3;
+      S.noalias()    += CK[iT + NTaylor/2] * S3;
+    }
   }
 
-  TEMP *= std::exp(-dcomplex(0,gamma/2 + (*groundState_->epsA())(0))*deltaT_ );
+  if((NTaylor / 2) % 2 == 0) TEMP.noalias() += S2 * S;
+  else                       TEMP.noalias() += S3 * S;
+
+  TEMP *= std::exp(-dcomplex(0,gamma/2 + EMin)*deltaT_ );
 
   TEMP *= 2;
 //prettyPrintSmart(this->fileio_->out,UTransScalar,"True");
 //prettyPrintSmart(this->fileio_->out,TEMP,"Taylor");
-//prettyPrintSmart(cout,UTransScalar - TEMP,"DIFF");
+  prettyPrintSmart(cout,UTransScalar - TEMP,"DIFF");
 //prettyPrintSmart(cout,UTransScalar.cwiseQuotient(TEMP).cwiseAbs(),"Q");
 };
 
@@ -167,7 +187,7 @@ void RealTime<T>::propDen() {
     new (&UTransMx) ComplexMap(UTransMx_,NB,NB);
   }
 
-  ComplexMap S(NBSqScratch_,NB,NB);
+  ComplexMap S(NBTSqScratch_,NB,NB);
 
 /*
   // FIXME: This only works for RHF
