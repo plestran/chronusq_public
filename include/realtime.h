@@ -57,13 +57,15 @@ enum PropagationStep {
   ForwardEuler,
   ModifiedMidpoint,
   ExplicitMagnus2,
+  ExplicitMagnus3,
   ExplicitMagnus4
 };
 
 
 enum IntegrationScheme {
   MMUT,
-  ExpMagnus2
+  ExpMagnus2,
+  ExpMagnus3
 };
 
 struct PropInfo {
