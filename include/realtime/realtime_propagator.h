@@ -105,10 +105,34 @@ void RealTime<T>::formUTrans() {
   gamma *= 2.5 / 2;
   double EMin = (*groundState_->epsA())(0);
 
+  double alpha = gamma * deltaT_ / 2;
 
   std::vector<double> CK(NTaylor);
+/*
   for(auto i = 0; i < NTaylor; i++)
     CK[i] = (std::pow(gamma * deltaT_ / 2,i) / factorial<double>(i));
+*/
+
+  auto binomial = [](int n, int m) -> double {
+    return factorial<double>(n) / 
+           factorial<double>(m) / factorial<double>(n-m);
+  };
+
+  for(auto iCheb = 0; iCheb < NTaylor; iCheb++){
+    double tmp = 0.0;
+    for(auto jCheb = iCheb; jCheb < NTaylor; jCheb += 2){
+      if(iCheb == 0) {
+        if(jCheb == 0) tmp += boost::math::cyl_bessel_j(jCheb,alpha);
+        else           tmp += 2.0 * boost::math::cyl_bessel_j(jCheb,alpha);
+      } else {
+        tmp += 2 * std::pow(2.0,iCheb - 1) * jCheb / iCheb *
+          binomial((iCheb + jCheb)/2 - 1, iCheb -1) *
+          boost::math::cyl_bessel_j(jCheb,alpha);
+      }
+    }
+
+    CK[iCheb] = tmp;
+  }
 
 
   NTaylor = 0;

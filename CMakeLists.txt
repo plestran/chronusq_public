@@ -127,6 +127,7 @@ ExternalProject_Add(boost
     --prefix=${PROJECT_BINARY_DIR}/deps 
     --with-python 
     --with-system 
+    --with-math
     --ignore-site-config cxxflags=${CMAKE_CXX_FLAGS} 
     install
   BUILD_IN_SOURCE 1
@@ -146,7 +147,15 @@ endif()
 if(APPLE)
   set(Boost_LIBRARIES ${PROJECT_BINARY_DIR}/deps/lib/libboost_python.dylib ${PROJECT_BINARY_DIR}/deps/lib/libboost_system.dylib)
 else()
-  set(Boost_LIBRARIES ${PROJECT_BINARY_DIR}/deps/lib/libboost_python.so ${PROJECT_BINARY_DIR}/deps/lib/libboost_system.so)
+  set(Boost_LIBRARIES 
+      ${PROJECT_BINARY_DIR}/deps/lib/libboost_python.so 
+      ${PROJECT_BINARY_DIR}/deps/lib/libboost_system.so
+      ${PROJECT_BINARY_DIR}/deps/lib/libboost_math_tr1.so
+      ${PROJECT_BINARY_DIR}/deps/lib/libboost_math_tr1f.so
+      ${PROJECT_BINARY_DIR}/deps/lib/libboost_math_tr1l.so
+      ${PROJECT_BINARY_DIR}/deps/lib/libboost_math_c99.so
+      ${PROJECT_BINARY_DIR}/deps/lib/libboost_math_c99f.so
+      ${PROJECT_BINARY_DIR}/deps/lib/libboost_math_c99l.so)
 endif()
 
 ExternalProject_Add(btas
