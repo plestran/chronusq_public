@@ -245,6 +245,8 @@ void RealTime<T>::propDen() {
   }
 
   ComplexMap S(NBTSqScratch_,NB,NB);
+  ComplexMap S2(NBTSqScratch2_,NB,NB);
+  ComplexMap S3(NBTSqScratch3_,NB,NB);
 
 /*
   // FIXME: This only works for RHF
@@ -253,6 +255,15 @@ void RealTime<T>::propDen() {
   (*ssPropagator_->onePDMOrthoScalar()) /= 4.0;
 */
   
+  // The full propagation of the SU(2) density may be written as:
+  //   U**H * PO * U = 
+  //     [ (UHP * P)(Scalar) * U(Scalar) + (UHP * P)(k) * U(k) ] x I2         
+  //     [ (UHP * P)(Scalar) * U(k)                                           
+  //       + (UHP * P)(k) * U(Scalar) 
+  //       + i * Eps(k,j,l) * (UHP * P)(j) * U(l)] x sigma_k
+
+  // S will hold the scalar part of the product of U**H and PO
+    
   // S = U**H(S) * PO(S) + U**H(k) * PO(k)
   S.noalias() = UTransScalar * (*ssPropagator_->onePDMOrthoScalar());
   if(ssPropagator_->nTCS() == 2 or !ssPropagator_->isClosedShell)
@@ -262,6 +273,10 @@ void RealTime<T>::propDen() {
     S.noalias() += UTransMx * (*ssPropagator_->onePDMOrthoMx());
   }
 
+  // Initialize the density propagation by recognizing that the scalar
+  // part of the product of U**H and PO goes both into the scalar and
+  // vector parts of the unitary transformation
+    
   // P(S) = S * U(S)
   // P(k) = S * U(k)
   ssPropagator_->onePDMScalar()->noalias() = S * UTransScalar.adjoint();
@@ -272,16 +287,83 @@ void RealTime<T>::propDen() {
     ssPropagator_->onePDMMx()->noalias() = S * UTransMx.adjoint();
   }
 
-  // S = U**H(S) * PO(z) + U**H(z) * PO(S)
+    
   if(ssPropagator_->nTCS() == 2 or !ssPropagator_->isClosedShell) {
+    // S will now hold the Z part of the product of U**H and PO
+      
+    // S = U**H(S) * PO(z) + U**H(z) * PO(S) 
+    //     + i * ( U**H(x) * PO(y) - U**H(y) * PO(x))
     S.noalias() =  UTransScalar * (*ssPropagator_->onePDMOrthoMz());
     S.noalias() += UTransMz     * (*ssPropagator_->onePDMOrthoScalar());
-    // FIXME: Need to add the i * Eps(z,i,j) U**H(i) * PO(j)
+    if(ssPropagator_->nTCS() == 2) {
+      S.noalias() += dcomplex(0,1) * UTransMx * (*ssPropagator_->onePDMOrthoMy());
+      S.noalias() -= dcomplex(0,1) * UTransMy * (*ssPropagator_->onePDMOrthoMx());
+    }
+
+    // Further propagate the Scalar and Z parts of the density.
+    //   - This wraps up the contribution from Z to the scalar part
+    //   - The cross product term to the Z part of the density is omitted here    
 
     // P(S) += S * U(z)
     // P(z) += S * U(S)
     ssPropagator_->onePDMScalar()->noalias() += S * UTransMz.adjoint();
-    ssPropagator_->onePDMMz()->noalias() += S * UTransScalar.adjoint();
+    ssPropagator_->onePDMMz()->noalias()     += S * UTransScalar.adjoint();
+  }
+
+  if(ssPropagator_->nTCS() == 2) {
+    // S2 will hold the X part of the product of U**H and PO
+      
+    // S2 = U**H(S) * PO(x) + U**H(x) * PO(S) 
+    //      + i * ( U**H(y) * PO(z) - U**H(z) * PO(y))
+    S2.noalias() =  UTransScalar * (*ssPropagator_->onePDMOrthoMx());
+    S2.noalias() += UTransMx     * (*ssPropagator_->onePDMOrthoScalar());
+    S2.noalias() += dcomplex(0,1) * UTransMy * (*ssPropagator_->onePDMOrthoMz());
+    S2.noalias() -= dcomplex(0,1) * UTransMz * (*ssPropagator_->onePDMOrthoMy());
+
+    // S3 will hold the Y part of the product of U**H and PO
+      
+    // S3 = U**H(S) * PO(y) + U**H(y) * PO(S) 
+    //      + i * ( U**H(z) * PO(x) - U**H(x) * PO(z))
+    S3.noalias() =  UTransScalar * (*ssPropagator_->onePDMOrthoMy());
+    S3.noalias() += UTransMy     * (*ssPropagator_->onePDMOrthoScalar());
+    S3.noalias() += dcomplex(0,1) * UTransMz * (*ssPropagator_->onePDMOrthoMx());
+    S3.noalias() -= dcomplex(0,1) * UTransMx * (*ssPropagator_->onePDMOrthoMz());
+
+    // Further propagate the Scalar and X parts of the density.
+    //   - This wraps up the contribution from X to the scalar part
+    //   - The cross product term to the X part of the density is omitted here    
+
+    // P(S) += S * U(x)
+    // P(x) += S * U(S)
+    ssPropagator_->onePDMScalar()->noalias() += S2 * UTransMx.adjoint();
+    ssPropagator_->onePDMMx()->noalias()     += S2 * UTransScalar.adjoint();
+
+    // Further propagate the Scalar and Y parts of the density.
+    //   - This wraps up the contribution from Y to the scalar part
+    //   - The cross product term to the Y part of the density is omitted here    
+
+    // P(S) += S * U(y)
+    // P(y) += S * U(S)
+    ssPropagator_->onePDMScalar()->noalias() += S3 * UTransMy.adjoint();
+    ssPropagator_->onePDMMy()->noalias()     += S3 * UTransScalar.adjoint();
+
+
+    // Account for the cross product terms to all of the vector parts
+    ComplexMap &UHPZ = S;
+    ComplexMap &UHPX = S2;
+    ComplexMap &UHPY = S3;
+
+    // P(z) += i * (UHPX * U(y) - UHPY * U(x))
+    ssPropagator_->onePDMMz()->noalias() += dcomplex(0,1) * UHPX * UTransMy.adjoint();
+    ssPropagator_->onePDMMz()->noalias() -= dcomplex(0,1) * UHPY * UTransMx.adjoint();
+
+    // P(x) += i * (UHPY * U(z) - UHPZ * U(y))
+    ssPropagator_->onePDMMx()->noalias() += dcomplex(0,1) * UHPY * UTransMz.adjoint();
+    ssPropagator_->onePDMMx()->noalias() -= dcomplex(0,1) * UHPZ * UTransMy.adjoint();
+
+    // P(y) += i * (UHPZ * U(x) - UHPX * U(z))
+    ssPropagator_->onePDMMy()->noalias() += dcomplex(0,1) * UHPZ * UTransMx.adjoint();
+    ssPropagator_->onePDMMy()->noalias() -= dcomplex(0,1) * UHPX * UTransMz.adjoint();
   }
 
   // Copy P -> PO

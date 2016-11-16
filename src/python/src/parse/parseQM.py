@@ -122,10 +122,10 @@ def handleReference(workers,settings):
 
   if len(ref) > 1:
     workers["CQSingleSlater"].setRef(str(ref[1]))
-    isDFT = 'HF' not in ref[1]
+    isDFT = 'HF' not in ref[1] and 'X2C' not in ref[1]
   else:
     workers["CQSingleSlater"].setRef(str(ref[0]))
-    isDFT = 'HF' not in ref[0]
+    isDFT = 'HF' not in ref[0] and 'X2C' not in ref[0]
 
 
   if isDFT:
@@ -143,9 +143,9 @@ def handleReference(workers,settings):
 def parseRT(workers,secDict):
 
 
-  if workers["CQSingleSlater"].nTCS() == 2:
-    msg = 'Two-Component Real-Time Simulations NYI'
-    CErrMsg(workers['CQFileIO'],str(msg))
+#  if workers["CQSingleSlater"].nTCS() == 2:
+#    msg = 'Two-Component Real-Time Simulations NYI'
+#    CErrMsg(workers['CQFileIO'],str(msg))
 
   ref = secDict['QM']['REFERENCE']
   ref = ref.split()
