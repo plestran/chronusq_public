@@ -116,6 +116,10 @@ class RealTime {
   int nSkip_;
   int iRstrt_;
 
+  // Polynomial Expansion of the propagator parameters
+  size_t nPolyExpMax_;
+  double polyEps_;
+
   double tOn_;
   double tOff_;
   double stepSize_;
@@ -156,6 +160,7 @@ public:
     tOn_(0.0), tOff_(1.0e4), maxSteps_(10), stepSize_(0.05), iRstrt_(50),
     iScheme_(MMUT), iRstScheme_(ExplicitMagnus2),
     iMethFormU_(EigenDecomp), iEnvlp_(Constant), iEllPol_(LXZ),
+    nPolyExpMax_(100), polyEps_(1e-15),
     EDField_({0.0,0.0,0.0}),
     tarCSVs(true){ };
 
@@ -216,11 +221,13 @@ public:
   void setIntScheme(const std::string&); 
   void setMMUTRstScheme(const std::string&); 
   void setEnvlp(const std::string&);
+  void setPropMeth(const std::string&);
     
   inline void setMaxSteps(int x)  { maxSteps_ = x; };
   inline void setNSkip(int x)     { nSkip_    = x; };
   inline void setIRstrt(int x)    { iRstrt_   = x; };
   inline void setPrintLevel(int x){ printLevel_ = x;};
+  inline void setNPolyExpMax(size_t x){ nPolyExpMax_ = x; };
              
   inline void setTOn(double x)      { tOn_      = x; };
   inline void setTOff(double x)     { tOff_     = x; };
@@ -229,6 +236,7 @@ public:
   inline void setFreq(double x)     { freq_     = x; };
   inline void setPhase(double x)    { phase_    = x; };
   inline void setSigma(double x)    { sigma_    = x; };
+  inline void setPolyEps(double x)  { polyEps_  = x; };
 
   inline void setEDFieldAmp(std::array<double,3> x) { staticEDAmp_ = x; };
 

@@ -45,3 +45,17 @@ void RealTime<T>::setEnvlp(const std::string &x) {
       this->fileio_->out);
 
 }
+template <typename T>
+void RealTime<T>::setPropMeth(const std::string &x) {
+  if(!x.compare("EIGEN") or !x.compare("EIGEN DECOMPOSITION") or
+     !x.compare("EIGEN DECOMPOSITION"))
+     this->iMethFormU_ = EigenDecomp;
+  else if(!x.compare("CHEB") or !x.compare("CHEBY") or 
+          !x.compare("CHEBYSHEV"))
+     this->iMethFormU_ = Chebyshev;
+  else if(!x.compare("TAYLOR"))
+     this->iMethFormU_ = Taylor;
+  else
+    CErr(x + std::string(" not a recognized matrix exponential method"),
+      this->fileio_->out);
+}

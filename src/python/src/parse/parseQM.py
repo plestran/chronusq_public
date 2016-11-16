@@ -176,6 +176,9 @@ def parseRT(workers,secDict):
 #    'ELL_POL'  :workers['CQRealTime'].setEllPol     
     'INTSCHEME':workers['CQRealTime'].setIntScheme,
     'MMUTSCHEME':workers['CQRealTime'].setMMUTRstScheme,
+    'MATEXP'   :workers['CQRealTime'].setPropMeth,
+    'NPOLYMAX' :workers['CQRealTime'].setNPolyExpMax,
+    'POLYEPS'  :workers['CQRealTime'].setPolyEps
   }
 
 

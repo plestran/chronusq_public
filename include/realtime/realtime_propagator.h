@@ -40,11 +40,30 @@ void RealTime<T>::formUTrans() {
     new (&UTransMx) ComplexMap(UTransMx_,NB,NB);
   }
 
-  ssPropagator_->populateMO4Diag();
-
   ComplexMap S(NBTSqScratch_,NBT,NBT);
   ComplexMap S2(NBTSqScratch2_,NBT,NBT);
   ComplexMap S3(NBTSqScratch3_,NBT,NBT);
+
+  // Scaling Parameters for Polynomial Expansion
+  double gamma = (*groundState_->epsA())(NBT-1) - (*groundState_->epsA())(0);
+  gamma *= 3. / 2;
+  double EMin = (*groundState_->epsA())(0);
+
+  double alpha = gamma * deltaT_ / 2;
+
+  std::vector<double> CK(nPolyExpMax_);
+  int nPolyKeep(0);
+
+  // Copy things into full dimension
+  ssPropagator_->populateMO4Diag();
+
+  // Functions for polynomial
+  using boost::math::factorial;
+
+  auto binomial = [](int n, int m) -> double {
+    return factorial<double>(n) / 
+           factorial<double>(m) / factorial<double>(n-m);
+  };
 
   if( iMethFormU_ == EigenDecomp ) {
     ssPropagator_->diagFock2();
@@ -67,7 +86,7 @@ void RealTime<T>::formUTrans() {
 
       Quantum<dcomplex>::spinScatter(S2,Us);
     } else {
-      // Temporarily store UA in UScalar
+      // Temporarily store UA in UTransScalar
       UTransScalar.noalias() = S * ssPropagator_->moA()->adjoint();
 
       if(!ssPropagator_->isClosedShell) {
@@ -81,73 +100,83 @@ void RealTime<T>::formUTrans() {
         // Temporarily store UB in UMz
         UTransMz.noalias() = S * ssPropagator_->moB()->adjoint();
 
-        // Reconstruct UScalar and UMz from UA and UB
+        // Reconstruct UTransScalar and UMz from UA and UB
         S = UTransScalar;
         UTransScalar.noalias() = S + UTransMz;
         UTransMz.noalias()     = S - UTransMz; 
       } else {
-        // UScalar = 2*UA for restricted
+        // UTransScalar = 2*UA for restricted
         UTransScalar *= 2;
       }
     }
   } else if( iMethFormU_ == Taylor ) {
-  }
 
-  using boost::math::factorial;
-  ComplexMatrix TEMP(NBT,NBT);
-  TEMP.setZero();
+    for(auto i = 0; i < nPolyExpMax_; i++)
+      CK[i] = (std::pow(gamma * deltaT_ / 2,i) / factorial<double>(i));
 
-  int NTaylor = 100;
-  
-//prettyPrintSmart(cout,*ssPropagator_->fockOrtho()[0],"FO After");
+  } else if( iMethFormU_ == Chebyshev ) {
 
-  double gamma = (*groundState_->epsA())(NBT-1) - (*groundState_->epsA())(0);
-  gamma *= 2.5 / 2;
-  double EMin = (*groundState_->epsA())(0);
-
-  double alpha = gamma * deltaT_ / 2;
-
-  std::vector<double> CK(NTaylor);
-/*
-  for(auto i = 0; i < NTaylor; i++)
-    CK[i] = (std::pow(gamma * deltaT_ / 2,i) / factorial<double>(i));
-*/
-
-  auto binomial = [](int n, int m) -> double {
-    return factorial<double>(n) / 
-           factorial<double>(m) / factorial<double>(n-m);
-  };
-
-  for(auto iCheb = 0; iCheb < NTaylor; iCheb++){
-    double tmp = 0.0;
-    for(auto jCheb = iCheb; jCheb < NTaylor; jCheb += 2){
-      if(iCheb == 0) {
-        if(jCheb == 0) tmp += boost::math::cyl_bessel_j(jCheb,alpha);
-        else           tmp += 2.0 * boost::math::cyl_bessel_j(jCheb,alpha);
-      } else {
-        tmp += 2 * std::pow(2.0,iCheb - 1) * jCheb / iCheb *
-          binomial((iCheb + jCheb)/2 - 1, iCheb -1) *
-          boost::math::cyl_bessel_j(jCheb,alpha);
+    for(auto iCheb = 0; iCheb < nPolyExpMax_; iCheb++){
+      double tmp = 0.0;
+      for(auto jCheb = iCheb; jCheb < nPolyExpMax_; jCheb += 2){
+        if(iCheb == 0) {
+          if(jCheb == 0) tmp += boost::math::cyl_bessel_j(jCheb,alpha);
+          else           tmp += 2.0 * boost::math::cyl_bessel_j(jCheb,alpha);
+        } else {
+          tmp += 2 * std::pow(2.0,iCheb - 1) * jCheb / iCheb *
+            binomial((iCheb + jCheb)/2 - 1, iCheb -1) *
+            boost::math::cyl_bessel_j(jCheb,alpha);
+        }
       }
+
+      CK[iCheb] = tmp;
     }
 
-    CK[iCheb] = tmp;
   }
 
+  if( iMethFormU_ == Taylor or iMethFormU_ == Chebyshev ){
+    nPolyKeep = 0;
+    for(auto x : CK) { nPolyKeep++; if(x < polyEps_) break; }
+    if(nPolyKeep % 2 != 0) nPolyKeep++;
 
-  NTaylor = 0;
-  for(auto x : CK) { NTaylor++; if(x < 1e-15) break; }
-  if(NTaylor % 2 != 0) NTaylor++;
-  cout << "Keeping " << NTaylor << " terms" << endl;
+    // to Alpha
+    (*ssPropagator_->fockOrtho()[0]) *= 0.5;
+ 
+    // Scale matrix for eigenvalues
+    (*ssPropagator_->fockOrtho()[0]).noalias() -= 
+      (gamma/2 + EMin)*ComplexMatrix::Identity(NBT,NBT);
+ 
+    (*ssPropagator_->fockOrtho()[0]) *= 2 / gamma;
 
-  // to Alpha
-  (*ssPropagator_->fockOrtho()[0]) *= 0.5;
-
-  // Scale matrix for eigenvalues
-  (*ssPropagator_->fockOrtho()[0]).noalias() -= 
-    (gamma/2 + EMin)*ComplexMatrix::Identity(NBT,NBT);
-
-  (*ssPropagator_->fockOrtho()[0]) *= 2 / gamma;
+    // Zeroth and setup for first term
+    UTransScalar.noalias() = CK[0] * ComplexMatrix::Identity(NBT,NBT);
+    S3.noalias()   = -dcomplex(0,1) * (*ssPropagator_->fockOrtho()[0]);
+ 
+    // First term
+    UTransScalar.noalias() += CK[1] * S3;
+    S.noalias()    =  CK[nPolyKeep/2 + 1] * S3;
+ 
+    // Loop over half the kept points
+    for(auto iT = 2; iT <= (nPolyKeep/2); iT++) {
+      if(iT % 2 == 0) {
+        S2.noalias() = dcomplex(0,-1) * (*ssPropagator_->fockOrtho()[0]) * S3;
+        UTransScalar.noalias() += CK[iT] * S2;
+        S.noalias()    += CK[iT + nPolyKeep/2] * S2;
+      } else {
+        S3.noalias() = dcomplex(0,-1) * (*ssPropagator_->fockOrtho()[0]) * S2;
+        UTransScalar.noalias() += CK[iT] * S3;
+        S.noalias()    += CK[iT + nPolyKeep/2] * S3;
+      }
+    }
+ 
+    if((nPolyKeep / 2) % 2 == 0) UTransScalar.noalias() += S2 * S;
+    else                         UTransScalar.noalias() += S3 * S;
+ 
+    UTransScalar *= std::exp(-dcomplex(0,gamma/2 + EMin)*deltaT_ );
+ 
+    // Back to Scalar
+    UTransScalar *= 2;
+  }
 
 /*
   TEMP = ComplexMatrix::Identity(NBT,NBT);
@@ -164,33 +193,9 @@ void RealTime<T>::formUTrans() {
   }
 */
 
-  TEMP.noalias() = CK[0] * ComplexMatrix::Identity(NBT,NBT);
-  S3.noalias()   = -dcomplex(0,1) * (*ssPropagator_->fockOrtho()[0]);
-
-  TEMP.noalias() += CK[1] * S3;
-  S.noalias()    =  CK[NTaylor/2 + 1] * S3;
-
-  for(auto iT = 2; iT <= (NTaylor/2); iT++) {
-    if(iT % 2 == 0) {
-      S2.noalias() = dcomplex(0,-1) * (*ssPropagator_->fockOrtho()[0]) * S3;
-      TEMP.noalias() += CK[iT] * S2;
-      S.noalias()    += CK[iT + NTaylor/2] * S2;
-    } else {
-      S3.noalias() = dcomplex(0,-1) * (*ssPropagator_->fockOrtho()[0]) * S2;
-      TEMP.noalias() += CK[iT] * S3;
-      S.noalias()    += CK[iT + NTaylor/2] * S3;
-    }
-  }
-
-  if((NTaylor / 2) % 2 == 0) TEMP.noalias() += S2 * S;
-  else                       TEMP.noalias() += S3 * S;
-
-  TEMP *= std::exp(-dcomplex(0,gamma/2 + EMin)*deltaT_ );
-
-  TEMP *= 2;
 //prettyPrintSmart(this->fileio_->out,UTransScalar,"True");
 //prettyPrintSmart(this->fileio_->out,TEMP,"Taylor");
-  prettyPrintSmart(cout,UTransScalar - TEMP,"DIFF");
+//prettyPrintSmart(cout,UTransScalar - TEMP,"DIFF");
 //prettyPrintSmart(cout,UTransScalar.cwiseQuotient(TEMP).cwiseAbs(),"Q");
 };
 

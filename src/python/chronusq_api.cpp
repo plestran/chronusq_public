@@ -312,6 +312,9 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setIRstrt"       , &RealTime<double>::setIRstrt       )
     .def("setIntScheme" , &RealTime<double>::setIntScheme)
     .def("setMMUTRstScheme" , &RealTime<double>::setMMUTRstScheme)
+    .def("setPropMeth"       , &RealTime<double>::setPropMeth       )
+    .def("setNPolyExpMax"       , &RealTime<double>::setNPolyExpMax       )
+    .def("setPolyEps"       , &RealTime<double>::setPolyEps       )
 
     .def("propEnergy", &RealTime<double>::Python_propEnergy)
     .def("propDipole", &RealTime<double>::Python_propDipole)
@@ -348,6 +351,9 @@ BOOST_PYTHON_MODULE(libpythonapi){
     .def("setIRstrt"       , &RealTime<dcomplex>::setIRstrt       )
     .def("setIntScheme" , &RealTime<dcomplex>::setIntScheme)
     .def("setMMUTRstScheme" , &RealTime<dcomplex>::setMMUTRstScheme)
+    .def("setPropMeth"       , &RealTime<dcomplex>::setPropMeth       )
+    .def("setNPolyExpMax"       , &RealTime<dcomplex>::setNPolyExpMax       )
+    .def("setPolyEps"       , &RealTime<dcomplex>::setPolyEps       )
 
     .def("propEnergy", &RealTime<dcomplex>::Python_propEnergy)
     .def("propDipole", &RealTime<dcomplex>::Python_propDipole)
