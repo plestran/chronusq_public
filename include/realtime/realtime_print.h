@@ -65,6 +65,26 @@ void RealTime<T>::printRTHeader() {
   }
 
   output << endl;
+  output << std::setw(38) << std::left << "  Matrix Exponential Method:";
+  if(iMethFormU_ == EigenDecomp)
+    output << "Eigen Decomposition";
+  else if(iMethFormU_ == Taylor)
+    output << "Taylor Series Expansion";
+  else if(iMethFormU_ == Chebyshev)
+    output << "Chebyshev Series Expansion";
+
+  output << endl;
+  if(iMethFormU_ == Taylor or iMethFormU_ == Chebyshev) {
+    output << std::setw(38) << std::left << "    Maximum Terms Kept:";
+    output << nPolyExpMax_ << endl;
+    output << std::setw(38) << std::left << "    Coefficient Cutoff:";
+    output << std::scientific << std::setprecision(4) << polyEps_ << endl;
+  }
+
+  output << endl;
+  
+
+  output << endl;
   output << std::setw(38) << std::left << "  * External Field Parameters:" 
          << endl; 
 
@@ -114,6 +134,7 @@ void RealTime<T>::printRTHeader() {
 
 template <typename T>
 void RealTime<T>::printRTStep(const long double currentTime) {
+  fileio_->out << std::fixed;
   fileio_->out << std::setw(11) << std::right << std::setprecision(4) 
                << currentTime  << std::setw(1)  << " ";
 

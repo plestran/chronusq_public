@@ -109,6 +109,9 @@ knownKeywords['RT'] = {
   'TARCSVS'   :CQKeyword('TARCSVS'   ,'B' ,False),
   'INTSCHEME' :CQKeyword('INTSCHEME' ,'S' ,False),
   'MMUTSCHEME':CQKeyword('MMUTSCHEME','S' ,False),
+  'MATEXP'    :CQKeyword('MATEXP'    ,'S' ,False),
+  'NPOLYMAX'  :CQKeyword('NPOLYMAX'  ,'I' ,False),
+  'POLYEPS'   :CQKeyword('POLYEPS'   ,'D' ,False)
 }
 
 knownKeywords['MISC'] = {

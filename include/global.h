@@ -41,6 +41,7 @@
 #include <boost/python.hpp>
 #include <boost/geometry/geometry.hpp>
 #include <boost/math/constants/constants.hpp>
+#include <boost/math/special_functions/bessel.hpp>
 #include <boost/math/special_functions/gamma.hpp>
 #include <boost/math/special_functions/asinh.hpp>
 #include <boost/math/special_functions/factorials.hpp>

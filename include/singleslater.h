@@ -376,6 +376,19 @@ class SingleSlater : public WaveFunction<T> {
   void allocDFT();
   void allocMultipole();
 
+
+
+  // Timings
+  std::chrono::duration<double> avgFockD_;
+  std::chrono::duration<double> avgPTD_;
+  std::chrono::duration<double> avgVXCD_;
+  std::chrono::duration<double> avgDiagD_;
+  std::chrono::duration<double> avgCommD_;
+  std::chrono::duration<double> avgOrthoD_;
+  
+  
+
+  std::chrono::duration<double> SCFD_;
 public:
  
 
@@ -717,6 +730,7 @@ public:
     this->printMultipole();
     this->fileio_->out << BannerEnd << endl;
   };
+  void printTimings();
 
   // Operators
   void printDensity();
