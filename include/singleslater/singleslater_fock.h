@@ -200,6 +200,7 @@ void SingleSlater<T>::formFock(bool increment){
 */
 
     if(!increment) {
+/*
       this->fockScalar_->setZero();
 
       if(this->nTCS_ == 2 or !this->isClosedShell)
@@ -209,7 +210,9 @@ void SingleSlater<T>::formFock(bool increment){
         this->fockMy_->setZero();
         this->fockMx_->setZero();
       }
+*/
 
+      auto AddHStart = std::chrono::high_resolution_clock::now();
       (*this->fockScalar_) = this->aointegrals_->coreH_->template cast<T>();
       this->aointegrals_->subElecDipole(*this->fockScalar_,this->elecField_);
 
@@ -230,8 +233,13 @@ void SingleSlater<T>::formFock(bool increment){
         (*this->fockMz_) *= ComplexScale<T>();
         // -----------------------------------
       }
+
       for(auto iF = fock_.begin(); iF != fock_.end(); iF++)
         *(*iF) *= 2;
+
+      auto AddHEnd = std::chrono::high_resolution_clock::now();
+
+      this->avgAddHD_ += AddHEnd - AddHStart;
     }
 
 /*
@@ -242,11 +250,14 @@ void SingleSlater<T>::formFock(bool increment){
         this->fockScalar_->data()[i] += this->PTScalar_->data()[i];
       }
 */
+    auto AddGPStart = std::chrono::high_resolution_clock::now();
     for(auto iF = 0; iF < fock_.size(); iF++) {
       *(fock_[iF]) += *(PT_[iF]);
       if(this->isDFT)
         (*fock_[iF]) += (*vXC_[iF]);
     }
+    auto AddGPEnd = std::chrono::high_resolution_clock::now();
+    this->avgAddGPD_ += AddGPEnd - AddGPStart;
 /*
     (*this->fockScalar_) += (*this->PTScalar_);
 */

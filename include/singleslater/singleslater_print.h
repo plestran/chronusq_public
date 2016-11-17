@@ -586,6 +586,16 @@ void SingleSlater<T>::printTimings() {
     }
 
     this->fileio_->out << std::left << std::setw(60) <<
+      "  Average Wall time for adding H:";
+    this->fileio_->out << std::left << std::setw(15) 
+      << this->avgAddHD_.count() << " sec" << endl;
+
+    this->fileio_->out << std::left << std::setw(60) <<
+      "  Average Wall time for adding G[P]/VXC:";
+    this->fileio_->out << std::left << std::setw(15) 
+      << this->avgAddGPD_.count() << " sec" << endl;
+
+    this->fileio_->out << std::left << std::setw(60) <<
       "Average Wall time for Fock diagonalization:";
     this->fileio_->out << std::left << std::setw(15) 
       << this->avgDiagD_.count() << " sec" << endl;

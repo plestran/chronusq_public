@@ -68,6 +68,10 @@ void SingleSlater<T>::SCF3(){
   avgDiagD_  -= avgDiagD_;
   avgCommD_  -= avgCommD_;
   avgOrthoD_ -= avgOrthoD_;
+  avgVXCD_   -= avgVXCD_; 
+  avgPTD_    -= avgPTD_ ; 
+  avgAddHD_    -= avgAddHD_ ; 
+  avgAddGPD_    -= avgAddGPD_ ; 
 
   auto scfStart = std::chrono::high_resolution_clock::now();
   for(iter = 0; iter < this->maxSCFIter_; iter++){
@@ -227,6 +231,8 @@ void SingleSlater<T>::SCF3(){
   avgOrthoD_ /= nSCFIter; 
   avgVXCD_ /= nSCFIter; 
   avgPTD_ /= nSCFIter; 
+  avgAddHD_ /= nSCFIter; 
+  avgAddGPD_ /= nSCFIter; 
   
 
 

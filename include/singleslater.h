@@ -385,6 +385,8 @@ class SingleSlater : public WaveFunction<T> {
   std::chrono::duration<double> avgDiagD_;
   std::chrono::duration<double> avgCommD_;
   std::chrono::duration<double> avgOrthoD_;
+  std::chrono::duration<double> avgAddHD_;
+  std::chrono::duration<double> avgAddGPD_;
   
   
 
