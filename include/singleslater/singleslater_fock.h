@@ -113,13 +113,19 @@ void SingleSlater<T>::formFock(bool increment){
   }
 #else
   // All MPI processes go to FormPT
+  auto PTStart = std::chrono::high_resolution_clock::now();
   this->formPT();
+  auto PTEnd = std::chrono::high_resolution_clock::now();
+  this->avgPTD_ += PTEnd - PTStart;
 #endif
 
   if(getRank() == 0) {
     if(!this->aointegrals_->haveAOOneE) this->aointegrals_->computeAOOneE();
 
+    auto VXCStart = std::chrono::high_resolution_clock::now();
     if (this->isDFT) this->formVXC_new();
+    auto VXCEnd = std::chrono::high_resolution_clock::now();
+    this->avgVXCD_ += VXCEnd - VXCStart;
   
 /*
     if(this->nTCS_ == 1 && this->isClosedShell) {

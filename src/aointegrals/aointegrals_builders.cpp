@@ -428,15 +428,17 @@ void AOIntegrals::computeAOOneE(){
 //  prettyPrint(this->fileio_->out,*this->kinetic_,"T");
 //  prettyPrint(this->fileio_->out,*this->potential_,"V");
 
-  // Get end time of one-electron integral evaluation
-  auto oneEEnd = std::chrono::high_resolution_clock::now();
 
   // Compute Orthonormal transformation matricies
+  auto orthoStart = std::chrono::high_resolution_clock::now();
   this->computeOrtho();
+  auto orthoEnd = std::chrono::high_resolution_clock::now();
 
- // -------------------------------
- // This is the X2C transformation!
- // -------------------------------
+  // -------------------------------
+  // This is the X2C transformation!
+  // -------------------------------
+  
+  auto X2CStart = std::chrono::high_resolution_clock::now();
   if (this->doX2C && this->isPrimary) {
     if(this->printLevel_ >= 3){
       this->fileio_->out << endl 
@@ -444,7 +446,11 @@ void AOIntegrals::computeAOOneE(){
     }
     this->formP2Transformation();
   }
+  auto X2CEnd = std::chrono::high_resolution_clock::now();
   //-----------------------------
+    
+  // Get end time of one-electron integral evaluation
+  auto oneEEnd = std::chrono::high_resolution_clock::now();
   
   if(this->printLevel_ >= 2) this->printOneE();
 
@@ -453,6 +459,8 @@ void AOIntegrals::computeAOOneE(){
   this->SED = OEnd - OStart;
   this->TED = TEnd - TStart;
   this->VED = VEnd - VStart;
+  this->OrthoD = orthoEnd - orthoStart;
+  this->X2CD = X2CEnd - X2CStart;
   this->haveAOOneE = true;
   this->breakUpMultipole();
 //if(this->isPrimary) this->writeOneE();

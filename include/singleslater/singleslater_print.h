@@ -558,3 +558,58 @@ void SingleSlater<T>::printSCFResults(){
     }
   }
 }
+
+template <typename T>
+void SingleSlater<T>::printTimings() {
+
+    this->fileio_->out << endl << "SCF Timings: "<<endl << BannerTop 
+      << endl;
+    this->fileio_->out << endl << "Average timing over SCF iterations" << endl 
+                       << bannerMid << endl;
+
+
+    this->fileio_->out << std::left << std::setw(60) <<
+      "Average Wall time for Fock build:";
+    this->fileio_->out << std::left << std::setw(15) 
+      << this->avgFockD_.count() << " sec" << endl;
+
+    this->fileio_->out << std::left << std::setw(60) <<
+      "  Average Wall time for G[P]:";
+    this->fileio_->out << std::left << std::setw(15) 
+      << this->avgPTD_.count() << " sec" << endl;
+
+    if(this->isDFT) {
+      this->fileio_->out << std::left << std::setw(60) <<
+        "  Average Wall time for EXC / VXC:";
+      this->fileio_->out << std::left << std::setw(15) 
+        << this->avgVXCD_.count() << " sec" << endl;
+    }
+
+    this->fileio_->out << std::left << std::setw(60) <<
+      "Average Wall time for Fock diagonalization:";
+    this->fileio_->out << std::left << std::setw(15) 
+      << this->avgDiagD_.count() << " sec" << endl;
+
+    this->fileio_->out << std::left << std::setw(60) <<
+      "Average Wall time spent on orthonormal transformation:";
+    this->fileio_->out << std::left << std::setw(15) 
+      << this->avgOrthoD_.count() << " sec" << endl;
+
+    if(this->doDIIS){
+      this->fileio_->out << std::left << std::setw(60) <<
+        "Average Wall time for [F,P]:";
+      this->fileio_->out << std::left << std::setw(15) 
+        << this->avgCommD_.count() << " sec" << endl;
+    }
+
+    this->fileio_->out << std::left << std::setw(60) << " "
+      << std::left << std::setw(15) << "---------------" 
+      << "----" << endl;
+
+    this->fileio_->out << std::left << std::setw(60) 
+      << "Total wall time for SCF procedure:" 
+      << std::left << std::setw(15) << this->SCFD_.count() << " sec" 
+      << endl;
+
+    this->fileio_->out << BannerEnd << endl;
+};

@@ -62,6 +62,14 @@ void SingleSlater<T>::SCF3(){
   this->doIncFock_ = this->isPrimary and !this->isDFT;
   this->doIncFock_ = false;
 
+  avgFockD_  -= avgFockD_;
+  avgPTD_    -= avgPTD_;
+  avgVXCD_   -= avgVXCD_;
+  avgDiagD_  -= avgDiagD_;
+  avgCommD_  -= avgCommD_;
+  avgOrthoD_ -= avgOrthoD_;
+
+  auto scfStart = std::chrono::high_resolution_clock::now();
   for(iter = 0; iter < this->maxSCFIter_; iter++){
     /*
     this->computeSExpect(*this->aointegrals_->overlap_);
@@ -77,8 +85,11 @@ void SingleSlater<T>::SCF3(){
 //    this->copyDeltaDtoD();
 
     // Form the AO Fock Matrix: F(k)[D(k)]
+    auto fockStart = std::chrono::high_resolution_clock::now();
     this->formFock(this->doIncFock_ && iter != 0);
+    auto fockEnd = std::chrono::high_resolution_clock::now();
 
+    avgFockD_ += fockEnd - fockStart;
    
 //  if(iter != 0 and this->doIncFock_){
 //    this->incPT();
@@ -87,7 +98,13 @@ void SingleSlater<T>::SCF3(){
    
 
     // Orthonormalize the Fock: F(k) -> FO(k)
+    auto orthoStart = std::chrono::high_resolution_clock::now();
     this->orthoFock3();
+    auto orthoEnd = std::chrono::high_resolution_clock::now();
+
+    avgOrthoD_ += orthoEnd - orthoStart;
+
+    auto commStart = std::chrono::high_resolution_clock::now();
     // Form the orthonormal product of fock and density:
     //   FPO = FO(k) * DO(k), FPO -> FP
     this->formFP();
@@ -100,6 +117,9 @@ void SingleSlater<T>::SCF3(){
       this->cpyDenDIIS(IDIISIter);
       this->genDIISCom(IDIISIter); 
     }
+    auto commEnd = std::chrono::high_resolution_clock::now();
+
+    avgCommD_ += commEnd - commStart;
 
     // DIIS Extrapolation of the Fock
     //   Extrapolates the AO Fock and then transforms into orthonormal
@@ -146,7 +166,11 @@ void SingleSlater<T>::SCF3(){
       
       // Diagonalizes the orthonormal fock matricies
       // FO(k) {stored in C} -> C(k+1) {in orthonormal basis}
+      auto diagStart = std::chrono::high_resolution_clock::now();
       this->diagFock2();
+      auto diagEnd = std::chrono::high_resolution_clock::now();
+
+      avgDiagD_ += diagEnd - diagStart;
 
       // This stupidly computes the orthonormal density and stores it in the
       // AO storage
@@ -161,7 +185,13 @@ void SingleSlater<T>::SCF3(){
 
     // Transform D into the AO basis
     //   DO(k+1) -> D(k+1)
+    orthoStart = std::chrono::high_resolution_clock::now();
     this->unOrthoDen3();
+    orthoEnd = std::chrono::high_resolution_clock::now();
+
+    avgOrthoD_ += orthoEnd - orthoStart;
+
+
     if(this->printLevel_ > 3) this->printDensity();
 
     // The generation of the commutator for DIIS also checks for convergece
@@ -185,6 +215,20 @@ void SingleSlater<T>::SCF3(){
     // If convergence is reached, break out of SCF loop
     if(this->isConverged) break;
   }
+  auto scfEnd = std::chrono::high_resolution_clock::now();
+
+  SCFD_ = scfEnd - scfStart;
+  
+  avgFockD_  /= nSCFIter; 
+  avgPTD_    /= nSCFIter; 
+  avgVXCD_   /= nSCFIter; 
+  avgDiagD_  /= nSCFIter; 
+  avgCommD_  /= nSCFIter; 
+  avgOrthoD_ /= nSCFIter; 
+  avgVXCD_ /= nSCFIter; 
+  avgPTD_ /= nSCFIter; 
+  
+
 
   // Deallocate all of the SCF temporaries
   this->cleanupSCFMem3();

@@ -263,11 +263,9 @@ public:
   std::chrono::duration<double> SED; ///< Timer for overlap matrix evaluation
   std::chrono::duration<double> TED; ///< Timer for kinetic energy tensor evaluation
   std::chrono::duration<double> VED; ///< Timer for potential energy tensor evaluation
-  std::chrono::duration<double> CoulD; ///< Timer for Coulomb tensor evaluation
-  std::chrono::duration<double> ExchD; ///< Timer for Exchange tensor evaluation
-  std::chrono::duration<double> PTD; ///< Timer for Perturbation tensor evaluation, \f$G[P]\f$
   std::chrono::duration<double> SchwartzD; ///< Timer for Schwartz bound evaluation
-  std::chrono::duration<double> DenShBlkD; ///< Timer for Density shell-block norm evaluation
+  std::chrono::duration<double> OrthoD; ///< Timer for orthonormal transformation formation
+  std::chrono::duration<double> X2CD; ///< Timer for X2C transformation  
 
   enum INTEGRAL_ALGORITHM {
     DIRECT,

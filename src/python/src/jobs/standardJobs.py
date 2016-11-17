@@ -79,10 +79,16 @@ def runCQJob(job,workers,meta):
 
 #  if job == 'SCF':
   workers["CQSingleSlater"].SCF() 
-
+  workers["CQSingleSlater"].printSCFResults()
   workers["CQSingleSlater"].computeProperties()
-  
   workers["CQSingleSlater"].printProperties()
+
+  workers["CQFileIO"].write('\n')
+  workers["CQFileIO"].write('\n')
+  workers["CQFileIO"].write('\n')
+
+  workers["CQAOIntegrals"].printTimings()
+  workers["CQSingleSlater"].printTimings()
 
   if job == 'RT':
     workers["CQRealTime"].alloc()

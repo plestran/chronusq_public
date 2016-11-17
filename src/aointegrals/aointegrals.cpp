@@ -291,20 +291,15 @@ void AOIntegrals::iniMolecularConstants(){
 };
 
 void AOIntegrals::printTimings() {
-    this->fileio_->out << endl << "Timing Statistics: "<<endl << bannerTop 
+    this->fileio_->out << endl << "Integral Timings: "<<endl << BannerTop 
       << endl;
     this->fileio_->out << endl << "One Electron Integral Timings" << endl 
                        << bannerMid << endl;
 
+/*
     if(this->maxMultipole_ >= 4) {
       this->fileio_->out << std::left << std::setw(60) 
             << "Wall time for Overlap + Dipole + Quadrupole + Octupole + RxP"; 
-    } else if(this->maxMultipole_ >= 3) {
-      this->fileio_->out << std::left << std::setw(60) 
-            << "Wall time for Overlap + Dipole + Quadrupole + Octupole"; 
-    } else if(this->maxMultipole_ >= 2) {
-      this->fileio_->out << std::left << std::setw(60) 
-            << "Wall time for Overlap + Dipole + Quadrupole evaluation:"; 
     } else if(this->maxMultipole_ >= 1) {
       this->fileio_->out << std::left << std::setw(60) 
                          << "Wall time for Overlap + Dipole evaluation:"; 
@@ -312,11 +307,12 @@ void AOIntegrals::printTimings() {
       this->fileio_->out << std::left << std::setw(60) 
                          << "Wall time for Overlap evaluation:"; 
     }
+*/
+
+    this->fileio_->out << std::left << std::setw(60) <<
+      "Wall time for Overlap + Multipole:";
     this->fileio_->out << std::left << std::setw(15) 
       << this->SED.count() << " sec" << endl;
-
-    if(this->maxMultipole_ >= 3) this->fileio_->out << std::left 
-      << "evaluation:" << endl;
 
     this->fileio_->out << std::left << std::setw(60) 
       << "Wall time for Kinetic evaluation:" 
@@ -326,6 +322,29 @@ void AOIntegrals::printTimings() {
       << "Wall time for Nuclear Attraction Potential evaluation:" 
       << std::left << std::setw(15) << this->VED.count() << " sec" << endl;
 
+    if(this->orthoType == LOWDIN)
+      this->fileio_->out << std::left << std::setw(60) 
+        << "Wall time for formation of Lowdin transformation:";
+    if(this->orthoType == CHOLESKY)
+      this->fileio_->out << std::left << std::setw(60) 
+        << "Wall time for formation of Cholesky transformation:";
+
+    this->fileio_->out
+      << std::left << std::setw(15) << this->OrthoD.count() << " sec" << endl;
+
+    if(this->doX2C)
+      this->fileio_->out << std::left << std::setw(60) 
+        << "Wall time for formation of X2C transformation:"
+        << std::left << std::setw(15) << this->X2CD.count() << " sec" << endl;
+
+    this->fileio_->out << std::left << std::setw(60) 
+      << "Wall time for Schwartz Bound evaluation:" 
+      << std::left << std::setw(15) << this->SchwartzD.count() << " sec" 
+      << endl;
+        
+
+
+
     this->fileio_->out << std::left << std::setw(60) << " "
       << std::left << std::setw(15) << "---------------" 
       << "----" << endl;
@@ -334,27 +353,16 @@ void AOIntegrals::printTimings() {
       << "Total wall time for one-electron integral evaluation:" 
       << std::left << std::setw(15) << this->OneED.count() << " sec" 
       << endl;
+
+
+/*
     this->fileio_->out << endl << endl;
-
-
     this->fileio_->out << "Two Electron Integral Timings" << endl << bannerMid 
       << endl;
+*/
 
-    this->fileio_->out << std::left << std::setw(60) 
-      << "Wall time for Schwartz Bound evaluation:" 
-      << std::left << std::setw(15) << this->SchwartzD.count() << " sec" 
-      << endl;
 
-    this->fileio_->out << std::left << std::setw(60) 
-      << "Wall time for Density Shell Block Norm evaluation:" 
-      << std::left << std::setw(15) << this->DenShBlkD.count() << " sec" 
-      << endl;
-
-    this->fileio_->out << std::left << std::setw(60) 
-      << "Wall time for Perturbation Tensor evaluation:" 
-      << std::left << std::setw(15) << this->PTD.count() << " sec" << endl;
-      
-    this->fileio_->out << bannerEnd << endl;
+    this->fileio_->out << BannerEnd << endl;
 }
 
 void AOIntegrals::printOneE(){
