@@ -80,6 +80,7 @@ void BasisSet::findBasisFile(std::string fName){
  */
 void BasisSet::parseGlobal(){
 
+/*
   std::string readString;
   std::string nameOfAtom;
   std::string shSymb;
@@ -169,6 +170,110 @@ void BasisSet::parseGlobal(){
 //cout << "Reference Shells" << endl;
 //for(auto i = 0; i < this->refShells_.size(); i++) cout << this->refShells_[i].shells << endl;
   //cout << this->refShells_.size() << endl;
+ */
+
+  std::vector< std::vector< std::string > > rawRecs;
+  rawRecs.emplace_back();
+
+  int nEmpty(0), nCom(0);
+
+  while(!this->basisFile_->eof()){
+    std::string readString;
+    std::getline(*this->basisFile_,readString);
+  
+    // Skip comment and empty lines
+    if(readString.size() == 0){ nEmpty++; continue; }
+    if(readString[0] == '!')  { nCom++;   continue; }
+
+    if(!readString.compare("****")){ rawRecs.emplace_back(); continue; }
+    
+    rawRecs.back().emplace_back(readString);
+
+  }
+/*
+  for( x : rawRecs){
+  for( y : x ){
+    cout << y << endl;
+  } cout << endl;}
+*/
+  for( rec : rawRecs ){
+    if(rec.size() == 0) continue;
+
+    int indx;
+    int atomicNumber;
+    std::vector<libint2::Shell> tmpShell;
+    std::vector<std::vector<double>> tmpCons;
+
+    for( auto line = rec.begin(); line != rec.end(); line++ ){
+      std::istringstream iss(*line);
+      std::vector<std::string> tokens(std::istream_iterator<std::string>{iss},
+        std::istream_iterator<std::string>{});
+
+      if( line == rec.begin() ) {
+        indx = HashAtom(tokens[0],0);
+        atomicNumber = elements[indx].atomicNumber;
+        tmpShell.clear();
+        tmpCons.clear();
+        continue;
+      }
+
+      int contDepth         = std::stoi(tokens[1]);
+      std::string shSymb    = tokens[0];
+      std::vector<double> exp;
+      std::vector<double> contPrimary;
+      std::vector<double> contSecondary;
+         
+      for(auto i = 0; i < contDepth; i++) {
+        line++;
+        std::istringstream iss2(*line);
+        std::vector<std::string> tokens2(
+          std::istream_iterator<std::string>{iss2},
+          std::istream_iterator<std::string>{});
+
+        exp.push_back(std::stod(tokens2[0]));
+        contPrimary.push_back(std::stod(tokens2[1]));
+        if(!shSymb.compare("SP"))
+          contSecondary.push_back(std::stod(tokens2[2]));
+      }
+
+      if(!shSymb.compare("SP")) {
+        tmpShell.push_back(
+          libint2::Shell{ exp, {{0,false,contPrimary}}, {{0,0,0}} }
+        );
+        tmpCons.push_back(contPrimary);
+        tmpShell.push_back(
+          libint2::Shell{ exp, {{1,false,contSecondary}}, {{0,0,0}} }
+        );
+        tmpCons.push_back(contSecondary);
+      } else {
+        int L = HashL(shSymb);
+        bool doSph = (L > 1);
+        if(this->forceCart_) doSph = false;
+
+        tmpShell.push_back(
+          libint2::Shell{ exp, {{L,doSph,contPrimary}}, {{0,0,0}} }
+        );
+        tmpCons.push_back(contPrimary);
+      }
+
+    }
+
+    this->refShells_.push_back(
+      ReferenceShell{atomicNumber,indx,tmpShell,tmpCons});
+  }
+
+  std::stable_sort(refShells_.begin(),refShells_.end(),
+    [&] (const ReferenceShell &r1, const ReferenceShell &r2) {
+      return r1.atomicNumber < r2.atomicNumber;
+    });
+
+/*
+  for( auto x : refShells_ ){
+    for( auto sh : x.shells )
+      cout << x.atomicNumber << endl << sh << endl;
+  }
+  CErr();
+*/
  
 }; // BasisSet::parseGlobal
 
