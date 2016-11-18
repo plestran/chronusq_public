@@ -38,47 +38,15 @@ void RealTime<T>::doPropagation() {
 //if(this->tOff_ != 0 and (this->tOff_ - this->tOn_) < this->stepSize_){
 //  this->tOff_ = this->stepSize_; 
 //}
+  iScheme_ = ExpMagnus3;
   printRTHeader();
 
   for(auto iStep = 0ul; iStep <= maxSteps_; iStep++) {
 
-/*
-    Start = (iStep == 0);
-    Start = Start or FinMM;
-    if(iRstrt_ > 0) Start = Start or (iStep % iRstrt_) == 0;
-    
-    FinMM = (iStep == maxSteps_);
-    FinMM = FinMM or (tOff_ != 0.0 and currentTime_ > tOff_ and currentTime_ <= tOff_ + stepSize_);
-    if(iRstrt_ > 0) FinMM = FinMM or ( (iStep + 1) % iRstrt_ == 0 );
-
-
-    if(Start) this->fileio_->out << "  *** STARTING MMUT ***" << endl;
-    if(FinMM) this->fileio_->out << "  *** FINISHING MMUT ***" << endl;
-
-    // Initial entry into MMUT
-    if(Start or FinMM) {
-      // Copy the orthonormal density from ssPropagator to POSav
-      // POSav(k) = PO(k)
-      for(auto iODen = 0; iODen < POSav_.size(); iODen++)
-        (*POSav_[iODen]) = (*ssPropagator_->onePDMOrtho()[iODen]);
-
-      deltaT_ = stepSize_;
-    // Subsequent MMUT iterations
-    } else {
-      // Swap POSav densities with those from ssPropagator
-      // POSav(k) <-> PO(k)
-      //
-      // POSav(k) = PO(k)
-      // PO(k)    = PO(k-1)
-      for(auto iODen = 0; iODen < POSav_.size(); iODen++)
-        POSav_[iODen]->swap(*ssPropagator_->onePDMOrtho()[iODen]);
-    }
-*/
-
     //JJG forcing Magnus3
     iScheme_ = ExpMagnus3;
     // JJG alloc scratch for Magnus3
-    ComplexMatrix POSav1(NBT, NBT); 
+  //ComplexMatrix POSav1(NBT, NBT); 
     ComplexMatrix FOSav1(NBT, NBT); 
     ComplexMatrix FOSav2(NBT, NBT); 
     ComplexMatrix FOSav3(NBT, NBT); 
@@ -158,9 +126,11 @@ void RealTime<T>::doPropagation() {
     }
 
     if (currentStep == ExplicitMagnus3) {
+/*
       // Copy the orthonormal density from ssPropagator to POSav1
       // POSav1(k) = PO(k)
       POSav1 = *ssPropagator_->onePDMOrthoScalar();
+*/
       // Copy the orthonormal fock from ssPropagator to FOSav1
       // FOSav1(k) = FO(k)
       FOSav1 = *ssPropagator_->fockOrtho()[0];
@@ -220,7 +190,7 @@ void RealTime<T>::doPropagation() {
      
       // update ssPropagator 
       *ssPropagator_->fockOrtho()[0] = FOSav3;
-      *ssPropagator_->onePDMOrthoScalar() = POSav1;
+      *ssPropagator_->onePDMOrthoScalar() = *POSav_[0];
       // Propagate and update Fock
       formUTrans();
       propDen();
@@ -234,7 +204,7 @@ void RealTime<T>::doPropagation() {
   
       //update ssPropagator 
       *ssPropagator_->fockOrtho()[0] = FOSav2;
-      *ssPropagator_->onePDMOrthoScalar() = POSav1;
+      *ssPropagator_->onePDMOrthoScalar() = *POSav_[0];
       // Propagate and update Fock
       formUTrans();
       propDen();
@@ -251,7 +221,7 @@ void RealTime<T>::doPropagation() {
       *ssPropagator_->fockOrtho()[0]  = (1/6.)*(FOSav1 + 4*FOSav4 + FOSav5);
       *ssPropagator_->fockOrtho()[0] -= (h/3.)*(FOSav3*FOSav4 - FOSav4*FOSav3);
       *ssPropagator_->fockOrtho()[0] -= (h/12.)*(FOSav2*FOSav5 - FOSav5*FOSav2);
-      *ssPropagator_->onePDMOrthoScalar() = POSav1;
+      *ssPropagator_->onePDMOrthoScalar() = *POSav_[0];
       // Propagate and update Fock
       formUTrans();
       propDen();

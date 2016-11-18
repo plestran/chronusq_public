@@ -108,11 +108,38 @@ class RealTime {
   std::unique_ptr<ComplexMap> POMxSav_;
   std::vector<ComplexMap *> POSav_;
 
+  // Needed for RKMK/Magnus 2+
   std::unique_ptr<ComplexMap> FOScalarSav_;
   std::unique_ptr<ComplexMap> FOMzSav_;
   std::unique_ptr<ComplexMap> FOMySav_;
   std::unique_ptr<ComplexMap> FOMxSav_;
   std::vector<ComplexMap *> FOSav_;
+
+  // Needed for RKMK/Magnus 3+
+  std::unique_ptr<ComplexMap> FOScalarSav2_;
+  std::unique_ptr<ComplexMap> FOMzSav2_;
+  std::unique_ptr<ComplexMap> FOMySav2_;
+  std::unique_ptr<ComplexMap> FOMxSav2_;
+  std::vector<ComplexMap *> FOSav2_;
+
+  std::unique_ptr<ComplexMap> FOScalarSav3_;
+  std::unique_ptr<ComplexMap> FOMzSav3_;
+  std::unique_ptr<ComplexMap> FOMySav3_;
+  std::unique_ptr<ComplexMap> FOMxSav3_;
+  std::vector<ComplexMap *> FOSav3_;
+
+  std::unique_ptr<ComplexMap> FOScalarSav4_;
+  std::unique_ptr<ComplexMap> FOMzSav4_;
+  std::unique_ptr<ComplexMap> FOMySav4_;
+  std::unique_ptr<ComplexMap> FOMxSav4_;
+  std::vector<ComplexMap *> FOSav4_;
+
+  std::unique_ptr<ComplexMap> FOScalarSav5_;
+  std::unique_ptr<ComplexMap> FOMzSav5_;
+  std::unique_ptr<ComplexMap> FOMySav5_;
+  std::unique_ptr<ComplexMap> FOMxSav5_;
+  std::vector<ComplexMap *> FOSav5_;
+
 
   // RT Simulation Control
   int maxSteps_;

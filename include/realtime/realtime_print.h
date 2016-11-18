@@ -49,6 +49,8 @@ void RealTime<T>::printRTHeader() {
     output << "Modified Midpoint Unitary Transformation (MMUT)"; 
   } else if(this->iScheme_ == ExpMagnus2) {
     output << "Explicit 2nd Order Magnus"; 
+  } else if(this->iScheme_ == ExpMagnus3) {
+    output << "Explicit 3nd Order Magnus"; 
   }
 
   output << endl;
@@ -59,6 +61,8 @@ void RealTime<T>::printRTHeader() {
      output << "Forward Euler";
    else if(this->iRstScheme_ == ExplicitMagnus2)
      output << "Explicit 2nd Order Magnus";
+   else if(this->iRstScheme_ == ExplicitMagnus3)
+     output << "Explicit 3nd Order Magnus";
    
    output << " step" << endl;
 
