@@ -259,6 +259,7 @@ public:
 
 
   enum BASISSETS {
+    // Pople Sets
     PopleSTO3G,
     PopleSTO6G,
     Pople321G,
@@ -268,11 +269,57 @@ public:
     Pople6311pGs,
     Pople6311pGss,
     Pople6311pG2dp,
+
+    // Dunning Sets
     ccpVDZ,
     ccpVTZ,
+
+    // Turbomol Sets
     def2SVP,
     def2SVPD,
-    def2TZVP
+    def2TZVP,
+
+    // Sapporo Sets
+    // Standard Sets
+    SapporoDZP,
+    SapporoTZP,
+    SapporoQZP,
+    SapporoDZPsp,
+    SapporoTZPsp,
+    SapporoQZPsp,
+    SapporoDZPall,
+    SapporoTZPall,
+    SapporoQZPall,
+    // 2012 sets
+    Sapporo2012DZP,
+    Sapporo2012TZP,
+    Sapporo2012QZP,
+    Sapporo2012DZPsp,
+    Sapporo2012TZPsp,
+    Sapporo2012QZPsp,
+    Sapporo2012DZPall,
+    Sapporo2012TZPall,
+    Sapporo2012QZPall,
+    // DKH3 Sets
+    SapporoDKH3DZP,
+    SapporoDKH3TZP,
+    SapporoDKH3QZP,
+    SapporoDKH3DZPsp,
+    SapporoDKH3TZPsp,
+    SapporoDKH3QZPsp,
+    SapporoDKH3DZPall,
+    SapporoDKH3TZPall,
+    SapporoDKH3QZPall,
+    // 2012 DKH3 Sets
+    Sapporo2012DKH3DZP,
+    Sapporo2012DKH3TZP,
+    Sapporo2012DKH3QZP,
+    Sapporo2012DKH3DZPsp,
+    Sapporo2012DKH3TZPsp,
+    Sapporo2012DKH3QZPsp,
+    Sapporo2012DKH3DZPall,
+    Sapporo2012DKH3TZPall,
+    Sapporo2012DKH3QZPall
   };
 
   std::map<BASISSETS,std::string> basisMap;

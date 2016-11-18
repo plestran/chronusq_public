@@ -84,6 +84,7 @@ void BasisSet::makeMapCen2Bf(Molecule *mol){
 } // BasisSet::makeMapCen2Bf
 
 void BasisSet::makeBasisMap(){
+  // Pople Sets
   this->basisMap[PopleSTO3G]    = std::string(BASIS_PATH) + "/sto3g.gbs";
   this->basisMap[PopleSTO6G]    = std::string(BASIS_PATH) + "/sto6g.gbs";
   this->basisMap[Pople321G]     = std::string(BASIS_PATH) + "/3-21g.gbs";
@@ -93,26 +94,188 @@ void BasisSet::makeBasisMap(){
   this->basisMap[Pople6311pGs]  = std::string(BASIS_PATH) + "/6-311+g*.gbs";
   this->basisMap[Pople6311pGss] = std::string(BASIS_PATH) + "/6-311+g**.gbs";
   this->basisMap[Pople6311pG2dp]= std::string(BASIS_PATH) + "/6-311+g_2d_p.gbs";
+
+  // Dunning Sets
   this->basisMap[ccpVDZ]        = std::string(BASIS_PATH) + "/cc-pvdz.gbs";
   this->basisMap[ccpVTZ]        = std::string(BASIS_PATH) + "/cc-pvtz.gbs";
+
+  // Turbomol sets
   this->basisMap[def2SVP]       = std::string(BASIS_PATH) + "/def2-svp.gbs";
   this->basisMap[def2SVPD]      = std::string(BASIS_PATH) + "/def2-svpd.gbs";
   this->basisMap[def2TZVP]      = std::string(BASIS_PATH) + "/def2-tzvp.gbs";
 
-  this->basisKey["STO-3G"]         = PopleSTO3G;
-  this->basisKey["STO-6G"]         = PopleSTO6G;
+  // Sapporo Sets
+    
+  // Standard Sets
+  this->basisMap[SapporoDZP]    = 
+    std::string(BASIS_PATH) + "/sapporo-dzp_no.gbs";
+  this->basisMap[SapporoTZP]    = 
+    std::string(BASIS_PATH) + "/sapporo-tzp_no.gbs";
+  this->basisMap[SapporoQZP]    = 
+    std::string(BASIS_PATH) + "/sapporo-qzp_no.gbs";
+
+  this->basisMap[SapporoDZPsp]    = 
+    std::string(BASIS_PATH) + "/sapporo-dzp_sp.gbs";
+  this->basisMap[SapporoTZPsp]    = 
+    std::string(BASIS_PATH) + "/sapporo-tzp_sp.gbs";
+  this->basisMap[SapporoQZPsp]    = 
+    std::string(BASIS_PATH) + "/sapporo-qzp_sp.gbs";
+
+  this->basisMap[SapporoDZPall]    = 
+    std::string(BASIS_PATH) + "/sapporo-dzp_all.gbs";
+  this->basisMap[SapporoTZPall]    = 
+    std::string(BASIS_PATH) + "/sapporo-tzp_all.gbs";
+  this->basisMap[SapporoQZPall]    = 
+    std::string(BASIS_PATH) + "/sapporo-qzp_all.gbs";
+
+  // 2012 Sets
+  this->basisMap[Sapporo2012DZP]    = 
+    std::string(BASIS_PATH) + "/sapporo-dzp-2012_no.gbs";
+  this->basisMap[Sapporo2012TZP]    = 
+    std::string(BASIS_PATH) + "/sapporo-tzp-2012_no.gbs";
+  this->basisMap[Sapporo2012QZP]    = 
+    std::string(BASIS_PATH) + "/sapporo-qzp-2012_no.gbs";
+
+  this->basisMap[Sapporo2012DZPsp]    = 
+    std::string(BASIS_PATH) + "/sapporo-dzp-2012_sp.gbs";
+  this->basisMap[Sapporo2012TZPsp]    = 
+    std::string(BASIS_PATH) + "/sapporo-tzp-2012_sp.gbs";
+  this->basisMap[Sapporo2012QZPsp]    = 
+    std::string(BASIS_PATH) + "/sapporo-qzp-2012_sp.gbs";
+
+  this->basisMap[Sapporo2012DZPall]    = 
+    std::string(BASIS_PATH) + "/sapporo-dzp-2012_all.gbs";
+  this->basisMap[Sapporo2012TZPall]    = 
+    std::string(BASIS_PATH) + "/sapporo-tzp-2012_all.gbs";
+  this->basisMap[Sapporo2012QZPall]    = 
+    std::string(BASIS_PATH) + "/sapporo-qzp-2012_all.gbs";
+
+  // DKH3 Sets
+  this->basisMap[SapporoDKH3DZP]    = 
+    std::string(BASIS_PATH) + "/sapporo-dkh3-dzp_no.gbs";
+  this->basisMap[SapporoDKH3TZP]    = 
+    std::string(BASIS_PATH) + "/sapporo-dkh3-tzp_no.gbs";
+  this->basisMap[SapporoDKH3QZP]    = 
+    std::string(BASIS_PATH) + "/sapporo-dkh3-qzp_no.gbs";
+
+  this->basisMap[SapporoDKH3DZPsp]    = 
+    std::string(BASIS_PATH) + "/sapporo-dkh3-dzp_sp.gbs";
+  this->basisMap[SapporoDKH3TZPsp]    = 
+    std::string(BASIS_PATH) + "/sapporo-dkh3-tzp_sp.gbs";
+  this->basisMap[SapporoDKH3QZPsp]    = 
+    std::string(BASIS_PATH) + "/sapporo-dkh3-qzp_sp.gbs";
+
+  this->basisMap[SapporoDKH3DZPall]    = 
+    std::string(BASIS_PATH) + "/sapporo-dkh3-dzp_all.gbs";
+  this->basisMap[SapporoDKH3TZPall]    = 
+    std::string(BASIS_PATH) + "/sapporo-dkh3-tzp_all.gbs";
+  this->basisMap[SapporoDKH3QZPall]    = 
+    std::string(BASIS_PATH) + "/sapporo-dkh3-qzp_all.gbs";
+
+  // 2012 DKH3 Sets
+  this->basisMap[Sapporo2012DKH3DZP]    = 
+    std::string(BASIS_PATH) + "/sapporo-dkh3-dzp-2012_no.gbs";
+  this->basisMap[Sapporo2012DKH3TZP]    = 
+    std::string(BASIS_PATH) + "/sapporo-dkh3-tzp-2012_no.gbs";
+  this->basisMap[Sapporo2012DKH3QZP]    = 
+    std::string(BASIS_PATH) + "/sapporo-dkh3-qzp-2012_no.gbs";
+
+  this->basisMap[Sapporo2012DKH3DZPsp]    = 
+    std::string(BASIS_PATH) + "/sapporo-dkh3-dzp-2012_sp.gbs";
+  this->basisMap[Sapporo2012DKH3TZPsp]    = 
+    std::string(BASIS_PATH) + "/sapporo-dkh3-tzp-2012_sp.gbs";
+  this->basisMap[Sapporo2012DKH3QZPsp]    = 
+    std::string(BASIS_PATH) + "/sapporo-dkh3-qzp-2012_sp.gbs";
+
+  this->basisMap[Sapporo2012DKH3DZPall]    = 
+    std::string(BASIS_PATH) + "/sapporo-dkh3-dzp-2012_all.gbs";
+  this->basisMap[Sapporo2012DKH3TZPall]    = 
+    std::string(BASIS_PATH) + "/sapporo-dkh3-tzp-2012_all.gbs";
+  this->basisMap[Sapporo2012DKH3QZPall]    = 
+    std::string(BASIS_PATH) + "/sapporo-dkh3-qzp-2012_all.gbs";
+
+  // Pople Sets
+  this->basisKey["STO-3G"]        = PopleSTO3G;
+  this->basisKey["STO-6G"]        = PopleSTO6G;
   this->basisKey["3-21G"]         = Pople321G;
   this->basisKey["4-31G"]         = Pople431G;
   this->basisKey["6-31G"]         = Pople631G;
+
   this->basisKey["6-31++G*"]      = Pople631ppGs;
+  this->basisKey["6-31++G(D)"]    = Pople631ppGs;
+
   this->basisKey["6-311+G*"]      = Pople6311pGs;
+  this->basisKey["6-311+G(D)"]    = Pople6311pGs;
+
   this->basisKey["6-311+G**"]     = Pople6311pGss;
+  this->basisKey["6-311+G(D,P)"]  = Pople6311pGss;
+
   this->basisKey["6-311+G(2D,P)"] = Pople6311pG2dp;
+
+  // Dunning Sets
   this->basisKey["CC-PVDZ"]       = ccpVDZ;
   this->basisKey["CC-PVTZ"]       = ccpVTZ;
+
+  // Turbomol Sets
   this->basisKey["DEF2-SVP"]      = def2SVP;
   this->basisKey["DEF2-SVPD"]     = def2SVPD;
   this->basisKey["DEF2-TZVP"]     = def2TZVP;
+
+  // Sapporo Sets
+    
+  // Standard Sets
+  this->basisKey["SAPPORO-DZP"]      = SapporoDZP;
+  this->basisKey["SAPPORO-TZP"]      = SapporoTZP;
+  this->basisKey["SAPPORO-QZP"]      = SapporoQZP;
+
+  this->basisKey["SAPPORO-DZP-SP"]   = SapporoDZPsp;
+  this->basisKey["SAPPORO-TZP-SP"]   = SapporoTZPsp;
+  this->basisKey["SAPPORO-QZP-SP"]   = SapporoQZPsp;
+
+  this->basisKey["SAPPORO-DZP-ALL"]  = SapporoDZPall;
+  this->basisKey["SAPPORO-TZP-ALL"]  = SapporoTZPall;
+  this->basisKey["SAPPORO-QZP-ALL"]  = SapporoQZPall;
+
+  // 2012 Sets
+  this->basisKey["SAPPORO-2012-DZP"]      = Sapporo2012DZP;
+  this->basisKey["SAPPORO-2012-TZP"]      = Sapporo2012TZP;
+  this->basisKey["SAPPORO-2012-QZP"]      = Sapporo2012QZP;
+
+  this->basisKey["SAPPORO-2012-DZP-SP"]   = Sapporo2012DZPsp;
+  this->basisKey["SAPPORO-2012-TZP-SP"]   = Sapporo2012TZPsp;
+  this->basisKey["SAPPORO-2012-QZP-SP"]   = Sapporo2012QZPsp;
+
+  this->basisKey["SAPPORO-2012-DZP-ALL"]  = Sapporo2012DZPall;
+  this->basisKey["SAPPORO-2012-TZP-ALL"]  = Sapporo2012TZPall;
+  this->basisKey["SAPPORO-2012-QZP-ALL"]  = Sapporo2012QZPall;
+
+  // DKH3 Sets
+  this->basisKey["SAPPORO-DKH3-DZP"]      = SapporoDKH3DZP;
+  this->basisKey["SAPPORO-DKH3-TZP"]      = SapporoDKH3TZP;
+  this->basisKey["SAPPORO-DKH3-QZP"]      = SapporoDKH3QZP;
+
+  this->basisKey["SAPPORO-DKH3-DZP-SP"]   = SapporoDKH3DZPsp;
+  this->basisKey["SAPPORO-DKH3-TZP-SP"]   = SapporoDKH3TZPsp;
+  this->basisKey["SAPPORO-DKH3-QZP-SP"]   = SapporoDKH3QZPsp;
+
+  this->basisKey["SAPPORO-DKH3-DZP-ALL"]  = SapporoDKH3DZPall;
+  this->basisKey["SAPPORO-DKH3-TZP-ALL"]  = SapporoDKH3TZPall;
+  this->basisKey["SAPPORO-DKH3-QZP-ALL"]  = SapporoDKH3QZPall;
+
+  // 2012 DKH3 Sets
+  this->basisKey["SAPPORO-2012-DKH3-DZP"]      = Sapporo2012DKH3DZP;
+  this->basisKey["SAPPORO-2012-DKH3-TZP"]      = Sapporo2012DKH3TZP;
+  this->basisKey["SAPPORO-2012-DKH3-QZP"]      = Sapporo2012DKH3QZP;
+
+  this->basisKey["SAPPORO-2012-DKH3-DZP-SP"]   = Sapporo2012DKH3DZPsp;
+  this->basisKey["SAPPORO-2012-DKH3-TZP-SP"]   = Sapporo2012DKH3TZPsp;
+  this->basisKey["SAPPORO-2012-DKH3-QZP-SP"]   = Sapporo2012DKH3QZPsp;
+
+  this->basisKey["SAPPORO-2012-DKH3-DZP-ALL"]  = Sapporo2012DKH3DZPall;
+  this->basisKey["SAPPORO-2012-DKH3-TZP-ALL"]  = Sapporo2012DKH3TZPall;
+  this->basisKey["SAPPORO-2012-DKH3-QZP-ALL"]  = Sapporo2012DKH3QZPall;
+
+  // Sapporo Sets
 }; // BasisSet::makeBasisMap
 
 void BasisSet::makeMapPrim2Bf(){
