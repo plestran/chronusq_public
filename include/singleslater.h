@@ -644,6 +644,7 @@ public:
   inline int DFTKernel() { return this->DFTKernel_ ;              };
   inline int printLevel(){ return this->printLevel_;              };
   inline std::vector<double> mullPop()   { return this->mullPop_; };
+  inline std::vector<double> lowPop()   { return this->lowPop_; };
   inline std::array<double,3> elecField(){ return this->elecField_; };
 
   inline double xHF(){return this->xHF_;};
@@ -697,6 +698,8 @@ public:
   inline void computeProperties(){
     this->computeMultipole();
     this->computeSExpect(*this->aointegrals_->overlap_);
+    this->mullikenPop();
+    this->loewdinPop();
   };
   void mullikenPop();
   void loewdinPop();

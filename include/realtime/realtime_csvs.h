@@ -63,16 +63,24 @@ void RealTime<T>::initCSV() {
            << "|| E total || (a.u.)" << endl;
 
   // MULLIKEN
-  *csvs_[2] << std::setw(14) << "Atom number";
-  for(auto iAtm = 0; iAtm < ssPropagator_->molecule()->nAtoms(); iAtm++) 
+  *csvs_[2] << std::setw(14) << "Atom number,";
+  for(auto iAtm = 0; iAtm < ssPropagator_->molecule()->nAtoms(); iAtm++){ 
     *csvs_[2] << std::setw(14) << iAtm;
+    if(iAtm != ssPropagator_->molecule()->nAtoms() -1) *csvs_[2] << ",";
+  }
+
   *csvs_[2] << endl;
-  *csvs_[2] << std::setw(14) << "Atom symbol";
-  for(auto iAtm = 0; iAtm < ssPropagator_->molecule()->nAtoms(); iAtm++) 
+  *csvs_[2] << std::setw(14) << "Atom symbol,";
+  for(auto iAtm = 0; iAtm < ssPropagator_->molecule()->nAtoms(); iAtm++){ 
     *csvs_[2] << std::setw(14) 
              << elements[ssPropagator_->molecule()->index(iAtm)].symbol;
+    if(iAtm != ssPropagator_->molecule()->nAtoms() -1) *csvs_[2] << ",";
+  }
   *csvs_[2] << endl;
-  *csvs_[2] << std::setw(14) << "Time (a.u.)" << endl;
+  *csvs_[2] << std::setw(14) << "Time (a.u.),";
+  for(auto iAtm = 0; iAtm < ssPropagator_->molecule()->nAtoms()-1; iAtm++) 
+    *csvs_[2] << ", ";
+  *csvs_[2] << endl;
 
   // ORBITAL OCCUPATION
   auto NBT = ssPropagator_->basisset()->nBasis() * ssPropagator_->nTCS();

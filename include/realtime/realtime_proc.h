@@ -210,5 +210,9 @@ void RealTime<T>::addRecord(const long double currentTime) {
                              std::pow(rec.appliedfield[1],2.0) +
                              std::pow(rec.appliedfield[2],2.0) );
 
+  rec.mullPop = ssPropagator_->mullPop();
+  rec.lowPop  = ssPropagator_->lowPop();
+
+
   propInfo.push_back(rec);
 }

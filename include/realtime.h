@@ -72,6 +72,7 @@ struct PropInfo {
   std::array<double,4> dipole;
   std::array<double,4> appliedfield;
   std::vector<double> mullPop;
+  std::vector<double> lowPop;
   std::vector<double> orbitalOccA;
   std::vector<double> orbitalOccB;
 };
@@ -202,7 +203,7 @@ public:
   inline void writeCSVs() {
     this->writeDipoleCSV();
     this->writeAppliedFieldCSV();
-//  this->writeMullikenCSV();
+    this->writeMullikenCSV();
 //  this->writeOrbitalCSV();
   }
 
