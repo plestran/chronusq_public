@@ -44,7 +44,7 @@ void RealTime<T>::doPropagation() {
 
     // JJG alloc scratch for Magnus3
   //ComplexMatrix POSav1(NBT, NBT); 
-    ComplexMatrix FOSav1(NBT, NBT); 
+  //ComplexMatrix FOSav1(NBT, NBT); 
     ComplexMatrix FOSav2(NBT, NBT); 
     ComplexMatrix FOSav3(NBT, NBT); 
     ComplexMatrix FOSav4(NBT, NBT); 
@@ -114,26 +114,37 @@ void RealTime<T>::doPropagation() {
     // F(k) -> FO(k)
     ssPropagator_->orthoFock3();
 
-    if(currentStep == ExplicitMagnus2) {
+    // Copy Fock's over for EM2 / EM3
+    if(currentStep == ExplicitMagnus2 or currentStep == ExplicitMagnus3) {
       // Copy the orthonormal fock from ssPropagator to FOSav
       // FOSav(k) = FO(k)
       for(auto iOFock = 0; iOFock < FOSav_.size(); iOFock++){
         (*FOSav_[iOFock]) = (*ssPropagator_->fockOrtho()[iOFock]);
       }
+
     }
 
-    if (currentStep == ExplicitMagnus3) {
+    // Scale Fock's for EM3
+    if(currentStep == ExplicitMagnus3) {
+      for(auto iOFock = 0; iOFock < FOSav_.size(); iOFock++){
+        //(*FOSav_[iOFock]) *= 0.5;
+        (*ssPropagator_->fockOrtho()[iOFock]) *= 0.5;
+      }
+    }
+
 /*
+    if (currentStep == ExplicitMagnus3) {
       // Copy the orthonormal density from ssPropagator to POSav1
       // POSav1(k) = PO(k)
-      POSav1 = *ssPropagator_->onePDMOrthoScalar();
-*/
+      //POSav1 = *ssPropagator_->onePDMOrthoScalar();
+        
       // Copy the orthonormal fock from ssPropagator to FOSav1
       // FOSav1(k) = FO(k)
       FOSav1 = *ssPropagator_->fockOrtho()[0];
       // FO = 0.5 * FO 
       *ssPropagator_->fockOrtho()[0] *= dcomplex(0.5);
     }
+*/
 
     // Form the unitary propagation matrix
     // U**H(k) = exp(-i * dt * F(k))
@@ -183,7 +194,7 @@ void RealTime<T>::doPropagation() {
 
       // Form FOSav2 and FOSav3
       FOSav2 = *ssPropagator_->fockOrtho()[0];
-      FOSav3 = 0.25*(FOSav1 + FOSav2); 
+      FOSav3 = 0.25*((*FOSav_[0]) + FOSav2); 
      
       // update ssPropagator 
       *ssPropagator_->fockOrtho()[0] = FOSav3;
@@ -215,7 +226,7 @@ void RealTime<T>::doPropagation() {
 
       // Final fock update
       dcomplex h = -dcomplex(0,1)*stepSize_;
-      *ssPropagator_->fockOrtho()[0]  = (1/6.)*(FOSav1 + 4*FOSav4 + FOSav5);
+      *ssPropagator_->fockOrtho()[0]  = (1/6.)*((*FOSav_[0]) + 4*FOSav4 + FOSav5);
       *ssPropagator_->fockOrtho()[0] -= (h/3.)*(FOSav3*FOSav4 - FOSav4*FOSav3);
       *ssPropagator_->fockOrtho()[0] -= (h/12.)*(FOSav2*FOSav5 - FOSav5*FOSav2);
       *ssPropagator_->onePDMOrthoScalar() = *POSav_[0];
