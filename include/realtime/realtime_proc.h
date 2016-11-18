@@ -45,10 +45,10 @@ void RealTime<T>::doPropagation() {
     // JJG alloc scratch for Magnus3
   //ComplexMatrix POSav1(NBT, NBT); 
   //ComplexMatrix FOSav1(NBT, NBT); 
-    ComplexMatrix FOSav2(NBT, NBT); 
-    ComplexMatrix FOSav3(NBT, NBT); 
-    ComplexMatrix FOSav4(NBT, NBT); 
-    ComplexMatrix FOSav5(NBT, NBT); 
+  //ComplexMatrix FOSav2(NBT, NBT); 
+  //ComplexMatrix FOSav3(NBT, NBT); 
+  //ComplexMatrix FOSav4(NBT, NBT); 
+  //ComplexMatrix FOSav5(NBT, NBT); 
 
     if(iScheme_ == MMUT) {
       Start = (iStep == 0);
@@ -193,12 +193,29 @@ void RealTime<T>::doPropagation() {
       ssPropagator_->orthoFock3();
 
       // Form FOSav2 and FOSav3
-      FOSav2 = *ssPropagator_->fockOrtho()[0];
-      FOSav3 = 0.25*((*FOSav_[0]) + FOSav2); 
+    //FOSav2 = *ssPropagator_->fockOrtho()[0];
+      for(auto iOFock = 0; iOFock < FOSav_.size(); iOFock++){
+        (*FOSav2_[iOFock]) = (*ssPropagator_->fockOrtho()[iOFock]);
+      }
+      
+    //FOSav3 = 0.25*((*FOSav_[0]) + (*FOSav2_[0])); 
+      for(auto iOFock = 0; iOFock < FOSav_.size(); iOFock++){
+        FOSav3_[iOFock]->noalias() = 
+          0.25 * ((*FOSav_[iOFock]) + (*FOSav2_[iOFock]));
+      }
      
       // update ssPropagator 
-      *ssPropagator_->fockOrtho()[0] = FOSav3;
-      *ssPropagator_->onePDMOrthoScalar() = *POSav_[0];
+      //*ssPropagator_->fockOrtho()[0] = FOSav3;
+      for(auto iOFock = 0; iOFock < FOSav_.size(); iOFock++) {
+        ssPropagator_->fockOrtho()[iOFock]->noalias() = (*FOSav3_[iOFock]);
+      }
+
+      //*ssPropagator_->onePDMOrthoScalar() = *POSav_[0];
+        
+      // Copy POSav to PO
+      for(auto iODen = 0; iODen < POSav_.size(); iODen++)
+        (*ssPropagator_->onePDMOrtho()[iODen]) = (*POSav_[iODen]); 
+
       // Propagate and update Fock
       formUTrans();
       propDen();
@@ -208,11 +225,24 @@ void RealTime<T>::doPropagation() {
       ssPropagator_->orthoFock3();
 
       // Form FOSav4
-      FOSav4 = *ssPropagator_->fockOrtho()[0];
+      //FOSav4 = *ssPropagator_->fockOrtho()[0];
+      for(auto iOFock = 0; iOFock < FOSav_.size(); iOFock++){
+        (*FOSav4_[iOFock]) = (*ssPropagator_->fockOrtho()[iOFock]);
+      }
   
       //update ssPropagator 
-      *ssPropagator_->fockOrtho()[0] = FOSav2;
-      *ssPropagator_->onePDMOrthoScalar() = *POSav_[0];
+      //*ssPropagator_->fockOrtho()[0] = FOSav2;
+      //*ssPropagator_->fockOrtho()[0] = (*FOSav2_[0]);
+      for(auto iOFock = 0; iOFock < FOSav_.size(); iOFock++) {
+        ssPropagator_->fockOrtho()[iOFock]->noalias() = (*FOSav2_[iOFock]);
+      }
+
+      //*ssPropagator_->onePDMOrthoScalar() = *POSav_[0];
+        
+      // Copy POSav to PO
+      for(auto iODen = 0; iODen < POSav_.size(); iODen++)
+        (*ssPropagator_->onePDMOrtho()[iODen]) = (*POSav_[iODen]); 
+
       // Propagate and update Fock
       formUTrans();
       propDen();
@@ -222,14 +252,31 @@ void RealTime<T>::doPropagation() {
       ssPropagator_->orthoFock3();
 
       // Form FOSav5
-      FOSav5 = *ssPropagator_->fockOrtho()[0];
+      //FOSav5 = *ssPropagator_->fockOrtho()[0];
+      for(auto iOFock = 0; iOFock < FOSav_.size(); iOFock++){
+        (*FOSav5_[iOFock]) = (*ssPropagator_->fockOrtho()[iOFock]);
+      }
 
       // Final fock update
       dcomplex h = -dcomplex(0,1)*stepSize_;
-      *ssPropagator_->fockOrtho()[0]  = (1/6.)*((*FOSav_[0]) + 4*FOSav4 + FOSav5);
-      *ssPropagator_->fockOrtho()[0] -= (h/3.)*(FOSav3*FOSav4 - FOSav4*FOSav3);
-      *ssPropagator_->fockOrtho()[0] -= (h/12.)*(FOSav2*FOSav5 - FOSav5*FOSav2);
-      *ssPropagator_->onePDMOrthoScalar() = *POSav_[0];
+      //*ssPropagator_->fockOrtho()[0]  = 
+      //  (1/6.)*((*FOSav_[0]) + 4*(*FOSav4_[0]) + (*FOSav5_[0]));
+      for(auto iOFock = 0; iOFock < FOSav_.size(); iOFock++){
+        ssPropagator_->fockOrtho()[iOFock]->noalias() = (1./6.) * 
+          ((*FOSav_[iOFock]) + 4*(*FOSav4_[iOFock]) + (*FOSav5_[iOFock]));
+      }
+
+      *ssPropagator_->fockOrtho()[0] -= 
+        (h/3.)*( (*FOSav3_[0])*(*FOSav4_[0]) - (*FOSav4_[0])*(*FOSav3_[0]));
+
+      *ssPropagator_->fockOrtho()[0] -= 
+        (h/12.)*( (*FOSav2_[0])*(*FOSav5_[0]) - (*FOSav5_[0])*(*FOSav2_[0]));
+
+      //*ssPropagator_->onePDMOrthoScalar() = *POSav_[0];
+      // Copy POSav to PO
+      for(auto iODen = 0; iODen < POSav_.size(); iODen++)
+        (*ssPropagator_->onePDMOrtho()[iODen]) = (*POSav_[iODen]); 
+
       // Propagate and update Fock
       formUTrans();
       propDen();
