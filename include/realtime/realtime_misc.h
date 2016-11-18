@@ -6,6 +6,9 @@ void RealTime<T>::setIntScheme(const std::string &x){
   else if(!x.compare("EM2") or !x.compare("EXPLICIT MAGNUS 2") or
           !x.compare("EXPLICITMAGNUS2"))
     iScheme_ = ExpMagnus2;
+  else if(!x.compare("EM3") or !x.compare("EXPLICIT MAGNUS 3") or
+          !x.compare("EXPLICITMAGNUS3"))
+    iScheme_ = ExpMagnus3;
   else
     CErr(x + std::string(" is not a recognized integration scheme."),
      fileio_->out);
@@ -19,6 +22,9 @@ void RealTime<T>::setMMUTRstScheme(const std::string &x){
   else if(!x.compare("EM2") or !x.compare("EXPLICIT MAGNUS 2") or
           !x.compare("EXPLICITMAGNUS2"))
     iRstScheme_ = ExplicitMagnus2;
+  else if(!x.compare("EM3") or !x.compare("EXPLICIT MAGNUS 3") or
+          !x.compare("EXPLICITMAGNUS3"))
+    iRstScheme_ = ExplicitMagnus3;
   else
     CErr(x + std::string(" is not a recognized MMUT restart scheme."),
      fileio_->out);

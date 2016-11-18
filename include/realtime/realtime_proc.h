@@ -38,13 +38,10 @@ void RealTime<T>::doPropagation() {
 //if(this->tOff_ != 0 and (this->tOff_ - this->tOn_) < this->stepSize_){
 //  this->tOff_ = this->stepSize_; 
 //}
-  iScheme_ = ExpMagnus3;
   printRTHeader();
 
   for(auto iStep = 0ul; iStep <= maxSteps_; iStep++) {
 
-    //JJG forcing Magnus3
-    iScheme_ = ExpMagnus3;
     // JJG alloc scratch for Magnus3
   //ComplexMatrix POSav1(NBT, NBT); 
     ComplexMatrix FOSav1(NBT, NBT); 
