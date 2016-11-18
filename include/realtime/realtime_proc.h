@@ -24,6 +24,8 @@
 template <typename T>
 void RealTime<T>::doPropagation() {
 
+  auto NBT = ssPropagator_->nBasis() * ssPropagator_->nTCS();
+
   bool Start(false); // Start the MMUT iterations
   bool FinMM(false); // Wrap up the MMUT iterations
 
@@ -73,6 +75,16 @@ void RealTime<T>::doPropagation() {
     }
 */
 
+    //JJG forcing Magnus3
+    iScheme_ = ExpMagnus3;
+    // JJG alloc scratch for Magnus3
+    ComplexMatrix POSav1(NBT, NBT); 
+    ComplexMatrix FOSav1(NBT, NBT); 
+    ComplexMatrix FOSav2(NBT, NBT); 
+    ComplexMatrix FOSav3(NBT, NBT); 
+    ComplexMatrix FOSav4(NBT, NBT); 
+    ComplexMatrix FOSav5(NBT, NBT); 
+
     if(iScheme_ == MMUT) {
       Start = (iStep == 0);
       Start = Start or FinMM;
@@ -91,8 +103,9 @@ void RealTime<T>::doPropagation() {
         fileio_->out << "  *** Performing MMUT Restart ***" << endl;
     } else if(iScheme_ == ExpMagnus2) {
       currentStep = ExplicitMagnus2;
+    } else if(iScheme_ == ExpMagnus3) {
+      currentStep = ExplicitMagnus3;
     }
-
 
     if(currentStep == ModifiedMidpoint) {
 
@@ -144,6 +157,17 @@ void RealTime<T>::doPropagation() {
       }
     }
 
+    if (currentStep == ExplicitMagnus3) {
+      // Copy the orthonormal density from ssPropagator to POSav1
+      // POSav1(k) = PO(k)
+      POSav1 = *ssPropagator_->onePDMOrthoScalar();
+      // Copy the orthonormal fock from ssPropagator to FOSav1
+      // FOSav1(k) = FO(k)
+      FOSav1 = *ssPropagator_->fockOrtho()[0];
+      // FO = 0.5 * FO 
+      *ssPropagator_->fockOrtho()[0] *= dcomplex(0.5);
+    }
+
     // Form the unitary propagation matrix
     // U**H(k) = exp(-i * dt * F(k))
     formUTrans();
@@ -184,6 +208,57 @@ void RealTime<T>::doPropagation() {
       formUTrans();
       propDen();
       ssPropagator_->unOrthoDen3();
+    } else if(currentStep == ExplicitMagnus3) {
+      // Form and orthonormalize Fock at t + 0.5*dt using new density
+      formField(currentTime + 0.5*stepSize_);
+      ssPropagator_->formFock();
+      ssPropagator_->orthoFock3();
+
+      // Form FOSav2 and FOSav3
+      FOSav2 = *ssPropagator_->fockOrtho()[0];
+      FOSav3 = 0.25*(FOSav1 + FOSav2); 
+     
+      // update ssPropagator 
+      *ssPropagator_->fockOrtho()[0] = FOSav3;
+      *ssPropagator_->onePDMOrthoScalar() = POSav1;
+      // Propagate and update Fock
+      formUTrans();
+      propDen();
+      ssPropagator_->unOrthoDen3();
+      formField(currentTime + 0.5*stepSize_);
+      ssPropagator_->formFock();
+      ssPropagator_->orthoFock3();
+
+      // Form FOSav4
+      FOSav4 = *ssPropagator_->fockOrtho()[0];
+  
+      //update ssPropagator 
+      *ssPropagator_->fockOrtho()[0] = FOSav2;
+      *ssPropagator_->onePDMOrthoScalar() = POSav1;
+      // Propagate and update Fock
+      formUTrans();
+      propDen();
+      ssPropagator_->unOrthoDen3();
+      formField(currentTime + stepSize_);
+      ssPropagator_->formFock();
+      ssPropagator_->orthoFock3();
+
+      // Form FOSav5
+      FOSav5 = *ssPropagator_->fockOrtho()[0];
+
+      // Final fock update
+      dcomplex h = -dcomplex(0,1)*stepSize_;
+      *ssPropagator_->fockOrtho()[0]  = (1/6.)*(FOSav1 + 4*FOSav4 + FOSav5);
+      *ssPropagator_->fockOrtho()[0] -= (h/3.)*(FOSav3*FOSav4 - FOSav4*FOSav3);
+      *ssPropagator_->fockOrtho()[0] -= (h/12.)*(FOSav2*FOSav5 - FOSav5*FOSav2);
+      *ssPropagator_->onePDMOrthoScalar() = POSav1;
+      // Propagate and update Fock
+      formUTrans();
+      propDen();
+      ssPropagator_->unOrthoDen3();
+      //formField(currentTime + stepSize_);
+      //ssPropagator_->formFock();
+      //ssPropagator_->orthoFock3();
     }
 
     // Increment the current time
