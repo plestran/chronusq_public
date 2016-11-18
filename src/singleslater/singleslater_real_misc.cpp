@@ -164,6 +164,7 @@ void SingleSlater<double>::fixPhase(){
    }
 };
 
+/*
 template<>
 void SingleSlater<double>::backTransformMOs(){
   if(this->nTCS_ == 1) {
@@ -204,5 +205,6 @@ void SingleSlater<double>::backTransformMOs(){
     
   }
 };
+*/
 
 } // Namespace ChronusQ

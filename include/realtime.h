@@ -188,6 +188,9 @@ public:
   void propDen();
   void addRecord(const long double);
 
+  // Extra Properties
+  void orbPop(std::vector<double>&,std::vector<double>&);
+
   // Print Functions
   void printRTStep(const long double);
   void printRTHeader();
@@ -204,7 +207,7 @@ public:
     this->writeDipoleCSV();
     this->writeAppliedFieldCSV();
     this->writeMullikenCSV();
-//  this->writeOrbitalCSV();
+    this->writeOrbitalCSV();
   }
 
   inline void resetPropagation() {

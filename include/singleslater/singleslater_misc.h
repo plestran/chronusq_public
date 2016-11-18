@@ -318,3 +318,89 @@ void SingleSlater<T>::McWeeny(std::vector<TMap*> OD, int MAX){
 //prettyPrintSmart(cout,*OD[0],"After");
   
 } 
+
+template <typename T>
+void SingleSlater<T>::backTransformMOs(){
+  if(this->nTCS_ == 1) {
+    this->NBSqScratch_->noalias() = 
+      this->aointegrals_->ortho1_->template cast<T>() * (*this->moA_);
+    this->moA_->noalias() = *this->NBSqScratch_;
+
+    if(!this->isClosedShell) {
+      this->NBSqScratch_->noalias() = 
+        this->aointegrals_->ortho1_->template cast<T>() * (*this->moB_);
+      this->moB_->noalias() = *this->NBSqScratch_;
+    }
+  } else {
+
+    Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> >
+      MOA(this->moA_->data(),this->nBasis_,this->nTCS_*this->nBasis_,
+          Eigen::Stride<Dynamic,Dynamic>(this->nTCS_*this->nBasis_,2));
+    Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> >
+      MOB(this->moA_->data()+1,this->nBasis_,this->nTCS_*this->nBasis_,
+          Eigen::Stride<Dynamic,Dynamic>(this->nTCS_*this->nBasis_,2));
+
+    TMap SCRATCH1(this->memManager_->template malloc<T>(this->nBasis_*
+          this->nBasis_*this->nTCS_),this->nBasis_,this->nTCS_*this->nBasis_);
+    TMap SCRATCH2(this->memManager_->template malloc<T>(this->nBasis_*
+          this->nBasis_*this->nTCS_),this->nBasis_,this->nTCS_*this->nBasis_);
+
+    SCRATCH1 = MOA;
+    SCRATCH2.noalias() = 
+      this->aointegrals_->ortho1_->template cast<T>() * SCRATCH1;
+    MOA = SCRATCH2;
+
+    SCRATCH1 = MOB;
+    SCRATCH2.noalias() = 
+      this->aointegrals_->ortho1_->template cast<T>() * SCRATCH1;
+    MOB = SCRATCH2;
+
+    this->memManager_->free(SCRATCH1.data(),
+      this->nBasis_*this->nBasis_*this->nTCS_);
+    this->memManager_->free(SCRATCH2.data(),
+      this->nBasis_*this->nBasis_*this->nTCS_);
+  }
+}
+
+template <typename T>
+void SingleSlater<T>::transformOrthoMO(){
+  if(this->nTCS_ == 1) {
+    this->NBSqScratch_->noalias() = 
+      this->aointegrals_->ortho2_->template cast<T>() * (*this->moA_);
+    this->moA_->noalias() = *this->NBSqScratch_;
+
+    if(!this->isClosedShell) {
+      this->NBSqScratch_->noalias() = 
+        this->aointegrals_->ortho2_->template cast<T>() * (*this->moB_);
+      this->moB_->noalias() = *this->NBSqScratch_;
+    }
+  } else {
+
+    Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> >
+      MOA(this->moA_->data(),this->nBasis_,this->nTCS_*this->nBasis_,
+          Eigen::Stride<Dynamic,Dynamic>(this->nTCS_*this->nBasis_,2));
+    Eigen::Map<TMatrix,0,Eigen::Stride<Dynamic,Dynamic> >
+      MOB(this->moA_->data()+1,this->nBasis_,this->nTCS_*this->nBasis_,
+          Eigen::Stride<Dynamic,Dynamic>(this->nTCS_*this->nBasis_,2));
+
+    TMap SCRATCH1(this->memManager_->template malloc<T>(this->nBasis_*
+          this->nBasis_*this->nTCS_),this->nBasis_,this->nTCS_*this->nBasis_);
+    TMap SCRATCH2(this->memManager_->template malloc<T>(this->nBasis_*
+          this->nBasis_*this->nTCS_),this->nBasis_,this->nTCS_*this->nBasis_);
+
+    SCRATCH1 = MOA;
+    SCRATCH2.noalias() = 
+      this->aointegrals_->ortho2_->template cast<T>() * SCRATCH1;
+    MOA = SCRATCH2;
+
+    SCRATCH1 = MOB;
+    SCRATCH2.noalias() = 
+      this->aointegrals_->ortho2_->template cast<T>() * SCRATCH1;
+    MOB = SCRATCH2;
+
+    this->memManager_->free(SCRATCH1.data(),
+      this->nBasis_*this->nBasis_*this->nTCS_);
+    this->memManager_->free(SCRATCH2.data(),
+      this->nBasis_*this->nBasis_*this->nTCS_);
+  }
+}

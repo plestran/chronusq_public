@@ -194,6 +194,9 @@ void RealTime<T>::doPropagation() {
 
 template <typename T>
 void RealTime<T>::addRecord(const long double currentTime) {
+  auto NB  = ssPropagator_->basisset()->nBasis();
+  auto NBT = NB * ssPropagator_->nTCS();
+
   PropInfo rec;
   rec.timeStep  = currentTime;
   rec.energy    = ssPropagator_->totalEnergy();
@@ -213,6 +216,59 @@ void RealTime<T>::addRecord(const long double currentTime) {
   rec.mullPop = ssPropagator_->mullPop();
   rec.lowPop  = ssPropagator_->lowPop();
 
+  orbPop(rec.orbitalOccA,rec.orbitalOccB);
 
   propInfo.push_back(rec);
+}
+
+template <typename T>
+void RealTime<T>::orbPop(std::vector<double> &a, std::vector<double> &b){
+  auto NB  = ssPropagator_->basisset()->nBasis();
+  auto NBT = NB * ssPropagator_->nTCS();
+
+  a.resize(NBT);
+  if(ssPropagator_->nTCS() == 1 and !ssPropagator_->isClosedShell)
+    b.resize(NBT);
+
+  
+  ComplexMap S(NBTSqScratch_,NBT,NBT);
+  ComplexMap S2(NBTSqScratch2_,NBT,NBT);
+
+  // Scatter the orthonormal densities into the MO storage
+  if(ssPropagator_->nTCS() == 1 and ssPropagator_->isClosedShell)
+    (*ssPropagator_->moA()) = 0.5 * (*ssPropagator_->onePDMOrtho()[0]);
+  else if(ssPropagator_->nTCS() == 1 and !ssPropagator_->isClosedShell) {
+    (*ssPropagator_->moA()) = 
+      0.5 * ((*ssPropagator_->onePDMOrtho()[0]) + 
+             (*ssPropagator_->onePDMOrtho()[1]));
+    (*ssPropagator_->moB()) = 
+      0.5 * ((*ssPropagator_->onePDMOrtho()[0]) - 
+             (*ssPropagator_->onePDMOrtho()[1]));
+  } else {
+    std::vector<std::reference_wrapper<ComplexMap>> scattered;
+    int I = 0;
+    for(auto iF = ssPropagator_->onePDMOrtho().begin(); 
+        iF != ssPropagator_->onePDMOrtho().end(); iF++){
+      scattered.emplace_back(*(*iF));
+    }
+    Quantum<dcomplex>::spinGather(*ssPropagator_->moA(),scattered);
+  }
+
+  // S2 = C(0)**H * PO(t) * C(0)
+  S.noalias() = 
+    groundState_->moA()->template cast<dcomplex>().adjoint() *
+    (*ssPropagator_->moA());
+  S2.noalias() = S * groundState_->moA()->template cast<dcomplex>();
+
+  for(auto i = 0; i < NBT; i++) a[i] = std::real(S2(i,i));
+
+  if(ssPropagator_->nTCS() == 1 and !ssPropagator_->isClosedShell){
+    S.noalias() = 
+      groundState_->moB()->template cast<dcomplex>().adjoint() *
+      (*ssPropagator_->moB());
+    S2.noalias() = S * groundState_->moB()->template cast<dcomplex>();
+
+    for(auto i = 0; i < NBT; i++) b[i] = std::real(S2(i,i));
+  }
+  
 }

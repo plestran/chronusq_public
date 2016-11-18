@@ -769,9 +769,9 @@ public:
   void orthoFock3();
   void unOrthoDen3();
   SCFConvergence evalConver3();
-  void backTransformMOs3();
   void diagFock2();         ///< Diagonalize Fock Matrix
   void cpyAOtoOrthoDen();
+  void transformOrthoMO();
 
   void gatherOrthoFock();
   void gatherFock();

@@ -93,5 +93,7 @@ void RealTime<T>::alloc() {
       FOSav_.emplace_back(FOMxSav_.get());
     }
   }
+
+  groundState_->transformOrthoMO();
 }
 

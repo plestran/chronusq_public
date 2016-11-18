@@ -96,6 +96,7 @@ void SingleSlater<dcomplex>::fixPhase(){
   // FIXME: Do nothing for now
 };
 
+/*
 template<>
 void SingleSlater<dcomplex>::backTransformMOs(){
   if(this->nTCS_ == 1) {
@@ -147,4 +148,5 @@ void SingleSlater<dcomplex>::backTransformMOs(){
     
   }
 };
+*/
 } // Namespace ChronusQ
