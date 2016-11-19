@@ -220,6 +220,11 @@ public:
   // Extra Properties
   void orbPop(std::vector<double>&,std::vector<double>&);
 
+  // Misc functionality
+  void incoreHComm(dcomplex,std::vector<ComplexMap*>&,
+                   std::vector<ComplexMap*>&,
+                   std::vector<ComplexMap*>&);
+
   // Print Functions
   void printRTStep(const long double);
   void printRTHeader();

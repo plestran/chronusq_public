@@ -239,11 +239,30 @@ void RealTime<T>::doPropagation() {
           ((*FOSav_[iOFock]) + 4*(*FOSav4_[iOFock]) + (*FOSav5_[iOFock]));
       }
 
+/*
       *ssPropagator_->fockOrtho()[0] -= 
         (h/3.)*( (*FOSav3_[0])*(*FOSav4_[0]) - (*FOSav4_[0])*(*FOSav3_[0]));
 
       *ssPropagator_->fockOrtho()[0] -= 
         (h/12.)*( (*FOSav2_[0])*(*FOSav5_[0]) - (*FOSav5_[0])*(*FOSav2_[0]));
+*/
+
+      // Store [F3,F4] in F (not being used)
+      incoreHComm((-h/3.), ssPropagator_->fock(),FOSav3_,FOSav4_);
+
+      // Increment FO by F
+      for(auto iOFock = 0; iOFock < FOSav_.size(); iOFock++)
+        ssPropagator_->fockOrtho()[iOFock]->noalias() +=
+          (*ssPropagator_->fock()[iOFock]);
+        
+      // Store [F2,F5] in F (not being used)
+      incoreHComm((-h/12.),ssPropagator_->fock(),FOSav2_,FOSav5_);
+
+      // Increment FO by F
+      for(auto iOFock = 0; iOFock < FOSav_.size(); iOFock++)
+        ssPropagator_->fockOrtho()[iOFock]->noalias() +=
+          (*ssPropagator_->fock()[iOFock]);
+
 
       // Copy POSav to PO
       for(auto iODen = 0; iODen < POSav_.size(); iODen++)
@@ -341,3 +360,54 @@ void RealTime<T>::orbPop(std::vector<double> &a, std::vector<double> &b){
   }
   
 }
+
+template <typename T>
+void RealTime<T>::incoreHComm(dcomplex fact,
+  std::vector<ComplexMap*> &COMM, std::vector<ComplexMap*> &A, 
+  std::vector<ComplexMap*> &B) {
+
+  for( x : COMM) x->setZero();
+
+  // Scalar Part
+  // AB(S) = (A(S) * B(S) + A(k) * B(k))
+  for(auto i = 0; i < COMM.size(); i++)
+    COMM[0]->noalias() += (*A[i]) * (*B[i]);
+
+  
+  if(COMM.size() > 1) {
+    // Non cross product part
+    // AB(k) = (A(S) * B(k) + A(k) * B(S))
+    for(auto i = 1; i < COMM.size(); i++){
+      COMM[i]->noalias() += (*A[0]) * (*B[i]);
+      COMM[i]->noalias() += (*A[i]) * (*B[0]);
+    }
+  }
+
+  if(COMM.size() > 2) {
+    // Z Cross product part
+    // AB(z) += i * (A(x) * B(y) - A(y) * B(x))
+    COMM[3]->noalias() += dcomplex(0,1) * (*A[1]) * (*B[2]);
+    COMM[3]->noalias() -= dcomplex(0,1) * (*A[2]) * (*B[1]);
+
+    // X Cross product part
+    // AB(x) += i * (A(y) * B(z) - A(z) * B(y))
+    COMM[1]->noalias() += dcomplex(0,1) * (*A[2]) * (*B[3]);
+    COMM[1]->noalias() -= dcomplex(0,1) * (*A[3]) * (*B[2]);
+
+    // Y Cross product part
+    // AB(y) += i * (A(z) * B(x) - A(x) * B(z))
+    COMM[2]->noalias() += dcomplex(0,1) * (*A[3]) * (*B[1]);
+    COMM[2]->noalias() -= dcomplex(0,1) * (*A[1]) * (*B[3]);
+  }
+
+
+  auto NB  = ssPropagator_->basisset()->nBasis();
+  ComplexMap S(NBTSqScratch_,NB,NB);
+
+  // Because A and B are hermetian, the commutator
+  // fact * [A,B] = fact * ( AB - (AB)**H )
+  for(auto i = 0; i < COMM.size(); i++){
+    S.noalias()        = (*COMM[i]);
+    COMM[i]->noalias() = 0.5 * fact * ( S - S.adjoint() );   
+  }
+};
