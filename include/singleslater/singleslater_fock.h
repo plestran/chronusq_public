@@ -200,7 +200,6 @@ void SingleSlater<T>::formFock(bool increment){
 */
 
     if(!increment) {
-/*
       this->fockScalar_->setZero();
 
       if(this->nTCS_ == 2 or !this->isClosedShell)
@@ -210,7 +209,6 @@ void SingleSlater<T>::formFock(bool increment){
         this->fockMy_->setZero();
         this->fockMx_->setZero();
       }
-*/
 
       auto AddHStart = std::chrono::high_resolution_clock::now();
       (*this->fockScalar_) = this->aointegrals_->coreH_->template cast<T>();
