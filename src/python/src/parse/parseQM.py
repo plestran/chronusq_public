@@ -143,9 +143,9 @@ def handleReference(workers,settings):
 def parseRT(workers,secDict):
 
 
-#  if workers["CQSingleSlater"].nTCS() == 2:
-#    msg = 'Two-Component Real-Time Simulations NYI'
-#    CErrMsg(workers['CQFileIO'],str(msg))
+  if workers["CQSingleSlater"].nTCS() == 2:
+    msg = 'Two-Component Real-Time Simulations NYI'
+    CErrMsg(workers['CQFileIO'],str(msg))
 
   ref = secDict['QM']['REFERENCE']
   ref = ref.split()
