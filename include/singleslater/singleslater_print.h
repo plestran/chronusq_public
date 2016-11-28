@@ -550,7 +550,7 @@ void SingleSlater<T>::printSCFResults(){
 
     for(auto e = 0 ; e !=  this->epsB_->size(); ++e){
       if(e == 0) this->fileio_->out << "Occupied:" << endl;
-      else if(e == no) this->fileio_->out << endl << "Unoccupied:" << endl;
+      else if(e == this->nOB_) this->fileio_->out << endl << "Unoccupied:" << endl;
       this->fileio_->out << std::setw(13) << std::scientific 
                          << std::setprecision(4) <<
                           (*this->epsB_)(e);
