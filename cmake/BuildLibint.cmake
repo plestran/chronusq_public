@@ -30,7 +30,7 @@ ExternalProject_Add(libint
     CXX=${CMAKE_CXX_COMPILER} 
     CXXFLAGS=${CMAKE_CXX_FLAGS} 
     --enable-shared
-  BUILD_COMMAND make -j8
+  BUILD_COMMAND make -j2
   BUILD_IN_SOURCE 1
   INSTALL_COMMAND make install
 )
