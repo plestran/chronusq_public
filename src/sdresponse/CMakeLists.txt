@@ -31,3 +31,6 @@ target_link_libraries(sdresponse LINK_PUBLIC mointegrals)
 target_link_libraries(sdresponse LINK_PUBLIC ${EXTERNAL_CQ_DEPS})
 endif()
 
+# Dependencies
+add_dependencies(sdresponse ${EXTERNAL_CQ_PROJECTS})
+

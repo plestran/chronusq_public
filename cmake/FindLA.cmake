@@ -20,11 +20,33 @@
 # Contact the Developers:
 #   E-Mail: xsli@uw.edu
 #
-add_library(dft SHARED slater.cpp vwn3.cpp vwn5.cpp b88.cpp lyp.cpp pbe.cpp)
 
-if(APPLE)
-target_link_libraries(singleslater LINK_PUBLIC ${EXTERNAL_CQ_DEPS})
+# Optionally build BLAS and LAPACK
+if(BUILD_LA)
+  ExternalProject_Add(lapack
+    PREFIX ${PROJECT_BINARY_DIR}/deps/lapack
+    URL "http://www.netlib.org/lapack/lapack-3.5.0.tgz"
+    CMAKE_ARGS -DCMAKE_Fortran_COMPILER=${CMAKE_Fortran_COMPILER} 
+               -DCMAKE_Fortran_FLAGS='-fPIC'
+               -DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR}/deps
+  )
+
+
+  set(LOCAL_BLAS   ${PROJECT_BINARY_DIR}/deps/lib/libblas.a  )
+  set(LOCAL_LAPACK ${PROJECT_BINARY_DIR}/deps/lib/liblapack.a)
+
+  set(LA_LINK ${LOCAL_LAPACK} ${LOCAL_BLAS} gfortran)
+else()
+
+# Find LAPACK / BLAS
+  if(CQ_ENABLE_ATLAS)
+    set(BLA_VENDOR ATLAS)
+  endif(CQ_ENABLE_ATLAS)
+
+  find_package(BLAS REQUIRED)  
+  find_package(LAPACK REQUIRED)
+  set(LA_LINK ${LAPACK_LINKER_FLAGS} ${LAPACK_LIBRARIES})
+  set(LA_LINK ${LA_LINK} ${BLAS_LINKER_FLAGS} ${BLAS_LIBRARIES})
 endif()
+message(STATUS "Will using the following Link Line for Linear Algebra Libs: ${LA_LINK}")
 
-# Dependencies
-add_dependencies(dft ${EXTERNAL_CQ_PROJECTS})

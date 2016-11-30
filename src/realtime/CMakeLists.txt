@@ -21,3 +21,5 @@
 #   E-Mail: xsli@uw.edu
 #
 add_library(realtime SHARED realtime_impl.cpp)
+# Dependencies
+add_dependencies(realtime ${EXTERNAL_CQ_PROJECTS})

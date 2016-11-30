@@ -20,11 +20,18 @@
 # Contact the Developers:
 #   E-Mail: xsli@uw.edu
 #
-add_library(dft SHARED slater.cpp vwn3.cpp vwn5.cpp b88.cpp lyp.cpp pbe.cpp)
 
-if(APPLE)
-target_link_libraries(singleslater LINK_PUBLIC ${EXTERNAL_CQ_DEPS})
+# Build or Find Libint
+if(BUILD_LIBINT)
+  message(STATUS "Opting to build Libint2 by CMake")
+  include(BuildLibint)
+else()
+  message(STATUS "Opting to find a pre-compiled Libint")
+  include(FindLibint)
 endif()
 
-# Dependencies
-add_dependencies(dft ${EXTERNAL_CQ_PROJECTS})
+# Append to Include / Link dirs
+link_directories("${LIBINT2_LIBRARY_DIRS}")
+include_directories("${LIBINT2_INCLUDE_DIRS}")
+message(STATUS "Libint2 library will be located at ${LIBINT2_LIBRARY_DIRS}")
+message(STATUS "Libint2 headers will be located at ${LIBINT2_INCLUDE_DIRS}")

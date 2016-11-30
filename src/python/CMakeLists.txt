@@ -63,6 +63,9 @@ target_link_libraries(pythonapi LINK_PUBLIC dft)
 target_link_libraries(pythonapi LINK_PUBLIC fileio)
 target_link_libraries(pythonapi LINK_PUBLIC ${EXTERNAL_CQ_DEPS})
 
+# Dependencies
+add_dependencies(pythonapi ${EXTERNAL_CQ_PROJECTS})
+
 #target_link_libraries(pythonapi LINK_PUBLIC 
 #basisset 
 #classtools

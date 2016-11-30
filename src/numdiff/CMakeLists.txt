@@ -40,3 +40,6 @@
 #target_link_libraries(numdiffTest LINK_PUBLIC ${EXTERNAL_CQ_DEPS})
 
 add_library(numdiff numdiff_util.cpp)
+
+# Dependencies
+add_dependencies(numdiff ${EXTERNAL_CQ_PROJECTS})

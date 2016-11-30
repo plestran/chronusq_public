@@ -31,3 +31,5 @@ target_link_libraries(quasinewton LINK_PUBLIC ${EXTERNAL_CQ_DEPS})
 endif()
 
 
+# Dependencies
+add_dependencies(quasinewton ${EXTERNAL_CQ_PROJECTS})

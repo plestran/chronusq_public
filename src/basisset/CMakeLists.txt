@@ -29,3 +29,5 @@ target_link_libraries(basisset LINK_PUBLIC ${EXTERNAL_CQ_DEPS})
 endif()
 
 
+# Dependencies
+add_dependencies(basisset ${EXTERNAL_CQ_PROJECTS})

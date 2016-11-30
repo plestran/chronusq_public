@@ -26,3 +26,5 @@ target_link_libraries(controls LINK_PUBLIC tools)
 target_link_libraries(controls LINK_PUBLIC ${EXTERNAL_CQ_DEPS})
 endif()
 
+# Dependencies
+add_dependencies(controls ${EXTERNAL_CQ_PROJECTS})

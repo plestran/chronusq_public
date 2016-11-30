@@ -26,3 +26,5 @@ target_link_libraries(cerr LINK_PUBLIC ${EXTERNAL_CQ_DEPS})
 target_link_libraries(cerr LINK_PUBLIC tools)
 endif()
 
+# Dependencies
+add_dependencies(cerr ${EXTERNAL_CQ_PROJECTS})

@@ -31,3 +31,5 @@ add_library(mointegrals SHARED
 mointegrals_impl.cpp
 )
 
+# Dependencies
+add_dependencies(mointegrals ${EXTERNAL_CQ_PROJECTS})

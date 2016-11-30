@@ -28,3 +28,5 @@ target_link_libraries(realtime LINK_PUBLIC singleslater)
 target_link_libraries(realtime LINK_PUBLIC ${EXTERNAL_CQ_DEPS})
 endif()
 
+# Dependencies
+add_dependencies(realtime ${EXTERNAL_CQ_PROJECTS})

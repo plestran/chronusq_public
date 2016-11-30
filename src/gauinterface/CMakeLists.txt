@@ -21,3 +21,5 @@
 #   E-Mail: xsli@uw.edu
 #
 add_library(gauinterface SHARED gaumatel.cpp gaujob.cpp)
+# Dependencies
+add_dependencies(gauinterface ${EXTERNAL_CQ_PROJECTS})

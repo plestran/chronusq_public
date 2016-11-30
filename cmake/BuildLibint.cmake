@@ -20,11 +20,29 @@
 # Contact the Developers:
 #   E-Mail: xsli@uw.edu
 #
-add_library(dft SHARED slater.cpp vwn3.cpp vwn5.cpp b88.cpp lyp.cpp pbe.cpp)
+
+# Add an external project to build libint in source
+ExternalProject_Add(libint
+  PREFIX ${PROJECT_BINARY_DIR}/deps/libint
+  URL "${PROJECT_SOURCE_DIR}/deps/src/libint-2.2.0-alpha.tgz"
+  CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/deps/libint/src/libint/configure 
+    --prefix=${PROJECT_BINARY_DIR}/deps 
+    CXX=${CMAKE_CXX_COMPILER} 
+    CXXFLAGS=${CMAKE_CXX_FLAGS} 
+    --enable-shared
+  BUILD_COMMAND make -j8
+  BUILD_IN_SOURCE 1
+  INSTALL_COMMAND make install
+)
+
+# Manually set the variables that would normally get set by PkgConfig
+set(LIBINT2_LIBRARY_DIRS ${PROJECT_BINARY_DIR}/deps/lib)
+set(LIBINT2_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/deps/include)
+set(LIBINT2_INCLUDE_DIRS ${LIBINT2_INCLUDE_DIRS} ${PROJECT_BINARY_DIR}/deps/include/libint2)
 
 if(APPLE)
-target_link_libraries(singleslater LINK_PUBLIC ${EXTERNAL_CQ_DEPS})
+  set(LIBINT2_LIBRARIES ${LIBINT2_LIBRARY_DIRS}/libint2.dylib)
+else()
+  set(LIBINT2_LIBRARIES ${LIBINT2_LIBRARY_DIRS}/libint2.so)
 endif()
 
-# Dependencies
-add_dependencies(dft ${EXTERNAL_CQ_PROJECTS})

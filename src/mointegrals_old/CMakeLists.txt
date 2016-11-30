@@ -25,3 +25,5 @@ if(APPLE)
 target_link_libraries(mointegrals LINK_PUBLIC ${EXTERNAL_CQ_DEPS})
 endif()
 
+# Dependencies
+add_dependencies(mointegrals ${EXTERNAL_CQ_PROJECTS})

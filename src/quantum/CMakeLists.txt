@@ -29,3 +29,6 @@ target_link_libraries(quantum LINK_PUBLIC singleslater)
 target_link_libraries(quantum LINK_PUBLIC ${EXTERNAL_CQ_DEPS})
 endif()
 
+# Dependencies
+add_dependencies(quantum ${EXTERNAL_CQ_PROJECTS})
+
