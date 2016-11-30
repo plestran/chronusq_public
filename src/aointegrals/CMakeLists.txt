@@ -22,16 +22,8 @@
 #
 if(USE_LIBINT)
   set(AOINTS_SOURCE 
-     aointegrals.cpp 
-     aointegrals_builders.cpp 
-#    aointegrals_real_contract_uniquegen.cpp 
-#    aointegrals_complex_contract_uniquegen.cpp 
-#    aointegrals_real_contract_percontract.cpp 
-#    aointegrals_real_contract_direct.cpp 
-#    aointegrals_complex_contract_percontract.cpp 
-#    aointegrals_complex_contract_direct.cpp aointegrals_real_contract_N4.cpp 
-#    aointegrals_real_contract_DF.cpp aointegrals_complex_contract_N4.cpp 
-#    aointegrals_complex_contract_DF.cpp aointegrals_dkh.cpp 
+    aointegrals.cpp 
+    aointegrals_builders.cpp 
     aointegrals_denfit.cpp 
     aointegrals_impl.cpp 
     aointegrals_util.cpp
@@ -50,3 +42,5 @@ target_link_libraries(aointegrals LINK_PUBLIC grid)
 target_link_libraries(aointegrals LINK_PUBLIC ${EXTERNAL_CQ_DEPS})
 endif()
 
+# Dependencies
+add_dependencies(aointegrals ${EXTERNAL_CQ_PROJECTS})

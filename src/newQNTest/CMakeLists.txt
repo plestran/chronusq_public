@@ -38,3 +38,5 @@ target_link_libraries(QNTest LINK_PUBLIC qn)
 target_link_libraries(QNTest LINK_PUBLIC fileio)
 target_link_libraries(QNTest LINK_PUBLIC ${EXTERNAL_CQ_DEPS})
 
+# Dependencies
+add_dependencies(QNTest ${EXTERNAL_CQ_PROJECTS})

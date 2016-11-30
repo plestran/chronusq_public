@@ -42,3 +42,5 @@ target_link_libraries(RESPHack LINK_PUBLIC qn)
 target_link_libraries(RESPHack LINK_PUBLIC worker)
 target_link_libraries(RESPHack LINK_PUBLIC ${EXTERNAL_CQ_DEPS})
 
+# Dependencies
+add_dependencies(RESPHack ${EXTERNAL_CQ_PROJECTS})

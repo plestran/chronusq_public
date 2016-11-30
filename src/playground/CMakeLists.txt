@@ -46,6 +46,9 @@ target_link_libraries(playground LINK_PUBLIC dft)
 target_link_libraries(playground LINK_PUBLIC fileio)
 target_link_libraries(playground LINK_PUBLIC ${EXTERNAL_CQ_DEPS})
 
+# Dependencies
+add_dependencies(playground ${EXTERNAL_CQ_PROJECTS})
+
 #add_executable(XAStest XAStest.cxx)
 #target_link_libraries(XAStest LINK_PUBLIC classtools)
 #target_link_libraries(XAStest LINK_PUBLIC quantum)

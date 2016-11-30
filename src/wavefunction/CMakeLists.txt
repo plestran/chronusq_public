@@ -21,7 +21,8 @@
 #   E-Mail: xsli@uw.edu
 #
 add_library(wavefunction SHARED 
-#  wavefunction_copy.cpp 
   wavefunction_impl.cpp)
 
 
+# Dependencies
+add_dependencies(wavefunction ${EXTERNAL_CQ_PROJECTS})

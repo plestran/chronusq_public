@@ -27,3 +27,6 @@ target_link_libraries(molecule LINK_PUBLIC cerr)
 target_link_libraries(molecule LINK_PUBLIC ${EXTERNAL_CQ_DEPS})
 endif()
 
+# Dependencies
+add_dependencies(molecule ${EXTERNAL_CQ_PROJECTS})
+

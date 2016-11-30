@@ -29,3 +29,6 @@ target_link_libraries(response LINK_PUBLIC aointegrals)
 target_link_libraries(response LINK_PUBLIC qn)
 target_link_libraries(response LINK_PUBLIC ${EXTERNAL_CQ_DEPS})
 endif()
+
+# Dependencies
+add_dependencies(response ${EXTERNAL_CQ_PROJECTS})

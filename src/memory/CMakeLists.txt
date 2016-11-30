@@ -21,3 +21,6 @@
 #   E-Mail: xsli@uw.edu
 #
 add_library(memory SHARED memory.cpp)
+
+# Dependencies
+add_dependencies(memory ${EXTERNAL_CQ_PROJECTS})

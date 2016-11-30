@@ -53,3 +53,5 @@ target_link_libraries(grid2 LINK_PUBLIC cerr)
 target_link_libraries(grid2 LINK_PUBLIC ${EXTERNAL_CQ_DEPS})
 endif()
 
+# Dependencies
+add_dependencies(grid2 ${EXTERNAL_CQ_PROJECTS})

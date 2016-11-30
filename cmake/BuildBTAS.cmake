@@ -20,11 +20,17 @@
 # Contact the Developers:
 #   E-Mail: xsli@uw.edu
 #
-add_library(dft SHARED slater.cpp vwn3.cpp vwn5.cpp b88.cpp lyp.cpp pbe.cpp)
 
-if(APPLE)
-target_link_libraries(singleslater LINK_PUBLIC ${EXTERNAL_CQ_DEPS})
-endif()
+# Pull the most recent BTAS from GitHub
+ExternalProject_Add(btas
+  PREFIX ${PROJECT_BINARY_DIR}/deps/btas
+  GIT_REPOSITORY https://github.com/BTAS/BTAS.git
+  UPDATE_COMMAND echo 'Skipping BTAS Update'
+  PATCH_COMMAND echo 'Skipping BTAS Patch'
+  CONFIGURE_COMMAND echo 'Skipping BTAS Configure'
+  BUILD_COMMAND echo 'Skipping BTAS Build'
+  INSTALL_COMMAND ${RSYNC_EXECUTABLE} -r 
+    ${PROJECT_BINARY_DIR}/deps/btas/src/btas/btas 
+    ${PROJECT_BINARY_DIR}/deps/include
+)
 
-# Dependencies
-add_dependencies(dft ${EXTERNAL_CQ_PROJECTS})

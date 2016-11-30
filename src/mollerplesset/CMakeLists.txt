@@ -27,4 +27,6 @@ target_link_libraries(mollerplesset LINK_PUBLIC mointegrals)
 target_link_libraries(mollerplesset LINK_PUBLIC ${EXTERNAL_CQ_DEPS}) 
 endif()
 
+# Dependencies
+add_dependencies(mollerplesset ${EXTERNAL_CQ_PROJECTS})
 

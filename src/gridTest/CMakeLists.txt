@@ -30,3 +30,6 @@ target_link_libraries(GRIDTest PUBLIC basisset)
 target_link_libraries(GRIDTest PUBLIC response)
 target_link_libraries(GRIDTest PUBLIC fileio)
 target_link_libraries(GRIDTest PUBLIC ${EXTERNAL_CQ_DEPS})
+
+# Dependencies
+add_dependencies(GRIDTest ${EXTERNAL_CQ_PROJECTS})

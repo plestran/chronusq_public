@@ -45,3 +45,6 @@ target_link_libraries(gentests LINK_PUBLIC qn)
 target_link_libraries(gentests LINK_PUBLIC dft)
 target_link_libraries(gentests LINK_PUBLIC fileio)
 target_link_libraries(gentests LINK_PUBLIC ${EXTERNAL_CQ_DEPS})
+
+# Dependencies
+add_dependencies(gentests ${EXTERNAL_CQ_PROJECTS})

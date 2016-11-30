@@ -43,7 +43,7 @@ void SingleSlater<T>::initSCFMem3(){
   this->initSCFPtr();
   this->initSCFFiles();
 
-  auto NSQ = this->nBasis_ * this->nBasis_; 
+  auto NSQ = this->nTCS_ * this->nTCS_ * this->nBasis_ * this->nBasis_; 
 
 
   if(this->Ref_ == CUHF) {

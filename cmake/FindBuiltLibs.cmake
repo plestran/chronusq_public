@@ -20,11 +20,15 @@
 # Contact the Developers:
 #   E-Mail: xsli@uw.edu
 #
-add_library(dft SHARED slater.cpp vwn3.cpp vwn5.cpp b88.cpp lyp.cpp pbe.cpp)
 
-if(APPLE)
-target_link_libraries(singleslater LINK_PUBLIC ${EXTERNAL_CQ_DEPS})
+# Using PKGCONFIG to find various libs (Libint, LibXC)
+set( ENV{PKG_CONFIG_PATH} "${PROJECT_SOURCE_DIR}/deps/lib/pkgconfig:$ENV{PKG_CONFIG_PATH}")
+find_package(PkgConfig)
+
+# Deal with the Libint build / find procedure
+include(HandleLibint)
+
+# Optionally Find LibXC
+if(CQ_ENABLE_LIBXC)
+  include(FindLibXC)
 endif()
-
-# Dependencies
-add_dependencies(dft ${EXTERNAL_CQ_PROJECTS})

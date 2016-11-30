@@ -27,6 +27,7 @@ cmake_minimum_required(VERSION 3.0)
 project(ChronusQ CXX C)
 set(ChronusQ_VERSION_MAJOR BETA2)
 set(ChronusQ_VERSION_MINOR 1)
+set(ChronusQ_VERSION_PATCH 1)
 
 # Get Git revision hash
 if(EXISTS ${PROJECT_SOURCE_DIR}/.git)
@@ -118,21 +119,10 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffast-math")
 
 include(ExternalProject)
 
-# Build Needed Parts of Boost
-ExternalProject_Add(boost
-  PREFIX ${PROJECT_BINARY_DIR}/deps/boost
-  URL "${PROJECT_SOURCE_DIR}/deps/src/boost_1_59_0.tar.gz"
-  CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/deps/boost/src/boost/bootstrap.sh
-  BUILD_COMMAND ${PROJECT_BINARY_DIR}/deps/boost/src/boost/b2
-    --prefix=${PROJECT_BINARY_DIR}/deps 
-    --with-python 
-    --with-system 
-    --with-math
-    --ignore-site-config cxxflags=${CMAKE_CXX_FLAGS} 
-    install
-  BUILD_IN_SOURCE 1
-  INSTALL_COMMAND echo "Boost Build Sucess!"
-)
+# Boost and BTAS Always built
+include(BuildBoost)
+include(BuildBTAS)
+
 
 # More compile flags that Boost throws a fit about 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
@@ -144,115 +134,21 @@ else()
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif()
 
-if(APPLE)
-  set(Boost_LIBRARIES ${PROJECT_BINARY_DIR}/deps/lib/libboost_python.dylib ${PROJECT_BINARY_DIR}/deps/lib/libboost_system.dylib)
-else()
-  set(Boost_LIBRARIES 
-      ${PROJECT_BINARY_DIR}/deps/lib/libboost_python.so 
-      ${PROJECT_BINARY_DIR}/deps/lib/libboost_system.so
-      ${PROJECT_BINARY_DIR}/deps/lib/libboost_math_tr1.so
-      ${PROJECT_BINARY_DIR}/deps/lib/libboost_math_tr1f.so
-      ${PROJECT_BINARY_DIR}/deps/lib/libboost_math_tr1l.so
-      ${PROJECT_BINARY_DIR}/deps/lib/libboost_math_c99.so
-      ${PROJECT_BINARY_DIR}/deps/lib/libboost_math_c99f.so
-      ${PROJECT_BINARY_DIR}/deps/lib/libboost_math_c99l.so)
-endif()
-
-ExternalProject_Add(btas
-  PREFIX ${PROJECT_BINARY_DIR}/deps/btas
-  GIT_REPOSITORY https://github.com/BTAS/BTAS.git
-  UPDATE_COMMAND echo 'Skipping BTAS Update'
-  PATCH_COMMAND echo 'Skipping BTAS Patch'
-  CONFIGURE_COMMAND echo 'Skipping BTAS Configure'
-  BUILD_COMMAND echo 'Skipping BTAS Build'
-  INSTALL_COMMAND ${RSYNC_EXECUTABLE} -r 
-    ${PROJECT_BINARY_DIR}/deps/btas/src/btas/btas 
-    ${PROJECT_BINARY_DIR}/deps/include
-)
-
 include_directories("${PROJECT_BINARY_DIR}/deps/include")
 link_directories("${PROJECT_BINARY_DIR}/deps/lib")
 
-# Set up Libint environment
-#if(USE_LIBINT)
-#  if(BUILD_LIBINT)
-#    ExternalProject_Add(libint
-#      PREFIX ${PROJECT_BINARY_DIR}/deps/libint
-#      URL "${PROJECT_SOURCE_DIR}/deps/src/libint-2.2.0-alpha.tgz"
-#      CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/deps/libint/src/libint/configure 
-#        --prefix=${PROJECT_BINARY_DIR}/deps 
-#        CXX=${CMAKE_CXX_COMPILER} 
-#        CXXFLAGS=${CMAKE_CXX_FLAGS} 
-#        --enable-shared
-#      BUILD_COMMAND make -j2
-#      BUILD_IN_SOURCE 1
-#      INSTALL_COMMAND make install
-#    )
-#    if(APPLE)
-#      set(LIBINT_LIB ${PROJECT_BINARY_DIR}/deps/lib/libint2.dylib)
-#    else()
-#      set(LIBINT_LIB ${PROJECT_BINARY_DIR}/deps/lib/libint2.so) 
-#    endif()
-#    include_directories("${PROJECT_BINARY_DIR}/deps/include")
-#    include_directories("${PROJECT_BINARY_DIR}/deps/include/libint2")
-#  else()
-#    find_library(LIBINT_LIB int2 ${PROJECT_SOURCE_DIR}/deps/lib)
-#    include_directories("${PROJECT_SOURCE_DIR}/deps/include")
-#    include_directories("${PROJECT_SOURCE_DIR}/deps/include/libint2")
-#  endif(BUILD_LIBINT)
-#endif(USE_LIBINT)
 
-# To find Libint and LibXC
-set( ENV{PKG_CONFIG_PATH} "${PROJECT_SOURCE_DIR}/deps/lib/pkgconfig:$ENV{PKG_CONFIG_PATH}")
-message(STATUS ${PROJECT_SOURCE_DIR})
-message(STATUS $ENV{PKG_CONFIG_PATH})
-
-find_package(PkgConfig)
-
-# Find Libint
-pkg_check_modules(LIBINT2 libint2)
-link_directories("${LIBINT2_LIBRARY_DIRS}")
-include_directories("${LIBINT2_INCLUDE_DIRS}")
-message(STATUS "${LIBINT2_LIBRARY_DIRS}")
-message(STATUS "${LIBINT2_INCLUDE_DIRS}")
-
-if(CQ_ENABLE_LIBXC)
-  pkg_check_modules(LIBXC libxc)
-  link_directories("${LIBXC_LIBRARY_DIRS}")
-endif()
-
-
-# Optinally build BLAS and LAPACK
-
-if(BUILD_LA)
-  ExternalProject_Add(lapack
-    PREFIX ${PROJECT_BINARY_DIR}/deps/lapack
-    URL "http://www.netlib.org/lapack/lapack-3.5.0.tgz"
-    CMAKE_ARGS -DCMAKE_Fortran_COMPILER=${CMAKE_Fortran_COMPILER} 
-               -DCMAKE_Fortran_FLAGS='-fPIC'
-               -DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR}/deps
-  )
-
-
-  set(LOCAL_BLAS   ${PROJECT_BINARY_DIR}/deps/lib/libblas.a  )
-  set(LOCAL_LAPACK ${PROJECT_BINARY_DIR}/deps/lib/liblapack.a)
-
-  set(LA_LINK ${LOCAL_LAPACK} ${LOCAL_BLAS} gfortran)
-else()
-  if(CQ_ENABLE_ATLAS)
-    set(BLA_VENDOR ATLAS)
-  endif(CQ_ENABLE_ATLAS)
-
-  find_package(BLAS REQUIRED)  
-  find_package(LAPACK REQUIRED)
-  set(LA_LINK ${LAPACK_LINKER_FLAGS} ${LAPACK_LIBRARIES})
-  set(LA_LINK ${LA_LINK} ${BLAS_LINKER_FLAGS} ${BLAS_LIBRARIES})
-endif()
-message(STATUS "Will using the following Link Line for Linear Algebra Libs: ${LA_LINK}")
+include(FindBuiltLibs)
+include(FindLA)
 
 set(EXTERNAL_CQ_DEPS ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${LA_LINK} 
   ${LIBINT2_LIBRARIES} ${LIBXC_LIBRARIES} m ${OpenMP_CXX_FLAGS} 
   ${HDF5_CXX_LIBRARIES})
+
+set(EXTERNAL_CQ_PROJECTS boost btas)
+if(BUILD_LIBINT)
+  set(EXTERNAL_CQ_PROJECTS ${EXTERNAL_CQ_PROJECTS} libint)
+endif()
 
 if(CQ_ENABLE_MPI)
   set(EXTERNAL_CQ_DEPS ${EXTERNAL_CQ_DEPS} ${MPI_CXX_LIBRARIES})

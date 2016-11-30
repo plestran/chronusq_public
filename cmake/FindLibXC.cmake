@@ -20,11 +20,7 @@
 # Contact the Developers:
 #   E-Mail: xsli@uw.edu
 #
-add_library(dft SHARED slater.cpp vwn3.cpp vwn5.cpp b88.cpp lyp.cpp pbe.cpp)
+find_package(PkgConfig)
+pkg_check_modules(LIBXC libxc)
+link_directories("${LIBXC_LIBRARY_DIRS}")
 
-if(APPLE)
-target_link_libraries(singleslater LINK_PUBLIC ${EXTERNAL_CQ_DEPS})
-endif()
-
-# Dependencies
-add_dependencies(dft ${EXTERNAL_CQ_PROJECTS})
