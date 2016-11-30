@@ -27,6 +27,7 @@ cmake_minimum_required(VERSION 3.0)
 project(ChronusQ CXX C)
 set(ChronusQ_VERSION_MAJOR BETA2)
 set(ChronusQ_VERSION_MINOR 1)
+set(ChronusQ_VERSION_PATCH 1)
 
 # Get Git revision hash
 if(EXISTS ${PROJECT_SOURCE_DIR}/.git)

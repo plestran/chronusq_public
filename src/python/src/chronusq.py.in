@@ -61,7 +61,7 @@ class MetaData:
 def runCQ(ifname,ofname):
   authorfname = '@AUTHOR_PATH@'
   gitrev = '@CQ_GIT_VERSION@'
-  progrev = '@ChronusQ_VERSION_MAJOR@.@ChronusQ_VERSION_MINOR@'
+  progrev = '@ChronusQ_VERSION_MAJOR@.@ChronusQ_VERSION_MINOR@.@ChronusQ_VERSION_PATCH@'
   header = """
      ______ __                                      ____ 
     / ____// /_   _____ ____   ____   __  __ _____ / __ \ 

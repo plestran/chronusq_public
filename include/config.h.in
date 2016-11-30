@@ -28,6 +28,7 @@
 // Version Information
 #define ChronusQ_VERSION_MAJOR @ChronusQ_VERSION_MAJOR@
 #define ChronusQ_VERSION_MINOR @ChronusQ_VERSION_MINOR@
+#define ChronusQ_VERSION_PATCH @ChronusQ_VERSION_PATCH@
 #define ChronusQ_Git_REVISION @CQ_GIT_VERSION@
 
 // Basis Path
