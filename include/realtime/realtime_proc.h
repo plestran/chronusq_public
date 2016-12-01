@@ -366,7 +366,7 @@ void RealTime<T>::incoreHComm(dcomplex fact,
   std::vector<ComplexMap*> &COMM, std::vector<ComplexMap*> &A, 
   std::vector<ComplexMap*> &B) {
 
-  for( x : COMM) x->setZero();
+  for( auto x : COMM) x->setZero();
 
   // Scalar Part
   // AB(S) = (A(S) * B(S) + A(k) * B(k))
