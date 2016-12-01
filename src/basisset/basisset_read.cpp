@@ -196,7 +196,7 @@ void BasisSet::parseGlobal(){
     cout << y << endl;
   } cout << endl;}
 */
-  for( rec : rawRecs ){
+  for( auto rec : rawRecs ){
     if(rec.size() == 0) continue;
 
     int indx;
@@ -263,7 +263,7 @@ void BasisSet::parseGlobal(){
   }
 
   std::stable_sort(refShells_.begin(),refShells_.end(),
-    [&] (const ReferenceShell &r1, const ReferenceShell &r2) {
+    [&] (const ReferenceShell &r1, const ReferenceShell &r2) -> bool {
       return r1.atomicNumber < r2.atomicNumber;
     });
 
