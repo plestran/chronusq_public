@@ -432,8 +432,8 @@ void FOPPropagator<T>::formDiag() {
         this->pscf_->reference()->epsA()->data() :
         this->pscf_->reference()->epsB()->data();
      
-      for(auto I = 0, AI = this->pscf_->nOAVA(); I < this->pscf_->nOB(); I++)
-      for(auto A = 0                     ; A < this->pscf_->nVB(); A++, AI++) 
+      for(int  I = 0, AI = this->pscf_->nOAVA(); I < this->pscf_->nOB(); I++)
+      for(int A = 0                     ; A < this->pscf_->nVB(); A++, AI++) 
         this->diag_[AI] = EPSB[A + this->pscf_->nOB()] - EPSB[I];
     }
   }
